@@ -9,7 +9,8 @@
 | **oaddump** | ~546 | **Done** | Self-contained OAD parser; small; no external deps |
 | eval | ~53 (CLI) + ~400 (grammar) | Blender work | Expression evaluator grammar needed by `wf_attr_validate`; belongs with Blender integration, not here |
 | prep | ~1 615 | Maybe later | Custom tokenizer + macro expander; interesting but larger scope |
-| chargrab / textile | ~4 000+ | Maybe later | Image packing tools; Windows I/O mixed in; bigger effort |
+| **textile** | ~4 000+ | **In progress** | Texture atlas packer; INI-driven room pipeline; TGA/BMP/SGI readers; 2D bin-packing algorithm |
+| chargrab | ~1 000+ | Maybe later | Image processing companion to textile |
 | iff2lvl | ~8 731 | No | Massive 3D level converter; hardcoded paths; PSX/Saturn targets |
 | attribedit | ~3 517 | Blender plugin | GTK+ 2.x standalone OAD property editor — the reference implementation for what the Blender plugin needs to do |
 | iffdb | ~536 | Superseded | Alternative iffdump using in-memory IFF tree; `iffdump-rs` renders it redundant |
@@ -430,3 +431,111 @@ oas2oad-rs/
 
 - **`wftools/prep/macro.cc`** — one-line 64-bit portability fix: `unsigned delimiterIndex` → `std::string::size_type delimiterIndex` (truncation of `string::npos` on 64-bit caused named-parameter branch to fire for all tokens)
 - **`wftools/prep/build.sh`** — captures working `g++ -std=c++14` command including `regexp/` sources
+
+---
+
+## In progress: `textile-rs`
+
+Texture atlas packer. Reads an INI file describing rooms and their 3D object
+files, parses IFF object binaries to find texture references, loads TGA/BMP/SGI
+images, packs them into composite atlases, and writes RMUV UV-mapping data.
+
+### What it does
+
+1. Reads a room `.ini` file (Windows INI format) for room→object-list mappings
+2. Parses IFF binary objects (`MODL`/`CROW` chunks) to collect texture filenames
+3. Loads texture images (TGA 16/24-bit, BMP, SGI) and normalizes to 16-bit 5:5:5
+4. Sorts textures by area (largest first), then runs 2D bin-packing into atlas pages
+5. Writes output per room: composite `.tga` atlas, palette `.tga`, RMUV `.ruv`, colour-cycle `.cyc`, HTML log
+
+### Design decisions
+
+- **No inheritance** — the C++ `Bitmap` subclass hierarchy (TargaBitmap, WindowsBitmap, SgiBitmap) becomes a single `Bitmap` struct; format-specific header state is a `BitmapFormat` enum used only during load/save
+- **No global mutable state** — replace all globals from `main.cc` and `texture.cc` with a `Config` struct passed by reference
+- **No external crates** — pure `std` + internal `wf_iff` for IFF chunk parsing
+- **INI parsing** — custom minimal parser (Windows-style `[Section]` / `key=value`); no external crate
+- **Error handling** — `enum Error { Io(io::Error), Format(String), NotFound(String) }`; fatal errors call `process::exit(1)` to match C++ behavior
+- **HTML log** — `&mut dyn Write` threaded through call stack instead of global `ofstream*`
+
+### CLI (matches C++ textile exactly)
+
+```
+textile -ini=<file> [-pagex=N] [-pagey=N] [-permpagex=N] [-permpagey=N]
+        [-palx=N] [-paly=N] [-alignx=(N|w)] [-aligny=(N|h)]
+        [-transparent=r,g,b] [-outdir=dir] [-o=file]
+        [-Tpsx|-Twin|-Tlinux] [-powerof2size] [-mipmap]
+        [-verbose] [-frame] [-showalign] [-showpacking] [-nocrop]
+        [-translucent] [-flipyout] [-debug] [-sourcecontrol]
+        [-colourcycle=file]
+```
+
+### Output files (per room)
+
+| File | Description |
+|------|-------------|
+| `Room0.tga` | 16-bit 5:5:5 composite texture atlas |
+| `pal0.tga` | Palette atlas (for ≤8-bit textures) |
+| `Room0.ruv` | RMUV binary: `rmuv` tag + size + count + `_RMUV[]` entries |
+| `Room0.cyc` | Colour cycle binary: `ccyc` tag + size + count + `CCYC[]` entries |
+| `textile.log.htm` | HTML diagnostic log with packing table |
+
+### `_RMUV` binary layout
+
+```
+#[repr(C, packed)]
+struct RmuvEntry {
+    texture_name: [u8; 33],  // 32-char name + null
+    n_frame:      i8,
+    u, v:         i16,       // position in atlas
+    w, h:         i16,       // texture dimensions
+    palx, paly:   i16,       // palette coordinates
+    flags:        u16,       // [15:11]=bitdepth [10]=translucent [9:0]=padding
+}
+// assert!(size_of::<RmuvEntry>() % 4 == 0)
+```
+
+### Directory layout
+
+```
+textile-rs/
+  Cargo.toml
+  src/
+    main.rs       — CLI arg parsing, HTML log open/close, main loop
+    config.rs     — Config struct (all global vars from main.cc/texture.cc)
+    profile.rs    — INI file parser (get_int, get_string)
+    locfile.rs    — locate_file(): search semicolon-delimited path list
+    bitmap.rs     — Bitmap struct; TGA/BMP/SGI readers; save_tga(); packing helpers
+    allocmap.rs   — AllocationMap + AllocationRestrictions (2D bin-packing)
+    rmuv.rs       — RmuvEntry; write_rmuv()
+    ccyc.rs       — ColourCycle, CcycEntry, write_ccyc()
+    texture.rs    — process_room(), lookup_textures(), load_textures(),
+                    texture_fit(), palette_fit(), write_texture_log()
+```
+
+### Reference files
+
+| File | Purpose |
+|------|---------|
+| `wftools/textile/main.cc` | CLI parsing, global config, HTML log frame |
+| `wftools/textile/texture.cc` | Full processing pipeline (IFF parse → pack → write) |
+| `wftools/textile/bitmap.hp/cc`, `tga.cc`, `bmp.cc`, `sgi.cc` | Bitmap class hierarchy and format readers |
+| `wftools/textile/allocmap.hp/cc` | 2D bin-packing algorithm |
+| `wftools/textile/rmuv.hp/cc` | UV mapping struct and binary I/O |
+| `wftools/textile/ccyc.hp/cc` | Colour cycle animation struct |
+| `wftools/textile/profile.cc` | Windows INI reader |
+| `wftools/textile/locfile.cc` | Path searching |
+
+### Testing
+
+```bash
+# Build
+cargo build --manifest-path textile-rs/Cargo.toml
+
+# Integration test: compare outputs against C++ binary
+cd textile && ./textile -ini=test.ini
+cd ../textile-rs && cargo run -- -ini=../textile/test.ini
+
+diff ../textile/Room0.tga Room0.tga          # atlas image
+diff ../textile/Room0.ruv Room0.ruv          # RMUV binary (byte-for-byte)
+diff ../textile/Room0.cyc Room0.cyc          # colour cycle binary
+```
