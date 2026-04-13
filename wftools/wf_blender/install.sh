@@ -6,6 +6,12 @@
 #
 # If no destination is given, defaults to ~/.config/blender/<latest>/scripts/addons/
 #
+# Python files are installed as symlinks so edits to the source tree are
+# reflected immediately without re-running this script.  Only wf_core.so
+# (a built artifact) is copied.
+#
+# Re-run only when wf_core.so changes (i.e. after `maturin build`).
+#
 # After running this, enable "World Foundry" in:
 #   Blender > Edit > Preferences > Add-ons
 
@@ -62,11 +68,10 @@ fi
 DEST="$ADDONS_DIR/wf_blender"
 mkdir -p "$DEST"
 
-# ── copy add-on Python files ──────────────────────────────────────────────────
-cp "$SCRIPT_DIR/__init__.py"      "$DEST/"
-cp "$SCRIPT_DIR/operators.py"    "$DEST/"
-cp "$SCRIPT_DIR/panels.py"       "$DEST/"
-cp "$SCRIPT_DIR/export_level.py" "$DEST/"
+# ── symlink add-on Python files (edits to source are live immediately) ────────
+for pyfile in __init__.py operators.py panels.py export_level.py; do
+    ln -sf "$SCRIPT_DIR/$pyfile" "$DEST/$pyfile"
+done
 
 # ── copy native library ───────────────────────────────────────────────────────
 cp "$SO" "$DEST/wf_core.so"
