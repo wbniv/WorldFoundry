@@ -14,7 +14,7 @@
 | iff2lvl | ~8 731 | No | Massive 3D level converter; hardcoded paths; PSX/Saturn targets |
 | attribedit | ~3 517 | Blender plugin | GTK+ 2.x standalone OAD property editor — the reference implementation for what the Blender plugin needs to do |
 | iffdb | ~536 | Superseded | Alternative iffdump using in-memory IFF tree; `iffdump-rs` renders it redundant |
-| lvldump | ~1 600 | Defer | Reads compiled `.lvl` game-level binaries; formats in `.oas` files, renderable by existing `prep`; port after oaddump-rs |
+| **lvldump** | ~1 600 | **In progress** | Reads compiled `.lvl` game-level binaries; dump objects/paths/channels/rooms + OAD fields |
 
 ---
 
@@ -538,4 +538,92 @@ cd ../textile-rs && cargo run -- -ini=../textile/test.ini
 diff ../textile/Room0.tga Room0.tga          # atlas image
 diff ../textile/Room0.ruv Room0.ruv          # RMUV binary (byte-for-byte)
 diff ../textile/Room0.cyc Room0.cyc          # colour cycle binary
+```
+
+---
+
+## In progress: `lvldump-rs`
+
+Diagnostic tool that parses compiled `.lvl` binary game-level files and dumps their contents as
+human-readable text. Two modes: basic (hex-dump OAD data) and full (`-l objects.lc`, named types
+and parsed OAD fields).
+
+### What it does
+
+1. Reads entire `.lvl` file into memory
+2. Parses `_LevelOnDisk` header (52 bytes, 13 × i32 LE) for section counts + offsets
+3. Follows offset arrays to dump objects, paths, channels, rooms, common block
+4. With `-l objects.lc`: loads object type names + per-type `.oad` schema files, displays parsed
+   OAD field values for each object instead of raw hex
+
+### CLI
+
+```
+lvldump [switches] <.lvl file> [output file]
+  -analysis            print object type histogram at end
+  -l<lc_file>          load objects.lc + companion .oad files
+```
+
+### Binary structures (all LE, `#pragma pack(1)`)
+
+| Struct | Fixed bytes | Notes |
+|--------|-------------|-------|
+| `_LevelOnDisk` | 52 | 13 × i32: version, 6 pairs of (count, offset) |
+| `_ObjectOnDisk` | 65 + OADSize | i16 type; 3×fixed32 pos; 3×fixed32 scale; wf_euler (7 bytes); 6×fixed32 coarse bbox; i32 oadFlags; i16 pathIndex; i16 OADSize |
+| `_PathOnDisk` | 43 | 3×fixed32 base pos; wf_euler; 6×i32 channel indices |
+| `_ChannelOnDisk` | 12 + numKeys×8 | i32 compressorType; fixed32 endTime; i32 numKeys; entries: (fixed32 time, i32 value) |
+| `_RoomOnDisk` | 34 + count×2 | i32 count; 6×fixed32 bbox; i16[2] adjacentRooms; i16 roomObjectIndex |
+
+`fixed32` = i32 Q16.16 → `v as f32 / 65536.0`. `LEVEL_VERSION = 28`.
+
+### Design decisions
+
+- **Zero-copy binary parsing** — `Vec<u8>` + offset arithmetic; no unsafe transmute
+- **Reuse `wf_oad`** — schema loading via `OadFile::read()`; binary OAD struct reading
+  implemented in `oad.rs` using entry descriptors (port of `QObjectAttributeData::LoadStruct`)
+- **Reuse `wf_hdump`** — for common block and raw OAD hex dump (4-indent, 16 bytes/line)
+- **`process::exit` + flush** — same pattern as textile-rs
+- **Skip `-p` stream redirection** — debug/progress streams suppressed; errors to stderr
+
+### OAD field sizes (for binary struct reading)
+
+| Types | Bytes |
+|-------|-------|
+| Fixed32, Int32, ObjectReference, Filename, CommonBlock, MeshName, ClassReference | 4 |
+| Fixed16, Int16 | 2 |
+| Int8 | 1 |
+| String | `entry.len` |
+| XData | 4 if `conversion_action ≤ 3`, else 0 |
+| All flags, PropertySheet, CameraRef, LightRef, etc. | 0 |
+
+### Directory layout
+
+```
+lvldump-rs/
+  Cargo.toml
+  .gitignore
+  src/
+    main.rs    — CLI arg parsing, load file, open output, call dump_level
+    level.rs   — parse + dump: objects, paths, channels, rooms, common block, histogram
+    oad.rs     — load_lc_file, load_oad_files, dump_oad_struct (binary OAD reader)
+```
+
+### Reference files
+
+| File | Purpose |
+|------|---------|
+| `wftools/lvldump/lvldump.cc` | CLI, main, file loading |
+| `wftools/lvldump/level.cc` | All dump_* functions + exact output format |
+| `wftools/lvldump/oad.cc` | OAD schema loading, binary parsing, SizeOfOnDisk |
+| `wfsource/source/oas/levelcon.h` | All binary struct definitions |
+| `wftools/wf_oad/src/lib.rs` | OadFile, OadEntry, ButtonType — reused for schema |
+| `wftools/wf_hdump/src/lib.rs` | `hdump()` — reused for hex output |
+
+### Testing
+
+```bash
+cargo build --manifest-path wftools/lvldump-rs/Cargo.toml
+# Run on any available .lvl file (build artifacts, not in repo)
+lvldump-rs/target/debug/lvldump some.lvl
+lvldump-rs/target/debug/lvldump -lobjects.lc some.lvl output.txt
 ```
