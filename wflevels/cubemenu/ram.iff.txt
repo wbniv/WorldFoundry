@@ -1,6 +1,0 @@
-{ 'RAM'
-	'OBJD' 340000l
-	'PERM' 153600l
-	'ROOM' 131072l
-	'FLAG' 1l 0l					// doomstick, bungeecam
-}
