@@ -41,7 +41,7 @@ The honest snapshot: 8 tools build on Linux, ~6 are *"keep around but don't comp
 | **chargrab** | ~5.0k | C++ | no | Tile extractor/deduplicator (TGA/BMP/SGI → tile atlas TGA + binary tilemap) — **dropped** (never used in production; C++ source deleted) |
 | **attribedit** | ~4.7k | C++/gtkmm | no | Schema-driven OAD attribute editor. The standalone GUI is one host of OAD-editing logic that is also (re)implemented in the 3DSMax plugin `wfmaxplugins/attrib/` and elsewhere — see §3.1. |
 | **aicomp** | ~3.5k | C++ + flex/bison | no | AI-script compiler — supports *both* a C-like and a Scheme-like input grammar |
-| **textile** | ~4.3k | C++ | yes | Texture atlas packer (TGA/BMP/SGI → palette + UV maps) for PSX/Win/Linux |
+| **textile** | ~4.3k | C++ | yes | Texture atlas packer (TGA/BMP/SGI → palette + UV maps) for PSX/Win/Linux — **ported to Rust** (`wftools/textile-rs`) |
 | **link** | ~2.1k | C++ | no Makefile | R3000 (PSX) MIPS object linker |
 | **lvldump** | ~2.0k | C++ | yes | `.lvl` file dumper |
 | **prep** | ~1.9k | C++ | yes | Custom macro/template processor (despite the name, *not* a C preprocessor) — drives the `.oas` schema-codegen pipeline. See §4.3. |
@@ -152,7 +152,7 @@ These are genuinely engine-specific. There is no off-the-shelf "WorldFoundry IFF
 | **iff2lvl** | ~8.7k | Whole asset pipeline pivot. Has to be rewritten *eventually*; the README already says so. |
 | **lvldump** | ~2.0k | Diagnostic dumper for the runtime level format. |
 | **oaddump** | ~616 | Diagnostic dumper for OAD. |
-| **textile** | ~4.3k | Texture atlas packer (PSX/Win/Linux output). |
+| **textile** | ~4.3k | Texture atlas packer (PSX/Win/Linux output) — **ported to Rust** (`wftools/textile-rs`). |
 | **chargrab** | ~5.0k | Tile extractor/deduplicator (outputs tile atlas TGA + binary tilemap) — **dropped** (never used in production; C++ source deleted; being ported to Rust as `chargrab-rs` as an independent exercise) |
 | **eval** | ~365 LoC handwritten<br>(+ ~5k generated) | **Correction of the original §4.1 listing.** `eval` is not a standalone calculator — it's the CLI test harness for `wfsource/source/eval/`, the runtime expression evaluator that the OAD attribute editor (and any other host of `worldfoundry-oad` that supports `szEnableExpression` predicates) calls at runtime. The library is a small flex+bison combo: `expr.l` (174 LoC) + `expr.y` (191 LoC), with a tiny public surface (`double eval(const char* expr, double (*lookup)(const char* sym))`). The `wftools/eval/eval.cc` binary is *byte-for-byte identical* to `wfsource/source/eval/evaltest.cc` (see §3.1 duplication table). The Rust shape: replace the flex/bison combo with a `winnow`-based parser, ~150 LoC of Rust, hosted as a `worldfoundry-eval` crate (or folded into `worldfoundry-oad` since they're always used together). The fate of this rewrite is *coupled* to the prep / `.oas` decision in §8 — see §8.6 specifically. |
 | **prep** | ~1.9k | **Correction of the original §4.1 listing.** `prep` is *not* a C preprocessor — it's a custom macro/template processor with `@`-prefixed directives (`@define`, `@include`, `@*comment`, `@\` continuation, `@+` argument concatenation, `@t` tab, `@n` newline, etc.). It drives the `.oas` → multi-target schema-codegen pipeline in `wfsource/source/oas/`: each `.oas` source file is fed through several `.s` template files (`iff.s`, `oadtypes.s`, `oaddef.s`, `xml.s`, …) by `prep`, generating the IFF descriptor source for `iffcomp` (`*.iff.txt` → `*.iff`, the on-disk OAD format), the C runtime header (`*.ht`), the scripting-language header (`*.def`), and the XML version — all from one source of truth. `cpp -E` and `m4` cannot replace it because the input syntax isn't C-preprocessor syntax. **Two viable rewrites**, pick based on appetite: **(a) keep `prep` as-is** while rewriting only its consumers — it works, it's only ~1.9 kLoC, and there's no urgent reason to touch it; or **(b) replace the whole `.oas` pipeline** by defining schemas as Rust types in `worldfoundry-oad` with derive macros that emit each downstream artifact (IFF descriptor, C runtime header, Blender bindings, form widgets) from one source of truth — both `.oas` and the `.s` templates collapse into the same crate everything else uses. Option (b) is the larger payoff and the bigger lift; option (a) is the path of least resistance for Phases 1–5 and lets you defer the schema-codegen rewrite indefinitely. **See §8 for the deep-dive with full pros/cons and a recommendation.** |
@@ -296,7 +296,7 @@ in a function that's still called from the read path.
 | iff2lvl | **rewrite** | **Rust** |
 | lvldump | **rewrite** | **Rust** |
 | oaddump | **rewrite** | **Rust** |
-| textile | **rewrite** | **Rust** + `image` + `etagere` |
+| textile | **done** | Rust port complete (`wftools/textile-rs`) |
 | chargrab | **drop** | never used in production; C++ source deleted |
 
 **Net effect (in-tree LoC accounting):**
