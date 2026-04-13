@@ -9,7 +9,7 @@
 | **oaddump** | ~546 | **Done** | Self-contained OAD parser; small; no external deps |
 | eval | ~53 (CLI) + ~400 (grammar) | Blender work | Expression evaluator grammar needed by `wf_attr_validate`; belongs with Blender integration, not here |
 | prep | ~1 615 | Maybe later | Custom tokenizer + macro expander; interesting but larger scope |
-| **textile** | ~4 000+ | **In progress** | Texture atlas packer; INI-driven room pipeline; TGA/BMP/SGI readers; 2D bin-packing algorithm |
+| **textile** | ~4 000+ | **Done** | Texture atlas packer; INI-driven room pipeline; TGA/BMP/SGI readers; 2D bin-packing algorithm |
 | chargrab | ~1 000+ | Maybe later | Image processing companion to textile |
 | iff2lvl | ~8 731 | No | Massive 3D level converter; hardcoded paths; PSX/Saturn targets |
 | attribedit | ~3 517 | Blender plugin | GTK+ 2.x standalone OAD property editor — the reference implementation for what the Blender plugin needs to do |
@@ -434,7 +434,7 @@ oas2oad-rs/
 
 ---
 
-## In progress: `textile-rs`
+## Completed: `textile-rs`
 
 Texture atlas packer. Reads an INI file describing rooms and their 3D object
 files, parses IFF object binaries to find texture references, loads TGA/BMP/SGI
