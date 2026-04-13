@@ -1,6 +1,6 @@
 //=============================================================================
 // binary.cc
-// Copyright 1997,99 World Foundry Group. 
+// Copyright 1997,99,2026 World Foundry Group.
 // Part of the World Foundry 3D video game engine/production environment
 // for more information about World Foundry, see www.worldfoundry.org
 //==============================================================================
@@ -339,9 +339,8 @@ IffWriterBinary::exitChunk()
     // the 4 is the size of the IFF size field
 	_out->seekp( cs->GetPos(), std::ios::beg );
 
-    long size = cs->GetSize();
-	assert( sizeof( long ) == 4 );
-	_out->write( (char const*)&( size ), sizeof( long ) );
+    uint32_t size = cs->GetSize();
+    _out->write( reinterpret_cast< char const* >( &size ), 4 );
 	_out->seekp( pos, std::ios::beg );
 
 	if ( !chunkSize.empty() )
