@@ -93,7 +93,7 @@ $(ASSET_DIR)/cd.iff : $(ASSET_DIR)/cd.iff.txt
 | `iffcomp` | C++ + flex/bison | `.iff.txt` (text DSL) → binary IFF |
 | `iffdump` | C++ (Rust port done) | Binary IFF → annotated hex dump or iffcomp source |
 | `iff2lvl` | C++ (~8.7k LOC) | Binary level IFF → runtime `.lvl` format |
-| `max2lvl` | C++ Win32 DLL | 3DS Max plugin: reads scene in-process → `.lvl` |
+| `max2lvl` | C++ Win32 DLL | 3DS Max plugin: reads scene in-process → `.lvl` — **superseded by `wf_blender`** (Blender exporter, in-tree) |
 | `lvldump` | C++ | `.lvl` → human-readable dump |
 | `textile` | C++ | TGA/BMP/SGI → texture atlas + UV maps |
 | `prep` | C++ | Macro/template processor — drives `.oas` → C codegen |
