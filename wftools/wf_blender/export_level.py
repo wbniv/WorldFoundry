@@ -432,39 +432,49 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
 
     uv_layer = bm.loops.layers.uv.active
 
-    # Gather vertices with per-loop UVs expanded (one vertex per loop for UVs)
-    # For simplicity: per-vertex UVs using first encountered UV per vertex.
-    n_verts = len(bm.verts)
     bm.verts.ensure_lookup_table()
     bm.faces.ensure_lookup_table()
 
-    # Collect per-vertex UVs (first loop wins)
-    uv_per_vert = [(0.0, 0.0)] * n_verts
-    if uv_layer:
-        for face in bm.faces:
-            for loop in face.loops:
-                vi = loop.vert.index
-                uv_per_vert[vi] = (loop[uv_layer].uv.x, loop[uv_layer].uv.y)
+    # Split vertices at UV seams: each unique (orig_vi, u_fixed, v_fixed) gets
+    # its own VRTX entry.  This is necessary because VRTX stores one UV per
+    # vertex — without splitting, seam edges pick up the wrong UV from whichever
+    # loop was visited first.
+    split_verts = []          # list of (co, u, v)
+    split_map   = {}          # (orig_vi, u_key, v_key) → new_vi
+
+    face_triples = []         # list of (new_v1, new_v2, new_v3, mat_idx)
+
+    for face in bm.faces:
+        tri = []
+        for loop in face.loops:
+            orig_vi = loop.vert.index
+            if uv_layer:
+                u = loop[uv_layer].uv.x
+                v = loop[uv_layer].uv.y
+            else:
+                u, v = 0.0, 0.0
+            # Quantise to fixed-point to avoid spurious splits from float noise
+            u_key = int(round(u * 65536))
+            v_key = int(round(v * 65536))
+            key = (orig_vi, u_key, v_key)
+            if key not in split_map:
+                split_map[key] = len(split_verts)
+                split_verts.append((bm.verts[orig_vi].co.copy(), u, v))
+            tri.append(split_map[key])
+        face_triples.append((tri[0], tri[1], tri[2], face.material_index))
 
     # Build VRTX payload
     vrtx = bytearray()
-    for vi, vert in enumerate(bm.verts):
-        # Blender Z-up → WF Y-up
-        wf_x, wf_y, wf_z = bl_to_wf(vert.co.x, vert.co.y, vert.co.z)
-        u, v = uv_per_vert[vi]
-        u_raw = int(u * 65536)
-        v_raw = int(v * 65536)
-        x_raw = int(wf_x * 65536)
-        y_raw = int(wf_y * 65536)
-        z_raw = int(wf_z * 65536)
-        vrtx += struct.pack('<iiIiii', u_raw, v_raw, 0xFFFFFF, x_raw, y_raw, z_raw)
+    for co, u, v in split_verts:
+        wf_x, wf_y, wf_z = bl_to_wf(co.x, co.y, co.z)
+        vrtx += struct.pack('<iiIiii',
+                            int(u * 65536), int(v * 65536), 0xFFFFFF,
+                            int(wf_x * 65536), int(wf_y * 65536), int(wf_z * 65536))
 
     # Build FACE payload
     face_data = bytearray()
-    for face in bm.faces:
-        loops = list(face.loops)
-        v1, v2, v3 = loops[0].vert.index, loops[1].vert.index, loops[2].vert.index
-        face_data += struct.pack('<hhhh', v1, v2, v3, face.material_index)
+    for v1, v2, v3, mat_idx in face_triples:
+        face_data += struct.pack('<hhhh', v1, v2, v3, mat_idx)
 
     bm.free()
 
