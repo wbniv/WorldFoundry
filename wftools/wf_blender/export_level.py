@@ -336,6 +336,7 @@ def _load_mesh_iff(filepath: str):
 
     vrtx_data = chunks.get('VRTX', b'')
     face_data  = chunks.get('FACE', b'')
+    matl_data  = chunks.get('MATL', b'')
 
     if not vrtx_data or not face_data:
         return None
@@ -357,13 +358,136 @@ def _load_mesh_iff(filepath: str):
         verts.append(wf_to_bl(wf_x, wf_y, wf_z))
         uvs.append((u_raw * _FIXED32_SCALE, v_raw * _FIXED32_SCALE))
 
-    faces = []
+    faces          = []
+    face_mat_idxs  = []
     for i in range(n_faces):
         base = i * _FACE_SIZE
-        v1, v2, v3, _mat = struct.unpack_from('<hhhh', face_data, base)
+        v1, v2, v3, mat_idx = struct.unpack_from('<hhhh', face_data, base)
         faces.append((v1, v2, v3))
+        face_mat_idxs.append(mat_idx)
 
-    return verts, faces, uvs
+    _MATL_SIZE = 264  # sizeof(_MaterialOnDisk) = 4+4+256
+    n_mats   = len(matl_data) // _MATL_SIZE
+    materials = []
+    for i in range(n_mats):
+        base = i * _MATL_SIZE
+        flags, color = struct.unpack_from('<iI', matl_data, base)
+        tex = matl_data[base+8:base+264].split(b'\x00')[0].decode('ascii', errors='replace')
+        materials.append({'flags': flags, 'color': color, 'tex': tex})
+
+    return verts, faces, uvs, face_mat_idxs, materials
+
+
+def _make_blender_material(name: str, mat_info: dict, tex_path: str | None):
+    """Create a Blender material with an optional Image Texture node."""
+    mat = bpy.data.materials.new(name=name)
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes["Principled BSDF"]
+
+    r = ((mat_info['color'] >> 16) & 0xFF) / 255.0
+    g = ((mat_info['color'] >>  8) & 0xFF) / 255.0
+    b = ( mat_info['color']        & 0xFF) / 255.0
+    bsdf.inputs['Base Color'].default_value = (r, g, b, 1.0)
+
+    if tex_path:
+        img = bpy.data.images.get(os.path.basename(tex_path))
+        if img is None:
+            img = bpy.data.images.load(tex_path)
+        tex_node = mat.node_tree.nodes.new('ShaderNodeTexImage')
+        tex_node.image = img
+        uv_node = mat.node_tree.nodes.new('ShaderNodeUVMap')
+        uv_node.uv_map = 'UVMap'
+        nt = mat.node_tree
+        nt.links.new(uv_node.outputs['UV'],       tex_node.inputs['Vector'])
+        nt.links.new(tex_node.outputs['Color'],   bsdf.inputs['Base Color'])
+
+    return mat
+
+
+def _write_iff_chunk(tag: str, payload: bytes) -> bytes:
+    """Serialize a single IFF chunk: 4-byte tag + LE size + payload + padding."""
+    tag_bytes = tag.encode('ascii')[:4].ljust(4, b'\x00')
+    size = len(payload)
+    pad = (4 - size % 4) % 4
+    return tag_bytes + struct.pack('<I', size) + payload + b'\x00' * pad
+
+
+def _write_mesh_iff(blobj, filepath: str) -> bool:
+    """
+    Write a Blender mesh object as a World Foundry MODL binary .iff.
+
+    Triangulates on the fly (does not modify the object).
+    Applies Blender Z-up → WF Y-up coordinate transform.
+    Returns True on success.
+    """
+    import bmesh as _bmesh
+    mesh = blobj.data
+    if mesh is None or not hasattr(mesh, 'vertices'):
+        return False
+
+    # Triangulate into a temporary bmesh
+    bm = _bmesh.new()
+    bm.from_mesh(mesh)
+    _bmesh.ops.triangulate(bm, faces=bm.faces)
+
+    uv_layer = bm.loops.layers.uv.active
+
+    # Gather vertices with per-loop UVs expanded (one vertex per loop for UVs)
+    # For simplicity: per-vertex UVs using first encountered UV per vertex.
+    n_verts = len(bm.verts)
+    bm.verts.ensure_lookup_table()
+    bm.faces.ensure_lookup_table()
+
+    # Collect per-vertex UVs (first loop wins)
+    uv_per_vert = [(0.0, 0.0)] * n_verts
+    if uv_layer:
+        for face in bm.faces:
+            for loop in face.loops:
+                vi = loop.vert.index
+                uv_per_vert[vi] = (loop[uv_layer].uv.x, loop[uv_layer].uv.y)
+
+    # Build VRTX payload
+    vrtx = bytearray()
+    for vi, vert in enumerate(bm.verts):
+        # Blender Z-up → WF Y-up
+        wf_x, wf_y, wf_z = bl_to_wf(vert.co.x, vert.co.y, vert.co.z)
+        u, v = uv_per_vert[vi]
+        u_raw = int(u * 65536)
+        v_raw = int(v * 65536)
+        x_raw = int(wf_x * 65536)
+        y_raw = int(wf_y * 65536)
+        z_raw = int(wf_z * 65536)
+        vrtx += struct.pack('<iiIiii', u_raw, v_raw, 0xFFFFFF, x_raw, y_raw, z_raw)
+
+    # Build FACE payload
+    face_data = bytearray()
+    for face in bm.faces:
+        loops = list(face.loops)
+        v1, v2, v3 = loops[0].vert.index, loops[1].vert.index, loops[2].vert.index
+        face_data += struct.pack('<hhhh', v1, v2, v3, 0)
+
+    bm.free()
+
+    # One default white material
+    mat_flags = 0
+    mat_color = 0x00FFFFFF
+    tex_name  = b'\x00' * 256
+    matl = struct.pack('<iI', mat_flags, mat_color) + tex_name
+
+    # Assemble MODL
+    inner = (
+        _write_iff_chunk('VRTX', bytes(vrtx)) +
+        _write_iff_chunk('MATL', matl) +
+        _write_iff_chunk('FACE', bytes(face_data))
+    )
+    modl = _write_iff_chunk('MODL', inner)
+
+    try:
+        with open(filepath, 'wb') as f:
+            f.write(modl)
+        return True
+    except OSError:
+        return False
 
 
 def _find_file_nocase(directory: str, filename: str) -> str | None:
@@ -386,8 +510,12 @@ def _default_oad_dirs() -> list[str]:
     # allows opening a directory picker while a file-selector dialog is already
     # open (currently raises "Cannot activate a file selector dialog, one
     # already open").
-    _HARDCODED = "/home/will/SRC/WorldFoundry/wftools/wf_oad/tests/fixtures"
-    candidates = [_HARDCODED] if os.path.isdir(_HARDCODED) else []
+    # TODO: replace with addon preference once Blender allows nested file pickers
+    _HARDCODED_CANDIDATES = [
+        "/home/will/SRC/WorldFoundry-wbniv/wftools/wf_oad/tests/fixtures",
+        "/home/will/SRC/WorldFoundry/wftools/wf_oad/tests/fixtures",
+    ]
+    candidates = [p for p in _HARDCODED_CANDIDATES if os.path.isdir(p)]
 
     # Walk up from this file's location to find wf_oad/tests/fixtures/
     here = os.path.dirname(os.path.abspath(__file__))
@@ -527,7 +655,7 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
 
             if mesh_geo:
                 # Real mesh geometry — vertices already in Blender space
-                verts, faces, uvs = mesh_geo
+                verts, faces, uvs, face_mat_idxs, materials = mesh_geo
                 mesh = bpy.data.meshes.new(obj_name)
                 mesh.from_pydata(verts, [], faces)
                 mesh.update()
@@ -542,6 +670,21 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
 
                 blobj = bpy.data.objects.new(obj_name, mesh)
                 blobj.location = bl_loc
+
+                # Materials
+                level_dir = os.path.dirname(self.filepath)
+                for i, mat_info in enumerate(materials):
+                    tex_path = None
+                    if mat_info['tex']:
+                        tex_path = _find_file_nocase(level_dir, mat_info['tex'])
+                    mat_name = mat_info['tex'] or f"{obj_name}_mat{i}"
+                    mat = _make_blender_material(mat_name, mat_info, tex_path)
+                    blobj.data.materials.append(mat)
+
+                # Per-face material index
+                for poly in blobj.data.polygons:
+                    if poly.index < len(face_mat_idxs):
+                        poly.material_index = face_mat_idxs[poly.index]
             else:
                 # Fallback: box sized to bounding box
                 sx = bb_max_wf[0] - bb_min_wf[0]  # WF X → Blender X
@@ -704,6 +847,22 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
                 f"{fp(wf_bb_max[0])} {fp(wf_bb_max[1])} {fp(wf_bb_max[2])}  //min(x,y,z)-max(x,y,z) }} }}"
             )
             lines.append(f'\t\t{{ \'STR\' {{ \'NAME\' "Class Name" }} {{ \'DATA\' "{typename}" }} }}')
+
+            # Mesh geometry — export .iff if object has a real mesh
+            level_dir  = os.path.dirname(self.filepath)
+            mesh_filename = ""
+            model_type    = 0  # 0=None/Box
+            if obj.data and obj.data.polygons:
+                mesh_filename = obj.name + ".iff"
+                mesh_out = os.path.join(level_dir, mesh_filename)
+                if _write_mesh_iff(obj, mesh_out):
+                    model_type = 1  # Mesh
+                else:
+                    self.report({'WARNING'}, f"{obj.name}: mesh export failed")
+                    mesh_filename = ""
+
+            lines.append(f'\t\t{{ \'FILE\' {{ \'NAME\' "Mesh Name" }} {{ \'STR\' "{mesh_filename}" }} }}')
+            lines.append(f'\t\t{{ \'I32\'  {{ \'NAME\' "Model Type" }} {{ \'DATA\' {model_type}l }} {{ \'STR\' "{"Mesh" if model_type == 1 else "None"}" }} }}')
 
             # OAD fields
             try:
