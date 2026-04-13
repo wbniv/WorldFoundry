@@ -33,7 +33,7 @@
           (loop (+ i 1)))))
   out)
 
-(define (compile-and-compare name input-name expected-name)
+(define (compile-and-compare name input-name expected-name mode)
   (test-case name
     (define input    (path->string (build-path TESTDATA input-name)))
     (define expected (build-path TESTDATA expected-name))
@@ -41,7 +41,7 @@
     (dynamic-wind
       void
       (λ ()
-        (compile input (path->string tmp) 'binary #f)
+        (compile input (path->string tmp) mode #f)
         (check-equal? (mask-timestamp (file->bytes tmp))
                       (mask-timestamp (file->bytes expected))
                       (format "~a: byte-exact match" name)))
@@ -49,7 +49,8 @@
 
 (define all-tests
   (test-suite "iffcomp-scm byte-exact"
-    (compile-and-compare "test.iff.txt"        "test.iff.txt"        "expected.iff")
-    (compile-and-compare "all_features.iff.txt" "all_features.iff.txt" "all_features.iff")))
+    (compile-and-compare "binary output (test.iff.txt)"        "test.iff.txt"        "expected.iff"     'binary)
+    (compile-and-compare "text output (test.iff.txt)"          "test.iff.txt"        "expected.iff.txt" 'text)
+    (compile-and-compare "binary output (all_features.iff.txt)" "all_features.iff.txt" "all_features.iff" 'binary)))
 
 (run-tests all-tests)

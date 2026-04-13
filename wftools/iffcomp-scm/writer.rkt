@@ -370,16 +370,16 @@
      (string-append "0." (make-string (- prec 1) #\0))]
     [else
      (define sign (if (< val 0) "-" ""))
-     (define abs  (abs val))
-     (define exp  (inexact->exact (floor (/ (log abs) (log 10)))))
+     (define abs-val (abs val))
+     (define exp  (inexact->exact (floor (/ (log abs-val) (log 10)))))
      (if (or (>= exp prec) (< exp -4))
          ;; Scientific notation
-         (let ([s (~r abs #:precision `(= ,(- prec 1)) #:notation 'exponential)])
+         (let ([s (~r abs-val #:precision `(= ,(- prec 1)) #:notation 'exponential)])
            ;; Normalize e+5 → e+05 (C printf style)
            (string-append sign (regexp-replace #rx"e([+-])([0-9])$" s "e\\10\\2")))
          ;; Fixed notation
          (let* ([dp (max 0 (- prec 1 exp))]
-                [s  (~r abs #:precision `(= ,dp))]
+                [s  (~r abs-val #:precision `(= ,dp))]
                 [s  (if (regexp-match? #rx"\\." s) s (string-append s "."))])
            (string-append sign s)))]))
 
