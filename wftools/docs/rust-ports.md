@@ -14,7 +14,7 @@
 | iff2lvl | ~8 731 | No | Massive 3D level converter; hardcoded paths; PSX/Saturn targets |
 | attribedit | ~3 517 | Blender plugin | GTK+ 2.x standalone OAD property editor — the reference implementation for what the Blender plugin needs to do |
 | iffdb | ~536 | Superseded | Alternative iffdump using in-memory IFF tree; `iffdump-rs` renders it redundant |
-| **lvldump** | ~1 600 | **In progress** | Reads compiled `.lvl` game-level binaries; dump objects/paths/channels/rooms + OAD fields |
+| **lvldump** | ~1 600 | **Done** | Reads compiled `.lvl` game-level binaries; dump objects/paths/channels/rooms + OAD fields |
 
 ---
 
@@ -542,7 +542,7 @@ diff ../textile/Room0.cyc Room0.cyc          # colour cycle binary
 
 ---
 
-## In progress: `lvldump-rs`
+## Completed: `lvldump-rs`
 
 Diagnostic tool that parses compiled `.lvl` binary game-level files and dumps their contents as
 human-readable text. Two modes: basic (hex-dump OAD data) and full (`-l objects.lc`, named types
