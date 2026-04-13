@@ -464,15 +464,45 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
     for face in bm.faces:
         loops = list(face.loops)
         v1, v2, v3 = loops[0].vert.index, loops[1].vert.index, loops[2].vert.index
-        face_data += struct.pack('<hhhh', v1, v2, v3, 0)
+        face_data += struct.pack('<hhhh', v1, v2, v3, face.material_index)
 
     bm.free()
 
-    # One default white material
-    mat_flags = 0
-    mat_color = 0x00FFFFFF
-    tex_name  = b'\x00' * 256
-    matl = struct.pack('<iI', mat_flags, mat_color) + tex_name
+    # Build MATL payload from Blender material slots
+    def _extract_mat_info(mat):
+        flags = 0x00
+        color = 0x00FFFFFF
+        tex   = ""
+        if mat is None or not mat.use_nodes:
+            return flags, color, tex
+        nt = mat.node_tree
+        bsdf = next((n for n in nt.nodes if n.type == 'BSDF_PRINCIPLED'), None)
+        if bsdf is None:
+            return flags, color, tex
+        base_input = bsdf.inputs.get('Base Color')
+        if base_input and base_input.links:
+            from_node = base_input.links[0].from_node
+            if from_node.type == 'TEX_IMAGE' and from_node.image:
+                tex = os.path.basename(from_node.image.filepath or from_node.image.name)
+                flags = 0x02
+        else:
+            bc = base_input.default_value if base_input else None
+            if bc:
+                r = int(bc[0] * 255) & 0xFF
+                g = int(bc[1] * 255) & 0xFF
+                b = int(bc[2] * 255) & 0xFF
+                color = (r << 16) | (g << 8) | b
+        return flags, color, tex
+
+    mats = blobj.data.materials if blobj.data and blobj.data.materials else []
+    matl = b''
+    if mats:
+        for mat in mats:
+            mat_flags, mat_color, mat_tex = _extract_mat_info(mat)
+            tex_bytes = mat_tex.encode('ascii', errors='replace')[:255].ljust(256, b'\x00')
+            matl += struct.pack('<iI', mat_flags, mat_color) + tex_bytes
+    else:
+        matl = struct.pack('<iI', 0, 0x00FFFFFF) + b'\x00' * 256
 
     # Assemble MODL
     inner = (
