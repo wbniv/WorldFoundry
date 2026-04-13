@@ -38,7 +38,7 @@ The honest snapshot: 8 tools build on Linux, ~6 are *"keep around but don't comp
 | Tool | LoC | Lang | Built (GNU)? | What it does |
 |---|---:|---|:---:|---|
 | **iff2lvl** | ~8.7k | C++ | yes | 3DSMax `.lev` (IFF) → runtime level format. README: *"the code base is a mess. A lot of cruft has accumulated, and it really needs a re-write."* |
-| **chargrab** | ~5.0k | C++ | no | Sprite extractor (TGA/BMP/SGI → IFF/RMUV) |
+| **chargrab** | ~5.0k | C++ | no | Tile extractor/deduplicator (TGA/BMP/SGI → tile atlas TGA + binary tilemap) — **dropped** (never used in production; C++ source deleted) |
 | **attribedit** | ~4.7k | C++/gtkmm | no | Schema-driven OAD attribute editor. The standalone GUI is one host of OAD-editing logic that is also (re)implemented in the 3DSMax plugin `wfmaxplugins/attrib/` and elsewhere — see §3.1. |
 | **aicomp** | ~3.5k | C++ + flex/bison | no | AI-script compiler — supports *both* a C-like and a Scheme-like input grammar |
 | **textile** | ~4.3k | C++ | yes | Texture atlas packer (TGA/BMP/SGI → palette + UV maps) for PSX/Win/Linux |
@@ -153,7 +153,7 @@ These are genuinely engine-specific. There is no off-the-shelf "WorldFoundry IFF
 | **lvldump** | ~2.0k | Diagnostic dumper for the runtime level format. |
 | **oaddump** | ~616 | Diagnostic dumper for OAD. |
 | **textile** | ~4.3k | Texture atlas packer (PSX/Win/Linux output). |
-| **chargrab** | ~5.0k | Sprite/RMUV asset pipeline. Currently unbuilt; should be folded into `textile` or the asset pipeline. |
+| **chargrab** | ~5.0k | Tile extractor/deduplicator (outputs tile atlas TGA + binary tilemap) — **dropped** (never used in production; C++ source deleted; being ported to Rust as `chargrab-rs` as an independent exercise) |
 | **eval** | ~365 LoC handwritten<br>(+ ~5k generated) | **Correction of the original §4.1 listing.** `eval` is not a standalone calculator — it's the CLI test harness for `wfsource/source/eval/`, the runtime expression evaluator that the OAD attribute editor (and any other host of `worldfoundry-oad` that supports `szEnableExpression` predicates) calls at runtime. The library is a small flex+bison combo: `expr.l` (174 LoC) + `expr.y` (191 LoC), with a tiny public surface (`double eval(const char* expr, double (*lookup)(const char* sym))`). The `wftools/eval/eval.cc` binary is *byte-for-byte identical* to `wfsource/source/eval/evaltest.cc` (see §3.1 duplication table). The Rust shape: replace the flex/bison combo with a `winnow`-based parser, ~150 LoC of Rust, hosted as a `worldfoundry-eval` crate (or folded into `worldfoundry-oad` since they're always used together). The fate of this rewrite is *coupled* to the prep / `.oas` decision in §8 — see §8.6 specifically. |
 | **prep** | ~1.9k | **Correction of the original §4.1 listing.** `prep` is *not* a C preprocessor — it's a custom macro/template processor with `@`-prefixed directives (`@define`, `@include`, `@*comment`, `@\` continuation, `@+` argument concatenation, `@t` tab, `@n` newline, etc.). It drives the `.oas` → multi-target schema-codegen pipeline in `wfsource/source/oas/`: each `.oas` source file is fed through several `.s` template files (`iff.s`, `oadtypes.s`, `oaddef.s`, `xml.s`, …) by `prep`, generating the IFF descriptor source for `iffcomp` (`*.iff.txt` → `*.iff`, the on-disk OAD format), the C runtime header (`*.ht`), the scripting-language header (`*.def`), and the XML version — all from one source of truth. `cpp -E` and `m4` cannot replace it because the input syntax isn't C-preprocessor syntax. **Two viable rewrites**, pick based on appetite: **(a) keep `prep` as-is** while rewriting only its consumers — it works, it's only ~1.9 kLoC, and there's no urgent reason to touch it; or **(b) replace the whole `.oas` pipeline** by defining schemas as Rust types in `worldfoundry-oad` with derive macros that emit each downstream artifact (IFF descriptor, C runtime header, Blender bindings, form widgets) from one source of truth — both `.oas` and the `.s` templates collapse into the same crate everything else uses. Option (b) is the larger payoff and the bigger lift; option (a) is the path of least resistance for Phases 1–5 and lets you defer the schema-codegen rewrite indefinitely. **See §8 for the deep-dive with full pros/cons and a recommendation.** |
 | **attribedit** | ~4.7k | OAD attribute editor. **Hugely important concept** — the schema-driven editor for the format that ties game objects to their authored data. The standalone GTK app is a justified entry point but **the value is the embeddable library**, not the GUI. The schema parser and data model (`oadesciffbinparser`, `parsetreenode`, `oad`) are already library-shaped — they just got coupled to gtkmm in the same source tree, then re-implemented from scratch in `wfmaxplugins/attrib/` for the 3DSMax plugin host. The historical Max plugins are not being ported forward; they're the cautionary tale of what *parallel* implementations look like. The rewrite is: extract `worldfoundry-oad` as a Rust library and build the funded hosts on top — a small standalone editor (`attribedit-egui` / `eframe`) and a Blender addon. **Blender is the funded 3D-editor target** going forward, so it's the only embedding host that has to ship by default; additional hosts (3DSMax, Alias/Maya, Houdini, web) are explicitly *supported by* the library's host-agnostic design but built only if someone funds the work — and crucially they consume the *same* library, not a vendored copy. The asset-pipeline tools (`iff2lvl`, `lvldump`, `oaddump`) become CLI consumers of the same library instead of each carrying their own `oad.cc`. |
@@ -214,13 +214,13 @@ The order matters because every tool depends on `iff` reading or writing — and
 
 **Phase 1 success:** `iffcomp test.iff.txt` produces a binary that the new `iffdump` and the old C++ `iffdump` print identically; `oaddump enemy.iff` and `lvldump some.lvl` match their old C++ counterparts on real engine data emitted from `wfsource/source/oas/` and the level build path.
 
-### Phase 2 — Texture pipeline (`textile`, `chargrab`)
+### Phase 2 — Texture pipeline (`textile`)
 
-**Goal:** port the texture/sprite asset path. Independent of the OAD work, so Phase 2 can run in parallel with Phase 1 once the IFF crate is stable.
+**Goal:** port the texture asset path. Independent of the OAD work, so Phase 2 can run in parallel with Phase 1 once the IFF crate is stable.
 
-1. **`textile`.** Adopt `image` (TGA/BMP), `etagere` / `crunch_packer` (atlas packing), `clap` (CLI). Replaces ~4 kLoC of C++ with ~1 kLoC of Rust. SGI RGB support in `image` is opt-in; check whether any in-tree TGAs actually rely on SGI as a source format.
+1. **`textile`.** Adopt `image` (TGA/BMP/PNG), `etagere` / `crunch_packer` (atlas packing), `clap` (CLI). Replaces ~4 kLoC of C++ with ~1 kLoC of Rust. SGI support dropped — use ImageMagick to convert.
 
-2. **`chargrab` folded in.** The sprite/RMUV pipeline becomes part of `textile` rather than a separate tool — the same source of truth for "where do textures come from."
+(`chargrab` was originally planned here but dropped — never used in production. Being ported to Rust as `chargrab-rs` as a standalone exercise; see `docs/chargrab-rs-plan.md`.)
 
 ### Phase 3 — `attribedit`: OAD library and standalone editor
 
@@ -297,7 +297,7 @@ in a function that's still called from the read path.
 | lvldump | **rewrite** | **Rust** |
 | oaddump | **rewrite** | **Rust** |
 | textile | **rewrite** | **Rust** + `image` + `etagere` |
-| chargrab | **rewrite** | **Rust** — fold into `textile` / asset pipeline |
+| chargrab | **drop** | never used in production; C++ source deleted |
 
 **Net effect (in-tree LoC accounting):**
 
