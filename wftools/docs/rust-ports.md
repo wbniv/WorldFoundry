@@ -10,7 +10,7 @@
 | eval | ~53 (CLI) + ~400 (grammar) | Blender work | Expression evaluator grammar needed by `wf_attr_validate`; belongs with Blender integration, not here |
 | prep | ~1 615 | Maybe later | Custom tokenizer + macro expander; interesting but larger scope |
 | **textile** | ~4 000+ | **Done** | Texture atlas packer; INI-driven room pipeline; TGA/BMP/SGI readers; 2D bin-packing algorithm |
-| chargrab | ~1 000+ | Maybe later | Image processing companion to textile |
+| **chargrab** | ~1 000+ | **In progress** | Tile extractor/deduplicator; C++ source dropped; plan at `docs/chargrab-rs-plan.md` |
 | iff2lvl | ~8 731 | No | Massive 3D level converter; hardcoded paths; PSX/Saturn targets |
 | attribedit | ~3 517 | Blender plugin | GTK+ 2.x standalone OAD property editor — the reference implementation for what the Blender plugin needs to do |
 | iffdb | ~536 | Superseded | Alternative iffdump using in-memory IFF tree; `iffdump-rs` renders it redundant |
@@ -627,3 +627,55 @@ cargo build --manifest-path wftools/lvldump-rs/Cargo.toml
 lvldump-rs/target/debug/lvldump some.lvl
 lvldump-rs/target/debug/lvldump -lobjects.lc some.lvl output.txt
 ```
+
+---
+
+## In progress: `chargrab-rs`
+
+Tile extractor and deduplicator. Reads a source image, chops it into fixed-size tiles,
+deduplicates identical tiles into a compact atlas TGA, and writes a binary tile-index
+map. Companion to `textile` (texture atlas packer).
+
+The C++ source (`wftools/chargrab/`) has been deleted — it was never used in production
+(World Foundry was a 3D engine; tile extraction only applied to speculative 2D/Genesis
+work). The algorithm is fully documented in `docs/chargrab-rs-plan.md`.
+
+### CLI
+
+```
+chargrab {-x<N>} {-y<N>} {-t<N>} <infile> <charfile> <mapfile>
+  -x<N>   output atlas width in pixels (default 128)
+  -y<N>   output atlas height in pixels (default 512)
+  -t<N>   tile size in pixels (default 8)
+```
+
+### Design decisions
+
+- **`image` crate** for format reading (TGA, BMP, PNG → `Rgba8` → BGR555); replaces
+  hand-rolled readers from textile-rs. SGI format dropped — use ImageMagick to convert.
+- **Phase A**: refactor textile-rs to use `image` crate (~500 lines of format readers removed)
+- **Phase B**: build chargrab-rs using the same `image`-based `Bitmap`
+
+### Directory layout
+
+```
+chargrab-rs/
+  Cargo.toml
+  src/
+    main.rs    — CLI parsing, orchestration
+    bitmap.rs  — Bitmap struct, load via image crate, TGA writer
+    tile.rs    — TileMap struct, extract_tiles (dedup algorithm), save_tilemap
+```
+
+### TileMap binary format
+
+```
+[x_tiles: u32 LE] [y_tiles: u32 LE] [entries: u8 × (x_tiles × y_tiles)]
+```
+
+Transparent (all-zero) tiles map to index 255 (`TRANSPARENT_INDEX`).
+
+### Full plan
+
+See `docs/chargrab-rs-plan.md` for complete algorithm, type definitions, and
+implementation steps.
