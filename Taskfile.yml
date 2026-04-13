@@ -1,0 +1,38 @@
+version: '3'
+
+tasks:
+
+  md:
+    desc: "Convert Markdown to HTML and open in browser (usage: task md -- docs/foo.md)"
+    cmds:
+      - |
+        bash -c '
+        set -euo pipefail
+        ARGS="{{.CLI_ARGS}}"
+        if [ -z "$ARGS" ]; then
+          echo "Usage: task md -- <filename> [filename ...]" >&2
+          exit 1
+        fi
+        resolve() {
+          local name="$1"
+          if [ -f "$name" ]; then
+            echo "$name"; return 0
+          fi
+          for dir in docs; do
+            match=$(find "$dir" -name "$name" -type f 2>/dev/null | head -1)
+            if [ -n "$match" ]; then
+              echo "$match"; return 0
+            fi
+          done
+          return 1
+        }
+        rc=0
+        for F in $ARGS; do
+          found=$(resolve "$F") || found=$(resolve "${F}.md") || {
+            echo "File not found: $F" >&2; rc=1; continue
+          }
+          [ "$found" != "$F" ] && echo "Found: $found"
+          ./scripts/md-to-pdf.sh "$found" || rc=1
+        done
+        exit $rc
+        '
