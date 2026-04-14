@@ -7,15 +7,15 @@ Minimum setup to build and run `wf_game` on a fresh Linux (Ubuntu 24.04 verified
 ```bash
 sudo apt install \
     g++ \
-    libgl-dev libglu1-mesa-dev libx11-dev \
-    liblua5.4-dev
+    libgl-dev libglu1-mesa-dev libx11-dev
 ```
 
 | Package | Needed for |
 |---------|-----------|
 | `g++` | compiling the engine and C++ tools |
 | `libgl-dev` / `libglu-dev` / `libx11-dev` | GL / GLU / X11 headers and `.so` symlinks for engine link (`build_game.sh`) |
-| `liblua5.4-dev` | Lua scripting interpreter (`LuaInterpreter` in `wftools/wf_viewer/stubs/scripting_stub.cc`) |
+
+Lua is **vendored** (`wftools/vendor/lua-5.4.8/`) and compiled statically — no system `liblua5.4-dev` needed.
 
 ## User-local tooling
 
@@ -84,4 +84,4 @@ Binaries land in each crate's `target/release/<name>`.
 ## Gotchas
 
 - `build_game.sh` historically referenced a podman container overlay (`$HOME/.local/share/containers/storage/overlay/<SHA>/diff`) for GL/GLU/X11 headers. Removed 2026-04-14 in favour of system `-dev` packages. If you're diffing against an older checkout, don't restore the `$CBASE` logic.
-- Lua 5.4 headers on Debian/Ubuntu live under `/usr/include/lua5.4/`, so the C++ source uses `#include <lua5.4/lua.h>` and wraps with `extern "C" { ... }` (the Debian headers don't self-wrap for C++).
+- Lua headers come from `wftools/vendor/lua-5.4.8/src/` (added to `CXXFLAGS` by `build_game.sh`). The system package `liblua5.4-dev` is no longer used or needed.

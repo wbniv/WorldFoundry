@@ -117,7 +117,7 @@ to the mailbox machinery or level format.
 
 | Language | Sigil | Runtime | Compile-time switch | Binary cost | Status |
 |----------|-------|---------|---------------------|-------------|--------|
-| Lua 5.4  | *(none — fallthrough)* | `-llua5.4` (system) → to-vendor | `WF_ENABLE_LUA=1` (default on today) | linked lib | shipping |
+| Lua 5.4  | *(none — fallthrough)* | vendored `wftools/vendor/lua-5.4.8/`, statically linked | `WF_ENABLE_LUA=1` (default on today) | linked lib | shipping |
 | Fennel   | `;` | `fennel.lua` embedded via codegen (minified) | `WF_ENABLE_FENNEL=1` (requires Lua) | ~145 KB `.rodata` | shipping |
 | JavaScript (QuickJS) | `//` | QuickJS v0.14.0 statically linked from `wftools/vendor/` | `WF_JS_ENGINE=quickjs` | ~1.2 MB unstripped (~350 KB target stripped) | shipping |
 | JavaScript (JerryScript) | `//` | JerryScript v3.0.0 `wf-minimal` profile | `WF_JS_ENGINE=jerryscript` | ~80–90 KB lib | landed (build path); not yet smoke-tested |

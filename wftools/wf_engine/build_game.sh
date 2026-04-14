@@ -43,6 +43,7 @@ case "$WF_WASM_ENGINE" in
        exit 2 ;;
 esac
 WASM3_DIR="$VENDOR/wasm3-v0.5.0"
+LUA_DIR="$VENDOR/lua-5.4.8"
 WASM3_WF_DIR="$VENDOR/wasm3-v0.5.0-wf"
 
 mkdir -p "$OUT"
@@ -54,7 +55,7 @@ CXXFLAGS=(
     -DDO_IOSTREAMS=1 -DSW_DBSTREAM=1 -DDEBUG=1 -DDEBUG_VARIABLES=1
     -DDO_VALIDATION=0 -DDO_TEST_CODE=0 -DDO_DEBUG_FILE_SYSTEM=0
     -DPHYSICS_ENGINE_WF '-D__GAME__="wf_game"' "-DERR_DEBUG(x)="
-    -I"$SRC" -I"$SRC/game" -I"$STUBS"
+    -I"$SRC" -I"$SRC/game" -I"$STUBS" -I"$LUA_DIR/src"
 )
 
 if [[ "$WF_ENABLE_FENNEL" == "1" ]]; then
@@ -207,6 +208,24 @@ for dir in "${DIRS[@]}"; do
 done
 
 # Compile stubs
+# Vendored Lua 5.4 (C, not C++). Compile every .c in src/ except lua.c and
+# luac.c (those are standalone-binary mains, not library TUs). LUA_USE_POSIX +
+# LUA_USE_DLOPEN gives require()/dlopen() support without pulling in readline
+# (which is only used by Lua's standalone REPL). Linked statically — no system
+# liblua5.4 dependency.
+LUA_CFLAGS=(-std=gnu99 -O2 -w -fno-strict-aliasing
+            -DLUA_USE_POSIX -DLUA_USE_DLOPEN -I"$LUA_DIR/src")
+for c in lapi.c lauxlib.c lbaselib.c lcode.c lcorolib.c lctype.c ldblib.c \
+         ldebug.c ldo.c ldump.c lfunc.c lgc.c linit.c liolib.c llex.c \
+         lmathlib.c lmem.c loadlib.c lobject.c lopcodes.c loslib.c lparser.c \
+         lstate.c lstring.c lstrlib.c ltable.c ltablib.c ltm.c lundump.c \
+         lutf8lib.c lvm.c lzio.c; do
+    obj="$OUT/lua__${c%.c}.o"
+    echo "  CC (vendor) lua/$c"
+    gcc "${LUA_CFLAGS[@]}" -c "$LUA_DIR/src/$c" -o "$obj"
+    OBJS+=("$obj")
+done
+
 echo "  CC (stub) scripting_stub.cc"
 g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_stub.cc" -o "$OUT/stubs__scripting_stub.o"
 OBJS+=("$OUT/stubs__scripting_stub.o")
@@ -326,7 +345,7 @@ fi
 
 echo "=== Linking ==="
 g++ "${OBJS[@]}" "${JS_LINK_EXTRA[@]}" \
-    -lGL -lGLU -lX11 -llua5.4 -lm -lpthread \
+    -lGL -lGLU -lX11 -lm -lpthread -ldl \
     -o "$SCRIPT_DIR/wf_game"
 
 echo ""
