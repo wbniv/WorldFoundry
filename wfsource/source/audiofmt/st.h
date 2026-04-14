@@ -13,9 +13,6 @@
 #include <cstdio>
 #include <cstring>
 
-#ifdef AMIGA
-#include "amiga.h"
-#endif /* AMIGA */
 
 struct soundstream;
 typedef struct soundstream *ft_t;
@@ -205,10 +202,6 @@ unsigned long  swapl(unsigned long ul);		/* Swap long */
 float  	       swapf(float f);			/* Swap float */
 double 	       swapd(double d);			/* Swap double */
 
-#ifdef ARM
-double sfloor(double x);   /* Hack our way around the flawed */
-double sceil(double x);    /* UnixLib floor ceil functions */
-#endif
 
 
 void report(char *, ...);
@@ -259,10 +252,6 @@ extern int soxpreview;	/* Preview mode: be fast and ugly */
 #ifdef	VMS
 #define READBINARY      "r", "mbf=16", "ctx=stm"
 #define WRITEBINARY     "w", "ctx=stm"
-#endif
-#if defined(DOS) || defined(_WIN32)
-#define READBINARY	"rb"
-#define WRITEBINARY	"wb"
 #endif
 
 /* Error code reporting */

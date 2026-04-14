@@ -43,12 +43,6 @@ main( int argc, char* argv[] )
 //	char**	argv = NULL;
 //#endif
 
-#if defined( DOS )
-	// Example code to show how to increase size of tree (in case of an
-	// internal MemCheck error) because it couldn't add more entries...
-	printf( "MC_Settings.MaxMem = %d\n", MC_Settings.MaxMem );
-	MC_Settings.MaxMem = 4096;
-#endif
 
 	sys_init(&argc, &argv);
 	printf("sys_init finished\n");

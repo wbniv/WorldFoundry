@@ -1,10 +1,6 @@
 #ifndef VFW_H
 #define VFW_H
 
-#if defined( __WIN__ ) || defined( _WINDOWS )
-#	include <windows.h>
-#	include <mmsystem.h>
-#else
 typedef unsigned char BYTE;
 typedef short WORD;
 typedef long DWORD;
@@ -47,7 +43,6 @@ typedef struct tagBITMAPINFO {
 } BITMAPINFO;	//, FAR *LPBITMAPINFO, *PBITMAPINFO;
 #endif
 
-#endif	/* !defined( __WIN__ ) */
 
 
 typedef struct {

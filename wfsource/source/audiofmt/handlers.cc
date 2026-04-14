@@ -77,9 +77,6 @@ FORMAT( hcom )
 
 char *sndtnames[] = {
 	"sndt",
-#if defined( DOS ) || defined( _WIN32 )
-	"snd",
-#endif
 	(char *) 0
 };
 FORMAT( sndt )

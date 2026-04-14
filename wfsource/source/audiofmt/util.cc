@@ -40,9 +40,6 @@ int writing = 0;	/* are we writing to a file? */
 //int verbose = 0;	/* be noisy on stderr */
 //int summary = 0;	/* just print summary of information */
 
-#ifdef	DOS
-char writebuf[BUFSIZ];	/* output write buffer */
-#endif
 
 char *myname;
 

@@ -554,18 +554,10 @@ ConvertToIeeeExtended(double num, char* bytes)
             }
             expon |= sign;
             fMant = ldexp(fMant, 32);
-#ifdef	ARM
-            fsMant = sfloor(fMant); 	/*  as UnixLib has a fit over this */
-#else
             fsMant = floor(fMant);
-#endif
             hiMant = FloatToUnsigned(fsMant);
             fMant = ldexp(fMant - fsMant, 32);
-#ifdef	ARM
-            fsMant = sfloor(fMant); 	/*  as UnixLib has a fit over this */
-#else
             fsMant = floor(fMant);
-#endif
             loMant = FloatToUnsigned(fsMant);
         }
     }

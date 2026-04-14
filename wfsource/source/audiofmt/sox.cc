@@ -50,9 +50,6 @@ void statistics();
  * Rewrite for multiple effects: Aug 24, 1994.
  */
 
-#ifdef	DOS
-extern char writebuf[];
-#endif
 
 int clipped = 0;		/* Volume change clipping errors */
 
@@ -144,10 +141,6 @@ main( int n, char* args[] )
 			if (ft->fp == NULL)
 				fail("Can't open output file '%s': %s",
 					ofile, strerror(errno));
-#ifdef	DOS
-			if (setvbuf (ft->fp,writebuf,_IOFBF,sizeof(writebuf)))
-				fail("Can't set write buffer");
-#endif
 		}
 		writing = 1;
 	    }
@@ -832,10 +825,8 @@ char *usagestr =
 void
 usage( const char* opt )
 {
-#ifndef	DOS
 	/* single-threaded machines don't really need this */
 	fprintf(stderr, "%s: ", myname);
-#endif
 	if (opt)
 		fprintf(stderr, "%s\n\n", version());
 	fprintf(stderr, "Usage: %s\n", usagestr);
