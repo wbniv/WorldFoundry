@@ -31,7 +31,12 @@ fi
 FILE_DIR="$(cd "$(dirname "$FILE")" && pwd)"
 FILE_NAME="$(basename "$FILE")"
 BASE_NAME="${FILE_NAME%.*}"
-OUT="/tmp/${BASE_NAME}.html"
+# Write under $HOME so snap-confined browsers (Firefox) can read it.
+# Snap's sandbox blocks /tmp access by design — /tmp is world-writable
+# and treated as hostile.
+OUT_DIR="${HOME}/tmp"
+mkdir -p "$OUT_DIR"
+OUT="${OUT_DIR}/${BASE_NAME}.html"
 
 python3 -c "
 import base64, re, os, sys, html as html_mod, urllib.request, urllib.parse, subprocess, shutil, io
