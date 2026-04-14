@@ -1,4 +1,4 @@
-# Plan: Optional QuickJS / JerryScript engines alongside Lua
+# Plan: Optional QuickJS / JerryScript scripting engines
 
 **Date:** 2026-04-14
 **Status:** landed 2026-04-14 (QuickJS v0.14.0, JerryScript v3.0.0). Deviations
@@ -6,9 +6,22 @@ from the as-designed plan are captured inline below under *"As built:"* call-out
 **Depends on:** Lua spike (landed); `docs/plans/2026-04-14-fennel-on-lua.md` (concurrent, owns Lua vendoring).
 **Source investigation:** `docs/investigations/2026-04-14-scripting-language-replacement.md`
 
+**Framing note (clarification, 2026-04-14):** an earlier draft of this
+plan described JS as plugging into an always-on Lua host. That was wrong.
+Every scripting engine (Lua, Fennel, QuickJS, JerryScript, wasm3) is an
+independent compile-time opt-in. A build may ship **JS-only** (no Lua,
+no Fennel), **wasm3-only**, **Lua-only**, or any combination. Fennel is
+the sole exception: it compiles to Lua, so `WF_ENABLE_FENNEL=1` requires
+Lua to also be compiled in. Below, phrases like "today's Lua-only build"
+describe today's default configuration, not a permanent prerequisite.
+
 ## Context
 
-Lua 5.4 is the default scripting engine and its replacement is handled by the Lua spike (landed) plus the Fennel plan (vendoring, Fennel-on-Lua). **This plan is strictly about adding JavaScript as an optional, opt-in engine.** Two JS runtimes were called out in the investigation as the strongest non-Lua candidates:
+Lua 5.4 is the default engine **in today's build**; the Lua spike (landed)
+and the Fennel plan cover its own vendoring and composition. **This plan
+is strictly about adding JavaScript as an independent, opt-in engine.**
+Two JS runtimes were called out in the investigation as the strongest JS
+candidates:
 
 - **QuickJS** — ~500–700 KB code, up to ~1 MB heap, MIT, modern ES2020.
 - **JerryScript** — ~60–100 KB code, ~40–80 KB baseline, Apache-2.0, smallest serious JS engine.
@@ -17,9 +30,9 @@ The user's constraints for this plan:
 
 1. **Compile-time language subset.** A game build selects 1..N languages from the menu `{lua, fennel-on-lua, javascript}`. Lua/Fennel is independently on/off from JS; the two dimensions don't interact. *Multiple implementations of the same language are forbidden* — so within "javascript", the choice is `none | quickjs | jerryscript`, never both.
 2. **No runtime filesystem** (CD / console target). Everything statically linked, no `dlopen`, no `fopen` of script assets — scripts live only inside IFF.
-3. **Zero footprint when a language isn't selected.** If JS is off: no JS sources compile, no JS-only constant tables, no JS chunks left in shipped IFF. Binary/asset delta vs. a today's Lua-only build = 0.
+3. **Zero footprint when a language isn't selected.** If JS is off: no JS sources compile, no JS-only constant tables, no JS chunks left in shipped IFF. Binary/asset delta vs. the Lua-only default is zero. The symmetric rule holds the other way: a JS-only build omits all Lua sources and link deps.
 
-Lua and Fennel continue to work unchanged whether or not a JS engine is compiled in, and vice versa.
+Every engine works independently of every other (modulo Fennel→Lua). A JS-only build has no Lua, no Fennel, no wasm3 — just JS.
 
 **Supersedes** the investigation's §"Multiple languages per game?" (l. 914–933), which landed at *"one language per game is almost certainly the right ceiling."* That verdict is revised: compile-time 1..N subset with sigil dispatch, zero-footprint for unselected languages. The original costs (binary size, mental tax, toolchain fragmentation) are eaten intentionally; the zero-footprint guarantee caps the binary-size cost.
 
@@ -82,10 +95,12 @@ Each engine TU registers itself **at compile time** via a `LANG_HANDLER(...)` ma
 #ifdef WF_FUTURE_LANG_XYZ              // placeholder for the language-after-JS
     LANG_HANDLER("…",  RunXyzScript)
 #endif
-// Lua is the fallthrough — no sigil, matched last.
+#ifdef WF_ENABLE_LUA
+    // Lua is the fallthrough when compiled in — no sigil, matched last.
+#endif
 ```
 
-Routing rule: skip leading whitespace, match the longest sigil, else fall through to Lua. Unselected languages contribute **no entry** to the table — the branch doesn't exist in the binary.
+Routing rule: skip leading whitespace, match the longest sigil; if nothing matches, fall through to the build's **fallthrough engine**. Today the fallthrough is Lua (when compiled in); if Lua is *not* compiled in, the build needs a `WF_DEFAULT_ENGINE` knob (follow-up) to pick another fallthrough, or the dispatcher logs and no-ops unsigilled scripts. Unselected languages contribute **no entry** to the table — the branch doesn't exist in the binary. Sigils must be Lua-syntax errors *only when Lua is compiled in*; with Lua off they just need to be distinct from each other.
 
 **As built:** the dispatch registry was *not* extracted into a separate `scripting_dispatch.{hp,cc}` for the JS landing — there are still only two non-Lua sigils (`;` for Fennel, `//` for JS), and the existing inline `#ifdef` pattern in `scripting_stub.cc::LuaInterpreter::RunScript` carries them. A new header `wftools/wf_viewer/stubs/scripting_js.hp` declares the JS plug ABI (`JsRuntimeInit`, `JsAddConstantArray`, `JsRunScript`, …) and is included by `scripting_stub.cc` under `#ifdef WF_WITH_JS`. The full sigil-table refactor is the right move when WASM (`#`) lands — at that point three sigils with shared whitespace skipping and longest-match routing pays for the indirection.
 
@@ -221,13 +236,13 @@ Enabled in `wf-minimal` on top of stock `minimal`:
 
 ### 5. Asset / CD footprint when JS engine is `none`
 
-The whole point of the `none` build is that a CD shipped with a Lua-only game has zero JS weight anywhere. Rules:
+When JS is off, a CD shipped with that build has zero JS weight anywhere. Rules:
 
 - **Binary**: JS TUs and vendor sources don't compile → zero code. The inline no-op stubs in the dispatch header are a single `if-constexpr`-ish branch that compiles out completely.
-- **Constants**: `INDEXOF_*` / `JOYSTICK_BUTTON_*` tables already exist for Lua; no new JS-only tables. Zero delta.
-- **IFF assets**: a `none` build does not ship JS script bodies in `cd.iff`. Enforce this with an IFF pre-flight check in the build (or at game boot, in debug builds) that scans OAS script fields and fails if any begin with `//` when `WF_JS_ENGINE_NONE` is defined. Keeps stray JS scripts out of the disc image. For multi-language games that *do* ship JS, the same chunks are authored as JS sources without a parallel `cd.iff` artifact — the sigil does the routing.
+- **Constants**: `INDEXOF_*` / `JOYSTICK_BUTTON_*` tables are shared across every compiled-in engine; no JS-only copies. Zero delta.
+- **IFF assets**: a `none`-JS build does not ship JS script bodies in `cd.iff`. Enforce this with an IFF pre-flight check in the build (or at game boot, in debug builds) that scans OAS script fields and fails if any begin with `//` when `WF_JS_ENGINE_NONE` is defined. Keeps stray JS scripts out of the disc image. The same per-sigil check applies symmetrically — a Lua-off build should reject sigil-less scripts, a Fennel-off build should reject `;`-prefixed scripts, and so on.
 
-Net effect: `none` builds are byte-identical to the Lua-only builds we'd produce today.
+Net effect: a JS-off build has zero JS delta vs. the same configuration without this plan.
 
 ### 6. Authoring JS scripts in the IFF
 
@@ -263,15 +278,19 @@ Reuse:
 ## Verification
 
 1. **Default build unchanged**:
-   - `bash wftools/wf_engine/build_game.sh` (no env var) → same `wf_game` as today (Lua-only). Binary-size delta vs. main: 0 bytes (±link-order noise).
-2. **QuickJS build**:
+   - `bash wftools/wf_engine/build_game.sh` (no env var) → same `wf_game` as today's default (Lua on, JS off). Binary-size delta vs. main: 0 bytes (±link-order noise).
+2. **QuickJS build (mixed with Lua)**:
    - `WF_JS_ENGINE=quickjs bash wftools/wf_engine/build_game.sh` links clean.
    - Smoke test (debug-only, runs at first `RunScript`): `// return 1+2` → `3.0`; `// write_mailbox(0,42); read_mailbox(0)` → `42.0`.
    - Snowgoons end-to-end with the JS-ported player script: joystick moves character; camshot still works (director remains Lua).
-3. **JerryScript build**: same as QuickJS, with `WF_JS_ENGINE=jerryscript`.
-4. **Mixed languages in one IFF**: patch the player script to JS, leave director as Lua (or Fennel if the Fennel plan has landed). Both run in the same level tick.
-5. **Size deltas**: report stripped `wf_game` size for each mode. Targets: QuickJS ≈ +350 KB; JerryScript (`wf-minimal` profile) ≈ +80–90 KB (lib only) / ~+100 KB including bindings; `none` = 0 KB vs. today. If JerryScript exceeds ~120 KB, re-verify `wf-minimal.profile` matches the spec in §4 (easy to accidentally include a stray builtin).
-6. **Asset footprint**: run the asset check in a `none` build against a JS-containing dev `cd.iff` and confirm it fails loudly; against the shipping Lua-only `cd.iff` it passes.
+3. **QuickJS-only build (no Lua)**:
+   - `WF_ENABLE_LUA=0 WF_JS_ENGINE=quickjs bash wftools/wf_engine/build_game.sh` links clean; no Lua link deps, no Lua TUs compiled.
+   - Snowgoons with all scripts authored as JS (player + director both prefixed `//`): plays identically to the mixed build.
+   - Sigil-less scripts in the iff fail the pre-flight check or no-op cleanly at runtime (choice deferred to the `WF_DEFAULT_ENGINE` follow-up).
+4. **JerryScript builds**: same as QuickJS, with `WF_JS_ENGINE=jerryscript`.
+5. **Mixed languages in one IFF**: patch the player script to JS, leave director as Lua (or Fennel if compiled in). Both run in the same level tick.
+6. **Size deltas**: report stripped `wf_game` size for each mode. Targets: QuickJS ≈ +350 KB; JerryScript (`wf-minimal` profile) ≈ +80–90 KB (lib only) / ~+100 KB including bindings; `none` = 0 KB vs. today. A JS-only build subtracts the Lua lib (~150-200 KB) from the total; don't mistake that for a regression.
+7. **Asset footprint**: run the asset check in a JS-off build against a JS-containing dev `cd.iff` and confirm it fails loudly; against the same-config-without-JS `cd.iff` it passes.
 
 ## Follow-ups (out of scope)
 

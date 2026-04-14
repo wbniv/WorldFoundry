@@ -12,16 +12,24 @@ snowgoons runs with hand-ported Lua player/director scripts byte-patched into
 both `wflevels/snowgoons.iff` and `wfsource/source/game/cd.iff`, and
 `-L<path>` loads a single level file directly.
 
-The original investigation recommends a second layer: **Fennel** — a Lisp
-that compiles to Lua — so power users get macros and the Scheme-ish feel of
-the original WF era while Lua remains the default. Fennel ships as a single
-~165 KB `fennel.lua` with zero native deps, so the integration cost is a
-handful of lines in the interpreter plus one vendored file.
+The investigation recommends **Fennel** — a Lisp that compiles to Lua —
+as an opt-in second layer for authors who want macros and Lisp-shaped
+syntax. Fennel ships as a single ~165 KB `fennel.lua` with zero native
+deps, so the integration cost is a handful of lines plus one vendored
+file.
 
-Goal: inside `wf_game`, scripts whose first non-whitespace byte is `;` are
-compiled+executed through Fennel; all other scripts keep running as plain
-Lua, unchanged. Verify by porting both snowgoons scripts (player + director)
-to Fennel and confirming the engine behaves identically.
+**Fennel is the one language that requires Lua.** Because Fennel compiles
+to Lua and evaluates in a live `lua_State`, the engine's Fennel
+dispatch can only be compiled in when Lua is also compiled in. Other
+engines (QuickJS, JerryScript, wasm3) are independent of Lua — a build
+can pick them without Lua — but `WF_ENABLE_FENNEL=1` implicitly requires
+`WF_ENABLE_LUA=1` (or whatever the Lua switch becomes; today Lua is
+always on). Enforce this in `build_game.sh` with an explicit error.
+
+Goal: inside `wf_game`, scripts whose first non-whitespace byte is `;`
+are compiled+executed through Fennel; all other scripts keep running as
+plain Lua (when Lua is compiled in). Verify by porting both snowgoons
+scripts (player + director) to Fennel and confirming behavior matches.
 
 ## Shape
 
