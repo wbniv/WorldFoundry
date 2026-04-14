@@ -149,7 +149,13 @@ def close_blockquote():
 def flush_para():
     global para_lines
     if para_lines:
-        html_lines.append('<p>' + ' '.join(para_lines) + '</p>')
+        joined = ' '.join(para_lines)
+        if li_open:
+            # Continuation inside an open <li> — emit as plain text to avoid
+            # block-level <p> gaps and anonymous-box line-breaking
+            html_lines.append(joined)
+        else:
+            html_lines.append('<p>' + joined + '</p>')
         para_lines = []
 
 def parse_table_row(line):
