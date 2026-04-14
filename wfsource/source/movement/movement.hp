@@ -144,7 +144,5 @@ extern MovementHandler* physicsHandlerTable[];
 extern MovementHandler* cameraHandlerTable[];
 
 //==============================================================================
-#include "movement.hpi"  // include all inline definitions as appropriate
-//==============================================================================
 #endif // _MOVEMENT_HP
 //==============================================================================

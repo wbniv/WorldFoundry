@@ -29,27 +29,13 @@
 #include "game.hp"
 #include "version.hp"
 
-#if defined( __WIN__ ) || defined(__LINUX__)
+#if defined(__LINUX__)
 	char szOadDir[ _MAX_PATH ];
 #endif
 
-#if defined ( __PSX__ )
-#include <libgte.h>
-#include <libgpu.h>
-#if DBSTREAM < 1
-bool enableScreenStream = false;        // kts remove in final game, used
-#endif
-#endif
 
 #include "level.hp"
 
-#if defined( __WIN__ )
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <mmsystem.h>
-int streamFrom = 0;
-extern "C" BOOL WINAPI IsDebuggerPresent(void);
-#endif
 
 #include <pigsys/pigsys.hp>
 #include <cpplib/libstrm.hp>
@@ -58,9 +44,6 @@ extern "C" BOOL WINAPI IsDebuggerPresent(void);
 
 //==============================================================================
 
-#if defined(__PSX__)
-BeforeMain wfBeforeMain;
-#endif
 bool gSoundEnabled = false;
 bool gCDEnabled = false;
 
@@ -70,12 +53,8 @@ WFGame* theGame = NULL;
 bool bRecordTGA = false;
 #endif
 
-#if defined( __PSX__ )
-bool bRenderZs = true;
-#else
 bool bPerspectiveCorrection = false;
 bool bRenderZs = false;
-#endif
 bool bRenderZb = !bRenderZs;
 
 bool bLinearMalloc = false;
@@ -101,7 +80,7 @@ std::ifstream* joystickInputFile;	// istream for joystick data
 
 const char szRate[] = "rate";
 
-#if ( !defined( __PSX__ ) && SW_DBSTREAM > 0)
+#if SW_DBSTREAM > 0
 
 void
 usage( int argc, char* argv[] )
@@ -122,10 +101,6 @@ usage( int argc, char* argv[] )
 	std::cout << "\t\t\tn=null, no output is produced" << std::endl;
 	std::cout << "\t\t\ts=standard out" << std::endl;
 	std::cout << "\t\t\te=standard err" << std::endl;
-#if defined (__PSX__)
-	std::cout << "\t\t\tc=screen, display on psx screen" << std::endl;
-	std::cout << "\t\t\tu=screenflush, display on psx screen during startup" << std::endl;
-#endif
 	std::cout << "\t\t\tm#=monochrome dispay, # = which window" << std::endl;
 	std::cout << "\t\t\tf<filename>=output to filename" << std::endl;
 	std::cout << "\t-s<stream initial><stream output>, where:" << std::endl;
@@ -148,13 +123,8 @@ usage( int argc, char* argv[] )
 
     std::cout << "\t-paranoid\tPerform insanely slow error checks" << std::endl;
     std::cout << "\t-record_tga\tSave every frame as frame#.tga in cwd" << std::endl;
-#if !defined( __PSX__ )
     std::cout << "\t-zs\t\tZ-Sorted" << std::endl;
     std::cout << "\t-zb\t\tZ-Buffered" << std::endl;
-#endif
-#if defined( __WIN__ )
-	std::cout << "\t-window\t\tDisplay game in a window" << std::endl;
-#endif
 	std::cout << "\t-nologo\t\tDon't display company logos" << std::endl;
 //			std::cout << "\t-framerate\tPrint framerate" << std::endl;
 #if defined (__WIN)
@@ -189,9 +159,6 @@ ParseCommandLine(int argc, char** argv)
 	for( index=1; index < argc && argv[index] && ((*argv[index] == '-') || (*argv[index] == '/')); index++)
 	{
 #if 0
-#if defined( __WIN__ )
-		const char szHeight[] = "height";
-#endif
 #endif
 
 		DBSTREAM1( std::cout << argv[index] << std::endl; )
@@ -211,15 +178,10 @@ ParseCommandLine(int argc, char** argv)
 			FakeFrameRate = SCALAR_CONSTANT(0.05);
 			DBSTREAM1( cerror << "Fake clock delta = " << FakeFrameRate << std::endl; )
 		}
-#if defined( __WIN__ )
-		else if ( strcmp( argv[index]+1, "perspective" ) == 0 )
-			bPerspectiveCorrection = true;
-#endif
 #if defined(DESIGNER_CHEATS)
         else if ( strcmp( argv[index]+1, "record_tga" ) == 0 )
             bRecordTGA = true;
 #endif
-#if !defined( __PSX__ )
 		else if ( strcmp( argv[index]+1, "zb" ) == 0 )
 		{
 			bRenderZb = true;
@@ -230,13 +192,6 @@ ParseCommandLine(int argc, char** argv)
 			bRenderZs = true;
 			bRenderZb = false;
 		}
-#endif
-#if defined( __WIN__ )
-		else if ( strcmp( argv[ index ] + 1, "hd" ) == 0 )
-			streamFrom = 1;
-		else if ( strcmp( argv[ index ] + 1, "cd" ) == 0 )
-			streamFrom = 2;
-#endif
 #if defined(JOYSTICK_RECORDER)
 		else if ( memcmp( argv[index]+1, "joy", 3 ) == 0 )
 		{
@@ -302,13 +257,13 @@ ParseCommandLine(int argc, char** argv)
 			  DBSTREAM1( std::cout << "PrintFrameRate on" << std::endl; )
 	 	}
 #endif
-#if (!defined( __PSX__ ) && SW_DBSTREAM > 0)
+#if SW_DBSTREAM > 0
 		else if ( *( argv[index]+1 ) == 'h' )
 	  	{
 			usage( argc, argv );
          sys_exit(1);
   		}
-#endif		// !defined( __PSX__ ) )
+#endif		// SW_DBSTREAM > 0
 #if DO_ASSERTIONS
 		else
 			DBSTREAM1( cerror << "game Error: Unrecognized command line switch \"" <<
@@ -321,45 +276,7 @@ ParseCommandLine(int argc, char** argv)
 
 
 
-#if defined( __PSX__ )
-extern int   _ramsize;
-extern int _stacksize;
-extern int __heapsize;
-extern void* __heapbase;
-#endif
 
-#if defined( __WIN__ )
-bool
-GetLocalMachineStringRegistryEntry( const char* path, const char* valueName, char* contents, int sizeOfContents )
-{
-	HKEY resultKey = NULL;
-    PHKEY phkResult = &resultKey; 	// address of handle of open key
-
-//	                              KEY_ENUMERATE_SUB_KEYS |
-//                              KEY_EXECUTE |
-
-	long retVal = RegOpenKeyEx( HKEY_LOCAL_MACHINE,	path, 0,
-		KEY_ENUMERATE_SUB_KEYS | KEY_QUERY_VALUE, phkResult );
-	//std::cout << "Registry read, retVal = " << retVal << ", key = " << resultKey << std::endl;
-	if ( retVal != ERROR_SUCCESS )
-		return false;
-	assert( retVal == ERROR_SUCCESS );
-	assert( phkResult );
-	assert( resultKey );
-
-	DWORD type;
-	DWORD cbData = sizeOfContents;
-
-	retVal = RegQueryValueEx( resultKey, valueName, NULL, &type, (BYTE*)contents, &cbData );
-	//std::cout << "retVal = " << retVal << std::endl;
-	//std::cout << "type = " << type << std::endl;
-	if ( retVal != ERROR_SUCCESS )
-		return false;
-	assert( type == REG_SZ );
-	assert( retVal == ERROR_SUCCESS );
-	return true;
-}
-#endif
 
 
 void
@@ -373,34 +290,14 @@ PIGSMain( int argc, char* * argv )
 
 //	ERR_SET_LOG(3);
 
-//	std::cout << "Heap Base =" << __heapbase << ", heapsize = " << __heapsize << std::endl;
-//#if DO_ASSERTIONS && defined( __PSX__ )
-//	void* test = malloc(10000000);		// allocate 10 million bytes (this should fail)
-//	AssertMsg(test == 0,"Wrong malloc in use, should have returned 0, returned " << test);
-//#endif
-
 	AssertMsg( true & 1, "True must have low bit set [required for bitfield memory optimization]" );
 
-#if defined( __WIN__ )
-	bool bSuccess = GetLocalMachineStringRegistryEntry( "SOFTWARE\\World Foundry\\GDK", "OAD_DIR", szOadDir, sizeof( szOadDir ) );
-#pragma message( __FILE__ ": check to see what happens if szOadDir not gotten from registry" )
-	//AssertMsg( bSuccess, "\"OAD_DIR\" not set in registry (SOFTWARE\\World Foundry\\GDK\\OAD_DIR)" );
-#endif
 
 	DBSTREAM1( std::cout << __GAME__ << " v" << (char*)szVersion; )
 
 	DBSTREAM1( std::cout << ", Built:" << (char*)szDate << "," << (char*)szTime << " by " << szBuildUser << std::endl; )
 	int commandIndex = ParseCommandLine(argc,argv);
 
-#if defined( __WIN__ )
-	// default to 20fps if in debugger
-	if ( IsDebuggerPresent()
-#if defined(JOYSTICK_RECORDER)
-	&& !bJoyPlayback
-#endif
-	)
-			FakeFrameRate = Scalar::one / Scalar(20,0);
-#endif
 
 #if defined(JOYSTICK_RECORDER)
 	// check for conflicting time-related options
@@ -418,18 +315,6 @@ PIGSMain( int argc, char* * argv )
 	DBSTREAM1( cver << "Level=" << nStartingLevel << std::endl; )
 
 #if 0
-#if defined( __WIN__ )
-	{
-		int error;
-		for ( int i=0; i<10; ++i )
-		{
-			JOYINFO ji;
-			if ( ( error = joyGetPos( 0, &ji ) ) != JOYERR_NOERROR )
-				break;
-		}
-		AssertMsg( error == JOYERR_NOERROR, "Joystick driver not installed or joystick not plugged in" );
-	}
-#endif
 #endif
 
 #pragma message( "System streams should be in HAL [framework]" )
@@ -449,9 +334,6 @@ PIGSMain( int argc, char* * argv )
 	cmem << "cmem:" << std::endl;
 #endif
 #if SW_DBSTREAM > 0
-#	ifdef __PSX__
-	DBSTREAM1( cver = std::cout; )
-#	endif
 	DBSTREAM1( cver << __GAME__ " Ver " << (char*)szVersion << ", Built:" << (char*)szDate << "," << (char*)szTime << " by " << szBuildUser << std::endl; )
 	DBSTREAM1( cver << "DBSTREAMS "; )
 #	ifdef DO_PROFILE

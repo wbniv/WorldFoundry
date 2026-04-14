@@ -29,11 +29,7 @@
 // ------------------------------------------------------------------------
 
 #if defined(SCALAR_TYPE_FIXED)
-#if defined ( __PSX__ )
-#include <math/psx/scalar.cc>
-#elif defined ( __WIN__ )
-#include <math/win/scalar.cc>
-#elif defined ( __LINUX__ )
+#if   defined ( __LINUX__ )
 #include <math/linux/scalar.cc>
 #else
 #error no scalar asm code!
@@ -1178,8 +1174,6 @@ Scalar::Random()
 #error update rand code
 #endif
 	temp = rand() >> 16;
-#elif defined(__WIN__)
-	temp = rand() << 1;
 #else 
 #error rand not implemented for this platform
 #endif

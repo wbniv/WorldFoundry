@@ -20,11 +20,7 @@
 // ------------------------------------------------------------------------
 
 #if defined(SCALAR_TYPE_FIXED)
-#if defined ( __PSX__ )
-#include <math/psx/scalar.hpi>
-#elif defined ( __WIN__ )
-#include <math/win/scalar.hpi>
-#elif defined ( __LINUX__ )
+#if   defined ( __LINUX__ )
 #include <math/linux/scalar.hpi>
 #else
 #error no scalar.hpi file for this platform!

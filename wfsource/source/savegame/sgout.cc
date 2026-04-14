@@ -28,9 +28,6 @@ saveostream::saveostream
 	_filesizeRounded = ROUND( _filesize, 8192 );
 	assert( ( _filesizeRounded % 8192 ) == 0 );
 	_nBlocks = _filesizeRounded / 8192;
-#if defined( __PSX__ )
-	AssertMsg( bufsz == 128, "Memory card can only write in 128 byte chunks" );
-#endif
 	_buf = (const char*)malloc( bufsz );
 	assert( _buf );
 	AssertMemoryAllocation(_buf);

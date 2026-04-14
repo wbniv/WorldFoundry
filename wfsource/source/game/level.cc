@@ -49,18 +49,6 @@
 #include <physics/ode/ode.hp>
 #endif
 
-#if defined( __PSX__ )
-#	include <sys/types.h>
-#	include <r3000.h>
-#	include <asm.h>
-#	include <kernel.h>
-#	include <libgte.h>
-#	include <libgpu.h>
-#	include <libcd.h>
-#	if defined( SOUND )
-#		include <libsnd.h>
-#	endif
-#endif
 
 #include <oas/levelobj.ht>
 #include <oas/matte.ht>
@@ -893,11 +881,6 @@ Level::update(Scalar deltaTime)
 
 #endif
 
-#if defined( __PSX__)
-	extern void ViewVideoMemory();
- 	if ( _hardwareInput1->justPressed( EJ_BUTTONF_E | EJ_BUTTONF_F | EJ_BUTTONF_G | EJ_BUTTONF_H) == ( EJ_BUTTONF_E | EJ_BUTTONF_F | EJ_BUTTONF_G | EJ_BUTTONF_H) )
-		ViewVideoMemory();
-#endif
 
 #if DO_DEBUGGING_INFO
 	// If WALL_CLOCK_BREAKPOINT_VALUE is set using the debugger, break here
@@ -1434,14 +1417,6 @@ Level::WriteSystemMailbox( int boxnum, Scalar value )
         case EMAILBOX_MIDI:
         {
             // TODO: Actually means something once we have .sep files
-#if defined( SOUND ) && defined( __PSX__ )
-            int nSong = value.WholePart();
-            extern short seq;	// midi music
-            if ( nSong )
-                SsSeqPlay( seq, SSPLAY_PLAY, SSPLAY_INFINITY );
-            else
-                SsSeqStop( seq );
-#endif
             break;
         }
 
