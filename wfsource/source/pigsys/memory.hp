@@ -67,65 +67,7 @@
 #if DEBUG_MEMORY
 #include <pigsys/psysmem.h>
 #else
-#if defined( __WIN__ )
-
-#define InMappedMemory(ptr) 1
-#define CodeAlignedPtr(ptr) 1
-#define AlignedPtr( ptr )			( ( (long)ptr & 1 ) == 0 )
-//#define ValidPtr( ptr )			    ( ( ptr ) )
-//#define ValidPtr( ptr )			    ( ( ptr ) && ( AlignedPtr( ptr ) ) )
-//#define ValidPtr( ptr )			    ( ( ptr ) && ( AlignedPtr( ptr ) ) && ( !IsBadReadPtr( ptr, 1 ) ) )
-
-#elif defined( __PSX__ )
-
-//==============================================================================
-// Valid Memory Map:
-//	0x00000000 - 0x007fffff
-//  0x1f800000 - 0x1f8003ff
-//	0x80000000 - 0x807fffff
-//	0xa0000000 - 0xa07fffff
-// 	assert not between main ram and scratch ram
-//	and not between scratch ram and main ram with cache
-//	and not between main ram at 8 and main ram at a
-//	and not between past main ram at a
-
-inline bool 
-InMappedMemory(const void* ptr)
-{
-	const void* mainRamTop 					= (void*)0x007fffff;
-	const void* scratchRamBottom 			= (void*)0x1f800000;
-	const void* scratchRamTop 				= (void*)0x1f8003ff;
-	const void* cachedMainRamBottom			= (void*)0x80000000;
-	const void* cachedMainRamTop 			= (void*)0x807fffff;
-	const void* secondCachedMainRamBottom 	= (void*)0xa0000000;
-	const void* secondCachedMainRamTop 		= (void*)0xa07fffff;
-
-	return
-	   ( !( ( (ptr) > mainRamTop ) && ( (ptr) < scratchRamBottom ) ) )
-	&& ( !( ( (ptr) > scratchRamTop ) && ( (ptr) < cachedMainRamBottom ) ) )
-	&& ( !( ( (ptr) > cachedMainRamTop) && ( (ptr) < secondCachedMainRamBottom ) ) )
-	&& ( !(   (ptr) > secondCachedMainRamTop ) );
-}
-
-//==============================================================================
-
-inline bool
-AlignedPtr( const void* ptr )
-{
-	return ( (long)(ptr) & 3 ) == 0;
-}
-
-#define CodeAlignedPtr(ptr) 1
-
-inline int
-wasteTime()
-{
-	int i;
-	i = 10;
-	return i;
-}
-
-#elif defined( __LINUX__ )
+#if   defined( __LINUX__ )
 // linux allows any alignedment
 #define AlignedPtr( ptr )			( 1 )
 #define CodeAlignedPtr( ptr )			( 1 )
@@ -152,10 +94,6 @@ ValidCodePtr(const void* ptr)
 
 	printf( "ValidPtr( %p ) failed\n", ptr );
 //	assert(0);
-#if defined(__PSX__)
-	for(int index=0;index < 1000; index++)
-		wasteTime();
-#endif
 	return false;
 }
 
@@ -177,10 +115,6 @@ ValidPtr(const void* ptr)
 
 	printf( "ValidPtr( %p ) failed\n", ptr );
 //	assert(0);
-#if defined(__PSX__)
-	for(int index=0;index < 1000; index++)
-		wasteTime();
-#endif
 	return false;
 }
 

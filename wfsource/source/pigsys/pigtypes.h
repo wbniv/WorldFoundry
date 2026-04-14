@@ -78,9 +78,7 @@ typedef	SYS_UCHAR		uchar;
 #endif	//!SYS_SUPPRESS_BASE_TYPEDEFS
 
 #if		!SYS_SUPPRESS_BSD_TYPEDEFS
-#if !defined(__PSX__)
 typedef SYS_USHORT		ushort;
-#endif
 typedef SYS_UINT		uint;
 typedef SYS_ULONG		ulong;
 #endif	//!SYS_SUPPRESS_BSD_TYPEDEFS
@@ -92,9 +90,6 @@ typedef	SYS_LARGEINT	largeint;
 // ANSI standard(looking) Boolean notation added by XINA
 //--------------------------------------------------
 #if !_BOOL_IS_DEFINED_
-#	if defined( __WIN__ ) && defined( __cplusplus )
-#		error Use the bool built-in to C++
-#	endif
 #undef bool
 // definition of bool changed in accordance with the ANSI C++ Standard
 //#define bool char

@@ -32,10 +32,8 @@
 
 static int _sys_exitcode;
 
-#if !defined( __WIN__ )
 	int __argc;
 	char* * __argv;
-#endif
 
 #ifndef	_SYS_CAST_2CHARP
 #define	_SYS_CAST_2CHARP	//nothing
@@ -122,40 +120,6 @@ static int _sys_exitcode;
 //
 //=============================================================================
 
-#ifdef	__PSX__
-
-//int			sscanf(const char* buf, const char* fmt, ...)
-//				{ TARG_UNIMPLEMENTED(PSX,sscanf); return 0; }
-sys_FILE*	fopen(const char* /*fname*/, const char* /*mode*/)
-				{ TARG_UNIMPLEMENTED(PSX,fopen); return (sys_FILE*)NULL; }
-int			fflush(sys_FILE* /*fp*/)
-				{ TARG_UNIMPLEMENTED(PSX,fflush); return EOF; }
-int			fclose(sys_FILE* /*fp*/)
-				{ TARG_UNIMPLEMENTED(PSX,fclose); return EOF; }
-int			fgetc(sys_FILE* /*fp*/)
-				{ TARG_UNIMPLEMENTED(PSX,fgetc); return EOF; }
-char*		fgets(char* /*s*/, int /*n*/, sys_FILE* /*fp*/)
-				{ TARG_UNIMPLEMENTED(PSX,fgets); return (char*)NULL; }
-int			fputc(int /*c*/, sys_FILE* /*fp*/)
-				{ TARG_UNIMPLEMENTED(PSX,fputc); return EOF; }
-int			ungetc(int /*c*/, sys_FILE* /*fp*/)
-				{ TARG_UNIMPLEMENTED(PSX,ungetc); return EOF; }
-size_t		fread(void* /*buf*/, size_t /*size*/, size_t /*nobj*/, sys_FILE* /*fp*/)
-				{ TARG_UNIMPLEMENTED(PSX,fread); return 0; }
-size_t		fwrite(const void* /*buf*/, size_t /*size*/, size_t /*nobj*/, sys_FILE* /*fp*/)
-				{ TARG_UNIMPLEMENTED(PSX,fwrite); return 0; }
-int			fseek(sys_FILE* /*fp*/, long /*off*/, int /*orig*/)
-				{ TARG_UNIMPLEMENTED(PSX,fseek); return -1; }
-long		ftell(sys_FILE* /*fp*/)
-				{ TARG_UNIMPLEMENTED(PSX,ftell); return -1L; }
-int			feof(sys_FILE* /*fp*/)
-				{ TARG_UNIMPLEMENTED(PSX,feof); return -1; }
-int			ferror(sys_FILE* /*fp*/)
-				{ TARG_UNIMPLEMENTED(PSX,ferror); return -1; }
-void		rewind(sys_FILE* /*fp*/)
-				{ TARG_UNIMPLEMENTED(PSX,rewind); }
-
-#endif	// defined(__PSX__)
 
 //=============================================================================
 
@@ -195,7 +159,6 @@ sys_fclose(sys_FILE* fp)
 
 //==============================================================================
 
-#if !defined( __PSX__ )
 int
 sys_fgetc(sys_FILE* fp)
 {
@@ -233,7 +196,6 @@ sys_ungetc(int c, sys_FILE* fp)
         assert( ValidPtr(fp) );
 	return _SYS_CAST_2INT ungetc(c, fp);
 }
-#endif
 
 //==============================================================================
 
@@ -414,11 +376,7 @@ sys_init(int* argcp, char*** argvp)
 	sys_atexit( memcheck_shutdown );
 #endif
 
-#if defined( __PSX__ )
-	_psx_init();
-#elif defined( __WIN__ )
-	_win32_init();
-#elif defined(__LINUX__)
+#if   defined(__LINUX__)
 	_linux_init();
 #else
 #	error Unknown platform

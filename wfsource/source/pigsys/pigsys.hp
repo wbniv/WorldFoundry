@@ -49,20 +49,6 @@ extern char* * __argv;
 }
 #endif
 
-#if defined( __WIN__ )
-#	if !defined( STRICT )
-#		define STRICT
-#	endif
-#	if !defined( WIN32_LEAN_AND_MEAN )
-#		define WIN32_LEAN_AND_MEAN
-#	endif
-//#	if !defined( _MSC_VER )
-//#		define _WIN32
-//#	endif
-#	if !defined( NOMINMAX )
-#		define NOMINMAX
-#	endif
-#endif
 
 
 //=============================================================================
@@ -92,11 +78,7 @@ typedef enum _MachineType
 
 // include directives from the makefile
 #ifndef _MKINC
-#if defined( __WIN__ )
-#define _MKINC "cf_win.h"
-#elif defined( __PSX__ )
-#define _MKINC "cf_psx.h"
-#elif defined( __LINUX__ )
+#if   defined( __LINUX__ )
 #define _MKINC "cf_linux.h"
 #else
 #error "Undefined platform: please define __WIN__, __PSX__ o  __LINUX__"
@@ -200,9 +182,7 @@ typedef enum _MachineType
 
 // Convenience macros.
 // these should only be used for numeric types
-#if !defined(__PSX__)			// already defined in psx libraries
 #define	ABS(_1)					((_1)<0?-(_1):(_1))
-#endif
 
 #define	until( _condition_ )	while ( !(_condition_) )
 
@@ -281,15 +261,6 @@ typedef void (*voidFunctionPtr)(void);
 //=============================================================================
 
 #if defined( __cplusplus )
-#if defined( __PSX__ )
-#	include <pigsys/psx/new.h>
-#	if DO_IOSTREAMS
-// these come from pigsys/psx
-#		include <iostream>
-#		include <fstream.h>
-#		define NULL_STREAM cnull
-#	endif
-#else          // defined(__PSX__)
 #include <new>
 #  if DO_DEBUG_FILE_SYSTEM
 #		if defined(OLD_IOSTREAMS)
@@ -341,7 +312,6 @@ typedef void (*voidFunctionPtr)(void);
 #		endif
 #	endif
 #endif
-#endif
 
 
 
@@ -354,19 +324,6 @@ typedef void (*voidFunctionPtr)(void);
 //	to mess with wrappered implementations.
 
 // kts added 10-17-97 02:49pm
-#if defined(__PSX__)
-#ifndef _MAX_FNAME
-#define _MAX_FNAME 260
-#endif
-
-#ifndef _MAX_EXT
-#define _MAX_EXT _MAX_FNAME
-#endif
-
-#ifndef _MAX_PATH
-#define _MAX_PATH _MAX_FNAME
-#endif
-#endif
 // end kts
 
 
@@ -406,25 +363,13 @@ ERROR: neither SYS_FOPEN_MAX nor FOPEN_MAX was defined;
 //	strstr, strerror, strtok.
 #ifndef	_STRING_H
 // kts added so that string does not define index
-#ifdef __PSX__
-#define index stupidfuckingpsxfunction
-#endif
 #include <cstring>
-#ifdef __PSX__
-#undef index
-#endif
 #undef	_STRING_H
 #define	_STRING_H
 
-#ifdef __PSX__
-#undef strdup
-#endif
 #endif	// !defined(_STRING_H)
 
 
-#ifdef __WIN__
-#define strcasecmp stricmp
-#endif
 
 #if		DO_ASSERTIONS
 

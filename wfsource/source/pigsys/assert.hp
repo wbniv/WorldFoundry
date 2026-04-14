@@ -50,9 +50,6 @@
 #   include <iostream.h>
 #   if defined(__LINUX__)
 #       include <strstream.h>
-#   elif defined(__WIN__)
-#       include <strstrea.h>
-#   elif defined(__PSX__)
 #   else
 #   error no strstream defined!
 #   endif
