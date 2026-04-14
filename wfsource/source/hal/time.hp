@@ -54,6 +54,16 @@ SYS_CLOCK()
 	return(whole+frac);
 //	return Scalar(clock() - _nWallClockBaseTime) / SCALAR_CONSTANT(CLOCKS_PER_SEC);
 	}
+#elif defined(__LINUX__)
+#include <time.h>
+inline long _SYS_TICKS_linux() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    // units: centiseconds (100 ticks/sec)
+    return (long)(ts.tv_sec * 100 + ts.tv_nsec / 10000000L);
+}
+#define SYS_TICKS() _SYS_TICKS_linux()
+extern Scalar SYS_CLOCK(void);
 #endif
 
 #endif // defined __TIME_H

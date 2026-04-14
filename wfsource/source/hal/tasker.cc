@@ -286,7 +286,7 @@ TaskShell(void)
 {
 	TaskSetPriority(GetCurrentTask(),_priority);
 	(*_taskRoutine)();
-	DBSTREAM2(cwarn << "WARNING: Task returned to caller\n"));
+	DBSTREAM2(cwarn << "WARNING: Task returned to caller\n");
 	TaskKill(GetCurrentTask());
 }
 

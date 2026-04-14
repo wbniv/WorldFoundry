@@ -1,0 +1,81 @@
+/*============================================================================*/
+/* mesh.ht: created from OADTYPES.S and mesh.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef mesh_HT
+#define mesh_HT
+ struct _Mesh {
+  // 0
+	int32 ModelType;               /* Minumum: 0 Maximum: 6 Default: 0 */
+	int32 AnimationMailbox;               /* Minumum: 0 Maximum: 4999 Default: 1 */
+	int32 VisibilityMailbox;               /* Minumum: 0 Maximum: 4999 Default: DEFAULT_VISIBILITY */
+	int32 MatteType;               /* Minumum: 0 Maximum: 2 Default: 1 */
+		int32 BackgroundColor;
+		int32 DebugBackgroundColor;
+		fixed32 Distance;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 8000 * 65536.0)) */
+    Scalar GetDistance() const { return Scalar::FromFixed32(Distance); }
+				int32 Tiles;	/* This is a packedAssetID */
+				int32 Map;	/* This is a packedAssetID */
+		fixed32 XRotationScale;         /* Minumum: ( ((long) -320 * 65536.0)) Maximum: ( ((long) 320 * 65536.0)) */
+    Scalar GetXRotationScale() const { return Scalar::FromFixed32(XRotationScale); }
+		fixed32 YRotationScale;         /* Minumum: ( ((long) -240 * 65536.0)) Maximum: ( ((long) 240 * 65536.0)) */
+    Scalar GetYRotationScale() const { return Scalar::FromFixed32(YRotationScale); }
+		int32 generationType;               /* Minumum: 0 Maximum: 1 Default: 0 */
+		fixed32 period;         /* Minumum: ( ((long) 0.01 * 65536.0)) Maximum: ( ((long) 5000 * 65536.0)) */
+    Scalar Getperiod() const { return Scalar::FromFixed32(period); }
+		fixed32 timeDelay;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 5000 * 65536.0)) */
+    Scalar GettimeDelay() const { return Scalar::FromFixed32(timeDelay); }
+		fixed32 yArc;         /* Minumum: ( ((long) 0.01 * 65536.0)) Maximum: ( ((long) 1.0 * 65536.0)) */
+    Scalar GetyArc() const { return Scalar::FromFixed32(yArc); }
+		fixed32 zArc;         /* Minumum: ( ((long) 0.01 * 65536.0)) Maximum: ( ((long) 1.0 * 65536.0)) */
+    Scalar GetzArc() const { return Scalar::FromFixed32(zArc); }
+		fixed32 initialSphereRadius;         /* Minumum: ( ((long) 0.01 * 65536.0)) Maximum: ( ((long) 50 * 65536.0)) */
+    Scalar GetinitialSphereRadius() const { return Scalar::FromFixed32(initialSphereRadius); }
+		fixed32 sphereExpansionRate;         /* Minumum: ( ((long) 0.01 * 65536.0)) Maximum: ( ((long) 50 * 65536.0)) */
+    Scalar GetsphereExpansionRate() const { return Scalar::FromFixed32(sphereExpansionRate); }
+		int32 nParticles;               /* Minumum: 0 Maximum: 500 Default: 1 */
+		fixed32 initialVelocity;         /* Minumum: ( ((long) 0.01 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
+    Scalar GetinitialVelocity() const { return Scalar::FromFixed32(initialVelocity); }
+		fixed32 initialAngleA;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetinitialAngleA() const { return Scalar::FromFixed32(initialAngleA); }
+		fixed32 initialAngleB;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetinitialAngleB() const { return Scalar::FromFixed32(initialAngleB); }
+		fixed32 initialAngleC;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetinitialAngleC() const { return Scalar::FromFixed32(initialAngleC); }
+		fixed32 deltaAngleA;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetdeltaAngleA() const { return Scalar::FromFixed32(deltaAngleA); }
+		fixed32 deltaAngleB;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetdeltaAngleB() const { return Scalar::FromFixed32(deltaAngleB); }
+		fixed32 deltaAngleC;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetdeltaAngleC() const { return Scalar::FromFixed32(deltaAngleC); }
+		fixed32 lifeTime;         /* Minumum: ( ((long) 0.01 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
+    Scalar GetlifeTime() const { return Scalar::FromFixed32(lifeTime); }
+		fixed32 initialAlpha;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetinitialAlpha() const { return Scalar::FromFixed32(initialAlpha); }
+		fixed32 alphaDecrement;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetalphaDecrement() const { return Scalar::FromFixed32(alphaDecrement); }
+		int32 Type;               /* Minumum: 0 Maximum: 3 Default: 0 */
+		fixed32 magnitude;         /* Minumum: ( ((long) 0.01 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
+    Scalar Getmagnitude() const { return Scalar::FromFixed32(magnitude); }
+		fixed32 vectorX;         /* Minumum: ( ((long) 0.0 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
+    Scalar GetvectorX() const { return Scalar::FromFixed32(vectorX); }
+		fixed32 vectorY;         /* Minumum: ( ((long) 0.0 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
+    Scalar GetvectorY() const { return Scalar::FromFixed32(vectorY); }
+		fixed32 vectorZ;         /* Minumum: ( ((long) 0.0 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
+    Scalar GetvectorZ() const { return Scalar::FromFixed32(vectorZ); }
+		int32 forceType;               /* Minumum: 0 Maximum: 3 Default: 0 */
+		fixed32 magnitude2;         /* Minumum: ( ((long) 0.01 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
+    Scalar Getmagnitude2() const { return Scalar::FromFixed32(magnitude2); }
+		fixed32 vectorX2;         /* Minumum: ( ((long) 0.0 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
+    Scalar GetvectorX2() const { return Scalar::FromFixed32(vectorX2); }
+		fixed32 vectorY2;         /* Minumum: ( ((long) 0.0 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
+    Scalar GetvectorY2() const { return Scalar::FromFixed32(vectorY2); }
+		fixed32 vectorZ2;         /* Minumum: ( ((long) 0.0 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
+    Scalar GetvectorZ2() const { return Scalar::FromFixed32(vectorZ2); }
+};
+/*============================================================================*/
+#endif         /* mesh_HT */
+/*============================================================================*/

@@ -1,0 +1,38 @@
+/*============================================================================*/
+/* tool.ht: created from OADTYPES.S and tool.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef tool_HT
+#define tool_HT
+ struct _Tool {
+	int32 moveblocPageOffset;                 /* offset in page data for this objects page */
+	int32 toolsetPageOffset;                 /* offset in page data for this objects page */
+	int32 commonPageOffset;                 /* offset in page data for this objects page */
+			int32 MeshName;	/* This is a packedAssetID */
+	int32 meshPageOffset;                 /* offset in page data for this objects page */
+	int32 shadowPageOffset;                 /* offset in page data for this objects page */
+	int32 TemplateObject;        /* Default: 1 */
+	int32 ActivationScript;
+	int32 ObjectToThrow;                               /* index into master object list, = OBJECT_NULL if no reference */
+	int32 ActivationCost;               /* Minumum: 0 Maximum: 100 Default: 1 */
+	int32 Autofire;        /* Default: 0 */
+	int32 MovingThrowPercentage;               /* Minumum: 0 Maximum: 100 Default: 25 */
+	int32 Type;               /* Minumum: 0 Maximum: 3 Default: 1 */
+	int32 ActivationButton;               /* Minumum: 0 Maximum: 7 Default: 1 */
+	fixed32 Recharge;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0)) */
+    Scalar GetRecharge() const { return Scalar::FromFixed32(Recharge); }
+	fixed32 HorizSpeed;         /* Minumum: ( ((long) 0.0 * 65536.0)) Maximum: ( ((long) 360.0 * 65536.0)) */
+    Scalar GetHorizSpeed() const { return Scalar::FromFixed32(HorizSpeed); }
+	fixed32 VertSpeed;         /* Minumum: ( ((long) 0.0 * 65536.0)) Maximum: ( ((long) 360.0 * 65536.0)) */
+    Scalar GetVertSpeed() const { return Scalar::FromFixed32(VertSpeed); }
+	fixed32 MaxRange;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 10000 * 65536.0)) */
+    Scalar GetMaxRange() const { return Scalar::FromFixed32(MaxRange); }
+	fixed32 BeamSpreadAngle;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetBeamSpreadAngle() const { return Scalar::FromFixed32(BeamSpreadAngle); }
+};
+/*============================================================================*/
+#endif         /* tool_HT */
+/*============================================================================*/

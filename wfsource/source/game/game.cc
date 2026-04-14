@@ -65,7 +65,8 @@ WFGame::WFGame( const int nStartingLevel )
 	:
 	// Memory pool for allocating MsgPort messages
 	_msgPortMemPool( MemPoolConstruct( sizeof( SMsg ), MSGPORTPOOLSIZE, HALLmalloc ) ),
-	_overrideLevelNum( nStartingLevel )
+	_overrideLevelNum( nStartingLevel ),
+	_desiredLevelNum( 4 )		// default to snowgoons; overridden by -l flag or shell script
 {
 	DBSTREAM1( cprogress << "WFGame::WFGame" << std::endl; )
 
@@ -186,13 +187,13 @@ WFGame::RunGameScript()				// runs the whole game, returns when game (really) ov
   		//  cerr << "EvalScript(" << szScript << ")=" << data << endl;
   		//return data;
       
+		if(_overrideLevelNum != -1)
+			_desiredLevelNum = _overrideLevelNum;
+
 		assert(_desiredLevelNum >= 0);
 		assert(_desiredLevelNum < 9999);
 		DBSTREAM3( cprogress << "Loading level " << _desiredLevelNum << std::endl; )
 #if defined(DO_CD_IFF)
-
-      if(_overrideLevelNum != -1)
-         _desiredLevelNum  = _overrideLevelNum;
 
 		const DiskTOC::TOCEntry& tocLevelEntry = _gameTOC.GetTOCEntry(GAMEFILE_LEVELSTART+_desiredLevelNum);
 //		std::cout << "seeking to level at offset " << tocLevelEntry._offsetInDiskFile+DiskFileCD::_SECTOR_SIZE << std::endl;

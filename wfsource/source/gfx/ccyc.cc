@@ -38,9 +38,9 @@ CCYC::CCYC()
 CCYC::CCYC( void* ppCCYC, int xOffset, int yOffset )
 {
 	assert( ValidPtr( ppCCYC ) );
-	long* pCCYC = (long*)ppCCYC;
+	int32* pCCYC = (int32*)ppCCYC;
 
-	assert( *pCCYC == IFFTAG('c','c','y','c' ));
+	assert( *pCCYC == (int32)IFFTAG('c','c','y','c' ));
 	++pCCYC;			// Skip 'CCYC'
 	assert( *pCCYC > 0 );
 	++pCCYC;			// Skip chunk size

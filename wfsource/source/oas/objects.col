@@ -1,0 +1,89 @@
+//============================================================================*/
+// objects.col: collision array, included by room.cc
+// created from  object.cos,DO NOT MODIFY */
+//============================================================================*/
+
+
+
+
+
+
+
+
+
+
+
+//============================================================================
+
+
+
+
+int collisionTable[] =
+{
+	0,	// NULL
+        	0,	// ActBox
+        	0,	// Generator
+        	0,	// Target
+        	0,	// Room
+        	1,	// StatPlat
+        	1,	// Enemy
+        	1,	// Platform
+        	1,	// Missile
+        	1,	// Explode
+		1,	// Spike
+        	0,	// Matte
+        	0,	// Destroyer
+        	1,	// Camera
+        	0,	// Shadow
+        	0,	// LevelObj
+        	0,	// CamShot
+        	0,	// ActBoxOR
+        	0,	// Warp
+        	0,	// Tool
+        	0,	// Director
+        	1,	// Shield
+        	1,	// Player
+		0,	// Light
+		0,	// Disabled
+		0,	// Alias
+
+	
+};
+
+
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+               
+        
+        
+        
+        
+        
+        
+        
+	
+	
+	
+
+
+
+
+//============================================================================
+

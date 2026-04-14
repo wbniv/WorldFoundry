@@ -1,0 +1,85 @@
+//============================================================================*/
+// objects.ctb: collision array table, included by room.cc
+// created from  object.cts,DO NOT MODIFY */
+//============================================================================*/
+
+
+
+
+
+
+
+
+
+
+
+//============================================================================
+
+
+
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+	
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+	
+	
+	
+
+
+
+
+
+        Explode,Explode,CI_SPECIAL,CI_SPECIAL
+        Explode,Enemy,CI_SPECIAL,CI_NOTHING
+        Explode,Player,CI_SPECIAL,CI_NOTHING
+        Explode,Missile,CI_SPECIAL,CI_NOTHING
+        Explode,Spike,CI_SPECIAL,CI_NOTHING
+        Explode,Platform,CI_SPECIAL,CI_NOTHING
+        Enemy,Enemy,CI_PHYSICS,CI_PHYSICS
+        Enemy,Platform,CI_PHYSICS,CI_PHYSICS
+        Enemy,Spike,CI_NOTHING,CI_SPECIAL
+        Enemy,StatPlat,CI_PHYSICS,CI_PHYSICS
+        Enemy,Player,CI_SPECIAL,CI_PHYSICS
+        Enemy,Missile,CI_NOTHING,CI_SPECIAL
+        Platform,Platform,CI_PHYSICS,CI_PHYSICS
+        Platform,Spike,CI_NOTHING,CI_SPECIAL
+        Platform,StatPlat,CI_PHYSICS,CI_PHYSICS
+        Platform,Player,CI_PHYSICS,CI_PHYSICS
+        Platform,Missile,CI_NOTHING,CI_SPECIAL
+        Spike,Spike,CI_PHYSICS,CI_PHYSICS
+        Spike,Player,CI_SPECIAL,CI_NOTHING       
+        Spike,Missile,CI_SPECIAL,CI_NOTHING
+        StatPlat,StatPlat,CI_PHYSICS,CI_PHYSICS
+        StatPlat,Spike,CI_NOTHING,CI_SPECIAL
+        StatPlat,Player,CI_PHYSICS,CI_PHYSICS
+        StatPlat,Missile,CI_NOTHING,CI_SPECIAL
+        Player,Player,CI_PHYSICS,CI_PHYSICS
+        Player,Missile,CI_NOTHING,CI_SPECIAL
+	Camera,Platform,CI_SPECIAL,CI_NOTHING
+	Camera,StatPlat,CI_SPECIAL,CI_NOTHING
+	Camera,Spike,CI_SPECIAL,CI_NOTHING
+
+
+
+
+//============================================================================
+

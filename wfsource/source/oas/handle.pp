@@ -1,0 +1,93 @@
+/*============================================================================*/
+/* handle.ht: created from OADTYPES.S and handle.oas DO NOT MODIFY */
+/*============================================================================*/
+
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+                 
+                 
+
+
+
+
+/*      maximum value of a long int     */
+
+/* minimum value of a long int  */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#ifndef handle_HT
+#define handle_HT
+
+
+
+ struct _"Handle" {
+	int32 commonPageOffset;                 /* offset in page data for this objects page */
+
+	
+	
+
+};
+
+
+
+/*============================================================================*/
+#endif         /* handle_HT */
+/*============================================================================*/
+

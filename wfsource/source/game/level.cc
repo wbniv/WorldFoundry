@@ -223,6 +223,14 @@ Level::constructObject( SObjectStartupData& startupData, int index )
 			setMainCharacter( pCreatedActor );
 			updateMainCharacter();
 		}
+		else if ( pCreatedActor->kind() == Actor::CamShot_KIND )
+		{
+			// Bootstrap camera when scripting is disabled: write the first CamShot's
+			// object index to EMAILBOX_CAMSHOT so DelayCameraHandler transitions
+			// instead of asserting after 5 frames.
+			if ( GetMailboxes().ReadMailbox( EMAILBOX_CAMSHOT ) == Scalar(0,0) )
+				GetMailboxes().WriteMailbox( EMAILBOX_CAMSHOT, Scalar( index, 0 ) );
+		}
 		else if ( pCreatedActor->kind() == Actor::Camera_KIND )
 		{
 			// only allow one camera for the level
@@ -619,26 +627,27 @@ Level::Level
 	}
 	}
 
-   // now call reset on all actors in all rooms
-   for(int roomIndex=0;roomIndex<_theLevelRooms->NumberOfRooms();roomIndex++)     // kts: there should be a Room iterator
-   {
-      const Room& room = _theLevelRooms->GetRoom( roomIndex );
-      BaseObjectIteratorWrapper iter = room.ListIter(ROOM_OBJECT_LIST_UPDATE);
-   
-      while(!iter.Empty())
-      {
-         Actor* actor = dynamic_cast<Actor*>(&(*iter));
-         assert(ValidPtr(actor));   
-         actor->reset();
-         ++iter;
-      }
-   }
-
 	DBSTREAM1( cprogress << "Done loading level data" << std::endl; )
 	assert( ValidPtr( mainCharacter() ) );
 
 	DBSTREAM1( cprogress << "Doing reset" << std::endl; )
 	reset();
+
+   // call reset on all actors after Level::reset() so that temp objects (tools, shadows)
+   // are created AFTER reset() clears the temp-object slots and sets up the active rooms
+   for(int roomIndex=0;roomIndex<_theLevelRooms->NumberOfRooms();roomIndex++)     // kts: there should be a Room iterator
+   {
+      const Room& room = _theLevelRooms->GetRoom( roomIndex );
+      BaseObjectIteratorWrapper iter = room.ListIter(ROOM_OBJECT_LIST_UPDATE);
+
+      while(!iter.Empty())
+      {
+         Actor* actor = dynamic_cast<Actor*>(&(*iter));
+         assert(ValidPtr(actor));
+         actor->reset();
+         ++iter;
+      }
+   }
 
 	DBSTREAM1( cprogress << "common block stuff" << std::endl; )
 	DBSTREAM1( cflow << "Level::level: common block stuff" << std::endl; )

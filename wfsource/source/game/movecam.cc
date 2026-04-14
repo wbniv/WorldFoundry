@@ -985,7 +985,10 @@ BungeeCameraHandler::predictPosition(MovementManager& /*movementManager*/, Movem
    	_update(movementObject, destCam);	// Fill in destCam with the "desired" new position/orientation
 	DBSTREAM3( ccamera << "Desired camera position: " << destCam.position << std::endl; )
 
-	theLevel->GetMailboxes().WriteMailbox( EMAILBOX_CAMSHOT, Scalar::zero );					// clear mailbox after use
+	// NOTE: do not clear EMAILBOX_CAMSHOT here. The original design relied on ActBoxOR
+	// triggers re-writing the CamShot index every frame. With scripting disabled,
+	// nobody re-writes it, so clearing it would cause an assertion failure next frame.
+	//theLevel->GetMailboxes().WriteMailbox( EMAILBOX_CAMSHOT, Scalar::zero );					// clear mailbox after use
 	PhysicalAttributes& actorAttr = movementObject.GetWritablePhysicalAttributes();
 	Vector3 origLinVelocity = actorAttr.LinVelocity();
 

@@ -62,6 +62,13 @@ Scalar SYS_CLOCK(void)
 
 #if defined( __WIN__ )
 
+#elif defined(__LINUX__)
+#include <time.h>
+Scalar SYS_CLOCK(void)
+{
+    long ticks = SYS_TICKS() - _nWallClockBaseTime;  // centiseconds elapsed
+    return Scalar::FromFloat((float)ticks / 100.0f);
+}
 #endif
 
 //=============================================================================
