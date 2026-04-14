@@ -12,6 +12,20 @@ World Foundry originally targeted PSX, Saturn, DOS, Windows, and Linux. Only the
 
 ---
 
+## Why delete Windows code rather than preserve it for Xbox?
+
+Future platform interest is Xbox, not Windows PC. The tempting-but-wrong instinct is "Xbox is Windows-adjacent, keep the `__WIN__` code as a head start." In fact the Windows code here is worse than useless for modern Xbox:
+
+1. **Vintage DirectX.** `gfx/directx/` is DX5/6/7 era with DirectDraw and a `winmain.cc`/`winproc.cc` scaffolding. Modern Xbox (One / Series) uses DX11/12 + GDK; the API surface is unrecognizable. `audio/win/` is DirectSound, deprecated in favor of XAudio2 / WASAPI. The 1999 code isn't a head start — it's a map drawn before the terrain was built.
+
+2. **`__WIN__` guards aren't porting scaffolding; `__LINUX__` guards are.** In the Shape-D platform chains, `#elif defined(__WIN__)` is a dead *selector* branch alongside the `#elif defined(__LINUX__)` branch that actually marks "here's a platform boundary, fork here." Stripping `__WIN__` and keeping `__LINUX__` loses zero porting signal. When Xbox work starts, grep `__LINUX__`, every hit is a decision point, add an `__XBOX__` arm at the same location.
+
+3. **Git history preserves everything.** If in 2028 you want to inspect 1999's `hal/win/` or `winmain.cc`, `git show <commit>^:path/to/file` brings it back verbatim. Deletion on HEAD is not loss.
+
+**Optional belt-and-braces:** before the Phase 1 commit on this branch, tag the parent commit as `preserved/pre-drop-dead-renderers` (or similar) so the pre-deletion state is trivially accessible by name later without having to remember a SHA. Zero ongoing cost.
+
+---
+
 ## Phase 1 — Delete entire dead directories and files
 
 All `git rm -r` safe; `build_game.sh` doesn't compile any of these, and every cross-reference from a kept file is guarded so the preprocessor skips it on Linux.
