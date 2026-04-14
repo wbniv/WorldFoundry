@@ -15,9 +15,6 @@
 #include <visual/brstrmi.hp>
 #include <visual/veuler.hp>
 #include <math/matrix34.hp>
-#if defined( __PSX__ )
-#	include <math/matrix3t.hp>
-#endif
 
 #if defined( WRITER )
 #include <visual/brstrmo.hp>
@@ -69,18 +66,6 @@ Quaternion::ConstructMatrix34( const Matrix34& matrix34 )
 
 // ------------------------------------------------------------------------
 
-#if defined( __PSX__ )
-
-void
-Quaternion::ConstructMatrix3t( const Matrix3t& matrix3t )
-{
-	assert(0);				// kts let me know if you need this
-	// brm: non-optimal, but BrMatrix3tToQuat does not exist
-//	Matrix34 matrix34( matrix3t );
-//	ConstructMatrix34( matrix34 );
-}
-
-#endif
 
 // ------------------------------------------------------------------------
 

@@ -29,11 +29,6 @@
 #include <math/matrix34.hp>
 
 
-#if defined( __PSX__ )
-#include <libgte.h>
-#include <inline_c.h>
-#include <gtemac.h>
-#endif
 
 extern MachineType gTargetMachineType;
 
@@ -41,20 +36,6 @@ extern MachineType gTargetMachineType;
 //=============================================================================
 // kts added 8/5/97 19:46
 
-#if defined( __PSX__ )
-
-void
-Matrix3t::SetGTE()
-{
-	MATRIX mat3t;
-	gte_SetRotMatrix(&_matrix);
-	mat3t.t[0] = _matrix.t[0].AsLong() >> 8;
-	mat3t.t[1] = _matrix.t[1].AsLong() >> 8;
-	mat3t.t[2] = _matrix.t[2].AsLong() >> 8;
-	gte_SetTransMatrix(&mat3t);
-}
-
-#endif
 
 #if 0
 // ------------------------------------------------------------------------
@@ -212,20 +193,7 @@ Matrix3t::operator * ( const Matrix3t& rhs ) const
 const Matrix3t&
 Matrix3t::operator *= ( const Matrix3t& rhs )
 {
-#if defined(__PSX__)
-	wf_matrix3t mattmp2;
-
-	Vector3 v;
-//	SetRotMatrix((MATRIX *)&_matrix);
-	gte_SetRotMatrix((MATRIX *)&_matrix);
-	MulRotMatrix0((MATRIX *)&rhs._matrix, (MATRIX *)&mattmp2);
-	ApplyTransposeMatrixLV((MATRIX *)&rhs._matrix, (VECTOR *)&_matrix.t, &v);
-
-	mattmp2.t = rhs._matrix.t + v;
-	_matrix = mattmp2;
-#else
 	Fail( "Only implemented on PSX" );
-#endif
 	return *this;
 }
 

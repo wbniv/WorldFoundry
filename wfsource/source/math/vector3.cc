@@ -65,36 +65,7 @@ Vector3::CrossProduct(const Vector3& other) const
 Scalar
 Vector3::Length() const
 {
-#if defined(SCALAR_TYPE_FIXED)
-	int32 a = X().AsLong();
-	int32 b = Y().AsLong();
-	int32 c = Z().AsLong();
-    register unsigned long out0;
-	register long out1;
-	register unsigned long out2;
-	register long out3;
-
-	// result = sqrt(a*a + b*b + c*c)
-	MultiplyAndNop64(a,a,out1,out0);
-
-	Multiply64(b,b,out3,out2);
-
-	AddCarry64(out1,out0,out3,out2);
-
-	Multiply64(c,c,out3,out2);
-
-	AddCarry64(out1,out0,out3,out2);
-
-	Scalar result(Sqrt64(out1,out0));
-//	cscreen << "len: " << *this << endl;
-//	cscreen << "out1:" << out1 << ",out2:" << out2 << endl;
-//	cscreen << "result: " << result << endl;
-	return result;
-#elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
    return ((X()*X()) + (Y()*Y()) + (Z()*Z())).Abs().Sqrt();
-#else
-#error SCALAR TYPE not defined
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -102,27 +73,7 @@ Vector3::Length() const
 Scalar
 Vector3::RLength() const
 {
-#if defined(SCALAR_TYPE_FIXED)
-	int32 a = X().AsLong();
-	int32 b = Y().AsLong();
-	int32 c = Z().AsLong();
-    register unsigned long out0;
-	register long out1;
-	register unsigned long out2;
-	register long out3;
-
-	// result = sqrt(a*a + b*b + c*c)
-	MultiplyAndNop64(a,a,out1,out0);
-	Multiply64(b,b,out3,out2);
-	AddCarry64(out1,out0,out3,out2);
-	Multiply64(c,c,out3,out2);
-	AddCarry64(out1,out0,out3,out2);
-	return Scalar(FastRSqrt64(out1,out0));
-#elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
    return ((X()*X()) + (Y()*Y()) + (Z()*Z())).FastSqrt();
-#else
-#error SCALAR TYPE not defined
-#endif
 
 }
 

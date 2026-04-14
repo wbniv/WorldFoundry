@@ -80,91 +80,18 @@ PIGSMain( int argc, char* argv[] )
 	Scalar divResult = a / b;
 	//std::cout << divResult.AsLong() << std::endl;
 	AssertMsg(divResult.WholePart() == 246, "divResult.WholePart = " << divResult.WholePart());
-#if defined(SCALAR_TYPE_FIXED)
-	AssertMsg(divResult.AsUnsignedFraction() == 59871, "divResult.AsUnsignedFraction() = " << divResult.AsUnsignedFraction());
-#elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
 	AssertMsg(divResult.AsUnsignedFraction() == 59870, "divResult.AsUnsignedFraction() = " << divResult.AsUnsignedFraction());
-#else
-#error SCALAR TYPE not defined
-#endif
 
 	{
 		Scalar a = SCALAR_CONSTANT(31000.001);
 		Scalar b = SCALAR_CONSTANT(123.0);
 		Scalar divResult = a / b;
 		assert( divResult.WholePart() == 252);
-#if defined(SCALAR_TYPE_FIXED)
-		AssertMsg( divResult.AsUnsignedFraction() == 2131,"divResult.AsUnsignedFraction() = " << divResult.AsUnsignedFraction());
-#elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
 		AssertMsg( divResult.AsUnsignedFraction() == 2132,"divResult.AsUnsignedFraction() = " << divResult.AsUnsignedFraction());
-#else
-#error SCALAR TYPE not defined
-#endif
 
 		MATH_DEBUG( std::cout << "divResult = " << divResult.AsUnsignedFraction() << std::endl; )
 	}
 
-#if defined(SCALAR_TYPE_FIXED)
-	// test divide overflow
-	a = SCALAR_CONSTANT(-10.973755);
-	b = SCALAR_CONSTANT(-0.000045);
-	divResult = a / b;
-	assert(divResult == SCALAR_CONSTANT(32000));
-	// kts shouldn't this be 32767? Investigate
-
-	// also check to see if negative overflows work
-
-    // check portions which are platform specific
-   MATH_DEBUG( std::cout << "testing 64 bit add \n");
-    unsigned long a1,a0;
-    unsigned long b1,b0;
-    a0 = 0x80000000;
-    a1 = 0x0;
-    b0 = 0x80000001;
-    b1 = 0x80;
-    AddCarry64(a1, a0, b1, b0);
-    std::cerr << std::hex;
-    assertEq(a1,0x81);
-    assertEq(a0,1);
-
-    MATH_DEBUG( std::cout << "testing 64 bit mult\n");
-    long in1, in2;
-    unsigned long resultLsb; 
-    long resultMsb; 
-    in1 = 0x10;
-    in2 = 0x7fffffff;
-    Multiply64(in1,in2,resultMsb,resultLsb);
-    assertEq(resultLsb,0xFFFFFFF0);
-    assertEq(resultMsb,0x7);
-
-    MATH_DEBUG( std::cout << "testing shifts\n");
-    in1 = 0x12345678;
-    in2 = 0x8;
-    ShiftRightLogical(resultLsb,in1,in2);
-    std::cout << std::hex << "resultLsb = " << resultLsb << ", in1 = " << in1 << ", in2 = " << in2 << std::endl;
-    assertEq(resultLsb,0x123456);
-
-
-    in1 = 0xf0000000;
-    in2 = 0x1;
-    ShiftRightLogicalVar(resultLsb,in1,in2);
-    std::cout << std::hex << "resultLsb = " << resultLsb << ", in1 = " << in1 << ", in2 = " << in2 << std::endl;
-    assertEq(resultLsb,0x78000000);
-    
-    resultLsb = 0x12345678;
-    unsigned long unsignedResultMsb = 0x90abcdef;
-    ShiftLeft64(unsignedResultMsb,resultLsb,0x8);
-    assertEq(resultLsb,(unsigned long)0x34567800);
-    assertEq(unsignedResultMsb,(unsigned long)0xabcdef12); 
-
-    // joinhilo test
-    resultLsb = JoinHiLo(0x12345678,(unsigned long)0x9abcdef0);
-    assertEq(resultLsb,0x56789abc);
-
-#elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
-#else
-#error SCALAR TYPE not defined
-#endif
 
 	// check against test tables
 #define ENTRIES 360*4

@@ -36,14 +36,6 @@ INLINE Quaternion::Quaternion( const Matrix34& matrix34 )
 
 // ------------------------------------------------------------------------
 
-#if defined( __PSX__ )
-
-INLINE Quaternion::Quaternion( const Matrix3t& matrix3t )
-{
-	ConstructMatrix3t( matrix3t );
-}
-
-#endif
 
 // ------------------------------------------------------------------------
 

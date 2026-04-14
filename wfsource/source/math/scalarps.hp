@@ -26,9 +26,6 @@
 
 // ------------------------------------------------------------------------
 
-#if defined(__PSX__) && !defined(RENDERER_PIPELINE_SOFTWARE)
-#include "psx/Scalarps.hp"
-#else
 
 #include <math/scalar.hp>
 
@@ -53,7 +50,6 @@ S32ToS12(Scalar in)
 }
 
 
-#endif
 
 // ------------------------------------------------------------------------
 #endif

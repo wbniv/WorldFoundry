@@ -47,10 +47,6 @@ class Matrix3t
 {
 public:
 
-#if defined( __PSX__ )
-	void SetGTE();				// set GTE to contain this matrix, is there a
-								// better way do to this? (like a HardwareMatrix class?)
-#endif
 //	struct RotateX { };
 //	struct RotateY { };
 //	struct RotateZ { };
