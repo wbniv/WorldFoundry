@@ -85,7 +85,12 @@ public:
 
    Euler AsEuler() const;
 
+#if defined(SCALAR_TYPE_FIXED)
+#elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
    const FLOAT_TYPE* AsFLoatArray() const;
+#else
+#error SCALAR TYPE not defined
+#endif
 
 	// inverse
 	Scalar Inverse(const Matrix34& source);				// returns the determinant of the matrix

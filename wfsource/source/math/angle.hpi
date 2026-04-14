@@ -99,7 +99,9 @@ inline void
 Angle::Validate() const
 {
 // kts when this becomes a float then it can be validated
+#if defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
    //assert(!isnan(_value));    
+#endif
 }
 
 // ------------------------------------------------------------------------

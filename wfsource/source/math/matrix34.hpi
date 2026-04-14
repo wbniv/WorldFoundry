@@ -180,12 +180,17 @@ MultiplyAcross (const Vector3& v,const Matrix34& matrix)
 
 //==============================================================================
 
+#if defined(SCALAR_TYPE_FIXED)
+#elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
 
 INLINE const FLOAT_TYPE *
 Matrix34::AsFLoatArray() const
 {
     return reinterpret_cast<const FLOAT_TYPE*>(&_matrix[0][0]);
 }
+#else
+#error SCALAR TYPE not defined
+#endif
 
 //=============================================================================
 #endif	// MATRIX34_HPI

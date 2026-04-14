@@ -77,7 +77,26 @@ operator >> ( binistream& binis, Vector2& v )
 Scalar
 Vector2::Length() const
 {
+#if defined(SCALAR_TYPE_FIXED)
+	long a = X().AsLong();
+	long b = Y().AsLong();
+   register unsigned long out0;
+	register long out1;
+	register unsigned long out2;
+	register long out3;
+
+	// result = sqrt(a*a + b*b)
+//	MultiplyAndNop64(a,a,out1,out0);
+	MultiplyAndNop64(a,a,out1,out0);
+	Multiply64(b,b,out3,out2);
+	AddCarry64(out1,out0,out3,out2);
+
+	return Scalar(Sqrt64(out1,out0));
+#elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
    return ((X()*X())+(Y()*Y())).Abs().Sqrt();
+#else
+#error SCALAR TYPE not defined
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -85,7 +104,27 @@ Vector2::Length() const
 Scalar
 Vector2::RLength() const
 {
+#if defined(SCALAR_TYPE_FIXED)
+	int32 a = X().AsLong();
+	int32 b = Y().AsLong();
+    register unsigned long out0;
+	register long out1;
+	register unsigned long out2;
+	register long out3;
+
+	// result = sqrt(a*a + b*b)
+	MultiplyAndNop64(a,a,out1,out0);
+
+	Multiply64(b,b,out3,out2);
+
+	AddCarry64(out1,out0,out3,out2);
+
+	return Scalar(FastRSqrt64(out1,out0));
+#elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
    return ((X()*X())+(Y()*Y())).Abs().FastSqrt();
+#else
+#error SCALAR TYPE not defined
+#endif
 }
 
 //=============================================================================
