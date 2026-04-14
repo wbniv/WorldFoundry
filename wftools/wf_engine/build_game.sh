@@ -32,6 +32,19 @@ VENDOR="$REPO_ROOT/wftools/vendor"
 QJS_DIR="$VENDOR/quickjs-v0.14.0"
 JRY_DIR="$VENDOR/jerryscript-v3.0.0"
 
+# Feature flag: optional WebAssembly engine for the `#` sigil. One of:
+#   none    (default) — no wasm compiled in, zero binary delta vs. today.
+#   wasm3   — wasm3 v0.5.0 (~65 KB), pure-C interpreter, MIT.
+# Future: wamr, wamr-aot. Only one wasm runtime at a time; sigil is shared.
+WF_WASM_ENGINE="${WF_WASM_ENGINE:-none}"
+case "$WF_WASM_ENGINE" in
+    none|wasm3) ;;
+    *) echo "error: WF_WASM_ENGINE must be one of: none, wasm3 (got: '$WF_WASM_ENGINE')" >&2
+       exit 2 ;;
+esac
+WASM3_DIR="$VENDOR/wasm3-v0.5.0"
+WASM3_WF_DIR="$VENDOR/wasm3-v0.5.0-wf"
+
 mkdir -p "$OUT"
 
 CXXFLAGS=(
@@ -52,6 +65,11 @@ case "$WF_JS_ENGINE" in
     quickjs)     CXXFLAGS+=(-DWF_JS_ENGINE_QUICKJS -I"$QJS_DIR") ;;
     jerryscript) CXXFLAGS+=(-DWF_JS_ENGINE_JERRYSCRIPT -I"$JRY_DIR/jerry-core/include") ;;
     none)        : ;;
+esac
+
+case "$WF_WASM_ENGINE" in
+    wasm3) CXXFLAGS+=(-DWF_WASM_ENGINE_WASM3 -I"$WASM3_DIR/source") ;;
+    none)  : ;;
 esac
 
 OBJS=()
@@ -238,6 +256,42 @@ case "$WF_JS_ENGINE" in
         JS_LINK_EXTRA+=("$JRY_BUILD/lib/libjerry-core.a"
                         "$JRY_BUILD/lib/libjerry-port.a")
         ;;
+esac
+
+# wasm3 engine plug — compiled and linked only when WF_WASM_ENGINE=wasm3.
+case "$WF_WASM_ENGINE" in
+    wasm3)
+        echo "  CC (stub) scripting_wasm3.cc"
+        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_wasm3.cc" -o "$OUT/stubs__scripting_wasm3.o"
+        OBJS+=("$OUT/stubs__scripting_wasm3.o")
+        # wasm3 core (C, not C++). Mirrors upstream source/CMakeLists.txt
+        # minus the WASI / tracer / UVWASI surface we don't want.
+        M3_CFLAGS=(-std=gnu11 -O2 -w -fno-strict-aliasing
+                   -Dd_m3HasWASI=0 -Dd_m3HasMetaWASI=0 -Dd_m3HasTracer=0
+                   -Dd_m3HasUVWASI=0 -I"$WASM3_DIR/source")
+        for c in m3_api_libc.c m3_bind.c m3_code.c m3_compile.c \
+                 m3_core.c m3_emit.c m3_env.c m3_exec.c m3_function.c \
+                 m3_info.c m3_module.c m3_parse.c; do
+            obj="$OUT/m3__${c%.c}.o"
+            echo "  CC (vendor) wasm3/$c"
+            gcc "${M3_CFLAGS[@]}" -c "$WASM3_DIR/source/$c" -o "$obj"
+            OBJS+=("$obj")
+        done
+        # Embed selftest.wasm as a byte array so the runtime can run the
+        # smoke test at startup without touching a filesystem.
+        echo "  GEN wasm_selftest.cc (xxd)"
+        WASM_CC="$OUT/wasm_selftest.cc"
+        {
+            echo '// AUTO-GENERATED from selftest.wasm by build_game.sh; do not edit.'
+            ( cd "$WASM3_WF_DIR" && xxd -i selftest.wasm ) \
+                | sed -E 's/^unsigned char selftest_wasm\[\]/extern "C" const unsigned char kWasmSelftest[]/;
+                          s/^unsigned int selftest_wasm_len/extern "C" const unsigned int kWasmSelftestLen/'
+        } > "$WASM_CC"
+        echo "  CC wasm_selftest.cc"
+        g++ "${CXXFLAGS[@]}" -c "$WASM_CC" -o "$OUT/wasm_selftest.o"
+        OBJS+=("$OUT/wasm_selftest.o")
+        ;;
+    none) : ;;
 esac
 
 # Embed minified fennel.lua as a byte array when Fennel is enabled. The

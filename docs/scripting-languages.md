@@ -15,7 +15,7 @@ another.
 | Fennel  | `WF_ENABLE_FENNEL=1` | `;` | Requires Lua (compiles to Lua); can't be selected without it. |
 | QuickJS | `WF_JS_ENGINE=quickjs` | `//` | Mutually exclusive with JerryScript. |
 | JerryScript | `WF_JS_ENGINE=jerryscript` | `//` | Mutually exclusive with QuickJS. |
-| wasm3 | `WF_WASM_ENGINE=wasm3` | `#` | Planned. |
+| wasm3 | `WF_WASM_ENGINE=wasm3` | `#b64\n` | Source languages: hand-written `.wat`, AssemblyScript, Rust, C, Zig → `.wasm`. Stored as base64 in existing text chunks; `#b64\n` is the full sigil (bare `#` falls through to Lua so TCL shell comments in `cd.iff` keep working). |
 
 Dispatch is a leading-byte sniff: matching a sigil routes to that engine,
 non-matching scripts go to the build's **fallthrough engine** (today Lua;
@@ -79,6 +79,35 @@ v = read_mailbox(99);  if (v !== 0) write_mailbox(INDEXOF_CAMSHOT, v);
 v = read_mailbox(98);  if (v !== 0) write_mailbox(INDEXOF_CAMSHOT, v);
 ```
 
+**WebAssembly (wasm3), authored in WAT:**
+```wat
+(module
+  (import "env" "read_mailbox"  (func $read  (param i32) (result f32)))
+  (import "env" "write_mailbox" (func $write (param i32 f32)))
+  (func $maybe (param $mb i32)
+    (local $v f32)
+    local.get $mb  call $read  local.tee $v
+    f32.const 0  f32.ne
+    if  i32.const 1021  local.get $v  call $write  end)
+  (func (export "main")
+    i32.const 100 call $maybe
+    i32.const 99  call $maybe
+    i32.const 98  call $maybe))
+```
+Compiled via `wat2wasm` then base64'd and wrapped as `#b64\n<base64>` in
+the iff text chunk. Note that wasm has no host-side constant import
+surface in the spike (see plan §3), so `INDEXOF_CAMSHOT` is baked as the
+literal `1021` (same value the engine exposes to the other languages).
+Source lives at `wftools/vendor/wasm3-v0.5.0-wf/snowgoons_director.wat`;
+patched into `wflevels/snowgoons.iff` by
+`scripts/patch_snowgoons_wasm.py`.
+
+The player script is *not* ported to wasm in the demo iff: its 77 B
+script slot cannot hold even a minimal wasm module's base64 form
+(~108 B). `snowgoons_player.wat` is committed as a reference
+implementation for when a binary IFF chunk type lands and frees the
+base64 overhead.
+
 ## Integration surface
 
 All languages ride on the same mailbox bridge, so the per-language cost is
@@ -92,7 +121,7 @@ to the mailbox machinery or level format.
 | Fennel   | `;` | `fennel.lua` embedded via codegen (minified) | `WF_ENABLE_FENNEL=1` (requires Lua) | ~145 KB `.rodata` | shipping |
 | JavaScript (QuickJS) | `//` | QuickJS v0.14.0 statically linked from `wftools/vendor/` | `WF_JS_ENGINE=quickjs` | ~1.2 MB unstripped (~350 KB target stripped) | shipping |
 | JavaScript (JerryScript) | `//` | JerryScript v3.0.0 `wf-minimal` profile | `WF_JS_ENGINE=jerryscript` | ~80–90 KB lib | landed (build path); not yet smoke-tested |
-| WebAssembly | `#` | wasm3 v0.5.0 (interpreter) | `WF_WASM_ENGINE=wasm3` | ~65 KB core | planned |
+| WebAssembly | `#b64\n` | wasm3 v0.5.0 (pure-C interpreter) | `WF_WASM_ENGINE=wasm3` | ~100 KB core at `-O2` unstripped (stripped binary delta ~136 KB including selftest + plug); upstream cites ~65 KB for stripped Cortex-M builds | shipping (spike) |
 
 None of these rows describe a dependency on any other row. The only
 exception is Fennel, which compiles to Lua and therefore can't be
@@ -135,6 +164,11 @@ supported build configuration.
 - `scripts/minify_lua.py` — Lua source minifier (used on `fennel.lua`).
 - `scripts/patch_snowgoons_lua.py` — TCL → Lua byte-preserving patcher.
 - `scripts/patch_snowgoons_fennel.py` — Lua → Fennel byte-preserving patcher.
+- `scripts/patch_snowgoons_wasm.py` — Fennel → wasm (director only) patcher.
+- `wftools/wf_viewer/stubs/scripting_wasm3.hp`/`.cc` — wasm3 plug.
+- `wftools/vendor/wasm3-v0.5.0/` — vendored wasm3 interpreter.
+- `wftools/vendor/wasm3-v0.5.0-wf/` — selftest + snowgoons WAT sources + compiled `.wasm` artifacts.
 - `docs/plans/2026-04-13-lua-interpreter-spike.md` — Lua spike plan.
 - `docs/plans/2026-04-14-fennel-on-lua.md` — Fennel-on-Lua spike plan.
 - `docs/plans/2026-04-14-pluggable-scripting-engine.md` — JS engine plan.
+- `docs/plans/2026-04-14-wasm3-scripting-engine.md` — wasm3 spike plan (this work).

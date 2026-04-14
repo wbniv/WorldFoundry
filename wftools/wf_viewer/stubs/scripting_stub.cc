@@ -9,6 +9,7 @@
 #include <scripting/scriptinterpreter.hp>
 #include <math/scalar.hp>
 #include "scripting_js.hp"
+#include "scripting_wasm3.hp"
 
 extern "C" {
 #include <lua5.4/lua.h>
@@ -184,6 +185,10 @@ LuaInterpreter::LuaInterpreter(MailboxesManager& mgr)
     JsRuntimeInit(mgr);
 #endif
 
+#ifdef WF_WITH_WASM
+    Wasm3RuntimeInit(mgr);
+#endif
+
     AddConstantArray(mailboxIndexArray);
     AddConstantArray(joystickArray);
 
@@ -210,6 +215,9 @@ LuaInterpreter::~LuaInterpreter()
 #ifdef WF_WITH_JS
     JsRuntimeShutdown();
 #endif
+#ifdef WF_WITH_WASM
+    Wasm3RuntimeShutdown();
+#endif
     if (_L) {
         lua_close(_L);
         _L = nullptr;
@@ -227,6 +235,9 @@ void LuaInterpreter::AddConstantArray(IntArrayEntry* entryList)
 #ifdef WF_WITH_JS
     JsAddConstantArray(entryList);
 #endif
+#ifdef WF_WITH_WASM
+    Wasm3AddConstantArray(entryList);
+#endif
 }
 
 void LuaInterpreter::DeleteConstantArray(IntArrayEntry* entryList)
@@ -239,6 +250,9 @@ void LuaInterpreter::DeleteConstantArray(IntArrayEntry* entryList)
     }
 #ifdef WF_WITH_JS
     JsDeleteConstantArray(entryList);
+#endif
+#ifdef WF_WITH_WASM
+    Wasm3DeleteConstantArray(entryList);
 #endif
 }
 
@@ -259,6 +273,21 @@ Scalar LuaInterpreter::RunScript(const void* script, int objectIndex)
         while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') p++;
         if (p[0] == '/' && p[1] == '/') {
             return Scalar::FromFloat(JsRunScript(src, objectIndex));
+        }
+    }
+#endif
+
+#ifdef WF_WITH_WASM
+    // Routes to wasm3 only for the full `#b64\n` marker. We don't claim
+    // every `#`-prefixed script because cd.iff ships TCL shell fragments
+    // that use `##` as a line comment; those still need to fall through
+    // to the next language so behaviour matches pre-wasm builds.
+    {
+        const char* p = src;
+        while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') p++;
+        if (p[0] == '#' && p[1] == 'b' && p[2] == '6' && p[3] == '4'
+            && p[4] == '\n') {
+            return Scalar::FromFloat(Wasm3RunScript(src, objectIndex));
         }
     }
 #endif
