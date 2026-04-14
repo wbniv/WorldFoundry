@@ -198,6 +198,12 @@ ParseCommandLine(int argc, char** argv)
 
 		if ( 0 )
 			;
+		else if ( argv[index][1] == 'L' && argv[index][2] != 0 )
+		{
+			extern const char* gLevelOverridePath;
+			gLevelOverridePath = argv[index] + 2;
+			DBSTREAM1( cprogress << "Level override path: " << gLevelOverridePath << std::endl; )
+		}
 		else if ( strncmp( argv[index]+1, (char*)szRate, strlen( szRate ) ) == 0)
 		{
 		    int value = atoi( argv[index] + strlen( szRate ) + 1 );

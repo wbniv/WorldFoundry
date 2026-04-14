@@ -8,7 +8,6 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SRC="$REPO_ROOT/wfsource/source"
-CBASE="$HOME/.local/share/containers/storage/overlay/eb44d05a7edcb9f08dba3fb4a0d3f10b39d504fa6bf5df78b1d94d042ce909bf/diff"
 STUBS="$REPO_ROOT/wftools/wf_viewer/include"
 STUB_SRC="$REPO_ROOT/wftools/wf_viewer/stubs"
 OUT="$SCRIPT_DIR/objs_game"
@@ -23,7 +22,6 @@ CXXFLAGS=(
     -DDO_VALIDATION=0 -DDO_TEST_CODE=0 -DDO_DEBUG_FILE_SYSTEM=0
     -DPHYSICS_ENGINE_WF '-D__GAME__="wf_game"' "-DERR_DEBUG(x)="
     -I"$SRC" -I"$SRC/game" -I"$STUBS"
-    -idirafter "$CBASE/usr/include"
 )
 
 OBJS=()
@@ -180,9 +178,7 @@ fi
 
 echo "=== Linking ==="
 g++ "${OBJS[@]}" \
-    -L"$CBASE/usr/lib/x86_64-linux-gnu" \
-    -lGL -lX11 -lm -lpthread \
-    "$CBASE/usr/lib/x86_64-linux-gnu/libGLU.so.1" \
+    -lGL -lGLU -lX11 -llua5.4 -lm -lpthread \
     -o "$SCRIPT_DIR/wf_game"
 
 echo ""

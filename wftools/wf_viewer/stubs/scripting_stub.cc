@@ -1,11 +1,24 @@
-// scripting_stub.cc — no-op ScriptInterpreter for Linux builds without Tcl
+// scripting_stub.cc — Lua 5.4 ScriptInterpreter for Linux builds
 //
 // Replaces scripting/scriptinterpreter.cc and scripting/tcl.cc entirely.
-// ScriptInterpreterFactory returns a NullInterpreter whose RunScript() is a no-op.
+// Provides LuaInterpreter, exposing read_mailbox/write_mailbox as Lua C
+// functions and the full INDEXOF_* / JOYSTICK_BUTTON_* constant namespace
+// as Lua globals. A NullInterpreter is kept as a fallback for when scripts
+// need to be silenced.
 
 #include <scripting/scriptinterpreter.hp>
+#include <math/scalar.hp>
+
+extern "C" {
+#include <lua5.4/lua.h>
+#include <lua5.4/lualib.h>
+#include <lua5.4/lauxlib.h>
+}
+
+#include <cstdio>
 
 //=============================================================================
+// Base-class implementations (formerly in scripting/scriptinterpreter.cc)
 
 ScriptInterpreter::ScriptInterpreter(MailboxesManager& manager)
     : _mailboxesManager(manager)
@@ -29,6 +42,7 @@ void ScriptInterpreter::DeleteConstantArray(IntArrayEntry* /*entryList*/)
 }
 
 //=============================================================================
+// NullInterpreter — no-op fallback.
 
 class NullInterpreter : public ScriptInterpreter
 {
@@ -43,8 +57,175 @@ public:
 };
 
 //=============================================================================
+// Mailbox name constants — same set TCL exposed, built from mailbox.inc plus
+// a hardcoded joystick table (the joystick values live nowhere else).
+
+static IntArrayEntry mailboxIndexArray[] =
+{
+#define Comment(val)
+#define MAILBOXENTRY(name,value)  { "INDEXOF_" #name, value },
+#include <mailbox/mailbox.inc>
+    { NULL, 0 }
+};
+#undef MAILBOXENTRY
+#undef Comment
+
+static IntArrayEntry joystickArray[] =
+{
+    { "JOYSTICK_BUTTON_UP",    2048 },
+    { "JOYSTICK_BUTTON_DOWN",  4096 },
+    { "JOYSTICK_BUTTON_RIGHT", 8192 },
+    { "JOYSTICK_BUTTON_LEFT",  16384 },
+    { "JOYSTICK_BUTTON_A", 1 },
+    { "JOYSTICK_BUTTON_B", 2 },
+    { "JOYSTICK_BUTTON_C", 4 },
+    { "JOYSTICK_BUTTON_D", 8 },
+    { "JOYSTICK_BUTTON_E", 16 },
+    { "JOYSTICK_BUTTON_F", 32 },
+    { "JOYSTICK_BUTTON_G", 64 },
+    { "JOYSTICK_BUTTON_H", 128 },
+    { "JOYSTICK_BUTTON_I", 256 },
+    { "JOYSTICK_BUTTON_J", 512 },
+    { "JOYSTICK_BUTTON_K", 1024 },
+    { NULL, 0 }
+};
+
+//=============================================================================
+// LuaInterpreter
+
+class LuaInterpreter : public ScriptInterpreter
+{
+public:
+    LuaInterpreter(MailboxesManager& mgr);
+    ~LuaInterpreter() override;
+
+    Scalar RunScript(const void* script, int objectIndex) override;
+    void   AddConstantArray(IntArrayEntry* entryList) override;
+    void   DeleteConstantArray(IntArrayEntry* entryList) override;
+
+    // exposed for the C closures
+    MailboxesManager& mailboxes() { return _mailboxesManager; }
+    int               currentObject() const { return _currentObjectIndex; }
+
+private:
+    lua_State* _L;
+    int        _currentObjectIndex;
+};
+
+// Recover the interpreter pointer from the C closure's first upvalue.
+static inline LuaInterpreter* self(lua_State* L)
+{
+    return static_cast<LuaInterpreter*>(lua_touserdata(L, lua_upvalueindex(1)));
+}
+
+static int lua_read_mailbox(lua_State* L)
+{
+    LuaInterpreter* THIS = self(L);
+    long mailbox  = static_cast<long>(luaL_checkinteger(L, 1));
+    int  actorIdx = THIS->currentObject();
+    if (lua_gettop(L) >= 2) {
+        actorIdx = static_cast<int>(luaL_checkinteger(L, 2));
+    }
+    Mailboxes& mb = THIS->mailboxes().LookupMailboxes(actorIdx);
+    Scalar v = mb.ReadMailbox(mailbox);
+    std::fprintf(stderr, "  lua read_mailbox(%ld, actor=%d) -> %g\n",
+                 mailbox, actorIdx, (double)v.AsFloat());
+    lua_pushnumber(L, v.AsFloat());
+    return 1;
+}
+
+static int lua_write_mailbox(lua_State* L)
+{
+    LuaInterpreter* THIS = self(L);
+    long   mailbox  = static_cast<long>(luaL_checkinteger(L, 1));
+    double value    = luaL_checknumber(L, 2);
+    int    actorIdx = THIS->currentObject();
+    if (lua_gettop(L) >= 3) {
+        actorIdx = static_cast<int>(luaL_checkinteger(L, 3));
+    }
+    Mailboxes& mb = THIS->mailboxes().LookupMailboxes(actorIdx);
+    std::fprintf(stderr, "  lua write_mailbox(%ld, %g, actor=%d)\n",
+                 mailbox, value, actorIdx);
+    mb.WriteMailbox(mailbox, Scalar::FromFloat(static_cast<float>(value)));
+    return 0;
+}
+
+static void register_closure(lua_State* L, LuaInterpreter* self,
+                             const char* name, lua_CFunction fn)
+{
+    lua_pushlightuserdata(L, self);
+    lua_pushcclosure(L, fn, 1);
+    lua_setglobal(L, name);
+}
+
+LuaInterpreter::LuaInterpreter(MailboxesManager& mgr)
+    : ScriptInterpreter(mgr),
+      _L(luaL_newstate()),
+      _currentObjectIndex(0)
+{
+    luaL_openlibs(_L);
+
+    // Primary API. Lua identifiers forbid hyphens, so underscores.
+    register_closure(_L, this, "read_mailbox",  lua_read_mailbox);
+    register_closure(_L, this, "write_mailbox", lua_write_mailbox);
+
+    AddConstantArray(mailboxIndexArray);
+    AddConstantArray(joystickArray);
+}
+
+LuaInterpreter::~LuaInterpreter()
+{
+    if (_L) {
+        lua_close(_L);
+        _L = nullptr;
+    }
+}
+
+void LuaInterpreter::AddConstantArray(IntArrayEntry* entryList)
+{
+    while (entryList->name) {
+        lua_pushinteger(_L, entryList->value);
+        lua_setglobal(_L, entryList->name);
+        entryList++;
+    }
+}
+
+void LuaInterpreter::DeleteConstantArray(IntArrayEntry* entryList)
+{
+    while (entryList->name) {
+        lua_pushnil(_L);
+        lua_setglobal(_L, entryList->name);
+        entryList++;
+    }
+}
+
+Scalar LuaInterpreter::RunScript(const void* script, int objectIndex)
+{
+    _currentObjectIndex = objectIndex;
+    const char* src = static_cast<const char*>(script);
+    if (!src || !*src) {
+        return Scalar::FromFloat(0.0f);
+    }
+
+    if (luaL_dostring(_L, src) != LUA_OK) {
+        const char* err = lua_tostring(_L, -1);
+        std::fprintf(stderr, "lua error: %s\n", err ? err : "(unknown)");
+        std::fprintf(stderr, "  script: %s\n", src);
+        lua_pop(_L, 1);
+        return Scalar::FromFloat(0.0f);
+    }
+
+    double result = 0.0;
+    if (lua_gettop(_L) > 0 && lua_isnumber(_L, -1)) {
+        result = lua_tonumber(_L, -1);
+    }
+    lua_settop(_L, 0);
+    return Scalar::FromFloat(static_cast<float>(result));
+}
+
+//=============================================================================
 
 ScriptInterpreter* ScriptInterpreterFactory(MailboxesManager& mailboxesManager, Memory& memory)
 {
-    return new (memory) NullInterpreter(mailboxesManager);
+    return new (memory) LuaInterpreter(mailboxesManager);
 }

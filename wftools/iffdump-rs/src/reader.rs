@@ -118,7 +118,44 @@ pub fn dump_chunks(
         writeln!(out, "{tabs}{{ '{}'\t\t// Size = {size}", id_name(id))
             .map_err(|e| IffDumpError::Io { path: "<output>".into(), source: e })?;
 
-        if wrappers.contains(&id) {
+        const ALGN_ID: u32 = u32::from_be_bytes(*b"ALGN");
+
+        if id == ALGN_ID && size > 0 && payload.iter().all(|&b| b == 0) {
+            // Try to recover an `.align(N)` directive from the recorded padding.
+            // The ALGN chunk pads the file so that the byte immediately after
+            // its payload sits on an N-byte boundary. We pick the largest
+            // standard N for which: (a) `payload_end % N == 0`,
+            // (b) `payload_start % N != 0` (the padding is meaningful), and
+            // (c) the recorded padding is the unique amount needed to reach
+            // the next N-boundary from `payload_start`.
+            let payload_end = payload_start + size;
+            let inner_tabs = "\t".repeat(indent + 1);
+            let mut emitted = false;
+            for &n in &[2048usize, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2] {
+                if payload_end % n == 0
+                    && payload_start % n != 0
+                    && size == n - (payload_start % n)
+                {
+                    writeln!(out, "{inner_tabs}.align({n})")
+                        .map_err(|e| IffDumpError::Io { path: "<output>".into(), source: e })?;
+                    emitted = true;
+                    break;
+                }
+            }
+            if !emitted {
+                writeln!(out, "{inner_tabs}// unknown chunk")
+                    .map_err(|e| IffDumpError::Io { path: "<output>".into(), source: e })?;
+                if opts.dump_binary && !payload.is_empty() {
+                    if opts.use_hdump {
+                        format_hdump(payload, indent + 1, opts.chars_per_line, out)
+                            .map_err(|e| IffDumpError::Io { path: "<output>".into(), source: e })?;
+                    } else {
+                        format_iffcomp(payload, indent + 1, opts.chars_per_line, out)
+                            .map_err(|e| IffDumpError::Io { path: "<output>".into(), source: e })?;
+                    }
+                }
+            }
+        } else if wrappers.contains(&id) {
             // Wrapper: recurse into payload
             dump_chunks(buf, payload_start, payload_start + size, depth + 1, wrappers, opts, out)?;
         } else {

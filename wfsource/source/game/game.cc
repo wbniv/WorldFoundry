@@ -66,7 +66,7 @@ WFGame::WFGame( const int nStartingLevel )
 	// Memory pool for allocating MsgPort messages
 	_msgPortMemPool( MemPoolConstruct( sizeof( SMsg ), MSGPORTPOOLSIZE, HALLmalloc ) ),
 	_overrideLevelNum( nStartingLevel ),
-	_desiredLevelNum( 4 )		// default to snowgoons; overridden by -l flag or shell script
+	_desiredLevelNum( 0 )		// default to first level in TOC; overridden by -l flag or shell script
 {
 	DBSTREAM1( cprogress << "WFGame::WFGame" << std::endl; )
 
@@ -91,9 +91,17 @@ WFGame::WFGame( const int nStartingLevel )
 	assert( ValidPtr( _viewPort ) );
 	DBSTREAM3( cprogress << "WFGame::WFGame done" << std::endl; )
 #if defined( DO_CD_IFF )
-	DBSTREAM1( std::cout <<"Opening cd.iff" << std::endl; )
-	_gameFile = ConstructDiskFile( "cd.iff", HALLmalloc );
-	assert( ValidPtr( _gameFile ) );
+	extern const char* gLevelOverridePath;
+	if ( gLevelOverridePath == nullptr )
+	{
+		DBSTREAM1( std::cout <<"Opening cd.iff" << std::endl; )
+		_gameFile = ConstructDiskFile( "cd.iff", HALLmalloc );
+		assert( ValidPtr( _gameFile ) );
+	}
+	else
+	{
+		_gameFile = nullptr;	// -L<path> mode: opened in RunGameScript instead
+	}
 #endif
 }
 
@@ -104,9 +112,11 @@ WFGame::~WFGame()
 	DBSTREAM1( cprogress << "WFGame::~WFGame" << std::endl; )
 
 #if defined(DO_CD_IFF)
-	DBSTREAM1( std::cout <<"closing cd.iff" << std::endl; )
-	assert(ValidPtr(_gameFile));
-	MEMORY_DELETE(HALLmalloc,_gameFile,_DiskFile);
+	if ( _gameFile != nullptr )
+	{
+		DBSTREAM1( std::cout <<"closing cd.iff" << std::endl; )
+		MEMORY_DELETE(HALLmalloc,_gameFile,_DiskFile);
+	}
 #endif
 
 //#ifdef DO_PROFILE
@@ -132,10 +142,33 @@ struct CHUNKHDR
 
 //-----------------------------------------------------------------------------
 
+// Set by `-L<path>` on the command line. When non-null, RunGameScript opens
+// this single level file directly and skips the cd.iff bundle / SHEL meta
+// script entirely. The file must be a complete L<N> chunk (8-byte chunk
+// header + ALGN + RAM + ...), exactly as it would appear inside cd.iff.
+// Seek to SECTOR_SIZE then puts us at the RAM tag, just like the cd.iff
+// path. Build with: `iffcomp { 'L0' [ "level.iff" ] }` or pre-pend the
+// 8-byte chunk header by hand.
+const char* gLevelOverridePath = nullptr;
+
 void
 WFGame::RunGameScript()				// runs the whole game, returns when game (really) over (quit to OS)
 {
 	DBSTREAM2( cflow << "WFGame::RunGameScript" << std::endl; )
+
+	if ( gLevelOverridePath != nullptr )
+	{
+		DBSTREAM1( cprogress << "Loading single level from path: " << gLevelOverridePath << std::endl; )
+		_DiskFile* diskFile = ConstructDiskFile( const_cast<char*>( gLevelOverridePath ), HALLmalloc );
+		assert( ValidPtr( diskFile ) );
+		// File is a complete L<N> chunk: header + ALGN + RAM + ... — same
+		// layout as inside cd.iff. RAM lands at SECTOR_SIZE.
+		diskFile->SeekRandom( DiskFileCD::_SECTOR_SIZE );
+		RunLevel( diskFile );
+		MEMORY_DELETE( HALLmalloc, diskFile, DiskFile );
+		return;
+	}
+
 #if defined(DO_CD_IFF)
 	assert(ValidPtr(_gameFile));
 	_gameFile->SeekRandom(0);

@@ -1,0 +1,19 @@
+// Minimal cd.iff with only shell + snowgoons (L4).
+// Run from this directory:
+//   ../wftools/iffcomp-rs/target/release/iffcomp -binary -o=cd.iff cd_snowgoons.iff.txt
+// Then copy to wfsource/source/game/cd.iff and run wf_game (boots L4 by default).
+{ 'GAME'
+    { 'TOC'
+        'SHEL'  .offsetof( ::'GAME'::'SHEL' )  .sizeof( ::'GAME'::'SHEL' )
+        'L4'    .offsetof( ::'GAME'::'L4' )    .sizeof( ::'GAME'::'L4' )
+    }
+    { 'ALGN' .align( 2048 ) }
+
+    { 'SHEL' [ "shell.aib" ] }
+    { 'ALGN' .align( 2048 ) }
+
+    // snowgoons.iff is a complete L4 chunk (8-byte header + ALGN + RAM + ...),
+    // ready to inline at top level — no outer wrapper needed.
+    [ "snowgoons.iff" ]
+    { 'ALGN' .align( 2048 ) }
+}
