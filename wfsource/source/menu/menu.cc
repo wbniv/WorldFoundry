@@ -102,13 +102,6 @@ SimpleMenu( const char* szHeader, const char* szFooter,
 	display.SetBackgroundColor( Color::darkgrey );
 	ViewPort vp( display, 4000, SCALAR_CONSTANT( 320 ), SCALAR_CONSTANT( 240 ) );
 
-#if defined( __PSX__ )
-	FntFlush( -1 );
-	SetDispMask( 1 );
-#endif
-#if defined( __WIN__ )
-//	auxCreateFont();
-#endif
 
 	IJoystick			joy1;
 	joystickButtonsF	b1 = 0;

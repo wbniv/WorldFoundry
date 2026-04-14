@@ -3,12 +3,6 @@
 // !!! This test program is currently for Windows only
 // !!! [in fact, Windows is the only version currently implemented]
 
-#if defined(__WIN__)
-#define STRICT
-#include <windows.h>
-#include <mmsystem.h>
-#include <dsound.h>			// why is this needed first? problems with including our stuff first!
-#endif
 #include <audio/audio.hp>
 
 #include <cassert>
@@ -32,9 +26,6 @@ const char* szFilenames[ 3 ] = {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-#if defined(__WIN__)
-extern HWND hWnd;
-#endif
 
 void
 PIGSMain( int argc, char* argv[] )
@@ -56,9 +47,6 @@ PIGSMain( int argc, char* argv[] )
 
 	buffer->play();
 
-#if defined(__WIN__)
-	Sleep( 3500 );
-#endif
 
 	delete buffer;
 	}

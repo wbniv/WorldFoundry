@@ -35,19 +35,9 @@ namespace ode
 
 
 
-#if defined(SCALAR_TYPE_FIXED)
-#error have not made ODE work with fixed point math (should we bother?)
-#elif defined(SCALAR_TYPE_FLOAT) 
 #ifndef dSINGLE
 #error ODE and WF scalar types do not match
 // kts if you get this you probably need to set SCALAR_TYPE to double (setenv SCALAR_TYPE double)
-#endif
-#elif defined(SCALAR_TYPE_DOUBLE)
-#ifndef dDOUBLE
-#error ODE and WF scalar types do not match
-#endif
-#else
-#error SCALAR TYPE not defined
 #endif
 
 //==============================================================================

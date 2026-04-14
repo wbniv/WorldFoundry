@@ -57,24 +57,6 @@ void
 RenderActor::Validate() const
 {
 #if DO_VALIDATION
-#if defined(__WIN__)
-	// Validate this object's vtable
-	long* vtable = (long*) this;
-	long* fptr = (long*)*vtable;
-	assert(*fptr);
-	assert(*(fptr+1));
-	assert(*(fptr+2));
-	assert(*(fptr+3));
-	assert(*(fptr+4));
-	assert( *fptr > 0x0100000L );
-	assert( *(fptr+1) > 0x0100000L );
-	assert( *(fptr+2) > 0x0100000L );
-	assert( *(fptr+3) > 0x0100000L );
-	assert( *(fptr+4) > 0x0100000L );
-
-	// let the derived class do specific validations
-	_Validate();
-#endif
 #endif
 }
 

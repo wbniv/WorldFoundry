@@ -7,7 +7,6 @@
 
 #include <gfxfmt/bitmap.hp>
 
-#if !defined( __WIN__ )
 #pragma pack( 2 )
 typedef struct
 {
@@ -39,7 +38,6 @@ typedef struct
 } BITMAPINFOHEADER;
 
 #pragma pack()
-#endif
 
 
 class WindowsBitmap : public Bitmap

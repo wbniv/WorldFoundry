@@ -29,31 +29,7 @@
 
 #include <hal/sjoystic.h>
                           
-#if defined(__WIN__)
-enum
-{
-	kBtnJump      = EJ_BUTTONF_A,
-	kBtnGrenade   = EJ_BUTTONF_B,
-	kBtnLook      = EJ_BUTTONF_C,
-	kBtnAngelMode = EJ_BUTTONF_D,
-	kBtnSword     = EJ_BUTTONF_E,
-	kBtnUnusedF   = EJ_BUTTONF_F,
-	kBtnStepLeft  = EJ_BUTTONF_G,
-	kBtnStepRight = EJ_BUTTONF_H
-};
-#elif defined(__PSX__)
-enum
-{
-	kBtnJump      = EJ_BUTTONF_A,
-	kBtnGrenade   = EJ_BUTTONF_B,
-	kBtnLook      = EJ_BUTTONF_C,
-	kBtnAngelMode = EJ_BUTTONF_D,
-	kBtnSword     = EJ_BUTTONF_E,
-	kBtnStepLeft  = EJ_BUTTONF_F,
-	kBtnUnusedG   = EJ_BUTTONF_G,
-	kBtnStepRight = EJ_BUTTONF_H
-};
-#elif defined(__LINUX__)
+#if   defined(__LINUX__)
 enum
 {
 	kBtnJump      = EJ_BUTTONF_A,

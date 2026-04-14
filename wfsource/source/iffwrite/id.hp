@@ -32,9 +32,6 @@
 #include <string>
 #include <cstring>
 #include <iostream>
-#if defined(__WIN__)
-#include <ostream>
-#endif
 
 class _IffWriter;
 
