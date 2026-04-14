@@ -89,6 +89,24 @@ Also strip PSX guards from: `display.cc`, `display.hp`, `pixelmap.*`, `viewport.
 4. Verify: `grep -r '__PSX__\|RENDERER_PSX\|RENDERER_PIPELINE_PSX' wfsource/source/` should return nothing
 5. Attempt `make WF_TARGET=linux` to confirm the GL path still compiles
 
+## Final report — exact line counts reduced
+
+When the branch is complete, produce a categorized summary of lines removed (measured against the merge-base with `master`, e.g. `git diff --stat $(git merge-base HEAD master)..HEAD`). Report:
+
+**By category**
+- Dead rendering pipelines (`gfx/psx`, `gfx/softwarepipeline`, `gfx/directx`, `gfx/directxpipeline`, `gfx/xwindows`, `gfx/gl/wgl.cc`)
+- PSX subsystems (`audio/psx`, `hal/psx`, `math/psx`, `movie/psx`, `pigsys/psx`, `pigsys/cf_psx.*`)
+- `#ifdef` guard strippage in kept files (gfx, game, pigsys, cpplib, hal, streams, savegame, math, anim, profile, movement)
+- Build system simplification (`GNUMakefile.bld`, `GNUMakefile.env`, `GNUMakefile.rul`)
+
+**For each category, report**
+- Lines deleted, lines added, net delta
+- File count (deleted / modified)
+
+**Summary line:** total net LOC removed across the whole branch, plus total file count touched. Include a one-line sanity check that the verification grep (Order §4, expanded for SOFTWARE/DIRECTX/XWINDOWS) returns zero.
+
+---
+
 ## What is NOT deleted
 
 - `wfsource/source/gfx/gl/` — active Mesa/GLX renderer (except `wgl.cc`)
