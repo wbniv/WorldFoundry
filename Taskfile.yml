@@ -18,7 +18,7 @@ tasks:
           if [ -f "$name" ]; then
             echo "$name"; return 0
           fi
-          for dir in docs; do
+          for dir in docs plans prompts; do
             match=$(find "$dir" -name "$name" -type f 2>/dev/null | head -1)
             if [ -n "$match" ]; then
               echo "$match"; return 0
