@@ -28,7 +28,7 @@
 // guarantee it will be constructed first, must create a local null stream
 // to get around this
 
-#		if defined( __WIN__) || defined(__LINUX__)
+#		if defined(__LINUX__)
 #			include <cpplib/strmnull.hp>
 			CREATENULLSTREAM(stdstream_null);		 		// must be in same file to insure proper order of construction
             CREATEANDASSIGNOSTREAM(cnull,stdstream_null);

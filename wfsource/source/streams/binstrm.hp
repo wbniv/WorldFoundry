@@ -85,7 +85,7 @@ class binios
 
 	enum alignment_defaults
 	{
-	  #if defined( __WIN__ ) || defined( __PSX__ ) || defined(__LINUX__)
+	  #if defined(__LINUX__)
 		native_align8			= 1,
 		native_align16			= 1,
 		native_align32			= 4,
@@ -100,7 +100,7 @@ class binios
 	{
 		little_endian		= 0,			// LSB -> MSB
 		big_endian			= 1,			// MSB -> LSB
-	  #if defined( __WIN__ ) || defined( __PSX__ ) || defined(__LINUX__)
+	  #if defined(__LINUX__)
 		native_word_order = little_endian
 	  #else
 	  #error "native byte ordering is not known"

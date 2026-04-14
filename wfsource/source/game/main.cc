@@ -29,7 +29,7 @@
 #include "game.hp"
 #include "version.hp"
 
-#if defined( __WIN__ ) || defined(__LINUX__)
+#if defined(__LINUX__)
 	char szOadDir[ _MAX_PATH ];
 #endif
 
@@ -80,7 +80,7 @@ std::ifstream* joystickInputFile;	// istream for joystick data
 
 const char szRate[] = "rate";
 
-#if ( !defined( __PSX__ ) && SW_DBSTREAM > 0)
+#if SW_DBSTREAM > 0
 
 void
 usage( int argc, char* argv[] )
@@ -250,13 +250,13 @@ ParseCommandLine(int argc, char** argv)
 			  DBSTREAM1( std::cout << "PrintFrameRate on" << std::endl; )
 	 	}
 #endif
-#if (!defined( __PSX__ ) && SW_DBSTREAM > 0)
+#if SW_DBSTREAM > 0
 		else if ( *( argv[index]+1 ) == 'h' )
 	  	{
 			usage( argc, argv );
          sys_exit(1);
   		}
-#endif		// !defined( __PSX__ ) )
+#endif		// SW_DBSTREAM > 0
 #if DO_ASSERTIONS
 		else
 			DBSTREAM1( cerror << "game Error: Unrecognized command line switch \"" <<

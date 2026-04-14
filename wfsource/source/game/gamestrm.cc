@@ -19,7 +19,7 @@
 
 // ------------------------------------------------------------------------
 
-#if defined(__WIN__) || defined(__LINUX__)
+#if defined(__LINUX__)
 #include <cpplib/strmnull.hp>
 
 CREATENULLSTREAM(gamestream_null);				// Create a global instance of the output

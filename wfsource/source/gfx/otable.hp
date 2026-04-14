@@ -75,7 +75,7 @@ public:
 private:
 	OrderTable();
 
-#if defined ( __PSX__) || defined( __WIN__ ) || defined (__LINUX__)
+#if defined(__LINUX__)
 	ORDER_TABLE_ENTRY* _orderTable;
 #else
 #	error "Unknown platform"
