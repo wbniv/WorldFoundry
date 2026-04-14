@@ -97,10 +97,6 @@ void
 Material::Construct()
 {
 
-//#if defined(__WIN__)
-//	_materialFlags &= ~Material::TEXTURE_MAPPED;
-//#endif
-
    // kts kludge until all models have been updated to be flat shaded
 
    if(_materialFlags & GOURAUD_SHADED)

@@ -81,7 +81,7 @@ typedef enum _MachineType
 #if   defined( __LINUX__ )
 #define _MKINC "cf_linux.h"
 #else
-#error "Undefined platform: please define __WIN__, __PSX__ o  __LINUX__"
+#error "Undefined platform: __LINUX__ must be defined"
 #endif
 #endif
 

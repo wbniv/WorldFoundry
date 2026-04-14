@@ -29,12 +29,6 @@
 
 //===========================================================================
 
-//#if defined(__WIN__)
-//#include <new.h>
-//#include <crtdbg.h>
-//void * operator new[] (size_t size);
-//#endif
-
 //===========================================================================
 // kts temp
 // kts I am attempting to document this, this data may be incorrect */

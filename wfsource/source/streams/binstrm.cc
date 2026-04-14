@@ -329,16 +329,6 @@ binistream::ConstructBinistreamFromFilename
 	DBSTREAM2( cbinstrm << "binistream::binistream( " << name << " )" << std::endl; )
 	DBSTREAM2( cstreaming << "binistream::binistream( " << name << " )" << std::endl; )
 
-//#if defined( __PSX__ ) && DO_ASSERTIONS
-//	{
-//	char szFilename[_MAX_FNAME];
-//	char szExt[_MAX_FNAME];
-//	SplitPath( name, NULL, NULL, szFilename, szExt );
-//	AssertMsg( strlen( szFilename ) <= 8, "Filename \"" << szFilename << "\" is too long!" );
-//	AssertMsg( strlen( szExt ) <= 4, "Filename extension \"" << szExt << "\" is too long!" );
-//	}
-//#endif
-
 	// open file
 	int fh = FHOPENRD( name );
 	if( fh != -1 )

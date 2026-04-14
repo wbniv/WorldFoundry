@@ -31,19 +31,6 @@
 
 //============================================================================
 
-//#if SW_DBSTREAM >= 1
-//#ifdef __PSX__
-//#include <pigsys/psx/_iostr.hp>
-
-//static StreamOutput_stdout gfxstdout_output;
-//static ostream gfxcout(gfxstdout_output);
-
-//#define cout gfxcout
-//#endif
-//#endif
-
-//============================================================================
-
 #define TRIFACEONDISK \
 	int16 v1Index,v2Index,v3Index; \
 	int16 materialIndex;

@@ -113,12 +113,6 @@ Matrix3t::ConstructTranslation( const Vector3& translation )
 //void
 //Matrix3t::ConstructScale( const Vector3& s, const Vector3& translation )
 //{
-//#if defined( __PSX__ )
-//	XBrMatrix3tScale( BrMatrix3tPtr(),
-//		s.X().AsLong(), s.Y().AsLong(), s.Z().AsLong() );
-//#else
-//	Fail( "Only implemented on PSX" );
-//#endif
 //	SetTranslation( translation );
 //}
 

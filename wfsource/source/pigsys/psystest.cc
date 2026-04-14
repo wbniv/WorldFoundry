@@ -38,12 +38,6 @@ main( int argc, char* argv[] )
 	char*	b1;
 	char*	b2;
 
-//#if defined(__PSX__)|| defined(__SAT__)
-//	int		argc = 0;
-//	char**	argv = NULL;
-//#endif
-
-
 	sys_init(&argc, &argv);
 	printf("sys_init finished\n");
 

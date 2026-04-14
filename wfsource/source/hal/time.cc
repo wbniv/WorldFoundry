@@ -41,9 +41,4 @@ SYS_CLOCK_RESET(void)
 	_nWallClockBaseTime = SYS_TICKS();
 }
 
-//#ifdef __DOS__
-//extern uint32	_pigsDosTimerValue;
-//#define SYS_TICKS()		(_pigsDosTimerValue)
-//#endif
-
 //=============================================================================

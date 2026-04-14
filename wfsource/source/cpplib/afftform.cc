@@ -173,12 +173,6 @@ AffineTransform::GetEuler( Euler& euler ) const
 //			euler.ConstructMatrix34( AsMatrix34() );
 //		break;
 
-//#if defined( __PSX__ )
-//		case AffineTransform::MATRIX3T:
-//			euler.ConstructMatrix3t( AsMatrix3t() );
-//		break;
-//#endif
-
 		default:
 			Fail( "Not yet implemented" );
 	}
@@ -207,12 +201,6 @@ AffineTransform::GetEuler( Euler& euler ) const
 //		case AffineTransform::MATRIX34:
 //			quaternion.ConstructMatrix34( AsMatrix34() );
 //		break;
-
-//#if defined( __PSX__ )
-//		case AffineTransform::MATRIX3T:
-//			quaternion.ConstructMatrix3t( AsMatrix3t() );
-//		break;
-//#endif
 
 //		default:
 //			Fail( "Not yet implemented" );
@@ -245,12 +233,6 @@ AffineTransform::GetMatrix34( Matrix34& matrix34 ) const
 		case AffineTransform::MATRIX34:
 			matrix34 = AsMatrix34();
 		break;
-
-//#if defined( __PSX__ )
-//		case AffineTransform::MATRIX3T:
-//			matrix34.ConstructMatrix3t( AsMatrix3t() );
-//		break;
-//#endif
 
 		default:
 			Fail( "Not yet implemented" );

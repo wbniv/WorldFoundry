@@ -137,10 +137,6 @@ AdjustStereoCameraParameters(Angle& eyeAngle, Scalar& eyeDistance)
 //      if (padd & PADR1)       vec.vz += 8;
 //      if (padd & PADR2)       vec.vz -= 8;
 
-//#if defined( __PSX__ )
-//	DBSTREAM1(cscreen << "camera position:" << std::endl << position << std::endl;)
-//	DBSTREAM1(cscreen << "camera rotation:" << std::endl << rotation << std::endl;)
-//#endif
 }
 #endif
 
