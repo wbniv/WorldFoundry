@@ -40,11 +40,6 @@
 #include <memory/memory.hp>
 #include <memory/lmalloc.hp>
 
-#if defined ( __PSX__)
-#	include <libetc.h>
-#	include <libgte.h>
-#	include <libgpu.h>
-#endif
 
 //============================================================================
 // Class and Structure Prototypes

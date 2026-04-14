@@ -26,24 +26,8 @@
 
 #include <gfx/display.hp>
 
-#if defined ( RENDERER_PSX )
-#include <gfx/psx/display.cc>
-
-#elif defined ( RENDERER_GL)
 #include <gfx/gl/display.cc>
 #pragma comment( lib, "opengl32.lib" )
 
-#elif defined ( RENDERER_XWINDOWS)
-#include <gfx/xwindows/display.cc>
-
-#elif defined ( RENDERER_DIRECTX)
-#include <gfx/directx/display.cc>
-#pragma comment( lib, "ddraw.lib" )
-#pragma comment( lib, "dxguid.lib" )
-
-#else
-#error no platform specific display code!
-
-#endif
 
 //============================================================================

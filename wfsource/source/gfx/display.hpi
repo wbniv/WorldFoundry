@@ -29,10 +29,6 @@ Display::Validate() const
 {
 	RangeCheckExclusive(0,_xSize,1024+1);
 	RangeCheckExclusive(0,_ySize,768+1);
-#if defined( __PSX__ )
-	RangeCheckInclusive(0,_xSize,640);
-	RangeCheckInclusive(0,_ySize,240);
-#endif
 	RangeCheck(0,_drawPage,DISPLAY_PAGES);
 #if defined(USE_ORDER_TABLES)
 	RangeCheck(0,_constructionOrderTableIndex,ORDER_TABLES);

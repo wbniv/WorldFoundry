@@ -29,10 +29,6 @@
 #include <iff/iffread.hp>
 #include <streams/binstrm.hp>
 
-#if defined (__PSX__)
-#include <libgte.h>
-#include <libgpu.h>
-#endif
 
 //=============================================================================
 

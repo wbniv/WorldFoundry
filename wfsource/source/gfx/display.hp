@@ -56,19 +56,12 @@ class PixelMap;
 //#define VIDEO_MEMORY_IN_ONE_PIXELMAP 
 
 
-#if defined(RENDERER_PIPELINE_GL)
 #define GFX_ZBUFFER
-#else
-//#define GFX_ZBUFFER
-#endif
 
 
-#if defined(RENDERER_GL)
 void LoadGLMatrixFromMatrix34(const Matrix34& matrix);
-#endif
 
 #if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
-#if defined(RENDERER_GL)
 #   include <GL/gl.h>
 const int VRAM_WIDTH = 1024;
 const int VRAM_HEIGHT = 512;
@@ -76,15 +69,7 @@ const float VRAM_WIDTHF = float( VRAM_WIDTH );
 const float VRAM_HEIGHTF = float( VRAM_HEIGHT );
 
 
-#endif          // RENDERER_GL
 
-#if defined(RENDERER_XWINDOWS)
-#   include <GL/gl.h>
-const int VRAM_WIDTH = 1024;
-const int VRAM_HEIGHT = 512;
-const float VRAM_WIDTHF = float( VRAM_WIDTH );
-const float VRAM_HEIGHTF = float( VRAM_HEIGHT );
-#endif          // RENDERER_XWINDOWS
 
 #else
 //#error not yet!
@@ -137,9 +122,7 @@ public:
 #if !defined(USE_ORDER_TABLES)
 #error must use order tables for stereogram
 #endif
-#if !defined(__PSX__)
 #error stereogram only works on psx
-#endif
 	int GetDrawPageIndex() const;						// returns whch page is available for drawing
 #endif
 
@@ -147,12 +130,6 @@ public:
 private:
 #endif
 
-#if defined(__PSX__)
-	int VideoSync();				    // components of PageFlip, public if stereogram, private otherwise
-	void UnSyncedPageFlip();
-	void ClearConstructionOrderTable();
-	void RenderOrderTable();
-#endif
 
 #if defined(USE_ORDER_TABLES)
 	void SetRenderOrderTableIndex(int index);
@@ -178,17 +155,7 @@ private:
 
 	int _xSize;						// x & y size of display
 	int _ySize;
-#if defined ( __PSX__)
-	DISPENV _dispEnv[DISPLAY_PAGES];
-	DRAWENV _drawEnv[DISPLAY_PAGES];
-	RECT bg[DISPLAY_PAGES];
-	bool _resetClock;
-#elif defined( __WIN__ )
-	float _backgroundColorRed;
-	float _backgroundColorGreen;
-	float _backgroundColorBlue;
-	unsigned long _clockLastTime;
-#elif defined( __LINUX__ )
+#if   defined( __LINUX__ )
 	float _backgroundColorRed;
 	float _backgroundColorGreen;
 	float _backgroundColorBlue;

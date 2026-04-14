@@ -37,10 +37,6 @@ Material::Validate() const
 //	assert(_renderer3D == Get3DRenderObjectPtr());
 	RangeCheck(0,_texture.u,Display::VRAMWidth);
 	RangeCheck(0,_texture.v,Display::VRAMHeight);
-#if defined( __PSX__ )
-	RangeCheck(0,_texture.w,256);
-	RangeCheck(0,_texture.h,256);
-#endif
 #if DO_ASSERTIONS
     if(_texturePixelMap)
     {
@@ -84,12 +80,6 @@ INLINE pRenderObj3DFunc
 Material::Get3DRenderer() const
 {
 #if DO_ASSERTIONS
-#if defined( __WIN__)
-	long* rendererPtr = (long*)&_renderer3D;
-//	cout << "rendererPtr = " << rendererPtr << std::endl;
-//	cout << "renderer = " << hex << *rendererPtr << std::endl;
-	assert(ValidCodePtr((void*)(*rendererPtr)));
-#endif
 #endif
 	return(_renderer3D);
 }

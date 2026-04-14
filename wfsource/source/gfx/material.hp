@@ -149,9 +149,6 @@ private:
 
 	pRenderObj3DFunc Get3DRenderer() const;
 	void InitPrimitive(Primitive& prim, const Vertex3D& vertex0, const Vertex3D& vertex1, const Vertex3D& vertex2) const;
-#if defined(RENDERER_PIPELINE_DIRECTX)
-	void InitPrimitive(TriFace& face, const Vertex3D& vertex0, const Vertex3D& vertex1, const Vertex3D& vertex2) const;
-#endif
 
 	pRenderObj2DFunc _renderer2D;
 	pRenderObj3DFunc _renderer3D;

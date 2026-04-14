@@ -32,25 +32,8 @@
 #include "material.hp"
 #include "callbacks.hp"
 
-#if defined ( __PSX__ )
-#	include <libgte.h>
-#	include <libgpu.h>
-#	include <inline_c.h>
-#elif defined ( __WIN__ )
-#	include <new.h>
-#endif
 
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-	#include <gfx/softwarepipeline/rendobj3.cc>
-#elif defined ( RENDERER_PIPELINE_PSX )
-	#include <gfx/psx/rendobj3.cc>
-#elif defined ( RENDERER_PIPELINE_GL )
 	#include <gfx/glpipeline/rendobj3.cc>
-#elif defined ( RENDERER_PIPELINE_DIRECTX )
-	#include <gfx/directxpipeline/rendobj3.cc>
-#else
-	#error no platform specific rendobj3 code!
-#endif
 
 //============================================================================
 // keeps pointers to facelist and vertexlist
@@ -116,9 +99,6 @@ RenderObject3D::Construct( Memory& memory, int vertexCount,Vertex3D* vertexList,
 		assert(_faceList[debugIndex].v1Index < _vertexCount);
 		assert(_faceList[debugIndex].v2Index < _vertexCount);
 		assert(_faceList[debugIndex].v3Index < _vertexCount);
-#if defined(__WIN__)
-		AssertMsg((faceList[debugIndex].normal.Length()) > Scalar::zero,"normal = " << faceList[debugIndex].normal << ", length = " << faceList[debugIndex].normal.Length());
-#endif
 	}
 #endif
 	_InitPrimList( memory );
@@ -151,18 +131,6 @@ RenderObject3D::ApplyMaterials(const Material* materialList )
 				_vertexList[face.v3Index] );
 		}
 
-#if defined(RENDERER_PIPELINE_DIRECTX)
-	for(int index=0;index<_faceCount;index++)
-	{
-		TriFace& face = _faceList[index];
-		const Material* pMaterial = &( materialList[face.materialIndex] );
-		assert( pMaterial );
-		pMaterial->InitPrimitive(face,
-			_vertexList[face.v1Index],
-			_vertexList[face.v2Index],
-			_vertexList[face.v3Index] );
-	}
-#endif
 }
 
 
@@ -267,9 +235,6 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 					Vector3 v1( PSToVector3(vertexList[tempFaceList[index].v2Index].position));
 					Vector3 v2( PSToVector3(vertexList[tempFaceList[index].v3Index].position));
 					tempFaceList[index].normal = Vector3ToPS12(CalculateNormal(v0,v1,v2));
-#if defined(__WIN__)
-					assert((tempFaceList[index].normal.Length()) > Scalar::zero);
-#endif
 					AssertMsg(tempFaceList[index].materialIndex < materialCount,"Object ??? tried to refernce material index " << tempFaceList[index].materialIndex  << " when there are only " << materialCount << " materials");
 					RangeCheck(0,tempFaceList[index].materialIndex,materialCount);
 				}

@@ -72,9 +72,6 @@ TriFace::TriFace( int16 v0, int16 v1, int16 v2, int16 mi, Vertex3D* vertexList )
 			PSToVector3(vertexList[v0].position),
 			PSToVector3(vertexList[v1].position),
 			PSToVector3(vertexList[v2].position) ) );
-#ifdef __WIN__
-	assert((normal.Length()) > Scalar::zero);
-#endif
 //		cout << *this << std::endl;
 }
 
@@ -88,11 +85,7 @@ operator << ( std::ostream& s, const TriFace& tf )
 	s << "TriFace: Vertex Indices : " << tf.v1Index << "," << tf.v2Index << "," << tf.v3Index << std::endl;
 	s << "  Material Index: " << tf.materialIndex << std::endl;
 	s << "  Normal: ";
-#if defined(RENDERER_PIPELINE_PSX)
-	tf.normal.PrintAs412(s) << std::endl;
-#else
 	s << tf.normal << std::endl;
-#endif
 	return s;
 }
 

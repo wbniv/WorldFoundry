@@ -30,12 +30,7 @@
 #include <gfx/renderer.hp>
 
 
-#if defined( __PSX__ )
-#       pragma message ("KTS: ClearOTagR seems to clear 3 more entries than asked for")
-#       define OTABLE_FUDGE 3
-#else
 #       define OTABLE_FUDGE 0
-#endif
 
 //============================================================================
 
@@ -112,9 +107,6 @@ operator << ( std::ostream& s, const OrderTable& ot )
 #endif
 		s << ", *ptr = " << (void*)(*(long*)_orderTable);
 		s << ", *ptr+1 = " << (void*)(*((long*)_orderTable+1)) << ", addr = " << (void*)(getaddr(_orderTable));
-#if defined( __PSX__ )
-		s << ", len = " << int(getlen(_orderTable));
-#endif
 		s << std::endl;
 	}
 #endif
@@ -124,26 +116,9 @@ operator << ( std::ostream& s, const OrderTable& ot )
 
 //============================================================================
 
-#if defined(__PSX__)
-#if 0
-uint32 myot_terminator = 0x04ffffff;
-
-void
-AltClearOTagR( uint32 *ot, long size )
-{
-	RangeCheckExclusive(0,size,10000);	// kts arbitrary
-	register uint32 *entry;
-	entry = ot + (size-1);
-	while( size-- )
-		*entry-- = (uint32)(entry-1) & 0x00FFFFFF;
-	ot[0] = (uint32*)(((uint32)(&myot_terminator)) & 0xffffff);
-}
-#endif
-#endif		// defined(__PSX__)
 
 //==============================================================================
 
-#if !defined( __PSX__ )
 
 static ORDER_TABLE_ENTRY ot_terminator = { (ORDER_TABLE_ENTRY*)~0, 0, 0, 0, CODE_NOP };
 
@@ -161,5 +136,4 @@ ClearOTagR( ORDER_TABLE_ENTRY* _orderTable, int _depth )
 	pPrimitive->code = CODE_NOP;
 }
 
-#endif			                        // !defined(__PSX__)
 //============================================================================

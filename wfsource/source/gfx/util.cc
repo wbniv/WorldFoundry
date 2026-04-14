@@ -24,10 +24,7 @@
 // Original Author: Kevin T. Seghetti
 //============================================================================
 
-#if defined ( __PSX__ )
-#	include <gfx/psx/gteutil.cc>
-#elif defined ( __WIN__ )
-#elif defined ( __LINUX__ )
+#if   defined ( __LINUX__ )
 #else
 #	error no util functions for this platform
 #endif

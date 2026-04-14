@@ -60,17 +60,7 @@ Material::Get3DRenderObjectPtr() const
 {
 	static const pRenderObj3DFunc _rendererList[] =
 	{
-		#if defined(RENDERER_PIPELINE_SOFTWARE)
-			#include <gfx/softwarepipeline/renderer.ext>
-		#elif defined( RENDERER_PIPELINE_PSX )
-			#include <gfx/psx/renderer.ext>
-		#elif defined( RENDERER_PIPELINE_GL )
 			#include <gfx/glpipeline/renderer.ext>
-		#elif defined( RENDERER_PIPELINE_DIRECTX )
-			#include <gfx/directxpipeline/renderer.ext>
-		#else
-			#error No platform...
-		#endif
 	};
 	ValidateRenderMask(_materialFlags);
 	return _rendererList[_materialFlags&RENDERER_SELECTION_MASK];
@@ -81,11 +71,7 @@ Material::Get3DRenderObjectPtr() const
 Material::Material(Color color, int materialFlags,const Texture& texture,const PixelMap* texturePixelMap)
 	:
 	_color(color),
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-	_materialFlags(materialFlags|Material::GOURAUD_SHADED),
-#else
    _materialFlags(materialFlags),
-#endif
 	_texture(texture),
     _texturePixelMap(texturePixelMap)
 
@@ -117,20 +103,8 @@ Material::Construct()
 
    // kts kludge until all models have been updated to be flat shaded
 
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-		// kts this is so fogging will always be smooth
-      _materialFlags |= GOURAUD_SHADED;
-#elif defined( RENDERER_PIPELINE_PSX )
-		// kts this is so fogging will always be smooth
-      _materialFlags |= GOURAUD_SHADED;
-#elif defined( RENDERER_PIPELINE_GL )
    if(_materialFlags & GOURAUD_SHADED)
       _materialFlags &= ~GOURAUD_SHADED;
-#elif defined( RENDERER_PIPELINE_DIRECTX )
-	#error hasnt been implemented yet, not sure what it will need	
-#else
-	#error No platform...
-#endif
 
 	// kts kludge until we can get translucency from material
 	if(_materialFlags & TEXTURE_MAPPED)
@@ -145,9 +119,6 @@ Material::Construct()
 	{
 		case FLAT_SHADED|SOLID_COLOR:
 		{
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-			assert(0);              // software pipeline needs all polys to be gouraud shaded so that fogging will work
-#endif
 			POLY_F3 poly;
 			setPolyF3(&poly);
 			Color color = GetColor();
@@ -157,9 +128,7 @@ Material::Construct()
 		}
 		case GOURAUD_SHADED|SOLID_COLOR:
 		{
-#if !defined(RENDERER_PIPELINE_SOFTWARE)
 //         assert(0);           // kts we don't seem to have color by vertex finished
-#endif
 			POLY_G3 poly;
 			setPolyG3(&poly);
 			Color color = GetColor();
@@ -171,9 +140,6 @@ Material::Construct()
 		}
 		case FLAT_SHADED|TEXTURE_MAPPED:
 		{
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-			assert(0);              // software pipeline needs all polys to be gouraud shaded so that fogging will work
-#endif
 			POLY_FT3 poly;
 			setPolyFT3(&poly);
 			Color color = GetColor();
@@ -183,9 +149,7 @@ Material::Construct()
 		}
 		case GOURAUD_SHADED|TEXTURE_MAPPED:
 		{
-#if !defined(RENDERER_PIPELINE_SOFTWARE)
          //assert(0);           // kts we don't seem to have color by vertex finished
-#endif
 			POLY_GT3 poly;
 			setPolyGT3(&poly);
 			Color color = GetColor();
@@ -236,46 +200,6 @@ Material::Construct()
 
 //-----------------------------------------------------------------------------
 
-#if defined(RENDERER_PIPELINE_DIRECTX)
-void
-Material::InitPrimitive(TriFace& face, const Vertex3D& vertex0, const Vertex3D& vertex1, const Vertex3D& vertex2) const
-{
-	if(_materialFlags & TEXTURE_MAPPED)
-	{
-#pragma message ("KTS: handle 4 & 8 bit textures as soon as I get data from textile")
-
-		Scalar minU = Scalar( vertex0.u.Min(vertex1.u).Min(vertex2.u).WholePart(), 0 );
-		Scalar minV = Scalar( vertex0.v.Min(vertex1.v).Min(vertex2.v).WholePart(), 0 );
-
-		assert(minU <= vertex0.u);
-		assert(minU <= vertex1.u);
-		assert(minU <= vertex2.u);
-		assert(minV <= vertex0.v);
-		assert(minV <= vertex1.v);
-		assert(minV <= vertex2.v);
-
-		float u0;
-		float v0;
-		DirectXCalcVRAMuv(vertex0.u-minU,vertex0.v-minV,u0,v0);
-
-		float u1;
-		float v1;
-		DirectXCalcVRAMuv(vertex1.u-minU,vertex1.v-minV,u1,v1);
-
-		float u2;
-		float v2;
-		DirectXCalcVRAMuv(vertex2.u-minU,vertex2.v-minV,u2,v2);
-
-		face._u[0] = u0;
-		face._v[0] = v0;
-		face._u[1] = u1;
-		face._v[1] = v1;
-		face._u[2] = u2;
-		face._v[2] = v2;
-	}
-}
-
-#endif
 
 //-----------------------------------------------------------------------------
 

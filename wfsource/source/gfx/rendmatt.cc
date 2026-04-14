@@ -28,19 +28,7 @@
 #include <gfx/viewport.hp>
 #include <gfx/material.hp>
 
-#if defined ( __PSX__ )
-#	include <sys/types.h>
-#	include <libetc.h>
-#	include <libgte.h>
-#	include <libgpu.h>
-#	include <inline_c.h>
-#elif defined ( __WIN__ )
-#	include <new.h>
-#pragma message( "move to correct place when completed" )
-void SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, RECT *tw)
-{
-}
-#elif defined ( __LINUX__ )
+#if   defined ( __LINUX__ )
 #pragma message( "move to correct place when completed" )
 void SetDrawMode(DR_MODE* /*p*/, int /*dfe*/, int /*dtd*/, int /*tpage*/, psxRECT* /*tw*/)
 {

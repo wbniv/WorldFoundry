@@ -70,17 +70,7 @@ private:
 	// used by constructors
 	void Construct( Memory& memory, int vertexCount,Vertex3D* vertexList, int faceCount, TriFace* faceList, const Material* materialList );
 
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-#	include <gfx/softwarepipeline/renderer.inc>
-#elif defined(RENDERER_PIPELINE_PSX)
-#	include <gfx/psx/renderer.inc>
-#elif defined( RENDERER_PIPELINE_GL)
 #	include <gfx/glpipeline/renderer.inc>
-#elif defined( RENDERER_PIPELINE_DIRECTX)
-#	include <gfx/directxpipeline/renderer.inc>
-#else
-#	error Undefined platform for renderer pipeline
-#endif
 	enum { MAX_RENDERERS = 8 };
 	Primitive*	_primList[ORDER_TABLES];				// array of primitives, same # as face list
 	const Material*	_materialList;
@@ -125,17 +115,7 @@ struct RotatedVector
 };
 
 
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-#	include <gfx/softwarepipeline/rendobj3.hp>
-#elif defined(RENDERER_PIPELINE_PSX)
-#	include <gfx/psx/rendobj3.hp>
-#elif defined(RENDERER_PIPELINE_GL)
 #		include <gfx/glpipeline/rendobj3.hp>
-#elif defined(RENDERER_PIPELINE_DIRECTX)
-#		include <gfx/directxpipeline/rendobj3.hp>
-#else
-#		error platform not defined
-#endif
 
 //============================================================================
 #include <gfx/rendobj3.hpi>		// include all inline definitions as appropriate

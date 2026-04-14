@@ -50,7 +50,6 @@ PixelMap::PixelMap(int flags, int xSize, int ySize)
 	_ySize = ySize;
 
     _parent = NULL;
-#if defined(RENDERER_GL) 
 #if SIXTEEN_BIT_VRAM
      _pixelBuffer = new uint16[xSize*ySize];
 #else
@@ -62,22 +61,8 @@ PixelMap::PixelMap(int flags, int xSize, int ySize)
     glGenTextures(1,&_glTextureName);
     assert(_glTextureName);
    AssertGLOK();
-#endif
 
 
-#if defined(RENDERER_XWINDOWS) 
-#if SIXTEEN_BIT_VRAM
-     _pixelBuffer = new uint16[xSize*ySize];
-#else
-    _pixelBuffer = new GLubyte[xSize*ySize*4];
-#endif		                            // sixteen_bit
-    ValidatePtr(_pixelBuffer);
-
-   AssertGLOK();
-#if DO_ASSERTIONS
-   AssertGLOK();
-#endif
-#endif
 
 	Validate();
     //std::cout << "PixelMap::PixelMap: this = " << *this << std::endl;
@@ -106,9 +91,7 @@ PixelMap::PixelMap(PixelMap& parent,int xPos, int yPos, int xSize, int ySize)
 	_xSize = xSize;
 	_ySize = ySize;
     _parent = &parent;
-#if defined(RENDERER_GL)
     _pixelBuffer = NULL;
-#endif
 	Validate();
     std::cout << "PixelMap::PixelMap: subpixelmap = " << this << std::endl;
 }
@@ -118,13 +101,9 @@ PixelMap::PixelMap(PixelMap& parent,int xPos, int yPos, int xSize, int ySize)
 PixelMap::~PixelMap()
 {
     Validate();
-#if defined(RENDERER_GL)
     if(_pixelBuffer)
         delete [] _pixelBuffer;
     glDeleteTextures(1,(GLuint*)&_glTextureName);
-#endif
-#if defined(RENDERER_XWINDOWS)
-#endif
 }
 
 //==============================================================================
@@ -160,82 +139,6 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
      }
 
 
-#if defined ( RENDERER_PSX )
-    RECT rect;
-    rect.x = _xPos+xOffset;
-    rect.y = _yPos+yOffset;
-    rect.w = xSize;
-    rect.h = ySize;
-    LoadImage(&rect,(long unsigned int *)memory);
-
-#elif defined ( RENDERER_DIRECTX)
-    psxRECT rect;
-    rect.x = _xPos+xOffset;
-    rect.y = _yPos+yOffset;
-    rect.w = xSize;
-    rect.h = ySize;
-
-    long unsigned int * _p = (long unsigned int *)memory;
-
-	LPDIRECTDRAWSURFACE surface = videoMemoryTexture.GetVMemSurface();
-	assert(ValidPtr(surface));
-
-	DDSURFACEDESC ddsd;
-	memset(&ddsd,0,sizeof(DDSURFACEDESC));
-	ddsd.dwSize = sizeof(ddsd);
-	HRESULT hResult = surface->Lock(NULL,&ddsd, 0, NULL);
-	DDCheckError(hResult,"Lock failed");
-
-	WORD* lpdMemory = (WORD*) ddsd.lpSurface;
-	// kts check what the format of this surface is
-	assert(ddsd.ddpfPixelFormat.dwFlags && DDPF_RGB);  // insure is rgb mode
-	assert(ddsd.ddpfPixelFormat.dwRGBBitCount == SCREEN_BITS);  // insure 16 bits per pixel
-	//printf("surface: %d, %d\n",ddsd.dwWidth, ddsd.dwHeight);
-
-//	std::cout << "loading image into vram:" << rect.x << "," << rect.y << ";" << rect.w << "," << rect.h << std::endl;
-	assert(ValidPtr(_p));
-	RGB_pixel* p = (RGB_pixel*)_p;
-
-	uint16* pixels = (uint16*)_p;
-
-	assert(ValidPtr(rect));
-
-	int x2 = rect.x + rect.w;
-	int y2 = rect.y + rect.h;
-
-	assert(rect.x >= 0);
-	assert(x2 <= GetXSize());
-	assert(rect.y >= 0);
-	assert(y2 <= GetYSize());
-
-	int redShift   = (32-LZC(ddsd.ddpfPixelFormat.dwRBitMask))-5;
-	int greenShift = (32-LZC(ddsd.ddpfPixelFormat.dwGBitMask))-5;
-	int blueShift  =(32-LZC(ddsd.ddpfPixelFormat.dwBBitMask))-5;
-
-	for ( int y=rect.y; y<y2; ++y )
-	{
-		for ( int x=rect.x; x<x2; ++x )
-		{
-			uint16 sourcePixel = *pixels;
-			uint16 red,green,blue;
-
-			blue   = (sourcePixel & 0x1f);
-			green = ((sourcePixel >> 5) & 0x1f);
-			red  = ((sourcePixel >> 10) & 0x1f);
-
-			red  = (red   << redShift  ) & ddsd.ddpfPixelFormat.dwRBitMask;
-			green= (green << greenShift) & ddsd.ddpfPixelFormat.dwGBitMask;
-			blue = (blue  << blueShift ) & ddsd.ddpfPixelFormat.dwBBitMask;
-
-			uint16 destPixel = red | green | blue;
-
-			lpdMemory[x + (y*(ddsd.lPitch/2))] = destPixel;
-			pixels++;
-		}
-	}
-	surface->Unlock( NULL );
-
-#elif defined(RENDERER_GL)
 
     psxRECT rect;
     rect.x = _xPos+xOffset;
@@ -341,78 +244,6 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
         AssertGLOK();
     }
 
-#elif defined(RENDERER_XWINDOWS)
-
-    psxRECT rect;
-    rect.x = _xPos+xOffset;
-    rect.y = _yPos+yOffset;
-    rect.w = xSize;
-    rect.h = ySize;
-
-    long unsigned int * _p = (long unsigned int *)memory;
-    GLubyte* pPB = _pixelBuffer;
-
-//	std::cout << "loading image into vram:" << rect.x << "," << rect.y << ";" << rect.w << "," << rect.h << std::endl;
-	assert(ValidPtr(_p));
-
-	uint16* pixels = (uint16*)_p;
-
-	int x2 = rect.x + rect.w;
-	int y2 = rect.y + rect.h;
-
-	assert(rect.x >= 0);
-	assert(x2 <= VRAM_WIDTH);
-	assert(rect.y >= 0);
-	assert(y2 <= VRAM_HEIGHT);
-
-	for ( int y=rect.y; y<y2; ++y )
-	{
-		for ( int x=rect.x; x<x2; ++x )
-		{
-            GLubyte* destPixel = pPB + ((y*_xSize) + x)*4;            // 4 bytes per pixel: R, G, B, A
-#if SIXTEEN_BIT_VRAM
-			*destPixel = *pixels;
-#else
-			destPixel[0] = ((*pixels >> 10) & 0x1f) << 3;
-			destPixel[1] = ((*pixels >> 5) & 0x1f) << 3;
-			destPixel[2] = (*pixels & 0x1f) << 3;
-			if(*pixels == 0x8000)
-				destPixel[3] = 255;	// be black
-			else if(*pixels == 0)
-				destPixel[3] = 0;  	// be transparent
-			else if(*pixels & 0x8000)
-				destPixel[3] = 128;  	// be semi-transparent
-			else
-				destPixel[3] = 255;	// be solid
-#endif // SIXTEEN_BIT_VRAM
-			pixels++;
-		}
-	}
-
-    if(_flags == MEMORY_VIDEO)
-    {
-        
-   AssertGLOK();
-
-//        // kts temp code
-//          char* foo = new char[_xSize*_ySize*4];
-//          assert(foo);
-//          for(int index = 0; index < (_xSize*_ySize*4);index++)
-//              foo[index] = 0x0;
-
-//             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _xSize, _ySize,
-//                     0, GL_RGBA, GL_UNSIGNED_BYTE, foo);
-//   AssertGLOK();
-
-//             delete [] foo;
-
-
-    }
-
-
-#else
-#error RENDERER not defined!
-#endif
 }
 
 //==============================================================================

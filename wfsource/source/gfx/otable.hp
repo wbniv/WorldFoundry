@@ -38,16 +38,8 @@ class Memory;
 
 //==============================================================================
 
-#if defined(__WIN__)
+#if   defined(__LINUX__)
 typedef P_TAG ORDER_TABLE_ENTRY;
-#elif defined(__LINUX__)
-typedef P_TAG ORDER_TABLE_ENTRY;
-#elif defined(__PSX__)
-// Polygon Primitive Definitions
-typedef struct {
-	unsigned	addr: 24;
-	unsigned 	len:   8;
-} ORDER_TABLE_ENTRY;
 #else
 #error order table not defined for platform
 #endif

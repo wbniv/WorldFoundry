@@ -90,12 +90,6 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 			//globalRendererVariables.currentRenderFace->Validate();
 
 			assert(ValidPtr(this));
-	#if defined(__WIN__)
-			long* rendererPtr = (long*)&renderer;
-	//		cout << "rendererPtr = " << rendererPtr << std::endl;
-	//		cout << "renderer = " << hex << *rendererPtr << std::endl;
-			assert(ValidCodePtr((void*)(*rendererPtr)));
-	#endif
 	//		cout << "RenderObject3D::Render: calling renderer " << std::endl;
 			(this->*renderer)(primitive);
 	//		cout << "RenderObject3D::Render: done calling renderer " << std::endl;

@@ -50,11 +50,6 @@ int wfWindowWidth = 640;
 int wfWindowHeight = 480;
 
 
-#if defined(__WIN__)
-#include <Mmsystem.h>
-#include <time.h>
-#include "wgl.cc"
-#endif
 #if defined(__LINUX__)
 #include "mesa.cc" 
 #include <sys/time.h>
@@ -240,10 +235,6 @@ WFInitGL()
 
     glEnable(GL_BLEND);
     AssertGLOK();
-#if !defined( RENDERER_PIPELINE_GL )
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    AssertGLOK();
-#endif
 
     glClearColor( 0.0, 0.0, 0.0, 0.0 );
     AssertGLOK();
@@ -286,17 +277,9 @@ WFInitGL()
     glLoadIdentity();
     
     AssertGLOK();
-#if defined( RENDERER_PIPELINE_GL )
     //float fAspect = float(wfWindowWidth)/float(wfWindowHeight);
     float fAspect = 1.0;                           // kts I am correcting for this elsewhere, eventually in the case of PIPELINE_GL this will need to be changed
     gluPerspective(60.0f,fAspect,1.0,1000.0f);
-#else
-#if defined ( GFX_ZBUFFER )
-    glOrtho(-1.0, 1.0, -1.0, 1.0, -0.5f, 1000.0f);
-#else /* GFX_ZBUFFER */
-    glOrtho(-320.0f/2, 320/2, -320.0f/2, 320/2, 1.0f, -1.0f); 
-#endif /* GFX_ZBUFFER */
-#endif
     AssertGLOK();
 
     glMatrixMode( GL_MODELVIEW );
@@ -417,9 +400,7 @@ Display::ResetTime()                    // used to reset delta timer for PageFli
 {
     //_clockLastTime = timeGetTime();  	//clock();
 
-#if defined(__WIN__)
-    _clockLastTime = timeGetTime();                 //clock();
-#elif defined(__LINUX__)
+#if   defined(__LINUX__)
     struct timeval tv;
     gettimeofday(&tv,NULL);
     _clockLastTime = tv;                
@@ -440,7 +421,6 @@ Display::RenderBegin()
    AssertGLOK();
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);     // Clear the window with current clearing color
    AssertGLOK();
-#if defined(RENDERER_PIPELINE_GL)
    glEnable(GL_LIGHTING);
    glEnable(GL_LIGHT0);
    glEnable(GL_LIGHT1);
@@ -460,10 +440,6 @@ Display::RenderBegin()
    glMaterialfv(GL_FRONT,GL_DIFFUSE,lightWhite);
    glMaterialfv(GL_FRONT,GL_SPECULAR,lightBlack);
    AssertGLOK();
-#else
-   glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-   glDisable(GL_LIGHTING);
-#endif
 
    AssertGLOK();
    glEnable( GL_TEXTURE_2D );
@@ -552,46 +528,6 @@ Display::PageFlip()
     }
 #endif
 
-#if defined(__WIN__)
-	MSG		msg;									// Windows Message Structure
-		  
-	while (PeekMessage(&msg,NULL,0,0,PM_REMOVE))	// Is There A Message Waiting?
-	{
-		if (msg.message==WM_QUIT)				// Have We Received A Quit Message?
-		{
-            printf("Display::PageFlip: gl\\display.cc calling sys_exit\n");
-			KillGLWindow();									// Kill The Window
-			sys_exit(1);
-		}
-		else									// If Not, Deal With Window Messages
-		{
-			TranslateMessage(&msg);				// Translate The Message
-			DispatchMessage(&msg);				// Dispatch The Message
-		}
-	}
-	{
-		// Watch For ESC Key 
-		if (keys[VK_ESCAPE])	// Active?  Was There A Quit Received?
-		{
-            printf("Display::PageFlip: gl\\display.cc calling sys_exit\n");
-			KillGLWindow();									// Kill The Window
-			sys_exit(1);
-		}
-
-		if (keys[VK_F1])						// Is F1 Being Pressed?
-		{
-			keys[VK_F1]=FALSE;					// If So Make Key FALSE
-			KillGLWindow();						// Kill Our Current Window
-			fullscreen=!fullscreen;				// Toggle Fullscreen / Windowed Mode
-			// Recreate Our OpenGL Window
-			if (!CreateGLWindow("WorldFoundry",_xPos, _yPos, _halWindowWidth, _halWindowHeight,16,fullscreen))
-			{
-				return 0;						// Quit If Window Was Not Created
-			}
-			WFInitGL();
-		}
-	}
-#endif
 #if defined(__LINUX__)
     XEventLoop(); 
 #endif
@@ -624,19 +560,6 @@ Display::PageFlip()
         // end test code
 #endif
 
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-#if defined(USE_ORDER_TABLES)
-    SetConstructionOrderTableIndex(_drawPage);
-    SetRenderOrderTableIndex(1-_drawPage);
-
-    _orderTable[GetRenderOrderTableIndex()]->Render();
-    _drawPage ^= 1;
-    _orderTable[GetConstructionOrderTableIndex()]->Clear();
-#else // USE_ORDER_TABLES
-#error now what?
-    assert(0);
-#endif
-#elif defined(RENDERER_PIPELINE_GL) // defined(RENDERER_PIPELINE_SOFTWARE)
 
 #if 0
     static float xRot;
@@ -682,17 +605,11 @@ Display::PageFlip()
 #endif // 0
 
 
-#else
-#error renderer pipeline not defined!
-#endif
 
     glFlush();
     AssertGLOK();
 
-#if defined(__WIN__)
-    // Call function to swap the buffers
-	SwapBuffers(hDC);					// Swap Buffers (Double Buffering)
-#elif defined(__LINUX__)
+#if   defined(__LINUX__)
     glXSwapBuffers(halDisplay.mainDisplay, halDisplay.win);
     AssertGLOK();
 
@@ -710,18 +627,7 @@ Display::PageFlip()
 //	hRC = 0;
 
     // now calc how long it has been since last frame
-#if defined(__WIN__)
-    unsigned long now = timeGetTime();                  //clock();
-    unsigned long delta = now - _clockLastTime;
-    _clockLastTime = now;
-
-    AssertMsg(delta/CLOCKS_PER_SEC < 65536, 
-              "delta/CLOCKS_PER_SEC = " << delta/CLOCKS_PER_SEC << ", delta = " << delta << ", CLOCKS_PER_SEC = " << CLOCKS_PER_SEC);
-    Scalar whole(short(delta/CLOCKS_PER_SEC),0);
-    Scalar frac(short(delta%CLOCKS_PER_SEC),0);
-    frac /= SCALAR_CONSTANT(CLOCKS_PER_SEC);
-    return(whole+frac);
-#elif defined(__LINUX__)
+#if   defined(__LINUX__)
     struct timeval tv;
     gettimeofday(&tv,NULL);
 

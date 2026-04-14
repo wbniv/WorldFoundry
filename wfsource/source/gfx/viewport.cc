@@ -26,17 +26,7 @@
 
 #include <gfx/viewport.hp>
 
-#if defined ( RENDERER_PSX )
-#include <gfx/psx/viewport.cc>
-#elif defined ( RENDERER_GL )
 #include <gfx/gl/viewport.cc>
-#elif defined ( RENDERER_XWINDOWS )
-#include <gfx/xwindows/viewport.cc>
-#elif defined ( RENDERER_DIRECTX )
-#include <gfx/directx/viewport.cc>
-#else
-#error no viewport code for this platform!
-#endif
 
 //============================================================================
 

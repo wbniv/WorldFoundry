@@ -29,24 +29,11 @@
 #include <gfx/rendmatt.hp>
 #include <cpplib/libstrm.hp>
 
-#if defined(__PSX__)
-#include <inline_c.h>
-#elif defined(__WIN__)
-#define scratchPadMemory _HALLmalloc
-#elif defined(__LINUX__)
+#if   defined(__LINUX__)
 #define scratchPadMemory _HALLmalloc
 #endif
         
         
-#if defined(RENDERER_PIPELINE_DIRECTX)
-#define D3D_OVERLOADS
-#include <ddraw.h>
-#include <d3d.h>
-#include <gfx/directx/winmain.hp>
-#include <gfx/directx/winproc.hp>
-#include <gfx/directx/d3dutils.hp>
-#include <gfx/math.hp>
-#endif
 
 //============================================================================
 
@@ -93,86 +80,10 @@ Matrix34 viewToScreen = Matrix34(
    );
 
 //============================================================================
-#if defined(RENDERER_PIPELINE_PSX)
 
-#define gte_SetDQA( r0 ) __asm__ volatile (		\
-	"addu	$12,$0,%0;"						\
-	"ctc2	$12, $27"					\
-	:							\
-	: "r"( r0 ) 			\
-	: "a0" )
-
-//-----------------------------------------------------------------------------
-
-#define gte_SetDQB( r0 ) __asm__ volatile (		\
-	"addu	$12,$0,%0;"				\
-	"ctc2	$12, $28"					\
-	:							\
-	: "r"( r0 )             \
-	: "$12"  )
-
-
-#else
-
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-int32 gte_DQA;
-int32 gte_DQB;
-Color gte_lcm[3];
-Color gte_farColor;
-Color gte_ambientColor;
-Matrix34 gte_llm;
-
-#define gte_SetDQA(a) gte_DQA = (a)
-#define gte_SetDQB(a) gte_DQB = (a)
-#endif
-#endif
 
 //=============================================================================
 
-#if defined(RENDERER_PIPELINE_SOFTWARE) || defined(RENDERER_PIPELINE_PSX)
-
-void
-WF_SetFogNearFar(int16 fogNear, int16 fogFar,int16 h)
-{
-	assert(fogNear > h);
-	assert(fogNear > 0);
-	assert(fogFar > 0);
-	AssertMsg(fogNear <= fogFar,"fogNear = " << fogNear << ", fogFar = " << fogFar);
-	assert(h > 0);
-	int16 delta = fogFar-fogNear;
-	if(delta >= 0x64)
-	{
-		int32 DQA,DQB;
-
-		assert(delta);
-		assert(h);
-		DQA = (
-			  	(
-					(
-						(0-fogNear)*fogFar
-					) / delta
-				) << 0x8
-			  ) / h;
-
-		if(DQA < -0x8000)
-			DQA = -0x8000;
-
-		if(DQA > 0x7fff)
-			DQA = 0x7fff;
-
-		DQB = ((fogFar << 0xc) / delta) << 0xc;
-
-//		cout << hex << "DQA = " << DQA << ", DQB = " << DQB << std::endl;
-
-		gte_SetDQA(DQA);
-		gte_SetDQB(DQB);
-	}
-	// kts added
-	else
-		assert(0);
-}
-
-#endif
 
 //============================================================================
 
@@ -221,57 +132,6 @@ FntPrintScalar(Scalar q)
 void
 AdjustStereoCameraParameters(Angle& eyeAngle, Scalar& eyeDistance)
 {
-#if defined( __PSX__ )
-	uint32 padd = PadRead(1);
-	padd >>= 16;
-
-	if(padd)
-	{
-#if SW_DBSTREAM
-		cscreen << "\n\nEyeAngle = " << eyeAngle << " (each)" << std::endl;
-		cscreen << "EyeDistance = " << eyeDistance*SCALAR_CONSTANT(2) << std::endl;
-#endif
-
-		FntPrint("\n\nEyeAngle = ");
-		FntPrintScalar(eyeAngle.AsDegree());
-		FntPrint(" (each)\nEyeDistance =");
-		FntPrintScalar(eyeDistance*SCALAR_CONSTANT(2));
-		FntPrint("\n");
-	}
-
-//      if (padd & PADselect)   ret = -1;
-
-	const Scalar distanceDelta(SCALAR_CONSTANT(0.0005));
-	const Angle angleDelta(Angle::Degree(SCALAR_CONSTANT(0.01)));
-
-	// change the rotation angles for the cube and the light source
-//	if (padd & PADRup)
-//		rotation.SetA(rotation.GetA() + Angle(Angle::Degree(SCALAR_CONSTANT(ADJUST_ANGLE))));
-//	if (padd & PADRdown)
-//		rotation.SetA(rotation.GetA() - Angle(Angle::Degree(SCALAR_CONSTANT(ADJUST_ANGLE))));
-	if (padd & PADRleft)
-		eyeAngle -= angleDelta;
-	if (padd & PADRright)
-		eyeAngle += angleDelta;
-//	if (padd & PADR1)
-//		rotation.SetC(rotation.GetC() - Angle(Angle::Degree(SCALAR_CONSTANT(ADJUST_ANGLE))));
-//	if (padd & PADR2)
-//		rotation.SetC(rotation.GetC() + Angle(Angle::Degree(SCALAR_CONSTANT(ADJUST_ANGLE))));
-
-//	if (padd & PADLup)
-//		position.SetY(position.Y() + SCALAR_CONSTANT(ADJUST_DELTA));
-//	if (padd & PADLdown)
-//		position.SetY(position.Y() - SCALAR_CONSTANT(ADJUST_DELTA));
-	if (padd & PADLleft)
-		eyeDistance -= distanceDelta;
-	if (padd & PADLright)
-		eyeDistance += distanceDelta;
-
-//	if (padd & PADL1)
-//		position.SetZ(position.Z() - SCALAR_CONSTANT(ADJUST_DELTA));
-//	if (padd & PADL2)
-//		position.SetZ(position.Z() + SCALAR_CONSTANT(ADJUST_DELTA));
-#endif
 
 	// distance from screen
 //      if (padd & PADR1)       vec.vz += 8;
@@ -357,44 +217,6 @@ RenderCamera::RenderBegin()
 	_invertedPosition.Inverse(_position);
 	assertNe(dtm,Scalar::zero);		// if zero, matrix could not be inverted
 
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-	_invertedPosition *= viewToScreen;
-	for(int index=0;index < 3;index++)
-		gte_lcm[index] = Color(_dirLightColors[index]);
-
-	gte_ambientColor = _ambientColor;
-	gte_farColor = _fogColor;
-	assert(_fogNear > Scalar::zero);
-	assert(_fogFar > Scalar::zero);
-	WF_SetFogNearFar(_fogNear.AsLong()>>8, _fogFar.AsLong()>>8, 110);
-//	cout << "gte_lcm = " << *gte_lcm << std::endl;
-#elif defined(RENDERER_PIPELINE_PSX)
-	MATRIX gte_lcm;
-	for(int index=0;index < MAX_LIGHTS;index++)
-	{
-		gte_lcm.m[0][index] = _dirLightColors[index].Red();
-		gte_lcm.m[1][index] = _dirLightColors[index].Green();
-		gte_lcm.m[2][index] = _dirLightColors[index].Blue();
-	}
-	gte_SetColorMatrix(&gte_lcm);
-	gte_SetBackColor(_ambientColor.Red(),_ambientColor.Green(),_ambientColor.Blue());
-	gte_SetFarColor(_fogColor.Red(),_fogColor.Green(),_fogColor.Blue());
-	WF_SetFogNearFar(_fogNear.AsLong()>>8, _fogFar.AsLong()>>8, 110);
-#if 0
-	cout << "gte_lcm = ";
-	for(int dy=0;dy<3;dy++)
-	{
-		cout << "[" << dy << "] ";
-		for(int dx=0;dx<3;dx++)
-			cout << gte_lcm.m[dy][dx] << ",";
-		cout << std::endl;
-	}
-	for(int dt=0;dt<3;dt++)
-		cout << "t = " << gte_lcm.t[dt] << ",";
-	cout << std::endl;
-#endif
-
-#elif defined(RENDERER_PIPELINE_GL)
 
    GLfloat lightBlack[] = {
        0.0, 0.0, 0.0, 1.0
@@ -443,72 +265,6 @@ RenderCamera::RenderBegin()
    glFogf(GL_FOG_END,_fogFar.AsFloat());
    glFogf(GL_FOG_MODE,GL_LINEAR);
 
-#elif defined(RENDERER_PIPELINE_DIRECTX)
-
-	// Get D3D window pointer
-    LPD3DWindow lpd3dWindow =  (LPD3DWindow)GetWindowLong (g_hMainWindow, GWL_USERDATA);
-	ValidatePtr(lpd3dWindow);
-
-	LPDIRECT3DDEVICE2 lpd3dDevice = lpd3dWindow->GetD3DDevice();
-	ValidatePtr(lpd3dDevice);
-
-#if 0
-	// kts test code
-	{				                    // 3d poly
-		static float zRot = 3.1415;
-//		zRot += 0.01;
-
-		static int zPos = 0;
-		zPos +=1;
-		if(zPos > 0)
-			zPos = -100;
-
-		D3DMATRIX m_View = ViewMatrix(D3DVECTOR(0,0,zPos), D3DVECTOR(sin(zRot),0,cos(zRot)+zPos), D3DVECTOR(0,1,0), 0);
-		lpd3dDevice->SetTransform(D3DTRANSFORMSTATE_VIEW, &m_View);
-
-		D3DMATRIX m_World = IdentityMatrix();
-		lpd3dDevice->SetTransform(D3DTRANSFORMSTATE_WORLD, &m_World);
-
-		D3DLVERTEX v[3];
-		v[0] = D3DLVERTEX(D3DVECTOR( 0, 10,0),D3DRGB(1,0,0),D3DRGB(1,0,0),0,0);
-		v[1] = D3DLVERTEX(D3DVECTOR( 10,-10,0),D3DRGB(0,1,0),D3DRGB(1,0,0),0,0);
-		v[2] = D3DLVERTEX(D3DVECTOR(-10,-10,0),D3DRGB(0,0,1),D3DRGB(1,0,0),0,0);
-		lpd3dDevice->DrawPrimitive(D3DPT_TRIANGLELIST,D3DVT_LVERTEX,(LPVOID)v,3,NULL);
-	}
-	{			                        // 2d triangle
-		static int x = 0;
-		x+=10;
-		if ( x > 200)
-			x = 10;
-		D3DTLVERTEX v[3];
-
-		v[0] = D3DTLVERTEX(D3DVECTOR(240,50,0),1,D3DRGB(1,0,0),D3DRGB(0,0,0),0,0);
-		v[1] = D3DTLVERTEX(D3DVECTOR(x,200,0),1,D3DRGB(0,1,0),D3DRGB(0,0,0),0,0);
-		v[2] = D3DTLVERTEX(D3DVECTOR(80,200,0),1,D3DRGB(0,0,1),D3DRGB(0,0,0),0,0);
-		lpd3dDevice->DrawPrimitive(D3DPT_TRIANGLELIST,D3DVT_TLVERTEX,(LPVOID)v,3,NULL);
-	}
-#endif
-	D3DMATRIX m_Projection = ProjectionMatrix(0.01f, 2000000.0f, (float)(60*PI/180)); // 60 degree FOV
-
-// kts supposed to invert projection matrix to change handedness
-//	cout << "proj\n" << m_Projection << std::endl;
-//	m_Projection._13 = -m_Projection._13;
-//	m_Projection._23 = -m_Projection._23;
-//	m_Projection._33 = -m_Projection._33;
-//	m_Projection._43 = -m_Projection._43;
-//	cout << "proj after\n" << m_Projection << std::endl;
-	lpd3dDevice->SetTransform(D3DTRANSFORMSTATE_PROJECTION, &m_Projection);
-
-	D3DMATRIX cameraMatrix;
-	Matrix34ToD3DMATRIX(cameraMatrix, _invertedPosition);
-	cameraMatrix._13 = -cameraMatrix._13;
-	cameraMatrix._23 = -cameraMatrix._23;
-	cameraMatrix._33 = -cameraMatrix._33;
-	cameraMatrix._43 = -cameraMatrix._43;
-	lpd3dDevice->SetTransform(D3DTRANSFORMSTATE_VIEW, &cameraMatrix);
-#else
-#error renderer pipeline not defined!
-#endif									// psx
 
 #if 0
 	for(int debugIndex=0;debugIndex < 3;debugIndex++)
@@ -544,39 +300,6 @@ RenderCamera::RenderObject(RenderObject3D& object,const Matrix34& objectPosition
 	assert(_renderInProgress);
 	// set up lighting
 
-#if defined( RENDERER_PIPELINE_SOFTWARE)
-	Matrix34 invertedObjectMatrix;
-	invertedObjectMatrix[3] = Vector3::zero;
-	invertedObjectMatrix.InverseDetOne(objectPosition);			// rotate lights into local coordinate space
-    //cout << "Object position: " << objectPosition << std::endl;
-    //cout << "invertedObjectMatrix = " << invertedObjectMatrix << std::endl;
-    invertedObjectMatrix[3] = Vector3::zero;
-	for(int index=0;index < 3;index++)
-    {
-		gte_llm[index] = _dirLightDirections[index] * invertedObjectMatrix;
-    //    cout << "dirLightDirections[" << index << "] = " << _dirLightDirections[index] << std::endl;
-    }
-
-	//for(int debugIndex=0;debugIndex < 3;debugIndex++)
-	//   cout << "gte_llm[" << debugIndex << "] = " << gte_llm[debugIndex] << std::endl;
-	Matrix34 temp(objectPosition);
-	temp *= _invertedPosition;
-	object.Render(_viewPort,temp);
-#elif defined(RENDERER_PIPELINE_PSX)
-	Matrix34 invertedObjectMatrix;
-	invertedObjectMatrix[3] = Vector3::zero;
-	invertedObjectMatrix.InverseDetOne(objectPosition);			// rotate lights into local coordinate space
-	MATRIX llm;
-	for(int index=0;index < 3;index++)
-	{
-		Vector3 worldCoord(_dirLightDirections[index] * invertedObjectMatrix);
-		*((Vector3_PS*)(&llm.m[index])) = Vector3ToPS12(worldCoord);
-	}
-	gte_SetLightMatrix(&llm);
-	Matrix34 temp(objectPosition);
-	temp *= _invertedPosition;
-	object.Render(_viewPort,temp);
-#elif defined(RENDERER_PIPELINE_GL)
 //#error kts write code here
 	Matrix34 invertedObjectMatrix;
 	invertedObjectMatrix[3] = Vector3::zero;
@@ -591,11 +314,6 @@ RenderCamera::RenderObject(RenderObject3D& object,const Matrix34& objectPosition
    //cout << "Final matrix: " << temp << endl;
 	object.Render(_viewPort,temp);
 
-#elif defined(RENDERER_PIPELINE_DIRECTX)
-	object.Render(_viewPort,objectPosition);
-#else
-#error renderer pipeline not defined!
-#endif
     DBSTREAM1( cgfx<< "RenderCamera::RenderObject done" << std::endl; )
 }
 

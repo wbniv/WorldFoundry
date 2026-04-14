@@ -65,9 +65,6 @@ public:
 	TRIFACEONDISK
 	Vector3_PS normal;
 
-#if defined(RENDERER_PIPELINE_DIRECTX)
-	float _u[3],_v[3];
-#endif
 
 	// IOSteam support
 #if DO_IOSTREAMS

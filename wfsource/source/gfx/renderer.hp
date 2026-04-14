@@ -25,30 +25,11 @@
 // Original Author: Kevin T. Seghetti
 //============================================================================
 
-#if defined( RENDERER_PSX )
-#	include <libetc.h>
-#	include <libgte.h>
-#	include <libgpu.h>
-#elif defined(RENDERER_GL)
-#	if defined( __WIN__ )
-#       include <windows.h>
-#	endif
 #  include <GL/gl.h>
 #	include <gfx/gl/wfprim.h>
-#elif defined(RENDERER_XWINDOWS)
-#  include <GL/gl.h>
-#	include <gfx/xwindows/wfprim.h>
-#elif defined(RENDERER_DIRECTX)
-#	include <gfx/directx/wfprim.h>
-#else
-# error renderer not defined
-#endif
 
 //==============================================================================
                                                        
-#if defined(__WIN__)
-#pragma comment( lib, "winmm.lib" )
-#endif
 
 //==============================================================================
  
