@@ -138,7 +138,7 @@ $(PIGS_LIB) :   $(LIB_OBJS)
 
 # kts wish the loop executed in pass 1, not as a rule
 LIBRARY_NAMES_DEFINES .ALWAYS .SILENT :
-	%foreach Dir pigsys cpplib iff math streams anim attrib audio audiofmt gfxfmt console gfx hal input savegame toolstub version ini fuzzy physical movement loadfile audiofmt gfxfmt attrib particle timer menu
+	%foreach Dir pigsys cpplib iff math streams anim attrib gfxfmt console gfx hal input savegame toolstub version ini fuzzy physical movement loadfile gfxfmt attrib particle timer menu
 		%set $(Dir,uc) $(PIGS_OBJ_DIR)\$(Dir,lc).lib
 	%end
 

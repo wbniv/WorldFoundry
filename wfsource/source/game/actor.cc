@@ -1333,16 +1333,6 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             break;
         }
 
-        case EMAILBOX_SOUND:
-        {
-            int32 soundEffect = value.WholePart();
-            DBSTREAM1( cdebug << "Playing sound # " << soundEffect << std::endl; )
-            RangeCheck( soundEffect, 0, 128 );
-            AssertMsg( theLevel->_sfx[ soundEffect ], "No sound effect loaded into slot #" << soundEffect );
-            theLevel->_sfx[ soundEffect ]->play();
-            break;
-        }
-
     case EMAILBOX_XSPEED:
        {
           Vector3 linVelocity = _physicalAttributes.LinVelocity();

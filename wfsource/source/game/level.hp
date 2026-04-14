@@ -53,8 +53,6 @@
 #include <mailbox/mailbox.hp>
 #include <physics/physical.hp>
 #include <physics/colbox.hp>
-#include <audio/device.hp>
-#include <audio/buffer.hp>
 #include <gfx/display.hp>
 #include <gfx/viewport.hp>
 #include <gfx/rendmatt.hp>
@@ -182,8 +180,6 @@ class Level
 
 	Scalar EvalScript( const void* , int objectIndex);
 
-	SoundDevice*					_theSoundDevice;
-	SoundBuffer*					_sfx[ 128 ];
 
 private:
    // private functions

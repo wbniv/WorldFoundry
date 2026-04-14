@@ -457,10 +457,6 @@ Level::Level
 #endif	// TASKER
 #endif
 
-	DBSTREAM1( cflow << "Level::Level: setting up sound device " << std::endl; )
-	_theSoundDevice = new (HALLmalloc) SoundDevice;
-	assert( _theSoundDevice );
-
 	// loading screen
 
 	DBSTREAM1( cflow << "Level::Level: setting up joysticks " << std::endl; )
@@ -594,27 +590,6 @@ Level::Level
 	_theActiveRooms->Construct(_levelData->roomCount);
 //	DBSTREAM1( cstats << "midi header = " << _levelOad->MidiMusicVabHeader << std::endl; )
 
-	{ // load sound effects
-	assert( ValidPtr( _theSoundDevice ) );
-	assert( ValidPtr( _levelOad ) );
-	(void)_levelOad->sfx127;		// causes compiler error if number of entries shrinks
-
-	int32* pSoundEffectsBank = &( _levelOad->sfx0 );
-	for ( int idxSoundEffect=0; idxSoundEffect<128; ++idxSoundEffect )
-	{
-		assert( ValidPtr( pSoundEffectsBank ) );
-		if ( pSoundEffectsBank[ idxSoundEffect ] )
-		{
-			binistream binis = GetAssetManager().GetAssetStream( pSoundEffectsBank[ idxSoundEffect ]);
-			assert( binis.good() );
-			_sfx[ idxSoundEffect ] = _theSoundDevice->CreateSoundBuffer( binis );
-			assert( ValidPtr( _sfx[ idxSoundEffect ] ) );
-		}
-		else
-			_sfx[ idxSoundEffect ] = NULL;
-	}
-	}
-
 	DBSTREAM1( cprogress << "Done loading level data" << std::endl; )
 	assert( ValidPtr( mainCharacter() ) );
 
@@ -669,13 +644,6 @@ Level::~Level()
 {
 #if defined( DESIGNER_CHEATS ) && defined( WRITER )
 	saveTextureBuffer( "textures.tga" );
-#endif
-
-	for ( int idxSoundEffect=0; idxSoundEffect<128; ++idxSoundEffect )
-		delete _sfx[ idxSoundEffect ];
-
-#if defined( MIDI_MUSIC )
-	DELETE_CLASS( _theSound );
 #endif
 
 #if defined(JOYSTICK_RECORDER)
