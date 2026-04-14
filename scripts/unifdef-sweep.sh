@@ -17,7 +17,9 @@ UNIFDEF_ARGS=(
     -DRENDERER_GL
     -URENDERER_PIPELINE_PSX -URENDERER_PIPELINE_SOFTWARE -URENDERER_PIPELINE_DIRECTX
     -DRENDERER_PIPELINE_GL
-    -USCALAR_TYPE_FIXED -DSCALAR_TYPE_FLOAT
+    # SCALAR_TYPE_FIXED / SCALAR_TYPE_FLOAT intentionally NOT defined here —
+    # fixed-point scalars are a supported build configuration we still want
+    # to toggle on for embedded / retro targets, so the guards survive.
 )
 
 changed=0
