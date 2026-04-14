@@ -39,11 +39,7 @@ class saveistream : public binios
 public:
 	enum
 	{
-#if defined( __PSX__ )
-		default_buffer_size		= 128			// Must be 128 on PlayStation!
-#else
 		default_buffer_size		= 512
-#endif
 	};
 
 	saveistream
@@ -124,11 +120,7 @@ class saveostream : public binios
 public:
 	enum
 	{
-#if defined( __PSX__ )
-		default_buffer_size		= 128			// Must be 128 on PlayStation!
-#else
 		default_buffer_size		= 512
-#endif
 	};
 
 	saveostream

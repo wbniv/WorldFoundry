@@ -28,7 +28,6 @@
 // guarantee it will be constructed first, must create a local null stream
 // to get around this
 
-#if !defined(__PSX__)
 #		if defined( __WIN__) || defined(__LINUX__)
 #			include <cpplib/strmnull.hp>
 			CREATENULLSTREAM(stdstream_null);		 		// must be in same file to insure proper order of construction
@@ -36,7 +35,6 @@
 #		else
 			ostream_withassign cnull( NULL );
 #		endif
-#endif
 
 CREATEANDASSIGNOSTREAM(cstats,std::cout);
 CREATEANDASSIGNOSTREAM(cdebug,cnull);
@@ -103,12 +101,6 @@ _RedirectStream( const char* selector )
 			return( std::cout );
 		case 'e':
 			return( std::cerr );
-#if defined ( __PSX__ )
-		case 'c':
-			return( cscreen );
-		case 'u':
-			return( cscreenflush );
-#endif
 #if DO_DEBUG_FILE_SYSTEM
 		case 'f':
 		 {

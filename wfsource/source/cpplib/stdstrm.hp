@@ -34,13 +34,6 @@ ostream_withassign newstream( assignto)
 #define ASSIGNOSTREAM(left,right) left = right 
 #endif
 
-#if defined( __PSX__ )
-#	define ostream_withassign ostream
-#define CREATEANDASSIGNOSTREAM(newstream,assignto) \
-ostream_withassign newstream( assignto)
-#define ASSIGNOSTREAM(left,right) left = right 
-
-#endif
 
 #if defined( __LINUX__ )
 
@@ -107,9 +100,6 @@ extern ostream_withassign cerror;	   	// errors in data being processed, i.e. to
 extern ostream_withassign cfatal;		// bad data files, etc.  i.e. input file corrupt.
 extern ostream_withassign cver;		// program version #, and startup statistics (compile time switches, and other one time information)
 extern ostream_withassign cuser;
-#if defined( __PSX__ )
-extern ostream cscreen;
-#endif
 
 // ------------------------------------------------------------------------
 // Function Prototypes

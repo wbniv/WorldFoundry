@@ -36,9 +36,6 @@ AffineTransform::Validate( const char * file, const int line ) const
 		case AffineTransform::EULER:
 //		case AffineTransform::QUATERNION:
 		case AffineTransform::MATRIX34:
-#if defined( __PSX__ )
-		case AffineTransform::MATRIX3T:
-#endif
 		break;
 
 
@@ -97,14 +94,6 @@ INLINE AffineTransform::AffineTransform( const Matrix34& matrix34 )
 
 // ------------------------------------------------------------------------
 
-#if defined( __PSX__ )
-
-INLINE AffineTransform::AffineTransform( const Matrix3t& matrix3t )
-{
-	ConstructMatrix3t( matrix3t );
-}
-
-#endif
 
 
 // ------------------------------------------------------------------------
@@ -180,15 +169,6 @@ AffineTransform::AsMatrix34() const
 
 // ------------------------------------------------------------------------
 
-#if defined( __PSX__ )
-
-INLINE const Matrix3t&
-AffineTransform::AsMatrix3t() const
-{
-	return *( (const Matrix3t *)&_t.t.mat3t.mat );
-}
-
-#endif
 
 // ------------------------------------------------------------------------
 
@@ -240,15 +220,6 @@ AffineTransform::AsMatrix34()
 
 // ------------------------------------------------------------------------
 
-#if defined( __PSX__ )
-
-INLINE Matrix3t&
-AffineTransform::AsMatrix3t()
-{
-	return *( (Matrix3t *)&_t.t.mat3t.mat );
-}
-
-#endif
 
 //=============================================================================
 #endif	// AFFTFORM_HPI

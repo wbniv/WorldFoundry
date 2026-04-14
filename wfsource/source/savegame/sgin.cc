@@ -43,9 +43,6 @@ saveistream::saveistream
 )
 {
 	_bufsz = bufsz;
-#if defined( __PSX__ )
-	AssertMsg( bufsz == 128, "Memory card can only read in 128 byte chunks" );
-#endif
 	_buf = (const char*)malloc( bufsz );
 	assert( _buf );
 	AssertMemoryAllocation(_buf);

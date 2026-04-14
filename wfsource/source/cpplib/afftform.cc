@@ -28,9 +28,6 @@
 #include <cpplib/matrix34.hp>
 #include <cpplib/euler.hp>
 #include <visual/binstrm.hp>
-#if defined( __PSX__ )
-#	include <cpplib/matrix3t.hp>
-#endif
 
 // ------------------------------------------------------------------------
 // Affine Transform Class
@@ -71,14 +68,6 @@ AffineTransform::AffineTransform( const Matrix34& matrix34 )
 
 // ------------------------------------------------------------------------
 
-#if defined( __PSX__ )
-
-AffineTransform::AffineTransform( const Matrix3t& matrix3t )
-{
-	ConstructMatrix3t( matrix3t );
-}
-
-#endif
 
 // ------------------------------------------------------------------------
 // type query/set
@@ -155,17 +144,6 @@ AffineTransform::ConstructMatrix34( const Matrix34& matrix34 )
 
 // ------------------------------------------------------------------------
 
-#if defined( __PSX__ )
-
-void
-AffineTransform::ConstructMatrix3t( const Matrix3t& matrix3t )
-{
-	SetType( AffineTransform::MATRIX3T );
-	AsMatrix3t() = matrix3t;
-	ValidateObject( *this );
-}
-
-#endif
 
 // ------------------------------------------------------------------------
 // conversion methods
@@ -281,43 +259,6 @@ AffineTransform::GetMatrix34( Matrix34& matrix34 ) const
 
 // ------------------------------------------------------------------------
 
-#if defined( __PSX__ )
-
-void
-AffineTransform::GetMatrix3t( Matrix3t& matrix3t ) const
-{
-	switch( GetType() )
-	{
-		case AffineTransform::IDENTITY:
-			matrix3t.ConstructIdentity();
-		break;
-
-		case AffineTransform::TRANSLATION:
-			matrix3t.ConstructTranslation( GetTranslation() );
-		break;
-
-//		case AffineTransform::EULER:
-//			matrix3t.ConstructEuler( AsEuler(), GetTranslation() );
-//		break;
-
-//		case AffineTransform::QUATERNION:
-//			matrix3t.ConstructQuaternion( AsQuaternion(), GetTranslation() );
-//		break;
-
-//		case AffineTransform::MATRIX34:
-//			matrix3t.ConstructMatrix34( AsMatrix34() );
-//		break;
-
-		case AffineTransform::MATRIX3T:
-			matrix3t = AsMatrix3t();
-		break;
-
-		default:
-			Fail( "Not yet implemented" );
-	}
-}
-
-#endif
 
 // ------------------------------------------------------------------------
 // query/set translation
@@ -348,11 +289,6 @@ AffineTransform::SetTranslation( const Vector3& translation )
 			AsMatrix34()[3] = translation;
 		break;
 
-#if defined( __PSX__ )
-		case AffineTransform::MATRIX3T:
-			AsMatrix3t().SetTranslation( translation );
-		break;
-#endif
 
 		default:
 			Fail( "Not yet implemented" );
@@ -382,10 +318,6 @@ AffineTransform::GetTranslation() const
 		case AffineTransform::MATRIX34:
 			return AsMatrix34()[3];
 
-#if defined( __PSX__ )
-		case AffineTransform::MATRIX3T:
-			return AsMatrix3t().GetTranslation();
-#endif
 
 		default:
 			Fail( "Not yet implemented" );
@@ -426,15 +358,6 @@ AffineTransform::operator * ( const AffineTransform& x ) const
 			result.AsMatrix34() *= x.AsMatrix34();
 		break;
 
-#if defined( __PSX__ )
-		case AffineTransform::MATRIX3T:
-		{
-			Matrix34 rhs;
-			x.GetMatrix34( rhs );
-			result.AsMatrix34() *= rhs;
-		}
-		break;
-#endif
 
 		default:
 			Fail( "Not yet implemented" );
@@ -503,15 +426,6 @@ AffineTransform::AsMatrix34() const
 
 // ------------------------------------------------------------------------
 
-#if defined( __PSX__ )
-
-const Matrix3t&
-AffineTransform::AsMatrix3t() const
-{
-	return *( (const Matrix3t *)&_t.t.mat3t.mat );
-}
-
-#endif
 
 // ------------------------------------------------------------------------
 
@@ -563,15 +477,6 @@ AffineTransform::AsMatrix34()
 
 // ------------------------------------------------------------------------
 
-#if defined( __PSX__ )
-
-Matrix3t&
-AffineTransform::AsMatrix3t()
-{
-	return *( (Matrix3t *)&_t.t.mat3t.mat );
-}
-
-#endif
 
 // ------------------------------------------------------------------------
 // ostream support
@@ -617,24 +522,6 @@ operator << ( ostream& os, const AffineTransform& x )
 		}
 		break;
 
-#if defined( __PSX__ )
-		case AffineTransform::MATRIX3T:
-		{
-			os << "MATRIX3T";
-			os << "( ";
-			for( int idxRow = 0; idxRow < 4; ++idxRow )
-			{
-				os << "( ";
-				for( int idxColumn = 0; idxColumn < 3; ++idxColumn )
-				{
-					os << x.AsMatrix3t().GetElement( idxRow, idxColumn ) << " ";
-				}
-				os << ") ";
-			}
-			os << ")";
-		}
-		break;
-#endif
 
 		default:
 			Fail( "Not yet implemented" );
@@ -674,11 +561,6 @@ operator >> ( binistream& binis, AffineTransform& x )
 			binis >> x.AsMatrix34();
 		break;
 
-#if defined( __PSX__ )
-		case AffineTransform::MATRIX3T:
-			binis >> x.AsMatrix3t();
-		break;
-#endif
 
 		default:
 			Fail( "Not yet implemented" );
@@ -716,11 +598,6 @@ operator << ( binostream& binos, const AffineTransform& x )
 			binos << x.AsMatrix34();
 		break;
 
-#if defined( __PSX__ )
-		case AffineTransform::MATRIX3T:
-			binos << x.AsMatrix3t();
-		break;
-#endif
 
 		default:
 			Fail( "Not yet implemented" );
@@ -747,9 +624,6 @@ AffineTransform::Validate( const char * file, const int line ) const
 		case AffineTransform::EULER:
 //		case AffineTransform::QUATERNION:
 		case AffineTransform::MATRIX34:
-#if defined( __PSX__ )
-		case AffineTransform::MATRIX3T:
-#endif
 		break;
 
 

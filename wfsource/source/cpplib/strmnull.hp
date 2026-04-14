@@ -42,13 +42,7 @@ public:
 
 // ===========================================================================
 
-#if defined(__WIN__)
-class nullstream : public ostream_withassign
-//class nullstream : public ostream
-#elif defined(__PSX__)
-class nullstream : public ostream
-
-#elif defined(__LINUX__)
+#if   defined(__LINUX__)
 class nullstream : public _IO_ostream_withassign
 #else
 #error platform not defined!
@@ -69,50 +63,7 @@ protected:
 #else
 // used in the case of new IO streams
 
-#if defined(__WIN__)
-
-// kts this worked with an older vc++, but doesn't with vc7, since I upgraded
-// I cannot really test with the older compiler, if you have the older
-// compiler try to form an ifdef so that it can compile with either
-
-#if 0
-class nullstream : public std::iostream
-{
-public:
-	nullstream()
-		: iostream(&_Sb), _Sb() {}
-//	/*_CRTIMP*/ nullstream(char *, streamsize, openmode = in | out);
-	/*_CRTIMP*/ virtual ~nullstream() {}
-	std::strstreambuf *rdbuf() const
-		{return ((std::strstreambuf *)&_Sb); }
-	void freeze(bool _F = true)
-		{_Sb.freeze(_F); }
-	char *str()
-		{return (_Sb.str()); }
-	std::streamsize pcount() const
-		{return (_Sb.pcount()); }
-private:
-	std::strstreambuf _Sb;
-	};
-#define CREATENULLSTREAM(name) nullstream name;
-
-#else
-
-class nullstreambuf : public std::streambuf
-{
-public:
-	virtual int_type overflow( int_type c) {
-		return c;
-	}
-	virtual int underflow()	{ return EOF; }
-};
-
-#define CREATENULLSTREAM(name) nullstreambuf name##buf; std::ostream name(&name##buf);
-#endif
-
-#elif defined(__PSX__)
-#error psx cannot do new iostreams
-#elif defined(__LINUX__)
+#if   defined(__LINUX__)
 class nullstreambuf : public std::streambuf
 {
 protected:

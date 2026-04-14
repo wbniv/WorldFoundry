@@ -23,61 +23,6 @@
 #include <pigsys/assert.hp>
 
 #if defined(OLD_IOSTREAMS)
-#    if defined (__WIN__)
-
-// ===========================================================================
-
-nullstreambuf::nullstreambuf( char* s, int n ) : streambuf()
-{
-    setb( s, s+n );
-	setp( base(), ebuf() );
-}
-
-// ===========================================================================
-
-nullstreambuf::~nullstreambuf()
-{
-	sync();
-}
-
-// ===========================================================================
-
-int
-nullstreambuf::overflow( int nChar )
-{
-	sync();
-	return nChar != EOF ? sputc( nChar ) : nChar;
-}
-
-// ===========================================================================
-
-int
-nullstreambuf::sync()
-{
-	if ( out_waiting() )
-		setp( base(), ebuf() );
-
-	return 0;
-}
-
-// ===========================================================================
-
-nullstream::nullstream()
-{
-	strbuf = new nullstreambuf( msgs, bsize );
-	assert( strbuf );
-	ostream::init( strbuf );
-	setf( ios::unitbuf );
-}
-
-// ===========================================================================
-
-nullstream::~nullstream()
-{
-	assert( strbuf );
-	delete strbuf;
-}
-#    endif              // defined(__WIN__)                                 
 
 //==============================================================================
 

@@ -28,9 +28,6 @@ saveostream::saveostream
 	_filesizeRounded = ROUND( _filesize, 8192 );
 	assert( ( _filesizeRounded % 8192 ) == 0 );
 	_nBlocks = _filesizeRounded / 8192;
-#if defined( __PSX__ )
-	AssertMsg( bufsz == 128, "Memory card can only write in 128 byte chunks" );
-#endif
 	_buf = (const char*)malloc( bufsz );
 	assert( _buf );
 	AssertMemoryAllocation(_buf);
@@ -185,15 +182,8 @@ saveostream::operator << ( const Scalar scalar )
 {
 	DBSTREAM4( cbinstrm << "saveostream::operator << const Scalar( " << scalar << " )" << std::endl; )
 	align( _align32 );
-#if defined(SCALAR_TYPE_FIXED)
-	int32 brs = scalar.AsLong();
-	return write( (const char*)&brs, sizeof( int32 ) );
-#elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
    assert(0);        // kts floating point exporter needed
    return *this;
-#else
-#error SCALAR TYPE not defined
-#endif
 }
 
 // ------------------------------------------------------------------------
