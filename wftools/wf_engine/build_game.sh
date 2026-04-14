@@ -12,6 +12,11 @@ STUBS="$REPO_ROOT/wftools/wf_viewer/include"
 STUB_SRC="$REPO_ROOT/wftools/wf_viewer/stubs"
 OUT="$SCRIPT_DIR/objs_game"
 
+# Feature flag: compile in Fennel (Lisp → Lua) support. Default off so the
+# default build stays Fennel-free (no ~145 KB embed, no `;`-sigil dispatch).
+# Set to 1 to embed the vendored fennel.lua and enable runtime dispatch.
+WF_ENABLE_FENNEL="${WF_ENABLE_FENNEL:-0}"
+
 mkdir -p "$OUT"
 
 CXXFLAGS=(
@@ -23,6 +28,10 @@ CXXFLAGS=(
     -DPHYSICS_ENGINE_WF '-D__GAME__="wf_game"' "-DERR_DEBUG(x)="
     -I"$SRC" -I"$SRC/game" -I"$STUBS"
 )
+
+if [[ "$WF_ENABLE_FENNEL" == "1" ]]; then
+    CXXFLAGS+=(-DWF_ENABLE_FENNEL)
+fi
 
 OBJS=()
 
@@ -166,6 +175,27 @@ OBJS+=("$OUT/stubs__scripting_stub.o")
 echo "  CC (stub) platform_stubs.cc"
 g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/platform_stubs.cc" -o "$OUT/stubs__platform_stubs.o"
 OBJS+=("$OUT/stubs__platform_stubs.o")
+
+# Embed minified fennel.lua as a byte array when Fennel is enabled. The
+# engine targets platforms without host filesystems, so fennel.lua can't be
+# an external asset; it has to live in .rodata. Minification shrinks the
+# embed by ~15% (165 KB -> 143 KB) without touching runtime semantics.
+if [[ "$WF_ENABLE_FENNEL" == "1" ]]; then
+    echo "  GEN fennel_source.cc (minify + xxd)"
+    FENNEL_MIN="$OUT/fennel.min.lua"
+    FENNEL_CC="$OUT/fennel_source.cc"
+    python3 "$REPO_ROOT/scripts/minify_lua.py" \
+        "$STUB_SRC/fennel.lua" "$FENNEL_MIN"
+    {
+        echo '// AUTO-GENERATED from fennel.lua by build_game.sh; do not edit.'
+        ( cd "$(dirname "$FENNEL_MIN")" && xxd -i "$(basename "$FENNEL_MIN")" ) \
+            | sed -E 's/^unsigned char fennel_min_lua\[\]/extern "C" const char kFennelSource[]/;
+                      s/^unsigned int fennel_min_lua_len/extern "C" const unsigned int kFennelSourceLen/'
+    } > "$FENNEL_CC"
+    echo "  CC fennel_source.cc"
+    g++ "${CXXFLAGS[@]}" -c "$FENNEL_CC" -o "$OUT/fennel_source.o"
+    OBJS+=("$OUT/fennel_source.o")
+fi
 
 echo ""
 if [[ ${#FAILED_SRCS[@]} -gt 0 ]]; then
