@@ -253,3 +253,34 @@ When the branch is complete, produce a categorized summary of lines removed (mea
 - `pigsys/pigsys.hp` `MachineType` enum — values kept; only code that branches on them goes away
 - `wftools/wf_viewer/` — standalone, independent of engine renderer
 - GNU / OpusMake makefiles — not the active build; leave alone (or address in a follow-up)
+
+---
+
+## Final report (2026-04-14)
+
+Measured against merge-base `71727ab` on branch `2026-first-working-gap`, scope restricted to `wfsource/` and excluding unrelated OAS additions that landed on the same branch.
+
+**By category**
+
+| Category | Files | Insertions | Deletions | Net |
+|---|---:|---:|---:|---:|
+| Dead rendering pipelines (`gfx/{psx,softwarepipeline,directx,directxpipeline,xwindows}`, `gfx/gl/{wgl,unused}.cc`) | 74 | 0 | 22,990 | −22,990 |
+| PSX & Win subsystems (`audio/{psx,win}`, `hal/{psx,win}`, `math/{psx,win}`, `movie/psx`, `pigsys/psx`, `pigsys/cf_{psx,win}.*`) | 57 | 0 | 8,870 | −8,870 |
+| `#ifdef` strippage in kept files (Phase 2 unifdef + Phase 3a compound-guard hand-edits + Phase 4 cosmetic scrub) | ~124 | 32 | 3,933 | −3,901 |
+| Phase 3c empty-on-Linux deletes (13 `.cc` shells, 6 empty `.hp`/`.hpi`/`.h`) | 19 | 0 | ~380 | −380 |
+
+**Per-subsystem (Phase 2+3+4 only, top hitters)**
+
+- `gfx/` −24,244 in 108 files (includes pipeline deletes)
+- `hal/` −4,020 in 32 files
+- `math/` −2,795 in 28 files (SCALAR_TYPE_FIXED preserved by design)
+- `pigsys/` −2,414 in 30 files
+- `game/` −327 in 10 files
+
+**Summary line:** 264 files changed, +32/−36,170, **net −36,138 LOC** removed on the renderer-drop path.
+
+**Phase 4 grep gate:** `grep -rE '__PSX__|__WIN__|_WIN32|__SATURN__|__DOS__|RENDERER_{PSX,SOFTWARE,DIRECTX,XWINDOWS}|RENDERER_PIPELINE_{PSX,SOFTWARE,DIRECTX}|SCALAR_TYPE_FIXED' wfsource/source` returns only expected hits: `SCALAR_TYPE_FIXED` branches (retained per Phase 3b), `profile/profile.txt` (a note file), and `audiofmt/sox.cc` (vendored — `defined(unix)` is always true on Linux). **Zero leaks.**
+
+**SKIP pruning (Phase 3):** Of the six candidates the plan flagged (`gfx/otable.cc`, `cpplib/afftform.cc`, `math/{matrix3t,quat,tables}.cc`, `hal/dfoff.cc`), five remain genuinely broken for reasons unrelated to platform guards (missing headers, ambiguous operators, unqualified `std::` names). `hal/dfoff.cc` compiles, but its SKIP entry is a deliberate choice over `dfhd.cc` (conflicting `HalInitFileSubsystem`). `SKIP` left unchanged.
+
+**Runtime smoke:** `task run` launches snowgoons and renders. Keyboard input is broken — pre-existing TCL→Lua migration gap, unrelated to this sweep; tracked as a follow-up against the Lua-vendor plan.
