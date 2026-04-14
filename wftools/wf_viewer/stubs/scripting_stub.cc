@@ -8,6 +8,7 @@
 
 #include <scripting/scriptinterpreter.hp>
 #include <math/scalar.hp>
+#include "scripting_js.hp"
 
 extern "C" {
 #include <lua5.4/lua.h>
@@ -178,6 +179,11 @@ LuaInterpreter::LuaInterpreter(MailboxesManager& mgr)
     register_closure(_L, this, "read_mailbox",  lua_read_mailbox);
     register_closure(_L, this, "write_mailbox", lua_write_mailbox);
 
+#ifdef WF_WITH_JS
+    // JS runtime must be live before AddConstantArray (which forwards to JS).
+    JsRuntimeInit(mgr);
+#endif
+
     AddConstantArray(mailboxIndexArray);
     AddConstantArray(joystickArray);
 
@@ -201,6 +207,9 @@ LuaInterpreter::LuaInterpreter(MailboxesManager& mgr)
 
 LuaInterpreter::~LuaInterpreter()
 {
+#ifdef WF_WITH_JS
+    JsRuntimeShutdown();
+#endif
     if (_L) {
         lua_close(_L);
         _L = nullptr;
@@ -209,20 +218,28 @@ LuaInterpreter::~LuaInterpreter()
 
 void LuaInterpreter::AddConstantArray(IntArrayEntry* entryList)
 {
-    while (entryList->name) {
-        lua_pushinteger(_L, entryList->value);
-        lua_setglobal(_L, entryList->name);
-        entryList++;
+    IntArrayEntry* p = entryList;
+    while (p->name) {
+        lua_pushinteger(_L, p->value);
+        lua_setglobal(_L, p->name);
+        p++;
     }
+#ifdef WF_WITH_JS
+    JsAddConstantArray(entryList);
+#endif
 }
 
 void LuaInterpreter::DeleteConstantArray(IntArrayEntry* entryList)
 {
-    while (entryList->name) {
+    IntArrayEntry* p = entryList;
+    while (p->name) {
         lua_pushnil(_L);
-        lua_setglobal(_L, entryList->name);
-        entryList++;
+        lua_setglobal(_L, p->name);
+        p++;
     }
+#ifdef WF_WITH_JS
+    JsDeleteConstantArray(entryList);
+#endif
 }
 
 Scalar LuaInterpreter::RunScript(const void* script, int objectIndex)
@@ -232,6 +249,19 @@ Scalar LuaInterpreter::RunScript(const void* script, int objectIndex)
     if (!src || !*src) {
         return Scalar::FromFloat(0.0f);
     }
+
+#ifdef WF_WITH_JS
+    // Leading `//` (after optional whitespace) routes to JavaScript. `//` is a
+    // Lua syntax error (integer-division needs operands) so Lua can't mistake
+    // a JS comment for its own code.
+    {
+        const char* p = src;
+        while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') p++;
+        if (p[0] == '/' && p[1] == '/') {
+            return Scalar::FromFloat(JsRunScript(src, objectIndex));
+        }
+    }
+#endif
 
 #ifdef WF_ENABLE_FENNEL
     // Leading `;` (after optional whitespace) routes to Fennel. `;` is a

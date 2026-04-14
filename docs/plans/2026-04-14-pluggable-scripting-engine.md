@@ -1,6 +1,8 @@
 # Plan: Optional QuickJS / JerryScript engines alongside Lua
 
 **Date:** 2026-04-14
+**Status:** landed 2026-04-14 (QuickJS v0.14.0, JerryScript v3.0.0). Deviations
+from the as-designed plan are captured inline below under *"As built:"* call-outs.
 **Depends on:** Lua spike (landed); `docs/plans/2026-04-14-fennel-on-lua.md` (concurrent, owns Lua vendoring).
 **Source investigation:** `docs/investigations/2026-04-14-scripting-language-replacement.md`
 
@@ -84,6 +86,8 @@ Each engine TU registers itself **at compile time** via a `LANG_HANDLER(...)` ma
 ```
 
 Routing rule: skip leading whitespace, match the longest sigil, else fall through to Lua. Unselected languages contribute **no entry** to the table — the branch doesn't exist in the binary.
+
+**As built:** the dispatch registry was *not* extracted into a separate `scripting_dispatch.{hp,cc}` for the JS landing — there are still only two non-Lua sigils (`;` for Fennel, `//` for JS), and the existing inline `#ifdef` pattern in `scripting_stub.cc::LuaInterpreter::RunScript` carries them. A new header `wftools/wf_viewer/stubs/scripting_js.hp` declares the JS plug ABI (`JsRuntimeInit`, `JsAddConstantArray`, `JsRunScript`, …) and is included by `scripting_stub.cc` under `#ifdef WF_WITH_JS`. The full sigil-table refactor is the right move when WASM (`#`) lands — at that point three sigils with shared whitespace skipping and longest-match routing pays for the indirection.
 
 One `cd.iff` can therefore mix Lua, Fennel, JS, and whatever-comes-next; language is a property of the script body, and the dispatch cost is a short `for`-loop over the compiled-in subset.
 
@@ -246,11 +250,11 @@ Create:
 - `wftools/wf_viewer/stubs/scripting_dispatch.{hp,cc}` — the sigil registry and `DispatchScript` entry point. Future languages add themselves by editing `dispatch_table.inc`, nothing else.
 - `wftools/wf_viewer/stubs/scripting_quickjs.cc` — QuickJS implementation, contributes `RunQuickJsScript` + lifetime hooks.
 - `wftools/wf_viewer/stubs/scripting_jerryscript.cc` — JerryScript implementation, contributes `RunJerryScript` + lifetime hooks.
-- `wftools/vendor/quickjs-<version>/` — vendored source.
-- `wftools/vendor/jerryscript-<version>/` — vendored source.
+- `wftools/vendor/quickjs-<version>/` — vendored source. *As built:* `quickjs-v0.14.0` (quickjs-ng fork). The plan's `cutils.{c,h}` and `libbf.{c,h}` lists are stale for this fork — `cutils.h` is header-only (no `.c`) and `libbf` was dropped from quickjs-ng. Core link set is `quickjs.c libregexp.c libunicode.c dtoa.c`.
+- `wftools/vendor/jerryscript-<version>/` — vendored source. *As built:* `jerryscript-v3.0.0`. CMake build is run by `build_game.sh` into `jerry-core/`'s sibling `build/` directory; `libjerry-core.a` + `libjerry-port.a` link in. The build also keeps `JERRY_ERROR_MESSAGES` + `JERRY_LINE_INFO` on by default — this is the dev-target build, the shipping toggle (§ Follow-ups) is still TODO.
 - `wftools/vendor/jerryscript-<version>/jerry-core/profiles/wf-minimal.profile` — new JerryScript feature profile (stock `minimal` + `ARRAY`/`STRING`/`NUMBER`/`MATH`/`ERRORS`/`BOOLEAN`/`GLOBAL_THIS`). Rationale spelled out in §4.
 - `wftools/vendor/README.md` — append QuickJS + JerryScript versions and SHA256s (file created by Fennel plan).
-- Optional: `scripts/check_iff_no_js.py` — fails if any OAS script body starts with `//` (used by the `none` build for asset-footprint verification).
+- Optional: `scripts/check_iff_no_js.py` — fails if any OAS script body starts with `//` (used by the `none` build for asset-footprint verification). *As built:* deferred — no JS scripts have been authored into `cd.iff` yet, so the asset check has nothing to fail on. Add when the first JS script lands.
 
 Reuse:
 - `ScriptInterpreter` ABI in `wfsource/source/scripting/scriptinterpreter.hp:42` — unchanged.
@@ -271,6 +275,7 @@ Reuse:
 
 ## Follow-ups (out of scope)
 
+- **Update `docs/scripting-languages.md`** with the QuickJS port of every script in the snowgoons level — paired side-by-side with the existing Lua / Fennel rows so authors can see the same gameplay logic in all three languages. Source of truth is whatever `tcl_to_lua_in_dump.py` produces from the snowgoons IFF; convert each by hand (no `lua_to_js_in_dump.py` yet — see next bullet).
 - `scripts/lua_to_js_in_dump.py` — bulk Lua→JS converter mirroring `tcl_to_lua_in_dump.py`.
 - Wire selection into `Taskfile.yml` (`task build`, `task build:quickjs`, `task build:jerryscript`).
 - **Debug vs. shipping JerryScript builds.** The `wf-minimal` profile turns off `JERRY_ERROR_MESSAGES` and `JERRY_LINE_INFO` because this flavor exists to be the smallest JS option. Add a `WF_JS_DEBUG_BUILD=1` toggle that flips those two flags back on (adds ~10–15 KB) so authors have readable stack traces during development; shipping builds stay lean.

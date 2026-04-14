@@ -17,6 +17,21 @@ OUT="$SCRIPT_DIR/objs_game"
 # Set to 1 to embed the vendored fennel.lua and enable runtime dispatch.
 WF_ENABLE_FENNEL="${WF_ENABLE_FENNEL:-0}"
 
+# Feature flag: optional JS engine for the `//` sigil. One of:
+#   none        (default) — no JS compiled in, zero binary/asset delta vs. Lua-only.
+#   quickjs     — QuickJS (~350 KB), modern ES2020.
+#   jerryscript — JerryScript wf-minimal profile (~80-90 KB), ES5.1 subset.
+# Multiple JS engines at once is deliberately forbidden; the sigil `//` is shared.
+WF_JS_ENGINE="${WF_JS_ENGINE:-none}"
+case "$WF_JS_ENGINE" in
+    none|quickjs|jerryscript) ;;
+    *) echo "error: WF_JS_ENGINE must be one of: none, quickjs, jerryscript (got: '$WF_JS_ENGINE')" >&2
+       exit 2 ;;
+esac
+VENDOR="$REPO_ROOT/wftools/vendor"
+QJS_DIR="$VENDOR/quickjs-v0.14.0"
+JRY_DIR="$VENDOR/jerryscript-v3.0.0"
+
 mkdir -p "$OUT"
 
 CXXFLAGS=(
@@ -32,6 +47,12 @@ CXXFLAGS=(
 if [[ "$WF_ENABLE_FENNEL" == "1" ]]; then
     CXXFLAGS+=(-DWF_ENABLE_FENNEL)
 fi
+
+case "$WF_JS_ENGINE" in
+    quickjs)     CXXFLAGS+=(-DWF_JS_ENGINE_QUICKJS -I"$QJS_DIR") ;;
+    jerryscript) CXXFLAGS+=(-DWF_JS_ENGINE_JERRYSCRIPT -I"$JRY_DIR/jerry-core/include") ;;
+    none)        : ;;
+esac
 
 OBJS=()
 
@@ -176,6 +197,49 @@ echo "  CC (stub) platform_stubs.cc"
 g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/platform_stubs.cc" -o "$OUT/stubs__platform_stubs.o"
 OBJS+=("$OUT/stubs__platform_stubs.o")
 
+# JS engine plug — compiled and linked only when a non-`none` flavour is selected.
+declare -a JS_LINK_EXTRA=()
+case "$WF_JS_ENGINE" in
+    quickjs)
+        echo "  CC (stub) scripting_quickjs.cc"
+        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_quickjs.cc" -o "$OUT/stubs__scripting_quickjs.o"
+        OBJS+=("$OUT/stubs__scripting_quickjs.o")
+        # QuickJS core (C, not C++). Compile each TU once; -O2 to keep the JIT-less
+        # interpreter tolerable. Warnings silenced — third-party code.
+        QJS_CFLAGS=(-std=gnu11 -O2 -w -fno-strict-aliasing
+                    -DQUICKJS_NG_BUILD -DCONFIG_VERSION='"0.14.0"' -I"$QJS_DIR")
+        for c in quickjs.c libregexp.c libunicode.c dtoa.c; do
+            obj="$OUT/qjs__${c%.c}.o"
+            echo "  CC (vendor) quickjs/$c"
+            gcc "${QJS_CFLAGS[@]}" -c "$QJS_DIR/$c" -o "$obj"
+            OBJS+=("$obj")
+        done
+        ;;
+    jerryscript)
+        echo "  CC (stub) scripting_jerryscript.cc"
+        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_jerryscript.cc" -o "$OUT/stubs__scripting_jerryscript.o"
+        OBJS+=("$OUT/stubs__scripting_jerryscript.o")
+        # Build JerryScript libs via upstream cmake (idempotent; skip if already built).
+        JRY_BUILD="$JRY_DIR/build"
+        if [[ ! -f "$JRY_BUILD/lib/libjerry-core.a" ]]; then
+            echo "  CMAKE jerryscript (wf-minimal profile)"
+            cmake -S "$JRY_DIR" -B "$JRY_BUILD" \
+                  -DJERRY_CMDLINE=OFF \
+                  -DJERRY_PROFILE="$JRY_DIR/jerry-core/profiles/wf-minimal.profile" \
+                  -DJERRY_ERROR_MESSAGES=ON \
+                  -DJERRY_LINE_INFO=ON \
+                  -DENABLE_LTO=OFF \
+                  > "$OUT/jry_cmake.log" 2>&1 \
+                  || { echo "  *** jerryscript cmake failed; see $OUT/jry_cmake.log" >&2; exit 1; }
+            cmake --build "$JRY_BUILD" -j --target jerry-core --target jerry-port-default \
+                  >> "$OUT/jry_cmake.log" 2>&1 \
+                  || { echo "  *** jerryscript build failed; see $OUT/jry_cmake.log" >&2; exit 1; }
+        fi
+        JS_LINK_EXTRA+=("$JRY_BUILD/lib/libjerry-core.a"
+                        "$JRY_BUILD/lib/libjerry-port.a")
+        ;;
+esac
+
 # Embed minified fennel.lua as a byte array when Fennel is enabled. The
 # engine targets platforms without host filesystems, so fennel.lua can't be
 # an external asset; it has to live in .rodata. Minification shrinks the
@@ -207,7 +271,7 @@ if [[ ${#FAILED_SRCS[@]} -gt 0 ]]; then
 fi
 
 echo "=== Linking ==="
-g++ "${OBJS[@]}" \
+g++ "${OBJS[@]}" "${JS_LINK_EXTRA[@]}" \
     -lGL -lGLU -lX11 -llua5.4 -lm -lpthread \
     -o "$SCRIPT_DIR/wf_game"
 

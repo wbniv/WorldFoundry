@@ -1,0 +1,23 @@
+# Vendored third-party sources
+
+Checked-in mirrors of third-party libraries that get statically linked into the
+engine. The CD / embedded target has no runtime filesystem, so everything ships
+as source and is linked in at build time.
+
+## Contents
+
+| Directory | Version | License | Upstream |
+|-----------|---------|---------|----------|
+| `quickjs-v0.14.0/` | 0.14.0 (2025-04-13) | MIT | https://bellard.org/quickjs/ |
+| `jerryscript-v3.0.0/` | 3.0.0 | Apache-2.0 | https://github.com/jerryscript-project/jerryscript/releases/tag/v3.0.0 |
+
+## Tarball SHA256
+
+- `jerryscript-v3.0.0.tar.gz` — `4d586d922ba575d95482693a45169ebe6cb539c4b5a0d256a6651a39e47bf0fc` (upstream GitHub tarball)
+
+## Notes
+
+- Optional. Only one JS engine (or none) links into a given build. Selection
+  happens in `wftools/wf_engine/build_game.sh` via `WF_JS_ENGINE`.
+- See `docs/plans/2026-04-14-pluggable-scripting-engine.md` for the dispatch
+  contract and the JerryScript `wf-minimal` profile.

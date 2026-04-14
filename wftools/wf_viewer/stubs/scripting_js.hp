@@ -1,0 +1,36 @@
+// scripting_js.hp — JS engine plug interface used by LuaInterpreter.
+//
+// Exactly one of WF_JS_ENGINE_QUICKJS / WF_JS_ENGINE_JERRYSCRIPT may be
+// defined; none means JS is not compiled in and nothing in this header is
+// available (the LuaInterpreter `//` dispatch arm is #ifdef'd away).
+//
+// Sigil registry (documented for future language additions):
+//   ";"  Fennel   (Lisp-on-Lua, owned by scripting_stub.cc + fennel.lua)
+//   "//" JavaScript (this header)
+//   "#"  reserved for WebAssembly
+//   "@"  reserved
+
+#ifndef WF_SCRIPTING_JS_HP
+#define WF_SCRIPTING_JS_HP
+
+#if defined(WF_JS_ENGINE_QUICKJS) || defined(WF_JS_ENGINE_JERRYSCRIPT)
+#define WF_WITH_JS 1
+
+class MailboxesManager;
+struct IntArrayEntry;
+
+// Lifetime hooks. Called from LuaInterpreter ctor/dtor.
+void  JsRuntimeInit(MailboxesManager& mgr);
+void  JsRuntimeShutdown();
+
+// Register/unregister INDEXOF_* / JOYSTICK_BUTTON_* tables as JS globals.
+void  JsAddConstantArray(IntArrayEntry* entryList);
+void  JsDeleteConstantArray(IntArrayEntry* entryList);
+
+// Execute a script. Returns the numeric result (NaN → 0.0). `objectIndex`
+// sets the "current actor" for unqualified read/write_mailbox calls.
+float JsRunScript(const char* src, int objectIndex);
+
+#endif // any WF_JS_ENGINE_*
+
+#endif // WF_SCRIPTING_JS_HP
