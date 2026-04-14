@@ -9,6 +9,7 @@ name = "textile"
 path = "src/main.rs"
 
 [dependencies]
+image = { version = "0.24", default-features = false, features = ["tga", "bmp", "png"] }
 
 [profile.release]
 opt-level = 3

@@ -1,5 +1,5 @@
 // bitmap.rs — Bitmap data structure and image format readers/writers
-// Port of bitmap.hp/cc, tga.cc, bmp.cc, sgi.cc
+// Port of bitmap.hp/cc, tga.cc, bmp.cc
 //
 // Internal pixel format: BGR555 with translucent bit at 15
 //   bit 15 : translucent / alpha flag
@@ -7,11 +7,12 @@
 //   bits 9:5   : Green (5 bits)
 //   bits 4:0   : Red   (5 bits)
 //
-// For paletted images (4/8-bit), pixels are stored as palette indices (u8 per pixel).
+// Image loading uses the `image` crate (TGA, BMP, PNG → RGBA8 → BGR555).
+// SGI format (.rgb/.bw/.sgi) is not supported; use ImageMagick to convert.
 // The atlas (out_bitmap) is always 16-bit: cb_row = width * 2.
 
 use std::fs::File;
-use std::io::{self, BufWriter, Read, Seek, SeekFrom, Write};
+use std::io::{self, BufWriter, Write};
 use std::path::Path;
 
 use crate::allocmap::{AllocationMap, round};
@@ -22,23 +23,13 @@ const TRANSLUCENT_BIT: u16 = 1 << 15;
 
 // ─── Colour conversion ───────────────────────────────────────────────────────
 
-/// Macro BR_COLOUR_BGRA(r,g,b,a): b→bits14:10, g→9:5, r→4:0, a→15
-/// Note: parameter naming in original is confusing; b is the value that ends up
-/// in the blue-high-bits position, r ends up in red-low-bits position.
-#[inline]
-pub fn br_colour_bgra(r: u8, g: u8, b: u8, a: u8) -> u16 {
-    (((b as u16) << 7) & 0x7c00)
-        | (((g as u16) << 2) & 0x03e0)
-        | ((r as u16) >> 3)
-        | ((a as u16) << 15)
-}
-
-/// Macro BR_COLOUR_RGB_555(r,g,b): r→bits14:10, g→9:5, b→4:0
+/// BGR_RGB_555: RGB bytes to BGR555 (no alpha). Used for palette conversion and col_transparent.
 #[inline]
 pub fn br_colour_rgb_555(r: u8, g: u8, b: u8) -> u16 {
-    (((r as u16) & 0xF8) << 7)
-        | (((g as u16) & 0xF8) << 2)
-        | (((b as u16) & 0xF8) >> 3)
+    let rr = (r as u16) >> 3;
+    let gg = (g as u16) >> 3;
+    let bb = (b as u16) >> 3;
+    (bb << 10) | (gg << 5) | rr
 }
 
 /// RGBA_555: converts 8-bit RGBA to BGR555.
@@ -53,22 +44,6 @@ pub fn rgba_555(r: u8, g: u8, b: u8, a: u8) -> u16 {
     let bb = (b as u16) >> 3;
     let alpha: u16 = if (a as u16) < 85 { 1 } else { 0 };
     (alpha << 15) | (bb << 10) | (gg << 5) | rr
-}
-
-/// Greyscale byte to BGR555.
-#[inline]
-fn greyscale_rgb555(grey: u8) -> u16 {
-    let g = (grey as u16) >> 3;
-    (g << 10) | (g << 5) | g
-}
-
-/// RGB bytes to BGR555 (0 alpha).
-#[inline]
-fn rgb_555(r: u8, g: u8, b: u8) -> u16 {
-    let rr = (r as u16) >> 3;
-    let gg = (g as u16) >> 3;
-    let bb = (b as u16) >> 3;
-    (bb << 10) | (gg << 5) | rr
 }
 
 // ─── ColourCycle ─────────────────────────────────────────────────────────────
@@ -556,314 +531,48 @@ impl Bitmap {
         ok
     }
 
-    // ── Load TGA ────────────────────────────────────────────────────────────
+    // ── Load image (TGA / BMP / PNG via `image` crate) ──────────────────────
 
-    pub fn load_tga(path: &Path, cfg: &Config) -> Option<Self> {
+    pub fn load(path: &Path, cfg: &Config) -> Option<Self> {
         let name = path.to_string_lossy().into_owned();
-        let mut f = match File::open(path) {
-            Ok(f) => f,
-            Err(e) => {
-                eprintln!("textile: couldn't open \"{}\": {}", name, e);
-                return None;
-            }
-        };
+        let img = image::open(path).map_err(|e| {
+            eprintln!("textile: couldn't open \"{}\": {}", name, e);
+        }).ok()?;
+        let rgba = img.to_rgba8();
+        let width  = rgba.width()  as i32;
+        let height = rgba.height() as i32;
+        let cb_row = width * 2;
 
-        // Read 18-byte TGA header
-        let mut hdr = [0u8; 18];
-        if f.read_exact(&mut hdr).is_err() {
-            eprintln!("textile: \"{}\" too short for TGA header", name);
-            return None;
-        }
-        let image_type  = hdr[2];
-        let cmap_start  = i16::from_le_bytes([hdr[3], hdr[4]]) as i32;
-        let cmap_length = i16::from_le_bytes([hdr[5], hdr[6]]) as i32;
-        let id_length   = hdr[0] as usize;
-        let pixel_depth = hdr[16] as i32;
-        let width       = i16::from_le_bytes([hdr[12], hdr[13]]) as i32;
-        let height      = i16::from_le_bytes([hdr[14], hdr[15]]) as i32;
-
-        // Validate
-        if image_type != 1 && image_type != 2 {
-            eprintln!("textile: \"{}\" isn't an ImageType I understand (1 or 2)", name);
-            std::process::exit(1);
-        }
-        if pixel_depth != 8 && pixel_depth != 16 && pixel_depth != 24 && pixel_depth != 32 {
-            eprintln!("textile: \"{}\" isn't an 8, 16, 24, or 32-bit Targa file", name);
-            std::process::exit(1);
-        }
-        if image_type == 1 {
-            if pixel_depth != 8 {
-                eprintln!("textile: type-1 TGA must be 8-bit: {}", name);
-                std::process::exit(1);
-            }
-            if (width % 2) != 0 {
-                eprintln!("textile: 8-bit texture \"{}\" width isn't multiple of 2 ({})", name, width);
-                std::process::exit(1);
-            }
-        }
-
-        // Skip ID field
-        if id_length > 0 {
-            f.seek(SeekFrom::Current(id_length as i64)).ok()?;
-        }
-
-        let col_transparent = cfg.col_transparent;
-        let target          = cfg.target;
-        let force_trans     = cfg.force_translucent;
-
-        let mut bm = match pixel_depth {
-            8 => load_tga_8bit(&mut f, width, height, cmap_start, cmap_length,
-                               name.clone(), col_transparent, cfg),
-            16 => load_tga_16bit(&mut f, width, height, name.clone()),
-            24 => load_tga_24bit(&mut f, width, height, name.clone()),
-            32 => load_tga_32bit(&mut f, width, height, name.clone()),
-            _  => {
-                eprintln!("textile: internal: bit depth {} not coded ({})", pixel_depth, name);
-                std::process::exit(1);
-            }
-        }?;
-
-        bm.power_of2 = cfg.power_of2;
-
-        if bm.bitdepth == 16 {
-            bm.transparent_remap(col_transparent);
-            if target == TargetSystem::PlayStation { bm.swap_rb(); }
-        }
-
-        bm.load_colour_cycles(cfg);
-
-        if bm.bitdepth == 16 && force_trans {
-            bm.force_translucent_pixels();
-        }
-
-        Some(bm)
-    }
-
-    // ── Load BMP ────────────────────────────────────────────────────────────
-
-    pub fn load_bmp(path: &Path, cfg: &Config) -> Option<Self> {
-        let name = path.to_string_lossy().into_owned();
-        let mut f = match File::open(path) {
-            Ok(f) => f,
-            Err(e) => {
-                eprintln!("textile: couldn't open \"{}\": {}", name, e);
-                return None;
-            }
-        };
-
-        // BITMAPFILEHEADER (14 bytes, pack-2)
-        let mut fh = [0u8; 14];
-        f.read_exact(&mut fh).ok()?;
-        let bf_type     = i16::from_le_bytes([fh[0], fh[1]]);
-        let bf_off_bits = u32::from_le_bytes([fh[10], fh[11], fh[12], fh[13]]) as u64;
-
-        if bf_type != 0x4D42 { // 'BM'
-            eprintln!("textile: \"{}\" is not a BMP format", name);
-            return None;
-        }
-
-        // BITMAPINFOHEADER (40 bytes)
-        let mut ih = [0u8; 40];
-        f.read_exact(&mut ih).ok()?;
-        let bi_size       = u32::from_le_bytes([ih[0],ih[1],ih[2],ih[3]]) as i32;
-        let bi_width      = i32::from_le_bytes([ih[4],ih[5],ih[6],ih[7]]);
-        let bi_height     = i32::from_le_bytes([ih[8],ih[9],ih[10],ih[11]]);
-        let bi_bit_count  = u16::from_le_bytes([ih[14],ih[15]]) as i32;
-        let bi_clr_used   = u32::from_le_bytes([ih[32],ih[33],ih[34],ih[35]]) as i32;
-
-        if bi_size != 40 {
-            eprintln!("textile: \"{}\" has unexpected BITMAPINFOHEADER size {}", name, bi_size);
-            return None;
-        }
-
-        match bi_bit_count {
-            4  => if (bi_width % 4) != 0 {
-                    eprintln!("textile: 4-bit texture \"{}\" width isn't multiple of 4", name);
-                    return None;
-                  },
-            8  => if (bi_width % 2) != 0 {
-                    eprintln!("textile: 8-bit texture \"{}\" width isn't multiple of 2", name);
-                    return None;
-                  },
-            24 => {},
-            _  => {
-                eprintln!("textile: \"{}\" isn't a 4, 8, or 24-bit BMP file", name);
-                return None;
-            }
-        }
-
-        let cmap_length = if bi_clr_used != 0 { bi_clr_used } else { 1 << bi_bit_count };
-
-        let col_transparent = cfg.col_transparent;
-        let target          = cfg.target;
-        let force_trans     = cfg.force_translucent;
-
-        let mut bm = match bi_bit_count {
-            4  => load_bmp_4bit(&mut f, bi_width, bi_height, cmap_length, bf_off_bits,
-                                name.clone(), col_transparent),
-            8  => load_bmp_8bit(&mut f, bi_width, bi_height, cmap_length, bf_off_bits,
-                                name.clone(), col_transparent),
-            24 => load_bmp_24bit(&mut f, bi_width, bi_height, bf_off_bits, name.clone()),
-            _  => unreachable!(),
-        }?;
-
-        bm.power_of2 = cfg.power_of2;
-
-        if bm.bitdepth == 16 {
-            bm.transparent_remap(col_transparent);
-            if target == TargetSystem::PlayStation { bm.swap_rb(); }
-        }
-
-        bm.load_colour_cycles(cfg);
-
-        if bm.bitdepth == 16 && force_trans {
-            bm.force_translucent_pixels();
-        }
-
-        Some(bm)
-    }
-
-    // ── Load SGI ────────────────────────────────────────────────────────────
-
-    pub fn load_sgi(path: &Path, cfg: &Config) -> Option<Self> {
-        let name = path.to_string_lossy().into_owned();
-        let mut f = match File::open(path) {
-            Ok(f) => f,
-            Err(e) => {
-                eprintln!("textile: couldn't open \"{}\": {}", name, e);
-                return None;
-            }
-        };
-
-        // SGI header is 512 bytes
-        let mut raw = [0u8; 512];
-        f.read_exact(&mut raw).ok()?;
-
-        // Byte-swap big-endian fields
-        let magic     = u16::from_be_bytes([raw[0], raw[1]]);
-        let storage   = raw[2];
-        let bpc       = raw[3];
-        let _dimension = u16::from_be_bytes([raw[4], raw[5]]);
-        let ixsize    = u16::from_be_bytes([raw[6], raw[7]]) as i32;
-        let iysize    = u16::from_be_bytes([raw[8], raw[9]]) as i32;
-        let zsize     = u16::from_be_bytes([raw[10], raw[11]]) as i32;
-        let pixmin    = u32::from_be_bytes([raw[12],raw[13],raw[14],raw[15]]);
-        let pixmax    = u32::from_be_bytes([raw[16],raw[17],raw[18],raw[19]]);
-        let colormap  = u32::from_be_bytes([raw[84],raw[85],raw[86],raw[87]]);
-
-        if magic != 474 {
-            eprintln!("textile: \"{}\" is not an SGI format", name);
-            return None;
-        }
-        if storage != 0 {
-            eprintln!("textile: \"{}\": only verbatim SGI storage supported", name);
-            return None;
-        }
-        if bpc != 1 {
-            eprintln!("textile: \"{}\": only 1 byte-per-channel SGI supported", name);
-            return None;
-        }
-        // dimension==2 means 2D (single channel); dimension==3 means 3D (multi-channel).
-        // The C++ code asserted dimension==2, so only dimension 2 or 3 are handled here.
-        if pixmin != 0 || pixmax != 255 || colormap != 0 {
-            eprintln!("textile: \"{}\": unexpected SGI header values", name);
-            return None;
-        }
-
-        let cb_row = ixsize * 2;
-        let mut pixels = vec![0u8; cb_row as usize * iysize as usize];
-
-        // Read raster data top-to-bottom.
-        // C++ used istream::read() which silently stops at EOF; replicate that by
-        // reading as many bytes as available rather than requiring an exact count.
-        let row_bytes = (ixsize * zsize) as usize;
-        let mut line_buf = vec![0u8; row_bytes];
-        for y in 0..iysize as usize {
-            // Fill line buffer with zeros (transparent/black) before reading
-            for b in line_buf.iter_mut() { *b = 0; }
-            let mut total = 0usize;
-            while total < row_bytes {
-                match f.read(&mut line_buf[total..]) {
-                    Ok(0) => break,   // EOF — remaining bytes stay zero
-                    Ok(n) => total += n,
-                    Err(_) => break,
-                }
-            }
-            if total == 0 { break; }  // Nothing left in file; leave remaining rows black
-
-            let dst_row = y * cb_row as usize;
-            let mut px_idx = 0usize;
-            for x in 0..ixsize as usize {
-                let pixel: u16 = match zsize {
-                    1 => greyscale_rgb555(line_buf[x]),
-                    3 => {
-                        let r = line_buf[px_idx];
-                        let g = line_buf[px_idx + 1];
-                        let b = line_buf[px_idx + 2];
-                        px_idx += 3;
-                        rgb_555(r, g, b)
-                    }
-                    4 => {
-                        let r = line_buf[px_idx];
-                        let g = line_buf[px_idx + 1];
-                        let b = line_buf[px_idx + 2];
-                        let a = line_buf[px_idx + 3];
-                        px_idx += 4;
-                        rgba_555(r, g, b, a)
-                    }
-                    _ => 0,
-                };
-                if zsize != 3 && zsize != 4 { px_idx += zsize as usize; }
-                let off = dst_row + x * 2;
-                let bytes = pixel.to_le_bytes();
-                pixels[off]     = bytes[0];
-                pixels[off + 1] = bytes[1];
-            }
+        let mut pixels = Vec::with_capacity((height * cb_row) as usize);
+        for pixel in rgba.pixels() {
+            let [r, g, b, a] = pixel.0;
+            pixels.extend_from_slice(&rgba_555(r, g, b, a).to_le_bytes());
         }
 
         let mut bm = Bitmap {
             pixels,
-            width:             ixsize,
-            height:            iysize,
-            bitdepth:          16,
+            width, height,
+            bitdepth: 16,
             cb_row,
-            buf_width:         ixsize,
-            buf_height:        iysize,
-            name:              name.clone(),
+            buf_width: width, buf_height: height,
+            name,
             converted_palette: Vec::new(),
-            cmap_start:        0,
-            cmap_length:       255,
-            start_colour:      -1,
-            end_colour:        -1,
-            subx:              -1,
-            suby:              -1,
-            xpal:              -1,
-            ypal:              -1,
-            idx_pal:           -1,
-            colour_cycles:     Vec::new(),
-            has_transparent:   false,
-            power_of2:         cfg.power_of2,
+            cmap_start: 0, cmap_length: 0,
+            start_colour: 0, end_colour: 0,
+            subx: -1, suby: -1,
+            xpal: -1, ypal: -1, idx_pal: -1,
+            colour_cycles: Vec::new(),
+            has_transparent: false,
+            power_of2: cfg.power_of2,
         };
 
-        bm.has_transparent = bm.check_for_transparent();
-
-        let col_transparent = cfg.col_transparent;
-        let target          = cfg.target;
-        let force_trans     = cfg.force_translucent;
-
-        bm.transparent_remap(col_transparent);
-        if target == TargetSystem::PlayStation { bm.swap_rb(); }
-
+        bm.transparent_remap(cfg.col_transparent);
+        if cfg.target == TargetSystem::PlayStation { bm.swap_rb(); }
         bm.load_colour_cycles(cfg);
-
-        if force_trans {
-            bm.force_translucent_pixels();
-        }
+        if cfg.force_translucent { bm.force_translucent_pixels(); }
 
         Some(bm)
     }
-
-    // ── Colour cycle loading ─────────────────────────────────────────────────
 
     fn load_colour_cycles(&mut self, cfg: &Config) {
         if cfg.colour_cycle_file.is_empty() || self.name.is_empty() {
@@ -885,317 +594,4 @@ impl Bitmap {
             self.colour_cycles.push(ColourCycle { start, end, speed });
         }
     }
-}
-
-// ─── TGA format readers ───────────────────────────────────────────────────────
-
-fn load_tga_8bit(
-    f: &mut File,
-    width: i32, height: i32,
-    _cmap_start: i32, cmap_length: i32,
-    name: String,
-    col_transparent: u16,
-    cfg: &Config,
-) -> Option<Bitmap> {
-    // Read palette (3 bytes BGR per entry)
-    let mut palette: Vec<[u8; 4]> = Vec::with_capacity(cmap_length as usize);
-    for _ in 0..cmap_length {
-        let mut rgb = [0u8; 3];
-        f.read_exact(&mut rgb).ok()?;
-        palette.push([rgb[0], rgb[1], rgb[2], 0]);
-    }
-
-    // Flip palette upside-down (C++ reverses for PSX palette layout)
-    let half = cmap_length as usize / 2;
-    for i in 0..half {
-        palette.swap(i, cmap_length as usize - 1 - i);
-    }
-
-    // Read pixel data bottom-up
-    let cb_row = width as usize;
-    let mut pixels = vec![0u8; cb_row * height as usize];
-    for y in (0..height as usize).rev() {
-        let row = &mut pixels[y * cb_row..(y + 1) * cb_row];
-        f.read_exact(row).ok()?;
-        // Remap pixel indices (also reversed because palette was flipped)
-        for p in row.iter_mut() {
-            *p = (cmap_length as u8).wrapping_sub(1).wrapping_sub(*p);
-        }
-    }
-
-    let mut bm = Bitmap {
-        pixels,
-        width,
-        height,
-        bitdepth:          8,
-        cb_row:            width,
-        buf_width:         width,
-        buf_height:        height,
-        name,
-        converted_palette: Vec::new(),
-        cmap_start:        0,
-        cmap_length,
-        start_colour:      -1,
-        end_colour:        -1,
-        subx:              -1,
-        suby:              -1,
-        xpal:              -1,
-        ypal:              -1,
-        idx_pal:           -1,
-        colour_cycles:     Vec::new(),
-        has_transparent:   false,
-        power_of2:         cfg.power_of2,
-    };
-    bm.calculate_palette_info(Some(&palette), 256, col_transparent);
-    Some(bm)
-}
-
-fn load_tga_16bit(f: &mut File, width: i32, height: i32, name: String) -> Option<Bitmap> {
-    let cb_row = width as usize * 2;
-    let mut pixels = vec![0u8; cb_row * height as usize];
-    for y in (0..height as usize).rev() {
-        f.read_exact(&mut pixels[y * cb_row..(y + 1) * cb_row]).ok()?;
-    }
-    Some(Bitmap {
-        pixels,
-        width,
-        height,
-        bitdepth:          16,
-        cb_row:            width * 2,
-        buf_width:         width,
-        buf_height:        height,
-        name,
-        converted_palette: Vec::new(),
-        cmap_start:        0,
-        cmap_length:       0,
-        start_colour:      -1,
-        end_colour:        -1,
-        subx:              -1,
-        suby:              -1,
-        xpal:              -1,
-        ypal:              -1,
-        idx_pal:           -1,
-        colour_cycles:     Vec::new(),
-        has_transparent:   false,
-        power_of2:         false,
-    })
-}
-
-fn load_tga_24bit(f: &mut File, width: i32, height: i32, name: String) -> Option<Bitmap> {
-    let cb_row = width as usize * 2;
-    let mut pixels = vec![0u8; cb_row * height as usize];
-    let mut line_buf = vec![0u8; width as usize * 3];
-    for y in (0..height as usize).rev() {
-        f.read_exact(&mut line_buf).ok()?;
-        for x in 0..width as usize {
-            // TGA 24-bit: stored as B,G,R bytes
-            let b = line_buf[x * 3];     // blue
-            let g = line_buf[x * 3 + 1]; // green
-            let r = line_buf[x * 3 + 2]; // red
-            // BR_COLOUR_BGRA(b, g, r, 0) where first param ends in low-bits
-            let px = br_colour_bgra(b, g, r, 0);
-            let off = y * cb_row + x * 2;
-            let bytes = px.to_le_bytes();
-            pixels[off]     = bytes[0];
-            pixels[off + 1] = bytes[1];
-        }
-    }
-    let has_transparent = {
-        let tmp_bm = Bitmap {
-            pixels: pixels.clone(),
-            width, height, bitdepth: 16, cb_row: width*2, buf_width: width, buf_height: height,
-            name: name.clone(), converted_palette: vec![], cmap_start: 0, cmap_length: 0,
-            start_colour: -1, end_colour: -1, subx: -1, suby: -1, xpal: -1, ypal: -1, idx_pal: -1,
-            colour_cycles: vec![], has_transparent: false, power_of2: false,
-        };
-        tmp_bm.check_for_transparent()
-    };
-    Some(Bitmap {
-        pixels,
-        width, height, bitdepth: 16, cb_row: width*2, buf_width: width, buf_height: height,
-        name, converted_palette: vec![], cmap_start: 0, cmap_length: 0,
-        start_colour: -1, end_colour: -1, subx: -1, suby: -1, xpal: -1, ypal: -1, idx_pal: -1,
-        colour_cycles: vec![], has_transparent, power_of2: false,
-    })
-}
-
-fn load_tga_32bit(f: &mut File, width: i32, height: i32, name: String) -> Option<Bitmap> {
-    let cb_row = width as usize * 2;
-    let mut pixels = vec![0u8; cb_row * height as usize];
-    let mut line_buf = vec![0u8; width as usize * 4];
-    for y in (0..height as usize).rev() {
-        f.read_exact(&mut line_buf).ok()?;
-        for x in 0..width as usize {
-            let r = line_buf[x * 4];
-            let g = line_buf[x * 4 + 1];
-            let b = line_buf[x * 4 + 2];
-            let a = line_buf[x * 4 + 3];
-            let px = rgba_555(r, g, b, a);
-            let off = y * cb_row + x * 2;
-            let bytes = px.to_le_bytes();
-            pixels[off]     = bytes[0];
-            pixels[off + 1] = bytes[1];
-        }
-    }
-    Some(Bitmap {
-        pixels, width, height, bitdepth: 16, cb_row: width*2, buf_width: width, buf_height: height,
-        name, converted_palette: vec![], cmap_start: 0, cmap_length: 0,
-        start_colour: -1, end_colour: -1, subx: -1, suby: -1, xpal: -1, ypal: -1, idx_pal: -1,
-        colour_cycles: vec![], has_transparent: false, power_of2: false,
-    })
-}
-
-// ─── BMP format readers ───────────────────────────────────────────────────────
-
-fn load_bmp_palette(f: &mut File, n: usize) -> Option<Vec<[u8; 4]>> {
-    let mut palette = Vec::with_capacity(n);
-    for _ in 0..n {
-        let mut entry = [0u8; 4]; // RGBQUAD: blue, green, red, reserved
-        f.read_exact(&mut entry).ok()?;
-        assert_eq!(entry[3], 0);
-        palette.push(entry);
-    }
-    Some(palette)
-}
-
-fn load_bmp_4bit(
-    f: &mut File,
-    width: i32, height: i32, cmap_length: i32,
-    bf_off_bits: u64,
-    name: String,
-    col_transparent: u16,
-) -> Option<Bitmap> {
-    let palette = load_bmp_palette(f, cmap_length as usize)?;
-
-    f.seek(SeekFrom::Start(bf_off_bits)).ok()?;
-
-    // BMP 4-bit: 2 pixels per byte, stored bottom-up.
-    // The C++ cb_row formula for 4-bit appears buggy (gives width*2 instead of width/2).
-    // We use the correct value: ceil(width/2) bytes per row.
-    let row_bytes = ((width + 1) / 2) as usize;
-    let mut pixels = vec![0u8; row_bytes * height as usize];
-    for y in (0..height as usize).rev() {
-        let row = &mut pixels[y * row_bytes..(y + 1) * row_bytes];
-        f.read_exact(row).ok()?;
-        // Swap nibbles within each byte (C++ BMP 4-bit code)
-        for byte in row.iter_mut() {
-            let lo = *byte & 0x0F;
-            let hi = (*byte & 0xF0) >> 4;
-            *byte = (lo << 4) | hi;
-        }
-    }
-
-    let mut bm = Bitmap {
-        pixels,
-        width,
-        height,
-        bitdepth:          4,
-        cb_row:            row_bytes as i32,
-        buf_width:         width,
-        buf_height:        height,
-        name,
-        converted_palette: Vec::new(),
-        cmap_start:        0,
-        cmap_length,
-        start_colour:      -1,
-        end_colour:        -1,
-        subx:              -1,
-        suby:              -1,
-        xpal:              -1,
-        ypal:              -1,
-        idx_pal:           -1,
-        colour_cycles:     Vec::new(),
-        has_transparent:   false,
-        power_of2:         false,
-    };
-    bm.calculate_palette_info(Some(&palette), 16, col_transparent);
-    Some(bm)
-}
-
-fn load_bmp_8bit(
-    f: &mut File,
-    width: i32, height: i32, cmap_length: i32,
-    bf_off_bits: u64,
-    name: String,
-    col_transparent: u16,
-) -> Option<Bitmap> {
-    let mut palette = load_bmp_palette(f, cmap_length as usize)?;
-
-    // Flip palette upside down (same as TGA 8-bit)
-    let half = cmap_length as usize / 2;
-    for i in 0..half {
-        palette.swap(i, cmap_length as usize - 1 - i);
-    }
-
-    f.seek(SeekFrom::Start(bf_off_bits)).ok()?;
-
-    let cb_row = width as usize;
-    let mut pixels = vec![0u8; cb_row * height as usize];
-    for y in (0..height as usize).rev() {
-        let row = &mut pixels[y * cb_row..(y + 1) * cb_row];
-        f.read_exact(row).ok()?;
-        // Remap indices (reversed because palette was flipped)
-        for p in row.iter_mut() {
-            *p = (cmap_length as u8).wrapping_sub(1).wrapping_sub(*p);
-        }
-    }
-
-    let mut bm = Bitmap {
-        pixels,
-        width,
-        height,
-        bitdepth:          8,
-        cb_row:            width,
-        buf_width:         width,
-        buf_height:        height,
-        name,
-        converted_palette: Vec::new(),
-        cmap_start:        0,
-        cmap_length,
-        start_colour:      -1,
-        end_colour:        -1,
-        subx:              -1,
-        suby:              -1,
-        xpal:              -1,
-        ypal:              -1,
-        idx_pal:           -1,
-        colour_cycles:     Vec::new(),
-        has_transparent:   false,
-        power_of2:         false,
-    };
-    bm.calculate_palette_info(Some(&palette), 256, col_transparent);
-    Some(bm)
-}
-
-fn load_bmp_24bit(
-    f: &mut File,
-    width: i32, height: i32,
-    bf_off_bits: u64,
-    name: String,
-) -> Option<Bitmap> {
-    f.seek(SeekFrom::Start(bf_off_bits)).ok()?;
-
-    let cb_row = width as usize * 2;
-    let mut pixels = vec![0u8; cb_row * height as usize];
-    let mut line_buf = vec![0u8; width as usize * 3];
-    for y in (0..height as usize).rev() {
-        f.read_exact(&mut line_buf).ok()?;
-        for x in 0..width as usize {
-            // BMP 24-bit: stored as B,G,R bytes (same byte order as TGA 24-bit)
-            let b = line_buf[x * 3];
-            let g = line_buf[x * 3 + 1];
-            let r = line_buf[x * 3 + 2];
-            let px = br_colour_bgra(b, g, r, 0);
-            let off = y * cb_row + x * 2;
-            let bytes = px.to_le_bytes();
-            pixels[off]     = bytes[0];
-            pixels[off + 1] = bytes[1];
-        }
-    }
-    Some(Bitmap {
-        pixels, width, height, bitdepth: 16, cb_row: width*2, buf_width: width, buf_height: height,
-        name, converted_palette: vec![], cmap_start: 0, cmap_length: 0,
-        start_colour: -1, end_colour: -1, subx: -1, suby: -1, xpal: -1, ypal: -1, idx_pal: -1,
-        colour_cycles: vec![], has_transparent: false, power_of2: false,
-    })
 }

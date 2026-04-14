@@ -234,11 +234,15 @@ pub fn load_textures(
         let ext = file_ext(&path.to_string_lossy()).to_lowercase();
 
         let mut bm = match ext.as_str() {
-            ".tga" => Bitmap::load_tga(&path, cfg),
-            ".bmp" => Bitmap::load_bmp(&path, cfg),
-            ".rgb" | ".bw" | ".sgi" => Bitmap::load_sgi(&path, cfg),
+            ".tga" | ".bmp" | ".png" => Bitmap::load(&path, cfg),
+            ".rgb" | ".bw" | ".sgi" => {
+                eprintln!("textile: SGI format not supported; convert with: convert {} {}.png",
+                    path.display(),
+                    path.file_stem().unwrap_or_default().to_string_lossy());
+                continue;
+            }
             _ => {
-                eprintln!("textile: unknown file format for texture \"{}\" (must be .tga, .bmp, .rgb, .rgba, .bw, or .sgi)",
+                eprintln!("textile: unknown file format for texture \"{}\" (must be .tga, .bmp, or .png)",
                     path.display());
                 continue;
             }
