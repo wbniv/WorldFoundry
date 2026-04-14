@@ -1,8 +1,5 @@
 #include <pigsys/pigsys.hp>
 #include <console/console.hp>
-#if defined(__PSX__)
-#	include <libetc.h>
-#endif
 static char
 charTable[256] =
 {
@@ -84,11 +81,4 @@ HDump( char* title, void* buffer, size_t bufferSize, Console& console )
 	console.print("Press a button to continue");
 	console.flush();
 
-#if defined( __PSX__ )
-	PadInit(0);
-	while(!(PadRead(0) & PADstart))
-		;
-	while((PadRead(0) & PADstart))
-		;
-#endif
 }

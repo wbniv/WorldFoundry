@@ -5,9 +5,7 @@
 #ifndef _PROFILE_HP
 #define _PROFILE_HP
 
-#if !defined( __PSX__ )
 #	error profiler only works on psx right now
-#endif
 
 //==============================================================================
 

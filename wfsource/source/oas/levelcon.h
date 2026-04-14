@@ -32,13 +32,8 @@
 
 #include <pigsys/pigsys.hp>
 
-#if defined( __WIN__ )
-#	pragma pack(4)
-#define GNUALIGN 
-#elif defined(__LINUX__)
+#if   defined(__LINUX__)
 #define GNUALIGN __attribute__ ((aligned(4)))
-#elif defined(__PSX__)
-#define GNUALIGN 
 #else
 #error target not defined
 #endif
@@ -208,12 +203,7 @@ struct _LevelOnDisk
 
 /*============================================================================*/
 
-#if defined( __WIN__ )
-#	pragma pack()
-#undef GNUALIGN 
-#elif defined(__LINUX__)
-#undef GNUALIGN 
-#elif defined(__PSX__)
+#if   defined(__LINUX__)
 #undef GNUALIGN 
 #else
 #error target not defined

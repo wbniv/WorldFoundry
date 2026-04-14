@@ -3,12 +3,6 @@
 
 #include <console/textbuff.hp>
 
-#if defined( __WIN__ )
-#ifndef STRICT
-#define STRICT
-#endif
-#include <windows.h>
-#endif
 #if 0
 void FntPrint( const char*, ... );
 void InitSimpleDisplay();

@@ -17,42 +17,7 @@
 
 // ------------------------------------------------------------------------
 
-#if defined( __DOS__ ) || defined( __WIN__ )
-
-#ifndef IOSTREAM
-#define IOSTREAM 1
-#endif
-
-// Expression contains compiler generated information
-#ifdef __WATCOMC__
-#pragma warning 549 9
-#endif
-
-// ------------------------------------------------------------------------
-
-#elif defined( __PSX__ )
-
-#ifndef SW_IOSTREAM
-#define SW_IOSTREAM 0
-#endif
-
-#ifndef _MAX_FNAME
-#define _MAX_FNAME 260
-#endif
-
-#ifndef _MAX_EXT
-#define _MAX_EXT _MAX_FNAME
-#endif
-
-#ifndef _MAX_PATH
-#define _MAX_PATH _MAX_FNAME
-#endif
-
-// ------------------------------------------------------------------------
-
-#else
 #error "unknown target"
-#endif
 
 // ------------------------------------------------------------------------
 

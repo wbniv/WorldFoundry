@@ -93,15 +93,6 @@ protected:
 }
 #endif
 
-#if defined(__PSX__)
-#define MEMORY_DELETE_ARRAY( memory, classptr, classname, entries) \
-{	\
-	long* pad = ((long*)classptr)-2; \
-	for(int index=0;index<entries;index++) \
-		##classptr##[index].~##classname##(); \
-	##(memory)##.Free(pad); \
-}
-#else
 #define MEMORY_DELETE_ARRAY( memory, classptr, classname, entries) \
 {	\
 	long* count = ((long*)classptr)-1; \
@@ -110,7 +101,6 @@ protected:
 		classptr [index].~classname (); \
 	(memory).Free(count); \
 }
-#endif
 
 
 
