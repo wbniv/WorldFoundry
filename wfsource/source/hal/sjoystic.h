@@ -108,75 +108,7 @@
 #define	EJ_BUTTONB_1 31
 #define	EJ_BUTTONB_2 31
 #else
-#if defined( __PSX__ )
-#define EJ_BUTTONB_UP 12
-#define	EJ_BUTTONB_DOWN 14
-#define	EJ_BUTTONB_RIGHT 13
-#define	EJ_BUTTONB_LEFT 15
-#define	EJ_BUTTONB_A 7
-#define	EJ_BUTTONB_B 4
-#define	EJ_BUTTONB_C 5
-#define	EJ_BUTTONB_D 6
-#define	EJ_BUTTONB_E 0
-#define	EJ_BUTTONB_F 2
-#define	EJ_BUTTONB_G 1
-#define	EJ_BUTTONB_H 3
-#define	EJ_BUTTONB_I 8
-#define	EJ_BUTTONB_J 11
-#define	EJ_BUTTONB_K 31
-#define	EJ_BUTTONB_L 31
-#define	EJ_BUTTONB_M 31
-#define	EJ_BUTTONB_N 31
-#define	EJ_BUTTONB_O 31
-#define	EJ_BUTTONB_P 31
-#define	EJ_BUTTONB_Q 31
-#define	EJ_BUTTONB_R 31
-#define	EJ_BUTTONB_S 31
-#define	EJ_BUTTONB_T 31
-#define	EJ_BUTTONB_U 31
-#define	EJ_BUTTONB_V 31
-#define	EJ_BUTTONB_W 31
-#define	EJ_BUTTONB_X 31
-#define	EJ_BUTTONB_Y 31
-#define	EJ_BUTTONB_Z 31
-#define	EJ_BUTTONB_1 31
-#define	EJ_BUTTONB_2 31
-#elif defined( __WIN__ )
-#define EJ_BUTTONB_UP 13
-#define	EJ_BUTTONB_DOWN 12
-#define	EJ_BUTTONB_RIGHT 10
-#define	EJ_BUTTONB_LEFT 11
-#define	EJ_BUTTONB_A 0		// a on sidewinder
-#define	EJ_BUTTONB_B 1      // b on sidewinder
-#define	EJ_BUTTONB_C 2      // c on sidewinder
-#define	EJ_BUTTONB_D 3		// X on DaveStick, x on sidewinder
-#define	EJ_BUTTONB_E 4      // Y on DaveStick, y on sidewinder
-#define	EJ_BUTTONB_F 5      // Z on DaveStick, z on sidewinder
-#define	EJ_BUTTONB_G 6      // P on DaveStick     , left trigger on sidewinder
-#define	EJ_BUTTONB_H 7      // Q on      DaveStick, right trigger on sidewinder
-#define	EJ_BUTTONB_I 8      // select on DaveStick, start on sidewinder
-#define	EJ_BUTTONB_J 9      // play on   DaveStick, M on sidewinder
-#define	EJ_BUTTONB_K 31
-#define	EJ_BUTTONB_L 31
-#define	EJ_BUTTONB_M 31
-#define	EJ_BUTTONB_N 31
-#define	EJ_BUTTONB_O 31
-#define	EJ_BUTTONB_P 31
-#define	EJ_BUTTONB_Q 31
-#define	EJ_BUTTONB_R 31
-#define	EJ_BUTTONB_S 31
-#define	EJ_BUTTONB_T 31
-#define	EJ_BUTTONB_U 31
-#define	EJ_BUTTONB_V 31
-#define	EJ_BUTTONB_W 31
-#define	EJ_BUTTONB_X 31
-#define	EJ_BUTTONB_Y 31
-#define	EJ_BUTTONB_Z 31
-#define	EJ_BUTTONB_1 31
-#define	EJ_BUTTONB_2 31
-#else
 #	error Unknown platform -- how are the joystick buttons mapped?
-#endif
 #endif
 
 typedef long joystickButtons;

@@ -6,9 +6,6 @@
 #include <hal/_list.h>
 #include <hal/_mempool.h>
 
-#if defined( __WIN__ )
-#include <windows.h>
-#endif
 
 bool bShowWindow = false;
 
@@ -85,23 +82,6 @@ TestHAL(void)
 	JoystickTest();
 #endif
 
-#ifdef __PSX__
-	// test mmgm malloc
-	void *stock[100];
-	long i;
-
-//	printf("start of malloc\n");
-//	for(i=0;i<20;i++)
-//		if((stock[i]=malloc(0x8000))==NULL)
-//			printf("%3d:allocation error\n",i);
-//		else
-//			printf("%3d:%08x\n",i,stock[i]);
-//	printf("start of free\n");
-//	for(i=0;i<20;i++)
-//		if(stock[i]!=NULL)
-//			free(stock[i]);
-//	printf("end of test\n");
-#endif
 
 	printf("HAL Tests Complete\n");
 }
@@ -144,12 +124,6 @@ extern void UpdateSimpleDisplay();
 	UpdateSimpleDisplay();
 #endif
 
-#if defined( __WIN__ )
-	{ // Test Windows interface
-//	extern HWND hwnd;
-//	MessageBox( hwnd, "Message Box", "Title", MB_OK );
-	}
-#endif
 
 //	_err_logbits = 0xf0;
 	TestHAL();

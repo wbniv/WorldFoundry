@@ -43,17 +43,6 @@ extern void UpdateSimpleDisplay();
 void
 HalInitFileSubsystem()
 {
-#if defined(__PSX__)
-#if DO_HDUMP
-	InitSimpleDisplay();
-#endif
-	ASSERTIONS(int PCinit_err = ) PCinit();			// xina - initialize filesystem
-	assert( PCinit_err == 0 );
-#if DO_HDUMP
-	FntPrint( "CDINIT" );
-	UpdateSimpleDisplay();
-#endif
-#endif
 }
 
 //=============================================================================
@@ -73,37 +62,6 @@ DiskFileHD::DiskFileHD( const char* fileName ) : _DiskFile( fileName )
 	_currentFilePosition = 0;
 	_hasSeeked = false;
 
-#if defined( __WIN__ )
-	// first try finding the data at the end of this executable
-	extern char* * __argv;
-	if ( _fileHandle = FHOPENRD( __argv[ 0 ] ) )
-	{
-		static const char szWorldFoundryTag[] = "WorldFoundry";
-
-		int cbToRead = strlen( szWorldFoundryTag ) + sizeof( DWORD );
-#if !DO_ASSERTIONS
-		int32
-#endif
-		_fileSize = FHSEEKEND( _fileHandle, -cbToRead );
-		if ( _fileSize != -1 )
-		{
-			AssertMsg( _fileSize != -1, "Error during seek" );
-
-			char buffer[ 256 ];
-			assert( cbToRead <= sizeof( buffer ) );
-			int readok = FHREAD( _fileHandle, buffer, cbToRead );
-			assert( readok == cbToRead );
-			if ( strncmp( buffer+4, szWorldFoundryTag, strlen( szWorldFoundryTag ) ) == 0 )
-			{
-				DWORD cbData = *((DWORD*)buffer);
-				_cbFileOffset = _fileSize - cbData;
-				_fileSize = cbData;
-				printf( "Found data in executable\n" );
-				return;
-			}
-		}
-	}
-#endif
 
 	// open file
 	_fileHandle = FHOPENRD( fileName );

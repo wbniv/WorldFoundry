@@ -29,10 +29,6 @@
 void
 HalInitFileSubsystem()
 {
-#if defined(__PSX__)
-	int PCinit_err = PCinit();			// xina - initialize filesystem
-	assert( PCinit_err == 0 );
-#endif
 }
 
 //=============================================================================

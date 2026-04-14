@@ -116,9 +116,6 @@ PIGSExit()
 #if DO_TEST_CODE
 	printf("Tasker shutting down\n");
 #endif
-#if defined(__PSX__)
-	assert(0);
-#endif
 }
 
 //============================================================================

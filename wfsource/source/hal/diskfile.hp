@@ -29,16 +29,7 @@
 //=============================================================================
 
 #include <hal/hal.h>
-#if defined( __PSX__ )
-extern "C" {
-#	include <libcd.h>
-};
-#endif
 
-#if defined( __WIN__ )
-#	include <windows.h>
-#	include <mmsystem.h>
-#endif
 
 //=============================================================================
 
@@ -105,15 +96,7 @@ public:
 
 protected:
 	enum { _MAX_SECTOR = 330000 };
-#if defined( __PSX__ )
-//	CdlFILE	gFilePosBCD;
-	int32 _fileStartPos;
-//	SBlockInfo* gBlockInfoPtr;
-#endif
 
-#if defined( __WIN__ )
-	HMMIO mmio;
-#endif
 
 	char _buffer[ _SECTOR_SIZE ];
 

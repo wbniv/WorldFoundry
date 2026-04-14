@@ -18,51 +18,13 @@ long _nWallClockBaseTime;
 
 //=============================================================================
 
-#ifdef __PSX__
-Scalar SYS_CLOCK(void)
-{
-	Scalar result;
-	ulong time = _PigsRootCounter2 - _nWallClockBaseTime;
-	result = Scalar((int32)time << 9);  // *65536/128
-
-	// 11/25/96 9:08PM brm hack: Timed PSX. 1000 PSX seconds = 551 real seconds.
-	// I'm not sure why this is occuring, but I was unable to find the cause,
-	// so here we are:
-
-	result = result * SCALAR_CONSTANT( 551.0 / 1000.0 );
-
-//	printf("better2 _PigsRootCounter2 = %lx, wallclockbasetime = %lx,result = %lx\n", _PigsRootCounter2,_nWallClockBaseTime,br_scalar(result));
-//	printf("time = %08lx\n",time);
-	return(result);
-}
-#endif
 
 //=============================================================================
 
-#ifdef __DOS__
-#include <bios.h>
-#define SYS_TICKS()		getMsdosTimeOfDay()
-
-long getMsdosTimeOfDay( void )
-{
-	long	msdosTimeOfDay;
-	_bios_timeofday( _TIME_GETCLOCK, &msdosTimeOfDay );
-	return( msdosTimeOfDay );
-}
-
-Scalar SYS_CLOCK(void)
-{
-	Scalar Xtime =  Scalar( ( (float)(getMsdosTimeOfDay()-_nWallClockBaseTime) )*(65536/18.2) );
-//	assert( Xtime >= Scalar::zero );
-	return Xtime;
-}
-#endif
 
 //=============================================================================
 
-#if defined( __WIN__ )
-
-#elif defined(__LINUX__)
+#if   defined(__LINUX__)
 #include <time.h>
 Scalar SYS_CLOCK(void)
 {
