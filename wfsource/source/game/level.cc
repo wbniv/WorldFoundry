@@ -49,18 +49,6 @@
 #include <physics/ode/ode.hp>
 #endif
 
-#if defined( __PSX__ )
-#	include <sys/types.h>
-#	include <r3000.h>
-#	include <asm.h>
-#	include <kernel.h>
-#	include <libgte.h>
-#	include <libgpu.h>
-#	include <libcd.h>
-#	if defined( SOUND )
-#		include <libsnd.h>
-#	endif
-#endif
 
 #include <oas/levelobj.ht>
 #include <oas/matte.ht>
@@ -803,15 +791,6 @@ Level::update(Scalar deltaTime)
       DBSTREAM1( cerror << "---ran out of joystick input---" << std::endl; )
       sys_exit(1);
    }
-#if defined(SCALAR_TYPE_FIXED)
- 	int32 xPos, yPos, zPos;
- 	int numScanned = sscanf(joystickBuffer, "%lx %lx %lx %lx %lx", (int32*)&newtime, &theButtons, &xPos, &yPos, &zPos);
-   AssertMsg(numScanned == 5, "problem scanning joystick input file, line = " << joystickBuffer);
- 	AssertMsg( cthugPos.X().AsLong() == xPos, "Something changed since this joystick file was recorded!, cthugPos.X = " << std::hex << cthugPos.X().AsLong() << ", stored X=" << std::hex << xPos );
- 	AssertMsg( cthugPos.Y().AsLong() == yPos, "Something changed since this joystick file was recorded!, cthugPos.Y = " << std::hex << cthugPos.Y().AsLong() << ", stored Y=" << std::hex << yPos );
- 	AssertMsg( cthugPos.Z().AsLong() == zPos, "Something changed since this joystick file was recorded!, cthugPos.Z = " << std::hex << cthugPos.Z().AsLong() << ", stored Z=" << std::hex << zPos );
- 	_joystickPlaybackInput->setButtons(theButtons);
-#elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
    FLOAT_TYPE temptime;
  	FLOAT_TYPE xPos, yPos, zPos;
 #if defined(SCALAR_TYPE_DOUBLE)
@@ -826,9 +805,6 @@ Level::update(Scalar deltaTime)
  	AssertMsg( cthugPos.Z() == zPos, "Something changed since this joystick file was recorded!, cthugPos.Z = " << cthugPos.Z() << ", stored Z=" << zPos );
  	_joystickPlaybackInput->setButtons(theButtons);
 
-#else
-#error SCALAR TYPE not defined
-#endif
 
  }
 #endif
@@ -859,21 +835,6 @@ Level::update(Scalar deltaTime)
 
 
 // kts clearly we need serialization functions, then these sorts of ifdefs can go away
-#if defined(SCALAR_TYPE_FIXED)
-	*_joystickOutputFile << std::hex << levelClock().AsLong() << " ";
-	_joystickOutputFile->width(8);
-	_joystickOutputFile->fill('0');
-	*_joystickOutputFile << (long)(_hardwareInput1->arePressed()) << " ";
-	_joystickOutputFile->width(8);
-	_joystickOutputFile->fill('0');
-	*_joystickOutputFile << mainCharacter()->GetPhysicalAttributes().Position().X().AsLong() << " ";
-	_joystickOutputFile->width(8);
-	_joystickOutputFile->fill('0');
-	*_joystickOutputFile << mainCharacter()->GetPhysicalAttributes().Position().Y().AsLong() << " ";
-	_joystickOutputFile->width(8);
-	_joystickOutputFile->fill('0');
-	*_joystickOutputFile << mainCharacter()->GetPhysicalAttributes().Position().Z().AsLong() << std::endl;
-#elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
 	*_joystickOutputFile << levelClock() << " ";
 	_joystickOutputFile->width(8);
 	_joystickOutputFile->fill('0');
@@ -887,17 +848,9 @@ Level::update(Scalar deltaTime)
 	_joystickOutputFile->width(8);
 	_joystickOutputFile->fill('0');
 	*_joystickOutputFile << mainCharacter()->GetPhysicalAttributes().Position().Z()<< std::endl;
-#else
-#error SCALAR TYPE not defined
-#endif
 
 #endif
 
-#if defined( __PSX__)
-	extern void ViewVideoMemory();
- 	if ( _hardwareInput1->justPressed( EJ_BUTTONF_E | EJ_BUTTONF_F | EJ_BUTTONF_G | EJ_BUTTONF_H) == ( EJ_BUTTONF_E | EJ_BUTTONF_F | EJ_BUTTONF_G | EJ_BUTTONF_H) )
-		ViewVideoMemory();
-#endif
 
 #if DO_DEBUGGING_INFO
 	// If WALL_CLOCK_BREAKPOINT_VALUE is set using the debugger, break here
@@ -1434,14 +1387,6 @@ Level::WriteSystemMailbox( int boxnum, Scalar value )
         case EMAILBOX_MIDI:
         {
             // TODO: Actually means something once we have .sep files
-#if defined( SOUND ) && defined( __PSX__ )
-            int nSong = value.WholePart();
-            extern short seq;	// midi music
-            if ( nSong )
-                SsSeqPlay( seq, SSPLAY_PLAY, SSPLAY_INFINITY );
-            else
-                SsSeqStop( seq );
-#endif
             break;
         }
 

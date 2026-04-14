@@ -41,16 +41,7 @@
 #include <gfx/vmem.hp>
 #include <cpplib/libstrm.hp>
 
-#if defined( __PSX__ ) && defined( DO_PROFILE )
-#	include <profile/sampprof.hp>
-#endif
 
-#if defined( __PSX__ )
-extern "C"
-{
-#	include "libetc.h"
-};
-#endif
 
 //==============================================================================
 
@@ -249,10 +240,6 @@ WFGame::RunGameScript()				// runs the whole game, returns when game (really) ov
 
 //==============================================================================
 
-#if defined(__PSX__) && defined(DO_PROFILE)
-extern bool bProfileMainLoop;
-extern bool bProfileMemLoad;
-#endif
 
 //-----------------------------------------------------------------------------
 
@@ -265,19 +252,10 @@ WFGame::RunLevel(_DiskFile* levelFile)
 	DBSTREAM3( cprogress << "new level at address " << _curLevel << ", sizeof " << sizeof(Level) << std::endl; )
 	assert( ValidPtr(_curLevel));
 	DBSTREAM3( cprogress << "WFGame::loadLevel done" << std::endl; )
-#if defined(__PSX__) && defined(DO_PROFILE)
-    if ( bProfileMemLoad )
-		sys_exit( -1 );
-#endif
 
 	Scalar deltaTime = Scalar::zero;
 	bool _bContinue = true;
 	DBSTREAM1 ( cprogress << "Entering main game loop\n"; );
-#if defined(__PSX__ ) && defined(DO_PROFILE)
-	profileSample sampler;
-	if ( bProfileMainLoop )
-		sampler.start();
-#endif
 
 #if defined(DO_SLOW_STEREOGRAM)
 	InitVSyncCallback(*_display);
@@ -288,13 +266,6 @@ WFGame::RunLevel(_DiskFile* levelFile)
 		DBSTREAM1( cframeinfo << char(12) << std::endl << "Frame Info:" << std::endl; )
 		DBSTREAM2( cflow << "Top of WFGame::update" << std::endl; )
 
-#if defined( __PSX__ ) && defined(DO_PROFILE)
-  		static int frameCount;
-  		frameCount++;
-
-  		if(bProfileMainLoop && frameCount > 20*5)
-			_bContinue = false;
-#endif
 
 #if defined(DESIGNER_CHEATS)
 		if ( PIGSUserAborted() )
@@ -366,9 +337,6 @@ WFGame::RunLevel(_DiskFile* levelFile)
 #else
 		deltaTime = _display->PageFlip();
 #endif
-#if defined(__PSX__)
-//		cscreen << "deltaTime = " << deltaTime << ", frame rate = " << Scalar::one / deltaTime << std::endl;
-#endif
 		DBSTREAM2( cflow << "WFGame::update: done" << std::endl; )
 
 		assert(HALScratchLmalloc.Empty());		// make sure everyone remembered to free their scratch memory
@@ -379,15 +347,6 @@ WFGame::RunLevel(_DiskFile* levelFile)
 	UnInitVSyncCallback();
 #endif
 
-#if defined(__PSX__ ) && defined(DO_PROFILE)
-	if ( bProfileMainLoop )
-	{
-		sampler.stop();
-		sampler.save( "mainloop.smp" );
-		printf("sampler done\n");
-		sys_exit(0);
-	}
-#endif
 
 #pragma message ("KTS: write code to handle lives and restarting same level, etc.")
 	DBSTREAM1( std::cout << ", _bContinue = " << _bContinue << ", _curLevel->done() = " << _curLevel->done() << std::endl; )

@@ -112,49 +112,6 @@ LimitRelativeMovementMagnitude(const Vector3& orig,const Vector3& outPos,const V
 
 //==============================================================================
 
-#if defined( __PSX__ )
-#if 0
-#pragma message ("KTS: test code: remove this function")
-
-void
-AdjustCameraParameters(Vector3& position,Euler& rotation)
-{
-	u_long	padd = PadRead(1);
-
-	padd >>= 16;
-	if (padd & PADRup)
-		rotation.SetA(rotation.GetA() + Angle(Angle::Degree(SCALAR_CONSTANT(1))));
-	if (padd & PADRdown)
-		rotation.SetA(rotation.GetA() - Angle(Angle::Degree(SCALAR_CONSTANT(1))));
-	if (padd & PADRleft)
-		rotation.SetB(rotation.GetB() - Angle(Angle::Degree(SCALAR_CONSTANT(1))));
-	if (padd & PADRright)
-		rotation.SetB(rotation.GetB() + Angle(Angle::Degree(SCALAR_CONSTANT(1))));
-	if (padd & PADR1)
-		rotation.SetC(rotation.GetC() - Angle(Angle::Degree(SCALAR_CONSTANT(1))));
-	if (padd & PADR2)
-		rotation.SetC(rotation.GetC() + Angle(Angle::Degree(SCALAR_CONSTANT(1))));
-
-	if (padd & PADLup)
-		position.SetY(position.Y() + SCALAR_CONSTANT(0.5));
-	if (padd & PADLdown)
-		position.SetY(position.Y() - SCALAR_CONSTANT(0.5));
-	if (padd & PADLleft)
-		position.SetX(position.X() - SCALAR_CONSTANT(0.5));
-	if (padd & PADLright)
-		position.SetX(position.X() + SCALAR_CONSTANT(0.5));
-
-	if (padd & PADL1)
-		position.SetZ(position.Z() - SCALAR_CONSTANT(0.5));
-	if (padd & PADL2)
-		position.SetZ(position.Z() + SCALAR_CONSTANT(0.5));
-
-	DBSTREAM3( cscreen << "camera position:" << std::endl << position << std::endl;
-	cscreen << "camera rotation:" << std::endl << rotation << std::endl; )
-}
-
-#endif
-#endif
 
 //==============================================================================
 

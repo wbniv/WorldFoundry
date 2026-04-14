@@ -73,17 +73,7 @@ const Scalar Actor::INDESTRUCTIBLE_HP = Scalar( SCALAR_CONSTANT(32767) );	// grr
 #include <streams/binstrm.hp>
 #include <iff/iffread.hp>
 
-#if defined( __WIN__ )				// only here so play cd kludge will work, remove
-#include <windows.h>
-#endif
 
-#if defined (__PSX__)
-#	include	<libcd.h>
-#	if defined( SOUND )
-#		include <libspu.h>
-#		include <libsnd.h>
-#	endif
-#endif
 
 #if defined( SOUND )
 #	include <climits>
@@ -135,7 +125,6 @@ Actor::Print( std::ostream& s ) const
 	strcpy( szActor, "unknown" );
 
 #pragma message( __FILE__ ": recode to use genfh.hp macros" )
-#if !defined(__PSX__)
 
 	static char* actorNames[2000];
 	static int actorCount = 0;
@@ -187,7 +176,6 @@ Actor::Print( std::ostream& s ) const
 	if ( actorNames[ 0 ] && ( GetActorIndex() <= actorCount && actorNames[ GetActorIndex() ] ) )
 		strcpy( szActor, actorNames[ GetActorIndex() ] );
 
-#endif
 
 	s << "Actor #" << GetActorIndex() << " (" << szActor << ')';
     s << " Mailboxes = [" <<_mailboxes << ']';
@@ -1342,13 +1330,6 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
 
         case EMAILBOX_CD_TRACK:
         {
-#if defined( __WIN__ )
-#include <cdda/cd.hp>
-            //extern HWND worldFoundryhWnd;
-            //assert( worldFoundryhWnd );
-            // kts 7/14/99 7:34AM doesn't link right now
-            //playCDTrack( worldFoundryhWnd, value.WholePart() );
-#endif
             break;
         }
 
