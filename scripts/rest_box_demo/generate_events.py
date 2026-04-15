@@ -48,10 +48,11 @@ PALETTE = [
 
 def rand_box(rng, args):
     """Return a dict of box creation parameters."""
+    cx, cy, cz = args.near_player
     return {
-        "x": round(rng.uniform(-args.world_size, args.world_size), 3),
-        "y": round(rng.uniform(0, args.world_size), 3),
-        "z": round(rng.uniform(-args.world_size, args.world_size), 3),
+        "x": round(rng.uniform(cx - args.world_size, cx + args.world_size), 3),
+        "y": round(rng.uniform(cy, cy + args.world_size), 3),
+        "z": round(rng.uniform(cz - args.world_size, cz + args.world_size), 3),
         "l": round(rng.uniform(args.size_min, args.size_max), 3),
         "w": round(rng.uniform(args.size_min, args.size_max), 3),
         "h": round(rng.uniform(args.size_min, args.size_max), 3),
@@ -102,12 +103,20 @@ def main():
     p.add_argument("--max-live",   type=int,   default=8,          help="Max live boxes")
     p.add_argument("--size-min",   type=float, default=0.5,        help="Min dimension (m)")
     p.add_argument("--size-max",   type=float, default=5.0,        help="Max dimension (m)")
-    p.add_argument("--world-size", type=float, default=10.0,       help="World half-extent (m)")
+    p.add_argument("--world-size",  type=float, default=10.0,       help="World half-extent (m)")
+    p.add_argument("--near-player", type=str,   default="0,0,0",
+                   help="Centre of generation volume as x,y,z (default: 0,0,0)")
     p.add_argument("--interval",   type=float, default=1.5,        help="Mean seconds between events")
     p.add_argument("--out",        type=str,   default="events.json", help="Output file")
     p.add_argument("--host",       type=str,   default="localhost", help="REST API host")
     p.add_argument("--port",       type=int,   default=8765,        help="REST API port")
     args = p.parse_args()
+    try:
+        args.near_player = tuple(float(v) for v in args.near_player.split(","))
+        if len(args.near_player) != 3:
+            raise ValueError
+    except ValueError:
+        p.error("--near-player must be x,y,z (e.g. 1.5,0,-3.2)")
 
     rng = random.Random(args.seed)
     seed_used = args.seed if args.seed is not None else "(random)"
