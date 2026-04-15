@@ -96,7 +96,17 @@ were removed and their `#elif defined PHYSICS_ENGINE_WF` branches promoted to un
 
 ## Batch 5 — SKIP-list files and platform dead code (completed 2026-04-15, `03211f9`)
 
-**Result:** −20,967 lines deleted across 208 files (committed).  Build clean.  
+**Result:** −20,967 lines deleted across 208 files (committed).  Build clean.
+
+**⚠️ Regression introduced — fixed in `ec49c72`:** Batch 5 changed `gfx/rendobj3.cc` to
+`#include <gfx/gl/rendobj3.cc>` instead of `gfx/glpipeline/rendobj3.cc`.  The `gl/` version
+is an empty stub (`RenderObject3D::Render()` body is blank).  This produced a black screen:
+every actor rendered nothing.  Batch 5 also incorrectly assessed `gfx/glpipeline/` as dead —
+the files are compiled *indirectly* via `#include` from `rendobj3.cc`, not directly by
+`build_game.sh`.  The SKIP entry for `gfx/glpipeline/rendobj3.cc` (which *is* on the skip
+list) was confused with the whole directory.  The entire `glpipeline/` rendering layer
+(~1,800 lines of real GL code: `glVertex4f`, `SetGLTexture`, etc.) was restored in `ec49c72`.
+
 Post-Batch-5 subsystem LOC (code + headers, vendor excluded):
 
 | Subsystem | LOC |
@@ -326,7 +336,7 @@ subsystems.
 | `gfx/gl/display.cc` | ~61–320 | `#if 0` — `TestGL2()` function (~260 lines); disabled GL initialization test, never called |
 | `gfx/gl/display.cc` | ~330–346 | `#if 0` — VRAM init test code (16 lines) |
 | `gfx/material.cc` | ~392–404 | `#if 0` — debug vertex UV dump (13 lines) |
-| `gfx/material.cc` | — | Dead member `_renderer3D` (always `nullptr`); `Get3DRenderObjectPtr()` returns `nullptr`; `Get3DRenderer()` has no callers — remove member + both accessors from `material.cc/hp/hpi` |
+| `gfx/material.cc` | — | ~~Dead member `_renderer3D` (always `nullptr`); `Get3DRenderObjectPtr()` returns `nullptr`; `Get3DRenderer()` has no callers~~ — **REVERTED in `ec49c72`**: `_renderer3D` is live; it is set from the `glpipeline/renderer.ext` dispatch table and read by `glpipeline/rendobj3.cc::Render()` for per-face material dispatch |
 | `game/level.cc` | ~128–140 | `#if 0` — `findOADData()` function body (12 lines) |
 | `game/level.cc` | ~370–404 | `#if 0` — sizeof/offsetof debug output (34 lines) |
 | `pigsys/assert.cc` | 19–33 | `#if defined(ASSERT_DEBUG_MENU)` — `MAX_COMMAND_LINES`, `commandLines[]`, `descStrings[]`; macro never defined |

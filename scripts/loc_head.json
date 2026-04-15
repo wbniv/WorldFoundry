@@ -1,6 +1,6 @@
 {
-  "ref": "8760f27",
-  "date": "2026-04-15T18:02:27",
+  "ref": "ec49c72",
+  "date": "2026-04-15T19:42:07",
   "root": "wfsource/source",
   "subsystems": {
     "_root": {
@@ -53,11 +53,11 @@
       "files": 82
     },
     "gfx": {
-      "blank": 1531,
-      "comment": 3051,
-      "code": 4824,
-      "total": 9406,
-      "files": 61
+      "blank": 1790,
+      "comment": 3737,
+      "code": 5747,
+      "total": 11274,
+      "files": 72
     },
     "gfxfmt": {
       "blank": 204,
@@ -144,10 +144,10 @@
       "files": 7
     },
     "physics": {
-      "blank": 677,
-      "comment": 1053,
-      "code": 2069,
-      "total": 3799,
+      "blank": 662,
+      "comment": 1078,
+      "code": 2124,
+      "total": 3864,
       "files": 20
     },
     "pigsys": {
@@ -222,10 +222,10 @@
     }
   },
   "total": {
-    "blank": 12186,
-    "comment": 21651,
-    "code": 38184,
-    "total": 72021,
-    "files": 492
+    "blank": 12430,
+    "comment": 22362,
+    "code": 39162,
+    "total": 73954,
+    "files": 503
   }
 }
