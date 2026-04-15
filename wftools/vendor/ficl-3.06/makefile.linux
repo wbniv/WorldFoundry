@@ -1,0 +1,48 @@
+# === Toolchain & flags ===
+# C11 required for static_assert, stdint.h, and dynamic arrays in data structures
+CC       = gcc
+CFLAGS   = -O2 -std=c11 -Dlinux -D_POSIX_C_SOURCE=200809L
+DEPFLAGS = -MMD -MP
+
+LIB 	 = ar cr
+RANLIB   = ranlib
+
+
+OBJECTS = dict.o ficl.o fileaccess.o float.o dpmath.o \
+		  prefix.o search.o softcore.o stack.o \
+		  sysdep.o tools.o unity.o vm.o words.o
+DEPS    = $(OBJECTS:.o=.d) testmain.d
+
+# === Softcore.c is generated from softwords folder ===
+softcore.c:
+	make -C softwords softcore.c
+	cp softwords/softcore.c .
+
+# === Static library ===
+libficl.a: $(OBJECTS)
+	$(LIB) $@ $(OBJECTS)
+	$(RANLIB) $@
+
+# === Console Test executable ===
+ficl: testmain.o ficl.h sysdep.h libficl.a
+	$(CC) testmain.o -o ficl -L. -lficl -lm
+
+# === Compile rules ===
+.SUFFIXES: .cxx .cc .c .o
+
+.c.o:
+	$(CC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
+
+.cxx.o:
+	$(CPP) $(CPFLAGS) $(DEPFLAGS) -c $*.cxx
+
+.cc.o:
+	$(CPP) $(CPFLAGS) $(DEPFLAGS) -c $*.cc
+
+-include $(DEPS)
+
+#
+#  === utility targets ===
+#
+clean:
+	rm -f *.o *.a *.d 
