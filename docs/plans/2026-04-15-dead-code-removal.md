@@ -435,8 +435,7 @@ Also: added root `.gitignore` to prevent build artifacts (`.o`, `.pyc`, `objs_ga
 - [ ] `wfsource/source/game/newobj.bat` — Windows object template generator (keeping for now)
 - [ ] `wfsource/Makefile.rul` — shared rule base; check if only referenced by Makefile.psx/Makefile.win
 - [ ] `wfsource/Makefile.template` — template for platform makefiles; likely dead with the platforms
-- [ ] `wfsource/libraryhierarchy.dia` + `libraryhierarchy.ps` — old Dia architecture diagram + PostScript render
-- [ ] `wfsource/'Production Pathway.ps'` — old PostScript doc
+- [ ] `wfsource/libraryhierarchy.dia` — old Dia architecture diagram (`.ps` render kept)
 
 ### To do — GNUMakefile PSX/Win dead branches
 
