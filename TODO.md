@@ -1,8 +1,5 @@
 # TODO
 
-
-
-
 ## SCRIPTING ENGINES
 
 - [ ] Forth plug wiring — `scripting_forth.{hp,cc}`, per-backend impls, `\` sigil in ScriptRouter — [plan](docs/plans/2026-04-14-forth-scripting-engine.md)
@@ -13,11 +10,13 @@
 
 ## LUA ENGINE
 
-- [ ] Fix #6 — coroutine continuations for multi-tick scripts (AI, cutscenes, dialogue) — [plan](docs/plans/2026-04-15-lua-engine-fixes.md)
+- [verify] Fix #6 — coroutine continuations for multi-tick scripts (AI, cutscenes, dialogue) — [plan](docs/plans/2026-04-15-lua-engine-fixes.md)
 - [ ] Lua remote step debugger — MobDebug / LuaLS-DAP wired into lua_engine for in-game step debugging
 
 
 ## SCRIPTING INFRASTRUCTURE
+
+- [ ] Review actor variable space w.r.t. scripting languages — each actor has a fixed-size mailbox array; audit whether per-actor _ENV tables (Lua), JS object state, wasm linear memory, and Fennel locals all play well with that constraint; document any per-language limits
 
 - [ ] `WF_DEFAULT_ENGINE` knob — sigil-less script fallback engine selection — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
 - [ ] Mailbox constants cross-language audit — verify INDEXOF_* names are consistent across Lua/JS/wasm — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
@@ -35,7 +34,7 @@
 
 - [ ] `WF_JS_ENGINE=jerryscript-nano` footprint build
 - [ ] Alternate wasm sigil `#!wat` — deferred pending wabt vendor — [plan](docs/plans/2026-04-14-wasm3-scripting-engine.md)
-- [ ] Rust OAD layer — deferred indefinitely — [investigation](docs/investigations/2026-04-11-wftools-rewrite-analysis.md)
+- [ ] Rust tool ports (`iffcomp`, `iffdump`, `oaddump`, `lvldump`) — prerequisite: `worldfoundry-iff` crate (Phase 1), then `worldfoundry-oad` descriptor-reader subset (Phase 1); full OAD editor library (Phase 3) needed only for `attribedit-egui` + Blender addon — [investigation](docs/investigations/2026-04-11-wftools-rewrite-analysis.md)
 
 
 ## DONE
