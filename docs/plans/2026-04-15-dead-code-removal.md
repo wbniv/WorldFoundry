@@ -400,6 +400,8 @@ internally.
 
 ### Already done (committed on this branch)
 
+**Deleted from wfsource:**
+
 | Item | What | Commit |
 |------|------|--------|
 | `wfsource/import.bat` | CVS import script | `c160456` |
@@ -408,12 +410,21 @@ internally.
 | `wfsource/source/eval/` | Dead lex/yacc expression evaluator (608 lines) | `330a23d` |
 | `wfsource/source/console/` | Already empty; rmdir only | — |
 | `wfsource/source/ini/` | Already empty; rmdir only | — |
+| `wfsource/source/template/` | Already empty; rmdir only | — |
 | `wfsource/source/menu/` | 136 LOC; no callers outside itself | `2f2fe37` |
 | `wfsource/source/midi/` | 1 leftover `.rc` file | `2f2fe37` |
-| `wfsource/source/template/` | Already empty; rmdir only | — |
 | `wfsource/source/savegame/` | 1 leftover `.rc` file | `b16573d` |
 | `wfsource/source/toolstub/` | HAL stub for old C++ tools; no callers | `4522938` |
-| `wfsource/source/eval/` (already listed) | see above | `330a23d` |
+
+**Moved to wftools (tool-only libraries, no game callers):**
+
+| Item | What | Commit |
+|------|------|--------|
+| `wfsource/source/iffwrite/` → `wftools/iffwrite/` | IFF write library; used by old C++ iffcomp | `f89c0c5` |
+| `wfsource/source/regexp/` → `wftools/regexp/` | Regex library; used by `prep` only | `01d708b` |
+| `wfsource/source/recolib/` → `wftools/recolib/` | Token/command/path lib; used by iffdump, iff2lvl, iffcomp, prep | `dde7dcd` |
+
+Also: added root `.gitignore` to prevent build artifacts (`.o`, `.pyc`, `objs_game/`) from being tracked (`01d708b`).
 
 ### To do — top-level wfsource artifacts
 
@@ -421,7 +432,7 @@ internally.
 - [ ] `wfsource/Makefile.win` — Windows build rules
 - [ ] `wfsource/psx.ini` — PSX hardware config
 - [ ] `wfsource/README.windows` — MSVC 6.0 / OpusMake build instructions
-- [ ] `wfsource/source/game/newobj.bat` — Windows object template generator (user keeping for now)
+- [ ] `wfsource/source/game/newobj.bat` — Windows object template generator (keeping for now)
 - [ ] `wfsource/Makefile.rul` — shared rule base; check if only referenced by Makefile.psx/Makefile.win
 - [ ] `wfsource/Makefile.template` — template for platform makefiles; likely dead with the platforms
 - [ ] `wfsource/libraryhierarchy.dia` + `libraryhierarchy.ps` — old Dia architecture diagram + PostScript render
@@ -435,7 +446,6 @@ internally.
 ### To do — orphaned subsystems (no game callers)
 
 - [ ] `wfsource/source/gfxfmt/` — image format library (TGA/BMP/SGI); only referenced by its own `test.cc`
-- [ ] `wfsource/source/iffwrite/` — IFF write library; only used by legacy C++ `wftools/iffcomp/` (superseded by `iffcomp-rs` and `iffcomp-go`)
 
 ### To do — platform #ifdef guards in source
 
