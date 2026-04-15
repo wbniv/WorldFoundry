@@ -408,8 +408,12 @@ internally.
 | `wfsource/source/eval/` | Dead lex/yacc expression evaluator (608 lines) | `330a23d` |
 | `wfsource/source/console/` | Already empty; rmdir only | — |
 | `wfsource/source/ini/` | Already empty; rmdir only | — |
-| `wfsource/source/menu/` | 136 LOC; no callers outside itself | (pending commit) |
-| `wfsource/source/midi/` | 1 leftover `.rc` file | (pending commit) |
+| `wfsource/source/menu/` | 136 LOC; no callers outside itself | `2f2fe37` |
+| `wfsource/source/midi/` | 1 leftover `.rc` file | `2f2fe37` |
+| `wfsource/source/template/` | Already empty; rmdir only | — |
+| `wfsource/source/savegame/` | 1 leftover `.rc` file | `b16573d` |
+| `wfsource/source/toolstub/` | HAL stub for old C++ tools; no callers | `4522938` |
+| `wfsource/source/eval/` (already listed) | see above | `330a23d` |
 
 ### To do — top-level wfsource artifacts
 
@@ -417,7 +421,7 @@ internally.
 - [ ] `wfsource/Makefile.win` — Windows build rules
 - [ ] `wfsource/psx.ini` — PSX hardware config
 - [ ] `wfsource/README.windows` — MSVC 6.0 / OpusMake build instructions
-- [ ] `wfsource/source/game/newobj.bat` — Windows object template generator (kept for now)
+- [ ] `wfsource/source/game/newobj.bat` — Windows object template generator (user keeping for now)
 - [ ] `wfsource/Makefile.rul` — shared rule base; check if only referenced by Makefile.psx/Makefile.win
 - [ ] `wfsource/Makefile.template` — template for platform makefiles; likely dead with the platforms
 - [ ] `wfsource/libraryhierarchy.dia` + `libraryhierarchy.ps` — old Dia architecture diagram + PostScript render
