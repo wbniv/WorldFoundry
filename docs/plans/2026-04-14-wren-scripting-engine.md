@@ -1,6 +1,12 @@
 # Plan: Wren as a scripting engine option for World Foundry
 
 **Date:** 2026-04-14
+**Status:** **pending.** Targets the 2026-04-15 ScriptRouter convention:
+the Wren plug lives in a new `wftools/wf_viewer/stubs/scripting_wren.{hp,cc}`
+as a file-scope `wren_engine` namespace (matching `lua_engine`), exposing
+`Init / Shutdown / AddConstantArray / DeleteConstantArray / RunScript`.
+The `//wren\n` sigil arm goes in `ScriptRouter::RunScript`, not in any
+Lua class.
 **Branch:** drop-dead-renderers (or new branch)
 **Prior art:** `docs/plans/2026-04-14-pluggable-scripting-engine.md` (JS pattern), `docs/plans/2026-04-14-wasm3-scripting-engine.md` (wasm3 pattern)
 
@@ -67,11 +73,13 @@ And record the tarball SHA256 in the SHA256 section.
 class MailboxesManager;
 struct IntArrayEntry;
 
-void  WrenRuntimeInit(MailboxesManager& mgr);
-void  WrenRuntimeShutdown();
-void  WrenAddConstantArray(IntArrayEntry* entryList);
-void  WrenDeleteConstantArray(IntArrayEntry* entryList);  // no-op (preamble rebuilt on add)
-float WrenRunScript(const char* src, int objectIndex);
+namespace wren_engine {
+    void  Init(MailboxesManager& mgr);
+    void  Shutdown();
+    void  AddConstantArray(IntArrayEntry* entryList);
+    void  DeleteConstantArray(IntArrayEntry* entryList);  // no-op (preamble rebuilt on add)
+    float RunScript(const char* src, int objectIndex);
+}
 
 #endif // WF_ENABLE_WREN
 ```
