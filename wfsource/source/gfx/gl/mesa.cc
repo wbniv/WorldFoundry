@@ -134,7 +134,8 @@ OpenMainWindow( char *title )
     if(!halDisplay.win)
         FatalError("Couldn't open X window!");
     XStoreName(halDisplay.mainDisplay, halDisplay.win, title);
-    XMapWindow(halDisplay.mainDisplay, halDisplay.win);
+    // XMapRaised = map + raise; signals the WM to focus the window on open.
+    XMapRaised(halDisplay.mainDisplay, halDisplay.win);
     glXMakeCurrent(halDisplay.mainDisplay, halDisplay.win, cx);
     AssertGLOK();
 #else
