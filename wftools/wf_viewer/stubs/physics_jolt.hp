@@ -1,0 +1,14 @@
+// physics_jolt.hp — declaration of Jolt runtime lifecycle functions.
+//
+// Include this wherever JoltRuntimeInit / JoltRuntimeShutdown are called.
+// Both are no-ops (not compiled) unless PHYSICS_ENGINE_JOLT is defined.
+
+#pragma once
+
+#ifdef PHYSICS_ENGINE_JOLT
+void JoltRuntimeInit();
+void JoltRuntimeShutdown();
+#else
+inline void JoltRuntimeInit()     {}
+inline void JoltRuntimeShutdown() {}
+#endif

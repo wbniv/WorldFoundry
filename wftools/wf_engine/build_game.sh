@@ -12,9 +12,8 @@ STUBS="$REPO_ROOT/wftools/wf_viewer/include"
 STUB_SRC="$REPO_ROOT/wftools/wf_viewer/stubs"
 OUT="$SCRIPT_DIR/objs_game"
 
-# Feature flag: compile in Fennel (Lisp → Lua) support. Default off so the
-# default build stays Fennel-free (no ~145 KB embed, no `;`-sigil dispatch).
-# Set to 1 to embed the vendored fennel.lua and enable runtime dispatch.
+# Feature flag: compile in Fennel (Lisp → Lua) support. Default on.
+# Set to 0 to drop the ~145 KB embed and `;`-sigil dispatch.
 WF_ENABLE_FENNEL="${WF_ENABLE_FENNEL:-1}"
 
 # Feature flag: optional JS engine for the `//` sigil. One of:
@@ -33,15 +32,15 @@ QJS_DIR="$VENDOR/quickjs-v0.14.0"
 JRY_DIR="$VENDOR/jerryscript-v3.0.0"
 
 # Feature flag: Wren scripting engine for the `//wren\n` sigil.
-# Checked before generic `//` (JS) in dispatch order.
-#   0 (default) — no Wren compiled in.
-#   1           — Wren 0.4.0 amalgamation (~420 KB source, ~150 KB .text).
+# Checked before generic `//` (JS) in dispatch order. Default on.
+#   0 — no Wren compiled in.
+#   1 — Wren 0.4.0 amalgamation (~420 KB source, ~150 KB .text).
 WF_ENABLE_WREN="${WF_ENABLE_WREN:-1}"
 WREN_DIR="$VENDOR/wren-0.4.0"
 
-# Feature flag: optional Forth engine for the `\` sigil. One of:
-#   none     (default) — no Forth compiled in.
-#   zforth   — zForth 4 KB core (MIT); default when Forth is enabled.
+# Feature flag: optional Forth engine for the `\` sigil. Default: zforth. One of:
+#   none     — no Forth compiled in.
+#   zforth   — zForth 4 KB core (MIT); default.
 #   ficl     — ficl ~100 KB (BSD-2); ANS Forth + OOP.
 #   atlast   — Atlast ~30 KB (public domain); Autodesk-pedigree.
 #   embed    — embed ~5 KB VM (MIT); 16-bit cells; correct on fixed-point target.
@@ -56,10 +55,10 @@ case "$WF_FORTH_ENGINE" in
 esac
 ZFORTH_DIR="$VENDOR/zforth-41db72d1"
 
-# Feature flag: optional WebAssembly engine for the `#b64\n` sigil. One of:
-#   none    (default) — no wasm compiled in, zero binary delta vs. today.
+# Feature flag: optional WebAssembly engine for the `#b64\n` sigil. Default: wamr. One of:
+#   none    — no wasm compiled in, zero binary delta vs. Lua-only.
 #   wasm3   — wasm3 v0.5.0 (~65 KB), pure-C interpreter, MIT.
-#   wamr    — WAMR 2.2.0 classic interpreter (~520 KB), Apache-2.0.
+#   wamr    — WAMR 2.2.0 classic interpreter (~520 KB), Apache-2.0; default.
 #             Supports host-supplied (global …) imports for INDEXOF_* constants.
 # Only one wasm runtime at a time; the `#b64\n` sigil is shared.
 WF_WASM_ENGINE="${WF_WASM_ENGINE:-wamr}"
@@ -482,7 +481,7 @@ fi
 declare -a JOLT_LINK_EXTRA=()
 if [[ "$WF_PHYSICS_ENGINE" == "jolt" ]]; then
     echo "  CC (stub) physics_jolt.cc"
-    g++ "${CXXFLAGS[@]}" -O2 -c "$STUB_SRC/physics_jolt.cc" -o "$OUT/stubs__physics_jolt.o"
+    g++ "${CXXFLAGS[@]}" -O2 -DNDEBUG -c "$STUB_SRC/physics_jolt.cc" -o "$OUT/stubs__physics_jolt.o"
     OBJS+=("$OUT/stubs__physics_jolt.o")
 
     JOLT_BUILD="$OUT/jolt_build"
@@ -497,14 +496,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Disable optional Jolt subsystems we do not need.
+# Jolt.cmake creates the Jolt target and alias Jolt::Jolt itself.
+# We only need to point it at the source root and configure the target after.
 set(PHYSICS_REPO_ROOT "$ENV{JOLT_DIR}")
-option(ENABLE_ALL_WARNINGS "" OFF)
-option(USE_STATIC_MSVC_RUNTIME_LIBRARY "" OFF)
-option(CROSS_PLATFORM_DETERMINISTIC "" OFF)
-option(OBJECT_LAYER_BITS "Number of bits in ObjectLayer" 16)
 
-# Exclude the debug renderer and soft-body (not needed by WF).
+# Compile without the debug renderer, profiler, and soft-body.
 add_compile_definitions(
     JPH_PROFILE_ENABLED=0
     JPH_DEBUG_RENDERER=0
@@ -513,11 +509,8 @@ add_compile_definitions(
 
 include(${PHYSICS_REPO_ROOT}/Jolt/Jolt.cmake)
 
-# Filter out soft-body and debug-renderer TUs.
-list(FILTER JOLT_PHYSICS_SRC_FILES EXCLUDE REGEX "SoftBody|DebugRenderer|Ragdoll|Skeleton|ObjectStream")
-
-add_library(Jolt STATIC ${JOLT_PHYSICS_SRC_FILES})
-target_include_directories(Jolt PUBLIC ${PHYSICS_REPO_ROOT})
+# Jolt.cmake has now created the Jolt static-library target.
+# Apply WF-specific compiler options to it.
 target_compile_options(Jolt PRIVATE -O2 -w)
 JOLTCMAKE
 
@@ -565,7 +558,7 @@ if [[ ${#FAILED_SRCS[@]} -gt 0 ]]; then
 fi
 
 echo "=== Linking ==="
-g++ "${OBJS[@]}" "${JS_LINK_EXTRA[@]}" \
+g++ "${OBJS[@]}" "${JS_LINK_EXTRA[@]}" "${JOLT_LINK_EXTRA[@]}" \
     -lGL -lGLU -lX11 -lm -lpthread -ldl \
     -o "$SCRIPT_DIR/wf_game"
 

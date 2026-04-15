@@ -20,8 +20,11 @@ as source and is linked in at build time.
 | `pforth-63d4a418/` | commit `63d4a418` | 0-clause BSD (PD) | https://github.com/philburk/pforth |
 | `nanoforth-3b9c3aab/` | commit `3b9c3aab` | MIT | https://github.com/chochain/nanoFORTH |
 | `wren-0.4.0/` | 0.4.0 | MIT | https://github.com/wren-lang/wren/releases/tag/0.4.0 |
+| `jolt-physics-5.5.0/` | 5.5.0 | MIT | https://github.com/jrouwe/JoltPhysics/releases/tag/v5.5.0 |
 
 ## Tarball SHA256
+
+- `jolt-physics-5.5.0.tar.gz` — `b2dbc3c41398f22b2914112a962f286643d1c74bac8418eae772e267392c1313` (upstream GitHub tarball)
 
 - `jerryscript-v3.0.0.tar.gz` — `4d586d922ba575d95482693a45169ebe6cb539c4b5a0d256a6651a39e47bf0fc` (upstream GitHub tarball)
 - `wasm3-v0.5.0.tar.gz` — `b778dd72ee2251f4fe9e2666ee3fe1c26f06f517c3ffce572416db067546536c` (upstream GitHub tarball)

@@ -1,0 +1,66 @@
+-- The C compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Build Configurations:
+     Build as target X86_64
+     CMAKE_BUILD_TYPE MinSizeRel
+     WAMR Interpreter enabled
+     WAMR AOT disabled
+     WAMR Fast JIT disabled
+     WAMR LLVM ORC JIT disabled
+     Libc builtin disabled
+     Libc WASI disabled
+     Fast interpreter enabled
+     Multiple modules disabled
+     Bulk memory feature enabled
+     Wakeup of blocking operations enabled
+     Reference types disabled
+     GC performance profiling disabled
+     Write linear memory base addr to x86 GS register enabled
+-- The ASM compiler identification is GNU
+-- Found assembler: /usr/bin/cc
+-- Looking for mremap
+-- Looking for mremap - found
+-- Configuring done (0.4s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/will/WorldFoundry/wftools/wf_engine/objs_game/wamr_build/out
+[  2%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/platform/common/posix/posix_blocking_op.c.o
+[  5%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/platform/common/posix/posix_sleep.c.o
+[  8%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/platform/common/posix/posix_malloc.c.o
+[ 13%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/mem-alloc/ems/ems_gc.c.o
+[ 19%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/platform/common/posix/posix_thread.c.o
+[ 22%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/platform/common/posix/posix_time.c.o
+[ 11%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/platform/linux/platform_init.c.o
+[ 19%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/platform/common/posix/posix_memmap.c.o
+[ 25%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/mem-alloc/ems/ems_alloc.c.o
+[ 27%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/mem-alloc/mem_alloc.c.o
+[ 30%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/mem-alloc/ems/ems_hmu.c.o
+[ 33%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/mem-alloc/ems/ems_kfc.c.o
+[ 36%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/utils/bh_assert.c.o
+[ 38%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/utils/bh_bitmap.c.o
+[ 41%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/utils/bh_common.c.o
+[ 44%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/utils/bh_vector.c.o
+[ 47%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/utils/bh_leb128.c.o
+[ 50%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/utils/runtime_timer.c.o
+[ 52%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/utils/bh_hashmap.c.o
+[ 55%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/utils/bh_list.c.o
+[ 58%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/utils/bh_log.c.o
+[ 63%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/iwasm/common/wasm_application.c.o
+[ 63%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/iwasm/common/wasm_c_api.c.o
+[ 69%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/shared/utils/bh_queue.c.o
+[ 66%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/iwasm/common/wasm_blocking_op.c.o
+[ 72%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/iwasm/common/wasm_loader_common.c.o
+[ 75%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/iwasm/common/wasm_native.c.o
+[ 77%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/iwasm/common/wasm_exec_env.c.o
+[ 80%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/iwasm/common/wasm_memory.c.o
+[ 83%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/iwasm/common/wasm_shared_memory.c.o
+[ 88%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/iwasm/common/wasm_runtime_common.c.o
+[ 86%] Building ASM object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/iwasm/common/arch/invokeNative_em64.s.o
+[ 94%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/iwasm/interpreter/wasm_runtime.c.o
+[ 91%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/iwasm/interpreter/wasm_loader.c.o
+[ 97%] Building C object CMakeFiles/vmlib.dir/home/will/WorldFoundry/wftools/vendor/wamr-2.2.0/core/iwasm/interpreter/wasm_interp_fast.c.o
+[100%] Linking C static library libvmlib.a
+[100%] Built target vmlib

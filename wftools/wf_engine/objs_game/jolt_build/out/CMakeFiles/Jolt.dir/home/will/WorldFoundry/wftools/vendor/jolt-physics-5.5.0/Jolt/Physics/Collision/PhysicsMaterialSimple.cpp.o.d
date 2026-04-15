@@ -1,0 +1,29 @@
+CMakeFiles/Jolt.dir/home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/PhysicsMaterialSimple.cpp.o: \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/PhysicsMaterialSimple.cpp \
+ /usr/include/stdc-predef.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/PhysicsMaterialSimple.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Physics/Collision/PhysicsMaterial.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Core/Reference.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Core/Atomics.h \
+ /usr/include/c++/13/atomic /usr/include/c++/13/bits/atomic_base.h \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
+ /usr/include/c++/13/new \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h \
+ /usr/include/c++/13/bits/atomic_lockfree_defines.h \
+ /usr/include/c++/13/bits/move.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Core/Color.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Core/Result.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/ObjectStream/SerializableObject.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/ObjectStream/ObjectStream.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Core/RTTI.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/ObjectStream/SerializableAttribute.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Core/NonCopyable.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/ObjectStream/TypeDeclarations.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Geometry/AABox.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Geometry/Triangle.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Geometry/IndexedTriangle.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Geometry/Plane.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/ObjectStream/SerializableAttributeTyped.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/ObjectStream/SerializableAttributeEnum.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Core/StreamIn.h \
+ /home/will/WorldFoundry/wftools/vendor/jolt-physics-5.5.0/Jolt/Core/StreamOut.h

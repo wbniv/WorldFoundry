@@ -18,6 +18,7 @@
 #include "scripting_js.hp"
 #include "scripting_wasm3.hp"
 #include "scripting_wamr.hp"
+#include "physics_jolt.hp"
 
 extern "C" {
 #include <lua.h>
@@ -435,6 +436,7 @@ public:
 ScriptRouter::ScriptRouter(MailboxesManager& mgr)
     : ScriptInterpreter(mgr)
 {
+    JoltRuntimeInit();
 #ifdef WF_WITH_FORTH
     forth_engine::Init(mgr);
 #endif
@@ -477,6 +479,7 @@ ScriptRouter::~ScriptRouter()
 #ifdef WF_WITH_FORTH
     forth_engine::Shutdown();
 #endif
+    JoltRuntimeShutdown();
 }
 
 Scalar ScriptRouter::RunScript(const void* script, int objectIndex)
