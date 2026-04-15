@@ -120,6 +120,10 @@ static std::unordered_map<const char*, int> gScriptRefs;
 // so INDEXOF_* constants and read_mailbox/write_mailbox remain visible while
 // actor-local writes stay isolated.
 static std::unordered_map<int, int> gActorEnvRefs;
+// Per-actor live coroutine threads: objectIndex → registry ref of lua_State*.
+// Present only while the coroutine is suspended (LUA_YIELD). Cleared on
+// LUA_OK (finished) or error.
+static std::unordered_map<int, int> gActorThreadRefs;
 
 // --------------------------------------------------------------------------
 // C closures — read_mailbox / write_mailbox
@@ -229,6 +233,52 @@ static int GetOrCreateActorEnv(int objectIndex)
     return ref;
 }
 
+// Resume an active coroutine thread for objectIndex.
+// Reads the yield/return value from the thread stack.
+// Clears the thread ref from gActorThreadRefs on LUA_OK or error.
+static float ResumeThread(int objectIndex, int threadRef, lua_State* thread)
+{
+    int nresults = 0;
+    int status = lua_resume(thread, gL, 0, &nresults);
+    double result = 0.0;
+
+    if (status == LUA_YIELD) {
+        if (nresults > 0 && lua_isnumber(thread, -1))
+            result = lua_tonumber(thread, -1);
+        lua_settop(thread, 0);
+    } else if (status == LUA_OK) {
+        if (nresults > 0 && lua_isnumber(thread, -1))
+            result = lua_tonumber(thread, -1);
+        lua_settop(thread, 0);
+        luaL_unref(gL, LUA_REGISTRYINDEX, threadRef);
+        gActorThreadRefs.erase(objectIndex);
+    } else {
+        std::fprintf(stderr, "lua coroutine error (actor %d): %s\n",
+                     objectIndex, lua_tostring(thread, -1));
+        lua_settop(thread, 0);
+        luaL_unref(gL, LUA_REGISTRYINDEX, threadRef);
+        gActorThreadRefs.erase(objectIndex);
+    }
+    return static_cast<float>(result);
+}
+
+// After a successful lua_pcall, inspect the top-of-stack return value.
+// If it is a coroutine thread, store it and do the first resume.
+// Otherwise treat it as a number (or 0 if not numeric).
+static float HandlePCallResult(int objectIndex)
+{
+    if (lua_gettop(gL) > 0 && lua_type(gL, -1) == LUA_TTHREAD) {
+        lua_State* thread = lua_tothread(gL, -1);
+        int threadRef = luaL_ref(gL, LUA_REGISTRYINDEX);  // pops thread from gL
+        gActorThreadRefs[objectIndex] = threadRef;
+        return ResumeThread(objectIndex, threadRef, thread);
+    }
+    double result = (lua_gettop(gL) > 0 && lua_isnumber(gL, -1))
+                    ? lua_tonumber(gL, -1) : 0.0;
+    lua_settop(gL, 0);
+    return static_cast<float>(result);
+}
+
 void Shutdown()
 {
     if (gL) {
@@ -236,11 +286,14 @@ void Shutdown()
             luaL_unref(gL, LUA_REGISTRYINDEX, kv.second);
         for (auto& kv : gActorEnvRefs)
             luaL_unref(gL, LUA_REGISTRYINDEX, kv.second);
+        for (auto& kv : gActorThreadRefs)
+            luaL_unref(gL, LUA_REGISTRYINDEX, kv.second);
         lua_close(gL);
         gL = nullptr;
     }
     gScriptRefs.clear();
     gActorEnvRefs.clear();
+    gActorThreadRefs.clear();
     gMailboxes = nullptr;
     gFennelEvalRef    = LUA_NOREF;
     gFennelCompileRef = LUA_NOREF;
@@ -266,6 +319,17 @@ float RunScript(const char* src, int objectIndex)
 {
     gCurrentObject = objectIndex;
     if (!src || !*src) return 0.0f;
+
+    // If this actor has a live coroutine, resume it instead of re-calling.
+    {
+        auto tit = gActorThreadRefs.find(objectIndex);
+        if (tit != gActorThreadRefs.end()) {
+            lua_rawgeti(gL, LUA_REGISTRYINDEX, tit->second);
+            lua_State* thread = lua_tothread(gL, -1);
+            lua_pop(gL, 1);
+            return ResumeThread(objectIndex, tit->second, thread);
+        }
+    }
 
 #ifdef WF_ENABLE_FENNEL
     if (gFennelCompileRef != LUA_NOREF) {
@@ -311,9 +375,7 @@ float RunScript(const char* src, int objectIndex)
                 lua_pop(gL, 1);
                 return 0.0f;
             }
-            double result = lua_isnumber(gL, -1) ? lua_tonumber(gL, -1) : 0.0;
-            lua_settop(gL, 0);
-            return static_cast<float>(result);
+            return HandlePCallResult(objectIndex);
         }
     }
 #endif
@@ -346,11 +408,7 @@ float RunScript(const char* src, int objectIndex)
         lua_pop(gL, 1);
         return 0.0f;
     }
-    double result = 0.0;
-    if (lua_gettop(gL) > 0 && lua_isnumber(gL, -1))
-        result = lua_tonumber(gL, -1);
-    lua_settop(gL, 0);
-    return static_cast<float>(result);
+    return HandlePCallResult(objectIndex);
 }
 
 } // namespace lua_engine
@@ -374,10 +432,10 @@ ScriptRouter::ScriptRouter(MailboxesManager& mgr)
 {
     lua_engine::Init(mgr);
 #ifdef WF_WITH_JS
-    JsRuntimeInit(mgr);
+    js_engine::Init(mgr);
 #endif
 #ifdef WF_WITH_WASM
-    Wasm3RuntimeInit(mgr);
+    wasm3_engine::Init(mgr);
 #endif
     AddConstantArray(mailboxIndexArray);
     AddConstantArray(joystickArray);
@@ -388,10 +446,10 @@ ScriptRouter::~ScriptRouter()
     DeleteConstantArray(joystickArray);
     DeleteConstantArray(mailboxIndexArray);
 #ifdef WF_WITH_WASM
-    Wasm3RuntimeShutdown();
+    wasm3_engine::Shutdown();
 #endif
 #ifdef WF_WITH_JS
-    JsRuntimeShutdown();
+    js_engine::Shutdown();
 #endif
     lua_engine::Shutdown();
 }
@@ -407,14 +465,14 @@ Scalar ScriptRouter::RunScript(const void* script, int objectIndex)
 #ifdef WF_WITH_JS
     // `//` → JavaScript. `//` is a Lua syntax error so no collision.
     if (p[0] == '/' && p[1] == '/')
-        return Scalar::FromFloat(JsRunScript(src, objectIndex));
+        return Scalar::FromFloat(js_engine::RunScript(src, objectIndex));
 #endif
 
 #ifdef WF_WITH_WASM
     // `#b64\n` → wasm3 (base64-encoded module). Bare `#` not claimed here
     // because cd.iff TCL fragments use `##` line comments.
     if (p[0] == '#' && p[1] == 'b' && p[2] == '6' && p[3] == '4' && p[4] == '\n')
-        return Scalar::FromFloat(Wasm3RunScript(src, objectIndex));
+        return Scalar::FromFloat(wasm3_engine::RunScript(src, objectIndex));
 #endif
 
     // Fallthrough → Lua engine (handles bare Lua and `;`-prefixed Fennel internally).
@@ -425,10 +483,10 @@ void ScriptRouter::AddConstantArray(IntArrayEntry* entryList)
 {
     lua_engine::AddConstantArray(entryList);
 #ifdef WF_WITH_JS
-    JsAddConstantArray(entryList);
+    js_engine::AddConstantArray(entryList);
 #endif
 #ifdef WF_WITH_WASM
-    Wasm3AddConstantArray(entryList);
+    wasm3_engine::AddConstantArray(entryList);
 #endif
 }
 
@@ -436,10 +494,10 @@ void ScriptRouter::DeleteConstantArray(IntArrayEntry* entryList)
 {
     lua_engine::DeleteConstantArray(entryList);
 #ifdef WF_WITH_JS
-    JsDeleteConstantArray(entryList);
+    js_engine::DeleteConstantArray(entryList);
 #endif
 #ifdef WF_WITH_WASM
-    Wasm3DeleteConstantArray(entryList);
+    wasm3_engine::DeleteConstantArray(entryList);
 #endif
 }
 

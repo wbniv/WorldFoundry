@@ -133,7 +133,7 @@ M3Result link_host_imports(IM3Module module)
 
 // -------------------------------------------------------------------- API
 
-void Wasm3RuntimeInit(MailboxesManager& mgr)
+void wasm3_engine::Init(MailboxesManager& mgr)
 {
     g_mailboxes = &mgr;
     g_env       = m3_NewEnvironment();
@@ -178,23 +178,23 @@ void Wasm3RuntimeInit(MailboxesManager& mgr)
     }
 }
 
-void Wasm3RuntimeShutdown()
+void wasm3_engine::Shutdown()
 {
     if (g_runtime) { m3_FreeRuntime(g_runtime); g_runtime = nullptr; }
     if (g_env)     { m3_FreeEnvironment(g_env); g_env     = nullptr; }
     g_mailboxes = nullptr;
 }
 
-void Wasm3AddConstantArray(IntArrayEntry* /*entryList*/)
+void wasm3_engine::AddConstantArray(IntArrayEntry* /*entryList*/)
 {
     // Deliberately empty — see file-top note on the constant-globals gap.
 }
 
-void Wasm3DeleteConstantArray(IntArrayEntry* /*entryList*/)
+void wasm3_engine::DeleteConstantArray(IntArrayEntry* /*entryList*/)
 {
 }
 
-float Wasm3RunScript(const char* src, int objectIndex)
+float wasm3_engine::RunScript(const char* src, int objectIndex)
 {
     if (!g_runtime || !src) return 0.0f;
     g_currentObjectIndex = objectIndex;

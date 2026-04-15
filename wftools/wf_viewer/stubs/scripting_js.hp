@@ -19,17 +19,21 @@
 class MailboxesManager;
 struct IntArrayEntry;
 
-// Lifetime hooks. Called from LuaInterpreter ctor/dtor.
-void  JsRuntimeInit(MailboxesManager& mgr);
-void  JsRuntimeShutdown();
+namespace js_engine {
+
+// Lifetime hooks. Called from ScriptRouter ctor/dtor.
+void  Init(MailboxesManager& mgr);
+void  Shutdown();
 
 // Register/unregister INDEXOF_* / JOYSTICK_BUTTON_* tables as JS globals.
-void  JsAddConstantArray(IntArrayEntry* entryList);
-void  JsDeleteConstantArray(IntArrayEntry* entryList);
+void  AddConstantArray(IntArrayEntry* entryList);
+void  DeleteConstantArray(IntArrayEntry* entryList);
 
 // Execute a script. Returns the numeric result (NaN → 0.0). `objectIndex`
 // sets the "current actor" for unqualified read/write_mailbox calls.
-float JsRunScript(const char* src, int objectIndex);
+float RunScript(const char* src, int objectIndex);
+
+} // namespace js_engine
 
 #endif // any WF_JS_ENGINE_*
 

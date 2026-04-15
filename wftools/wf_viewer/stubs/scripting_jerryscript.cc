@@ -73,7 +73,7 @@ void set_global_fn(const char* name, jerry_external_handler_t h)
 
 } // namespace
 
-void JsRuntimeInit(MailboxesManager& mgr)
+void js_engine::Init(MailboxesManager& mgr)
 {
     gMgr = &mgr;
     jerry_init(JERRY_INIT_EMPTY);
@@ -83,7 +83,7 @@ void JsRuntimeInit(MailboxesManager& mgr)
     std::fprintf(stderr, "jerryscript: runtime initialised\n");
 }
 
-void JsRuntimeShutdown()
+void js_engine::Shutdown()
 {
     if (gInit) {
         jerry_cleanup();
@@ -92,7 +92,7 @@ void JsRuntimeShutdown()
     gMgr = nullptr;
 }
 
-void JsAddConstantArray(IntArrayEntry* entryList)
+void js_engine::AddConstantArray(IntArrayEntry* entryList)
 {
     if (!gInit) return;
     jerry_value_t global = jerry_current_realm();
@@ -105,7 +105,7 @@ void JsAddConstantArray(IntArrayEntry* entryList)
     jerry_value_free(global);
 }
 
-void JsDeleteConstantArray(IntArrayEntry* entryList)
+void js_engine::DeleteConstantArray(IntArrayEntry* entryList)
 {
     if (!gInit) return;
     jerry_value_t global = jerry_current_realm();
@@ -116,7 +116,7 @@ void JsDeleteConstantArray(IntArrayEntry* entryList)
     jerry_value_free(global);
 }
 
-float JsRunScript(const char* src, int objectIndex)
+float js_engine::RunScript(const char* src, int objectIndex)
 {
     if (!gInit || !src) return 0.0f;
     gCurObj = objectIndex;

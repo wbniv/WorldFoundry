@@ -89,7 +89,7 @@ void log_exception(const char* where)
 
 } // namespace
 
-void JsRuntimeInit(MailboxesManager& mgr)
+void js_engine::Init(MailboxesManager& mgr)
 {
     gMgr = &mgr;
     gRt  = JS_NewRuntime();
@@ -103,19 +103,19 @@ void JsRuntimeInit(MailboxesManager& mgr)
     // an IFF patch. Drop after the JS path has shipped to a level script.
     {
         const char* s1 = "// js smoke 1\n1 + 2";
-        float r1 = JsRunScript(s1, 0);
+        float r1 = js_engine::RunScript(s1, 0);
         std::fprintf(stderr, "quickjs smoke: 1+2 -> %g (expect 3)\n", (double)r1);
     }
 }
 
-void JsRuntimeShutdown()
+void js_engine::Shutdown()
 {
     if (gCtx) { JS_FreeContext(gCtx); gCtx = nullptr; }
     if (gRt)  { JS_FreeRuntime(gRt);  gRt  = nullptr; }
     gMgr = nullptr;
 }
 
-void JsAddConstantArray(IntArrayEntry* entryList)
+void js_engine::AddConstantArray(IntArrayEntry* entryList)
 {
     if (!gCtx) return;
     JSValue global = JS_GetGlobalObject(gCtx);
@@ -125,7 +125,7 @@ void JsAddConstantArray(IntArrayEntry* entryList)
     JS_FreeValue(gCtx, global);
 }
 
-void JsDeleteConstantArray(IntArrayEntry* entryList)
+void js_engine::DeleteConstantArray(IntArrayEntry* entryList)
 {
     if (!gCtx) return;
     JSValue global = JS_GetGlobalObject(gCtx);
@@ -137,7 +137,7 @@ void JsDeleteConstantArray(IntArrayEntry* entryList)
     JS_FreeValue(gCtx, global);
 }
 
-float JsRunScript(const char* src, int objectIndex)
+float js_engine::RunScript(const char* src, int objectIndex)
 {
     if (!gCtx || !src) return 0.0f;
     gCurObj = objectIndex;
