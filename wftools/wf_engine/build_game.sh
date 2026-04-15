@@ -500,12 +500,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # We only need to point it at the source root and configure the target after.
 set(PHYSICS_REPO_ROOT "$ENV{JOLT_DIR}")
 
-# Compile without the debug renderer, profiler, and soft-body.
-add_compile_definitions(
-    JPH_PROFILE_ENABLED=0
-    JPH_DEBUG_RENDERER=0
-    NDEBUG
-)
+# Use only NDEBUG — Jolt's own headers suppress the profiler, debug renderer,
+# and assertions based on NDEBUG.  Explicit JPH_*=0 defines cause a
+# JPH_VERSION_ID mismatch (the macro is then "defined" even though its value
+# is 0, so Jolt's #ifdef checks fire differently in the lib vs. the stub).
+add_compile_definitions(NDEBUG)
 
 include(${PHYSICS_REPO_ROOT}/Jolt/Jolt.cmake)
 
@@ -560,6 +559,7 @@ fi
 echo "=== Linking ==="
 g++ "${OBJS[@]}" "${JS_LINK_EXTRA[@]}" "${JOLT_LINK_EXTRA[@]}" \
     -lGL -lGLU -lX11 -lm -lpthread -ldl \
+    -Wl,-z,noexecstack \
     -o "$SCRIPT_DIR/wf_game"
 
 echo ""
