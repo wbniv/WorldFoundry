@@ -431,15 +431,15 @@ Also: added root `.gitignore` to prevent build artifacts (`.o`, `.pyc`, `objs_ga
 
 - [ ] `wfsource/source/gfxfmt/` — image format library (TGA/BMP/SGI); only referenced by its own `test.cc`
 - [ ] `wfsource/source/registry/` — Windows registry API (`HKEY`, `windows.h`); only iff2lvl callers are in `#if 0` blocks; delete or move to wftools
-- [ ] `wfsource/source/version/` → `wftools/version/` — generic version strings; only consumer is `wftools/iffcomp/main.cc`
+- [x] `wfsource/source/version/` — deleted `10fb59e` (game uses `game/version.h`; old C++ iffcomp superseded by iffcomp-rs)
 
 ### To do — empty directories
 
-- [ ] `wfsource/source/cdda/` — empty
+- [x] `wfsource/source/cdda/` — empty; rmdir done
 
 ### To do — dead build files
 
-- [ ] `wfsource/source/pigs.dep` — Win/PSX dependency file (`.lib` rules, `psylink`, `%chdir`); Linux uses `GNUpigs.dep`
+- [x] `wfsource/source/pigs.dep` — OpusMake/Win dep file; deleted `decaf01`
 - [ ] `wfsource/source/Makefile.inc` — OpusMake include; lists deleted dirs (`attrib`, `console`, `ini`, `menu`, `savegame`, `loadfile`, `physical`, `fuzzy`) and Win/PSX platform blocks; either delete or strip to Linux-only
 
 ### To do — platform #ifdef guards in source
