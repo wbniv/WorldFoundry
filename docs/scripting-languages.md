@@ -46,11 +46,12 @@ that meant for one engine never silently runs on another.
 ## Reference scripts: snowgoons player + director
 
 Below are the same two gameplay scripts authored in every engine WF
-currently supports. The engines are independent — a build can pick any
-combination; the script set below only illustrates what each language
-looks like, not what a single build must contain. Fennel, QuickJS, and
-JerryScript each use a sigil; Lua scripts are sigil-less and only run if
-Lua is compiled in.
+supports (landed) or has designed (pending). The engines are independent
+— a build picks any subset; the scripts only illustrate what each
+language looks like, not what a single build must contain. Pending
+engines are marked *(pending Phase D.x)* and will be smoke-tested and
+de-marked when their Phase D task lands. Sigil-less scripts (Lua) only
+run if Lua is compiled in.
 
 ### Player — forward raw joystick input to the input mailbox
 
@@ -65,11 +66,12 @@ write_mailbox(INDEXOF_INPUT, read_mailbox(INDEXOF_HARDWARE_JOYSTICK1_RAW))
 (write_mailbox INDEXOF_INPUT (read_mailbox INDEXOF_HARDWARE_JOYSTICK1_RAW))
 ```
 
-**JavaScript (QuickJS):**
+**JavaScript (QuickJS / JerryScript):**
 ```javascript
 // snowgoons player
 write_mailbox(INDEXOF_INPUT, read_mailbox(INDEXOF_HARDWARE_JOYSTICK1_RAW));
 ```
+*JerryScript uses the same `//` sigil and identical source. `WF_JS_ENGINE` picks which runtime compiles in.*
 
 **WebAssembly (wasm3), authored in WAT:**
 ```wat
@@ -107,7 +109,7 @@ v = read_mailbox(98);  if v ~= 0 then write_mailbox(INDEXOF_CAMSHOT, v) end
 (let [v (read_mailbox 98)]  (when (not= v 0) (write_mailbox INDEXOF_CAMSHOT v)))
 ```
 
-**JavaScript (QuickJS):**
+**JavaScript (QuickJS / JerryScript):**
 ```javascript
 // snowgoons director
 var v;
@@ -115,6 +117,7 @@ v = read_mailbox(100); if (v !== 0) write_mailbox(INDEXOF_CAMSHOT, v);
 v = read_mailbox(99);  if (v !== 0) write_mailbox(INDEXOF_CAMSHOT, v);
 v = read_mailbox(98);  if (v !== 0) write_mailbox(INDEXOF_CAMSHOT, v);
 ```
+*JerryScript uses the same `//` sigil and identical source.*
 
 **WebAssembly (wasm3), authored in WAT:**
 ```wat
@@ -132,12 +135,89 @@ v = read_mailbox(98);  if (v !== 0) write_mailbox(INDEXOF_CAMSHOT, v);
     i32.const 98  call $maybe))
 ```
 Compiled via `wat2wasm` then base64'd and wrapped as `#b64\n<base64>` in
-the iff text chunk. Note that wasm has no host-side constant import
-surface in the spike (see plan §3), so `INDEXOF_CAMSHOT` is baked as the
-literal `1021` (same value the engine exposes to the other languages).
+the iff text chunk. `INDEXOF_CAMSHOT` is baked as the literal `1021` —
+wasm3 has no host-side constant import surface (see plan §3).
 Source lives at `wftools/vendor/wasm3-v0.5.0-wf/snowgoons_director.wat`;
 patched into `wflevels/snowgoons.iff` by
 `scripts/patch_snowgoons_wasm.py`.
+
+**Forth *(pending Phase D.3)*, authored in standard Forth:**
+
+`read-mailbox ( idx -- val )` and `write-mailbox ( val idx -- )` are host
+words; `INDEXOF_*` constants are loaded into the dictionary at engine
+init. Same source runs on every backend (zForth, ficl, Atlast, embed,
+libforth, pForth) — backend is a compile-time switch.
+
+*Player:*
+```forth
+\ snowgoons player
+INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox
+```
+
+*Director:*
+```forth
+\ snowgoons director
+: ?cam ( mb -- ) read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then ;
+100 ?cam   99 ?cam   98 ?cam
+```
+
+**Wren *(pending Phase D.4)*:**
+
+`INDEXOF_*` constants are injected as module-level `var` declarations at
+engine init; mailbox access goes through the foreign class `Env` (Wren
+has no top-level functions).
+
+*Player:*
+```wren
+//wren
+Env.write_mailbox(INDEXOF_INPUT, Env.read_mailbox(INDEXOF_HARDWARE_JOYSTICK1_RAW))
+```
+
+*Director:*
+```wren
+//wren
+var v
+v = Env.read_mailbox(100); if (v != 0) Env.write_mailbox(INDEXOF_CAMSHOT, v)
+v = Env.read_mailbox(99);  if (v != 0) Env.write_mailbox(INDEXOF_CAMSHOT, v)
+v = Env.read_mailbox(98);  if (v != 0) Env.write_mailbox(INDEXOF_CAMSHOT, v)
+```
+
+**WebAssembly (WAMR) *(pending Phase D.5)*, authored in WAT:**
+
+Same `.wat` authoring model as wasm3 but WAMR supports host-supplied
+`(global …)` imports, so `INDEXOF_*` are resolved at instantiate time
+instead of being baked as literals.
+
+*Player:*
+```wat
+(module
+  (import "consts" "INDEXOF_HARDWARE_JOYSTICK1_RAW" (global $raw i32))
+  (import "consts" "INDEXOF_INPUT"                  (global $inp i32))
+  (import "env"    "read_mailbox"  (func $read  (param i32) (result f32)))
+  (import "env"    "write_mailbox" (func $write (param i32 f32)))
+  (func (export "main")
+    global.get $inp
+    global.get $raw
+    call $read
+    call $write))
+```
+
+*Director:*
+```wat
+(module
+  (import "consts" "INDEXOF_CAMSHOT" (global $cam i32))
+  (import "env"    "read_mailbox"    (func $read  (param i32) (result f32)))
+  (import "env"    "write_mailbox"   (func $write (param i32 f32)))
+  (func $maybe (param $mb i32)
+    (local $v f32)
+    local.get $mb  call $read  local.tee $v
+    f32.const 0  f32.ne
+    if  global.get $cam  local.get $v  call $write  end)
+  (func (export "main")
+    i32.const 100 call $maybe
+    i32.const 99  call $maybe
+    i32.const 98  call $maybe))
+```
 
 ## Integration surface
 

@@ -204,6 +204,113 @@ Phase 1 (interp only):
 6. **WAMR** — last; largest lift; 2–3 days
 7. **Lua fix #6** — separate, after everything else stable
 
+### Phase E — Reference scripts in `docs/scripting-languages.md`
+
+`docs/scripting-languages.md` carries the canonical player + director
+snowgoons scripts for every engine WF supports.  The doc currently has
+working, committed scripts for **Lua**, **Fennel**, **QuickJS**, and
+**wasm3**.  Phase E extends it with the remaining engines.
+
+**JerryScript** — no new block needed; JerryScript shares the `//` sigil
+with QuickJS and the authored source is byte-for-byte identical.  Add a
+one-line note under the existing QuickJS block:
+
+> **JavaScript (JerryScript):** scripts are identical to the QuickJS
+> block above. Both engines use the `//` sigil; `WF_JS_ENGINE` picks
+> which runtime is compiled in.
+
+**Forth** (after D.3 lands) — add after the existing wasm3 block.
+`read-mailbox` and `write-mailbox` are hyphenated host words with stack
+signatures `( idx -- val )` and `( val idx -- )` respectively.
+`INDEXOF_*` constants are loaded into the dictionary at `Init`.
+The same source runs on every backend (zForth, ficl, Atlast, embed,
+libforth, pForth) — backend selection is compile-time only.
+
+*Player:*
+```forth
+\ snowgoons player
+INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox
+```
+
+*Director:*
+```forth
+\ snowgoons director
+: ?cam ( mb -- ) read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then ;
+100 ?cam   99 ?cam   98 ?cam
+```
+
+Note: on PC dev mailbox values are float; embed truncates to 16-bit int.
+On the real fixed-point target all engines use integer-valued mailboxes
+so this is correct.
+
+**Wren** (after D.4 lands) — add after the Forth block.
+`INDEXOF_*` constants are injected as module-level `var` declarations in
+a preamble built at `wren_engine::Init`; they are bare names in scripts.
+Mailbox access is through the foreign class `Env` — Wren has no
+top-level functions.
+
+*Player:*
+```wren
+//wren
+Env.write_mailbox(INDEXOF_INPUT, Env.read_mailbox(INDEXOF_HARDWARE_JOYSTICK1_RAW))
+```
+
+*Director:*
+```wren
+//wren
+var v
+v = Env.read_mailbox(100); if (v != 0) Env.write_mailbox(INDEXOF_CAMSHOT, v)
+v = Env.read_mailbox(99);  if (v != 0) Env.write_mailbox(INDEXOF_CAMSHOT, v)
+v = Env.read_mailbox(98);  if (v != 0) Env.write_mailbox(INDEXOF_CAMSHOT, v)
+```
+
+**WAMR WAT** (after D.5 lands) — add a note under the existing wasm3 WAT
+block.  The `.wat` source differs from wasm3 only in how constants are
+imported: WAMR supports host-supplied `(global …)` imports so
+`INDEXOF_*` are declared as global imports rather than baked literals.
+
+*Player WAT (WAMR):*
+```wat
+(module
+  (import "consts" "INDEXOF_HARDWARE_JOYSTICK1_RAW" (global $raw i32))
+  (import "consts" "INDEXOF_INPUT"                  (global $inp i32))
+  (import "env"    "read_mailbox"  (func $read  (param i32) (result f32)))
+  (import "env"    "write_mailbox" (func $write (param i32 f32)))
+  (func (export "main")
+    global.get $inp
+    global.get $raw
+    call $read
+    call $write))
+```
+
+*Director WAT (WAMR):*
+```wat
+(module
+  (import "consts" "INDEXOF_CAMSHOT" (global $cam i32))
+  (import "env"    "read_mailbox"    (func $read  (param i32) (result f32)))
+  (import "env"    "write_mailbox"   (func $write (param i32 f32)))
+  (func $maybe (param $mb i32)
+    (local $v f32)
+    local.get $mb  call $read  local.tee $v
+    f32.const 0  f32.ne
+    if  global.get $cam  local.get $v  call $write  end)
+  (func (export "main")
+    i32.const 100 call $maybe
+    i32.const 99  call $maybe
+    i32.const 98  call $maybe))
+```
+
+Unlike wasm3, WAMR resolves `INDEXOF_CAMSHOT` from the host globals table
+at instantiate time — no baked literals in the module body.
+
+#### Phase E verification
+
+For each engine block added:
+1. Script source is copy-pasted from the doc into the patching script (or
+   run manually) and the iff is re-patched.
+2. `wf_game` runs snowgoons: player moves, director cuts cameras.
+3. Status in the doc's engine table updated to "shipping".
+
 ## Critical files
 
 **Docs (Phases A, B, C):**
