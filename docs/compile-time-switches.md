@@ -26,6 +26,19 @@ is gated by its own switch; `ScriptRouter` dispatches at runtime by leading-byte
 | `WF_ENABLE_WREN` | `0` / `1` | Wren | `//wren\n` | Checked before `//` (JS) |
 | `WF_JS_ENGINE` | `quickjs` / `jerryscript` | JavaScript | `//` | Mutually exclusive |
 
+## Derived Switches (set by BUILDMODE)
+
+These are not set directly — `GNUMakefile.bld` derives them from `BUILDMODE`.
+
+| Switch | `debug` | `safe-fast` | `release` | `final` | What it controls |
+|--------|---------|-------------|-----------|---------|-----------------|
+| `DO_DEBUG_FILE_SYSTEM` | `1` | `1` | `0` | `0` | Enables direct filesystem access (`binistream` from path); also gates `JOYSTICK_RECORDER` |
+| `DO_ASSERTIONS` | `1` | `1` | `0` | `0` | Assertions and VALIDATE macros |
+| `DO_VALIDATION` | `1` | `0` | `0` | `0` | Per-class validation, item tracking |
+| `DO_DEBUG_VARIABLES` | `1` | `0` | `0` | `0` | Extra per-class debugging state |
+| `DO_IOSTREAMS` | `1` | `1` | `0` | `0` | C++ iostream support |
+| `DBSTREAM` | `3` | `0` | `0` | `0` | Debug stream verbosity level |
+
 ## Build Directory Encoding
 
 Object output directories encode the full configuration:
