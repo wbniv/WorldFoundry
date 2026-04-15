@@ -147,10 +147,15 @@ static void RunSelftest()
 
 void JoltRuntimeInit()
 {
+    std::fprintf(stderr, "jolt: RegisterDefaultAllocator\n");
     JPH::RegisterDefaultAllocator();
+    std::fprintf(stderr, "jolt: Factory\n");
     JPH::Factory::sInstance = new JPH::Factory();
+    std::fprintf(stderr, "jolt: RegisterTypes\n");
     JPH::RegisterTypes();
+    std::fprintf(stderr, "jolt: RunSelftest\n");
     RunSelftest();
+    std::fprintf(stderr, "jolt: init complete\n");
 }
 
 void JoltRuntimeShutdown()

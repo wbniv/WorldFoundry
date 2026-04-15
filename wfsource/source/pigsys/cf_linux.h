@@ -19,7 +19,7 @@
 // or see www.fsf.org
 
 // ===========================================================================
-// Description: Generic configuration file compiling for PSX.
+// Description: Generic configuration file compiling for Linux.
 // Original Author: Kevin T. Seghetti
 // ===========================================================================
 //=============================================================================
@@ -61,5 +61,5 @@ START_EXTERN_C
 END_EXTERN_C
 
 //=============================================================================
-#endif	//!defined(_CF_PSX_H)
+#endif	//!defined(_CF_LINUX_H)
 //=============================================================================

@@ -13,28 +13,6 @@
 // Standard Set of ostreams
 // ------------------------------------------------------------------------
 
-#if defined( __WATCOMC__ )
-#	define ostream_withassign ostream
-#define CREATEANDASSIGNOSTREAM(newstream,assignto) \
-ostream_withassign newstream( assignto)
-#define ASSIGNOSTREAM(left,right) left = right 
-
-#endif
-
-//#if defined(OLD_IOSTREAMS)
-//#error hey, trying new stuff
-//#endif
-
-#if defined( _MSC_VER )
-#if !defined(OLD_IOSTREAMS)
-#	define ostream_withassign std::ostream
-#endif
-#define CREATEANDASSIGNOSTREAM(newstream,assignto) \
-ostream_withassign newstream( assignto)
-#define ASSIGNOSTREAM(left,right) left = right 
-#endif
-
-
 #if defined( __LINUX__ )
 
 #if defined(OLD_IOSTREAMS)

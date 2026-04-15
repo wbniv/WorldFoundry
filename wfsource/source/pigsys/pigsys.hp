@@ -57,9 +57,12 @@ extern char* * __argv;
 
 typedef enum _MachineType
 {
-	WIN,
-	PSX,
-	LINUX
+	LINUX,
+	ANDROID,
+	IOS,
+	XBOX,
+	SWITCH,
+	PLAYSTATION
 } MachineType;
 
 #endif // defined( __cplusplus )

@@ -411,48 +411,43 @@ Expected reduction: ~450–500 lines across `gfx`, `game`, `pigsys`, and smaller
 
 Also: added root `.gitignore` to prevent build artifacts (`.o`, `.pyc`, `objs_game/`) from being tracked (`01d708b`).
 
-### To do — top-level wfsource artifacts
+### Completed — top-level wfsource artifacts
 
-- [ ] `wfsource/Makefile.psx` — PSX build rules
-- [ ] `wfsource/Makefile.win` — Windows build rules
-- [ ] `wfsource/psx.ini` — PSX hardware config
-- [ ] `wfsource/README.windows` — MSVC 6.0 / OpusMake build instructions
-- [ ] `wfsource/source/game/newobj.bat` — Windows object template generator (keeping for now)
-- [ ] `wfsource/Makefile.rul` — shared rule base; check if only referenced by Makefile.psx/Makefile.win
-- [ ] `wfsource/Makefile.template` — template for platform makefiles; likely dead with the platforms
-- [ ] `wfsource/libraryhierarchy.dia` — old Dia architecture diagram (`.ps` render kept)
+- [x] `wfsource/Makefile.psx` — deleted
+- [x] `wfsource/Makefile.win` — deleted
+- [x] `wfsource/psx.ini` — deleted
+- [x] `wfsource/README.windows` — deleted
+- [x] `wfsource/Makefile.rul` — deleted
+- [x] `wfsource/Makefile.template` — deleted
+- [x] `wfsource/libraryhierarchy.dia` — deleted (`.ps` render kept)
+- [x] `wfsource/Makefile` — OpusMake top-level; deleted
+- [x] `wfsource/levels.src/levels.mak` — OpusMake level build; deleted
+- [ ] `wfsource/source/game/newobj.bat` — keeping for now
 
-### To do — GNUMakefile PSX/Win dead branches
+### Completed — GNUMakefile PSX/Win dead branches
 
-- [ ] `wfsource/source/GNUMakefile.print` lines 8–18: PSX + Windows print targets
-- [ ] `wfsource/source/GNUMakefile.test` lines 14–18, 24–26, 42–44, 62–111: PSX reset/run/link + MSVC debugger
+- [x] `wfsource/source/GNUMakefile.print` — PSX + Windows print blocks removed
+- [x] `wfsource/source/GNUMakefile.test` — PSX reset/run/link + MSVC debugger/link removed; Linux paths kept
 
-### To do — orphaned subsystems / misplaced libraries (no game callers)
+### Completed — orphaned subsystems / misplaced libraries
 
-- [ ] `wfsource/source/gfxfmt/` — image format library (TGA/BMP/SGI); only referenced by its own `test.cc`
-- [ ] `wfsource/source/registry/` — Windows registry API (`HKEY`, `windows.h`); only iff2lvl callers are in `#if 0` blocks; delete or move to wftools
-- [x] `wfsource/source/version/` — deleted `10fb59e` (game uses `game/version.h`; old C++ iffcomp superseded by iffcomp-rs)
+- [x] `wfsource/source/gfxfmt/` — deleted
+- [x] `wfsource/source/registry/` — deleted (Windows-only API, no active callers)
+- [x] `wfsource/source/version/` — deleted `10fb59e`
+- [x] `wfsource/source/cdda/` — empty; rmdir
 
-### To do — empty directories
+### Completed — dead build files
 
-- [x] `wfsource/source/cdda/` — empty; rmdir done
+- [x] `wfsource/source/pigs.dep` — deleted `decaf01`
+- [x] `wfsource/source/Makefile.inc` — deleted
+- [x] Per-subsystem `Makefile` files (all OpusMake): `anim/`, `asset/`, `baseobject/`, `cpplib/`, `gfxfmt/`, `hal/`, `iff/`, `input/`, `math/`, `movement/`, `particle/`, `physics/`, `pigsys/`, `registry/`, `room/`, `scripting/`, `streams/`, `timer/`; and `wftools/`: `iffwrite/`, `recolib/`, `regexp/`, `lvldump/`, `oaddump/`
 
-### To do — dead build files
+### Completed — platform #ifdef guards in source
 
-- [x] `wfsource/source/pigs.dep` — OpusMake/Win dep file; deleted `decaf01`
-- [ ] `wfsource/source/Makefile.inc` — OpusMake include; lists deleted dirs (`attrib`, `console`, `ini`, `menu`, `savegame`, `loadfile`, `physical`, `fuzzy`) and Win/PSX platform blocks; either delete or strip to Linux-only
-- [ ] Per-subsystem `Makefile` files — all OpusMake syntax (`!if`, `%chdir`, `.lib`); Linux build uses `GNUpigs.dep`, never invokes these:
-  `wfsource/source/`: `anim/`, `asset/`, `baseobject/`, `cpplib/`, `gfxfmt/`, `hal/`, `iff/`, `input/`, `math/`, `movement/`, `particle/`, `physics/`, `pigsys/`, `registry/`, `room/`, `scripting/`, `streams/`, `timer/`
-  `wftools/`: `iffwrite/`, `recolib/`, `regexp/`, `lvldump/`, `oaddump/`
-- [ ] `wfsource/Makefile` — OpusMake top-level (`%chdir`, `WF_TARGET ?= win`); Linux uses `GNUMakefile.linux`
-- [ ] `wfsource/levels.src/levels.mak` — OpusMake level build (`!include`)
-
-### To do — platform #ifdef guards in source
-
-- [ ] `#ifdef __WATCOMC__` block in `cpplib/stdstrm.hp`
-- [ ] `#ifdef _MSC_VER` guards in `oas/oad.h` (pragma pack) and test files
-- [ ] `PSX` and `WIN` members in `pigsys/pigsys.hp` `MachineType` enum
-- [ ] Wrong header guard in `pigsys/cf_linux.h` (`_CF_PSX_H` → `_CF_LINUX_H`)
+- [x] `#ifdef __WATCOMC__` block removed from `cpplib/stdstrm.hp`
+- [x] `#ifdef _MSC_VER` guards removed from `oas/oad.h` (pragma pack)
+- [x] `MachineType` enum: removed `PSX`/`WIN`; added `ANDROID`, `IOS`, `XBOX`, `SWITCH`, `PLAYSTATION`
+- [x] `pigsys/cf_linux.h`: fixed comment ("PSX" → "Linux") and footer guard (`_CF_PSX_H` → `_CF_LINUX_H`)
 
 ### After completing Batch 7
 

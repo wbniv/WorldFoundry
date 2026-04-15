@@ -127,11 +127,7 @@ typedef struct _oadHeader
 typedef char EConversionAction;
 
 
-#if defined( _MSC_VER )
-#pragma pack( push, 1 )
-#else
 #pragma pack( 1 )
-#endif
 
 typedef struct _typeDescriptor
 {
@@ -171,11 +167,7 @@ typedef struct _typeDescriptor
 
 } typeDescriptor;
 
-#if defined( _MSC_VER )
-#pragma pack( pop )
-#else
 #pragma pack( )
-#endif
 
 /*============================================================================*/
 
