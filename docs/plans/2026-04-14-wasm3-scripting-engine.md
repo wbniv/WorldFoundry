@@ -1,6 +1,17 @@
 # Plan: WebAssembly (wasm3) as a third scripting engine
 
 **Date:** 2026-04-14
+**Status:** **landed 2026-04-14** (commit `cfa739c`, "wasm3 scripting
+engine: base64-wrapped modules on the #b64 sigil"). Retargeted onto the
+ScriptRouter convention on 2026-04-15: the `#b64\n` dispatch arm now
+lives in `ScriptRouter::RunScript` in
+`wftools/wf_viewer/stubs/scripting_stub.cc`, not in `LuaInterpreter`. The
+plug is being renamed from the free-function `Wasm3RuntimeInit /
+Wasm3RunScript / Wasm3AddConstantArray / Wasm3RuntimeShutdown` shape
+into a `wasm3_engine` namespace (`Init / RunScript / AddConstantArray /
+DeleteConstantArray / Shutdown`) as part of the
+`docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md` sweep, so
+every compiled-in engine has the same five-function shape as `lua_engine`.
 **Depends on:** Lua spike (landed); Fennel plan (landed/in-flight);
 JS engines plan (`docs/plans/2026-04-14-pluggable-scripting-engine.md`,
 which reserved sigil `#` for WebAssembly).

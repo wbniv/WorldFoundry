@@ -1,5 +1,12 @@
 # Plan: Vendor Lua 5.4 and statically link it into wf_game
 
+**Date:** 2026-04-14
+**Status:** **landed 2026-04-14.** `wftools/vendor/lua-5.4.8/` is in tree;
+`build_game.sh` compiles the Lua TUs directly; `wf_game` no longer links
+`-llua5.4`. Post-2026-04-15, the Lua plug is the file-scope `lua_engine`
+namespace in `scripting_stub.cc`, called by `ScriptRouter` — see
+`docs/plans/2026-04-15-lua-engine-fixes.md` for the convention.
+
 ## Context
 
 WF's Linux build currently relies on the system `lua5.4` package (`-llua5.4` in `wftools/wf_engine/build_game.sh`). This has two problems flagged in both the mobile-port plan and the scripting-languages doc:

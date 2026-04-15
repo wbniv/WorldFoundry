@@ -47,9 +47,29 @@ For each **landed** plan (rows 1–5) add (if missing) a top-of-file `**Status:*
 
 **Plan 3 (Fennel):** call out that `_fennelEvalRef` lives as a module-level static inside `lua_engine`, not a `LuaInterpreter` member; the sigil dispatch is inside `lua_engine::RunScript` before the plain-Lua path; the compilation-cache improvements from `2026-04-15-lua-engine-fixes.md` fix #3 supersede the `fennel.eval` path described here.
 
-**Plan 4 (pluggable / JS):** status marker already present. The existing "As built (ScriptRouter refactor, 2026-04-15)" callout at line ~107 already captures the refactor; promote the `//` arm to `ScriptRouter::RunScript`. Add a migration TODO for "rename `JsRuntimeInit` → `js_engine::Init` etc. for consistency with `lua_engine`" as a follow-up (low priority — a shim header keeps current call sites working).
+**Plan 4 (pluggable / JS):** status marker already present. The existing "As built (ScriptRouter refactor, 2026-04-15)" callout at line ~107 already captures the refactor; promote the `//` arm to `ScriptRouter::RunScript`.
 
-**Plan 5 (wasm3):** add a `**Status:** landed <date>` line (date from `git log` for `scripting_wasm3.cc` — per memory, commit cfa739c). Flip all "add the `#` arm in `scripting_stub.cc` next to the `;` and `//` branches" to "`ScriptRouter::RunScript` already contains the arm (see scripting_stub.cc)". Add the same rename-to-`wasm3_engine::*` follow-up as plan 4.
+**Plan 5 (wasm3):** add a `**Status:** landed <date>` line (date from `git log` for `scripting_wasm3.cc` — commit `cfa739c`, 2026-04-14). Flip all "add the `#` arm in `scripting_stub.cc` next to the `;` and `//` branches" to "`ScriptRouter::RunScript` already contains the arm".
+
+### Phase A′ — Rename landed engines into the `<engine>_engine` namespace
+
+Code change, not just docs. Bring JS and wasm3 into the convention so
+every engine has the same five-function shape:
+
+- `scripting_js.hp` + `scripting_quickjs.cc` / `scripting_jerryscript.cc`:
+  rename `JsRuntimeInit / JsRuntimeShutdown / JsRunScript /
+  JsAddConstantArray / JsDeleteConstantArray` → `js_engine::Init /
+  Shutdown / RunScript / AddConstantArray / DeleteConstantArray`. Update
+  `ScriptRouter` call sites.
+- `scripting_wasm3.hp` + `scripting_wasm3.cc`: rename `Wasm3RuntimeInit /
+  Wasm3RuntimeShutdown / Wasm3RunScript / Wasm3AddConstantArray /
+  Wasm3DeleteConstantArray` → `wasm3_engine::Init / Shutdown / RunScript
+  / AddConstantArray / DeleteConstantArray`. Update `ScriptRouter` call
+  sites.
+
+Verify by rebuilding each flavour (`WF_JS_ENGINE=quickjs`,
+`WF_JS_ENGINE=jerryscript`, `WF_WASM_ENGINE=wasm3`) and re-running the
+snowgoons player + director ports.
 
 ### Phase B — Retarget pending plans onto the new convention
 
@@ -69,9 +89,33 @@ For each pending plan (rows 6–8) rewrite every snippet that names `LuaInterpre
 
 ### Phase C — Add a unified status table to `docs/scripting-languages.md`
 
-Prepend a **Status** table (the one in this plan) to `docs/scripting-languages.md`. If that doc does not yet exist / is not the right home, place it in a new `docs/plans/README.md`. Each pending row links to its plan; each landed row links to the plan **and** to the source file in `wftools/wf_viewer/stubs/`.
+Prepend a **Status** table (the one in this plan) to `docs/scripting-languages.md`. Each pending row links to its plan; each landed row links to the plan **and** to the source file in `wftools/wf_viewer/stubs/`.
 
-Out of scope for this plan: writing the snowgoons scripts in Wren/Forth, or actually running any new engines.
+### Phase D — Fill out `docs/scripting-languages.md` reference scripts
+
+`docs/scripting-languages.md` already carries the snowgoons player +
+director reference scripts in Lua, Fennel, QuickJS/JerryScript, and
+AssemblyScript (wasm3). Extend that section with:
+
+- **Wren** — player + director ports via `scripts/patch_snowgoons_wren.py`
+  (already called out in the Wren plan, Phase 7).
+- **Forth** — player + director ports via `scripts/patch_snowgoons_forth.py`
+  (new; mirrors the Lua/Fennel/Wren patchers).
+
+Both additions land alongside the code landing for their respective
+plans — the doc text is part of the deliverable, not a separate pass.
+
+### Phase E — Run the engines end-to-end
+
+For each newly landed engine:
+
+1. Build with the engine enabled (`WF_ENABLE_WREN=1`, `WF_FORTH_ENGINE=<impl>`, `WF_WASM_ENGINE=wamr`, etc.).
+2. Patch the level iff with the engine's snowgoons scripts.
+3. `task run-level -- wflevels/snowgoons.iff` — confirm player moves and
+   director cuts cameras, matching the existing Lua/Fennel/JS/wasm3
+   verification in each engine's plan.
+4. Record binary-size delta (`size wf_game` before/after) in the commit
+   message and in the plan's Verification section.
 
 ## Critical files
 

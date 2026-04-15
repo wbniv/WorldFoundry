@@ -1,6 +1,16 @@
 # Plan: Fennel on top of the Lua interpreter spike
 
 **Date:** 2026-04-14
+**Status:** **landed 2026-04-14**, then retargeted onto the ScriptRouter
+convention on 2026-04-15. Fennel is **not** a router-level peer — it
+compiles to Lua and shares the `lua_State`, so its sub-dispatch (the `;`
+sigil) lives inside `lua_engine::RunScript` in
+`wftools/wf_viewer/stubs/scripting_stub.cc`. What was originally drafted
+as a `LuaInterpreter` member `int _fennelEvalRef` now lives as a
+file-scope static inside the `lua_engine` namespace. The compilation-
+cache story described in §3 below is superseded by
+`docs/plans/2026-04-15-lua-engine-fixes.md` fix #3 (Fennel
+pre-compilation via `fennel.compileString` + `luaL_ref`).
 **Depends on:** `docs/plans/2026-04-13-lua-interpreter-spike.md` (landed)
 **Source investigation:** `docs/investigations/2026-04-14-scripting-language-replacement.md:335-343`
 
@@ -58,7 +68,7 @@ flowchart LR
     C --> L
 ```
 
-### Runtime dispatch inside `LuaInterpreter`
+### Runtime dispatch inside `lua_engine` *(as built — the original draft named `LuaInterpreter`; that class was retired 2026-04-15)*
 
 ```mermaid
 flowchart TD
@@ -151,10 +161,10 @@ Preserves all `"..."`, `'...'`, `[[...]]`, `[=[...]=]` string literals
 byte-for-byte. Must also skip `--` that appears inside a long-bracket
 string. Output should still be a valid Lua file.
 
-### 3. Load Fennel in `LuaInterpreter` ctor (guarded)
-Always add member `int _fennelEvalRef` (init `LUA_NOREF`) — cheap, avoids
-`#ifdef` sprawl in the class definition. Only the load/dispatch code is
-guarded:
+### 3. Load Fennel in `lua_engine::Init` (guarded) *(as built — was originally `LuaInterpreter` ctor)*
+File-scope static `int gFennelEvalRef = LUA_NOREF` in the `lua_engine`
+namespace — cheap, avoids `#ifdef` sprawl at the declaration site. Only
+the load/dispatch code is guarded:
 
 ```cpp
 #ifdef WF_ENABLE_FENNEL
@@ -178,9 +188,11 @@ if (luaL_loadbuffer(_L, kFennelSource, kFennelSourceLen, "fennel.lua") != LUA_OK
 Non-fatal on failure; `;`-prefixed scripts fall through to the Lua path
 (where they'll log a syntax error, same as any malformed Lua).
 
-### 4. Sigil dispatch in `RunScript`
+### 4. Sigil dispatch in `lua_engine::RunScript`
 Before `luaL_dostring`, skip leading whitespace; if `*p == ';'` and
-`_fennelEvalRef != LUA_NOREF`, `lua_rawgeti` the ref, push src, `lua_pcall`.
+`gFennelEvalRef != LUA_NOREF`, `lua_rawgeti` the ref, push src, `lua_pcall`.
+(Note: the `;` arm lives *inside* `lua_engine`, not in `ScriptRouter`,
+because Fennel shares the Lua state.)
 
 ### 5. Port snowgoons scripts to Fennel
 ```fennel

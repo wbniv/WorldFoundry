@@ -1,7 +1,13 @@
 # Plan: Optional QuickJS / JerryScript scripting engines
 
 **Date:** 2026-04-14
-**Status:** landed 2026-04-14 (QuickJS v0.14.0, JerryScript v3.0.0). Deviations
+**Status:** landed 2026-04-14 (QuickJS v0.14.0, JerryScript v3.0.0). The
+plug is being renamed from the free-function `JsRuntimeInit / JsRunScript
+/ JsAddConstantArray / JsRuntimeShutdown` shape into a `js_engine`
+namespace (`Init / RunScript / AddConstantArray / DeleteConstantArray /
+Shutdown`) as part of the
+`docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md` sweep, to
+match `lua_engine` and every engine that comes after. Other deviations
 from the as-designed plan are captured inline below under *"As built:"* call-outs.
 **Depends on:** Lua spike (landed); `docs/plans/2026-04-14-fennel-on-lua.md` (concurrent, owns Lua vendoring).
 **Source investigation:** `docs/investigations/2026-04-14-scripting-language-replacement.md`

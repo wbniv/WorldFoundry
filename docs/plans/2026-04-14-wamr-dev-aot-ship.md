@@ -1,6 +1,12 @@
 # Plan: WAMR for dev, AOT-only (or w2c2) for ship
 
 **Date:** 2026-04-14
+**Status:** **pending.** Targets the 2026-04-15 ScriptRouter convention:
+the WAMR plug lives in a new `wftools/wf_viewer/stubs/scripting_wamr.{hp,cc}`
+as a file-scope `wamr_engine` namespace (matching `lua_engine`'s shape),
+exposing `Init / Shutdown / AddConstantArray / DeleteConstantArray /
+RunScript`. Dispatch still goes through `ScriptRouter::RunScript`'s `#`
+arm; `WF_WASM_ENGINE` picks which `<impl>_engine` gets called.
 **Depends on:** wasm3 spike (landed in cfa739c) — proved the dispatch,
 sigil, base64 wrapper, host-import ABI, and snowgoons-as-wasm end-to-end.
 **Source investigation:** Conversation captured in the wasm3 spike thread;
@@ -75,10 +81,13 @@ flowchart LR
 1. **Vendor** `wftools/vendor/wamr-<version>/` (tarball, SHA256 in README).
    Use WAMR's minimal-profile config (disable WASI, multi-module, libc
    surface we don't need); keep classic interp only.
-2. **`scripting_wamr.{hp,cc}`** — same shape as `scripting_wasm3.cc`.
-   `Wamr3RunScript` → `wasm_runtime_load` + `wasm_runtime_instantiate`
-   + `wasm_runtime_lookup_function` + `wasm_runtime_call_wasm`. Host
-   imports via `NativeSymbol` table built once at runtime init.
+2. **`scripting_wamr.{hp,cc}`** — file-scope `wamr_engine` namespace,
+   same five-function shape as `lua_engine` (`Init / Shutdown /
+   AddConstantArray / DeleteConstantArray / RunScript`).
+   `wamr_engine::RunScript` → `wasm_runtime_load` +
+   `wasm_runtime_instantiate` + `wasm_runtime_lookup_function` +
+   `wasm_runtime_call_wasm`. Host imports via `NativeSymbol` table built
+   once at runtime init.
 3. **Constant-globals import** — walk `mailboxIndexArray` + `joystickArray`
    at instantiate-time, register each as a host global. Authors can now
    write `import "consts" "INDEXOF_INPUT" (global i32)` instead of baking

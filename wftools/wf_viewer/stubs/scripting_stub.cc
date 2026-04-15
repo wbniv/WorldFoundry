@@ -170,8 +170,11 @@ void Init(MailboxesManager& mgr)
     gL = luaL_newstate();
 
     // Open only safe standard libraries — io and os are excluded.
+    // package is included because Fennel uses package.loaded for module
+    // registration; without it Fennel fails to initialise.
     static const luaL_Reg kSafeLibs[] = {
         { LUA_GNAME,        luaopen_base      },
+        { LUA_LOADLIBNAME,  luaopen_package   },
         { LUA_STRLIBNAME,   luaopen_string    },
         { LUA_MATHLIBNAME,  luaopen_math      },
         { LUA_TABLIBNAME,   luaopen_table     },

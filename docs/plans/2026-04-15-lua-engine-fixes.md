@@ -254,4 +254,9 @@ Fixes #1–#5 implemented in a single commit to `scripting_stub.cc`. #6 (corouti
 is no longer used at runtime — only `gFennelCompileRef` is called. Can be removed in a
 cleanup pass.
 
+**Sandbox correction:** `package` was added to `kSafeLibs` after smoke testing revealed
+that Fennel uses `package.loaded` for module registration and fails to initialise without
+it (`fennel: load failed: attempt to index a nil value (global 'package')`). `io` and
+`os` remain excluded.
+
 No other files are affected.
