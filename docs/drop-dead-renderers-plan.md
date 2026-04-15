@@ -260,24 +260,26 @@ When the branch is complete, produce a categorized summary of lines removed (mea
 
 Measured against merge-base `71727ab` on branch `2026-first-working-gap`, scope restricted to `wfsource/` and excluding unrelated OAS additions that landed on the same branch.
 
+Baseline: 132,257 C/C++ LOC in `wfsource/source/` at merge-base. Percentages below are relative to that baseline.
+
 **By category**
 
-| Category | Files | Insertions | Deletions | Net |
-|---|---:|---:|---:|---:|
-| Dead rendering pipelines (`gfx/{psx,softwarepipeline,directx,directxpipeline,xwindows}`, `gfx/gl/{wgl,unused}.cc`) | 74 | 0 | 22,990 | −22,990 |
-| PSX & Win subsystems (`audio/{psx,win}`, `hal/{psx,win}`, `math/{psx,win}`, `movie/psx`, `pigsys/psx`, `pigsys/cf_{psx,win}.*`) | 57 | 0 | 8,870 | −8,870 |
-| `#ifdef` strippage in kept files (Phase 2 unifdef + Phase 3a compound-guard hand-edits + Phase 4 cosmetic scrub) | ~124 | 32 | 3,933 | −3,901 |
-| Phase 3c empty-on-Linux deletes (13 `.cc` shells, 6 empty `.hp`/`.hpi`/`.h`) | 19 | 0 | ~380 | −380 |
+| Category | Files | Insertions | Deletions | Net | % of baseline |
+|---|---:|---:|---:|---:|---:|
+| Dead rendering pipelines (`gfx/{psx,softwarepipeline,directx,directxpipeline,xwindows}`, `gfx/gl/{wgl,unused}.cc`) | 74 | 0 | 22,990 | −22,990 | −17.4% |
+| PSX & Win subsystems (`audio/{psx,win}`, `hal/{psx,win}`, `math/{psx,win}`, `movie/psx`, `pigsys/psx`, `pigsys/cf_{psx,win}.*`) | 57 | 0 | 8,870 | −8,870 | −6.7% |
+| `#ifdef` strippage in kept files (Phase 2 unifdef + Phase 3a compound-guard hand-edits + Phase 4 cosmetic scrub) | ~124 | 32 | 3,933 | −3,901 | −2.9% |
+| Phase 3c empty-on-Linux deletes (13 `.cc` shells, 6 empty `.hp`/`.hpi`/`.h`) | 19 | 0 | ~380 | −380 | −0.3% |
 
-**Per-subsystem (Phase 2+3+4 only, top hitters)**
+**Per-subsystem (Phase 2+3+4 only, top hitters — % of that subsystem's baseline)**
 
-- `gfx/` −24,244 in 108 files (includes pipeline deletes)
-- `hal/` −4,020 in 32 files
-- `math/` −2,795 in 28 files (SCALAR_TYPE_FIXED preserved by design)
-- `pigsys/` −2,414 in 30 files
-- `game/` −327 in 10 files
+- `gfx/` −24,244 in 108 files (−76.1% of 31,847; includes pipeline deletes)
+- `hal/` −4,020 in 32 files (−42.1% of 9,557)
+- `pigsys/` −2,414 in 30 files (−42.6% of 5,671)
+- `math/` −2,795 in 28 files (−27.1% of 10,305; SCALAR_TYPE_FIXED preserved by design)
+- `game/` −327 in 10 files (−2.5% of 13,154)
 
-**Summary line:** 264 files changed, +32/−36,170, **net −36,138 LOC** removed on the renderer-drop path.
+**Summary line:** 264 files changed, +32/−36,170, **net −36,138 LOC (−27.3% of wfsource/source)** removed on the renderer-drop path.
 
 **Phase 4 grep gate:** `grep -rE '__PSX__|__WIN__|_WIN32|__SATURN__|__DOS__|RENDERER_{PSX,SOFTWARE,DIRECTX,XWINDOWS}|RENDERER_PIPELINE_{PSX,SOFTWARE,DIRECTX}|SCALAR_TYPE_FIXED' wfsource/source` returns only expected hits: `SCALAR_TYPE_FIXED` branches (retained per Phase 3b), `profile/profile.txt` (a note file), and `audiofmt/sox.cc` (vendored — `defined(unix)` is always true on Linux). **Zero leaks.**
 

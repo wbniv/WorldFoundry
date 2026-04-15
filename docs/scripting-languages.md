@@ -52,6 +52,24 @@ write_mailbox(INDEXOF_INPUT, read_mailbox(INDEXOF_HARDWARE_JOYSTICK1_RAW))
 write_mailbox(INDEXOF_INPUT, read_mailbox(INDEXOF_HARDWARE_JOYSTICK1_RAW));
 ```
 
+**WebAssembly (wasm3), authored in WAT:**
+```wat
+;; INDEXOF_HARDWARE_JOYSTICK1_RAW = 1009   INDEXOF_INPUT = 3024
+(module
+  (import "env" "read_mailbox"  (func $read  (param i32) (result f32)))
+  (import "env" "write_mailbox" (func $write (param i32 f32)))
+  (func (export "main")
+    i32.const 3024
+    i32.const 1009
+    call $read
+    call $write))
+```
+Compiled via `wat2wasm` then base64'd and wrapped as `#b64\n<base64>` in the iff text
+chunk. This script is *not* patched into the demo iff: the player's slot is 77 B, which
+cannot hold even a minimal wasm module's base64 form (~108 B). `snowgoons_player.wasm`
+is committed as a reference for when a binary IFF chunk type lands and frees the
+base64 overhead. Source: `wftools/vendor/wasm3-v0.5.0-wf/snowgoons_player.wat`.
+
 ### Director — switch camshot based on trigger mailboxes
 
 **Lua:**
@@ -101,12 +119,6 @@ literal `1021` (same value the engine exposes to the other languages).
 Source lives at `wftools/vendor/wasm3-v0.5.0-wf/snowgoons_director.wat`;
 patched into `wflevels/snowgoons.iff` by
 `scripts/patch_snowgoons_wasm.py`.
-
-The player script is *not* ported to wasm in the demo iff: its 77 B
-script slot cannot hold even a minimal wasm module's base64 form
-(~108 B). `snowgoons_player.wat` is committed as a reference
-implementation for when a binary IFF chunk type lands and frees the
-base64 overhead.
 
 ## Integration surface
 
