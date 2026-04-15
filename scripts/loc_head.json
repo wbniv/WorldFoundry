@@ -1,14 +1,14 @@
 {
-  "ref": "ec49c72",
-  "date": "2026-04-15T19:42:07",
+  "ref": "e2dcc98",
+  "date": "2026-04-15T20:35:28",
   "root": "wfsource/source",
   "subsystems": {
     "_root": {
-      "blank": 76,
-      "comment": 65,
-      "code": 254,
-      "total": 395,
-      "files": 2
+      "blank": 2,
+      "comment": 16,
+      "code": 11,
+      "total": 29,
+      "files": 1
     },
     "anim": {
       "blank": 488,
@@ -32,18 +32,11 @@
       "files": 10
     },
     "cpplib": {
-      "blank": 586,
-      "comment": 989,
-      "code": 1782,
-      "total": 3357,
+      "blank": 581,
+      "comment": 974,
+      "code": 1780,
+      "total": 3335,
       "files": 24
-    },
-    "eval": {
-      "blank": 56,
-      "comment": 56,
-      "code": 120,
-      "total": 232,
-      "files": 4
     },
     "game": {
       "blank": 2198,
@@ -59,13 +52,6 @@
       "total": 11274,
       "files": 72
     },
-    "gfxfmt": {
-      "blank": 204,
-      "comment": 113,
-      "code": 699,
-      "total": 1016,
-      "files": 5
-    },
     "hal": {
       "blank": 770,
       "comment": 1371,
@@ -79,13 +65,6 @@
       "code": 326,
       "total": 705,
       "files": 7
-    },
-    "iffwrite": {
-      "blank": 361,
-      "comment": 397,
-      "code": 1053,
-      "total": 1811,
-      "files": 11
     },
     "input": {
       "blank": 83,
@@ -115,13 +94,6 @@
       "total": 2378,
       "files": 17
     },
-    "menu": {
-      "blank": 57,
-      "comment": 110,
-      "code": 136,
-      "total": 303,
-      "files": 4
-    },
     "movement": {
       "blank": 440,
       "comment": 790,
@@ -131,9 +103,9 @@
     },
     "oas": {
       "blank": 378,
-      "comment": 740,
+      "comment": 732,
       "code": 1310,
-      "total": 2428,
+      "total": 2420,
       "files": 53
     },
     "particle": {
@@ -153,23 +125,9 @@
     "pigsys": {
       "blank": 551,
       "comment": 1350,
-      "code": 1335,
-      "total": 3236,
+      "code": 1338,
+      "total": 3239,
       "files": 21
-    },
-    "recolib": {
-      "blank": 216,
-      "comment": 340,
-      "code": 605,
-      "total": 1161,
-      "files": 16
-    },
-    "registry": {
-      "blank": 21,
-      "comment": 19,
-      "code": 75,
-      "total": 115,
-      "files": 2
     },
     "renderassets": {
       "blank": 190,
@@ -205,27 +163,13 @@
       "code": 70,
       "total": 112,
       "files": 4
-    },
-    "toolstub": {
-      "blank": 13,
-      "comment": 13,
-      "code": 27,
-      "total": 53,
-      "files": 1
-    },
-    "version": {
-      "blank": 1,
-      "comment": 1,
-      "code": 6,
-      "total": 8,
-      "files": 2
     }
   },
   "total": {
-    "blank": 12430,
-    "comment": 22362,
-    "code": 39162,
-    "total": 73954,
-    "files": 503
+    "blank": 11422,
+    "comment": 21241,
+    "code": 36199,
+    "total": 68862,
+    "files": 457
   }
 }
