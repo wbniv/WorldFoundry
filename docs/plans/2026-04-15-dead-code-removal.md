@@ -381,22 +381,7 @@ Expected reduction: ~450–500 lines across `gfx`, `game`, `pigsys`, and smaller
 
 ---
 
-## Batch 7 — physics engine replacement (planned)
-
-Replace the custom WF physics engine with Jolt Physics.  Survey and integration plan:
-`docs/investigations/2026-04-14-physics-engine-survey.md` (Jolt recommended),
-`docs/investigations/2026-04-14-jolt-physics-integration.md` (integration plan, deferred).
-
-The Lua spike exposed a bad `reinterpret_cast` in `BungeeCameraHandler`/`SPECIAL_COLLISION`
-(`movecam.cc:1007`).  Patching that in isolation is not the goal — replacing physics wholesale
-is.  WF's variable-dt game loop is load-bearing; any fixed-step physics library must substep
-internally.
-
----
-
----
-
-## Batch 8 — Windows/PSX artifacts + orphaned subsystems (2026-04-15)
+## Batch 7 — Windows/PSX artifacts + orphaned subsystems (2026-04-15)
 
 ### Already done (committed on this branch)
 
@@ -452,6 +437,30 @@ Also: added root `.gitignore` to prevent build artifacts (`.o`, `.pyc`, `objs_ga
 - [ ] `#ifdef _MSC_VER` guards in `oas/oad.h` (pragma pack) and test files
 - [ ] `PSX` and `WIN` members in `pigsys/pigsys.hp` `MachineType` enum
 - [ ] Wrong header guard in `pigsys/cf_linux.h` (`_CF_PSX_H` → `_CF_LINUX_H`)
+
+### After completing Batch 7
+
+```bash
+python3 scripts/loc_report.py -o scripts/loc_head.json
+python3 scripts/loc_report.py --compare scripts/loc_baseline_74d1a47.json
+# Update docs/investigations/2026-04-15-loc-tracking.md:
+#   - Add milestone row (date, ref, total LOC, Δ LOC, Δ %, note)
+#   - Re-sort subsystem table by HEAD LOC descending
+#   - Update saved snapshot ref + LOC
+```
+
+---
+
+## Batch 8 — physics engine replacement (planned)
+
+Replace the custom WF physics engine with Jolt Physics.  Survey and integration plan:
+`docs/investigations/2026-04-14-physics-engine-survey.md` (Jolt recommended),
+`docs/investigations/2026-04-14-jolt-physics-integration.md` (integration plan, deferred).
+
+The Lua spike exposed a bad `reinterpret_cast` in `BungeeCameraHandler`/`SPECIAL_COLLISION`
+(`movecam.cc:1007`).  Patching that in isolation is not the goal — replacing physics wholesale
+is.  WF's variable-dt game loop is load-bearing; any fixed-step physics library must substep
+internally.
 
 ---
 
