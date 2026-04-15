@@ -958,11 +958,9 @@ BungeeCameraHandler::predictPosition(MovementManager& /*movementManager*/, Movem
 	while( msgPort.GetMsgByType( MsgPort::SPECIAL_COLLISION, &msgData, msgDataSize ) )
 	{
 		hitSomething = true;
-      Actor* actor = (Actor*)&msgData;
-      assert(ValidPtr(actor));
-
-		if (movementObject.GetPhysicalAttributes().Position().Z() < actor->GetPhysicalAttributes().Position().Z())
-			hitTop = true;
+		// hitTop detection skipped — (Actor*)&msgData cast is invalid (msgData is
+		// raw collision bytes, not an Actor). Leaves hitTop=false; camera won't
+		// climb over collision tops until physics is replaced.
 	}
 
 	// if collision prevention may make us climb, don't seek the target in Z

@@ -2,6 +2,11 @@ version: '3'
 
 tasks:
 
+  build:
+    desc: "Build wf_game"
+    cmds:
+      - bash wftools/wf_engine/build_game.sh
+
   run:
     desc: "Run wf_game (cd.iff in cwd)"
     dir: wfsource/source/game

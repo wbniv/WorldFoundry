@@ -15,7 +15,7 @@ OUT="$SCRIPT_DIR/objs_game"
 # Feature flag: compile in Fennel (Lisp → Lua) support. Default off so the
 # default build stays Fennel-free (no ~145 KB embed, no `;`-sigil dispatch).
 # Set to 1 to embed the vendored fennel.lua and enable runtime dispatch.
-WF_ENABLE_FENNEL="${WF_ENABLE_FENNEL:-0}"
+WF_ENABLE_FENNEL="${WF_ENABLE_FENNEL:-1}"
 
 # Feature flag: optional JS engine for the `//` sigil. One of:
 #   none        (default) — no JS compiled in, zero binary/asset delta vs. Lua-only.
@@ -45,6 +45,11 @@ esac
 WASM3_DIR="$VENDOR/wasm3-v0.5.0"
 LUA_DIR="$VENDOR/lua-5.4.8"
 WASM3_WF_DIR="$VENDOR/wasm3-v0.5.0-wf"
+HTTPLIB_DIR="$VENDOR/cpp-httplib-v0.20.0"
+
+# Feature flag: embed a minimal HTTP REST API for runtime box manipulation.
+# Requires cpp-httplib (single-header, vendored). Default off.
+WF_REST_API="${WF_REST_API:-1}"
 
 mkdir -p "$OUT"
 
@@ -55,7 +60,7 @@ CXXFLAGS=(
     -DDO_IOSTREAMS=1 -DSW_DBSTREAM=1 -DDEBUG=1 -DDEBUG_VARIABLES=1
     -DDO_VALIDATION=0 -DDO_TEST_CODE=0 -DDO_DEBUG_FILE_SYSTEM=0
     -DPHYSICS_ENGINE_WF '-D__GAME__="wf_game"' "-DERR_DEBUG(x)="
-    -I"$SRC" -I"$SRC/game" -I"$STUBS" -I"$LUA_DIR/src"
+    -I"$SRC" -I"$SRC/game" -I"$STUBS" -I"$STUB_SRC" -I"$LUA_DIR/src"
 )
 
 if [[ "$WF_ENABLE_FENNEL" == "1" ]]; then
@@ -72,6 +77,10 @@ case "$WF_WASM_ENGINE" in
     wasm3) CXXFLAGS+=(-DWF_WASM_ENGINE_WASM3 -I"$WASM3_DIR/source") ;;
     none)  : ;;
 esac
+
+if [[ "$WF_REST_API" == "1" ]]; then
+    CXXFLAGS+=(-DWF_REST_API -I"$HTTPLIB_DIR")
+fi
 
 OBJS=()
 
@@ -312,6 +321,13 @@ case "$WF_WASM_ENGINE" in
         ;;
     none) : ;;
 esac
+
+# REST API plug — compiled only when WF_REST_API=1.
+if [[ "$WF_REST_API" == "1" ]]; then
+    echo "  CC (stub) rest_api.cc"
+    g++ "${CXXFLAGS[@]}" -O1 -c "$STUB_SRC/rest_api.cc" -o "$OUT/stubs__rest_api.o"
+    OBJS+=("$OUT/stubs__rest_api.o")
+fi
 
 # Embed minified fennel.lua as a byte array when Fennel is enabled. The
 # engine targets platforms without host filesystems, so fennel.lua can't be

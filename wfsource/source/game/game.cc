@@ -29,6 +29,7 @@
 
 #include "level.hp"
 #include "game.hp"
+#include "rest_api.hp"
 #include "oas/matte.ht"
 #include "gamestrm.hp"
 #include "camera.hp"
@@ -256,12 +257,14 @@ WFGame::RunLevel(_DiskFile* levelFile)
 	Scalar deltaTime = Scalar::zero;
 	bool _bContinue = true;
 	DBSTREAM1 ( cprogress << "Entering main game loop\n"; );
+	RestApi_Start();
 
 #if defined(DO_SLOW_STEREOGRAM)
 	InitVSyncCallback(*_display);
 #endif
 	while ( !_curLevel->done() && _bContinue )
 	{
+		RestApi_DrainQueue();
 		assert(HALScratchLmalloc.Empty());
 		DBSTREAM1( cframeinfo << char(12) << std::endl << "Frame Info:" << std::endl; )
 		DBSTREAM2( cflow << "Top of WFGame::update" << std::endl; )
@@ -324,6 +327,7 @@ WFGame::RunLevel(_DiskFile* levelFile)
 #else
 			_curLevel->RenderScene();
 #endif
+			RestApi_RenderBoxes();
 			_display->RenderEnd();
 		}
 #if DO_ASSERTIONS
@@ -351,6 +355,7 @@ WFGame::RunLevel(_DiskFile* levelFile)
 #pragma message ("KTS: write code to handle lives and restarting same level, etc.")
 	DBSTREAM1( std::cout << ", _bContinue = " << _bContinue << ", _curLevel->done() = " << _curLevel->done() << std::endl; )
 
+	RestApi_Stop();
 	MEMORY_DELETE(HALLmalloc,_curLevel,Level);
 	_curLevel = NULL;
 }
