@@ -5,12 +5,12 @@
 - [ ] Forth plug wiring — `scripting_forth.{hp,cc}`, per-backend impls, `\` sigil in ScriptRouter — [plan](docs/plans/2026-04-14-forth-scripting-engine.md)
 - [ ] Wren plug — `wren_engine` namespace, `//wren\n` sigil, snowgoons port — [plan](docs/plans/2026-04-14-wren-scripting-engine.md)
 - [ ] WAMR dev/ship — `wamr_engine` namespace, AOT-only ship target, replaces wasm3 for prod — [plan](docs/plans/2026-04-14-wamr-dev-aot-ship.md)
-- [ ] JerryScript smoke test — not yet run; JS engine compiled but untested against snowgoons — [plan](docs/plans/2026-04-15-phase-d-scripting-engines.md)
+- [ ] JerryScript smoke test — not yet run; JS engine compiled but untested against snowgoons — [plan](docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md#d2-jerryscript-smoke-test)
 
 
 ## LUA ENGINE
 
-- [verify] Fix #6 — coroutine continuations for multi-tick scripts (AI, cutscenes, dialogue) — [plan](docs/plans/2026-04-15-lua-engine-fixes.md)
+- [ ] Fix #6 smoke test — coroutine continuations implemented; needs snowgoons regression run — [plan](docs/plans/2026-04-15-lua-engine-fixes.md)
 - [ ] Lua remote step debugger — MobDebug / LuaLS-DAP wired into lua_engine for in-game step debugging
 
 
@@ -45,6 +45,6 @@
 - [x] Pluggable scripting engine — ScriptRouter neutral dispatcher, all engines as peers — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
 - [x] wasm3 scripting spike — `#b64\n` sigil, wasm3 engine plug — [plan](docs/plans/2026-04-14-wasm3-scripting-engine.md)
 - [x] lua_engine fixes #1–#5 — compile cache, per-actor _ENV, Fennel pre-compilation, sandbox, debug prints — [plan](docs/plans/2026-04-15-lua-engine-fixes.md)
-- [x] REST API PoC — cpp-httplib, 5 routes, GL wireframe box renderer, Postman collection playback — [plan](docs/plans/2026-04-15-phase-d-scripting-engines.md)
+- [x] REST API PoC — cpp-httplib, 5 routes, GL wireframe box renderer, Postman collection playback
 - [x] `wf_game -L<level.iff>` CLI flag — bypass cd.iff for dev iteration
 - [x] movecam crash stabilised — invalid (Actor*)&msgData cast at movecam.cc:964 guarded; physics replacement planned

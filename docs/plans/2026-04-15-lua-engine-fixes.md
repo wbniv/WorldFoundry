@@ -3,6 +3,14 @@
 **Date:** 2026-04-15
 **File:** `wftools/wf_viewer/stubs/scripting_stub.cc` (`lua_engine` namespace)
 
+> **Convention note.** This plan's `lua_engine` namespace is the canonical
+> shape for every WF scripting-engine plug: five free functions (`Init`,
+> `Shutdown`, `AddConstantArray`, `DeleteConstantArray`, `RunScript`) in
+> a file-scope `<engine>_engine` namespace, module-level globals instead
+> of member variables, lifecycle driven by `ScriptRouter`. The
+> retargeting of every other scripting-engine plan onto this convention
+> is tracked in `docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md`.
+
 ## Problems
 
 ### 1. `luaL_dostring` re-parses every tick (performance)
@@ -232,7 +240,7 @@ if the coroutine management gets complex.
 
 ## As built (2026-04-15)
 
-Fixes #1–#5 implemented in a single commit to `scripting_stub.cc`. #6 (coroutines) deferred.
+Fixes #1–#5 implemented in a single commit to `scripting_stub.cc`. Fix #6 (coroutines) implemented in a follow-up commit.
 
 **Changes made:**
 
@@ -260,3 +268,22 @@ it (`fennel: load failed: attempt to index a nil value (global 'package')`). `io
 `os` remain excluded.
 
 No other files are affected.
+
+**Fix #6 (coroutines) — as built:**
+
+- `gActorThreadRefs: unordered_map<int, int>` (objectIndex → registry ref) tracks live
+  coroutine threads.
+- `ResumeThread(objectIndex, threadRef, thread)` — resumes a thread, reads yield/return
+  value from thread stack, clears ref on `LUA_OK` or error.
+- `HandlePCallResult(objectIndex)` — after any successful `lua_pcall`, detects if the
+  return value is a thread (`LUA_TTHREAD`); if so, stores it and calls `ResumeThread`
+  for the first tick. Otherwise returns the numeric result.
+- `RunScript` checks `gActorThreadRefs` before the compile+call path; active threads
+  skip re-evaluation entirely.
+- Both Lua and Fennel paths use `HandlePCallResult` — coroutine detection is uniform.
+- `Shutdown` unrefs all thread refs before `lua_close`.
+- Usage: scripts return `coroutine.create(fn)` (not `coroutine.wrap`). Plain scripts
+  that return a number are unaffected.
+- Documented in `docs/scripting-languages.md` under "Coroutines — multi-tick scripts"
+  with four example patterns: wait-N-ticks, repeating state machine, wait-for-condition,
+  and Fennel equivalent.

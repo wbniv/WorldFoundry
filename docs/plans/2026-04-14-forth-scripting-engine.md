@@ -1,6 +1,11 @@
 # Plan: Forth as a scripting engine option for World Foundry
 
 **Date:** 2026-04-14
+**Status:** **pending.** Targets the 2026-04-15 ScriptRouter convention:
+the Forth plug lives in a file-scope `forth_engine` namespace (exposing
+`Init / Shutdown / AddConstantArray / DeleteConstantArray / RunScript`),
+implemented by whichever per-backend `scripting_<impl>.cc` is selected
+via `WF_FORTH_ENGINE`. The `\` sigil arm goes in `ScriptRouter::RunScript`.
 **Branch:** 2026-first-working-gap (or new branch)
 **Prior art:** `docs/plans/2026-04-14-pluggable-scripting-engine.md` (JS pattern),
 `docs/plans/2026-04-14-wasm3-scripting-engine.md` (wasm3 pattern),
@@ -285,16 +290,18 @@ Rows added to `wftools/vendor/README.md`. ✓
 class MailboxesManager;
 struct IntArrayEntry;
 
-void  ForthRuntimeInit(MailboxesManager& mgr);
-void  ForthRuntimeShutdown();
-void  ForthAddConstantArray(IntArrayEntry* entryList);
-void  ForthDeleteConstantArray(IntArrayEntry* entryList);  // no-op (dict not shrunk)
-float ForthRunScript(const char* src, int objectIndex);
+namespace forth_engine {
+    void  Init(MailboxesManager& mgr);
+    void  Shutdown();
+    void  AddConstantArray(IntArrayEntry* entryList);
+    void  DeleteConstantArray(IntArrayEntry* entryList);  // no-op (dict not shrunk)
+    float RunScript(const char* src, int objectIndex);
+}
 
 #endif // WF_ENABLE_FORTH
 ```
 
-This header is identical regardless of which backend is compiled in. `scripting_stub.cc` only ever sees this interface.
+This header is identical regardless of which backend is compiled in. `ScriptRouter` in `scripting_stub.cc` only ever sees this interface.
 
 ### Phase 3 — Per-backend implementation files
 
@@ -324,20 +331,20 @@ zf_result zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char*) {
     }
 }
 
-void ForthRuntimeInit(MailboxesManager& mgr) {
+void forth_engine::Init(MailboxesManager& mgr) {
     g_mgr = &mgr;
     zf_init(&g_ctx, 0);
     zf_bootstrap(&g_ctx);
     zf_eval(&g_ctx, ": read-mailbox 0 sys ; : write-mailbox 1 sys ;");
 }
-void ForthRuntimeShutdown() {}
-void ForthAddConstantArray(IntArrayEntry* e) {
+void forth_engine::Shutdown() {}
+void forth_engine::AddConstantArray(IntArrayEntry* e) {
     std::string s;
     for (; e->name; ++e) s += std::to_string(e->value) + " constant " + e->name + "\n";
     zf_eval(&g_ctx, s.c_str());
 }
-void ForthDeleteConstantArray(IntArrayEntry*) {}  // dict is append-only
-float ForthRunScript(const char* src, int objectIndex) {
+void forth_engine::DeleteConstantArray(IntArrayEntry*) {}  // dict is append-only
+float forth_engine::RunScript(const char* src, int objectIndex) {
     g_curObj = objectIndex;
     // skip past sigil line (\ ...\n)
     while (*src && *src != '\n') ++src;
@@ -370,24 +377,24 @@ static void ficl_write_mailbox(ficlVm* vm) {
     g_mgr->WriteMailbox(idx, val, g_curObj);
 }
 
-void ForthRuntimeInit(MailboxesManager& mgr) {
+void forth_engine::Init(MailboxesManager& mgr) {
     g_mgr = &mgr;
     g_sys = ficlSystemCreate(NULL);
     g_vm  = ficlSystemCreateVm(g_sys);
     ficlBuild(g_sys, "read-mailbox",  ficl_read_mailbox,  FICL_WORD_DEFAULT);
     ficlBuild(g_sys, "write-mailbox", ficl_write_mailbox, FICL_WORD_DEFAULT);
 }
-void ForthRuntimeShutdown() {
+void forth_engine::Shutdown() {
     if (g_vm)  ficlVmDestroy(g_vm);
     if (g_sys) ficlSystemDestroy(g_sys);
 }
-void ForthAddConstantArray(IntArrayEntry* e) {
+void forth_engine::AddConstantArray(IntArrayEntry* e) {
     std::string s;
     for (; e->name; ++e) s += std::to_string(e->value) + " constant " + e->name + "\n";
     ficlVmEvaluate(g_vm, s.c_str());
 }
-void ForthDeleteConstantArray(IntArrayEntry*) {}
-float ForthRunScript(const char* src, int objectIndex) {
+void forth_engine::DeleteConstantArray(IntArrayEntry*) {}
+float forth_engine::RunScript(const char* src, int objectIndex) {
     g_curObj = objectIndex;
     while (*src && *src != '\n') ++src;
     if (*src == '\n') ++src;
@@ -418,21 +425,21 @@ static void atlast_write_mailbox() {
     g_mgr->WriteMailbox(idx, val, g_curObj);
 }
 
-void ForthRuntimeInit(MailboxesManager& mgr) {
+void forth_engine::Init(MailboxesManager& mgr) {
     g_mgr = &mgr;
     atl_init();
     atlDefine("read-mailbox",  atlast_read_mailbox);
     atlDefine("write-mailbox", atlast_write_mailbox);
 }
-void ForthRuntimeShutdown() { atl_fini(); }
-void ForthAddConstantArray(IntArrayEntry* e) {
+void forth_engine::Shutdown() { atl_fini(); }
+void forth_engine::AddConstantArray(IntArrayEntry* e) {
     for (; e->name; ++e) {
         std::string s = std::to_string(e->value) + " constant " + e->name;
         atl_eval(const_cast<char*>(s.c_str()));
     }
 }
-void ForthDeleteConstantArray(IntArrayEntry*) {}
-float ForthRunScript(const char* src, int objectIndex) {
+void forth_engine::DeleteConstantArray(IntArrayEntry*) {}
+float forth_engine::RunScript(const char* src, int objectIndex) {
     g_curObj = objectIndex;
     while (*src && *src != '\n') ++src;
     if (*src == '\n') ++src;
@@ -445,9 +452,9 @@ float ForthRunScript(const char* src, int objectIndex) {
 
 > Atlast's stack API (`S0`, `Pop`, `Push`) uses C macros defined in `atlast.h`. Verify exact names against vendored source — they may differ by release.
 
-### Phase 4 — Dispatch in `scripting_stub.cc`
+### Phase 4 — Dispatch in `ScriptRouter` (`scripting_stub.cc`)
 
-Changes are **identical regardless of backend**; the macro `WF_ENABLE_FORTH` is set by the build system for all three.
+Changes are **identical regardless of backend**; the macro `WF_ENABLE_FORTH` is set by the build system for whichever backend was chosen.
 
 1. Guarded include at top:
 ```cpp
@@ -456,16 +463,30 @@ Changes are **identical regardless of backend**; the macro `WF_ENABLE_FORTH` is 
 #endif
 ```
 
-2. Ctor / dtor / `AddConstantArray` / `DeleteConstantArray` — same as before (guarded on `WF_ENABLE_FORTH`).
+2. In `ScriptRouter::ScriptRouter()` (alongside `lua_engine::Init`, `js_engine::Init`, `wasm3_engine::Init`, `wren_engine::Init`):
+```cpp
+#ifdef WF_ENABLE_FORTH
+    forth_engine::Init(mgr);
+#endif
+```
 
-3. `RunScript()` — insert before `#ifdef WF_WITH_JS`:
+3. In `ScriptRouter::~ScriptRouter()` (reverse order):
+```cpp
+#ifdef WF_ENABLE_FORTH
+    forth_engine::Shutdown();
+#endif
+```
+
+4. In `ScriptRouter::AddConstantArray(entryList)` / `DeleteConstantArray(entryList)`, call the matching `forth_engine::` method under `#ifdef WF_ENABLE_FORTH`.
+
+5. `ScriptRouter::RunScript()` — insert **first**, before the `//wren\n` / `//` / `#` arms (the single-byte `\` is the most specific backslash sigil):
 ```cpp
 #ifdef WF_ENABLE_FORTH
     {
         const char* p = src;
         while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') p++;
         if (*p == '\\') {
-            return Scalar::FromFloat(ForthRunScript(src, objectIndex));
+            return Scalar::FromFloat(forth_engine::RunScript(src, objectIndex));
         }
     }
 #endif

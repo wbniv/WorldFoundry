@@ -1,5 +1,24 @@
 # Scripting languages in WF
 
+## Status of each scripting plan
+
+| # | Plan doc | Language / runtime | Status | Source file |
+|---|----------|--------------------|--------|-------------|
+| 1 | [Lua spike](plans/2026-04-13-lua-interpreter-spike.md) | Lua 5.4 | landed 2026-04-13 | [`scripting_stub.cc` (`lua_engine` ns)](../wftools/wf_viewer/stubs/scripting_stub.cc) |
+| 2 | [Vendor Lua](plans/2026-04-14-vendor-lua.md) | Lua 5.4 (vendoring) | landed 2026-04-14 | [`wftools/vendor/lua-5.4.8/`](../wftools/vendor/lua-5.4.8/) |
+| 3 | [Fennel-on-Lua](plans/2026-04-14-fennel-on-lua.md) | Fennel | landed 2026-04-14 | sub-dispatch in `lua_engine` ns |
+| 4 | [Pluggable / JS](plans/2026-04-14-pluggable-scripting-engine.md) | QuickJS / JerryScript | landed 2026-04-14 (rename to `js_engine` ns in-flight) | [`scripting_quickjs.cc`](../wftools/wf_viewer/stubs/scripting_quickjs.cc), [`scripting_jerryscript.cc`](../wftools/wf_viewer/stubs/scripting_jerryscript.cc) |
+| 5 | [wasm3](plans/2026-04-14-wasm3-scripting-engine.md) | wasm3 | landed 2026-04-14 (rename to `wasm3_engine` ns in-flight) | [`scripting_wasm3.cc`](../wftools/wf_viewer/stubs/scripting_wasm3.cc) |
+| 6 | [WAMR dev + AOT ship](plans/2026-04-14-wamr-dev-aot-ship.md) | WAMR (interp + AOT) | pending | — |
+| 7 | [Wren](plans/2026-04-14-wren-scripting-engine.md) | Wren | pending | — |
+| 8 | [Forth](plans/2026-04-14-forth-scripting-engine.md) | zForth / ficl / Atlast / embed / libforth / pForth (pluggable) | pending (vendor dirs checked in) | — |
+| 9 | [lua_engine fixes](plans/2026-04-15-lua-engine-fixes.md) | Lua (perf + correctness fixes) | pending | — |
+| — | [Align plans with ScriptRouter](plans/2026-04-15-scripting-plans-align-scriptrouter.md) | docs + rename sweep | in-flight | — |
+
+Every engine follows the same shape: a file-scope `<engine>_engine` namespace exposing `Init / Shutdown / AddConstantArray / DeleteConstantArray / RunScript`, driven by `ScriptRouter` in [`scripting_stub.cc`](../wftools/wf_viewer/stubs/scripting_stub.cc).
+
+---
+
 The engine supports several scripting languages. **A build chooses any
 subset** — Lua-only, JS-only, Lua + Fennel, QuickJS + wasm3, etc. No
 language is mandatory; the scriptless build (no engines compiled in) is
@@ -140,6 +159,89 @@ exception is Fennel, which compiles to Lua and therefore can't be
 selected without Lua. Every other combination — QuickJS without Lua,
 wasm3 without Lua, JerryScript + wasm3 with no Lua or Fennel — is a
 supported build configuration.
+
+## Coroutines — multi-tick scripts
+
+By default a script runs to completion in one tick and returns a number.
+Scripts that need to span multiple ticks — AI state machines, cutscenes,
+dialogue sequences, timed events — can return a coroutine thread instead.
+`lua_engine` detects this and resumes the thread once per tick until it
+finishes.
+
+### How it works
+
+On the first tick the script function is called normally. If it returns a
+coroutine thread (`coroutine.create(fn)`), that thread is stored and resumed
+immediately. On every subsequent tick, instead of re-calling the function,
+`lua_engine::RunScript` resumes the stored thread. When the thread returns
+(falls off the end of its function body) or errors, the ref is cleared and
+the script reverts to normal per-tick calling.
+
+A yielded value is used as the `RunScript` return for that tick — useful if
+the script controls a mailbox write from inside the loop.
+
+### Example patterns
+
+**Wait N ticks:**
+```lua
+return coroutine.create(function()
+    for _ = 1, 60 do          -- hold for 60 ticks (~2 s at 30 Hz)
+        coroutine.yield()
+    end
+    write_mailbox(INDEXOF_CAMSHOT, 3)
+end)
+```
+
+**Repeating state machine:**
+```lua
+return coroutine.create(function()
+    while true do
+        -- PATROL
+        write_mailbox(INDEXOF_AI_STATE, 1)
+        for _ = 1, 90 do coroutine.yield() end
+
+        -- ALERT
+        write_mailbox(INDEXOF_AI_STATE, 2)
+        for _ = 1, 30 do coroutine.yield() end
+    end
+end)
+```
+
+**Wait for condition:**
+```lua
+return coroutine.create(function()
+    -- Wait until trigger mailbox fires
+    while read_mailbox(INDEXOF_TRIGGER_A) == 0 do
+        coroutine.yield()
+    end
+    write_mailbox(INDEXOF_CAMSHOT, 5)
+    write_mailbox(INDEXOF_MUSIC, 2)
+end)
+```
+
+**Fennel equivalent (`;` sigil):**
+```fennel
+; cutscene — hold camera on shot 7 for 120 ticks then cut to shot 1
+(coroutine.create
+  (fn []
+    (write-mailbox INDEXOF_CAMSHOT 7)
+    (for [_ 1 120] (coroutine.yield))
+    (write-mailbox INDEXOF_CAMSHOT 1)))
+```
+
+### Rules
+
+- Use `coroutine.create(fn)`, not `coroutine.wrap(fn)`. `coroutine.wrap`
+  returns a plain function, not a thread, so the engine won't detect it.
+- A script that never returns a thread is unaffected — plain per-tick
+  execution is unchanged.
+- If a coroutine errors, it is cleared and the script restarts from scratch
+  on the next tick (returning a fresh coroutine if desired).
+- Per-actor `_ENV` isolation applies inside coroutines — locals written
+  inside the coroutine are private to that actor.
+- Only one coroutine per actor at a time. Returning a new thread while one
+  is running is not supported; the new thread would only be picked up after
+  the current one finishes or errors.
 
 ## Notes for future languages
 

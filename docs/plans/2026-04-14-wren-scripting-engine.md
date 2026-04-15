@@ -101,17 +101,17 @@ static std::string       g_preamble;   // "var INDEXOF_INPUT = 3024\n..."
 static WrenConfiguration g_config;
 ```
 
-**`WrenRuntimeInit(mgr)`:**
+**`wren_engine::Init(mgr)`:**
 1. Store `mgr` in `g_mgr`.
 2. `wrenInitConfiguration(&g_config)`.
 3. Set `g_config.writeFn`, `g_config.errorFn` (stderr), `g_config.bindForeignMethodFn`.
 4. `g_config.loadModuleFn = nullptr` (no imports needed — preamble approach).
 5. `g_preamble` starts empty; `WrenAddConstantArray()` appends to it.
 
-**`WrenAddConstantArray(entryList)`:**
+**`wren_engine::AddConstantArray(entryList)`:**
 - Walk `IntArrayEntry*` and append `"var " + name + " = " + value + "\n"` to `g_preamble`.
 
-**`WrenRunScript(src, objectIndex)`:**
+**`wren_engine::RunScript(src, objectIndex)`:**
 1. `g_curObj = objectIndex`.
 2. Strip the `//wren\n` sigil line from `src`.
 3. Build combined source: `g_preamble + "\n" + stripped_src`.
@@ -158,7 +158,7 @@ class Env {
 }
 ```
 
-### Phase 4 — Dispatch in `scripting_stub.cc`
+### Phase 4 — Dispatch in `ScriptRouter` (`scripting_stub.cc`)
 
 **File:** `wftools/wf_viewer/stubs/scripting_stub.cc`
 
@@ -169,35 +169,35 @@ class Env {
 #endif
 ```
 
-2. In `LuaInterpreter::LuaInterpreter()` ctor (before `AddConstantArray` calls):
+2. In `ScriptRouter::ScriptRouter()` (alongside `lua_engine::Init`, `js_engine::Init`, `wasm3_engine::Init`):
 ```cpp
 #ifdef WF_ENABLE_WREN
-    WrenRuntimeInit(_mailboxesManager);
+    wren_engine::Init(mgr);
 #endif
 ```
 
-3. In `LuaInterpreter::~LuaInterpreter()`:
+3. In `ScriptRouter::~ScriptRouter()` (reverse order):
 ```cpp
 #ifdef WF_ENABLE_WREN
-    WrenRuntimeShutdown();
+    wren_engine::Shutdown();
 #endif
 ```
 
-4. In `LuaInterpreter::AddConstantArray(entryList)`:
+4. In `ScriptRouter::AddConstantArray(entryList)`:
 ```cpp
 #ifdef WF_ENABLE_WREN
-    WrenAddConstantArray(entryList);
+    wren_engine::AddConstantArray(entryList);
 #endif
 ```
 
-5. In `LuaInterpreter::DeleteConstantArray(entryList)`:
+5. In `ScriptRouter::DeleteConstantArray(entryList)`:
 ```cpp
 #ifdef WF_ENABLE_WREN
-    WrenDeleteConstantArray(entryList);
+    wren_engine::DeleteConstantArray(entryList);
 #endif
 ```
 
-6. In `LuaInterpreter::RunScript()`, insert **before** the `#ifdef WF_WITH_JS` block (~line 267):
+6. In `ScriptRouter::RunScript()`, insert **before** the `//` JS block (the `//wren\n` prefix must match before the shorter `//`):
 ```cpp
 #ifdef WF_ENABLE_WREN
     {
@@ -205,7 +205,7 @@ class Env {
         while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') p++;
         if (p[0]=='/' && p[1]=='/' && p[2]=='w' && p[3]=='r'
             && p[4]=='e' && p[5]=='n' && p[6]=='\n') {
-            return Scalar::FromFloat(WrenRunScript(src, objectIndex));
+            return Scalar::FromFloat(wren_engine::RunScript(src, objectIndex));
         }
     }
 #endif
