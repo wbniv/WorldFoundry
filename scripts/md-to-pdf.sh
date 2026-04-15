@@ -247,6 +247,13 @@ for line in lines:
         # Process inline code in cells first, escaping HTML inside code spans,
         # then escape remaining HTML in the rest of the cell content
         def escape_cell(c):
+            # Extract <a id="..."></a> anchor tags before any escaping so they
+            # survive as real HTML elements (needed for index → row jump links).
+            anchors = []
+            def save_anchor(m):
+                anchors.append(m.group(0))
+                return f'\x00ANCHOR{len(anchors)-1}\x00'
+            c = re.sub(r'<a\s[^>]*></a>', save_anchor, c)
             # Handle double-backtick spans (can contain single backticks) before single-backtick spans
             parts = re.split(r'(\`\`.+?\`\`|\`[^\`]+\`)', c)
             result = []
@@ -262,7 +269,10 @@ for line in lines:
                     result.append('<code>' + inner + '</code>')
                 else:
                     result.append(html_mod.escape(part))
-            return ''.join(result)
+            out = ''.join(result)
+            for i, tag in enumerate(anchors):
+                out = out.replace(f'\x00ANCHOR{i}\x00', tag)
+            return out
         cells = [escape_cell(c) for c in cells]
         if not in_table:
             close_lists(); close_blockquote()
@@ -456,7 +466,7 @@ html = f'''<!DOCTYPE html>
   blockquote p {{ margin: 4px 0; }}
   del {{ color: #656d76; }}
   table {{ border-collapse: collapse; width: 100%; margin: 16px 0; }}
-  th, td {{ border: 1px solid #d1d9e0; padding: 8px 12px; text-align: left; }}
+  th, td {{ border: 1px solid #d1d9e0; padding: 8px 12px; text-align: left; vertical-align: top; }}
   th {{ background: #f6f8fa; font-weight: 600; }}
   tr:nth-child(even) {{ background: #f6f8fa; }}
   hr {{ border: none; border-top: 1px solid #d1d9e0; margin: 24px 0; }}
