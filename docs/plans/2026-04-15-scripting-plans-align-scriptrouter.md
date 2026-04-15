@@ -1,6 +1,7 @@
 # Plan: align scripting-engine plans with ScriptRouter convention
 
 **Date:** 2026-04-15
+**Status:** landed 2026-04-15 — all phases (A, A′, B, C, D.1–D.5, E) complete; smoke tests blocked pending HAL cleanup (other branch)
 **Scope:** docs-only pass over `docs/plans/2026-04-{13,14,15}-*` scripting-engine plans.
 
 ## Context
@@ -25,10 +26,10 @@ The older scripting plans (Lua spike, Fennel, JS, wasm3) describe a `LuaInterpre
 | 3 | `2026-04-14-fennel-on-lua.md` | Fennel | **landed** | `wftools/wf_viewer/stubs/fennel.lua` | sub-dispatch in `lua_engine` ns | yes (sub-engine, not router peer) |
 | 4 | `2026-04-14-pluggable-scripting-engine.md` | QuickJS / JerryScript | **landed** (status marker present) | `quickjs-v0.14.0/`, `jerryscript-v3.0.0/` | `scripting_quickjs.cc`, `scripting_jerryscript.cc` | partial — uses `JsRuntimeInit/JsRunScript` free-fn style; should migrate to `js_engine` namespace |
 | 5 | `2026-04-14-wasm3-scripting-engine.md` | wasm3 | **landed** (no status marker) | `wasm3-v0.5.0/`, `wasm3-v0.5.0-wf/` | `scripting_wasm3.cc` | partial — uses `Wasm3RuntimeInit/Wasm3RunScript`; should migrate to `wasm3_engine` namespace |
-| 6 | `2026-04-14-wamr-dev-aot-ship.md` | WAMR (interp + AOT) | **pending** | — | — | n/a — plan still references `LuaInterpreter` dispatch |
-| 7 | `2026-04-14-wren-scripting-engine.md` | Wren | **pending** | — | — | no — plan describes `LuaInterpreter::LuaInterpreter()` ctor hooks |
-| 8 | `2026-04-14-forth-scripting-engine.md` | zForth/ficl/Atlast/embed/libforth/pForth (pluggable) | **pending** — vendor dirs already checked in (`wftools/vendor/{zforth,ficl,atlast,embed,libforth,pforth,nanoforth}-*`); no `scripting_forth*.cc` yet | partial (vendor only) | — | no — plan describes `LuaInterpreter` dispatch |
-| 9 | `2026-04-15-lua-engine-fixes.md` | Lua (fixes #1–#6) | **pending** | n/a | n/a | yes — defines the convention |
+| 6 | `2026-04-14-wamr-dev-aot-ship.md` | WAMR (interp + AOT) | **landed 2026-04-15** (interp phase 1; WAT compiled; needs smoke test) | `wamr-2.2.0/`, `wamr-2.2.0-wf/` (incl. compiled `.wasm`) | `scripting_wamr.hp`, `scripting_wamr.cc` | yes — `wamr_engine` namespace |
+| 7 | `2026-04-14-wren-scripting-engine.md` | Wren | **landed 2026-04-15** (needs smoke test) | `wren-0.4.0/` | `scripting_wren.hp`, `scripting_wren.cc` | yes — `wren_engine` namespace |
+| 8 | `2026-04-14-forth-scripting-engine.md` | zForth/ficl/Atlast/embed/libforth/pForth (pluggable) | **landed 2026-04-15** (zForth default; needs smoke test) | `zforth-*/`, `ficl-*/`, etc. | `scripting_forth.hp`, `scripting_zforth.cc` | yes — `forth_engine` namespace |
+| 9 | `2026-04-15-lua-engine-fixes.md` | Lua (fixes #1–#6) | **landed 2026-04-15** (#1–#5 shipped; #6 coroutines landed, needs smoke test) | n/a | n/a | yes — defines the convention |
 
 A row-for-row version of this table should also land at the top of `docs/scripting-languages.md` (user-visible status reference). That is included in Phase C below.
 
@@ -169,19 +170,17 @@ Sigil: `//wren\n` (checked before generic `//` to avoid false dispatch to JS).
 
 #### D.5 WAMR — see `2026-04-14-wamr-dev-aot-ship.md`
 
-Nothing in tree yet. Sigil: `#b64\n` (shared with wasm3; `WF_WASM_ENGINE` switch selects between them). AOT path is a stretch goal.
+**Landed 2026-04-15 (phase 1 — interp; needs smoke test).**
 
-Phase 1 (interp only):
-1. Vendor WAMR classic interpreter under `wftools/vendor/wamr-*/`
-2. `wftools/wf_viewer/stubs/scripting_wamr.hp` + `scripting_wamr.cc` (`wamr_engine` namespace)
-3. Extend `WF_WASM_ENGINE=wamr` in `build_game.sh`
-4. Re-author snowgoons WAT sources to use WAMR const-import host globals (`import "consts" "INDEXOF_INPUT" (global i32)` at instantiate time)
-5. Recompile `.wasm` and re-patch snowgoons IFF via `scripts/patch_snowgoons_wasm.py`
-6. Smoke test
+Phase 1 (interp only) — all steps complete:
+1. ✓ Vendor WAMR 2.2.0 classic interpreter under `wftools/vendor/wamr-2.2.0/`
+2. ✓ `wftools/wf_viewer/stubs/scripting_wamr.hp` + `scripting_wamr.cc` (`wamr_engine` namespace, wasm-C-API)
+3. ✓ Extend `WF_WASM_ENGINE=wamr` in `build_game.sh`; CMake block builds `libvmlib.a` (~519 KB at MinSizeRel)
+4. ✓ Re-authored snowgoons WAT sources in `wamr-2.2.0-wf/` using `(import "consts" "INDEXOF_*" (global i32))` host globals
+5. ✓ Compiled WAT → `.wasm` via `wat2wasm` (director 158 B, player 159 B); `scripts/patch_snowgoons_wamr.py` prefers these over the wasm3 fallback
+6. ⬜ Smoke test — blocked on HAL cleanup (other branch)
 
-**Doc updates:** add WAMR row — `WF_WASM_ENGINE=wamr`, binary cost, status, note that WAMR supports const-import globals (unlike wasm3 which requires baked literals). Update wasm3 row to clarify it remains as `WF_WASM_ENGINE=wasm3`.
-
-**Effort:** 2–3 days (largest lift).
+AOT path (phase 2) deferred.
 
 #### Full dispatch order after Phase D
 
@@ -310,6 +309,23 @@ For each engine block added:
    run manually) and the iff is re-patched.
 2. `wf_game` runs snowgoons: player moves, director cuts cameras.
 3. Status in the doc's engine table updated to "shipping".
+
+### Phase F — Smoke test all engines in `wf_game`
+
+**Definition of done:** `wf_game -Lwflevels/snowgoons.iff` runs with the given engine
+compiled in, player moves under joystick input, director cuts cameras on trigger.
+Once passed, flip the engine's status to "shipping" in `docs/scripting-languages.md`.
+
+| Engine | Build switch | Status |
+|--------|-------------|--------|
+| Lua 5.4 | `WF_ENABLE_LUA=1` | ✓ done |
+| Fennel | `WF_ENABLE_FENNEL=1` | ✓ done |
+| JavaScript (QuickJS) | `WF_JS_ENGINE=quickjs` | ✓ done |
+| WebAssembly (wasm3) | `WF_WASM_ENGINE=wasm3` | ✓ done |
+| JavaScript (JerryScript) | `WF_JS_ENGINE=jerryscript` | ⬜ build path landed; never run |
+| WebAssembly (WAMR) | `WF_WASM_ENGINE=wamr` | ⬜ blocked on HAL cleanup (other branch) |
+| Forth (zForth) | `WF_FORTH_ENGINE=zforth` | ⬜ landed 2026-04-15; needs smoke test |
+| Wren | `WF_ENABLE_WREN=1` | ⬜ landed 2026-04-15; needs smoke test |
 
 ## Critical files
 

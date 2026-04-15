@@ -1,24 +1,5 @@
 # Scripting languages in WF
 
-## Status of each scripting plan
-
-| # | Plan doc | Language / runtime | Status | Source file |
-|---|----------|--------------------|--------|-------------|
-| 1 | [Lua spike](plans/2026-04-13-lua-interpreter-spike.md) | Lua 5.4 | landed 2026-04-13 | [`scripting_stub.cc` (`lua_engine` ns)](../wftools/wf_viewer/stubs/scripting_stub.cc) |
-| 2 | [Vendor Lua](plans/2026-04-14-vendor-lua.md) | Lua 5.4 (vendoring) | landed 2026-04-14 | [`wftools/vendor/lua-5.4.8/`](../wftools/vendor/lua-5.4.8/) |
-| 3 | [Fennel-on-Lua](plans/2026-04-14-fennel-on-lua.md) | Fennel | landed 2026-04-14 | sub-dispatch in `lua_engine` ns |
-| 4 | [Pluggable / JS](plans/2026-04-14-pluggable-scripting-engine.md) | QuickJS / JerryScript | landed 2026-04-14; `js_engine` ns landed 2026-04-15 | [`scripting_quickjs.cc`](../wftools/wf_viewer/stubs/scripting_quickjs.cc), [`scripting_jerryscript.cc`](../wftools/wf_viewer/stubs/scripting_jerryscript.cc) |
-| 5 | [wasm3](plans/2026-04-14-wasm3-scripting-engine.md) | wasm3 | landed 2026-04-14; `wasm3_engine` ns landed 2026-04-15 | [`scripting_wasm3.cc`](../wftools/wf_viewer/stubs/scripting_wasm3.cc) |
-| 6 | [WAMR dev + AOT ship](plans/2026-04-14-wamr-dev-aot-ship.md) | WAMR (interp + AOT) | pending | — |
-| 7 | [Wren](plans/2026-04-14-wren-scripting-engine.md) | Wren | pending | — |
-| 8 | [Forth](plans/2026-04-14-forth-scripting-engine.md) | zForth / ficl / Atlast / embed / libforth / pForth (pluggable) | pending (vendor dirs checked in) | — |
-| 9 | [lua_engine fixes](plans/2026-04-15-lua-engine-fixes.md) | Lua fixes #1–#5 | landed 2026-04-15; fix #6 (coroutines) landed 2026-04-15 (needs smoke test) | [`scripting_stub.cc` (`lua_engine` ns)](../wftools/wf_viewer/stubs/scripting_stub.cc) |
-| — | [Align plans with ScriptRouter](plans/2026-04-15-scripting-plans-align-scriptrouter.md) | docs + rename sweep | **landed 2026-04-15** | — |
-
-Every engine follows the same shape: a file-scope `<engine>_engine` namespace exposing `Init / Shutdown / AddConstantArray / DeleteConstantArray / RunScript`, driven by `ScriptRouter` in [`scripting_stub.cc`](../wftools/wf_viewer/stubs/scripting_stub.cc).
-
----
-
 The engine supports several scripting languages. **A build chooses any
 subset** — Lua-only, JS-only, Lua + Fennel, QuickJS + wasm3, etc. No
 language is mandatory; the scriptless build (no engines compiled in) is
@@ -35,6 +16,16 @@ another.
 | QuickJS | `WF_JS_ENGINE=quickjs` | `//` | Mutually exclusive with JerryScript. |
 | JerryScript | `WF_JS_ENGINE=jerryscript` | `//` | Mutually exclusive with QuickJS. |
 | wasm3 | `WF_WASM_ENGINE=wasm3` | `#b64\n` | Source languages: hand-written `.wat`, AssemblyScript, Rust, C, Zig → `.wasm`. Stored as base64 in existing text chunks; `#b64\n` is the full sigil (bare `#` falls through to Lua so TCL shell comments in `cd.iff` keep working). |
+| WAMR | `WF_WASM_ENGINE=wamr` | `#b64\n` | Same sigil and binary format as wasm3; `WF_WASM_ENGINE` selects exactly one. WAMR adds host-supplied `(global …)` imports so `INDEXOF_*` constants are resolved at instantiate time instead of baked as literals. |
+| Forth | `WF_FORTH_ENGINE=zforth` (or `ficl`/`atlast`/`embed`/`libforth`/`pforth`) | `\` | Backend is a compile-time switch; same source runs on all backends. Dictionary pre-loaded with `INDEXOF_*` constants and `read-mailbox` / `write-mailbox` host words. |
+| Wren | `WF_ENABLE_WREN=1` | `//wren\n` | Checked before generic `//` to avoid false dispatch to JS. Mailbox access via foreign class `Env` (`Env.read_mailbox` / `Env.write_mailbox`). |
+
+The WebAssembly rows above show hand-written WAT for illustration, but nobody is expected
+to author scripts in WAT directly. The value of the wasm target is the languages that
+compile to `.wasm`: AssemblyScript, Rust, C, C++, Zig, Go (TinyGo), and any other
+language with a wasm backend. Scripts in those languages compile to `.wasm` offline,
+get base64-wrapped, and drop into an iff text chunk unchanged — the engine doesn't know
+or care what source language produced the binary.
 
 Dispatch is a leading-byte sniff: matching a sigil routes to that engine,
 non-matching scripts go to the build's **fallthrough engine** (today Lua;
@@ -66,6 +57,24 @@ write_mailbox(INDEXOF_INPUT, read_mailbox(INDEXOF_HARDWARE_JOYSTICK1_RAW))
 (write_mailbox INDEXOF_INPUT (read_mailbox INDEXOF_HARDWARE_JOYSTICK1_RAW))
 ```
 
+**Forth:**
+```forth
+\ snowgoons player
+INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox
+```
+`read-mailbox ( idx -- val )` and `write-mailbox ( val idx -- )` are host words;
+`INDEXOF_*` constants are loaded into the dictionary at engine init. Same source runs on
+every backend (zForth, ficl, Atlast, embed, libforth, pForth) — backend is a compile-time
+switch.
+
+**Wren:**
+```wren
+//wren
+Env.write_mailbox(INDEXOF_INPUT, Env.read_mailbox(INDEXOF_HARDWARE_JOYSTICK1_RAW))
+```
+`INDEXOF_*` constants are injected as module-level `var` declarations at engine init;
+mailbox access goes through the foreign class `Env` (Wren has no top-level functions).
+
 **JavaScript (QuickJS / JerryScript):**
 ```javascript
 // snowgoons player
@@ -89,7 +98,24 @@ Compiled via `wat2wasm` then base64'd and wrapped as `#b64\n<base64>` in the iff
 chunk. This script is *not* patched into the demo iff: the player's slot is 77 B, which
 cannot hold even a minimal wasm module's base64 form (~108 B). `snowgoons_player.wasm`
 is committed as a reference for when a binary IFF chunk type lands and frees the
-base64 overhead. Source: `wftools/vendor/wasm3-v0.5.0-wf/snowgoons_player.wat`.
+base64 overhead. Sources: `wftools/vendor/wasm3-v0.5.0-wf/snowgoons_player.wat` (baked
+literals), `wftools/vendor/wamr-2.2.0-wf/snowgoons_player.wat` (global-import version).
+
+**WebAssembly (WAMR), authored in WAT:**
+```wat
+(module
+  (import "consts" "INDEXOF_HARDWARE_JOYSTICK1_RAW" (global $raw i32))
+  (import "consts" "INDEXOF_INPUT"                  (global $inp i32))
+  (import "env"    "read_mailbox"  (func $read  (param i32) (result f32)))
+  (import "env"    "write_mailbox" (func $write (param i32 f32)))
+  (func (export "main")
+    global.get $inp
+    global.get $raw
+    call $read
+    call $write))
+```
+Same `.wat` authoring model as wasm3 but WAMR supports host-supplied `(global …)` imports,
+so `INDEXOF_*` are resolved at instantiate time instead of being baked as literals.
 
 ### Director — switch camshot based on trigger mailboxes
 
@@ -107,6 +133,25 @@ v = read_mailbox(98);  if v ~= 0 then write_mailbox(INDEXOF_CAMSHOT, v) end
 (let [v (read_mailbox 100)] (when (not= v 0) (write_mailbox INDEXOF_CAMSHOT v)))
 (let [v (read_mailbox 99)]  (when (not= v 0) (write_mailbox INDEXOF_CAMSHOT v)))
 (let [v (read_mailbox 98)]  (when (not= v 0) (write_mailbox INDEXOF_CAMSHOT v)))
+```
+
+**Forth:**
+```forth
+\ snowgoons director
+: ?cam ( mb -- ) read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then ;
+100 ?cam   99 ?cam   98 ?cam
+```
+
+**Wren:**
+```wren
+//wren
+var v
+v = Env.read_mailbox(100)
+if (v != 0) Env.write_mailbox(INDEXOF_CAMSHOT, v)
+v = Env.read_mailbox(99)
+if (v != 0) Env.write_mailbox(INDEXOF_CAMSHOT, v)
+v = Env.read_mailbox(98)
+if (v != 0) Env.write_mailbox(INDEXOF_CAMSHOT, v)
 ```
 
 **JavaScript (QuickJS / JerryScript):**
@@ -138,71 +183,9 @@ Compiled via `wat2wasm` then base64'd and wrapped as `#b64\n<base64>` in
 the iff text chunk. `INDEXOF_CAMSHOT` is baked as the literal `1021` —
 wasm3 has no host-side constant import surface (see plan §3).
 Source lives at `wftools/vendor/wasm3-v0.5.0-wf/snowgoons_director.wat`;
-patched into `wflevels/snowgoons.iff` by
-`scripts/patch_snowgoons_wasm.py`.
+patched into `wflevels/snowgoons.iff` by `scripts/patch_snowgoons_wasm.py`.
 
-**Forth *(pending Phase D.3)*, authored in standard Forth:**
-
-`read-mailbox ( idx -- val )` and `write-mailbox ( val idx -- )` are host
-words; `INDEXOF_*` constants are loaded into the dictionary at engine
-init. Same source runs on every backend (zForth, ficl, Atlast, embed,
-libforth, pForth) — backend is a compile-time switch.
-
-*Player:*
-```forth
-\ snowgoons player
-INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox
-```
-
-*Director:*
-```forth
-\ snowgoons director
-: ?cam ( mb -- ) read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then ;
-100 ?cam   99 ?cam   98 ?cam
-```
-
-**Wren *(pending Phase D.4)*:**
-
-`INDEXOF_*` constants are injected as module-level `var` declarations at
-engine init; mailbox access goes through the foreign class `Env` (Wren
-has no top-level functions).
-
-*Player:*
-```wren
-//wren
-Env.write_mailbox(INDEXOF_INPUT, Env.read_mailbox(INDEXOF_HARDWARE_JOYSTICK1_RAW))
-```
-
-*Director:*
-```wren
-//wren
-var v
-v = Env.read_mailbox(100); if (v != 0) Env.write_mailbox(INDEXOF_CAMSHOT, v)
-v = Env.read_mailbox(99);  if (v != 0) Env.write_mailbox(INDEXOF_CAMSHOT, v)
-v = Env.read_mailbox(98);  if (v != 0) Env.write_mailbox(INDEXOF_CAMSHOT, v)
-```
-
-**WebAssembly (WAMR) *(pending Phase D.5)*, authored in WAT:**
-
-Same `.wat` authoring model as wasm3 but WAMR supports host-supplied
-`(global …)` imports, so `INDEXOF_*` are resolved at instantiate time
-instead of being baked as literals.
-
-*Player:*
-```wat
-(module
-  (import "consts" "INDEXOF_HARDWARE_JOYSTICK1_RAW" (global $raw i32))
-  (import "consts" "INDEXOF_INPUT"                  (global $inp i32))
-  (import "env"    "read_mailbox"  (func $read  (param i32) (result f32)))
-  (import "env"    "write_mailbox" (func $write (param i32 f32)))
-  (func (export "main")
-    global.get $inp
-    global.get $raw
-    call $read
-    call $write))
-```
-
-*Director:*
+**WebAssembly (WAMR), authored in WAT:**
 ```wat
 (module
   (import "consts" "INDEXOF_CAMSHOT" (global $cam i32))
@@ -218,6 +201,8 @@ instead of being baked as literals.
     i32.const 99  call $maybe
     i32.const 98  call $maybe))
 ```
+WAMR supports host-supplied `(global …)` imports, so `INDEXOF_CAMSHOT` is resolved at
+instantiate time instead of being baked as a literal.
 
 ## Integration surface
 
@@ -232,7 +217,10 @@ to the mailbox machinery or level format.
 | Fennel   | `;` | `fennel.lua` embedded via codegen (minified) | `WF_ENABLE_FENNEL=1` (requires Lua) | ~145 KB `.rodata` | shipping |
 | JavaScript (QuickJS) | `//` | QuickJS v0.14.0 statically linked from `wftools/vendor/` | `WF_JS_ENGINE=quickjs` | ~1.2 MB unstripped (~350 KB target stripped) | shipping |
 | JavaScript (JerryScript) | `//` | JerryScript v3.0.0 `wf-minimal` profile | `WF_JS_ENGINE=jerryscript` | ~80–90 KB lib | landed (build path); not yet smoke-tested |
-| WebAssembly | `#b64\n` | wasm3 v0.5.0 (pure-C interpreter) | `WF_WASM_ENGINE=wasm3` | ~100 KB core at `-O2` unstripped (stripped binary delta ~136 KB including selftest + plug); upstream cites ~65 KB for stripped Cortex-M builds | shipping (spike) |
+| WebAssembly (wasm3) | `#b64\n` | wasm3 v0.5.0 (pure-C interpreter) | `WF_WASM_ENGINE=wasm3` | ~100 KB core at `-O2` unstripped (stripped binary delta ~136 KB including selftest + plug); upstream cites ~65 KB for stripped Cortex-M builds | shipping (spike) |
+| WebAssembly (WAMR) | `#b64\n` | WAMR 2.2.0 classic interpreter (Apache-2.0); supports host-supplied `(global …)` imports for `INDEXOF_*` constants; WAT sources + compiled `.wasm` in `wamr-2.2.0-wf/` | `WF_WASM_ENGINE=wamr` | ~519 KB static lib (`-Os`); AOT planned (phase 2) | landed 2026-04-15 (interp; needs smoke test) |
+| Forth (zForth) | `\` | zForth 4 KB core (MIT); ficl/Atlast/embed/libforth/pForth also supported | `WF_FORTH_ENGINE=zforth` (or ficl/atlast/embed/libforth/pforth) | ~4 KB .text (zForth) | landed 2026-04-15 |
+| Wren | `//wren\n` | Wren 0.4.0 amalgamation | `WF_ENABLE_WREN=1` | ~150 KB .text | landed 2026-04-15 |
 
 None of these rows describe a dependency on any other row. The only
 exception is Fennel, which compiles to Lua and therefore can't be
@@ -348,21 +336,35 @@ end)
 
 ## Files
 
-- `wftools/wf_viewer/stubs/scripting_stub.cc` — `LuaInterpreter` + sigil
-  dispatch.
-- `wftools/wf_viewer/stubs/scripting_js.hp` — JS engine plug ABI.
+- `wftools/wf_viewer/stubs/scripting_stub.cc` — `ScriptRouter` + sigil dispatch + `lua_engine` namespace.
+- `wftools/wf_viewer/stubs/scripting_js.hp` — JS engine plug ABI (`js_engine` namespace).
 - `wftools/wf_viewer/stubs/scripting_quickjs.cc` — QuickJS implementation.
 - `wftools/wf_viewer/stubs/scripting_jerryscript.cc` — JerryScript implementation.
 - `wftools/wf_viewer/stubs/fennel.lua` — vendored Fennel 1.6.1.
 - `wftools/vendor/quickjs-v0.14.0/`, `wftools/vendor/jerryscript-v3.0.0/` — vendored JS engines.
+- `wftools/wf_viewer/stubs/scripting_wasm3.hp`/`.cc` — wasm3 plug (`wasm3_engine` namespace).
+- `wftools/vendor/wasm3-v0.5.0/` — vendored wasm3 interpreter.
+- `wftools/vendor/wasm3-v0.5.0-wf/` — selftest + snowgoons WAT sources (baked literals) + compiled `.wasm` artifacts.
+- `wftools/wf_viewer/stubs/scripting_wamr.hp`/`.cc` — WAMR plug (`wamr_engine` namespace, wasm-C-API).
+- `wftools/vendor/wamr-2.2.0/` — vendored WAMR 2.2.0 source.
+- `wftools/vendor/wamr-2.2.0-wf/` — snowgoons WAT sources (global-import version) + compiled `.wasm` artifacts.
+- `wftools/wf_viewer/stubs/scripting_forth.hp` — Forth engine plug ABI (`forth_engine` namespace).
+- `wftools/wf_viewer/stubs/scripting_zforth.cc` — zForth default backend; `zfconf.h` config.
+- `wftools/vendor/zforth-*/` (+ `ficl`, `atlast`, `embed`, `libforth`, `pforth`) — vendored Forth engines.
+- `wftools/wf_viewer/stubs/scripting_wren.hp`/`.cc` — Wren plug (`wren_engine` namespace).
+- `wftools/vendor/wren-0.4.0/` — vendored Wren 0.4.0 amalgamation.
 - `scripts/minify_lua.py` — Lua source minifier (used on `fennel.lua`).
 - `scripts/patch_snowgoons_lua.py` — TCL → Lua byte-preserving patcher.
 - `scripts/patch_snowgoons_fennel.py` — Lua → Fennel byte-preserving patcher.
-- `scripts/patch_snowgoons_wasm.py` — Fennel → wasm (director only) patcher.
-- `wftools/wf_viewer/stubs/scripting_wasm3.hp`/`.cc` — wasm3 plug.
-- `wftools/vendor/wasm3-v0.5.0/` — vendored wasm3 interpreter.
-- `wftools/vendor/wasm3-v0.5.0-wf/` — selftest + snowgoons WAT sources + compiled `.wasm` artifacts.
+- `scripts/patch_snowgoons_wasm.py` — Fennel/Lua → wasm3 (director only) patcher.
+- `scripts/patch_snowgoons_wamr.py` — any form → WAMR wasm (director only) patcher; prefers `wamr-2.2.0-wf/snowgoons_director.wasm`.
+- `scripts/patch_snowgoons_forth.py` — any form → Forth `\`-sigil patcher.
+- `scripts/patch_snowgoons_wren.py` — any form → Wren `//wren\n`-sigil patcher.
+- `scripts/patch_snowgoons_js.py` — any form → JS `//` patcher.
 - `docs/plans/2026-04-13-lua-interpreter-spike.md` — Lua spike plan.
 - `docs/plans/2026-04-14-fennel-on-lua.md` — Fennel-on-Lua spike plan.
 - `docs/plans/2026-04-14-pluggable-scripting-engine.md` — JS engine plan.
-- `docs/plans/2026-04-14-wasm3-scripting-engine.md` — wasm3 spike plan (this work).
+- `docs/plans/2026-04-14-wasm3-scripting-engine.md` — wasm3 spike plan.
+- `docs/plans/2026-04-14-wamr-dev-aot-ship.md` — WAMR interp + AOT plan.
+- `docs/plans/2026-04-14-wren-scripting-engine.md` — Wren plan.
+- `docs/plans/2026-04-14-forth-scripting-engine.md` — Forth (multi-backend) plan.
