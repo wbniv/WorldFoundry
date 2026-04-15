@@ -1,12 +1,8 @@
 # Plan: WAMR for dev, AOT-only (or w2c2) for ship
 
 **Date:** 2026-04-14
-**Status:** **pending.** Targets the 2026-04-15 ScriptRouter convention:
-the WAMR plug lives in a new `wftools/wf_viewer/stubs/scripting_wamr.{hp,cc}`
-as a file-scope `wamr_engine` namespace (matching `lua_engine`'s shape),
-exposing `Init / Shutdown / AddConstantArray / DeleteConstantArray /
-RunScript`. Dispatch still goes through `ScriptRouter::RunScript`'s `#`
-arm; `WF_WASM_ENGINE` picks which `<impl>_engine` gets called.
+**Status:** **landed 2026-04-15 (Phase 1 — classic interp; WAT compiled; smoke test pending HAL cleanup).**
+Phase 2 (AOT) deferred.
 **Depends on:** wasm3 spike (landed in cfa739c) — proved the dispatch,
 sigil, base64 wrapper, host-import ABI, and snowgoons-as-wasm end-to-end.
 **Source investigation:** Conversation captured in the wasm3 spike thread;
@@ -100,6 +96,27 @@ flowchart LR
 6. **Verify:** selftest, director behavior, mixed-engine, and the
    wasm3-parity baseline (snowgoons runs identically under wasm3 and
    WAMR; host trace line-for-line matches).
+
+> **As built (2026-04-15):** Steps 1–5 complete; step 6 blocked on HAL cleanup.
+>
+> - WAMR 2.2.0 vendored at `wftools/vendor/wamr-2.2.0/`; CMake block in
+>   `build_game.sh` builds `libvmlib.a` (~519 KB at MinSizeRel) with
+>   `WAMR_BUILD_INTERP=1 WAMR_BUILD_WASM_C_API=1` and all other modules off.
+> - **API divergence:** implementation uses the **wasm-C-API** (`wasm_engine_new /
+>   wasm_module_new / wasm_instance_new / wasm_func_new / wasm_global_new`) rather
+>   than WAMR's proprietary `wasm_runtime_load / wasm_runtime_instantiate` ABI.
+>   The wasm-C-API is the standard ISO/W3C interface; `wasm_module_imports()` lets
+>   `RunScript` introspect each import at instantiate time and supply the correct
+>   host extern (func or global) without a pre-registered `NativeSymbol` table.
+> - `wamr_engine::AddConstantArray` populates `g_consts: unordered_map<string,int32_t>`;
+>   `RunScript` walks module imports, matches `"consts"` globals to `g_consts` via
+>   `wasm_global_new()` and `"env"` funcs to `host_read_mailbox` / `host_write_mailbox`.
+> - WAT sources in `wftools/vendor/wamr-2.2.0-wf/`: `snowgoons_director.wat` (uses
+>   `(import "consts" "INDEXOF_CAMSHOT" (global $cam i32))`),
+>   `snowgoons_player.wat` (uses `INDEXOF_HARDWARE_JOYSTICK1_RAW` + `INDEXOF_INPUT`).
+>   Both compiled to `.wasm` via `wat2wasm` (director 158 B, player 159 B).
+> - `scripts/patch_snowgoons_wamr.py` prefers `wamr-2.2.0-wf/snowgoons_director.wasm`
+>   over the wasm3 fallback.
 
 ### Phase 2: WAMR AOT-only as the ship path
 

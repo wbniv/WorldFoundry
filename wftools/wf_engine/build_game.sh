@@ -22,7 +22,7 @@ WF_ENABLE_FENNEL="${WF_ENABLE_FENNEL:-1}"
 #   quickjs     — QuickJS (~350 KB), modern ES2020.
 #   jerryscript — JerryScript wf-minimal profile (~80-90 KB), ES5.1 subset.
 # Multiple JS engines at once is deliberately forbidden; the sigil `//` is shared.
-WF_JS_ENGINE="${WF_JS_ENGINE:-none}"
+WF_JS_ENGINE="${WF_JS_ENGINE:-quickjs}"
 case "$WF_JS_ENGINE" in
     none|quickjs|jerryscript) ;;
     *) echo "error: WF_JS_ENGINE must be one of: none, quickjs, jerryscript (got: '$WF_JS_ENGINE')" >&2
@@ -36,7 +36,7 @@ JRY_DIR="$VENDOR/jerryscript-v3.0.0"
 # Checked before generic `//` (JS) in dispatch order.
 #   0 (default) — no Wren compiled in.
 #   1           — Wren 0.4.0 amalgamation (~420 KB source, ~150 KB .text).
-WF_ENABLE_WREN="${WF_ENABLE_WREN:-0}"
+WF_ENABLE_WREN="${WF_ENABLE_WREN:-1}"
 WREN_DIR="$VENDOR/wren-0.4.0"
 
 # Feature flag: optional Forth engine for the `\` sigil. One of:
@@ -48,7 +48,7 @@ WREN_DIR="$VENDOR/wren-0.4.0"
 #   libforth — libforth ~50 KB (MIT).
 #   pforth   — pForth ~120 KB (0-BSD); strong float; proven on 40+ platforms.
 # Only one Forth engine at a time; sigil `\` is shared across all backends.
-WF_FORTH_ENGINE="${WF_FORTH_ENGINE:-none}"
+WF_FORTH_ENGINE="${WF_FORTH_ENGINE:-zforth}"
 case "$WF_FORTH_ENGINE" in
     none|zforth|ficl|atlast|embed|libforth|pforth) ;;
     *) echo "error: WF_FORTH_ENGINE must be one of: none, zforth, ficl, atlast, embed, libforth, pforth (got: '$WF_FORTH_ENGINE')" >&2
@@ -62,7 +62,7 @@ ZFORTH_DIR="$VENDOR/zforth-41db72d1"
 #   wamr    — WAMR 2.2.0 classic interpreter (~520 KB), Apache-2.0.
 #             Supports host-supplied (global …) imports for INDEXOF_* constants.
 # Only one wasm runtime at a time; the `#b64\n` sigil is shared.
-WF_WASM_ENGINE="${WF_WASM_ENGINE:-none}"
+WF_WASM_ENGINE="${WF_WASM_ENGINE:-wamr}"
 case "$WF_WASM_ENGINE" in
     none|wasm3|wamr) ;;
     *) echo "error: WF_WASM_ENGINE must be one of: none, wasm3, wamr (got: '$WF_WASM_ENGINE')" >&2
@@ -73,6 +73,23 @@ WAMR_DIR="$VENDOR/wamr-2.2.0"
 LUA_DIR="$VENDOR/lua-5.4.8"
 WASM3_WF_DIR="$VENDOR/wasm3-v0.5.0-wf"
 HTTPLIB_DIR="$VENDOR/cpp-httplib-v0.20.0"
+
+# Feature flag: physics backend. One of:
+#   legacy  (default) — WF's own kinematic collision engine (-DPHYSICS_ENGINE_WF).
+#             No library overhead, identical to all prior builds.
+#   jolt    — Jolt Physics v5.5.0 (~1 MB stripped) via CMake static lib.
+#             Enables CharacterVirtual, shape casts, and removes the
+#             reinterpret_cast in movecam.cc. Requires a C++17 toolchain
+#             (already required by the rest of the build).
+# Only one physics backend at a time.
+WF_PHYSICS_ENGINE="${WF_PHYSICS_ENGINE:-legacy}"
+case "$WF_PHYSICS_ENGINE" in
+    legacy|jolt) ;;
+    *) echo "error: WF_PHYSICS_ENGINE must be one of: legacy, jolt (got: '$WF_PHYSICS_ENGINE')" >&2
+       exit 2 ;;
+esac
+JOLT_DIR="$VENDOR/jolt-physics-5.5.0"
+JOLT_WF_DIR="$VENDOR/jolt-physics-5.5.0-wf"
 
 # Feature flag: embed a minimal HTTP REST API for runtime box manipulation.
 # Requires cpp-httplib (single-header, vendored). Default off.
@@ -86,9 +103,16 @@ CXXFLAGS=(
     -DBUILDMODE_DEBUG -DDO_ASSERTIONS=1 -DDO_DEBUGGING_INFO=1
     -DDO_IOSTREAMS=1 -DSW_DBSTREAM=1 -DDEBUG=1 -DDEBUG_VARIABLES=1
     -DDO_VALIDATION=0 -DDO_TEST_CODE=0 -DDO_DEBUG_FILE_SYSTEM=0
-    -DPHYSICS_ENGINE_WF '-D__GAME__="wf_game"' "-DERR_DEBUG(x)="
+    '-D__GAME__="wf_game"' "-DERR_DEBUG(x)="
     -I"$SRC" -I"$SRC/game" -I"$STUBS" -I"$STUB_SRC" -I"$LUA_DIR/src"
 )
+
+# Physics engine compile-time selection — must come before any other flag block
+# that might read CXXFLAGS so the -DPHYSICS_ENGINE_* define is always present.
+case "$WF_PHYSICS_ENGINE" in
+    legacy) CXXFLAGS+=(-DPHYSICS_ENGINE_WF) ;;
+    jolt)   CXXFLAGS+=(-DPHYSICS_ENGINE_JOLT -I"$JOLT_DIR") ;;
+esac
 
 if [[ "$WF_ENABLE_FENNEL" == "1" ]]; then
     CXXFLAGS+=(-DWF_ENABLE_FENNEL)
@@ -450,6 +474,64 @@ if [[ "$WF_REST_API" == "1" ]]; then
     echo "  CC (stub) rest_api.cc"
     g++ "${CXXFLAGS[@]}" -O1 -c "$STUB_SRC/rest_api.cc" -o "$OUT/stubs__rest_api.o"
     OBJS+=("$OUT/stubs__rest_api.o")
+fi
+
+# Jolt physics plug — compiled and linked only when WF_PHYSICS_ENGINE=jolt.
+# Jolt is built via CMake into a static library (cached in OUT/jolt_build).
+# The physics_jolt.cc stub owns JoltRuntimeInit/Shutdown and the selftest.
+declare -a JOLT_LINK_EXTRA=()
+if [[ "$WF_PHYSICS_ENGINE" == "jolt" ]]; then
+    echo "  CC (stub) physics_jolt.cc"
+    g++ "${CXXFLAGS[@]}" -O2 -c "$STUB_SRC/physics_jolt.cc" -o "$OUT/stubs__physics_jolt.o"
+    OBJS+=("$OUT/stubs__physics_jolt.o")
+
+    JOLT_BUILD="$OUT/jolt_build"
+    JOLT_LIB="$JOLT_BUILD/libJolt.a"
+    if [[ ! -f "$JOLT_LIB" ]]; then
+        JOLT_CMAKE="$JOLT_BUILD/CMakeLists.txt"
+        mkdir -p "$JOLT_BUILD"
+        cat > "$JOLT_CMAKE" << 'JOLTCMAKE'
+cmake_minimum_required(VERSION 3.16)
+project(jolt_wf CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Disable optional Jolt subsystems we do not need.
+set(PHYSICS_REPO_ROOT "$ENV{JOLT_DIR}")
+option(ENABLE_ALL_WARNINGS "" OFF)
+option(USE_STATIC_MSVC_RUNTIME_LIBRARY "" OFF)
+option(CROSS_PLATFORM_DETERMINISTIC "" OFF)
+option(OBJECT_LAYER_BITS "Number of bits in ObjectLayer" 16)
+
+# Exclude the debug renderer and soft-body (not needed by WF).
+add_compile_definitions(
+    JPH_PROFILE_ENABLED=0
+    JPH_DEBUG_RENDERER=0
+    NDEBUG
+)
+
+include(${PHYSICS_REPO_ROOT}/Jolt/Jolt.cmake)
+
+# Filter out soft-body and debug-renderer TUs.
+list(FILTER JOLT_PHYSICS_SRC_FILES EXCLUDE REGEX "SoftBody|DebugRenderer|Ragdoll|Skeleton|ObjectStream")
+
+add_library(Jolt STATIC ${JOLT_PHYSICS_SRC_FILES})
+target_include_directories(Jolt PUBLIC ${PHYSICS_REPO_ROOT})
+target_compile_options(Jolt PRIVATE -O2 -w)
+JOLTCMAKE
+
+        echo "  CMAKE jolt"
+        JOLT_DIR="$JOLT_DIR" cmake -S "$JOLT_BUILD" -B "$JOLT_BUILD/out" \
+              -DCMAKE_BUILD_TYPE=MinSizeRel \
+              > "$OUT/jolt_cmake.log" 2>&1 \
+              || { echo "  *** jolt cmake failed; see $OUT/jolt_cmake.log" >&2; exit 1; }
+        cmake --build "$JOLT_BUILD/out" -j --target Jolt \
+              >> "$OUT/jolt_cmake.log" 2>&1 \
+              || { echo "  *** jolt build failed; see $OUT/jolt_cmake.log" >&2; exit 1; }
+        cp "$JOLT_BUILD/out/libJolt.a" "$JOLT_LIB"
+    fi
+    JOLT_LINK_EXTRA+=("$JOLT_LIB")
 fi
 
 # Embed minified fennel.lua as a byte array when Fennel is enabled. The

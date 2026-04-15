@@ -3,7 +3,9 @@
 // ScriptRouter owns the lifecycle of all compiled-in scripting engines as peers:
 //   Lua 5.4 (+ optional Fennel sub-dispatch, handled inside lua_engine)
 //   JavaScript  (QuickJS or JerryScript, via scripting_js.hp)
-//   WebAssembly (wasm3, via scripting_wasm3.hp)
+//   WebAssembly (wasm3 or WAMR; exactly one selected by WF_WASM_ENGINE)
+//   Wren        (via scripting_wren.hp)
+//   Forth       (zForth/ficl/…, via scripting_forth.hp)
 //
 // None of these engines is the "parent" of any other. Sigil dispatch lives
 // here in ScriptRouter::RunScript; each engine only sees scripts intended
@@ -11,8 +13,11 @@
 
 #include <scripting/scriptinterpreter.hp>
 #include <math/scalar.hp>
+#include "scripting_forth.hp"
+#include "scripting_wren.hp"
 #include "scripting_js.hp"
 #include "scripting_wasm3.hp"
+#include "scripting_wamr.hp"
 
 extern "C" {
 #include <lua.h>
@@ -430,12 +435,22 @@ public:
 ScriptRouter::ScriptRouter(MailboxesManager& mgr)
     : ScriptInterpreter(mgr)
 {
+#ifdef WF_WITH_FORTH
+    forth_engine::Init(mgr);
+#endif
     lua_engine::Init(mgr);
+#ifdef WF_ENABLE_WREN
+    wren_engine::Init(mgr);
+#endif
 #ifdef WF_WITH_JS
     js_engine::Init(mgr);
 #endif
 #ifdef WF_WITH_WASM
+#  ifdef WF_WASM_ENGINE_WAMR
+    wamr_engine::Init(mgr);
+#  else
     wasm3_engine::Init(mgr);
+#  endif
 #endif
     AddConstantArray(mailboxIndexArray);
     AddConstantArray(joystickArray);
@@ -446,12 +461,22 @@ ScriptRouter::~ScriptRouter()
     DeleteConstantArray(joystickArray);
     DeleteConstantArray(mailboxIndexArray);
 #ifdef WF_WITH_WASM
+#  ifdef WF_WASM_ENGINE_WAMR
+    wamr_engine::Shutdown();
+#  else
     wasm3_engine::Shutdown();
+#  endif
 #endif
 #ifdef WF_WITH_JS
     js_engine::Shutdown();
 #endif
+#ifdef WF_ENABLE_WREN
+    wren_engine::Shutdown();
+#endif
     lua_engine::Shutdown();
+#ifdef WF_WITH_FORTH
+    forth_engine::Shutdown();
+#endif
 }
 
 Scalar ScriptRouter::RunScript(const void* script, int objectIndex)
@@ -462,6 +487,20 @@ Scalar ScriptRouter::RunScript(const void* script, int objectIndex)
     const char* p = src;
     while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') p++;
 
+#ifdef WF_WITH_FORTH
+    // `\` → Forth. Backslash is the standard Forth line-comment marker;
+    // it is not a valid Lua/JS/wasm token at position 0.
+    if (p[0] == '\\')
+        return Scalar::FromFloat(forth_engine::RunScript(src, objectIndex));
+#endif
+
+#ifdef WF_ENABLE_WREN
+    // `//wren\n` → Wren. Checked before generic `//` to avoid false dispatch
+    // to the JS engine. The `//wren` opener is a valid Wren `//` line comment.
+    if (p[0] == '/' && p[1] == '/' && strncmp(p+2, "wren\n", 5) == 0)
+        return Scalar::FromFloat(wren_engine::RunScript(src, objectIndex));
+#endif
+
 #ifdef WF_WITH_JS
     // `//` → JavaScript. `//` is a Lua syntax error so no collision.
     if (p[0] == '/' && p[1] == '/')
@@ -469,10 +508,16 @@ Scalar ScriptRouter::RunScript(const void* script, int objectIndex)
 #endif
 
 #ifdef WF_WITH_WASM
-    // `#b64\n` → wasm3 (base64-encoded module). Bare `#` not claimed here
+    // `#b64\n` → wasm (base64-encoded module). Bare `#` not claimed here
     // because cd.iff TCL fragments use `##` line comments.
-    if (p[0] == '#' && p[1] == 'b' && p[2] == '6' && p[3] == '4' && p[4] == '\n')
+    // WF_WASM_ENGINE selects exactly one of wasm3 or wamr.
+    if (p[0] == '#' && p[1] == 'b' && p[2] == '6' && p[3] == '4' && p[4] == '\n') {
+#  ifdef WF_WASM_ENGINE_WAMR
+        return Scalar::FromFloat(wamr_engine::RunScript(src, objectIndex));
+#  else
         return Scalar::FromFloat(wasm3_engine::RunScript(src, objectIndex));
+#  endif
+    }
 #endif
 
     // Fallthrough → Lua engine (handles bare Lua and `;`-prefixed Fennel internally).
@@ -481,23 +526,43 @@ Scalar ScriptRouter::RunScript(const void* script, int objectIndex)
 
 void ScriptRouter::AddConstantArray(IntArrayEntry* entryList)
 {
+#ifdef WF_WITH_FORTH
+    forth_engine::AddConstantArray(entryList);
+#endif
     lua_engine::AddConstantArray(entryList);
+#ifdef WF_ENABLE_WREN
+    wren_engine::AddConstantArray(entryList);
+#endif
 #ifdef WF_WITH_JS
     js_engine::AddConstantArray(entryList);
 #endif
 #ifdef WF_WITH_WASM
+#  ifdef WF_WASM_ENGINE_WAMR
+    wamr_engine::AddConstantArray(entryList);
+#  else
     wasm3_engine::AddConstantArray(entryList);
+#  endif
 #endif
 }
 
 void ScriptRouter::DeleteConstantArray(IntArrayEntry* entryList)
 {
+#ifdef WF_WITH_FORTH
+    forth_engine::DeleteConstantArray(entryList);
+#endif
     lua_engine::DeleteConstantArray(entryList);
+#ifdef WF_ENABLE_WREN
+    wren_engine::DeleteConstantArray(entryList);
+#endif
 #ifdef WF_WITH_JS
     js_engine::DeleteConstantArray(entryList);
 #endif
 #ifdef WF_WITH_WASM
+#  ifdef WF_WASM_ENGINE_WAMR
+    wamr_engine::DeleteConstantArray(entryList);
+#  else
     wasm3_engine::DeleteConstantArray(entryList);
+#  endif
 #endif
 }
 

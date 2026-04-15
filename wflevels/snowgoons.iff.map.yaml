@@ -1,0 +1,138 @@
+# snowgoons.iff chunk map
+# Generated 2026-04-15 from post-script-expansion binary (182344 bytes)
+#
+# All offsets are absolute byte positions in the binary file.
+# toc_base = 0x1000 — added to every raw TOC offset to get disk position.
+# Script slots were expanded to 5000 bytes each; this shifted PERM/RM0/RM1
+# past the offsets the TOC still contains.  The TOC must be patched.
+
+file:
+  path: wflevels/snowgoons.iff
+  size_bytes: 182344       # 0x2C848
+  toc_base: 0x1000        # added to every raw TOC offset → disk position
+
+# ── Outer wrapper ─────────────────────────────────────────────────────────────
+# Written by iffcomp-rs; encloses the entire file content after the 8-byte hdr.
+outer:
+  offset: 0x0000
+  tag: L4
+  header_bytes: 8
+  content_size: 182336     # 0x2C840  (file_size − 8)
+
+# ── Fixed structural chunks ────────────────────────────────────────────────────
+# These are at known positions regardless of script content.
+
+chunks:
+  ALGN_1:
+    offset: 0x0008
+    tag: ALGN
+    size: 0x07F0           # 2032 bytes — pads to 0x800 sector boundary
+
+  RAM:
+    offset: 0x0800
+    tag: RAM
+    size: 0x0024           # 36 bytes — RAM-allocation directory
+    note: >
+      Lists (tag, ram_size) pairs for OBJD/PERM/ROOM used by the asset manager
+      to pre-allocate RAM before loading from disk.
+    sub_entries:
+      OBJD: { ram_bytes: 100000 }
+      PERM: { ram_bytes: 300000 }
+      ROOM: { ram_bytes: 300000 }
+
+  ALGN_2:
+    offset: 0x082C
+    tag: ALGN
+    size: 0x07CC           # pads to 0x1000 sector boundary
+
+  TOC_sector:
+    offset: 0x1000
+    tag: LVAS              # outer wrapper around TOC
+    size: 0x27FF8
+    note: Outer LVAS wrapper; the engine seeks here via toc_base.
+    sub_chunks:
+      TOC:
+        offset: 0x1008
+        tag: TOC
+        size: 0x48         # 72 bytes = 6 entries × 12 bytes
+        entries_start: 0x1010
+        entries:
+          - { tag: ASMP, offset_in_file: 0x1010, raw_offset: 0x0800, disk_pos: 0x1800, size: 0x007C }
+          - { tag: LVL,  offset_in_file: 0x101C, raw_offset: 0x1000, disk_pos: 0x2000, size: 0x21B4, note: "size field STALE after script expansion" }
+          - { tag: PERM, offset_in_file: 0x1028, raw_offset: 0x3800, disk_pos: 0x4800, size: 0x7334 }
+          - { tag: RM0,  offset_in_file: 0x1034, raw_offset: 0xB000, disk_pos: 0xC000, size: 0x10F0 }
+          - { tag: RM1,  offset_in_file: 0x1040, raw_offset: 0xC800, disk_pos: 0xD800, size: 0x1B59C }
+          - { tag: FAKE, offset_in_file: 0x104C, raw_offset: 0x1000, disk_pos: 0x2000, size: 0x007C }
+
+  ALGN_3:
+    offset: 0x1058
+    tag: ALGN
+    size: 0x07A0           # pads to 0x1800 sector boundary
+
+  ASMP:
+    offset: 0x1800
+    tag: ASMP
+    size: 0x007C           # 124 bytes
+    data_start: 0x1808
+    data_end: 0x1884
+
+  ALGN_4:
+    offset: 0x1884
+    tag: ALGN
+    size: 0x0774           # pads to 0x2000 sector boundary
+
+  LVL:
+    offset: 0x2000
+    tag: LVL
+    header_size_field: 0x21B4   # STALE — declared before script expansion
+    actual_data_extends_to: 0x5A9E
+    note: >
+      The CHUNKHDR size field (0x21B4) was not updated when script slots were
+      expanded to 5000 bytes each.  The engine uses the TOC to locate PERM/RM0/RM1
+      directly and never re-reads the LVL size, so this stale field is benign
+      as long as the TOC offsets are correct.
+    script_slots:
+      director:
+        offset: 0x338C
+        content_bytes: 439   # null-terminated; FIXED LENGTH — _Common struct offsets depend on it
+        end: 0x3543          # last content byte; null at 0x3543
+        current_engine: Fennel
+        note: >
+          Length is fixed by the _Common struct. Changing it shifts all subsequent
+          offsets inside _Common and corrupts actor mailbox counts.
+      player:
+        offset: 0x3545       # after director null + 0x0A separator at 0x3544
+        content_bytes: 77    # null-terminated; FIXED LENGTH
+        end: 0x3592
+        current_engine: Fennel
+
+  PERM:
+    offset: 0x8047
+    tag: PERM
+    size: 0x7334           # chunk content (excludes 8-byte CHUNKHDR)
+    data_start: 0x804F
+    data_end: 0xF383       # 0x8047 + 8 + 0x7334
+    note: >
+      Starts 0x47 bytes into sector 16 (0x8000); the null padding before
+      it is part of the preceding LVL data region.
+
+  RM0:
+    offset: 0xF847
+    tag: RM0
+    size: 0x10F0
+    data_start: 0xF84F
+    data_end: 0x1093F      # 0xF847 + 8 + 0x10F0
+
+  RM1:
+    offset: 0x11047
+    tag: RM1
+    size: 0x1B59C
+    data_start: 0x1104F
+    data_end: 0x2C5EB      # 0x11047 + 8 + 0x1B59C
+
+# ── How to update stale TOC offsets ───────────────────────────────────────────
+# In snowgoons.iff.txt, change these three lines:
+#   line 1039:  $00 $38 $00 $00  →  $47 $70 $00 $00   (PERM raw 0x3800 → 0x7047)
+#   line 1042:  $00 $B0 $00 $00  →  $47 $E8 $00 $00   (RM0  raw 0xB000 → 0xE847)
+#   line 1045:  $00 $C8 $00 $00  →  $47 $00 $01 $00   (RM1  raw 0xC800 → 0x10047)
+# Then recompile: iffcomp-rs -o=snowgoons.iff -binary snowgoons.iff.txt

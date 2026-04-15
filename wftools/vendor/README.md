@@ -19,6 +19,7 @@ as source and is linked in at build time.
 | `libforth-b851c6a2/` | commit `b851c6a2` | MIT | https://github.com/howerj/libforth |
 | `pforth-63d4a418/` | commit `63d4a418` | 0-clause BSD (PD) | https://github.com/philburk/pforth |
 | `nanoforth-3b9c3aab/` | commit `3b9c3aab` | MIT | https://github.com/chochain/nanoFORTH |
+| `wren-0.4.0/` | 0.4.0 | MIT | https://github.com/wren-lang/wren/releases/tag/0.4.0 |
 
 ## Tarball SHA256
 

@@ -1,12 +1,14 @@
 # Plan: Forth as a scripting engine option for World Foundry
 
 **Date:** 2026-04-14
-**Status:** **pending.** Targets the 2026-04-15 ScriptRouter convention:
-the Forth plug lives in a file-scope `forth_engine` namespace (exposing
-`Init / Shutdown / AddConstantArray / DeleteConstantArray / RunScript`),
-implemented by whichever per-backend `scripting_<impl>.cc` is selected
-via `WF_FORTH_ENGINE`. The `\` sigil arm goes in `ScriptRouter::RunScript`.
-**Branch:** 2026-first-working-gap (or new branch)
+**Status:** **landed 2026-04-15 (zForth default; needs smoke test — blocked on HAL cleanup).**
+Phase 1 (vendor, all 6 backends) was already done. Phases 2–5 complete:
+`scripting_forth.hp` + `scripting_zforth.cc` (`forth_engine` namespace,
+zForth default); `\` dispatch arm in `ScriptRouter::RunScript`;
+`WF_FORTH_ENGINE` / `WF_ENABLE_FORTH` in `build_game.sh`;
+`scripts/patch_snowgoons_forth.py`; reference scripts in
+`docs/scripting-languages.md`. Remaining backends (ficl, atlast, embed,
+libforth, pforth) not yet implemented — deferred until zForth smoke test passes.
 **Prior art:** `docs/plans/2026-04-14-pluggable-scripting-engine.md` (JS pattern),
 `docs/plans/2026-04-14-wasm3-scripting-engine.md` (wasm3 pattern),
 `docs/plans/2026-04-14-wren-scripting-engine.md` (Wren pattern)

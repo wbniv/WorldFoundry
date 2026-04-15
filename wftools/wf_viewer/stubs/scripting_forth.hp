@@ -1,0 +1,61 @@
+// scripting_forth.hp — Forth engine plug interface used by ScriptRouter.
+//
+// Exactly one backend may be compiled in at a time (or none):
+//   WF_FORTH_ENGINE_ZFORTH    — zForth 4 KB core, MIT
+//   WF_FORTH_ENGINE_FICL      — ficl  ~100 KB, BSD-2
+//   WF_FORTH_ENGINE_ATLAST    — Atlast ~30 KB, public domain
+//   WF_FORTH_ENGINE_EMBED     — embed  ~5 KB VM, MIT (16-bit cells)
+//   WF_FORTH_ENGINE_LIBFORTH  — libforth ~50 KB, MIT
+//   WF_FORTH_ENGINE_PFORTH    — pForth ~120 KB, 0-BSD
+//
+// All backends expose the same five-function ABI in namespace forth_engine.
+//
+// Sigil: `\` (backslash at position 0 after optional whitespace).
+// In Forth `\` is the standard line-comment marker; the first line reads:
+//   \ wf
+// This is a no-op comment in any Forth; it signals the engine to ScriptRouter.
+//
+// Dispatch order (see scripting_stub.cc ScriptRouter::RunScript):
+//   `\`        → Forth   (this header; checked first — one-byte test)
+//   `//wren\n` → Wren    (before generic `//`)
+//   `//`       → JS      (QuickJS or JerryScript)
+//   `#b64\n`   → Wasm    (wasm3 or WAMR)
+//   `;`        → Fennel  (inside lua_engine)
+//   fallthrough→ Lua
+
+#ifndef WF_SCRIPTING_FORTH_HP
+#define WF_SCRIPTING_FORTH_HP
+
+#if defined(WF_FORTH_ENGINE_ZFORTH)  || \
+    defined(WF_FORTH_ENGINE_FICL)    || \
+    defined(WF_FORTH_ENGINE_ATLAST)  || \
+    defined(WF_FORTH_ENGINE_EMBED)   || \
+    defined(WF_FORTH_ENGINE_LIBFORTH)|| \
+    defined(WF_FORTH_ENGINE_PFORTH)
+#define WF_WITH_FORTH 1
+
+class MailboxesManager;
+struct IntArrayEntry;
+
+namespace forth_engine {
+
+// Lifetime hooks — called from ScriptRouter ctor/dtor.
+void  Init(MailboxesManager& mgr);
+void  Shutdown();
+
+// Register/unregister INDEXOF_* / JOYSTICK_BUTTON_* as Forth constants.
+// Eval'd into the dictionary at init as: `N constant NAME\n`
+void  AddConstantArray(IntArrayEntry* entryList);
+void  DeleteConstantArray(IntArrayEntry* entryList);  // no-op (dict not shrunk)
+
+// Execute a Forth script. The leading `\ wf` comment line is interpreted
+// by Forth itself (it's a valid Forth line comment). `objectIndex` sets the
+// current actor for read-mailbox / write-mailbox. Returns TOS as float after
+// execution (0.0f if the stack is empty or on error).
+float RunScript(const char* src, int objectIndex);
+
+} // namespace forth_engine
+
+#endif // any WF_FORTH_ENGINE_*
+
+#endif // WF_SCRIPTING_FORTH_HP

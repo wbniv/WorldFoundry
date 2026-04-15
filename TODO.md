@@ -2,15 +2,15 @@
 
 ## SCRIPTING ENGINES
 
-- [ ] Forth plug wiring — `scripting_forth.{hp,cc}`, per-backend impls, `\` sigil in ScriptRouter — [plan](docs/plans/2026-04-14-forth-scripting-engine.md)
-- [ ] Wren plug — `wren_engine` namespace, `//wren\n` sigil, snowgoons port — [plan](docs/plans/2026-04-14-wren-scripting-engine.md)
-- [ ] WAMR dev/ship — `wamr_engine` namespace, AOT-only ship target, replaces wasm3 for prod — [plan](docs/plans/2026-04-14-wamr-dev-aot-ship.md)
-- [ ] JerryScript smoke test — not yet run; JS engine compiled but untested against snowgoons — [plan](docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md#d2-jerryscript-smoke-test)
+- [verify] Forth plug wiring — `scripting_forth.hp`, `scripting_zforth.cc`, `zfconf.h`, `\` sigil in ScriptRouter; snowgoons IFF patched via `scripts/patch_snowgoons_forth.py`; needs smoke test once build is unblocked — [plan](docs/plans/2026-04-14-forth-scripting-engine.md)
+- [verify] Wren plug — `scripting_wren.{hp,cc}`, `wren-0.4.0` vendor, `//wren\n` sigil, snowgoons IFF patched via `scripts/patch_snowgoons_wren.py`; needs smoke test once build is unblocked — [plan](docs/plans/2026-04-14-wren-scripting-engine.md)
+- [verify] WAMR interp — `wamr_engine` namespace, wasm-C-API, global-import constants; vendor at `wftools/vendor/wamr-2.2.0`; WAT sources in `wamr-2.2.0-wf/`; needs smoke test + global-import WAT compiled (requires wabt/wat2wasm) — [plan](docs/plans/2026-04-14-wamr-dev-aot-ship.md)
+- [verify] JerryScript smoke test — JerryScript compiled (7 GCC 14 bugs fixed); snowgoons patched with JS; run `wf_game -Lwflevels/snowgoons.iff` to confirm player+director — [plan](docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md#d2-jerryscript-smoke-test) [investigation](docs/investigations/2026-04-15-jerryscript-gcc14-build-fixes.md)
 
 
 ## LUA ENGINE
 
-- [ ] Fix #6 smoke test — coroutine continuations implemented; needs snowgoons regression run — [plan](docs/plans/2026-04-15-lua-engine-fixes.md)
+- [verify] Fix #6 smoke test — coroutine continuations implemented; needs snowgoons regression run — [plan](docs/plans/2026-04-15-lua-engine-fixes.md)
 - [ ] Lua remote step debugger — MobDebug / LuaLS-DAP wired into lua_engine for in-game step debugging
 
 
@@ -21,8 +21,19 @@
 - [ ] `WF_DEFAULT_ENGINE` knob — sigil-less script fallback engine selection — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
 - [ ] Mailbox constants cross-language audit — verify INDEXOF_* names are consistent across Lua/JS/wasm — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
 - [ ] `scripts/check_iff_no_js.py` — JS footprint checker; blocked on JS scripts being authored into assets — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
-- [ ] `WF_JS_ENGINE=jerryscript-nano` — deferred until footprint pressure — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
+- [verify] `WF_JS_ENGINE=jerryscript-nano` — deferred until footprint pressure — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
 - [ ] Collapse wasm sigil `#b64\n` → bare `#` — workaround for cd.iff `##` TCL lines; revert once cd.iff cleaned up
+
+
+## CONCURRENCY / ASYNC
+
+The 1994 cooperative tasker (`hal/tasker.cc`) was never completed for Linux (context-switch
+asm was never written) and is being deleted.  If a use case arises (background loading,
+timer callbacks, concurrent AI), explore these alternatives instead:
+
+- [ ] `std::thread` + work queue — simplest; good for background asset loading
+- [ ] C++20 coroutines — stackless; fits scripted AI / state-machine actors well
+- [ ] Fiber library (e.g. Boost.Context or `libco`) — stackful cooperative tasks, closest to the original tasker model; worth revisiting if multiple concurrent game tasks are needed
 
 
 ## PHYSICS

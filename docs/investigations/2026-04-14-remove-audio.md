@@ -1,7 +1,7 @@
 # Investigation: Remove audio subsystem
 
 **Date:** 2026-04-14
-**Status:** Ready to implement — no prerequisites.
+**Status:** Implemented (2026-04-15).
 
 ## Context
 
@@ -121,7 +121,30 @@ Remove `audio` and `audiofmt` from the directory list on line 141.
 
 - `levelobj.ht` SFX/music fields — inert but left to avoid OAD regeneration churn.
 - `EMAILBOX_SOUND` / `EMAILBOX_LOCAL_MIDI` mailbox constants in OAS — constants without handlers are harmless.
-- `EMAILBOX_LOCAL_MIDI` cases in `actor.cc` (lines 1049, 1218) — these are read-only assignments to local variables with no downstream effect; leave them for now.
+
+## CDDA removal (completed 2026-04-15)
+
+`wfsource/source/cdda/` contained a Windows-only CD-DA audio test (`cddatest.cc` using
+`playCDTrack(hwnd, …)` and a `win/` subdirectory).  No external includes anywhere in
+`wfsource/source/` or `wftools/`.  The directory was deleted entirely.
+
+## Midi removal (completed 2026-04-15)
+
+The `wfsource/source/midi/` directory contained only a standalone test binary
+(`miditest.cc`, `miditest.rc`, `Makefile`) — no library, no headers, nothing
+linked into the game build.  The directory was deleted entirely.
+
+The three remaining stub cases in game code were also removed:
+
+| File | Change |
+|------|--------|
+| `game/level.cc` | Removed `case EMAILBOX_MIDI:` no-op TODO block |
+| `game/actor.cc` | Removed `case EMAILBOX_LOCAL_MIDI: UNIMPLEMENTED(...)` read case |
+| `game/actor.cc` | Removed `case EMAILBOX_LOCAL_MIDI: break;` write case |
+
+The `EMAILBOX_MIDI` and `EMAILBOX_LOCAL_MIDI` constants in `mailbox/mailbox.inc`
+are OAS-generated and left in place — removing them requires touching the OAD
+format, which is a separate non-trivial effort.
 
 ## Follow-up
 

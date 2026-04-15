@@ -1,13 +1,11 @@
 # Plan: Wren as a scripting engine option for World Foundry
 
 **Date:** 2026-04-14
-**Status:** **pending.** Targets the 2026-04-15 ScriptRouter convention:
-the Wren plug lives in a new `wftools/wf_viewer/stubs/scripting_wren.{hp,cc}`
-as a file-scope `wren_engine` namespace (matching `lua_engine`), exposing
-`Init / Shutdown / AddConstantArray / DeleteConstantArray / RunScript`.
-The `//wren\n` sigil arm goes in `ScriptRouter::RunScript`, not in any
-Lua class.
-**Branch:** drop-dead-renderers (or new branch)
+**Status:** **landed 2026-04-15 (needs smoke test — blocked on HAL cleanup).**
+All phases complete. Vendor `wftools/vendor/wren-0.4.0/`; plug in
+`scripting_wren.{hp,cc}` (`wren_engine` namespace); `//wren\n` dispatch
+arm in `ScriptRouter::RunScript`; `scripts/patch_snowgoons_wren.py`;
+reference scripts in `docs/scripting-languages.md`.
 **Prior art:** `docs/plans/2026-04-14-pluggable-scripting-engine.md` (JS pattern), `docs/plans/2026-04-14-wasm3-scripting-engine.md` (wasm3 pattern)
 
 ## Context

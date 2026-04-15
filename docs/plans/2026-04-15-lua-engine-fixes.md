@@ -1,6 +1,7 @@
 # Plan: lua_engine — correctness and performance fixes
 
 **Date:** 2026-04-15
+**Status:** **landed 2026-04-15 (fixes #1–#6 all complete; smoke test pending HAL cleanup).**
 **File:** `wftools/wf_viewer/stubs/scripting_stub.cc` (`lua_engine` namespace)
 
 > **Convention note.** This plan's `lua_engine` namespace is the canonical
