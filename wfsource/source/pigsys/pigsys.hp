@@ -444,18 +444,6 @@ END_EXTERN_C
 //#include <pigsys/qsort.h>
 //#endif	// !defined(_QSORT_H)
 
-#if 0
-// setjmp.h, 'sys_' prepended
-#ifndef	_SETJMP_H
-#include <csetjmp>
-#undef	_SETJMP_H
-#define	_SETJMP_H
-#endif	// !defined(_SETJMP_H)
-
-#ifndef	sys_jmp_buf
-#define	sys_jmp_buf			jmp_buf
-#endif	// !defined(sys_jmp_buf)
-#endif
 
 //#include <pigsys/psyserr.h>
 #include <pigsys/clib.h>

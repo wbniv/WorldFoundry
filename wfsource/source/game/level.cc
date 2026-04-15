@@ -125,20 +125,6 @@ Level::_print( std::ostream& s ) const
 // class Level
 //==============================================================================
 
-#if 0
-void*
-Level::findOADData( int idxActor ) const
-{
-	assert( idxActor > 0 );
-	assert( idxActor <= _actors.Size() );
-	int32 * objArray = ( int32 * )( (char * )_levelData + ( _levelData->objectsOffset ));
-	_ObjectOnDisk * ood = ( _ObjectOnDisk * )( (( char * )_levelData ) + objArray[ idxActor ] );
-	ValidatePtr( ood );
-	++ood;	// oad data immediately follows the ood data
-	return ood;
-}
-#endif
-
 //==============================================================================
 // Level constructor, this initializes a level
 // we are going to rename this to World soon

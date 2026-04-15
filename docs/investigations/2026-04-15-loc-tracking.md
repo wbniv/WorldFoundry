@@ -16,14 +16,14 @@ python3 scripts/loc_report.py --compare scripts/loc_baseline_74d1a47.json
 
 ## Milestones
 
-| Date       | Ref       | Code LOC | Δ from baseline | Notes |
-|------------|-----------|----------|-----------------|-------|
-| 2026-04-14 | `74d1a47` | 64,252   | — (baseline)    | Pre-renderer-drop |
-| 2026-04-15 | `53028fa` | 47,131   | **−17,121 (−26.6%)** | After `drop-dead-renderers` merge |
-| 2026-04-15 | `bfe4356` | 43,166   | **−21,086 (−32.8%)** | After audio, attrib, ODE, game dead-code, midi removal |
-| 2026-04-15 | `0b04a40` | 42,248   | **−22,004 (−34.2%)** | After physicstest.cc + particle/test.cc deletion |
-| 2026-04-15 | `0b04a40` | 41,815   | **−22,437 (−34.9%)** | After cdda/, shell/, orphaned/ deletion + main.cc __WIN |
-| 2026-04-15 | `03211f9`  | 38,396  | **−25,856 (−40.2%)** | Batch 5 + _signal.cc/h + timer.cc/h deleted; test harnesses (particle/test.cc, physicstest.cc) restored |
+| Date       | Ref       | Code LOC | Δ LOC     | Δ %     | Notes |
+|------------|-----------|----------|-----------|---------|-------|
+| 2026-04-14 | `74d1a47` | 64,252   | —         | —       | Pre-renderer-drop (baseline) |
+| 2026-04-15 | `53028fa` | 47,131   | −17,121   | −26.6%  | After `drop-dead-renderers` merge |
+| 2026-04-15 | `bfe4356` | 43,166   | −21,086   | −32.8%  | After audio, attrib, ODE, game dead-code, midi removal |
+| 2026-04-15 | `0b04a40` | 42,248   | −22,004   | −34.2%  | After physicstest.cc + particle/test.cc deletion |
+| 2026-04-15 | `0b04a40` | 41,815   | −22,437   | −34.9%  | After cdda/, shell/, orphaned/ deletion + main.cc __WIN |
+| 2026-04-15 | `03211f9` | 38,396   | −25,856   | −40.2%  | Batch 5 + _signal.cc/h + timer.cc/h deleted; test harnesses restored |
 
 ## Subsystem breakdown at baseline vs HEAD (2026-04-15, after Batch 5)
 
@@ -34,8 +34,8 @@ Committed at `03211f9`.
 | math | 8,209 | 6,469 | −1,740 | −21% |
 | game | 6,365 | 6,078 | −287 | −5% |
 | gfx | 17,560 | 4,984 | **−12,576** | **−72%** |
-| cpplib | 2,327 | 1,782 | −545 | −23% |
 | physics | 2,150 | 2,069 | −81 | −4% |
+| cpplib | 2,327 | 1,782 | −545 | −23% |
 | hal | 4,476 | 1,740 | **−2,736** | **−61%** |
 | room | ~1,710 | 1,421 | ~−289 | ~−17% |
 | pigsys | 2,348 | 1,376 | −972 | −41% |
@@ -48,8 +48,8 @@ Committed at `03211f9`.
 | particle | 819 | 807 | −12 | −1% |
 | renderassets | 573 | 560 | −13 | −2% |
 | menu | ~190 | 136 | ~−54 | ~−28% |
-| midi | 107 | 0 | −107 | −100% |
 | scripting | ~300 | 28 | ~−272 | ~−91% |
+| midi | 107 | 0 | −107 | −100% |
 | (all others) | ≈9,943 | ≈4,059 | ~−5,884 | ~−59% |
 | **TOTAL** | **64,252** | **38,396** | **−25,856** | **−40%** |
 
@@ -82,7 +82,7 @@ Removed `wfsource/source/audio/`, `wfsource/source/audiofmt/`,
 `RENDERER_BRENDER`.  See `docs/plans/2026-04-15-dead-code-removal.md`
 for the full change list.
 
-### Batch 5 (uncommitted) — SKIP-list files + HAL tasker/IPC (−4,217 code LOC vs prev HEAD)
+### Batch 5 (`03211f9`) — dead subsystems + HAL tasker/IPC cluster (−4,217 code LOC vs prev HEAD)
 
 Largest drops:
 - `gfx/glpipeline/` — PSX software rasterizer (~1,794 lines); was in `DIRS` but every file

@@ -55,14 +55,6 @@ Material::Material(const _MaterialOnDisk& mod, const Texture& texture, const Pix
 
 //============================================================================
 
-pRenderObj3DFunc
-Material::Get3DRenderObjectPtr() const
-{
-	return nullptr;		// GL renderer uses RenderObject3D::Render() directly; PSX function-pointer dispatch removed with glpipeline
-}
-
-//============================================================================
-
 Material::Material(Color color, int materialFlags,const Texture& texture,const PixelMap* texturePixelMap)
 	:
 	_color(color),
@@ -103,8 +95,6 @@ Material::Construct()
 		if(_texture.bTranslucent)
 			_materialFlags |= TEXTURE_TRANSLUCENCY_HALF_BACK_HALF_PRIMITIVE;
 	}
-
-	_renderer3D = Get3DRenderObjectPtr();
 
 	switch ( _materialFlags & POLYGON_TYPE_FLAGS )
 	{
@@ -389,19 +379,6 @@ Material::InitPrimitive(Primitive& prim, const Vertex3D& vertex0, const Vertex3D
 //				u2 << "," << v2 << std::endl;
 			setUV3(poly,u0,v0,u1,v1,u2,v2);
 
-#if 0
-			cout << "vertex uv:" <<
-				vertex0.u << "," << vertex0.v << ";" <<
-				vertex1.u << "," << vertex1.v << ";" <<
-				vertex2.u << "," << vertex2.v << std::endl;
-
-			WFdumpTPage(poly->tpage);
-			cout << "Texture:" << _texture << std::endl;
-			cout << "uv: " <<
-				u0 << "," << v0 << ";" <<
-				u1 << "," << v1 << ";" <<
-				u2 << "," << v2 << std::endl;
-#endif
 
 
 

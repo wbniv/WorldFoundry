@@ -16,22 +16,6 @@
 
 
 
-#if defined( ASSERT_DEBUG_MENU )
-const int MAX_COMMAND_LINES = 3;
-static char* commandLines[MAX_COMMAND_LINES] =
-{
-	"Ignore the error and continue [dangerous!]",
-	"Abort the program",
-	"Launch debugger"
-};
-static char* descStrings[MAX_COMMAND_LINES] =
-{
-	"&Ignore",
-	"&Abort",
-	"&Debug"
-};
-#endif
-
 enum { ASSERT_IGNORE=0, ASSERT_ABORT, ASSERT_DEBUG };
 
 void

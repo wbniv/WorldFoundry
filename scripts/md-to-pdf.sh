@@ -467,6 +467,7 @@ html = f'''<!DOCTYPE html>
   del {{ color: #656d76; }}
   table {{ border-collapse: collapse; width: 100%; margin: 16px 0; }}
   th, td {{ border: 1px solid #d1d9e0; padding: 8px 12px; text-align: left; vertical-align: top; }}
+  td:first-child, th:first-child {{ white-space: nowrap; }}
   th {{ background: #f6f8fa; font-weight: 600; }}
   tr:nth-child(even) {{ background: #f6f8fa; }}
   hr {{ border: none; border-top: 1px solid #d1d9e0; margin: 24px 0; }}

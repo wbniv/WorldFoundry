@@ -412,20 +412,7 @@ sys_init(int* argcp, char*** argvp)
 		{
 			if ( 0 )
 				;
-#if 0
-		    else if ( strncmp((*argvp)[i], LOGFLAG, strlen(LOGFLAG)) == 0 )
-	    	{
-#if	DO_ASSERTIONS
-				ulong	ll = ERR_LOG;
-				sscanf((*argvp)[i]+strlen(LOGFLAG), "%li", &ll);
-#else
-#pragma message ("kts: fix this")
-#endif
-				ERR_UNSET_LOG(0xffffffffUL);
-				ERR_SET_LOG(ll);
-				bPrintVersion = ERR_LOG_ISSET(ERR_LOG2);
-			}
-#endif
+
 			else if ( strcmp((*argvp)[i], VERSIONFLAG) == 0 )
 				bPrintVersion = true;
 			else if ( strcmp((*argvp)[i], QUIETFLAG) == 0 )

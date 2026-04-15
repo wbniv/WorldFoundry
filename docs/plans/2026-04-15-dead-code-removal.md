@@ -257,10 +257,9 @@ python3 scripts/loc_report.py -o scripts/loc_head.json
 python3 scripts/loc_report.py --compare scripts/loc_baseline_74d1a47.json
 
 # 7. Update docs/investigations/2026-04-15-loc-tracking.md
-#    - Add new milestone row (date, ref, total LOC, Δ, note)
-#    - Update affected subsystem rows (math, cpplib, anim, gfx, hal, scripting,
-#      room, menu, pigsys, console, template) sorted by HEAD LOC descending
-#    - Update saved snapshots ref and LOC
+#    - Add milestone row (date, ref, total LOC, Δ LOC, Δ %, note)
+#    - Re-sort subsystem table by HEAD LOC descending
+#    - Update saved snapshot ref + LOC
 ```
 
 ---
@@ -313,7 +312,79 @@ dead on modern targets.
 
 ---
 
-## Where to look next (after Batch 5)
+## Batch 6 — `#if 0` sweep across subsystems (planned)
+
+Survey found no `#ifdef __WIN` / `#ifdef PSX` / `#ifdef SATURN` guards in pigsys — the
+platform abstraction uses a `linux/` subdirectory and positive `__LINUX__` guards rather than
+negative platform guards.  All dead code is explicit `#if 0` blocks, scattered across several
+subsystems.
+
+### Files to edit
+
+| File | Lines | Dead block |
+|------|-------|------------|
+| `gfx/gl/display.cc` | ~61–320 | `#if 0` — `TestGL2()` function (~260 lines); disabled GL initialization test, never called |
+| `gfx/gl/display.cc` | ~330–346 | `#if 0` — VRAM init test code (16 lines) |
+| `gfx/material.cc` | ~392–404 | `#if 0` — debug vertex UV dump (13 lines) |
+| `gfx/material.cc` | — | Dead member `_renderer3D` (always `nullptr`); `Get3DRenderObjectPtr()` returns `nullptr`; `Get3DRenderer()` has no callers — remove member + both accessors from `material.cc/hp/hpi` |
+| `game/level.cc` | ~128–140 | `#if 0` — `findOADData()` function body (12 lines) |
+| `game/level.cc` | ~370–404 | `#if 0` — sizeof/offsetof debug output (34 lines) |
+| `pigsys/assert.cc` | 19–33 | `#if defined(ASSERT_DEBUG_MENU)` — `MAX_COMMAND_LINES`, `commandLines[]`, `descStrings[]`; macro never defined |
+| `pigsys/new.cc` | 30–56 | `#if 0` — placement `operator new`/`operator new[]` overloads; disabled |
+| `pigsys/pigsys.cc` | 415–428 | `#if 0` — alternative log-level command-line parsing |
+| `pigsys/pigsys.hp` | 447–458 | `#if 0` — `setjmp.h` includes and `sys_jmp_buf` definitions |
+| `pigsys/minmax.hp` | 49–74 | `#if 0` — old `min()`/`max()` templates; replaced by live templates at lines 9–45 |
+
+Additional smaller `#if 0` blocks confirmed in `game/`, `gfx/`, `hal/linux/`, `movement/`,
+`room/`, `math/` — collect these in the same pass (each is ≤35 lines; full line-number list
+in the survey notes).
+
+### Do not touch
+
+| File | Reason |
+|------|--------|
+| `pigsys/scanf.cc` | In SKIP (intentional platform override); leave as-is |
+| `pigsys/clib.h` | `#if !defined(__LINUX__)` guard is intentional — libc++ collision workaround disabled on Linux by design |
+| `pigsys/pigtypes.h` | `__LINUX__` / `#else` branches — `#else` paths are dead on Linux but correct abstraction for future ports |
+| `pigsys/assert.hp` | `#if defined(NO_CONSOLE)` / `windows.h` block — feature flag, not platform guard; leave |
+| `pigsys/psystest.cc` | In SKIP; kept as test harness |
+| `eval/` | 120 LOC; tool-side callers (`wftools/prep`, `wftools/iff2lvl`) need porting to Blender plugin first |
+
+### Execution steps
+
+```bash
+# Surgical #if 0 deletions (see line numbers above)
+
+# Build
+cd wftools/wf_engine && bash build_game.sh
+
+# Measure and update docs
+python3 scripts/loc_report.py -o scripts/loc_head.json
+python3 scripts/loc_report.py --compare scripts/loc_baseline_74d1a47.json
+# Update docs/investigations/2026-04-15-loc-tracking.md:
+#   - Add milestone row (date, ref, total LOC, Δ LOC, Δ %, note)
+#   - Re-sort subsystem table by HEAD LOC descending
+#   - Update saved snapshot ref + LOC
+```
+
+Expected reduction: ~450–500 lines across `gfx`, `game`, `pigsys`, and smaller subsystems.
+
+---
+
+## Batch 7 — physics engine replacement (planned)
+
+Replace the custom WF physics engine with Jolt Physics.  Survey and integration plan:
+`docs/investigations/2026-04-14-physics-engine-survey.md` (Jolt recommended),
+`docs/investigations/2026-04-14-jolt-physics-integration.md` (integration plan, deferred).
+
+The Lua spike exposed a bad `reinterpret_cast` in `BungeeCameraHandler`/`SPECIAL_COLLISION`
+(`movecam.cc:1007`).  Patching that in isolation is not the goal — replacing physics wholesale
+is.  WF's variable-dt game loop is load-bearing; any fixed-step physics library must substep
+internally.
+
+---
+
+## Where to look next (after Batch 6)
 
 ### `hal/_list` + `hal/_mempool` — migrate then delete
 
@@ -323,14 +394,8 @@ because `baseobject/msgport.hp` uses them directly as struct members.  `MsgPort`
 `cpplib/minlist.hp` (already exists) + `memory/mempool.hp` instead, then update the single
 include in `msgport.hp` and delete the hal files.
 
-
-### `pigsys/` — platform abstraction layer
-
-1,376 LOC remaining after Batch 4.  Likely still has non-Linux dead paths (Windows, PSX
-platform stubs) after the renderer drop.  Survey for `#ifdef __WIN`, `#ifdef PSX`, and
-similar guards with no Linux branch.
-
 ### `eval/`
 
-120 LOC.  Not in `DIRS`.  Used by `wftools/` — delete after the Blender attributes editor
-implements equivalent functionality.
+120 LOC.  Not in game `DIRS`.  Referenced by `wftools/prep/source.cc` and
+`wftools/iff2lvl/oad.cc` — tool-side callers that themselves need porting to the Blender
+plugin.  Delete `eval/` once those tools are replaced.
