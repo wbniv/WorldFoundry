@@ -1,4 +1,4 @@
-# Investigation: Integrate Jolt Physics as the WF physics backend
+# Investigation: Integrate [Jolt Physics](https://jrouwe.github.io/JoltPhysics/) as the WF physics backend
 
 **Date:** 2026-04-14
 **Status:** Deferred — plan captured for future work, not scheduled.
