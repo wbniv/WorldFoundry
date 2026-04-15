@@ -1,6 +1,6 @@
 {
-  "ref": "0b04a40",
-  "date": "2026-04-15T16:38:25",
+  "ref": "8760f27",
+  "date": "2026-04-15T18:02:27",
   "root": "wfsource/source",
   "subsystems": {
     "_root": {
@@ -46,17 +46,17 @@
       "files": 4
     },
     "game": {
-      "blank": 2199,
-      "comment": 4314,
-      "code": 6078,
-      "total": 12591,
+      "blank": 2198,
+      "comment": 4312,
+      "code": 6067,
+      "total": 12577,
       "files": 82
     },
     "gfx": {
-      "blank": 1551,
-      "comment": 3072,
-      "code": 4984,
-      "total": 9607,
+      "blank": 1531,
+      "comment": 3051,
+      "code": 4824,
+      "total": 9406,
       "files": 61
     },
     "gfxfmt": {
@@ -67,11 +67,11 @@
       "files": 5
     },
     "hal": {
-      "blank": 851,
-      "comment": 1492,
-      "code": 1860,
-      "total": 4203,
-      "files": 35
+      "blank": 770,
+      "comment": 1371,
+      "code": 1740,
+      "total": 3881,
+      "files": 31
     },
     "iff": {
       "blank": 102,
@@ -137,24 +137,24 @@
       "files": 53
     },
     "particle": {
-      "blank": 99,
-      "comment": 263,
-      "code": 270,
-      "total": 632,
-      "files": 6
+      "blank": 253,
+      "comment": 504,
+      "code": 807,
+      "total": 1564,
+      "files": 7
     },
     "physics": {
-      "blank": 554,
-      "comment": 918,
-      "code": 1688,
-      "total": 3160,
-      "files": 19
+      "blank": 677,
+      "comment": 1053,
+      "code": 2069,
+      "total": 3799,
+      "files": 20
     },
     "pigsys": {
-      "blank": 556,
-      "comment": 1371,
-      "code": 1376,
-      "total": 3303,
+      "blank": 551,
+      "comment": 1350,
+      "code": 1335,
+      "total": 3236,
       "files": 21
     },
     "recolib": {
@@ -222,10 +222,10 @@
     }
   },
   "total": {
-    "blank": 12016,
-    "comment": 21440,
-    "code": 37598,
-    "total": 71054,
-    "files": 494
+    "blank": 12186,
+    "comment": 21651,
+    "code": 38184,
+    "total": 72021,
+    "files": 492
   }
 }

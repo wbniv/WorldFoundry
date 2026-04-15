@@ -24,6 +24,7 @@ python3 scripts/loc_report.py --compare scripts/loc_baseline_74d1a47.json
 | 2026-04-15 | `0b04a40` | 42,248   | −22,004   | −34.2%  | After physicstest.cc + particle/test.cc deletion |
 | 2026-04-15 | `0b04a40` | 41,815   | −22,437   | −34.9%  | After cdda/, shell/, orphaned/ deletion + main.cc __WIN |
 | 2026-04-15 | `03211f9` | 38,396   | −25,856   | −40.2%  | Batch 5 + _signal.cc/h + timer.cc/h deleted; test harnesses restored |
+| 2026-04-15 | `8760f27` | 38,184   | −26,068   | −40.6%  | Batch 6: #if 0 sweep — display.cc TestGL2, material dead members, pigsys |
 
 ## Subsystem breakdown at baseline vs HEAD (2026-04-15, after Batch 5)
 
@@ -32,13 +33,13 @@ Committed at `03211f9`.
 | Subsystem | Baseline code | HEAD code | Δ Code | % |
 |-----------|--------------|-----------|--------|---|
 | math | 8,209 | 6,469 | −1,740 | −21% |
-| game | 6,365 | 6,078 | −287 | −5% |
-| gfx | 17,560 | 4,984 | **−12,576** | **−72%** |
+| game | 6,365 | 6,067 | −298 | −5% |
+| gfx | 17,560 | 4,824 | **−12,736** | **−73%** |
 | physics | 2,150 | 2,069 | −81 | −4% |
 | cpplib | 2,327 | 1,782 | −545 | −23% |
 | hal | 4,476 | 1,740 | **−2,736** | **−61%** |
 | room | ~1,710 | 1,421 | ~−289 | ~−17% |
-| pigsys | 2,348 | 1,376 | −972 | −41% |
+| pigsys | 2,348 | 1,335 | −1,013 | −43% |
 | anim | 1,452 | 1,366 | −86 | −6% |
 | oas | ~1,310 | 1,310 | 0 | 0% |
 | streams | ~1,241 | 1,241 | 0 | 0% |
@@ -51,7 +52,7 @@ Committed at `03211f9`.
 | scripting | ~300 | 28 | ~−272 | ~−91% |
 | midi | 107 | 0 | −107 | −100% |
 | (all others) | ≈9,943 | ≈4,059 | ~−5,884 | ~−59% |
-| **TOTAL** | **64,252** | **38,396** | **−25,856** | **−40%** |
+| **TOTAL** | **64,252** | **38,184** | **−26,068** | **−41%** |
 
 ## What drove the drop
 
@@ -105,7 +106,7 @@ rather than wrapped).  `_signal.cc/h` and `timer.cc/h` were stubbed to `assert(0
 | File | Ref | Code LOC |
 |------|-----|---------|
 | `scripts/loc_baseline_74d1a47.json` | `74d1a47` | 64,252 |
-| `scripts/loc_head.json` | `03211f9` | 38,396 |
+| `scripts/loc_head.json` | `8760f27` | 38,184 |
 
 Committed at `03211f9`.
 
