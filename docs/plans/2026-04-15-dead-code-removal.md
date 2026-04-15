@@ -427,9 +427,20 @@ Also: added root `.gitignore` to prevent build artifacts (`.o`, `.pyc`, `objs_ga
 - [ ] `wfsource/source/GNUMakefile.print` lines 8–18: PSX + Windows print targets
 - [ ] `wfsource/source/GNUMakefile.test` lines 14–18, 24–26, 42–44, 62–111: PSX reset/run/link + MSVC debugger
 
-### To do — orphaned subsystems (no game callers)
+### To do — orphaned subsystems / misplaced libraries (no game callers)
 
 - [ ] `wfsource/source/gfxfmt/` — image format library (TGA/BMP/SGI); only referenced by its own `test.cc`
+- [ ] `wfsource/source/registry/` — Windows registry API (`HKEY`, `windows.h`); only iff2lvl callers are in `#if 0` blocks; delete or move to wftools
+- [ ] `wfsource/source/version/` → `wftools/version/` — generic version strings; only consumer is `wftools/iffcomp/main.cc`
+
+### To do — empty directories
+
+- [ ] `wfsource/source/cdda/` — empty
+
+### To do — dead build files
+
+- [ ] `wfsource/source/pigs.dep` — Win/PSX dependency file (`.lib` rules, `psylink`, `%chdir`); Linux uses `GNUpigs.dep`
+- [ ] `wfsource/source/Makefile.inc` — OpusMake include; lists deleted dirs (`attrib`, `console`, `ini`, `menu`, `savegame`, `loadfile`, `physical`, `fuzzy`) and Win/PSX platform blocks; either delete or strip to Linux-only
 
 ### To do — platform #ifdef guards in source
 
