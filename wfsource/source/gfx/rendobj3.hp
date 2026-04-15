@@ -70,6 +70,7 @@ private:
 	// used by constructors
 	void Construct( Memory& memory, int vertexCount,Vertex3D* vertexList, int faceCount, TriFace* faceList, const Material* materialList );
 
+#	include <gfx/glpipeline/renderer.inc>
 	enum { MAX_RENDERERS = 8 };
 	Primitive*	_primList[ORDER_TABLES];				// array of primitives, same # as face list
 	const Material*	_materialList;
@@ -114,7 +115,7 @@ struct RotatedVector
 };
 
 
-#include <gfx/gl/rendobj3.hp>
+#		include <gfx/glpipeline/rendobj3.hp>
 //============================================================================
 #include <gfx/rendobj3.hpi>		// include all inline definitions as appropriate
 //=============================================================================

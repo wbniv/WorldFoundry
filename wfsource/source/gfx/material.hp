@@ -59,6 +59,8 @@ class PixelMap;
 
 
 typedef void (RenderObject3D::* pRenderObj2DFunc)(ViewPort& vp,const Vector2& position, int depth);
+typedef int (RenderObject3D::* pRenderObj3DFunc)(Primitive* primitive);
+
 //============================================================================
 // Class and Structure Prototypes
 //============================================================================
@@ -140,12 +142,16 @@ protected:
 private:
 	void Construct();					// called by all constructors
 
+	pRenderObj3DFunc Get3DRenderObjectPtr() const;
+
 	friend class RenderObject3D;
 	friend _IffWriter& operator << ( _IffWriter& iff, const Material& mat );
 
+	pRenderObj3DFunc Get3DRenderer() const;
 	void InitPrimitive(Primitive& prim, const Vertex3D& vertex0, const Vertex3D& vertex1, const Vertex3D& vertex2) const;
 
 	pRenderObj2DFunc _renderer2D;
+	pRenderObj3DFunc _renderer3D;
 	P_CODE	_cdColor;				    // color plus poly code
 	Color _color;
 	int _materialFlags;

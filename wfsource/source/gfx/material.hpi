@@ -76,6 +76,16 @@ Material::SetColor(const Color& color)
 
 //============================================================================
 
+INLINE pRenderObj3DFunc
+Material::Get3DRenderer() const
+{
+#if DO_ASSERTIONS
+#endif
+	return(_renderer3D);
+}
+
+//============================================================================
+
 #if DO_IOSTREAMS
 INLINE std::ostream& operator<<(std::ostream& s, const Material& mat)
 {

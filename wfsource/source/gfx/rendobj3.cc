@@ -33,7 +33,7 @@
 #include "callbacks.hp"
 
 
-	#include <gfx/gl/rendobj3.cc>
+	#include <gfx/glpipeline/rendobj3.cc>
 
 //============================================================================
 // keeps pointers to facelist and vertexlist
