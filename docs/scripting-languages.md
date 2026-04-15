@@ -7,13 +7,13 @@
 | 1 | [Lua spike](plans/2026-04-13-lua-interpreter-spike.md) | Lua 5.4 | landed 2026-04-13 | [`scripting_stub.cc` (`lua_engine` ns)](../wftools/wf_viewer/stubs/scripting_stub.cc) |
 | 2 | [Vendor Lua](plans/2026-04-14-vendor-lua.md) | Lua 5.4 (vendoring) | landed 2026-04-14 | [`wftools/vendor/lua-5.4.8/`](../wftools/vendor/lua-5.4.8/) |
 | 3 | [Fennel-on-Lua](plans/2026-04-14-fennel-on-lua.md) | Fennel | landed 2026-04-14 | sub-dispatch in `lua_engine` ns |
-| 4 | [Pluggable / JS](plans/2026-04-14-pluggable-scripting-engine.md) | QuickJS / JerryScript | landed 2026-04-14 (rename to `js_engine` ns in-flight) | [`scripting_quickjs.cc`](../wftools/wf_viewer/stubs/scripting_quickjs.cc), [`scripting_jerryscript.cc`](../wftools/wf_viewer/stubs/scripting_jerryscript.cc) |
-| 5 | [wasm3](plans/2026-04-14-wasm3-scripting-engine.md) | wasm3 | landed 2026-04-14 (rename to `wasm3_engine` ns in-flight) | [`scripting_wasm3.cc`](../wftools/wf_viewer/stubs/scripting_wasm3.cc) |
+| 4 | [Pluggable / JS](plans/2026-04-14-pluggable-scripting-engine.md) | QuickJS / JerryScript | landed 2026-04-14; `js_engine` ns landed 2026-04-15 | [`scripting_quickjs.cc`](../wftools/wf_viewer/stubs/scripting_quickjs.cc), [`scripting_jerryscript.cc`](../wftools/wf_viewer/stubs/scripting_jerryscript.cc) |
+| 5 | [wasm3](plans/2026-04-14-wasm3-scripting-engine.md) | wasm3 | landed 2026-04-14; `wasm3_engine` ns landed 2026-04-15 | [`scripting_wasm3.cc`](../wftools/wf_viewer/stubs/scripting_wasm3.cc) |
 | 6 | [WAMR dev + AOT ship](plans/2026-04-14-wamr-dev-aot-ship.md) | WAMR (interp + AOT) | pending | — |
 | 7 | [Wren](plans/2026-04-14-wren-scripting-engine.md) | Wren | pending | — |
 | 8 | [Forth](plans/2026-04-14-forth-scripting-engine.md) | zForth / ficl / Atlast / embed / libforth / pForth (pluggable) | pending (vendor dirs checked in) | — |
-| 9 | [lua_engine fixes](plans/2026-04-15-lua-engine-fixes.md) | Lua (perf + correctness fixes) | pending | — |
-| — | [Align plans with ScriptRouter](plans/2026-04-15-scripting-plans-align-scriptrouter.md) | docs + rename sweep | in-flight | — |
+| 9 | [lua_engine fixes](plans/2026-04-15-lua-engine-fixes.md) | Lua fixes #1–#5 | landed 2026-04-15; fix #6 (coroutines) landed 2026-04-15 (needs smoke test) | [`scripting_stub.cc` (`lua_engine` ns)](../wftools/wf_viewer/stubs/scripting_stub.cc) |
+| — | [Align plans with ScriptRouter](plans/2026-04-15-scripting-plans-align-scriptrouter.md) | docs + rename sweep | **landed 2026-04-15** | — |
 
 Every engine follows the same shape: a file-scope `<engine>_engine` namespace exposing `Init / Shutdown / AddConstantArray / DeleteConstantArray / RunScript`, driven by `ScriptRouter` in [`scripting_stub.cc`](../wftools/wf_viewer/stubs/scripting_stub.cc).
 
