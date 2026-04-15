@@ -1,0 +1,301 @@
+{
+  "ref": "53028fa",
+  "date": "2026-04-15T09:14:37",
+  "root": "wfsource/source",
+  "subsystems": {
+    "_root": {
+      "blank": 76,
+      "comment": 65,
+      "code": 254,
+      "total": 395,
+      "files": 2
+    },
+    "anim": {
+      "blank": 488,
+      "comment": 846,
+      "code": 1366,
+      "total": 2700,
+      "files": 18
+    },
+    "asset": {
+      "blank": 184,
+      "comment": 300,
+      "code": 547,
+      "total": 1031,
+      "files": 8
+    },
+    "attrib": {
+      "blank": 1194,
+      "comment": 676,
+      "code": 3747,
+      "total": 5617,
+      "files": 48
+    },
+    "baseobject": {
+      "blank": 171,
+      "comment": 351,
+      "code": 438,
+      "total": 960,
+      "files": 10
+    },
+    "cdda": {
+      "blank": 23,
+      "comment": 68,
+      "code": 46,
+      "total": 137,
+      "files": 3
+    },
+    "console": {
+      "blank": 85,
+      "comment": 54,
+      "code": 274,
+      "total": 413,
+      "files": 8
+    },
+    "cpplib": {
+      "blank": 755,
+      "comment": 1198,
+      "code": 2172,
+      "total": 4125,
+      "files": 28
+    },
+    "eval": {
+      "blank": 56,
+      "comment": 56,
+      "code": 120,
+      "total": 232,
+      "files": 4
+    },
+    "game": {
+      "blank": 2234,
+      "comment": 4450,
+      "code": 6211,
+      "total": 12895,
+      "files": 83
+    },
+    "gfx": {
+      "blank": 1826,
+      "comment": 3796,
+      "code": 5953,
+      "total": 11575,
+      "files": 73
+    },
+    "gfxfmt": {
+      "blank": 204,
+      "comment": 113,
+      "code": 699,
+      "total": 1016,
+      "files": 5
+    },
+    "hal": {
+      "blank": 1242,
+      "comment": 2075,
+      "code": 2833,
+      "total": 6150,
+      "files": 43
+    },
+    "iff": {
+      "blank": 102,
+      "comment": 277,
+      "code": 326,
+      "total": 705,
+      "files": 7
+    },
+    "iffwrite": {
+      "blank": 361,
+      "comment": 397,
+      "code": 1053,
+      "total": 1811,
+      "files": 11
+    },
+    "ini": {
+      "blank": 79,
+      "comment": 150,
+      "code": 270,
+      "total": 499,
+      "files": 3
+    },
+    "input": {
+      "blank": 83,
+      "comment": 39,
+      "code": 267,
+      "total": 389,
+      "files": 2
+    },
+    "loadfile": {
+      "blank": 24,
+      "comment": 18,
+      "code": 77,
+      "total": 119,
+      "files": 2
+    },
+    "mailbox": {
+      "blank": 72,
+      "comment": 99,
+      "code": 225,
+      "total": 396,
+      "files": 4
+    },
+    "math": {
+      "blank": 1425,
+      "comment": 2260,
+      "code": 6713,
+      "total": 10398,
+      "files": 36
+    },
+    "memory": {
+      "blank": 376,
+      "comment": 859,
+      "code": 1143,
+      "total": 2378,
+      "files": 17
+    },
+    "menu": {
+      "blank": 68,
+      "comment": 113,
+      "code": 187,
+      "total": 368,
+      "files": 5
+    },
+    "midi": {
+      "blank": 9,
+      "comment": 24,
+      "code": 11,
+      "total": 44,
+      "files": 1
+    },
+    "movement": {
+      "blank": 440,
+      "comment": 790,
+      "code": 1174,
+      "total": 2404,
+      "files": 16
+    },
+    "oas": {
+      "blank": 378,
+      "comment": 740,
+      "code": 1310,
+      "total": 2428,
+      "files": 53
+    },
+    "orphaned": {
+      "blank": 60,
+      "comment": 45,
+      "code": 146,
+      "total": 251,
+      "files": 4
+    },
+    "particle": {
+      "blank": 253,
+      "comment": 504,
+      "code": 807,
+      "total": 1564,
+      "files": 7
+    },
+    "physics": {
+      "blank": 714,
+      "comment": 1192,
+      "code": 2150,
+      "total": 4056,
+      "files": 23
+    },
+    "pigsys": {
+      "blank": 556,
+      "comment": 1371,
+      "code": 1376,
+      "total": 3303,
+      "files": 21
+    },
+    "recolib": {
+      "blank": 216,
+      "comment": 340,
+      "code": 605,
+      "total": 1161,
+      "files": 16
+    },
+    "registry": {
+      "blank": 21,
+      "comment": 19,
+      "code": 75,
+      "total": 115,
+      "files": 2
+    },
+    "renderassets": {
+      "blank": 190,
+      "comment": 275,
+      "code": 560,
+      "total": 1025,
+      "files": 3
+    },
+    "room": {
+      "blank": 393,
+      "comment": 685,
+      "code": 1426,
+      "total": 2504,
+      "files": 14
+    },
+    "savegame": {
+      "blank": 220,
+      "comment": 237,
+      "code": 607,
+      "total": 1064,
+      "files": 10
+    },
+    "scripting": {
+      "blank": 126,
+      "comment": 203,
+      "code": 254,
+      "total": 583,
+      "files": 8
+    },
+    "shell": {
+      "blank": 95,
+      "comment": 39,
+      "code": 240,
+      "total": 374,
+      "files": 3
+    },
+    "streams": {
+      "blank": 375,
+      "comment": 482,
+      "code": 1241,
+      "total": 2098,
+      "files": 8
+    },
+    "template": {
+      "blank": 59,
+      "comment": 67,
+      "code": 125,
+      "total": 251,
+      "files": 5
+    },
+    "timer": {
+      "blank": 29,
+      "comment": 13,
+      "code": 70,
+      "total": 112,
+      "files": 4
+    },
+    "toolstub": {
+      "blank": 13,
+      "comment": 13,
+      "code": 27,
+      "total": 53,
+      "files": 1
+    },
+    "version": {
+      "blank": 1,
+      "comment": 1,
+      "code": 6,
+      "total": 8,
+      "files": 2
+    }
+  },
+  "total": {
+    "blank": 15276,
+    "comment": 25300,
+    "code": 47131,
+    "total": 87707,
+    "files": 621
+  }
+}
