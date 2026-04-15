@@ -1,3 +1,0 @@
-/home/will/WorldFoundry/wftools/wf_engine/objs_game/jolt_build/out/CMakeFiles/Jolt.dir
-/home/will/WorldFoundry/wftools/wf_engine/objs_game/jolt_build/out/CMakeFiles/edit_cache.dir
-/home/will/WorldFoundry/wftools/wf_engine/objs_game/jolt_build/out/CMakeFiles/rebuild_cache.dir

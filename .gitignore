@@ -1,0 +1,20 @@
+# Build artifacts
+*.o
+*.a
+*.so
+*.pyc
+__pycache__/
+*.json~
+*~
+
+# wfsource build output dirs
+wfsource/source/obj*/
+wfsource/bin/
+
+# wftools build output dirs
+wftools/wf_engine/objs_game/
+wftools/*/target/
+
+# Editor
+*.swp
+.DS_Store

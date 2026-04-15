@@ -116,7 +116,7 @@ $(PIGS_LIB_DIR)librecolib.a  :
 
 $(PIGS_LIB_DIR)libregexp.a  :
 	@echo regexp
-	@cd $(PIGS_DIR)/regexp ; make FORCEBUILDMODE=$(BUILDMODE)
+	@cd $(WF_DIR)/../wftools/regexp ; make FORCEBUILDMODE=$(BUILDMODE)
 
 #$(PIGS_LIB_DIR)libregistry.a  :
 #	@echo registry
