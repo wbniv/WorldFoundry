@@ -441,6 +441,11 @@ Also: added root `.gitignore` to prevent build artifacts (`.o`, `.pyc`, `objs_ga
 
 - [x] `wfsource/source/pigs.dep` — OpusMake/Win dep file; deleted `decaf01`
 - [ ] `wfsource/source/Makefile.inc` — OpusMake include; lists deleted dirs (`attrib`, `console`, `ini`, `menu`, `savegame`, `loadfile`, `physical`, `fuzzy`) and Win/PSX platform blocks; either delete or strip to Linux-only
+- [ ] Per-subsystem `Makefile` files — all OpusMake syntax (`!if`, `%chdir`, `.lib`); Linux build uses `GNUpigs.dep`, never invokes these:
+  `wfsource/source/`: `anim/`, `asset/`, `baseobject/`, `cpplib/`, `gfxfmt/`, `hal/`, `iff/`, `input/`, `math/`, `movement/`, `particle/`, `physics/`, `pigsys/`, `registry/`, `room/`, `scripting/`, `streams/`, `timer/`
+  `wftools/`: `iffwrite/`, `recolib/`, `regexp/`, `lvldump/`, `oaddump/`
+- [ ] `wfsource/Makefile` — OpusMake top-level (`%chdir`, `WF_TARGET ?= win`); Linux uses `GNUMakefile.linux`
+- [ ] `wfsource/levels.src/levels.mak` — OpusMake level build (`!include`)
 
 ### To do — platform #ifdef guards in source
 
