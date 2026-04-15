@@ -3,3 +3,7 @@
 *.iff    binary
 *.wf     binary
 *.dmp    binary
+*.tar.gz binary
+*.tgz    binary
+*.zip    binary
+*.wasm   binary
