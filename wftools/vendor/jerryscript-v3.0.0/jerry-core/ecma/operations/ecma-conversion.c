@@ -136,7 +136,7 @@ ecma_op_same_value (ecma_value_t x, /**< ecma value */
   return false;
 } /* ecma_op_same_value */
 
-#if JERRY_BUILTIN_CONTAINER
+/* Used by Array.prototype.includes and containers; compiled unconditionally. */
 /**
  * SameValueZero operation.
  *
@@ -180,7 +180,6 @@ ecma_op_same_value_zero (ecma_value_t x, /**< ecma value */
 
   return ecma_op_same_value (x, y);
 } /* ecma_op_same_value_zero */
-#endif /* JERRY_BUILTIN_CONTAINER */
 
 /**
  * ToPrimitive operation.

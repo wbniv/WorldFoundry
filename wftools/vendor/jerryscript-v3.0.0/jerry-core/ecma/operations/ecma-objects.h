@@ -107,9 +107,8 @@ ecma_collection_t *ecma_op_object_own_property_keys (ecma_object_t *obj_p, jerry
 ecma_collection_t *ecma_op_object_enumerate (ecma_object_t *obj_p);
 
 lit_magic_string_id_t ecma_object_get_class_name (ecma_object_t *obj_p);
-#if JERRY_BUILTIN_REGEXP
+/* Used by ecma_op_is_regexp unconditionally; declare outside JERRY_BUILTIN_REGEXP guard. */
 bool ecma_object_is_regexp_object (ecma_value_t arg);
-#endif /* JERRY_BUILTIN_REGEXP */
 ecma_value_t ecma_op_is_concat_spreadable (ecma_value_t arg);
 ecma_value_t ecma_op_is_regexp (ecma_value_t arg);
 ecma_value_t ecma_op_species_constructor (ecma_object_t *this_value, ecma_builtin_id_t default_constructor_id);

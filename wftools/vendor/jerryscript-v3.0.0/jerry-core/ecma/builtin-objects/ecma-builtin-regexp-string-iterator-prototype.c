@@ -49,6 +49,7 @@
  * @return iterator result object, if success
  *         error - otherwise
  */
+#if JERRY_BUILTIN_REGEXP
 static ecma_value_t
 ecma_builtin_regexp_string_iterator_prototype_object_next (ecma_value_t this_val) /**< this argument */
 {
@@ -176,6 +177,14 @@ free_variables:
 
   return result;
 } /* ecma_builtin_regexp_string_iterator_prototype_object_next */
+#else /* !JERRY_BUILTIN_REGEXP */
+static ecma_value_t
+ecma_builtin_regexp_string_iterator_prototype_object_next (ecma_value_t this_val) /**< this argument */
+{
+  JERRY_UNUSED (this_val);
+  return ecma_raise_type_error (ECMA_ERR_ARGUMENT_THIS_NOT_ITERATOR);
+} /* ecma_builtin_regexp_string_iterator_prototype_object_next (stub) */
+#endif /* JERRY_BUILTIN_REGEXP */
 
 /**
  * @}

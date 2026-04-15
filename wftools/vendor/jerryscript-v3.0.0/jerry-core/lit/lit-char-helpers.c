@@ -934,6 +934,7 @@ lit_char_fold_to_lower (lit_code_point_t cp) /**< code point */
                                             lit_unicode_folding_skip_to_lower_chars,
                                             NUM_OF_ELEMENTS (lit_unicode_folding_skip_to_lower_chars))));
 #else /* !JERRY_UNICODE_CASE_CONVERSION */
+  (void) cp;
   return true;
 #endif /* JERRY_UNICODE_CASE_CONVERSION */
 } /* lit_char_fold_to_lower */
@@ -957,6 +958,7 @@ lit_char_fold_to_upper (lit_code_point_t cp) /**< code point */
                                            lit_unicode_folding_to_upper_chars,
                                            NUM_OF_ELEMENTS (lit_unicode_folding_to_upper_chars))));
 #else /* !JERRY_UNICODE_CASE_CONVERSION */
+  (void) cp;
   return false;
 #endif /* JERRY_UNICODE_CASE_CONVERSION */
 } /* lit_char_fold_to_upper */

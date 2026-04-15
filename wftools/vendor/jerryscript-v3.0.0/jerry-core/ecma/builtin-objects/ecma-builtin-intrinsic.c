@@ -93,6 +93,7 @@ ecma_builtin_intrinsic_array_prototype_values (ecma_value_t this_value) /**< thi
   return ret_value;
 } /* ecma_builtin_intrinsic_array_prototype_values */
 
+#if JERRY_BUILTIN_CONTAINER
 /**
  * The Map.prototype entries and [@@iterator] routines
  *
@@ -144,6 +145,7 @@ ecma_builtin_intrinsic_set_prototype_values (ecma_value_t this_value) /**< this 
                                             ECMA_OBJECT_CLASS_SET_ITERATOR,
                                             ECMA_ITERATOR_VALUES);
 } /* ecma_builtin_intrinsic_set_prototype_values */
+#endif /* JERRY_BUILTIN_CONTAINER */
 
 /**
  * Dispatcher of the built-in's routines

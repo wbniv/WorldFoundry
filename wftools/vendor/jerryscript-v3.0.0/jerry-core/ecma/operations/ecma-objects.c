@@ -2913,9 +2913,10 @@ ecma_object_get_class_name (ecma_object_t *obj_p) /**< object */
   }
 } /* ecma_object_get_class_name */
 
-#if JERRY_BUILTIN_REGEXP
 /**
  * Checks if the given argument has [[RegExpMatcher]] internal slot
+ *
+ * Called unconditionally by ecma_op_is_regexp; returns false when JERRY_BUILTIN_REGEXP=0.
  *
  * @return true - if the given argument is a regexp
  *         false - otherwise
@@ -2923,10 +2924,14 @@ ecma_object_get_class_name (ecma_object_t *obj_p) /**< object */
 extern inline bool JERRY_ATTR_ALWAYS_INLINE
 ecma_object_is_regexp_object (ecma_value_t arg) /**< argument */
 {
+#if JERRY_BUILTIN_REGEXP
   return (ecma_is_value_object (arg)
           && ecma_object_class_is (ecma_get_object_from_value (arg), ECMA_OBJECT_CLASS_REGEXP));
-} /* ecma_object_is_regexp_object */
+#else /* !JERRY_BUILTIN_REGEXP */
+  JERRY_UNUSED (arg);
+  return false;
 #endif /* JERRY_BUILTIN_REGEXP */
+} /* ecma_object_is_regexp_object */
 
 /**
  * Object's IsConcatSpreadable operation, used for Array.prototype.concat

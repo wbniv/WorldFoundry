@@ -92,6 +92,7 @@ ecma_builtin_array_iterator_prototype_object_next (ecma_value_t this_val) /**< t
 
   /* 8. */
   ecma_length_t length;
+#if JERRY_BUILTIN_TYPEDARRAY
   if (ecma_object_is_typedarray (array_object_p))
   {
     /* a. */
@@ -105,6 +106,7 @@ ecma_builtin_array_iterator_prototype_object_next (ecma_value_t this_val) /**< t
     length = ecma_typedarray_get_length (array_object_p);
   }
   else
+#endif /* JERRY_BUILTIN_TYPEDARRAY */
   {
     ecma_value_t len_value = ecma_op_object_get_length (array_object_p, &length);
 
