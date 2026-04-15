@@ -20,26 +20,42 @@ python3 scripts/loc_report.py --compare scripts/loc_baseline_74d1a47.json
 |------------|-----------|----------|-----------------|-------|
 | 2026-04-14 | `74d1a47` | 64,252   | — (baseline)    | Pre-renderer-drop |
 | 2026-04-15 | `53028fa` | 47,131   | **−17,121 (−26.6%)** | After `drop-dead-renderers` merge |
+| 2026-04-15 | `bfe4356` | 43,166   | **−21,086 (−32.8%)** | After audio, attrib, ODE, game dead-code, midi removal |
+| 2026-04-15 | `0b04a40` | 42,248   | **−22,004 (−34.2%)** | After physicstest.cc + particle/test.cc deletion |
+| 2026-04-15 | `0b04a40` | 41,815   | **−22,437 (−34.9%)** | After cdda/, shell/, orphaned/ deletion + main.cc __WIN |
+| 2026-04-15 | `03211f9`  | 38,396  | **−25,856 (−40.2%)** | Batch 5 + _signal.cc/h + timer.cc/h deleted; test harnesses (particle/test.cc, physicstest.cc) restored |
 
-## Subsystem breakdown at baseline vs HEAD (2026-04-15)
+## Subsystem breakdown at baseline vs HEAD (2026-04-15, after Batch 5)
 
-| Subsystem | Baseline code | HEAD code | Δ Code |
-|-----------|--------------|-----------|--------|
-| gfx | 17,560 | 5,953 | **−11,607** |
-| math | 8,209 | 6,713 | −1,496 |
-| hal | 4,476 | 2,833 | −1,643 |
-| pigsys | 2,348 | 1,376 | −972 |
-| midi | 107 | 11 | −96 |
-| anim | 1,452 | 1,366 | −86 |
-| cpplib | 2,327 | 2,172 | −155 |
-| game | 6,365 | 6,211 | −154 |
-| movement | 1,196 | 1,174 | −22 |
-| particle | 819 | 807 | −12 |
-| renderassets | 573 | 560 | −13 |
-| (all others) | ≈18,010 | ≈18,010 | ~0 |
-| **TOTAL** | **64,252** | **47,131** | **−17,121** |
+Committed at `03211f9`.
+
+| Subsystem | Baseline code | HEAD code | Δ Code | % |
+|-----------|--------------|-----------|--------|---|
+| math | 8,209 | 6,469 | −1,740 | −21% |
+| game | 6,365 | 6,078 | −287 | −5% |
+| gfx | 17,560 | 4,984 | **−12,576** | **−72%** |
+| cpplib | 2,327 | 1,782 | −545 | −23% |
+| physics | 2,150 | 2,069 | −81 | −4% |
+| hal | 4,476 | 1,740 | **−2,736** | **−61%** |
+| room | ~1,710 | 1,421 | ~−289 | ~−17% |
+| pigsys | 2,348 | 1,376 | −972 | −41% |
+| anim | 1,452 | 1,366 | −86 | −6% |
+| oas | ~1,310 | 1,310 | 0 | 0% |
+| streams | ~1,241 | 1,241 | 0 | 0% |
+| movement | 1,196 | 1,174 | −22 | −2% |
+| memory | ~1,143 | 1,143 | 0 | 0% |
+| iffwrite | ~1,053 | 1,053 | 0 | 0% |
+| particle | 819 | 807 | −12 | −1% |
+| renderassets | 573 | 560 | −13 | −2% |
+| menu | ~190 | 136 | ~−54 | ~−28% |
+| midi | 107 | 0 | −107 | −100% |
+| scripting | ~300 | 28 | ~−272 | ~−91% |
+| (all others) | ≈9,943 | ≈4,059 | ~−5,884 | ~−59% |
+| **TOTAL** | **64,252** | **38,396** | **−25,856** | **−40%** |
 
 ## What drove the drop
+
+### `53028fa` — drop-dead-renderers (−17,121)
 
 The `drop-dead-renderers` branch removed the PSX, PS2, Saturn, and D3D
 renderer back-ends from `gfx/`, along with associated `hal/` stubs and
@@ -52,48 +68,52 @@ ops) and Windows `win/msvc/` and `win/watcom/` subdirectories (x86 inline
 assembly for Watcom and MSVC).  The fixed-point types and Linux/PC
 implementations (`math/linux/scalar.cc/.hpi`) are intact.
 
+### `0b04a40` — standalone test binaries (−918 vs prev HEAD)
+
+Deleted `physics/physicstest.cc` (ODE test harness, broken after `ode/` removal) and
+`particle/test.cc` (particle subsystem test binary).  Neither was in the game build.
+
+### `bfe4356` — audio, attrib, ODE, game dead-code (−3,943 vs prev HEAD)
+
+Removed `wfsource/source/audio/`, `wfsource/source/audiofmt/`,
+`wfsource/source/attrib/`, `wftools/attribedit/`, and
+`wfsource/source/physics/ode/`, plus dead `#if` blocks in `game/` for
+`DO_STEREOGRAM`, `DO_SLOW_STEREOGRAM`, `MIDI_MUSIC`, and
+`RENDERER_BRENDER`.  See `docs/plans/2026-04-15-dead-code-removal.md`
+for the full change list.
+
+### Batch 5 (uncommitted) — SKIP-list files + HAL tasker/IPC (−4,217 code LOC vs prev HEAD)
+
+Largest drops:
+- `gfx/glpipeline/` — PSX software rasterizer (~1,794 lines); was in `DIRS` but every file
+  overridden by `SKIP`; included as sub-files by parent `.cc` files.
+- `hal/` tasker cluster — `tasker.cc`, `_tasker.h`, `tasker.h`, `item.cc`, `item.h`,
+  `halconv.cc`, `linux/_procsta.h` (~800 lines): 80386 cooperative multi-tasker, never
+  implemented for Linux, `DO_MULTITASKING` never defined.
+- `savegame/`, `loadfile/`, `ini/` — ~480 lines; in `DIRS` but zero callers in game.
+- `console/`, `template/` — ~400 lines; not in `DIRS`, zero external includes.
+- `cpplib/afftform.cc`, `math/matrix3t.cc`, `math/quat.cc`, `math/tables.cc` — ~1,100 lines;
+  afftform explicitly SKIPped, the math files only used by afftform.
+- `scripting/tcl.cc`, `scripting/scriptinterpreter.cc`, Perl counterparts — ~380 lines; all in SKIP.
+
+All `DO_MULTITASKING` preprocessor guards removed (macro never defined; dead code deleted
+rather than wrapped).  `_signal.cc/h` and `timer.cc/h` were stubbed to `assert(0)` then
+**deleted entirely** — no callers outside themselves.  See `docs/plans/2026-04-15-dead-code-removal.md`.
+
 ## Saved snapshots
 
 | File | Ref | Code LOC |
 |------|-----|---------|
 | `scripts/loc_baseline_74d1a47.json` | `74d1a47` | 64,252 |
-| `scripts/loc_head.json` | `53028fa` | 47,131 |
+| `scripts/loc_head.json` | `03211f9` | 38,396 |
 
-## Delete list (confirmed candidates)
-
-| Target | Code LOC | Reason |
-|--------|---------|--------|
-| `wftools/attribedit/` | ~2,500 | Standalone GTK+ attribute editor superseded by Blender port |
-| `wfsource/source/attrib/` | 3,747 | Windows-only tool-side UI; zero game engine usage |
-
-`wfsource/source/attrib/` is not a game runtime dependency — game objects read
-attributes via binary structs from `oas/oad.h` compiled into level files.
-The `Attributes` class and all button widgets depend on `windows.h`/`commctrl.h`
-and are never linked into the game build.  `wftools/attribedit/` is a standalone
-C++ GTK+/gtkmm attribute editor; it superseded an earlier Perl-based editor
-(now lost) and is itself superseded by the Blender port.
-
-## `game/` dead code (~302 lines)
-
-| File | Lines | Dead feature |
-|------|-------|-------------|
-| `game/wf_vfw.h` | 178 | Windows Video for Windows header — never included anywhere; delete entirely |
-| `game/game.cc` | ~95 | `DO_SLOW_STEREOGRAM` PSX-only dual order-table VSync callback loop (`#error stereogram only works on psx` is literally in the guarded block) |
-| `game/level.cc` + `level.hp` | 14 | `MIDI_MUSIC` PSX SEQ/VAB audio blocks + `Sound* _theSound` member |
-| `game/explode.cc` | 6 | `RENDERER_BRENDER` blocks |
-| `game/camera.cc` | 3 | `DO_STEREOGRAM` eye-distance init |
-| `game/shield.cc` | 3 | Commented-out sound `WriteMailbox` calls |
-
-`DO_SLOW_STEREOGRAM`, `MIDI_MUSIC`, and `RENDERER_BRENDER` are never defined
-in the build and are dead. `DO_STEREOGRAM` is intentionally kept — the camera
-eye-distance/angle math in `gfx/camera.cc` is valid on Linux with a
-stereoscopic display; only the PSX VSync sync mechanism (`DO_SLOW_STEREOGRAM`)
-is dead. The `GNUMakefile.bld` defines both together under `DO_STEREOGRAM=true`
-but they are separable in the code.
+Committed at `03211f9`.
 
 ## Next survey targets
 
 - `pigsys/` — 1,376 lines; platform abstraction layer; may still have
   non-Linux dead paths after the renderer drop.
-- `physics/` — 2,150 lines unchanged; survey for Jolt replacement path
+- `physics/` — 1,688 lines; survey for Jolt replacement path
   (see `docs/investigations/2026-04-14-jolt-physics-integration.md`).
+- `hal/_list` + `hal/_mempool` — migrate `MsgPort` to `cpplib/minlist.hp` +
+  `memory/mempool.hp`, then delete the HAL remnants (see dead-code plan).
