@@ -21,6 +21,7 @@ extern "C" {
 }
 
 #include <cstdio>
+#include <unordered_map>
 
 //=============================================================================
 // Base-class implementations (formerly in scripting/scriptinterpreter.cc)
@@ -108,8 +109,17 @@ namespace lua_engine {
 
 static lua_State*  gL              = nullptr;
 static int         gCurrentObject  = 0;
-static int         gFennelEvalRef  = LUA_NOREF;
+static int         gFennelEvalRef     = LUA_NOREF;
+static int         gFennelCompileRef  = LUA_NOREF;
 static MailboxesManager* gMailboxes = nullptr;
+// Compilation cache: script pointer → registry ref of compiled lua_Function.
+// Keys are raw pointers into the level IFF block (stable for level lifetime).
+static std::unordered_map<const char*, int> gScriptRefs;
+// Per-actor environment tables: objectIndex → registry ref.
+// Each actor gets its own _ENV that chains to shared globals via __index,
+// so INDEXOF_* constants and read_mailbox/write_mailbox remain visible while
+// actor-local writes stay isolated.
+static std::unordered_map<int, int> gActorEnvRefs;
 
 // --------------------------------------------------------------------------
 // C closures — read_mailbox / write_mailbox
@@ -122,8 +132,10 @@ static int lua_read_mailbox(lua_State* L)
         actorIdx = static_cast<int>(luaL_checkinteger(L, 2));
     Mailboxes& mb = gMailboxes->LookupMailboxes(actorIdx);
     Scalar v = mb.ReadMailbox(mailbox);
+#ifdef WF_SCRIPT_DEBUG
     std::fprintf(stderr, "  lua read_mailbox(%ld, actor=%d) -> %g\n",
                  mailbox, actorIdx, (double)v.AsFloat());
+#endif
     lua_pushnumber(L, v.AsFloat());
     return 1;
 }
@@ -136,8 +148,10 @@ static int lua_write_mailbox(lua_State* L)
     if (lua_gettop(L) >= 3)
         actorIdx = static_cast<int>(luaL_checkinteger(L, 3));
     Mailboxes& mb = gMailboxes->LookupMailboxes(actorIdx);
+#ifdef WF_SCRIPT_DEBUG
     std::fprintf(stderr, "  lua write_mailbox(%ld, %g, actor=%d)\n",
                  mailbox, value, actorIdx);
+#endif
     mb.WriteMailbox(mailbox, Scalar::FromFloat(static_cast<float>(value)));
     return 0;
 }
@@ -154,7 +168,21 @@ void Init(MailboxesManager& mgr)
 {
     gMailboxes = &mgr;
     gL = luaL_newstate();
-    luaL_openlibs(gL);
+
+    // Open only safe standard libraries — io and os are excluded.
+    static const luaL_Reg kSafeLibs[] = {
+        { LUA_GNAME,        luaopen_base      },
+        { LUA_STRLIBNAME,   luaopen_string    },
+        { LUA_MATHLIBNAME,  luaopen_math      },
+        { LUA_TABLIBNAME,   luaopen_table     },
+        { LUA_UTF8LIBNAME,  luaopen_utf8      },
+        { LUA_COLIBNAME,    luaopen_coroutine },
+        { NULL, NULL }
+    };
+    for (const luaL_Reg* lib = kSafeLibs; lib->func; lib++) {
+        luaL_requiref(gL, lib->name, lib->func, 1);
+        lua_pop(gL, 1);
+    }
 
     lua_pushcfunction(gL, lua_read_mailbox);
     lua_setglobal(gL, "read_mailbox");
@@ -170,20 +198,49 @@ void Init(MailboxesManager& mgr)
     } else {
         lua_getfield(gL, -1, "eval");
         gFennelEvalRef = luaL_ref(gL, LUA_REGISTRYINDEX);
+        lua_getfield(gL, -1, "compileString");
+        gFennelCompileRef = luaL_ref(gL, LUA_REGISTRYINDEX);
         lua_pop(gL, 1);  // pop fennel module
         std::fprintf(stderr, "fennel: loaded (%u bytes embedded)\n", kFennelSourceLen);
     }
 #endif
 }
 
+// Return the registry ref for objectIndex's environment table, creating it
+// on first use. The env table has a metatable with __index = _G so that
+// shared globals (INDEXOF_*, read_mailbox, etc.) fall through, while
+// actor-local writes stay in the per-actor table.
+static int GetOrCreateActorEnv(int objectIndex)
+{
+    auto it = gActorEnvRefs.find(objectIndex);
+    if (it != gActorEnvRefs.end())
+        return it->second;
+
+    lua_newtable(gL);               // env table
+    lua_newtable(gL);               // metatable
+    lua_pushglobaltable(gL);
+    lua_setfield(gL, -2, "__index");
+    lua_setmetatable(gL, -2);
+    int ref = luaL_ref(gL, LUA_REGISTRYINDEX);
+    gActorEnvRefs[objectIndex] = ref;
+    return ref;
+}
+
 void Shutdown()
 {
     if (gL) {
+        for (auto& kv : gScriptRefs)
+            luaL_unref(gL, LUA_REGISTRYINDEX, kv.second);
+        for (auto& kv : gActorEnvRefs)
+            luaL_unref(gL, LUA_REGISTRYINDEX, kv.second);
         lua_close(gL);
         gL = nullptr;
     }
+    gScriptRefs.clear();
+    gActorEnvRefs.clear();
     gMailboxes = nullptr;
-    gFennelEvalRef = LUA_NOREF;
+    gFennelEvalRef    = LUA_NOREF;
+    gFennelCompileRef = LUA_NOREF;
 }
 
 void AddConstantArray(IntArrayEntry* entryList)
@@ -208,14 +265,45 @@ float RunScript(const char* src, int objectIndex)
     if (!src || !*src) return 0.0f;
 
 #ifdef WF_ENABLE_FENNEL
-    if (gFennelEvalRef != LUA_NOREF) {
+    if (gFennelCompileRef != LUA_NOREF) {
         const char* p = src;
         while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') p++;
         if (*p == ';') {
-            lua_rawgeti(gL, LUA_REGISTRYINDEX, gFennelEvalRef);
-            lua_pushstring(gL, src);
-            if (lua_pcall(gL, 1, 1, 0) != LUA_OK) {
-                std::fprintf(stderr, "fennel error: %s\n  script: %s\n",
+            // Fennel path: compile to Lua once, cache by pointer, then call
+            // exactly like the Lua path (with per-actor _ENV).
+            int fenRef;
+            auto fit = gScriptRefs.find(src);
+            if (fit != gScriptRefs.end()) {
+                fenRef = fit->second;
+            } else {
+                lua_rawgeti(gL, LUA_REGISTRYINDEX, gFennelCompileRef);
+                lua_pushstring(gL, src);
+                if (lua_pcall(gL, 1, 1, 0) != LUA_OK) {
+                    std::fprintf(stderr, "fennel compile error: %s\n  script: %.120s\n",
+                                 lua_tostring(gL, -1), src);
+                    lua_pop(gL, 1);
+                    return 0.0f;
+                }
+                // Stack top: Lua source string from fennel.compileString
+                size_t luaSrcLen;
+                const char* luaSrc = lua_tolstring(gL, -1, &luaSrcLen);
+                if (luaL_loadbuffer(gL, luaSrc, luaSrcLen, src) != LUA_OK) {
+                    std::fprintf(stderr, "fennel→lua load error: %s\n",
+                                 lua_tostring(gL, -1));
+                    lua_pop(gL, 2);  // error + lua src string
+                    return 0.0f;
+                }
+                lua_remove(gL, -2);  // pop lua src string; keep function
+                fenRef = luaL_ref(gL, LUA_REGISTRYINDEX);
+                gScriptRefs[src] = fenRef;
+            }
+
+            lua_rawgeti(gL, LUA_REGISTRYINDEX, fenRef);
+            int envRef = GetOrCreateActorEnv(objectIndex);
+            lua_rawgeti(gL, LUA_REGISTRYINDEX, envRef);
+            lua_setupvalue(gL, -2, 1);
+            if (lua_pcall(gL, 0, 1, 0) != LUA_OK) {
+                std::fprintf(stderr, "fennel error: %s\n  script: %.120s\n",
                              lua_tostring(gL, -1), src);
                 lua_pop(gL, 1);
                 return 0.0f;
@@ -227,10 +315,31 @@ float RunScript(const char* src, int objectIndex)
     }
 #endif
 
-    if (luaL_dostring(gL, src) != LUA_OK) {
-        const char* err = lua_tostring(gL, -1);
-        std::fprintf(stderr, "lua error: %s\n", err ? err : "(unknown)");
-        std::fprintf(stderr, "  script: %s\n", src);
+    // Look up or compile the script.
+    int fnRef;
+    auto it = gScriptRefs.find(src);
+    if (it != gScriptRefs.end()) {
+        fnRef = it->second;
+    } else {
+        if (luaL_loadstring(gL, src) != LUA_OK) {
+            std::fprintf(stderr, "lua compile error: %s\n  script: %.120s\n",
+                         lua_tostring(gL, -1), src);
+            lua_pop(gL, 1);
+            return 0.0f;
+        }
+        fnRef = luaL_ref(gL, LUA_REGISTRYINDEX);
+        gScriptRefs[src] = fnRef;
+    }
+
+    // Push compiled function, then swap in the per-actor _ENV upvalue.
+    lua_rawgeti(gL, LUA_REGISTRYINDEX, fnRef);
+    int envRef = GetOrCreateActorEnv(objectIndex);
+    lua_rawgeti(gL, LUA_REGISTRYINDEX, envRef);
+    lua_setupvalue(gL, -2, 1);  // upvalue 1 is always _ENV in Lua 5.4
+
+    if (lua_pcall(gL, 0, 1, 0) != LUA_OK) {
+        std::fprintf(stderr, "lua error: %s\n  script: %.120s\n",
+                     lua_tostring(gL, -1), src);
         lua_pop(gL, 1);
         return 0.0f;
     }

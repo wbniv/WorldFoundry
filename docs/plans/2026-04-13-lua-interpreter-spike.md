@@ -1,6 +1,14 @@
 # Plan: Lua 5.4 Interpreter Spike (snowgoons player + director)
 
 **Date:** 2026-04-13
+**Status:** **landed 2026-04-13**, then refactored on 2026-04-15. The
+`LuaInterpreter` class described below was superseded by the file-scope
+`lua_engine` namespace inside `wftools/wf_viewer/stubs/scripting_stub.cc`,
+and `ScriptInterpreterFactory` now returns a `ScriptRouter` that
+dispatches to `lua_engine` (and any other compiled-in engines) by sigil.
+The spike's *behaviour* — Lua 5.4 running snowgoons' player + director —
+is unchanged; only the C++ shape moved. See
+`docs/plans/2026-04-15-lua-engine-fixes.md` for the canonical convention.
 **Source investigation:** `docs/investigations/2026-04-14-scripting-language-replacement.md`
 **Decision being spiked:** Lua 5.4 as the WF scripting language, replacing the stubbed `NullInterpreter` (and, in history, TCL).
 
@@ -50,7 +58,7 @@ LD_LIBRARY_PATH=../../../wftools/wf_engine/libs DISPLAY=:0 \
 
 ## Implementation
 
-### 1. `LuaInterpreter` skeleton
+### 1. `LuaInterpreter` skeleton *(as designed — actually landed as the `lua_engine` namespace in `scripting_stub.cc`; see Status block above)*
 
 **File:** `wfsource/source/scripting/luainterpreter.hp`
 
@@ -88,13 +96,16 @@ private:
 
 Reference existing TCL implementation at `wfsource/source/scripting/tcl.cc:12-238` for the pattern — Lua version is shorter because we don't need `Tcl_LinkVar`'s write-back semantics.
 
-### 2. Factory swap
+### 2. Factory swap *(as built: returns `ScriptRouter`, not `LuaInterpreter`)*
 
 **File:** `wfsource/source/scripting/scriptinterpreter.cc:62-68`
 
 Replace the `TCLInterpreter` instantiation with `LuaInterpreter`. Guard behind `WF_SCRIPTING_LUA` macro if we want a side-by-side toggle; otherwise just change the body.
 
-Confirm what the current `NullInterpreter` build is doing — there's likely another factory override somewhere (based on the project memory that snowgoons ran with `NullInterpreter`). Find it and redirect it to `LuaInterpreter` in the same spot.
+**As built (2026-04-15):** the factory returns a `ScriptRouter` which
+wraps `lua_engine` (the Lua plug) plus whichever other engines are
+compiled in. `lua_engine::RunScript` gets called by `ScriptRouter` as
+the sigil-less fallthrough.
 
 ### 3. Makefile
 
