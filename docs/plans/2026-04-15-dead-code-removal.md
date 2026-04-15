@@ -394,6 +394,54 @@ internally.
 
 ---
 
+---
+
+## Batch 8 — Windows/PSX artifacts + orphaned subsystems (2026-04-15)
+
+### Already done (committed on this branch)
+
+| Item | What | Commit |
+|------|------|--------|
+| `wfsource/import.bat` | CVS import script | `c160456` |
+| `wfsource/regset.bat` | Windows registry setup | `c160456` |
+| `wfsource/levels.src/assetdir.bat` | Windows asset dir listing | `c160456` |
+| `wfsource/source/eval/` | Dead lex/yacc expression evaluator (608 lines) | `330a23d` |
+| `wfsource/source/console/` | Already empty; rmdir only | — |
+| `wfsource/source/ini/` | Already empty; rmdir only | — |
+| `wfsource/source/menu/` | 136 LOC; no callers outside itself | (pending commit) |
+| `wfsource/source/midi/` | 1 leftover `.rc` file | (pending commit) |
+
+### To do — top-level wfsource artifacts
+
+- [ ] `wfsource/Makefile.psx` — PSX build rules
+- [ ] `wfsource/Makefile.win` — Windows build rules
+- [ ] `wfsource/psx.ini` — PSX hardware config
+- [ ] `wfsource/README.windows` — MSVC 6.0 / OpusMake build instructions
+- [ ] `wfsource/source/game/newobj.bat` — Windows object template generator (kept for now)
+- [ ] `wfsource/Makefile.rul` — shared rule base; check if only referenced by Makefile.psx/Makefile.win
+- [ ] `wfsource/Makefile.template` — template for platform makefiles; likely dead with the platforms
+- [ ] `wfsource/libraryhierarchy.dia` + `libraryhierarchy.ps` — old Dia architecture diagram + PostScript render
+- [ ] `wfsource/'Production Pathway.ps'` — old PostScript doc
+
+### To do — GNUMakefile PSX/Win dead branches
+
+- [ ] `wfsource/source/GNUMakefile.print` lines 8–18: PSX + Windows print targets
+- [ ] `wfsource/source/GNUMakefile.test` lines 14–18, 24–26, 42–44, 62–111: PSX reset/run/link + MSVC debugger
+
+### To do — orphaned subsystems (no game callers)
+
+- [ ] `wfsource/source/gfxfmt/` — image format library (TGA/BMP/SGI); only referenced by its own `test.cc`
+- [ ] `wfsource/source/iffwrite/` — IFF write library; only used by legacy C++ `wftools/iffcomp/` (superseded by `iffcomp-rs` and `iffcomp-go`)
+
+### To do — platform #ifdef guards in source
+
+- [ ] `#ifdef __WATCOMC__` block in `cpplib/stdstrm.hp`
+- [ ] `#ifdef _MSC_VER` guards in `oas/oad.h` (pragma pack) and test files
+- [ ] `PSX` and `WIN` members in `pigsys/pigsys.hp` `MachineType` enum
+- [ ] Wrong header guard in `pigsys/cf_linux.h` (`_CF_PSX_H` → `_CF_LINUX_H`)
+
+---
+
 ## Where to look next (after Batch 6)
 
 ### `hal/_list` + `hal/_mempool` — migrate then delete
@@ -403,9 +451,3 @@ because `baseobject/msgport.hp` uses them directly as struct members.  `MsgPort`
 24 files.  To eventually delete these hal remnants, refactor `MsgPort` to use
 `cpplib/minlist.hp` (already exists) + `memory/mempool.hp` instead, then update the single
 include in `msgport.hp` and delete the hal files.
-
-### `eval/`
-
-120 LOC.  Not in game `DIRS`.  Referenced by `wftools/prep/source.cc` and
-`wftools/iff2lvl/oad.cc` — tool-side callers that themselves need porting to the Blender
-plugin.  Delete `eval/` once those tools are replaced.
