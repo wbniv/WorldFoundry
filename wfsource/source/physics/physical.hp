@@ -43,10 +43,6 @@
 #error PHYSICAL_INTERNAL not defined
 #endif
 
-#if defined PHYSICS_ENGINE_ODE
-#include "ode/ode.hp"
-#endif
-
 //==============================================================================
 
 class PhysicalAttributes
@@ -152,13 +148,6 @@ private:
     unsigned 				_hasRunPredictPosition : 1;
     unsigned 				_hasRunUpdate : 1;
 
-#if defined PHYSICS_ENGINE_ODE
-   ode::dBodyID _body;			// the body
-   ode::dGeomID _geom;		// geometries representing this body
-#elif defined PHYSICS_ENGINE_WF
-#else
-#error physics engine not defined! 
-#endif
 };
 
 //============================================================================

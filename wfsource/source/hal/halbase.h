@@ -147,5 +147,17 @@ enum
 };
 
 //=============================================================================
+// Item handle macros — no-ops when DO_VALIDATION=0 (item.h was removed)
+#if !DO_VALIDATION
+#define NULLITEM NULL
+#define ITEMCREATE(ptr,type) (type*)(ptr)
+#define ITEMRETRIEVE(item,type) (type*)(item)
+#define ITEMDESTROY(item,type)
+#define VALIDATEITEM(item)
+#define ITEMLOOKUP(ptr,type) (ptr)
+// ITEMTYPECREATE(IFoo,SFoo) — with validation off, just typedef the pointer type
+#define ITEMTYPECREATE(itype,stype) typedef stype* itype;
+#endif
+//=============================================================================
 #endif
 //=============================================================================

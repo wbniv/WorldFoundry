@@ -29,7 +29,6 @@
 // dependencies
 
 #include <hal/halbase.h>
-#include <hal/item.h>
 
 //=============================================================================
 // debugging macros

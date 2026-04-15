@@ -25,6 +25,7 @@
 //============================================================================
 
 #include <gfx/camera.hp>
+#include <hal/halbase.h>
 #include <hal/platform.h>
 #include <gfx/rendmatt.hp>
 #include <cpplib/libstrm.hp>

@@ -18,10 +18,8 @@
 
 #include <hal/hal.h>
 #include <hal/_platfor.h>
-#include <hal/_tasker.h>
 #include <hal/_input.h>
 #include <hal/sjoystic.h>
-#include <hal/_message.h>
 #include <hal/diskfile.hp>
 
 //============================================================================
@@ -65,25 +63,8 @@ HALStart(int argc, char** argv, int maxTasks,int maxMessages, int maxPorts)
 		assert(ValidPtr(_HALScratchLmalloc));
 		HalInitFileSubsystem();
 		_InitJoystickInterface();					// setup joystick code
-#if DO_VALIDATION
-		ItemInit();
-#endif
-#if defined( DO_MULTITASKING )
-		_MessageSystemConstruct(maxMessages,maxPorts);				// this is where the malloc occurs
-		_PublicMessagePortListConstruct();
-		_TaskerStart(PIGSInitStartupTask,maxTasks,maxMessages,maxPorts);				// note: doesn't return until someone calls _TaskerEnd
-#else
 		PIGSMain( __argc, __argv );
-#endif
 
-#if defined( DO_MULTITASKING )
-	// cleanup
-		_PublicMessagePortListDestruct();
-		_MessageSystemDestruct();
-#endif
-#if DO_VALIDATION
-		ItemTerm();
-#endif
 		_TermJoystickInterface();
 	}
 	_PlatformSpecificUnInit();
@@ -95,10 +76,6 @@ HALStart(int argc, char** argv, int maxTasks,int maxMessages, int maxPorts)
 void
 PIGSInitStartupTask()
 {
-	// any pigs modules which want to always have a task running should start it here
-#if defined( TASKER )
-//	_TimerStart(HAL_MAX_TIMER_SUBSCRIBERS);			// create all timer tasks
-#endif
 	PIGSMain( __argc,__argv );				// call game code, when returns, game is over
 	PIGSExit();
 }
@@ -109,10 +86,6 @@ PIGSInitStartupTask()
 void
 PIGSExit()
 {
-#if defined( DO_MULTITASKING )
-//	_TimerStop();
-	_TaskerStop();			// shuts down tasker, doesn't return
-#endif
 #if DO_TEST_CODE
 	printf("Tasker shutting down\n");
 #endif

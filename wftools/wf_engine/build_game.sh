@@ -32,17 +32,44 @@ VENDOR="$REPO_ROOT/wftools/vendor"
 QJS_DIR="$VENDOR/quickjs-v0.14.0"
 JRY_DIR="$VENDOR/jerryscript-v3.0.0"
 
-# Feature flag: optional WebAssembly engine for the `#` sigil. One of:
+# Feature flag: Wren scripting engine for the `//wren\n` sigil.
+# Checked before generic `//` (JS) in dispatch order.
+#   0 (default) — no Wren compiled in.
+#   1           — Wren 0.4.0 amalgamation (~420 KB source, ~150 KB .text).
+WF_ENABLE_WREN="${WF_ENABLE_WREN:-0}"
+WREN_DIR="$VENDOR/wren-0.4.0"
+
+# Feature flag: optional Forth engine for the `\` sigil. One of:
+#   none     (default) — no Forth compiled in.
+#   zforth   — zForth 4 KB core (MIT); default when Forth is enabled.
+#   ficl     — ficl ~100 KB (BSD-2); ANS Forth + OOP.
+#   atlast   — Atlast ~30 KB (public domain); Autodesk-pedigree.
+#   embed    — embed ~5 KB VM (MIT); 16-bit cells; correct on fixed-point target.
+#   libforth — libforth ~50 KB (MIT).
+#   pforth   — pForth ~120 KB (0-BSD); strong float; proven on 40+ platforms.
+# Only one Forth engine at a time; sigil `\` is shared across all backends.
+WF_FORTH_ENGINE="${WF_FORTH_ENGINE:-none}"
+case "$WF_FORTH_ENGINE" in
+    none|zforth|ficl|atlast|embed|libforth|pforth) ;;
+    *) echo "error: WF_FORTH_ENGINE must be one of: none, zforth, ficl, atlast, embed, libforth, pforth (got: '$WF_FORTH_ENGINE')" >&2
+       exit 2 ;;
+esac
+ZFORTH_DIR="$VENDOR/zforth-41db72d1"
+
+# Feature flag: optional WebAssembly engine for the `#b64\n` sigil. One of:
 #   none    (default) — no wasm compiled in, zero binary delta vs. today.
 #   wasm3   — wasm3 v0.5.0 (~65 KB), pure-C interpreter, MIT.
-# Future: wamr, wamr-aot. Only one wasm runtime at a time; sigil is shared.
+#   wamr    — WAMR 2.2.0 classic interpreter (~520 KB), Apache-2.0.
+#             Supports host-supplied (global …) imports for INDEXOF_* constants.
+# Only one wasm runtime at a time; the `#b64\n` sigil is shared.
 WF_WASM_ENGINE="${WF_WASM_ENGINE:-none}"
 case "$WF_WASM_ENGINE" in
-    none|wasm3) ;;
-    *) echo "error: WF_WASM_ENGINE must be one of: none, wasm3 (got: '$WF_WASM_ENGINE')" >&2
+    none|wasm3|wamr) ;;
+    *) echo "error: WF_WASM_ENGINE must be one of: none, wasm3, wamr (got: '$WF_WASM_ENGINE')" >&2
        exit 2 ;;
 esac
 WASM3_DIR="$VENDOR/wasm3-v0.5.0"
+WAMR_DIR="$VENDOR/wamr-2.2.0"
 LUA_DIR="$VENDOR/lua-5.4.8"
 WASM3_WF_DIR="$VENDOR/wasm3-v0.5.0-wf"
 HTTPLIB_DIR="$VENDOR/cpp-httplib-v0.20.0"
@@ -75,7 +102,22 @@ esac
 
 case "$WF_WASM_ENGINE" in
     wasm3) CXXFLAGS+=(-DWF_WASM_ENGINE_WASM3 -I"$WASM3_DIR/source") ;;
+    wamr)  CXXFLAGS+=(-DWF_WASM_ENGINE_WAMR  -I"$WAMR_DIR/core/iwasm/include") ;;
     none)  : ;;
+esac
+
+if [[ "$WF_ENABLE_WREN" == "1" ]]; then
+    CXXFLAGS+=(-DWF_ENABLE_WREN -I"$WREN_DIR")
+fi
+
+case "$WF_FORTH_ENGINE" in
+    zforth)   CXXFLAGS+=(-DWF_FORTH_ENGINE_ZFORTH   -I"$STUB_SRC" -I"$ZFORTH_DIR/src/zforth") ;;
+    ficl)     CXXFLAGS+=(-DWF_FORTH_ENGINE_FICL) ;;
+    atlast)   CXXFLAGS+=(-DWF_FORTH_ENGINE_ATLAST) ;;
+    embed)    CXXFLAGS+=(-DWF_FORTH_ENGINE_EMBED) ;;
+    libforth) CXXFLAGS+=(-DWF_FORTH_ENGINE_LIBFORTH) ;;
+    pforth)   CXXFLAGS+=(-DWF_FORTH_ENGINE_PFORTH) ;;
+    none)     : ;;
 esac
 
 if [[ "$WF_REST_API" == "1" ]]; then
@@ -275,6 +317,7 @@ case "$WF_JS_ENGINE" in
                   -DJERRY_ERROR_MESSAGES=ON \
                   -DJERRY_LINE_INFO=ON \
                   -DENABLE_LTO=OFF \
+                  -DCMAKE_C_FLAGS="-w" \
                   > "$OUT/jry_cmake.log" 2>&1 \
                   || { echo "  *** jerryscript cmake failed; see $OUT/jry_cmake.log" >&2; exit 1; }
             cmake --build "$JRY_BUILD" -j --target jerry-core --target jerry-port-default \
@@ -319,8 +362,88 @@ case "$WF_WASM_ENGINE" in
         g++ "${CXXFLAGS[@]}" -c "$WASM_CC" -o "$OUT/wasm_selftest.o"
         OBJS+=("$OUT/wasm_selftest.o")
         ;;
+    wamr)
+        echo "  CC (stub) scripting_wamr.cc"
+        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_wamr.cc" -o "$OUT/stubs__scripting_wamr.o"
+        OBJS+=("$OUT/stubs__scripting_wamr.o")
+        # WAMR 2.2.0 classic interpreter — build via CMake into a static lib.
+        # The build output is cached in OUT/wamr_build so subsequent runs skip cmake.
+        WAMR_BUILD="$OUT/wamr_build"
+        WAMR_LIB="$WAMR_BUILD/libvmlib.a"
+        if [[ ! -f "$WAMR_LIB" ]]; then
+            WAMR_CMAKE="$WAMR_BUILD/CMakeLists.txt"
+            mkdir -p "$WAMR_BUILD"
+            cat > "$WAMR_CMAKE" << 'WAMRCMAKE'
+cmake_minimum_required(VERSION 3.14)
+project(wamr_wf C)
+set(WAMR_BUILD_PLATFORM  "linux")
+set(WAMR_BUILD_TARGET    "X86_64")
+set(WAMR_BUILD_INTERP    1)
+set(WAMR_BUILD_AOT       0)
+set(WAMR_BUILD_JIT       0)
+set(WAMR_BUILD_FAST_JIT  0)
+set(WAMR_BUILD_FAST_INTERP 1)
+set(WAMR_BUILD_LIBC_BUILTIN 0)
+set(WAMR_BUILD_LIBC_WASI 0)
+set(WAMR_BUILD_SIMD      0)
+set(WAMR_BUILD_MULTI_MODULE 0)
+set(WAMR_BUILD_LIB_PTHREAD 0)
+set(WAMR_BUILD_WASM_C_API 1)
+include(${WAMR_ROOT_DIR}/build-scripts/runtime_lib.cmake)
+add_library(vmlib STATIC ${WAMR_RUNTIME_LIB_SOURCE})
+target_include_directories(vmlib PUBLIC ${WAMR_ROOT_DIR}/core/iwasm/include)
+WAMRCMAKE
+            echo "  CMAKE wamr"
+            cmake -S "$WAMR_BUILD" -B "$WAMR_BUILD/out" \
+                  -DWAMR_ROOT_DIR="$WAMR_DIR" \
+                  -DCMAKE_BUILD_TYPE=MinSizeRel \
+                  -DCMAKE_C_FLAGS="-w" \
+                  > "$OUT/wamr_cmake.log" 2>&1 \
+                  || { echo "  *** wamr cmake failed; see $OUT/wamr_cmake.log" >&2; exit 1; }
+            cmake --build "$WAMR_BUILD/out" -j --target vmlib \
+                  >> "$OUT/wamr_cmake.log" 2>&1 \
+                  || { echo "  *** wamr build failed; see $OUT/wamr_cmake.log" >&2; exit 1; }
+            cp "$WAMR_BUILD/out/libvmlib.a" "$WAMR_LIB"
+        fi
+        OBJS+=("$WAMR_LIB")
+        ;;
     none) : ;;
 esac
+
+# Forth engine plug — compiled only when WF_FORTH_ENGINE is not `none`.
+case "$WF_FORTH_ENGINE" in
+    zforth)
+        echo "  CC (stub) scripting_zforth.cc"
+        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_zforth.cc" -o "$OUT/stubs__scripting_zforth.o"
+        OBJS+=("$OUT/stubs__scripting_zforth.o")
+        # zForth core (C). Two source files; -O2; warnings silenced (vendor).
+        # zfconf.h is provided by STUB_SRC (listed first in CXXFLAGS -I flags).
+        ZF_CFLAGS=(-std=gnu11 -O2 -w -fno-strict-aliasing
+                   -I"$STUB_SRC" -I"$ZFORTH_DIR/src/zforth")
+        obj="$OUT/zforth__zforth.o"
+        echo "  CC (vendor) zforth/zforth.c"
+        gcc "${ZF_CFLAGS[@]}" -c "$ZFORTH_DIR/src/zforth/zforth.c" -o "$obj"
+        OBJS+=("$obj")
+        ;;
+    none) : ;;
+    *)
+        echo "error: WF_FORTH_ENGINE=$WF_FORTH_ENGINE not yet implemented in build_game.sh" >&2
+        exit 2
+        ;;
+esac
+
+# Wren engine plug — compiled only when WF_ENABLE_WREN=1.
+if [[ "$WF_ENABLE_WREN" == "1" ]]; then
+    echo "  CC (stub) scripting_wren.cc"
+    g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_wren.cc" -o "$OUT/stubs__scripting_wren.o"
+    OBJS+=("$OUT/stubs__scripting_wren.o")
+    # Wren 0.4.0 amalgamation (C, not C++). Single TU; -O2; warnings silenced.
+    WREN_CFLAGS=(-std=gnu11 -O2 -w -fno-strict-aliasing -I"$WREN_DIR")
+    obj="$OUT/wren__wren.o"
+    echo "  CC (vendor) wren/wren.c"
+    gcc "${WREN_CFLAGS[@]}" -c "$WREN_DIR/wren.c" -o "$obj"
+    OBJS+=("$obj")
+fi
 
 # REST API plug — compiled only when WF_REST_API=1.
 if [[ "$WF_REST_API" == "1" ]]; then

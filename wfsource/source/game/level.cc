@@ -45,11 +45,6 @@
 #include <cpplib/libstrm.hp>
 #include <cpplib/algo.hp>
 #include <math/vector3.hp>
-#if defined PHYSICS_ENGINE_ODE
-#include <physics/ode/ode.hp>
-#endif
-
-
 #include <oas/levelobj.ht>
 #include <oas/matte.ht>
 
@@ -241,12 +236,6 @@ Level::constructObject( SObjectStartupData& startupData, int index )
 	else if ( objdata->type == Actor::LevelObj_KIND )
 	{
 		DBSTREAM2( cdebug << " constructing level object" << std::endl; )
-		#if defined( MIDI_MUSIC )
-			if ( _levelOad->MidiMusicVabHeader && * ( _levelOad->MidiMusicVabHeader ))
-				_theSound->addVabHeader( _levelOad->MidiMusicVabHeader, _levelOad->MidiMusicVabBody );
-			if ( _levelOad->SoundEffectsVabHeader && * ( _levelOad->SoundEffectsVabHeader ))
-				_theSound->addSfxHeader( _levelOad->SoundEffectsVabHeader, _levelOad->SoundEffectsVabBody );
-		#endif
 	}
 	else
 	{
@@ -416,9 +405,6 @@ Level::Level
 
 	assert( ValidPtr( diskFile ) );
 	theLevel = this;
-#if defined PHYSICS_ENGINE_ODE
-   odeWorld.SetSpace(ode::dHashSpaceCreate(0));
-#endif
 
 #if defined(JOYSTICK_RECORDER)
 	_joystickOutputFile = new (HALLmalloc) std::ofstream("joystick.out");
@@ -449,13 +435,6 @@ Level::Level
 
 	int index;
 
-#if 0	//msvc
-#if defined( TASKER )
-	// set up the game's message port
-	_port = MessagePortNewTask( "GAME" );
-	VALIDATEITEM( _port );
-#endif	// TASKER
-#endif
 
 	// loading screen
 
@@ -915,10 +894,6 @@ Level::update(Scalar deltaTime)
 void
 Level::updateSound()
 {
-#if defined( MIDI_MUSIC )
-	_theSound->updateSound();
-	SetMailbox( EMAILBOX_MIDI, 0 );
-#endif
 }
 
 //==============================================================================
@@ -1173,10 +1148,6 @@ Level::reset( )
    int32 roomIndex = ObjectIsInWhichRoom( GetObjectIndex(main_char),  _levelData );
 	_theActiveRooms->InitActiveRoom( roomIndex, GetLevelRooms() );
 
-#if defined( MIDI_MUSIC )
-	DBSTREAM1( cflow << "Level::reset(): sound" << std::endl; )
-	_theSound->reset();
-#endif
 
 	// Comented this out, because the clock code needs to be able to deal with the discontinuity in wall clock values at startup
 	levelClock.reset();
@@ -1381,12 +1352,6 @@ Level::WriteSystemMailbox( int boxnum, Scalar value )
         case EMAILBOX_CAMROLL:
             _camRollMailBox = value.WholePart();
             break;
-
-        case EMAILBOX_MIDI:
-        {
-            // TODO: Actually means something once we have .sep files
-            break;
-        }
 
         default:
             AssertMsg( 0, "Attempted to write to mailbox " << boxnum );			// invalid system mailbox

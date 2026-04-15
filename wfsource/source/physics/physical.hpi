@@ -36,8 +36,6 @@ PhysicalAttributes::Validate() const
 #if DO_ASSERTIONS
    //kts write more validation code here
 
-#if defined PHYSICS_ENGINE_ODE
-#elif defined PHYSICS_ENGINE_WF
 // Validate the colBox expansion vector against the PredictedPosition vector
 	Vector3 expansionVector, predictedMotionVector;
 
@@ -75,9 +73,6 @@ PhysicalAttributes::Validate() const
 		)
 		assert(0);
 	}
-#else
-#error physics engine not defined! 
-#endif
 
 
 #endif
@@ -99,10 +94,6 @@ PhysicalAttributes::PhysicalAttributes()
 	_hasRunPredictPosition = false;
 	_hasRunUpdate = false;
 
-#if defined PHYSICS_ENGINE_ODE
-   _body = 0;
-   _geom = 0;
-#endif
 }
 
 //==============================================================================
@@ -172,34 +163,6 @@ PhysicalAttributes::Construct(const Vector3& position, const Euler& rotation, co
 #endif
 	_predictedPosition = Position();
 
-#if defined PHYSICS_ENGINE_ODE
-   assert(_body == 0);
-   assert(_geom == 0);
-   assert(odeWorld.Space() != 0);
-
-    _body = ode::dBodyCreate (odeWorld());
-    ode::dBodySetPosition (_body, position[0].AsFloat(),position[1].AsFloat(),position[2].AsFloat());
-
-#if defined(PHYSICAL_INTERNAL_EULER)              
-    Matrix34 temp(_orientation,_position);
-   ode::dBodySetRotation (_body,temp.AsFLoatArray());
-#elif defined(PHYSICAL_INTERNAL_MATRIX)
-    ode::dBodySetRotation (_body,_matrix.AsFLoatArray());
-#else
-#error PHYSICAL_INTERNAL not defined
-#endif
-
-    //dBodySetRotation (_body,R);
-    //dBodySetData (temp->body,(void*) i);
-    Vector3 size = _colSpace.Max()-_colSpace.Min();
-    _geom = dCreateBox (odeWorld.Space(),size.X().AsFloat(),size.Y().AsFloat(),size.Z().AsFloat());
-    ode::dGeomSetBody (_geom,_body);
-    ode::dMass m;
-#define DENSITY (5.0)		// density of all objects
-
-    ode::dMassSetBox (&m,DENSITY,size.X().AsFloat(),size.Y().AsFloat(),size.Z().AsFloat());
-    ode::dBodySetMass (_body,&m);
-#endif
 }
 
 //==============================================================================
@@ -524,12 +487,6 @@ PhysicalAttributes::Max() const
 
 //==============================================================================
 
-#if defined PHYSICS_ENGINE_ODE
-#include "ode/physical.hpi"
-#elif defined PHYSICS_ENGINE_WF
 #include "wf/physical.hpi"
-#else
-#error physics engine not defined! 
-#endif
 
 //==============================================================================

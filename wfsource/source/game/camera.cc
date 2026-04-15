@@ -56,9 +56,6 @@ Camera::Camera( const SObjectStartupData* startupData ) :
 	Color color(Color::FromInt(getOad()->FoggingColor));
 	GetRenderCamera().SetFog( color, Scalar(getOad()->GetFoggingStartDistance()), Scalar(getOad()->GetFoggingCompleteDistance()) );
 
-#if defined(DO_STEREOGRAM)
-	GetRenderCamera().SetStereogram( Scalar(getOad()->EyeDistance), Angle(Angle::Degree(Scalar(getOad()->EyeAngle))) );
-#endif
 	// Create collision box for the Camera actor, since some handlers do collision checking
 	_physicalAttributes.SetColSpace( Vector3( SCALAR_CONSTANT(-0.1), SCALAR_CONSTANT(-0.1), SCALAR_CONSTANT(-0.1) ),
 									 Vector3( SCALAR_CONSTANT(0.1), SCALAR_CONSTANT(0.1), SCALAR_CONSTANT(0.1) ) );

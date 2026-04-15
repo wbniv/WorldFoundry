@@ -228,15 +228,6 @@ private:
 #pragma message( __FILE__ ": remove _idealMainCharacter" )
 	PhysicalObject*							_idealMainCharacter;
 
-#if 0	//msvc
-#if defined( TASKER )
-	IMessagePort					_port;
-#endif	// TASKER
-#endif
-
-  #if defined( MIDI_MUSIC )
-	Sound*							_theSound;
-  #endif
 
 	Clock levelClock;
 

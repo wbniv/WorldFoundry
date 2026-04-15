@@ -58,12 +58,7 @@ Material::Material(const _MaterialOnDisk& mod, const Texture& texture, const Pix
 pRenderObj3DFunc
 Material::Get3DRenderObjectPtr() const
 {
-	static const pRenderObj3DFunc _rendererList[] =
-	{
-			#include <gfx/glpipeline/renderer.ext>
-	};
-	ValidateRenderMask(_materialFlags);
-	return _rendererList[_materialFlags&RENDERER_SELECTION_MASK];
+	return nullptr;		// GL renderer uses RenderObject3D::Render() directly; PSX function-pointer dispatch removed with glpipeline
 }
 
 //============================================================================

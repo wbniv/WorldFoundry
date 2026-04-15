@@ -1,6 +1,6 @@
 {
-  "ref": "53028fa",
-  "date": "2026-04-15T09:14:37",
+  "ref": "0b04a40",
+  "date": "2026-04-15T16:38:25",
   "root": "wfsource/source",
   "subsystems": {
     "_root": {
@@ -24,13 +24,6 @@
       "total": 1031,
       "files": 8
     },
-    "attrib": {
-      "blank": 1194,
-      "comment": 676,
-      "code": 3747,
-      "total": 5617,
-      "files": 48
-    },
     "baseobject": {
       "blank": 171,
       "comment": 351,
@@ -38,26 +31,12 @@
       "total": 960,
       "files": 10
     },
-    "cdda": {
-      "blank": 23,
-      "comment": 68,
-      "code": 46,
-      "total": 137,
-      "files": 3
-    },
-    "console": {
-      "blank": 85,
-      "comment": 54,
-      "code": 274,
-      "total": 413,
-      "files": 8
-    },
     "cpplib": {
-      "blank": 755,
-      "comment": 1198,
-      "code": 2172,
-      "total": 4125,
-      "files": 28
+      "blank": 586,
+      "comment": 989,
+      "code": 1782,
+      "total": 3357,
+      "files": 24
     },
     "eval": {
       "blank": 56,
@@ -67,18 +46,18 @@
       "files": 4
     },
     "game": {
-      "blank": 2234,
-      "comment": 4450,
-      "code": 6211,
-      "total": 12895,
-      "files": 83
+      "blank": 2199,
+      "comment": 4314,
+      "code": 6078,
+      "total": 12591,
+      "files": 82
     },
     "gfx": {
-      "blank": 1826,
-      "comment": 3796,
-      "code": 5953,
-      "total": 11575,
-      "files": 73
+      "blank": 1551,
+      "comment": 3072,
+      "code": 4984,
+      "total": 9607,
+      "files": 61
     },
     "gfxfmt": {
       "blank": 204,
@@ -88,11 +67,11 @@
       "files": 5
     },
     "hal": {
-      "blank": 1242,
-      "comment": 2075,
-      "code": 2833,
-      "total": 6150,
-      "files": 43
+      "blank": 851,
+      "comment": 1492,
+      "code": 1860,
+      "total": 4203,
+      "files": 35
     },
     "iff": {
       "blank": 102,
@@ -108,25 +87,11 @@
       "total": 1811,
       "files": 11
     },
-    "ini": {
-      "blank": 79,
-      "comment": 150,
-      "code": 270,
-      "total": 499,
-      "files": 3
-    },
     "input": {
       "blank": 83,
       "comment": 39,
       "code": 267,
       "total": 389,
-      "files": 2
-    },
-    "loadfile": {
-      "blank": 24,
-      "comment": 18,
-      "code": 77,
-      "total": 119,
       "files": 2
     },
     "mailbox": {
@@ -137,11 +102,11 @@
       "files": 4
     },
     "math": {
-      "blank": 1425,
-      "comment": 2260,
-      "code": 6713,
-      "total": 10398,
-      "files": 36
+      "blank": 1316,
+      "comment": 2129,
+      "code": 6469,
+      "total": 9914,
+      "files": 33
     },
     "memory": {
       "blank": 376,
@@ -151,18 +116,11 @@
       "files": 17
     },
     "menu": {
-      "blank": 68,
-      "comment": 113,
-      "code": 187,
-      "total": 368,
-      "files": 5
-    },
-    "midi": {
-      "blank": 9,
-      "comment": 24,
-      "code": 11,
-      "total": 44,
-      "files": 1
+      "blank": 57,
+      "comment": 110,
+      "code": 136,
+      "total": 303,
+      "files": 4
     },
     "movement": {
       "blank": 440,
@@ -178,26 +136,19 @@
       "total": 2428,
       "files": 53
     },
-    "orphaned": {
-      "blank": 60,
-      "comment": 45,
-      "code": 146,
-      "total": 251,
-      "files": 4
-    },
     "particle": {
-      "blank": 253,
-      "comment": 504,
-      "code": 807,
-      "total": 1564,
-      "files": 7
+      "blank": 99,
+      "comment": 263,
+      "code": 270,
+      "total": 632,
+      "files": 6
     },
     "physics": {
-      "blank": 714,
-      "comment": 1192,
-      "code": 2150,
-      "total": 4056,
-      "files": 23
+      "blank": 554,
+      "comment": 918,
+      "code": 1688,
+      "total": 3160,
+      "files": 19
     },
     "pigsys": {
       "blank": 556,
@@ -228,31 +179,17 @@
       "files": 3
     },
     "room": {
-      "blank": 393,
-      "comment": 685,
-      "code": 1426,
-      "total": 2504,
-      "files": 14
-    },
-    "savegame": {
-      "blank": 220,
-      "comment": 237,
-      "code": 607,
-      "total": 1064,
-      "files": 10
+      "blank": 387,
+      "comment": 657,
+      "code": 1421,
+      "total": 2465,
+      "files": 13
     },
     "scripting": {
-      "blank": 126,
-      "comment": 203,
-      "code": 254,
-      "total": 583,
-      "files": 8
-    },
-    "shell": {
-      "blank": 95,
-      "comment": 39,
-      "code": 240,
-      "total": 374,
+      "blank": 24,
+      "comment": 50,
+      "code": 28,
+      "total": 102,
       "files": 3
     },
     "streams": {
@@ -261,13 +198,6 @@
       "code": 1241,
       "total": 2098,
       "files": 8
-    },
-    "template": {
-      "blank": 59,
-      "comment": 67,
-      "code": 125,
-      "total": 251,
-      "files": 5
     },
     "timer": {
       "blank": 29,
@@ -292,10 +222,10 @@
     }
   },
   "total": {
-    "blank": 15276,
-    "comment": 25300,
-    "code": 47131,
-    "total": 87707,
-    "files": 621
+    "blank": 12016,
+    "comment": 21440,
+    "code": 37598,
+    "total": 71054,
+    "files": 494
   }
 }

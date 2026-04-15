@@ -36,9 +36,6 @@
 #include "oas/matte.ht"
 #include "matte.hp"
 #include "mailbox.hp"
-#if TCL
-#include <scripting/tcl.hp>
-#endif
 #include <gfx/vmem.hp>
 #include <cpplib/libstrm.hp>
 
@@ -68,11 +65,7 @@ WFGame::WFGame( const int nStartingLevel )
 	extern int _halWindowYPos;
 	extern int _halWindowWidth;
 	extern int _halWindowHeight;
-	_display = new (HALLmalloc) Display(10,_halWindowXPos, _halWindowYPos, _halWindowWidth, _halWindowHeight, HALLmalloc
-#if defined(DO_STEREOGRAM)
-	,true
-#endif
-	);
+	_display = new (HALLmalloc) Display(10,_halWindowXPos, _halWindowYPos, _halWindowWidth, _halWindowHeight, HALLmalloc);
 	assert(ValidPtr(_display));
 
 	_videoMemory = new (HALLmalloc) VideoMemory(*_display);
@@ -259,9 +252,6 @@ WFGame::RunLevel(_DiskFile* levelFile)
 	DBSTREAM1 ( cprogress << "Entering main game loop\n"; );
 	RestApi_Start();
 
-#if defined(DO_SLOW_STEREOGRAM)
-	InitVSyncCallback(*_display);
-#endif
 	while ( !_curLevel->done() && _bContinue )
 	{
 		RestApi_DrainQueue();
@@ -289,44 +279,7 @@ WFGame::RunLevel(_DiskFile* levelFile)
 		if(_curLevel->camera()->ValidView())
 		{
 			_display->RenderBegin();
-#if defined(DO_SLOW_STEREOGRAM)
-			int localOffset = vsyncCallbackInterface.orderTableOffset ^ 2;
-			int secondLocalOffset = localOffset+1;
-			vsyncCallbackInterface.constructLock = localOffset;
-			if(localOffset == vsyncCallbackInterface.renderLock)
-			{
-				secondLocalOffset = localOffset;
-				localOffset = secondLocalOffset+1;
-			}
-
-			vsyncCallbackInterface.constructLock = localOffset;
-			_display->SetConstructionOrderTableIndex(localOffset);
-			assert(localOffset != vsyncCallbackInterface.renderLock);
-			if(localOffset == vsyncCallbackInterface.renderLock)
-				printf(__FILE__ ":%d: renderLock falied\n",__LINE__);
-			_display->ClearConstructionOrderTable();
 			_curLevel->RenderScene();
-			assert(localOffset != vsyncCallbackInterface.renderLock);
-
-			while(secondLocalOffset == vsyncCallbackInterface.renderLock)
-				;				        // lock waiting for renderer to catch up
-
-			vsyncCallbackInterface.constructLock = secondLocalOffset;
-			assert(secondLocalOffset != vsyncCallbackInterface.renderLock);
-			if(secondLocalOffset == vsyncCallbackInterface.renderLock)
-				printf(__FILE__ ":%d: renderLock falied\n",__LINE__);
-			_display->SetConstructionOrderTableIndex(secondLocalOffset);
-			_display->ClearConstructionOrderTable();
-			_curLevel->RenderScene();
-			assert(secondLocalOffset != vsyncCallbackInterface.renderLock);
-
-			vsyncCallbackInterface.constructLock = -1;
-			vsyncCallbackInterface.orderTableOffset ^= 2;
-			vsyncCallbackInterface.pagesDirty[0] = 1;
-			vsyncCallbackInterface.pagesDirty[1] = 1;
-#else
-			_curLevel->RenderScene();
-#endif
 			RestApi_RenderBoxes();
 			_display->RenderEnd();
 		}
@@ -336,20 +289,13 @@ WFGame::RunLevel(_DiskFile* levelFile)
 #endif
 
 		DBSTREAM2( cflow << "WFGame::update: page flip" << std::endl; )
-#if defined(DO_SLOW_STEREOGRAM)
-		deltaTime = VSyncCallBackReadVSyncCount();
-#else
 		deltaTime = _display->PageFlip();
-#endif
 		DBSTREAM2( cflow << "WFGame::update: done" << std::endl; )
 
 		assert(HALScratchLmalloc.Empty());		// make sure everyone remembered to free their scratch memory
 	}
 	_display->PageFlip();			    // insure no pending ordertable renderings
 	_display->PageFlip();
-#if defined(DO_SLOW_STEREOGRAM)
-	UnInitVSyncCallback();
-#endif
 
 
 #pragma message ("KTS: write code to handle lives and restarting same level, etc.")

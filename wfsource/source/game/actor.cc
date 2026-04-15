@@ -1046,9 +1046,6 @@ Actor::ReadSystemMailbox( int boxnum ) const
         case EMAILBOX_SHIELD:
             return Scalar( getPower(), 0 );
 
-        case EMAILBOX_LOCAL_MIDI:
-            UNIMPLEMENTED( "read local midi" );
-
         case EMAILBOX_ALIVE:
             return Scalar::one;
 
@@ -1213,9 +1210,6 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             break;
 
         case EMAILBOX_SHIELD:
-            break;
-
-        case EMAILBOX_LOCAL_MIDI:
             break;
 
         case EMAILBOX_ALIVE:

@@ -34,10 +34,8 @@
 
 #include <hal/hal.h>			// includes everything
 #include <hal/_platfor.h>
-#include <hal/_tasker.h>
 #include <hal/_input.h>
 #include <hal/sjoystic.h>
-#include <hal/_message.h>
 #include <hal/salloc.hp>
 #include <signal.h>
 extern bool bPrintVersion;

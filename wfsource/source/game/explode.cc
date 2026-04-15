@@ -91,13 +91,6 @@ Explode::update()
 		}
 	 }
 
-#if defined(RENDERER_BRENDER)
-	_vactor.PostScale( Vector3::one );
-#endif
-#if defined(RENDERER_BRENDER)
-	assert(0);
-#endif
-
 	if ( theLevel->LevelClock().Current() > _timeDone )
 	{	// done exploding,  remove from world
 		_nonStatPlat->_hitPoints = Scalar::zero;							// Tell script its going away this frame

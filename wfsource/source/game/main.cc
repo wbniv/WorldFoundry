@@ -127,9 +127,6 @@ usage( int argc, char* argv[] )
     std::cout << "\t-zb\t\tZ-Buffered" << std::endl;
 	std::cout << "\t-nologo\t\tDon't display company logos" << std::endl;
 //			std::cout << "\t-framerate\tPrint framerate" << std::endl;
-#if defined (__WIN)
-	std::cout << "\t-perspective\tEnable texture perspective correction" << std::endl;
-#endif
 	std::cout << "\t-" << szRate << "N\t\tSimulate a frame rate of N Hz" << std::endl;
 	std::cout << "\t-profmemload\tProfile memory usage during load" << std::endl;
 	std::cout << "\t-profmainloop\tProfile cpu usage during main game loop" << std::endl;
@@ -282,11 +279,6 @@ ParseCommandLine(int argc, char** argv)
 void
 PIGSMain( int argc, char* * argv )
 {
-#if 0	//msvc defined( TASKER )
-	assert( TaskGetPriority(GetCurrentTask()) == 0);
-	if( TaskGetPriority(GetCurrentTask()) != 0)
-		printf("Incorrect task priority, game will probably fail\n");
-#endif
 
 //	ERR_SET_LOG(3);
 
