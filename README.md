@@ -125,4 +125,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 12:47** — [`docs/plans/2026-04-14-forth-scripting-engine.md`](docs/plans/2026-04-14-forth-scripting-engine.md): Plan: Forth as a scripting engine option for World Foundry
+**2026-04-16 12:56** — [`docs/plans/2026-04-16-blender-level-roundtrip.md`](docs/plans/2026-04-16-blender-level-roundtrip.md): Plan: Blender ↔ Level Round-Trip
