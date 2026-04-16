@@ -133,4 +133,4 @@ The uncommitted work is two things:
 
 ## Last Change
 
-**2026-04-16 (session)** — `docs/reference/`: moved 10 Reference-status docs out of `docs/investigations/`; added `## Reference` table to wf-status.md; updated `update_wf_status.py` + `hook_md_written.sh` to handle `docs/reference/` path.
+**2026-04-16 03:52** — [`docs/plans/2026-04-16-script-language-oad-field.md`](docs/plans/2026-04-16-script-language-oad-field.md): Plan: encode scripting language in OAS/OAD; drop runtime sigil detection
