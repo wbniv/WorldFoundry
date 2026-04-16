@@ -1,20 +1,13 @@
-## shell.tcl
-## Sample World Foundry Game Shell for tcl
+-- shell.lua — default World Foundry game shell (ported from shell.tcl)
+-- Runs once per frame at level-startup time.  Toggles a "phase" mailbox
+-- (6000) on odd/even ticks; on the first tick (phase clear) it also
+-- writes 0 to INDEXOF_LEVEL_TO_RUN as the default-level bootstrap.
 
-   set phase 6000
+local phase = 6000
 
-	if { [read-mailbox $phase] } { 
-			 write-mailbox $phase 0
-		} else {
-			write-mailbox $phase 1
-			write-mailbox $INDEXOF_LEVEL_TO_RUN 0 
-		}
-
-
-
-
-##	( writeln "Default Shell" )
-##	( write "new level = ")
-##	( write LEVEL_TO_RUN )
-##	( writeln " " )
-##;	( set! LEVEL_TO_RUN 1)
+if read_mailbox(phase) ~= 0 then
+    write_mailbox(phase, 0)
+else
+    write_mailbox(phase, 1)
+    write_mailbox(INDEXOF_LEVEL_TO_RUN, 0)
+end

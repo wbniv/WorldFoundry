@@ -3064,25 +3064,13 @@
 		{ 'STR' 
 			{ 'NAME' "Script" 
 			}
-			{ 'STR' "#===========================================================================\n"
-"# Director tcl script\n"
-"#===========================================================================\n"
-"\n"
-"\n"
-"	if { [read-mailbox 100] } {\n"
-"		write-mailbox $INDEXOF_CAMSHOT [ read-mailbox 100 ]\n"
-"	}\n"
-"	if { [read-mailbox 99] } {\n"
-"		write-mailbox $INDEXOF_CAMSHOT [ read-mailbox 99 ]\n"
-"	} \n"
-"	if { [read-mailbox 98] } {\n"
-"		write-mailbox $INDEXOF_CAMSHOT [ read-mailbox 98 ]\n"
-"	} \n"
-" \n"
-"\n"
-"\n"
-"\n"
-"" 
+			{ 'STR' "-- Director script (ported from Tcl)\n"
+"-- Forwards whichever of mailboxes 100/99/98 is set to INDEXOF_CAMSHOT.\n"
+"local v\n"
+"v = read_mailbox(100); if v ~= 0 then write_mailbox(INDEXOF_CAMSHOT, v) end\n"
+"v = read_mailbox(99);  if v ~= 0 then write_mailbox(INDEXOF_CAMSHOT, v) end\n"
+"v = read_mailbox(98);  if v ~= 0 then write_mailbox(INDEXOF_CAMSHOT, v) end\n"
+""
 			}
 		}
 		{ 'I32' 
@@ -12301,9 +12289,10 @@
 		{ 'STR' 
 			{ 'NAME' "Script" 
 			}
-			{ 'STR' "\n"
-"	write-mailbox $INDEXOF_INPUT [read-mailbox $INDEXOF_HARDWARE_JOYSTICK1_RAW]\n"
-"" 
+			{ 'STR' "-- Player input script (ported from Tcl)\n"
+"-- Forwards joystick raw bits into INDEXOF_INPUT each frame.\n"
+"write_mailbox(INDEXOF_INPUT, read_mailbox(INDEXOF_HARDWARE_JOYSTICK1_RAW))\n"
+""
 			}
 		}
 		{ 'I32' 
