@@ -1,4 +1,3 @@
-"""
 World Foundry level import / export operators.
 
   WF_OT_import_level  — read a .lev text IFF → populate Blender scene
@@ -759,6 +758,12 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
 
             context.collection.objects.link(blobj)
 
+            # Import PATH animation data (if present)
+            try:
+                _import_path_block(blobj, obj_chunk, context.scene)
+            except Exception as e_path:
+                self.report({'WARNING'}, f"{obj_name}: PATH import error: {e_path}")
+
             # Attach OAD schema
             oad_path = _find_oad(typename, oad_dir)
             if oad_path:
@@ -897,6 +902,13 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
 
             lines.append("\t{ 'OBJ' ")
             lines.append(f'\t\t{{ \'NAME\' "{obj.name}" }}')
+
+            # PATH block — animation keyframes (max2lev/max2lev.cc:158-306)
+            # Emitted before VEC3/EULR, matching the original .lev layout.
+            path_lines = _emit_path_block(obj, fp)
+            for pl in path_lines:
+                lines.append("\t\t" + pl)
+
             lines.append(f"\t\t{{ 'VEC3' {{ 'NAME' \"Position\" }} {{ 'DATA' {fp(wf_pos[0])} {fp(wf_pos[1])} {fp(wf_pos[2])}  //x,y,z }} }}")
             lines.append(f"\t\t{{ 'EULR' {{ 'NAME' \"Orientation\" }} {{ 'DATA' {fp(wf_rot[0])} {fp(wf_rot[1])} {fp(wf_rot[2])}  //a,b,c }} }}")
             lines.append(
@@ -905,9 +917,6 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
                 f"{fp(wf_bb_max[0])} {fp(wf_bb_max[1])} {fp(wf_bb_max[2])}  //min(x,y,z)-max(x,y,z) }} }}"
             )
             lines.append(f'\t\t{{ \'STR\' {{ \'NAME\' "Class Name" }} {{ \'DATA\' "{typename}" }} }}')
-            # TRACE — write to file so we can see what the OAD export does
-            with open("/tmp/wf_export_trace.log", "a") as _tf:
-                _tf.write(f"obj={obj.name} schema_path={schema_path!r}\n")
 
             # Mesh geometry — export .iff if object has a real mesh
             level_dir  = os.path.dirname(self.filepath)
@@ -933,12 +942,58 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
                 schema = wf_core.load_schema(resolved)
                 for fl in _emit_lev_fields(obj, schema, fp):
                     lines.append("\t\t" + fl)
-            except Exception as e:
+            except Exception as e_oad:
                 import traceback
                 with open("/tmp/wf_export_errors.log", "a") as _ef:
-                    _ef.write(f"[wf_export] {obj.name}: {e}\n")
+                    _ef.write(f"[wf_export] {obj.name}: {e_oad}\n")
                     traceback.print_exc(file=_ef)
-                self.report({'WARNING'}, f"{obj.name}: OAD export error: {e}")
+                self.report({'WARNING'}, f"{obj.name}: OAD export error: {e_oad}")
+
+            # ── max2lev-injected specials ─────────────────────────────
+            # These fields are NOT in the OAD schema — max2lev injects
+            # them by reading 3DS Max scene data.  We do the Blender
+            # equivalent here.
+
+            # Light properties (max2lev/oadobj.cc:289-393)
+            # Detect lights by class name since the importer creates them
+            # as mesh/empty objects, not Blender LIGHT objects.
+            is_light = typename.lower() == "light"
+            if is_light:
+                if obj.type == 'LIGHT' and obj.data:
+                    r, g, b = obj.data.color[0], obj.data.color[1], obj.data.color[2]
+                    lt = 1 if obj.data.type == 'POINT' else 0
+                else:
+                    # Imported as mesh/empty — use stored OAD values or defaults
+                    r = float(obj.get(_prop_key("lightRed"), 1.0))
+                    g = float(obj.get(_prop_key("lightGreen"), 1.0))
+                    b = float(obj.get(_prop_key("lightBlue"), 1.0))
+                    lt_raw = obj.get(_prop_key("lightType"), 0)
+                    lt_map = {"directional": 0, "ambient": 1}
+                    lt = lt_map.get(str(lt_raw).lower(), int(lt_raw) if str(lt_raw).isdigit() else 0)
+                lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightRed\" }} {{ 'DATA' {fp(r)} }} {{ 'STR' \"{r:f}\" }} }}")
+                lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightGreen\" }} {{ 'DATA' {fp(g)} }} {{ 'STR' \"{g:f}\" }} }}")
+                lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightBlue\" }} {{ 'DATA' {fp(b)} }} {{ 'STR' \"{b:f}\" }} }}")
+                lines.append(f"\t\t{{ 'I32' {{ 'NAME' \"lightType\" }} {{ 'DATA' {lt}l  //Directional|Ambient }} {{ 'STR' \"{'Ambient' if lt else 'Directional'}\" }} }}")
+
+            # Slope plane coefficients (max2lev/oadobj.cc:410-480)
+            if obj.data and hasattr(obj.data, 'polygons') and obj.data.polygons:
+                mesh = obj.data
+                nx, ny, nz = 0.0, 0.0, 0.0
+                for poly in mesh.polygons:
+                    nx += poly.normal.x
+                    ny += poly.normal.y
+                    nz += poly.normal.z
+                n = len(mesh.polygons)
+                if n > 0:
+                    nx, ny, nz = nx/n, ny/n, nz/n
+                    wf_a, wf_b, wf_c = bl_to_wf(nx, ny, nz)
+                    loc = obj.matrix_world.to_translation()
+                    wf_px, wf_py, wf_pz = bl_to_wf(loc.x, loc.y, loc.z)
+                    wf_d = wf_a * wf_px + wf_b * wf_py + wf_c * wf_pz
+                    lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeA\" }} {{ 'DATA' {fp(wf_a)} }} {{ 'STR' \"{wf_a:f}\" }} }}")
+                    lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeB\" }} {{ 'DATA' {fp(wf_b)} }} {{ 'STR' \"{wf_b:f}\" }} }}")
+                    lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeC\" }} {{ 'DATA' {fp(wf_c)} }} {{ 'STR' \"{wf_c:f}\" }} }}")
+                    lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeD\" }} {{ 'DATA' {fp(wf_d)} }} {{ 'STR' \"{wf_d:f}\" }} }}")
 
             lines.append("\t}")
 
@@ -961,6 +1016,150 @@ def _corner(obj, i):
     from mathutils import Vector
     local = Vector(obj.bound_box[i])
     return obj.matrix_world @ local
+
+
+def _import_path_block(blobj, obj_chunk, scene):
+    """Parse a PATH sub-chunk from the .lev and create Blender keyframes.
+
+    PATH layout:
+      { 'PATH'
+          { 'BPOS' x y z }
+          { 'BROT' a b c w }
+          { 'CHAN' { 'NAME' "position.x" } { 'TYPE' 0l } { 'RATE' t } { 'DIM' n } { 'DATA' t0 v0 t1 v1 ... } }
+          ... (6 channels: position.x/y/z + rotation.a/b/c)
+      }
+    """
+    path = _child_by_tag(obj_chunk, 'PATH')
+    if not path:
+        return
+
+    fps = scene.render.fps / scene.render.fps_base
+
+    # WF channel name → (Blender data_path, array_index, value transform)
+    chan_map = {
+        "position.x":  ("location", 0, lambda v: v),       # wf_x → bl_x
+        "position.y":  ("location", 2, lambda v: v),       # wf_y → bl_z
+        "position.z":  ("location", 1, lambda v: -v),      # wf_z → -bl_y
+        "rotation.a":  ("rotation_euler", 0, lambda v: v),  # wf_a → bl_rx
+        "rotation.b":  ("rotation_euler", 2, lambda v: v),  # wf_b → bl_rz
+        "rotation.c":  ("rotation_euler", 1, lambda v: -v), # wf_c → -bl_ry
+    }
+
+    # Ensure the object has animation data
+    if not blobj.animation_data:
+        blobj.animation_data_create()
+    action = bpy.data.actions.new(name=f"{blobj.name}_path")
+    blobj.animation_data.action = action
+
+    for chan_chunk in _children_by_tag(path, 'CHAN'):
+        name_ch = _child_by_tag(chan_chunk, 'NAME')
+        if not name_ch or not name_ch['scalars']:
+            continue
+        chan_name = str(name_ch['scalars'][0][1])
+
+        mapping = chan_map.get(chan_name)
+        if not mapping:
+            continue
+        bl_path, bl_idx, xform = mapping
+
+        data_ch = _child_by_tag(chan_chunk, 'DATA')
+        if not data_ch or not data_ch['scalars']:
+            continue
+        raw = [float(s[1]) for s in data_ch['scalars']]
+
+        # DATA contains pairs: time0 value0 time1 value1 ...
+        if len(raw) < 2:
+            continue
+        keys = [(raw[i], raw[i+1]) for i in range(0, len(raw)-1, 2)]
+
+        fc = action.fcurves.new(data_path=bl_path, index=bl_idx)
+        fc.keyframe_points.add(count=len(keys))
+        for ki, (t, v) in enumerate(keys):
+            frame = t * fps
+            fc.keyframe_points[ki].co = (frame, xform(v))
+            fc.keyframe_points[ki].interpolation = 'LINEAR'
+
+    # Update the fcurves
+    for fc in action.fcurves:
+        fc.update()
+
+
+def _emit_path_block(obj, fp) -> list[str]:
+    """If the Blender object has animation keyframes, emit a PATH block
+    with BPOS, BROT, and 6 CHAN chunks (position.x/y/z + rotation.a/b/c).
+
+    Matches max2lev/max2lev.cc:158-306.  Returns empty list if no
+    animation data exists on this object.
+    """
+    if not obj.animation_data or not obj.animation_data.action:
+        return []
+
+    action = obj.animation_data.action
+    fcurves = action.fcurves
+    if not fcurves:
+        return []
+
+    scene = bpy.context.scene
+    fps = scene.render.fps / scene.render.fps_base
+
+    # Map Blender fcurve channels → WF channel names.
+    # Blender:  location[0]=X, location[1]=Y, location[2]=Z
+    #           rotation_euler[0]=X, [1]=Y, [2]=Z
+    # WF .lev:  position.x/y/z  rotation.a/b/c
+    # With coordinate transform: wf_x=bl_x, wf_y=bl_z, wf_z=-bl_y
+    channel_map = [
+        ("position.x",  "location", 0, lambda v: v),       # bl_x → wf_x
+        ("position.y",  "location", 2, lambda v: v),       # bl_z → wf_y
+        ("position.z",  "location", 1, lambda v: -v),      # -bl_y → wf_z
+        ("rotation.a",  "rotation_euler", 0, lambda v: v),  # bl_rx → wf_a
+        ("rotation.b",  "rotation_euler", 2, lambda v: v),  # bl_rz → wf_b
+        ("rotation.c",  "rotation_euler", 1, lambda v: -v), # -bl_ry → wf_c
+    ]
+
+    chan_data = {}  # name → [(time, value), ...]
+    for wf_name, bl_path, bl_idx, xform in channel_map:
+        fc = fcurves.find(bl_path, index=bl_idx)
+        if fc and fc.keyframe_points:
+            keys = []
+            for kp in fc.keyframe_points:
+                t = kp.co.x / fps  # frame → seconds
+                v = xform(kp.co.y)
+                keys.append((t, v))
+            chan_data[wf_name] = keys
+        else:
+            chan_data[wf_name] = [(0.0, 0.0)]  # constant zero
+
+    if all(len(v) <= 1 and (not v or v[0][1] == 0.0) for v in chan_data.values()):
+        return []  # no meaningful animation
+
+    lines = ["{ 'PATH' "]
+    # BPOS — base position (all zeros; the actual position comes from keyframes)
+    lines.append(f"\t{{ 'BPOS' {fp(0.0)} {fp(0.0)} {fp(0.0)}  //basePosition }}")
+    # BROT — base rotation as quaternion (identity: 0,0,0,1)
+    lines.append(f"\t{{ 'BROT' {fp(0.0)} {fp(0.0)} {fp(0.0)} {fp(1.0)}  //baseRotation }}")
+
+    for wf_name in ["position.x", "position.y", "position.z",
+                     "rotation.a", "rotation.b", "rotation.c"]:
+        keys = chan_data[wf_name]
+        num_keys = len(keys)
+        end_time = keys[-1][0] if keys else 0.0
+        chan_type = 0 if num_keys > 1 else 1  # 0=LINEAR, 1=CONSTANT
+
+        lines.append("\t{ 'CHAN' ")
+        lines.append(f'\t\t{{ \'NAME\' "{wf_name}" }}')
+        lines.append(f"\t\t{{ 'TYPE' {chan_type}l }}")
+        lines.append(f"\t\t{{ 'RATE' {fp(end_time)} }}")
+        lines.append(f"\t\t{{ 'DIM' {num_keys}l }}")
+
+        data_parts = []
+        for i, (t, v) in enumerate(keys):
+            data_parts.append(f"{fp(t)} {fp(v)}  //#{i}")
+        lines.append("\t\t{ 'DATA' " + "\n\t\t\t\t".join(data_parts) + " }")
+
+        lines.append("\t}")
+
+    lines.append("}")
+    return lines
 
 
 def _emit_lev_fields(obj, schema, fp) -> list[str]:
