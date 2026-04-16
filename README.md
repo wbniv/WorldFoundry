@@ -123,4 +123,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 06:57** — [`docs/plans/2026-04-16-script-language-oad-field.md`](docs/plans/2026-04-16-script-language-oad-field.md): Plan: encode scripting language in OAS/OAD; drop runtime sigil detection
+**2026-04-16 07:42** — [`docs/plans/2026-04-16-blender-level-roundtrip.md`](docs/plans/2026-04-16-blender-level-roundtrip.md): Plan: Blender ↔ Level Round-Trip
