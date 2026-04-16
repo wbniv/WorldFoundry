@@ -125,3 +125,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 ## Last Change
 
 **2026-04-16** — Repo reorganization: `engine/` is now a top-level directory. `wftools/wf_engine/`, `wftools/vendor/`, `wf_viewer/stubs/`, `wf_viewer/include/` all moved under `engine/`. `wftools/` is now strictly dev tooling. See [`docs/plans/2026-04-16-engine-directory-reorganization.md`](docs/plans/2026-04-16-engine-directory-reorganization.md).
+**2026-04-16 09:22** — [`docs/plans/2026-04-16-script-language-oad-field.md`](docs/plans/2026-04-16-script-language-oad-field.md): Plan: encode scripting language in OAS/OAD; drop runtime sigil detection
