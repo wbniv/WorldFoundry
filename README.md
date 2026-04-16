@@ -131,4 +131,4 @@ The uncommitted work is two things:
 
 ## Last Change
 
-**2026-04-16 04:08** — [`docs/investigations/2026-04-15-loc-tracking.md`](docs/investigations/2026-04-15-loc-tracking.md): WF LOC tracking — shrinking the codebase
+**2026-04-16 04:10** — [`docs/reference/production-pathway.md`](docs/reference/production-pathway.md): Production Pathway
