@@ -124,4 +124,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 09:35** — [`docs/plans/2026-04-14-forth-scripting-engine.md`](docs/plans/2026-04-14-forth-scripting-engine.md): Plan: Forth as a scripting engine option for World Foundry
+**2026-04-16** — Repo reorganization: `engine/` is now a top-level directory. `wftools/wf_engine/`, `wftools/vendor/`, `wf_viewer/stubs/`, `wf_viewer/include/` all moved under `engine/`. `wftools/` is now strictly dev tooling. See [`docs/plans/2026-04-16-engine-directory-reorganization.md`](docs/plans/2026-04-16-engine-directory-reorganization.md).
