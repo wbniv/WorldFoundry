@@ -504,9 +504,8 @@ html = f'''<!DOCTYPE html>
   blockquote {{ border-left: 4px solid #d1d9e0; margin: 16px 0; padding: 4px 16px; color: #656d76; }}
   blockquote p {{ margin: 4px 0; }}
   del {{ color: #656d76; }}
-  table {{ border-collapse: collapse; width: 100%; margin: 16px 0; table-layout: fixed; }}
-  th, td {{ border: 1px solid #d1d9e0; padding: 8px 12px; text-align: left; vertical-align: top; }}
-  th:first-child {{ white-space: nowrap; width: 15%; }}
+  table {{ border-collapse: collapse; width: 100%; margin: 16px 0; }}
+  th, td {{ border: 1px solid #d1d9e0; padding: 8px 12px; text-align: left; vertical-align: top; overflow-wrap: break-word; }}
   th {{ background: #f6f8fa; font-weight: 600; }}
   tr:nth-child(even) {{ background: #f6f8fa; }}
   tr.note-row td {{ background: #fafafa; font-size: 0.88em; color: #555; padding: 3px 12px 5px 20px; border-top: none; }}

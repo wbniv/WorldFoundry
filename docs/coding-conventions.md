@@ -389,7 +389,7 @@ RangeCheck(0, language, 6);
 AssertMsg(kDispatch[language] != nullptr, "no dispatch table entry for language " << language);
 ```
 
-**Better:**
+**Best:**
 ```cpp
 RangeCheck(0, language, std::size(kDispatch));
 AssertMsg(kDispatch[language] != nullptr, "no dispatch table entry for language " << language);
@@ -620,16 +620,16 @@ An `.oas` file is an X-macro template. When compiled, it expands to:
 The macros are defined in `oas/iff.s` and `oas/oadtypes.s`. Common field
 macros:
 
-| Macro | Field type |
+| Field type | Macro |
 |---|---|
-| `TYPEENTRYINT32(name, displayName, min, max, def, buttons, showas, help, enable)` | 32-bit int, range-checked |
-| `TYPEENTRYFIXED32(name, displayName, min, max, def, showas, help, enable)`         | Q16.16 fixed-point |
-| `TYPEENTRYBOOLEAN(name, displayName, def, showas, help)`                            | Boolean |
-| `TYPEENTRYCOLOR(name, displayName, def, help)`                                      | Packed color |
-| `TYPEENTRYFILENAME(name, displayName, filespec, help)`                              | Asset reference |
-| `TYPEENTRYOBJREFERENCE(name, displayName, help)`                                    | Reference to another level object |
-| `PROPERTY_SHEET_HEADER(name, pageNum)` / `PROPERTY_SHEET_FOOTER`                    | Grouped page |
-| `GROUP_START(name, ...)` / `GROUP_STOP()`                                           | Sub-group within a sheet |
+| 32-bit int, range-checked      | `TYPEENTRYINT32(name, displayName, min, max, def, buttons, showas, help, enable)` |
+| Q16.16 fixed-point             | `TYPEENTRYFIXED32(name, displayName, min, max, def, showas, help, enable)` |
+| Boolean                        | `TYPEENTRYBOOLEAN(name, displayName, def, showas, help)` |
+| Packed color                   | `TYPEENTRYCOLOR(name, displayName, def, help)` |
+| Asset reference                | `TYPEENTRYFILENAME(name, displayName, filespec, help)` |
+| Reference to another level object | `TYPEENTRYOBJREFERENCE(name, displayName, help)` |
+| Grouped page                   | `PROPERTY_SHEET_HEADER(name, pageNum)` / `PROPERTY_SHEET_FOOTER` |
+| Sub-group within a sheet       | `GROUP_START(name, ...)` / `GROUP_STOP()` |
 
 ### 9.3 Canonical examples
 
