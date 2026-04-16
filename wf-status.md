@@ -56,13 +56,14 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 | 2026-04-14 | [Constraint-based props](docs/investigations/2026-04-14-constraint-based-props.md) | **Deferred** | Doors, chains, pulleys, elevators via Jolt constraints. **Hard prerequisite:** Jolt integration must land first; also requires IFF binary chunk support. Not yet scheduled. |
 | 2026-04-14 | [Mobile port (Android / iOS)](docs/investigations/2026-04-14-mobile-port-android-ios.md) | **Deferred** | Full plan for arm64 Android and iOS builds. Key blocker: immediate-mode GL must be replaced before any mobile API can work. CMake migration required. Not yet scheduled. |
 | 2026-04-14 | [Multiplayer, voice chat, mobile input](docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md) | **Deferred** | Surveyed multiplayer sync models, voice (LKWS/Agora/LiveKit), mobile input (touch/gyro/haptics). Depends on mobile port landing first. Not yet scheduled. |
-| 2026-04-14 | [REST API box PoC](docs/investigations/2026-04-14-rest-api-box-poc.md) | **Deferred** | Proof-of-concept for an HTTP API embedded in `wf_game` for creating/moving/deleting boxes at runtime. Not yet implemented. |
+| 2026-04-14 | [REST API box PoC](docs/investigations/2026-04-14-rest-api-box-poc.md) | **Complete** | cpp-httplib embedded server in `wf_game`; create/recolor/resize/delete GL wireframe boxes via HTTP at runtime. Landed `7e690e1`. |
 
 ---
 ## Reference
 
 | Date | Document | Summary |
 |------|----------|---------|
+| 2026-04-16 | [Coding conventions](docs/coding-conventions.md) | Authoritative C++ style guide for WF runtime code. Subsumes `wfsource/source/codingstandards.txt`. Covers target envelope, naming, Validate() discipline, assert family, no-fallback policy, lookup tables, OAS/OAD decision tree, mailboxes, streams, and foreign-library interop. |
 | 2026-04-15 | [JerryScript GCC 14 build fixes](docs/reference/2026-04-15-jerryscript-gcc14-build-fixes.md) | Documents 7 GCC 14 build failures in JerryScript v3.0.0 with `wf-minimal` profile and how they were fixed. Applied as part of the JS engine landing. |
 | 2026-04-14 | [Compile-time switches](docs/reference/2026-04-14-compile-time-switches.md) | Generated catalogue of 929 unique `#ifdef` switches across the codebase. Informational. See also `docs/compile-time-switches.md` (live version). |
 | 2026-04-14 | [Party game — reaction timer + image recognition](docs/reference/2026-04-14-party-game.md) | Chromecast party game concept (phone as controller, TV as display). Not a WF engine task — explores a standalone project idea. |
@@ -123,4 +124,4 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 ## Last Change
 
-**2026-04-16** — All eight scripting engines smoke-tested end-to-end in snowgoons (JerryScript, WAMR, Wren, zForth confirmed 2026-04-16; Lua/Fennel/QuickJS/wasm3 confirmed previously). Status docs and plan files updated.
+**2026-04-16 05:52** — [`docs/investigations/2026-04-14-jolt-physics-integration.md`](docs/investigations/2026-04-14-jolt-physics-integration.md): Investigation: Integrate [Jolt Physics](https://jrouwe.github.io/JoltPhysics/) as the WF physics backend
