@@ -123,4 +123,4 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 ## Last Change
 
-**2026-04-16 05:15** — [`docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md`](docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md): Plan: align scripting-engine plans with ScriptRouter convention
+**2026-04-16** — All eight scripting engines smoke-tested end-to-end in snowgoons (JerryScript, WAMR, Wren, zForth confirmed 2026-04-16; Lua/Fennel/QuickJS/wasm3 confirmed previously). Status docs and plan files updated.
