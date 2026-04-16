@@ -17,6 +17,7 @@
 
 use crate::lc_parser::ClassMap;
 use crate::lev_parser::LevObject;
+use crate::oad_loader::{per_object_size, OadSchemas};
 
 pub const LEVEL_VERSION: i32 = 28;
 
@@ -43,16 +44,29 @@ fn align4(n: usize) -> usize { (n + 3) & !3 }
 pub struct LevelPlan<'a> {
     pub objects: &'a [LevObject],
     pub classes: &'a ClassMap,
+    pub schemas: &'a OadSchemas,
 }
 
 pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
     // Object count includes the NULL_Object placeholder at index 0.
     let total_objects = plan.objects.len() + 1;
 
-    // Every object is header + oad_data, padded up to 4 bytes.
-    // MVP: oad_data is empty, so every object is align4(65) = 68 bytes.
-    let per_obj_size = align4(OBJ_HEADER_SIZE);
-    let objects_total = per_obj_size * total_objects;
+    // Per-object size = align4(OBJ_HEADER_SIZE + oad_size).  NULL_Object always
+    // has oad_size=0; real objects look their size up from the OAD schema.
+    let mut obj_sizes = Vec::with_capacity(total_objects);
+    let mut obj_oad_sizes = Vec::with_capacity(total_objects);
+    obj_sizes.push(align4(OBJ_HEADER_SIZE));
+    obj_oad_sizes.push(0usize);
+    for obj in plan.objects {
+        let oad_size = plan
+            .schemas
+            .get(&obj.class_name)
+            .map(per_object_size)
+            .unwrap_or(0);
+        obj_oad_sizes.push(oad_size);
+        obj_sizes.push(align4(OBJ_HEADER_SIZE + oad_size));
+    }
+    let objects_total: usize = obj_sizes.iter().sum();
 
     let header_size   = 52;
     let objects_off   = header_size;
@@ -83,9 +97,10 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
     debug_assert_eq!(out.len(), header_size);
 
     // ── object offset array ──────────────────────────────────────────────────
-    let first_obj_off = objects_off + array_bytes;
-    for i in 0..total_objects {
-        push_i32(&mut out, (first_obj_off + i * per_obj_size) as i32);
+    let mut cursor = objects_off + array_bytes;
+    for sz in &obj_sizes {
+        push_i32(&mut out, cursor as i32);
+        cursor += sz;
     }
 
     // ── objects ──────────────────────────────────────────────────────────────
@@ -100,14 +115,15 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
         &[0, 0, 0, ONE, ONE, ONE],
         0, -1, 0,
     );
-    pad_section(&mut out, start, per_obj_size);
+    pad_section(&mut out, start, obj_sizes[0]);
 
-    for obj in plan.objects {
+    for (i, obj) in plan.objects.iter().enumerate() {
         let type_idx = plan
             .classes
             .index_of(&obj.class_name)
             .ok_or_else(|| format!("object '{}': unknown class '{}'", obj.name, obj.class_name))?
             as i16;
+        let oad_size = obj_oad_sizes[i + 1] as i16;
 
         // .lev rotations are fixed32 radians; iff2lvl stores them divided by 2π
         // (i.e. in revolutions) as the low 16 bits of the resulting fixed32.
@@ -130,9 +146,12 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
             &bbox,
             /* oad_flags  */ 0,
             /* path_index */ -1,
-            /* oad_size   */ 0,
+            oad_size,
         );
-        pad_section(&mut out, start, per_obj_size);
+        // Phase 2a: emit the correctly-sized OAD data block as placeholder
+        // zero bytes.  Phase 2b will fill in real field values from the .lev
+        // sub-chunks and populate the common data block with XDATA scripts.
+        pad_section(&mut out, start, obj_sizes[i + 1]);
     }
 
     // No paths, channels, rooms, or common block in MVP.
