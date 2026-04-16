@@ -13,7 +13,7 @@ The scripting system is comprehensively implemented and fully smoke-tested — L
 
 Dead-code removal is largely done: Batches 1–7 are complete, reducing `wfsource/source/` from 64,252 to 36,199 code lines (−43.7%). One batch (Batch 8 — physics replacement) is in progress.
 
-Jolt Physics integration is actively in progress: Phases 1–3 are committed (`b17a7ca`); further work is in the current uncommitted changes (`jolt_backend.cc`, `jolt_backend.hp`, `level.cc`, `halbase.h`, `haltest.cc`).
+Jolt Physics is functional and the default: `WF_PHYSICS_ENGINE=jolt`, snowgoons is playable. All committed; runtime init/shutdown lives in `WFGame`. Legacy `physics/wf/` retained pending parity on a second level.
 
 Multiple larger investigations (audio, mobile port, multiplayer, constraint-based props) are written up and deferred pending prerequisite work.
 
