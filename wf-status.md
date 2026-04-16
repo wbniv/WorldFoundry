@@ -23,7 +23,7 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
-| 2026-04-16 | [Context](docs/plans/2026-04-16-engine-directory-reorganization.md) | **Planned** | `wftools/wf_engine/` is the actual game engine executable — not a dev tool. It should not live alongside `iffcomp`, `iffdump`, and friends. Similarly, `wftools/vendor/` contains ~145 MB of … |
+| 2026-04-16 | [Engine directory reorganization](docs/plans/2026-04-16-engine-directory-reorganization.md) | **Complete** | `engine/` is now a top-level directory. `wftools/wf_engine/` → `engine/`, `wftools/vendor/` → `engine/vendor/`, `wf_viewer/stubs/` → `engine/stubs/`, `wf_viewer/include/` → `engine/include/`. `wftools/` is now strictly dev tooling. |
 | 2026-04-16 | [Plan: Blender ↔ Level Round-Trip](docs/plans/2026-04-16-blender-level-roundtrip.md) | **Planned** | **Branch:** 2026-first-working-gap |
 | 2026-04-16 | [ScriptLanguage OAD field](docs/plans/2026-04-16-script-language-oad-field.md) | **Complete** | `int32 ScriptLanguage` OAD field (dropmenu). `common.oad` rebuilt. `EvalScript`/`RunScript` thread language param. `ScriptRouter` dispatches via `kDispatch[6]` function-pointer table. Blender plugin has enum dropdown + autodetect operator. |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Partial** | Batches 1–7 complete (−43.7% LOC). Batch 6 (`#if 0` sweep) done. Batch 7 (PSX/Win artifacts, OpusMake, platform guards) done. Batch 8 (Jolt physics replacement) in progress. |
@@ -124,4 +124,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 09:35** — [`docs/plans/2026-04-14-forth-scripting-engine.md`](docs/plans/2026-04-14-forth-scripting-engine.md): Plan: Forth as a scripting engine option for World Foundry
+**2026-04-16** — Repo reorganization: `engine/` is now a top-level directory. `wftools/wf_engine/`, `wftools/vendor/`, `wf_viewer/stubs/`, `wf_viewer/include/` all moved under `engine/`. `wftools/` is now strictly dev tooling. See [`docs/plans/2026-04-16-engine-directory-reorganization.md`](docs/plans/2026-04-16-engine-directory-reorganization.md).

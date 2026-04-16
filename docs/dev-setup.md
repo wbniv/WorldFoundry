@@ -40,7 +40,7 @@ Installs under `~/.cargo` and `~/.rustup`. Needed for the Rust ports of asset-pi
 
 Two things the repo needs but doesn't ship:
 
-1. **`wftools/engine/stubs/` and `wftools/engine/include/`** — scripting + platform stubs and a few headers/`.inc`s. Currently shared between machines by hand. TODO: commit, or generate, or document how to regenerate from scratch.
+1. **`engine/stubs/` and `engine/include/`** — scripting + platform stubs and a few headers/`.inc`s. Currently shared between machines by hand. TODO: commit, or generate, or document how to regenerate from scratch.
 
 2. **Generated `prep` outputs under `wfsource/source/gfx/glpipeline/`:**
    - `renderer.inc` ← `prep renderer.ins renderer.inc`
@@ -68,7 +68,7 @@ LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 \
   ../../../engine/wf_game
 ```
 
-`cd.iff` is read from the current directory. Snowgoons is the hardcoded default boot level (see `engine/PLAN.md`).
+`cd.iff` is read from the current directory. Snowgoons is the hardcoded default boot level (see `docs/plans/2026-04-engine-start-snowgoons-directly.md`).
 
 ### Rust-port pipeline tools
 
