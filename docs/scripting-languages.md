@@ -20,29 +20,29 @@ All languages ride on the same mailbox bridge, so the per-language cost is
 machinery or level format. Runtime details (vendor paths, version, link
 strategy) are in the per-engine plan docs in `docs/plans/`.
 
-Binary cost and RAM figures are measured from the current WF build (x86-64, unstripped, debug). Target (Cortex-M / stripped) numbers will be lower; proportions are representative.
+Binary cost figures are `.text` section size, compiled `-O2`, measured from object files (x86-64). RAM figures are from the current unstripped debug build and are indicative only.
 
-| Language | Compile-time switch | Binary cost (.text) | RAM (init) |
-|----------|---------------------|---------------------|------------|
-| Lua 5.4.8 | `WF_ENABLE_LUA=1` (default on today) | ~225 KB | ~50 KB (`lua_State` + standard libs) |
+| Language | Compile-time switch | Binary cost (.text, -O2) | RAM (init) |
+|----------|---------------------|--------------------------|------------|
+| Lua 5.4.8 | `WF_ENABLE_LUA=1` (default on today) | ~224 KB | ~50 KB (`lua_State` + standard libs) |
 | Fennel 1.6.1 | `WF_ENABLE_FENNEL=1` (requires Lua) | ~140 KB (embedded `.lua` data) | +0 (shares `lua_State`; compiler runs transiently) |
 | *Requires Lua (compiles to Lua); can't be selected without it.* | | | |
-| JavaScript<br/>(QuickJS v0.14.0) | `WF_JS_ENGINE=quickjs` | ~978 KB (.text + .data) | ~200 KB (`JSRuntime` + `JSContext` baseline) |
+| JavaScript<br/>(QuickJS v0.14.0) | `WF_JS_ENGINE=quickjs` | ~938 KB | ~200 KB (`JSRuntime` + `JSContext` baseline) |
 | *Mutually exclusive with JerryScript.* | | | |
-| JavaScript<br/>(JerryScript v3.0.0) | `WF_JS_ENGINE=jerryscript` | ~322 KB x86-64; upstream cites <200 KB flash for Cortex-M minimal | <64 KB (configurable heap; IoT-targeted) |
+| JavaScript<br/>(JerryScript v3.0.0) | `WF_JS_ENGINE=jerryscript` | — (TODO measure) | <64 KB (configurable heap; IoT-targeted) |
 | *Mutually exclusive with QuickJS.* | | | |
-| WebAssembly<br/>(wasm3 v0.5.0) | `WF_WASM_ENGINE=wasm3` | ~97 KB; upstream cites ~65 KB stripped Cortex-M | ~10 KB (runtime only; WF scripts use no linear memory) |
+| WebAssembly<br/>(wasm3 v0.5.0) | `WF_WASM_ENGINE=wasm3` | ~96 KB | ~10 KB (runtime only; WF scripts use no linear memory) |
 | *Initial spike; planned for retirement once WAMR reaches full parity. Source languages: AssemblyScript, Rust, C, Zig, etc. → `.wasm`, stored base64-wrapped in iff text chunks.* | | | |
-| WebAssembly<br/>(WAMR 2.2.0) | `WF_WASM_ENGINE=wamr` | ~150 KB .text (archive 531 KB including debug) | ~60 KB (classic interpreter runtime; `os_malloc`-based in WF build) |
+| WebAssembly<br/>(WAMR 2.2.0) | `WF_WASM_ENGINE=wamr` | — (TODO measure) | ~60 KB (classic interpreter runtime; `os_malloc`-based in WF build) |
 | *`WF_WASM_ENGINE` selects exactly one wasm engine. Supports host-supplied `(global …)` imports so `INDEXOF_*` constants resolve at instantiate time rather than baked as literals. AOT mode (phase 2) deferred.* | | | |
-| Forth<br/>(zForth — default) | `WF_FORTH_ENGINE=zforth` | ~11 KB (core + WF wrapper) | ~17 KB (`ZF_DICT_SIZE=16384` + stacks per WF `zfconf.h`) |
+| Forth<br/>(zForth — default) | `WF_FORTH_ENGINE=zforth` | ~7 KB (core + WF wrapper) | ~17 KB (`ZF_DICT_SIZE=16384` + stacks per WF `zfconf.h`) |
 | Forth (ficl) | `WF_FORTH_ENGINE=ficl` | ~100 KB est. (BSD-2; not yet built) | — |
 | Forth (Atlast) | `WF_FORTH_ENGINE=atlast` | ~30 KB est. (public domain; not yet built) | — |
 | Forth (embed) | `WF_FORTH_ENGINE=embed` | ~5 KB est. (MIT; 16-bit cells; not yet built) | — |
 | Forth (libforth) | `WF_FORTH_ENGINE=libforth` | ~50 KB est. (MIT; not yet built) | — |
 | Forth (pForth) | `WF_FORTH_ENGINE=pforth` | ~120 KB est. (0-BSD; not yet built) | — |
 | *Backend is a compile-time switch; same source runs on all backends. Dictionary pre-loaded with `INDEXOF_*` constants and `read-mailbox` / `write-mailbox` host words. Alternate backends deferred; zForth is the shipping default.* | | | |
-| Wren 0.4.0 | `WF_ENABLE_WREN=1` | ~149 KB | ~100 KB initial; GC trigger default 10 MB (**must be overridden** for 2 MB target — set `WrenConfiguration.initialHeapSize` / `minHeapSize`) |
+| Wren 0.4.0 | `WF_ENABLE_WREN=1` | ~146 KB | ~100 KB initial; GC trigger default 10 MB (**must be overridden** for 2 MB target — set `WrenConfiguration.initialHeapSize` / `minHeapSize`) |
 | *Mailbox access via foreign class `Env` (`Env.read_mailbox` / `Env.write_mailbox`); `INDEXOF_*` constants injected as module-level `var` declarations at engine init.* | | | |
 
 None of these rows describe a dependency on any other row. The only
