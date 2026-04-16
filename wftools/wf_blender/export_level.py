@@ -688,6 +688,14 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
                 if mesh_path:
                     mesh_geo = _load_mesh_iff(mesh_path)
 
+            # Orientation (EULR) — WF a,b,c → Blender rotation_euler
+            rot_wf = (0.0, 0.0, 0.0)
+            eulr = _child_by_tag(obj_chunk, 'EULR')
+            if eulr:
+                d = _data_scalars(eulr)
+                if len(d) >= 3:
+                    rot_wf = (float(d[0]), float(d[1]), float(d[2]))
+
             # Derive Blender location from BB centre
             cx_wf = (bb_min_wf[0] + bb_max_wf[0]) * 0.5
             cy_wf = (bb_min_wf[1] + bb_max_wf[1]) * 0.5
@@ -745,6 +753,10 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
                 blobj.location = bl_loc
                 blobj.scale = (sx, sy, sz)
 
+            # Orientation: inverse of export mapping (rot.x, rot.z, -rot.y) → WF (a,b,c)
+            # so import: bl_x=wf_a, bl_y=-wf_c, bl_z=wf_b
+            blobj.rotation_euler = (rot_wf[0], -rot_wf[2], rot_wf[1])
+
             context.collection.objects.link(blobj)
 
             # Attach OAD schema
@@ -794,6 +806,11 @@ def _apply_field_chunks(blobj, schema, obj_chunk):
 
         prop_key = _prop_key(field.key)
         data = _data_scalars(chunk)
+        if not data and tag == 'STR':
+            # XDATA/string fields store value in a nested STR child, not DATA
+            str_child = _child_by_tag(chunk, 'STR')
+            if str_child and str_child['scalars']:
+                data = [str_child['scalars'][0][1]]
         if not data:
             continue
         val = data[0]

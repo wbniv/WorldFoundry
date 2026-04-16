@@ -220,3 +220,7 @@ one-time pass, not an ongoing concern.
 - `levelobj.oas` has `Startup Script` (via `DEFAULT_SCRIPTNAME`) — covered by `common.inc`.
 - The Blender exporter should guard against writing a sigil that was accidentally left
   in the script text after the migration pass (warn or strip on export).
+- **Tool class rearchitect** — `tool.cc` / `toolshld.cc` / `toolngun.cc` currently pass `language=0`
+  hardcoded for `ActivationScript`. These classes share a lot of structure; consider consolidating
+  them (and `ActivationScriptLanguage`) as part of the `tool.oas` follow-up rather than patching
+  each one individually.

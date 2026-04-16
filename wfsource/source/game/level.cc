@@ -274,10 +274,10 @@ Level::ConstructStartupData( SObjectStartupData& startupData, _ObjectOnDisk* obj
 //==============================================================================
 
 Scalar
-Level::EvalScript( const void* script, int objectIndex )
+Level::EvalScript( const void* script, int objectIndex, int language )
 {
 	ValidatePtr(script);
-   Scalar data = _interpreter->RunScript(script,objectIndex);
+   Scalar data = _interpreter->RunScript(script,objectIndex,language);
 	return data;
 }
 
@@ -594,7 +594,7 @@ Level::Level
 		if ( commonPage->Script != -1 )
 		{	// Run the script for the level object [if any] after all objects are constructed and only once
 			const void* pScript = _commonBlock->GetBlockPtr(commonPage->Script);
-         EvalScript(pScript,0);
+         EvalScript(pScript,0,0);  // shell script is always Lua
 		}
 	}
 

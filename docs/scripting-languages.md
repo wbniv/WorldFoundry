@@ -24,14 +24,14 @@ Binary cost figures are `.text` section size, compiled `-O2`, measured from obje
 
 | Language | Compile-time switch | Binary cost (.text, -O2) | RAM (init) |
 |----------|---------------------|--------------------------|------------|
-| Lua 5.4.8 | `WF_ENABLE_LUA=1` (default on today) | ~224 KB | ~50 KB (`lua_State` + standard libs) |
+| Lua 5.4.8 | `WF_ENABLE_LUA=1` | ~224 KB | ~50 KB (`lua_State` + standard libs) |
 | *Per-actor `_ENV` isolation — each actor script runs in its own environment table; globals don't leak between actors. Standard libs loaded: `base`, `math`, `string`, `table`, `coroutine`; no `io`, `os`, or `debug`. Coroutine return from a script enables multi-tick state machines (see §Coroutines below). Fennel can be layered on top without any engine change.* | | | |
 | Fennel 1.6.1 | `WF_ENABLE_FENNEL=1` (requires Lua) | ~140 KB (embedded `.lua` data) | +0 (shares `lua_State`; compiler runs transiently) |
 | *Lisp dialect that compiles to Lua at script load time; the Fennel compiler runs transiently and the resulting Lua bytecode executes in the shared `lua_State`. All Lua globals (`read_mailbox`, `write_mailbox`, `INDEXOF_*`) are directly accessible from Fennel without wrapping. Fennel and Lua can call each other freely. `_ENV` isolation applies identically.* | | | |
 | JavaScript<br/>(QuickJS v0.14.0) | `WF_JS_ENGINE=quickjs` | ~938 KB | ~200 KB (`JSRuntime` + `JSContext` baseline) |
-| *ES2020-compliant; generators, destructuring, optional chaining, `BigInt`, typed arrays, and full `Math` / `JSON` built-ins available. `async`/`await` compiles but is unnecessary in the tick model — use generators or callbacks. Fastest JS engine in the lineup. Mutually exclusive with JerryScript (`WF_JS_ENGINE` selects one).* | | | |
+| *ES2020-compliant; generators, destructuring, optional chaining, `BigInt`, typed arrays, and full `Math` / `JSON` built-ins available. `async`/`await` compiles but is unnecessary in the tick model — use generators. Generator return from a script (`(function*() { ... })()`) enables multi-tick sequencing via `yield`; the engine advances the generator one step per tick. Fastest JS engine in the lineup. Mutually exclusive with JerryScript (`WF_JS_ENGINE` selects one).* | | | |
 | JavaScript<br/>(JerryScript v3.0.0) | `WF_JS_ENGINE=jerryscript` | — (TODO measure) | <64 KB (configurable heap; IoT-targeted) |
-| *ES5.1 target: no generators, no `let`/`const`, no arrow functions, no destructuring. Heap size is configurable at compile time (`JERRY_HEAP_SIZE`), making it suitable for constrained targets where QuickJS's 200 KB baseline is too large. Mutually exclusive with QuickJS (`WF_JS_ENGINE` selects one).* | | | |
+| *ES5.1 target: no generators, no `let`/`const`, no arrow functions, no destructuring. No multi-tick script support — use per-tick `if`/state-variable patterns instead. Heap size is configurable at compile time (`JERRY_HEAP_SIZE`), making it suitable for constrained targets where QuickJS's 200 KB baseline is too large. Mutually exclusive with QuickJS (`WF_JS_ENGINE` selects one).* | | | |
 | WebAssembly<br/>(wasm3 v0.5.0) | `WF_WASM_ENGINE=wasm3` | ~96 KB | ~10 KB (runtime only; WF scripts use no linear memory) |
 | *Interpreter-only — no JIT; safe on all platforms including MIPS. WF scripts use only host imports (`read_mailbox`, `write_mailbox`) and no linear memory, so the 10 KB init cost is the complete runtime budget. `.wasm` modules stored base64-wrapped in iff text chunks, decoded at load time. Initial spike; planned for replacement by WAMR once parity is confirmed. Source languages: AssemblyScript, Rust, C, Zig, TinyGo, etc.* | | | |
 | WebAssembly<br/>(WAMR 2.2.0) | `WF_WASM_ENGINE=wamr` | — (TODO measure) | ~60 KB (classic interpreter runtime; `os_malloc`-based in WF build) |
@@ -44,7 +44,7 @@ Binary cost figures are `.text` section size, compiled `-O2`, measured from obje
 | Forth (pForth) | `WF_FORTH_ENGINE=pforth` | ~120 KB est. (0-BSD; not yet built) | — |
 | *Concatenative stack language; scripts compile to a compact bytecode dictionary at load time. WF's zForth build uses `ZF_DICT_SIZE=16384` (16 KB dictionary) and 4-byte cells (`ZF_CELL=int32_t`) for 32-bit fixed-point compatibility. Dictionary pre-loaded with `INDEXOF_*` constants and `read-mailbox` / `write-mailbox` host words. No GC; no heap allocation after init — real-time safe. `WF_FORTH_ENGINE` is a compile-time backend switch; the same Forth source runs unchanged on all backends. Alternate backends (ficl, Atlast, embed, libforth, pForth) not yet built; zForth is the shipping default.* | | | |
 | Wren 0.4.0 | `WF_ENABLE_WREN=1` | ~146 KB | ~100 KB initial; GC trigger default 10 MB (**must be overridden** for 2 MB target — set `WrenConfiguration.initialHeapSize` / `minHeapSize`) |
-| *Class-based OO with single inheritance; built-in Fiber (coroutine) support for multi-tick scripts. Mailbox access via foreign class `Env` (`Env.read_mailbox(idx)` / `Env.write_mailbox(idx, val)`); `INDEXOF_*` constants injected as module-level `var` declarations at engine init. GC heap defaults to 10 MB trigger — **must be overridden** before shipping on 2 MB hardware.* | | | |
+| *Class-based OO with single inheritance; built-in Fiber support for multi-tick scripts. Assign `Fiber.new { ... }` to a module-level `var _thread` — the engine stores and resumes it once per tick, same model as Lua coroutines. Helper `Fn` objects called from inside the fiber can call `Fiber.yield()` freely. Mailbox access via foreign class `Env` (`Env.read_mailbox(idx)` / `Env.write_mailbox(idx, val)`); `INDEXOF_*` constants injected as module-level `var` declarations at engine init. GC heap defaults to 10 MB trigger — **must be overridden** before shipping on 2 MB hardware.* | | | |
 
 None of these rows describe a dependency on any other row. The only
 exception is Fennel, which compiles to Lua and therefore can't be
@@ -68,7 +68,6 @@ The same two gameplay scripts in each language. All access identical mailbox ind
 | Lua 5.4 | <pre>write_mailbox(INDEXOF_INPUT,&#10;  read_mailbox(INDEXOF_HARDWARE_JOYSTICK1_RAW))</pre> | <pre>local v&#10;v = read_mailbox(100); if v ~= 0 then write_mailbox(INDEXOF_CAMSHOT, v) end&#10;v = read_mailbox(99);  if v ~= 0 then write_mailbox(INDEXOF_CAMSHOT, v) end&#10;v = read_mailbox(98);  if v ~= 0 then write_mailbox(INDEXOF_CAMSHOT, v) end</pre> |
 | Fennel | <pre>(write_mailbox INDEXOF_INPUT&#10;  (read_mailbox INDEXOF_HARDWARE_JOYSTICK1_RAW))</pre> | <pre>(let [v (read_mailbox 100)] (when (not= v 0) (write_mailbox INDEXOF_CAMSHOT v)))&#10;(let [v (read_mailbox 99)]  (when (not= v 0) (write_mailbox INDEXOF_CAMSHOT v)))&#10;(let [v (read_mailbox 98)]  (when (not= v 0) (write_mailbox INDEXOF_CAMSHOT v)))</pre> |
 | JavaScript<br/>(QuickJS / JerryScript) | <pre>write_mailbox(INDEXOF_INPUT,&#10;  read_mailbox(INDEXOF_HARDWARE_JOYSTICK1_RAW));</pre> | <pre>var v;&#10;v = read_mailbox(100); if (v !== 0) write_mailbox(INDEXOF_CAMSHOT, v);&#10;v = read_mailbox(99);  if (v !== 0) write_mailbox(INDEXOF_CAMSHOT, v);&#10;v = read_mailbox(98);  if (v !== 0) write_mailbox(INDEXOF_CAMSHOT, v);</pre> |
-| WebAssembly<br/>(wasm3) | <pre>;; INDEXOF_HARDWARE_JOYSTICK1_RAW=1009  INDEXOF_INPUT=3024&#10;(module&#10;  (import "env" "read_mailbox"  (func $read  (param i32) (result f32)))&#10;  (import "env" "write_mailbox" (func $write (param i32 f32)))&#10;  (func (export "main")&#10;    i32.const 3024  i32.const 1009&#10;    call $read  call $write))</pre> | <pre>(module&#10;  (import "env" "read_mailbox"  (func $read  (param i32) (result f32)))&#10;  (import "env" "write_mailbox" (func $write (param i32 f32)))&#10;  (func $maybe (param $mb i32) (local $v f32)&#10;    local.get $mb  call $read  local.tee $v&#10;    f32.const 0  f32.ne&#10;    if  i32.const 1021  local.get $v  call $write  end)&#10;  (func (export "main")&#10;    i32.const 100 call $maybe&#10;    i32.const 99  call $maybe&#10;    i32.const 98  call $maybe))</pre> |
 | WebAssembly<br/>(WAMR) | <pre>(module&#10;  (import "consts" "INDEXOF_HARDWARE_JOYSTICK1_RAW" (global $raw i32))&#10;  (import "consts" "INDEXOF_INPUT"                  (global $inp i32))&#10;  (import "env"    "read_mailbox"  (func $read  (param i32) (result f32)))&#10;  (import "env"    "write_mailbox" (func $write (param i32 f32)))&#10;  (func (export "main")&#10;    global.get $inp  global.get $raw&#10;    call $read  call $write))</pre> | <pre>(module&#10;  (import "consts" "INDEXOF_CAMSHOT" (global $cam i32))&#10;  (import "env"    "read_mailbox"    (func $read  (param i32) (result f32)))&#10;  (import "env"    "write_mailbox"   (func $write (param i32 f32)))&#10;  (func $maybe (param $mb i32) (local $v f32)&#10;    local.get $mb  call $read  local.tee $v&#10;    f32.const 0  f32.ne&#10;    if  global.get $cam  local.get $v  call $write  end)&#10;  (func (export "main")&#10;    i32.const 100 call $maybe&#10;    i32.const 99  call $maybe&#10;    i32.const 98  call $maybe))</pre> |
 | *`INDEXOF_*` constants resolved via host-supplied `(global …)` imports at instantiate time; no baked literals.* | | |
 | Forth (zForth) | <pre>INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox</pre> | <pre>: ?cam ( mb -- ) read-mailbox dup 0 &lt;&gt; if INDEXOF_CAMSHOT write-mailbox else drop then ;&#10;100 ?cam   99 ?cam   98 ?cam</pre> |
@@ -96,165 +95,83 @@ the script controls a mailbox write from inside the loop.
 
 ### Example patterns
 
-All examples below use tick-counting for timing (`for _ = 1, N`). WF has a
-variable tick rate, so tick counts are approximations. Once `INDEXOF_GAME_TIME_S`
-and `INDEXOF_DT` mailboxes are available (deferred), replace tick loops with
-real-time accumulation.
+A single conditional wait — "do X when Y becomes true" — is no better than
+a per-tick `if` check. Coroutines earn their keep the moment there is a
+**second** wait: without them, each additional phase needs an explicit state
+variable and a new `if`/`elseif` branch that grows with every step. The
+coroutine captures that state implicitly in the suspended function's execution
+position, so the script reads as a linear sequence of authored events rather
+than an inside-out state machine.
 
-**Wait for condition, then act:**
-```lua
-return coroutine.create(function()
-    while read_mailbox(INDEXOF_TRIGGER_A) == 0 do
-        coroutine.yield()
-    end
-    write_mailbox(INDEXOF_CAMSHOT, 5)
-    write_mailbox(INDEXOF_MUSIC, 2)
-end)
-```
+Tick-counting is used for timing. WF has a variable tick rate, so tick counts
+are approximations. Once `INDEXOF_GAME_TIME_S` and `INDEXOF_DT` mailboxes are
+available (deferred), replace tick loops with real-time accumulation.
 
-**NPC patrol — walks to waypoints, idles between them:**
-```lua
-return coroutine.create(function()
-    while true do
-        -- Walk to waypoint A, wait until arrived
-        write_mailbox(INDEXOF_AI_DEST, WAYPOINT_A)
-        write_mailbox(INDEXOF_AI_STATE, STATE_WALKING)
-        repeat coroutine.yield()
-        until read_mailbox(INDEXOF_AT_DEST) ~= 0
+Wren uses `var _thread = Fiber.new { ... }` to declare a multi-tick fiber.
+JS (QuickJS) uses an immediately-invoked generator function `(function*() { ... })()`.
+JerryScript (ES5.1) has no generator support and is omitted from these examples.
 
-        -- Idle at A for ~3 s
-        write_mailbox(INDEXOF_AI_STATE, STATE_IDLE)
-        for _ = 1, 90 do coroutine.yield() end
+**Triggered alarm sequence** — three ordered phases: wait for player to enter
+zone, sound alarm for ~2 s, seal the door. Without a coroutine: explicit `state`
+variable + one `if`/`elseif` branch per phase, growing with every new step.
 
-        -- Walk to waypoint B
-        write_mailbox(INDEXOF_AI_DEST, WAYPOINT_B)
-        write_mailbox(INDEXOF_AI_STATE, STATE_WALKING)
-        repeat coroutine.yield()
-        until read_mailbox(INDEXOF_AT_DEST) ~= 0
+| Language | Script |
+|----------|--------|
+| Lua | <pre>return coroutine.create(function()&#10;    repeat coroutine.yield()&#10;    until read_mailbox(INDEXOF_TRIGGER_A) ~= 0&#10;&#10;    write_mailbox(INDEXOF_ALARM, 1)&#10;    for _ = 1, 60 do coroutine.yield() end&#10;&#10;    write_mailbox(INDEXOF_ALARM, 0)&#10;    write_mailbox(INDEXOF_DOOR_LOCKED, 1)&#10;end)</pre> |
+| Fennel | <pre>(coroutine.create&#10;  (fn []&#10;    (while (= (read_mailbox INDEXOF_TRIGGER_A) 0)&#10;      (coroutine.yield))&#10;&#10;    (write_mailbox INDEXOF_ALARM 1)&#10;    (for [_ 1 60] (coroutine.yield))&#10;&#10;    (write_mailbox INDEXOF_ALARM 0)&#10;    (write_mailbox INDEXOF_DOOR_LOCKED 1)))</pre> |
+| Wren | <pre>var _thread = Fiber.new {&#10;    while (Env.read_mailbox(INDEXOF_TRIGGER_A) == 0) Fiber.yield()&#10;&#10;    Env.write_mailbox(INDEXOF_ALARM, 1)&#10;    var i = 0&#10;    while (i &lt; 60) { Fiber.yield(); i = i + 1 }&#10;&#10;    Env.write_mailbox(INDEXOF_ALARM, 0)&#10;    Env.write_mailbox(INDEXOF_DOOR_LOCKED, 1)&#10;}</pre> |
+| JS (QuickJS) | <pre>(function*() {&#10;    while (read_mailbox(INDEXOF_TRIGGER_A) == 0) yield&#10;&#10;    write_mailbox(INDEXOF_ALARM, 1)&#10;    for (let i = 0; i &lt; 60; i++) yield&#10;&#10;    write_mailbox(INDEXOF_ALARM, 0)&#10;    write_mailbox(INDEXOF_DOOR_LOCKED, 1)&#10;})()</pre> |
 
-        for _ = 1, 90 do coroutine.yield() end
-    end
-end)
-```
+**NPC patrol** — walk A → idle → walk B → idle → repeat. The state machine
+equivalent needs an explicit state variable and a separate branch per leg; the
+coroutine reads top-to-bottom as the authored sequence.
 
-The same logic as a tick-based state machine needs an explicit `state` variable,
-transition guards in every branch, and the loop structure inverted — the
-coroutine reads top-to-bottom as the authored sequence of events.
+| Language | Script |
+|----------|--------|
+| Lua | <pre>return coroutine.create(function()&#10;    while true do&#10;        write_mailbox(INDEXOF_AI_DEST, WAYPOINT_A)&#10;        write_mailbox(INDEXOF_AI_STATE, STATE_WALKING)&#10;        repeat coroutine.yield()&#10;        until read_mailbox(INDEXOF_AT_DEST) ~= 0&#10;&#10;        write_mailbox(INDEXOF_AI_STATE, STATE_IDLE)&#10;        for _ = 1, 90 do coroutine.yield() end&#10;&#10;        write_mailbox(INDEXOF_AI_DEST, WAYPOINT_B)&#10;        write_mailbox(INDEXOF_AI_STATE, STATE_WALKING)&#10;        repeat coroutine.yield()&#10;        until read_mailbox(INDEXOF_AT_DEST) ~= 0&#10;&#10;        for _ = 1, 90 do coroutine.yield() end&#10;    end&#10;end)</pre> |
+| Fennel | <pre>(coroutine.create&#10;  (fn []&#10;    (while true&#10;      (write_mailbox INDEXOF_AI_DEST WAYPOINT_A)&#10;      (write_mailbox INDEXOF_AI_STATE STATE_WALKING)&#10;      (while (= (read_mailbox INDEXOF_AT_DEST) 0)&#10;        (coroutine.yield))&#10;&#10;      (write_mailbox INDEXOF_AI_STATE STATE_IDLE)&#10;      (for [_ 1 90] (coroutine.yield))&#10;&#10;      (write_mailbox INDEXOF_AI_DEST WAYPOINT_B)&#10;      (write_mailbox INDEXOF_AI_STATE STATE_WALKING)&#10;      (while (= (read_mailbox INDEXOF_AT_DEST) 0)&#10;        (coroutine.yield))&#10;&#10;      (for [_ 1 90] (coroutine.yield)))))</pre> |
+| Wren | <pre>var _thread = Fiber.new {&#10;    while (true) {&#10;        Env.write_mailbox(INDEXOF_AI_DEST, WAYPOINT_A)&#10;        Env.write_mailbox(INDEXOF_AI_STATE, STATE_WALKING)&#10;        while (Env.read_mailbox(INDEXOF_AT_DEST) == 0) Fiber.yield()&#10;&#10;        Env.write_mailbox(INDEXOF_AI_STATE, STATE_IDLE)&#10;        var i = 0&#10;        while (i &lt; 90) { Fiber.yield(); i = i + 1 }&#10;&#10;        Env.write_mailbox(INDEXOF_AI_DEST, WAYPOINT_B)&#10;        Env.write_mailbox(INDEXOF_AI_STATE, STATE_WALKING)&#10;        while (Env.read_mailbox(INDEXOF_AT_DEST) == 0) Fiber.yield()&#10;&#10;        i = 0&#10;        while (i &lt; 90) { Fiber.yield(); i = i + 1 }&#10;    }&#10;}</pre> |
+| JS (QuickJS) | <pre>(function*() {&#10;    while (true) {&#10;        write_mailbox(INDEXOF_AI_DEST, WAYPOINT_A)&#10;        write_mailbox(INDEXOF_AI_STATE, STATE_WALKING)&#10;        while (read_mailbox(INDEXOF_AT_DEST) == 0) yield&#10;&#10;        write_mailbox(INDEXOF_AI_STATE, STATE_IDLE)&#10;        for (let i = 0; i &lt; 90; i++) yield&#10;&#10;        write_mailbox(INDEXOF_AI_DEST, WAYPOINT_B)&#10;        write_mailbox(INDEXOF_AI_STATE, STATE_WALKING)&#10;        while (read_mailbox(INDEXOF_AT_DEST) == 0) yield&#10;&#10;        for (let i = 0; i &lt; 90; i++) yield&#10;    }&#10;})()</pre> |
 
-**Cutscene sequencer — timed camera cuts:**
-```lua
-return coroutine.create(function()
-    local function hold(shot, ticks)
-        write_mailbox(INDEXOF_CAMSHOT, shot)
-        for _ = 1, ticks do coroutine.yield() end
-    end
-    local function wait_trigger(mb)
-        repeat coroutine.yield() until read_mailbox(mb) ~= 0
-    end
+**Cutscene sequencer** — gate on trigger, timed camera cuts, signal completion.
+Helper functions inline keep the sequence readable. JS uses `yield*` to delegate
+yields from inner generator helpers into the outer one.
 
-    wait_trigger(INDEXOF_CUTSCENE_START)
-    hold(1, 60)    -- establishing shot ~2 s
-    hold(2, 45)    -- cut to character ~1.5 s
-    hold(3, 90)    -- reaction ~3 s
-    hold(1, 30)    -- back to wide ~1 s
-    write_mailbox(INDEXOF_CUTSCENE_DONE, 1)
-end)
-```
+| Language | Script |
+|----------|--------|
+| Lua | <pre>return coroutine.create(function()&#10;    local function hold(shot, ticks)&#10;        write_mailbox(INDEXOF_CAMSHOT, shot)&#10;        for _ = 1, ticks do coroutine.yield() end&#10;    end&#10;    local function wait_trigger(mb)&#10;        repeat coroutine.yield()&#10;        until read_mailbox(mb) ~= 0&#10;    end&#10;&#10;    wait_trigger(INDEXOF_CUTSCENE_START)&#10;    hold(1, 60)  -- establishing ~2 s&#10;    hold(2, 45)  -- character ~1.5 s&#10;    hold(3, 90)  -- reaction ~3 s&#10;    hold(1, 30)  -- wide ~1 s&#10;    write_mailbox(INDEXOF_CUTSCENE_DONE, 1)&#10;end)</pre> |
+| Fennel | <pre>(coroutine.create&#10;  (fn []&#10;    (let [hold&#10;          (fn [shot ticks]&#10;            (write_mailbox INDEXOF_CAMSHOT shot)&#10;            (for [_ 1 ticks] (coroutine.yield)))&#10;          wait-trigger&#10;          (fn [mb]&#10;            (while (= (read_mailbox mb) 0)&#10;              (coroutine.yield)))]&#10;      (wait-trigger INDEXOF_CUTSCENE_START)&#10;      (hold 1 60)&#10;      (hold 2 45)&#10;      (hold 3 90)&#10;      (hold 1 30)&#10;      (write_mailbox INDEXOF_CUTSCENE_DONE 1))))</pre> |
+| Wren | <pre>var hold = Fn.new {|shot, ticks|&#10;    Env.write_mailbox(INDEXOF_CAMSHOT, shot)&#10;    var i = 0&#10;    while (i &lt; ticks) { Fiber.yield(); i = i + 1 }&#10;}&#10;var waitTrigger = Fn.new {|mb|&#10;    while (Env.read_mailbox(mb) == 0) Fiber.yield()&#10;}&#10;&#10;var _thread = Fiber.new {&#10;    waitTrigger.call(INDEXOF_CUTSCENE_START)&#10;    hold.call(1, 60)&#10;    hold.call(2, 45)&#10;    hold.call(3, 90)&#10;    hold.call(1, 30)&#10;    Env.write_mailbox(INDEXOF_CUTSCENE_DONE, 1)&#10;}</pre> |
+| JS (QuickJS) | <pre>(function*() {&#10;    function* hold(shot, ticks) {&#10;        write_mailbox(INDEXOF_CAMSHOT, shot)&#10;        for (let i = 0; i &lt; ticks; i++) yield&#10;    }&#10;    function* waitTrigger(mb) {&#10;        while (read_mailbox(mb) == 0) yield&#10;    }&#10;&#10;    yield* waitTrigger(INDEXOF_CUTSCENE_START)&#10;    yield* hold(1, 60)&#10;    yield* hold(2, 45)&#10;    yield* hold(3, 90)&#10;    yield* hold(1, 30)&#10;    write_mailbox(INDEXOF_CUTSCENE_DONE, 1)&#10;})()</pre> |
 
-**Door — waits for player, plays open animation, stays open:**
-```lua
-return coroutine.create(function()
-    -- Wait until player is close
-    repeat coroutine.yield()
-    until read_mailbox(INDEXOF_PLAYER_DIST) < 100
+**Door** — wait for player proximity, step through open animation, stay open.
+Script ends; mailbox persists.
 
-    -- Step through open animation frames
-    for frame = 0, 7 do
-        write_mailbox(INDEXOF_DOOR_FRAME, frame)
-        coroutine.yield()
-        coroutine.yield()   -- 2 ticks per frame
-    end
-
-    write_mailbox(INDEXOF_DOOR_OPEN, 1)
-    -- script ends; mailbox persists; door stays open
-end)
-```
-
-### Fennel equivalents
-
-The same four patterns in Fennel. `coroutine.create`, `coroutine.yield`, and
-all mailbox globals are the same — only the syntax changes.
-
-**Wait for condition:**
-```fennel
-(coroutine.create
-  (fn []
-    (while (= (read_mailbox INDEXOF_TRIGGER_A) 0) (coroutine.yield))
-    (write_mailbox INDEXOF_CAMSHOT 5)
-    (write_mailbox INDEXOF_MUSIC 2)))
-```
-
-**NPC patrol:**
-```fennel
-(coroutine.create
-  (fn []
-    (while true
-      (write_mailbox INDEXOF_AI_DEST WAYPOINT_A)
-      (write_mailbox INDEXOF_AI_STATE STATE_WALKING)
-      (while (= (read_mailbox INDEXOF_AT_DEST) 0) (coroutine.yield))
-
-      (write_mailbox INDEXOF_AI_STATE STATE_IDLE)
-      (for [_ 1 90] (coroutine.yield))
-
-      (write_mailbox INDEXOF_AI_DEST WAYPOINT_B)
-      (write_mailbox INDEXOF_AI_STATE STATE_WALKING)
-      (while (= (read_mailbox INDEXOF_AT_DEST) 0) (coroutine.yield))
-
-      (for [_ 1 90] (coroutine.yield)))))
-```
-
-**Cutscene sequencer:**
-```fennel
-(coroutine.create
-  (fn []
-    (let [hold (fn [shot ticks]
-                 (write_mailbox INDEXOF_CAMSHOT shot)
-                 (for [_ 1 ticks] (coroutine.yield)))
-          wait-trigger (fn [mb]
-                         (while (= (read_mailbox mb) 0) (coroutine.yield)))]
-      (wait-trigger INDEXOF_CUTSCENE_START)
-      (hold 1 60)
-      (hold 2 45)
-      (hold 3 90)
-      (hold 1 30)
-      (write_mailbox INDEXOF_CUTSCENE_DONE 1))))
-```
-
-**Door:**
-```fennel
-(coroutine.create
-  (fn []
-    (while (>= (read_mailbox INDEXOF_PLAYER_DIST) 100) (coroutine.yield))
-    (for [frame 0 7]
-      (write_mailbox INDEXOF_DOOR_FRAME frame)
-      (coroutine.yield)
-      (coroutine.yield))
-    (write_mailbox INDEXOF_DOOR_OPEN 1)))
-```
+| Language | Script |
+|----------|--------|
+| Lua | <pre>return coroutine.create(function()&#10;    repeat coroutine.yield()&#10;    until read_mailbox(INDEXOF_PLAYER_DIST) &lt; 100&#10;&#10;    for frame = 0, 7 do&#10;        write_mailbox(INDEXOF_DOOR_FRAME, frame)&#10;        coroutine.yield()&#10;        coroutine.yield()  -- 2 ticks per frame&#10;    end&#10;&#10;    write_mailbox(INDEXOF_DOOR_OPEN, 1)&#10;end)</pre> |
+| Fennel | <pre>(coroutine.create&#10;  (fn []&#10;    (while (>= (read_mailbox INDEXOF_PLAYER_DIST) 100)&#10;      (coroutine.yield))&#10;    (for [frame 0 7]&#10;      (write_mailbox INDEXOF_DOOR_FRAME frame)&#10;      (coroutine.yield)&#10;      (coroutine.yield))&#10;    (write_mailbox INDEXOF_DOOR_OPEN 1)))</pre> |
+| Wren | <pre>var _thread = Fiber.new {&#10;    while (Env.read_mailbox(INDEXOF_PLAYER_DIST) >= 100) Fiber.yield()&#10;&#10;    var frame = 0&#10;    while (frame &lt;= 7) {&#10;        Env.write_mailbox(INDEXOF_DOOR_FRAME, frame)&#10;        Fiber.yield()&#10;        Fiber.yield()&#10;        frame = frame + 1&#10;    }&#10;&#10;    Env.write_mailbox(INDEXOF_DOOR_OPEN, 1)&#10;}</pre> |
+| JS (QuickJS) | <pre>(function*() {&#10;    while (read_mailbox(INDEXOF_PLAYER_DIST) >= 100) yield&#10;&#10;    for (let frame = 0; frame &lt;= 7; frame++) {&#10;        write_mailbox(INDEXOF_DOOR_FRAME, frame)&#10;        yield&#10;        yield&#10;    }&#10;&#10;    write_mailbox(INDEXOF_DOOR_OPEN, 1)&#10;})()</pre> |
 
 ### Rules
 
-- Use `coroutine.create(fn)`, not `coroutine.wrap(fn)`. `coroutine.wrap`
-  returns a plain function, not a thread, so the engine won't detect it.
-- A script that never returns a thread is unaffected — plain per-tick
-  execution is unchanged.
-- If a coroutine errors, it is cleared and the script restarts from scratch
-  on the next tick (returning a fresh coroutine if desired).
-- Per-actor `_ENV` isolation applies inside coroutines — locals written
-  inside the coroutine are private to that actor.
-- Only one coroutine per actor at a time. Returning a new thread while one
-  is running is not supported; the new thread would only be picked up after
-  the current one finishes or errors.
+- **Lua/Fennel**: return `coroutine.create(fn)`, not `coroutine.wrap(fn)`.
+  `coroutine.wrap` returns a plain function, not a thread; the engine won't
+  detect it.
+- **Wren**: assign `Fiber.new { ... }` to a module-level variable named
+  `_thread`. Helper `Fn` objects called from inside the fiber can call
+  `Fiber.yield()` freely — it yields the enclosing fiber regardless of call depth.
+- **JS (QuickJS)**: evaluate to a generator via `(function*() { ... })()`.
+  Helper generator functions called with `yield*` delegate their yields into
+  the outer generator. JerryScript (ES5.1) has no generators; use per-tick
+  `if`/state-variable patterns instead.
+- A script that never returns a thread/fiber/generator is unaffected — plain
+  per-tick execution is unchanged.
+- On error or completion the actor reverts to normal per-tick execution.
+- Per-actor isolation applies inside suspended coroutines/fibers/generators —
+  locals are private to that actor.
+- Only one suspended thread per actor at a time.
 
 ## Notes for future languages
 

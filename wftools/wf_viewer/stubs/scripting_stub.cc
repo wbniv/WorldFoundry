@@ -62,7 +62,7 @@ public:
     NullInterpreter(MailboxesManager& mgr) : ScriptInterpreter(mgr) {}
     ~NullInterpreter() {}
 
-    Scalar RunScript(const void* /*script*/, int /*objectIndex*/) override
+    Scalar RunScript(const void* /*script*/, int /*objectIndex*/, int /*language*/) override
     {
         return Scalar::FromFloat(0.0f);
     }
@@ -420,6 +420,31 @@ float RunScript(const char* src, int objectIndex)
 } // namespace lua_engine
 
 //=============================================================================
+// fennel_engine — thin shim; Fennel evaluation lives inside lua_engine.
+//
+// The lua_engine Fennel path is triggered by a leading ';' sigil.  This
+// wrapper ensures the sigil is present so scripts without the sigil (i.e.
+// after the one-time migration pass) still hit the Fennel path.
+
+#ifdef WF_ENABLE_FENNEL
+namespace fennel_engine {
+
+float RunScript(const char* src, int objectIndex)
+{
+    static thread_local std::string buf;
+    const char* p = src;
+    while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') p++;
+    if (*p == ';')
+        return lua_engine::RunScript(src, objectIndex);
+    buf = "; ";
+    buf += src;
+    return lua_engine::RunScript(buf.c_str(), objectIndex);
+}
+
+} // namespace fennel_engine
+#endif
+
+//=============================================================================
 // ScriptRouter — neutral dispatcher; all engines are peers.
 
 class ScriptRouter : public ScriptInterpreter
@@ -428,7 +453,7 @@ public:
     ScriptRouter(MailboxesManager& mgr);
     ~ScriptRouter() override;
 
-    Scalar RunScript(const void* script, int objectIndex) override;
+    Scalar RunScript(const void* script, int objectIndex, int language) override;
     void   AddConstantArray(IntArrayEntry* entryList) override;
     void   DeleteConstantArray(IntArrayEntry* entryList) override;
 };
@@ -480,49 +505,54 @@ ScriptRouter::~ScriptRouter()
 #endif
 }
 
-Scalar ScriptRouter::RunScript(const void* script, int objectIndex)
+Scalar ScriptRouter::RunScript(const void* script, int objectIndex, int language)
 {
     const char* src = static_cast<const char*>(script);
     if (!src || !*src) return Scalar::FromFloat(0.0f);
 
-    const char* p = src;
-    while (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') p++;
-
-#ifdef WF_WITH_FORTH
-    // `\` → Forth. Backslash is the standard Forth line-comment marker;
-    // it is not a valid Lua/JS/wasm token at position 0.
-    if (p[0] == '\\')
-        return Scalar::FromFloat(forth_engine::RunScript(src, objectIndex));
+    // language enum: 0=Lua 1=Fennel 2=Wren 3=Forth 4=JS 5=Wasm
+    // Slots for engines not compiled in are null; assert rather than crash.
+    using RunFn = float(*)(const char*, int);
+    static const RunFn kDispatch[] = {
+#ifdef WF_ENABLE_LUA
+        /* 0 lua    */ lua_engine::RunScript,
+#else
+        /* 0 lua    */ nullptr,
 #endif
-
+#ifdef WF_ENABLE_FENNEL
+        /* 1 fennel */ fennel_engine::RunScript,
+#else
+        /* 1 fennel */ nullptr,
+#endif
 #ifdef WF_ENABLE_WREN
-    // `//wren\n` → Wren. Checked before generic `//` to avoid false dispatch
-    // to the JS engine. The `//wren` opener is a valid Wren `//` line comment.
-    if (p[0] == '/' && p[1] == '/' && strncmp(p+2, "wren\n", 5) == 0)
-        return Scalar::FromFloat(wren_engine::RunScript(src, objectIndex));
+        /* 2 wren   */ wren_engine::RunScript,
+#else
+        /* 2 wren   */ nullptr,
 #endif
-
+#ifdef WF_WITH_FORTH
+        /* 3 forth  */ forth_engine::RunScript,
+#else
+        /* 3 forth  */ nullptr,
+#endif
 #ifdef WF_WITH_JS
-    // `//` → JavaScript. `//` is a Lua syntax error so no collision.
-    if (p[0] == '/' && p[1] == '/')
-        return Scalar::FromFloat(js_engine::RunScript(src, objectIndex));
+        /* 4 js     */ js_engine::RunScript,
+#else
+        /* 4 js     */ nullptr,
 #endif
-
 #ifdef WF_WITH_WASM
-    // `#b64\n` → wasm (base64-encoded module). Bare `#` not claimed here
-    // because cd.iff TCL fragments use `##` line comments.
-    // WF_WASM_ENGINE selects exactly one of wasm3 or wamr.
-    if (p[0] == '#' && p[1] == 'b' && p[2] == '6' && p[3] == '4' && p[4] == '\n') {
 #  ifdef WF_WASM_ENGINE_WAMR
-        return Scalar::FromFloat(wamr_engine::RunScript(src, objectIndex));
+        /* 5 wasm   */ wamr_engine::RunScript,
 #  else
-        return Scalar::FromFloat(wasm3_engine::RunScript(src, objectIndex));
+        /* 5 wasm   */ wasm3_engine::RunScript,
 #  endif
-    }
+#else
+        /* 5 wasm   */ nullptr,
 #endif
+    };
 
-    // Fallthrough → Lua engine (handles bare Lua and `;`-prefixed Fennel internally).
-    return Scalar::FromFloat(lua_engine::RunScript(src, objectIndex));
+    RangeCheck(0, language, std::size(kDispatch));
+    AssertMsg(kDispatch[language], "script engine not compiled in for language " << language);
+    return Scalar::FromFloat(kDispatch[language](src, objectIndex));
 }
 
 void ScriptRouter::AddConstantArray(IntArrayEntry* entryList)

@@ -19,6 +19,7 @@
 		TYPEENTRYINT32(Write To Mailbox On Death,Death Mailbox, 0, 3999, 0,,SHOW_AS_NUMBER,"Mailbox to write to when object is destroyed")
 @*		TYPEENTRYXDATA_CONVERT(Script,DEFAULT_SCRIPTNAME,"Cave Logic Studios AI [Script]||..\\scripts\\default.s",XDATA_NOT_REQUIRED,,,,,XDATA_SCRIPT)
 		TYPEENTRYXDATA_CONVERT(Script,DEFAULT_SCRIPTNAME,"Cave Logic Studios AI [Script]||what is this?..\\scripts\\default.s",XDATA_NOT_REQUIRED,,,,,XDATA_COPY)
+		TYPEENTRYINT32(Script Language,ScriptLanguage,0,5,0,"Lua|Fennel|Wren|Forth|JavaScript|WebAssembly",SHOW_AS_DROPMENU)
 		TYPEENTRYBOOLEAN(Script Controls Input,,0)
 		TYPEENTRYXDATA_NOTES
 

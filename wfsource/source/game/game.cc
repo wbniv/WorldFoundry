@@ -204,7 +204,7 @@ WFGame::RunGameScript()				// runs the whole game, returns when game (really) ov
 	{
 		DBSTREAM2( cflow << "WFGame::RunGameScript::loop top" << std::endl; )
       //Scalar data = 
-      interpreter->RunScript(pScript,0);
+      interpreter->RunScript(pScript,0,0);  // meta script is always Lua
   		//  cerr << "EvalScript(" << szScript << ")=" << data << endl;
   		//return data;
       

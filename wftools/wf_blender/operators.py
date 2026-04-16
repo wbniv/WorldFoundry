@@ -545,6 +545,67 @@ class WF_OT_pick_color(bpy.types.Operator):
 
 # ── registration ──────────────────────────────────────────────────────────────
 
+def _detect_script_language(script_text: str) -> str:
+    """
+    Heuristic scan of script text → ScriptLanguage label.
+
+    Checks for unambiguous syntactic markers anywhere in the body.
+    Returns one of the enum strings from common.oad ScriptLanguage field.
+    Does NOT look at leading sigils — those are legacy and may be stripped.
+    """
+    t = script_text
+
+    # WebAssembly: base64-only content or WAT s-expression opener
+    import re
+    stripped = t.strip()
+    if stripped.startswith('(module') or re.fullmatch(r'[A-Za-z0-9+/=\s]+', stripped):
+        return "WebAssembly"
+
+    # Fennel: Lisp s-expression keywords
+    if any(kw in t for kw in ('(defn ', '(defn\t', '(let [', '(fn ', '(var ', '(local ')):
+        return "Fennel"
+
+    # Wren: class-based OO keywords or Fiber
+    if any(kw in t for kw in ('class ', 'Fiber.', '.new()', 'import "')):
+        return "Wren"
+
+    # Forth: colon definitions, stack comments, typical Forth words
+    if any(kw in t for kw in (': ', 'VARIABLE ', 'CREATE ', 'CONSTANT ', ': ?')):
+        return "Forth"
+
+    # JavaScript: ES keywords not valid in Lua
+    if any(kw in t for kw in ('function ', 'const ', 'let ', '=>', 'var ', 'console.')):
+        return "JavaScript"
+
+    return "Lua"
+
+
+class WF_OT_detect_script_language(bpy.types.Operator):
+    """Scan the object's Script text and pre-fill ScriptLanguage."""
+    bl_idname = "wf.detect_script_language"
+    bl_label  = "Detect Script Language"
+
+    def execute(self, context):
+        obj = context.active_object
+        if obj is None:
+            self.report({'WARNING'}, "No active object")
+            return {'CANCELLED'}
+
+        script_key   = _prop_key("Script")
+        language_key = _prop_key("ScriptLanguage")
+
+        script_text = obj.get(script_key, "")
+        if not script_text:
+            self.report({'INFO'}, "No script text on object — defaulting to Lua")
+            obj[language_key] = "Lua"
+            return {'FINISHED'}
+
+        lang = _detect_script_language(str(script_text))
+        obj[language_key] = lang
+        self.report({'INFO'}, f"Detected: {lang}")
+        return {'FINISHED'}
+
+
 _CLASSES = [
     WF_OT_attach_schema,
     WF_OT_detach_schema,
@@ -554,6 +615,7 @@ _CLASSES = [
     WF_OT_pick_color,
     WF_OT_pick_file,
     WF_OT_validate,
+    WF_OT_detect_script_language,
     WF_OT_export_iff_txt,
     WF_OT_import_iff_txt,
     WF_OT_export_iff,

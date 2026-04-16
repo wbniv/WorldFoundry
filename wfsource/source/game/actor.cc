@@ -810,7 +810,7 @@ Actor::update()
 	if ( _nonStatPlat->_pScript )
 	{
 		DBSTREAM3( cactor << " executing script:" << _nonStatPlat->_pScript << std::endl; )
-      theLevel->EvalScript(_nonStatPlat->_pScript,GetActorIndex());
+      theLevel->EvalScript(_nonStatPlat->_pScript,GetActorIndex(),GetCommonBlockPtr()->ScriptLanguage);
 	}
 
 //#if DEBUG

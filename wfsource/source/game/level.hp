@@ -178,7 +178,7 @@ class Level
 	// miscellaneous public methods - not sure how to categorize
 	inline const SObjectStartupData* FindTemplateObjectData( int32 objectIndex ) const;
 
-	Scalar EvalScript( const void* , int objectIndex);
+	Scalar EvalScript( const void* , int objectIndex, int language);
 
 
 private:

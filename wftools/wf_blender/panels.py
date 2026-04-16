@@ -221,6 +221,13 @@ class WF_PT_attributes(bpy.types.Panel):
                     )
                     op.field_key  = field.key
                     op.item_label = item
+                # ScriptLanguage gets an autodetect hint button below the grid
+                if field.key == "ScriptLanguage":
+                    layout.operator(
+                        "wf.detect_script_language",
+                        text="Detect from script text",
+                        icon='SHADERFX',
+                    )
 
             else:
                 # ≤4 items or unlisted show_as: horizontal button row

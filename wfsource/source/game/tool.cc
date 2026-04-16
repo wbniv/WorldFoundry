@@ -311,7 +311,7 @@ Tool::activate()
 
 	// Run this tool's activation script (if it has one)
 	if (_pScript)
-      theLevel->EvalScript(_pScript,GetActorIndex());
+      theLevel->EvalScript(_pScript,GetActorIndex(),0);  // TODO: ActivationScriptLanguage (tool.oas)
 }
 
 //============================================================================
