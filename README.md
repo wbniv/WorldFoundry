@@ -23,6 +23,7 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
+| 2026-04-16 | [Test plan for hook](docs/plans/2026-04-16-hook-test.md) | **Planned** | This is a test plan created to verify that update_wf_status.py correctly inserts a new row into the Plans table of wf-status.md. |
 | 2026-04-16 | [ScriptLanguage OAD field](docs/plans/2026-04-16-script-language-oad-field.md) | **Planned** | Move language selection from runtime sigil detection into an explicit `int32 ScriptLanguage` OAD field (dropmenu in Blender). Dispatch via function pointer table. Migration scriptable from Blender headless. |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Partial** | Batches 1–7 complete (−43.7% LOC). Batch 6 (`#if 0` sweep) done. Batch 7 (PSX/Win artifacts, OpusMake, platform guards) done. Batch 8 (Jolt physics replacement) in progress. |
 | 2026-04-15 | [Lua engine fixes (#1–#6)](docs/plans/2026-04-15-lua-engine-fixes.md) | **Landed** | All 6 fixes implemented: script cache, per-actor envs, Fennel precompile, debug gating, stdlib sandbox, coroutine continuations. Smoke test pending HAL cleanup. |
@@ -128,4 +129,4 @@ The uncommitted work is two things:
 
 ## Last Change
 
-**2026-04-16 03:29** — [`docs/investigations/2026-04-16-coding-conventions-remediation.md`](docs/investigations/2026-04-16-coding-conventions-remediation.md): Coding-conventions remediation — 2026 additions
+**2026-04-16 03:30** — [`docs/plans/2026-04-16-hook-test.md`](docs/plans/2026-04-16-hook-test.md): Test plan for hook
