@@ -133,4 +133,4 @@ The uncommitted work is two things:
 
 ## Last Change
 
-**2026-04-16 03:52** — [`docs/plans/2026-04-16-script-language-oad-field.md`](docs/plans/2026-04-16-script-language-oad-field.md): Plan: encode scripting language in OAS/OAD; drop runtime sigil detection
+**2026-04-16 03:55** — [`docs/plans/2026-04-16-script-language-oad-field.md`](docs/plans/2026-04-16-script-language-oad-field.md): Plan: encode scripting language in OAS/OAD; drop runtime sigil detection
