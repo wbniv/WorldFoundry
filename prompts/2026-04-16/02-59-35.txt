@@ -1,0 +1,1 @@
+i've never heard of PascalCase before. is that the same as CamelCase? if so, change the term used to CamelCase

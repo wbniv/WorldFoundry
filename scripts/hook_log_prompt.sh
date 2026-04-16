@@ -5,5 +5,7 @@ PROMPT=$(printf '%s' "$INPUT" | jq -r '.prompt // empty')
 [ -z "$PROMPT" ] && exit 0
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
-TIMESTAMP=$(date '+%Y-%m-%d_%H-%M-%S')
-printf '%s\n' "$PROMPT" > "$REPO/prompts/$TIMESTAMP.txt"
+DAY=$(date '+%Y-%m-%d')
+TIME=$(date '+%H-%M-%S')
+mkdir -p "$REPO/prompts/$DAY"
+printf '%s\n' "$PROMPT" > "$REPO/prompts/$DAY/$TIME.txt"
