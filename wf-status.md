@@ -24,7 +24,7 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
 | 2026-04-16 | [Plan: Blender ↔ Level Round-Trip](docs/plans/2026-04-16-blender-level-roundtrip.md) | **Planned** | **Branch:** 2026-first-working-gap |
-| 2026-04-16 | [ScriptLanguage OAD field](docs/plans/2026-04-16-script-language-oad-field.md) | **Planned** | Move language selection from runtime sigil detection into an explicit `int32 ScriptLanguage` OAD field (dropmenu in Blender). Dispatch via function pointer table. Migration scriptable from Blender headless. |
+| 2026-04-16 | [ScriptLanguage OAD field](docs/plans/2026-04-16-script-language-oad-field.md) | **Complete** | `int32 ScriptLanguage` OAD field (dropmenu). `common.oad` rebuilt. `EvalScript`/`RunScript` thread language param. `ScriptRouter` dispatches via `kDispatch[6]` function-pointer table. Blender plugin has enum dropdown + autodetect operator. |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Partial** | Batches 1–7 complete (−43.7% LOC). Batch 6 (`#if 0` sweep) done. Batch 7 (PSX/Win artifacts, OpusMake, platform guards) done. Batch 8 (Jolt physics replacement) in progress. |
 | 2026-04-14 | [WAMR (dev interp + AOT ship)](docs/plans/2026-04-14-wamr-dev-aot-ship.md) | **Partial** | Phase 1 (classic interpreter) landed 2026-04-15; smoke-tested 2026-04-16 (GROUND, no crashes). Phase 2 (AOT) deferred. |
 | 2026-04-14 | [Forth scripting engine](docs/plans/2026-04-14-forth-scripting-engine.md) | **Partial** | Phase 1 (all 6 vendors) done. zForth default backend landed with `scripting_forth.hp`/`scripting_zforth.cc`, dispatch arm, build flag, patcher, docs. Smoke-tested 2026-04-16 (GROUND, no crashes). Alternate backends (ficl, atlast, embed, libforth, pforth) deferred. |
@@ -35,7 +35,7 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 | 2026-04-14 | [Wren scripting engine](docs/plans/2026-04-14-wren-scripting-engine.md) | **Complete** | All phases complete: vendor, plug, dispatch, build, docs, patcher. Smoke-tested 2026-04-16 (GROUND, no crashes). |
 | 2026-04-14 | [WebAssembly (wasm3)](docs/plans/2026-04-14-wasm3-scripting-engine.md) | **Complete** | Landed 2026-04-14. Sigil `#b64\n`, dispatch in `ScriptRouter`, snowgoons AssemblyScript scripts. Renamed to `wasm3_engine` namespace 2026-04-15. |
 | 2026-04-14 | [Fennel on Lua](docs/plans/2026-04-14-fennel-on-lua.md) | **Complete** | Landed 2026-04-14. `;` sigil, sub-dispatch inside `lua_engine`, vendored Fennel 1.6.1, minifier, codegen, snowgoons Fennel scripts. |
-| 2026-04-14 | [Vendor Lua 5.4](docs/plans/2026-04-14-vendor-lua.md) | **Complete** | Landed 2026-04-14. Lua 5.4.8 in `wftools/vendor/lua-5.4.8/`, compiled directly from source, no system `liblua5.4` dependency. |
+| 2026-04-14 | [Vendor Lua 5.4](docs/plans/2026-04-14-vendor-lua.md) | **Complete** | Landed 2026-04-14. Lua 5.4.8 in `engine/vendor/lua-5.4.8/`, compiled directly from source, no system `liblua5.4` dependency. |
 | 2026-04-13 | [Lua interpreter spike](docs/plans/2026-04-13-lua-interpreter-spike.md) | **Complete** | Landed 2026-04-13; refactored 2026-04-15 to `lua_engine` namespace in `ScriptRouter`. Snowgoons player + director ported to Lua; player moves, cameras cut. |
 
 ---
@@ -120,6 +120,7 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 - **Steam packaging** — most runtime blockers resolved; packaging pipeline itself not yet started.
 
 ---
+
 ## Last Change
 
-**2026-04-16 07:46** — [`docs/plans/2026-04-16-blender-level-roundtrip.md`](docs/plans/2026-04-16-blender-level-roundtrip.md): Plan: Blender ↔ Level Round-Trip
+**2026-04-16 09:22** — [`docs/plans/2026-04-16-script-language-oad-field.md`](docs/plans/2026-04-16-script-language-oad-field.md): Plan: encode scripting language in OAS/OAD; drop runtime sigil detection

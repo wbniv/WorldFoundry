@@ -197,9 +197,9 @@ Script ends; mailbox persists.
 
 ## Files
 
-- `wftools/wf_viewer/stubs/scripting_stub.cc` — `ScriptRouter`, `lua_engine`, Fennel sub-dispatch.
-- `wftools/wf_viewer/stubs/scripting_{js,quickjs,jerryscript,wasm3,wamr,forth,wren}.{hp,cc}` — per-engine plugs.
-- `wftools/wf_viewer/stubs/fennel.lua` — vendored Fennel 1.6.1 (minified by `scripts/minify_lua.py`).
-- `wftools/vendor/{quickjs-v0.14.0,jerryscript-v3.0.0,wasm3-v0.5.0,wamr-2.2.0,wren-0.4.0,zforth-*,ficl,atlast,embed,libforth,pforth}/` — vendored runtimes.
+- `wftools/engine/stubs/scripting_stub.cc` — `ScriptRouter`, `lua_engine`, Fennel sub-dispatch.
+- `wftools/engine/stubs/scripting_{js,quickjs,jerryscript,wasm3,wamr,forth,wren}.{hp,cc}` — per-engine plugs.
+- `wftools/engine/stubs/fennel.lua` — vendored Fennel 1.6.1 (minified by `scripts/minify_lua.py`).
+- `engine/vendor/{quickjs-v0.14.0,jerryscript-v3.0.0,wasm3-v0.5.0,wamr-2.2.0,wren-0.4.0,zforth-*,ficl,atlast,embed,libforth,pforth}/` — vendored runtimes.
 - `scripts/patch_snowgoons_*.py` — per-language snowgoons iff patchers.
 - `docs/plans/2026-04-1{3,4}-*.md` — per-engine spike/integration plans.
