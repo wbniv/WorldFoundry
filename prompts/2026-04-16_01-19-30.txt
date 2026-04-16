@@ -1,0 +1,102 @@
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Summary:
+1. Primary Request and Intent:
+   The session's main tasks were:
+   - Create `status.md` at the repo root covering all plans (`docs/plans/`) and investigations (`docs/investigations/`) with status, summaries, and open follow-up work
+   - Answer questions about the current blocker (HAL cleanup) and update the status doc to accurately reflect it (Jolt character position fix, not HAL, is the real blocker)
+   - Correct the iffcomp primary language claim (Go → Rust; user confirmed "tools in Rust")
+   - Render `docs/compile-time-switches.md`; fix `DO_STEREOGRAM=true` → `=1`; document all BUILDMODE values including release vs final distinction (only `DESIGNER_CHEATS` differs); note that `build_game.sh` doesn't implement BUILDMODE at all
+   - Create a new plan `docs/plans/2026-04-16-script-language-oad-field.md` for encoding the scripting language in the OAS/OAD attribute field (and add Blender dropdown), dropping runtime sigil detection
+   - Add a note and planned-enum column to the scripting section of compile-time-switches.md referencing the new plan
+   - **Interrupted mid-task:** rename `status.md` → `wf-status.md`, set up a hook to auto-update `wf-status.md` whenever any `.md` doc is created
+
+2. Key Technical Concepts:
+   - WorldFoundry scripting: `ScriptRouter` dispatches by leading-byte sigil to compiled-in engines (Lua, Fennel, JS, Wasm, Wren, Forth); plan to replace with OAD integer field
+   - OAS/OAD format: `common.inc` defines per-actor attributes; `common.ht` is the C++ CommonBlock struct; `TYPEENTRYINT32` with `SHOW_AS_DROPMENU` is the pattern for enum fields
+   - Jolt physics character controller bug: WF stores actor position at feet; `JPH::CharacterVirtual` expects centre; fix is `ctr = minPt + half` offset applied on every set/get
+   - `build_game.sh` hardcodes debug-like flags; `GNUMakefile.bld` (old OpusMake) defined 8 BUILDMODE values (debug, safe-fast, release, final, profile, tool, max, kts)
+   - release vs final: identical except `DESIGNER_CHEATS` (1 vs 0); final is the disc-master build
+   - Tools language decision: Rust (confirmed by user); Go port superseded; C++ iffcomp kept as byte-exact oracle
+   - HAL cleanup: trivial dangling `TEST_TASKER`/`TEST_TIMER` references removed from `halbase.h`/`haltest.cc`; not blocking the build
+
+3. Files and Code Sections:
+   - `/home/will/WorldFoundry/status.md` (created, to be renamed wf-status.md)
+     - Tables of all 11 plans and 24 investigations with status
+     - Current blockers section: Jolt character position fix (not HAL) is the real blocker
+     - Open follow-up work organized by area
+   - `/home/will/WorldFoundry/docs/compile-time-switches.md` (modified)
+     - Added `DESIGNER_CHEATS` row to derived switches table
+     - Added plain-English description of release vs final
+     - Added note that `build_game.sh` doesn't implement BUILDMODE
+     - Architectural switches table updated to list all 8 BUILDMODE values
+     - Scripting section: added callout about planned OAD field + new "Enum (planned)" column
+     - Mid-edit when interrupted: was about to add full tool/max/kts descriptions
+   - `/home/will/WorldFoundry/docs/plans/2026-04-16-script-language-oad-field.md` (created)
+     - OAS change: `TYPEENTRYINT32(Script Language,ScriptLanguage,0,5,0,"Lua|Fennel|JavaScript|WebAssembly|Wren|Forth",SHOW_AS_DROPMENU)` in `common.inc`
+     - OAD struct change: `int32 ScriptLanguage;` in `common.ht`/`common.pp`
+     - `EvalScript`/`RunScript` gain `language` parameter
+     - `ScriptRouter::RunScript` becomes enum dispatch, no sigil sniff
+     - Blender plugin: enum dropdown with autodetect hint
+     - Enum: 0=lua, 1=fennel, 2=js, 3=wasm, 4=wren, 5=forth
+     - Migration: old files return 0 (Lua) for absent field; sigils stay as harmless comments
+   - `/home/will/.claude/projects/-home-will-WorldFoundry/memory/project_tools_language.md` (created)
+     - Captures "tools in Rust" decision
+   - `/home/will/.claude/projects/-home-will-WorldFoundry/memory/MEMORY.md` (updated)
+     - Added entry for tools language memory
+
+4. Errors and fixes:
+   - Edit failed on compile-time-switches.md: tried to Edit before Reading — fixed by reading the file first
+   - Status doc incorrectly stated Go was primary for iffcomp — user corrected "it's rust, btw. the decision was tools in rust." Fixed in status.md and saved to memory.
+   - Status doc's "Current blockers" section incorrectly framed HAL cleanup as the blocker — user said "right. update status doc" after my explanation that the Jolt char position fix was the real blocker. Rewrote the section to accurately describe both pieces of uncommitted work.
+   - Status doc had "iffcomp Go port as primary" — user challenged "says who?" — corrected to "undecided" then to Rust after user clarified.
+
+5. Problem Solving:
+   - Determined HAL cleanup is trivial (dead TEST_TASKER/TEST_TIMER guards); real blocker is Jolt character position offset bug (feet vs centre coordinate mismatch in CharacterVirtual)
+   - Identified that release vs final BUILDMODE differ only in DESIGNER_CHEATS by reading GNUMakefile.bld
+   - Identified tool/max/kts modes exist and were not yet documented in compile-time-switches.md
+
+6. All user messages:
+   - "make a new document, status.md (in root of WorldFoundry/) / create a table listing each plan's name (with link to plan doc) sorted by date of plan creation reverse-chronologically ordered / note if completed, in progress, deferred, decided against, etc. / provide a summary of status / note any follow-up work that hasn't been done yet or other important information called out in the plan"
+   - "include docs/investigations/ , too"
+   - "md" (while investigations were being read — render and open the resulting HTML)
+   - "Current blockers / HAL cleanup (this branch)... / how to unblock?"
+   - "right. update status doc"
+   - "'iffcomp Go port as primary...' says who?"
+   - "it's rust, btw. the decision was tools in rust"
+   - "md compile-time-switches"
+   - "DO_STEREOGRAM=true / we prefer / DO_STEREOGRAM=1 / no?"
+   - "commit this"
+   - "update compile-time-switches / what is the difference between release and final BUILDMODE?"
+   - "md" (render compile-time-switches.md again after edits)
+   - "have you documented all possible BUILDMODE values in compile-time-switches?" (sent while plan doc was rendering)
+   - "add note to 'A build may compile in any subset of engines...' / that in the future, the language will be encoded in the oas/oad attribute (and dropdown selector for language in the blender attributes editor plugin). / please make a plan for that (and completely drop the autodetect language at runtime---we'll probably keep it on the plugin so that the user doesn't have to manually set the language) / and refer to the new plan in compile-time-switch's note"
+   - "md" (render the new plan doc)
+   - "have you documented all possible BUILDMODE values in compile-time-switches?" (repeated)
+   - "rename status.md to wf-status.md / every time you create a new plan or investigation (Pretty much any .md file), update wf-status.md / save that as a hook"
+   - [summary request]
+
+7. Pending Tasks:
+   - Rename `status.md` → `wf-status.md`
+   - Set up a Claude Code hook (via `update-config` skill / settings.json) that auto-updates `wf-status.md` whenever a `.md` file is created in `docs/plans/` or `docs/investigations/`
+   - Complete BUILDMODE documentation in compile-time-switches.md: add `profile`, `tool`, `max`, `kts` to the derived switches table/section with descriptions
+   - Commit the compile-time-switches.md updates and the new plan doc
+
+8. Current Work:
+   Was mid-edit on `docs/compile-time-switches.md` adding all BUILDMODE values. Had just updated the architectural switches table to list all 8 modes but had not yet added descriptive rows or a full table for `profile`, `tool`, `max`, and `kts`. The edit already applied was:
+   ```
+   | `BUILDMODE` | `debug` / `safe-fast` / `release` / `final` / `profile` / `tool` / `max` / `kts` | ...
+   ```
+   But the derived switches table still only covers debug/safe-fast/release/final columns; profile/tool/max/kts need to be described (as prose, since they inherit from other modes rather than having unique switch values).
+
+   Simultaneously, the user interrupted with: "rename status.md to wf-status.md / every time you create a new plan or investigation (Pretty much any .md file), update wf-status.md / save that as a hook"
+
+9. Optional Next Step:
+   The most recent explicit requests, in order of recency:
+   1. Rename `status.md` → `wf-status.md`
+   2. Set up a hook (settings.json via `update-config` skill) to auto-update `wf-status.md` on new `.md` file creation
+   
+   Start with the rename, then use the `update-config` skill to configure the hook. The user said "save that as a hook" — this means a Claude Code hook in settings.json, not just a memory. Then complete the BUILDMODE documentation.
+
+If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/will/.claude/projects/-home-will-WorldFoundry/257f4b07-a0ff-438e-9c43-e8a4f05f6529.jsonl
+Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.

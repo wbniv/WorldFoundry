@@ -1,0 +1,1 @@
+i want to push wf-status.md to github whenever it is updated

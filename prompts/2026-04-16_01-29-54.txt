@@ -1,0 +1,5 @@
+"  On placement before Script: this does shift the binary layout of the CommonBlock struct in level IFF files, so old IFFs (not rebuilt after the change) would misread the fields. That's
+  fine if the migration plan includes a full level rebuild from Blender (re-export → re-run level converter on all levels). I'll update the plan to make that explicit.
+"
+
+ok, that's a fine reason. let's move the the language back to after the script field

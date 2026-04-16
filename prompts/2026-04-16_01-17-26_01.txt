@@ -1,0 +1,2 @@
+rename status.md to wf-status.md
+every time you create a new plan or investigation (Pretty much any .md file),

@@ -1,0 +1,21 @@
+Scalar ScriptRouter::RunScript(const void* script, int objectIndex, int language)
+{
+    const char* src = static_cast<const char*>(script);
+#ifdef WF_ENABLE_WREN
+    if (language == 2) return Scalar::FromFloat(wren_engine::RunScript(src, objectIndex));
+#endif
+#ifdef WF_ENABLE_FORTH
+    if (language == 3) return Scalar::FromFloat(forth_engine::RunScript(src, objectIndex));
+#endif
+#if defined(WF_JS_ENGINE_QUICKJS) || defined(WF_JS_ENGINE_JERRYSCRIPT)
+    if (language == 4) return Scalar::FromFloat(js_engine::RunScript(src, objectIndex));
+#endif
+#if defined(WF_WASM_ENGINE_WAMR) || defined(WF_WASM_ENGINE_WASM3)
+    if (language == 5) return Scalar::FromFloat(wasm3_engine::RunScript(src, objectIndex));
+#endif
+    // language == 1 (Fennel) is sub-dispatched inside lua_engine.
+    // language == 0 (Lua) and language == 1 (Fennel) both go here.
+    return Scalar::FromFloat(lua_engine::RunScript(src, objectIndex, language == 1));
+}
+
+never heard of a lookup table? heh

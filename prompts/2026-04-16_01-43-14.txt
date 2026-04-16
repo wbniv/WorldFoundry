@@ -1,0 +1,4 @@
+assert(language >= 0 && language < 6 && kDispatch[language] != nullptr);
+    return Scalar::FromFloat(kDispatch[language](static_cast<const char*>(script), objectIndex));
+
+you ALSO need to assert that the dispatch entry isn't null (not all languages will be compiled into an instance of the game engine)

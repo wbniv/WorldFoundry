@@ -1,0 +1,3 @@
+The HAL cleanup itself isn't blocking the build — it's that the smoke-test session needed these changes to land cleanly on one branch before starting the scripting regression run.
+
+right. update status doc

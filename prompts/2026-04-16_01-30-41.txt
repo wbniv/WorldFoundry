@@ -1,0 +1,2 @@
+i'm not terribly worried about backwards compatability atm but it does make it easier to debug for now.
+the binary compatability can be broken later, after we are primarily exporting from blender

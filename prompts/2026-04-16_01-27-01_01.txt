@@ -1,0 +1,20 @@
+"OAD / CommonBlock struct change
+
+File: wfsource/source/oas/common.ht
+
+Add alongside the existing Script and ScriptControlsInput fields:
+
+int32 Script;
+int32 ScriptLanguage;   // enum: 0=lua 1=fennel 2=js 3=wasm 4=wren 5=forth
+int32 ScriptControlsInput;
+
+Field order must match the OAS definition order (OAD is a flat struct laid out by the OAS compiler). Inserting ScriptLanguage between Script and ScriptControlsInput matches the common.inc definition above.
+
+common.pp must be updated identically."
+
+this is actually a misunderstanding of the build artifacts.
+making the change in source/oas/... is the source of several other files, including common.ht 
+
+you say "common.pp must be updated identically" --- what is common.pp again? --- pretty sure it's created from OAS file (OAS files are the source of truth)
+
+review the oas/oad system (you already have a doc on it, btw)

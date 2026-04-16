@@ -1,0 +1,4 @@
+"iffcomp Go port as primary — Go is primary; C++ kept as oracle. Formally retire C++ once Go passes all corner cases from
+all_features.iff.txt"
+
+says who?
