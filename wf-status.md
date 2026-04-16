@@ -13,7 +13,7 @@ The scripting system is comprehensively implemented and fully smoke-tested — L
 
 Dead-code removal is largely done: Batches 1–7 are complete, reducing `wfsource/source/` from 64,252 to 36,199 code lines (−43.7%). One batch (Batch 8 — physics replacement) is in progress.
 
-Jolt Physics integration is actively in progress: Phases 1–3 are committed (`b17a7ca`); further work is in the current uncommitted changes (`jolt_backend.cc`, `jolt_backend.hp`, `level.cc`, `halbase.h`, `haltest.cc`).
+Jolt Physics is functional and the default: `WF_PHYSICS_ENGINE=jolt`, snowgoons is playable. All committed; runtime init/shutdown lives in `WFGame`. Legacy `physics/wf/` retained pending parity on a second level.
 
 Multiple larger investigations (audio, mobile port, multiplayer, constraint-based props) are written up and deferred pending prerequisite work.
 
@@ -46,7 +46,7 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 | 2026-04-15 | [LOC tracking](docs/investigations/2026-04-15-loc-tracking.md) | **Ongoing** | Tracks code line count over time. Current HEAD: ~36,199 lines (−43.7% from baseline 64,252 at `74d1a47`). Tool: `scripts/loc_report.py`. |
 | 2026-04-14 | [Scripting language replacement](docs/investigations/2026-04-14-scripting-language-replacement.md) | **Complete** | Comprehensive survey that recommended Lua 5.4 as the primary engine. Spawned all scripting plans. Decision: Lua won. |
 | 2026-04-14 | [Physics engine survey](docs/investigations/2026-04-14-physics-engine-survey.md) | **Complete** | Surveyed Bullet, PhysX, Rapier, Jolt, and others. Recommended **Jolt Physics** (MIT, ~300 KB, `CharacterVirtual`, active upstream). Spawned Jolt integration plan. |
-| 2026-04-14 | [Jolt Physics integration](docs/investigations/2026-04-14-jolt-physics-integration.md) | **In progress** | Phases 1–3 committed (`b17a7ca`). Phase 4+ in current uncommitted changes (`jolt_backend.cc/hp`, `level.cc`). HAL changes (`halbase.h`, `haltest.cc`) also in flight. |
+| 2026-04-14 | [Jolt Physics integration](docs/investigations/2026-04-14-jolt-physics-integration.md) | **Functional** | Jolt is the default (`WF_PHYSICS_ENGINE=jolt`); snowgoons is playable. Runtime init/shutdown moved to `WFGame` (`b5dc7fe`). Legacy `physics/wf/` retained pending parity on a second level. |
 | 2026-04-14 | [Remove audio subsystem](docs/investigations/2026-04-14-remove-audio.md) | **Complete** | Implemented 2026-04-15. `wfsource/source/audio/` and `wfsource/source/audiofmt/` deleted. Stub audio stubs were non-functional on Linux. To be replaced by miniaudio (see audio investigation). |
 | 2026-04-13 | [ButtonType × showAs coverage audit](docs/investigations/2026-04-13-showas-coverage.md) | **Complete** | Audited all OAD field type × showAs combinations against the Blender plugin. Gaps identified and fixed. |
 | 2026-04-11 | [iffcomp — Rust rewrite](docs/investigations/2026-04-11-iffcomp-rs-rewrite.md) | **Complete** | Rust port in `wftools/iffcomp-rs/`. Byte-exact against C++ oracle. Includes comprehensive `all_features.iff.txt` torture test shared with Go port. |
@@ -78,11 +78,7 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 ## Current blockers
 
-**Jolt character position fix (in progress, this branch):** Jolt phases 4+ are in progress (`jolt_backend.cc`, `jolt_backend.hp`, `level.cc` uncommitted, plus HAL cleanup in `halbase.h`, `haltest.cc`). The scripting smoke tests have been completed on this branch. Remaining uncommitted work:
-
-- **HAL cleanup** (`halbase.h`, `haltest.cc`) — trivial. Removes dangling `TEST_TASKER` / `TEST_TIMER` guards and `TaskerTest()`/`TimerTest()` call sites left over from the Batch 5 tasker deletion. No logic change.
-
-- **Jolt character controller position fix** (`jolt_backend.cc`, `level.cc`) — WF stores actor position at the **feet**; Jolt's `CharacterVirtual` expects position at the **centre** of the bounding box. Fix stores `ctr = minPt + half` and applies it on every `SetPosition`; subtracts on every `GetPosition`. Also adds `JoltOptimizeBroadPhase()` call in `level.cc` after all static bodies are registered.
+No hard blockers. Jolt is functional and all scripting engines are smoke-tested. Active areas of ongoing work are listed in Open follow-up work below.
 
 ---
 
