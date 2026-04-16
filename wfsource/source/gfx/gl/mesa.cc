@@ -260,6 +260,7 @@ void ProcessXEvents(XEvent event)
                     break;
                 case XK_KP_Insert:
                 case XK_1:
+                case XK_space:
                     _joystickButtons |= EJ_BUTTONF_A;
                     break;
                 case XK_KP_Delete:
@@ -348,6 +349,7 @@ void ProcessXEvents(XEvent event)
                     break;
                 case XK_KP_Insert:
                 case XK_1:
+                case XK_space:
                     _joystickButtons &= ~EJ_BUTTONF_A;
                     break;
                 case XK_KP_Delete:

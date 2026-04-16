@@ -552,6 +552,7 @@ def _default_oad_dirs() -> list[str]:
     # already open").
     # TODO: replace with addon preference once Blender allows nested file pickers
     _HARDCODED_CANDIDATES = [
+        "/home/will/WorldFoundry/wftools/wf_oad/tests/fixtures",
         "/home/will/SRC/WorldFoundry-wbniv/wftools/wf_oad/tests/fixtures",
         "/home/will/SRC/WorldFoundry/wftools/wf_oad/tests/fixtures",
     ]
