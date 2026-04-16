@@ -1,3 +1,4 @@
+"""
 World Foundry level import / export operators.
 
   WF_OT_import_level  — read a .lev text IFF → populate Blender scene
@@ -19,9 +20,10 @@ World Foundry level import / export operators.
       ...
   }
 
-Coordinate transform (Blender Z-up ↔ WF Y-up):
-  export: wf_x = bl_x,  wf_y = bl_z,  wf_z = -bl_y
-  import: bl_x = wf_x,  bl_y = -wf_z, bl_z = wf_y
+Coordinate system: both WF and Blender use right-hand Z-up.
+  wf_to_bl and bl_to_wf are identity transforms.
+  (The earlier Y↔Z swap was wrong — WF is Z-up, confirmed by
+  mesh vertex data and Jolt physics output.)
 """
 
 import math
@@ -267,13 +269,13 @@ def _name_value(chunk):
 # ── coordinate transform ──────────────────────────────────────────────────────
 
 def wf_to_bl(wf_x, wf_y, wf_z):
-    """WF Y-up → Blender Z-up."""
-    return (wf_x, -wf_z, wf_y)
+    """WF Z-up → Blender Z-up (identity — both use right-hand Z-up)."""
+    return (wf_x, wf_y, wf_z)
 
 
 def bl_to_wf(bl_x, bl_y, bl_z):
-    """Blender Z-up → WF Y-up."""
-    return (bl_x, bl_z, -bl_y)
+    """Blender Z-up → WF Z-up (identity)."""
+    return (bl_x, bl_y, bl_z)
 
 
 # ── binary mesh reader ────────────────────────────────────────────────────────
@@ -752,9 +754,8 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
                 blobj.location = bl_loc
                 blobj.scale = (sx, sy, sz)
 
-            # Orientation: inverse of export mapping (rot.x, rot.z, -rot.y) → WF (a,b,c)
-            # so import: bl_x=wf_a, bl_y=-wf_c, bl_z=wf_b
-            blobj.rotation_euler = (rot_wf[0], -rot_wf[2], rot_wf[1])
+            # Both WF and Blender are Z-up — rotation axes map directly.
+            blobj.rotation_euler = (rot_wf[0], rot_wf[1], rot_wf[2])
 
             context.collection.objects.link(blobj)
 
@@ -893,9 +894,9 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
             loc = obj.matrix_world.to_translation()
             wf_pos = bl_to_wf(loc.x, loc.y, loc.z)
 
-            # Orientation: Euler from world rotation (ZXY ≈ WF a,b,c)
+            # Both Z-up — rotation maps directly.
             rot = obj.matrix_world.to_euler('XYZ')
-            wf_rot = (rot.x, rot.z, -rot.y)
+            wf_rot = (rot.x, rot.y, rot.z)
 
             def fp(v):
                 return f"{v:.16f}(1.15.16)"
@@ -1036,13 +1037,14 @@ def _import_path_block(blobj, obj_chunk, scene):
     fps = scene.render.fps / scene.render.fps_base
 
     # WF channel name → (Blender data_path, array_index, value transform)
+    # Both Z-up — direct mapping, no axis swap.
     chan_map = {
-        "position.x":  ("location", 0, lambda v: v),       # wf_x → bl_x
-        "position.y":  ("location", 2, lambda v: v),       # wf_y → bl_z
-        "position.z":  ("location", 1, lambda v: -v),      # wf_z → -bl_y
-        "rotation.a":  ("rotation_euler", 0, lambda v: v),  # wf_a → bl_rx
-        "rotation.b":  ("rotation_euler", 2, lambda v: v),  # wf_b → bl_rz
-        "rotation.c":  ("rotation_euler", 1, lambda v: -v), # wf_c → -bl_ry
+        "position.x":  ("location", 0, lambda v: v),
+        "position.y":  ("location", 1, lambda v: v),
+        "position.z":  ("location", 2, lambda v: v),
+        "rotation.a":  ("rotation_euler", 0, lambda v: v),
+        "rotation.b":  ("rotation_euler", 1, lambda v: v),
+        "rotation.c":  ("rotation_euler", 2, lambda v: v),
     }
 
     # Ensure the object has animation data
@@ -1107,13 +1109,14 @@ def _emit_path_block(obj, fp) -> list[str]:
     #           rotation_euler[0]=X, [1]=Y, [2]=Z
     # WF .lev:  position.x/y/z  rotation.a/b/c
     # With coordinate transform: wf_x=bl_x, wf_y=bl_z, wf_z=-bl_y
+    # Both Z-up — direct mapping, no axis swap.
     channel_map = [
-        ("position.x",  "location", 0, lambda v: v),       # bl_x → wf_x
-        ("position.y",  "location", 2, lambda v: v),       # bl_z → wf_y
-        ("position.z",  "location", 1, lambda v: -v),      # -bl_y → wf_z
-        ("rotation.a",  "rotation_euler", 0, lambda v: v),  # bl_rx → wf_a
-        ("rotation.b",  "rotation_euler", 2, lambda v: v),  # bl_rz → wf_b
-        ("rotation.c",  "rotation_euler", 1, lambda v: -v), # -bl_ry → wf_c
+        ("position.x",  "location", 0, lambda v: v),
+        ("position.y",  "location", 1, lambda v: v),
+        ("position.z",  "location", 2, lambda v: v),
+        ("rotation.a",  "rotation_euler", 0, lambda v: v),
+        ("rotation.b",  "rotation_euler", 1, lambda v: v),
+        ("rotation.c",  "rotation_euler", 2, lambda v: v),
     ]
 
     chan_data = {}  # name → [(time, value), ...]

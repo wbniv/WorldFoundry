@@ -229,3 +229,8 @@ Objects will appear in the correct WF-relative positions in Blender. The only or
 4. ✅ Blender .lev round-trip — 152/152 field names survive import→export;
    lights, slopes, and animation channels all emit correctly.
    Cross-referenced field-by-field against recovered `wfmaxplugins/max2lev`.
+5. ✅ Coordinate system fix — WF is Z-up (not Y-up as originally assumed).
+   Confirmed by mesh vertex data (house height on Z axis) and Jolt physics
+   output (feet_z ≈ 0, center_z ≈ 1).  Removed the incorrect Y↔Z swap from
+   `wf_to_bl`/`bl_to_wf` — transforms are now identity.  Level appears
+   upright in Blender.

@@ -316,6 +316,22 @@ The plugin source didn't overturn anything I'd already committed.  It
 *did* save several more iterations of the loop and made the remaining
 sentinel rules explicit enough to document in comments.
 
+### 16. WF is Z-up, not Y-up
+
+The Blender importer's `wf_to_bl` / `bl_to_wf` transforms assumed WF
+was Y-up and swapped Y↔Z on every position, rotation, and mesh vertex.
+This rotated the entire scene 90° in Blender — houses lying on their
+sides, trees horizontal.
+
+Confirmed WF is Z-up from two independent sources:
+- Mesh vertex data: `house.iff` VRTX has height along Z (range 6.50)
+- Jolt physics output: `feet_z=-0.017`, `center_z=0.985` (Z = up)
+- 3DS Max (which authored the original levels) is also Z-up
+
+Fix: changed `wf_to_bl` and `bl_to_wf` to identity transforms.
+Fixed rotation import/export and PATH/CHAN channel mapping to use
+direct axis correspondence instead of Y↔Z swaps.
+
 ## Resolution
 
 The ScriptLanguage field was reverted from `common.oad` to restore
