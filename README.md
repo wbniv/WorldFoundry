@@ -63,6 +63,7 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 | Date | Document | Summary |
 |------|----------|---------|
+| 2026-04-16 | [Coding conventions](docs/coding-conventions.md) | Authoritative C++ style guide for WF runtime code. Subsumes `wfsource/source/codingstandards.txt`. Covers target envelope, naming, Validate() discipline, assert family, no-fallback policy, lookup tables, OAS/OAD decision tree, mailboxes, streams, and foreign-library interop. |
 | 2026-04-15 | [JerryScript GCC 14 build fixes](docs/reference/2026-04-15-jerryscript-gcc14-build-fixes.md) | Documents 7 GCC 14 build failures in JerryScript v3.0.0 with `wf-minimal` profile and how they were fixed. Applied as part of the JS engine landing. |
 | 2026-04-14 | [Compile-time switches](docs/reference/2026-04-14-compile-time-switches.md) | Generated catalogue of 929 unique `#ifdef` switches across the codebase. Informational. See also `docs/compile-time-switches.md` (live version). |
 | 2026-04-14 | [Party game — reaction timer + image recognition](docs/reference/2026-04-14-party-game.md) | Chromecast party game concept (phone as controller, TV as display). Not a WF engine task — explores a standalone project idea. |
