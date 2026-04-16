@@ -15,6 +15,8 @@
 use std::path::Path;
 use wf_oad::{ButtonType, OadEntry, OadFile};
 
+use std::collections::HashMap;
+
 use crate::common_block::CommonBlockBuilder;
 use crate::lev_parser::{field_data, field_str_value, LevObject};
 
@@ -150,6 +152,7 @@ pub fn serialize_oad_data(
     schema: &OadFile,
     obj: &LevObject,
     common: &mut CommonBlockBuilder,
+    name_to_idx: &HashMap<String, i32>,
 ) -> Vec<u8> {
     let mut out = Vec::new();
     let mut i = 0;
@@ -167,7 +170,7 @@ pub fn serialize_oad_data(
                     && schema.entries[j].button_type != ButtonType::EndCommon
                 {
                     let e = &schema.entries[j];
-                    serialize_entry(&mut section, e, obj, common, true);
+                    serialize_entry(&mut section, e, obj, common, true, name_to_idx);
                     j += 1;
                 }
                 while section.len() % 4 != 0 { section.push(0); }
@@ -180,7 +183,7 @@ pub fn serialize_oad_data(
                 i += 1;
             }
             _ => {
-                serialize_entry(&mut out, entry, obj, common, false);
+                serialize_entry(&mut out, entry, obj, common, false, name_to_idx);
                 i += 1;
             }
         }
@@ -194,6 +197,7 @@ fn serialize_entry(
     obj: &LevObject,
     common: &mut CommonBlockBuilder,
     in_common: bool,
+    name_to_idx: &HashMap<String, i32>,
 ) {
     let key = entry.name_str();
     let chunk = obj.find_field(key);
@@ -220,11 +224,18 @@ fn serialize_entry(
             out.extend(std::iter::repeat(0u8).take(len - copy));
         }
         ButtonType::ObjectReference | ButtonType::ClassReference => {
-            // iff2lvl distinguishes context:
-            // - OUTSIDE a COMMONBLOCK (oad.cc:1677): default 0.
-            // - INSIDE  a COMMONBLOCK (level3.cc:99): default -1 (OBJECT_NULL).
-            // Name-based resolution is still a later phase.
-            let val = if in_common { -1 } else { 0 };
+            // iff2lvl / max2lvl resolve ObjectReference by looking up the
+            // .lev sub-chunk's nested STR value (the referenced object's
+            // name) in the level's object-name table.  When no name is
+            // given or it can't be resolved, iff2lvl/oad.cc:1677 uses
+            // default 0 outside common blocks; level3.cc:99 uses -1 inside.
+            let text = chunk.map(field_str_value).unwrap_or_default();
+            let resolved = if !text.is_empty() {
+                name_to_idx.get(&text).copied()
+            } else {
+                None
+            };
+            let val = resolved.unwrap_or(if in_common { -1 } else { 0 });
             push_i32(out, val);
         }
         ButtonType::Filename | ButtonType::MeshName => {

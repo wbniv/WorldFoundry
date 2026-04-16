@@ -74,13 +74,14 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
     // length before writing the header (the header carries commonDataOffset
     // and commonDataLength).  Building in-order mirrors iff2lvl's Save flow.
     let mut common = CommonBlockBuilder::new();
+    let name_to_idx = crate::lev_parser::name_to_index(plan.objects);
     let mut oad_payloads: Vec<Vec<u8>> = Vec::with_capacity(total_objects);
     oad_payloads.push(Vec::new());  // NULL_Object: empty payload
     for obj in plan.objects {
         let payload = plan
             .schemas
             .get(&obj.class_name)
-            .map(|s| serialize_oad_data(s, obj, &mut common))
+            .map(|s| serialize_oad_data(s, obj, &mut common, &name_to_idx))
             .unwrap_or_default();
         oad_payloads.push(payload);
     }

@@ -58,6 +58,17 @@ impl LevObject {
     }
 }
 
+/// Build a map from object name → 1-based index matching the `.lev` order.
+/// (Index 0 is reserved for NULL_Object in the output, so `objects[0]`
+/// becomes index 1, etc.)  Used for resolving ObjectReference fields.
+pub fn name_to_index(objects: &[LevObject]) -> std::collections::HashMap<String, i32> {
+    let mut map = std::collections::HashMap::new();
+    for (i, obj) in objects.iter().enumerate() {
+        map.insert(obj.name.clone(), (i + 1) as i32);
+    }
+    map
+}
+
 /// Return the NAME text of a field chunk, or empty string if absent.
 fn field_name(chunk: &IffChunk) -> String {
     let children = match read_chunks(&chunk.payload) {

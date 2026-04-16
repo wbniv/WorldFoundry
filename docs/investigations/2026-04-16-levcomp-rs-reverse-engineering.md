@@ -179,6 +179,44 @@ iff2lvl's `[TYPE | ROOM | INDEX]` packing (see `max2lvl::level2.cc:228`).
 
 With this post-patch applied, **snowgoons loads and the game loop runs**.
 
+### 13. ObjectReference name resolution
+
+One more assert landed after the game loop started: `actboxor.cc:83`
+on `getOad()->Object` (ObjectReference to the player actor).  My code
+was emitting `entry.def` (=0) for all outside-CB ObjectReferences.  The
+`.lev` format stores these as a nested STR containing the target
+object's name (e.g. `{ STR "player01" }`).  iff2lvl's
+`FindObjectIndex(name)` looks the name up in the level's object-list
+and writes the resulting index; max2lvl does the same at common-block
+assembly time (`level3.cc:99-118`).
+
+Added a name → 1-based-index map built from `plan.objects` at the top
+of `write()` and threaded through `serialize_oad_data` and
+`serialize_entry`.  When an ObjectReference field has a non-empty text
+value, look it up; fall back to the context-appropriate default (0
+outside CB, -1 inside) only when the name is absent or unknown.
+
+### The final milestone
+
+With ObjectReference resolution landed, the full boot sequence runs:
+
+- Level loads; 37 objects registered, 2 rooms computed
+- 15 statplats materialise as Jolt static bodies
+- Player character spawns, finds ground (`feet_z = -0.017`)
+- Physics broadphase optimized
+- REST API listens on port 8765
+- Game loop ticks
+
+The remaining failure (`No Valid View after 10 seconds`) is a script
+interpreter error: `snowgoons.lev` embeds Tcl script bodies
+(`# comments`, `write-mailbox $VAR [read-mailbox $VAR]`), but the
+engine's default script language is Lua and Tcl isn't one of the
+supported engines.  Every tick the Lua interpreter spits
+`unexpected symbol near '#'` for the Director script and the
+input-forwarding player script.  No input propagates; no camshot
+ever activates; the view-timeout fires.  This is a content-migration
+concern, not a levcomp-rs concern.
+
 ## Pivot: reading `max2lev` / `max2lvl`
 
 At this point the user said: "one of those is what you're trying to
@@ -249,16 +287,13 @@ sentinel rules explicit enough to document in comments.
 
 ## Outstanding work
 
-- OBJECTLIST sentinel fix landed (this session).  Waiting on a rebuilt
-  `wf_game` (user is in the middle of adding pforth) to see the next
-  assert — or first clean run.
 - Asset ID packing: deferred until we build a `.iff` from scratch,
   not needed for the LVL-swap pipeline we're using now to validate.
 - Path/channel generation: requires Blender-side keyframe export
   or post-process from mesh animations; deferred.
-- Commit hygiene: the last three fixes (OBJECT_REFERENCE in_common,
-  MovementClass default patch, XDATA sentinel table) haven't been
-  committed yet.
+- Content: port Tcl scripts in `snowgoons.lev` to Lua (or add a Tcl
+  engine to the scripting dispatch) to get the player moving and the
+  camera active.
 
 ## Files touched
 
