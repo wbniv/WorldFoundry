@@ -123,3 +123,7 @@ The uncommitted work is two things:
 - **Mobile port** — Android arm64 / iOS arm64; blocked on GL immediate-mode replacement + CMake migration.
 - **Multiplayer / voice / mobile input** — blocked on mobile port.
 - **Steam packaging** — most runtime blockers resolved; packaging pipeline itself not yet started.
+
+## Last Change
+
+**2026-04-16 02:08** — [`docs/plans/2026-04-16-script-language-oad-field.md`](docs/plans/2026-04-16-script-language-oad-field.md): Plan: encode scripting language in OAS/OAD; drop runtime sigil detection
