@@ -78,11 +78,7 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 ## Current blockers
 
-**Jolt character position fix (in progress, this branch):** Jolt phases 4+ are in progress (`jolt_backend.cc`, `jolt_backend.hp`, `level.cc` uncommitted, plus HAL cleanup in `halbase.h`, `haltest.cc`). The scripting smoke tests have been completed on this branch. Remaining uncommitted work:
-
-- **HAL cleanup** (`halbase.h`, `haltest.cc`) — trivial. Removes dangling `TEST_TASKER` / `TEST_TIMER` guards and `TaskerTest()`/`TimerTest()` call sites left over from the Batch 5 tasker deletion. No logic change.
-
-- **Jolt character controller position fix** (`jolt_backend.cc`, `level.cc`) — WF stores actor position at the **feet**; Jolt's `CharacterVirtual` expects position at the **centre** of the bounding box. Fix stores `ctr = minPt + half` and applies it on every `SetPosition`; subtracts on every `GetPosition`. Also adds `JoltOptimizeBroadPhase()` call in `level.cc` after all static bodies are registered.
+No hard blockers. Jolt is functional and all scripting engines are smoke-tested. Active areas of ongoing work are listed in Open follow-up work below.
 
 ---
 
