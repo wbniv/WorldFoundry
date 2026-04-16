@@ -494,7 +494,7 @@ html = f'''<!DOCTYPE html>
   del {{ color: #656d76; }}
   table {{ border-collapse: collapse; width: 100%; margin: 16px 0; table-layout: fixed; }}
   th, td {{ border: 1px solid #d1d9e0; padding: 8px 12px; text-align: left; vertical-align: top; }}
-  th:first-child {{ white-space: nowrap; }}
+  th:first-child {{ white-space: nowrap; width: 15%; }}
   th {{ background: #f6f8fa; font-weight: 600; }}
   tr:nth-child(even) {{ background: #f6f8fa; }}
   tr.note-row td {{ background: #fafafa; font-size: 0.88em; color: #555; padding: 3px 12px 5px 20px; border-top: none; }}
