@@ -5,7 +5,7 @@
 **Depends on:**
 - `docs/investigations/2026-04-14-jolt-physics-integration.md` (this plan assumes `WF_PHYSICS_ENGINE=jolt` is the default by the time this work starts).
 - **IFF binary chunk support** (referenced in the wasm3 plan's follow-ups). Hard prerequisite — this plan does not ship a text-encoded interim format. See Open questions for rationale.
-**Related:** `docs/investigations/2026-04-13-blender-to-cd-iff-pipeline.md`, `docs/investigations/2026-04-13-oas-oad-format.md`, `docs/2026-04-10-worldfoundry-iffcomp-format.md`.
+**Related:** `docs/reference/2026-04-13-blender-to-cd-iff-pipeline.md`, `docs/reference/2026-04-13-oas-oad-format.md`, `docs/2026-04-10-worldfoundry-iffcomp-format.md`.
 
 ## Context
 
@@ -90,7 +90,7 @@ Goal: Prove the constraint runtime by hand-writing a `CNST` chunk into a test if
 
 Goal: Author the same test props in Blender, export via the existing Blender→CD-IFF pipeline, and produce a byte-identical (or equivalent) `CNST` chunk to the hand-authored one.
 
-1. Extend the pipeline's exporter (see `docs/investigations/2026-04-13-blender-to-cd-iff-pipeline.md`) to walk `bpy.data.objects` looking for `obj.rigid_body_constraint`.
+1. Extend the pipeline's exporter (see `docs/reference/2026-04-13-blender-to-cd-iff-pipeline.md`) to walk `bpy.data.objects` looking for `obj.rigid_body_constraint`.
 2. Map Blender constraint types to the `CnstRecord.type` enum:
    - `HINGE` → 0
    - `SLIDER` → 1

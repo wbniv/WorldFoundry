@@ -6,7 +6,7 @@ INPUT=$(cat)
 FILE=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // empty')
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 
-if echo "$FILE" | grep -qE 'docs/(plans|investigations)/[^/]+\.md$'; then
+if echo "$FILE" | grep -qE 'docs/(plans|investigations|reference)/[^/]+\.md$'; then
     python3 "$REPO/scripts/update_wf_status.py" "$FILE"
 fi
 

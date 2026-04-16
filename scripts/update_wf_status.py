@@ -114,10 +114,10 @@ def main():
         sys.exit(0)
 
     parts = rel.parts
-    if len(parts) < 2 or parts[0] != 'docs' or parts[1] not in ('plans', 'investigations'):
+    if len(parts) < 2 or parts[0] != 'docs' or parts[1] not in ('plans', 'investigations', 'reference'):
         sys.exit(0)
 
-    kind = parts[1]   # 'plans' or 'investigations'
+    kind = parts[1]   # 'plans', 'investigations', or 'reference'
     rel_path = str(rel)
 
     # Read the doc
@@ -138,20 +138,36 @@ def main():
     # ── update body ──────────────────────────────────────────────────────────
     content = status_path.read_text()
 
-    section_header = '## Plans' if kind == 'plans' else '## Investigations'
-    col_header = 'Plan' if kind == 'plans' else 'Investigation'
+    if kind == 'plans':
+        section_header = '## Plans'
+        col_header = 'Plan'
+    elif kind == 'investigations':
+        section_header = '## Investigations'
+        col_header = 'Investigation'
+    else:
+        section_header = '## Reference'
+        col_header = 'Document'
 
     # Only add if not already present
     if rel_path not in content:
-        new_row = make_row(date, title, rel_path, status, summary)
+        if kind == 'reference':
+            # Reference table has no Status column
+            new_row = f'| {date} | [{title}]({rel_path}) | {summary} |'
+            pattern = (
+                r'(' + re.escape(section_header) + r'\n\n'
+                r'\| Date \| ' + re.escape(col_header) + r' \| Summary \|\n'
+                r'\|[-| ]+\|\n'
+                r')'
+            )
+        else:
+            new_row = make_row(date, title, rel_path, status, summary)
+            pattern = (
+                r'(' + re.escape(section_header) + r'\n\n'
+                r'\| Date \| ' + re.escape(col_header) + r' \| Status \| Summary \|\n'
+                r'\|[-| ]+\|\n'
+                r')'
+            )
 
-        # Find the table in the correct section and insert after the header row
-        pattern = (
-            r'(' + re.escape(section_header) + r'\n\n'
-            r'\| Date \| ' + re.escape(col_header) + r' \| Status \| Summary \|\n'
-            r'\|[-| ]+\|\n'
-            r')'
-        )
         def insert_row(m):
             return m.group(1) + new_row + '\n'
 
