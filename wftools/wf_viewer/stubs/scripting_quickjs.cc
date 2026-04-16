@@ -4,6 +4,23 @@
 // read_mailbox / write_mailbox callbacks and INDEXOF_* / JOYSTICK_BUTTON_*
 // globals the Lua side publishes, so an author can port a Lua script to JS
 // by hand with no API drift.
+//
+// Multi-tick generator support
+// ----------------------------
+// A script that wants to span multiple ticks evaluates to a generator object
+// using the IIFE pattern:
+//
+//   (function*() {
+//       while (read_mailbox(INDEXOF_TRIGGER_A) == 0) yield
+//       write_mailbox(INDEXOF_ALARM, 1)
+//       for (let i = 0; i < 60; i++) yield
+//       write_mailbox(INDEXOF_ALARM, 0)
+//       write_mailbox(INDEXOF_DOOR_LOCKED, 1)
+//   })()
+//
+// RunScript duck-type-checks the return value for a callable `.next` property.
+// If found, it stores the generator and advances it once per tick via .next().
+// When the {done: true} result arrives the stored value is freed.
 
 #include "scripting_js.hp"
 
@@ -20,6 +37,7 @@ extern "C" {
 #include <cstdio>
 #include <cstring>
 #include <cmath>
+#include <unordered_map>
 
 namespace {
 
@@ -27,6 +45,10 @@ JSRuntime*        gRt       = nullptr;
 JSContext*        gCtx      = nullptr;
 MailboxesManager* gMgr      = nullptr;
 int               gCurObj   = 0;
+
+// Per-actor live generator handles: objectIndex → JSValue (generator object).
+// Values are JS_DupValue'd; freed with JS_FreeValue when done.
+std::unordered_map<int, JSValue> gActorGenHandles;
 
 JSValue js_read_mailbox(JSContext* ctx, JSValueConst, int argc, JSValueConst* argv)
 {
@@ -87,6 +109,35 @@ void log_exception(const char* where)
     JS_FreeValue(gCtx, exc);
 }
 
+// Duck-type check: object with a callable `.next` property → treat as generator.
+bool IsGenerator(JSValue v)
+{
+    if (!JS_IsObject(v)) return false;
+    JSValue next = JS_GetPropertyStr(gCtx, v, "next");
+    bool ok = JS_IsFunction(gCtx, next);
+    JS_FreeValue(gCtx, next);
+    return ok;
+}
+
+// Advance the generator one step. Returns true if done (or errored).
+bool StepGenerator(JSValue gen)
+{
+    JSAtom nextAtom = JS_NewAtom(gCtx, "next");
+    JSValue result  = JS_Invoke(gCtx, gen, nextAtom, 0, nullptr);
+    JS_FreeAtom(gCtx, nextAtom);
+
+    if (JS_IsException(result)) {
+        log_exception("generator step");
+        JS_FreeValue(gCtx, result);
+        return true;
+    }
+    JSValue done  = JS_GetPropertyStr(gCtx, result, "done");
+    bool isDone   = (JS_ToBool(gCtx, done) == 1);
+    JS_FreeValue(gCtx, done);
+    JS_FreeValue(gCtx, result);
+    return isDone;
+}
+
 } // namespace
 
 void js_engine::Init(MailboxesManager& mgr)
@@ -110,7 +161,13 @@ void js_engine::Init(MailboxesManager& mgr)
 
 void js_engine::Shutdown()
 {
-    if (gCtx) { JS_FreeContext(gCtx); gCtx = nullptr; }
+    if (gCtx) {
+        for (auto& kv : gActorGenHandles)
+            JS_FreeValue(gCtx, kv.second);
+        gActorGenHandles.clear();
+        JS_FreeContext(gCtx);
+        gCtx = nullptr;
+    }
     if (gRt)  { JS_FreeRuntime(gRt);  gRt  = nullptr; }
     gMgr = nullptr;
 }
@@ -141,6 +198,20 @@ float js_engine::RunScript(const char* src, int objectIndex)
 {
     if (!gCtx || !src) return 0.0f;
     gCurObj = objectIndex;
+
+    // Resume a live generator instead of re-evaluating the script.
+    {
+        auto it = gActorGenHandles.find(objectIndex);
+        if (it != gActorGenHandles.end()) {
+            bool done = StepGenerator(it->second);
+            if (done) {
+                JS_FreeValue(gCtx, it->second);
+                gActorGenHandles.erase(it);
+            }
+            return 0.0f;
+        }
+    }
+
     size_t len = std::strlen(src);
     JSValue rv = JS_Eval(gCtx, src, len, "<iff>", JS_EVAL_TYPE_GLOBAL);
     if (JS_IsException(rv)) {
@@ -149,6 +220,19 @@ float js_engine::RunScript(const char* src, int objectIndex)
         JS_FreeValue(gCtx, rv);
         return 0.0f;
     }
+
+    // Detect multi-tick generator.
+    if (IsGenerator(rv)) {
+        gActorGenHandles[objectIndex] = JS_DupValue(gCtx, rv);
+        bool done = StepGenerator(rv);  // first step
+        if (done) {
+            JS_FreeValue(gCtx, gActorGenHandles[objectIndex]);
+            gActorGenHandles.erase(objectIndex);
+        }
+        JS_FreeValue(gCtx, rv);
+        return 0.0f;
+    }
+
     double d = 0.0;
     if (JS_ToFloat64(gCtx, &d, rv) < 0 || std::isnan(d)) d = 0.0;
     JS_FreeValue(gCtx, rv);

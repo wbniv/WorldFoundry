@@ -12,6 +12,13 @@
 //   : read-mailbox  128 sys ;   \ ZF_SYSCALL_USER+0: ( idx -- val )
 //   : write-mailbox 129 sys ;   \ ZF_SYSCALL_USER+1: ( val idx -- )
 //
+// Control flow (zForth uses `fi` not `then`):
+//   if ... fi        ( flag -- )
+//   if ... else ... fi
+//   begin ... until  ( flag -- )
+//   begin ... again
+//   limit start do ... loop
+//
 // Constants are loaded at AddConstantArray time:
 //   3024 constant INDEXOF_INPUT
 //   1009 constant INDEXOF_HARDWARE_JOYSTICK1_RAW
@@ -145,6 +152,11 @@ static const char* kCoreBootstrap =
     ": !    0 !! ; "
     ": @    0 @@ ; "
     ": ,    0 ,, ; "
+    // Max-width cell stores for jump targets — must be fixed-width so the
+    // compiler can back-patch branch addresses after emitting a placeholder.
+    // 64 is ZF_MEM_SIZE_VAR_MAX; see zforth.c.
+    ": !j  64 !! ; "
+    ": ,j  64 ,, ; "
     // Interpreter state control
     ": [ 0 compiling ! ; immediate "
     ": ] 1 compiling ! ; "
@@ -159,8 +171,29 @@ static const char* kCoreBootstrap =
     ": not 0 = ; "
     ": <  - <0 ; "
     ": >  swap < ; "
+    ": <= over over >r >r < r> r> = + ; "
+    ": >= swap <= ; "
     ": <> = not ; "
     ": 0<> 0 <> ; "
+    // Control flow — if/else/fi, begin/until/again
+    // `if` emits a jmp0 with a placeholder target; `fi` back-patches it.
+    // `else` emits an unconditional jmp past the else-body, back-patches
+    // the if's jmp0 to here, then leaves the else's jmp for `fi` to patch.
+    ": if     ' jmp0 , here 0 ,j ; immediate "
+    ": else   ' jmp  , here 0 ,j swap here swap !j ; immediate "
+    ": fi     here swap !j ; immediate "
+    ": begin  here ; immediate "
+    ": again  ' jmp  , , ; immediate "
+    ": until  ' jmp0 , , ; immediate "
+    // Counted loop: `limit start do ... loop`
+    // `i` pushes the current loop index (TOR[0]); `j` the outer index (TOR[2]).
+    // loop+ increments by n; loop by 1.  All immediate — compiled, not eval'd.
+    ": i     ' lit , 0 , ' pickr , ; immediate "
+    ": j     ' lit , 2 , ' pickr , ; immediate "
+    ": do    ' swap , ' >r , ' >r , here ; immediate "
+    ": loop+ ' r> , ' + , ' dup , ' >r , ' lit , 1 , ' pickr , ' >= , "
+             "' jmp0 , , ' r> , ' drop , ' r> , ' drop , ; immediate "
+    ": loop  ' lit , 1 , postpone loop+ ; immediate "
     ;
 
 void Init(MailboxesManager& mgr)

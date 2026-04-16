@@ -23,10 +23,12 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
+| 2026-04-16 | [Plan: Blender ↔ Level Round-Trip](docs/plans/2026-04-16-blender-level-roundtrip.md) | **Planned** | **Branch:** 2026-first-working-gap |
 | 2026-04-16 | [ScriptLanguage OAD field](docs/plans/2026-04-16-script-language-oad-field.md) | **Planned** | Move language selection from runtime sigil detection into an explicit `int32 ScriptLanguage` OAD field (dropmenu in Blender). Dispatch via function pointer table. Migration scriptable from Blender headless. |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Partial** | Batches 1–7 complete (−43.7% LOC). Batch 6 (`#if 0` sweep) done. Batch 7 (PSX/Win artifacts, OpusMake, platform guards) done. Batch 8 (Jolt physics replacement) in progress. |
 | 2026-04-14 | [WAMR (dev interp + AOT ship)](docs/plans/2026-04-14-wamr-dev-aot-ship.md) | **Partial** | Phase 1 (classic interpreter) landed 2026-04-15; smoke-tested 2026-04-16 (GROUND, no crashes). Phase 2 (AOT) deferred. |
 | 2026-04-14 | [Forth scripting engine](docs/plans/2026-04-14-forth-scripting-engine.md) | **Partial** | Phase 1 (all 6 vendors) done. zForth default backend landed with `scripting_forth.hp`/`scripting_zforth.cc`, dispatch arm, build flag, patcher, docs. Smoke-tested 2026-04-16 (GROUND, no crashes). Alternate backends (ficl, atlast, embed, libforth, pforth) deferred. |
+| 2026-04-16 | [Finish Jolt physics integration](docs/plans/2026-04-16-jolt-physics-finish.md) | **Complete** | Five-step plan: fix SIGABRT (`JoltSyncFromCharacter`), eliminate zombie kinematic bodies, lock WF↔Jolt authority model, fix 3 m vertical pop (feet vs centre offset), 60 s soak. Player walks on snowgoons floor. |
 | 2026-04-14 | [Pluggable JS engines (QuickJS / JerryScript)](docs/plans/2026-04-14-pluggable-scripting-engine.md) | **Complete** | Both engines landed 2026-04-14 with `js_engine` namespace. QuickJS and JerryScript both smoke-tested 2026-04-16 (snowgoons passes). |
 | 2026-04-15 | [Lua engine fixes (#1–#6)](docs/plans/2026-04-15-lua-engine-fixes.md) | **Landed** | All 6 fixes implemented: script cache, per-actor envs, Fennel precompile, debug gating, stdlib sandbox, coroutine continuations. Smoke test pending HAL cleanup. |
 | 2026-04-15 | [Align scripting plans to ScriptRouter](docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md) | **Complete** | Phases A–E complete: all plan docs updated, JS/wasm3 renamed to `js_engine`/`wasm3_engine` namespaces, WAMR/Wren/Forth landed. All engine smoke tests passed 2026-04-16. |
@@ -63,11 +65,10 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 | Date | Document | Summary |
 |------|----------|---------|
+| 2026-04-16 | [Scripting languages in WF](docs/scripting-languages.md) | Survey of all supported engines (Lua, Fennel, JS, wasm, Wren, Forth). Covers integration surface, binary cost (`.text`, `-O2`), RAM footprint, compile-time switches, and reference scripts for each language. |
 | 2026-04-16 | [Coding conventions](docs/coding-conventions.md) | Authoritative C++ style guide for WF runtime code. Subsumes `wfsource/source/codingstandards.txt`. Covers target envelope, naming, Validate() discipline, assert family, no-fallback policy, lookup tables, OAS/OAD decision tree, mailboxes, streams, and foreign-library interop. |
 | 2026-04-15 | [JerryScript GCC 14 build fixes](docs/reference/2026-04-15-jerryscript-gcc14-build-fixes.md) | Documents 7 GCC 14 build failures in JerryScript v3.0.0 with `wf-minimal` profile and how they were fixed. Applied as part of the JS engine landing. |
 | 2026-04-14 | [Compile-time switches](docs/reference/2026-04-14-compile-time-switches.md) | Generated catalogue of 929 unique `#ifdef` switches across the codebase. Informational. See also `docs/compile-time-switches.md` (live version). |
-| 2026-04-14 | [Party game — reaction timer + image recognition](docs/reference/2026-04-14-party-game.md) | Chromecast party game concept (phone as controller, TV as display). Not a WF engine task — explores a standalone project idea. |
-| 2026-04-14 | [Party game — card games (fill-in-the-blank / comic strip)](docs/reference/2026-04-14-party-game-cards.md) | Two Chromecast card game designs. Same platform stack as above. Not a WF engine task. |
 | 2026-04-13 | [Blender → cd.iff pipeline](docs/reference/2026-04-13-blender-to-cd-iff-pipeline.md) | Maps the existing pipeline and proposes the Blender-native replacement for the 3DS Max content path. Key follow-up: no automated `.lev` → `.iff` path from Blender yet. |
 | 2026-04-13 | [OAS / OAD format](docs/reference/2026-04-13-oas-oad-format.md) | Documents the OAS (object attribute source) and OAD (compiled descriptor) binary format. Used by `wf_blender` and `oas2oad-rs`. |
 | 2026-04-12 | [Steam shipping plan](docs/reference/2026-04-12-steam-shipping-plan.md) | Comprehensive plan for shipping a WF-based game on Steam. Enumerates runtime blockers (build system, C++ dialect, HAL, graphics, scripting). Most blockers are now resolved or being resolved; Steam packaging itself not yet started. |
@@ -118,6 +119,7 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 - **Multiplayer / voice / mobile input** — blocked on mobile port.
 - **Steam packaging** — most runtime blockers resolved; packaging pipeline itself not yet started.
 
+---
 ## Last Change
 
-**2026-04-16 05:52** — [`docs/investigations/2026-04-14-jolt-physics-integration.md`](docs/investigations/2026-04-14-jolt-physics-integration.md): Investigation: Integrate [Jolt Physics](https://jrouwe.github.io/JoltPhysics/) as the WF physics backend
+**2026-04-16 07:46** — [`docs/plans/2026-04-16-blender-level-roundtrip.md`](docs/plans/2026-04-16-blender-level-roundtrip.md): Plan: Blender ↔ Level Round-Trip

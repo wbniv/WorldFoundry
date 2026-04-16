@@ -515,7 +515,7 @@ html = f'''<!DOCTYPE html>
   hr {{ border: none; border-top: 1px solid #d1d9e0; margin: 24px 0; }}
   .mermaid-diagram {{ margin: 24px -20px; }}
   .mermaid-diagram svg {{ width: 100%; height: auto; }}
-  @media print {{ body {{ max-width: 100%; margin: 0; }} img {{ break-inside: avoid; }} table {{ break-inside: avoid; }} .mermaid-diagram {{ margin: 24px 0; page-break-inside: avoid; }} }}
+  @media print {{ body {{ max-width: 100%; margin: 0; }} img {{ break-inside: avoid; }} tr {{ break-inside: avoid; }} .mermaid-diagram {{ margin: 24px 0; page-break-inside: avoid; }} }}
 </style>
 </head>
 <body>

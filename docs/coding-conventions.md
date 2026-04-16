@@ -382,12 +382,19 @@ assert(kDispatch[language] != nullptr);
 The first assertion tells you the range fact; the second tells you the table
 fact. A failure in either reports which one.
 
-**Best:**
+**Better:**
 
 ```cpp
 RangeCheck(0, language, 6);
 AssertMsg(kDispatch[language] != nullptr, "no dispatch table entry for language " << language);
 ```
+
+**Better:**
+```cpp
+RangeCheck(0, language, std::size(kDispatch));
+AssertMsg(kDispatch[language] != nullptr, "no dispatch table entry for language " << language);
+```
+
 
 `AssertMsg` streams the value of `language` into the failure output — so
 when the table assertion fires on a console log, the message names the

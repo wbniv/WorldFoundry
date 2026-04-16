@@ -100,7 +100,7 @@ New crate `wftools/levcomp-rs/`:
 
 ### cd.iff packing
 
-After `levcomp-rs` produces a binary level `.iff`, inject it into `cd.iff`. Either extend `iffcomp-rs` or add a small `cdpack-rs` tool to replace a named level slot. Secondary concern — tackle after levcomp-rs works on a test file.
+After `levcomp-rs` produces a binary level `.iff`, rebuild `cd.iff` from `cd.iff.txt` via `iffcomp-rs`. The `.iff.txt` already references level files by name — updating it to point at the new level output is the intended workflow, not slot-injection.
 
 ## Orientation check verdict
 
@@ -127,7 +127,7 @@ Objects will appear in the correct WF-relative positions in Blender. The only or
 
 1. **Gap 1+2:** Import `snowgoons.lev`; player object shows script text in its Blender panel
 2. **Gap 3:** `ScriptLanguage=0` on player; snowgoons runs identically; `grep 'p\[0\]\|sigil' wftools/wf_viewer/stubs/scripting_stub.cc` → empty
-3. **Gap 4:** `levcomp-rs snowgoons.lev -o snowgoons_new.iff`; pack into `cd.iff`; `wf_game` loads and plays snowgoons identically to original
+3. **Gap 4:** `levcomp-rs snowgoons.lev -o snowgoons_new.iff`; update `cd.iff.txt` to reference it; `iffcomp-rs cd.iff.txt -o cd.iff`; `wf_game` loads and plays snowgoons identically to original
 
 ## Sequencing
 

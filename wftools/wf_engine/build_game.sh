@@ -19,7 +19,7 @@ WF_ENABLE_FENNEL="${WF_ENABLE_FENNEL:-1}"
 # Feature flag: optional JS engine for the `//` sigil. One of:
 #   none        (default) — no JS compiled in, zero binary/asset delta vs. Lua-only.
 #   quickjs     — QuickJS (~350 KB), modern ES2020.
-#   jerryscript — JerryScript wf-minimal profile (~80-90 KB), ES5.1 subset.
+#   jerryscript — JerryScript wf-minimal profile (~237 KB .text), ES5.1 subset.
 # Multiple JS engines at once is deliberately forbidden; the sigil `//` is shared.
 WF_JS_ENGINE="${WF_JS_ENGINE:-quickjs}"
 case "$WF_JS_ENGINE" in

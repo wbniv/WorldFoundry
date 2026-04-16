@@ -233,20 +233,20 @@ public:
 
 #	define RangeCheck( min, value, max) \
 		{\
-		AssertMsg((value) >= (min), #min " = " << (min) << ", " << #value " = " << (value) ); \
-		AssertMsg((value) < (max), #value " = " << (value) << ", " #max " = " << (max) );\
+		AssertMsg((ptrdiff_t)(value) >= (ptrdiff_t)(min), #min " = " << (min) << ", " << #value " = " << (value) ); \
+		AssertMsg((ptrdiff_t)(value) < (ptrdiff_t)(max), #value " = " << (value) << ", " #max " = " << (max) );\
 		}
 
 #	define RangeCheckInclusive( min, value,  max) \
 	{\
-		AssertMsg((value) >= (min), #min " = " << (min) << ", " << #value " = " << (value) ); \
-		AssertMsg((value) <= (max), #value " = " << (value) << ", " #max " = " << (max) ); \
+		AssertMsg((ptrdiff_t)(value) >= (ptrdiff_t)(min), #min " = " << (min) << ", " << #value " = " << (value) ); \
+		AssertMsg((ptrdiff_t)(value) <= (ptrdiff_t)(max), #value " = " << (value) << ", " #max " = " << (max) ); \
 	}
 
 #	define RangeCheckExclusive( min, value, max) \
 	{\
-		AssertMsg((value) > (min), #min " = " << (min) << ", " << #value " = " << (value) ); \
-		AssertMsg((value) < (max), #value " = " << (value) << ", " << #max " = " << (max) ); \
+		AssertMsg((ptrdiff_t)(value) > (ptrdiff_t)(min), #min " = " << (min) << ", " << #value " = " << (value) ); \
+		AssertMsg((ptrdiff_t)(value) < (ptrdiff_t)(max), #value " = " << (value) << ", " << #max " = " << (max) ); \
 	}
 
 #	define assertEq(value1, value2) AssertMsg((value1) == (value2), #value1 " = " << (value1) << ", " #value2 " = " << (value2))
