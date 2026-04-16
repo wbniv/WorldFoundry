@@ -125,6 +125,10 @@ pub fn per_object_size(schema: &OadFile) -> usize {
 ///   buffer, hands them to `common` for dedup, then writes the returned offset
 ///   into the per-object payload as a 4-byte LE i32.
 /// - ENDCOMMON marker: closes the common section.
+///
+/// `common` is the level's common data area.  XDATA script fields append
+/// their text bytes here too (separately from CB sections), and their 4-byte
+/// value in the CB section is the returned offset.
 pub fn serialize_oad_data(
     schema: &OadFile,
     obj: &LevObject,
@@ -137,20 +141,18 @@ pub fn serialize_oad_data(
         match entry.button_type {
             ButtonType::CommonBlock => {
                 // Gather fields up to the next EndCommon into a section buffer.
+                // XDATA fields serialize by appending their text to `common`
+                // first, then writing the returned offset — so we pass the
+                // builder down into the per-field serializer.
                 let mut section = Vec::new();
                 let mut j = i + 1;
                 while j < schema.entries.len()
                     && schema.entries[j].button_type != ButtonType::EndCommon
                 {
                     let e = &schema.entries[j];
-                    // Nested COMMONBLOCK inside a COMMONBLOCK isn't valid in
-                    // iff2lvl; treat it as a normal entry if it appears.
-                    serialize_entry(&mut section, e, obj);
+                    serialize_entry(&mut section, e, obj, common);
                     j += 1;
                 }
-                // Pad section to 4-byte boundary — common data area is kept
-                // 4-byte aligned by iff2lvl, and section lengths always end up
-                // there naturally, but guard against schema quirks.
                 while section.len() % 4 != 0 { section.push(0); }
                 let offset = common.add(&section);
                 push_i32(&mut out, offset);
@@ -161,7 +163,7 @@ pub fn serialize_oad_data(
                 i += 1;
             }
             _ => {
-                serialize_entry(&mut out, entry, obj);
+                serialize_entry(&mut out, entry, obj, common);
                 i += 1;
             }
         }
@@ -169,7 +171,12 @@ pub fn serialize_oad_data(
     out
 }
 
-fn serialize_entry(out: &mut Vec<u8>, entry: &OadEntry, obj: &LevObject) {
+fn serialize_entry(
+    out: &mut Vec<u8>,
+    entry: &OadEntry,
+    obj: &LevObject,
+    common: &mut CommonBlockBuilder,
+) {
     let key = entry.name_str();
     let chunk = obj.find_field(key);
 
@@ -206,9 +213,26 @@ fn serialize_entry(out: &mut Vec<u8>, entry: &OadEntry, obj: &LevObject) {
             push_i32(out, 0);
         }
         ButtonType::XData => {
-            // Scripts / object lists / contextual animations live in the
-            // common data area.  Offset resolution is a later phase.
-            push_i32(out, 0);
+            // Conversion actions 1..=4 (COPY / OBJECTLIST / CONTEXTUAL_ANIM_LIST
+            // / SCRIPT) all materialise as a 4-byte offset into the common
+            // data area where the payload bytes live.  Action 0 (IGNORE) and
+            // anything else writes nothing (per_object_size() also treats it
+            // as 0 bytes, so that case doesn't reach here).
+            let action = entry.xdata_conversion_action();
+            if (1..=4).contains(&action) {
+                let offset = match chunk {
+                    Some(c) => {
+                        let text = crate::lev_parser::field_str_value(c);
+                        // Null-terminated; add() pads the result to 4-byte.
+                        let mut bytes = text.into_bytes();
+                        bytes.push(0);
+                        while bytes.len() % 4 != 0 { bytes.push(0); }
+                        common.add(&bytes)
+                    }
+                    None => 0,
+                };
+                push_i32(out, offset);
+            }
         }
         _ => {}  // size-0 entries (PropertySheet, GroupStart, GroupStop, flags)
     }
