@@ -492,7 +492,7 @@ html = f'''<!DOCTYPE html>
   blockquote {{ border-left: 4px solid #d1d9e0; margin: 16px 0; padding: 4px 16px; color: #656d76; }}
   blockquote p {{ margin: 4px 0; }}
   del {{ color: #656d76; }}
-  table {{ border-collapse: collapse; width: 100%; margin: 16px 0; }}
+  table {{ border-collapse: collapse; width: 100%; margin: 16px 0; table-layout: fixed; }}
   th, td {{ border: 1px solid #d1d9e0; padding: 8px 12px; text-align: left; vertical-align: top; }}
   th:first-child {{ white-space: nowrap; }}
   th {{ background: #f6f8fa; font-weight: 600; }}
