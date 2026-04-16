@@ -69,8 +69,6 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 | 2026-04-16 | [Coding conventions](docs/coding-conventions.md) | Authoritative C++ style guide for WF runtime code. Subsumes `wfsource/source/codingstandards.txt`. Covers target envelope, naming, Validate() discipline, assert family, no-fallback policy, lookup tables, OAS/OAD decision tree, mailboxes, streams, and foreign-library interop. |
 | 2026-04-15 | [JerryScript GCC 14 build fixes](docs/reference/2026-04-15-jerryscript-gcc14-build-fixes.md) | Documents 7 GCC 14 build failures in JerryScript v3.0.0 with `wf-minimal` profile and how they were fixed. Applied as part of the JS engine landing. |
 | 2026-04-14 | [Compile-time switches](docs/reference/2026-04-14-compile-time-switches.md) | Generated catalogue of 929 unique `#ifdef` switches across the codebase. Informational. See also `docs/compile-time-switches.md` (live version). |
-| 2026-04-14 | [Party game — reaction timer + image recognition](docs/reference/2026-04-14-party-game.md) | Chromecast party game concept (phone as controller, TV as display). Not a WF engine task — explores a standalone project idea. |
-| 2026-04-14 | [Party game — card games (fill-in-the-blank / comic strip)](docs/reference/2026-04-14-party-game-cards.md) | Two Chromecast card game designs. Same platform stack as above. Not a WF engine task. |
 | 2026-04-13 | [Blender → cd.iff pipeline](docs/reference/2026-04-13-blender-to-cd-iff-pipeline.md) | Maps the existing pipeline and proposes the Blender-native replacement for the 3DS Max content path. Key follow-up: no automated `.lev` → `.iff` path from Blender yet. |
 | 2026-04-13 | [OAS / OAD format](docs/reference/2026-04-13-oas-oad-format.md) | Documents the OAS (object attribute source) and OAD (compiled descriptor) binary format. Used by `wf_blender` and `oas2oad-rs`. |
 | 2026-04-12 | [Steam shipping plan](docs/reference/2026-04-12-steam-shipping-plan.md) | Comprehensive plan for shipping a WF-based game on Steam. Enumerates runtime blockers (build system, C++ dialect, HAL, graphics, scripting). Most blockers are now resolved or being resolved; Steam packaging itself not yet started. |
@@ -121,6 +119,8 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 - **Multiplayer / voice / mobile input** — blocked on mobile port.
 - **Steam packaging** — most runtime blockers resolved; packaging pipeline itself not yet started.
 
+---
+
 ## Last Change
 
-**2026-04-16 07:46** — [`docs/plans/2026-04-16-blender-level-roundtrip.md`](docs/plans/2026-04-16-blender-level-roundtrip.md): Plan: Blender ↔ Level Round-Trip
+**2026-04-16 09:16** — [`docs/plans/2026-04-16-blender-level-roundtrip.md`](docs/plans/2026-04-16-blender-level-roundtrip.md): Plan: Blender ↔ Level Round-Trip
