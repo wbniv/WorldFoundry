@@ -23,7 +23,6 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
-| 2026-04-16 | [Test plan for hook](docs/plans/2026-04-16-hook-test.md) | **Planned** | This is a test plan created to verify that update_wf_status.py correctly inserts a new row into the Plans table of wf-status.md. |
 | 2026-04-16 | [ScriptLanguage OAD field](docs/plans/2026-04-16-script-language-oad-field.md) | **Planned** | Move language selection from runtime sigil detection into an explicit `int32 ScriptLanguage` OAD field (dropmenu in Blender). Dispatch via function pointer table. Migration scriptable from Blender headless. |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Partial** | Batches 1–7 complete (−43.7% LOC). Batch 6 (`#if 0` sweep) done. Batch 7 (PSX/Win artifacts, OpusMake, platform guards) done. Batch 8 (Jolt physics replacement) in progress. |
 | 2026-04-15 | [Lua engine fixes (#1–#6)](docs/plans/2026-04-15-lua-engine-fixes.md) | **Landed** | All 6 fixes implemented: script cache, per-actor envs, Fennel precompile, debug gating, stdlib sandbox, coroutine continuations. Smoke test pending HAL cleanup. |
@@ -44,32 +43,37 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 | Date | Investigation | Status | Summary |
 |------|---------------|--------|---------|
 | 2026-04-16 | [Coding-conventions remediation](docs/investigations/2026-04-16-coding-conventions-remediation.md) | **In progress** | Audit of 2026-authored code in `wfsource/source/` against `docs/coding-conventions.md`. Honest accounting of where recent additions don't yet follow the rules they propose. |
-| 2026-04-15 | [JerryScript GCC 14 build fixes](docs/investigations/2026-04-15-jerryscript-gcc14-build-fixes.md) | **Reference** | Documents 7 GCC 14 build failures in JerryScript v3.0.0 with `wf-minimal` profile and how they were fixed. Applied as part of the JS engine landing. |
 | 2026-04-15 | [LOC tracking](docs/investigations/2026-04-15-loc-tracking.md) | **Ongoing** | Tracks code line count over time. Current HEAD: ~36,199 lines (−43.7% from baseline 64,252 at `74d1a47`). Tool: `scripts/loc_report.py`. |
 | 2026-04-14 | [Scripting language replacement](docs/investigations/2026-04-14-scripting-language-replacement.md) | **Complete** | Comprehensive survey that recommended Lua 5.4 as the primary engine. Spawned all scripting plans. Decision: Lua won. |
 | 2026-04-14 | [Physics engine survey](docs/investigations/2026-04-14-physics-engine-survey.md) | **Complete** | Surveyed Bullet, PhysX, Rapier, Jolt, and others. Recommended **Jolt Physics** (MIT, ~300 KB, `CharacterVirtual`, active upstream). Spawned Jolt integration plan. |
 | 2026-04-14 | [Jolt Physics integration](docs/investigations/2026-04-14-jolt-physics-integration.md) | **In progress** | Phases 1–3 committed (`b17a7ca`). Phase 4+ in current uncommitted changes (`jolt_backend.cc/hp`, `level.cc`). HAL changes (`halbase.h`, `haltest.cc`) also in flight. |
 | 2026-04-14 | [Remove audio subsystem](docs/investigations/2026-04-14-remove-audio.md) | **Complete** | Implemented 2026-04-15. `wfsource/source/audio/` and `wfsource/source/audiofmt/` deleted. Stub audio stubs were non-functional on Linux. To be replaced by miniaudio (see audio investigation). |
-| 2026-04-14 | [Compile-time switches](docs/investigations/2026-04-14-compile-time-switches.md) | **Reference** | Generated catalogue of 929 unique `#ifdef` switches across the codebase. Informational. See also `docs/compile-time-switches.md` (live version). |
 | 2026-04-14 | [Audio: sound effects, music, positional sound](docs/investigations/2026-04-14-audio-sound-music.md) | **Deferred** | Full miniaudio-based audio plan: SFX one-shots, music streaming, 3D panning, script-triggerable via mailboxes. Statically linked. Not yet scheduled. |
 | 2026-04-14 | [Constraint-based props](docs/investigations/2026-04-14-constraint-based-props.md) | **Deferred** | Doors, chains, pulleys, elevators via Jolt constraints. **Hard prerequisite:** Jolt integration must land first; also requires IFF binary chunk support. Not yet scheduled. |
 | 2026-04-14 | [Mobile port (Android / iOS)](docs/investigations/2026-04-14-mobile-port-android-ios.md) | **Deferred** | Full plan for arm64 Android and iOS builds. Key blocker: immediate-mode GL must be replaced before any mobile API can work. CMake migration required. Not yet scheduled. |
 | 2026-04-14 | [Multiplayer, voice chat, mobile input](docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md) | **Deferred** | Surveyed multiplayer sync models, voice (LKWS/Agora/LiveKit), mobile input (touch/gyro/haptics). Depends on mobile port landing first. Not yet scheduled. |
 | 2026-04-14 | [REST API box PoC](docs/investigations/2026-04-14-rest-api-box-poc.md) | **Deferred** | Proof-of-concept for an HTTP API embedded in `wf_game` for creating/moving/deleting boxes at runtime. Not yet implemented. |
-| 2026-04-14 | [Party game — reaction timer + image recognition](docs/investigations/2026-04-14-party-game.md) | **Reference** | Chromecast party game concept (phone as controller, TV as display). Not a WF engine task — explores a standalone project idea. |
-| 2026-04-14 | [Party game — card games (fill-in-the-blank / comic strip)](docs/investigations/2026-04-14-party-game-cards.md) | **Reference** | Two Chromecast card game designs. Same platform stack as above. Not a WF engine task. |
-| 2026-04-13 | [Blender → cd.iff pipeline](docs/investigations/2026-04-13-blender-to-cd-iff-pipeline.md) | **Reference** | Maps the existing pipeline and proposes the Blender-native replacement for the 3DS Max content path. Key follow-up: no automated `.lev` → `.iff` path from Blender yet. |
-| 2026-04-13 | [OAS / OAD format](docs/investigations/2026-04-13-oas-oad-format.md) | **Reference** | Documents the OAS (object attribute source) and OAD (compiled descriptor) binary format. Used by `wf_blender` and `oas2oad-rs`. |
 | 2026-04-13 | [ButtonType × showAs coverage audit](docs/investigations/2026-04-13-showas-coverage.md) | **Complete** | Audited all OAD field type × showAs combinations against the Blender plugin. Gaps identified and fixed. |
-| 2026-04-12 | [Steam shipping plan](docs/investigations/2026-04-12-steam-shipping-plan.md) | **Reference** | Comprehensive plan for shipping a WF-based game on Steam. Enumerates runtime blockers (build system, C++ dialect, HAL, graphics, scripting). Most blockers are now resolved or being resolved; Steam packaging itself not yet started. |
 | 2026-04-11 | [iffcomp — Rust rewrite](docs/investigations/2026-04-11-iffcomp-rs-rewrite.md) | **Complete** | Rust port in `wftools/iffcomp-rs/`. Byte-exact against C++ oracle. Includes comprehensive `all_features.iff.txt` torture test shared with Go port. |
 | 2026-04-11 | [iffcomp — Go rewrite](docs/investigations/2026-04-11-iffcomp-go-rewrite.md) | **Complete** | Go port in `wftools/iffcomp-go/`. Byte-exact against C++ oracle (both binary and text output). Passes shared torture fixture. Go is primary; C++ kept as oracle. |
 | 2026-04-11 | [iffcomp — C++ modernization](docs/investigations/2026-04-11-iffcomp-modernization.md) | **Complete** | Modernized the 1996 flex/bison C++ `iffcomp` to build on GCC 15 / Clang under C++17. Now serves as byte-exact oracle for Go and Rust ports. |
-| 2026-04-11 | [wftools rewrite analysis](docs/investigations/2026-04-11-wftools-rewrite-analysis.md) | **Reference** | Analyzes all ~23 `wftools/` directories; recommends which to drop, rewrite (Go/Rust), or replace with off-the-shelf tools. |
-| (early) | [WF viewer design notes](docs/investigations/wf-viewer.md) | **Reference** | Describes the standalone `wftools/wf_viewer/` approach for rendering level geometry without the full engine stack. Superseded by `wf_game` running end-to-end. |
-| (early) | [Production pathway diagram](docs/investigations/production-pathway.md) | **Reference** | Mermaid diagram of the original pipeline from `.oas` / 3D editor → `cd.iff`. Useful map of where each tool fits. |
 
 ---
+## Reference
+
+| Date | Document | Summary |
+|------|----------|---------|
+| 2026-04-15 | [JerryScript GCC 14 build fixes](docs/reference/2026-04-15-jerryscript-gcc14-build-fixes.md) | Documents 7 GCC 14 build failures in JerryScript v3.0.0 with `wf-minimal` profile and how they were fixed. Applied as part of the JS engine landing. |
+| 2026-04-14 | [Compile-time switches](docs/reference/2026-04-14-compile-time-switches.md) | Generated catalogue of 929 unique `#ifdef` switches across the codebase. Informational. See also `docs/compile-time-switches.md` (live version). |
+| 2026-04-14 | [Party game — reaction timer + image recognition](docs/reference/2026-04-14-party-game.md) | Chromecast party game concept (phone as controller, TV as display). Not a WF engine task — explores a standalone project idea. |
+| 2026-04-14 | [Party game — card games (fill-in-the-blank / comic strip)](docs/reference/2026-04-14-party-game-cards.md) | Two Chromecast card game designs. Same platform stack as above. Not a WF engine task. |
+| 2026-04-13 | [Blender → cd.iff pipeline](docs/reference/2026-04-13-blender-to-cd-iff-pipeline.md) | Maps the existing pipeline and proposes the Blender-native replacement for the 3DS Max content path. Key follow-up: no automated `.lev` → `.iff` path from Blender yet. |
+| 2026-04-13 | [OAS / OAD format](docs/reference/2026-04-13-oas-oad-format.md) | Documents the OAS (object attribute source) and OAD (compiled descriptor) binary format. Used by `wf_blender` and `oas2oad-rs`. |
+| 2026-04-12 | [Steam shipping plan](docs/reference/2026-04-12-steam-shipping-plan.md) | Comprehensive plan for shipping a WF-based game on Steam. Enumerates runtime blockers (build system, C++ dialect, HAL, graphics, scripting). Most blockers are now resolved or being resolved; Steam packaging itself not yet started. |
+| 2026-04-11 | [wftools rewrite analysis](docs/reference/2026-04-11-wftools-rewrite-analysis.md) | Analyzes all ~23 `wftools/` directories; recommends which to drop, rewrite (Go/Rust), or replace with off-the-shelf tools. |
+| (early) | [WF viewer design notes](docs/reference/wf-viewer.md) | Describes the standalone `wftools/wf_viewer/` approach for rendering level geometry without the full engine stack. Superseded by `wf_game` running end-to-end. |
+| (early) | [Production pathway diagram](docs/reference/production-pathway.md) | Mermaid diagram of the original pipeline from `.oas` / 3D editor → `cd.iff`. Useful map of where each tool fits. |
+
 
 ## Current blockers
 
@@ -129,4 +133,4 @@ The uncommitted work is two things:
 
 ## Last Change
 
-**2026-04-16 03:30** — [`docs/plans/2026-04-16-hook-test.md`](docs/plans/2026-04-16-hook-test.md): Test plan for hook
+**2026-04-16 (session)** — `docs/reference/`: moved 10 Reference-status docs out of `docs/investigations/`; added `## Reference` table to wf-status.md; updated `update_wf_status.py` + `hook_md_written.sh` to handle `docs/reference/` path.
