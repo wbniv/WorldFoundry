@@ -123,4 +123,4 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 ## Last Change
 
-**2026-04-16 05:52** — [`docs/investigations/2026-04-15-loc-tracking.md`](docs/investigations/2026-04-15-loc-tracking.md): WF LOC tracking — shrinking the codebase
+**2026-04-16 05:52** — [`docs/investigations/2026-04-14-jolt-physics-integration.md`](docs/investigations/2026-04-14-jolt-physics-integration.md): Investigation: Integrate [Jolt Physics](https://jrouwe.github.io/JoltPhysics/) as the WF physics backend
