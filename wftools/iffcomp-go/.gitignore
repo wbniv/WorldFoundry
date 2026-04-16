@@ -1,5 +1,0 @@
-# Compiled binary (named after the module directory)
-/iffcomp-go
-
-# Test output files
-/testdata/*.out
