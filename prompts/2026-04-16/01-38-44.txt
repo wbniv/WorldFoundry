@@ -1,6 +1,0 @@
-The OAD exporter always writes the explicit enum integer — it never writes a
-
-"detect" sentinel.
-
-
-i'm pretty sure i actually understand what you're trying to say but i don't really understand the words you're using, heh

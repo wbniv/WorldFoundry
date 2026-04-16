@@ -1,5 +1,0 @@
-make a new document, status.md (in root of WorldFoundry/)
-create a table listing each plan's name (with link to plan doc) sorted by date of plan creation reverse-chronologically ordered
-note if completed, in progress, deferred, decided against, etc.
-provide a summary of status
-note any follow-up work that hasn't been done yet or other important information called out in theplan

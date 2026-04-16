@@ -1,6 +1,0 @@
-"On export, warn if the script text still contains a legacy sigil prefix
-(;, //, \, #b64) that was not stripped during migration."
-
-how do you know it was missed during migration vs. something the user typed?
-
-how about we just verify migrations properly? ;-)

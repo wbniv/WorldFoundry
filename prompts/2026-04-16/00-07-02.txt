@@ -1,4 +1,0 @@
-DO_STEREOGRAM=true
-we prefer
-DO_STEREOGRAM=1
-no?

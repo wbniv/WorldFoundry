@@ -1,1 +1,0 @@
-one more addition to the hook: when you update wf-status.md , keep a LAST CHANGE section at the bottom of the page. it should summarize the change you had just made. do not accumulate them. update the hook and run now

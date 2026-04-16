@@ -1,6 +1,0 @@
-add note to
-"A build may compile in any subset of engines (including none). Each engine is gated by its own switch; ScriptRouter dispatches at runtime by leading-byte sigil.
-
-that in the future, the language will be encoded in the oas/oad attribute (and dropdown selector for language in the blender attributes editor plugin).
-please make a plan for that (and completely drop the autodetect language at runtime---we'll probably keep it on the plugin so that the user doesn't have to manually set the language)
-and refer to the new plan in compile-time-switch's note

@@ -1,5 +1,0 @@
-Current blockers
-
-HAL cleanup (this branch): JerryScript, WAMR, Wren, Forth/zForth, and Lua coroutines all need smoke tests against snowgoons but have been explicitly flagged as "blocked on HAL cleanup (other branch)" — that HAL work appears to be happening now (uncommitted changes to halbase.h and haltest.cc). Once merged, all of those engines can be smoke-tested in sequence.
-
-how to unblock?

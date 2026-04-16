@@ -1,1 +1,0 @@
-yup, that's exactly what we want. the philosophy is to validate all of the (level) data before shipping a release version of the executable
