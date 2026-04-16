@@ -1,3 +1,18 @@
+# Level inventory — slot assignments from cd_full.iff
+#
+# Slot  Dir          Key assets
+# L0    cube         cube.iff, matte.tga/map  (simple cube test)
+# L1    basic        text01, box01, sphere01, cone01  (basic primitives)
+# L2    cyber        cyber.iff, tranbot.iff, 6 rooms  (cyber-themed level)
+# L3    primitives   geosphere01.iff  (primitives test level)
+# L4    snowgoons    tree*.iff, player.iff, house.iff  (snowgoons demo)
+# L5    main_game    30 rooms; xplode, grenade, huntseek, bubba, etc.
+# L6    whitestar    whitestar.iff  (whitestar test level)
+
+cube
+basic
+cyber
 primitives
 snowgoons
+main_game
 whitestar
