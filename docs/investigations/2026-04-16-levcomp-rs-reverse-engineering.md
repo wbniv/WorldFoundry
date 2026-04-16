@@ -196,7 +196,7 @@ of `write()` and threaded through `serialize_oad_data` and
 value, look it up; fall back to the context-appropriate default (0
 outside CB, -1 inside) only when the name is absent or unknown.
 
-### The final milestone
+### The first milestone
 
 With ObjectReference resolution landed, the full boot sequence runs:
 
@@ -207,15 +207,46 @@ With ObjectReference resolution landed, the full boot sequence runs:
 - REST API listens on port 8765
 - Game loop ticks
 
-The remaining failure (`No Valid View after 10 seconds`) is a script
-interpreter error: `snowgoons.lev` embeds Tcl script bodies
-(`# comments`, `write-mailbox $VAR [read-mailbox $VAR]`), but the
-engine's default script language is Lua and Tcl isn't one of the
-supported engines.  Every tick the Lua interpreter spits
-`unexpected symbol near '#'` for the Director script and the
-input-forwarding player script.  No input propagates; no camshot
-ever activates; the view-timeout fires.  This is a content-migration
-concern, not a levcomp-rs concern.
+### 14. Tcl script bodies
+
+`snowgoons.lev` embeds Tcl script bodies (`# comments`,
+`write-mailbox $VAR [read-mailbox $VAR]`), but the engine's default
+script language is Lua and Tcl isn't one of the six supported engines.
+Every tick the Lua interpreter spits `unexpected symbol near '#'` for
+the Director script and the input-forwarding player script.  Ported
+all three (`shell.aib`, Director, Player) to straightforward Lua
+equivalents.  Errors disappear; game loop runs 120 frames cleanly.
+
+### 15. Adjacent rooms drive the active-room system
+
+Even with clean scripts, the camera still fails to transition.  Root
+cause: Camera (obj[8]) is in Room 0, Player (obj[33]) is in Room 1.
+`Level::update()` calls `_theActiveRooms->UpdateRoom(_camera->GetWatchObject())`
+which sets the active room based on the watched object's room, i.e.
+the player's.  Actors are updated via the per-room iterator
+`GetActiveRooms().GetObjectIter(ROOM_OBJECT_LIST_UPDATE)` — but the
+active room set includes the adjacent rooms declared in each room
+record's `adjacentRooms[2]` field.
+
+I was emitting `-1` (NULL) for both adjacency slots in every room.
+Oracle had the correct pair — `room[0].adjacent = [1, -1]` and vice
+versa.  Without adjacency, Camera stopped ticking whenever the player
+was in a different room, so `DelayCameraHandler::update` never saw a
+non-zero `EMAILBOX_CAMSHOT` and never transitioned to Normal → view
+never validated → 10-second timeout.
+
+Fix: in `rooms.rs`, resolve each room object's "Adjacent Room 1" and
+"Adjacent Room 2" OAD fields.  Both are ObjectReferences whose .lev
+value is the target room object's name.  Two-step translation:
+
+1. name → object index (via the name_to_index map built for
+   ObjectReference resolution in round 13)
+2. object index → room index (find the room whose
+   `room_object_index` matches)
+
+Store the resulting pair on `Room.adjacent_rooms` and write it in
+`Room::write()`.  After landing this, our rooms table matches oracle's
+adjacency exactly.
 
 ## Pivot: reading `max2lev` / `max2lvl`
 

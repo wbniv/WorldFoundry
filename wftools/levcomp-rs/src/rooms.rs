@@ -32,6 +32,9 @@ pub struct Room {
     pub room_object_index: i16,
     /// Indices of contained objects (excluding the room object itself).
     pub entries: Vec<i16>,
+    /// Resolved adjacent-room indices (into the rooms array), or
+    /// `ADJACENT_ROOM_NULL` when absent.
+    pub adjacent_rooms: [i16; 2],
 }
 
 impl Room {
@@ -44,8 +47,8 @@ impl Room {
         let start = out.len();
         out.extend_from_slice(&(self.entries.len() as i32).to_le_bytes());
         for &v in &self.bbox { out.extend_from_slice(&v.to_le_bytes()); }
-        out.extend_from_slice(&ADJACENT_ROOM_NULL.to_le_bytes());
-        out.extend_from_slice(&ADJACENT_ROOM_NULL.to_le_bytes());
+        out.extend_from_slice(&self.adjacent_rooms[0].to_le_bytes());
+        out.extend_from_slice(&self.adjacent_rooms[1].to_le_bytes());
         out.extend_from_slice(&self.room_object_index.to_le_bytes());
         for &e in &self.entries {
             out.extend_from_slice(&e.to_le_bytes());
@@ -65,12 +68,19 @@ pub fn is_room_class(class_name: &str, schemas: &OadSchemas) -> bool {
     }
 }
 
-/// Sort level objects into rooms.  Follows iff2lvl's SortIntoRooms:
+/// Sort level objects into rooms.  Follows iff2lvl's SortIntoRooms +
+/// QRoom::Save's adjacent-room resolution.
 ///
 /// - For each object whose class has LEVELCONFLAG_ROOM, create a room with
 ///   its world-space bounding box (object.position + object.bbox).
 /// - For every other object (not itself a room), add it to the first room
 ///   whose bbox contains its world-space *center*.
+/// - Resolve each room's "Adjacent Room 1/2" OAD fields: look up the named
+///   room object, translate its *object index* into a *room index* (index
+///   into the rooms vector), store in adjacentRooms[0/1].  This is load-
+///   bearing: the active-room system keeps adjacent rooms' objects on the
+///   update list even while the player is elsewhere — without it, the camera
+///   in one room stops ticking when the player is in another.
 /// - If no rooms are found, create one giant fallback room containing every
 ///   object (mirrors iff2lvl's default-room path).
 pub fn sort(objects: &[LevObject], schemas: &OadSchemas) -> Vec<Room> {
@@ -86,11 +96,41 @@ pub fn sort(objects: &[LevObject], schemas: &OadSchemas) -> Vec<Room> {
                 bbox: wb,
                 room_object_index: (i + 1) as i16,
                 entries: Vec::new(),
+                adjacent_rooms: [ADJACENT_ROOM_NULL; 2],
             });
             room_of_obj.push(-1);  // rooms themselves are not entries
         } else {
             room_of_obj.push(-2);  // unassigned marker
         }
+    }
+
+    // Pass 1.5 — resolve adjacent-room references for each room object.
+    let mut adjacencies: Vec<[i16; 2]> = vec![[ADJACENT_ROOM_NULL; 2]; rooms.len()];
+    for (ri, room) in rooms.iter().enumerate() {
+        let room_obj = &objects[(room.room_object_index as usize) - 1];
+        for (slot, field_name) in ["Adjacent Room 1", "Adjacent Room 2"].iter().enumerate() {
+            let Some(chunk) = room_obj.find_field(field_name) else { continue };
+            let target_name = crate::lev_parser::field_str_value(chunk);
+            if target_name.is_empty() { continue; }
+            // Find the target object by name, then find the room whose
+            // room_object_index points at that object.
+            if let Some((target_obj_i, _)) =
+                objects.iter().enumerate().find(|(_, o)| o.name == target_name)
+            {
+                let target_obj_idx = (target_obj_i + 1) as i16;
+                if let Some((target_room_idx, _)) = rooms.iter().enumerate()
+                    .find(|(_, r)| r.room_object_index == target_obj_idx)
+                {
+                    adjacencies[ri][slot] = target_room_idx as i16;
+                }
+            }
+        }
+    }
+    for (ri, room) in rooms.iter_mut().enumerate() {
+        // Stash the resolved adjacencies; the Room struct currently has no
+        // field for them, so emit via adjacentRooms in `write()` below.  We
+        // extend Room to carry them explicitly.
+        room.adjacent_rooms = adjacencies[ri];
     }
 
     // Pass 2 — sort every non-room object into the first room containing its
@@ -116,6 +156,7 @@ pub fn sort(objects: &[LevObject], schemas: &OadSchemas) -> Vec<Room> {
             bbox: [-huge, -huge, -huge, huge, huge, huge],
             room_object_index: 0,
             entries: Vec::new(),
+            adjacent_rooms: [ADJACENT_ROOM_NULL; 2],
         };
         for i in 0..objects.len() {
             fallback.entries.push((i + 1) as i16);
