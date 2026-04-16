@@ -54,6 +54,11 @@ case "$WF_FORTH_ENGINE" in
        exit 2 ;;
 esac
 ZFORTH_DIR="$VENDOR/zforth-41db72d1"
+FICL_DIR="$VENDOR/ficl-3.06"
+ATLAST_DIR="$VENDOR/atlast-08ff0e1a/atlast-64"
+EMBED_DIR="$VENDOR/embed-154aeb2f"
+LIBFORTH_DIR="$VENDOR/libforth-b851c6a2"
+PFORTH_DIR="$VENDOR/pforth-63d4a418"
 
 # Feature flag: optional WebAssembly engine for the `#b64\n` sigil. Default: wamr. One of:
 #   none    — no wasm compiled in, zero binary delta vs. Lua-only.
@@ -135,11 +140,12 @@ fi
 
 case "$WF_FORTH_ENGINE" in
     zforth)   CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_ZFORTH   -I"$STUB_SRC" -I"$ZFORTH_DIR/src/zforth") ;;
-    ficl)     CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_FICL) ;;
-    atlast)   CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_ATLAST) ;;
-    embed)    CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_EMBED) ;;
-    libforth) CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_LIBFORTH) ;;
-    pforth)   CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_PFORTH) ;;
+    ficl)     CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_FICL     -I"$FICL_DIR") ;;
+    atlast)   CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_ATLAST   -I"$ATLAST_DIR") ;;
+    embed)    CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_EMBED    -I"$EMBED_DIR") ;;
+    libforth) CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_LIBFORTH -I"$LIBFORTH_DIR") ;;
+    pforth)   CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_PFORTH   -I"$PFORTH_DIR/csrc"
+                         "-DPFORTH_FTH_DIR=\"$PFORTH_DIR/fth\"") ;;
     none)     : ;;
 esac
 
@@ -439,6 +445,7 @@ WAMRCMAKE
 esac
 
 # Forth engine plug — compiled only when WF_FORTH_ENGINE is not `none`.
+FORTH_VENDOR_CFLAGS=(-std=gnu11 -O2 -w -fno-strict-aliasing)
 case "$WF_FORTH_ENGINE" in
     zforth)
         echo "  CC (stub) scripting_zforth.cc"
@@ -453,11 +460,97 @@ case "$WF_FORTH_ENGINE" in
         gcc "${ZF_CFLAGS[@]}" -c "$ZFORTH_DIR/src/zforth/zforth.c" -o "$obj"
         OBJS+=("$obj")
         ;;
-    none) : ;;
-    *)
-        echo "error: WF_FORTH_ENGINE=$WF_FORTH_ENGINE not yet implemented in build_game.sh" >&2
-        exit 2
+    ficl)
+        echo "  CC (stub) scripting_ficl.cc"
+        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_ficl.cc" -o "$OUT/stubs__scripting_ficl.o"
+        OBJS+=("$OUT/stubs__scripting_ficl.o")
+        # ficl-3.06 core (C). Compile the non-test, non-platform-specific files.
+        # Exclude: testmain.c, unity.c (test framework), wasm_main.c (wasm host).
+        FICL_CFLAGS=("${FORTH_VENDOR_CFLAGS[@]}" -I"$FICL_DIR")
+        for ficl_src in dict.c dpmath.c ficl.c fileaccess.c float.c prefix.c \
+                        search.c stack.c sysdep.c tools.c vm.c words.c; do
+            obj="$OUT/ficl__${ficl_src%.c}.o"
+            echo "  CC (vendor) ficl/$ficl_src"
+            gcc "${FICL_CFLAGS[@]}" -c "$FICL_DIR/$ficl_src" -o "$obj"
+            OBJS+=("$obj")
+        done
         ;;
+    atlast)
+        echo "  CC (stub) scripting_atlast.cc"
+        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_atlast.cc" -o "$OUT/stubs__scripting_atlast.o"
+        OBJS+=("$OUT/stubs__scripting_atlast.o")
+        # atlast-64: single source file. -DEXPORT makes internal globals
+        # non-static so scripting_atlast.cc can access stack pointers via
+        # atldef.h macros (stk/stackbot/S0/Pop/Push = atl__sp etc.).
+        ATLAST_CFLAGS=("${FORTH_VENDOR_CFLAGS[@]}" -DEXPORT -I"$ATLAST_DIR")
+        obj="$OUT/atlast__atlast.o"
+        echo "  CC (vendor) atlast-64/atlast.c"
+        gcc "${ATLAST_CFLAGS[@]}" -c "$ATLAST_DIR/atlast.c" -o "$obj"
+        OBJS+=("$obj")
+        ;;
+    embed)
+        echo "  CC (stub) scripting_embed.cc"
+        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_embed.cc" -o "$OUT/stubs__scripting_embed.o"
+        OBJS+=("$OUT/stubs__scripting_embed.o")
+        # embed: embed.c (VM + built-in ROM image) and image.c (image utilities).
+        # Exclude main.c and util.c (standalone tool, not needed for embedding).
+        EMBED_CFLAGS=("${FORTH_VENDOR_CFLAGS[@]}" -I"$EMBED_DIR")
+        for embed_src in embed.c image.c; do
+            obj="$OUT/embed__${embed_src%.c}.o"
+            echo "  CC (vendor) embed/$embed_src"
+            gcc "${EMBED_CFLAGS[@]}" -c "$EMBED_DIR/$embed_src" -o "$obj"
+            OBJS+=("$obj")
+        done
+        ;;
+    libforth)
+        echo "  CC (stub) scripting_libforth.cc"
+        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_libforth.cc" -o "$OUT/stubs__scripting_libforth.o"
+        OBJS+=("$OUT/stubs__scripting_libforth.o")
+        # libforth: single source file. Exclude main.c (standalone REPL).
+        LIBFORTH_CFLAGS=("${FORTH_VENDOR_CFLAGS[@]}" -I"$LIBFORTH_DIR")
+        obj="$OUT/libforth__libforth.o"
+        echo "  CC (vendor) libforth/libforth.c"
+        gcc "${LIBFORTH_CFLAGS[@]}" -c "$LIBFORTH_DIR/libforth.c" -o "$obj"
+        OBJS+=("$obj")
+        ;;
+    pforth)
+        echo "  CC (stub) scripting_pforth.cc"
+        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_pforth.cc" -o "$OUT/stubs__scripting_pforth.o"
+        OBJS+=("$OUT/stubs__scripting_pforth.o")
+        # pForth csrc/ files. Exclude:
+        #   pf_main.c      — standalone main()
+        #   pf_io_none.c   — alternate I/O stub (conflicts with pf_io.c)
+        #   pfcustom.c     — default glue body; scripting_pforth.cc provides
+        #                    CustomFunctionTable/CompileCustomFunctions instead.
+        # pfcglue.c is compiled with -DPF_USER_CUSTOM=1 to suppress the
+        # default implementations; scripting_pforth.cc provides them.
+        PFORTH_CFLAGS=("${FORTH_VENDOR_CFLAGS[@]}" -I"$PFORTH_DIR/csrc")
+        for pf_src in pf_cglue.c pf_clib.c pfcompil.c pf_core.c pf_inner.c \
+                      pf_io.c pf_mem.c pf_save.c pf_text.c pf_words.c; do
+            obj="$OUT/pforth__${pf_src%.c}.o"
+            echo "  CC (vendor) pforth/csrc/$pf_src"
+            gcc "${PFORTH_CFLAGS[@]}" -c "$PFORTH_DIR/csrc/$pf_src" -o "$obj"
+            OBJS+=("$obj")
+        done
+        # POSIX terminal I/O backend (provides sdTerminalOut/In/Init/Flush etc.)
+        obj="$OUT/pforth__posix__pf_io_posix.o"
+        echo "  CC (vendor) pforth/csrc/posix/pf_io_posix.c"
+        gcc "${PFORTH_CFLAGS[@]}" -I"$PFORTH_DIR/csrc/posix" \
+            -c "$PFORTH_DIR/csrc/posix/pf_io_posix.c" -o "$obj"
+        OBJS+=("$obj")
+        # stdio file I/O backend (provides sdResizeFile, sdOpenFile, etc.)
+        obj="$OUT/pforth__stdio__pf_fileio_stdio.o"
+        echo "  CC (vendor) pforth/csrc/stdio/pf_fileio_stdio.c"
+        gcc "${PFORTH_CFLAGS[@]}" -I"$PFORTH_DIR/csrc/stdio" \
+            -c "$PFORTH_DIR/csrc/stdio/pf_fileio_stdio.c" -o "$obj"
+        OBJS+=("$obj")
+        # pfcustom.c compiled with -DPF_USER_CUSTOM=1 to suppress default body.
+        obj="$OUT/pforth__pfcustom.o"
+        echo "  CC (vendor) pforth/csrc/pfcustom.c (PF_USER_CUSTOM=1)"
+        gcc "${PFORTH_CFLAGS[@]}" -DPF_USER_CUSTOM=1 -c "$PFORTH_DIR/csrc/pfcustom.c" -o "$obj"
+        OBJS+=("$obj")
+        ;;
+    none) : ;;
 esac
 
 # Wren engine plug — compiled only when WF_ENABLE_WREN=1.

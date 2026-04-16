@@ -1,14 +1,19 @@
 # Plan: Forth as a scripting engine option for World Foundry
 
 **Date:** 2026-04-14
-**Status:** **complete — landed 2026-04-15; smoke test passed 2026-04-16 (zForth; GROUND, no crashes).**
-Phase 1 (vendor, all 6 backends) was already done. Phases 2–5 complete:
-`scripting_forth.hp` + `scripting_zforth.cc` (`forth_engine` namespace,
-zForth default); `\` dispatch arm in `ScriptRouter::RunScript`;
-`WF_FORTH_ENGINE` / `WF_ENABLE_FORTH` in `build_game.sh`;
-`scripts/patch_snowgoons_forth.py`; reference scripts in
-`docs/scripting-languages.md`. Remaining backends (ficl, atlast, embed,
-libforth, pforth) not yet implemented — deferred until zForth smoke test passes.
+**Status:** **complete — all six backends build and link. 2026-04-16.**
+Phases 1–6 done. Phase 7 (snowgoons demo scripts) pending.
+zForth landed 2026-04-15; smoke test passed (GROUND, no crashes).
+All five remaining backends (ficl, atlast, embed, libforth, pforth) implemented
+and build-verified 2026-04-16.  Notable integration issues resolved:
+- **atlast**: neither `atldef.h` nor `atlast.h` safe to include in C++ TU
+  (`atldef.h` macros pollute stdlib headers; `atlast.h` uses K&R empty parens).
+  All needed symbols declared manually; `-DEXPORT` on atlast.c for stack access.
+- **libforth**: `forth_t` is fully opaque; CALL bridge can't access `o->m[TOP]`
+  safely. Redesigned to use C global exchange buffer addressed via Forth `!`/`@`.
+- **pforth**: `pfInit()` is file-static; `PF_DEFAULT_*` constants are file-scoped
+  in pf_core.c. Also needs posix/pf_io_posix.c + stdio/pf_fileio_stdio.c. 
+  `system.fth` uses bare `include` filenames — requires `chdir` to fth/ during load.
 **Prior art:** `docs/plans/2026-04-14-pluggable-scripting-engine.md` (JS pattern),
 `docs/plans/2026-04-14-wasm3-scripting-engine.md` (wasm3 pattern),
 `docs/plans/2026-04-14-wren-scripting-engine.md` (Wren pattern)
@@ -305,7 +310,7 @@ namespace forth_engine {
 
 This header is identical regardless of which backend is compiled in. `ScriptRouter` in `scripting_stub.cc` only ever sees this interface.
 
-### Phase 3 — Per-backend implementation files
+### Phase 3 — Per-backend implementation files ✓ DONE
 
 #### `scripting_zforth.cc` (zForth backend)
 
@@ -573,21 +578,14 @@ case "$WF_FORTH_ENGINE" in
 esac
 ```
 
-### Phase 6 — Documentation
+### Phase 6 — Documentation ✓ DONE
 
-**`docs/scripting-languages.md`:** Add Forth rows to both engine tables:
-```
-| Forth (zForth)   | `\` | `WF_FORTH_ENGINE=zforth`   | vendored `engine/vendor/zforth-<sha>/`; 2 C files       | ~4 KB core  | spike |
-| Forth (ficl)     | `\` | `WF_FORTH_ENGINE=ficl`     | vendored `engine/vendor/ficl-3.06/`; ~15 C files        | ~100 KB     | spike |
-| Forth (Atlast)   | `\` | `WF_FORTH_ENGINE=atlast`   | vendored `engine/vendor/atlast-<sha>/`; 1 C file        | ~30 KB      | spike |
-| Forth (embed)    | `\` | `WF_FORTH_ENGINE=embed`    | vendored `engine/vendor/embed-<sha>/`; ~3 C files       | ~5 KB VM    | spike |
-| Forth (libforth) | `\` | `WF_FORTH_ENGINE=libforth` | vendored `engine/vendor/libforth-<sha>/`; 1 C file      | ~50 KB      | spike |
-| Forth (pForth)   | `\` | `WF_FORTH_ENGINE=pforth`   | vendored `engine/vendor/pforth-<sha>/`; ~9 C files      | ~120 KB     | spike |
-```
+**`docs/scripting-languages.md`:** Forth rows updated; "not yet built" text removed
+from all five backends. Runtime memory column (`—`) left pending measured values.
 
-Note: all six share sigil `\`; only one may be compiled in at a time (same rule as `WF_JS_ENGINE`).
-
-Update the runtime memory column (currently `—`) for each non-zForth backend once it is built: measure actual RAM footprint at steady state (dict + stacks) analogous to the zForth entry (`~17 KB` with `ZF_DICT_SIZE=16384`), and fill in the table row for that backend.
+To fill in the memory column: measure actual RAM footprint at steady state
+(dict + stacks) for each backend analogous to the zForth entry
+(`~17 KB` with `ZF_DICT_SIZE=16384`), then update the table rows.
 
 Also add snowgoons player + director Forth scripts to the **reference scripts section** of `docs/scripting-languages.md`, alongside the existing Lua/Fennel/JS/wasm examples:
 
