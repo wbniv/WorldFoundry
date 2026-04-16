@@ -104,8 +104,6 @@ The uncommitted work is two things:
 - **Coroutine smoke test** — fix #6 landed but untested end-to-end with a real yielding script.
 - **wasm module cache** — hash source pointer + size, reuse compiled modules across `RunScript` calls (needed before wasm in hot-loop scripts).
 - **Binary IFF chunk types** — `WSM `/`AOT ` tags with explicit length; drop base64 for ~33% asset shrink.
-- **WASM `#` sigil vs `#!wasm\n`** — open question noted in wasm3 plan; tentatively keep `#` as discriminator, treat rest of first line as subtype.
-- **Collapse `#b64\n` wasm sigil back to bare `#`** — `#b64\n` is a workaround for `cd.iff`'s `##` TCL shell lines; revert once `cd.iff` is cleaned up.
 - **Cross-language API parity audit** — `read_actor`/`read_fixed`/`read_color`/`read_flags` typed accessors need to be consistent across all engines when added. No canonical IDL yet.
 - **`WF_DEFAULT_ENGINE` knob** — for Lua-off builds, needs a way to select the sigil-less fallthrough engine. Currently undefined behavior.
 - **Lua → JS / Lua → Wren script converters** — mirroring `tcl_to_lua_in_dump.py`.
