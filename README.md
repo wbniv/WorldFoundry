@@ -131,4 +131,4 @@ The uncommitted work is two things:
 
 ## Last Change
 
-**2026-04-16 04:10** — [`docs/reference/production-pathway.md`](docs/reference/production-pathway.md): Production Pathway
+**2026-04-16 04:10** — [`docs/reference/2026-04-13-blender-to-cd-iff-pipeline.md`](docs/reference/2026-04-13-blender-to-cd-iff-pipeline.md): Investigation: Blender → cd.iff Pipeline
