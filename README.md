@@ -88,11 +88,7 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 ## Open follow-up work
 
 ### Scripting
-- **JerryScript smoke test** — build path landed; never run (`WF_JS_ENGINE=jerryscript`). Half-day effort.
-- **WAMR smoke test** — Phase 1 interp landed; needs snowgoons player + director verification.
-- **Wren smoke test** — fully landed; needs snowgoons verification.
-- **Forth/zForth smoke test** — fully landed; needs snowgoons verification.
-- **Forth alternate backends** — ficl, atlast, embed, libforth, pforth deferred until zForth smoke test passes.
+- **Forth alternate backends** — ficl, atlast, embed, libforth, pforth deferred; zForth is the shipping default.
 - **WAMR Phase 2 (AOT)** — deferred; `wamrc` + `#aot\n` sigil; ~10 KB runtime vs. 519 KB interp.
 - **wasm3 retirement** — planned after WAMR interp is proven at parity (remove vendor tree + `scripting_wasm3.cc`).
 - **Lua remote step debugger** — explicit user request for "later": MobDebug/DBG.lua/LuaLS-DAP into LuaInterpreter for in-game step debugging.
