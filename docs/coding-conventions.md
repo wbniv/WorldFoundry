@@ -241,6 +241,45 @@ These carry forward from the older `codingstandards.txt` without change.
   (Q16.16); on PC dev builds it can be `float` via `SCALAR_TYPE=float`. New
   math code must work in both. See `math/scalar.hp`.
 
+### 4.1 Resource-owning types — canonical form
+
+If a class owns a resource (raw pointer, `FILE*`, lock, handle), define all
+four special members explicitly: default constructor, copy constructor,
+copy-assignment operator, and destructor. If copying doesn't make sense,
+`= delete` both the copy constructor and copy-assignment operator (or declare
+them `private` in pre-C++11 style). Never leave copy semantics undefined — the
+compiler generates shallow copies silently, which double-frees or corrupts
+the resource.
+
+```cpp
+class SoundBuffer
+{
+public:
+    SoundBuffer();                                // alloc
+    ~SoundBuffer();                               // free
+    SoundBuffer(const SoundBuffer&) = delete;
+    SoundBuffer& operator=(const SoundBuffer&) = delete;
+    // ...
+};
+```
+
+*(IS C++ §5, "Canonical Form")*
+
+### 4.2 Concrete vs. abstract base classes
+
+A concrete class (non-virtual destructor, public copy) used as a base class
+causes **object slicing**: when a derived object is passed or assigned by
+value, the derived portion is silently discarded. This is a data-loss bug with
+no compile-time warning.
+
+Rule: if a class is intended to be derived from, give it a `virtual`
+destructor. If it can also be copied, document that slicing is intentional and
+harmless. If it shouldn't be copied (most non-trivial base classes), `= delete`
+the copy constructor and copy-assignment operator. If the class is *not*
+intended as a base class, mark it `final` in new code.
+
+*(IS C++ §4, "Class Design")*
+
 ---
 
 ## 5. The `Validate()` discipline
@@ -349,8 +388,7 @@ fact. A failure in either reports which one.
 
 ```cpp
 RangeCheck(0, language, 6);
-AssertMsg(kDispatch[language] != nullptr,
-          "no dispatch table entry for language " << language);
+AssertMsg(kDispatch[language] != nullptr, "no dispatch table entry for language " << language);
 ```
 
 `AssertMsg` streams the value of `language` into the failure output — so
@@ -424,6 +462,26 @@ of the code is structured to honor "no script" as a valid state.
 Avoid: chains that substitute a made-up default and keep going, or
 `if (!ptr) return;` guards protecting required inputs.
 
+### 7.3 Two categories of failure — don't mix them
+
+*(IS C++ §7, "Error Handling")*
+
+| Category | What it means | Correct response |
+|---|---|---|
+| **Precondition violation** | Programmer error — caller passed an invalid handle, called in wrong state, indexed out of range | `assert` and abort; the program state is undefined |
+| **Recoverable condition** | External data, user input, file-not-found, network timeout — something that is expected to fail in production | Return code, out-parameter, or (in tool builds) exception |
+
+Never use `assert` for recoverable conditions — it fires in debug builds and
+silently succeeds in release, shipping broken behavior. Never use a return code
+for a precondition violation — you're adding a branch to handle something that
+shouldn't happen, and callers will omit the check.
+
+WF's §7.1 rationale (data problems are dev-time issues; fallbacks cost bytes
+forever) applies specifically to **precondition violations** on authored data.
+Conditions that can legitimately occur at runtime — an optional script field
+not present, a level file not yet built — are recoverable and handled with
+clean optional-branch contracts.
+
 ---
 
 ## 8. Lookup tables over if-chains
@@ -454,6 +512,36 @@ renderer a one-line data edit instead of a switch edit.
 
 **2D interaction matrix** — `game/level.cc:1537` using
 `collisionInteractionTable[type][kind]`.
+
+**Script engine dispatch** — `ScriptRouter::RunScript` in
+`wftools/wf_viewer/stubs/scripting_stub.cc`. An integer language tag (read
+from an OAS field per §9) indexes a function-pointer table, replacing an
+older leading-byte sigil sniff. The entries are thin lambdas that normalize
+each engine's call signature into a uniform `(const char*, int) → float`
+shape:
+
+```cpp
+Scalar ScriptRouter::RunScript(const void* script, int objectIndex, int language)
+{
+    using RunFn = float(*)(const char*, int);
+    static const RunFn kDispatch[6] = {
+        /* 0 lua    */ [](const char* s, int i){ return lua_engine::RunScript(s, i); },
+        /* 1 fennel */ [](const char* s, int i){ return fennel_engine::RunScript(s, i); },
+        /* 2 js     */ [](const char* s, int i){ return js_engine::RunScript(s, i); },
+        /* 3 wasm   */ [](const char* s, int i){ return wasm3_engine::RunScript(s, i); },
+        /* 4 wren   */ [](const char* s, int i){ return wren_engine::RunScript(s, i); },
+        /* 5 forth  */ [](const char* s, int i){ return zforth_engine::RunScript(s, i); },
+    };
+    RangeCheck(0, language, 6);
+    AssertMsg(kDispatch[language] != nullptr, "no dispatch entry for language " << language);
+    return Scalar::FromFloat(kDispatch[language](static_cast<const char*>(script), objectIndex));
+}
+```
+
+What *not* to write: a six-branch `if`/`else` on `language`, each branch
+calling a different engine's `RunScript`. That's bigger code, slower, and
+every new engine requires a new `else if`. The table makes adding an
+engine a one-row edit.
 
 ### 8.2 When a switch is still right
 
@@ -724,6 +812,12 @@ boundary is **acceptable and often preferable**:
 - This is the one place where "not class-shaped" is fine. Inside WF
   proper, still classes.
 
+More broadly: **member functions that don't need access to private data
+should be free functions.** This rule (IS C++ §3) reduces coupling — clients
+depend only on the public header surface, not the entire class. At an interop
+boundary it's mandatory; inside WF proper it's a signal to reconsider whether
+a function belongs to a class at all.
+
 The rest of the rules in this guide (Validate, streams, assertions,
 no-fallbacks, file-header boilerplate, WF integer types, include guards)
 still apply to the wrapper.
@@ -742,8 +836,11 @@ still apply to the wrapper.
 - **No Bugs**, David Thielen (ISBN 0-201-6080-1) — origin of the
   redirectable-streams idea used in §12.
 - **Industrial Strength C++**, Henricson / Nyquist (ISBN 0-13-120965-5).
-  WorldFoundry follows most of it (biggest deviation: underscore-prefixed
-  members).
+  WorldFoundry follows most of it. Cited directly in this guide: canonical
+  form for resource-owning types (§4.1), concrete vs. abstract base class
+  rules (§4.2), free functions at boundary (§13), and the precondition vs.
+  recoverable-error distinction (§7.3). Biggest WF deviation: underscore-
+  prefixed private members are used where IS C++ would prefer no underscore.
 - **The C++ Programming Language**, 3rd ed., Stroustrup
   (ISBN 0-201-88954-4).
 
