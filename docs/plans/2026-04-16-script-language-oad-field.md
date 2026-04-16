@@ -104,37 +104,49 @@ Scalar ScriptRouter::RunScript(const void* script, int objectIndex, int language
 {
     using RunFn = float(*)(const char*, int);
     static const RunFn kDispatch[6] = {
-        /* 0 lua    */ [](const char* s, int i){ return lua_engine::RunScript(s, i); },
-        /* 1 fennel */ [](const char* s, int i){ return fennel_engine::RunScript(s, i); },
+#ifdef WF_ENABLE_LUA
+        /* 0 lua    */ lua_engine::RunScript,
+#else
+        /* 0 lua    */ nullptr,
+#endif
+#ifdef WF_ENABLE_FENNEL
+        /* 1 fennel */ fennel_engine::RunScript,
+#else
+        /* 1 fennel */ nullptr,
+#endif
 #ifdef WF_ENABLE_WREN
-        /* 2 wren   */ [](const char* s, int i){ return wren_engine::RunScript(s, i); },
+        /* 2 wren   */ wren_engine::RunScript,
 #else
         /* 2 wren   */ nullptr,
 #endif
 #ifdef WF_ENABLE_FORTH
-        /* 3 forth  */ [](const char* s, int i){ return forth_engine::RunScript(s, i); },
+        /* 3 forth  */ forth_engine::RunScript,
 #else
         /* 3 forth  */ nullptr,
 #endif
 #if defined(WF_JS_ENGINE_QUICKJS) || defined(WF_JS_ENGINE_JERRYSCRIPT)
-        /* 4 js     */ [](const char* s, int i){ return js_engine::RunScript(s, i); },
+        /* 4 js     */ js_engine::RunScript,
 #else
         /* 4 js     */ nullptr,
 #endif
 #if defined(WF_WASM_ENGINE_WAMR) || defined(WF_WASM_ENGINE_WASM3)
-        /* 5 wasm   */ [](const char* s, int i){ return wasm3_engine::RunScript(s, i); },
+        /* 5 wasm   */ wasm3_engine::RunScript,
 #else
         /* 5 wasm   */ nullptr,
 #endif
     };
-    assert(language >= 0 && language < 6 && kDispatch[language] != nullptr);
+    RangeCheck(0, language, 6);
+    AssertMsg(kDispatch[language] != nullptr, "no dispatch entry for language " << language);
     return Scalar::FromFloat(kDispatch[language](static_cast<const char*>(script), objectIndex));
 }
 ```
 
+Every `RunScript` has exactly the signature `float(const char*, int)` — the function name
+decays directly to a `RunFn` pointer; no lambda wrapper needed.
+
 `fennel_engine::RunScript` is a thin wrapper that uses the Lua VM internally — the
 `gFennelEvalRef` path is unchanged, just reached via `fennel_engine` rather than a
-boolean flag passed into `lua_engine`. Every entry in the table has the same signature.
+boolean flag passed into `lua_engine`.
 
 The `NullInterpreter` stub also grows the `language` parameter (ignored).
 

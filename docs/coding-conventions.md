@@ -201,8 +201,6 @@ Identifiers:
 
 ## 4. C++ rules
 
-These carry forward from the older `codingstandards.txt` without change.
-
 - **No multiple inheritance.** If you think you need it, design differently.
 - **Prefer references over pointers** unless NULL / "invalid object" is a
   real value in the contract.
@@ -518,19 +516,47 @@ renderer a one-line data edit instead of a switch edit.
 from an OAS field per §9) indexes a function-pointer table, replacing an
 older leading-byte sigil sniff. The entries are thin lambdas that normalize
 each engine's call signature into a uniform `(const char*, int) → float`
-shape:
+shape. Every `RunScript` has exactly that signature, so the function name
+decays directly to a `RunFn` pointer — no lambda wrapper needed. Engines
+gated behind compile-time switches are `nullptr` in the disabled slots,
+keeping indices stable across builds so the authored-on-disk language tag
+always means the same slot:
 
 ```cpp
 Scalar ScriptRouter::RunScript(const void* script, int objectIndex, int language)
 {
     using RunFn = float(*)(const char*, int);
     static const RunFn kDispatch[6] = {
-        /* 0 lua    */ [](const char* s, int i){ return lua_engine::RunScript(s, i); },
-        /* 1 fennel */ [](const char* s, int i){ return fennel_engine::RunScript(s, i); },
-        /* 2 js     */ [](const char* s, int i){ return js_engine::RunScript(s, i); },
-        /* 3 wasm   */ [](const char* s, int i){ return wasm3_engine::RunScript(s, i); },
-        /* 4 wren   */ [](const char* s, int i){ return wren_engine::RunScript(s, i); },
-        /* 5 forth  */ [](const char* s, int i){ return zforth_engine::RunScript(s, i); },
+#ifdef WF_ENABLE_LUA
+        /* 0 lua    */ lua_engine::RunScript,
+#else
+        /* 0 lua    */ nullptr,
+#endif
+#ifdef WF_ENABLE_FENNEL
+        /* 1 fennel */ fennel_engine::RunScript,
+#else
+        /* 1 fennel */ nullptr,
+#endif
+#ifdef WF_ENABLE_WREN
+        /* 2 wren   */ wren_engine::RunScript,
+#else
+        /* 2 wren   */ nullptr,
+#endif
+#ifdef WF_ENABLE_FORTH
+        /* 3 forth  */ forth_engine::RunScript,
+#else
+        /* 3 forth  */ nullptr,
+#endif
+#if defined(WF_JS_ENGINE_QUICKJS) || defined(WF_JS_ENGINE_JERRYSCRIPT)
+        /* 4 js     */ js_engine::RunScript,
+#else
+        /* 4 js     */ nullptr,
+#endif
+#if defined(WF_WASM_ENGINE_WAMR) || defined(WF_WASM_ENGINE_WASM3)
+        /* 5 wasm   */ wasm3_engine::RunScript,
+#else
+        /* 5 wasm   */ nullptr,
+#endif
     };
     RangeCheck(0, language, 6);
     AssertMsg(kDispatch[language] != nullptr, "no dispatch entry for language " << language);
@@ -541,7 +567,8 @@ Scalar ScriptRouter::RunScript(const void* script, int objectIndex, int language
 What *not* to write: a six-branch `if`/`else` on `language`, each branch
 calling a different engine's `RunScript`. That's bigger code, slower, and
 every new engine requires a new `else if`. The table makes adding an
-engine a one-row edit.
+engine a one-row edit — and the `nullptr` sentinel in disabled slots is
+exactly what the §6 assertion example catches at the call site.
 
 ### 8.2 When a switch is still right
 
