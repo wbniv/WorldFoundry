@@ -810,7 +810,10 @@ Actor::update()
 	if ( _nonStatPlat->_pScript )
 	{
 		DBSTREAM3( cactor << " executing script:" << _nonStatPlat->_pScript << std::endl; )
-      theLevel->EvalScript(_nonStatPlat->_pScript,GetActorIndex(),GetCommonBlockPtr()->ScriptLanguage);
+      // ScriptLanguage field removed from common.oad to restore layout compat
+      // with pre-existing compiled levels.  Language selection moves to the
+      // next Gap 4 iteration (Blender/levcomp-rs-driven path).
+      theLevel->EvalScript(_nonStatPlat->_pScript,GetActorIndex(),0);
 	}
 
 //#if DEBUG

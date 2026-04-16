@@ -316,15 +316,28 @@ The plugin source didn't overturn anything I'd already committed.  It
 *did* save several more iterations of the loop and made the remaining
 sentinel rules explicit enough to document in comments.
 
+## Resolution
+
+The ScriptLanguage field was reverted from `common.oad` to restore
+layout compatibility with the original compiled snowgoons.iff.  The
+engine's dispatch-table code and `language` parameter threading remain
+in place (passing 0 = Lua).  ScriptLanguage will be re-introduced
+once the full Blender→levcomp-rs→cd.iff pipeline is the primary
+authoring path and all levels are re-compiled.
+
+The Blender exporter now produces a `.lev` with 152/152 unique field
+names matching the original, cross-referenced against `wfmaxplugins/max2lev`.
+Lights (from stored properties), slope plane coefficients (from mesh
+normals), and animation keyframes (from Blender fcurves) all export.
+Tcl scripts in snowgoons.lev were ported to Lua.
+
 ## Outstanding work
 
-- Asset ID packing: deferred until we build a `.iff` from scratch,
-  not needed for the LVL-swap pipeline we're using now to validate.
-- Path/channel generation: requires Blender-side keyframe export
-  or post-process from mesh animations; deferred.
-- Content: port Tcl scripts in `snowgoons.lev` to Lua (or add a Tcl
-  engine to the scripting dispatch) to get the player moving and the
-  camera active.
+- Asset ID packing in levcomp-rs: needed when building `.iff` from
+  scratch instead of LVL-swapping into an existing LVAS wrapper.
+- Re-introduce ScriptLanguage field once all levels compile fresh.
+- End-to-end test: Blender export → levcomp-rs → cd.iff → wf_game
+  (currently validated in pieces but not as a single automated pipeline).
 
 ## Files touched
 

@@ -223,5 +223,9 @@ Objects will appear in the correct WF-relative positions in Blender. The only or
 ## Sequencing
 
 1. ✅ Gaps 1 + 2 — `export_level.py` EULR + STR/XDATA import fixes
-2. ✅ Gap 3 — ScriptLanguage OAD field, dispatch table, Blender panel
-3. ⏳ Gap 4 — Phases 1 + 2a + 2b landed (engine loads + game loop runs); Phase 2c + 3 ahead
+2. ✅ Gap 3 — ScriptLanguage OAD field (reverted from common.oad for compat;
+   dispatch table + language param threading remain in engine code, passing 0)
+3. ✅ Gap 4 — levcomp-rs produces runnable .lvl; snowgoons loads in wf_game
+4. ✅ Blender .lev round-trip — 152/152 field names survive import→export;
+   lights, slopes, and animation channels all emit correctly.
+   Cross-referenced field-by-field against recovered `wfmaxplugins/max2lev`.

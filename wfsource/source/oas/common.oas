@@ -1,1 +1,9 @@
-/home/will/WorldFoundry/wfsource/source/oas/common.oas
+@*============================================================================
+@* common.oas: shim to regenerate common.oad from common.inc
+@*============================================================================
+
+TYPEHEADER(Common)
+    @include common.inc
+TYPEFOOTER
+
+@*============================================================================

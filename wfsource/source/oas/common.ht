@@ -15,7 +15,6 @@
 		int32 IsNeedleGunTarget;        /* Default: 0 */
 		int32 WriteToMailboxOnDeath;               /* Minumum: 0 Maximum: 3999 Default: 0 */
 		int32 Script;
-		int32 ScriptLanguage;              /* 0=Lua 1=Fennel 2=Wren 3=Forth 4=JS 5=Wasm; Default: 0 */
 		int32 ScriptControlsInput;        /* Default: 0 */
 		fixed32 slopeA;         /* Minumum: ( ((long) -32768 * 65536.0)) Maximum: ( ((long) 32767 * 65536.0)) */
     Scalar GetslopeA() const { return Scalar::FromFixed32(slopeA); }
