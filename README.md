@@ -125,4 +125,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 13:15** — [`docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md`](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md): Reverse-engineering the WF binary level format for `levcomp-rs`
+**2026-04-16 13:16** — [`docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md`](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md): Reverse-engineering the WF binary level format for `levcomp-rs`
