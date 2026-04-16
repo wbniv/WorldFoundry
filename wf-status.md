@@ -45,6 +45,7 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 | Date | Investigation | Status | Summary |
 |------|---------------|--------|---------|
+| 2026-04-16 | [Reverse-engineering the WF binary level format for `levcomp-rs`](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md) | **Functional** | Binary format fully mapped; `levcomp-rs` output loads in `wf_game`; snowgoons game loop runs. Remaining: mesh bbox extension, MeshName packing, real path keyframes. |
 | 2026-04-16 | [Coding-conventions remediation](docs/investigations/2026-04-16-coding-conventions-remediation.md) | **In progress** | Audit of 2026-authored code in `wfsource/source/` against `docs/coding-conventions.md`. Honest accounting of where recent additions don't yet follow the rules they propose. |
 | 2026-04-15 | [LOC tracking](docs/investigations/2026-04-15-loc-tracking.md) | **Ongoing** | Tracks code line count over time. Current HEAD: ~36,199 lines (−43.7% from baseline 64,252 at `74d1a47`). Tool: `scripts/loc_report.py`. |
 | 2026-04-14 | [Scripting language replacement](docs/investigations/2026-04-14-scripting-language-replacement.md) | **Complete** | Comprehensive survey that recommended Lua 5.4 as the primary engine. Spawned all scripting plans. Decision: Lua won. |
@@ -124,5 +125,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16** — Repo reorganization: `engine/` is now a top-level directory. `wftools/wf_engine/`, `wftools/vendor/`, `wf_viewer/stubs/`, `wf_viewer/include/` all moved under `engine/`. `wftools/` is now strictly dev tooling. See [`docs/plans/2026-04-16-engine-directory-reorganization.md`](docs/plans/2026-04-16-engine-directory-reorganization.md).
-**2026-04-16 09:22** — [`docs/plans/2026-04-16-script-language-oad-field.md`](docs/plans/2026-04-16-script-language-oad-field.md): Plan: encode scripting language in OAS/OAD; drop runtime sigil detection
+**2026-04-16** — `levcomp-rs` output (Phases 1 + 2a + 2b) loads in `wf_game`; snowgoons game loop runs with compiled level. See [`docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md`](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md).

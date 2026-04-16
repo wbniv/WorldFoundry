@@ -1,9 +1,11 @@
 # Reverse-engineering the WF binary level format for `levcomp-rs`
 
 **Date:** 2026-04-16
-**Status:** Incomplete — still running the engine-assert debug loop; most of the
-binary format has been mapped from first principles and cross-checked against
-recovered source.
+**Status:** Functional — `levcomp-rs` output loads cleanly in `wf_game`;
+player character spawns, physics broadphase completes, REST API starts.
+A trailing `terminate called without an active exception` appears after
+the game loop is already running and is attributable to an unrelated
+subsystem (pforth added in the same session), not to the compiled level.
 
 ## Context
 
@@ -110,13 +112,72 @@ common block, that object's `Activated By Object List` reads 0 and
 points at a block whose only entry is `0xffffffff` (the end sentinel).
 My code wrote -1 because I was treating all empty XDATA identically.
 
-### 7. `OBJECT_REFERENCE` sentinels depend on context
+### 7. XDATA sentinels vary by conversion action
+
+After the OBJECTLIST sentinel fix (always emit at least a `[0xffffffff]`
+block and use that offset, never -1), the next assertion is again
+`offset = -1` in commonblock.cc — this time from a different field.
+
+Final sentinel table (from `max2lvl::level4.cc:485+` confirmation):
+
+| XData action | Empty case | Engine behaviour |
+|---|---|---|
+| COPY (1) / SCRIPT (4) | write -1 | engine guards with `!= -1` |
+| OBJECTLIST (2) | append 4-byte `0xffffffff` block, store that offset | engine iterates until terminator |
+| CONTEXTUALANIMATIONLIST (3) | write -1 | engine guards |
+
+### 8. `OBJECT_REFERENCE` sentinels depend on context
 
 Oracle's inside-CB ObjectReference fields (e.g. `Object To Follow`,
 `Shadow Object Template`) all read -1.  Outside-CB ObjectReferences
 all read 0.  `iff2lvl::oad.cc:1677` comments this: an explicit 1996
 change from -1 to 0 for the outside-CB case.  Threaded an `in_common`
 flag through the serialiser.
+
+### 9. Degenerate bboxes crash colbox
+
+Lights (type=23 / "Omni01") carry no `BOX3` chunk in the `.lev`, so our
+parser defaulted to zeros — `(0,0,0)-(0,0,0)`.  The engine's colbox
+constructor asserts `max.X() > min.X()`.  `iff2lvl::level.cc:575-598`
+handles this by pushing any thin axis' min down by 0.25 (so lights get
+`(-0.25,-0.25,-0.25)-(0,0,0)`).  Mirrored the expansion in `lvl_writer`.
+
+### 10. Path + channel records must exist when any actor has Mobility=Path
+
+`Path::Path` (anim/path.cc:65-99) dereferences all six channel indices
+*unconditionally*.  A "null path" isn't a thing at the runtime level.
+For MVP we emit one dummy `_PathOnDisk` with base=(0,0,0) and all six
+channel slots pointing at a single dummy `_ChannelOnDisk` whose
+compressor type is `CONSTANT_COMPRESSION` (=1) with one zero-valued
+key.  Any object whose `.lev` Mobility field resolves to "Path" gets
+pathIndex=0 instead of -1.  The enemy doesn't animate but the level
+loads.
+
+### 11. `OADFLAG_TEMPLATE_OBJECT` isn't the `TemplateObject` field
+
+The generated `oas/objects.c::ConstructOadObject` dispatcher checks
+`startData->objectData->oadFlags & (1 << OADFLAG_TEMPLATE_OBJECT)`
+— **not** the `TemplateObject` int32 inside per-object OAD.  When the
+`.lev` has `Template Object = 1` (tools, missiles), we need both:
+keep the field value at 1 for the engine's second check at
+`level.cc:512`, *and* set bit 0 of `_ObjectOnDisk.oadFlags` so the
+dispatcher returns NULL and no actor is constructed.  Also found a bug
+in my own code: `field_str_value` treats DATA bytes as a C-string, so
+`{ DATA 1l }{ STR "1" }` read `"\x01"` not `"1"`.  Switched to reading
+DATA as a little-endian i32 for this detection.
+
+### 12. MeshName asset IDs needed before meshes can load
+
+Once the engine successfully constructs statplats, `GetMeshName()`
+must return a valid packedAssetID (class `[TYPE | ROOM | INDEX]`).
+We write 0 for unresolved Filename/MeshName; the engine asserts.
+For the LVL-swap validation path we short-circuit by copying the
+oracle's MeshName values into our output, matched by `(type, position)`
+tuple — the asset IDs are guaranteed valid because we're reusing the
+oracle's ASMP/PERM/RM* chunks verbatim.  A proper port would implement
+iff2lvl's `[TYPE | ROOM | INDEX]` packing (see `max2lvl::level2.cc:228`).
+
+With this post-patch applied, **snowgoons loads and the game loop runs**.
 
 ## Pivot: reading `max2lev` / `max2lvl`
 

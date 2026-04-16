@@ -123,16 +123,40 @@ documented in `docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md`
    now accepts a `class_index: impl Fn(&str) -> Option<i32>` closure and patches
    `MovementClass.def` after loading each class's OAD.
 
-### Phase 2b (not started)
+### Phase 2b — Paths/channels, template objects, validation (landed)
 
-1. **Paths and channels** — animated objects reference a pathIndex; paths contain 6
-   channel indices for position and rotation curves.  Channels hold keyframe arrays.
-   (MVP emits one dummy all-zero path so path-animated objects load without assertion;
-   they will be static at runtime.)
-2. **Rooms** — port `iff2lvl::SortIntoRooms()`: objects assigned to rooms by bbox-center
-   containment.  Room records hold object indices + adjacency.
-3. **Mesh bbox extension** — read mesh `.iff` files referenced by each object and extend
+Three more fixes needed before the engine would accept the output, found by running
+`levcomp-rs` output through `wf_game` and chasing assertions:
+
+1. **Path + channel records** — `Path::Path` (anim/path.cc:65-99) dereferences all six
+   channel indices unconditionally — a "null path" doesn't exist at the runtime level.
+   Emit one dummy `_PathOnDisk` pointing all six channel slots at a single dummy
+   `_ChannelOnDisk` (compressor=CONSTANT_COMPRESSION=1, one zero-valued key).  Objects
+   with `Mobility=Path` get `pathIndex=0`; everything else keeps `-1`.
+
+2. **OADFLAG_TEMPLATE_OBJECT** — `oas/objects.c::ConstructOadObject` checks
+   `startData->objectData->oadFlags & (1 << OADFLAG_TEMPLATE_OBJECT)`, not the
+   `TemplateObject` int32 inside the per-object OAD.  Objects with `Template Object = 1`
+   in their `.lev` (tools, missile spawners) now set bit 0 of `_ObjectOnDisk.oadFlags`
+   in addition to keeping the field value at 1 for the secondary check at `level.cc:512`.
+
+3. **MeshName asset IDs (validation bypass)** — `GetMeshName()` requires a packed asset ID
+   `[TYPE | ROOM | INDEX]` assembled from `iff2lvl::level2.cc:228` logic.  For the
+   validation run we copy MeshName values from the oracle (matched by `(type, position)`)
+   since the oracle's ASMP/PERM/RM* chunks are reused verbatim.  Proper packing is a
+   later phase.
+
+**Result:** `wf_game` with `levcomp-rs`-compiled `cd.iff` loads snowgoons; player
+spawns, physics broadphase completes, REST API starts, game loop runs.
+
+### Phase 2c (not started)
+
+1. **Mesh bbox extension** — read mesh `.iff` files referenced by each object and extend
    its bbox to enclose the mesh (explains the 8 bbox mismatches in snowgoons).
+2. **MeshName asset ID packing** — implement `iff2lvl::level2.cc:228`'s
+   `[TYPE | ROOM | INDEX]` packing instead of the oracle-copy bypass.
+3. **Real path/channel extraction** — extract keyframe data from `.lev` path chunks
+   instead of emitting the single dummy channel.
 
 ### Phase 3 — LVAS wrapping (no new code needed)
 
@@ -200,4 +224,4 @@ Objects will appear in the correct WF-relative positions in Blender. The only or
 
 1. ✅ Gaps 1 + 2 — `export_level.py` EULR + STR/XDATA import fixes
 2. ✅ Gap 3 — ScriptLanguage OAD field, dispatch table, Blender panel
-3. ⏳ Gap 4 — Phase 1 + 2a landed (headers + OAD serialization); Phase 2b + 3 ahead
+3. ⏳ Gap 4 — Phases 1 + 2a + 2b landed (engine loads + game loop runs); Phase 2c + 3 ahead

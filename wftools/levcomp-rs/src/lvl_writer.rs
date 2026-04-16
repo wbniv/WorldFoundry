@@ -104,9 +104,32 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
             .map(|c| crate::lev_parser::field_str_value(c))
             .as_deref() == Some("Path"))
         .collect();
+
+    // Which objects are "template" objects — the engine's oas/objects.c
+    // dispatcher skips construction for any class whose oadFlags bit 0
+    // (OADFLAG_TEMPLATE_OBJECT) is set.  Objects carry a "Template Object"
+    // INT32 field in their per-class OAD; when its .lev value is "1"
+    // ("True" in the False|True enum) the flag must propagate into the
+    // _ObjectOnDisk.oadFlags field or level.cc:188 asserts.
+    let is_template_object: Vec<bool> = plan.objects.iter()
+        .map(|obj| obj.find_field("Template Object")
+            .map(|c| {
+                let d = crate::lev_parser::field_data(c);
+                d.len() >= 4 && i32::from_le_bytes(d[..4].try_into().unwrap()) != 0
+            })
+            .unwrap_or(false))
+        .collect();
     let any_path_objects = needs_dummy_path.iter().any(|&b| b);
     let path_count = if any_path_objects { 1 } else { 0 };
     let path_record_size = 44;  // fixed32×3 + u16×3 + u8 + 1 pad + i32×6
+
+    // Channels — Path::Path dereferences each of its six channel indices
+    // unconditionally (path.cc:65–99), so even a "static" path needs at
+    // least one valid channel.  Emit one CONSTANT_COMPRESSION channel
+    // with a single zero-valued key; the dummy path points all six of
+    // its channel slots at this one record.
+    let channel_count = if any_path_objects { 1 } else { 0 };
+    let channel_record_size = 12 + 8;  // header (compressor+endTime+numKeys) + 1 key
 
     let header_size   = 52;
     let objects_off   = header_size;
@@ -116,7 +139,9 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
     let paths_array  = 4 * path_count;
     let paths_total  = path_record_size * path_count;
     let channels_off = paths_off + paths_array + paths_total;
-    let rooms_off    = channels_off; // empty channels section
+    let channels_array = 4 * channel_count;
+    let channels_total = channel_record_size * channel_count;
+    let rooms_off    = channels_off + channels_array + channels_total;
     let rooms_array  = 4 * room_list.len();
     let common_off   = rooms_off + rooms_array + rooms_total;
     let common_len   = common.bytes().len();
@@ -129,7 +154,7 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
     push_i32(&mut out, objects_off as i32);
     push_i32(&mut out, path_count as i32);
     push_i32(&mut out, paths_off as i32);
-    push_i32(&mut out, 0);                     // channelCount
+    push_i32(&mut out, channel_count as i32);
     push_i32(&mut out, channels_off as i32);
     push_i32(&mut out, 0);                     // lightCount
     push_i32(&mut out, 0);                     // lightsOffset
@@ -180,6 +205,8 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
         ]);
 
         let path_index: i16 = if needs_dummy_path[i] { 0 } else { -1 };
+        const OADFLAG_TEMPLATE_OBJECT: i32 = 1 << 0;
+        let oad_flags: i32 = if is_template_object[i] { OADFLAG_TEMPLATE_OBJECT } else { 0 };
         let start = out.len();
         write_obj_header(
             &mut out,
@@ -188,7 +215,7 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
             (ONE, ONE, ONE),
             rot,
             &bbox,
-            /* oad_flags  */ 0,
+            oad_flags,
             path_index,
             oad_size,
         );
@@ -203,13 +230,12 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
         pad_section(&mut out, start, obj_sizes[i + 1]);
     }
 
-    // Paths: offset array + dummy record(s).  See the any_path_objects
-    // comment above for why we emit one null path even in MVP.
+    // Paths: offset array + dummy record(s).  Each path references 6
+    // channels unconditionally (path.cc:65–99), so point every channel
+    // index at channel 0 (the dummy constant channel emitted below).
     debug_assert_eq!(out.len(), paths_off);
     if path_count > 0 {
-        push_i32(&mut out, (paths_off + paths_array) as i32);  // offset to path 0
-        // _PathOnDisk: all-zero base position + rotation + all channel
-        // indices = -1 (no animation).  Pad total to 44 bytes.
+        push_i32(&mut out, (paths_off + paths_array) as i32);
         let path_start = out.len();
         push_i32(&mut out, 0);   // base.x
         push_i32(&mut out, 0);   // base.y
@@ -219,11 +245,24 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
         out.extend_from_slice(&0u16.to_le_bytes());  // rot.c
         out.push(0);                                 // order
         out.push(0);                                 // pad
-        for _ in 0..6 { push_i32(&mut out, -1); }    // 6 channels × -1
+        for _ in 0..6 { push_i32(&mut out, 0); }     // all 6 channels → channel 0
         debug_assert_eq!(out.len() - path_start, path_record_size);
     }
 
-    // Channels: empty.
+    // Channels: one CONSTANT_COMPRESSION channel with a single zero key.
+    // Layout (anim/channel.cc): compressorType (i32) + endTime (fixed32) +
+    // numKeys (i32) + numKeys × { time (fixed32), value (i32) }.
+    debug_assert_eq!(out.len(), channels_off);
+    if channel_count > 0 {
+        push_i32(&mut out, (channels_off + channels_array) as i32);
+        let ch_start = out.len();
+        push_i32(&mut out, 1);   // compressorType = CONSTANT_COMPRESSION
+        push_i32(&mut out, 0);   // endTime = 0
+        push_i32(&mut out, 1);   // numKeys = 1
+        push_i32(&mut out, 0);   // key time = 0
+        push_i32(&mut out, 0);   // key value = 0
+        debug_assert_eq!(out.len() - ch_start, channel_record_size);
+    }
 
     // Rooms: offset array, then packed records.
     debug_assert_eq!(out.len(), rooms_off);
