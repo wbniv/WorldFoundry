@@ -19,6 +19,7 @@ use crate::common_block::CommonBlockBuilder;
 use crate::lc_parser::ClassMap;
 use crate::lev_parser::LevObject;
 use crate::oad_loader::{per_object_size, serialize_oad_data, OadSchemas};
+use crate::rooms;
 
 pub const LEVEL_VERSION: i32 = 28;
 
@@ -84,6 +85,11 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
         oad_payloads.push(payload);
     }
 
+    // Rooms: sort non-room objects into rooms by bbox-center containment.
+    let room_list = rooms::sort(plan.objects, plan.schemas);
+    let room_sizes: Vec<usize> = room_list.iter().map(|r| r.byte_size()).collect();
+    let rooms_total: usize = room_sizes.iter().sum();
+
     let header_size   = 52;
     let objects_off   = header_size;
     let array_bytes   = 4 * total_objects;
@@ -91,7 +97,8 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
     let paths_off    = objects_off + array_bytes + objects_total;
     let channels_off = paths_off;    // empty paths section
     let rooms_off    = channels_off; // empty channels section
-    let common_off   = rooms_off;    // empty rooms section
+    let rooms_array  = 4 * room_list.len();
+    let common_off   = rooms_off + rooms_array + rooms_total;
     let common_len   = common.bytes().len();
 
     let mut out = Vec::with_capacity(common_off + common_len);
@@ -106,7 +113,7 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
     push_i32(&mut out, channels_off as i32);
     push_i32(&mut out, 0);                     // lightCount
     push_i32(&mut out, 0);                     // lightsOffset
-    push_i32(&mut out, 0);                     // roomCount
+    push_i32(&mut out, room_list.len() as i32);
     push_i32(&mut out, rooms_off as i32);
     push_i32(&mut out, common_len as i32);
     push_i32(&mut out, common_off as i32);
@@ -175,7 +182,23 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
         pad_section(&mut out, start, obj_sizes[i + 1]);
     }
 
-    // No paths, channels, or rooms in MVP.  Common data area sits at the end.
+    // No paths or channels in MVP (offsets point at empty regions).
+
+    // Rooms: offset array, then packed records.
+    debug_assert_eq!(out.len(), rooms_off);
+    let mut room_cursor = rooms_off + rooms_array;
+    for sz in &room_sizes {
+        push_i32(&mut out, room_cursor as i32);
+        room_cursor += sz;
+    }
+    for room in &room_list {
+        let start = out.len();
+        room.write(&mut out);
+        debug_assert_eq!(out.len() - start, room.byte_size());
+    }
+
+    // Common data area sits at the end.
+    debug_assert_eq!(out.len(), common_off);
     out.extend_from_slice(common.bytes());
     debug_assert_eq!(out.len(), common_off + common_len);
     Ok(out)

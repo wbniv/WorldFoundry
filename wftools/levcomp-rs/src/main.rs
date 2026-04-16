@@ -13,6 +13,7 @@ mod lc_parser;
 mod lev_parser;
 mod lvl_writer;
 mod oad_loader;
+mod rooms;
 
 use std::path::Path;
 use std::process;
