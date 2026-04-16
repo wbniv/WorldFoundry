@@ -125,4 +125,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 15:45** — [`wftools/wf_blender/export_level.py`](wftools/wf_blender/export_level.py): Fix coordinate system (WF is Z-up, not Y-up); 152/152 field round-trip; lights, slopes, animation channels
+**2026-04-16 16:02** — [`docs/plans/2026-04-15-lua-engine-fixes.md`](docs/plans/2026-04-15-lua-engine-fixes.md): Plan: lua_engine — correctness and performance fixes
