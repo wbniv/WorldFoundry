@@ -833,7 +833,7 @@ def _apply_field_chunks(blobj, schema, obj_chunk):
                     blobj[prop_key] = items[idx]
             except (ValueError, TypeError):
                 pass
-        elif field.kind in ("Str", "ObjRef", "FileRef"):
+        elif field.kind in ("Str", "ObjRef", "FileRef", "Skip", "Annotation"):
             blobj[prop_key] = str(val)
 
 
@@ -905,6 +905,9 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
                 f"{fp(wf_bb_max[0])} {fp(wf_bb_max[1])} {fp(wf_bb_max[2])}  //min(x,y,z)-max(x,y,z) }} }}"
             )
             lines.append(f'\t\t{{ \'STR\' {{ \'NAME\' "Class Name" }} {{ \'DATA\' "{typename}" }} }}')
+            # TRACE — write to file so we can see what the OAD export does
+            with open("/tmp/wf_export_trace.log", "a") as _tf:
+                _tf.write(f"obj={obj.name} schema_path={schema_path!r}\n")
 
             # Mesh geometry — export .iff if object has a real mesh
             level_dir  = os.path.dirname(self.filepath)
@@ -922,16 +925,19 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
             lines.append(f'\t\t{{ \'FILE\' {{ \'NAME\' "Mesh Name" }} {{ \'STR\' "{mesh_filename}" }} }}')
             lines.append(f'\t\t{{ \'I32\'  {{ \'NAME\' "Model Type" }} {{ \'DATA\' {model_type}l }} {{ \'STR\' "{"Mesh" if model_type == 1 else "None"}" }} }}')
 
-            # OAD fields
+            # OAD fields — walk the schema and emit every stored property
+            # as text-IFF chunks matching the .lev format that iff2lvl and
+            # levcomp-rs consume.
             try:
-                schema = wf_core.load_schema(bpy.path.abspath(schema_path))
-                values = _collect_values(obj, schema)
-                oad_iff = wf_core.export_iff_txt(schema, values)
-                # extract the inner field chunks from the OAD iff.txt
-                # (it's wrapped in { 'TYPE' { 'NAME' ... } ... })
-                for field_line in _extract_field_lines(oad_iff):
-                    lines.append("\t\t" + field_line)
+                resolved = bpy.path.abspath(schema_path)
+                schema = wf_core.load_schema(resolved)
+                for fl in _emit_lev_fields(obj, schema, fp):
+                    lines.append("\t\t" + fl)
             except Exception as e:
+                import traceback
+                with open("/tmp/wf_export_errors.log", "a") as _ef:
+                    _ef.write(f"[wf_export] {obj.name}: {e}\n")
+                    traceback.print_exc(file=_ef)
                 self.report({'WARNING'}, f"{obj.name}: OAD export error: {e}")
 
             lines.append("\t}")
@@ -955,6 +961,109 @@ def _corner(obj, i):
     from mathutils import Vector
     local = Vector(obj.bound_box[i])
     return obj.matrix_world @ local
+
+
+def _emit_lev_fields(obj, schema, fp) -> list[str]:
+    """Walk every visible schema field and emit its value as a text-IFF
+    chunk line matching the .lev format that iffcomp / levcomp-rs consume.
+
+    Returns a list of single-line strings, one per field:
+      { 'I32'  { 'NAME' "Mobility" } { 'DATA' 0l } { 'STR' "Anchored" } }
+      { 'FX32' { 'NAME' "Mass" }     { 'DATA' 75.0(1.15.16) } { 'STR' "75.0" } }
+      { 'STR'  { 'NAME' "Script" }   { 'STR' "write_mailbox(..." } }
+    """
+    lines = []
+    for field in schema.fields():
+        kind = field.kind
+        if kind in ("Section", "Group", "GroupEnd"):
+            continue
+        key = _prop_key(field.key)
+        val = obj.get(key)
+        if val is None:
+            continue
+        # Skip hidden/structural fields UNLESS they carry a real value
+        # (e.g. XDATA Script fields are marked kind="Skip" by the schema
+        # but do hold script text that must round-trip).
+        if kind == "Skip" and (val == "" or val == 0):
+            continue
+        if field.show_as == 6 and kind != "Skip":  # hidden non-content
+            continue
+
+        # max2lev (oadobj.cc:504) writes GetName() = the internal key,
+        # NOT the display label.  The .lev reader (iff2lvl) and our own
+        # importer match by key, so round-tripping requires the key.
+        name = field.key
+
+        if kind == "Int" or kind == "Bool":
+            iv = int(val)
+            items = field.enum_items() if hasattr(field, 'enum_items') else []
+            if items:
+                label = items[iv] if 0 <= iv < len(items) else str(iv)
+                lines.append(
+                    f"{{ 'I32' {{ 'NAME' \"{name}\" }} "
+                    f"{{ 'DATA' {iv}l  //{_items_comment(items)} }} "
+                    f"{{ 'STR' \"{label}\" }} }}")
+            else:
+                lines.append(
+                    f"{{ 'I32' {{ 'NAME' \"{name}\" }} "
+                    f"{{ 'DATA' {iv}l }} {{ 'STR' \"{iv}\" }} }}")
+
+        elif kind == "Float":
+            fv = float(val)
+            lines.append(
+                f"{{ 'FX32' {{ 'NAME' \"{name}\" }} "
+                f"{{ 'DATA' {fp(fv)} }} {{ 'STR' \"{fv}\" }} }}")
+
+        elif kind == "Enum":
+            label = str(val)
+            items = field.enum_items()
+            idx = items.index(label) if label in items else 0
+            # max2lev (oadobj.cc:555): SHOW_AS_DROPMENU (4) omits DATA,
+            # writes only STR with the label.  All other showAs values
+            # (RADIOBUTTONS=5, etc.) write DATA(index) + STR(label).
+            if field.show_as == 4:
+                lines.append(
+                    f"{{ 'I32' {{ 'NAME' \"{name}\" }} "
+                    f"{{ 'STR' \"{label}\" }} }}")
+            else:
+                lines.append(
+                    f"{{ 'I32' {{ 'NAME' \"{name}\" }} "
+                    f"{{ 'DATA' {idx}l  //{_items_comment(items)} }} "
+                    f"{{ 'STR' \"{label}\" }} }}")
+
+        elif kind == "Str" or kind == "Annotation":
+            sv = str(val).replace('"', '\\"')
+            lines.append(
+                f"{{ 'STR' {{ 'NAME' \"{name}\" }} "
+                f"{{ 'STR' \"{sv}\" }} }}")
+
+        elif kind == "ObjRef":
+            sv = str(val)
+            lines.append(
+                f"{{ 'STR' {{ 'NAME' \"{name}\" }} "
+                f"{{ 'STR' \"{sv}\" }} }}")
+
+        elif kind == "FileRef":
+            sv = str(val)
+            lines.append(
+                f"{{ 'FILE' {{ 'NAME' \"{name}\" }} "
+                f"{{ 'STR' \"{sv}\" }} }}")
+
+        elif kind == "Skip":
+            # XDATA fields (Script, Notes, etc.) — emit as STR with the
+            # stored text value, matching max2lev's XDATA→'STR' mapping.
+            sv = str(val).replace('"', '\\"')
+            if sv:
+                lines.append(
+                    f"{{ 'STR' {{ 'NAME' \"{name}\" }} "
+                    f"{{ 'STR' \"{sv}\" }} }}")
+
+    return lines
+
+
+def _items_comment(items):
+    """Format enum items as a comment string: 'False|True'."""
+    return '|'.join(items) if items else ''
 
 
 def _extract_field_lines(oad_iff_txt: str) -> list[str]:
