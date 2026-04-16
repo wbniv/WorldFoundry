@@ -20,7 +20,13 @@ from pathlib import Path
 
 SCRIPT_DIR   = Path(__file__).parent
 REPO_ROOT    = SCRIPT_DIR.parent
-DIRECTOR_WASM = REPO_ROOT / 'wftools/vendor/wasm3-v0.5.0-wf/snowgoons_director.wasm'
+
+# wasm3 director binary embedded directly (133 bytes; baked INDEXOF_CAMSHOT=1021).
+_DIRECTOR_WASM_B64 = (
+    "AGFzbQEAAAABEgRgAX8BfWACf30AYAF/AGAAAAIoAgNlbnYMcmVhZF9tYWlsYm94AAADZW52"
+    "DXdyaXRlX21haWxib3gAAQMDAgIDBwgBBG1haW4AAwouAhoBAX0gABAAIgFDAAAAAFwEQEH9"
+    "ByABEAELCxEAQeQAEAJB4wAQAkHiABACCw=="
+)
 
 # Reuse pad_to + TCL needles from the Lua patcher, and the Fennel forms
 # that are currently in the iff from the Fennel patcher.
@@ -40,7 +46,7 @@ _DIR_TCL_NEEDLE,    _DIR_LUA     = _lua.PATCHES[1]
 _DIR_FENNEL_PADDED                = pad_to(_fennel.DIRECTOR_FENNEL, len(_DIR_TCL_NEEDLE))
 
 def build_wasm_replacement() -> bytes:
-    wasm = DIRECTOR_WASM.read_bytes()
+    wasm = base64.b64decode(_DIRECTOR_WASM_B64)
     b64  = base64.b64encode(wasm)
     return b'#b64\n' + b64
 

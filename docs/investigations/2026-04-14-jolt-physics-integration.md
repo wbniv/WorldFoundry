@@ -1,7 +1,7 @@
 # Investigation: Integrate [Jolt Physics](https://jrouwe.github.io/JoltPhysics/) as the WF physics backend
 
 **Date:** 2026-04-14
-**Status:** Deferred — plan captured for future work, not scheduled.
+**Status:** **Functional** — `WF_PHYSICS_ENGINE=jolt` is the default; snowgoons is playable. Legacy `physics/wf/` retained pending parity on a second level.
 **Depends on:** `docs/investigations/2026-04-14-physics-engine-survey.md` (Jolt selected over Bullet/PhysX/Rapier on size, license, character-controller quality, and maintenance trajectory).
 
 ## Context

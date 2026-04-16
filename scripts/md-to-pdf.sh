@@ -264,6 +264,8 @@ for line in lines:
                 anchors.append(m.group(0))
                 return f'\x00ANCHOR{len(anchors)-1}\x00'
             c = re.sub(r'<a\s[^>]*></a>', save_anchor, c)
+            c = re.sub(r'<br\s*/?>', save_anchor, c)
+            c = re.sub(r'<pre[^>]*>.*?</pre>', save_anchor, c)
             # Handle double-backtick spans (can contain single backticks) before single-backtick spans
             parts = re.split(r'(\`\`.+?\`\`|\`[^\`]+\`)', c)
             result = []
@@ -294,12 +296,18 @@ for line in lines:
             html_lines.append('</tr></thead><tbody>')
             in_table = True
         else:
-            html_lines.append('<tr>')
-            for ci, c in enumerate(cells):
-                align = table_aligns[ci] if ci < len(table_aligns) else 'left'
-                style = f' style="text-align:{align}"' if align != 'left' else ''
-                html_lines.append(f'<td{style}>{c}</td>')
-            html_lines.append('</tr>')
+            non_empty = [(ci, c) for ci, c in enumerate(cells) if c.strip()]
+            if len(non_empty) == 1:
+                # Single non-empty cell → full-width note row spanning all columns
+                ncols = len(table_aligns) if table_aligns else len(cells)
+                html_lines.append(f'<tr class="note-row"><td colspan="{ncols}">{non_empty[0][1]}</td></tr>')
+            else:
+                html_lines.append('<tr>')
+                for ci, c in enumerate(cells):
+                    align = table_aligns[ci] if ci < len(table_aligns) else 'left'
+                    style = f' style="text-align:{align}"' if align != 'left' else ''
+                    html_lines.append(f'<td{style}>{c}</td>')
+                html_lines.append('</tr>')
         continue
 
     if in_table and not stripped.startswith('|'):
@@ -486,9 +494,12 @@ html = f'''<!DOCTYPE html>
   del {{ color: #656d76; }}
   table {{ border-collapse: collapse; width: 100%; margin: 16px 0; }}
   th, td {{ border: 1px solid #d1d9e0; padding: 8px 12px; text-align: left; vertical-align: top; }}
-  td:first-child, th:first-child {{ white-space: nowrap; }}
+  th:first-child {{ white-space: nowrap; }}
   th {{ background: #f6f8fa; font-weight: 600; }}
   tr:nth-child(even) {{ background: #f6f8fa; }}
+  tr.note-row td {{ background: #fafafa; font-size: 0.88em; color: #555; padding: 3px 12px 5px 20px; border-top: none; }}
+  td pre {{ margin: 0; padding: 4px 6px; background: #f0f0f0; border-radius: 3px; white-space: pre-wrap; overflow-wrap: break-word; font-size: 0.82em; border: none; }}
+  td code {{ white-space: normal; overflow-wrap: break-word; }}
   hr {{ border: none; border-top: 1px solid #d1d9e0; margin: 24px 0; }}
   .mermaid-diagram {{ margin: 24px -20px; }}
   .mermaid-diagram svg {{ width: 100%; height: auto; }}

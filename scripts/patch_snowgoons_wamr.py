@@ -4,11 +4,8 @@ its current form to a WAMR wasm module (base64-wrapped under the `#b64\\n`
 subtype tag), padding with trailing spaces so the script's total byte count
 stays identical.
 
-Prefers the WAMR-specific global-import wasm
-(wamr-2.2.0-wf/snowgoons_director.wasm) compiled from the WAT source via
-wabt.  Falls back to the wasm3-compiled director wasm (baked literals) if
-the WAMR wasm is absent, since both engines share the `#b64\\n` sigil.
-
+Uses the WAMR-specific global-import wasm (compiled from snowgoons_director.wat
+via wabt; INDEXOF_CAMSHOT resolved at instantiation time via host global import).
 The player slot (77 B) is too small for any base64-wrapped wasm module; it
 is not patched.
 
@@ -24,11 +21,13 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent
 REPO_ROOT  = SCRIPT_DIR.parent
 
-# Prefer the WAMR-specific global-import wasm if compiled; fall back to the
-# wasm3 baked-literal binary (same bits, works on WAMR too).
-_WAMR_DIRECTOR = REPO_ROOT / 'wftools/vendor/wamr-2.2.0-wf/snowgoons_director.wasm'
-_WASM3_DIRECTOR = REPO_ROOT / 'wftools/vendor/wasm3-v0.5.0-wf/snowgoons_director.wasm'
-DIRECTOR_WASM = _WAMR_DIRECTOR if _WAMR_DIRECTOR.exists() else _WASM3_DIRECTOR
+# Wasm binary embedded directly (158 bytes; compiled from snowgoons_director.wat
+# with INDEXOF_CAMSHOT as a host-supplied global import).
+_DIRECTOR_WASM_B64 = (
+    "AGFzbQEAAAABEgRgAX8BfWACf30AYAF/AGAAAAJCAwZjb25zdHMPSU5ERVhPRl9DQU1TSE9U"
+    "A38AA2VudgxyZWFkX21haWxib3gAAANlbnYNd3JpdGVfbWFpbGJveAABAwMCAgMHCAEEbWFp"
+    "bgADCi0CGQEBfSAAEAAiAUMAAAAAXARAIwAgARABCwsRAEHkABACQeMAEAJB4gAQAgs="
+)
 
 
 def _load(name: str, path: Path):
@@ -72,14 +71,7 @@ def _find_current_director_bytes(data: bytearray) -> bytes | None:
 
 
 def build_replacement() -> bytes:
-    if not DIRECTOR_WASM.exists():
-        raise FileNotFoundError(
-            f"Director wasm not found at {DIRECTOR_WASM}\n"
-            "Run: wat2wasm wftools/vendor/wamr-2.2.0-wf/snowgoons_director.wat "
-            "-o wftools/vendor/wamr-2.2.0-wf/snowgoons_director.wasm\n"
-            "Or ensure wftools/vendor/wasm3-v0.5.0-wf/snowgoons_director.wasm exists."
-        )
-    wasm = DIRECTOR_WASM.read_bytes()
+    wasm = base64.b64decode(_DIRECTOR_WASM_B64)
     b64  = base64.b64encode(wasm)
     return b'#b64\n' + b64
 

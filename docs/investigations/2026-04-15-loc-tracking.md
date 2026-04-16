@@ -123,9 +123,26 @@ rather than wrapped).  `_signal.cc/h` and `timer.cc/h` were stubbed to `assert(0
 
 Snapshot at `95a065d`.
 
+### `95a065d` — Jolt physics integration (+614 net)
+
+Added `physics/jolt/` (~1,700 lines): Jolt backend (`jolt_backend.cc/hp`),
+`CharacterVirtual` for the player actor, zone-volume exclusion filter
+(large fully-enclosing StatPlats filtered out of character collision),
+and velocity clamp on ground contact (prevents `vel_z` accumulation from
+WF's per-frame gravity additions).
+
+`movement/` grew +30 lines (Jolt branches in Ground and Air handlers, using
+`JoltSyncFromCharacter` to commit Jolt-resolved positions without triggering
+WF's swept-AABB Expand/Validate path). `game/` grew +6 lines (Jolt init/step
+calls). Legacy `physics/wf/` is **retained** pending parity on a second level.
+
+Net: +614 LOC. Gross new code ≈ 1,700 lines; Jolt replaces WF collision paths
+in `movement.cc` that were removed or bypassed.
+
 ## Next survey targets
 
-- `physics/` — 2,124 lines; survey for Jolt replacement path
-  (see `docs/investigations/2026-04-14-jolt-physics-integration.md`).
+- `physics/wf/` + `physics/colspace/` + WF collision code in `physical.cc/hpi`
+  — ~1,700 LOC removable once Jolt passes parity on a second level beyond snowgoons
+  (see projected row in milestones table above).
 - `hal/_list` + `hal/_mempool` — migrate `MsgPort` to `cpplib/minlist.hp` +
   `memory/mempool.hp`, then delete the HAL remnants (see dead-code plan).
