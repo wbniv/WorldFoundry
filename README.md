@@ -125,4 +125,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 15:52** — [`docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md`](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md): Reverse-engineering the WF binary level format for `levcomp-rs`
+**2026-04-16 15:45** — [`wftools/wf_blender/export_level.py`](wftools/wf_blender/export_level.py): Fix coordinate system (WF is Z-up, not Y-up); 152/152 field round-trip; lights, slopes, animation channels
