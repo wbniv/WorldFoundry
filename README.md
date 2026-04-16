@@ -125,6 +125,7 @@ The uncommitted work is two things:
 - **Multiplayer / voice / mobile input** — blocked on mobile port.
 - **Steam packaging** — most runtime blockers resolved; packaging pipeline itself not yet started.
 
+
 ## Last Change
 
-**2026-04-16 02:08** — [`docs/plans/2026-04-16-script-language-oad-field.md`](docs/plans/2026-04-16-script-language-oad-field.md): Plan: encode scripting language in OAS/OAD; drop runtime sigil detection
+**2026-04-16 02:56** — [`docs/investigations/2026-04-16-coding-conventions-remediation.md`](docs/investigations/2026-04-16-coding-conventions-remediation.md): Coding-conventions remediation — 2026 additions
