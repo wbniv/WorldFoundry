@@ -123,4 +123,4 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 ## Last Change
 
-**2026-04-16** — All eight scripting engines smoke-tested end-to-end in snowgoons (JerryScript, WAMR, Wren, zForth confirmed 2026-04-16; Lua/Fennel/QuickJS/wasm3 confirmed previously). Status docs and plan files updated.
+**2026-04-16 05:52** — [`docs/investigations/2026-04-15-loc-tracking.md`](docs/investigations/2026-04-15-loc-tracking.md): WF LOC tracking — shrinking the codebase
