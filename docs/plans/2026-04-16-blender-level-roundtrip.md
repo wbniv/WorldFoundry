@@ -67,7 +67,7 @@ Implemented per `docs/plans/2026-04-16-script-language-oad-field.md`. All five s
 4. Added `WF_OT_detect_script_language` operator to Blender addon (`operators.py`); panel renders "Detect from script text" button below the ScriptLanguage grid (`panels.py`)
 5. `wf_game` builds and launches cleanly with all changes
 
-## Gap 4 — Level compiler (in progress — Phase 1 landed)
+## Gap 4 — Level compiler (in progress — Phases 1 + 2a landed)
 
 The full build pipeline is several tools chained together:
 
@@ -96,13 +96,43 @@ The full build pipeline is several tools chained together:
 - Paths/channels/rooms/common block: sections present but empty (MVP accepts loss of runtime features)
 - Parity on snowgoons: 29/37 object headers match bytewise; remaining 8 differ in bbox (iff2lvl extends bboxes using mesh data — Phase 2) and 2 differ in rotation (Phase 2 investigation)
 
-### Phase 2 (not started)
+### Phase 2a — OAD field serialization (landed)
 
-1. **OAD field serialization** — for each OBJ, walk its I32/FX32/STR/XDAT sub-chunks and emit the binary OAD data block after each `_ObjectOnDisk` header.  Requires loading `.oad` files for every class and matching sub-chunks to schema fields.
-2. **Paths and channels** — animated objects reference a pathIndex; paths contain 6 channel indices for position and rotation curves.  Channels hold keyframe arrays.
-3. **Rooms** — port `iff2lvl::SortIntoRooms()`: objects are assigned to rooms based on bbox-vs-room-bbox containment.  Room records hold the list of contained object indices plus adjacency info.
-4. **Common block** — XDATA scripts, object reference lists, and contextual animation lists get deduplicated into the level's common area; each OAD field that references common data stores an offset into it.
-5. **Mesh bbox extension** — read mesh `.iff` files referenced by each object and extend its bbox to enclose the mesh (explains the 8 bbox mismatches in snowgoons).
+Four correctness fixes discovered via iterative byte-diff against `iff2lvl` output,
+documented in `docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md`:
+
+1. **Thin bbox expansion** — `expand_thin_bbox` in `lvl_writer.rs` ensures every bbox
+   axis has `max − min ≥ 0.25` (fixed32 `0x4000 = 0x00004000`).  Mirrors
+   `iff2lvl/level.cc:573-598`.  Engine colbox constructor asserts `max > min`; objects
+   with no BOX3 in their `.lev` (lights, mattes, zero-mesh actors) would otherwise trigger
+   it.
+
+2. **XDATA sentinel table** — empty XDATA fields in `oad_loader.rs::serialize_entry` now
+   write the correct sentinel per action type:
+   - `COPY (1)` / `CONTEXTUALANIMATIONLIST (3)` / `SCRIPT (4)` → `-1`
+   - `OBJECTLIST (2)` → offset pointing at a `0xffffffff` terminator word in the common
+     block (engine iterates the list until terminator; a `-1` offset would crash)
+
+3. **ObjectReference/ClassReference context** — outside a COMMONBLOCK the correct
+   default is `0`; inside it is `-1` (OBJECT_NULL).  Mirrors `iff2lvl/oad.cc:1677` vs
+   `level3.cc:99`.  `serialize_entry` now accepts an `in_common: bool` parameter.
+
+4. **MovementClass default patch** — `oas2oad-rs` evaluates the `@e0(OASNAME_KIND)` prep
+   macro to 0, so every compiled `.oad` has `MovementClass.def = 0`.  The correct default
+   is the class's index in `objects.lc` (e.g. 5 for `statplat`).  `OadSchemas::load_dir`
+   now accepts a `class_index: impl Fn(&str) -> Option<i32>` closure and patches
+   `MovementClass.def` after loading each class's OAD.
+
+### Phase 2b (not started)
+
+1. **Paths and channels** — animated objects reference a pathIndex; paths contain 6
+   channel indices for position and rotation curves.  Channels hold keyframe arrays.
+   (MVP emits one dummy all-zero path so path-animated objects load without assertion;
+   they will be static at runtime.)
+2. **Rooms** — port `iff2lvl::SortIntoRooms()`: objects assigned to rooms by bbox-center
+   containment.  Room records hold object indices + adjacency.
+3. **Mesh bbox extension** — read mesh `.iff` files referenced by each object and extend
+   its bbox to enclose the mesh (explains the 8 bbox mismatches in snowgoons).
 
 ### Phase 3 — LVAS wrapping (no new code needed)
 
@@ -170,4 +200,4 @@ Objects will appear in the correct WF-relative positions in Blender. The only or
 
 1. ✅ Gaps 1 + 2 — `export_level.py` EULR + STR/XDATA import fixes
 2. ✅ Gap 3 — ScriptLanguage OAD field, dispatch table, Blender panel
-3. ⏳ Gap 4 — Phase 1 landed (object headers); Phases 2–3 still ahead
+3. ⏳ Gap 4 — Phase 1 + 2a landed (headers + OAD serialization); Phase 2b + 3 ahead

@@ -64,7 +64,10 @@ fn main() {
     eprintln!("  loaded {} classes", classes.names.len());
 
     let schemas = if let Some(d) = oad_dir {
-        let s = oad_loader::OadSchemas::load_dir(d).unwrap_or_else(|e| {
+        let s = oad_loader::OadSchemas::load_dir(d, |name| {
+            classes.index_of(name).map(|i| i as i32)
+        })
+        .unwrap_or_else(|e| {
             eprintln!("error: {}", e);
             process::exit(1);
         });

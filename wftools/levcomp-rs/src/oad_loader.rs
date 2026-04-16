@@ -30,7 +30,15 @@ impl OadSchemas {
 
     /// Load every `<class>.oad` file found in `dir`.  Class name is the file
     /// stem, lowercased, to match how objects.lc records class identity.
-    pub fn load_dir(dir: &Path) -> Result<Self, String> {
+    ///
+    /// `class_index` resolves a class name to its `objects.lc` index; used to
+    /// patch the `MovementClass` field's default, which the .oas authors
+    /// specify via the `@e0(OASNAME_KIND)` prep macro (currently bottoms out
+    /// to 0 in oas2oad-rs but should be the class's KIND = its type index).
+    pub fn load_dir(
+        dir: &Path,
+        class_index: impl Fn(&str) -> Option<i32>,
+    ) -> Result<Self, String> {
         let mut by_class = std::collections::HashMap::new();
         for entry in std::fs::read_dir(dir).map_err(|e| format!("read_dir {}: {e}", dir.display()))? {
             let entry = entry.map_err(|e| e.to_string())?;
@@ -47,8 +55,17 @@ impl OadSchemas {
                 continue;  // skip common.oad — handled separately for common block fields
             }
             let bytes = std::fs::read(&path).map_err(|e| format!("read {}: {e}", path.display()))?;
-            let oad = OadFile::read(&mut std::io::Cursor::new(&bytes))
+            let mut oad = OadFile::read(&mut std::io::Cursor::new(&bytes))
                 .map_err(|e| format!("parse {}: {e}", path.display()))?;
+            // Patch MovementClass default — see doc comment above.
+            if let Some(idx) = class_index(&stem) {
+                for field in &mut oad.entries {
+                    if field.name_str() == "MovementClass" {
+                        field.def = idx;
+                        break;
+                    }
+                }
+            }
             by_class.insert(stem, oad);
         }
         Ok(Self { by_class })
@@ -150,7 +167,7 @@ pub fn serialize_oad_data(
                     && schema.entries[j].button_type != ButtonType::EndCommon
                 {
                     let e = &schema.entries[j];
-                    serialize_entry(&mut section, e, obj, common);
+                    serialize_entry(&mut section, e, obj, common, true);
                     j += 1;
                 }
                 while section.len() % 4 != 0 { section.push(0); }
@@ -163,7 +180,7 @@ pub fn serialize_oad_data(
                 i += 1;
             }
             _ => {
-                serialize_entry(&mut out, entry, obj, common);
+                serialize_entry(&mut out, entry, obj, common, false);
                 i += 1;
             }
         }
@@ -176,6 +193,7 @@ fn serialize_entry(
     entry: &OadEntry,
     obj: &LevObject,
     common: &mut CommonBlockBuilder,
+    in_common: bool,
 ) {
     let key = entry.name_str();
     let chunk = obj.find_field(key);
@@ -202,36 +220,53 @@ fn serialize_entry(
             out.extend(std::iter::repeat(0u8).take(len - copy));
         }
         ButtonType::ObjectReference | ButtonType::ClassReference => {
-            // An unresolved reference is -1 (PATH_NULL / OBJECT_NULL); the
-            // game's ValidObject() check treats -1 as "none".  Actual name
-            // resolution (looking up the target in the level's object list
-            // and writing its index) is a later phase.
-            push_i32(out, -1);
+            // iff2lvl distinguishes context:
+            // - OUTSIDE a COMMONBLOCK (oad.cc:1677): default 0.
+            // - INSIDE  a COMMONBLOCK (level3.cc:99): default -1 (OBJECT_NULL).
+            // Name-based resolution is still a later phase.
+            let val = if in_common { -1 } else { 0 };
+            push_i32(out, val);
         }
         ButtonType::Filename | ButtonType::MeshName => {
             // Asset IDs come from asset.inc; unresolved = 0.
             push_i32(out, 0);
         }
         ButtonType::XData => {
-            // Conversion actions 1..=4 (COPY / OBJECTLIST / CONTEXTUAL_ANIM_LIST
-            // / SCRIPT) all materialise as a 4-byte offset into the common
-            // data area where the payload bytes live.  Action 0 (IGNORE) and
-            // anything else writes nothing (per_object_size() also treats it
-            // as 0 bytes, so that case doesn't reach here).
+            // XData fields (actions 1..=4) materialise as a 4-byte offset
+            // into the common data area.  The "empty" case differs by
+            // action — mirrors `wftools/iff2lvl/level4.cc::AddXDataToCommonData`:
+            //
+            //   XDATA_COPY (1) / XDATA_SCRIPT (4):
+            //     iff2lvl writes -1 sentinel when no script/data.  Engine
+            //     guards with `!= -1` (actor.cc:294, :594) and asserts -1
+            //     on classes that shouldn't carry scripts (actor.cc:604).
+            //
+            //   XDATA_OBJECTLIST (2):
+            //     iff2lvl always emits at least an empty-list block — a
+            //     single 0xffffffff terminator — and stores the offset of
+            //     that block.  Engine iterates the list until terminator,
+            //     so we need a valid offset pointing at a terminator.
+            //
+            //   XDATA_CONTEXTUALANIMATIONLIST (3):
+            //     iff2lvl writes -1 sentinel when no list.
             let action = entry.xdata_conversion_action();
             if (1..=4).contains(&action) {
-                let offset = match chunk {
-                    Some(c) => {
-                        let text = crate::lev_parser::field_str_value(c);
-                        // Null-terminated; add() pads the result to 4-byte.
-                        let mut bytes = text.into_bytes();
-                        bytes.push(0);
-                        while bytes.len() % 4 != 0 { bytes.push(0); }
-                        common.add(&bytes)
+                let text = chunk
+                    .map(crate::lev_parser::field_str_value)
+                    .unwrap_or_default();
+                let value = if text.is_empty() {
+                    match action {
+                        1 | 3 | 4 => -1,
+                        2 => common.add(&0xffffffffu32.to_le_bytes()),
+                        _ => -1,
                     }
-                    None => 0,
+                } else {
+                    let mut bytes = text.into_bytes();
+                    bytes.push(0);
+                    while bytes.len() % 4 != 0 { bytes.push(0); }
+                    common.add(&bytes)
                 };
-                push_i32(out, offset);
+                push_i32(out, value);
             }
         }
         _ => {}  // size-0 entries (PropertySheet, GroupStart, GroupStop, flags)

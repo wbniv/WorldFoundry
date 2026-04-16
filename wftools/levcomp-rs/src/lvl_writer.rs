@@ -90,12 +90,32 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
     let room_sizes: Vec<usize> = room_list.iter().map(|r| r.byte_size()).collect();
     let rooms_total: usize = room_sizes.iter().sum();
 
+    // Paths — MVP emits a single "dummy" path (all-zero base, all channel
+    // indices = -1) shared by every object whose `.lev` carries
+    // Mobility=Path in its movebloc common block.  Without this, the
+    // engine's MovementObject constructor (movementobject.hpi:49) asserts
+    // `ValidPtr(startupData->path)` because we'd leave pathIndex=-1 for
+    // every object including path-moving ones.  Real keyframe extraction
+    // is a later phase — the enemy ends up static, which is acceptable
+    // for snowgoons where the one path-animated object is a background
+    // enemy.
+    let needs_dummy_path: Vec<bool> = plan.objects.iter()
+        .map(|obj| obj.find_field("Mobility")
+            .map(|c| crate::lev_parser::field_str_value(c))
+            .as_deref() == Some("Path"))
+        .collect();
+    let any_path_objects = needs_dummy_path.iter().any(|&b| b);
+    let path_count = if any_path_objects { 1 } else { 0 };
+    let path_record_size = 44;  // fixed32×3 + u16×3 + u8 + 1 pad + i32×6
+
     let header_size   = 52;
     let objects_off   = header_size;
     let array_bytes   = 4 * total_objects;
 
     let paths_off    = objects_off + array_bytes + objects_total;
-    let channels_off = paths_off;    // empty paths section
+    let paths_array  = 4 * path_count;
+    let paths_total  = path_record_size * path_count;
+    let channels_off = paths_off + paths_array + paths_total;
     let rooms_off    = channels_off; // empty channels section
     let rooms_array  = 4 * room_list.len();
     let common_off   = rooms_off + rooms_array + rooms_total;
@@ -107,7 +127,7 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
     push_i32(&mut out, LEVEL_VERSION);
     push_i32(&mut out, total_objects as i32);
     push_i32(&mut out, objects_off as i32);
-    push_i32(&mut out, 0);                     // pathCount
+    push_i32(&mut out, path_count as i32);
     push_i32(&mut out, paths_off as i32);
     push_i32(&mut out, 0);                     // channelCount
     push_i32(&mut out, channels_off as i32);
@@ -154,11 +174,12 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
         let rot = (radians_fx_to_u16_revs(obj.rotation.a),
                    radians_fx_to_u16_revs(obj.rotation.b),
                    radians_fx_to_u16_revs(obj.rotation.c));
-        let bbox = [
+        let bbox = expand_thin_bbox([
             obj.bbox.min[0], obj.bbox.min[1], obj.bbox.min[2],
             obj.bbox.max[0], obj.bbox.max[1], obj.bbox.max[2],
-        ];
+        ]);
 
+        let path_index: i16 = if needs_dummy_path[i] { 0 } else { -1 };
         let start = out.len();
         write_obj_header(
             &mut out,
@@ -168,7 +189,7 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
             rot,
             &bbox,
             /* oad_flags  */ 0,
-            /* path_index */ -1,
+            path_index,
             oad_size,
         );
         // Per-object OAD payload: fields outside any COMMONBLOCK carry real
@@ -182,7 +203,27 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
         pad_section(&mut out, start, obj_sizes[i + 1]);
     }
 
-    // No paths or channels in MVP (offsets point at empty regions).
+    // Paths: offset array + dummy record(s).  See the any_path_objects
+    // comment above for why we emit one null path even in MVP.
+    debug_assert_eq!(out.len(), paths_off);
+    if path_count > 0 {
+        push_i32(&mut out, (paths_off + paths_array) as i32);  // offset to path 0
+        // _PathOnDisk: all-zero base position + rotation + all channel
+        // indices = -1 (no animation).  Pad total to 44 bytes.
+        let path_start = out.len();
+        push_i32(&mut out, 0);   // base.x
+        push_i32(&mut out, 0);   // base.y
+        push_i32(&mut out, 0);   // base.z
+        out.extend_from_slice(&0u16.to_le_bytes());  // rot.a
+        out.extend_from_slice(&0u16.to_le_bytes());  // rot.b
+        out.extend_from_slice(&0u16.to_le_bytes());  // rot.c
+        out.push(0);                                 // order
+        out.push(0);                                 // pad
+        for _ in 0..6 { push_i32(&mut out, -1); }    // 6 channels × -1
+        debug_assert_eq!(out.len() - path_start, path_record_size);
+    }
+
+    // Channels: empty.
 
     // Rooms: offset array, then packed records.
     debug_assert_eq!(out.len(), rooms_off);
@@ -251,6 +292,26 @@ fn radians_fx_to_u16_revs(fx: i32) -> u16 {
     let revs = (fx as f64 / 65536.0) / TWO_PI;  // radians → revolutions (float)
     let revs_fx = (revs * 65536.0) as i32;      // truncate toward zero
     (revs_fx as u32 & 0xffff) as u16
+}
+
+/// Ensure every bbox axis has `max - min >= 0.25` (fixed32 `0x4000`).
+///
+/// iff2lvl/level.cc:573-598 applies this to every object's collision box:
+/// where an axis's span is below 0.25, it pushes min down by 0.25 (keeping
+/// max where it was).  The engine's colbox constructor asserts `max > min`
+/// per-axis and would otherwise fire on lights / matte objects / zero-mesh
+/// actors whose `.lev` carries no BOX3 (they'd default to zeros here).
+fn expand_thin_bbox(mut bbox: [i32; 6]) -> [i32; 6] {
+    const QUARTER: i32 = 0x4000;  // 0.25 in fixed32
+    for axis in 0..3 {
+        let min = bbox[axis];
+        let max = bbox[axis + 3];
+        let span = (max - min).abs();
+        if span < QUARTER {
+            bbox[axis] = max - QUARTER;
+        }
+    }
+    bbox
 }
 
 /// Pad `out` with zeros until it reaches `start + target_len`.
