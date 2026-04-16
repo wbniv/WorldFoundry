@@ -1,7 +1,7 @@
 # Plan: Forth as a scripting engine option for World Foundry
 
 **Date:** 2026-04-14
-**Status:** **landed 2026-04-15 (zForth default; needs smoke test — blocked on HAL cleanup).**
+**Status:** **complete — landed 2026-04-15; smoke test passed 2026-04-16 (zForth; GROUND, no crashes).**
 Phase 1 (vendor, all 6 backends) was already done. Phases 2–5 complete:
 `scripting_forth.hp` + `scripting_zforth.cc` (`forth_engine` namespace,
 zForth default); `\` dispatch arm in `ScriptRouter::RunScript`;

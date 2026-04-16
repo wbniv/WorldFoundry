@@ -1,7 +1,7 @@
 # Plan: align scripting-engine plans with ScriptRouter convention
 
 **Date:** 2026-04-15
-**Status:** landed 2026-04-15 — all phases (A, A′, B, C, D.1–D.5, E) complete; smoke tests blocked pending HAL cleanup (other branch)
+**Status:** complete 2026-04-16 — all phases (A, A′, B, C, D.1–D.5, E) complete; all engine smoke tests passed 2026-04-16 (JerryScript, WAMR, Wren, zForth)
 **Scope:** docs-only pass over `docs/plans/2026-04-{13,14,15}-*` scripting-engine plans.
 
 ## Context

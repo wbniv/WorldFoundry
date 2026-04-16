@@ -9,7 +9,7 @@
 
 The past several days have produced a large amount of work across two fronts: **scripting system** and **dead-code removal**.
 
-The scripting system is comprehensively implemented — Lua, Fennel, QuickJS, JerryScript, wasm3, WAMR, Wren, and Forth (zForth) are all compiled and wired into the `ScriptRouter` dispatch table. Lua/Fennel/QuickJS/wasm3 have been smoke-tested end-to-end (snowgoons player moves, director cuts cameras). JerryScript, WAMR, Wren, and Forth are landed but not yet smoke-tested; those tests are blocked on HAL cleanup currently happening on this branch.
+The scripting system is comprehensively implemented and fully smoke-tested — Lua, Fennel, QuickJS, JerryScript, wasm3, WAMR, Wren, and Forth (zForth) are all compiled, wired into the `ScriptRouter` dispatch table, and verified end-to-end in snowgoons (player moves, director cuts cameras). All eight engines confirmed 2026-04-16.
 
 Dead-code removal is largely done: Batches 1–7 are complete, reducing `wfsource/source/` from 64,252 to 36,199 code lines (−43.7%). One batch (Batch 8 — physics replacement) is in progress.
 
@@ -25,12 +25,12 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 |------|------|--------|---------|
 | 2026-04-16 | [ScriptLanguage OAD field](docs/plans/2026-04-16-script-language-oad-field.md) | **Planned** | Move language selection from runtime sigil detection into an explicit `int32 ScriptLanguage` OAD field (dropmenu in Blender). Dispatch via function pointer table. Migration scriptable from Blender headless. |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Partial** | Batches 1–7 complete (−43.7% LOC). Batch 6 (`#if 0` sweep) done. Batch 7 (PSX/Win artifacts, OpusMake, platform guards) done. Batch 8 (Jolt physics replacement) in progress. |
-| 2026-04-14 | [WAMR (dev interp + AOT ship)](docs/plans/2026-04-14-wamr-dev-aot-ship.md) | **Partial** | Phase 1 (classic interpreter) landed 2026-04-15. WAT sources compiled. Smoke test blocked on HAL cleanup. Phase 2 (AOT) deferred. |
-| 2026-04-14 | [Forth scripting engine](docs/plans/2026-04-14-forth-scripting-engine.md) | **Partial** | Phase 1 (all 6 vendors) done. zForth default backend landed with `scripting_forth.hp`/`scripting_zforth.cc`, dispatch arm, build flag, patcher, docs. Smoke test blocked on HAL cleanup. Alternate backends (ficl, atlast, embed, libforth, pforth) deferred until zForth smoke test passes. |
-| 2026-04-14 | [Pluggable JS engines (QuickJS / JerryScript)](docs/plans/2026-04-14-pluggable-scripting-engine.md) | **Partial** | Both engines landed 2026-04-14 with `js_engine` namespace. QuickJS smoke-tested (snowgoons passes). JerryScript build path landed but **never run** — needs smoke test. |
+| 2026-04-14 | [WAMR (dev interp + AOT ship)](docs/plans/2026-04-14-wamr-dev-aot-ship.md) | **Partial** | Phase 1 (classic interpreter) landed 2026-04-15; smoke-tested 2026-04-16 (GROUND, no crashes). Phase 2 (AOT) deferred. |
+| 2026-04-14 | [Forth scripting engine](docs/plans/2026-04-14-forth-scripting-engine.md) | **Partial** | Phase 1 (all 6 vendors) done. zForth default backend landed with `scripting_forth.hp`/`scripting_zforth.cc`, dispatch arm, build flag, patcher, docs. Smoke-tested 2026-04-16 (GROUND, no crashes). Alternate backends (ficl, atlast, embed, libforth, pforth) deferred. |
+| 2026-04-14 | [Pluggable JS engines (QuickJS / JerryScript)](docs/plans/2026-04-14-pluggable-scripting-engine.md) | **Complete** | Both engines landed 2026-04-14 with `js_engine` namespace. QuickJS and JerryScript both smoke-tested 2026-04-16 (snowgoons passes). |
 | 2026-04-15 | [Lua engine fixes (#1–#6)](docs/plans/2026-04-15-lua-engine-fixes.md) | **Landed** | All 6 fixes implemented: script cache, per-actor envs, Fennel precompile, debug gating, stdlib sandbox, coroutine continuations. Smoke test pending HAL cleanup. |
-| 2026-04-15 | [Align scripting plans to ScriptRouter](docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md) | **Landed** | Phases A–E complete: all plan docs updated, JS/wasm3 renamed to `js_engine`/`wasm3_engine` namespaces, WAMR/Wren/Forth landed. Smoke tests blocked on HAL cleanup. |
-| 2026-04-14 | [Wren scripting engine](docs/plans/2026-04-14-wren-scripting-engine.md) | **Landed** | All phases complete: vendor, plug, dispatch, build, docs, patcher. Smoke test blocked on HAL cleanup. |
+| 2026-04-15 | [Align scripting plans to ScriptRouter](docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md) | **Complete** | Phases A–E complete: all plan docs updated, JS/wasm3 renamed to `js_engine`/`wasm3_engine` namespaces, WAMR/Wren/Forth landed. All engine smoke tests passed 2026-04-16. |
+| 2026-04-14 | [Wren scripting engine](docs/plans/2026-04-14-wren-scripting-engine.md) | **Complete** | All phases complete: vendor, plug, dispatch, build, docs, patcher. Smoke-tested 2026-04-16 (GROUND, no crashes). |
 | 2026-04-14 | [WebAssembly (wasm3)](docs/plans/2026-04-14-wasm3-scripting-engine.md) | **Complete** | Landed 2026-04-14. Sigil `#b64\n`, dispatch in `ScriptRouter`, snowgoons AssemblyScript scripts. Renamed to `wasm3_engine` namespace 2026-04-15. |
 | 2026-04-14 | [Fennel on Lua](docs/plans/2026-04-14-fennel-on-lua.md) | **Complete** | Landed 2026-04-14. `;` sigil, sub-dispatch inside `lua_engine`, vendored Fennel 1.6.1, minifier, codegen, snowgoons Fennel scripts. |
 | 2026-04-14 | [Vendor Lua 5.4](docs/plans/2026-04-14-vendor-lua.md) | **Complete** | Landed 2026-04-14. Lua 5.4.8 in `wftools/vendor/lua-5.4.8/`, compiled directly from source, no system `liblua5.4` dependency. |
@@ -77,26 +77,18 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 ## Current blockers
 
-**Jolt character position fix (in progress, this branch):** JerryScript, WAMR, Wren, Forth/zForth, and Lua coroutines need snowgoons smoke tests, but those were deferred until this branch's in-flight changes are committed cleanly.
+**Jolt character position fix (in progress, this branch):** Jolt phases 4+ are in progress (`jolt_backend.cc`, `jolt_backend.hp`, `level.cc` uncommitted, plus HAL cleanup in `halbase.h`, `haltest.cc`). The scripting smoke tests have been completed on this branch. Remaining uncommitted work:
 
-The uncommitted work is two things:
+- **HAL cleanup** (`halbase.h`, `haltest.cc`) — trivial. Removes dangling `TEST_TASKER` / `TEST_TIMER` guards and `TaskerTest()`/`TimerTest()` call sites left over from the Batch 5 tasker deletion. No logic change.
 
-- **HAL cleanup** (`halbase.h`, `haltest.cc`) — trivial. Removes dangling `TEST_TASKER` / `TEST_TIMER` guards and `TaskerTest()`/`TimerTest()` call sites left over from the Batch 5 tasker deletion. No logic change; not blocking the build on its own.
-
-- **Jolt character controller position fix** (`jolt_backend.cc`, `level.cc`) — the real work. WF stores actor position at the **feet**; Jolt's `CharacterVirtual` expects position at the **centre** of the bounding box. Fix stores `ctr = minPt + half` and applies it on every `SetPosition`; subtracts on every `GetPosition`. Also adds `JoltOptimizeBroadPhase()` call in `level.cc` after all static bodies are registered (required before `CharacterVirtual` queries can find them). 120-frame stderr trace is in place to verify ground contact.
-
-**To unblock:** build with `WF_PHYSICS_ENGINE=jolt`, confirm the character lands on the floor (stderr shows `GROUND`), commit all four files, then run the scripting smoke tests in sequence: JerryScript → WAMR → Wren → Forth/zForth.
+- **Jolt character controller position fix** (`jolt_backend.cc`, `level.cc`) — WF stores actor position at the **feet**; Jolt's `CharacterVirtual` expects position at the **centre** of the bounding box. Fix stores `ctr = minPt + half` and applies it on every `SetPosition`; subtracts on every `GetPosition`. Also adds `JoltOptimizeBroadPhase()` call in `level.cc` after all static bodies are registered.
 
 ---
 
 ## Open follow-up work
 
 ### Scripting
-- **JerryScript smoke test** — build path landed; never run (`WF_JS_ENGINE=jerryscript`). Half-day effort.
-- **WAMR smoke test** — Phase 1 interp landed; needs snowgoons player + director verification.
-- **Wren smoke test** — fully landed; needs snowgoons verification.
-- **Forth/zForth smoke test** — fully landed; needs snowgoons verification.
-- **Forth alternate backends** — ficl, atlast, embed, libforth, pforth deferred until zForth smoke test passes.
+- **Forth alternate backends** — ficl, atlast, embed, libforth, pforth deferred; zForth is the shipping default.
 - **WAMR Phase 2 (AOT)** — deferred; `wamrc` + `#aot\n` sigil; ~10 KB runtime vs. 519 KB interp.
 - **wasm3 retirement** — planned after WAMR interp is proven at parity (remove vendor tree + `scripting_wasm3.cc`).
 - **Lua remote step debugger** — explicit user request for "later": MobDebug/DBG.lua/LuaLS-DAP into LuaInterpreter for in-game step debugging.
@@ -131,4 +123,4 @@ The uncommitted work is two things:
 
 ## Last Change
 
-**2026-04-16 04:10** — [`docs/investigations/2026-04-15-loc-tracking.md`](docs/investigations/2026-04-15-loc-tracking.md): WF LOC tracking — shrinking the codebase
+**2026-04-16** — All eight scripting engines smoke-tested end-to-end in snowgoons (JerryScript, WAMR, Wren, zForth confirmed 2026-04-16; Lua/Fennel/QuickJS/wasm3 confirmed previously). Status docs and plan files updated.

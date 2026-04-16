@@ -1,7 +1,7 @@
 # Plan: WAMR for dev, AOT-only (or w2c2) for ship
 
 **Date:** 2026-04-14
-**Status:** **landed 2026-04-15 (Phase 1 — classic interp; WAT compiled; smoke test pending HAL cleanup).**
+**Status:** **complete — Phase 1 landed 2026-04-15; smoke test passed 2026-04-16 (GROUND, no crashes). Phase 2 (AOT) deferred.**
 Phase 2 (AOT) deferred.
 **Depends on:** wasm3 spike (landed in cfa739c) — proved the dispatch,
 sigil, base64 wrapper, host-import ABI, and snowgoons-as-wasm end-to-end.

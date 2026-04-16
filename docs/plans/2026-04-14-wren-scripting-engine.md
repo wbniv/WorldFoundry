@@ -1,7 +1,7 @@
 # Plan: Wren as a scripting engine option for World Foundry
 
 **Date:** 2026-04-14
-**Status:** **landed 2026-04-15 (needs smoke test — blocked on HAL cleanup).**
+**Status:** **complete — landed 2026-04-15; smoke test passed 2026-04-16 (GROUND, no crashes).**
 All phases complete. Vendor `wftools/vendor/wren-0.4.0/`; plug in
 `scripting_wren.{hp,cc}` (`wren_engine` namespace); `//wren\n` dispatch
 arm in `ScriptRouter::RunScript`; `scripts/patch_snowgoons_wren.py`;
