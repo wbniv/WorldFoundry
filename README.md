@@ -125,4 +125,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 13:17** — [`docs/plans/2026-04-16-blender-level-roundtrip.md`](docs/plans/2026-04-16-blender-level-roundtrip.md): Plan: Blender ↔ Level Round-Trip
+**2026-04-16** — `levcomp-rs` output (Phases 1 + 2a + 2b) loads in `wf_game`; snowgoons game loop runs with compiled level. See [`docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md`](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md).
