@@ -27,25 +27,27 @@ python3 scripts/loc_report.py --compare scripts/loc_baseline_74d1a47.json
 | 2026-04-15 | `8760f27` | 38,184   | −26,068   | −40.6%  | Batch 6: #if 0 sweep — display.cc TestGL2, material dead members, pigsys |
 | 2026-04-15 | `ec49c72` | 39,162   | +978      | +2.6%   | Restore glpipeline GL renderer (black screen regression from Batch 5) |
 | 2026-04-15 | `e2dcc98` | 36,199   | −28,053   | −43.7%  | Batch 7: PSX/Win artifacts, OpusMake Makefiles, gfxfmt/, registry/, platform guards |
+| 2026-04-16 | `95a065d` | 36,813   | −27,439   | −42.7%  | Jolt physics integration functional on snowgoons (`physics/jolt/`, +614 net) |
+| _projected_  | _post-WF-rip_ | _~35,113_ | _−29,139_ | _−45.3%_ | After legacy `physics/wf/` + colspace/colbox/collision.cc + WF collision routines in physical.cc/hpi removed (~1,700 LOC). Pending parity on a second level. |
 
-## Subsystem breakdown at baseline vs HEAD (2026-04-15, after Batch 7)
+## Subsystem breakdown at baseline vs HEAD (2026-04-16, after Jolt integration)
 
-Snapshot at `e2dcc98`.
+Snapshot at `95a065d`.
 
 | Subsystem | Baseline code | HEAD code | Δ Code | % |
 |-----------|--------------|-----------|--------|---|
 | math | 8,209 | 6,469 | −1,740 | −21% |
-| game | 6,365 | 6,067 | −298 | −5% |
-| gfx | 17,560 | 5,747 | **−11,813** | **−67%** |
-| physics | 2,150 | 2,069 | −81 | −4% | *(in progress — not updated)* |
+| game | 6,365 | 6,073 | −292 | −5% |
+| gfx | 17,560 | 5,749 | **−11,811** | **−67%** |
+| physics | 2,150 | 2,686 | **+536** | **+25%** | *(Jolt backend + character + filter)* |
 | cpplib | 2,327 | 1,780 | −547 | −24% |
-| hal | 4,476 | 1,740 | **−2,736** | **−61%** |
+| hal | 4,476 | 1,732 | **−2,744** | **−61%** |
 | room | ~1,710 | 1,421 | ~−289 | ~−17% |
 | anim | 1,452 | 1,366 | −86 | −6% |
 | pigsys | 2,348 | 1,338 | −1,010 | −43% |
 | oas | ~1,310 | 1,310 | 0 | 0% |
 | streams | ~1,241 | 1,241 | 0 | 0% |
-| movement | 1,196 | 1,174 | −22 | −2% |
+| movement | 1,196 | 1,226 | +30 | +3% | *(Jolt branches in Ground/Air handlers)* |
 | memory | ~1,143 | 1,143 | 0 | 0% |
 | particle | 819 | 807 | −12 | −1% |
 | renderassets | 573 | 560 | −13 | −2% |
@@ -56,13 +58,14 @@ Snapshot at `e2dcc98`.
 | mailbox | ~225 | 225 | 0 | 0% |
 | timer | ~70 | 70 | 0 | 0% |
 | scripting | ~300 | 28 | ~−272 | ~−91% |
+| _root | 0 | 11 | +11 | n/a |
 | iffwrite | ~1,053 | 0 | −1,053 | −100% |
 | version | ~8 | 0 | ~−8 | −100% |
 | menu | ~190 | 0 | ~−190 | −100% |
 | midi | 107 | 0 | −107 | −100% |
 | gfxfmt | ~800 | 0 | ~−800 | −100% |
 | registry | ~60 | 0 | ~−60 | −100% |
-| **TOTAL** | **64,252** | **36,199** | **−28,053** | **−43.7%** |
+| **TOTAL** | **64,252** | **36,813** | **−27,439** | **−42.7%** |
 
 ## What drove the drop
 
@@ -116,9 +119,9 @@ rather than wrapped).  `_signal.cc/h` and `timer.cc/h` were stubbed to `assert(0
 | File | Ref | Code LOC |
 |------|-----|---------|
 | `scripts/loc_baseline_74d1a47.json` | `74d1a47` | 64,252 |
-| `scripts/loc_head.json` | `e2dcc98` | 36,199 |
+| `scripts/loc_head.json` | `95a065d` | 36,813 |
 
-Snapshot at `e2dcc98`.
+Snapshot at `95a065d`.
 
 ## Next survey targets
 
