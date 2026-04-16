@@ -8,6 +8,7 @@
 //! Usage:
 //!   levcomp <input.lev.bin> <objects.lc> <output.lvl>
 
+mod common_block;
 mod lc_parser;
 mod lev_parser;
 mod lvl_writer;

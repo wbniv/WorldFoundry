@@ -15,6 +15,7 @@
 //!
 //! MVP: objects only (no paths/channels/rooms/common block), OADSize = 0.
 
+use crate::common_block::CommonBlockBuilder;
 use crate::lc_parser::ClassMap;
 use crate::lev_parser::LevObject;
 use crate::oad_loader::{per_object_size, serialize_oad_data, OadSchemas};
@@ -68,6 +69,21 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
     }
     let objects_total: usize = obj_sizes.iter().sum();
 
+    // Pre-build the per-object OAD payloads so we know the final common data
+    // length before writing the header (the header carries commonDataOffset
+    // and commonDataLength).  Building in-order mirrors iff2lvl's Save flow.
+    let mut common = CommonBlockBuilder::new();
+    let mut oad_payloads: Vec<Vec<u8>> = Vec::with_capacity(total_objects);
+    oad_payloads.push(Vec::new());  // NULL_Object: empty payload
+    for obj in plan.objects {
+        let payload = plan
+            .schemas
+            .get(&obj.class_name)
+            .map(|s| serialize_oad_data(s, obj, &mut common))
+            .unwrap_or_default();
+        oad_payloads.push(payload);
+    }
+
     let header_size   = 52;
     let objects_off   = header_size;
     let array_bytes   = 4 * total_objects;
@@ -76,7 +92,7 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
     let channels_off = paths_off;    // empty paths section
     let rooms_off    = channels_off; // empty channels section
     let common_off   = rooms_off;    // empty rooms section
-    let common_len   = 0;
+    let common_len   = common.bytes().len();
 
     let mut out = Vec::with_capacity(common_off + common_len);
 
@@ -148,22 +164,20 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
             /* path_index */ -1,
             oad_size,
         );
-        // Per-object OAD payload — fields outside any COMMONBLOCK carry real
-        // values extracted from the .lev sub-chunks.  COMMONBLOCK markers emit
-        // a zero offset placeholder (Phase 2c: populate common data area and
-        // patch real offsets); fields inside COMMONBLOCK sections emit nothing
-        // here (their bytes live in common data).
-        if let Some(schema) = plan.schemas.get(&obj.class_name) {
-            let payload = serialize_oad_data(schema, obj);
-            debug_assert_eq!(payload.len(), oad_size as usize,
-                "serialized OAD payload ({}) != computed size ({})",
-                payload.len(), oad_size);
-            out.extend_from_slice(&payload);
-        }
+        // Per-object OAD payload: fields outside any COMMONBLOCK carry real
+        // values from the .lev sub-chunks; COMMONBLOCK markers carry the
+        // offset returned by the CommonBlockBuilder for the section's bytes.
+        let payload = &oad_payloads[i + 1];
+        debug_assert_eq!(payload.len(), oad_size as usize,
+            "serialized OAD payload ({}) != computed size ({})",
+            payload.len(), oad_size);
+        out.extend_from_slice(payload);
         pad_section(&mut out, start, obj_sizes[i + 1]);
     }
 
-    // No paths, channels, rooms, or common block in MVP.
+    // No paths, channels, or rooms in MVP.  Common data area sits at the end.
+    out.extend_from_slice(common.bytes());
+    debug_assert_eq!(out.len(), common_off + common_len);
     Ok(out)
 }
 

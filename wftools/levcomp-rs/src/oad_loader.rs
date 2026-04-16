@@ -15,6 +15,7 @@
 use std::path::Path;
 use wf_oad::{ButtonType, OadEntry, OadFile};
 
+use crate::common_block::CommonBlockBuilder;
 use crate::lev_parser::{field_data, field_str_value, LevObject};
 
 /// Per-class schema bundle — maps a class name to its parsed `.oad` file.
@@ -116,31 +117,53 @@ pub fn per_object_size(schema: &OadFile) -> usize {
 
 /// Emit the binary OAD data block for one object.
 ///
-/// Walks the class schema in order; for each entry *outside* a COMMONBLOCK,
-/// looks up the matching sub-chunk by name in `obj.fields` and serializes
-/// the value with the correct width and format.  COMMONBLOCK markers emit a
-/// 4-byte placeholder offset (zeroed — Phase 2c will populate the common
-/// data block and patch these offsets).  Fields *inside* a COMMONBLOCK emit
-/// nothing (their bytes live in the common data area, not here).
-pub fn serialize_oad_data(schema: &OadFile, obj: &LevObject) -> Vec<u8> {
+/// Walks the class schema in order:
+///
+/// - Entries *outside* any COMMONBLOCK: their bytes are written into the
+///   per-object OAD payload, with values looked up from the .lev sub-chunks.
+/// - COMMONBLOCK marker: collects the enclosed section's bytes into a temp
+///   buffer, hands them to `common` for dedup, then writes the returned offset
+///   into the per-object payload as a 4-byte LE i32.
+/// - ENDCOMMON marker: closes the common section.
+pub fn serialize_oad_data(
+    schema: &OadFile,
+    obj: &LevObject,
+    common: &mut CommonBlockBuilder,
+) -> Vec<u8> {
     let mut out = Vec::new();
-    let mut in_common = false;
-
-    for entry in &schema.entries {
+    let mut i = 0;
+    while i < schema.entries.len() {
+        let entry = &schema.entries[i];
         match entry.button_type {
             ButtonType::CommonBlock => {
-                // Phase 2c: real offset into common data area.  For now, 0.
-                push_i32(&mut out, 0);
-                in_common = true;
+                // Gather fields up to the next EndCommon into a section buffer.
+                let mut section = Vec::new();
+                let mut j = i + 1;
+                while j < schema.entries.len()
+                    && schema.entries[j].button_type != ButtonType::EndCommon
+                {
+                    let e = &schema.entries[j];
+                    // Nested COMMONBLOCK inside a COMMONBLOCK isn't valid in
+                    // iff2lvl; treat it as a normal entry if it appears.
+                    serialize_entry(&mut section, e, obj);
+                    j += 1;
+                }
+                // Pad section to 4-byte boundary — common data area is kept
+                // 4-byte aligned by iff2lvl, and section lengths always end up
+                // there naturally, but guard against schema quirks.
+                while section.len() % 4 != 0 { section.push(0); }
+                let offset = common.add(&section);
+                push_i32(&mut out, offset);
+                i = j + 1;  // skip past EndCommon
             }
             ButtonType::EndCommon => {
-                in_common = false;
+                // Stray EndCommon with no matching CommonBlock — skip.
+                i += 1;
             }
-            _ if in_common => {
-                // Fields inside a COMMONBLOCK are stored in the common data
-                // area, not in the per-object payload.
+            _ => {
+                serialize_entry(&mut out, entry, obj);
+                i += 1;
             }
-            _ => serialize_entry(&mut out, entry, obj),
         }
     }
     out
@@ -171,12 +194,20 @@ fn serialize_entry(out: &mut Vec<u8>, entry: &OadEntry, obj: &LevObject) {
             out.extend_from_slice(&bytes[..copy]);
             out.extend(std::iter::repeat(0u8).take(len - copy));
         }
-        ButtonType::ObjectReference
-        | ButtonType::Filename
-        | ButtonType::MeshName
-        | ButtonType::ClassReference
-        | ButtonType::XData => {
-            // Phase 2c: resolve asset IDs, object indices, XDATA script refs.
+        ButtonType::ObjectReference | ButtonType::ClassReference => {
+            // An unresolved reference is -1 (PATH_NULL / OBJECT_NULL); the
+            // game's ValidObject() check treats -1 as "none".  Actual name
+            // resolution (looking up the target in the level's object list
+            // and writing its index) is a later phase.
+            push_i32(out, -1);
+        }
+        ButtonType::Filename | ButtonType::MeshName => {
+            // Asset IDs come from asset.inc; unresolved = 0.
+            push_i32(out, 0);
+        }
+        ButtonType::XData => {
+            // Scripts / object lists / contextual animations live in the
+            // common data area.  Offset resolution is a later phase.
             push_i32(out, 0);
         }
         _ => {}  // size-0 entries (PropertySheet, GroupStart, GroupStop, flags)
