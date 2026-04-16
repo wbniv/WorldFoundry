@@ -5,7 +5,7 @@
 convention on 2026-04-15. Fennel is **not** a router-level peer — it
 compiles to Lua and shares the `lua_State`, so its sub-dispatch (the `;`
 sigil) lives inside `lua_engine::RunScript` in
-`wftools/wf_viewer/stubs/scripting_stub.cc`. What was originally drafted
+`wftools/engine/stubs/scripting_stub.cc`. What was originally drafted
 as a `LuaInterpreter` member `int _fennelEvalRef` now lives as a
 file-scope static inside the `lua_engine` namespace. The compilation-
 cache story described in §3 below is superseded by
@@ -17,7 +17,7 @@ pre-compilation via `fennel.compileString` + `luaL_ref`).
 ## Context
 
 The Lua interpreter spike has landed: `LuaInterpreter` in
-`wftools/wf_viewer/stubs/scripting_stub.cc` replaced `NullInterpreter`,
+`wftools/engine/stubs/scripting_stub.cc` replaced `NullInterpreter`,
 snowgoons runs with hand-ported Lua player/director scripts byte-patched into
 both `wflevels/snowgoons.iff` and `wfsource/source/game/cd.iff`, and
 `-L<path>` loads a single level file directly.
@@ -95,7 +95,7 @@ The dispatch is a one-byte sniff — no language tag, no file extension.
 ## Scope
 
 **In scope:**
-- Vendor `fennel.lua` at `wftools/wf_viewer/stubs/fennel.lua`.
+- Vendor `fennel.lua` at `wftools/engine/stubs/fennel.lua`.
 - `LuaInterpreter` loads `fennel.lua` at construction, stashes `fennel.eval`
   in the Lua registry, and routes `;`-prefixed scripts through it in
   `RunScript`.
@@ -114,7 +114,7 @@ The dispatch is a one-byte sniff — no language tag, no file extension.
 
 | Decision | Choice | Why |
 |----------|--------|-----|
-| Source fennel.lua | **Vendor in repo** (`wftools/wf_viewer/stubs/fennel.lua`) | Reproducible; single file; matches spike style |
+| Source fennel.lua | **Vendor in repo** (`wftools/engine/stubs/fennel.lua`) | Reproducible; single file; matches spike style |
 | Detection | **Leading `;` = Fennel** | `;` is idiomatic Lisp comment AND a Lua syntax error — unambiguous |
 | fennel.lua delivery | **Embedded in binary via codegen** (minify → `xxd -i` → `fennel_source.cc`, compiled + linked) | WF targets filesystem-less platforms; engine runtime belongs in the binary, not as external asset or IFF chunk |
 | Compile-time switch | **`WF_ENABLE_FENNEL` (default off)** | Keeps default builds ~100 KB leaner and Fennel-free; opt-in for authors/targets that want it |
@@ -127,7 +127,7 @@ The dispatch is a one-byte sniff — no language tag, no file extension.
 
 ### 1. Vendor fennel.lua
 Fennel 1.6.1 `bootstrap/fennel.lua`, MIT. Copied to
-`wftools/wf_viewer/stubs/fennel.lua`. Record version + SHA256 in
+`wftools/engine/stubs/fennel.lua`. Record version + SHA256 in
 `docs/dev-setup.md`.
 
 ### 2. Codegen + minification in `build_game.sh`
@@ -218,8 +218,8 @@ with trailing spaces (Fennel whitespace is benign).
 
 **Default build (Fennel off):**
 ```bash
-bash wftools/wf_engine/build_game.sh      # no fennel codegen
-size wftools/wf_engine/wf_game            # baseline
+bash engine/build_game.sh      # no fennel codegen
+size engine/wf_game            # baseline
 ```
 - Binary size unchanged vs pre-patch baseline.
 - No `fennel:` lines at startup.
@@ -227,7 +227,7 @@ size wftools/wf_engine/wf_game            # baseline
 
 **Fennel build:**
 ```bash
-WF_ENABLE_FENNEL=1 bash wftools/wf_engine/build_game.sh
+WF_ENABLE_FENNEL=1 bash engine/build_game.sh
 scripts/patch_snowgoons_fennel.py wflevels/snowgoons.iff
 scripts/patch_snowgoons_fennel.py wfsource/source/game/cd.iff
 task run-level -- wflevels/snowgoons.iff
@@ -240,11 +240,11 @@ task run
 
 ## Critical files
 
-- `wftools/wf_viewer/stubs/fennel.lua` — vendored (Fennel 1.6.1, MIT).
+- `wftools/engine/stubs/fennel.lua` — vendored (Fennel 1.6.1, MIT).
 - `scripts/minify_lua.py` — **new**, string-literal-aware Lua minifier.
-- `wftools/wf_engine/build_game.sh` — `WF_ENABLE_FENNEL` switch, minify +
+- `engine/build_game.sh` — `WF_ENABLE_FENNEL` switch, minify +
   codegen + link; adds `-DWF_ENABLE_FENNEL` to `CXXFLAGS` when on.
-- `wftools/wf_viewer/stubs/scripting_stub.cc` — `_fennelEvalRef` member
+- `wftools/engine/stubs/scripting_stub.cc` — `_fennelEvalRef` member
   (always), `#ifdef WF_ENABLE_FENNEL` guards around load + sigil dispatch.
 - `scripts/patch_snowgoons_fennel.py` — new.
 - `wflevels/snowgoons.iff`, `wfsource/source/game/cd.iff` — re-patched.

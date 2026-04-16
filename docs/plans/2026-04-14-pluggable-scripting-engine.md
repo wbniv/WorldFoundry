@@ -60,7 +60,7 @@ Valid matrix (this plan only adds the right-hand column):
 
 ### 1. Compile-time switches
 
-`wftools/wf_engine/build_game.sh` grows two orthogonal selectors (Lua/Fennel toggles belong to their own plans; shown here for completeness):
+`engine/build_game.sh` grows two orthogonal selectors (Lua/Fennel toggles belong to their own plans; shown here for completeness):
 
 ```bash
 WF_JS_ENGINE="${WF_JS_ENGINE:-none}"   # none | quickjs | jerryscript
@@ -108,7 +108,7 @@ Each engine TU registers itself **at compile time** via a `LANG_HANDLER(...)` ma
 
 Routing rule: skip leading whitespace, match the longest sigil; if nothing matches, fall through to the build's **fallthrough engine**. Today the fallthrough is Lua (when compiled in); if Lua is *not* compiled in, the build needs a `WF_DEFAULT_ENGINE` knob (follow-up) to pick another fallthrough, or the dispatcher logs and no-ops unsigilled scripts. Unselected languages contribute **no entry** to the table — the branch doesn't exist in the binary. Sigils must be Lua-syntax errors *only when Lua is compiled in*; with Lua off they just need to be distinct from each other.
 
-**As built (JS landing, 2026-04-14):** the dispatch registry was *not* extracted into a separate `scripting_dispatch.{hp,cc}` for the JS landing — there are still only two non-Lua sigils (`;` for Fennel, `//` for JS), and the existing inline `#ifdef` pattern in `scripting_stub.cc::LuaInterpreter::RunScript` carried them. A new header `wftools/wf_viewer/stubs/scripting_js.hp` declares the JS plug ABI (`JsRuntimeInit`, `JsAddConstantArray`, `JsRunScript`, …) and is included by `scripting_stub.cc` under `#ifdef WF_WITH_JS`.
+**As built (JS landing, 2026-04-14):** the dispatch registry was *not* extracted into a separate `scripting_dispatch.{hp,cc}` for the JS landing — there are still only two non-Lua sigils (`;` for Fennel, `//` for JS), and the existing inline `#ifdef` pattern in `scripting_stub.cc::LuaInterpreter::RunScript` carried them. A new header `wftools/engine/stubs/scripting_js.hp` declares the JS plug ABI (`JsRuntimeInit`, `JsAddConstantArray`, `JsRunScript`, …) and is included by `scripting_stub.cc` under `#ifdef WF_WITH_JS`.
 
 **As built (ScriptRouter refactor, 2026-04-15):** `LuaInterpreter` is gone. `scripting_stub.cc` now contains a file-scope `lua_engine` namespace (pure Lua + optional Fennel sub-dispatch, using module-level globals instead of member variables) and a `ScriptRouter : public ScriptInterpreter` class that owns all engine lifecycles as peers. `ScriptInterpreterFactory` returns a `ScriptRouter`. The sigil dispatch, `AddConstantArray` broadcast, and shutdown sequencing all live in `ScriptRouter`; no engine initialises any other. Fennel remains a sub-dispatch within `lua_engine` (it compiles to Lua and shares the `lua_State`), so it does not appear at the router level.
 
@@ -129,8 +129,8 @@ Claim one per language as it's added; document the reservation in `scripting_dis
 
 New files, each compiled **only** when its flag is set:
 
-- `wftools/wf_viewer/stubs/scripting_quickjs.cc` — QuickJS implementation.
-- `wftools/wf_viewer/stubs/scripting_jerryscript.cc` — JerryScript implementation.
+- `wftools/engine/stubs/scripting_quickjs.cc` — QuickJS implementation.
+- `wftools/engine/stubs/scripting_jerryscript.cc` — JerryScript implementation.
 
 Each exposes a single function (no new class, no factory re-plumbing):
 
@@ -162,10 +162,10 @@ Specifics:
 
 ### 4. Vendoring (no filesystem at runtime)
 
-Matches the `wftools/vendor/<name>-<version>/` convention from the Fennel plan; hashes appended to `wftools/vendor/README.md`.
+Matches the `engine/vendor/<name>-<version>/` convention from the Fennel plan; hashes appended to `engine/vendor/README.md`.
 
 ```
-wftools/vendor/
+engine/vendor/
   quickjs-<version>/     quickjs.{c,h} cutils.{c,h}
                          libregexp.{c,h} libunicode.{c,h}
                          libbf.{c,h} quickjs-atom.h
@@ -177,13 +177,13 @@ Both are statically linked — no `.so`, no `dlopen`, no filesystem touch at run
 
 Build-script branches:
 
-- `WF_JS_ENGINE=none` — nothing from `wftools/vendor/` compiles; `scripting_quickjs.cc` / `scripting_jerryscript.cc` are skipped; no JS link deps.
+- `WF_JS_ENGINE=none` — nothing from `engine/vendor/` compiles; `scripting_quickjs.cc` / `scripting_jerryscript.cc` are skipped; no JS link deps.
 - `WF_JS_ENGINE=quickjs` — compile `scripting_quickjs.cc` + `quickjs-<version>/{quickjs,cutils,libregexp,libunicode,libbf}.c` with `-DCONFIG_VERSION='"<version>"' -Wno-sign-compare -Wno-unused-parameter`.
-- `WF_JS_ENGINE=jerryscript` — size-optimised profile (see below). One-shot CMake into `wftools/vendor/jerryscript-<version>/build/` (idempotent: skip if `libjerry-core.a` is fresher than sources):
+- `WF_JS_ENGINE=jerryscript` — size-optimised profile (see below). One-shot CMake into `engine/vendor/jerryscript-<version>/build/` (idempotent: skip if `libjerry-core.a` is fresher than sources):
 
   ```bash
-  cmake -S wftools/vendor/jerryscript-<version> \
-        -B wftools/vendor/jerryscript-<version>/build \
+  cmake -S engine/vendor/jerryscript-<version> \
+        -B engine/vendor/jerryscript-<version>/build \
     -DJERRY_CMDLINE=OFF \
     -DJERRY_PROFILE=wf-minimal        `# custom profile file, see below` \
     -DJERRY_ERROR_MESSAGES=OFF \
@@ -197,12 +197,12 @@ Build-script branches:
     -DJERRY_VM_HALT=OFF \
     -DJERRY_VM_THROW=OFF \
     -DENABLE_LTO=ON -DENABLE_STRIP=ON
-  cmake --build wftools/vendor/jerryscript-<version>/build
+  cmake --build engine/vendor/jerryscript-<version>/build
   ```
 
   Compile `scripting_jerryscript.cc` with the jerry-core/jerry-port includes. Link `libjerry-core.a libjerry-port-default.a`.
 
-**Profile choice — "gameplay-minimum" (`wf-minimal.profile`).** JerryScript ships three stock profiles: `es5.1` (default, ~100 KB), `es.next` (~180 KB), `minimal` (~60 KB, strips *everything* non-VM). We check in a fourth, `wftools/vendor/jerryscript-<version>/jerry-core/profiles/wf-minimal.profile`, derived from stock `minimal` and re-enabling exactly the builtins gameplay scripts cannot reasonably live without.
+**Profile choice — "gameplay-minimum" (`wf-minimal.profile`).** JerryScript ships three stock profiles: `es5.1` (default, ~100 KB), `es.next` (~180 KB), `minimal` (~60 KB, strips *everything* non-VM). We check in a fourth, `engine/vendor/jerryscript-<version>/jerry-core/profiles/wf-minimal.profile`, derived from stock `minimal` and re-enabling exactly the builtins gameplay scripts cannot reasonably live without.
 
 Enabled in `wf-minimal` on top of stock `minimal`:
 
@@ -266,17 +266,17 @@ No parallel `cd.iff` needed. A Lua→JS converter is follow-up work (mirroring `
 ## Critical files
 
 Modify:
-- `wftools/wf_engine/build_game.sh` — add `WF_JS_ENGINE` selection, conditional compile/link.
-- `wftools/wf_viewer/stubs/scripting_lua.cc` (or wherever sigil sniff lives after the Fennel plan) — add `//` branch that calls `RunJsScript` when any JS engine is compiled, else falls through.
+- `engine/build_game.sh` — add `WF_JS_ENGINE` selection, conditional compile/link.
+- `wftools/engine/stubs/scripting_lua.cc` (or wherever sigil sniff lives after the Fennel plan) — add `//` branch that calls `RunJsScript` when any JS engine is compiled, else falls through.
 
 Create:
-- `wftools/wf_viewer/stubs/scripting_dispatch.{hp,cc}` — the sigil registry and `DispatchScript` entry point. Future languages add themselves by editing `dispatch_table.inc`, nothing else.
-- `wftools/wf_viewer/stubs/scripting_quickjs.cc` — QuickJS implementation, contributes `RunQuickJsScript` + lifetime hooks.
-- `wftools/wf_viewer/stubs/scripting_jerryscript.cc` — JerryScript implementation, contributes `RunJerryScript` + lifetime hooks.
-- `wftools/vendor/quickjs-<version>/` — vendored source. *As built:* `quickjs-v0.14.0` (quickjs-ng fork). The plan's `cutils.{c,h}` and `libbf.{c,h}` lists are stale for this fork — `cutils.h` is header-only (no `.c`) and `libbf` was dropped from quickjs-ng. Core link set is `quickjs.c libregexp.c libunicode.c dtoa.c`.
-- `wftools/vendor/jerryscript-<version>/` — vendored source. *As built:* `jerryscript-v3.0.0`. CMake build is run by `build_game.sh` into `jerry-core/`'s sibling `build/` directory; `libjerry-core.a` + `libjerry-port.a` link in. The build also keeps `JERRY_ERROR_MESSAGES` + `JERRY_LINE_INFO` on by default — this is the dev-target build, the shipping toggle (§ Follow-ups) is still TODO.
-- `wftools/vendor/jerryscript-<version>/jerry-core/profiles/wf-minimal.profile` — new JerryScript feature profile (stock `minimal` + `ARRAY`/`STRING`/`NUMBER`/`MATH`/`ERRORS`/`BOOLEAN`/`GLOBAL_THIS`). Rationale spelled out in §4.
-- `wftools/vendor/README.md` — append QuickJS + JerryScript versions and SHA256s (file created by Fennel plan).
+- `wftools/engine/stubs/scripting_dispatch.{hp,cc}` — the sigil registry and `DispatchScript` entry point. Future languages add themselves by editing `dispatch_table.inc`, nothing else.
+- `wftools/engine/stubs/scripting_quickjs.cc` — QuickJS implementation, contributes `RunQuickJsScript` + lifetime hooks.
+- `wftools/engine/stubs/scripting_jerryscript.cc` — JerryScript implementation, contributes `RunJerryScript` + lifetime hooks.
+- `engine/vendor/quickjs-<version>/` — vendored source. *As built:* `quickjs-v0.14.0` (quickjs-ng fork). The plan's `cutils.{c,h}` and `libbf.{c,h}` lists are stale for this fork — `cutils.h` is header-only (no `.c`) and `libbf` was dropped from quickjs-ng. Core link set is `quickjs.c libregexp.c libunicode.c dtoa.c`.
+- `engine/vendor/jerryscript-<version>/` — vendored source. *As built:* `jerryscript-v3.0.0`. CMake build is run by `build_game.sh` into `jerry-core/`'s sibling `build/` directory; `libjerry-core.a` + `libjerry-port.a` link in. The build also keeps `JERRY_ERROR_MESSAGES` + `JERRY_LINE_INFO` on by default — this is the dev-target build, the shipping toggle (§ Follow-ups) is still TODO.
+- `engine/vendor/jerryscript-<version>/jerry-core/profiles/wf-minimal.profile` — new JerryScript feature profile (stock `minimal` + `ARRAY`/`STRING`/`NUMBER`/`MATH`/`ERRORS`/`BOOLEAN`/`GLOBAL_THIS`). Rationale spelled out in §4.
+- `engine/vendor/README.md` — append QuickJS + JerryScript versions and SHA256s (file created by Fennel plan).
 - Optional: `scripts/check_iff_no_js.py` — fails if any OAS script body starts with `//` (used by the `none` build for asset-footprint verification). *As built:* deferred — no JS scripts have been authored into `cd.iff` yet, so the asset check has nothing to fail on. Add when the first JS script lands.
 
 Reuse:
@@ -286,13 +286,13 @@ Reuse:
 ## Verification
 
 1. **Default build unchanged**:
-   - `bash wftools/wf_engine/build_game.sh` (no env var) → same `wf_game` as today's default (Lua on, JS off). Binary-size delta vs. main: 0 bytes (±link-order noise).
+   - `bash engine/build_game.sh` (no env var) → same `wf_game` as today's default (Lua on, JS off). Binary-size delta vs. main: 0 bytes (±link-order noise).
 2. **QuickJS build (mixed with Lua)**:
-   - `WF_JS_ENGINE=quickjs bash wftools/wf_engine/build_game.sh` links clean.
+   - `WF_JS_ENGINE=quickjs bash engine/build_game.sh` links clean.
    - Smoke test (debug-only, runs at first `RunScript`): `// return 1+2` → `3.0`; `// write_mailbox(0,42); read_mailbox(0)` → `42.0`.
    - Snowgoons end-to-end with the JS-ported player script: joystick moves character; camshot still works (director remains Lua).
 3. **QuickJS-only build (no Lua)**:
-   - `WF_ENABLE_LUA=0 WF_JS_ENGINE=quickjs bash wftools/wf_engine/build_game.sh` links clean; no Lua link deps, no Lua TUs compiled.
+   - `WF_ENABLE_LUA=0 WF_JS_ENGINE=quickjs bash engine/build_game.sh` links clean; no Lua link deps, no Lua TUs compiled.
    - Snowgoons with all scripts authored as JS (player + director both prefixed `//`): plays identically to the mixed build.
    - Sigil-less scripts in the iff fail the pre-flight check or no-op cleanly at runtime (choice deferred to the `WF_DEFAULT_ENGINE` follow-up).
 4. **JerryScript builds**: same as QuickJS, with `WF_JS_ENGINE=jerryscript`.

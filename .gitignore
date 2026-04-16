@@ -12,7 +12,7 @@ wfsource/source/obj*/
 wfsource/bin/
 
 # wftools build output dirs
-wftools/wf_engine/objs_game/
+engine/objs_game/
 wftools/*/target/
 
 # Editor

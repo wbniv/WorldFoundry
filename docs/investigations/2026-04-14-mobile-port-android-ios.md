@@ -6,7 +6,7 @@
 
 ## Context
 
-WF today is a Linux-only desktop build: `wftools/wf_engine/build_game.sh` compiles with `-DWF_TARGET_LINUX -D__LINUX__ -DRENDERER_GL` and links against system `GL`, `GLU`, `X11`, and `lua5.4`. The codebase carries `__LINUX__` / `__WIN__` / `__PSX__` platform defines and a `wfsource/source/hal/` abstraction with a `hal/linux/` subdir, but no current code paths target mobile. Vendored libraries (wasm3, quickjs, jerryscript) are already portable to mobile; Lua is system-linked today and would need vendoring.
+WF today is a Linux-only desktop build: `engine/build_game.sh` compiles with `-DWF_TARGET_LINUX -D__LINUX__ -DRENDERER_GL` and links against system `GL`, `GLU`, `X11`, and `lua5.4`. The codebase carries `__LINUX__` / `__WIN__` / `__PSX__` platform defines and a `wfsource/source/hal/` abstraction with a `hal/linux/` subdir, but no current code paths target mobile. Vendored libraries (wasm3, quickjs, jerryscript) are already portable to mobile; Lua is system-linked today and would need vendoring.
 
 The exploration's key finding: **the engine's portability story is uneven**. Input, HAL, and the build system are cleanly isolated and cheap to port. Graphics is the heavy item — `wfsource/source/gfx/glpipeline/*.cc` calls `glBegin`/`glEnd` immediate-mode directly, with no backend abstraction, and immediate mode does not exist on any mobile API (GLES 2+, Metal, or Vulkan). The main loop and windowing are X11-specific and synchronous; mobile requires OS-driven event callbacks and lifecycle hooks that the current loop does not have.
 
@@ -25,7 +25,7 @@ Intended outcome: `WF_TARGET=android` and `WF_TARGET=ios` build flavours that pr
 | Windowing + lifecycle | **Android: `NativeActivity` via `android_native_app_glue`. iOS: `UIViewController` + `CAMetalLayer` (or `CAEAGLLayer` if GLES)** | Standard patterns; well-documented. Game main loop becomes a callback the OS drives (`onFrame` / `CADisplayLink`), replacing X11's `for(;;)` pump. |
 | Audio | **Skip in v1** | WF has no working audio today (`audio/audio.cc` is empty). Porting "no audio" to mobile is free. Pick a backend when audio becomes a thing (`OpenAL Soft` is portable; native `AudioTrack` / `AVAudioEngine` is lower-level but first-party). |
 | Asset delivery | **APK/IPA bundle + lazy copy to app-private dir on first launch** (if mutating I/O is needed) | Android `AAssetManager` and iOS `NSBundle` both expose read-only asset access; redirect `hal/dfhd.cc` through an asset shim. If WF ever writes back to asset paths (savegames, patched levels), those writes go to `Context.getFilesDir()` / `NSDocumentDirectory`. |
-| Lua | **Vendor Lua 5.4 source** into `wftools/vendor/lua-5.4.x/` | Linux relies on `-llua5.4` system package; mobile has no such thing. Static-link the vendored copy. Lua is small (~200 KB stripped) and already builds portably. Linux build switches to the vendored copy for parity — remove a system dependency across the board, not just on mobile. |
+| Lua | **Vendor Lua 5.4 source** into `engine/vendor/lua-5.4.x/` | Linux relies on `-llua5.4` system package; mobile has no such thing. Static-link the vendored copy. Lua is small (~200 KB stripped) and already builds portably. Linux build switches to the vendored copy for parity — remove a system dependency across the board, not just on mobile. |
 | Scripting engines | **All current engines (Lua, Fennel, QuickJS, JerryScript, wasm3) included unchanged** | All five are pure-C or portable-C++ and build on iOS/Android without modification. Verified via vendor tree inspection (`platforms/android/` in wasm3, `__ANDROID__` handling in quickjs's cutils.h, etc.). No mobile-specific engine work. |
 | Physics (Jolt) | **Works as-is** when the Jolt integration plan has landed | Jolt supports arm64 natively with NEON SIMD. No mobile-specific work beyond the CMake target. |
 | Code signing / distribution | **Dev-build via sideload only in v1** | Android: debug APK, sideload. iOS: developer-profile signing, install via Xcode on a tethered device. App Store / Play Store distribution is a separate concern once there's a product to ship. |
@@ -44,7 +44,7 @@ Short summaries from exploration; port cost is roughly proportional to area size
 | **Filesystem** (`hal/dfhd.cc`) | POSIX `open()` on loose level files or `cd.iff` | **Moderate.** Redirect through `AAssetManager` / `NSBundle`. Writes land in platform app-private dir. |
 | **Audio** (`audio/audio.cc`, `audio/linux/device.cc`) | Empty stubs | **Free for v1** — no code to port. |
 | **Build** (`build_game.sh`) | Bash loop calling `g++` per-TU | **Light-moderate.** CMakeLists that preserves the TU list + feature-flag structure. Android uses NDK CMake toolchain; iOS uses CMake's Xcode generator or ExternalProject + xcodebuild. |
-| **Vendored libs** (`wftools/vendor/`) | wasm3, quickjs, jerryscript already portable; Lua system-linked | **Light.** Vendor Lua 5.4. Everything else compiles unchanged. |
+| **Vendored libs** (`engine/vendor/`) | wasm3, quickjs, jerryscript already portable; Lua system-linked | **Light.** Vendor Lua 5.4. Everything else compiles unchanged. |
 | **Lifecycle** (no current hooks) | `for(;;)` in `game.cc` ignores OS signals | **Moderate.** Add pause/resume hooks; on GL context loss reload textures/VBOs; save volatile state on suspend. This is new code, not a port. |
 
 Rough total: **a focused engineer-quarter for Android v1, plus ~2 weeks incremental for iOS v1** once Android is working (most work is shared; iOS adds Metal/MoltenVK and Xcode plumbing). Numbers are fuzzy until the graphics rewrite is scoped more precisely.
@@ -64,8 +64,8 @@ Goal: Linux build uses GLES 3.0 core-profile (or equivalent desktop GL 3.3 core)
 
 Goal: `cmake -B build && cmake --build build` produces the same `wf_game` as `build_game.sh` does today. No mobile code yet; this removes the bash-script dependency and puts the build on a foundation that NDK / Xcode can consume.
 
-1. Write `CMakeLists.txt` at the repo root and in `wftools/wf_engine/` mirroring `build_game.sh`'s TU list and feature flags.
-2. Vendor Lua 5.4 source into `wftools/vendor/lua-5.4.x/`; link statically. Drop the `-llua5.4` system dep from the Linux build.
+1. Write `CMakeLists.txt` at the repo root and in `engine/` mirroring `build_game.sh`'s TU list and feature flags.
+2. Vendor Lua 5.4 source into `engine/vendor/lua-5.4.x/`; link statically. Drop the `-llua5.4` system dep from the Linux build.
 3. Keep `build_game.sh` working during the transition; retire it once CMake parity is verified.
 4. **Verify:** binary-identical (modulo timestamps) output between `build_game.sh` and CMake build. All existing feature flags (`WF_ENABLE_FENNEL`, `WF_JS_ENGINE`, `WF_WASM_ENGINE`, future `WF_PHYSICS_ENGINE`) work identically.
 
@@ -119,9 +119,9 @@ Goal: An IPA that runs snowgoons on a tethered iPhone. Can be sideloaded via Xco
 | `wfsource/source/hal/dfhd.cc` | Phase 2 — redirect through asset accessor interface |
 | `wfsource/source/hal/android/`, `wfsource/source/hal/ios/` | Phase 3/4 — new platform HAL impls |
 | `wfsource/source/game/game.cc` (`RunGameScript`, `RunLevel`) | Phase 2 — add suspend/resume hooks |
-| `wftools/wf_engine/build_game.sh` | Phase 1 — deprecate in favour of CMake |
+| `engine/build_game.sh` | Phase 1 — deprecate in favour of CMake |
 | `CMakeLists.txt` (root + subdirs) | Phase 1 — new |
-| `wftools/vendor/lua-5.4.x/` | Phase 1 — new (vendored Lua) |
+| `engine/vendor/lua-5.4.x/` | Phase 1 — new (vendored Lua) |
 | Android Gradle / `AndroidManifest.xml` | Phase 3 — new |
 | Xcode project wrapper | Phase 4 — new |
 

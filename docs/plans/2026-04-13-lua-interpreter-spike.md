@@ -3,7 +3,7 @@
 **Date:** 2026-04-13
 **Status:** **landed 2026-04-13**, then refactored on 2026-04-15. The
 `LuaInterpreter` class described below was superseded by the file-scope
-`lua_engine` namespace inside `wftools/wf_viewer/stubs/scripting_stub.cc`,
+`lua_engine` namespace inside `wftools/engine/stubs/scripting_stub.cc`,
 and `ScriptInterpreterFactory` now returns a `ScriptRouter` that
 dispatches to `lua_engine` (and any other compiled-in engines) by sigil.
 The spike's *behaviour* — Lua 5.4 running snowgoons' player + director —
@@ -46,15 +46,15 @@ Build recipe (from prior session notes):
 
 ```bash
 # Build
-cd wftools/wf_engine && bash build_game.sh
+cd engine && bash build_game.sh
 
 # Run (from wfsource/source/game where cd.iff lives)
 cd wfsource/source/game
-LD_LIBRARY_PATH=../../../wftools/wf_engine/libs DISPLAY=:0 \
-  ../../../wftools/wf_engine/wf_game
+LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 \
+  ../../../engine/wf_game
 ```
 
-`build_game.sh` uses the scripting + platform stubs in `wftools/wf_viewer/stubs/`. The engine is currently hardcoded to boot level 4 (snowgoons) with scripting disabled (`NullInterpreter`). Reproduce this baseline before touching Lua — that's the known-good regression target.
+`build_game.sh` uses the scripting + platform stubs in `wftools/engine/stubs/`. The engine is currently hardcoded to boot level 4 (snowgoons) with scripting disabled (`NullInterpreter`). Reproduce this baseline before touching Lua — that's the known-good regression target.
 
 ## Implementation
 

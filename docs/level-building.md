@@ -44,7 +44,7 @@ Each `.iff` level embeds `_levelData->objectCount` (37 in snowgoons). Temporary 
 - **ActBoxOR objects**: write a named object's index to a mailbox when the Player enters
   their trigger volume. In snowgoons, one ActBoxOR writes `CamShot01`'s index to mailbox 1021
   (`EMAILBOX_CAMSHOT`) when the Player enters.
-- **NullInterpreter stub**: `wftools/wf_viewer/stubs/scripting_stub.cc` — replaces Tcl scripting
+- **NullInterpreter stub**: `wftools/engine/stubs/scripting_stub.cc` — replaces Tcl scripting
   with a no-op. All `RunScript()` calls return 0. This is intentional pending replacement
   with a non-Tcl scripting system.
 
@@ -123,13 +123,13 @@ The `Actor::reset()` / `_InitTools()` pattern:
 ## Build & Run
 
 ```bash
-cd wftools/wf_engine
+cd engine
 bash build_game.sh
 
 # Run:
 cd wfsource/source/game
-LD_LIBRARY_PATH=../../../wftools/wf_engine/libs DISPLAY=:0 ../../../wftools/wf_engine/wf_game
+LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 ../../../engine/wf_game
 ```
 
 `build_game.sh` compiles all source dirs, skips test/Windows files, uses the scripting stub
-and platform stubs from `wftools/wf_viewer/stubs/`.
+and platform stubs from `wftools/engine/stubs/`.

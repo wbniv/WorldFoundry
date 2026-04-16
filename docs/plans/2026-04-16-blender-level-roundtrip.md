@@ -153,7 +153,7 @@ Objects will appear in the correct WF-relative positions in Blender. The only or
 |------|--------|
 | `wftools/wf_blender/export_level.py` | Gap 1: apply EULR; Gap 2: fix STR/XDATA import |
 | `wfsource/source/oas/common.inc` | Gap 3: add ScriptLanguage field |
-| `wftools/wf_viewer/stubs/scripting_stub.cc` | Gap 3: enum dispatch table |
+| `wftools/engine/stubs/scripting_stub.cc` | Gap 3: enum dispatch table |
 | `wfsource/source/game/level.hp` + `level.cc` | Gap 3: language param |
 | `wfsource/source/game/actor.cc` | Gap 3: pass ScriptLanguage |
 | `wfsource/source/scripting/scriptinterpreter.hp` | Gap 3: language param |
@@ -163,7 +163,7 @@ Objects will appear in the correct WF-relative positions in Blender. The only or
 ## Verification
 
 1. **Gap 1+2:** Import `snowgoons.lev`; player object shows script text in its Blender panel
-2. **Gap 3:** `ScriptLanguage=0` on player; snowgoons runs identically; `grep 'p\[0\]\|sigil' wftools/wf_viewer/stubs/scripting_stub.cc` → empty
+2. **Gap 3:** `ScriptLanguage=0` on player; snowgoons runs identically; `grep 'p\[0\]\|sigil' wftools/engine/stubs/scripting_stub.cc` → empty
 3. **Gap 4:** `levcomp-rs snowgoons.lev -o snowgoons_new.iff`; update `cd.iff.txt` to reference it; `iffcomp-rs cd.iff.txt -o cd.iff`; `wf_game` loads and plays snowgoons identically to original
 
 ## Sequencing

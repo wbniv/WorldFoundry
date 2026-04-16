@@ -74,7 +74,7 @@ flowchart LR
 
 ### Phase 1: WAMR classic interpreter as a new `WF_WASM_ENGINE` value
 
-1. **Vendor** `wftools/vendor/wamr-<version>/` (tarball, SHA256 in README).
+1. **Vendor** `engine/vendor/wamr-<version>/` (tarball, SHA256 in README).
    Use WAMR's minimal-profile config (disable WASI, multi-module, libc
    surface we don't need); keep classic interp only.
 2. **`scripting_wamr.{hp,cc}`** — file-scope `wamr_engine` namespace,
@@ -99,7 +99,7 @@ flowchart LR
 
 > **As built (2026-04-15):** Steps 1–5 complete; step 6 blocked on HAL cleanup.
 >
-> - WAMR 2.2.0 vendored at `wftools/vendor/wamr-2.2.0/`; CMake block in
+> - WAMR 2.2.0 vendored at `engine/vendor/wamr-2.2.0/`; CMake block in
 >   `build_game.sh` builds `libvmlib.a` (~519 KB at MinSizeRel) with
 >   `WAMR_BUILD_INTERP=1 WAMR_BUILD_WASM_C_API=1` and all other modules off.
 > - **API divergence:** implementation uses the **wasm-C-API** (`wasm_engine_new /
@@ -111,7 +111,7 @@ flowchart LR
 > - `wamr_engine::AddConstantArray` populates `g_consts: unordered_map<string,int32_t>`;
 >   `RunScript` walks module imports, matches `"consts"` globals to `g_consts` via
 >   `wasm_global_new()` and `"env"` funcs to `host_read_mailbox` / `host_write_mailbox`.
-> - WAT sources in `wftools/vendor/wamr-2.2.0-wf/`: `snowgoons_director.wat` (uses
+> - WAT sources in `engine/vendor/wamr-2.2.0-wf/`: `snowgoons_director.wat` (uses
 >   `(import "consts" "INDEXOF_CAMSHOT" (global $cam i32))`),
 >   `snowgoons_player.wat` (uses `INDEXOF_HARDWARE_JOYSTICK1_RAW` + `INDEXOF_INPUT`).
 >   Both compiled to `.wasm` via `wat2wasm` (director 158 B, player 159 B).
@@ -216,7 +216,7 @@ not drop-in data."
   `--runtime incremental` becomes desirable. Neither WAMR-classic nor
   wasm3 supports it today; wait for WAMR to add it upstream.
 - **Retire wasm3** — once WAMR ships at parity, remove
-  `wftools/vendor/wasm3-v0.5.0/`, `scripting_wasm3.{hp,cc}`, and the
+  `engine/vendor/wasm3-v0.5.0/`, `scripting_wasm3.{hp,cc}`, and the
   `wasm3` arm of `WF_WASM_ENGINE`. Commit the removal in one change so
   history stays clean.
 

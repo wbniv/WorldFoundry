@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# wf_engine/build_game.sh — build the WF game engine executable from source
+# engine/build_game.sh — build the WF game engine executable from source
 #
 # Run from this directory. Output: wf_game binary here.
-# To run: cd wfsource/source/game && DISPLAY=:0 ../../../wftools/wf_engine/wf_game
+# To run: cd wfsource/source/game && DISPLAY=:0 ../../../engine/wf_game
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SRC="$REPO_ROOT/wfsource/source"
-STUBS="$REPO_ROOT/wftools/wf_viewer/include"
-STUB_SRC="$REPO_ROOT/wftools/wf_viewer/stubs"
+STUBS="$REPO_ROOT/engine/include"
+STUB_SRC="$REPO_ROOT/engine/stubs"
 OUT="$SCRIPT_DIR/objs_game"
 
 # Feature flag: compile in Fennel (Lisp → Lua) support. Default on.
@@ -27,7 +27,7 @@ case "$WF_JS_ENGINE" in
     *) echo "error: WF_JS_ENGINE must be one of: none, quickjs, jerryscript (got: '$WF_JS_ENGINE')" >&2
        exit 2 ;;
 esac
-VENDOR="$REPO_ROOT/wftools/vendor"
+VENDOR="$REPO_ROOT/engine/vendor"
 QJS_DIR="$VENDOR/quickjs-v0.14.0"
 JRY_DIR="$VENDOR/jerryscript-v3.0.0"
 

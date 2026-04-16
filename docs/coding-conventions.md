@@ -519,7 +519,7 @@ renderer a one-line data edit instead of a switch edit.
 `collisionInteractionTable[type][kind]`.
 
 **Script engine dispatch** — `ScriptRouter::RunScript` in
-`wftools/wf_viewer/stubs/scripting_stub.cc`. An integer language tag (read
+`wftools/engine/stubs/scripting_stub.cc`. An integer language tag (read
 from an OAS field per §9) indexes a function-pointer table, replacing an
 older leading-byte sigil sniff. The entries are thin lambdas that normalize
 each engine's call signature into a uniform `(const char*, int) → float`

@@ -5,22 +5,22 @@ tasks:
   build:
     desc: "Build wf_game"
     cmds:
-      - bash wftools/wf_engine/build_game.sh
+      - bash engine/build_game.sh
 
   run:
     desc: "Run wf_game (cd.iff in cwd)"
     dir: wfsource/source/game
     cmds:
-      - LD_LIBRARY_PATH=../../../wftools/wf_engine/libs DISPLAY=:0 ../../../wftools/wf_engine/wf_game
+      - LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 ../../../engine/wf_game
 
   gdb:
     desc: "Run wf_game under gdb (-batch backtrace), tee to /tmp/wfgdb.log"
     dir: wfsource/source/game
     cmds:
       - |
-        LD_LIBRARY_PATH=../../../wftools/wf_engine/libs DISPLAY=:0 \
+        LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 \
           gdb -batch -ex run -ex bt -ex 'thread apply all bt' --args \
-          ../../../wftools/wf_engine/wf_game 2>&1 | tee /tmp/wfgdb.log
+          ../../../engine/wf_game 2>&1 | tee /tmp/wfgdb.log
 
   run-level:
     desc: "Run wf_game with -L<path> (usage: task run-level -- wflevels/snowgoons.iff)"
@@ -31,8 +31,8 @@ tasks:
           echo "Usage: task run-level -- <path/to/level.iff>" >&2
           exit 1
         fi
-        LD_LIBRARY_PATH=wftools/wf_engine/libs DISPLAY=:0 \
-          wftools/wf_engine/wf_game "-L$ARGS"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
+          engine/wf_game "-L$ARGS"
 
   md:
     desc: "Convert Markdown to HTML and open in browser (usage: task md -- docs/foo.md)"

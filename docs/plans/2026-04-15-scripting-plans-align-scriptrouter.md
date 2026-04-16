@@ -6,7 +6,7 @@
 
 ## Context
 
-The 2026-04-15 ScriptRouter refactor (captured in `docs/plans/2026-04-15-lua-engine-fixes.md` and the "As built" callout in `docs/plans/2026-04-14-pluggable-scripting-engine.md`) changed the shape of every scripting engine in `wftools/wf_viewer/stubs/scripting_stub.cc`:
+The 2026-04-15 ScriptRouter refactor (captured in `docs/plans/2026-04-15-lua-engine-fixes.md` and the "As built" callout in `docs/plans/2026-04-14-pluggable-scripting-engine.md`) changed the shape of every scripting engine in `wftools/engine/stubs/scripting_stub.cc`:
 
 - `LuaInterpreter` is gone. A `ScriptRouter : public ScriptInterpreter` owns every engine's lifecycle as a peer.
 - Each engine lives as a file-scope `<engine>_engine` namespace with module-level globals (not a class, not member variables), exposing `Init(mgr) / Shutdown() / AddConstantArray(list) / DeleteConstantArray(list) / RunScript(src, objectIndex)`.
@@ -21,9 +21,9 @@ The older scripting plans (Lua spike, Fennel, JS, wasm3) describe a `LuaInterpre
 
 | # | Plan doc | Language / runtime | Status | Vendor present | Plug file present | Uses new convention |
 |---|----------|--------------------|--------|----------------|-------------------|---------------------|
-| 1 | `2026-04-13-lua-interpreter-spike.md` | Lua 5.4 | **landed** | `wftools/vendor/lua-5.4.8/` | `scripting_stub.cc` (`lua_engine` ns) | yes (canonical) |
-| 2 | `2026-04-14-vendor-lua.md` | Lua 5.4 (vendoring) | **landed** | `wftools/vendor/lua-5.4.8/` | n/a | yes |
-| 3 | `2026-04-14-fennel-on-lua.md` | Fennel | **landed** | `wftools/wf_viewer/stubs/fennel.lua` | sub-dispatch in `lua_engine` ns | yes (sub-engine, not router peer) |
+| 1 | `2026-04-13-lua-interpreter-spike.md` | Lua 5.4 | **landed** | `engine/vendor/lua-5.4.8/` | `scripting_stub.cc` (`lua_engine` ns) | yes (canonical) |
+| 2 | `2026-04-14-vendor-lua.md` | Lua 5.4 (vendoring) | **landed** | `engine/vendor/lua-5.4.8/` | n/a | yes |
+| 3 | `2026-04-14-fennel-on-lua.md` | Fennel | **landed** | `wftools/engine/stubs/fennel.lua` | sub-dispatch in `lua_engine` ns | yes (sub-engine, not router peer) |
 | 4 | `2026-04-14-pluggable-scripting-engine.md` | QuickJS / JerryScript | **landed** (status marker present) | `quickjs-v0.14.0/`, `jerryscript-v3.0.0/` | `scripting_quickjs.cc`, `scripting_jerryscript.cc` | partial — uses `JsRuntimeInit/JsRunScript` free-fn style; should migrate to `js_engine` namespace |
 | 5 | `2026-04-14-wasm3-scripting-engine.md` | wasm3 | **landed** (no status marker) | `wasm3-v0.5.0/`, `wasm3-v0.5.0-wf/` | `scripting_wasm3.cc` | partial — uses `Wasm3RuntimeInit/Wasm3RunScript`; should migrate to `wasm3_engine` namespace |
 | 6 | `2026-04-14-wamr-dev-aot-ship.md` | WAMR (interp + AOT) | **landed 2026-04-15** (interp phase 1; WAT compiled; needs smoke test) | `wamr-2.2.0/`, `wamr-2.2.0-wf/` (incl. compiled `.wasm`) | `scripting_wamr.hp`, `scripting_wamr.cc` | yes — `wamr_engine` namespace |
@@ -90,7 +90,7 @@ For each pending plan (rows 6–8) rewrite every snippet that names `LuaInterpre
 
 ### Phase C — Add a unified status table to `docs/scripting-languages.md`
 
-Prepend a **Status** table (the one in this plan) to `docs/scripting-languages.md`. Each pending row links to its plan; each landed row links to the plan **and** to the source file in `wftools/wf_viewer/stubs/`.
+Prepend a **Status** table (the one in this plan) to `docs/scripting-languages.md`. Each pending row links to its plan; each landed row links to the plan **and** to the source file in `wftools/engine/stubs/`.
 
 ### Phase D — Implement pending scripting engines
 
@@ -113,9 +113,9 @@ Land order: #4+#5 → #1+#2+#3 together → #6 separately. Update Lua + Fennel r
 
 #### D.2 JerryScript smoke test
 
-Build path landed; vendor at `wftools/vendor/jerryscript-v3.0.0/`; `scripting_jerryscript.cc` exists. Not yet smoke-tested.
+Build path landed; vendor at `engine/vendor/jerryscript-v3.0.0/`; `scripting_jerryscript.cc` exists. Not yet smoke-tested.
 
-1. Build: `WF_JS_ENGINE=jerryscript bash wftools/wf_engine/build_game.sh`
+1. Build: `WF_JS_ENGINE=jerryscript bash engine/build_game.sh`
 2. Run snowgoons player + director; fix any bugs
 3. Verify behavior matches QuickJS
 
@@ -139,7 +139,7 @@ All 6 vendor dirs already in tree. Default engine: **zForth** (4 KB, MIT).
 
 Sigil: `\` (Forth line-comment; dispatch before `//`).
 
-1. `wftools/wf_viewer/stubs/scripting_forth.hp` — shared plug ABI header
+1. `wftools/engine/stubs/scripting_forth.hp` — shared plug ABI header
 2. `scripting_zforth.cc` — zForth default backend (`forth_engine` namespace)
 3. Dispatch arm in `ScriptRouter::RunScript` (`\` sigil, before `//`)
 4. `WF_FORTH_ENGINE=zforth` + `WF_ENABLE_FORTH` in `build_game.sh`
@@ -157,7 +157,7 @@ Plan already refreshed to ScriptRouter convention in Phase B. Vendor (Wren 0.4.0
 
 Sigil: `//wren\n` (checked before generic `//` to avoid false dispatch to JS).
 
-1. Vendor Wren 0.4.0 amalgamation under `wftools/vendor/wren-0.4.0/`
+1. Vendor Wren 0.4.0 amalgamation under `engine/vendor/wren-0.4.0/`
 2. `scripting_wren.hp` + `scripting_wren.cc` (`wren_engine` namespace)
 3. Dispatch arm in `ScriptRouter::RunScript` (before `//` JS check)
 4. `WF_ENABLE_WREN=1` in `build_game.sh`
@@ -173,8 +173,8 @@ Sigil: `//wren\n` (checked before generic `//` to avoid false dispatch to JS).
 **Landed 2026-04-15 (phase 1 — interp; needs smoke test).**
 
 Phase 1 (interp only) — all steps complete:
-1. ✓ Vendor WAMR 2.2.0 classic interpreter under `wftools/vendor/wamr-2.2.0/`
-2. ✓ `wftools/wf_viewer/stubs/scripting_wamr.hp` + `scripting_wamr.cc` (`wamr_engine` namespace, wasm-C-API)
+1. ✓ Vendor WAMR 2.2.0 classic interpreter under `engine/vendor/wamr-2.2.0/`
+2. ✓ `wftools/engine/stubs/scripting_wamr.hp` + `scripting_wamr.cc` (`wamr_engine` namespace, wasm-C-API)
 3. ✓ Extend `WF_WASM_ENGINE=wamr` in `build_game.sh`; CMake block builds `libvmlib.a` (~519 KB at MinSizeRel)
 4. ✓ Re-authored snowgoons WAT sources in `wamr-2.2.0-wf/` using `(import "consts" "INDEXOF_*" (global i32))` host globals
 5. ✓ Compiled WAT → `.wasm` via `wat2wasm` (director 158 B, player 159 B); `scripts/patch_snowgoons_wamr.py` prefers these over the wasm3 fallback
@@ -342,23 +342,23 @@ Once passed, flip the engine's status to "shipping" in `docs/scripting-languages
 - `docs/scripting-languages.md` — host for the unified status table + per-engine rows and snowgoons reference scripts.
 
 **Code (Phase A′ — rename):**
-- `wftools/wf_viewer/stubs/scripting_js.hp` — wrap decls in `namespace js_engine { ... }`
-- `wftools/wf_viewer/stubs/scripting_wasm3.hp` — wrap decls in `namespace wasm3_engine { ... }`
-- `wftools/wf_viewer/stubs/scripting_quickjs.cc`, `scripting_jerryscript.cc` — rename defs to `js_engine::*`
-- `wftools/wf_viewer/stubs/scripting_wasm3.cc` — rename defs to `wasm3_engine::*`
-- `wftools/wf_viewer/stubs/scripting_stub.cc` — rename call sites
+- `wftools/engine/stubs/scripting_js.hp` — wrap decls in `namespace js_engine { ... }`
+- `wftools/engine/stubs/scripting_wasm3.hp` — wrap decls in `namespace wasm3_engine { ... }`
+- `wftools/engine/stubs/scripting_quickjs.cc`, `scripting_jerryscript.cc` — rename defs to `js_engine::*`
+- `wftools/engine/stubs/scripting_wasm3.cc` — rename defs to `wasm3_engine::*`
+- `wftools/engine/stubs/scripting_stub.cc` — rename call sites
 
 **Code (Phase D — new engines / lua fixes):**
-- `wftools/wf_viewer/stubs/scripting_stub.cc` (lua_engine fixes, dispatch arms)
+- `wftools/engine/stubs/scripting_stub.cc` (lua_engine fixes, dispatch arms)
 - new: `scripting_forth.hp`, `scripting_zforth.cc` (+ other Forth backends)
 - new: `scripting_wren.hp`, `scripting_wren.cc`
 - new: `scripting_wamr.hp`, `scripting_wamr.cc`
-- new vendor dirs: `wftools/vendor/wren-0.4.0/`, `wftools/vendor/wamr-*/`
+- new vendor dirs: `engine/vendor/wren-0.4.0/`, `engine/vendor/wamr-*/`
 - new patchers: `scripts/patch_snowgoons_{forth,wren}.py`
-- `wftools/wf_engine/build_game.sh` — new `WF_ENABLE_FORTH` / `WF_FORTH_ENGINE` / `WF_ENABLE_WREN` / `WF_WASM_ENGINE=wamr` flags
+- `engine/build_game.sh` — new `WF_ENABLE_FORTH` / `WF_FORTH_ENGINE` / `WF_ENABLE_WREN` / `WF_WASM_ENGINE=wamr` flags
 
 **Reference (canonical shape):**
-- `wftools/wf_viewer/stubs/scripting_stub.cc` — `ScriptRouter` + `lua_engine` namespace.
+- `wftools/engine/stubs/scripting_stub.cc` — `ScriptRouter` + `lua_engine` namespace.
 
 ## Verification
 

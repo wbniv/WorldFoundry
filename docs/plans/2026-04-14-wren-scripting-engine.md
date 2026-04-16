@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-14
 **Status:** **complete — landed 2026-04-15; smoke test passed 2026-04-16 (GROUND, no crashes).**
-All phases complete. Vendor `wftools/vendor/wren-0.4.0/`; plug in
+All phases complete. Vendor `engine/vendor/wren-0.4.0/`; plug in
 `scripting_wren.{hp,cc}` (`wren_engine` namespace); `//wren\n` dispatch
 arm in `ScriptRouter::RunScript`; `scripts/patch_snowgoons_wren.py`;
 reference scripts in `docs/scripting-languages.md`.
@@ -47,14 +47,14 @@ Vendor Wren 0.4.0 single-file amalgamation from https://github.com/wren-lang/wre
 
 Files needed from `single/`:
 ```
-wftools/vendor/wren-0.4.0/
+engine/vendor/wren-0.4.0/
   src/
     wren.c     (amalgamation, ~7 000 lines)
     wren.h     (public API)
   LICENSE
 ```
 
-Add to `wftools/vendor/README.md`:
+Add to `engine/vendor/README.md`:
 ```
 | `wren-0.4.0/` | 0.4.0 | MIT | https://github.com/wren-lang/wren/releases/tag/0.4.0 |
 ```
@@ -62,7 +62,7 @@ And record the tarball SHA256 in the SHA256 section.
 
 ### Phase 2 — Plug header
 
-**New file:** `wftools/wf_viewer/stubs/scripting_wren.hp`
+**New file:** `wftools/engine/stubs/scripting_wren.hp`
 
 ```cpp
 #pragma once
@@ -84,7 +84,7 @@ namespace wren_engine {
 
 ### Phase 3 — Implementation
 
-**New file:** `wftools/wf_viewer/stubs/scripting_wren.cc`
+**New file:** `wftools/engine/stubs/scripting_wren.cc`
 
 Key design points:
 
@@ -158,7 +158,7 @@ class Env {
 
 ### Phase 4 — Dispatch in `ScriptRouter` (`scripting_stub.cc`)
 
-**File:** `wftools/wf_viewer/stubs/scripting_stub.cc`
+**File:** `wftools/engine/stubs/scripting_stub.cc`
 
 1. Add include at top (guarded):
 ```cpp
@@ -211,7 +211,7 @@ class Env {
 
 ### Phase 5 — Build system
 
-**File:** `wftools/wf_engine/build_game.sh`
+**File:** `engine/build_game.sh`
 
 1. Near the top where feature flags are declared (~line 35):
 ```bash
@@ -245,7 +245,7 @@ fi
 
 Add row to both engine tables:
 ```
-| Wren 0.4 | `//wren\n` | `WF_ENABLE_WREN=1` | vendored `wftools/vendor/wren-0.4.0/`, single amalgamation | ~100 KB | spike |
+| Wren 0.4 | `//wren\n` | `WF_ENABLE_WREN=1` | vendored `engine/vendor/wren-0.4.0/`, single amalgamation | ~100 KB | spike |
 ```
 
 Add snowgoons player + director examples in Wren to the reference scripts section.
@@ -264,19 +264,19 @@ Following the same pattern as `patch_snowgoons_lua.py` / `patch_snowgoons_fennel
 
 | File | Action |
 |------|--------|
-| `wftools/vendor/wren-0.4.0/` | Create (vendor tarball) |
-| `wftools/vendor/README.md` | Add row + SHA256 |
-| `wftools/wf_viewer/stubs/scripting_wren.hp` | Create (plug ABI header) |
-| `wftools/wf_viewer/stubs/scripting_wren.cc` | Create (implementation) |
-| `wftools/wf_viewer/stubs/scripting_stub.cc` | Add dispatch block + lifecycle hooks |
-| `wftools/wf_engine/build_game.sh` | Add `WF_ENABLE_WREN` flag + compile block |
+| `engine/vendor/wren-0.4.0/` | Create (vendor tarball) |
+| `engine/vendor/README.md` | Add row + SHA256 |
+| `wftools/engine/stubs/scripting_wren.hp` | Create (plug ABI header) |
+| `wftools/engine/stubs/scripting_wren.cc` | Create (implementation) |
+| `wftools/engine/stubs/scripting_stub.cc` | Add dispatch block + lifecycle hooks |
+| `engine/build_game.sh` | Add `WF_ENABLE_WREN` flag + compile block |
 | `docs/scripting-languages.md` | Add Wren row + reference scripts |
 | `scripts/patch_snowgoons_wren.py` | Create patcher |
 
 ## Verification
 
-1. **Default build (no Wren):** `./wftools/wf_engine/build_game.sh` — zero footprint change.
-2. **Wren build:** `WF_ENABLE_WREN=1 ./wftools/wf_engine/build_game.sh` — compiles cleanly.
+1. **Default build (no Wren):** `./engine/build_game.sh` — zero footprint change.
+2. **Wren build:** `WF_ENABLE_WREN=1 ./engine/build_game.sh` — compiles cleanly.
 3. **Selftest:** minimal Wren script (`//wren\nEnv.write_mailbox(0, 42.0)`) verified in a `WrenRunScript` unit call; confirm the foreign method is reached and the return is correct.
 4. **Snowgoons integration:** patch Wren scripts into snowgoons IFF via `scripts/patch_snowgoons_wren.py`, launch `wf_game`, confirm director switches camshot on triggers and player forwards joystick input.
 5. **Binary delta:** `size wf_game` before/after — expect ~100 KB increase with `WF_ENABLE_WREN=1`.

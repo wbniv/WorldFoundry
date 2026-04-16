@@ -1,12 +1,1 @@
-@*============================================================================
-@* common.oas: this file only exists to create the .ht file for the common movement data
-@*============================================================================
-
-@*============================================================================
-@* common type definition
-
-TYPEHEADER(Common)
-    @include common.inc
-TYPEFOOTER
-
-@*============================================================================
+/home/will/WorldFoundry/wfsource/source/oas/common.oas

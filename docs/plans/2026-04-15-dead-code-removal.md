@@ -23,7 +23,7 @@ widgets depend on `windows.h`/`commctrl.h` and are never linked into the game bu
 Perl-based editor (now lost) and is itself superseded by the Blender port.
 
 `wfsource/source/physics/ode/` wraps the Open Dynamics Engine.  The build defines
-`PHYSICS_ENGINE_WF` (set in `wftools/wf_engine/build_game.sh`); the ODE path has never been
+`PHYSICS_ENGINE_WF` (set in `engine/build_game.sh`); the ODE path has never been
 active in the Linux game build.
 
 ---
@@ -260,7 +260,7 @@ rm -rf wfsource/source/ini/
 # game/main.cc:   remove #if 0 //msvc defined(TASKER) block (~282–285)
 
 # 5. Build
-cd wftools/wf_engine && bash build_game.sh
+cd engine && bash build_game.sh
 
 # 6. Measure and save snapshot
 python3 scripts/loc_report.py -o scripts/loc_head.json
@@ -366,7 +366,7 @@ in the survey notes).
 # Surgical #if 0 deletions (see line numbers above)
 
 # Build
-cd wftools/wf_engine && bash build_game.sh
+cd engine && bash build_game.sh
 
 # Measure and update docs
 python3 scripts/loc_report.py -o scripts/loc_head.json

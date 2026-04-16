@@ -8,7 +8,7 @@ World Foundry originally targeted PSX, Saturn, DOS, Windows, and Linux. Only the
 
 **Dead (delete):** PSX & Windows renderer dirs, PSX & Win subsystem dirs, obsolete single files (see Phase 1). Also strip `__PSX__`, `__WIN__`/`_WIN32`, `__SATURN__`, `__DOS__`, `RENDERER_{PSX,SOFTWARE,DIRECTX,XWINDOWS}`, `RENDERER_PIPELINE_{PSX,SOFTWARE,DIRECTX}`, and `SCALAR_TYPE_FIXED` guards from the ~90 kept files.
 
-**Active build entry point:** `wftools/wf_engine/build_game.sh` (hand-rolled bash) — *not* the GNU makefiles. `task run` invokes the pre-built binary it produces.
+**Active build entry point:** `engine/build_game.sh` (hand-rolled bash) — *not* the GNU makefiles. `task run` invokes the pre-built binary it produces.
 
 ---
 
@@ -161,7 +161,7 @@ One commit per subsystem. Suggested order, leaves-first so coupling surfaces lat
 6. `gfx/`
 7. `game/`
 
-After each commit: `bash wftools/wf_engine/build_game.sh` must succeed. Shape B/C regressions surface as compile errors immediately.
+After each commit: `bash engine/build_game.sh` must succeed. Shape B/C regressions surface as compile errors immediately.
 
 ### Watch items
 
@@ -173,7 +173,7 @@ After each commit: `bash wftools/wf_engine/build_game.sh` must succeed. Shape B/
 
 ## Phase 3 — Post-sweep cleanup
 
-### Prune `wftools/wf_engine/build_game.sh`
+### Prune `engine/build_game.sh`
 
 The `SKIP` array (`build_game.sh:48-98`) currently excludes files that didn't build with PSX/Win guards present. After the sweep, re-test each and remove from SKIP if they now compile:
 
@@ -209,7 +209,7 @@ Recommend: leave for now, address in a separate cleanup.
    ```
    Expect zero hits (a handful of string-literal or comment mentions may be fine to leave). **Note:** `__LINUX__` is NOT in this regex — those guards are expected to remain.
 
-2. Build: `bash wftools/wf_engine/build_game.sh` exits 0.
+2. Build: `bash engine/build_game.sh` exits 0.
 
 3. Smoke tests:
    - `task run` — game launches against `wfsource/source/game/cd.iff`.

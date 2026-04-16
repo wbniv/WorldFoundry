@@ -8,7 +8,7 @@
 
 WF's current physics lives in `wfsource/source/physics/wf/` (selected by `-DPHYSICS_ENGINE_WF`) and its handlers in `wfsource/source/movement/`. The recent Lua-scripting spike unmasked a bad `reinterpret_cast` in `BungeeCameraHandler`'s `SPECIAL_COLLISION` path at `wfsource/source/game/movecam.cc:1004-1007` — symptomatic of a deeper design where kinematic queries, camera logic, and collision response are entangled. Patching locally is brittle; the desired direction is a wholesale replacement.
 
-The survey report recommended **Jolt Physics** (MIT, ~300 KB stripped, C++17, active upstream, `CharacterVirtual` solves the exact character-vs-world problem WF's current code handles badly). Exploration confirmed: WF already builds with `-std=c++17`; there's an existing `PHYSICS_ENGINE_ODE` compile-time branch in `physics/physical.hp` that demonstrates the backend-swap pattern; vendor convention (`wftools/vendor/<lib>-<version>/`) is established by wasm3/quickjs/jerryscript. Scripts do not currently invoke physics directly — they only read/write mailboxes — so there is no scripting-host-function ABI to break.
+The survey report recommended **Jolt Physics** (MIT, ~300 KB stripped, C++17, active upstream, `CharacterVirtual` solves the exact character-vs-world problem WF's current code handles badly). Exploration confirmed: WF already builds with `-std=c++17`; there's an existing `PHYSICS_ENGINE_ODE` compile-time branch in `physics/physical.hp` that demonstrates the backend-swap pattern; vendor convention (`engine/vendor/<lib>-<version>/`) is established by wasm3/quickjs/jerryscript. Scripts do not currently invoke physics directly — they only read/write mailboxes — so there is no scripting-host-function ABI to break.
 
 **Known constraint up front:** WF's tick rate varies (and historically took significant effort to get right). Jolt prefers a fixed step. Any integration must subdivide the variable game `dt` into fixed-size substeps internally — never feed Jolt the raw variable `dt`. See Open questions §"Frame-rate coupling".
 
@@ -21,7 +21,7 @@ Intended outcome when this work is scheduled: `WF_PHYSICS_ENGINE=jolt` produces 
 | Engine | **Jolt Physics** (latest tagged release, e.g. `v5.x.x`) | MIT, ~300 KB stripped, `CharacterVirtual`, deterministic, active upstream (Guerrilla). Survey report is the justification. |
 | Build flag | **`WF_PHYSICS_ENGINE=legacy\|jolt`** (env var, default `legacy`) | Mirrors `WF_WASM_ENGINE` / `WF_JS_ENGINE` pattern. `legacy` = `-DPHYSICS_ENGINE_WF`; `jolt` = `-DPHYSICS_ENGINE_JOLT`. The defunct `PHYSICS_ENGINE_ODE` branch is removed in Phase 0 before any Jolt work lands. |
 | Drop ODE first | **Delete `physics/ode/` and every `PHYSICS_ENGINE_ODE` compile branch as Phase 0** | Never compiled, never selected, no ODE library is linked. It's dead code that confuses the backend-swap pattern. Removing it first makes the Jolt branches land in a cleaner header. |
-| Vendor layout | **`wftools/vendor/jolt-physics-<version>/`** (upstream tarball, SHA256 in `wftools/vendor/README.md`) + **`wftools/vendor/jolt-physics-<version>-wf/`** for WF-specific glue (type converters, selftest) | Matches wasm3 precedent. Jolt's upstream CMake is large; we compile only the TUs we need via direct `g++` calls from `build_game.sh`, same as wasm3. |
+| Vendor layout | **`engine/vendor/jolt-physics-<version>/`** (upstream tarball, SHA256 in `engine/vendor/README.md`) + **`engine/vendor/jolt-physics-<version>-wf/`** for WF-specific glue (type converters, selftest) | Matches wasm3 precedent. Jolt's upstream CMake is large; we compile only the TUs we need via direct `g++` calls from `build_game.sh`, same as wasm3. |
 | Adapter location | **`wfsource/source/physics/jolt/`** (new) | Mirrors existing `physics/wf/` dir. `jolt/jolt_backend.{hp,cc}` holds the `PhysicalAttributes` impl for `PHYSICS_ENGINE_JOLT`. |
 | Scope of PhysicalAttributes rewrite | **Keep the public API byte-for-byte**; swap private state to `JPH::BodyID` + cached pose | Minimal blast radius. Every caller of `Position()`, `Rotation()`, `LinVelocity()`, `CheckCollision()`, etc. keeps working. Euler ↔ Quaternion conversion happens inside the accessors. |
 | Character controller | **Replace GroundHandler + AirHandler's collision math with `JPH::CharacterVirtual`** | This is the single biggest win. Slope, step, one-way platforms, snap-to-ground all come "free" from Jolt. |
@@ -48,12 +48,12 @@ Goal: `physics/ode/` and every `PHYSICS_ENGINE_ODE` reference are gone before Jo
 
 Goal: `WF_PHYSICS_ENGINE=jolt ./build_game.sh` produces a binary that compiles and links Jolt, prints a selftest line at runtime, and otherwise behaves identically to `legacy` (no physics is routed through Jolt yet).
 
-1. Download Jolt release tarball (latest stable) into `wftools/vendor/jolt-physics-<version>/`. Record SHA256 in `wftools/vendor/README.md`.
+1. Download Jolt release tarball (latest stable) into `engine/vendor/jolt-physics-<version>/`. Record SHA256 in `engine/vendor/README.md`.
 2. Identify the minimal TU set (Jolt's `Jolt/**/*.cpp` minus `Jolt/Physics/SoftBody/*` and the debug renderer). Jolt's upstream `CMakeLists.txt` lists them — mirror that list into `build_game.sh` alongside the wasm3 TU list.
 3. Add `WF_PHYSICS_ENGINE` case to `build_game.sh` (model after `WF_WASM_ENGINE` at `build_game.sh:39-73`):
    - `legacy` → `-DPHYSICS_ENGINE_WF` (today's behaviour, unchanged)
    - `jolt` → `-DPHYSICS_ENGINE_JOLT -I"$VENDOR/jolt-physics-<ver>"` and compile Jolt TUs into `OBJS`
-4. Add a stub `wftools/wf_viewer/stubs/physics_jolt.cc` (mirrors `scripting_wasm3.cc`) with `JoltRuntimeInit()` / `JoltRuntimeShutdown()`; called from wherever the engine initialises subsystems (likely near `LuaInterpreter` ctor / `ScriptInterpreterFactory`). The selftest creates a `PhysicsSystem`, inserts a falling sphere, steps 10 frames, asserts it moved downward, and logs `jolt: selftest ok`.
+4. Add a stub `wftools/engine/stubs/physics_jolt.cc` (mirrors `scripting_wasm3.cc`) with `JoltRuntimeInit()` / `JoltRuntimeShutdown()`; called from wherever the engine initialises subsystems (likely near `LuaInterpreter` ctor / `ScriptInterpreterFactory`). The selftest creates a `PhysicsSystem`, inserts a falling sphere, steps 10 frames, asserts it moved downward, and logs `jolt: selftest ok`.
 5. **Verify:** `WF_PHYSICS_ENGINE=legacy` unchanged (binary size delta = 0). `WF_PHYSICS_ENGINE=jolt` compiles, links, prints selftest line, runs snowgoons identically to legacy (because no actor code is on the Jolt path yet).
 
 ### Phase 2 — PhysicalAttributes backed by Jolt bodies
@@ -104,10 +104,10 @@ Goal: Delete the `reinterpret_cast` in `movecam.cc:1007` as part of rewriting `B
 
 | File | Change |
 |------|--------|
-| `wftools/wf_engine/build_game.sh` | Add `WF_PHYSICS_ENGINE` switch; compile Jolt TUs under `jolt` |
-| `wftools/vendor/README.md` | Add Jolt entry with SHA256 |
-| `wftools/vendor/jolt-physics-<ver>/` | New — upstream tarball |
-| `wftools/vendor/jolt-physics-<ver>-wf/` | New — selftest + any WF-specific glue |
+| `engine/build_game.sh` | Add `WF_PHYSICS_ENGINE` switch; compile Jolt TUs under `jolt` |
+| `engine/vendor/README.md` | Add Jolt entry with SHA256 |
+| `engine/vendor/jolt-physics-<ver>/` | New — upstream tarball |
+| `engine/vendor/jolt-physics-<ver>-wf/` | New — selftest + any WF-specific glue |
 | `wfsource/source/physics/ode/` | **Deleted in Phase 0** — dead code, never compiled |
 | `wfsource/source/physics/physical.hp` | Phase 0: remove ODE branches. Phase 2: add `PHYSICS_ENGINE_JOLT` branches in the freed slots |
 | `wfsource/source/physics/physical.cc` + `.hpi` | Branch all accessor impls on `PHYSICS_ENGINE_JOLT` |
@@ -120,7 +120,7 @@ Goal: Delete the `reinterpret_cast` in `movecam.cc:1007` as part of rewriting `B
 
 - `-DPHYSICS_ENGINE_*` compile-time select pattern (present in `physical.hp`; Phase 0 simplifies it from `WF|ODE` to `WF` before Phase 1 adds `JOLT`).
 - `WF_WASM_ENGINE` / `WF_JS_ENGINE` env-var + case-match structure in `build_game.sh:39-73` — identical shape for `WF_PHYSICS_ENGINE`.
-- Vendor directory layout (`wftools/vendor/wasm3-v0.5.0/` + `wasm3-v0.5.0-wf/`) — same split for Jolt.
+- Vendor directory layout (`engine/vendor/wasm3-v0.5.0/` + `wasm3-v0.5.0-wf/`) — same split for Jolt.
 - WF math types — no new math library needed; Jolt's `Vec3`/`Quat`/`Mat44` stay inside the adapter.
 - Existing collision-event dispatch in `PhysicalObject::Collision(other, normal)` — `CharacterContactListener` forwards into it.
 

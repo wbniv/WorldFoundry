@@ -52,7 +52,7 @@ Goal: Remove dead code before adding live code. Easier to review the diff when t
 
 Goal: Existing `actor.cc:1342` SFX playback becomes audible.
 
-1. `wftools/vendor/miniaudio-<ver>/miniaudio.h` — single header. Record SHA256 in `wftools/vendor/README.md`.
+1. `engine/vendor/miniaudio-<ver>/miniaudio.h` — single header. Record SHA256 in `engine/vendor/README.md`.
 2. New TU `wfsource/source/audio/linux/miniaudio_impl.cc` with `#define MINIAUDIO_IMPLEMENTATION` — the one place the implementation is instantiated. Compile with `-DMA_NO_ENCODING` (we don't record), optionally `-DMA_NO_FLAC` / `-DMA_NO_MP3` if we commit to Ogg+WAV only (trims ~100 KB).
 3. Reimplement `SoundDevice` / `SoundBuffer`:
    - `SoundDevice` owns a single `ma_engine` configured with sfx+music submixers.
@@ -109,16 +109,16 @@ Goal: Audio works on Android and iOS. Mostly free — miniaudio already supports
 
 | File | Change |
 |------|--------|
-| `wftools/vendor/miniaudio-<ver>/` | New — single-header vendor |
-| `wftools/vendor/README.md` | Add miniaudio entry + SHA256 |
-| `wftools/wf_engine/build_game.sh` | Add miniaudio impl TU; delete `audiofmt/` references if any; no system audio lib needed |
+| `engine/vendor/miniaudio-<ver>/` | New — single-header vendor |
+| `engine/vendor/README.md` | Add miniaudio entry + SHA256 |
+| `engine/build_game.sh` | Add miniaudio impl TU; delete `audiofmt/` references if any; no system audio lib needed |
 | `wfsource/source/audio/linux/device.cc` | Rewrite against `ma_engine` |
 | `wfsource/source/audio/linux/buffer.cc` | Rewrite against `ma_sound` |
 | `wfsource/source/audio/buffer.hp` | Add `setPosition` / `setVelocity` |
 | `wfsource/source/audio/device.hp` | Add mixer-bus accessors, listener setter |
 | `wfsource/source/audio/music.{hp,cc}` | New — `MusicPlayer` |
 | `wfsource/source/game/level.cc` | Load per-level music (Phase 3) |
-| `wftools/wf_viewer/stubs/scripting_stub.cc` | Register `play_sound` / `play_music` / volume closures |
+| `wftools/engine/stubs/scripting_stub.cc` | Register `play_sound` / `play_music` / volume closures |
 | `wfsource/source/mailbox/mailbox.inc` | If SFX needs mailbox indices; TBD |
 | `wfsource/source/audiofmt/` | **Delete** |
 | `wfsource/source/audio/orig.cc`, `test.cc`, `LOADFILE.CC`, `*.WAV` | **Delete** |

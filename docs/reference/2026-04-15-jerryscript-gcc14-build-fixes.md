@@ -1,7 +1,7 @@
 # JerryScript v3.0.0 — GCC 14 Build Fixes
 
 **Date:** 2026-04-15  
-**Vendor path:** `wftools/vendor/jerryscript-v3.0.0/`  
+**Vendor path:** `engine/vendor/jerryscript-v3.0.0/`  
 **GCC version:** GCC 14 (Ubuntu 24.04 default)  
 **Build profile:** `wf-minimal.profile` (no BigInt, no Realms, no debugger,
 no RegExp, no TypedArray, no Container builtins)
@@ -179,38 +179,38 @@ block in `#if JERRY_BUILTIN_TYPEDARRAY`.
 ## Files changed
 
 ```
-wftools/vendor/jerryscript-v3.0.0/jerry-core/ecma/operations/ecma-conversion.h
+engine/vendor/jerryscript-v3.0.0/jerry-core/ecma/operations/ecma-conversion.h
   - Remove #if JERRY_BUILTIN_CONTAINER guard around ecma_op_same_value_zero declaration
 
-wftools/vendor/jerryscript-v3.0.0/jerry-core/ecma/operations/ecma-conversion.c
+engine/vendor/jerryscript-v3.0.0/jerry-core/ecma/operations/ecma-conversion.c
   - Remove #if JERRY_BUILTIN_CONTAINER guard around ecma_op_same_value_zero definition
 
-wftools/vendor/jerryscript-v3.0.0/jerry-core/vm/opcodes.c
+engine/vendor/jerryscript-v3.0.0/jerry-core/vm/opcodes.c
   - ecma_builtin_get_global() → ecma_make_object_value(ecma_builtin_get_global()) in assert
   - global_obj_p → ecma_builtin_get_global() in ecma_get_global_scope call
 
-wftools/vendor/jerryscript-v3.0.0/jerry-core/lit/lit-char-helpers.c
+engine/vendor/jerryscript-v3.0.0/jerry-core/lit/lit-char-helpers.c
   - Add (void) cp; in #else branches of lit_char_fold_to_lower and lit_char_fold_to_upper
 
-wftools/vendor/jerryscript-v3.0.0/jerry-core/ecma/operations/ecma-objects.h
+engine/vendor/jerryscript-v3.0.0/jerry-core/ecma/operations/ecma-objects.h
   - Remove #if JERRY_BUILTIN_REGEXP guard around ecma_object_is_regexp_object declaration
 
-wftools/vendor/jerryscript-v3.0.0/jerry-core/ecma/operations/ecma-objects.c
+engine/vendor/jerryscript-v3.0.0/jerry-core/ecma/operations/ecma-objects.c
   - Remove #if JERRY_BUILTIN_REGEXP guard from function definition
   - Make body conditional: JERRY_BUILTIN_REGEXP=0 returns false immediately
 
-wftools/vendor/jerryscript-v3.0.0/jerry-core/ecma/builtin-objects/ecma-builtin-intrinsic.c
+engine/vendor/jerryscript-v3.0.0/jerry-core/ecma/builtin-objects/ecma-builtin-intrinsic.c
   - Wrap ecma_builtin_intrinsic_map_prototype_entries and ..._set_prototype_values
     in #if JERRY_BUILTIN_CONTAINER / #endif
 
-wftools/vendor/jerryscript-v3.0.0/jerry-core/ecma/builtin-objects/ecma-builtin-regexp-string-iterator-prototype.c
+engine/vendor/jerryscript-v3.0.0/jerry-core/ecma/builtin-objects/ecma-builtin-regexp-string-iterator-prototype.c
   - Wrap real function body in #if JERRY_BUILTIN_REGEXP
   - Provide stub implementation in #else that returns type error
 
-wftools/vendor/jerryscript-v3.0.0/jerry-core/ecma/builtin-objects/ecma-builtin-array-iterator-prototype.c
+engine/vendor/jerryscript-v3.0.0/jerry-core/ecma/builtin-objects/ecma-builtin-array-iterator-prototype.c
   - Wrap typedarray-dependent block in #if JERRY_BUILTIN_TYPEDARRAY
 
-wftools/vendor/jerryscript-v3.0.0/jerry-core/ecma/operations/ecma-iterator-object.c
+engine/vendor/jerryscript-v3.0.0/jerry-core/ecma/operations/ecma-iterator-object.c
   - Wrap ECMA_OBJECT_CLASS_REGEXP_STRING_ITERATOR assert branch in #if JERRY_BUILTIN_REGEXP
 ```
 
@@ -257,7 +257,7 @@ with upstream access has seen them.
 After applying all patches, build with:
 
 ```bash
-cd wftools/wf_engine
+cd engine
 WF_JS_ENGINE=jerryscript bash build_game.sh
 ```
 

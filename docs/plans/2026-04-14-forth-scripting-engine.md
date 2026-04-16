@@ -252,38 +252,38 @@ Because all backends register `read-mailbox` and `write-mailbox` as named words 
 
 ### Phase 1 — Vendor all six engines ✓ DONE
 
-#### zForth — `wftools/vendor/zforth-41db72d1/`
+#### zForth — `engine/vendor/zforth-41db72d1/`
 Commit `41db72d165c1539d57f3f79970fc57ea881a79dc` from https://github.com/zevv/zForth
 Core source at `src/zforth/zforth.c` and `src/zforth/zforth.h`.
 SHA256 of archive: `34c578ec2aa979786387e5f244fa933b6b040f9a6f18888ed2cc4273ef06df8d`
 
-#### ficl — `wftools/vendor/ficl-3.06/`
+#### ficl — `engine/vendor/ficl-3.06/`
 Tag `ficl306` (commit `7ff58de370ffdfc066daceffbcd2341ae07235a5`) from https://github.com/jwsadler58/ficl
 SHA256 of archive: `ac3bc105cab8f770dfbc2b3bcd7ca258da25cae638e790d9b0f07dc3976ebbe7`
 
-#### Atlast — `wftools/vendor/atlast-08ff0e1a/`
+#### Atlast — `engine/vendor/atlast-08ff0e1a/`
 Commit `08ff0e1aa90310e401510e843540786ac97d2f4f` from https://github.com/Fourmilab/atlast
 Source at `atlast-64/atlast.c` and `atlast-64/atlast.h` (64-bit variant; `atlast-32/` also present).
 SHA256 of archive: `807ac62e966e6dc11f3e360beceb670103ddb6542766e204c80c11650e311e10`
 
-#### embed — `wftools/vendor/embed-154aeb2f/`
+#### embed — `engine/vendor/embed-154aeb2f/`
 Commit `154aeb2faba01106c2324fb7b46cf5fe236e6a81` from https://github.com/howerj/embed
 SHA256 of archive: `4312df38dc216c65d8acb2aec96c73c63657c22657504802d311061af21861c6`
 
-#### libforth — `wftools/vendor/libforth-b851c6a2/`
+#### libforth — `engine/vendor/libforth-b851c6a2/`
 Commit `b851c6a25150e7d2114804fc8712664c6d825214` from https://github.com/howerj/libforth
 SHA256 of archive: `26271b77ef930799e399157d65f50f6dc2c44149314d5f206c852bd2639669bc`
 
-#### pForth — `wftools/vendor/pforth-63d4a418/`
+#### pForth — `engine/vendor/pforth-63d4a418/`
 Commit `63d4a4181b39dda123bd63fed4c56bc8e3d47b1c` from https://github.com/philburk/pforth
 Source in `csrc/`; Forth bootstrap files in `fth/`.
 SHA256 of archive: `239a32e02cacc3b52702b939a59c4eca599cb23eac2052055d819736aa22e218`
 
-Rows added to `wftools/vendor/README.md`. ✓
+Rows added to `engine/vendor/README.md`. ✓
 
 ### Phase 2 — Plug header (shared ABI)
 
-**New file:** `wftools/wf_viewer/stubs/scripting_forth.hp`
+**New file:** `wftools/engine/stubs/scripting_forth.hp`
 
 ```cpp
 #pragma once
@@ -496,7 +496,7 @@ Changes are **identical regardless of backend**; the macro `WF_ENABLE_FORTH` is 
 
 ### Phase 5 — Build system
 
-**File:** `wftools/wf_engine/build_game.sh`
+**File:** `engine/build_game.sh`
 
 1. Feature-flag declaration (near line 35):
 ```bash
@@ -577,15 +577,17 @@ esac
 
 **`docs/scripting-languages.md`:** Add Forth rows to both engine tables:
 ```
-| Forth (zForth)   | `\` | `WF_FORTH_ENGINE=zforth`   | vendored `wftools/vendor/zforth-<sha>/`; 2 C files       | ~4 KB core  | spike |
-| Forth (ficl)     | `\` | `WF_FORTH_ENGINE=ficl`     | vendored `wftools/vendor/ficl-3.06/`; ~15 C files        | ~100 KB     | spike |
-| Forth (Atlast)   | `\` | `WF_FORTH_ENGINE=atlast`   | vendored `wftools/vendor/atlast-<sha>/`; 1 C file        | ~30 KB      | spike |
-| Forth (embed)    | `\` | `WF_FORTH_ENGINE=embed`    | vendored `wftools/vendor/embed-<sha>/`; ~3 C files       | ~5 KB VM    | spike |
-| Forth (libforth) | `\` | `WF_FORTH_ENGINE=libforth` | vendored `wftools/vendor/libforth-<sha>/`; 1 C file      | ~50 KB      | spike |
-| Forth (pForth)   | `\` | `WF_FORTH_ENGINE=pforth`   | vendored `wftools/vendor/pforth-<sha>/`; ~9 C files      | ~120 KB     | spike |
+| Forth (zForth)   | `\` | `WF_FORTH_ENGINE=zforth`   | vendored `engine/vendor/zforth-<sha>/`; 2 C files       | ~4 KB core  | spike |
+| Forth (ficl)     | `\` | `WF_FORTH_ENGINE=ficl`     | vendored `engine/vendor/ficl-3.06/`; ~15 C files        | ~100 KB     | spike |
+| Forth (Atlast)   | `\` | `WF_FORTH_ENGINE=atlast`   | vendored `engine/vendor/atlast-<sha>/`; 1 C file        | ~30 KB      | spike |
+| Forth (embed)    | `\` | `WF_FORTH_ENGINE=embed`    | vendored `engine/vendor/embed-<sha>/`; ~3 C files       | ~5 KB VM    | spike |
+| Forth (libforth) | `\` | `WF_FORTH_ENGINE=libforth` | vendored `engine/vendor/libforth-<sha>/`; 1 C file      | ~50 KB      | spike |
+| Forth (pForth)   | `\` | `WF_FORTH_ENGINE=pforth`   | vendored `engine/vendor/pforth-<sha>/`; ~9 C files      | ~120 KB     | spike |
 ```
 
 Note: all six share sigil `\`; only one may be compiled in at a time (same rule as `WF_JS_ENGINE`).
+
+Update the runtime memory column (currently `—`) for each non-zForth backend once it is built: measure actual RAM footprint at steady state (dict + stacks) analogous to the zForth entry (`~17 KB` with `ZF_DICT_SIZE=16384`), and fill in the table row for that backend.
 
 Also add snowgoons player + director Forth scripts to the **reference scripts section** of `docs/scripting-languages.md`, alongside the existing Lua/Fennel/JS/wasm examples:
 
@@ -620,22 +622,22 @@ Script source is engine-agnostic (`read-mailbox`, `write-mailbox` are named word
 
 | File | Action |
 |------|--------|
-| `wftools/vendor/zforth-<sha8>/` | Create |
-| `wftools/vendor/ficl-3.06/` | Create |
-| `wftools/vendor/atlast-<sha8>/` | Create |
-| `wftools/vendor/embed-<sha8>/` | Create |
-| `wftools/vendor/libforth-<sha8>/` | Create |
-| `wftools/vendor/pforth-<sha8>/` | Create |
-| `wftools/vendor/README.md` | Add 6 rows + SHA256s |
-| `wftools/wf_viewer/stubs/scripting_forth.hp` | Create (shared ABI header) |
-| `wftools/wf_viewer/stubs/scripting_zforth.cc` | Create |
-| `wftools/wf_viewer/stubs/scripting_ficl.cc` | Create |
-| `wftools/wf_viewer/stubs/scripting_atlast.cc` | Create |
-| `wftools/wf_viewer/stubs/scripting_embed.cc` | Create |
-| `wftools/wf_viewer/stubs/scripting_libforth.cc` | Create |
-| `wftools/wf_viewer/stubs/scripting_pforth.cc` | Create |
-| `wftools/wf_viewer/stubs/scripting_stub.cc` | Add `\` dispatch + lifecycle hooks |
-| `wftools/wf_engine/build_game.sh` | Add `WF_FORTH_ENGINE` block |
+| `engine/vendor/zforth-<sha8>/` | Create |
+| `engine/vendor/ficl-3.06/` | Create |
+| `engine/vendor/atlast-<sha8>/` | Create |
+| `engine/vendor/embed-<sha8>/` | Create |
+| `engine/vendor/libforth-<sha8>/` | Create |
+| `engine/vendor/pforth-<sha8>/` | Create |
+| `engine/vendor/README.md` | Add 6 rows + SHA256s |
+| `wftools/engine/stubs/scripting_forth.hp` | Create (shared ABI header) |
+| `wftools/engine/stubs/scripting_zforth.cc` | Create |
+| `wftools/engine/stubs/scripting_ficl.cc` | Create |
+| `wftools/engine/stubs/scripting_atlast.cc` | Create |
+| `wftools/engine/stubs/scripting_embed.cc` | Create |
+| `wftools/engine/stubs/scripting_libforth.cc` | Create |
+| `wftools/engine/stubs/scripting_pforth.cc` | Create |
+| `wftools/engine/stubs/scripting_stub.cc` | Add `\` dispatch + lifecycle hooks |
+| `engine/build_game.sh` | Add `WF_FORTH_ENGINE` block |
 | `docs/scripting-languages.md` | Add 3 Forth rows + reference scripts |
 | `scripts/patch_snowgoons_forth.py` | Create patcher |
 
@@ -643,13 +645,13 @@ Script source is engine-agnostic (`read-mailbox`, `write-mailbox` are named word
 
 ## Verification
 
-1. **Default build (no Forth):** `./wftools/wf_engine/build_game.sh` — zero footprint change.
-2. **zForth:** `WF_FORTH_ENGINE=zforth ./wftools/wf_engine/build_game.sh` — compiles; binary delta ~10 KB.
-3. **ficl:** `WF_FORTH_ENGINE=ficl ./wftools/wf_engine/build_game.sh` — compiles; binary delta ~100 KB.
-4. **Atlast:** `WF_FORTH_ENGINE=atlast ./wftools/wf_engine/build_game.sh` — compiles; binary delta ~30 KB.
-5. **embed:** `WF_FORTH_ENGINE=embed ./wftools/wf_engine/build_game.sh` — compiles; binary delta ~5 KB.
-6. **libforth:** `WF_FORTH_ENGINE=libforth ./wftools/wf_engine/build_game.sh` — compiles; binary delta ~50 KB.
-7. **pForth:** `WF_FORTH_ENGINE=pforth ./wftools/wf_engine/build_game.sh` — compiles; binary delta ~120 KB.
+1. **Default build (no Forth):** `./engine/build_game.sh` — zero footprint change.
+2. **zForth:** `WF_FORTH_ENGINE=zforth ./engine/build_game.sh` — compiles; binary delta ~10 KB.
+3. **ficl:** `WF_FORTH_ENGINE=ficl ./engine/build_game.sh` — compiles; binary delta ~100 KB.
+4. **Atlast:** `WF_FORTH_ENGINE=atlast ./engine/build_game.sh` — compiles; binary delta ~30 KB.
+5. **embed:** `WF_FORTH_ENGINE=embed ./engine/build_game.sh` — compiles; binary delta ~5 KB.
+6. **libforth:** `WF_FORTH_ENGINE=libforth ./engine/build_game.sh` — compiles; binary delta ~50 KB.
+7. **pForth:** `WF_FORTH_ENGINE=pforth ./engine/build_game.sh` — compiles; binary delta ~120 KB.
 8. **Selftest per backend:** eval `\ wf\n42 INDEXOF_INPUT write-mailbox`, confirm mailbox 3024 = 42.
 9. **Script portability:** same snowgoons script source runs correctly on all six backends.
 10. **Snowgoons integration:** patch Forth scripts into IFF, launch `wf_game`, confirm gameplay.

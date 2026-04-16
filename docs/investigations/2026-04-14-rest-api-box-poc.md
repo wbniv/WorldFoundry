@@ -125,11 +125,11 @@ For a PoC, avoid a full framework. Two options:
 
 ### Option A — cpp-httplib (recommended)
 
-Single-header MIT library. Embed directly in `wftools/wf_viewer/stubs/` or
+Single-header MIT library. Embed directly in `wftools/engine/stubs/` or
 `wfsource/source/`:
 
 ```
-wftools/vendor/cpp-httplib-v0.x.y/httplib.h
+engine/vendor/cpp-httplib-v0.x.y/httplib.h
 ```
 
 Usage:
@@ -264,7 +264,7 @@ WF_REST_API="${WF_REST_API:-0}"   # 0 = off (default), 1 = embed HTTP server
 
 When on:
 - Adds `-DWF_REST_API -I"$VENDOR/cpp-httplib-v0.x.y"` to `CXXFLAGS`.
-- Compiles `wftools/wf_viewer/stubs/rest_api.cc`.
+- Compiles `wftools/engine/stubs/rest_api.cc`.
 - Links nothing extra (cpp-httplib is header-only).
 
 Server starts automatically at game boot, listening on `127.0.0.1:8765` (LAN PoC;
@@ -276,17 +276,17 @@ restrict to loopback by default, make host/port configurable via env vars
 ## New files
 
 ```
-wftools/vendor/cpp-httplib-v0.x.y/
+engine/vendor/cpp-httplib-v0.x.y/
   httplib.h                         — vendored, header-only
 
-wftools/wf_viewer/stubs/
+wftools/engine/stubs/
   rest_api.hp                       — BoxCommand struct, push/pop API
   rest_api.cc                       — HTTP server thread, route handlers,
                                       command queue, ID allocator
 ```
 
 Modify:
-- `wftools/wf_engine/build_game.sh` — `WF_REST_API` flag, conditional compile.
+- `engine/build_game.sh` — `WF_REST_API` flag, conditional compile.
 - Main game loop (likely `wfsource/source/game/main.cc` or equivalent) — call
   `RestApi_DrainQueue()` once per frame; call `RestApi_Shutdown()` on exit.
 

@@ -15,7 +15,7 @@ sudo apt install \
 | `g++` | compiling the engine and C++ tools |
 | `libgl-dev` / `libglu-dev` / `libx11-dev` | GL / GLU / X11 headers and `.so` symlinks for engine link (`build_game.sh`) |
 
-Lua is **vendored** (`wftools/vendor/lua-5.4.8/`) and compiled statically — no system `liblua5.4-dev` needed.
+Lua is **vendored** (`engine/vendor/lua-5.4.8/`) and compiled statically — no system `liblua5.4-dev` needed.
 
 ## User-local tooling
 
@@ -40,7 +40,7 @@ Installs under `~/.cargo` and `~/.rustup`. Needed for the Rust ports of asset-pi
 
 Two things the repo needs but doesn't ship:
 
-1. **`wftools/wf_viewer/stubs/` and `wftools/wf_viewer/include/`** — scripting + platform stubs and a few headers/`.inc`s. Currently shared between machines by hand. TODO: commit, or generate, or document how to regenerate from scratch.
+1. **`wftools/engine/stubs/` and `wftools/engine/include/`** — scripting + platform stubs and a few headers/`.inc`s. Currently shared between machines by hand. TODO: commit, or generate, or document how to regenerate from scratch.
 
 2. **Generated `prep` outputs under `wfsource/source/gfx/glpipeline/`:**
    - `renderer.inc` ← `prep renderer.ins renderer.inc`
@@ -54,21 +54,21 @@ Two things the repo needs but doesn't ship:
 ### Engine (`wf_game`)
 
 ```bash
-cd wftools/wf_engine
+cd engine
 bash build_game.sh
 ```
 
-Output: `wftools/wf_engine/wf_game`.
+Output: `engine/wf_game`.
 
 ### Running
 
 ```bash
 cd wfsource/source/game
-LD_LIBRARY_PATH=../../../wftools/wf_engine/libs DISPLAY=:0 \
-  ../../../wftools/wf_engine/wf_game
+LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 \
+  ../../../engine/wf_game
 ```
 
-`cd.iff` is read from the current directory. Snowgoons is the hardcoded default boot level (see `wftools/wf_engine/PLAN.md`).
+`cd.iff` is read from the current directory. Snowgoons is the hardcoded default boot level (see `engine/PLAN.md`).
 
 ### Rust-port pipeline tools
 
@@ -84,4 +84,4 @@ Binaries land in each crate's `target/release/<name>`.
 ## Gotchas
 
 - `build_game.sh` historically referenced a podman container overlay (`$HOME/.local/share/containers/storage/overlay/<SHA>/diff`) for GL/GLU/X11 headers. Removed 2026-04-14 in favour of system `-dev` packages. If you're diffing against an older checkout, don't restore the `$CBASE` logic.
-- Lua headers come from `wftools/vendor/lua-5.4.8/src/` (added to `CXXFLAGS` by `build_game.sh`). The system package `liblua5.4-dev` is no longer used or needed.
+- Lua headers come from `engine/vendor/lua-5.4.8/src/` (added to `CXXFLAGS` by `build_game.sh`). The system package `liblua5.4-dev` is no longer used or needed.

@@ -103,7 +103,7 @@ what the original ActBoxOR script would have done).
 
 ```bash
 cd wfsource/source/game
-LD_LIBRARY_PATH=../../../wftools/wf_engine/libs DISPLAY=:0 ../../../wftools/wf_engine/wf_game
+LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 ../../../engine/wf_game
 ```
 
 Expected: engine loads L4 (snowgoons), no assertion in `movecam.cc`, X11 window

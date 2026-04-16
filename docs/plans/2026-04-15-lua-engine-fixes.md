@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-15
 **Status:** **landed 2026-04-15 (fixes #1–#6 all complete; smoke test pending HAL cleanup).**
-**File:** `wftools/wf_viewer/stubs/scripting_stub.cc` (`lua_engine` namespace)
+**File:** `wftools/engine/stubs/scripting_stub.cc` (`lua_engine` namespace)
 
 > **Convention note.** This plan's `lua_engine` namespace is the canonical
 > shape for every WF scripting-engine plug: five free functions (`Init`,
@@ -235,7 +235,7 @@ the resumed tick sees the prior local state.
 
 ## Files to change
 
-Only `wftools/wf_viewer/stubs/scripting_stub.cc` needs to change for fixes #1–#5.
+Only `wftools/engine/stubs/scripting_stub.cc` needs to change for fixes #1–#5.
 Fix #6 may also touch `scripting_stub.cc` only, or may introduce a small helper header
 if the coroutine management gets complex.
 

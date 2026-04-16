@@ -173,7 +173,7 @@ Not "must use all of these" — a menu the game designer picks from per mini-gam
 | File | Change |
 |------|--------|
 | `wfsource/source/net/` (new tree) | Mailbox-delta protocol, WebRTC peer wrapper |
-| `wftools/vendor/libdatachannel-<ver>/` | New — WebRTC library (MIT) |
+| `engine/vendor/libdatachannel-<ver>/` | New — WebRTC library (MIT) |
 | `wfsource/source/scripting/` (mailbox manager) | Per-mailbox visibility bitmask for hidden-info |
 | `wfsource/source/hal/android/`, `wfsource/source/hal/ios/` | New sensor and mic input impls |
 | `wfsource/source/hal/` (interface) | Haptic output surface |

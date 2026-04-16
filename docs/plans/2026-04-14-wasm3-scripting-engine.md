@@ -5,7 +5,7 @@
 engine: base64-wrapped modules on the #b64 sigil"). Retargeted onto the
 ScriptRouter convention on 2026-04-15: the `#b64\n` dispatch arm now
 lives in `ScriptRouter::RunScript` in
-`wftools/wf_viewer/stubs/scripting_stub.cc`, not in `LuaInterpreter`. The
+`wftools/engine/stubs/scripting_stub.cc`, not in `LuaInterpreter`. The
 plug is being renamed from the free-function `Wasm3RuntimeInit /
 Wasm3RunScript / Wasm3AddConstantArray / Wasm3RuntimeShutdown` shape
 into a `wasm3_engine` namespace (`Init / RunScript / AddConstantArray /
@@ -88,7 +88,7 @@ flowchart TD
 ### 1. Vendor wasm3
 
 ```
-wftools/vendor/wasm3-v0.5.0/
+engine/vendor/wasm3-v0.5.0/
     source/
         m3_api_libc.c    m3_api_meta_wasi.c  m3_api_tracer.c
         m3_api_uvwasi.c  m3_api_wasi.c       m3_bind.c
@@ -100,7 +100,7 @@ wftools/vendor/wasm3-v0.5.0/
 ```
 
 Upstream tarball is `https://github.com/wasm3/wasm3/archive/refs/tags/v0.5.0.tar.gz`.
-Record version + SHA256 in `wftools/vendor/README.md` (same file the JS
+Record version + SHA256 in `engine/vendor/README.md` (same file the JS
 plan and Fennel plan append to).
 
 ### 2. Build switch in `build_game.sh`
@@ -240,7 +240,7 @@ at startup when `WF_WASM_DEBUG=1`; stdout logs
 `wasm3: selftest mailbox r/w OK`.
 
 Source for the selftest — hand-written `.wat` checked into
-`wftools/vendor/wasm3-v0.5.0-wf/selftest.wat` and compiled via `wat2wasm`
+`engine/vendor/wasm3-v0.5.0-wf/selftest.wat` and compiled via `wat2wasm`
 (from wabt) at spike-author time; the committed binary is the
 `selftest.wasm` that `xxd -i` produces. wabt is NOT linked into wf_game —
 it's only on the developer's path to regenerate the asset.
@@ -345,20 +345,20 @@ wasm cache. Zero delta to CD/console portability.
 ## Critical files
 
 Modify:
-- `wftools/wf_engine/build_game.sh` — add `WF_WASM_ENGINE` switch,
+- `engine/build_game.sh` — add `WF_WASM_ENGINE` switch,
   conditional compile/link of `scripting_wasm3.cc` + wasm3 vendor TUs.
-- `wftools/wf_viewer/stubs/scripting_stub.cc` — add `#`-sigil dispatch arm
+- `wftools/engine/stubs/scripting_stub.cc` — add `#`-sigil dispatch arm
   (or the `LANG_HANDLER("#", Wasm3RunScript)` row if the sigil registry
   from the JS plan has landed).
 
 Create:
-- `wftools/vendor/wasm3-v0.5.0/` — vendored upstream.
-- `wftools/vendor/wasm3-v0.5.0-wf/selftest.wat` — handwritten selftest
+- `engine/vendor/wasm3-v0.5.0/` — vendored upstream.
+- `engine/vendor/wasm3-v0.5.0-wf/selftest.wat` — handwritten selftest
   source.
-- `wftools/vendor/wasm3-v0.5.0-wf/selftest.wasm` — compiled selftest (build
+- `engine/vendor/wasm3-v0.5.0-wf/selftest.wasm` — compiled selftest (build
   artifact, but checked in so wf_game builds don't need wabt).
-- `wftools/wf_viewer/stubs/scripting_wasm3.cc` — the plugin.
-- `wftools/wf_viewer/stubs/scripting_wasm3.hp` — externs for
+- `wftools/engine/stubs/scripting_wasm3.cc` — the plugin.
+- `wftools/engine/stubs/scripting_wasm3.hp` — externs for
   `Wasm3RunScript` / `Wasm3RuntimeInit` / `Wasm3RuntimeShutdown`.
 - `scripts/patch_snowgoons_wasm.py` — Lua→wasm (base64) patcher, reuses
   `pad_to` from `patch_snowgoons_lua.py`.

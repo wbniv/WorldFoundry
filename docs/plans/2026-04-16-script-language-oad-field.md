@@ -1,7 +1,7 @@
 # Plan: encode scripting language in OAS/OAD; drop runtime sigil detection
 
 **Date:** 2026-04-16
-**Status:** planned
+**Status:** complete
 
 ## Context
 
@@ -95,7 +95,7 @@ directly — pass `0` (Lua) there since the shell script is always Lua.
 
 ## `ScriptRouter::RunScript` change
 
-**File:** `wftools/wf_viewer/stubs/scripting_stub.cc`
+**File:** `wftools/engine/stubs/scripting_stub.cc`
 
 Replace the sigil-sniff block with a language-enum dispatch:
 
@@ -201,7 +201,7 @@ one-time pass, not an ongoing concern.
 | `wfsource/source/game/level.cc` | Thread `language` through; shell script passes 0 |
 | `wfsource/source/game/actor.cc` | Pass `GetCommonBlockPtr()->ScriptLanguage` |
 | `wfsource/source/scripting/scriptinterpreter.hp` | Add `language` param to `RunScript` |
-| `wftools/wf_viewer/stubs/scripting_stub.cc` | Replace sigil sniff with enum dispatch |
+| `wftools/engine/stubs/scripting_stub.cc` | Replace sigil sniff with enum dispatch |
 | `wf_blender/` | Add `ScriptLanguage` enum dropdown + full-text autodetect hint |
 
 ## Verification
@@ -211,7 +211,7 @@ one-time pass, not an ongoing concern.
    behaviour matches the pre-change run.
 3. Old IFF (no `ScriptLanguage` field): boots and runs; `ScriptLanguage` reads 0 (Lua) — correct for all existing Lua scripts.
 4. Blender autodetect: open a script with Fennel syntax; confirm dropdown pre-fills to Fennel.
-5. `grep -n 'p\[0\]\|sigil\|\*p ==' wftools/wf_viewer/stubs/scripting_stub.cc` returns nothing.
+5. `grep -n 'p\[0\]\|sigil\|\*p ==' wftools/engine/stubs/scripting_stub.cc` returns nothing.
 
 ## Follow-ups
 
