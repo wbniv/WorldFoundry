@@ -15,6 +15,8 @@
 use std::path::Path;
 use wf_oad::{ButtonType, OadEntry, OadFile};
 
+use crate::lev_parser::{field_data, field_str_value, LevObject};
+
 /// Per-class schema bundle — maps a class name to its parsed `.oad` file.
 pub struct OadSchemas {
     by_class: std::collections::HashMap<String, OadFile>,
@@ -108,4 +110,115 @@ pub fn per_object_size(schema: &OadFile) -> usize {
         }
     }
     size
+}
+
+// ── Per-object OAD payload serialization ─────────────────────────────────────
+
+/// Emit the binary OAD data block for one object.
+///
+/// Walks the class schema in order; for each entry *outside* a COMMONBLOCK,
+/// looks up the matching sub-chunk by name in `obj.fields` and serializes
+/// the value with the correct width and format.  COMMONBLOCK markers emit a
+/// 4-byte placeholder offset (zeroed — Phase 2c will populate the common
+/// data block and patch these offsets).  Fields *inside* a COMMONBLOCK emit
+/// nothing (their bytes live in the common data area, not here).
+pub fn serialize_oad_data(schema: &OadFile, obj: &LevObject) -> Vec<u8> {
+    let mut out = Vec::new();
+    let mut in_common = false;
+
+    for entry in &schema.entries {
+        match entry.button_type {
+            ButtonType::CommonBlock => {
+                // Phase 2c: real offset into common data area.  For now, 0.
+                push_i32(&mut out, 0);
+                in_common = true;
+            }
+            ButtonType::EndCommon => {
+                in_common = false;
+            }
+            _ if in_common => {
+                // Fields inside a COMMONBLOCK are stored in the common data
+                // area, not in the per-object payload.
+            }
+            _ => serialize_entry(&mut out, entry, obj),
+        }
+    }
+    out
+}
+
+fn serialize_entry(out: &mut Vec<u8>, entry: &OadEntry, obj: &LevObject) {
+    let key = entry.name_str();
+    let chunk = obj.find_field(key);
+
+    match entry.button_type {
+        ButtonType::Fixed32 | ButtonType::Int32 => {
+            let value = int_value(entry, chunk, obj);
+            push_i32(out, value);
+        }
+        ButtonType::Fixed16 | ButtonType::Int16 => {
+            let value = int_value(entry, chunk, obj) as i16;
+            out.extend_from_slice(&value.to_le_bytes());
+        }
+        ButtonType::Int8 => {
+            let value = int_value(entry, chunk, obj) as i8;
+            out.push(value as u8);
+        }
+        ButtonType::String => {
+            let text = chunk.map(field_str_value).unwrap_or_default();
+            let len = entry.len as usize;
+            let bytes = text.as_bytes();
+            let copy = bytes.len().min(len);
+            out.extend_from_slice(&bytes[..copy]);
+            out.extend(std::iter::repeat(0u8).take(len - copy));
+        }
+        ButtonType::ObjectReference
+        | ButtonType::Filename
+        | ButtonType::MeshName
+        | ButtonType::ClassReference
+        | ButtonType::XData => {
+            // Phase 2c: resolve asset IDs, object indices, XDATA script refs.
+            push_i32(out, 0);
+        }
+        _ => {}  // size-0 entries (PropertySheet, GroupStart, GroupStop, flags)
+    }
+}
+
+/// Resolve an integer-valued field (I32/I16/I8 with or without enum items)
+/// from the .lev chunk, falling back to the schema default.
+///
+/// - If the entry has enum items ("A|B|C") and the .lev chunk carries a nested
+///   STR label, return the matching item's index.
+/// - Otherwise, if the chunk has a DATA payload, return its value as i32.
+/// - Otherwise, return the schema default.
+fn int_value(entry: &OadEntry, chunk: Option<&wf_iff::IffChunk>, _obj: &LevObject) -> i32 {
+    let Some(chunk) = chunk else {
+        return entry.def;
+    };
+
+    // Enum-style: items come from the entry's String, pipe-separated.
+    let items = entry.string_str();
+    if !items.is_empty() && items.contains('|') {
+        let label = field_str_value(chunk);
+        if !label.is_empty() {
+            if let Some(idx) = items.split('|').position(|it| it.trim() == label.trim()) {
+                return idx as i32;
+            }
+        }
+    }
+
+    // Numeric: read the DATA payload as a little-endian i32 (or shorter width).
+    let data = field_data(chunk);
+    if data.len() >= 4 {
+        i32::from_le_bytes(data[..4].try_into().unwrap())
+    } else if data.len() >= 2 {
+        i16::from_le_bytes(data[..2].try_into().unwrap()) as i32
+    } else if data.len() == 1 {
+        data[0] as i8 as i32
+    } else {
+        entry.def
+    }
+}
+
+fn push_i32(out: &mut Vec<u8>, v: i32) {
+    out.extend_from_slice(&v.to_le_bytes());
 }

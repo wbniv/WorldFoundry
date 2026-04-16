@@ -43,11 +43,61 @@ pub struct LevObject {
     pub position: Vec3,
     pub rotation: Eulr,
     pub bbox: Box3,
-    /// All sub-chunks of this OBJ, in order.  Phase 2 will walk these to
-    /// serialize per-class OAD fields (I32/FX32/STR/XDAT) into the flat OAD
-    /// data block that follows each `_ObjectOnDisk` header.
-    #[allow(dead_code)]
+    /// All sub-chunks of this OBJ, in order.  Each field chunk carries a NAME
+    /// child (the schema key) plus its value as either a DATA child (raw bytes)
+    /// or a nested STR child (label, used for enum selections).
     pub fields: Vec<IffChunk>,
+}
+
+impl LevObject {
+    /// Find a field by its NAME.  Matches on schema key (e.g. "Mobility",
+    /// "Mesh Name").  Returns the outer chunk (I32/FX32/STR/etc.) whose NAME
+    /// child equals `key`.
+    pub fn find_field(&self, key: &str) -> Option<&IffChunk> {
+        self.fields.iter().find(|c| field_name(c) == key)
+    }
+}
+
+/// Return the NAME text of a field chunk, or empty string if absent.
+fn field_name(chunk: &IffChunk) -> String {
+    let children = match read_chunks(&chunk.payload) {
+        Ok(c) => c,
+        Err(_) => return String::new(),
+    };
+    for c in children {
+        if id_to_str(c.id) == "NAME" {
+            return read_cstr(&c.payload);
+        }
+    }
+    String::new()
+}
+
+/// Extract a field's raw DATA bytes (for I32/FX32/BOX3/VEC3/etc.).
+pub fn field_data(chunk: &IffChunk) -> Vec<u8> {
+    let children = match read_chunks(&chunk.payload) { Ok(c) => c, Err(_) => return Vec::new() };
+    for c in children {
+        if id_to_str(c.id) == "DATA" {
+            return c.payload;
+        }
+    }
+    Vec::new()
+}
+
+/// Extract a field's nested STR value (enum label, or some STR-kind fields).
+pub fn field_str_value(chunk: &IffChunk) -> String {
+    let children = match read_chunks(&chunk.payload) { Ok(c) => c, Err(_) => return String::new() };
+    // STR fields can hold either a DATA child with the text or a nested STR.
+    // Both forms appear; prefer DATA if present, otherwise fall back to nested STR.
+    let mut via_data = None;
+    let mut via_str  = None;
+    for c in children {
+        match id_to_str(c.id).as_str() {
+            "DATA" => via_data = Some(read_cstr(&c.payload)),
+            "STR"  => via_str  = Some(read_cstr(&c.payload)),
+            _ => {}
+        }
+    }
+    via_data.or(via_str).unwrap_or_default()
 }
 
 pub fn parse(data: &[u8]) -> Result<Vec<LevObject>, String> {

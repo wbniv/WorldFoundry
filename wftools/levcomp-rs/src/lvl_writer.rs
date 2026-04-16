@@ -17,7 +17,7 @@
 
 use crate::lc_parser::ClassMap;
 use crate::lev_parser::LevObject;
-use crate::oad_loader::{per_object_size, OadSchemas};
+use crate::oad_loader::{per_object_size, serialize_oad_data, OadSchemas};
 
 pub const LEVEL_VERSION: i32 = 28;
 
@@ -148,9 +148,18 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
             /* path_index */ -1,
             oad_size,
         );
-        // Phase 2a: emit the correctly-sized OAD data block as placeholder
-        // zero bytes.  Phase 2b will fill in real field values from the .lev
-        // sub-chunks and populate the common data block with XDATA scripts.
+        // Per-object OAD payload — fields outside any COMMONBLOCK carry real
+        // values extracted from the .lev sub-chunks.  COMMONBLOCK markers emit
+        // a zero offset placeholder (Phase 2c: populate common data area and
+        // patch real offsets); fields inside COMMONBLOCK sections emit nothing
+        // here (their bytes live in common data).
+        if let Some(schema) = plan.schemas.get(&obj.class_name) {
+            let payload = serialize_oad_data(schema, obj);
+            debug_assert_eq!(payload.len(), oad_size as usize,
+                "serialized OAD payload ({}) != computed size ({})",
+                payload.len(), oad_size);
+            out.extend_from_slice(&payload);
+        }
         pad_section(&mut out, start, obj_sizes[i + 1]);
     }
 
