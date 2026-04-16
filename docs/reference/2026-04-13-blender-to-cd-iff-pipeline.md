@@ -263,6 +263,24 @@ all objects in a scene and writes a level file.
         └─────────────┘           └──────────┘
 ```
 
+**Object and level convergence** (snowgoons example: ~3 objects/level × 7 levels):
+
+```mermaid
+sankey-beta
+
+Blender objects,Level export,21
+Level export,level.lev files,7
+level.lev files,iffcomp and iff2lvl,7
+iffcomp and iff2lvl,level.iff files,7
+level.iff files,cd.iff assembly,7
+levels.txt,cd.pl,1
+cd.pl,cd.iff assembly,1
+cd.iff assembly,cd.iff,8
+```
+
+The 21→7 drop shows many Blender objects converging per level; the 8→1 at the right
+shows all levels merging into one `cd.iff`.
+
 ---
 
 ## 7. What the Level IFF Must Contain

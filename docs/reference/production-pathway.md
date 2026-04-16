@@ -5,6 +5,35 @@ Original note: *"Some details could be missing or incorrect. Note that the makef
 
 ---
 
+## High-level asset funnel
+
+Six asset categories enter the pipeline and converge into two outputs. The Sankey
+widths are proportional to the number of distinct data streams — not byte sizes.
+
+```mermaid
+sankey-beta
+
+OAS / OAD schemas,Prep,2
+Source code,C++ compiler,4
+Textures,Geometry + texture pipeline,2
+3D geometry,Geometry + texture pipeline,3
+Level descriptors,Level compile pipeline,4
+levels.txt,cd.pl,1
+
+Prep,C++ compiler,1
+Prep,Level compile pipeline,1
+Geometry + texture pipeline,Level compile pipeline,5
+Level compile pipeline,Per-level IFFs,10
+C++ compiler,game executable,5
+cd.pl,iffcomp (cd),1
+Per-level IFFs,iffcomp (cd),10
+iffcomp (cd),cd.iff,11
+```
+
+The detailed step-by-step flow follows below.
+
+---
+
 ```mermaid
 flowchart TD
 
