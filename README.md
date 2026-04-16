@@ -125,4 +125,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 12:41** — [`docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md`](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md): Reverse-engineering the WF binary level format for `levcomp-rs`
+**2026-04-16 12:47** — [`docs/plans/2026-04-14-forth-scripting-engine.md`](docs/plans/2026-04-14-forth-scripting-engine.md): Plan: Forth as a scripting engine option for World Foundry
