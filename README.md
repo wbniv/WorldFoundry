@@ -9,7 +9,7 @@
 
 The past several days have produced a large amount of work across two fronts: **scripting system** and **dead-code removal**.
 
-The scripting system is comprehensively implemented — Lua, Fennel, QuickJS, JerryScript, wasm3, WAMR, Wren, and Forth (zForth) are all compiled and wired into the `ScriptRouter` dispatch table. Lua/Fennel/QuickJS/wasm3 have been smoke-tested end-to-end (snowgoons player moves, director cuts cameras). JerryScript, WAMR, Wren, and Forth are landed but not yet smoke-tested; those tests are blocked on HAL cleanup currently happening on this branch.
+The scripting system is comprehensively implemented and fully smoke-tested — Lua, Fennel, QuickJS, JerryScript, wasm3, WAMR, Wren, and Forth (zForth) are all compiled, wired into the `ScriptRouter` dispatch table, and verified end-to-end in snowgoons (player moves, director cuts cameras). All eight engines confirmed 2026-04-16.
 
 Dead-code removal is largely done: Batches 1–7 are complete, reducing `wfsource/source/` from 64,252 to 36,199 code lines (−43.7%). One batch (Batch 8 — physics replacement) is in progress.
 
