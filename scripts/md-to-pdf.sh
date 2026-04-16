@@ -120,14 +120,20 @@ code_lang = ''
 # Stack of open list tags, e.g. [('ul', 0), ('ol', 2)]
 list_stack = []
 li_open = False  # True when a <li> is open and can accept nested content
+# True while the open <li> is still collecting its first-paragraph text;
+# a continuation line (non-marker text line) in this phase is folded into
+# the <li> directly instead of being wrapped in a <p>. Reset by a blank
+# line inside the list or by any block-level element inside the li.
+li_accepting_text = False
 # Accumulate consecutive text lines into a single paragraph
 para_lines = []
 
 def close_li():
-    global li_open
+    global li_open, li_accepting_text
     if li_open:
         html_lines.append('</li>')
         li_open = False
+    li_accepting_text = False
 
 def close_lists():
     global list_stack
@@ -223,6 +229,8 @@ for line in lines:
             close_table(); close_blockquote()
             code_lang = stripped.removeprefix('\`\`\`').strip()
             in_code = True
+            # Code block inside an open <li> ends the first-paragraph phase.
+            li_accepting_text = False
         continue
     if in_code:
         code_lines.append(line if code_lang == 'mermaid' else html_mod.escape(line))
@@ -231,6 +239,8 @@ for line in lines:
     # Tables
     if stripped.startswith('|') and stripped.endswith('|'):
         flush_para()
+        # Table inside an open <li> ends the first-paragraph phase.
+        li_accepting_text = False
         # Separator row (e.g. |---|---|) — parse alignment
         if re.match(r'^\|[\s\-:|]+\|$', stripped):
             table_aligns = []
@@ -357,6 +367,7 @@ for line in lines:
         else:
             html_lines.append(f'<li>{text}')
         li_open = True
+        li_accepting_text = True
         continue
 
     # Non-list line closes lists — but indented content (code blocks,
@@ -371,13 +382,21 @@ for line in lines:
     if stripped.startswith('<'):
         flush_para()
         html_lines.append(line)
+        li_accepting_text = False
     elif stripped == '':
         flush_para()
         if list_stack:
-            pass  # Keep lists open across single blank lines
+            # Blank line inside a list ends the current li's first-paragraph
+            # phase — any further content is a second block inside the li and
+            # should be <p>-wrapped by the normal paragraph path.
+            li_accepting_text = False
         else:
             close_blockquote()
             html_lines.append('')
+    elif li_accepting_text:
+        # Continuation line of the open <li>'s first paragraph — fold into
+        # the <li> text directly instead of paragraph-accumulating it.
+        html_lines[-1] = html_lines[-1] + ' ' + stripped
     else:
         # Accumulate text lines into a paragraph (joined on flush)
         para_lines.append(line)

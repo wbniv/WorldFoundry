@@ -1,11 +1,13 @@
 World Foundry coding standards:
 
-This is just slapped together, I realize it is not laid out very well, I
-just focused on getting the information down.
+NOTE: this file is now superseded by docs/coding-conventions.md, which
+absorbs everything here and adds the OAS/OAD, streams, assertion variants,
+no-fallback, lookup-tables, mailbox, substepping, and interop-boundary
+conventions. This file is preserved for incoming links and historical record.
 
-Also, due to the size of WF (and the vintage of some of the code), these
-standards are not met everywhere in the code base. Think of it as where
-I wish it was and am working towards.
+Due to the size of WF (and the vintage of some of the code), these standards
+are not met everywhere in the code base. Think of it as where I wish it was
+and am working towards.
 
 Feel free to ask for the rationale behind any of this stuff.
 
