@@ -77,15 +77,11 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 ## Current blockers
 
-**Jolt character position fix (in progress, this branch):** JerryScript, WAMR, Wren, Forth/zForth, and Lua coroutines need snowgoons smoke tests, but those were deferred until this branch's in-flight changes are committed cleanly.
+**Jolt character position fix (in progress, this branch):** Jolt phases 4+ are in progress (`jolt_backend.cc`, `jolt_backend.hp`, `level.cc` uncommitted, plus HAL cleanup in `halbase.h`, `haltest.cc`). The scripting smoke tests have been completed on this branch. Remaining uncommitted work:
 
-The uncommitted work is two things:
+- **HAL cleanup** (`halbase.h`, `haltest.cc`) — trivial. Removes dangling `TEST_TASKER` / `TEST_TIMER` guards and `TaskerTest()`/`TimerTest()` call sites left over from the Batch 5 tasker deletion. No logic change.
 
-- **HAL cleanup** (`halbase.h`, `haltest.cc`) — trivial. Removes dangling `TEST_TASKER` / `TEST_TIMER` guards and `TaskerTest()`/`TimerTest()` call sites left over from the Batch 5 tasker deletion. No logic change; not blocking the build on its own.
-
-- **Jolt character controller position fix** (`jolt_backend.cc`, `level.cc`) — the real work. WF stores actor position at the **feet**; Jolt's `CharacterVirtual` expects position at the **centre** of the bounding box. Fix stores `ctr = minPt + half` and applies it on every `SetPosition`; subtracts on every `GetPosition`. Also adds `JoltOptimizeBroadPhase()` call in `level.cc` after all static bodies are registered (required before `CharacterVirtual` queries can find them). 120-frame stderr trace is in place to verify ground contact.
-
-**To unblock:** build with `WF_PHYSICS_ENGINE=jolt`, confirm the character lands on the floor (stderr shows `GROUND`), commit all four files, then run the scripting smoke tests in sequence: JerryScript → WAMR → Wren → Forth/zForth.
+- **Jolt character controller position fix** (`jolt_backend.cc`, `level.cc`) — WF stores actor position at the **feet**; Jolt's `CharacterVirtual` expects position at the **centre** of the bounding box. Fix stores `ctr = minPt + half` and applies it on every `SetPosition`; subtracts on every `GetPosition`. Also adds `JoltOptimizeBroadPhase()` call in `level.cc` after all static bodies are registered.
 
 ---
 
