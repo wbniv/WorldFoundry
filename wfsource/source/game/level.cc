@@ -30,6 +30,9 @@
 #include <movement/movement.hp>
 #include <room/room.hp>
 #include <physics/collision.hp>
+#ifdef PHYSICS_ENGINE_JOLT
+#include <physics/jolt/jolt_backend.hp>
+#endif
 #include <room/rooms.hp>
 #include <room/actrooms.hp>
 #include <room/actroit.hp>
@@ -843,6 +846,11 @@ Level::update(Scalar deltaTime)
 	DBSTREAM2( cflow << "Level::StartFrame: done" << std::endl; )
 
 	Validate();
+#ifdef PHYSICS_ENGINE_JOLT
+	// Advance the Jolt simulation before WF movement prediction so that Jolt
+	// gravity and collision response are folded into the starting pose each frame.
+	JoltWorldStep(LevelClock().Delta().AsFloat());
+#endif
     PredictPosition(GetActiveRooms().GetObjectIter(ROOM_OBJECT_LIST_UPDATE), LevelClock());
 	DBSTREAM2( cflow << "Level::update: detecting collisions" << std::endl; )
 	Validate();

@@ -143,6 +143,13 @@ static void RunSelftest()
 }
 
 // ---------------------------------------------------------------------------
+// Forward declarations for the game-source backend (jolt_backend.cc).
+// Resolved at link time; physics_jolt.cc does not include game source headers.
+
+void JoltBackendInit();
+void JoltBackendShutdown();
+
+// ---------------------------------------------------------------------------
 // Public lifecycle functions — called by ScriptRouter ctor/dtor pattern.
 
 void JoltRuntimeInit()
@@ -155,11 +162,14 @@ void JoltRuntimeInit()
     JPH::RegisterTypes();
     std::fprintf(stderr, "jolt: RunSelftest\n");
     RunSelftest();
+    std::fprintf(stderr, "jolt: backend init\n");
+    JoltBackendInit();
     std::fprintf(stderr, "jolt: init complete\n");
 }
 
 void JoltRuntimeShutdown()
 {
+    JoltBackendShutdown();
     JPH::UnregisterTypes();
     delete JPH::Factory::sInstance;
     JPH::Factory::sInstance = nullptr;

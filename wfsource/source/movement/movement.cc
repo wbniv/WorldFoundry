@@ -38,6 +38,9 @@
 #include "movementmanager.hp"
 #include <input/inputdig.hp>
 #include <physics/physical.hp>
+#ifdef PHYSICS_ENGINE_JOLT
+#include <physics/jolt/jolt_backend.hp>
+#endif
 #include <cpplib/libstrm.hp>
 #include <oas/movement.h>
 
@@ -411,6 +414,25 @@ GroundHandler::predictPosition(MovementManager& movementManager, MovementObject&
 	newVelocity += Vector3(Scalar::zero, Scalar::zero, -(movementObject.GetMovementBlockPtr()->GetFallingAcceleration() * deltaT));
 
 	// Apply new velocity to velocity and predicted position
+#ifdef PHYSICS_ENGINE_JOLT
+	{
+		uint32_t charID = actorAttr.JoltCharacterID();
+		if (charID != kJoltInvalidBodyID)
+		{
+			// Hand the WF-computed velocity to CharacterVirtual and let Jolt resolve
+			// movement against the static world geometry.
+			JoltCharacterSetLinVelocity(charID, newVelocity);
+			JoltCharacterUpdate(charID, deltaT.AsFloat());
+			actorAttr.SetPredictedPosition(JoltCharacterGetPosition(charID));
+			actorAttr.SetLinVelocity(JoltCharacterGetLinVelocity(charID));
+			handlerData->wheelVelocity = wheelVelocity;
+			if (newMovementHandler)
+				movementManager.SetMovementHandler(newMovementHandler, movementObject);
+			handlerData->supportingObject = NULL;
+			return;
+		}
+	}
+#endif // PHYSICS_ENGINE_JOLT
 	actorAttr.SetPredictedPosition(actorAttr.Position() +
 			((newVelocity + actorAttr.OldLinVelocity()) * Scalar::half * deltaT));
 
@@ -455,6 +477,19 @@ bool GroundHandler::update(MovementManager& movementManager, MovementObject& mov
 	//if (handlerData->stunnedUntil > theTime)
 	//	handlerData->stunnedUntil = theTime + thisActor->_animManager->GetCycleDuration();
 
+#ifdef PHYSICS_ENGINE_JOLT
+	{
+		const PhysicalAttributes& actorAttr = movementObject.GetPhysicalAttributes();
+		uint32_t charID = actorAttr.JoltCharacterID();
+		if (charID != kJoltInvalidBodyID)
+		{
+			// Use Jolt ground detection instead of WF's supportingObject pointer.
+			if (!JoltCharacterIsOnGround(charID))
+				movementManager.SetMovementHandler(&theAirHandler, movementObject);
+			return true;
+		}
+	}
+#endif // PHYSICS_ENGINE_JOLT
 	if (handlerData->supportingObject == NULL)
 		movementManager.SetMovementHandler(&theAirHandler,movementObject);
 
@@ -463,7 +498,7 @@ bool GroundHandler::update(MovementManager& movementManager, MovementObject& mov
 
 //============================================================================
 
-void 
+void
 GroundHandler::SetStunTime(MovementManager& movementManager,Scalar newTime)
 {
 	MovementHandlerData* handlerData = movementManager.GetMovementHandlerData();
@@ -505,6 +540,24 @@ AirHandler::update(MovementManager& movementManager,  MovementObject& movementOb
 	MovementHandlerData* handlerData = movementManager.GetMovementHandlerData();
 	assert(ValidPtr(handlerData));
 
+#ifdef PHYSICS_ENGINE_JOLT
+	{
+		uint32_t charID = actorAttr.JoltCharacterID();
+		if (charID != kJoltInvalidBodyID)
+		{
+			// Use Jolt's ground contact result from the most recent JoltCharacterUpdate.
+			if (JoltCharacterIsOnGround(charID) && handlerData->jumpDuration <= Scalar::zero)
+			{
+				handlerData->stunnedUntil = Scalar::zero;
+				Vector3 newWheelVelocity = actorAttr.LinVelocity();
+				newWheelVelocity.SetZ(Scalar::zero);
+				handlerData->wheelVelocity = newWheelVelocity;
+				movementManager.SetMovementHandler(&theGroundHandler, movementObject);
+			}
+			return true;
+		}
+	}
+#endif // PHYSICS_ENGINE_JOLT
 	if(handlerData->supportingObject)
 	{
 		handlerData->stunnedUntil = Scalar::zero;
@@ -667,6 +720,20 @@ AirHandler::predictPosition(MovementManager& movementManager, MovementObject& mo
 	newVelocity.SetZ( newVelocity.Z() * vDrag );
 
 	// Apply new velocity to velocity and predicted position
+#ifdef PHYSICS_ENGINE_JOLT
+	{
+		uint32_t charID = actorAttr.JoltCharacterID();
+		if (charID != kJoltInvalidBodyID)
+		{
+			JoltCharacterSetLinVelocity(charID, newVelocity);
+			JoltCharacterUpdate(charID, deltaT.AsFloat());
+			actorAttr.SetPredictedPosition(JoltCharacterGetPosition(charID));
+			actorAttr.SetLinVelocity(JoltCharacterGetLinVelocity(charID));
+			handlerData->supportingObject = NULL;
+			return;
+		}
+	}
+#endif // PHYSICS_ENGINE_JOLT
 	actorAttr.SetPredictedPosition(actorAttr.Position() +
 			((newVelocity + actorAttr.OldLinVelocity()) * Scalar::half * deltaT));
 

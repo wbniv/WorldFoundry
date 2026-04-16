@@ -1,0 +1,25 @@
+// jolt/physical.hpi — Jolt-specific inline implementations for PhysicalAttributes.
+// Included at the bottom of physical.hpi when PHYSICS_ENGINE_JOLT is defined.
+// Replaces wf/physical.hpi for the Jolt build.
+
+#include <physics/jolt/jolt_backend.hp>
+
+// Update() is called at end of each physics frame by the movement system.
+// Commits the predicted position to the position cache and pushes state back
+// into the Jolt body so the next JoltWorldStep() sees the correct initial pose.
+INLINE void
+PhysicalAttributes::Update()
+{
+    SetOldLinVelocity(LinVelocity());
+    SetPosition(PredictedPosition());
+    // Push committed state to Jolt body so it starts the next substep from
+    // the movement-corrected position, not the mid-air Jolt-simulated one.
+    if (_joltBodyID != kJoltInvalidBodyID)
+    {
+        JoltBodySetPosition(_joltBodyID, _position);
+        // Zero velocity so kinematic body doesn't drift during JoltWorldStep.
+        // WF fully controls kinematic positions; Jolt only maintains the
+        // broadphase collision structure.
+        JoltBodySetLinVelocity(_joltBodyID, Vector3::zero);
+    }
+}

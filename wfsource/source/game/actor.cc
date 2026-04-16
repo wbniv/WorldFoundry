@@ -605,6 +605,11 @@ Actor::Actor( const SObjectStartupData* startupData ) :
 		AssertMsg( !GetCommonBlockPtr()->ScriptControlsInput, *this <<" -- No scripts [and therefore no Script Controls Input] on StatPlat's" );
 		AssertMsg( GetCommonBlockPtr()->NumberOfLocalMailboxes == 0, *this << " -- No local mailboxes allowed on StatPlat's" );
 		AssertMsg( GetMovementBlockPtr()->Mobility == MOBILITY_ANCHORED, *this << " -- StatPlat's must be anchored -- Mobility is " << GetMovementBlockPtr()->Mobility );
+#ifdef PHYSICS_ENGINE_JOLT
+		// StatPlats are immovable world geometry — make the Jolt body STATIC so
+		// Jolt can use it for collision queries (CharacterVirtual, ray casts).
+		_physicalAttributes.JoltMakeStatic();
+#endif
 	}
 	else
 	{
@@ -635,6 +640,10 @@ Actor::Actor( const SObjectStartupData* startupData ) :
          // kts this is lame, there should be no connection between movement and animation (and it should be possible for a follow or pathed object to animate)
          _nonStatPlat->_animManager = new (theLevel->GetMemory()) AnimationManagerActual;
          assert(ValidPtr(_nonStatPlat->_animManager));
+#ifdef PHYSICS_ENGINE_JOLT
+         // PHYSICS actors are driven by CharacterVirtual — replaces the kinematic body.
+         _physicalAttributes.JoltMakeCharacter();
+#endif
       }
 
 		// setup the tools

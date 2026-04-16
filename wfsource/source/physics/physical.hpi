@@ -27,6 +27,9 @@
 #include <math/angle.hp>
 #include <oas/levelcon.h>
 #include <math/matrix34.hp>
+#ifdef PHYSICS_ENGINE_JOLT
+#include <physics/jolt/jolt_backend.hp>
+#endif
 
 //==============================================================================
 
@@ -93,7 +96,10 @@ PhysicalAttributes::PhysicalAttributes()
 #endif
 	_hasRunPredictPosition = false;
 	_hasRunUpdate = false;
-
+#ifdef PHYSICS_ENGINE_JOLT
+	_joltBodyID = kJoltInvalidBodyID;
+	_joltCharID = kJoltInvalidBodyID;
+#endif
 }
 
 //==============================================================================
@@ -144,7 +150,7 @@ PhysicalAttributes::PhysicalAttributes(const Vector3& position,
 //==============================================================================
 
 INLINE void
-PhysicalAttributes::Construct(const Vector3& position, const Euler& rotation, const Vector3& min, const Vector3& max, 
+PhysicalAttributes::Construct(const Vector3& position, const Euler& rotation, const Vector3& min, const Vector3& max,
 								Scalar slopeA,
 								Scalar slopeB,
 								Scalar slopeC,
@@ -163,13 +169,66 @@ PhysicalAttributes::Construct(const Vector3& position, const Euler& rotation, co
 #endif
 	_predictedPosition = Position();
 
+#ifdef PHYSICS_ENGINE_JOLT
+	// Destroy any previous Jolt body before creating a new one.
+	if (_joltBodyID != kJoltInvalidBodyID)
+	{
+		JoltBodyDestroy(_joltBodyID);
+		_joltBodyID = kJoltInvalidBodyID;
+	}
+	_joltBodyID = JoltBodyCreate(position, rotation, min, max);
+#endif
 }
+
+//==============================================================================
+
+#ifdef PHYSICS_ENGINE_JOLT
+INLINE void
+PhysicalAttributes::JoltMakeStatic()
+{
+    // Destroy the default KINEMATIC body and replace it with a STATIC one.
+    if (_joltBodyID != kJoltInvalidBodyID)
+    {
+        JoltBodyDestroy(_joltBodyID);
+        _joltBodyID = kJoltInvalidBodyID;
+    }
+    _joltBodyID = JoltBodyCreateStatic(
+        _position, _orientation,
+        _colSpace.UnExpMin(), _colSpace.UnExpMax());
+}
+
+INLINE void
+PhysicalAttributes::JoltMakeCharacter()
+{
+    // Discard the KINEMATIC body — CharacterVirtual replaces it for PHYSICS actors.
+    if (_joltBodyID != kJoltInvalidBodyID)
+    {
+        JoltBodyDestroy(_joltBodyID);
+        _joltBodyID = kJoltInvalidBodyID;
+    }
+    _joltCharID = JoltCharacterCreate(
+        _position, _orientation,
+        _colSpace.UnExpMin(), _colSpace.UnExpMax());
+}
+#endif
 
 //==============================================================================
 
 INLINE
 PhysicalAttributes::~PhysicalAttributes()
 {
+#ifdef PHYSICS_ENGINE_JOLT
+	if (_joltBodyID != kJoltInvalidBodyID)
+	{
+		JoltBodyDestroy(_joltBodyID);
+		_joltBodyID = kJoltInvalidBodyID;
+	}
+	if (_joltCharID != kJoltInvalidBodyID)
+	{
+		JoltCharacterDestroy(_joltCharID);
+		_joltCharID = kJoltInvalidBodyID;
+	}
+#endif
 }
 
 //==============================================================================
@@ -487,6 +546,12 @@ PhysicalAttributes::Max() const
 
 //==============================================================================
 
+#if defined(PHYSICS_ENGINE_JOLT)
+#include "jolt/physical.hpi"
+#elif defined(PHYSICS_ENGINE_WF)
 #include "wf/physical.hpi"
+#else
+#error "PHYSICS_ENGINE_JOLT or PHYSICS_ENGINE_WF must be defined"
+#endif
 
 //==============================================================================

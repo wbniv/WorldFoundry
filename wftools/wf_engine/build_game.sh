@@ -81,7 +81,7 @@ HTTPLIB_DIR="$VENDOR/cpp-httplib-v0.20.0"
 #             reinterpret_cast in movecam.cc. Requires a C++17 toolchain
 #             (already required by the rest of the build).
 # Only one physics backend at a time.
-WF_PHYSICS_ENGINE="${WF_PHYSICS_ENGINE:-legacy}"
+WF_PHYSICS_ENGINE="${WF_PHYSICS_ENGINE:-jolt}"
 case "$WF_PHYSICS_ENGINE" in
     legacy|jolt) ;;
     *) echo "error: WF_PHYSICS_ENGINE must be one of: legacy, jolt (got: '$WF_PHYSICS_ENGINE')" >&2
@@ -483,6 +483,10 @@ if [[ "$WF_PHYSICS_ENGINE" == "jolt" ]]; then
     echo "  CC (stub) physics_jolt.cc"
     g++ "${CXXFLAGS[@]}" -O2 -DNDEBUG -c "$STUB_SRC/physics_jolt.cc" -o "$OUT/stubs__physics_jolt.o"
     OBJS+=("$OUT/stubs__physics_jolt.o")
+    echo "  CC physics/jolt/jolt_backend.cc"
+    g++ "${CXXFLAGS[@]}" -O2 -DNDEBUG -c "$SRC/physics/jolt/jolt_backend.cc" \
+        -o "$OUT/physics__jolt__jolt_backend.o"
+    OBJS+=("$OUT/physics__jolt__jolt_backend.o")
 
     JOLT_BUILD="$OUT/jolt_build"
     JOLT_LIB="$JOLT_BUILD/libJolt.a"

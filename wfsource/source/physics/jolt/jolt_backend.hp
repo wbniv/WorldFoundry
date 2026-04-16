@@ -1,0 +1,78 @@
+// jolt_backend.hp — Jolt Physics world singleton public API.
+//
+// Uses only WF types in all signatures so this header is safe to include
+// from any translation unit that defines PHYSICS_ENGINE_JOLT — no Jolt
+// headers bleed through.
+//
+// All implementations live in jolt_backend.cc.
+
+#pragma once
+#ifdef PHYSICS_ENGINE_JOLT
+
+#include <cstdint>
+#include <math/vector3.hp>
+#include <math/euler.hp>
+
+static constexpr uint32_t kJoltInvalidBodyID = 0xffffffff;
+
+// ---------------------------------------------------------------------------
+// Body lifecycle
+// Create a dynamic (gravity-affected) body with box shape [minPt, maxPt].
+// Returns a handle usable in all other functions.  kJoltInvalidBodyID on error.
+uint32_t JoltBodyCreate(const Vector3& pos, const Euler& rot,
+                        const Vector3& minPt, const Vector3& maxPt);
+
+// Create an immovable body (world geometry, platforms).
+uint32_t JoltBodyCreateStatic(const Vector3& pos, const Euler& rot,
+                               const Vector3& minPt, const Vector3& maxPt);
+
+// Release body; safe to call with kJoltInvalidBodyID (no-op).
+void JoltBodyDestroy(uint32_t handle);
+
+// Upgrade a (default STATIC) body to DYNAMIC so Jolt applies gravity to it.
+// Call from GroundHandler::init for MOBILITY_PHYSICS actors.
+void JoltBodySetDynamic(uint32_t handle);
+
+// ---------------------------------------------------------------------------
+// Cached-read accessors (updated once per JoltWorldStep; no Jolt lock taken).
+const Vector3& JoltBodyGetPosition(uint32_t handle);
+Euler          JoltBodyGetRotation(uint32_t handle);
+const Vector3& JoltBodyGetLinVelocity(uint32_t handle);
+
+// ---------------------------------------------------------------------------
+// Write — immediately applies to Jolt body (teleport / velocity override).
+void JoltBodySetPosition(uint32_t handle, const Vector3& pos);
+void JoltBodySetRotation(uint32_t handle, const Euler& rot);
+void JoltBodySetLinVelocity(uint32_t handle, const Vector3& vel);
+void JoltBodyAddLinVelocity(uint32_t handle, const Vector3& delta);
+
+// ---------------------------------------------------------------------------
+// Per-frame step.  Call once per game frame BEFORE movement prediction.
+// dt is the game's variable delta time in seconds; internally subdivides
+// into fixed 1/60 s substeps (max 4) to protect against spiral-of-death.
+void JoltWorldStep(float dt);
+
+// ---------------------------------------------------------------------------
+// CharacterVirtual — one per MOBILITY_PHYSICS actor (player, physics NPCs).
+// The character casts its box shape against STATIC world geometry each frame
+// and resolves movement without fighting WF's own position control.
+//
+// Workflow per frame:
+//   1. WF movement code computes desired velocity (gravity, input, jump).
+//   2. JoltCharacterSetLinVelocity — hand velocity to the character.
+//   3. JoltCharacterUpdate(dt)    — move and resolve collisions.
+//   4. JoltCharacterGetPosition   — read resolved position → SetPredictedPosition.
+//   5. JoltCharacterIsOnGround    — replaces supportingObject for handler transitions.
+
+uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
+                              const Vector3& minPt, const Vector3& maxPt);
+void JoltCharacterDestroy(uint32_t handle);
+
+const Vector3& JoltCharacterGetPosition(uint32_t handle);
+const Vector3& JoltCharacterGetLinVelocity(uint32_t handle);
+void           JoltCharacterSetLinVelocity(uint32_t handle, const Vector3& vel);
+void           JoltCharacterSetPosition(uint32_t handle, const Vector3& pos);
+void           JoltCharacterUpdate(uint32_t handle, float dt);
+bool           JoltCharacterIsOnGround(uint32_t handle);
+
+#endif // PHYSICS_ENGINE_JOLT

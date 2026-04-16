@@ -32,6 +32,7 @@
 #include <math/euler.hp>
 #include <timer/clock.hp>
 #include <oas/levelcon.h>
+#include <cstdint>
 
 //#define PHYSICAL_INTERNAL_MATRIX
 #define PHYSICAL_INTERNAL_EULER
@@ -117,6 +118,17 @@ public:
     bool HasRunUpdate() const;
     void HasRunUpdate(bool);
 
+#ifdef PHYSICS_ENGINE_JOLT
+    // Recreate the Jolt body as STATIC (immovable world geometry).
+    // Call once, immediately after construction, for MOBILITY_ANCHORED actors.
+    void JoltMakeStatic();
+    // Replace the kinematic body with a CharacterVirtual controller.
+    // Call once, immediately after construction, for MOBILITY_PHYSICS actors.
+    void JoltMakeCharacter();
+    // Returns kJoltInvalidBodyID if this PA has no CharacterVirtual.
+    uint32_t JoltCharacterID() const { return _joltCharID; }
+#endif
+
 #if SW_DBSTREAM >= 1
 	friend std::ostream& operator << ( std::ostream& s, const PhysicalAttributes& pa );
 #endif
@@ -137,6 +149,11 @@ private:
     Matrix34 _matrix;                           // position and rotation matrix
 #else
 #error PHYSICAL_INTERNAL not defined
+#endif
+
+#ifdef PHYSICS_ENGINE_JOLT
+    uint32_t _joltBodyID;  // kinematic/static body handle; kJoltInvalidBodyID for CharacterVirtual actors
+    uint32_t _joltCharID;  // CharacterVirtual handle; kJoltInvalidBodyID unless JoltMakeCharacter() called
 #endif
 
 	Vector3	_predictedPosition;

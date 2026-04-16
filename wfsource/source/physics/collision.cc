@@ -11,6 +11,9 @@
 #include <cpplib/libstrm.hp>
 #include <physics/physical.hp>
 #include <physics/physicalobject.hp>
+#ifdef PHYSICS_ENGINE_JOLT
+#include <physics/jolt/jolt_backend.hp>
+#endif
 
 //==============================================================================
 
@@ -507,10 +510,20 @@ CollideObjectWithList(PhysicalObject& checkObject, BaseObjectIteratorWrapper poI
 
                     if ( ((ci>>16) == CI_PHYSICS) || ((ci & 0xFFFF) == CI_PHYSICS) )
                     {
-                        collisionEventList[collisionEventListLength].object1 = &checkObject;
-                        collisionEventList[collisionEventListLength].object2 = pObject;
-                        collisionEventList[collisionEventListLength++].eventTime = Scalar::zero;
-                        AssertMsg(collisionEventListLength < MAX_COLLISION_EVENTS, "The collision event list is full!");
+#ifdef PHYSICS_ENGINE_JOLT
+                        // CharacterVirtual actors resolve physics collisions through Jolt;
+                        // skip WF's AABB-based physics resolution to avoid double-handling.
+                        bool joltManaged =
+                            (checkObject.GetPhysicalAttributes().JoltCharacterID() != kJoltInvalidBodyID) ||
+                            (pObject->GetPhysicalAttributes().JoltCharacterID() != kJoltInvalidBodyID);
+                        if (!joltManaged)
+#endif
+                        {
+                            collisionEventList[collisionEventListLength].object1 = &checkObject;
+                            collisionEventList[collisionEventListLength].object2 = pObject;
+                            collisionEventList[collisionEventListLength++].eventTime = Scalar::zero;
+                            AssertMsg(collisionEventListLength < MAX_COLLISION_EVENTS, "The collision event list is full!");
+                        }
                     }
                 }
 			}
