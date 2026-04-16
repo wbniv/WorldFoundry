@@ -11,7 +11,6 @@ another.
 
 The WebAssembly engines don't expect WAT to be authored directly. The value of the wasm target is the languages that compile to `.wasm`: AssemblyScript, Rust, C, C++, Zig, Go (TinyGo), and any other language with a wasm backend. Scripts in those languages compile to `.wasm` offline, get base64-wrapped, and drop into an iff text chunk unchanged.
 
-Dispatch is currently a leading-byte sigil sniff; this is moving to an explicit `ScriptLanguage` OAD field — see [the plan](plans/2026-04-16-script-language-oad-field.md).
 
 ## Integration surface
 
@@ -169,11 +168,6 @@ end)
   pair (and the same constant globals) so the level format stays one format
   regardless of script language.
 
-- **Language dispatch is moving to OAD.** Sigil sniffing is being replaced
-  by an explicit `ScriptLanguage` field in the OAD (a dropmenu authored in
-  Blender). `RunScript` will dispatch via a function-pointer table indexed
-  by that field; the runtime will never guess. See
-  [`docs/plans/2026-04-16-script-language-oad-field.md`](plans/2026-04-16-script-language-oad-field.md).
 
 ## Files
 
