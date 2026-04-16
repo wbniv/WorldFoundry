@@ -53,7 +53,7 @@ wasm3 without Lua, JerryScript + wasm3 with no Lua or Fennel — is a
 supported build configuration.
 
 **All engines are currently enabled in the dev build.** For a shipping
-binary, compile in only the language your scripts actually use — each
+binary, compile in only the language(s) your scripts actually use — each
 engine adds 5–978 KB to `.text`. A game scripted entirely in Lua needs
 only `WF_ENABLE_LUA=1`; a Forth-scripted game needs only
 `WF_FORTH_ENGINE=zforth`. The scriptless build (no flags set) is also
