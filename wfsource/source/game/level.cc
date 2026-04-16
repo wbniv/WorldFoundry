@@ -603,6 +603,11 @@ Level::Level
 
 	DBSTREAM1( cprogress << "Done Loading Level" << std::endl; )
 	DBSTREAM1( casset << *_theAssetManager << std::endl; )
+#ifdef PHYSICS_ENGINE_JOLT
+	// All StatPlat static bodies are now registered. Build the broadphase tree
+	// so CharacterVirtual queries can find them.
+	JoltOptimizeBroadPhase();
+#endif
 }
 
 //==============================================================================

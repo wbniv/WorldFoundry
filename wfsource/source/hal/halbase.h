@@ -69,19 +69,12 @@
 #define TEST_ITEM	1
 #define TEST_MEMPOOL	1
 #define TEST_DISKFILE	1
-#if defined( DO_MULTITASKING )
-#	define TEST_TASKER	1
-//#	define TEST_TIMER	1
-#	define TEST_TIMER	0
-#endif
 #else
 #define TEST_LIST	0
 #define TEST_JOYSTICK	0
-#define TEST_TASKER	0
 #define TEST_SIGNAL	0
 #define TEST_MESSAGE	0
 #define TEST_GENERAL	0
-#define TEST_TIMER	0
 #define TEST_ITEM	0
 #define TEST_MEMPOOL	0
 #define TEST_DISKFILE	0

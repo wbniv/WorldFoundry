@@ -47,6 +47,11 @@ void JoltBodySetLinVelocity(uint32_t handle, const Vector3& vel);
 void JoltBodyAddLinVelocity(uint32_t handle, const Vector3& delta);
 
 // ---------------------------------------------------------------------------
+// Call once after all level actors have been constructed (end of Level::Level).
+// Builds Jolt's static broadphase tree so CharacterVirtual queries can find static bodies.
+void JoltOptimizeBroadPhase();
+
+// ---------------------------------------------------------------------------
 // Per-frame step.  Call once per game frame BEFORE movement prediction.
 // dt is the game's variable delta time in seconds; internally subdivides
 // into fixed 1/60 s substeps (max 4) to protect against spiral-of-death.

@@ -127,6 +127,10 @@ public:
     void JoltMakeCharacter();
     // Returns kJoltInvalidBodyID if this PA has no CharacterVirtual.
     uint32_t JoltCharacterID() const { return _joltCharID; }
+    // Write the authoritative Jolt-resolved position back into _position and
+    // _predictedPosition without exercising WF's swept-AABB expansion/validate
+    // machinery. Use from MovementHandlers that already ran a Jolt step.
+    void JoltSyncFromCharacter(const Vector3& newPos);
 #endif
 
 #if SW_DBSTREAM >= 1

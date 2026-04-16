@@ -17,21 +17,11 @@ void
 GeneralTest(void);
 #endif
 
-#if TEST_TIMER
-void
-TimerTest(void);
-#endif
-
 #if DO_TEST_CODE
 #if TEST_ITEM
 void
 ItemTest(void);
 #endif
-#endif
-
-#if TEST_TASKER
-void
-TaskerTest(void);
 #endif
 
 #if TEST_DISKFILE
@@ -64,15 +54,6 @@ TestHAL(void)
 	ItemTest();
 #endif
 #endif
-#if TEST_TASKER
-	printf("HAL Testing Tasker\n");
-	TaskerTest();
-#endif
-#if TEST_TIMER
-	printf("HAL Testing Timer\n");
-	TimerTest();
-#endif
-
 #if TEST_DISKFILE
 	printf("HAL Testing DiskFile\n");
 	DiskFileTest();

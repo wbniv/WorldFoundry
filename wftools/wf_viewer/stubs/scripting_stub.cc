@@ -436,7 +436,6 @@ public:
 ScriptRouter::ScriptRouter(MailboxesManager& mgr)
     : ScriptInterpreter(mgr)
 {
-    JoltRuntimeInit();
 #ifdef WF_WITH_FORTH
     forth_engine::Init(mgr);
 #endif
@@ -479,7 +478,6 @@ ScriptRouter::~ScriptRouter()
 #ifdef WF_WITH_FORTH
     forth_engine::Shutdown();
 #endif
-    JoltRuntimeShutdown();
 }
 
 Scalar ScriptRouter::RunScript(const void* script, int objectIndex)

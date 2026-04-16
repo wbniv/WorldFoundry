@@ -141,9 +141,16 @@ PhysicalAttributes::PhysicalAttributes(const Vector3& position,
                       Scalar slopeA,
                       Scalar slopeB,
                       Scalar slopeC,
-                      Scalar slopeD) 
+                      Scalar slopeD)
 	: _predictedPosition(Vector3::zero), linVelocity(Vector3::zero), oldLinVelocity(Vector3::zero)
 {
+#ifdef PHYSICS_ENGINE_JOLT
+   // Construct() will JoltBodyDestroy(_joltBodyID) if it isn't the sentinel,
+   // so the ID must be initialized *before* that call. (The default ctor
+   // handles this; the parameterized path has to do it explicitly.)
+   _joltBodyID = kJoltInvalidBodyID;
+   _joltCharID = kJoltInvalidBodyID;
+#endif
    Construct(position,euler,minPoint,maxPoint,slopeA,slopeB,slopeC,slopeD);
 }
 
@@ -170,13 +177,15 @@ PhysicalAttributes::Construct(const Vector3& position, const Euler& rotation, co
 	_predictedPosition = Position();
 
 #ifdef PHYSICS_ENGINE_JOLT
-	// Destroy any previous Jolt body before creating a new one.
-	if (_joltBodyID != kJoltInvalidBodyID)
-	{
-		JoltBodyDestroy(_joltBodyID);
-		_joltBodyID = kJoltInvalidBodyID;
-	}
-	_joltBodyID = JoltBodyCreate(position, rotation, min, max);
+	// Construct() creates NO Jolt body. JoltMakeStatic() (for StatPlats)
+	// and JoltMakeCharacter() (for MOBILITY_PHYSICS actors) are the only
+	// entry points that create Jolt objects. Non-participating actors
+	// (lights, cameras, markers, triggers, tools, shadows) carry no Jolt
+	// body at all — they existed pre-Jolt too, and WF's gameplay code
+	// doesn't touch Jolt for them.
+	// The defensive destroy-before-create guards in JoltMakeStatic /
+	// JoltMakeCharacter are now no-ops on the normal path but kept in case
+	// Construct() is ever called twice on the same instance.
 #endif
 }
 

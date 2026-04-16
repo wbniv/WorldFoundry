@@ -11,6 +11,7 @@
 #include <vector>
 #include <cstdio>
 #include <cassert>
+#include <limits>
 
 // Jolt headers — must be included after the WF headers to avoid redefinition
 // issues with standard types pulled in by pigsys.
@@ -89,10 +90,10 @@ public:
 
 struct BodyEntry
 {
-    JPH::BodyID joltID;       // The Jolt-assigned body identifier
-    Vector3     posCache;     // Refreshed after each JoltWorldStep
-    Vector3     velCache;
-    Euler       rotCache;
+    JPH::BodyID joltID;                     // The Jolt-assigned body identifier
+    Vector3     posCache = Vector3::zero;   // Refreshed after each JoltWorldStep
+    Vector3     velCache = Vector3::zero;
+    Euler       rotCache = Euler::zero;
     bool        occupied = false;
 };
 
@@ -153,8 +154,13 @@ static JPH::BodyID CreateJoltBodyImpl(const Vector3& pos, const Euler& rot,
     );
 
     // Body position = actor position + local box centre offset.
+    // Rotation: WF's ColSpace is world-axis-aligned (ColBox stores world-space
+    // min/max, never rotated), so the authored actor rotation must NOT be
+    // applied to the Jolt shape — doing so would produce a larger, rotated
+    // world AABB that doesn't match WF's collision geometry. Pass identity.
+    (void)rot;
     JPH::RVec3 bodyPos = ToJph(pos + ctr);
-    JPH::Quat  bodyRot = ToJph(rot);
+    JPH::Quat  bodyRot = JPH::Quat::sIdentity();
 
     JPH::BodyCreationSettings cfg(
         new JPH::BoxShape(halfExt),
@@ -164,7 +170,16 @@ static JPH::BodyID CreateJoltBodyImpl(const Vector3& pos, const Euler& rot,
     JPH::EActivation act = (motionType == JPH::EMotionType::Static)
                          ? JPH::EActivation::DontActivate
                          : JPH::EActivation::Activate;
-    return gBodyInterface->CreateAndAddBody(cfg, act);
+    JPH::BodyID id = gBodyInterface->CreateAndAddBody(cfg, act);
+    const char* mtName = (motionType == JPH::EMotionType::Static)  ? "STATIC"
+                       : (motionType == JPH::EMotionType::Kinematic) ? "KINEMATIC"
+                       : "DYNAMIC";
+    std::fprintf(stderr, "jolt: body %s pos=(%.2f,%.2f,%.2f) half=(%.2f,%.2f,%.2f) id=%u\n",
+        mtName,
+        bodyPos.GetX(), bodyPos.GetY(), bodyPos.GetZ(),
+        halfExt.GetX(), halfExt.GetY(), halfExt.GetZ(),
+        id.GetIndexAndSequenceNumber());
+    return id;
 }
 
 static JPH::BodyID CreateJoltBody(const Vector3& pos, const Euler& rot,
@@ -326,8 +341,14 @@ void JoltWorldStep(float dt)
 struct CharEntry
 {
     JPH::Ref<JPH::CharacterVirtual> character;
-    Vector3 posCache;
-    Vector3 velCache;
+    Vector3 posCache = Vector3::zero;   // actor "feet" position (WF convention)
+    Vector3 velCache = Vector3::zero;
+    Vector3 ctr      = Vector3::zero;   // colspace centre offset: Jolt pos = actor pos + ctr
+    // Statics that enclose the character at spawn — "zone volume" StatPlats
+    // wrapping the play area, not walkable geometry. IgnoreMultipleBodiesFilter
+    // is non-copyable (CharEntry goes in a vector), so we hold the list and
+    // construct a filter per-update.
+    std::vector<JPH::BodyID> excludeBodies;
     bool    occupied = false;
 };
 
@@ -374,15 +395,66 @@ uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
     settings.mMaxSlopeAngle  = JPH::DegreesToRadians(45.0f);
     settings.mShape          = new JPH::BoxShape(halfExt);
 
+    // Colspace centre in local space — same offset CreateJoltBodyImpl uses.
+    // Jolt character position = actor_feet_pos + ctr.
+    Vector3 ctr = minPt + half;
+    JPH::RVec3 charPos = ToJph(pos + ctr);
+
     uint32_t handle = AllocCharEntry();
     CharEntry& e = gCharacters[handle];
-    e.character = new JPH::CharacterVirtual(&settings, ToJph(pos), ToJph(rot),
+    // WF's ColSpace is world-axis-aligned; do not apply the authored actor
+    // rotation to the Jolt collision shape (see CreateJoltBodyImpl for the
+    // same reasoning). The visual orientation is handled by WF separately.
+    (void)rot;
+    e.character = new JPH::CharacterVirtual(&settings, charPos, JPH::Quat::sIdentity(),
                                              0, gPhysicsSystem);
     e.posCache  = pos;
     e.velCache  = Vector3::zero;
+    e.ctr       = ctr;
     e.occupied  = true;
-    std::fprintf(stderr, "jolt: character %u created at (%.2f, %.2f, %.2f)\n",
-                 handle, pos.X().AsFloat(), pos.Y().AsFloat(), pos.Z().AsFloat());
+    std::fprintf(stderr, "jolt: character %u created at (%.2f, %.2f, %.2f) ctr=(%.2f,%.2f,%.2f)\n",
+                 handle, pos.X().AsFloat(), pos.Y().AsFloat(), pos.Z().AsFloat(),
+                 ctr.X().AsFloat(), ctr.Y().AsFloat(), ctr.Z().AsFloat());
+
+    // Exclude "zone volume" StatPlats from this character's collision. WF
+    // levels sometimes wrap the play area in a large box StatPlat that's
+    // meant as a region marker, not as walkable geometry. Legacy WF's
+    // swept-AABB collision resolved these benignly (pre-move overlap +
+    // collision event with the real floor), but Jolt's CharacterVirtual
+    // penetration recovery would pop the character up and out of the zone,
+    // placing them above the real floor.
+    //
+    // A static that fully encloses the character's spawn AABB can't be a
+    // floor or wall for this character — the character is inside the box
+    // with clearance on every side. Mark those bodies as ignored for all
+    // future character queries; Jolt will then only collide the character
+    // with actual floors/walls, and normal penetration recovery + stick-
+    // to-floor place the character on the nearest real surface.
+    {
+        const float charMinX = charPos.GetX() - halfExt.GetX();
+        const float charMaxX = charPos.GetX() + halfExt.GetX();
+        const float charMinY = charPos.GetY() - halfExt.GetY();
+        const float charMaxY = charPos.GetY() + halfExt.GetY();
+        const float charMinZ = charPos.GetZ() - halfExt.GetZ();
+        const float charMaxZ = charPos.GetZ() + halfExt.GetZ();
+        for (const BodyEntry& be : gBodies)
+        {
+            if (!be.occupied) continue;
+            if (gBodyInterface->GetMotionType(be.joltID) != JPH::EMotionType::Static)
+                continue;
+            JPH::AABox aabb = gBodyInterface->GetTransformedShape(be.joltID).GetWorldSpaceBounds();
+            JPH::Vec3 mn = aabb.mMin, mx = aabb.mMax;
+            if (mn.GetX() <= charMinX && mx.GetX() >= charMaxX &&
+                mn.GetY() <= charMinY && mx.GetY() >= charMaxY &&
+                mn.GetZ() <= charMinZ && mx.GetZ() >= charMaxZ)
+            {
+                e.excludeBodies.push_back(be.joltID);
+                std::fprintf(stderr, "jolt: character %u ignoring zone body id=%u\n",
+                             handle, be.joltID.GetIndexAndSequenceNumber());
+            }
+        }
+    }
+
     return handle;
 }
 
@@ -418,7 +490,7 @@ void JoltCharacterSetPosition(uint32_t handle, const Vector3& pos)
     if (handle >= (uint32_t)gCharacters.size() || !gCharacters[handle].occupied) return;
     CharEntry& e = gCharacters[handle];
     e.posCache = pos;
-    e.character->SetPosition(ToJph(pos));
+    e.character->SetPosition(ToJph(pos + e.ctr));
 }
 
 void JoltCharacterUpdate(uint32_t handle, float dt)
@@ -436,18 +508,54 @@ void JoltCharacterUpdate(uint32_t handle, float dt)
     upd.mStickToFloorStepDown = JPH::Vec3(0.0f, 0.0f, -0.5f);
     upd.mWalkStairsStepUp     = JPH::Vec3(0.0f, 0.0f,  0.4f);
 
-    JPH::BodyFilter  bodyFilter;
     JPH::ShapeFilter shapeFilter;
+
+    JPH::IgnoreMultipleBodiesFilter bodyFilter;
+    if (!e.excludeBodies.empty())
+    {
+        bodyFilter.Reserve((uint)e.excludeBodies.size());
+        for (JPH::BodyID id : e.excludeBodies) bodyFilter.IgnoreBody(id);
+    }
 
     e.character->ExtendedUpdate(dt, gravity, upd,
         gCharBPFilter, gCharObjFilter,
         bodyFilter, shapeFilter,
         *gTempAllocator);
 
-    // Refresh caches from the resolved state.
+    // Refresh caches: convert Jolt centre position back to WF actor feet position.
     JPH::RVec3 p = e.character->GetPosition();
-    e.posCache = FromJph(JPH::Vec3(p));
+    Vector3 newPos = FromJph(JPH::Vec3(p)) - e.ctr;
     e.velCache = FromJph(e.character->GetLinearVelocity());
+
+    // When grounded, clamp vel_z to 0. WF's GroundHandler unconditionally
+    // adds (−gravity·dt) to newVelocity every frame; stick-to-floor holds
+    // position fixed but velocity has nowhere to go, so it accumulates
+    // unboundedly and the first time the character leaves the ground they
+    // plummet at terminal absurdity. Zeroing on contact matches legacy
+    // WF's behavior (collision response zeroed vel_z on landing).
+    if (e.character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround)
+    {
+        if (e.velCache.Z() < Scalar::zero)
+            e.velCache.SetZ(Scalar::zero);
+    }
+
+    // Trace first 120 frames so we can see whether the character ever touches the floor.
+    static int sFrameCount = 0;
+    if (sFrameCount < 120) {
+        const char* groundStr = "AIR";
+        if (e.character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround)
+            groundStr = "GROUND";
+        else if (e.character->GetGroundState() == JPH::CharacterBase::EGroundState::OnSteepGround)
+            groundStr = "STEEP";
+        std::fprintf(stderr, "jolt: char f%03d jolt_ctr=(%.3f,%.3f,%.3f) feet=(%.3f,%.3f,%.3f) vel_z=%.3f %s\n",
+            sFrameCount,
+            p.GetX(), p.GetY(), p.GetZ(),
+            newPos.X().AsFloat(), newPos.Y().AsFloat(), newPos.Z().AsFloat(),
+            e.velCache.Z().AsFloat(),
+            groundStr);
+        ++sFrameCount;
+    }
+    e.posCache = newPos;
 }
 
 bool JoltCharacterIsOnGround(uint32_t handle)
@@ -461,10 +569,25 @@ bool JoltCharacterIsOnGround(uint32_t handle)
 // Init / shutdown — called by JoltRuntimeInit / JoltRuntimeShutdown (physics_jolt.cc)
 // These are called from the existing lifecycle in scripting_stub.cc.
 
+void JoltOptimizeBroadPhase()
+{
+    if (!gPhysicsSystem) return;
+    gPhysicsSystem->OptimizeBroadPhase();
+    std::fprintf(stderr, "jolt: OptimizeBroadPhase done (%zu static bodies)\n",
+        []{
+            size_t n = 0;
+            for (const BodyEntry& e : gBodies)
+                if (e.occupied) ++n;
+            return n;
+        }());
+}
+
 void JoltBackendInit()
 {
-    // 2 MB temp allocator; 1024 physics bodies; large-enough body pairs / constraints.
-    gTempAllocator = new JPH::TempAllocatorImpl(2 * 1024 * 1024);
+    // 10 MB temp allocator (Jolt's recommended default); 1024 physics bodies;
+    // large-enough body pairs / constraints. ContactConstraintManager grows
+    // with body count + step substeps; 2 MB was not enough for snowgoons.
+    gTempAllocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
     gJobSystem     = new JPH::JobSystemSingleThreaded(JPH::cMaxPhysicsJobs);
     gPhysicsSystem = new JPH::PhysicsSystem();
     gPhysicsSystem->Init(1024, 0, 4096, 4096,

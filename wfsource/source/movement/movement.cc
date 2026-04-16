@@ -423,7 +423,7 @@ GroundHandler::predictPosition(MovementManager& movementManager, MovementObject&
 			// movement against the static world geometry.
 			JoltCharacterSetLinVelocity(charID, newVelocity);
 			JoltCharacterUpdate(charID, deltaT.AsFloat());
-			actorAttr.SetPredictedPosition(JoltCharacterGetPosition(charID));
+			actorAttr.JoltSyncFromCharacter(JoltCharacterGetPosition(charID));
 			actorAttr.SetLinVelocity(JoltCharacterGetLinVelocity(charID));
 			handlerData->wheelVelocity = wheelVelocity;
 			if (newMovementHandler)
@@ -727,7 +727,7 @@ AirHandler::predictPosition(MovementManager& movementManager, MovementObject& mo
 		{
 			JoltCharacterSetLinVelocity(charID, newVelocity);
 			JoltCharacterUpdate(charID, deltaT.AsFloat());
-			actorAttr.SetPredictedPosition(JoltCharacterGetPosition(charID));
+			actorAttr.JoltSyncFromCharacter(JoltCharacterGetPosition(charID));
 			actorAttr.SetLinVelocity(JoltCharacterGetLinVelocity(charID));
 			handlerData->supportingObject = NULL;
 			return;

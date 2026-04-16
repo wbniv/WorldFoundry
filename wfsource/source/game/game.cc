@@ -30,6 +30,7 @@
 #include "level.hp"
 #include "game.hp"
 #include "rest_api.hp"
+#include "physics_jolt.hp"
 #include "oas/matte.ht"
 #include "gamestrm.hp"
 #include "camera.hp"
@@ -58,6 +59,7 @@ WFGame::WFGame( const int nStartingLevel )
 	_desiredLevelNum( 0 )		// default to first level in TOC; overridden by -l flag or shell script
 {
 	DBSTREAM1( cprogress << "WFGame::WFGame" << std::endl; )
+	JoltRuntimeInit();
 
 	assert(ValidPtr(_msgPortMemPool));
 
@@ -114,6 +116,7 @@ WFGame::~WFGame()
 	MEMORY_DELETE(HALLmalloc,_viewPort,ViewPort);
 	MEMORY_DELETE(HALLmalloc,_videoMemory,VideoMemory);
 	MEMORY_DELETE(HALLmalloc,_display,Display);
+	JoltRuntimeShutdown();
 	DBSTREAM1( cprogress << "game destructor finished" << std::endl; )
 }
 
