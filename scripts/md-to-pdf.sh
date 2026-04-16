@@ -164,7 +164,7 @@ def flush_para():
         para_lines = []
 
 def parse_table_row(line):
-    # Split on | but respect backtick code spans (| inside them is literal)
+    # Split on | but respect backtick code spans and <pre> blocks (| inside them is literal)
     # Handles multi-backtick spans like \`\` \` \`\` (double-backtick wrapping a literal backtick)
     s = line.strip().strip('|')
     cells = []
@@ -187,6 +187,18 @@ def parse_table_row(line):
                 current.append(ticks)
                 i = close_idx + tick_len
             # else: no closing ticks found, just continue
+        elif ch == '<' and s[i:i+4] == '<pre':
+            # Find the end of the <pre> tag then the closing </pre>
+            tag_end = s.find('>', i)
+            if tag_end != -1:
+                close_idx = s.find('</pre>', tag_end)
+                if close_idx != -1:
+                    end = close_idx + len('</pre>')
+                    current.append(s[i:end])
+                    i = end
+                    continue
+            current.append(ch)
+            i += 1
         elif ch == '|':
             cells.append(''.join(current).strip())
             current = []
