@@ -102,6 +102,7 @@ CXXFLAGS=(
     -DDO_IOSTREAMS=1 -DSW_DBSTREAM=1 -DDEBUG=1 -DDEBUG_VARIABLES=1
     -DDO_VALIDATION=0 -DDO_TEST_CODE=0 -DDO_DEBUG_FILE_SYSTEM=0
     '-D__GAME__="wf_game"' "-DERR_DEBUG(x)="
+    -DWF_ENABLE_LUA
     -I"$SRC" -I"$SRC/game" -I"$STUBS" -I"$STUB_SRC" -I"$LUA_DIR/src"
 )
 
@@ -117,14 +118,14 @@ if [[ "$WF_ENABLE_FENNEL" == "1" ]]; then
 fi
 
 case "$WF_JS_ENGINE" in
-    quickjs)     CXXFLAGS+=(-DWF_JS_ENGINE_QUICKJS -I"$QJS_DIR") ;;
-    jerryscript) CXXFLAGS+=(-DWF_JS_ENGINE_JERRYSCRIPT -I"$JRY_DIR/jerry-core/include") ;;
+    quickjs)     CXXFLAGS+=(-DWF_WITH_JS -DWF_JS_ENGINE_QUICKJS -I"$QJS_DIR") ;;
+    jerryscript) CXXFLAGS+=(-DWF_WITH_JS -DWF_JS_ENGINE_JERRYSCRIPT -I"$JRY_DIR/jerry-core/include") ;;
     none)        : ;;
 esac
 
 case "$WF_WASM_ENGINE" in
-    wasm3) CXXFLAGS+=(-DWF_WASM_ENGINE_WASM3 -I"$WASM3_DIR/source") ;;
-    wamr)  CXXFLAGS+=(-DWF_WASM_ENGINE_WAMR  -I"$WAMR_DIR/core/iwasm/include") ;;
+    wasm3) CXXFLAGS+=(-DWF_WITH_WASM -DWF_WASM_ENGINE_WASM3 -I"$WASM3_DIR/source") ;;
+    wamr)  CXXFLAGS+=(-DWF_WITH_WASM -DWF_WASM_ENGINE_WAMR  -I"$WAMR_DIR/core/iwasm/include") ;;
     none)  : ;;
 esac
 
@@ -133,12 +134,12 @@ if [[ "$WF_ENABLE_WREN" == "1" ]]; then
 fi
 
 case "$WF_FORTH_ENGINE" in
-    zforth)   CXXFLAGS+=(-DWF_FORTH_ENGINE_ZFORTH   -I"$STUB_SRC" -I"$ZFORTH_DIR/src/zforth") ;;
-    ficl)     CXXFLAGS+=(-DWF_FORTH_ENGINE_FICL) ;;
-    atlast)   CXXFLAGS+=(-DWF_FORTH_ENGINE_ATLAST) ;;
-    embed)    CXXFLAGS+=(-DWF_FORTH_ENGINE_EMBED) ;;
-    libforth) CXXFLAGS+=(-DWF_FORTH_ENGINE_LIBFORTH) ;;
-    pforth)   CXXFLAGS+=(-DWF_FORTH_ENGINE_PFORTH) ;;
+    zforth)   CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_ZFORTH   -I"$STUB_SRC" -I"$ZFORTH_DIR/src/zforth") ;;
+    ficl)     CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_FICL) ;;
+    atlast)   CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_ATLAST) ;;
+    embed)    CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_EMBED) ;;
+    libforth) CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_LIBFORTH) ;;
+    pforth)   CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_PFORTH) ;;
     none)     : ;;
 esac
 
