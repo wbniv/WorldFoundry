@@ -23,6 +23,7 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
+| 2026-04-16 | [Context](docs/plans/2026-04-16-engine-directory-reorganization.md) | **Planned** | `wftools/wf_engine/` is the actual game engine executable — not a dev tool. It should not live alongside `iffcomp`, `iffdump`, and friends. Similarly, `wftools/vendor/` contains ~145 MB of … |
 | 2026-04-16 | [Plan: Blender ↔ Level Round-Trip](docs/plans/2026-04-16-blender-level-roundtrip.md) | **Planned** | **Branch:** 2026-first-working-gap |
 | 2026-04-16 | [ScriptLanguage OAD field](docs/plans/2026-04-16-script-language-oad-field.md) | **Complete** | `int32 ScriptLanguage` OAD field (dropmenu). `common.oad` rebuilt. `EvalScript`/`RunScript` thread language param. `ScriptRouter` dispatches via `kDispatch[6]` function-pointer table. Blender plugin has enum dropdown + autodetect operator. |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Partial** | Batches 1–7 complete (−43.7% LOC). Batch 6 (`#if 0` sweep) done. Batch 7 (PSX/Win artifacts, OpusMake, platform guards) done. Batch 8 (Jolt physics replacement) in progress. |
@@ -35,7 +36,7 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 | 2026-04-14 | [Wren scripting engine](docs/plans/2026-04-14-wren-scripting-engine.md) | **Complete** | All phases complete: vendor, plug, dispatch, build, docs, patcher. Smoke-tested 2026-04-16 (GROUND, no crashes). |
 | 2026-04-14 | [WebAssembly (wasm3)](docs/plans/2026-04-14-wasm3-scripting-engine.md) | **Complete** | Landed 2026-04-14. Sigil `#b64\n`, dispatch in `ScriptRouter`, snowgoons AssemblyScript scripts. Renamed to `wasm3_engine` namespace 2026-04-15. |
 | 2026-04-14 | [Fennel on Lua](docs/plans/2026-04-14-fennel-on-lua.md) | **Complete** | Landed 2026-04-14. `;` sigil, sub-dispatch inside `lua_engine`, vendored Fennel 1.6.1, minifier, codegen, snowgoons Fennel scripts. |
-| 2026-04-14 | [Vendor Lua 5.4](docs/plans/2026-04-14-vendor-lua.md) | **Complete** | Landed 2026-04-14. Lua 5.4.8 in `wftools/vendor/lua-5.4.8/`, compiled directly from source, no system `liblua5.4` dependency. |
+| 2026-04-14 | [Vendor Lua 5.4](docs/plans/2026-04-14-vendor-lua.md) | **Complete** | Landed 2026-04-14. Lua 5.4.8 in `engine/vendor/lua-5.4.8/`, compiled directly from source, no system `liblua5.4` dependency. |
 | 2026-04-13 | [Lua interpreter spike](docs/plans/2026-04-13-lua-interpreter-spike.md) | **Complete** | Landed 2026-04-13; refactored 2026-04-15 to `lua_engine` namespace in `ScriptRouter`. Snowgoons player + director ported to Lua; player moves, cameras cut. |
 
 ---
@@ -123,4 +124,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 09:22** — [`docs/plans/2026-04-16-script-language-oad-field.md`](docs/plans/2026-04-16-script-language-oad-field.md): Plan: encode scripting language in OAS/OAD; drop runtime sigil detection
+**2026-04-16 09:33** — [`docs/plans/2026-04-16-engine-directory-reorganization.md`](docs/plans/2026-04-16-engine-directory-reorganization.md): Context
