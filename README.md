@@ -112,7 +112,7 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 - **`eval/` (120 LOC)** — tool-side callers (`wftools/prep`, `wftools/iff2lvl`) need porting to Blender plugin first.
 
 ### Content pipeline
-- **Blender → `cd.iff` automation** — no automated `.lev` → `.iff` path from Blender yet; currently requires manual `iffcomp` invocation.
+- **Blender → `cd.iff` pipeline** — `levcomp-rs` compiles `.lev.bin` → `.lvl`; validated via LVL-swap into existing snowgoons.iff. Remaining: asset ID packing, mesh bbox extension, real path/channel extraction, end-to-end automation script.
 - **iffcomp: Rust is primary** — Decision: tools in Rust. Three implementations exist (C++ modernized oracle, Go, Rust); all pass `all_features.iff.txt`. Rust port (`iffcomp-rs/`) is the going-forward implementation. C++ kept as byte-exact oracle; Go port (`iffcomp-go/`) is superseded.
 
 ### Larger / deferred work
