@@ -67,13 +67,50 @@ Implemented per `docs/plans/2026-04-16-script-language-oad-field.md`. All five s
 4. Added `WF_OT_detect_script_language` operator to Blender addon (`operators.py`); panel renders "Detect from script text" button below the ScriptLanguage grid (`panels.py`)
 5. `wf_game` builds and launches cleanly with all changes
 
-## Gap 4 — No level compiler (the session-defining work item)
+## Gap 4 — Level compiler (in progress — Phase 1 landed)
 
-There is no tool yet for `.lev` → binary level `.iff`. This is the only path needed to complete the round-trip to the running game:
+The full build pipeline is several tools chained together:
 
 ```
-.lev  →  levcomp-rs  →  level binary .iff  →  cd.iff packing  →  wf_game
+.lev (text IFF)  --[iffcomp-rs]-->  .lev.bin (binary IFF)
+  --[levcomp-rs]-->  .lvl (flat _LevelOnDisk binary)
+  --[prep + iffcomp-rs with iff.prp template]-->  .iff (LVAS-wrapped)
+  --[update cd.iff.txt and rebuild]-->  cd.iff  →  wf_game
 ```
+
+`levcomp-rs` is the Rust port of C++ `iff2lvl` — it reads `.lev.bin` and an
+`objects.lc` class-index file, then writes a flat binary `.lvl` matching the
+`_LevelOnDisk` layout the runtime reads via `GetCommonBlockPtr()`.
+
+### Phase 1 (landed)
+
+- `wftools/levcomp-rs` crate exists; builds clean
+- Parses `.lev.bin` via `wf_iff::read_chunks` (proper IFF walk, no hardcoded offsets)
+- Parses `objects.lc` (NullObject at index 0, real classes follow)
+- Writes `_LevelOnDisk` header (52 bytes) + object offset array + `_ObjectOnDisk` records
+- `_ObjectOnDisk` is **68 bytes** with natural alignment (2-byte pad after `type`, 1-byte pad after rotation `order`) — verified byte-for-byte against the LVL chunk extracted from `snowgoons.iff`
+- Rotation units: `.lev` stores fixed32 radians; flat binary stores low 16 bits of `fixed32(radians / 2π)` (matches `iff2lvl` / `WF_FLOAT_TO_SCALAR`)
+- Scale default: fixed32 1.0 (= 0x10000); NULL\_Object at index 0 gets scale=0 + unit-cube bbox (matches `iff2lvl` QLevel ctor)
+- Rotation order byte: 0xFE (iff2lvl Euler default)
+- Also fixed a pre-existing layout bug in `wftools/lvldump-rs` (it had 65-byte packed header; real layout is 68 bytes aligned)
+- Paths/channels/rooms/common block: sections present but empty (MVP accepts loss of runtime features)
+- Parity on snowgoons: 29/37 object headers match bytewise; remaining 8 differ in bbox (iff2lvl extends bboxes using mesh data — Phase 2) and 2 differ in rotation (Phase 2 investigation)
+
+### Phase 2 (not started)
+
+1. **OAD field serialization** — for each OBJ, walk its I32/FX32/STR/XDAT sub-chunks and emit the binary OAD data block after each `_ObjectOnDisk` header.  Requires loading `.oad` files for every class and matching sub-chunks to schema fields.
+2. **Paths and channels** — animated objects reference a pathIndex; paths contain 6 channel indices for position and rotation curves.  Channels hold keyframe arrays.
+3. **Rooms** — port `iff2lvl::SortIntoRooms()`: objects are assigned to rooms based on bbox-vs-room-bbox containment.  Room records hold the list of contained object indices plus adjacency info.
+4. **Common block** — XDATA scripts, object reference lists, and contextual animation lists get deduplicated into the level's common area; each OAD field that references common data stores an offset into it.
+5. **Mesh bbox extension** — read mesh `.iff` files referenced by each object and extend its bbox to enclose the mesh (explains the 8 bbox mismatches in snowgoons).
+
+### Phase 3 — LVAS wrapping (no new code needed)
+
+After `levcomp-rs` produces a flat `.lvl`, the final `.iff` is built by running
+`iffcomp-rs` with the `iff.prp` prep template (already in the tree at
+`wfsource/levels.src/iff.prp`).  The template reads `asset.inc` and `ram.iff.txt`
+and emits an `.iff.txt` that inlines the `.lvl` as the LVL sub-chunk of LVAS
+alongside ASMP/PERM/RM* asset chunks.
 
 ### What levcomp-rs must do
 
@@ -133,4 +170,4 @@ Objects will appear in the correct WF-relative positions in Blender. The only or
 
 1. ✅ Gaps 1 + 2 — `export_level.py` EULR + STR/XDATA import fixes
 2. ✅ Gap 3 — ScriptLanguage OAD field, dispatch table, Blender panel
-3. Gap 4 — multiple sessions (the real engineering work); not yet started
+3. ⏳ Gap 4 — Phase 1 landed (object headers); Phases 2–3 still ahead
