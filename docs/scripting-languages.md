@@ -95,35 +95,14 @@ the script controls a mailbox write from inside the loop.
 
 ### Example patterns
 
-**Wait N ticks:**
+All examples below use tick-counting for timing (`for _ = 1, N`). WF has a
+variable tick rate, so tick counts are approximations. Once `INDEXOF_GAME_TIME_S`
+and `INDEXOF_DT` mailboxes are available (deferred), replace tick loops with
+real-time accumulation.
+
+**Wait for condition, then act:**
 ```lua
 return coroutine.create(function()
-    for _ = 1, 60 do          -- hold for 60 ticks (~2 s at 30 Hz)
-        coroutine.yield()
-    end
-    write_mailbox(INDEXOF_CAMSHOT, 3)
-end)
-```
-
-**Repeating state machine:**
-```lua
-return coroutine.create(function()
-    while true do
-        -- PATROL
-        write_mailbox(INDEXOF_AI_STATE, 1)
-        for _ = 1, 90 do coroutine.yield() end
-
-        -- ALERT
-        write_mailbox(INDEXOF_AI_STATE, 2)
-        for _ = 1, 30 do coroutine.yield() end
-    end
-end)
-```
-
-**Wait for condition:**
-```lua
-return coroutine.create(function()
-    -- Wait until trigger mailbox fires
     while read_mailbox(INDEXOF_TRIGGER_A) == 0 do
         coroutine.yield()
     end
@@ -132,14 +111,72 @@ return coroutine.create(function()
 end)
 ```
 
-**Fennel equivalent (`;` sigil):**
-```fennel
-; cutscene — hold camera on shot 7 for 120 ticks then cut to shot 1
-(coroutine.create
-  (fn []
-    (write-mailbox INDEXOF_CAMSHOT 7)
-    (for [_ 1 120] (coroutine.yield))
-    (write-mailbox INDEXOF_CAMSHOT 1)))
+**NPC patrol — walks to waypoints, idles between them:**
+```lua
+return coroutine.create(function()
+    while true do
+        -- Walk to waypoint A, wait until arrived
+        write_mailbox(INDEXOF_AI_DEST, WAYPOINT_A)
+        write_mailbox(INDEXOF_AI_STATE, STATE_WALKING)
+        repeat coroutine.yield()
+        until read_mailbox(INDEXOF_AT_DEST) ~= 0
+
+        -- Idle at A for ~3 s
+        write_mailbox(INDEXOF_AI_STATE, STATE_IDLE)
+        for _ = 1, 90 do coroutine.yield() end
+
+        -- Walk to waypoint B
+        write_mailbox(INDEXOF_AI_DEST, WAYPOINT_B)
+        write_mailbox(INDEXOF_AI_STATE, STATE_WALKING)
+        repeat coroutine.yield()
+        until read_mailbox(INDEXOF_AT_DEST) ~= 0
+
+        for _ = 1, 90 do coroutine.yield() end
+    end
+end)
+```
+
+The same logic as a tick-based state machine needs an explicit `state` variable,
+transition guards in every branch, and the loop structure inverted — the
+coroutine reads top-to-bottom as the authored sequence of events.
+
+**Cutscene sequencer — timed camera cuts:**
+```lua
+return coroutine.create(function()
+    local function hold(shot, ticks)
+        write_mailbox(INDEXOF_CAMSHOT, shot)
+        for _ = 1, ticks do coroutine.yield() end
+    end
+    local function wait_trigger(mb)
+        repeat coroutine.yield() until read_mailbox(mb) ~= 0
+    end
+
+    wait_trigger(INDEXOF_CUTSCENE_START)
+    hold(1, 60)    -- establishing shot ~2 s
+    hold(2, 45)    -- cut to character ~1.5 s
+    hold(3, 90)    -- reaction ~3 s
+    hold(1, 30)    -- back to wide ~1 s
+    write_mailbox(INDEXOF_CUTSCENE_DONE, 1)
+end)
+```
+
+**Door — waits for player, plays open animation, stays open:**
+```lua
+return coroutine.create(function()
+    -- Wait until player is close
+    repeat coroutine.yield()
+    until read_mailbox(INDEXOF_PLAYER_DIST) < 100
+
+    -- Step through open animation frames
+    for frame = 0, 7 do
+        write_mailbox(INDEXOF_DOOR_FRAME, frame)
+        coroutine.yield()
+        coroutine.yield()   -- 2 ticks per frame
+    end
+
+    write_mailbox(INDEXOF_DOOR_OPEN, 1)
+    -- script ends; mailbox persists; door stays open
+end)
 ```
 
 ### Rules
