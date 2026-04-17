@@ -45,7 +45,7 @@ public:
    virtual ~BaseObject();
    void Validate() const;
 
-	bool sendMsg(const int16 msgType, const int32 msgData);
+	bool sendMsg(const int16 msgType, const uintptr_t msgData);
 	bool sendMsg(const int16 msgType, const void* msgData,uint32 msgDataSize);
 
    virtual MsgPort& GetMsgPort() = 0;

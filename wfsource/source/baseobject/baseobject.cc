@@ -56,7 +56,7 @@ operator << ( std::ostream& s, const BaseObject& obj )
 //==============================================================================
                       
 bool
-BaseObject::sendMsg(const int16 msgType, const int32 msgData)
+BaseObject::sendMsg(const int16 msgType, const uintptr_t msgData)
 {
 	bool bSuccess = GetMsgPort().PutMsg( msgType, msgData );
 	assert( bSuccess );
