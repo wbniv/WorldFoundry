@@ -119,7 +119,7 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ### Larger / deferred work
 - **Audio (miniaudio)** — SFX one-shots, music streaming, 3D panning, all statically linked. No start date.
-- **Mobile port** — Android arm64 / iOS arm64; blocked on GL immediate-mode replacement + CMake migration.
+- **Mobile port** — Android arm64 / iOS arm64; plans written ([Android](docs/plans/2026-04-16-android-port.md), [iOS](docs/plans/2026-04-16-ios-port.md)); blocked on GL immediate-mode replacement + CMake migration.
 - **Multiplayer / voice / mobile input** — blocked on mobile port.
 - **Steam packaging** — most runtime blockers resolved; packaging pipeline itself not yet started.
 
