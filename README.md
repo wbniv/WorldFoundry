@@ -100,7 +100,7 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 - **Cross-language API parity audit** — `read_actor`/`read_fixed`/`read_color`/`read_flags` typed accessors need to be consistent across all engines when added. No canonical IDL yet.
 - **`WF_DEFAULT_ENGINE` knob** — for Lua-off builds, needs a way to select the sigil-less fallthrough engine. Currently undefined behavior.
 - **Lua → JS / Lua → Wren script converters** — mirroring `tcl_to_lua_in_dump.py`.
-- **Load level by filename from CLI** — `wf_game <level.iff>` flag to bypass `cd.iff` for dev iteration (after Lua spike + iffdump round-trip).
+- **Load level by filename from CLI** — **done**: `-L<path>` flag in `main.cc:167`; `gLevelOverridePath` in `game.cc:140`. `wf_game -L<level.iff>` bypasses `cd.iff`.
 
 ### Physics
 - **Remove `physics/wf/`** — kept until Jolt passes snowgoons parity on at least one other level; removal is a separate reviewable commit.
