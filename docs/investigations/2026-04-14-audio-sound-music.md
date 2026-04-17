@@ -177,15 +177,38 @@ Goal: Scripts can trigger SFX directly (not just via actor behaviours).
 3. Mirror for JS and wasm3 (same pattern each other audio-less API follows).
 4. **Verify:** A Fennel script `(play-sound SFX_BEEP)` produces a beep.
 
-### Phase 5 — 3D positional SFX
+### Phase 5 — 3D positional SFX ✓ DONE (2026-04-17)
 
 Goal: Actors' SFX play-calls pan relative to the camera; moving sources track smoothly.
 
-1. Add `setPosition(x, y, z)` and `setVelocity(dx, dy, dz)` to `SoundBuffer` / `buffer.hp`. Back them with `ma_sound_set_position` / `ma_sound_set_velocity`.
-2. `SoundDevice` exposes a listener-position setter; `game.cc` (or camera code) updates it each frame from the camera transform.
-3. Wire per-level SFX min/max rolloff distance: read from new `SFXM` IFF chunk (see Open Questions) or default constants.
-4. HRTF: off by default; enable with `-DMA_ENABLE_HRTF` and bundled ~40 KB IR dataset when a level tags `hrtf=1`.
-5. **Verify:** A source 10 units left of the camera is fully in the left channel; moving the source right-to-left pans smoothly. CPU delta < 1% vs. mono playback.
+1. ✓ `SoundBuffer::play(x, y, z)` overload added in `audio/buffer.hp` / `audio/linux/buffer.cc`. Backed by `ma_sound_set_position`. (`set_velocity` deferred — no current caller needs it.)
+2. ✓ `SoundDevice::tick()` takes listener position + forward + up; `Level::updateSound()` feeds it `_camera->cameraPos.position / direction / up` each frame.
+3. Default `min_distance=5` on positional sources (see bugs below); per-level SFXM rolloff chunk deferred.
+4. HRTF deferred — not needed for current levels.
+5. ✓ Verified in snowgoons 2026-04-17: Für Elise plays continuously, REF beep centred, +right-vector beep pans right, −right-vector beep pans left. No regressions to Phase 3 music playback.
+
+Three miniaudio gotchas surfaced during verification (all three were simultaneously broken
+in the first Phase 5 cut, commit `c385251`; fixed in `d1e913d`). They share a failure mode:
+`ma_sound_start` returns success, `ma_sound_is_playing` returns true, and yet there is
+no audible output, so they look identical to real bugs in the source data.
+
+- **End-callback `ma_sound_uninit` corrupts the mixer.** miniaudio forbids destroying a
+  sound from inside a callback (callback runs on the audio thread). The Phase 5 cut did
+  exactly that, which cut off any concurrently playing sounds (including the MIDI stream)
+  a few samples after the one-shot finished. Fix: lock-free atomic stack of done
+  PlayInstances, drained from the main thread by `DrainDoneSounds()` in
+  `SoundDevice::tick()`.
+- **Zero listener direction/up silences spatialization.** Early frames (before the camera
+  transform is populated) pass zero vectors; miniaudio accepts them without error and
+  produces silent output for every positional sound. Fix: length-check the vectors in
+  `SoundDevice::tick()` before forwarding to `ma_engine_listener_set_direction` /
+  `_set_world_up`.
+- **Default `min_distance=1` attenuates too aggressively.** At min=1 and distance=5
+  (typical small-scale sound placement), gain = 1/5 = −14 dB. With a music bed running,
+  the one-shot is effectively inaudible. Fix: `ma_sound_set_min_distance(5.f)` on all
+  positional sources — a better default for meter-scale worlds.
+
+Recorded for future miniaudio work: `memory/project_miniaudio_gotchas.md`.
 
 ### Phase 6 — Mobile backends
 
@@ -249,6 +272,18 @@ Goal: Audio works on Android and iOS. Mostly free — miniaudio already supports
 
 ## Follow-ups (out of scope)
 
+0. **Mailbox-wired audio API (music + SFX).** Phase 4 as originally planned
+   was mailbox primitives reachable from every scripting engine; it shipped as
+   Lua-only C closures (`play_music` / `stop_music` / `set_music_volume` in
+   `scripting_lua.cc`). The other seven engines can't trigger audio. SFX are
+   not scriptable at all — the old `_sfx[]->play()` still fires from actor
+   internals but there is no `play_sound` mailbox or closure. The pre-cleanup
+   engine had per-level SFX slots (`_sfx[128]`) loaded from level IFF and
+   triggered from actor code via `EMAILBOX_CD_TRACK`; the dead-code removal
+   batches deleted most of that plumbing. The follow-up plan is to re-wire
+   both music and SFX as mailbox writes on top of the current miniaudio
+   backend — see the separate plan doc (linked from `wf-status.md` when
+   written).
 1. **HRTF.** Binaural audio for headphone users. miniaudio supports via `ma_hrtf`, dataset is ~40 KB. Ship when a level wants it.
 2. **Reverb / occlusion.** Per-zone reverb presets, raycast-based occlusion against level geometry. Needs level-side authoring.
 3. **Voice chat.** Covered by the multiplayer plan (WebRTC); separate pipeline from this SFX/music plan. See `docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md`.
