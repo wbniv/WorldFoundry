@@ -1,8 +1,8 @@
 // scripting_zforth.cc — zForth backend for forth_engine namespace.
 //
 // Compiled in when WF_FORTH_ENGINE_ZFORTH is defined (via build_game.sh).
-// Sigil: `\` — handled by ScriptRouter before dispatch here; zForth also
-// treats `\` as a standard line-comment so the `\ wf` opener is a no-op.
+// Sigil: `\` — handled by ScriptRouter before dispatch here; RunScript
+// strips the `\ wf` opener line before passing to zf_eval.
 //
 // Cell type: float (see wf_zfconf.h). Mailbox indices and values flow
 // through as floats on PC dev; on the real fixed-point target integer
@@ -252,8 +252,11 @@ float RunScript(const char* src, int objectIndex)
 
     g_curObj = objectIndex;
 
-    // zForth's `\` word reads to end of line as a comment, so we can pass
-    // the script verbatim — the `\ wf` opener line is silently consumed.
+    // Skip the `\ wf` sigil line before handing to zForth.
+    while (*src && *src != '\n') ++src;
+    if (*src == '\n') ++src;
+    if (!*src) return 0.0f;
+
     zf_result r = zf_eval(&g_ctx, src);
     if (r != ZF_OK) {
         fprintf(stderr, "zforth error %d: %.120s\n", r, src);

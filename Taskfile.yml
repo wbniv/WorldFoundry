@@ -34,6 +34,11 @@ tasks:
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
           engine/wf_game "-L$ARGS"
 
+  snowgoons:
+    desc: "Run wf_game on wflevels/snowgoons.iff directly (bypass cd.iff)"
+    cmds:
+      - LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/snowgoons.iff
+
   md:
     desc: "Convert Markdown to HTML and open in browser (usage: task md -- docs/foo.md)"
     cmds:

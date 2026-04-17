@@ -1,8 +1,7 @@
 # Plan: WAMR for dev, AOT-only (or w2c2) for ship
 
 **Date:** 2026-04-14
-**Status:** **complete — Phase 1 landed 2026-04-15; smoke test passed 2026-04-16 (GROUND, no crashes). Phase 2 (AOT) deferred.**
-Phase 2 (AOT) deferred.
+**Status:** **Complete — Phase 1 landed 2026-04-15; smoke-tested 2026-04-16 (GROUND, all engines confirmed). Phases 2 (AOT) and 3 (w2c2) deferred.**
 **Depends on:** wasm3 spike (landed in cfa739c) — proved the dispatch,
 sigil, base64 wrapper, host-import ABI, and snowgoons-as-wasm end-to-end.
 **Source investigation:** Conversation captured in the wasm3 spike thread;
@@ -72,7 +71,7 @@ flowchart LR
 
 ## Implementation
 
-### Phase 1: WAMR classic interpreter as a new `WF_WASM_ENGINE` value
+### Phase 1: WAMR classic interpreter as a new `WF_WASM_ENGINE` value ✓ DONE
 
 1. **Vendor** `engine/vendor/wamr-<version>/` (tarball, SHA256 in README).
    Use WAMR's minimal-profile config (disable WASI, multi-module, libc
@@ -97,11 +96,13 @@ flowchart LR
    wasm3-parity baseline (snowgoons runs identically under wasm3 and
    WAMR; host trace line-for-line matches).
 
-> **As built (2026-04-15):** Steps 1–5 complete; step 6 blocked on HAL cleanup.
+> **As built (2026-04-15 / 2026-04-16):** Steps 1–6 complete.
 >
 > - WAMR 2.2.0 vendored at `engine/vendor/wamr-2.2.0/`; CMake block in
 >   `build_game.sh` builds `libvmlib.a` (~519 KB at MinSizeRel) with
 >   `WAMR_BUILD_INTERP=1 WAMR_BUILD_WASM_C_API=1` and all other modules off.
+>   Measured `-O2` `.text` size in `wf_game`: ~107 KB (see
+>   `docs/scripting-languages.md`).
 > - **API divergence:** implementation uses the **wasm-C-API** (`wasm_engine_new /
 >   wasm_module_new / wasm_instance_new / wasm_func_new / wasm_global_new`) rather
 >   than WAMR's proprietary `wasm_runtime_load / wasm_runtime_instantiate` ABI.
@@ -117,8 +118,13 @@ flowchart LR
 >   Both compiled to `.wasm` via `wat2wasm` (director 158 B, player 159 B).
 > - `scripts/patch_snowgoons_wamr.py` prefers `wamr-2.2.0-wf/snowgoons_director.wasm`
 >   over the wasm3 fallback.
+> - **Smoke test (2026-04-16):** snowgoons runs under `WF_WASM_ENGINE=wamr`,
+>   player reaches GROUND, no crashes. Parity vs wasm3 confirmed (commit 952c766).
 
-### Phase 2: WAMR AOT-only as the ship path
+### Phase 2: WAMR AOT-only as the ship path — DEFERRED
+
+Not needed until ship targets are concrete; dev workflow runs on classic interp.
+Left as the primary candidate when the ~107 KB interp cost becomes a problem.
 
 1. **`wamrc` as an author-time tool.** Committed prebuilt binary per
    host (matches WABT precedent from the wasm3 spike) OR `task aot`
@@ -136,7 +142,7 @@ flowchart LR
 4. **Verify:** snowgoons under `WF_WASM_ENGINE=wamr-aot` runs identically;
    `size wf_game` delta drops from WAMR-interp's ~80 KB to ~10 KB.
 
-### Phase 3 (stretch): w2c2 as a zero-runtime ship path
+### Phase 3 (stretch): w2c2 as a zero-runtime ship path — DEFERRED
 
 If WAMR-AOT's ~10 KB is still too big (or the AOT asset overhead matters
 more than the runtime overhead), evaluate w2c2:

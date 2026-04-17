@@ -813,7 +813,8 @@ Actor::update()
       // ScriptLanguage field removed from common.oad to restore layout compat
       // with pre-existing compiled levels.  Language selection moves to the
       // next Gap 4 iteration (Blender/levcomp-rs-driven path).
-      theLevel->EvalScript(_nonStatPlat->_pScript,GetActorIndex(),0);
+      // TEMP: hardcoded to 3 (Forth) for snowgoons Forth smoke test.
+      theLevel->EvalScript(_nonStatPlat->_pScript,GetActorIndex(),3);
 	}
 
 //#if DEBUG
