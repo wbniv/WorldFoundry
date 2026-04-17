@@ -1,13 +1,13 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-04-16  
+**As of:** 2026-04-17  
 **Branch:** `2026-first-working-gap`
 
 ---
 
 ## Summary
 
-Four days of work (2026-04-12 – 2026-04-16) across five major areas:
+Five days of work (2026-04-12 – 2026-04-17) across six major areas:
 
 **Scripting system** — Seven engines smoke-tested end-to-end in snowgoons: Lua 5.4, Fennel, QuickJS, JerryScript, WAMR (classic interp), Wren, and Forth (zForth). Five additional Forth backends (ficl, atlast, embed, libforth, pforth) build and link but are not yet end-to-end tested. All wired into a `ScriptRouter` dispatch table with per-engine sigils. wasm3 retired 2026-04-16 (WAMR reached parity). Lua made optional via `WF_LUA_ENGINE=lua54|none` (2026-04-16); `scripting_lua.cc/hp` extracted as a peer TU matching all other engine plugs. WAMR AOT deferred.
 
@@ -17,7 +17,9 @@ Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 
 **Dead-code removal** — Batches 1–7 complete: `wfsource/source/` reduced from 64,252 → 36,199 lines (−43.7%). Batch 8 (Jolt replaces WF physics) in progress.
 
-**Tooling and plans** — `engine/` reorganised to top-level. REST API box PoC landed. Android + iOS port plans written (blocked on GL immediate-mode rewrite + CMake migration). CLI level override (`-L<path>`) confirmed done.
+**Steam (Phases 1–2)** — Steamworks SDK lifecycle wired into HAL (`SteamAPI_Init/Shutdown` in `HALStart`) and display (`SteamAPI_RunCallbacks` after `XEventLoop` in `PageFlip`). Steam Input polls all connected controllers each frame and ORs results into `_JoystickButtonsF`; keyboard path unchanged. `WF_ENABLE_STEAM=1` build flag; SDK not committed (see `engine/vendor/steamworks/README.md`). `steam/game_actions_480.vdf` defines the `InGame` action set. `steam_appid.txt=480` for dev. Phases 3 (SteamPipe depot) and 4 (store page) deferred.
+
+**Tooling and plans** — `engine/` reorganised to top-level. REST API box PoC landed. Android + iOS port plans written (blocked on GL immediate-mode rewrite + CMake migration). CLI level override (`-L<path>`) confirmed done. Audio investigation updated: `AudioBackend` pimpl seam documented; MIDI sources (OpenScore CC0, Mutopia, piano-midi.de) researched and catalogued; IFF format lineage (EA IFF 85 → AIFF, RIFF, WF IFF) documented.
 
 ---
 
