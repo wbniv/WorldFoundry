@@ -90,7 +90,6 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 ## Open follow-up work
 
 ### Scripting
-- **Forth alternate backends** — ficl, atlast, embed, libforth, pforth deferred; zForth is the shipping default.
 - **WAMR Phase 2 (AOT)** — deferred; `wamrc` compiles `.wasm` → native machine code offline; output is ISA-specific (x86_64, arm32, arm64 each need a separate `.aot` blob); ~10 KB AOT loader vs. ~107 KB classic interp. Revisit when ship targets are concrete.
 - **wasm3 retirement** — parity confirmed 2026-04-16; ready to remove `engine/vendor/wasm3-v0.5.0/` + `scripting_wasm3.{hp,cc}` in one commit.
 - **Lua remote step debugger** — explicit user request for "later": MobDebug/DBG.lua/LuaLS-DAP into LuaInterpreter for in-game step debugging.
@@ -101,7 +100,7 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 - **Cross-language API parity audit** — `read_actor`/`read_fixed`/`read_color`/`read_flags` typed accessors need to be consistent across all engines when added. No canonical IDL yet.
 - **`WF_DEFAULT_ENGINE` knob** — for Lua-off builds, needs a way to select the sigil-less fallthrough engine. Currently undefined behavior.
 - **Lua → JS / Lua → Wren script converters** — mirroring `tcl_to_lua_in_dump.py`.
-- **Load level by filename from CLI** — `wf_game <level.iff>` flag to bypass `cd.iff` for dev iteration (after Lua spike + iffdump round-trip).
+- **Load level by filename from CLI** — **done**: `-L<path>` flag in `main.cc:167`; `gLevelOverridePath` in `game.cc:140`. `wf_game -L<level.iff>` bypasses `cd.iff`.
 
 ### Physics
 - **Remove `physics/wf/`** — kept until Jolt passes snowgoons parity on at least one other level; removal is a separate reviewable commit.
@@ -113,7 +112,7 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 - **`eval/` (120 LOC)** — tool-side callers (`wftools/prep`, `wftools/iff2lvl`) need porting to Blender plugin first.
 
 ### Content pipeline
-- **Blender → `cd.iff` pipeline** — `levcomp-rs` compiles `.lev.bin` → `.lvl`; validated via LVL-swap into existing snowgoons.iff. Remaining: asset ID packing, mesh bbox extension, real path/channel extraction, end-to-end automation script.
+- **Blender → `cd.iff` pipeline** — Phases 2a + 2b landed; snowgoons loads end-to-end from `levcomp-rs` output. Phase 2c not started: mesh bbox extension (8 bbox mismatches), MeshName asset ID packing (currently oracle-copy bypass), real path/channel keyframes.
 - **iffcomp: Rust is primary** — Decision: tools in Rust. Four implementations exist (C++ modernized oracle, Go, Node.js, Rust); all pass `all_features.iff.txt`. Rust port (`iffcomp-rs/`) is the going-forward implementation. C++ kept as byte-exact oracle; Go and Node.js ports are superseded.
 
 ### Larger / deferred work
@@ -126,4 +125,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 21:42** — [`docs/plans/2026-04-16-android-port.md`](docs/plans/2026-04-16-android-port.md): Plan: Android port
+**2026-04-16 22:06** — [`docs/plans/2026-04-16-android-port.md`](docs/plans/2026-04-16-android-port.md): Plan: Android port

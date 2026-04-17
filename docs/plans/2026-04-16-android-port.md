@@ -12,7 +12,7 @@
 | Asset bundling | `cd.iff` via `AAssetManager`; loose-file iteration stays Linux-only |
 | Minimum API level | 21 (Android 5.0 Lollipop) — arm64 + NDK r26 floor; ~99.8% device coverage |
 | Graphics API | GLES 3.0 via EGL |
-| Architecture | arm64-v8a primary; arm32 deferred |
+| Architecture | arm64-v8a only |
 
 ## Scripting engines on Android
 
@@ -76,7 +76,7 @@ Each has standalone value on Linux; Android blocks on all four.
 1. Add `hal/android/` — platform init, input, filesystem (`AAssetManager`), timer.
 2. Write `NativeActivity` entry point (`android_native_app_glue`-style). Map `onStart`/`onPause`/`onResume`/`onStop` to Phase 2 hooks.
 3. CMake NDK toolchain build (arm64-v8a): compile engine + zForth + Jolt into `libwf_game.so` with the Forth-only flags above. Add Gradle project + `AndroidManifest.xml`; package into APK.
-4. Touch shim: on-screen dpad + 4–6 buttons; hit-test each `MotionEvent`; emit `EJ_BUTTONF_*` bitmask to the existing input path.
+4. Input: on-screen dpad + 4–6 buttons (hit-test each `MotionEvent`) AND physical gamepad via `InputDevice` — both emit the same `EJ_BUTTONF_*` bitmask.
 5. Asset pipeline: bake `cd.iff` into `assets/` in APK; redirect Phase 2's asset accessor to `AAssetManager_open`.
 6. GL renderer: hook Phase 0's `glpipeline_modern` to GLES 3.0 context from `EGLContext`.
 7. **Verify:** sideload APK, launch, play snowgoons. Pause (Home), resume, game continues. No crash on orientation change (landscape-lock as first defence).
@@ -105,8 +105,7 @@ Each has standalone value on Linux; Android blocks on all four.
 
 ## Open questions
 
-- **Android gamepad support?** `EJ_BUTTONF_*` maps naturally to physical gamepads via Android `InputDevice`. One day of work; out of scope for v1.
-- **arm32 stretch goal.** Build config addition, ~2 days; defer until data shows a user base that needs it.
+- **Android gamepad support: yes, in v1.** `EJ_BUTTONF_*` maps naturally to physical gamepads via Android `InputDevice`. Add to Phase 3 alongside touch shim.
 
 ## Out of scope
 
