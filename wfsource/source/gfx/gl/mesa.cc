@@ -45,6 +45,7 @@ struct HalDisplay
 };
 
 HalDisplay halDisplay;
+static Atom _wmDeleteWindow;
 
 //==============================================================================
 
@@ -136,6 +137,8 @@ OpenMainWindow( char *title )
     XStoreName(halDisplay.mainDisplay, halDisplay.win, title);
     // XMapRaised = map + raise; signals the WM to focus the window on open.
     XMapRaised(halDisplay.mainDisplay, halDisplay.win);
+    _wmDeleteWindow = XInternAtom(halDisplay.mainDisplay, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(halDisplay.mainDisplay, halDisplay.win, &_wmDeleteWindow, 1);
     glXMakeCurrent(halDisplay.mainDisplay, halDisplay.win, cx);
     AssertGLOK();
 #else
@@ -418,6 +421,11 @@ void ProcessXEvents(XEvent event)
           printf("destroynotify!!\n");
           SetX11AutoRepeat(1);
           break;
+
+        case ClientMessage:
+            if ((Atom)event.xclient.data.l[0] == _wmDeleteWindow)
+                sys_exit(0);
+            break;
 
         default:
             break;
