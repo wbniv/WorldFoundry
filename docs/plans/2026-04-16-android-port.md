@@ -52,6 +52,7 @@ Each has standalone value on Linux; Android blocks on all four.
 ## Steps
 
 ### Phase 0 — Retire immediate-mode GL on Linux
+**Estimate: 2–3 weeks.** Largest phase; carries the most risk. Depth of `glBegin`/`glEnd` entanglement in the 8 renderer TUs is unknown until the first TU is opened.
 
 1. Introduce thin renderer-backend interface at `wfsource/source/gfx/renderer.hp`. Start minimal: `SubmitBatch(VBO, index, shader, uniforms)`. Keep `glpipeline_legacy` working during transition.
 2. Port one renderer TU at a time — `rendgtp.cc` first. Validate via golden-image diff against snowgoons.
@@ -59,12 +60,14 @@ Each has standalone value on Linux; Android blocks on all four.
 4. **Verify:** snowgoons renders identically on Linux under `WF_RENDERER=modern`; frame time equal or better.
 
 ### Phase 1 — CMake build
+**Estimate: 2–3 days.** Mechanical translation of `build_game.sh`; no new logic.
 
 1. Write `CMakeLists.txt` at repo root and in `engine/` mirroring `build_game.sh`'s TU list and all feature flags (`WF_LUA_ENGINE`, `WF_ENABLE_FENNEL`, `WF_JS_ENGINE`, `WF_WASM_ENGINE`, `WF_PHYSICS_ENGINE`).
 2. Keep `build_game.sh` working until CMake parity is verified; then retire it.
 3. **Verify:** CMake output byte-equivalent to `build_game.sh`. All feature flags work.
 
 ### Phase 2 — HAL lifecycle + filesystem abstraction
+**Estimate: 2–3 days.** Plumbing only; Linux no-ops keep the diff reviewable.
 
 1. Add suspend/resume hooks in `wfsource/source/game/game.cc` around the `for(;;)` in `RunGameScript`. Linux no-ops them.
 2. Factor `hal/dfhd.cc` through an asset-accessor interface. Linux impl: open files from working dir.
@@ -72,6 +75,7 @@ Each has standalone value on Linux; Android blocks on all four.
 4. **Verify:** Linux build unchanged; hooks exist but are no-ops.
 
 ### Phase 3 — Android port
+**Estimate: 1 week.** New platform layer + Gradle wiring; most steps are one-to-one with existing Linux equivalents.
 
 1. Add `hal/android/` — platform init, input, filesystem (`AAssetManager`), timer.
 2. Write `NativeActivity` entry point (`android_native_app_glue`-style). Map `onStart`/`onPause`/`onResume`/`onStop` to Phase 2 hooks.
@@ -83,6 +87,7 @@ Each has standalone value on Linux; Android blocks on all four.
    **Verify (Google TV):** sideload same APK to Chromecast with Google TV via ADB, launch via leanback launcher, play snowgoons with a gamepad. No on-screen d-pad rendered.
 
 ### Phase 4 — Second-level smoke test + performance pass
+**Estimate: 2–3 days.**
 
 1. Run a non-snowgoons level to confirm level-load path is not snowgoons-hardcoded.
 2. Profile with `simpleperf`: frame time, GPU time, RSS. Mobile CPU speed is a real concern — measure whether 30 fps is achievable on low-end ARM64.
