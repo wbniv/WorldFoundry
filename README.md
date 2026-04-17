@@ -148,4 +148,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 10:00** — [`docs/plans/2026-04-16-android-port.md`](docs/plans/2026-04-16-android-port.md): Android port Phase 1 complete — Linux + Android CMake builds reach expected GL Phase 0 boundary
+**2026-04-17 09:52** — [`docs/plans/2026-04-17-android-phase-2.md`](docs/plans/2026-04-17-android-phase-2.md): Plan: Android port Phase 2 — HAL lifecycle + asset accessor
