@@ -28,7 +28,7 @@ its own switch; `ScriptRouter` currently dispatches at runtime by leading-byte s
 |--------|--------|--------|-------|-------|-------|
 | `WF_ENABLE_LUA` | `0` / `1` | Lua 5.4 | *(none — fallthrough)* | `0` | |
 | `WF_ENABLE_FENNEL` | `0` / `1` | Fennel | `;` | `1` | Requires `WF_ENABLE_LUA=1` |
-| `WF_WASM_ENGINE` | `wasm3` / `wamr` | WebAssembly | `#b64\n` | `3` | |
+| `WF_WASM_ENGINE` | `wamr` | WebAssembly | `#b64\n` | `3` | `wasm3` retired 2026-04-16 |
 | `WF_FORTH_ENGINE` | `none` / `zforth` / `ficl` / `atlast` / `embed` / `libforth` / `pforth` | Forth | `\` | `5` | One backend at a time; zForth is default |
 | `WF_ENABLE_WREN` | `0` / `1` | Wren | `//wren\n` | `4` | |
 | `WF_JS_ENGINE` | `quickjs` / `jerryscript` | JavaScript | `//` | `2` | Mutually exclusive |

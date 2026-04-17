@@ -9,7 +9,7 @@
 
 Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 
-**Scripting system** — Eight engines implemented and smoke-tested end-to-end in snowgoons: Lua 5.4, Fennel, QuickJS, JerryScript, wasm3, WAMR (classic interp), Wren, and Forth (zForth). All wired into a `ScriptRouter` dispatch table with per-engine sigils. Lua and Fennel vendored; all others vendored previously. WAMR AOT and alternate Forth backends deferred.
+**Scripting system** — Seven engines implemented and smoke-tested end-to-end in snowgoons: Lua 5.4, Fennel, QuickJS, JerryScript, WAMR (classic interp), Wren, and Forth (zForth). All wired into a `ScriptRouter` dispatch table with per-engine sigils. wasm3 retired 2026-04-16 (WAMR reached parity). WAMR AOT and alternate Forth backends deferred.
 
 **Blender ↔ level round-trip** — `levcomp-rs` (Rust) compiles `.lev` source → binary `.lvl`; snowgoons loads end-to-end from `levcomp-rs` output. Blender plugin imports/exports 152/152 OAD fields, all light/slope/animation-channel types, Tcl→Lua script migration. Coordinate system fixed (WF is Z-up). Phase 2c (mesh bbox extension, MeshName asset ID packing, real path keyframes) not yet started.
 
@@ -39,7 +39,7 @@ Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 | 2026-04-15 | [Lua engine fixes (#1–#6)](docs/plans/2026-04-15-lua-engine-fixes.md) | **Complete** | All 6 fixes: script cache, per-actor envs, Fennel precompile, debug gating, stdlib sandbox, coroutine continuations. Smoke-tested 2026-04-16. |
 | 2026-04-15 | [Align scripting plans to ScriptRouter](docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md) | **Complete** | Phases A–E complete: all plan docs updated, JS/wasm3 renamed to `js_engine`/`wasm3_engine` namespaces, WAMR/Wren/Forth landed. All engine smoke tests passed 2026-04-16. |
 | 2026-04-14 | [Wren scripting engine](docs/plans/2026-04-14-wren-scripting-engine.md) | **Complete** | All phases complete: vendor, plug, dispatch, build, docs, patcher. Smoke-tested 2026-04-16 (GROUND, no crashes). |
-| 2026-04-14 | [WebAssembly (wasm3)](docs/plans/2026-04-14-wasm3-scripting-engine.md) | **Complete** | Landed 2026-04-14. Sigil `#b64\n`, dispatch in `ScriptRouter`, snowgoons AssemblyScript scripts. Renamed to `wasm3_engine` namespace 2026-04-15. |
+| 2026-04-14 | [WebAssembly (wasm3)](docs/plans/2026-04-14-wasm3-scripting-engine.md) | **Retired 2026-04-16** | Initial wasm spike. WAMR reached parity; `engine/vendor/wasm3-v0.5.0/` + `scripting_wasm3.{hp,cc}` deleted. `WF_WASM_ENGINE=wamr` is now the only wasm option. |
 | 2026-04-14 | [Fennel on Lua](docs/plans/2026-04-14-fennel-on-lua.md) | **Complete** | Landed 2026-04-14. `;` sigil, sub-dispatch inside `lua_engine`, vendored Fennel 1.6.1, minifier, codegen, snowgoons Fennel scripts. |
 | 2026-04-14 | [Vendor Lua 5.4](docs/plans/2026-04-14-vendor-lua.md) | **Complete** | Landed 2026-04-14. Lua 5.4.8 in `engine/vendor/lua-5.4.8/`, compiled directly from source, no system `liblua5.4` dependency. |
 | 2026-04-13 | [Lua interpreter spike](docs/plans/2026-04-13-lua-interpreter-spike.md) | **Complete** | Landed 2026-04-13; refactored 2026-04-15 to `lua_engine` namespace in `ScriptRouter`. Snowgoons player + director ported to Lua; player moves, cameras cut. |
@@ -93,7 +93,7 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ### Scripting
 - **WAMR Phase 2 (AOT)** — deferred; `wamrc` compiles `.wasm` → native machine code offline; output is ISA-specific (x86_64, arm32, arm64 each need a separate `.aot` blob); ~10 KB AOT loader vs. ~107 KB classic interp. Revisit when ship targets are concrete.
-- **wasm3 retirement** — parity confirmed 2026-04-16; ready to remove `engine/vendor/wasm3-v0.5.0/` + `scripting_wasm3.{hp,cc}` in one commit.
+- **wasm3 retired** — done 2026-04-16; `engine/vendor/wasm3-v0.5.0/` + `scripting_wasm3.{hp,cc}` removed; `WF_WASM_ENGINE=wamr` is the only wasm option.
 - **Lua remote step debugger** — explicit user request for "later": MobDebug/DBG.lua/LuaLS-DAP into LuaInterpreter for in-game step debugging.
 - **Fennel macros / `require`** — `fennel.searcher` / `package.searchers`; `.fnl` build step.
 - **Coroutine smoke test** — fix #6 landed but untested end-to-end with a real yielding script.
@@ -127,4 +127,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 22:14** — [`docs/plans/2026-04-16-android-port.md`](docs/plans/2026-04-16-android-port.md): Plan: Android port
+**2026-04-16 22:25** — [`docs/plans/2026-04-14-wasm3-scripting-engine.md`](docs/plans/2026-04-14-wasm3-scripting-engine.md): Plan: WebAssembly (wasm3) as a third scripting engine

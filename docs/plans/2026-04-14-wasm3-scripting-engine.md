@@ -1,7 +1,16 @@
 # Plan: WebAssembly (wasm3) as a third scripting engine
 
 **Date:** 2026-04-14
-**Status:** **landed 2026-04-14** (commit `cfa739c`, "wasm3 scripting
+**Status:** **RETIRED 2026-04-16** — wasm3 v0.5.0 served as the initial
+spike runtime. WAMR 2.2.0 reached parity and became the default
+(`WF_WASM_ENGINE=wamr`). `engine/vendor/wasm3-v0.5.0/`,
+`engine/stubs/scripting_wasm3.{cc,hp}`, and all `build_game.sh` wasm3
+build paths have been deleted. `WF_WASM_ENGINE=wasm3` is no longer a
+valid value. This plan is kept for historical reference only.
+
+---
+
+**Original status:** **landed 2026-04-14** (commit `cfa739c`, "wasm3 scripting
 engine: base64-wrapped modules on the #b64 sigil"). Retargeted onto the
 ScriptRouter convention on 2026-04-15: the `#b64\n` dispatch arm now
 lives in `ScriptRouter::RunScript` in

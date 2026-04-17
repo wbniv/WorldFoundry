@@ -1,7 +1,7 @@
 # Scripting languages in WF
 
 The engine supports several scripting languages. **A build chooses any
-subset** — Lua-only, JS-only, Lua + Fennel, QuickJS + wasm3, etc. No
+subset** — Lua-only, JS-only, Lua + Fennel, QuickJS + WAMR, etc. No
 language is mandatory; the scriptless build (no engines compiled in) is
 valid too. Every engine targets the same embedded API —
 `read_mailbox(idx[, actor])`, `write_mailbox(idx, value[, actor])`, and
@@ -32,10 +32,8 @@ Binary cost figures are `.text` section size, compiled `-O2`, measured from obje
 | *ES2020-compliant; generators, destructuring, optional chaining, `BigInt`, typed arrays, and full `Math` / `JSON` built-ins available. `async`/`await` compiles but is unnecessary in the tick model — use generators. Generator return from a script (`(function*() { ... })()`) enables multi-tick sequencing via `yield`; the engine advances the generator one step per tick. Fastest JS engine in the lineup. Mutually exclusive with JerryScript (`WF_JS_ENGINE` selects one).* | | | |
 | JavaScript<br/>(JerryScript v3.0.0) | `WF_JS_ENGINE=jerryscript` | ~237 KB (wf-minimal profile) | <64 KB (configurable heap; IoT-targeted) |
 | *ES5.1 target: no generators, no `let`/`const`, no arrow functions, no destructuring. No multi-tick script support — use per-tick `if`/state-variable patterns instead. Heap size is configurable at compile time (`JERRY_HEAP_SIZE`), making it suitable for constrained targets where QuickJS's 200 KB baseline is too large. Mutually exclusive with QuickJS (`WF_JS_ENGINE` selects one).* | | | |
-| WebAssembly<br/>(wasm3 v0.5.0) | `WF_WASM_ENGINE=wasm3` | ~96 KB | ~10 KB (runtime only; WF scripts use no linear memory) |
-| *Interpreter-only — no JIT; safe on all platforms including MIPS. WF scripts use only host imports (`read_mailbox`, `write_mailbox`) and no linear memory, so the 10 KB init cost is the complete runtime budget. `.wasm` modules stored base64-wrapped in iff text chunks, decoded at load time. Initial spike; planned for replacement by WAMR once parity is confirmed. Source languages: AssemblyScript, Rust, C, Zig, TinyGo, etc.* | | | |
 | WebAssembly<br/>(WAMR 2.2.0) | `WF_WASM_ENGINE=wamr` | ~107 KB (classic interp, MinSizeRel) | ~60 KB (classic interpreter runtime; `os_malloc`-based in WF build) |
-| *Classic interpreter mode in the WF build (`os_malloc`-based memory; no platform thread pool or JIT). Supports host-supplied `(global …)` imports so `INDEXOF_*` constants resolve at module instantiate time rather than baked as literals in WAT source — scripts are portable across levels without recompilation. `WF_WASM_ENGINE` selects exactly one wasm engine; wasm3 and WAMR are never both linked. **AOT (deferred):** `wamrc` compiles `.wasm` → native machine code at asset-build time; the output is ISA-specific (separate blob per target: x86_64, arm32, arm64, etc.) and replaces the 107 KB interpreter with a ~10 KB AOT loader. Deferred until ship targets are concrete.* | | | |
+| *Classic interpreter mode in the WF build (`os_malloc`-based memory; no platform thread pool or JIT). Supports host-supplied `(global …)` imports so `INDEXOF_*` constants resolve at module instantiate time rather than baked as literals in WAT source — scripts are portable across levels without recompilation. **AOT (deferred):** `wamrc` compiles `.wasm` → native machine code at asset-build time; the output is ISA-specific (separate blob per target: x86_64, arm32, arm64, etc.) and replaces the 107 KB interpreter with a ~10 KB AOT loader. Deferred until ship targets are concrete. wasm3 v0.5.0 was the initial spike runtime; retired 2026-04-16 once WAMR reached parity.* | | | |
 | Forth<br/>(zForth — default) | `WF_FORTH_ENGINE=zforth` | ~7 KB (core + WF wrapper) | ~17 KB (`ZF_DICT_SIZE=16384` + stacks per WF `zfconf.h`) |
 | Forth (ficl) | `WF_FORTH_ENGINE=ficl` | ~100 KB (BSD-2; ficl-3.06; 12 C files) | — |
 | Forth (Atlast) | `WF_FORTH_ENGINE=atlast` | ~30 KB (public domain; 1 C file; `-DEXPORT`) | — |
@@ -198,8 +196,8 @@ Script ends; mailbox persists.
 ## Files
 
 - `wftools/engine/stubs/scripting_stub.cc` — `ScriptRouter`, `lua_engine`, Fennel sub-dispatch.
-- `wftools/engine/stubs/scripting_{js,quickjs,jerryscript,wasm3,wamr,forth,wren}.{hp,cc}` — per-engine plugs.
+- `wftools/engine/stubs/scripting_{js,quickjs,jerryscript,wamr,forth,wren}.{hp,cc}` — per-engine plugs.
 - `wftools/engine/stubs/fennel.lua` — vendored Fennel 1.6.1 (minified by `scripts/minify_lua.py`).
-- `engine/vendor/{quickjs-v0.14.0,jerryscript-v3.0.0,wasm3-v0.5.0,wamr-2.2.0,wren-0.4.0,zforth-*,ficl,atlast,embed,libforth,pforth}/` — vendored runtimes.
+- `engine/vendor/{quickjs-v0.14.0,jerryscript-v3.0.0,wamr-2.2.0,wren-0.4.0,zforth-*,ficl,atlast,embed,libforth,pforth}/` — vendored runtimes.
 - `scripts/patch_snowgoons_*.py` — per-language snowgoons iff patchers.
 - `docs/plans/2026-04-1{3,4}-*.md` — per-engine spike/integration plans.
