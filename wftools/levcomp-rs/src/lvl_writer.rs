@@ -15,6 +15,7 @@
 //!
 //! MVP: objects only (no paths/channels/rooms/common block), OADSize = 0.
 
+use crate::asset_registry::AssetRegistry;
 use crate::common_block::CommonBlockBuilder;
 use crate::lc_parser::ClassMap;
 use crate::lev_parser::LevObject;
@@ -47,9 +48,15 @@ pub struct LevelPlan<'a> {
     pub objects: &'a [LevObject],
     pub classes: &'a ClassMap,
     pub schemas: &'a OadSchemas,
+    /// Pre-computed mesh bboxes, parallel to `objects`.  `None` means no mesh
+    /// file was found for that object (no Mesh Name field or file absent).
+    pub mesh_bboxes: &'a [Option<[i32; 6]>],
+    /// Asset registry — populated during OAD serialization; caller reads it
+    /// after `write()` to emit `asset.inc`.
+    pub assets: &'a mut AssetRegistry,
 }
 
-pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
+pub fn write(plan: &mut LevelPlan) -> Result<Vec<u8>, String> {
     // Object count includes the NULL_Object placeholder at index 0.
     let total_objects = plan.objects.len() + 1;
 
@@ -81,7 +88,7 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
         let payload = plan
             .schemas
             .get(&obj.class_name)
-            .map(|s| serialize_oad_data(s, obj, &mut common, &name_to_idx))
+            .map(|s| serialize_oad_data(s, obj, &mut common, &name_to_idx, plan.assets))
             .unwrap_or_default();
         oad_payloads.push(payload);
     }
@@ -200,10 +207,20 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
         let rot = (radians_fx_to_u16_revs(obj.rotation.a),
                    radians_fx_to_u16_revs(obj.rotation.b),
                    radians_fx_to_u16_revs(obj.rotation.c));
-        let bbox = expand_thin_bbox([
+        // Start with the authoring-tool bbox from the .lev, then extend to
+        // encompass mesh vertices when a mesh file was found.  Mirrors
+        // iff2lvl/level.cc's CreateQObjectFromSceneNode which reads the mesh
+        // and expands the colbox if a VRTX chunk is present.
+        let base_bbox = [
             obj.bbox.min[0], obj.bbox.min[1], obj.bbox.min[2],
             obj.bbox.max[0], obj.bbox.max[1], obj.bbox.max[2],
-        ]);
+        ];
+        let extended_bbox = if let Some(mesh_bb) = plan.mesh_bboxes.get(i).and_then(|b| *b) {
+            extend_bbox(base_bbox, mesh_bb)
+        } else {
+            base_bbox
+        };
+        let bbox = expand_thin_bbox(extended_bbox);
 
         let path_index: i16 = if needs_dummy_path[i] { 0 } else { -1 };
         const OADFLAG_TEMPLATE_OBJECT: i32 = 1 << 0;
@@ -352,6 +369,18 @@ fn expand_thin_bbox(mut bbox: [i32; 6]) -> [i32; 6] {
         }
     }
     bbox
+}
+
+/// Extend `base` bbox to also encompass `mesh` bbox.
+///
+/// The mesh bbox is in local (object) space; the .lev BOX3 is also local
+/// space (iff2lvl reads vertices directly and updates the colbox in-place).
+fn extend_bbox(mut base: [i32; 6], mesh: [i32; 6]) -> [i32; 6] {
+    for axis in 0..3 {
+        if mesh[axis] < base[axis] { base[axis] = mesh[axis]; }
+        if mesh[axis + 3] > base[axis + 3] { base[axis + 3] = mesh[axis + 3]; }
+    }
+    base
 }
 
 /// Pad `out` with zeros until it reaches `start + target_len`.

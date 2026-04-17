@@ -17,6 +17,7 @@ use wf_oad::{ButtonType, OadEntry, OadFile};
 
 use std::collections::HashMap;
 
+use crate::asset_registry::AssetRegistry;
 use crate::common_block::CommonBlockBuilder;
 use crate::lev_parser::{field_data, field_str_value, LevObject};
 
@@ -153,6 +154,7 @@ pub fn serialize_oad_data(
     obj: &LevObject,
     common: &mut CommonBlockBuilder,
     name_to_idx: &HashMap<String, i32>,
+    assets: &mut AssetRegistry,
 ) -> Vec<u8> {
     let mut out = Vec::new();
     let mut i = 0;
@@ -160,30 +162,25 @@ pub fn serialize_oad_data(
         let entry = &schema.entries[i];
         match entry.button_type {
             ButtonType::CommonBlock => {
-                // Gather fields up to the next EndCommon into a section buffer.
-                // XDATA fields serialize by appending their text to `common`
-                // first, then writing the returned offset — so we pass the
-                // builder down into the per-field serializer.
                 let mut section = Vec::new();
                 let mut j = i + 1;
                 while j < schema.entries.len()
                     && schema.entries[j].button_type != ButtonType::EndCommon
                 {
                     let e = &schema.entries[j];
-                    serialize_entry(&mut section, e, obj, common, true, name_to_idx);
+                    serialize_entry(&mut section, e, obj, common, true, name_to_idx, assets);
                     j += 1;
                 }
                 while section.len() % 4 != 0 { section.push(0); }
                 let offset = common.add(&section);
                 push_i32(&mut out, offset);
-                i = j + 1;  // skip past EndCommon
+                i = j + 1;
             }
             ButtonType::EndCommon => {
-                // Stray EndCommon with no matching CommonBlock — skip.
                 i += 1;
             }
             _ => {
-                serialize_entry(&mut out, entry, obj, common, false, name_to_idx);
+                serialize_entry(&mut out, entry, obj, common, false, name_to_idx, assets);
                 i += 1;
             }
         }
@@ -198,6 +195,7 @@ fn serialize_entry(
     common: &mut CommonBlockBuilder,
     in_common: bool,
     name_to_idx: &HashMap<String, i32>,
+    assets: &mut AssetRegistry,
 ) {
     let key = entry.name_str();
     let chunk = obj.find_field(key);
@@ -238,9 +236,19 @@ fn serialize_entry(
             let val = resolved.unwrap_or(if in_common { -1 } else { 0 });
             push_i32(out, val);
         }
-        ButtonType::Filename | ButtonType::MeshName => {
-            // Asset IDs come from asset.inc; unresolved = 0.
-            push_i32(out, 0);
+        ButtonType::MeshName | ButtonType::Filename => {
+            // Both BUTTON_MESHNAME and BUTTON_FILENAME are used for the
+            // "Mesh Name" field (the fixture OADs use FILENAME=7; newer OAS
+            // uses MESHNAME=19).  Either way: if the value is a .iff file,
+            // register it in the asset registry.  Other file types (not yet
+            // tracked in Phase 2c) write 0.
+            let name = chunk.map(field_str_value).unwrap_or_default();
+            let id = if name.to_ascii_lowercase().ends_with(".iff") && !name.is_empty() {
+                assets.add_iff(&name)
+            } else {
+                0
+            };
+            push_i32(out, id);
         }
         ButtonType::XData => {
             // XData fields (actions 1..=4) materialise as a 4-byte offset
