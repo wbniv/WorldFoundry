@@ -63,6 +63,7 @@ Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 
 | Date | Investigation | Status | Summary |
 |------|---------------|--------|---------|
+| 2026-04-17 | [IFF format lineage — EA IFF 85, AIFF, RIFF, WorldFoundry IFF](docs/investigations/2026-04-17-iff-format-lineage.md) | **Complete** | Traces all four formats from the common 1985 ancestor. Key findings: AIFF and WF IFF independently arrived at the same solution (bake navigational offsets at write time for slow-media random access); WF uniquely separates interchange (text source) from execution (platform binary); `.align(2048)` maps CD-ROM sectors. Side-by-side comparison table included. |
 | 2026-04-16 | [Reverse-engineering the WF binary level format for `levcomp-rs`](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md) | **Functional** | Binary format fully mapped; `levcomp-rs` output loads in `wf_game`; snowgoons game loop runs. Remaining: mesh bbox extension, MeshName packing, real path keyframes. |
 | 2026-04-16 | [Coding-conventions remediation](docs/investigations/2026-04-16-coding-conventions-remediation.md) | **In progress** | Audit of 2026-authored code in `wfsource/source/` against `docs/coding-conventions.md`. Honest accounting of where recent additions don't yet follow the rules they propose. |
 | 2026-04-15 | [LOC tracking](docs/investigations/2026-04-15-loc-tracking.md) | **Ongoing** | Tracks code line count over time. Current HEAD: ~36,199 lines (−43.7% from baseline 64,252 at `74d1a47`). Tool: `scripts/loc_report.py`. |
@@ -74,7 +75,7 @@ Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 | 2026-04-11 | [iffcomp — Rust rewrite](docs/investigations/2026-04-11-iffcomp-rs-rewrite.md) | **Complete** | Rust port in `wftools/iffcomp-rs/`. Byte-exact against C++ oracle. Includes comprehensive `all_features.iff.txt` torture test shared with Go port. |
 | 2026-04-11 | [iffcomp — Go rewrite](docs/investigations/2026-04-11-iffcomp-go-rewrite.md) | **Complete** | Go port in `wftools/iffcomp-go/`. Byte-exact against C++ oracle (both binary and text output). Passes shared torture fixture. Go is primary; C++ kept as oracle. |
 | 2026-04-11 | [iffcomp — C++ modernization](docs/investigations/2026-04-11-iffcomp-modernization.md) | **Complete** | Modernized the 1996 flex/bison C++ `iffcomp` to build on GCC 15 / Clang under C++17. Now serves as byte-exact oracle for Go and Rust ports. |
-| 2026-04-14 | [Audio: sound effects, music, positional sound](docs/investigations/2026-04-14-audio-sound-music.md) | **Active — Phase 0 done** | miniaudio (SFX/Ogg) + TinySoundFont (MIDI). Phase 0 complete (audio/ + audiofmt/ already deleted). Phase 1 next: vendor miniaudio, hook up SFX one-shots. |
+| 2026-04-14 | [Audio: sound effects, music, positional sound](docs/investigations/2026-04-14-audio-sound-music.md) | **Active — Phase 0 done** | miniaudio (SFX/Ogg) + TinySoundFont (MIDI). AudioBackend pimpl seam for clean console porting. Phase 1 next: vendor miniaudio + SFX one-shots; Phase 2 immediately after: MIDI player (tsf.h). 3D positional SFX is Phase 5 (after scripting surface). |
 | 2026-04-14 | [Constraint-based props](docs/investigations/2026-04-14-constraint-based-props.md) | **Deferred** | Doors, chains, pulleys, elevators via Jolt constraints. **Hard prerequisite:** Jolt integration must land first; also requires IFF binary chunk support. Not yet scheduled. |
 | 2026-04-14 | [Multiplayer, voice chat, mobile input](docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md) | **Deferred** | Surveyed multiplayer sync models, voice (LKWS/Agora/LiveKit), mobile input (touch/gyro/haptics). Depends on mobile port landing first. Not yet scheduled. |
 | 2026-04-14 | [REST API box PoC](docs/investigations/2026-04-14-rest-api-box-poc.md) | **Complete** | cpp-httplib embedded server in `wf_game`; create/recolor/resize/delete GL wireframe boxes via HTTP at runtime. Landed `7e690e1`. |
@@ -140,4 +141,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 23:58** — [`docs/investigations/2026-04-14-audio-sound-music.md`](docs/investigations/2026-04-14-audio-sound-music.md): Investigation: Audio — sound effects, music, positional sound
+**2026-04-17 00:26** — [`docs/investigations/2026-04-17-iff-format-lineage.md`](docs/investigations/2026-04-17-iff-format-lineage.md): Investigation: IFF format lineage — EA IFF 85, AIFF, RIFF, WorldFoundry IFF
