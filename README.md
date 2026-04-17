@@ -23,6 +23,7 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
+| 2026-04-16 | [Plan: Lua engine is not special — make it optional](docs/plans/2026-04-16-lua-not-special.md) | **Not started** | **Goal:** Lua is a peer engine, compiled in by `WF_LUA_ENGINE=lua54` (default) and absent when `WF_LUA_ENGINE=none`. No engine is hardcoded. Fennel depends on Lua; it is forced off when Lua is absent. |
 | 2026-04-16 | [Plan: iOS port](docs/plans/2026-04-16-ios-port.md) | **Not started — blocked on Android port** | **Goal:** An IPA that runs snowgoons on a tethered iPhone, installed via Xcode with a developer profile. Proof-of-viability, not a shipping product. |
 | 2026-04-16 | [Plan: Android port](docs/plans/2026-04-16-android-port.md) | **Not started** | **Goal:** An APK that launches, runs snowgoons on an arm64 Android device, takes touch input, and handles background/foreground transitions without crashing. Forth (zForth) + Lua only in v1; other engines disabled. Proof-of-viability, not a shipping product. |
 | 2026-04-16 | [Engine directory reorganization](docs/plans/2026-04-16-engine-directory-reorganization.md) | **Complete** | `engine/` is now a top-level directory. `wftools/wf_engine/` → `engine/`, `wftools/vendor/` → `engine/vendor/`, `wf_viewer/stubs/` → `engine/stubs/`, `wf_viewer/include/` → `engine/include/`. `wftools/` is now strictly dev tooling. |
@@ -125,4 +126,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 21:40** — [`docs/plans/2026-04-16-android-port.md`](docs/plans/2026-04-16-android-port.md): Plan: Android port
+**2026-04-16 21:41** — [`docs/plans/2026-04-16-lua-not-special.md`](docs/plans/2026-04-16-lua-not-special.md): Plan: Lua engine is not special — make it optional
