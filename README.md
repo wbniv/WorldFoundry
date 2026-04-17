@@ -125,4 +125,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 21:20** — [`docs/plans/2026-04-14-wamr-dev-aot-ship.md`](docs/plans/2026-04-14-wamr-dev-aot-ship.md): Plan: WAMR for dev, AOT-only (or w2c2) for ship
+**2026-04-16** — [`docs/plans/2026-04-14-wamr-dev-aot-ship.md`](docs/plans/2026-04-14-wamr-dev-aot-ship.md): WAMR plan closed — Phase 1 complete, Phases 2 (AOT) and 3 (w2c2) deferred.
