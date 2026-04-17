@@ -140,4 +140,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 00:11** — [`docs/investigations/2026-04-14-audio-sound-music.md`](docs/investigations/2026-04-14-audio-sound-music.md): Investigation: Audio — sound effects, music, positional sound
+**2026-04-17 00:13** — [`docs/investigations/2026-04-14-audio-sound-music.md`](docs/investigations/2026-04-14-audio-sound-music.md): Investigation: Audio — sound effects, music, positional sound
