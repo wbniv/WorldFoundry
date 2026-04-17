@@ -141,4 +141,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 00:24** — [`docs/investigations/2026-04-17-iff-format-lineage.md`](docs/investigations/2026-04-17-iff-format-lineage.md): Investigation: IFF format lineage — EA IFF 85, AIFF, RIFF, WorldFoundry IFF
+**2026-04-17 00:25** — [`docs/investigations/2026-04-17-iff-format-lineage.md`](docs/investigations/2026-04-17-iff-format-lineage.md): Investigation: IFF format lineage — EA IFF 85, AIFF, RIFF, WorldFoundry IFF
