@@ -15,6 +15,15 @@ wfsource/bin/
 engine/objs_game/
 wftools/*/target/
 
+# CMake build output dirs
+cmake-build-*/
+
+# Built game binary
+engine/wf_game
+
+# Preprocessor temp files (build artifacts)
+*.pp.tmp
+
 # Editor
 *.swp
 .DS_Store
