@@ -1,7 +1,7 @@
 # Investigation: Audio — sound effects, music, positional sound
 
 **Date:** 2026-04-14
-**Status:** Deferred — plan captured for future work, not scheduled.
+**Status:** Active — Phase 0 complete; Phase 1 next.
 **Related:** `docs/investigations/2026-04-14-mobile-port-android-ios.md` (mobile backends), `docs/investigations/2026-04-14-jolt-physics-integration.md` (actor position source for 3D audio).
 
 ## Context
@@ -25,9 +25,9 @@ Intended outcome: `wf_game` produces sound. Actors' existing `play(soundEffect)`
 |----------|--------|-----|
 | Backend library | **miniaudio** (single-header, MIT, ~30 KLoC) | Covers playback + 3D spatialization + decoding (WAV/FLAC/MP3/Vorbis) in one TU. No system deps on Linux/Android/iOS/macOS/Windows. Vendors cleanly alongside wasm3/quickjs/lua. |
 | 3D spatialization | **miniaudio's built-in `ma_sound_set_position`** (HRTF optional, vector-pan default) | Zero additional code. HRTF adds ~40 KB for the IR dataset; defer until a level actually wants it. |
-| Music format | **Ogg Vorbis** (miniaudio decodes natively, no extra dep) | Free, patent-clear, quality-per-byte competitive with MP3, ubiquitous authoring tools. |
+| Music format | **Ogg Vorbis** for new/recorded tracks; **MIDI + TinySoundFont** for original game music (see MIDI section below) | Ogg: free, patent-clear, miniaudio-native. MIDI: tiny file size, authentic to original game; TSF renders MIDI → PCM via a bundled SF2 soundfont. |
 | SFX format | **WAV (PCM 16-bit) for short sounds, Ogg Vorbis for long ones** | WAV decode is zero-cost; Ogg for anything >2s saves disk. miniaudio handles both transparently. |
-| Existing `audiofmt/` (sox) | **Retire.** Not wired up; miniaudio decodes everything we need; sox's 1990s code is not worth maintaining. | One-time deletion — separate commit, easy revert. |
+| Existing `audiofmt/` (sox) | **Already deleted** (dead-code removal batch, 2026-04-15). | Was not wired up; miniaudio decodes everything we need. |
 | Existing `SoundBuffer`/`SoundDevice` API | **Keep the class names, reimplement internals on miniaudio.** `actor.cc:1342` and `level.cc:610` keep compiling. | Minimizes churn in game code. The header is 17 lines; the impl is the interesting part. |
 | Level format encoding | **Keep existing `_sfx[128]` per-level slot loading.** Add a new IFF chunk `MUSX` (music track) if/when levels want per-level music — separate followup. | Current SFX pipeline works mechanically; music can be deferred to a second iteration. |
 | Scripting surface | **Mailbox primitives:** `play_sound(sfxIndex, volume=1, pitch=1)`, `stop_sound(handle)`, `play_music(name)`, `stop_music()`. Named SFX constants via the same `INDEXOF_*` registry extended with `SFX_*`. | Fits the existing script surface; scripts already drive actor behaviour this way. |
@@ -39,14 +39,9 @@ Intended outcome: `wf_game` produces sound. Actors' existing `play(soundEffect)`
 
 ## Implementation
 
-### Phase 0 — Retire the stubs and sox
+### Phase 0 — Retire the stubs and sox ✓ DONE
 
-Goal: Remove dead code before adding live code. Easier to review the diff when the baseline is clean.
-
-1. Delete `wfsource/source/audiofmt/` (sox vendor). Keep a note in the commit message; nothing links to it.
-2. Delete `wfsource/source/audio/orig.cc` (DirectSound reference) and `wfsource/source/audio/test.cc` (standalone test harness).
-3. Delete `wfsource/source/audio/LOADFILE.CC`, the `.WAV` sample files sitting in the source tree.
-4. **Verify:** `build_game.sh` succeeds; snowgoons still runs (silent — no regression because audio was never audible).
+`wfsource/source/audio/` and `wfsource/source/audiofmt/` were both removed in dead-code removal batch 2026-04-15. No action needed. `build_game.sh` succeeds and snowgoons runs silently.
 
 ### Phase 1 — Vendor miniaudio, hook up SFX one-shots
 
@@ -70,6 +65,26 @@ Goal: SFX originating from actors pan/attenuate relative to the camera.
 3. Listener: each frame, set listener position/orientation from the active camera. Single listener for now (splitscreen gets its own plan).
 4. Distance model config: per-sound min/max distance read from level data (new field in whatever authoring structure holds per-sound metadata — TBD; could piggyback on existing mailbox-indexed SFX slots with a parallel array).
 5. **Verify:** A stereo test level with sound sources to left/right of the camera pans correctly; walking away attenuates.
+
+### MIDI player
+
+The original WF game shipped with MIDI music. MIDI files are tiny (a few KB each) and fit naturally in an IFF chunk. To render MIDI → PCM for miniaudio we need a software synthesizer.
+
+**Chosen library: TinySoundFont** (`tsf.h` + `tml.h`)
+- Single-header, MIT license, pure C, zero dependencies
+- `tml.h` parses `.mid` files; `tsf.h` renders them to interleaved PCM via an SF2 soundfont
+- Outputs PCM that feeds directly into a miniaudio custom data source
+- Confirmed working on Linux and Android arm64
+
+**RAM footprint:**
+- `tsf.h` runtime state: ~1–4 KB per TSF instance (voice table, channel state)
+- Active voices: each simultaneous note consumes ~200–400 bytes of voice state; a typical GM MIDI track peaks at 32–64 simultaneous voices → ~8–25 KB voice RAM
+- Soundfont samples: the loaded SF2 sample data is the dominant cost. A small bundled soundfont (e.g. `florestan-subset.sf2` included in TSF examples) is ~2–4 MB loaded; a full GM bank (GeneralUser GS) is ~30 MB. **Soundfont choice is the RAM decision**, not TSF itself.
+- Practical target: a curated WF-subset SF2 (only the instruments actually used) should land under 2 MB loaded.
+
+**Integration:** `MusicPlayer` owns a `tml_message*` sequence + `tsf*` instance. A miniaudio custom data source calls `tsf_render_short` into the mix buffer each callback. MIDI playback is driven entirely from the audio thread — no game-thread polling.
+
+**Soundfont:** Bundle a small SF2 in `engine/vendor/`; exact file TBD once MIDI tracks are inventoried. License must be permissive (CC0 or MIT-equivalent).
 
 ### Phase 3 — Music subsystem
 
@@ -120,8 +135,10 @@ Goal: Audio works on Android and iOS. Mostly free — miniaudio already supports
 | `wfsource/source/game/level.cc` | Load per-level music (Phase 3) |
 | `wftools/engine/stubs/scripting_stub.cc` | Register `play_sound` / `play_music` / volume closures |
 | `wfsource/source/mailbox/mailbox.inc` | If SFX needs mailbox indices; TBD |
-| `wfsource/source/audiofmt/` | **Delete** |
-| `wfsource/source/audio/orig.cc`, `test.cc`, `LOADFILE.CC`, `*.WAV` | **Delete** |
+| `wfsource/source/audiofmt/` | **Already deleted** (2026-04-15) |
+| `wfsource/source/audio/orig.cc`, `test.cc`, `LOADFILE.CC`, `*.WAV` | **Already deleted** (2026-04-15) |
+| `engine/vendor/tsf/` | New — `tsf.h` + `tml.h` (TinySoundFont, MIT) |
+| `engine/vendor/tsf/<name>.sf2` | New — bundled soundfont (TBD; permissive license) |
 | `docs/audio.md` | New — authoring guide |
 
 ## Reuses
