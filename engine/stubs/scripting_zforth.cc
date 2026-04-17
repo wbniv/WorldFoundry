@@ -39,6 +39,7 @@ extern "C" {
 #include <cstring>
 #include <cstdarg>
 #include <string>
+#include <unordered_map>
 
 // ---------------------------------------------------------------------------
 // Module state
@@ -46,6 +47,10 @@ extern "C" {
 static zf_ctx              g_ctx;
 static MailboxesManager*   g_mgr     = nullptr;
 static int                 g_curObj  = 0;
+
+// Cache: src pointer → compiled word name.
+// Scripts are compiled once on first call; subsequent calls just invoke the word.
+static std::unordered_map<const char*, std::string> g_scriptCache;
 
 // ---------------------------------------------------------------------------
 // Required zForth host callbacks
@@ -226,17 +231,26 @@ void Shutdown()
     // zForth state is a plain struct — no heap to free.
     g_mgr    = nullptr;
     g_curObj = 0;
+    g_scriptCache.clear();
 }
 
 void AddConstantArray(IntArrayEntry* entryList)
 {
-    // Eval each constant into the dictionary as: `N constant NAME`
+    // Define each constant as `: NAME VALUE ;` — the integer literal is
+    // embedded inline at compile time so at runtime NAME just pushes VALUE.
+    // `constant` (r> + postpone literal) is compile-time-only and broken
+    // at runtime in zForth's embedding model.
     char buf[128];
     for (IntArrayEntry* p = entryList; p->name; p++) {
-        snprintf(buf, sizeof(buf), "%d constant %s", p->value, p->name);
+        snprintf(buf, sizeof(buf), ": %s %d ;", p->name, p->value);
         zf_result r = zf_eval(&g_ctx, buf);
         if (r != ZF_OK)
             fprintf(stderr, "zforth: failed to define constant %s: %d\n", p->name, r);
+    }
+    // Spot-check: verify INDEXOF_CAMSHOT loaded correctly.
+    if (zf_eval(&g_ctx, "INDEXOF_CAMSHOT") == ZF_OK) {
+        zf_cell v = zf_pop(&g_ctx);
+        fprintf(stderr, "zforth: INDEXOF_CAMSHOT = %d (expect 1021)\n", (int)v);
     }
 }
 
@@ -252,14 +266,67 @@ float RunScript(const char* src, int objectIndex)
 
     g_curObj = objectIndex;
 
-    // Skip the `\ wf` sigil line before handing to zForth.
+    // Skip leading whitespace, then the `\ wf` sigil line.
+    while (*src == ' ' || *src == '\t' || *src == '\r' || *src == '\n') ++src;
     while (*src && *src != '\n') ++src;
     if (*src == '\n') ++src;
     if (!*src) return 0.0f;
 
-    zf_result r = zf_eval(&g_ctx, src);
+    // Compile each unique script once (keyed by src pointer) into a named word
+    // so if/else/then work correctly (they require compile mode) and the
+    // dictionary doesn't grow every frame.
+    //
+    // Scripts may contain `: word ... ;` definitions followed by a call body.
+    // We can't nest `:` definitions inside the wrapper word, so we split:
+    //   1. Eval the definitions part (everything up to and including the last `;`)
+    //      directly — compiled once, never re-eval'd.
+    //   2. Wrap only the call body (everything after the last `;`) in `_wfsN`.
+    auto it = g_scriptCache.find(src);
+    if (it == g_scriptCache.end()) {
+        const char* callBody = src;
+
+        // Find last `;` to locate the boundary between definitions and call body.
+        const char* lastSemi = nullptr;
+        for (const char* p = src; *p; ++p)
+            if (*p == ';') lastSemi = p;
+
+        if (lastSemi) {
+            std::string defs(src, static_cast<size_t>(lastSemi + 1 - src));
+            zf_result rc = zf_eval(&g_ctx, defs.c_str());
+            if (rc != ZF_OK) {
+                fprintf(stderr, "zforth compile error %d (defs): %.120s\n", rc, src);
+                return 0.0f;
+            }
+            callBody = lastSemi + 1;
+            while (*callBody == ' ' || *callBody == '\t' || *callBody == '\r' || *callBody == '\n')
+                ++callBody;
+        }
+
+        char wordName[32];
+        snprintf(wordName, sizeof(wordName), "_wfs%zu", g_scriptCache.size());
+        if (*callBody) {
+            std::string def = ": ";
+            def += wordName;
+            def += " ";
+            def += callBody;
+            def += " ;";
+            zf_result rc = zf_eval(&g_ctx, def.c_str());
+            if (rc != ZF_OK) {
+                fprintf(stderr, "zforth compile error %d (call): %.120s\n", rc, callBody);
+                return 0.0f;
+            }
+        } else {
+            // No call body — define an empty word so cache is populated.
+            std::string def = ": "; def += wordName; def += " ;";
+            zf_eval(&g_ctx, def.c_str());
+        }
+        g_scriptCache[src] = wordName;
+        it = g_scriptCache.find(src);
+    }
+
+    zf_result r = zf_eval(&g_ctx, it->second.c_str());
     if (r != ZF_OK) {
-        fprintf(stderr, "zforth error %d: %.120s\n", r, src);
+        fprintf(stderr, "zforth error %d calling %s\n", r, it->second.c_str());
         return 0.0f;
     }
 
