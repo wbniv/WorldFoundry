@@ -146,4 +146,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 06:56** — [`docs/plans/2026-04-17-collision-message-pointer-fix.md`](docs/plans/2026-04-17-collision-message-pointer-fix.md): Plan: Fix COLLISION/SPECIAL_COLLISION message to carry full pointer
+**2026-04-17 09:35** — [`docs/plans/2026-04-16-android-port.md`](docs/plans/2026-04-16-android-port.md): Plan: Android port
