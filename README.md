@@ -144,4 +144,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 00:44** — [`docs/plans/2026-04-17-steam.md`](docs/plans/2026-04-17-steam.md): Plan: Steam release
+**2026-04-17** — `feat(steam)`: Steamworks SDK lifecycle + Steam Input Phases 1–2 wired; `WF_ENABLE_STEAM=1`; `game_actions_480.vdf`; Phases 3+4 deferred.
