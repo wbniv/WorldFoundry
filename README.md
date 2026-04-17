@@ -126,4 +126,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 21:58** — [`docs/plans/2026-04-16-ios-port.md`](docs/plans/2026-04-16-ios-port.md): Plan: iOS port
+**2026-04-16 21:59** — [`docs/plans/2026-04-16-ios-port.md`](docs/plans/2026-04-16-ios-port.md): Plan: iOS port
