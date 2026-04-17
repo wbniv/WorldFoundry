@@ -17,7 +17,7 @@ Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 
 **Dead-code removal** — Batches 1–7 complete: `wfsource/source/` reduced from 64,252 → 36,199 lines (−43.7%). Batch 8 (Jolt replaces WF physics) in progress.
 
-**Tooling and plans** — `engine/` reorganised to top-level. REST API box PoC landed. Android + iOS port plans written (blocked on GL immediate-mode rewrite + CMake migration). Lua-not-special plan written (Lua must be optional like every other engine). CLI level override (`-L<path>`) confirmed done.
+**Tooling and plans** — `engine/` reorganised to top-level. REST API box PoC landed. Android + iOS port plans written (blocked on GL immediate-mode rewrite + CMake migration). CLI level override (`-L<path>`) confirmed done.
 
 ---
 
