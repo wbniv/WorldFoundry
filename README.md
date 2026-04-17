@@ -146,4 +146,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 05:48** — [`docs/plans/2026-04-17-fix-window-close-crash.md`](docs/plans/2026-04-17-fix-window-close-crash.md): Fix: core dump on window close button
+**2026-04-17 06:56** — [`docs/plans/2026-04-17-collision-message-pointer-fix.md`](docs/plans/2026-04-17-collision-message-pointer-fix.md): Plan: Fix COLLISION/SPECIAL_COLLISION message to carry full pointer
