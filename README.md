@@ -89,7 +89,7 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ### Scripting
 - **Forth alternate backends** — ficl, atlast, embed, libforth, pforth deferred; zForth is the shipping default.
-- **WAMR Phase 2 (AOT)** — deferred; `wamrc` + `#aot\n` sigil; ~10 KB runtime vs. 519 KB interp.
+- **WAMR Phase 2 (AOT)** — deferred; `wamrc` compiles `.wasm` → native machine code offline; output is ISA-specific (x86_64, arm32, arm64 each need a separate `.aot` blob); ~10 KB AOT loader vs. ~107 KB classic interp. Revisit when ship targets are concrete.
 - **wasm3 retirement** — planned after WAMR interp is proven at parity (remove vendor tree + `scripting_wasm3.cc`).
 - **Lua remote step debugger** — explicit user request for "later": MobDebug/DBG.lua/LuaLS-DAP into LuaInterpreter for in-game step debugging.
 - **Fennel macros / `require`** — `fennel.searcher` / `package.searchers`; `.fnl` build step.
