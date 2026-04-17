@@ -125,4 +125,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 16:02** — [`docs/plans/2026-04-15-lua-engine-fixes.md`](docs/plans/2026-04-15-lua-engine-fixes.md): Plan: lua_engine — correctness and performance fixes
+**2026-04-16 21:04** — [`docs/plans/2026-04-14-forth-scripting-engine.md`](docs/plans/2026-04-14-forth-scripting-engine.md): Plan: Forth as a scripting engine option for World Foundry
