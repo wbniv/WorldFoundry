@@ -37,6 +37,33 @@ Intended outcome: `wf_game` produces sound. Actors' existing `play(soundEffect)`
 | Pause-on-focus-loss | **Yes by default**, opt-out per-sound | Users hate audio that keeps going when they alt-tab. |
 | Determinism | **Audio is non-deterministic and does not feed back into simulation.** | Multiplayer sync (see multiplayer plan) doesn't need audio to be lockstep; each client plays locally. |
 
+## Architecture: platform seam
+
+The audio HAL is split into two layers so that console porting touches only the bottom layer:
+
+```
+game code / scripts
+      |
+SoundDevice / SoundBuffer  (wfsource/source/audio/*.hp)   ← public API; no backend types visible
+      |
+AudioBackend interface     (wfsource/source/audio/backend.hp)
+      |  \_____________________________
+      |                               |
+miniaudio impl                 console impl (future)
+hal/linux/audio_backend.cc     hal/ps5/audio_backend.cc
+hal/android/audio_backend.cc   hal/xbox/audio_backend.cc
+hal/ios/audio_backend.cc       hal/switch/audio_backend.cc
+```
+
+**Rules that keep the seam clean:**
+
+1. **No `ma_*` types in public headers.** `SoundDevice.hp`, `SoundBuffer.hp`, and `MusicPlayer.hp` never `#include <miniaudio.h>`. All miniaudio state lives in impl `.cc` files or a pimpl struct.
+2. **`AudioBackend` interface.** A thin abstract class (or C-style vtable struct) in `audio/backend.hp` with the minimum surface: `init`, `shutdown`, `play`, `stop`, `set_position`, `set_listener`, `stream_open`, `stream_close`, `tick` (if needed). `SoundDevice` holds a pointer to this; the correct impl is link-selected per platform (same pattern as `hal/linux/` vs. `hal/android/`).
+3. **PCM pipeline stays above the seam.** TinySoundFont renders to a `float*` buffer before handing to the backend. Console backends consume the same PCM buffer — no MIDI-awareness needed below the seam.
+4. **Build system selects impl TU.** `build_game.sh` / CMake links the right `hal/<platform>/audio_backend.cc`; no `#ifdef PLATFORM` chains in game code.
+
+This mirrors the existing WF HAL pattern (`hal/dfhd.cc` → asset-accessor interface for Android). Console audio ports then reduce to: write `hal/<platform>/audio_backend.cc`, acquire SDK.
+
 ## Implementation
 
 ### Phase 0 — Retire the stubs and sox ✓ DONE
@@ -180,6 +207,8 @@ Goal: Audio works on Android and iOS. Mostly free — miniaudio already supports
 
 | File | Change |
 |------|--------|
+| `wfsource/source/audio/backend.hp` | New — `AudioBackend` interface (pimpl seam) |
+| `wfsource/source/audio/linux/audio_backend.cc` | New — miniaudio impl of `AudioBackend` |
 | `engine/vendor/miniaudio-<ver>/` | New — single-header vendor |
 | `engine/vendor/README.md` | Add miniaudio entry + SHA256 |
 | `engine/build_game.sh` | Add miniaudio impl TU; delete `audiofmt/` references if any; no system audio lib needed |
