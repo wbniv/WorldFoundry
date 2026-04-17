@@ -146,4 +146,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17** — `feat(audio)` Phase 2: TinySoundFont MIDI player audible; per-level `level<N>.mid` + Lua `play_music`/`stop_music` in progress.
+**2026-04-17** — `feat(audio)` Phases 1–4 complete: miniaudio SFX, TinySoundFont MIDI, per-level music, Lua `play_music`/`stop_music`/`set_music_volume`.
