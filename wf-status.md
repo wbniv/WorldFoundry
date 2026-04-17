@@ -9,7 +9,7 @@
 
 Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 
-**Scripting system** — Seven engines implemented and smoke-tested end-to-end in snowgoons: Lua 5.4, Fennel, QuickJS, JerryScript, WAMR (classic interp), Wren, and Forth (zForth). All wired into a `ScriptRouter` dispatch table with per-engine sigils. wasm3 retired 2026-04-16 (WAMR reached parity). Lua made optional via `WF_LUA_ENGINE=lua54|none` (2026-04-16); `scripting_lua.cc/hp` extracted as a peer TU matching all other engine plugs. WAMR AOT and alternate Forth backends deferred.
+**Scripting system** — Seven engines smoke-tested end-to-end in snowgoons: Lua 5.4, Fennel, QuickJS, JerryScript, WAMR (classic interp), Wren, and Forth (zForth). Five additional Forth backends (ficl, atlast, embed, libforth, pforth) build and link but are not yet end-to-end tested. All wired into a `ScriptRouter` dispatch table with per-engine sigils. wasm3 retired 2026-04-16 (WAMR reached parity). Lua made optional via `WF_LUA_ENGINE=lua54|none` (2026-04-16); `scripting_lua.cc/hp` extracted as a peer TU matching all other engine plugs. WAMR AOT deferred.
 
 **Blender ↔ level round-trip** — `levcomp-rs` (Rust) compiles `.lev` source → binary `.lvl`; snowgoons loads end-to-end from `levcomp-rs` output. Blender plugin imports/exports 152/152 OAD fields, all light/slope/animation-channel types, Tcl→Lua script migration. Coordinate system fixed (WF is Z-up). Phase 2c (mesh bbox extension, MeshName asset ID packing, real path keyframes) not yet started.
 
@@ -23,22 +23,29 @@ Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 
 ## Plans
 
+### Active
+
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
 | 2026-04-16 | [Plan: git-branch-browser — curses TUI for browsing branch diffs](docs/plans/2026-04-16-git-branch-browser.md) | **Not started** | **Goal:** A Python curses program at `scripts/git-branch-browser.py` that lets you browse all git branches, see per-branch changed files as a collapsible directory tree with status annotations, and … |
-| 2026-04-16 | [Plan: Lua engine is not special — make it optional](docs/plans/2026-04-16-lua-not-special.md) | **Done** | `scripting_lua.cc/hp` extracted; `WF_LUA_ENGINE=lua54\|none` added to `build_game.sh`; all `lua_engine::` calls guarded; Fennel+none warns and forces lua54; stale `scripting_wasm3.hp` include removed. |
 | 2026-04-16 | [Plan: iOS port](docs/plans/2026-04-16-ios-port.md) | **Not started — blocked on Android port** | **Goal:** An IPA that runs snowgoons on a tethered iPhone, installed via Xcode with a developer profile. Proof-of-viability, not a shipping product. |
 | 2026-04-16 | [Plan: Android port](docs/plans/2026-04-16-android-port.md) | **Not started** | **Goal:** An APK that launches, runs snowgoons on an arm64 Android device, takes touch input, and handles background/foreground transitions without crashing. Forth (zForth) + Lua only in v1; other engines disabled. Proof-of-viability, not a shipping product. |
-| 2026-04-16 | [Engine directory reorganization](docs/plans/2026-04-16-engine-directory-reorganization.md) | **Complete** | `engine/` is now a top-level directory. `wftools/wf_engine/` → `engine/`, `wftools/vendor/` → `engine/vendor/`, `wf_viewer/stubs/` → `engine/stubs/`, `wf_viewer/include/` → `engine/include/`. `wftools/` is now strictly dev tooling. |
-| 2026-04-16 | [Plan: Blender ↔ Level Round-Trip](docs/plans/2026-04-16-blender-level-roundtrip.md) | **Complete** | `levcomp-rs` compiles `.lev` → `.lvl`; snowgoons loads in `wf_game`. Blender import/export round-trips 152/152 OAD fields. Lights, slopes, animation channels, scripts all emit. Coordinate system fixed (WF is Z-up, not Y-up). Tcl scripts ported to Lua. Investigation: [reverse-engineering doc](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md). |
 | 2026-04-16 | [ScriptLanguage OAD field](docs/plans/2026-04-16-script-language-oad-field.md) | **Reverted** | Field added then reverted from `common.oad` to restore binary layout compat with existing compiled levels. Dispatch table + language param threading remain in engine (passing 0=Lua). Will re-introduce once all levels compile through Blender+levcomp-rs. |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Partial** | Batches 1–7 complete (−43.7% LOC). Batch 6 (`#if 0` sweep) done. Batch 7 (PSX/Win artifacts, OpusMake, platform guards) done. Batch 8 (Jolt physics replacement) in progress. |
-| 2026-04-14 | [WAMR (dev interp + AOT ship)](docs/plans/2026-04-14-wamr-dev-aot-ship.md) | **Complete** | Phase 1 (classic interpreter) landed 2026-04-15; smoke-tested 2026-04-16 (GROUND, no crashes). Phase 2 (AOT) and Phase 3 (w2c2) deferred until ship targets are concrete. |
-| 2026-04-14 | [Forth scripting engine](docs/plans/2026-04-14-forth-scripting-engine.md) | **Complete** | All seven phases landed 2026-04-16. All six backends build and link; snowgoons.iff + cd.iff carry Forth scripts (`\ wf` sigil) via byte-preserving patcher. zForth is the default; alternate backends (ficl, atlast, embed, libforth, pforth) deferred. |
+
+### Complete
+
+| Date | Plan | Status | Summary |
+|------|------|--------|---------|
+| 2026-04-16 | [Plan: Lua engine is not special — make it optional](docs/plans/2026-04-16-lua-not-special.md) | **Done** | `scripting_lua.cc/hp` extracted; `WF_LUA_ENGINE=lua54\|none` added to `build_game.sh`; all `lua_engine::` calls guarded; Fennel+none warns and forces lua54; stale `scripting_wasm3.hp` include removed. |
+| 2026-04-16 | [Engine directory reorganization](docs/plans/2026-04-16-engine-directory-reorganization.md) | **Complete** | `engine/` is now a top-level directory. `wftools/wf_engine/` → `engine/`, `wftools/vendor/` → `engine/vendor/`, `wf_viewer/stubs/` → `engine/stubs/`, `wf_viewer/include/` → `engine/include/`. `wftools/` is now strictly dev tooling. |
+| 2026-04-16 | [Plan: Blender ↔ Level Round-Trip](docs/plans/2026-04-16-blender-level-roundtrip.md) | **Complete** | `levcomp-rs` compiles `.lev` → `.lvl`; snowgoons loads in `wf_game`. Blender import/export round-trips 152/152 OAD fields. Lights, slopes, animation channels, scripts all emit. Coordinate system fixed (WF is Z-up, not Y-up). Tcl scripts ported to Lua. Investigation: [reverse-engineering doc](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md). |
 | 2026-04-16 | [Finish Jolt physics integration](docs/plans/2026-04-16-jolt-physics-finish.md) | **Complete** | Five-step plan: fix SIGABRT (`JoltSyncFromCharacter`), eliminate zombie kinematic bodies, lock WF↔Jolt authority model, fix 3 m vertical pop (feet vs centre offset), 60 s soak. Player walks on snowgoons floor. |
-| 2026-04-14 | [Pluggable JS engines (QuickJS / JerryScript)](docs/plans/2026-04-14-pluggable-scripting-engine.md) | **Complete** | Both engines landed 2026-04-14 with `js_engine` namespace. QuickJS and JerryScript both smoke-tested 2026-04-16 (snowgoons passes). |
 | 2026-04-15 | [Lua engine fixes (#1–#6)](docs/plans/2026-04-15-lua-engine-fixes.md) | **Complete** | All 6 fixes: script cache, per-actor envs, Fennel precompile, debug gating, stdlib sandbox, coroutine continuations. Smoke-tested 2026-04-16. |
 | 2026-04-15 | [Align scripting plans to ScriptRouter](docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md) | **Complete** | Phases A–E complete: all plan docs updated, JS/wasm3 renamed to `js_engine`/`wasm3_engine` namespaces, WAMR/Wren/Forth landed. All engine smoke tests passed 2026-04-16. |
+| 2026-04-14 | [WAMR (dev interp + AOT ship)](docs/plans/2026-04-14-wamr-dev-aot-ship.md) | **Complete** | Phase 1 (classic interpreter) landed 2026-04-15; smoke-tested 2026-04-16 (GROUND, no crashes). Phase 2 (AOT) and Phase 3 (w2c2) deferred until ship targets are concrete. |
+| 2026-04-14 | [Forth scripting engine](docs/plans/2026-04-14-forth-scripting-engine.md) | **Complete** | All seven phases landed 2026-04-16. All six backends build and link; snowgoons.iff + cd.iff carry Forth scripts (`\ wf` sigil) via byte-preserving patcher. zForth is the default and smoke-tested; the five alternates (ficl, atlast, embed, libforth, pforth) are build-verified but not yet end-to-end smoke-tested. |
+| 2026-04-14 | [Pluggable JS engines (QuickJS / JerryScript)](docs/plans/2026-04-14-pluggable-scripting-engine.md) | **Complete** | Both engines landed 2026-04-14 with `js_engine` namespace. QuickJS and JerryScript both smoke-tested 2026-04-16 (snowgoons passes). |
 | 2026-04-14 | [Wren scripting engine](docs/plans/2026-04-14-wren-scripting-engine.md) | **Complete** | All phases complete: vendor, plug, dispatch, build, docs, patcher. Smoke-tested 2026-04-16 (GROUND, no crashes). |
 | 2026-04-14 | [WebAssembly (wasm3)](docs/plans/2026-04-14-wasm3-scripting-engine.md) | **Retired 2026-04-16** | Initial wasm spike. WAMR reached parity; `engine/vendor/wasm3-v0.5.0/` + `scripting_wasm3.{hp,cc}` deleted. `WF_WASM_ENGINE=wamr` is now the only wasm option. |
 | 2026-04-14 | [Fennel on Lua](docs/plans/2026-04-14-fennel-on-lua.md) | **Complete** | Landed 2026-04-14. `;` sigil, sub-dispatch inside `lua_engine`, vendored Fennel 1.6.1, minifier, codegen, snowgoons Fennel scripts. |
@@ -128,4 +135,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16** — `feat(scripting)`: Lua made optional via `WF_LUA_ENGINE=lua54|none`. `scripting_lua.cc/hp` extracted as peer TU; `build_game.sh` Lua vendor loop gated; Fennel+none warned; stale `scripting_wasm3.hp` include removed.
+**2026-04-16 23:06** — [`docs/plans/2026-04-16-git-branch-browser.md`](docs/plans/2026-04-16-git-branch-browser.md): Plan: git-branch-browser — curses TUI for browsing branch diffs
