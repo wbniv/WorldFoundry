@@ -17,6 +17,7 @@ use wf_oad::{ButtonType, OadEntry, OadFile};
 
 use std::collections::HashMap;
 
+use crate::asset_registry::{moves_between_rooms, AssetRegistry};
 use crate::common_block::CommonBlockBuilder;
 use crate::lev_parser::{field_data, field_str_value, LevObject};
 
@@ -153,7 +154,10 @@ pub fn serialize_oad_data(
     obj: &LevObject,
     common: &mut CommonBlockBuilder,
     name_to_idx: &HashMap<String, i32>,
+    room: Option<usize>,
+    registry: &AssetRegistry,
 ) -> Vec<u8> {
+    let is_perm = moves_between_rooms(obj);
     let mut out = Vec::new();
     let mut i = 0;
     while i < schema.entries.len() {
@@ -170,7 +174,8 @@ pub fn serialize_oad_data(
                     && schema.entries[j].button_type != ButtonType::EndCommon
                 {
                     let e = &schema.entries[j];
-                    serialize_entry(&mut section, e, obj, common, true, name_to_idx);
+                    serialize_entry(&mut section, e, obj, common, true, name_to_idx,
+                                    is_perm, room, registry);
                     j += 1;
                 }
                 while section.len() % 4 != 0 { section.push(0); }
@@ -183,7 +188,8 @@ pub fn serialize_oad_data(
                 i += 1;
             }
             _ => {
-                serialize_entry(&mut out, entry, obj, common, false, name_to_idx);
+                serialize_entry(&mut out, entry, obj, common, false, name_to_idx,
+                                is_perm, room, registry);
                 i += 1;
             }
         }
@@ -198,6 +204,9 @@ fn serialize_entry(
     common: &mut CommonBlockBuilder,
     in_common: bool,
     name_to_idx: &HashMap<String, i32>,
+    is_perm: bool,
+    room: Option<usize>,
+    registry: &AssetRegistry,
 ) {
     let key = entry.name_str();
     let chunk = obj.find_field(key);
@@ -239,8 +248,15 @@ fn serialize_entry(
             push_i32(out, val);
         }
         ButtonType::Filename | ButtonType::MeshName => {
-            // Asset IDs come from asset.inc; unresolved = 0.
-            push_i32(out, 0);
+            // Look up the packed asset ID from the registry.
+            // PatchAssetIDsIntoOADs checks permanents first, then the object's room.
+            let name = chunk.map(field_str_value).unwrap_or_default();
+            let id = if name.is_empty() {
+                0
+            } else {
+                registry.lookup(&name, is_perm, room)
+            };
+            push_i32(out, id);
         }
         ButtonType::XData => {
             // XData fields (actions 1..=4) materialise as a 4-byte offset

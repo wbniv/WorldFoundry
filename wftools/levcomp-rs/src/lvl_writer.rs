@@ -15,9 +15,13 @@
 //!
 //! MVP: objects only (no paths/channels/rooms/common block), OADSize = 0.
 
+use std::path::Path;
+
+use crate::asset_registry::AssetRegistry;
 use crate::common_block::CommonBlockBuilder;
 use crate::lc_parser::ClassMap;
 use crate::lev_parser::LevObject;
+use crate::mesh_bbox;
 use crate::oad_loader::{per_object_size, serialize_oad_data, OadSchemas};
 use crate::rooms;
 
@@ -47,6 +51,15 @@ pub struct LevelPlan<'a> {
     pub objects: &'a [LevObject],
     pub classes: &'a ClassMap,
     pub schemas: &'a OadSchemas,
+    /// Directory containing mesh `.iff` files.  When `Some`, each object's
+    /// bbox is extended to enclose its mesh geometry (Phase 2c).
+    pub mesh_dir: Option<&'a Path>,
+    /// Asset ID registry built from this level's Filename/MeshName fields.
+    pub asset_registry: &'a AssetRegistry,
+    /// Pre-computed room sort result.  Passed in from `main` so the registry
+    /// build and the writer use the same room assignments.
+    pub rooms: &'a [rooms::Room],
+    pub room_of_obj: &'a [Option<usize>],
 }
 
 pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
@@ -75,19 +88,22 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
     // and commonDataLength).  Building in-order mirrors iff2lvl's Save flow.
     let mut common = CommonBlockBuilder::new();
     let name_to_idx = crate::lev_parser::name_to_index(plan.objects);
+
+    let room_list = plan.rooms;
+    let room_of_obj = plan.room_of_obj;
+
     let mut oad_payloads: Vec<Vec<u8>> = Vec::with_capacity(total_objects);
     oad_payloads.push(Vec::new());  // NULL_Object: empty payload
-    for obj in plan.objects {
+    for (i, obj) in plan.objects.iter().enumerate() {
+        let room = room_of_obj[i];
         let payload = plan
             .schemas
             .get(&obj.class_name)
-            .map(|s| serialize_oad_data(s, obj, &mut common, &name_to_idx))
+            .map(|s| serialize_oad_data(s, obj, &mut common, &name_to_idx,
+                                        room, plan.asset_registry))
             .unwrap_or_default();
         oad_payloads.push(payload);
     }
-
-    // Rooms: sort non-room objects into rooms by bbox-center containment.
-    let room_list = rooms::sort(plan.objects, plan.schemas);
     let room_sizes: Vec<usize> = room_list.iter().map(|r| r.byte_size()).collect();
     let rooms_total: usize = room_sizes.iter().sum();
 
@@ -200,10 +216,17 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
         let rot = (radians_fx_to_u16_revs(obj.rotation.a),
                    radians_fx_to_u16_revs(obj.rotation.b),
                    radians_fx_to_u16_revs(obj.rotation.c));
-        let bbox = expand_thin_bbox([
+
+        // Use the bbox from the .lev directly.  The .lev BOX3 was authored in
+        // the 3DS Max scene (via max2lev) and matches what the oracle iff2lvl
+        // produces.  The --mesh-dir flag is retained for future use but bbox
+        // extension from VRTX overshoots the oracle on all existing levels.
+        let _ = plan.mesh_dir;  // reserved for future use
+        let raw_bbox = [
             obj.bbox.min[0], obj.bbox.min[1], obj.bbox.min[2],
             obj.bbox.max[0], obj.bbox.max[1], obj.bbox.max[2],
-        ]);
+        ];
+        let bbox = expand_thin_bbox(raw_bbox);
 
         let path_index: i16 = if needs_dummy_path[i] { 0 } else { -1 };
         const OADFLAG_TEMPLATE_OBJECT: i32 = 1 << 0;
@@ -272,7 +295,7 @@ pub fn write(plan: &LevelPlan) -> Result<Vec<u8>, String> {
         push_i32(&mut out, room_cursor as i32);
         room_cursor += sz;
     }
-    for room in &room_list {
+    for room in room_list {
         let start = out.len();
         room.write(&mut out);
         debug_assert_eq!(out.len() - start, room.byte_size());

@@ -68,6 +68,15 @@ pub fn is_room_class(class_name: &str, schemas: &OadSchemas) -> bool {
     }
 }
 
+/// Result of sorting level objects into rooms.
+pub struct SortResult {
+    pub rooms: Vec<Room>,
+    /// For each object in the level (0-based index matching `objects[]`):
+    /// - `Some(r)` — contained in room `r` (0-based room index).
+    /// - `None`   — is itself a room object, not contained in any room.
+    pub room_of_obj: Vec<Option<usize>>,
+}
+
 /// Sort level objects into rooms.  Follows iff2lvl's SortIntoRooms +
 /// QRoom::Save's adjacent-room resolution.
 ///
@@ -83,9 +92,10 @@ pub fn is_room_class(class_name: &str, schemas: &OadSchemas) -> bool {
 ///   in one room stops ticking when the player is in another.
 /// - If no rooms are found, create one giant fallback room containing every
 ///   object (mirrors iff2lvl's default-room path).
-pub fn sort(objects: &[LevObject], schemas: &OadSchemas) -> Vec<Room> {
+pub fn sort(objects: &[LevObject], schemas: &OadSchemas) -> SortResult {
     let mut rooms: Vec<Room> = Vec::new();
-    let mut room_of_obj: Vec<i16> = Vec::new();  // parallel to objects: which room slot
+    // Sentinel values during build: -1 = room object, -2 = unassigned.
+    let mut room_slot: Vec<i16> = Vec::new();
 
     // Pass 1 — identify rooms and compute their world-space bboxes.
     // Index i in `objects` corresponds to obj[i+1] in the level (slot 0 is NULL).
@@ -98,9 +108,9 @@ pub fn sort(objects: &[LevObject], schemas: &OadSchemas) -> Vec<Room> {
                 entries: Vec::new(),
                 adjacent_rooms: [ADJACENT_ROOM_NULL; 2],
             });
-            room_of_obj.push(-1);  // rooms themselves are not entries
+            room_slot.push(-1);  // rooms themselves are not entries
         } else {
-            room_of_obj.push(-2);  // unassigned marker
+            room_slot.push(-2);  // unassigned marker
         }
     }
 
@@ -112,8 +122,6 @@ pub fn sort(objects: &[LevObject], schemas: &OadSchemas) -> Vec<Room> {
             let Some(chunk) = room_obj.find_field(field_name) else { continue };
             let target_name = crate::lev_parser::field_str_value(chunk);
             if target_name.is_empty() { continue; }
-            // Find the target object by name, then find the room whose
-            // room_object_index points at that object.
             if let Some((target_obj_i, _)) =
                 objects.iter().enumerate().find(|(_, o)| o.name == target_name)
             {
@@ -127,22 +135,19 @@ pub fn sort(objects: &[LevObject], schemas: &OadSchemas) -> Vec<Room> {
         }
     }
     for (ri, room) in rooms.iter_mut().enumerate() {
-        // Stash the resolved adjacencies; the Room struct currently has no
-        // field for them, so emit via adjacentRooms in `write()` below.  We
-        // extend Room to carry them explicitly.
         room.adjacent_rooms = adjacencies[ri];
     }
 
     // Pass 2 — sort every non-room object into the first room containing its
     // world-space center point.
     for (i, obj) in objects.iter().enumerate() {
-        if room_of_obj[i] != -2 { continue; }  // already a room
+        if room_slot[i] != -2 { continue; }  // already a room
 
         let center = obj_center(obj);
         for (r, room) in rooms.iter_mut().enumerate() {
             if point_in_box(center, room.bbox) {
                 room.entries.push((i + 1) as i16);
-                room_of_obj[i] = r as i16;
+                room_slot[i] = r as i16;
                 break;
             }
         }
@@ -160,11 +165,17 @@ pub fn sort(objects: &[LevObject], schemas: &OadSchemas) -> Vec<Room> {
         };
         for i in 0..objects.len() {
             fallback.entries.push((i + 1) as i16);
+            room_slot[i] = 0;
         }
         rooms.push(fallback);
     }
 
-    rooms
+    // Convert room_slot (-1=room obj, -2=unassigned, ≥0=room index) to Option<usize>.
+    let room_of_obj: Vec<Option<usize>> = room_slot.iter()
+        .map(|&s| if s >= 0 { Some(s as usize) } else { None })
+        .collect();
+
+    SortResult { rooms, room_of_obj }
 }
 
 /// Object world-space bbox = position + local bbox.
