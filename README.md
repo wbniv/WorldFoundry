@@ -125,4 +125,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 21:04** — [`docs/plans/2026-04-14-forth-scripting-engine.md`](docs/plans/2026-04-14-forth-scripting-engine.md): Plan: Forth as a scripting engine option for World Foundry
+**2026-04-16 21:19** — [`docs/plans/2026-04-14-wamr-dev-aot-ship.md`](docs/plans/2026-04-14-wamr-dev-aot-ship.md): Plan: WAMR for dev, AOT-only (or w2c2) for ship
