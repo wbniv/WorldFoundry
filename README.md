@@ -144,4 +144,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17** — `feat(steam)`: Steamworks SDK lifecycle + Steam Input Phases 1–2 wired; `WF_ENABLE_STEAM=1`; `game_actions_480.vdf`; Phases 3+4 deferred.
+**2026-04-17 02:40** — [`docs/investigations/2026-04-14-audio-sound-music.md`](docs/investigations/2026-04-14-audio-sound-music.md): Investigation: Audio — sound effects, music, positional sound
