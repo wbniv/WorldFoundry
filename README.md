@@ -138,7 +138,7 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 - **Audio (miniaudio)** — SFX one-shots, music streaming, 3D panning, all statically linked. No start date.
 - **Mobile port** — Android arm64 / iOS arm64; plans written ([Android](docs/plans/2026-04-16-android-port.md), [iOS](docs/plans/2026-04-16-ios-port.md)); blocked on GL immediate-mode replacement + CMake migration.
 - **Multiplayer / voice / mobile input** — blocked on mobile port.
-- **Steam packaging** — most runtime blockers resolved; packaging pipeline itself not yet started.
+- **Steam packaging** — Phases 1+2 done: Steamworks SDK lifecycle and Steam Input are wired in. Phases 3 (SteamPipe depot build + upload) and 4 (store page assets) deferred; blocked on Steamworks partner account and store capsule art.
 
 ---
 
