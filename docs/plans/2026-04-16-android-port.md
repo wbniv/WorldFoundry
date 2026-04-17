@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-16
 **Status:** Not started
-**Goal:** An APK that launches, runs snowgoons on an arm64 Android device, takes touch input, and handles background/foreground transitions without crashing. Proof-of-viability, not a shipping product.
+**Goal:** An APK that launches, runs snowgoons on an arm64 Android device or Google TV (Chromecast with Google TV), takes touch or gamepad input, and handles background/foreground transitions without crashing. Proof-of-viability, not a shipping product.
 
 ## Settled decisions
 
@@ -14,6 +14,7 @@
 | Graphics API | GLES 3.0 via EGL |
 | Architecture | arm64-v8a only |
 | Gamepad support | Yes in v1 — `InputDevice` → `EJ_BUTTONF_*` bitmask alongside touch |
+| Google TV / Chromecast | Same APK; leanback manifest flag + runtime TV-mode detection; no on-screen d-pad on TV |
 
 ## Scripting engines on Android
 
@@ -77,10 +78,11 @@ Each has standalone value on Linux; Android blocks on all four.
 1. Add `hal/android/` — platform init, input, filesystem (`AAssetManager`), timer.
 2. Write `NativeActivity` entry point (`android_native_app_glue`-style). Map `onStart`/`onPause`/`onResume`/`onStop` to Phase 2 hooks.
 3. CMake NDK toolchain build (arm64-v8a): compile engine + zForth + Jolt into `libwf_game.so` with the Forth-only flags above. Add Gradle project + `AndroidManifest.xml`; package into APK.
-4. Input: on-screen dpad + 4–6 buttons (hit-test each `MotionEvent`) AND physical gamepad via `InputDevice` — both emit the same `EJ_BUTTONF_*` bitmask.
+4. Input: detect TV mode at runtime via `UiModeManager.getCurrentModeType() == UI_MODE_TYPE_TELEVISION`. On TV: physical gamepad/D-pad remote only → `EJ_BUTTONF_*` bitmask directly; no on-screen d-pad rendered. On phone/tablet: on-screen d-pad + 4–6 buttons (hit-test each `MotionEvent`) AND physical gamepad — both paths emit the same `EJ_BUTTONF_*` bitmask.
 5. Asset pipeline: bake `cd.iff` into `assets/` in APK; redirect Phase 2's asset accessor to `AAssetManager_open`.
 6. GL renderer: hook Phase 0's `glpipeline_modern` to GLES 3.0 context from `EGLContext`.
-7. **Verify:** sideload APK, launch, play snowgoons. Pause (Home), resume, game continues. No crash on orientation change (landscape-lock as first defence).
+7. **Verify (phone):** sideload APK, launch, play snowgoons. Pause (Home), resume, game continues. No crash on orientation change (landscape-lock as first defence).
+   **Verify (Google TV):** sideload same APK to Chromecast with Google TV via ADB, launch via leanback launcher, play snowgoons with a gamepad. No on-screen d-pad rendered.
 
 ### Phase 4 — Second-level smoke test + performance pass
 
@@ -102,7 +104,7 @@ Each has standalone value on Linux; Android blocks on all four.
 | `wfsource/source/game/game.cc` | Phase 2 — add suspend/resume hooks |
 | `engine/build_game.sh` | Phase 1 — deprecate in favour of CMake |
 | `CMakeLists.txt` (root + subdirs) | Phase 1 — new |
-| `android/build.gradle`, `AndroidManifest.xml` | Phase 3 — new |
+| `android/build.gradle`, `AndroidManifest.xml` | Phase 3 — new; leanback feature + launcher intent for Google TV |
 
 ## Open questions
 
