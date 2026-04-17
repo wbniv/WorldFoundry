@@ -148,4 +148,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 11:40** — [`docs/investigations/2026-04-14-audio-sound-music.md`](docs/investigations/2026-04-14-audio-sound-music.md): Investigation: Audio — sound effects, music, positional sound
+**2026-04-17 11:45** — [`docs/plans/2026-04-17-audio-mailbox-api.md`](docs/plans/2026-04-17-audio-mailbox-api.md): Plan: Mailbox-wired audio API (music + SFX)
