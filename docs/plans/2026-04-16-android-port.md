@@ -30,8 +30,6 @@ WF_REST_API=0
 WF_FORTH_ENGINE=zforth   # default, explicit for clarity
 ```
 
-Until the lua-not-special plan lands, Lua compiles in unconditionally; the interim Android build ships Forth + Lua.
-
 zForth: ~4 KB compiled core + WF bridge; pure portable C, no OS-specific code. All other engines are portable to arm64 and can be re-enabled later.
 
 **Note on WAMR if re-enabled later:** change `WAMR_BUILD_TARGET` from `X86_64` to `AARCH64`.
