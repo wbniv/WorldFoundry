@@ -126,4 +126,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 21:42** — [`docs/plans/2026-04-16-lua-not-special.md`](docs/plans/2026-04-16-lua-not-special.md): Plan: Lua engine is not special — make it optional
+**2026-04-16 21:42** — [`docs/plans/2026-04-16-android-port.md`](docs/plans/2026-04-16-android-port.md): Plan: Android port
