@@ -32,6 +32,12 @@ Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 | 2026-04-16 | [ScriptLanguage OAD field](docs/plans/2026-04-16-script-language-oad-field.md) | **Reverted** | Field added then reverted from `common.oad` to restore binary layout compat with existing compiled levels. Dispatch table + language param threading remain in engine (passing 0=Lua). Will re-introduce once all levels compile through Blender+levcomp-rs. |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Partial** | Batches 1–7 complete (−43.7% LOC). Batch 6 (`#if 0` sweep) done. Batch 7 (PSX/Win artifacts, OpusMake, platform guards) done. Batch 8 (Jolt physics replacement) in progress. |
 
+### Deferred
+
+| Date | Plan | Status | Summary |
+|------|------|--------|---------|
+| 2026-04-16 | [Plan: iOS port](docs/plans/2026-04-16-ios-port.md) | **Deferred — blocked on Android port** | **Goal:** An IPA that runs snowgoons on a tethered iPhone, installed via Xcode with a developer profile. Proof-of-viability, not a shipping product. |
+
 ### Complete
 
 | Date | Plan | Status | Summary |
