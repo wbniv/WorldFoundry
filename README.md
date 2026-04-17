@@ -139,7 +139,7 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 - **iffcomp: Rust is primary** — Decision: tools in Rust. Four implementations exist (C++ modernized oracle, Go, Node.js, Rust); all pass `all_features.iff.txt`. Rust port (`iffcomp-rs/`) is the going-forward implementation. C++ kept as byte-exact oracle; Go and Node.js ports are superseded.
 
 ### Larger / deferred work
-- **Audio (miniaudio)** — Phases 1–4 complete (SFX one-shots, MIDI MusicPlayer, per-level music, Lua scripting surface). Phases 5–7 (3D SFX, mobile backends, docs) deferred.
+- **Audio (miniaudio)** — Phases 1–5 complete (SFX one-shots, MIDI MusicPlayer, per-level music, Lua scripting surface, 3D positional SFX + listener tracking). Phases 6 (mobile backends) and 7 (docs) deferred. **Gap:** audio API is Lua-only (C closures in `scripting_lua.cc`), not mailbox-wired; the other seven scripting engines currently can't trigger music or SFX.
 - **Mobile port** — Android arm64 / iOS arm64; plans written ([Android](docs/plans/2026-04-16-android-port.md), [iOS](docs/plans/2026-04-16-ios-port.md)); blocked on GL immediate-mode replacement + CMake migration.
 - **Multiplayer / voice / mobile input** — blocked on mobile port.
 - **Steam packaging** — Phases 1+2 done: Steamworks SDK lifecycle and Steam Input are wired in. Phases 3 (SteamPipe depot build + upload) and 4 (store page assets) deferred; blocked on Steamworks partner account and store capsule art.
