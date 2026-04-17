@@ -148,4 +148,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 09:52** — [`docs/plans/2026-04-17-android-phase-2.md`](docs/plans/2026-04-17-android-phase-2.md): Plan: Android port Phase 2 — HAL lifecycle + asset accessor
+**2026-04-17 11:25** — [`docs/investigations/2026-04-14-audio-sound-music.md`](docs/investigations/2026-04-14-audio-sound-music.md): Investigation: Audio — sound effects, music, positional sound
