@@ -6,6 +6,7 @@
 
 #include <scripting/scriptinterpreter.hp>
 #include <math/scalar.hp>
+#include <audio/music.hp>
 
 extern "C" {
 #include <lua.h>
@@ -46,6 +47,29 @@ static std::unordered_map<int, int> gActorEnvRefs;
 static std::unordered_map<int, int> gActorThreadRefs;
 
 // --------------------------------------------------------------------------
+// C closures — audio
+
+static int lua_play_music(lua_State* L)
+{
+    const char* path = luaL_checkstring(L, 1);
+    bool ok = gMusicPlayer && gMusicPlayer->play(path);
+    lua_pushboolean(L, ok);
+    return 1;
+}
+
+static int lua_stop_music(lua_State* L)
+{
+    if (gMusicPlayer) gMusicPlayer->stop();
+    return 0;
+}
+
+static int lua_set_music_volume(lua_State* L)
+{
+    float v = (float)luaL_checknumber(L, 1);
+    if (gMusicPlayer) gMusicPlayer->setVolume(v);
+    return 0;
+}
+
 // C closures — read_mailbox / write_mailbox
 
 static int lua_read_mailbox(lua_State* L)
@@ -116,6 +140,15 @@ void Init(MailboxesManager& mgr)
 
     lua_pushcfunction(gL, lua_write_mailbox);
     lua_setglobal(gL, "write_mailbox");
+
+    lua_pushcfunction(gL, lua_play_music);
+    lua_setglobal(gL, "play_music");
+
+    lua_pushcfunction(gL, lua_stop_music);
+    lua_setglobal(gL, "stop_music");
+
+    lua_pushcfunction(gL, lua_set_music_volume);
+    lua_setglobal(gL, "set_music_volume");
 
 #ifdef WF_ENABLE_FENNEL
     if (luaL_loadbuffer(gL, kFennelSource, kFennelSourceLen, "fennel.lua") != LUA_OK

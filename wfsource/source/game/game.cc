@@ -29,8 +29,6 @@
 
 #include "level.hp"
 #include "game.hp"
-#include <audio/device.hp>
-#include <audio/buffer.hp>
 #include <audio/music.hp>
 #include "rest_api.hp"
 #include "physics_jolt.hp"
@@ -64,21 +62,6 @@ WFGame::WFGame( const int nStartingLevel )
 	DBSTREAM1( cprogress << "WFGame::WFGame" << std::endl; )
 	JoltRuntimeInit();
 
-	// Audio smoke-tests (Phase 1: WAV beep; Phase 2: MIDI scale).
-	if (gSoundDevice && gSoundDevice->isReady()) {
-		static std::vector<char> beepData;
-		if (FILE* f = fopen("test_beep.wav", "rb")) {
-			fseek(f, 0, SEEK_END); long sz = ftell(f); rewind(f);
-			beepData.resize(sz);
-			fread(beepData.data(), 1, sz, f);
-			fclose(f);
-			static SoundBuffer beep(beepData.data(), (unsigned)beepData.size());
-			beep.play();
-			fprintf(stderr, "audio: startup beep queued (%ld bytes)\n", sz);
-		}
-	}
-	if (gMusicPlayer)
-		gMusicPlayer->play("test_scale.mid");
 
 	assert(ValidPtr(_msgPortMemPool));
 
@@ -269,6 +252,17 @@ WFGame::RunLevel(_DiskFile* levelFile)
 	assert( ValidPtr(_curLevel));
 	DBSTREAM3( cprogress << "WFGame::loadLevel done" << std::endl; )
 
+	// Start per-level music: look for level<N>.mid alongside cd.iff.
+	if (gMusicPlayer) {
+		char midiName[64];
+		if (_desiredLevelNum >= 0)
+			snprintf(midiName, sizeof(midiName), "level%d.mid", _desiredLevelNum);
+		else
+			snprintf(midiName, sizeof(midiName), "music.mid");
+		// play() silently ignores missing files
+		gMusicPlayer->play(midiName);
+	}
+
 	Scalar deltaTime = Scalar::zero;
 	bool _bContinue = true;
 	DBSTREAM1 ( cprogress << "Entering main game loop\n"; );
@@ -324,6 +318,7 @@ WFGame::RunLevel(_DiskFile* levelFile)
 	DBSTREAM1( std::cout << ", _bContinue = " << _bContinue << ", _curLevel->done() = " << _curLevel->done() << std::endl; )
 
 	RestApi_Stop();
+	if (gMusicPlayer) gMusicPlayer->stop();
 	MEMORY_DELETE(HALLmalloc,_curLevel,Level);
 	_curLevel = NULL;
 }
