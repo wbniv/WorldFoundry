@@ -23,12 +23,14 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
+| 2026-04-16 | [Plan: iOS port](docs/plans/2026-04-16-ios-port.md) | **Not started — blocked on Android port** | **Goal:** An IPA that runs snowgoons on a tethered iPhone, installed via Xcode with a developer profile. Proof-of-viability, not a shipping product. |
+| 2026-04-16 | [Plan: Android port](docs/plans/2026-04-16-android-port.md) | **Not started** | **Goal:** An APK that launches, runs snowgoons on an arm64 Android device, takes touch input, and handles background/foreground transitions without crashing. Proof-of-viability, not a shipping … |
 | 2026-04-16 | [Engine directory reorganization](docs/plans/2026-04-16-engine-directory-reorganization.md) | **Complete** | `engine/` is now a top-level directory. `wftools/wf_engine/` → `engine/`, `wftools/vendor/` → `engine/vendor/`, `wf_viewer/stubs/` → `engine/stubs/`, `wf_viewer/include/` → `engine/include/`. `wftools/` is now strictly dev tooling. |
 | 2026-04-16 | [Plan: Blender ↔ Level Round-Trip](docs/plans/2026-04-16-blender-level-roundtrip.md) | **Complete** | `levcomp-rs` compiles `.lev` → `.lvl`; snowgoons loads in `wf_game`. Blender import/export round-trips 152/152 OAD fields. Lights, slopes, animation channels, scripts all emit. Coordinate system fixed (WF is Z-up, not Y-up). Tcl scripts ported to Lua. Investigation: [reverse-engineering doc](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md). |
 | 2026-04-16 | [ScriptLanguage OAD field](docs/plans/2026-04-16-script-language-oad-field.md) | **Reverted** | Field added then reverted from `common.oad` to restore binary layout compat with existing compiled levels. Dispatch table + language param threading remain in engine (passing 0=Lua). Will re-introduce once all levels compile through Blender+levcomp-rs. |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Partial** | Batches 1–7 complete (−43.7% LOC). Batch 6 (`#if 0` sweep) done. Batch 7 (PSX/Win artifacts, OpusMake, platform guards) done. Batch 8 (Jolt physics replacement) in progress. |
 | 2026-04-14 | [WAMR (dev interp + AOT ship)](docs/plans/2026-04-14-wamr-dev-aot-ship.md) | **Complete** | Phase 1 (classic interpreter) landed 2026-04-15; smoke-tested 2026-04-16 (GROUND, no crashes). Phase 2 (AOT) and Phase 3 (w2c2) deferred until ship targets are concrete. |
-| 2026-04-14 | [Forth scripting engine](docs/plans/2026-04-14-forth-scripting-engine.md) | **Partial** | Phase 1 (all 6 vendors) done. zForth default backend landed with `scripting_forth.hp`/`scripting_zforth.cc`, dispatch arm, build flag, patcher, docs. Smoke-tested 2026-04-16 (GROUND, no crashes). Alternate backends (ficl, atlast, embed, libforth, pforth) deferred. |
+| 2026-04-14 | [Forth scripting engine](docs/plans/2026-04-14-forth-scripting-engine.md) | **Complete** | All seven phases landed 2026-04-16. All six backends build and link; snowgoons.iff + cd.iff carry Forth scripts (`\ wf` sigil) via byte-preserving patcher. zForth is the default; alternate backends (ficl, atlast, embed, libforth, pforth) deferred. |
 | 2026-04-16 | [Finish Jolt physics integration](docs/plans/2026-04-16-jolt-physics-finish.md) | **Complete** | Five-step plan: fix SIGABRT (`JoltSyncFromCharacter`), eliminate zombie kinematic bodies, lock WF↔Jolt authority model, fix 3 m vertical pop (feet vs centre offset), 60 s soak. Player walks on snowgoons floor. |
 | 2026-04-14 | [Pluggable JS engines (QuickJS / JerryScript)](docs/plans/2026-04-14-pluggable-scripting-engine.md) | **Complete** | Both engines landed 2026-04-14 with `js_engine` namespace. QuickJS and JerryScript both smoke-tested 2026-04-16 (snowgoons passes). |
 | 2026-04-15 | [Lua engine fixes (#1–#6)](docs/plans/2026-04-15-lua-engine-fixes.md) | **Complete** | All 6 fixes: script cache, per-actor envs, Fennel precompile, debug gating, stdlib sandbox, coroutine continuations. Smoke-tested 2026-04-16. |
@@ -58,7 +60,7 @@ Multiple larger investigations (audio, mobile port, multiplayer, constraint-base
 | 2026-04-11 | [iffcomp — C++ modernization](docs/investigations/2026-04-11-iffcomp-modernization.md) | **Complete** | Modernized the 1996 flex/bison C++ `iffcomp` to build on GCC 15 / Clang under C++17. Now serves as byte-exact oracle for Go and Rust ports. |
 | 2026-04-14 | [Audio: sound effects, music, positional sound](docs/investigations/2026-04-14-audio-sound-music.md) | **Deferred** | Full miniaudio-based audio plan: SFX one-shots, music streaming, 3D panning, script-triggerable via mailboxes. Statically linked. Not yet scheduled. |
 | 2026-04-14 | [Constraint-based props](docs/investigations/2026-04-14-constraint-based-props.md) | **Deferred** | Doors, chains, pulleys, elevators via Jolt constraints. **Hard prerequisite:** Jolt integration must land first; also requires IFF binary chunk support. Not yet scheduled. |
-| 2026-04-14 | [Mobile port (Android / iOS)](docs/investigations/2026-04-14-mobile-port-android-ios.md) | **Deferred** | Full plan for arm64 Android and iOS builds. Key blocker: immediate-mode GL must be replaced before any mobile API can work. CMake migration required. Not yet scheduled. |
+| 2026-04-16 | [Android port](docs/plans/2026-04-16-android-port.md) / [iOS port](docs/plans/2026-04-16-ios-port.md) | **Not started** | Investigation promoted to two plans. Android first; iOS blocked on Android. Key blocker: immediate-mode GL rewrite + CMake migration. |
 | 2026-04-14 | [Multiplayer, voice chat, mobile input](docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md) | **Deferred** | Surveyed multiplayer sync models, voice (LKWS/Agora/LiveKit), mobile input (touch/gyro/haptics). Depends on mobile port landing first. Not yet scheduled. |
 | 2026-04-14 | [REST API box PoC](docs/investigations/2026-04-14-rest-api-box-poc.md) | **Complete** | cpp-httplib embedded server in `wf_game`; create/recolor/resize/delete GL wireframe boxes via HTTP at runtime. Landed `7e690e1`. |
 
@@ -113,11 +115,11 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ### Content pipeline
 - **Blender → `cd.iff` pipeline** — `levcomp-rs` compiles `.lev.bin` → `.lvl`; validated via LVL-swap into existing snowgoons.iff. Remaining: asset ID packing, mesh bbox extension, real path/channel extraction, end-to-end automation script.
-- **iffcomp: Rust is primary** — Decision: tools in Rust. Three implementations exist (C++ modernized oracle, Go, Rust); all pass `all_features.iff.txt`. Rust port (`iffcomp-rs/`) is the going-forward implementation. C++ kept as byte-exact oracle; Go port (`iffcomp-go/`) is superseded.
+- **iffcomp: Rust is primary** — Decision: tools in Rust. Four implementations exist (C++ modernized oracle, Go, Node.js, Rust); all pass `all_features.iff.txt`. Rust port (`iffcomp-rs/`) is the going-forward implementation. C++ kept as byte-exact oracle; Go and Node.js ports are superseded.
 
 ### Larger / deferred work
 - **Audio (miniaudio)** — SFX one-shots, music streaming, 3D panning, all statically linked. No start date.
-- **Mobile port** — Android arm64 / iOS arm64; blocked on GL immediate-mode replacement + CMake migration.
+- **Mobile port** — Android arm64 / iOS arm64; plans written ([Android](docs/plans/2026-04-16-android-port.md), [iOS](docs/plans/2026-04-16-ios-port.md)); blocked on GL immediate-mode replacement + CMake migration.
 - **Multiplayer / voice / mobile input** — blocked on mobile port.
 - **Steam packaging** — most runtime blockers resolved; packaging pipeline itself not yet started.
 
@@ -125,4 +127,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16** — [`docs/plans/2026-04-14-wamr-dev-aot-ship.md`](docs/plans/2026-04-14-wamr-dev-aot-ship.md): WAMR plan closed — Phase 1 complete, Phases 2 (AOT) and 3 (w2c2) deferred.
+**2026-04-16 21:25** — [`docs/plans/2026-04-16-ios-port.md`](docs/plans/2026-04-16-ios-port.md): Plan: iOS port
