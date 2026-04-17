@@ -19,6 +19,8 @@ Five days of work (2026-04-12 – 2026-04-17) across six major areas:
 
 **Steam (Phases 1–2)** — Steamworks SDK lifecycle wired into HAL (`SteamAPI_Init/Shutdown` in `HALStart`) and display (`SteamAPI_RunCallbacks` after `XEventLoop` in `PageFlip`). Steam Input polls all connected controllers each frame and ORs results into `_JoystickButtonsF`; keyboard path unchanged. `WF_ENABLE_STEAM=1` build flag; SDK not committed (see `engine/vendor/steamworks/README.md`). `steam/game_actions_480.vdf` defines the `InGame` action set. `steam_appid.txt=480` for dev. Phases 3 (SteamPipe depot) and 4 (store page) deferred.
 
+**Audio (Phases 1–2 + in-progress 3–4)** — Phase 1 (2026-04-17): miniaudio v0.11.25 vendored; `SoundDevice`/`SoundBuffer` reimplemented on `ma_engine`; `_InitAudio`/`_TermAudio` in HAL; fire-and-forget `play()` via heap `PlayInstance` freed by end-callback. Phase 2 (2026-04-17): TinySoundFont (`tsf.h`/`tml.h`) vendored; `MusicPlayer` renders MIDI → stereo float PCM as a miniaudio custom data source on the audio thread; C-major scale (`test_scale.mid`) audible via PulseAudio. Phase 3 in progress: per-level music (`level<N>.mid`) loads on `RunLevel`, stops on exit; `level0.mid` added. Phase 4 in progress: `play_music`/`stop_music`/`set_music_volume` Lua C closures registered in `scripting_lua.cc`.
+
 **Tooling and plans** — `engine/` reorganised to top-level. REST API box PoC landed. Android + iOS port plans written (blocked on GL immediate-mode rewrite + CMake migration). CLI level override (`-L<path>`) confirmed done. Audio investigation updated: `AudioBackend` pimpl seam documented; MIDI sources (OpenScore CC0, Mutopia, piano-midi.de) researched and catalogued; IFF format lineage (EA IFF 85 → AIFF, RIFF, WF IFF) documented.
 
 ---
