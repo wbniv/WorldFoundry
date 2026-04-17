@@ -1,0 +1,71 @@
+//=============================================================================
+// asset_accessor.hp:
+// Copyright ( c ) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//=============================================================================
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// Version 2 as published by the Free Software Foundation
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// or see www.fsf.org
+//=============================================================================
+// Description: Abstract read-only accessor for game-package assets.
+//
+// Covers assets shipped inside the game package (e.g. cd.iff). The Linux impl
+// opens POSIX files from the working directory; the Android impl (Phase 3)
+// will wrap AAssetManager_open from inside the APK. Save games, config, MIDI
+// loaded by the audio subsystem, and -L<path> overrides stay on POSIX file I/O
+// and do NOT go through this interface — it's purely for the bundled asset
+// pipeline that DiskFileHD / DiskFileCD read from.
+//=============================================================================
+
+#ifndef HAL_ASSET_ACCESSOR_HP
+#define HAL_ASSET_ACCESSOR_HP
+
+#include <pigsys/pigsys.hp>
+#include <stdint.h>
+
+//=============================================================================
+
+struct AssetHandle;   // opaque; backend-specific
+
+class AssetAccessor
+{
+public:
+    virtual ~AssetAccessor() = default;
+
+    // Open a packaged asset for reading. Returns nullptr on failure.
+    virtual AssetHandle* OpenForRead(const char* path) = 0;
+
+    // Close a handle previously returned by OpenForRead.
+    virtual void Close(AssetHandle* handle) = 0;
+
+    // Total size of the asset in bytes.
+    virtual int64_t Size(AssetHandle* handle) = 0;
+
+    // Absolute seek (SEEK_SET semantics). Returns new position, or -1 on error.
+    virtual int64_t SeekAbsolute(AssetHandle* handle, int64_t offset) = 0;
+
+    // Read up to `count` bytes. Returns bytes read (may be short), or -1 on error.
+    virtual int64_t Read(AssetHandle* handle, void* buffer, int64_t count) = 0;
+};
+
+//=============================================================================
+// Singleton access. Installed at HAL startup (_PlatformSpecificInit).
+// Never returns nullptr after HALStart has begun.
+
+AssetAccessor& HALGetAssetAccessor();
+void           HALSetAssetAccessor(AssetAccessor* accessor);   // platform-init use
+
+//=============================================================================
+#endif // HAL_ASSET_ACCESSOR_HP
+//=============================================================================

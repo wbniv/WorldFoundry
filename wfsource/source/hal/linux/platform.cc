@@ -37,7 +37,11 @@
 #include <hal/_input.h>
 #include <hal/sjoystic.h>
 #include <hal/salloc.hp>
+#include <hal/asset_accessor.hp>
 #include <signal.h>
+
+// Installed below by _PlatformSpecificInit. Declared in asset_accessor_posix.cc.
+extern AssetAccessor* HALCreatePosixAssetAccessor();
 extern bool bPrintVersion;
 
 //=============================================================================
@@ -241,6 +245,8 @@ _PlatformSpecificInit(int /*argc*/, char** /*argv*/, int /*maxTasks*/,int /*maxM
 
 	_HALDmalloc = new (*_HALLmalloc)DMalloc( *_HALLmalloc, HAL_DMALLOC_SIZE MEMORY_NAMED( COMMA "HALDmalloc"));
 	ValidatePtr(_HALDmalloc);
+
+	HALSetAssetAccessor(HALCreatePosixAssetAccessor());
 }
 
 //=============================================================================

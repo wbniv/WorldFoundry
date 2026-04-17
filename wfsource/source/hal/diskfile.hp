@@ -30,6 +30,7 @@
 
 #include <hal/hal.h>
 
+struct AssetHandle;   // forward; defined per-backend in asset_accessor_*.cc
 
 //=============================================================================
 
@@ -74,7 +75,7 @@ public:
 	virtual void ReadBytes( void* buffer, int32 size );
 
 protected:
-	int _fileHandle;
+	AssetHandle* _fileHandle;
 	int _cbFileOffset;
 	bool _hasSeeked;
 private:

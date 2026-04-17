@@ -1,6 +1,6 @@
 //=============================================================================
 // DiskFileHD.cc:
-// Copyright ( c ) 1996,97,99 World Foundry Group  
+// Copyright ( c ) 1996,97,99,2026 World Foundry Group
 // Part of the World Foundry 3D video game engine/production environment
 // for more information about World Foundry, see www.worldfoundry.org
 //==============================================================================
@@ -19,17 +19,15 @@
 // or see www.fsf.org
 
 // ===========================================================================
-// Description:
+// Description: DiskFileHD — reads bundled game assets (cd.iff) through the
+// platform-agnostic AssetAccessor interface. POSIX fd / AAssetManager /
+// future backends all look the same from here.
 // Original Author: Kevin T. Seghetti
 //============================================================================
-// kts shouldn't this be in each platforms sub-directory?
-//=============================================================================
 
 #include <pigsys/pigsys.hp>
-//#include <cpplib/stdstrm.hp>
-//#include <streams/dbstrm.hp>
-#include <pigsys/genfh.hp>
 #include <hal/diskfile.hp>
+#include <hal/asset_accessor.hp>
 
 extern void InitSimpleDisplay();
 extern void UpdateSimpleDisplay();
@@ -62,24 +60,18 @@ DiskFileHD::DiskFileHD( const char* fileName ) : _DiskFile( fileName )
 	_currentFilePosition = 0;
 	_hasSeeked = false;
 
-
-	// open file
-	_fileHandle = FHOPENRD( fileName );
-	AssertMsg( _fileHandle != -1, "filename = " << fileName );
-	if ( _fileHandle != -1 )
+	AssetAccessor& fs = HALGetAssetAccessor();
+	_fileHandle = fs.OpenForRead(fileName);
+	AssertMsg( _fileHandle, "filename = " << fileName );
+	if ( _fileHandle )
 	{
-		// determine file length
-		int seekok = FHSEEKEND( _fileHandle, 0 );
-		AssertMsg( seekok != -1, "Error during seek" );
 #if DO_ASSERTIONS
-		_fileSize = FHTELL( _fileHandle );
+		_fileSize = static_cast<int32>(fs.Size(_fileHandle));
 #endif
-		seekok = FHSEEKABS( _fileHandle, 0 );
+		int64_t seekok = fs.SeekAbsolute(_fileHandle, 0);
 		AssertMsg( seekok != -1, "Error during seek" );
 
 		assert(_fileSize > 0);
-//		DBSTREAM1( cprogress << "DiskFile opening " << fileName << " with a length of " << _fileSize << endl; )
-
 		_cbFileOffset = 0;
 	}
 }
@@ -89,8 +81,7 @@ DiskFileHD::DiskFileHD( const char* fileName ) : _DiskFile( fileName )
 DiskFileHD::~DiskFileHD()
 {
 	Validate();
-	// close file
-	FHCLOSE( _fileHandle );
+	HALGetAssetAccessor().Close(_fileHandle);
 }
 
 //=============================================================================
@@ -111,10 +102,8 @@ DiskFileHD::SeekRandom( int32 position )
 	assert(position <= _fileSize);
 	AssertMsg( position % DiskFileCD::_SECTOR_SIZE == 0, "position = " << position );
 
-#if DO_ASSERTIONS
-	int seekok =
-#endif
-		FHSEEKABS( _fileHandle, _cbFileOffset + position );
+	int64_t seekok = HALGetAssetAccessor().SeekAbsolute(
+		_fileHandle, static_cast<int64_t>(_cbFileOffset + position) );
 	AssertMsg( seekok != -1, "Error during seek" );
 
 	_currentFilePosition = position;
@@ -148,10 +137,7 @@ DiskFileHD::ReadBytes( void* buffer, int32 size )
 	assert(_currentFilePosition % DiskFileCD::_SECTOR_SIZE == 0);
 	AssertMsg(size % DiskFileCD::_SECTOR_SIZE == 0, "size = " << size);
 
-#if DO_ASSERTIONS
-	int cbRead =
-#endif
-		::FHREAD( _fileHandle, buffer, size );
+	int64_t cbRead = HALGetAssetAccessor().Read(_fileHandle, buffer, size);
 	assert( cbRead == size );
 	_currentFilePosition += size;
 	_hasSeeked = false;
