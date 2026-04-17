@@ -24,7 +24,7 @@ Binary cost figures are `.text` section size, compiled `-O2`, measured from obje
 
 | Language | Compile-time switch | Binary cost (.text, -O2) | RAM (init) |
 |----------|---------------------|--------------------------|------------|
-| Lua 5.4.8 | `WF_ENABLE_LUA=1` | ~224 KB | ~50 KB (`lua_State` + standard libs) |
+| Lua 5.4.8 | `WF_LUA_ENGINE=lua54` | ~224 KB | ~50 KB (`lua_State` + standard libs) |
 | *Per-actor `_ENV` isolation — each actor script runs in its own environment table; globals don't leak between actors. Standard libs loaded: `base`, `math`, `string`, `table`, `coroutine`; no `io`, `os`, or `debug`. Coroutine return from a script enables multi-tick state machines (see §Coroutines below). Fennel can be layered on top without any engine change.* | | | |
 | Fennel 1.6.1 | `WF_ENABLE_FENNEL=1` (requires Lua) | ~140 KB (embedded `.lua` data) | +0 (shares `lua_State`; compiler runs transiently) |
 | *Lisp dialect that compiles to Lua at script load time; the Fennel compiler runs transiently and the resulting Lua bytecode executes in the shared `lua_State`. All Lua globals (`read_mailbox`, `write_mailbox`, `INDEXOF_*`) are directly accessible from Fennel without wrapping. Fennel and Lua can call each other freely. `_ENV` isolation applies identically.* | | | |
@@ -47,7 +47,7 @@ Binary cost figures are `.text` section size, compiled `-O2`, measured from obje
 **All engines are currently enabled in the dev build.** For a shipping
 binary, compile in only the language(s) your scripts actually use — each
 engine adds 5–978 KB to `.text`. A game scripted entirely in Lua needs
-only `WF_ENABLE_LUA=1`; a Forth-scripted game needs only
+only `WF_LUA_ENGINE=lua54`; a Forth-scripted game needs only
 `WF_FORTH_ENGINE=zforth`. The scriptless build (no flags set) is also
 valid for games that need no scripting at all.
 

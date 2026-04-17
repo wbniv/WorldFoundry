@@ -9,7 +9,7 @@
 
 Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 
-**Scripting system** — Seven engines implemented and smoke-tested end-to-end in snowgoons: Lua 5.4, Fennel, QuickJS, JerryScript, WAMR (classic interp), Wren, and Forth (zForth). All wired into a `ScriptRouter` dispatch table with per-engine sigils. wasm3 retired 2026-04-16 (WAMR reached parity). WAMR AOT and alternate Forth backends deferred.
+**Scripting system** — Seven engines implemented and smoke-tested end-to-end in snowgoons: Lua 5.4, Fennel, QuickJS, JerryScript, WAMR (classic interp), Wren, and Forth (zForth). All wired into a `ScriptRouter` dispatch table with per-engine sigils. wasm3 retired 2026-04-16 (WAMR reached parity). Lua made optional via `WF_LUA_ENGINE=lua54|none` (2026-04-16); `scripting_lua.cc/hp` extracted as a peer TU matching all other engine plugs. WAMR AOT and alternate Forth backends deferred.
 
 **Blender ↔ level round-trip** — `levcomp-rs` (Rust) compiles `.lev` source → binary `.lvl`; snowgoons loads end-to-end from `levcomp-rs` output. Blender plugin imports/exports 152/152 OAD fields, all light/slope/animation-channel types, Tcl→Lua script migration. Coordinate system fixed (WF is Z-up). Phase 2c (mesh bbox extension, MeshName asset ID packing, real path keyframes) not yet started.
 
@@ -17,7 +17,7 @@ Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 
 **Dead-code removal** — Batches 1–7 complete: `wfsource/source/` reduced from 64,252 → 36,199 lines (−43.7%). Batch 8 (Jolt replaces WF physics) in progress.
 
-**Tooling and plans** — `engine/` reorganised to top-level. REST API box PoC landed. Android + iOS port plans written (blocked on GL immediate-mode rewrite + CMake migration). Lua-not-special plan written (Lua must be optional like every other engine). CLI level override (`-L<path>`) confirmed done.
+**Tooling and plans** — `engine/` reorganised to top-level. REST API box PoC landed. Android + iOS port plans written (blocked on GL immediate-mode rewrite + CMake migration). CLI level override (`-L<path>`) confirmed done.
 
 ---
 
@@ -25,7 +25,8 @@ Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
-| 2026-04-16 | [Plan: Lua engine is not special — make it optional](docs/plans/2026-04-16-lua-not-special.md) | **Not started** | **Goal:** Lua is a peer engine, compiled in by `WF_LUA_ENGINE=lua54` (default) and absent when `WF_LUA_ENGINE=none`. No engine is hardcoded. Fennel depends on Lua; it is forced off when Lua is absent. |
+| 2026-04-16 | [Plan: git-branch-browser — curses TUI for browsing branch diffs](docs/plans/2026-04-16-git-branch-browser.md) | **Not started** | **Goal:** A Python curses program at `scripts/git-branch-browser.py` that lets you browse all git branches, see per-branch changed files as a collapsible directory tree with status annotations, and … |
+| 2026-04-16 | [Plan: Lua engine is not special — make it optional](docs/plans/2026-04-16-lua-not-special.md) | **Done** | `scripting_lua.cc/hp` extracted; `WF_LUA_ENGINE=lua54\|none` added to `build_game.sh`; all `lua_engine::` calls guarded; Fennel+none warns and forces lua54; stale `scripting_wasm3.hp` include removed. |
 | 2026-04-16 | [Plan: iOS port](docs/plans/2026-04-16-ios-port.md) | **Not started — blocked on Android port** | **Goal:** An IPA that runs snowgoons on a tethered iPhone, installed via Xcode with a developer profile. Proof-of-viability, not a shipping product. |
 | 2026-04-16 | [Plan: Android port](docs/plans/2026-04-16-android-port.md) | **Not started** | **Goal:** An APK that launches, runs snowgoons on an arm64 Android device, takes touch input, and handles background/foreground transitions without crashing. Forth (zForth) + Lua only in v1; other engines disabled. Proof-of-viability, not a shipping product. |
 | 2026-04-16 | [Engine directory reorganization](docs/plans/2026-04-16-engine-directory-reorganization.md) | **Complete** | `engine/` is now a top-level directory. `wftools/wf_engine/` → `engine/`, `wftools/vendor/` → `engine/vendor/`, `wf_viewer/stubs/` → `engine/stubs/`, `wf_viewer/include/` → `engine/include/`. `wftools/` is now strictly dev tooling. |
@@ -127,4 +128,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 22:25** — [`docs/plans/2026-04-14-wasm3-scripting-engine.md`](docs/plans/2026-04-14-wasm3-scripting-engine.md): Plan: WebAssembly (wasm3) as a third scripting engine
+**2026-04-16** — `feat(scripting)`: Lua made optional via `WF_LUA_ENGINE=lua54|none`. `scripting_lua.cc/hp` extracted as peer TU; `build_game.sh` Lua vendor loop gated; Fennel+none warned; stale `scripting_wasm3.hp` include removed.
