@@ -142,4 +142,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 00:34** — [`docs/plans/2026-04-17-steam.md`](docs/plans/2026-04-17-steam.md): Plan: Steam release
+**2026-04-17 00:43** — [`docs/plans/2026-04-17-steam.md`](docs/plans/2026-04-17-steam.md): Plan: Steam release
