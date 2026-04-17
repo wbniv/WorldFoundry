@@ -148,4 +148,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 11:25** — [`docs/investigations/2026-04-14-audio-sound-music.md`](docs/investigations/2026-04-14-audio-sound-music.md): Investigation: Audio — sound effects, music, positional sound
+**2026-04-17** — Phase 5 (3D positional SFX + listener tracking) verified audible in snowgoons; three miniaudio gotchas fixed in `d1e913d` (end-callback mustn't `ma_sound_uninit` — drain done-list on main thread; zero listener dir/up silences spatialization; default `min_distance=1` is too aggressive for meter-scale worlds). See [`docs/investigations/2026-04-14-audio-sound-music.md`](docs/investigations/2026-04-14-audio-sound-music.md).
