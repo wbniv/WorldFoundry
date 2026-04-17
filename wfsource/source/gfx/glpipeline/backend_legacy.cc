@@ -48,6 +48,11 @@ public:
         AssertGLOK();
     }
 
+    void EndFrame() override
+    {
+        // No batching in fixed-function mode; nothing to flush.
+    }
+
     void DrawTriangle(const RBVertex& v0,
                       const RBVertex& v1,
                       const RBVertex& v2,
@@ -92,7 +97,7 @@ LegacyRendererBackend sLegacyBackend;
 
 }  // namespace
 
-RendererBackend& RendererBackendGet()
+RendererBackend* LegacyBackendInstance()
 {
-    return sLegacyBackend;
+    return &sLegacyBackend;
 }

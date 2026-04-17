@@ -414,6 +414,7 @@ Display::PageFlip()
 #endif // 0
 
 
+    RendererBackendGet().EndFrame();
 
     glFlush();
     AssertGLOK();

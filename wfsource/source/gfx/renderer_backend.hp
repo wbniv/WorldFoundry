@@ -48,6 +48,11 @@ public:
                               const RBVertex& v2,
                               float nx, float ny, float nz,
                               const PixelMap* texture) = 0;
+
+    // Flush any pending batched draws. Called once per frame, right before
+    // the swap-buffers. Legacy fixed-function backend is a no-op; modern
+    // VBO backend uses this to drain its accumulated vertex buffer.
+    virtual void EndFrame() = 0;
 };
 
 RendererBackend& RendererBackendGet();
