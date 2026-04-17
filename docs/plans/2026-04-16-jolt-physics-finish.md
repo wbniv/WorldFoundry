@@ -1,5 +1,7 @@
 # Finish the Jolt Physics integration
 
+**Status: Complete** — all five steps landed; snowgoons player walks on the floor, 60 s soak passed. Per-frame stderr trace still present (flagged as pre-ship cleanup in Architectural smells §5).
+
 Take snowgoons from "frame-1 SIGABRT in `PhysicalAttributes::Validate`" to
 "player walks on the floor without falling through for at least a minute."
 

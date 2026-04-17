@@ -95,10 +95,10 @@ These are large enabling workstreams. Each has standalone value on Linux; Androi
 
 ## Open questions
 
-- **MFi/Android gamepad support?** The `EJ_BUTTONF_*` bitmask naturally maps to physical gamepads. One day of work; lean toward "yes" but out of scope for v1.
-- **Asset bundling: loose files or `cd.iff`?** Both work. Decide based on whether on-device iteration without full rebuild matters.
+- **Android gamepad support?** `EJ_BUTTONF_*` maps naturally to physical gamepads via Android `InputDevice`. One day of work; out of scope for v1.
+- **Asset bundling: `cd.iff`.** Ship the single archive; redirect the asset accessor to open it via `AAssetManager`. Loose-file iteration stays a Linux dev workflow.
 - **Performance floor.** Mobile CPUs are slow. The variable-`dt` loop has run at 30 fps before so correctness is not the question; the question is whether the renderer + Jolt + game logic stay above a playable threshold on low-end ARM64. Measure in Phase 4.
-- **Minimum Android API level.** Pins GLES 3.0 availability and NDK version. Decide when a dev device is in hand.
+- **Minimum Android API level: 21 (Android 5.0 Lollipop).** Settled — arm64-v8a cannot target below API 21 in any NDK version; NDK r26+ also enforces 21 as its floor. GLES 3.0 and NativeActivity are satisfied below that, so nothing is left on the table. Covers ~99.8% of active devices.
 - **arm32 stretch goal.** Build config addition, ~2 days; defer until data shows a user base that needs it.
 
 ## Out of scope
