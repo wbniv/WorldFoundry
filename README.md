@@ -93,7 +93,7 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ### Scripting
 - **WAMR Phase 2 (AOT)** — deferred; `wamrc` compiles `.wasm` → native machine code offline; output is ISA-specific (x86_64, arm32, arm64 each need a separate `.aot` blob); ~10 KB AOT loader vs. ~107 KB classic interp. Revisit when ship targets are concrete.
-- **wasm3 retirement** — parity confirmed 2026-04-16; ready to remove `engine/vendor/wasm3-v0.5.0/` + `scripting_wasm3.{hp,cc}` in one commit.
+- **wasm3 retired** — done 2026-04-16; `engine/vendor/wasm3-v0.5.0/` + `scripting_wasm3.{hp,cc}` removed; `WF_WASM_ENGINE=wamr` is the only wasm option.
 - **Lua remote step debugger** — explicit user request for "later": MobDebug/DBG.lua/LuaLS-DAP into LuaInterpreter for in-game step debugging.
 - **Fennel macros / `require`** — `fennel.searcher` / `package.searchers`; `.fnl` build step.
 - **Coroutine smoke test** — fix #6 landed but untested end-to-end with a real yielding script.
