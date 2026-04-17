@@ -128,6 +128,7 @@ CXXFLAGS=(
     -DDO_VALIDATION=0 -DDO_TEST_CODE=0 -DDO_DEBUG_FILE_SYSTEM=0
     '-D__GAME__="wf_game"' "-DERR_DEBUG(x)="
     -I"$SRC" -I"$SRC/game" -I"$STUBS" -I"$STUB_SRC"
+    -I"$VENDOR/miniaudio-0.11.25"
 )
 
 # Physics engine compile-time selection — must come before any other flag block

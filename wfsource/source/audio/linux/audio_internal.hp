@@ -1,0 +1,25 @@
+#pragma once
+// Internal header shared between device.cc and buffer.cc only.
+// Never include this from game code.
+#include <miniaudio/miniaudio.h>
+#include <audio/device.hp>
+
+struct SoundDevice::Impl {
+	ma_engine     engine;
+	ma_sound_group sfxGroup;
+};
+
+// Returns nullptr if the sound device is not initialised.
+inline ma_engine* ma_engine_get()
+{
+	if (gSoundDevice && gSoundDevice->isReady())
+		return &gSoundDevice->_impl->engine;
+	return nullptr;
+}
+
+inline ma_sound_group* ma_sfx_group_get()
+{
+	if (gSoundDevice && gSoundDevice->isReady())
+		return &gSoundDevice->_impl->sfxGroup;
+	return nullptr;
+}

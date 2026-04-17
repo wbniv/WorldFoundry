@@ -1,7 +1,7 @@
 # Investigation: Audio — sound effects, music, positional sound
 
 **Date:** 2026-04-14
-**Status:** Active — Phase 0 complete; Phase 1 next; Phase 2 (MIDI) follows immediately after.
+**Status:** Active — Phase 1 complete; Phase 2 (MIDI) next.
 **Related:** `docs/investigations/2026-04-14-mobile-port-android-ios.md` (mobile backends), `docs/investigations/2026-04-14-jolt-physics-integration.md` (actor position source for 3D audio).
 
 ## Context
@@ -70,7 +70,7 @@ This mirrors the existing WF HAL pattern (`hal/dfhd.cc` → asset-accessor inter
 
 `wfsource/source/audio/` and `wfsource/source/audiofmt/` were both removed in dead-code removal batch 2026-04-15. No action needed. `build_game.sh` succeeds and snowgoons runs silently.
 
-### Phase 1 — Vendor miniaudio, hook up SFX one-shots
+### Phase 1 — Vendor miniaudio, hook up SFX one-shots ✓ DONE
 
 Goal: Existing `actor.cc:1342` SFX playback becomes audible.
 

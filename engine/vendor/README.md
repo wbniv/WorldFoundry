@@ -21,6 +21,7 @@ as source and is linked in at build time.
 | `nanoforth-3b9c3aab/` | commit `3b9c3aab` | MIT | https://github.com/chochain/nanoFORTH |
 | `wren-0.4.0/` | 0.4.0 | MIT | https://github.com/wren-lang/wren/releases/tag/0.4.0 |
 | `jolt-physics-5.5.0/` | 5.5.0 | MIT | https://github.com/jrouwe/JoltPhysics/releases/tag/v5.5.0 |
+| `miniaudio-0.11.25/` | 0.11.25 (2026-03-04) | MIT-0 / Public Domain | https://github.com/mackron/miniaudio |
 
 ## Tarball SHA256
 
@@ -36,6 +37,7 @@ as source and is linked in at build time.
 - `libforth-b851c6a2.tar.gz` (commit `b851c6a25150e7d2114804fc8712664c6d825214`) — `26271b77ef930799e399157d65f50f6dc2c44149314d5f206c852bd2639669bc`
 - `pforth-63d4a418.tar.gz` (commit `63d4a4181b39dda123bd63fed4c56bc8e3d47b1c`) — `239a32e02cacc3b52702b939a59c4eca599cb23eac2052055d819736aa22e218`
 - `nanoforth-3b9c3aab.tar.gz` (commit `3b9c3aab053b7082c695af5a600f6e55021a2320`) — `e2795764ab9aae91c1c72bf59fe6f6780fdb2dd2d6d7b3787fbea577d4038acc`
+- `miniaudio-0.11.25/miniaudio.h` — `ac7af4de748b7e26b777f37e01cee313a308a7296a3eb080e2906b320cc55c89` (fetched from mackron/miniaudio main 2026-04-17)
 
 ## Notes
 

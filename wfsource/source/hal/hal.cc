@@ -21,6 +21,7 @@
 #if defined(WF_ENABLE_STEAM)
 #  include <hal/linux/steam.h>
 #endif
+#include <hal/linux/audio.h>
 #include <hal/_input.h>
 #include <hal/sjoystic.h>
 #include <hal/diskfile.hp>
@@ -69,8 +70,10 @@ HALStart(int argc, char** argv, int maxTasks,int maxMessages, int maxPorts)
 #if defined(WF_ENABLE_STEAM)
 		_InitSteam();
 #endif
+		_InitAudio();
 		PIGSMain( __argc, __argv );
 
+		_TermAudio();
 		_TermJoystickInterface();
 #if defined(WF_ENABLE_STEAM)
 		_TermSteam();

@@ -1,0 +1,31 @@
+#pragma once
+// SoundDevice — global audio engine owner.  One instance per process.
+//
+// Backed by miniaudio (linux) or a platform-specific backend on consoles.
+// No miniaudio types in this header; all implementation state is in the .cc.
+
+class SoundBuffer;
+
+class SoundDevice
+{
+public:
+	SoundDevice();
+	~SoundDevice();
+
+	// Returns false if audio could not be initialised (no device, etc.).
+	// Game continues silently; SoundBuffer::play() becomes a no-op.
+	bool isReady() const { return _ready; }
+
+	// Volume in [0, 1].
+	void setMasterVolume(float v);
+	void setSfxVolume(float v);
+
+	// Called once per frame; updates listener position, drains callbacks.
+	void tick(float x, float y, float z);
+
+	bool _ready;
+	struct Impl;
+	Impl* _impl;  // complete type only in audio/linux/audio_internal.hp
+};
+
+extern SoundDevice* gSoundDevice;

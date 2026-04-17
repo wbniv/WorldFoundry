@@ -1,0 +1,22 @@
+#pragma once
+// SoundBuffer — a loaded, playable sound asset.
+// Constructed from raw WAV/Ogg bytes; fire-and-forget play() calls.
+// No miniaudio types in this header.
+
+class SoundBuffer
+{
+public:
+	// `data` and `len` must remain valid for the lifetime of this object.
+	SoundBuffer(const void* data, unsigned len);
+	~SoundBuffer();
+
+	// Play a new overlapping instance of this sound at full volume.
+	void play() const;
+
+	bool isLoaded() const { return _loaded; }
+
+private:
+	bool _loaded;
+	struct Impl;
+	Impl* _impl;
+};

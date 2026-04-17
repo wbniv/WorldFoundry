@@ -50,6 +50,7 @@
 #include <math/vector3.hp>
 #include <oas/levelobj.ht>
 #include <oas/matte.ht>
+#include <audio/device.hp>
 
 //-----------------------------------------------------------------------------
 
@@ -893,6 +894,12 @@ Level::update(Scalar deltaTime)
 void
 Level::updateSound()
 {
+	// Update audio listener position to the active camera each frame.
+	// Camera position drives stereo pan and (future) 3D rolloff.
+	if (gSoundDevice) {
+		// Use origin for now; Phase 5 wires in the real camera transform.
+		gSoundDevice->tick(0.0f, 0.0f, 0.0f);
+	}
 }
 
 //==============================================================================

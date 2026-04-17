@@ -29,6 +29,8 @@
 
 #include "level.hp"
 #include "game.hp"
+#include <audio/device.hp>
+#include <audio/buffer.hp>
 #include "rest_api.hp"
 #include "physics_jolt.hp"
 #include "oas/matte.ht"
@@ -60,6 +62,23 @@ WFGame::WFGame( const int nStartingLevel )
 {
 	DBSTREAM1( cprogress << "WFGame::WFGame" << std::endl; )
 	JoltRuntimeInit();
+
+	// Audio smoke-test: play a short beep on startup to verify miniaudio output.
+	// The WAV is loaded from the game directory (same dir as cd.iff).
+	if (gSoundDevice && gSoundDevice->isReady()) {
+		static std::vector<char> beepData;
+		if (FILE* f = fopen("test_beep.wav", "rb")) {
+			fseek(f, 0, SEEK_END);
+			long sz = ftell(f);
+			rewind(f);
+			beepData.resize(sz);
+			fread(beepData.data(), 1, sz, f);
+			fclose(f);
+			static SoundBuffer beep(beepData.data(), (unsigned)beepData.size());
+			beep.play();
+			fprintf(stderr, "audio: startup beep queued (%ld bytes)\n", sz);
+		}
+	}
 
 	assert(ValidPtr(_msgPortMemPool));
 
