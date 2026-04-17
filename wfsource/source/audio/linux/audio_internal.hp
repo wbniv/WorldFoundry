@@ -23,3 +23,6 @@ inline ma_sound_group* ma_sfx_group_get()
 		return &gSoundDevice->_impl->sfxGroup;
 	return nullptr;
 }
+
+// Drains finished PlayInstances queued by on_sound_end; call from main thread.
+void DrainDoneSounds();

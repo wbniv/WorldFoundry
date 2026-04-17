@@ -1,5 +1,6 @@
 #include <audio/linux/audio_internal.hp>
 #include <cstdio>
+#include <cmath>
 
 SoundDevice* gSoundDevice = nullptr;
 
@@ -46,7 +47,12 @@ void SoundDevice::tick(float px, float py, float pz,
                        float ux, float uy, float uz)
 {
 	if (!_ready) return;
+	DrainDoneSounds();
 	ma_engine_listener_set_position(&_impl->engine, 0, px, py, pz);
-	ma_engine_listener_set_direction(&_impl->engine, 0, fx, fy, fz);
-	ma_engine_listener_set_world_up(&_impl->engine, 0, ux, uy, uz);
+	float fLen2 = fx*fx + fy*fy + fz*fz;
+	float uLen2 = ux*ux + uy*uy + uz*uz;
+	if (fLen2 > 1e-6f && uLen2 > 1e-6f) {
+		ma_engine_listener_set_direction(&_impl->engine, 0, fx, fy, fz);
+		ma_engine_listener_set_world_up(&_impl->engine, 0, ux, uy, uz);
+	}
 }
