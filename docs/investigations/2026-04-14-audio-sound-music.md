@@ -1,7 +1,7 @@
 # Investigation: Audio — sound effects, music, positional sound
 
 **Date:** 2026-04-14
-**Status:** Active — Phase 1 complete; Phase 2 (MIDI) next.
+**Status:** Active — Phases 1+2 complete; Phase 3 (music subsystem / per-level tracks) next.
 **Related:** `docs/investigations/2026-04-14-mobile-port-android-ios.md` (mobile backends), `docs/investigations/2026-04-14-jolt-physics-integration.md` (actor position source for 3D audio).
 
 ## Context
@@ -83,7 +83,7 @@ Goal: Existing `actor.cc:1342` SFX playback becomes audible.
 4. Link `-ldl -lpthread -lm` (already linked). On Linux miniaudio picks ALSA→PulseAudio→JACK at runtime via dlopen — **no build-time audio dep**.
 5. **Verify:** Snowgoons emits its existing SFX when actors fire the existing `play()` paths. Compare CPU usage baseline vs. with audio (expect <2% on idle desktop).
 
-### Phase 2 — MIDI player
+### Phase 2 — MIDI player ✓ DONE
 
 Goal: MIDI music playback via TinySoundFont; a level can trigger a track and hear it rendered through miniaudio.
 

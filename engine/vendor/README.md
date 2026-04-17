@@ -22,6 +22,7 @@ as source and is linked in at build time.
 | `wren-0.4.0/` | 0.4.0 | MIT | https://github.com/wren-lang/wren/releases/tag/0.4.0 |
 | `jolt-physics-5.5.0/` | 5.5.0 | MIT | https://github.com/jrouwe/JoltPhysics/releases/tag/v5.5.0 |
 | `miniaudio-0.11.25/` | 0.11.25 (2026-03-04) | MIT-0 / Public Domain | https://github.com/mackron/miniaudio |
+| `tsf/` | tsf v0.9 + tml v0.7 | Public Domain | https://github.com/schellingb/TinySoundFont |
 
 ## Tarball SHA256
 
@@ -38,6 +39,14 @@ as source and is linked in at build time.
 - `pforth-63d4a418.tar.gz` (commit `63d4a4181b39dda123bd63fed4c56bc8e3d47b1c`) — `239a32e02cacc3b52702b939a59c4eca599cb23eac2052055d819736aa22e218`
 - `nanoforth-3b9c3aab.tar.gz` (commit `3b9c3aab053b7082c695af5a600f6e55021a2320`) — `e2795764ab9aae91c1c72bf59fe6f6780fdb2dd2d6d7b3787fbea577d4038acc`
 - `miniaudio-0.11.25/miniaudio.h` — `ac7af4de748b7e26b777f37e01cee313a308a7296a3eb080e2906b320cc55c89` (fetched from mackron/miniaudio main 2026-04-17)
+- `tsf/tsf.h` — `70d55963c98f60ebb81518eaa1f25d46888d5180eb5f5289fd6b74ffc177d197` (fetched from schellingb/TinySoundFont main 2026-04-17)
+- `tsf/tml.h` — `93257db259e0efb2ea2037d7157841bec8cb4a2d7986286e43c8090705326546` (fetched from schellingb/TinySoundFont main 2026-04-17)
+
+## Runtime assets (not committed)
+
+| File | Notes |
+|------|-------|
+| `wfsource/source/game/TimGM6mb.sf2` | Dev soundfont (GPL, 5.7 MB). Download via `apt-get download timgm6mb-soundfont && dpkg-deb -x *.deb . && mv usr/share/sounds/sf2/TimGM6mb.sf2 wfsource/source/game/`. Ship target will use a custom WF-subset SF2. |
 
 ## Notes
 

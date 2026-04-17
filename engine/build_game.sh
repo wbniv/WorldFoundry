@@ -129,6 +129,7 @@ CXXFLAGS=(
     '-D__GAME__="wf_game"' "-DERR_DEBUG(x)="
     -I"$SRC" -I"$SRC/game" -I"$STUBS" -I"$STUB_SRC"
     -I"$VENDOR/miniaudio-0.11.25"
+    -I"$VENDOR/tsf"
 )
 
 # Physics engine compile-time selection — must come before any other flag block
