@@ -63,6 +63,7 @@ Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 
 | Date | Investigation | Status | Summary |
 |------|---------------|--------|---------|
+| 2026-04-17 | [Investigation: IFF format lineage — EA IFF 85, AIFF, RIFF, WorldFoundry IFF](docs/investigations/2026-04-17-iff-format-lineage.md) | **In progress** | Electronic Arts published the Interchange File Format specification in 1985, designed for the Amiga. The core idea is simple and elegant: |
 | 2026-04-16 | [Reverse-engineering the WF binary level format for `levcomp-rs`](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md) | **Functional** | Binary format fully mapped; `levcomp-rs` output loads in `wf_game`; snowgoons game loop runs. Remaining: mesh bbox extension, MeshName packing, real path keyframes. |
 | 2026-04-16 | [Coding-conventions remediation](docs/investigations/2026-04-16-coding-conventions-remediation.md) | **In progress** | Audit of 2026-authored code in `wfsource/source/` against `docs/coding-conventions.md`. Honest accounting of where recent additions don't yet follow the rules they propose. |
 | 2026-04-15 | [LOC tracking](docs/investigations/2026-04-15-loc-tracking.md) | **Ongoing** | Tracks code line count over time. Current HEAD: ~36,199 lines (−43.7% from baseline 64,252 at `74d1a47`). Tool: `scripts/loc_report.py`. |
@@ -140,4 +141,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 00:13** — [`docs/investigations/2026-04-14-audio-sound-music.md`](docs/investigations/2026-04-14-audio-sound-music.md): Investigation: Audio — sound effects, music, positional sound
+**2026-04-17 00:23** — [`docs/investigations/2026-04-17-iff-format-lineage.md`](docs/investigations/2026-04-17-iff-format-lineage.md): Investigation: IFF format lineage — EA IFF 85, AIFF, RIFF, WorldFoundry IFF
