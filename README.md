@@ -146,4 +146,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17** — `feat(audio)` Phases 1–4 complete: miniaudio SFX, TinySoundFont MIDI, per-level music, Lua `play_music`/`stop_music`/`set_music_volume`.
+**2026-04-17 04:54** — [`docs/plans/2026-04-16-android-port.md`](docs/plans/2026-04-16-android-port.md): Plan: Android port
