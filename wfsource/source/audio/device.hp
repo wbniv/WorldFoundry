@@ -20,8 +20,13 @@ public:
 	void setMasterVolume(float v);
 	void setSfxVolume(float v);
 
-	// Called once per frame; updates listener position, drains callbacks.
-	void tick(float x, float y, float z);
+	// Called once per frame; updates listener transform.
+	// pos: world-space camera position.
+	// fwd: normalised forward vector (camera look direction).
+	// up:  normalised up vector.
+	void tick(float px, float py, float pz,
+	          float fx = 0.f, float fy = 1.f, float fz = 0.f,
+	          float ux = 0.f, float uy = 0.f, float uz = 1.f);
 
 	bool _ready;
 	struct Impl;

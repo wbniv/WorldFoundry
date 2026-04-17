@@ -10,8 +10,12 @@ public:
 	SoundBuffer(const void* data, unsigned len);
 	~SoundBuffer();
 
-	// Play a new overlapping instance of this sound at full volume.
+	// Play a non-positional (2D) instance.
 	void play() const;
+
+	// Play a positional (3D) instance at world-space coordinates.
+	// Attenuates with distance from the audio listener.
+	void play(float x, float y, float z) const;
 
 	bool isLoaded() const { return _loaded; }
 

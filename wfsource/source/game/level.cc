@@ -894,12 +894,17 @@ Level::update(Scalar deltaTime)
 void
 Level::updateSound()
 {
-	// Update audio listener position to the active camera each frame.
-	// Camera position drives stereo pan and (future) 3D rolloff.
-	if (gSoundDevice) {
-		// Use origin for now; Phase 5 wires in the real camera transform.
-		gSoundDevice->tick(0.0f, 0.0f, 0.0f);
-	}
+	if (!gSoundDevice || !_camera) return;
+
+	const Vector3& pos = _camera->cameraPos.position;
+	const Vector3& fwd = _camera->cameraPos.direction;
+	const Vector3& up  = _camera->cameraPos.up;
+
+	gSoundDevice->tick(
+		pos.X().AsFloat(), pos.Y().AsFloat(), pos.Z().AsFloat(),
+		fwd.X().AsFloat(), fwd.Y().AsFloat(), fwd.Z().AsFloat(),
+		up.X().AsFloat(),  up.Y().AsFloat(),  up.Z().AsFloat()
+	);
 }
 
 //==============================================================================

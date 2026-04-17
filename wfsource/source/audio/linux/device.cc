@@ -41,8 +41,12 @@ void SoundDevice::setSfxVolume(float v)
 	if (_ready) ma_sound_group_set_volume(&_impl->sfxGroup, v);
 }
 
-void SoundDevice::tick(float x, float y, float z)
+void SoundDevice::tick(float px, float py, float pz,
+                       float fx, float fy, float fz,
+                       float ux, float uy, float uz)
 {
-	if (_ready)
-		ma_engine_listener_set_position(&_impl->engine, 0, x, y, z);
+	if (!_ready) return;
+	ma_engine_listener_set_position(&_impl->engine, 0, px, py, pz);
+	ma_engine_listener_set_direction(&_impl->engine, 0, fx, fy, fz);
+	ma_engine_listener_set_world_up(&_impl->engine, 0, ux, uy, uz);
 }

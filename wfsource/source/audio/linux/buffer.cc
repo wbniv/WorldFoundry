@@ -65,3 +65,32 @@ void SoundBuffer::play() const
 	ma_sound_set_end_callback(&inst->snd, on_sound_end, nullptr);
 	ma_sound_start(&inst->snd);
 }
+
+void SoundBuffer::play(float x, float y, float z) const
+{
+	if (!_loaded || !_impl) return;
+	ma_engine* eng = ma_engine_get();
+	if (!eng) return;
+
+	PlayInstance* inst = new PlayInstance();
+
+	ma_decoder_config dcfg = ma_decoder_config_init_default();
+	if (ma_decoder_init_memory(_impl->data, _impl->len, &dcfg, &inst->dec) != MA_SUCCESS) {
+		delete inst;
+		return;
+	}
+
+	// Positional: no NO_SPATIALIZATION flag — miniaudio applies distance attenuation.
+	ma_uint32 flags = MA_SOUND_FLAG_ASYNC | MA_SOUND_FLAG_NO_PITCH;
+	ma_result r = ma_sound_init_from_data_source(eng, &inst->dec, flags,
+	                  ma_sfx_group_get(), &inst->snd);
+	if (r != MA_SUCCESS) {
+		ma_decoder_uninit(&inst->dec);
+		delete inst;
+		return;
+	}
+
+	ma_sound_set_position(&inst->snd, x, y, z);
+	ma_sound_set_end_callback(&inst->snd, on_sound_end, nullptr);
+	ma_sound_start(&inst->snd);
+}
