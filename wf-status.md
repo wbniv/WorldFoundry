@@ -7,7 +7,7 @@
 
 ## Summary
 
-Five days of work (2026-04-12 – 2026-04-17) across six major areas:
+Five days of work (2026-04-12 – 2026-04-17) across seven major areas:
 
 **Scripting system** — Seven engines smoke-tested end-to-end in snowgoons: Lua 5.4, Fennel, QuickJS, JerryScript, WAMR (classic interp), Wren, and Forth (zForth). Five additional Forth backends (ficl, atlast, embed, libforth, pforth) build and link but are not yet end-to-end tested. All wired into a `ScriptRouter` dispatch table with per-engine sigils. wasm3 retired 2026-04-16 (WAMR reached parity). Lua made optional via `WF_LUA_ENGINE=lua54|none` (2026-04-16); `scripting_lua.cc/hp` extracted as a peer TU matching all other engine plugs. WAMR AOT deferred.
 
@@ -21,7 +21,9 @@ Five days of work (2026-04-12 – 2026-04-17) across six major areas:
 
 **Audio (Phases 1–4 complete)** — Phase 1 (2026-04-17): miniaudio v0.11.25 vendored; `SoundDevice`/`SoundBuffer` reimplemented on `ma_engine`; `_InitAudio`/`_TermAudio` in HAL; fire-and-forget `play()` via heap `PlayInstance` freed by end-callback. Phase 2 (2026-04-17): TinySoundFont (`tsf.h`/`tml.h`) vendored; `MusicPlayer` renders MIDI → stereo float PCM as a miniaudio custom data source on the audio thread; C-major scale audible via PulseAudio. Phase 3 (2026-04-17): per-level `level<N>.mid` loads on `RunLevel`, stops on exit; `level0.mid` added for snowgoons. Phase 4 (2026-04-17): `play_music`/`stop_music`/`set_music_volume` Lua C closures registered in `scripting_lua.cc`. Phases 5–7 (3D SFX, mobile backends, docs) deferred.
 
-**Tooling and plans** — `engine/` reorganised to top-level. REST API box PoC landed. Android + iOS port plans written (blocked on GL immediate-mode rewrite + CMake migration). CLI level override (`-L<path>`) confirmed done. Audio investigation updated: `AudioBackend` pimpl seam documented; MIDI sources (OpenScore CC0, Mutopia, piano-midi.de) researched and catalogued; IFF format lineage (EA IFF 85 → AIFF, RIFF, WF IFF) documented.
+**Android port (Phase 1 complete)** — 2026-04-17: `CMakeLists.txt` at repo root translates `build_game.sh` for both Linux and Android (NDK r26c, arm64-v8a, API 21); Linux CMake binary launches snowgoons; Forth-only flag combination (`WF_LUA_ENGINE=none`, no JS/WASM/Wren/Steam/REST) compiles; Android build reaches the expected Phase 0 boundary (`GL/gl.h` not found). `task build-cmake` + `task build-cmake-android` + `task dev-setup` (reproducible toolchain install) added. `cf_android.h` platform config defines `__LINUX__` so the 40+ downstream `#if defined(__LINUX__)` guards work without per-file patching; `ANDROID` enum member renamed `MACHINE_ANDROID` to avoid NDK macro collision. 64-bit pointer-truncation bug in `DispatchCollisionMessages` surfaced and fixed (`SMsg::_data._message` widened to `uintptr_t`). Next blocker: Phase 0 (retire immediate-mode `glBegin`/`glEnd` for GLES 3.0).
+
+**Tooling and plans** — `engine/` reorganised to top-level. REST API box PoC landed. iOS port plan written (blocked on Android). CLI level override (`-L<path>`) confirmed done. Audio investigation updated: `AudioBackend` pimpl seam documented; MIDI sources (OpenScore CC0, Mutopia, piano-midi.de) researched and catalogued; IFF format lineage (EA IFF 85 → AIFF, RIFF, WF IFF) documented.
 
 ---
 
@@ -33,7 +35,7 @@ Five days of work (2026-04-12 – 2026-04-17) across six major areas:
 |------|------|--------|---------|
 | 2026-04-16 | [Plan: git-branch-browser — curses TUI for browsing branch diffs](docs/plans/2026-04-16-git-branch-browser.md) | **Not started** | **Goal:** A Python curses program at `scripts/git-branch-browser.py` that lets you browse all git branches, see per-branch changed files as a collapsible directory tree with status annotations, and … |
 | 2026-04-17 | [Plan: Steam release](docs/plans/2026-04-17-steam.md) | **In progress — Phases 1+2 done** | Steamworks SDK lifecycle wired into HAL + PageFlip. Steam Input → `EJ_BUTTONF_*` merged in `_JoystickButtonsF`. `WF_ENABLE_STEAM=1` build flag; SDK not committed (see vendor README). Phases 3 (depot) and 4 (store page) deferred. |
-| 2026-04-16 | [Plan: Android port](docs/plans/2026-04-16-android-port.md) | **In progress — Phase 1 (CMake)** | NDK r26c installed (`/usr/lib/android-sdk/ndk/26.2.11394342`). `CMakeLists.txt` written; `task build-cmake` (Linux) and `task build-cmake-android` (arm64) added. Parity verification pending. Phase 0 (GL rewrite) is next blocker. |
+| 2026-04-16 | [Plan: Android port](docs/plans/2026-04-16-android-port.md) | **In progress — Phase 1 done** | Phase 1 ✅: `CMakeLists.txt` at repo root; Linux CMake build launches snowgoons; Forth-only flag combo compiles; Android build reaches the expected `GL/gl.h` Phase 0 boundary. 64-bit collision-message pointer-truncation bug discovered + fixed. Next: Phase 2 (HAL lifecycle) or Phase 0 (GL rewrite). |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Partial** | Batches 1–7 complete (−43.7% LOC). Batch 6 (`#if 0` sweep) done. Batch 7 (PSX/Win artifacts, OpusMake, platform guards) done. Batch 8 (Jolt physics replacement) in progress. |
 
 ### Deferred
@@ -146,4 +148,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 05:48** — [`docs/plans/2026-04-17-fix-window-close-crash.md`](docs/plans/2026-04-17-fix-window-close-crash.md): Fix: core dump on window close button
+**2026-04-17 10:00** — [`docs/plans/2026-04-16-android-port.md`](docs/plans/2026-04-16-android-port.md): Android port Phase 1 complete — Linux + Android CMake builds reach expected GL Phase 0 boundary

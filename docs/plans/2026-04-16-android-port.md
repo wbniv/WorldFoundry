@@ -1,7 +1,7 @@
 # Plan: Android port
 
 **Date:** 2026-04-16
-**Status:** In progress — Phase 1 (CMake) underway
+**Status:** In progress — Phase 1 (CMake) complete; next is Phase 2 (HAL lifecycle) or Phase 0 (GL rewrite)
 **Goal:** An APK that launches, runs snowgoons on an arm64 Android device or Google TV (Chromecast with Google TV), takes touch or gamepad input, and handles background/foreground transitions without crashing. Proof-of-viability, not a shipping product.
 
 ## Settled decisions
@@ -43,8 +43,8 @@ Each has standalone value on Linux; Android blocks on all four.
 2. **Phase 0 — Retire immediate-mode GL (Linux VBO rewrite)**
    `glBegin`/`glEnd` does not exist in GLES 3.0. Rewrite `gfx/glpipeline/*.cc` to VBO + shader batches on Linux first. **Not yet started — largest phase.**
 
-3. **Phase 1 — CMake build** ✅ In progress 2026-04-17
-   `CMakeLists.txt` written at repo root. NDK r26c installed at `/usr/lib/android-sdk/ndk/26.2.11394342`. `task build-cmake` (Linux) and `task build-cmake-android` (arm64-v8a, API 21) added to Taskfile. Parity verification vs. `build_game.sh` pending.
+3. **Phase 1 — CMake build** ✅ Done 2026-04-17
+   `CMakeLists.txt` at repo root; NDK r26c at `/usr/lib/android-sdk/ndk/26.2.11394342`; `task build-cmake` (Linux) and `task build-cmake-android` (arm64-v8a, API 21) in Taskfile. Linux CMake build produces a runnable `engine/wf_game` (launches snowgoons); Forth-only flag combination compiles; Android build reaches the expected Phase 0 boundary (`GL/gl.h` not found). 64-bit collision-message bug discovered + fixed along the way.
 
 4. **Phase 2 — HAL lifecycle + filesystem abstraction**
    Add suspend/resume hooks to the game loop; factor `hal/dfhd.cc` through an asset-accessor interface. Linux no-ops the hooks.
