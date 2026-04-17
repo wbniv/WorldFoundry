@@ -9,7 +9,7 @@
 
 Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 
-**Scripting system** — Eight engines implemented and smoke-tested end-to-end in snowgoons: Lua 5.4, Fennel, QuickJS, JerryScript, wasm3, WAMR (classic interp), Wren, and Forth (zForth). All wired into a `ScriptRouter` dispatch table with per-engine sigils. Lua and Fennel vendored; all others vendored previously. WAMR AOT and alternate Forth backends deferred.
+**Scripting system** — Seven engines implemented and smoke-tested end-to-end in snowgoons: Lua 5.4, Fennel, QuickJS, JerryScript, WAMR (classic interp), Wren, and Forth (zForth). All wired into a `ScriptRouter` dispatch table with per-engine sigils. wasm3 retired 2026-04-16 (WAMR reached parity). WAMR AOT and alternate Forth backends deferred.
 
 **Blender ↔ level round-trip** — `levcomp-rs` (Rust) compiles `.lev` source → binary `.lvl`; snowgoons loads end-to-end from `levcomp-rs` output. Blender plugin imports/exports 152/152 OAD fields, all light/slope/animation-channel types, Tcl→Lua script migration. Coordinate system fixed (WF is Z-up). Phase 2c (mesh bbox extension, MeshName asset ID packing, real path keyframes) not yet started.
 
