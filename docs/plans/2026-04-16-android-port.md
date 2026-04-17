@@ -13,6 +13,7 @@
 | Minimum API level | 21 (Android 5.0 Lollipop) — arm64 + NDK r26 floor; ~99.8% device coverage |
 | Graphics API | GLES 3.0 via EGL |
 | Architecture | arm64-v8a only |
+| Gamepad support | Yes in v1 — `InputDevice` → `EJ_BUTTONF_*` bitmask alongside touch |
 
 ## Scripting engines on Android
 
@@ -105,7 +106,7 @@ Each has standalone value on Linux; Android blocks on all four.
 
 ## Open questions
 
-- **Android gamepad support: yes, in v1.** `EJ_BUTTONF_*` maps naturally to physical gamepads via Android `InputDevice`. Add to Phase 3 alongside touch shim.
+- **Performance floor.** Mobile CPUs are slow. The variable-`dt` loop has run at 30 fps before so correctness is not the question; the question is whether the renderer + Jolt + game logic stay above a playable threshold on low-end ARM64. Measure in Phase 4.
 
 ## Out of scope
 
