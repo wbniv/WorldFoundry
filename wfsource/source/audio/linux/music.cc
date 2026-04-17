@@ -17,12 +17,12 @@ MusicPlayer* gMusicPlayer = nullptr;
 #endif
 
 struct MusicPlayer::Impl {
+	ma_data_source_base dsBase;         // must be first — ds_read casts pDs to Impl*
 	tsf*          synth    = nullptr;
 	tml_message*  midi     = nullptr;   // loaded MIDI sequence (heap, tml owns)
 	tml_message*  cursor   = nullptr;   // current playback position
 	double        msElapsed = 0.0;      // milliseconds into current playback
 	ma_sound      sound;                // wraps the custom data source
-	ma_data_source_base dsBase;
 	bool          soundInit = false;
 	float         volume    = 1.0f;
 };
@@ -77,11 +77,13 @@ static ma_result ds_read(ma_data_source* pDs, void* buf, ma_uint64 frameCount,
 		impl->msElapsed += msPerFrame;
 		done++;
 
-		// Loop when MIDI ends
+		// Loop when MIDI ends: reset voices but keep channel presets
 		if (!impl->cursor) {
 			impl->cursor    = impl->midi;
 			impl->msElapsed = 0.0;
 			tsf_reset(impl->synth);
+			for (int ch = 0; ch < 16; ch++)
+				tsf_channel_set_presetnumber(impl->synth, ch, 0, ch == 9);
 		}
 	}
 
@@ -144,6 +146,12 @@ bool MusicPlayer::play(const char* midiPath)
 		fprintf(stderr, "audio: MusicPlayer — soundfont loaded (%s)\n",
 		        WF_MIDI_SOUNDFONT);
 	}
+
+	// GM default: pre-init all 16 channels so note-ons work without a
+	// preceding program-change event (many simple MIDI files omit them).
+	tsf_reset(_impl->synth);
+	for (int ch = 0; ch < 16; ch++)
+		tsf_channel_set_presetnumber(_impl->synth, ch, 0, ch == 9);
 
 	// Load MIDI
 	_impl->midi = tml_load_filename(midiPath);
