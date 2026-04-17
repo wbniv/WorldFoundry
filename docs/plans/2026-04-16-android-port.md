@@ -1,7 +1,7 @@
 # Plan: Android port
 
 **Date:** 2026-04-16
-**Status:** In progress — Phase 1 (CMake) complete; next is Phase 2 (HAL lifecycle) or Phase 0 (GL rewrite)
+**Status:** In progress — Phases 1+2 complete; next is Phase 0 (GL rewrite) or Phase 3 (Android platform proper)
 **Goal:** An APK that launches, runs snowgoons on an arm64 Android device or Google TV (Chromecast with Google TV), takes touch or gamepad input, and handles background/foreground transitions without crashing. Proof-of-viability, not a shipping product.
 
 ## Settled decisions
