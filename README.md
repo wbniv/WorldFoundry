@@ -128,4 +128,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16** — `feat(scripting)`: Lua made optional via `WF_LUA_ENGINE=lua54|none`. `scripting_lua.cc/hp` extracted as peer TU; `build_game.sh` Lua vendor loop gated; Fennel+none warned; stale `scripting_wasm3.hp` include removed.
+**2026-04-16 23:06** — [`docs/plans/2026-04-16-git-branch-browser.md`](docs/plans/2026-04-16-git-branch-browser.md): Plan: git-branch-browser — curses TUI for browsing branch diffs
