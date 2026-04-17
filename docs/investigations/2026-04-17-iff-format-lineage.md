@@ -129,7 +129,8 @@ WF IFF shares the EA IFF 85 chunk concept — 4-byte ID, 32-bit size, padded pay
 | Size field | Payload only | Payload only | Payload only | Payload only |
 | Intra-chunk nav fields | None | **SSND offset+blockSize** | None | **`.offsetof()`/`.sizeof()` (compile-time)** |
 | Platform float type | None | **80-bit extended (68881)** | None | **Fixed-point integers only** |
-| Intended use | Interchange | Interchange | Interchange | **Direct memory load** |
+| Text source as interchange | No | No | No | **Yes — unique feature** |
+| Intended use (binary) | Interchange | Interchange | Interchange | **Direct memory load** |
 | Still in use | Legacy | Yes (macOS, Pro Tools) | Yes (WAV, AVI) | WF engine |
 
 ---
@@ -146,6 +147,11 @@ Both were driven by the same constraint: the CPU is fast, but the storage medium
 
 WF takes the media-awareness one step further: the `.align(N)` directive (with optional `.fillchar(byte)` for padding fill) aligns a chunk's payload to an arbitrary byte boundary — typically 2048 bytes, matching a CD-ROM sector. When large asset chunks (textures, geometry, audio) are sector-aligned, a single read-ahead fills the drive buffer with exactly the data needed; no read spans a sector boundary. AIFF's `blockSize` field communicates this alignment to the reader after the fact; WF's `.align()` bakes it into the file at author time, so the engine never needs to calculate or negotiate it.
 
+**The key divergence is scope and layering.** Apple solved the navigational problem for one chunk type (`SSND`) within the binary format itself. WF generalised it to every chunk — but more importantly, WF separated the two concerns that AIFF and RIFF conflate:
+
+- **AIFF / RIFF**: the binary file is both the interchange format and the execution format. They stay big/little-endian and add navigational metadata to the binary so that any reader on any platform can parse it.
+- **WorldFoundry IFF**: the text source (iffcomp `.iff` files) is the interchange format — human-readable, editable, platform-neutral, and a unique feature among these four formats. The binary output makes no attempt at portability; it is a compiled platform image. Interchange and execution are cleanly separated rather than conflated in one representation.
+
 ---
 
 ## What each format optimises for
@@ -153,4 +159,4 @@ WF takes the media-awareness one step further: the `.align(N)` directive (with o
 - **EA IFF 85**: Generic self-describing interchange. Any application on any Amiga can identify and skip unknown chunks.
 - **AIFF**: Interchange with streaming. The Mac needs to play audio off a slow hard disk; SSND adds just enough navigational structure for that without breaking IFF compatibility.
 - **RIFF**: Interchange on Intel hardware. Microsoft's only change was endianness — everything else is IFF 85.
-- **WorldFoundry IFF**: Zero-copy direct load. The file is the data structure. 4-byte alignment, back-patched offsets, fixed-point integers, and little-endian layout all serve the goal of `mmap` + cast-to-struct with no post-processing.
+- **WorldFoundry IFF**: Two-layer design. The **text source** (iffcomp `.iff` files) is the interchange format — human-readable, editable, platform-neutral, unique among these four formats. The **compiled binary** is a zero-copy direct-load platform blob: 4-byte alignment, back-patched offsets, fixed-point integers, little-endian layout, `mmap` + cast-to-struct with no post-processing. Interchange and execution are cleanly separated rather than conflated.
