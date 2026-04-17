@@ -29,6 +29,8 @@
 
 #include "level.hp"
 #include "game.hp"
+#include <hal/lifecycle.h>
+#include <unistd.h>
 #include <audio/music.hp>
 #include "rest_api.hp"
 #include "physics_jolt.hp"
@@ -270,6 +272,15 @@ WFGame::RunLevel(_DiskFile* levelFile)
 
 	while ( !_curLevel->done() && _bContinue )
 	{
+		if ( HALIsSuspended() )
+		{
+			// Platform has backgrounded us (Android onPause). Skip render + PageFlip
+			// to avoid touching a torn-down GL context; wake briefly and re-check.
+			// Linux never gets here — HALIsSuspended() is always false there.
+			usleep(16000);
+			continue;
+		}
+
 		RestApi_DrainQueue();
 		assert(HALScratchLmalloc.Empty());
 		DBSTREAM1( cframeinfo << char(12) << std::endl << "Frame Info:" << std::endl; )
