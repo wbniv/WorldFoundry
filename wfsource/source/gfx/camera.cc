@@ -28,6 +28,7 @@
 #include <hal/halbase.h>
 #include <hal/platform.h>
 #include <gfx/rendmatt.hp>
+#include <gfx/renderer_backend.hp>
 #include <cpplib/libstrm.hp>
 
 #if   defined(__LINUX__) || defined(__ANDROID__)
@@ -232,8 +233,9 @@ RenderCamera::RenderBegin()
 //#error GL light assumption violated
 //#endif
 
-   glMatrixMode(GL_MODELVIEW);               // so that lights don't get rotated
-   LoadGLMatrixFromMatrix34(_invertedPosition);
+   // View matrix must be the current modelview before glLightfv POSITION
+   // calls below — GL transforms light positions by the active modelview.
+   RendererBackendGet().SetModelView(_invertedPosition);
 
     for(int index=0;index < MAX_LIGHTS;index++)
     {

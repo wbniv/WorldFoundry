@@ -12,6 +12,11 @@
 #include <gfx/renderer_backend.hp>
 #include <gfx/pixelmap.hp>
 #include <gfx/renderer.hp>
+#include <gfx/display.hp>           // LoadGLMatrixFromMatrix34
+#include <math/matrix34.hp>
+
+// GLU is only pulled in for gluPerspective here; pure GL otherwise.
+#include <GL/glu.h>
 
 namespace
 {
@@ -19,6 +24,30 @@ namespace
 class LegacyRendererBackend : public RendererBackend
 {
 public:
+    void SetProjection(float fovDegY, float aspect,
+                       float nearZ, float farZ) override
+    {
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluPerspective(fovDegY, aspect, nearZ, farZ);
+        glMatrixMode(GL_MODELVIEW);
+        AssertGLOK();
+    }
+
+    void SetModelView(const Matrix34& m) override
+    {
+        glMatrixMode(GL_MODELVIEW);
+        LoadGLMatrixFromMatrix34(m);
+        AssertGLOK();
+    }
+
+    void ResetModelView() override
+    {
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        AssertGLOK();
+    }
+
     void DrawTriangle(const RBVertex& v0,
                       const RBVertex& v1,
                       const RBVertex& v2,

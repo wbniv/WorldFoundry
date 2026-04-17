@@ -33,6 +33,7 @@
 #include <memory/memory.hp>
 #include <gfx/pixelmap.hp>
 #include <gfx/rendobj3.hp>
+#include <gfx/renderer_backend.hp>
 extern bool bFullScreen;
 extern int _halWindowWidth;
 extern int _halWindowHeight;
@@ -98,51 +99,15 @@ WFInitGL()
     AssertGLOK();
 //    glClearIndex( Black );
 
-    glMatrixMode( GL_MODELVIEW );
-    AssertGLOK();
-    glLoadIdentity();
-    AssertGLOK();
-
-    //glCullFace( GL_BACK );
-    //glEnable( GL_CULL_FACE );
-
-    // Prevent a divide by zero, when window is too short
-    // (you cant make a window of zero width).
-    //if(h == 0)
-    //	h = 1;
+    RendererBackendGet().ResetModelView();
 
     // Set the viewport to be the entire window
     glViewport(0, 0, wfWindowWidth, wfWindowHeight);
     AssertGLOK();
 
-    // Keep the square square, this time, save calculated
-    // width and height for later use
-//     if (w <= h)
-//     {
-//         windowHeight = 250.0f*h/w;
-//         windowWidth = 250.0f;
-//     }
-//     else
-//     {
-//         windowWidth = 250.0f*w/h;
-//         windowHeight = 250.0f;
-//     }
-    // Set the clipping volume
-
-    
-    glMatrixMode( GL_PROJECTION );
-    AssertGLOK();
-    glLoadIdentity();
-    
-    AssertGLOK();
     //float fAspect = float(wfWindowWidth)/float(wfWindowHeight);
-    float fAspect = 1.0;                           // kts I am correcting for this elsewhere, eventually in the case of PIPELINE_GL this will need to be changed
-    gluPerspective(60.0f,fAspect,1.0,1000.0f);
-    AssertGLOK();
-
-    glMatrixMode( GL_MODELVIEW );
-    AssertGLOK();
-
+    float fAspect = 1.0f;                          // kts I am correcting for this elsewhere, eventually in the case of PIPELINE_GL this will need to be changed
+    RendererBackendGet().SetProjection(60.0f, fAspect, 1.0f, 1000.0f);
 }
 //==============================================================================
 
@@ -329,7 +294,7 @@ Display::RenderBegin()
     glVertex3f( 0.9,  0.0, -5.0 + zOffset);
     glEnd();
 #endif
-    glLoadIdentity ();
+    RendererBackendGet().ResetModelView();
 }
 
 //==============================================================================

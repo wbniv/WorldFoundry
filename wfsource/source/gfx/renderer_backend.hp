@@ -14,6 +14,7 @@
 #ifndef _RENDERER_BACKEND_HP
 #define _RENDERER_BACKEND_HP
 
+class Matrix34;
 class PixelMap;
 
 struct RBVertex
@@ -28,6 +29,20 @@ class RendererBackend
 public:
     virtual ~RendererBackend() = default;
 
+    // Projection: perspective with vertical fov in degrees. Called once at
+    // startup, and again on window resize.
+    virtual void SetProjection(float fovDegY, float aspect,
+                               float nearZ, float farZ) = 0;
+
+    // Modelview replace. Callers pass the object's world transform already
+    // combined with the camera's view matrix (or the raw view matrix for
+    // camera/light setup).
+    virtual void SetModelView(const Matrix34& m) = 0;
+
+    // Modelview identity.
+    virtual void ResetModelView() = 0;
+
+    // Triangle submission (see top of file).
     virtual void DrawTriangle(const RBVertex& v0,
                               const RBVertex& v1,
                               const RBVertex& v2,

@@ -32,6 +32,7 @@
 #include <gfx/material.hp>
 #include <gfx/math.hp>
 #include <gfx/display.hp>
+#include <gfx/renderer_backend.hp>
 
 //============================================================================
 // kts maybe I should write an SVECTOR class
@@ -61,8 +62,7 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
    );
   globalRendererVariables.GTEMatrix = inverted;
 
-  glMatrixMode( GL_MODELVIEW );
-  LoadGLMatrixFromMatrix34(position);
+  RendererBackendGet().SetModelView(position);
 
 	Primitive* primitive  = _primList[0];
 	pRenderObj3DFunc renderer;
