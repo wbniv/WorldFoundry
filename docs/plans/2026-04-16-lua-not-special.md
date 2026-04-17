@@ -1,7 +1,7 @@
 # Plan: Lua engine is not special — make it optional
 
 **Date:** 2026-04-16
-**Status:** Not started
+**Status:** Done
 **Goal:** Lua is a peer engine, compiled in by `WF_LUA_ENGINE=lua54` (default) and absent when `WF_LUA_ENGINE=none`. No engine is hardcoded. Fennel depends on Lua; it is forced off when Lua is absent.
 
 ## Problem
