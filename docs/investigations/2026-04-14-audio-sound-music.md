@@ -79,12 +79,19 @@ The original WF game shipped with MIDI music. MIDI files are tiny (a few KB each
 **RAM footprint:**
 - `tsf.h` runtime state: ~1–4 KB per TSF instance (voice table, channel state)
 - Active voices: each simultaneous note consumes ~200–400 bytes of voice state; a typical GM MIDI track peaks at 32–64 simultaneous voices → ~8–25 KB voice RAM
-- Soundfont samples: the loaded SF2 sample data is the dominant cost. A small bundled soundfont (e.g. `florestan-subset.sf2` included in TSF examples) is ~2–4 MB loaded; a full GM bank (GeneralUser GS) is ~30 MB. **Soundfont choice is the RAM decision**, not TSF itself.
-- Practical target: a curated WF-subset SF2 (only the instruments actually used) should land under 2 MB loaded.
+- Soundfont samples: the loaded SF2 sample data is the dominant cost. **Soundfont choice is the RAM decision**, not TSF itself.
+
+**Soundfont tiers:**
+
+| Tier | File | Loaded RAM | Notes |
+|------|------|-----------|-------|
+| Dev default | `florestan-subset.sf2` (bundled in TSF repo) | ~400–600 KB | Drop-in, no curation work, acceptable quality. Use while MIDI tracks are being inventoried. |
+| Ship target | WF-subset SF2 | ~1–2 MB | Custom SF2 containing only the MIDI program numbers WF's tracks actually use. Requires inventorying all MIDI files first. Smaller and purpose-fit. |
+| Synthetic (floor) | Hand-rolled SF2 | ~100–200 KB | **Zero PCM samples.** SF2 built entirely from sine/triangle/sawtooth generator modulators. Absolute minimum possible size — the SF2 format overhead plus patch definitions only, no sample data. Instruments sound thin/electronic but are consistent and free on RAM. Requires authoring a custom SF2 file. This is the smallest MIDI playback option that exists short of dropping MIDI entirely. |
 
 **Integration:** `MusicPlayer` owns a `tml_message*` sequence + `tsf*` instance. A miniaudio custom data source calls `tsf_render_short` into the mix buffer each callback. MIDI playback is driven entirely from the audio thread — no game-thread polling.
 
-**Soundfont:** Bundle a small SF2 in `engine/vendor/`; exact file TBD once MIDI tracks are inventoried. License must be permissive (CC0 or MIT-equivalent).
+**Soundfont license:** must be permissive (CC0 or MIT-equivalent). `florestan-subset.sf2` is public domain.
 
 ### Phase 3 — Music subsystem
 
