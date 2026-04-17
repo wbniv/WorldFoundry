@@ -115,7 +115,7 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ### Content pipeline
 - **Blender → `cd.iff` pipeline** — `levcomp-rs` compiles `.lev.bin` → `.lvl`; validated via LVL-swap into existing snowgoons.iff. Remaining: asset ID packing, mesh bbox extension, real path/channel extraction, end-to-end automation script.
-- **iffcomp: Rust is primary** — Decision: tools in Rust. Three implementations exist (C++ modernized oracle, Go, Rust); all pass `all_features.iff.txt`. Rust port (`iffcomp-rs/`) is the going-forward implementation. C++ kept as byte-exact oracle; Go port (`iffcomp-go/`) is superseded.
+- **iffcomp: Rust is primary** — Decision: tools in Rust. Four implementations exist (C++ modernized oracle, Go, Node.js, Rust); all pass `all_features.iff.txt`. Rust port (`iffcomp-rs/`) is the going-forward implementation. C++ kept as byte-exact oracle; Go and Node.js ports are superseded.
 
 ### Larger / deferred work
 - **Audio (miniaudio)** — SFX one-shots, music streaming, 3D panning, all statically linked. No start date.
