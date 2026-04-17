@@ -83,15 +83,46 @@ The original WF game shipped with MIDI music. MIDI files are tiny (a few KB each
 
 **Soundfont tiers:**
 
-| Tier | File | Loaded RAM | Notes |
-|------|------|-----------|-------|
-| Dev default | `florestan-subset.sf2` (bundled in TSF repo) | ~400–600 KB | Drop-in, no curation work, acceptable quality. Use while MIDI tracks are being inventoried. |
-| Ship target | WF-subset SF2 | ~1–2 MB | Custom SF2 containing only the MIDI program numbers WF's tracks actually use. Requires inventorying all MIDI files first. Smaller and purpose-fit. |
-| Synthetic (floor) | Hand-rolled SF2 | ~100–200 KB | **Zero PCM samples.** SF2 built entirely from sine/triangle/sawtooth generator modulators. Absolute minimum possible size — the SF2 format overhead plus patch definitions only, no sample data. Instruments sound thin/electronic but are consistent and free on RAM. Requires authoring a custom SF2 file. This is the smallest MIDI playback option that exists short of dropping MIDI entirely. |
+| Tier | File | Loaded RAM | Platform | Notes |
+|------|------|-----------|----------|-------|
+| Synthetic (floor) | Hand-rolled SF2 | ~100–200 KB | **Android** | **Zero PCM samples.** SF2 built entirely from sine/triangle/sawtooth generator modulators. No sample data at all. Instruments sound thin/electronic but consistent and essentially free on RAM. Requires authoring a custom SF2 file. |
+| Dev / Linux v1 | `florestan-subset.sf2` (bundled in TSF repo) | ~400–600 KB | **Linux** | Drop-in, public domain, no curation work. Use for initial implementation; evaluate stepping up after hearing it in practice. |
+| Step-up (Linux, optional) | TimGM6mb.sf2 | ~6 MB | Linux only | Real PCM samples, GM coverage, noticeably better timbre. Evaluate after florestan-subset is working. License: GPL — check if acceptable for the build. |
+| Ship target (future) | WF-subset SF2 | ~1–2 MB | Both | Custom SF2 containing only the MIDI program numbers WF's tracks actually use. Requires inventorying all MIDI files first. Best balance of quality and size. |
+
+**Soundfont selection is a compile-time flag** (`WF_MIDI_SOUNDFONT=florestan|synthetic|path/to/custom.sf2`) so swapping tiers requires no code change.
 
 **Integration:** `MusicPlayer` owns a `tml_message*` sequence + `tsf*` instance. A miniaudio custom data source calls `tsf_render_short` into the mix buffer each callback. MIDI playback is driven entirely from the audio thread — no game-thread polling.
 
 **Soundfont license:** must be permissive (CC0 or MIT-equivalent). `florestan-subset.sf2` is public domain.
+
+## MIDI score sources
+
+Classical music pre-1928 is public domain as a *composition*, but the MIDI *file* (the arrangement/performance) may carry its own copyright. Only use sources that explicitly license the MIDI files themselves.
+
+### CC0 — no attribution required
+
+| Source | URL | Content | Notes |
+|--------|-----|---------|-------|
+| OpenGameArt.org CC0 Music | opengameart.org | 1,000+ game music tracks incl. orchestral, ambient, RPG | Purpose-built for games; loopable; diverse genres |
+| GitHub: CC0-midis | github.com/m-malandro/CC0-midis | Original compositions | Small curated collection; actively maintained |
+| GitHub: SoundSafari CC0 | github.com/SoundSafari/CC0-1.0-Music | Large corpus | Largest CC0 music database available |
+| itch.io CC0 MIDI assets | itch.io/game-assets/tag-cc0/tag-midi | Game music bundles: fantasy, battle, ambient | Community-curated; generally higher quality than vintage archives |
+
+### CC BY — attribution required (still commercial-friendly)
+
+| Source | URL | Content | Notes |
+|--------|-----|---------|-------|
+| **Piano-midi.de** | piano-midi.de | Classical piano: Bach, Beethoven, Brahms, Chopin, Liszt, Mozart | **Best classical source.** CC-BY-SA (Germany). Professionally performed and transcribed. Attribution: credit Bernd Krueger + URL. |
+| Incompetech (Kevin MacLeod) | incompetech.com | 2,000+ cinematic/orchestral/ambient compositions | Professional grade; widely used in media. CC-BY 4.0. |
+| Wikimedia Commons | commons.wikimedia.org/wiki/Category:MIDI_files | Mixed; classical and other | Verify each file individually — license varies per upload. |
+
+### NOT suitable for commercial use (avoid)
+
+- BitMidi — personal use only
+- Kunstderfuge — CC-BY-NC-SA (non-commercial)
+- VGMusic — entertainment purposes only
+- FreeMidi — unclear license, assume restricted
 
 ### Phase 3 — Music subsystem
 
