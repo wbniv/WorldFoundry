@@ -25,6 +25,7 @@ Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
+| 2026-04-16 | [Plan: git-branch-browser — curses TUI for browsing branch diffs](docs/plans/2026-04-16-git-branch-browser.md) | **Not started** | **Goal:** A Python curses program at `scripts/git-branch-browser.py` that lets you browse all git branches, see per-branch changed files as a collapsible directory tree with status annotations, and … |
 | 2026-04-16 | [Plan: Lua engine is not special — make it optional](docs/plans/2026-04-16-lua-not-special.md) | **Not started** | **Goal:** Lua is a peer engine, compiled in by `WF_LUA_ENGINE=lua54` (default) and absent when `WF_LUA_ENGINE=none`. No engine is hardcoded. Fennel depends on Lua; it is forced off when Lua is absent. |
 | 2026-04-16 | [Plan: iOS port](docs/plans/2026-04-16-ios-port.md) | **Not started — blocked on Android port** | **Goal:** An IPA that runs snowgoons on a tethered iPhone, installed via Xcode with a developer profile. Proof-of-viability, not a shipping product. |
 | 2026-04-16 | [Plan: Android port](docs/plans/2026-04-16-android-port.md) | **Not started** | **Goal:** An APK that launches, runs snowgoons on an arm64 Android device, takes touch input, and handles background/foreground transitions without crashing. Forth (zForth) + Lua only in v1; other engines disabled. Proof-of-viability, not a shipping product. |
@@ -127,4 +128,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 22:25** — [`docs/plans/2026-04-14-wasm3-scripting-engine.md`](docs/plans/2026-04-14-wasm3-scripting-engine.md): Plan: WebAssembly (wasm3) as a third scripting engine
+**2026-04-16 22:42** — [`docs/plans/2026-04-16-git-branch-browser.md`](docs/plans/2026-04-16-git-branch-browser.md): Plan: git-branch-browser — curses TUI for browsing branch diffs
