@@ -104,7 +104,6 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 - **Load level by filename from CLI** — `wf_game <level.iff>` flag to bypass `cd.iff` for dev iteration (after Lua spike + iffdump round-trip).
 
 ### Physics
-- **Jolt Phases 4+** — in progress (`jolt_backend.cc/hp`, `level.cc` uncommitted). Phase 3 was `CharacterVirtual`; check plan for Phase 4+ scope.
 - **Remove `physics/wf/`** — kept until Jolt passes snowgoons parity on at least one other level; removal is a separate reviewable commit.
 - **Constraint-based props** — doors/chains/pulleys via Jolt; blocked on Jolt parity + IFF binary chunks.
 
