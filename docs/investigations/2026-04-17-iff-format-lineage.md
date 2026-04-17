@@ -144,6 +144,8 @@ WF's approach is proactive and generalised: the iffcomp compiler resolves `.offs
 
 Both were driven by the same constraint: the CPU is fast, but the storage medium (Mac hard disk, WF CD-ROM) is slow. Seeking beats scanning.
 
+WF takes the media-awareness one step further: the `.align(N)` directive (with optional `.fillchar(byte)` for padding fill) aligns a chunk's payload to an arbitrary byte boundary — typically 2048 bytes, matching a CD-ROM sector. When large asset chunks (textures, geometry, audio) are sector-aligned, a single read-ahead fills the drive buffer with exactly the data needed; no read spans a sector boundary. AIFF's `blockSize` field communicates this alignment to the reader after the fact; WF's `.align()` bakes it into the file at author time, so the engine never needs to calculate or negotiate it.
+
 ---
 
 ## What each format optimises for
