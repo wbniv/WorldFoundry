@@ -1,0 +1,40 @@
+//=============================================================================
+// gfx/renderer_backend.hp: Renderer backend seam
+// Copyright ( c ) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//==============================================================================
+// Thin per-triangle submission interface. Ported renderer TUs call
+// RendererBackendGet().DrawTriangle(...) instead of emitting glBegin/glEnd
+// directly. Legacy backend (gfx/glpipeline/backend_legacy.cc) maps each call
+// back to the original fixed-function GL calls; a future modern backend will
+// batch into a VBO + shader path for GLES 3.0.
+//============================================================================
+
+#ifndef _RENDERER_BACKEND_HP
+#define _RENDERER_BACKEND_HP
+
+class PixelMap;
+
+struct RBVertex
+{
+    float x, y, z;
+    float r, g, b;
+    float u, v;
+};
+
+class RendererBackend
+{
+public:
+    virtual ~RendererBackend() = default;
+
+    virtual void DrawTriangle(const RBVertex& v0,
+                              const RBVertex& v1,
+                              const RBVertex& v2,
+                              float nx, float ny, float nz,
+                              const PixelMap* texture) = 0;
+};
+
+RendererBackend& RendererBackendGet();
+
+#endif

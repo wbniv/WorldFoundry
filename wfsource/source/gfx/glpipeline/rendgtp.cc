@@ -1,7 +1,6 @@
 //==============================================================================
 // rendgtp.cc: Renderer for GouraudTexturePreLit
-// Automatically generated from render.ccs DO NOT MODOFIY
-// Copyright ( c ) 1997,98,99 World Foundry Group  
+// Copyright ( c ) 1997,98,99 World Foundry Group
 //
 // Part of the World Foundry 3D video game engine/production environment
 // for more information about World Foundry, see www.worldfoundry.org
@@ -21,36 +20,22 @@
 // or see www.fsf.org
 
 // ===========================================================================
-// Description:
-//
+// Description: GouraudTexturePreLit — per-vertex color + texture, no lighting.
 // Original Author: Kevin T. Seghetti
 //============================================================================
 
-#define PRINT_EVERYTHING 0
-
-#include <gfx/display.hp>				// kts just to get switches
+#include <gfx/display.hp>
 #include <gfx/rendobj3.hp>
 #include <gfx/material.hp>
-#include <math/vector3p.hp>
 #include <gfx/renderer.hp>
-#include <math/scalar.hp>
-#include <math/scalarps.hp>
+#include <gfx/renderer_backend.hp>
+#include <gfx/prim.hp>
 #include <math/vector3.hp>
 #include <math/vector3p.hp>
+#include <math/scalar.hp>
+#include <math/scalarps.hp>
 
-#include <cpplib/libstrm.hp>
-#include <gfx/prim.hp>
-
-#define FLAG_TEXTURE 1
-#define FLAG_GOURAUD 1
-#define FLAG_LIGHTING 0
-
-//============================================================================
-
-// these globals are defined in rendobj3.cc
 extern RendererVariables globalRendererVariables;
-
-//============================================================================
 
 #if defined(USE_ORDER_TABLES)
 #error ORDER TABLES not used by glpipeline!
@@ -58,149 +43,67 @@ extern RendererVariables globalRendererVariables;
 
 //==============================================================================
 
-inline void
-GL_3D_VERTEX(const Vector3& point)                                                                         
-{                                                                                              
-    glVertex4f(point.X().AsFloat(),point.Y().AsFloat(),point.Z().AsFloat(),1.0);
+static inline void
+CalcUV(unsigned short tpage,
+       unsigned char uin, unsigned char vin,
+       const PixelMap& texturePixelMap,
+       float& uOut, float& vOut)
+{
+    ulong u(uin + DecodeTPageX(tpage));
+    ulong v(vin + DecodeTPageY(tpage));
+
+#if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
+    uOut = float(u) / VRAM_WIDTHF;
+    vOut = float(v) / VRAM_HEIGHTF;
+#else
+    uOut = float(u) / texturePixelMap.GetBaseXSize();
+    vOut = float(v) / texturePixelMap.GetBaseYSize();
+#endif
 }
 
 //==============================================================================
 
-inline void
-SetTexture(const PixelMap& texturePixelMap)
-{
-#if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
-#else
-    texturePixelMap.SetGLTexture();
-#endif
-}
-
-static void 
-CalcAndSetUV(unsigned short tpage, unsigned char uin, unsigned char vin, const PixelMap& texturePixelMap) 
-{
-    ulong u(uin+DecodeTPageX(tpage)); 
-    ulong v(vin+DecodeTPageY(tpage)); 
-
-#if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
-    float uResult(float(u)/VRAM_WIDTHF);                            
-    float vResult(float(v)/VRAM_HEIGHTF);                           
-#else
-    float uResult(float(u)/texturePixelMap.GetBaseXSize());                            
-    float vResult(float(v)/texturePixelMap.GetBaseYSize());
-#endif
-    glTexCoord2f(uResult, vResult);                         
-}
-
-//-----------------------------------------------------------------------------
-
 int
 RenderObject3D::RenderPoly3DGouraudTexturePreLit(Primitive* primitive)
 {
-   float color[4];
-   color[3] = 1.0;
-   assert(primitive);
-   POLY_GT3& poly = (*(POLY_GT3*)primitive);
+    assert(primitive);
+    POLY_GT3& poly = (*(POLY_GT3*)primitive);
+    assert(ValidPtr(poly.pPixelMap));
 
-#if FLAG_TEXTURE
-   glEnable( GL_TEXTURE_2D );
-   assert(ValidPtr(poly.pPixelMap));
-   SetTexture(*poly.pPixelMap);
-#else
-   glDisable( GL_TEXTURE_2D );
-#endif
-   AssertGLOK();
+    RBVertex v[3];
+    const Vector3_PS* const gte = globalRendererVariables.gteVect;
 
-   glBegin( GL_TRIANGLES );
+    v[0].x = gte[0].X().AsFloat();
+    v[0].y = gte[0].Y().AsFloat();
+    v[0].z = gte[0].Z().AsFloat();
+    v[0].r = float(poly.r0) / 256.0f;
+    v[0].g = float(poly.g0) / 256.0f;
+    v[0].b = float(poly.b0) / 256.0f;
+    CalcUV(poly.tpage, poly.u0, poly.v0, *poly.pPixelMap, v[0].u, v[0].v);
 
-   const Vector3_PS& glnormal = (globalRendererVariables.currentRenderFace->normal);
-   glNormal3f(glnormal.X().AsFloat(),glnormal.Y().AsFloat(),glnormal.Z().AsFloat());
+    v[1].x = gte[1].X().AsFloat();
+    v[1].y = gte[1].Y().AsFloat();
+    v[1].z = gte[1].Z().AsFloat();
+    v[1].r = float(poly.r1) / 256.0f;
+    v[1].g = float(poly.g1) / 256.0f;
+    v[1].b = float(poly.b1) / 256.0f;
+    CalcUV(poly.tpage, poly.u1, poly.v1, *poly.pPixelMap, v[1].u, v[1].v);
 
-#if FLAG_TEXTURE == 0
-#if FLAG_GOURAUD == 0
-   // f3
-   //glColor3ub( poly.r0, poly.g0, poly.b0 );
-   color[0] = float(poly.r0)/256.0;
-   color[1] = float(poly.g0)/256.0;
-   color[2] = float(poly.b0)/256.0;
-   glMaterialfv(GL_FRONT, GL_AMBIENT, color);
-   glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
-   GL_3D_VERTEX(globalRendererVariables.gteVect[0]);
-   GL_3D_VERTEX(globalRendererVariables.gteVect[1]);
-   GL_3D_VERTEX(globalRendererVariables.gteVect[2]);
-#else       // FLAG_GOURAUD
-   //g3 
-   color[0] = float(poly.r0)/256.0;
-   color[1] = float(poly.g0)/256.0;
-   color[2] = float(poly.b0)/256.0;
-   glMaterialfv(GL_FRONT, GL_AMBIENT, color);
-   glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
-   GL_3D_VERTEX(globalRendererVariables.gteVect[0]);
-   color[0] = float(poly.r1)/256.0;
-   color[1] = float(poly.g1)/256.0;
-   color[2] = float(poly.b1)/256.0;
-   glMaterialfv(GL_FRONT, GL_AMBIENT, color);
-   glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
-   GL_3D_VERTEX(globalRendererVariables.gteVect[1]);
-   color[0] = float(poly.r2)/256.0;
-   color[1] = float(poly.g2)/256.0;
-   color[2] = float(poly.b2)/256.0;
-   glMaterialfv(GL_FRONT, GL_AMBIENT, color);
-   glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
-   GL_3D_VERTEX(globalRendererVariables.gteVect[2]);
-#endif
-#else         // FLAG_TEXTURE
+    v[2].x = gte[2].X().AsFloat();
+    v[2].y = gte[2].Y().AsFloat();
+    v[2].z = gte[2].Z().AsFloat();
+    v[2].r = float(poly.r2) / 256.0f;
+    v[2].g = float(poly.g2) / 256.0f;
+    v[2].b = float(poly.b2) / 256.0f;
+    CalcUV(poly.tpage, poly.u2, poly.v2, *poly.pPixelMap, v[2].u, v[2].v);
 
-   assert(poly.pPixelMap);
-#if FLAG_GOURAUD == 0
-   //ft3
-//            glColor3ub( 255, 0, 0 );
-   color[0] = float(poly.r0)/256.0;
-   color[1] = float(poly.g0)/256.0;
-   color[2] = float(poly.b0)/256.0;
-
-   // kts temp
-   color[0] = 1.0;
-   color[1] = 1.0;
-   color[2] = 1.0;
-   glMaterialfv(GL_FRONT, GL_AMBIENT, color);
-   glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
-   CalcAndSetUV(poly.tpage, poly.u0,poly.v0,*poly.pPixelMap);
-   GL_3D_VERTEX(globalRendererVariables.gteVect[0]);
-   CalcAndSetUV(poly.tpage, poly.u1,poly.v1,*poly.pPixelMap);
-   GL_3D_VERTEX(globalRendererVariables.gteVect[1]);
-   CalcAndSetUV(poly.tpage, poly.u2,poly.v2,*poly.pPixelMap);
-   GL_3D_VERTEX(globalRendererVariables.gteVect[2]);
-#else            // FLAG_GOURAUD
-   // gt3
-   CalcAndSetUV(poly.tpage, poly.u0,poly.v0,*poly.pPixelMap);
-   color[0] = float(poly.r0)/256.0;
-   color[1] = float(poly.g0)/256.0;
-   color[2] = float(poly.b0)/256.0;
-   glMaterialfv(GL_FRONT, GL_AMBIENT, color);
-   glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
-   GL_3D_VERTEX(globalRendererVariables.gteVect[0]);
-   CalcAndSetUV(poly.tpage, poly.u1,poly.v1,*poly.pPixelMap);
-   color[0] = float(poly.r1)/256.0;
-   color[1] = float(poly.g1)/256.0;
-   color[2] = float(poly.b1)/256.0;
-   glMaterialfv(GL_FRONT, GL_AMBIENT, color);
-   glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
-   GL_3D_VERTEX(globalRendererVariables.gteVect[1]);
-   CalcAndSetUV(poly.tpage, poly.u2,poly.v2,*poly.pPixelMap);
-   color[0] = float(poly.r2)/256.0;
-   color[1] = float(poly.g2)/256.0;
-   color[2] = float(poly.b2)/256.0;
-   glMaterialfv(GL_FRONT, GL_AMBIENT, color);
-   glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
-   GL_3D_VERTEX(globalRendererVariables.gteVect[2]);
-#endif           // FLAG_GOURAUD
-#endif           // FLAG_TEXTURE
-
-   glEnd();
-   AssertGLOK();
-
-	return 1;
+    const Vector3_PS& n = globalRendererVariables.currentRenderFace->normal;
+    RendererBackendGet().DrawTriangle(v[0], v[1], v[2],
+                                      n.X().AsFloat(),
+                                      n.Y().AsFloat(),
+                                      n.Z().AsFloat(),
+                                      poly.pPixelMap);
+    return 1;
 }
 
 //============================================================================
-
