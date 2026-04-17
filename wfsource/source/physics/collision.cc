@@ -224,13 +224,13 @@ DispatchCollisionMessages( PhysicalObject& object1, PhysicalObject& object2,
 	if ( msg1 && (msg1 != CI_PHYSICS) )
 	{
 		DBSTREAM3( ccollision << "Sent " << msg1 << " message to " << object1 << " referring to " << object2 << std::endl; )
-		object1.sendMsg( msg1, int32(&object2) );
+		object1.sendMsg( msg1, static_cast<int32>(reinterpret_cast<intptr_t>(&object2)) );
 	}
 
 	if ( msg2 && (msg2 != CI_PHYSICS) )
 	{
 		DBSTREAM3( ccollision << "Sent " << msg2 << " message to " << object2 << " referring to " << object1 << std::endl; )
-		object2.sendMsg( msg2, int32(&object1) );
+		object2.sendMsg( msg2, static_cast<int32>(reinterpret_cast<intptr_t>(&object1)) );
 	}
 }
 

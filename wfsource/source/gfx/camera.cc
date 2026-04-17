@@ -30,7 +30,7 @@
 #include <gfx/rendmatt.hp>
 #include <cpplib/libstrm.hp>
 
-#if   defined(__LINUX__)
+#if   defined(__LINUX__) || defined(__ANDROID__)
 #define scratchPadMemory _HALLmalloc
 #endif
         

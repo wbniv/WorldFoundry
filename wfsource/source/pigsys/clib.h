@@ -27,7 +27,7 @@
 // Disabled on __LINUX__ (2026): modern libc++ qualifies std::atoi / std::exit
 // etc., so textual #define atoi sys_atoi turns `std::atoi` into `std::sys_atoi`
 // which doesn't exist in the std namespace.
-#if		DO_ASSERTIONS && !defined(_SYS_NOCHECK_DIRECT_STD) && !defined(__LINUX__)
+#if		DO_ASSERTIONS && !defined(_SYS_NOCHECK_DIRECT_STD) && !defined(__LINUX__) && !defined(__ANDROID__)
 
 // stdlib.h
 #undef  atoi
@@ -42,15 +42,15 @@
 //#undef	atexit
 //#define	atexit		sys_atexit
 
-#endif	// DO_ASSERTIONS && !defined(_SYS_NOCHECK_DIRECT_STD) && !defined(__LINUX__)
+#endif	// DO_ASSERTIONS && !defined(_SYS_NOCHECK_DIRECT_STD) && !defined(__LINUX__) && !defined(__ANDROID__)
 
 // This section is for functions which are always implemented as our own
 // function, thus we can always check them
-#if !defined(_PIGSYS_C) && !defined(__LINUX__)
+#if !defined(_PIGSYS_C) && !defined(__LINUX__) && !defined(__ANDROID__)
 
 // stdlib.h
 #undef	exit
 #define exit            sys_exit
 
-#endif	// !defined(_PIGSYS_C) && !defined(__LINUX__)
+#endif	// !defined(_PIGSYS_C) && !defined(__LINUX__) && !defined(__ANDROID__)
 

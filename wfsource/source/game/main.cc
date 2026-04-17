@@ -29,7 +29,7 @@
 #include "game.hp"
 #include "version.hp"
 
-#if defined(__LINUX__)
+#if defined(__LINUX__) || defined(__ANDROID__)
 	char szOadDir[ _MAX_PATH ];
 #endif
 

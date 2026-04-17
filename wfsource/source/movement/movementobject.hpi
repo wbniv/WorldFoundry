@@ -51,7 +51,7 @@ MovementObject::MovementObject(const SObjectStartupData* startupData, const void
       _path = new (*startupData->memory) Path(startupData->path,*startupData->memory,startupData->levelOnDisk);
       assert( ValidPtr( _path ) );
 
-#pragma message (__LINE__: kts fix: pathed objects get their position set in game/actor.cc since we cant do it here (yet) )
+#pragma message ("kts fix: pathed objects get their position set in game/actor.cc since we cant do it here (yet)")
 #if 0
       DBSTREAM1
       (

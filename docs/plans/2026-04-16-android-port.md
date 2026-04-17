@@ -1,7 +1,7 @@
 # Plan: Android port
 
 **Date:** 2026-04-16
-**Status:** Not started
+**Status:** In progress — Phase 1 (CMake) underway
 **Goal:** An APK that launches, runs snowgoons on an arm64 Android device or Google TV (Chromecast with Google TV), takes touch or gamepad input, and handles background/foreground transitions without crashing. Proof-of-viability, not a shipping product.
 
 ## Settled decisions
@@ -38,13 +38,13 @@ zForth: ~4 KB compiled core + WF bridge; pure portable C, no OS-specific code. A
 
 Each has standalone value on Linux; Android blocks on all four.
 
-1. **[lua-not-special](2026-04-16-lua-not-special.md)** — makes `WF_LUA_ENGINE=none` available so the Android build can be truly Forth-only.
+1. **[lua-not-special](2026-04-16-lua-not-special.md)** ✅ Done 2026-04-16 — `WF_LUA_ENGINE=none` available; Android build will be Forth-only.
 
 2. **Phase 0 — Retire immediate-mode GL (Linux VBO rewrite)**
-   `glBegin`/`glEnd` does not exist in GLES 3.0. Rewrite `gfx/glpipeline/*.cc` to VBO + shader batches on Linux first.
+   `glBegin`/`glEnd` does not exist in GLES 3.0. Rewrite `gfx/glpipeline/*.cc` to VBO + shader batches on Linux first. **Not yet started — largest phase.**
 
-3. **Phase 1 — CMake build**
-   Android NDK consumes CMake natively. Replace `build_game.sh` with `CMakeLists.txt`.
+3. **Phase 1 — CMake build** ✅ In progress 2026-04-17
+   `CMakeLists.txt` written at repo root. NDK r26c installed at `/usr/lib/android-sdk/ndk/26.2.11394342`. `task build-cmake` (Linux) and `task build-cmake-android` (arm64-v8a, API 21) added to Taskfile. Parity verification vs. `build_game.sh` pending.
 
 4. **Phase 2 — HAL lifecycle + filesystem abstraction**
    Add suspend/resume hooks to the game loop; factor `hal/dfhd.cc` through an asset-accessor interface. Linux no-ops the hooks.

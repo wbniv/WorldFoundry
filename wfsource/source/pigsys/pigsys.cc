@@ -376,7 +376,7 @@ sys_init(int* argcp, char*** argvp)
 	sys_atexit( memcheck_shutdown );
 #endif
 
-#if   defined(__LINUX__)
+#if   defined(__LINUX__) || defined(__ANDROID__)
 	_linux_init();
 #else
 #	error Unknown platform

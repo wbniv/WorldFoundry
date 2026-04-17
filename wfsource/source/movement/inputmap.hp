@@ -29,7 +29,7 @@
 
 #include <hal/sjoystic.h>
                           
-#if   defined(__LINUX__)
+#if   defined(__LINUX__) || defined(__ANDROID__)
 enum
 {
 	kBtnJump      = EJ_BUTTONF_A,

@@ -43,7 +43,7 @@
 #include "otable.hp"
 #include "renderer.hp"
 
-#if defined(__LINUX__)
+#if defined(__LINUX__) || defined(__ANDROID__)
 #include <sys/time.h>
 #endif
 
@@ -155,7 +155,7 @@ private:
 
 	int _xSize;						// x & y size of display
 	int _ySize;
-#if   defined( __LINUX__ )
+#if   defined(__LINUX__) || defined(__ANDROID__)
 	float _backgroundColorRed;
 	float _backgroundColorGreen;
 	float _backgroundColorBlue;

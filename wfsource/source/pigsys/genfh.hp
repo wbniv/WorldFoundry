@@ -39,7 +39,7 @@ extern "C"
 #   include <stdio.h>
 #endif
 
-#if   defined( __LINUX__ )
+#if   defined(__LINUX__) || defined(__ANDROID__)
 #	include <fcntl.h>
 #	include <unistd.h>
 #else
@@ -65,7 +65,7 @@ extern "C"
 // Macros
 // ------------------------------------------------------------------------
 
-#if   defined( __LINUX__ )
+#if   defined(__LINUX__) || defined(__ANDROID__)
 
 	#define FHINITOK					1
 	#define FHINIT						FHINITOK

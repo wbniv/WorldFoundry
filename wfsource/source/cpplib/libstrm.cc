@@ -17,7 +17,7 @@
 
 // ------------------------------------------------------------------------
 
-#if defined(__LINUX__)
+#if defined(__LINUX__) || defined(__ANDROID__)
 #include <cpplib/strmnull.hp>
 
 CREATENULLSTREAM(libstream_null);				// Create a global instance of the output

@@ -13,7 +13,7 @@
 // Standard Set of ostreams
 // ------------------------------------------------------------------------
 
-#if defined( __LINUX__ )
+#if defined(__LINUX__) || defined(__ANDROID__)
 
 #if defined(OLD_IOSTREAMS)
 #	define ostream_withassign _IO_ostream_withassign

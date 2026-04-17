@@ -61,12 +61,12 @@
 #if DEBUG_MEMORY
 #include <pigsys/psysmem.h>
 #else
-#if   defined( __LINUX__ )
-// linux allows any alignedment
+#if   defined(__LINUX__) || defined(__ANDROID__)
+// linux allows any alignment
 #define AlignedPtr( ptr )			( 1 )
 #define CodeAlignedPtr( ptr )			( 1 )
 // kts for now
-#define InMappedMemory( ptr )	( 1 ) 		
+#define InMappedMemory( ptr )	( 1 )
 #else
 #error "Unknown pointer alignment"
 #endif

@@ -58,7 +58,7 @@ extern char* * __argv;
 typedef enum _MachineType
 {
 	LINUX,
-	ANDROID,
+	MACHINE_ANDROID,
 	IOS,
 	XBOX,
 	SWITCH,
@@ -81,10 +81,12 @@ typedef enum _MachineType
 
 // include directives from the makefile
 #ifndef _MKINC
-#if   defined( __LINUX__ )
+#if   defined(__LINUX__) || defined(__ANDROID__)
 #define _MKINC "cf_linux.h"
+#elif defined( __ANDROID__ )
+#define _MKINC "cf_android.h"
 #else
-#error "Undefined platform: __LINUX__ must be defined"
+#error "Undefined platform: __LINUX__ or __ANDROID__ must be defined"
 #endif
 #endif
 
@@ -389,7 +391,7 @@ END_EXTERN_C
 
 
 // Disabled on __LINUX__ (2026): same std:: collision as clib.h.
-#if !defined(__LINUX__)
+#if !defined(__LINUX__) && !defined(__ANDROID__)
 #define	strcmp      sys_strcmp
 #undef	strncmp
 #define	strncmp     sys_strncmp
@@ -399,7 +401,7 @@ END_EXTERN_C
 #define	strrchr     sys_strrchr
 #undef	strlen
 #define	strlen      sys_strlen
-#endif	// !defined(__LINUX__)
+#endif	// !defined(__LINUX__) && !defined(__ANDROID__)
 
 #else	// !DO_ASSERTIONS
 #endif	// !DO_ASSERTIONS

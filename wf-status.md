@@ -1,23 +1,27 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-04-16  
+**As of:** 2026-04-17  
 **Branch:** `2026-first-working-gap`
 
 ---
 
 ## Summary
 
-Four days of work (2026-04-12 – 2026-04-16) across five major areas:
+Five days of work (2026-04-12 – 2026-04-17) across six major areas:
 
 **Scripting system** — Seven engines smoke-tested end-to-end in snowgoons: Lua 5.4, Fennel, QuickJS, JerryScript, WAMR (classic interp), Wren, and Forth (zForth). Five additional Forth backends (ficl, atlast, embed, libforth, pforth) build and link but are not yet end-to-end tested. All wired into a `ScriptRouter` dispatch table with per-engine sigils. wasm3 retired 2026-04-16 (WAMR reached parity). Lua made optional via `WF_LUA_ENGINE=lua54|none` (2026-04-16); `scripting_lua.cc/hp` extracted as a peer TU matching all other engine plugs. WAMR AOT deferred.
 
-**Blender ↔ level round-trip** — `levcomp-rs` (Rust) compiles `.lev` source → binary `.lvl`; snowgoons loads end-to-end from `levcomp-rs` output. Blender plugin imports/exports 152/152 OAD fields, all light/slope/animation-channel types, Tcl→Lua script migration. Coordinate system fixed (WF is Z-up). Phase 2c (mesh bbox extension, MeshName asset ID packing, real path keyframes) not yet started.
+**Blender ↔ level round-trip** — `levcomp-rs` (Rust) compiles `.lev` source → binary `.lvl`; snowgoons loads end-to-end from `levcomp-rs` output. Blender plugin imports/exports 152/152 OAD fields, all light/slope/animation-channel types, Tcl→Lua script migration. Coordinate system fixed (WF is Z-up). Phase 2c complete (2026-04-17): `mesh_bbox.rs` extracts per-mesh bounding boxes from MODL/VRTX chunks; `asset_registry.rs` assigns packed `[TYPE|ROOM|INDEX]` asset IDs and emits `asset.inc`; `ButtonType::Filename` handled alongside `MeshName`; 37 objects placed, all Jolt bodies valid. Remaining: real path/channel keyframes.
 
 **Jolt Physics** — Integrated and default (`WF_PHYSICS_ENGINE=jolt`). Five-step plan complete: SIGABRT fixed, zombie kinematic bodies eliminated, WF↔Jolt authority model locked, 3 m vertical pop fixed (feet vs centre offset), 60 s soak passed. Legacy `physics/wf/` retained pending a second level.
 
 **Dead-code removal** — Batches 1–7 complete: `wfsource/source/` reduced from 64,252 → 36,199 lines (−43.7%). Batch 8 (Jolt replaces WF physics) in progress.
 
-**Tooling and plans** — `engine/` reorganised to top-level. REST API box PoC landed. Android + iOS port plans written (blocked on GL immediate-mode rewrite + CMake migration). CLI level override (`-L<path>`) confirmed done.
+**Steam (Phases 1–2)** — Steamworks SDK lifecycle wired into HAL (`SteamAPI_Init/Shutdown` in `HALStart`) and display (`SteamAPI_RunCallbacks` after `XEventLoop` in `PageFlip`). Steam Input polls all connected controllers each frame and ORs results into `_JoystickButtonsF`; keyboard path unchanged. `WF_ENABLE_STEAM=1` build flag; SDK not committed (see `engine/vendor/steamworks/README.md`). `steam/game_actions_480.vdf` defines the `InGame` action set. `steam_appid.txt=480` for dev. Phases 3 (SteamPipe depot) and 4 (store page) deferred.
+
+**Audio (Phases 1–4 complete)** — Phase 1 (2026-04-17): miniaudio v0.11.25 vendored; `SoundDevice`/`SoundBuffer` reimplemented on `ma_engine`; `_InitAudio`/`_TermAudio` in HAL; fire-and-forget `play()` via heap `PlayInstance` freed by end-callback. Phase 2 (2026-04-17): TinySoundFont (`tsf.h`/`tml.h`) vendored; `MusicPlayer` renders MIDI → stereo float PCM as a miniaudio custom data source on the audio thread; C-major scale audible via PulseAudio. Phase 3 (2026-04-17): per-level `level<N>.mid` loads on `RunLevel`, stops on exit; `level0.mid` added for snowgoons. Phase 4 (2026-04-17): `play_music`/`stop_music`/`set_music_volume` Lua C closures registered in `scripting_lua.cc`. Phases 5–7 (3D SFX, mobile backends, docs) deferred.
+
+**Tooling and plans** — `engine/` reorganised to top-level. REST API box PoC landed. Android + iOS port plans written (blocked on GL immediate-mode rewrite + CMake migration). CLI level override (`-L<path>`) confirmed done. Audio investigation updated: `AudioBackend` pimpl seam documented; MIDI sources (OpenScore CC0, Mutopia, piano-midi.de) researched and catalogued; IFF format lineage (EA IFF 85 → AIFF, RIFF, WF IFF) documented.
 
 ---
 
@@ -29,7 +33,7 @@ Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 |------|------|--------|---------|
 | 2026-04-16 | [Plan: git-branch-browser — curses TUI for browsing branch diffs](docs/plans/2026-04-16-git-branch-browser.md) | **Not started** | **Goal:** A Python curses program at `scripts/git-branch-browser.py` that lets you browse all git branches, see per-branch changed files as a collapsible directory tree with status annotations, and … |
 | 2026-04-17 | [Plan: Steam release](docs/plans/2026-04-17-steam.md) | **In progress — Phases 1+2 done** | Steamworks SDK lifecycle wired into HAL + PageFlip. Steam Input → `EJ_BUTTONF_*` merged in `_JoystickButtonsF`. `WF_ENABLE_STEAM=1` build flag; SDK not committed (see vendor README). Phases 3 (depot) and 4 (store page) deferred. |
-| 2026-04-16 | [Plan: Android port](docs/plans/2026-04-16-android-port.md) | **Not started** | **Goal:** An APK that runs snowgoons on arm64 Android and Google TV (Chromecast with Google TV). TV: leanback manifest + runtime `UI_MODE_TYPE_TELEVISION` detection → gamepad-only, no on-screen d-pad. Same APK for both targets. Forth-only scripting in v1. |
+| 2026-04-16 | [Plan: Android port](docs/plans/2026-04-16-android-port.md) | **In progress — Phase 1 (CMake)** | NDK r26c installed (`/usr/lib/android-sdk/ndk/26.2.11394342`). `CMakeLists.txt` written; `task build-cmake` (Linux) and `task build-cmake-android` (arm64) added. Parity verification pending. Phase 0 (GL rewrite) is next blocker. |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Partial** | Batches 1–7 complete (−43.7% LOC). Batch 6 (`#if 0` sweep) done. Batch 7 (PSX/Win artifacts, OpusMake, platform guards) done. Batch 8 (Jolt physics replacement) in progress. |
 
 ### Deferred
@@ -65,7 +69,7 @@ Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 | Date | Investigation | Status | Summary |
 |------|---------------|--------|---------|
 | 2026-04-17 | [IFF format lineage — EA IFF 85, AIFF, RIFF, WorldFoundry IFF](docs/investigations/2026-04-17-iff-format-lineage.md) | **Complete** | Traces all four formats from the common 1985 ancestor. Key findings: AIFF and WF IFF independently arrived at the same solution (bake navigational offsets at write time for slow-media random access); WF uniquely separates interchange (text source) from execution (platform binary); `.align(2048)` maps CD-ROM sectors. Side-by-side comparison table included. |
-| 2026-04-16 | [Reverse-engineering the WF binary level format for `levcomp-rs`](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md) | **Functional** | Binary format fully mapped; `levcomp-rs` output loads in `wf_game`; snowgoons game loop runs. Remaining: mesh bbox extension, MeshName packing, real path keyframes. |
+| 2026-04-16 | [Reverse-engineering the WF binary level format for `levcomp-rs`](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md) | **Phase 2c complete** | Binary format fully mapped; Phase 2c (2026-04-17): mesh bbox from MODL/VRTX, packed asset IDs, `asset.inc` output, 37 objects validated. Remaining: real path/channel keyframes. |
 | 2026-04-16 | [Coding-conventions remediation](docs/investigations/2026-04-16-coding-conventions-remediation.md) | **In progress** | Audit of 2026-authored code in `wfsource/source/` against `docs/coding-conventions.md`. Honest accounting of where recent additions don't yet follow the rules they propose. |
 | 2026-04-15 | [LOC tracking](docs/investigations/2026-04-15-loc-tracking.md) | **Ongoing** | Tracks code line count over time. Current HEAD: ~36,199 lines (−43.7% from baseline 64,252 at `74d1a47`). Tool: `scripts/loc_report.py`. |
 | 2026-04-14 | [Scripting language replacement](docs/investigations/2026-04-14-scripting-language-replacement.md) | **Complete** | Comprehensive survey that recommended Lua 5.4 as the primary engine. Spawned all scripting plans. Decision: Lua won. |
@@ -76,7 +80,7 @@ Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 | 2026-04-11 | [iffcomp — Rust rewrite](docs/investigations/2026-04-11-iffcomp-rs-rewrite.md) | **Complete** | Rust port in `wftools/iffcomp-rs/`. Byte-exact against C++ oracle. Includes comprehensive `all_features.iff.txt` torture test shared with Go port. |
 | 2026-04-11 | [iffcomp — Go rewrite](docs/investigations/2026-04-11-iffcomp-go-rewrite.md) | **Complete** | Go port in `wftools/iffcomp-go/`. Byte-exact against C++ oracle (both binary and text output). Passes shared torture fixture. Go is primary; C++ kept as oracle. |
 | 2026-04-11 | [iffcomp — C++ modernization](docs/investigations/2026-04-11-iffcomp-modernization.md) | **Complete** | Modernized the 1996 flex/bison C++ `iffcomp` to build on GCC 15 / Clang under C++17. Now serves as byte-exact oracle for Go and Rust ports. |
-| 2026-04-14 | [Audio: sound effects, music, positional sound](docs/investigations/2026-04-14-audio-sound-music.md) | **Active — Phase 0 done** | miniaudio (SFX/Ogg) + TinySoundFont (MIDI). AudioBackend pimpl seam for clean console porting. Phase 1 next: vendor miniaudio + SFX one-shots; Phase 2 immediately after: MIDI player (tsf.h). 3D positional SFX is Phase 5 (after scripting surface). |
+| 2026-04-14 | [Audio: sound effects, music, positional sound](docs/investigations/2026-04-14-audio-sound-music.md) | **Active — Phases 1–4 complete** | Phase 1: miniaudio SFX one-shots. Phase 2: TinySoundFont MIDI player audible. Phase 3: per-level `level<N>.mid` + load/stop hooks. Phase 4: `play_music`/`stop_music`/`set_music_volume` Lua closures. Phase 5 (3D SFX) deferred. |
 | 2026-04-14 | [Constraint-based props](docs/investigations/2026-04-14-constraint-based-props.md) | **Deferred** | Doors, chains, pulleys, elevators via Jolt constraints. **Hard prerequisite:** Jolt integration must land first; also requires IFF binary chunk support. Not yet scheduled. |
 | 2026-04-14 | [Multiplayer, voice chat, mobile input](docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md) | **Deferred** | Surveyed multiplayer sync models, voice (LKWS/Agora/LiveKit), mobile input (touch/gyro/haptics). Depends on mobile port landing first. Not yet scheduled. |
 | 2026-04-14 | [REST API box PoC](docs/investigations/2026-04-14-rest-api-box-poc.md) | **Complete** | cpp-httplib embedded server in `wf_game`; create/recolor/resize/delete GL wireframe boxes via HTTP at runtime. Landed `7e690e1`. |
@@ -129,17 +133,17 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 - **`eval/` (120 LOC)** — tool-side callers (`wftools/prep`, `wftools/iff2lvl`) need porting to Blender plugin first.
 
 ### Content pipeline
-- **Blender → `cd.iff` pipeline** — Phases 2a + 2b landed; snowgoons loads end-to-end from `levcomp-rs` output. Phase 2c not started: mesh bbox extension (8 bbox mismatches), MeshName asset ID packing (currently oracle-copy bypass), real path/channel keyframes.
+- **Blender → `cd.iff` pipeline** — Phases 2a + 2b + 2c landed; snowgoons loads 37 objects end-to-end, all Jolt bodies valid. Remaining: real path/channel keyframes.
 - **iffcomp: Rust is primary** — Decision: tools in Rust. Four implementations exist (C++ modernized oracle, Go, Node.js, Rust); all pass `all_features.iff.txt`. Rust port (`iffcomp-rs/`) is the going-forward implementation. C++ kept as byte-exact oracle; Go and Node.js ports are superseded.
 
 ### Larger / deferred work
-- **Audio (miniaudio)** — SFX one-shots, music streaming, 3D panning, all statically linked. No start date.
+- **Audio (miniaudio)** — Phases 1–4 complete (SFX one-shots, MIDI MusicPlayer, per-level music, Lua scripting surface). Phases 5–7 (3D SFX, mobile backends, docs) deferred.
 - **Mobile port** — Android arm64 / iOS arm64; plans written ([Android](docs/plans/2026-04-16-android-port.md), [iOS](docs/plans/2026-04-16-ios-port.md)); blocked on GL immediate-mode replacement + CMake migration.
 - **Multiplayer / voice / mobile input** — blocked on mobile port.
-- **Steam packaging** — most runtime blockers resolved; packaging pipeline itself not yet started.
+- **Steam packaging** — Phases 1+2 done: Steamworks SDK lifecycle and Steam Input are wired in. Phases 3 (SteamPipe depot build + upload) and 4 (store page assets) deferred; blocked on Steamworks partner account and store capsule art.
 
 ---
 
 ## Last Change
 
-**2026-04-17 00:44** — [`docs/plans/2026-04-17-steam.md`](docs/plans/2026-04-17-steam.md): Plan: Steam release
+**2026-04-17 05:48** — [`docs/plans/2026-04-17-fix-window-close-crash.md`](docs/plans/2026-04-17-fix-window-close-crash.md): Fix: core dump on window close button

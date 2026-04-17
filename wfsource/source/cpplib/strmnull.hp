@@ -42,7 +42,7 @@ public:
 
 // ===========================================================================
 
-#if   defined(__LINUX__)
+#if   defined(__LINUX__) || defined(__ANDROID__)
 class nullstream : public _IO_ostream_withassign
 #else
 #error platform not defined!
@@ -63,7 +63,7 @@ protected:
 #else
 // used in the case of new IO streams
 
-#if   defined(__LINUX__)
+#if   defined(__LINUX__) || defined(__ANDROID__)
 class nullstreambuf : public std::streambuf
 {
 protected:

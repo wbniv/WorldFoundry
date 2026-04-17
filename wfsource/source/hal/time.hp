@@ -22,7 +22,7 @@ extern long _nWallClockBaseTime;
 
 
 
-#if   defined(__LINUX__)
+#if   defined(__LINUX__) || defined(__ANDROID__)
 #include <time.h>
 inline long _SYS_TICKS_linux() {
     struct timespec ts;

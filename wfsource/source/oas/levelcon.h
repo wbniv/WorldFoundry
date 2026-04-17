@@ -32,7 +32,7 @@
 
 #include <pigsys/pigsys.hp>
 
-#if   defined(__LINUX__)
+#if   defined(__LINUX__) || defined(__ANDROID__)
 #define GNUALIGN __attribute__ ((aligned(4)))
 #else
 #error target not defined
@@ -203,7 +203,7 @@ struct _LevelOnDisk
 
 /*============================================================================*/
 
-#if   defined(__LINUX__)
+#if   defined(__LINUX__) || defined(__ANDROID__)
 #undef GNUALIGN 
 #else
 #error target not defined

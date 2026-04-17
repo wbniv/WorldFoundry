@@ -38,7 +38,7 @@ class Memory;
 
 //==============================================================================
 
-#if   defined(__LINUX__)
+#if   defined(__LINUX__) || defined(__ANDROID__)
 typedef P_TAG ORDER_TABLE_ENTRY;
 #else
 #error order table not defined for platform
@@ -75,7 +75,7 @@ public:
 private:
 	OrderTable();
 
-#if defined(__LINUX__)
+#if defined(__LINUX__) || defined(__ANDROID__)
 	ORDER_TABLE_ENTRY* _orderTable;
 #else
 #	error "Unknown platform"

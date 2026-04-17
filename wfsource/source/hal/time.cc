@@ -24,7 +24,7 @@ long _nWallClockBaseTime;
 
 //=============================================================================
 
-#if   defined(__LINUX__)
+#if   defined(__LINUX__) || defined(__ANDROID__)
 #include <time.h>
 Scalar SYS_CLOCK(void)
 {

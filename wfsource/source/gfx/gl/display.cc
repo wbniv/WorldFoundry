@@ -53,7 +53,7 @@ int wfWindowWidth = 640;
 int wfWindowHeight = 480;
 
 
-#if defined(__LINUX__)
+#if defined(__LINUX__) || defined(__ANDROID__)
 #include "mesa.cc" 
 #include <sys/time.h>
 #include <unistd.h>
@@ -220,7 +220,7 @@ Display::~Display()
 
 //============================================================================
 
-#if defined(__LINUX__)
+#if defined(__LINUX__) || defined(__ANDROID__)
 inline Scalar
 ConvertTimeToScalar(const struct timeval&  tv)
 {
@@ -241,7 +241,7 @@ Display::ResetTime()                    // used to reset delta timer for PageFli
 {
     //_clockLastTime = timeGetTime();  	//clock();
 
-#if   defined(__LINUX__)
+#if   defined(__LINUX__) || defined(__ANDROID__)
     struct timeval tv;
     gettimeofday(&tv,NULL);
     _clockLastTime = tv;                
@@ -369,7 +369,7 @@ Display::PageFlip()
     }
 #endif
 
-#if defined(__LINUX__)
+#if defined(__LINUX__) || defined(__ANDROID__)
     XEventLoop();
 #endif
 #if defined(WF_ENABLE_STEAM)
@@ -453,7 +453,7 @@ Display::PageFlip()
     glFlush();
     AssertGLOK();
 
-#if   defined(__LINUX__)
+#if   defined(__LINUX__) || defined(__ANDROID__)
     glXSwapBuffers(halDisplay.mainDisplay, halDisplay.win);
     AssertGLOK();
 
@@ -471,7 +471,7 @@ Display::PageFlip()
 //	hRC = 0;
 
     // now calc how long it has been since last frame
-#if   defined(__LINUX__)
+#if   defined(__LINUX__) || defined(__ANDROID__)
     struct timeval tv;
     gettimeofday(&tv,NULL);
 

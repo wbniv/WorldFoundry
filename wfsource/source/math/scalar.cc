@@ -1169,7 +1169,7 @@ Scalar
 Scalar::Random()
 {
    long temp;
-#if defined(__LINUX__)
+#if defined(__LINUX__) || defined(__ANDROID__)
 #if !(RAND_MAX == INT_MAX)
 #error update rand code
 #endif
