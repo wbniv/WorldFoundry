@@ -7,15 +7,17 @@
 
 ## Summary
 
-The past several days have produced a large amount of work across two fronts: **scripting system** and **dead-code removal**.
+Four days of work (2026-04-12 – 2026-04-16) across five major areas:
 
-The scripting system is comprehensively implemented and fully smoke-tested — Lua, Fennel, QuickJS, JerryScript, wasm3, WAMR, Wren, and Forth (zForth) are all compiled, wired into the `ScriptRouter` dispatch table, and verified end-to-end in snowgoons (player moves, director cuts cameras). All eight engines confirmed 2026-04-16.
+**Scripting system** — Eight engines implemented and smoke-tested end-to-end in snowgoons: Lua 5.4, Fennel, QuickJS, JerryScript, wasm3, WAMR (classic interp), Wren, and Forth (zForth). All wired into a `ScriptRouter` dispatch table with per-engine sigils. Lua and Fennel vendored; all others vendored previously. WAMR AOT and alternate Forth backends deferred.
 
-Dead-code removal is largely done: Batches 1–7 are complete, reducing `wfsource/source/` from 64,252 to 36,199 code lines (−43.7%). One batch (Batch 8 — physics replacement) is in progress.
+**Blender ↔ level round-trip** — `levcomp-rs` (Rust) compiles `.lev` source → binary `.lvl`; snowgoons loads end-to-end from `levcomp-rs` output. Blender plugin imports/exports 152/152 OAD fields, all light/slope/animation-channel types, Tcl→Lua script migration. Coordinate system fixed (WF is Z-up). Phase 2c (mesh bbox extension, MeshName asset ID packing, real path keyframes) not yet started.
 
-Jolt Physics is functional and the default: `WF_PHYSICS_ENGINE=jolt`, snowgoons is playable. All committed; runtime init/shutdown lives in `WFGame`. Legacy `physics/wf/` retained pending parity on a second level.
+**Jolt Physics** — Integrated and default (`WF_PHYSICS_ENGINE=jolt`). Five-step plan complete: SIGABRT fixed, zombie kinematic bodies eliminated, WF↔Jolt authority model locked, 3 m vertical pop fixed (feet vs centre offset), 60 s soak passed. Legacy `physics/wf/` retained pending a second level.
 
-Multiple larger investigations (audio, mobile port, multiplayer, constraint-based props) are written up and deferred pending prerequisite work.
+**Dead-code removal** — Batches 1–7 complete: `wfsource/source/` reduced from 64,252 → 36,199 lines (−43.7%). Batch 8 (Jolt replaces WF physics) in progress.
+
+**Tooling and plans** — `engine/` reorganised to top-level. REST API box PoC landed. Android + iOS port plans written (blocked on GL immediate-mode rewrite + CMake migration). Lua-not-special plan written (Lua must be optional like every other engine). CLI level override (`-L<path>`) confirmed done.
 
 ---
 
