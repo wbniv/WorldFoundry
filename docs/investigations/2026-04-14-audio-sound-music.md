@@ -98,31 +98,46 @@ The original WF game shipped with MIDI music. MIDI files are tiny (a few KB each
 
 ## MIDI score sources
 
-Classical music pre-1928 is public domain as a *composition*, but the MIDI *file* (the arrangement/performance) may carry its own copyright. Only use sources that explicitly license the MIDI files themselves.
+### Important legal note
 
-### CC0 — no attribution required
+A MIDI file has **two copyright layers**:
+1. **The composition** — pre-1928 works (Bach, Mozart, Beethoven, etc.) are public domain everywhere. No issue.
+2. **The MIDI arrangement itself** — a new creative work by whoever encoded it. This layer is what we must license, regardless of how old the underlying piece is. MIDI as a format is too young for any file to have expired into PD naturally; every MIDI file is either explicitly licensed or all-rights-reserved.
 
-| Source | URL | Content | Notes |
-|--------|-----|---------|-------|
-| OpenGameArt.org CC0 Music | opengameart.org | 1,000+ game music tracks incl. orchestral, ambient, RPG | Purpose-built for games; loopable; diverse genres |
-| GitHub: CC0-midis | github.com/m-malandro/CC0-midis | Original compositions | Small curated collection; actively maintained |
-| GitHub: SoundSafari CC0 | github.com/SoundSafari/CC0-1.0-Music | Large corpus | Largest CC0 music database available |
-| itch.io CC0 MIDI assets | itch.io/game-assets/tag-cc0/tag-midi | Game music bundles: fantasy, battle, ambient | Community-curated; generally higher quality than vintage archives |
+### CC0 — no attribution required (preferred)
 
-### CC BY — attribution required (still commercial-friendly)
+| Source | URL | Content | Quality | Notes |
+|--------|-----|---------|---------|-------|
+| **OpenScore** (Open Goldberg, Open WTC) | musescore.com / github.com/OpenScore | Bach: Goldberg Variations (BWV 988), Well-Tempered Clavier (BWV 846–893), inventions | Machine-generated from engraving source | **Best for Bach.** Explicit CC0. MIDI export per-score or bulk via MuseScore CLI. Coverage skews heavily Bach; other composers sparse. |
+| OpenGameArt.org CC0 Music | opengameart.org | 1,000+ game tracks: orchestral, ambient, RPG, battle | Varies; curated for games | Purpose-built for games; loopable. Diverse genres, not classical-focused. |
+| GitHub: CC0-midis | github.com/m-malandro/CC0-midis | Original compositions | Community | Small curated CC0 collection; actively maintained. |
+| itch.io CC0 MIDI assets | itch.io/game-assets/tag-cc0/tag-midi | Game music bundles: fantasy, battle, ambient | Generally higher quality than vintage archives | Community-curated. |
 
-| Source | URL | Content | Notes |
-|--------|-----|---------|-------|
-| **Piano-midi.de** | piano-midi.de | Classical piano: Bach, Beethoven, Brahms, Chopin, Liszt, Mozart | **Best classical source.** CC-BY-SA (Germany). Professionally performed and transcribed. Attribution: credit Bernd Krueger + URL. |
-| Incompetech (Kevin MacLeod) | incompetech.com | 2,000+ cinematic/orchestral/ambient compositions | Professional grade; widely used in media. CC-BY 4.0. |
-| Wikimedia Commons | commons.wikimedia.org/wiki/Category:MIDI_files | Mixed; classical and other | Verify each file individually — license varies per upload. |
+### CC BY / CC BY-SA — attribution required (still commercial-friendly)
+
+| Source | URL | Content | Quality | Notes |
+|--------|-----|---------|---------|-------|
+| **Mutopia Project** | mutopiaproject.org | Bach, Mozart, Beethoven, Haydn, Schubert, Brahms, Handel, and many others | Metronomic (generated from LilyPond engraving) | Mix of PD, CC BY, CC BY-SA. **Filter out CC BY-NC items at download time.** Bulk download available. |
+| **piano-midi.de** (Bernd Krueger) | piano-midi.de | Piano solo: Bach, Beethoven, Brahms, Chopin, Debussy, Mozart, Schubert, Tchaikovsky | **Expressive, high quality** — performed timing, not metronomic | CC BY-SA (German jurisdiction). Attribution: "Bernd Krueger, http://www.piano-midi.de". ShareAlike applies to derivative arrangements, not to the game shipping MIDI as a data asset unmodified. |
+| Incompetech (Kevin MacLeod) | incompetech.com | 2,000+ cinematic/orchestral/ambient | Professional | CC BY 4.0. Not classical but high quality. |
 
 ### NOT suitable for commercial use (avoid)
 
-- BitMidi — personal use only
-- Kunstderfuge — CC-BY-NC-SA (non-commercial)
-- VGMusic — entertainment purposes only
-- FreeMidi — unclear license, assume restricted
+| Source | Reason |
+|--------|--------|
+| Kunstderfuge (19,300+ files) | NC-only; 2,192 files are CC BY-NC-SA — still non-commercial |
+| Classical Archives | Subscription; no free commercial license |
+| BitMidi (113,000+ files) | Personal use only |
+| VGMusic | Entertainment purposes only |
+| IMSLP MIDI files | Per-file varies; must verify each — too much risk for bulk use |
+| FreeMidi | Unclear license, assume restricted |
+
+### Recommendation
+
+- **Bach**: OpenScore CC0 (Goldberg, WTC) — zero friction, no attribution.
+- **Broader classical**: Mutopia Project (filter to PD/CC BY/CC BY-SA) — large catalogue, metronomic quality.
+- **Expressive piano**: piano-midi.de (CC BY-SA) — best quality, credit Bernd Krueger in game credits.
+- **Game-style background**: OpenGameArt.org CC0 — designed for exactly this use case.
 
 ### Phase 3 — Music subsystem
 
