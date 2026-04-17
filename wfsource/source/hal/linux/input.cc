@@ -42,6 +42,9 @@
 //=============================================================================
 
 #include <hal/hal.h>
+#if defined(WF_ENABLE_STEAM)
+#  include "steam.h"
+#endif
 
 //=============================================================================
 
@@ -126,6 +129,9 @@ _JoystickButtonsF(IJoystick joystick)
 	if ( self->_stickNum == EJW_JOYSTICK1 )
 	{
         buttons = _buttons;
+#if defined(WF_ENABLE_STEAM)
+        buttons |= _GetSteamJoystickButtons();
+#endif
 #if 0
 		if ( joyGetPos( 0, &ji ) != JOYERR_UNPLUGGED )
 		{

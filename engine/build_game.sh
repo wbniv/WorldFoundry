@@ -90,6 +90,12 @@ case "$WF_LUA_ENGINE" in
 esac
 
 HTTPLIB_DIR="$VENDOR/cpp-httplib-v0.20.0"
+STEAM_DIR="$VENDOR/steamworks"
+
+# Feature flag: Steamworks SDK integration. Default off.
+# Requires SDK unpacked at engine/vendor/steamworks/ (see README there).
+# Build: WF_ENABLE_STEAM=1 ./build_game.sh
+WF_ENABLE_STEAM="${WF_ENABLE_STEAM:-0}"
 
 # Feature flag: physics backend. One of:
 #   legacy  (default) — WF's own kinematic collision engine (-DPHYSICS_ENGINE_WF).
@@ -168,6 +174,15 @@ esac
 
 if [[ "$WF_REST_API" == "1" ]]; then
     CXXFLAGS+=(-DWF_REST_API -I"$HTTPLIB_DIR")
+fi
+
+if [[ "$WF_ENABLE_STEAM" == "1" ]]; then
+    if [[ ! -d "$STEAM_DIR/public/steam" ]]; then
+        echo "error: WF_ENABLE_STEAM=1 but Steamworks SDK not found at $STEAM_DIR" >&2
+        echo "       See engine/vendor/steamworks/README.md" >&2
+        exit 1
+    fi
+    CXXFLAGS+=(-DWF_ENABLE_STEAM -I"$STEAM_DIR/public")
 fi
 
 OBJS=()
@@ -557,6 +572,16 @@ if [[ "$WF_ENABLE_WREN" == "1" ]]; then
     OBJS+=("$obj")
 fi
 
+# Steam plug — compiled only when WF_ENABLE_STEAM=1.
+declare -a STEAM_LINK_EXTRA=()
+if [[ "$WF_ENABLE_STEAM" == "1" ]]; then
+    echo "  CC hal/linux/steam.cc"
+    g++ "${CXXFLAGS[@]}" -c "$SRC/hal/linux/steam.cc" -o "$OUT/hal__linux__steam.o"
+    OBJS+=("$OUT/hal__linux__steam.o")
+    STEAM_LINK_EXTRA+=("-L$STEAM_DIR/redistributable_bin/linux64" "-lsteam_api"
+                       "-Wl,-rpath,\$ORIGIN")
+fi
+
 # REST API plug — compiled only when WF_REST_API=1.
 if [[ "$WF_REST_API" == "1" ]]; then
     echo "  CC (stub) rest_api.cc"
@@ -650,7 +675,7 @@ if [[ ${#FAILED_SRCS[@]} -gt 0 ]]; then
 fi
 
 echo "=== Linking ==="
-g++ "${OBJS[@]}" "${JS_LINK_EXTRA[@]}" "${JOLT_LINK_EXTRA[@]}" \
+g++ "${OBJS[@]}" "${JS_LINK_EXTRA[@]}" "${JOLT_LINK_EXTRA[@]}" "${STEAM_LINK_EXTRA[@]}" \
     -lGL -lGLU -lX11 -lm -lpthread -ldl \
     -Wl,-z,noexecstack \
     -o "$SCRIPT_DIR/wf_game"

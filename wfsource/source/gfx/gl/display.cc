@@ -25,6 +25,9 @@
 //============================================================================
 
 #include <hal/hal.h>
+#if defined(WF_ENABLE_STEAM)
+#  include <hal/linux/steam.h>
+#endif
 #include <GL/gl.h>
 
 #include <memory/memory.hp>
@@ -367,7 +370,10 @@ Display::PageFlip()
 #endif
 
 #if defined(__LINUX__)
-    XEventLoop(); 
+    XEventLoop();
+#endif
+#if defined(WF_ENABLE_STEAM)
+    _SteamRunCallbacks();
 #endif
 
     Validate();

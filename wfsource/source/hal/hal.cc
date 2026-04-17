@@ -18,6 +18,9 @@
 
 #include <hal/hal.h>
 #include <hal/_platfor.h>
+#if defined(WF_ENABLE_STEAM)
+#  include <hal/linux/steam.h>
+#endif
 #include <hal/_input.h>
 #include <hal/sjoystic.h>
 #include <hal/diskfile.hp>
@@ -63,9 +66,15 @@ HALStart(int argc, char** argv, int maxTasks,int maxMessages, int maxPorts)
 		assert(ValidPtr(_HALScratchLmalloc));
 		HalInitFileSubsystem();
 		_InitJoystickInterface();					// setup joystick code
+#if defined(WF_ENABLE_STEAM)
+		_InitSteam();
+#endif
 		PIGSMain( __argc, __argv );
 
 		_TermJoystickInterface();
+#if defined(WF_ENABLE_STEAM)
+		_TermSteam();
+#endif
 	}
 	_PlatformSpecificUnInit();
 }
