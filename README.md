@@ -128,4 +128,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-16 22:59** — [`docs/plans/2026-04-16-lua-not-special.md`](docs/plans/2026-04-16-lua-not-special.md): Plan: Lua engine is not special — make it optional
+**2026-04-16** — `feat(scripting)`: Lua made optional via `WF_LUA_ENGINE=lua54|none`. `scripting_lua.cc/hp` extracted as peer TU; `build_game.sh` Lua vendor loop gated; Fennel+none warned; stale `scripting_wasm3.hp` include removed.
