@@ -1,103 +1,167 @@
 #!/usr/bin/env python3
-"""Patch wflevels/snowgoons.iff.txt with Forth (\\ sigil) scripts.
+"""Byte-preserving patch of snowgoons.iff: rewrite the player and director
+scripts from Fennel to Forth (backslash sigil) for forth_engine dispatch,
+padding with trailing spaces so each script's total byte count stays identical
+(no chunk size changes, no IFF size shifts, no alignment to repair).
 
-Edits the PLAYER SCRIPT and DIRECTOR SCRIPT hex blocks in snowgoons.iff.txt
-in-place, then recompiles with iffcomp-rs to produce snowgoons.iff.
+Works directly on the binary snowgoons.iff — no iff.txt recompile needed.
+The same script source runs on every backend (zForth, ficl, Atlast, embed,
+libforth, pForth); backend selection is compile-time only via WF_FORTH_ENGINE.
 
 Usage:
-    python3 scripts/patch_snowgoons_forth.py [iff.txt] [iff.out]
+    python3 scripts/patch_snowgoons_forth.py wflevels/snowgoons.iff [out.iff]
 
-Defaults: wflevels/snowgoons.iff.txt → wflevels/snowgoons.iff
-
-Scripts use the `\\` sigil (Forth line-comment); ScriptRouter dispatches to
-forth_engine.  The same source runs on every backend (zForth, ficl, Atlast,
-embed, libforth, pForth) — backend selection is compile-time only via
-WF_FORTH_ENGINE.
+If out.iff is omitted, writes back to the input.
 
 Word signatures:
     read-mailbox  ( idx -- val )
     write-mailbox ( val idx -- )
 INDEXOF_* constants are loaded into the dictionary at forth_engine::Init.
+
+Slot sizes (fixed by _Common struct offsets; must not change):
+    Player:   77 bytes (null-terminated C string)
+    Director: 439 bytes (null-terminated C string)
 """
 
-import re
-import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-IFFCOMP   = REPO_ROOT / "wftools/iffcomp-rs/target/release/iffcomp"
-SLOT_SIZE = 5000
+SCRIPT_DIR = Path(__file__).parent
+REPO_ROOT  = SCRIPT_DIR.parent
 
-# Player: read joystick raw mailbox, write to input mailbox.
-# Stack effect: ( -- )
+
+def pad_to(replacement: bytes, target_len: int) -> bytes:
+    """Pad replacement to target_len with trailing spaces.
+    If replacement ends in \\n, the \\n is preserved as the final byte."""
+    if len(replacement) > target_len:
+        raise ValueError(
+            f'replacement ({len(replacement)}B) longer than original ({target_len}B):\n'
+            f'  {replacement!r}'
+        )
+    deficit = target_len - len(replacement)
+    if deficit == 0:
+        return replacement
+    if replacement.endswith(b'\n'):
+        return replacement[:-1] + (b' ' * deficit) + b'\n'
+    return replacement + (b' ' * deficit)
+
+
+# ---------------------------------------------------------------------------
+# Slot sizes (bytes of script text, excluding the null terminator)
+# ---------------------------------------------------------------------------
+PLAYER_SLOT   = 77   # ;\n(write_mailbox ...) — 77 bytes of text
+DIRECTOR_SLOT = 439  # ;; snowgoons director ... — 439 bytes including trailing \n
+
+# ---------------------------------------------------------------------------
+# Current content needles (Fennel state written by patch_snowgoons_fennel.py)
+# ---------------------------------------------------------------------------
+PLAYER_FENNEL_NEEDLE = (
+    b';\n'
+    b'(write_mailbox INDEXOF_INPUT (read_mailbox INDEXOF_HARDWARE_JOYSTICK1_RAW))'
+)  # exactly PLAYER_SLOT bytes
+
+# Accept both the wflevels/ form (compiled from iff.txt, has "(Fennel)" label)
+# and the cd.iff form (patched by patch_snowgoons_fennel.py, no label suffix).
+_DIRECTOR_FENNEL_PREFIX_OPTS = (
+    b';; snowgoons director (Fennel)\n',  # wflevels/snowgoons.iff
+    b';; snowgoons director\n',           # cd.iff after patch_snowgoons_fennel.py
+)
+DIRECTOR_FENNEL_PREFIX = None  # resolved at patch time
+
+# ---------------------------------------------------------------------------
+# Forth replacements
+# ---------------------------------------------------------------------------
+# Player: \ sigil (Forth line-comment) + one-liner. 76 bytes → padded to 77.
 PLAYER_FORTH = (
-    b'\\ snowgoons player\n'
+    b'\\ wf\n'
     b'INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n'
 )
 
-# Director: for each of mailboxes 100, 99, 98 — if non-zero, write to camshot.
-# Uses a helper word ?cam ( idx -- ) defined in the same script.
+# Director: inline if/else/fi for mailboxes 100/99/98.
+# Avoids defining a word per tick (zForth dict is append-only).
+# Uses zForth `then` (= `fi` alias defined in bootstrap) for readability.
+# 225 bytes → padded to 439.
 DIRECTOR_FORTH = (
-    b'\\ snowgoons director\n'
-    b': ?cam ( idx -- ) read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then ;\n'
-    b'100 ?cam   99 ?cam   98 ?cam\n'
+    b'\\ wf\n'
+    b'100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n'
+    b' 99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n'
+    b' 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n'
 )
 
-
-def make_hex_block(script: bytes, slot: int = SLOT_SIZE,
-                   indent: str = '\t', width: int = 16) -> str:
-    data = script + b' ' * (slot - len(script))
-    assert len(data) == slot
-    lines = []
-    for i in range(0, len(data), width):
-        row = data[i:i+width]
-        lines.append(indent + ' '.join(f'${b:02X}' for b in row))
-    return '\n'.join(lines) + '\n'
-
-
-def replace_script_block(text: str, label: str, new_script: bytes) -> str:
-    """Replace the hex block following the '// LABEL SCRIPT' comment."""
-    pattern = re.compile(
-        r'(// =+\n\t// ' + label + r' SCRIPT.*?// =+\n)'  # comment block
-        r'(\t(?:\$[0-9A-Fa-f]{2} ?)+\n)+',               # hex lines
-        re.DOTALL,
-    )
-    m = pattern.search(text)
-    if not m:
-        raise ValueError(f"{label} SCRIPT block not found in iff.txt")
-    new_block = m.group(1) + make_hex_block(new_script)
-    result = text[:m.start()] + new_block + text[m.end():]
-    old_bytes = (m.end() - m.start() - len(m.group(1)))
-    print(f"  {label}: replaced ~{old_bytes} chars of hex "
-          f"({len(new_script)} B script → {SLOT_SIZE} B slot)", file=sys.stderr)
-    return result
+assert len(PLAYER_FENNEL_NEEDLE) == PLAYER_SLOT,   "player needle length mismatch"
+assert len(PLAYER_FORTH)         <= PLAYER_SLOT,   "player Forth script too long"
+assert len(DIRECTOR_FORTH)       <= DIRECTOR_SLOT, "director Forth script too long"
 
 
 def main() -> int:
-    txt_path = (Path(sys.argv[1]) if len(sys.argv) > 1
-                else REPO_ROOT / 'wflevels/snowgoons.iff.txt')
-    iff_out  = (Path(sys.argv[2]) if len(sys.argv) > 2
-                else txt_path.with_suffix(''))  # strips .txt
+    if len(sys.argv) not in (2, 3):
+        print(__doc__, file=sys.stderr)
+        return 1
 
-    assert len(PLAYER_FORTH)   <= SLOT_SIZE, "player script too long"
-    assert len(DIRECTOR_FORTH) <= SLOT_SIZE, "director script too long"
+    in_path  = Path(sys.argv[1])
+    out_path = Path(sys.argv[2]) if len(sys.argv) == 3 else in_path
 
-    text = txt_path.read_text()
-    text = replace_script_block(text, 'DIRECTOR', DIRECTOR_FORTH)
-    text = replace_script_block(text, 'PLAYER',   PLAYER_FORTH)
-    txt_path.write_text(text)
-    print(f"  Updated {txt_path}", file=sys.stderr)
+    data = bytearray(in_path.read_bytes())
+    n    = len(data)
 
-    print(f"  Compiling → {iff_out}", file=sys.stderr)
-    r = subprocess.run(
-        [str(IFFCOMP), f'-o={iff_out}', '-binary', str(txt_path)],
-        capture_output=True, text=True,
-    )
-    if r.returncode:
-        print(r.stderr, file=sys.stderr)
-        return r.returncode
-    print(f"  Done ({iff_out.stat().st_size} B)", file=sys.stderr)
+    # ------------------------------------------------------------------
+    # Patch player
+    # ------------------------------------------------------------------
+    idx = data.find(PLAYER_FENNEL_NEEDLE)
+    if idx < 0:
+        print('patch_snowgoons_forth: player Fennel needle not found '
+              '(has the file already been Forth-patched, or not Fennel-patched?)',
+              file=sys.stderr)
+        return 2
+    if data.find(PLAYER_FENNEL_NEEDLE, idx + 1) >= 0:
+        print('patch_snowgoons_forth: player needle matched twice (refusing)',
+              file=sys.stderr)
+        return 3
+
+    padded_player = pad_to(PLAYER_FORTH, PLAYER_SLOT)
+    assert len(padded_player) == PLAYER_SLOT
+    data[idx:idx + PLAYER_SLOT] = padded_player
+    print(f'player:   patched @0x{idx:06x}: {PLAYER_SLOT}B '
+          f'(script {len(PLAYER_FORTH)}B, padded {PLAYER_SLOT - len(PLAYER_FORTH)}B)',
+          file=sys.stderr)
+
+    # ------------------------------------------------------------------
+    # Patch director (try each known prefix variant)
+    # ------------------------------------------------------------------
+    dir_idx = -1
+    matched_prefix = None
+    for pfx in _DIRECTOR_FENNEL_PREFIX_OPTS:
+        i = data.find(pfx)
+        if i >= 0:
+            dir_idx = i
+            matched_prefix = pfx
+            break
+    if dir_idx < 0:
+        print('patch_snowgoons_forth: director Fennel prefix not found '
+              '(has the file already been Forth-patched, or not Fennel-patched?)',
+              file=sys.stderr)
+        return 4
+    if data.find(matched_prefix, dir_idx + 1) >= 0:
+        print('patch_snowgoons_forth: director prefix matched twice (refusing)',
+              file=sys.stderr)
+        return 5
+
+    padded_director = pad_to(DIRECTOR_FORTH, DIRECTOR_SLOT)
+    assert len(padded_director) == DIRECTOR_SLOT
+    data[dir_idx:dir_idx + DIRECTOR_SLOT] = padded_director
+    print(f'director: patched @0x{dir_idx:06x}: {DIRECTOR_SLOT}B '
+          f'(script {len(DIRECTOR_FORTH)}B, padded {DIRECTOR_SLOT - len(DIRECTOR_FORTH)}B)',
+          file=sys.stderr)
+
+    # ------------------------------------------------------------------
+    # Verify no size change and write
+    # ------------------------------------------------------------------
+    if len(data) != n:
+        print('internal error: data length changed', file=sys.stderr)
+        return 6
+
+    out_path.write_bytes(bytes(data))
+    print(f'wrote {len(data)}B to {out_path}', file=sys.stderr)
     return 0
 
 

@@ -1,11 +1,12 @@
 # Plan: Forth as a scripting engine option for World Foundry
 
 **Date:** 2026-04-14
-**Status:** **complete — all six backends build and link. 2026-04-16.**
-Phases 1–6 done. Phase 7 (snowgoons demo scripts) pending.
-zForth landed 2026-04-15; smoke test passed (GROUND, no crashes).
-All five remaining backends (ficl, atlast, embed, libforth, pforth) implemented
-and build-verified 2026-04-16.  Notable integration issues resolved:
+**Status:** **Complete — all seven phases landed 2026-04-16.**
+All six backends build and link; snowgoons.iff + cd.iff carry Forth scripts
+(`\ wf` sigil) via `scripts/patch_snowgoons_forth.py` (byte-preserving patch,
+no iff.txt recompile needed). zForth smoke-tested 2026-04-15 (GROUND, no
+crashes); all five remaining backends (ficl, atlast, embed, libforth, pforth)
+implemented and build-verified 2026-04-16. Notable integration issues resolved:
 - **atlast**: neither `atldef.h` nor `atlast.h` safe to include in C++ TU
   (`atldef.h` macros pollute stdlib headers; `atlast.h` uses K&R empty parens).
   All needed symbols declared manually; `-DEXPORT` on atlast.c for stack access.
@@ -608,11 +609,25 @@ Notes for the `docs/scripting-languages.md` entry:
 - All four backends produce identical script syntax; the backend choice is invisible to script authors
 - embed note: on PC dev, mailbox float values are truncated to 16-bit int; correct on real fixed-point target
 
-### Phase 7 — Snowgoons demo scripts
+### Phase 7 — Snowgoons demo scripts ✓ DONE
 
-**New file:** `scripts/patch_snowgoons_forth.py`
+**File:** `scripts/patch_snowgoons_forth.py`
 
-Script source is engine-agnostic (`read-mailbox`, `write-mailbox` are named words in all three backends). One patcher handles all three. Player script (~50 bytes) fits the 77-byte slot; director with `: ?cam` helper may be longer — measure and document.
+Byte-preserving patcher (no iff.txt recompile). Rewrites the existing Fennel
+player + director scripts in place and pads each replacement with trailing
+spaces so total byte counts stay identical — `_Common` struct offsets are
+fixed so no chunk-size changes, IFF size shifts, or alignment repair are
+needed.
+
+- **Player** (76 B script, 77 B slot): `\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n`
+- **Director** (225 B script, 439 B slot): three inline `if/else/then`
+  blocks for mailboxes 100/99/98. Avoids defining a word per tick (zForth
+  dict is append-only).
+
+Script source is engine-agnostic — the same patch works against whichever
+backend `WF_FORTH_ENGINE` selects at build time.
+
+Applied to both `wflevels/snowgoons.iff` and `wfsource/source/game/cd.iff`.
 
 ---
 

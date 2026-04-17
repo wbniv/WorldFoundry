@@ -175,14 +175,16 @@ static const char* kCoreBootstrap =
     ": >= swap <= ; "
     ": <> = not ; "
     ": 0<> 0 <> ; "
-    // Control flow — if/else/fi, begin/until/again
-    // `if` emits a jmp0 with a placeholder target; `fi` back-patches it.
+    // Control flow — if/else/fi/then, begin/until/again
+    // `h` is zForth's uservar for the current dictionary pointer ("here").
+    // `if` emits a jmp0 with a placeholder target; `fi`/`then` back-patch it.
     // `else` emits an unconditional jmp past the else-body, back-patches
-    // the if's jmp0 to here, then leaves the else's jmp for `fi` to patch.
-    ": if     ' jmp0 , here 0 ,j ; immediate "
-    ": else   ' jmp  , here 0 ,j swap here swap !j ; immediate "
-    ": fi     here swap !j ; immediate "
-    ": begin  here ; immediate "
+    // the if's jmp0 to h, then leaves the else's jmp for `fi`/`then` to patch.
+    ": if     ' jmp0 , h 0 ,j ; immediate "
+    ": else   ' jmp  , h 0 ,j swap h swap !j ; immediate "
+    ": fi     h swap !j ; immediate "
+    ": then   h swap !j ; immediate "   // standard Forth alias for fi
+    ": begin  h ; immediate "
     ": again  ' jmp  , , ; immediate "
     ": until  ' jmp0 , , ; immediate "
     // Counted loop: `limit start do ... loop`
@@ -190,7 +192,7 @@ static const char* kCoreBootstrap =
     // loop+ increments by n; loop by 1.  All immediate — compiled, not eval'd.
     ": i     ' lit , 0 , ' pickr , ; immediate "
     ": j     ' lit , 2 , ' pickr , ; immediate "
-    ": do    ' swap , ' >r , ' >r , here ; immediate "
+    ": do    ' swap , ' >r , ' >r , h ; immediate "
     ": loop+ ' r> , ' + , ' dup , ' >r , ' lit , 1 , ' pickr , ' >= , "
              "' jmp0 , , ' r> , ' drop , ' r> , ' drop , ; immediate "
     ": loop  ' lit , 1 , postpone loop+ ; immediate "
