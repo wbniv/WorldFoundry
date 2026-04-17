@@ -33,7 +33,7 @@ Five days of work (2026-04-12 – 2026-04-17) across six major areas:
 |------|------|--------|---------|
 | 2026-04-16 | [Plan: git-branch-browser — curses TUI for browsing branch diffs](docs/plans/2026-04-16-git-branch-browser.md) | **Not started** | **Goal:** A Python curses program at `scripts/git-branch-browser.py` that lets you browse all git branches, see per-branch changed files as a collapsible directory tree with status annotations, and … |
 | 2026-04-17 | [Plan: Steam release](docs/plans/2026-04-17-steam.md) | **In progress — Phases 1+2 done** | Steamworks SDK lifecycle wired into HAL + PageFlip. Steam Input → `EJ_BUTTONF_*` merged in `_JoystickButtonsF`. `WF_ENABLE_STEAM=1` build flag; SDK not committed (see vendor README). Phases 3 (depot) and 4 (store page) deferred. |
-| 2026-04-16 | [Plan: Android port](docs/plans/2026-04-16-android-port.md) | **Not started** | **Goal:** An APK that runs snowgoons on arm64 Android and Google TV (Chromecast with Google TV). TV: leanback manifest + runtime `UI_MODE_TYPE_TELEVISION` detection → gamepad-only, no on-screen d-pad. Same APK for both targets. Forth-only scripting in v1. |
+| 2026-04-16 | [Plan: Android port](docs/plans/2026-04-16-android-port.md) | **In progress — Phase 1 (CMake)** | NDK r26c installed (`/usr/lib/android-sdk/ndk/26.2.11394342`). `CMakeLists.txt` written; `task build-cmake` (Linux) and `task build-cmake-android` (arm64) added. Parity verification pending. Phase 0 (GL rewrite) is next blocker. |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Partial** | Batches 1–7 complete (−43.7% LOC). Batch 6 (`#if 0` sweep) done. Batch 7 (PSX/Win artifacts, OpusMake, platform guards) done. Batch 8 (Jolt physics replacement) in progress. |
 
 ### Deferred
