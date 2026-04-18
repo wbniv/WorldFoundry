@@ -301,16 +301,19 @@ impl<'w> Parser<'w> {
                 };
                 match width {
                     1 => {
-                        self.w.out_int8(val as u8);
-                        if val > 0xFF {
+                        // Allow signed [-128, 127] or unsigned [0, 255]
+                        let s = val as i64;
+                        if s < i8::MIN as i64 || s > u8::MAX as i64 {
                             return Err(IffError::Parse {
                                 at: Pos::default(),
                                 msg: "value doesn't fit in int8".into(),
                             });
                         }
+                        self.w.out_int8(val as u8);
                     }
                     2 => {
-                        if val > 0xFFFF {
+                        let s = val as i64;
+                        if s < i16::MIN as i64 || s > u16::MAX as i64 {
                             return Err(IffError::Parse {
                                 at: Pos::default(),
                                 msg: "value doesn't fit in int16".into(),
@@ -319,7 +322,8 @@ impl<'w> Parser<'w> {
                         self.w.out_int16(val as u16);
                     }
                     4 => {
-                        if val > 0x7FFF_FFFF {
+                        let s = val as i64;
+                        if s < i32::MIN as i64 || s > u32::MAX as i64 {
                             return Err(IffError::Parse {
                                 at: Pos::default(),
                                 msg: "value doesn't fit in int32".into(),

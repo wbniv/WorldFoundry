@@ -299,10 +299,11 @@ fn emit_oad_fields(
                     entry.def
                 };
                 let items = entry.string_str();
-                if !items.is_empty() && items.contains('|') {
+                // SHOW_AS_DROPMENU (4): enum label stored in string; no DATA chunk.
+                // All other showAs values: DATA chunk with integer + STR with decimal.
+                if entry.show_as == 4 {
                     let labels: Vec<&str> = items.split('|').collect();
                     let label = labels.get(raw as usize).copied().unwrap_or("");
-                    // Emit enum-style: STR child only (no DATA)
                     out.push_str(&format!(
                         "\t\t{{ 'I32' \n\
                          \t\t\t{{ 'NAME' \"{name}\" \n\
@@ -314,12 +315,12 @@ fn emit_oad_fields(
                         label = label,
                     ));
                 } else {
-                    // Non-enum: DATA + STR
+                    // DATA + STR with integer value; items string appears as DATA comment.
                     out.push_str(&format!(
                         "\t\t{{ 'I32' \n\
                          \t\t\t{{ 'NAME' \"{name}\" \n\
                          \t\t\t}}\n\
-                         \t\t\t{{ 'DATA' {raw}l  //\n\
+                         \t\t\t{{ 'DATA' {raw}l  //{items}\n\
                          \t\t\t\t\t\n\
                          \t\t\t}}\n\
                          \t\t\t{{ 'STR' \"{raw}\" \n\
@@ -327,6 +328,7 @@ fn emit_oad_fields(
                          \t\t}}\n",
                         name = name,
                         raw = raw,
+                        items = items,
                     ));
                 }
             }
@@ -338,7 +340,8 @@ fn emit_oad_fields(
                     entry.def
                 };
                 let items = entry.string_str();
-                if !items.is_empty() && items.contains('|') {
+                // Same showAs logic as Int32.
+                if entry.show_as == 4 {
                     let labels: Vec<&str> = items.split('|').collect();
                     let label = labels.get(raw as usize).copied().unwrap_or("");
                     out.push_str(&format!(
@@ -356,7 +359,7 @@ fn emit_oad_fields(
                         "\t\t{{ 'I32' \n\
                          \t\t\t{{ 'NAME' \"{name}\" \n\
                          \t\t\t}}\n\
-                         \t\t\t{{ 'DATA' {raw}l  //\n\
+                         \t\t\t{{ 'DATA' {raw}l  //{items}\n\
                          \t\t\t\t\t\n\
                          \t\t\t}}\n\
                          \t\t\t{{ 'STR' \"{raw}\" \n\
@@ -364,6 +367,7 @@ fn emit_oad_fields(
                          \t\t}}\n",
                         name = name,
                         raw = raw,
+                        items = items,
                     ));
                 }
             }
@@ -374,19 +378,36 @@ fn emit_oad_fields(
                 } else {
                     entry.def
                 };
-                out.push_str(&format!(
-                    "\t\t{{ 'I32' \n\
-                     \t\t\t{{ 'NAME' \"{name}\" \n\
-                     \t\t\t}}\n\
-                     \t\t\t{{ 'DATA' {raw}l  //\n\
-                     \t\t\t\t\t\n\
-                     \t\t\t}}\n\
-                     \t\t\t{{ 'STR' \"{raw}\" \n\
-                     \t\t\t}}\n\
-                     \t\t}}\n",
-                    name = name,
-                    raw = raw,
-                ));
+                let items = entry.string_str();
+                if entry.show_as == 4 {
+                    let labels: Vec<&str> = items.split('|').collect();
+                    let label = labels.get(raw as usize).copied().unwrap_or("");
+                    out.push_str(&format!(
+                        "\t\t{{ 'I32' \n\
+                         \t\t\t{{ 'NAME' \"{name}\" \n\
+                         \t\t\t}}\n\
+                         \t\t\t{{ 'STR' \"{label}\" \n\
+                         \t\t\t}}\n\
+                         \t\t}}\n",
+                        name = name,
+                        label = label,
+                    ));
+                } else {
+                    out.push_str(&format!(
+                        "\t\t{{ 'I32' \n\
+                         \t\t\t{{ 'NAME' \"{name}\" \n\
+                         \t\t\t}}\n\
+                         \t\t\t{{ 'DATA' {raw}l  //{items}\n\
+                         \t\t\t\t\t\n\
+                         \t\t\t}}\n\
+                         \t\t\t{{ 'STR' \"{raw}\" \n\
+                         \t\t\t}}\n\
+                         \t\t}}\n",
+                        name = name,
+                        raw = raw,
+                        items = items,
+                    ));
+                }
             }
             ButtonType::String => {
                 let len = entry.len as usize;
