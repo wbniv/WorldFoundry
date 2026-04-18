@@ -153,4 +153,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 22:33** — [`docs/plans/2026-04-16-android-port.md`](docs/plans/2026-04-16-android-port.md): Plan: Android port
+**2026-04-17 22:34** — [`docs/plans/2026-04-17-level-pipeline-proof.md`](docs/plans/2026-04-17-level-pipeline-proof.md): Plan: Prove all 7 level pipelines → breaking common.inc rearrangement
