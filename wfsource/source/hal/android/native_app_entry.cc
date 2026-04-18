@@ -29,7 +29,13 @@
 #include <android/log.h>
 #include <android_native_app_glue.h>
 
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 #include <hal/hal.h>
@@ -54,6 +60,59 @@ struct android_app* gApp         = nullptr;
 AAssetManager*      gAssetMgr    = nullptr;
 bool                gEglReady    = false;
 bool                gExitLoop    = false;
+
+// ---- diagnostic log -------------------------------------------------------
+// Redirect stdout/stderr into a file in the app's external-files dir
+// (/storage/emulated/0/Android/data/org.worldfoundry.wf_game/files/wf.log) so
+// crashes on a sideloaded device leave a trail the user can open with any
+// Files app. Also catches SIGSEGV / SIGABRT / SIGBUS to log where we died
+// before the OS tombstones us.
+
+static const char* kWfLogName = "wf.log";
+
+void CrashSigHandler(int sig, siginfo_t* info, void* /*ucontext*/)
+{
+    std::fprintf(stderr,
+                 "\n!!! wf_game crashed: signal=%d si_code=%d si_addr=%p !!!\n",
+                 sig, info ? info->si_code : 0, info ? info->si_addr : nullptr);
+    std::fflush(stderr);
+    // Let the OS finish the job with a tombstone.
+    signal(sig, SIG_DFL);
+    raise(sig);
+}
+
+void InstallCrashHandlers()
+{
+    struct sigaction sa;
+    std::memset(&sa, 0, sizeof(sa));
+    sa.sa_flags     = SA_SIGINFO;
+    sa.sa_sigaction = CrashSigHandler;
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGSEGV, &sa, nullptr);
+    sigaction(SIGBUS,  &sa, nullptr);
+    sigaction(SIGABRT, &sa, nullptr);
+    sigaction(SIGILL,  &sa, nullptr);
+    sigaction(SIGFPE,  &sa, nullptr);
+}
+
+void OpenDiagnosticLog(struct android_app* app)
+{
+    if (!app->activity || !app->activity->externalDataPath) return;
+    mkdir(app->activity->externalDataPath, 0755);  // usually already exists
+    char logpath[512];
+    std::snprintf(logpath, sizeof(logpath), "%s/%s",
+                  app->activity->externalDataPath, kWfLogName);
+    int fd = open(logpath, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if (fd < 0) return;
+    dup2(fd, STDOUT_FILENO);
+    dup2(fd, STDERR_FILENO);
+    close(fd);
+    std::setvbuf(stdout, nullptr, _IOLBF, 0);
+    std::setvbuf(stderr, nullptr, _IOLBF, 0);
+    std::fprintf(stderr, "\n=== wf_game android_main (log → %s) ===\n", logpath);
+    __android_log_print(ANDROID_LOG_INFO, WF_LOG_TAG,
+                        "diagnostic log: %s", logpath);
+}
 
 // Bitmask of WF buttons currently held — combined gamepad + touch states are
 // merged here and flushed to _HALSetJoystickButtons.
@@ -297,6 +356,10 @@ extern "C" void
 android_main(struct android_app* app)
 {
     gApp = app;
+    OpenDiagnosticLog(app);
+    InstallCrashHandlers();
+    WFLOG("android_main: enter");
+
     app->onAppCmd     = HandleAppCmd;
     app->onInputEvent = HandleInputEvent;
 
@@ -304,16 +367,18 @@ android_main(struct android_app* app)
     // asset_accessor_aasset.cc grabs it during _PlatformSpecificInit.
     if (app->activity && app->activity->assetManager)
         gAssetMgr = app->activity->assetManager;
+    WFLOG("android_main: assetMgr=%p", (void*)gAssetMgr);
 
     if (app->config)
     {
         const int32_t uiMode = AConfiguration_getUiModeType(app->config);
         gIsTvMode = (uiMode == ACONFIGURATION_UI_MODE_TYPE_TELEVISION);
-        WFLOG("uiMode=%d (tv=%d)", uiMode, gIsTvMode ? 1 : 0);
+        WFLOG("android_main: uiMode=%d (tv=%d)", uiMode, gIsTvMode ? 1 : 0);
     }
 
     // Block until the first surface arrives so EGL is live before the
     // engine tries to draw.
+    WFLOG("android_main: waiting for APP_CMD_INIT_WINDOW");
     while (!gEglReady && !app->destroyRequested)
     {
         int events = 0;
@@ -325,15 +390,18 @@ android_main(struct android_app* app)
     }
     if (app->destroyRequested)
     {
+        WFLOG("android_main: destroyRequested before EGL ready");
         WFAndroidEglTerm();
         return;
     }
+    WFLOG("android_main: EGL ready, entering HALStart");
 
     char arg0[] = "wf_game";
     char* argv[1] = { arg0 };
     HALStart(1, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
 
     // HALStart returns when the game exits (PIGSMain's loop terminates).
+    WFLOG("android_main: HALStart returned, tearing down EGL");
     WFAndroidEglTerm();
-    WFLOG("android_main exiting");
+    WFLOG("android_main: exit");
 }
