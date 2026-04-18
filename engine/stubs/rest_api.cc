@@ -6,6 +6,8 @@
 
 #ifdef WF_REST_API
 
+#include <pigsys/pigsys.hp>     // sys_atexit — join server thread before libc exit()
+
 // TLS not needed for LAN PoC — ensure OpenSSL support is off.
 #undef CPPHTTPLIB_OPENSSL_SUPPORT
 #include "httplib.h"
@@ -281,6 +283,16 @@ void RestApi_Start()
         gServer->listen(host, port);
         std::fprintf(stderr, "rest_api: server stopped\n");
     });
+
+    // Window-close routes through sys_exit() → libc exit(), which runs static
+    // destructors.  ~std::thread() on a joinable thread calls std::terminate.
+    // Register stop-and-join as an atexit so shutdown happens before the
+    // static gServerThread destructor runs.
+    static bool atexitRegistered = false;
+    if (!atexitRegistered) {
+        sys_atexit([](int) { RestApi_Stop(); });
+        atexitRegistered = true;
+    }
 }
 
 //=============================================================================
