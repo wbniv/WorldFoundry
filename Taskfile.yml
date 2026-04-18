@@ -41,6 +41,14 @@ tasks:
       - |
         set -euo pipefail
 
+        # Fast-path: everything is already installed and user-owned. This is
+        # the hot case when `task build-apk` triggers us as a dep.
+        if [ -d "{{.SDK_HOME}}/platforms/android-34" ] \
+            && [ -d "{{.SDK_HOME}}/build-tools/34.0.0" ] \
+            && [ -w "{{.SDK_HOME}}" ]; then
+            exit 0
+        fi
+
         echo "==> Ensuring cmdline-tools under {{.SDK_HOME}}/cmdline-tools/latest/"
         if [ ! -x "{{.SDK_HOME}}/cmdline-tools/latest/bin/sdkmanager" ]; then
             cd /tmp
@@ -83,6 +91,7 @@ tasks:
 
   build-apk:
     desc: "Assemble the Android APK (debug, auto-signed for sideload)"
+    deps: [android-sdk-install]
     dir: android
     env:
       ANDROID_HOME: /usr/lib/android-sdk
