@@ -33,15 +33,7 @@ impl OadSchemas {
 
     /// Load every `<class>.oad` file found in `dir`.  Class name is the file
     /// stem, lowercased, to match how objects.lc records class identity.
-    ///
-    /// `class_index` resolves a class name to its `objects.lc` index; used to
-    /// patch the `MovementClass` field's default, which the .oas authors
-    /// specify via the `@e0(OASNAME_KIND)` prep macro (currently bottoms out
-    /// to 0 in oas2oad-rs but should be the class's KIND = its type index).
-    pub fn load_dir(
-        dir: &Path,
-        class_index: impl Fn(&str) -> Option<i32>,
-    ) -> Result<Self, String> {
+    pub fn load_dir(dir: &Path) -> Result<Self, String> {
         let mut by_class = std::collections::HashMap::new();
         for entry in std::fs::read_dir(dir).map_err(|e| format!("read_dir {}: {e}", dir.display()))? {
             let entry = entry.map_err(|e| e.to_string())?;
@@ -58,17 +50,8 @@ impl OadSchemas {
                 continue;  // skip common.oad — handled separately for common block fields
             }
             let bytes = std::fs::read(&path).map_err(|e| format!("read {}: {e}", path.display()))?;
-            let mut oad = OadFile::read(&mut std::io::Cursor::new(&bytes))
+            let oad = OadFile::read(&mut std::io::Cursor::new(&bytes))
                 .map_err(|e| format!("parse {}: {e}", path.display()))?;
-            // Patch MovementClass default — see doc comment above.
-            if let Some(idx) = class_index(&stem) {
-                for field in &mut oad.entries {
-                    if field.name_str() == "MovementClass" {
-                        field.def = idx;
-                        break;
-                    }
-                }
-            }
             by_class.insert(stem, oad);
         }
         Ok(Self { by_class })
