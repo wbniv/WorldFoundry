@@ -227,10 +227,7 @@ Display::RenderBegin()
    AssertGLOK();
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);     // Clear the window with current clearing color
    AssertGLOK();
-   glEnable(GL_LIGHTING);
-   glEnable(GL_LIGHT0);
-   glEnable(GL_LIGHT1);
-   glEnable(GL_LIGHT2);
+   RendererBackendGet().SetLightingEnabled(true);
    glEnable(GL_NORMALIZE);
    glEnable(GL_FOG);
 

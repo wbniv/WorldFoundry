@@ -48,6 +48,43 @@ public:
         AssertGLOK();
     }
 
+    void SetAmbient(float r, float g, float b) override
+    {
+        GLfloat c[4] = { r, g, b, 1.0f };
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, c);
+    }
+
+    void SetDirLight(int index,
+                     float dirX, float dirY, float dirZ,
+                     float r, float g, float b) override
+    {
+        static const GLenum kIds[3] = { GL_LIGHT0, GL_LIGHT1, GL_LIGHT2 };
+        GLfloat pos[4]   = { dirX, dirY, dirZ, 0.0f };   // w=0 → directional
+        GLfloat col[4]   = { r, g, b, 1.0f };
+        GLfloat black[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        glLightfv(kIds[index], GL_POSITION, pos);
+        glLightfv(kIds[index], GL_AMBIENT,  black);
+        glLightfv(kIds[index], GL_DIFFUSE,  col);
+        glLightfv(kIds[index], GL_SPECULAR, black);
+        AssertGLOK();
+    }
+
+    void SetLightingEnabled(bool enabled) override
+    {
+        if (enabled)
+        {
+            glEnable(GL_LIGHTING);
+            glEnable(GL_LIGHT0);
+            glEnable(GL_LIGHT1);
+            glEnable(GL_LIGHT2);
+        }
+        else
+        {
+            glDisable(GL_LIGHTING);
+        }
+        AssertGLOK();
+    }
+
     void EndFrame() override
     {
         // No batching in fixed-function mode; nothing to flush.

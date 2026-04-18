@@ -42,7 +42,23 @@ public:
     // Modelview identity.
     virtual void ResetModelView() = 0;
 
-    // Triangle submission (see top of file).
+    // Scene ambient light color (RGB, 0..1).
+    virtual void SetAmbient(float r, float g, float b) = 0;
+
+    // Directional light. `dirX/Y/Z` points from the surface toward the light
+    // source, in world space; the backend transforms it by the current
+    // modelview so the shader can use it in eye space. `r/g/b` is the
+    // diffuse color (ambient + specular are black by convention). `index` in
+    // [0 .. RB_MAX_LIGHTS).
+    virtual void SetDirLight(int index,
+                             float dirX, float dirY, float dirZ,
+                             float r, float g, float b) = 0;
+
+    // Global lighting on/off (for matte / unlit passes).
+    virtual void SetLightingEnabled(bool enabled) = 0;
+
+    // Triangle submission (see top of file). `nx/ny/nz` is the object-space
+    // face normal — the modern backend replicates it into all three verts.
     virtual void DrawTriangle(const RBVertex& v0,
                               const RBVertex& v1,
                               const RBVertex& v2,
@@ -54,6 +70,9 @@ public:
     // VBO backend uses this to drain its accumulated vertex buffer.
     virtual void EndFrame() = 0;
 };
+
+// Must match camera.cc's MAX_LIGHTS.
+constexpr int RB_MAX_LIGHTS = 3;
 
 RendererBackend& RendererBackendGet();
 

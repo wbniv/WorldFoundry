@@ -157,15 +157,6 @@ ConvertToGLColor(const Color& in, GLfloat* out)
 
 //==============================================================================
 
-GLenum GLLightTable[] = 
-{
-   GL_LIGHT0,
-   GL_LIGHT1,
-   GL_LIGHT2
-};
-
-//==============================================================================
-
 void
 RenderCamera::RenderBegin()
 {
@@ -216,46 +207,31 @@ RenderCamera::RenderBegin()
 	assertNe(dtm,Scalar::zero);		// if zero, matrix could not be inverted
 
 
-   GLfloat lightBlack[] = {
-       0.0, 0.0, 0.0, 1.0
-   };
-
    GLfloat lightColor[4];
 
-   ConvertToGLColor(_ambientColor, lightColor);
-   glLightModelfv(GL_LIGHT_MODEL_AMBIENT,lightColor);
-
-#if MAX_LIGHTS > GL_MAX_LIGHTS
-#error This GL implemenation does not provide enough lights
+#if MAX_LIGHTS > RB_MAX_LIGHTS
+#error scripting constants mismatch: MAX_LIGHTS > RB_MAX_LIGHTS
 #endif
 
-//#if GL_LIGHT1 != (GL_LIGHT0+1) || GL_LIGHT2 != (GL_LIGHT1+1)
-//#error GL light assumption violated
-//#endif
-
-   // View matrix must be the current modelview before glLightfv POSITION
-   // calls below — GL transforms light positions by the active modelview.
+   // View matrix must be the current modelview before SetDirLight below —
+   // the backend transforms light directions by the active modelview so the
+   // shader can consume them in eye space.
    RendererBackendGet().SetModelView(_invertedPosition);
+
+   ConvertToGLColor(_ambientColor, lightColor);
+   RendererBackendGet().SetAmbient(lightColor[0], lightColor[1], lightColor[2]);
 
     for(int index=0;index < MAX_LIGHTS;index++)
     {
-        GLfloat lightDirection[4];
-        lightDirection[3] = 0.0;
-        
-        // negate because we store the direction the light travels, where GL stores the lights position
-        lightDirection[0] = -_dirLightDirections[index].X().AsFloat();
-        lightDirection[1] = -_dirLightDirections[index].Y().AsFloat();
-        lightDirection[2] = -_dirLightDirections[index].Z().AsFloat();
-//        cout << "light direction[" << index << "]: " << _dirLightDirections[index] << endl;
-//        cout << "light color: " << _dirLightColors[index] << endl;
-        glLightfv(GLLightTable[index],GL_POSITION,lightDirection);
-        
-        ConvertToGLColor(_dirLightColors[index],lightColor);
-        
-        glLightfv(GLLightTable[index],GL_AMBIENT,lightBlack);
-        glLightfv(GLLightTable[index],GL_DIFFUSE,lightColor);
-        glLightfv(GLLightTable[index],GL_SPECULAR,lightBlack);
-        AssertGLOK();
+        // negate because we store the direction the light travels, where the
+        // backend (like GL) expects the direction toward the light source.
+        const float dx = -_dirLightDirections[index].X().AsFloat();
+        const float dy = -_dirLightDirections[index].Y().AsFloat();
+        const float dz = -_dirLightDirections[index].Z().AsFloat();
+
+        ConvertToGLColor(_dirLightColors[index], lightColor);
+        RendererBackendGet().SetDirLight(index, dx, dy, dz,
+                                        lightColor[0], lightColor[1], lightColor[2]);
     }
 
    ConvertToGLColor(_fogColor,lightColor);
