@@ -158,4 +158,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-18 00:52** — [`docs/investigations/2026-04-15-loc-tracking.md`](docs/investigations/2026-04-15-loc-tracking.md): WF LOC tracking — shrinking the codebase
+**2026-04-18 01:59** — [`docs/plans/2026-04-17-oas2oad-name-kind-fix.md`](docs/plans/2026-04-17-oas2oad-name-kind-fix.md): Plan: fix oas2oad-rs name_KIND → correct MovementClass default
