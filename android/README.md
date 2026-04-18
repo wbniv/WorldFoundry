@@ -35,11 +35,22 @@ with `-DCMAKE_BUILD_TYPE=RelWithDebInfo` and packages the resulting
 
 ## Status
 
+Phases 1–3 complete. Playable APK on arm64; port is closed pending launcher
+icons + light polish.
+
 - **Phase 3 step 1**: `libwf_game.so` builds ✅
 - **Phase 3 step 2**: `android_main` + EGL context ✅
-- **Phase 3 step 3**: this Gradle project ✅
-- **Phase 3 step 4**: touch / gamepad input wiring — pending
-- **Phase 3 step 5**: `AAssetManager` asset accessor — pending
-- **Phase 3 step 7**: first device / emulator smoke test — pending
+- **Phase 3 step 3**: Gradle project ✅
+- **Phase 3 step 4**: touch + gamepad input (TV-mode detection) ✅
+- **Phase 3 step 5**: `AAssetManager` asset accessor (reads `cd.iff` from APK) ✅
+- **Phase 3 step 6**: audio (miniaudio + TinySoundFont, `level0.mid` + soundfont bundled) ✅
+- **Phase 3 step 7**: on-device smoke test on arm64 phone ✅
+- **Post-boot polish**: viewport/projection aspect, pause/resume EGL context
+  preservation, zForth `if/else/then` director fix, on-screen touch HUD ✅
+
+Remaining before full closure: launcher icons (`res/mipmap-*/` + adaptive icon
+XML + `android:icon` in the manifest), and removing the stale
+"sideload cd.iff" comment in `android/app/build.gradle.kts`. See
+`docs/investigations/2026-04-18-android-port-closure.md`.
 
 See `docs/plans/2026-04-16-android-port.md` for the full plan.
