@@ -1,7 +1,7 @@
 # Plan: Android port
 
 **Date:** 2026-04-16
-**Status:** In progress — Phases 0 (all of steps 1–4 + 4c(a–f) done; modern is the sole backend, legacy retired at `ff589c8`), 1, 2 complete; Phase 3 steps 1–6 done (libwf_game.so links, NativeActivity entry + EGL live, Gradle project scaffolded, gamepad + touch input wired, AAssetManager reads cd.iff from APK); step 7 (device smoke test) remaining. Tag `pre-legacy-gl-retire` (`807d1ea`) marks the last commit with `backend_legacy.cc` present.
+**Status:** Closed 2026-04-18 — Phases 0+1+2 + Phase 3 steps 1–7 all landed, plus post-boot polish (viewport/projection aspect, pause/resume EGL preservation, zForth `here` director fix, on-screen touch HUD). Remaining polish tracked as separate plans: [android-launcher-polish](2026-04-18-android-launcher-polish.md) and [audio-assets-from-iff](2026-04-18-audio-assets-from-iff.md). Tag `pre-legacy-gl-retire` (`807d1ea`) marks the last commit with `backend_legacy.cc` present.
 **Goal:** An APK that launches, runs snowgoons on an arm64 Android device or Google TV (Chromecast with Google TV), takes touch or gamepad input, and handles background/foreground transitions without crashing. Proof-of-viability, not a shipping product.
 
 ## Settled decisions
