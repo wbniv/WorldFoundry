@@ -41,7 +41,16 @@ namespace
 {
 
 #if defined(__ANDROID__)
-static const char* kShaderHeader = "#version 300 es\nprecision highp float;\n";
+// GLES 3.0 requires explicit precision on `int` in the fragment shader (there
+// is no default), but the vertex shader gets `highp` implicitly. If we set
+// int precision in only one stage, the link fails with
+// "fragment integer variable foo does not match the vertex variable".
+// Declare highp for both float and int so u_fog / u_lighting / u_use_tex
+// match across stages.
+static const char* kShaderHeader =
+    "#version 300 es\n"
+    "precision highp float;\n"
+    "precision highp int;\n";
 #else
 static const char* kShaderHeader = "#version 330 core\n";
 #endif
