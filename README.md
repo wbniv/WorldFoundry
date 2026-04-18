@@ -156,4 +156,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 22:36** — [`docs/plans/2026-04-17-oas2oad-name-kind-fix.md`](docs/plans/2026-04-17-oas2oad-name-kind-fix.md): Plan: fix oas2oad-rs name_KIND → correct MovementClass default
+**2026-04-17** — [`wfsource/source/game/snowgoons.iff`](wfsource/source/game/snowgoons.iff) + [`cd.iff`](wfsource/source/game/cd.iff) (`a7ef46e`): snowgoons joystick control restored by re-patching the stale director script to the inlined three-block form.
