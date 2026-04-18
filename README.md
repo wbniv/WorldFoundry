@@ -7,7 +7,9 @@
 
 ## Summary
 
-Six days of work (2026-04-12 – 2026-04-17) across nine major areas. Newest first:
+Six days of work (2026-04-12 – 2026-04-17). Newest first:
+
+**Snowgoons joystick control restored (2026-04-17)** — `wfsource/source/game/snowgoons.iff` and `cd.iff` still carried the pre-`671de1e` director script (`: ?cam ( idx -- ) ... ;` helper-word form) even though `scripts/patch_snowgoons_forth.py` was updated to the inlined three-block form in that commit. zForth's minimal bootstrap doesn't define `(`, so the director's `(defs)` compile aborted every frame and poisoned zforth state enough to break the player's cached `_wfs0` call path — joystick input never reached `EMAILBOX_INPUT`. Fix (`a7ef46e`): byte-preserving re-patch of both `.iff` files — same 439-byte slot, trailing-space padding, no chunk offsets change.
 
 **Window-close shutdown stability (2026-04-17)** — Two fixes on the X11 close-button path: `mesa.cc` now handles `WM_DELETE_WINDOW` (routing to `sys_exit(0)`), and `rest_api.cc` registers `RestApi_Stop` via `sys_atexit` so the server thread is joined before static destructors run. Clean exit, no abort.
 
