@@ -393,7 +393,7 @@ endif()
 
 # ─── Platform link libraries ──────────────────────────────────────────────────
 if(ANDROID)
-    list(APPEND WF_LINK_LIBS EGL GLESv3 android log m)
+    list(APPEND WF_LINK_LIBS EGL GLESv3 android log m OpenSLES)
 else()
     list(APPEND WF_LINK_LIBS GL GLU X11 m pthread dl)
     target_link_options(wf_game PRIVATE -Wl,-z,noexecstack)
