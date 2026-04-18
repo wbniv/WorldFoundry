@@ -68,45 +68,27 @@ int wfWindowHeight = 480;
 void
 WFInitGL()
 {
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	AssertGLOK();
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	AssertGLOK();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	AssertGLOK();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	AssertGLOK();
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	AssertGLOK();
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    //glShadeModel( GL_FLAT );
-    glShadeModel( GL_SMOOTH ); 
-    AssertGLOK();
-    glClearColor( 0.5, 0.5, 0.5, 1.0 );
-    AssertGLOK();
-
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     AssertGLOK();
 
-    glEnable(GL_BLEND);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     AssertGLOK();
 
-    glClearColor( 0.0, 0.0, 0.0, 0.0 );
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     AssertGLOK();
-//    glClearIndex( Black );
 
     RendererBackendGet().ResetModelView();
 
-    // Set the viewport to be the entire window
     glViewport(0, 0, wfWindowWidth, wfWindowHeight);
     AssertGLOK();
 
     //float fAspect = float(wfWindowWidth)/float(wfWindowHeight);
-    float fAspect = 1.0f;                          // kts I am correcting for this elsewhere, eventually in the case of PIPELINE_GL this will need to be changed
+    const float fAspect = 1.0f;
     RendererBackendGet().SetProjection(60.0f, fAspect, 1.0f, 1000.0f);
 }
 //==============================================================================
@@ -228,25 +210,7 @@ Display::RenderBegin()
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);     // Clear the window with current clearing color
    AssertGLOK();
    RendererBackendGet().SetLightingEnabled(true);
-   glEnable(GL_NORMALIZE);
    // Fog enable/disable is driven by camera.cc's SetFog each frame.
-
-   GLfloat lightWhite[] = {
-       1.0, 1.0, 1.0, 1.0
-   };
-
-
-   GLfloat lightBlack[] = {
-       0.0, 0.0, 0.0, 0.0
-   };
-   glMaterialfv(GL_FRONT,GL_AMBIENT,lightWhite);
-   glMaterialfv(GL_FRONT,GL_DIFFUSE,lightWhite);
-   glMaterialfv(GL_FRONT,GL_SPECULAR,lightBlack);
-   AssertGLOK();
-
-   AssertGLOK();
-   glEnable( GL_TEXTURE_2D );
-   AssertGLOK();
 
 #if 0
    static GLfloat cameraZ = -5.0;
