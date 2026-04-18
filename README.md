@@ -25,7 +25,7 @@ Seven days of work (2026-04-12 – 2026-04-18). Newest first:
 
 **Audio (Phases 1–5 complete) (2026-04-17)** — miniaudio + TinySoundFont vendored with per-level `level<N>.mid` music, fire-and-forget SFX, and 3D positional playback audible in snowgoons, but only via `scripting_lua.cc` closures — mailbox-wired audio API for the other seven engines is deferred.
 
-**Android port (Phases 0+1+2 complete; Phase 3 steps 1–6 done) (2026-04-18)** — Phase 0 done (see Graphics entry above). Phases 1+2 landed the CMake+NDK build, HAL lifecycle seam, and AssetAccessor. Phase 3 has stubs, NativeActivity + EGL 3.0 from `ANativeWindow`, a Gradle project (AGP 8.5.2, leanback manifest, arm64-v8a, min 21 / target 34), gamepad + touch input with TV-mode detection, and `AAssetManager` reading `cd.iff` from the APK; only step 7 (phone + Google TV device smoke test) remains.
+**Android port (Phases 0+1+2 complete; Phase 3 steps 1–6 done) (2026-04-18)** — Phase 0 retired legacy GL, Phases 1+2 landed CMake+NDK build / HAL lifecycle seam / AssetAccessor, and Phase 3 added `NativeActivity` + EGL 3.0, a Gradle project (AGP 8.5.2, leanback manifest, arm64-v8a, min 21 / target 34), gamepad + touch with TV-mode detection, and `AAssetManager`-backed `cd.iff` — only step 7 (device smoke test) remained at the time, since closed.
 
 **Blender ↔ level round-trip (2026-04-17)** — `levcomp-rs` compiles `.lev` → `.lvl` and snowgoons loads through it end-to-end; Blender plugin round-trips 152/152 OAD fields. Phase 2c landed mesh bboxes, packed asset IDs, and `asset.inc`; real path/channel keyframes are the last remaining piece.
 
