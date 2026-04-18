@@ -16,6 +16,14 @@ python3 scripts/loc_report.py --compare scripts/loc_baseline_74d1a47.json
 
 ## Milestones
 
+```mermaid
+xychart-beta
+    title "wfsource/source/ Code LOC over time"
+    x-axis [74d1a47, 53028fa, bfe4356, 0b04a40a, 0b04a40b, 03211f9, 8760f27, ec49c72, e2dcc98, 95a065d]
+    y-axis "Code LOC" 30000 --> 65000
+    line [64252, 47131, 43166, 42248, 41815, 38396, 38184, 39162, 36199, 36813]
+```
+
 | Date       | Ref       | Code LOC | Δ LOC     | Δ %     | Notes |
 |------------|-----------|----------|-----------|---------|-------|
 | 2026-04-14 | `74d1a47` | 64,252   | —         | —       | Pre-renderer-drop (baseline) |
