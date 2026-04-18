@@ -27,8 +27,10 @@
 INLINE void
 Display::Validate() const
 {
-	RangeCheckExclusive(0,_xSize,1024+1);
-	RangeCheckExclusive(0,_ySize,768+1);
+	// PSX-era cap was 1024×768; modern mobile / desktop surfaces routinely
+	// exceed that. Bump to 4K — still a sanity check, not a hard limit.
+	RangeCheckExclusive(0,_xSize,4096+1);
+	RangeCheckExclusive(0,_ySize,4096+1);
 	RangeCheck(0,_drawPage,DISPLAY_PAGES);
 #if defined(USE_ORDER_TABLES)
 	RangeCheck(0,_constructionOrderTableIndex,ORDER_TABLES);
