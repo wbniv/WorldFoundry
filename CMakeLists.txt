@@ -361,9 +361,19 @@ if(WF_ENABLE_STEAM)
     list(APPEND WF_DEFS WF_ENABLE_STEAM)
 endif()
 
+# ─── android_native_app_glue (Android only) ──────────────────────────────────
+if(ANDROID)
+    set(APP_GLUE_DIR ${ANDROID_NDK}/sources/android/native_app_glue)
+    list(APPEND WF_SOURCES ${APP_GLUE_DIR}/android_native_app_glue.c)
+    list(APPEND WF_INCLUDES ${APP_GLUE_DIR})
+endif()
+
 # ─── wf_game target ───────────────────────────────────────────────────────────
 if(ANDROID)
     add_library(wf_game SHARED ${WF_SOURCES})
+    # ANativeActivity_onCreate lives in android_native_app_glue.c and is the
+    # Android loader's entry point. Without -u the linker garbage-collects it.
+    target_link_options(wf_game PRIVATE -u ANativeActivity_onCreate)
 else()
     add_executable(wf_game ${WF_SOURCES})
 endif()
