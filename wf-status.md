@@ -7,7 +7,9 @@
 
 ## Summary
 
-Six days of work (2026-04-12 – 2026-04-17). Newest first:
+Seven days of work (2026-04-12 – 2026-04-18). Newest first:
+
+**Snowgoons rendering on Android phone (2026-04-18)** — Phase 3 step 7 ✅. Sideloaded debug APK boots into snowgoons on a physical arm64 phone via the Forth-only build: `libwf_game.so` loaded by `NativeActivity`, EGL 3.0 context live from `ANativeWindow`, `cd.iff` read from the APK via `AAssetManager`, modern VBO+shader backend drawing. Final pre-flight fixes: (1) shell script ported from Lua to Forth (`wflevels/shell.aib` + `scripts/patch_shell_forth.py`; `game.cc` hardcodes the meta-script language to Forth) so the Forth-only build has a working bootstrap; (2) `ScriptRouter::RunScript` gracefully no-ops missing-engine calls (warn-once) instead of asserting — kept the Android build alive through the per-level common Script at language=0; (3) `Display::Validate` 1024×768 VRAM-era framebuffer cap lifted to 4096² — modern phones routinely exceed that; (4) GLSL ES 300 fragment-shader `int` precision mismatched the vertex stage (`u_fog` / `u_lighting` / `u_use_tex`), modern backend now emits `precision highp int;` on Android. On-device wf.log (via the `WF Log` launcher icon we added earlier) was load-bearing for every one of those fixes since `adb logcat` wasn't reachable. Current cosmetic issue: render only fills the upper-left corner — GL viewport + projection-aspect still driven by the 640×480 module defaults, not the actual surface size. Next.
 
 **Snowgoons joystick control restored (2026-04-17)** — On-disk `snowgoons.iff`/`cd.iff` still had the pre-`671de1e` `?cam`-helper director that zForth's minimal bootstrap couldn't compile; byte-preserving re-patch (`a7ef46e`) landed the inlined three-block form the current `patch_snowgoons_forth.py` produces.
 
