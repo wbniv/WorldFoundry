@@ -162,6 +162,11 @@ static const char* kCoreBootstrap =
     // 64 is ZF_MEM_SIZE_VAR_MAX; see zforth.c.
     ": !j  64 !! ; "
     ": ,j  64 ,, ; "
+    // `here` — fetch current HERE (compilation pointer) value.
+    // `h` alone is a uservar word that pushes its address (0); control-flow
+    // words need the stored VALUE, so they use `here` (= `h @`). Matches the
+    // vendor core.zf convention (see engine/vendor/zforth-41db72d1/forth/core.zf).
+    ": here h @ ; "
     // Interpreter state control
     ": [ 0 compiling ! ; immediate "
     ": ] 1 compiling ! ; "
@@ -181,15 +186,16 @@ static const char* kCoreBootstrap =
     ": <> = not ; "
     ": 0<> 0 <> ; "
     // Control flow — if/else/fi/then, begin/until/again
-    // `h` is zForth's uservar for the current dictionary pointer ("here").
-    // `if` emits a jmp0 with a placeholder target; `fi`/`then` back-patch it.
-    // `else` emits an unconditional jmp past the else-body, back-patches
-    // the if's jmp0 to h, then leaves the else's jmp for `fi`/`then` to patch.
-    ": if     ' jmp0 , h 0 ,j ; immediate "
-    ": else   ' jmp  , h 0 ,j swap h swap !j ; immediate "
-    ": fi     h swap !j ; immediate "
-    ": then   h swap !j ; immediate "   // standard Forth alias for fi
-    ": begin  h ; immediate "
+    // `if` emits a jmp0 with a placeholder target at HERE; `fi`/`then` back-
+    // patch it with the value of HERE at their point. `else` emits an
+    // unconditional jmp past the else-body, back-patches the if's jmp0 to
+    // current HERE, then leaves the else's jmp placeholder for `fi`/`then`
+    // to patch. All use `here` (the VALUE) not `h` (the uservar ID).
+    ": if     ' jmp0 , here 0 ,j ; immediate "
+    ": else   ' jmp  , here 0 ,j swap here swap !j ; immediate "
+    ": fi     here swap !j ; immediate "
+    ": then   here swap !j ; immediate "   // standard Forth alias for fi
+    ": begin  here ; immediate "
     ": again  ' jmp  , , ; immediate "
     ": until  ' jmp0 , , ; immediate "
     // Counted loop: `limit start do ... loop`
@@ -197,7 +203,7 @@ static const char* kCoreBootstrap =
     // loop+ increments by n; loop by 1.  All immediate — compiled, not eval'd.
     ": i     ' lit , 0 , ' pickr , ; immediate "
     ": j     ' lit , 2 , ' pickr , ; immediate "
-    ": do    ' swap , ' >r , ' >r , h ; immediate "
+    ": do    ' swap , ' >r , ' >r , here ; immediate "
     ": loop+ ' r> , ' + , ' dup , ' >r , ' lit , 1 , ' pickr , ' >= , "
              "' jmp0 , , ' r> , ' drop , ' r> , ' drop , ; immediate "
     ": loop  ' lit , 1 , postpone loop+ ; immediate "
