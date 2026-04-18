@@ -536,4 +536,14 @@ mod tests {
                 "entry count mismatch in {filename}");
         }
     }
+
+    #[test]
+    fn parse_common_oad() {
+        let data = include_bytes!("../tests/fixtures/common.oad");
+        let oad = OadFile::read(&mut Cursor::new(data)).unwrap();
+        assert_eq!(oad.header.display_name(), "Common");
+        assert_eq!(oad.entries.len(), 14);
+        assert!(oad.entries.iter().any(|e| e.name_str() == "Script"),
+            "common.oad must contain a Script field");
+    }
 }

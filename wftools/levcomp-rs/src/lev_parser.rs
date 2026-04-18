@@ -126,12 +126,16 @@ pub fn parse(data: &[u8]) -> Result<Vec<LevObject>, String> {
         if id_to_str(chunk.id) != "OBJ" {
             continue;
         }
-        objects.push(parse_obj(&chunk.payload)?);
+        if let Some(obj) = parse_obj(&chunk.payload)? {
+            objects.push(obj);
+        }
     }
     Ok(objects)
 }
 
-fn parse_obj(payload: &[u8]) -> Result<LevObject, String> {
+/// Returns `None` for objects with no Class Name — these are 3ds Max helper objects
+/// (e.g. light targets) whose position was consumed at export time.
+fn parse_obj(payload: &[u8]) -> Result<Option<LevObject>, String> {
     let fields = read_chunks(payload).map_err(|e: IffError| e.message)?;
 
     let mut name = String::new();
@@ -184,10 +188,10 @@ fn parse_obj(payload: &[u8]) -> Result<LevObject, String> {
     }
 
     if class_name.is_empty() {
-        return Err(format!("OBJ '{name}' has no Class Name field"));
+        return Ok(None);
     }
 
-    Ok(LevObject { name, class_name, position, rotation, bbox, fields })
+    Ok(Some(LevObject { name, class_name, position, rotation, bbox, fields }))
 }
 
 /// An OBJ field chunk is `{ NAME "<key>" }{ DATA ... }` or similar.

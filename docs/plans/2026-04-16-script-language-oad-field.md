@@ -1,7 +1,8 @@
 # Plan: encode scripting language in OAS/OAD; drop runtime sigil detection
 
 **Date:** 2026-04-16
-**Status:** complete
+**Status:** deferred — blocked on `docs/plans/2026-04-17-level-pipeline-proof.md` (all
+7 levels must be rebuildable from source before common.inc layout changes are safe). `ScriptLanguage` field was added then reverted from `common.oad` to preserve layout compat with existing compiled levels. In the interim, **one stopgap hardcode** selects Forth for snowgoons: `engine/stubs/scripting_stub.cc` `ScriptRouter::RunScript` overwrites its `language` parameter with `3` (Forth) before dispatch. Revert by deleting the `language = 3;` override block when this plan lands. All call sites (`actor.cc`, `level.cc`, `game.cc`, `tool*.cc`) currently pass `0` and rely on the dispatcher override; once the OAD field is back, each call site threads its actual language (`GetCommonBlockPtr()->ScriptLanguage` for actors; correct per-script value for shell/meta/tool) and the override comes out in the same change.
 
 ## Context
 
@@ -190,11 +191,19 @@ automatically. The migration script needs to:
 Scripts without a sigil (plain Lua) are unaffected. The corpus is small; this is a
 one-time pass, not an ongoing concern.
 
+## Prerequisites
+
+**Hard gate from `docs/plans/2026-04-17-level-pipeline-proof.md`:** all 7 levels must be
+in cd.iff and rebuildable from `.lev` source through levcomp-rs before executing this
+plan. Once that gate passes, the rebuild step below is unblocked.
+
 ## Critical files
 
 | File | Change |
 |------|--------|
-| `wfsource/source/oas/common.inc` | Add `TYPEENTRYINT32(Script Language, …)` after `Script` |
+| `wfsource/source/oas/common.inc` | Rearrange fields as desired; add `TYPEENTRYINT32(Script Language, …)` near `Script` |
+| `wfsource/source/oas/common.oad` | **Rebuilt** by `oas2oad-rs`; copy to `wftools/wf_oad/tests/fixtures/common.oad` |
+| all 7 `.lev` files | **Rebuild** all levels through `levcomp-rs` + LVAS wrap after OAD changes |
 | `wfsource/source/oas/common.ht` | **Generated** — rebuilt by `oas2oad-rs`; do not hand-edit |
 | `wfsource/source/oas/common.pp` | **Generated** — rebuilt by `oas2oad-rs`; do not hand-edit |
 | `wfsource/source/game/level.hp` | Add `language` param to `EvalScript` |
