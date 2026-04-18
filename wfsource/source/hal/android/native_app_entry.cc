@@ -22,6 +22,8 @@
 // Phase 3 step 4.
 //=============================================================================
 
+#include <android/input.h>
+#include <android/keycodes.h>
 #include <android/log.h>
 #include <android_native_app_glue.h>
 
@@ -30,6 +32,8 @@
 
 #include <hal/hal.h>
 #include <hal/lifecycle.h>
+
+extern "C" void _HALSetJoystickButtons(joystickButtonsF joystickButtons);
 
 extern "C" bool WFAndroidEglInit(struct ANativeWindow* window);
 extern "C" void WFAndroidEglTerm();
@@ -44,6 +48,35 @@ namespace
 struct android_app* gApp        = nullptr;
 bool                gEglReady   = false;
 bool                gExitLoop   = false;
+
+// Bitmask of WF buttons currently held (updated by HandleInputEvent, read by
+// hal/android/input.cc's _JoystickButtonsF via _HALSetJoystickButtons).
+joystickButtonsF    gButtons    = 0;
+
+// Joystick axes trigger LEFT/RIGHT/UP/DOWN when past this threshold — matches
+// Android's AGAMEPAD guideline. Separate from D-pad key events which fire as
+// discrete AKEYCODE_DPAD_* presses.
+constexpr float kJoystickThreshold = 0.5f;
+
+uint32_t MapKeyCode(int32_t code)
+{
+    switch (code)
+    {
+        case AKEYCODE_DPAD_LEFT:       return EJ_BUTTONF_LEFT;
+        case AKEYCODE_DPAD_RIGHT:      return EJ_BUTTONF_RIGHT;
+        case AKEYCODE_DPAD_UP:         return EJ_BUTTONF_UP;
+        case AKEYCODE_DPAD_DOWN:       return EJ_BUTTONF_DOWN;
+        case AKEYCODE_BUTTON_A:        return EJ_BUTTONF_A;
+        case AKEYCODE_BUTTON_B:        return EJ_BUTTONF_B;
+        case AKEYCODE_BUTTON_X:        return EJ_BUTTONF_C;
+        case AKEYCODE_BUTTON_Y:        return EJ_BUTTONF_D;
+        case AKEYCODE_BUTTON_L1:       return EJ_BUTTONF_E;
+        case AKEYCODE_BUTTON_R1:       return EJ_BUTTONF_F;
+        case AKEYCODE_BUTTON_START:    return EJ_BUTTONF_G;
+        case AKEYCODE_BUTTON_SELECT:   return EJ_BUTTONF_H;
+        default:                       return 0;
+    }
+}
 
 void HandleAppCmd(struct android_app* app, int32_t cmd)
 {
@@ -81,9 +114,56 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
     }
 }
 
-int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* /*event*/)
+int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
 {
-    // Phase 3 step 4 wires touch + gamepad → _HALSetJoystickButtons.
+    const int32_t type = AInputEvent_getType(event);
+
+    if (type == AINPUT_EVENT_TYPE_KEY)
+    {
+        const int32_t keyCode = AKeyEvent_getKeyCode(event);
+        const int32_t action  = AKeyEvent_getAction(event);
+        const uint32_t mask   = MapKeyCode(keyCode);
+        if (mask == 0) return 0;
+
+        if (action == AKEY_EVENT_ACTION_DOWN)      gButtons |=  mask;
+        else if (action == AKEY_EVENT_ACTION_UP)   gButtons &= ~mask;
+        _HALSetJoystickButtons(gButtons);
+        return 1;
+    }
+
+    if (type == AINPUT_EVENT_TYPE_MOTION)
+    {
+        const int32_t source = AInputEvent_getSource(event);
+
+        // Gamepad analog sticks. Android reports the left stick on AXIS_X /
+        // AXIS_Y and the D-pad hat on AXIS_HAT_X / AXIS_HAT_Y.
+        if (source & AINPUT_SOURCE_JOYSTICK)
+        {
+            float x = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_X,     0);
+            float y = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_Y,     0);
+            float hx = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_X, 0);
+            float hy = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_Y, 0);
+
+            if (hx != 0.0f) x = hx;
+            if (hy != 0.0f) y = hy;
+
+            joystickButtonsF axes = 0;
+            if (x < -kJoystickThreshold)  axes |= EJ_BUTTONF_LEFT;
+            if (x >  kJoystickThreshold)  axes |= EJ_BUTTONF_RIGHT;
+            if (y < -kJoystickThreshold)  axes |= EJ_BUTTONF_UP;
+            if (y >  kJoystickThreshold)  axes |= EJ_BUTTONF_DOWN;
+
+            constexpr uint32_t kAxisBits = EJ_BUTTONF_LEFT | EJ_BUTTONF_RIGHT
+                                          | EJ_BUTTONF_UP  | EJ_BUTTONF_DOWN;
+            gButtons = (gButtons & ~kAxisBits) | axes;
+            _HALSetJoystickButtons(gButtons);
+            return 1;
+        }
+
+        // Touch (AINPUT_SOURCE_TOUCHSCREEN) is deferred to a follow-up — the
+        // on-screen d-pad hit-test lands alongside the UI-mode detection.
+    }
+
     return 0;
 }
 
