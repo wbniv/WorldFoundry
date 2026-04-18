@@ -235,10 +235,10 @@ RenderCamera::RenderBegin()
     }
 
    ConvertToGLColor(_fogColor, lightColor);
-   RendererBackendGet().SetFog(true,
-                              lightColor[0], lightColor[1], lightColor[2],
+   RendererBackendGet().SetFog(lightColor[0], lightColor[1], lightColor[2],
                               _fogNear.AsFloat(),
                               _fogFar.AsFloat());
+   RendererBackendGet().SetFogEnabled(true);
 
 
 #if 0

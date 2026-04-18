@@ -27,6 +27,7 @@
 #include <gfx/rendmatt.hp>
 #include <gfx/viewport.hp>
 #include <gfx/material.hp>
+#include <gfx/renderer_backend.hp>
 
 #if   defined ( __LINUX__ )
 #pragma message( "move to correct place when completed" )
@@ -77,20 +78,20 @@ ScrollingMatte::ScrollingMatte(const char* textureName, const Texture& texture, 
 	resultv = vramV.WholePart(); \
 	}
 
-static void 
-CalcAndSetUV(unsigned char uin, unsigned char vin, const PixelMap& texturePixelMap) 
+static void
+CalcUV(unsigned char uin, unsigned char vin, const PixelMap& texturePixelMap,
+       float& uOut, float& vOut)
 {
-    ulong u(uin); 
-    ulong v(vin); 
+    ulong u(uin);
+    ulong v(vin);
 
 #if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
-    float uResult(float(u)/VRAM_WIDTHF);                            
-    float vResult(float(v)/VRAM_HEIGHTF);                           
+    uOut = float(u) / VRAM_WIDTHF;
+    vOut = float(v) / VRAM_HEIGHTF;
 #else
-    float uResult(float(u)/texturePixelMap.GetBaseXSize());                            
-    float vResult(float(v)/texturePixelMap.GetBaseYSize());
+    uOut = float(u) / texturePixelMap.GetBaseXSize();
+    vOut = float(v) / texturePixelMap.GetBaseYSize();
 #endif
-    glTexCoord2f(uResult, vResult);                         
 }
 
 //==============================================================================
@@ -141,12 +142,9 @@ ScrollingMatte::Render(ViewPort&
 
 #if defined(USE_ORDER_TABLES)
 #else
-   glLoadIdentity();
-   glEnable( GL_TEXTURE_2D );
-   texturePixelMap->SetGLTexture();
-   glDisable(GL_LIGHTING);
-   glDisable(GL_FOG);
-   glColor3f(1.0, 1.0, 1.0);
+   RendererBackendGet().ResetModelView();
+   RendererBackendGet().SetLightingEnabled(false);
+   RendererBackendGet().SetFogEnabled(false);
 #endif
 
 
@@ -185,36 +183,43 @@ ScrollingMatte::Render(ViewPort&
 				vp.AddPrimitive(*(Primitive*)&sprite,_depth);
 #else
 
-            glBegin( GL_QUADS );
             const int XOFFSET = - ((320/2)+16);
             const int YOFFSET = - ((224/2)+16+(16/2));         // add a tile & a half
             //const int ZOFFSET = -350;                     // switch to this one to see the entire map
             const int ZOFFSET = -277;
 
-            int uResult,vResult;
+            int uResult, vResult;
 
-            Scalar xTileOffset = Scalar(xMapIndex*16,0)/Scalar(_texture.w,0);
-            Scalar yTileOffset = Scalar(_texture.h-(yMapIndex*16),0)/Scalar(_texture.h,0);
-            Scalar xTileOffsetRight = Scalar((xMapIndex*16)+16,0)/Scalar(_texture.w,0);
-            Scalar yTileOffsetBottom = Scalar(_texture.h-((yMapIndex*16)+16),0)/Scalar(_texture.h,0);
+            Scalar xTileOffset       = Scalar(xMapIndex*16, 0)         / Scalar(_texture.w, 0);
+            Scalar yTileOffset       = Scalar(_texture.h - (yMapIndex*16), 0)      / Scalar(_texture.h, 0);
+            Scalar xTileOffsetRight  = Scalar((xMapIndex*16) + 16, 0)  / Scalar(_texture.w, 0);
+            Scalar yTileOffsetBottom = Scalar(_texture.h - ((yMapIndex*16)+16), 0) / Scalar(_texture.h, 0);
 
-            //std::cout << "  xTileOffset = " << xTileOffset << ", xTileOffsetRight = " << xTileOffsetRight << std::endl;
-            //std::cout << "  yTileOffset = " << yTileOffset << ", yTileOffsetBottom = " << yTileOffsetBottom <<std::endl;
+            // World-space corners (Z negative = into screen).
+            const float x0 = float(((xIndex*16) - xSmoothScroll) + XOFFSET);
+            const float y0 = float(-(((yIndex*16) - ySmoothScroll) + YOFFSET));
+            const float x1 = x0 + 16.0f;
+            const float y1 = y0 - 16.0f;
+            const float z  = float(ZOFFSET);
 
-            CalcVRAMuv(xTileOffset,yTileOffset,uResult,vResult,_texture);
-            CalcAndSetUV(uResult,vResult,*texturePixelMap);
-            glVertex3i( ((xIndex*16)-xSmoothScroll)+XOFFSET,    -(((yIndex*16)-ySmoothScroll)+YOFFSET),    ZOFFSET );
-            CalcVRAMuv(xTileOffset,yTileOffsetBottom,uResult,vResult,_texture);
-            CalcAndSetUV(uResult,vResult,*texturePixelMap);
-            glVertex3i( ((xIndex*16)-xSmoothScroll)+XOFFSET,    -(((yIndex*16)-ySmoothScroll)+YOFFSET+16), ZOFFSET );
-            CalcVRAMuv(xTileOffsetRight,yTileOffsetBottom,uResult,vResult,_texture);
-            CalcAndSetUV(uResult,vResult,*texturePixelMap);
-            glVertex3i( ((xIndex*16)-xSmoothScroll)+XOFFSET+16, -(((yIndex*16)-ySmoothScroll)+YOFFSET+16), ZOFFSET );
-            CalcVRAMuv(xTileOffsetRight,yTileOffset,uResult,vResult,_texture);
-            CalcAndSetUV(uResult,vResult,*texturePixelMap);
-            glVertex3i( ((xIndex*16)-xSmoothScroll)+XOFFSET+16, -(((yIndex*16)-ySmoothScroll)+YOFFSET),    ZOFFSET );
-            glEnd();
-            AssertGLOK();
+            RBVertex tl, bl, br, tr;
+            tl.x = x0; tl.y = y0; tl.z = z;  tl.r = tl.g = tl.b = 1.0f;
+            bl.x = x0; bl.y = y1; bl.z = z;  bl.r = bl.g = bl.b = 1.0f;
+            br.x = x1; br.y = y1; br.z = z;  br.r = br.g = br.b = 1.0f;
+            tr.x = x1; tr.y = y0; tr.z = z;  tr.r = tr.g = tr.b = 1.0f;
+
+            CalcVRAMuv(xTileOffset,       yTileOffset,       uResult, vResult, _texture);
+            CalcUV(uResult, vResult, *texturePixelMap, tl.u, tl.v);
+            CalcVRAMuv(xTileOffset,       yTileOffsetBottom, uResult, vResult, _texture);
+            CalcUV(uResult, vResult, *texturePixelMap, bl.u, bl.v);
+            CalcVRAMuv(xTileOffsetRight,  yTileOffsetBottom, uResult, vResult, _texture);
+            CalcUV(uResult, vResult, *texturePixelMap, br.u, br.v);
+            CalcVRAMuv(xTileOffsetRight,  yTileOffset,       uResult, vResult, _texture);
+            CalcUV(uResult, vResult, *texturePixelMap, tr.u, tr.v);
+
+            // Unlit matte: normal unused, but set facing camera.
+            RendererBackendGet().DrawTriangle(tl, bl, br, 0.0f, 0.0f, 1.0f, texturePixelMap);
+            RendererBackendGet().DrawTriangle(tl, br, tr, 0.0f, 0.0f, 1.0f, texturePixelMap);
 #endif
 			}
 		}
@@ -252,8 +257,8 @@ ScrollingMatte::Render(ViewPort&
    AssertGLOK();
 #endif
 
-   glEnable(GL_LIGHTING);
-   glEnable(GL_FOG);
+   RendererBackendGet().SetLightingEnabled(true);
+   RendererBackendGet().SetFogEnabled(true);
 #endif
 }
 

@@ -57,11 +57,14 @@ public:
     // Global lighting on/off (for matte / unlit passes).
     virtual void SetLightingEnabled(bool enabled) = 0;
 
-    // Linear fog. `start`/`end` are eye-space distances (positive). Color is
-    // RGB 0..1. Disabled means the fragment is passed through untouched.
-    virtual void SetFog(bool enabled,
-                        float r, float g, float b,
+    // Linear fog parameters. `start`/`end` are eye-space distances (positive).
+    // Color is RGB 0..1. Does not toggle fog — use SetFogEnabled.
+    virtual void SetFog(float r, float g, float b,
                         float start, float end) = 0;
+
+    // Fog on/off. Params preserved across toggles (so matte can disable +
+    // re-enable without re-specifying the camera's fog setup).
+    virtual void SetFogEnabled(bool enabled) = 0;
 
     // Triangle submission (see top of file). `nx/ny/nz` is the object-space
     // face normal — the modern backend replicates it into all three verts.

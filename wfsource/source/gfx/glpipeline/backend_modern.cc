@@ -287,17 +287,21 @@ public:
         _lightingEnabled = enabled;
     }
 
-    void SetFog(bool enabled,
-                float r, float g, float b,
+    void SetFog(float r, float g, float b,
                 float start, float end) override
     {
         Flush();
-        _fogEnabled = enabled;
         _fogColor[0] = r;
         _fogColor[1] = g;
         _fogColor[2] = b;
         _fogStart = start;
         _fogEnd   = end;
+    }
+
+    void SetFogEnabled(bool enabled) override
+    {
+        Flush();
+        _fogEnabled = enabled;
     }
 
     void DrawTriangle(const RBVertex& v0,
