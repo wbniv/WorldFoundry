@@ -22,6 +22,7 @@
 // Phase 3 step 4.
 //=============================================================================
 
+#include <android/asset_manager.h>
 #include <android/configuration.h>
 #include <android/input.h>
 #include <android/keycodes.h>
@@ -49,9 +50,10 @@ extern "C" void WFAndroidEglTerm();
 namespace
 {
 
-struct android_app* gApp        = nullptr;
-bool                gEglReady   = false;
-bool                gExitLoop   = false;
+struct android_app* gApp         = nullptr;
+AAssetManager*      gAssetMgr    = nullptr;
+bool                gEglReady    = false;
+bool                gExitLoop    = false;
 
 // Bitmask of WF buttons currently held — combined gamepad + touch states are
 // merged here and flushed to _HALSetJoystickButtons.
@@ -264,6 +266,14 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
 
 }  // namespace
 
+// Read by hal/android/asset_accessor_aasset.cc when creating the accessor
+// during _PlatformSpecificInit.
+extern "C" AAssetManager*
+WFAndroidGetAssetManager()
+{
+    return gAssetMgr;
+}
+
 // Called from XEventLoop (display.cc PageFlip) once per frame. Non-blocking
 // drain of any queued commands + input events.
 extern "C" void
@@ -289,6 +299,11 @@ android_main(struct android_app* app)
     gApp = app;
     app->onAppCmd     = HandleAppCmd;
     app->onInputEvent = HandleInputEvent;
+
+    // AAssetManager is live as soon as the NativeActivity is created;
+    // asset_accessor_aasset.cc grabs it during _PlatformSpecificInit.
+    if (app->activity && app->activity->assetManager)
+        gAssetMgr = app->activity->assetManager;
 
     if (app->config)
     {

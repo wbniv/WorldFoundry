@@ -98,11 +98,6 @@ tasks:
       - adb install -r app/build/outputs/apk/debug/app-debug.apk
       - adb shell am start -n org.worldfoundry.wf_game/android.app.NativeActivity
 
-  push-assets:
-    desc: "Push cd.iff to device (pre-AAssetManager; goes to /data/local/tmp/wf/)"
-    cmds:
-      - adb shell mkdir -p /data/local/tmp/wf
-      - adb push wfsource/source/game/cd.iff /data/local/tmp/wf/cd.iff
 
   run:
     desc: "Run wf_game (cd.iff in cwd)"

@@ -21,10 +21,13 @@ After it finishes, add the env-var lines it prints to `~/.bashrc` /
 
 ```
 task build-apk        # → android/app/build/outputs/apk/debug/app-debug.apk
-task push-assets      # adb push cd.iff to /data/local/tmp/wf/ (pre-AAssetManager)
 task install-apk      # adb install + start NativeActivity
 adb logcat -s wf_game # stream engine logs
 ```
+
+`cd.iff` is bundled in the APK under `assets/` via a symlink
+(`android/app/src/main/assets/cd.iff → ../../../../../wfsource/source/game/cd.iff`);
+the AAssetAccessor reads it directly from the APK at runtime.
 
 Gradle calls the repo-root CMake (via `externalNativeBuild`) for arm64-v8a
 with `-DCMAKE_BUILD_TYPE=RelWithDebInfo` and packages the resulting

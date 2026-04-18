@@ -23,9 +23,11 @@
 #include <cstdlib>
 #include <cstring>
 
-// Installed below by _PlatformSpecificInit. Declared in
-// hal/android/asset_accessor_posix.cc.
-extern AssetAccessor* HALCreatePosixAssetAccessor();
+// Installed below by _PlatformSpecificInit. Defined in
+// hal/android/asset_accessor_aasset.cc — wraps AAssetManager_open from the
+// APK bundle. native_app_entry.cc stashes the AAssetManager pointer before
+// HALStart is entered.
+extern "C" AssetAccessor* HALCreateAAssetAccessor();
 
 //=============================================================================
 
@@ -66,7 +68,13 @@ _PlatformSpecificInit(int /*argc*/, char** /*argv*/,
                                              MEMORY_NAMED(COMMA "HALDmalloc"));
     ValidatePtr(_HALDmalloc);
 
-    HALSetAssetAccessor(HALCreatePosixAssetAccessor());
+    AssetAccessor* accessor = HALCreateAAssetAccessor();
+    if (!accessor)
+    {
+        FatalError("HALCreateAAssetAccessor returned null — "
+                   "AAssetManager pointer not yet stashed");
+    }
+    HALSetAssetAccessor(accessor);
 }
 
 //=============================================================================
