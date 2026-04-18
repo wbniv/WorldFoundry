@@ -33,7 +33,7 @@ Seven days of work (2026-04-12 – 2026-04-18). Newest first:
 
 **Tooling and plans (2026-04-17)** — `engine/` reorganised to top-level; REST API box PoC landed; iOS plan written (blocked on Android); CLI level override (`-L<path>`) confirmed; IFF lineage + MIDI-source investigations filed.
 
-**Scripting system (2026-04-16)** — Seven engines smoke-tested end-to-end in snowgoons (Lua 5.4, Fennel, QuickJS, JerryScript, WAMR, Wren, zForth); five alternate Forth backends build+link but aren't end-to-end tested. Lua is optional via `WF_LUA_ENGINE=lua54|none`; wasm3 retired in favour of WAMR; WAMR AOT deferred.
+**Scripting system (2026-04-16)** — Seven engines smoke-tested end-to-end in snowgoons (Lua 5.4, Fennel, QuickJS, JerryScript, WAMR, Wren, zForth) with Lua optional (`WF_LUA_ENGINE=lua54|none`) and wasm3 retired in favour of WAMR — five alternate Forth backends build+link but aren't end-to-end tested, WAMR AOT deferred.
 
 **Dead-code removal (2026-04-15, closed 2026-04-18)** — Batches 1–7 complete: `wfsource/source/` down from 64,252 → 36,199 lines (−43.7%). Batch 8 (delete legacy `physics/wf/`) accepted at its ~1,700 LOC estimated reduction but deferred opportunistically until Jolt has parity on a second level; `hal/_list` + `hal/_mempool` migration left as future opt-in.
 
