@@ -7,7 +7,9 @@
 
 ## Summary
 
-Five days of work (2026-04-12 – 2026-04-17) across eight major areas:
+Six days of work (2026-04-12 – 2026-04-17) across nine major areas. Newest first:
+
+**Window-close shutdown stability (2026-04-17)** — Two fixes on the X11 close-button path: `mesa.cc` now handles `WM_DELETE_WINDOW` (routing to `sys_exit(0)`), and `rest_api.cc` registers `RestApi_Stop` via `sys_atexit` so the server thread is joined before static destructors run. Clean exit, no abort.
 
 **Scripting system** — Seven engines smoke-tested end-to-end in snowgoons: Lua 5.4, Fennel, QuickJS, JerryScript, WAMR (classic interp), Wren, and Forth (zForth). Five additional Forth backends (ficl, atlast, embed, libforth, pforth) build and link but are not yet end-to-end tested. All wired into a `ScriptRouter` dispatch table with per-engine sigils. wasm3 retired 2026-04-16 (WAMR reached parity). Lua made optional via `WF_LUA_ENGINE=lua54|none` (2026-04-16); `scripting_lua.cc/hp` extracted as a peer TU matching all other engine plugs. WAMR AOT deferred.
 
@@ -35,8 +37,7 @@ Five days of work (2026-04-12 – 2026-04-17) across eight major areas:
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
-| 2026-04-17 | [Plan: Mailbox-wired audio API](docs/plans/2026-04-17-audio-mailbox-api.md) | **Not started** | **Goal:** Every scripting engine can trigger music + SFX via mailbox writes. `EMAILBOX_SOUND=3017` enum and OAD `sfx0..sfx127` asset slots still exist; handler + slot loader were deleted in the `460a3fd` dead-code sweep (pre-cleanup impl was Linux-stubbed). Phase A: restore `_sfx[128]` loader + `EMAILBOX_SOUND` handler that plays at the actor's position. Phase B: `MUSIC_PLAY`/`MUSIC_STOP`/`MUSIC_VOLUME` mailboxes; Lua closures become forwarders. Phase C (opt): named `SFX_*` constants. |
-| 2026-04-16 | [Plan: git-branch-browser — curses TUI for browsing branch diffs](docs/plans/2026-04-16-git-branch-browser.md) | **Not started** | **Goal:** A Python curses program at `scripts/git-branch-browser.py` that lets you browse all git branches, see per-branch changed files as a collapsible directory tree with status annotations, and … |
+| 2026-04-16 | [Plan: git-branch-browser — curses TUI for browsing branch diffs](docs/plans/2026-04-16-git-branch-browser.md) | **In testing** | **Goal:** A Python curses program at `scripts/git-branch-browser.py` that lets you browse all git branches, see per-branch changed files as a collapsible directory tree with status annotations, and view file diffs inline. Implementation landed (~784 LOC); currently in user testing. |
 | 2026-04-17 | [Plan: Steam release](docs/plans/2026-04-17-steam.md) | **In progress — Phases 1+2 done** | Steamworks SDK lifecycle wired into HAL + PageFlip. Steam Input → `EJ_BUTTONF_*` merged in `_JoystickButtonsF`. `WF_ENABLE_STEAM=1` build flag; SDK not committed (see vendor README). Phases 3 (depot) and 4 (store page) deferred. |
 | 2026-04-16 | [Plan: Android port](docs/plans/2026-04-16-android-port.md) | **In progress — Phases 1+2 done; Phase 0 steps 1/2/4a/4b done** | Phase 1 ✅ (CMake + NDK toolchain + 64-bit fixes). Phase 2 ✅ ([plan](docs/plans/2026-04-17-android-phase-2.md)): HAL lifecycle hooks + `AssetAccessor` POSIX backend. Phase 0 🟡: renderer backend seam landed (`gfx/renderer_backend.hp`); all 8 render TUs ported (−928 LOC); matrix state routed through backend; modern VBO+shader backend (`backend_modern.cc`, GLSL 330 core / GLES 300 es) selectable via `WF_RENDERER=modern`. Step 4c remaining (retire fixed-function calls in `display.cc`/`camera.cc`/`rendmatt.cc`), then Phase 3. |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Partial** | Batches 1–7 complete (−43.7% LOC). Batch 6 (`#if 0` sweep) done. Batch 7 (PSX/Win artifacts, OpusMake, platform guards) done. Batch 8 (Jolt physics replacement) in progress. |
@@ -45,6 +46,7 @@ Five days of work (2026-04-12 – 2026-04-17) across eight major areas:
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
+| 2026-04-17 | [Plan: Mailbox-wired audio API](docs/plans/deferred/2026-04-17-audio-mailbox-api.md) | **Deferred** | **Goal:** Every scripting engine can trigger music + SFX via mailbox writes. `EMAILBOX_SOUND=3017` enum and OAD `sfx0..sfx127` asset slots still exist; handler + slot loader were deleted in the `460a3fd` dead-code sweep (pre-cleanup impl was Linux-stubbed). Phase A: restore `_sfx[128]` loader + `EMAILBOX_SOUND` handler that plays at the actor's position. Phase B: `MUSIC_PLAY`/`MUSIC_STOP`/`MUSIC_VOLUME` mailboxes; Lua closures become forwarders. Phase C (opt): named `SFX_*` constants. |
 | 2026-04-16 | [ScriptLanguage OAD field](docs/plans/2026-04-16-script-language-oad-field.md) | **Deferred — blocked on Blender+levcomp-rs level round-trip** | Field added then reverted from `common.oad` to restore binary layout compat with existing compiled levels. Dispatch table + language param threading remain in engine (passing 0=Lua). Will re-introduce once all levels compile through Blender+levcomp-rs. |
 | 2026-04-16 | [Plan: iOS port](docs/plans/2026-04-16-ios-port.md) | **Deferred — blocked on Android port** | **Goal:** An IPA that runs snowgoons on a tethered iPhone, installed via Xcode with a developer profile. Proof-of-viability, not a shipping product. |
 
@@ -151,4 +153,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 19:29** — [`docs/plans/2026-04-16-script-language-oad-field.md`](docs/plans/2026-04-16-script-language-oad-field.md): Plan: encode scripting language in OAS/OAD; drop runtime sigil detection
+**2026-04-17 22:09** — [`docs/plans/2026-04-17-level-pipeline-proof.md`](docs/plans/2026-04-17-level-pipeline-proof.md): Plan: Prove all 7 level pipelines → breaking common.inc rearrangement
