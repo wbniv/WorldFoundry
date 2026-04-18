@@ -95,8 +95,13 @@ WFInitGL()
     glViewport(0, 0, wfWindowWidth, wfWindowHeight);
     AssertGLOK();
 
-    //float fAspect = float(wfWindowWidth)/float(wfWindowHeight);
-    const float fAspect = 1.0f;
+    // Aspect from the actual surface so geometry isn't squished when the
+    // window isn't square. Keeps content proportions — on a landscape
+    // phone the horizontal field of view widens instead of content
+    // stretching. (Was hardcoded 1.0 which combined with the 640×480
+    // wfWindow defaults rendered the engine into the top-left corner of
+    // anything larger.)
+    const float fAspect = float(wfWindowWidth) / float(wfWindowHeight);
     RendererBackendGet().SetProjection(60.0f, fAspect, 1.0f, 1000.0f);
 }
 //==============================================================================
