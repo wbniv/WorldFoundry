@@ -1,11 +1,10 @@
 # Reverse-engineering the WF binary level format for `levcomp-rs`
 
 **Date:** 2026-04-16
-**Status:** Functional — `levcomp-rs` output loads cleanly in `wf_game`;
-player character spawns, physics broadphase completes, REST API starts.
-A trailing `terminate called without an active exception` appears after
-the game loop is already running and is attributable to an unrelated
-subsystem (pforth added in the same session), not to the compiled level.
+**Status:** Complete — findings landed in `levcomp-rs`; all binary-layout
+questions are resolved. The three "Outstanding work" items listed below
+have migrated to other plans or been shipped; none are tracked here
+anymore.
 
 ## Context
 
@@ -347,13 +346,22 @@ Lights (from stored properties), slope plane coefficients (from mesh
 normals), and animation keyframes (from Blender fcurves) all export.
 Tcl scripts in snowgoons.lev were ported to Lua.
 
-## Outstanding work
+## Outstanding work (migrated)
 
-- Asset ID packing in levcomp-rs: needed when building `.iff` from
-  scratch instead of LVL-swapping into an existing LVAS wrapper.
-- Re-introduce ScriptLanguage field once all levels compile fresh.
-- End-to-end test: Blender export → levcomp-rs → cd.iff → wf_game
-  (currently validated in pieces but not as a single automated pipeline).
+- ~~Asset ID packing in levcomp-rs~~ — **Done** at `534ead7` (Phase 2c).
+  `wf_oad/asset_registry.rs` assigns packed `[TYPE|ROOM|INDEX]` IDs and
+  emits `asset.inc`.
+- ~~Re-introduce ScriptLanguage field once all levels compile fresh~~ —
+  tracked in [`docs/plans/2026-04-16-script-language-oad-field.md`](../plans/2026-04-16-script-language-oad-field.md)
+  (deferred) and gated by [`docs/plans/2026-04-17-level-pipeline-proof.md`](../plans/2026-04-17-level-pipeline-proof.md).
+- ~~End-to-end Blender → levcomp-rs → cd.iff → wf_game~~ — works for
+  snowgoons end-to-end (validated via the joystick-fix path). The
+  "single automated pipeline" aspect is Phase E of
+  [`docs/plans/2026-04-17-level-pipeline-proof.md`](../plans/2026-04-17-level-pipeline-proof.md).
+
+Real path/channel keyframe extraction remains the last unshipped piece of
+the Blender round-trip itself; tracked in
+[`docs/plans/2026-04-16-blender-level-roundtrip.md`](../plans/2026-04-16-blender-level-roundtrip.md).
 
 ## Files touched
 
