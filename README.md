@@ -9,7 +9,7 @@
 
 Seven days of work (2026-04-12 – 2026-04-18). Newest first:
 
-**Android port closure (2026-04-18)** — Branch hits its close criterion (polished sideloadable APK); remaining work is launcher icons + one stale `build.gradle.kts` comment, with Play Store / keystore / R8 / splash explicitly out of scope — see [closure audit](docs/investigations/2026-04-18-android-port-closure.md). `android/README.md` status table refreshed: Phases 1–3 + post-boot polish all ✅.
+**Android port closure (2026-04-18)** — Branch hits its close criterion (polished sideloadable APK) with only launcher icons + one stale `build.gradle.kts` comment left and Play Store / keystore / R8 / splash explicitly out of scope — see [closure audit](docs/investigations/2026-04-18-android-port-closure.md).
 
 **Android audio — Für Elise on snowgoons (2026-04-18)** — The desktop miniaudio + TinySoundFont pipeline ports to Android as-is (miniaudio auto-detects AAudio / OpenSL ES); `audio_stub.cc` retired and `music.cc` switched to an `HALGetAssetAccessor()` memory loader so APK-bundled MIDI + soundfont play the same as desktop loose files. Follow-up plan [audio-assets-from-iff](docs/plans/2026-04-18-audio-assets-from-iff.md) routes audio through `cd.iff` like every other asset class.
 
