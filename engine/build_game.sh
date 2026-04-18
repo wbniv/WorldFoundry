@@ -236,6 +236,7 @@ SKIP=(
     attrib
     # sub-files included by parent .cc (not compiled directly)
     gfx/gl/mesa.cc
+    gfx/gl/android_window.cc
     gfx/gl/rendobj3.cc
     gfx/gl/viewport.cc
     gfx/gl/display.cc

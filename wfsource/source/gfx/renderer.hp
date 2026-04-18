@@ -25,8 +25,12 @@
 // Original Author: Kevin T. Seghetti
 //============================================================================
 
+#if defined(__ANDROID__)
+#  include <GLES3/gl3.h>
+#else
 #  include <GL/gl.h>
-#	include <gfx/gl/wfprim.h>
+#endif
+#include <gfx/gl/wfprim.h>
 
 //==============================================================================
                                                        

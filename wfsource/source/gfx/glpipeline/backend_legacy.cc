@@ -5,9 +5,11 @@
 // for more information about World Foundry, see www.worldfoundry.org
 //==============================================================================
 // One glBegin/glEnd per triangle, same as the pre-seam rendfcp/rendgtp/... TUs
-// emitted inline. Drops away once every renderer TU is ported to the modern
-// VBO backend for GLES 3.0.
+// emitted inline. Desktop-only — GLES 3.0 has no fixed-function pipeline, so
+// this file compiles to empty on Android.
 //============================================================================
+
+#if !defined(__ANDROID__)
 
 #include <gfx/renderer_backend.hp>
 #include <gfx/pixelmap.hp>
@@ -156,3 +158,5 @@ RendererBackend* LegacyBackendInstance()
 {
     return &sLegacyBackend;
 }
+
+#endif  // !__ANDROID__

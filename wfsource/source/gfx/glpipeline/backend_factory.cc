@@ -13,8 +13,11 @@
 #include <cstdlib>
 #include <cstring>
 
-// Each backend TU exposes an instance accessor.
+// Each backend TU exposes an instance accessor. Legacy is desktop-only
+// (uses fixed-function GL that GLES 3.0 doesn't expose).
+#if !defined(__ANDROID__)
 RendererBackend* LegacyBackendInstance();
+#endif
 RendererBackend* ModernBackendInstance();
 
 namespace

@@ -31,7 +31,9 @@ Documentation:
 #include <math/vector3.hp>
 #include <memory/memory.hp>
 
+#if defined(_MSC_VER)
 #pragma comment( lib, "winmm.lib" )
+#endif
 
 //==============================================================================
 

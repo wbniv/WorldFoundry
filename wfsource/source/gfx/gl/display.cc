@@ -28,7 +28,11 @@
 #if defined(WF_ENABLE_STEAM)
 #  include <hal/linux/steam.h>
 #endif
-#include <GL/gl.h>
+#if defined(__ANDROID__)
+#  include <GLES3/gl3.h>
+#else
+#  include <GL/gl.h>
+#endif
 
 #include <memory/memory.hp>
 #include <gfx/pixelmap.hp>
@@ -54,10 +58,14 @@ int wfWindowWidth = 640;
 int wfWindowHeight = 480;
 
 
+#if defined(__ANDROID__)
+#  include "android_window.cc"
+#elif defined(__LINUX__)
+#  include "mesa.cc"
+#endif
 #if defined(__LINUX__) || defined(__ANDROID__)
-#include "mesa.cc" 
-#include <sys/time.h>
-#include <unistd.h>
+#  include <sys/time.h>
+#  include <unistd.h>
 #endif
 
 //==============================================================================
@@ -380,10 +388,12 @@ Display::PageFlip()
     glFlush();
     AssertGLOK();
 
-#if   defined(__LINUX__) || defined(__ANDROID__)
+#if defined(__ANDROID__)
+    AndroidSwapBuffers();
+    AssertGLOK();
+#elif defined(__LINUX__)
     glXSwapBuffers(halDisplay.mainDisplay, halDisplay.win);
     AssertGLOK();
-
          // glFinish();
 #else
 #error platform not defined
@@ -704,6 +714,9 @@ DrawOTag( ORDER_TABLE_ENTRY* __orderTable )
 
 //==============================================================================
 
+#if !defined(__ANDROID__)
+// Legacy-backend helper — emits glLoadMatrixf, which is fixed-function-only
+// and has no GLES 3.0 equivalent. Legacy backend is desktop-only anyway.
 void
 LoadGLMatrixFromMatrix34(const Matrix34& matrix)
 {
@@ -731,6 +744,7 @@ LoadGLMatrixFromMatrix34(const Matrix34& matrix)
 
     glLoadMatrixf(mat);
 }
+#endif
 
 //==============================================================================
 

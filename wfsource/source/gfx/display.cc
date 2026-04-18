@@ -27,7 +27,9 @@
 #include <gfx/display.hp>
 
 #include <gfx/gl/display.cc>
+#if defined(_MSC_VER)
 #pragma comment( lib, "opengl32.lib" )
+#endif
 
 
 //============================================================================

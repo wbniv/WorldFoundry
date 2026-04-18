@@ -67,7 +67,7 @@ if(ANDROID)
     set(WF_DIRS
         pigsys streams cpplib math memory iff mailbox
         hal hal/android
-        gfx gfx/gles gfx/glpipeline
+        gfx gfx/gl gfx/glpipeline
         input asset baseobject movement room physics
         anim timer scripting game ini loadfile
         profile renderassets savegame savegame/android
@@ -98,8 +98,9 @@ set(WF_SKIP
     gfx/gl/unused.cc            gfx/gl/wgl.cc           gfx/otable.cc
     attrib/
     # sub-files #included by parent .cc — not compiled directly
-    gfx/gl/mesa.cc              gfx/gl/rendobj3.cc
-    gfx/gl/viewport.cc          gfx/gl/display.cc
+    gfx/gl/mesa.cc              gfx/gl/android_window.cc
+    gfx/gl/rendobj3.cc          gfx/gl/viewport.cc
+    gfx/gl/display.cc
     gfx/glpipeline/rendobj3.cc
     math/matrix3t.cc            math/quat.cc            math/tables.cc
     cpplib/afftform.cc

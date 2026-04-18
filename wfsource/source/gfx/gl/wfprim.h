@@ -10,19 +10,36 @@
 //#if DO_ASSERTIONS
 //#if SW_DBSTREAM
 
-// kts 4/20/2002 5:33PM windows version at least needs glu for release build
-#include <GL/glu.h>
-//#endif
-//#endif
+#if !defined(__ANDROID__)
+// Desktop only — GLU provides gluErrorString for AssertGLOK diagnostics.
+#  include <GL/glu.h>
+#endif
 
 //==============================================================================
 
 #define AssertGLOK()        AssertGLOKMsg("")
-                                             
+
 #if DO_ASSERTIONS
 
 #if SW_DBSTREAM
-                      
+
+#if defined(__ANDROID__)
+// GLES has no gluErrorString; print the numeric code.
+#define AssertGLOKMsg(string)        \
+{                           \
+    GLenum glError = glGetError(); \
+    if(glError != GL_NO_ERROR) \
+    { \
+        while(glError != GL_NO_ERROR) \
+        { \
+            DBSTREAM1(cerror << "GL error: " << glError << std::endl; \
+            cerror << "WFError: " << string << std::endl;) \
+            glError = glGetError(); \
+        } \
+        assert(0); \
+    } \
+}
+#else
 #define AssertGLOKMsg(string)        \
 {                           \
     GLenum glError = glGetError(); \
@@ -37,6 +54,7 @@
         assert(0); \
     } \
 }
+#endif
 
 #else
                       
