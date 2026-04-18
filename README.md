@@ -11,7 +11,7 @@ Seven days of work (2026-04-12 – 2026-04-18). Newest first:
 
 **Android port closure (2026-04-18)** — Branch hits its close criterion (polished sideloadable APK) with only launcher icons + one stale `build.gradle.kts` comment left and Play Store / keystore / R8 / splash explicitly out of scope — see [closure audit](docs/investigations/2026-04-18-android-port-closure.md).
 
-**Android audio — Für Elise on snowgoons (2026-04-18)** — The desktop miniaudio + TinySoundFont pipeline ports to Android as-is (miniaudio auto-detects AAudio / OpenSL ES); `audio_stub.cc` retired and `music.cc` switched to an `HALGetAssetAccessor()` memory loader so APK-bundled MIDI + soundfont play the same as desktop loose files. Follow-up plan [audio-assets-from-iff](docs/plans/2026-04-18-audio-assets-from-iff.md) routes audio through `cd.iff` like every other asset class.
+**Android audio — Für Elise on snowgoons (2026-04-18)** — Desktop miniaudio + TinySoundFont ports to Android as-is via an `HALGetAssetAccessor()` memory loader (`audio_stub.cc` retired, `music.cc` reworked); follow-up plan [audio-assets-from-iff](docs/plans/2026-04-18-audio-assets-from-iff.md) routes audio through `cd.iff` like every other asset class.
 
 **Android post-boot polish (2026-04-18)** — Snowgoons is a fully playable APK on stock arm64: viewport/projection aspect from real EGL surface (`aebbb15`), pause/resume preserving EGL context + events-during-suspend (`0b19119`), zForth `here` bootstrap fix for `if/else/then` (`62451a1`), and an on-screen d-pad + A/B HUD (`c20e56e`, TV-mode suppressed).
 
