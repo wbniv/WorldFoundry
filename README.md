@@ -153,4 +153,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 22:16** — [`docs/plans/2026-04-17-level-pipeline-proof.md`](docs/plans/2026-04-17-level-pipeline-proof.md): Plan: Prove all 7 level pipelines → breaking common.inc rearrangement
+**2026-04-17 22:17** — [`docs/plans/2026-04-16-script-language-oad-field.md`](docs/plans/2026-04-16-script-language-oad-field.md): Plan: encode scripting language in OAS/OAD; drop runtime sigil detection
