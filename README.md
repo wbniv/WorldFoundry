@@ -158,4 +158,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-18 01:59** — [`docs/plans/2026-04-17-oas2oad-name-kind-fix.md`](docs/plans/2026-04-17-oas2oad-name-kind-fix.md): Plan: fix oas2oad-rs name_KIND → correct MovementClass default
+**2026-04-18 02:13** — [`docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md`](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md): Reverse-engineering the WF binary level format for `levcomp-rs`
