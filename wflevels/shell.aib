@@ -1,13 +1,15 @@
--- shell.lua — default World Foundry game shell (ported from shell.tcl)
--- Runs once per frame at level-startup time.  Toggles a "phase" mailbox
--- (6000) on odd/even ticks; on the first tick (phase clear) it also
--- writes 0 to INDEXOF_LEVEL_TO_RUN as the default-level bootstrap.
+\ wf
+\ shell.aib — default World Foundry game shell (ported from Lua to Forth
+\ for the Forth-only Android build; desktop Linux runs this same script
+\ now too since game.cc/level.cc hardcode the shell language to Forth).
+\ Toggles a "phase" mailbox (6000) on odd/even ticks; on the first tick
+\ (phase clear) also writes 0 to INDEXOF_LEVEL_TO_RUN as the default-level
+\ bootstrap.
 
-local phase = 6000
-
-if read_mailbox(phase) ~= 0 then
-    write_mailbox(phase, 0)
+6000 read-mailbox  0 <>
+if
+    0 6000                   write-mailbox
 else
-    write_mailbox(phase, 1)
-    write_mailbox(INDEXOF_LEVEL_TO_RUN, 0)
-end
+    1 6000                   write-mailbox
+    0 INDEXOF_LEVEL_TO_RUN   write-mailbox
+then

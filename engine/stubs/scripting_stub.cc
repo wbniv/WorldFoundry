@@ -232,7 +232,23 @@ Scalar ScriptRouter::RunScript(const void* script, int objectIndex, int language
     };
 
     RangeCheck(0, language, std::size(kDispatch));
-    AssertMsg(kDispatch[language], "script engine not compiled in for language " << language);
+    if (!kDispatch[language])
+    {
+        // Requested engine isn't compiled in for this build (e.g. Lua on the
+        // Forth-only Android build). Graceful no-op — callers like game.cc's
+        // meta-script path + level.cc's shell path hardcode language=0, and
+        // skipping them lets the game continue; the director + per-actor
+        // scripts keep running under whichever engine(s) are compiled in.
+        static bool s_warned[std::size(kDispatch)] = {};
+        if (!s_warned[language])
+        {
+            s_warned[language] = true;
+            cerror << "ScriptRouter: engine for language " << language
+                   << " not compiled in; skipping script (warned once)"
+                   << std::endl;
+        }
+        return Scalar::FromFloat(0.0f);
+    }
     return Scalar::FromFloat(kDispatch[language](src, objectIndex));
 }
 
