@@ -17,10 +17,13 @@
 #if defined(__ANDROID__)
 
 #include <EGL/egl.h>
+#include <GLES3/gl3.h>
 #include <android/log.h>
 #include <android/native_window.h>
 
 #include <cstdio>
+#include <cstdlib>
+#include <vector>
 
 namespace
 {
@@ -30,6 +33,15 @@ EGLSurface gEglSurface = EGL_NO_SURFACE;
 EGLContext gEglContext = EGL_NO_CONTEXT;
 EGLConfig  gEglConfig  = nullptr;
 ANativeWindow* gNativeWindow = nullptr;
+
+// Touch-control HUD overlay — self-contained GL objects live alongside the
+// game's modern backend in the shared EGL context. On EGL_CONTEXT_LOST
+// (rare, below) these are reset to 0 so HudInit lazy-recompiles.
+GLuint gHudProg    = 0;
+GLuint gHudVao     = 0;
+GLuint gHudVbo     = 0;
+bool   gHudInited  = false;
+bool   gHudEnabled = true;
 
 #define WF_LOG_TAG "wf_game"
 #define WFLOG(fmt, ...) __android_log_print(ANDROID_LOG_INFO, WF_LOG_TAG, fmt, ##__VA_ARGS__)
@@ -131,6 +143,10 @@ WFAndroidEglInit(ANativeWindow* window)
             WFLOG("EGL_CONTEXT_LOST — rebuilding");
             extern void WFAndroidNotifySurfaceLost();
             WFAndroidNotifySurfaceLost();
+            gHudInited = false;
+            gHudProg   = 0;
+            gHudVao    = 0;
+            gHudVbo    = 0;
             eglDestroyContext(gEglDisplay, gEglContext);
             gEglContext = EGL_NO_CONTEXT;
             // Fall through to normal retry on next INIT_WINDOW.
@@ -192,10 +208,177 @@ void XEventLoop()
 
 void SetX11AutoRepeat(int /*state*/) {}
 
+// ---- Touch-control HUD overlay ---------------------------------------------
+// Self-contained GL state (own shader + VBO) so we don't disturb the game's
+// modern backend. Drawn at the end of every frame, just before swap. Shows
+// semi-transparent rectangles over the (otherwise invisible) hit-test regions
+// wired up in hal/android/native_app_entry.cc — keep in sync with those.
+
+extern int _halWindowWidth;
+extern int _halWindowHeight;
+
+namespace
+{
+
+const char* kHudVS =
+    "#version 300 es\n"
+    "layout(location=0) in vec2 a_pos;\n"
+    "layout(location=1) in vec4 a_color;\n"
+    "out vec4 v_color;\n"
+    "void main() {\n"
+    "    gl_Position = vec4(a_pos, 0.0, 1.0);\n"
+    "    v_color = a_color;\n"
+    "}\n";
+
+const char* kHudFS =
+    "#version 300 es\n"
+    "precision highp float;\n"
+    "in vec4 v_color;\n"
+    "out vec4 frag;\n"
+    "void main() { frag = v_color; }\n";
+
+struct HudVert { float x, y, r, g, b, a; };
+
+GLuint CompileHudShader(GLenum type, const char* src)
+{
+    GLuint s = glCreateShader(type);
+    glShaderSource(s, 1, &src, nullptr);
+    glCompileShader(s);
+    GLint ok = 0;
+    glGetShaderiv(s, GL_COMPILE_STATUS, &ok);
+    if (!ok)
+    {
+        char log[1024] = { 0 };
+        glGetShaderInfoLog(s, sizeof(log) - 1, nullptr, log);
+        WFLOGE("HUD shader compile failed:\n%s", log);
+        glDeleteShader(s);
+        return 0;
+    }
+    return s;
+}
+
+void HudInit()
+{
+    if (gHudInited) return;
+
+    GLuint vs = CompileHudShader(GL_VERTEX_SHADER,   kHudVS);
+    GLuint fs = CompileHudShader(GL_FRAGMENT_SHADER, kHudFS);
+    gHudProg = glCreateProgram();
+    glAttachShader(gHudProg, vs);
+    glAttachShader(gHudProg, fs);
+    glLinkProgram(gHudProg);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+
+    glGenVertexArrays(1, &gHudVao);
+    glGenBuffers(1, &gHudVbo);
+    glBindVertexArray(gHudVao);
+    glBindBuffer(GL_ARRAY_BUFFER, gHudVbo);
+
+    const GLsizei stride = sizeof(HudVert);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(HudVert, x));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(HudVert, r));
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    gHudInited = true;
+}
+
+// Pixel coords (origin top-left, Y down) → NDC (origin center, Y up).
+void PushHudRect(std::vector<HudVert>& v,
+                 float x0, float y0, float x1, float y1,
+                 float w, float h,
+                 float r, float g, float b, float a)
+{
+    const float nx0 = (x0 / w) * 2.0f - 1.0f;
+    const float nx1 = (x1 / w) * 2.0f - 1.0f;
+    const float ny0 = 1.0f - (y0 / h) * 2.0f;   // top
+    const float ny1 = 1.0f - (y1 / h) * 2.0f;   // bottom
+    v.push_back({nx0, ny0, r, g, b, a});
+    v.push_back({nx1, ny0, r, g, b, a});
+    v.push_back({nx1, ny1, r, g, b, a});
+    v.push_back({nx0, ny0, r, g, b, a});
+    v.push_back({nx1, ny1, r, g, b, a});
+    v.push_back({nx0, ny1, r, g, b, a});
+}
+
+}  // namespace
+
+// native_app_entry.cc calls this after AConfiguration_getUiModeType — suppress
+// the HUD on Google TV / Android TV where input is gamepad-only.
+extern "C" void
+WFAndroidSetHudEnabled(int enabled)
+{
+    gHudEnabled = (enabled != 0);
+}
+
+extern "C" void
+WFAndroidDrawHUD()
+{
+    if (!gHudEnabled) return;
+    const int w = _halWindowWidth;
+    const int h = _halWindowHeight;
+    if (w <= 0 || h <= 0) return;
+
+    HudInit();
+    if (gHudProg == 0) return;
+
+    const float fw = float(w);
+    const float fh = float(h);
+
+    // D-pad cross + A + B — same pixel regions the hit test uses.
+    std::vector<HudVert> verts;
+    verts.reserve(6 * 6);
+
+    // D-pad: four directional buttons. Slightly brighter gray; 50% alpha.
+    const float gR = 0.6f, gG = 0.6f, gB = 0.6f, gA = 0.5f;
+    PushHudRect(verts, 0,    h-133, 66,  h-66,  fw, fh, gR, gG, gB, gA);  // LEFT
+    PushHudRect(verts, 133,  h-133, 200, h-66,  fw, fh, gR, gG, gB, gA);  // RIGHT
+    PushHudRect(verts, 66,   h-200, 133, h-133, fw, fh, gR, gG, gB, gA);  // UP
+    PushHudRect(verts, 66,   h-66,  133, h,     fw, fh, gR, gG, gB, gA);  // DOWN
+
+    // Action buttons. A=red (primary); B=blue.
+    PushHudRect(verts, w-120, h-120, w,     h, fw, fh, 0.80f, 0.25f, 0.25f, 0.55f);
+    PushHudRect(verts, w-240, h-120, w-120, h, fw, fh, 0.25f, 0.35f, 0.85f, 0.55f);
+
+    // Save minimal GL state we'll touch.
+    GLboolean prevBlend   = glIsEnabled(GL_BLEND);
+    GLboolean prevDepth   = glIsEnabled(GL_DEPTH_TEST);
+    GLboolean prevCull    = glIsEnabled(GL_CULL_FACE);
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glUseProgram(gHudProg);
+    glBindVertexArray(gHudVao);
+    glBindBuffer(GL_ARRAY_BUFFER, gHudVbo);
+    glBufferData(GL_ARRAY_BUFFER,
+                 GLsizeiptr(verts.size() * sizeof(HudVert)),
+                 verts.data(),
+                 GL_STREAM_DRAW);
+    glDrawArrays(GL_TRIANGLES, 0, GLsizei(verts.size()));
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glUseProgram(0);
+
+    if (!prevBlend) glDisable(GL_BLEND);
+    if ( prevDepth) glEnable(GL_DEPTH_TEST);
+    if ( prevCull)  glEnable(GL_CULL_FACE);
+}
+
 void AndroidSwapBuffers()
 {
     if (gEglDisplay != EGL_NO_DISPLAY && gEglSurface != EGL_NO_SURFACE)
+    {
+        WFAndroidDrawHUD();
         eglSwapBuffers(gEglDisplay, gEglSurface);
+    }
 }
 
 #endif  // __ANDROID__

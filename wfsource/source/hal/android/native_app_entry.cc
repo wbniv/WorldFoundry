@@ -48,6 +48,7 @@ extern int _halWindowHeight;
 
 extern "C" bool WFAndroidEglInit(struct ANativeWindow* window);
 extern "C" void WFAndroidEglTerm();
+extern "C" void WFAndroidSetHudEnabled(int enabled);
 
 #define WF_LOG_TAG "wf_game"
 #define WFLOG(fmt, ...) __android_log_print(ANDROID_LOG_INFO,  WF_LOG_TAG, fmt, ##__VA_ARGS__)
@@ -248,6 +249,7 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
             {
                 const int32_t uiMode = AConfiguration_getUiModeType(app->config);
                 gIsTvMode = (uiMode == ACONFIGURATION_UI_MODE_TYPE_TELEVISION);
+                WFAndroidSetHudEnabled(gIsTvMode ? 0 : 1);
                 WFLOG("APP_CMD_CONFIG_CHANGED: uiMode=%d (tv=%d)",
                       uiMode, gIsTvMode ? 1 : 0);
             }
@@ -373,6 +375,7 @@ android_main(struct android_app* app)
     {
         const int32_t uiMode = AConfiguration_getUiModeType(app->config);
         gIsTvMode = (uiMode == ACONFIGURATION_UI_MODE_TYPE_TELEVISION);
+        WFAndroidSetHudEnabled(gIsTvMode ? 0 : 1);
         WFLOG("android_main: uiMode=%d (tv=%d)", uiMode, gIsTvMode ? 1 : 0);
     }
 
