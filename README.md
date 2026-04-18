@@ -37,7 +37,7 @@ Seven days of work (2026-04-12 – 2026-04-18). Newest first:
 
 **Dead-code removal (2026-04-15, closed 2026-04-18)** — Batches 1–7 complete (`wfsource/source/` 64,252 → 36,199 lines, −43.7%) with Batch 8 (`physics/wf/`, ~1,700 LOC) deferred until Jolt parity on a second level and `hal/_list` / `_mempool` migration left as future opt-in.
 
-**Jolt Physics (2026-04-14)** — Integrated as default (`WF_PHYSICS_ENGINE=jolt`); five-step plan complete (SIGABRT, zombie bodies, authority model, vertical pop, 60 s soak). Legacy `physics/wf/` retained until parity on a second level.
+**Jolt Physics (2026-04-14)** — Integrated as default (`WF_PHYSICS_ENGINE=jolt`) with the five-step plan complete (SIGABRT, zombie bodies, authority model, vertical pop, 60 s soak); legacy `physics/wf/` retained until parity on a second level.
 
 **Steam (Phases 1+2) (2026-04-12)** — Steamworks SDK lifecycle wired into HAL + `PageFlip`; Steam Input polls controllers each frame and ORs into `_JoystickButtonsF`. `WF_ENABLE_STEAM=1` flag; SDK not committed. Phases 3 (depot) and 4 (store page) deferred.
 
