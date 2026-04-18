@@ -27,7 +27,7 @@ Six days of work (2026-04-12 – 2026-04-17). Newest first:
 
 **Scripting system (2026-04-16)** — Seven engines smoke-tested end-to-end in snowgoons (Lua 5.4, Fennel, QuickJS, JerryScript, WAMR, Wren, zForth); five alternate Forth backends build+link but aren't end-to-end tested. Lua is optional via `WF_LUA_ENGINE=lua54|none`; wasm3 retired in favour of WAMR; WAMR AOT deferred.
 
-**Dead-code removal (2026-04-15)** — Batches 1–7 complete: `wfsource/source/` down from 64,252 → 36,199 lines (−43.7%). Batch 8 (Jolt replaces WF physics) in progress.
+**Dead-code removal (2026-04-15, closed 2026-04-18)** — Batches 1–7 complete: `wfsource/source/` down from 64,252 → 36,199 lines (−43.7%). Batch 8 (delete legacy `physics/wf/`) accepted at its ~1,700 LOC estimated reduction but deferred opportunistically until Jolt has parity on a second level; `hal/_list` + `hal/_mempool` migration left as future opt-in.
 
 **Jolt Physics (2026-04-14)** — Integrated as default (`WF_PHYSICS_ENGINE=jolt`); five-step plan complete (SIGABRT, zombie bodies, authority model, vertical pop, 60 s soak). Legacy `physics/wf/` retained until parity on a second level.
 
