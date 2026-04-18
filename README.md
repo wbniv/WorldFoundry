@@ -158,4 +158,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-18 00:46** — [`docs/investigations/2026-04-15-loc-tracking.md`](docs/investigations/2026-04-15-loc-tracking.md): WF LOC tracking — shrinking the codebase
+**2026-04-18 00:46** — [`docs/plans/2026-04-16-android-port.md`](docs/plans/2026-04-16-android-port.md): Plan: Android port
