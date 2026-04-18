@@ -21,7 +21,7 @@ Six days of work (2026-04-12 – 2026-04-17). Newest first:
 
 **Blender ↔ level round-trip (2026-04-17)** — `levcomp-rs` compiles `.lev` → `.lvl` and snowgoons loads through it end-to-end; Blender plugin round-trips 152/152 OAD fields. Phase 2c landed mesh bboxes, packed asset IDs, and `asset.inc`; real path/channel keyframes are the last remaining piece.
 
-**Level pipeline proof (2026-04-17, in progress)** — Phases A+B done: `primitives.lev` and `whitestar.lev` both compile through `iffcomp-rs` → `levcomp-rs`, and `wf_oad` has a `common.oad` fixture test. Remaining C–E (decompile subcommand, 4 source-less levels, multi-level `cd.iff`) gate any breaking `common.inc` rearrangement — which is what the deferred ScriptLanguage OAD plan needs.
+**Level pipeline proof (2026-04-17, in progress)** — Phases A+B+C done: `primitives.lev`/`whitestar.lev` compile through the pipeline; `wf_oad` has a `common.oad` fixture test; `levcomp decompile` subcommand implemented and verified — snowgoons round-trips 36 objects with an 8-byte common-block delta (schema defaults vs authored values). Remaining D–E (decompile 4 source-less levels, multi-level `cd.iff`) gate any breaking `common.inc` rearrangement — which is what the deferred ScriptLanguage OAD plan needs.
 
 **Tooling and plans (2026-04-17)** — `engine/` reorganised to top-level; REST API box PoC landed; iOS plan written (blocked on Android); CLI level override (`-L<path>`) confirmed; IFF lineage + MIDI-source investigations filed.
 
