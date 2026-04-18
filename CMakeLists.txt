@@ -71,7 +71,7 @@ if(ANDROID)
         input asset baseobject movement room physics
         anim timer scripting game ini loadfile
         profile renderassets savegame savegame/android
-        menu particle audio/android
+        menu particle audio/linux  # miniaudio impl is portable; dir name is legacy
     )
 else()
     set(WF_DIRS

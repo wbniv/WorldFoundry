@@ -5,16 +5,24 @@
 
 #include <audio/music.hp>
 #include <audio/linux/audio_internal.hp>
+#include <hal/asset_accessor.hp>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
+#include <vector>
 
 MusicPlayer* gMusicPlayer = nullptr;
 
-// Soundfont path — resolved relative to the executable's working directory
-// (same dir as cd.iff).  A compile-time override can point to a custom SF2.
+// Soundfont path. Resolved through HALGetAssetAccessor (POSIX cwd on
+// desktop, AAssetManager on Android) so the same code path works on both
+// platforms — we switched away from tsf_load_filename / tml_load_filename
+// since Android assets live inside the APK, not on the filesystem.
 #ifndef WF_MIDI_SOUNDFONT
-#  define WF_MIDI_SOUNDFONT "TimGM6mb.sf2"
+#  define WF_MIDI_SOUNDFONT "florestan-subset.sf2"
 #endif
+
+// Default to a soft background volume. Can be overridden with setVolume.
+static constexpr float kDefaultMusicVolume = 0.20f;
 
 struct MusicPlayer::Impl {
 	ma_data_source_base dsBase;         // must be first — ds_read casts pDs to Impl*
@@ -24,8 +32,27 @@ struct MusicPlayer::Impl {
 	double        msElapsed = 0.0;      // milliseconds into current playback
 	ma_sound      sound;                // wraps the custom data source
 	bool          soundInit = false;
-	float         volume    = 1.0f;
+	float         volume    = kDefaultMusicVolume;
+	std::vector<uint8_t> midiBytes;     // tml_load_memory doesn't copy; keep alive.
 };
+
+// Load an asset into a byte vector via the platform AssetAccessor.
+// Returns empty on failure.
+static std::vector<uint8_t> loadAssetBytes(const char* path)
+{
+	std::vector<uint8_t> out;
+	AssetAccessor& a = HALGetAssetAccessor();
+	AssetHandle* h = a.OpenForRead(path);
+	if (!h) return out;
+	const int64_t size = a.Size(h);
+	if (size > 0) {
+		out.resize(static_cast<size_t>(size));
+		const int64_t n = a.Read(h, out.data(), size);
+		if (n != size) out.clear();
+	}
+	a.Close(h);
+	return out;
+}
 
 // ── miniaudio custom data source callbacks ────────────────────────────────
 
@@ -98,8 +125,11 @@ static ma_result ds_read(ma_data_source* pDs, void* buf, ma_uint64 frameCount,
 }
 
 static ma_result ds_seek(ma_data_source*, ma_uint64) { return MA_NOT_IMPLEMENTED; }
+// miniaudio's vtable uses size_t for the channel-map-size parameter; on
+// Linux x86_64 the older ma_uint32 in this slot happens to work, but the
+// NDK toolchain rejects the type mismatch. Use size_t everywhere.
 static ma_result ds_get_format(ma_data_source*, ma_format* fmt, ma_uint32* ch,
-                                ma_uint32* sr, ma_channel*, ma_uint32)
+                                ma_uint32* sr, ma_channel*, size_t)
 {
 	if (fmt) *fmt = ma_format_f32;
 	if (ch)  *ch  = 2;
@@ -136,15 +166,21 @@ bool MusicPlayer::play(const char* midiPath)
 
 	// Load soundfont (cached: reload only on first call)
 	if (!_impl->synth) {
-		_impl->synth = tsf_load_filename(WF_MIDI_SOUNDFONT);
-		if (!_impl->synth) {
+		auto sf = loadAssetBytes(WF_MIDI_SOUNDFONT);
+		if (sf.empty()) {
 			fprintf(stderr, "audio: MusicPlayer — soundfont not found: %s\n",
 			        WF_MIDI_SOUNDFONT);
 			return false;
 		}
+		_impl->synth = tsf_load_memory(sf.data(), static_cast<int>(sf.size()));
+		if (!_impl->synth) {
+			fprintf(stderr, "audio: MusicPlayer — soundfont parse failed: %s\n",
+			        WF_MIDI_SOUNDFONT);
+			return false;
+		}
 		tsf_set_output(_impl->synth, TSF_STEREO_INTERLEAVED, 44100, 0.0f);
-		fprintf(stderr, "audio: MusicPlayer — soundfont loaded (%s)\n",
-		        WF_MIDI_SOUNDFONT);
+		fprintf(stderr, "audio: MusicPlayer — soundfont loaded (%s, %zu B)\n",
+		        WF_MIDI_SOUNDFONT, sf.size());
 	}
 
 	// GM default: pre-init all 16 channels so note-ons work without a
@@ -153,10 +189,19 @@ bool MusicPlayer::play(const char* midiPath)
 	for (int ch = 0; ch < 16; ch++)
 		tsf_channel_set_presetnumber(_impl->synth, ch, 0, ch == 9);
 
-	// Load MIDI
-	_impl->midi = tml_load_filename(midiPath);
-	if (!_impl->midi) {
+	// Load MIDI via AssetAccessor. tml_load_memory parses in-place without
+	// copying; keep the byte buffer alive for the playback's lifetime in
+	// _impl->midiBytes.
+	_impl->midiBytes = loadAssetBytes(midiPath);
+	if (_impl->midiBytes.empty()) {
 		fprintf(stderr, "audio: MusicPlayer — MIDI not found: %s\n", midiPath);
+		return false;
+	}
+	_impl->midi = tml_load_memory(_impl->midiBytes.data(),
+	                              static_cast<int>(_impl->midiBytes.size()));
+	if (!_impl->midi) {
+		fprintf(stderr, "audio: MusicPlayer — MIDI parse failed: %s\n", midiPath);
+		_impl->midiBytes.clear();
 		return false;
 	}
 	_impl->cursor     = _impl->midi;
@@ -198,6 +243,8 @@ void MusicPlayer::stop()
 		_impl->midi   = nullptr;
 		_impl->cursor = nullptr;
 	}
+	_impl->midiBytes.clear();
+	_impl->midiBytes.shrink_to_fit();
 	if (_impl->synth) {
 		tsf_reset(_impl->synth);
 	}
