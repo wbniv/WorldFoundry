@@ -1,7 +1,7 @@
 # Plan: Android port
 
 **Date:** 2026-04-16
-**Status:** In progress — Phases 1+2 complete; Phase 0 steps 1, 2, 4a, 4b done (step 4c retires last fixed-function call sites); next is Phase 0 step 4c or Phase 3 (Android platform proper)
+**Status:** In progress — Phases 1+2 complete; Phase 0 steps 1, 2, 4a, 4b done; step 4c is proper shader ports of lighting/fog/matte (no Android-only stubs); next is Phase 0 step 4c or Phase 3 (Android platform proper)
 **Goal:** An APK that launches, runs snowgoons on an arm64 Android device or Google TV (Chromecast with Google TV), takes touch or gamepad input, and handles background/foreground transitions without crashing. Proof-of-viability, not a shipping product.
 
 ## Settled decisions
@@ -58,8 +58,21 @@ Each has standalone value on Linux; Android blocks on all four.
 2. ✅ **Step 2 (2026-04-17, `c3c62c7`).** Remaining 7 render TUs (fcp/fcl/ftp/ftl/gcp/gcl/gtl) all feed `RendererBackendGet().DrawTriangle`. Per-variant `FLAG_TEXTURE × FLAG_GOURAUD × FLAG_LIGHTING` branching collapsed to a single shape — net −928 LOC. Snowgoons runs cleanly.
 3. ✅ **Step 4a (2026-04-17, `bba0a65`).** Matrix state routed through backend: `SetProjection` / `SetModelView` / `ResetModelView`. Call sites updated in `display.cc`, `camera.cc`, `rendobj3.cc`. Legacy impl maps to `glMatrixMode` + `gluPerspective` / `glLoadMatrixf` / `glLoadIdentity`.
 4. ✅ **Step 4b (2026-04-17, `cfb309d`).** `ModernRendererBackend` in `gfx/glpipeline/backend_modern.cc`: interleaved VBO (pos/color/uv), CPU accumulation per batch, GLSL 330 core / GLES 300 es shader pair (MVP uniform, texture-or-vertex-color fragment). CPU-computed MVP from separate projection + modelview. Flush on texture / modelview change or `EndFrame`. `gfx/glpipeline/backend_factory.cc` picks modern on Android, legacy on desktop by default; `WF_RENDERER=modern` flips desktop for regression. Snowgoons runs clean on both backends for 10 s with no GL errors.
-5. ⬜ **Step 4c.** Retire remaining fixed-function call sites: `display.cc` (`glMaterialfv`, `glEnable(GL_LIGHTING)`, `glShadeModel`), `camera.cc` (`glLightfv`/`glLightModelfv`), `rendmatt.cc` (`glBegin(GL_QUADS)`). After 4c, the modern backend is self-contained and GLES 3.0 can be the sole target on Android.
-6. ⬜ **Verify:** snowgoons renders identically on Linux under `WF_RENDERER=modern`; frame time equal or better.
+5. ⬜ **Step 4c.** Retire remaining fixed-function call sites. **Proper shader ports, not `#ifndef __ANDROID__` stubs** — otherwise Android snowgoons loses visible features (lit surfaces, fog, matte background).
+
+   a. **Per-vertex normal through the seam.** `DrawTriangle(v0, v1, v2, nx, ny, nz, texture)` currently passes a per-triangle normal that the modern backend ignores. Promote to `a_normal` vertex attribute in the interleaved VBO (replicate the face normal into all three verts at pack time). Needed as the input to (b).
+
+   b. **Directional lighting in the shader.** Add backend methods `SetAmbient(rgb)`, `SetDirLight(index, dirXYZ, colorRGB)`, `SetLightingEnabled(bool)`. `camera.cc` `SetLightsAndViewMatrix` calls these instead of `glLightModelfv`/`glLightfv`. Vertex shader transforms the normal by the modelview's 3×3 upper-left and computes `lit = u_ambient + Σ u_light_color[i] · max(0, N·(−L_i))`; fragment multiplies color by `lit`. Matches the GL fixed-function equation for directional lights with all-white materials and the current three-light setup. Modern backend stores the light state; legacy maps the new methods back to `glLightModelfv`/`glLightfv` so behavior stays unchanged on Linux until legacy is retired.
+
+   c. **Linear fog in the shader.** Add `SetFog(enabled, colorRGB, start, end)`. `camera.cc` calls it when it currently sets `glFogfv`/`glFogf`. Vertex shader computes eye-space Z from `u_mv * position` and derives `fog_factor = clamp((u_end − eye_z)/(u_end − u_start), 0, 1)`; fragment does `mix(fog_color, color, fog_factor)` when fog is enabled.
+
+   d. **`rendmatt.cc` quads through the seam.** Each `glBegin(GL_QUADS)` block becomes two `DrawTriangle` calls on the same texture; the per-matte `glDisable(LIGHTING)`/`glDisable(FOG)` become `SetLightingEnabled(false)` / `SetFog(false, …)` for the duration of the draw (re-enabled after). Matte stays unlit/unfogged by design.
+
+   e. **Strip vestigial fixed-function calls in `display.cc` and `camera.cc`.** After (a–d) the remaining `glEnable(GL_LIGHTING/LIGHT0-2/NORMALIZE/FOG/TEXTURE_2D)`, `glShadeModel`, `glMaterialfv(lightWhite/lightBlack)` calls are all redundant — the shader controls each via uniforms, and the material is implicit in the per-vertex color. Delete them outright on both backends.
+
+   f. **Retire `backend_legacy.cc`.** After visual parity on Linux with `WF_RENDERER=modern`, delete the legacy backend and the `WF_RENDERER` env var; modern becomes the only backend. Also delete `display.cc`'s `LoadGLMatrixFromMatrix34` helper (only the legacy backend used it).
+
+6. ⬜ **Verify:** snowgoons renders identically on Linux under the (now-sole) modern backend; frame time equal or better. Lit surfaces shade correctly, fog fades distant geometry, matte background scrolls.
 
 ### Phase 1 — CMake build
 **Estimate: 2–3 days.** Mechanical translation of `build_game.sh`; no new logic.
