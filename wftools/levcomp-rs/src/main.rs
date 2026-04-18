@@ -1,15 +1,20 @@
-//! levcomp — compile a `.lev.bin` (binary IFF) into a flat `.lvl` level file.
+//! levcomp — compile a `.lev.bin` (binary IFF) into a flat `.lvl` level file,
+//! or decompile a compiled LVAS `.iff` back to a `.lev` text IFF.
 //!
 //! Rust port of `wftools/iff2lvl`.  MVP scope: objects only (type + position +
 //! rotation + bounding box).  OAD data, paths, channels, rooms, and the common
 //! block are not yet populated — they appear as empty sections so `lvldump-rs`
 //! can still parse the output.
 //!
-//! Usage:
+//! Usage (compile):
 //!   levcomp <input.lev.bin> <objects.lc> <output.lvl> [<oad_dir>] [--mesh-dir <dir>]
+//!
+//! Usage (decompile):
+//!   levcomp decompile <input.iff> <objects.lc> [--oad-dir <dir>] [-o <output.lev>]
 
 mod asset_registry;
 mod common_block;
+mod decompile;
 mod lc_parser;
 mod lev_parser;
 mod lvl_writer;
@@ -24,6 +29,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn usage() -> ! {
     eprintln!("Usage: levcomp <input.lev.bin> <objects.lc> <output.lvl> [<oad_dir>] [--mesh-dir <dir>]");
+    eprintln!("       levcomp decompile <input.iff> <objects.lc> [--oad-dir <dir>] [-o <output.lev>]");
     eprintln!();
     eprintln!("  oad_dir:    directory of compiled <class>.oad files (optional).");
     eprintln!("              When present, each object's OAD data block is sized");
@@ -35,8 +41,75 @@ fn usage() -> ! {
     process::exit(1);
 }
 
+fn run_decompile(args: &[String]) {
+    // args[0] = "decompile", args[1..] = remaining
+    if args.len() < 3 {
+        eprintln!("Usage: levcomp decompile <input.iff> <objects.lc> [--oad-dir <dir>] [-o <output.lev>]");
+        process::exit(1);
+    }
+    let iff_path = Path::new(&args[1]);
+    let lc_path  = Path::new(&args[2]);
+
+    let mut oad_dir_str: Option<String> = None;
+    let mut out_str: Option<String> = None;
+
+    let mut i = 3;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--oad-dir" => {
+                i += 1;
+                if i >= args.len() {
+                    eprintln!("error: --oad-dir requires a directory argument");
+                    process::exit(1);
+                }
+                oad_dir_str = Some(args[i].clone());
+            }
+            "-o" => {
+                i += 1;
+                if i >= args.len() {
+                    eprintln!("error: -o requires a file argument");
+                    process::exit(1);
+                }
+                out_str = Some(args[i].clone());
+            }
+            other => {
+                eprintln!("error: unexpected argument: {}", other);
+                process::exit(1);
+            }
+        }
+        i += 1;
+    }
+
+    // Default output: replace .iff extension with .lev, or add .lev
+    let out_path_buf = if let Some(s) = out_str {
+        std::path::PathBuf::from(s)
+    } else {
+        iff_path.with_extension("lev")
+    };
+    let out_path = out_path_buf.as_path();
+    let oad_dir = oad_dir_str.as_deref().map(Path::new);
+
+    eprintln!("levcomp v{VERSION} decompile");
+    eprintln!("  input : {}", iff_path.display());
+    eprintln!("  .lc   : {}", lc_path.display());
+    eprintln!("  output: {}", out_path.display());
+    if let Some(d) = oad_dir { eprintln!("  oad   : {}", d.display()); }
+
+    decompile::run(iff_path, lc_path, oad_dir, out_path).unwrap_or_else(|e| {
+        eprintln!("error: {}", e);
+        process::exit(1);
+    });
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
+
+    // Dispatch on first argument being "decompile"
+    if args.get(1).map(|s| s.as_str()) == Some("decompile") {
+        run_decompile(&args[1..]);
+        return;
+    }
+
     if args.len() < 4 { usage(); }
 
     let lev_path = Path::new(&args[1]);

@@ -1,7 +1,7 @@
 # Plan: Prove all 7 level pipelines → breaking common.inc rearrangement
 
 **Date:** 2026-04-17
-**Status:** In progress — Phases A + B done (`534ead7`). Phase A: `primitives.lev` + `whitestar.lev` both compile through `iffcomp-rs` → `levcomp-rs` (levcomp now skips OBJ chunks with no Class Name field — Max aim-point helpers like `Direct01.Target`). Phase B: `wf_oad/tests/fixtures/common.oad` committed; `parse_common_oad` test asserts display name, 14 entries, and `Script` field present; 6 tests pass. Remaining: Phase C (decompile subcommand), D (decompile the 4 source-less levels), E (multi-level `cd.iff`), then the gated breaking rearrangement.
+**Status:** In progress — Phases A + B + C done. Phase A: `primitives.lev` + `whitestar.lev` both compile through `iffcomp-rs` → `levcomp-rs` (levcomp now skips OBJ chunks with no Class Name field — Max aim-point helpers like `Direct01.Target`). Phase B: `wf_oad/tests/fixtures/common.oad` committed; `parse_common_oad` test asserts display name, 14 entries, and `Script` field present; 6 tests pass. Phase C: `levcomp decompile` subcommand implemented in `decompile.rs`; reads LVAS/LVL/ASMP from compiled `.iff`, emits text IFF `.lev`; round-trip on snowgoons: 36 objects decompiled, iffcomp-rs + levcomp-rs re-compilation succeeds, common block delta = 8 bytes (schema defaults vs original authored values, no crashes). Remaining: Phase D (decompile the 4 source-less levels), E (multi-level `cd.iff`), then the gated breaking rearrangement.
 
 ## Context
 
