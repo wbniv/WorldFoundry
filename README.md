@@ -151,4 +151,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 19:08** — [`docs/plans/2026-04-16-android-port.md`](docs/plans/2026-04-16-android-port.md): Plan: Android port
+**2026-04-17 19:12** — [`docs/plans/2026-04-16-android-port.md`](docs/plans/2026-04-16-android-port.md): Plan: Android port
