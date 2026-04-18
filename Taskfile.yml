@@ -26,6 +26,20 @@ tasks:
           -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - cmake --build cmake-build-android -j
 
+  build-apk:
+    desc: "Assemble the Android APK (requires Android SDK + gradle — see android/README.md)"
+    dir: android
+    cmds:
+      - gradle assembleRelease
+      - echo "APK → android/app/build/outputs/apk/release/app-release.apk"
+
+  install-apk:
+    desc: "Install the APK onto a connected Android device"
+    dir: android
+    cmds:
+      - adb install -r app/build/outputs/apk/release/app-release.apk
+      - adb shell am start -n org.worldfoundry.wf_game/android.app.NativeActivity
+
   run:
     desc: "Run wf_game (cd.iff in cwd)"
     dir: wfsource/source/game

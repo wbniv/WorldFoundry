@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Gamepad + touch are both optional so the APK installs on phones,
+         tablets, and Google TV (Chromecast with Google TV). Runtime code
+         detects the form factor. -->
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:name="android.hardware.gamepad" android:required="false" />
+
+    <application
+        android:label="@string/app_name"
+        android:allowBackup="true"
+        android:hasCode="false"
+        android:isGame="true">
+
+        <!-- NativeActivity: the Android loader calls into
+             ANativeActivity_onCreate inside libwf_game.so, which
+             android_native_app_glue hooks to start our android_main. -->
+        <activity
+            android:name="android.app.NativeActivity"
+            android:label="@string/app_name"
+            android:configChanges="orientation|keyboardHidden|screenSize|uiMode"
+            android:screenOrientation="landscape"
+            android:exported="true">
+            <meta-data android:name="android.app.lib_name"
+                       android:value="wf_game" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <!-- Phone / tablet launcher -->
+                <category android:name="android.intent.category.LAUNCHER" />
+                <!-- Google TV / Android TV launcher -->
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

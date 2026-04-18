@@ -1,0 +1,13 @@
+# Gradle
+.gradle/
+build/
+local.properties
+
+# IDE
+.idea/
+*.iml
+.cxx/
+
+# Build outputs
+*.apk
+*.aab
