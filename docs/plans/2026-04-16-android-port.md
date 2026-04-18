@@ -1,7 +1,7 @@
 # Plan: Android port
 
 **Date:** 2026-04-16
-**Status:** In progress — Phases 1+2 complete; next is Phase 0 (GL rewrite) or Phase 3 (Android platform proper)
+**Status:** In progress — Phases 1+2 complete; Phase 0 steps 1, 2, 4a, 4b done (step 4c retires last fixed-function call sites); next is Phase 0 step 4c or Phase 3 (Android platform proper)
 **Goal:** An APK that launches, runs snowgoons on an arm64 Android device or Google TV (Chromecast with Google TV), takes touch or gamepad input, and handles background/foreground transitions without crashing. Proof-of-viability, not a shipping product.
 
 ## Settled decisions
@@ -40,8 +40,8 @@ Each has standalone value on Linux; Android blocks on all four.
 
 1. **[lua-not-special](2026-04-16-lua-not-special.md)** ✅ Done 2026-04-16 — `WF_LUA_ENGINE=none` available; Android build will be Forth-only.
 
-2. **Phase 0 — Retire immediate-mode GL (Linux VBO rewrite)**
-   `glBegin`/`glEnd` does not exist in GLES 3.0. Rewrite `gfx/glpipeline/*.cc` to VBO + shader batches on Linux first. **Not yet started — largest phase.**
+2. **Phase 0 — Retire immediate-mode GL (Linux VBO rewrite)** 🟡 In progress 2026-04-17
+   `glBegin`/`glEnd` does not exist in GLES 3.0. Rewrite `gfx/glpipeline/*.cc` to VBO + shader batches on Linux first. Steps 1, 2, 4a, 4b landed (`b868a26`, `c3c62c7`, `bba0a65`, `cfb309d`): renderer backend seam (`gfx/renderer_backend.hp`), all 8 render TUs ported (−928 LOC), matrix state routed through backend, modern VBO + shader backend (`gfx/glpipeline/backend_modern.cc`, GLSL 330 core / GLES 300 es) selectable via `WF_RENDERER=modern`. Default: modern on Android, legacy on desktop. Step 4c remaining: retire `glMaterialfv`/`glEnable(GL_LIGHTING)`/`glShadeModel` in `display.cc`, `glLightfv`/`glLightModelfv` in `camera.cc`, `glBegin(GL_QUADS)` in `rendmatt.cc`.
 
 3. **Phase 1 — CMake build** ✅ Done 2026-04-17
    `CMakeLists.txt` at repo root; NDK r26c at `/usr/lib/android-sdk/ndk/26.2.11394342`; `task build-cmake` (Linux) and `task build-cmake-android` (arm64-v8a, API 21) in Taskfile. Linux CMake build produces a runnable `engine/wf_game` (launches snowgoons); Forth-only flag combination compiles; Android build reaches the expected Phase 0 boundary (`GL/gl.h` not found). 64-bit collision-message bug discovered + fixed along the way.
@@ -52,12 +52,14 @@ Each has standalone value on Linux; Android blocks on all four.
 ## Steps
 
 ### Phase 0 — Retire immediate-mode GL on Linux
-**Estimate: 2–3 weeks.** Largest phase; carries the most risk. Depth of `glBegin`/`glEnd` entanglement in the 8 renderer TUs is unknown until the first TU is opened.
+**Estimate: 2–3 weeks.** Largest phase; carries the most risk. Depth of `glBegin`/`glEnd` entanglement in the 8 renderer TUs was unknown until the first TU was opened.
 
-1. Introduce thin renderer-backend interface at `wfsource/source/gfx/renderer.hp`. Start minimal: `SubmitBatch(VBO, index, shader, uniforms)`. Keep `glpipeline_legacy` working during transition.
-2. Port one renderer TU at a time — `rendgtp.cc` first. Validate via golden-image diff against snowgoons.
-3. Port remaining 7 renderer TUs. Retire `glpipeline_legacy` behind `WF_RENDERER=legacy|modern`; default modern.
-4. **Verify:** snowgoons renders identically on Linux under `WF_RENDERER=modern`; frame time equal or better.
+1. ✅ **Step 1 (2026-04-17, `b868a26`).** Thin renderer-backend interface at `gfx/renderer_backend.hp` with per-triangle `DrawTriangle` seam. Legacy backend (`gfx/glpipeline/backend_legacy.cc`) maps calls back to fixed-function GL — behavior byte-identical. `rendgtp.cc` (GouraudTexturePreLit) ported first as proof.
+2. ✅ **Step 2 (2026-04-17, `c3c62c7`).** Remaining 7 render TUs (fcp/fcl/ftp/ftl/gcp/gcl/gtl) all feed `RendererBackendGet().DrawTriangle`. Per-variant `FLAG_TEXTURE × FLAG_GOURAUD × FLAG_LIGHTING` branching collapsed to a single shape — net −928 LOC. Snowgoons runs cleanly.
+3. ✅ **Step 4a (2026-04-17, `bba0a65`).** Matrix state routed through backend: `SetProjection` / `SetModelView` / `ResetModelView`. Call sites updated in `display.cc`, `camera.cc`, `rendobj3.cc`. Legacy impl maps to `glMatrixMode` + `gluPerspective` / `glLoadMatrixf` / `glLoadIdentity`.
+4. ✅ **Step 4b (2026-04-17, `cfb309d`).** `ModernRendererBackend` in `gfx/glpipeline/backend_modern.cc`: interleaved VBO (pos/color/uv), CPU accumulation per batch, GLSL 330 core / GLES 300 es shader pair (MVP uniform, texture-or-vertex-color fragment). CPU-computed MVP from separate projection + modelview. Flush on texture / modelview change or `EndFrame`. `gfx/glpipeline/backend_factory.cc` picks modern on Android, legacy on desktop by default; `WF_RENDERER=modern` flips desktop for regression. Snowgoons runs clean on both backends for 10 s with no GL errors.
+5. ⬜ **Step 4c.** Retire remaining fixed-function call sites: `display.cc` (`glMaterialfv`, `glEnable(GL_LIGHTING)`, `glShadeModel`), `camera.cc` (`glLightfv`/`glLightModelfv`), `rendmatt.cc` (`glBegin(GL_QUADS)`). After 4c, the modern backend is self-contained and GLES 3.0 can be the sole target on Android.
+6. ⬜ **Verify:** snowgoons renders identically on Linux under `WF_RENDERER=modern`; frame time equal or better.
 
 ### Phase 1 — CMake build
 **Estimate: 2–3 days.** Mechanical translation of `build_game.sh`; no new logic.
