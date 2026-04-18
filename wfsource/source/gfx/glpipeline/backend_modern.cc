@@ -4,12 +4,13 @@
 // Part of the World Foundry 3D video game engine/production environment
 // for more information about World Foundry, see www.worldfoundry.org
 //==============================================================================
-// GLES-3.0-compatible replacement for backend_legacy.cc. Accumulates triangles
-// into a host-side buffer, uploads + draws on state change (matrix, texture)
-// or at EndFrame. MVP is computed CPU-side and passed as a uniform.
+// VBO + GLSL backend. Accumulates triangles into a host-side buffer, uploads
+// + draws on state change (matrix, texture) or at EndFrame. MVP is computed
+// CPU-side and passed as a uniform.
 //
 // Works on desktop OpenGL 3.3+ and Android GLES 3.0; shader preamble is
-// conditional on the platform.
+// conditional on the platform. Only backend as of Phase 0 step 4c(f) —
+// the fixed-function legacy path was retired after visual parity.
 //============================================================================
 
 // On Linux/Mesa, GL 3.3+ function prototypes are gated behind this macro in
@@ -144,8 +145,7 @@ static void Mat4Multiply(const float a[16], const float b[16], float out[16])
     std::memcpy(out, r, sizeof(r));
 }
 
-// Convert Matrix34 (WF's 3x4 row-major-ish) to GL 4x4 column-major. Same
-// mapping as display.cc's LoadGLMatrixFromMatrix34 helper.
+// Convert Matrix34 (WF's 3x4) to GL 4x4 column-major.
 static void Matrix34ToFloat16(const Matrix34& matrix, float out[16])
 {
     out[0]  = matrix[0][0].AsFloat();

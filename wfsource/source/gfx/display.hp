@@ -59,8 +59,6 @@ class PixelMap;
 #define GFX_ZBUFFER
 
 
-void LoadGLMatrixFromMatrix34(const Matrix34& matrix);
-
 #if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
 #   include <GL/gl.h>
 const int VRAM_WIDTH = 1024;

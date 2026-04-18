@@ -4,11 +4,10 @@
 // Part of the World Foundry 3D video game engine/production environment
 // for more information about World Foundry, see www.worldfoundry.org
 //==============================================================================
-// Thin per-triangle submission interface. Ported renderer TUs call
-// RendererBackendGet().DrawTriangle(...) instead of emitting glBegin/glEnd
-// directly. Legacy backend (gfx/glpipeline/backend_legacy.cc) maps each call
-// back to the original fixed-function GL calls; a future modern backend will
-// batch into a VBO + shader path for GLES 3.0.
+// Thin per-triangle submission interface. Renderer TUs call
+// RendererBackendGet().DrawTriangle(...) — the modern backend
+// (gfx/glpipeline/backend_modern.cc) batches them into a VBO + shader path
+// that targets both GLES 3.0 and desktop GL 3.3 core.
 //============================================================================
 
 #ifndef _RENDERER_BACKEND_HP

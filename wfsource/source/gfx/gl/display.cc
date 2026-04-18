@@ -714,37 +714,3 @@ DrawOTag( ORDER_TABLE_ENTRY* __orderTable )
 
 //==============================================================================
 
-#if !defined(__ANDROID__)
-// Legacy-backend helper — emits glLoadMatrixf, which is fixed-function-only
-// and has no GLES 3.0 equivalent. Legacy backend is desktop-only anyway.
-void
-LoadGLMatrixFromMatrix34(const Matrix34& matrix)
-{
-
-    GLfloat mat[16];
-    mat[(0*4)+0] = matrix[0][0].AsFloat();
-    mat[(0*4)+1] = matrix[0][1].AsFloat();
-    mat[(0*4)+2] = matrix[0][2].AsFloat();
-    mat[(0*4)+3] = 0;
-
-    mat[(1*4)+0] = matrix[1][0].AsFloat();
-    mat[(1*4)+1] = matrix[1][1].AsFloat();
-    mat[(1*4)+2] = matrix[1][2].AsFloat();
-    mat[(1*4)+3] = 0;
-
-    mat[(2*4)+0] = matrix[2][0].AsFloat();
-    mat[(2*4)+1] = matrix[2][1].AsFloat();
-    mat[(2*4)+2] = matrix[2][2].AsFloat();
-    mat[(2*4)+3] = 0;
-
-    mat[(3*4)+0] = matrix[3][0].AsFloat();
-    mat[(3*4)+1] = matrix[3][1].AsFloat();
-    mat[(3*4)+2] = matrix[3][2].AsFloat();
-    mat[(3*4)+3] = 1.0;
-
-    glLoadMatrixf(mat);
-}
-#endif
-
-//==============================================================================
-

@@ -1,44 +1,20 @@
 //=============================================================================
-// gfx/glpipeline/backend_factory.cc: RendererBackend singleton selection
+// gfx/glpipeline/backend_factory.cc: RendererBackend singleton accessor
 // Copyright ( c ) 2026 World Foundry Group
 // Part of the World Foundry 3D video game engine/production environment
 // for more information about World Foundry, see www.worldfoundry.org
 //==============================================================================
-// Android → modern (GLES 3.0 has no fixed-function pipeline).
-// Linux   → legacy by default; WF_RENDERER=modern flips to the VBO+shader
-//           path for regression testing.
+// Modern (VBO + shader) backend is the only backend on both Linux and Android.
+// The fixed-function legacy backend was retired after visual parity on
+// snowgoons (Android port plan Phase 0 step 4c/f).
 //============================================================================
 
 #include <gfx/renderer_backend.hp>
-#include <cstdlib>
-#include <cstring>
 
-// Each backend TU exposes an instance accessor. Legacy is desktop-only
-// (uses fixed-function GL that GLES 3.0 doesn't expose).
-#if !defined(__ANDROID__)
-RendererBackend* LegacyBackendInstance();
-#endif
 RendererBackend* ModernBackendInstance();
-
-namespace
-{
-
-RendererBackend* PickBackend()
-{
-#if defined(__ANDROID__)
-    return ModernBackendInstance();
-#else
-    const char* sel = std::getenv("WF_RENDERER");
-    if (sel && std::strcmp(sel, "modern") == 0)
-        return ModernBackendInstance();
-    return LegacyBackendInstance();
-#endif
-}
-
-}  // namespace
 
 RendererBackend& RendererBackendGet()
 {
-    static RendererBackend* s = PickBackend();
+    static RendererBackend* s = ModernBackendInstance();
     return *s;
 }
