@@ -1,7 +1,7 @@
 # Plan: Android port
 
 **Date:** 2026-04-16
-**Status:** In progress — Phases 0 (steps 1–4c/a–e done; 4c/f gated on visual parity + legacy retire), 1, 2 complete; Phase 3 steps 1–6 done (libwf_game.so links, NativeActivity entry + EGL live, Gradle project scaffolded, gamepad + touch input wired, AAssetManager reads cd.iff from APK); step 7 (device smoke test) remaining
+**Status:** In progress — Phases 0 (all of steps 1–4 + 4c(a–f) done; modern is the sole backend, legacy retired at `ff589c8`), 1, 2 complete; Phase 3 steps 1–6 done (libwf_game.so links, NativeActivity entry + EGL live, Gradle project scaffolded, gamepad + touch input wired, AAssetManager reads cd.iff from APK); step 7 (device smoke test) remaining. Tag `pre-legacy-gl-retire` (`807d1ea`) marks the last commit with `backend_legacy.cc` present.
 **Goal:** An APK that launches, runs snowgoons on an arm64 Android device or Google TV (Chromecast with Google TV), takes touch or gamepad input, and handles background/foreground transitions without crashing. Proof-of-viability, not a shipping product.
 
 ## Settled decisions
@@ -64,15 +64,15 @@ Each has standalone value on Linux; Android blocks on all four.
 
    b. ✅ **Directional lighting in the shader.** Backend has `SetAmbient`/`SetDirLight`/`SetLightingEnabled`. Modern backend transforms light direction into eye space via the current modelview (`backend_modern.cc:263-288`); vertex shader does `lit = u_ambient + Σ u_light_color[i] · max(0, N·L_i)` (`backend_modern.cc:71-80`); fragment multiplies color by `v_lit`. `camera.cc:219-235` calls `SetModelView` then `SetAmbient` then `SetDirLight` ×3 with world-space directions negated; `display.cc:220` enables lighting at init. Legacy backend routes the same methods back to `glLightModelfv`/`glLightfv`. Visually verified 2026-04-17.
 
-   c. **Linear fog in the shader.** Add `SetFog(enabled, colorRGB, start, end)`. `camera.cc` calls it when it currently sets `glFogfv`/`glFogf`. Vertex shader computes eye-space Z from `u_mv * position` and derives `fog_factor = clamp((u_end − eye_z)/(u_end − u_start), 0, 1)`; fragment does `mix(fog_color, color, fog_factor)` when fog is enabled.
+   c. ✅ **Linear fog in the shader.** `SetFog(rgb, start, end)` + `SetFogEnabled(bool)` on backend. Vertex shader computes eye-space Z from `u_mv * position` and derives `fog_factor = clamp((u_end − eye_z)/(u_end − u_start), 0, 1)`; fragment does `mix(fog_color, color, fog_factor)` when fog is enabled. `camera.cc:237-241` calls both. Visually verified along with (a+b) 2026-04-17.
 
-   d. **`rendmatt.cc` quads through the seam.** Each `glBegin(GL_QUADS)` block becomes two `DrawTriangle` calls on the same texture; the per-matte `glDisable(LIGHTING)`/`glDisable(FOG)` become `SetLightingEnabled(false)` / `SetFog(false, …)` for the duration of the draw (re-enabled after). Matte stays unlit/unfogged by design.
+   d. ✅ **`rendmatt.cc` quads through the seam** (`e8acdf8`). Each tile emits two `DrawTriangle` calls on the same texture; matte bracket calls `ResetModelView` + `SetLightingEnabled(false)` + `SetFogEnabled(false)` before draw and re-enables after. Visually verified as part of the 2026-04-17 snowgoons run.
 
-   e. **Strip vestigial fixed-function calls in `display.cc` and `camera.cc`.** After (a–d) the remaining `glEnable(GL_LIGHTING/LIGHT0-2/NORMALIZE/FOG/TEXTURE_2D)`, `glShadeModel`, `glMaterialfv(lightWhite/lightBlack)` calls are all redundant — the shader controls each via uniforms, and the material is implicit in the per-vertex color. Delete them outright on both backends.
+   e. ✅ **Strip vestigial fixed-function calls in `display.cc` and `camera.cc`.** Every remaining `glLight*`/`glMaterial*`/`glShadeModel`/`glEnable(GL_LIGHT*|GL_FOG)` outside `backend_legacy.cc` turned out to be inside `#if 0` blocks (display.cc:223-265 debug init) or `#if defined(USE_ORDER_TABLES)` (PSX-only). No live code needed stripping. USE_ORDER_TABLES removal is a separate cleanup pass.
 
-   f. **Retire `backend_legacy.cc`.** After visual parity on Linux with `WF_RENDERER=modern`, delete the legacy backend and the `WF_RENDERER` env var; modern becomes the only backend. Also delete `display.cc`'s `LoadGLMatrixFromMatrix34` helper (only the legacy backend used it).
+   f. ✅ **Retire `backend_legacy.cc`** (`62ef11f` deleted the TU, `ff589c8` cleaned up the leftover plumbing). `backend_factory.cc` now unconditionally returns `ModernBackendInstance()` — 20 lines, no env var, no `#ifdef __ANDROID__` split. `display.cc`/`display.hp` `LoadGLMatrixFromMatrix34` deleted. Tag `pre-legacy-gl-retire` (`807d1ea`) marks the last commit with the legacy backend present. LOC impact documented in `docs/investigations/2026-04-15-loc-tracking.md` (−541 net for the OpenGL rewrite in isolation).
 
-6. ⬜ **Verify:** snowgoons renders identically on Linux under the (now-sole) modern backend; frame time equal or better. Lit surfaces shade correctly, fog fades distant geometry, matte background scrolls.
+6. ✅ **Verify:** snowgoons renders identically on Linux under the (now-sole) modern backend (visually confirmed 2026-04-17, modern vs legacy side-by-side before legacy was retired). Frame-time parity not quantified; subjective playthrough was indistinguishable.
 
 ### Phase 1 — CMake build
 **Estimate: 2–3 days.** Mechanical translation of `build_game.sh`; no new logic.

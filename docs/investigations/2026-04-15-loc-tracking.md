@@ -139,6 +139,45 @@ calls). Legacy `physics/wf/` is **retained** pending parity on a second level.
 Net: +614 LOC. Gross new code ≈ 1,700 lines; Jolt replaces WF collision paths
 in `movement.cc` that were removed or bypassed.
 
+### `ff589c8` — Phase 0: retire immediate-mode GL (−541 OpenGL-only)
+
+Scope: only the files touched by the renderer-backend seam + shader port.
+Does **not** count the other work (Android platform layer, audio, etc.) that
+landed on the same branch.
+
+Baseline: `0f6c34e` (last commit before Phase 0 step 1). Head: `ff589c8`
+(after legacy backend retire + factory/display.hp cleanup).
+
+| File | 0f6c34e | ff589c8 | Δ |
+|------|---------|---------|---|
+| `gfx/camera.cc`                     | 377   | 355   | −22   |
+| `gfx/gl/display.cc`                 | 809   | 716   | −93   |
+| `gfx/rendmatt.cc`                   | 260   | 265   | +5    |
+| `gfx/glpipeline/rendfcp.cc`         | 206   | 65    | −141  |
+| `gfx/glpipeline/rendfcl.cc`         | 206   | 65    | −141  |
+| `gfx/glpipeline/rendftp.cc`         | 206   | 84    | −122  |
+| `gfx/glpipeline/rendftl.cc`         | 206   | 83    | −123  |
+| `gfx/glpipeline/rendgcp.cc`         | 206   | 65    | −141  |
+| `gfx/glpipeline/rendgcl.cc`         | 206   | 65    | −141  |
+| `gfx/glpipeline/rendgtp.cc`         | 206   | 109   | −97   |
+| `gfx/glpipeline/rendgtl.cc`         | 206   | 87    | −119  |
+| `gfx/glpipeline/rendobj3.cc`        | 105   | 105   | 0     |
+| `gfx/display.hp`                    | 204   | 202   | −2    |
+| `gfx/renderer_backend.hp`           | —     | 87    | +87   |
+| `gfx/glpipeline/backend_factory.cc` | —     | 20    | +20   |
+| `gfx/glpipeline/backend_modern.cc`  | —     | 489   | +489  |
+| **TOTAL**                           | 3,403 | 2,862 | **−541** |
+
+The 8 per-variant renderer TUs collapsed from a combined 1,648 LOC to 623 LOC
+(−1,025) once the `FLAG_TEXTURE × FLAG_GOURAUD × FLAG_LIGHTING` branching
+disappeared. That saving paid for the new modern backend (489), the thin
+seam header (87), and the factory stub (20).
+
+Transitional scaffolding — `gfx/glpipeline/backend_legacy.cc` — existed from
+step 1 (`b868a26`) through step 4c(f) deletion at `62ef11f` but is not in
+either endpoint, so it doesn't appear in the table. Tagged
+`pre-legacy-gl-retire` (`807d1ea`) if ever needed.
+
 ## Next survey targets
 
 - `physics/wf/` + `physics/colspace/` + WF collision code in `physical.cc/hpi`
