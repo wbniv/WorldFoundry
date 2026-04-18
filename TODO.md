@@ -42,6 +42,11 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 - [ ] Replace physics engine — Jolt integration; pre-existing bad cast in movecam.cc:964 is the trigger — [investigation](docs/investigations/2026-04-14-jolt-physics-integration.md)
 
 
+## BUILD / TOOLCHAIN
+
+- [ ] Investigate RTTI claim — engine is supposed to have **no** C++ RTTI (no `dynamic_cast`, no `typeid`), yet `wfsource/source/baseobject/baseobject.hp:71` has `virtual EActorKind kind() const = 0;` with comment "manual RTTI, investigate removing". Confirm the enum-dispatch `kind()` is not actual C++ RTTI, then try building with `-fno-rtti` and measure the size/startup win (Android size-optimisation context). If something else does depend on RTTI, document where and why.
+
+
 ## TBD?
 
 - [ ] `WF_JS_ENGINE=jerryscript-nano` footprint build
