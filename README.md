@@ -143,7 +143,7 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ### Larger / deferred work
 - **Audio (miniaudio)** — Phases 1–5 complete (SFX one-shots, MIDI MusicPlayer, per-level music, Lua scripting surface, 3D positional SFX + listener tracking). Phases 6 (mobile backends) and 7 (docs) deferred. **Gap:** audio API is Lua-only (C closures in `scripting_lua.cc`), not mailbox-wired; the other seven scripting engines currently can't trigger music or SFX.
-- **Mobile port** — Android arm64 / iOS arm64; plans written ([Android](docs/plans/2026-04-16-android-port.md), [iOS](docs/plans/2026-04-16-ios-port.md)). Android Phases 1+2 done; Phase 0 (immediate-mode GL retirement) in progress — steps 1/2/4a/4b landed 2026-04-17, step 4c remaining (a handful of fixed-function calls in `display.cc`/`camera.cc`/`rendmatt.cc`). iOS still blocked on Android.
+- **Mobile port** — Android arm64 / iOS arm64; plans written ([Android](docs/plans/2026-04-16-android-port.md), [iOS](docs/plans/2026-04-16-ios-port.md)). Android Phases 1+2 done; Phase 0 (immediate-mode GL retirement) in progress — steps 1/2/4a/4b landed 2026-04-17, step 4c remaining is **proper shader ports of directional lighting + linear fog + matte triangles, not Android-only stubs**. iOS still blocked on Android.
 - **Multiplayer / voice / mobile input** — blocked on mobile port.
 - **Steam packaging** — Phases 1+2 done: Steamworks SDK lifecycle and Steam Input are wired in. Phases 3 (SteamPipe depot build + upload) and 4 (store page assets) deferred; blocked on Steamworks partner account and store capsule art.
 
