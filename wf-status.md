@@ -9,37 +9,37 @@
 
 Seven days of work (2026-04-12 – 2026-04-18). Newest first:
 
-**Android port closure (2026-04-18)** — Branch hits its close criterion (polished sideloadable APK); remaining work is launcher icons + one stale `build.gradle.kts` comment, with Play Store / keystore / R8 / splash explicitly out of scope — see [closure audit](docs/investigations/2026-04-18-android-port-closure.md). `android/README.md` status table refreshed: Phases 1–3 + post-boot polish all ✅.
+**Android port closure (2026-04-18)** — Branch hits its close criterion (polished sideloadable APK) with only launcher icons + one stale `build.gradle.kts` comment left and Play Store / keystore / R8 / splash explicitly out of scope — see [closure audit](docs/investigations/2026-04-18-android-port-closure.md).
 
-**Android audio — Für Elise on snowgoons (2026-04-18)** — The desktop miniaudio + TinySoundFont pipeline ports to Android as-is (miniaudio auto-detects AAudio / OpenSL ES); `audio_stub.cc` retired and `music.cc` switched to an `HALGetAssetAccessor()` memory loader so APK-bundled MIDI + soundfont play the same as desktop loose files. Follow-up plan [audio-assets-from-iff](docs/plans/2026-04-18-audio-assets-from-iff.md) routes audio through `cd.iff` like every other asset class.
+**Android audio — Für Elise on snowgoons (2026-04-18)** — Desktop miniaudio + TinySoundFont ports to Android as-is via an `HALGetAssetAccessor()` memory loader (`audio_stub.cc` retired, `music.cc` reworked); follow-up plan [audio-assets-from-iff](docs/plans/2026-04-18-audio-assets-from-iff.md) routes audio through `cd.iff` like every other asset class.
 
 **Android post-boot polish (2026-04-18)** — Snowgoons is a fully playable APK on stock arm64: viewport/projection aspect from real EGL surface (`aebbb15`), pause/resume preserving EGL context + events-during-suspend (`0b19119`), zForth `here` bootstrap fix for `if/else/then` (`62451a1`), and an on-screen d-pad + A/B HUD (`c20e56e`, TV-mode suppressed).
 
-**Snowgoons rendering on Android phone (2026-04-18)** — Phase 3 step 7 ✅: sideloaded debug APK boots snowgoons on physical arm64 via `NativeActivity` + EGL 3.0 + `AAssetManager`-backed `cd.iff`, unblocked by four pre-flight fixes (Forth shell bootstrap, graceful missing-engine no-op, 4096² framebuffer cap, GLSL ES `int` precision). On-device `wf.log` via the `WF Log` launcher was load-bearing — `adb logcat` wasn't reachable.
+**Snowgoons rendering on Android phone (2026-04-18)** — Phase 3 step 7 ✅: sideloaded debug APK boots snowgoons on physical arm64 via `NativeActivity` + EGL 3.0 + `AAssetManager`-backed `cd.iff`, unblocked by four pre-flight fixes (Forth shell bootstrap, graceful missing-engine no-op, 4096² framebuffer cap, GLSL ES `int` precision) and on-device `wf.log` since `adb logcat` wasn't reachable.
 
 **Snowgoons joystick control restored (2026-04-17)** — On-disk `snowgoons.iff`/`cd.iff` still had the pre-`671de1e` `?cam`-helper director that zForth's minimal bootstrap couldn't compile; byte-preserving re-patch (`a7ef46e`) landed the inlined three-block form the current `patch_snowgoons_forth.py` produces.
 
 **Window-close shutdown stability (2026-04-17)** — `mesa.cc` now handles `WM_DELETE_WINDOW` and `rest_api.cc` registers `RestApi_Stop` via `sys_atexit`; X11 close button exits cleanly instead of aborting.
 
-**Graphics — retire immediate-mode GL / Android Phase 0 (2026-04-18, complete)** — Modern VBO + GLSL 330 / GLES 300 es shader backend is the sole GL path on both Linux and Android; legacy fixed-function backend retired at `ff589c8` after visual parity on snowgoons. Net OpenGL-only impact: **−541 LOC** across 16 files (8 renderer TUs collapsed −1,025 once the `FLAG_TEXTURE × FLAG_GOURAUD × FLAG_LIGHTING` branching dissolved, paying for the modern backend, seam header, and factory stub). Tag `pre-legacy-gl-retire` (`807d1ea`) preserves the last commit with `backend_legacy.cc` present.
+**Graphics — retire immediate-mode GL / Android Phase 0 (2026-04-18, complete)** — Modern VBO + GLSL 330 / GLES 300 es shader backend is the sole GL path on Linux and Android (legacy fixed-function retired at `ff589c8`, **−541 LOC** net across 16 files; tag `pre-legacy-gl-retire` at `807d1ea` preserves the last `backend_legacy.cc` commit).
 
-**Audio (Phases 1–5 complete) (2026-04-17)** — miniaudio + TinySoundFont vendored; per-level `level<N>.mid` music + fire-and-forget SFX + 3D positional playback with camera-tracked listener, all audible in snowgoons. Gap: Lua-only scripting surface (`scripting_lua.cc` closures) — mailbox-wired audio API for the other seven engines is deferred.
+**Audio (Phases 1–5 complete) (2026-04-17)** — miniaudio + TinySoundFont vendored with per-level `level<N>.mid` music, fire-and-forget SFX, and 3D positional playback audible in snowgoons, but only via `scripting_lua.cc` closures — mailbox-wired audio API for the other seven engines is deferred.
 
-**Android port (Phases 0+1+2 complete; Phase 3 steps 1–6 done) (2026-04-18)** — Phase 0 done (see Graphics entry above). Phases 1+2 landed the CMake+NDK build, HAL lifecycle seam, and AssetAccessor. Phase 3 has stubs, NativeActivity + EGL 3.0 from `ANativeWindow`, a Gradle project (AGP 8.5.2, leanback manifest, arm64-v8a, min 21 / target 34), gamepad + touch input with TV-mode detection, and `AAssetManager` reading `cd.iff` from the APK; only step 7 (phone + Google TV device smoke test) remains.
+**Android port (Phases 0+1+2 complete; Phase 3 steps 1–6 done) (2026-04-18)** — Phase 0 retired legacy GL, Phases 1+2 landed CMake+NDK build / HAL lifecycle seam / AssetAccessor, and Phase 3 added `NativeActivity` + EGL 3.0, a Gradle project (AGP 8.5.2, leanback manifest, arm64-v8a, min 21 / target 34), gamepad + touch with TV-mode detection, and `AAssetManager`-backed `cd.iff` — only step 7 (device smoke test) remained at the time, since closed.
 
-**Blender ↔ level round-trip (2026-04-17)** — `levcomp-rs` compiles `.lev` → `.lvl` and snowgoons loads through it end-to-end; Blender plugin round-trips 152/152 OAD fields. Phase 2c landed mesh bboxes, packed asset IDs, and `asset.inc`; real path/channel keyframes are the last remaining piece.
+**Blender ↔ level round-trip (2026-04-17)** — `levcomp-rs` compiles `.lev` → `.lvl` end-to-end and the Blender plugin round-trips 152/152 OAD fields with Phase 2c mesh bboxes / packed asset IDs / `asset.inc` landed — real path/channel keyframes are the last remaining piece.
 
-**Level pipeline proof (2026-04-17, in progress)** — Phases A+B+C done: `primitives.lev`/`whitestar.lev` compile through the pipeline; `wf_oad` has a `common.oad` fixture test; `levcomp decompile` subcommand implemented and verified — snowgoons round-trips 36 objects with an 8-byte common-block delta (schema defaults vs authored values). Remaining D–E (decompile 4 source-less levels, multi-level `cd.iff`) gate any breaking `common.inc` rearrangement — which is what the deferred ScriptLanguage OAD plan needs.
+**Level pipeline proof (2026-04-17, in progress)** — Phases A+B+C done (`primitives.lev`/`whitestar.lev` compile through the pipeline; `wf_oad` has a `common.oad` fixture test; `levcomp decompile` round-trips snowgoons' 36 objects with an 8-byte common-block delta), with D–E (decompile 4 source-less levels, multi-level `cd.iff`) gating the `common.inc` rearrangement the deferred ScriptLanguage OAD plan needs.
 
 **Tooling and plans (2026-04-17)** — `engine/` reorganised to top-level; REST API box PoC landed; iOS plan written (blocked on Android); CLI level override (`-L<path>`) confirmed; IFF lineage + MIDI-source investigations filed.
 
-**Scripting system (2026-04-16)** — Seven engines smoke-tested end-to-end in snowgoons (Lua 5.4, Fennel, QuickJS, JerryScript, WAMR, Wren, zForth); five alternate Forth backends build+link but aren't end-to-end tested. Lua is optional via `WF_LUA_ENGINE=lua54|none`; wasm3 retired in favour of WAMR; WAMR AOT deferred.
+**Scripting system (2026-04-16)** — Seven engines smoke-tested end-to-end in snowgoons (Lua 5.4, Fennel, QuickJS, JerryScript, WAMR, Wren, zForth) with Lua optional (`WF_LUA_ENGINE=lua54|none`) and wasm3 retired in favour of WAMR — five alternate Forth backends build+link but aren't end-to-end tested, WAMR AOT deferred.
 
-**Dead-code removal (2026-04-15, closed 2026-04-18)** — Batches 1–7 complete: `wfsource/source/` down from 64,252 → 36,199 lines (−43.7%). Batch 8 (delete legacy `physics/wf/`) accepted at its ~1,700 LOC estimated reduction but deferred opportunistically until Jolt has parity on a second level; `hal/_list` + `hal/_mempool` migration left as future opt-in.
+**Dead-code removal (2026-04-15, closed 2026-04-18)** — Batches 1–7 complete (`wfsource/source/` 64,252 → 36,199 lines, −43.7%) with Batch 8 (`physics/wf/`, ~1,700 LOC) deferred until Jolt parity on a second level and `hal/_list` / `_mempool` migration left as future opt-in.
 
-**Jolt Physics (2026-04-14)** — Integrated as default (`WF_PHYSICS_ENGINE=jolt`); five-step plan complete (SIGABRT, zombie bodies, authority model, vertical pop, 60 s soak). Legacy `physics/wf/` retained until parity on a second level.
+**Jolt Physics (2026-04-14)** — Integrated as default (`WF_PHYSICS_ENGINE=jolt`) with the five-step plan complete (SIGABRT, zombie bodies, authority model, vertical pop, 60 s soak); legacy `physics/wf/` retained until parity on a second level.
 
-**Steam (Phases 1+2) (2026-04-12)** — Steamworks SDK lifecycle wired into HAL + `PageFlip`; Steam Input polls controllers each frame and ORs into `_JoystickButtonsF`. `WF_ENABLE_STEAM=1` flag; SDK not committed. Phases 3 (depot) and 4 (store page) deferred.
+**Steam (Phases 1+2) (2026-04-12)** — Steamworks SDK lifecycle wired into HAL + `PageFlip` with Steam Input ORing into `_JoystickButtonsF` each frame (`WF_ENABLE_STEAM=1`; SDK not committed); Phases 3 (depot) and 4 (store page) deferred.
 
 ---
 
@@ -168,4 +168,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-18 05:47** — [`docs/investigations/2026-04-18-android-port-closure.md`](docs/investigations/2026-04-18-android-port-closure.md): Closing the Android Port — Remaining Work
+**2026-04-18 06:14** — [`docs/investigations/2026-04-18-android-port-closure.md`](docs/investigations/2026-04-18-android-port-closure.md): Closing the Android Port — Remaining Work
