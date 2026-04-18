@@ -71,8 +71,8 @@ LoadTexture(binistream& texturestream, PixelMap& map)
 	int height = header.Height;
 
 	const void* buffer = texturestream.GetMemoryPtr(width * height * 2);
-   RangeCheckExclusive(0,width,map.GetXSize()+1);
-   RangeCheckExclusive(0,height,map.GetYSize()+1);
+	RangeCheckExclusive(0,width,map.GetXSize()+1);
+	RangeCheckExclusive(0,height,map.GetYSize()+1);
    assert(buffer);
 
 		// kts hack, image needs to be long word aligned on disk
