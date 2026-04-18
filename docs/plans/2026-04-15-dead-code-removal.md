@@ -1,5 +1,22 @@
 # Dead-code removal — April 2026
 
+**Status: Closed 2026-04-18.** Batches 1–7 landed, taking `wfsource/source/`
+from 64,252 → 36,199 LOC (−43.7%). Batch 8 (delete legacy `physics/wf/`
+once Jolt has parity on a second level) is accepted at its **~1,700 LOC
+estimated reduction** but will happen opportunistically in a later
+reviewable commit — not blocking plan closure. The `hal/_list` +
+`hal/_mempool` migration mentioned at the bottom is an explicit stretch
+item, also left as future opt-in work.
+
+LOC claims verified against git history: Batch 5 commit `03211f9` shows
+−20,967 across 208 files; the `e2dcc98` milestone in
+`docs/investigations/2026-04-15-loc-tracking.md` records the 36,199
+total after Batch 7. Current HEAD has accreted ~1,700 LOC of new value
+(Jolt, Android HAL, audio backend, gfx renderer seam) on top — the
+dead-code removals themselves still hold.
+
+---
+
 Tracking confirmed dead-code removals that shrink `wfsource/source/` without touching live
 functionality.  All changes here have been implemented and the build verified clean after each
 batch.
