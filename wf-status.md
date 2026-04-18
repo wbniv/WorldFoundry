@@ -7,7 +7,9 @@
 
 ## Summary
 
-Five days of work (2026-04-12 – 2026-04-17) across eight major areas:
+Six days of work (2026-04-12 – 2026-04-17) across nine major areas. Newest first:
+
+**Window-close shutdown stability (2026-04-17)** — Two fixes on the X11 close-button path. First, `mesa.cc` registers `WM_DELETE_WINDOW` via `XSetWMProtocols` and routes the resulting `ClientMessage` to `sys_exit(0)`, matching the Escape-key path so the WM no longer destroys the window out from under the running game. Second, `engine/stubs/rest_api.cc` registers `RestApi_Stop` via `sys_atexit` inside `RestApi_Start` so the file-scope `std::thread gServerThread` is stopped and joined before libc `exit()` runs static destructors — previously `~std::thread()` on the still-joinable thread called `std::terminate`, producing `Aborted (core dumped)` after an otherwise-clean exit log. Verified: exit 0, `rest_api: server stopped` printed, no abort.
 
 **Scripting system** — Seven engines smoke-tested end-to-end in snowgoons: Lua 5.4, Fennel, QuickJS, JerryScript, WAMR (classic interp), Wren, and Forth (zForth). Five additional Forth backends (ficl, atlast, embed, libforth, pforth) build and link but are not yet end-to-end tested. All wired into a `ScriptRouter` dispatch table with per-engine sigils. wasm3 retired 2026-04-16 (WAMR reached parity). Lua made optional via `WF_LUA_ENGINE=lua54|none` (2026-04-16); `scripting_lua.cc/hp` extracted as a peer TU matching all other engine plugs. WAMR AOT deferred.
 

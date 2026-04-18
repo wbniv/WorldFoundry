@@ -1,7 +1,7 @@
 # Plan: git-branch-browser — curses TUI for browsing branch diffs
 
 **Date:** 2026-04-16
-**Status:** Not started
+**Status:** In testing — implementation landed (~784 LOC at `scripts/git-branch-browser.py`)
 **Goal:** A Python curses program at `scripts/git-branch-browser.py` that lets you browse all git branches, see per-branch changed files as a collapsible directory tree with status annotations, and view file diffs inline.
 
 ## Screenshots
