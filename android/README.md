@@ -5,61 +5,30 @@ This directory is the Android Gradle project that packages `libwf_game.so`
 
 ## One-time setup
 
-The repo's `task dev-setup` installs the NDK. You additionally need:
-
-- **Java 17** (`openjdk-17-jdk` on Debian/Ubuntu — already in `dev-setup`).
-- **Android SDK platforms + build-tools**. One way:
-
-  ```
-  sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
-  ```
-
-  (If `sdkmanager` isn't on your PATH, install `cmdline-tools;latest` from an
-  Android Studio install or from the Android SDK command-line tools zip.)
-
-- **Gradle 8.x**. Easiest: drop a gradle wrapper in this directory. Until
-  then, install the package (`apt install gradle`, Homebrew `brew install
-  gradle`, or `sdk install gradle 8.7` via sdkman).
-
-Set `ANDROID_HOME` (or `ANDROID_SDK_ROOT`) to your SDK install, e.g. in
-`~/.bashrc`:
-
-```sh
-export ANDROID_HOME=/usr/lib/android-sdk
-export PATH=$PATH:$ANDROID_HOME/platform-tools
+```
+task dev-setup            # NDK + JDK + adb (from repo root)
+task android-sdk-install  # cmdline-tools + platforms;android-34 + build-tools;34.0.0 + Gradle 8.7
 ```
 
-A `local.properties` in this directory pointing Gradle at the SDK also works
-and is git-ignored (`sdk.dir=/usr/lib/android-sdk`).
+`android-sdk-install` is idempotent — re-runs skip already-installed pieces.
+Needs sudo to write under `/usr/lib/android-sdk/` and `/opt/`. It also writes
+`android/local.properties` pointing Gradle at the SDK.
 
-## Build
+After it finishes, add the env-var lines it prints to `~/.bashrc` /
+`~/.zshrc` so Gradle + adb are always on PATH.
 
-From this directory:
+## Build + install
 
 ```
-gradle assembleRelease
+task build-apk        # → android/app/build/outputs/apk/debug/app-debug.apk
+task push-assets      # adb push cd.iff to /data/local/tmp/wf/ (pre-AAssetManager)
+task install-apk      # adb install + start NativeActivity
+adb logcat -s wf_game # stream engine logs
 ```
-
-The APK lands in `app/build/outputs/apk/release/app-release.apk`.
 
 Gradle calls the repo-root CMake (via `externalNativeBuild`) for arm64-v8a
 with `-DCMAKE_BUILD_TYPE=RelWithDebInfo` and packages the resulting
 `libwf_game.so` under `lib/arm64-v8a/` in the APK.
-
-## Sideload + run
-
-```
-adb install -r app/build/outputs/apk/release/app-release.apk
-adb shell am start -n org.worldfoundry.wf_game/android.app.NativeActivity
-adb logcat -s wf_game
-```
-
-For the assets (`cd.iff`), until the APK asset pipeline lands (Phase 3 step
-5), push the file to the device's working directory:
-
-```
-adb push /home/will/WorldFoundry/wfsource/source/game/cd.iff /data/local/tmp/wf/cd.iff
-```
 
 ## Status
 

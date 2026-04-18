@@ -26,19 +26,83 @@ tasks:
           -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - cmake --build cmake-build-android -j
 
+  android-sdk-install:
+    desc: "Install Android SDK platforms + build-tools + Gradle (idempotent)"
+    vars:
+      SDK_HOME: /usr/lib/android-sdk
+      GRADLE_VERSION: "8.7"
+      CMDTOOLS_VERSION: "11076708"
+      PLATFORM: "platforms;android-34"
+      BUILDTOOLS: "build-tools;34.0.0"
+    cmds:
+      - |
+        set -euo pipefail
+
+        echo "==> Ensuring cmdline-tools under {{.SDK_HOME}}/cmdline-tools/latest/"
+        if [ ! -x "{{.SDK_HOME}}/cmdline-tools/latest/bin/sdkmanager" ]; then
+            cd /tmp
+            zip="commandlinetools-linux-{{.CMDTOOLS_VERSION}}_latest.zip"
+            [ -f "$zip" ] || wget -q --show-progress \
+                "https://dl.google.com/android/repository/$zip"
+            rm -rf /tmp/cmdline-tools
+            unzip -q "$zip"
+            sudo mkdir -p "{{.SDK_HOME}}/cmdline-tools"
+            sudo rm -rf "{{.SDK_HOME}}/cmdline-tools/latest"
+            sudo mv /tmp/cmdline-tools "{{.SDK_HOME}}/cmdline-tools/latest"
+        else
+            echo "    already installed"
+        fi
+
+        export ANDROID_HOME={{.SDK_HOME}}
+        export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools"
+
+        echo "==> Accepting SDK licenses"
+        yes | sudo -E "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
+
+        echo "==> Installing {{.PLATFORM}} + {{.BUILDTOOLS}}"
+        sudo -E "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            "{{.PLATFORM}}" "{{.BUILDTOOLS}}"
+
+        echo "==> Ensuring Gradle {{.GRADLE_VERSION}} under /opt/gradle-{{.GRADLE_VERSION}}/"
+        if [ ! -x "/opt/gradle-{{.GRADLE_VERSION}}/bin/gradle" ]; then
+            cd /tmp
+            zip="gradle-{{.GRADLE_VERSION}}-bin.zip"
+            [ -f "$zip" ] || wget -q --show-progress \
+                "https://services.gradle.org/distributions/$zip"
+            sudo unzip -q -o "$zip" -d /opt/
+        else
+            echo "    already installed"
+        fi
+
+        echo "==> Writing android/local.properties"
+        echo "sdk.dir={{.SDK_HOME}}" > android/local.properties
+
+        echo
+        echo "Add these lines to ~/.bashrc (or ~/.zshrc) if you haven't yet:"
+        echo "    export ANDROID_HOME={{.SDK_HOME}}"
+        echo "    export PATH=\"\$PATH:\$ANDROID_HOME/cmdline-tools/latest/bin:\$ANDROID_HOME/platform-tools:/opt/gradle-{{.GRADLE_VERSION}}/bin\""
+        echo
+        echo "Then: task build-apk"
+
   build-apk:
-    desc: "Assemble the Android APK (requires Android SDK + gradle — see android/README.md)"
+    desc: "Assemble the Android APK (debug, auto-signed for sideload)"
     dir: android
     cmds:
-      - gradle assembleRelease
-      - echo "APK → android/app/build/outputs/apk/release/app-release.apk"
+      - gradle assembleDebug
+      - echo "APK → android/app/build/outputs/apk/debug/app-debug.apk"
 
   install-apk:
-    desc: "Install the APK onto a connected Android device"
+    desc: "Install the APK onto a connected Android device and start it"
     dir: android
     cmds:
-      - adb install -r app/build/outputs/apk/release/app-release.apk
+      - adb install -r app/build/outputs/apk/debug/app-debug.apk
       - adb shell am start -n org.worldfoundry.wf_game/android.app.NativeActivity
+
+  push-assets:
+    desc: "Push cd.iff to device (pre-AAssetManager; goes to /data/local/tmp/wf/)"
+    cmds:
+      - adb shell mkdir -p /data/local/tmp/wf
+      - adb push wfsource/source/game/cd.iff /data/local/tmp/wf/cd.iff
 
   run:
     desc: "Run wf_game (cd.iff in cwd)"
