@@ -27,10 +27,9 @@ tasks:
       - cmake --build cmake-build-android -j
 
   android-sdk-install:
-    desc: "Install Android SDK platforms + build-tools + Gradle (idempotent)"
+    desc: "Install Android SDK platforms + build-tools (idempotent; Gradle is a repo-vendored wrapper)"
     vars:
       SDK_HOME: /usr/lib/android-sdk
-      GRADLE_VERSION: "8.7"
       CMDTOOLS_VERSION: "11076708"
       PLATFORM: "platforms;android-34"
       BUILDTOOLS: "build-tools;34.0.0"
@@ -63,40 +62,30 @@ tasks:
         sudo -E "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
             "{{.PLATFORM}}" "{{.BUILDTOOLS}}"
 
-        echo "==> Ensuring Gradle {{.GRADLE_VERSION}} under /opt/gradle-{{.GRADLE_VERSION}}/"
-        if [ ! -x "/opt/gradle-{{.GRADLE_VERSION}}/bin/gradle" ]; then
-            cd /tmp
-            zip="gradle-{{.GRADLE_VERSION}}-bin.zip"
-            [ -f "$zip" ] || wget -q --show-progress \
-                "https://services.gradle.org/distributions/$zip"
-            sudo unzip -q -o "$zip" -d /opt/
-        else
-            echo "    already installed"
-        fi
-
         echo "==> Writing android/local.properties"
         echo "sdk.dir={{.SDK_HOME}}" > android/local.properties
 
         echo
-        echo "Add these lines to ~/.bashrc (or ~/.zshrc) if you haven't yet:"
-        echo "    export ANDROID_HOME={{.SDK_HOME}}"
-        echo "    export PATH=\"\$PATH:\$ANDROID_HOME/cmdline-tools/latest/bin:\$ANDROID_HOME/platform-tools:/opt/gradle-{{.GRADLE_VERSION}}/bin\""
-        echo
-        echo "Then: task build-apk"
+        echo "Done. Run: task build-apk"
+        echo "Gradle itself is via the repo-vendored android/gradlew wrapper — no system install needed."
 
   build-apk:
     desc: "Assemble the Android APK (debug, auto-signed for sideload)"
     dir: android
+    env:
+      ANDROID_HOME: /usr/lib/android-sdk
     cmds:
-      - gradle assembleDebug
+      - ./gradlew assembleDebug
       - echo "APK → android/app/build/outputs/apk/debug/app-debug.apk"
 
   install-apk:
     desc: "Install the APK onto a connected Android device and start it"
     dir: android
+    vars:
+      ADB: /usr/lib/android-sdk/platform-tools/adb
     cmds:
-      - adb install -r app/build/outputs/apk/debug/app-debug.apk
-      - adb shell am start -n org.worldfoundry.wf_game/android.app.NativeActivity
+      - "{{.ADB}} install -r app/build/outputs/apk/debug/app-debug.apk"
+      - "{{.ADB}} shell am start -n org.worldfoundry.wf_game/android.app.NativeActivity"
 
 
   run:

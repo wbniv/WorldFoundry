@@ -1,4 +1,4 @@
-# Gradle
+# Gradle caches (the wrapper jar + script + properties stay tracked)
 .gradle/
 build/
 local.properties
