@@ -22,6 +22,7 @@
 // Phase 3 step 4.
 //=============================================================================
 
+#include <android/configuration.h>
 #include <android/input.h>
 #include <android/keycodes.h>
 #include <android/log.h>
@@ -34,6 +35,9 @@
 #include <hal/lifecycle.h>
 
 extern "C" void _HALSetJoystickButtons(joystickButtonsF joystickButtons);
+
+extern int _halWindowWidth;
+extern int _halWindowHeight;
 
 extern "C" bool WFAndroidEglInit(struct ANativeWindow* window);
 extern "C" void WFAndroidEglTerm();
@@ -49,14 +53,88 @@ struct android_app* gApp        = nullptr;
 bool                gEglReady   = false;
 bool                gExitLoop   = false;
 
-// Bitmask of WF buttons currently held (updated by HandleInputEvent, read by
-// hal/android/input.cc's _JoystickButtonsF via _HALSetJoystickButtons).
-joystickButtonsF    gButtons    = 0;
+// Bitmask of WF buttons currently held — combined gamepad + touch states are
+// merged here and flushed to _HALSetJoystickButtons.
+joystickButtonsF    gGamepadButtons = 0;
+joystickButtonsF    gTouchButtons   = 0;
+
+// True when running on Google TV / Android TV (leanback). On TV there's no
+// touchscreen worth hit-testing and the on-screen d-pad is suppressed.
+bool                gIsTvMode       = false;
+
+constexpr uint32_t kDPadBits   = EJ_BUTTONF_LEFT | EJ_BUTTONF_RIGHT
+                               | EJ_BUTTONF_UP   | EJ_BUTTONF_DOWN;
+constexpr uint32_t kActionBits = EJ_BUTTONF_A | EJ_BUTTONF_B;
+
+void Emit()
+{
+    _HALSetJoystickButtons(gGamepadButtons | gTouchButtons);
+}
 
 // Joystick axes trigger LEFT/RIGHT/UP/DOWN when past this threshold — matches
 // Android's AGAMEPAD guideline. Separate from D-pad key events which fire as
 // discrete AKEYCODE_DPAD_* presses.
 constexpr float kJoystickThreshold = 0.5f;
+
+// ---- Touch hit-test ---------------------------------------------------------
+// Simple fixed-pixel layout (no rendering yet — the modern backend picks up
+// overlay drawing in a follow-up). Coords are raw surface pixels, origin
+// top-left, +Y down.
+//
+// Bottom-left quadrant: d-pad cross, 200 px × 200 px.
+//   LEFT  (0..66, h-133..h-66)
+//   RIGHT (133..200, h-133..h-66)
+//   UP    (66..133, h-200..h-133)
+//   DOWN  (66..133, h-66..h)
+//
+// Bottom-right corner: action buttons.
+//   A     (w-120..w-0,   h-120..h-0)
+//   B     (w-240..w-120, h-120..h-0)
+
+uint32_t HitTestTouch(float x, float y)
+{
+    const int w = _halWindowWidth;
+    const int h = _halWindowHeight;
+    if (w <= 0 || h <= 0) return 0;
+
+    // D-pad (bottom-left).
+    if (x >= 0.0f   && x < 200.0f &&
+        y >= h-200  && y < h)
+    {
+        if (x < 66.0f   && y >= h-133 && y <  h-66)   return EJ_BUTTONF_LEFT;
+        if (x >= 133.0f && y >= h-133 && y <  h-66)   return EJ_BUTTONF_RIGHT;
+        if (x >= 66.0f  && x < 133.0f && y <  h-133)  return EJ_BUTTONF_UP;
+        if (x >= 66.0f  && x < 133.0f && y >= h-66)   return EJ_BUTTONF_DOWN;
+    }
+
+    // A button (far bottom-right).
+    if (x >= w-120 && x <  w   && y >= h-120 && y < h)
+        return EJ_BUTTONF_A;
+
+    // B button (inside of A).
+    if (x >= w-240 && x <  w-120 && y >= h-120 && y < h)
+        return EJ_BUTTONF_B;
+
+    return 0;
+}
+
+void RecomputeTouchState(AInputEvent* event, bool clearOnUp)
+{
+    if (clearOnUp)
+    {
+        gTouchButtons = 0;
+        return;
+    }
+    joystickButtonsF active = 0;
+    const size_t n = AMotionEvent_getPointerCount(event);
+    for (size_t i = 0; i < n; ++i)
+    {
+        const float x = AMotionEvent_getX(event, i);
+        const float y = AMotionEvent_getY(event, i);
+        active |= HitTestTouch(x, y);
+    }
+    gTouchButtons = active;
+}
 
 uint32_t MapKeyCode(int32_t code)
 {
@@ -104,6 +182,16 @@ void HandleAppCmd(struct android_app* app, int32_t cmd)
             HALNotifyResume();
             break;
 
+        case APP_CMD_CONFIG_CHANGED:
+            if (app->config)
+            {
+                const int32_t uiMode = AConfiguration_getUiModeType(app->config);
+                gIsTvMode = (uiMode == ACONFIGURATION_UI_MODE_TYPE_TELEVISION);
+                WFLOG("APP_CMD_CONFIG_CHANGED: uiMode=%d (tv=%d)",
+                      uiMode, gIsTvMode ? 1 : 0);
+            }
+            break;
+
         case APP_CMD_DESTROY:
             WFLOG("APP_CMD_DESTROY");
             gExitLoop = true;
@@ -125,9 +213,9 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
         const uint32_t mask   = MapKeyCode(keyCode);
         if (mask == 0) return 0;
 
-        if (action == AKEY_EVENT_ACTION_DOWN)      gButtons |=  mask;
-        else if (action == AKEY_EVENT_ACTION_UP)   gButtons &= ~mask;
-        _HALSetJoystickButtons(gButtons);
+        if (action == AKEY_EVENT_ACTION_DOWN)      gGamepadButtons |=  mask;
+        else if (action == AKEY_EVENT_ACTION_UP)   gGamepadButtons &= ~mask;
+        Emit();
         return 1;
     }
 
@@ -153,15 +241,22 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
             if (y < -kJoystickThreshold)  axes |= EJ_BUTTONF_UP;
             if (y >  kJoystickThreshold)  axes |= EJ_BUTTONF_DOWN;
 
-            constexpr uint32_t kAxisBits = EJ_BUTTONF_LEFT | EJ_BUTTONF_RIGHT
-                                          | EJ_BUTTONF_UP  | EJ_BUTTONF_DOWN;
-            gButtons = (gButtons & ~kAxisBits) | axes;
-            _HALSetJoystickButtons(gButtons);
+            gGamepadButtons = (gGamepadButtons & ~kDPadBits) | axes;
+            Emit();
             return 1;
         }
 
-        // Touch (AINPUT_SOURCE_TOUCHSCREEN) is deferred to a follow-up — the
-        // on-screen d-pad hit-test lands alongside the UI-mode detection.
+        // Touch — suppressed on TV.
+        if ((source & AINPUT_SOURCE_TOUCHSCREEN) && !gIsTvMode)
+        {
+            const int32_t raw    = AMotionEvent_getAction(event);
+            const int32_t action = raw & AMOTION_EVENT_ACTION_MASK;
+            const bool    clear  = (action == AMOTION_EVENT_ACTION_UP
+                                 || action == AMOTION_EVENT_ACTION_CANCEL);
+            RecomputeTouchState(event, clear);
+            Emit();
+            return 1;
+        }
     }
 
     return 0;
@@ -194,6 +289,13 @@ android_main(struct android_app* app)
     gApp = app;
     app->onAppCmd     = HandleAppCmd;
     app->onInputEvent = HandleInputEvent;
+
+    if (app->config)
+    {
+        const int32_t uiMode = AConfiguration_getUiModeType(app->config);
+        gIsTvMode = (uiMode == ACONFIGURATION_UI_MODE_TYPE_TELEVISION);
+        WFLOG("uiMode=%d (tv=%d)", uiMode, gIsTvMode ? 1 : 0);
+    }
 
     // Block until the first surface arrives so EGL is live before the
     // engine tries to draw.
