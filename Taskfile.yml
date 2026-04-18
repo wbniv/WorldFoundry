@@ -68,7 +68,11 @@ tasks:
         export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools"
 
         echo "==> Accepting SDK licenses"
-        yes | sudo -E "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
+        # `yes | sdkmanager --licenses` is idiomatic, but `yes` gets SIGPIPE
+        # when sdkmanager exits, which trips `set -o pipefail`. Use a finite
+        # printf so stdin hits EOF naturally.
+        printf 'y\n%.0s' {1..20} \
+            | sudo -E "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
 
         echo "==> Installing {{.PLATFORM}} + {{.BUILDTOOLS}}"
         sudo -E "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
