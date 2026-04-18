@@ -69,9 +69,12 @@ tasks:
 
         echo "==> Accepting SDK licenses"
         # `yes | sdkmanager --licenses` is idiomatic, but `yes` gets SIGPIPE
-        # when sdkmanager exits, which trips `set -o pipefail`. Use a finite
-        # printf so stdin hits EOF naturally.
-        printf 'y\n%.0s' {1..20} \
+        # when sdkmanager exits, which trips `set -o pipefail`. Feed a finite
+        # stream instead so stdin hits EOF naturally. Plain POSIX loop so
+        # this works under dash too.
+        ( for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25; do
+              echo y
+          done ) \
             | sudo -E "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
 
         echo "==> Installing {{.PLATFORM}} + {{.BUILDTOOLS}}"
