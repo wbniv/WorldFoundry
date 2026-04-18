@@ -162,4 +162,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-18 03:06** — [`docs/plans/2026-04-17-level-pipeline-proof.md`](docs/plans/2026-04-17-level-pipeline-proof.md): Plan: Prove all 7 level pipelines → breaking common.inc rearrangement
+**2026-04-18 05:45** — [`docs/plans/2026-04-18-audio-assets-from-iff.md`](docs/plans/2026-04-18-audio-assets-from-iff.md): Plan: audio assets come from `.iff`, not loose files
