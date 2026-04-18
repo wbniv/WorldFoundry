@@ -15,7 +15,7 @@ Seven days of work (2026-04-12 – 2026-04-18). Newest first:
 
 **Android post-boot polish (2026-04-18)** — Snowgoons is a fully playable APK on stock arm64: viewport/projection aspect from real EGL surface (`aebbb15`), pause/resume preserving EGL context + events-during-suspend (`0b19119`), zForth `here` bootstrap fix for `if/else/then` (`62451a1`), and an on-screen d-pad + A/B HUD (`c20e56e`, TV-mode suppressed).
 
-**Snowgoons rendering on Android phone (2026-04-18)** — Phase 3 step 7 ✅: sideloaded debug APK boots snowgoons on physical arm64 via `NativeActivity` + EGL 3.0 + `AAssetManager`-backed `cd.iff`, unblocked by four pre-flight fixes (Forth shell bootstrap, graceful missing-engine no-op, 4096² framebuffer cap, GLSL ES `int` precision). On-device `wf.log` via the `WF Log` launcher was load-bearing — `adb logcat` wasn't reachable.
+**Snowgoons rendering on Android phone (2026-04-18)** — Phase 3 step 7 ✅: sideloaded debug APK boots snowgoons on physical arm64 via `NativeActivity` + EGL 3.0 + `AAssetManager`-backed `cd.iff`, unblocked by four pre-flight fixes (Forth shell bootstrap, graceful missing-engine no-op, 4096² framebuffer cap, GLSL ES `int` precision) and on-device `wf.log` since `adb logcat` wasn't reachable.
 
 **Snowgoons joystick control restored (2026-04-17)** — On-disk `snowgoons.iff`/`cd.iff` still had the pre-`671de1e` `?cam`-helper director that zForth's minimal bootstrap couldn't compile; byte-preserving re-patch (`a7ef46e`) landed the inlined three-block form the current `patch_snowgoons_forth.py` produces.
 
