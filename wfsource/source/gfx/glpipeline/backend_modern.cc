@@ -50,15 +50,19 @@ static const char* kVS =
     "layout(location=1) in vec3 a_color;\n"
     "layout(location=2) in vec2 a_uv;\n"
     "layout(location=3) in vec3 a_normal;\n"
-    "out vec3 v_color;\n"
-    "out vec2 v_uv;\n"
-    "out vec3 v_lit;\n"
+    "out vec3  v_color;\n"
+    "out vec2  v_uv;\n"
+    "out vec3  v_lit;\n"
+    "out float v_fog_factor;\n"
     "uniform mat4 u_mvp;\n"
     "uniform mat4 u_mv;\n"
     "uniform int  u_lighting;\n"
     "uniform vec3 u_ambient;\n"
     "uniform vec3 u_light_dir[3];\n"
     "uniform vec3 u_light_color[3];\n"
+    "uniform int   u_fog;\n"
+    "uniform float u_fog_start;\n"
+    "uniform float u_fog_end;\n"
     "void main()\n"
     "{\n"
     "    gl_Position = u_mvp * vec4(a_pos, 1.0);\n"
@@ -74,19 +78,30 @@ static const char* kVS =
     "    } else {\n"
     "        v_lit = vec3(1.0);\n"
     "    }\n"
+    "    if (u_fog != 0) {\n"
+    "        float eye_dist = -(u_mv * vec4(a_pos, 1.0)).z;\n"
+    "        v_fog_factor = clamp((u_fog_end - eye_dist) /\n"
+    "                             (u_fog_end - u_fog_start), 0.0, 1.0);\n"
+    "    } else {\n"
+    "        v_fog_factor = 1.0;\n"
+    "    }\n"
     "}\n";
 
 static const char* kFS =
-    "in vec3 v_color;\n"
-    "in vec2 v_uv;\n"
-    "in vec3 v_lit;\n"
+    "in vec3  v_color;\n"
+    "in vec2  v_uv;\n"
+    "in vec3  v_lit;\n"
+    "in float v_fog_factor;\n"
     "out vec4 frag;\n"
     "uniform sampler2D u_tex;\n"
     "uniform int u_use_tex;\n"
+    "uniform int u_fog;\n"
+    "uniform vec3 u_fog_color;\n"
     "void main()\n"
     "{\n"
     "    vec4 c = vec4(v_color * v_lit, 1.0);\n"
     "    if (u_use_tex != 0) c = c * texture(u_tex, v_uv);\n"
+    "    if (u_fog != 0) c.rgb = mix(u_fog_color, c.rgb, v_fog_factor);\n"
     "    frag = c;\n"
     "}\n";
 
@@ -272,6 +287,19 @@ public:
         _lightingEnabled = enabled;
     }
 
+    void SetFog(bool enabled,
+                float r, float g, float b,
+                float start, float end) override
+    {
+        Flush();
+        _fogEnabled = enabled;
+        _fogColor[0] = r;
+        _fogColor[1] = g;
+        _fogColor[2] = b;
+        _fogStart = start;
+        _fogEnd   = end;
+    }
+
     void DrawTriangle(const RBVertex& v0,
                       const RBVertex& v1,
                       const RBVertex& v2,
@@ -309,6 +337,10 @@ private:
     GLint  _uAmbient    = -1;
     GLint  _uLightDir   = -1;
     GLint  _uLightColor = -1;
+    GLint  _uFog        = -1;
+    GLint  _uFogColor   = -1;
+    GLint  _uFogStart   = -1;
+    GLint  _uFogEnd     = -1;
 
     float _proj[16];
     float _mv[16];
@@ -319,6 +351,11 @@ private:
     float _ambient[3];
     float _lightDir  [RB_MAX_LIGHTS][3];
     float _lightColor[RB_MAX_LIGHTS][3];
+
+    bool  _fogEnabled = false;
+    float _fogColor[3] = { 0.0f, 0.0f, 0.0f };
+    float _fogStart = 1.0f;
+    float _fogEnd   = 1000.0f;
 
     const PixelMap* _curTexture = nullptr;
     std::vector<Vert> _cpu;
@@ -350,6 +387,10 @@ private:
         _uAmbient    = glGetUniformLocation(_prog, "u_ambient");
         _uLightDir   = glGetUniformLocation(_prog, "u_light_dir");
         _uLightColor = glGetUniformLocation(_prog, "u_light_color");
+        _uFog        = glGetUniformLocation(_prog, "u_fog");
+        _uFogColor   = glGetUniformLocation(_prog, "u_fog_color");
+        _uFogStart   = glGetUniformLocation(_prog, "u_fog_start");
+        _uFogEnd     = glGetUniformLocation(_prog, "u_fog_end");
 
         glGenVertexArrays(1, &_vao);
         glGenBuffers(1, &_vbo);
@@ -400,6 +441,10 @@ private:
         glUniform3fv(_uAmbient, 1, _ambient);
         glUniform3fv(_uLightDir,   RB_MAX_LIGHTS, &_lightDir[0][0]);
         glUniform3fv(_uLightColor, RB_MAX_LIGHTS, &_lightColor[0][0]);
+        glUniform1i(_uFog, _fogEnabled ? 1 : 0);
+        glUniform3fv(_uFogColor, 1, _fogColor);
+        glUniform1f(_uFogStart, _fogStart);
+        glUniform1f(_uFogEnd,   _fogEnd);
 
         if (_curTexture)
         {

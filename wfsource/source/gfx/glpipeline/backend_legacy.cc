@@ -85,6 +85,26 @@ public:
         AssertGLOK();
     }
 
+    void SetFog(bool enabled,
+                float r, float g, float b,
+                float start, float end) override
+    {
+        if (enabled)
+        {
+            GLfloat color[4] = { r, g, b, 1.0f };
+            glFogfv(GL_FOG_COLOR, color);
+            glFogf(GL_FOG_START, start);
+            glFogf(GL_FOG_END, end);
+            glFogi(GL_FOG_MODE, GL_LINEAR);
+            glEnable(GL_FOG);
+        }
+        else
+        {
+            glDisable(GL_FOG);
+        }
+        AssertGLOK();
+    }
+
     void EndFrame() override
     {
         // No batching in fixed-function mode; nothing to flush.

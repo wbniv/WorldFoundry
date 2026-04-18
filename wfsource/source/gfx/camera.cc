@@ -234,11 +234,11 @@ RenderCamera::RenderBegin()
                                         lightColor[0], lightColor[1], lightColor[2]);
     }
 
-   ConvertToGLColor(_fogColor,lightColor);
-   glFogfv(GL_FOG_COLOR, lightColor); 
-   glFogf(GL_FOG_START,_fogNear.AsFloat());
-   glFogf(GL_FOG_END,_fogFar.AsFloat());
-   glFogf(GL_FOG_MODE,GL_LINEAR);
+   ConvertToGLColor(_fogColor, lightColor);
+   RendererBackendGet().SetFog(true,
+                              lightColor[0], lightColor[1], lightColor[2],
+                              _fogNear.AsFloat(),
+                              _fogFar.AsFloat());
 
 
 #if 0

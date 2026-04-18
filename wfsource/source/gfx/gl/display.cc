@@ -229,7 +229,7 @@ Display::RenderBegin()
    AssertGLOK();
    RendererBackendGet().SetLightingEnabled(true);
    glEnable(GL_NORMALIZE);
-   glEnable(GL_FOG);
+   // Fog enable/disable is driven by camera.cc's SetFog each frame.
 
    GLfloat lightWhite[] = {
        1.0, 1.0, 1.0, 1.0
