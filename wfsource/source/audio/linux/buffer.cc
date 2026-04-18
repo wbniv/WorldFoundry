@@ -67,6 +67,10 @@ void SoundBuffer::play() const
 
 	PlayInstance* inst = new PlayInstance();
 
+	// SFX format commitment: WAV (linear PCM or IMA ADPCM). With MA_NO_FLAC /
+	// MA_NO_MP3 / MA_NO_VORBIS defined in miniaudio_impl.cc, the generic
+	// format-dispatch init only has the WAV path available — the Vorbis /
+	// FLAC / MP3 decoders don't link in.
 	ma_decoder_config dcfg = ma_decoder_config_init_default();
 	if (ma_decoder_init_memory(_impl->data, _impl->len, &dcfg, &inst->dec) != MA_SUCCESS) {
 		fprintf(stderr, "audio: SoundBuffer::play() — decoder init failed\n");

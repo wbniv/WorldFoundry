@@ -18,11 +18,6 @@ android {
         versionCode   = 1
         versionName   = "0.1"
 
-        externalNativeBuild {
-            cmake {
-                arguments += "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
-            }
-        }
         ndk {
             // arm64 only — the port plan's settled decision.
             abiFilters += setOf("arm64-v8a")
@@ -37,10 +32,31 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            // AGP's default: CMake passes -DCMAKE_BUILD_TYPE=Debug, which in
+            // our CMakeLists maps to -O0 -g for the wf_game target.
+            externalNativeBuild {
+                cmake {
+                    arguments += "-DCMAKE_BUILD_TYPE=Debug"
+                }
+            }
+        }
         getByName("release") {
             isMinifyEnabled = false
-            // Debuggable until we have a real signing config.
-            isDebuggable = true
+            // Sideload-signed with the debug keystore so `task build-apk`
+            // produces an installable APK without a real signing config.
+            // Flip this back to true (and add a signingConfig) once we have
+            // a distribution pipeline.
+            signingConfig = signingConfigs.getByName("debug")
+            isDebuggable = false
+            externalNativeBuild {
+                cmake {
+                    // Full release: -O3 + thin LTO + section GC + ICF.
+                    // See wf_game target's generator-expression flags in
+                    // the repo-root CMakeLists.txt.
+                    arguments += "-DCMAKE_BUILD_TYPE=Release"
+                }
+            }
         }
     }
 

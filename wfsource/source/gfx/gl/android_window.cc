@@ -21,6 +21,8 @@
 #include <android/log.h>
 #include <android/native_window.h>
 
+#include <hal/android/wf_android_export.hp>
+
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
@@ -58,7 +60,7 @@ extern "C" void WFAndroidSetSurfaceSize(int w, int h);
 extern "C" bool WFAndroidEglInit(ANativeWindow* window);
 extern "C" void WFAndroidEglTerm();
 
-extern "C" bool
+extern "C" WF_ANDROID_EXPORT bool
 WFAndroidEglInit(ANativeWindow* window)
 {
     if (!window)
@@ -168,7 +170,7 @@ WFAndroidEglInit(ANativeWindow* window)
 // backend's GL-object handles so the next draw recompiles.
 extern "C" void WFAndroidNotifySurfaceLost();
 
-extern "C" void
+extern "C" WF_ANDROID_EXPORT void
 WFAndroidEglTerm()
 {
     // Pause/background path: destroy only the surface. Context survives,
@@ -309,7 +311,7 @@ void PushHudRect(std::vector<HudVert>& v,
 
 // native_app_entry.cc calls this after AConfiguration_getUiModeType — suppress
 // the HUD on Google TV / Android TV where input is gamepad-only.
-extern "C" void
+extern "C" WF_ANDROID_EXPORT void
 WFAndroidSetHudEnabled(int enabled)
 {
     gHudEnabled = (enabled != 0);

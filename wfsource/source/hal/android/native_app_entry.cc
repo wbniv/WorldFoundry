@@ -40,6 +40,7 @@
 
 #include <hal/hal.h>
 #include <hal/lifecycle.h>
+#include <hal/android/wf_android_export.hp>
 
 extern "C" void _HALSetJoystickButtons(joystickButtonsF joystickButtons);
 
@@ -329,7 +330,7 @@ int32_t HandleInputEvent(struct android_app* /*app*/, AInputEvent* event)
 
 // Read by hal/android/asset_accessor_aasset.cc when creating the accessor
 // during _PlatformSpecificInit.
-extern "C" AAssetManager*
+extern "C" WF_ANDROID_EXPORT AAssetManager*
 WFAndroidGetAssetManager()
 {
     return gAssetMgr;
@@ -337,7 +338,7 @@ WFAndroidGetAssetManager()
 
 // Called from XEventLoop (display.cc PageFlip) once per frame. Non-blocking
 // drain of any queued commands + input events.
-extern "C" void
+extern "C" WF_ANDROID_EXPORT void
 WFAndroidPumpEvents()
 {
     if (!gApp) return;
@@ -354,7 +355,7 @@ WFAndroidPumpEvents()
 
 // Entry point — android_native_app_glue calls this on a dedicated thread
 // after ANativeActivity_onCreate returns to the UI thread.
-extern "C" void
+extern "C" WF_ANDROID_EXPORT void
 android_main(struct android_app* app)
 {
     gApp = app;

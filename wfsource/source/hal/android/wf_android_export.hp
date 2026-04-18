@@ -1,0 +1,30 @@
+//==========================================================================
+// Copyright (c) 2026 World Foundry Group
+// Part of the World Foundry 3D video game engine/production environment
+// for more information about World Foundry, see www.worldfoundry.org
+//==============================================================================
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// Version 2 as published by the Free Software Foundation
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//==========================================================================
+// Description: Visibility macro for symbols that must survive
+//              -fvisibility=hidden on the Android build.
+// Original Author: kts
+//==========================================================================
+
+#ifndef _WF_ANDROID_EXPORT_HP
+#define _WF_ANDROID_EXPORT_HP
+
+// Applied to extern "C" functions called from outside libwf_game.so:
+// the NDK loader (ANativeActivity_onCreate / android_main), platform
+// HAL callbacks (WFAndroid*, HAL*), and the asset-accessor factory.
+// With -fvisibility=hidden in Release every other symbol defaults to
+// hidden.
+#define WF_ANDROID_EXPORT __attribute__((visibility("default")))
+
+#endif // _WF_ANDROID_EXPORT_HP

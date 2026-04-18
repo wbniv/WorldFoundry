@@ -12,6 +12,7 @@
 //=============================================================================
 
 #include <hal/asset_accessor.hp>
+#include <hal/android/wf_android_export.hp>
 
 #include <android/asset_manager.h>
 
@@ -90,7 +91,7 @@ AAssetAccessor::Read(AssetHandle* handle, void* buffer, int64_t count)
 // if the NativeActivity hasn't yet given us an AAssetManager — which would
 // be a programmer error: HALStart shouldn't run before android_main has
 // stashed it.
-extern "C" AssetAccessor*
+extern "C" WF_ANDROID_EXPORT AssetAccessor*
 HALCreateAAssetAccessor()
 {
     AAssetManager* mgr = WFAndroidGetAssetManager();

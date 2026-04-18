@@ -112,39 +112,6 @@
 		( (__expr__) ? (void)0 : (_sys_assert((int)(long)(__expr__), #__expr__, __FILE__, __LINE__ ) ) )
 
 #	ifdef __cplusplus
-#	if defined(NO_CONSOLE)
-#ifndef EXPORTER_EXCEPTION_DEFINED
-#define EXPORTER_EXCEPTION_DEFINED
-class WRLExporterException
-{
-public:
-	long	exceptionData;
-};
-#include <windows.h>
-#include <winuser.h>
-#endif
-#	define AssertMsg(__cond__, __msg__)\
-		if (!(__cond__))\
-		{\
-			char messageBuffer[1024];\
-            std::strstream outputStream(messageBuffer,1024,std::ios::out|std::ios::binary);\
-            outputStream << __msg__ << std::endl << __FILE__ << ":" << __LINE__;\
-			outputStream << '\0';\
-			MessageBox(NULL, outputStream.str(), "Error", MB_OK);\
-			throw WRLExporterException();\
-		}
-#	define AssertMsgFileLine(__cond__, __msg__, file, line)\
-		if (!(__cond__))\
-		{\
-			char messageBuffer[1024];\
-            std::strstream outputStream(messageBuffer,1024,std::ios::out|std::ios::binary);\
-            outputStream << __msg__ << std::endl << file << ":" << line;\
-			outputStream << '\0';\
-			MessageBox(NULL, outputStream.str(), "Error", MB_OK);\
-			throw WRLExporterException();\
-		}
-
-#	else
 #		if SW_DBSTREAM
 #		define AssertMsg( exp, str )\
 	 		do\
@@ -189,7 +156,6 @@ public:
 
 //#	define AssertMsg(ignore1,ignore2) ((void)0)
 #	endif		// SW_DBSTREAM
-#endif			// defined(NO_CONSOLE)
 
 #	define ValidateObject( x )\
  		( x ).Validate( __FILE__, __LINE__ )

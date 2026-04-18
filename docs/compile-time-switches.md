@@ -8,7 +8,7 @@ code paths rather than just toggling features.
 | Switch | Options | What it controls |
 |--------|---------|-----------------|
 | `WF_TARGET` | `linux` / `android` *(future)* / `ios` *(future)* | Platform — drives toolchain, HAL, input, `__LINUX__` etc. |
-| `BUILDMODE` | `debug` / `safe-fast` / `release` / `final` / `profile` / `tool` / `max` / `kts` | Assertions, cheats, optimizations, debug streaming (see table below) |
+| `BUILDMODE` | `debug` / `safe-fast` / `release` / `final` / `profile` / `tool` / `kts` | Assertions, cheats, optimizations, debug streaming (see table below) |
 | `SCALAR_TYPE` | `fixed` / `float` / `double` | All math, physics, and vector/matrix operations |
 | `BUILD_STREAMING` | `hd` / `cd` / `off` | Asset streaming strategy |
 
@@ -65,9 +65,6 @@ must be accounted for.
 
 `tool` is `debug` with the Linux target, GL renderer, and streaming disabled, plus
 `-DSYS_TOOL`. It cannot build the `game` library — it targets auxiliary tool binaries.
-
-`max` inherits from `tool`, then switches to a Windows/multi-threaded configuration and
-adds `-DNO_CONSOLE -DASSERT_GUI`. A legacy mode for a Windows-hosted tool build.
 
 `kts` inherits from `debug` with Linux target. A custom configuration maintained for a
 specific external party ("whatever kts wants today").

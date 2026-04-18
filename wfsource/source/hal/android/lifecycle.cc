@@ -11,6 +11,7 @@
 //=============================================================================
 
 #include <hal/lifecycle.h>
+#include <hal/android/wf_android_export.hp>
 
 #include <atomic>
 
@@ -18,19 +19,19 @@ namespace {
 std::atomic<bool> g_suspended{false};
 }
 
-extern "C" void
+extern "C" WF_ANDROID_EXPORT void
 HALNotifySuspend(void)
 {
     g_suspended.store(true, std::memory_order_release);
 }
 
-extern "C" void
+extern "C" WF_ANDROID_EXPORT void
 HALNotifyResume(void)
 {
     g_suspended.store(false, std::memory_order_release);
 }
 
-extern "C" int
+extern "C" WF_ANDROID_EXPORT int
 HALIsSuspended(void)
 {
     return g_suspended.load(std::memory_order_acquire) ? 1 : 0;
@@ -39,7 +40,7 @@ HALIsSuspended(void)
 // Defined in hal/android/native_app_entry.cc — ALooper_pollOnce(0, ...).
 extern "C" void WFAndroidPumpEvents(void);
 
-extern "C" void
+extern "C" WF_ANDROID_EXPORT void
 HALPumpSuspendedEvents(void)
 {
     // Drain the ALooper so APP_CMD_RESUME (+ any input events queued during

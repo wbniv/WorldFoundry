@@ -109,7 +109,17 @@ tasks:
         echo "Gradle itself is via the repo-vendored android/gradlew wrapper — no system install needed."
 
   build-apk:
-    desc: "Assemble the Android APK (debug, auto-signed for sideload)"
+    desc: "Assemble the Android APK (release: -O3 + LTO + section GC; debug-keystore signed for sideload)"
+    deps: [android-sdk-install]
+    dir: android
+    env:
+      ANDROID_HOME: /usr/lib/android-sdk
+    cmds:
+      - ./gradlew assembleRelease
+      - echo "APK → android/app/build/outputs/apk/release/worldfoundry-release.apk"
+
+  build-apk-debug:
+    desc: "Assemble the Android APK (debug: -O0 -g, for attaching ndk-gdb / lldb)"
     deps: [android-sdk-install]
     dir: android
     env:
@@ -119,12 +129,12 @@ tasks:
       - echo "APK → android/app/build/outputs/apk/debug/worldfoundry-debug.apk"
 
   install-apk:
-    desc: "Install the APK onto a connected Android device and start it"
+    desc: "Install the release APK onto a connected Android device and start it"
     dir: android
     vars:
       ADB: /usr/lib/android-sdk/platform-tools/adb
     cmds:
-      - "{{.ADB}} install -r app/build/outputs/apk/debug/worldfoundry-debug.apk"
+      - "{{.ADB}} install -r app/build/outputs/apk/release/worldfoundry-release.apk"
       - "{{.ADB}} shell am start -n org.worldfoundry.wf_game/android.app.NativeActivity"
 
 

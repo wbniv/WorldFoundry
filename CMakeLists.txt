@@ -380,15 +380,33 @@ endif()
 
 target_include_directories(wf_game PRIVATE ${WF_INCLUDES})
 target_compile_definitions(wf_game PRIVATE ${WF_DEFS})
-# -fpermissive and tricky macro defines go in compile_options (not definitions)
+# -fpermissive and tricky macro defines go in compile_options (not definitions).
+# Optimisation is config-dependent: Debug / RelWithDebInfo stay at -O0 -g so
+# the debugger shows real source; Release cranks up -O3 + LTO + section GC.
 target_compile_options(wf_game PRIVATE
-    -fpermissive -w -O0 -g
+    -fpermissive -w
     "-D__GAME__=\"wf_game\""
     "-DERR_DEBUG(x)="
+    "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
+    "$<$<CONFIG:Release>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>"
+)
+target_link_options(wf_game PRIVATE
+    "$<$<CONFIG:Release>:-flto=thin;-Wl,--gc-sections;-Wl,--icf=safe;-Wl,-O2;-Wl,--export-dynamic-symbol=ANativeActivity_onCreate>"
 )
 
 if(ANDROID)
     target_compile_options(wf_game PRIVATE -Wno-register)
+    # Bump Jolt + zforth to -O3 in Release to match main target. (Jolt is ~36%
+    # of .text so even +10% speed here moves the needle.) Jolt has no `throw`
+    # in its source, so -fno-exceptions is a drop-in win — removes all the
+    # .eh_frame / .gcc_except_table entries that C++ template-heavy code
+    # generates by default.
+    if(TARGET Jolt)
+        target_compile_options(Jolt PRIVATE "$<$<CONFIG:Release>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>")
+    endif()
+    if(TARGET zforth)
+        target_compile_options(zforth PRIVATE "$<$<CONFIG:Release>:-O3;-flto=thin;-ffunction-sections;-fdata-sections>")
+    endif()
 endif()
 
 # ─── Platform link libraries ──────────────────────────────────────────────────
