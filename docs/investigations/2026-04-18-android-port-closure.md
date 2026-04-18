@@ -27,11 +27,14 @@ Verified state:
 
 Source art: reuse whatever WF logo/mark exists in-repo; if none at the right resolution, generate from a high-res master.
 
-### 2. Stale build.gradle.kts comment
+### 2. Asset-pipeline remediation (not just a comment fix)
 
-`android/app/build.gradle.kts:60-62` says "the packaged APK ships no assets — sideload cd.iff to /data/local/tmp/wf/cd.iff". This is **out of date** — `android/app/src/main/assets/cd.iff` exists (symlink) and Gradle bundles it.
+`android/app/build.gradle.kts:60-62` described the packaged APK as shipping no assets and asked the operator to sideload cd.iff. That's now inaccurate — `android/app/src/main/assets/` bundles three symlinks (cd.iff, level0.mid, florestan-subset.sf2) into `wfsource/source/game/`. But the symlinks are a **dev shortcut, not the real target state**: loose `.mid` + `.sf2` alongside `cd.iff` is a second asset pipeline that shouldn't exist. See `docs/plans/2026-04-18-audio-assets-from-iff.md`.
 
-**Action:** Delete the stale comment. Confirm on a fresh install (uninstall, reinstall, wipe `/data/local/tmp/wf/`) that Snowgoons still boots purely from bundled assets.
+**Action:**
+- Short-term (comment rewrite, landed): describe the transitional three-symlink state and point at the audio-assets-from-iff plan.
+- Real remediation: execute the audio-assets-from-iff plan — move MIDI + SF2 into `cd.iff` as typed chunks, retire the loose-file loaders, delete the `.mid` / `.sf2` symlinks. Only `cd.iff` ships.
+- Verification (post-plan): fresh install (uninstall, reinstall, wipe `/data/local/tmp/wf/`) boots Snowgoons from a single bundled `cd.iff`.
 
 ### 3. README status table out of sync
 
@@ -64,7 +67,7 @@ When the port is closed, prepend a new topical paragraph to the top of `docs/wf-
 ## Verification
 
 1. `./gradlew :app:assembleDebug` — build succeeds.
-2. `adb install -r android/app/build/outputs/apk/debug/app-debug.apk` on a clean device (after `adb uninstall org.worldfoundry.wf_game` and `rm -rf /data/local/tmp/wf`).
+2. `adb install -r android/app/build/outputs/apk/debug/worldfoundry-debug.apk` on a clean device (after `adb uninstall org.worldfoundry.wf_game` and `rm -rf /data/local/tmp/wf`).
 3. Home screen / app drawer shows the WF icon (not the gear) for both "World Foundry" and "WF Log Viewer" launchers.
 4. Tapping the icon boots Snowgoons from bundled `cd.iff` with no sideloaded files present.
 5. Briefly verify pause/resume still works (home button → reopen) and that HUD + gamepad still behave.

@@ -57,7 +57,19 @@ android {
         }
     }
 
-    // Asset pipeline (Phase 3 step 5): bundle cd.iff under assets/. For now
-    // the packaged APK ships no assets — sideload cd.iff to
-    // /data/local/tmp/wf/cd.iff and start the engine from that working dir.
+    // Override the AGP default (app-debug.apk) so the file uploaded to Drive
+    // and downloaded on the phone shows up as "worldfoundry-debug.apk".
+    applicationVariants.all {
+        val variant = this
+        outputs.all {
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl)
+                .outputFileName = "worldfoundry-${variant.buildType.name}.apk"
+        }
+    }
+
+    // Asset pipeline (Phase 3 step 5): Gradle bundles src/main/assets/ into
+    // the APK. Transitional layout: three symlinks into wfsource/source/game/
+    // (cd.iff + level0.mid + florestan-subset.sf2) — the loose MIDI + soundfont
+    // are a dev shortcut. Real remediation is docs/plans/2026-04-18-audio-
+    // assets-from-iff.md: move audio inside cd.iff so only cd.iff ships.
 }

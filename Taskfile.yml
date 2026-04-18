@@ -116,7 +116,7 @@ tasks:
       ANDROID_HOME: /usr/lib/android-sdk
     cmds:
       - ./gradlew assembleDebug
-      - echo "APK → android/app/build/outputs/apk/debug/app-debug.apk"
+      - echo "APK → android/app/build/outputs/apk/debug/worldfoundry-debug.apk"
 
   install-apk:
     desc: "Install the APK onto a connected Android device and start it"
@@ -124,7 +124,7 @@ tasks:
     vars:
       ADB: /usr/lib/android-sdk/platform-tools/adb
     cmds:
-      - "{{.ADB}} install -r app/build/outputs/apk/debug/app-debug.apk"
+      - "{{.ADB}} install -r app/build/outputs/apk/debug/worldfoundry-debug.apk"
       - "{{.ADB}} shell am start -n org.worldfoundry.wf_game/android.app.NativeActivity"
 
 

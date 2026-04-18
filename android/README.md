@@ -20,7 +20,7 @@ After it finishes, add the env-var lines it prints to `~/.bashrc` /
 ## Build + install
 
 ```
-task build-apk        # → android/app/build/outputs/apk/debug/app-debug.apk
+task build-apk        # → android/app/build/outputs/apk/debug/worldfoundry-debug.apk
 task install-apk      # adb install + start NativeActivity
 adb logcat -s wf_game # stream engine logs
 ```
@@ -48,9 +48,10 @@ icons + light polish.
 - **Post-boot polish**: viewport/projection aspect, pause/resume EGL context
   preservation, zForth `if/else/then` director fix, on-screen touch HUD ✅
 
-Remaining before full closure: launcher icons (`res/mipmap-*/` + adaptive icon
-XML + `android:icon` in the manifest), and removing the stale
-"sideload cd.iff" comment in `android/app/build.gradle.kts`. See
-`docs/investigations/2026-04-18-android-port-closure.md`.
+Remaining before full closure: adaptive-icon XML (`res/mipmap-anydpi-v26/`)
+layered on top of the legacy mipmap PNGs just landed, and the
+audio-assets-from-iff remediation (`docs/plans/2026-04-18-audio-assets-from-iff.md`)
+that collapses the three-symlink transitional `assets/` layout to a single
+bundled `cd.iff`. See `docs/investigations/2026-04-18-android-port-closure.md`.
 
 See `docs/plans/2026-04-16-android-port.md` for the full plan.
