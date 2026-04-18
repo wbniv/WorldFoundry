@@ -44,6 +44,12 @@ android {
         }
     }
 
+    compileOptions {
+        // Java code (LogViewerActivity) targets 1.8 — fine for minSdk 21.
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
     packaging {
         jniLibs {
             // Keep symbols until we have a real obfuscation/strip pipeline.
