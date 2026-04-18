@@ -108,7 +108,7 @@ WF IFF shares the EA IFF 85 chunk concept — 4-byte ID, 32-bit size, padded pay
 
 *4-byte alignment instead of 2-byte.* Chunks pad to 4-byte boundaries. Reason: MIPS R3000 raises a bus error on unaligned 32-bit loads. 4-byte alignment lets the engine cast chunk payloads directly to structs without copying or fixups. AIFF and RIFF both use 2-byte alignment — insufficient for MIPS.
 
-*No FORM/LIST/CAT/PROP container types.* Any 4-char ID can contain nested chunks. The nesting is syntactic (iffcomp source nests `{ }` blocks) rather than semantic (no special container IDs). There is no document-type field after the size in a container chunk; the ID itself is the type.
+*No reserved container IDs.* Any 4-char ID can contain nested chunks. The nesting is syntactic (iffcomp source nests `{ }` blocks) rather than semantic — no ID is privileged as a container. Nothing stops a WF `.iff` source from using `FORM`, `LIST`, `CAT `, or `PROP` as chunk IDs; they just carry no special meaning to the format or engine. There is no document-type field after the size in a container chunk; the ID itself is the type.
 
 *Back-patching: `.offsetof()` / `.sizeof()`.* iffcomp resolves forward references after layout: `.offsetof('CHUNK')` emits the absolute file offset of a named chunk's payload; `.sizeof('CHUNK')` emits its payload size. These become 32-bit little-endian integers in the output. The game engine uses these to jump directly to a known chunk without scanning. AIFF achieves something similar with SSND's `offset` field for the one case of sample-data streaming; WF generalises it to any chunk.
 
@@ -125,7 +125,7 @@ WF IFF shares the EA IFF 85 chunk concept — 4-byte ID, 32-bit size, padded pay
 | Year | 1985 | 1988 | 1991 | ~1993 |
 | Byte order | Big-endian | Big-endian | **Little-endian** | **Little-endian** |
 | Chunk alignment | 2-byte | 2-byte | 2-byte | **4-byte** |
-| Container types | FORM/LIST/CAT/PROP | FORM (only) | RIFF/LIST | **None — any ID nests** |
+| Reserved container IDs | FORM/LIST/CAT/PROP | FORM (only) | RIFF/LIST | **None — any ID may nest** |
 | Size field | Payload only | Payload only | Payload only | Payload only |
 | Intra-chunk nav fields | None | **SSND offset+blockSize** | None | **`.offsetof()`/`.sizeof()` (compile-time)** |
 | Platform float type | None | **80-bit extended (68881)** | None | **Fixed-point integers only** |
