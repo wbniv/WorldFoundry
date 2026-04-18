@@ -158,4 +158,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17** — [`wfsource/source/game/snowgoons.iff`](wfsource/source/game/snowgoons.iff) + [`cd.iff`](wfsource/source/game/cd.iff) (`a7ef46e`): snowgoons joystick control restored by re-patching the stale director script to the inlined three-block form.
+**2026-04-17 22:49** — [`docs/plans/2026-04-15-dead-code-removal.md`](docs/plans/2026-04-15-dead-code-removal.md): Dead-code removal — April 2026
