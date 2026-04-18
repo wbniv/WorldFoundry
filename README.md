@@ -158,4 +158,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-17 22:49** — [`docs/plans/2026-04-16-android-port.md`](docs/plans/2026-04-16-android-port.md): Plan: Android port
+**2026-04-17 23:57** — [`docs/plans/2026-04-17-oas2oad-name-kind-fix.md`](docs/plans/2026-04-17-oas2oad-name-kind-fix.md): Plan: fix oas2oad-rs name_KIND → correct MovementClass default
