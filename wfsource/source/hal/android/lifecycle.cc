@@ -35,3 +35,16 @@ HALIsSuspended(void)
 {
     return g_suspended.load(std::memory_order_acquire) ? 1 : 0;
 }
+
+// Defined in hal/android/native_app_entry.cc — ALooper_pollOnce(0, ...).
+extern "C" void WFAndroidPumpEvents(void);
+
+extern "C" void
+HALPumpSuspendedEvents(void)
+{
+    // Drain the ALooper so APP_CMD_RESUME (+ any input events queued during
+    // suspension) reach our handlers. Without this the game loop's
+    // HALIsSuspended() check stays true forever and the app is visibly
+    // stuck on resume.
+    WFAndroidPumpEvents();
+}

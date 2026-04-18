@@ -274,9 +274,12 @@ WFGame::RunLevel(_DiskFile* levelFile)
 	{
 		if ( HALIsSuspended() )
 		{
-			// Platform has backgrounded us (Android onPause). Skip render + PageFlip
-			// to avoid touching a torn-down GL context; wake briefly and re-check.
-			// Linux never gets here — HALIsSuspended() is always false there.
+			// Platform has backgrounded us (Android onPause). Skip render +
+			// PageFlip to avoid touching a torn-down GL context; pump platform
+			// events so APP_CMD_RESUME actually reaches HALNotifyResume and
+			// unsticks us. Linux never enters this branch — HALIsSuspended()
+			// is always false there.
+			HALPumpSuspendedEvents();
 			usleep(16000);
 			continue;
 		}

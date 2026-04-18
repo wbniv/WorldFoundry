@@ -337,6 +337,33 @@ public:
         Flush();
     }
 
+    // Called from the Android lifecycle hook (WFAndroidEglTerm) when the
+    // EGL surface is destroyed. Reset all GL-object handles; the next draw
+    // call's LazyInit will recompile the program + recreate VAO/VBO in the
+    // new context. Textures are re-uploaded lazily by PixelMap::SetGLTexture
+    // the first time each one is bound after resume.
+    void OnSurfaceLost()
+    {
+        _inited      = false;
+        _vao         = 0;
+        _vbo         = 0;
+        _prog        = 0;
+        _uMvp        = -1;
+        _uMv         = -1;
+        _uTex        = -1;
+        _uUseTex     = -1;
+        _uLighting   = -1;
+        _uAmbient    = -1;
+        _uLightDir   = -1;
+        _uLightColor = -1;
+        _uFog        = -1;
+        _uFogColor   = -1;
+        _uFogStart   = -1;
+        _uFogEnd     = -1;
+        _cpu.clear();
+        _curTexture  = nullptr;
+    }
+
 private:
     bool   _inited   = false;
     GLuint _vao      = 0;
@@ -496,3 +523,15 @@ RendererBackend* ModernBackendInstance()
 {
     return &sModernBackend;
 }
+
+#if defined(__ANDROID__)
+// Called from gfx/gl/android_window.cc's WFAndroidEglTerm when the EGL
+// surface is torn down on pause/backgrounding. Resets all GL-object IDs so
+// the first draw after resume (into the new context) triggers LazyInit
+// again instead of trying to use stale handles.
+extern "C" void
+WFAndroidNotifySurfaceLost()
+{
+    sModernBackend.OnSurfaceLost();
+}
+#endif

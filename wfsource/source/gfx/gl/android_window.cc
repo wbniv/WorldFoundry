@@ -66,26 +66,47 @@ WFAndroidEglInit(ANativeWindow* window)
         EGL_NONE
     };
 
-    gEglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    // First-time setup: display + config + context. Preserved across
+    // pause/resume so textures and VBOs in the context survive.
     if (gEglDisplay == EGL_NO_DISPLAY)
     {
-        WFLOGE("eglGetDisplay failed");
-        return false;
-    }
-    if (!eglInitialize(gEglDisplay, nullptr, nullptr))
-    {
-        WFLOGE("eglInitialize failed: 0x%x", eglGetError());
-        return false;
+        gEglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        if (gEglDisplay == EGL_NO_DISPLAY)
+        {
+            WFLOGE("eglGetDisplay failed");
+            return false;
+        }
+        if (!eglInitialize(gEglDisplay, nullptr, nullptr))
+        {
+            WFLOGE("eglInitialize failed: 0x%x", eglGetError());
+            return false;
+        }
+
+        EGLint numConfigs = 0;
+        if (!eglChooseConfig(gEglDisplay, configAttribs, &gEglConfig, 1, &numConfigs)
+            || numConfigs < 1)
+        {
+            WFLOGE("eglChooseConfig failed: 0x%x", eglGetError());
+            return false;
+        }
     }
 
-    EGLint numConfigs = 0;
-    if (!eglChooseConfig(gEglDisplay, configAttribs, &gEglConfig, 1, &numConfigs)
-        || numConfigs < 1)
+    if (gEglContext == EGL_NO_CONTEXT)
     {
-        WFLOGE("eglChooseConfig failed: 0x%x", eglGetError());
-        return false;
+        const EGLint contextAttribs[] = {
+            EGL_CONTEXT_CLIENT_VERSION, 3,
+            EGL_NONE
+        };
+        gEglContext = eglCreateContext(gEglDisplay, gEglConfig,
+                                       EGL_NO_CONTEXT, contextAttribs);
+        if (gEglContext == EGL_NO_CONTEXT)
+        {
+            WFLOGE("eglCreateContext failed: 0x%x", eglGetError());
+            return false;
+        }
     }
 
+    // Per-surface setup: happens every pause/resume cycle.
     EGLint format = 0;
     eglGetConfigAttrib(gEglDisplay, gEglConfig, EGL_NATIVE_VISUAL_ID, &format);
     ANativeWindow_setBuffersGeometry(window, 0, 0, format);
@@ -97,20 +118,23 @@ WFAndroidEglInit(ANativeWindow* window)
         return false;
     }
 
-    const EGLint contextAttribs[] = {
-        EGL_CONTEXT_CLIENT_VERSION, 3,
-        EGL_NONE
-    };
-    gEglContext = eglCreateContext(gEglDisplay, gEglConfig, EGL_NO_CONTEXT, contextAttribs);
-    if (gEglContext == EGL_NO_CONTEXT)
-    {
-        WFLOGE("eglCreateContext failed: 0x%x", eglGetError());
-        return false;
-    }
-
     if (!eglMakeCurrent(gEglDisplay, gEglSurface, gEglSurface, gEglContext))
     {
-        WFLOGE("eglMakeCurrent failed: 0x%x", eglGetError());
+        EGLint err = eglGetError();
+        WFLOGE("eglMakeCurrent failed: 0x%x", err);
+        // EGL_CONTEXT_LOST (0x300E): the driver killed our GL objects on
+        // the way back in — rare, but must be recovered from. Drop the
+        // context, tell the backend to rebuild, and try once more with a
+        // fresh context.
+        if (err == EGL_CONTEXT_LOST)
+        {
+            WFLOG("EGL_CONTEXT_LOST — rebuilding");
+            extern void WFAndroidNotifySurfaceLost();
+            WFAndroidNotifySurfaceLost();
+            eglDestroyContext(gEglDisplay, gEglContext);
+            gEglContext = EGL_NO_CONTEXT;
+            // Fall through to normal retry on next INIT_WINDOW.
+        }
         return false;
     }
 
@@ -118,26 +142,29 @@ WFAndroidEglInit(ANativeWindow* window)
     eglQuerySurface(gEglDisplay, gEglSurface, EGL_WIDTH,  &w);
     eglQuerySurface(gEglDisplay, gEglSurface, EGL_HEIGHT, &h);
     WFAndroidSetSurfaceSize(w, h);
-    WFLOG("EGL context ready: %dx%d", w, h);
+    WFLOG("EGL surface ready: %dx%d (context %s)",
+          w, h, gEglContext == EGL_NO_CONTEXT ? "NEW" : "reused");
     return true;
 }
+
+// Defined in gfx/glpipeline/backend_modern.cc — safety-net for the rare
+// EGL_CONTEXT_LOST path (low-memory driver reset). Clears the modern
+// backend's GL-object handles so the next draw recompiles.
+extern "C" void WFAndroidNotifySurfaceLost();
 
 extern "C" void
 WFAndroidEglTerm()
 {
-    if (gEglDisplay != EGL_NO_DISPLAY)
+    // Pause/background path: destroy only the surface. Context survives,
+    // so all its textures, shader programs and VBOs survive. When the
+    // user switches back, WFAndroidEglInit creates a new surface and
+    // eglMakeCurrent's the existing context onto it — no rebuild needed.
+    if (gEglDisplay != EGL_NO_DISPLAY && gEglSurface != EGL_NO_SURFACE)
     {
-        eglMakeCurrent(gEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-        if (gEglContext != EGL_NO_CONTEXT)
-            eglDestroyContext(gEglDisplay, gEglContext);
-        if (gEglSurface != EGL_NO_SURFACE)
-            eglDestroySurface(gEglDisplay, gEglSurface);
-        eglTerminate(gEglDisplay);
+        eglMakeCurrent(gEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, gEglContext);
+        eglDestroySurface(gEglDisplay, gEglSurface);
     }
-    gEglDisplay   = EGL_NO_DISPLAY;
     gEglSurface   = EGL_NO_SURFACE;
-    gEglContext   = EGL_NO_CONTEXT;
-    gEglConfig    = nullptr;
     gNativeWindow = nullptr;
 }
 

@@ -39,6 +39,12 @@ void HALNotifySuspend(void);
 void HALNotifyResume(void);
 int  HALIsSuspended(void);   // 0 = running, nonzero = suspended
 
+// Pump platform lifecycle/input events while the game loop is suspended.
+// Android: drains the ALooper so APP_CMD_RESUME actually reaches us.
+// Linux: no-op (no suspend path). Call this from the suspend wait loop —
+// without it we'd never receive the resume command and stay stuck forever.
+void HALPumpSuspendedEvents(void);
+
 #if defined(__cplusplus)
 }
 #endif

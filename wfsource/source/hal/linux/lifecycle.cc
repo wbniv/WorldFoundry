@@ -50,3 +50,9 @@ HALIsSuspended(void)
 {
     return g_suspended.load(std::memory_order_acquire) ? 1 : 0;
 }
+
+extern "C" void
+HALPumpSuspendedEvents(void)
+{
+    // No platform lifecycle events on Linux.
+}
