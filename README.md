@@ -13,7 +13,7 @@ Six days of work (2026-04-12 – 2026-04-17). Newest first:
 
 **Window-close shutdown stability (2026-04-17)** — `mesa.cc` now handles `WM_DELETE_WINDOW` and `rest_api.cc` registers `RestApi_Stop` via `sys_atexit`; X11 close button exits cleanly instead of aborting.
 
-**Graphics — retire immediate-mode GL / Android Phase 0 (2026-04-17, in progress)** — Renderer-backend seam landed, all 8 render TUs ported to a single `DrawTriangle` call (−928 LOC), matrix state routed through the backend, and a modern VBO + GLSL 330 / GLES 300 es shader backend (`backend_modern.cc`) is selectable via `WF_RENDERER=modern` — default modern on Android, legacy on desktop. Step 4c remaining is proper shader ports for lighting/fog/matte (not `#ifndef __ANDROID__` stubs), then legacy retires.
+**Graphics — retire immediate-mode GL / Android Phase 0 (2026-04-18, complete)** — Modern VBO + GLSL 330 / GLES 300 es shader backend is the sole GL path on both Linux and Android; legacy fixed-function backend retired at `ff589c8` after visual parity on snowgoons. Net OpenGL-only impact: **−541 LOC** across 16 files (8 renderer TUs collapsed −1,025 once the `FLAG_TEXTURE × FLAG_GOURAUD × FLAG_LIGHTING` branching dissolved, paying for the modern backend, seam header, and factory stub). Tag `pre-legacy-gl-retire` (`807d1ea`) preserves the last commit with `backend_legacy.cc` present.
 
 **Audio (Phases 1–5 complete) (2026-04-17)** — miniaudio + TinySoundFont vendored; per-level `level<N>.mid` music + fire-and-forget SFX + 3D positional playback with camera-tracked listener, all audible in snowgoons. Gap: Lua-only scripting surface (`scripting_lua.cc` closures) — mailbox-wired audio API for the other seven engines is deferred.
 
