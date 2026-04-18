@@ -6,6 +6,7 @@
 - [verify] Wren plug — `scripting_wren.{hp,cc}`, `wren-0.4.0` vendor, `//wren\n` sigil, snowgoons IFF patched via `scripts/patch_snowgoons_wren.py`; needs smoke test once build is unblocked — [plan](docs/plans/2026-04-14-wren-scripting-engine.md)
 - [verify] WAMR interp — `wamr_engine` namespace, wasm-C-API, global-import constants; vendor at `engine/vendor/wamr-2.2.0`; WAT sources in `wamr-2.2.0-wf/`; needs smoke test + global-import WAT compiled (requires wabt/wat2wasm) — [plan](docs/plans/2026-04-14-wamr-dev-aot-ship.md)
 - [verify] JerryScript smoke test — JerryScript compiled (7 GCC 14 bugs fixed); snowgoons patched with JS; run `wf_game -Lwflevels/snowgoons.iff` to confirm player+director — [plan](docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md#d2-jerryscript-smoke-test) [investigation](docs/investigations/2026-04-15-jerryscript-gcc14-build-fixes.md)
+- [ ] Review Forth compile vs. run separation — Forth conflates compile-time (`:` definitions, immediate words) with run-time (interpret loop); audit how `scripting_zforth.cc` handles this for per-actor scripts and whether a pre-compile pass into a saved dictionary makes sense
 
 
 ## LUA ENGINE

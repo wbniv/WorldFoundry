@@ -1,7 +1,7 @@
 # Plan: Mailbox-wired audio API (music + SFX)
 
 **Date:** 2026-04-17
-**Status:** Not started
+**Status:** Deferred
 
 ## Context
 
@@ -200,7 +200,7 @@ needing it — a 128-entry integer slot is a fine interim API.
 - HRTF / reverb / occlusion. Phase 5 follow-ups in the audio investigation.
 - Per-slot metadata (min/max distance, loop flag, bus routing). Requires
   a new `SFXM`-style IFF chunk; design deferred.
-- Voice chat, dynamic music stems, beat-synced gameplay. Separate plans.
+- Voice chat ([multiplayer/voice/mobile-input investigation](../../investigations/2026-04-14-multiplayer-voice-mobile-input.md)), dynamic music stems, beat-synced gameplay. Separate plans.
 - Retuning the mailbox enum numbering. Stability of the mailbox IDs
   matters for compiled scripts; keep `EMAILBOX_SOUND = 3017` as-is and
   pick new values in the neighbouring range for the music triplet.

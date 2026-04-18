@@ -131,6 +131,7 @@ WF IFF shares the EA IFF 85 chunk concept — 4-byte ID, 32-bit size, padded pay
 | Platform float type | None | **80-bit extended (68881)** | None | **Fixed-point integers only** |
 | Text source as interchange | No | No | No | **Yes — unique feature** |
 | Intended use (binary) | Interchange | Interchange | Interchange | **Direct memory load** |
+| Intended use (text) | None | None | None | **Interchange (iffcomp source)** |
 | Still in use | Legacy | Yes (macOS, Pro Tools) | Yes (WAV, AVI) | WF engine |
 
 ---

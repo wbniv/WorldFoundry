@@ -10,8 +10,13 @@ no RegExp, no TypedArray, no Container builtins)
 
 ## Background
 
-JerryScript v3.0.0 was released in 2023 against GCC ≤ 12. GCC 14 tightened
-several diagnostics to errors that were previously warnings or silent.
+JerryScript v3.0.0 was released **2024-12-18**, after a long quiet period —
+the previous tag (v2.4.0) was January 2021. CI for v3.0.0 was constrained
+to Ubuntu 20.04 (GCC 9-10); see upstream issue
+[#5115](https://github.com/jerryscript-project/jerryscript/issues/5115)
+"Not feasible to update some CI jobs to ubuntu 22.04" (closed 2023-12).
+GCC 14 (Ubuntu 24.04 default) tightened several diagnostics to errors that
+were previously warnings or silent.
 
 The `wf-minimal` profile (`JERRY_BUILTINS=0`, with a small allow-list of
 essential builtins) triggers **seven distinct build failures** that are all
@@ -21,11 +26,10 @@ with GCC 14, so the bugs accumulated unseen.
 
 ### Why the upstream project doesn't see this
 
-JerryScript v3.0.0 was tested on GCC 9-10 (Ubuntu 20.04). Under those
-compilers, most of these diagnostics were warnings, not errors, or were
-suppressed. The project has had essentially no commits since mid-2023 and
-appears to be in maintenance-only mode. No upstream profile disables
-`JERRY_BUILTINS` the way our `wf-minimal` profile does.
+Under GCC 9-10, most of these diagnostics were warnings, not errors, or were
+suppressed. The project is now in maintenance-only mode (see "Upstream
+status" below). No upstream profile disables `JERRY_BUILTINS` the way our
+`wf-minimal` profile does.
 
 ---
 
@@ -218,31 +222,110 @@ engine/vendor/jerryscript-v3.0.0/jerry-core/ecma/operations/ecma-iterator-object
 
 ## Upstream status and how to report
 
-The upstream project is at `github.com/jerryscript-project/jerryscript`.
-The v3.0.0 tag is the last release (2023); the project is in maintenance-only
-mode with sparse activity.
+Repo: `github.com/jerryscript-project/jerryscript` (7,388 stars, 228 open
+issues/PRs as of 2026-04-17, ~191 of which are issues).
 
-**These bugs are almost certainly not yet reported or fixed upstream.** The
-root cause — no CI coverage for minimal profiles on GCC 14 — means nobody
-with upstream access has seen them.
+### Project activity since 2020
 
-**To file a bug:**
+| Year | Commits | Issues opened | PRs merged |
+|------|--------:|--------------:|-----------:|
+| 2020 | 597 | 258 | 601 |
+| 2021 | 335 | 129 | 339 |
+| 2022 | 33  | 70  | 33  |
+| 2023 | 9   | 76  | 9   |
+| 2024 | 46  | 36  | 48  |
+| 2025 | 2   | 44  | 2   |
+| 2026 (YTD) | 0 | 8 | 0 |
 
-1. Search `github.com/jerryscript-project/jerryscript/issues` for "GCC 14",
-   "same_value_zero", "global_obj_p", "unused parameter cp".
-2. If no open issue covers the full set, file one issue titled something like:
-   > "Build failures on GCC 14 with JERRY_BUILTINS=0 (7 bugs in minimal profile)"  
-   Include the reproducer:
-   ```bash
-   # Minimum repro (ubuntu 24.04):
-   cmake -S . -B build -DJERRY_BUILTINS=0 -DJERRY_BUILTIN_ARRAY=1 \
-         -DJERRY_BUILTIN_ERRORS=1
-   cmake --build build -j
-   ```
-   Reference this investigation file for the full patch list.
-3. A consolidated PR with the 10 changed files would be a clean contribution.
-   All fixes are in `#if`/`#else` branches — they are purely additive,
-   zero risk to the default (full-features) build.
+```mermaid
+xychart-beta
+    title "Commits per year"
+    x-axis [2020, 2021, 2022, 2023, 2024, 2025, "2026 YTD"]
+    y-axis "Commits" 0 --> 650
+    bar [597, 335, 33, 9, 46, 2, 0]
+```
+
+```mermaid
+xychart-beta
+    title "PRs merged per year"
+    x-axis [2020, 2021, 2022, 2023, 2024, 2025, "2026 YTD"]
+    y-axis "PRs merged" 0 --> 650
+    bar [601, 339, 33, 9, 48, 2, 0]
+```
+
+```mermaid
+xychart-beta
+    title "Issues opened per year (community pressure)"
+    x-axis [2020, 2021, 2022, 2023, 2024, 2025, "2026 YTD"]
+    y-axis "Issues opened" 0 --> 280
+    bar [258, 129, 70, 76, 36, 44, 8]
+```
+
+The shape: commits and PR-merges fall together (maintainer activity), while
+issue-opens hold roughly steady through 2024 (community keeps reporting).
+2024's commit spike is the v3.0.0 release prep, not sustained activity.
+
+The collapse is sharp: 2020-21 was a normal active project (~hundreds of
+commits/year, hundreds of merged PRs); 2022 is a >90% drop; 2023 is
+near-flatline with one tag in mid-year. 2024 has a ~46-commit spike
+clustered around the **v3.0.0 release on 2024-12-18** (docs, README,
+migration guide, cmake bumps). 2025 was effectively two commits (a RIOT
+target bump and a cmake/ranlib fix in October). 2026 is empty so far.
+
+Issues continue to accumulate (~40-80/year) but PR throughput has
+collapsed to single digits — the typical late-stage maintenance pattern
+where the community files reports faster than the maintainers can land
+fixes. Most recent commit: `b706935` 2025-10-08, "cmake: avoid Apple
+ranlib flags when not using AppleClang (#5258)". No release since v3.0.0.
+
+### Search results for our 7 bugs
+
+Searched the issue tracker for the relevant terms (2026-04-17):
+
+| Search term | Hits | Status |
+|-------------|------|--------|
+| `GCC 14` | 9 | All closed; nothing about minimal-profile build failures. Top hit is the CI-can't-update ticket #5115. |
+| `same_value_zero` | 0 | Not reported. |
+| `global_obj_p` | 4 | None about Bugs 2/3. |
+| `unused parameter` | 1 (closed, 2015) | Not our Bug 4. |
+| `minimal profile` / `JERRY_BUILTINS=0` | 0 relevant | Not reported. |
+| `Werror unused` | 1 open ([#5171](https://github.com/jerryscript-project/jerryscript/issues/5171), Clang pointer-auth) | Different bug. |
+
+**One open ticket is in the same family but does not cover any of our 7
+bugs:** [#5050](https://github.com/jerryscript-project/jerryscript/issues/5050)
+"build error with certain config options" (opened 2023-03-11, **still
+open**, **0 comments**, last touched 2024-11). It reports compile failures
+with `JERRY_BUILTIN_WEAKREF=0` + `JERRY_BUILTIN_CONTAINER=1`, and
+separately with `JERRY_BUILTIN_REALMS=0`. The REALMS=0 case is the same
+class of bug as our Bugs 2/3 (different files), and the report has sat
+unanswered for three years. This is strong evidence that:
+
+1. None of our 7 specific bugs are reported upstream.
+2. The general class of "disabled-builtin combinations don't compile" is
+   known to upstream but unaddressed.
+3. New build-failure reports are unlikely to be acted on quickly.
+
+### How to file (if we choose to)
+
+Reasonable course: comment on **#5050** with our findings (it's the
+existing umbrella for this class), and/or open a fresh issue titled
+something like:
+
+> "Build failures on GCC 14 with JERRY_BUILTINS=0 (7 distinct bugs in v3.0.0)"
+
+Reproducer:
+
+```bash
+# Ubuntu 24.04 (GCC 14):
+cmake -S . -B build -DJERRY_BUILTINS=0 -DJERRY_BUILTIN_ARRAY=1 \
+      -DJERRY_BUILTIN_ERRORS=1
+cmake --build build -j
+```
+
+A consolidated PR with the 10 changed files would be a clean contribution.
+All fixes are in `#if`/`#else` branches — purely additive, zero risk to
+the default (full-features) build. Given the 2-PRs-merged-in-2025 pace,
+do not block on it landing.
 
 **Prioritized upstreaming order** (most broadly useful first):
 1. Bugs 1, 2, 3 — single-line fixes, clearly correct, affect any minimal profile
