@@ -12283,7 +12283,7 @@
 		{ 'STR' 
 			{ 'NAME' "Script" 
 			}
-			{ 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n"
+			{ 'STR' "\n\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n"
 			}
 		}
 		{ 'I32' 
