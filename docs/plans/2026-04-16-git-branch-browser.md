@@ -1,7 +1,7 @@
 # Plan: git-branch-browser — curses TUI for browsing a branch pipeline
 
-**Date:** 2026-04-16 (revised 2026-04-18)
-**Status:** Revised design — redesigning the v1 script (`scripts/git-branch-browser.py`, ~784 LOC) in place
+**Date:** 2026-04-16 (revised 2026-04-18, v2 shipped 2026-04-19)
+**Status:** Done — v2 waypoint pipeline shipped (`scripts/git-branch-browser.py`, ~1260 LOC). Topology detection, strata bars, vs-parent/vs-master/compare modes, and clean Ctrl+C handling all verified against current repo.
 **Goal:** A Python curses program at `scripts/git-branch-browser.py` that surfaces the repo's branch topology as a chronological **waypoint pipeline** (not a flat tree), with incremental per-waypoint deltas, automatic sideways-fork detection, and three diff modes (vs parent, vs master, branch-to-branch compare).
 
 ## Why not "collapsible tree of branches"

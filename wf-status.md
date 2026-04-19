@@ -9,6 +9,8 @@
 
 Eight days of work (2026-04-12 – 2026-04-19). Newest first:
 
+**git-branch-browser v2 shipped (2026-04-19)** — Curses TUI now renders the repo's branch topology as a chronological waypoint pipeline with per-waypoint strata bars, sideways-fork detection, and three diff modes (vs parent / vs master / compare), with clean Ctrl+C handling in every input loop — see plan [git-branch-browser](docs/plans/2026-04-16-git-branch-browser.md).
+
 **Blender round-trip reaches gameplay (2026-04-19)** — Four exporter fixes (unrotated BOX3, gated Mesh Name, preserved authored BOX3, enum-label import) take `snowgoons-blender.iff` through load, physics, scripts, audio, REST API, and into per-frame enemy-AI execution before a `statplat` assertion at ~5 s that still likely stems from levcomp-rs's Phase-2c dummy-channel stub (real path keyframes not yet serialized, pathCount=1 + chanCount=1 vs the original's 1 + 6) — see plan [blender-level-roundtrip](docs/plans/2026-04-16-blender-level-roundtrip.md).
 
 **Android port closure (2026-04-18)** — Branch hits its close criterion (polished sideloadable APK) with only launcher icons + one stale `build.gradle.kts` comment left and Play Store / keystore / R8 / splash explicitly out of scope — see [closure audit](docs/investigations/2026-04-18-android-port-closure.md).
@@ -51,7 +53,6 @@ Eight days of work (2026-04-12 – 2026-04-19). Newest first:
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
-| 2026-04-16 | [Plan: git-branch-browser — curses TUI for browsing branch diffs](docs/plans/2026-04-16-git-branch-browser.md) | **In testing** | **Goal:** A Python curses program at `scripts/git-branch-browser.py` that lets you browse all git branches, see per-branch changed files as a collapsible directory tree with status annotations, and view file diffs inline. Implementation landed (~784 LOC); currently in user testing. |
 | 2026-04-16 | [Plan: Blender ↔ Level Round-Trip](docs/plans/2026-04-16-blender-level-roundtrip.md) | **In progress — step 6 🟡** | Steps 1–5 complete (levcomp-rs pipeline, 152/152 OAD fields, Z-up coordinate fix).  2026-04-19: four exporter fixes (unrotated BOX3, gated Mesh Name, preserved authored BOX3, enum-label import) take `snowgoons-blender.iff` through full init + into per-frame enemy-AI execution; asserts on `Cannot generate or move a statplat at runtime` at ~5 s.  Likely root cause is levcomp-rs's Phase-2c dummy-channel stub — Blender emits real PATH/CHAN text but levcomp-rs drops it (LVL pathCount=1 + chanCount=1 vs original 1 + 6), so snowman01's runtime position drifts ~0.15 m and it collides with the player on the first tick.  Unblocks the deferred `ScriptLanguage` OAD plan once stable. |
 | 2026-04-17 | [Plan: Prove all 7 level pipelines before breaking common.inc](docs/plans/2026-04-17-level-pipeline-proof.md) | **In progress — Phases A+B done** | Phase A (`534ead7`): `primitives.lev` + `whitestar.lev` compile through `iffcomp-rs` → `levcomp-rs` (skips OBJ chunks with no Class Name — Max aim-point helpers). Phase B: `wf_oad/tests/fixtures/common.oad` committed; `parse_common_oad` test asserts 14 entries + `Script` field; 6 tests pass. Phases C (decompile subcommand), D (4 source-less levels), E (multi-level `cd.iff`) remaining before the gated common.inc rearrangement that unblocks the ScriptLanguage OAD plan. |
 
@@ -70,6 +71,7 @@ Eight days of work (2026-04-12 – 2026-04-19). Newest first:
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
+| 2026-04-16 | [Plan: git-branch-browser — curses TUI for browsing a branch pipeline](docs/plans/2026-04-16-git-branch-browser.md) | **Closed 2026-04-19** | **Goal:** A Python curses program at `scripts/git-branch-browser.py` that surfaces branch topology as a chronological waypoint pipeline with strata bars, sideways-fork detection, and three diff modes (vs parent, vs master, compare). v2 (~1260 LOC) shipped 2026-04-19; clean Ctrl+C handling in main loop, diff pager, and compare view verified under a pty. |
 | 2026-04-16 | [Plan: Android port](docs/plans/2026-04-16-android-port.md) | **Closed 2026-04-18** | Phases 0+1+2 + Phase 3 steps 1–7 all landed: legacy GL retired (`ff589c8`, `pre-legacy-gl-retire` tag at `807d1ea`), CMake+NDK build, HAL lifecycle seam, AssetAccessor, `NativeActivity` + EGL 3.0, Gradle project (AGP 8.5.2, leanback, arm64-v8a, min 21 / target 34), gamepad + touch with TV-mode detection, `AAssetManager`-backed `cd.iff`, on-device smoke test on arm64 phone. Post-boot polish shipped (viewport aspect, pause/resume EGL preservation, zForth `here` director fix, on-screen touch HUD). Remaining polish tracked as separate plans: [android-launcher-polish](docs/plans/2026-04-18-android-launcher-polish.md) and [audio-assets-from-iff](docs/plans/2026-04-18-audio-assets-from-iff.md). |
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Closed 2026-04-18** | Batches 1–7 landed (64,252 → 36,199 LOC, −43.7%). LOC claims verified against git history — Batch 5 `03211f9` shows −20,967 across 208 files; `e2dcc98` milestone records the 36,199 total. Batch 8 (`physics/wf/` deletion, ~1,700 LOC) + `hal/_list`/`_mempool` migration (stretch) accepted at their estimates, deferred to future opportunistic commits. |
 | 2026-04-16 | [Plan: Lua engine is not special — make it optional](docs/plans/2026-04-16-lua-not-special.md) | **Done** | `scripting_lua.cc/hp` extracted; `WF_LUA_ENGINE=lua54\|none` added to `build_game.sh`; all `lua_engine::` calls guarded; Fennel+none warns and forces lua54; stale `scripting_wasm3.hp` include removed. |
@@ -172,4 +174,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 01:28** — [`docs/plans/2026-04-16-blender-level-roundtrip.md`](docs/plans/2026-04-16-blender-level-roundtrip.md): Plan: Blender ↔ Level Round-Trip
+**2026-04-19 05:21** — [`docs/plans/2026-04-16-git-branch-browser.md`](docs/plans/2026-04-16-git-branch-browser.md): Plan: git-branch-browser — v2 waypoint pipeline closed

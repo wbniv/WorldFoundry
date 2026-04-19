@@ -892,9 +892,12 @@ def show_diff_pager(stdscr, diff_lines: list, title: str):
             pass
 
         stdscr.refresh()
-        key = stdscr.getch()
+        try:
+            key = stdscr.getch()
+        except KeyboardInterrupt:
+            break
 
-        if key in (ord('q'), 27):
+        if key in (ord('q'), 27, 3):  # 3 = Ctrl+C if raw mode ever swallows SIGINT
             break
         elif key == curses.KEY_DOWN:
             scroll = min(scroll + 1, max(0, total - visible))
@@ -986,8 +989,11 @@ def open_compare_view(stdscr, state: AppState, a: BranchNode, b: BranchNode):
             pass
 
         stdscr.refresh()
-        key = stdscr.getch()
-        if key in (ord('q'), 27):
+        try:
+            key = stdscr.getch()
+        except KeyboardInterrupt:
+            break
+        if key in (ord('q'), 27, 3):
             break
         elif key in (curses.KEY_DOWN, ord('j')):
             cursor = min(cursor + 1, len(rows) - 1)
@@ -1166,6 +1172,20 @@ def main(stdscr):
     )
     state.rows = flatten_all(branches)
 
+    try:
+        _run_main_loop(stdscr, state, pipe_r, repo_root, branches)
+    finally:
+        try:
+            os.close(pipe_r)
+        except OSError:
+            pass
+        try:
+            os.close(pipe_w)
+        except OSError:
+            pass
+
+
+def _run_main_loop(stdscr, state, pipe_r, repo_root, branches):
     while True:
         if state.needs_redraw:
             render_main(stdscr, state)
@@ -1173,8 +1193,11 @@ def main(stdscr):
 
         try:
             rlist, _, _ = select.select([pipe_r], [], [], 0.05)
-        except (select.error, ValueError):
-            break
+        except (select.error, ValueError, InterruptedError):
+            # SIGINT during select → EINTR; treat as quit
+            return
+        except KeyboardInterrupt:
+            return
 
         if pipe_r in rlist:
             try:
@@ -1185,14 +1208,22 @@ def main(stdscr):
             state.needs_redraw = True
             continue
 
-        key = stdscr.getch()
+        try:
+            key = stdscr.getch()
+        except KeyboardInterrupt:
+            return
         if key == -1:
             continue
+        if key == 3:  # Ctrl+C as a key code
+            return
 
-        action = handle_key_main(key, state, stdscr)
+        try:
+            action = handle_key_main(key, state, stdscr)
+        except KeyboardInterrupt:
+            return
 
         if action == 'quit':
-            break
+            return
 
         elif action in ('show_diff_parent', 'show_diff_master'):
             row = state.rows[state.cursor]
@@ -1233,9 +1264,10 @@ def main(stdscr):
         state.rows = flatten_all(branches)
         state.needs_redraw = True
 
-    os.close(pipe_r)
-    os.close(pipe_w)
-
 
 if __name__ == '__main__':
-    curses.wrapper(main)
+    try:
+        curses.wrapper(main)
+    except KeyboardInterrupt:
+        # Curses already torn down by wrapper; exit quietly.
+        sys.exit(130)
