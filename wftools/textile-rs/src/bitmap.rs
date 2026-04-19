@@ -583,8 +583,14 @@ impl Bitmap {
         Some(bm)
     }
 
-    /// Fast path for WF's native 16-bit uncompressed BGR555 TGAs.
-    /// Returns None for any other shape (colour-mapped, RLE-compressed, 8/24/32-bit),
+    /// Fast path for WF's native uncompressed truecolor TGAs (16-bit BGR555
+    /// and 24-bit). 16-bit inputs copy pixel bytes verbatim (source already
+    /// in target format). 24-bit inputs pack each pixel via `br_colour_rgb_555`
+    /// exactly like C++ textile's `BR_COLOUR_BGRA(r,g,b,0)` at `tga.cc:179` —
+    /// reads file-bytes positionally as r,g,b, which matches how C++ assigns
+    /// them even though standard TGA stores 24-bit as BGR (C++'s positional
+    /// naming is self-consistent; we mirror it to preserve byte-identity).
+    /// Returns None for any other shape (colour-mapped, RLE, 8/32-bit),
     /// letting the caller fall through to the image-crate general path.
     fn try_load_tga_bgr555(path: &Path, cfg: &Config) -> Option<Self> {
         let ext = path.extension().and_then(|s| s.to_str())?;
@@ -601,27 +607,39 @@ impl Bitmap {
         let bpp       = bytes[16];
         let desc      = bytes[17];
 
-        // Only uncompressed truecolor, 16-bit, no colormap.
-        if cmap_type != 0 || img_type != 2 || bpp != 16 { return None; }
+        // Only uncompressed truecolor, 16 or 24-bit, no colormap.
+        if cmap_type != 0 || img_type != 2 { return None; }
+        if bpp != 16 && bpp != 24 { return None; }
 
-        let pixel_start = 18 + id_len;
-        let row_bytes   = (w as usize) * 2;
-        let pixel_bytes = row_bytes * (h as usize);
-        if bytes.len() < pixel_start + pixel_bytes { return None; }
+        let src_bpp_bytes = (bpp as usize) / 8;
+        let pixel_start   = 18 + id_len;
+        let src_row_bytes = (w as usize) * src_bpp_bytes;
+        let src_pixel_bytes = src_row_bytes * (h as usize);
+        if bytes.len() < pixel_start + src_pixel_bytes { return None; }
 
-        // TGA descriptor bit 5 (0x20): origin at top-left. Otherwise bottom-left,
-        // which matches the engine's expected row order so no flip needed — but
-        // matches what image-crate-based path also produces (image::open returns
-        // top-down pixels). Be consistent: flip to top-down if origin is bottom.
         let origin_top = (desc & 0x20) != 0;
-        let mut pixels = Vec::with_capacity(pixel_bytes);
-        if origin_top {
-            pixels.extend_from_slice(&bytes[pixel_start .. pixel_start + pixel_bytes]);
-        } else {
-            for y in 0..h {
-                let src_y  = (h - 1 - y) as usize;
-                let off    = pixel_start + src_y * row_bytes;
-                pixels.extend_from_slice(&bytes[off .. off + row_bytes]);
+
+        let dst_row_bytes = (w as usize) * 2;
+        let dst_pixel_bytes = dst_row_bytes * (h as usize);
+        let mut pixels = Vec::with_capacity(dst_pixel_bytes);
+
+        // Iterate buffer rows top-down; read corresponding source row.
+        for y in 0..h {
+            let src_y = if origin_top { y as usize } else { (h - 1 - y) as usize };
+            let src_off = pixel_start + src_y * src_row_bytes;
+            if bpp == 16 {
+                pixels.extend_from_slice(&bytes[src_off .. src_off + src_row_bytes]);
+            } else {
+                // 24-bit: pack each triplet via br_colour_rgb_555 (= C++
+                // BR_COLOUR_BGRA(r, g, b, 0)). Positional byte naming matches
+                // C++ tga.cc:176-179.
+                for x in 0..w as usize {
+                    let o = src_off + x * 3;
+                    let r = bytes[o];
+                    let g = bytes[o + 1];
+                    let b = bytes[o + 2];
+                    pixels.extend_from_slice(&br_colour_rgb_555(r, g, b).to_le_bytes());
+                }
             }
         }
 
