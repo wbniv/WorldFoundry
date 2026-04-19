@@ -383,17 +383,25 @@ fn int_value(entry: &OadEntry, chunk: Option<&wf_iff::IffChunk>, _obj: &LevObjec
         return entry.def;
     };
 
-    // Enum-style: items come from the entry's String, pipe-separated.
-    // Use `field_str_child_only` (not `field_str_value`) because for
-    // I32-typed fields the DATA sub-chunk is 4 binary bytes and
-    // `read_cstr` on `00 00 00 00` returns "" — which
-    // `field_str_value`'s `Option::or` would treat as present and
-    // short-circuit the enum lookup. The enum label lives in the
-    // nested STR sibling (e.g. `'I32' { 'NAME' "Rotation" } { 'DATA' 0l }
-    // { 'STR' "Track" }`). Audit fix #1; see
-    // docs/investigations/2026-04-19-oad-buttontype-audit.md.
+    // Enum-style lookup via STR: iff2lvl applies this when ShowAs is
+    // either `SHOW_AS_DROPMENU` or `SHOW_AS_RADIOBUTTONS`
+    // (iff2lvl/oad.cc:1245-1276). All other ShowAs values for
+    // BUTTON_INT32 — N_A (0), NUMBER (1), SLIDER (2), HIDDEN (6),
+    // COLOR (7), CHECKBOX (8) — read DATA directly and ignore any STR
+    // sibling. Snowgoons has two witnesses:
+    //   - CamShot01/GMACamShot `Rotation`/`Position X/Y/Z` fields have
+    //     ShowAs=RADIOBUTTONS, STR="Track"/"Relative", DATA=0 →
+    //     iff2lvl picks STR (index 1). `21ca707` fixed this.
+    //   - Omni01/Omni02 `lightType` has ShowAs=NUMBER with
+    //     contradictory STR="Ambient"+DATA=0 → iff2lvl picks DATA=0.
+    //     Without the ShowAs gate here the STR path fired and demoted
+    //     both directional lights to ambient, dimming the scene.
+    const SHOW_AS_DROPMENU: u8 = 4;
+    const SHOW_AS_RADIOBUTTONS: u8 = 5;
     let items = entry.string_str();
-    if !items.is_empty() && items.contains('|') {
+    let use_str = entry.show_as == SHOW_AS_DROPMENU
+        || entry.show_as == SHOW_AS_RADIOBUTTONS;
+    if use_str && !items.is_empty() && items.contains('|') {
         let label = field_str_child_only(chunk);
         if !label.is_empty() {
             if let Some(idx) = items.split('|').position(|it| it.trim() == label.trim()) {
