@@ -1,7 +1,35 @@
 # Plan: textile → Rust — validation & round-trip integration
 
 **Date:** 2026-04-19
-**Status:** **Not started**
+**Status:** **In progress — Phase 1 started, three concrete gaps identified**
+
+## Phase 1 findings (2026-04-19 first pass)
+
+Running textile-rs on snowgoons surfaced three concrete gaps. Fix/next-action noted inline.
+
+1. **16-bit BGR555 TGA loader — FIXED.** The `image` crate doesn't support 16-bit uncompressed truecolor TGAs (the `Unknown(16)` color type), which is WF's native source art format. All 52 snowgoons source TGAs failed to load with `The decoder for Tga does not support the color type Unknown(16)`. Fix landed: `wftools/textile-rs/src/bitmap.rs::try_load_tga_bgr555` copies the pixel bytes directly into textile's internal BGR555 representation (no round-trip through RGBA8 → `rgba_555` quantization). Preserves byte-identity for source art that's already in the target format.
+
+2. **Palette atlas size mismatch.** textile-rs default `-palx=320, -paly=8` produces a 5138-byte `palPerm.tga`. Oracle `perm.bin`'s first ASS chunk embeds a `256×8` palette TGA = 4114 bytes. Fix: set `palx = 256` in `snowgoons.ini` (or make it the default for snowgoons). Re-run Phase 1 with the corrected INI to confirm Perm.tga / Perm.ruv / Perm.cyc sizes match oracle.
+
+3. **textile-rs doesn't produce `perm.bin` / `rmN.bin` — it emits separate files.** Current output is per-room `{Room0,Room1,Perm}.{tga,ruv,cyc}` + `pal{0,1,Perm}.tga`. levcomp-rs's `lvas_writer` references `perm.bin` / `rm0.bin` / `rm1.bin` — each an ASS-wrapped concatenation of the individual outputs *plus* per-mesh IFF file contents, with a 4-byte packed asset ID prefixing each ASS payload. Per the historical `wfsource/levels.src/iff.prp` template, asset IDs are:
+    - `$1fffffe` = palPerm.tga
+    - `$1ffffff` = Perm.tga
+    - `$5ffffff` = Perm.ruv
+    - `$7ffffff` = Perm.cyc
+    - `$1fffXXX` etc. for per-mesh IFFs (X = PERM slot index — `3fff001` = tree02.iff etc. per `asset.inc`)
+
+    Three options:
+    - (a) **Add `--emit-ass-bin` to textile-rs** — post-processing pass that reads its own per-room outputs + reads the per-room mesh IFFs from `asset.inc`, wraps each in an ASS chunk with the right ID, concatenates into `perm.bin` / `rmN.bin`. Additive, doesn't touch existing texture-atlas code paths.
+    - (b) **New packager tool `wftools/ass_packer/`** — dedicated Rust crate that does (a). Cleaner separation but more crate boilerplate.
+    - (c) **Levcomp-rs does the packaging** — since levcomp-rs already owns the LVAS layout, it could also glue textile outputs + mesh IFFs into `.bin` files. Least new surface area, mixes concerns (levcomp-rs shouldn't know about ASS details).
+
+    Preferred: (a). Smallest change, cleanest ownership (textile-rs owns the `.bin` contract because levcomp-rs treats `.bin` as opaque).
+
+4. **Output naming mismatch.** textile-rs uses `Room0` / `Room1` / `Perm` in filenames (hardcoded `format!("Room{}", n)` at `main.rs:234`); levcomp-rs's `lvas_writer.rs:128-131` references `perm.bin` / `rm0.bin` / `rm1.bin` (lowercase, `rm` prefix). Either rename in textile-rs to lowercase `rm0` / `rm1` / `perm` (matches `lvas_writer`), or have the `--emit-ass-bin` option from (3a) write under the `rm*.bin` / `perm.bin` names regardless of internal room-name convention. Latter is simpler — individual `Room0.tga` etc. become intermediate build artifacts, only the `.bin` output is authoritative.
+
+The first-pass harness INI committed at `wflevels/snowgoons/snowgoons.ini` — currently references the three PERM IFFs + two RM1 IFFs, points `[Texture] Path` at the current directory, leaves Room0 empty. Next iteration: bump `palx = 256`, add `--emit-ass-bin`, re-run and md5-diff the `.bin` files.
+
+---
 
 ## Context
 

@@ -535,6 +535,15 @@ impl Bitmap {
 
     pub fn load(path: &Path, cfg: &Config) -> Option<Self> {
         let name = path.to_string_lossy().into_owned();
+
+        // Fast path: 16-bit uncompressed BGR555 TGA. WF's source art is already
+        // in the target pixel format, so copy the raw bytes verbatim rather
+        // than routing through image::open (which doesn't support 16-bit TGA)
+        // → to_rgba8 → rgba_555 requantization. Preserves byte-identity.
+        if let Some(bm) = Self::try_load_tga_bgr555(path, cfg) {
+            return Some(bm);
+        }
+
         let img = image::open(path).map_err(|e| {
             eprintln!("textile: couldn't open \"{}\": {}", name, e);
         }).ok()?;
@@ -556,6 +565,73 @@ impl Bitmap {
             cb_row,
             buf_width: width, buf_height: height,
             name,
+            converted_palette: Vec::new(),
+            cmap_start: 0, cmap_length: 0,
+            start_colour: 0, end_colour: 0,
+            subx: -1, suby: -1,
+            xpal: -1, ypal: -1, idx_pal: -1,
+            colour_cycles: Vec::new(),
+            has_transparent: false,
+            power_of2: cfg.power_of2,
+        };
+
+        bm.transparent_remap(cfg.col_transparent);
+        if cfg.target == TargetSystem::PlayStation { bm.swap_rb(); }
+        bm.load_colour_cycles(cfg);
+        if cfg.force_translucent { bm.force_translucent_pixels(); }
+
+        Some(bm)
+    }
+
+    /// Fast path for WF's native 16-bit uncompressed BGR555 TGAs.
+    /// Returns None for any other shape (colour-mapped, RLE-compressed, 8/24/32-bit),
+    /// letting the caller fall through to the image-crate general path.
+    fn try_load_tga_bgr555(path: &Path, cfg: &Config) -> Option<Self> {
+        let ext = path.extension().and_then(|s| s.to_str())?;
+        if !ext.eq_ignore_ascii_case("tga") { return None; }
+
+        let bytes = std::fs::read(path).ok()?;
+        if bytes.len() < 18 { return None; }
+
+        let id_len    = bytes[0] as usize;
+        let cmap_type = bytes[1];
+        let img_type  = bytes[2];
+        let w         = u16::from_le_bytes([bytes[12], bytes[13]]) as i32;
+        let h         = u16::from_le_bytes([bytes[14], bytes[15]]) as i32;
+        let bpp       = bytes[16];
+        let desc      = bytes[17];
+
+        // Only uncompressed truecolor, 16-bit, no colormap.
+        if cmap_type != 0 || img_type != 2 || bpp != 16 { return None; }
+
+        let pixel_start = 18 + id_len;
+        let row_bytes   = (w as usize) * 2;
+        let pixel_bytes = row_bytes * (h as usize);
+        if bytes.len() < pixel_start + pixel_bytes { return None; }
+
+        // TGA descriptor bit 5 (0x20): origin at top-left. Otherwise bottom-left,
+        // which matches the engine's expected row order so no flip needed — but
+        // matches what image-crate-based path also produces (image::open returns
+        // top-down pixels). Be consistent: flip to top-down if origin is bottom.
+        let origin_top = (desc & 0x20) != 0;
+        let mut pixels = Vec::with_capacity(pixel_bytes);
+        if origin_top {
+            pixels.extend_from_slice(&bytes[pixel_start .. pixel_start + pixel_bytes]);
+        } else {
+            for y in 0..h {
+                let src_y  = (h - 1 - y) as usize;
+                let off    = pixel_start + src_y * row_bytes;
+                pixels.extend_from_slice(&bytes[off .. off + row_bytes]);
+            }
+        }
+
+        let mut bm = Bitmap {
+            pixels,
+            width: w, height: h,
+            bitdepth: 16,
+            cb_row: w * 2,
+            buf_width: w, buf_height: h,
+            name: path.to_string_lossy().into_owned(),
             converted_palette: Vec::new(),
             cmap_start: 0, cmap_length: 0,
             start_colour: 0, end_colour: 0,
