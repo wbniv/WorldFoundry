@@ -172,4 +172,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 01:28** — [`docs/plans/2026-04-16-blender-level-roundtrip.md`](docs/plans/2026-04-16-blender-level-roundtrip.md): Plan: Blender ↔ Level Round-Trip
+**2026-04-19 05:18** — [`docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md`](docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md): Plan: Blender round-trip — oracle dependencies
