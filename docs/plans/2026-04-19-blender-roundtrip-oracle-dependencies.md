@@ -57,11 +57,21 @@ loose ends.
    `wf_had_authored_bbox` flag on import and skip BOX3 emission on
    export when it was absent from the source.
 
-3. **Actboxor01/02 object-index order** — oracle LVL has
-   `obj[5] = Actboxor02`, `obj[17] = Actboxor01`; my compiler
-   preserves `.lev` text order (`obj[5] = Actboxor01`,
-   `obj[17] = Actboxor02`).  Both rooms end up with the right
-   contents; just index ordering differs.  Cosmetic.
+3. **Actboxor01/02 object-index order — NOTED AND DEFERRED
+   (2026-04-19).**  Oracle LVL has `obj[5] = Actboxor02`,
+   `obj[17] = Actboxor01`; my compiler preserves `.lev` text order
+   (`obj[5] = Actboxor01`, `obj[17] = Actboxor02`).  Root cause is
+   presumably max2lev's internal node-iteration quirk (not
+   reverse-engineered), carried through to the oracle binary.  Both
+   objects reach the correct room; semantically identical — same
+   class, same containment outcome.  Possible clean fixes are:
+   (a) preserve oracle order via `wf_lev_index` custom property on
+   Blender objects and re-sort on export; (b) export objects in
+   deterministic alphabetical order and regenerate the oracle.
+   Both deviate from mirror-first for a 2-object cosmetic diff.
+   **Accepting the diff as-is;** revisit after the texture pipeline
+   lands and we drop `swap_lvl.py` (which is when we'd regenerate
+   the oracle anyway, so option (b) becomes free).
 
 4. **`_PathOnDisk.base.rot` bytes** — iff2lvl's
    `new char[SizeOfOnDisk()]` leaves struct padding uninitialized;
@@ -81,6 +91,70 @@ loose ends.
    that just landed in `5d184b4` logs a warning + uses zeros.
    Round-trip does contain a LevelObj so this doesn't fire, but
    the defaults-on-missing path hasn't been exercised.
+
+## Natural Blender-exporter ASMP order vs oracle (2026-04-19)
+
+Question: does the Blender exporter's natural object iteration
+order match the oracle's ASMP order?
+
+### Plain natural order (walk the .lev text top-to-bottom)
+
+| # | source obj   | mesh              | MBR | room assignment |
+|---|--------------|-------------------|-----|-----------------|
+| 1 | House        | House.iff         | 0   | rm1 (by containment) |
+| 2 | QuadPatch01  | QuadPatch01.iff   | 0   | rm1 (by containment) |
+| 3 | Tree02       | Tree02.iff        | 1   | PERM (MovesBetweenRooms) |
+| 4 | Tree03       | Tree03.iff        | 1   | PERM |
+| 5 | Player       | Player.iff        | 1   | PERM |
+
+The plain walk puts statplats (House, QuadPatch01) *first* because
+that's the order max2lev emitted them into the .lev; the
+MovesBetweenRooms actors come later.  Does **not** match oracle order.
+
+### Room-grouped order (emit PERM first, then each room in index order; within each group, first-seen Blender order)
+
+| # | source obj   | mesh              | MBR | room |
+|---|--------------|-------------------|-----|------|
+| 1 | Tree02       | Tree02.iff        | 1   | PERM |
+| 2 | Tree03       | Tree03.iff        | 1   | PERM |
+| 3 | Player       | Player.iff        | 1   | PERM |
+| 1 | House        | House.iff         | 0   | rm1  |
+| 2 | QuadPatch01  | QuadPatch01.iff   | 0   | rm1  |
+
+### Oracle target
+
+| # | mesh              | room |
+|---|-------------------|------|
+| 1 | tree02.iff        | PERM |
+| 2 | tree03.iff        | PERM |
+| 3 | player.iff        | PERM |
+| 1 | house.iff         | rm1  |
+| 2 | quadpatch01.iff   | rm1  |
+
+### Verdict
+
+**Room-grouped matches the oracle exactly** (modulo filename case —
+Blender object names are capitalised, oracle filenames lowercase;
+a simple `.lower()` at emit time closes the cosmetic gap).
+
+So the natural recipe for a Blender-side ASMP emitter is:
+
+1. Partition mesh-bearing objects into PERM + per-room buckets,
+   using `MovesBetweenRooms` → PERM, otherwise room containment by
+   world-space bbox centre.
+2. For each bucket in `[PERM, room0, room1, …]`, walk Blender scene
+   objects in insertion order; first-seen `MeshName` gets the next
+   1-based index.
+3. Pack `[type(8) | room(12) | index(12)]` and emit as
+   `$<hex>l { 'STR' "<lower(filename)>" }`.
+
+This is what `levcomp-rs::asset_registry` already does when called
+in the right order — the current code iterates `plan.objects` in
+`.lev` text order for a single pass, assigning each object's
+`MeshName` to a room slot.  To match the oracle, the iteration
+needs to be partitioned: PERM-bound objects first, then by room.
+That's a small change to `asset_registry.rs` / the caller that
+feeds it.
 
 ## Texture pipeline (separate next-up plan, referenced here)
 

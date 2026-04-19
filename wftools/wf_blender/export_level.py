@@ -973,22 +973,22 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
 
             lines.append(f"\t\t{{ 'VEC3' {{ 'NAME' \"Position\" }} {{ 'DATA' {fp(wf_pos[0])} {fp(wf_pos[1])} {fp(wf_pos[2])}  //x,y,z\n\t\t}} }}")
             lines.append(f"\t\t{{ 'EULR' {{ 'NAME' \"Orientation\" }} {{ 'DATA' {fp(wf_rot[0])} {fp(wf_rot[1])} {fp(wf_rot[2])}  //a,b,c\n\t\t}} }}")
-            # Emit BOX3 only for geometry objects.  max2lev's
-            # process_bounding_box (max2lev.cc:374) gates the whole BOX3
-            # chunk on `os.obj->SuperClassID() == GEOMOBJECT_CLASS_ID`,
-            # so abstract actors (camera, director, camshot, matte, …)
-            # never get a BOX3 — iff2lvl fills in default (0,0,0)-(0,0,0)
-            # which `expand_thin_bbox` then turns into
-            # (-0.25,-0.25,-0.25)-(0,0,0).  Round-trip must preserve
-            # that absence (and the round-tripped `.lev` may have a
-            # Blender-synthesized BOX3 from the importer's cube
-            # fallback, which is not authoritative).
-            orig_mesh_name = obj.get("wf_original_mesh_name", None)
-            has_real_mesh = (
-                bool(orig_mesh_name) if orig_mesh_name is not None
-                else bool(obj.data and obj.data.polygons)
-            )
-            if has_real_mesh:
+            # Emit BOX3 only if the source .lev had one.  max2lev's
+            # process_bounding_box (max2lev.cc:374) gates BOX3 on
+            # `os.obj->SuperClassID() == GEOMOBJECT_CLASS_ID`, so
+            # abstract actors (camera, director, camshot, matte, …)
+            # don't get a BOX3 — iff2lvl fills in default (0,0,0)-(0,0,0)
+            # which `expand_thin_bbox` turns into (-0.25,-0.25,-0.25)-
+            # (0,0,0).  `wf_had_authored_bbox` stashed at import time
+            # is our faithful record of "did max2lev emit a BOX3."
+            # Fall back to "has any polygons" for objects newly
+            # created in Blender without a round-trip history.
+            had_bbox = obj.get("wf_had_authored_bbox", None)
+            if had_bbox is not None:
+                should_emit_bbox = bool(had_bbox)
+            else:
+                should_emit_bbox = bool(obj.data and obj.data.polygons)
+            if should_emit_bbox:
                 lines.append(
                     f"\t\t{{ 'BOX3' {{ 'NAME' \"Global Bounding Box\" }} "
                     f"{{ 'DATA' {fp(wf_local_min[0])} {fp(wf_local_min[1])} {fp(wf_local_min[2])} "
