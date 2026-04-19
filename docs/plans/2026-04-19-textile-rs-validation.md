@@ -1,7 +1,7 @@
 # Plan: textile → Rust — validation & round-trip integration
 
 **Date:** 2026-04-19
-**Status:** **In progress — Phase 1 in flight; PERM byte-identical; RM1 atlas content 29/31 textures match oracle**
+**Status:** **Phase 1 done — end-to-end pipeline working.** Seven fixes landed: 16-bit BGR555 TGA fast path (`f3da913`); 24-bit TGA fast path — also fixed the invisible-roof renderer bug (`11cbca7`); `align_to_size_multiple` unit mismatch (`a45194c`); `paly=-1` for 16-bit textures (`72a4af9`); levcomp-rs `--textile-ini` replicating `prep ini.prp` (`a45194c`); per-asset ASS expansion in `lvas_writer` replacing the `perm.bin` placeholder (`a45194c`); textile-rs outputs replace the oracle-extracted `.bin` placeholders (`edaffb3`). PERM chunk byte-identical (29492/29492); RM1 atlas content 31/31 textures byte-identical per-texture extraction. Game runs via textile-rs + levcomp-rs + iffcomp-rs pipeline with full scene lighting + House roof rendering.
 
 ## Alternate verification technique: per-texture extracted-bitmap equivalence
 
