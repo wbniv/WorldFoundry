@@ -177,4 +177,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 08:22** — [`docs/plans/2026-04-19-tuilib-worker-pool.md`](docs/plans/2026-04-19-tuilib-worker-pool.md): Plan 4: extract generic `WorkerPool` from `data/fetcher.py`
+**2026-04-19 08:23** — [`docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md`](docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md): `_PathOnDisk.base.rot` mystery bytes in oracle `snowgoons.iff`
