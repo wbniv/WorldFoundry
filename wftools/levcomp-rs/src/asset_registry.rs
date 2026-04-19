@@ -26,9 +26,10 @@
 //!
 //! # Strategy
 //!
-//! All IFF mesh assets are placed in the permanent room (room = -1 → 0xFFF),
-//! matching how `iff2lvl` resolves shared assets (it tries permanents first).
-//! Indices are assigned in first-seen order, starting at 1.
+//! IFF mesh assets are placed in the room their containing object lives in.
+//! Objects with `MovesBetweenRooms=True` (or not contained in any room) are
+//! placed in the permanent room (room = -1 → 0xFFF).  Indices are assigned in
+//! first-seen order, starting at 1, separately per (room, type) pair.
 
 use std::collections::HashMap;
 
@@ -36,9 +37,10 @@ pub const ROOM_PERM: i32 = -1;  // stored as 0xFFF in packed ID
 pub const TYPE_IFF: i32  = 3;
 
 pub struct AssetRegistry {
-    /// filename (lowercased) → packed asset ID (i32)
+    /// (filename_original, packed_id) in registration order.
     entries: Vec<(String, i32)>,
-    by_name: HashMap<String, i32>,
+    /// (filename_lowercase, room) → packed asset ID.
+    by_name: HashMap<(String, i32), i32>,
     /// Next index per (room, type).  Key = (room as i32, type).
     next_index: HashMap<(i32, i32), i32>,
 }
@@ -52,18 +54,22 @@ impl AssetRegistry {
         }
     }
 
-    /// Register or look up an IFF mesh asset.  Returns the packed asset ID.
-    /// The filename is stored as-is for the `asset.inc` output, but looked up
-    /// case-insensitively.
-    pub fn add_iff(&mut self, filename: &str) -> i32 {
-        let key = filename.to_ascii_lowercase();
+    /// Register or look up an IFF mesh asset in a specific room slot.
+    /// Returns the packed asset ID.
+    pub fn add_iff_room(&mut self, filename: &str, room: i32) -> i32 {
+        let key = (filename.to_ascii_lowercase(), room);
         if let Some(&id) = self.by_name.get(&key) {
             return id;
         }
-        let id = pack(ROOM_PERM, TYPE_IFF, self.next_index(ROOM_PERM, TYPE_IFF));
+        let id = pack(room, TYPE_IFF, self.next_index(room, TYPE_IFF));
         self.by_name.insert(key, id);
         self.entries.push((filename.to_string(), id));
         id
+    }
+
+    /// Register or look up an IFF mesh asset in the permanent slot.
+    pub fn add_iff(&mut self, filename: &str) -> i32 {
+        self.add_iff_room(filename, ROOM_PERM)
     }
 
     fn next_index(&mut self, room: i32, typ: i32) -> i32 {
@@ -74,19 +80,44 @@ impl AssetRegistry {
 
     /// Generate the `asset.inc` text for this level.
     ///
-    /// Only outputs the PERM room (permanents) since that is all that Phase 2c
-    /// assigns.  The format matches what `iff.prp` / `iffcomp-rs` expect.
+    /// Outputs a ROOM_START(Permanents,PERM) block followed by one
+    /// ROOM_START(rmN,RMN) block per room that has mesh assets.
     pub fn asset_inc(&self, level_name: &str) -> String {
         let mut out = String::new();
         out.push_str("@*============================================================================\n");
         out.push_str("@* asset.inc: asset list for use with prep, created by levcomp-rs\n");
         out.push_str("@*============================================================================\n");
         out.push_str(&format!("FILE_HEADER({level_name},1,levcomp-rs)\n"));
+
+        // PERM section
         out.push_str("ROOM_START(Permanents,PERM)\n");
         for (name, id) in &self.entries {
-            out.push_str(&format!("\tROOM_ENTRY({name},{id:x})\n"));
+            if room_from_id(*id) == ROOM_PERM {
+                out.push_str(&format!("\tROOM_ENTRY({name},{id:x})\n"));
+            }
         }
         out.push_str("ROOM_END\n");
+
+        // Per-room sections (RM0, RM1, …), in room-index order.
+        let mut room_indices: Vec<i32> = self.entries.iter()
+            .map(|(_, id)| room_from_id(*id))
+            .filter(|&r| r != ROOM_PERM)
+            .collect();
+        room_indices.sort();
+        room_indices.dedup();
+
+        for ri in room_indices {
+            let room_upper = format!("RM{ri}");
+            let room_lower = format!("rm{ri}");
+            out.push_str(&format!("ROOM_START({room_lower},{room_upper})\n"));
+            for (name, id) in &self.entries {
+                if room_from_id(*id) == ri {
+                    out.push_str(&format!("\tROOM_ENTRY({name},{id:x})\n"));
+                }
+            }
+            out.push_str("ROOM_END\n");
+        }
+
         out.push_str("FILE_FOOTER\n");
         out
     }
@@ -94,6 +125,13 @@ impl AssetRegistry {
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
     }
+}
+
+/// Extract the room field from a packed asset ID.
+/// Returns `ROOM_PERM` (-1) when room bits == 0xFFF.
+fn room_from_id(id: i32) -> i32 {
+    let room_bits = ((id as u32) >> 12) & 0xFFF;
+    if room_bits == 0xFFF { ROOM_PERM } else { room_bits as i32 }
 }
 
 /// Pack `(room, type, index)` into a 32-bit `packedAssetID` integer.

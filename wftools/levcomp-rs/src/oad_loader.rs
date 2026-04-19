@@ -138,6 +138,7 @@ pub fn serialize_oad_data(
     common: &mut CommonBlockBuilder,
     name_to_idx: &HashMap<String, i32>,
     assets: &mut AssetRegistry,
+    asset_room: i32,
 ) -> Vec<u8> {
     let mut out = Vec::new();
     let mut i = 0;
@@ -151,7 +152,7 @@ pub fn serialize_oad_data(
                     && schema.entries[j].button_type != ButtonType::EndCommon
                 {
                     let e = &schema.entries[j];
-                    serialize_entry(&mut section, e, obj, common, true, name_to_idx, assets);
+                    serialize_entry(&mut section, e, obj, common, true, name_to_idx, assets, asset_room);
                     j += 1;
                 }
                 while section.len() % 4 != 0 { section.push(0); }
@@ -163,7 +164,7 @@ pub fn serialize_oad_data(
                 i += 1;
             }
             _ => {
-                serialize_entry(&mut out, entry, obj, common, false, name_to_idx, assets);
+                serialize_entry(&mut out, entry, obj, common, false, name_to_idx, assets, asset_room);
                 i += 1;
             }
         }
@@ -179,6 +180,7 @@ fn serialize_entry(
     in_common: bool,
     name_to_idx: &HashMap<String, i32>,
     assets: &mut AssetRegistry,
+    asset_room: i32,
 ) {
     let key = entry.name_str();
     let chunk = obj.find_field(key);
@@ -227,7 +229,7 @@ fn serialize_entry(
             // tracked in Phase 2c) write 0.
             let name = chunk.map(field_str_value).unwrap_or_default();
             let id = if name.to_ascii_lowercase().ends_with(".iff") && !name.is_empty() {
-                assets.add_iff(&name)
+                assets.add_iff_room(&name, asset_room)
             } else {
                 0
             };

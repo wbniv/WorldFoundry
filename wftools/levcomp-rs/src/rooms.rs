@@ -20,7 +20,11 @@ use crate::lev_parser::LevObject;
 use crate::oad_loader::OadSchemas;
 
 pub const ADJACENT_ROOM_NULL: i16 = -1;
-pub const ROOM_HEADER_SIZE: usize = 34;
+/// `_RoomOnDisk` is 34 bytes of fields (int32 count + 6×i32 bbox + 2×i16 adj
+/// + i16 roomObjectIndex) but the C struct has `__attribute__((aligned(4)))`
+/// which rounds `sizeof` up to the next multiple of 4 — so iff2lvl writes
+/// 36 bytes and starts the entries array right after.  We must match.
+pub const ROOM_HEADER_SIZE: usize = 36;
 
 /// A room: the room object's index in the level list + an ordered list of
 /// contained object indices.
@@ -50,6 +54,10 @@ impl Room {
         out.extend_from_slice(&self.adjacent_rooms[0].to_le_bytes());
         out.extend_from_slice(&self.adjacent_rooms[1].to_le_bytes());
         out.extend_from_slice(&self.room_object_index.to_le_bytes());
+        // 2 bytes of struct padding — the C struct's sizeof rounds up to 36
+        // under `__attribute__((aligned(4)))`, and iff2lvl places the
+        // entries array right after `sizeof(_RoomOnDisk)`.
+        out.extend_from_slice(&[0u8, 0u8]);
         for &e in &self.entries {
             out.extend_from_slice(&e.to_le_bytes());
         }
