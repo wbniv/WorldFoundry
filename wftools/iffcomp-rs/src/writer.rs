@@ -597,6 +597,31 @@ impl Writer {
             return Ok(());
         }
 
+        // Binary: if the included file's first 8 bytes look like a valid
+        // IFF chunk header (big-endian FOURCC + 32-bit LE size that fits
+        // in the sliced region), register that chunk as a symbol. This
+        // lets `.offsetof(::'GAME'::'L4')` resolve when `L4` lives inside
+        // a `[ "snowgoons.iff" ]` include — the pattern used by the
+        // cd.iff builder scripts. No alignment nudging here: the caller's
+        // `.align(N)` directives already position the include correctly
+        // (authors pair `[ ... ]` with an explicit `{ 'ALGN' .align(N) }`).
+        if let Some(child_id) = peek_chunk_id(slice) {
+            let child_payload_size = u32::from_le_bytes(slice[4..8].try_into().unwrap()) as usize;
+            // Sanity-check the claimed size before trusting it.
+            if child_payload_size + 8 <= slice.len() {
+                let child_payload_pos = self.pos + 8; // where payload will land after write_raw
+                let mut child_ids = self.path_ids.clone();
+                child_ids.push(child_id);
+                let child_path = build_path_key(&child_ids);
+                self.symbols.insert(
+                    child_path,
+                    ChunkSym {
+                        pos: child_payload_pos,
+                        size: child_payload_size,
+                    },
+                );
+            }
+        }
         self.write_raw(slice);
         Ok(())
     }
@@ -716,6 +741,31 @@ fn translate_escape_codes(s: &str) -> String {
         }
     }
     String::from_utf8_lossy(&out).into_owned()
+}
+
+/// If the first 4 bytes of `slice` look like a valid IFF FOURCC (at least
+/// one printable-ASCII character, all bytes either printable-ASCII or NUL
+/// padding at the tail), decode it as a big-endian u32 and return Some.
+/// Used by file-include to detect "this file starts with a chunk header".
+fn peek_chunk_id(slice: &[u8]) -> Option<u32> {
+    if slice.len() < 8 {
+        return None;
+    }
+    let id = &slice[0..4];
+    // At least first byte must be printable ASCII; trailing bytes may be NUL.
+    let is_printable = |b: u8| (0x20..=0x7e).contains(&b);
+    if !is_printable(id[0]) {
+        return None;
+    }
+    let mut seen_nul = false;
+    for &b in &id[1..] {
+        if b == 0 {
+            seen_nul = true;
+        } else if seen_nul || !is_printable(b) {
+            return None;
+        }
+    }
+    Some(u32::from_be_bytes([id[0], id[1], id[2], id[3]]))
 }
 
 /// Decode a FOURCC packed MSB-first into a `u32`, trimming trailing NULs.
