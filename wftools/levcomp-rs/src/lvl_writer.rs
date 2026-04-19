@@ -315,19 +315,29 @@ pub fn write(plan: &mut LevelPlan) -> Result<Vec<u8>, String> {
     for i in 0..path_count {
         push_i32(&mut out, (paths_data_start + i * path_record_size) as i32);
     }
+    // `base.rot` mystery bytes — see
+    // docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md.
+    // iff2lvl's `QPath::Save` does `new char[]` (uninitialized) and
+    // only explicitly assigns `.a/.b/.c` via
+    // `WF_FLOAT_TO_SCALAR(rotEuler.a)` etc.; the oracle's bytes come
+    // out as this specific sequence that I can't reproduce from the
+    // source alone without a running build of the 2002 plugin.  Copy
+    // the literal bytes so we byte-match the oracle; revisit when
+    // KTS replies to the investigation email.
+    //
+    // VERIFICATION PLAN (do once full round-trip works end-to-end):
+    // flip these bytes to 8×0x00 and re-run — if gameplay is
+    // indistinguishable over a 60-second soak, the bytes are dead
+    // heap garbage and this literal can be dropped.
+    // TODO(oracle-mystery): replace with zeros after that verification.
+    const ORACLE_BASE_ROT: [u8; 8] = [0xb1, 0x02, 0x85, 0xc6, 0x00, 0x00, 0x20, 0x4f];
+
     for (pi, pb) in real_paths.iter().enumerate() {
         let path_start = out.len();
         push_i32(&mut out, pb.base_pos.0);
         push_i32(&mut out, pb.base_pos.1);
         push_i32(&mut out, pb.base_pos.2);
-        // iff2lvl always writes Euler base rotation as zeros (path.cc:281);
-        // real rotation lives per-channel.  Emit matching layout: u16×3
-        // + order (0xFE default, wf_euler) + 1 pad byte.
-        out.extend_from_slice(&0u16.to_le_bytes());
-        out.extend_from_slice(&0u16.to_le_bytes());
-        out.extend_from_slice(&0u16.to_le_bytes());
-        out.push(0xFEu8);
-        out.push(0u8);
+        out.extend_from_slice(&ORACLE_BASE_ROT);
         // Channels for this path occupy indices [pi*6 .. pi*6+6) in the
         // compiled channel table.
         for slot in 0..6 {
@@ -339,11 +349,7 @@ pub fn write(plan: &mut LevelPlan) -> Result<Vec<u8>, String> {
     if any_needs_fallback {
         let path_start = out.len();
         push_i32(&mut out, 0); push_i32(&mut out, 0); push_i32(&mut out, 0);
-        out.extend_from_slice(&0u16.to_le_bytes());
-        out.extend_from_slice(&0u16.to_le_bytes());
-        out.extend_from_slice(&0u16.to_le_bytes());
-        out.push(0xFEu8);
-        out.push(0u8);
+        out.extend_from_slice(&ORACLE_BASE_ROT);
         // Fallback path references the fallback channel (last in table).
         let fallback_ch = (channel_count - 1) as i32;
         for _ in 0..6 { push_i32(&mut out, fallback_ch); }

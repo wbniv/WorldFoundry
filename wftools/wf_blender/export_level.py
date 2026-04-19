@@ -778,6 +778,15 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
             # raw mesh extent (Max's collision-box authoring); recomputing
             # from mesh vertices would shrink the bbox and break runtime
             # coarse-collision checks for static platforms.
+            #
+            # Also remember whether the source .lev had a BOX3 at all.
+            # max2lev.cc:374 (`process_bounding_box`) only emits BOX3 for
+            # geometry objects; cameras / camshots / directors / mattes
+            # get none, and iff2lvl defaults + expand_thin_bbox fills in
+            # (-0.25,-0.25,-0.25)-(0,0,0).  Round-trip must skip BOX3
+            # emission for those, or the default-path behaviour diverges
+            # from the oracle.
+            blobj["wf_had_authored_bbox"] = has_authored_bbox
             if has_authored_bbox:
                 blobj["wf_original_bbox"] = (
                     float(bb_min_wf[0]), float(bb_min_wf[1]), float(bb_min_wf[2]),
@@ -964,11 +973,27 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
 
             lines.append(f"\t\t{{ 'VEC3' {{ 'NAME' \"Position\" }} {{ 'DATA' {fp(wf_pos[0])} {fp(wf_pos[1])} {fp(wf_pos[2])}  //x,y,z\n\t\t}} }}")
             lines.append(f"\t\t{{ 'EULR' {{ 'NAME' \"Orientation\" }} {{ 'DATA' {fp(wf_rot[0])} {fp(wf_rot[1])} {fp(wf_rot[2])}  //a,b,c\n\t\t}} }}")
-            lines.append(
-                f"\t\t{{ 'BOX3' {{ 'NAME' \"Global Bounding Box\" }} "
-                f"{{ 'DATA' {fp(wf_local_min[0])} {fp(wf_local_min[1])} {fp(wf_local_min[2])} "
-                f"{fp(wf_local_max[0])} {fp(wf_local_max[1])} {fp(wf_local_max[2])}  //min(x,y,z)-max(x,y,z)\n\t\t}} }}"
+            # Emit BOX3 only for geometry objects.  max2lev's
+            # process_bounding_box (max2lev.cc:374) gates the whole BOX3
+            # chunk on `os.obj->SuperClassID() == GEOMOBJECT_CLASS_ID`,
+            # so abstract actors (camera, director, camshot, matte, …)
+            # never get a BOX3 — iff2lvl fills in default (0,0,0)-(0,0,0)
+            # which `expand_thin_bbox` then turns into
+            # (-0.25,-0.25,-0.25)-(0,0,0).  Round-trip must preserve
+            # that absence (and the round-tripped `.lev` may have a
+            # Blender-synthesized BOX3 from the importer's cube
+            # fallback, which is not authoritative).
+            orig_mesh_name = obj.get("wf_original_mesh_name", None)
+            has_real_mesh = (
+                bool(orig_mesh_name) if orig_mesh_name is not None
+                else bool(obj.data and obj.data.polygons)
             )
+            if has_real_mesh:
+                lines.append(
+                    f"\t\t{{ 'BOX3' {{ 'NAME' \"Global Bounding Box\" }} "
+                    f"{{ 'DATA' {fp(wf_local_min[0])} {fp(wf_local_min[1])} {fp(wf_local_min[2])} "
+                    f"{fp(wf_local_max[0])} {fp(wf_local_max[1])} {fp(wf_local_max[2])}  //min(x,y,z)-max(x,y,z)\n\t\t}} }}"
+                )
             lines.append(f'\t\t{{ \'STR\' {{ \'NAME\' "Class Name" }} {{ \'DATA\' "{typename}" }} }}')
 
             # Mesh geometry — export .iff only when the source .lev had a
