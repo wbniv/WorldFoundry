@@ -185,4 +185,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 11:14** — [`docs/plans/2026-04-19-textile-rs-validation.md`](docs/plans/2026-04-19-textile-rs-validation.md): Plan: textile → Rust — validation & round-trip integration
+**2026-04-19 11:17** — [`docs/plans/2026-04-19-levcomp-common-block-two-phase.md`](docs/plans/2026-04-19-levcomp-common-block-two-phase.md): Plan: levcomp-rs two-phase common-block emission — oracle byte-identity for the LVL chunk
