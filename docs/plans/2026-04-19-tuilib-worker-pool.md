@@ -1,8 +1,8 @@
 # Plan 4: extract generic `WorkerPool` from `data/fetcher.py`
 
 **Date:** 2026-04-19
-**Status:** Draft — waiting on prerequisite plan
-**Prerequisite:** Plan 1 (`2026-04-19-python-tui-lib-extraction.md`) must land first — this plan adds a new module inside tuilib's `framework/` subpackage.
+**Status:** Done — 2026-04-19. Landed in tuilib commit `d071e1f`: 174-LOC `WorkerPool` in `tuilib/framework/worker_pool.py` + 7 unit tests (all pass). Contract is return-value-only (per survey of 50 DataFetcher call-sites; opt-out deferred until needed). Parking-space untouched — plan 2 writes the adapter.
+**Prerequisite:** Plan 1 landed same day.
 
 ## Context
 
