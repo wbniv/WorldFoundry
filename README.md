@@ -95,6 +95,7 @@ Eight days of work (2026-04-12 – 2026-04-19). Newest first:
 
 | Date | Investigation | Status | Summary |
 |------|---------------|--------|---------|
+| 2026-04-19 | [`.offsetof` arithmetic in iffcomp — oracle vs current behavior](docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md) | **Recommendation accepted; iffcomp-rs arithmetic implementation in** | **Context:** Reconstructing `wflevels/snowgoons.iff.txt` as a proper compile-source text-IFF file (mirror-first, deviate-later), chunk-by-chunk, so iffcomp-rs can produce byte-identical output … |
 | 2026-04-19 | [Email: `_PathOnDisk.base.rot` mystery bytes in oracle `snowgoons.iff`](docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md) | **In progress** | **To:** Kevin T. Seghetti (cc: original WF team — this is about `wftools/iff2lvl/path.cc`) **From:** Will, via Claude-assisted archaeology **Subject:** Do you remember what `_PathOnDisk.base.rot` … |
 | 2026-04-18 | [Android Port — Executable Size and RAM Usage](docs/investigations/2026-04-18-android-port-size-and-ram.md) | **In progress** | **Branch:** 2026-android **Artifact:** `android/app/build/outputs/apk/debug/worldfoundry-debug.apk` **NDK:** 26.2.11394342, arm64-v8a, `-DCMAKE_BUILD_TYPE=RelWithDebInfo`, then stripped by AGP … |
 | 2026-04-18 | [Closing the Android Port — Remaining Work](docs/investigations/2026-04-18-android-port-closure.md) | **Playable APK shipped; this doc lists what's left to call it "done."** | **Branch:** 2026-android |
@@ -176,4 +177,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 08:15** — [`docs/plans/2026-04-19-python-tui-lib-extraction.md`](docs/plans/2026-04-19-python-tui-lib-extraction.md): Plan: extract reusable TUI code into `python-tui-lib`
+**2026-04-19 08:15** — [`docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md`](docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md): `.offsetof` arithmetic in iffcomp — oracle vs current behavior
