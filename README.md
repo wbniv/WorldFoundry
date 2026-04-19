@@ -176,4 +176,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 06:19** — [`docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md`](docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md): Plan: Blender round-trip — oracle dependencies
+**2026-04-19 06:22** — [`docs/plans/2026-04-19-deferred-oracle-deviations.md`](docs/plans/2026-04-19-deferred-oracle-deviations.md): Plan: Deferred oracle deviations — post-reproduction cleanups
