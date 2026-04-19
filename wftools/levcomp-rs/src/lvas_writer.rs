@@ -124,11 +124,50 @@ pub fn write(
     s.push_str(&format!("\t{{ 'LVL' [ \"{level_stem}.lvl\" ] }}\n"));
 
     // ── PERM + per-room ASS-slot payloads ───────────────────────────────────
+    // Replicates the original iff.prp ROOM_START / ROOM_ENTRY macro
+    // expansion (wfsource/levels.src/iff.prp:33-54): each texture / palette
+    // / ruv / cyc / mesh file becomes its own `{ 'ASS' $<id>l [ "file" ] }`
+    // chunk inside the room wrapper. Hardcoded asset IDs for the four
+    // textile outputs; per-mesh IDs come from `assets` (i.e. the same
+    // asset.inc LevelCon emitted). Scheme:
+    //   palette  $1<room_hex>ffe ["pal<n>.tga" | "palPerm.tga"]
+    //   texture  $1<room_hex>fff ["Room<n>.tga" | "Perm.tga"]
+    //   rmuv     $5<room_hex>fff ["Room<n>.ruv" | "Perm.ruv"]
+    //   ccyc     $7<room_hex>fff ["Room<n>.cyc" | "Perm.cyc"]
+    // where room_hex = 3-digit hex of room index (or `fff` for PERM).
     s.push_str("\t{ 'ALGN' .align(2048) }\n");
-    s.push_str("\t{ 'PERM' [ \"perm.bin\" ] }\n");
+    s.push_str("\t{ 'PERM'\n");
+    s.push_str("\t\t{ 'ASS' $1fffffel [ \"palPerm.tga\" ] }\n");
+    s.push_str("\t\t{ 'ASS' $1ffffffl [ \"Perm.tga\" ] }\n");
+    s.push_str("\t\t{ 'ASS' $5ffffffl [ \"Perm.ruv\" ] }\n");
+    s.push_str("\t\t{ 'ASS' $7ffffffl [ \"Perm.cyc\" ] }\n");
+    for (name, id) in assets.entries() {
+        if room_from_id(*id) == ROOM_PERM && !name.ends_with(".tga") {
+            s.push_str(&format!(
+                "\t\t{{ 'ASS' ${id:x}l [ \"{name}\" ] }}\n",
+                id = id,
+                name = name
+            ));
+        }
+    }
+    s.push_str("\t}\n");
     for &r in rooms {
         s.push_str("\t{ 'ALGN' .align(2048) }\n");
-        s.push_str(&format!("\t{{ 'RM{r}' [ \"rm{r}.bin\" ] }}\n", r = r));
+        s.push_str(&format!("\t{{ 'RM{r}'\n"));
+        s.push_str(&format!("\t\t{{ 'ASS' $1{r:03x}ffel [ \"pal{r}.tga\" ] }}\n"));
+        s.push_str(&format!("\t\t{{ 'ASS' $1{r:03x}fffl [ \"Room{r}.tga\" ] }}\n"));
+        s.push_str(&format!("\t\t{{ 'ASS' $5{r:03x}fffl [ \"Room{r}.ruv\" ] }}\n"));
+        s.push_str(&format!("\t\t{{ 'ASS' $7{r:03x}fffl [ \"Room{r}.cyc\" ] }}\n"));
+        for (name, id) in assets.entries() {
+            if room_from_id(*id) == r && !name.ends_with(".tga") {
+                s.push_str(&format!(
+                    "\t\t{{ 'ASS' ${id:x}l [ \"{name}\" ] }}\n",
+                    id = id,
+                    name = name
+                ));
+            }
+        }
+        s.push_str("\t}\n");
     }
 
     // ── trailing ALGN inside LVAS ───────────────────────────────────────────

@@ -65,8 +65,15 @@ impl AllocationMap {
         if src_w + x > self.x_slots { return false; }
         if src_h + y > self.y_slots { return false; }
 
-        if self.align_to_size_multiple && (x % src_bm.width != 0) { return false; }
-        if self.align_to_size_multiple && (y % src_bm.height != 0) { return false; }
+        // align-to-size wants the placement origin to land on texture-sized
+        // boundaries. `x` / `y` are in SLOTS (x_align_slots wide, y_align
+        // tall), so the modulus must use the slot-space width/height
+        // (src_w / src_h) — NOT src_bm.width/height, which are pixel
+        // counts. That unit-mismatch rejected most placements and caused
+        // "couldn't fit" errors for textures that had plenty of room.
+        let _ = src_bm; // kept on the signature for future bpp-aware checks
+        if self.align_to_size_multiple && (x % src_w != 0) { return false; }
+        if self.align_to_size_multiple && (y % src_h != 0) { return false; }
 
         for yy in y..y + src_h {
             for xx in x..x + src_w {

@@ -17,6 +17,7 @@ mod common_block;
 mod decompile;
 mod lc_parser;
 mod lev_parser;
+mod ini_writer;
 mod lvas_writer;
 mod lvl_writer;
 mod mesh_bbox;
@@ -29,18 +30,22 @@ use std::process;
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn usage() -> ! {
-    eprintln!("Usage: levcomp <input.lev.bin> <objects.lc> <output.lvl> [<oad_dir>] [--mesh-dir <dir>] [--iff-txt <path>]");
+    eprintln!("Usage: levcomp <input.lev.bin> <objects.lc> <output.lvl> [<oad_dir>] [--mesh-dir <dir>] [--iff-txt <path>] [--textile-ini <path>]");
     eprintln!("       levcomp decompile <input.iff> <objects.lc> [--oad-dir <dir>] [-o <output.lev>]");
     eprintln!();
-    eprintln!("  oad_dir:    directory of compiled <class>.oad files (optional).");
-    eprintln!("              When present, each object's OAD data block is sized");
-    eprintln!("              from its class schema; when absent, OADSize = 0.");
-    eprintln!("  --mesh-dir: directory containing mesh .iff files (optional).");
-    eprintln!("              When present, each object's bbox is extended to");
-    eprintln!("              encompass its mesh vertices.  Also writes asset.inc");
-    eprintln!("              alongside the output .lvl for the iff.prp pipeline.");
-    eprintln!("  --iff-txt:  also emit a LVAS text-IFF that subsumes the prep step.");
-    eprintln!("              Compile via iffcomp-rs to produce the final <level>.iff.");
+    eprintln!("  oad_dir:        directory of compiled <class>.oad files (optional).");
+    eprintln!("                  When present, each object's OAD data block is sized");
+    eprintln!("                  from its class schema; when absent, OADSize = 0.");
+    eprintln!("  --mesh-dir:     directory containing mesh .iff files (optional).");
+    eprintln!("                  When present, each object's bbox is extended to");
+    eprintln!("                  encompass its mesh vertices.  Also writes asset.inc");
+    eprintln!("                  alongside the output .lvl for the iff.prp pipeline.");
+    eprintln!("  --iff-txt:      also emit a LVAS text-IFF that subsumes the prep step's");
+    eprintln!("                  iff.prp expansion.  Compile via iffcomp-rs to produce");
+    eprintln!("                  the final <level>.iff.");
+    eprintln!("  --textile-ini:  also emit textile's input INI (subsumes prep's ini.prp");
+    eprintln!("                  expansion).  Matches the [Version] + [Rooms] shape the");
+    eprintln!("                  original pipeline produced.");
     process::exit(1);
 }
 
@@ -123,6 +128,7 @@ fn main() {
     let mut oad_dir_str: Option<String> = None;
     let mut mesh_dir_str: Option<String> = None;
     let mut iff_txt_str: Option<String> = None;
+    let mut textile_ini_str: Option<String> = None;
     {
         let mut i = 4;
         while i < args.len() {
@@ -134,6 +140,10 @@ fn main() {
                 i += 1;
                 if i >= args.len() { usage(); }
                 iff_txt_str = Some(args[i].clone());
+            } else if args[i] == "--textile-ini" {
+                i += 1;
+                if i >= args.len() { usage(); }
+                textile_ini_str = Some(args[i].clone());
             } else if oad_dir_str.is_none() && !args[i].starts_with("--") {
                 oad_dir_str = Some(args[i].clone());
             } else {
@@ -263,5 +273,16 @@ fn main() {
                 eprintln!("warning: could not write {}: {}", iff_txt_path.display(), e);
             });
         eprintln!("  wrote {}", iff_txt_path.display());
+    }
+
+    // Emit textile's input INI when --textile-ini was given. Subsumes prep's
+    // ini.prp expansion (wfsource/levels.src/ini.prp).
+    if let Some(textile_ini) = textile_ini_str.as_deref() {
+        let textile_ini_path = Path::new(textile_ini);
+        ini_writer::write(&assets, &level_name, textile_ini_path)
+            .unwrap_or_else(|e| {
+                eprintln!("warning: could not write {}: {}", textile_ini_path.display(), e);
+            });
+        eprintln!("  wrote {}", textile_ini_path.display());
     }
 }
