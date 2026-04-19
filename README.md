@@ -195,4 +195,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 12:51** — [`docs/investigations/2026-04-19-oad-buttontype-audit.md`](docs/investigations/2026-04-19-oad-buttontype-audit.md): OAD ButtonType audit — iff2lvl vs levcomp-rs
+**2026-04-19 13:01** — [`docs/plans/2026-04-19-textile-rs-validation.md`](docs/plans/2026-04-19-textile-rs-validation.md): Plan: textile → Rust — validation & round-trip integration
