@@ -169,27 +169,42 @@ The Blender export now also preserves the source `.lev`'s original
 synthesizing from `obj.name` — so filename case follows the
 authoring source, not the Blender scene name.
 
-### Remaining filename-case oddity
+### Filename-case oddity — ✅ root-caused (2026-04-19)
 
 Source `wflevels/snowgoons/snowgoons.lev` has **mixed case**:
 `House.iff`, `QuadPatch01.iff`, `Player.iff` capitalised;
 `tree02.iff`, `tree03.iff` lowercase.  Oracle binary ASMP has
-**all lowercase**.  Round-trip preserves whatever the `.lev`
-says, so my output still has mixed case for 3 of 5 entries.
+**all lowercase**.
 
-Possibilities:
-- max2lev or iff2lvl lowercased the `MeshName` field at write time
-  (not reflected in the `.lev` source, which is the authoring
-  form).  Some path lowercased on the way to binary.
-- The `.lev` file we have got hand-edited (or decompiled
-  incorrectly) after the oracle was compiled, upper-casing
-  some names.
+Investigation (both tools' source code):
 
-Either way, the correctness-preserving fix is to **lowercase at
-`levcomp-rs::asset_registry` emit time** — the source `.lev`
-lookup is already case-insensitive, so using `.to_ascii_lowercase()`
-for the stored-name field (as well as the key) closes this.
-Noted but not landed this session.
+- **max2lev does NOT lowercase.** `wfmaxplugins/max2lev/oadobj.cc`
+  just copies the Max OAD-editor string verbatim:
+  `strcpy(entry->GetTypeDescriptor()->string, oe.GetString())`
+  and emits via `_iff->out_string(oadEntry->GetString())`.  The
+  `.lev`'s mixed case is authentic — it's what the Max user
+  typed in the OAD editor per object.
+- **iff2lvl DOES lowercase**, explicitly and knowingly, at
+  `wftools/iff2lvl/level2.cc:220-222`:
+
+      // kts this strlwr needs to go away, but first the levels in
+      // wflevels need to be updated to have the proper case
+      strlwr(oldName);
+
+  Same pattern at `level2.cc:275`.  So the oracle binary's
+  lowercase filenames are an iff2lvl normalisation step on top of
+  the authentic mixed-case `.lev`.
+- **Neither levcomp-rs decompile nor Blender importer touches
+  case** — confirmed by grep for `to_lowercase`/`to_ascii_lowercase`
+  in `wftools/levcomp-rs/src/decompile.rs` and
+  `wftools/wf_blender/export_level.py`: no hits.  The `.lev` we
+  have carries the original max2lev case straight through to
+  Blender and back out.
+
+Fix for mirror-first: **apply `strlwr` in
+`levcomp-rs::asset_registry::add_iff_room`** — same workaround
+iff2lvl applied, same "until the .lev files get normalized"
+caveat.  Lands in the same commit as this note.
 
 ## Texture pipeline (separate next-up plan, referenced here)
 
@@ -227,3 +242,54 @@ or documented).
 | `wfsource/levels.src/iff.prp` | prep template that assembles LVAS |
 | `wfsource/levels.src/ram.iff.txt` | RAM chunk template |
 | `wftools/levcomp-rs/src/lvl_writer.rs` | LVL emitter — source of CamShot BOX3 / base.rot / entry-list diffs |
+
+---
+
+## Deferred deviations — execute after oracle reproduces
+
+Each item below is a known-cleaner-than-oracle behaviour that we
+hold off on until `snowgoons-blender.iff` reproduces the oracle
+binary exactly.  Policy: mirror first, then run these as a single
+breaking-compat batch alongside
+[`2026-04-16-script-language-oad-field`](2026-04-16-script-language-oad-field.md).
+
+**a. Lowercase `.lev` filenames, drop iff2lvl's `strlwr` workaround.**
+Source `.lev` files have mixed-case mesh filenames that iff2lvl
+normalised with `strlwr(oldName)` at `level2.cc:222`/`:275` — KTS's
+own comment: "this strlwr needs to go away, but first the levels
+in wflevels need to be updated to have the proper case."
+levcomp-rs now replicates the strlwr; after the batch, normalise
+the `.lev` files to lowercase and remove the call.
+
+**b. Alphabetical export order, regenerate Actboxor indices.**
+Oracle has `obj[5] = Actboxor02`, `obj[17] = Actboxor01` from
+max2lev's Max-node iteration order.  Export in deterministic
+alphabetical-by-name order and regenerate the oracle; both
+Actboxors end up in the right rooms already, only their LVL
+indices shift.
+
+**c. Zero `_PathOnDisk.base.rot`.**
+levcomp-rs emits the literal 8-byte oracle sequence
+`b1 02 85 c6 00 00 20 4f` (investigation:
+[path-base-rot-oracle-mystery](../investigations/2026-04-19-path-base-rot-oracle-mystery.md)).
+After reproduction, flip to 8×0x00 and soak-test; if gameplay
+unchanged, drop the literal.
+
+**d. Drop iff2lvl's spurious CamShot BOX3 default in decompile.**
+iff2lvl fills a default `(0,0,0)-(0,0,0)` bbox for non-geometry
+objects that `expand_thin_bbox` widens to
+`(-0.25,-0.25,-0.25)-(0,0,0)`.  The decompiled `.lev` carries that
+synthesized bbox through, so Blender round-trip re-emits a BOX3
+for CamShots that max2lev would never have written.  Fix in
+`levcomp-rs::decompile`: recognise the default pattern and omit
+BOX3.  Blender import/export gate then works naturally.
+
+**e. ScriptLanguage OAD field — see separate plan.**
+`docs/plans/2026-04-16-script-language-oad-field.md` already
+tracks this.  Same gate.
+
+**f. Drop NULL_Object (index 0) from room entry lists.**
+Oracle's Room02 entries start with `[0, 1, 2, …]` — iff2lvl's
+accidental inclusion of NULL_Object because its identity bbox
+lands at the origin.  Engine skips null entries at load, so this
+is cosmetic.  Reproduce for byte-identity; drop after.

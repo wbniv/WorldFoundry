@@ -56,14 +56,23 @@ impl AssetRegistry {
 
     /// Register or look up an IFF mesh asset in a specific room slot.
     /// Returns the packed asset ID.
+    ///
+    /// Stores the filename lowercased to mirror iff2lvl's explicit
+    /// `strlwr(oldName)` at `wftools/iff2lvl/level2.cc:222`.  The `.lev`
+    /// files carry the authentic mixed-case filenames the Max user
+    /// typed into max2lev; iff2lvl normalises on the way to binary
+    /// (with a comment calling it out as a workaround "until the
+    /// levels in wflevels need to be updated to have the proper
+    /// case").  We match bug-for-bug for byte-identical oracle output.
     pub fn add_iff_room(&mut self, filename: &str, room: i32) -> i32 {
-        let key = (filename.to_ascii_lowercase(), room);
+        let lowered = filename.to_ascii_lowercase();
+        let key = (lowered.clone(), room);
         if let Some(&id) = self.by_name.get(&key) {
             return id;
         }
         let id = pack(room, TYPE_IFF, self.next_index(room, TYPE_IFF));
         self.by_name.insert(key, id);
-        self.entries.push((filename.to_string(), id));
+        self.entries.push((lowered, id));
         id
     }
 
