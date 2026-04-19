@@ -17,6 +17,7 @@ mod common_block;
 mod decompile;
 mod lc_parser;
 mod lev_parser;
+mod lvas_writer;
 mod lvl_writer;
 mod mesh_bbox;
 mod oad_loader;
@@ -28,7 +29,7 @@ use std::process;
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn usage() -> ! {
-    eprintln!("Usage: levcomp <input.lev.bin> <objects.lc> <output.lvl> [<oad_dir>] [--mesh-dir <dir>]");
+    eprintln!("Usage: levcomp <input.lev.bin> <objects.lc> <output.lvl> [<oad_dir>] [--mesh-dir <dir>] [--iff-txt <path>]");
     eprintln!("       levcomp decompile <input.iff> <objects.lc> [--oad-dir <dir>] [-o <output.lev>]");
     eprintln!();
     eprintln!("  oad_dir:    directory of compiled <class>.oad files (optional).");
@@ -38,6 +39,8 @@ fn usage() -> ! {
     eprintln!("              When present, each object's bbox is extended to");
     eprintln!("              encompass its mesh vertices.  Also writes asset.inc");
     eprintln!("              alongside the output .lvl for the iff.prp pipeline.");
+    eprintln!("  --iff-txt:  also emit a LVAS text-IFF that subsumes the prep step.");
+    eprintln!("              Compile via iffcomp-rs to produce the final <level>.iff.");
     process::exit(1);
 }
 
@@ -116,9 +119,10 @@ fn main() {
     let lc_path  = Path::new(&args[2]);
     let out_path = Path::new(&args[3]);
 
-    // Parse remaining args: positional oad_dir + named --mesh-dir.
+    // Parse remaining args: positional oad_dir + named --mesh-dir / --iff-txt.
     let mut oad_dir_str: Option<String> = None;
     let mut mesh_dir_str: Option<String> = None;
+    let mut iff_txt_str: Option<String> = None;
     {
         let mut i = 4;
         while i < args.len() {
@@ -126,6 +130,10 @@ fn main() {
                 i += 1;
                 if i >= args.len() { usage(); }
                 mesh_dir_str = Some(args[i].clone());
+            } else if args[i] == "--iff-txt" {
+                i += 1;
+                if i >= args.len() { usage(); }
+                iff_txt_str = Some(args[i].clone());
             } else if oad_dir_str.is_none() && !args[i].starts_with("--") {
                 oad_dir_str = Some(args[i].clone());
             } else {
@@ -209,16 +217,51 @@ fn main() {
     eprintln!("  wrote {} bytes", bytes.len());
 
     // Write asset.inc alongside the .lvl when mesh assets were registered.
+    let level_name = out_path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("level")
+        .to_string();
     if !assets.is_empty() {
-        let level_name = out_path
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("level");
         let asset_inc_path = out_path.with_file_name("asset.inc");
-        let text = assets.asset_inc(level_name);
+        let text = assets.asset_inc(&level_name);
         std::fs::write(&asset_inc_path, text).unwrap_or_else(|e| {
             eprintln!("warning: could not write {}: {}", asset_inc_path.display(), e);
         });
         eprintln!("  wrote {}", asset_inc_path.display());
+    }
+
+    // Emit the LVAS text-IFF when --iff-txt was given. Subsumes prep.
+    if let Some(iff_txt) = iff_txt_str.as_deref() {
+        let iff_txt_path = Path::new(iff_txt);
+        // Collect the distinct, sorted list of room indices that own
+        // mesh assets (all registered non-PERM entries). Texture rooms
+        // that carry no meshes — e.g. `RM0` in snowgoons — still need
+        // their own ASS-slot chunk in the LVAS, so callers can widen
+        // this set as more of the texture pipeline lands. For now we
+        // include any room that appears in the registry plus a fixed
+        // RM0 slot when the level has at least one per-room bucket
+        // (matches snowgoons; other levels may need different handling
+        // once textile-rs is wired up).
+        use std::collections::BTreeSet;
+        let mut room_set: BTreeSet<i32> = BTreeSet::new();
+        for (_, id) in assets.entries() {
+            let room = ((*id as u32) >> 12) & 0xFFF;
+            if room != 0xFFF {
+                room_set.insert(room as i32);
+            }
+        }
+        // Snowgoons has RM0 (textures only) + RM1 (meshes + textures).
+        // The registry only surfaces RM1; add RM0 explicitly so the TOC
+        // and chunk list match the oracle.
+        if !room_set.is_empty() {
+            room_set.insert(0);
+        }
+        let rooms: Vec<i32> = room_set.into_iter().collect();
+        lvas_writer::write(&assets, &level_name, &rooms, iff_txt_path)
+            .unwrap_or_else(|e| {
+                eprintln!("warning: could not write {}: {}", iff_txt_path.display(), e);
+            });
+        eprintln!("  wrote {}", iff_txt_path.display());
     }
 }

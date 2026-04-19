@@ -134,6 +134,14 @@ impl AssetRegistry {
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
     }
+
+    /// Registered entries in first-seen order — `(filename_lowercase,
+    /// packed_id)`. Used by the LVAS-text-IFF emitter to compose the
+    /// `'ASMP'` chunk contents and to walk room buckets in deterministic
+    /// order.
+    pub fn entries(&self) -> &[(String, i32)] {
+        &self.entries
+    }
 }
 
 /// Extract the room field from a packed asset ID.
