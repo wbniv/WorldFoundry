@@ -179,4 +179,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 09:22** — [`docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md`](docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md): `_PathOnDisk.base.rot` mystery bytes in oracle `snowgoons.iff`
+**2026-04-19 09:23** — [`docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md`](docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md): `_PathOnDisk.base.rot` mystery bytes in oracle `snowgoons.iff`
