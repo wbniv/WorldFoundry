@@ -177,4 +177,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 08:21** — [`docs/plans/2026-04-19-tuilib-log-source.md`](docs/plans/2026-04-19-tuilib-log-source.md): Plan 3: extract `panes/logs.py` behind abstract `LogSource`
+**2026-04-19 08:22** — [`docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md`](docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md): `_PathOnDisk.base.rot` mystery bytes in oracle `snowgoons.iff`
