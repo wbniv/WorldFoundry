@@ -68,7 +68,22 @@ The parser disambiguates "chunk vs. state-push" by lookahead: if the next token 
 
 ### Numeric expressions
 
-`expr` allows `item + item` and `item - item`, both fully implemented (`$$ = $1 + $3` and `$$ = $1 - $3`).
+`expr` allows `item + item` and `item - item`. **In iffcomp-rs these are
+fully implemented** — items build a Term, `expr` composes them, and the
+combined 32-bit value is emitted once (with combined-symbol backpatches
+where needed). **The current C++ `wftools/iffcomp/lang.y` is regressed**:
+it emits bytes at *item reduction* time, so `.offsetof(A) - .offsetof(B)`
+writes eight bytes (two separate offsets) and discards the arithmetic on
+`$`. That regression was introduced by an undated post-original
+modernization pass and has shipped undetected because no current
+`test.iff.txt` exercises `.offsetof - .offsetof`. The oracle
+`snowgoons.iff` TOC is known-good evidence that the *original* iffcomp
+had working arithmetic. For the full archaeology and the iffcomp-rs fix
+see [2026-04-19-iffcomp-offsetof-arithmetic](investigations/2026-04-19-iffcomp-offsetof-arithmetic.md).
+
+`.sizeof(X)` resolves to **payload size only** (the on-disk `size` field,
+excluding the 8-byte chunk header). If a TOC entry needs
+"total chunk size including header," write `.sizeof(X) + 8` explicitly.
 
 ### Defaults
 

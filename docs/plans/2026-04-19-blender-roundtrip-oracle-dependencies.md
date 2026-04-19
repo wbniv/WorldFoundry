@@ -20,7 +20,7 @@ LVL payload.  What that means concretely:
 
 | Oracle chunk | What it holds | Blocker to regenerating |
 |---|---|---|
-| `L4` + `ALGN` + `LVAS` header + `TOC` | IFF wrapper + offsets/sizes for ASMP/LVL/PERM/RMn | `prep` + `iff.prp` + valid `asset.inc` can produce this; currently `prep` bails on missing texture atlases |
+| `L4` + `ALGN` + `LVAS` header + `TOC` | IFF wrapper + offsets/sizes for ASMP/LVL/PERM/RMn | `prep` + `iff.prp` + valid `asset.inc` can produce this; currently `prep` bails on missing texture atlases. **TOC form** now understood: entries are `.offsetof(X) - .offsetof(LVAS) .sizeof(X)` (LVAS-header-relative), with a 6th `FAKE` sentinel that cross-wires `LVL`'s offset with `ASMP`'s size — see [iffcomp-offsetof-arithmetic](../investigations/2026-04-19-iffcomp-offsetof-arithmetic.md) for the grammar archaeology and [snowgoons.iff.txt](../../wflevels/snowgoons.iff.txt) for the reconstructed source. `.sizeof()` returns payload size (not header+payload). |
 | `RAM` | Runtime memory budget (`OBJD`, `PERM`, `ROOM`, `FLAG` sizes) | Trivial; just hasn't been authored in `levcomp-rs` |
 | `ASMP` | Packed-asset-ID → filename table | `levcomp-rs` emits the matching `asset.inc` text but doesn't produce the binary chunk yet |
 | `PERM` | Permanent-residency: `palPerm.tga` + `Perm.tga/.ruv/.cyc` + permanent mesh `.iff` bytes | **textile atlases** (see "Texture pipeline" below); mesh bytes already emittable from Blender |
@@ -84,17 +84,29 @@ loose ends.
    Semantically identical, just byte-different.
 
 5. **Oracle Room02 entry list begins with `0` (NULL object)** —
-   oracle: `[0, 1, 2, 4, 5, 9, …]`; mine: `[1, 2, 4, 9, …]`.  The
-   engine's `Room::Construct` skips null entries at load
-   (`if (masterObjectList[idx] != NULL)`), so the zero is benign.
-   Unknown whether iff2lvl meant it as a sentinel or it's an
-   off-by-one.
+   ✅ mirrored as of `6cc4a8c`.  iff2lvl's QObject list has
+   NULL_Object at slot 0 with identity bbox centred at origin,
+   and `SortIntoRooms` iterates starting from index 0, so
+   Room02 (whose world bbox contains the origin) always gets a
+   leading `0` entry.  `rooms::sort` now pre-pushes `0` into
+   whichever room's world bbox contains the origin before the
+   real-object pass.  Round-trip room entry lists now match:
+   `orig room[1] = [0, 1, 2, 4, 5, 9, ...]` and
+   `blen room[1] = [0, 1, 2, 4, 9, 10, ...]` (remaining 5↔17
+   diff is the deferred Actboxor ordering item).  Engine skips
+   null entries at load so this has no runtime effect — purely
+   a byte-identity mirror.  Drop-the-sentinel cleanup is
+   deferred-deviation (f) below.
 
-6. **`levelOad` member initialisation** — original engine asserts
-   on `No LevelObject object in level`; the `level.cc` soft-fail
-   that just landed in `5d184b4` logs a warning + uses zeros.
-   Round-trip does contain a LevelObj so this doesn't fire, but
-   the defaults-on-missing path hasn't been exercised.
+6. **`levelOad` member initialisation** — ✅ non-issue.  snowgoons
+   has a `LevelObj` object (schema: `wfsource/source/oas/levelobj.oad`;
+   carries Number Of Temporary Objects=200, mailbox counts,
+   matte/skybox settings, 128 SFX slots, 128 localised-text slots,
+   and the default character-physics values from `actor.inc`).
+   The `level.cc` soft-fail lands a warning + zero defaults if
+   any future level is authored without a LevelObj; round-trip
+   of snowgoons never exercises it.  Remove from this list — it's
+   not an oracle-reproduction concern.
 
 ## Natural Blender-exporter ASMP order vs oracle (2026-04-19)
 
@@ -151,7 +163,7 @@ So the natural recipe for a Blender-side ASMP emitter is:
 3. Pack `[type(8) | room(12) | index(12)]` and emit as
    `$<hex>l { 'STR' "<filename>" }`.
 
-### Implementation — landed 2026-04-19 (`0c399c0` + follow-up)
+### ✅ Implementation — landed 2026-04-19 (`0c399c0` + follow-up)
 
 `levcomp-rs::lvl_writer::write` now runs a pre-pass over
 `plan.objects` partitioned `[PERM, room 0, room 1, …]` before the

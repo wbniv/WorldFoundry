@@ -1,9 +1,97 @@
-# Email: `_PathOnDisk.base.rot` mystery bytes in oracle `snowgoons.iff`
+# `_PathOnDisk.base.rot` mystery bytes in oracle `snowgoons.iff`
 
 **Date:** 2026-04-19
-**To:** Kevin T. Seghetti (cc: original WF team — this is about `wftools/iff2lvl/path.cc`)
-**From:** Will, via Claude-assisted archaeology
-**Subject:** Do you remember what `_PathOnDisk.base.rot` was supposed to contain? Oracle has mystery bytes.
+**Status:** **RESOLVED** — all 8 bytes are uninitialized memory (see Resolution below).
+**Audience:** archaeology notes for `wftools/iff2lvl/path.cc`; was drafted as a question to KTS before we found the answer.
+
+---
+
+## Resolution (2026-04-19)
+
+**The `Euler` used in `path.cc` is the plain POD struct defined inline in `wftools/iff2lvl/global.hp:68-73`:**
+
+```cpp
+// This is a replacement (in progress) for br_euler.  The ordering is always XYZ_S
+typedef struct
+{
+    float a;
+    float b;
+    float c;
+} Euler;
+```
+
+Public `.a/.b/.c`, no constructor. `path.cc` pulls this in via `#include "global.hp"` at line 24 — it never includes `euler.hp`, so the `#error !!` tombstone is irrelevant to this TU. No `WF_TOOL` / `MAX_BUILDMODE` preprocessor gating is involved. `euler.hp`/`euler.cc` are orphaned dead code from the earlier class-based Euler (private `_a/_b/_c` with `GetA()/SetA()` accessors); the `#error !!` was a deliberate tripwire to prevent accidental reuse after the replacement POD landed in `global.hp`.
+
+**Consequence:** `Euler rotEuler;` is default-initialization of a POD struct — all three `float` members are *indeterminate*. Then:
+
+```cpp
+diskPath->base.rot.a = WF_FLOAT_TO_SCALAR(rotEuler.a);   // WF_FLOAT_TO_SCALAR(garbage float)
+```
+
+feeds a garbage float through `(fixed32)(x * 65536.0f)` and narrows the result to `u16`. So the three u16 axes are *also* uninitialized, not just the `.order`/`.pad` u8s that fall out of `new char[]` default-init. **All 8 bytes of `base.rot` are indeterminate memory.** The determinism across re-runs is a stack/heap layout artifact of the short-running plugin (same allocator state, same call pattern → same uninitialized contents), not evidence of any real value being stored.
+
+The third u16 (`.c = 0x0000`) matching expectations is coincidence — whatever float sat there happened to be 0.0 or small enough to narrow to zero fixed32.
+
+### What were these bytes *supposed* to contain, and whose path is it?
+
+**Whose path:** snowgoons has exactly one `_PathOnDisk` record, and it belongs to **`snowman01`** — the snowgoon enemy that walks back and forth across the yard. The intermediate `.lev` text confirms it: `wflevels/snowgoons/snowgoons.lev` under `{ 'NAME' "snowman01" } { 'PATH' ... }` with three `position.{x,y,z}` channels and three `rotation.{a,b,c}` channels.
+
+**What `base.rot` is for:** it's the **base rotation of the path's coordinate frame** — specifically the rotation of the *parent object* a relative/hierarchical path is anchored to. The runtime in `wfsource/source/anim/path.cc:157` adds it to every sampled rotation:
+
+```cpp
+rotation += _baseRot;   // Add offset for relative path or zero for absolute path
+```
+
+For an **absolute** path, `base.rot` is supposed to be zero (identity) — the per-channel rotation channels carry the full orientation.
+For a **relative/hierarchical** path (one with an `ObjectToFollow`), `base.rot` would carry the parent's orientation so the per-channel angles can be expressed in the parent's local frame.
+
+**snowman01 is absolute.** Its `.lev` entry has `Object To Follow ""` (empty). The `'BROT'` chunk in the `.lev` text is correctly authored as identity — `0, 0, 0, 1` (quat) — exactly as the design intends. So the on-disk `base.rot` *should* be `00 00 00 00 00 00 00 00`.
+
+**Why isn't it?** Two failures compound:
+
+1. **`QPath::baseRotation` (the class member) is never consulted by `QPath::Save`.** The class stores `Quat baseRotation;` correctly — set to identity by the default constructor, or to the caller's quat by the relative-path constructor. But `Save` declares a shadowing local `Euler rotEuler;` and writes *that* (uninitialized) instead of converting `baseRotation` → Euler.
+
+2. **The Quat→Euler conversion was never implemented.** `QPath::AddRotationKey` (`wftools/iff2lvl/path.cc:151-158`) is a stub:
+   ```cpp
+   #pragma message ("KTS " __FILE__ ": finish this")
+   //QuatToEuler(newRotation - baseRotation, angles);
+   assert(0);
+   ```
+   Same conversion was needed in `Save`, never got written, and the save path papered over it by declaring a fresh local and writing garbage.
+
+**Why it escaped notice:** even for the relative-path case where `base.rot` semantically matters, the runtime **overwrites it on every frame** from the parent object's live rotation (`wfsource/source/movement/movepath.cc:109`: `path->SetBaseRot( target->GetPhysicalAttributes().Rotation() )`). The saved bytes are clobbered before first use. For the absolute-path case (snowman01), the bytes are read into `_baseRot` and then added to every frame's rotation — but the per-channel rotation channels authored into snowgoons happen to produce angles that look correct with or without the garbage offset (short path, low-res visuals, no other reference to compare against). So the bug has been shipping undetected since 1995–2010.
+
+### What this means for `levcomp-rs`
+
+The `TODO` that currently emits the literal 8-byte sequence `b1 02 85 c6 00 00 20 4f` is a mirror of heap garbage. The verification plan below (flip to zeros once the end-to-end round-trip works and confirm nothing changes) is the right path to drop the literal constant. Given the runtime reads these bytes into `_baseRot` and the per-channel rotation channels then overwrite the actor rotation every frame, the flip to zeros is very likely safe.
+
+### Why the conventions exist: this bug is exactly what they were designed to prevent
+
+The `Euler` in `global.hp:68-73` violates at least three WF coding conventions, and those violations are what make the bug possible. It's a nice teaching moment:
+
+**1. "No public data" (`wfsource/source/codingstandards.txt:103`)**
+> *"inline accessors are free, so there is no reason to ever have public data."*
+
+`Euler` exposes `a/b/c` directly. That's the only reason `rotEuler.a` compiled at all — a proper class with `GetA()/SetA()` (like `wfsource/source/math/euler.hp`) wouldn't have matched the pattern in `path.cc`.
+
+**2. Canonical form / four special members (`docs/coding-conventions.md §4.1`, older IS C++ §5)**
+
+`Euler` declares *none* of the four — no default constructor, no copy, no assignment, no destructor. Modern §4.1 scopes the rule to resource-owning classes, so it doesn't strictly apply here; but the older IS C++ canonical-form rule (which `codingstandards.txt` recommends generally) covers all classes. The author flagged it themselves in the comment: *"This is a replacement (in progress) for br_euler."* It was meant to become a real class and never did. An explicit default constructor would almost certainly have zero-initialized `a/b/c`, the same way `wfsource/source/math/euler.hp`'s constructors do.
+
+**3. `Validate()` discipline (`codingstandards.txt:74-82`, `docs/coding-conventions.md §5`)**
+> *"Every class should have an inline function named `Validate()`. … Constructors should call Validate upon exit."*
+
+`Euler` has no `Validate()`. If it had one that asserted `a/b/c` are finite and within `[0, 1)` revolutions (per the "angles are in revolutions" project rule), and the default constructor called it on exit — the debug build of `iff2lvl` would have asserted the first time `QPath::Save` ran instead of silently emitting garbage.
+
+So the bug isn't "the compiler did something weird." It's *"a type that should have been a class was left as a POD shim, which bypassed three separate WF conventions each independently designed to prevent this class of bug."* The garbage bytes in the oracle are exactly what `codingstandards.txt` was written to make impossible.
+
+**Caveat on scope:** the WF coding standards were strictly enforced for the **game-engine runtime** (`wfsource/source/…`) and *much* more loosely for the **tools** (`wftools/iff2lvl`, the Max plugin, etc.). That's why the shortcuts that produced this bug — public-data POD struct, no `Validate()`, no canonical form, plus the stubbed-out Quat→Euler conversion in `AddRotationKey` — slipped through on the tools side. In hindsight it's clear that at least the value-type conventions (explicit default constructor, `Validate()`, no public data) *should* have applied to the tools as well: tools are the first producer of every byte the runtime reads, and a tool bug that writes garbage to an on-disk struct is indistinguishable from a runtime bug that reads one. The enforcement asymmetry is a historical artifact — not a deliberate design choice to be preserved — and the Rust rewrites (`iffcomp-rs`, `levcomp-rs`, `oas2oad-rs`) are a good opportunity to close that gap.
+
+---
+
+## Original investigation (as drafted before the resolution)
+
+The rest of this doc is the email-framed investigation I had queued up for KTS before tracing `global.hp` turned up the POD struct. Kept for archaeology.
 
 ---
 
@@ -88,7 +176,7 @@ struct _PathOnDisk
 and `wf_euler` is 8 bytes: three u16 axes (`a`, `b`, `c`) followed
 by `order` and `pad` u8s.
 
-### The stale header — suspicious
+### The stale header — suspicious [RESOLVED: red herring, see top]
 
 `wftools/iff2lvl/euler.hp` starts with:
 
@@ -222,12 +310,13 @@ Thanks!
 
 ## Status
 
-**Open.**  Awaiting reply from KTS.  In the meantime, `levcomp-rs`
-emits the literal 8-byte sequence `b1 02 85 c6 00 00 20 4f` for
-every `_PathOnDisk.base.rot`, matching snowgoons's oracle.  If/when
-we build levels with non-zero authored base rotation (unclear from
-the runtime code whether this is even possible), this will need to
-be revisited.
+**Resolved 2026-04-19.** The `Euler` is the POD struct in `global.hp:68-73`;
+`Euler rotEuler;` leaves `a/b/c` indeterminate; `WF_FLOAT_TO_SCALAR` then
+narrows garbage floats into the three u16 axes. Combined with the
+`new char[]` default-init of `.order`/`.pad`, all 8 bytes of `base.rot`
+are uninitialized memory. Mirror-first stands: `levcomp-rs` emits the
+literal 8-byte sequence `b1 02 85 c6 00 00 20 4f` for now; verification
+plan below is how we drop the literal.
 
 ## Verification plan once the round-trip is fully working
 

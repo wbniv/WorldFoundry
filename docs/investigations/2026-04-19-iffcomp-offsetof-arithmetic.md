@@ -600,3 +600,21 @@ includes all the level .iff files and wraps each in its own L4 block.
 Net: the restructure is the clean design; the arithmetic + expression
 extensions are now belt-and-suspenders — kept because they're small
 and well-tested, not because they're needed for the oracle match.
+
+### Footnote: the in-tree `iff.prp` was always LVAS-at-root
+
+Worth flagging for next time: the current in-tree template
+`wfsource/levels.src/iff.prp:7` already emits LVAS at root — the
+`FILE_HEADER` macro opens `{ 'LVAS' { 'TOC' ... } }` directly, no L4
+wrapper. This has been the template shape since the pre-L4 era and
+was preserved through every subsequent revision. A single `head -10
+wfsource/levels.src/iff.prp` at the start of this investigation would
+have answered the "does iff.prp emit L4?" sub-question without the
+SourceForge CVS round-trip. Postscript 3 recovered the historical CVS
+form and confirmed it's identical on this point — but the modern
+in-tree file was there the whole time and would have cracked it first.
+
+Lesson for future byte-identity archaeology: **check the in-tree
+template before fetching the external archive.** The purged-code
+three-tier fallback (working tree → `git show c5761ca^:<path>` →
+SourceForge `wf-gdk` CVS snapshot) applies here too — tier 1 first.

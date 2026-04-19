@@ -4,6 +4,14 @@
 //   ../wftools/iffcomp-rs/target/release/iffcomp -binary -o=cd.iff cd_full.iff.txt
 { 'GAME'
     { 'TOC'
+        // GAME is the outermost chunk (file offset 0), so single-arg
+        // `.offsetof(::'GAME'::X)` gives the correct GAME-relative (==
+        // file-absolute) offset with no subtraction needed. Contrast
+        // with snowgoons's LVAS TOC, which nests inside L4 and uses
+        // `.offsetof(X) - .offsetof(LVAS)`. `.sizeof(X)` returns the
+        // chunk's payload size (no 8-byte header). See
+        // docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md
+        // for the grammar archaeology behind both forms.
         'SHEL' .offsetof( ::'GAME'::'SHEL' ) .sizeof( ::'GAME'::'SHEL' )
         'L0'   .offsetof( ::'GAME'::'L0' )   .sizeof( ::'GAME'::'L0' )
         'L1'   .offsetof( ::'GAME'::'L1' )   .sizeof( ::'GAME'::'L1' )
