@@ -95,6 +95,7 @@ Eight days of work (2026-04-12 – 2026-04-19). Newest first:
 
 | Date | Investigation | Status | Summary |
 |------|---------------|--------|---------|
+| 2026-04-19 | [Email: `_PathOnDisk.base.rot` mystery bytes in oracle `snowgoons.iff`](docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md) | **In progress** | **To:** Kevin T. Seghetti (cc: original WF team — this is about `wftools/iff2lvl/path.cc`) **From:** Will, via Claude-assisted archaeology **Subject:** Do you remember what `_PathOnDisk.base.rot` … |
 | 2026-04-18 | [Android Port — Executable Size and RAM Usage](docs/investigations/2026-04-18-android-port-size-and-ram.md) | **In progress** | **Branch:** 2026-android **Artifact:** `android/app/build/outputs/apk/debug/worldfoundry-debug.apk` **NDK:** 26.2.11394342, arm64-v8a, `-DCMAKE_BUILD_TYPE=RelWithDebInfo`, then stripped by AGP … |
 | 2026-04-18 | [Closing the Android Port — Remaining Work](docs/investigations/2026-04-18-android-port-closure.md) | **Playable APK shipped; this doc lists what's left to call it "done."** | **Branch:** 2026-android |
 | 2026-04-17 | [IFF format lineage — EA IFF 85, AIFF, RIFF, WorldFoundry IFF](docs/investigations/2026-04-17-iff-format-lineage.md) | **Complete** | Traces all four formats from the common 1985 ancestor. Key findings: AIFF and WF IFF independently arrived at the same solution (bake navigational offsets at write time for slow-media random access); WF uniquely separates interchange (text source) from execution (platform binary); `.align(2048)` maps CD-ROM sectors. Side-by-side comparison table included. |
@@ -175,4 +176,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 05:21** — [`docs/plans/2026-04-16-git-branch-browser.md`](docs/plans/2026-04-16-git-branch-browser.md): Plan: git-branch-browser — v2 waypoint pipeline closed
+**2026-04-19 05:44** — [`docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md`](docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md): Email: `_PathOnDisk.base.rot` mystery bytes in oracle `snowgoons.iff`
