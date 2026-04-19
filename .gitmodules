@@ -1,0 +1,3 @@
+[submodule "vendor/python-tui-lib"]
+	path = vendor/python-tui-lib
+	url = /home/will/python-tui-lib

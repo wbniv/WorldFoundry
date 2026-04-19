@@ -20,7 +20,23 @@ import subprocess
 import sys
 import threading
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Optional
+
+# Bootstrap: make the vendored tuilib importable as `tuilib.*`.
+_TUILIB_ROOT = Path(__file__).resolve().parent.parent / 'vendor' / 'python-tui-lib'
+if _TUILIB_ROOT.is_dir() and str(_TUILIB_ROOT) not in sys.path:
+    sys.path.insert(0, str(_TUILIB_ROOT))
+
+# Per-app cache/config dir — keeps branch-browser's tuilib state
+# (e.g. char-widths cache) out of the default `tuilib` dir.
+import tuilib  # noqa: E402
+tuilib.APP_NAME = 'git-branch-browser'
+
+from tuilib.ui import theme as _tuilib_theme  # noqa: E402
+from tuilib.ui.doc_viewer.renderer import DocViewer  # noqa: E402
+
+_HELP_MD_PATH = Path(__file__).resolve().with_suffix('.help.md')
 
 
 # ---------------------------------------------------------------------------
@@ -109,32 +125,37 @@ class AppState:
     max_commits_ahead: int = 1
     needs_redraw: bool = True
     message: str = ''                   # transient status message
+    # Embedded markdown help overlay (shown when ? is pressed).
+    help_viewer: Optional[DocViewer] = None
+    help_open: bool = False
 
 
 # ---------------------------------------------------------------------------
 # Color pairs
 # ---------------------------------------------------------------------------
 
-CP_BRANCH_CURRENT = 1
-CP_BRANCH_LOCAL   = 2
-CP_BRANCH_REMOTE  = 3
-CP_DIR            = 4
-CP_FILE_NEW       = 5
-CP_FILE_DEL       = 6
-CP_FILE_MOD       = 7
-CP_FILE_RENAME    = 8
-CP_FILE_BINARY    = 9
-CP_STATUS_BAR     = 10
-CP_DIM            = 11
-CP_ERROR          = 12
-CP_DIFF_ADD       = 13
-CP_DIFF_DEL       = 14
-CP_DIFF_HUNK      = 15
-CP_DIFF_HEADER    = 16
-CP_NORMAL         = 17
-CP_SIDEWAYS       = 18
-CP_STRATA         = 19
-CP_COMPARE_MARK   = 20
+# Pair IDs start at 30 to avoid collision with tuilib's theme pairs
+# (which use IDs 1–26 and are initialized alongside for the `?` help overlay).
+CP_BRANCH_CURRENT = 30
+CP_BRANCH_LOCAL   = 31
+CP_BRANCH_REMOTE  = 32
+CP_DIR            = 33
+CP_FILE_NEW       = 34
+CP_FILE_DEL       = 35
+CP_FILE_MOD       = 36
+CP_FILE_RENAME    = 37
+CP_FILE_BINARY    = 38
+CP_STATUS_BAR     = 39
+CP_DIM            = 40
+CP_ERROR          = 41
+CP_DIFF_ADD       = 42
+CP_DIFF_DEL       = 43
+CP_DIFF_HUNK      = 44
+CP_DIFF_HEADER    = 45
+CP_NORMAL         = 46
+CP_SIDEWAYS       = 47
+CP_STRATA         = 48
+CP_COMPARE_MARK   = 49
 
 _STRIKE_ON  = b''
 _STRIKE_OFF = b''
@@ -142,8 +163,9 @@ _STRIKE_OFF = b''
 
 def init_colors():
     global _STRIKE_ON, _STRIKE_OFF
-    curses.start_color()
-    curses.use_default_colors()
+    # Initialize tuilib's theme pairs (IDs 1–26) first so DocViewer
+    # renders the help overlay correctly. Our own pairs (IDs 30+) follow.
+    _tuilib_theme.init_colors()
     bg = -1
     curses.init_pair(CP_BRANCH_CURRENT, curses.COLOR_CYAN,    bg)
     curses.init_pair(CP_BRANCH_LOCAL,   curses.COLOR_YELLOW,  bg)
@@ -828,7 +850,7 @@ def _render_branch_row(win, y: int, row: DisplayRow, base_attr: int,
 def _render_status_bar(stdscr, state: AppState, h: int, w: int):
     total = len(state.rows)
     pos = f'{state.cursor + 1}/{total}' if total else '0/0'
-    hint = '  ENTER=expand/diff  m=vs-master  c=compare  -/←=collapse  q=quit'
+    hint = '  ENTER=expand/diff  m=vs-master  c=compare  -/←=collapse  ?=help  q=quit'
     bar = f' {pos}{hint}'
     bar = bar[:w - 1].ljust(w - 1)
     try:
@@ -921,6 +943,57 @@ def show_diff_pager(stdscr, diff_lines: list, title: str):
             curses.resizeterm(*stdscr.getmaxyx())
 
     stdscr.nodelay(True)
+
+
+# ---------------------------------------------------------------------------
+# Help overlay (?-key, renders git-branch-browser.help.md via tuilib DocViewer)
+# ---------------------------------------------------------------------------
+
+def show_help_overlay(stdscr, state: AppState):
+    """Modal: load help.md once into a tuilib DocViewer, drive it until Esc/q/?."""
+    if state.help_viewer is None:
+        state.help_viewer = DocViewer()
+        try:
+            md = _HELP_MD_PATH.read_text(encoding='utf-8')
+        except OSError as e:
+            state.message = f'Help unavailable: {e}'
+            return
+        state.help_viewer.load_text(md, title='git-branch-browser — help')
+
+    viewer = state.help_viewer
+    stdscr.nodelay(False)
+    try:
+        while True:
+            h, w = stdscr.getmaxyx()
+            stdscr.erase()
+            try:
+                viewer.draw(stdscr, y=0, x=0, w=w, h=h - 1)
+            except curses.error:
+                pass
+            footer = '  ?/Esc/q=close   ↑↓/PgUp/PgDn=scroll'
+            try:
+                stdscr.addstr(h - 1, 0, footer[:w - 1].ljust(w - 1),
+                              curses.color_pair(CP_STATUS_BAR))
+            except curses.error:
+                pass
+            stdscr.refresh()
+
+            try:
+                key = stdscr.getch()
+            except KeyboardInterrupt:
+                break
+            if key in (ord('q'), ord('?'), 27, 3):
+                break
+            if key == curses.KEY_RESIZE:
+                curses.resizeterm(*stdscr.getmaxyx())
+                continue
+            # Delegate scroll / nav keys to the viewer.
+            try:
+                viewer.handle_key(key)
+            except Exception:
+                pass
+    finally:
+        stdscr.nodelay(True)
 
 
 # ---------------------------------------------------------------------------
@@ -1045,6 +1118,9 @@ def handle_key_main(key: int, state: AppState, stdscr) -> Optional[str]:
 
     if key == ord('q'):
         return 'quit'
+
+    elif key == ord('?'):
+        return 'open_help'
 
     elif key == 27:  # ESC clears compare mark or message
         state.compare_mark = None
@@ -1230,6 +1306,10 @@ def _run_main_loop(stdscr, state, pipe_r, repo_root, branches):
 
         if action == 'quit':
             return
+
+        elif action == 'open_help':
+            show_help_overlay(stdscr, state)
+            state.needs_redraw = True
 
         elif action in ('show_diff_parent', 'show_diff_master'):
             row = state.rows[state.cursor]
