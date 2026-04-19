@@ -202,4 +202,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 15:42** — [`docs/investigations/2026-04-19-snowgoons-build-pipeline.md`](docs/investigations/2026-04-19-snowgoons-build-pipeline.md): Snowgoons build pipeline — Blender to running game
+**2026-04-19 15:43** — [`docs/investigations/2026-04-19-snowgoons-build-pipeline.md`](docs/investigations/2026-04-19-snowgoons-build-pipeline.md): Snowgoons build pipeline — Blender to running game
