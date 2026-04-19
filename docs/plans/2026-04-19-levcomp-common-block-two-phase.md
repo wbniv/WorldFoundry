@@ -1,7 +1,7 @@
 # Plan: levcomp-rs two-phase common-block emission — oracle byte-identity for the LVL chunk
 
 **Date:** 2026-04-19
-**Status:** Not started
+**Status:** **Phase A done** — two-phase refactor landed 2026-04-19. LVL length is now byte-identical to oracle (8628/8628). Content diff count dropped 94.9% (2,772 → 141 byte-diffs). Remaining 141 bytes are unrelated to the common-block phase ordering — see "Remaining deviations after Phase A" at the end of this doc.
 **Related:** [blender-roundtrip-oracle-dependencies](2026-04-19-blender-roundtrip-oracle-dependencies.md), [iffcomp-offsetof-arithmetic](../investigations/2026-04-19-iffcomp-offsetof-arithmetic.md)
 
 ## Context
@@ -203,3 +203,39 @@ shot.
   (not an oracle copy), md5 matching the pre-2026-04-19 `oracle_lvl_payload.bin`.
 - `snowgoons.iff` produced by the full pipeline remains md5 `96bae4…`.
 - Snowgoons still boots and plays (same smoke test as today).
+
+## Remaining deviations after Phase A
+
+The two-phase refactor landed as planned and closed the common-block
+phase-ordering issue. 141 byte-diffs remain against oracle — all
+traced to **orthogonal** problems, not to common-block emission:
+
+| Bytes | Region          | Cause                                                                         | Owner       |
+|-------|-----------------|-------------------------------------------------------------------------------|-------------|
+| 40    | objects, rooms  | Actboxor01/02 obj[5] ↔ obj[17] index swap (oracle-deps plan item 3)           | deferred    |
+| 78    | common block    | Player script has leading `\n` in oracle that the current `.lev` source lacks | .lev source |
+| 14    | objects, rooms  | Cascaded effects of Actboxor swap on room-entries arrays                      | deferred    |
+| 7     | obj[12], obj[35]| Class defaults (`01 00 00 00`) we emit as zero — probably schema default issue | follow-up   |
+| 2     | Room 1 pad      | Heap-garbage pad (oracle `0x0B 0x08` vs our zeros); inconsistent across rooms | deferred    |
+
+None is a common-block emission bug. Room pad is unpredictable heap
+garbage that differs between Room 0 (zero) and Room 1 (`0x0B 0x08`) in
+the same oracle file, so no single fix mirrors both. Script newline
+lives in the `.lev` source, not the compiler. Actboxor swap is already
+on the deferred-deviations list. The obj[12] / obj[35] `01 00 00 00`
+run is small enough to chase as a follow-up if byte-identity becomes
+blocking; otherwise it can wait.
+
+Exit criteria scorecard:
+
+- ✗ `cmp` zero: not quite — 141 bytes left, all non-common-block.
+- ✗ levcomp-rs's own `.lvl` as the committed source: still gated on
+  those 141 bytes landing (unless we accept the deviations and commit
+  `snowgoons.lvl` as the one with those known diffs).
+- ✓ `snowgoons.iff` md5 `96bae4…`: still true (that's driven off the
+  oracle-LVL stopgap, which we haven't touched).
+- ✓ Snowgoons still plays: unchanged.
+
+Next action once we want to push further: attack the 7-byte
+obj[12]/obj[35] default-value mystery (smallest, most tractable), then
+decide whether the Actboxor swap is worth dislodging from deferred status.

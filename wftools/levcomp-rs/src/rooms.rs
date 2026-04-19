@@ -56,7 +56,13 @@ impl Room {
         out.extend_from_slice(&self.room_object_index.to_le_bytes());
         // 2 bytes of struct padding — the C struct's sizeof rounds up to 36
         // under `__attribute__((aligned(4)))`, and iff2lvl places the
-        // entries array right after `sizeof(_RoomOnDisk)`.
+        // entries array right after `sizeof(_RoomOnDisk)`. iff2lvl
+        // allocates rooms via `new char[...]` so this pad is uninit heap
+        // bytes, and — unlike the consistent `0x0B 0x08` values in
+        // `_ObjectOnDisk` — oracle rooms have *inconsistent* pad bytes
+        // (Room 0: 0x00 0x00; Room 1: 0x0B 0x08). No predictable
+        // allocator pattern. Emit zeros and accept the Room 1 byte-diff
+        // as a deferred deviation.
         out.extend_from_slice(&[0u8, 0u8]);
         for &e in &self.entries {
             out.extend_from_slice(&e.to_le_bytes());

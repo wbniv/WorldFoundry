@@ -19,7 +19,7 @@ use crate::asset_registry::{AssetRegistry, ROOM_PERM};
 use crate::common_block::CommonBlockBuilder;
 use crate::lc_parser::ClassMap;
 use crate::lev_parser::LevObject;
-use crate::oad_loader::{per_object_size, serialize_oad_data, OadSchemas};
+use crate::oad_loader::{per_object_size, precompute_xdata_offsets, serialize_oad_data, OadSchemas};
 use crate::rooms;
 
 pub const LEVEL_VERSION: i32 = 28;
@@ -124,8 +124,27 @@ pub fn write(plan: &mut LevelPlan) -> Result<Vec<u8>, String> {
 
     // Pre-build the per-object OAD payloads so we know the final common data
     // length before writing the header (the header carries commonDataOffset
-    // and commonDataLength).  Building in-order mirrors iff2lvl's Save flow.
+    // and commonDataLength).
+    //
+    // Two-phase common-block emission, mirroring iff2lvl:
+    //   Pass 1 — `precompute_xdata_offsets` walks all objects × all entries
+    //     and adds every XDATA (COPY / SCRIPT / OBJECTLIST /
+    //     CONTEXTUALANIMATIONLIST) blob to the common area, recording the
+    //     returned offset into a side table.
+    //   Pass 2 — per-object `serialize_oad_data` walks the schema normally;
+    //     for XDATA entries it reads the offset from the side table
+    //     (doesn't re-call `common.add`); for COMMONBLOCK…ENDCOMMON
+    //     sections it accumulates 4-byte values (including Pass-1 XDATA
+    //     offsets) and `common.add`s the section at ENDCOMMON.
+    //
+    // This ordering matters because `CommonBlockBuilder::add`'s dedup is
+    // greedy — earlier runs of bytes win. Putting the big XDATA blobs (most
+    // notably the Forth director/player scripts) into the area first lets
+    // later small COMMONBLOCK sections dedup against bytes inside them,
+    // reproducing iff2lvl's layout and the oracle's `common_len`.
+    // See docs/plans/2026-04-19-levcomp-common-block-two-phase.md.
     let mut common = CommonBlockBuilder::new();
+    let xdata_offsets = precompute_xdata_offsets(plan.objects, plan.schemas, &mut common);
     let name_to_idx = crate::lev_parser::name_to_index(plan.objects);
     let mut oad_payloads: Vec<Vec<u8>> = Vec::with_capacity(total_objects);
     oad_payloads.push(Vec::new());  // NULL_Object: empty payload
@@ -133,7 +152,11 @@ pub fn write(plan: &mut LevelPlan) -> Result<Vec<u8>, String> {
         let payload = plan
             .schemas
             .get(&obj.class_name)
-            .map(|s| serialize_oad_data(s, obj, &mut common, &name_to_idx, plan.assets, obj_asset_room[i]))
+            .map(|s| serialize_oad_data(
+                s, obj, i,
+                &mut common, &xdata_offsets,
+                &name_to_idx, plan.assets, obj_asset_room[i],
+            ))
             .unwrap_or_default();
         oad_payloads.push(payload);
     }
@@ -451,7 +474,15 @@ fn write_obj_header(
     oad_size: i16,
 ) {
     out.extend_from_slice(&type_idx.to_le_bytes());
-    out.extend_from_slice(&[0u8; 2]);                    // pad for i32 alignment
+    // iff2lvl's `_ObjectOnDisk` is allocated via `new char[size]`, which leaves
+    // the 2-byte pad after `type_idx` (for i32 alignment) as uninitialised
+    // heap bytes. Oracle snowgoons.iff consistently holds `0x0B 0x08` in this
+    // slot across every object — the same allocator-bin value iff2lvl's
+    // `_PathOnDisk` garbage pattern represents (see ORACLE_BASE_ROT below
+    // and the base.rot entry in the deferred-deviations plan). We mirror
+    // the garbage for byte-identity; functionally these two bytes are
+    // padding the engine never reads.
+    out.extend_from_slice(&[0x0Bu8, 0x08u8]);            // pad for i32 alignment (oracle heap garbage)
     push_i32(out, pos.0);
     push_i32(out, pos.1);
     push_i32(out, pos.2);
@@ -460,11 +491,13 @@ fn write_obj_header(
     push_i32(out, scale.2);
     // rotation: a, b, c (u16 each), order (u8) + 1 byte pad = 8 bytes total.
     // iff2lvl's Euler default constructor sets order = 0xFE (see euler.hp).
+    // The 1-byte pad after `order` is uninit heap memory from the same
+    // `new char[size]` call; oracle carries `0xBF` in every object slot.
     out.extend_from_slice(&rot.0.to_le_bytes());
     out.extend_from_slice(&rot.1.to_le_bytes());
     out.extend_from_slice(&rot.2.to_le_bytes());
     out.push(0xFEu8);                                    // order
-    out.push(0u8);                                       // pad (wf_euler aligned(4))
+    out.push(0xBFu8);                                    // pad (wf_euler aligned(4) — oracle heap garbage)
     // coarse bbox
     for v in bbox { push_i32(out, *v); }
     push_i32(out, oad_flags);

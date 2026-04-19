@@ -116,26 +116,125 @@ pub fn per_object_size(schema: &OadFile) -> usize {
     size
 }
 
-// ── Per-object OAD payload serialization ─────────────────────────────────────
+// ── Pass 1: precompute XDATA common-block offsets ────────────────────────────
+
+/// Side table of precomputed XDATA offsets, keyed by `(obj_idx, entry_idx)`.
+///
+/// `obj_idx` is the caller's `plan.objects` index (0-based; the NULL_Object
+/// sentinel at slot 0 isn't a real OAD-bearing object, so callers index from
+/// their real objects vector).  `entry_idx` is the schema-entry position
+/// within that object's class OAD.
+///
+/// Only XDATA entries with action ∈ {COPY, SCRIPT, OBJECTLIST,
+/// CONTEXTUALANIMATIONLIST} populate this table; other entries are absent
+/// (not inserted). Pass 2 reads an `Option<i32>` and falls back to the
+/// schema-default or sentinel value when missing — mirroring iff2lvl's
+/// behavior where `td->SetDef` is skipped for XDATA paths that don't call
+/// `AddCommonBlockData` (e.g. `XDATA_CONTEXTUALANIMATIONLIST` with no
+/// AppData available).
+pub type XDataOffsets = HashMap<(usize, usize), i32>;
+
+/// Pass 1 — iterate all objects × all OAD entries, and for each XDATA entry
+/// with action 1..=4 call `common.add(...)` and record the returned offset.
+///
+/// Mirrors `wftools/iff2lvl/level4.cc::AddXDataToCommonData`, which runs
+/// **before** `CreateCommonData` so that Phase-2 common-block sections can
+/// dedup against XDATA script bytes that got added first. The dedup in
+/// `CommonBlockBuilder::add` is greedy — earlier runs of bytes win — so
+/// emission order determines sharing, which determines total common-area
+/// size. See `docs/plans/2026-04-19-levcomp-common-block-two-phase.md`.
+///
+/// Callers must invoke this before the per-object `serialize_oad_data` loop,
+/// so the `common` area already holds all XDATA bytes by the time
+/// COMMONBLOCK-enclosed sections are added.
+pub fn precompute_xdata_offsets(
+    objects: &[LevObject],
+    schemas: &OadSchemas,
+    common: &mut CommonBlockBuilder,
+) -> XDataOffsets {
+    let mut table: XDataOffsets = HashMap::new();
+    for (obj_idx, obj) in objects.iter().enumerate() {
+        let Some(schema) = schemas.get(&obj.class_name) else {
+            continue;
+        };
+        for (entry_idx, entry) in schema.entries.iter().enumerate() {
+            if entry.button_type != ButtonType::XData {
+                continue;
+            }
+            let action = entry.xdata_conversion_action();
+            if !(1..=4).contains(&action) {
+                continue;
+            }
+            let text = obj
+                .find_field(entry.name_str())
+                .map(field_str_value)
+                .unwrap_or_default();
+            // Match iff2lvl's `AddXDataToCommonData` action dispatch:
+            //
+            //   OBJECTLIST (2) — always emit a block even for empty list;
+            //     an empty list is just the single 0xFFFFFFFF terminator
+            //     (iff2lvl appends the terminator after the list then
+            //     `AddCommonBlockData`s the whole thing). Non-empty lists
+            //     aren't yet exercised by our test levels; when they are,
+            //     this path needs the object-name → index resolution that
+            //     iff2lvl does at level4.cc ~566ff.
+            //
+            //   COPY (1) / SCRIPT (4) — NUL-terminate the script text and
+            //     pad to 4-byte alignment, then `AddCommonBlockData`.
+            //     Empty-script path: iff2lvl skips `SetDef`, which our
+            //     Pass 2 mirrors by leaving the table entry absent and
+            //     writing -1 as the per-object OAD byte.
+            //
+            //   CONTEXTUALANIMATIONLIST (3) — iff2lvl hard-codes
+            //     `xdataSize = -1; // Waiting for AppData`, so this path
+            //     never calls `AddCommonBlockData` in practice; we match
+            //     by leaving the table entry absent.
+            let offset: Option<i32> = match action {
+                2 if text.is_empty() => {
+                    Some(common.add(&0xffffffffu32.to_le_bytes()))
+                }
+                2 => {
+                    // Non-empty OBJECTLIST: not yet exercised; safe
+                    // fallback is the single-terminator block. When a
+                    // real test level exercises this, port iff2lvl's
+                    // level4.cc OBJECTLIST parsing here.
+                    Some(common.add(&0xffffffffu32.to_le_bytes()))
+                }
+                1 | 4 if !text.is_empty() => {
+                    let mut bytes = text.into_bytes();
+                    bytes.push(0);
+                    while bytes.len() % 4 != 0 { bytes.push(0); }
+                    Some(common.add(&bytes))
+                }
+                _ => None, // empty COPY/SCRIPT, all CONTEXTUALANIMATIONLIST
+            };
+            if let Some(off) = offset {
+                table.insert((obj_idx, entry_idx), off);
+            }
+        }
+    }
+    table
+}
+
+// ── Pass 2: per-object OAD payload serialization ─────────────────────────────
 
 /// Emit the binary OAD data block for one object.
 ///
-/// Walks the class schema in order:
+/// Pass 2 of the two-phase common-block emission. Walks the class schema in
+/// order; for any XDATA entry the 4-byte value comes from the `xdata_offsets`
+/// side table populated by [`precompute_xdata_offsets`] in Pass 1 — not from
+/// a fresh `common.add(...)` call. COMMONBLOCK…ENDCOMMON sections accumulate
+/// their 4-byte per-entry values (including Pass-1 XDATA offsets read from
+/// the side table) into a temp buffer, which gets `common.add`ed on close.
 ///
-/// - Entries *outside* any COMMONBLOCK: their bytes are written into the
-///   per-object OAD payload, with values looked up from the .lev sub-chunks.
-/// - COMMONBLOCK marker: collects the enclosed section's bytes into a temp
-///   buffer, hands them to `common` for dedup, then writes the returned offset
-///   into the per-object payload as a 4-byte LE i32.
-/// - ENDCOMMON marker: closes the common section.
-///
-/// `common` is the level's common data area.  XDATA script fields append
-/// their text bytes here too (separately from CB sections), and their 4-byte
-/// value in the CB section is the returned offset.
+/// `obj_idx` must match the key used during Pass 1 (caller's
+/// `plan.objects[obj_idx]` == `obj`).
 pub fn serialize_oad_data(
     schema: &OadFile,
     obj: &LevObject,
+    obj_idx: usize,
     common: &mut CommonBlockBuilder,
+    xdata_offsets: &XDataOffsets,
     name_to_idx: &HashMap<String, i32>,
     assets: &mut AssetRegistry,
     asset_room: i32,
@@ -152,7 +251,10 @@ pub fn serialize_oad_data(
                     && schema.entries[j].button_type != ButtonType::EndCommon
                 {
                     let e = &schema.entries[j];
-                    serialize_entry(&mut section, e, obj, common, true, name_to_idx, assets, asset_room);
+                    serialize_entry(
+                        &mut section, e, obj, obj_idx, j,
+                        true, xdata_offsets, name_to_idx, assets, asset_room,
+                    );
                     j += 1;
                 }
                 while section.len() % 4 != 0 { section.push(0); }
@@ -164,7 +266,10 @@ pub fn serialize_oad_data(
                 i += 1;
             }
             _ => {
-                serialize_entry(&mut out, entry, obj, common, false, name_to_idx, assets, asset_room);
+                serialize_entry(
+                    &mut out, entry, obj, obj_idx, i,
+                    false, xdata_offsets, name_to_idx, assets, asset_room,
+                );
                 i += 1;
             }
         }
@@ -176,8 +281,10 @@ fn serialize_entry(
     out: &mut Vec<u8>,
     entry: &OadEntry,
     obj: &LevObject,
-    common: &mut CommonBlockBuilder,
+    obj_idx: usize,
+    entry_idx: usize,
     in_common: bool,
+    xdata_offsets: &XDataOffsets,
     name_to_idx: &HashMap<String, i32>,
     assets: &mut AssetRegistry,
     asset_room: i32,
@@ -237,39 +344,26 @@ fn serialize_entry(
         }
         ButtonType::XData => {
             // XData fields (actions 1..=4) materialise as a 4-byte offset
-            // into the common data area.  The "empty" case differs by
-            // action — mirrors `wftools/iff2lvl/level4.cc::AddXDataToCommonData`:
+            // into the common data area. The offset was computed in Pass 1
+            // (`precompute_xdata_offsets`) before any COMMONBLOCK section
+            // was added, so the `common` area already contains every
+            // XDATA blob and our Pass-2 COMMONBLOCK additions can dedup
+            // against them (matching iff2lvl's emission order).
             //
-            //   XDATA_COPY (1) / XDATA_SCRIPT (4):
-            //     iff2lvl writes -1 sentinel when no script/data.  Engine
-            //     guards with `!= -1` (actor.cc:294, :594) and asserts -1
-            //     on classes that shouldn't carry scripts (actor.cc:604).
-            //
-            //   XDATA_OBJECTLIST (2):
-            //     iff2lvl always emits at least an empty-list block — a
-            //     single 0xffffffff terminator — and stores the offset of
-            //     that block.  Engine iterates the list until terminator,
-            //     so we need a valid offset pointing at a terminator.
-            //
-            //   XDATA_CONTEXTUALANIMATIONLIST (3):
-            //     iff2lvl writes -1 sentinel when no list.
+            // Fallback when Pass 1 didn't populate the table (matching
+            // iff2lvl's "no SetDef" cases):
+            //   XDATA_COPY (1) / XDATA_SCRIPT (4):  no script text → -1.
+            //   XDATA_CONTEXTUALANIMATIONLIST (3):  always -1 until
+            //     AppData gets wired up (`xdataSize = -1` hardcoded in
+            //     iff2lvl's level4.cc path).
+            //   XDATA_OBJECTLIST (2):  always populated in Pass 1
+            //     (iff2lvl emits at least the empty-list sentinel block).
             let action = entry.xdata_conversion_action();
             if (1..=4).contains(&action) {
-                let text = chunk
-                    .map(crate::lev_parser::field_str_value)
-                    .unwrap_or_default();
-                let value = if text.is_empty() {
-                    match action {
-                        1 | 3 | 4 => -1,
-                        2 => common.add(&0xffffffffu32.to_le_bytes()),
-                        _ => -1,
-                    }
-                } else {
-                    let mut bytes = text.into_bytes();
-                    bytes.push(0);
-                    while bytes.len() % 4 != 0 { bytes.push(0); }
-                    common.add(&bytes)
-                };
+                let value = xdata_offsets
+                    .get(&(obj_idx, entry_idx))
+                    .copied()
+                    .unwrap_or(-1);
                 push_i32(out, value);
             }
         }
