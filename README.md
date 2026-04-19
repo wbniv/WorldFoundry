@@ -108,6 +108,7 @@ Eight days of work (2026-04-12 – 2026-04-19). Newest first:
 
 | Date | Investigation | Status | Summary |
 |------|---------------|--------|---------|
+| 2026-04-19 | [OAD ButtonType audit — iff2lvl vs levcomp-rs](docs/investigations/2026-04-19-oad-buttontype-audit.md) | **In progress** | **Purpose:** cross-reference every `ButtonType` variant from `wf_oad::ButtonType` (29 total) against how `wftools/iff2lvl` emits it and how `wftools/levcomp-rs/src/oad_loader.rs` emits it, to catch … |
 | 2026-04-19 | [`.offsetof` arithmetic in iffcomp — oracle vs current behavior](docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md) | **Recommendation accepted; iffcomp-rs arithmetic implementation in** | **Context:** Reconstructing `wflevels/snowgoons.iff.txt` as a proper compile-source text-IFF file (mirror-first, deviate-later), chunk-by-chunk, so iffcomp-rs can produce byte-identical output … |
 | 2026-04-19 | [Email: `_PathOnDisk.base.rot` mystery bytes in oracle `snowgoons.iff`](docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md) | **In progress** | **To:** Kevin T. Seghetti (cc: original WF team — this is about `wftools/iff2lvl/path.cc`) **From:** Will, via Claude-assisted archaeology **Subject:** Do you remember what `_PathOnDisk.base.rot` … |
 | 2026-04-18 | [Android Port — Executable Size and RAM Usage](docs/investigations/2026-04-18-android-port-size-and-ram.md) | **In progress** | **Branch:** 2026-android **Artifact:** `android/app/build/outputs/apk/debug/worldfoundry-debug.apk` **NDK:** 26.2.11394342, arm64-v8a, `-DCMAKE_BUILD_TYPE=RelWithDebInfo`, then stripped by AGP … |
@@ -190,4 +191,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 12:25** — [`docs/plans/2026-04-19-levcomp-common-block-two-phase.md`](docs/plans/2026-04-19-levcomp-common-block-two-phase.md): Plan: levcomp-rs two-phase common-block emission — oracle byte-identity for the LVL chunk
+**2026-04-19 12:34** — [`docs/investigations/2026-04-19-oad-buttontype-audit.md`](docs/investigations/2026-04-19-oad-buttontype-audit.md): OAD ButtonType audit — iff2lvl vs levcomp-rs
