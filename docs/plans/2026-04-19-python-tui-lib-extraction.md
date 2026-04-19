@@ -1,7 +1,7 @@
 # Plan: extract reusable TUI code into `python-tui-lib`
 
 **Date:** 2026-04-19
-**Status:** Awaiting approval
+**Status:** Done — all 4 phases landed 2026-04-19. `python-tui-lib` exists at `/home/will/python-tui-lib` (commits `2695044` / `1942141` / `82764dd`) and is consumed by WorldFoundry's `git-branch-browser.py` via the `vendor/python-tui-lib/` submodule (commit `f75e7c7`). `?` opens the markdown help page.
 
 ## Context
 
