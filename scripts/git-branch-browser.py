@@ -497,22 +497,25 @@ def _node_glyph_and_attr(b: BranchNode) -> tuple[str, int]:
 
 
 def _spine_for_branch(b: BranchNode) -> list:
-    dim = curses.color_pair(CP_DIM) | curses.A_DIM
-    side = curses.color_pair(CP_SIDEWAYS)
-    glyph, gattr = _node_glyph_and_attr(b)
+    # Sideways forks keep the tree-art so the off-chain shape is visible.
     if b.is_sideways:
-        # Mainline │ continues past; sideways branches off to the right.
+        dim = curses.color_pair(CP_DIM) | curses.A_DIM
+        side = curses.color_pair(CP_SIDEWAYS)
+        glyph, gattr = _node_glyph_and_attr(b)
         return [('│', dim), (' ', dim), ('├', side), ('─', side),
                 (glyph, gattr), (' ', 0)]
-    return [(glyph, gattr), (' ', 0)]
+    # Mainline rows: no status glyph — just `*` on the current branch.
+    if b.is_current:
+        return [('*', curses.color_pair(CP_BRANCH_CURRENT) | curses.A_BOLD), (' ', 0)]
+    return [(' ', 0), (' ', 0)]
 
 
 def _spine_for_subrow(b: BranchNode) -> list:
-    dim = curses.color_pair(CP_DIM) | curses.A_DIM
-    side = curses.color_pair(CP_SIDEWAYS) | curses.A_DIM
     if b.is_sideways:
+        dim = curses.color_pair(CP_DIM) | curses.A_DIM
+        side = curses.color_pair(CP_SIDEWAYS) | curses.A_DIM
         return [('│', dim), (' ', dim), ('│', side), (' ', dim), (' ', 0), (' ', 0)]
-    return [('│', dim), (' ', 0)]
+    return [(' ', 0), (' ', 0)]
 
 
 def flatten_all(branches: list) -> list:
@@ -578,7 +581,8 @@ def _truncate(s: str, max_len: int) -> str:
         return s
     if max_len <= 3:
         return s[:max_len]
-    return '…' + s[-(max_len - 1):]
+    # Right-truncate so date prefixes (`2026-…`) stay visible.
+    return s[:max_len - 1] + '…'
 
 
 def _compute_scroll(cursor: int, offset: int, visible: int, total: int) -> int:
@@ -767,7 +771,7 @@ def _render_branch_row(win, y: int, row: DisplayRow, base_attr: int,
         name_attr |= curses.A_UNDERLINE
 
     short_sha = b.tip_sha[:7] if b.tip_sha else '       '
-    ahead = f'+{b.commits_ahead}' if b.commits_ahead else '+0'
+    ahead = (f'+{b.commits_ahead}' if b.commits_ahead else '+0').rjust(5)
     if b.parent is None:
         arrow = '(root)'
     elif b.is_sideways:
@@ -778,45 +782,47 @@ def _render_branch_row(win, y: int, row: DisplayRow, base_attr: int,
     strata_w = max(6, min(16, max_w // 6))
     date_str = b.tip_date[5:10] if len(b.tip_date) >= 10 else ''
 
-    right_bits = [short_sha, ahead.rjust(5), _truncate(arrow, 28).ljust(28),
-                  _strata_bar(b.commits_ahead, state.max_commits_ahead, strata_w)]
-    if date_str:
-        right_bits.append(date_str)
-    right_text = '  '.join(right_bits)
+    # Column layout (left → right):
+    #   spine | marker | name(fixed) | sha(7) | ahead(5) | arrow(natural) | strata | date
+    # Name column is fixed-width so left edges align. Arrow is natural-width
+    # so the strata bar sits right after the arrow text, not in a distant column.
+    gap = 2
+    avail = max_w - x0 - len(marker) - 1
+    fixed_tail = 7 + 5 + strata_w + (len(date_str) if date_str else 0)
+    fixed_gaps = 4 * gap + (gap if date_str else 0)
+    name_w = 32
+    if avail < name_w + fixed_tail + fixed_gaps + 4:
+        # Very narrow terminal — shrink name column first.
+        name_w = max(12, avail - fixed_tail - fixed_gaps - 4)
+    arrow_budget = max(0, avail - name_w - fixed_tail - fixed_gaps)
+    arrow_w = min(len(arrow), arrow_budget) if arrow_budget > 0 else 0
 
-    name_max = max_w - x0 - len(marker) - len(right_text) - 2
-    if name_max < 8:
-        name_max = max(max_w - x0 - len(marker) - 1, 8)
-        right_text = ''
-    name = _truncate(b.display_name, name_max)
+    name_txt = _truncate(b.display_name, name_w).ljust(name_w)
+    arrow_txt = _truncate(arrow, arrow_w) if arrow_w > 0 else ''
+
+    dim_attr = curses.color_pair(CP_DIM) | curses.A_DIM | base_attr
+    arrow_attr = (curses.color_pair(CP_SIDEWAYS) if b.is_sideways
+                  else curses.color_pair(CP_DIM)) | base_attr
+    ahead_attr = curses.color_pair(CP_FILE_NEW) | base_attr
 
     x = x0
-    safe_addstr(win, y, x, marker, curses.color_pair(CP_DIM) | curses.A_DIM | base_attr)
+    safe_addstr(win, y, x, marker, dim_attr)
     x += len(marker)
-    safe_addstr(win, y, x, name, name_attr | base_attr)
-    x += len(name)
-
-    if right_text:
-        pad = max_w - x - len(right_text) - 1
-        if pad > 0:
-            safe_addstr(win, y, x, ' ' * pad, base_attr)
-            x += pad
-        dim_attr = curses.color_pair(CP_DIM) | curses.A_DIM | base_attr
-        safe_addstr(win, y, x, short_sha + '  ', dim_attr)
-        x += len(short_sha) + 2
-        ahead_attr = curses.color_pair(CP_FILE_NEW) | base_attr
-        safe_addstr(win, y, x, ahead.rjust(5) + '  ', ahead_attr)
-        x += 5 + 2
-        arrow_attr = (curses.color_pair(CP_SIDEWAYS) if b.is_sideways
-                      else curses.color_pair(CP_DIM)) | base_attr
-        arrow_txt = _truncate(arrow, 28).ljust(28)
-        safe_addstr(win, y, x, arrow_txt + '  ', arrow_attr)
-        x += len(arrow_txt) + 2
+    safe_addstr(win, y, x, name_txt, name_attr | base_attr)
+    x += len(name_txt)
+    safe_addstr(win, y, x, '  ' + short_sha, dim_attr)
+    x += gap + 7
+    safe_addstr(win, y, x, '  ' + ahead, ahead_attr)
+    x += gap + 5
+    if arrow_txt:
+        safe_addstr(win, y, x, '  ' + arrow_txt, arrow_attr)
+        x += gap + len(arrow_txt)
+    if strata_w > 0:
         strata_txt = _strata_bar(b.commits_ahead, state.max_commits_ahead, strata_w)
-        safe_addstr(win, y, x, strata_txt, curses.color_pair(CP_STRATA) | base_attr)
-        x += len(strata_txt)
-        if date_str:
-            safe_addstr(win, y, x, '  ' + date_str, dim_attr)
+        safe_addstr(win, y, x, '  ' + strata_txt, curses.color_pair(CP_STRATA) | base_attr)
+        x += gap + len(strata_txt)
+    if date_str:
+        safe_addstr(win, y, x, '  ' + date_str, dim_attr)
 
 
 def _render_status_bar(stdscr, state: AppState, h: int, w: int):
