@@ -87,6 +87,25 @@ So the bug isn't "the compiler did something weird." It's *"a type that should h
 
 **Caveat on scope:** the WF coding standards were strictly enforced for the **game-engine runtime** (`wfsource/source/…`) and *much* more loosely for the **tools** (`wftools/iff2lvl`, the Max plugin, etc.). That's why the shortcuts that produced this bug — public-data POD struct, no `Validate()`, no canonical form, plus the stubbed-out Quat→Euler conversion in `AddRotationKey` — slipped through on the tools side. In hindsight it's clear that at least the value-type conventions (explicit default constructor, `Validate()`, no public data) *should* have applied to the tools as well: tools are the first producer of every byte the runtime reads, and a tool bug that writes garbage to an on-disk struct is indistinguishable from a runtime bug that reads one. The enforcement asymmetry is a historical artifact — not a deliberate design choice to be preserved — and the Rust rewrites (`iffcomp-rs`, `levcomp-rs`, `oas2oad-rs`) are a good opportunity to close that gap.
 
+### Not the only uninit-heap site: the `_RoomOnDisk` pad bytes are the same pattern
+
+Update, 2026-04-19 later that day: while chasing the last 3 byte-diffs in snowgoons's `.lvl` (see `docs/plans/2026-04-19-levcomp-common-block-two-phase.md`), we found the SAME C-allocator-heap-garbage pattern in a different struct — `_RoomOnDisk` pads. iff2lvl allocates rooms via `new char[size]`, writes 34 bytes of fields into a `__attribute__((aligned(4)))` 36-byte footprint, and doesn't zero the 2-byte struct-header pad. It also doesn't zero the trailing-entries pad that brings `36 + 2×count` up to the next 4-byte boundary. Both regions end up carrying whatever bytes happened to be in the allocator bucket the OS handed out.
+
+Concrete snowgoons witnesses (see `rooms.rs:61-65`):
+
+- Room 0: struct-header pad = `00 00` (same as our zero-init), **trailing pad = `01 00`** (ours emits `00 00`).
+- Room 1: **struct-header pad = `0B 08`** (ours emits `00 00`), trailing pad n/a (entries array lands on a 4-byte boundary).
+
+Three bytes total, same class as `_PathOnDisk.base.rot`'s 8-byte Euler garbage. Both:
+
+- **Uninitialized heap from `new char[size]`** (C allocator semantics — no zero-fill).
+- **Deterministic within one run** (same process, same allocator state) but **not reproducible across platforms or implementations** (Rust `Vec::extend_from_slice` zero-fills; C's `new char[]` doesn't).
+- **Not content** — the runtime doesn't read these bytes meaningfully. They're artifacts of the authoring tool's allocation pattern, preserved on disk because the authoring tool never overwrote them before committing bytes to the `.lvl` file.
+
+The lesson: **any `new char[]` without explicit zero-init in iff2lvl is a potential byte-identity cliff.** `_PathOnDisk` and `_RoomOnDisk` are the two we've hit; `_ObjectOnDisk`'s type-field pad (2 bytes after the i16 type, before position) is a third, already mirrored consistently by levcomp-rs (`lvl_writer.rs:477` emits the same `0x0B 0x08` that iff2lvl produced — lucky in that case because iff2lvl always pulls the same allocator bin for object zero, so the bytes are consistent). Other on-disk structs are worth auditing if future byte-identity work turns up unexpected diffs.
+
+**Mirror policy for these pad bytes**: zero-fill on the Rust side and accept the constant-width drift. Replaying the iff2lvl heap state exactly is infeasible, and the bytes are meaningless to the runtime — so the cheapest path is "don't chase." Document and move on. (The `mirror-oracle-first` rule has an explicit carve-out for indeterminate heap bytes: there's nothing to mirror.)
+
 ---
 
 ## Original investigation (as drafted before the resolution)

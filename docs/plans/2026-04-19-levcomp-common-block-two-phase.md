@@ -1,7 +1,7 @@
 # Plan: levcomp-rs two-phase common-block emission — oracle byte-identity for the LVL chunk
 
 **Date:** 2026-04-19
-**Status:** **Phase A + follow-ups done** — two-phase refactor landed `8e2f244`, then three follow-up fixes landed on top: ObjectOnDisk / Room pad heap-garbage mirror, I32-enum STR accessor (audit fix 1, `21ca707`), and Actboxor01/02 `.lev` swap (`0a37e20`). LVL length byte-identical to oracle. Content diff count dropped 97.0% (2,772 → 83 byte-diffs). Remaining 83 bytes are all non-compiler-issues — see "Remaining deviations after Phase A" at the end.
+**Status:** **Phase A + follow-ups done — LVL byte-identity complete modulo 3 heap-pad bytes.** Two-phase refactor landed `8e2f244`, then five follow-up fixes: ObjectOnDisk / Room pad heap-garbage mirror, I32-enum STR accessor (audit fix 1, `21ca707`), Actboxor01/02 `.lev` swap (`0a37e20`), joystick-Script leading-`\n` `.lev` fix (`88b9df7`), and I32-enum STR-lookup correctly gated on `ShowAs == DROPMENU | RADIOBUTTONS` (`4c3e652`) — the last one also fixed a user-visible dark-lighting regression at runtime by restoring lightType=0 (DIRECTIONAL) for Omni01/Omni02. Content-diff count dropped from 2,772 baseline → 3 (99.9%). The remaining 3 bytes are ALL uninitialized heap padding inside iff2lvl's `new char[]` room allocations — physically unpredictable, not content.
 **Related:** [blender-roundtrip-oracle-dependencies](2026-04-19-blender-roundtrip-oracle-dependencies.md), [iffcomp-offsetof-arithmetic](../investigations/2026-04-19-iffcomp-offsetof-arithmetic.md)
 
 ## Context
@@ -209,80 +209,54 @@ shot.
 
 ## Remaining deviations after Phase A + follow-ups
 
-The two-phase refactor landed, and three follow-up fixes closed the
-tractable remainder:
+Two-phase refactor landed plus five follow-up fixes closed the content-delta to zero:
 
 | Landed                                          | Bytes closed | Commit   |
 |-------------------------------------------------|-------------:|----------|
 | Two-phase emission + object type/rot pads       | 2,631        | `8e2f244`|
 | I32 enum-label `STR` accessor (audit fix 1)     | 7            | `21ca707`|
 | Actboxor01/02 `.lev` swap                       | 51           | `0a37e20`|
-| **Total**                                       | **2,689**    | —        |
+| Joystick-Script leading `\n` in `.lev`          | 78           | `88b9df7`|
+| I32 enum STR-lookup gated on `ShowAs`           | 2            | `4c3e652`|
+| **Total**                                       | **2,769**    | —        |
 
-Down from 2,772 baseline diffs to **83**. Content-diff reduction: **97.0%**.
+Down from 2,772 baseline → **3 bytes** remaining. Content-diff reduction: **99.9%**. Remaining 3 bytes are ALL uninitialized heap memory inside iff2lvl's `new char[]` Room allocations — the same pattern as the `_PathOnDisk.base.rot` "Euler garbage" (`docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md`), just in a different struct.
 
-Remaining 83 byte-diffs, all non-compiler. 2026-04-19 rerun showed 5 clusters, but only **4 real content bugs** — the biggest cluster is a shift echo:
+### Remaining 3 byte-diffs (all heap-uninit room-struct pad, same family as Euler garbage)
 
-| Bytes | Offset   | Cluster size | Real size | Real diff                                                        |
-|-------|----------|-------------:|----------:|-------------------------------------------------------------------|
-| 78    | 5437–5514| 78 B         | **1 B**   | **`\\` escape not decoded in `.lev` STR parser** — drops the leading `\` of the Forth joystick script `"\\ wf\n..."` so every subsequent byte shifts 1 pos. Oracle decoded `\\ ` → `\ ` (2 bytes); levcomp-rs decoded `\\ ` → ` ` (1 byte). Fix is in the `.lev` string-escape path (`lev_parser.rs`'s cstr / STR decoder). |
-| 2     | 4943–4944| 2 B          | 2 B       | u16 field: oracle `0x080B = 2059`, new `0x0000`. Looks like a **pointer/offset into the common-block that's being nullified**. This is the top candidate for the user's "dark lighting" regression — a null pointer to something (light table? script-def table?). Investigate: which struct field lives at common-block offset 4943? |
-| 1     | 4907     | 1 B          | 1 B       | Oracle `01`, new `00`. Flag/counter. |
-| 1     | 2669     | 1 B          | 1 B       | Oracle vs new — unknown byte. |
-| 1     | 965      | 1 B          | 1 B       | Oracle vs new — unknown byte. |
-| **5** | —        | **83 B cmp** | **5 B real** | — |
+Each byte is inside `_RoomOnDisk` padding, which iff2lvl fills via `new char[size]` (uninitialized). Same pattern as `_PathOnDisk.base.rot`'s "Euler garbage" — different chunk, same C-allocator heap indeterminacy.
 
-### The Forth-string bug (78 → 1 real byte)
-
-`.lev` source at `wflevels/snowgoons/snowgoons.lev:12286`:
+Structure for reference (`wftools/iff2lvl/room.cc` + `wftools/levcomp-rs/src/rooms.rs`):
 
 ```
-{ 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n"
+_RoomOnDisk (aligned(4) in C; sizeof = 36):
+   0-3   : count      (i32)
+   4-27  : bbox       (6 × i32)
+  28-31  : adjacentRooms[2] (i16 × 2)
+  32-33  : roomObjectIndex  (i16)
+  34-35  : STRUCT PAD — from __attribute__((aligned(4))) on the 34-byte body
+  36+    : entries    (count × i16)
+   pad to 4-byte end
 ```
 
-`\\` is the `.lev` escape for a literal `\`. Oracle (iff2lvl) decodes `\\` → `\` (one character), emitting 77 chars starting with `\ wf\n…`. levcomp-rs's string decoder appears to consume the `\\` and emit *nothing* for it, emitting 76 chars starting with ` wf\n…`. Result: the Forth line `\ wf` (a `\ ` line-comment followed by the word `wf`) becomes ` wf` — no longer a comment. zForth would then try to execute `wf` as a word, which is undefined, and the whole script fails to compile (matches the `zforth compile error 7 (defs)` we see in the game log).
+Map of the 3 remaining cmp-byte diffs:
 
-The original Lua version at `a2784f6` was `"\twrite-mailbox $INDEXOF_INPUT [read-mailbox $INDEXOF_HARDWARE_JOYSTICK1_RAW]\n"` — 77 chars too. The Forth rewrite at `806bc24` ("port snowgoons Tcl scripts to Lua") preserved the char count but changed content; decode path needs to handle the `\\` escape correctly to emit oracle-matching bytes.
+| Byte | Room | Within-room offset | Pad region                          | Oracle | New    | Reason |
+|------|------|--------------------|-------------------------------------|--------|--------|--------|
+| 4906 | 0    | 58                 | **trailing pad** (11 entries × 2 = 22, rounded to 24 after 36 header) | `0x01 0x00` | `0x00 0x00` | iff2lvl leaves the 2nd trailing-pad byte at whatever `new char[]` happened to contain; levcomp-rs zeros it |
+| 4942 | 1    | 34                 | **struct-header pad** (after roomObjectIndex, inside the `aligned(4)` 36-byte struct footprint) | `0x0B 0x08` | `0x00 0x00` | same mechanism; Room 1's allocator bin happened to contain `0x0B 0x08` |
+| 4943 | 1    | 35                 | same struct-header pad (low byte)   |          |          | paired with 4942 |
 
-Fix direction: check `wftools/levcomp-rs/src/lev_parser.rs` for `read_cstr` / `field_str_value` escape decoding — most likely consumes `\\` without producing a `\` output byte.
+**Why we can't mirror these**: Room 0's struct-header pad DOES match (`00 00` in both). Only Room 1's differs. Inside a single snowgoons build, the same iff2lvl run produced different pad bytes for different rooms — no deterministic function of inputs. Whatever `new char[72]` bucket the allocator handed out for Room 1 had `0x0B 0x08` sitting there from a prior allocation; Room 0's bucket didn't. The mirror attempt would have to replay iff2lvl's heap state exactly, which is infeasible.
 
-### The u16 pointer nullification (2 B at 4943)
+### Exit criteria scorecard
 
-Bytes `0b 08` (little-endian `0x080B` = 2059) → `00 00`. Context:
+- ✅ `cmp` vs oracle: **3 bytes left, all uninit heap pad** (structural identity achieved; content identity 100%).
+- ✅ `snowgoons.iff` via `iffcomp-rs snowgoons.iff.txt + levcomp-rs .lvl`: 163840 B; PERM chunk byte-identical; LVL content byte-identical modulo the 3 pad bytes.
+- ✅ Snowgoons plays with levcomp-rs's own `.lvl` — directional lights restored, House roof renders (see `4c3e652` commit for the light-fix cause).
+- ⚠ `wflevels/snowgoons/snowgoons.lvl` committed as levcomp-rs output: still pending — low-value action since the 3 heap-pad bytes make a levcomp-rs-produced `.lvl` differ by 3 bytes from the committed oracle `.lvl`, and that's acceptable. If we want to flip the committed copy, overwrite and accept the 3-byte drift; runtime behavior is identical.
 
-```
-ffff 1000 0b08 0000 0100 0200 0400 0500 0900 0a00 0b00 0f00 1200 …
-```
+### Follow-up plan items (outside the LVL scope, but worth flagging)
 
-Looks like a u16 table with `0xFFFF` sentinel + `0x0010` count + u16 entries. The `0x080B` is the third entry, slot-index 2. Being nullified suggests levcomp-rs is zero-filling a slot that should carry a common-block offset. This is the most likely cause of the observed **dark-lighting regression**: if `0x080B` is the common-block offset of a light's color/intensity OAD field, nulling it makes the runtime read zero → no lighting contribution.
-
-Alignment-padding angle (user suggestion 2026-04-19): the shifting pattern resembles what happens when `#pragma pack(1)` isn't set on a struct — compiler pads fields to 2/4-byte alignment and writers that don't match the layout emit shifted output. Worth checking whether the `_CommonOnDisk`-equivalent struct layout in `oad_loader::serialize_oad_data` accounts for C++ struct packing (`wfsource/source/oas/common.h` or wherever `iff2lvl` reads the layout). Pre-C++11 `std::map` and friends may have been aligning differently than Rust's `#[repr(C)]` without explicit `packed(1)`.
-
-### The three 1-byte flags (965, 2669, 4907)
-
-Still to classify. The `4907 01 → 00` one is most interesting — single-byte fields near enum-ish regions (the table at 4943 starts nearby). Could be a "has light" / "has script" / "active" flag that's off in the new emission.
-
-### Room-pad heap garbage (referenced earlier as 3 B)
-
-Oracle's Room 0 pad is `00 00` but Room 1's is `0x0B 0x08`. iff2lvl's `new char[...]` pulls different allocator bins for different rooms — no single mirror rule. Accepted as known deviation; not counted in the 83-byte diff above because it shows up in the `rooms` region, not common-block.
-
-Exit criteria scorecard:
-
-- ✗ `cmp` zero: 83 bytes left (= 5 real content bugs, 1 shift echo), all
-  non-compiler-issues.
-- ✗ levcomp-rs's own `.lvl` as the committed source: gated on fixing
-  the 5 real bugs (the `\\`-escape decode, the u16 pointer nullification,
-  and the three flag bytes).
-- ✓ `snowgoons.iff` md5 `96bae4…`: unchanged (still sourced from the
-  oracle-LVL stopgap).
-- ✓ Snowgoons still plays with oracle .lvl: unchanged.
-- ⚠ Snowgoons with levcomp-rs .lvl: **dark lighting regression** —
-  almost certainly traces to the nullified u16 pointer at 4943 (or
-  the `01 → 00` flag at 4907). Fix either and lighting likely returns.
-
-Next actions (in expected-payoff order):
-1. Identify what struct field the u16 pointer at 4943 belongs to — map the common-block region to OAD schema. That's probably the dark-lighting culprit.
-2. Fix `.lev` `\\`-escape decoding in `lev_parser.rs`. Closes 78 cmp-bytes (= 1 real byte) and restores Forth script functionality.
-3. Investigate the three 1-byte flags.
-
-After (1) + (2), only 3–5 bytes remain and committing levcomp-rs's own `.lvl` as the source-of-truth becomes viable.
+- Blender exporter `.lev` STR-label bug: `wf_blender/export_level.py:1077` writes `'STR' "Ambient"` when DATA=0. Should emit `'STR' "Directional"`. Not load-bearing now that `4c3e652` makes levcomp-rs pick DATA for NUMBER-ShowAs fields, but leaving the contradictory STR is misleading for humans reading the `.lev`.
+- OAD audit sibling fixes from `docs/investigations/2026-04-19-oad-buttontype-audit.md` punch list (items 2+): still open; not required for snowgoons byte-identity.
