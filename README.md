@@ -177,4 +177,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 08:15** — [`docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md`](docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md): `.offsetof` arithmetic in iffcomp — oracle vs current behavior
+**2026-04-19 08:15** — [`docs/plans/2026-04-19-python-tui-lib-extraction.md`](docs/plans/2026-04-19-python-tui-lib-extraction.md): Plan: extract reusable TUI code into `python-tui-lib`
