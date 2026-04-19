@@ -1006,7 +1006,10 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
             mesh_filename = ""
             model_type    = 0  # 0=None/Box
             if has_mesh and obj.data and obj.data.polygons:
-                mesh_filename = obj.name + ".iff"
+                # Prefer the source .lev's Mesh Name (preserves the oracle's
+                # filename case, e.g. "house.iff" lowercase); only synthesize
+                # `<obj.name>.iff` for objects newly created in Blender.
+                mesh_filename = orig_mesh if orig_mesh else obj.name + ".iff"
                 mesh_out = os.path.join(level_dir, mesh_filename)
                 if _write_mesh_iff(obj, mesh_out):
                     model_type = 1  # Mesh

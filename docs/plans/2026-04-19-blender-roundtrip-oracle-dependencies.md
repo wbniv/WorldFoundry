@@ -33,13 +33,17 @@ differ from the oracle LVL in ways I haven't fully root-caused yet.
 All are currently benign (the level runs) but they're the remaining
 loose ends.
 
-1. **`MeshName` asset-ID packing** — `asset_registry.rs` packs
-   `[TYPE | ROOM | INDEX]` in first-seen order.  My IDs don't match
-   the oracle's baked IDs, so when the runtime resolves a mesh's
-   texture slot through the oracle's `ASMP` table, it lands on the
-   wrong `PERM`/`RMn` entry.  **This is why the level renders
-   untextured.**  Port `iff2lvl/level2.cc:228`'s ID-packing
-   algorithm or align with the oracle's discovery order.
+1. **`MeshName` asset-ID packing** — ✅ matches oracle as of
+   `0c399c0` + follow-up.  `lvl_writer` now pre-registers mesh
+   assets in `[PERM, room 0, room 1, …]` order before the OAD
+   serialization loop so per-(room,type) slot indices come out
+   to `3fff001 / 3fff002 / 3fff003 / 3001001 / 3001002` matching
+   the oracle.  Blender exporter preserves `wf_original_mesh_name`
+   (instead of synthesizing `<obj.name>.iff`) so filename case
+   follows the authoring source.  Remaining cosmetic gap: source
+   `.lev` has mixed-case filenames but oracle binary has all
+   lowercase — documented in the "Natural ASMP order" section
+   below; fix is to lowercase at asset_registry emit time.
 
 2. **`CamShot` BOX3** — ✅ root cause understood.  Reading
    `max2lev.cc:374` (first commit of `wfmaxplugins/max2lev/`):
@@ -134,8 +138,7 @@ MovesBetweenRooms actors come later.  Does **not** match oracle order.
 ### Verdict
 
 **Room-grouped matches the oracle exactly** (modulo filename case —
-Blender object names are capitalised, oracle filenames lowercase;
-a simple `.lower()` at emit time closes the cosmetic gap).
+see below).
 
 So the natural recipe for a Blender-side ASMP emitter is:
 
@@ -146,15 +149,47 @@ So the natural recipe for a Blender-side ASMP emitter is:
    objects in insertion order; first-seen `MeshName` gets the next
    1-based index.
 3. Pack `[type(8) | room(12) | index(12)]` and emit as
-   `$<hex>l { 'STR' "<lower(filename)>" }`.
+   `$<hex>l { 'STR' "<filename>" }`.
 
-This is what `levcomp-rs::asset_registry` already does when called
-in the right order — the current code iterates `plan.objects` in
-`.lev` text order for a single pass, assigning each object's
-`MeshName` to a room slot.  To match the oracle, the iteration
-needs to be partitioned: PERM-bound objects first, then by room.
-That's a small change to `asset_registry.rs` / the caller that
-feeds it.
+### Implementation — landed 2026-04-19 (`0c399c0` + follow-up)
+
+`levcomp-rs::lvl_writer::write` now runs a pre-pass over
+`plan.objects` partitioned `[PERM, room 0, room 1, …]` before the
+OAD serialization loop, calling `plan.assets.add_iff_room` in
+that order so the 1-based slot indices match the oracle.  Each
+object's `serialize_entry("Mesh Name", …)` call then hits the
+cache in `AssetRegistry` and retrieves the pre-assigned ID
+unchanged.
+
+Verified against oracle: packed IDs match `3fff001` / `3fff002` /
+`3fff003` / `3001001` / `3001002` (PERM slots 1-3, rm1 slots 1-2).
+
+The Blender export now also preserves the source `.lev`'s original
+`Mesh Name` field (via `wf_original_mesh_name`) instead of
+synthesizing from `obj.name` — so filename case follows the
+authoring source, not the Blender scene name.
+
+### Remaining filename-case oddity
+
+Source `wflevels/snowgoons/snowgoons.lev` has **mixed case**:
+`House.iff`, `QuadPatch01.iff`, `Player.iff` capitalised;
+`tree02.iff`, `tree03.iff` lowercase.  Oracle binary ASMP has
+**all lowercase**.  Round-trip preserves whatever the `.lev`
+says, so my output still has mixed case for 3 of 5 entries.
+
+Possibilities:
+- max2lev or iff2lvl lowercased the `MeshName` field at write time
+  (not reflected in the `.lev` source, which is the authoring
+  form).  Some path lowercased on the way to binary.
+- The `.lev` file we have got hand-edited (or decompiled
+  incorrectly) after the oracle was compiled, upper-casing
+  some names.
+
+Either way, the correctness-preserving fix is to **lowercase at
+`levcomp-rs::asset_registry` emit time** — the source `.lev`
+lookup is already case-insensitive, so using `.to_ascii_lowercase()`
+for the stored-name field (as well as the key) closes this.
+Noted but not landed this session.
 
 ## Texture pipeline (separate next-up plan, referenced here)
 

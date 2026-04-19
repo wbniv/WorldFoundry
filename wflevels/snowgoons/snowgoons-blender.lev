@@ -204,7 +204,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -2.9961173534393311(1.15.16) -4.0640101432800293(1.15.16) -2.6700782775878911(1.15.16) 3.0923180580139160(1.15.16) 3.4611880779266362(1.15.16) 4.8654704093933114(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "Tree02.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tree02.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 5l } { 'STR' "5" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
@@ -302,7 +302,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -4.2773976325988770(1.15.16) -4.5854878425598153(1.15.16) -3.3421897888183589(1.15.16) 3.8429625034332280(1.15.16) 5.3452110290527344(1.15.16) 6.2531032562255859(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "Tree03.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tree03.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 5l } { 'STR' "5" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }

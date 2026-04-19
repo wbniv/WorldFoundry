@@ -99,6 +99,25 @@ pub fn write(plan: &mut LevelPlan) -> Result<Vec<u8>, String> {
         }).collect()
     };
 
+    // Pre-register mesh assets in PERM-first, then per-room order so the
+    // assigned 1-based slot indices match the oracle's ASMP layout.
+    // iff2lvl builds its ASMP chunk by iterating asset-slot buckets
+    // (PERM, RM0, RM1, …) separately; we match that ordering here so
+    // each MeshName packed-asset-ID comes out to the same value.
+    // The OAD serialization loop below hits the cache in `add_iff_room`
+    // and gets the pre-assigned IDs verbatim.
+    let room_count = room_list.len() as i32;
+    for target_room in std::iter::once(ROOM_PERM).chain(0..room_count) {
+        for (i, obj) in plan.objects.iter().enumerate() {
+            if obj_asset_room[i] != target_room { continue; }
+            let Some(chunk) = obj.find_field("Mesh Name") else { continue };
+            let name = crate::lev_parser::field_str_value(chunk);
+            if !name.is_empty() && name.to_ascii_lowercase().ends_with(".iff") {
+                plan.assets.add_iff_room(&name, target_room);
+            }
+        }
+    }
+
     // Pre-build the per-object OAD payloads so we know the final common data
     // length before writing the header (the header carries commonDataOffset
     // and commonDataLength).  Building in-order mirrors iff2lvl's Save flow.
