@@ -182,4 +182,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 10:19** — [`docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md`](docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md): `.offsetof` arithmetic in iffcomp — oracle vs current behavior
+**2026-04-19 10:21** — [`docs/plans/2026-04-19-tuilib-worker-pool.md`](docs/plans/2026-04-19-tuilib-worker-pool.md): Plan 4: extract generic `WorkerPool` from `data/fetcher.py`
