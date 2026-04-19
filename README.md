@@ -191,4 +191,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 12:34** — [`docs/investigations/2026-04-19-oad-buttontype-audit.md`](docs/investigations/2026-04-19-oad-buttontype-audit.md): OAD ButtonType audit — iff2lvl vs levcomp-rs
+**2026-04-19 12:50** — [`docs/plans/2026-04-19-levcomp-common-block-two-phase.md`](docs/plans/2026-04-19-levcomp-common-block-two-phase.md): Plan: levcomp-rs two-phase common-block emission — oracle byte-identity for the LVL chunk
