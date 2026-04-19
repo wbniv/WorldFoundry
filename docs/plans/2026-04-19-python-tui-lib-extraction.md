@@ -145,9 +145,11 @@ Column "Scope" — **tuilib** (copied to tuilib by this plan), **excluded** (not
 - `data/runbook_parser.py` → `tuilib/panes/runbook_parser.py` (co-located with `runbook.py`, 235 LOC)
 - **In-pass fix:** `runbook.py` line 28 `'parkingspace'` hardcoded state-dir → ctor arg `state_dir` (default `~/.cache/tuilib/runbook-state.json`, consumer overrides)
 
-## Follow-on plan: parking-space migration
+## Follow-on plans (committed, separate docs)
 
-A separate plan ("plan 2") will rewrite parking-space to consume tuilib and delete its in-tree copies. That plan handles:
+### Plan 2 — parking-space migration to tuilib
+
+Rewrites parking-space to consume tuilib and deletes its in-tree copies. Written as `/home/will/parking-space/plans/2026-04-19-migrate-to-tuilib.md` (already committed). Summary:
 
 1. `git submodule add <url> vendor/python-tui-lib` in parking-space.
 2. Sys-path bootstrap in `scripts/tui/__main__.py`, `scripts/chat/__main__.py`, `scripts/view/__main__.py`.
@@ -157,42 +159,81 @@ A separate plan ("plan 2") will rewrite parking-space to consume tuilib and dele
 
 Until plan 2 runs, parking-space and tuilib hold duplicate copies of the reusable subset. Bug fixes during that window have to land in both — noted as a risk, mitigated by keeping the window short.
 
-## `tui_about.py` — in-scope work during extraction
+### Plan 3 — extract `panes/logs.py` with abstract log-source interface
 
-Unlike the other moving panes, `tui_about.py` (632 LOC) hardcodes parking-space-specific content (lines 306 + 310 in the original: `"Operational dashboard for parking-space infrastructure"` and `https://motorbike-parking.info/tui`) and imports `..data.llm_billing` (a parking-space LLM billing fetcher).
+Not yet written. Moves the 2818-LOC log-tailer + LLM-summarization pane into `tuilib/panes/logs.py`, behind a pluggable log-source abstraction:
+- Define `LogSource` protocol (query + tail + paginate methods).
+- Leave CloudWatch-specific `data/log_query.py` in parking-space as the concrete impl.
+- Parking-space's `app.py` instantiates `LogPane(source=CloudWatchLogSource(...))`.
+- Other consumers plug in journald, k8s pods, raw files, etc.
 
-To make it a genuine tuilib pane, during Phase B:
+Separated from this plan because the abstraction is design work, not a mechanical move — it warrants its own scoped plan. Committed follow-on, not a "maybe".
 
-1. Extract the content strings into a data class / dict consumed via ctor arg: `TuiAboutPane(title, tagline, home_url, features=[...], links=[...])`.
-2. Replace the hard import of `..data.llm_billing` with a ctor-injected `billing_provider` callable (default `None`, hides the billing panel).
-3. In parking-space's `app.py`, construct with the parking-space-specific values:
-   ```python
-   TuiAboutPane(
-       title='parking-space tui',
-       tagline='Operational dashboard for parking-space infrastructure',
-       home_url='https://motorbike-parking.info/tui',
-       billing_provider=lambda: fetch_balance() if has_billing_api() else None,
-   )
-   ```
+### Plan 4 — extract generic worker-pool from `scripts/tui/data/fetcher.py`
 
-Noted as "let's give it a try" — if the refactor proves invasive, fall back to leaving `tui_about.py` in parking-space for now.
+Not yet written. Carves a lean `tuilib.framework.worker_pool` out of the 800-LOC `DataFetcher`:
+- Keep: `ThreadPoolExecutor`, scheduling (`_maybe_fetch` interval rotation), `DataCache` integration, `tick()` entry point.
+- Leave behind in parking-space: the 60+ AWS-specific fetch jobs (aws/health/pagerduty/vm/dep_versions/…).
+- Parking-space refactors `DataFetcher` to subclass or compose the generic worker-pool and register its own jobs.
+- Other consumers get a generic "schedule recurring background work on a thread pool" primitive.
 
-## Known contamination left in place (deferred cleanup)
+Separated from this plan because, like plan 3, this is design work (what's the public API? how do consumers register jobs? one lock or per-job?), not a mechanical move. Committed follow-on.
 
-Per the "easy/guaranteed" directive, these stay as-is for now:
+## Hardcoded-path parameterization (in-scope, Phase B)
 
-- `tuilib/ui/config.py:317` — `SSM_KEY_PREFIX = '/parkingspace/tui/'`
-- `tuilib/ui/llm_picker/client.py` — `parking-space-tui` config dir, User-Agent, SSM prefix
-- `tuilib/ui/text.py` — ctypes cache at `~/.cache/parkingspace-tui/`
-- `tuilib/ui/image_cache.py`, `doc_viewer/mermaid_cache.py`, `doc_viewer/full_text_search.py` — cache paths reference `parkingspace-tui`
+Every reference to `parkingspace` / `parking-space-tui` / `parkingspace-tui` gets replaced with a runtime-derived value from `tuilib.APP_NAME`. Consumers set `APP_NAME` before importing anything heavy; sensible default is `'tuilib'`.
 
-Branch-browser ignores all of these (it only uses the doc viewer for rendering; no LLM, no image cache, no mermaid). They're dead weight but harmless.
+### The `tuilib.APP_NAME` symbol
+
+```python
+# tuilib/__init__.py
+import os
+APP_NAME = os.environ.get('TUILIB_APP_NAME', 'tuilib')
+```
+
+Consumers override one of two ways:
+- **Env var:** `TUILIB_APP_NAME=branch-browser python3 git-branch-browser.py`
+- **Python:** `import tuilib; tuilib.APP_NAME = 'branch-browser'` **before** any other tuilib import
+
+### Specific sites to rewrite
+
+| File | Before | After |
+|---|---|---|
+| `tuilib/ui/config.py:317` | `SSM_KEY_PREFIX = '/parkingspace/tui/'` | `SSM_KEY_PREFIX = f'/{tuilib.APP_NAME}/tui/'` |
+| `tuilib/ui/llm_picker/client.py` (config dir) | `~/.config/parking-space-tui/` | `~/.config/{tuilib.APP_NAME}/` |
+| `tuilib/ui/llm_picker/client.py` (User-Agent) | `parking-space-tui/...` | `{tuilib.APP_NAME}/...` |
+| `tuilib/ui/llm_picker/client.py` (SSM prefix) | `/parkingspace/tui/` | `/{tuilib.APP_NAME}/tui/` |
+| `tuilib/ui/text.py` (ctypes width cache) | `~/.cache/parkingspace-tui/` | `~/.cache/{tuilib.APP_NAME}/` |
+| `tuilib/ui/image_cache.py` | `~/.cache/parkingspace-tui/images/` | `~/.cache/{tuilib.APP_NAME}/images/` |
+| `tuilib/ui/doc_viewer/mermaid_cache.py` | `~/.cache/parkingspace-tui/mermaid/` | `~/.cache/{tuilib.APP_NAME}/mermaid/` |
+| `tuilib/ui/doc_viewer/full_text_search.py` | vault-size heuristic tagged `parkingspace` | neutral / keyed off `{tuilib.APP_NAME}` |
+
+### Plan-2 implication (state continuity for parking-space)
+
+When plan 2 rewires parking-space to tuilib, its entry points (`scripts/tui/__main__.py`, `scripts/chat/__main__.py`, `scripts/view/__main__.py`) will set `tuilib.APP_NAME = 'parkingspace'` (or `'parking-space-tui'` — whichever matches the original cache-dir name) **before importing anything**, so existing caches, configs, and SSM paths resolve to exactly the same locations they used before. Plan 2 already mentions "preserve on-disk state locations" — this is the mechanism.
+
+### Read-only lookup helpers (not hardcoded)
+
+Introduce one utility in `tuilib/ui/config.py` that every path-using module calls, rather than re-deriving:
+
+```python
+def app_cache_dir(*parts):
+    return os.path.join(os.path.expanduser(f'~/.cache/{tuilib.APP_NAME}'), *parts)
+
+def app_config_dir(*parts):
+    return os.path.join(os.path.expanduser(f'~/.config/{tuilib.APP_NAME}'), *parts)
+
+def app_ssm_prefix():
+    return f'/{tuilib.APP_NAME}/tui/'
+```
+
+Each rewrite above points at one of these helpers. Keeps the "where do paths come from" contract in one file.
 
 ## Asset paths that break when files move
 
 - `tuilib/games/dragons_lair.py` loads assets via `os.path.join(project.root, 'scripts', 'tui', 'assets', ...)` — needs rewrite to relative-to-`__file__` or `tuilib.games.assets`. **Address in Phase B.**
 - `tuilib/ui/config.py` loads `config.yaml` via `os.path.join(os.path.dirname(__file__), 'config.yaml')` — **already file-relative**, no change needed.
-- `scripts/tui/data/documents/notes.md` loaded by `DocumentPane` — that pane stays in parking-space; no move needed.
+- `scripts/tui/data/documents/notes.md` — **the file stays in parking-space** (parking-space-owned content, not a tuilib asset). `DocumentPane` itself moves to `tuilib/panes/document.py`; parking-space's `app.py` instantiates it with the path: `DocumentPane(file_path='scripts/tui/data/documents/notes.md')`. Same pattern TodoPane already uses — consumer supplies the content path.
 
 ## Third-party dependencies to declare
 
@@ -279,14 +320,12 @@ Since this plan does **not** modify parking-space, the risk surface is small: we
 4. **WorldFoundry smoke** — `task git` lists branches, cursor/scroll/expand work, `?` opens help page rendered as markdown, headings / lists / code fences / inline formatting visible, scrolling via ↑↓/PgUp/PgDn, Esc/`?`/`q` close the overlay. Ctrl+C exits cleanly.
 5. **Parking-space not broken** — `git status` in parking-space shows no changes; `python -m scripts.tui` runs identically to before (no code touched, no behavior change).
 
-## Deferred follow-ups (noted, not in scope)
+## Deferred follow-ups (noted, genuinely "maybe someday")
 
-1. **Parking-space migration (plan 2)** — submodule tuilib into parking-space, rewrite ~40 files' imports, delete the redundant originals. Separate plan, run after this one lands and bakes briefly.
-2. **Extract `panes/logs.py`** (2818 LOC) into tuilib with an abstract log-source interface; leave CloudWatch-specific `data/log_query.py` in parking-space as an implementation.
-3. **Slice `md_viewer` from `doc_viewer/renderer.py`** — minimal markdown pager (~900 LOC) dropping vault/mermaid/HAR/CSV/FTS/images/wiki. Swap WorldFoundry's branch-browser to it once stable.
-4. **Parameterize `parkingspace-tui` hard-codes** — `tuilib.APP_NAME = 'tuilib'` or env var `TUILIB_APP_NAME`; used for cache paths (`~/.cache/<app>-tui/`), SSM prefix, User-Agent.
-5. **Extract generic worker-pool from `scripts/tui/data/fetcher.py`** — leave AWS-specific fetchers in parking-space; ship a lean `tuilib.framework.worker_pool` with the scheduling pattern only.
-6. **Installable packaging** — revisit `pip install -e .` vs submodule once there are ≥3 consumers.
-7. **Move `scripts/view/` and `scripts/chat/` into `tuilib/tools/`** — ship them as bundled example CLIs.
-8. **Third-party install bootstrap** — document optional deps (`chafa`, `mmdc`, `rg`) and how consumers declare them.
-9. **`tui_about.py` extraction** — once the branding/URL/billing-provider is data-driven, move it to `tuilib/panes/`.
+Committed follow-on plans are listed above. These are actual "maybe" ideas:
+
+1. **Slice `md_viewer` from `doc_viewer/renderer.py`** — minimal markdown pager (~900 LOC) dropping vault/mermaid/HAR/CSV/FTS/images/wiki. Swap WorldFoundry's branch-browser to it once stable. Maybe; the full renderer works fine for now.
+2. **Installable packaging** — revisit `pip install -e .` vs submodule once there are ≥3 consumers.
+3. **Move `scripts/view/` and `scripts/chat/` into `tuilib/tools/`** — ship them as bundled example CLIs.
+4. **Third-party install bootstrap** — document optional deps (`chafa`, `mmdc`, `rg`) and how consumers declare them.
+5. **`tui_about.py` extraction** — once the branding/URL/billing-provider is data-driven, move it to `tuilib/panes/`.
