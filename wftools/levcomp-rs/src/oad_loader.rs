@@ -384,6 +384,15 @@ fn int_value(entry: &OadEntry, chunk: Option<&wf_iff::IffChunk>, _obj: &LevObjec
     };
 
     // Enum-style: items come from the entry's String, pipe-separated.
+    //
+    // TODO(oad-audit/fix-1): `field_str_value` prefers the DATA chunk,
+    // but for I32-typed fields the DATA is 4 binary bytes; `read_cstr`
+    // on `00 00 00 00` returns "" which `Option::or` treats as
+    // present, short-circuiting the enum lookup. For snowgoons's
+    // CamShot `Rotation` / `Position X/Y/Z` fields this makes us emit
+    // 0 where iff2lvl emits the enum index (1). Fix is a
+    // `field_str_child_only` helper used here — see
+    // docs/investigations/2026-04-19-oad-buttontype-audit.md.
     let items = entry.string_str();
     if !items.is_empty() && items.contains('|') {
         let label = field_str_value(chunk);
