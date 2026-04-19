@@ -1,7 +1,22 @@
 # Plan: textile → Rust — validation & round-trip integration
 
 **Date:** 2026-04-19
-**Status:** **In progress — Phase 1 started, three concrete gaps identified**
+**Status:** **In progress — Phase 1 in flight; PERM byte-identical; RM1 atlas content 29/31 textures match oracle**
+
+## Alternate verification technique: per-texture extracted-bitmap equivalence
+
+When the *atlas as a whole* isn't byte-identical to the oracle (because texture placement order differs), byte-diff of the full `.tga` isn't the right test — it conflates "content correctness" with "placement stability." Cleaner: use the atlas's own RMUV records to extract each texture as a standalone image, then compare per-texture.
+
+Recipe:
+
+1. Parse the atlas (`Room1.tga` or equivalent) and its RMUV (`Room1.ruv`). RMUV header is 4-byte magic `rmuv` + 4-byte cb + 4-byte entry count; each entry is 48 bytes (`szTextureName[33]` + `nFrame` + `u,v,w,h` i16×4 + `palx,paly` i16×2 + `flags` u16).
+2. For each RMUV entry, slice pixels `tw × th` from the atlas starting at `(u, v)`. **Important: the RMUV `v` is in buffer coordinates (top-down), and when textile was invoked with `-flipyout` the atlas file bytes are also in buffer order — `file_row = v + y`. Without `-flipyout`, the file stores rows bottom-up and `file_row = H - 1 - (v + y)`. The TGA header's `desc` byte is always 0 regardless, so origin isn't self-describing.**
+3. Wrap each slice in a minimal standalone TGA header (same w/h, 16bpp, `desc=0x20` for top-down) and md5 it.
+4. For each (oracle, new) pair keyed by texture name, compare md5.
+
+Expected outcome with a working textile-rs port: **all extracted pairs match**, even when the full atlas md5 differs. Any mismatch points at per-texture processing (quantization, palette-fit, transparent-color remap, colour-cycle expansion) — not placement.
+
+Verified in the 2026-04-19 Phase 1 pass: 29/31 Room1 textures match between oracle and textile-rs atlases. The 2 mismatches (`G_HedgeWsnowSide.tga`, `G_shakesWsnowRM.tga`) are both 48×32 (non-square) — worth checking whether they're the *only* non-32×32 source textures in Room1 and diagnosing separately.
 
 ## Phase 1 findings (2026-04-19 first pass)
 
