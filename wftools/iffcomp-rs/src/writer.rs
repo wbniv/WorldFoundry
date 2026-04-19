@@ -68,6 +68,31 @@ struct Backpatch {
     write_pos: usize,
 }
 
+/// A term in an arithmetic expression. Integer literals carry their value
+/// inline; offsetof/sizeof carry a symbolic reference that may or may not
+/// resolve at the point of emission. `sign` is always `+1` or `-1`.
+#[derive(Debug, Clone)]
+pub enum Term {
+    Const(i64),
+    Offsetof { path: String, addend: i32 },
+    Sizeof { path: String },
+}
+
+#[derive(Debug, Clone)]
+pub struct SignedTerm {
+    pub sign: i32,
+    pub term: Term,
+}
+
+/// Deferred compound-expression backpatch. `terms` is the full sum; at
+/// resolution time every term must resolve to a numeric value, and the
+/// patched int32 is the signed sum. Used when any term in an arithmetic
+/// expression references a chunk that hasn't been closed yet.
+struct CompoundBackpatch {
+    terms: Vec<SignedTerm>,
+    write_pos: usize,
+}
+
 pub struct Writer {
     mode: Mode,
 
@@ -76,6 +101,7 @@ pub struct Writer {
     path_ids: Vec<u32>,
     symbols: HashMap<String, ChunkSym>,
     pending: Vec<Backpatch>,
+    pending_compound: Vec<CompoundBackpatch>,
     fill_char: u8,
 
     // binary state
@@ -95,6 +121,7 @@ impl Writer {
             path_ids: Vec::new(),
             symbols: HashMap::new(),
             pending: Vec::new(),
+            pending_compound: Vec::new(),
             fill_char: 0,
             buf: Vec::with_capacity(4096),
             pos: 0,
@@ -357,9 +384,122 @@ impl Writer {
                 None => missing.push(bp.path),
             }
         }
+        // Compound (arithmetic) backpatches. Each term resolves to an i64;
+        // the signed sum is patched as int32. For symbolic terms here we use
+        // the chunk's header-start offset (`sym.pos - 8`), which gives a
+        // consistent reference point for `offsetof - offsetof` style
+        // expressions — the exact choice doesn't affect differences.
+        let pending_compound = std::mem::take(&mut self.pending_compound);
+        for bp in pending_compound {
+            let mut total: i64 = 0;
+            let mut this_missing: Vec<String> = Vec::new();
+            for SignedTerm { sign, term } in &bp.terms {
+                match term {
+                    Term::Const(v) => total += (*sign as i64) * v,
+                    Term::Offsetof { path, addend } => match self.symbols.get(path).copied() {
+                        Some(sym) => {
+                            let v = (sym.pos as i64) - 8 + (*addend as i64);
+                            total += (*sign as i64) * v;
+                        }
+                        None => this_missing.push(path.clone()),
+                    },
+                    Term::Sizeof { path } => match self.symbols.get(path).copied() {
+                        Some(sym) => total += (*sign as i64) * (sym.size as i64),
+                        None => this_missing.push(path.clone()),
+                    },
+                }
+            }
+            if !this_missing.is_empty() {
+                missing.extend(this_missing);
+                continue;
+            }
+            self.write_at(&(total as i32).to_le_bytes(), bp.write_pos);
+        }
         if !missing.is_empty() {
             return Err(IffError::UnresolvedSymbols(missing));
         }
+        Ok(())
+    }
+
+    /// Emit a compound arithmetic expression as a single int32. For a
+    /// single-term expression, uses the same immediate / deferred formulas
+    /// as [`emit_offsetof`] / [`emit_sizeof`] for byte-for-byte parity with
+    /// the existing oracle-pinned fixtures. For multi-term expressions,
+    /// resolves every term now if possible, otherwise queues a
+    /// [`CompoundBackpatch`].
+    pub fn emit_expr(&mut self, terms: Vec<SignedTerm>) -> Result<()> {
+        // Single-term fast path: dispatch to the pre-existing emitters so
+        // the standalone `.offsetof(X)` / `.sizeof(X)` / `42l` cases stay
+        // byte-identical with the oracle (the offsetof immediate-vs-deferred
+        // 4-byte quirk lives in those helpers).
+        if terms.len() == 1 {
+            let st = &terms[0];
+            // A bare unary minus on a single term is unusual but handle it
+            // by negating the constant; symbolic negation falls through to
+            // the compound path.
+            match &st.term {
+                Term::Const(v) => {
+                    let v = if st.sign < 0 { -*v } else { *v };
+                    // No width info at this layer — parser passes int32-
+                    // compatible terms only (integer literals go through
+                    // their own emit path still). This path only fires for
+                    // standalone .offsetof/.sizeof now, both 4-byte.
+                    self.out_int32(v as u32);
+                    return Ok(());
+                }
+                Term::Offsetof { path, addend } if st.sign > 0 => {
+                    self.emit_offsetof(path, *addend);
+                    return Ok(());
+                }
+                Term::Sizeof { path } if st.sign > 0 => {
+                    self.emit_sizeof(path);
+                    return Ok(());
+                }
+                _ => {} // fall through to compound path
+            }
+        }
+
+        // Compound path: try immediate resolution.
+        let mut total: i64 = 0;
+        let mut all_resolved = true;
+        for SignedTerm { sign, term } in &terms {
+            match term {
+                Term::Const(v) => total += (*sign as i64) * v,
+                Term::Offsetof { path, addend } => match self.find_symbol(path) {
+                    Some(sym) => {
+                        let v = (sym.pos as i64) - 8 + (*addend as i64);
+                        total += (*sign as i64) * v;
+                    }
+                    None => {
+                        all_resolved = false;
+                        break;
+                    }
+                },
+                Term::Sizeof { path } => match self.find_symbol(path) {
+                    Some(sym) => total += (*sign as i64) * (sym.size as i64),
+                    None => {
+                        all_resolved = false;
+                        break;
+                    }
+                },
+            }
+        }
+
+        if all_resolved {
+            self.out_int32(total as u32);
+            return Ok(());
+        }
+
+        if self.mode == Mode::Text {
+            self.out_int32(0);
+            return Ok(());
+        }
+
+        self.pending_compound.push(CompoundBackpatch {
+            terms,
+            write_pos: self.pos,
+        });
+        self.out_int32(0xFFFF_FFFF);
         Ok(())
     }
 

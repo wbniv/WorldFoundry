@@ -12,7 +12,7 @@
 
 use crate::error::{IffError, Pos, Result};
 use crate::lexer::{Lexer, SizeSpec, Token};
-use crate::writer::{id_name, Writer};
+use crate::writer::{id_name, SignedTerm, Term, Writer};
 use std::path::PathBuf;
 
 /// One layer of push-down state for the nested `{ Y … }` / `{ .precision … }`
@@ -216,7 +216,7 @@ impl<'w> Parser<'w> {
             Token::FillChar => return self.parse_fill_char(),
             _ => {}
         }
-        self.parse_expr().map(|_| ())
+        self.parse_expr()
     }
 
     fn parse_alignment(&mut self) -> Result<()> {
@@ -244,26 +244,121 @@ impl<'w> Parser<'w> {
     }
 
     // --- expr / item --------------------------------------------------------
+    //
+    // Grammar shape:
+    //   expr : item (('+' | '-') item)*
+    // Items fall into two buckets:
+    //   - **arithmetic** (`Integer`, `.offsetof`, `.sizeof`) — build a
+    //     `SignedTerm` and compose via `+/-`. Emitted ONCE as a single
+    //     int32 via `Writer::emit_expr`.
+    //   - **non-arithmetic** (`String`, `Real`, `CharLit`, `.timestamp`,
+    //     file-include `[...]`, state-push `{Y/W/L/.precision ...}`) —
+    //     emit immediately; return `None` so `parse_expr` stops.
+    //
+    // The original C++ bison grammar emitted bytes at item-reduction time
+    // and discarded the arithmetic result — a regression that shipped
+    // after the oracle was built. This implementation matches what the
+    // oracle bytes show: arithmetic composes, expr emits once. See
+    // `docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md`.
 
-    fn parse_expr(&mut self) -> Result<u64> {
-        let mut lhs = self.parse_item()?;
+    fn parse_expr(&mut self) -> Result<()> {
+        let Some(first) = self.parse_item_maybe_term()? else {
+            return Ok(()); // non-arithmetic item already emitted
+        };
+        let mut terms: Vec<SignedTerm> = first;
         loop {
             let op = self.peek()?;
-            match op {
+            let sign = match op {
                 Token::Plus => {
                     self.consume()?;
-                    let rhs = self.parse_item()?;
-                    lhs = lhs.wrapping_add(rhs);
+                    1
                 }
                 Token::Minus => {
                     self.consume()?;
-                    let rhs = self.parse_item()?;
-                    lhs = lhs.wrapping_sub(rhs);
+                    -1
                 }
                 _ => break,
+            };
+            let Some(rhs) = self.parse_item_maybe_term()? else {
+                return Err(IffError::Parse {
+                    at: Pos::default(),
+                    msg: "right-hand side of '+'/'-' must be an arithmetic term \
+                         (integer, .offsetof, or .sizeof)"
+                        .into(),
+                });
+            };
+            // Distribute the outer sign across all terms the RHS produced.
+            for st in rhs {
+                terms.push(SignedTerm {
+                    sign: sign * st.sign,
+                    term: st.term,
+                });
             }
         }
-        Ok(lhs)
+        self.w.emit_expr(terms)?;
+        Ok(())
+    }
+
+    /// Parse the addend expression inside `.offsetof(path, <expr>)`. This is
+    /// a sub-grammar that accepts any arithmetic expression — the 2nd
+    /// parameter of `.offsetof` was originally designed as the workaround for
+    /// broken top-level `+`/`-`, so expressions like `.offsetof(X, -.offsetof(Y))`
+    /// are the idiomatic way to express "X's offset relative to Y". Returns
+    /// the terms that should be added to the enclosing offsetof's term list.
+    fn parse_addend_expr(&mut self) -> Result<Vec<SignedTerm>> {
+        // Optional leading sign.
+        let leading_sign = match self.peek()? {
+            Token::Plus => {
+                self.consume()?;
+                1
+            }
+            Token::Minus => {
+                self.consume()?;
+                -1
+            }
+            _ => 1,
+        };
+        let Some(first) = self.parse_item_maybe_term()? else {
+            return Err(IffError::Parse {
+                at: Pos::default(),
+                msg: ".offsetof addend must be an arithmetic expression \
+                     (integer, .offsetof, or .sizeof, possibly with +/-)"
+                    .into(),
+            });
+        };
+        let mut terms: Vec<SignedTerm> = first
+            .into_iter()
+            .map(|st| SignedTerm {
+                sign: leading_sign * st.sign,
+                term: st.term,
+            })
+            .collect();
+        loop {
+            let sign = match self.peek()? {
+                Token::Plus => {
+                    self.consume()?;
+                    1
+                }
+                Token::Minus => {
+                    self.consume()?;
+                    -1
+                }
+                _ => break,
+            };
+            let Some(rhs) = self.parse_item_maybe_term()? else {
+                return Err(IffError::Parse {
+                    at: Pos::default(),
+                    msg: ".offsetof addend +/- RHS must be arithmetic".into(),
+                });
+            };
+            for st in rhs {
+                terms.push(SignedTerm {
+                    sign: sign * st.sign,
+                    term: st.term,
+                });
+            }
+        }
+        Ok(terms)
     }
 
     fn parse_expr_list(&mut self) -> Result<()> {
@@ -271,26 +366,32 @@ impl<'w> Parser<'w> {
             match self.peek()? {
                 Token::RBrace | Token::Eof => break,
                 _ => {
-                    self.parse_item()?;
+                    self.parse_expr()?;
                 }
             }
         }
         Ok(())
     }
 
-    fn parse_item(&mut self) -> Result<u64> {
+    /// Consume one item. Arithmetic items (Integer, .offsetof, .sizeof)
+    /// return `Some(Vec<SignedTerm>)` and emit nothing — the caller
+    /// accumulates them into a compound expression and flushes via
+    /// `Writer::emit_expr`. A single item can produce multiple terms when
+    /// it carries an inline arithmetic addend (see `.offsetof(X, <expr>)`).
+    /// Non-arithmetic items emit directly and return `None`.
+    fn parse_item_maybe_term(&mut self) -> Result<Option<Vec<SignedTerm>>> {
         self.trace("item");
         let tok = self.peek()?;
         match tok {
             Token::LBrace => {
                 self.parse_state_push()?;
-                Ok(0)
+                Ok(None)
             }
             Token::Real { val, precision } => {
                 self.consume()?;
                 let prec = precision.unwrap_or(self.top_state().precision);
                 self.w.out_fixed(val, prec);
-                Ok(0)
+                Ok(None)
             }
             Token::Integer { val, width } => {
                 self.consume()?;
@@ -299,79 +400,83 @@ impl<'w> Parser<'w> {
                 } else {
                     width
                 };
-                match width {
-                    1 => {
-                        // Allow signed [-128, 127] or unsigned [0, 255]
-                        let s = val as i64;
-                        if s < i8::MIN as i64 || s > u8::MAX as i64 {
+                // For non-int32 widths, emit directly at the token's width
+                // and return None — arithmetic only makes sense for int32.
+                // This preserves byte-for-byte compat for `42y` / `42w`
+                // sequences that never participate in arithmetic.
+                if width != 4 {
+                    let s = val as i64;
+                    match width {
+                        1 => {
+                            if s < i8::MIN as i64 || s > u8::MAX as i64 {
+                                return Err(IffError::Parse {
+                                    at: Pos::default(),
+                                    msg: "value doesn't fit in int8".into(),
+                                });
+                            }
+                            self.w.out_int8(val as u8);
+                        }
+                        2 => {
+                            if s < i16::MIN as i64 || s > u16::MAX as i64 {
+                                return Err(IffError::Parse {
+                                    at: Pos::default(),
+                                    msg: "value doesn't fit in int16".into(),
+                                });
+                            }
+                            self.w.out_int16(val as u16);
+                        }
+                        _ => {
                             return Err(IffError::Parse {
                                 at: Pos::default(),
-                                msg: "value doesn't fit in int8".into(),
+                                msg: format!("bad width {}", width),
                             });
                         }
-                        self.w.out_int8(val as u8);
                     }
-                    2 => {
-                        let s = val as i64;
-                        if s < i16::MIN as i64 || s > u16::MAX as i64 {
-                            return Err(IffError::Parse {
-                                at: Pos::default(),
-                                msg: "value doesn't fit in int16".into(),
-                            });
-                        }
-                        self.w.out_int16(val as u16);
-                    }
-                    4 => {
-                        let s = val as i64;
-                        if s < i32::MIN as i64 || s > u32::MAX as i64 {
-                            return Err(IffError::Parse {
-                                at: Pos::default(),
-                                msg: "value doesn't fit in int32".into(),
-                            });
-                        }
-                        self.w.out_int32(val as u32);
-                    }
-                    _ => {
-                        return Err(IffError::Parse {
-                            at: Pos::default(),
-                            msg: format!("bad width {}", width),
-                        });
-                    }
+                    return Ok(None);
                 }
-                Ok(val)
+                // Width = 4: treat as arithmetic term so `42l + 10l` and
+                // `$Nl + .offsetof(X)` compose correctly.
+                let s = val as i64;
+                if s < i32::MIN as i64 || s > u32::MAX as i64 {
+                    return Err(IffError::Parse {
+                        at: Pos::default(),
+                        msg: "value doesn't fit in int32".into(),
+                    });
+                }
+                Ok(Some(vec![SignedTerm {
+                    sign: 1,
+                    term: Term::Const(s),
+                }]))
             }
             Token::String { .. } => {
                 self.parse_string_list()?;
-                Ok(0)
+                Ok(None)
             }
             Token::LBrack => {
                 self.parse_file_include()?;
-                Ok(0)
+                Ok(None)
             }
             Token::CharLit(v) => {
                 self.consume()?;
                 self.w.out_id(v);
-                Ok(0)
+                Ok(None)
             }
             Token::Timestamp => {
                 self.consume()?;
-                // Same as C++ / Go: wall-clock seconds. test.iff.txt doesn't
-                // exercise this, so the byte-level oracle doesn't pin it —
-                // but if it did we'd need SOURCE_DATE_EPOCH support here.
                 let secs = std::time::SystemTime::now()
                     .duration_since(std::time::UNIX_EPOCH)
                     .map(|d| d.as_secs() as i64)
                     .unwrap_or(0);
                 self.w.out_timestamp(secs);
-                Ok(0)
+                Ok(None)
             }
-            Token::Offsetof => {
-                self.parse_offsetof()?;
-                Ok(0)
-            }
+            Token::Offsetof => Ok(Some(self.parse_offsetof_terms()?)),
             Token::Sizeof => {
-                self.parse_sizeof()?;
-                Ok(0)
+                let path = self.parse_sizeof_term()?;
+                Ok(Some(vec![SignedTerm {
+                    sign: 1,
+                    term: Term::Sizeof { path },
+                }]))
             }
             _ => Err(IffError::Parse {
                 at: Pos::default(),
@@ -487,28 +592,62 @@ impl<'w> Parser<'w> {
         Ok(path)
     }
 
-    fn parse_offsetof(&mut self) -> Result<()> {
+    /// Parse `.offsetof(<path>)` or `.offsetof(<path>, <addend-expr>)`.
+    /// Returns the ordered list of SignedTerms that the caller should splice
+    /// into its expression: the primary offsetof term first, then any addend
+    /// terms. When the addend is a bare integer literal we fold it into the
+    /// offsetof's `addend` field (backward-compat with the original int-only
+    /// 2nd-parameter form); when it's a full expression we spread its terms
+    /// into the outer sum.
+    fn parse_offsetof_terms(&mut self) -> Result<Vec<SignedTerm>> {
         self.consume()?; // .offsetof
         self.expect(&Token::LParen, "'(' after .offsetof")?;
         let path = self.parse_chunk_specifier()?;
-        let mut addend = 0i32;
+        let mut terms: Vec<SignedTerm> = Vec::new();
         if matches!(self.peek()?, Token::Comma) {
             self.consume()?;
-            let (n, _) = self.expect_integer("addend integer in .offsetof")?;
-            addend = n as i32;
+            // Look ahead: if the next tokens are exactly `INTEGER RPAREN`,
+            // take the fast path — fold the integer into the addend field
+            // and avoid building a compound expression. This keeps the
+            // existing test fixtures (`.offsetof(X, 8)`) on the simpler
+            // resolution path. Anything more complex (including leading
+            // `-` before an integer or any symbolic term) goes through
+            // the full addend-expression path.
+            let fold_int = matches!(self.peek()?, Token::Integer { .. })
+                && matches!(self.peek1()?, Token::RParen);
+            if fold_int {
+                let (n, _) = self.expect_integer("addend integer in .offsetof")?;
+                terms.push(SignedTerm {
+                    sign: 1,
+                    term: Term::Offsetof {
+                        path,
+                        addend: n as i32,
+                    },
+                });
+            } else {
+                terms.push(SignedTerm {
+                    sign: 1,
+                    term: Term::Offsetof { path, addend: 0 },
+                });
+                let addend_terms = self.parse_addend_expr()?;
+                terms.extend(addend_terms);
+            }
+        } else {
+            terms.push(SignedTerm {
+                sign: 1,
+                term: Term::Offsetof { path, addend: 0 },
+            });
         }
         self.expect(&Token::RParen, "')' closing .offsetof")?;
-        self.w.emit_offsetof(&path, addend);
-        Ok(())
+        Ok(terms)
     }
 
-    fn parse_sizeof(&mut self) -> Result<()> {
+    fn parse_sizeof_term(&mut self) -> Result<String> {
         self.consume()?; // .sizeof
         self.expect(&Token::LParen, "'(' after .sizeof")?;
         let path = self.parse_chunk_specifier()?;
         self.expect(&Token::RParen, "')' closing .sizeof")?;
-        self.w.emit_sizeof(&path);
-        Ok(())
+        Ok(path)
     }
 }
 
