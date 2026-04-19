@@ -131,7 +131,13 @@ LevelRooms::AddObjectToRoom( int32 objectIndex )
 	assert( objectIndex >= 0 );
 	BaseObject* object = (*_masterObjectList)[objectIndex];
    assert(ValidPtr(object));
-	AssertMsg( object->kind() != BaseObject::StatPlat_KIND, "Cannot generate or move a statplat at runtime" );
+	if ( object->kind() == BaseObject::StatPlat_KIND )
+	{
+		cerror << "Warning: statplat objectIndex=" << objectIndex
+		       << " tried to move at runtime — leaving in place (round-trip room-sort mismatch?)"
+		       << std::endl;
+		return;
+	}
 
    PhysicalObject* po = dynamic_cast<PhysicalObject*>(object);
    assert(ValidPtr(po));

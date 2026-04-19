@@ -268,6 +268,7 @@ Room::UpdateRoomContents(int updateIndex, LevelRooms& levelRooms)
 		if (!CheckCollision(*po))
 		 {
 			int32 objectIndex = *alIter;
+			cerror << "Room::UpdateRoomContents: object " << objectIndex << " kind=" << object->kind() << " fell out of room " << GetRoomIndex() << "; re-adding" << std::endl;
 			RemoveObject(objectIndex);
 
          Validate();
