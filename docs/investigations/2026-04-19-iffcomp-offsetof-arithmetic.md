@@ -375,4 +375,100 @@ particular theory about what got stripped.
 - `.relative_to` as a *new* form would still be a nice ergonomics win —
   even if it wasn't the historical approach, the TOC reads better with
   it than with the `.offsetof - .offsetof` pattern repeated six times.
+
+## Postscript 3: SourceForge CVS resolves the mystery
+
+Fetched `https://sourceforge.net/code-snapshots/cvs/w/wf/wf-gdk.zip` — a
+CVS snapshot of the last SourceForge-hosted revision (HEAD = 1.7, dated
+2010, marked `state dead` at the point the project moved to GitHub). The
+snapshot contains the historical `iffcomp/Attic/lang.y,v` **and** the
+original `wfsource/levels.src/Attic/iff.prp,v` that produced the oracle
+`.iff` files. Three findings:
+
+**1. The historical grammar has the same "emit at item time" behavior
+as the current grammar.** The `expr` rule includes an arithmetic action —
+
+```yacc
+expr :
+    item                { $$ = $1; }
+  | expr PLUS expr      { $$ = $1 + $3; printf( "%ld + %ld = %ld\n", $1, $3, $$ ); }
+  | expr MINUS expr
+  ;
+```
+
+— but the computed `$$` is never emitted anywhere in the output stream.
+Item reductions for `INTEGER` / `OFFSETOF` / `SIZEOF` all call
+`out_intN` or `out_int32` directly, same as the modernized grammar.
+**Binary `+`/`-` has literally never worked to compose an emitted
+expression in C++ iffcomp.** It was a no-op (or a `printf` trace for `+`,
+empty action for `-`) for the whole life of the tool. Our theory that
+the arithmetic regressed is wrong — there was never anything to regress.
+
+**2. The 2nd parameter of `.offsetof` has always been `INTEGER`.** Same
+grammar rule, same binding to `$5.val` as an `unsigned long`, same
+behavior. No expression-accepting historical form ever existed.
+
+**3. The historical `iff.prp` template uses `.offsetof(X, -2048)`.**
+Extracted verbatim:
+
+```
+{ 'LVAS'
+    { 'TOC'
+        'ASMP'  .offsetof( ::'LVAS'::'ASMP', -2048 )  .sizeof( ::'LVAS'::'ASMP' )
+        'LVL'   .offsetof( ::'LVAS'::'LVL',  -2048 )  .sizeof( ::'LVAS'::'LVL' )
+        …
+        'FAKE'  .offsetof( ::'LVAS'::'ASMP' )         .sizeof( ::'LVAS'::'ASMP' )
+```
+
+`-2048` wasn't a magic number — it was correct **for the original file
+layout**, which had no `L4` wrapper. The iff.prp emitted `RAM` at file
+offset 0 (via `include "ram.iff.txt"`), an ALGN pad to 0x800, and LVAS
+at 0x800. So `.offsetof(ASMP, -2048)` = `ASMP.pos - 0x800` = ASMP's
+LVAS-relative offset. The FAKE entry used unaddended `.offsetof(ASMP)`
+deliberately: it stored ASMP's *absolute* file position (0x1000 under
+the pre-L4 layout, which coincidentally equals LVL's LVAS-relative
+offset — the "cross-wired" look is a layout accident, not a template
+bug).
+
+### Why the modern oracle `snowgoons.iff` has L4 wrapping
+
+The oracle we have in the repo today starts with `L4` at file offset 0,
+which shifts LVAS from 0x800 to 0x1000. Modernized structure:
+
+```
+0x0000  L4 header
+0x0008  ALGN pad → 0x0800
+0x0800  RAM
+0x082C  ALGN pad → 0x1000
+0x1000  LVAS ← was at 0x0800 pre-L4-wrap
+```
+
+Under the L4-wrapped layout, the historical `.offsetof(X, -2048)` would
+produce **wrong** bytes: `0x1800 - 2048 = 0x1000` (= LVL's entry value),
+not ASMP's `0x800`. So the oracle in the repo was NOT built by the
+historical iff.prp applied to the L4-wrapped layout — it was either:
+
+- Built by the historical iff.prp on the pre-L4 layout, then **wrapped
+  in L4 after the fact** (TOC bytes copied through verbatim; LVAS-
+  relative offsets remain correct because they're layout-invariant).
+- Built by a later iff.prp variant with `-4096` or arithmetic, that
+  isn't in the current repo.
+
+The first is more likely given zero evidence of an updated iff.prp.
+
+### What this changes
+
+- **iffcomp-rs arithmetic fix (`+/-`)** — still correct and still
+  valuable, but no longer "restoring original behavior". It's a *new*
+  feature iffcomp-rs adds that C++ iffcomp never had.
+- **iffcomp-rs 2nd-arg expression fix** — same story: a *new* extension,
+  not a restoration.
+- **The "right" TOC expression for the modern oracle layout** — either
+  `.offsetof(X, -4096)` (integer-addend form, one byte nudge from the
+  historical `-2048`) or the arithmetic form. Both compile
+  byte-identically.
+
+The previous "Status" section's "port the arithmetic fix back to C++
+iffcomp" is now **not a regression fix** — it's a forward-looking
+improvement. Decision on whether to actually port it can wait.
   Park as a future-nice-to-have.
