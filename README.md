@@ -201,4 +201,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 15:05** — [`docs/plans/2026-04-19-host-scripts-in-forth.md`](docs/plans/2026-04-19-host-scripts-in-forth.md): Plan: scripts in Forth (host-side + in-level)
+**2026-04-19 15:05** — [`docs/plans/2026-04-19-levcomp-common-block-two-phase.md`](docs/plans/2026-04-19-levcomp-common-block-two-phase.md): Plan: levcomp-rs two-phase common-block emission — oracle byte-identity for the LVL chunk
