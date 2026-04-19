@@ -9,6 +9,8 @@
 
 Eight days of work (2026-04-12 – 2026-04-19). Newest first:
 
+**`snowgoons.iff.txt` round-trips byte-identical (2026-04-19)** — iffcomp-rs gained real top-level `+/-` arithmetic plus expression-accepting 2nd-arg `.offsetof`, iffdump-rs default wrappers now match the oracle `chunks.txt` (plus L4–L9), and two mis-nested chunks in `wflevels/snowgoons.iff.txt` got relocated, so `iffcomp-rs snowgoons.iff.txt` now produces md5-identical bytes to the oracle `snowgoons.iff` — see [iffcomp-offsetof-arithmetic](docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md).
+
 **git-branch-browser v2 shipped (2026-04-19)** — Curses TUI now renders the repo's branch topology as a chronological waypoint pipeline with per-waypoint strata bars, sideways-fork detection, and three diff modes (vs parent / vs master / compare), with clean Ctrl+C handling in every input loop — see plan [git-branch-browser](docs/plans/2026-04-16-git-branch-browser.md).
 
 **Blender round-trip plays continuously, untextured (2026-04-19)** — Nine exporter/compiler fixes (BOX3 frame, Mesh Name gating, authored BOX3 preservation, enum-label import, path+channel serialization, oadFlags MovesBetweenRooms bit, mesh-bbox extension disable, first-keyframe t=0 export, `_RoomOnDisk` 36-byte struct-alignment padding) take `snowgoons-blender.iff` through a continuous per-frame loop with audio + camera + no assertions; next-up oracle dependencies (texture atlases, MeshName asset-ID packing, CamShot BOX3 gating) tracked in [blender-roundtrip-oracle-dependencies](docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md).
