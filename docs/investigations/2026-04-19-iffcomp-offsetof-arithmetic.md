@@ -95,10 +95,13 @@ the oracle.
   no test currently covers `.offsetof - .offsetof`.
 - **(B)** The original iffcomp had the bug too, but the iff.prp used a
   different formula — hardcoded hex, or a single `.offsetof` with a constant
-  addend. But that's not what the iff.prp says (`.offsetof(A) - .offsetof(B)`
-  pattern is common in the stored `.iff.txt` reference outputs), and there's
-  no way a single `.offsetof` call emits `0x800`, since every `.offsetof` in
-  either resolution path (`pos - 4` or `pos - 8`) resolves to an absolute
+  addend. But that's not what the iff.prp says (the reconstructed
+  `wflevels/snowgoons.iff.txt` uses `.offsetof(A) - .offsetof(B)` for the TOC;
+  this is the only stored `.iff.txt` in the tree that uses that pattern — the
+  others use single-arg `.offsetof` for outer-level absolute-offset TOCs), and
+  there's no way a single `.offsetof` call emits `0x800`, since every
+  `.offsetof` in either resolution path (`pos - 4` or `pos - 8`) resolves to
+  an absolute
   file offset, not a relative one.
 
 (A) is overwhelmingly more likely: the current C++ grammar is a regression
@@ -106,7 +109,7 @@ that shipped after the oracle and was never exercised against a level that
 actually uses TOC arithmetic.
 
 KTS's read: *"you can't reproduce the original iffcomp anyway, it's been
-hacked since the original and never fully re-validated."*
+hacked away at since the original and never fully re-validated."*
 
 ## Implication for iffcomp-rs
 
@@ -177,6 +180,48 @@ values don't matter as long as they're distinguishable.
 Action: deferred. Once iffcomp-rs can emit the other five entries
 byte-identically, we'll pick FAKE's formula by working backwards from the
 oracle bytes and trust the oracle over the template.
+
+### The 0x7c / 124 bytes is content-determined, not a struct size
+
+The size `0x0000007c = 124` that shows up in both `ASMP`'s entry and the
+`FAKE` sentinel's entry is **not** the size of any WF struct. It's the
+arithmetic sum of the five specific asset entries in snowgoons's ASMP
+payload:
+
+| filename         | strlen+NUL | padded to 4 | entry bytes (id + `STR` header + padded string) |
+|------------------|-----------:|------------:|----------------------------------------------:|
+| `tree02.iff`     | 11         | 12          | 4 + 8 + 12 = **24**                           |
+| `tree03.iff`     | 11         | 12          | 24                                            |
+| `player.iff`     | 11         | 12          | 24                                            |
+| `house.iff`      | 10         | 12          | 24                                            |
+| `quadpatch01.iff`| 16         | 16          | 4 + 8 + 16 = **28**                           |
+|                  |            |             | **124 = 0x7c**                                |
+
+Change any filename's length and the number changes. The smallest OAD in
+the tree is 1571 bytes; there's no sizeof(some_struct) == 124 match
+anywhere in WF. So the `FAKE` sentinel's `0x7c` isn't pointing at a known
+size constant — it's literally just re-emitting ASMP's size, which
+happened to land at 124 bytes because of which filenames snowgoons ships.
+The cross-wiring `(LVL offset, ASMP size)` is genuinely arbitrary, which
+is exactly what a tombstone sentinel should look like.
+
+### `.sizeof()` returns payload size, not total chunk size
+
+Worth stating explicitly since it's easy to get wrong by analogy with
+`.offsetof()`: `.sizeof(::'X'::'Y')` resolves to the **payload size** of
+the named chunk — the on-disk `size` field written into the chunk header,
+which excludes the 8-byte header itself. Verified against snowgoons's
+oracle: ASMP's on-disk chunk header at file offset `0x1800` reads
+`4153 4d50 7c00 0000` = `'ASMP'` + size `0x7c`, and the TOC entry's size
+field is also `0x7c`. iffcomp-rs's `emit_sizeof`
+(`wftools/iffcomp-rs/src/writer.rs:321`) stores `ChunkSym.size =
+payload_size` at chunk close and writes that back unchanged.
+
+If a TOC needs "total chunk size including header," write
+`.sizeof(X) + 8`. Nothing in the snowgoons / cd.iff oracles does this,
+but it's worth knowing which way the convention goes before reading
+older `.iff.prp` templates that may have been written against a
+different convention.
 
 ## Side investigation: `ASS` and iffdump recursion
 
@@ -472,3 +517,86 @@ The previous "Status" section's "port the arithmetic fix back to C++
 iffcomp" is now **not a regression fix** — it's a forward-looking
 improvement. Decision on whether to actually port it can wait.
   Park as a future-nice-to-have.
+
+## Postscript 4: the simplest answer was a restructure, not a feature
+
+After the SourceForge CVS finding settled that the arithmetic /
+2nd-arg-expression forms weren't historical, the next question was:
+is there a cleaner expression shape for the TOC using only what the
+grammar already provides?
+
+Looking at `cd_snowgoons.iff.txt`, the GAME TOC uses bare single-arg
+`.offsetof(::'GAME'::X)` — no subtraction, no addend. It works
+because GAME is the outermost chunk (at file offset 0), so
+file-absolute and GAME-header-relative coincide. The answer to
+"can LVAS get the same treatment?" is yes — by making LVAS the
+outermost chunk in its own compile unit.
+
+`wflevels/snowgoons.iff.txt` used to start with `{ 'L4' … { 'LVAS' … } }`
+— L4 wrapped around LVAS, LVAS nested one level deep, TOC requiring
+arithmetic or `-0x1000` addend to get LVAS-relative values.
+
+It now starts with `{ 'LVAS' … }` — LVAS at the root of its own file —
+and the TOC uses the dirt-simple form, same shape as cd.iff's GAME TOC:
+
+```
+{ 'TOC'
+    'ASMP' .offsetof(::'LVAS'::'ASMP') .sizeof(::'LVAS'::'ASMP')
+    'LVL'  .offsetof(::'LVAS'::'LVL')  .sizeof(::'LVAS'::'LVL')
+    'PERM' .offsetof(::'LVAS'::'PERM') .sizeof(::'LVAS'::'PERM')
+    'RM0'  .offsetof(::'LVAS'::'RM0')  .sizeof(::'LVAS'::'RM0')
+    'RM1'  .offsetof(::'LVAS'::'RM1')  .sizeof(::'LVAS'::'RM1')
+    'FAKE' .offsetof(::'LVAS'::'LVL')  .sizeof(::'LVAS'::'ASMP')
+}
+```
+
+The L4 + ALGN + RAM + ALGN wrap that used to live in snowgoons.iff.txt
+now lives in **cd.iff.txt**, inlined around `[ "snowgoons.iff" ]`.
+This mirrors the real pipeline architecture: the level converter
+(iff2lvl / levcomp-rs / `.lev`) only knows about LVAS — it doesn't
+emit L4, GAME, or SHEL. L4 is a cd.iff assembly concern, not a
+level-content concern.
+
+### Why not the even-simpler `{ 'L4' [ "snowgoons.iff" ] }`?
+
+Tempting, but breaks the engine's layout contract. `game.cc:158` does
+`SeekRandom(SECTOR_SIZE)` then expects the `RAM` chunk at file-offset
+0x800 inside L4. Options:
+
+- Put `RAM + ALGN + LVAS` inside `snowgoons.iff` and use the bare
+  `{ 'L4' [snowgoons.iff] }` wrap. But then LVAS isn't at file offset
+  0 of `snowgoons.iff` (RAM + ALGN push it to 0x1000), so the inner
+  TOC needs arithmetic or `-0x1000` addend again. Pick one wart:
+  the TOC complexity or the cd.iff.txt boilerplate.
+- Current choice: keep LVAS pristine in `snowgoons.iff` (TOC uses
+  1-arg), and cd.iff.txt carries the L4 assembly block. Matches the
+  level-pipeline mental model — level tools don't know about L4.
+
+### Verification
+
+```
+iffcomp snowgoons.iff.txt     → snowgoons.iff  (163 840 B, md5 96bae4…)
+iffcomp cd_snowgoons.iff.txt  → cd.iff         (174 080 B)
+  extract L4 chunk bytes      → matches original L4-wrapped oracle
+                                (167 936 B, md5 3a3a985c…)
+```
+
+Build chain: **N+1 iffcomp runs** for N levels — one per level
+(.iff.txt → .iff, LVAS as root) plus one final run for cd.iff that
+includes all the level .iff files and wraps each in its own L4 block.
+
+### What this changes about the arithmetic + 2nd-arg-expression work
+
+- **iffcomp-rs `+/-` arithmetic** — still useful for future cases
+  where arithmetic over resolved offsets is genuinely needed, but
+  the TOC no longer needs it. `5l + 3l - 2l` test fixture keeps
+  the code path exercised.
+- **2nd-arg expression extension** — same story: still there, no
+  longer load-bearing for the oracle match.
+- **File-include first-chunk-header scan** — *this* one stays
+  load-bearing; it's what makes `.offsetof(::'GAME'::'L4')` resolve
+  against the `[ "snowgoons.iff" ]` include when building cd.iff.
+
+Net: the restructure is the clean design; the arithmetic + expression
+extensions are now belt-and-suspenders — kept because they're small
+and well-tested, not because they're needed for the oracle match.

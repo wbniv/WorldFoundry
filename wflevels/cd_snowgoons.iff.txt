@@ -4,6 +4,12 @@
 // Then copy to wfsource/source/game/cd.iff and run wf_game (boots L4 by default).
 { 'GAME'
     { 'TOC'
+        // GAME is outermost, so single-arg `.offsetof(::'GAME'::X)` is
+        // both file-absolute and GAME-relative — no subtraction needed.
+        // `.sizeof(X)` returns payload size (no 8-byte header). Same
+        // trick holds for the LVAS TOC inside snowgoons.iff, because
+        // LVAS is the outermost chunk in its own compile unit. See
+        // docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md.
         'SHEL'  .offsetof( ::'GAME'::'SHEL' )  .sizeof( ::'GAME'::'SHEL' )
         'L4'    .offsetof( ::'GAME'::'L4' )    .sizeof( ::'GAME'::'L4' )
     }
@@ -12,8 +18,23 @@
     { 'SHEL' [ "shell.aib" ] }
     { 'ALGN' .align( 2048 ) }
 
-    // snowgoons.iff is a complete L4 chunk (8-byte header + ALGN + RAM + ...),
-    // ready to inline at top level — no outer wrapper needed.
-    [ "snowgoons.iff" ]
+    // L4 assembly lives here, not in snowgoons.iff.txt. The level
+    // pipeline (iff2lvl → .lev → levcomp-rs → .lvl) naturally emits
+    // LVAS — it doesn't know about L4, GAME, or SHEL — so
+    // snowgoons.iff is just the LVAS chunk as its own root, and this
+    // file assembles the outer level/game structure. Duplicate this
+    // `{ 'L4' … }` block (with its own RAM values and
+    // `[ "<level>.iff" ]` include) for each additional level.
+    { 'L4'
+        { 'ALGN' .align( 2048 ) }
+        { 'RAM'
+            'OBJD' 100000l
+            'PERM' 300000l
+            'ROOM' 300000l
+            'FLAG' 1l 1l                    // doomstick, bungeecam
+        }
+        { 'ALGN' .align( 2048 ) }
+        [ "snowgoons.iff" ]
+    }
     { 'ALGN' .align( 2048 ) }
 }
