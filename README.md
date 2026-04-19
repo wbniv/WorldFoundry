@@ -179,4 +179,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 09:51** — [`docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md`](docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md): `.offsetof` arithmetic in iffcomp — oracle vs current behavior
+**2026-04-19 09:52** — [`docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md`](docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md): Plan: Blender round-trip — oracle dependencies
