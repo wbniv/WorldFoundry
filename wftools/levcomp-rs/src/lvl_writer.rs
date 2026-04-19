@@ -87,6 +87,10 @@ pub fn write(plan: &mut LevelPlan) -> Result<Vec<u8>, String> {
         let mut obj_to_room = vec![-1i32; plan.objects.len()];
         for (ri, room) in room_list.iter().enumerate() {
             for &oi in &room.entries {
+                // NULL_Object (index 0) may appear as a leading sentinel in
+                // a room's entry list — it's an iff2lvl-compat artefact
+                // and has no corresponding entry in plan.objects.
+                if oi <= 0 { continue; }
                 obj_to_room[(oi as usize) - 1] = ri as i32;
             }
         }

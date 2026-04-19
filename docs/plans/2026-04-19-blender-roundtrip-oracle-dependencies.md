@@ -258,8 +258,12 @@ Source `.lev` files have mixed-case mesh filenames that iff2lvl
 normalised with `strlwr(oldName)` at `level2.cc:222`/`:275` — KTS's
 own comment: "this strlwr needs to go away, but first the levels
 in wflevels need to be updated to have the proper case."
-levcomp-rs now replicates the strlwr; after the batch, normalise
-the `.lev` files to lowercase and remove the call.
+Historical context: WF started on DOS/Windows 3.1 with 8.3 FAT
+filenames (no case); the strlwr was a case-insensitive
+compatibility shim that stuck around after the toolchain moved to
+long-filename hosts.  levcomp-rs now replicates the strlwr; after
+the batch, normalise the `.lev` files to lowercase and remove the
+call.
 
 **b. Alphabetical export order, regenerate Actboxor indices.**
 Oracle has `obj[5] = Actboxor02`, `obj[17] = Actboxor01` from

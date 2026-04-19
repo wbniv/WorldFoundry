@@ -143,6 +143,22 @@ pub fn sort(objects: &[LevObject], schemas: &OadSchemas) -> Vec<Room> {
 
     // Pass 2 — sort every non-room object into the first room containing its
     // world-space center point.
+    //
+    // Mirror iff2lvl's pre-pass on NULL_Object (the implicit slot-0 sentinel
+    // in its QObject list): its centre is the origin with an identity bbox,
+    // and whichever room's world bbox contains (0,0,0) gets a leading `0`
+    // entry in its list.  The engine skips null entries at
+    // `Room::Construct` (`if (masterObjectList[idx] != NULL)`), so this
+    // carries no runtime effect — it's purely a byte-identity mirror.
+    // See deferred-deviation (f) in the oracle-dependencies plan for the
+    // post-reproduction cleanup.
+    for room in rooms.iter_mut() {
+        if point_in_box([0, 0, 0], room.bbox) {
+            room.entries.push(0);
+            break;
+        }
+    }
+
     for (i, obj) in objects.iter().enumerate() {
         if room_of_obj[i] != -2 { continue; }  // already a room
 
