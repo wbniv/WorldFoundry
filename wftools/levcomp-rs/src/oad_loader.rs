@@ -19,7 +19,7 @@ use std::collections::HashMap;
 
 use crate::asset_registry::AssetRegistry;
 use crate::common_block::CommonBlockBuilder;
-use crate::lev_parser::{field_data, field_str_value, LevObject};
+use crate::lev_parser::{field_data, field_str_child_only, field_str_value, LevObject};
 
 /// Per-class schema bundle — maps a class name to its parsed `.oad` file.
 pub struct OadSchemas {
@@ -384,18 +384,17 @@ fn int_value(entry: &OadEntry, chunk: Option<&wf_iff::IffChunk>, _obj: &LevObjec
     };
 
     // Enum-style: items come from the entry's String, pipe-separated.
-    //
-    // TODO(oad-audit/fix-1): `field_str_value` prefers the DATA chunk,
-    // but for I32-typed fields the DATA is 4 binary bytes; `read_cstr`
-    // on `00 00 00 00` returns "" which `Option::or` treats as
-    // present, short-circuiting the enum lookup. For snowgoons's
-    // CamShot `Rotation` / `Position X/Y/Z` fields this makes us emit
-    // 0 where iff2lvl emits the enum index (1). Fix is a
-    // `field_str_child_only` helper used here — see
+    // Use `field_str_child_only` (not `field_str_value`) because for
+    // I32-typed fields the DATA sub-chunk is 4 binary bytes and
+    // `read_cstr` on `00 00 00 00` returns "" — which
+    // `field_str_value`'s `Option::or` would treat as present and
+    // short-circuit the enum lookup. The enum label lives in the
+    // nested STR sibling (e.g. `'I32' { 'NAME' "Rotation" } { 'DATA' 0l }
+    // { 'STR' "Track" }`). Audit fix #1; see
     // docs/investigations/2026-04-19-oad-buttontype-audit.md.
     let items = entry.string_str();
     if !items.is_empty() && items.contains('|') {
-        let label = field_str_value(chunk);
+        let label = field_str_child_only(chunk);
         if !label.is_empty() {
             if let Some(idx) = items.split('|').position(|it| it.trim() == label.trim()) {
                 return idx as i32;

@@ -127,6 +127,21 @@ pub fn field_data(chunk: &IffChunk) -> Vec<u8> {
     Vec::new()
 }
 
+/// Extract a field's nested STR child only, ignoring any DATA child.
+/// Used when the field is an enum-labeled I32 whose DATA holds a binary
+/// integer (not text) but whose companion STR child carries the enum label.
+/// `field_str_value` prefers DATA over STR, which short-circuits in that
+/// case; this function is the explicit-STR variant.
+pub fn field_str_child_only(chunk: &IffChunk) -> String {
+    let children = match read_chunks(&chunk.payload) { Ok(c) => c, Err(_) => return String::new() };
+    for c in children {
+        if id_to_str(c.id) == "STR" {
+            return read_cstr(&c.payload);
+        }
+    }
+    String::new()
+}
+
 /// Extract a field's nested STR value (enum label, or some STR-kind fields).
 pub fn field_str_value(chunk: &IffChunk) -> String {
     let children = match read_chunks(&chunk.payload) { Ok(c) => c, Err(_) => return String::new() };
