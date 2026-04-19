@@ -932,12 +932,23 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
                 )
 
             # Object position (world-space origin → WF)
-            loc = obj.matrix_world.to_translation()
-            wf_pos = bl_to_wf(loc.x, loc.y, loc.z)
-
-            # Both Z-up — rotation maps directly.
-            rot = obj.matrix_world.to_euler('XYZ')
-            wf_rot = (rot.x, rot.y, rot.z)
+            # For animated objects, Blender's evaluated transform at the
+            # current scene frame interpolates between keyframes — which
+            # drifts by the first-frame's interpolation delta if the scene
+            # is not sitting on frame 0.  The canonical Position is the
+            # transform at t=0 (first-keyframe value), matching how the
+            # engine resolves path-driven objects at load time.  Read
+            # from fcurves directly when they exist.
+            loc_vals = list(obj.matrix_world.to_translation())
+            rot_vals = list(obj.matrix_world.to_euler('XYZ'))
+            if obj.animation_data and obj.animation_data.action:
+                for bl_path, vals in (("location", loc_vals), ("rotation_euler", rot_vals)):
+                    for idx in range(3):
+                        fc = obj.animation_data.action.fcurves.find(bl_path, index=idx)
+                        if fc and fc.keyframe_points:
+                            vals[idx] = fc.keyframe_points[0].co.y
+            wf_pos = bl_to_wf(loc_vals[0], loc_vals[1], loc_vals[2])
+            wf_rot = (rot_vals[0], rot_vals[1], rot_vals[2])
 
             def fp(v):
                 return f"{v:.16f}(1.15.16)"
