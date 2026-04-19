@@ -9,6 +9,8 @@
 
 Eight days of work (2026-04-12 – 2026-04-19). Newest first:
 
+**`snowgoons.iff.txt` round-trips byte-identical (2026-04-19)** — iffcomp-rs gained real top-level `+/-` arithmetic plus expression-accepting 2nd-arg `.offsetof`, iffdump-rs default wrappers now match the oracle `chunks.txt` (plus L4–L9), and two mis-nested chunks in `wflevels/snowgoons.iff.txt` got relocated, so `iffcomp-rs snowgoons.iff.txt` now produces md5-identical bytes to the oracle `snowgoons.iff` — see [iffcomp-offsetof-arithmetic](docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md).
+
 **git-branch-browser v2 shipped (2026-04-19)** — Curses TUI now renders the repo's branch topology as a chronological waypoint pipeline with per-waypoint strata bars, sideways-fork detection, and three diff modes (vs parent / vs master / compare), with clean Ctrl+C handling in every input loop — see plan [git-branch-browser](docs/plans/2026-04-16-git-branch-browser.md).
 
 **Blender round-trip plays continuously, untextured (2026-04-19)** — Nine exporter/compiler fixes (BOX3 frame, Mesh Name gating, authored BOX3 preservation, enum-label import, path+channel serialization, oadFlags MovesBetweenRooms bit, mesh-bbox extension disable, first-keyframe t=0 export, `_RoomOnDisk` 36-byte struct-alignment padding) take `snowgoons-blender.iff` through a continuous per-frame loop with audio + camera + no assertions; next-up oracle dependencies (texture atlases, MeshName asset-ID packing, CamShot BOX3 gating) tracked in [blender-roundtrip-oracle-dependencies](docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md).
@@ -95,6 +97,8 @@ Eight days of work (2026-04-12 – 2026-04-19). Newest first:
 
 | Date | Investigation | Status | Summary |
 |------|---------------|--------|---------|
+| 2026-04-19 | [`.offsetof` arithmetic in iffcomp — oracle vs current behavior](docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md) | **Recommendation accepted; iffcomp-rs arithmetic implementation in** | **Context:** Reconstructing `wflevels/snowgoons.iff.txt` as a proper compile-source text-IFF file (mirror-first, deviate-later), chunk-by-chunk, so iffcomp-rs can produce byte-identical output … |
+| 2026-04-19 | [Email: `_PathOnDisk.base.rot` mystery bytes in oracle `snowgoons.iff`](docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md) | **In progress** | **To:** Kevin T. Seghetti (cc: original WF team — this is about `wftools/iff2lvl/path.cc`) **From:** Will, via Claude-assisted archaeology **Subject:** Do you remember what `_PathOnDisk.base.rot` … |
 | 2026-04-18 | [Android Port — Executable Size and RAM Usage](docs/investigations/2026-04-18-android-port-size-and-ram.md) | **In progress** | **Branch:** 2026-android **Artifact:** `android/app/build/outputs/apk/debug/worldfoundry-debug.apk` **NDK:** 26.2.11394342, arm64-v8a, `-DCMAKE_BUILD_TYPE=RelWithDebInfo`, then stripped by AGP … |
 | 2026-04-18 | [Closing the Android Port — Remaining Work](docs/investigations/2026-04-18-android-port-closure.md) | **Playable APK shipped; this doc lists what's left to call it "done."** | **Branch:** 2026-android |
 | 2026-04-17 | [IFF format lineage — EA IFF 85, AIFF, RIFF, WorldFoundry IFF](docs/investigations/2026-04-17-iff-format-lineage.md) | **Complete** | Traces all four formats from the common 1985 ancestor. Key findings: AIFF and WF IFF independently arrived at the same solution (bake navigational offsets at write time for slow-media random access); WF uniquely separates interchange (text source) from execution (platform binary); `.align(2048)` maps CD-ROM sectors. Side-by-side comparison table included. |
@@ -175,4 +179,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 05:21** — [`docs/plans/2026-04-16-git-branch-browser.md`](docs/plans/2026-04-16-git-branch-browser.md): Plan: git-branch-browser — v2 waypoint pipeline closed
+**2026-04-19 08:44** — [`docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md`](docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md): `.offsetof` arithmetic in iffcomp — oracle vs current behavior
