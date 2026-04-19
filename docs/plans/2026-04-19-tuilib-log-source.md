@@ -1,8 +1,16 @@
 # Plan 3: extract `panes/logs.py` behind abstract `LogSource`
 
 **Date:** 2026-04-19
-**Status:** Draft — waiting on prerequisite plan
-**Prerequisite:** Plan 1 (`2026-04-19-python-tui-lib-extraction.md`) must land first — this plan touches tuilib and assumes its structure exists.
+**Status:** Done — 2026-04-19, commit `40ac57c` (tuilib). Scope was revised mid-flight (see below); delivered a 4-method `LogSource` protocol + ~280-LOC reusable `LogPane`, not a port of parking-space's 2818-LOC CloudWatch analyzer. 11/12 tests pass; the skipped test (curses draw) verified manually under a pty.
+**Prerequisite:** Plan 1 (landed 2026-04-19).
+
+## Scope revision (2026-04-19)
+
+Mid-implementation survey of parking-space's `scripts/tui/panes/logs.py` revealed it depends on ~30 methods of `LogQuerySession` (patterns, field stats, metrics, transactions, drilldown, zoom, excludes) — far more than the 4-method protocol originally drafted here. A faithful port would need a bloated `LogSource` interface that reflects parking-space's CloudWatch Insights analyzer design rather than a universal log-source abstraction.
+
+**Revised plan:** tuilib ships a **minimal `LogSource` protocol** (query + tail + groups + fields) and a **small purpose-built `LogPane`** that uses only that protocol (~400 LOC of new code, not a port). Parking-space keeps its existing 2818-LOC `logs.py` / `LogQuerySession` — that's a CloudWatch-specific analytics tool, not a general log viewer. If parking-space ever wants the generic `LogPane` instead, plan 2 can choose between (a) accepting the feature downgrade or (b) keeping its analyzer pane alongside the generic one.
+
+Dropped features (vs original parking-space pane): pattern clustering, field stats histograms, metric aggregates, transaction tracking, field drilldown, zoom selection, exclude lists, anomaly detection. Kept: event listing with scroll, query expression, source/group filter, tail mode, optional LLM summarization.
 
 ## Context
 
