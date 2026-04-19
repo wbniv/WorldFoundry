@@ -234,3 +234,103 @@ Objects will appear in the correct WF-relative positions in Blender. The only or
    output (feet_z ≈ 0, center_z ≈ 1).  Removed the incorrect Y↔Z swap from
    `wf_to_bl`/`bl_to_wf` — transforms are now identity.  Level appears
    upright in Blender.
+6. 🟡 End-to-end proof (2026-04-19, `138c3c2`) — `snowgoons-blender.lev`
+   through headless Blender + iffcomp-rs + levcomp-rs + in-place LVL
+   chunk swap into the original LVAS shell produces a loadable
+   `snowgoons-blender.iff`; `wf_game -L` runs through level load,
+   physics, scripting, audio, REST API, and into per-frame execution
+   (first enemy AI tick dispatches a damage message).  Hits
+   `Cannot generate or move a statplat at runtime` after ~5 s — cause
+   not isolated; the enemy collides earlier than in the original run
+   because snowman01's runtime position differs by ~0.15 m on X/Y,
+   which is a round-trip artifact, so the assertion may well be
+   caused by the round-trip rather than a pre-existing gameplay
+   bug.  Still open.
+
+## 2026-04-19 — End-to-end round-trip fixes
+
+Four distinct Blender-exporter bugs fixed while walking the pipeline
+to gameplay.  Each surfaced only after the previous one was past:
+
+1. **BOX3 was rotated** — `matrix_world @ bound_box` baked in the
+   object rotation, then "localize" subtracted position but left the
+   bbox in world axes.  `iff2lvl`/`levcomp-rs` treat BOX3 as the
+   unrotated object-local frame (they add position, never rotation).
+   Room02 (rotated −π around X) flipped on Z and put the player
+   outside its room at compile time.  Fix: read `obj.bound_box`
+   directly, apply only the axis-convention transform.
+
+2. **Mesh Name emitted for every polygon-having object** — the
+   importer synthesizes a bbox-cube mesh for abstract actors
+   (camera, director, matte, level, omni…).  Round-trip re-emitted
+   those as `Mesh Name "Camera.iff"` etc., inflating the per-room
+   asset table and breaking asset-ID lookups at runtime.  Fix:
+   stash the source `.lev`'s Mesh Name on the Blender object as
+   `wf_original_mesh_name` on import; gate emission on export.
+
+3. **Authored BOX3 shrunk to mesh extent on export** — the original
+   `.lev` stores bboxes wider than the raw mesh (Max's collision-box
+   authoring that the runtime depends on, e.g. House is authored at
+   ±5.7 / −5.5 vs mesh ±5.0 / −4.8).  Fix: stash `wf_original_bbox`
+   on import; prefer it over the recomputed mesh bbox on export.
+
+4. **Enum fields dropped on import** — enum chunks like
+   `{ 'I32' { 'NAME' "Mobility" } { 'STR' "Path" } }` carry only a
+   label, no `DATA` integer.  `_apply_field_chunks`'s nested-STR
+   fallback only ran for `tag == 'STR'`, not for `'I32'` enum
+   wrappers, so every such field silently reset to its schema
+   default.  snowman01's Mobility reset from `Path` (2) to
+   `Anchored` (0), which made the engine spawn the enemy as a Jolt
+   dynamic character instead of a path-following actor (3 Jolt
+   characters instead of 1).  Fix: for `field.kind == "Enum"`, map
+   nested STR labels back through `field.enum_items()`.
+
+## Remaining gaps
+
+- **Phase 2c of levcomp-rs — real path/channel keyframe extraction.**
+  Blender's exported `.lev` *does* carry full PATH + CHAN blocks for
+  snowman01 (position.x/y/z + rotation.a/b/c, 3 keys each), and
+  iffcomp-rs compiles them to binary OK.  levcomp-rs discards them
+  and emits one dummy path pointing all six channel slots at a
+  single constant-compressed channel (the Phase 2b stub).  LVL
+  header counts confirm: original = 1 path + 6 channels;
+  round-trip = 1 path + 1 channel.  This is likely what causes the
+  snowman to sit at the wrong runtime position, which in turn drives
+  the first-tick enemy collision, which in turn hits the statplat
+  assertion.  Required for any animated object to behave correctly
+  through the round-trip.
+
+- **Phase 2c — `MeshName` packed-asset-ID packing.**  `iff2lvl`'s
+  `[TYPE | ROOM | INDEX]` algorithm (`iff2lvl::level2.cc:228`) not
+  yet ported.  Currently relying on the per-object asset-room
+  placement landed for Phase 2c-partial (`asset_registry.rs`'s
+  `add_iff_room`).  Blocks Blender-authored levels that don't start
+  life as a decompile of an existing level.
+
+- **Phase 2c — mesh-bbox extension.**  Less critical now that the
+  authored bbox is preserved through Blender round-trip (fix 3 in
+  the 2026-04-19 batch), but still required for freshly-authored
+  Blender levels where no prior authored bbox exists.
+
+- **LVAS-wrapping from scratch.**  The 2026-04-19 proof uses an
+  in-place LVL chunk swap into the original LVAS shell, reusing the
+  original's `ASMP`/`PERM`/`RM*` texture atlas chunks verbatim
+  (`/tmp/swap_lvl.py`).  A fully standalone build needs the
+  `textile`-produced atlases (`palN.tga`, `rmN.tga`, `rmN.ruv`,
+  `rmN.cyc`) or a path that bypasses texture atlasing.
+
+- **Snowman runtime-position drift (~0.15 m).**  Animated object
+  positions at t=0 differ from the original.  The Blender importer
+  interpolates path keyframes at t=0 rather than snapping to the
+  literal first-keyframe value, so the re-exported `Position` VEC3
+  is off by the first-keyframe delta on each animated axis.
+  Suspected root cause of the statplat assertion (drives the enemy
+  close enough to the player to collide on the first tick); worth
+  verifying after Phase 2c lands.
+
+- **Statplat assertion in `rooms.cc:134`.**  Not yet root-caused.
+  Hypothesis: enemy-AI collision response triggers a code path that
+  does not fire in the pristine original load.  Needs either a
+  fix to the round-trip (path data, snowman position) or a
+  minimal repro in the original to demonstrate the assertion is
+  pre-existing.

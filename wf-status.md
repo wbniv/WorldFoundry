@@ -1,13 +1,15 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-04-17  
+**As of:** 2026-04-19  
 **Branch:** `2026-android`
 
 ---
 
 ## Summary
 
-Seven days of work (2026-04-12 – 2026-04-18). Newest first:
+Eight days of work (2026-04-12 – 2026-04-19). Newest first:
+
+**Blender round-trip reaches gameplay (2026-04-19)** — Four exporter fixes (unrotated BOX3, gated Mesh Name, preserved authored BOX3, enum-label import) take `snowgoons-blender.iff` through load, physics, scripts, audio, REST API, and into per-frame enemy-AI execution before a `statplat` assertion at ~5 s that still likely stems from levcomp-rs's Phase-2c dummy-channel stub (real path keyframes not yet serialized, pathCount=1 + chanCount=1 vs the original's 1 + 6) — see plan [blender-level-roundtrip](docs/plans/2026-04-16-blender-level-roundtrip.md).
 
 **Android port closure (2026-04-18)** — Branch hits its close criterion (polished sideloadable APK) with only launcher icons + one stale `build.gradle.kts` comment left and Play Store / keystore / R8 / splash explicitly out of scope — see [closure audit](docs/investigations/2026-04-18-android-port-closure.md).
 
@@ -50,6 +52,7 @@ Seven days of work (2026-04-12 – 2026-04-18). Newest first:
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
 | 2026-04-16 | [Plan: git-branch-browser — curses TUI for browsing branch diffs](docs/plans/2026-04-16-git-branch-browser.md) | **In testing** | **Goal:** A Python curses program at `scripts/git-branch-browser.py` that lets you browse all git branches, see per-branch changed files as a collapsible directory tree with status annotations, and view file diffs inline. Implementation landed (~784 LOC); currently in user testing. |
+| 2026-04-16 | [Plan: Blender ↔ Level Round-Trip](docs/plans/2026-04-16-blender-level-roundtrip.md) | **In progress — step 6 🟡** | Steps 1–5 complete (levcomp-rs pipeline, 152/152 OAD fields, Z-up coordinate fix).  2026-04-19: four exporter fixes (unrotated BOX3, gated Mesh Name, preserved authored BOX3, enum-label import) take `snowgoons-blender.iff` through full init + into per-frame enemy-AI execution; asserts on `Cannot generate or move a statplat at runtime` at ~5 s.  Likely root cause is levcomp-rs's Phase-2c dummy-channel stub — Blender emits real PATH/CHAN text but levcomp-rs drops it (LVL pathCount=1 + chanCount=1 vs original 1 + 6), so snowman01's runtime position drifts ~0.15 m and it collides with the player on the first tick.  Unblocks the deferred `ScriptLanguage` OAD plan once stable. |
 | 2026-04-17 | [Plan: Prove all 7 level pipelines before breaking common.inc](docs/plans/2026-04-17-level-pipeline-proof.md) | **In progress — Phases A+B done** | Phase A (`534ead7`): `primitives.lev` + `whitestar.lev` compile through `iffcomp-rs` → `levcomp-rs` (skips OBJ chunks with no Class Name — Max aim-point helpers). Phase B: `wf_oad/tests/fixtures/common.oad` committed; `parse_common_oad` test asserts 14 entries + `Script` field; 6 tests pass. Phases C (decompile subcommand), D (4 source-less levels), E (multi-level `cd.iff`) remaining before the gated common.inc rearrangement that unblocks the ScriptLanguage OAD plan. |
 
 ### Backlog
@@ -71,7 +74,6 @@ Seven days of work (2026-04-12 – 2026-04-18). Newest first:
 | 2026-04-15 | [Dead-code removal](docs/plans/2026-04-15-dead-code-removal.md) | **Closed 2026-04-18** | Batches 1–7 landed (64,252 → 36,199 LOC, −43.7%). LOC claims verified against git history — Batch 5 `03211f9` shows −20,967 across 208 files; `e2dcc98` milestone records the 36,199 total. Batch 8 (`physics/wf/` deletion, ~1,700 LOC) + `hal/_list`/`_mempool` migration (stretch) accepted at their estimates, deferred to future opportunistic commits. |
 | 2026-04-16 | [Plan: Lua engine is not special — make it optional](docs/plans/2026-04-16-lua-not-special.md) | **Done** | `scripting_lua.cc/hp` extracted; `WF_LUA_ENGINE=lua54\|none` added to `build_game.sh`; all `lua_engine::` calls guarded; Fennel+none warns and forces lua54; stale `scripting_wasm3.hp` include removed. |
 | 2026-04-16 | [Engine directory reorganization](docs/plans/2026-04-16-engine-directory-reorganization.md) | **Complete** | `engine/` is now a top-level directory. `wftools/wf_engine/` → `engine/`, `wftools/vendor/` → `engine/vendor/`, `wf_viewer/stubs/` → `engine/stubs/`, `wf_viewer/include/` → `engine/include/`. `wftools/` is now strictly dev tooling. |
-| 2026-04-16 | [Plan: Blender ↔ Level Round-Trip](docs/plans/2026-04-16-blender-level-roundtrip.md) | **Complete** | `levcomp-rs` compiles `.lev` → `.lvl`; snowgoons loads in `wf_game`. Blender import/export round-trips 152/152 OAD fields. Lights, slopes, animation channels, scripts all emit. Coordinate system fixed (WF is Z-up, not Y-up). Tcl scripts ported to Lua. Investigation: [reverse-engineering doc](docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md). |
 | 2026-04-16 | [Finish Jolt physics integration](docs/plans/2026-04-16-jolt-physics-finish.md) | **Complete** | Five-step plan: fix SIGABRT (`JoltSyncFromCharacter`), eliminate zombie kinematic bodies, lock WF↔Jolt authority model, fix 3 m vertical pop (feet vs centre offset), 60 s soak. Player walks on snowgoons floor. |
 | 2026-04-15 | [Lua engine fixes (#1–#6)](docs/plans/2026-04-15-lua-engine-fixes.md) | **Complete** | All 6 fixes: script cache, per-actor envs, Fennel precompile, debug gating, stdlib sandbox, coroutine continuations. Smoke-tested 2026-04-16. |
 | 2026-04-15 | [Align scripting plans to ScriptRouter](docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md) | **Complete** | Phases A–E complete: all plan docs updated, JS/wasm3 renamed to `js_engine`/`wasm3_engine` namespaces, WAMR/Wren/Forth landed. All engine smoke tests passed 2026-04-16. |
@@ -170,4 +172,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-18 08:13** — [`docs/investigations/2026-04-18-android-port-size-and-ram.md`](docs/investigations/2026-04-18-android-port-size-and-ram.md): Android Port — Executable Size and RAM Usage
+**2026-04-19 01:28** — [`docs/plans/2026-04-16-blender-level-roundtrip.md`](docs/plans/2026-04-16-blender-level-roundtrip.md): Plan: Blender ↔ Level Round-Trip
