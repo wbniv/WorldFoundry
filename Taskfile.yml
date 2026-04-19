@@ -186,6 +186,12 @@ tasks:
           adb \
           google-android-ndk-r26c-installer
 
+  git:
+    desc: "Browse git branches as a waypoint pipeline (curses TUI)"
+    interactive: true
+    cmds:
+      - python3 scripts/git-branch-browser.py
+
   md:
     desc: "Convert Markdown to HTML and open in browser (usage: task md -- docs/foo.md)"
     cmds:

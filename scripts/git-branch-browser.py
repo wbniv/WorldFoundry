@@ -1,7 +1,19 @@
 #!/usr/bin/env python3
-"""Curses TUI for browsing git branches and their diffs."""
+"""Curses TUI for browsing git branches as a chronological waypoint pipeline.
+
+Design: in repos like this one, most branches form a linear chain where each
+branch is a strict superset of the prior. Rather than flatten every branch to
+`diff vs master`, this tool detects each branch's nearest-ancestor branch
+(its parent waypoint) and shows the incremental delta.
+
+Diff modes:
+  ENTER on file — diff vs parent waypoint (default)
+  m     on file — diff vs master
+  c     on branch — mark / compare two branches
+"""
 
 import curses
+import math
 import os
 import select
 import subprocess
@@ -41,7 +53,7 @@ class FileNode:
 class TreeNode:
     name: str
     full_path: str
-    children: dict = field(default_factory=dict)  # str -> TreeNode | FileNode
+    children: dict = field(default_factory=dict)
     expanded: bool = False
 
 
@@ -50,12 +62,21 @@ class BranchNode:
     display_name: str
     ref: str
     is_local: bool
-    is_current: bool
+    is_current: bool = False
+    tip_sha: str = ''
+    tip_date: str = ''              # ISO 8601 committer date
+
+    # Topology (populated by detect_topology)
+    parent: Optional['BranchNode'] = None
+    is_sideways: bool = False
+    commits_ahead: int = 0
+    parent_base: Optional[str] = None   # merge-base(parent, self); diff base
+
+    # Display state
     expanded: bool = False
     loaded: bool = False
     loading: bool = False
     file_tree: Optional[TreeNode] = None
-    merge_base: Optional[str] = None
     error: Optional[str] = None
 
 
@@ -66,7 +87,12 @@ class DisplayRow:
     label: str
     annotation: str
     ref: Any
-    branch: Any  # owning BranchNode
+    branch: Any
+    # Spine prefix cells: list of (char, attr_flags_without_base).
+    # Rendered before indent/content; attr gets ORed with the cursor-highlight
+    # base at draw time. Encodes the graph topology: nodes (●◉○◆), connectors
+    # (├─) and vertical continuation (│).
+    spine_cells: list = field(default_factory=list)
 
 
 @dataclass
@@ -78,7 +104,11 @@ class AppState:
     scroll_offset: int
     notify_pipe_r: int
     notify_pipe_w: int
+    master_ref: Optional[str] = None    # resolved once at startup
+    compare_mark: Optional[BranchNode] = None
+    max_commits_ahead: int = 1
     needs_redraw: bool = True
+    message: str = ''                   # transient status message
 
 
 # ---------------------------------------------------------------------------
@@ -102,8 +132,10 @@ CP_DIFF_DEL       = 14
 CP_DIFF_HUNK      = 15
 CP_DIFF_HEADER    = 16
 CP_NORMAL         = 17
+CP_SIDEWAYS       = 18
+CP_STRATA         = 19
+CP_COMPARE_MARK   = 20
 
-# Terminfo strikethrough (may be None on some terminals)
 _STRIKE_ON  = b''
 _STRIKE_OFF = b''
 
@@ -130,6 +162,9 @@ def init_colors():
     curses.init_pair(CP_DIFF_HUNK,      curses.COLOR_CYAN,    bg)
     curses.init_pair(CP_DIFF_HEADER,    curses.COLOR_WHITE,   bg)
     curses.init_pair(CP_NORMAL,         curses.COLOR_WHITE,   bg)
+    curses.init_pair(CP_SIDEWAYS,       curses.COLOR_MAGENTA, bg)
+    curses.init_pair(CP_STRATA,         curses.COLOR_GREEN,   bg)
+    curses.init_pair(CP_COMPARE_MARK,   curses.COLOR_BLACK,   curses.COLOR_YELLOW)
     try:
         _STRIKE_ON  = curses.tigetstr('smxx') or b''
         _STRIKE_OFF = curses.tigetstr('rmxx') or b''
@@ -151,9 +186,7 @@ def annotation_color(status: str) -> int:
 # ---------------------------------------------------------------------------
 
 def _run(args, cwd=None) -> subprocess.CompletedProcess:
-    return subprocess.run(
-        args, cwd=cwd, capture_output=True, text=True
-    )
+    return subprocess.run(args, cwd=cwd, capture_output=True, text=True)
 
 
 def get_repo_root() -> str:
@@ -170,6 +203,14 @@ def get_current_branch(root: str) -> Optional[str]:
     return r.stdout.strip()
 
 
+def resolve_master_ref(root: str) -> Optional[str]:
+    for ref in ('master', 'origin/master', 'main', 'origin/main'):
+        r = _run(['git', '-C', root, 'rev-parse', '--verify', '--quiet', ref])
+        if r.returncode == 0:
+            return ref
+    return None
+
+
 def get_all_branches(root: str) -> list:
     r = _run(['git', '-C', root, 'branch', '-a'])
     if r.returncode != 0:
@@ -179,45 +220,150 @@ def get_all_branches(root: str) -> list:
     branches = []
 
     lines = r.stdout.splitlines()
-    # Local branches first
     for line in lines:
         stripped = line.strip().lstrip('* ')
-        if stripped.startswith('remotes/'):
-            continue
-        if '->' in stripped:
+        if stripped.startswith('remotes/') or '->' in stripped:
             continue
         if stripped not in seen_short:
             seen_short.add(stripped)
-            branches.append(BranchNode(
-                display_name=stripped,
-                ref=stripped,
-                is_local=True,
-                is_current=False,
-            ))
+            branches.append(BranchNode(display_name=stripped, ref=stripped, is_local=True))
 
-    # Remote branches (deduplicate against locals)
     for line in lines:
         stripped = line.strip().lstrip('* ')
-        if not stripped.startswith('remotes/'):
+        if not stripped.startswith('remotes/') or '->' in stripped:
             continue
-        if '->' in stripped:
-            continue
-        short = stripped[len('remotes/'):]        # e.g. origin/master
-        # strip origin/ prefix for dedup key
+        short = stripped[len('remotes/'):]
         parts = short.split('/', 1)
         dedup_key = parts[1] if len(parts) == 2 else short
         if dedup_key in seen_short:
             continue
         seen_short.add(dedup_key)
-        branches.append(BranchNode(
-            display_name=short,
-            ref=stripped,
-            is_local=False,
-            is_current=False,
-        ))
+        branches.append(BranchNode(display_name=short, ref=stripped, is_local=False))
 
     return branches
 
+
+def _resolve(root: str, ref: str) -> str:
+    r = _run(['git', '-C', root, 'rev-parse', ref])
+    return r.stdout.strip() if r.returncode == 0 else ''
+
+
+def _commit_date(root: str, ref: str) -> str:
+    r = _run(['git', '-C', root, 'log', '-1', '--format=%cI', ref])
+    return r.stdout.strip() if r.returncode == 0 else ''
+
+
+def _merge_base(root: str, a: str, b: str) -> str:
+    r = _run(['git', '-C', root, 'merge-base', a, b])
+    return r.stdout.strip() if r.returncode == 0 else ''
+
+
+def _rev_count(root: str, rng: str) -> int:
+    r = _run(['git', '-C', root, 'rev-list', '--count', rng])
+    try:
+        return int(r.stdout.strip())
+    except ValueError:
+        return 0
+
+
+def _is_ancestor(root: str, a: str, b: str) -> bool:
+    r = _run(['git', '-C', root, 'merge-base', '--is-ancestor', a, b])
+    return r.returncode == 0
+
+
+# ---------------------------------------------------------------------------
+# Topology detection
+# ---------------------------------------------------------------------------
+
+def detect_topology(root: str, branches: list) -> int:
+    """Populate parent/parent_base/commits_ahead/is_sideways on each branch.
+    Returns max commits_ahead (for strata-bar scaling)."""
+    for b in branches:
+        b.tip_sha  = _resolve(root, b.ref)
+        b.tip_date = _commit_date(root, b.ref)
+
+    # Cache pairwise merge-bases to avoid recomputation.
+    mb_cache: dict[tuple[str, str], str] = {}
+
+    def mb(a: BranchNode, c: BranchNode) -> str:
+        key = (a.tip_sha, c.tip_sha)
+        if key not in mb_cache:
+            mb_cache[key] = _merge_base(root, a.ref, c.ref)
+            mb_cache[(c.tip_sha, a.tip_sha)] = mb_cache[key]
+        return mb_cache[key]
+
+    max_ahead = 1
+    for b in branches:
+        # A candidate parent is a *strict* ancestor of b.
+        candidates = []
+        for p in branches:
+            if p is b or not p.tip_sha or not b.tip_sha:
+                continue
+            base = mb(p, b)
+            if base == p.tip_sha and base != b.tip_sha:
+                candidates.append(p)
+
+        if not candidates:
+            b.parent = None
+            b.parent_base = None
+            b.commits_ahead = _rev_count(root, b.tip_sha) if b.tip_sha else 0
+            b.is_sideways = False
+        else:
+            # Nearest ancestor = latest commit date.
+            candidates.sort(key=lambda p: p.tip_date, reverse=True)
+            parent = candidates[0]
+            b.parent = parent
+            b.parent_base = parent.tip_sha
+            b.commits_ahead = _rev_count(root, f'{parent.tip_sha}..{b.tip_sha}')
+            # Sideways: b diverges from some other branch c that also
+            # descends from parent (i.e. neither is an ancestor of the other).
+            # Linear chain descendants (c is ancestor of b or b is ancestor of c)
+            # don't count — that's just the chain continuing.
+            b.is_sideways = False
+            for c in branches:
+                if c is b or c is parent or not c.tip_sha:
+                    continue
+                if mb(parent, c) != parent.tip_sha:
+                    continue
+                bc = mb(b, c)
+                if bc == b.tip_sha or bc == c.tip_sha:
+                    continue
+                b.is_sideways = True
+                break
+
+        if b.commits_ahead > max_ahead:
+            max_ahead = b.commits_ahead
+
+    return max_ahead
+
+
+def sort_waypoints(branches: list) -> list:
+    """Chronological, newest first. Sideways forks grouped immediately under
+    their parent (which comes first in the date order)."""
+    mainline = [b for b in branches if not b.is_sideways]
+    sideways = [b for b in branches if b.is_sideways]
+    mainline.sort(key=lambda b: b.tip_date, reverse=True)
+
+    result = []
+    sideways_by_parent: dict[str, list] = {}
+    for s in sideways:
+        key = s.parent.ref if s.parent else ''
+        sideways_by_parent.setdefault(key, []).append(s)
+    for lst in sideways_by_parent.values():
+        lst.sort(key=lambda b: b.tip_date, reverse=True)
+
+    for b in mainline:
+        result.append(b)
+        result.extend(sideways_by_parent.pop(b.ref, []))
+    # Orphan sideways (parent not in mainline): append at end
+    for lst in sideways_by_parent.values():
+        result.extend(lst)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Branch diff loading
+# ---------------------------------------------------------------------------
 
 def parse_name_status(text: str) -> list:
     results = []
@@ -255,12 +401,10 @@ def parse_numstat(text: str) -> dict:
 
 def build_file_tree(entries: list, numstat: dict) -> TreeNode:
     root = TreeNode(name='', full_path='')
-
     for entry in entries:
         status = entry[0]
         path = entry[1]
         old_path = entry[2] if len(entry) > 2 else None
-
         added, deleted = numstat.get(path, (None, None))
         file_node = FileNode(
             name=path.split('/')[-1],
@@ -271,7 +415,6 @@ def build_file_tree(entries: list, numstat: dict) -> TreeNode:
             rename_from=old_path,
         )
         _insert_path(root, path.split('/'), file_node)
-
     return root
 
 
@@ -284,43 +427,46 @@ def _insert_path(root: TreeNode, parts: list, file_node: FileNode):
             node.children[part] = TreeNode(name=part, full_path=child_path)
         child = node.children[part]
         if isinstance(child, FileNode):
-            # path collision (shouldn't happen in practice)
             return
         node = child
     node.children[parts[-1]] = file_node
 
 
+def load_diff_tree(root: str, base: Optional[str], ref: str) -> tuple[Optional[TreeNode], Optional[str]]:
+    """Return (tree, error). base=None means 'diff against the empty tree'
+    (root waypoint — every file appears as [N])."""
+    if base is None:
+        r = _run(['git', '-C', root, 'ls-tree', '-r', '--name-only', ref])
+        if r.returncode != 0:
+            return None, 'ls-tree failed'
+        entries = [('A', p) for p in r.stdout.splitlines() if p]
+        return build_file_tree(entries, {}), None
+
+    if base == _resolve(root, ref):
+        return TreeNode(name='', full_path=''), None
+
+    r = _run(['git', '-C', root, 'diff', '--name-status', base, ref])
+    if r.returncode != 0:
+        return None, f'diff failed: {r.stderr.strip()[:60]}'
+    entries = parse_name_status(r.stdout)
+    numstat = {}
+    if entries:
+        r2 = _run(['git', '-C', root, 'diff', '--numstat',
+                   '--diff-filter=M', base, ref])
+        numstat = parse_numstat(r2.stdout)
+    return build_file_tree(entries, numstat), None
+
+
 def load_branch_data(branch: BranchNode, root: str, pipe_w: int):
-    """Run in a background thread. Signals main loop via pipe_w when done."""
+    """Background thread: load branch's delta vs parent waypoint."""
     branch.loading = True
     try:
-        # Find merge-base with master (try local then remote)
-        mb = None
-        for master_ref in ('master', 'origin/master', 'main', 'origin/main'):
-            r = _run(['git', '-C', root, 'merge-base', branch.ref, master_ref])
-            if r.returncode == 0:
-                mb = r.stdout.strip()
-                break
-        if mb is None:
-            branch.error = 'No common ancestor with master/main'
+        tree, err = load_diff_tree(root, branch.parent_base, branch.ref)
+        if err:
+            branch.error = err
             return
-
-        branch.merge_base = mb
-
-        # Changed files
-        r = _run(['git', '-C', root, 'diff', '--name-status', mb, branch.ref])
-        entries = parse_name_status(r.stdout)
-
-        # Line counts for modified files
-        numstat = {}
-        if entries:
-            r2 = _run(['git', '-C', root, 'diff', '--numstat',
-                       '--diff-filter=M', mb, branch.ref])
-            numstat = parse_numstat(r2.stdout)
-
-        branch.file_tree = build_file_tree(entries, numstat)
+        branch.file_tree = tree
         branch.loaded = True
-
     except Exception as e:
         branch.error = str(e)
     finally:
@@ -340,6 +486,35 @@ def fetch_diff(root: str, base: str, ref: str, path: str) -> list:
 # Display list
 # ---------------------------------------------------------------------------
 
+def _node_glyph_and_attr(b: BranchNode) -> tuple[str, int]:
+    if b.is_current:
+        return '◉', curses.color_pair(CP_BRANCH_CURRENT) | curses.A_BOLD
+    if b.is_sideways:
+        return '◆', curses.color_pair(CP_SIDEWAYS) | curses.A_BOLD
+    if b.is_local:
+        return '●', curses.color_pair(CP_BRANCH_LOCAL) | curses.A_BOLD
+    return '○', curses.color_pair(CP_BRANCH_REMOTE)
+
+
+def _spine_for_branch(b: BranchNode) -> list:
+    dim = curses.color_pair(CP_DIM) | curses.A_DIM
+    side = curses.color_pair(CP_SIDEWAYS)
+    glyph, gattr = _node_glyph_and_attr(b)
+    if b.is_sideways:
+        # Mainline │ continues past; sideways branches off to the right.
+        return [('│', dim), (' ', dim), ('├', side), ('─', side),
+                (glyph, gattr), (' ', 0)]
+    return [(glyph, gattr), (' ', 0)]
+
+
+def _spine_for_subrow(b: BranchNode) -> list:
+    dim = curses.color_pair(CP_DIM) | curses.A_DIM
+    side = curses.color_pair(CP_SIDEWAYS) | curses.A_DIM
+    if b.is_sideways:
+        return [('│', dim), (' ', dim), ('│', side), (' ', dim), (' ', 0), (' ', 0)]
+    return [('│', dim), (' ', 0)]
+
+
 def flatten_all(branches: list) -> list:
     rows = []
     for b in branches:
@@ -348,30 +523,32 @@ def flatten_all(branches: list) -> list:
 
 
 def _flatten_branch(branch: BranchNode) -> list:
-    marker = 'v' if branch.expanded else '>'
-    prefix = '*' if branch.is_current else ' '
+    spine = _spine_for_branch(branch)
+    sub_spine = _spine_for_subrow(branch)
     rows = [DisplayRow(
         kind='branch',
         depth=0,
-        label=f'{prefix} {marker} {branch.display_name}',
+        label=branch.display_name,
         annotation='',
         ref=branch,
         branch=branch,
+        spine_cells=spine,
     )]
     if not branch.expanded:
         return rows
     if branch.loading:
-        rows.append(DisplayRow('loading', 1, '  (loading…)', '', None, branch))
+        rows.append(DisplayRow('loading', 1, '(loading…)', '', None, branch, spine_cells=sub_spine))
     elif branch.error:
-        rows.append(DisplayRow('error', 1, f'  Error: {branch.error}', '', None, branch))
+        rows.append(DisplayRow('error', 1, f'Error: {branch.error}', '', None, branch, spine_cells=sub_spine))
     elif branch.file_tree is None or not branch.file_tree.children:
-        rows.append(DisplayRow('empty', 1, '  (no changes vs master)', '', None, branch))
+        parent_label = branch.parent.display_name if branch.parent else 'root'
+        rows.append(DisplayRow('empty', 1, f'(no changes vs {parent_label})', '', None, branch, spine_cells=sub_spine))
     else:
-        rows.extend(_flatten_tree(branch.file_tree, depth=1, branch=branch))
+        rows.extend(_flatten_tree(branch.file_tree, depth=1, branch=branch, sub_spine=sub_spine))
     return rows
 
 
-def _flatten_tree(tree: TreeNode, depth: int, branch: BranchNode) -> list:
+def _flatten_tree(tree: TreeNode, depth: int, branch: BranchNode, sub_spine: list) -> list:
     rows = []
     dirs  = {k: v for k, v in tree.children.items() if isinstance(v, TreeNode)}
     files = {k: v for k, v in tree.children.items() if isinstance(v, FileNode)}
@@ -379,13 +556,13 @@ def _flatten_tree(tree: TreeNode, depth: int, branch: BranchNode) -> list:
     for name in sorted(dirs):
         child = dirs[name]
         marker = 'v' if child.expanded else '>'
-        rows.append(DisplayRow('dir', depth, f'{marker} {name}/', '', child, branch))
+        rows.append(DisplayRow('dir', depth, f'{marker} {name}/', '', child, branch, spine_cells=sub_spine))
         if child.expanded:
-            rows.extend(_flatten_tree(child, depth + 1, branch))
+            rows.extend(_flatten_tree(child, depth + 1, branch, sub_spine))
 
     for name in sorted(files):
         f = files[name]
-        rows.append(DisplayRow('file', depth, name, f.annotation, f, branch))
+        rows.append(DisplayRow('file', depth, name, f.annotation, f, branch, spine_cells=sub_spine))
 
     return rows
 
@@ -412,15 +589,63 @@ def _compute_scroll(cursor: int, offset: int, visible: int, total: int) -> int:
     return offset
 
 
-def _apply_strikethrough(state: AppState, h: int, w: int):
-    """After stdscr.refresh(), write raw ANSI strikethrough over deleted file rows.
-    curses.putp() fights curses' own buffer; writing to sys.stdout.buffer after
-    refresh() is in sync with the terminal and works reliably."""
+_STRATA_EIGHTHS = ' ▏▎▍▌▋▊▉▇'
+
+
+def _strata_bar(commits: int, max_commits: int, width: int) -> str:
+    if width <= 0 or max_commits <= 0 or commits <= 0:
+        return ' ' * max(width, 0)
+    total_eighths = max(1, round((commits / max_commits) * width * 8))
+    total_eighths = min(total_eighths, width * 8)
+    full = total_eighths // 8
+    rem  = total_eighths % 8
+    s = '▇' * full
+    if rem:
+        s += _STRATA_EIGHTHS[rem]
+    return s.ljust(width)
+
+
+def render_main(stdscr, state: AppState):
+    h, w = stdscr.getmaxyx()
+    visible = h - 2  # status + compare banner
+
+    state.scroll_offset = _compute_scroll(
+        state.cursor, state.scroll_offset, visible, len(state.rows)
+    )
+
+    # Header line: title or compare banner
+    try:
+        stdscr.move(0, 0)
+        stdscr.clrtoeol()
+    except curses.error:
+        pass
+    _render_header(stdscr, state, w)
+
+    for sy in range(visible):
+        idx = state.scroll_offset + sy
+        y = sy + 1  # leave row 0 for header
+        try:
+            stdscr.move(y, 0)
+            stdscr.clrtoeol()
+        except curses.error:
+            pass
+        if idx >= len(state.rows):
+            continue
+        row = state.rows[idx]
+        _render_row(stdscr, y, row, idx == state.cursor, w, state)
+
+    _render_status_bar(stdscr, state, h, w)
+    stdscr.refresh()
+    # Strikethrough writes happen after refresh but rows are offset by 1 (header)
+    _apply_strikethrough_offset(state, h, w, y_offset=1)
+
+
+def _apply_strikethrough_offset(state: AppState, h: int, w: int, y_offset: int):
     if not _STRIKE_ON:
         return
-    smxx = _STRIKE_ON        # e.g. b'\x1b[9m'
+    smxx = _STRIKE_ON
     rmxx = _STRIKE_OFF or b'\x1b[29m'
-    visible = h - 1
+    visible = h - 2
     out = bytearray()
     for sy in range(visible):
         idx = state.scroll_offset + sy
@@ -432,13 +657,13 @@ def _apply_strikethrough(state: AppState, h: int, w: int):
         f = row.ref
         if not isinstance(f, FileNode) or f.status != 'D':
             continue
+        x0 = len(row.spine_cells)
         indent = '  ' * min(row.depth, 12)
         ann = row.annotation
-        avail = w - len(indent) - len(ann) - 1
+        avail = w - x0 - len(indent) - len(ann) - 1
         name = _truncate(row.label, max(avail, 1))
-        col = len(indent)
-        # ANSI cursor position: \033[row;colH  (1-indexed)
-        out += f'\033[{sy + 1};{col + 1}H'.encode()
+        col = x0 + len(indent)
+        out += f'\033[{sy + 1 + y_offset};{col + 1}H'.encode()
         out += smxx
         out += name.encode(errors='replace')
         out += rmxx
@@ -447,33 +672,38 @@ def _apply_strikethrough(state: AppState, h: int, w: int):
         sys.stdout.buffer.flush()
 
 
-def render_main(stdscr, state: AppState):
-    h, w = stdscr.getmaxyx()
-    visible = h - 1
+def _render_header(stdscr, state: AppState, w: int):
+    if state.compare_mark:
+        text = f' Cmp: {state.compare_mark.display_name} ↔ ?   (press c on second branch, ESC to cancel)'
+        attr = curses.color_pair(CP_COMPARE_MARK)
+    elif state.message:
+        text = f' {state.message}'
+        attr = curses.color_pair(CP_STATUS_BAR)
+    else:
+        text = ' git-branch-browser   waypoint pipeline view'
+        attr = curses.color_pair(CP_STATUS_BAR) | curses.A_DIM
+    text = text[:w - 1].ljust(w - 1)
+    try:
+        stdscr.addstr(0, 0, text, attr)
+    except curses.error:
+        pass
 
-    state.scroll_offset = _compute_scroll(
-        state.cursor, state.scroll_offset, visible, len(state.rows)
-    )
 
-    for sy in range(visible):
-        idx = state.scroll_offset + sy
+def _draw_spine(win, y: int, cells: list, base_attr: int, max_w: int) -> int:
+    """Draw row.spine_cells at x=0. Returns x-column where content starts."""
+    x = 0
+    for ch, attr in cells:
+        if x >= max_w:
+            break
         try:
-            stdscr.move(sy, 0)
-            stdscr.clrtoeol()
+            win.addstr(y, x, ch, attr | base_attr)
         except curses.error:
             pass
-        if idx >= len(state.rows):
-            continue
-        row = state.rows[idx]
-        _render_row(stdscr, sy, row, idx == state.cursor, w)
-
-    _render_status_bar(stdscr, state, h, w)
-    stdscr.refresh()
-    _apply_strikethrough(state, h, w)
+        x += 1
+    return x
 
 
-def _render_row(win, y: int, row: DisplayRow, is_cursor: bool, max_w: int):
-    indent = '  ' * min(row.depth, 12)
+def _render_row(win, y: int, row: DisplayRow, is_cursor: bool, max_w: int, state: AppState):
     base = curses.A_REVERSE if is_cursor else curses.A_NORMAL
 
     def safe_addstr(win, y, x, s, attr):
@@ -486,45 +716,113 @@ def _render_row(win, y: int, row: DisplayRow, is_cursor: bool, max_w: int):
             pass
 
     if row.kind == 'branch':
-        b = row.ref
-        if b.is_current:
-            attr = curses.color_pair(CP_BRANCH_CURRENT) | curses.A_BOLD | base
-        elif b.is_local:
-            attr = curses.color_pair(CP_BRANCH_LOCAL) | curses.A_BOLD | base
-        else:
-            attr = curses.color_pair(CP_BRANCH_REMOTE) | base
-        label = _truncate(row.label, max_w - len(indent))
-        safe_addstr(win, y, 0, indent + label, attr)
+        _render_branch_row(win, y, row, base, max_w, state, safe_addstr)
+        return
 
-    elif row.kind == 'dir':
-        label = _truncate(row.label, max_w - len(indent))
-        safe_addstr(win, y, 0, indent + label,
+    x0 = _draw_spine(win, y, row.spine_cells, base, max_w)
+    indent = '  ' * min(row.depth, 12)
+
+    if row.kind == 'dir':
+        label = _truncate(row.label, max_w - x0 - len(indent))
+        safe_addstr(win, y, x0, indent + label,
                     curses.color_pair(CP_DIR) | curses.A_BOLD | base)
 
     elif row.kind == 'file':
         f = row.ref
         ann = row.annotation
-        avail = max_w - len(indent) - len(ann) - 1
+        avail = max_w - x0 - len(indent) - len(ann) - 1
         name = _truncate(row.label, max(avail, 1))
         file_color = annotation_color(f.status) if f.status == 'D' else curses.color_pair(CP_NORMAL)
-        safe_addstr(win, y, 0, indent + name + ' ', file_color | base)
-        x = len(indent) + len(name) + 1
+        safe_addstr(win, y, x0, indent + name + ' ', file_color | base)
+        x = x0 + len(indent) + len(name) + 1
         if ann and x < max_w:
             safe_addstr(win, y, x, ann, annotation_color(f.status) | base)
 
     elif row.kind in ('loading', 'empty'):
-        safe_addstr(win, y, 0, indent + row.label,
+        safe_addstr(win, y, x0, indent + row.label,
                     curses.color_pair(CP_DIM) | curses.A_DIM | base)
 
     elif row.kind == 'error':
-        safe_addstr(win, y, 0, indent + row.label,
+        safe_addstr(win, y, x0, indent + row.label,
                     curses.color_pair(CP_ERROR) | base)
+
+
+def _render_branch_row(win, y: int, row: DisplayRow, base_attr: int,
+                       max_w: int, state: AppState, safe_addstr):
+    b: BranchNode = row.ref
+
+    x0 = _draw_spine(win, y, row.spine_cells, base_attr, max_w)
+    marker = 'v ' if b.expanded else '> '
+
+    if b.is_current:
+        name_attr = curses.color_pair(CP_BRANCH_CURRENT) | curses.A_BOLD
+    elif b.is_sideways:
+        name_attr = curses.color_pair(CP_SIDEWAYS) | curses.A_BOLD
+    elif b.is_local:
+        name_attr = curses.color_pair(CP_BRANCH_LOCAL) | curses.A_BOLD
+    else:
+        name_attr = curses.color_pair(CP_BRANCH_REMOTE)
+
+    if state.compare_mark is b:
+        name_attr |= curses.A_UNDERLINE
+
+    short_sha = b.tip_sha[:7] if b.tip_sha else '       '
+    ahead = f'+{b.commits_ahead}' if b.commits_ahead else '+0'
+    if b.parent is None:
+        arrow = '(root)'
+    elif b.is_sideways:
+        arrow = f'↗{b.parent.display_name}'
+    else:
+        arrow = f'←{b.parent.display_name}'
+
+    strata_w = max(6, min(16, max_w // 6))
+    date_str = b.tip_date[5:10] if len(b.tip_date) >= 10 else ''
+
+    right_bits = [short_sha, ahead.rjust(5), _truncate(arrow, 28).ljust(28),
+                  _strata_bar(b.commits_ahead, state.max_commits_ahead, strata_w)]
+    if date_str:
+        right_bits.append(date_str)
+    right_text = '  '.join(right_bits)
+
+    name_max = max_w - x0 - len(marker) - len(right_text) - 2
+    if name_max < 8:
+        name_max = max(max_w - x0 - len(marker) - 1, 8)
+        right_text = ''
+    name = _truncate(b.display_name, name_max)
+
+    x = x0
+    safe_addstr(win, y, x, marker, curses.color_pair(CP_DIM) | curses.A_DIM | base_attr)
+    x += len(marker)
+    safe_addstr(win, y, x, name, name_attr | base_attr)
+    x += len(name)
+
+    if right_text:
+        pad = max_w - x - len(right_text) - 1
+        if pad > 0:
+            safe_addstr(win, y, x, ' ' * pad, base_attr)
+            x += pad
+        dim_attr = curses.color_pair(CP_DIM) | curses.A_DIM | base_attr
+        safe_addstr(win, y, x, short_sha + '  ', dim_attr)
+        x += len(short_sha) + 2
+        ahead_attr = curses.color_pair(CP_FILE_NEW) | base_attr
+        safe_addstr(win, y, x, ahead.rjust(5) + '  ', ahead_attr)
+        x += 5 + 2
+        arrow_attr = (curses.color_pair(CP_SIDEWAYS) if b.is_sideways
+                      else curses.color_pair(CP_DIM)) | base_attr
+        arrow_txt = _truncate(arrow, 28).ljust(28)
+        safe_addstr(win, y, x, arrow_txt + '  ', arrow_attr)
+        x += len(arrow_txt) + 2
+        strata_txt = _strata_bar(b.commits_ahead, state.max_commits_ahead, strata_w)
+        safe_addstr(win, y, x, strata_txt, curses.color_pair(CP_STRATA) | base_attr)
+        x += len(strata_txt)
+        if date_str:
+            safe_addstr(win, y, x, '  ' + date_str, dim_attr)
 
 
 def _render_status_bar(stdscr, state: AppState, h: int, w: int):
     total = len(state.rows)
     pos = f'{state.cursor + 1}/{total}' if total else '0/0'
-    hint = '  ENTER=expand/diff  -/←=collapse  +/→=expand  q=quit'
+    hint = '  ENTER=expand/diff  m=vs-master  c=compare  -/←=collapse  q=quit'
     bar = f' {pos}{hint}'
     bar = bar[:w - 1].ljust(w - 1)
     try:
@@ -553,7 +851,7 @@ def _diff_line_color(line: str) -> int:
 
 def show_diff_pager(stdscr, diff_lines: list, title: str):
     scroll = 0
-    stdscr.nodelay(False)  # blocking input in pager
+    stdscr.nodelay(False)
 
     while True:
         h, w = stdscr.getmaxyx()
@@ -583,7 +881,6 @@ def show_diff_pager(stdscr, diff_lines: list, title: str):
             except curses.error:
                 pass
 
-        # status bar
         total = len(diff_lines)
         end = min(scroll + visible, total)
         pct = int(100 * end / total) if total else 100
@@ -618,12 +915,116 @@ def show_diff_pager(stdscr, diff_lines: list, title: str):
 
 
 # ---------------------------------------------------------------------------
+# Compare view (two branches picked via `c`)
+# ---------------------------------------------------------------------------
+
+def open_compare_view(stdscr, state: AppState, a: BranchNode, b: BranchNode):
+    """Modal: load file-tree delta a..b, let user ENTER on files to diff."""
+    root = state.repo_root
+    base_sha = _merge_base(root, a.ref, b.ref)
+    if not base_sha:
+        state.message = f'No common ancestor between {a.display_name} and {b.display_name}'
+        return
+    tree, err = load_diff_tree(root, base_sha, b.ref)
+    if err:
+        state.message = f'Compare failed: {err}'
+        return
+
+    # Wrap in a synthetic branch so we can reuse the same flatten/render code.
+    synthetic = BranchNode(
+        display_name=f'Compare: {a.display_name} → {b.display_name}',
+        ref=b.ref,
+        is_local=b.is_local,
+        tip_sha=b.tip_sha,
+        tip_date=b.tip_date,
+        parent=a,
+        parent_base=base_sha,
+        commits_ahead=_rev_count(root, f'{base_sha}..{b.tip_sha}'),
+        file_tree=tree,
+        loaded=True,
+        expanded=True,
+    )
+
+    # Dedicated navigation loop over the compare tree only.
+    rows = _flatten_branch(synthetic)
+    cursor = 0
+    scroll = 0
+    stdscr.nodelay(False)
+    while True:
+        h, w = stdscr.getmaxyx()
+        visible = h - 2
+        scroll = _compute_scroll(cursor, scroll, visible, len(rows))
+
+        try:
+            stdscr.move(0, 0)
+            stdscr.clrtoeol()
+            n_files = sum(1 for r in rows if r.kind == 'file')
+            title = f' Compare  {a.display_name} ↔ {b.display_name}   {n_files} files   (+{synthetic.commits_ahead} commits)'
+            stdscr.addstr(0, 0, title[:w - 1].ljust(w - 1),
+                          curses.color_pair(CP_COMPARE_MARK))
+        except curses.error:
+            pass
+
+        for sy in range(visible):
+            idx = scroll + sy
+            y = sy + 1
+            try:
+                stdscr.move(y, 0)
+                stdscr.clrtoeol()
+            except curses.error:
+                pass
+            if idx >= len(rows):
+                continue
+            row = rows[idx]
+            _render_row(stdscr, y, row, idx == cursor, w, state)
+
+        try:
+            hint = f' {cursor + 1}/{len(rows)}   ENTER=diff  q/ESC=back'
+            stdscr.addstr(h - 1, 0, hint[:w - 1].ljust(w - 1),
+                          curses.color_pair(CP_STATUS_BAR))
+        except curses.error:
+            pass
+
+        stdscr.refresh()
+        key = stdscr.getch()
+        if key in (ord('q'), 27):
+            break
+        elif key in (curses.KEY_DOWN, ord('j')):
+            cursor = min(cursor + 1, len(rows) - 1)
+        elif key in (curses.KEY_UP, ord('k')):
+            cursor = max(cursor - 1, 0)
+        elif key == curses.KEY_NPAGE:
+            cursor = min(cursor + visible, len(rows) - 1)
+        elif key == curses.KEY_PPAGE:
+            cursor = max(cursor - visible, 0)
+        elif key == curses.KEY_HOME:
+            cursor = 0
+        elif key == curses.KEY_END:
+            cursor = max(len(rows) - 1, 0)
+        elif key == curses.KEY_RESIZE:
+            curses.resizeterm(*stdscr.getmaxyx())
+        elif key in (10, 13):
+            row = rows[cursor]
+            if row.kind == 'branch':
+                pass  # synthetic header — no-op
+            elif row.kind == 'dir':
+                row.ref.expanded = not row.ref.expanded
+                rows = _flatten_branch(synthetic)
+            elif row.kind == 'file':
+                f = row.ref
+                lines = fetch_diff(root, base_sha, b.ref, f.path)
+                show_diff_pager(stdscr, lines, title=f'{a.display_name}..{b.display_name}  {f.path}')
+
+    stdscr.nodelay(True)
+
+
+# ---------------------------------------------------------------------------
 # Input handling
 # ---------------------------------------------------------------------------
 
 def _page_size(state: AppState, stdscr) -> int:
     h, _ = stdscr.getmaxyx()
-    return max(h - 2, 1)
+    return max(h - 3, 1)
 
 
 def handle_key_main(key: int, state: AppState, stdscr) -> Optional[str]:
@@ -632,6 +1033,10 @@ def handle_key_main(key: int, state: AppState, stdscr) -> Optional[str]:
 
     if key == ord('q'):
         return 'quit'
+
+    elif key == 27:  # ESC clears compare mark or message
+        state.compare_mark = None
+        state.message = ''
 
     elif key in (curses.KEY_DOWN, ord('j')):
         state.cursor = min(state.cursor + 1, len(rows) - 1)
@@ -669,7 +1074,25 @@ def handle_key_main(key: int, state: AppState, stdscr) -> Optional[str]:
         elif row.kind == 'dir':
             row.ref.expanded = not row.ref.expanded
         elif row.kind == 'file':
-            return 'show_diff'
+            return 'show_diff_parent'
+
+    elif key == ord('m'):
+        if row and row.kind == 'file':
+            return 'show_diff_master'
+        else:
+            state.message = 'Move cursor to a file first (m = diff vs master)'
+
+    elif key == ord('c'):
+        if row is None or row.kind != 'branch':
+            state.message = 'Compare: move cursor to a branch row'
+        elif state.compare_mark is None:
+            state.compare_mark = row.ref
+            state.message = ''
+        elif state.compare_mark is row.ref:
+            state.compare_mark = None
+            state.message = 'Compare mark cleared'
+        else:
+            return 'open_compare'
 
     elif key in (ord('+'), curses.KEY_RIGHT):
         if row is None:
@@ -695,7 +1118,6 @@ def handle_key_main(key: int, state: AppState, stdscr) -> Optional[str]:
         elif row.kind == 'dir':
             row.ref.expanded = False
         elif row.kind == 'file':
-            # collapse nearest dir ancestor
             for i in range(state.cursor - 1, -1, -1):
                 r = rows[i]
                 if r.kind == 'dir' and r.depth == row.depth - 1:
@@ -721,9 +1143,14 @@ def main(stdscr):
 
     repo_root = get_repo_root()
     current = get_current_branch(repo_root)
+    master_ref = resolve_master_ref(repo_root)
     branches = get_all_branches(repo_root)
     for b in branches:
         b.is_current = (b.ref == current or b.display_name == current)
+
+    # Startup: topology detection (O(N²) merge-base — ~100 calls at N=10)
+    max_ahead = detect_topology(repo_root, branches)
+    branches = sort_waypoints(branches)
 
     pipe_r, pipe_w = os.pipe()
     state = AppState(
@@ -734,6 +1161,8 @@ def main(stdscr):
         scroll_offset=0,
         notify_pipe_r=pipe_r,
         notify_pipe_w=pipe_w,
+        master_ref=master_ref,
+        max_commits_ahead=max_ahead,
     )
     state.rows = flatten_all(branches)
 
@@ -764,14 +1193,42 @@ def main(stdscr):
 
         if action == 'quit':
             break
-        elif action == 'show_diff':
+
+        elif action in ('show_diff_parent', 'show_diff_master'):
             row = state.rows[state.cursor]
             f = row.ref
             b = row.branch
-            if b and b.merge_base:
-                diff_lines = fetch_diff(repo_root, b.merge_base, b.ref, f.path)
-                show_diff_pager(stdscr, diff_lines, title=f.path)
+            if not b:
+                pass
+            elif action == 'show_diff_parent':
+                base = b.parent_base
+                if base is None:
+                    # Root waypoint — diff against empty tree
+                    base = _run(['git', '-C', repo_root, 'hash-object', '-t', 'tree', '/dev/null']).stdout.strip() \
+                        or '4b825dc642cb6eb9a060e54bf8d69288fbee4904'  # git empty tree SHA
+                diff_lines = fetch_diff(repo_root, base, b.ref, f.path)
+                title = f'{f.path}   (vs {b.parent.display_name if b.parent else "∅"})'
+                show_diff_pager(stdscr, diff_lines, title=title)
                 state.needs_redraw = True
+            else:  # show_diff_master
+                if not state.master_ref:
+                    state.message = 'No master/main branch found'
+                else:
+                    mb = _merge_base(repo_root, state.master_ref, b.ref)
+                    if not mb:
+                        state.message = f'No common ancestor with {state.master_ref}'
+                    else:
+                        diff_lines = fetch_diff(repo_root, mb, b.ref, f.path)
+                        title = f'{f.path}   (vs {state.master_ref})'
+                        show_diff_pager(stdscr, diff_lines, title=title)
+                        state.needs_redraw = True
+
+        elif action == 'open_compare':
+            other = state.rows[state.cursor].ref
+            a = state.compare_mark
+            state.compare_mark = None
+            open_compare_view(stdscr, state, a, other)
+            state.needs_redraw = True
 
         state.rows = flatten_all(branches)
         state.needs_redraw = True

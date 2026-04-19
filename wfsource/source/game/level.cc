@@ -146,11 +146,14 @@ Level::initLevelOad()
 		_ObjectOnDisk * objdata = ( _ObjectOnDisk * )( (( char * )_levelData ) + objArray[index] );
 		if ( objdata->type == Actor::LevelObj_KIND )
 		{
-			AssertMsg( !_levelOad, "Multiple LevelObj objects in level" );
-			_levelOad = ( _LevelObj * )( objdata + 1 );
+			if ( _levelOad )
+				DBSTREAM1( cwarn << "Warning: Multiple LevelObj objects in level, using first" << std::endl; )
+			else
+				_levelOad = ( _LevelObj * )( objdata + 1 );
 		}
 	}
-	AssertMsg( _levelOad, "No LevelObject object in level" );
+	if ( !_levelOad )
+		DBSTREAM1( cwarn << "Warning: No LevelObject object in level (using defaults)" << std::endl; )
 }
 
 //==============================================================================
@@ -486,10 +489,11 @@ Level::Level
 	DBSTREAM1( cprogress << "Reading objects" << std::endl; )
 	int32* objArray = ( int32* )( (char* )_levelData + ( _levelData->objectsOffset ));
 
-	DBSTREAM3( cnull << "Number of temp objects = " << _levelOad->NumberOfTemporaryObjects << std::endl; )
-   _actors.SetMax(_levelData->objectCount + _levelOad->NumberOfTemporaryObjects);
+	int32 numTempObjects = _levelOad ? _levelOad->NumberOfTemporaryObjects : 0;
+	DBSTREAM3( cnull << "Number of temp objects = " << numTempObjects << std::endl; )
+   _actors.SetMax(_levelData->objectCount + numTempObjects);
 	// kts clear array
-	for( int actIndex=0; actIndex<_levelData->objectCount + _levelOad->NumberOfTemporaryObjects; ++actIndex )
+	for( int actIndex=0; actIndex<_levelData->objectCount + numTempObjects; ++actIndex )
 		_actors[actIndex] = NULL;
 
 	_templateObjects = new (HALLmalloc)( SObjectStartupData * [_levelData->objectCount] );            // array of template object pointers, in levelcon order
@@ -549,9 +553,8 @@ Level::Level
 		DBSTREAM2( cdebug << "Level::Level: Done" << std::endl; )
 	}
 
-	// make sure that we have a camera
-	// fail if no Camera object in level data
-	AssertMsg( ValidPtr( _camera ), "No camera in level" );
+	if ( !_camera )
+		DBSTREAM1( cwarn << "Warning: No camera in level" << std::endl; )
 
 	_theLevelRooms->InitRooms(_levelData->roomCount,_levelData,checkList, _actors, _roomCallbacks,GetMemory(),GetLevelOAD());
 	_theActiveRooms = new (HALLmalloc) ActiveRooms(HALLmalloc,*_theAssetManager,*_theLevelRooms);
@@ -560,7 +563,8 @@ Level::Level
 //	DBSTREAM1( cstats << "midi header = " << _levelOad->MidiMusicVabHeader << std::endl; )
 
 	DBSTREAM1( cprogress << "Done loading level data" << std::endl; )
-	assert( ValidPtr( mainCharacter() ) );
+	if ( !mainCharacter() )
+		DBSTREAM1( cwarn << "Warning: No player (main character) in level" << std::endl; )
 
 	DBSTREAM1( cprogress << "Doing reset" << std::endl; )
 	reset();
@@ -583,9 +587,9 @@ Level::Level
 
 	DBSTREAM1( cprogress << "common block stuff" << std::endl; )
 	DBSTREAM1( cflow << "Level::level: common block stuff" << std::endl; )
+	if ( _levelOad )
 	{
 		_LevelObj* pActorData = _levelOad;
-		assert( ValidPtr( pActorData ) );
 
 		int commonDataOffset = pActorData->commonPageOffset;
 		assert( (commonDataOffset & 3) == 0 );
@@ -844,9 +848,8 @@ Level::update(Scalar deltaTime)
 	_theActiveRooms->WaitRoomLoad( false );
 
 	DBSTREAM2( cflow << "Level::update: updating current room selection" << std::endl; )
-	assert(ValidPtr(_camera));
-	assert(ValidPtr(_camera->GetWatchObject()));
-	_theActiveRooms->UpdateRoom(_camera->GetWatchObject());
+	if ( _camera && _camera->GetWatchObject() )
+		_theActiveRooms->UpdateRoom(_camera->GetWatchObject());
 
 	DBSTREAM1( ccollision << std::endl << "*** FRAME BOUNDARY ***	Wall clock = " << levelClock() << std::dec << std::endl << std::endl; )
 

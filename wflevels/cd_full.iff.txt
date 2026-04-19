@@ -1,0 +1,41 @@
+// 7-level cd.iff: L0 (cube), L1 (basic), L2 (cyber), L3 (primitives),
+//                 L4 (snowgoons), L5 (main_game), L6 (whitestar)
+// Run from wflevels/ directory:
+//   ../wftools/iffcomp-rs/target/release/iffcomp -binary -o=cd.iff cd_full.iff.txt
+{ 'GAME'
+    { 'TOC'
+        'SHEL' .offsetof( ::'GAME'::'SHEL' ) .sizeof( ::'GAME'::'SHEL' )
+        'L0'   .offsetof( ::'GAME'::'L0' )   .sizeof( ::'GAME'::'L0' )
+        'L1'   .offsetof( ::'GAME'::'L1' )   .sizeof( ::'GAME'::'L1' )
+        'L2'   .offsetof( ::'GAME'::'L2' )   .sizeof( ::'GAME'::'L2' )
+        'L3'   .offsetof( ::'GAME'::'L3' )   .sizeof( ::'GAME'::'L3' )
+        'L4'   .offsetof( ::'GAME'::'L4' )   .sizeof( ::'GAME'::'L4' )
+        'L5'   .offsetof( ::'GAME'::'L5' )   .sizeof( ::'GAME'::'L5' )
+        'L6'   .offsetof( ::'GAME'::'L6' )   .sizeof( ::'GAME'::'L6' )
+    }
+    { 'ALGN' .align( 2048 ) }
+
+    { 'SHEL' [ "shell.aib" ] }
+    { 'ALGN' .align( 2048 ) }
+
+    [ "/tmp/L0_cube.iff" ]
+    { 'ALGN' .align( 2048 ) }
+
+    [ "/tmp/L1_basic.iff" ]
+    { 'ALGN' .align( 2048 ) }
+
+    [ "/tmp/L2_cyber.iff" ]
+    { 'ALGN' .align( 2048 ) }
+
+    [ "/tmp/L3_primitives.iff" ]
+    { 'ALGN' .align( 2048 ) }
+
+    [ "snowgoons.iff" ]
+    { 'ALGN' .align( 2048 ) }
+
+    [ "main_game/main_game.iff" ]
+    { 'ALGN' .align( 2048 ) }
+
+    [ "/tmp/L6_whitestar.iff" ]
+    { 'ALGN' .align( 2048 ) }
+}

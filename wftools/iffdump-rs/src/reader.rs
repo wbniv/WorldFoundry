@@ -54,7 +54,7 @@ pub fn parse_chunk_list(text: &str) -> HashSet<u32> {
             if bytes.len() > 4 {
                 continue; // malformed, skip
             }
-            let mut arr = [b' '; 4];
+            let mut arr = [b'\0'; 4];
             arr[..bytes.len()].copy_from_slice(bytes);
             let id = u32::from_be_bytes(arr);
             set.insert(id);

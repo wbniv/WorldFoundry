@@ -306,7 +306,7 @@ WFGame::RunLevel(_DiskFile* levelFile)
 		_curLevel->update(deltaTime);
 		DBSTREAM2( cflow << "WFGame::update: render scene" << std::endl; )
 
-		if(_curLevel->camera()->ValidView())
+		if(_curLevel->camera() && _curLevel->camera()->ValidView())
 		{
 			_display->RenderBegin();
 			_curLevel->RenderScene();
@@ -314,7 +314,7 @@ WFGame::RunLevel(_DiskFile* levelFile)
 			_display->RenderEnd();
 		}
 #if DO_ASSERTIONS
-		else
+		else if(_curLevel->camera())
 			AssertMsg(_curLevel->LevelClock().Current() < SCALAR_CONSTANT(10),"No Valid View after 10 seconds");
 #endif
 
