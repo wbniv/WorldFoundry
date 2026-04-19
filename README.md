@@ -1,13 +1,15 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-04-17  
+**As of:** 2026-04-19  
 **Branch:** `2026-android`
 
 ---
 
 ## Summary
 
-Seven days of work (2026-04-12 – 2026-04-18). Newest first:
+Eight days of work (2026-04-12 – 2026-04-19). Newest first:
+
+**Blender round-trip reaches gameplay (2026-04-19)** — Four exporter fixes (unrotated BOX3, gated Mesh Name, preserved authored BOX3, enum-label import) take `snowgoons-blender.iff` through load, physics, scripts, audio, REST API, and into per-frame enemy-AI execution before a `statplat` assertion at ~5 s that still likely stems from levcomp-rs's Phase-2c dummy-channel stub (real path keyframes not yet serialized, pathCount=1 + chanCount=1 vs the original's 1 + 6) — see plan [blender-level-roundtrip](docs/plans/2026-04-16-blender-level-roundtrip.md).
 
 **Android port closure (2026-04-18)** — Branch hits its close criterion (polished sideloadable APK) with only launcher icons + one stale `build.gradle.kts` comment left and Play Store / keystore / R8 / splash explicitly out of scope — see [closure audit](docs/investigations/2026-04-18-android-port-closure.md).
 
