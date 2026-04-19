@@ -112,7 +112,7 @@ Column "Scope" — **tuilib** (copied to tuilib by this plan), **excluded** (not
 | 7  | `tui_about.py` | 632 | excluded | hardcodes parking-space branding + URL + depends on `data/llm_billing.py`; extraction needs a data-driven content config. Stays for now |
 | 8  | `output.py` | 98 | **tuilib** | ★ fully generic subprocess output viewer; only imports base + theme + widgets/ansi + scrollbar |
 | 9  | `runbook.py` | 839 | **tuilib** | ★ runbook path already parameterized via `project.root`; **state-dir hardcode `'parkingspace'` at line 28 needs a ctor arg**; pulls in `data/runbook_parser.py` (235 LOC, pure stdlib) which also moves |
-| 10 | `sparkline_dashboard.py` | 678 | later | generic sparkline dashboard — reusable, not in this plan |
+| 10 | `sparkline_dashboard.py` | 678 | excluded | tech demo only — never extracted |
 | 11 | `logs.py` | 2818 | later | ★ TUI log tailer + search + LLM summarization; genuinely reusable but CloudWatch-coupled via `data/log_query.py` — extraction needs an abstract log-source interface. Deferred #7 |
 | 12 | `audit.py` | 338 | excluded | audit log |
 | 13 | `bg_deploy.py` | 573 | excluded | blue/green deploy state |
