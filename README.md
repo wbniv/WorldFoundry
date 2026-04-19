@@ -174,4 +174,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 05:20** — [`docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md`](docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md): Plan: Blender round-trip — oracle dependencies
+**2026-04-19 05:21** — [`docs/plans/2026-04-16-git-branch-browser.md`](docs/plans/2026-04-16-git-branch-browser.md): Plan: git-branch-browser — v2 waypoint pipeline closed
