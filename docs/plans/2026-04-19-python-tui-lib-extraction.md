@@ -74,7 +74,7 @@ python-tui-lib/                           # git repo
 
 ## What moves, what stays
 
-**Moves to tuilib** (agent-confirmed reusable, ~34.2K LOC):
+**Moves to tuilib** (~34.2K LOC total):
 
 - All of `scripts/ui/` — 11,689 LOC, 25 files
 - All of `scripts/tui/widgets/` — ~1200 LOC, 12 files
@@ -113,7 +113,7 @@ Column "Scope" — **tuilib** (copied to tuilib by this plan), **excluded** (not
 | 8  | `output.py` | 98 | **tuilib** | ★ fully generic subprocess output viewer; only imports base + theme + widgets/ansi + scrollbar |
 | 9  | `runbook.py` | 839 | **tuilib** | ★ runbook path already parameterized via `project.root`; **state-dir hardcode `'parkingspace'` at line 28 needs a ctor arg**; pulls in `data/runbook_parser.py` (235 LOC, pure stdlib) which also moves |
 | 10 | `sparkline_dashboard.py` | 678 | excluded | tech demo only — never extracted |
-| 11 | `logs.py` | 2818 | later | ★ TUI log tailer + search + LLM summarization; genuinely reusable but CloudWatch-coupled via `data/log_query.py` — extraction needs an abstract log-source interface. Deferred #7 |
+| 11 | `logs.py` | 2818 | later | ★ TUI log tailer + search + LLM summarization; CloudWatch-coupled via `data/log_query.py`. Extracted by plan 3 (separate doc) behind an abstract `LogSource` protocol |
 | 12 | `audit.py` | 338 | excluded | audit log |
 | 13 | `bg_deploy.py` | 573 | excluded | blue/green deploy state |
 | 14 | `capacity_planner.py` | 2253 | excluded | capacity planning |
@@ -153,7 +153,7 @@ Rewrites parking-space to consume tuilib and deletes its in-tree copies. Written
 
 1. `git submodule add <url> vendor/python-tui-lib` in parking-space.
 2. Sys-path bootstrap in `scripts/tui/__main__.py`, `scripts/chat/__main__.py`, `scripts/view/__main__.py`.
-3. Mechanical import rewrite across ~40 files: `scripts.ui.` → `tuilib.ui.`, `scripts.tui.widgets.` → `tuilib.widgets.`, `scripts.tui.layout` → `tuilib.framework.layout`, `scripts.tui.timing_fps` → `tuilib.framework.timing_fps`, `scripts.tui.recorder` → `tuilib.framework.recorder`, `scripts.tui.data.cache` → `tuilib.framework.cache`, `scripts.tui.data.taskfile` → `tuilib.framework.taskfile`, `scripts.tui.scripting.` → `tuilib.scripting.`, `scripts.tui.games.` → `tuilib.games.`, `scripts.tui.panes.{base,flat_list_pane,document,todo,output,runbook}` → `tuilib.panes.X`.
+3. Mechanical import rewrite across ~40 files (full map in plan 2).
 4. Delete the now-redundant files from parking-space.
 5. Smoke test `python -m scripts.tui` and the full baseline tape.
 
@@ -167,7 +167,7 @@ Not yet written. Moves the 2818-LOC log-tailer + LLM-summarization pane into `tu
 - Parking-space's `app.py` instantiates `LogPane(source=CloudWatchLogSource(...))`.
 - Other consumers plug in journald, k8s pods, raw files, etc.
 
-Separated from this plan because the abstraction is design work, not a mechanical move — it warrants its own scoped plan. Committed follow-on, not a "maybe".
+Separated from this plan because the abstraction is design work, not a mechanical move.
 
 ### Plan 4 — extract generic worker-pool from `scripts/tui/data/fetcher.py`
 
@@ -177,7 +177,7 @@ Not yet written. Carves a lean `tuilib.framework.worker_pool` out of the 800-LOC
 - Parking-space refactors `DataFetcher` to subclass or compose the generic worker-pool and register its own jobs.
 - Other consumers get a generic "schedule recurring background work on a thread pool" primitive.
 
-Separated from this plan because, like plan 3, this is design work (what's the public API? how do consumers register jobs? one lock or per-job?), not a mechanical move. Committed follow-on.
+Separated from this plan because, like plan 3, it's design work, not a mechanical move.
 
 ## Hardcoded-path parameterization (in-scope, Phase B)
 
