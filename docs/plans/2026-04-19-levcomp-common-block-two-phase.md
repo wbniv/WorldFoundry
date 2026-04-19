@@ -83,7 +83,7 @@ delta is the net.
 
 ## Plan
 
-### Phase A: refactor `oad_loader::serialize_oad_data` / `lvl_writer::write` into two passes
+### Phase A: refactor `oad_loader::serialize_oad_data` / `lvl_writer::write` into two passes — ✅ DONE 2026-04-19 (`8e2f244`)
 
 Currently `serialize_oad_data` does everything for one object in a single
 linear pass over its OAD entries:
@@ -123,7 +123,7 @@ Split into:
   payloads.
 - Header / objects array / paths / rooms / etc. are unchanged.
 
-### Phase B: verify byte identity
+### Phase B: verify byte identity — 🟡 partial
 
 Diagnostic command:
 
@@ -136,7 +136,10 @@ levcomp wflevels/snowgoons/snowgoons.lev.bin \
 cmp /tmp/my.lvl /tmp/oracle_lvl_payload.bin && echo OK
 ```
 
-Passing `cmp` is the success criterion. When that goes green:
+Post-Phase-A: length matches (8628/8628) but 141 byte-diffs remain —
+all orthogonal to common-block emission. See "Remaining deviations
+after Phase A" at the bottom of this doc. When the last of those
+closes:
 
 - Delete the `cp /tmp/oracle_lvl_payload.bin wflevels/snowgoons/snowgoons.lvl`
   stopgap from the pipeline.
