@@ -24,10 +24,30 @@
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "snowgoons.lvl" ] }
 	{ 'ALGN' .align(2048) }
-	{ 'PERM' [ "perm.bin" ] }
+	{ 'PERM'
+		{ 'ASS' $1fffffel [ "palPerm.tga" ] }
+		{ 'ASS' $1ffffffl [ "Perm.tga" ] }
+		{ 'ASS' $5ffffffl [ "Perm.ruv" ] }
+		{ 'ASS' $7ffffffl [ "Perm.cyc" ] }
+		{ 'ASS' $3fff001l [ "tree02.iff" ] }
+		{ 'ASS' $3fff002l [ "tree03.iff" ] }
+		{ 'ASS' $3fff003l [ "player.iff" ] }
+	}
 	{ 'ALGN' .align(2048) }
-	{ 'RM0' [ "rm0.bin" ] }
+	{ 'RM0'
+		{ 'ASS' $1000ffel [ "pal0.tga" ] }
+		{ 'ASS' $1000fffl [ "Room0.tga" ] }
+		{ 'ASS' $5000fffl [ "Room0.ruv" ] }
+		{ 'ASS' $7000fffl [ "Room0.cyc" ] }
+	}
 	{ 'ALGN' .align(2048) }
-	{ 'RM1' [ "rm1.bin" ] }
+	{ 'RM1'
+		{ 'ASS' $1001ffel [ "pal1.tga" ] }
+		{ 'ASS' $1001fffl [ "Room1.tga" ] }
+		{ 'ASS' $5001fffl [ "Room1.ruv" ] }
+		{ 'ASS' $7001fffl [ "Room1.cyc" ] }
+		{ 'ASS' $3001001l [ "house.iff" ] }
+		{ 'ASS' $3001002l [ "quadpatch01.iff" ] }
+	}
 	{ 'ALGN' .align(2048) }
 }
