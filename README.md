@@ -201,4 +201,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 14:40** — [`docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md`](docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md): Plan: Blender round-trip — oracle dependencies
+**2026-04-19 14:55** — [`docs/plans/2026-04-19-host-scripts-in-forth.md`](docs/plans/2026-04-19-host-scripts-in-forth.md): Plan: host-side scripts in Forth
