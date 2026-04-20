@@ -105,6 +105,21 @@ Material::Construct()
 	// kts kludge until we can get translucency from material
 	if(_materialFlags & TEXTURE_MAPPED)
 	{
+		// Diagnostic (2026-04-19): log per-texture translucency pickup so we
+		// can see which materials flag translucent at load time. Suspects:
+		// roof textures (G_*shakes*) picking up bTranslucent from textile-rs
+		// setting `has_transparent=true` on any texture whose pixel data
+		// contains col_transparent (0x0000 by default) — even a single black
+		// pixel flips the flag. Remove once the roof transparency question
+		// is answered.
+		std::cerr << "material: texture=\"" << _texture.szTextureName
+		          << "\"  bTranslucent=" << int(_texture.bTranslucent)
+		          << "  bitdepth=" << int(_texture.bitdepth)
+		          << "  flags_in=0x" << std::hex << _materialFlags
+		          << std::dec
+		          << (_texture.bTranslucent ? "  ← flipping HALF_BACK_HALF_PRIM" : "")
+		          << std::endl;
+
 		if(_texture.bTranslucent)
 			_materialFlags |= TEXTURE_TRANSLUCENCY_HALF_BACK_HALF_PRIMITIVE;
 	}
