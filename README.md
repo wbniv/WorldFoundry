@@ -202,4 +202,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 22:18** — [`docs/reference/2026-04-15-jerryscript-gcc14-build-fixes.md`](docs/reference/2026-04-15-jerryscript-gcc14-build-fixes.md): JerryScript v3.0.0 — GCC 14 Build Fixes
+**2026-04-19 22:22** — [`docs/plans/2026-04-19-strip-nongeom-box3.md`](docs/plans/2026-04-19-strip-nongeom-box3.md): Plan: strip spurious BOX3 chunks from non-geometry actors in `snowgoons.lev`
