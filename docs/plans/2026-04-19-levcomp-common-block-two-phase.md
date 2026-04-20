@@ -1,7 +1,7 @@
 # Plan: levcomp-rs two-phase common-block emission — oracle byte-identity for the LVL chunk
 
 **Date:** 2026-04-19
-**Status:** **Phase A + follow-ups done — LVL byte-identity complete modulo 3 heap-pad bytes.** Two-phase refactor landed `8e2f244`, then five follow-up fixes: ObjectOnDisk / Room pad heap-garbage mirror, I32-enum STR accessor (audit fix 1, `21ca707`), Actboxor01/02 `.lev` swap (`0a37e20`), joystick-Script leading-`\n` `.lev` fix (`88b9df7`), and I32-enum STR-lookup correctly gated on `ShowAs == DROPMENU | RADIOBUTTONS` (`4c3e652`) — the last one also fixed a user-visible dark-lighting regression at runtime by restoring lightType=0 (DIRECTIONAL) for Omni01/Omni02. Content-diff count dropped from 2,772 baseline → 3 (99.9%). The remaining 3 bytes are ALL uninitialized heap padding inside iff2lvl's `new char[]` room allocations — physically unpredictable, not content.
+**Status:** **Phase A + follow-ups done — LVL byte-identity complete modulo 3 heap-pad bytes.** Two-phase refactor landed `8e2f244`, then five follow-up fixes: ObjectOnDisk / Room pad heap-garbage mirror, I32-enum STR accessor (audit fix 1, `21ca707`), Actboxor01/02 `.lev` swap (`0a37e20`), joystick-Script leading-`\n` `.lev` fix (`88b9df7`), and I32-enum STR-lookup correctly gated on `ShowAs == DROPMENU | RADIOBUTTONS` (`4c3e652`) — the last one also fixed a user-visible dark-lighting regression at runtime by restoring lightType=0 (DIRECTIONAL) for Omni01/Omni02. Content-diff count dropped from 2,772 baseline → 3 (99.9%). The remaining 3 bytes are ALL uninitialized heap padding inside iff2lvl's `new char[]` room allocations — physically unpredictable, not content. Working-tree `wflevels/snowgoons/snowgoons.lvl` is now levcomp-rs's own output (was the oracle copy at HEAD); commit to flip the repo copy pending.
 **Related:** [blender-roundtrip-oracle-dependencies](2026-04-19-blender-roundtrip-oracle-dependencies.md), [iffcomp-offsetof-arithmetic](../investigations/2026-04-19-iffcomp-offsetof-arithmetic.md)
 
 ## Context
@@ -254,7 +254,7 @@ Map of the 3 remaining cmp-byte diffs:
 - ✅ `cmp` vs oracle: **3 bytes left, all uninit heap pad** (structural identity achieved; content identity 100%).
 - ✅ `snowgoons.iff` via `iffcomp-rs snowgoons.iff.txt + levcomp-rs .lvl`: 163840 B; PERM chunk byte-identical; LVL content byte-identical modulo the 3 pad bytes.
 - ✅ Snowgoons plays with levcomp-rs's own `.lvl` — directional lights restored, House roof renders (see `4c3e652` commit for the light-fix cause).
-- ⚠ `wflevels/snowgoons/snowgoons.lvl` committed as levcomp-rs output: still pending — low-value action since the 3 heap-pad bytes make a levcomp-rs-produced `.lvl` differ by 3 bytes from the committed oracle `.lvl`, and that's acceptable. If we want to flip the committed copy, overwrite and accept the 3-byte drift; runtime behavior is identical.
+- 🟡 `wflevels/snowgoons/snowgoons.lvl` — working-tree copy has been flipped to levcomp-rs's own output (md5 `4b9c1df0…`, matches `target/release/levcomp …` output, differs from `/tmp/oracle_lvl_payload.bin` by exactly the 3 heap-pad bytes above); commit pending. Runtime is identical to the oracle-copied HEAD version; no behavioral risk in landing the drift.
 
 ### Follow-up plan items (outside the LVL scope, but worth flagging)
 
