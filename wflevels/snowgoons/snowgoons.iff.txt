@@ -14,40 +14,49 @@
 		'FAKE' .offsetof(::'LVAS'::'LVL')  .sizeof(::'LVAS'::'ASMP')
 	}
 	{ 'ALGN' .align(2048) }
+	// Packed asset ID layout (see `wfsource/source/streams/asset.hp`):
+	//   bits [31:24]  `type`  — file fourcc code
+	//   bits [23:12]  `room`  — `fff` = permanent, `000..N` = `RMn`
+	//   bits [11:0]   `index` — 1-based slot per (room, type);
+	//                           `ffe` = palette, `fff` = atlas (reserved)
+	// Type codes (`wfsource/source/streams/assets.inc`):
+	//   `0 NUL`  `1 TGA`  `2 BMP`  `3 IFF`  `4 ___`
+	//   `5 RUV`  `6 WAV`  `7 CYC`  `8 CHR`  `9 MAP`
+	// Example: `$3fff001` = `IFF` + room `fff` (`PERM`) + slot `001`.
 	{ 'ASMP'
-		$3fff001l { 'STR' "tree02.iff" }
-		$3fff002l { 'STR' "tree03.iff" }
-		$3fff003l { 'STR' "player.iff" }
-		$3001001l { 'STR' "house.iff" }
-		$3001002l { 'STR' "quadpatch01.iff" }
+		$3fff001l { 'STR' "tree02.iff" }  // IFF PERM fff:001
+		$3fff002l { 'STR' "tree03.iff" }  // IFF PERM fff:002
+		$3fff003l { 'STR' "player.iff" }  // IFF PERM fff:003
+		$3001001l { 'STR' "house.iff" }  // IFF RM1 001:001
+		$3001002l { 'STR' "quadpatch01.iff" }  // IFF RM1 001:002
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "snowgoons.lvl" ] }
 	{ 'ALGN' .align(2048) }
 	{ 'PERM'
-		{ 'ASS' $1fffffel [ "palPerm.tga" ] }
-		{ 'ASS' $1ffffffl [ "Perm.tga" ] }
-		{ 'ASS' $5ffffffl [ "Perm.ruv" ] }
-		{ 'ASS' $7ffffffl [ "Perm.cyc" ] }
-		{ 'ASS' $3fff001l [ "tree02.iff" ] }
-		{ 'ASS' $3fff002l [ "tree03.iff" ] }
-		{ 'ASS' $3fff003l [ "player.iff" ] }
+		{ 'ASS' $1fffffel [ "palPerm.tga" ] }  // TGA PERM fff:ffe
+		{ 'ASS' $1ffffffl [ "Perm.tga" ] }     // TGA PERM fff:fff
+		{ 'ASS' $5ffffffl [ "Perm.ruv" ] }     // RUV PERM fff:fff
+		{ 'ASS' $7ffffffl [ "Perm.cyc" ] }     // CYC PERM fff:fff
+		{ 'ASS' $3fff001l [ "tree02.iff" ] }  // IFF PERM fff:001
+		{ 'ASS' $3fff002l [ "tree03.iff" ] }  // IFF PERM fff:002
+		{ 'ASS' $3fff003l [ "player.iff" ] }  // IFF PERM fff:003
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'
-		{ 'ASS' $1000ffel [ "pal0.tga" ] }
-		{ 'ASS' $1000fffl [ "Room0.tga" ] }
-		{ 'ASS' $5000fffl [ "Room0.ruv" ] }
-		{ 'ASS' $7000fffl [ "Room0.cyc" ] }
+		{ 'ASS' $1000ffel [ "pal0.tga" ] }      // TGA RM0 000:ffe
+		{ 'ASS' $1000fffl [ "Room0.tga" ] }    // TGA RM0 000:fff
+		{ 'ASS' $5000fffl [ "Room0.ruv" ] }    // RUV RM0 000:fff
+		{ 'ASS' $7000fffl [ "Room0.cyc" ] }    // CYC RM0 000:fff
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM1'
-		{ 'ASS' $1001ffel [ "pal1.tga" ] }
-		{ 'ASS' $1001fffl [ "Room1.tga" ] }
-		{ 'ASS' $5001fffl [ "Room1.ruv" ] }
-		{ 'ASS' $7001fffl [ "Room1.cyc" ] }
-		{ 'ASS' $3001001l [ "house.iff" ] }
-		{ 'ASS' $3001002l [ "quadpatch01.iff" ] }
+		{ 'ASS' $1001ffel [ "pal1.tga" ] }      // TGA RM1 001:ffe
+		{ 'ASS' $1001fffl [ "Room1.tga" ] }    // TGA RM1 001:fff
+		{ 'ASS' $5001fffl [ "Room1.ruv" ] }    // RUV RM1 001:fff
+		{ 'ASS' $7001fffl [ "Room1.cyc" ] }    // CYC RM1 001:fff
+		{ 'ASS' $3001001l [ "house.iff" ] }  // IFF RM1 001:001
+		{ 'ASS' $3001002l [ "quadpatch01.iff" ] }  // IFF RM1 001:002
 	}
 	{ 'ALGN' .align(2048) }
 }

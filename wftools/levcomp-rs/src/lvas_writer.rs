@@ -95,14 +95,24 @@ pub fn write(
 
     // ── ASMP ────────────────────────────────────────────────────────────────
     s.push_str("\t{ 'ALGN' .align(2048) }\n");
+    s.push_str("\t// Packed asset ID layout (see `wfsource/source/streams/asset.hp`):\n");
+    s.push_str("\t//   bits [31:24]  `type`  — file fourcc code\n");
+    s.push_str("\t//   bits [23:12]  `room`  — `fff` = permanent, `000..N` = `RMn`\n");
+    s.push_str("\t//   bits [11:0]   `index` — 1-based slot per (room, type);\n");
+    s.push_str("\t//                           `ffe` = palette, `fff` = atlas (reserved)\n");
+    s.push_str("\t// Type codes (`wfsource/source/streams/assets.inc`):\n");
+    s.push_str("\t//   `0 NUL`  `1 TGA`  `2 BMP`  `3 IFF`  `4 ___`\n");
+    s.push_str("\t//   `5 RUV`  `6 WAV`  `7 CYC`  `8 CHR`  `9 MAP`\n");
+    s.push_str("\t// Example: `$3fff001` = `IFF` + room `fff` (`PERM`) + slot `001`.\n");
     s.push_str("\t{ 'ASMP'\n");
     // PERM entries first, then per-room entries in `rooms` order.
     for (name, id) in assets.entries() {
         if room_from_id(*id) == ROOM_PERM {
             s.push_str(&format!(
-                "\t\t${id:x}l {{ 'STR' \"{name}\" }}\n",
+                "\t\t${id:x}l {{ 'STR' \"{name}\" }}  // {decoded}\n",
                 id = id,
-                name = name
+                name = name,
+                decoded = decode_id(*id),
             ));
         }
     }
@@ -110,9 +120,10 @@ pub fn write(
         for (name, id) in assets.entries() {
             if room_from_id(*id) == r {
                 s.push_str(&format!(
-                    "\t\t${id:x}l {{ 'STR' \"{name}\" }}\n",
+                    "\t\t${id:x}l {{ 'STR' \"{name}\" }}  // {decoded}\n",
                     id = id,
-                    name = name
+                    name = name,
+                    decoded = decode_id(*id),
                 ));
             }
         }
@@ -137,16 +148,17 @@ pub fn write(
     // where room_hex = 3-digit hex of room index (or `fff` for PERM).
     s.push_str("\t{ 'ALGN' .align(2048) }\n");
     s.push_str("\t{ 'PERM'\n");
-    s.push_str("\t\t{ 'ASS' $1fffffel [ \"palPerm.tga\" ] }\n");
-    s.push_str("\t\t{ 'ASS' $1ffffffl [ \"Perm.tga\" ] }\n");
-    s.push_str("\t\t{ 'ASS' $5ffffffl [ \"Perm.ruv\" ] }\n");
-    s.push_str("\t\t{ 'ASS' $7ffffffl [ \"Perm.cyc\" ] }\n");
+    s.push_str("\t\t{ 'ASS' $1fffffel [ \"palPerm.tga\" ] }  // TGA PERM fff:ffe\n");
+    s.push_str("\t\t{ 'ASS' $1ffffffl [ \"Perm.tga\" ] }     // TGA PERM fff:fff\n");
+    s.push_str("\t\t{ 'ASS' $5ffffffl [ \"Perm.ruv\" ] }     // RUV PERM fff:fff\n");
+    s.push_str("\t\t{ 'ASS' $7ffffffl [ \"Perm.cyc\" ] }     // CYC PERM fff:fff\n");
     for (name, id) in assets.entries() {
         if room_from_id(*id) == ROOM_PERM && !name.ends_with(".tga") {
             s.push_str(&format!(
-                "\t\t{{ 'ASS' ${id:x}l [ \"{name}\" ] }}\n",
+                "\t\t{{ 'ASS' ${id:x}l [ \"{name}\" ] }}  // {decoded}\n",
                 id = id,
-                name = name
+                name = name,
+                decoded = decode_id(*id),
             ));
         }
     }
@@ -154,16 +166,17 @@ pub fn write(
     for &r in rooms {
         s.push_str("\t{ 'ALGN' .align(2048) }\n");
         s.push_str(&format!("\t{{ 'RM{r}'\n"));
-        s.push_str(&format!("\t\t{{ 'ASS' $1{r:03x}ffel [ \"pal{r}.tga\" ] }}\n"));
-        s.push_str(&format!("\t\t{{ 'ASS' $1{r:03x}fffl [ \"Room{r}.tga\" ] }}\n"));
-        s.push_str(&format!("\t\t{{ 'ASS' $5{r:03x}fffl [ \"Room{r}.ruv\" ] }}\n"));
-        s.push_str(&format!("\t\t{{ 'ASS' $7{r:03x}fffl [ \"Room{r}.cyc\" ] }}\n"));
+        s.push_str(&format!("\t\t{{ 'ASS' $1{r:03x}ffel [ \"pal{r}.tga\" ] }}      // TGA RM{r} {r:03x}:ffe\n"));
+        s.push_str(&format!("\t\t{{ 'ASS' $1{r:03x}fffl [ \"Room{r}.tga\" ] }}    // TGA RM{r} {r:03x}:fff\n"));
+        s.push_str(&format!("\t\t{{ 'ASS' $5{r:03x}fffl [ \"Room{r}.ruv\" ] }}    // RUV RM{r} {r:03x}:fff\n"));
+        s.push_str(&format!("\t\t{{ 'ASS' $7{r:03x}fffl [ \"Room{r}.cyc\" ] }}    // CYC RM{r} {r:03x}:fff\n"));
         for (name, id) in assets.entries() {
             if room_from_id(*id) == r && !name.ends_with(".tga") {
                 s.push_str(&format!(
-                    "\t\t{{ 'ASS' ${id:x}l [ \"{name}\" ] }}\n",
+                    "\t\t{{ 'ASS' ${id:x}l [ \"{name}\" ] }}  // {decoded}\n",
                     id = id,
-                    name = name
+                    name = name,
+                    decoded = decode_id(*id),
                 ));
             }
         }
@@ -177,6 +190,37 @@ pub fn write(
     s.push_str("}\n");
 
     fs::write(out_path, s)
+}
+
+/// Decode a packed asset ID into a readable `<FOURCC> <ROOM> <room:index>`
+/// comment — type code (TGA/IFF/RUV/CYC/…) from bits [31:24], room from
+/// [23:12], slot index from [11:0]. Emitted only as a `//` comment in the
+/// generated `.iff.txt`, so iffcomp strips it and the compiled bytes are
+/// unchanged.
+fn decode_id(id: i32) -> String {
+    let u = id as u32;
+    let type_bits = ((u >> 24) & 0xFF) as u8;
+    let room_bits = ((u >> 12) & 0xFFF) as u16;
+    let idx_bits  = (u & 0xFFF) as u16;
+    let type_str = match type_bits {
+        0 => "NUL",
+        1 => "TGA",
+        2 => "BMP",
+        3 => "IFF",
+        4 => "___",
+        5 => "RUV",
+        6 => "WAV",
+        7 => "CYC",
+        8 => "CHR",
+        9 => "MAP",
+        _ => "???",
+    };
+    let room_str = if room_bits == 0xFFF {
+        "PERM".to_string()
+    } else {
+        format!("RM{}", room_bits)
+    };
+    format!("{type_str} {room_str} {room_bits:03x}:{idx_bits:03x}")
 }
 
 /// Extract the room field from a packed asset ID. Mirrors the helper in
