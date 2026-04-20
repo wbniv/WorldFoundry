@@ -202,4 +202,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 22:34** — [`docs/reference/2026-04-15-jerryscript-gcc14-build-fixes.md`](docs/reference/2026-04-15-jerryscript-gcc14-build-fixes.md): JerryScript v3.0.0 — GCC 14 Build Fixes
+**2026-04-19 22:39** — [`docs/reference/2026-04-15-jerryscript-gcc14-build-fixes.md`](docs/reference/2026-04-15-jerryscript-gcc14-build-fixes.md): JerryScript v3.0.0 — GCC 14 Build Fixes
