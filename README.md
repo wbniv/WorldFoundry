@@ -202,4 +202,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-19 21:34** — [`docs/plans/2026-04-19-levcomp-common-block-two-phase.md`](docs/plans/2026-04-19-levcomp-common-block-two-phase.md): Plan: levcomp-rs two-phase common-block emission — oracle byte-identity for the LVL chunk
+**2026-04-19 22:18** — [`docs/reference/2026-04-15-jerryscript-gcc14-build-fixes.md`](docs/reference/2026-04-15-jerryscript-gcc14-build-fixes.md): JerryScript v3.0.0 — GCC 14 Build Fixes
