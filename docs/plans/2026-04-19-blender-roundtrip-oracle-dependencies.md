@@ -218,6 +218,63 @@ Fix for mirror-first: **apply `strlwr` in
 iff2lvl applied, same "until the .lev files get normalized"
 caveat.  Lands in the same commit as this note.
 
+### Filename-case — Blender side also lowercases now (2026-04-19)
+
+The fix above handles the *`asset.inc` / ASMP* side of the
+lowercase normalization. On the **Blender export side**, the
+exporter was also silently capitalising mesh filenames: objects
+with no `wf_original_mesh_name` (newly-created in Blender) got
+`<obj.name>.iff` synthesized, which used whatever case Blender's
+scene had (`House.iff`, `Player.iff`, `QuadPatch01.iff`). That
+produced a capitalised `.iff` *file* on disk next to the lowercase
+one `asset.inc` referenced — half-migrated state where 2 of 5
+meshes (`tree02`, `tree03`) had `wf_original_mesh_name` preserved
+from the authoring source and exported lowercase, while 3 of 5
+(House/Player/QuadPatch01) exported uppercase and were effectively
+unused by the `asset.inc`-driven pipeline.
+
+Fix: lowercase the synthesized filename at
+`wftools/wf_blender/export_level.py:1026`:
+
+```python
+mesh_filename = (orig_mesh if orig_mesh else obj.name + ".iff").lower()
+```
+
+With both ends lowercased (exporter + asset_registry), the
+Blender-regenerated `.iff` file and the `asset.inc` reference
+agree; no capitalised duplicates get left behind.
+
+### Footnote on `tree02.iff` / `tree03.iff` vs `player.iff` / `house.iff` / `quadpatch01.iff` — which meshes are Blender-regenerated today (2026-04-19)
+
+Current `wflevels/snowgoons/` working-tree state per mesh:
+
+| Mesh             | Size     | HEAD size | Source                           |
+|------------------|---------:|----------:|----------------------------------|
+| `tree02.iff`     | 10,024 B | 10,164 B  | **Blender re-export** (140 B smaller) |
+| `tree03.iff`     | 10,024 B | 10,164 B  | **Blender re-export** (140 B smaller) |
+| `player.iff`     | 728 B    | 728 B     | original max2lev-committed       |
+| `house.iff`      | 18,628 B | 18,628 B  | original max2lev-committed       |
+| `quadpatch01.iff`| 22,144 B | 22,144 B  | original max2lev-committed       |
+
+The 280-byte PERM-chunk size gap against oracle I chased while
+working on `levcomp-common-block-two-phase` turned out to be
+exactly this: Blender re-exports of the trees trimmed 140 B each,
+so the PERM chunk (which embeds all five per-mesh `.iff` files via
+`'ASS' $3fff001l [ "tree02.iff" ]` entries) is 280 B shorter than
+the oracle's PERM. Not a levcomp-rs or textile-rs bug — the
+Blender exporter's mesh-write path is 140 B tighter than max2lev's
+for these specific objects. Restoring `HEAD:wflevels/snowgoons/tree02.iff`
+(max2lev-original) into the working tree brings the PERM chunk
+byte-identical to oracle.
+
+Meaning: oracle byte-identity on PERM will require *both*
+re-using max2lev-era meshes (or round-tripping them through
+Blender without the size drift) *and* the lowercase-filename fix
+above. Since Blender's trim is consistent, flipping to "all meshes
+are Blender-regenerated" gives a stable new snapshot that differs
+from oracle by a predictable amount — acceptable once we're no
+longer chasing oracle byte-identity as the target.
+
 ## Texture pipeline (separate next-up plan, referenced here)
 
 The biggest oracle dependency is the **texture atlas pipeline**.
