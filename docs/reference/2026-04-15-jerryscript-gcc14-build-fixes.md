@@ -46,11 +46,41 @@ guarded by `#if JERRY_BUILTIN_CONTAINER`. But `Array.prototype.includes`
 (`ecma-builtin-array-prototype.c`) calls `ecma_op_same_value_zero`
 unconditionally.
 
-**Fix:**  
-- `ecma-conversion.h`: remove `#if JERRY_BUILTIN_CONTAINER` guard from the
-  declaration  
-- `ecma-conversion.c`: remove `#if JERRY_BUILTIN_CONTAINER` guard from the
-  definition
+**Fix** (from landed patch `ad2da53`; `patch -p1`-applicable from `engine/vendor/jerryscript-v3.0.0/`):
+```diff
+--- a/jerry-core/ecma/operations/ecma-conversion.h
++++ b/jerry-core/ecma/operations/ecma-conversion.h
+@@ -49,9 +49,8 @@ typedef enum
+
+ bool ecma_op_require_object_coercible (ecma_value_t value);
+ bool ecma_op_same_value (ecma_value_t x, ecma_value_t y);
+-#if JERRY_BUILTIN_CONTAINER
++/* Used by Array.prototype.includes and containers; declare unconditionally. */
+ bool ecma_op_same_value_zero (ecma_value_t x, ecma_value_t y, bool strict_equality);
+-#endif /* JERRY_BUILTIN_CONTAINER */
+ ecma_value_t ecma_op_to_primitive (ecma_value_t value, ecma_preferred_type_hint_t preferred_type);
+ bool ecma_op_to_boolean (ecma_value_t value);
+ ecma_value_t ecma_op_to_number (ecma_value_t value, ecma_number_t *number_p);
+--- a/jerry-core/ecma/operations/ecma-conversion.c
++++ b/jerry-core/ecma/operations/ecma-conversion.c
+@@ -136,7 +136,7 @@ ecma_op_same_value (ecma_value_t x, /**< ecma value */
+   return false;
+ } /* ecma_op_same_value */
+
+-#if JERRY_BUILTIN_CONTAINER
++/* Used by Array.prototype.includes and containers; compiled unconditionally. */
+ /**
+  * SameValueZero operation.
+  *
+@@ -180,7 +180,6 @@ ecma_op_same_value_zero (ecma_value_t x, /**< ecma value */
+
+   return ecma_op_same_value (x, y);
+ } /* ecma_op_same_value_zero */
+-#endif /* JERRY_BUILTIN_CONTAINER */
+
+ /**
+  * ToPrimitive operation.
+```
 
 ---
 
@@ -65,12 +95,17 @@ integer). `ecma_builtin_get_global()` returns `ecma_object_t*` (pointer).
 GCC 14 errors on the implicit pointer↔integer comparison. The
 `JERRY_BUILTIN_REALMS` branch correctly compares two `ecma_value_t` fields.
 
-**Fix:**
-```c
-// BEFORE:
-JERRY_ASSERT (frame_ctx_p->this_binding == ecma_builtin_get_global ());
-// AFTER:
-JERRY_ASSERT (frame_ctx_p->this_binding == ecma_make_object_value (ecma_builtin_get_global ()));
+**Fix** (from landed patch `ad2da53`; `patch -p1`-applicable from `engine/vendor/jerryscript-v3.0.0/`):
+```diff
+--- a/jerry-core/vm/opcodes.c
++++ b/jerry-core/vm/opcodes.c
+@@ -2248,7 +2248,7 @@ opfunc_lexical_scope_has_restricted_binding (vm_frame_ctx_t *frame_ctx_p, ...)
+ #if JERRY_BUILTIN_REALMS
+   JERRY_ASSERT (frame_ctx_p->this_binding == JERRY_CONTEXT (global_object_p)->this_binding);
+ #else /* !JERRY_BUILTIN_REALMS */
+-  JERRY_ASSERT (frame_ctx_p->this_binding == ecma_builtin_get_global ());
++  JERRY_ASSERT (frame_ctx_p->this_binding == ecma_make_object_value (ecma_builtin_get_global ()));
+ #endif /* JERRY_BUILTIN_REALMS */
 ```
 
 ---
@@ -85,12 +120,17 @@ function. Used before declaration in the `!JERRY_BUILTIN_REALMS` branch.
 The `JERRY_BUILTIN_REALMS` branch correctly uses
 `(ecma_object_t *) JERRY_CONTEXT (global_object_p)`.
 
-**Fix:**
-```c
-// BEFORE:
-ecma_object_t *const global_scope_p = ecma_get_global_scope (global_obj_p);
-// AFTER:
-ecma_object_t *const global_scope_p = ecma_get_global_scope (ecma_builtin_get_global ());
+**Fix** (from landed patch `ad2da53`; `patch -p1`-applicable from `engine/vendor/jerryscript-v3.0.0/`):
+```diff
+--- a/jerry-core/vm/opcodes.c
++++ b/jerry-core/vm/opcodes.c
+@@ -2262,7 +2262,7 @@ opfunc_lexical_scope_has_restricted_binding (vm_frame_ctx_t *frame_ctx_p, ...)
+ #if JERRY_BUILTIN_REALMS
+   ecma_object_t *const global_scope_p = ecma_get_global_scope ((ecma_object_t *) JERRY_CONTEXT (global_object_p));
+ #else /* !JERRY_BUILTIN_REALMS */
+-  ecma_object_t *const global_scope_p = ecma_get_global_scope (global_obj_p);
++  ecma_object_t *const global_scope_p = ecma_get_global_scope (ecma_builtin_get_global ());
+ #endif /* JERRY_BUILTIN_REALMS */
 ```
 
 ---
@@ -105,8 +145,27 @@ use `cp` only inside `#if JERRY_UNICODE_CASE_CONVERSION`. With
 `JERRY_UNICODE_CASE_CONVERSION=0` (wf-minimal profile), the parameter
 is never referenced, triggering `-Werror=unused-parameter`.
 
-**Fix:** Add `(void) cp;` in each `#else` branch before the `return`
-statement.
+**Fix** (from landed patch `ad2da53`; `patch -p1`-applicable from `engine/vendor/jerryscript-v3.0.0/`):
+```diff
+--- a/jerry-core/lit/lit-char-helpers.c
++++ b/jerry-core/lit/lit-char-helpers.c
+@@ -934,6 +934,7 @@ lit_char_fold_to_lower (lit_code_point_t cp) /**< code point */
+                                             lit_unicode_folding_skip_to_lower_chars,
+                                             NUM_OF_ELEMENTS (lit_unicode_folding_skip_to_lower_chars))));
+ #else /* !JERRY_UNICODE_CASE_CONVERSION */
++  (void) cp;
+   return true;
+ #endif /* JERRY_UNICODE_CASE_CONVERSION */
+ } /* lit_char_fold_to_lower */
+@@ -957,6 +958,7 @@ lit_char_fold_to_upper (lit_code_point_t cp) /**< code point */
+                                            lit_unicode_folding_to_upper_chars,
+                                            NUM_OF_ELEMENTS (lit_unicode_folding_to_upper_chars))));
+ #else /* !JERRY_UNICODE_CASE_CONVERSION */
++  (void) cp;
+   return false;
+ #endif /* JERRY_UNICODE_CASE_CONVERSION */
+ } /* lit_char_fold_to_upper */
+```
 
 ---
 
@@ -120,11 +179,52 @@ statement.
 but `ecma_op_is_regexp` calls `ecma_object_is_regexp_object` unconditionally
 after a Symbol.match check.
 
-**Fix:**  
-- `ecma-objects.h`: remove the `#if JERRY_BUILTIN_REGEXP` guard from the
-  declaration  
-- `ecma-objects.c`: keep the function outside the guard, but make its body
-  conditional — return `false` immediately when `JERRY_BUILTIN_REGEXP=0`
+**Fix** (from landed patch `ad2da53`; `patch -p1`-applicable from `engine/vendor/jerryscript-v3.0.0/`):
+```diff
+--- a/jerry-core/ecma/operations/ecma-objects.h
++++ b/jerry-core/ecma/operations/ecma-objects.h
+@@ -107,9 +107,8 @@ ecma_collection_t *ecma_op_object_own_property_keys (ecma_object_t *obj_p, jerry
+ ecma_collection_t *ecma_op_object_enumerate (ecma_object_t *obj_p);
+
+ lit_magic_string_id_t ecma_object_get_class_name (ecma_object_t *obj_p);
+-#if JERRY_BUILTIN_REGEXP
++/* Used by ecma_op_is_regexp unconditionally; declare outside JERRY_BUILTIN_REGEXP guard. */
+ bool ecma_object_is_regexp_object (ecma_value_t arg);
+-#endif /* JERRY_BUILTIN_REGEXP */
+ ecma_value_t ecma_op_is_concat_spreadable (ecma_value_t arg);
+ ecma_value_t ecma_op_is_regexp (ecma_value_t arg);
+ ecma_value_t ecma_op_species_constructor (ecma_object_t *this_value, ecma_builtin_id_t default_constructor_id);
+--- a/jerry-core/ecma/operations/ecma-objects.c
++++ b/jerry-core/ecma/operations/ecma-objects.c
+@@ -2913,20 +2913,25 @@ ecma_object_get_class_name (ecma_object_t *obj_p) /**< object */
+   }
+ } /* ecma_object_get_class_name */
+
+-#if JERRY_BUILTIN_REGEXP
+ /**
+  * Checks if the given argument has [[RegExpMatcher]] internal slot
+  *
++ * Called unconditionally by ecma_op_is_regexp; returns false when JERRY_BUILTIN_REGEXP=0.
++ *
+  * @return true - if the given argument is a regexp
+  *         false - otherwise
+  */
+ extern inline bool JERRY_ATTR_ALWAYS_INLINE
+ ecma_object_is_regexp_object (ecma_value_t arg) /**< argument */
+ {
++#if JERRY_BUILTIN_REGEXP
+   return (ecma_is_value_object (arg)
+           && ecma_object_class_is (ecma_get_object_from_value (arg), ECMA_OBJECT_CLASS_REGEXP));
+-} /* ecma_object_is_regexp_object */
++#else /* !JERRY_BUILTIN_REGEXP */
++  JERRY_UNUSED (arg);
++  return false;
+ #endif /* JERRY_BUILTIN_REGEXP */
++} /* ecma_object_is_regexp_object */
+
+ /**
+  * Object's IsConcatSpreadable operation, used for Array.prototype.concat
+```
 
 ---
 
@@ -141,8 +241,27 @@ that call container-specific APIs. They are properly *called* under
 `#if JERRY_BUILTIN_CONTAINER` in the dispatch switch, but the function
 *definitions* have no such guard, so they compile (and fail) unconditionally.
 
-**Fix:** Wrap both function definitions in `#if JERRY_BUILTIN_CONTAINER` /
-`#endif`.
+**Fix** (from landed patch `ad2da53`; `patch -p1`-applicable from `engine/vendor/jerryscript-v3.0.0/`):
+```diff
+--- a/jerry-core/ecma/builtin-objects/ecma-builtin-intrinsic.c
++++ b/jerry-core/ecma/builtin-objects/ecma-builtin-intrinsic.c
+@@ -93,6 +93,7 @@ ecma_builtin_intrinsic_array_prototype_values (ecma_value_t this_value) /**< thi
+   return ret_value;
+ } /* ecma_builtin_intrinsic_array_prototype_values */
+
++#if JERRY_BUILTIN_CONTAINER
+ /**
+  * The Map.prototype entries and [@@iterator] routines
+  *
+@@ -144,6 +145,7 @@ ecma_builtin_intrinsic_set_prototype_values (ecma_value_t this_value) /**< this
+                                             ECMA_OBJECT_CLASS_SET_ITERATOR,
+                                             ECMA_ITERATOR_VALUES);
+ } /* ecma_builtin_intrinsic_set_prototype_values */
++#endif /* JERRY_BUILTIN_CONTAINER */
+
+ /**
+  * Dispatcher of the built-in's routines
+```
 
 ---
 
@@ -162,21 +281,66 @@ constants defined only when `JERRY_BUILTIN_REGEXP=1`. The JerryScript cmake
 build compiles all source files unconditionally — there is no CMakeLists.txt
 guard to skip this file when REGEXP is disabled.
 
-**Fix:**  
-- `ecma-builtin-regexp-string-iterator-prototype.c`: wrap the real function
-  body in `#if JERRY_BUILTIN_REGEXP`; provide a stub in `#else` that returns
-  `ecma_raise_type_error` so the dispatch table (generated by the
-  `BUILTIN_INC_HEADER_NAME` template mechanism) can still link.  
-- `ecma-iterator-object.c`: wrap the
-  `ECMA_OBJECT_CLASS_REGEXP_STRING_ITERATOR` branch of the assert in
-  `#if JERRY_BUILTIN_REGEXP`.
+**Fix** (from landed patch `ad2da53`; `patch -p1`-applicable from `engine/vendor/jerryscript-v3.0.0/`):
+```diff
+--- a/jerry-core/ecma/builtin-objects/ecma-builtin-regexp-string-iterator-prototype.c
++++ b/jerry-core/ecma/builtin-objects/ecma-builtin-regexp-string-iterator-prototype.c
+@@ -49,6 +49,7 @@
+  * @return iterator result object, if success
+  *         error - otherwise
+  */
++#if JERRY_BUILTIN_REGEXP
+ static ecma_value_t
+ ecma_builtin_regexp_string_iterator_prototype_object_next (ecma_value_t this_val) /**< this argument */
+ {
+@@ -176,6 +177,14 @@ free_variables:
 
-**Note on the typedarray path in `ecma-builtin-array-iterator-prototype.c`:**
-The same pattern applies to lines ~95–105, where `ecma_object_is_typedarray`,
-`ecma_typedarray_get_arraybuffer`, `ecma_arraybuffer_is_detached`, and
-`ecma_typedarray_get_length` are called without a `JERRY_BUILTIN_TYPEDARRAY`
-guard. Fixed by wrapping the entire `if (ecma_object_is_typedarray(...)) { }`
-block in `#if JERRY_BUILTIN_TYPEDARRAY`.
+   return result;
+ } /* ecma_builtin_regexp_string_iterator_prototype_object_next */
++#else /* !JERRY_BUILTIN_REGEXP */
++static ecma_value_t
++ecma_builtin_regexp_string_iterator_prototype_object_next (ecma_value_t this_val) /**< this argument */
++{
++  JERRY_UNUSED (this_val);
++  return ecma_raise_type_error (ECMA_ERR_ARGUMENT_THIS_NOT_ITERATOR);
++} /* ecma_builtin_regexp_string_iterator_prototype_object_next (stub) */
++#endif /* JERRY_BUILTIN_REGEXP */
+
+ /**
+  * @}
+--- a/jerry-core/ecma/operations/ecma-iterator-object.c
++++ b/jerry-core/ecma/operations/ecma-iterator-object.c
+@@ -132,7 +132,9 @@ ecma_op_create_iterator_object (ecma_value_t iterated_value, /**< value from cre
+   /* 1. */
+   JERRY_ASSERT (iterator_type == ECMA_OBJECT_CLASS_ARRAY_ITERATOR || iterator_type == ECMA_OBJECT_CLASS_SET_ITERATOR
+                 || iterator_type == ECMA_OBJECT_CLASS_MAP_ITERATOR
++#if JERRY_BUILTIN_REGEXP
+                 || iterator_type == ECMA_OBJECT_CLASS_REGEXP_STRING_ITERATOR
++#endif /* JERRY_BUILTIN_REGEXP */
+                 || iterator_type == ECMA_OBJECT_CLASS_STRING_ITERATOR);
+   JERRY_ASSERT (kind < ECMA_ITERATOR__COUNT);
+```
+
+**Companion patch — `ecma-builtin-array-iterator-prototype.c`, typedarray path** (same family of fix; also in `ad2da53`):
+```diff
+--- a/jerry-core/ecma/builtin-objects/ecma-builtin-array-iterator-prototype.c
++++ b/jerry-core/ecma/builtin-objects/ecma-builtin-array-iterator-prototype.c
+@@ -92,6 +92,7 @@ ecma_builtin_array_iterator_prototype_object_next (ecma_value_t this_val) /**< t
+
+   /* 8. */
+   ecma_length_t length;
++#if JERRY_BUILTIN_TYPEDARRAY
+   if (ecma_object_is_typedarray (array_object_p))
+   {
+     /* a. */
+@@ -105,6 +106,7 @@ ecma_builtin_array_iterator_prototype_object_next (ecma_value_t this_val) /**< t
+     length = ecma_typedarray_get_length (array_object_p);
+   }
+   else
++#endif /* JERRY_BUILTIN_TYPEDARRAY */
+   {
+     ecma_value_t len_value = ecma_op_object_get_length (array_object_p, &length);
+```
 
 ---
 
@@ -235,7 +399,7 @@ issues/PRs as of 2026-04-17, ~191 of which are issues).
 | 2023 | 9   | 76  | 9   |
 | 2024 | 46  | 36  | 48  |
 | 2025 | 2   | 44  | 2   |
-| 2026 (YTD) | 0 | 8 | 0 |
+| 2026 (YTD) | 0 | 11 | 0 |
 
 ```mermaid
 xychart-beta
@@ -258,7 +422,7 @@ xychart-beta
     title "Issues opened per year (community pressure)"
     x-axis [2020, 2021, 2022, 2023, 2024, 2025, "2026 YTD"]
     y-axis "Issues opened" 0 --> 280
-    bar [258, 129, 70, 76, 36, 44, 8]
+    bar [258, 129, 70, 76, 36, 44, 11]
 ```
 
 The shape: commits and PR-merges fall together (maintainer activity), while
@@ -271,6 +435,24 @@ near-flatline with one tag in mid-year. 2024 has a ~46-commit spike
 clustered around the **v3.0.0 release on 2024-12-18** (docs, README,
 migration guide, cmake bumps). 2025 was effectively two commits (a RIOT
 target bump and a cmake/ranlib fix in October). 2026 is empty so far.
+
+### 2026 issues opened so far (none triaged, none closed; refreshed 2026-04-19)
+
+| # | Date | Reporter | Title |
+|---|------|----------|-------|
+| [#5274](https://github.com/jerryscript-project/jerryscript/issues/5274) | 2026-01-09 | oneafter | [Bug] Segmentation Fault (NULL Pointer Dereference) in parser_parse_function_statement |
+| [#5275](https://github.com/jerryscript-project/jerryscript/issues/5275) | 2026-01-13 | matthewruzzi | Enable GitHub Discussions |
+| [#5276](https://github.com/jerryscript-project/jerryscript/issues/5276) | 2026-01-19 | Sab1e-dev | Questions about Realm lifecycle, cleanup behavior, and best practices for reducing initialization overhead |
+| [#5277](https://github.com/jerryscript-project/jerryscript/issues/5277) | 2026-02-02 | kj-powell | OpenJS Best Practices: Website Updates |
+| [#5281](https://github.com/jerryscript-project/jerryscript/issues/5281) | 2026-03-18 | hkbinbin | Type confusion in Array.prototype.slice via Array[Symbol.species] TOCTOU |
+| [#5282](https://github.com/jerryscript-project/jerryscript/issues/5282) | 2026-03-20 | hkbinbin | Heap OOB Read in Array.prototype.copyWithin via TOCTOU |
+| [#5283](https://github.com/jerryscript-project/jerryscript/issues/5283) | 2026-03-20 | hkbinbin | Heap OOB Write in Array.prototype.fill via start.valueOf() array shrink |
+| [#5284](https://github.com/jerryscript-project/jerryscript/issues/5284) | 2026-04-17 | ShannonBase | Question about to execute SQL in jerry |
+| [#5285](https://github.com/jerryscript-project/jerryscript/issues/5285) | 2026-04-18 | davidlie | Infinite recursion resutls in stack overflow |
+| [#5286](https://github.com/jerryscript-project/jerryscript/issues/5286) | 2026-04-18 | davidlie | Infinite recurssion in regex handling |
+| [#5287](https://github.com/jerryscript-project/jerryscript/issues/5287) | 2026-04-18 | davidlie | Heap reference count exhaustion |
+
+Of the 11, **seven are bug reports** (three security TOCTOU/OOB bugs from `hkbinbin`, three recursion/exhaustion bugs from `davidlie`, one parser NULL-deref from `oneafter`), **two are governance requests** (Discussions, OpenJS), **two are usage questions** (SQL, Realms). None have received a maintainer reply; none are triaged; none of them touch our 7 build bugs. The three security-class hkbinbin reports from 2026-03-18/20 are exactly the kind of "community reports pile up, maintainers silent" signal the throughput numbers imply.
 
 Issues continue to accumulate (~40-80/year) but PR throughput has
 collapsed to single digits — the typical late-stage maintenance pattern
