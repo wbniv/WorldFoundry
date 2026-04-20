@@ -1,0 +1,27 @@
+// snowgoons-standalone.iff.txt — L4-wrapped form of snowgoons for wf_game -L.
+//
+// wf_game's -L<path> loader (game.cc:151-162) seeks to SECTOR_SIZE (2048)
+// and expects the RAM chunk there. That's the layout inside cd.iff's L4
+// chunk — 8-byte chunk header + ALGN pad + RAM + ALGN + LVAS-level-content.
+// This template produces that layout as a standalone file.
+//
+// Build:
+//   ../wftools/iffcomp-rs/target/release/iffcomp -binary \
+//     -o=../snowgoons-standalone.iff snowgoons-standalone.iff.txt
+//
+// Run:
+//   cd wfsource/source/game && wf_game -L<repo>/wflevels/snowgoons-standalone.iff
+//
+// RAM memory-configuration values mirror wflevels/cd_snowgoons.iff.txt's
+// L4 block — keep in sync.
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 100000l
+        'PERM' 300000l
+        'ROOM' 300000l
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../snowgoons.iff" ]
+}
