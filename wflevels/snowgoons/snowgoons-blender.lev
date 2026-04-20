@@ -768,7 +768,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "-- Director script (ported from Tcl)n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then                                                                                                                                                                                                                    \n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
@@ -3250,7 +3250,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "-- Player input script (ported from Tcl)n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }

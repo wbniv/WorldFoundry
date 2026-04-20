@@ -131,12 +131,18 @@ def _tokenize(text: str):
             yield ('tag', text[i+1:j])
             i = j + 1
         elif c == '"':
-            # Quoted string
+            # Quoted string.  Handle standard C-style escapes so that
+            # multi-line script text (`\n`, `\t`, `\\`, `\"`) survives
+            # round-tripping — a bare `\n` → `n` strip (the previous
+            # behaviour) corrupts every embedded newline in Director and
+            # Player scripts.
             j = i + 1
             buf = []
+            ESCAPES = {'n': '\n', 't': '\t', 'r': '\r', '0': '\0',
+                       '\\': '\\', '"': '"', "'": "'"}
             while j < n and text[j] != '"':
                 if text[j] == '\\' and j + 1 < n:
-                    buf.append(text[j+1])
+                    buf.append(ESCAPES.get(text[j+1], text[j+1]))
                     j += 2
                 else:
                     buf.append(text[j])
@@ -851,7 +857,15 @@ def _apply_field_chunks(blobj, schema, obj_chunk):
         str_val = None
         str_child = _child_by_tag(chunk, 'STR')
         if str_child and str_child['scalars']:
-            str_val = str_child['scalars'][0][1]
+            # WF IFF allows C-style adjacent-string concatenation
+            # within a STR chunk: `{ 'STR' "line 1\n" "line 2\n" }` is
+            # one logical string.  The tokenizer emits each as a
+            # separate `('str', …)` scalar; concatenate them all.
+            # Without this, multi-line script text (Director + Player
+            # in snowgoons) gets truncated to the first line only.
+            str_val = "".join(
+                s[1] for s in str_child['scalars'] if s[0] == 'str'
+            )
         if not data and tag == 'STR' and str_val is not None:
             # XDATA/string fields store value in a nested STR child, not DATA
             data = [str_val]
@@ -1007,9 +1021,14 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
             model_type    = 0  # 0=None/Box
             if has_mesh and obj.data and obj.data.polygons:
                 # Prefer the source .lev's Mesh Name (preserves the oracle's
-                # filename case, e.g. "house.iff" lowercase); only synthesize
-                # `<obj.name>.iff` for objects newly created in Blender.
-                mesh_filename = orig_mesh if orig_mesh else obj.name + ".iff"
+                # filename case); only synthesize `<obj.name>.iff` for
+                # objects newly created in Blender. Then lowercase —
+                # iff2lvl's binary ASMP is always lowercase (it `strlwr()`s
+                # at `iff2lvl/level2.cc:220-222`), so emitting anything
+                # else creates a capitalized-duplicate file that sits
+                # unreferenced next to the real one. See oracle-deps plan
+                # (Natural ASMP order section) for the lowercase policy.
+                mesh_filename = (orig_mesh if orig_mesh else obj.name + ".iff").lower()
                 mesh_out = os.path.join(level_dir, mesh_filename)
                 if _write_mesh_iff(obj, mesh_out):
                     model_type = 1  # Mesh
@@ -1320,7 +1339,18 @@ def _emit_lev_fields(obj, schema, fp) -> list[str]:
                     f"{{ 'STR' \"{label}\" }} }}  //{_items_comment(items)}")
 
         elif kind == "Str" or kind == "Annotation":
-            sv = str(val).replace('"', '\\"')
+            # Re-escape control characters so the emitted iff.txt is a
+            # single-line string literal (iffcomp doesn't accept raw
+            # newlines inside `"..."`).  Mirrors the tokenizer's
+            # escape-table on import.
+            sv = (
+                str(val)
+                .replace('\\', '\\\\')
+                .replace('"',  '\\"')
+                .replace('\n', '\\n')
+                .replace('\r', '\\r')
+                .replace('\t', '\\t')
+            )
             lines.append(
                 f"{{ 'STR' {{ 'NAME' \"{name}\" }} "
                 f"{{ 'STR' \"{sv}\" }} }}")
@@ -1340,7 +1370,15 @@ def _emit_lev_fields(obj, schema, fp) -> list[str]:
         elif kind == "Skip":
             # XDATA fields (Script, Notes, etc.) — emit as STR with the
             # stored text value, matching max2lev's XDATA→'STR' mapping.
-            sv = str(val).replace('"', '\\"')
+            # Re-escape control characters (scripts can be multi-line).
+            sv = (
+                str(val)
+                .replace('\\', '\\\\')
+                .replace('"',  '\\"')
+                .replace('\n', '\\n')
+                .replace('\r', '\\r')
+                .replace('\t', '\\t')
+            )
             if sv:
                 lines.append(
                     f"{{ 'STR' {{ 'NAME' \"{name}\" }} "
