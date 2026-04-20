@@ -276,7 +276,7 @@ Issues continue to accumulate (~40-80/year) but PR throughput has
 collapsed to single digits — the typical late-stage maintenance pattern
 where the community files reports faster than the maintainers can land
 fixes. Most recent commit: `b706935` 2025-10-08, "cmake: avoid Apple
-ranlib flags when not using AppleClang (#5258)". No release since v3.0.0.
+ranlib flags when not using AppleClang ([#5258](https://github.com/jerryscript-project/jerryscript/pull/5258))". No release since v3.0.0.
 
 ### Search results for our 7 bugs
 
@@ -284,7 +284,7 @@ Searched the issue tracker for the relevant terms (2026-04-17; re-verified 2026-
 
 | Search term | Hits | Status |
 |-------------|------|--------|
-| `GCC 14` | 9 | All closed; nothing about minimal-profile build failures. Top hit is the CI-can't-update ticket #5115. |
+| `GCC 14` | 9 | All closed; nothing about minimal-profile build failures. Top hit is the CI-can't-update ticket [#5115](https://github.com/jerryscript-project/jerryscript/issues/5115). |
 | `same_value_zero` | 0 | Not reported. |
 | `global_obj_p` | 4 | None about Bugs 2/3. |
 | `unused parameter` | 1 (closed, 2015) | Not our Bug 4. |
@@ -295,7 +295,7 @@ Searched the issue tracker for the relevant terms (2026-04-17; re-verified 2026-
 [#5050](https://github.com/jerryscript-project/jerryscript/issues/5050)
 "build error with certain config options" (opened 2023-03-11, **still
 open**, **0 comments**, last touched 2024-11). Re-verified 2026-04-19:
-the REALMS=0 case reported in #5050's body is the **same file
+the REALMS=0 case reported in [#5050](https://github.com/jerryscript-project/jerryscript/issues/5050)'s body is the **same file
 (`jerry-core/vm/opcodes.c`), same function
 (`opfunc_lexical_scope_has_restricted_binding`), same assertion line
 (`frame_ctx_p->this_binding == ecma_builtin_get_global ()`), same
@@ -318,7 +318,7 @@ for three years. This is strong evidence that:
 
 ### How to file (if we choose to)
 
-Reasonable course: comment on **#5050** with our findings (it's the
+Reasonable course: comment on **[#5050](https://github.com/jerryscript-project/jerryscript/issues/5050)** with our findings (it's the
 existing umbrella for this class), and/or open a fresh issue titled
 something like:
 
