@@ -280,7 +280,7 @@ ranlib flags when not using AppleClang (#5258)". No release since v3.0.0.
 
 ### Search results for our 7 bugs
 
-Searched the issue tracker for the relevant terms (2026-04-17):
+Searched the issue tracker for the relevant terms (2026-04-17; re-verified 2026-04-19):
 
 | Search term | Hits | Status |
 |-------------|------|--------|
@@ -291,19 +291,30 @@ Searched the issue tracker for the relevant terms (2026-04-17):
 | `minimal profile` / `JERRY_BUILTINS=0` | 0 relevant | Not reported. |
 | `Werror unused` | 1 open ([#5171](https://github.com/jerryscript-project/jerryscript/issues/5171), Clang pointer-auth) | Different bug. |
 
-**One open ticket is in the same family but does not cover any of our 7
-bugs:** [#5050](https://github.com/jerryscript-project/jerryscript/issues/5050)
+**One open ticket covers Bugs 2 and 3 verbatim:**
+[#5050](https://github.com/jerryscript-project/jerryscript/issues/5050)
 "build error with certain config options" (opened 2023-03-11, **still
-open**, **0 comments**, last touched 2024-11). It reports compile failures
-with `JERRY_BUILTIN_WEAKREF=0` + `JERRY_BUILTIN_CONTAINER=1`, and
-separately with `JERRY_BUILTIN_REALMS=0`. The REALMS=0 case is the same
-class of bug as our Bugs 2/3 (different files), and the report has sat
-unanswered for three years. This is strong evidence that:
+open**, **0 comments**, last touched 2024-11). Re-verified 2026-04-19:
+the REALMS=0 case reported in #5050's body is the **same file
+(`jerry-core/vm/opcodes.c`), same function
+(`opfunc_lexical_scope_has_restricted_binding`), same assertion line
+(`frame_ctx_p->this_binding == ecma_builtin_get_global ()`), same
+undeclared-variable line (`ecma_get_global_scope (global_obj_p)`)** as
+our Bugs 2 and 3 — not "same class, different files" as an earlier draft
+of this doc claimed. The WEAKREF=0 + CONTAINER=1 case in the same ticket
+is a separate file (`ecma-gc.c`, `ECMA_OBJECT_CLASS_WEAKREF` undeclared)
+and is the same class as our Bug 7 (`ECMA_OBJECT_CLASS_REGEXP_STRING_ITERATOR`
+undeclared under `JERRY_BUILTIN_REGEXP=0`). The ticket has sat unanswered
+for three years. This is strong evidence that:
 
-1. None of our 7 specific bugs are reported upstream.
+1. Bugs 2 and 3 are already reported upstream and stalled; Bugs 1, 4, 5,
+   6 are novel; Bug 7 is a sibling of the WEAKREF case in the same ticket.
 2. The general class of "disabled-builtin combinations don't compile" is
    known to upstream but unaddressed.
-3. New build-failure reports are unlikely to be acted on quickly.
+3. New build-failure reports are unlikely to be acted on quickly — the
+   maintainer's standard response to build/feature tickets is
+   "Contributions through new PRs are always welcome!" (see e.g.
+   [#5171 comment](https://github.com/jerryscript-project/jerryscript/issues/5171#issuecomment-2490349571)).
 
 ### How to file (if we choose to)
 
