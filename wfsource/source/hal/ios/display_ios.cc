@@ -120,12 +120,26 @@ Display::PageFlip()
     // signaled by the main-thread CADisplayLink callback.
     usleep(16000);
 
+    // ConvertTimeToScalar packs seconds into an int16, so the caller must
+    // hand it a *delta* timeval (small), not an absolute Unix-epoch one.
+    // Mirror the gfx/gl/display.cc:417-454 pattern.
     struct timeval tvNow;
     gettimeofday(&tvNow, nullptr);
-    const Scalar now  = ConvertTimeToScalar(tvNow);
-    const Scalar prev = ConvertTimeToScalar(_clockLastTime);
+
+    struct timeval deltatime;
+    deltatime.tv_usec = tvNow.tv_usec - _clockLastTime.tv_usec;
+    deltatime.tv_sec  = tvNow.tv_sec  - _clockLastTime.tv_sec;
+    while (deltatime.tv_usec < 0) {
+        deltatime.tv_usec += 1000000;
+        deltatime.tv_sec  -= 1;
+    }
+
+    Scalar delta = ConvertTimeToScalar(deltatime);
+    if (delta > SCALAR_CONSTANT(1.0 / 5.0))  delta = SCALAR_CONSTANT(1.0 / 5.0);
+    if (delta < SCALAR_CONSTANT(1.0 / 1200)) delta = SCALAR_CONSTANT(1.0 / 1200);
+
     _clockLastTime = tvNow;
-    return now - prev;
+    return delta;
 }
 
 //==============================================================================
