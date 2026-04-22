@@ -22,6 +22,7 @@
 //=============================================================================
 
 #import <Metal/Metal.h>
+#import <QuartzCore/CAMetalLayer.h>
 #import <simd/simd.h>
 
 #include <gfx/renderer_backend.hp>
