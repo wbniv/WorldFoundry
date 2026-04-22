@@ -75,9 +75,36 @@ Commit `498f6ec`. Controller loads `cast_sender.js?loadCastFramework=1`, initial
 
 Controller PING displays on the TV receiver via actual Cast session. Blocked on device serial (Phase 1b last step) — user locating remote.
 
-### Phase 2+ — reaction game
+### Phase 2a — reaction game state machine (mini-game 1) ✅ (server + tests; end-to-end pending Cast device)
 
-Implements the reaction game on top of the platform shell (`party-games/games/reaction/`). Phases per the design doc: mini-game 1 (countdown), mini-game 2 (image recognition), 10-point win condition, fireworks.
+Implements mini-game 1 (countdown timer) as a **game plugin** at `party-games/games/reaction/reaction.js` consumed by the platform via `createServer({ game })`. Plugin interface is minimal: `{onJoin, onLeave, onMessage}` receiving a `services = {broadcast, sendTo, getPlayers, getHost, now, schedule, random}` surface. All clocks are injectable so tests can deterministically fast-forward through countdowns + scoring windows.
+
+State machine: `LOBBY → ROUND_COUNTDOWN → ROUND_OPEN → ROUND_ENDED → (next round | GAME_OVER) → NEW_GAME (LOBBY)`. Server owns all state + timestamps; controllers forward button presses; receiver renders phases + scoreboard.
+
+New messages on top of the platform's HELLO/PING/STATE/WELCOME/PONG:
+- Controller → server: `START_GAME` (host only from LOBBY/GAME_OVER), `BUTTON_PRESS {clientTs}`, `NEW_GAME` (host only from GAME_OVER).
+- Server → clients: `PHASE {phase, scores}`, `ROUND_COUNTDOWN {roundId, showMs}`, `TIMER_FIRED {roundId, serverTs}`, `EARLY_PRESS {roundId, playerId, name}`, `ROUND_ENDED {roundId, ranks, scores}`, `GAME_OVER {winnerId, name, scores}`.
+
+Scoring: 4/3/2/1 to 1st–4th; first to 10 pts wins. Early press → lockout for that round only, scores 0. Server-receive-timestamp adjudication (design doc §Timing).
+
+Receiver renders: LOBBY player list; countdown with a decaying CSS bar keyed to showMs (9s); giant animated GO! on TIMER_FIRED; per-round rankings + running scoreboard; final winner screen.
+
+Controller button label + action adapts to phase: START/NEW GAME for host in LOBBY/GAME_OVER; GO! (or LOCKED) during ROUND_OPEN.
+
+Test coverage:
+- `party-games/platform/server/test/relay.test.js` — 10 tests (platform protocol, hardening).
+- `party-games/platform/server/test/reaction-integration.test.js` — 2 tests (game wired through real WebSocket server with fake clock).
+- `party-games/games/reaction/test/reaction.test.js` — 13 tests (state machine in isolation).
+
+End-to-end verification on a physical Cast device is still blocked on device-serial registration (Phase 1b).
+
+### Phase 2b — reaction game mini-game 2 (image recognition) — deferred
+
+Needs a pool of ~20 distinct flat icons + preload logic on receiver + same timing-adjudication machinery applied to `SHOW_IMAGE(targetId)` rather than `TIMER_FIRED`. Tackled after Phase 1d unblocks and 2a is hardened on a real device.
+
+### Phase 3+ — UX polish, PWA manifest, mobile CSS, cards game, production hosting
+
+Per the "Out of scope" section below; expanded after Phase 2 lands.
 
 ## Proposed repo layout
 

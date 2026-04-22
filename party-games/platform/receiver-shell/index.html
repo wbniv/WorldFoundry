@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Party Games · Receiver</title>
   <link rel="stylesheet" href="receiver.css">
-  <!-- Google Cast Application Framework (CAF v3). Loaded from gstatic.
-       The receiver runs both on a real Chromecast and in a plain browser tab
-       (dev loop); receiver.js gates cast-specific init on `cast.framework`. -->
   <script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
 </head>
 <body>
@@ -16,9 +13,32 @@
       <h1>Party Games Platform</h1>
       <p id="status" class="status">connecting…</p>
     </header>
-    <section id="players">
-      <h2>Players</h2>
-      <ul id="player-list"><li class="empty">(no players yet)</li></ul>
+    <section id="stage">
+      <!-- The stage swaps content based on game phase. -->
+      <div id="lobby" class="stage-panel" hidden>
+        <h2>Players</h2>
+        <ul id="player-list"><li class="empty">(no players yet)</li></ul>
+        <p class="hint">Host: tap <strong>START</strong> on your phone once everyone has joined.</p>
+      </div>
+      <div id="countdown" class="stage-panel" hidden>
+        <p class="phase-label">ROUND <span id="round-num"></span></p>
+        <div id="countdown-bar"><div id="countdown-fill"></div></div>
+        <p class="hint">Wait for <strong>GO</strong> · don't tap early!</p>
+      </div>
+      <div id="open" class="stage-panel" hidden>
+        <p id="go" class="go-word">GO!</p>
+      </div>
+      <div id="ended" class="stage-panel" hidden>
+        <h2>Round <span id="ended-round-num"></span> results</h2>
+        <ol id="round-ranks"></ol>
+        <h3>Scoreboard</h3>
+        <ul id="scoreboard"></ul>
+      </div>
+      <div id="gameover" class="stage-panel" hidden>
+        <p class="phase-label">GAME OVER</p>
+        <p class="winner">🏆 <span id="winner-name"></span> wins!</p>
+        <ul id="final-scoreboard"></ul>
+      </div>
     </section>
     <section id="log">
       <h2>Events</h2>
