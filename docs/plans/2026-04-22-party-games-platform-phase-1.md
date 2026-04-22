@@ -61,20 +61,19 @@ HELLO(role, name?)           →   STATE({players})              // broadcast to
 PING()                       →   PONG(fromPlayerId)             // broadcast to receivers
 ```
 
-### Phase 1b — HTTPS tunnel + Cast Console receiver app registration
+### Phase 1b — HTTPS tunnel + Cast Console receiver app registration ✅
 
-- `cloudflared tunnel --url http://localhost:8080` (or equivalent) → note the `https://<rand>.trycloudflare.com` URL.
-- Cast Console → Applications → Add Custom Receiver → URL = `https://<tunnel>/receiver` → save, note App ID.
-- Cast Console → Devices → verify Chromecast serial is registered (needs ~15 min propagation after add).
-- On phone: Chrome → `⋮` → Cast → pick Chromecast → TV loads the receiver page. Still talks to server via WS through the tunnel.
+- `cloudflared tunnel --url http://localhost:8080` — live at `https://elderly-ethical-gear-cruises.trycloudflare.com` during dev. Quick tunnel, not persistent across restarts; for named tunnels see Phase 4.
+- Cast Console → Applications → Custom Receiver **`A40DF337`** registered as `Party Games Platform (dev)` with URL `https://<tunnel>/receiver`, **unpublished** (only runs on whitelisted test devices — which is what we want).
+- Cast Console → Devices → whitelist Chromecast serial: **pending** — user locating the physical device + remote.
 
-### Phase 1c — Cast sender in the controller
+### Phase 1c — Cast sender in the controller ✅
 
-Replace the manual "cast via Chrome menu" with an in-page "Cast to TV" button (Cast Sender SDK v3). Session management: first controller to connect starts the cast; subsequent controllers join the same room.
+Commit `498f6ec`. Controller loads `cast_sender.js?loadCastFramework=1`, initialises `CastContext` with `receiverApplicationId: 'A40DF337'`, exposes a `<google-cast-launcher>` web component for the native device picker. State line reflects `idle / connecting / on <device>`. Receiver logs `SENDER_CONNECTED/DISCONNECTED` to the on-screen event log; status line appends app-data name once CAF's `READY` fires.
 
-### Phase 1d — end-to-end button round-trip on real Cast device
+### Phase 1d — end-to-end button round-trip on real Cast device (blocked)
 
-Controller PING displays on the TV receiver via actual Cast session. Commit Phase 1 complete.
+Controller PING displays on the TV receiver via actual Cast session. Blocked on device serial (Phase 1b last step) — user locating remote.
 
 ### Phase 2+ — reaction game
 
