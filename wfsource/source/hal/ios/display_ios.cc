@@ -130,22 +130,7 @@ Display::PageFlip()
 
 //==============================================================================
 
-void
-Display::SetBackgroundColor(const Color& color)
-{
-    _backgroundColor      = color;
-    _backgroundColorRed   = float(color.Red())   / 255.0f;
-    _backgroundColorGreen = float(color.Green()) / 255.0f;
-    _backgroundColorBlue  = float(color.Blue())  / 255.0f;
-}
-
-//==============================================================================
-
-void
-Display::Validate() const
-{
-    assert(_xSize > 0);
-    assert(_ySize > 0);
-}
+// SetBackgroundColor + Validate are already inlined in gfx/display.hpi; do
+// not redefine them here (the GL display.cc doesn't either).
 
 //==============================================================================
