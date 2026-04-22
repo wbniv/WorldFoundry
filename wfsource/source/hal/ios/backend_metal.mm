@@ -316,24 +316,27 @@ public:
         _cpu.push_back(tri[0]);
         _cpu.push_back(tri[1]);
         _cpu.push_back(tri[2]);
+        _frameTrisSubmitted++;
     }
 
     void EndFrame() override
     {
-        // Log every 30 frames so we can watch the triangle count evolve
-        // as the camera stabilizes without spamming wf.log. The camera
-        // settles over the first few seconds of play — the snowgoons
-        // scene goes from 12 tris visible (just one object in frame) to
-        // the full ~600-tri view once the bungee camera tracks the
-        // main character.
-        static int  sFrameN = 0;
+        // Log every 30 frames: per-frame DrawTriangle total (counted across
+        // all texture-change flushes) plus the number of batches those split
+        // into (Flush invocations per frame). Earlier this tracer logged
+        // _cpu.size() right before the final Flush — which only measures
+        // the LAST texture's batch, not the whole frame's draw count.
+        static int sFrameN = 0;
         if (sFrameN == 0 || (sFrameN % 30) == 0) {
             std::fprintf(stderr,
-                         "wf_game: MetalBackend EndFrame #%d — cpu=%zu tris, encoder=%s\n",
-                         sFrameN, _cpu.size() / 3, _encoder ? "live" : "nil");
+                         "wf_game: frame #%d — %d tris in %d batches, encoder=%s\n",
+                         sFrameN, _frameTrisSubmitted, _frameFlushCount,
+                         _encoder ? "live" : "nil");
         }
         sFrameN++;
         Flush();
+        _frameTrisSubmitted = 0;
+        _frameFlushCount    = 0;
     }
 
     // Phase 2C: MetalView's CADisplayLink callback calls SetCurrentEncoder
@@ -358,6 +361,10 @@ private:
     id<MTLTexture>             _dummyWhiteTex   = nil;
     std::unordered_map<const PixelMap*, id<MTLTexture>> _texCache;
     bool                       _inited          = false;
+
+    // Per-frame counters reset in EndFrame after the periodic tracer reads them.
+    int                        _frameTrisSubmitted = 0;
+    int                        _frameFlushCount    = 0;
 
     float _proj[16];
     float _mv[16];
@@ -565,6 +572,7 @@ private:
             _curTexture = nullptr;
             return;
         }
+        _frameFlushCount++;
         LazyInit();
         if (!_inited) {
             _cpu.clear();
