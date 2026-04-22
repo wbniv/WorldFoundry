@@ -175,8 +175,15 @@ list(APPEND WF_SOURCES
 # iOS: link stubs for the 8 GL-backend RenderObject3D::RenderPoly3D* methods
 # that Material::Get3DRenderObjectPtr references unconditionally. Real impls
 # land with the Metal backend in Phase 2B3.
+#
+# backend_factory.cc lives in gfx/glpipeline/ which is excluded from the
+# iOS build (rest of glpipeline hard-depends on GLES), but it's
+# backend-agnostic and picks Metal on iOS via a WF_TARGET_IOS #ifdef.
 if(IOS)
-    list(APPEND WF_SOURCES ${STUB_SRC}/renderpoly3d_stubs.cc)
+    list(APPEND WF_SOURCES
+        ${STUB_SRC}/renderpoly3d_stubs.cc
+        ${SRC}/gfx/glpipeline/backend_factory.cc
+    )
 endif()
 
 # ─── Lua 5.4 ──────────────────────────────────────────────────────────────────
