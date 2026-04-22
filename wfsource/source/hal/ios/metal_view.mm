@@ -25,6 +25,10 @@
 #import <Metal/Metal.h>
 #include <hal/hal.h>
 
+// Defined in hal/ios/input.mm. Android has the same forward-decl in its
+// native_app_entry.cc for the same reason — the prototype isn't in hal.h.
+extern "C" void _HALSetJoystickButtons(joystickButtonsF joystickButtons);
+
 // Read from backend_metal.mm (engine thread). __strong by default under ARC.
 CAMetalLayer*       gWFMetalLayer = nil;
 id<MTLCommandQueue> gWFMetalQueue = nil;
