@@ -168,17 +168,25 @@ list(APPEND WF_SOURCES
     ${STUB_SRC}/platform_stubs.cc
 )
 
-# iOS: link stubs for the 8 GL-backend RenderObject3D::RenderPoly3D* methods
-# that Material::Get3DRenderObjectPtr references unconditionally. Real impls
-# land with the Metal backend in Phase 2B3.
+# iOS: the 8 RenderObject3D::RenderPoly3D* methods in gfx/glpipeline/rend*.cc
+# are backend-agnostic — they just decode a Primitive into RBVertex/normal
+# and call RendererBackendGet().DrawTriangle(...). Pull them in explicitly
+# since the rest of gfx/glpipeline/ hard-depends on GLES. Same for
+# backend_factory.cc (picks Metal via WF_TARGET_IOS ifdef).
 #
-# backend_factory.cc lives in gfx/glpipeline/ which is excluded from the
-# iOS build (rest of glpipeline hard-depends on GLES), but it's
-# backend-agnostic and picks Metal on iOS via a WF_TARGET_IOS #ifdef.
+# Phase 2C-B removed the renderpoly3d_stubs.cc no-ops that were used while
+# only backend_metal.mm existed — the real impls now drive DrawTriangle.
 if(IOS)
     list(APPEND WF_SOURCES
-        ${STUB_SRC}/renderpoly3d_stubs.cc
         ${SRC}/gfx/glpipeline/backend_factory.cc
+        ${SRC}/gfx/glpipeline/rendfcl.cc
+        ${SRC}/gfx/glpipeline/rendfcp.cc
+        ${SRC}/gfx/glpipeline/rendftl.cc
+        ${SRC}/gfx/glpipeline/rendftp.cc
+        ${SRC}/gfx/glpipeline/rendgcl.cc
+        ${SRC}/gfx/glpipeline/rendgcp.cc
+        ${SRC}/gfx/glpipeline/rendgtl.cc
+        ${SRC}/gfx/glpipeline/rendgtp.cc
     )
 endif()
 
