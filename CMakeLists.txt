@@ -80,12 +80,18 @@ if(ANDROID)
         menu particle audio/linux  # miniaudio impl is portable; dir name is legacy
     )
 elseif(IOS)
-    # Phase 2B1: adding gfx/ root dir. gfx/gl (X11/GLX) and gfx/glpipeline
-    # (GL-only backend) stay out — iOS gets its own Metal backend in 2B.
+    # Phase 2B2: most of the engine. gfx/gl (X11/GLX) and gfx/glpipeline
+    # (GL-only backend) stay out; iOS renders through hal/ios/metal_view.mm
+    # + (Phase 2B3) a Metal RendererBackend.
+    # savegame/linux is reused — it's POSIX file I/O, works on Darwin too.
     set(WF_DIRS
         pigsys streams cpplib math memory iff mailbox
         hal hal/ios
         gfx
+        input asset baseobject movement room physics
+        anim timer scripting game ini loadfile
+        profile renderassets savegame savegame/linux
+        menu particle audio/linux
     )
 else()
     set(WF_DIRS
