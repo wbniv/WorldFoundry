@@ -212,4 +212,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-22 02:50** — [`docs/plans/2026-04-22-nongeom-actor-zero-bbox-spike.md`](docs/plans/2026-04-22-nongeom-actor-zero-bbox-spike.md): Plan: empirical spike — does zero-extent bbox break the 5 non-collision Actor classes?
+**2026-04-22 02:52** — [`docs/plans/2026-04-22-nongeom-actor-zero-bbox-spike.md`](docs/plans/2026-04-22-nongeom-actor-zero-bbox-spike.md): Plan: empirical spike — does zero-extent bbox break non-geometry Actor classes?
