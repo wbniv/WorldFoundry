@@ -449,6 +449,19 @@ if(ANDROID OR IOS)
     target_compile_options(wf_game PRIVATE -Wno-register)
 endif()
 
+# iOS: miniaudio.h (included via audio/linux/audio_internal.hp) pulls in
+# AVFoundation.framework headers on Darwin, which contain Objective-C syntax.
+# The audio/linux/*.cc files would fail to parse as plain C++, so compile them
+# as Objective-C++ on iOS. (Linux/Android stay on plain C++ — no AVFoundation.)
+if(IOS)
+    foreach(_audio_src miniaudio_impl.cc music.cc buffer.cc device.cc)
+        set_source_files_properties(
+            ${SRC}/audio/linux/${_audio_src}
+            PROPERTIES LANGUAGE OBJCXX
+        )
+    endforeach()
+endif()
+
 if(ANDROID)
     # Bump Jolt + zforth to -O3 in Release to match main target. (Jolt is ~36%
     # of .text so even +10% speed here moves the needle.) Jolt has no `throw`
