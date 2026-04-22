@@ -7,7 +7,9 @@
 
 ## Summary
 
-Eight days of work (2026-04-12 – 2026-04-19). Newest first:
+Ten days of work (2026-04-12 – 2026-04-21). Newest first:
+
+**iOS port unblocked, Phase 0 in progress (2026-04-21)** — Codemagic cloud-Mac builds lift the "no Mac" block that parked the 2026-04-16 iOS plan; `2026-ios` branch cut from `2026-android`, revised plan ([2026-04-21-ios-port-codemagic](docs/plans/2026-04-21-ios-port-codemagic.md)) stages Simulator-only work (Phases 0–3) before the $99 Apple Developer spend (Phase 4) and collaborator-device verification via TestFlight (Phase 5).
 
 **Snowgoons renders fully via textile-rs + levcomp-rs pipeline (2026-04-19)** — two user-visible regressions closed this session: textile-rs's 24-bit TGA path was routing `rgba_555(r,g,b,255)` into its `a > 170 → return 0` translucent-black sentinel, blanking the House shake-roof texture (`11cbca7` added a direct BGR555 fast path matching C++ `BR_COLOUR_BGRA(r,g,b,0)`); and levcomp-rs's earlier `21ca707` audit-fix was too eager — unconditionally preferring nested STR over DATA for any I32 field with a pipe-separated enum list — demoting Omni01/Omni02 `lightType` from DIRECTIONAL (DATA=0) to AMBIENT (STR="Ambient"→1 due to a Blender-exporter bug at `export_level.py:1077`), removing both directional lights at runtime and dimming the scene (`4c3e652` gated the STR-lookup on `ShowAs ∈ {DROPMENU, RADIOBUTTONS}` per iff2lvl's `oad.cc:1245-1276`); LVL content-diff is now 3 uninitialized room-struct pad bytes (same `new char[]` family as the `_PathOnDisk.base.rot` "Euler garbage" earlier in the day), shadows + textured House roof both restored in-game.
 
