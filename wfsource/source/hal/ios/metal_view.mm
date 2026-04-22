@@ -1,26 +1,37 @@
 //=============================================================================
-// hal/ios/metal_view.mm: CAMetalLayer-backed UIView + CADisplayLink driver
+// hal/ios/metal_view.mm: CAMetalLayer-backed UIView, owner of device + queue
 // Copyright ( c ) 2026 World Foundry Group
 // Part of the World Foundry 3D video game engine/production environment
 // for more information about World Foundry, see www.worldfoundry.org
 //=============================================================================
-// Phase 2A: minimal Metal bring-up. Creates a CAMetalLayer-hosting UIView,
-// owns a MTLDevice + MTLCommandQueue, and clears to a solid color every frame
-// via a CADisplayLink. No rendering yet — proves Metal links on iOS Simulator,
-// CAMetalLayer renders drawables, and the display-link callback fires.
+// Phase 2C-B: the view no longer drives its own per-frame clear/present via a
+// CADisplayLink. Instead, the engine thread owns the frame end-to-end (mirror
+// of how Linux works): Display::RenderBegin calls WFIosRenderBegin (defined in
+// backend_metal.mm) which acquires a drawable, builds a command buffer +
+// encoder, and hands the encoder to the MetalRendererBackend. RenderEnd calls
+// WFIosRenderEnd which flushes any batched triangles, ends the encoder, and
+// commits/presents.
 //
-// Phase 2B replaces the clear with the real RendererBackend path (MSL shader
-// + vertex buffer + snowgoons triangles).
+// This file's remaining responsibilities:
+//   - Create the CAMetalLayer as the view's backing layer.
+//   - Own the MTLDevice + MTLCommandQueue.
+//   - Expose the layer + queue to backend_metal.mm via two globals
+//     (gWFMetalLayer, gWFMetalQueue) — Obj-C __strong, so they stay alive for
+//     the app's lifetime.
+//   - Keep drawableSize in sync with the view's pixel bounds via layoutSubviews.
 //=============================================================================
 
 #import "metal_view.h"
 #import <Metal/Metal.h>
 
+// Read from backend_metal.mm (engine thread). __strong by default under ARC.
+CAMetalLayer*       gWFMetalLayer = nil;
+id<MTLCommandQueue> gWFMetalQueue = nil;
+
 @implementation WFMetalView
 {
     id<MTLDevice>        _device;
     id<MTLCommandQueue>  _queue;
-    CADisplayLink*       _displayLink;
 }
 
 + (Class)layerClass { return [CAMetalLayer class]; }
@@ -43,51 +54,21 @@
     ml.framebufferOnly    = YES;
     ml.contentsScale      = [UIScreen mainScreen].scale;
 
-    // Phase 2A debug color: a distinctive cornflower blue. If the screenshot
-    // shows this, Metal is running; Phase 2B will replace with real rendering.
-    self.backgroundColor  = [UIColor colorWithRed:0.39 green:0.58 blue:0.93 alpha:1.0];
+    // Publish to the engine-thread side of the bridge.
+    gWFMetalLayer = ml;
+    gWFMetalQueue = _queue;
 
     NSLog(@"wf_game: MetalView init, device=%@, scale=%g",
           _device.name, ml.contentsScale);
     return self;
 }
 
-- (void)didMoveToWindow
+- (void)layoutSubviews
 {
-    [super didMoveToWindow];
-    if (self.window && !_displayLink) {
-        _displayLink = [CADisplayLink displayLinkWithTarget:self
-                                                   selector:@selector(tick:)];
-        [_displayLink addToRunLoop:[NSRunLoop mainRunLoop]
-                           forMode:NSRunLoopCommonModes];
-    } else if (!self.window && _displayLink) {
-        [_displayLink invalidate];
-        _displayLink = nil;
-    }
-}
-
-- (void)tick:(CADisplayLink*)link
-{
+    [super layoutSubviews];
     CAMetalLayer* ml = (CAMetalLayer*)self.layer;
     ml.drawableSize = CGSizeMake(self.bounds.size.width  * ml.contentsScale,
                                  self.bounds.size.height * ml.contentsScale);
-
-    id<CAMetalDrawable> drawable = [ml nextDrawable];
-    if (!drawable) return;
-
-    MTLRenderPassDescriptor* rp = [MTLRenderPassDescriptor renderPassDescriptor];
-    rp.colorAttachments[0].texture     = drawable.texture;
-    rp.colorAttachments[0].loadAction  = MTLLoadActionClear;
-    rp.colorAttachments[0].storeAction = MTLStoreActionStore;
-    rp.colorAttachments[0].clearColor  = MTLClearColorMake(0.39, 0.58, 0.93, 1.0);
-
-    id<MTLCommandBuffer> cb = [_queue commandBuffer];
-    id<MTLRenderCommandEncoder> enc =
-        [cb renderCommandEncoderWithDescriptor:rp];
-    [enc endEncoding];
-
-    [cb presentDrawable:drawable];
-    [cb commit];
 }
 
 @end

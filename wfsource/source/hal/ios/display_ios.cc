@@ -29,6 +29,13 @@
 extern int _halWindowWidth;
 extern int _halWindowHeight;
 
+// Implemented in hal/ios/backend_metal.mm. The engine thread calls these per
+// frame — WFIosRenderBegin acquires a drawable + command buffer + encoder and
+// hands the encoder to the Metal backend; WFIosRenderEnd ends the encoder and
+// commits/presents.
+extern "C" void WFIosRenderBegin(float clearR, float clearG, float clearB);
+extern "C" void WFIosRenderEnd(void);
+
 //==============================================================================
 
 static inline Scalar
@@ -94,8 +101,13 @@ void
 Display::RenderBegin()
 {
     Validate();
-    // Clear + drawable acquisition are WFMetalView's job; Display here just
-    // sets per-frame renderer state.
+    // Phase 2C-B: engine thread owns the frame. Acquire a drawable + build a
+    // command buffer + render command encoder, clearing to the Display's
+    // background color, and hand the encoder to the Metal backend. Subsequent
+    // DrawTriangle calls batch against this encoder until RenderEnd flushes.
+    WFIosRenderBegin(_backgroundColorRed,
+                     _backgroundColorGreen,
+                     _backgroundColorBlue);
     RendererBackendGet().SetLightingEnabled(true);
     RendererBackendGet().ResetModelView();
 }
@@ -105,9 +117,10 @@ Display::RenderBegin()
 void
 Display::RenderEnd()
 {
-    // Flush batched triangles into the current frame's Metal encoder (set up
-    // by WFMetalView's CADisplayLink callback — Phase 2C-B wiring).
+    // Flush batched triangles into the live encoder, then tear down the frame:
+    // end the encoder, present the drawable, commit the command buffer.
     RendererBackendGet().EndFrame();
+    WFIosRenderEnd();
 }
 
 //==============================================================================

@@ -493,3 +493,59 @@ RendererBackend* MetalBackendInstance()
 {
     return &sMetalBackend;
 }
+
+// ---- Phase 2C-B frame bridge ------------------------------------------------
+// Display::RenderBegin / RenderEnd (display_ios.cc) call these from the engine
+// thread. Between them the engine batches triangles into sMetalBackend;
+// RenderEnd's backend.EndFrame() flushes the batch into the live encoder, then
+// WFIosRenderEnd ends the encoder and commits.
+//
+// Layer + queue come from hal/ios/metal_view.mm.
+extern CAMetalLayer*       gWFMetalLayer;
+extern id<MTLCommandQueue> gWFMetalQueue;
+
+static id<MTLCommandBuffer>        sFrameCmdBuffer = nil;
+static id<CAMetalDrawable>         sFrameDrawable  = nil;
+static id<MTLRenderCommandEncoder> sFrameEncoder   = nil;
+
+extern "C" void
+WFIosRenderBegin(float clearR, float clearG, float clearB)
+{
+    if (!gWFMetalLayer || !gWFMetalQueue) return;
+
+    id<CAMetalDrawable> drawable = [gWFMetalLayer nextDrawable];
+    if (!drawable) return;   // swap chain busy — drop this frame.
+
+    MTLRenderPassDescriptor* rp = [MTLRenderPassDescriptor renderPassDescriptor];
+    rp.colorAttachments[0].texture     = drawable.texture;
+    rp.colorAttachments[0].loadAction  = MTLLoadActionClear;
+    rp.colorAttachments[0].storeAction = MTLStoreActionStore;
+    rp.colorAttachments[0].clearColor  =
+        MTLClearColorMake(clearR, clearG, clearB, 1.0);
+
+    id<MTLCommandBuffer> cb  = [gWFMetalQueue commandBuffer];
+    id<MTLRenderCommandEncoder> enc =
+        [cb renderCommandEncoderWithDescriptor:rp];
+
+    sFrameCmdBuffer = cb;
+    sFrameDrawable  = drawable;
+    sFrameEncoder   = enc;
+    sMetalBackend.SetCurrentEncoder(enc);
+}
+
+extern "C" void
+WFIosRenderEnd(void)
+{
+    if (!sFrameEncoder) return;   // matched a skipped RenderBegin.
+
+    // Display::RenderEnd has already invoked backend.EndFrame(), which calls
+    // Flush() and submits any batched triangles into sFrameEncoder. Tear down.
+    sMetalBackend.ClearCurrentEncoder();
+    [sFrameEncoder endEncoding];
+    [sFrameCmdBuffer presentDrawable:sFrameDrawable];
+    [sFrameCmdBuffer commit];
+
+    sFrameEncoder   = nil;
+    sFrameDrawable  = nil;
+    sFrameCmdBuffer = nil;
+}
