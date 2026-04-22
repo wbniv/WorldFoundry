@@ -9,6 +9,15 @@ SoundDevice::SoundDevice() : _ready(false), _impl(nullptr)
 	_impl = new Impl();
 
 	ma_engine_config cfg = ma_engine_config_init();
+#if defined(WF_TARGET_IOS)
+	// iOS Simulator's CoreAudio Initialize RPC deadlocks (~9s timeout) on
+	// Codemagic's headless Mac mini — no audio hardware session, so
+	// ma_engine_init never returns and HALStart stalls inside _InitAudio.
+	// noDevice=MA_TRUE keeps the engine's mixing graph alive without opening
+	// a playback device; nothing is rendered. Revisit when on-device testing
+	// lands in Phase 5 and actual CoreAudio is available.
+	cfg.noDevice = MA_TRUE;
+#endif
 	ma_result r = ma_engine_init(&cfg, &_impl->engine);
 	if (r != MA_SUCCESS) {
 		fprintf(stderr, "audio: ma_engine_init failed (%d) — running silent\n", r);
