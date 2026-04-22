@@ -1,0 +1,75 @@
+:root { color-scheme: dark; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #0c0f14;
+  color: #e6e8eb;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+}
+
+main {
+  padding: 4vh 6vw;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3vh;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+header {
+  text-align: center;
+  padding-top: 1vh;
+}
+.status {
+  opacity: 0.55;
+  font-size: 0.85rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.name {
+  font-size: 1.15rem;
+  margin-top: 0.6vh;
+  opacity: 0.9;
+}
+
+.big-button {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  border: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ff8a8a, #d14545 55%, #8a2a2a 100%);
+  color: white;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: transform 80ms ease-out;
+  box-shadow: 0 2vh 5vh rgba(0,0,0,0.45), inset 0 -1vh 3vh rgba(0,0,0,0.3);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.big-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.big-button.flash {
+  transform: scale(1.08);
+}
+.big-button:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.help {
+  opacity: 0.5;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: auto;
+  padding-bottom: 2vh;
+}
