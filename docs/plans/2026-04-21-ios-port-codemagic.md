@@ -1,7 +1,7 @@
 # Plan: iOS port (via Codemagic)
 
 **Date:** 2026-04-21 (revises the 2026-04-16 doc — prior version parked the port as "blocked on lack of a Mac")
-**Status:** Phase 1 verified (2026-04-22) — Codemagic ships the `.app`, boots it on an iPhone 17 Pro Simulator inside the same Mac runner, and the unified log confirms `HALGetAssetAccessor().OpenForRead("cd.iff")` succeeded. Build → install → launch → viewDidLoad → NSLog `"cd.iff opened, size=174080"`, all automated, zero user Macs involved. Full HAL-plus-core build in 172 KB arm64 Mach-O + 170 KB bundled cd.iff resource. Phase 2 next: Metal backend + gfx/ + game/ wired in.
+**Status:** Phase 2A verified (2026-04-22) — Metal is alive on the iOS Simulator. `WFMetalView` hosts a `CAMetalLayer` as the root view, `CADisplayLink` ticks a clear-to-color render pass each frame, presents the drawable, and the sim-verify screenshot shows a solid cornflower-blue framebuffer (3.1M of 3.16M pixels at the expected (99,148,237)). `MTLCreateSystemDefaultDevice()` returns "Apple iOS simulator GPU" at @3x scale. `cd.iff` still opens from `HALGetAssetAccessor`. Phase 2B next: port GLSL shaders to MSL, implement `RendererBackend` subclass with real vertex batching + texture binding, pull `gfx/` + `game/` into iOS `WF_DIRS`, wire `backend_factory.cc` iOS branch, first snowgoons frame.
 **Goal:** An arm64 IPA that runs snowgoons on a physical iPhone, installed via TestFlight (or ad-hoc), with Codemagic as the only Mac in the loop. Proof-of-viability, not a shipping product.
 
 ## Context
