@@ -470,6 +470,36 @@ endif()
 
 target_link_libraries(wf_game PRIVATE ${WF_LINK_LIBS})
 
+# ─── iOS .app bundle resources ────────────────────────────────────────────────
+if(IOS)
+    set(IOS_DIR ${CMAKE_SOURCE_DIR}/ios)
+    set_target_properties(wf_game PROPERTIES
+        BUNDLE                                         TRUE
+        MACOSX_BUNDLE_INFO_PLIST                       ${IOS_DIR}/Info.plist
+        MACOSX_BUNDLE_GUI_IDENTIFIER                   org.worldfoundry.wf-game
+        MACOSX_BUNDLE_BUNDLE_NAME                      wf_game
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER      org.worldfoundry.wf-game
+        XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET     "13.0"
+        XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY         "1,2"
+        # No signing in Phase 1 — Simulator only, no provisioning needed.
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY             ""
+        XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED          "NO"
+        XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED           "NO"
+    )
+    # Launch storyboard needs to be a bundle resource. Any assets (cd.iff,
+    # level0.mid, sf2) that exist at configure time get bundled alongside.
+    set(IOS_RESOURCES ${IOS_DIR}/LaunchScreen.storyboard)
+    foreach(asset cd.iff level0.mid florestan-subset.sf2)
+        set(path ${CMAKE_SOURCE_DIR}/wfsource/source/game/${asset})
+        if(EXISTS ${path})
+            list(APPEND IOS_RESOURCES ${path})
+        endif()
+    endforeach()
+    target_sources(wf_game PRIVATE ${IOS_RESOURCES})
+    set_source_files_properties(${IOS_RESOURCES} PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources)
+endif()
+
 # ─── Output location matches build_game.sh ────────────────────────────────────
 if(NOT ANDROID)
     set_target_properties(wf_game PROPERTIES
