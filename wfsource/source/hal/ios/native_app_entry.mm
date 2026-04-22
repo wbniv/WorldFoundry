@@ -11,6 +11,7 @@
 //=============================================================================
 
 #import <UIKit/UIKit.h>
+#import "metal_view.h"
 #include <hal/asset_accessor.hp>
 
 // Defined in hal/ios/platform.mm. C++ linkage (matches the Linux/Android HAL;
@@ -30,10 +31,17 @@ extern "C" void HALNotifyResume(void);
 
 @implementation WFRootViewController
 
+- (void)loadView
+{
+    // Phase 2A: root view is a CAMetalLayer-backed WFMetalView (see
+    // hal/ios/metal_view.mm). CADisplayLink drives clear-to-color each frame;
+    // Phase 2B will replace the clear with the real RendererBackend path.
+    self.view = [[WFMetalView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.view.backgroundColor = [UIColor blackColor];
 
     // Phase 1 HAL bring-up. Args are dummies; HAL_MAX_* match hal/linux's call.
     static int  argc = 1;

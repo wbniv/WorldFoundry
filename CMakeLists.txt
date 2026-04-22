@@ -454,13 +454,16 @@ endif()
 if(ANDROID)
     list(APPEND WF_LINK_LIBS EGL GLESv3 android log m OpenSLES)
 elseif(IOS)
-    # Phase 1 minimum frameworks. Metal/MetalKit land in Phase 2 with the
-    # backend_metal.mm implementation.
+    # Metal/MetalKit added 2026-04-22 for Phase 2A (MetalView in hal/ios/
+    # drives a CAMetalLayer clear via CADisplayLink). Phase 2B wires this to
+    # the engine RendererBackend proper.
     list(APPEND WF_LINK_LIBS
         "-framework Foundation"
         "-framework UIKit"
         "-framework QuartzCore"
         "-framework CoreFoundation"
+        "-framework Metal"
+        "-framework MetalKit"
     )
 else()
     list(APPEND WF_LINK_LIBS GL GLU X11 m pthread dl)
