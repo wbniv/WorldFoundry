@@ -4,7 +4,9 @@
 **Status:** Phase 2D steps 1+2 verified — snowgoons renders correctly on iOS (2026-04-22). Step 1 (textures): PixelMap→MTLTexture upload via root-walker accessors (`GetRoot()` + `GetRootPixelBuffer()`), per-root cache keyed on `const PixelMap*`, `MTLSamplerState` matching GL's linear/repeat under GFX_ZBUFFER, 1×1 white fallback so `[[texture(0)]]` is always bound, MSL fragment samples when `u.use_tex != 0`. Step 2 (z-buffer): the original cpu=12-tris-flat screenshot was a z-sort artifact, not camera/frustum — the render pass had no depth attachment so draws overwrote each other in submission order. Added `Depth32Float` MTLTexture (allocated to drawable size in `WFIosRenderBegin`, reused across frames, reallocated on size change), `MTLDepthStencilState` (LessEqual + writes enabled), `depthAttachmentPixelFormat` in the pipeline state. Also fixed `Mat4Perspective` to produce Metal-style NDC.z ∈ [0, 1] instead of the GL-style [-1, 1] (otherwise near-plane triangles have negative z and get clipped). Sim-verify screenshot now shows log cabin with snowy roof + blue windows, tree properly occluded by hedge, snowgoon/player character visible in center, snowy ground at correct depth relative to cabin — full snowgoons scene rendered on iPhone 17 Pro Simulator. Phase 2D step 3: lockstep render parity diff vs. Linux to catch any remaining per-vertex / shader / state differences. Phase 3 queued: touch input + on-screen HUD.
 **Goal:** An arm64 IPA that runs snowgoons on a physical iPhone, installed via TestFlight (or ad-hoc), with Codemagic as the only Mac in the loop. Proof-of-viability, not a shipping product.
 
-<img src="screenshots/2026-04-22-ios-phase-2d-zbuffer.png" width="400" alt="Snowgoons on iOS Simulator after Phase 2D z-buffer fix — log cabin, tree, hedge, ground all rendering with correct depth ordering and textures.">
+<p align="center">
+  <img src="screenshots/2026-04-22-ios-phase-2d-zbuffer.png" width="500" alt="Snowgoons on iOS Simulator after Phase 2D z-buffer fix — log cabin, tree, hedge, ground all rendering with correct depth ordering and textures.">
+</p>
 
 ## Context
 
