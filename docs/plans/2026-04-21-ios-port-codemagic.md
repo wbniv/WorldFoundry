@@ -22,16 +22,11 @@ Two constraints change how the phases stage:
 - **No interactive Xcode / Instruments.** Runtime debug falls back to on-device log files (same pattern as Android's on-device `wf.log` — see commit history). GPU frame capture is deferred or handled out-of-band on the collaborator's Mac if available.
 - **Build path is `git push` → `codemagic.yaml` → artifact.** The repo grows a `codemagic.yaml` at root describing the build workflow; no local Xcode invocation.
 - **Codemagic M-series Mac minis run arm64 Simulator natively** — Simulator architecture matches device, so Metal shader behavior is a realistic preview.
-- **Mind the Mac build minutes, but don't starve the bring-up.** Expect ~15–25 min for a clean CMake + Xcode build; 500 min/month ≈ 20–30 builds. It's a delicate balance: during Phases 0–2, expect to push per step — each Codemagic run is the only way to see what the Mac toolchain rejects, and skipping steps wastes more minutes than it saves. Once the pipeline is reliably green, batch commits before pushing.
+- **Mac build minutes are cheap enough to push per step.** Measured across 29 real runs (2026-04-22 session), Codemagic's M2 Mac mini runs clean CMake + Xcode builds + 45s sim-verify in **2–4 min each (avg 3.4 min)**. 500 min/month ≈ **100–150 builds** — easily enough to push per commit during bring-up; no need to batch. The original 15–25 min estimate in this plan was wildly conservative; ccache and incremental CMake are pulling their weight.
 
 ## Correction to the original plan's graphics options
 
-The 2026-04-16 doc proposed "GLES via MoltenVK" as a graphics option. MoltenVK is **Vulkan → Metal**, not GL → Metal — WF uses GLES 3.0, not Vulkan, so MoltenVK doesn't apply directly. The real options are:
-
-- **Native Metal** (recommended) — write a `backend_metal.cc` alongside `wfsource/source/gfx/glpipeline/backend_modern.cc` implementing the `RendererBackend` interface (`wfsource/source/gfx/renderer_backend.hp:26-80`). WF's shader surface is tiny (per-vertex phong + fog, see embedded GLSL in `backend_modern.cc:58-116`). MSL port is tractable.
-- **ANGLE (GL→Metal translation layer)** as fallback — Google's ANGLE ships an iOS Metal backend and could consume the existing GLSL ES shaders unchanged. Bigger runtime dependency, extra build complexity on Codemagic, but zero shader port work. Hold in reserve if Metal shader porting hits a wall.
-
-Recommendation: native Metal. The fallback exists only if MSL translation becomes a time sink.
+The 2026-04-16 doc proposed "GLES via MoltenVK" as a graphics option, but MoltenVK is **Vulkan → Metal**, not GL → Metal — WF uses GLES 3.0, not Vulkan, so MoltenVK doesn't apply directly. The actual path taken was **native Metal**: `wfsource/source/hal/ios/backend_metal.mm` implements the `RendererBackend` interface method-for-method against `backend_modern.cc`, with MSL vertex+fragment shaders inline and runtime-compiled via `[MTLDevice newLibraryWithSource:]` — no separate `.metal` file, no Xcode build phase, Codemagic-native. The shader port was tractable (snowgoons renders correctly as of 2026-04-22, see Status above); ANGLE was never needed as a fallback.
 
 ## Phases
 
