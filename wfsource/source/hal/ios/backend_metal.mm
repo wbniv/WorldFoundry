@@ -30,6 +30,7 @@
 #include <math/matrix34.hp>
 
 #include <cmath>
+#include <cstdio>
 #include <cstring>
 #include <vector>
 
@@ -308,6 +309,13 @@ public:
 
     void EndFrame() override
     {
+        static bool sLoggedFirstEndFrame = true;
+        if (sLoggedFirstEndFrame) {
+            sLoggedFirstEndFrame = false;
+            std::fprintf(stderr,
+                         "wf_game: first MetalBackend EndFrame — cpu=%zu tris, encoder=%s\n",
+                         _cpu.size() / 3, _encoder ? "live" : "nil");
+        }
         Flush();
     }
 
@@ -512,10 +520,33 @@ static id<MTLRenderCommandEncoder> sFrameEncoder   = nil;
 extern "C" void
 WFIosRenderBegin(float clearR, float clearG, float clearB)
 {
-    if (!gWFMetalLayer || !gWFMetalQueue) return;
+    static bool sFirstCall    = true;
+    static bool sLoggedNoLayer = false;
+    static bool sLoggedNoDraw  = false;
+
+    if (sFirstCall) {
+        sFirstCall = false;
+        std::fprintf(stderr, "wf_game: → first WFIosRenderBegin "
+                             "layer=%p queue=%p clear=(%.2f,%.2f,%.2f)\n",
+                     (void*)gWFMetalLayer, (void*)gWFMetalQueue,
+                     clearR, clearG, clearB);
+    }
+    if (!gWFMetalLayer || !gWFMetalQueue) {
+        if (!sLoggedNoLayer) {
+            sLoggedNoLayer = true;
+            std::fprintf(stderr, "wf_game: WFIosRenderBegin — layer/queue nil\n");
+        }
+        return;
+    }
 
     id<CAMetalDrawable> drawable = [gWFMetalLayer nextDrawable];
-    if (!drawable) return;   // swap chain busy — drop this frame.
+    if (!drawable) {
+        if (!sLoggedNoDraw) {
+            sLoggedNoDraw = true;
+            std::fprintf(stderr, "wf_game: WFIosRenderBegin — nextDrawable nil (first occurrence)\n");
+        }
+        return;   // swap chain busy — drop this frame.
+    }
 
     MTLRenderPassDescriptor* rp = [MTLRenderPassDescriptor renderPassDescriptor];
     rp.colorAttachments[0].texture     = drawable.texture;
