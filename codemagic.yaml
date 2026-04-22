@@ -73,17 +73,18 @@ workflows:
 
       - name: Boot Simulator, install .app, capture screenshot + log
         # Phase 1 Verify proxy for users without a local Mac: Codemagic's Mac
-        # runner already has Xcode + xcrun simctl, so we can install the .app
-        # on a boot'd Simulator and exercise viewDidLoad long enough to capture
-        # the NSLog from native_app_entry.mm:viewDidLoad (sanity-probes cd.iff
-        # via HALGetAssetAccessor). Screenshot + log stream become artifacts.
+        # runner has Xcode + xcrun simctl, so we install the .app on a boot'd
+        # Simulator and capture a screenshot + unified-log output from the
+        # launched process. NSLog from WFRootViewController::viewDidLoad
+        # (cd.iff sanity probe via HALGetAssetAccessor) is our target signal.
         script: |
           set -euo pipefail
 
+          SIM_ART="$CM_BUILD_DIR/sim-artifacts"
+          mkdir -p "$SIM_ART"
+
           APP="$CM_BUILD_DIR/engine/Debug/wf_game.app"
           BUNDLE_ID="org.worldfoundry.wf-game"
-          SCREENSHOT="$CM_BUILD_DIR/sim-screenshot.png"
-          SIMLOG="$CM_BUILD_DIR/sim-launch.log"
 
           # Pick the first available iPhone simulator that matches the SDK.
           DEVICE_ID=$(xcrun simctl list -j devices available \
@@ -99,46 +100,57 @@ workflows:
           ')
           echo "Using simulator UDID: $DEVICE_ID"
 
-          xcrun simctl boot "$DEVICE_ID" || true   # already-booted is fine
+          xcrun simctl boot "$DEVICE_ID" || true
           xcrun simctl bootstatus "$DEVICE_ID" -b
 
           echo "--- install ---"
           xcrun simctl install "$DEVICE_ID" "$APP"
 
-          echo "--- launch (background, console-pty detached) ---"
-          # --terminate-running-process so reruns don't share state.
-          # --console-pty would block; we redirect the launched process's
-          # stderr/stdout via the unified log stream instead.
-          xcrun simctl launch --terminate-running-process "$DEVICE_ID" "$BUNDLE_ID"
+          echo "--- launch ---"
+          LAUNCH_OUTPUT=$(xcrun simctl launch --terminate-running-process "$DEVICE_ID" "$BUNDLE_ID")
+          echo "$LAUNCH_OUTPUT"
+          APP_PID=$(echo "$LAUNCH_OUTPUT" | awk '{print $NF}')
+          echo "Launched PID: $APP_PID"
 
-          echo "--- wait for viewDidLoad log ---"
-          # Stream the unified log for 3 seconds to catch the NSLog from
-          # WFRootViewController::viewDidLoad (cd.iff sanity probe).
-          timeout 3 xcrun simctl spawn "$DEVICE_ID" log stream \
-              --level debug \
-              --predicate "processImagePath CONTAINS 'wf_game'" \
-            > "$SIMLOG" 2>&1 || true
-          echo "--- last 40 lines of sim log ---"
-          tail -40 "$SIMLOG" || true
+          echo "--- sleep 3s to let viewDidLoad run ---"
+          sleep 3
 
           echo "--- screenshot ---"
-          xcrun simctl io "$DEVICE_ID" screenshot "$SCREENSHOT"
-          ls -la "$SCREENSHOT" "$SIMLOG"
+          xcrun simctl io "$DEVICE_ID" screenshot "$SIM_ART/screenshot.png"
+
+          echo "--- capture unified log (last 60s, wf_game process) ---"
+          # log show reads finished log entries — no streaming, no GNU timeout
+          # needed (which doesn't exist on macOS).
+          xcrun simctl spawn "$DEVICE_ID" log show \
+              --predicate 'processImagePath CONTAINS "wf_game"' \
+              --style compact \
+              --last 60s \
+            > "$SIM_ART/launch.log" 2>&1 || true
+          echo "--- last 40 lines of sim log ---"
+          tail -40 "$SIM_ART/launch.log" || true
+
+          echo "--- process still alive check ---"
+          # If the app crashed, it won't be listed. Non-fatal.
+          if xcrun simctl spawn "$DEVICE_ID" launchctl list 2>/dev/null | grep -q wf_game; then
+              echo "wf_game still running after 3s"
+          else
+              echo "NOTE: wf_game not in launchctl list (may have exited cleanly or crashed)"
+          fi
+
+          ls -la "$SIM_ART/"
 
           echo "--- shutdown ---"
           xcrun simctl shutdown "$DEVICE_ID" || true
 
-          # Non-fatal — the sanity probe is informational. Build is still
-          # green if simctl succeeded to install + launch + screenshot.
-          if grep -q "cd.iff opened" "$SIMLOG"; then
+          # Non-fatal — the sanity probe is informational.
+          if grep -q "cd.iff opened" "$SIM_ART/launch.log"; then
               echo "Phase 1 Verify: HALGetAssetAccessor opened cd.iff"
           else
-              echo "WARN: did not observe 'cd.iff opened' in sim log — check screenshot + log"
+              echo "WARN: did not observe 'cd.iff opened' in sim log — see artifacts"
           fi
 
     artifacts:
-      - sim-screenshot.png
-      - sim-launch.log
+      - sim-artifacts/**
       # CMake sets RUNTIME_OUTPUT_DIRECTORY to ${CMAKE_SOURCE_DIR}/engine, so
       # the .app + its dSYM land under engine/Debug/ on iOS Sim builds.
       - engine/**/*.app
