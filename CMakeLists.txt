@@ -132,17 +132,13 @@ set(WF_SKIP
     scripting/perl/scriptinterpreter_perl.cc
 )
 
-# iOS: skip files that need platform-specific subsystems we haven't wired up.
-#  - audio.mm: references SoundDevice/MusicPlayer from audio/linux (not in dirs)
-#  - input.mm: engine-only glue, no callers in Phase 2A build
-#  - gfx/display.cc: #includes gfx/gl/display.cc which hard-includes <GL/gl.h>.
-#    Phase 2+ iOS render path goes through WFMetalView; Display stubs land when
-#    the engine tries to instantiate one.
+# iOS: skip files that aren't standalone translation units.
+#  - display_ios.cc: #included from gfx/display.cc when WF_TARGET_IOS is
+#    defined (same pattern as gfx/gl/display.cc on Linux).
+# audio.mm + input.mm are now needed once HALStart runs on iOS (Phase 2C).
 if(IOS)
     list(APPEND WF_SKIP
-        hal/ios/audio.mm
-        hal/ios/input.mm
-        gfx/display.cc
+        hal/ios/display_ios.cc
     )
 endif()
 

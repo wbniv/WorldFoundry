@@ -13,6 +13,9 @@
 #import <UIKit/UIKit.h>
 #import "metal_view.h"
 #include <hal/asset_accessor.hp>
+#include <hal/hal.h>
+
+#include <pthread.h>
 
 // Defined in hal/ios/platform.mm. C++ linkage (matches the Linux/Android HAL;
 // extern "C" here would mismatch the definition's mangling and fail at link).
@@ -23,6 +26,29 @@ extern "C" void WFIosSetSurfaceSize(int w, int h);
 // Defined in hal/ios/lifecycle.mm.
 extern "C" void HALNotifySuspend(void);
 extern "C" void HALNotifyResume(void);
+
+//=============================================================================
+// Engine thread. Phase 2C-A pattern: UIApplicationMain + CADisplayLink
+// stay on the main thread; HALStart → PIGSMain → WFGame's blocking game
+// loop runs on a dedicated background thread that we spawn from
+// viewDidLoad. HALStart itself calls _PlatformSpecificInit, so we don't
+// pre-init from the main thread; the AssetAccessor becomes valid on the
+// engine thread just before PIGSMain.
+//=============================================================================
+
+static pthread_t sEngineThread;
+static bool      sEngineThreadStarted = false;
+
+static void* WFEngineThreadMain(void* /*arg*/)
+{
+    NSLog(@"wf_game: engine thread enter");
+    static int   argc    = 1;
+    static char  arg0[]  = "wf_game";
+    static char* argv[2] = { arg0, nullptr };
+    HALStart(argc, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
+    NSLog(@"wf_game: engine thread exit (HALStart returned)");
+    return nullptr;
+}
 
 //=============================================================================
 
@@ -43,20 +69,25 @@ extern "C" void HALNotifyResume(void);
 {
     [super viewDidLoad];
 
-    // Phase 1 HAL bring-up. Args are dummies; HAL_MAX_* match hal/linux's call.
-    static int  argc = 1;
-    static char arg0[] = "wf_game";
-    static char* argv[] = { arg0, nullptr };
-    _PlatformSpecificInit(argc, argv, 32, 256, 32);
-
-    // Sanity check: can we open cd.iff via NSBundle?
-    AssetHandle* h = HALGetAssetAccessor().OpenForRead("cd.iff");
-    if (h) {
-        int64_t sz = HALGetAssetAccessor().Size(h);
-        NSLog(@"wf_game: cd.iff opened, size=%lld", sz);
-        HALGetAssetAccessor().Close(h);
-    } else {
-        NSLog(@"wf_game: cd.iff NOT found in bundle (Phase 1 expected, assets land in Phase 1C)");
+    // Phase 2C-A: spawn the engine thread. HALStart → _PlatformSpecificInit
+    // → PIGSMain → WFGame → RunGameScript happen on this thread; the main
+    // thread remains owned by UIApplication + the CADisplayLink in
+    // WFMetalView. Thread sync for the Metal encoder handoff lands in
+    // Phase 2C-B — for now, Display::PageFlip sleeps ~16ms and the Metal
+    // backend drops any batched triangles because no encoder is set.
+    if (!sEngineThreadStarted) {
+        pthread_attr_t attr;
+        pthread_attr_init(&attr);
+        pthread_attr_setstacksize(&attr, 8 * 1024 * 1024);  // WF eats stack
+        int rc = pthread_create(&sEngineThread, &attr,
+                                WFEngineThreadMain, nullptr);
+        pthread_attr_destroy(&attr);
+        if (rc == 0) {
+            sEngineThreadStarted = true;
+            NSLog(@"wf_game: engine thread spawned");
+        } else {
+            NSLog(@"wf_game: engine thread spawn failed (errno=%d)", rc);
+        }
     }
 }
 

@@ -26,7 +26,15 @@
 
 #include <gfx/display.hp>
 
-#include <gfx/gl/display.cc>
+#if defined(WF_TARGET_IOS)
+// iOS uses the Metal backend; windowing/drawable acquisition live in
+// hal/ios/metal_view.mm rather than gfx/gl/mesa.cc. Display on iOS is a
+// thin timer + projection-setup wrapper over the Metal RendererBackend.
+#  include <hal/ios/display_ios.cc>
+#else
+#  include <gfx/gl/display.cc>
+#endif
+
 #if defined(_MSC_VER)
 #pragma comment( lib, "opengl32.lib" )
 #endif

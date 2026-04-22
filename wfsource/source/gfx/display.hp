@@ -43,7 +43,7 @@
 #include "otable.hp"
 #include "renderer.hp"
 
-#if defined(__LINUX__) || defined(__ANDROID__)
+#if defined(__LINUX__) || defined(__ANDROID__) || defined(WF_TARGET_IOS)
 #include <sys/time.h>
 #endif
 
