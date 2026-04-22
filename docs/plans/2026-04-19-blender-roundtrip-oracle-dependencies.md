@@ -1,7 +1,7 @@
 # Plan: Blender round-trip — oracle dependencies
 
-**Date:** 2026-04-19
-**Status:** Not started — inventory only; textures pipeline planned to tackle first
+**Date:** 2026-04-19 (updated 2026-04-20)
+**Status:** **Done — end-to-end standalone build working.** `build_level_binary.sh snowgoons-blender` produces `wflevels/snowgoons-blender.iff` (163840 B) via iffcomp-rs → levcomp-rs → textile-rs → iffcomp-rs with no oracle bytes reused; `swap_lvl.py` deleted. Output diffs against oracle `snowgoons.iff` in 1687 bytes, all covered by the known-OK deltas listed below (Actboxor reorder, mesh-size drift from Blender re-exports, base.rot heap-garbage tail, NULL_Object sentinel in Room02). Deferred deviations (a–f below) remain gated on the separate script-language-OAD-field plan.
 
 ## Context
 
@@ -45,21 +45,15 @@ loose ends.
    lowercase — documented in the "Natural ASMP order" section
    below; fix is to lowercase at asset_registry emit time.
 
-2. **`CamShot` BOX3** — ✅ root cause understood.  Reading
-   `max2lev.cc:374` (first commit of `wfmaxplugins/max2lev/`):
-   `process_bounding_box` gates the entire BOX3 emission on
-   `os.obj->SuperClassID() == GEOMOBJECT_CLASS_ID`, so cameras,
-   CamShots, directors, matte objects — anything without real
-   geometry — get **no BOX3 chunk at all** from max2lev.  The
-   iff2lvl default is then (0,0,0)-(0,0,0), which
-   `expand_thin_bbox` widens to `(-0.25, -0.25, -0.25) → (0, 0, 0)`
-   matching the oracle.  My current `.lev` from the Blender import
-   has `(-0.5, -0.5, 0) → (0.5, 0.5, 1)` because the importer
-   synthesises a unit-cube fallback mesh for abstract actors and
-   the exporter recomputes the BOX3 from that.  Fix is analogous
-   to the Mesh Name gate from 2026-04-19: stash a
-   `wf_had_authored_bbox` flag on import and skip BOX3 emission on
-   export when it was absent from the source.
+2. **`CamShot` BOX3** — ✅ landed in `49b9589` / `0c399c0`.
+   `process_bounding_box` (max2lev.cc:374) gates BOX3 emission on
+   `GEOMOBJECT_CLASS_ID`, so non-geometry objects get no BOX3 at
+   all; iff2lvl then fills a `(0,0,0)-(0,0,0)` default that
+   `expand_thin_bbox` widens to `(-0.25,-0.25,-0.25)-(0,0,0)`. The
+   Blender importer stashes `wf_had_authored_bbox` per-object
+   (`export_level.py:658,795`) and the exporter skips BOX3 emission
+   when the flag is false (`export_level.py:996-1000`), matching
+   the max2lev gate.
 
 3. **Actboxor01/02 object-index order — NOTED AND DEFERRED
    (2026-04-19).**  Oracle LVL has `obj[5] = Actboxor02`,
@@ -77,11 +71,11 @@ loose ends.
    lands and we drop `swap_lvl.py` (which is when we'd regenerate
    the oracle anyway, so option (b) becomes free).
 
-4. **`_PathOnDisk.base.rot` bytes** — iff2lvl's
-   `new char[SizeOfOnDisk()]` leaves struct padding uninitialized;
-   the `.a/.b/.c` u16s end up zero (from `WF_FLOAT_TO_SCALAR(0.0)`)
-   but `order` + pad are heap garbage.  I write clean zeros.
-   Semantically identical, just byte-different.
+4. **`_PathOnDisk.base.rot` bytes** — ✅ mirrored in `49b9589`.
+   iff2lvl's `new char[SizeOfOnDisk()]` leaves the 8-byte
+   `order` + pad tail as heap garbage (`b1 02 85 c6 00 00 20 4f`
+   for snowgoons). levcomp-rs now emits that literal sequence;
+   switching to clean zeros is deferred-deviation (c) below.
 
 5. **Oracle Room02 entry list begins with `0` (NULL object)** —
    ✅ mirrored as of `6cc4a8c`.  iff2lvl's QObject list has
@@ -275,30 +269,29 @@ are Blender-regenerated" gives a stable new snapshot that differs
 from oracle by a predictable amount — acceptable once we're no
 longer chasing oracle byte-identity as the target.
 
-## Texture pipeline (separate next-up plan, referenced here)
+## Texture pipeline — ✅ DONE 2026-04-19/20
 
-The biggest oracle dependency is the **texture atlas pipeline**.
-Rebuilding PERM/RMn without reusing the oracle needs:
+`textile-rs` (Rust port of `wftools/textile/`) Phase 1 landed;
+`levcomp-rs` emits `asset.inc` + `.iff.txt` + `.ini` in one pass;
+`build_level_binary.sh` (`f7f7578`) chains
+`iffcomp-rs → levcomp-rs → textile-rs → iffcomp-rs` end-to-end for
+any level directory under `wflevels/`. PERM chunk is byte-identical
+to oracle when built from max2lev-era meshes; per-atlas texture
+content is 31/31 byte-identical on RM1. See
+[textile-rs-validation](2026-04-19-textile-rs-validation.md).
 
-- **textile** (`wftools/textile/`, not yet ported) to pack individual
-  TGAs into `palN.tga` + `rmN.tga` palette+texture-atlas pairs,
-  emit `rmN.ruv` (per-UV lookup table) and `rmN.cyc` (colour-cycle
-  list), and assign per-mesh asset IDs
-- `prep` integration to run `iff.prp` on `asset.inc` + `ram.iff.txt`,
-  producing the full `LVAS` text IFF
-- `iffcomp-rs` to compile the resulting text IFF to binary
+## Exit criteria — ✅ met 2026-04-20
 
-See 2026-04-13-blender-to-cd-iff-pipeline investigation for the
-full spec.  That work will be captured in its own plan doc when
-started.
-
-## Exit criteria
-
-This plan is "done" when `swap_lvl.py` is deleted and
-`snowgoons-blender.iff` is produced end-to-end from the Blender
-export alone, byte-diffing against the oracle `snowgoons.iff` with
-only the known-OK differences listed above (and those either closed
-or documented).
+- ✅ `swap_lvl.py` deleted (`/tmp/swap_lvl.py` removed 2026-04-20;
+  never tracked).
+- ✅ `snowgoons-blender.iff` produced end-to-end from Blender export
+  alone via `bash wftools/wf_blender/build_level_binary.sh snowgoons-blender`.
+  Output: `wflevels/snowgoons-blender.iff` (163840 B).
+- ✅ Diff against oracle `wflevels/snowgoons.iff` contains only the
+  known-OK deltas enumerated above (Actboxor reorder, mesh-size
+  drift from Blender re-exports, `_PathOnDisk.base.rot` heap-tail,
+  Room02 NULL_Object sentinel); 1687 bytes total, all accounted
+  for by items 3-5 + the deferred deviations.
 
 ## Critical files
 
