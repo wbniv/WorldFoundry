@@ -33,6 +33,8 @@ Recommendation: native Metal. The fallback exists only if MSL translation become
 
 ### Phase 0 — Codemagic project bootstrap (no signing)
 
+> Project + webhook wiring steps live in [codemagic-setup.md](../codemagic-setup.md) — do that once on the Codemagic/GitHub side before pushing anything here.
+
 1. Add `codemagic.yaml` at repo root — Xcode workflow, M-series Mac mini runner, triggers on the `2026-ios` branch (new).
 2. Workflow runs `cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_SYSROOT=iphonesimulator ...` and `xcodebuild -configuration Debug`. Initially *nothing compiles* — Phase 0 just proves the Mac runner reaches the CMake error.
 3. Cut `2026-ios` branch from `2026-android` (master is badly out of date; 2026-android is where the Android port, textile-rs, levcomp-rs, and Blender round-trip work actually lives). Push; confirm Codemagic picks it up; watch the first build log.

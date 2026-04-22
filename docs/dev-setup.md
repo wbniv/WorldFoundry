@@ -2,6 +2,8 @@
 
 Minimum setup to build and run `wf_game` on a fresh Linux (Ubuntu 24.04 verified) box, plus the Rust-port asset pipeline tools.
 
+> **iOS builds** run on Codemagic's cloud Mac mini — see [codemagic-setup.md](codemagic-setup.md) for the one-time GitHub App + webhook wiring.
+
 ## System packages (apt)
 
 ```bash
