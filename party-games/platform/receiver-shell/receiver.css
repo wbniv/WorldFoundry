@@ -1,0 +1,53 @@
+/* Receiver — TV display. Sized in vh/vw so it scales from browser-tab preview to 1080p TV. */
+:root { color-scheme: dark; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #0c0f14;
+  color: #e6e8eb;
+  min-height: 100vh;
+  padding: 3vh 4vw;
+  line-height: 1.35;
+}
+
+header { margin-bottom: 3vh; }
+h1 {
+  font-size: 4.5vh;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+h2 {
+  font-size: 2.2vh;
+  font-weight: 500;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 2.5vh 0 1vh;
+}
+
+.status {
+  font-size: 1.8vh;
+  opacity: 0.55;
+  margin-top: 0.6vh;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+#players ul, #log ol {
+  list-style: none;
+  font-size: 2.4vh;
+}
+#players li, #log li {
+  padding: 0.5vh 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+#players .empty {
+  opacity: 0.35;
+  font-style: italic;
+  border-bottom: none;
+}
+#log li {
+  opacity: 0.85;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.9vh;
+}

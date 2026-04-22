@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Party Games · Receiver</title>
+  <link rel="stylesheet" href="receiver.css">
+  <!-- Google Cast Application Framework (CAF v3). Loaded from gstatic.
+       The receiver runs both on a real Chromecast and in a plain browser tab
+       (dev loop); receiver.js gates cast-specific init on `cast.framework`. -->
+  <script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Party Games Platform</h1>
+      <p id="status" class="status">connecting…</p>
+    </header>
+    <section id="players">
+      <h2>Players</h2>
+      <ul id="player-list"><li class="empty">(no players yet)</li></ul>
+    </section>
+    <section id="log">
+      <h2>Events</h2>
+      <ol id="event-log"></ol>
+    </section>
+  </div>
+  <script src="receiver.js"></script>
+</body>
+</html>
