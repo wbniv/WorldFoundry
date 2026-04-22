@@ -17,8 +17,9 @@ workflows:
 
     environment:
       xcode: latest
-      cmake: 3.28.3
 
+    # python-tui-lib submodule points at a local dev path; not needed for engine
+    # build, so skip submodule init on CI.
     triggering:
       events:
         - push
@@ -26,10 +27,7 @@ workflows:
         - pattern: '2026-ios'
           include: true
           source: true
-
-    # python-tui-lib submodule points at a local dev path; not needed for engine
-    # build, so skip submodule init on CI.
-    cancel_previous_builds: true
+      cancel_previous_builds: true
 
     scripts:
       - name: Toolchain versions
@@ -77,6 +75,3 @@ workflows:
       - build-ios-sim/**/*.app
       - build-ios-sim/CMakeFiles/**/*.log
       - xcodebuild.log
-
-    publishing:
-      # No email/TestFlight/etc. wired up during bring-up.
