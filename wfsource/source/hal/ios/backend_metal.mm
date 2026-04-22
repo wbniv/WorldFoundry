@@ -158,14 +158,19 @@ static void Mat4Identity(float m[16])
 static void Mat4Perspective(float fovDegY, float aspect, float nz, float fz,
                             float out[16])
 {
+    // Metal-style right-handed perspective: NDC.z ∈ [0, 1], unlike GL's
+    // [-1, 1]. Using a GL-style matrix here against a Metal depth buffer
+    // clips the near half of the view (NDC.z < 0 fails depth test). WF's
+    // Linux build uses the GL-native [-1, 1] convention in
+    // gfx/glpipeline/backend_modern.cc's matching helper.
     const float f =
         1.0f / std::tan((fovDegY * 0.5f) * (3.14159265358979323846f / 180.0f));
     std::memset(out, 0, sizeof(float) * 16);
     out[0]  = f / aspect;
     out[5]  = f;
-    out[10] = (fz + nz) / (nz - fz);
+    out[10] = fz / (nz - fz);
     out[11] = -1.0f;
-    out[14] = (2.0f * fz * nz) / (nz - fz);
+    out[14] = (fz * nz) / (nz - fz);
 }
 
 static void Mat4Multiply(const float a[16], const float b[16], float out[16])
@@ -349,6 +354,7 @@ private:
     id<MTLRenderPipelineState> _pipeline        = nil;
     id<MTLRenderCommandEncoder> _encoder        = nil;
     id<MTLSamplerState>        _sampler         = nil;
+    id<MTLDepthStencilState>   _depthState      = nil;
     id<MTLTexture>             _dummyWhiteTex   = nil;
     std::unordered_map<const PixelMap*, id<MTLTexture>> _texCache;
     bool                       _inited          = false;
@@ -424,10 +430,11 @@ private:
 
         MTLRenderPipelineDescriptor* pd =
             [[MTLRenderPipelineDescriptor alloc] init];
-        pd.vertexFunction                  = vs;
-        pd.fragmentFunction                = fs;
-        pd.vertexDescriptor                = vd;
-        pd.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+        pd.vertexFunction                   = vs;
+        pd.fragmentFunction                 = fs;
+        pd.vertexDescriptor                 = vd;
+        pd.colorAttachments[0].pixelFormat  = MTLPixelFormatBGRA8Unorm;
+        pd.depthAttachmentPixelFormat       = MTLPixelFormatDepth32Float;
 
         _pipeline = [_device newRenderPipelineStateWithDescriptor:pd
                                                             error:&err];
@@ -445,6 +452,13 @@ private:
         sd.sAddressMode = MTLSamplerAddressModeRepeat;
         sd.tAddressMode = MTLSamplerAddressModeRepeat;
         _sampler = [_device newSamplerStateWithDescriptor:sd];
+
+        // Depth-stencil state: standard z-less-equal with writes enabled.
+        MTLDepthStencilDescriptor* dsd =
+            [[MTLDepthStencilDescriptor alloc] init];
+        dsd.depthCompareFunction = MTLCompareFunctionLessEqual;
+        dsd.depthWriteEnabled    = YES;
+        _depthState = [_device newDepthStencilStateWithDescriptor:dsd];
 
         // 1x1 white fallback so the shader always has a valid texture bound
         // on untextured draws — u.use_tex=0 gates actual sampling, but Metal
@@ -569,6 +583,7 @@ private:
         [_encoder setFragmentSamplerState:_sampler atIndex:0];
 
         [_encoder setRenderPipelineState:_pipeline];
+        [_encoder setDepthStencilState:_depthState];
         [_encoder setVertexBytes:_cpu.data()
                            length:_cpu.size() * sizeof(Vert)
                           atIndex:0];
@@ -610,6 +625,25 @@ static id<MTLCommandBuffer>        sFrameCmdBuffer = nil;
 static id<CAMetalDrawable>         sFrameDrawable  = nil;
 static id<MTLRenderCommandEncoder> sFrameEncoder   = nil;
 
+// Reused across frames; reallocated on drawable-size changes (e.g. orientation
+// transitions). Depth32Float matches the pipeline state's depthAttachmentPixelFormat.
+static id<MTLTexture>              sDepthTex       = nil;
+
+static id<MTLTexture>
+WFIosGetDepthTexture(NSUInteger w, NSUInteger h)
+{
+    if (sDepthTex && sDepthTex.width == w && sDepthTex.height == h)
+        return sDepthTex;
+    MTLTextureDescriptor* td = [MTLTextureDescriptor
+        texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float
+                                     width:w height:h
+                                 mipmapped:NO];
+    td.usage       = MTLTextureUsageRenderTarget;
+    td.storageMode = MTLStorageModePrivate;
+    sDepthTex = [gWFMetalQueue.device newTextureWithDescriptor:td];
+    return sDepthTex;
+}
+
 extern "C" void
 WFIosRenderBegin(float clearR, float clearG, float clearB)
 {
@@ -647,6 +681,13 @@ WFIosRenderBegin(float clearR, float clearG, float clearB)
     rp.colorAttachments[0].storeAction = MTLStoreActionStore;
     rp.colorAttachments[0].clearColor  =
         MTLClearColorMake(clearR, clearG, clearB, 1.0);
+
+    id<MTLTexture> depth =
+        WFIosGetDepthTexture(drawable.texture.width, drawable.texture.height);
+    rp.depthAttachment.texture     = depth;
+    rp.depthAttachment.loadAction  = MTLLoadActionClear;
+    rp.depthAttachment.storeAction = MTLStoreActionDontCare;
+    rp.depthAttachment.clearDepth  = 1.0;
 
     id<MTLCommandBuffer> cb  = [gWFMetalQueue commandBuffer];
     id<MTLRenderCommandEncoder> enc =
