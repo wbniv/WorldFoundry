@@ -27,6 +27,13 @@
 
 #if defined(__ANDROID__)
 #  include <GLES3/gl3.h>
+#elif defined(WF_TARGET_IOS)
+// iOS ships OpenGLES.framework (deprecated iOS 12+, still present). We use
+// the GL type declarations (GLuint, GLenum, etc.) as a neutral vocabulary —
+// Metal doesn't use them, but existing gfx/ code still has sprinkled refs
+// that need to compile. Phase 2+ Metal backend renders through MTL*; the GL
+// API calls themselves never execute on iOS.
+#  include <OpenGLES/ES3/gl.h>
 #else
 #  include <GL/gl.h>
 #endif

@@ -80,12 +80,12 @@ if(ANDROID)
         menu particle audio/linux  # miniaudio impl is portable; dir name is legacy
     )
 elseif(IOS)
-    # Phase 1 minimal set — just enough to link an .app that launches to a
-    # black UIViewController and can call HALGetAssetAccessor(). Phase 2 adds
-    # gfx/ + game/ + the rest once a Metal backend exists.
+    # Phase 2B1: adding gfx/ root dir. gfx/gl (X11/GLX) and gfx/glpipeline
+    # (GL-only backend) stay out — iOS gets its own Metal backend in 2B.
     set(WF_DIRS
         pigsys streams cpplib math memory iff mailbox
         hal hal/ios
+        gfx
     )
 else()
     set(WF_DIRS
