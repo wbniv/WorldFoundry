@@ -11,6 +11,8 @@
 
 #include <hal/hal.h>
 
+#include <cstdio>
+
 static joystickButtonsF _buttons = 0;
 
 extern "C" void
@@ -19,7 +21,10 @@ _HALSetJoystickButtons(joystickButtonsF joystickButtons)
     _buttons = joystickButtons;
 }
 
-void _InitJoystickInterface(void) {}
+void _InitJoystickInterface(void)
+{
+    std::fprintf(stderr, "wf_game: _InitJoystickInterface (stub)\n");
+}
 void _TermJoystickInterface(void) {}
 
 int _JoystickUserAbort(void)

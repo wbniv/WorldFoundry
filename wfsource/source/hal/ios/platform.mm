@@ -60,6 +60,7 @@ void
 _PlatformSpecificInit(int /*argc*/, char** /*argv*/,
                       int /*maxTasks*/, int /*maxMessages*/, int /*maxPorts*/)
 {
+    std::fprintf(stderr, "wf_game: → _PlatformSpecificInit\n");
     halMemory = malloc(cbHalLmalloc);
     ValidatePtr(halMemory);
     _HALLmalloc = new LMalloc(halMemory, cbHalLmalloc MEMORY_NAMED(COMMA "HalLMalloc"));
@@ -75,6 +76,7 @@ _PlatformSpecificInit(int /*argc*/, char** /*argv*/,
         FatalError("HALCreateNSBundleAccessor returned null");
     }
     HALSetAssetAccessor(accessor);
+    std::fprintf(stderr, "wf_game: ← _PlatformSpecificInit\n");
 }
 
 //=============================================================================

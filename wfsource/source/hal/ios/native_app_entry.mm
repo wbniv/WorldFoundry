@@ -104,12 +104,13 @@ static bool      sEngineThreadStarted = false;
 
 static void* WFEngineThreadMain(void* /*arg*/)
 {
-    NSLog(@"wf_game: engine thread enter");
+    std::fprintf(stderr, "wf_game: engine thread enter\n");
     static int   argc    = 1;
     static char  arg0[]  = "wf_game";
     static char* argv[2] = { arg0, nullptr };
+    std::fprintf(stderr, "wf_game: → HALStart\n");
     HALStart(argc, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
-    NSLog(@"wf_game: engine thread exit (HALStart returned)");
+    std::fprintf(stderr, "wf_game: ← HALStart (returned — game loop ended)\n");
     return nullptr;
 }
 

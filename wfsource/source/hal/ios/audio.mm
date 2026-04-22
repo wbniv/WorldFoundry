@@ -4,10 +4,15 @@
 #include <audio/device.hp>
 #include <audio/music.hp>
 
+#include <cstdio>
+
 void _InitAudio()
 {
+    std::fprintf(stderr, "wf_game: → _InitAudio\n");
     gSoundDevice = new SoundDevice();
+    std::fprintf(stderr, "wf_game: ·  SoundDevice ctor done\n");
     gMusicPlayer = new MusicPlayer();
+    std::fprintf(stderr, "wf_game: ← _InitAudio\n");
 }
 
 void _TermAudio()
