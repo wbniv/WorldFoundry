@@ -53,6 +53,10 @@ set(WF_LINK_LIBS)
 if(ANDROID)
     list(APPEND WF_DEFS WF_TARGET_ANDROID __ANDROID__
                         RENDERER_GLES RENDERER_PIPELINE_GLES SCALAR_TYPE_FLOAT)
+elseif(IOS)
+    # Phase 1: core runtime + HAL only. No RENDERER_* yet — gfx/game/physics
+    # dirs are excluded from the iOS build until Phase 2 lands the Metal backend.
+    list(APPEND WF_DEFS WF_TARGET_IOS SCALAR_TYPE_FLOAT)
 else()
     list(APPEND WF_DEFS WF_TARGET_LINUX __LINUX__
                         RENDERER_GL RENDERER_PIPELINE_GL SCALAR_TYPE_FLOAT)
@@ -74,6 +78,14 @@ if(ANDROID)
         anim timer scripting game ini loadfile
         profile renderassets savegame savegame/android
         menu particle audio/linux  # miniaudio impl is portable; dir name is legacy
+    )
+elseif(IOS)
+    # Phase 1 minimal set — just enough to link an .app that launches to a
+    # black UIViewController and can call HALGetAssetAccessor(). Phase 2 adds
+    # gfx/ + game/ + the rest once a Metal backend exists.
+    set(WF_DIRS
+        pigsys streams cpplib math memory iff mailbox
+        hal hal/ios
     )
 else()
     set(WF_DIRS
@@ -114,9 +126,18 @@ set(WF_SKIP
     scripting/perl/scriptinterpreter_perl.cc
 )
 
+# iOS Phase 1: skip HAL files that pull in sibling subsystems we haven't
+# brought into the build yet. audio.mm references SoundDevice/MusicPlayer
+# from audio/linux/ (not in iOS WF_DIRS); input.mm is engine-only glue.
+if(IOS)
+    list(APPEND WF_SKIP hal/ios/audio.mm hal/ios/input.mm)
+endif()
+
 # ─── Collect sources with skip filter ─────────────────────────────────────────
+# .mm is Objective-C++, only used by hal/ios/ today. Globbing it unconditionally
+# is safe — no other platform ships .mm sources.
 foreach(dir ${WF_DIRS})
-    file(GLOB dir_srcs "${SRC}/${dir}/*.cc")
+    file(GLOB dir_srcs "${SRC}/${dir}/*.cc" "${SRC}/${dir}/*.mm")
     foreach(src ${dir_srcs})
         file(RELATIVE_PATH rel ${SRC} ${src})
         set(_skip FALSE)
@@ -385,6 +406,10 @@ if(ANDROID)
     # ANativeActivity_onCreate lives in android_native_app_glue.c and is the
     # Android loader's entry point. Without -u the linker garbage-collects it.
     target_link_options(wf_game PRIVATE -u ANativeActivity_onCreate)
+elseif(IOS)
+    # MACOSX_BUNDLE makes this an .app directory rather than a bare Mach-O.
+    # Phase 1C fills in the Info.plist + launch screen via target properties.
+    add_executable(wf_game MACOSX_BUNDLE ${WF_SOURCES})
 else()
     add_executable(wf_game ${WF_SOURCES})
 endif()
@@ -423,6 +448,15 @@ endif()
 # ─── Platform link libraries ──────────────────────────────────────────────────
 if(ANDROID)
     list(APPEND WF_LINK_LIBS EGL GLESv3 android log m OpenSLES)
+elseif(IOS)
+    # Phase 1 minimum frameworks. Metal/MetalKit land in Phase 2 with the
+    # backend_metal.mm implementation.
+    list(APPEND WF_LINK_LIBS
+        "-framework Foundation"
+        "-framework UIKit"
+        "-framework QuartzCore"
+        "-framework CoreFoundation"
+    )
 else()
     list(APPEND WF_LINK_LIBS GL GLU X11 m pthread dl)
     target_link_options(wf_game PRIVATE -Wl,-z,noexecstack)
