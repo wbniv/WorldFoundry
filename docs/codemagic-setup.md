@@ -89,6 +89,43 @@ not:
 - Check the Codemagic project's Webhooks page for the delivery and any error
   messages.
 
+## Step 5 — Generate an API token for artifact fetching
+
+This step is only needed if you want `scripts/codemagic-fetch-latest.sh` (or
+an automated agent) to pull build artifacts without downloading the zip
+manually from the dashboard.
+
+1. In Codemagic, click the user icon (top-right) → **Integrations** →
+   **Codemagic API** → **Create new token**. Copy the token — it won't be
+   shown again.
+2. Save it to a file outside the repo (don't commit it):
+
+   ```bash
+   mkdir -p ~/.config/codemagic && chmod 700 ~/.config/codemagic
+   # paste the token into this file (no trailing newline) with your editor:
+   ${EDITOR:-nano} ~/.config/codemagic/token
+   chmod 600 ~/.config/codemagic/token
+   ```
+
+3. Smoke-test the token:
+
+   ```bash
+   APP_ID=69e86667c563ac927a0fbcba  # wbniv/WorldFoundry on Codemagic
+   curl -sH "x-auth-token: $(cat ~/.config/codemagic/token)" \
+        "https://api.codemagic.io/builds?appId=$APP_ID&limit=1" \
+     | python3 -m json.tool | head -30
+   ```
+
+   A JSON payload with a `builds` array (most-recent first) means the token
+   works. `401` / `403` means the token is wrong or was already revoked.
+
+4. `scripts/codemagic-fetch-latest.sh` reads this token path by default; see
+   its `--help` for flags (latest-for-branch, specific-build-id, `--watch`
+   until HEAD finishes).
+
+The token has read access to every app in your Codemagic account, so keep
+it at `chmod 600` and rotate via the same UI whenever you want.
+
 ## Historical notes
 
 - Before 2026-04-22, Codemagic builds were started manually from the dashboard
