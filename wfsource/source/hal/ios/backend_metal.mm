@@ -309,10 +309,14 @@ public:
 
     void EndFrame() override
     {
-        // Log every 60 frames so we can watch the triangle count evolve
-        // across the first few seconds of play without spamming wf.log.
+        // Log every 30 frames so we can watch the triangle count evolve
+        // as the camera stabilizes without spamming wf.log. The camera
+        // settles over the first few seconds of play — the snowgoons
+        // scene goes from 12 tris visible (just one object in frame) to
+        // the full ~600-tri view once the bungee camera tracks the
+        // main character.
         static int  sFrameN = 0;
-        if (sFrameN == 0 || (sFrameN % 60) == 0) {
+        if (sFrameN == 0 || (sFrameN % 30) == 0) {
             std::fprintf(stderr,
                          "wf_game: MetalBackend EndFrame #%d — cpu=%zu tris, encoder=%s\n",
                          sFrameN, _cpu.size() / 3, _encoder ? "live" : "nil");

@@ -112,8 +112,8 @@ workflows:
           APP_PID=$(echo "$LAUNCH_OUTPUT" | awk '{print $NF}')
           echo "Launched PID: $APP_PID"
 
-          echo "--- sleep 6s to let engine thread tick through HALStart → _InitAudio → PIGSMain ---"
-          sleep 6
+          echo "--- sleep 12s to let engine boot AND camera stabilize (takes a few seconds on the Sim) ---"
+          sleep 12
 
           echo "--- screenshot ---"
           xcrun simctl io "$DEVICE_ID" screenshot "$SIM_ART/screenshot-raw.png"
