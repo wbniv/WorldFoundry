@@ -13,9 +13,10 @@
 #import <UIKit/UIKit.h>
 #include <hal/asset_accessor.hp>
 
-// Defined in hal/ios/platform.mm — installs the NSBundle asset accessor.
-extern "C" void _PlatformSpecificInit(int argc, char** argv,
-                                      int maxTasks, int maxMessages, int maxPorts);
+// Defined in hal/ios/platform.mm. C++ linkage (matches the Linux/Android HAL;
+// extern "C" here would mismatch the definition's mangling and fail at link).
+void _PlatformSpecificInit(int argc, char** argv,
+                           int maxTasks, int maxMessages, int maxPorts);
 extern "C" void WFIosSetSurfaceSize(int w, int h);
 
 // Defined in hal/ios/lifecycle.mm.

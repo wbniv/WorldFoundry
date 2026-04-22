@@ -44,17 +44,14 @@ void*   halMemory = nullptr;
 //=============================================================================
 // UIKit layer (native_app_entry.mm) calls this when the CAMetalLayer /
 // UIViewController view reports its first resolved size.
-
-extern int wfWindowWidth;
-extern int wfWindowHeight;
+// Phase 2 will also forward to gfx/gl/display.cc's wfWindowWidth/Height once
+// the gfx/ dir is in the iOS build; for Phase 1 we only need the HAL globals.
 
 extern "C" void
 WFIosSetSurfaceSize(int w, int h)
 {
     _halWindowWidth  = w;
     _halWindowHeight = h;
-    wfWindowWidth    = w;
-    wfWindowHeight   = h;
 }
 
 //=============================================================================
