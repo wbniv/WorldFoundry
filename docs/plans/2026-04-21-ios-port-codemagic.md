@@ -5,7 +5,7 @@
 **Goal:** An arm64 IPA that runs snowgoons on a physical iPhone, installed via TestFlight (or ad-hoc), with Codemagic as the only Mac in the loop. Proof-of-viability, not a shipping product.
 
 <p align="center">
-  <img src="screenshots/2026-04-22-ios-phase-2d-zbuffer.png" width="600" alt="Snowgoons on iOS Simulator after Phase 2D z-buffer fix — log cabin, tree, hedge, ground all rendering with correct depth ordering and textures.">
+  <img src="screenshots/2026-04-22-ios-phase-2d-zbuffer.png" width="500" alt="Snowgoons on iOS Simulator after Phase 2D z-buffer fix — log cabin, tree, hedge, ground all rendering with correct depth ordering and textures.">
 </p>
 
 ## Context
