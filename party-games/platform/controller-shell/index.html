@@ -7,6 +7,8 @@
   <meta name="mobile-web-app-capable" content="yes">
   <title>Party Games · Controller</title>
   <link rel="stylesheet" href="controller.css">
+  <!-- Google Cast Sender SDK (loadCastFramework=1 pulls in cast.framework API). -->
+  <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 </head>
 <body>
   <main>
@@ -14,8 +16,14 @@
       <p id="status" class="status">connecting…</p>
       <p id="name" class="name"></p>
     </header>
+    <div class="cast-row">
+      <!-- Google's built-in cast-launcher web component. Renders the standard
+           cast button and opens the native device picker on tap. -->
+      <google-cast-launcher id="cast-button"></google-cast-launcher>
+      <span id="cast-state" class="cast-state">cast: idle</span>
+    </div>
     <button id="ping" type="button" class="big-button" disabled>PING</button>
-    <p class="help">Tap the button. A PING event should appear on the TV.</p>
+    <p class="help">Tap the cast button to launch the receiver on your TV, then tap PING.</p>
   </main>
   <script src="controller.js"></script>
 </body>
