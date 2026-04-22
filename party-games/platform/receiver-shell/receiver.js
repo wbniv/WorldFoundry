@@ -8,9 +8,22 @@ const eventLogEl = document.getElementById('event-log');
 // In a regular browser, `cast.framework` is undefined; we skip silently and keep the
 // server WebSocket as the only transport for dev-loop iteration.
 let isCastContext = false;
+let castSessionDetail = '';
 if (typeof cast !== 'undefined' && cast.framework) {
   try {
     const ctx = cast.framework.CastReceiverContext.getInstance();
+    ctx.addEventListener(cast.framework.system.EventType.READY, (ev) => {
+      const info = ctx.getApplicationData();
+      castSessionDetail = info?.name ? ` (${info.name})` : '';
+      refreshStatus('cast + server connected' + castSessionDetail);
+      console.log('[cast] READY', info);
+    });
+    ctx.addEventListener(cast.framework.system.EventType.SENDER_CONNECTED, (ev) => {
+      pushLog(`sender connected: ${ev.senderId}`);
+    });
+    ctx.addEventListener(cast.framework.system.EventType.SENDER_DISCONNECTED, (ev) => {
+      pushLog(`sender disconnected: ${ev.senderId}`);
+    });
     ctx.start();
     isCastContext = true;
     console.log('[cast] CastReceiverContext started');
@@ -24,12 +37,16 @@ const ws = new WebSocket(wsUrl);
 
 ws.addEventListener('open', () => {
   ws.send(JSON.stringify({ type: 'HELLO', role: 'receiver' }));
-  statusEl.textContent = isCastContext ? 'cast + server connected' : 'server connected (browser)';
+  refreshStatus(isCastContext ? 'cast + server connected' + castSessionDetail : 'server connected (browser)');
 });
 
 ws.addEventListener('close', () => {
-  statusEl.textContent = 'disconnected';
+  refreshStatus('disconnected');
 });
+
+function refreshStatus(text) {
+  statusEl.textContent = text;
+}
 
 ws.addEventListener('error', (e) => {
   console.warn('[ws] error', e);

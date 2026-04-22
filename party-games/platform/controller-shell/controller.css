@@ -73,3 +73,26 @@ header {
   margin-top: auto;
   padding-bottom: 2vh;
 }
+
+/* Cast launcher row ────────────────────────────────────────────────────── */
+.cast-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1vh 0;
+}
+google-cast-launcher {
+  --connected-color: #60a5fa;
+  --disconnected-color: #e6e8eb;
+  width: 40px;
+  height: 40px;
+}
+.cast-state {
+  font-size: 0.9rem;
+  opacity: 0.75;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.cast-state[data-state="connected"] { color: #60a5fa; opacity: 1; }
+.cast-state[data-state="connecting"] { color: #facc15; }
+.cast-state[data-state="unavail"] { opacity: 0.4; }
