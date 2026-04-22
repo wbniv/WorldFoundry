@@ -1,13 +1,16 @@
 # Codemagic CI — WorldFoundry iOS port
 #
 # See docs/plans/2026-04-21-ios-port-codemagic.md for phase plan.
+# Setup docs: docs/codemagic-setup.md (webhook + API token wiring).
 #
-# Phase 0 goal: prove the Mac runner reaches the CMake/Xcode toolchain and
-# fails in an identifiable way (hal/ios/ not yet present). No signing.
+# Two workflows:
+#   ios-simulator-debug (push to 2026-ios) — Phases 0-3, no signing.
+#   ios-device-release  (manual/tag)       — Phase 4+, signed arm64 IPA.
 #
-# Budget: Codemagic individual plan = 500 Mac-min/month. Expect ~15–25 min
-# per clean build. Phases 0–2 push per step (each run is the only Mac
-# feedback we have); batch commits once the pipeline is reliably green.
+# Budget: Codemagic individual plan = 500 Mac-min/month. Measured 2-4 min
+# per debug build on M2 minis (avg 3.4 min across 29 runs as of 2026-04-22)
+# — ~100-150 builds/mo is feasible at this cadence. Release builds are
+# similar once signing is warm.
 
 workflows:
   ios-simulator-debug:
@@ -180,3 +183,143 @@ workflows:
       - build-ios-sim/**/*.app
       - build-ios-sim/CMakeFiles/**/*.log
       - xcodebuild.log
+
+  #------------------------------------------------------------------------------
+  # ios-device-release — signed arm64 .ipa for TestFlight / ad-hoc install.
+  #
+  # Phase 4 deliverable. Intentionally manual-trigger-only for now — release
+  # builds shouldn't fire on every push to 2026-ios. Once we're shipping,
+  # consider a tag-based trigger like `release-*`.
+  #
+  # This workflow depends on Codemagic-side signing setup that hasn't landed
+  # yet. Before the first run will succeed:
+  #
+  #   1. Enroll in Apple Developer Program ($99/yr individual).
+  #   2. In App Store Connect, create an app record with bundle id
+  #      org.worldfoundry.wf-game (matches Info.plist). Create an App Store
+  #      Connect API key at App Store Connect → Users and Access → Integrations.
+  #   3. In Codemagic, Team settings → Integrations → App Store Connect: add
+  #      the key. Give it a nickname like "wf_game_appstore".
+  #   4. In this project's settings → Code signing, enable automatic iOS code
+  #      signing tied to that integration.
+  #   5. Uncomment the `integrations:` + `ios_signing:` blocks below.
+  #
+  # Until then, manual runs of this workflow will reach the "archive" step and
+  # fail with a clear "no signing certificate" error — which is itself useful
+  # signal that cmake + xcodebuild -sdk iphoneos compile cleanly.
+  #------------------------------------------------------------------------------
+  ios-device-release:
+    name: iOS Device (Release, arm64 IPA)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+
+    # Manual trigger only. Launch from the Codemagic dashboard or via API.
+    # No `triggering:` → Codemagic won't auto-fire on push.
+
+    environment:
+      xcode: latest
+      vars:
+        BUNDLE_ID: "org.worldfoundry.wf-game"
+        XCODE_SCHEME: "wf_game"
+        APP_STORE_APPLE_ID: ""     # fill in once App Store Connect app record exists
+
+      # --- Uncomment once Apple Developer enrollment + App Store Connect API
+      #     key are wired into Codemagic's integrations (see header block). ---
+      # ios_signing:
+      #   distribution_type: development   # or app_store for TestFlight
+      #   bundle_identifier: $BUNDLE_ID
+      # integrations:
+      #   app_store_connect: wf_game_appstore
+
+    scripts:
+      - name: Toolchain versions
+        script: |
+          set -euo pipefail
+          sw_vers
+          xcodebuild -version
+          cmake --version
+          xcrun --sdk iphoneos --show-sdk-path
+
+      - name: Configure CMake for iOS device (arm64)
+        script: |
+          set -euo pipefail
+          mkdir -p build-ios-dev
+          cd build-ios-dev
+          cmake -G Xcode \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT=iphoneos \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
+            -DCMAKE_BUILD_TYPE=Release \
+            ..
+
+      - name: Archive (xcodebuild archive)
+        script: |
+          set -euo pipefail
+          cd build-ios-dev
+          # Archive targets iphoneos SDK + generic device destination. Signing
+          # happens via Codemagic's ios_signing block (once wired) — until
+          # then, this step fails with a clear "requires a provisioning
+          # profile" error.
+          xcodebuild archive \
+            -project "${XCODE_SCHEME}.xcodeproj" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$CM_BUILD_DIR/build-ios-dev/${XCODE_SCHEME}.xcarchive" \
+            CODE_SIGN_STYLE=Automatic \
+            | tee ../xcodebuild-archive.log
+          # tee preserves exit code via pipefail.
+
+      - name: Export signed IPA
+        script: |
+          set -euo pipefail
+          # exportOptions tells xcodebuild what kind of IPA to produce. For
+          # first device tests, development is cheapest; flip to app-store
+          # once we're actually pushing to TestFlight.
+          cat > "$CM_BUILD_DIR/export_options.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>              <string>development</string>
+            <key>teamID</key>              <string>\$(DEVELOPMENT_TEAM)</string>
+            <key>signingStyle</key>        <string>automatic</string>
+            <key>stripSwiftSymbols</key>   <true/>
+          </dict>
+          </plist>
+          PLIST
+
+          xcodebuild -exportArchive \
+            -archivePath  "$CM_BUILD_DIR/build-ios-dev/${XCODE_SCHEME}.xcarchive" \
+            -exportPath   "$CM_BUILD_DIR/ipa" \
+            -exportOptionsPlist "$CM_BUILD_DIR/export_options.plist" \
+            | tee "$CM_BUILD_DIR/xcodebuild-export.log"
+
+          echo "--- codesign -v on the IPA ---"
+          find "$CM_BUILD_DIR/ipa" -name '*.ipa' -print \
+            | xargs -I{} codesign -vvv --deep --strict {}
+
+      - name: Summarize artifact sizes
+        script: |
+          set -euo pipefail
+          find "$CM_BUILD_DIR/ipa" "$CM_BUILD_DIR/build-ios-dev" \
+              -maxdepth 4 \( -name '*.ipa' -o -name '*.xcarchive' -o -name '*.dSYM' \) \
+              -exec du -sh {} \;
+
+    artifacts:
+      - ipa/*.ipa
+      - build-ios-dev/*.xcarchive
+      - build-ios-dev/**/*.dSYM
+      - xcodebuild-archive.log
+      - xcodebuild-export.log
+
+    # --- TestFlight push (Phase 5). Uncomment once an App Store Connect
+    #     integration exists and the first manual IPA upload has validated. ---
+    # publishing:
+    #   app_store_connect:
+    #     auth: integration
+    #     submit_to_testflight: true
+    #     beta_groups:
+    #       - "Internal Testers"
