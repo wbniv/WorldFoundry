@@ -9,6 +9,8 @@ on the controller round-trips through the relay to the receiver, proving the pip
 
 ## Run locally (Phase 1a smoke test)
 
+**Prerequisites:** Node.js LTS via `fnm` — see [Prerequisites in the phase-1 plan](../docs/plans/2026-04-22-party-games-platform-phase-1.md#prerequisites).
+
 ```sh
 cd platform/server
 npm install
