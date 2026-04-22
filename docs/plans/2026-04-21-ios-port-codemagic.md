@@ -18,7 +18,7 @@ Two constraints change how the phases stage:
 - **No interactive Xcode / Instruments.** Runtime debug falls back to on-device log files (same pattern as Android's on-device `wf.log` — see commit history). GPU frame capture is deferred or handled out-of-band on the collaborator's Mac if available.
 - **Build path is `git push` → `codemagic.yaml` → artifact.** The repo grows a `codemagic.yaml` at root describing the build workflow; no local Xcode invocation.
 - **Codemagic M-series Mac minis run arm64 Simulator natively** — Simulator architecture matches device, so Metal shader behavior is a realistic preview.
-- **Cache the Mac build minutes.** Expect ~15–25 min for a clean CMake + Xcode build. With 500 min/month that's 20–30 builds before paying for more — push in batches, not on every trivial commit.
+- **Mind the Mac build minutes, but don't starve the bring-up.** Expect ~15–25 min for a clean CMake + Xcode build; 500 min/month ≈ 20–30 builds. It's a delicate balance: during Phases 0–2, expect to push per step — each Codemagic run is the only way to see what the Mac toolchain rejects, and skipping steps wastes more minutes than it saves. Once the pipeline is reliably green, batch commits before pushing.
 
 ## Correction to the original plan's graphics options
 
@@ -35,7 +35,7 @@ Recommendation: native Metal. The fallback exists only if MSL translation become
 
 1. Add `codemagic.yaml` at repo root — Xcode workflow, M-series Mac mini runner, triggers on the `2026-ios` branch (new).
 2. Workflow runs `cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_SYSROOT=iphonesimulator ...` and `xcodebuild -configuration Debug`. Initially *nothing compiles* — Phase 0 just proves the Mac runner reaches the CMake error.
-3. Cut `2026-ios` branch from master; push; confirm Codemagic picks it up; watch the first build log.
+3. Cut `2026-ios` branch from `2026-android` (master is badly out of date; 2026-android is where the Android port, textile-rs, levcomp-rs, and Blender round-trip work actually lives). Push; confirm Codemagic picks it up; watch the first build log.
 4. **Verify:** Codemagic run lands on a CMake error mentioning the missing `hal/ios/` target (i.e. the pipeline works end-to-end even though the code doesn't).
 
 ### Phase 1 — iOS HAL skeleton + Simulator "hello, viewcontroller" (no signing)

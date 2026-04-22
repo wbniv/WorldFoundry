@@ -1,0 +1,82 @@
+# Codemagic CI — WorldFoundry iOS port
+#
+# See docs/plans/2026-04-21-ios-port-codemagic.md for phase plan.
+#
+# Phase 0 goal: prove the Mac runner reaches the CMake/Xcode toolchain and
+# fails in an identifiable way (hal/ios/ not yet present). No signing.
+#
+# Budget: Codemagic individual plan = 500 Mac-min/month. Expect ~15–25 min
+# per clean build. Phases 0–2 push per step (each run is the only Mac
+# feedback we have); batch commits once the pipeline is reliably green.
+
+workflows:
+  ios-simulator-debug:
+    name: iOS Simulator (Debug)
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+
+    environment:
+      xcode: latest
+      cmake: 3.28.3
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: '2026-ios'
+          include: true
+          source: true
+
+    # python-tui-lib submodule points at a local dev path; not needed for engine
+    # build, so skip submodule init on CI.
+    cancel_previous_builds: true
+
+    scripts:
+      - name: Toolchain versions
+        script: |
+          set -euo pipefail
+          sw_vers
+          xcodebuild -version
+          cmake --version
+          which xcrun
+          xcrun --sdk iphonesimulator --show-sdk-path
+
+      - name: Configure CMake for iOS Simulator (arm64)
+        script: |
+          set -euo pipefail
+          mkdir -p build-ios-sim
+          cd build-ios-sim
+          # Phase 0: the CMakeLists.txt has no if(IOS) branch yet; this
+          # configure is expected to fail or fall through to the Linux path
+          # and then break at build time. That failure *is* the Phase 0
+          # signal — the pipeline reached the Mac toolchain.
+          cmake -G Xcode \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT=iphonesimulator \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
+            -DCMAKE_BUILD_TYPE=Debug \
+            ..
+
+      - name: Build
+        script: |
+          set -euo pipefail
+          cd build-ios-sim
+          xcodebuild \
+            -project wf_game.xcodeproj \
+            -scheme wf_game \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            build \
+            | tee ../xcodebuild.log
+          # xcodebuild exit code is what we care about; `tee` preserves it
+          # via pipefail.
+
+    artifacts:
+      - build-ios-sim/**/*.app
+      - build-ios-sim/CMakeFiles/**/*.log
+      - xcodebuild.log
+
+    publishing:
+      # No email/TestFlight/etc. wired up during bring-up.

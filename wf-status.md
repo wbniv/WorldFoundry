@@ -1,13 +1,15 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-04-19  
-**Branch:** `2026-android`
+**As of:** 2026-04-21  
+**Branch:** `2026-ios`
 
 ---
 
 ## Summary
 
-Eight days of work (2026-04-12 – 2026-04-19). Newest first:
+Ten days of work (2026-04-12 – 2026-04-21). Newest first:
+
+**iOS port unblocked, Phase 0 in progress (2026-04-21)** — Codemagic cloud-Mac builds lift the "no Mac" block that parked the 2026-04-16 iOS plan; `2026-ios` branch cut from `2026-android`, revised plan ([2026-04-21-ios-port-codemagic](docs/plans/2026-04-21-ios-port-codemagic.md)) stages Simulator-only work (Phases 0–3) before the $99 Apple Developer spend (Phase 4) and collaborator-device verification via TestFlight (Phase 5).
 
 **Snowgoons renders fully via textile-rs + levcomp-rs pipeline (2026-04-19)** — two user-visible regressions closed this session: textile-rs's 24-bit TGA path was routing `rgba_555(r,g,b,255)` into its `a > 170 → return 0` translucent-black sentinel, blanking the House shake-roof texture (`11cbca7` added a direct BGR555 fast path matching C++ `BR_COLOUR_BGRA(r,g,b,0)`); and levcomp-rs's earlier `21ca707` audit-fix was too eager — unconditionally preferring nested STR over DATA for any I32 field with a pipe-separated enum list — demoting Omni01/Omni02 `lightType` from DIRECTIONAL (DATA=0) to AMBIENT (STR="Ambient"→1 due to a Blender-exporter bug at `export_level.py:1077`), removing both directional lights at runtime and dimming the scene (`4c3e652` gated the STR-lookup on `ShowAs ∈ {DROPMENU, RADIOBUTTONS}` per iff2lvl's `oad.cc:1245-1276`); LVL content-diff is now 3 uninitialized room-struct pad bytes (same `new char[]` family as the `_PathOnDisk.base.rot` "Euler garbage" earlier in the day), shadows + textured House roof both restored in-game.
 
@@ -78,6 +80,7 @@ Eight days of work (2026-04-12 – 2026-04-19). Newest first:
 | 2026-04-19 | [Plan: textile-rs validation & round-trip integration](docs/plans/2026-04-19-textile-rs-validation.md) | **Phase 1 done — end-to-end pipeline working** | Seven fixes landed: 16-bit BGR555 TGA fast path (`f3da913`); 24-bit TGA fast path matching C++ `BR_COLOUR_BGRA` — also fixes invisible-roof renderer bug (`11cbca7`); `align_to_size_multiple` unit mismatch that made `-alignx=w -aligny=h` always fail (`a45194c`); `paly=-1` for 16-bit textures matching C++'s unconditional division (`72a4af9`); levcomp-rs `--textile-ini` flag replicating `prep ini.prp` (`a45194c`); per-asset ASS expansion in `lvas_writer` replacing `[ "perm.bin" ]` placeholder with individual `{ 'ASS' $<id>l [ "file" ] }` includes per iff.prp semantics (`a45194c`); textile-rs output files replace the oracle-extracted `.bin` placeholders (`edaffb3`). PERM chunk byte-identical (29492/29492); RM1 atlas content 31/31 textures byte-identical per-texture extraction. Game runs with textile-rs outputs + levcomp-rs `.lvl`, House roof + directional shadows all rendering correctly. |
 | 2026-04-19 | [Plan: levcomp-rs two-phase common-block emission](docs/plans/2026-04-19-levcomp-common-block-two-phase.md) | **Phase A + follow-ups done — 3 heap-pad bytes remain (99.9% closed, content-diff zero)** | Five commits land the refactor plus four follow-up fixes: (a) `8e2f244` — two-phase emission + `_ObjectOnDisk` heap-garbage type/rot pads (141 diffs); (b) `21ca707` — audit-fix 1, `field_str_child_only` accessor for I32 enum-label lookup (134 diffs; closed CamShot `Rotation`/`Position X/Y/Z` per obj[12]/obj[35]); (c) `0a37e20` — Actboxor01/02 OBJ-chunk swap in the `.lev` (83 diffs); (d) `88b9df7` — prepend `\n` to joystick-input `Script` STR in `snowgoons.lev` to match oracle byte-for-byte (5 diffs); (e) `4c3e652` — gate I32 STR-lookup on `ShowAs ∈ {DROPMENU, RADIOBUTTONS}` per iff2lvl's `oad.cc:1245-1276` (3 diffs; also the fix that restored directional lighting in-game — `21ca707`'s too-eager heuristic had demoted Omni01/Omni02 to AMBIENT). Remaining 3 bytes are all uninitialized `_RoomOnDisk` pad from iff2lvl's `new char[]` allocator (Room 0 trailing pad + Room 1 struct-alignment pad) — same `new char[size]` family as the `_PathOnDisk.base.rot` Euler garbage; no deterministic mirror rule possible. Content-diff is effectively zero; structural identity achieved. |
 | 2026-04-17 | [Plan: Prove all 7 level pipelines before breaking common.inc](docs/plans/2026-04-17-level-pipeline-proof.md) | **In progress — Phases A+B done** | Phase A (`534ead7`): `primitives.lev` + `whitestar.lev` compile through `iffcomp-rs` → `levcomp-rs` (skips OBJ chunks with no Class Name — Max aim-point helpers). Phase B: `wf_oad/tests/fixtures/common.oad` committed; `parse_common_oad` test asserts 14 entries + `Script` field; 6 tests pass. Phases C (decompile subcommand), D (4 source-less levels), E (multi-level `cd.iff`) remaining before the gated common.inc rearrangement that unblocks the ScriptLanguage OAD plan. |
+| 2026-04-21 | [Plan: iOS port (via Codemagic)](docs/plans/2026-04-21-ios-port-codemagic.md) | **In progress — Phase 0 (Codemagic bootstrap)** | Supersedes the 2026-04-16 plan parked "blocked on lack of a Mac"; Codemagic cloud-Mac builds unblock it. Staged to keep spend low: Phases 0–3 run Simulator-only (no signing, no Apple Dev account); Phase 4 gates on $99/yr Apple Developer Program enrollment; Phase 5 verifies on a collaborator's iPhone via TestFlight. Graphics path is native Metal (`backend_metal.mm` + MSL shaders), not MoltenVK — that was a mischaracterization in the old plan. |
 
 ### Backlog
 
@@ -88,7 +91,6 @@ Eight days of work (2026-04-12 – 2026-04-19). Newest first:
 | 2026-04-17 | [Plan: Steam release](docs/plans/2026-04-17-steam.md) | **In progress — Phases 1+2 done** | Steamworks SDK lifecycle wired into HAL + PageFlip. Steam Input → `EJ_BUTTONF_*` merged in `_JoystickButtonsF`. `WF_ENABLE_STEAM=1` build flag; SDK not committed (see vendor README). Phases 3 (depot) and 4 (store page) deferred. |
 | 2026-04-17 | [Plan: Mailbox-wired audio API](docs/plans/deferred/2026-04-17-audio-mailbox-api.md) | **Not started** | **Goal:** Every scripting engine can trigger music + SFX via mailbox writes. `EMAILBOX_SOUND=3017` enum and OAD `sfx0..sfx127` asset slots still exist; handler + slot loader were deleted in the `460a3fd` dead-code sweep (pre-cleanup impl was Linux-stubbed). Phase A: restore `_sfx[128]` loader + `EMAILBOX_SOUND` handler that plays at the actor's position. Phase B: `MUSIC_PLAY`/`MUSIC_STOP`/`MUSIC_VOLUME` mailboxes; Lua closures become forwarders. Phase C (opt): named `SFX_*` constants. |
 | 2026-04-16 | [ScriptLanguage OAD field](docs/plans/2026-04-16-script-language-oad-field.md) | **Deferred — blocked on Blender+levcomp-rs level round-trip** | Field added then reverted from `common.oad` to restore binary layout compat with existing compiled levels. Dispatch table + language param threading remain in engine (passing 0=Lua). Will re-introduce once all levels compile through Blender+levcomp-rs. |
-| 2026-04-16 | [Plan: iOS port](docs/plans/2026-04-16-ios-port.md) | **Backlog — blocked on lack of a Mac** | **Goal:** An IPA that runs snowgoons on a tethered iPhone, installed via Xcode with a developer profile. Proof-of-viability, not a shipping product. Xcode + signing + device provisioning all require macOS; Android prerequisite already satisfied. |
 
 ### Complete
 
@@ -202,4 +204,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-21 22:55** — [`docs/plans/2026-04-21-ios-port-codemagic.md`](docs/plans/2026-04-21-ios-port-codemagic.md): Plan: iOS port (via Codemagic)
+**2026-04-21 23:03** — [`wf-status.md`](wf-status.md): iOS port — Summary paragraph added; moved Backlog → Active; branch line flipped to `2026-ios`
