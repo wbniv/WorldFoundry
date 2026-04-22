@@ -7,7 +7,9 @@
 
 ## Summary
 
-Ten days of work (2026-04-12 – 2026-04-21). Newest first:
+Eleven days of work (2026-04-12 – 2026-04-22). Newest first:
+
+**iOS port Phase 1 build green (2026-04-22)** — Codemagic ships a `wf_game.app` bundle for iOS Simulator arm64; entire HAL-plus-core build compiles + links under Apple clang and bundles `cd.iff` + `level0.mid` as resources. Four bring-up commits past Phase 0: route pigsys through `cf_linux.h` on iOS (Darwin is POSIX), widen `-Wno-register` to iOS (C++17 removed the keyword, `endian.cc` still uses it), drop `extern "C"` from `_PlatformSpecificInit` forward-declaration to match Linux/Android C++ linkage, and retire two `wfWindowWidth/Height` references in `platform.mm` since `gfx/` is excluded from the Phase 1 iOS build.
 
 **iOS port Phase 0 complete (2026-04-21)** — Codemagic cloud-Mac pipeline end-to-end green on `2026-ios`, Xcode build now reaches per-source compilation and stops at the expected iOS HAL gap (`GL/gl.h` not found in `gfx/renderer.hp`); five bring-up commits unblocked it: `codemagic.yaml` + two schema fixes, force `WF_PHYSICS_ENGINE=legacy` on Xcode (Jolt-on-Xcode deferred), restore zforth sources lost to a bare-`zforth` gitignore pattern + drop the local-path python-tui-lib submodule, extend the Forth-only mobile policy to iOS so WAMR's x86_64 `invokeNative_em64.s` stops being in the build graph.
 
