@@ -72,6 +72,10 @@ workflows:
           # via pipefail.
 
     artifacts:
+      # CMake sets RUNTIME_OUTPUT_DIRECTORY to ${CMAKE_SOURCE_DIR}/engine, so
+      # the .app + its dSYM land under engine/Debug/ on iOS Sim builds.
+      - engine/**/*.app
+      - engine/**/*.dSYM
       - build-ios-sim/**/*.app
       - build-ios-sim/CMakeFiles/**/*.log
       - xcodebuild.log

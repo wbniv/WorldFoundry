@@ -1,7 +1,7 @@
 # Plan: iOS port (via Codemagic)
 
 **Date:** 2026-04-21 (revises the 2026-04-16 doc — prior version parked the port as "blocked on lack of a Mac")
-**Status:** Phase 0 complete (2026-04-21) — Codemagic pipeline green end-to-end, Mac toolchain reached per-source compilation of the engine, stopped at the expected iOS HAL gap (`fatal error: 'GL/gl.h' file not found` in `gfx/renderer.hp`). Phase 1 next: `hal/ios/` skeleton + `elseif(IOS)` CMake branch + `ios/` Xcode wrapper.
+**Status:** Phase 1 build green (2026-04-22) — Codemagic produces a signed `wf_game.app` artifact for iOS Simulator arm64. Entire HAL-plus-core build compiles + links on Apple clang, bundles `cd.iff` + `level0.mid` as resources, launches via `UIApplicationMain` → `WFAppDelegate` → `WFRootViewController`. Pending: actually boot the `.app` in iOS Simulator to confirm `HALGetAssetAccessor()` doesn't crash and `cd.iff` opens (Phase 1 Verify). Then Phase 2: Metal backend + gfx/ + game/ wired in.
 **Goal:** An arm64 IPA that runs snowgoons on a physical iPhone, installed via TestFlight (or ad-hoc), with Codemagic as the only Mac in the loop. Proof-of-viability, not a shipping product.
 
 ## Context

@@ -1,13 +1,15 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-04-21  
+**As of:** 2026-04-22  
 **Branch:** `2026-ios`
 
 ---
 
 ## Summary
 
-Ten days of work (2026-04-12 – 2026-04-21). Newest first:
+Eleven days of work (2026-04-12 – 2026-04-22). Newest first:
+
+**iOS port Phase 1 build green (2026-04-22)** — Codemagic ships a `wf_game.app` bundle for iOS Simulator arm64; entire HAL-plus-core build compiles + links under Apple clang and bundles `cd.iff` + `level0.mid` as resources. Four bring-up commits past Phase 0: route pigsys through `cf_linux.h` on iOS (Darwin is POSIX), widen `-Wno-register` to iOS (C++17 removed the keyword, `endian.cc` still uses it), drop `extern "C"` from `_PlatformSpecificInit` forward-declaration to match Linux/Android C++ linkage, and retire two `wfWindowWidth/Height` references in `platform.mm` since `gfx/` is excluded from the Phase 1 iOS build.
 
 **iOS port Phase 0 complete (2026-04-21)** — Codemagic cloud-Mac pipeline end-to-end green on `2026-ios`, Xcode build now reaches per-source compilation and stops at the expected iOS HAL gap (`GL/gl.h` not found in `gfx/renderer.hp`); five bring-up commits unblocked it: `codemagic.yaml` + two schema fixes, force `WF_PHYSICS_ENGINE=legacy` on Xcode (Jolt-on-Xcode deferred), restore zforth sources lost to a bare-`zforth` gitignore pattern + drop the local-path python-tui-lib submodule, extend the Forth-only mobile policy to iOS so WAMR's x86_64 `invokeNative_em64.s` stops being in the build graph.
 
@@ -80,7 +82,7 @@ Ten days of work (2026-04-12 – 2026-04-21). Newest first:
 | 2026-04-19 | [Plan: textile-rs validation & round-trip integration](docs/plans/2026-04-19-textile-rs-validation.md) | **Phase 1 done — end-to-end pipeline working** | Seven fixes landed: 16-bit BGR555 TGA fast path (`f3da913`); 24-bit TGA fast path matching C++ `BR_COLOUR_BGRA` — also fixes invisible-roof renderer bug (`11cbca7`); `align_to_size_multiple` unit mismatch that made `-alignx=w -aligny=h` always fail (`a45194c`); `paly=-1` for 16-bit textures matching C++'s unconditional division (`72a4af9`); levcomp-rs `--textile-ini` flag replicating `prep ini.prp` (`a45194c`); per-asset ASS expansion in `lvas_writer` replacing `[ "perm.bin" ]` placeholder with individual `{ 'ASS' $<id>l [ "file" ] }` includes per iff.prp semantics (`a45194c`); textile-rs output files replace the oracle-extracted `.bin` placeholders (`edaffb3`). PERM chunk byte-identical (29492/29492); RM1 atlas content 31/31 textures byte-identical per-texture extraction. Game runs with textile-rs outputs + levcomp-rs `.lvl`, House roof + directional shadows all rendering correctly. |
 | 2026-04-19 | [Plan: levcomp-rs two-phase common-block emission](docs/plans/2026-04-19-levcomp-common-block-two-phase.md) | **Phase A + follow-ups done — 3 heap-pad bytes remain (99.9% closed, content-diff zero)** | Five commits land the refactor plus four follow-up fixes: (a) `8e2f244` — two-phase emission + `_ObjectOnDisk` heap-garbage type/rot pads (141 diffs); (b) `21ca707` — audit-fix 1, `field_str_child_only` accessor for I32 enum-label lookup (134 diffs; closed CamShot `Rotation`/`Position X/Y/Z` per obj[12]/obj[35]); (c) `0a37e20` — Actboxor01/02 OBJ-chunk swap in the `.lev` (83 diffs); (d) `88b9df7` — prepend `\n` to joystick-input `Script` STR in `snowgoons.lev` to match oracle byte-for-byte (5 diffs); (e) `4c3e652` — gate I32 STR-lookup on `ShowAs ∈ {DROPMENU, RADIOBUTTONS}` per iff2lvl's `oad.cc:1245-1276` (3 diffs; also the fix that restored directional lighting in-game — `21ca707`'s too-eager heuristic had demoted Omni01/Omni02 to AMBIENT). Remaining 3 bytes are all uninitialized `_RoomOnDisk` pad from iff2lvl's `new char[]` allocator (Room 0 trailing pad + Room 1 struct-alignment pad) — same `new char[size]` family as the `_PathOnDisk.base.rot` Euler garbage; no deterministic mirror rule possible. Content-diff is effectively zero; structural identity achieved. |
 | 2026-04-17 | [Plan: Prove all 7 level pipelines before breaking common.inc](docs/plans/2026-04-17-level-pipeline-proof.md) | **In progress — Phases A+B done** | Phase A (`534ead7`): `primitives.lev` + `whitestar.lev` compile through `iffcomp-rs` → `levcomp-rs` (skips OBJ chunks with no Class Name — Max aim-point helpers). Phase B: `wf_oad/tests/fixtures/common.oad` committed; `parse_common_oad` test asserts 14 entries + `Script` field; 6 tests pass. Phases C (decompile subcommand), D (4 source-less levels), E (multi-level `cd.iff`) remaining before the gated common.inc rearrangement that unblocks the ScriptLanguage OAD plan. |
-| 2026-04-21 | [Plan: iOS port (via Codemagic)](docs/plans/2026-04-21-ios-port-codemagic.md) | **Phase 0 complete — ready for Phase 1** | Codemagic pipeline green end-to-end on `2026-ios`; Xcode build now reaches per-source compilation of `wf_game` and stops at `fatal error: 'GL/gl.h' file not found` (gfx/renderer.hp) — the expected iOS HAL gap. Five bring-up commits landed: `codemagic.yaml`, two YAML schema fixes, Jolt-skip-on-Xcode, zforth tracking fix + python-tui-lib submodule drop, and mobile-policy (Forth-only) extended to iOS. Phase 1 next: `hal/ios/` skeleton + `elseif(IOS)` CMake branch + `ios/` Xcode wrapper. |
+| 2026-04-21 | [Plan: iOS port (via Codemagic)](docs/plans/2026-04-21-ios-port-codemagic.md) | **Phase 1 build green — pending Simulator boot** | Codemagic ships a `wf_game.app` artifact for iOS Simulator arm64. Phase 1 (hal/ios/ skeleton + elseif(IOS) CMake branch + ios/ wrapper) landed in 3 commits; 4 follow-ups got through the bring-up (pigsys→cf_linux.h on iOS; -Wno-register widened to iOS; extern "C" mismatch on _PlatformSpecificInit; drop gfx-only wfWindow* refs from platform.mm). Pending: actually boot the `.app` in iOS Simulator to confirm `HALGetAssetAccessor()` + cd.iff open. Phase 2 next: Metal backend + gfx/ + game/. |
 
 ### Backlog
 
@@ -204,4 +206,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-21 23:47** — [`docs/plans/2026-04-21-ios-port-codemagic.md`](docs/plans/2026-04-21-ios-port-codemagic.md): Plan: iOS port (via Codemagic)
+**2026-04-22 00:42** — [`docs/plans/2026-04-21-ios-port-codemagic.md`](docs/plans/2026-04-21-ios-port-codemagic.md): Plan: iOS port (via Codemagic)
