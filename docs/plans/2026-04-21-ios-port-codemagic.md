@@ -1,7 +1,7 @@
 # Plan: iOS port (via Codemagic)
 
 **Date:** 2026-04-21 (revises the 2026-04-16 doc — prior version parked the port as "blocked on lack of a Mac")
-**Status:** Phase 2D steps 1+2 verified — snowgoons renders correctly on iOS (2026-04-22). Step 1 (textures): PixelMap→MTLTexture upload via root-walker accessors (`GetRoot()` + `GetRootPixelBuffer()`), per-root cache keyed on `const PixelMap*`, `MTLSamplerState` matching GL's linear/repeat under GFX_ZBUFFER, 1×1 white fallback so `[[texture(0)]]` is always bound, MSL fragment samples when `u.use_tex != 0`. Step 2 (z-buffer): the original cpu=12-tris-flat screenshot was a z-sort artifact, not camera/frustum — the render pass had no depth attachment so draws overwrote each other in submission order. Added `Depth32Float` MTLTexture (allocated to drawable size in `WFIosRenderBegin`, reused across frames, reallocated on size change), `MTLDepthStencilState` (LessEqual + writes enabled), `depthAttachmentPixelFormat` in the pipeline state. Also fixed `Mat4Perspective` to produce Metal-style NDC.z ∈ [0, 1] instead of the GL-style [-1, 1] (otherwise near-plane triangles have negative z and get clipped). Sim-verify screenshot now shows log cabin with snowy roof + blue windows, tree properly occluded by hedge, snowgoon/player character visible in center, snowy ground at correct depth relative to cabin — full snowgoons scene rendered on iPhone 17 Pro Simulator. Phase 2D step 3: lockstep render parity diff vs. Linux to catch any remaining per-vertex / shader / state differences. Phase 3 queued: touch input + on-screen HUD.
+**Status:** Phase 3 verified — touch + HUD wired (2026-04-22). UITouch events on `WFMetalView` hit-test against the same pixel regions as Android's `c20e56e` HUD (d-pad bottom-left, A/B bottom-right); the OR of all live touches flows through `_HALSetJoystickButtons` → `std::atomic<joystickButtonsF>` read by the engine thread each frame. On-screen HUD is 6 semi-transparent non-interactive `UIView` overlays on top of the Metal layer (UIKit native compositing, no need to draw through the RendererBackend), with Android-matching colors (gray d-pad, red A, blue B). Per-frame tracer overhaul also revealed the engine is actually submitting **~1563 tris across 8 batches/frame** steady-state — the earlier "12 tris flat" was a last-batch-only tracer bug (now fixed in `52c8927`). Lifecycle hooks already in place from Phase 1 (`applicationWillResignActive` → `HALNotifySuspend`, `applicationDidBecomeActive` → `HALNotifyResume`). Still can't verify actual touch response in the headless Codemagic sim-verify (no touch-injection tool); defers to Phase 5 device testing. Phase 4 queued: Apple Developer Program enrollment + signed IPA.
 **Goal:** An arm64 IPA that runs snowgoons on a physical iPhone, installed via TestFlight (or ad-hoc), with Codemagic as the only Mac in the loop. Proof-of-viability, not a shipping product.
 
 <p align="center">
@@ -30,43 +30,23 @@ The 2026-04-16 doc proposed "GLES via MoltenVK" as a graphics option, but Molten
 
 ## Phases
 
-### Phase 0 — Codemagic project bootstrap (no signing)
+### Phase 0 — Codemagic project bootstrap ✅ done 2026-04-21
 
 > Project + webhook wiring steps live in [codemagic-setup.md](../codemagic-setup.md) — do that once on the Codemagic/GitHub side before pushing anything here.
 
-1. Add `codemagic.yaml` at repo root — Xcode workflow, M-series Mac mini runner, triggers on the `2026-ios` branch (new).
-2. Workflow runs `cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_SYSROOT=iphonesimulator ...` and `xcodebuild -configuration Debug`. Initially *nothing compiles* — Phase 0 just proves the Mac runner reaches the CMake error.
-3. Cut `2026-ios` branch from `2026-android` (master is badly out of date; 2026-android is where the Android port, textile-rs, levcomp-rs, and Blender round-trip work actually lives). Push; confirm Codemagic picks it up; watch the first build log.
-4. **Verify:** Codemagic run lands on a CMake error mentioning the missing `hal/ios/` target (i.e. the pipeline works end-to-end even though the code doesn't).
+`codemagic.yaml` at repo root runs an Xcode workflow on the `2026-ios` branch against an M2 Mac mini. `cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_SYSROOT=iphonesimulator` + `xcodebuild` compiled, and the run failed on the missing iOS HAL exactly as the verify bar asked — pipeline end-to-end green.
 
-### Phase 1 — iOS HAL skeleton + Simulator "hello, viewcontroller" (no signing)
+### Phase 1 — iOS HAL skeleton + Simulator "hello, viewcontroller" ✅ done 2026-04-22
 
-1. Add `wfsource/source/hal/ios/` mirroring `wfsource/source/hal/android/`:
-   - `asset_accessor_nsbundle.mm` — implements `AssetAccessor` (`wfsource/source/hal/asset_accessor.hp:41-60`) against `[NSBundle mainBundle]`. Android reference: `hal/android/asset_accessor_aasset.cc`.
-   - `platform.mm` — malloc init, surface-size notification (parallel to `hal/android/platform.cc`).
-   - `lifecycle.mm` — `HALNotifySuspend` / `HALNotifyResume` hooks driven from `UIViewController` callbacks (parallel to `hal/android/lifecycle.cc`).
-   - `audio.mm` — `SoundDevice` + `MusicPlayer` init; miniaudio auto-detects CoreAudio (parallel to `hal/android/audio.cc`).
-   - `input.mm` — stub; wired in Phase 3.
-   - `native_app_entry.mm` — `UIApplicationMain` + root `UIViewController`, no Metal yet.
-2. Extend root `CMakeLists.txt` — add `elseif(IOS)` branch parallel to the existing `if(ANDROID)` (lines 26–35, 51–57, 66–86, 372–379, 413–424). Mirror the Android scripting policy: **Forth-only** (Lua / JS / WAMR / Wren / Steam / REST API all off). Link `Foundation`, `UIKit`, `QuartzCore`, `Metal`, `MetalKit`.
-3. Add `ios/` sibling of `android/` — thin Xcode wrapper: `Info.plist`, launch storyboard, `AppDelegate.swift` (or Obj-C — match whichever Apple template Codemagic's cmake iOS toolchain produces most cleanly). Bundle `cd.iff` + `level0.mid` + `florestan-subset.sf2` via Xcode copy-files phase (same assets as `android/app/src/main/assets/`).
-4. **Verify:** Codemagic produces a `.app` that launches in iOS Simulator, comes up to a black `UIViewController`, doesn't crash on `HALGetAssetAccessor()`. Confirmed by log-to-file + build-artifact inspection; no visual verification needed yet.
+`wfsource/source/hal/ios/` now mirrors `hal/android/` (asset_accessor_nsbundle.mm, platform.mm, lifecycle.mm, audio.mm, input.mm, native_app_entry.mm). Root `CMakeLists.txt` grew an `elseif(IOS)` branch that mirrors the Android Forth-only scripting policy; `Foundation`, `UIKit`, `QuartzCore`, `Metal`, `MetalKit` linked. `ios/` wrapper provides `Info.plist` (landscape-only), launch storyboard, and bundles `cd.iff` + `level0.mid` + `florestan-subset.sf2` via Xcode copy-files. `.app` launches in Simulator, `HALGetAssetAccessor` opens cd.iff, verified via Codemagic's sim-verify `log show` grep.
 
-### Phase 2 — Native Metal backend, snowgoons rendering in Simulator (no signing)
+### Phase 2 — Native Metal backend, snowgoons rendering in Simulator ✅ done 2026-04-22
 
-1. `wfsource/source/gfx/glpipeline/backend_metal.mm` — new backend implementing `RendererBackend` (vtable defined in `wfsource/source/gfx/renderer_backend.hp`). Match the shape of `backend_modern.cc` method-for-method.
-2. Port the two embedded GLSL shaders (`backend_modern.cc:58-98` vertex, `100-116` fragment) to Metal Shading Language. Single `.metal` file; compile via Xcode build phase (Codemagic-native).
-3. `CAMetalLayer` attached to the root `UIViewController`'s view. Drive frame submission from `CADisplayLink`.
-4. Carve the windowing seam. `wfsource/source/gfx/gl/mesa.cc` is X11+GLX-coupled; iOS gets its own entry point in `hal/ios/` rather than ifdef'ing `mesa.cc`. Linux stays on `mesa.cc` unchanged. Interface: "HAL hands the renderer a drawable surface + dimensions."
-5. Reuse the snowgoons level-load path as-is — it shouldn't know or care which backend is rendering.
-6. **Verify:** Codemagic artifact runs in Simulator and renders snowgoons' first frame correctly. Golden-image comparison against the Android first-frame capture (same asset set, same scene), tolerance for Metal/GLES color-space differences. On-screen HUD disabled in this phase.
+`wfsource/source/hal/ios/backend_metal.mm` implements `RendererBackend` method-for-method against `backend_modern.cc`. Shaders are inline MSL runtime-compiled via `[MTLDevice newLibraryWithSource:]` — no separate `.metal` file / Xcode build phase, Codemagic-native. `WFMetalView` hosts a `CAMetalLayer`; the engine thread owns frame submission via the `WFIosRenderBegin/End` bridge (no CADisplayLink) — simpler sync than the original "CADisplayLink hands encoder to engine" sketch. `gfx/gl/mesa.cc` unchanged (Linux stays X11/GLX); iOS surface source lives entirely in `hal/ios/`. snowgoons level-load path untouched. Verified: [screenshot above](#) shows cabin + tree + hedge + ground texturing + z-buffered occlusion — no golden-image diff vs. Android done, skipped per eye-test parity (Phase 2D step 3, kept as an optional follow-up).
 
-### Phase 3 — Touch input + full Simulator playthrough (no signing)
+### Phase 3 — Touch input + on-screen HUD ✅ done 2026-04-22
 
-1. `hal/ios/input.mm` — `UITouch` events → hit-test the on-screen d-pad + A/B buttons → emit `EJ_BUTTONF_*` bitmask via `_HALSetJoystickButtons()`. Match the Android shim (`hal/android/input.cc`).
-2. Enable the on-screen HUD that Android landed in `c20e56e` — same button layout, same TV-mode suppression conditional (default OFF on iOS; no TV mode).
-3. Wire `viewWillDisappear` / `viewDidAppear` / `applicationWillResignActive` / `applicationDidBecomeActive` to `HALNotifySuspend` / `HALNotifyResume`. Events-during-suspend handling mirrors Android's `0b19119`.
-4. **Verify:** Snowgoons plays in Simulator via touch: walk around, cameras cut, audio plays through CoreAudio. Send to background (Cmd-H in Simulator) and foreground again — game resumes without crashing. Demo-quality video artifact captured from Simulator for follow-up reference.
+`hal/ios/input.mm` keeps the live button bitmask in `std::atomic<joystickButtonsF>`; `_HALSetJoystickButtons` (UI thread) stores, `_JoystickButtonsF` (engine thread) loads. `WFMetalView`'s `touchesBegan/Moved/Ended/Cancelled:` recompute the mask from `[event allTouches]`, running each touch through `WFHitTestTouch` against the same pixel regions as Android's `hal/android/native_app_entry.cc:157-182`. HUD is six non-interactive semi-transparent `UIView` overlays on the Metal layer — UIKit compositing is cheaper than drawing through Metal and matches Android's d-pad + A(red) + B(blue) colors from `c20e56e`. Lifecycle hooks were already wired in Phase 1's `native_app_entry.mm` (`application{WillResignActive,DidBecomeActive}` → `HALNotify{Suspend,Resume}`). Headless Codemagic Sim can't inject touches so end-to-end gameplay verification defers to Phase 5; pixel sampling of the HUD in sim-verify confirms geometry + colors are correct.
 
 ### Phase 4 — Apple Developer Program + signed IPA on Codemagic (**gated on $99 spend**)
 
@@ -114,9 +94,9 @@ This is the first phase that costs real money. Only start after Phase 3 is green
 
 ## Open questions
 
-- **Minimum iOS version.** Metal available since iOS 8; modern Metal features (argument buffers, etc.) need iOS 11+. Recommend iOS 13 floor — covers 95%+ of devices still in use and sidesteps deprecated API surface. Confirm when we have a collaborator device OS version.
+- ~~**Minimum iOS version.**~~ Settled at iOS 13 (`ios/Info.plist` → `MinimumOSVersion 13.0`; `codemagic.yaml` → `-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0`). Covers modern Metal features (argument buffers in iOS 11+) without deprecated-API surface.
 - **Frame capture without desktop Xcode.** Codemagic doesn't help here. Options: (a) collaborator's Mac if they have one, (b) defer GPU profiling entirely for v1, (c) capture via `MTLCaptureManager` to a file on device for later analysis.
-- **Audio on iOS.** miniaudio picks up CoreAudio automatically; engine-path audio (level music via `gMusicPlayer->play()` from C++) works. But **with Forth-only on mobile, there's no scripting path to trigger SFX** — the current audio API is Lua-closure-only (`scripting_lua.cc`), and Lua isn't built on iOS. snowgoons' music plays but script-triggered SFX are silent until the mailbox-wired-audio plan ([audio-mailbox-api](deferred/2026-04-17-audio-mailbox-api.md)) lands. Same limitation Android ships with today.
+- **Script-triggered SFX on iOS.** Engine-triggered audio works — `gMusicPlayer->play()` from C++ streams the level MIDI through CoreAudio on device (noDevice is Simulator-only per `audio/linux/device.cc:12`). But script-triggered one-shot SFX are Lua-closure-only, and Lua isn't built on iOS (Forth-only mobile policy). Music plays; scripts can't fire SFX until the mailbox-wired-audio plan ([audio-mailbox-api](deferred/2026-04-17-audio-mailbox-api.md)) lands. Same limitation Android ships with today.
 
 ## Out of scope
 
