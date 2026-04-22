@@ -172,6 +172,13 @@ list(APPEND WF_SOURCES
     ${STUB_SRC}/platform_stubs.cc
 )
 
+# iOS: link stubs for the 8 GL-backend RenderObject3D::RenderPoly3D* methods
+# that Material::Get3DRenderObjectPtr references unconditionally. Real impls
+# land with the Metal backend in Phase 2B3.
+if(IOS)
+    list(APPEND WF_SOURCES ${STUB_SRC}/renderpoly3d_stubs.cc)
+endif()
+
 # ─── Lua 5.4 ──────────────────────────────────────────────────────────────────
 set(LUA_DIR ${VENDOR}/lua-5.4.8)
 if(WF_LUA_ENGINE STREQUAL "lua54")
@@ -483,6 +490,8 @@ elseif(IOS)
     # Metal/MetalKit added 2026-04-22 for Phase 2A (MetalView in hal/ios/
     # drives a CAMetalLayer clear via CADisplayLink). Phase 2B wires this to
     # the engine RendererBackend proper.
+    # AVFoundation + AudioToolbox + CoreAudio are pulled in by miniaudio's
+    # iOS backend (AVAudioSession, route-change notifications, etc.).
     list(APPEND WF_LINK_LIBS
         "-framework Foundation"
         "-framework UIKit"
@@ -490,6 +499,9 @@ elseif(IOS)
         "-framework CoreFoundation"
         "-framework Metal"
         "-framework MetalKit"
+        "-framework AVFoundation"
+        "-framework AudioToolbox"
+        "-framework CoreAudio"
     )
 else()
     list(APPEND WF_LINK_LIBS GL GLU X11 m pthread dl)
