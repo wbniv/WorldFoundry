@@ -9,6 +9,38 @@
 
 Reusable Chromecast platform — Node.js relay server + receiver shell (TV) + controller shell (phone). Receiver loads on a real Chromecast; phone controller launches the cast and connects to the same relay; button press on phone appears on TV. **No game logic yet** — the game lives in `games/<name>/` on top of this shell in Phase 2+.
 
+## Prerequisites
+
+### Node.js via fnm (one-time, per-user)
+
+We standardise on **fnm** (Fast Node Manager) for per-user Node version management. Non-privileged install, no `sudo`, trivial version switching.
+
+```sh
+# 1. Install fnm (writes to ~/.local/share/fnm/; adds init to ~/.bashrc / ~/.zshrc)
+curl -fsSL https://fnm.vercel.app/install | bash
+
+# 2. Re-source the shell (or open a new terminal)
+source ~/.bashrc
+
+# 3. Install current LTS Node
+fnm install --lts
+fnm default lts-latest
+
+# 4. Verify
+node --version   # v22.x or v20.x
+npm --version
+```
+
+If `curl | bash` is blocked in your environment, download the binary release from <https://github.com/Schniz/fnm/releases/latest> (`fnm-linux.zip` / `fnm-macos.zip`) and extract to somewhere on `PATH`.
+
+### Google Cast Developer account
+
+Required for Phases 1b+ (registering the receiver URL and whitelisting your Cast device). See separate [Cast Developer registration notes in the main conversation / README]; one-time $5, ~15 min propagation after adding the test device serial.
+
+### Chromecast on dev network
+
+Any Chromecast 3rd-gen / Ultra / Google TV dongle on the same Wi-Fi as your phone and dev laptop. Needed from Phase 1b onwards; Phase 1a runs entirely in browser tabs.
+
 ## Sub-phases
 
 ### Phase 1a — platform shell, localhost-only smoke test
