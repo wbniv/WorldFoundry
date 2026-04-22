@@ -13,9 +13,7 @@ workflows:
   ios-simulator-debug:
     name: iOS Simulator (Debug)
     instance_type: mac_mini_m2
-    # Bumped to accommodate the 5-minute sim-verify sleep + ~15-20 min of
-    # compile + link. 45 was OK when sim-verify was 12s.
-    max_build_duration: 60
+    max_build_duration: 45
 
     environment:
       xcode: latest
@@ -114,8 +112,8 @@ workflows:
           APP_PID=$(echo "$LAUNCH_OUTPUT" | awk '{print $NF}')
           echo "Launched PID: $APP_PID"
 
-          echo "--- sleep 300s — Sim runs at ≈¼ realtime, so 5 min wall-clock ≈ 75s of game time; long enough for the camera to stabilize and the full scene to start rendering ---"
-          sleep 300
+          echo "--- sleep 45s — Sim runs at ≈¼ realtime so this is ~10s of game time, plenty to reach steady-state rendering (the earlier 5-min sleep was while we were chasing a z-sort bug we mistook for a camera-stabilization issue) ---"
+          sleep 45
 
           echo "--- screenshot ---"
           xcrun simctl io "$DEVICE_ID" screenshot "$SIM_ART/screenshot-raw.png"
