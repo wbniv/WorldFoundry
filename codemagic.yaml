@@ -118,6 +118,20 @@ workflows:
           echo "--- screenshot ---"
           xcrun simctl io "$DEVICE_ID" screenshot "$SIM_ART/screenshot.png"
 
+          echo "--- pull wf.log from app data container ---"
+          # WFOpenDiagnosticLog dups stdout/stderr to NSTemporaryDirectory()/wf.log
+          # in -application:didFinishLaunchingWithOptions: before HALStart runs.
+          APP_DATA=$(xcrun simctl get_app_container "$DEVICE_ID" "$BUNDLE_ID" data 2>/dev/null || true)
+          if [ -n "$APP_DATA" ] && [ -f "$APP_DATA/tmp/wf.log" ]; then
+              cp "$APP_DATA/tmp/wf.log" "$SIM_ART/wf.log"
+              echo "--- wf.log size ---"
+              wc -c "$SIM_ART/wf.log"
+              echo "--- wf.log tail (last 40 lines) ---"
+              tail -40 "$SIM_ART/wf.log"
+          else
+              echo "NOTE: wf.log not found at $APP_DATA/tmp/wf.log (app may not have dup'd fds yet)"
+          fi
+
           echo "--- capture unified log (last 60s, wf_game process) ---"
           # log show reads finished log entries — no streaming, no GNU timeout
           # needed (which doesn't exist on macOS).

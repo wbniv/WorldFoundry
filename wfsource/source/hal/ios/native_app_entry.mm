@@ -16,6 +16,12 @@
 #include <hal/hal.h>
 
 #include <pthread.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
 
 // Defined in hal/ios/platform.mm. C++ linkage (matches the Linux/Android HAL;
 // extern "C" here would mismatch the definition's mangling and fail at link).
@@ -26,6 +32,63 @@ extern "C" void WFIosSetSurfaceSize(int w, int h);
 // Defined in hal/ios/lifecycle.mm.
 extern "C" void HALNotifySuspend(void);
 extern "C" void HALNotifyResume(void);
+
+//=============================================================================
+// Diagnostic log — short-term shim. iOS sends stdio to /dev/null by default,
+// so printf / std::cout (and the WF streams in streams/binstrm.cc, which build
+// on std::ostream) are invisible in the Codemagic sim run. Dup the stdio fds
+// to a file under NSTemporaryDirectory(); the sim-verify step in
+// codemagic.yaml pulls it back out via `xcrun simctl get_app_container`.
+// Long-term, WF's own stream subsystem should acquire a platform-filesystem
+// sink for iOS/Android parallel to Linux — see
+// docs/plans/deferred/2026-04-22-streams-platform-filesystems.md.
+//=============================================================================
+
+static void WFCrashSigHandler(int sig, siginfo_t* info, void* /*ucontext*/)
+{
+    std::fprintf(stderr,
+                 "\n!!! wf_game crashed: signal=%d si_code=%d si_addr=%p !!!\n",
+                 sig, info ? info->si_code : 0, info ? info->si_addr : nullptr);
+    std::fflush(stderr);
+    signal(sig, SIG_DFL);
+    raise(sig);
+}
+
+static void WFInstallCrashHandlers(void)
+{
+    struct sigaction sa;
+    std::memset(&sa, 0, sizeof(sa));
+    sa.sa_flags     = SA_SIGINFO;
+    sa.sa_sigaction = WFCrashSigHandler;
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGSEGV, &sa, nullptr);
+    sigaction(SIGBUS,  &sa, nullptr);
+    sigaction(SIGABRT, &sa, nullptr);
+    sigaction(SIGILL,  &sa, nullptr);
+    sigaction(SIGFPE,  &sa, nullptr);
+}
+
+static void WFOpenDiagnosticLog(void)
+{
+    NSString* dir = NSTemporaryDirectory();
+    if (!dir) return;
+    NSString* path = [dir stringByAppendingPathComponent:@"wf.log"];
+    int fd = open([path fileSystemRepresentation],
+                  O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if (fd < 0) {
+        NSLog(@"wf_game: failed to open diagnostic log at %@ (errno=%d)",
+              path, errno);
+        return;
+    }
+    dup2(fd, STDOUT_FILENO);
+    dup2(fd, STDERR_FILENO);
+    close(fd);
+    std::setvbuf(stdout, nullptr, _IOLBF, 0);
+    std::setvbuf(stderr, nullptr, _IOLBF, 0);
+    std::fprintf(stderr, "\n=== wf_game ios (log → %s) ===\n",
+                 [path fileSystemRepresentation]);
+    NSLog(@"wf_game: diagnostic log at %@", path);
+}
 
 //=============================================================================
 // Engine thread. Phase 2C-A pattern: UIApplicationMain + CADisplayLink
@@ -112,6 +175,8 @@ static void* WFEngineThreadMain(void* /*arg*/)
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
 {
+    WFOpenDiagnosticLog();
+    WFInstallCrashHandlers();
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = [[WFRootViewController alloc] init];
     [self.window makeKeyAndVisible];
