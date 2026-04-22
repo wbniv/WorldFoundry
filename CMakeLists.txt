@@ -430,8 +430,13 @@ target_link_options(wf_game PRIVATE
     "$<$<CONFIG:Release>:-flto=thin;-Wl,--gc-sections;-Wl,--icf=safe;-Wl,-O2;-Wl,--export-dynamic-symbol=ANativeActivity_onCreate>"
 )
 
-if(ANDROID)
+if(ANDROID OR IOS)
+    # Legacy `register` keyword is C++17-removed; WF's pigsys/endian.cc still
+    # uses it. Silence to match the Linux build's permissive stance.
     target_compile_options(wf_game PRIVATE -Wno-register)
+endif()
+
+if(ANDROID)
     # Bump Jolt + zforth to -O3 in Release to match main target. (Jolt is ~36%
     # of .text so even +10% speed here moves the needle.) Jolt has no `throw`
     # in its source, so -fno-exceptions is a drop-in win — removes all the
