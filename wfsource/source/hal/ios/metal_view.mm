@@ -111,7 +111,7 @@ static UIColor* WFHudBColor(void)      { return [UIColor colorWithRed:0.25 green
     // Layout is done in layoutSubviews using point-space frames derived
     // from the same pixel regions as WFHitTestTouch.
     auto makeHud = ^(UIColor* color, CGFloat cornerRadius) {
-        UIView* v = [[UIView alloc] initWithFrame:CGRectZero];
+        UIView* v = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
         v.backgroundColor = color;
         v.userInteractionEnabled = NO;
         v.layer.cornerRadius = cornerRadius;
