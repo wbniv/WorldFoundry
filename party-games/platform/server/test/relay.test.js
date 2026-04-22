@@ -1,0 +1,235 @@
+// Platform relay — behaviour tests. Uses node:test (built-in; no Jest / mocha).
+//
+//   node --test test/
+//
+// Each test spins up an isolated server on an ephemeral port with quiet=true
+// so output stays clean.
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const WebSocket = require('ws');
+
+const { createServer, MAX_NAME_LEN, MAX_MESSAGE_BYTES } = require('../createServer');
+
+// ───────── helpers ──────────────────────────────────────────────────────────
+
+function withServer(fn) {
+  return async () => {
+    const srv = await createServer({ port: 0, quiet: true });
+    const base = `ws://localhost:${srv.port}/ws`;
+    try {
+      await fn({ base, port: srv.port, ...srv });
+    } finally {
+      await srv.close();
+    }
+  };
+}
+
+/** Open a ws client; resolves once the socket is OPEN.
+ *
+ * `waitFor(predicate, { timeoutMs, sinceIndex })` — `sinceIndex` (default 0)
+ * skips messages that arrived before that index. Snapshot `client.messages.length`
+ * before an action, then pass it in to wait strictly for *new* messages.
+ */
+function openClient(url) {
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(url);
+    const messages = [];
+    ws.on('message', (data) => {
+      try { messages.push(JSON.parse(data.toString())); } catch { /* drop */ }
+    });
+    ws.on('error', reject);
+    ws.once('open', () => resolve({ ws, messages, waitFor }));
+
+    function waitFor(predicate, opts = {}) {
+      const timeoutMs = opts.timeoutMs ?? 1000;
+      const sinceIndex = opts.sinceIndex ?? 0;
+      return new Promise((resolveW, rejectW) => {
+        let settled = false;
+        const scanFrom = (start) => {
+          for (let i = start; i < messages.length; i++) {
+            if (predicate(messages[i])) {
+              if (settled) return;
+              settled = true;
+              clearTimeout(to);
+              ws.off('message', listener);
+              return resolveW(messages[i]);
+            }
+          }
+        };
+        const listener = () => scanFrom(sinceIndex);
+        ws.on('message', listener);
+        const to = setTimeout(() => {
+          if (settled) return;
+          settled = true;
+          ws.off('message', listener);
+          rejectW(new Error(`timeout waiting for message (since=${sinceIndex}); saw: ${JSON.stringify(messages.slice(sinceIndex))}`));
+        }, timeoutMs);
+        scanFrom(sinceIndex);
+      });
+    }
+  });
+}
+
+function send(ws, msg) { ws.send(JSON.stringify(msg)); }
+function close(ws) {
+  return new Promise((res) => { ws.once('close', res); ws.close(); });
+}
+
+// ───────── tests ────────────────────────────────────────────────────────────
+
+test('receiver gets empty STATE on HELLO', withServer(async ({ base }) => {
+  const recv = await openClient(base);
+  send(recv.ws, { type: 'HELLO', role: 'receiver' });
+  const state = await recv.waitFor(m => m.type === 'STATE');
+  assert.deepEqual(state.players, []);
+  await close(recv.ws);
+}));
+
+test('controller HELLO yields WELCOME and broadcasts STATE', withServer(async ({ base }) => {
+  const recv = await openClient(base);
+  send(recv.ws, { type: 'HELLO', role: 'receiver' });
+  await recv.waitFor(m => m.type === 'STATE');
+
+  const alice = await openClient(base);
+  send(alice.ws, { type: 'HELLO', role: 'controller', name: 'Alice' });
+  const welcome = await alice.waitFor(m => m.type === 'WELCOME');
+  assert.equal(welcome.id, 1);
+  assert.equal(welcome.name, 'Alice');
+
+  const stateBroadcast = await recv.waitFor(m => m.type === 'STATE' && m.players.length === 1);
+  assert.deepEqual(stateBroadcast.players, [{ id: 1, name: 'Alice' }]);
+
+  await close(alice.ws);
+  await close(recv.ws);
+}));
+
+test('PING from controller yields PONG to everyone with client+server ts', withServer(async ({ base }) => {
+  const recv = await openClient(base);
+  send(recv.ws, { type: 'HELLO', role: 'receiver' });
+  const alice = await openClient(base);
+  send(alice.ws, { type: 'HELLO', role: 'controller', name: 'Alice' });
+  await alice.waitFor(m => m.type === 'WELCOME');
+
+  const t0 = Date.now();
+  send(alice.ws, { type: 'PING', clientTs: t0 });
+
+  const pongAtReceiver = await recv.waitFor(m => m.type === 'PONG');
+  assert.equal(pongAtReceiver.from, 1);
+  assert.equal(pongAtReceiver.name, 'Alice');
+  assert.equal(pongAtReceiver.clientTs, t0);
+  assert.ok(pongAtReceiver.serverTs >= t0, 'serverTs should be ≥ clientTs');
+  assert.ok(pongAtReceiver.serverTs < t0 + 5000, 'serverTs should be reasonable');
+
+  const pongAtAlice = await alice.waitFor(m => m.type === 'PONG');
+  assert.equal(pongAtAlice.from, 1);
+
+  await close(alice.ws); await close(recv.ws);
+}));
+
+test('disconnect broadcasts updated STATE without the departed player', withServer(async ({ base }) => {
+  const recv = await openClient(base);
+  send(recv.ws, { type: 'HELLO', role: 'receiver' });
+
+  const alice = await openClient(base);
+  send(alice.ws, { type: 'HELLO', role: 'controller', name: 'Alice' });
+  const bob = await openClient(base);
+  send(bob.ws, { type: 'HELLO', role: 'controller', name: 'Bob' });
+  await recv.waitFor(m => m.type === 'STATE' && m.players.length === 2);
+
+  const sinceIndex = recv.messages.length;
+  await close(alice.ws);
+  const stateAfterLeave = await recv.waitFor(
+    m => m.type === 'STATE' && m.players.length === 1,
+    { sinceIndex },
+  );
+  assert.deepEqual(stateAfterLeave.players, [{ id: 2, name: 'Bob' }]);
+
+  await close(bob.ws); await close(recv.ws);
+}));
+
+test('PING from unregistered socket is ignored', withServer(async ({ base }) => {
+  const recv = await openClient(base);
+  send(recv.ws, { type: 'HELLO', role: 'receiver' });
+  await recv.waitFor(m => m.type === 'STATE');
+
+  const anon = await openClient(base);
+  send(anon.ws, { type: 'PING', clientTs: Date.now() });     // no HELLO first
+  await new Promise(r => setTimeout(r, 100));                // allow stray broadcast to arrive
+  assert.equal(recv.messages.filter(m => m.type === 'PONG').length, 0,
+               'receiver should not have seen a PONG from an anon socket');
+
+  await close(anon.ws); await close(recv.ws);
+}));
+
+test('malformed JSON does not crash or leak state', withServer(async ({ base }) => {
+  const recv = await openClient(base);
+  send(recv.ws, { type: 'HELLO', role: 'receiver' });
+  await recv.waitFor(m => m.type === 'STATE');
+
+  const garbled = await openClient(base);
+  garbled.ws.send('{not valid json');
+  garbled.ws.send('42');           // valid json but not an object
+  garbled.ws.send('[]');           // array
+  garbled.ws.send(JSON.stringify({ /* no type */ name: 'ghost' }));
+  send(garbled.ws, { type: 'UNKNOWN_FANCY_TYPE' });
+
+  // Now a legit HELLO must still work.
+  send(garbled.ws, { type: 'HELLO', role: 'controller', name: 'Eve' });
+  const welcome = await garbled.waitFor(m => m.type === 'WELCOME');
+  assert.equal(welcome.name, 'Eve');
+
+  await close(garbled.ws); await close(recv.ws);
+}));
+
+test('name is truncated to MAX_NAME_LEN characters', withServer(async ({ base }) => {
+  const client = await openClient(base);
+  const long = 'x'.repeat(MAX_NAME_LEN + 20);
+  send(client.ws, { type: 'HELLO', role: 'controller', name: long });
+  const welcome = await client.waitFor(m => m.type === 'WELCOME');
+  assert.equal(welcome.name.length, MAX_NAME_LEN);
+  assert.equal(welcome.name, 'x'.repeat(MAX_NAME_LEN));
+  await close(client.ws);
+}));
+
+test('repeated HELLO from same socket is ignored (role stays first-set)', withServer(async ({ base }) => {
+  const client = await openClient(base);
+  send(client.ws, { type: 'HELLO', role: 'controller', name: 'Alice' });
+  await client.waitFor(m => m.type === 'WELCOME');
+
+  // Attempt to re-HELLO as receiver — should be silently ignored.
+  send(client.ws, { type: 'HELLO', role: 'receiver' });
+  await new Promise(r => setTimeout(r, 80));
+  // No second WELCOME / no fresh STATE snapshot should be sent to Alice.
+  const welcomes = client.messages.filter(m => m.type === 'WELCOME');
+  assert.equal(welcomes.length, 1, 'only one WELCOME expected');
+
+  await close(client.ws);
+}));
+
+test('HELLO with unknown role ignored; client stays anonymous (PING drops)', withServer(async ({ base }) => {
+  const recv = await openClient(base);
+  send(recv.ws, { type: 'HELLO', role: 'receiver' });
+  await recv.waitFor(m => m.type === 'STATE');
+
+  const spectator = await openClient(base);
+  send(spectator.ws, { type: 'HELLO', role: 'spectator' });   // unknown role
+  send(spectator.ws, { type: 'PING', clientTs: Date.now() }); // should be rejected since not a controller
+  await new Promise(r => setTimeout(r, 100));
+  assert.equal(recv.messages.filter(m => m.type === 'PONG').length, 0);
+
+  await close(spectator.ws); await close(recv.ws);
+}));
+
+test('oversize payload is rejected by ws (closes connection)', withServer(async ({ base }) => {
+  const client = await openClient(base);
+  // Enqueue a payload larger than maxPayload; ws library closes the socket.
+  const bigName = 'y'.repeat(MAX_MESSAGE_BYTES);
+  const oversize = JSON.stringify({ type: 'HELLO', role: 'controller', name: bigName });
+  assert.ok(oversize.length > MAX_MESSAGE_BYTES, 'setup: payload genuinely larger than max');
+
+  const closed = new Promise(r => client.ws.once('close', r));
+  client.ws.send(oversize);
+  await closed;
+  // Success = socket closed on its own; no crash.
+}));
