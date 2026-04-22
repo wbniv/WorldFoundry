@@ -325,6 +325,15 @@ endif()
 
 # ─── Jolt Physics ─────────────────────────────────────────────────────────────
 set(JOLT_DIR ${VENDOR}/jolt-physics-5.5.0)
+# iOS/Xcode: Jolt's add_library(Jolt ...) does not produce a target our scope
+# can modify under -G Xcode + CMAKE_SYSTEM_NAME=iOS (symptom: "Cannot specify
+# compile options for target 'Jolt' which is not built by this project").
+# TODO(ios): investigate Jolt + Xcode generator and re-enable. Until then,
+# fall back to the legacy physics backend for the iOS target.
+if(IOS AND WF_PHYSICS_ENGINE STREQUAL "jolt")
+    message(STATUS "iOS: forcing WF_PHYSICS_ENGINE=legacy (Jolt+Xcode integration deferred)")
+    set(WF_PHYSICS_ENGINE "legacy" CACHE STRING "" FORCE)
+endif()
 if(WF_PHYSICS_ENGINE STREQUAL "jolt")
     list(APPEND WF_SOURCES
         ${STUB_SRC}/physics_jolt.cc
