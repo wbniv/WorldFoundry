@@ -18,6 +18,13 @@ wftools/*/target/
 # CMake build output dirs
 cmake-build-*/
 
+# Codemagic artifact downloads (CI output, never source)
+WorldFoundry_*_artifacts.zip
+wf_game.app.zip
+wf_game.app.dSYM.zip
+wf_game.app/
+wf_game.app.dSYM/
+
 # Built game binary
 engine/wf_game
 
