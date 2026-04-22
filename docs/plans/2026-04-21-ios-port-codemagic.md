@@ -1,7 +1,7 @@
 # Plan: iOS port (via Codemagic)
 
 **Date:** 2026-04-21 (revises the 2026-04-16 doc — prior version parked the port as "blocked on lack of a Mac")
-**Status:** Phase 1 build green (2026-04-22) — Codemagic produces a signed `wf_game.app` artifact for iOS Simulator arm64. Entire HAL-plus-core build compiles + links on Apple clang, bundles `cd.iff` + `level0.mid` as resources, launches via `UIApplicationMain` → `WFAppDelegate` → `WFRootViewController`. Pending: actually boot the `.app` in iOS Simulator to confirm `HALGetAssetAccessor()` doesn't crash and `cd.iff` opens (Phase 1 Verify). Then Phase 2: Metal backend + gfx/ + game/ wired in.
+**Status:** Phase 1 verified (2026-04-22) — Codemagic ships the `.app`, boots it on an iPhone 17 Pro Simulator inside the same Mac runner, and the unified log confirms `HALGetAssetAccessor().OpenForRead("cd.iff")` succeeded. Build → install → launch → viewDidLoad → NSLog `"cd.iff opened, size=174080"`, all automated, zero user Macs involved. Full HAL-plus-core build in 172 KB arm64 Mach-O + 170 KB bundled cd.iff resource. Phase 2 next: Metal backend + gfx/ + game/ wired in.
 **Goal:** An arm64 IPA that runs snowgoons on a physical iPhone, installed via TestFlight (or ad-hoc), with Codemagic as the only Mac in the loop. Proof-of-viability, not a shipping product.
 
 ## Context
