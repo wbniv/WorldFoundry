@@ -35,15 +35,30 @@ function resolveStatic(url) {
  * Start a platform relay instance.
  *
  * @param {object} opts
- * @param {number} [opts.port=8080]     0 = ephemeral (tests)
- * @param {string} [opts.staticRoot]    dir holding receiver-shell/ + controller-shell/
- * @param {boolean} [opts.quiet=false]  suppress console.log chatter (tests)
- * @returns {Promise<{server: http.Server, wss: WebSocketServer, port: number, close: () => Promise<void>}>}
+ * @param {number}  [opts.port=8080]        0 = ephemeral (tests)
+ * @param {string}  [opts.staticRoot]       dir holding receiver-shell/ + controller-shell/
+ * @param {boolean} [opts.quiet=false]      suppress console.log chatter (tests)
+ * @param {object}  [opts.game]             optional game plugin:
+ *                                            onJoin?(player, services)
+ *                                            onLeave?(player, services)
+ *                                            onMessage?(player, msg, services)
+ *                                          where services = {
+ *                                            broadcast(msg), sendTo(playerId, msg),
+ *                                            getPlayers(), getHost(), now(),
+ *                                            schedule(delayMs, fn) → cancel-fn
+ *                                          }
+ * @returns {Promise<{server, wss, port, close}>}
  */
 function createServer(opts = {}) {
   const port = opts.port ?? 8080;
   const staticRoot = opts.staticRoot ?? path.resolve(__dirname, '..');
   const quiet = !!opts.quiet;
+  const game = opts.game ?? null;
+  const now = opts.now ?? (() => Date.now());
+  const scheduleFn = opts.schedule ?? ((ms, fn) => {
+    const h = setTimeout(fn, ms);
+    return () => clearTimeout(h);
+  });
   const log = quiet ? () => {} : (...args) => console.log(...args);
 
   const server = http.createServer((req, res) => {
@@ -77,13 +92,14 @@ function createServer(opts = {}) {
 
   const everyone  = new Set();
   const receivers = new Set();
-  const players   = new Map();   // playerId → { id, name, ws }
+  const players   = new Map();   // playerId → { id, name, ws, joinedAt }
   let nextPlayerId = 1;
 
   function snapshotState() {
     return {
       type: 'STATE',
       players: [...players.values()].map(p => ({ id: p.id, name: p.name })),
+      hostId: firstHostId(),
     };
   }
 
@@ -93,6 +109,39 @@ function createServer(opts = {}) {
       if (ws.readyState === ws.OPEN) ws.send(data);
     }
   }
+
+  function sendTo(playerId, msg) {
+    const p = players.get(playerId);
+    if (p && p.ws.readyState === p.ws.OPEN) p.ws.send(JSON.stringify(msg));
+  }
+
+  /** First-joined player is host; re-elect when they leave. */
+  function firstHostId() {
+    let first = null;
+    for (const p of players.values()) {
+      if (!first || p.joinedAt < first.joinedAt) first = p;
+    }
+    return first ? first.id : null;
+  }
+
+  // Services surface handed to game plugins. Platform-owned message types
+  // (HELLO, PING, STATE, WELCOME, PONG) stay reserved; games should use
+  // distinct type names.
+  const random = opts.random ?? Math.random;
+  const services = {
+    broadcast(msg) { broadcast(msg); },
+    sendTo,
+    getPlayers() { return [...players.values()].map(p => ({ id: p.id, name: p.name })); },
+    getHost() {
+      const id = firstHostId();
+      if (id == null) return null;
+      const p = players.get(id);
+      return { id: p.id, name: p.name };
+    },
+    now,
+    schedule: scheduleFn,
+    random,
+  };
 
   wss.on('connection', (ws) => {
     everyone.add(ws);
@@ -121,10 +170,13 @@ function createServer(opts = {}) {
           } else if (role === 'controller') {
             playerId = nextPlayerId++;
             const name = String(msg.name ?? '').slice(0, MAX_NAME_LEN) || `Player ${playerId}`;
-            players.set(playerId, { id: playerId, name, ws });
+            const player = { id: playerId, name, ws, joinedAt: now() };
+            players.set(playerId, player);
             log(`[ws] player joined id=${playerId} name=${name}`);
-            ws.send(JSON.stringify({ type: 'WELCOME', id: playerId, name }));
+            ws.send(JSON.stringify({ type: 'WELCOME', id: playerId, name, hostId: firstHostId() }));
             broadcast(snapshotState());
+            try { game?.onJoin?.({ id: playerId, name }, services); }
+            catch (e) { log('[game] onJoin threw', e); }
           } else {
             role = null;  // reject unknown role; stay anonymous
           }
@@ -138,11 +190,21 @@ function createServer(opts = {}) {
             from: playerId,
             name: players.get(playerId)?.name,
             clientTs,
-            serverTs: Date.now(),
+            serverTs: now(),
           });
           break;
         }
-        // Unknown types are silently dropped.
+        default: {
+          // Forward non-platform messages to the game plugin, if any.
+          if (role === 'controller' && playerId != null && game?.onMessage) {
+            try {
+              const p = players.get(playerId);
+              game.onMessage({ id: p.id, name: p.name }, msg, services);
+            } catch (e) {
+              log('[game] onMessage threw', e);
+            }
+          }
+        }
       }
     });
 
@@ -152,9 +214,14 @@ function createServer(opts = {}) {
         receivers.delete(ws);
         log('[ws] receiver detached');
       } else if (playerId != null) {
+        const p = players.get(playerId);
         players.delete(playerId);
         log(`[ws] player left id=${playerId}`);
         broadcast(snapshotState());
+        if (p) {
+          try { game?.onLeave?.({ id: p.id, name: p.name }, services); }
+          catch (e) { log('[game] onLeave threw', e); }
+        }
       }
     });
 
