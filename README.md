@@ -204,4 +204,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-21 23:03** — [`wf-status.md`](wf-status.md): iOS port — Summary paragraph added; moved Backlog → Active; branch line flipped to `2026-ios`
+**2026-04-21 23:47** — [`docs/plans/2026-04-21-ios-port-codemagic.md`](docs/plans/2026-04-21-ios-port-codemagic.md): Plan: iOS port (via Codemagic)
