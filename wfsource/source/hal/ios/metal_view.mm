@@ -56,10 +56,26 @@ static joystickButtonsF WFHitTestTouch(CGFloat px, CGFloat py, int w, int h)
     return 0;
 }
 
+// HUD color constants, lifted from gfx/gl/android_window.cc:338-347 so the
+// iOS on-screen controls look the same as Android's. Directions are a
+// semi-transparent gray, A is red (primary action), B is blue.
+static UIColor* WFHudDPadColor(void)   { return [UIColor colorWithWhite:0.55 alpha:0.50]; }
+static UIColor* WFHudAColor(void)      { return [UIColor colorWithRed:0.80 green:0.25 blue:0.25 alpha:0.55]; }
+static UIColor* WFHudBColor(void)      { return [UIColor colorWithRed:0.25 green:0.35 blue:0.85 alpha:0.55]; }
+
 @implementation WFMetalView
 {
     id<MTLDevice>        _device;
     id<MTLCommandQueue>  _queue;
+    // HUD child views — non-interactive overlays whose frames track the
+    // same pixel-space hit regions as WFHitTestTouch. CAMetalLayer renders
+    // the engine scene underneath; these UIViews composite over it.
+    UIView*              _hudLeft;
+    UIView*              _hudRight;
+    UIView*              _hudUp;
+    UIView*              _hudDown;
+    UIView*              _hudA;
+    UIView*              _hudB;
 }
 
 + (Class)layerClass { return [CAMetalLayer class]; }
@@ -86,6 +102,25 @@ static joystickButtonsF WFHitTestTouch(CGFloat px, CGFloat py, int w, int h)
     gWFMetalLayer = ml;
     gWFMetalQueue = _queue;
 
+    // HUD buttons — semi-transparent UIViews over the Metal layer. Non-
+    // interactive so UITouch events pass through to WFMetalView itself.
+    // Layout is done in layoutSubviews using point-space frames derived
+    // from the same pixel regions as WFHitTestTouch.
+    auto makeHud = ^(UIColor* color, CGFloat cornerRadius) {
+        UIView* v = [[UIView alloc] initWithFrame:CGRectZero];
+        v.backgroundColor = color;
+        v.userInteractionEnabled = NO;
+        v.layer.cornerRadius = cornerRadius;
+        [self addSubview:v];
+        return v;
+    };
+    _hudLeft  = makeHud(WFHudDPadColor(), 4.0);
+    _hudRight = makeHud(WFHudDPadColor(), 4.0);
+    _hudUp    = makeHud(WFHudDPadColor(), 4.0);
+    _hudDown  = makeHud(WFHudDPadColor(), 4.0);
+    _hudA     = makeHud(WFHudAColor(),    22.0);
+    _hudB     = makeHud(WFHudBColor(),    22.0);
+
     NSLog(@"wf_game: MetalView init, device=%@, scale=%g",
           _device.name, ml.contentsScale);
     return self;
@@ -97,6 +132,30 @@ static joystickButtonsF WFHitTestTouch(CGFloat px, CGFloat py, int w, int h)
     CAMetalLayer* ml = (CAMetalLayer*)self.layer;
     ml.drawableSize = CGSizeMake(self.bounds.size.width  * ml.contentsScale,
                                  self.bounds.size.height * ml.contentsScale);
+
+    // HUD layout: convert the Android-parallel pixel regions back to points
+    // for UIView frames (UIView works in points; WFHitTestTouch does the
+    // reverse conversion on every UITouch).
+    const CGFloat s = ml.contentsScale;
+    const CGFloat w = self.bounds.size.width;
+    const CGFloat h = self.bounds.size.height;
+    const CGFloat px  = 1.0 / s;     // 1 pixel in points
+    const CGFloat p66 = 66.0 * px;
+    const CGFloat p120= 120.0 * px;
+    const CGFloat p133= 133.0 * px;
+    const CGFloat p67 = 67.0 * px;   // height of d-pad middle row: h-133..h-66 is 67px
+    const CGFloat p200= 200.0 * px;
+    const CGFloat p240= 240.0 * px;
+
+    // D-pad cross (bottom-left). Mirror gfx/gl/android_window.cc:340-343.
+    _hudLeft.frame  = CGRectMake(0,        h - p133, p66,           p67);
+    _hudRight.frame = CGRectMake(p133,     h - p133, p200 - p133,   p67);
+    _hudUp.frame    = CGRectMake(p66,      h - p200, p133 - p66,    p200 - p133);
+    _hudDown.frame  = CGRectMake(p66,      h - p66,  p133 - p66,    p66);
+
+    // Action buttons (bottom-right). A is the outer one; B is inside.
+    _hudA.frame = CGRectMake(w - p120,          h - p120, p120,          p120);
+    _hudB.frame = CGRectMake(w - p240,          h - p120, p240 - p120,   p120);
 }
 
 //=============================================================================
