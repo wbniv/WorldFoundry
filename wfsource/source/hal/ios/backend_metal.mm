@@ -309,13 +309,15 @@ public:
 
     void EndFrame() override
     {
-        static bool sLoggedFirstEndFrame = true;
-        if (sLoggedFirstEndFrame) {
-            sLoggedFirstEndFrame = false;
+        // Log every 60 frames so we can watch the triangle count evolve
+        // across the first few seconds of play without spamming wf.log.
+        static int  sFrameN = 0;
+        if (sFrameN == 0 || (sFrameN % 60) == 0) {
             std::fprintf(stderr,
-                         "wf_game: first MetalBackend EndFrame — cpu=%zu tris, encoder=%s\n",
-                         _cpu.size() / 3, _encoder ? "live" : "nil");
+                         "wf_game: MetalBackend EndFrame #%d — cpu=%zu tris, encoder=%s\n",
+                         sFrameN, _cpu.size() / 3, _encoder ? "live" : "nil");
         }
+        sFrameN++;
         Flush();
     }
 
