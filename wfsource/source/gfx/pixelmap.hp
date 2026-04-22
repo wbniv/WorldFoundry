@@ -67,6 +67,13 @@ public:
     // kts temp
     void SetGLTexture() const;                 // make this pixelmap the current GL texture
 
+    // Root-walker accessors used by the iOS Metal backend to upload the
+    // backing pixel data into an MTLTexture. A PixelMap with a parent is a
+    // subregion — the parent owns the actual pixel buffer. UV coordinates
+    // are already computed relative to the root's dimensions, so textures
+    // are cached per-root.
+    const PixelMap* GetRoot() const;
+    const void*     GetRootPixelBuffer() const;
 
 	void Validate() const;
 	enum

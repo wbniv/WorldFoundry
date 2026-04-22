@@ -107,6 +107,26 @@ PixelMap::GetBaseYSize() const
 	return pm->GetYSize();
 }
 
+//=============================================================================
+
+inline const PixelMap*
+PixelMap::GetRoot() const
+{
+	Validate();
+	const PixelMap* pm = this;
+	while (pm->_parent)
+		pm = pm->_parent;
+	return pm;
+}
+
+//=============================================================================
+
+inline const void*
+PixelMap::GetRootPixelBuffer() const
+{
+	return GetRoot()->_pixelBuffer;
+}
+
 //==============================================================================
 
 inline int

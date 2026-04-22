@@ -32,6 +32,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <unordered_map>
 #include <vector>
 
 namespace
@@ -105,11 +106,16 @@ vertex VertexOut wf_vs(VertexIn v                  [[stage_in]],
 }
 
 fragment float4 wf_fs(VertexOut v                  [[stage_in]],
-                      constant Uniforms& u         [[buffer(1)]])
+                      constant Uniforms& u         [[buffer(1)]],
+                      texture2d<float> tex         [[texture(0)]],
+                      sampler smp                  [[sampler(0)]])
 {
     float4 c = float4(v.color * v.lit, 1.0);
-    // Phase 2B3: texture path disabled, PixelMap→MTLTexture upload lands
-    // with the frame-loop wiring in Phase 2C.
+    if (u.use_tex != 0) {
+        float4 t = tex.sample(smp, v.uv);
+        c.rgb *= t.rgb;
+        c.a   *= t.a;
+    }
     if (u.fog != 0) {
         c.rgb = mix(u.fog_color, c.rgb, v.fog_factor);
     }
@@ -342,6 +348,9 @@ private:
     id<MTLDevice>              _device          = nil;
     id<MTLRenderPipelineState> _pipeline        = nil;
     id<MTLRenderCommandEncoder> _encoder        = nil;
+    id<MTLSamplerState>        _sampler         = nil;
+    id<MTLTexture>             _dummyWhiteTex   = nil;
+    std::unordered_map<const PixelMap*, id<MTLTexture>> _texCache;
     bool                       _inited          = false;
 
     float _proj[16];
@@ -427,8 +436,80 @@ private:
             return;
         }
 
+        // Sampler: linear min/mag/mip + repeat wrap, matching the GL setup in
+        // gfx/pixelmap.cc (GL_LINEAR / GL_REPEAT) under GFX_ZBUFFER.
+        MTLSamplerDescriptor* sd = [[MTLSamplerDescriptor alloc] init];
+        sd.minFilter    = MTLSamplerMinMagFilterLinear;
+        sd.magFilter    = MTLSamplerMinMagFilterLinear;
+        sd.mipFilter    = MTLSamplerMipFilterNotMipmapped;
+        sd.sAddressMode = MTLSamplerAddressModeRepeat;
+        sd.tAddressMode = MTLSamplerAddressModeRepeat;
+        _sampler = [_device newSamplerStateWithDescriptor:sd];
+
+        // 1x1 white fallback so the shader always has a valid texture bound
+        // on untextured draws — u.use_tex=0 gates actual sampling, but Metal
+        // still dereferences [[texture(0)]] in the shader parameter list.
+        MTLTextureDescriptor* dd = [MTLTextureDescriptor
+            texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
+                                         width:1 height:1 mipmapped:NO];
+        dd.usage = MTLTextureUsageShaderRead;
+        _dummyWhiteTex = [_device newTextureWithDescriptor:dd];
+        static const uint8_t kWhite[4] = { 255, 255, 255, 255 };
+        [_dummyWhiteTex replaceRegion:MTLRegionMake2D(0, 0, 1, 1)
+                          mipmapLevel:0
+                            withBytes:kWhite
+                          bytesPerRow:4];
+
         NSLog(@"wf_game: MetalBackend ready (device=%@)", _device.name);
         _inited = true;
+    }
+
+    // Upload a PixelMap's RGBA bytes into an MTLTexture, caching by root
+    // PixelMap pointer so sub-region PixelMaps share their parent's texture
+    // (UV coordinates are already normalized against GetBaseXSize/YSize per
+    // gfx/glpipeline/rendgtl.cc:CalcUV). Called from Flush() the first time
+    // each texture is drawn — PixelMap::Load copies the source bytes into
+    // _pixelBuffer; we then blit into GPU memory once.
+    id<MTLTexture> GetOrUploadTexture(const PixelMap* pm)
+    {
+        const PixelMap* root = pm->GetRoot();
+        auto it = _texCache.find(root);
+        if (it != _texCache.end()) return it->second;
+
+        const int w = root->GetXSize();
+        const int h = root->GetYSize();
+        const void* bytes = root->GetRootPixelBuffer();
+        if (!bytes || w <= 0 || h <= 0) {
+            _texCache[root] = nil;
+            return nil;
+        }
+
+        MTLTextureDescriptor* td = [MTLTextureDescriptor
+            texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
+                                         width:(NSUInteger)w
+                                        height:(NSUInteger)h
+                                     mipmapped:NO];
+        td.usage = MTLTextureUsageShaderRead;
+        id<MTLTexture> tex = [_device newTextureWithDescriptor:td];
+        if (!tex) {
+            NSLog(@"wf_game: MetalBackend texture alloc failed (%dx%d)", w, h);
+            _texCache[root] = nil;
+            return nil;
+        }
+        [tex replaceRegion:MTLRegionMake2D(0, 0, w, h)
+               mipmapLevel:0
+                 withBytes:bytes
+               bytesPerRow:w * 4];
+        _texCache[root] = tex;
+
+        static int sUploadN = 0;
+        if (sUploadN < 8 || (sUploadN % 8) == 0) {
+            std::fprintf(stderr,
+                         "wf_game: MetalBackend uploaded texture #%d (%dx%d)\n",
+                         sUploadN, w, h);
+        }
+        sUploadN++;
+        return tex;
     }
 
     void UpdateMvp()
@@ -452,7 +533,7 @@ private:
         u.fog       = _fogEnabled ? 1 : 0;
         u.fog_start = _fogStart;
         u.fog_end   = _fogEnd;
-        u.use_tex   = 0;  // Phase 2C adds texture binding.
+        u.use_tex   = (_curTexture != nullptr) ? 1 : 0;
         u._pad      = 0;
     }
 
@@ -480,6 +561,12 @@ private:
 
         Uniforms u;
         BuildUniforms(u);
+
+        id<MTLTexture> tex =
+            _curTexture ? GetOrUploadTexture(_curTexture) : _dummyWhiteTex;
+        if (!tex) tex = _dummyWhiteTex;
+        [_encoder setFragmentTexture:tex atIndex:0];
+        [_encoder setFragmentSamplerState:_sampler atIndex:0];
 
         [_encoder setRenderPipelineState:_pipeline];
         [_encoder setVertexBytes:_cpu.data()
