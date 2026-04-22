@@ -1,7 +1,7 @@
 # Plan: iOS port (via Codemagic)
 
 **Date:** 2026-04-21 (revises the 2026-04-16 doc — prior version parked the port as "blocked on lack of a Mac")
-**Status:** Ready to start — macOS build environment now available via Codemagic cloud build minutes.
+**Status:** Phase 0 complete (2026-04-21) — Codemagic pipeline green end-to-end, Mac toolchain reached per-source compilation of the engine, stopped at the expected iOS HAL gap (`fatal error: 'GL/gl.h' file not found` in `gfx/renderer.hp`). Phase 1 next: `hal/ios/` skeleton + `elseif(IOS)` CMake branch + `ios/` Xcode wrapper.
 **Goal:** An arm64 IPA that runs snowgoons on a physical iPhone, installed via TestFlight (or ad-hoc), with Codemagic as the only Mac in the loop. Proof-of-viability, not a shipping product.
 
 ## Context
