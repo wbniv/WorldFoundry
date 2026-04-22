@@ -22,8 +22,10 @@ set(WF_PHYSICS_ENGINE "jolt"    CACHE STRING "legacy | jolt")
 option(WF_REST_API        "REST API box PoC"              ON)
 option(WF_ENABLE_STEAM    "Steamworks SDK"                OFF)
 
-# Android: Forth-only, no Steam, no REST API (matches build_game.sh Android flags)
-if(ANDROID)
+# Mobile (Android + iOS): Forth-only scripting, no Steam, no REST API.
+# Matches build_game.sh Android flags. WAMR in particular ships x86_64 assembly
+# (`invokeNative_em64.s`) that fails to build on arm64 mobile targets.
+if(ANDROID OR IOS)
     set(WF_LUA_ENGINE    "none"   CACHE STRING "" FORCE)
     set(WF_ENABLE_FENNEL OFF      CACHE BOOL   "" FORCE)
     set(WF_JS_ENGINE     "none"   CACHE STRING "" FORCE)
