@@ -119,12 +119,12 @@ workflows:
           xcrun simctl io "$DEVICE_ID" screenshot "$SIM_ART/screenshot-raw.png"
           # `xcrun simctl io screenshot` captures the device's hardware framebuffer
           # in its natural portrait orientation regardless of Info.plist telling
-          # iOS the app is landscape-only. The landscape content appears rotated
-          # 90° CCW within the portrait image. Rotate 90° CW (sips notation) to
-          # get a landscape-oriented screenshot that matches what a real-device
-          # user would see. Keep the raw capture around for debugging.
+          # iOS the app is landscape-only. Rotate 270° (i.e. 90° CCW) so the
+          # scene appears right-side-up — the app is landscape-left, so the
+          # portrait hardware framebuffer contains content rotated 90° CW;
+          # rotating CCW undoes that. Keep the raw capture for debugging.
           cp "$SIM_ART/screenshot-raw.png" "$SIM_ART/screenshot.png"
-          sips -r 90 "$SIM_ART/screenshot.png" > /dev/null
+          sips -r 270 "$SIM_ART/screenshot.png" > /dev/null
 
           echo "--- pull wf.log from app data container ---"
           # WFOpenDiagnosticLog dups stdout/stderr to NSTemporaryDirectory()/wf.log
