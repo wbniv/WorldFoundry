@@ -50,6 +50,17 @@ void*   halMemory = nullptr;
 extern "C" void
 WFIosSetSurfaceSize(int w, int h)
 {
+    // One-shot trace so we know if the app is actually landscape (w > h) or
+    // portrait. Info.plist advertises landscape-only, but headless-boot
+    // Simulators sometimes ignore that and the app renders portrait-aspect.
+    static bool sLogged = false;
+    if (!sLogged) {
+        sLogged = true;
+        std::fprintf(stderr,
+                     "wf_game: WFIosSetSurfaceSize %dx%d (aspect=%.3f, %s)\n",
+                     w, h, (h > 0) ? float(w) / float(h) : 0.0f,
+                     (w > h) ? "landscape" : "portrait");
+    }
     _halWindowWidth  = w;
     _halWindowHeight = h;
 }
