@@ -212,4 +212,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-22 02:17** — [`docs/plans/2026-04-19-strip-nongeom-box3.md`](docs/plans/2026-04-19-strip-nongeom-box3.md): Plan: reconcile non-geometry-actor BOX3 chunks in `snowgoons.lev` with the oracle gate
+**2026-04-22 02:50** — [`docs/plans/2026-04-21-ios-port-codemagic.md`](docs/plans/2026-04-21-ios-port-codemagic.md): Plan: iOS port (via Codemagic)
