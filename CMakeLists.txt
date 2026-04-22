@@ -126,11 +126,18 @@ set(WF_SKIP
     scripting/perl/scriptinterpreter_perl.cc
 )
 
-# iOS Phase 1: skip HAL files that pull in sibling subsystems we haven't
-# brought into the build yet. audio.mm references SoundDevice/MusicPlayer
-# from audio/linux/ (not in iOS WF_DIRS); input.mm is engine-only glue.
+# iOS: skip files that need platform-specific subsystems we haven't wired up.
+#  - audio.mm: references SoundDevice/MusicPlayer from audio/linux (not in dirs)
+#  - input.mm: engine-only glue, no callers in Phase 2A build
+#  - gfx/display.cc: #includes gfx/gl/display.cc which hard-includes <GL/gl.h>.
+#    Phase 2+ iOS render path goes through WFMetalView; Display stubs land when
+#    the engine tries to instantiate one.
 if(IOS)
-    list(APPEND WF_SKIP hal/ios/audio.mm hal/ios/input.mm)
+    list(APPEND WF_SKIP
+        hal/ios/audio.mm
+        hal/ios/input.mm
+        gfx/display.cc
+    )
 endif()
 
 # ─── Collect sources with skip filter ─────────────────────────────────────────
