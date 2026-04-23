@@ -30,17 +30,26 @@
     <div id="game-root" class="game-root"></div>
   </main>
 
-  <!-- Room-code entry overlay: shown if the URL doesn't carry ?room=ABCD.
-       The connect() loop in controller.js waits until the form here submits. -->
-  <div id="room-gate" class="room-gate" hidden>
-    <form id="room-form" class="room-form">
-      <h2>Enter room code</h2>
-      <p class="room-gate-hint">Look at the TV. The receiver shows a 4-letter room code.</p>
-      <input id="room-input" class="room-input" type="text"
-             inputmode="latin" autocomplete="off" autocapitalize="characters" spellcheck="false"
-             maxlength="4" pattern="[A-Z]{4}" required
-             aria-label="4-letter room code">
-      <button id="room-join" type="submit" class="room-join">JOIN</button>
+  <!-- Entry overlay: prompts for whichever of name/room the URL didn't carry.
+       connect() in controller.js waits until this form submits. -->
+  <div id="entry-gate" class="room-gate" hidden>
+    <form id="entry-form" class="room-form">
+      <h2 id="entry-heading">Join the game</h2>
+      <p id="entry-hint" class="room-gate-hint"></p>
+      <label id="name-field" class="entry-field" hidden>
+        <span class="entry-label">Your name</span>
+        <input id="name-input" class="name-input" type="text"
+               inputmode="text" autocomplete="given-name" autocapitalize="words"
+               maxlength="32" aria-label="Your name">
+      </label>
+      <label id="room-field" class="entry-field" hidden>
+        <span class="entry-label">Room code</span>
+        <input id="room-input" class="room-input" type="text"
+               inputmode="latin" autocomplete="off" autocapitalize="characters" spellcheck="false"
+               maxlength="4" pattern="[A-Z]{4}"
+               aria-label="4-letter room code">
+      </label>
+      <button id="entry-join" type="submit" class="room-join">JOIN</button>
     </form>
   </div>
 

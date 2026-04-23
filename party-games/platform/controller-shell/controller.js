@@ -28,9 +28,12 @@ const PLATFORM_RESERVED_TYPES = new Set([
 // ───── URL + state ─────────────────────────────────────────────────────────
 
 const params = new URLSearchParams(location.search);
-const name = (params.get('name') || `Player ${Math.floor(Math.random() * 900 + 100)}`).slice(0, 32);
+// Name: preferred from URL, else what the user typed into the entry gate.
+// No silent `Player 123` fallback any more — if the user didn't pre-set a
+// name, we pop the gate and ask for one.
+let name = (params.get('name') || '').slice(0, 32);
 // Room code: required to connect. If the URL has ?room=ABCD use it; otherwise
-// show the room-gate overlay and wait for the user to enter one.
+// show the entry-gate and wait for the user to enter one.
 let roomCode = (params.get('room') || '').toUpperCase();
 
 // Per-tab session id: survives reload (sessionStorage), dies with the tab.
@@ -61,7 +64,10 @@ const nameEl        = document.getElementById('name');
 const castStateEl   = document.getElementById('cast-state');
 const gameRoot      = document.getElementById('game-root');
 
-nameEl.textContent = `Hi, ${name}.`;
+refreshNameEl();
+function refreshNameEl() {
+  nameEl.textContent = name ? `Hi, ${name}.` : '';
+}
 
 let myId = null;
 let hostId = null;
@@ -242,32 +248,71 @@ async function handleMessage(ev) {
   }
 }
 
-// ───── room gate ───────────────────────────────────────────────────────────
-// If the URL doesn't carry ?room=ABCD, we pop a modal that asks for one.
-// Only once the user submits a valid-shaped code do we start the WebSocket.
+// ───── entry gate ─────────────────────────────────────────────────────────
+// If the URL is missing ?name= and/or ?room=ABCD, we pop a modal that asks
+// for whichever piece(s) are missing. connect() only fires once everything
+// we need is populated.
 
-const roomGateEl   = document.getElementById('room-gate');
-const roomFormEl   = document.getElementById('room-form');
-const roomInputEl  = document.getElementById('room-input');
+const entryGateEl   = document.getElementById('entry-gate');
+const entryFormEl   = document.getElementById('entry-form');
+const entryHeadingEl = document.getElementById('entry-heading');
+const entryHintEl   = document.getElementById('entry-hint');
+const nameFieldEl   = document.getElementById('name-field');
+const nameInputEl   = document.getElementById('name-input');
+const roomFieldEl   = document.getElementById('room-field');
+const roomInputEl   = document.getElementById('room-input');
 
-if (!roomCode) {
-  roomGateEl.hidden = false;
-  statusEl.textContent = 'waiting for room code';
-  roomInputEl.focus();
-  roomFormEl.addEventListener('submit', (ev) => {
+function needsName() { return !name; }
+function needsRoom() { return !roomCode; }
+
+if (needsName() || needsRoom()) {
+  nameFieldEl.hidden = !needsName();
+  roomFieldEl.hidden = !needsRoom();
+  // Heading + hint tune themselves to whatever's actually being asked.
+  if (needsName() && needsRoom()) {
+    entryHeadingEl.textContent = 'Join the game';
+    entryHintEl.textContent = 'Pick a name and enter the 4-letter room code shown on the TV.';
+  } else if (needsName()) {
+    entryHeadingEl.textContent = 'Pick a name';
+    entryHintEl.textContent = 'What should other players call you?';
+  } else {
+    entryHeadingEl.textContent = 'Enter room code';
+    entryHintEl.textContent = 'Look at the TV. The receiver shows a 4-letter room code.';
+  }
+  entryGateEl.hidden = false;
+  statusEl.textContent = 'waiting for entry';
+  // Focus the first un-filled field.
+  (needsName() ? nameInputEl : roomInputEl).focus();
+
+  entryFormEl.addEventListener('submit', (ev) => {
     ev.preventDefault();
-    const entered = roomInputEl.value.trim().toUpperCase();
-    if (!/^[ABCDEFGHJKLMNPRSTUVWXYZ]{4}$/.test(entered)) {
-      roomInputEl.setCustomValidity('4 letters, no I/O/Q');
-      roomInputEl.reportValidity();
-      return;
+    if (needsName()) {
+      const enteredName = nameInputEl.value.trim().slice(0, 32);
+      if (!enteredName) {
+        nameInputEl.setCustomValidity('name required');
+        nameInputEl.reportValidity();
+        return;
+      }
+      nameInputEl.setCustomValidity('');
+      name = enteredName;
+      params.set('name', name);
+      refreshNameEl();
     }
-    roomCode = entered;
-    // Reflect in URL so a refresh keeps the room.
-    params.set('room', roomCode);
+    if (needsRoom()) {
+      const enteredRoom = roomInputEl.value.trim().toUpperCase();
+      if (!/^[ABCDEFGHJKLMNPRSTUVWXYZ]{4}$/.test(enteredRoom)) {
+        roomInputEl.setCustomValidity('4 letters, no I/O/Q');
+        roomInputEl.reportValidity();
+        return;
+      }
+      roomInputEl.setCustomValidity('');
+      roomCode = enteredRoom;
+      params.set('room', roomCode);
+    }
+    // Reflect both pieces in the URL so a refresh keeps them.
     const newUrl = location.pathname + '?' + params.toString() + location.hash;
     history.replaceState(null, '', newUrl);
-    roomGateEl.hidden = true;
+    entryGateEl.hidden = true;
     connect();
   });
 } else {

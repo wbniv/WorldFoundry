@@ -154,21 +154,41 @@ google-cast-launcher {
   font-size: 0.95rem;
   text-align: center;
 }
-.room-input {
+.entry-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
   width: 100%;
-  padding: 1.2rem;
-  font-size: 2.6rem;
+}
+.entry-field[hidden] { display: none; }
+.entry-label {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding-left: 0.2rem;
+}
+.room-input, .name-input {
+  width: 100%;
+  padding: 1rem 1.2rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  text-align: center;
-  letter-spacing: 0.5em;
-  text-indent: 0.5em;  /* counteract the trailing letter-spacing push */
   background: #1a1d23;
   color: #fef3c7;
   border: 2px solid #3a3d44;
   border-radius: 0.8rem;
+}
+.room-input {
+  font-size: 2.6rem;
+  text-align: center;
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;  /* counteract the trailing letter-spacing push */
   text-transform: uppercase;
 }
-.room-input:focus { outline: none; border-color: #facc15; }
+.name-input {
+  font-size: 1.4rem;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.room-input:focus, .name-input:focus { outline: none; border-color: #facc15; }
 .room-join {
   width: 100%;
   padding: 1.1rem;
