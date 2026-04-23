@@ -194,6 +194,7 @@ function showOutcome(gameOver) {
     outcomeSublineEl.textContent = `${winnerName} won this round.`;
     confettiEl.hidden = true;
     confettiEl.innerHTML = '';
+    feedbackLose();
   }
 
   // Build scoreboard: highest to lowest, highlight winner and self.
@@ -288,6 +289,13 @@ function feedbackWin() {
   // Arpeggio: C5, E5, G5, C6 over ~300 ms.
   const notes = [523, 659, 784, 1047];
   notes.forEach((f, i) => setTimeout(() => playBlip({ freq: f, durMs: 160, kind: 'triangle' }), i * 90));
+}
+function feedbackLose() {
+  // Mellow descending two-note sigh (A4 → F4). No haptic — the visual overlay
+  // is already clear that the round ended; buzzing on top of that feels like
+  // extra punishment we don't need.
+  playBlip({ freq: 440, durMs: 220, kind: 'triangle' });
+  setTimeout(() => playBlip({ freq: 349, durMs: 320, kind: 'triangle' }), 180);
 }
 
 // ───── button handler ──────────────────────────────────────────────────────
