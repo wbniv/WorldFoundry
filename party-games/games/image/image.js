@@ -228,8 +228,17 @@ function createImageGame(opts = {}) {
   }
 
   // ──── hooks ────────────────────────────────────────────────────────────────
-  function onJoin(player /* , services */) {
+  function onJoin(player, services) {
     if (!state.scores.has(player.id)) state.scores.set(player.id, 0);
+    // Catch late joiners up on the current phase. Without this the new client
+    // sits on its default phase='LOBBY' until the next PHASE broadcast fires
+    // — so a player who joins mid-round sees a disabled button and their
+    // taps go nowhere (controller ignores clicks when action='idle').
+    services.sendTo(player.id, {
+      type: 'PHASE',
+      phase: state.phase,
+      scores: Object.fromEntries(state.scores),
+    });
   }
 
   function onLeave(player, services) {

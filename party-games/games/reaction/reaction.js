@@ -162,8 +162,16 @@ function createReactionGame(opts = {}) {
   }
 
   // ──── hooks ────────────────────────────────────────────────────────────────
-  function onJoin(player /* , services */) {
+  function onJoin(player, services) {
     if (!state.scores.has(player.id)) state.scores.set(player.id, 0);
+    // Catch late joiners up on the current phase — without this, a player who
+    // joins mid-round sees their controller sit on the default phase='LOBBY'
+    // (button disabled, action='idle') until the next PHASE broadcast.
+    services.sendTo(player.id, {
+      type: 'PHASE',
+      phase: state.phase,
+      scores: Object.fromEntries(state.scores),
+    });
   }
 
   function onLeave(player, services) {

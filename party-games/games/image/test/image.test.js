@@ -368,6 +368,30 @@ test('NEW_GAME from GAME_OVER resets scores and returns to LOBBY', () => {
   assert.equal(game._debugState().scores.get(1), 0);
 });
 
+test('onJoin catches late joiners up on the current phase (bug that sat them on LOBBY)', () => {
+  // Need a services mock that records sendTo calls — default mock is a no-op.
+  const sentTo = [];
+  const h = makeServices();
+  h.services.sendTo = (pid, msg) => sentTo.push({ pid, msg });
+  const game = createImageGame({ pool: TWO_POOL });
+  const alice = { id: 1, name: 'Alice' };
+  h.players.push(alice);
+  game.onJoin(alice, h.services);
+  game.onMessage(alice, { type: 'START_GAME' }, h.services);
+  h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
+  assert.equal(game._debugState().phase, 'PLAY');
+
+  // Bob joins mid-PLAY.
+  const bob = { id: 2, name: 'Bob' };
+  h.players.push(bob);
+  const sinceJoin = sentTo.length;
+  game.onJoin(bob, h.services);
+  const toBob = sentTo.slice(sinceJoin).filter(x => x.pid === 2);
+  const phaseMsg = toBob.find(x => x.msg.type === 'PHASE');
+  assert.ok(phaseMsg, 'Bob must receive a PHASE message on join');
+  assert.equal(phaseMsg.msg.phase, 'PLAY', 'should match the current round phase');
+});
+
 test('onLeave with last player mid-round folds to LOBBY', () => {
   const h = makeServices();
   const game = createImageGame();
