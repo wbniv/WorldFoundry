@@ -27,6 +27,7 @@ const scoreboardEl    = document.getElementById('scoreboard');
 const winnerNameEl    = document.getElementById('winner-name');
 const finalScoreEl    = document.getElementById('final-scoreboard');
 const revealImageEl     = document.getElementById('reveal-image');
+const revealBarFillEl   = document.getElementById('reveal-bar-fill');
 const distractorImageEl = document.getElementById('distractor-image');
 const distRoundNumEl    = document.getElementById('dist-round-num');
 const commitIndicatorEl = document.getElementById('commit-indicator');
@@ -98,6 +99,10 @@ function handle(msg) {
       roundNumEl.textContent = msg.roundId;
       startCountdownAnimation(msg.showMs);
       showPanel('ROUND_COUNTDOWN');
+      // Clear last round's commit pills — the reaction game counterpart of
+      // the ROUND_REVEAL reset used by the image game.
+      commits.clear();
+      renderCommits();
       break;
 
     case 'TIMER_FIRED':
@@ -111,6 +116,7 @@ function handle(msg) {
       revealImageEl.textContent = msg.targetId;
       revealImageEl.classList.remove('cleared');
       distRoundNumEl.textContent = msg.roundId;
+      startRevealBar(msg.showMs);
       setTimeout(() => { revealImageEl.classList.add('cleared'); }, msg.showMs);
       // Fresh round — clear last round's commit pills.
       commits.clear();
@@ -282,6 +288,16 @@ function startCountdownAnimation(showMs) {
   requestAnimationFrame(() => requestAnimationFrame(() => {
     countdownFillEl.style.transition = `transform ${showMs}ms linear`;
     countdownFillEl.style.transform = 'scaleX(0)';
+  }));
+}
+
+function startRevealBar(showMs) {
+  if (!revealBarFillEl) return;
+  revealBarFillEl.style.transition = 'none';
+  revealBarFillEl.style.transform = 'scaleX(1)';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    revealBarFillEl.style.transition = `transform ${showMs}ms linear`;
+    revealBarFillEl.style.transform = 'scaleX(0)';
   }));
 }
 

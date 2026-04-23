@@ -33,13 +33,13 @@
       <div id="reveal" class="stage-panel" hidden>
         <p class="phase-label">Memorise the target</p>
         <div id="reveal-image" class="image-display"></div>
+        <!-- Shrinks over showMs so players see the reveal window draining. -->
+        <div id="reveal-bar" class="reveal-bar"><div id="reveal-bar-fill"></div></div>
         <p class="hint">spot it when it comes back</p>
       </div>
       <div id="distractors" class="stage-panel" hidden>
         <p class="phase-label">Round <span id="dist-round-num"></span></p>
         <div id="distractor-image" class="image-display image-flash"></div>
-        <!-- Live commit indicator: checkmarks + crosses as players lock in. -->
-        <ul id="commit-indicator" class="commit-indicator"></ul>
       </div>
       <div id="ended" class="stage-panel" hidden>
         <h2>Round <span id="ended-round-num"></span> results</h2>
@@ -53,6 +53,10 @@
         <ol id="final-scoreboard" class="final-scoreboard"></ol>
       </div>
     </section>
+    <!-- Live commit indicator, outside the stage panels so it's visible in all
+         round phases (REVEAL / PLAY / ROUND_COUNTDOWN / ROUND_OPEN / ROUND_ENDED)
+         across both games. Auto-hidden when no commits have landed. -->
+    <ul id="commit-indicator" class="commit-indicator"></ul>
     <section id="log">
       <h2>Events</h2>
       <ol id="event-log"></ol>
