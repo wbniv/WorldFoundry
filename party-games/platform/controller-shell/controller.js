@@ -140,7 +140,10 @@ function handleMessage(ev) {
         phase = msg.phase;
         // Reset lockout at the top of any fresh round. ROUND_COUNTDOWN (reaction)
         // and REVEAL (image) are both the "entering a new round" phase.
-        if (phase === 'ROUND_COUNTDOWN' || phase === 'REVEAL') lockedOutThisRound = false;
+        if (phase === 'ROUND_COUNTDOWN' || phase === 'REVEAL') {
+          lockedOutThisRound = false;
+          feedbackRoundStart();
+        }
         // Dismiss the end-of-game overlay as soon as we're out of GAME_OVER —
         // typically the host tapping NEW_GAME triggers PHASE=LOBBY.
         if (wasGameOver && phase !== 'GAME_OVER') hideOutcome();
@@ -296,6 +299,14 @@ function feedbackLose() {
   // extra punishment we don't need.
   playBlip({ freq: 440, durMs: 220, kind: 'triangle' });
   setTimeout(() => playBlip({ freq: 349, durMs: 320, kind: 'triangle' }), 180);
+}
+function feedbackRoundStart() {
+  // Short ascending two-note "get ready" on each ROUND_REVEAL. Subtle enough
+  // not to be distracting across rounds but distinct from the press/lockout
+  // tones. Intentionally does NOT play on target-appearance during PLAY —
+  // that would turn the game into an audio-reaction contest.
+  playBlip({ freq: 587, durMs: 100, kind: 'sine' });
+  setTimeout(() => playBlip({ freq: 784, durMs: 140, kind: 'sine' }), 110);
 }
 
 // ───── button handler ──────────────────────────────────────────────────────
