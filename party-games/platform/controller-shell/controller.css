@@ -218,10 +218,10 @@ google-cast-launcher {
   border-radius: 0.8rem;
 }
 .room-input {
-  font-size: 2.6rem;
+  font-size: 2.2rem;
   text-align: center;
-  letter-spacing: 0.5em;
-  text-indent: 0.5em;  /* counteract the trailing letter-spacing push */
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;  /* counteract the trailing letter-spacing push */
   text-transform: uppercase;
 }
 .name-input {
