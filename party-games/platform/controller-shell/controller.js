@@ -72,21 +72,46 @@ function refreshButton() {
 }
 
 // ───── WebSocket ───────────────────────────────────────────────────────────
+// Mobile browsers (Android Chrome especially) aggressively suspend/drop
+// WebSocket connections when the tab goes to background, screen locks, or
+// network hiccups; Cloudflare quick tunnels also have their own idle quirks.
+// An auto-reconnecting loop keeps Bob's controller usable without the user
+// having to notice and manually reload.
 
 const wsUrl = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws';
-const ws = new WebSocket(wsUrl);
+let ws = null;
+let reconnectAttempt = 0;
+let reconnectTimer = null;
 
-ws.addEventListener('open', () => {
-  ws.send(JSON.stringify({ type: 'HELLO', role: 'controller', name }));
-});
-ws.addEventListener('close', () => {
-  statusEl.textContent = 'disconnected';
-  btn.disabled = true;
-  btn.dataset.action = 'idle';
-});
-ws.addEventListener('error', (e) => console.warn('[ws] error', e));
+function connect() {
+  if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+  statusEl.textContent = reconnectAttempt > 0 ? `reconnecting (attempt ${reconnectAttempt})…` : 'connecting…';
+  ws = new WebSocket(wsUrl);
 
-ws.addEventListener('message', (ev) => {
+  ws.addEventListener('open', () => {
+    reconnectAttempt = 0;
+    // Re-identify; on reconnect the server will issue a new player id (scores
+    // for any in-progress round are forfeit — acceptable trade for a usable
+    // controller after a transient drop).
+    ws.send(JSON.stringify({ type: 'HELLO', role: 'controller', name }));
+  });
+
+  ws.addEventListener('close', () => {
+    statusEl.textContent = 'disconnected';
+    btn.textContent = '↻';       // rotating-reconnect hint; refreshButton() will re-skin once WELCOME lands
+    btn.disabled = true;
+    btn.dataset.action = 'idle';
+    // Exponential backoff capped at ~8 s so a recovered device reconnects fast.
+    const delay = Math.min(8_000, 500 * (2 ** reconnectAttempt));
+    reconnectAttempt++;
+    reconnectTimer = setTimeout(connect, delay);
+  });
+
+  ws.addEventListener('error', (e) => console.warn('[ws] error', e));
+  ws.addEventListener('message', handleMessage);
+}
+
+function handleMessage(ev) {
   let msg;
   try { msg = JSON.parse(ev.data); } catch { return; }
 
@@ -119,6 +144,18 @@ ws.addEventListener('message', (ev) => {
     case 'ROUND_ENDED':
       lockedOutThisRound = false;
       break;
+  }
+}
+
+connect();
+
+// When the tab comes back to foreground on mobile, kick a reconnect if the
+// socket had been suspended. The `close` event usually fires first and
+// schedules a reconnect anyway; this is belt-and-suspenders.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && ws && ws.readyState === WebSocket.CLOSED) {
+    reconnectAttempt = 0;
+    connect();
   }
 });
 
