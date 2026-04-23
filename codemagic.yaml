@@ -216,6 +216,17 @@ workflows:
             echo "NDK $WF_NDK_VERSION already present"
           fi
 
+      - name: Extract Jolt vendor archive
+        script: |
+          set -euo pipefail
+          cd engine/vendor
+          if [ ! -d jolt-physics-5.5.0 ]; then
+            echo "Extracting jolt-physics-5.5.0.tar.gz..."
+            tar -xzf jolt-physics-5.5.0.tar.gz
+          else
+            echo "Jolt already extracted"
+          fi
+
       - name: Build debug APK
         script: |
           set -euo pipefail
