@@ -11,9 +11,10 @@
 //   PLAY, target seen   → press = valid, ranked 4/3/2/1 by serverTs order
 //
 // The target may flash by once or several times; the "armed" flag never
-// un-arms for the round, so a press three seconds after the target cleared
-// still counts. One commit per player per round. Round ends when every
-// active player has committed, or at maxRoundMs (60 s), whichever first.
+// un-arms for the round. Round ends when every player has committed
+// (pressed or locked out), at maxRoundMs (60 s), or early on a
+// LAST_STANDING auto-win when only one un-locked player remains.
+// One commit per player per round.
 
 const WIN_SCORE              = 10;
 const REVEAL_MS              = 3000;    // target shown at start to memorise
@@ -169,8 +170,43 @@ function createImageGame(opts = {}) {
     return players.every((p) => r.presses.has(p.id) || r.lockedOut.has(p.id));
   }
 
+  // If everyone except one player has been locked out, that player wins the
+  // round by default — announce and end the round early. Requires at least
+  // one lockout (otherwise in solo play we'd fire at round start).
+  function checkLastStanding(services) {
+    const r = state.round;
+    if (!r) return null;
+    if (r.lockedOut.size === 0) return null;
+    const active = services.getPlayers().filter((p) => !r.lockedOut.has(p.id));
+    if (active.length !== 1) return null;
+    return active[0];
+  }
+
+  function awardLastStanding(services, winner) {
+    const r = state.round;
+    if (!r) return;
+    // If the last-standing player hasn't tapped yet, auto-record a press at
+    // now() so ranking treats them as the first (and only) presser → 4 pts.
+    if (!r.presses.has(winner.id)) {
+      r.presses.set(winner.id, {
+        serverTs: services.now(),
+        clientTs: null,
+        autoWin: true,
+      });
+    }
+    services.broadcast({
+      type: 'LAST_STANDING',
+      roundId: r.id,
+      playerId: winner.id,
+      name: winner.name,
+    });
+    endRound(services, {});
+  }
+
   function endRound(services, { timedOut = false } = {}) {
-    if (state.phase !== 'PLAY') return;
+    // Callable from REVEAL or PLAY (e.g. LAST_STANDING lockout in REVEAL);
+    // ignore from phases where a round isn't active.
+    if (state.phase === 'LOBBY' || state.phase === 'GAME_OVER' || state.phase === 'ROUND_ENDED') return;
     clearAllTimers();
 
     const r = state.round;
@@ -296,14 +332,13 @@ function createImageGame(opts = {}) {
             playerId: player.id,
             name: player.name,
           });
+          const lastStanding = checkLastStanding(services);
+          if (lastStanding) { awardLastStanding(services, lastStanding); return; }
         } else if (state.phase === 'PLAY') {
           if (r.lockedOut.has(player.id)) return;
-          if (r.presses.has(player.id)) return;  // one commit per round
-          // Target not yet revealed this round → press is premature → lockout.
-          // Once the target has flashed by at least once the round is "armed"
-          // and any subsequent press counts, no matter which frame is currently
-          // on screen. Ranking is pure serverTs order.
+          if (r.presses.has(player.id)) return;
           if (r.targetFirstShownAt == null) {
+            // Target not yet revealed this round → premature press → lockout.
             r.lockedOut.add(player.id);
             services.broadcast({
               type: 'EARLY_PRESS',
@@ -311,7 +346,12 @@ function createImageGame(opts = {}) {
               playerId: player.id,
               name: player.name,
             });
+            const lastStanding = checkLastStanding(services);
+            if (lastStanding) { awardLastStanding(services, lastStanding); return; }
           } else {
+            // Target seen → press counts. Ranking is 4/3/2/1 by serverTs
+            // across all successful pressers, so we wait for more before
+            // ending the round.
             r.presses.set(player.id, {
               serverTs: services.now(),
               clientTs: Number.isFinite(msg.clientTs) ? msg.clientTs : null,
@@ -323,9 +363,7 @@ function createImageGame(opts = {}) {
               name: player.name,
             });
           }
-          if (checkAllCommitted(services)) {
-            endRound(services, {});
-          }
+          if (checkAllCommitted(services)) endRound(services, {});
         }
         // ROUND_ENDED / LOBBY / GAME_OVER: ignore.
         break;

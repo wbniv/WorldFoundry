@@ -425,6 +425,31 @@ test('onLeave with last player mid-round folds to LOBBY', () => {
   assert.equal(game._debugState().round, null);
 });
 
+test('LAST_STANDING: if every other player is locked out, the remaining player auto-wins and the round ends', () => {
+  const h = makeServices();
+  h.setRandomSeries([0.1]);  // target = pool[0]; rest of series doesn't matter (round ends before first image)
+  const game = createImageGame({ pool: TWO_POOL });
+  const alice = { id: 1, name: 'Alice' };
+  const bob   = { id: 2, name: 'Bob' };
+  h.players.push(alice, bob);
+  for (const p of h.players) game.onJoin(p, h.services);
+  game.onMessage(alice, { type: 'START_GAME' }, h.services);
+  // Both are still in REVEAL. Alice taps prematurely → lockout. That leaves
+  // Bob as the only un-locked player → auto-win.
+  pressButton(game, h.services, alice);
+
+  const ls = h.byType('LAST_STANDING')[0];
+  assert.ok(ls, 'expected a LAST_STANDING broadcast');
+  assert.equal(ls.playerId, 2);
+  assert.equal(ls.name, 'Bob');
+  const ended = h.byType('ROUND_ENDED')[0];
+  assert.ok(ended, 'round should end immediately after LAST_STANDING');
+  const byId = Object.fromEntries(ended.ranks.map(r => [r.playerId, r]));
+  assert.equal(byId[2].points, POINTS_BY_RANK[0], 'Bob auto-win → 4 pts');
+  assert.equal(byId[1].points, 0, 'Alice locked out → 0');
+  assert.equal(byId[1].lockedOut, true);
+});
+
 test('default MAX_ROUND_MS is 60_000', () => {
   assert.equal(MAX_ROUND_MS, 60_000);
 });
