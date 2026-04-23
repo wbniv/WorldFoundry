@@ -32,6 +32,7 @@ const distractorImageEl = document.getElementById('distractor-image');
 const distRoundNumEl    = document.getElementById('dist-round-num');
 const commitIndicatorEl = document.getElementById('commit-indicator');
 const commits = new Map();  // playerId → 'pressed' | 'lockedOut' for the current round
+let lastScores = {};        // id → pts last seen, so renderScoreboard can highlight changed rows
 
 // Default panel
 showPanel('LOBBY');
@@ -213,14 +214,30 @@ function renderRanks(ranks) {
     if (b.ms != null) return 1;
     return 0;
   });
-  for (const r of sorted) {
+  sorted.forEach((r, i) => {
     const li = document.createElement('li');
-    const reaction = r.lockedOut ? 'locked out'
-                   : r.ms != null ? `${r.ms} ms`
-                   : 'no press';
-    li.textContent = `${r.name} — ${r.points} pt${r.points === 1 ? '' : 's'} (${reaction})`;
+    // Stagger index drives CSS animation-delay so rows reveal 1-by-1.
+    li.style.setProperty('--i', i);
+    if (r.points > 0) li.classList.add('scored');
+    if (r.lockedOut) li.classList.add('locked-out');
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'rank-name';
+    nameSpan.textContent = r.name;
+
+    const badge = document.createElement('span');
+    badge.className = 'rank-badge';
+    badge.textContent = r.points > 0 ? `+${r.points}` : '—';
+
+    const reaction = document.createElement('span');
+    reaction.className = 'rank-reaction';
+    reaction.textContent = r.lockedOut ? 'locked out'
+                        : r.ms != null ? `${r.ms} ms`
+                        : 'no press';
+
+    li.append(nameSpan, badge, reaction);
     roundRanksEl.appendChild(li);
-  }
+  });
 }
 
 function renderCommits() {
@@ -240,14 +257,17 @@ function renderScoreboard(scores, el) {
   const rows = Object.entries(scores || {})
     .map(([id, pts]) => {
       const p = currentPlayers.find((pl) => String(pl.id) === String(id));
-      return { name: p?.name ?? `#${id}`, pts };
+      const prev = lastScores[id] ?? 0;
+      return { id, name: p?.name ?? `#${id}`, pts, changed: pts !== prev, delta: pts - prev };
     })
     .sort((a, b) => b.pts - a.pts);
   for (const row of rows) {
     const li = document.createElement('li');
+    if (row.changed) li.classList.add('changed');
     li.textContent = `${row.name}: ${row.pts}`;
     el.appendChild(li);
   }
+  lastScores = { ...(scores || {}) };
 }
 
 function renderFinalScoreboard(scores, winnerId, el) {

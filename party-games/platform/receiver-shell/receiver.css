@@ -113,8 +113,66 @@ h2 {
   margin-top: 1vh;
   padding-left: 0;
 }
-#round-ranks li { padding: 0.4vh 0; }
+#round-ranks li {
+  padding: 0.6vh 0.5vw;
+  display: grid;
+  grid-template-columns: 1fr auto 12vw;
+  gap: 1.5vw;
+  align-items: baseline;
+  opacity: 0;
+  transform: translateY(1vh);
+  animation: rank-enter 0.35s ease-out forwards;
+  animation-delay: calc(var(--i, 0) * 150ms);
+}
+#round-ranks li.scored .rank-badge {
+  color: #86efac;
+  font-weight: 700;
+  animation: badge-pop 0.4s ease-out;
+  animation-delay: calc((var(--i, 0) * 150ms) + 200ms);
+  display: inline-block;
+}
+#round-ranks li.locked-out {
+  opacity: 0.55;
+}
+#round-ranks li.locked-out .rank-badge { color: #fca5a5; }
+#round-ranks .rank-name { text-align: left; }
+#round-ranks .rank-badge {
+  text-align: right;
+  min-width: 4vw;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+#round-ranks .rank-reaction {
+  text-align: right;
+  opacity: 0.55;
+  font-size: 1.9vh;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@keyframes rank-enter {
+  from { opacity: 0; transform: translateY(1.5vh); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes badge-pop {
+  0%   { transform: scale(1);    filter: none; }
+  40%  { transform: scale(1.35); filter: drop-shadow(0 0 1.5vh rgba(134, 239, 172, 0.6)); }
+  100% { transform: scale(1);    filter: none; }
+}
+
 #scoreboard  li, #final-scoreboard li { padding: 0.3vh 0; opacity: 0.85; }
+#scoreboard  li.changed {
+  opacity: 1;
+  color: #fef3c7;
+  animation: score-update 0.6s ease-out;
+  /* Wait for the rank rows to finish their stagger before the cumulative
+     update catches up. Longest rank delay is (max rows * 150ms) + badge
+     pulse ≈ 900 ms; pad slightly. */
+  animation-delay: 1000ms;
+  animation-fill-mode: backwards;
+}
+@keyframes score-update {
+  0%   { background: rgba(250, 204, 21, 0.2); transform: translateX(-0.6vw); }
+  40%  { background: rgba(250, 204, 21, 0.15); }
+  100% { background: transparent; transform: translateX(0); }
+}
 
 .winner {
   font-size: 6vh;
