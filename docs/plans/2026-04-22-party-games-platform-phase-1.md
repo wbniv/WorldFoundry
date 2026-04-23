@@ -125,33 +125,54 @@ Phase names in this shape: `LOBBY → REVEAL → PLAY → ROUND_ENDED → (next 
 ```mermaid
 stateDiagram-v2
     [*] --> LOBBY
-    LOBBY --> REVEAL: START_GAME (host)\nnew target picked
-    REVEAL --> PLAY: after 3 s reveal + 0.5 s clear
-    PLAY --> PLAY: every 800 ms:\nSHOW_IMAGE (uniform random)
-    PLAY --> ROUND_ENDED: all players committed\n(pressed or locked out)
-    PLAY --> ROUND_ENDED: maxRoundMs (60 s)\nROUND_ENDED.timedOut = true
-    ROUND_ENDED --> REVEAL: after 3 s pause
-    ROUND_ENDED --> GAME_OVER: someone hit winScore
-    GAME_OVER --> LOBBY: NEW_GAME (host)
+    LOBBY --> REVEAL: START_GAME (host only)\nnew target picked\nscores retained
+    REVEAL --> PLAY: after 3 s reveal + 0.5 s clear\n(ROUND_REVEAL broadcast)
+    PLAY --> PLAY: every 800 ms:\nSHOW_IMAGE (uniform-random pick)\ntarget naturally appears ~5% per frame
+    PLAY --> ROUND_ENDED: all players committed\n(each pressed or locked out)
+    PLAY --> ROUND_ENDED: maxRoundMs (60 s failsafe)\nROUND_ENDED.timedOut = true
+    ROUND_ENDED --> REVEAL: after 3 s pause\n(next round; scores kept)
+    ROUND_ENDED --> GAME_OVER: any player hit winScore\n(default 10)
+    GAME_OVER --> LOBBY: NEW_GAME (host only)\nscores reset
     LOBBY --> [*]: server shutdown
 
     note right of REVEAL
-        BUTTON_PRESS → EARLY_PRESS
-        player locked out for round
+        Player joining now
+          receives a PHASE:REVEAL
+          catch-up (onJoin → sendTo)
+        BUTTON_PRESS
+          → EARLY_PRESS
+          → locked out for round
     end note
     note right of PLAY
         Round "arms" the first time
-          the target frame appears.
+          the target frame appears
+          (targetFirstShownAt set once,
+           never cleared within round).
         BUTTON_PRESS before arming
           → EARLY_PRESS, locked out
         BUTTON_PRESS after arming
           → recorded, ranked 4/3/2/1
-          (current frame doesn't
-           matter — the armed flag
-           never un-arms for the
-           rest of the round)
+          by serverTs order.
+        Target may flash by multiple
+          times; only the first one
+          matters for adjudication.
+        Currently-displayed frame is
+          irrelevant once armed.
+    end note
+    note left of ROUND_ENDED
+        ROUND_ENDED carries
+          {roundId, ranks, scores,
+           targetId, timedOut?}
+        Locked-out players: 0 pts
+        Un-pressed players:  0 pts
     end note
 ```
+
+Client-side details that don't live in the state machine but are load-bearing for the real game:
+
+- **Controller reconnect.** Mobile browsers drop the WebSocket on tab suspend / screen lock. Controller's `connect()` loop retries with 500 ms → 8 s backoff and re-HELLOs on each open. Result: a new player id, current-round score forfeit, subsequent rounds normal.
+- **Late joiner catch-up.** `onJoin` uses `services.sendTo` to push the current `PHASE` to the new player so their default `phase='LOBBY'` (non-host → disabled button) doesn't strand them when they arrive mid-round.
+- **Receiver no-cache + CAF gate.** Server sets `Cache-Control: no-store` on static files so reloaded tabs always get fresh JS (avoids cached-out-of-date controller dropping into a removed phase case). CAF's `ctx.start()` is gated on a Cast-capable user agent (`CrKey|Android TV|Tizen|webOS`) — in a plain browser we skip CAF entirely, which silences the `ws://localhost:8008/v2/ipc` reconnect spam.
 
 Messages beyond the platform base: `ROUND_REVEAL {targetId, showMs, clearMs}`, `SHOW_IMAGE {seq, imageId, showMs, isTarget, serverTs}`, plus the shared `PHASE / EARLY_PRESS / ROUND_ENDED {… timedOut?} / GAME_OVER`.
 
