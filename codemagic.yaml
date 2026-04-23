@@ -178,6 +178,15 @@ workflows:
         # name under $ANDROID_SDK_ROOT/ndk/.
         WF_NDK_VERSION: "26.2.11394342"
 
+    cache:
+      cache_paths:
+        # NDK install (~500 MB) — skip sdkmanager on warm builds
+        - /usr/local/share/android-sdk/ndk/26.2.11394342
+        # Gradle dependency cache — avoids re-downloading AGP + deps each build
+        - ~/.gradle/caches
+        # Jolt extracted source — skip tar extraction on warm builds
+        - engine/vendor/jolt-physics-5.5.0
+
     scripts:
       - name: Toolchain versions
         script: |
