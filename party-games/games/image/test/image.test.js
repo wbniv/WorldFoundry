@@ -15,6 +15,7 @@ const {
   MAX_DISTRACTORS,
   SCORING_WINDOW_MS,
   ROUND_END_PAUSE_MS,
+  MAX_ROUND_MS,
   POINTS_BY_RANK,
 } = require('../image');
 
@@ -195,8 +196,10 @@ test('target fires after all distractors; phase transitions to TARGET; SHOW_IMAG
   assert.equal(targetFrames[0].imageId, targetFromReveal, 'target SHOW_IMAGE matches ROUND_REVEAL.targetId');
 });
 
-test('distractor count stays within [MIN, MAX]', () => {
-  // Try each extreme random value to sanity-check bounds are respected.
+test('pre-target distractor count stays within [MIN, MAX]', () => {
+  // Pre-target = distractors with a seq index less than the target's seq index.
+  // The stream keeps cycling post-target (extra distractors until the scoring
+  // window closes) — those don't count toward the pre-target bound.
   for (const r of [0, 0.25, 0.5, 0.75, 1.0]) {
     const h = makeServices();
     h.setRandom(r);
@@ -205,13 +208,49 @@ test('distractor count stays within [MIN, MAX]', () => {
     h.players.push(alice);
     game.onJoin(alice, h.services);
     game.onMessage(alice, { type: 'START_GAME' }, h.services);
-    h.advance(REVEAL_MS + REVEAL_CLEAR_MS + MAX_DISTRACTORS * IMAGE_SHOW_MS + IMAGE_SHOW_MS);
-    const nDistractors = h.byType('SHOW_IMAGE').filter(m => !m.isTarget).length;
+    // Advance far enough to land inside TARGET phase but not past the scoring window.
+    h.advance(REVEAL_MS + REVEAL_CLEAR_MS + MAX_DISTRACTORS * IMAGE_SHOW_MS);
+    const target = h.byType('SHOW_IMAGE').find(m => m.isTarget);
+    assert.ok(target, `random=${r}: target SHOW_IMAGE should have fired by now`);
+    const preTargetDistractors = h.byType('SHOW_IMAGE').filter(m => !m.isTarget && m.seq < target.seq).length;
     assert.ok(
-      nDistractors >= MIN_DISTRACTORS && nDistractors <= MAX_DISTRACTORS,
-      `random=${r}: nDistractors=${nDistractors} out of [${MIN_DISTRACTORS},${MAX_DISTRACTORS}]`,
+      preTargetDistractors >= MIN_DISTRACTORS && preTargetDistractors <= MAX_DISTRACTORS,
+      `random=${r}: preTargetDistractors=${preTargetDistractors} out of [${MIN_DISTRACTORS},${MAX_DISTRACTORS}]`,
     );
   }
+});
+
+test('SHOW_IMAGE stream continues cycling during TARGET phase, then stops at endRound', () => {
+  const h = makeServices();
+  h.setRandom(0);  // MIN_DISTRACTORS pre-target, target = pool[0]
+  const game = createImageGame();
+  const alice = { id: 1, name: 'Alice' };
+  h.players.push(alice);
+  game.onJoin(alice, h.services);
+  game.onMessage(alice, { type: 'START_GAME' }, h.services);
+
+  // Advance into TARGET phase.
+  h.advance(REVEAL_MS + REVEAL_CLEAR_MS + MIN_DISTRACTORS * IMAGE_SHOW_MS);
+  assert.equal(game._debugState().phase, 'TARGET');
+  const countAtTargetFire = h.byType('SHOW_IMAGE').length;
+
+  // Midway through scoring window, more SHOW_IMAGE frames should have fired.
+  h.advance(IMAGE_SHOW_MS * 2);
+  assert.equal(game._debugState().phase, 'TARGET', 'still in TARGET mid-scoring-window');
+  const countMidScoring = h.byType('SHOW_IMAGE').length;
+  assert.ok(countMidScoring > countAtTargetFire, 'stream should keep cycling past the target');
+  const postTargetFrames = h.byType('SHOW_IMAGE').filter(m => !m.isTarget).slice(-2);
+  for (const m of postTargetFrames) {
+    assert.equal(m.isTarget, false, 'post-target frames should not be flagged isTarget');
+    assert.notEqual(m.imageId, h.byType('ROUND_REVEAL')[0].targetId, 'post-target distractor must not equal the target');
+  }
+
+  // Advance past scoring window → endRound → cycling stops.
+  h.advance(SCORING_WINDOW_MS);
+  assert.equal(game._debugState().phase, 'ROUND_ENDED');
+  const countAfterEnd = h.byType('SHOW_IMAGE').length;
+  h.advance(IMAGE_SHOW_MS * 5);
+  assert.equal(h.byType('SHOW_IMAGE').length, countAfterEnd, 'no more images after round ends');
 });
 
 test('BUTTON_PRESS during REVEAL → early-press lockout', () => {
@@ -366,6 +405,32 @@ test('NEW_GAME from GAME_OVER resets scores and returns to LOBBY', () => {
   game.onMessage(alice, { type: 'NEW_GAME' }, h.services);
   assert.equal(game._debugState().phase, 'LOBBY');
   assert.equal(game._debugState().scores.get(1), 0);
+});
+
+test('failsafe: round hanging past maxRoundMs force-ends with zero scores and timedOut flag', () => {
+  // To provoke the failsafe we set maxRoundMs shorter than the natural round
+  // length (REVEAL + CLEAR alone is 3500 ms), so the failsafe fires while the
+  // round is still in REVEAL and nothing has progressed. In production
+  // maxRoundMs = MAX_ROUND_MS = 60 s; natural rounds end in ~10-13 s, so it
+  // never fires unless something is genuinely stuck.
+  const h = makeServices();
+  h.setRandom(0);
+  const game = createImageGame({ maxRoundMs: 500 });
+  const alice = { id: 1, name: 'Alice' };
+  h.players.push(alice);
+  game.onJoin(alice, h.services);
+  game.onMessage(alice, { type: 'START_GAME' }, h.services);
+  assert.equal(game._debugState().phase, 'REVEAL');
+
+  h.advance(500);
+  const ended = h.byType('ROUND_ENDED').find(m => m.timedOut === true);
+  assert.ok(ended, 'failsafe ROUND_ENDED should have fired with timedOut=true');
+  assert.equal(ended.ranks[0].points, 0, 'forced ending gives nobody points');
+  assert.equal(game._debugState().phase, 'ROUND_ENDED');
+
+  // Next round schedules normally after ROUND_END_PAUSE_MS.
+  h.advance(ROUND_END_PAUSE_MS);
+  assert.equal(game._debugState().phase, 'REVEAL', 'next round should have started');
 });
 
 test('onLeave with last player mid-round folds to LOBBY', () => {

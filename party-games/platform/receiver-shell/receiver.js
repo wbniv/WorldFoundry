@@ -13,10 +13,11 @@ const panels = {
   // reaction (mini-game 1)
   ROUND_COUNTDOWN: document.getElementById('countdown'),
   ROUND_OPEN:      document.getElementById('open'),
-  // image-recognition (mini-game 2)
+  // image-recognition (mini-game 2). TARGET reuses the distractors panel so
+  // the image stream keeps cycling visually through the scoring window.
   REVEAL:          document.getElementById('reveal'),
   DISTRACTORS:     document.getElementById('distractors'),
-  TARGET:          document.getElementById('target'),
+  TARGET:          document.getElementById('distractors'),
 };
 const countdownFillEl = document.getElementById('countdown-fill');
 const roundNumEl      = document.getElementById('round-num');
@@ -27,7 +28,6 @@ const winnerNameEl    = document.getElementById('winner-name');
 const finalScoreEl    = document.getElementById('final-scoreboard');
 const revealImageEl     = document.getElementById('reveal-image');
 const distractorImageEl = document.getElementById('distractor-image');
-const targetImageEl     = document.getElementById('target-image');
 const distRoundNumEl    = document.getElementById('dist-round-num');
 
 // Default panel
@@ -108,16 +108,15 @@ function handle(msg) {
       break;
 
     case 'SHOW_IMAGE':
-      if (msg.isTarget) {
-        targetImageEl.textContent = msg.imageId;
-      } else {
-        // Re-trigger the flash animation by cycling the class.
-        distractorImageEl.classList.remove('image-flash');
-        // Force reflow so the next add replays the keyframes.
-        void distractorImageEl.offsetWidth;
-        distractorImageEl.textContent = msg.imageId;
-        distractorImageEl.classList.add('image-flash');
-      }
+      // Always update the cycling image — stream keeps running through TARGET
+      // phase (target + post-target distractors) until the scoring window
+      // closes. Intentionally don't add a special highlight for isTarget: the
+      // game is about recognising the target from the REVEAL memorisation,
+      // and flagging it on screen would be cheating.
+      distractorImageEl.classList.remove('image-flash');
+      void distractorImageEl.offsetWidth;  // force reflow so the animation restarts
+      distractorImageEl.textContent = msg.imageId;
+      distractorImageEl.classList.add('image-flash');
       break;
 
     case 'EARLY_PRESS':

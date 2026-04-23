@@ -13,6 +13,7 @@ const MIN_DISTRACTORS        =    4;    // inclusive
 const MAX_DISTRACTORS        =    8;    // inclusive
 const SCORING_WINDOW_MS      = 3000;    // after target SHOW_IMAGE, presses count for this long
 const ROUND_END_PAUSE_MS     = 3000;    // pause between rounds
+const MAX_ROUND_MS           = 60000;   // defensive failsafe; a natural round is ~10–13 s
 const POINTS_BY_RANK         = [4, 3, 2, 1];
 const MIN_PLAYERS_TO_START   = 1;       // matches reaction; see platform README
 
@@ -40,21 +41,30 @@ const IMAGE_POOL = [
  *   NEW_GAME                                (host only; from GAME_OVER)
  */
 function createImageGame(opts = {}) {
-  const winScore = opts.winScore ?? WIN_SCORE;
-  const pool     = opts.pool ?? IMAGE_POOL;
+  const winScore   = opts.winScore ?? WIN_SCORE;
+  const pool       = opts.pool ?? IMAGE_POOL;
+  const maxRoundMs = opts.maxRoundMs ?? MAX_ROUND_MS;
 
   const state = {
     phase: 'LOBBY',
     roundId: 0,
-    round: null,        // { id, target, sequence: [{imageId, isTarget}], shownAt: Map(seq→serverTs),
-                        //   targetShownAt, seqIdx, presses: Map, earlyPressed: Set }
+    round: null,        // { id, target, preCount, seqIdx, targetShownAt, presses, earlyPressed }
     scores: new Map(),
     winScore,
   };
-  let cancelTimer = null;
+  // Multiple independent timer slots: the image stream keeps cycling even after
+  // the target flashes by, so the next-image schedule and the scoring-window
+  // schedule must not clobber each other. Failsafe is a hard overall cap.
+  let nextImageCancel = null;
+  let scoringCancel   = null;
+  let phaseCancel     = null;  // REVEAL → DISTRACTORS transition + round-end pause
+  let failsafeCancel  = null;  // MAX_ROUND_MS overall round cap
 
-  function clearTimer() {
-    if (cancelTimer) { cancelTimer(); cancelTimer = null; }
+  function clearAllTimers() {
+    if (nextImageCancel) { nextImageCancel(); nextImageCancel = null; }
+    if (scoringCancel)   { scoringCancel();   scoringCancel   = null; }
+    if (phaseCancel)     { phaseCancel();     phaseCancel     = null; }
+    if (failsafeCancel)  { failsafeCancel();  failsafeCancel  = null; }
   }
 
   function broadcastPhase(services) {
@@ -71,33 +81,27 @@ function createImageGame(opts = {}) {
     return min + Math.min(Math.floor(services.random() * (span + 1)), span);
   }
 
-  function buildSequence(services) {
-    const target = pool[pickInt(services, 0, pool.length - 1)];
-    const nDistractors = pickInt(services, MIN_DISTRACTORS, MAX_DISTRACTORS);
-    const distractorPool = pool.filter((id) => id !== target);
-    const distractors = [];
-    for (let i = 0; i < nDistractors; i++) {
-      distractors.push(distractorPool[pickInt(services, 0, distractorPool.length - 1)]);
-    }
-    const sequence = [
-      ...distractors.map((imageId) => ({ imageId, isTarget: false })),
-      { imageId: target, isTarget: true },
-    ];
-    return { target, sequence };
+  function pickTarget(services) {
+    return pool[pickInt(services, 0, pool.length - 1)];
+  }
+
+  function pickDistractor(services, excludeId) {
+    const distractorPool = pool.filter((id) => id !== excludeId);
+    return distractorPool[pickInt(services, 0, distractorPool.length - 1)];
   }
 
   function startRound(services) {
-    clearTimer();
-    const { target, sequence } = buildSequence(services);
+    clearAllTimers();
+    const target = pickTarget(services);
+    const preCount = pickInt(services, MIN_DISTRACTORS, MAX_DISTRACTORS);
     state.phase = 'REVEAL';
     state.roundId += 1;
     state.round = {
       id: state.roundId,
       target,
-      sequence,
-      shownAt: new Map(),   // seqIdx → serverTs when broadcast
+      preCount,              // distractors shown before the target flashes
+      seqIdx: -1,            // incremented on each showNext; target fires at seqIdx===preCount
       targetShownAt: null,
-      seqIdx: -1,
       presses: new Map(),
       earlyPressed: new Set(),
     };
@@ -109,12 +113,37 @@ function createImageGame(opts = {}) {
       showMs: REVEAL_MS,
       clearMs: REVEAL_CLEAR_MS,
     });
-    cancelTimer = services.schedule(REVEAL_MS + REVEAL_CLEAR_MS, () => startDistractors(services));
+    phaseCancel = services.schedule(REVEAL_MS + REVEAL_CLEAR_MS, () => startDistractors(services));
+    // Overall round cap — never expected to fire; catches state-machine hangs.
+    failsafeCancel = services.schedule(maxRoundMs, () => failsafeEndRound(services));
+  }
+
+  function failsafeEndRound(services) {
+    if (!state.round) return;
+    if (state.phase === 'LOBBY' || state.phase === 'GAME_OVER' || state.phase === 'ROUND_ENDED') return;
+    clearAllTimers();
+    const r = state.round;
+    state.phase = 'ROUND_ENDED';
+    const ranks = services.getPlayers().map((p) => ({
+      playerId: p.id, name: p.name, points: 0,
+      lockedOut: r.earlyPressed.has(p.id) || undefined,
+      ms: null,
+    }));
+    broadcastPhase(services);
+    services.broadcast({
+      type: 'ROUND_ENDED',
+      roundId: r.id,
+      ranks,
+      scores: Object.fromEntries(state.scores),
+      targetId: r.target,
+      timedOut: true,
+    });
+    phaseCancel = services.schedule(ROUND_END_PAUSE_MS, () => startRound(services));
   }
 
   function startDistractors(services) {
     if (state.phase !== 'REVEAL') return;
-    clearTimer();
+    if (phaseCancel) { phaseCancel = null; }
     state.phase = 'DISTRACTORS';
     broadcastPhase(services);
     showNext(services);
@@ -123,51 +152,42 @@ function createImageGame(opts = {}) {
   function showNext(services) {
     const r = state.round;
     if (!r) return;
-    const idx = r.seqIdx + 1;
-    if (idx >= r.sequence.length) {
-      // Should not happen — target is the last entry and triggers its own scoring schedule.
-      return;
-    }
-    r.seqIdx = idx;
-    const entry = r.sequence[idx];
-    const serverTs = services.now();
-    r.shownAt.set(idx, serverTs);
+    if (nextImageCancel) { nextImageCancel = null; }  // self-fired
 
-    if (entry.isTarget) {
-      // Transition into TARGET phase before broadcasting SHOW_IMAGE so the
-      // PHASE change lands first (controller updates its button before the
-      // target fires).
+    const idx = r.seqIdx + 1;
+    r.seqIdx = idx;
+    const isTarget = idx === r.preCount;
+    const imageId = isTarget ? r.target : pickDistractor(services, r.target);
+    const serverTs = services.now();
+
+    if (isTarget) {
+      // Target just appeared — transition into TARGET phase (opens scoring
+      // window) and schedule endRound. Keep cycling images; the post-target
+      // distractor stream provides pressure while players react.
       state.phase = 'TARGET';
       r.targetShownAt = serverTs;
       broadcastPhase(services);
-      services.broadcast({
-        type: 'SHOW_IMAGE',
-        roundId: r.id,
-        seq: idx,
-        imageId: entry.imageId,
-        showMs: IMAGE_SHOW_MS,
-        isTarget: true,
-        serverTs,
-      });
-      cancelTimer = services.schedule(SCORING_WINDOW_MS, () => endRound(services));
-      return;
+      scoringCancel = services.schedule(SCORING_WINDOW_MS, () => endRound(services));
     }
 
     services.broadcast({
       type: 'SHOW_IMAGE',
       roundId: r.id,
       seq: idx,
-      imageId: entry.imageId,
+      imageId,
       showMs: IMAGE_SHOW_MS,
-      isTarget: false,
+      isTarget,
       serverTs,
     });
-    cancelTimer = services.schedule(IMAGE_SHOW_MS, () => showNext(services));
+
+    // Always schedule the next image — stream continues until endRound clears
+    // the timer when the scoring window expires.
+    nextImageCancel = services.schedule(IMAGE_SHOW_MS, () => showNext(services));
   }
 
   function endRound(services) {
     if (state.phase !== 'TARGET') return;
-    clearTimer();
+    clearAllTimers();
 
     const r = state.round;
     const orderedPresses = [...r.presses.entries()]
@@ -224,7 +244,7 @@ function createImageGame(opts = {}) {
       });
       state.round = null;
     } else {
-      cancelTimer = services.schedule(ROUND_END_PAUSE_MS, () => startRound(services));
+      phaseCancel = services.schedule(ROUND_END_PAUSE_MS, () => startRound(services));
     }
   }
 
@@ -240,7 +260,7 @@ function createImageGame(opts = {}) {
       state.round.earlyPressed.delete(player.id);
     }
     if (services.getPlayers().length === 0 && state.phase !== 'LOBBY') {
-      clearTimer();
+      clearAllTimers();
       state.phase = 'LOBBY';
       state.round = null;
       broadcastPhase(services);
@@ -319,6 +339,7 @@ module.exports = {
   MAX_DISTRACTORS,
   SCORING_WINDOW_MS,
   ROUND_END_PAUSE_MS,
+  MAX_ROUND_MS,
   POINTS_BY_RANK,
   MIN_PLAYERS_TO_START,
 };
