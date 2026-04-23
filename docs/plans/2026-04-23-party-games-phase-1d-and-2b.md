@@ -100,22 +100,23 @@ Phase 2b acceptance (in-browser, achieved today):
 5. First target appearance arms the round. Any subsequent tap ranks by order. Round ends when all players have committed or 60 s, whichever first.
 6. First to 10 points → `GAME_OVER` with winner banner. Host can `NEW GAME` to reset.
 
-## Phase 2c — end-of-game polish (in progress)
+## Phase 2c — end-of-game polish
 
-First iteration shipped as `a4539fa`:
+Four iterations shipped today. Mobile + desktop tested via browser tabs; TV-path still pending Phase 1d propagation.
 
-- **Winning phone** gets a full-screen gold-gradient "YOU WIN" overlay with animated confetti emoji rain.
-- **Losing phones** get a muted purple overlay with "Game over / <winner> won this round".
-- **Both phones** see the final scoreboard on the overlay, ordered high→low, winner row highlighted, self row outlined.
-- **TV receiver** final scoreboard became an ordered list with CSS-counter ranks (🥇 for the winner, plain numbers otherwise). Round-end scoreboard still uses the simpler plain renderer.
-- Overlay dismisses automatically on the next non-`GAME_OVER` phase (typically host tapping NEW GAME).
+- **iter-1 (`a4539fa`):** end-of-game overlay — winning phone gets gold-gradient "YOU WIN" + confetti, losing phones get a muted "Game over / <winner> won this round" screen, both show a full final scoreboard with winner highlight. TV receiver final scoreboard became an ordered podium list (🥇 on winner). Overlay dismisses on next non-`GAME_OVER` phase.
+- **iter-2 (`ce1d4de`):** haptic + Web Audio feedback on the controller. Successful press = 40 ms vibrate + 880 Hz triangle blip. Lockout = descending two-tone sawtooth buzz + 3-pulse vibrate. Win = C-major arpeggio + celebratory haptic pattern. AudioContext lazily constructed on first user-gesture click (iOS Safari requires this to unlock audio).
+- **iter-3 (`bbabf44`):** live commit indicator on the TV during PLAY — pills appear in order as players commit (green ✓ = recorded, red ✗ = locked out), clears at next round start. Game side exposes this via a new `PRESS_RECORDED { roundId, playerId, name }` broadcast mirroring the existing `EARLY_PRESS`.
+- **iter-4 (`cf7b5e6`):** `touch-action: manipulation` on the controller body + big button kills the 300 ms double-tap-to-zoom delay that iOS Safari and some Android Chrome builds impose by default. Reaction game also broadcasts `PRESS_RECORDED` for protocol symmetry so a shared receiver indicator will work for both games in the future.
 
-Follow-ups queued for Phase 2c:
+Test count bumped 46 → 49 across runners (one new image-game test in iter-3, one new reaction-game test in iter-4).
 
-- **Haptic + audio feedback on phone presses.** `navigator.vibrate` is a no-dependency mobile nicety; a short Web Audio oscillator blip covers desktop. Different pattern for successful commit vs. lockout (buzz).
-- **Live commit indicator on TV during PLAY.** Current receiver doesn't surface "Alice has committed, waiting on Bob" — players lose track of who's still active. Broadcasting a `PRESS_RECORDED` (new) or reusing the existing state would let the receiver render a committed-list overlay.
-- **Round-end scoreboard animation.** Fade in new rankings; animate point deltas (`+4`, `+3`, etc.) from the rank row into the running scoreboard.
-- **REVEAL drama.** Current REVEAL is a static emoji + hint. A 3,2,1 countdown or subtle pulse on the emoji would cue "game starts NOW".
+Queued for future iterations:
+
+- **Round-end scoreboard animation.** Fade in new rankings; animate `+4 / +3 / +2 / +1` point-delta badges from the rank row into the running scoreboard.
+- **REVEAL drama.** A 3-2-1 countdown overlay or a decaying ring around the target emoji would cue "game starts NOW". Currently just a static emoji + "memorise" hint.
+- **Shared commit-indicator panel on receiver.** Right now the pills only render inside the image game's panel. Moving to a shared overlay would light up in reaction-game rounds too (iter-4 already sends `PRESS_RECORDED` for both games).
+- **Win/lose sound cue on losing phones.** Sonically, losing phones are silent. A soft "womp-womp" or just a muted closing chord would feel more complete.
 
 ## Follow-up after Phase 1d unblocks
 
