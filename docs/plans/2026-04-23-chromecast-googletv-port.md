@@ -1,7 +1,7 @@
 # Plan: Chromecast / Google TV port
 
 **Date:** 2026-04-23
-**Status:** Phase 0 ✅ done. Phase 1 in progress.
+**Status:** Phase 0 ✅ Phase 1 ✅ done. Phase 2 needs Android phone hardware.
 **Branch:** `party-games-platform`, worktree `/home/will/WorldFoundry.party-games-platform`.
 **Goal:** Run World Foundry (snowgoons) on a Chromecast with Google TV device — launch
 from the TV leanback launcher, take gamepad input, render correctly at TV resolution.
@@ -53,21 +53,11 @@ Android CI), not new HAL code.
 `android:banner="@drawable/tv_banner"` on `<application>` in AndroidManifest.xml.
 `wflogo.png` added to repo root as the source image.
 
-### Phase 1 — Codemagic Android workflow
+### Phase 1 — Codemagic Android workflow ✅
 
-**Estimate: 1 day. No hardware required.**
-
-iOS has Codemagic CI; Android only has local `./gradlew`. Add an Android workflow so
-every push produces a downloadable debug APK, enabling verification without a local
-Android SDK.
-
-1. Add `android-apk-debug` workflow to `codemagic.yaml` (after the existing iOS workflow):
-   - **Instance:** Codemagic Linux agents ship Android SDK + NDK pre-installed
-   - **NDK version:** pin to r26c (matches local `26.2.11394342`)
-   - **Build step:** `cd android && ./gradlew :app:assembleDebug`
-   - **Artifact:** `android/app/build/outputs/apk/debug/*.apk`
-   - **Trigger:** manual (no webhook yet; trigger from Codemagic dashboard)
-2. Trigger manually in Codemagic dashboard; verify downloadable APK artifact.
+`android-apk-debug` workflow added to `codemagic.yaml`. Linux instance (`linux_x2`),
+NDK r26c pinned, `./gradlew :app:assembleDebug`, artifact `apk/debug/*.apk`. Manual
+trigger only (no webhook yet). Trigger from Codemagic dashboard to verify APK artifact.
 
 ### Phase 2 — Phone verification
 
@@ -120,7 +110,7 @@ Verify (after that plan lands): music plays during snowgoons on both phone and T
 | `android/app/src/main/AndroidManifest.xml` | `android:banner="@drawable/tv_banner"` on `<application>` ✅ |
 | `android/app/src/main/res/drawable/tv_banner.png` | 320×180 TV banner (logo left, right reserved for title) ✅ |
 | `wflogo.png` | Source logo added to repo root ✅ |
-| `codemagic.yaml` | New `android-apk-debug` workflow after existing iOS workflow |
+| `codemagic.yaml` | New `android-apk-debug` workflow after existing iOS workflow ✅ |
 
 No HAL or CMake changes needed — the Google TV code path is already in place.
 
