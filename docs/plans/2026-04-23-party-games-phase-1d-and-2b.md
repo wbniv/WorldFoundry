@@ -53,7 +53,7 @@ All of these were surprising enough to merit capturing for the next time (or the
 5. **Missing IPv4 address on TV — not definitively the root cause.** Chromecast's device status page showed only an IPv6 address (Chrome's Cast discovery uses IPv4 mDNS, so this seemed suspicious). Set a static IPv4 (`192.168.4.50`) on the TV and YouTube cast started working shortly after; we never isolated whether the static-IP was actually what fixed it vs. the router / TV happening to recover around the same time from something else. Leaving the static IP in place because it's harmless and removes a variable if discovery regresses.
 
    Side confusion: the device shows as **"TV"** in the Google Home app but as **"ch"** / **"th"** in the Cast Developer Console (descriptions we typed at registration). When troubleshooting "where's the device in the picker?" the Google Home app label is what the sender SDK shows users, not the dev-console description — worth remembering next time.
-6. **48-hour propagation.** Google Cast Console says "it may take up to 48 hours for your Google Cast Developer Console registration to be fully processed". No UI indicator for completion — only signal is the cast button appearing on a controller page. Any Cast Console edit restarts the clock, so we stopped touching it.
+6. **48-hour propagation.** Google Cast Console says "it may take up to 48 hours for your Google Cast Developer Console registration to be fully processed". No UI indicator for completion — only signal is the cast button appearing on a controller page. We stopped touching the Cast Console entry on the theory that edits could restart the propagation clock — unverified, behaving cautiously.
 
 ### Current state / next actions for Phase 1d
 

@@ -81,7 +81,7 @@ Controller PING displays on the TV receiver via actual Cast session. Registratio
 - **Device serial swap.** Registered TV serial turned out to differ from the physically-plugged-in device; added both `2628105GN0GT7C` and `31191HFGN54Q67` to the devices whitelist.
 - **IPv4 DHCP.** Physical TV was IPv6-only (DHCPv4 didn't land); Cast discovery needs IPv4 mDNS. Static IP `192.168.4.50` on the TV unblocked YouTube casting as a sanity check; Party Games receiver will follow once 071CDEDD propagates.
 
-Current state: waiting on Google's 48h window for 071CDEDD. Tunnel + server left running, Cast Console URL pinned to the current `helped-enjoy-calm-renewable.trycloudflare.com/receiver`. Any Cast Console edits restart the clock, so leaving alone.
+Current state: waiting on Google's 48h window for 071CDEDD. Tunnel + server left running, Cast Console URL pinned to the current `helped-enjoy-calm-renewable.trycloudflare.com/receiver`. Leaving the Cast Console entry alone on the cautious assumption that edits could restart the propagation clock — that's unverified, not something Google documents.
 
 ### Phase 2a — reaction game state machine (mini-game 1) ✅ (playable end-to-end in browser)
 
