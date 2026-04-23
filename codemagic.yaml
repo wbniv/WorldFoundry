@@ -32,6 +32,11 @@ workflows:
           source: true
       cancel_previous_builds: true
 
+    cache:
+      cache_paths:
+        # Jolt extracted source — skip tar extraction on warm builds
+        - engine/vendor/jolt-physics-5.5.0
+
     scripts:
       - name: Toolchain versions
         script: |
@@ -41,6 +46,20 @@ workflows:
           cmake --version
           which xcrun
           xcrun --sdk iphonesimulator --show-sdk-path
+
+      - name: Extract Jolt vendor archive
+        script: |
+          set -euo pipefail
+          cd engine/vendor
+          if [ ! -d jolt-physics-5.5.0 ]; then
+            echo "Extracting jolt-physics-5.5.0.tar.gz..."
+            tar -xzf jolt-physics-5.5.0.tar.gz
+            extracted=$(tar -tzf jolt-physics-5.5.0.tar.gz | head -1 | cut -d/ -f1)
+            mv "$extracted" jolt-physics-5.5.0
+            echo "Renamed $extracted -> jolt-physics-5.5.0"
+          else
+            echo "Jolt already extracted"
+          fi
 
       - name: Configure CMake for iOS Simulator (arm64)
         script: |
