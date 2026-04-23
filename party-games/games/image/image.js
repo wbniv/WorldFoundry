@@ -1,19 +1,17 @@
 // Image Recognition Game — server-side state machine. Mini-game 2.
 //
 // Plugs into platform createServer({ game: createImageGame() }).
-// Flow: REVEAL (memorise target) → DISTRACTORS (4–8 non-target images stream) →
-// TARGET (target shown; scoring window opens) → ROUND_ENDED → next / GAME_OVER.
+// Flow: REVEAL (memorise target) → PLAY (image stream; each player gets one
+// press; press during target = ranked, press during distractor = lockout) →
+// ROUND_ENDED → next / GAME_OVER.
 // Same server-receive-timestamp adjudication as the reaction game.
 
 const WIN_SCORE              = 10;
 const REVEAL_MS              = 3000;    // target shown at start to memorise
-const REVEAL_CLEAR_MS        =  500;    // blank between reveal and distractor stream
-const IMAGE_SHOW_MS          =  800;    // duration each image is on screen (distractor or target)
-const MIN_DISTRACTORS        =    4;    // inclusive
-const MAX_DISTRACTORS        =    8;    // inclusive
-const SCORING_WINDOW_MS      = 3000;    // after target SHOW_IMAGE, presses count for this long
+const REVEAL_CLEAR_MS        =  500;    // blank between reveal and image stream
+const IMAGE_SHOW_MS          =  800;    // duration each image is on screen
 const ROUND_END_PAUSE_MS     = 3000;    // pause between rounds
-const MAX_ROUND_MS           = 60000;   // defensive failsafe; a natural round is ~10–13 s
+const MAX_ROUND_MS           = 60000;   // how long the image stream runs if players don't all commit
 const POINTS_BY_RANK         = [4, 3, 2, 1];
 const MIN_PLAYERS_TO_START   = 1;       // matches reaction; see platform README
 
@@ -25,19 +23,19 @@ const IMAGE_POOL = [
 
 /**
  * Game lifecycle:
- *   LOBBY → REVEAL → DISTRACTORS → TARGET → ROUND_ENDED → (next round | GAME_OVER)
+ *   LOBBY → REVEAL → PLAY → ROUND_ENDED → (next round | GAME_OVER)
  *
  * Messages OUT (broadcast unless noted):
  *   PHASE          { phase, scores }
  *   ROUND_REVEAL   { roundId, targetId, showMs, clearMs }
  *   SHOW_IMAGE     { roundId, seq, imageId, showMs, isTarget, serverTs }
- *   EARLY_PRESS    { roundId, playerId, name }
- *   ROUND_ENDED    { roundId, ranks, scores, targetId }
+ *   EARLY_PRESS    { roundId, playerId, name }    // pressed during REVEAL or on a non-target
+ *   ROUND_ENDED    { roundId, ranks, scores, targetId, timedOut? }
  *   GAME_OVER      { winnerId, name, scores }
  *
  * Messages IN (controller):
  *   START_GAME                              (host only; from LOBBY / GAME_OVER)
- *   BUTTON_PRESS  { clientTs }              (any phase except LOBBY/ROUND_ENDED/GAME_OVER)
+ *   BUTTON_PRESS  { clientTs }              (REVEAL → lockout; PLAY → evaluated)
  *   NEW_GAME                                (host only; from GAME_OVER)
  */
 function createImageGame(opts = {}) {
@@ -48,23 +46,21 @@ function createImageGame(opts = {}) {
   const state = {
     phase: 'LOBBY',
     roundId: 0,
-    round: null,        // { id, target, preCount, seqIdx, targetShownAt, presses, earlyPressed }
+    round: null,        // { id, target, seq, currentImage: {imageId,isTarget,serverTs},
+                        //   presses: Map(pid → {serverTs, clientTs}), lockedOut: Set(pid) }
     scores: new Map(),
     winScore,
   };
-  // Multiple independent timer slots: the image stream keeps cycling even after
-  // the target flashes by, so the next-image schedule and the scoring-window
-  // schedule must not clobber each other. Failsafe is a hard overall cap.
+  // Independent timer slots — image cycling, overall round cap, phase transitions
+  // (REVEAL→PLAY and ROUND_ENDED→next) all run concurrently.
   let nextImageCancel = null;
-  let scoringCancel   = null;
-  let phaseCancel     = null;  // REVEAL → DISTRACTORS transition + round-end pause
-  let failsafeCancel  = null;  // MAX_ROUND_MS overall round cap
+  let roundCapCancel  = null;
+  let phaseCancel     = null;
 
   function clearAllTimers() {
     if (nextImageCancel) { nextImageCancel(); nextImageCancel = null; }
-    if (scoringCancel)   { scoringCancel();   scoringCancel   = null; }
+    if (roundCapCancel)  { roundCapCancel();  roundCapCancel  = null; }
     if (phaseCancel)     { phaseCancel();     phaseCancel     = null; }
-    if (failsafeCancel)  { failsafeCancel();  failsafeCancel  = null; }
   }
 
   function broadcastPhase(services) {
@@ -76,7 +72,6 @@ function createImageGame(opts = {}) {
   }
 
   function pickInt(services, min, max) {
-    // [min, max] inclusive; tolerant of services.random() returning exactly 1.0 (tests do this).
     const span = max - min;
     return min + Math.min(Math.floor(services.random() * (span + 1)), span);
   }
@@ -85,25 +80,18 @@ function createImageGame(opts = {}) {
     return pool[pickInt(services, 0, pool.length - 1)];
   }
 
-  function pickDistractor(services, excludeId) {
-    const distractorPool = pool.filter((id) => id !== excludeId);
-    return distractorPool[pickInt(services, 0, distractorPool.length - 1)];
-  }
-
   function startRound(services) {
     clearAllTimers();
     const target = pickTarget(services);
-    const preCount = pickInt(services, MIN_DISTRACTORS, MAX_DISTRACTORS);
     state.phase = 'REVEAL';
     state.roundId += 1;
     state.round = {
       id: state.roundId,
       target,
-      preCount,              // distractors shown before the target flashes
-      seqIdx: -1,            // incremented on each showNext; target fires at seqIdx===preCount
-      targetShownAt: null,
+      seq: -1,
+      currentImage: null,
       presses: new Map(),
-      earlyPressed: new Set(),
+      lockedOut: new Set(),
     };
     broadcastPhase(services);
     services.broadcast({
@@ -113,80 +101,57 @@ function createImageGame(opts = {}) {
       showMs: REVEAL_MS,
       clearMs: REVEAL_CLEAR_MS,
     });
-    phaseCancel = services.schedule(REVEAL_MS + REVEAL_CLEAR_MS, () => startDistractors(services));
-    // Overall round cap — never expected to fire; catches state-machine hangs.
-    failsafeCancel = services.schedule(maxRoundMs, () => failsafeEndRound(services));
+    phaseCancel = services.schedule(REVEAL_MS + REVEAL_CLEAR_MS, () => startPlay(services));
   }
 
-  function failsafeEndRound(services) {
-    if (!state.round) return;
-    if (state.phase === 'LOBBY' || state.phase === 'GAME_OVER' || state.phase === 'ROUND_ENDED') return;
-    clearAllTimers();
-    const r = state.round;
-    state.phase = 'ROUND_ENDED';
-    const ranks = services.getPlayers().map((p) => ({
-      playerId: p.id, name: p.name, points: 0,
-      lockedOut: r.earlyPressed.has(p.id) || undefined,
-      ms: null,
-    }));
-    broadcastPhase(services);
-    services.broadcast({
-      type: 'ROUND_ENDED',
-      roundId: r.id,
-      ranks,
-      scores: Object.fromEntries(state.scores),
-      targetId: r.target,
-      timedOut: true,
-    });
-    phaseCancel = services.schedule(ROUND_END_PAUSE_MS, () => startRound(services));
-  }
-
-  function startDistractors(services) {
+  function startPlay(services) {
     if (state.phase !== 'REVEAL') return;
-    if (phaseCancel) { phaseCancel = null; }
-    state.phase = 'DISTRACTORS';
+    phaseCancel = null;
+    state.phase = 'PLAY';
     broadcastPhase(services);
+    // Overall round cap — round ends when maxRoundMs has elapsed in PLAY, or
+    // earlier if all players have committed (pressed or locked out).
+    roundCapCancel = services.schedule(maxRoundMs, () => endRound(services, { timedOut: true }));
     showNext(services);
   }
 
   function showNext(services) {
+    if (state.phase !== 'PLAY') return;
     const r = state.round;
     if (!r) return;
-    if (nextImageCancel) { nextImageCancel = null; }  // self-fired
+    nextImageCancel = null;
 
-    const idx = r.seqIdx + 1;
-    r.seqIdx = idx;
-    const isTarget = idx === r.preCount;
-    const imageId = isTarget ? r.target : pickDistractor(services, r.target);
+    r.seq += 1;
+    // Uniform random pick from the full pool — target naturally appears with
+    // probability 1/pool.length per frame (~5% with the default 20-image pool).
+    const imageId = pool[pickInt(services, 0, pool.length - 1)];
+    const isTarget = imageId === r.target;
     const serverTs = services.now();
-
-    if (isTarget) {
-      // Target just appeared — transition into TARGET phase (opens scoring
-      // window) and schedule endRound. Keep cycling images; the post-target
-      // distractor stream provides pressure while players react.
-      state.phase = 'TARGET';
-      r.targetShownAt = serverTs;
-      broadcastPhase(services);
-      scoringCancel = services.schedule(SCORING_WINDOW_MS, () => endRound(services));
-    }
+    r.currentImage = { imageId, isTarget, serverTs };
 
     services.broadcast({
       type: 'SHOW_IMAGE',
       roundId: r.id,
-      seq: idx,
+      seq: r.seq,
       imageId,
       showMs: IMAGE_SHOW_MS,
       isTarget,
       serverTs,
     });
 
-    // Always schedule the next image — stream continues until endRound clears
-    // the timer when the scoring window expires.
     nextImageCancel = services.schedule(IMAGE_SHOW_MS, () => showNext(services));
   }
 
-  function endRound(services) {
-    if (state.phase !== 'TARGET') return;
+  function checkAllCommitted(services) {
+    const r = state.round;
+    if (!r) return false;
+    const players = services.getPlayers();
+    if (players.length === 0) return false;
+    return players.every((p) => r.presses.has(p.id) || r.lockedOut.has(p.id));
+  }
+
+  function endRound(services, { timedOut = false } = {}) {
+    if (state.phase !== 'PLAY') return;
     clearAllTimers();
 
     const r = state.round;
@@ -196,7 +161,7 @@ function createImageGame(opts = {}) {
 
     const allPlayers = services.getPlayers();
     const ranks = allPlayers.map((p) => {
-      if (r.earlyPressed.has(p.id)) {
+      if (r.lockedOut.has(p.id)) {
         return { playerId: p.id, name: p.name, points: 0, lockedOut: true, ms: null };
       }
       const idx = orderedPresses.findIndex((x) => x.playerId === p.id);
@@ -204,15 +169,18 @@ function createImageGame(opts = {}) {
         return { playerId: p.id, name: p.name, points: 0, ms: null };
       }
       const points = POINTS_BY_RANK[idx] ?? 0;
-      const ms = orderedPresses[idx].serverTs - r.targetShownAt;
+      // Reaction time is measured from when that player's pressed image was
+      // broadcast — i.e. the frame they actually reacted to. Falls back to
+      // null if we lost the frame record.
+      const ms = orderedPresses[idx].imageServerTs != null
+        ? orderedPresses[idx].serverTs - orderedPresses[idx].imageServerTs
+        : null;
       return { playerId: p.id, name: p.name, points, ms };
     });
 
     for (const rk of ranks) {
       if (!state.scores.has(rk.playerId)) state.scores.set(rk.playerId, 0);
-      if (rk.points > 0) {
-        state.scores.set(rk.playerId, state.scores.get(rk.playerId) + rk.points);
-      }
+      if (rk.points > 0) state.scores.set(rk.playerId, state.scores.get(rk.playerId) + rk.points);
     }
 
     state.phase = 'ROUND_ENDED';
@@ -224,6 +192,7 @@ function createImageGame(opts = {}) {
       ranks,
       scores: scoresObj,
       targetId: r.target,
+      ...(timedOut ? { timedOut: true } : {}),
     });
 
     let winner = null;
@@ -257,7 +226,7 @@ function createImageGame(opts = {}) {
     state.scores.delete(player.id);
     if (state.round) {
       state.round.presses.delete(player.id);
-      state.round.earlyPressed.delete(player.id);
+      state.round.lockedOut.delete(player.id);
     }
     if (services.getPlayers().length === 0 && state.phase !== 'LOBBY') {
       clearAllTimers();
@@ -284,22 +253,44 @@ function createImageGame(opts = {}) {
       case 'BUTTON_PRESS': {
         const r = state.round;
         if (!r) return;
-        if (state.phase === 'REVEAL' || state.phase === 'DISTRACTORS') {
-          if (r.earlyPressed.has(player.id)) return;
-          r.earlyPressed.add(player.id);
+        if (state.phase === 'REVEAL') {
+          // Pressing before the stream starts → lockout for the round.
+          if (r.lockedOut.has(player.id)) return;
+          r.lockedOut.add(player.id);
           services.broadcast({
             type: 'EARLY_PRESS',
             roundId: r.id,
             playerId: player.id,
             name: player.name,
           });
-        } else if (state.phase === 'TARGET') {
-          if (r.earlyPressed.has(player.id)) return;
-          if (r.presses.has(player.id)) return;  // one press per round
-          r.presses.set(player.id, {
-            serverTs: services.now(),
-            clientTs: Number.isFinite(msg.clientTs) ? msg.clientTs : null,
-          });
+        } else if (state.phase === 'PLAY') {
+          if (r.lockedOut.has(player.id)) return;
+          if (r.presses.has(player.id)) return;  // one commit per round
+          const img = r.currentImage;
+          if (img && img.isTarget) {
+            r.presses.set(player.id, {
+              serverTs: services.now(),
+              clientTs: Number.isFinite(msg.clientTs) ? msg.clientTs : null,
+              imageServerTs: img.serverTs,
+              imageSeq: r.seq,
+            });
+            // All players committed? End the round early.
+            if (checkAllCommitted(services)) {
+              endRound(services, {});
+            }
+          } else {
+            // Pressed on a distractor frame (or no frame has landed yet) → lockout.
+            r.lockedOut.add(player.id);
+            services.broadcast({
+              type: 'EARLY_PRESS',
+              roundId: r.id,
+              playerId: player.id,
+              name: player.name,
+            });
+            if (checkAllCommitted(services)) {
+              endRound(services, {});
+            }
+          }
         }
         // ROUND_ENDED / LOBBY / GAME_OVER: ignore.
         break;
@@ -335,9 +326,6 @@ module.exports = {
   REVEAL_MS,
   REVEAL_CLEAR_MS,
   IMAGE_SHOW_MS,
-  MIN_DISTRACTORS,
-  MAX_DISTRACTORS,
-  SCORING_WINDOW_MS,
   ROUND_END_PAUSE_MS,
   MAX_ROUND_MS,
   POINTS_BY_RANK,

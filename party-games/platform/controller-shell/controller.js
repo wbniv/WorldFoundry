@@ -45,17 +45,16 @@ function refreshButton() {
       break;
     case 'ROUND_COUNTDOWN':    // reaction game: countdown bar running
     case 'REVEAL':             // image game: memorise the target
-    case 'DISTRACTORS':        // image game: distractor frames streaming
       btn.textContent = 'WAIT';
       btn.disabled = lockedOutThisRound;   // stays tappable before lockout — so an early press CAN happen
       btn.dataset.action = 'press';        // any press here is an early press on the server side
       break;
-    case 'ROUND_OPEN':         // reaction game: GO! window
+    case 'ROUND_OPEN':         // reaction game: GO! window (post-TIMER_FIRED)
       btn.textContent = lockedOutThisRound ? 'LOCKED' : 'GO!';
       btn.disabled = lockedOutThisRound;
       btn.dataset.action = 'press';
       break;
-    case 'TARGET':             // image game: target visible, scoring window open
+    case 'PLAY':               // image game: stream running, press when you see target
       btn.textContent = lockedOutThisRound ? 'LOCKED' : 'TAP!';
       btn.disabled = lockedOutThisRound;
       btn.dataset.action = 'press';

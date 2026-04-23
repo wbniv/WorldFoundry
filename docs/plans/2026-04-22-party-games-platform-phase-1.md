@@ -71,11 +71,19 @@ PING()                       →   PONG(fromPlayerId)             // broadcast t
 
 Commit `498f6ec`. Controller loads `cast_sender.js?loadCastFramework=1`, initialises `CastContext` with `receiverApplicationId: 'A40DF337'`, exposes a `<google-cast-launcher>` web component for the native device picker. State line reflects `idle / connecting / on <device>`. Receiver logs `SENDER_CONNECTED/DISCONNECTED` to the on-screen event log; status line appends app-data name once CAF's `READY` fires.
 
-### Phase 1d — end-to-end button round-trip on real Cast device (blocked)
+### Phase 1d — end-to-end button round-trip on real Cast device (waiting on propagation)
 
-Controller PING displays on the TV receiver via actual Cast session. Blocked on device serial (Phase 1b last step) — user locating remote.
+Controller PING displays on the TV receiver via actual Cast session. Registration side-quest surfaced several issues along the way — all fixed:
 
-### Phase 2a — reaction game state machine (mini-game 1) ✅ (server + tests; end-to-end pending Cast device)
+- **Static-asset bug (commit `bb1a0c5`).** `/receiver` HTML's `<script src="receiver.js">` resolved to `/receiver.js`, which `resolveStatic` only handled for the `/receiver/foo` form. Silent 404; page stuck on default "connecting…" text. Fix: two new routing rules for sibling assets, plus a relay.test.js case.
+- **Cast SDK timing quirks (commit `bb1a0c5`).** `__onGCastApiAvailable(true)` can fire before `cast.framework` / `chrome.cast.AutoJoinPolicy` is populated; added poll-then-init, string-literal fallback for the autoJoinPolicy, and explicit seeding of the cast-state UI since CAST_STATE_CHANGED doesn't always emit an initial event.
+- **Cast Console registration.** Original `A40DF337` app was wedged (device-to-app association never pushed despite "Ready For Testing"); recreated as `071CDEDD` with Sender Details populated at creation time. Cast Console claims up to **48 hours** for the first push to a newly-registered app — no per-app propagation-complete indicator visible, detected only by cast button appearing on a controller tab.
+- **Device serial swap.** Registered TV serial turned out to differ from the physically-plugged-in device; added both `2628105GN0GT7C` and `31191HFGN54Q67` to the devices whitelist.
+- **IPv4 DHCP.** Physical TV was IPv6-only (DHCPv4 didn't land); Cast discovery needs IPv4 mDNS. Static IP `192.168.4.50` on the TV unblocked YouTube casting as a sanity check; Party Games receiver will follow once 071CDEDD propagates.
+
+Current state: waiting on Google's 48h window for 071CDEDD. Tunnel + server left running, Cast Console URL pinned to the current `helped-enjoy-calm-renewable.trycloudflare.com/receiver`. Any Cast Console edits restart the clock, so leaving alone.
+
+### Phase 2a — reaction game state machine (mini-game 1) ✅ (playable end-to-end in browser)
 
 Implements mini-game 1 (countdown timer) as a **game plugin** at `party-games/games/reaction/reaction.js` consumed by the platform via `createServer({ game })`. Plugin interface is minimal: `{onJoin, onLeave, onMessage}` receiving a `services = {broadcast, sendTo, getPlayers, getHost, now, schedule, random}` surface. All clocks are injectable so tests can deterministically fast-forward through countdowns + scoring windows.
 
@@ -96,11 +104,37 @@ Test coverage:
 - `party-games/platform/server/test/reaction-integration.test.js` — 2 tests (game wired through real WebSocket server with fake clock).
 - `party-games/games/reaction/test/reaction.test.js` — 13 tests (state machine in isolation).
 
-End-to-end verification on a physical Cast device is still blocked on device-serial registration (Phase 1b).
+End-to-end verification on a physical Cast device is pending Phase 1d.
 
-### Phase 2b — reaction game mini-game 2 (image recognition) — deferred
+### Phase 2b — image-recognition mini-game ✅ (playable end-to-end in browser; commits `3b2b00e`, `abee593`, `14a0cd2`, later reshape)
 
-Needs a pool of ~20 distinct flat icons + preload logic on receiver + same timing-adjudication machinery applied to `SHOW_IMAGE(targetId)` rather than `TIMER_FIRED`. Tackled after Phase 1d unblocks and 2a is hardened on a real device.
+Second reaction-family mini-game, plugged into the same platform shell via `games/image/image.js`.
+
+**Original shape (shipped in `3b2b00e`):** REVEAL (memorise target 3 s) → DISTRACTORS (4–8 non-target frames at 800 ms) → TARGET (target shown with 3 s scoring window). Early press during REVEAL/DISTRACTORS → lockout.
+
+**Reshape after first play (`abee593` + current follow-up):** The static REVEAL/DISTRACTORS/TARGET carve-up felt mechanical. New design collapses the playing portion into a single **PLAY** phase where images from the pool cycle uniformly at random at 800 ms each for up to `MAX_ROUND_MS = 60 s`. The target appears naturally any time its slot comes up (≈5 % per frame with the default 20-emoji pool). Rules:
+
+- Press during REVEAL → lockout.
+- Press during PLAY when the currently-shown frame is the target → ranked (server-receive-timestamp adjudication, 4/3/2/1).
+- Press during PLAY when the currently-shown frame is a distractor → lockout.
+- One press per round, per player. Round ends the moment every active player has either pressed or locked out, or 60 s, whichever first.
+- Target may show zero, one, or many times per round — depending on the roll.
+
+Phase names in this shape: `LOBBY → REVEAL → PLAY → ROUND_ENDED → (next round | GAME_OVER)`.
+
+Messages beyond the platform base: `ROUND_REVEAL {targetId, showMs, clearMs}`, `SHOW_IMAGE {seq, imageId, showMs, isTarget, serverTs}`, plus the shared `PHASE / EARLY_PRESS / ROUND_ENDED {… timedOut?} / GAME_OVER`.
+
+Image pool: 20 visually-distinct emoji. Design doc calls for SVG at prod polish time; emoji are zero-dep and adequate for v1.
+
+UI:
+- Receiver: separate REVEAL panel (target held 3 s, fades 0.5 s); PLAY reuses the image-stream panel, continuously updating. No on-screen highlight of the target frame — the game is about recognising it from the REVEAL memorisation.
+- Controller: REVEAL → "WAIT" (press locks out). PLAY → "TAP!" (press evaluated against current frame). Standard START / NEW GAME / LOCKED labels for other phases.
+
+Test coverage (45 across three runners):
+- `party-games/games/image/test/image.test.js` — 16 state-machine tests (random pool forced to 2 entries to drive target/distractor choice, failsafe, all-committed early-end, etc.).
+- `party-games/platform/server/test/image-integration.test.js` — 2 tests through real WebSocket server.
+- Reaction: unchanged (13 + 2).
+- Platform relay: unchanged (11 including static-file coverage).
 
 ### Phase 3+ — UX polish, PWA manifest, mobile CSS, cards game, production hosting
 
@@ -147,10 +181,8 @@ No bundler, no framework. Plain HTML/CSS/JS + Node http + `ws`.
 
 ## Follow-up
 
-- Phase 2a: lobby + round scaffolding in `games/reaction/`.
-- Phase 2b: mini-game 1 (countdown) end-to-end.
-- Phase 2c: mini-game 2 (image recognition).
-- Phase 2d: scoring, win condition, fireworks.
+- Phase 1d: verify on physical Cast device once 071CDEDD propagates.
+- Phase 2c: scoring polish / fireworks on winner phone.
 - Phase 3: PWA manifest, mobile CSS, browser-on-HDMI verification, accessibility.
-- Phase 4: production hosting (AWS S3+CloudFront + Lightsail), custom domain, published Cast app review.
+- Phase 4: production hosting (AWS S3+CloudFront + Lightsail), custom domain, published Cast app review. Named Cloudflare tunnel so the Cast Console URL stops being a moving target.
 - Phase 5+: cards game on the same platform.

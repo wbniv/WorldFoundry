@@ -13,11 +13,11 @@ const panels = {
   // reaction (mini-game 1)
   ROUND_COUNTDOWN: document.getElementById('countdown'),
   ROUND_OPEN:      document.getElementById('open'),
-  // image-recognition (mini-game 2). TARGET reuses the distractors panel so
-  // the image stream keeps cycling visually through the scoring window.
+  // image-recognition (mini-game 2): REVEAL shows the memorisation target;
+  // PLAY is the uniform-random image stream (#distractors holds its element
+  // for historical id reasons — the target now appears randomly within it).
   REVEAL:          document.getElementById('reveal'),
-  DISTRACTORS:     document.getElementById('distractors'),
-  TARGET:          document.getElementById('distractors'),
+  PLAY:            document.getElementById('distractors'),
 };
 const countdownFillEl = document.getElementById('countdown-fill');
 const roundNumEl      = document.getElementById('round-num');
