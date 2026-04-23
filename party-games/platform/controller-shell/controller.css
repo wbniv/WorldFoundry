@@ -16,6 +16,15 @@ html, body {
 
 main {
   padding: 4vh 6vw;
+  /* Respect iPhone X+ notch / home-indicator and Android 3-button nav.
+     viewport-fit=cover in the <meta> lets us draw edge-to-edge; env(...)
+     gives the OS-reported inset sizes so interactive content doesn't
+     hide under the bars. max() keeps our existing padding as the floor
+     so normal Android phones don't end up with less than 4vh/6vw. */
+  padding-top:    max(4vh, env(safe-area-inset-top));
+  padding-bottom: max(4vh, env(safe-area-inset-bottom));
+  padding-left:   max(6vw, env(safe-area-inset-left));
+  padding-right:  max(6vw, env(safe-area-inset-right));
   max-width: 480px;
   margin: 0 auto;
   display: flex;
@@ -23,6 +32,30 @@ main {
   gap: 3vh;
   min-height: 100vh;
   min-height: 100dvh;
+}
+
+/* Landscape adjustment: the default layout is tall-column, which makes
+   the aspect-ratio:1/1 big-button taller than the viewport once the
+   phone rotates. Cap the button to the visible height and push the
+   whole main column into a two-column arrangement so the button and
+   status/cast column sit side-by-side. */
+@media (orientation: landscape) and (max-height: 520px) {
+  main {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2vh 4vw;
+  }
+  header { flex: 1 1 40%; }
+  .cast-row { flex: 1 1 100%; }
+  .big-button {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: none;
+    height: 70vh;
+    aspect-ratio: 1 / 1;
+  }
+  .game-root { flex: 1 1 50%; min-width: 50%; }
 }
 
 header {
@@ -133,6 +166,13 @@ google-cast-launcher {
   display: flex; align-items: center; justify-content: center;
   background: rgba(12, 15, 20, 0.97);
   z-index: 20;
+  /* Respect notch + home-indicator while the modal is up. */
+  padding: max(4vh, env(safe-area-inset-top)) max(6vw, env(safe-area-inset-right))
+           max(4vh, env(safe-area-inset-bottom)) max(6vw, env(safe-area-inset-left));
+  /* Keep scroll/swipe gestures inside the modal — prevents iOS Safari
+     rubber-band from revealing the controller behind the overlay. */
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 .room-gate[hidden] { display: none; }
 .room-form {
