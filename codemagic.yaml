@@ -1,15 +1,87 @@
-# Codemagic CI — WorldFoundry iOS port
+# Codemagic CI — WorldFoundry
 #
-# See docs/plans/2026-04-21-ios-port-codemagic.md for phase plan.
+# Workflows:
+#   android-apk-debug   (push to 2026-ios) — Linux arm64 APK, no signing.
+#   ios-simulator-debug (push to 2026-ios) — Phases 0-3, no signing.
+#   ios-device-release  (manual/tag)       — Phase 4+, signed arm64 IPA.
 #
-# Phase 0 goal: prove the Mac runner reaches the CMake/Xcode toolchain and
-# fails in an identifiable way (hal/ios/ not yet present). No signing.
-#
-# Budget: Codemagic individual plan = 500 Mac-min/month. Expect ~15–25 min
-# per clean build. Phases 0–2 push per step (each run is the only Mac
-# feedback we have); batch commits once the pipeline is reliably green.
+# iOS budget: 500 Mac-min/month (individual plan). Avg 3.4 min/build as of
+# 2026-04-22 — ~100-150 builds/mo feasible.
+# Android budget: Linux minutes are free on the individual plan.
 
 workflows:
+  #------------------------------------------------------------------------------
+  # android-apk-debug — debug APK (arm64-v8a) for phone + Google TV sideload.
+  #
+  # See docs/plans/2026-04-23-chromecast-googletv-port.md Phase 1.
+  # Triggers on every push to 2026-ios so each commit has a downloadable APK.
+  # Linux minutes are free on Codemagic's individual plan.
+  #------------------------------------------------------------------------------
+  android-apk-debug:
+    name: Android APK (Debug, arm64)
+    instance_type: linux_x2
+    max_build_duration: 30
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: '2026-ios'
+          include: true
+          source: true
+      cancel_previous_builds: true
+
+    environment:
+      vars:
+        # NDK r26c — matches local 26.2.11394342. sdkmanager will install it if
+        # the agent ships a different version; the exact string is the NDK
+        # directory name under $ANDROID_SDK_ROOT/ndk/.
+        WF_NDK_VERSION: "26.2.11394342"
+
+    scripts:
+      - name: Toolchain versions
+        script: |
+          set -euo pipefail
+          java -version
+          gradle --version || true
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-unset}"
+          echo "ANDROID_HOME=${ANDROID_HOME:-unset}"
+          cmake --version
+
+      - name: Install NDK r26c
+        script: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME}}"
+          if [ ! -d "$SDK/ndk/$WF_NDK_VERSION" ]; then
+            echo "Installing NDK $WF_NDK_VERSION..."
+            yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" \
+              "ndk;$WF_NDK_VERSION" \
+              "platforms;android-34" \
+              "build-tools;34.0.0" \
+              --sdk_root="$SDK"
+          else
+            echo "NDK $WF_NDK_VERSION already present."
+          fi
+          echo "NDK path: $SDK/ndk/$WF_NDK_VERSION"
+
+      - name: Build debug APK
+        script: |
+          set -euo pipefail
+          cd android
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME}}"
+          ./gradlew :app:assembleDebug \
+            -Pandroid.ndkVersion="$WF_NDK_VERSION" \
+            -Psdk.dir="$SDK" \
+            --no-daemon \
+            --stacktrace \
+            | tee ../gradle-build.log
+          echo "--- APK ---"
+          find . -name '*.apk' -exec ls -lh {} \;
+
+    artifacts:
+      - android/app/build/outputs/apk/debug/*.apk
+      - gradle-build.log
+
   ios-simulator-debug:
     name: iOS Simulator (Debug)
     instance_type: mac_mini_m2
