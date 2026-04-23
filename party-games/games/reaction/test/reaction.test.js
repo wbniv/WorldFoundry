@@ -200,6 +200,22 @@ test('BUTTON_PRESS during ROUND_OPEN → ranked by server-receive timestamp', ()
   assert.deepEqual(re.scores, { 1: 2, 2: 4, 3: 3 });
 });
 
+test('successful press during ROUND_OPEN broadcasts a PRESS_RECORDED event', () => {
+  const alice = { id: 1, name: 'Alice' };
+  const ctx = makeServices({ players: [alice], random: 0.0 });
+  const game = createReactionGame();
+  game.onJoin(alice, ctx.services);
+  game.onMessage(alice, { type: 'START_GAME' }, ctx.services);
+  ctx.advance(COUNTDOWN_MIN_MS);
+  assert.equal(game._debugState().phase, 'ROUND_OPEN');
+
+  game.onMessage(alice, { type: 'BUTTON_PRESS', clientTs: ctx.time }, ctx.services);
+  const pr = ctx.byType('PRESS_RECORDED');
+  assert.equal(pr.length, 1);
+  assert.equal(pr[0].playerId, 1);
+  assert.equal(pr[0].name, 'Alice');
+});
+
 test('non-presser gets 0 pts; press after scoring window closes is ignored', () => {
   const alice = { id: 1, name: 'Alice' }, bob = { id: 2, name: 'Bob' };
   const ctx = makeServices({ players: [alice, bob], random: 0.0 });

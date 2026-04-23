@@ -8,6 +8,10 @@ html, body {
   min-height: 100vh;
   min-height: 100dvh;
   overscroll-behavior-y: none;
+  /* Disables the 300 ms tap-delay that iOS Safari + some Android Chrome
+     builds otherwise impose while waiting to see if you're double-tapping
+     to zoom. Still allows scrolling and pinch on the page. */
+  touch-action: manipulation;
 }
 
 main {
@@ -54,6 +58,7 @@ header {
   box-shadow: 0 2vh 5vh rgba(0,0,0,0.45), inset 0 -1vh 3vh rgba(0,0,0,0.3);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  touch-action: manipulation;   /* belt-and-suspenders: no tap-delay on the button itself */
 }
 .big-button:disabled {
   opacity: 0.4;

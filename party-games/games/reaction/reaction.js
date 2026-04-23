@@ -222,6 +222,12 @@ function createReactionGame(opts = {}) {
             serverTs: services.now(),
             clientTs: Number.isFinite(msg.clientTs) ? msg.clientTs : null,
           });
+          services.broadcast({
+            type: 'PRESS_RECORDED',
+            roundId: r.id,
+            playerId: player.id,
+            name: player.name,
+          });
         }
         // ROUND_ENDED / LOBBY / GAME_OVER: ignore.
         break;
