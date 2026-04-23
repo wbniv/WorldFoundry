@@ -16,14 +16,14 @@
 <body>
   <main>
     <header>
-      <p id="status" class="status">connecting…</p>
+      <p id="status" class="status" role="status" aria-live="polite">connecting…</p>
       <p id="name" class="name"></p>
     </header>
     <div class="cast-row">
       <!-- Google's built-in cast-launcher web component. Renders the standard
            cast button and opens the native device picker on tap. -->
-      <google-cast-launcher id="cast-button"></google-cast-launcher>
-      <span id="cast-state" class="cast-state">cast: idle</span>
+      <google-cast-launcher id="cast-button" aria-label="Cast to TV"></google-cast-launcher>
+      <span id="cast-state" class="cast-state" role="status" aria-live="polite">cast: idle</span>
     </div>
     <!-- Game-owned region. Games build their entire controller UI inside this
          container via mount(ctx). The shell owns nothing below this line. -->
@@ -32,7 +32,7 @@
 
   <!-- Entry overlay: prompts for whichever of name/room the URL didn't carry.
        connect() in controller.js waits until this form submits. -->
-  <div id="entry-gate" class="room-gate" hidden>
+  <div id="entry-gate" class="room-gate" hidden role="dialog" aria-modal="true" aria-labelledby="entry-heading">
     <form id="entry-form" class="room-form">
       <h2 id="entry-heading">Join the game</h2>
       <p id="entry-hint" class="room-gate-hint"></p>

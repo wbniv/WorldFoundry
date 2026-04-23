@@ -51,7 +51,7 @@ h2 {
 
 .status {
   font-size: 1.8vh;
-  opacity: 0.55;
+  opacity: 0.68;   /* WCAG AA bump; 0.55 was marginal on #0c0f14 */
   margin-top: 0.6vh;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
@@ -98,11 +98,11 @@ h2 {
   font-size: 2vh;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  opacity: 0.55;
+  opacity: 0.68;   /* WCAG AA: phase-label is small all-caps, needs more contrast than eye guesses */
   margin-bottom: 1vh;
 }
 .hint {
-  opacity: 0.5;
+  opacity: 0.65;   /* WCAG AA: bump from 0.5 on #0c0f14 */
   font-size: 1.8vh;
   margin-top: 2vh;
   font-style: italic;
@@ -171,7 +171,9 @@ h2 {
   display: inline-block;
 }
 #round-ranks li.locked-out {
-  opacity: 0.55;
+  /* Locked-out row: deliberately softer than active rows. Bumped from 0.55
+     to 0.65 so the name + badge still clear WCAG AA when displayed on TV. */
+  opacity: 0.65;
 }
 #round-ranks li.locked-out .rank-badge { color: #fca5a5; }
 #round-ranks .rank-name { text-align: left; }
@@ -182,7 +184,7 @@ h2 {
 }
 #round-ranks .rank-reaction {
   text-align: right;
-  opacity: 0.55;
+  opacity: 0.68;   /* WCAG AA: reaction-ms is small mono; 0.55 was too faint on TV */
   font-size: 1.9vh;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
@@ -325,4 +327,19 @@ h2 {
 @keyframes commit-pop {
   from { transform: scale(0.85); opacity: 0; }
   to   { transform: scale(1);    opacity: 1; }
+}
+
+/* Reduced-motion: respects OS-level opt-in. Disables the countdown-bar
+   drain, GO! pulse, rank-row stagger, badge pop, score-update flash,
+   image-flash, image-target pulse, and the reveal-bar scale. Games'
+   animations (which load in CSS files after this one) are also killed
+   via the universal !important rules — our game CSS doesn't use
+   !important so these win. Users who opt in still get a functional UI,
+   just without the motion. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -14,10 +14,10 @@
   <div id="app">
     <header>
       <h1>Party Games Platform</h1>
-      <p id="status" class="status">connecting…</p>
+      <p id="status" class="status" role="status" aria-live="polite">connecting…</p>
       <p class="room-code-line">
         room code:
-        <span id="room-code" class="room-code">—</span>
+        <span id="room-code" class="room-code" aria-live="polite">—</span>
       </p>
     </header>
     <section id="stage">
@@ -25,9 +25,9 @@
            container via mount(ctx). The shell owns nothing below this line. -->
       <div id="game-root" class="game-root"></div>
     </section>
-    <section id="log">
-      <h2>Events</h2>
-      <ol id="event-log"></ol>
+    <section id="log" aria-labelledby="log-heading">
+      <h2 id="log-heading">Events</h2>
+      <ol id="event-log" aria-live="polite" aria-relevant="additions"></ol>
     </section>
   </div>
   <script type="module" src="receiver.js"></script>

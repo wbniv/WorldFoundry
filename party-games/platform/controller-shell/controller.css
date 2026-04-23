@@ -63,7 +63,7 @@ header {
   padding-top: 1vh;
 }
 .status {
-  opacity: 0.55;
+  opacity: 0.68;   /* WCAG AA small-text needs ≳4.5:1 on #0c0f14; 0.55 was marginal */
   font-size: 0.85rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
@@ -105,7 +105,7 @@ header {
 }
 
 .help {
-  opacity: 0.5;
+  opacity: 0.62;   /* WCAG AA bump from 0.5 for small text on #0c0f14 */
   font-size: 0.85rem;
   text-align: center;
   margin-top: auto;
@@ -339,4 +339,19 @@ google-cast-launcher {
 @keyframes confetti-fall {
   0%   { transform: translate3d(0, -10vh, 0) rotate(0deg);    opacity: 1; }
   100% { transform: translate3d(0, 110vh, 0) rotate(720deg);  opacity: 0.7; }
+}
+
+/* Reduced-motion: respect OS setting. Disables the confetti rain, the
+   headline pulse, the button-flash scale, the entry-gate fade-in, and any
+   animations/transitions game CSS layers on top (game CSS loads after this
+   file but doesn't use !important, so the universal !important rules here
+   override). Users who've opted in still get a functional UI, just without
+   the motion that might trigger vestibular issues. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .confetti { display: none; }   /* nothing left to see even once animations are stilled */
 }

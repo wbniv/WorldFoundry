@@ -28,7 +28,9 @@ export function mount(shellCtx) {
   rootEl.innerHTML = `
     <button id="im-btn" type="button" class="big-button" disabled>···</button>
     <p class="im-help">Tap the cast button to launch the receiver on your TV.</p>
-    <div id="im-outcome" class="outcome" hidden>
+    <div id="im-outcome" class="outcome" hidden
+         role="alertdialog" aria-modal="true"
+         aria-labelledby="im-outcome-headline" aria-describedby="im-outcome-subline">
       <div class="outcome-content">
         <p id="im-outcome-headline" class="outcome-headline"></p>
         <p id="im-outcome-subline" class="outcome-subline"></p>
