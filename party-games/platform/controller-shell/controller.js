@@ -153,6 +153,7 @@ function handleMessage(ev) {
     case 'EARLY_PRESS':
       if (msg.playerId === myId) {
         lockedOutThisRound = true;
+        feedbackLockout();
         refreshButton();
       }
       break;
@@ -186,6 +187,7 @@ function showOutcome(gameOver) {
     outcomeSublineEl.textContent = 'First to 10 points. Nicely done.';
     spawnConfetti();
     confettiEl.hidden = false;
+    feedbackWin();
   } else {
     outcomeHeadlineEl.textContent = 'Game over';
     const winnerName = gameOver.name || 'someone';
@@ -235,13 +237,69 @@ function spawnConfetti() {
   }
 }
 
+// ───── haptic + audio feedback ─────────────────────────────────────────────
+// Two light cues: a confirming click on a successful press, a lower buzz on
+// lockout. Web Audio so we don't ship audio files; navigator.vibrate for
+// haptics where supported (Android; iOS doesn't expose it to the web).
+// AudioContext must be created/resumed from a user-gesture callback, so we
+// defer creation until the first click.
+
+let audioCtx = null;
+function ensureAudioCtx() {
+  if (audioCtx) {
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+    return audioCtx;
+  }
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (Ctx) audioCtx = new Ctx();
+  } catch { /* browser blocks audio; fail silent */ }
+  return audioCtx;
+}
+
+function playBlip({ freq, durMs, kind = 'sine', fadeOut = 0.05 }) {
+  const ctx = audioCtx;
+  if (!ctx) return;
+  const t0 = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = kind;
+  osc.frequency.setValueAtTime(freq, t0);
+  gain.gain.setValueAtTime(0.0001, t0);
+  gain.gain.exponentialRampToValueAtTime(0.2, t0 + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durMs / 1000);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(t0);
+  osc.stop(t0 + durMs / 1000 + fadeOut);
+}
+
+function feedbackPress() {
+  if (navigator.vibrate) navigator.vibrate(40);
+  playBlip({ freq: 880, durMs: 120, kind: 'triangle' });
+}
+function feedbackLockout() {
+  if (navigator.vibrate) navigator.vibrate([20, 40, 80]);
+  // Descending two-tone buzz.
+  playBlip({ freq: 260, durMs: 180, kind: 'sawtooth' });
+  setTimeout(() => playBlip({ freq: 180, durMs: 220, kind: 'sawtooth' }), 160);
+}
+function feedbackWin() {
+  if (navigator.vibrate) navigator.vibrate([60, 40, 60, 40, 120]);
+  // Arpeggio: C5, E5, G5, C6 over ~300 ms.
+  const notes = [523, 659, 784, 1047];
+  notes.forEach((f, i) => setTimeout(() => playBlip({ freq: f, durMs: 160, kind: 'triangle' }), i * 90));
+}
+
 // ───── button handler ──────────────────────────────────────────────────────
 
 btn.addEventListener('click', () => {
+  // Unlock/resume the AudioContext on any click (user-gesture requirement).
+  ensureAudioCtx();
   if (ws.readyState !== WebSocket.OPEN) return;
   const action = btn.dataset.action;
   if (action === 'press') {
     ws.send(JSON.stringify({ type: 'BUTTON_PRESS', clientTs: Date.now() }));
+    feedbackPress();
     btn.classList.add('flash');
     setTimeout(() => btn.classList.remove('flash'), 150);
   } else if (action === 'start-game') {

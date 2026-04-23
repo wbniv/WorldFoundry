@@ -100,10 +100,26 @@ Phase 2b acceptance (in-browser, achieved today):
 5. First target appearance arms the round. Any subsequent tap ranks by order. Round ends when all players have committed or 60 s, whichever first.
 6. First to 10 points → `GAME_OVER` with winner banner. Host can `NEW GAME` to reset.
 
+## Phase 2c — end-of-game polish (in progress)
+
+First iteration shipped as `a4539fa`:
+
+- **Winning phone** gets a full-screen gold-gradient "YOU WIN" overlay with animated confetti emoji rain.
+- **Losing phones** get a muted purple overlay with "Game over / <winner> won this round".
+- **Both phones** see the final scoreboard on the overlay, ordered high→low, winner row highlighted, self row outlined.
+- **TV receiver** final scoreboard became an ordered list with CSS-counter ranks (🥇 for the winner, plain numbers otherwise). Round-end scoreboard still uses the simpler plain renderer.
+- Overlay dismisses automatically on the next non-`GAME_OVER` phase (typically host tapping NEW GAME).
+
+Follow-ups queued for Phase 2c:
+
+- **Haptic + audio feedback on phone presses.** `navigator.vibrate` is a no-dependency mobile nicety; a short Web Audio oscillator blip covers desktop. Different pattern for successful commit vs. lockout (buzz).
+- **Live commit indicator on TV during PLAY.** Current receiver doesn't surface "Alice has committed, waiting on Bob" — players lose track of who's still active. Broadcasting a `PRESS_RECORDED` (new) or reusing the existing state would let the receiver render a committed-list overlay.
+- **Round-end scoreboard animation.** Fade in new rankings; animate point deltas (`+4`, `+3`, etc.) from the rank row into the running scoreboard.
+- **REVEAL drama.** Current REVEAL is a static emoji + hint. A 3,2,1 countdown or subtle pulse on the emoji would cue "game starts NOW".
+
 ## Follow-up after Phase 1d unblocks
 
 - Commit marking 1d ✅ in the parent phase-1 plan doc and the party-games README.
-- Phase 2c (UX polish): sound cues on target, winner fireworks on the phone, scoreboard animation.
 - Phase 3 (mobile polish): viewport + no-zoom, full-screen friendly, add-to-home-screen manifest.
 - Phase 4 (production): named Cloudflare tunnel so the Cast Console URL stops being a moving target; S3+CloudFront for static; Lightsail for the WS server; published Cast app review.
 - Session IDs so a reconnecting player rejoins as the same id (currently reconnect forfeits current-round score).
