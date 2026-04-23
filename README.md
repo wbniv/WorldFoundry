@@ -223,4 +223,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-22 08:07** — [`docs/plans/2026-04-21-ios-port-codemagic.md`](docs/plans/2026-04-21-ios-port-codemagic.md): Plan: iOS port (via Codemagic)
+**2026-04-23 06:06** — [`docs/plans/2026-04-23-chromecast-googletv-port.md`](docs/plans/2026-04-23-chromecast-googletv-port.md): Plan: Chromecast / Google TV port
