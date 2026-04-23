@@ -158,7 +158,17 @@ Test count after these three + reaction-parity + room-codes = **56 across runner
 
 Queued for future iterations:
 
-- **Post-first-commit grace timer.** After the first player commits, start a shorter clock (10-15 s) that force-ends the round even if stragglers haven't tapped. Caps the worst-case round duration below the 60 s `maxRoundMs`. User asked about it earlier but hasn't decided; open question.
+- **Post-first-commit grace timer.** When a round has a mix of engaged and
+  disengaged players — first few tap within a couple of seconds, someone else
+  puts their phone down and never taps — the round currently hangs for the full
+  60 s `maxRoundMs` because nobody's been locked out (so `LAST_STANDING` doesn't
+  fire) and not everyone's committed. Proposed: once the first successful press
+  lands, start a `POST_COMMIT_GRACE_MS = 10_000` clock; when it expires, force-
+  end the round with the stragglers counted as non-pressers (0 pts). Caps the
+  worst-case round length at roughly "first-tap + 10 s" instead of 60 s. User
+  considered this 2026-04-23, deferred — not a burning issue with the current
+  2-player playtest cadence, revisit after real 3-4 player sessions surface the
+  pain.
 - **Reaction game parity on GUARANTEED_TARGET_BY_SEQ.** Doesn't really map to reaction — the countdown has a pre-committed timer window rather than a probabilistic target roll. But if reaction ever grows a similar "something must happen within X" contract, mirror it here.
 
 **Reaction-game LAST_STANDING** shipped separately — same rule as the image game, wired into the `ROUND_COUNTDOWN` early-press path. Receiver now renders a `<name> wins by default — everyone else locked out` event-log line on any `LAST_STANDING` broadcast (reaction + image).
