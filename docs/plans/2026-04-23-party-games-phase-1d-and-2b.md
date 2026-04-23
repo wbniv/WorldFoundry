@@ -108,15 +108,14 @@ Four iterations shipped today. Mobile + desktop tested via browser tabs; TV-path
 - **iter-2 (`ce1d4de`):** haptic + Web Audio feedback on the controller. Successful press = 40 ms vibrate + 880 Hz triangle blip. Lockout = descending two-tone sawtooth buzz + 3-pulse vibrate. Win = C-major arpeggio + celebratory haptic pattern. AudioContext lazily constructed on first user-gesture click (iOS Safari requires this to unlock audio).
 - **iter-3 (`bbabf44`):** live commit indicator on the TV during PLAY — pills appear in order as players commit (green ✓ = recorded, red ✗ = locked out), clears at next round start. Game side exposes this via a new `PRESS_RECORDED { roundId, playerId, name }` broadcast mirroring the existing `EARLY_PRESS`.
 - **iter-4 (`cf7b5e6`):** `touch-action: manipulation` on the controller body + big button kills the 300 ms double-tap-to-zoom delay that iOS Safari and some Android Chrome builds impose by default. Reaction game also broadcasts `PRESS_RECORDED` for protocol symmetry so a shared receiver indicator will work for both games in the future.
+- **iter-5 (`245a502`):** REVEAL countdown bar — target emoji now has a thin decaying progress bar underneath during the 3 s reveal. Commit indicator moved from inside the image-game's distractors panel up to a shared location below the stage, so it lights up for reaction-game rounds too (ROUND_COUNTDOWN handler resets the map symmetric with ROUND_REVEAL's existing reset).
+- **iter-6 (`8611f68`):** soft descending A4 → F4 triangle sigh on losing phones at GAME_OVER. No haptic — the visual overlay already signals the loss, so an extra buzz felt like piling on.
 
-Test count bumped 46 → 49 across runners (one new image-game test in iter-3, one new reaction-game test in iter-4).
+Test count 46 → 49 across runners (one new image-game test in iter-3, one new reaction-game test in iter-4; iter-5/6 are UI-only).
 
 Queued for future iterations:
 
-- **Round-end scoreboard animation.** Fade in new rankings; animate `+4 / +3 / +2 / +1` point-delta badges from the rank row into the running scoreboard.
-- **REVEAL drama.** A 3-2-1 countdown overlay or a decaying ring around the target emoji would cue "game starts NOW". Currently just a static emoji + "memorise" hint.
-- **Shared commit-indicator panel on receiver.** Right now the pills only render inside the image game's panel. Moving to a shared overlay would light up in reaction-game rounds too (iter-4 already sends `PRESS_RECORDED` for both games).
-- **Win/lose sound cue on losing phones.** Sonically, losing phones are silent. A soft "womp-womp" or just a muted closing chord would feel more complete.
+- **Round-end scoreboard animation.** Fade in new rankings; animate `+4 / +3 / +2 / +1` point-delta badges from the rank row into the running scoreboard. Biggest remaining polish item; benefits from being implemented while watching real round endings so the timing is right.
 
 ## Follow-up after Phase 1d unblocks
 
