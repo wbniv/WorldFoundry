@@ -31,6 +31,7 @@ let myId = null;
 let hostId = null;
 let phase = 'LOBBY';        // mirror of game phase, updated on PHASE broadcasts
 let lockedOutThisRound = false;
+let pressedThisRound = false;  // set after we fire BUTTON_PRESS so the UI commits optimistically even before the server acknowledges
 let players = new Map();    // id → name, updated from STATE broadcasts; used to render the end-of-game scoreboard overlay
 
 function refreshButton() {
@@ -56,13 +57,17 @@ function refreshButton() {
       btn.dataset.action = 'press';        // any press here is an early press on the server side
       break;
     case 'ROUND_OPEN':         // reaction game: GO! window (post-TIMER_FIRED)
-      btn.textContent = lockedOutThisRound ? 'LOCKED' : 'GO!';
-      btn.disabled = lockedOutThisRound;
+      btn.textContent = lockedOutThisRound ? 'LOCKED'
+                      : pressedThisRound   ? '✓'
+                      : 'GO!';
+      btn.disabled = lockedOutThisRound || pressedThisRound;
       btn.dataset.action = 'press';
       break;
     case 'PLAY':               // image game: stream running, press when you see target
-      btn.textContent = lockedOutThisRound ? 'LOCKED' : 'TAP!';
-      btn.disabled = lockedOutThisRound;
+      btn.textContent = lockedOutThisRound ? 'LOCKED'
+                      : pressedThisRound   ? '✓'
+                      : 'TAP!';
+      btn.disabled = lockedOutThisRound || pressedThisRound;
       btn.dataset.action = 'press';
       break;
     case 'ROUND_ENDED':
@@ -142,6 +147,7 @@ function handleMessage(ev) {
         // and REVEAL (image) are both the "entering a new round" phase.
         if (phase === 'ROUND_COUNTDOWN' || phase === 'REVEAL') {
           lockedOutThisRound = false;
+          pressedThisRound = false;
           feedbackRoundStart();
         }
         // Dismiss the end-of-game overlay as soon as we're out of GAME_OVER —
@@ -314,10 +320,16 @@ function feedbackRoundStart() {
 btn.addEventListener('click', () => {
   // Unlock/resume the AudioContext on any click (user-gesture requirement).
   ensureAudioCtx();
-  if (ws.readyState !== WebSocket.OPEN) return;
+  if (ws.readyState !== WebSocket.OPEN) {
+    // Surface the silent-fail case so DevTools console shows it.
+    console.warn('[click] ignored — ws.readyState=' + ws.readyState + ' action=' + btn.dataset.action);
+    return;
+  }
   const action = btn.dataset.action;
   if (action === 'press') {
     ws.send(JSON.stringify({ type: 'BUTTON_PRESS', clientTs: Date.now() }));
+    pressedThisRound = true;
+    refreshButton();          // flip button to ✓ + disabled immediately
     feedbackPress();
     btn.classList.add('flash');
     setTimeout(() => btn.classList.remove('flash'), 150);

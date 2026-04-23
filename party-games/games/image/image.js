@@ -272,6 +272,11 @@ function createImageGame(opts = {}) {
       case 'BUTTON_PRESS': {
         const r = state.round;
         if (!r) return;
+        // Server-side diagnostic: phase + whether target has been revealed yet.
+        // Helps explain to a player why their tap was accepted or locked out.
+        console.log(`[image] BUTTON_PRESS from ${player.name} (id=${player.id}) `
+          + `phase=${state.phase} targetShown=${r.targetFirstShownAt != null} `
+          + `alreadyPressed=${r.presses.has(player.id)} alreadyLocked=${r.lockedOut.has(player.id)}`);
         if (state.phase === 'REVEAL') {
           // Pressing before the stream starts → lockout for the round.
           if (r.lockedOut.has(player.id)) return;
