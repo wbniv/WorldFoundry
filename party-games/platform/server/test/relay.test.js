@@ -290,6 +290,124 @@ test('receiver with no room gets a server-generated code back in WELCOME_RECEIVE
   await close(recv.ws);
 }));
 
+test('session-id reconnect within grace: resumes same player id, WELCOME.resumed=true', withServer(async ({ base }) => {
+  const session = 'testsession12345';  // passes SESSION_ID_RE (8-64 [A-Za-z0-9_-])
+
+  const first = await openClient(base);
+  send(first.ws, { type: 'HELLO', role: 'controller', name: 'Alice', room: 'ABCD', sessionId: session });
+  const w1 = await first.waitFor(m => m.type === 'WELCOME');
+  assert.equal(w1.resumed, false);
+  assert.equal(w1.sessionId, session);
+  const originalId = w1.id;
+
+  // Disconnect first ws. Room holds the session in grace; open a second ws
+  // with the same sessionId and watch it resume.
+  await close(first.ws);
+
+  const second = await openClient(base);
+  send(second.ws, { type: 'HELLO', role: 'controller', name: 'Alice', room: 'ABCD', sessionId: session });
+  const w2 = await second.waitFor(m => m.type === 'WELCOME');
+  assert.equal(w2.id, originalId, 'same player id preserved across reconnect');
+  assert.equal(w2.resumed, true);
+  await close(second.ws);
+}));
+
+test('session-id reconnect: a DIFFERENT sessionId gets a fresh player id', withServer(async ({ base }) => {
+  const firstSession  = 'alice-session-aaa1';
+  const secondSession = 'alice-session-bbb2';
+
+  const first = await openClient(base);
+  send(first.ws, { type: 'HELLO', role: 'controller', name: 'Alice', room: 'ABCD', sessionId: firstSession });
+  const w1 = await first.waitFor(m => m.type === 'WELCOME');
+  await close(first.ws);
+
+  const second = await openClient(base);
+  send(second.ws, { type: 'HELLO', role: 'controller', name: 'Alice', room: 'ABCD', sessionId: secondSession });
+  const w2 = await second.waitFor(m => m.type === 'WELCOME');
+  assert.notEqual(w2.id, w1.id, 'different session → different player id');
+  assert.equal(w2.resumed, false);
+  await close(second.ws);
+}));
+
+test('session-id reconnect: missing sessionId falls back to old behavior (no resume)', withServer(async ({ base }) => {
+  // Keep a receiver attached so the room isn't destroyed when the controller
+  // disconnects — that way the second HELLO lands in the same room, and any
+  // session-based resume would be visible.
+  const recv = await openClient(base);
+  send(recv.ws, { type: 'HELLO', role: 'receiver', room: 'ABCD' });
+  await recv.waitFor(m => m.type === 'WELCOME_RECEIVER');
+
+  const first = await openClient(base);
+  send(first.ws, { type: 'HELLO', role: 'controller', name: 'Nomad', room: 'ABCD' });
+  const w1 = await first.waitFor(m => m.type === 'WELCOME');
+  assert.equal(w1.sessionId, null);
+  assert.equal(w1.resumed, false);
+  await close(first.ws);
+  await recv.waitFor(m => m.type === 'STATE' && m.players.length === 0);
+
+  const second = await openClient(base);
+  send(second.ws, { type: 'HELLO', role: 'controller', name: 'Nomad', room: 'ABCD' });
+  const w2 = await second.waitFor(m => m.type === 'WELCOME');
+  assert.equal(w2.resumed, false, 'no session → server cannot resume, always treated as fresh');
+  assert.notEqual(w2.id, w1.id, 'with room preserved, new player gets a fresh id (nextPlayerId advances)');
+  await close(second.ws); await close(recv.ws);
+}));
+
+test('after grace expires, session slot is released and reconnect is treated as fresh', async () => {
+  // Short grace so the test runs fast; receiver attached keeps room alive
+  // across the grace expiry so we can observe the id advance (without a
+  // receiver the room would destroy itself and nextPlayerId would reset).
+  const srv = await createServer({ port: 0, quiet: true, sessionGraceMs: 50 });
+  const base = `ws://localhost:${srv.port}/ws`;
+  try {
+    const recv = await openClient(base);
+    send(recv.ws, { type: 'HELLO', role: 'receiver', room: 'ABCD' });
+    await recv.waitFor(m => m.type === 'WELCOME_RECEIVER');
+
+    const session = 'short-grace-sess';
+    const first = await openClient(base);
+    send(first.ws, { type: 'HELLO', role: 'controller', name: 'Ghost', room: 'ABCD', sessionId: session });
+    const w1 = await first.waitFor(m => m.type === 'WELCOME');
+    await recv.waitFor(m => m.type === 'STATE' && m.players.length === 1);
+    const sinceIndex = recv.messages.length;
+    await close(first.ws);
+    // Wait past grace → finalizePlayerLeave fires → STATE with players=[].
+    await recv.waitFor(
+      m => m.type === 'STATE' && m.players.length === 0,
+      { sinceIndex, timeoutMs: 1000 },
+    );
+
+    const second = await openClient(base);
+    send(second.ws, { type: 'HELLO', role: 'controller', name: 'Ghost', room: 'ABCD', sessionId: session });
+    const w2 = await second.waitFor(m => m.type === 'WELCOME');
+    assert.equal(w2.resumed, false, 'grace expired → server treats reconnect as fresh');
+    assert.notEqual(w2.id, w1.id, 'fresh id allocated (nextPlayerId advanced)');
+    await close(second.ws); await close(recv.ws);
+  } finally { await srv.close(); }
+});
+
+test('grace window keeps the room alive even after all sockets drop', withServer(async ({ base, rooms }) => {
+  const session = 'grace-test-session1';
+  const first = await openClient(base);
+  send(first.ws, { type: 'HELLO', role: 'controller', name: 'Solo', room: 'ABCD', sessionId: session });
+  await first.waitFor(m => m.type === 'WELCOME');
+  assert.equal(rooms.size, 1, 'room present');
+
+  await close(first.ws);
+  // Even though we were the only occupant, the grace window should keep the
+  // room alive. (Real SESSION_GRACE_MS is 20 s; we only need ~50 ms here to
+  // observe the immediate-post-close state.)
+  await new Promise(r => setTimeout(r, 50));
+  assert.equal(rooms.size, 1, 'room still present during grace');
+
+  // Reconnect resumes the same slot — confirms the room really was preserved.
+  const second = await openClient(base);
+  send(second.ws, { type: 'HELLO', role: 'controller', name: 'Solo', room: 'ABCD', sessionId: session });
+  const w2 = await second.waitFor(m => m.type === 'WELCOME');
+  assert.equal(w2.resumed, true);
+  await close(second.ws);
+}));
+
 test('static file routing — index + sibling assets + 404', withServer(async ({ port }) => {
   const fetch = (path) => new Promise((resolve, reject) => {
     http.get(`http://localhost:${port}${path}`, (res) => {

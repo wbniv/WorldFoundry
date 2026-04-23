@@ -1,14 +1,29 @@
-// Controller — Phase 2a. Reaction-game aware:
-//   - Cast Sender SDK to launch the receiver onto a TV (same as Phase 1c)
-//   - Host-only "Start Game" button when in LOBBY / GAME_OVER
-//   - PING button becomes the reaction-game BIG BUTTON during ROUND_COUNTDOWN /
-//     ROUND_OPEN, forwarded to the server as BUTTON_PRESS with clientTs.
+// Controller shell — platform-only (Phase 5 seam).
+//
+// Everything game-specific lives in a per-game module at
+// games/<WF_GAME>/client/controller.js, loaded on demand via dynamic
+// import from /game/client/controller.js. The shell's job:
+//
+//   - Open and auto-reconnect the WebSocket
+//   - Handle HELLO / WELCOME / STATE / PONG / NEED_ROOM / BAD_ROOM
+//   - Show the room-code entry gate if ?room= isn't in the URL
+//   - Track player identity + host and expose them through ctx
+//   - Boot Cast Sender so the user can launch the receiver on a TV
+//   - Surface an AudioContext + reusable haptic/audio feedback helpers
+//   - Pass every non-platform message through to the game via ctx.on
+//
+// The shell never touches the game's DOM inside <div id="game-root">;
+// the game module owns that tree from mount() to unmount().
 
 // Party Games Platform (dev) = 071CDEDD (Cast Console). CC1AD845 = Default
 // Media Receiver (every Chromecast supports it). Append ?castAppId=<id> to
 // the URL to override — used during device-registration diagnostic.
 const CAST_APPLICATION_ID =
   new URLSearchParams(location.search).get('castAppId') || '071CDEDD';
+
+const PLATFORM_RESERVED_TYPES = new Set([
+  'WELCOME', 'WELCOME_RECEIVER', 'STATE', 'PONG', 'NEED_ROOM', 'BAD_ROOM',
+]);
 
 // ───── URL + state ─────────────────────────────────────────────────────────
 
@@ -18,71 +33,119 @@ const name = (params.get('name') || `Player ${Math.floor(Math.random() * 900 + 1
 // show the room-gate overlay and wait for the user to enter one.
 let roomCode = (params.get('room') || '').toUpperCase();
 
+// Per-tab session id: survives reload (sessionStorage), dies with the tab.
+// Server keeps the player's slot + scores alive for ~20 s after the WS drops;
+// a reconnect HELLO carrying the same sessionId resumes that slot. Closing
+// the tab and opening a fresh one gets a new id — intentional, a user who
+// genuinely walked away shouldn't keep holding a scoreboard seat.
+const SESSION_KEY = 'party-games-session';
+let sessionId = null;
+try {
+  sessionId = sessionStorage.getItem(SESSION_KEY);
+} catch { /* private-browsing / disabled storage — fall through */ }
+if (!sessionId || !/^[A-Za-z0-9_-]{8,64}$/.test(sessionId)) {
+  sessionId = generateSessionId();
+  try { sessionStorage.setItem(SESSION_KEY, sessionId); } catch { /* ignore */ }
+}
+function generateSessionId() {
+  const bytes = new Uint8Array(18);   // 24 chars of base64url
+  crypto.getRandomValues(bytes);
+  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+const gameNameMeta = document.querySelector('meta[name="game-name"]');
+const gameName = (gameNameMeta && gameNameMeta.content) ? gameNameMeta.content : null;
+
 const statusEl      = document.getElementById('status');
 const nameEl        = document.getElementById('name');
-const btn           = document.getElementById('ping');
 const castStateEl   = document.getElementById('cast-state');
-const outcomeEl         = document.getElementById('outcome');
-const outcomeHeadlineEl = document.getElementById('outcome-headline');
-const outcomeSublineEl  = document.getElementById('outcome-subline');
-const outcomeScoreEl    = document.getElementById('outcome-scoreboard');
-const confettiEl        = document.getElementById('confetti');
+const gameRoot      = document.getElementById('game-root');
 
 nameEl.textContent = `Hi, ${name}.`;
 
 let myId = null;
 let hostId = null;
-let phase = 'LOBBY';        // mirror of game phase, updated on PHASE broadcasts
-let lockedOutThisRound = false;
-let pressedThisRound = false;  // set after we fire BUTTON_PRESS so the UI commits optimistically even before the server acknowledges
-let players = new Map();    // id → name, updated from STATE broadcasts; used to render the end-of-game scoreboard overlay
+let playersById = new Map();  // id → name, mirror of STATE broadcasts for ctx.players()
 
-function refreshButton() {
-  // Button label + behaviour depend on game phase.
-  btn.classList.remove('flash');
-  switch (phase) {
-    case 'LOBBY':
-    case 'GAME_OVER':
-      if (myId != null && myId === hostId) {
-        btn.textContent = phase === 'GAME_OVER' ? 'NEW GAME' : 'START';
-        btn.disabled = false;
-        btn.dataset.action = phase === 'GAME_OVER' ? 'new-game' : 'start-game';
-      } else {
-        btn.textContent = myId === hostId ? 'START' : 'WAIT';
-        btn.disabled = true;
-        btn.dataset.action = 'idle';
-      }
-      break;
-    case 'ROUND_COUNTDOWN':    // reaction game: countdown bar running
-    case 'REVEAL':             // image game: memorise the target
-      btn.textContent = 'WAIT';
-      btn.disabled = lockedOutThisRound;   // stays tappable before lockout — so an early press CAN happen
-      btn.dataset.action = 'press';        // any press here is an early press on the server side
-      break;
-    case 'ROUND_OPEN':         // reaction game: GO! window (post-TIMER_FIRED)
-      btn.textContent = lockedOutThisRound ? 'LOCKED'
-                      : pressedThisRound   ? '✓'
-                      : 'GO!';
-      btn.disabled = lockedOutThisRound || pressedThisRound;
-      btn.dataset.action = 'press';
-      break;
-    case 'PLAY':               // image game: stream running, press when you see target
-      btn.textContent = lockedOutThisRound ? 'LOCKED'
-                      : pressedThisRound   ? '✓'
-                      : 'TAP!';
-      btn.disabled = lockedOutThisRound || pressedThisRound;
-      btn.dataset.action = 'press';
-      break;
-    case 'ROUND_ENDED':
-      btn.textContent = '···';
-      btn.disabled = true;
-      btn.dataset.action = 'idle';
-      break;
-    default:
-      btn.textContent = '···';
-      btn.disabled = true;
-      btn.dataset.action = 'idle';
+// Subscribers registered by the game via ctx.on(type, handler)
+const gameSubscribers = new Map();  // type → Set<handler>
+
+let gameModule = null;
+let mounted = false;
+
+// ───── game module loading ─────────────────────────────────────────────────
+// Dynamic import keeps the shell decoupled from game-specific code. If the
+// game has no client (server-only during development), mount() simply never
+// runs; the shell is still useful as a WS + room-gate harness.
+
+async function loadGameModule() {
+  if (gameModule || !gameName) return;
+  try {
+    gameModule = await import(`/game/client/controller.js?g=${encodeURIComponent(gameName)}`);
+  } catch (e) {
+    console.warn(`[shell] failed to load /game/client/controller.js for '${gameName}':`, e.message);
+    gameRoot.innerHTML =
+      `<p class="shell-error">game UI missing for '<code>${escapeHtml(gameName)}</code>' — ` +
+      `expected <code>games/${escapeHtml(gameName)}/client/controller.js</code></p>`;
   }
+}
+
+function mountGame() {
+  if (!gameModule || mounted) return;
+  if (typeof gameModule.mount !== 'function') {
+    console.warn('[shell] game module has no mount() export');
+    return;
+  }
+  try {
+    gameModule.mount(buildCtx());
+    mounted = true;
+  } catch (e) {
+    console.error('[shell] game mount() threw:', e);
+  }
+}
+
+function unmountGame() {
+  if (!mounted) return;
+  mounted = false;
+  gameSubscribers.clear();
+  if (gameModule && typeof gameModule.unmount === 'function') {
+    try { gameModule.unmount(); } catch (e) { console.error('[shell] game unmount() threw:', e); }
+  }
+  gameRoot.innerHTML = '';
+}
+
+function buildCtx() {
+  return {
+    root: gameRoot,
+    send: (msg) => {
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        console.warn('[shell] send ignored — ws not open (type=' + (msg && msg.type) + ')');
+        return;
+      }
+      ws.send(JSON.stringify(msg));
+    },
+    on: (type, handler) => {
+      if (!gameSubscribers.has(type)) gameSubscribers.set(type, new Set());
+      gameSubscribers.get(type).add(handler);
+      return () => {
+        const set = gameSubscribers.get(type);
+        if (set) set.delete(handler);
+      };
+    },
+    get playerId() { return myId; },
+    isHost: () => myId != null && myId === hostId,
+    players: () => [...playersById.entries()].map(([id, nm]) => ({ id, name: nm })),
+    feedback: {
+      press:       feedbackPress,
+      lockout:     feedbackLockout,
+      win:         feedbackWin,
+      lose:        feedbackLose,
+      roundStart:  feedbackRoundStart,
+    },
+    assetUrl: (asset) => `/game/assets/${asset}`,
+    log: () => {},   // receiver-side log; no-op on controller
+    ensureAudio: ensureAudioCtx,
+  };
 }
 
 // ───── WebSocket ───────────────────────────────────────────────────────────
@@ -100,22 +163,26 @@ let reconnectTimer = null;
 function connect() {
   if (!roomCode) return;    // wait for room-gate submission
   if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+  // Don't unmount up-front — if the server resumes our session (WELCOME
+  // carries resumed:true + same id), the game module's in-memory state is
+  // still the right state for the current round and its subscribers should
+  // keep serving the new ws via the stable ctx.send closure.
   statusEl.textContent = reconnectAttempt > 0 ? `reconnecting (attempt ${reconnectAttempt})…` : 'connecting…';
   ws = new WebSocket(wsUrl);
 
   ws.addEventListener('open', () => {
     reconnectAttempt = 0;
-    // Re-identify; on reconnect the server will issue a new player id (scores
-    // for any in-progress round are forfeit — acceptable trade for a usable
-    // controller after a transient drop).
-    ws.send(JSON.stringify({ type: 'HELLO', role: 'controller', name, room: roomCode }));
+    ws.send(JSON.stringify({
+      type: 'HELLO',
+      role: 'controller',
+      name,
+      room: roomCode,
+      sessionId,
+    }));
   });
 
   ws.addEventListener('close', () => {
     statusEl.textContent = 'disconnected';
-    btn.textContent = '↻';       // rotating-reconnect hint; refreshButton() will re-skin once WELCOME lands
-    btn.disabled = true;
-    btn.dataset.action = 'idle';
     // Exponential backoff capped at ~8 s so a recovered device reconnects fast.
     const delay = Math.min(8_000, 500 * (2 ** reconnectAttempt));
     reconnectAttempt++;
@@ -126,53 +193,52 @@ function connect() {
   ws.addEventListener('message', handleMessage);
 }
 
-function handleMessage(ev) {
+async function handleMessage(ev) {
   let msg;
   try { msg = JSON.parse(ev.data); } catch { return; }
+  if (!msg || typeof msg.type !== 'string') return;
 
   switch (msg.type) {
     case 'WELCOME':
+      // Fresh session → unmount any stale game tree before remounting with
+      // the new identity. Session resume → the game module is already
+      // mounted and holding the right state for the round in progress; just
+      // refresh myId/hostId and let the existing subscribers continue.
+      if (!msg.resumed && mounted) unmountGame();
       myId = msg.id;
       hostId = msg.hostId;
-      statusEl.textContent = `connected · id=${myId}`;
-      refreshButton();
+      statusEl.textContent = msg.resumed
+        ? `reconnected · id=${myId}`
+        : `connected · id=${myId}`;
+      if (!msg.resumed) {
+        await loadGameModule();
+        mountGame();
+      }
       break;
     case 'STATE':
       hostId = msg.hostId;
-      // Rebuild the id→name map so the end-of-game scoreboard can label rows.
-      players = new Map((msg.players || []).map((p) => [p.id, p.name]));
-      refreshButton();
+      playersById = new Map((msg.players || []).map((p) => [p.id, p.name]));
       break;
-    case 'PHASE':
-      if (phase !== msg.phase) {
-        const wasGameOver = phase === 'GAME_OVER';
-        phase = msg.phase;
-        // Reset lockout at the top of any fresh round. ROUND_COUNTDOWN (reaction)
-        // and REVEAL (image) are both the "entering a new round" phase.
-        if (phase === 'ROUND_COUNTDOWN' || phase === 'REVEAL') {
-          lockedOutThisRound = false;
-          pressedThisRound = false;
-          feedbackRoundStart();
-        }
-        // Dismiss the end-of-game overlay as soon as we're out of GAME_OVER —
-        // typically the host tapping NEW_GAME triggers PHASE=LOBBY.
-        if (wasGameOver && phase !== 'GAME_OVER') hideOutcome();
-        refreshButton();
-      }
+    case 'NEED_ROOM':
+    case 'BAD_ROOM':
+      // The room-gate UI already handles re-prompting; surface the state.
+      statusEl.textContent = msg.type === 'NEED_ROOM' ? 'needs a room code' : 'bad room code';
       break;
-    case 'GAME_OVER':
-      showOutcome(msg);
+    case 'PONG':
+      // Platform-level echo — games that want latency diagnostics can PING
+      // via ctx.send; the response is also offered through gameSubscribers.
       break;
-    case 'EARLY_PRESS':
-      if (msg.playerId === myId) {
-        lockedOutThisRound = true;
-        feedbackLockout();
-        refreshButton();
-      }
-      break;
-    case 'ROUND_ENDED':
-      lockedOutThisRound = false;
-      break;
+  }
+
+  // Deliver every message (including platform ones) to any game subscribers
+  // that explicitly asked for that type. STATE and WELCOME are commonly
+  // useful for games that want to keep their own player list, so don't hide
+  // them — games subscribe deliberately.
+  const subs = gameSubscribers.get(msg.type);
+  if (subs) {
+    for (const handler of subs) {
+      try { handler(msg); } catch (e) { console.error(`[shell] game handler for ${msg.type} threw:`, e); }
+    }
   }
 }
 
@@ -218,68 +284,11 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-// ───── end-of-game overlay ─────────────────────────────────────────────────
-
-function showOutcome(gameOver) {
-  const isWinner = gameOver.winnerId === myId;
-  outcomeEl.classList.toggle('win',  isWinner);
-  outcomeEl.classList.toggle('lose', !isWinner);
-
-  if (isWinner) {
-    outcomeHeadlineEl.textContent = 'YOU WIN';
-    outcomeSublineEl.textContent = 'First to 10 points. Nicely done.';
-    spawnConfetti();
-    confettiEl.hidden = false;
-    feedbackWin();
-  } else {
-    outcomeHeadlineEl.textContent = 'Game over';
-    const winnerName = gameOver.name || 'someone';
-    outcomeSublineEl.textContent = `${winnerName} won this round.`;
-    confettiEl.hidden = true;
-    confettiEl.innerHTML = '';
-    feedbackLose();
-  }
-
-  // Build scoreboard: highest to lowest, highlight winner and self.
-  outcomeScoreEl.innerHTML = '';
-  const rows = Object.entries(gameOver.scores || {})
-    .map(([id, pts]) => ({ id: Number(id), pts, name: players.get(Number(id)) || `Player ${id}` }))
-    .sort((a, b) => b.pts - a.pts);
-  for (const r of rows) {
-    const li = document.createElement('li');
-    if (r.id === gameOver.winnerId) li.classList.add('winner');
-    if (r.id === myId) li.classList.add('me');
-    const nameSpan = document.createElement('span');
-    nameSpan.textContent = r.name + (r.id === myId ? ' (you)' : '');
-    const ptsSpan = document.createElement('span');
-    ptsSpan.textContent = `${r.pts} pt${r.pts === 1 ? '' : 's'}`;
-    li.appendChild(nameSpan);
-    li.appendChild(ptsSpan);
-    outcomeScoreEl.appendChild(li);
-  }
-
-  outcomeEl.hidden = false;
-}
-
-function hideOutcome() {
-  outcomeEl.hidden = true;
-  confettiEl.hidden = true;
-  confettiEl.innerHTML = '';
-}
-
-function spawnConfetti() {
-  const pieces = ['🎉', '🎊', '⭐', '✨', '🏆', '🥇'];
-  confettiEl.innerHTML = '';
-  const N = 28;
-  for (let i = 0; i < N; i++) {
-    const s = document.createElement('span');
-    s.textContent = pieces[Math.floor(Math.random() * pieces.length)];
-    s.style.left = `${Math.random() * 100}%`;
-    s.style.animationDuration = `${2.5 + Math.random() * 2.5}s`;
-    s.style.animationDelay = `${Math.random() * 1.2}s`;
-    confettiEl.appendChild(s);
-  }
-}
+// A first click on the page is also our AudioContext unlock gesture —
+// games that use ctx.feedback will have their audio silently blocked
+// otherwise. Done at the shell level because the gesture requirement is
+// browser policy, not game-specific.
+document.addEventListener('click', () => { ensureAudioCtx(); }, { capture: true });
 
 // ───── haptic + audio feedback ─────────────────────────────────────────────
 // Two light cues: a confirming click on a successful press, a lower buzz on
@@ -341,38 +350,11 @@ function feedbackLose() {
   setTimeout(() => playBlip({ freq: 349, durMs: 320, kind: 'triangle' }), 180);
 }
 function feedbackRoundStart() {
-  // Short ascending two-note "get ready" on each ROUND_REVEAL. Subtle enough
-  // not to be distracting across rounds but distinct from the press/lockout
-  // tones. Intentionally does NOT play on target-appearance during PLAY —
-  // that would turn the game into an audio-reaction contest.
+  // Short ascending two-note "get ready". Subtle enough not to be distracting
+  // across rounds but distinct from the press/lockout tones.
   playBlip({ freq: 587, durMs: 100, kind: 'sine' });
   setTimeout(() => playBlip({ freq: 784, durMs: 140, kind: 'sine' }), 110);
 }
-
-// ───── button handler ──────────────────────────────────────────────────────
-
-btn.addEventListener('click', () => {
-  // Unlock/resume the AudioContext on any click (user-gesture requirement).
-  ensureAudioCtx();
-  if (ws.readyState !== WebSocket.OPEN) {
-    // Surface the silent-fail case so DevTools console shows it.
-    console.warn('[click] ignored — ws.readyState=' + ws.readyState + ' action=' + btn.dataset.action);
-    return;
-  }
-  const action = btn.dataset.action;
-  if (action === 'press') {
-    ws.send(JSON.stringify({ type: 'BUTTON_PRESS', clientTs: Date.now() }));
-    pressedThisRound = true;
-    refreshButton();          // flip button to ✓ + disabled immediately
-    feedbackPress();
-    btn.classList.add('flash');
-    setTimeout(() => btn.classList.remove('flash'), 150);
-  } else if (action === 'start-game') {
-    ws.send(JSON.stringify({ type: 'START_GAME' }));
-  } else if (action === 'new-game') {
-    ws.send(JSON.stringify({ type: 'NEW_GAME' }));
-  }
-});
 
 // ───── Cast Sender ──────────────────────────────────────────────────────────
 
@@ -439,4 +421,10 @@ function initCastContext() {
 function setCastState(text, cls) {
   castStateEl.textContent = text;
   castStateEl.dataset.state = cls;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (ch) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[ch]);
 }

@@ -3,9 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="game-name" content="{{GAME_NAME}}">
   <title>Party Games · Receiver</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%F0%9F%8E%B2%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="receiver.css">
+  {{GAME_STYLESHEET}}
   <script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
 </head>
 <body>
@@ -19,53 +21,15 @@
       </p>
     </header>
     <section id="stage">
-      <!-- The stage swaps content based on game phase. -->
-      <div id="lobby" class="stage-panel" hidden>
-        <h2>Players</h2>
-        <ul id="player-list"><li class="empty">(no players yet)</li></ul>
-        <p class="hint">Host: tap <strong>START</strong> on your phone once everyone has joined.</p>
-      </div>
-      <div id="countdown" class="stage-panel" hidden>
-        <p class="phase-label">ROUND <span id="round-num"></span></p>
-        <div id="countdown-bar"><div id="countdown-fill"></div></div>
-        <p class="hint">Wait for <strong>GO</strong> · don't tap early!</p>
-      </div>
-      <div id="open" class="stage-panel" hidden>
-        <p id="go" class="go-word">GO!</p>
-      </div>
-      <!-- Image-recognition game panels (mini-game 2). -->
-      <div id="reveal" class="stage-panel" hidden>
-        <p class="phase-label">Memorise the target</p>
-        <div id="reveal-image" class="image-display"></div>
-        <!-- Shrinks over showMs so players see the reveal window draining. -->
-        <div id="reveal-bar" class="reveal-bar"><div id="reveal-bar-fill"></div></div>
-        <p class="hint">spot it when it comes back</p>
-      </div>
-      <div id="distractors" class="stage-panel" hidden>
-        <p class="phase-label">Round <span id="dist-round-num"></span></p>
-        <div id="distractor-image" class="image-display image-flash"></div>
-      </div>
-      <div id="ended" class="stage-panel" hidden>
-        <h2>Round <span id="ended-round-num"></span> results</h2>
-        <ol id="round-ranks"></ol>
-        <h3>Scoreboard</h3>
-        <ul id="scoreboard"></ul>
-      </div>
-      <div id="gameover" class="stage-panel" hidden>
-        <p class="phase-label">GAME OVER</p>
-        <p class="winner">🏆 <span id="winner-name"></span> wins!</p>
-        <ol id="final-scoreboard" class="final-scoreboard"></ol>
-      </div>
+      <!-- Game-owned region. Games build their entire receiver UI inside this
+           container via mount(ctx). The shell owns nothing below this line. -->
+      <div id="game-root" class="game-root"></div>
     </section>
-    <!-- Live commit indicator, outside the stage panels so it's visible in all
-         round phases (REVEAL / PLAY / ROUND_COUNTDOWN / ROUND_OPEN / ROUND_ENDED)
-         across both games. Auto-hidden when no commits have landed. -->
-    <ul id="commit-indicator" class="commit-indicator"></ul>
     <section id="log">
       <h2>Events</h2>
       <ol id="event-log"></ol>
     </section>
   </div>
-  <script src="receiver.js"></script>
+  <script type="module" src="receiver.js"></script>
 </body>
 </html>

@@ -1,10 +1,27 @@
-// Receiver shell — Phase 2a. Reaction-game aware. Runs on both Chromecast and
-// in a plain browser tab (the dev loop).
+// Receiver shell — platform-only (Phase 5 seam).
+//
+// Runs on both Chromecast and in a plain browser tab (the dev loop). Like
+// the controller shell, it delegates all game-specific rendering to a
+// per-game module at games/<WF_GAME>/client/receiver.js loaded dynamically
+// from /game/client/receiver.js.
+//
+// Shell responsibilities:
+//   - Open the WebSocket and identify as receiver
+//   - Render the room-code chip and mirror it into the URL
+//   - Track player roster + host (for games that want them via ctx.players())
+//   - Boot CAF on actual Cast devices (skip in browser; CAF retries forever)
+//   - Maintain the event log at the bottom of the page
+//   - Dispatch non-platform messages to game subscribers
+//
+// Everything under <div id="game-root"> belongs to the game module.
 
-const statusEl       = document.getElementById('status');
-const roomCodeEl     = document.getElementById('room-code');
-const playerListEl   = document.getElementById('player-list');
-const eventLogEl     = document.getElementById('event-log');
+const statusEl     = document.getElementById('status');
+const roomCodeEl   = document.getElementById('room-code');
+const eventLogEl   = document.getElementById('event-log');
+const gameRoot     = document.getElementById('game-root');
+
+const gameNameMeta = document.querySelector('meta[name="game-name"]');
+const gameName = (gameNameMeta && gameNameMeta.content) ? gameNameMeta.content : null;
 
 // Room code: from URL ?room=ABCD, else server assigns on HELLO and we fill
 // this in from the WELCOME_RECEIVER response. URL is rewritten on assign so
@@ -13,37 +30,14 @@ const urlParams = new URLSearchParams(location.search);
 let roomCode = (urlParams.get('room') || '').toUpperCase();
 if (roomCode) roomCodeEl.textContent = roomCode;
 
-const panels = {
-  // shared
-  LOBBY:           document.getElementById('lobby'),
-  ROUND_ENDED:     document.getElementById('ended'),
-  GAME_OVER:       document.getElementById('gameover'),
-  // reaction (mini-game 1)
-  ROUND_COUNTDOWN: document.getElementById('countdown'),
-  ROUND_OPEN:      document.getElementById('open'),
-  // image-recognition (mini-game 2): REVEAL shows the memorisation target;
-  // PLAY is the uniform-random image stream (#distractors holds its element
-  // for historical id reasons — the target now appears randomly within it).
-  REVEAL:          document.getElementById('reveal'),
-  PLAY:            document.getElementById('distractors'),
-};
-const countdownFillEl = document.getElementById('countdown-fill');
-const roundNumEl      = document.getElementById('round-num');
-const endedRoundNumEl = document.getElementById('ended-round-num');
-const roundRanksEl    = document.getElementById('round-ranks');
-const scoreboardEl    = document.getElementById('scoreboard');
-const winnerNameEl    = document.getElementById('winner-name');
-const finalScoreEl    = document.getElementById('final-scoreboard');
-const revealImageEl     = document.getElementById('reveal-image');
-const revealBarFillEl   = document.getElementById('reveal-bar-fill');
-const distractorImageEl = document.getElementById('distractor-image');
-const distRoundNumEl    = document.getElementById('dist-round-num');
-const commitIndicatorEl = document.getElementById('commit-indicator');
-const commits = new Map();  // playerId → 'pressed' | 'lockedOut' for the current round
-let lastScores = {};        // id → pts last seen, so renderScoreboard can highlight changed rows
+let currentPlayers = [];
+let currentHostId = null;
 
-// Default panel
-showPanel('LOBBY');
+// Subscribers registered by the game via ctx.on(type, handler)
+const gameSubscribers = new Map();  // type → Set<handler>
+
+let gameModule = null;
+let mounted = false;
 
 // ───── CAF boot ────────────────────────────────────────────────────────────
 // Only initialise CAF when we're actually running on a Cast device. In a
@@ -75,6 +69,74 @@ if (looksLikeCastDevice && typeof cast !== 'undefined' && cast.framework) {
   }
 }
 
+// ───── game module loading ─────────────────────────────────────────────────
+
+async function loadGameModule() {
+  if (gameModule || !gameName) return;
+  try {
+    gameModule = await import(`/game/client/receiver.js?g=${encodeURIComponent(gameName)}`);
+  } catch (e) {
+    console.warn(`[shell] failed to load /game/client/receiver.js for '${gameName}':`, e.message);
+    gameRoot.innerHTML =
+      `<p class="shell-error">game UI missing for '<code>${escapeHtml(gameName)}</code>' — ` +
+      `expected <code>games/${escapeHtml(gameName)}/client/receiver.js</code></p>`;
+  }
+}
+
+function mountGame() {
+  if (!gameModule || mounted) return;
+  if (typeof gameModule.mount !== 'function') {
+    console.warn('[shell] game module has no mount() export');
+    return;
+  }
+  try {
+    gameModule.mount(buildCtx());
+    mounted = true;
+  } catch (e) {
+    console.error('[shell] game mount() threw:', e);
+  }
+}
+
+function unmountGame() {
+  if (!mounted) return;
+  mounted = false;
+  gameSubscribers.clear();
+  if (gameModule && typeof gameModule.unmount === 'function') {
+    try { gameModule.unmount(); } catch (e) { console.error('[shell] game unmount() threw:', e); }
+  }
+  gameRoot.innerHTML = '';
+}
+
+function buildCtx() {
+  return {
+    root: gameRoot,
+    send: (msg) => {
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        console.warn('[shell] send ignored — ws not open (type=' + (msg && msg.type) + ')');
+        return;
+      }
+      ws.send(JSON.stringify(msg));
+    },
+    on: (type, handler) => {
+      if (!gameSubscribers.has(type)) gameSubscribers.set(type, new Set());
+      gameSubscribers.get(type).add(handler);
+      return () => {
+        const set = gameSubscribers.get(type);
+        if (set) set.delete(handler);
+      };
+    },
+    get playerId() { return null; },   // receivers aren't players
+    isHost: () => false,
+    players: () => currentPlayers.map((p) => ({ id: p.id, name: p.name })),
+    hostId: () => currentHostId,
+    feedback: { press: noop, lockout: noop, win: noop, lose: noop, roundStart: noop },
+    assetUrl: (asset) => `/game/assets/${asset}`,
+    log: pushLog,
+  };
+}
+
+function noop() {}
+
 // ───── WebSocket ───────────────────────────────────────────────────────────
 
 const wsUrl = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws';
@@ -84,16 +146,14 @@ ws.addEventListener('open', () => {
   ws.send(JSON.stringify({ type: 'HELLO', role: 'receiver', room: roomCode || undefined }));
   refreshStatus(isCastContext ? 'cast + server connected' + castSessionDetail : 'server connected (browser)');
 });
-ws.addEventListener('close', () => refreshStatus('disconnected'));
+ws.addEventListener('close', () => { unmountGame(); refreshStatus('disconnected'); });
 ws.addEventListener('error', (e) => console.warn('[ws] error', e));
 
-ws.addEventListener('message', (ev) => {
+ws.addEventListener('message', async (ev) => {
   let msg;
   try { msg = JSON.parse(ev.data); } catch { return; }
-  handle(msg);
-});
+  if (!msg || typeof msg.type !== 'string') return;
 
-function handle(msg) {
   switch (msg.type) {
     case 'WELCOME_RECEIVER':
       roomCode = msg.room;
@@ -104,264 +164,28 @@ function handle(msg) {
         const newUrl = location.pathname + '?' + urlParams.toString() + location.hash;
         history.replaceState(null, '', newUrl);
       }
+      await loadGameModule();
+      mountGame();
       break;
 
     case 'STATE':
       logPlayerDiff(currentPlayers, msg.players || []);
-      renderPlayers(msg.players, msg.hostId);
-      break;
-
-    case 'PHASE':
-      showPanel(msg.phase);
-      if (msg.phase === 'LOBBY') renderPlayers(currentPlayers, currentHostId);
-      break;
-
-    case 'ROUND_COUNTDOWN':
-      roundNumEl.textContent = msg.roundId;
-      startCountdownAnimation(msg.showMs);
-      showPanel('ROUND_COUNTDOWN');
-      // Clear last round's commit pills — the reaction game counterpart of
-      // the ROUND_REVEAL reset used by the image game.
-      commits.clear();
-      renderCommits();
-      break;
-
-    case 'TIMER_FIRED':
-      stopCountdownAnimation();
-      showPanel('ROUND_OPEN');
-      break;
-
-    case 'ROUND_REVEAL':
-      // Target reveal for memorisation: show for showMs, then clear for clearMs.
-      // Phase is already REVEAL; this drives the image sub-animation.
-      revealImageEl.textContent = msg.targetId;
-      revealImageEl.classList.remove('cleared');
-      distRoundNumEl.textContent = msg.roundId;
-      startRevealBar(msg.showMs);
-      setTimeout(() => { revealImageEl.classList.add('cleared'); }, msg.showMs);
-      // Fresh round — clear last round's commit pills.
-      commits.clear();
-      renderCommits();
-      break;
-
-    case 'PRESS_RECORDED':
-      commits.set(msg.playerId, { name: msg.name, kind: 'pressed' });
-      renderCommits();
-      break;
-
-    case 'SHOW_IMAGE':
-      // Always update the cycling image — stream keeps running through TARGET
-      // phase (target + post-target distractors) until the scoring window
-      // closes. Intentionally don't add a special highlight for isTarget: the
-      // game is about recognising the target from the REVEAL memorisation,
-      // and flagging it on screen would be cheating.
-      distractorImageEl.classList.remove('image-flash');
-      void distractorImageEl.offsetWidth;  // force reflow so the animation restarts
-      distractorImageEl.textContent = msg.imageId;
-      distractorImageEl.classList.add('image-flash');
-      break;
-
-    case 'EARLY_PRESS':
-      pushLog(`early press · ${msg.name} locked out`);
-      commits.set(msg.playerId, { name: msg.name, kind: 'lockedOut' });
-      renderCommits();
-      break;
-
-    case 'LAST_STANDING':
-      pushLog(`${msg.name} wins by default — everyone else locked out`);
-      break;
-
-    case 'ROUND_ENDED':
-      endedRoundNumEl.textContent = msg.roundId;
-      renderRanks(msg.ranks);
-      renderScoreboard(msg.scores, scoreboardEl);
-      showPanel('ROUND_ENDED');
-      break;
-
-    case 'GAME_OVER':
-      winnerNameEl.textContent = msg.name;
-      renderFinalScoreboard(msg.scores, msg.winnerId, finalScoreEl);
-      showPanel('GAME_OVER');
-      break;
-
-    case 'PONG':
-      pushLog(`PONG from ${msg.name}`);
+      currentPlayers = msg.players || [];
+      currentHostId  = msg.hostId ?? null;
       break;
   }
-}
 
-// ───── rendering helpers ───────────────────────────────────────────────────
-
-let currentPlayers = [];
-let currentHostId = null;
-
-function showPanel(name) {
-  // De-dup by element — TARGET aliases DISTRACTORS's panel so the image stream
-  // can keep cycling through the scoring window. Without de-dup, the double
-  // entry would overwrite the hidden state for that element and blank the
-  // screen during DISTRACTORS.
-  const target = panels[name];
-  const seen = new Set();
-  for (const el of Object.values(panels)) {
-    if (seen.has(el)) continue;
-    seen.add(el);
-    el.hidden = el !== target;
+  // Dispatch to game subscribers — including STATE so games can re-render
+  // their player list / scoreboard.
+  const subs = gameSubscribers.get(msg.type);
+  if (subs) {
+    for (const handler of subs) {
+      try { handler(msg); } catch (e) { console.error(`[shell] game handler for ${msg.type} threw:`, e); }
+    }
   }
-}
+});
 
-function renderPlayers(players, hostId) {
-  currentPlayers = players || [];
-  currentHostId  = hostId ?? null;
-  playerListEl.innerHTML = '';
-  if (!currentPlayers.length) {
-    const li = document.createElement('li');
-    li.className = 'empty';
-    li.textContent = '(no players yet)';
-    playerListEl.appendChild(li);
-    return;
-  }
-  for (const p of currentPlayers) {
-    const li = document.createElement('li');
-    li.textContent = `#${p.id} · ${p.name}${p.id === currentHostId ? '  (host)' : ''}`;
-    playerListEl.appendChild(li);
-  }
-}
-
-function renderRanks(ranks) {
-  roundRanksEl.innerHTML = '';
-  // Sort for display: by points desc, then by reaction ms asc. 0-points with
-  // lockedOut sink to the bottom.
-  const sorted = [...ranks].sort((a, b) => {
-    if (a.points !== b.points) return b.points - a.points;
-    if (a.ms != null && b.ms != null) return a.ms - b.ms;
-    if (a.ms != null) return -1;
-    if (b.ms != null) return 1;
-    return 0;
-  });
-  sorted.forEach((r, i) => {
-    const li = document.createElement('li');
-    // Stagger index drives CSS animation-delay so rows reveal 1-by-1.
-    li.style.setProperty('--i', i);
-    if (r.points > 0) li.classList.add('scored');
-    if (r.lockedOut) li.classList.add('locked-out');
-
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'rank-name';
-    nameSpan.textContent = r.name;
-
-    const badge = document.createElement('span');
-    badge.className = 'rank-badge';
-    badge.textContent = r.points > 0 ? `+${r.points}` : '—';
-
-    const reaction = document.createElement('span');
-    reaction.className = 'rank-reaction';
-    reaction.textContent = r.lockedOut ? 'locked out'
-                        : r.ms != null ? `${r.ms} ms`
-                        : 'no press';
-
-    li.append(nameSpan, badge, reaction);
-    roundRanksEl.appendChild(li);
-  });
-}
-
-function logPlayerDiff(oldList, newList) {
-  const oldById = new Map(oldList.map((p) => [p.id, p]));
-  const newById = new Map(newList.map((p) => [p.id, p]));
-  for (const [, p] of newById) if (!oldById.has(p.id)) pushLog(`${p.name} joined`);
-  for (const [, p] of oldById) if (!newById.has(p.id)) pushLog(`${p.name} left`);
-}
-
-function renderCommits() {
-  if (!commitIndicatorEl) return;
-  commitIndicatorEl.innerHTML = '';
-  // Preserve insertion order so players see the chronological commit sequence.
-  for (const [, { name, kind }] of commits) {
-    const li = document.createElement('li');
-    li.className = kind;
-    li.textContent = `${name} ${kind === 'pressed' ? '✓' : '✗'}`;
-    commitIndicatorEl.appendChild(li);
-  }
-}
-
-function renderScoreboard(scores, el) {
-  el.innerHTML = '';
-  const rows = Object.entries(scores || {})
-    .map(([id, pts]) => {
-      const p = currentPlayers.find((pl) => String(pl.id) === String(id));
-      const prev = lastScores[id] ?? 0;
-      return { id, name: p?.name ?? `#${id}`, pts, changed: pts !== prev, delta: pts - prev };
-    })
-    .sort((a, b) => b.pts - a.pts);
-  for (const row of rows) {
-    const li = document.createElement('li');
-    if (row.changed) li.classList.add('changed');
-    li.textContent = `${row.name}: ${row.pts}`;
-    el.appendChild(li);
-  }
-  lastScores = { ...(scores || {}) };
-}
-
-function renderFinalScoreboard(scores, winnerId, el) {
-  el.innerHTML = '';
-  const rows = Object.entries(scores || {})
-    .map(([id, pts]) => {
-      const idNum = Number(id);
-      const p = currentPlayers.find((pl) => String(pl.id) === String(id));
-      return { id: idNum, name: p?.name ?? `#${id}`, pts };
-    })
-    .sort((a, b) => b.pts - a.pts);
-  for (const row of rows) {
-    const li = document.createElement('li');
-    if (row.id === winnerId) li.classList.add('winner');
-    const nameEl = document.createElement('span');
-    nameEl.className = 'name';
-    nameEl.textContent = row.name;
-    const ptsEl = document.createElement('span');
-    ptsEl.className = 'pts';
-    ptsEl.textContent = `${row.pts} pt${row.pts === 1 ? '' : 's'}`;
-    li.appendChild(nameEl);
-    li.appendChild(ptsEl);
-    el.appendChild(li);
-  }
-}
-
-// ───── countdown animation ─────────────────────────────────────────────────
-// CSS transform-driven; the real hidden timer is on the server, we just decay
-// the bar visually over the max showMs window.
-
-let countdownAnimHandle = null;
-
-function startCountdownAnimation(showMs) {
-  stopCountdownAnimation();
-  countdownFillEl.style.transition = 'none';
-  countdownFillEl.style.transform = 'scaleX(1)';
-  // double-rAF to ensure the starting state is committed before the transition
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    countdownFillEl.style.transition = `transform ${showMs}ms linear`;
-    countdownFillEl.style.transform = 'scaleX(0)';
-  }));
-}
-
-function startRevealBar(showMs) {
-  if (!revealBarFillEl) return;
-  revealBarFillEl.style.transition = 'none';
-  revealBarFillEl.style.transform = 'scaleX(1)';
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    revealBarFillEl.style.transition = `transform ${showMs}ms linear`;
-    revealBarFillEl.style.transform = 'scaleX(0)';
-  }));
-}
-
-function stopCountdownAnimation() {
-  if (countdownAnimHandle != null) {
-    cancelAnimationFrame(countdownAnimHandle);
-    countdownAnimHandle = null;
-  }
-  countdownFillEl.style.transition = 'none';
-  countdownFillEl.style.transform = 'scaleX(0)';
-}
-
-// ───── misc ────────────────────────────────────────────────────────────────
+// ───── helpers ─────────────────────────────────────────────────────────────
 
 function refreshStatus(text) { statusEl.textContent = text; }
 
@@ -371,4 +195,17 @@ function pushLog(text) {
   li.textContent = `[${time}] ${text}`;
   eventLogEl.prepend(li);
   while (eventLogEl.children.length > 20) eventLogEl.removeChild(eventLogEl.lastChild);
+}
+
+function logPlayerDiff(oldList, newList) {
+  const oldById = new Map((oldList || []).map((p) => [p.id, p]));
+  const newById = new Map((newList || []).map((p) => [p.id, p]));
+  for (const [, p] of newById) if (!oldById.has(p.id)) pushLog(`${p.name} joined`);
+  for (const [, p] of oldById) if (!newById.has(p.id)) pushLog(`${p.name} left`);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (ch) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[ch]);
 }

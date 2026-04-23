@@ -10,7 +10,10 @@ let gameFactory = null;
 if (GAME_NAME && GAME_NAME !== 'none') {
   try {
     const mod = require(`../../games/${GAME_NAME}/${GAME_NAME}`);
-    const factoryFnName = `create${GAME_NAME[0].toUpperCase()}${GAME_NAME.slice(1)}Game`;
+    // Convert kebab-case game name to PascalCase for the factory export:
+    // `reaction` → `createReactionGame`; `worst-take-wins` → `createWorstTakeWinsGame`.
+    const pascal = GAME_NAME.split('-').map((seg) => seg[0].toUpperCase() + seg.slice(1)).join('');
+    const factoryFnName = `create${pascal}Game`;
     const factory = mod[factoryFnName];
     if (typeof factory !== 'function') {
       throw new Error(`expected factory ${factoryFnName} in games/${GAME_NAME}/${GAME_NAME}.js`);
@@ -25,7 +28,7 @@ if (GAME_NAME && GAME_NAME !== 'none') {
   }
 }
 
-createServer({ port: PORT, gameFactory }).then(({ port, close }) => {
+createServer({ port: PORT, gameFactory, gameName: GAME_NAME && GAME_NAME !== 'none' ? GAME_NAME : null }).then(({ port, close }) => {
   console.log(`party-games platform ready on http://localhost:${port}`);
   console.log(`  receiver:   http://localhost:${port}/receiver`);
   console.log(`  controller: http://localhost:${port}/controller?name=Alice`);

@@ -1,0 +1,137 @@
+/* Reaction-game controller — phone UI, scoped via #game-root. */
+
+#game-root .big-button {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  border: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ff8a8a, #d14545 55%, #8a2a2a 100%);
+  color: white;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: transform 80ms ease-out;
+  box-shadow: 0 2vh 5vh rgba(0,0,0,0.45), inset 0 -1vh 3vh rgba(0,0,0,0.3);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
+#game-root .big-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+#game-root .big-button.flash {
+  transform: scale(1.08);
+}
+#game-root .big-button:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+#game-root .rx-help {
+  opacity: 0.5;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: auto;
+  padding-bottom: 2vh;
+}
+
+/* End-of-game overlay — positioned fixed so it covers the whole viewport,
+   regardless of where the game-root is in the DOM tree. */
+#game-root .outcome {
+  position: fixed; inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3vh;
+  padding: 4vh 6vw;
+  text-align: center;
+  z-index: 10;
+  overflow: hidden;
+  animation: rx-outcome-fade-in 0.4s ease-out;
+}
+#game-root .outcome[hidden] { display: none; }
+#game-root .outcome.win {
+  background: radial-gradient(ellipse at center, #1c4c2a 0%, #0a1e12 60%, #0c0f14 100%);
+  color: #f0fdf4;
+}
+#game-root .outcome.lose {
+  background: radial-gradient(ellipse at center, #2a2230 0%, #121017 60%, #0c0f14 100%);
+  color: #cbcad1;
+}
+@keyframes rx-outcome-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+#game-root .outcome-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2vh;
+  z-index: 1;
+}
+#game-root .outcome-headline {
+  font-size: 3.2rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+#game-root .outcome.win .outcome-headline {
+  background: linear-gradient(90deg, #fde047, #facc15, #86efac);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rx-headline-pulse 0.6s ease-in-out infinite alternate;
+}
+#game-root .outcome.lose .outcome-headline { opacity: 0.85; }
+@keyframes rx-headline-pulse {
+  from { transform: scale(1); }
+  to   { transform: scale(1.05); }
+}
+#game-root .outcome-subline {
+  font-size: 1.2rem;
+  opacity: 0.75;
+  line-height: 1.45;
+}
+#game-root .outcome-scoreboard {
+  list-style: none;
+  font-size: 1rem;
+  padding: 1vh 0;
+  line-height: 1.7;
+  min-width: 60%;
+}
+#game-root .outcome-scoreboard li {
+  padding: 0.6vh 1rem;
+  border-radius: 0.6rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+#game-root .outcome-scoreboard li.me {
+  background: rgba(255,255,255,0.08);
+  font-weight: 600;
+}
+#game-root .outcome-scoreboard li.winner {
+  color: #facc15;
+}
+
+#game-root .confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+#game-root .confetti[hidden] { display: none; }
+#game-root .confetti span {
+  position: absolute;
+  top: -10vh;
+  font-size: 2rem;
+  animation: rx-confetti-fall linear infinite;
+  will-change: transform;
+}
+@keyframes rx-confetti-fall {
+  0%   { transform: translate3d(0, -10vh, 0) rotate(0deg);    opacity: 1; }
+  100% { transform: translate3d(0, 110vh, 0) rotate(720deg);  opacity: 0.7; }
+}

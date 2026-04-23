@@ -297,4 +297,80 @@ No bundler, no framework. Plain HTML/CSS/JS + Node http + `ws`.
 - Phase 2c: scoring polish / fireworks on winner phone.
 - Phase 3: PWA manifest, mobile CSS, browser-on-HDMI verification, accessibility.
 - Phase 4: production hosting (AWS S3+CloudFront + Lightsail), custom domain, published Cast app review. Named Cloudflare tunnel so the Cast Console URL stops being a moving target.
-- Phase 5+: cards game on the same platform.
+- ~~Phase 5+: cards game on the same platform.~~ **Shipped** — see §Phase 5 below.
+
+---
+
+## Phase 5: Worst Take Wins + shell plugin seam
+
+**Date:** 2026-04-23. Plan file: `/home/will/.claude/plans/phase-5-atomic-pine.md`.
+
+Third game scaffold, bundled with a platform refactor because the exercise
+surfaced that `createServer({ game })` generalised cleanly on the server
+side but the controller/receiver shells had reaction+image assumptions
+hardcoded (phase tables, panel registry, single-button UI). A third game
+needed either a third set of hardcoded cases or a real per-game client
+seam; we built the seam.
+
+### What landed
+
+- **Per-game client-asset plugin seam.** Shell HTML templates `{{GAME_NAME}}`
+  and `{{GAME_STYLESHEET}}` at request time. New routes `/game/client/*`
+  (→ `games/<WF_GAME>/client/*`) and `/game/assets/*` with their own
+  path-traversal guard rooted at `gamesRoot`. Shells are platform-only; the
+  game module is imported dynamically on WELCOME and owns everything inside
+  `<div id="game-root">`.
+- **`/shell-lib/*` route + `platform/shell-lib/scoreboard.js`.** Shared
+  render helpers that game clients import via `'/shell-lib/scoreboard.js'`
+  (ES module). Used by reaction + image + WTW receivers.
+- **Retrofit**: `games/reaction/client/` + `games/image/client/` extracted
+  from the old monolithic shells. Reaction and image shell JS are now
+  thin (WS + Cast + room gate + feedback helpers only).
+- **Worst Take Wins** — fill-in-the-blank card game, Cards Against Humanity
+  model. Full server state machine (LOBBY → SHOW_PROMPT → JUDGE_REVEAL →
+  SCORE → GAME_OVER), private per-player hands via `services.sendTo`,
+  judge rotation, anonymous submissions, auto-submit on timeout, 3-player
+  minimum. Default winScore 8, handSize 7, submitTimeoutMs 90 000.
+- **Deck loader + CAH base deck.** `games/worst-take-wins/deckLoader.js`
+  globs `.json` files in `assets/decks/`, dedupes by id, shuffles per-room.
+  Ships `cah-base.json` (279 prompts + 1270 responses, CC BY-NC-SA 2.0
+  attributed to Cards Against Humanity LLC via
+  [crhallberg/JSON-against-humanity](https://github.com/crhallberg/JSON-against-humanity)).
+  Pick-2 prompts skipped at draw time — client v1 ships pick-1 only.
+- **Tests: 98 total** (was 51 before Phase 5). Platform: 31, reaction: 15,
+  image: 22, worst-take-wins: 30. Shell-template tests verify HTML
+  templating, game asset routing, missing-file 404s, and dual-root
+  path-traversal 403s.
+
+### Index.js factory-name fix
+
+`createReactionGame` / `createImageGame` / `createWorstTakeWinsGame` — the
+kebab-to-PascalCase conversion for the last needed a split-and-join (was
+doing a single first-letter uppercase, which produced
+`createWorst-take-winsGame`). Minor but real bug found at server startup
+under `WF_GAME=worst-take-wins`.
+
+### Client → game ctx (new public API)
+
+```
+{ root, send, on, playerId, isHost, players, hostId, feedback, assetUrl, log }
+```
+
+See `party-games/README.md` "Plugin interface" section for the full
+contract. Receiver and controller have slightly different `ctx` shapes:
+receiver has `hostId()` + no-op feedback + functional `log`; controller
+has `isHost()` + real feedback + no-op log.
+
+### Verification
+
+- All four test suites pass (`node --test`); `WF_GAME={reaction,image,worst-take-wins,none}` each boots cleanly.
+- HTTP smoke-check for each WF_GAME: `/controller`, `/receiver`, `/game/client/{controller,receiver}.{js,css}`, `/shell-lib/scoreboard.js` all return 200 with correctly-templated HTML.
+- **Live browser click-through still owed**: open `WF_GAME=worst-take-wins node index.js`, receiver tab + 3 controller tabs (Alice / Bob / Carol), play a round end-to-end.
+
+### Follow-ups (deferred from Phase 5)
+
+- Runtime game switching / in-lobby game picker — each process still runs one game via `WF_GAME`. If the lobby picks the game, shell template needs per-request or per-room game identity and `/game/*` needs a room-scoped prefix.
+- Pick-2 prompts in the controller UI (server already handles them).
+- Family-mode deck filter (tag-based exclusion) — data structure supports `tags`; no filter UI.
+- Shell CSS cleanup — `platform/controller-shell/controller.css` still has unused reaction-era `.big-button` / `.outcome` / `.confetti` rules. Dead, not harmful.
+- Spectator mode + mid-round hand restore on reconnect.

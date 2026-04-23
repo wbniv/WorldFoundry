@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="game-name" content="{{GAME_NAME}}">
   <title>Party Games · Controller</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%F0%9F%8E%B2%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="controller.css">
+  {{GAME_STYLESHEET}}
   <!-- Google Cast Sender SDK (loadCastFramework=1 pulls in cast.framework API). -->
   <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 </head>
@@ -23,8 +25,9 @@
       <google-cast-launcher id="cast-button"></google-cast-launcher>
       <span id="cast-state" class="cast-state">cast: idle</span>
     </div>
-    <button id="ping" type="button" class="big-button" disabled>PING</button>
-    <p class="help">Tap the cast button to launch the receiver on your TV, then tap PING.</p>
+    <!-- Game-owned region. Games build their entire controller UI inside this
+         container via mount(ctx). The shell owns nothing below this line. -->
+    <div id="game-root" class="game-root"></div>
   </main>
 
   <!-- Room-code entry overlay: shown if the URL doesn't carry ?room=ABCD.
@@ -41,17 +44,6 @@
     </form>
   </div>
 
-  <!-- End-of-game overlay: win/lose flavour for the player. Populated from the
-       GAME_OVER broadcast, dismissed by any subsequent phase change. -->
-  <div id="outcome" class="outcome" hidden>
-    <div class="outcome-content">
-      <p id="outcome-headline" class="outcome-headline"></p>
-      <p id="outcome-subline" class="outcome-subline"></p>
-      <ol id="outcome-scoreboard" class="outcome-scoreboard"></ol>
-    </div>
-    <div id="confetti" class="confetti" hidden aria-hidden="true"></div>
-  </div>
-
-  <script src="controller.js"></script>
+  <script type="module" src="controller.js"></script>
 </body>
 </html>

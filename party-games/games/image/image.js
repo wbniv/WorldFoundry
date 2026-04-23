@@ -279,7 +279,18 @@ function createImageGame(opts = {}) {
     // sits on its default phase='LOBBY' until the next PHASE broadcast fires
     // — so a player who joins mid-round sees a disabled button and their
     // taps go nowhere (controller ignores clicks when action='idle').
-    services.sendTo(player.id, {
+    sendPhaseTo(services, player.id);
+  }
+
+  function onReconnect(player, services) {
+    // Session-resume: player's scores + round-state are still intact, but
+    // their fresh socket needs the current phase so the controller UI
+    // re-synchronises (otherwise it waits for the next PHASE broadcast).
+    sendPhaseTo(services, player.id);
+  }
+
+  function sendPhaseTo(services, playerId) {
+    services.sendTo(playerId, {
       type: 'PHASE',
       phase: state.phase,
       scores: Object.fromEntries(state.scores),
@@ -385,6 +396,7 @@ function createImageGame(opts = {}) {
   return {
     name: 'image',
     onJoin,
+    onReconnect,
     onLeave,
     onMessage,
     /** Test-only window into the plugin's state. */

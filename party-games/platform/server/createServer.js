@@ -26,6 +26,14 @@ const MAX_NAME_LEN = 32;
 const ROOM_ALPHA = 'ABCDEFGHJKLMNPRSTUVWXYZ';
 const ROOM_CODE_LEN = 4;
 const ROOM_CODE_RE = new RegExp(`^[${ROOM_ALPHA}]{${ROOM_CODE_LEN}}$`);
+// How long a dropped player stays in the room waiting for a reconnect carrying
+// their sessionId before we really remove them (call onLeave, broadcast the
+// STATE change, destroy the room if empty). Tuned so mobile suspend / screen-
+// lock / brief Wi-Fi hiccups resolve transparently without forfeiting round
+// scores, but a genuine walk-away still cleans up in a reasonable window.
+const SESSION_GRACE_MS = 20_000;
+const MAX_SESSION_ID_LEN = 64;
+const SESSION_ID_RE = /^[A-Za-z0-9_-]{8,64}$/;
 
 function resolveStatic(url) {
   const clean = url.split('?')[0];
@@ -41,6 +49,28 @@ function resolveStatic(url) {
   return clean;
 }
 
+// Shell HTML template placeholders — substituted at request time so the
+// shell can name which game's client module + stylesheet to load. The
+// shell HTML ships with these tokens in the head; createServer is the
+// only thing that expands them. Games get selected at launch time via
+// `WF_GAME` (threaded in as `gameName`), not per-request.
+function applyShellTemplate(html, gameName, role, gamesRoot) {
+  const name = gameName || '';
+  const styleTag = (name && gameCssExists(gamesRoot, name, role))
+    ? `<link rel="stylesheet" href="/game/client/${role}.css">`
+    : '';
+  return html
+    .replace(/\{\{GAME_NAME\}\}/g, name)
+    .replace(/\{\{GAME_STYLESHEET\}\}/g, styleTag);
+}
+
+function gameCssExists(gamesRoot, gameName, role) {
+  try {
+    fs.accessSync(path.join(gamesRoot, gameName, 'client', `${role}.css`));
+    return true;
+  } catch { return false; }
+}
+
 /**
  * Start a platform relay instance.
  *
@@ -52,6 +82,13 @@ function resolveStatic(url) {
  *                                            Plugin interface: {onJoin?, onLeave?, onMessage?}
  *                                            where services = {broadcast, sendTo, getPlayers,
  *                                            getHost, now, schedule, random}.
+ * @param {string}  [opts.gameName]           Name of the active game — matches the directory
+ *                                            under `gamesRoot`. Used to resolve /game/client/*
+ *                                            and /game/assets/* plus to populate the shell HTML
+ *                                            template (`{{GAME_NAME}}`, `{{GAME_STYLESHEET}}`).
+ * @param {string}  [opts.gamesRoot]          Root for per-game client assets. Defaults to
+ *                                            `<repo>/party-games/games`. Resolves alongside
+ *                                            `staticRoot` with its own path-traversal guard.
  * @param {object}  [opts.game]               DEPRECATED — single game instance shared across
  *                                            every room. Works fine for single-room testing
  *                                            but state collides once two rooms share it.
@@ -61,6 +98,8 @@ function resolveStatic(url) {
 function createServer(opts = {}) {
   const port = opts.port ?? 8080;
   const staticRoot = opts.staticRoot ?? path.resolve(__dirname, '..');
+  const gamesRoot  = opts.gamesRoot  ?? path.resolve(__dirname, '../../games');
+  const gameName   = opts.gameName   ?? null;
   const quiet = !!opts.quiet;
   const gameFactory = opts.gameFactory ?? (opts.game ? () => opts.game : null);
   const now = opts.now ?? (() => Date.now());
@@ -68,10 +107,89 @@ function createServer(opts = {}) {
     const h = setTimeout(fn, ms);
     return () => clearTimeout(h);
   });
+  const sessionGraceMs = opts.sessionGraceMs ?? SESSION_GRACE_MS;
   const log = quiet ? () => {} : (...args) => console.log(...args);
   const random = opts.random ?? Math.random;
 
   const server = http.createServer((req, res) => {
+    const cleanUrl = (req.url || '').split('?')[0];
+
+    // ── shared shell-lib helpers ───────────────────────────────────────────
+    // /shell-lib/<path> → <staticRoot>/shell-lib/<path>. Exposes reusable
+    // helpers (e.g. scoreboard rendering) that sit between the shell and
+    // game clients. Rooted inside staticRoot so the default guard applies.
+    if (cleanUrl.startsWith('/shell-lib/')) {
+      const sub = cleanUrl.slice('/shell-lib/'.length);
+      const libRoot = path.join(staticRoot, 'shell-lib');
+      const filePath = path.join(libRoot, sub);
+      if (!filePath.startsWith(libRoot + path.sep) && filePath !== libRoot) {
+        res.statusCode = 403;
+        res.end('forbidden');
+        return;
+      }
+      fs.readFile(filePath, (err, data) => {
+        if (err) {
+          res.statusCode = 404;
+          res.setHeader('content-type', 'text/plain; charset=utf-8');
+          res.end('not found: ' + cleanUrl);
+          return;
+        }
+        res.setHeader('content-type', MIME[path.extname(filePath)] || 'application/octet-stream');
+        res.setHeader('cache-control', 'no-store, no-cache, must-revalidate');
+        res.setHeader('pragma', 'no-cache');
+        res.end(data);
+      });
+      return;
+    }
+
+    // ── per-game client assets ─────────────────────────────────────────────
+    // /game/client/<path>  → <gamesRoot>/<gameName>/client/<path>
+    // /game/assets/<path>  → <gamesRoot>/<gameName>/client/assets/<path>
+    // Separate root from staticRoot (games/ is a sibling of platform/), so
+    // the traversal guard here anchors against gamesRoot, not staticRoot.
+    if (cleanUrl.startsWith('/game/')) {
+      if (!gameName) {
+        res.statusCode = 404;
+        res.setHeader('content-type', 'text/plain; charset=utf-8');
+        res.end('no game active (set WF_GAME)');
+        return;
+      }
+      let sub = null;
+      let clientRoot = null;
+      if (cleanUrl.startsWith('/game/client/')) {
+        sub = cleanUrl.slice('/game/client/'.length);
+        clientRoot = path.join(gamesRoot, gameName, 'client');
+      } else if (cleanUrl.startsWith('/game/assets/')) {
+        sub = cleanUrl.slice('/game/assets/'.length);
+        clientRoot = path.join(gamesRoot, gameName, 'client', 'assets');
+      } else {
+        res.statusCode = 404;
+        res.setHeader('content-type', 'text/plain; charset=utf-8');
+        res.end('not found: ' + cleanUrl);
+        return;
+      }
+      const filePath = path.join(clientRoot, sub);
+      if (!filePath.startsWith(clientRoot + path.sep) && filePath !== clientRoot) {
+        res.statusCode = 403;
+        res.end('forbidden');
+        return;
+      }
+      fs.readFile(filePath, (err, data) => {
+        if (err) {
+          res.statusCode = 404;
+          res.setHeader('content-type', 'text/plain; charset=utf-8');
+          res.end(`not found: ${cleanUrl} (game '${gameName}' — is games/${gameName}/client/${sub} present?)`);
+          return;
+        }
+        res.setHeader('content-type', MIME[path.extname(filePath)] || 'application/octet-stream');
+        res.setHeader('cache-control', 'no-store, no-cache, must-revalidate');
+        res.setHeader('pragma', 'no-cache');
+        res.end(data);
+      });
+      return;
+    }
+
+    // ── shell HTML + sibling assets ────────────────────────────────────────
     const mapped = resolveStatic(req.url);
     const filePath = path.join(staticRoot, mapped);
 
@@ -82,12 +200,21 @@ function createServer(opts = {}) {
       return;
     }
 
-    fs.readFile(filePath, (err, data) => {
+    // Shell index.html gets templated (game name + per-game stylesheet).
+    // Everything else is served raw.
+    const isShellHtml = (mapped === '/controller-shell/index.html' || mapped === '/receiver-shell/index.html');
+    const role = mapped === '/controller-shell/index.html' ? 'controller' : 'receiver';
+
+    fs.readFile(filePath, isShellHtml ? 'utf8' : null, (err, data) => {
       if (err) {
         res.statusCode = 404;
         res.setHeader('content-type', 'text/plain; charset=utf-8');
         res.end('not found: ' + mapped);
         return;
+      }
+      let body = data;
+      if (isShellHtml) {
+        body = applyShellTemplate(data, gameName, role, gamesRoot);
       }
       res.setHeader('content-type', MIME[path.extname(filePath)] || 'application/octet-stream');
       // Dev loop: forbid browser caching so controller.js / receiver.js / CSS
@@ -96,7 +223,7 @@ function createServer(opts = {}) {
       // (Phase 4), we'll revisit with versioned URLs and long max-age.
       res.setHeader('cache-control', 'no-store, no-cache, must-revalidate');
       res.setHeader('pragma', 'no-cache');
-      res.end(data);
+      res.end(body);
     });
   });
 
@@ -131,7 +258,8 @@ function createServer(opts = {}) {
       code,
       everyone:  new Set(),
       receivers: new Set(),
-      players:   new Map(),   // playerId → { id, name, ws, joinedAt }
+      players:   new Map(),   // playerId → { id, name, ws, joinedAt, sessionId, graceCancel? }
+      sessions:  new Map(),   // sessionId → playerId (for reconnect resume)
       nextPlayerId: 1,
       game: null,
       services: null,
@@ -146,8 +274,29 @@ function createServer(opts = {}) {
 
   function destroyRoomIfEmpty(room) {
     if (room.everyone.size > 0) return;
+    // Players in grace (disconnected but session-resumable) keep the room
+    // alive. Otherwise a quick server-restart-style ws flap would destroy
+    // rooms mid-round even though reconnect-in-grace would have rescued them.
+    for (const p of room.players.values()) if (p.graceCancel) return;
     rooms.delete(room.code);
     log(`[ws] room ${room.code} destroyed (empty)`);
+  }
+
+  // Called when a player's session-grace window expires (or on immediate
+  // removal for sessionless clients). Broadcasts the STATE change, invokes
+  // game.onLeave, and destroys the room if it's now empty.
+  function finalizePlayerLeave(room, playerId) {
+    const p = room.players.get(playerId);
+    if (!p) return;
+    room.players.delete(playerId);
+    if (p.sessionId) room.sessions.delete(p.sessionId);
+    log(`[ws] player left room=${room.code} id=${playerId} (final)`);
+    broadcastRoom(room, snapshotState(room));
+    if (room.game?.onLeave) {
+      try { room.game.onLeave({ id: p.id, name: p.name }, room.services); }
+      catch (e) { log('[game] onLeave threw', e); }
+    }
+    destroyRoomIfEmpty(room);
   }
 
   function snapshotState(room) {
@@ -249,23 +398,55 @@ function createServer(opts = {}) {
             log(`[ws] receiver attached to room=${room.code}`);
             ws.send(JSON.stringify({ type: 'WELCOME_RECEIVER', room: room.code }));
             ws.send(JSON.stringify(snapshotState(room)));
-          } else {
+            break;
+          }
+
+          // Controller path. If the client supplies a valid sessionId that we
+          // still have mapped to a player (because they disconnected within
+          // SESSION_GRACE_MS), resume their slot rather than allocating a new
+          // one — preserves scores and any mid-round state the game holds.
+          const rawSession = typeof msg.sessionId === 'string' ? msg.sessionId : '';
+          const sessionId = SESSION_ID_RE.test(rawSession) ? rawSession : null;
+          let resumed = false;
+          if (sessionId) {
+            const existingId = room.sessions.get(sessionId);
+            const existing = existingId != null ? room.players.get(existingId) : null;
+            if (existing) {
+              if (existing.graceCancel) { existing.graceCancel(); existing.graceCancel = null; }
+              existing.ws = ws;
+              playerId = existingId;
+              resumed = true;
+              log(`[ws] player resumed room=${room.code} id=${playerId} name=${existing.name}`);
+            }
+          }
+
+          if (!resumed) {
             playerId = room.nextPlayerId++;
             const name = String(msg.name ?? '').slice(0, MAX_NAME_LEN) || `Player ${playerId}`;
-            const player = { id: playerId, name, ws, joinedAt: now() };
+            const player = { id: playerId, name, ws, joinedAt: now(), sessionId: sessionId || null };
             room.players.set(playerId, player);
+            if (sessionId) room.sessions.set(sessionId, playerId);
             log(`[ws] player joined room=${room.code} id=${playerId} name=${name}`);
-            ws.send(JSON.stringify({
-              type: 'WELCOME',
-              id: playerId,
-              name,
-              hostId: firstHostId(room),
-              room: room.code,
-            }));
-            broadcastRoom(room, snapshotState(room));
-            try { room.game?.onJoin?.({ id: playerId, name }, room.services); }
-            catch (e) { log('[game] onJoin threw', e); }
           }
+
+          const p = room.players.get(playerId);
+          ws.send(JSON.stringify({
+            type: 'WELCOME',
+            id: playerId,
+            name: p.name,
+            hostId: firstHostId(room),
+            room: room.code,
+            sessionId: p.sessionId || null,
+            resumed,
+          }));
+          broadcastRoom(room, snapshotState(room));
+          try {
+            if (resumed) {
+              room.game?.onReconnect?.({ id: p.id, name: p.name }, room.services);
+            } else {
+              room.game?.onJoin?.({ id: p.id, name: p.name }, room.services);
+            }
+          } catch (e) { log(`[game] ${resumed ? 'onReconnect' : 'onJoin'} threw`, e); }
           break;
         }
         case 'PING': {
@@ -299,17 +480,29 @@ function createServer(opts = {}) {
       if (role === 'receiver') {
         room.receivers.delete(ws);
         log(`[ws] receiver detached room=${room.code}`);
-      } else if (playerId != null) {
-        const p = room.players.get(playerId);
-        room.players.delete(playerId);
-        log(`[ws] player left room=${room.code} id=${playerId}`);
-        broadcastRoom(room, snapshotState(room));
-        if (p && room.game?.onLeave) {
-          try { room.game.onLeave({ id: p.id, name: p.name }, room.services); }
-          catch (e) { log('[game] onLeave threw', e); }
-        }
+        destroyRoomIfEmpty(room);
+        return;
       }
-      destroyRoomIfEmpty(room);
+      if (playerId == null) { destroyRoomIfEmpty(room); return; }
+
+      const p = room.players.get(playerId);
+      if (!p || p.ws !== ws) {
+        // This socket lost the slot (someone else resumed the session on a
+        // new ws, or they've already been cleaned up) — nothing to do here.
+        return;
+      }
+      p.ws = null;
+      if (!p.sessionId) {
+        // No session → can't resume. Remove immediately as before.
+        finalizePlayerLeave(room, playerId);
+        return;
+      }
+      // Schedule delayed cleanup. If a reconnecting HELLO with the same
+      // sessionId arrives before SESSION_GRACE_MS, it cancels this timer.
+      log(`[ws] player dropped room=${room.code} id=${playerId} — grace ${sessionGraceMs}ms`);
+      p.graceCancel = scheduleFn(sessionGraceMs, () => {
+        finalizePlayerLeave(room, playerId);
+      });
     });
 
     ws.on('error', (err) => {
@@ -329,6 +522,11 @@ function createServer(opts = {}) {
         close() {
           return new Promise((res) => {
             for (const room of rooms.values()) {
+              // Cancel any pending session-grace timers so they don't keep
+              // the event loop alive past server shutdown.
+              for (const p of room.players.values()) {
+                if (p.graceCancel) { p.graceCancel(); p.graceCancel = null; }
+              }
               for (const ws of room.everyone) {
                 try { ws.terminate(); } catch {}
               }

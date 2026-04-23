@@ -206,7 +206,17 @@ function createReactionGame(opts = {}) {
     // Catch late joiners up on the current phase — without this, a player who
     // joins mid-round sees their controller sit on the default phase='LOBBY'
     // (button disabled, action='idle') until the next PHASE broadcast.
-    services.sendTo(player.id, {
+    sendPhaseTo(services, player.id);
+  }
+
+  function onReconnect(player, services) {
+    // Session-resume: player slot + scores are still live, they just need
+    // their controller re-synchronised to the current phase.
+    sendPhaseTo(services, player.id);
+  }
+
+  function sendPhaseTo(services, playerId) {
+    services.sendTo(playerId, {
       type: 'PHASE',
       phase: state.phase,
       scores: Object.fromEntries(state.scores),
@@ -290,6 +300,7 @@ function createReactionGame(opts = {}) {
   return {
     name: 'reaction',
     onJoin,
+    onReconnect,
     onLeave,
     onMessage,
     /** Test-only window into the plugin's state. Do not rely on this in clients. */
