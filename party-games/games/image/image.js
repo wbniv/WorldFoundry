@@ -10,6 +10,7 @@ const WIN_SCORE              = 10;
 const REVEAL_MS              = 3000;    // target shown at start to memorise
 const REVEAL_CLEAR_MS        =  500;    // blank between reveal and image stream
 const IMAGE_SHOW_MS          =  800;    // duration each image is on screen
+const PRESS_GRACE_MS         =  250;    // press arriving up to this soon after the target ends still counts
 const ROUND_END_PAUSE_MS     = 3000;    // pause between rounds
 const MAX_ROUND_MS           = 60000;   // how long the image stream runs if players don't all commit
 const POINTS_BY_RANK         = [4, 3, 2, 1];
@@ -90,6 +91,7 @@ function createImageGame(opts = {}) {
       target,
       seq: -1,
       currentImage: null,
+      prevImage: null,        // previous frame, kept briefly for press-grace adjudication
       presses: new Map(),
       lockedOut: new Set(),
     };
@@ -127,6 +129,9 @@ function createImageGame(opts = {}) {
     const imageId = pool[pickInt(services, 0, pool.length - 1)];
     const isTarget = imageId === r.target;
     const serverTs = services.now();
+    // Save the outgoing frame so a press arriving shortly after the transition
+    // can still be adjudicated against it (see PRESS_GRACE_MS below).
+    r.prevImage = r.currentImage;
     r.currentImage = { imageId, isTarget, serverTs };
 
     services.broadcast({
@@ -266,20 +271,30 @@ function createImageGame(opts = {}) {
         } else if (state.phase === 'PLAY') {
           if (r.lockedOut.has(player.id)) return;
           if (r.presses.has(player.id)) return;  // one commit per round
+          const now = services.now();
           const img = r.currentImage;
+          const prev = r.prevImage;
+          // Grace window: a press reacting to the target can arrive up to
+          // PRESS_GRACE_MS after the frame transitioned (cloudflare-tunnel
+          // latency ~50–100 ms plus human tap jitter). If the current frame
+          // is not target but the previous one was and we're still within the
+          // grace window, credit the previous frame.
+          let creditFrame = null;
           if (img && img.isTarget) {
+            creditFrame = img;
+          } else if (prev && prev.isTarget && img && (now - img.serverTs) < PRESS_GRACE_MS) {
+            creditFrame = prev;
+          }
+
+          if (creditFrame) {
             r.presses.set(player.id, {
-              serverTs: services.now(),
+              serverTs: now,
               clientTs: Number.isFinite(msg.clientTs) ? msg.clientTs : null,
-              imageServerTs: img.serverTs,
+              imageServerTs: creditFrame.serverTs,
               imageSeq: r.seq,
             });
-            // All players committed? End the round early.
-            if (checkAllCommitted(services)) {
-              endRound(services, {});
-            }
           } else {
-            // Pressed on a distractor frame (or no frame has landed yet) → lockout.
+            // Pressed on a distractor frame with no target in grace range → lockout.
             r.lockedOut.add(player.id);
             services.broadcast({
               type: 'EARLY_PRESS',
@@ -287,9 +302,9 @@ function createImageGame(opts = {}) {
               playerId: player.id,
               name: player.name,
             });
-            if (checkAllCommitted(services)) {
-              endRound(services, {});
-            }
+          }
+          if (checkAllCommitted(services)) {
+            endRound(services, {});
           }
         }
         // ROUND_ENDED / LOBBY / GAME_OVER: ignore.
@@ -326,6 +341,7 @@ module.exports = {
   REVEAL_MS,
   REVEAL_CLEAR_MS,
   IMAGE_SHOW_MS,
+  PRESS_GRACE_MS,
   ROUND_END_PAUSE_MS,
   MAX_ROUND_MS,
   POINTS_BY_RANK,

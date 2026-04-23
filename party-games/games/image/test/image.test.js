@@ -11,6 +11,7 @@ const {
   REVEAL_MS,
   REVEAL_CLEAR_MS,
   IMAGE_SHOW_MS,
+  PRESS_GRACE_MS,
   ROUND_END_PAUSE_MS,
   MAX_ROUND_MS,
   POINTS_BY_RANK,
@@ -201,6 +202,44 @@ test('BUTTON_PRESS during PLAY on a target frame → recorded as a press', () =>
 
   pressButton(game, h.services, alice);
   assert.ok(game._debugState().round.presses.has(1));
+});
+
+test('press within PRESS_GRACE_MS after the target frame transitions → still credited', () => {
+  const h = makeServices();
+  // Series: [pickTarget=0, frame1=target, frame2=distractor]
+  h.setRandomSeries([0, 0, 0.9]);
+  const game = createImageGame({ pool: TWO_POOL });
+  const alice = { id: 1, name: 'Alice' };
+  h.players.push(alice);
+  game.onJoin(alice, h.services);
+  game.onMessage(alice, { type: 'START_GAME' }, h.services);
+  h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
+  // frame1 (target) shown; advance into frame2 (distractor) but within grace.
+  assert.equal(h.byType('SHOW_IMAGE')[0].isTarget, true);
+  h.advance(IMAGE_SHOW_MS + PRESS_GRACE_MS - 1);
+  // currentImage is now the distractor but we're inside the grace window.
+  assert.equal(game._debugState().round.currentImage.isTarget, false);
+  assert.equal(game._debugState().round.prevImage.isTarget, true);
+
+  pressButton(game, h.services, alice);
+  assert.ok(game._debugState().round.presses.has(1), 'press should count (grace)');
+  assert.ok(!game._debugState().round.lockedOut.has(1), 'player should not be locked out');
+});
+
+test('press beyond PRESS_GRACE_MS after the target frame transitions → lockout', () => {
+  const h = makeServices();
+  h.setRandomSeries([0, 0, 0.9, 0.9]);   // target, then distractors
+  const game = createImageGame({ pool: TWO_POOL });
+  const alice = { id: 1, name: 'Alice' };
+  h.players.push(alice);
+  game.onJoin(alice, h.services);
+  game.onMessage(alice, { type: 'START_GAME' }, h.services);
+  h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
+  // Move well past the grace window — prev frame was target but too long ago.
+  h.advance(IMAGE_SHOW_MS + PRESS_GRACE_MS + 10);
+
+  pressButton(game, h.services, alice);
+  assert.ok(game._debugState().round.lockedOut.has(1), 'too late to credit the previous frame');
 });
 
 test('BUTTON_PRESS during PLAY on a distractor frame → lockout', () => {

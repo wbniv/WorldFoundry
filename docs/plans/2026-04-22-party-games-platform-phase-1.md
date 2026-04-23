@@ -116,11 +116,38 @@ Second reaction-family mini-game, plugged into the same platform shell via `game
 
 - Press during REVEAL → lockout.
 - Press during PLAY when the currently-shown frame is the target → ranked (server-receive-timestamp adjudication, 4/3/2/1).
-- Press during PLAY when the currently-shown frame is a distractor → lockout.
+- Press during PLAY when the currently-shown frame is a distractor → lockout. A `PRESS_GRACE_MS = 250 ms` window after the previous frame lets late-arriving presses that were made during the target still count against the target — covers cloudflare-tunnel RTT + finger-tap jitter so players aren't penalised for "I pressed when I saw it" races.
 - One press per round, per player. Round ends the moment every active player has either pressed or locked out, or 60 s, whichever first.
 - Target may show zero, one, or many times per round — depending on the roll.
 
 Phase names in this shape: `LOBBY → REVEAL → PLAY → ROUND_ENDED → (next round | GAME_OVER)`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> LOBBY
+    LOBBY --> REVEAL: START_GAME (host)\nnew target picked
+    REVEAL --> PLAY: after 3 s reveal + 0.5 s clear
+    PLAY --> PLAY: every 800 ms:\nSHOW_IMAGE (uniform random)
+    PLAY --> ROUND_ENDED: all players committed\n(pressed or locked out)
+    PLAY --> ROUND_ENDED: maxRoundMs (60 s)\nROUND_ENDED.timedOut = true
+    ROUND_ENDED --> REVEAL: after 3 s pause
+    ROUND_ENDED --> GAME_OVER: someone hit winScore
+    GAME_OVER --> LOBBY: NEW_GAME (host)
+    LOBBY --> [*]: server shutdown
+
+    note right of REVEAL
+        BUTTON_PRESS → EARLY_PRESS
+        player locked out for round
+    end note
+    note right of PLAY
+        BUTTON_PRESS on target frame
+          (or prev frame within
+           PRESS_GRACE_MS = 250 ms)
+          → recorded, ranked 4/3/2/1
+        BUTTON_PRESS on distractor
+          → EARLY_PRESS, locked out
+    end note
+```
 
 Messages beyond the platform base: `ROUND_REVEAL {targetId, showMs, clearMs}`, `SHOW_IMAGE {seq, imageId, showMs, isTarget, serverTs}`, plus the shared `PHASE / EARLY_PRESS / ROUND_ENDED {… timedOut?} / GAME_OVER`.
 
@@ -130,8 +157,8 @@ UI:
 - Receiver: separate REVEAL panel (target held 3 s, fades 0.5 s); PLAY reuses the image-stream panel, continuously updating. No on-screen highlight of the target frame — the game is about recognising it from the REVEAL memorisation.
 - Controller: REVEAL → "WAIT" (press locks out). PLAY → "TAP!" (press evaluated against current frame). Standard START / NEW GAME / LOCKED labels for other phases.
 
-Test coverage (45 across three runners):
-- `party-games/games/image/test/image.test.js` — 16 state-machine tests (random pool forced to 2 entries to drive target/distractor choice, failsafe, all-committed early-end, etc.).
+Test coverage (47 across three runners):
+- `party-games/games/image/test/image.test.js` — 18 state-machine tests (random pool forced to 2 entries to drive target/distractor choice, failsafe, all-committed early-end, press-within-grace, press-beyond-grace).
 - `party-games/platform/server/test/image-integration.test.js` — 2 tests through real WebSocket server.
 - Reaction: unchanged (13 + 2).
 - Platform relay: unchanged (11 including static-file coverage).
