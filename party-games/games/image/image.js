@@ -21,6 +21,11 @@ const REVEAL_CLEAR_MS        =  500;    // blank between reveal and image stream
 const IMAGE_SHOW_MS          =  800;    // duration each image is on screen
 const ROUND_END_PAUSE_MS     = 3000;    // pause between rounds
 const MAX_ROUND_MS           = 60000;   // how long the image stream runs if players don't all commit
+// With pool of 20 and 1/20 per-frame target probability, ~2% of rounds would
+// otherwise have the target never appear at all. Force it to appear no later
+// than this frame if it hasn't already — still feels random from the player's
+// side because the natural appearance usually happens much earlier.
+const GUARANTEED_TARGET_BY_SEQ = 40;
 const POINTS_BY_RANK         = [4, 3, 2, 1];
 const MIN_PLAYERS_TO_START   = 1;       // matches reaction; see platform README
 
@@ -133,7 +138,11 @@ function createImageGame(opts = {}) {
     r.seq += 1;
     // Uniform random pick from the full pool — target naturally appears with
     // probability 1/pool.length per frame (~5% with the default 20-image pool).
-    const imageId = pool[pickInt(services, 0, pool.length - 1)];
+    // Safety net: if the target hasn't shown up by GUARANTEED_TARGET_BY_SEQ,
+    // force it on this frame so we never stream a full round's worth of
+    // distractors with no way to arm.
+    const forceTargetNow = r.targetFirstShownAt == null && r.seq >= GUARANTEED_TARGET_BY_SEQ;
+    const imageId = forceTargetNow ? r.target : pool[pickInt(services, 0, pool.length - 1)];
     const isTarget = imageId === r.target;
     const serverTs = services.now();
     // First target appearance arms the round — any press from now on counts.
@@ -354,6 +363,7 @@ module.exports = {
   IMAGE_SHOW_MS,
   ROUND_END_PAUSE_MS,
   MAX_ROUND_MS,
+  GUARANTEED_TARGET_BY_SEQ,
   POINTS_BY_RANK,
   MIN_PLAYERS_TO_START,
 };

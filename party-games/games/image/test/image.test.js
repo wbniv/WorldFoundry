@@ -13,6 +13,7 @@ const {
   IMAGE_SHOW_MS,
   ROUND_END_PAUSE_MS,
   MAX_ROUND_MS,
+  GUARANTEED_TARGET_BY_SEQ,
   POINTS_BY_RANK,
 } = require('../image');
 
@@ -426,4 +427,27 @@ test('onLeave with last player mid-round folds to LOBBY', () => {
 
 test('default MAX_ROUND_MS is 60_000', () => {
   assert.equal(MAX_ROUND_MS, 60_000);
+});
+
+test('if uniform random never picks the target, it is force-shown by GUARANTEED_TARGET_BY_SEQ', () => {
+  // Force a series that always picks the distractor (pool[1]) so the target
+  // (pool[0]) never naturally comes up. The guarantee-frame logic has to
+  // kick in.
+  const series = new Array(200).fill(0.9);
+  series[0] = 0;   // first random call is pickTarget; bias toward pool[0]
+  const h = makeServices();
+  h.setRandomSeries(series);
+  const game = createImageGame({ pool: TWO_POOL });
+  const alice = { id: 1, name: 'Alice' };
+  h.players.push(alice);
+  game.onJoin(alice, h.services);
+  game.onMessage(alice, { type: 'START_GAME' }, h.services);
+
+  // Walk up to and through the guaranteed-target frame.
+  h.advance(REVEAL_MS + REVEAL_CLEAR_MS + (GUARANTEED_TARGET_BY_SEQ + 1) * IMAGE_SHOW_MS);
+
+  const targetShow = h.byType('SHOW_IMAGE').find(m => m.isTarget);
+  assert.ok(targetShow, 'target must have been forced-shown by now');
+  assert.equal(targetShow.seq, GUARANTEED_TARGET_BY_SEQ,
+    `target should have been forced at seq=${GUARANTEED_TARGET_BY_SEQ}, got seq=${targetShow.seq}`);
 });
