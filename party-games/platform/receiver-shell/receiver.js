@@ -29,6 +29,8 @@ const finalScoreEl    = document.getElementById('final-scoreboard');
 const revealImageEl     = document.getElementById('reveal-image');
 const distractorImageEl = document.getElementById('distractor-image');
 const distRoundNumEl    = document.getElementById('dist-round-num');
+const commitIndicatorEl = document.getElementById('commit-indicator');
+const commits = new Map();  // playerId → 'pressed' | 'lockedOut' for the current round
 
 // Default panel
 showPanel('LOBBY');
@@ -110,6 +112,14 @@ function handle(msg) {
       revealImageEl.classList.remove('cleared');
       distRoundNumEl.textContent = msg.roundId;
       setTimeout(() => { revealImageEl.classList.add('cleared'); }, msg.showMs);
+      // Fresh round — clear last round's commit pills.
+      commits.clear();
+      renderCommits();
+      break;
+
+    case 'PRESS_RECORDED':
+      commits.set(msg.playerId, { name: msg.name, kind: 'pressed' });
+      renderCommits();
       break;
 
     case 'SHOW_IMAGE':
@@ -126,6 +136,8 @@ function handle(msg) {
 
     case 'EARLY_PRESS':
       pushLog(`early press · ${msg.name} locked out`);
+      commits.set(msg.playerId, { name: msg.name, kind: 'lockedOut' });
+      renderCommits();
       break;
 
     case 'ROUND_ENDED':
@@ -202,6 +214,18 @@ function renderRanks(ranks) {
                    : 'no press';
     li.textContent = `${r.name} — ${r.points} pt${r.points === 1 ? '' : 's'} (${reaction})`;
     roundRanksEl.appendChild(li);
+  }
+}
+
+function renderCommits() {
+  if (!commitIndicatorEl) return;
+  commitIndicatorEl.innerHTML = '';
+  // Preserve insertion order so players see the chronological commit sequence.
+  for (const [, { name, kind }] of commits) {
+    const li = document.createElement('li');
+    li.className = kind;
+    li.textContent = `${name} ${kind === 'pressed' ? '✓' : '✗'}`;
+    commitIndicatorEl.appendChild(li);
   }
 }
 

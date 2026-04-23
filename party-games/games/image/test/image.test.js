@@ -195,6 +195,23 @@ test('BUTTON_PRESS during PLAY BEFORE target has appeared → lockout', () => {
   assert.equal(h.byType('EARLY_PRESS').length, 1);
 });
 
+test('successful press broadcasts a PRESS_RECORDED event (receiver live indicator)', () => {
+  const h = makeServices();
+  h.setRandomSeries([0.1, 0.1]);  // target pick, first frame = target
+  const game = createImageGame({ pool: TWO_POOL });
+  const alice = { id: 1, name: 'Alice' };
+  h.players.push(alice);
+  game.onJoin(alice, h.services);
+  game.onMessage(alice, { type: 'START_GAME' }, h.services);
+  h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
+
+  pressButton(game, h.services, alice);
+  const pr = h.byType('PRESS_RECORDED');
+  assert.equal(pr.length, 1);
+  assert.equal(pr[0].playerId, 1);
+  assert.equal(pr[0].name, 'Alice');
+});
+
 test('BUTTON_PRESS during PLAY AFTER target has appeared → counted (even on a distractor frame)', () => {
   const h = makeServices();
   // [pickTarget=0.1 → target, frame1=0.1 → target, frame2=0.9 → distractor]

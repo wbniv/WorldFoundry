@@ -302,6 +302,12 @@ function createImageGame(opts = {}) {
               serverTs: services.now(),
               clientTs: Number.isFinite(msg.clientTs) ? msg.clientTs : null,
             });
+            services.broadcast({
+              type: 'PRESS_RECORDED',
+              roundId: r.id,
+              playerId: player.id,
+              name: player.name,
+            });
           }
           if (checkAllCommitted(services)) {
             endRound(services, {});
