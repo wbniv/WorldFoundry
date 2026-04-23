@@ -88,6 +88,7 @@ ws.addEventListener('message', (ev) => {
 function handle(msg) {
   switch (msg.type) {
     case 'STATE':
+      logPlayerDiff(currentPlayers, msg.players || []);
       renderPlayers(msg.players, msg.hostId);
       break;
 
@@ -238,6 +239,13 @@ function renderRanks(ranks) {
     li.append(nameSpan, badge, reaction);
     roundRanksEl.appendChild(li);
   });
+}
+
+function logPlayerDiff(oldList, newList) {
+  const oldById = new Map(oldList.map((p) => [p.id, p]));
+  const newById = new Map(newList.map((p) => [p.id, p]));
+  for (const [, p] of newById) if (!oldById.has(p.id)) pushLog(`${p.name} joined`);
+  for (const [, p] of oldById) if (!newById.has(p.id)) pushLog(`${p.name} left`);
 }
 
 function renderCommits() {
