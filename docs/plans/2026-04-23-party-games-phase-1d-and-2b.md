@@ -16,7 +16,7 @@ Continuation of the Phase 1 platform work on a different laptop from the first s
 - Laptop: Ubuntu 25.10, system Node v20.19.4, Chrome (desktop + Android for phone testing).
 - Repo: `/home/will/SRC/WorldFoundry-wbniv/`, branch `party-games-platform`.
 - Cast dev account: `wbnorris@gmail.com`.
-- TV: Chromecast with Google TV, serial `31191HFGN54Q67` (originally registered a different serial `2628105GN0GT7C` "ch" by mistake; both are now on the whitelist).
+- TV: Chromecast with Google TV, serial `31191HFGN54Q67` ("th"). You have two units; originally registered + tested the other one (`2628105GN0GT7C` "ch") but swapped to this one when the first was giving problems. Both are registered in the Devices whitelist.
 
 ### Running pieces at end of session
 
@@ -49,7 +49,7 @@ All of these were surprising enough to merit capturing for the next time (or the
 1. **Static-asset 404.** `<script src="receiver.js">` at `/receiver` resolves to `/receiver.js`, not `/receiver/receiver.js`. Old `resolveStatic` only handled the latter. Silent 404, page stuck on default "connecting…" text. Phase 1a's "verified in browser tabs" claim was aspirational — no test covered static serving. Fixed in `bb1a0c5` plus a `relay.test.js` case.
 2. **Cast SDK timing quirks.** `window.__onGCastApiAvailable(true)` callback fires before `cast.framework` / `chrome.cast.AutoJoinPolicy` are populated on some browsers. Fixed with a poll-then-init loop, string-literal fallback for `autoJoinPolicy`, and explicit seeding of the cast-state UI from `ctx.getCastState()` (CAST_STATE_CHANGED doesn't always fire initially).
 3. **Empty Cast Console Sender Details.** The UI notes "required to publish" but in practice the backend also uses it for device-to-app association on unpublished apps. The first app (`A40DF337`) was registered without Sender Details set — never propagated to the device. Recreating as `071CDEDD` with Sender Details populated at creation time was the path forward.
-4. **Serial mismatch.** TV physically plugged in (`31191HFGN54Q67`) didn't match the serial initially registered in the Cast Console (`2628105GN0GT7C`). Small text, easy typo — took a while to notice.
+4. **Device swap during debugging.** Started the day with Chromecast `2628105GN0GT7C` ("ch"). When it kept not working we (reasonably) swapped to the other unit `31191HFGN54Q67` ("th") to rule out a hardware-specific issue. Briefly confusing because the Cast Console still had the first device highlighted as "Ready For Testing" while the physically-plugged-in unit was the second one. Both serials are on the whitelist now.
 5. **IPv4 DHCP wedged.** Google TV pulled only an IPv6 lease; Chrome's Cast discovery uses IPv4 mDNS. Set a static IPv4 (`192.168.4.50`) on the TV to unblock. YouTube cast started working as soon as that landed.
 6. **48-hour propagation.** Google Cast Console says "it may take up to 48 hours for your Google Cast Developer Console registration to be fully processed". No UI indicator for completion — only signal is the cast button appearing on a controller page. Any Cast Console edit restarts the clock, so we stopped touching it.
 
