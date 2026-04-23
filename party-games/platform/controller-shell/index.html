@@ -26,6 +26,18 @@
     <button id="ping" type="button" class="big-button" disabled>PING</button>
     <p class="help">Tap the cast button to launch the receiver on your TV, then tap PING.</p>
   </main>
+
+  <!-- End-of-game overlay: win/lose flavour for the player. Populated from the
+       GAME_OVER broadcast, dismissed by any subsequent phase change. -->
+  <div id="outcome" class="outcome" hidden>
+    <div class="outcome-content">
+      <p id="outcome-headline" class="outcome-headline"></p>
+      <p id="outcome-subline" class="outcome-subline"></p>
+      <ol id="outcome-scoreboard" class="outcome-scoreboard"></ol>
+    </div>
+    <div id="confetti" class="confetti" hidden aria-hidden="true"></div>
+  </div>
+
   <script src="controller.js"></script>
 </body>
 </html>

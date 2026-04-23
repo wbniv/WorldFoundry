@@ -123,6 +123,44 @@ h2 {
   color: #facc15;
 }
 
+/* Final scoreboard: podium-style with rank, highlight winner row. */
+.final-scoreboard {
+  list-style: none;
+  counter-reset: rank;
+  padding: 0;
+  margin: 2vh 0;
+  max-width: 70vw;
+}
+.final-scoreboard li {
+  counter-increment: rank;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2vw;
+  padding: 1vh 2vw;
+  margin-bottom: 0.8vh;
+  border-radius: 1vh;
+  background: rgba(255,255,255,0.03);
+  font-size: 2.6vh;
+}
+.final-scoreboard li::before {
+  content: counter(rank);
+  min-width: 2.5vw;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  opacity: 0.4;
+  font-size: 2vh;
+}
+.final-scoreboard li .name { flex: 1; }
+.final-scoreboard li .pts  { font-weight: 600; opacity: 0.85; }
+.final-scoreboard li.winner {
+  background: linear-gradient(90deg, rgba(250, 204, 21, 0.15), transparent);
+  color: #facc15;
+}
+.final-scoreboard li.winner::before {
+  content: '🥇';
+  font-size: 2.6vh;
+}
+
 /* ───── image-recognition panels ───────────────────────────────────── */
 .image-display {
   font-size: 32vh;

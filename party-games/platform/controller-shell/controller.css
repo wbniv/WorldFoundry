@@ -96,3 +96,100 @@ google-cast-launcher {
 .cast-state[data-state="connected"] { color: #60a5fa; opacity: 1; }
 .cast-state[data-state="connecting"] { color: #facc15; }
 .cast-state[data-state="unavail"] { opacity: 0.4; }
+
+/* Outcome overlay ──────────────────────────────────────────────────────── */
+.outcome {
+  position: fixed; inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3vh;
+  padding: 4vh 6vw;
+  text-align: center;
+  z-index: 10;
+  overflow: hidden;
+  animation: outcome-fade-in 0.4s ease-out;
+}
+.outcome[hidden] { display: none; }
+.outcome.win {
+  background: radial-gradient(ellipse at center, #1c4c2a 0%, #0a1e12 60%, #0c0f14 100%);
+  color: #f0fdf4;
+}
+.outcome.lose {
+  background: radial-gradient(ellipse at center, #2a2230 0%, #121017 60%, #0c0f14 100%);
+  color: #cbcad1;
+}
+@keyframes outcome-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.outcome-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2vh;
+  z-index: 1;
+}
+.outcome-headline {
+  font-size: 3.2rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+.outcome.win .outcome-headline {
+  background: linear-gradient(90deg, #fde047, #facc15, #86efac);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: headline-pulse 0.6s ease-in-out infinite alternate;
+}
+.outcome.lose .outcome-headline { opacity: 0.85; }
+@keyframes headline-pulse {
+  from { transform: scale(1); }
+  to   { transform: scale(1.05); }
+}
+.outcome-subline {
+  font-size: 1.2rem;
+  opacity: 0.75;
+  line-height: 1.45;
+}
+.outcome-scoreboard {
+  list-style: none;
+  font-size: 1rem;
+  padding: 1vh 0;
+  line-height: 1.7;
+  min-width: 60%;
+}
+.outcome-scoreboard li {
+  padding: 0.6vh 1rem;
+  border-radius: 0.6rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.outcome-scoreboard li.me {
+  background: rgba(255,255,255,0.08);
+  font-weight: 600;
+}
+.outcome-scoreboard li.winner {
+  color: #facc15;
+}
+
+/* Confetti: emoji particles dropping/drifting; purely decorative. */
+.confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.confetti[hidden] { display: none; }
+.confetti span {
+  position: absolute;
+  top: -10vh;
+  font-size: 2rem;
+  animation: confetti-fall linear infinite;
+  will-change: transform;
+}
+@keyframes confetti-fall {
+  0%   { transform: translate3d(0, -10vh, 0) rotate(0deg);    opacity: 1; }
+  100% { transform: translate3d(0, 110vh, 0) rotate(720deg);  opacity: 0.7; }
+}

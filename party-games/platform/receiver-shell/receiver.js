@@ -137,7 +137,7 @@ function handle(msg) {
 
     case 'GAME_OVER':
       winnerNameEl.textContent = msg.name;
-      renderScoreboard(msg.scores, finalScoreEl);
+      renderFinalScoreboard(msg.scores, msg.winnerId, finalScoreEl);
       showPanel('GAME_OVER');
       break;
 
@@ -216,6 +216,30 @@ function renderScoreboard(scores, el) {
   for (const row of rows) {
     const li = document.createElement('li');
     li.textContent = `${row.name}: ${row.pts}`;
+    el.appendChild(li);
+  }
+}
+
+function renderFinalScoreboard(scores, winnerId, el) {
+  el.innerHTML = '';
+  const rows = Object.entries(scores || {})
+    .map(([id, pts]) => {
+      const idNum = Number(id);
+      const p = currentPlayers.find((pl) => String(pl.id) === String(id));
+      return { id: idNum, name: p?.name ?? `#${id}`, pts };
+    })
+    .sort((a, b) => b.pts - a.pts);
+  for (const row of rows) {
+    const li = document.createElement('li');
+    if (row.id === winnerId) li.classList.add('winner');
+    const nameEl = document.createElement('span');
+    nameEl.className = 'name';
+    nameEl.textContent = row.name;
+    const ptsEl = document.createElement('span');
+    ptsEl.className = 'pts';
+    ptsEl.textContent = `${row.pts} pt${row.pts === 1 ? '' : 's'}`;
+    li.appendChild(nameEl);
+    li.appendChild(ptsEl);
     el.appendChild(li);
   }
 }

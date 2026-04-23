@@ -19,6 +19,11 @@ const statusEl      = document.getElementById('status');
 const nameEl        = document.getElementById('name');
 const btn           = document.getElementById('ping');
 const castStateEl   = document.getElementById('cast-state');
+const outcomeEl         = document.getElementById('outcome');
+const outcomeHeadlineEl = document.getElementById('outcome-headline');
+const outcomeSublineEl  = document.getElementById('outcome-subline');
+const outcomeScoreEl    = document.getElementById('outcome-scoreboard');
+const confettiEl        = document.getElementById('confetti');
 
 nameEl.textContent = `Hi, ${name}.`;
 
@@ -26,6 +31,7 @@ let myId = null;
 let hostId = null;
 let phase = 'LOBBY';        // mirror of game phase, updated on PHASE broadcasts
 let lockedOutThisRound = false;
+let players = new Map();    // id → name, updated from STATE broadcasts; used to render the end-of-game scoreboard overlay
 
 function refreshButton() {
   // Button label + behaviour depend on game phase.
@@ -124,16 +130,25 @@ function handleMessage(ev) {
       break;
     case 'STATE':
       hostId = msg.hostId;
+      // Rebuild the id→name map so the end-of-game scoreboard can label rows.
+      players = new Map((msg.players || []).map((p) => [p.id, p.name]));
       refreshButton();
       break;
     case 'PHASE':
       if (phase !== msg.phase) {
+        const wasGameOver = phase === 'GAME_OVER';
         phase = msg.phase;
         // Reset lockout at the top of any fresh round. ROUND_COUNTDOWN (reaction)
         // and REVEAL (image) are both the "entering a new round" phase.
         if (phase === 'ROUND_COUNTDOWN' || phase === 'REVEAL') lockedOutThisRound = false;
+        // Dismiss the end-of-game overlay as soon as we're out of GAME_OVER —
+        // typically the host tapping NEW_GAME triggers PHASE=LOBBY.
+        if (wasGameOver && phase !== 'GAME_OVER') hideOutcome();
         refreshButton();
       }
+      break;
+    case 'GAME_OVER':
+      showOutcome(msg);
       break;
     case 'EARLY_PRESS':
       if (msg.playerId === myId) {
@@ -158,6 +173,67 @@ document.addEventListener('visibilitychange', () => {
     connect();
   }
 });
+
+// ───── end-of-game overlay ─────────────────────────────────────────────────
+
+function showOutcome(gameOver) {
+  const isWinner = gameOver.winnerId === myId;
+  outcomeEl.classList.toggle('win',  isWinner);
+  outcomeEl.classList.toggle('lose', !isWinner);
+
+  if (isWinner) {
+    outcomeHeadlineEl.textContent = 'YOU WIN';
+    outcomeSublineEl.textContent = 'First to 10 points. Nicely done.';
+    spawnConfetti();
+    confettiEl.hidden = false;
+  } else {
+    outcomeHeadlineEl.textContent = 'Game over';
+    const winnerName = gameOver.name || 'someone';
+    outcomeSublineEl.textContent = `${winnerName} won this round.`;
+    confettiEl.hidden = true;
+    confettiEl.innerHTML = '';
+  }
+
+  // Build scoreboard: highest to lowest, highlight winner and self.
+  outcomeScoreEl.innerHTML = '';
+  const rows = Object.entries(gameOver.scores || {})
+    .map(([id, pts]) => ({ id: Number(id), pts, name: players.get(Number(id)) || `Player ${id}` }))
+    .sort((a, b) => b.pts - a.pts);
+  for (const r of rows) {
+    const li = document.createElement('li');
+    if (r.id === gameOver.winnerId) li.classList.add('winner');
+    if (r.id === myId) li.classList.add('me');
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = r.name + (r.id === myId ? ' (you)' : '');
+    const ptsSpan = document.createElement('span');
+    ptsSpan.textContent = `${r.pts} pt${r.pts === 1 ? '' : 's'}`;
+    li.appendChild(nameSpan);
+    li.appendChild(ptsSpan);
+    outcomeScoreEl.appendChild(li);
+  }
+
+  outcomeEl.hidden = false;
+}
+
+function hideOutcome() {
+  outcomeEl.hidden = true;
+  confettiEl.hidden = true;
+  confettiEl.innerHTML = '';
+}
+
+function spawnConfetti() {
+  const pieces = ['🎉', '🎊', '⭐', '✨', '🏆', '🥇'];
+  confettiEl.innerHTML = '';
+  const N = 28;
+  for (let i = 0; i < N; i++) {
+    const s = document.createElement('span');
+    s.textContent = pieces[Math.floor(Math.random() * pieces.length)];
+    s.style.left = `${Math.random() * 100}%`;
+    s.style.animationDuration = `${2.5 + Math.random() * 2.5}s`;
+    s.style.animationDelay = `${Math.random() * 1.2}s`;
+    confettiEl.appendChild(s);
+  }
+}
 
 // ───── button handler ──────────────────────────────────────────────────────
 
