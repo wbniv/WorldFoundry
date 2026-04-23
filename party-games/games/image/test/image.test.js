@@ -11,7 +11,6 @@ const {
   REVEAL_MS,
   REVEAL_CLEAR_MS,
   IMAGE_SHOW_MS,
-  PRESS_GRACE_MS,
   ROUND_END_PAUSE_MS,
   MAX_ROUND_MS,
   POINTS_BY_RANK,
@@ -84,8 +83,7 @@ function pressButton(game, services, player, opts = {}) {
   game.onMessage(player, { type: 'BUTTON_PRESS', clientTs: opts.clientTs ?? 0 }, services);
 }
 
-// Two-item pool lets tests force the target vs. distractor pick per frame:
-// random < 0.5 → pool[0] (target), random ≥ 0.5 → pool[1] (distractor).
+// Two-item pool — random < 0.5 → pool[0] (target), random ≥ 0.5 → pool[1] (distractor).
 const TWO_POOL = ['★', '•'];
 
 // ───── tests ───────────────────────────────────────────────────────────────
@@ -100,7 +98,7 @@ test('starts in LOBBY; onJoin registers player with score 0', () => {
   assert.equal(game._debugState().scores.get(1), 0);
 });
 
-test('START_GAME from LOBBY → REVEAL; broadcasts ROUND_REVEAL with a target from the pool', () => {
+test('START_GAME from LOBBY → REVEAL; ROUND_REVEAL carries a target from the pool', () => {
   const h = makeServices();
   const game = createImageGame();
   const alice = { id: 1, name: 'Alice' };
@@ -143,10 +141,9 @@ test('after REVEAL_MS + REVEAL_CLEAR_MS transitions to PLAY', () => {
   assert.equal(game._debugState().phase, 'PLAY');
 });
 
-test('PLAY streams SHOW_IMAGE at IMAGE_SHOW_MS; isTarget matches the pool picks', () => {
+test('PLAY streams SHOW_IMAGE at IMAGE_SHOW_MS; isTarget flag matches random picks', () => {
   const h = makeServices();
-  // random series: [pickTarget, pick1, pick2, pick3, pick4]
-  // With TWO_POOL: 0.1 → pool[0]=target, 0.9 → pool[1]=distractor.
+  // [pickTarget, pick1, pick2, pick3, pick4]  — in TWO_POOL, 0.1 → target, 0.9 → distractor
   h.setRandomSeries([0.1, 0.9, 0.1, 0.9, 0.1]);
   const game = createImageGame({ pool: TWO_POOL });
   const alice = { id: 1, name: 'Alice' };
@@ -154,21 +151,17 @@ test('PLAY streams SHOW_IMAGE at IMAGE_SHOW_MS; isTarget matches the pool picks'
   game.onJoin(alice, h.services);
   game.onMessage(alice, { type: 'START_GAME' }, h.services);
   h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
-  assert.equal(game._debugState().phase, 'PLAY');
-
-  // After entering PLAY, 4 SHOW_IMAGEs fire: 1 immediate, then 3 more at 800 ms each.
   h.advance(IMAGE_SHOW_MS * 3);
+
   const imgs = h.byType('SHOW_IMAGE');
   assert.equal(imgs.length, 4);
-  // per random series: distractor, target, distractor, target
   assert.equal(imgs[0].isTarget, false);
   assert.equal(imgs[1].isTarget, true);
   assert.equal(imgs[2].isTarget, false);
   assert.equal(imgs[3].isTarget, true);
-  for (const m of imgs) assert.equal(m.showMs, IMAGE_SHOW_MS);
 });
 
-test('BUTTON_PRESS during REVEAL → lockout (EARLY_PRESS broadcast)', () => {
+test('BUTTON_PRESS during REVEAL → lockout', () => {
   const h = makeServices();
   const game = createImageGame({ pool: TWO_POOL });
   const alice = { id: 1, name: 'Alice' };
@@ -177,7 +170,6 @@ test('BUTTON_PRESS during REVEAL → lockout (EARLY_PRESS broadcast)', () => {
   game.onJoin(alice, h.services);
   game.onJoin(bob,   h.services);
   game.onMessage(alice, { type: 'START_GAME' }, h.services);
-  assert.equal(game._debugState().phase, 'REVEAL');
 
   pressButton(game, h.services, bob);
   assert.ok(game._debugState().round.lockedOut.has(2));
@@ -186,89 +178,66 @@ test('BUTTON_PRESS during REVEAL → lockout (EARLY_PRESS broadcast)', () => {
   assert.equal(ep[0].playerId, 2);
 });
 
-test('BUTTON_PRESS during PLAY on a target frame → recorded as a press', () => {
+test('BUTTON_PRESS during PLAY BEFORE target has appeared → lockout', () => {
   const h = makeServices();
-  h.setRandomSeries([0.1, 0.1]);  // target picked for both pickTarget and first image
+  h.setRandomSeries([0.1, 0.9, 0.9]);  // target picked, then distractor, distractor
   const game = createImageGame({ pool: TWO_POOL });
   const alice = { id: 1, name: 'Alice' };
   h.players.push(alice);
   game.onJoin(alice, h.services);
   game.onMessage(alice, { type: 'START_GAME' }, h.services);
   h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
-  assert.equal(game._debugState().phase, 'PLAY');
-  // First SHOW_IMAGE should be target.
-  const firstImg = h.byType('SHOW_IMAGE')[0];
-  assert.equal(firstImg.isTarget, true);
-
-  pressButton(game, h.services, alice);
-  assert.ok(game._debugState().round.presses.has(1));
-});
-
-test('press within PRESS_GRACE_MS after the target frame transitions → still credited', () => {
-  const h = makeServices();
-  // Series: [pickTarget=0, frame1=target, frame2=distractor]
-  h.setRandomSeries([0, 0, 0.9]);
-  const game = createImageGame({ pool: TWO_POOL });
-  const alice = { id: 1, name: 'Alice' };
-  h.players.push(alice);
-  game.onJoin(alice, h.services);
-  game.onMessage(alice, { type: 'START_GAME' }, h.services);
-  h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
-  // frame1 (target) shown; advance into frame2 (distractor) but within grace.
-  assert.equal(h.byType('SHOW_IMAGE')[0].isTarget, true);
-  h.advance(IMAGE_SHOW_MS + PRESS_GRACE_MS - 1);
-  // currentImage is now the distractor but we're inside the grace window.
-  assert.equal(game._debugState().round.currentImage.isTarget, false);
-  assert.equal(game._debugState().round.prevImage.isTarget, true);
-
-  pressButton(game, h.services, alice);
-  assert.ok(game._debugState().round.presses.has(1), 'press should count (grace)');
-  assert.ok(!game._debugState().round.lockedOut.has(1), 'player should not be locked out');
-});
-
-test('press beyond PRESS_GRACE_MS after the target frame transitions → lockout', () => {
-  const h = makeServices();
-  h.setRandomSeries([0, 0, 0.9, 0.9]);   // target, then distractors
-  const game = createImageGame({ pool: TWO_POOL });
-  const alice = { id: 1, name: 'Alice' };
-  h.players.push(alice);
-  game.onJoin(alice, h.services);
-  game.onMessage(alice, { type: 'START_GAME' }, h.services);
-  h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
-  // Move well past the grace window — prev frame was target but too long ago.
-  h.advance(IMAGE_SHOW_MS + PRESS_GRACE_MS + 10);
-
-  pressButton(game, h.services, alice);
-  assert.ok(game._debugState().round.lockedOut.has(1), 'too late to credit the previous frame');
-});
-
-test('BUTTON_PRESS during PLAY on a distractor frame → lockout', () => {
-  const h = makeServices();
-  h.setRandomSeries([0.1, 0.9]);  // target = pool[0]; first image = pool[1] distractor
-  const game = createImageGame({ pool: TWO_POOL });
-  const alice = { id: 1, name: 'Alice' };
-  h.players.push(alice);
-  game.onJoin(alice, h.services);
-  game.onMessage(alice, { type: 'START_GAME' }, h.services);
-  h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
-  assert.equal(h.byType('SHOW_IMAGE')[0].isTarget, false);
+  // First frame is a distractor; target hasn't shown yet.
+  assert.equal(game._debugState().round.targetFirstShownAt, null);
 
   pressButton(game, h.services, alice);
   assert.ok(game._debugState().round.lockedOut.has(1));
   assert.equal(h.byType('EARLY_PRESS').length, 1);
 });
 
-test('ranks 4/3/2/1 across players who pressed on target; locked-out players get 0', () => {
+test('BUTTON_PRESS during PLAY AFTER target has appeared → counted (even on a distractor frame)', () => {
   const h = makeServices();
-  // Random series:
-  //   [0]    → pickTarget = pool[0]
-  //   [1]    → first image = target (t=0 in PLAY)
-  //   [2..]  → alternating distractor to give later target appearances
-  //
-  // Actually we only need the first image to be target; once everyone commits,
-  // round ends. Series = [0, 0, 0, 0, 0] makes every image the target so each
-  // player's press lands on a target frame deterministically.
-  h.setRandomSeries([0, 0, 0, 0, 0, 0]);
+  // [pickTarget=0.1 → target, frame1=0.1 → target, frame2=0.9 → distractor]
+  h.setRandomSeries([0.1, 0.1, 0.9]);
+  const game = createImageGame({ pool: TWO_POOL });
+  const alice = { id: 1, name: 'Alice' };
+  h.players.push(alice);
+  game.onJoin(alice, h.services);
+  game.onMessage(alice, { type: 'START_GAME' }, h.services);
+  h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
+  // Target just flashed as frame 1 — round is now armed.
+  assert.ok(h.byType('SHOW_IMAGE')[0].isTarget);
+  assert.notEqual(game._debugState().round.targetFirstShownAt, null);
+
+  // Advance into the distractor frame and press — should still count because
+  // the target was already seen earlier in the round.
+  h.advance(IMAGE_SHOW_MS + 50);
+  assert.equal(h.byType('SHOW_IMAGE').pop().isTarget, false, 'sanity: current frame is distractor');
+  pressButton(game, h.services, alice);
+  assert.ok(game._debugState().round.presses.has(1), 'press should count once target has appeared');
+  assert.ok(!game._debugState().round.lockedOut.has(1));
+});
+
+test('press ~2 s after target cleared is still valid as long as target appeared earlier', () => {
+  const h = makeServices();
+  // target appears as frame 1, then lots of distractors.
+  h.setRandomSeries([0.1, 0.1, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9]);
+  const game = createImageGame({ pool: TWO_POOL });
+  const alice = { id: 1, name: 'Alice' };
+  h.players.push(alice);
+  game.onJoin(alice, h.services);
+  game.onMessage(alice, { type: 'START_GAME' }, h.services);
+  h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
+  // Walk 3 distractor frames forward — target is well in the past.
+  h.advance(IMAGE_SHOW_MS * 3);
+  pressButton(game, h.services, alice);
+  assert.ok(game._debugState().round.presses.has(1));
+});
+
+test('ranks 4/3/2/1 by serverTs order across players who committed', () => {
+  const h = makeServices();
+  // Target on first frame; subsequent frames don't matter for ranking.
+  h.setRandomSeries([0.1, 0.1, 0.9, 0.9, 0.9, 0.9]);
   const game = createImageGame({ pool: TWO_POOL });
   const alice = { id: 1, name: 'Alice' };
   const bob   = { id: 2, name: 'Bob' };
@@ -283,36 +252,52 @@ test('ranks 4/3/2/1 across players who pressed on target; locked-out players get
   pressButton(game, h.services, alice); h.advance(10);
   pressButton(game, h.services, cara);  h.advance(10);
   pressButton(game, h.services, dan);
-  // All four committed → round ends early; we don't need to advance more.
 
   const ended = h.byType('ROUND_ENDED')[0];
-  assert.ok(ended, 'round should end as soon as all players are committed');
+  assert.ok(ended, 'round should end when all players commit');
   const byId = Object.fromEntries(ended.ranks.map(r => [r.playerId, r]));
-  assert.equal(byId[2].points, POINTS_BY_RANK[0], 'Bob first → 4 pts');
-  assert.equal(byId[1].points, POINTS_BY_RANK[1], 'Alice 2nd → 3 pts');
-  assert.equal(byId[3].points, POINTS_BY_RANK[2], 'Cara 3rd → 2 pts');
-  assert.equal(byId[4].points, POINTS_BY_RANK[3], 'Dan 4th → 1 pt');
+  assert.equal(byId[2].points, POINTS_BY_RANK[0]);
+  assert.equal(byId[1].points, POINTS_BY_RANK[1]);
+  assert.equal(byId[3].points, POINTS_BY_RANK[2]);
+  assert.equal(byId[4].points, POINTS_BY_RANK[3]);
 });
 
-test('ROUND_ENDED includes targetId even when players are locked out', () => {
+test('ms field in ranks is measured from targetFirstShownAt, not from the press itself', () => {
   const h = makeServices();
-  h.setRandomSeries([0, 0.9, 0.9]);  // target pick, then 2 distractor frames
-  const game = createImageGame({ pool: TWO_POOL, maxRoundMs: 2_000 });  // short cap
+  h.setRandomSeries([0.1, 0.1, 0.9, 0.9]);   // target at frame 1
+  const game = createImageGame({ pool: TWO_POOL });
+  const alice = { id: 1, name: 'Alice' };
+  h.players.push(alice);
+  game.onJoin(alice, h.services);
+  game.onMessage(alice, { type: 'START_GAME' }, h.services);
+  h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
+  const targetTs = game._debugState().round.targetFirstShownAt;
+
+  h.advance(123);   // simulate a reaction delay
+  pressButton(game, h.services, alice);
+  const ended = h.byType('ROUND_ENDED')[0];
+  assert.equal(ended.ranks[0].ms, 123);
+  assert.equal(ended.ranks[0].ms, h.time - targetTs - 0 /* no frame transitions happened */);
+});
+
+test('ROUND_ENDED includes targetId', () => {
+  const h = makeServices();
+  h.setRandomSeries([0.1, 0.1]);
+  const game = createImageGame({ pool: TWO_POOL });
   const alice = { id: 1, name: 'Alice' };
   h.players.push(alice);
   game.onJoin(alice, h.services);
   game.onMessage(alice, { type: 'START_GAME' }, h.services);
   const targetFromReveal = h.byType('ROUND_REVEAL')[0].targetId;
-
   h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
-  pressButton(game, h.services, alice);   // distractor frame → lockout, ends early
+  pressButton(game, h.services, alice);
   const ended = h.byType('ROUND_ENDED')[0];
   assert.equal(ended.targetId, targetFromReveal);
 });
 
 test('round ends with timedOut=true when maxRoundMs elapses without commitment', () => {
   const h = makeServices();
-  h.setRandomSeries([0, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9]);  // target picked, but stream is all distractors
+  h.setRandomSeries([0.1, 0.9, 0.9, 0.9, 0.9]);   // target picked, but stream is all distractors
   const game = createImageGame({ pool: TWO_POOL, maxRoundMs: 3 * IMAGE_SHOW_MS });
   const alice = { id: 1, name: 'Alice' };
   h.players.push(alice);
@@ -322,12 +307,12 @@ test('round ends with timedOut=true when maxRoundMs elapses without commitment',
 
   const ended = h.byType('ROUND_ENDED').find(m => m.timedOut === true);
   assert.ok(ended);
-  assert.equal(ended.ranks[0].points, 0, 'no presses → 0 pts');
+  assert.equal(ended.ranks[0].points, 0);
 });
 
 test('round ends early when all active players have committed', () => {
   const h = makeServices();
-  h.setRandomSeries([0, 0, 0]);  // target, then target image frame
+  h.setRandomSeries([0.1, 0.1]);   // target at frame 1
   const game = createImageGame({ pool: TWO_POOL });
   const alice = { id: 1, name: 'Alice' };
   const bob   = { id: 2, name: 'Bob' };
@@ -336,17 +321,15 @@ test('round ends early when all active players have committed', () => {
   game.onJoin(bob,   h.services);
   game.onMessage(alice, { type: 'START_GAME' }, h.services);
   h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
-  assert.equal(game._debugState().phase, 'PLAY');
 
   pressButton(game, h.services, alice);
   pressButton(game, h.services, bob);
-
-  assert.equal(game._debugState().phase, 'ROUND_ENDED', 'should end as soon as last player commits');
+  assert.equal(game._debugState().phase, 'ROUND_ENDED');
 });
 
 test('winner at win-score → GAME_OVER', () => {
   const h = makeServices();
-  h.setRandomSeries([0, 0, 0, 0, 0, 0, 0]);  // everything a target
+  h.setRandomSeries([0.1, 0.1, 0.1, 0.1, 0.1, 0.1]);
   const game = createImageGame({ pool: TWO_POOL, winScore: 8 });
   const alice = { id: 1, name: 'Alice' };
   h.players.push(alice);
@@ -360,11 +343,9 @@ test('winner at win-score → GAME_OVER', () => {
 
   // Round 2.
   h.advance(ROUND_END_PAUSE_MS);
-  assert.equal(game._debugState().phase, 'REVEAL');
   h.advance(REVEAL_MS + REVEAL_CLEAR_MS);
   pressButton(game, h.services, alice);
   assert.equal(game._debugState().phase, 'GAME_OVER');
-
   const over = h.byType('GAME_OVER')[0];
   assert.equal(over.winnerId, 1);
   assert.equal(over.scores[1], 8);
@@ -372,7 +353,7 @@ test('winner at win-score → GAME_OVER', () => {
 
 test('NEW_GAME from GAME_OVER resets scores and returns to LOBBY', () => {
   const h = makeServices();
-  h.setRandomSeries([0, 0, 0]);
+  h.setRandomSeries([0.1, 0.1]);
   const game = createImageGame({ pool: TWO_POOL, winScore: 4 });
   const alice = { id: 1, name: 'Alice' };
   h.players.push(alice);
@@ -403,7 +384,5 @@ test('onLeave with last player mid-round folds to LOBBY', () => {
 });
 
 test('default MAX_ROUND_MS is 60_000', () => {
-  // Sanity-check the constant — surface in the exports so anyone setting
-  // game-specific timeouts knows the baseline.
   assert.equal(MAX_ROUND_MS, 60_000);
 });

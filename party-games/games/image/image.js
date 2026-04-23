@@ -1,16 +1,24 @@
 // Image Recognition Game — server-side state machine. Mini-game 2.
 //
 // Plugs into platform createServer({ game: createImageGame() }).
-// Flow: REVEAL (memorise target) → PLAY (image stream; each player gets one
-// press; press during target = ranked, press during distractor = lockout) →
-// ROUND_ENDED → next / GAME_OVER.
-// Same server-receive-timestamp adjudication as the reaction game.
+// Flow: REVEAL (memorise target) → PLAY (images stream; target appears
+// somewhere in the stream and "arms" the round; any subsequent press counts,
+// ranked by server-receive timestamp) → ROUND_ENDED → next / GAME_OVER.
+//
+// Press rules:
+//   REVEAL              → press = lockout (too early)
+//   PLAY, no target yet → press = lockout (target hasn't flashed by yet)
+//   PLAY, target seen   → press = valid, ranked 4/3/2/1 by serverTs order
+//
+// The target may flash by once or several times; the "armed" flag never
+// un-arms for the round, so a press three seconds after the target cleared
+// still counts. One commit per player per round. Round ends when every
+// active player has committed, or at maxRoundMs (60 s), whichever first.
 
 const WIN_SCORE              = 10;
 const REVEAL_MS              = 3000;    // target shown at start to memorise
 const REVEAL_CLEAR_MS        =  500;    // blank between reveal and image stream
 const IMAGE_SHOW_MS          =  800;    // duration each image is on screen
-const PRESS_GRACE_MS         =  250;    // press arriving up to this soon after the target ends still counts
 const ROUND_END_PAUSE_MS     = 3000;    // pause between rounds
 const MAX_ROUND_MS           = 60000;   // how long the image stream runs if players don't all commit
 const POINTS_BY_RANK         = [4, 3, 2, 1];
@@ -90,8 +98,7 @@ function createImageGame(opts = {}) {
       id: state.roundId,
       target,
       seq: -1,
-      currentImage: null,
-      prevImage: null,        // previous frame, kept briefly for press-grace adjudication
+      targetFirstShownAt: null,  // set to serverTs when the target first appears in the stream
       presses: new Map(),
       lockedOut: new Set(),
     };
@@ -129,10 +136,8 @@ function createImageGame(opts = {}) {
     const imageId = pool[pickInt(services, 0, pool.length - 1)];
     const isTarget = imageId === r.target;
     const serverTs = services.now();
-    // Save the outgoing frame so a press arriving shortly after the transition
-    // can still be adjudicated against it (see PRESS_GRACE_MS below).
-    r.prevImage = r.currentImage;
-    r.currentImage = { imageId, isTarget, serverTs };
+    // First target appearance arms the round — any press from now on counts.
+    if (isTarget && r.targetFirstShownAt == null) r.targetFirstShownAt = serverTs;
 
     services.broadcast({
       type: 'SHOW_IMAGE',
@@ -174,11 +179,11 @@ function createImageGame(opts = {}) {
         return { playerId: p.id, name: p.name, points: 0, ms: null };
       }
       const points = POINTS_BY_RANK[idx] ?? 0;
-      // Reaction time is measured from when that player's pressed image was
-      // broadcast — i.e. the frame they actually reacted to. Falls back to
-      // null if we lost the frame record.
-      const ms = orderedPresses[idx].imageServerTs != null
-        ? orderedPresses[idx].serverTs - orderedPresses[idx].imageServerTs
+      // Reaction time is measured from when the target first flashed by
+      // (i.e. when the round became armed). Null if somehow the round ended
+      // without the target ever appearing (players all early-pressed).
+      const ms = r.targetFirstShownAt != null
+        ? orderedPresses[idx].serverTs - r.targetFirstShownAt
         : null;
       return { playerId: p.id, name: p.name, points, ms };
     });
@@ -271,36 +276,22 @@ function createImageGame(opts = {}) {
         } else if (state.phase === 'PLAY') {
           if (r.lockedOut.has(player.id)) return;
           if (r.presses.has(player.id)) return;  // one commit per round
-          const now = services.now();
-          const img = r.currentImage;
-          const prev = r.prevImage;
-          // Grace window: a press reacting to the target can arrive up to
-          // PRESS_GRACE_MS after the frame transitioned (cloudflare-tunnel
-          // latency ~50–100 ms plus human tap jitter). If the current frame
-          // is not target but the previous one was and we're still within the
-          // grace window, credit the previous frame.
-          let creditFrame = null;
-          if (img && img.isTarget) {
-            creditFrame = img;
-          } else if (prev && prev.isTarget && img && (now - img.serverTs) < PRESS_GRACE_MS) {
-            creditFrame = prev;
-          }
-
-          if (creditFrame) {
-            r.presses.set(player.id, {
-              serverTs: now,
-              clientTs: Number.isFinite(msg.clientTs) ? msg.clientTs : null,
-              imageServerTs: creditFrame.serverTs,
-              imageSeq: r.seq,
-            });
-          } else {
-            // Pressed on a distractor frame with no target in grace range → lockout.
+          // Target not yet revealed this round → press is premature → lockout.
+          // Once the target has flashed by at least once the round is "armed"
+          // and any subsequent press counts, no matter which frame is currently
+          // on screen. Ranking is pure serverTs order.
+          if (r.targetFirstShownAt == null) {
             r.lockedOut.add(player.id);
             services.broadcast({
               type: 'EARLY_PRESS',
               roundId: r.id,
               playerId: player.id,
               name: player.name,
+            });
+          } else {
+            r.presses.set(player.id, {
+              serverTs: services.now(),
+              clientTs: Number.isFinite(msg.clientTs) ? msg.clientTs : null,
             });
           }
           if (checkAllCommitted(services)) {
@@ -341,7 +332,6 @@ module.exports = {
   REVEAL_MS,
   REVEAL_CLEAR_MS,
   IMAGE_SHOW_MS,
-  PRESS_GRACE_MS,
   ROUND_END_PAUSE_MS,
   MAX_ROUND_MS,
   POINTS_BY_RANK,

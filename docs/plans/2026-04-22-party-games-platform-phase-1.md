@@ -115,10 +115,10 @@ Second reaction-family mini-game, plugged into the same platform shell via `game
 **Reshape after first play (`abee593` + current follow-up):** The static REVEAL/DISTRACTORS/TARGET carve-up felt mechanical. New design collapses the playing portion into a single **PLAY** phase where images from the pool cycle uniformly at random at 800 ms each for up to `MAX_ROUND_MS = 60 s`. The target appears naturally any time its slot comes up (≈5 % per frame with the default 20-emoji pool). Rules:
 
 - Press during REVEAL → lockout.
-- Press during PLAY when the currently-shown frame is the target → ranked (server-receive-timestamp adjudication, 4/3/2/1).
-- Press during PLAY when the currently-shown frame is a distractor → lockout. A `PRESS_GRACE_MS = 250 ms` window after the previous frame lets late-arriving presses that were made during the target still count against the target — covers cloudflare-tunnel RTT + finger-tap jitter so players aren't penalised for "I pressed when I saw it" races.
+- Press during PLAY, **before** the target has appeared in the stream at least once → lockout ("early press"; target hasn't been revealed yet).
+- Press during PLAY, **after** the target has appeared at least once → counted, ranked 4/3/2/1 by server-receive timestamp order. The currently-displayed frame doesn't matter — once the round is "armed" by the target having flashed by, any tap is a commit, even if it lands on a distractor seconds later. Ranking is pure tap order across committed players.
 - One press per round, per player. Round ends the moment every active player has either pressed or locked out, or 60 s, whichever first.
-- Target may show zero, one, or many times per round — depending on the roll.
+- Target may show zero, one, or many times per round — depending on the roll. Ideally it appears once and everyone catches it; if the first appearance is missed, later ones give a second chance (still valid under the "armed" rule).
 
 Phase names in this shape: `LOBBY → REVEAL → PLAY → ROUND_ENDED → (next round | GAME_OVER)`.
 
@@ -140,12 +140,16 @@ stateDiagram-v2
         player locked out for round
     end note
     note right of PLAY
-        BUTTON_PRESS on target frame
-          (or prev frame within
-           PRESS_GRACE_MS = 250 ms)
-          → recorded, ranked 4/3/2/1
-        BUTTON_PRESS on distractor
+        Round "arms" the first time
+          the target frame appears.
+        BUTTON_PRESS before arming
           → EARLY_PRESS, locked out
+        BUTTON_PRESS after arming
+          → recorded, ranked 4/3/2/1
+          (current frame doesn't
+           matter — the armed flag
+           never un-arms for the
+           rest of the round)
     end note
 ```
 
@@ -157,8 +161,8 @@ UI:
 - Receiver: separate REVEAL panel (target held 3 s, fades 0.5 s); PLAY reuses the image-stream panel, continuously updating. No on-screen highlight of the target frame — the game is about recognising it from the REVEAL memorisation.
 - Controller: REVEAL → "WAIT" (press locks out). PLAY → "TAP!" (press evaluated against current frame). Standard START / NEW GAME / LOCKED labels for other phases.
 
-Test coverage (47 across three runners):
-- `party-games/games/image/test/image.test.js` — 18 state-machine tests (random pool forced to 2 entries to drive target/distractor choice, failsafe, all-committed early-end, press-within-grace, press-beyond-grace).
+Test coverage (46 across three runners):
+- `party-games/games/image/test/image.test.js` — 18 state-machine tests (random pool forced to 2 entries to drive target/distractor choice, press-before-arm → lockout, press-after-arm → counted, press-long-after-target-cleared still counted, ms-field-from-targetFirstShownAt, failsafe, all-committed early-end, etc.).
 - `party-games/platform/server/test/image-integration.test.js` — 2 tests through real WebSocket server.
 - Reaction: unchanged (13 + 2).
 - Platform relay: unchanged (11 including static-file coverage).
