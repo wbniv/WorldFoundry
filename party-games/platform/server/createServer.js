@@ -84,6 +84,12 @@ function createServer(opts = {}) {
         return;
       }
       res.setHeader('content-type', MIME[path.extname(filePath)] || 'application/octet-stream');
+      // Dev loop: forbid browser caching so controller.js / receiver.js / CSS
+      // changes pushed while players have tabs open are reflected on reload
+      // without hard-refresh. When we move to production static hosting
+      // (Phase 4), we'll revisit with versioned URLs and long max-age.
+      res.setHeader('cache-control', 'no-store, no-cache, must-revalidate');
+      res.setHeader('pragma', 'no-cache');
       res.end(data);
     });
   });
