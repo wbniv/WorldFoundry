@@ -118,7 +118,9 @@ Second reaction-family mini-game, plugged into the same platform shell via `game
 - Press during PLAY, **before** the target has appeared in the stream at least once → lockout ("early press"; target hasn't been revealed yet).
 - Press during PLAY, **after** the target has appeared at least once → counted, ranked 4/3/2/1 by server-receive timestamp order. The currently-displayed frame doesn't matter — once the round is "armed" by the target having flashed by, any tap is a commit, even if it lands on a distractor seconds later. Ranking is pure tap order across committed players.
 - One press per round, per player. Round ends the moment every active player has either pressed or locked out, or 60 s, whichever first.
-- Target may show zero, one, or many times per round — depending on the roll. Ideally it appears once and everyone catches it; if the first appearance is missed, later ones give a second chance (still valid under the "armed" rule).
+- **LAST_STANDING auto-win.** If a lockout leaves exactly one player un-locked (and at least one lockout has occurred — exempts solo play), the remaining player wins the round by default: server auto-records a press for them → 4 pts, broadcasts a `LAST_STANDING` event, and ends the round immediately.
+- **GUARANTEED_TARGET_BY_SEQ = 40.** Pure uniform random on a 20-emoji pool means ~2% of rounds would never produce the target (observed live). If the target hasn't come up naturally by frame 40 (~32 s into the 60 s cap), force it on that frame.
+- Target may show once or several times per round — depending on the roll. Ideally it appears once and everyone catches it; if the first appearance is missed, later ones give a second chance (still valid under the "armed" rule).
 
 Phase names in this shape: `LOBBY → REVEAL → PLAY → ROUND_ENDED → (next round | GAME_OVER)`.
 
@@ -126,9 +128,14 @@ Phase names in this shape: `LOBBY → REVEAL → PLAY → ROUND_ENDED → (next 
 stateDiagram-v2
     [*] --> LOBBY
     LOBBY --> REVEAL: START_GAME (host only)\nnew target picked\nscores retained
+    REVEAL --> REVEAL: BUTTON_PRESS → EARLY_PRESS\nplayer locked out
+    REVEAL --> ROUND_ENDED: LAST_STANDING\n(lockout left 1 player un-locked)
     REVEAL --> PLAY: after 3 s reveal + 0.5 s clear\n(ROUND_REVEAL broadcast)
-    PLAY --> PLAY: every 800 ms:\nSHOW_IMAGE (uniform-random pick)\ntarget naturally appears ~5% per frame
+    PLAY --> PLAY: every 800 ms:\nSHOW_IMAGE (uniform-random pick\nor forced-target at seq 40)
+    PLAY --> PLAY: BUTTON_PRESS pre-arming\n→ EARLY_PRESS, locked out
+    PLAY --> PLAY: BUTTON_PRESS post-arming\n→ PRESS_RECORDED, 4/3/2/1 rank
     PLAY --> ROUND_ENDED: all players committed\n(each pressed or locked out)
+    PLAY --> ROUND_ENDED: LAST_STANDING\n(lockout left 1 player un-locked)
     PLAY --> ROUND_ENDED: maxRoundMs (60 s failsafe)\nROUND_ENDED.timedOut = true
     ROUND_ENDED --> REVEAL: after 3 s pause\n(next round; scores kept)
     ROUND_ENDED --> GAME_OVER: any player hit winScore\n(default 10)
@@ -139,25 +146,26 @@ stateDiagram-v2
         Player joining now
           receives a PHASE:REVEAL
           catch-up (onJoin → sendTo)
-        BUTTON_PRESS
-          → EARLY_PRESS
-          → locked out for round
     end note
     note right of PLAY
         Round "arms" the first time
           the target frame appears
           (targetFirstShownAt set once,
            never cleared within round).
-        BUTTON_PRESS before arming
-          → EARLY_PRESS, locked out
-        BUTTON_PRESS after arming
-          → recorded, ranked 4/3/2/1
-          by serverTs order.
-        Target may flash by multiple
-          times; only the first one
-          matters for adjudication.
-        Currently-displayed frame is
+        Current-frame-on-screen is
           irrelevant once armed.
+        Target forced to appear at
+          seq=40 if uniform random
+          hasn't surfaced it yet.
+    end note
+    note left of ROUND_ENDED
+        Emitted on any exit path:
+          all-committed / timedOut /
+          LAST_STANDING. Payload carries
+          {roundId, ranks, scores,
+           targetId, timedOut?}.
+        LAST_STANDING also fires its
+          own broadcast just before.
     end note
     note left of ROUND_ENDED
         ROUND_ENDED carries
@@ -206,7 +214,7 @@ Other client-side details that aren't state-machine-shaped:
 - **Receiver no-cache.** Server sets `Cache-Control: no-store` on static files so reloaded tabs always get fresh JS (avoids cached-out-of-date controller dropping into a removed phase case).
 - **CAF gate.** Receiver's `ctx.start()` is gated on a Cast-capable user agent (`CrKey|Android TV|Tizen|webOS`). In a plain browser we skip CAF entirely, which silences the `ws://localhost:8008/v2/ipc` reconnect spam that would otherwise fill the console.
 
-Messages beyond the platform base: `ROUND_REVEAL {targetId, showMs, clearMs}`, `SHOW_IMAGE {seq, imageId, showMs, isTarget, serverTs}`, plus the shared `PHASE / EARLY_PRESS / ROUND_ENDED {… timedOut?} / GAME_OVER`.
+Messages beyond the platform base: `ROUND_REVEAL {targetId, showMs, clearMs}`, `SHOW_IMAGE {seq, imageId, showMs, isTarget, serverTs}`, `PRESS_RECORDED {roundId, playerId, name}` (fires on successful press; used by the receiver's live commit indicator), `LAST_STANDING {roundId, playerId, name}` (auto-win announcement), plus the shared `PHASE / EARLY_PRESS / ROUND_ENDED {… timedOut?} / GAME_OVER`.
 
 Image pool: 20 visually-distinct emoji. Design doc calls for SVG at prod polish time; emoji are zero-dep and adequate for v1.
 
@@ -214,8 +222,8 @@ UI:
 - Receiver: separate REVEAL panel (target held 3 s, fades 0.5 s); PLAY reuses the image-stream panel, continuously updating. No on-screen highlight of the target frame — the game is about recognising it from the REVEAL memorisation.
 - Controller: REVEAL → "WAIT" (press locks out). PLAY → "TAP!" (press evaluated against current frame). Standard START / NEW GAME / LOCKED labels for other phases.
 
-Test coverage (46 across three runners):
-- `party-games/games/image/test/image.test.js` — 18 state-machine tests (random pool forced to 2 entries to drive target/distractor choice, press-before-arm → lockout, press-after-arm → counted, press-long-after-target-cleared still counted, ms-field-from-targetFirstShownAt, failsafe, all-committed early-end, etc.).
+Test coverage (51 across three runners):
+- `party-games/games/image/test/image.test.js` — 22 state-machine tests (random pool forced to 2 entries to drive target/distractor choice, press-before-arm → lockout, press-after-arm → counted, press-long-after-target-cleared still counted, ms-field-from-targetFirstShownAt, failsafe, all-committed early-end, `PRESS_RECORDED` broadcast, `GUARANTEED_TARGET_BY_SEQ` force-appearance, `LAST_STANDING` auto-win, etc.).
 - `party-games/platform/server/test/image-integration.test.js` — 2 tests through real WebSocket server.
 - Reaction: unchanged (13 + 2).
 - Platform relay: unchanged (11 including static-file coverage).

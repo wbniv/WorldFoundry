@@ -56,7 +56,7 @@ cd party-games/games/reaction && npm test
 cd party-games/games/image && npm test
 ```
 
-All 43 tests use the built-in `node:test` runner; no Jest / mocha dependency. Server
+All 51 tests use the built-in `node:test` runner; no Jest / mocha dependency. Server
 tests spin up isolated instances on ephemeral ports with an injected fake clock so
 the 2–9 s countdown, 3 s reveal, 800 ms per-image stream, and 3 s scoring window all
 fire instantly.

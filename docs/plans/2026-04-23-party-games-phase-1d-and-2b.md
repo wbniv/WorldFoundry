@@ -56,8 +56,19 @@ Phase 2c — end-of-game polish:
 | `cf7b5e6` | iter-4 — mobile tap-delay fix + reaction-game PRESS_RECORDED symmetry |
 | `245a502` | iter-5 — REVEAL countdown bar + shared commit indicator |
 | `8611f68` | iter-6 — soft descending-tone on losing phones |
+| `c9ca6fd` | iter-7 — round-end scoreboard animation (staggered rank reveal + badge pulse) |
+| `0a779ea` | iter-8 — 'get ready' chime on round start |
+| `802d448` | iter-9 — join/leave events on TV log |
 | `4eb763a` | plan — Phase 2c iter-2/3/4 recap |
 | `89b933c` | plan — Phase 2c iter-5/6 recap |
+| `ad6e271` | plan — expand commit log + flesh out follow-up sections |
+
+Gameplay-rule iterations (post-polish):
+| Commit | Subject |
+|--------|---------|
+| `661bfdc` | diagnose 'first tap not accepted' — optimistic press UI + server log |
+| `d791496` | image game — guarantee the target appears within each round (`GUARANTEED_TARGET_BY_SEQ = 40`) |
+| `5f0f66c` | image game — LAST_STANDING auto-win when everyone else locks out |
 
 ### Root causes uncovered during Phase 1d setup
 
@@ -119,7 +130,7 @@ Phase 2b acceptance (in-browser, achieved today):
 
 ## Phase 2c — end-of-game polish
 
-Four iterations shipped today. Mobile + desktop tested via browser tabs; TV-path still pending Phase 1d propagation.
+Nine iterations shipped today. Mobile + desktop tested via browser tabs; TV-path still pending Phase 1d propagation.
 
 - **iter-1 (`a4539fa`):** end-of-game overlay — winning phone gets gold-gradient "YOU WIN" + confetti, losing phones get a muted "Game over / <winner> won this round" screen, both show a full final scoreboard with winner highlight. TV receiver final scoreboard became an ordered podium list (🥇 on winner). Overlay dismisses on next non-`GAME_OVER` phase.
 - **iter-2 (`ce1d4de`):** haptic + Web Audio feedback on the controller. Successful press = 40 ms vibrate + 880 Hz triangle blip. Lockout = descending two-tone sawtooth buzz + 3-pulse vibrate. Win = C-major arpeggio + celebratory haptic pattern. AudioContext lazily constructed on first user-gesture click (iOS Safari requires this to unlock audio).
@@ -127,12 +138,28 @@ Four iterations shipped today. Mobile + desktop tested via browser tabs; TV-path
 - **iter-4 (`cf7b5e6`):** `touch-action: manipulation` on the controller body + big button kills the 300 ms double-tap-to-zoom delay that iOS Safari and some Android Chrome builds impose by default. Reaction game also broadcasts `PRESS_RECORDED` for protocol symmetry so a shared receiver indicator will work for both games in the future.
 - **iter-5 (`245a502`):** REVEAL countdown bar — target emoji now has a thin decaying progress bar underneath during the 3 s reveal. Commit indicator moved from inside the image-game's distractors panel up to a shared location below the stage, so it lights up for reaction-game rounds too (ROUND_COUNTDOWN handler resets the map symmetric with ROUND_REVEAL's existing reset).
 - **iter-6 (`8611f68`):** soft descending A4 → F4 triangle sigh on losing phones at GAME_OVER. No haptic — the visual overlay already signals the loss, so an extra buzz felt like piling on.
+- **iter-7 (`c9ca6fd`):** round-end scoreboard animation — rank rows reveal 1-by-1 (150 ms stagger), scoring rows get a green `+N` badge that pulses 200 ms after the row lands, locked-out rows dim to 55%, cumulative scoreboard flashes yellow on rows whose score changed this round (delayed ~1 s so the flash lands after the stagger finishes).
+- **iter-8 (`0a779ea`):** 'get ready' ascending two-note chime on each `ROUND_COUNTDOWN` / `REVEAL`. Intentionally does NOT play on target appearance — that would turn the image game into an audio-reaction contest.
+- **iter-9 (`802d448`):** STATE-diff on the receiver logs `<name> joined` / `<name> left` entries to the event log so the TV audibly/visually acknowledges the roster changing.
 
-Test count 46 → 49 across runners (one new image-game test in iter-3, one new reaction-game test in iter-4; iter-5/6 are UI-only).
+Test count 46 → 49 across runners after Phase 2c (one new image-game test in iter-3, one new reaction-game test in iter-4; iter-5/6/7/8/9 are UI-only).
+
+## Gameplay-rule iterations (post-polish)
+
+Landed after the initial polish pass, in response to live-playtest feedback on the image game:
+
+- **`661bfdc` — diagnostic + optimistic press UI.** Will reported that his first tap of a round was being silently ignored. Added (a) server-side `console.log` on every `BUTTON_PRESS` with phase + whether the target has been revealed + whether the player is already in presses/lockedOut, and (b) client-side `pressedThisRound` tracking — after firing `BUTTON_PRESS` the button immediately flips to `✓` disabled, so the player gets proof their tap left the tab even if the server rejects it. Also logs a DevTools `[click] ignored` warning when the `ws.readyState !== OPEN` guard drops a tap.
+- **`d791496` — guaranteed target appearance.** A round happened where the target never appeared at all (math: with a 20-emoji pool at 5%/frame, ~2% of 60 s rounds produce no target, and one did). Added `GUARANTEED_TARGET_BY_SEQ = 40` (~32 s in): if the natural random hasn't surfaced the target by frame 40, the next frame is forced to be the target.
+- **`5f0f66c` — LAST_STANDING auto-win.** Per user: "if there's only 1 player who hasn't been locked out, that player should win that round by default". After any EARLY_PRESS lockout (in REVEAL or PLAY), if exactly one player remains un-locked (and at least one lockout has occurred — solo-play exemption), that player gets an auto-recorded press → 4 pts and a new `LAST_STANDING { roundId, playerId, name }` broadcast announces it. `endRound`'s phase guard relaxed so REVEAL-phase auto-wins can close the round.
+
+**Rule walk-back that didn't ship:** mid-iteration the user asked "first person who gets it right should end the round (not waiting for other players)" — I implemented it, then the user remembered the 4/3/2/1 ranking was deliberate and the "waiting feels wrong" was an artifact of 2-player playtesting. Reverted before commit, so the current rule remains: all successful presses within a round rank 4/3/2/1 by serverTs, round ends when everyone has committed or `maxRoundMs` elapses (or LAST_STANDING short-circuits).
+
+Test count after these three = **51 across runners** (22 image unit + 14 reaction unit + 15 platform-server = 11 relay + 2 reaction integration + 2 image integration).
 
 Queued for future iterations:
 
-- **Round-end scoreboard animation.** Fade in new rankings; animate `+4 / +3 / +2 / +1` point-delta badges from the rank row into the running scoreboard. Biggest remaining polish item; benefits from being implemented while watching real round endings so the timing is right.
+- **Post-first-commit grace timer.** After the first player commits, start a shorter clock (10-15 s) that force-ends the round even if stragglers haven't tapped. Caps the worst-case round duration below the 60 s `maxRoundMs`. User asked about it earlier but hasn't decided; open question.
+- **Reaction game parity on LAST_STANDING + GUARANTEED_TARGET_BY_SEQ.** Only wired into the image game right now. The reaction-game countdown has a different structure (pre-committed real timer window) but the "last standing" concept would still apply.
 
 ## Follow-up
 
