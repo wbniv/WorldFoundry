@@ -24,8 +24,9 @@ Continuation of the Phase 1 platform work on a different laptop from the first s
 - Cloudflare quick tunnel: `cloudflared tunnel --url http://localhost:8080` — currently `https://helped-enjoy-calm-renewable.trycloudflare.com`.
 - Cast Console app ID: **`071CDEDD`** — "Party Games Platform (dev)", Custom Receiver, Unpublished, receiver URL pointed at the tunnel, Sender Website URL populated. Originally `A40DF337` but it got wedged (propagation never completed even after hours); recreated with Sender Details populated at creation time.
 
-### What we fixed along the way (committed)
+### What we fixed / shipped along the way (committed)
 
+Phase 1d debugging + Phase 2b build:
 | Commit | Subject |
 |--------|---------|
 | `bb1a0c5` | Phase 1d — static-asset fix + Cast SDK hardening |
@@ -41,6 +42,22 @@ Continuation of the Phase 1 platform work on a different laptop from the first s
 | `452c015` | quiet console noise — gate CAF by Cast user agent + inline favicon |
 | `908deef` | plan — flesh out the Phase 2b state diagram |
 | `b6d1d90` | plan — second mermaid diagram for the controller WS lifecycle |
+| `5cfd5b6` | plan — today's session (this file) |
+| `9fbd194` | plan — fix device-swap description (two units, not a typo) |
+| `57823fe` | plan — soften IPv4 claim + note Home-vs-Console name confusion |
+| `cd71811` | plan — flag 'Cast edits restart clock' as unverified |
+
+Phase 2c — end-of-game polish:
+| Commit | Subject |
+|--------|---------|
+| `a4539fa` | iter-1 — end-of-game outcome overlay + podium scoreboard |
+| `ce1d4de` | iter-2 — haptic + Web Audio feedback on controller |
+| `bbabf44` | iter-3 — live commit indicator on TV during PLAY |
+| `cf7b5e6` | iter-4 — mobile tap-delay fix + reaction-game PRESS_RECORDED symmetry |
+| `245a502` | iter-5 — REVEAL countdown bar + shared commit indicator |
+| `8611f68` | iter-6 — soft descending-tone on losing phones |
+| `4eb763a` | plan — Phase 2c iter-2/3/4 recap |
+| `89b933c` | plan — Phase 2c iter-5/6 recap |
 
 ### Root causes uncovered during Phase 1d setup
 
@@ -117,9 +134,21 @@ Queued for future iterations:
 
 - **Round-end scoreboard animation.** Fade in new rankings; animate `+4 / +3 / +2 / +1` point-delta badges from the rank row into the running scoreboard. Biggest remaining polish item; benefits from being implemented while watching real round endings so the timing is right.
 
-## Follow-up after Phase 1d unblocks
+## Follow-up
 
-- Commit marking 1d ✅ in the parent phase-1 plan doc and the party-games README.
-- Phase 3 (mobile polish): viewport + no-zoom, full-screen friendly, add-to-home-screen manifest.
-- Phase 4 (production): named Cloudflare tunnel so the Cast Console URL stops being a moving target; S3+CloudFront for static; Lightsail for the WS server; published Cast app review.
-- Session IDs so a reconnecting player rejoins as the same id (currently reconnect forfeits current-round score).
+**Phase 2c polish, still queued:**
+- Round-end scoreboard animation (point-delta badges `+4 / +3 / +2 / +1` flying from rank rows into the cumulative scoreboard).
+- Sound cue on target appearance during PLAY (subtle rise-tone so players who were looking away mid-stream get an audio hint). Design question: does this give an unfair advantage to the first player who hears it, or is the whole point that everyone's on the same broadcast? Probably fine since all clients get the SHOW_IMAGE at the same server tick.
+- Tune the reveal countdown-bar duration so it exits with a beat of silence before PLAY (currently shrinks to 0 exactly when CLEAR begins; could end earlier and hold at 0 briefly for visual "beat").
+
+**After Phase 1d unblocks:**
+- Mark 1d ✅ in the parent phase-1 plan doc and the party-games README.
+- Play-test on real Cast hardware with 2-4 phones. Likely surfaces mobile issues the browser-tab rehearsal doesn't (actual Cast session quirks, screen-lock-mid-round behaviour, multi-sender disagreement).
+- Any gameplay tuning that real hardware play surfaces (image timing, reveal duration, distractor density) — the existing constants are guesses.
+
+**Longer horizon (Phase 3-5):**
+- Phase 3 mobile polish: `viewport-fit=cover` is already set; add a PWA manifest + service worker so "Add to Home Screen" works; safe-area insets; landscape layout check.
+- Phase 3 room codes so multiple groups can play on the same server without colliding (currently single-room).
+- Phase 4 production: named Cloudflare tunnel (stops the Cast Console URL being a moving target every restart), S3+CloudFront for the static shells, Lightsail for the WS relay, published Cast app review.
+- Phase 4 session IDs so a reconnecting player rejoins as their original id rather than forfeiting mid-round scores.
+- Phase 5 cards game — third plugin under `games/` exercising a different mechanic (turn-based, not reaction-based) to stress-test the plugin interface.
