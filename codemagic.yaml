@@ -190,12 +190,28 @@ workflows:
       - name: Install NDK r26c if absent
         script: |
           set -euo pipefail
-          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME}}"
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          if [ -z "$SDK" ]; then
+            echo "error: ANDROID_SDK_ROOT and ANDROID_HOME are both unset" >&2; exit 1
+          fi
+          # sdkmanager lives under cmdline-tools (new layout) or tools (old layout)
+          SDKMANAGER=""
+          for candidate in \
+              "$SDK/cmdline-tools/latest/bin/sdkmanager" \
+              "$SDK/cmdline-tools/bin/sdkmanager" \
+              "$SDK/tools/bin/sdkmanager"; do
+            if [ -x "$candidate" ]; then SDKMANAGER="$candidate"; break; fi
+          done
+          if [ -z "$SDKMANAGER" ]; then
+            # last resort: search the whole SDK dir
+            SDKMANAGER="$(find "$SDK" -name sdkmanager -type f 2>/dev/null | head -1)"
+          fi
+          echo "sdkmanager: ${SDKMANAGER:-NOT FOUND}"
           if [ ! -d "$SDK/ndk/$WF_NDK_VERSION" ]; then
-            echo "Installing NDK $WF_NDK_VERSION via sdkmanager..."
-            yes | sdkmanager "ndk;$WF_NDK_VERSION"
+            echo "Installing NDK $WF_NDK_VERSION..."
+            yes | "$SDKMANAGER" "ndk;$WF_NDK_VERSION"
           else
-            echo "NDK $WF_NDK_VERSION already present at $SDK/ndk/$WF_NDK_VERSION"
+            echo "NDK $WF_NDK_VERSION already present"
           fi
 
       - name: Build debug APK
