@@ -158,3 +158,51 @@ workflows:
       - build-ios-sim/**/*.app
       - build-ios-sim/CMakeFiles/**/*.log
       - xcodebuild.log
+
+  #------------------------------------------------------------------------------
+  # android-apk-debug — debug APK (arm64-v8a) for phone + Google TV sideload.
+  #
+  # See docs/plans/2026-04-23-chromecast-googletv-port.md Phase 1.
+  # Linux minutes are free on Codemagic's individual plan.
+  # Trigger manually from the Codemagic dashboard (no webhook configured yet).
+  #------------------------------------------------------------------------------
+  android-apk-debug:
+    name: Android APK (Debug, arm64)
+    instance_type: linux_x2
+    max_build_duration: 30
+
+    environment:
+      vars:
+        # NDK r26c — matches local 26.2.11394342. sdkmanager installs it if the
+        # agent ships a different version; the exact string is the NDK directory
+        # name under $ANDROID_SDK_ROOT/ndk/.
+        WF_NDK_VERSION: "26.2.11394342"
+
+    scripts:
+      - name: Toolchain versions
+        script: |
+          set -euo pipefail
+          java -version
+          cmake --version
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-unset}"
+          echo "ANDROID_HOME=${ANDROID_HOME:-unset}"
+
+      - name: Install NDK r26c if absent
+        script: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME}}"
+          if [ ! -d "$SDK/ndk/$WF_NDK_VERSION" ]; then
+            echo "Installing NDK $WF_NDK_VERSION via sdkmanager..."
+            yes | sdkmanager "ndk;$WF_NDK_VERSION"
+          else
+            echo "NDK $WF_NDK_VERSION already present at $SDK/ndk/$WF_NDK_VERSION"
+          fi
+
+      - name: Build debug APK
+        script: |
+          set -euo pipefail
+          cd android
+          ./gradlew :app:assembleDebug
+
+    artifacts:
+      - android/app/build/outputs/apk/debug/*.apk
