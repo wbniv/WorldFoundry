@@ -34,10 +34,15 @@ const distRoundNumEl    = document.getElementById('dist-round-num');
 showPanel('LOBBY');
 
 // ───── CAF boot ────────────────────────────────────────────────────────────
-
+// Only initialise CAF when we're actually running on a Cast device. In a
+// plain browser, ctx.start() tries to connect to ws://localhost:8008/v2/ipc
+// (Chromecast's internal IPC port) — it fails and retries forever, spamming
+// the console. CrKey is the Chromecast user-agent marker; Android TV / Tizen
+// / webOS cover other Cast-capable TV platforms we might end up on.
+const looksLikeCastDevice = /CrKey|AndroidTV|Android TV|Tizen\/|web0s/i.test(navigator.userAgent);
 let isCastContext = false;
 let castSessionDetail = '';
-if (typeof cast !== 'undefined' && cast.framework) {
+if (looksLikeCastDevice && typeof cast !== 'undefined' && cast.framework) {
   try {
     const ctx = cast.framework.CastReceiverContext.getInstance();
     ctx.addEventListener(cast.framework.system.EventType.READY, () => {
