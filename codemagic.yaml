@@ -209,7 +209,9 @@ workflows:
           echo "sdkmanager: ${SDKMANAGER:-NOT FOUND}"
           if [ ! -d "$SDK/ndk/$WF_NDK_VERSION" ]; then
             echo "Installing NDK $WF_NDK_VERSION..."
-            yes | "$SDKMANAGER" "ndk;$WF_NDK_VERSION"
+            # 'yes' exits with SIGPIPE (141) once sdkmanager closes stdin;
+            # run in a subshell with pipefail off so that doesn't fail the step.
+            ( set +o pipefail; yes | "$SDKMANAGER" "ndk;$WF_NDK_VERSION" )
           else
             echo "NDK $WF_NDK_VERSION already present"
           fi
