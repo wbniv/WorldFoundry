@@ -100,14 +100,14 @@ test('image game end-to-end: reveal → play → all players commit → ranked s
 
   try {
     const recv = await openClient(base);
-    send(recv.ws, { type: 'HELLO', role: 'receiver' });
+    send(recv.ws, { type: 'HELLO', role: 'receiver', room: 'ABCD' });
     await recv.waitFor((m) => m.type === 'STATE');
 
     const alice = await openClient(base);
-    send(alice.ws, { type: 'HELLO', role: 'controller', name: 'Alice' });
+    send(alice.ws, { type: 'HELLO', role: 'controller', name: 'Alice', room: 'ABCD' });
     await alice.waitFor((m) => m.type === 'WELCOME');
     const bob = await openClient(base);
-    send(bob.ws, { type: 'HELLO', role: 'controller', name: 'Bob' });
+    send(bob.ws, { type: 'HELLO', role: 'controller', name: 'Bob', room: 'ABCD' });
     await bob.waitFor((m) => m.type === 'WELCOME');
     await recv.waitFor((m) => m.type === 'STATE' && m.players.length === 2);
 
@@ -158,9 +158,9 @@ test('image game end-to-end: early press during REVEAL locks out the presser', a
 
   try {
     const recv = await openClient(base);
-    send(recv.ws, { type: 'HELLO', role: 'receiver' });
+    send(recv.ws, { type: 'HELLO', role: 'receiver', room: 'ABCD' });
     const alice = await openClient(base);
-    send(alice.ws, { type: 'HELLO', role: 'controller', name: 'Alice' });
+    send(alice.ws, { type: 'HELLO', role: 'controller', name: 'Alice', room: 'ABCD' });
     await alice.waitFor((m) => m.type === 'WELCOME');
 
     send(alice.ws, { type: 'START_GAME' });

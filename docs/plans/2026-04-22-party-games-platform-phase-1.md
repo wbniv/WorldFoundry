@@ -222,12 +222,31 @@ UI:
 - Receiver: separate REVEAL panel (target held 3 s, fades 0.5 s); PLAY reuses the image-stream panel, continuously updating. No on-screen highlight of the target frame — the game is about recognising it from the REVEAL memorisation.
 - Controller: REVEAL → "WAIT" (press locks out). PLAY → "TAP!" (press evaluated against current frame). Standard START / NEW GAME / LOCKED labels for other phases.
 
-Test coverage (52 across three runners):
+Test coverage (56 across three runners):
 - `party-games/games/image/test/image.test.js` — 22 state-machine tests (random pool forced to 2 entries to drive target/distractor choice, press-before-arm → lockout, press-after-arm → counted, press-long-after-target-cleared still counted, ms-field-from-targetFirstShownAt, failsafe, all-committed early-end, `PRESS_RECORDED` broadcast, `GUARANTEED_TARGET_BY_SEQ` force-appearance, `LAST_STANDING` auto-win, etc.).
 - `party-games/games/reaction/test/reaction.test.js` — 15 state-machine tests including `PRESS_RECORDED` broadcast and `LAST_STANDING` auto-win in countdown.
 - `party-games/platform/server/test/image-integration.test.js` — 2 tests through real WebSocket server.
 - Reaction: unchanged (13 + 2).
 - Platform relay: unchanged (11 including static-file coverage).
+
+### Phase 3: Room codes ✅ (multi-room support shipped)
+
+Server refactored from a single shared room to a `Map<code, Room>`. Each room has its own `players` + `receivers` sets, its own player-id counter (starting at 1), and its own game plugin instance (`gameFactory()` called once per room, so state can't leak across rooms).
+
+Room codes are 4 uppercase letters from a 23-char alphabet (Latin caps minus I/O/Q) — ~280k distinct codes. Rooms are created on first HELLO that references them and destroyed when their last member disconnects.
+
+HELLO protocol gains a `room` field:
+- Receiver may omit it; server generates a fresh code and returns it in `WELCOME_RECEIVER`.
+- Receiver with `room: 'XXXX'` joins (or creates) that specific code.
+- Controller must supply a valid-shaped code; server responds `NEED_ROOM` if missing, `BAD_ROOM` if malformed.
+
+Controller URL convention: `?room=ABCD`. If absent, a room-gate modal blocks the UI until the user enters a code (the one the receiver is displaying).
+
+Receiver UI shows the room code in a prominent gold/green gradient on the header so players can read it off the TV and type it into their phones. `history.replaceState` writes the assigned code into the URL on first WELCOME so refreshing keeps the same room.
+
+Broadcasts are now room-scoped — a `PING` from one room's controller can't reach the receiver of another. Verified by a new `relay.test.js` case that opens two rooms on the same server and asserts traffic isolation.
+
+Other Phase 3 items still queued (below).
 
 ### Phase 3+ — UX polish, PWA manifest, mobile CSS, cards game, production hosting
 
@@ -263,7 +282,7 @@ No bundler, no framework. Plain HTML/CSS/JS + Node http + `ws`.
 - PWA manifest / service worker — Phase 3.
 - Apple TV / Fire TV / browser-on-HDMI matrix polish — Phase 3.
 - Cloudflare Tunnel → named tunnel → zero-trust reserved URL — Phase 4 (trycloudflare random URLs are fine for dev).
-- Room codes / multi-room — Phase 2 when reaction game needs isolation.
+- ~~Room codes / multi-room — Phase 2 when reaction game needs isolation.~~ **Shipped** — see §Phase 3: Room codes.
 
 ## Verification
 

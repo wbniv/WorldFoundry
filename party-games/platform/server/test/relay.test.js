@@ -81,7 +81,7 @@ function close(ws) {
 
 test('receiver gets empty STATE on HELLO', withServer(async ({ base }) => {
   const recv = await openClient(base);
-  send(recv.ws, { type: 'HELLO', role: 'receiver' });
+  send(recv.ws, { type: 'HELLO', role: 'receiver', room: 'ABCD' });
   const state = await recv.waitFor(m => m.type === 'STATE');
   assert.deepEqual(state.players, []);
   await close(recv.ws);
@@ -89,11 +89,11 @@ test('receiver gets empty STATE on HELLO', withServer(async ({ base }) => {
 
 test('controller HELLO yields WELCOME and broadcasts STATE', withServer(async ({ base }) => {
   const recv = await openClient(base);
-  send(recv.ws, { type: 'HELLO', role: 'receiver' });
+  send(recv.ws, { type: 'HELLO', role: 'receiver', room: 'ABCD' });
   await recv.waitFor(m => m.type === 'STATE');
 
   const alice = await openClient(base);
-  send(alice.ws, { type: 'HELLO', role: 'controller', name: 'Alice' });
+  send(alice.ws, { type: 'HELLO', role: 'controller', name: 'Alice', room: 'ABCD' });
   const welcome = await alice.waitFor(m => m.type === 'WELCOME');
   assert.equal(welcome.id, 1);
   assert.equal(welcome.name, 'Alice');
@@ -107,9 +107,9 @@ test('controller HELLO yields WELCOME and broadcasts STATE', withServer(async ({
 
 test('PING from controller yields PONG to everyone with client+server ts', withServer(async ({ base }) => {
   const recv = await openClient(base);
-  send(recv.ws, { type: 'HELLO', role: 'receiver' });
+  send(recv.ws, { type: 'HELLO', role: 'receiver', room: 'ABCD' });
   const alice = await openClient(base);
-  send(alice.ws, { type: 'HELLO', role: 'controller', name: 'Alice' });
+  send(alice.ws, { type: 'HELLO', role: 'controller', name: 'Alice', room: 'ABCD' });
   await alice.waitFor(m => m.type === 'WELCOME');
 
   const t0 = Date.now();
@@ -130,12 +130,12 @@ test('PING from controller yields PONG to everyone with client+server ts', withS
 
 test('disconnect broadcasts updated STATE without the departed player', withServer(async ({ base }) => {
   const recv = await openClient(base);
-  send(recv.ws, { type: 'HELLO', role: 'receiver' });
+  send(recv.ws, { type: 'HELLO', role: 'receiver', room: 'ABCD' });
 
   const alice = await openClient(base);
-  send(alice.ws, { type: 'HELLO', role: 'controller', name: 'Alice' });
+  send(alice.ws, { type: 'HELLO', role: 'controller', name: 'Alice', room: 'ABCD' });
   const bob = await openClient(base);
-  send(bob.ws, { type: 'HELLO', role: 'controller', name: 'Bob' });
+  send(bob.ws, { type: 'HELLO', role: 'controller', name: 'Bob', room: 'ABCD' });
   await recv.waitFor(m => m.type === 'STATE' && m.players.length === 2);
 
   const sinceIndex = recv.messages.length;
@@ -151,7 +151,7 @@ test('disconnect broadcasts updated STATE without the departed player', withServ
 
 test('PING from unregistered socket is ignored', withServer(async ({ base }) => {
   const recv = await openClient(base);
-  send(recv.ws, { type: 'HELLO', role: 'receiver' });
+  send(recv.ws, { type: 'HELLO', role: 'receiver', room: 'ABCD' });
   await recv.waitFor(m => m.type === 'STATE');
 
   const anon = await openClient(base);
@@ -165,18 +165,18 @@ test('PING from unregistered socket is ignored', withServer(async ({ base }) => 
 
 test('malformed JSON does not crash or leak state', withServer(async ({ base }) => {
   const recv = await openClient(base);
-  send(recv.ws, { type: 'HELLO', role: 'receiver' });
+  send(recv.ws, { type: 'HELLO', role: 'receiver', room: 'ABCD' });
   await recv.waitFor(m => m.type === 'STATE');
 
   const garbled = await openClient(base);
   garbled.ws.send('{not valid json');
   garbled.ws.send('42');           // valid json but not an object
   garbled.ws.send('[]');           // array
-  garbled.ws.send(JSON.stringify({ /* no type */ name: 'ghost' }));
+  garbled.ws.send(JSON.stringify({ /* no type */ name: 'ghost', room: 'ABCD' }));
   send(garbled.ws, { type: 'UNKNOWN_FANCY_TYPE' });
 
   // Now a legit HELLO must still work.
-  send(garbled.ws, { type: 'HELLO', role: 'controller', name: 'Eve' });
+  send(garbled.ws, { type: 'HELLO', role: 'controller', name: 'Eve', room: 'ABCD' });
   const welcome = await garbled.waitFor(m => m.type === 'WELCOME');
   assert.equal(welcome.name, 'Eve');
 
@@ -186,7 +186,7 @@ test('malformed JSON does not crash or leak state', withServer(async ({ base }) 
 test('name is truncated to MAX_NAME_LEN characters', withServer(async ({ base }) => {
   const client = await openClient(base);
   const long = 'x'.repeat(MAX_NAME_LEN + 20);
-  send(client.ws, { type: 'HELLO', role: 'controller', name: long });
+  send(client.ws, { type: 'HELLO', role: 'controller', name: long, room: 'ABCD' });
   const welcome = await client.waitFor(m => m.type === 'WELCOME');
   assert.equal(welcome.name.length, MAX_NAME_LEN);
   assert.equal(welcome.name, 'x'.repeat(MAX_NAME_LEN));
@@ -195,11 +195,11 @@ test('name is truncated to MAX_NAME_LEN characters', withServer(async ({ base })
 
 test('repeated HELLO from same socket is ignored (role stays first-set)', withServer(async ({ base }) => {
   const client = await openClient(base);
-  send(client.ws, { type: 'HELLO', role: 'controller', name: 'Alice' });
+  send(client.ws, { type: 'HELLO', role: 'controller', name: 'Alice', room: 'ABCD' });
   await client.waitFor(m => m.type === 'WELCOME');
 
   // Attempt to re-HELLO as receiver — should be silently ignored.
-  send(client.ws, { type: 'HELLO', role: 'receiver' });
+  send(client.ws, { type: 'HELLO', role: 'receiver', room: 'ABCD' });
   await new Promise(r => setTimeout(r, 80));
   // No second WELCOME / no fresh STATE snapshot should be sent to Alice.
   const welcomes = client.messages.filter(m => m.type === 'WELCOME');
@@ -210,11 +210,11 @@ test('repeated HELLO from same socket is ignored (role stays first-set)', withSe
 
 test('HELLO with unknown role ignored; client stays anonymous (PING drops)', withServer(async ({ base }) => {
   const recv = await openClient(base);
-  send(recv.ws, { type: 'HELLO', role: 'receiver' });
+  send(recv.ws, { type: 'HELLO', role: 'receiver', room: 'ABCD' });
   await recv.waitFor(m => m.type === 'STATE');
 
   const spectator = await openClient(base);
-  send(spectator.ws, { type: 'HELLO', role: 'spectator' });   // unknown role
+  send(spectator.ws, { type: 'HELLO', role: 'spectator', room: 'ABCD' });   // unknown role
   send(spectator.ws, { type: 'PING', clientTs: Date.now() }); // should be rejected since not a controller
   await new Promise(r => setTimeout(r, 100));
   assert.equal(recv.messages.filter(m => m.type === 'PONG').length, 0);
@@ -233,6 +233,61 @@ test('oversize payload is rejected by ws (closes connection)', withServer(async 
   client.ws.send(oversize);
   await closed;
   // Success = socket closed on its own; no crash.
+}));
+
+test('two rooms on one server are fully isolated', withServer(async ({ base }) => {
+  // Room ABCD.
+  const recvA = await openClient(base);
+  send(recvA.ws, { type: 'HELLO', role: 'receiver', room: 'ABCD' });
+  await recvA.waitFor(m => m.type === 'WELCOME_RECEIVER' && m.room === 'ABCD');
+  const aliceA = await openClient(base);
+  send(aliceA.ws, { type: 'HELLO', role: 'controller', name: 'Alice', room: 'ABCD' });
+  await aliceA.waitFor(m => m.type === 'WELCOME' && m.room === 'ABCD');
+
+  // Room WXYZ.
+  const recvB = await openClient(base);
+  send(recvB.ws, { type: 'HELLO', role: 'receiver', room: 'WXYZ' });
+  await recvB.waitFor(m => m.type === 'WELCOME_RECEIVER' && m.room === 'WXYZ');
+  const aliceB = await openClient(base);
+  send(aliceB.ws, { type: 'HELLO', role: 'controller', name: 'Alice', room: 'WXYZ' });
+  const welcomeB = await aliceB.waitFor(m => m.type === 'WELCOME' && m.room === 'WXYZ');
+  // Each room starts its own player-id counter.
+  assert.equal(welcomeB.id, 1);
+
+  // Alice-A pings — only ABCD should see it.
+  send(aliceA.ws, { type: 'PING', clientTs: Date.now() });
+  await recvA.waitFor(m => m.type === 'PONG');
+  await new Promise(r => setTimeout(r, 80));  // let any stray traffic arrive
+  assert.equal(recvB.messages.filter(m => m.type === 'PONG').length, 0,
+    'PONG from room ABCD must not reach room WXYZ');
+
+  await close(aliceA.ws); await close(recvA.ws);
+  await close(aliceB.ws); await close(recvB.ws);
+}));
+
+test('HELLO without a room rejects controllers with NEED_ROOM', withServer(async ({ base }) => {
+  const ctl = await openClient(base);
+  send(ctl.ws, { type: 'HELLO', role: 'controller', name: 'Nomad' });
+  const need = await ctl.waitFor(m => m.type === 'NEED_ROOM');
+  assert.ok(need);
+  await close(ctl.ws);
+}));
+
+test('HELLO with malformed room code rejects with BAD_ROOM', withServer(async ({ base }) => {
+  const ctl = await openClient(base);
+  send(ctl.ws, { type: 'HELLO', role: 'controller', name: 'Typo', room: 'abc1' });  // has digit + lowercase; also too short
+  const bad = await ctl.waitFor(m => m.type === 'BAD_ROOM');
+  assert.ok(bad);
+  await close(ctl.ws);
+}));
+
+test('receiver with no room gets a server-generated code back in WELCOME_RECEIVER', withServer(async ({ base }) => {
+  const recv = await openClient(base);
+  send(recv.ws, { type: 'HELLO', role: 'receiver' });  // no room
+  const welcome = await recv.waitFor(m => m.type === 'WELCOME_RECEIVER');
+  assert.ok(welcome.room, 'server should assign a code');
+  assert.match(welcome.room, /^[ABCDEFGHJKLMNPRSTUVWXYZ]{4}$/, 'code matches allowed alphabet');
+  await close(recv.ws);
 }));
 
 test('static file routing — index + sibling assets + 404', withServer(async ({ port }) => {

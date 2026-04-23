@@ -14,6 +14,9 @@ const CAST_APPLICATION_ID =
 
 const params = new URLSearchParams(location.search);
 const name = (params.get('name') || `Player ${Math.floor(Math.random() * 900 + 100)}`).slice(0, 32);
+// Room code: required to connect. If the URL has ?room=ABCD use it; otherwise
+// show the room-gate overlay and wait for the user to enter one.
+let roomCode = (params.get('room') || '').toUpperCase();
 
 const statusEl      = document.getElementById('status');
 const nameEl        = document.getElementById('name');
@@ -95,6 +98,7 @@ let reconnectAttempt = 0;
 let reconnectTimer = null;
 
 function connect() {
+  if (!roomCode) return;    // wait for room-gate submission
   if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
   statusEl.textContent = reconnectAttempt > 0 ? `reconnecting (attempt ${reconnectAttempt})…` : 'connecting…';
   ws = new WebSocket(wsUrl);
@@ -104,7 +108,7 @@ function connect() {
     // Re-identify; on reconnect the server will issue a new player id (scores
     // for any in-progress round are forfeit — acceptable trade for a usable
     // controller after a transient drop).
-    ws.send(JSON.stringify({ type: 'HELLO', role: 'controller', name }));
+    ws.send(JSON.stringify({ type: 'HELLO', role: 'controller', name, room: roomCode }));
   });
 
   ws.addEventListener('close', () => {
@@ -172,7 +176,37 @@ function handleMessage(ev) {
   }
 }
 
-connect();
+// ───── room gate ───────────────────────────────────────────────────────────
+// If the URL doesn't carry ?room=ABCD, we pop a modal that asks for one.
+// Only once the user submits a valid-shaped code do we start the WebSocket.
+
+const roomGateEl   = document.getElementById('room-gate');
+const roomFormEl   = document.getElementById('room-form');
+const roomInputEl  = document.getElementById('room-input');
+
+if (!roomCode) {
+  roomGateEl.hidden = false;
+  statusEl.textContent = 'waiting for room code';
+  roomInputEl.focus();
+  roomFormEl.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const entered = roomInputEl.value.trim().toUpperCase();
+    if (!/^[ABCDEFGHJKLMNPRSTUVWXYZ]{4}$/.test(entered)) {
+      roomInputEl.setCustomValidity('4 letters, no I/O/Q');
+      roomInputEl.reportValidity();
+      return;
+    }
+    roomCode = entered;
+    // Reflect in URL so a refresh keeps the room.
+    params.set('room', roomCode);
+    const newUrl = location.pathname + '?' + params.toString() + location.hash;
+    history.replaceState(null, '', newUrl);
+    roomGateEl.hidden = true;
+    connect();
+  });
+} else {
+  connect();
+}
 
 // When the tab comes back to foreground on mobile, kick a reconnect if the
 // socket had been suspended. The `close` event usually fires first and

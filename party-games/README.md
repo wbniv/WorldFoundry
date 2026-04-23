@@ -21,11 +21,16 @@ Server logs `party-games platform ready on http://localhost:8080` and `game plug
 
 Open three browser tabs:
 
-- Receiver: <http://localhost:8080/receiver>
-- Host controller: <http://localhost:8080/controller?name=Alice>
-- Second controller: <http://localhost:8080/controller?name=Bob>
+1. **Receiver** first — <http://localhost:8080/receiver>. The page picks a 4-letter room
+   code and displays it in the header (e.g. `HTKM`). Copy that.
+2. **Host controller** — <http://localhost:8080/controller?name=Alice&room=HTKM>
+3. **Second controller** — <http://localhost:8080/controller?name=Bob&room=HTKM>
 
-Alice is the host (first to connect). Click **START** on her tab; the receiver shows a
+Controllers without `?room=…` get a prompt asking for the code the receiver's displaying.
+Multiple rooms can run side-by-side on the same server — `…/controller?room=AAAA` and
+`…/controller?room=BBBB` land in separate isolated rooms.
+
+Alice is the host (first to connect in her room). Click **START** on her tab; the receiver shows a
 countdown bar, then a giant **GO!** The first controller to tap wins 4 pts; next 3, etc.
 Early presses get locked out for that round (0 pts). First to 10 pts wins.
 
@@ -56,7 +61,7 @@ cd party-games/games/reaction && npm test
 cd party-games/games/image && npm test
 ```
 
-All 52 tests use the built-in `node:test` runner; no Jest / mocha dependency. Server
+All 56 tests use the built-in `node:test` runner; no Jest / mocha dependency. Server
 tests spin up isolated instances on ephemeral ports with an injected fake clock so
 the 2–9 s countdown, 3 s reveal, 800 ms per-image stream, and 3 s scoring window all
 fire instantly.

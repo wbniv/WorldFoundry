@@ -154,7 +154,7 @@ Landed after the initial polish pass, in response to live-playtest feedback on t
 
 **Rule walk-back that didn't ship:** mid-iteration the user asked "first person who gets it right should end the round (not waiting for other players)" — I implemented it, then the user remembered the 4/3/2/1 ranking was deliberate and the "waiting feels wrong" was an artifact of 2-player playtesting. Reverted before commit, so the current rule remains: all successful presses within a round rank 4/3/2/1 by serverTs, round ends when everyone has committed or `maxRoundMs` elapses (or LAST_STANDING short-circuits).
 
-Test count after these three + reaction-parity = **52 across runners** (22 image unit + 15 reaction unit + 15 platform-server = 11 relay + 2 reaction integration + 2 image integration).
+Test count after these three + reaction-parity + room-codes = **56 across runners** (22 image unit + 15 reaction unit + 19 platform-server = 15 relay + 2 reaction integration + 2 image integration).
 
 Queued for future iterations:
 

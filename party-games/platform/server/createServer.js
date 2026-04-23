@@ -1,7 +1,8 @@
 // Platform relay server — factory form so tests can spin up isolated instances.
 //
 // Serves receiver-shell/ and controller-shell/ as static, exposes a WebSocket at /ws,
-// and relays HELLO / PING events between clients. Single room, in-memory state.
+// and relays HELLO / PING events between clients. Rooms are identified by a
+// 4-character code so multiple groups can share one server without colliding.
 
 const http = require('http');
 const fs = require('fs');
@@ -20,6 +21,11 @@ const MIME = {
 
 const MAX_MESSAGE_BYTES = 16 * 1024;
 const MAX_NAME_LEN = 32;
+// Room code alphabet — uppercase Latin letters with the visually ambiguous
+// ones (I, O, Q) dropped. 23^4 ≈ 280k distinct codes, plenty for our scale.
+const ROOM_ALPHA = 'ABCDEFGHJKLMNPRSTUVWXYZ';
+const ROOM_CODE_LEN = 4;
+const ROOM_CODE_RE = new RegExp(`^[${ROOM_ALPHA}]{${ROOM_CODE_LEN}}$`);
 
 function resolveStatic(url) {
   const clean = url.split('?')[0];
@@ -39,31 +45,31 @@ function resolveStatic(url) {
  * Start a platform relay instance.
  *
  * @param {object} opts
- * @param {number}  [opts.port=8080]        0 = ephemeral (tests)
- * @param {string}  [opts.staticRoot]       dir holding receiver-shell/ + controller-shell/
- * @param {boolean} [opts.quiet=false]      suppress console.log chatter (tests)
- * @param {object}  [opts.game]             optional game plugin:
- *                                            onJoin?(player, services)
- *                                            onLeave?(player, services)
- *                                            onMessage?(player, msg, services)
- *                                          where services = {
- *                                            broadcast(msg), sendTo(playerId, msg),
- *                                            getPlayers(), getHost(), now(),
- *                                            schedule(delayMs, fn) → cancel-fn
- *                                          }
- * @returns {Promise<{server, wss, port, close}>}
+ * @param {number}  [opts.port=8080]          0 = ephemeral (tests)
+ * @param {string}  [opts.staticRoot]         dir holding receiver-shell/ + controller-shell/
+ * @param {boolean} [opts.quiet=false]        suppress console.log chatter (tests)
+ * @param {function} [opts.gameFactory]       () → game plugin instance; called once per room.
+ *                                            Plugin interface: {onJoin?, onLeave?, onMessage?}
+ *                                            where services = {broadcast, sendTo, getPlayers,
+ *                                            getHost, now, schedule, random}.
+ * @param {object}  [opts.game]               DEPRECATED — single game instance shared across
+ *                                            every room. Works fine for single-room testing
+ *                                            but state collides once two rooms share it.
+ *                                            Prefer gameFactory.
+ * @returns {Promise<{server, wss, port, close, rooms}>}
  */
 function createServer(opts = {}) {
   const port = opts.port ?? 8080;
   const staticRoot = opts.staticRoot ?? path.resolve(__dirname, '..');
   const quiet = !!opts.quiet;
-  const game = opts.game ?? null;
+  const gameFactory = opts.gameFactory ?? (opts.game ? () => opts.game : null);
   const now = opts.now ?? (() => Date.now());
   const scheduleFn = opts.schedule ?? ((ms, fn) => {
     const h = setTimeout(fn, ms);
     return () => clearTimeout(h);
   });
   const log = quiet ? () => {} : (...args) => console.log(...args);
+  const random = opts.random ?? Math.random;
 
   const server = http.createServer((req, res) => {
     const mapped = resolveStatic(req.url);
@@ -100,35 +106,76 @@ function createServer(opts = {}) {
     maxPayload: MAX_MESSAGE_BYTES,
   });
 
-  const everyone  = new Set();
-  const receivers = new Set();
-  const players   = new Map();   // playerId → { id, name, ws, joinedAt }
-  let nextPlayerId = 1;
+  // ──── room registry ────────────────────────────────────────────────────────
+  // Each room holds its own player/receiver sets plus an independent game
+  // plugin instance. Rooms are created on first HELLO that references them
+  // and destroyed when their last member disconnects.
+  const rooms = new Map();  // code → Room
 
-  function snapshotState() {
+  function generateRoomCode() {
+    // Cryptographically non-essential — these codes are just for grouping
+    // players; collision is merely inconvenient.
+    while (true) {
+      let code = '';
+      for (let i = 0; i < ROOM_CODE_LEN; i++) {
+        code += ROOM_ALPHA[Math.floor(random() * ROOM_ALPHA.length)];
+      }
+      if (!rooms.has(code)) return code;
+    }
+  }
+
+  function ensureRoom(code) {
+    let room = rooms.get(code);
+    if (room) return room;
+    room = {
+      code,
+      everyone:  new Set(),
+      receivers: new Set(),
+      players:   new Map(),   // playerId → { id, name, ws, joinedAt }
+      nextPlayerId: 1,
+      game: null,
+      services: null,
+    };
+    // Game plugin is per-room so state doesn't leak across rooms.
+    room.game = gameFactory ? gameFactory() : null;
+    room.services = makeServices(room);
+    rooms.set(code, room);
+    log(`[ws] room ${code} created`);
+    return room;
+  }
+
+  function destroyRoomIfEmpty(room) {
+    if (room.everyone.size > 0) return;
+    rooms.delete(room.code);
+    log(`[ws] room ${room.code} destroyed (empty)`);
+  }
+
+  function snapshotState(room) {
     return {
       type: 'STATE',
-      players: [...players.values()].map(p => ({ id: p.id, name: p.name })),
-      hostId: firstHostId(),
+      room: room.code,
+      players: [...room.players.values()].map(p => ({ id: p.id, name: p.name })),
+      hostId: firstHostId(room),
     };
   }
 
-  function broadcast(msg, recipients = everyone) {
+  function broadcastRoom(room, msg, recipients) {
     const data = JSON.stringify(msg);
-    for (const ws of recipients) {
+    const dest = recipients ?? room.everyone;
+    for (const ws of dest) {
       if (ws.readyState === ws.OPEN) ws.send(data);
     }
   }
 
-  function sendTo(playerId, msg) {
-    const p = players.get(playerId);
+  function sendToInRoom(room, playerId, msg) {
+    const p = room.players.get(playerId);
     if (p && p.ws.readyState === p.ws.OPEN) p.ws.send(JSON.stringify(msg));
   }
 
   /** First-joined player is host; re-elect when they leave. */
-  function firstHostId() {
+  function firstHostId(room) {
     let first = null;
-    for (const p of players.values()) {
+    for (const p of room.players.values()) {
       if (!first || p.joinedAt < first.joinedAt) first = p;
     }
     return first ? first.id : null;
@@ -137,30 +184,29 @@ function createServer(opts = {}) {
   // Services surface handed to game plugins. Platform-owned message types
   // (HELLO, PING, STATE, WELCOME, PONG) stay reserved; games should use
   // distinct type names.
-  const random = opts.random ?? Math.random;
-  const services = {
-    broadcast(msg) { broadcast(msg); },
-    sendTo,
-    getPlayers() { return [...players.values()].map(p => ({ id: p.id, name: p.name })); },
-    getHost() {
-      const id = firstHostId();
-      if (id == null) return null;
-      const p = players.get(id);
-      return { id: p.id, name: p.name };
-    },
-    now,
-    schedule: scheduleFn,
-    random,
-  };
+  function makeServices(room) {
+    return {
+      broadcast(msg) { broadcastRoom(room, msg); },
+      sendTo(playerId, msg) { sendToInRoom(room, playerId, msg); },
+      getPlayers() { return [...room.players.values()].map(p => ({ id: p.id, name: p.name })); },
+      getHost() {
+        const id = firstHostId(room);
+        if (id == null) return null;
+        const p = room.players.get(id);
+        return { id: p.id, name: p.name };
+      },
+      now,
+      schedule: scheduleFn,
+      random,
+    };
+  }
 
   wss.on('connection', (ws) => {
-    everyone.add(ws);
     let role = null;
+    let room = null;        // Room reference once HELLO lands
     let playerId = null;
 
     ws.on('message', (raw) => {
-      // raw is a Buffer. The `ws` library already enforces maxPayload, so the
-      // size check here is belt-and-suspenders for downstream ws versions.
       if (raw.length > MAX_MESSAGE_BYTES) return;
 
       let msg;
@@ -170,46 +216,75 @@ function createServer(opts = {}) {
       switch (msg.type) {
         case 'HELLO': {
           if (role !== null) return;  // HELLO is not repeatable
-          role = msg.role === 'receiver' ? 'receiver'
-               : msg.role === 'controller' ? 'controller'
-               : null;
+          const requestedRole = msg.role === 'receiver' ? 'receiver'
+                              : msg.role === 'controller' ? 'controller'
+                              : null;
+          if (!requestedRole) return;  // reject unknown role; stay anonymous
+
+          // Room code: case-insensitive from client. Receivers may omit it
+          // to have the server generate a fresh one; controllers must supply
+          // a valid one (we're permissive about existence — any valid-
+          // shaped code creates the room if it doesn't exist).
+          let reqRoom = typeof msg.room === 'string' ? msg.room.toUpperCase() : '';
+          if (reqRoom && !ROOM_CODE_RE.test(reqRoom)) {
+            ws.send(JSON.stringify({ type: 'BAD_ROOM', room: reqRoom }));
+            return;
+          }
+          if (!reqRoom) {
+            if (requestedRole === 'receiver') {
+              reqRoom = generateRoomCode();
+            } else {
+              // Controllers need a code. Tell them so they can prompt.
+              ws.send(JSON.stringify({ type: 'NEED_ROOM' }));
+              return;
+            }
+          }
+
+          role = requestedRole;
+          room = ensureRoom(reqRoom);
+          room.everyone.add(ws);
+
           if (role === 'receiver') {
-            receivers.add(ws);
-            log('[ws] receiver attached');
-            ws.send(JSON.stringify(snapshotState()));
-          } else if (role === 'controller') {
-            playerId = nextPlayerId++;
+            room.receivers.add(ws);
+            log(`[ws] receiver attached to room=${room.code}`);
+            ws.send(JSON.stringify({ type: 'WELCOME_RECEIVER', room: room.code }));
+            ws.send(JSON.stringify(snapshotState(room)));
+          } else {
+            playerId = room.nextPlayerId++;
             const name = String(msg.name ?? '').slice(0, MAX_NAME_LEN) || `Player ${playerId}`;
             const player = { id: playerId, name, ws, joinedAt: now() };
-            players.set(playerId, player);
-            log(`[ws] player joined id=${playerId} name=${name}`);
-            ws.send(JSON.stringify({ type: 'WELCOME', id: playerId, name, hostId: firstHostId() }));
-            broadcast(snapshotState());
-            try { game?.onJoin?.({ id: playerId, name }, services); }
+            room.players.set(playerId, player);
+            log(`[ws] player joined room=${room.code} id=${playerId} name=${name}`);
+            ws.send(JSON.stringify({
+              type: 'WELCOME',
+              id: playerId,
+              name,
+              hostId: firstHostId(room),
+              room: room.code,
+            }));
+            broadcastRoom(room, snapshotState(room));
+            try { room.game?.onJoin?.({ id: playerId, name }, room.services); }
             catch (e) { log('[game] onJoin threw', e); }
-          } else {
-            role = null;  // reject unknown role; stay anonymous
           }
           break;
         }
         case 'PING': {
-          if (role !== 'controller' || playerId == null) break;
+          if (role !== 'controller' || playerId == null || !room) break;
           const clientTs = Number.isFinite(msg.clientTs) ? msg.clientTs : null;
-          broadcast({
+          broadcastRoom(room, {
             type: 'PONG',
             from: playerId,
-            name: players.get(playerId)?.name,
+            name: room.players.get(playerId)?.name,
             clientTs,
             serverTs: now(),
           });
           break;
         }
         default: {
-          // Forward non-platform messages to the game plugin, if any.
-          if (role === 'controller' && playerId != null && game?.onMessage) {
+          if (role === 'controller' && playerId != null && room && room.game?.onMessage) {
             try {
-              const p = players.get(playerId);
-              game.onMessage({ id: p.id, name: p.name }, msg, services);
+              const p = room.players.get(playerId);
+              room.game.onMessage({ id: p.id, name: p.name }, msg, room.services);
             } catch (e) {
               log('[game] onMessage threw', e);
             }
@@ -219,20 +294,22 @@ function createServer(opts = {}) {
     });
 
     ws.on('close', () => {
-      everyone.delete(ws);
+      if (!room) return;
+      room.everyone.delete(ws);
       if (role === 'receiver') {
-        receivers.delete(ws);
-        log('[ws] receiver detached');
+        room.receivers.delete(ws);
+        log(`[ws] receiver detached room=${room.code}`);
       } else if (playerId != null) {
-        const p = players.get(playerId);
-        players.delete(playerId);
-        log(`[ws] player left id=${playerId}`);
-        broadcast(snapshotState());
-        if (p) {
-          try { game?.onLeave?.({ id: p.id, name: p.name }, services); }
+        const p = room.players.get(playerId);
+        room.players.delete(playerId);
+        log(`[ws] player left room=${room.code} id=${playerId}`);
+        broadcastRoom(room, snapshotState(room));
+        if (p && room.game?.onLeave) {
+          try { room.game.onLeave({ id: p.id, name: p.name }, room.services); }
           catch (e) { log('[game] onLeave threw', e); }
         }
       }
+      destroyRoomIfEmpty(room);
     });
 
     ws.on('error', (err) => {
@@ -248,10 +325,13 @@ function createServer(opts = {}) {
         server,
         wss,
         port: actualPort,
+        rooms,   // expose for tests + diagnostics (e.g., `srv.rooms.size`)
         close() {
           return new Promise((res) => {
-            for (const ws of everyone) {
-              try { ws.terminate(); } catch {}
+            for (const room of rooms.values()) {
+              for (const ws of room.everyone) {
+                try { ws.terminate(); } catch {}
+              }
             }
             wss.close(() => {
               server.close(() => res());
@@ -263,4 +343,11 @@ function createServer(opts = {}) {
   });
 }
 
-module.exports = { createServer, MAX_MESSAGE_BYTES, MAX_NAME_LEN };
+module.exports = {
+  createServer,
+  MAX_MESSAGE_BYTES,
+  MAX_NAME_LEN,
+  ROOM_ALPHA,
+  ROOM_CODE_LEN,
+  ROOM_CODE_RE,
+};

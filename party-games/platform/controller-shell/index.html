@@ -27,6 +27,20 @@
     <p class="help">Tap the cast button to launch the receiver on your TV, then tap PING.</p>
   </main>
 
+  <!-- Room-code entry overlay: shown if the URL doesn't carry ?room=ABCD.
+       The connect() loop in controller.js waits until the form here submits. -->
+  <div id="room-gate" class="room-gate" hidden>
+    <form id="room-form" class="room-form">
+      <h2>Enter room code</h2>
+      <p class="room-gate-hint">Look at the TV. The receiver shows a 4-letter room code.</p>
+      <input id="room-input" class="room-input" type="text"
+             inputmode="latin" autocomplete="off" autocapitalize="characters" spellcheck="false"
+             maxlength="4" pattern="[A-Z]{4}" required
+             aria-label="4-letter room code">
+      <button id="room-join" type="submit" class="room-join">JOIN</button>
+    </form>
+  </div>
+
   <!-- End-of-game overlay: win/lose flavour for the player. Populated from the
        GAME_OVER broadcast, dismissed by any subsequent phase change. -->
   <div id="outcome" class="outcome" hidden>

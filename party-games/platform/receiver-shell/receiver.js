@@ -2,8 +2,16 @@
 // in a plain browser tab (the dev loop).
 
 const statusEl       = document.getElementById('status');
+const roomCodeEl     = document.getElementById('room-code');
 const playerListEl   = document.getElementById('player-list');
 const eventLogEl     = document.getElementById('event-log');
+
+// Room code: from URL ?room=ABCD, else server assigns on HELLO and we fill
+// this in from the WELCOME_RECEIVER response. URL is rewritten on assign so
+// a refresh stays in the same room.
+const urlParams = new URLSearchParams(location.search);
+let roomCode = (urlParams.get('room') || '').toUpperCase();
+if (roomCode) roomCodeEl.textContent = roomCode;
 
 const panels = {
   // shared
@@ -73,7 +81,7 @@ const wsUrl = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.h
 const ws = new WebSocket(wsUrl);
 
 ws.addEventListener('open', () => {
-  ws.send(JSON.stringify({ type: 'HELLO', role: 'receiver' }));
+  ws.send(JSON.stringify({ type: 'HELLO', role: 'receiver', room: roomCode || undefined }));
   refreshStatus(isCastContext ? 'cast + server connected' + castSessionDetail : 'server connected (browser)');
 });
 ws.addEventListener('close', () => refreshStatus('disconnected'));
@@ -87,6 +95,17 @@ ws.addEventListener('message', (ev) => {
 
 function handle(msg) {
   switch (msg.type) {
+    case 'WELCOME_RECEIVER':
+      roomCode = msg.room;
+      roomCodeEl.textContent = roomCode;
+      // Reflect the code in the URL so a refresh keeps the same room.
+      if (!urlParams.get('room')) {
+        urlParams.set('room', roomCode);
+        const newUrl = location.pathname + '?' + urlParams.toString() + location.hash;
+        history.replaceState(null, '', newUrl);
+      }
+      break;
+
     case 'STATE':
       logPlayerDiff(currentPlayers, msg.players || []);
       renderPlayers(msg.players, msg.hostId);

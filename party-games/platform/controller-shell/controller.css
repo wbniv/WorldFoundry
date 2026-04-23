@@ -102,6 +102,63 @@ google-cast-launcher {
 .cast-state[data-state="connecting"] { color: #facc15; }
 .cast-state[data-state="unavail"] { opacity: 0.4; }
 
+/* Room-code entry overlay ─────────────────────────────────────────────── */
+.room-gate {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(12, 15, 20, 0.97);
+  z-index: 20;
+}
+.room-gate[hidden] { display: none; }
+.room-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2vh;
+  padding: 4vh 6vw;
+  max-width: 420px;
+  width: 100%;
+}
+.room-form h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.room-gate-hint {
+  opacity: 0.6;
+  font-size: 0.95rem;
+  text-align: center;
+}
+.room-input {
+  width: 100%;
+  padding: 1.2rem;
+  font-size: 2.6rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-align: center;
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;  /* counteract the trailing letter-spacing push */
+  background: #1a1d23;
+  color: #fef3c7;
+  border: 2px solid #3a3d44;
+  border-radius: 0.8rem;
+  text-transform: uppercase;
+}
+.room-input:focus { outline: none; border-color: #facc15; }
+.room-join {
+  width: 100%;
+  padding: 1.1rem;
+  border: none;
+  border-radius: 0.8rem;
+  background: radial-gradient(circle at 30% 30%, #facc15, #eab308);
+  color: #111;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.room-join:disabled { opacity: 0.4; cursor: not-allowed; }
+
 /* Outcome overlay ──────────────────────────────────────────────────────── */
 .outcome {
   position: fixed; inset: 0;
