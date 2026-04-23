@@ -26,6 +26,10 @@ function resolveStatic(url) {
   if (clean === '/' || clean === '')      return '/controller-shell/index.html';
   if (clean === '/receiver')              return '/receiver-shell/index.html';
   if (clean === '/controller')            return '/controller-shell/index.html';
+  // Sibling assets — <script src="receiver.js"> loaded from /receiver (no trailing
+  // slash) resolves to /receiver.js, not /receiver/receiver.js. Route those in.
+  if (clean.startsWith('/receiver.'))     return '/receiver-shell/' + clean.slice(1);
+  if (clean.startsWith('/controller.'))   return '/controller-shell/' + clean.slice(1);
   if (clean.startsWith('/receiver/'))     return '/receiver-shell' + clean.slice('/receiver'.length);
   if (clean.startsWith('/controller/'))   return '/controller-shell' + clean.slice('/controller'.length);
   return clean;

@@ -7,6 +7,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const http = require('node:http');
 const WebSocket = require('ws');
 
 const { createServer, MAX_NAME_LEN, MAX_MESSAGE_BYTES } = require('../createServer');
@@ -232,4 +233,48 @@ test('oversize payload is rejected by ws (closes connection)', withServer(async 
   client.ws.send(oversize);
   await closed;
   // Success = socket closed on its own; no crash.
+}));
+
+test('static file routing — index + sibling assets + 404', withServer(async ({ port }) => {
+  const fetch = (path) => new Promise((resolve, reject) => {
+    http.get(`http://localhost:${port}${path}`, (res) => {
+      const chunks = [];
+      res.on('data', (c) => chunks.push(c));
+      res.on('end', () => resolve({
+        status: res.statusCode,
+        contentType: res.headers['content-type'],
+        body: Buffer.concat(chunks),
+      }));
+    }).on('error', reject);
+  });
+
+  const receiver = await fetch('/receiver');
+  assert.equal(receiver.status, 200);
+  assert.match(receiver.contentType, /text\/html/);
+  assert.ok(receiver.body.length > 0);
+
+  // These are the paths the browser requests after loading /receiver:
+  // <script src="receiver.js"> → /receiver.js,  <link href="receiver.css"> → /receiver.css.
+  const recvJs = await fetch('/receiver.js');
+  assert.equal(recvJs.status, 200, 'receiver.js sibling path must be served');
+  assert.match(recvJs.contentType, /text\/javascript/);
+  assert.ok(recvJs.body.length > 100);
+
+  const recvCss = await fetch('/receiver.css');
+  assert.equal(recvCss.status, 200);
+  assert.match(recvCss.contentType, /text\/css/);
+
+  const ctrlJs = await fetch('/controller.js');
+  assert.equal(ctrlJs.status, 200, 'controller.js sibling path must be served');
+  assert.match(ctrlJs.contentType, /text\/javascript/);
+
+  const ctrlCss = await fetch('/controller.css');
+  assert.equal(ctrlCss.status, 200);
+
+  // Under-directory path still works (legacy form).
+  const nested = await fetch('/receiver/receiver.js');
+  assert.equal(nested.status, 200);
+
+  const missing = await fetch('/does-not-exist.js');
+  assert.equal(missing.status, 404);
 }));

@@ -4,7 +4,11 @@
 //   - PING button becomes the reaction-game BIG BUTTON during ROUND_COUNTDOWN /
 //     ROUND_OPEN, forwarded to the server as BUTTON_PRESS with clientTs.
 
-const CAST_APPLICATION_ID = 'A40DF337';  // Party Games Platform (dev) — Cast Console registration
+// Party Games Platform (dev) = 071CDEDD (Cast Console). CC1AD845 = Default
+// Media Receiver (every Chromecast supports it). Append ?castAppId=<id> to
+// the URL to override — used during device-registration diagnostic.
+const CAST_APPLICATION_ID =
+  new URLSearchParams(location.search).get('castAppId') || '071CDEDD';
 
 // ───── URL + state ─────────────────────────────────────────────────────────
 
@@ -130,15 +134,34 @@ btn.addEventListener('click', () => {
 
 window.__onGCastApiAvailable = (isAvailable) => {
   if (!isAvailable) { setCastState('cast: unavailable', 'unavail'); return; }
+  // The SDK sometimes fires this callback before `cast.framework` or
+  // `chrome.cast.AutoJoinPolicy` is populated; poll briefly for readiness.
+  let attempts = 0;
+  const waitReady = () => {
+    const ready =
+      typeof cast !== 'undefined' && cast.framework && cast.framework.CastContext
+      && typeof chrome !== 'undefined' && chrome.cast && chrome.cast.AutoJoinPolicy;
+    if (ready) { initCastContext(); return; }
+    if (++attempts >= 40) {
+      setCastState('cast: SDK never ready (40×100ms)', 'unavail');
+      return;
+    }
+    setTimeout(waitReady, 100);
+  };
+  waitReady();
+};
+
+function initCastContext() {
   try {
+    const AUTO_JOIN_POLICY = chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED || 'origin_scoped';
     const ctx = cast.framework.CastContext.getInstance();
     ctx.setOptions({
       receiverApplicationId: CAST_APPLICATION_ID,
-      autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+      autoJoinPolicy: AUTO_JOIN_POLICY,
       resumeSavedSession: true,
     });
-    ctx.addEventListener(cast.framework.CastContextEventType.CAST_STATE_CHANGED, (ev) => {
-      switch (ev.castState) {
+    const applyCastState = (state) => {
+      switch (state) {
         case cast.framework.CastState.NO_DEVICES_AVAILABLE:
           setCastState('cast: no devices found', 'idle'); break;
         case cast.framework.CastState.NOT_CONNECTED:
@@ -151,12 +174,21 @@ window.__onGCastApiAvailable = (isAvailable) => {
           setCastState(`cast: on ${device}`, 'connected');
           break;
         }
+        default:
+          setCastState(`cast: ? (${state})`, 'idle');
       }
-    });
-    setCastState('cast: initialising…', 'idle');
+    };
+    ctx.addEventListener(
+      cast.framework.CastContextEventType.CAST_STATE_CHANGED,
+      (ev) => applyCastState(ev.castState),
+    );
+    // Seed the UI from the current state — the SDK doesn't always emit an
+    // initial CAST_STATE_CHANGED, so otherwise we'd sit on "initialising…".
+    applyCastState(ctx.getCastState());
   } catch (e) {
     console.warn('[cast] init failed', e);
-    setCastState('cast: init failed', 'unavail');
+    const detail = (e && (e.message || e.toString())) || 'unknown';
+    setCastState('cast: init failed — ' + detail.slice(0, 80), 'unavail');
   }
 };
 
