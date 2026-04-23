@@ -148,8 +148,16 @@ let currentPlayers = [];
 let currentHostId = null;
 
 function showPanel(name) {
-  for (const [k, el] of Object.entries(panels)) {
-    el.hidden = k !== name;
+  // De-dup by element — TARGET aliases DISTRACTORS's panel so the image stream
+  // can keep cycling through the scoring window. Without de-dup, the double
+  // entry would overwrite the hidden state for that element and blank the
+  // screen during DISTRACTORS.
+  const target = panels[name];
+  const seen = new Set();
+  for (const el of Object.values(panels)) {
+    if (seen.has(el)) continue;
+    seen.add(el);
+    el.hidden = el !== target;
   }
 }
 
