@@ -43,13 +43,20 @@ function refreshButton() {
         btn.dataset.action = 'idle';
       }
       break;
-    case 'ROUND_COUNTDOWN':
+    case 'ROUND_COUNTDOWN':    // reaction game: countdown bar running
+    case 'REVEAL':             // image game: memorise the target
+    case 'DISTRACTORS':        // image game: distractor frames streaming
       btn.textContent = 'WAIT';
       btn.disabled = lockedOutThisRound;   // stays tappable before lockout — so an early press CAN happen
       btn.dataset.action = 'press';        // any press here is an early press on the server side
       break;
-    case 'ROUND_OPEN':
+    case 'ROUND_OPEN':         // reaction game: GO! window
       btn.textContent = lockedOutThisRound ? 'LOCKED' : 'GO!';
+      btn.disabled = lockedOutThisRound;
+      btn.dataset.action = 'press';
+      break;
+    case 'TARGET':             // image game: target visible, scoring window open
+      btn.textContent = lockedOutThisRound ? 'LOCKED' : 'TAP!';
       btn.disabled = lockedOutThisRound;
       btn.dataset.action = 'press';
       break;
@@ -98,7 +105,9 @@ ws.addEventListener('message', (ev) => {
     case 'PHASE':
       if (phase !== msg.phase) {
         phase = msg.phase;
-        if (phase === 'ROUND_COUNTDOWN') lockedOutThisRound = false;
+        // Reset lockout at the top of any fresh round. ROUND_COUNTDOWN (reaction)
+        // and REVEAL (image) are both the "entering a new round" phase.
+        if (phase === 'ROUND_COUNTDOWN' || phase === 'REVEAL') lockedOutThisRound = false;
         refreshButton();
       }
       break;

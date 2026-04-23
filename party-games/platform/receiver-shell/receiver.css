@@ -122,3 +122,26 @@ h2 {
   margin: 2vh 0 3vh;
   color: #facc15;
 }
+
+/* ───── image-recognition panels ───────────────────────────────────── */
+.image-display {
+  font-size: 32vh;
+  line-height: 1;
+  text-align: center;
+  margin: 2vh auto;
+  user-select: none;
+}
+/* Each new distractor flashes in briefly so you can tell the image changed. */
+.image-flash { animation: img-flash 0.12s ease-out; }
+@keyframes img-flash {
+  from { opacity: 0.3; transform: scale(0.85); }
+  to   { opacity: 1;   transform: scale(1); }
+}
+/* Target pulses to signal the scoring window. */
+.image-target { animation: img-target 0.5s ease-in-out infinite alternate; }
+@keyframes img-target {
+  from { transform: scale(1);    filter: drop-shadow(0 0 1vh rgba(134, 239, 172, 0.4)); }
+  to   { transform: scale(1.08); filter: drop-shadow(0 0 3vh rgba(52, 211, 153, 0.9)); }
+}
+/* CLEAR sub-phase of REVEAL — brief blank to clear short-term memory. */
+.image-display.cleared { opacity: 0; }

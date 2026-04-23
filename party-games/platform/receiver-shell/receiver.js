@@ -6,11 +6,17 @@ const playerListEl   = document.getElementById('player-list');
 const eventLogEl     = document.getElementById('event-log');
 
 const panels = {
+  // shared
   LOBBY:           document.getElementById('lobby'),
-  ROUND_COUNTDOWN: document.getElementById('countdown'),
-  ROUND_OPEN:      document.getElementById('open'),
   ROUND_ENDED:     document.getElementById('ended'),
   GAME_OVER:       document.getElementById('gameover'),
+  // reaction (mini-game 1)
+  ROUND_COUNTDOWN: document.getElementById('countdown'),
+  ROUND_OPEN:      document.getElementById('open'),
+  // image-recognition (mini-game 2)
+  REVEAL:          document.getElementById('reveal'),
+  DISTRACTORS:     document.getElementById('distractors'),
+  TARGET:          document.getElementById('target'),
 };
 const countdownFillEl = document.getElementById('countdown-fill');
 const roundNumEl      = document.getElementById('round-num');
@@ -19,6 +25,10 @@ const roundRanksEl    = document.getElementById('round-ranks');
 const scoreboardEl    = document.getElementById('scoreboard');
 const winnerNameEl    = document.getElementById('winner-name');
 const finalScoreEl    = document.getElementById('final-scoreboard');
+const revealImageEl     = document.getElementById('reveal-image');
+const distractorImageEl = document.getElementById('distractor-image');
+const targetImageEl     = document.getElementById('target-image');
+const distRoundNumEl    = document.getElementById('dist-round-num');
 
 // Default panel
 showPanel('LOBBY');
@@ -86,6 +96,28 @@ function handle(msg) {
     case 'TIMER_FIRED':
       stopCountdownAnimation();
       showPanel('ROUND_OPEN');
+      break;
+
+    case 'ROUND_REVEAL':
+      // Target reveal for memorisation: show for showMs, then clear for clearMs.
+      // Phase is already REVEAL; this drives the image sub-animation.
+      revealImageEl.textContent = msg.targetId;
+      revealImageEl.classList.remove('cleared');
+      distRoundNumEl.textContent = msg.roundId;
+      setTimeout(() => { revealImageEl.classList.add('cleared'); }, msg.showMs);
+      break;
+
+    case 'SHOW_IMAGE':
+      if (msg.isTarget) {
+        targetImageEl.textContent = msg.imageId;
+      } else {
+        // Re-trigger the flash animation by cycling the class.
+        distractorImageEl.classList.remove('image-flash');
+        // Force reflow so the next add replays the keyframes.
+        void distractorImageEl.offsetWidth;
+        distractorImageEl.textContent = msg.imageId;
+        distractorImageEl.classList.add('image-flash');
+      }
       break;
 
     case 'EARLY_PRESS':
