@@ -148,6 +148,10 @@ function handle(msg) {
       renderCommits();
       break;
 
+    case 'LAST_STANDING':
+      pushLog(`${msg.name} wins by default — everyone else locked out`);
+      break;
+
     case 'ROUND_ENDED':
       endedRoundNumEl.textContent = msg.roundId;
       renderRanks(msg.ranks);

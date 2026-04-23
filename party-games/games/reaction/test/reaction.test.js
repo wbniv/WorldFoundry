@@ -145,6 +145,36 @@ test('TIMER_FIRED fires exactly at realMs; phase → ROUND_OPEN', () => {
 });
 
 test('BUTTON_PRESS during countdown → EARLY_PRESS; player locked out for this round', () => {
+  // Use three players so a single early press doesn't trip LAST_STANDING
+  // — that's covered separately. This test is specifically about the
+  // EARLY_PRESS → lockout mechanic surviving into ROUND_ENDED.
+  const alice = { id: 1, name: 'Alice' };
+  const bob   = { id: 2, name: 'Bob' };
+  const carol = { id: 3, name: 'Carol' };
+  const ctx = makeServices({ players: [alice, bob, carol], random: 0.5 });
+  const game = createReactionGame();
+  for (const p of [alice, bob, carol]) game.onJoin(p, ctx.services);
+  game.onMessage(alice, { type: 'START_GAME' }, ctx.services);
+
+  ctx.advance(500);  // still in countdown
+  game.onMessage(bob, { type: 'BUTTON_PRESS', clientTs: ctx.time }, ctx.services);
+
+  const early = ctx.lastBroadcast('EARLY_PRESS');
+  assert.ok(early, 'EARLY_PRESS was not broadcast');
+  assert.equal(early.playerId, 2);
+  // LAST_STANDING should NOT have fired — Alice and Carol both still in.
+  assert.equal(ctx.byType('LAST_STANDING').length, 0);
+
+  // Ride out the round; Bob should score 0 with lockedOut flag on this round's ROUND_ENDED.
+  ctx.advance(COUNTDOWN_MAX_MS + SCORING_WINDOW_MS);
+  const re = ctx.byType('ROUND_ENDED')[0];  // specifically round 1
+  assert.ok(re);
+  const bobRank = re.ranks.find(r => r.playerId === 2);
+  assert.equal(bobRank.points, 0);
+  assert.equal(bobRank.lockedOut, true);
+});
+
+test('LAST_STANDING: EARLY_PRESS that leaves one player un-locked auto-wins the remaining player', () => {
   const alice = { id: 1, name: 'Alice' }, bob = { id: 2, name: 'Bob' };
   const ctx = makeServices({ players: [alice, bob], random: 0.5 });
   const game = createReactionGame();
@@ -155,15 +185,15 @@ test('BUTTON_PRESS during countdown → EARLY_PRESS; player locked out for this 
   ctx.advance(500);  // still in countdown
   game.onMessage(bob, { type: 'BUTTON_PRESS', clientTs: ctx.time }, ctx.services);
 
-  const early = ctx.lastBroadcast('EARLY_PRESS');
-  assert.ok(early, 'EARLY_PRESS was not broadcast');
-  assert.equal(early.playerId, 2);
-
-  // Ride out the round; Bob should score 0 with lockedOut flag.
-  ctx.advance(COUNTDOWN_MAX_MS + SCORING_WINDOW_MS);  // more than enough
+  const ls = ctx.lastBroadcast('LAST_STANDING');
+  assert.ok(ls, 'LAST_STANDING must be broadcast when Bob locking out leaves Alice alone');
+  assert.equal(ls.playerId, 1);
+  assert.equal(ls.name, 'Alice');
   const re = ctx.lastBroadcast('ROUND_ENDED');
-  assert.ok(re);
-  const bobRank = re.ranks.find(r => r.playerId === 2);
+  assert.ok(re, 'ROUND_ENDED fires right after LAST_STANDING');
+  const aliceRank = re.ranks.find(r => r.playerId === 1);
+  const bobRank   = re.ranks.find(r => r.playerId === 2);
+  assert.equal(aliceRank.points, POINTS_BY_RANK[0], 'Alice auto-win → 4 pts');
   assert.equal(bobRank.points, 0);
   assert.equal(bobRank.lockedOut, true);
 });

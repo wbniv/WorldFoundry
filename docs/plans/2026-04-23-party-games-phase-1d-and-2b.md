@@ -154,12 +154,14 @@ Landed after the initial polish pass, in response to live-playtest feedback on t
 
 **Rule walk-back that didn't ship:** mid-iteration the user asked "first person who gets it right should end the round (not waiting for other players)" — I implemented it, then the user remembered the 4/3/2/1 ranking was deliberate and the "waiting feels wrong" was an artifact of 2-player playtesting. Reverted before commit, so the current rule remains: all successful presses within a round rank 4/3/2/1 by serverTs, round ends when everyone has committed or `maxRoundMs` elapses (or LAST_STANDING short-circuits).
 
-Test count after these three = **51 across runners** (22 image unit + 14 reaction unit + 15 platform-server = 11 relay + 2 reaction integration + 2 image integration).
+Test count after these three + reaction-parity = **52 across runners** (22 image unit + 15 reaction unit + 15 platform-server = 11 relay + 2 reaction integration + 2 image integration).
 
 Queued for future iterations:
 
 - **Post-first-commit grace timer.** After the first player commits, start a shorter clock (10-15 s) that force-ends the round even if stragglers haven't tapped. Caps the worst-case round duration below the 60 s `maxRoundMs`. User asked about it earlier but hasn't decided; open question.
-- **Reaction game parity on LAST_STANDING + GUARANTEED_TARGET_BY_SEQ.** Only wired into the image game right now. The reaction-game countdown has a different structure (pre-committed real timer window) but the "last standing" concept would still apply.
+- **Reaction game parity on GUARANTEED_TARGET_BY_SEQ.** Doesn't really map to reaction — the countdown has a pre-committed timer window rather than a probabilistic target roll. But if reaction ever grows a similar "something must happen within X" contract, mirror it here.
+
+**Reaction-game LAST_STANDING** shipped separately — same rule as the image game, wired into the `ROUND_COUNTDOWN` early-press path. Receiver now renders a `<name> wins by default — everyone else locked out` event-log line on any `LAST_STANDING` broadcast (reaction + image).
 
 ## Follow-up
 

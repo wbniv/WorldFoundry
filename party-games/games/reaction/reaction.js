@@ -97,8 +97,47 @@ function createReactionGame(opts = {}) {
     cancelTimer = services.schedule(SCORING_WINDOW_MS, () => endRound(services));
   }
 
+  // If everyone except one player has been early-pressed (locked out), that
+  // player wins the round by default — the reaction-game counterpart of the
+  // image-game LAST_STANDING rule. Requires at least one lockout so solo
+  // play doesn't auto-fire at round start.
+  function checkLastStanding(services) {
+    const r = state.round;
+    if (!r) return null;
+    if (r.earlyPressed.size === 0) return null;
+    const active = services.getPlayers().filter((p) => !r.earlyPressed.has(p.id));
+    if (active.length !== 1) return null;
+    return active[0];
+  }
+
+  function awardLastStanding(services, winner) {
+    const r = state.round;
+    if (!r) return;
+    // Auto-record a press for the last-standing player so endRound ranks them
+    // as 1st → 4 pts. Reaction game tracks ms relative to firedAt; the hidden
+    // timer never fired in this path, so use serverTs equal to now() and
+    // firedAt=now() so ms = 0 (cosmetic — points are what matter).
+    if (r.firedAt == null) r.firedAt = services.now();
+    if (!r.presses.has(winner.id)) {
+      r.presses.set(winner.id, {
+        serverTs: services.now(),
+        clientTs: null,
+        autoWin: true,
+      });
+    }
+    services.broadcast({
+      type: 'LAST_STANDING',
+      roundId: r.id,
+      playerId: winner.id,
+      name: winner.name,
+    });
+    endRound(services);
+  }
+
   function endRound(services) {
-    if (state.phase !== 'ROUND_OPEN') return;
+    // Callable from ROUND_COUNTDOWN (via LAST_STANDING) as well as the
+    // normal ROUND_OPEN exit — ignore from inactive phases.
+    if (state.phase === 'LOBBY' || state.phase === 'GAME_OVER' || state.phase === 'ROUND_ENDED') return;
     clearTimer();
 
     const r = state.round;
@@ -215,6 +254,8 @@ function createReactionGame(opts = {}) {
             playerId: player.id,
             name: player.name,
           });
+          const lastStanding = checkLastStanding(services);
+          if (lastStanding) { awardLastStanding(services, lastStanding); return; }
         } else if (state.phase === 'ROUND_OPEN') {
           if (r.earlyPressed.has(player.id)) return;
           if (r.presses.has(player.id)) return;       // one press per round

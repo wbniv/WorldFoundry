@@ -222,8 +222,9 @@ UI:
 - Receiver: separate REVEAL panel (target held 3 s, fades 0.5 s); PLAY reuses the image-stream panel, continuously updating. No on-screen highlight of the target frame — the game is about recognising it from the REVEAL memorisation.
 - Controller: REVEAL → "WAIT" (press locks out). PLAY → "TAP!" (press evaluated against current frame). Standard START / NEW GAME / LOCKED labels for other phases.
 
-Test coverage (51 across three runners):
+Test coverage (52 across three runners):
 - `party-games/games/image/test/image.test.js` — 22 state-machine tests (random pool forced to 2 entries to drive target/distractor choice, press-before-arm → lockout, press-after-arm → counted, press-long-after-target-cleared still counted, ms-field-from-targetFirstShownAt, failsafe, all-committed early-end, `PRESS_RECORDED` broadcast, `GUARANTEED_TARGET_BY_SEQ` force-appearance, `LAST_STANDING` auto-win, etc.).
+- `party-games/games/reaction/test/reaction.test.js` — 15 state-machine tests including `PRESS_RECORDED` broadcast and `LAST_STANDING` auto-win in countdown.
 - `party-games/platform/server/test/image-integration.test.js` — 2 tests through real WebSocket server.
 - Reaction: unchanged (13 + 2).
 - Platform relay: unchanged (11 including static-file coverage).
