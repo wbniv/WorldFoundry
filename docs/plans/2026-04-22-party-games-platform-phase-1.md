@@ -168,11 +168,43 @@ stateDiagram-v2
     end note
 ```
 
-Client-side details that don't live in the state machine but are load-bearing for the real game:
+Controller WebSocket lifecycle (separate state machine from the round, but load-bearing — mobile browsers drop the socket aggressively on tab suspend / screen lock, so the controller needs to heal itself):
 
-- **Controller reconnect.** Mobile browsers drop the WebSocket on tab suspend / screen lock. Controller's `connect()` loop retries with 500 ms → 8 s backoff and re-HELLOs on each open. Result: a new player id, current-round score forfeit, subsequent rounds normal.
-- **Late joiner catch-up.** `onJoin` uses `services.sendTo` to push the current `PHASE` to the new player so their default `phase='LOBBY'` (non-host → disabled button) doesn't strand them when they arrive mid-round.
-- **Receiver no-cache + CAF gate.** Server sets `Cache-Control: no-store` on static files so reloaded tabs always get fresh JS (avoids cached-out-of-date controller dropping into a removed phase case). CAF's `ctx.start()` is gated on a Cast-capable user agent (`CrKey|Android TV|Tizen|webOS`) — in a plain browser we skip CAF entirely, which silences the `ws://localhost:8008/v2/ipc` reconnect spam.
+```mermaid
+stateDiagram-v2
+    [*] --> connecting: page load\nor reload
+    connecting --> open: ws 'open' event\n→ send HELLO(role, name)
+    open --> open: ws 'message'\n(WELCOME, PHASE, STATE,\n ROUND_ENDED, EARLY_PRESS, …)
+    open --> disconnected: ws 'close'\n(tab suspended,\n screen locked,\n tunnel hiccup)
+    connecting --> disconnected: open failed
+    disconnected --> connecting: backoff timer\n(500 ms → 8 s cap)
+    disconnected --> connecting: visibilitychange\n(tab foregrounded\n while socket closed)
+
+    note right of open
+        Status line: "connected · id=N"
+        Button: driven by round-phase
+          state machine (see above)
+    end note
+    note right of disconnected
+        Status line:
+          "disconnected" or
+          "reconnecting (attempt N)…"
+        Button: ↻ / disabled /
+          action='idle'
+        Click handler short-circuits
+          on readyState !== OPEN.
+        On re-open the server issues a
+          fresh player id — current-round
+          score forfeit, subsequent
+          rounds normal.
+    end note
+```
+
+Other client-side details that aren't state-machine-shaped:
+
+- **Late-joiner catch-up.** Game plugins' `onJoin` uses `services.sendTo` to push the current `PHASE` to the new player so their default `phase='LOBBY'` (non-host → disabled button) doesn't strand them when they arrive mid-round.
+- **Receiver no-cache.** Server sets `Cache-Control: no-store` on static files so reloaded tabs always get fresh JS (avoids cached-out-of-date controller dropping into a removed phase case).
+- **CAF gate.** Receiver's `ctx.start()` is gated on a Cast-capable user agent (`CrKey|Android TV|Tizen|webOS`). In a plain browser we skip CAF entirely, which silences the `ws://localhost:8008/v2/ipc` reconnect spam that would otherwise fill the console.
 
 Messages beyond the platform base: `ROUND_REVEAL {targetId, showMs, clearMs}`, `SHOW_IMAGE {seq, imageId, showMs, isTarget, serverTs}`, plus the shared `PHASE / EARLY_PRESS / ROUND_ENDED {… timedOut?} / GAME_OVER`.
 
