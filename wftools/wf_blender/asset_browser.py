@@ -457,6 +457,19 @@ class WF_OT_import_asset(Operator):
         state.status_text = f'Imported "{item.title}"'
 
 
+# ── New OS window ────────────────────────────────────────────────────────────
+
+class WF_OT_open_browser_window(Operator):
+    """Open the WF Asset Browser in a new resizable OS window"""
+    bl_idname  = "wf.open_browser_window"
+    bl_label   = "Open in New Window"
+    bl_options = {'REGISTER'}
+
+    def execute(self, context):
+        bpy.ops.wm.window_new()
+        return {'FINISHED'}
+
+
 # ── Wide popup ───────────────────────────────────────────────────────────────
 
 class WF_OT_open_browser_popup(Operator):
@@ -564,7 +577,9 @@ class WF_PT_asset_browser(Panel):
             layout.label(text=f"  {_WAP_ERROR}")
             return
 
-        layout.operator("wf.open_browser_popup", text="Open Wide Browser", icon='ASSET_MANAGER')
+        row = layout.row(align=True)
+        row.operator("wf.open_browser_popup",  text="Wide Popup",    icon='ASSET_MANAGER')
+        row.operator("wf.open_browser_window", text="New Window",    icon='WINDOW')
         layout.separator()
 
         # Search bar
@@ -646,6 +661,7 @@ _CLASSES = [
     WF_OT_browse_assets,
     WF_OT_cancel_search,
     WF_OT_import_asset,
+    WF_OT_open_browser_window,
     WF_OT_open_browser_popup,
     WF_PT_asset_browser,
 ]
