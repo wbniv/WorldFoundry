@@ -61,6 +61,9 @@ player['wf_Vertical Elasticity']   = 0.3
 player['wf_Horizontal Elasticity'] = 0.7
 player['wf_Running Acceleration']  = 15.0
 
+# Always visible (mailbox 1 is permanently true)
+player['wf_Visibility Mailbox'] = 1
+
 print(f"[sphere] Player mesh → SphereMesh, mesh_name=sphere.iff, bbox={player['wf_original_bbox']}")
 
 print(f"[sphere] Exporting to {LEV}")
