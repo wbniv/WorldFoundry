@@ -23,7 +23,7 @@
 	//   `5 RUV`  `6 WAV`  `7 CYC`  `8 CHR`  `9 MAP`
 	// Example: `$3fff001` = `IFF` + room `fff` (`PERM`) + slot `001`.
 	{ 'ASMP'
-		$3fff001l { 'STR' "player.iff" }  // IFF PERM fff:001
+		$3fff001l { 'STR' "sphere.iff" }  // IFF PERM fff:001
 		$3000001l { 'STR' "ramp.iff" }  // IFF RM0 000:001
 	}
 	{ 'ALGN' .align(2048) }
@@ -34,7 +34,7 @@
 		{ 'ASS' $1ffffffl [ "Perm.tga" ] }     // TGA PERM fff:fff
 		{ 'ASS' $5ffffffl [ "Perm.ruv" ] }     // RUV PERM fff:fff
 		{ 'ASS' $7ffffffl [ "Perm.cyc" ] }     // CYC PERM fff:fff
-		{ 'ASS' $3fff001l [ "player.iff" ] }  // IFF PERM fff:001
+		{ 'ASS' $3fff001l [ "sphere.iff" ] }  // IFF PERM fff:001
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'

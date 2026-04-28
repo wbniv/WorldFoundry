@@ -871,10 +871,10 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) -0.4363322854042053(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3322315216064453(1.15.16) -0.3594688773155212(1.15.16) 0.0018521547317505(1.15.16) 0.3322315216064453(1.15.16) 0.3594688773155212(1.15.16) 2.0018520355224609(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.5000000000000000(1.15.16) -0.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.5000000000000000(1.15.16) 0.5000000000000000(1.15.16) 1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "player" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "player.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sphere.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 22l } { 'STR' "22" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
@@ -882,8 +882,8 @@
 		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
-		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.3000000000000000(1.15.16) } { 'STR' "0.3" } }
+		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.7000000000000000(1.15.16) } { 'STR' "0.7" } }
 		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9499970078468323(1.15.16) } { 'STR' "0.9499970078468323" } }
 		{ 'I32' { 'NAME' "At End Of Path" } { 'STR' "Ping-Pong" } }
 		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
@@ -959,10 +959,10 @@
 		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000960626494(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000225991243(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000011641532(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000000058207661(1.15.16) } { 'STR' "-0.000000" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "Target01" }
