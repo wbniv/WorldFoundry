@@ -109,21 +109,47 @@ fn extract_gltf_from_zip(zip_bytes: &[u8], dest_dir: &Path, asset_id: &str) -> R
         .filter_map(|i| archive.by_index(i).ok().map(|f| f.name().to_string()))
         .collect();
 
+    // Prefer .glb (self-contained), fall back to .gltf
     let name = names.iter()
-        .find(|n| n.ends_with(".glb") || n.ends_with(".gltf"))
+        .find(|n| n.ends_with(".glb"))
+        .or_else(|| names.iter().find(|n| n.ends_with(".gltf")))
         .ok_or_else(|| AssetError::ProviderFailed {
             provider: "quaternius".to_string(),
             message: format!("no glTF in ZIP for {asset_id:?}"),
         })?
         .clone();
 
-    let mut file = archive.by_name(&name).map_err(|e| AssetError::ProviderFailed {
+    // Extract the chosen file and all siblings in the same ZIP directory
+    let gltf_dir = std::path::Path::new(&name)
+        .parent()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_default();
+
+    let mut primary_out: Option<PathBuf> = None;
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i).map_err(|e| AssetError::ProviderFailed {
+            provider: "quaternius".to_string(),
+            message: format!("ZIP index {i}: {e}"),
+        })?;
+        let zip_name = file.name().to_string();
+        let file_dir = std::path::Path::new(&zip_name)
+            .parent()
+            .map(|p| p.to_string_lossy().to_string())
+            .unwrap_or_default();
+        if file_dir != gltf_dir { continue; }
+        let basename = std::path::Path::new(&zip_name)
+            .file_name()
+            .map(|n| n.to_string_lossy().to_string())
+            .unwrap_or_default();
+        if basename.is_empty() { continue; }
+        let out_path = dest_dir.join(&basename);
+        let mut out = std::fs::File::create(&out_path)?;
+        std::io::copy(&mut file, &mut out)?;
+        if zip_name == name { primary_out = Some(out_path); }
+    }
+
+    primary_out.ok_or_else(|| AssetError::ProviderFailed {
         provider: "quaternius".to_string(),
-        message: format!("{e}"),
-    })?;
-    let basename = Path::new(&name).file_name().unwrap_or_default().to_string_lossy().to_string();
-    let out_path = dest_dir.join(basename);
-    let mut out = std::fs::File::create(&out_path)?;
-    std::io::copy(&mut file, &mut out)?;
-    Ok(out_path)
+        message: format!("failed to extract {name:?}"),
+    })
 }

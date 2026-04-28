@@ -19,8 +19,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WF_PY_DIR="$(dirname "$SCRIPT_DIR")/wf_py"
+WAP_DIR="$(dirname "$SCRIPT_DIR")/wf_asset_provider"
 
-# ── build if needed ───────────────────────────────────────────────────────────
+# ── build wf_core if needed ───────────────────────────────────────────────────
 WHEEL=$(find "$WF_PY_DIR/target/wheels" -name "wf_core*.whl" 2>/dev/null | sort | tail -1)
 if [[ -z "$WHEEL" ]]; then
     echo "Building wf_core..."
@@ -28,10 +29,10 @@ if [[ -z "$WHEEL" ]]; then
     WHEEL=$(find "$WF_PY_DIR/target/wheels" -name "wf_core*.whl" 2>/dev/null | sort | tail -1)
 fi
 if [[ -z "$WHEEL" ]]; then
-    echo "Build failed — no wheel found"
+    echo "Build failed — no wf_core wheel found"
     exit 1
 fi
-echo "Using wheel: $WHEEL"
+echo "Using wf_core wheel: $WHEEL"
 
 # ── extract wf_core.so from wheel ─────────────────────────────────────────────
 SO_TMP=$(mktemp /tmp/wf_core_XXXXXX.so)
@@ -48,7 +49,40 @@ with open("$SO_TMP", 'wb') as f:
     f.write(data)
 EOF
 SO="$SO_TMP"
-echo "Extracted: $SO"
+echo "Extracted wf_core: $SO"
+
+# ── build wf_asset_provider if needed ────────────────────────────────────────
+WAP_WHEEL=$(find "$WAP_DIR/target/wheels" -name "wf_asset_provider*.whl" 2>/dev/null | sort | tail -1)
+if [[ -z "$WAP_WHEEL" ]]; then
+    echo "Building wf_asset_provider..."
+    (cd "$WAP_DIR" && maturin build --release)
+    WAP_WHEEL=$(find "$WAP_DIR/target/wheels" -name "wf_asset_provider*.whl" 2>/dev/null | sort | tail -1)
+fi
+if [[ -z "$WAP_WHEEL" ]]; then
+    echo "Build failed — no wf_asset_provider wheel found"
+    exit 1
+fi
+echo "Using wf_asset_provider wheel: $WAP_WHEEL"
+
+# ── extract wf_asset_provider.so from wheel ───────────────────────────────────
+WAP_SO=$(python3 - <<EOF
+import zipfile, tempfile, os, sys
+wheel = "$WAP_WHEEL"
+with zipfile.ZipFile(wheel) as z:
+    names = [n for n in z.namelist() if n.endswith('.so')]
+    if not names:
+        print("", end="")
+        sys.exit(0)
+    data = z.read(names[0])
+    # preserve abi3 suffix in filename
+    basename = os.path.basename(names[0])
+    tmp = tempfile.mktemp(suffix="_" + basename)
+    with open(tmp, 'wb') as f:
+        f.write(data)
+    print(tmp, end="")
+EOF
+)
+echo "Extracted wf_asset_provider: $WAP_SO"
 
 # ── resolve Blender addons dir ────────────────────────────────────────────────
 if [[ $# -ge 1 ]]; then
@@ -69,12 +103,16 @@ DEST="$ADDONS_DIR/wf_blender"
 mkdir -p "$DEST"
 
 # ── symlink add-on Python files (edits to source are live immediately) ────────
-for pyfile in __init__.py operators.py panels.py export_level.py; do
+for pyfile in __init__.py operators.py panels.py export_level.py asset_browser.py asset_threading.py; do
     ln -sf "$SCRIPT_DIR/$pyfile" "$DEST/$pyfile"
 done
 
-# ── copy native library ───────────────────────────────────────────────────────
+# ── copy native libraries ─────────────────────────────────────────────────────
 cp "$SO" "$DEST/wf_core.so"
+if [[ -n "$WAP_SO" ]]; then
+    WAP_BASENAME=$(basename "$WAP_SO" | sed 's/^[^_]*_//')  # strip mktemp prefix
+    cp "$WAP_SO" "$DEST/wf_asset_provider.abi3.so"
+fi
 
 echo ""
 echo "Installed to: $DEST"

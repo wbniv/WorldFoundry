@@ -65,6 +65,7 @@ class WF_AssetBrowserState(PropertyGroup):
     results:         CollectionProperty(type=WF_AssetResultItem)
     result_index:    IntProperty(default=0)
     is_searching:    BoolProperty(default=False)
+    is_importing:    BoolProperty(default=False)
     status_text:     StringProperty(default="")
     policy_path:     StringProperty(default="")
     policy_accept:   StringProperty(default="")
@@ -126,10 +127,13 @@ class WF_UL_AssetResults(UIList):
 
         key = f"{item.provider}:{item.provider_id}"
         previews = _ensure_previews()
-        thumb_icon = previews[key].icon_id if key in previews else 'FILE_IMAGE'
+        thumb_icon_id = previews[key].icon_id if key in previews else None
 
         row = layout.row(align=True)
-        row.label(text="", icon_value=thumb_icon)
+        if thumb_icon_id is not None:
+            row.label(text="", icon_value=thumb_icon_id)
+        else:
+            row.label(text="", icon='FILE_IMAGE')
         col = row.column()
         col.label(text=item.title)
         sub = col.row()
@@ -162,7 +166,7 @@ class WF_OT_browse_assets(Operator):
             return {'CANCELLED'}
 
         state.is_searching = True
-        state.status_text = f"Searching for "{query}"…"
+        state.status_text = f'Querying providers for "{query}"…'
         state.results.clear()
         state.result_index = 0
 
@@ -203,19 +207,50 @@ class WF_OT_browse_assets(Operator):
                 item.lower_trust   = c.lower_trust
                 item.thumb_loaded  = False
             count = len(state.results)
-            state.status_text = f"{count} result{'s' if count != 1 else ''} after policy filter"
-            for area in context.screen.areas:
-                if area.type == 'VIEW_3D':
-                    area.tag_redraw()
+            state.status_text = f"{count} result{'s' if count != 1 else ''} from {len(enabled)} providers"
+
+            def _finish_search():
+                state.is_searching = False
+                try:
+                    ctx = bpy.context
+                    if ctx and ctx.screen:
+                        for area in ctx.screen.areas:
+                            if area.type == 'VIEW_3D':
+                                area.tag_redraw()
+                except Exception:
+                    pass
+                return None
+
+            bpy.app.timers.register(_finish_search, first_interval=0.4)
 
         def on_error(exc):
             state.is_searching = False
             state.status_text = f"Search failed: {exc}"
-            for area in context.screen.areas:
-                if area.type == 'VIEW_3D':
-                    area.tag_redraw()
+            try:
+                for area in context.screen.areas:
+                    if area.type == 'VIEW_3D':
+                        area.tag_redraw()
+            except Exception:
+                pass
 
         asset_threading.submit(do_search, on_result=on_results, on_error=on_error)
+
+        # Pulse redraws while searching so the spinner animates.
+        # Runs only as long as is_searching is True.
+        def _redraw_pulse():
+            try:
+                scene = bpy.context.scene
+                if not scene or not scene.wf_asset_browser.is_searching:
+                    return None
+                for window in bpy.context.window_manager.windows:
+                    for area in window.screen.areas:
+                        if area.type == 'VIEW_3D':
+                            area.tag_redraw()
+            except Exception:
+                return None
+            return 0.15
+
+        bpy.app.timers.register(_redraw_pulse, first_interval=0.15)
         return {'FINISHED'}
 
 
@@ -291,12 +326,30 @@ class WF_OT_import_asset(Operator):
 
         asset_threading.submit(do_download, on_result=on_done, on_error=on_fail)
         context.window_manager.modal_handler_add(self)
-        state.status_text = f"Downloading "{title}"…"
+        state.status_text = f'Downloading "{title}"…'
+        state.is_importing = True
+
+        def _import_pulse():
+            try:
+                scene = bpy.context.scene
+                if not scene or not scene.wf_asset_browser.is_importing:
+                    return None
+                for window in bpy.context.window_manager.windows:
+                    for area in window.screen.areas:
+                        if area.type == 'VIEW_3D':
+                            area.tag_redraw()
+            except Exception:
+                return None
+            return 0.15
+
+        bpy.app.timers.register(_import_pulse, first_interval=0.15)
         return {'RUNNING_MODAL'}
 
     def modal(self, context, event):
         if not self._future_done:
             return {'PASS_THROUGH'}
+
+        context.scene.wf_asset_browser.is_importing = False
 
         if self._error_msg:
             self.report({'ERROR'}, self._error_msg)
@@ -337,6 +390,8 @@ class WF_PT_asset_browser(Panel):
 
     def draw(self, context):
         layout = self.layout
+        if not context.scene:
+            return
         state  = context.scene.wf_asset_browser
 
         if not _WAP_OK:
@@ -373,8 +428,16 @@ class WF_PT_asset_browser(Panel):
             if state.policy_accept:
                 col.label(text=f"  Accept: {state.policy_accept}")
 
-        # Status / result count
-        if state.status_text:
+        # In-progress indicator
+        if state.is_searching or state.is_importing:
+            import time
+            factor = (time.time() % 1.0)
+            layout.progress(
+                text=state.status_text or ("Importing…" if state.is_importing else "Searching…"),
+                factor=factor,
+                type='BAR',
+            )
+        elif state.status_text:
             layout.label(text=state.status_text, icon='INFO')
 
         # Results list
@@ -386,8 +449,6 @@ class WF_PT_asset_browser(Panel):
                 rows=6,
             )
             layout.operator("wf.import_asset", icon='IMPORT')
-        elif not state.is_searching:
-            layout.label(text="No results", icon='OUTLINER_OB_MESH')
 
 
 # ── Registration ──────────────────────────────────────────────────────────────

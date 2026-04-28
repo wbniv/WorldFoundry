@@ -186,6 +186,11 @@ tasks:
           adb \
           google-android-ndk-r26c-installer
 
+  blender:
+    desc: "Launch Blender, print logs to terminal and capture to /tmp/blender.log"
+    cmds:
+      - blender 2>&1 | tee /tmp/blender.log
+
   git:
     desc: "Browse git branches as a waypoint pipeline (curses TUI)"
     interactive: true

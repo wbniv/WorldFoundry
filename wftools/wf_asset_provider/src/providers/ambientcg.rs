@@ -38,9 +38,13 @@ struct SearchResponse {
 struct AmbientCGAsset {
     asset_id: String,
     display_name: String,
+    data_type: Option<String>,
+    // previewImage is {"64-PNG": "url", "256-PNG": "url", …} — not a plain string
     #[serde(default)]
-    preview_image_url: Option<String>,
-    licence: String,
+    preview_image: serde_json::Value,
+    // licence field was removed from the API; all AmbientCG assets are CC0
+    #[serde(default)]
+    licence: Option<String>,
     #[serde(default)]
     download_folders: serde_json::Value,
 }
@@ -63,8 +67,12 @@ impl Provider for AmbientCG {
         let results = resp
             .found_assets
             .into_iter()
+            .filter(|a| a.data_type.as_deref() == Some("3DModel"))
             .filter_map(|a| {
-                let licence = LicenceId::from_raw(&a.licence);
+                // All AmbientCG assets are CC0; use declared licence if present
+                let licence = a.licence.as_deref()
+                    .map(LicenceId::from_raw)
+                    .unwrap_or(LicenceId::Cc0_1_0);
                 if !policy.allows(&licence) {
                     return None;
                 }
@@ -72,7 +80,7 @@ impl Provider for AmbientCG {
                     provider_id: a.asset_id.clone(),
                     provider: "ambientcg".to_string(),
                     title: a.display_name,
-                    thumbnail_url: a.preview_image_url.unwrap_or_default(),
+                    thumbnail_url: pick_thumbnail(&a.preview_image),
                     licence_id: licence,
                     download_url: format!("https://ambientcg.com/api/v2/full_json?id={}&downloadType=zip", a.asset_id),
                     original_url: format!("https://ambientcg.com/view?id={}", a.asset_id),
@@ -181,9 +189,136 @@ fn extract_gltf_from_zip(zip_bytes: &[u8], dest_dir: &Path, asset_id: &str) -> R
     Ok(out_path)
 }
 
+fn pick_thumbnail(preview_image: &serde_json::Value) -> String {
+    // previewImage is {"64-PNG": "url", "256-PNG": "url", …}; pick smallest available
+    if let Some(obj) = preview_image.as_object() {
+        for key in &["64-PNG", "128-PNG", "256-PNG"] {
+            if let Some(url) = obj.get(*key).and_then(|v| v.as_str()) {
+                return url.to_string();
+            }
+        }
+        // fall through to any available URL
+        if let Some(url) = obj.values().find_map(|v| v.as_str()) {
+            return url.to_string();
+        }
+    }
+    String::new()
+}
+
 fn urlenc(s: &str) -> String {
     s.chars().map(|c| {
         if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c.to_string() }
         else { format!("%{:02X}", c as u32) }
     }).collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Minimal response matching the current AmbientCG API shape (no `licence` field).
+    const SEARCH_RESP_3DMODEL: &str = r#"{
+        "foundAssets": [
+            {
+                "assetId": "TableRound001",
+                "displayName": "Round Table",
+                "dataType": "3DModel",
+                "previewImage": {"64-PNG": "https://example.com/thumb.jpg"},
+                "downloadFolders": null
+            }
+        ]
+    }"#;
+
+    const SEARCH_RESP_HDRI: &str = r#"{
+        "foundAssets": [
+            {
+                "assetId": "SkyHDRI001",
+                "displayName": "Sky HDRI",
+                "dataType": "HDRI",
+                "previewImage": {"64-PNG": "https://example.com/sky.jpg"},
+                "downloadFolders": null
+            }
+        ]
+    }"#;
+
+    const SEARCH_RESP_MIXED: &str = r#"{
+        "foundAssets": [
+            {
+                "assetId": "TableRound001",
+                "displayName": "Round Table",
+                "dataType": "3DModel",
+                "previewImage": {"64-PNG": "https://example.com/table.jpg"},
+                "downloadFolders": null
+            },
+            {
+                "assetId": "SkyHDRI001",
+                "displayName": "Sky HDRI",
+                "dataType": "HDRI",
+                "previewImage": {"64-PNG": "https://example.com/sky.jpg"},
+                "downloadFolders": null
+            },
+            {
+                "assetId": "ChairWood001",
+                "displayName": "Wooden Chair",
+                "dataType": "3DModel",
+                "licence": "CC0-1.0",
+                "previewImage": {"64-PNG": "https://example.com/chair.jpg"},
+                "downloadFolders": null
+            }
+        ]
+    }"#;
+
+    fn cc0_policy() -> crate::policy::Policy {
+        crate::policy::load_policy(std::path::Path::new("/nonexistent")).0
+    }
+
+    fn parse_resp(json: &str) -> SearchResponse {
+        serde_json::from_str(json).expect("parse failed")
+    }
+
+    #[test]
+    fn parses_3dmodel_without_licence_field() {
+        let resp = parse_resp(SEARCH_RESP_3DMODEL);
+        assert_eq!(resp.found_assets.len(), 1);
+        let a = &resp.found_assets[0];
+        assert_eq!(a.asset_id, "TableRound001");
+        assert_eq!(a.display_name, "Round Table");
+        assert_eq!(a.data_type.as_deref(), Some("3DModel"));
+        assert_eq!(pick_thumbnail(&a.preview_image), "https://example.com/thumb.jpg");
+        assert!(a.licence.is_none(), "licence field absent in response must be None");
+    }
+
+    #[test]
+    fn filters_out_hdri_assets() {
+        let resp = parse_resp(SEARCH_RESP_MIXED);
+        let policy = cc0_policy();
+        let only_3d: Vec<_> = resp.found_assets.into_iter()
+            .filter(|a| a.data_type.as_deref() == Some("3DModel"))
+            .filter_map(|a| {
+                let licence = a.licence.as_deref()
+                    .map(LicenceId::from_raw)
+                    .unwrap_or(LicenceId::Cc0_1_0);
+                if !policy.allows(&licence) { return None; }
+                Some(a.asset_id)
+            })
+            .collect();
+        assert_eq!(only_3d, vec!["TableRound001", "ChairWood001"]);
+    }
+
+    #[test]
+    fn pure_hdri_response_yields_no_candidates() {
+        let resp = parse_resp(SEARCH_RESP_HDRI);
+        let filtered: Vec<_> = resp.found_assets.into_iter()
+            .filter(|a| a.data_type.as_deref() == Some("3DModel"))
+            .collect();
+        assert!(filtered.is_empty());
+    }
+
+    #[test]
+    fn explicit_licence_field_is_respected() {
+        let resp = parse_resp(SEARCH_RESP_MIXED);
+        let chair = resp.found_assets.into_iter()
+            .find(|a| a.asset_id == "ChairWood001").unwrap();
+        assert_eq!(chair.licence.as_deref(), Some("CC0-1.0"));
+    }
 }

@@ -189,7 +189,6 @@ fn validate_licence_match(manifest_path: &str, candidate: &PyAssetCandidate) -> 
 
 // ── Module entry point ────────────────────────────────────────────────────────
 
-#[pymodule]
 pub fn wf_asset_provider(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(load_policy, m)?)?;
     m.add_function(wrap_pyfunction!(search, m)?)?;

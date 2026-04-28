@@ -37,6 +37,7 @@ struct AssetFiles {
 struct GltfEntry {
     gltf: Option<GltfFile>,
     glb: Option<GltfFile>,
+    bin: Option<GltfFile>,
 }
 
 #[derive(Deserialize)]
@@ -91,13 +92,27 @@ impl Provider for PolyHaven {
         let files_url = format!("https://api.polyhaven.com/files/{}", candidate.provider_id);
         let files: AssetFiles = self.client.get_json(&files_url)?;
 
-        // Prefer 1k glb for speed, fall back to gltf
-        let (download_url, filename) = pick_gltf_download(&files, &candidate.provider_id)?;
+        // Prefer 1k glb for speed, fall back to gltf + optional companion bin
+        let (download_url, filename, bin_url) = pick_gltf_download(&files, &candidate.provider_id)?;
 
         let bytes = self.client.get_bytes(&download_url)?;
         std::fs::create_dir_all(dest_dir)?;
         let asset_path = dest_dir.join(&filename);
         std::fs::write(&asset_path, &bytes)?;
+
+        // If we downloaded a .gltf, fetch all buffer URIs it references.
+        // bin_url from the API is a fallback; parsing the gltf is authoritative.
+        if filename.ends_with(".gltf") {
+            fetch_gltf_buffers(&self.client, &bytes, dest_dir, &download_url)?;
+        } else if let Some(bin_url) = bin_url {
+            // .glb shouldn't need this, but keep as a belt-and-suspenders fallback
+            let bin_name = std::path::Path::new(&bin_url)
+                .file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_else(|| format!("{}.bin", candidate.provider_id));
+            let bin_bytes = self.client.get_bytes(&bin_url)?;
+            std::fs::write(dest_dir.join(&bin_name), &bin_bytes)?;
+        }
 
         let manifest = Manifest {
             licence_id: "CC0-1.0".to_string(),
@@ -117,23 +132,28 @@ impl Provider for PolyHaven {
     }
 }
 
-fn pick_gltf_download(files: &AssetFiles, slug: &str) -> Result<(String, String), AssetError> {
-    // Try 1k first, then 2k, then any resolution
+fn pick_gltf_download(files: &AssetFiles, slug: &str) -> Result<(String, String, Option<String>), AssetError> {
+    // Returns (primary_url, filename, optional_bin_url)
     if let Some(gltf_map) = &files.gltf {
         for res in &["1k", "2k", "4k"] {
             if let Some(entry) = gltf_map.get(*res) {
                 if let Some(glb) = &entry.glb {
-                    return Ok((glb.url.clone(), format!("{slug}_{res}.glb")));
+                    return Ok((glb.url.clone(), format!("{slug}_{res}.glb"), None));
                 }
                 if let Some(gltf) = &entry.gltf {
-                    return Ok((gltf.url.clone(), format!("{slug}_{res}.gltf")));
+                    let bin_url = entry.bin.as_ref().map(|b| b.url.clone());
+                    return Ok((gltf.url.clone(), format!("{slug}_{res}.gltf"), bin_url));
                 }
             }
         }
         // Any available resolution
         if let Some((res, entry)) = gltf_map.iter().next() {
             if let Some(glb) = &entry.glb {
-                return Ok((glb.url.clone(), format!("{slug}_{res}.glb")));
+                return Ok((glb.url.clone(), format!("{slug}_{res}.glb"), None));
+            }
+            if let Some(gltf) = &entry.gltf {
+                let bin_url = entry.bin.as_ref().map(|b| b.url.clone());
+                return Ok((gltf.url.clone(), format!("{slug}_{res}.gltf"), bin_url));
             }
         }
     }
@@ -141,4 +161,127 @@ fn pick_gltf_download(files: &AssetFiles, slug: &str) -> Result<(String, String)
         provider: "polyhaven".to_string(),
         message: format!("no glTF download found for {slug:?}"),
     })
+}
+
+/// Parse gltf_bytes as glTF JSON and download every relative buffer URI.
+/// base_url is the URL the .gltf was fetched from, used to resolve relative URIs.
+fn fetch_gltf_buffers(client: &RateLimitedClient, gltf_bytes: &[u8], dest_dir: &Path, base_url: &str) -> Result<(), AssetError> {
+    let json: serde_json::Value = match serde_json::from_slice(gltf_bytes) {
+        Ok(v) => v,
+        Err(_) => return Ok(()), // not valid JSON gltf — skip
+    };
+
+    let base = base_url.rfind('/').map(|i| &base_url[..=i]).unwrap_or(base_url);
+
+    if let Some(buffers) = json.get("buffers").and_then(|b| b.as_array()) {
+        for buf in buffers {
+            if let Some(uri) = buf.get("uri").and_then(|u| u.as_str()) {
+                if uri.starts_with("data:") { continue; } // embedded, no fetch needed
+                let buf_url = if uri.starts_with("http://") || uri.starts_with("https://") {
+                    uri.to_string()
+                } else {
+                    format!("{base}{uri}")
+                };
+                let bin_name = std::path::Path::new(uri)
+                    .file_name()
+                    .map(|n| n.to_string_lossy().to_string())
+                    .unwrap_or_else(|| uri.to_string());
+                let bin_bytes = client.get_bytes(&buf_url)?;
+                std::fs::write(dest_dir.join(&bin_name), &bin_bytes)?;
+            }
+        }
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn parse_files(json: &str) -> AssetFiles {
+        serde_json::from_str(json).expect("parse failed")
+    }
+
+    #[test]
+    fn prefers_glb_over_gltf() {
+        let files = parse_files(r#"{
+            "gltf": {
+                "1k": {
+                    "glb": {"url": "https://cdn.polyhaven.com/model_1k.glb"},
+                    "gltf": {"url": "https://cdn.polyhaven.com/model_1k.gltf"},
+                    "bin": {"url": "https://cdn.polyhaven.com/model_1k.bin"}
+                }
+            }
+        }"#);
+        let (url, name, bin) = pick_gltf_download(&files, "test_model").unwrap();
+        assert!(url.ends_with(".glb"), "should pick glb");
+        assert_eq!(name, "test_model_1k.glb");
+        assert!(bin.is_none(), "glb is self-contained, no bin needed");
+    }
+
+    #[test]
+    fn falls_back_to_gltf_with_bin() {
+        let files = parse_files(r#"{
+            "gltf": {
+                "1k": {
+                    "gltf": {"url": "https://cdn.polyhaven.com/outdoor_table_chair_set_01_1k.gltf"},
+                    "bin":  {"url": "https://cdn.polyhaven.com/outdoor_table_chair_set_01_1k.bin"}
+                }
+            }
+        }"#);
+        let (url, name, bin) = pick_gltf_download(&files, "outdoor_table_chair_set_01").unwrap();
+        assert!(url.ends_with(".gltf"));
+        assert_eq!(name, "outdoor_table_chair_set_01_1k.gltf");
+        assert_eq!(bin.as_deref(), Some("https://cdn.polyhaven.com/outdoor_table_chair_set_01_1k.bin"));
+    }
+
+    #[test]
+    fn gltf_without_bin_entry_yields_none_bin() {
+        let files = parse_files(r#"{
+            "gltf": {
+                "1k": {
+                    "gltf": {"url": "https://cdn.polyhaven.com/model_1k.gltf"}
+                }
+            }
+        }"#);
+        let (_url, _name, bin) = pick_gltf_download(&files, "model").unwrap();
+        assert!(bin.is_none());
+    }
+
+    #[test]
+    fn prefers_1k_over_2k() {
+        let files = parse_files(r#"{
+            "gltf": {
+                "2k": {"glb": {"url": "https://cdn.polyhaven.com/model_2k.glb"}},
+                "1k": {"glb": {"url": "https://cdn.polyhaven.com/model_1k.glb"}}
+            }
+        }"#);
+        let (url, name, _) = pick_gltf_download(&files, "model").unwrap();
+        assert!(url.contains("1k"), "should pick 1k: {url}");
+        assert_eq!(name, "model_1k.glb");
+    }
+
+    #[test]
+    fn no_gltf_section_returns_error() {
+        let files = parse_files(r#"{"hdri": {}}"#);
+        assert!(pick_gltf_download(&files, "model").is_err());
+    }
+
+    #[test]
+    fn search_filters_by_slug() {
+        let list_json = r#"{
+            "outdoor_table_chair_set_01": {},
+            "wooden_chair_01": {},
+            "coffee_table_round": {}
+        }"#;
+        let list: std::collections::HashMap<String, serde_json::Value> =
+            serde_json::from_str(list_json).unwrap();
+        let q = "table";
+        let matched: Vec<_> = list.keys()
+            .filter(|k| k.to_ascii_lowercase().contains(q))
+            .collect();
+        assert_eq!(matched.len(), 2);
+        assert!(matched.iter().any(|k| k.contains("outdoor_table")));
+        assert!(matched.iter().any(|k| k.contains("coffee_table")));
+    }
 }

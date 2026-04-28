@@ -133,20 +133,146 @@ fn extract_gltf_from_zip(
         })?
         .clone();
 
-    let mut file = archive.by_name(&name).map_err(|e| AssetError::ProviderFailed {
+    // Determine the directory prefix of the chosen file so we can extract siblings
+    let gltf_dir = std::path::Path::new(&name)
+        .parent()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_default();
+
+    // Extract the chosen file and all siblings in the same ZIP directory
+    let mut primary_out: Option<PathBuf> = None;
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i).map_err(|e| AssetError::ProviderFailed {
+            provider: "kenney".to_string(),
+            message: format!("ZIP index {i}: {e}"),
+        })?;
+        let zip_name = file.name().to_string();
+        let file_dir = std::path::Path::new(&zip_name)
+            .parent()
+            .map(|p| p.to_string_lossy().to_string())
+            .unwrap_or_default();
+        if file_dir != gltf_dir {
+            continue;
+        }
+        let basename = std::path::Path::new(&zip_name)
+            .file_name()
+            .map(|n| n.to_string_lossy().to_string())
+            .unwrap_or_default();
+        if basename.is_empty() {
+            continue;
+        }
+        let out_path = dest_dir.join(&basename);
+        let mut out = std::fs::File::create(&out_path)?;
+        std::io::copy(&mut file, &mut out)?;
+        if zip_name == name {
+            primary_out = Some(out_path);
+        }
+    }
+
+    primary_out.ok_or_else(|| AssetError::ProviderFailed {
         provider: "kenney".to_string(),
-        message: format!("ZIP entry {name:?}: {e}"),
-    })?;
+        message: format!("failed to extract {name:?}"),
+    })
+}
 
-    let basename = std::path::Path::new(&name)
-        .file_name()
-        .unwrap_or(std::ffi::OsStr::new("model.glb"))
-        .to_string_lossy()
-        .to_string();
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+    use tempfile::TempDir;
 
-    let out_path = dest_dir.join(&basename);
-    let mut out = std::fs::File::create(&out_path)?;
-    std::io::copy(&mut file, &mut out)?;
+    fn make_zip(entries: &[(&str, &[u8])]) -> Vec<u8> {
+        let mut buf = Vec::new();
+        {
+            let mut w = zip::ZipWriter::new(std::io::Cursor::new(&mut buf));
+            let opts = zip::write::FileOptions::<()>::default()
+                .compression_method(zip::CompressionMethod::Stored);
+            for (name, data) in entries {
+                w.start_file(*name, opts).unwrap();
+                w.write_all(data).unwrap();
+            }
+            w.finish().unwrap();
+        }
+        buf
+    }
 
-    Ok(out_path)
+    #[test]
+    fn extracts_glb_alone() {
+        let dir = TempDir::new().unwrap();
+        let zip = make_zip(&[
+            ("models/chair.glb", b"glb-data"),
+        ]);
+        let path = extract_gltf_from_zip(&zip, dir.path(), "chair").unwrap();
+        assert_eq!(path.file_name().unwrap(), "chair.glb");
+        assert_eq!(std::fs::read(&path).unwrap(), b"glb-data");
+    }
+
+    #[test]
+    fn extracts_gltf_with_bin_sibling() {
+        let dir = TempDir::new().unwrap();
+        let zip = make_zip(&[
+            ("models/chair.gltf", b"gltf-data"),
+            ("models/chair.bin",  b"bin-data"),
+        ]);
+        let path = extract_gltf_from_zip(&zip, dir.path(), "chair").unwrap();
+        assert_eq!(path.file_name().unwrap(), "chair.gltf");
+        assert!(dir.path().join("chair.bin").exists(), ".bin sibling must be extracted");
+    }
+
+    #[test]
+    fn ignores_other_format_dirs() {
+        // ZIP contains both FBX and glTF subdirs; only the glTF dir should be extracted
+        let dir = TempDir::new().unwrap();
+        let zip = make_zip(&[
+            ("fbx/chair.fbx",        b"fbx-data"),
+            ("gltf/chair.gltf",      b"gltf-data"),
+            ("gltf/chair.bin",       b"bin-data"),
+        ]);
+        let path = extract_gltf_from_zip(&zip, dir.path(), "chair").unwrap();
+        assert_eq!(path.file_name().unwrap(), "chair.gltf");
+        assert!(dir.path().join("chair.bin").exists());
+        assert!(!dir.path().join("chair.fbx").exists(), "FBX must not be extracted");
+    }
+
+    #[test]
+    fn prefers_glb_over_gltf() {
+        let dir = TempDir::new().unwrap();
+        let zip = make_zip(&[
+            ("models/chair.glb",  b"glb-data"),
+            ("models/chair.gltf", b"gltf-data"),
+        ]);
+        let path = extract_gltf_from_zip(&zip, dir.path(), "chair").unwrap();
+        assert_eq!(path.file_name().unwrap(), "chair.glb");
+    }
+
+    #[test]
+    fn error_on_no_gltf_in_zip() {
+        let dir = TempDir::new().unwrap();
+        let zip = make_zip(&[("readme.txt", b"text")]);
+        assert!(extract_gltf_from_zip(&zip, dir.path(), "x").is_err());
+    }
+
+    #[test]
+    fn search_filters_by_query() {
+        let k = Kenney::new();
+        let policy = crate::policy::load_policy(std::path::Path::new("/nonexistent")).0;
+        // "dungeon" matches both id and title in the catalog
+        let results = k.search("dungeon", &policy, 50).unwrap();
+        assert!(!results.is_empty(), "catalog should have at least one dungeon entry");
+        for r in &results {
+            let hay = format!("{} {}", r.title.to_ascii_lowercase(), r.provider_id.to_ascii_lowercase());
+            assert!(
+                hay.contains("dungeon"),
+                "result {hay:?} doesn't match 'dungeon'"
+            );
+        }
+    }
+
+    #[test]
+    fn search_empty_query_returns_nothing() {
+        let k = Kenney::new();
+        let policy = crate::policy::load_policy(std::path::Path::new("/nonexistent")).0;
+        let results = k.search("zzznomatch_xyzzy", &policy, 50).unwrap();
+        assert!(results.is_empty());
+    }
 }
