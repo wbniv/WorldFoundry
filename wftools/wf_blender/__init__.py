@@ -53,7 +53,6 @@ except ImportError as _e:
 from . import operators      # noqa: E402
 from . import panels         # noqa: E402
 from . import export_level   # noqa: E402
-from . import asset_browser  # noqa: E402
 
 
 def register():
@@ -73,12 +72,10 @@ def register():
     operators.register()
     panels.register()
     export_level.register()
-    asset_browser.register()
 
 
 def unregister():
     if _WF_CORE_OK:
-        asset_browser.unregister()
         export_level.unregister()
         panels.unregister()
         operators.unregister()
