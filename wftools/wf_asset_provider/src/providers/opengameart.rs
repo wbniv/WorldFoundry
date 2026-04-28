@@ -50,7 +50,13 @@ impl Provider for OpenGameArt {
         // content page fetch (handles CLI download where query == provider_id).
         let query_is_slug = query.chars().all(|c| c.is_ascii_alphanumeric() || c == '-');
         if query_is_slug && !slugs.iter().any(|(s, _, _)| s == query) {
-            slugs.insert(0, (query.to_string(), query.replace('-', " "), String::new()));
+            // Fetch the content page to get a real thumbnail for this direct-slug entry.
+            let thumb = {
+                let page_url = format!("https://opengameart.org/content/{query}");
+                let page_html = self.client.get_bytes(&page_url).unwrap_or_default();
+                extract_img_url_forward(&String::from_utf8_lossy(&page_html))
+            };
+            slugs.insert(0, (query.to_string(), query.replace('-', " "), thumb));
         }
 
         let results = slugs
