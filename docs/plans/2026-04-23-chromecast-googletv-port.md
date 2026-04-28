@@ -1,7 +1,8 @@
 # Plan: Chromecast / Google TV port
 
 **Date:** 2026-04-23
-**Status:** Phase 0 + Phase 1 done — banner image + Codemagic Android workflow landed. Phases 2–3 need hardware.
+**Status:** Phase 0 ✅ Phase 1 ✅ done. Phase 2 needs Android phone hardware.
+**Branch:** `party-games-platform`, worktree `/home/will/WorldFoundry.party-games-platform`.
 **Goal:** Run World Foundry (snowgoons) on a Chromecast with Google TV device — launch
 from the TV leanback launcher, take gamepad input, render correctly at TV resolution.
 
@@ -16,7 +17,7 @@ The Android port (closed 2026-04-18) already baked in Google TV support:
 What the Android plan never did: **device verification** (Phase 3 Step 7 is ⬜ in
 [android-port](2026-04-16-android-port.md)). Neither a phone nor a TV has ever run the
 APK. Additionally:
-- No TV **banner image** exists — Google TV launcher shows a blank tile without
+- No TV **banner image** existed — Google TV launcher shows a blank tile without
   `android:banner` on `<application>`.
 - **Audio is silent stubs** — acceptable for v1;
   [audio-assets-from-iff](2026-04-18-audio-assets-from-iff.md) is the follow-up.
@@ -43,35 +44,24 @@ Android CI), not new HAL code.
 
 ## Steps
 
-### Phase 0 — TV banner image
-**Estimate: 1 day. No hardware required.**
+### Phase 0 — TV banner image ✅
 
-Google TV launcher requires `android:banner` on `<application>`. Without it the app tile
-in the leanback launcher grid is blank.
+**Commit:** `7219b5f` — `android: TV banner template from wflogo.png + wire android:banner`
 
-1. Create `android/app/src/main/res/drawable/tv_banner.png` — **640×360 px** (2×, 320×180 dp).
-   Use any WF mark / placeholder art; polish later.
-2. Add `android:banner="@drawable/tv_banner"` to `<application>` in
-   `android/app/src/main/AndroidManifest.xml`.
-3. `./gradlew :app:assembleDebug` — verify APK builds clean; `aapt dump badging` confirms
-   banner attribute is present.
+`android/app/src/main/res/drawable/tv_banner.png` — 320×180 px, logo fills left half,
+174px blank right side reserved for per-game/per-level title text. Wire
+`android:banner="@drawable/tv_banner"` on `<application>` in AndroidManifest.xml.
+`wflogo.png` added to repo root as the source image.
 
-### Phase 1 — Codemagic Android workflow
-**Estimate: 1 day. No hardware required.**
+### Phase 1 — Codemagic Android workflow ✅
 
-iOS has Codemagic CI; Android only has local `./gradlew`. Add an Android workflow so
-every push produces a downloadable debug APK, enabling verification without a local
-Android SDK.
-
-1. Add `android-apk-debug` workflow to `codemagic.yaml` (after the two existing iOS
-   workflows):
-   - **Instance:** Codemagic Linux agents ship Android SDK + NDK pre-installed
-   - **NDK version:** pin to r26c (matches local `26.2.11394342`)
-   - **Build step:** `cd android && ./gradlew :app:assembleDebug`
-   - **Artifact:** `android/app/build/outputs/apk/debug/*.apk`
-2. Trigger manually in Codemagic dashboard; verify downloadable APK artifact.
+`android-apk-debug` workflow added to `codemagic.yaml`. Linux instance (`linux_x2`),
+NDK r26c pinned, `./gradlew :app:assembleDebug`, artifact `apk/debug/*.apk`. Manual
+trigger only (no webhook yet). Trigger from Codemagic dashboard to verify APK artifact.
 
 ### Phase 2 — Phone verification
+
+
 **Estimate: 1 day. Requires an Android phone (arm64, API 21+).**
 
 This is the unfinished Phase 3 Step 7 from the Android port plan. Verify on phone
@@ -86,6 +76,8 @@ before TV to isolate any issues from TV-specific behaviour.
 3. Document any regressions; file follow-up plans as needed.
 
 ### Phase 3 — Google TV device verification
+
+
 **Estimate: 2–3 days. Requires Chromecast with Google TV.**
 
 Chromecast has no USB host port — ADB is over the network:
@@ -103,6 +95,8 @@ Verify:
 - No audio (expected for v1)
 
 ### Phase 4 — Audio unblock
+
+
 **Depends on:** [audio-assets-from-iff](2026-04-18-audio-assets-from-iff.md) landing.
 
 Miniaudio on Android auto-selects AAudio (API 26+) or OpenSL ES (API 21+) — no
@@ -116,9 +110,10 @@ Verify (after that plan lands): music plays during snowgoons on both phone and T
 
 | File | Change |
 |------|--------|
-| `android/app/src/main/AndroidManifest.xml` | Add `android:banner="@drawable/tv_banner"` to `<application>` |
-| `android/app/src/main/res/drawable/tv_banner.png` | New — 640×360 px TV banner image |
-| `codemagic.yaml` | New `android-apk-debug` workflow after existing iOS workflows |
+| `android/app/src/main/AndroidManifest.xml` | `android:banner="@drawable/tv_banner"` on `<application>` ✅ |
+| `android/app/src/main/res/drawable/tv_banner.png` | 320×180 TV banner (logo left, right reserved for title) ✅ |
+| `wflogo.png` | Source logo added to repo root ✅ |
+| `codemagic.yaml` | New `android-apk-debug` workflow after existing iOS workflow ✅ |
 
 No HAL or CMake changes needed — the Google TV code path is already in place.
 
