@@ -37,12 +37,16 @@ struct AssetFiles {
 struct GltfEntry {
     gltf: Option<GltfFile>,
     glb: Option<GltfFile>,
-    bin: Option<GltfFile>,
 }
 
 #[derive(Deserialize)]
 struct GltfFile {
     url: String,
+    /// Companion files keyed by relative path (e.g. "textures/foo_diff_1k.jpg").
+    /// The API provides canonical CDN URLs here — use these instead of reconstructing
+    /// paths from the gltf's internal URIs (which drift when Poly Haven reorganises CDN).
+    #[serde(default)]
+    include: HashMap<String, GltfFile>,
 }
 
 impl Provider for PolyHaven {
@@ -92,26 +96,25 @@ impl Provider for PolyHaven {
         let files_url = format!("https://api.polyhaven.com/files/{}", candidate.provider_id);
         let files: AssetFiles = self.client.get_json(&files_url)?;
 
-        // Prefer 1k glb for speed, fall back to gltf + optional companion bin
-        let (download_url, filename, bin_url) = pick_gltf_download(&files, &candidate.provider_id)?;
+        let (download_url, filename, companions) = pick_gltf_download(&files, &candidate.provider_id)?;
 
         let bytes = self.client.get_bytes(&download_url)?;
         std::fs::create_dir_all(dest_dir)?;
         let asset_path = dest_dir.join(&filename);
         std::fs::write(&asset_path, &bytes)?;
 
-        // If we downloaded a .gltf, fetch all buffer URIs it references.
-        // bin_url from the API is a fallback; parsing the gltf is authoritative.
-        if filename.ends_with(".gltf") {
-            fetch_gltf_buffers(&self.client, &bytes, dest_dir, &download_url)?;
-        } else if let Some(bin_url) = bin_url {
-            // .glb shouldn't need this, but keep as a belt-and-suspenders fallback
-            let bin_name = std::path::Path::new(&bin_url)
-                .file_name()
-                .map(|n| n.to_string_lossy().to_string())
-                .unwrap_or_else(|| format!("{}.bin", candidate.provider_id));
-            let bin_bytes = self.client.get_bytes(&bin_url)?;
-            std::fs::write(dest_dir.join(&bin_name), &bin_bytes)?;
+        // Download all companion files (textures, bin) using the canonical URLs
+        // from the API's include map — these are authoritative and stable even
+        // when Poly Haven reorganises their CDN directory structure.
+        for (rel_path, companion) in &companions {
+            let out_path = dest_dir.join(rel_path);
+            if let Some(parent) = out_path.parent() {
+                let _ = std::fs::create_dir_all(parent);
+            }
+            match self.client.get_bytes(&companion.url) {
+                Ok(data) => { let _ = std::fs::write(&out_path, &data); }
+                Err(e) => eprintln!("[polyhaven] warning: skipping {rel_path}: {e}"),
+            }
         }
 
         let manifest = Manifest {
@@ -132,28 +135,29 @@ impl Provider for PolyHaven {
     }
 }
 
-fn pick_gltf_download(files: &AssetFiles, slug: &str) -> Result<(String, String, Option<String>), AssetError> {
-    // Returns (primary_url, filename, optional_bin_url)
+/// Returns (primary_url, filename, include_map).
+/// include_map: relative path → GltfFile with canonical CDN URL for each companion file.
+fn pick_gltf_download(files: &AssetFiles, slug: &str) -> Result<(String, String, HashMap<String, GltfFile>), AssetError> {
     if let Some(gltf_map) = &files.gltf {
         for res in &["1k", "2k", "4k"] {
             if let Some(entry) = gltf_map.get(*res) {
                 if let Some(glb) = &entry.glb {
-                    return Ok((glb.url.clone(), format!("{slug}_{res}.glb"), None));
+                    return Ok((glb.url.clone(), format!("{slug}_{res}.glb"), HashMap::new()));
                 }
-                if let Some(gltf) = &entry.gltf {
-                    let bin_url = entry.bin.as_ref().map(|b| b.url.clone());
-                    return Ok((gltf.url.clone(), format!("{slug}_{res}.gltf"), bin_url));
+                if let Some(gltf) = entry.gltf.as_ref() {
+                    return Ok((gltf.url.clone(), format!("{slug}_{res}.gltf"),
+                               gltf.include.iter().map(|(k, v)| (k.clone(), GltfFile { url: v.url.clone(), include: HashMap::new() })).collect()));
                 }
             }
         }
         // Any available resolution
-        if let Some((res, entry)) = gltf_map.iter().next() {
+        for (res, entry) in gltf_map.iter() {
             if let Some(glb) = &entry.glb {
-                return Ok((glb.url.clone(), format!("{slug}_{res}.glb"), None));
+                return Ok((glb.url.clone(), format!("{slug}_{res}.glb"), HashMap::new()));
             }
-            if let Some(gltf) = &entry.gltf {
-                let bin_url = entry.bin.as_ref().map(|b| b.url.clone());
-                return Ok((gltf.url.clone(), format!("{slug}_{res}.gltf"), bin_url));
+            if let Some(gltf) = entry.gltf.as_ref() {
+                return Ok((gltf.url.clone(), format!("{slug}_{res}.gltf"),
+                           gltf.include.iter().map(|(k, v)| (k.clone(), GltfFile { url: v.url.clone(), include: HashMap::new() })).collect()));
             }
         }
     }
@@ -161,51 +165,6 @@ fn pick_gltf_download(files: &AssetFiles, slug: &str) -> Result<(String, String,
         provider: "polyhaven".to_string(),
         message: format!("no glTF download found for {slug:?}"),
     })
-}
-
-/// Parse gltf_bytes as glTF JSON and download all relative buffer + image URIs.
-/// base_url is the URL the .gltf was fetched from, used to resolve relative URIs.
-fn fetch_gltf_buffers(client: &RateLimitedClient, gltf_bytes: &[u8], dest_dir: &Path, base_url: &str) -> Result<(), AssetError> {
-    let json: serde_json::Value = match serde_json::from_slice(gltf_bytes) {
-        Ok(v) => v,
-        Err(_) => return Ok(()),
-    };
-
-    let base = base_url.rfind('/').map(|i| &base_url[..=i]).unwrap_or(base_url);
-
-    let mut uris: Vec<String> = Vec::new();
-    for section in &["buffers", "images"] {
-        if let Some(arr) = json.get(section).and_then(|v| v.as_array()) {
-            for entry in arr {
-                if let Some(uri) = entry.get("uri").and_then(|u| u.as_str()) {
-                    if !uri.starts_with("data:") {
-                        uris.push(uri.to_string());
-                    }
-                }
-            }
-        }
-    }
-
-    for uri in uris {
-        let fetch_url = if uri.starts_with("http://") || uri.starts_with("https://") {
-            uri.clone()
-        } else {
-            format!("{base}{uri}")
-        };
-        // Preserve relative path (e.g. "textures/foo.png") under dest_dir
-        let out_path = dest_dir.join(&uri);
-        if let Some(parent) = out_path.parent() {
-            if let Err(e) = std::fs::create_dir_all(parent) {
-                eprintln!("[polyhaven] warning: could not create dir for {uri}: {e}");
-                continue;
-            }
-        }
-        match client.get_bytes(&fetch_url) {
-            Ok(bytes) => { let _ = std::fs::write(&out_path, &bytes); }
-            Err(e) => eprintln!("[polyhaven] warning: skipping {uri}: {e}"),
-        }
-    }
-    Ok(())
 }
 
 #[cfg(test)]
@@ -227,39 +186,47 @@ mod tests {
                 }
             }
         }"#);
-        let (url, name, bin) = pick_gltf_download(&files, "test_model").unwrap();
+        let (url, name, companions) = pick_gltf_download(&files, "test_model").unwrap();
         assert!(url.ends_with(".glb"), "should pick glb");
         assert_eq!(name, "test_model_1k.glb");
-        assert!(bin.is_none(), "glb is self-contained, no bin needed");
+        assert!(companions.is_empty(), "glb is self-contained, no companions needed");
     }
 
     #[test]
-    fn falls_back_to_gltf_with_bin() {
+    fn falls_back_to_gltf_with_include_map() {
         let files = parse_files(r#"{
             "gltf": {
                 "1k": {
-                    "gltf": {"url": "https://cdn.polyhaven.com/outdoor_table_chair_set_01_1k.gltf"},
-                    "bin":  {"url": "https://cdn.polyhaven.com/outdoor_table_chair_set_01_1k.bin"}
+                    "gltf": {
+                        "url": "https://dl.polyhaven.org/model_1k.gltf",
+                        "include": {
+                            "textures/model_diff_1k.jpg": {"url": "https://dl.polyhaven.org/Models/jpg/1k/model/model_diff_1k.jpg"},
+                            "model_1k.bin":               {"url": "https://dl.polyhaven.org/Models/gltf/1k/model/model_1k.bin"}
+                        }
+                    }
                 }
             }
         }"#);
-        let (url, name, bin) = pick_gltf_download(&files, "outdoor_table_chair_set_01").unwrap();
+        let (url, name, companions) = pick_gltf_download(&files, "model").unwrap();
         assert!(url.ends_with(".gltf"));
-        assert_eq!(name, "outdoor_table_chair_set_01_1k.gltf");
-        assert_eq!(bin.as_deref(), Some("https://cdn.polyhaven.com/outdoor_table_chair_set_01_1k.bin"));
+        assert_eq!(name, "model_1k.gltf");
+        assert_eq!(companions.len(), 2);
+        assert!(companions.contains_key("textures/model_diff_1k.jpg"));
+        assert!(companions.contains_key("model_1k.bin"));
+        assert!(companions["textures/model_diff_1k.jpg"].url.contains("/jpg/"));
     }
 
     #[test]
-    fn gltf_without_bin_entry_yields_none_bin() {
+    fn gltf_without_include_yields_empty_map() {
         let files = parse_files(r#"{
             "gltf": {
                 "1k": {
-                    "gltf": {"url": "https://cdn.polyhaven.com/model_1k.gltf"}
+                    "gltf": {"url": "https://dl.polyhaven.org/model_1k.gltf"}
                 }
             }
         }"#);
-        let (_url, _name, bin) = pick_gltf_download(&files, "model").unwrap();
-        assert!(bin.is_none());
+        let (_url, _name, companions) = pick_gltf_download(&files, "model").unwrap();
+        assert!(companions.is_empty());
     }
 
     #[test]
