@@ -457,6 +457,93 @@ class WF_OT_import_asset(Operator):
         state.status_text = f'Imported "{item.title}"'
 
 
+# ── Wide popup ───────────────────────────────────────────────────────────────
+
+class WF_OT_open_browser_popup(Operator):
+    bl_idname  = "wf.open_browser_popup"
+    bl_label   = "WF Asset Browser"
+    bl_options = {'REGISTER'}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_popup(self, width=880)
+
+    def execute(self, context):
+        return {'FINISHED'}
+
+    def draw(self, context):
+        layout = self.layout
+        if not context.scene:
+            return
+        state   = context.scene.wf_asset_browser
+        toggles = state.providers
+
+        if not _WAP_OK:
+            layout.label(text="wf_asset_provider not loaded", icon='ERROR')
+            return
+
+        # Search bar
+        row = layout.row(align=True)
+        row.prop(state, "query", text="", icon='VIEWZOOM')
+        if state.is_searching:
+            row.operator("wf.cancel_asset_search", text="", icon='X')
+        else:
+            row.operator("wf.browse_assets", text="", icon='VIEWZOOM')
+
+        # Provider toggles
+        box = layout.box()
+        row = box.row()
+        row.label(text="Providers:", icon='NETWORK_DRIVE')
+        row.prop(toggles, "polyhaven",   toggle=True)
+        row.prop(toggles, "kenney",      toggle=True)
+        row.prop(toggles, "ambientcg",   toggle=True)
+        row.prop(toggles, "opengameart", toggle=True)
+
+        # Progress / status
+        if state.is_searching or state.is_importing:
+            import time
+            layout.progress(
+                text=state.status_text or ("Importing…" if state.is_importing else "Searching…"),
+                factor=time.time() % 1.0,
+                type='BAR',
+            )
+        elif state.status_text:
+            layout.label(text=state.status_text, icon='INFO')
+
+        if not state.results:
+            return
+
+        # Two-column body: list left | preview + import right
+        split = layout.split(factor=0.55)
+        col_list  = split.column()
+        col_right = split.column()
+
+        col_list.template_list(
+            "WF_UL_AssetResults", "popup",
+            state, "results",
+            state, "result_index",
+            rows=24, maxrows=30,
+        )
+
+        idx = state.result_index
+        if 0 <= idx < len(state.results):
+            sel = state.results[idx]
+            key = f"{sel.provider}:{sel.provider_id}"
+            box = col_right.box()
+            if key in _icon_ids:
+                box.template_icon(_icon_ids[key], scale=14.0)
+            else:
+                c = box.column()
+                c.scale_y = 3.0
+                c.label(text="No preview available", icon='IMAGE_ALPHA')
+            box.label(text=sel.title)
+            sub = box.row()
+            sub.scale_y = 0.7
+            licence_txt = sel.licence_id + ("  ⚠ lower trust" if sel.lower_trust else "")
+            sub.label(text=f"{sel.provider}  ·  {licence_txt}")
+            col_right.separator()
+            col_right.operator("wf.import_asset", icon='IMPORT')
+
+
 # ── Panel ─────────────────────────────────────────────────────────────────────
 
 class WF_PT_asset_browser(Panel):
@@ -476,6 +563,9 @@ class WF_PT_asset_browser(Panel):
             layout.label(text="wf_asset_provider not loaded", icon='ERROR')
             layout.label(text=f"  {_WAP_ERROR}")
             return
+
+        layout.operator("wf.open_browser_popup", text="Open Wide Browser", icon='ASSET_MANAGER')
+        layout.separator()
 
         # Search bar
         row = layout.row(align=True)
@@ -556,6 +646,7 @@ _CLASSES = [
     WF_OT_browse_assets,
     WF_OT_cancel_search,
     WF_OT_import_asset,
+    WF_OT_open_browser_popup,
     WF_PT_asset_browser,
 ]
 
