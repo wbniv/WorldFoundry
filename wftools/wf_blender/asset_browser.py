@@ -75,6 +75,7 @@ class WF_AssetBrowserState(PropertyGroup):
 
 _previews: bpy.utils.previews.ImagePreviewCollection | None = None
 _pending_thumbs: set = set()   # keys currently in-flight; prevents duplicate fetches
+_failed_thumbs: set = set()    # keys that failed this session; no retry
 _icon_ids: dict = {}           # key → icon_id; populated by on_result, read by draw_item
 
 def _ensure_previews():
@@ -109,7 +110,7 @@ def _load_thumbnail(item: WF_AssetResultItem):
         return
 
     key = f"{item.provider}:{item.provider_id}"
-    if key in _icon_ids or key in _pending_thumbs:
+    if key in _icon_ids or key in _pending_thumbs or key in _failed_thumbs:
         return
 
     # Mark in-flight before submitting so concurrent draw calls don't re-submit
@@ -139,6 +140,7 @@ def _load_thumbnail(item: WF_AssetResultItem):
     def on_result(path):
         _pending_thumbs.discard(thumb_key)
         if not path:
+            _failed_thumbs.add(thumb_key)
             return
         try:
             p = _ensure_previews()
@@ -197,6 +199,7 @@ class WF_OT_browse_assets(Operator):
         state.results.clear()
         state.result_index = 0
         _pending_thumbs.clear()
+        _failed_thumbs.clear()
         _icon_ids.clear()
 
         # Resolve policy
