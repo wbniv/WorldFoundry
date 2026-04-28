@@ -2,7 +2,47 @@
 
 ## Context
 
-The `docs/investigations/2026-04-28-level-construction-tooling.md` Seam 5 specifies an asset-sourcing system with provider abstractions, per-asset `manifest.json`, project-level `licence_policy.toml` (structured `[[licence]]` records with `id` / `status` / `reason`), and a Blender plugin that searches across providers with the policy as a hard filter. Phase B and Phase D of the investigation cover the Rust crate side and the plugin side respectively. The user's request is the *plugin* deliverable, with the licence-policy schema we just defined as the filter input.
+The `docs/investigations/2026-04-28-level-construction-tooling.md` Seam 5 specifies an asset-sourcing system with provider abstractions, per-asset `manifest.json`, project-level `licence_policy.toml` (structured `[[licence]]` records with `id` / `status` / `reason`), and a Blender plugin that searches across providers with the policy as a hard filter. Phase B and Phase D of the investigation cover the Rust crate side and the plugin side respectively. The user's request is the *plugin* deliverable, with the licence-policy schema we just defined as the filter input. The schema lives at `wflevels/licence_policy.toml`:
+
+```toml
+# status values:
+#   "accept"         — asset with this licence may be imported
+#   "reject"         — never import; hard block
+#   "reject-default" — blocked by default; can be overridden per-asset with [[waiver]]
+
+require_attribution_credits = true
+
+[[licence]]
+id = "CC0-1.0"
+status = "accept"
+requires_attribution = false
+reason = "public domain dedication — no restrictions on use, modification, or distribution"
+
+[[licence]]
+id = "CC-BY-4.0"
+status = "reject-default"
+requires_attribution = true
+reason = "attribution required — acceptable if credits screen is maintained; waiver available per-asset"
+
+[[licence]]
+id = "CC-BY-SA-4.0"
+status = "reject"
+requires_attribution = true
+reason = "share-alike would require WF derivative works to be released under CC-BY-SA; incompatible with commercial distribution"
+
+# ... (CC-BY-NC-4.0, CC-BY-NC-SA-4.0, GPL-3.0, LGPL-3.0, editorial-only,
+#      royalty-on-revenue, unknown — all "reject")
+
+# Per-asset waivers:
+# [[waiver]]
+# asset_id    = "provider/asset-id"
+# licence_id  = "CC-BY-SA-4.0"
+# approved_by = "wbnorris"
+# approved_at = "2026-04-28"
+# reason      = "..."
+```
+
+Full file: [`wflevels/licence_policy.toml`](../../wflevels/licence_policy.toml).
 
 What exists today (verified by exploration):
 
