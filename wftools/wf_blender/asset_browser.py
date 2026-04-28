@@ -167,7 +167,7 @@ class WF_UL_AssetResults(UIList):
         if icon_id:
             row.label(text="", icon_value=icon_id)
         else:
-            row.label(text="", icon='FILE_IMAGE')
+            row.label(text="", icon='IMAGE_ALPHA')
         trust = "  ⚠" if item.lower_trust else ""
         row.label(text=f"{item.title}  [{item.provider}{trust}]")
 
@@ -531,7 +531,9 @@ class WF_PT_asset_browser(Panel):
                 if key in _icon_ids:
                     box.template_icon(_icon_ids[key], scale=9.0)
                 else:
-                    box.label(text="", icon='FILE_IMAGE')
+                    col = box.column()
+                    col.scale_y = 3.0
+                    col.label(text="No preview available", icon='IMAGE_ALPHA')
                 box.label(text=sel.title)
                 sub = box.row()
                 sub.scale_y = 0.7
