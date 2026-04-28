@@ -74,6 +74,8 @@ class WF_AssetBrowserState(PropertyGroup):
 # ── Thumbnail preview collection ──────────────────────────────────────────────
 
 _previews: bpy.utils.previews.ImagePreviewCollection | None = None
+_pending_thumbs: set = set()   # keys currently in-flight; prevents duplicate fetches
+_icon_ids: dict = {}           # key → icon_id; populated by on_result, read by draw_item
 
 def _ensure_previews():
     global _previews
@@ -95,60 +97,58 @@ def _redraw_3d():
         for window in bpy.context.window_manager.windows:
             for area in window.screen.areas:
                 if area.type == 'VIEW_3D':
-                    area.tag_redraw()
+                    for region in area.regions:
+                        region.tag_redraw()
     except Exception:
         pass
 
 
 def _load_thumbnail(item: WF_AssetResultItem):
-    """Load thumbnail from disk cache, or fetch and cache it."""
-    if item.thumb_loaded or not item.thumbnail_url:
+    """Load thumbnail from disk cache, or fetch and cache it. One fetch per key."""
+    if not item.thumbnail_url:
         return
 
     key = f"{item.provider}:{item.provider_id}"
-    previews = _ensure_previews()
-    if key in previews:
+    if key in _icon_ids or key in _pending_thumbs:
         return
+
+    # Mark in-flight before submitting so concurrent draw calls don't re-submit
+    _pending_thumbs.add(key)
 
     import os
-    suffix = os.path.splitext(item.thumbnail_url.split('?')[0])[-1] or '.png'
-    cache_path = _thumb_cache_path(item.provider, item.provider_id, suffix)
-
-    # Load from disk cache if present (no network needed)
-    if os.path.exists(cache_path):
-        try:
-            previews.load(key, cache_path, 'IMAGE')
-            _redraw_3d()
-        except Exception:
-            pass
-        return
-
-    # Capture values — PropertyGroup can't be closed over safely
     url       = item.thumbnail_url
     thumb_key = key
-    dst       = cache_path
+    suffix    = os.path.splitext(url.split('?')[0])[-1] or '.png'
+    dst       = _thumb_cache_path(item.provider, item.provider_id, suffix)
 
     def fetch():
-        import urllib.request
+        import urllib.request, os
+        # Serve from disk cache — skip network entirely
+        if os.path.exists(dst):
+            return dst
         try:
             with urllib.request.urlopen(url, timeout=15) as resp:
                 data = resp.read()
             with open(dst, 'wb') as f:
                 f.write(data)
             return dst
-        except Exception:
+        except Exception as e:
+            print(f"[wf_blender] thumb fetch failed {thumb_key}: {e}")
             return None
 
     def on_result(path):
+        _pending_thumbs.discard(thumb_key)
         if not path:
             return
         try:
             p = _ensure_previews()
             if thumb_key not in p:
                 p.load(thumb_key, path, 'IMAGE')
+            _icon_ids[thumb_key] = p[thumb_key].icon_id
             _redraw_3d()
-        except Exception:
-            pass
+        except Exception as e:
+            import sys
+            print(f"[wf_blender] thumb load failed {thumb_key}: {e}", file=sys.stderr)
 
     asset_threading.submit(fetch, on_result=on_result)
 
@@ -161,8 +161,7 @@ class WF_UL_AssetResults(UIList):
             return
 
         key = f"{item.provider}:{item.provider_id}"
-        previews = _ensure_previews()
-        icon_id = previews[key].icon_id if key in previews else 0
+        icon_id = _icon_ids.get(key, 0)
 
         row = layout.row(align=True)
         if icon_id:
@@ -197,6 +196,8 @@ class WF_OT_browse_assets(Operator):
         state.status_text = f'Querying providers for "{query}"…'
         state.results.clear()
         state.result_index = 0
+        _pending_thumbs.clear()
+        _icon_ids.clear()
 
         # Resolve policy
         blend_dir = os.path.dirname(bpy.data.filepath) if bpy.data.filepath else os.getcwd()
@@ -419,13 +420,16 @@ class WF_OT_import_asset(Operator):
                         def _try_load_preview(obj_name=obj_name, k=key,
                                               prov=item.provider, pid=item.provider_id):
                             o = bpy.data.objects.get(obj_name)
-                            if o and o.preview and any(o.preview.pixels):
-                                w = o.preview.image_size[0]
-                                h = o.preview.image_size[1]
-                                if w > 0 and h > 0:
+                            if o is None:
+                                return None
+                            preview = o.preview  # ImagePreview — do NOT bool-test it
+                            if preview is not None:
+                                w, h = preview.image_size
+                                pixels = list(preview.image_pixels_float)
+                                if w > 0 and h > 0 and any(pixels):
                                     cache_path = _thumb_cache_path(prov, pid, '.png')
                                     img = bpy.data.images.new("_wf_thumb_tmp", w, h)
-                                    img.pixels[:] = o.preview.pixels
+                                    img.pixels[:] = pixels
                                     img.filepath_raw = cache_path
                                     img.file_format = 'PNG'
                                     img.save()
@@ -433,6 +437,7 @@ class WF_OT_import_asset(Operator):
                                     p = _ensure_previews()
                                     if k not in p:
                                         p.load(k, cache_path, 'IMAGE')
+                                    _icon_ids[k] = p[k].icon_id
                                     _redraw_3d()
                             return None
 
@@ -522,10 +527,9 @@ class WF_PT_asset_browser(Panel):
             if 0 <= idx < len(state.results):
                 sel = state.results[idx]
                 key = f"{sel.provider}:{sel.provider_id}"
-                previews = _ensure_previews()
                 box = layout.box()
-                if key in previews:
-                    box.template_icon(previews[key].icon_id, scale=9.0)
+                if key in _icon_ids:
+                    box.template_icon(_icon_ids[key], scale=9.0)
                 else:
                     box.label(text="", icon='FILE_IMAGE')
                 box.label(text=sel.title)
