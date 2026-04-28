@@ -363,8 +363,15 @@ class WF_OT_import_asset(Operator):
         state = context.scene.wf_asset_browser
         item  = state.results[state.result_index]
 
-        # Import the glTF at the 3D cursor
-        bpy.ops.import_scene.gltf(filepath=asset_path)
+        # Import the asset — detect format by extension
+        ext = os.path.splitext(asset_path)[1].lower()
+        if ext in ('.glb', '.gltf'):
+            bpy.ops.import_scene.gltf(filepath=asset_path)
+        elif ext == '.obj':
+            bpy.ops.wm.obj_import(filepath=asset_path)
+        else:
+            self.report({'WARNING'}, f"Unknown format {ext!r}; trying glTF importer")
+            bpy.ops.import_scene.gltf(filepath=asset_path)
 
         # Attach default OAD schema to all newly imported objects
         imported = [o for o in context.selected_objects]

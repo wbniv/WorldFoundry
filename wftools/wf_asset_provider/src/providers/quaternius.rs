@@ -76,7 +76,25 @@ impl Provider for Quaternius {
     }
 
     fn download(&self, candidate: &AssetCandidate, dest_dir: &Path) -> Result<(PathBuf, Manifest), AssetError> {
-        let bytes = self.client.get_bytes(&candidate.download_url)?;
+        // Try the catalog URL; if 404, attempt to scrape the pack page.
+        let bytes = self.client.get_bytes(&candidate.download_url).or_else(|_| {
+            // Quaternius moved direct downloads to Patreon; try scraping the page.
+            let page_url = &candidate.original_url;
+            let html_bytes = self.client.get_bytes(page_url)?;
+            let html = String::from_utf8_lossy(&html_bytes);
+            let zip_url = html.split('"')
+                .find(|s| s.ends_with(".zip") && s.starts_with("http"))
+                .map(|s| s.to_string())
+                .ok_or_else(|| AssetError::ProviderFailed {
+                    provider: "quaternius".to_string(),
+                    message: format!(
+                        "Pack {:?} no longer has a free direct download. \
+                         Visit {} to download via Patreon.",
+                        candidate.provider_id, candidate.original_url
+                    ),
+                })?;
+            self.client.get_bytes(&zip_url)
+        })?;
         std::fs::create_dir_all(dest_dir)?;
         let asset_path = extract_gltf_from_zip(&bytes, dest_dir, &candidate.provider_id)?;
 

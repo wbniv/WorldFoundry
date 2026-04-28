@@ -2,80 +2,56 @@
   {
     "id": "nature-kit",
     "title": "Nature Kit",
-    "thumbnail_url": "https://kenney.nl/content/3-assets/173-nature-kit/preview.png",
-    "download_url": "https://kenney.nl/content/3-assets/173-nature-kit/naturekit.zip",
+    "thumbnail_url": "https://kenney.nl/media/pages/assets/nature-kit/8334871c74-1677698939/preview.png",
+    "download_url": "https://kenney.nl/media/pages/assets/nature-kit/8334871c74-1677698939/kenney_nature-kit.zip",
     "original_url": "https://kenney.nl/assets/nature-kit",
     "tags": ["tree", "nature", "plant", "flower", "rock", "outdoor", "environment"]
   },
   {
     "id": "city-kit-commercial",
     "title": "City Kit (Commercial)",
-    "thumbnail_url": "https://kenney.nl/content/3-assets/136-city-kit-commercial-/preview.png",
-    "download_url": "https://kenney.nl/content/3-assets/136-city-kit-commercial-/citykit_commercial.zip",
+    "thumbnail_url": "https://kenney.nl/media/pages/assets/city-kit-commercial/16eb35d771-1753115042/preview.png",
+    "download_url": "https://kenney.nl/media/pages/assets/city-kit-commercial/16eb35d771-1753115042/kenney_city-kit-commercial_2.1.zip",
     "original_url": "https://kenney.nl/assets/city-kit-commercial",
     "tags": ["city", "building", "urban", "street", "car", "road"]
   },
   {
     "id": "city-kit-roads",
     "title": "City Kit (Roads)",
-    "thumbnail_url": "https://kenney.nl/content/3-assets/143-city-kit-roads-/preview.png",
-    "download_url": "https://kenney.nl/content/3-assets/143-city-kit-roads-/citykit_roads.zip",
+    "thumbnail_url": "https://kenney.nl/media/pages/assets/city-kit-roads/4b84d0ea8d-1741864740/preview.png",
+    "download_url": "https://kenney.nl/media/pages/assets/city-kit-roads/4b84d0ea8d-1741864740/kenney_city-kit-roads.zip",
     "original_url": "https://kenney.nl/assets/city-kit-roads",
     "tags": ["road", "street", "city", "intersection", "traffic"]
   },
   {
-    "id": "dungeon-kit",
-    "title": "Dungeon Kit",
-    "thumbnail_url": "https://kenney.nl/content/3-assets/172-dungeon-kit/preview.png",
-    "download_url": "https://kenney.nl/content/3-assets/172-dungeon-kit/dungeonkit.zip",
-    "original_url": "https://kenney.nl/assets/dungeon-kit",
-    "tags": ["dungeon", "castle", "medieval", "stone", "brick", "wall", "floor", "torch"]
-  },
-  {
     "id": "pirate-kit",
     "title": "Pirate Kit",
-    "thumbnail_url": "https://kenney.nl/content/3-assets/175-pirate-kit/preview.png",
-    "download_url": "https://kenney.nl/content/3-assets/175-pirate-kit/piratekit.zip",
+    "thumbnail_url": "https://kenney.nl/media/pages/assets/pirate-kit/85d331e664-1771333093/preview.png",
+    "download_url": "https://kenney.nl/media/pages/assets/pirate-kit/85d331e664-1771333093/kenney_pirate-kit.zip",
     "original_url": "https://kenney.nl/assets/pirate-kit",
     "tags": ["pirate", "ship", "ocean", "barrel", "chest", "treasure", "cannon"]
   },
   {
     "id": "space-kit",
     "title": "Space Kit",
-    "thumbnail_url": "https://kenney.nl/content/3-assets/82-space-kit/preview.png",
-    "download_url": "https://kenney.nl/content/3-assets/82-space-kit/spacekit.zip",
+    "thumbnail_url": "https://kenney.nl/media/pages/assets/space-kit/cceeafbd0c-1677698978/preview.png",
+    "download_url": "https://kenney.nl/media/pages/assets/space-kit/cceeafbd0c-1677698978/kenney_space-kit.zip",
     "original_url": "https://kenney.nl/assets/space-kit",
     "tags": ["space", "planet", "rocket", "satellite", "asteroid", "spaceship", "sci-fi"]
   },
   {
-    "id": "farm-kit",
-    "title": "Farm Kit",
-    "thumbnail_url": "https://kenney.nl/content/3-assets/174-farm-kit/preview.png",
-    "download_url": "https://kenney.nl/content/3-assets/174-farm-kit/farmkit.zip",
-    "original_url": "https://kenney.nl/assets/farm-kit",
-    "tags": ["farm", "barn", "animal", "crop", "tractor", "rural", "field"]
-  },
-  {
-    "id": "medieval-hex-pack",
-    "title": "Medieval Hex Pack",
-    "thumbnail_url": "https://kenney.nl/content/3-assets/160-medieval-hex-pack/preview.png",
-    "download_url": "https://kenney.nl/content/3-assets/160-medieval-hex-pack/medievalhexpack.zip",
-    "original_url": "https://kenney.nl/assets/medieval-hex-pack",
-    "tags": ["medieval", "hex", "tile", "castle", "knight", "village"]
-  },
-  {
     "id": "survival-kit",
     "title": "Survival Kit",
-    "thumbnail_url": "https://kenney.nl/content/3-assets/181-survival-kit/preview.png",
-    "download_url": "https://kenney.nl/content/3-assets/181-survival-kit/survivalkit.zip",
+    "thumbnail_url": "https://kenney.nl/media/pages/assets/survival-kit/750a1eb3f9-1712149243/preview.png",
+    "download_url": "https://kenney.nl/media/pages/assets/survival-kit/750a1eb3f9-1712149243/kenney_survival-kit.zip",
     "original_url": "https://kenney.nl/assets/survival-kit",
     "tags": ["survival", "forest", "camp", "fire", "tent", "axe", "wood", "log"]
   },
   {
     "id": "mini-dungeon",
     "title": "Mini Dungeon",
-    "thumbnail_url": "https://kenney.nl/content/3-assets/183-mini-dungeon/preview.png",
-    "download_url": "https://kenney.nl/content/3-assets/183-mini-dungeon/minidungeon.zip",
+    "thumbnail_url": "https://kenney.nl/media/pages/assets/mini-dungeon/2de2de674e-1771249391/preview.png",
+    "download_url": "https://kenney.nl/media/pages/assets/mini-dungeon/2de2de674e-1771249391/kenney_mini-dungeon.zip",
     "original_url": "https://kenney.nl/assets/mini-dungeon",
     "tags": ["dungeon", "mini", "small", "tile", "character", "monster", "fantasy"]
   }

@@ -1,11 +1,11 @@
 /// OpenGameArt provider — https://opengameart.org/
 ///
-/// Uses the Drupal-based unofficial JSON API.  Licence quality is mixed
-/// (open-upload bazaar); assets are marked `lower_trust = true` in results.
-/// We filter to CC0 only server-side where possible, then re-filter client-side.
+/// The Drupal JSON API endpoint (/api/assets) was removed; we now scrape the
+/// art-search-advanced HTML page (field_art_type_tid[]=10 for 3D, licence 284 = CC0).
+/// Licence quality is mixed; assets are marked `lower_trust = true`.
+/// Download: scrape the node page for direct file links.
 
 use std::path::{Path, PathBuf};
-use serde::Deserialize;
 use crate::candidate::AssetCandidate;
 use crate::error::AssetError;
 use crate::http::RateLimitedClient;
@@ -26,30 +26,6 @@ impl OpenGameArt {
     }
 }
 
-#[derive(Deserialize)]
-struct OgaSearchResponse {
-    #[serde(default)]
-    nodes: Vec<OgaNode>,
-}
-
-#[derive(Deserialize)]
-struct OgaNode {
-    node: OgaAsset,
-}
-
-#[derive(Deserialize)]
-struct OgaAsset {
-    nid: String,
-    title: String,
-    #[serde(rename = "field_art_licence")]
-    licence: Option<String>,
-    #[serde(rename = "field_preview_image")]
-    preview_image: Option<String>,
-    // Download links are embedded in the node body; we use a secondary fetch
-    #[allow(dead_code)]
-    body: Option<String>,
-}
-
 impl Provider for OpenGameArt {
     fn name(&self) -> &str { "opengameart" }
 
@@ -58,40 +34,40 @@ impl Provider for OpenGameArt {
             return Ok(Vec::new());
         }
 
-        // OGA Drupal JSON API — type 3 = 3D model
+        // Scrape the HTML search page: type 10 = 3D art, licence 284 = CC0
+        // (The old /api/assets JSON endpoint was removed)
         let url = format!(
-            "https://opengameart.org/api/assets?field_art_type=3&keys={}&limit={}",
+            "https://opengameart.org/art-search-advanced?field_art_type_tid%5B%5D=10&field_art_licence_version_tid%5B%5D=284&keys={}",
             urlenc(query),
-            limit * 3, // fetch more because we'll filter down to CC0
         );
 
-        let resp: OgaSearchResponse = self.client.get_json(&url).unwrap_or(OgaSearchResponse { nodes: Vec::new() });
+        let html_bytes = self.client.get_bytes(&url).unwrap_or_default();
+        let html = String::from_utf8_lossy(&html_bytes);
 
-        let results = resp
-            .nodes
+        let mut slugs = extract_content_slugs(&html, limit);
+
+        // If the search didn't return the query as an exact slug match, try a direct
+        // content page fetch (handles CLI download where query == provider_id).
+        let query_is_slug = query.chars().all(|c| c.is_ascii_alphanumeric() || c == '-');
+        if query_is_slug && !slugs.iter().any(|(s, _)| s == query) {
+            slugs.insert(0, (query.to_string(), query.replace('-', " ")));
+        }
+
+        let results = slugs
             .into_iter()
-            .filter_map(|n| {
-                let a = n.node;
-                let raw_licence = a.licence.as_deref().unwrap_or("");
-                let licence = LicenceId::from_raw(raw_licence);
-                if !policy.allows(&licence) {
-                    return None;
-                }
-                let nid = a.nid.clone();
-                Some(AssetCandidate {
-                    provider_id: nid.clone(),
-                    provider: "opengameart".to_string(),
-                    title: a.title,
-                    thumbnail_url: a.preview_image.unwrap_or_default(),
-                    licence_id: licence,
-                    download_url: format!("https://opengameart.org/node/{nid}"),
-                    original_url: format!("https://opengameart.org/node/{nid}"),
-                    attribution_string: String::new(),
-                    attribution_required: false,
-                    lower_trust: true,
-                })
-            })
             .take(limit)
+            .map(|(slug, title)| AssetCandidate {
+                provider_id: slug.clone(),
+                provider: "opengameart".to_string(),
+                title,
+                thumbnail_url: String::new(),
+                licence_id: LicenceId::Cc0_1_0,
+                download_url: format!("https://opengameart.org/content/{slug}"),
+                original_url: format!("https://opengameart.org/content/{slug}"),
+                attribution_string: String::new(),
+                attribution_required: false,
+                lower_trust: true,
+            })
             .collect();
 
         Ok(results)
@@ -117,13 +93,15 @@ impl Provider for OpenGameArt {
         let bytes = self.client.get_bytes(&download_url)?;
         std::fs::create_dir_all(dest_dir)?;
 
-        let filename = download_url
-            .split('/')
-            .last()
-            .unwrap_or("asset.glb")
-            .to_string();
-        let asset_path = dest_dir.join(&filename);
-        std::fs::write(&asset_path, &bytes)?;
+        // If it's a ZIP, extract the 3D file from inside it.
+        let asset_path = if download_url.to_ascii_lowercase().ends_with(".zip") {
+            extract_from_zip(&bytes, dest_dir, &candidate.provider_id)?
+        } else {
+            let filename = download_url.split('/').last().unwrap_or("asset.glb").to_string();
+            let path = dest_dir.join(&filename);
+            std::fs::write(&path, &bytes)?;
+            path
+        };
 
         let manifest = Manifest {
             licence_id: "CC0-1.0".to_string(),
@@ -142,20 +120,118 @@ impl Provider for OpenGameArt {
     }
 }
 
+/// Extract (slug, title) pairs from OGA art-search-advanced HTML.
+/// Navigation links have title="..." attributes; asset results do not — skip those.
+fn extract_content_slugs(html: &str, limit: usize) -> Vec<(String, String)> {
+    let mut seen = std::collections::HashSet::new();
+    let mut results = Vec::new();
+    // OGA asset results: href="/content/<slug>">Title<  (no title= attribute)
+    // Navigation links:  href="/content/faq" title="...">FAQ<  (has title= attribute)
+    for part in html.split("href=\"/content/") {
+        if results.len() >= limit { break; }
+        let Some(end) = part.find('"') else { continue };
+        let slug = part[..end].to_string();
+        if slug.is_empty() || slug.contains('/') || !slug.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
+            continue;
+        }
+        // The char immediately after the closing " should be '>' for asset links.
+        // Navigation links have a space then title="..." before '>'.
+        let after_slug = &part[end..];
+        if !after_slug.starts_with("\">") {
+            continue; // has title= or other attributes — navigation link
+        }
+        if !seen.insert(slug.clone()) { continue; }
+        let title = after_slug.get(2..)
+            .and_then(|s| s.find('<').map(|j| &s[..j]))
+            .map(|t| html_decode(t.trim()))
+            .filter(|t| !t.is_empty())
+            .unwrap_or_else(|| slug.replace('-', " "));
+        results.push((slug, title));
+    }
+    results
+}
+
+fn html_decode(s: &str) -> String {
+    s.replace("&#039;", "'").replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"")
+}
+
 fn extract_download_link(html: &str) -> Option<String> {
-    // Look for href to file extensions we can handle
+    // Scan for href="...<ext>" patterns; terminate URL at closing quote.
     for ext in &[".glb", ".gltf", ".zip", ".obj"] {
-        if let Some(pos) = html.find(ext) {
-            // Walk back to find href="
+        let mut search_from = 0;
+        while let Some(rel) = html[search_from..].find(ext) {
+            let pos = search_from + rel;
             let prefix = &html[..pos + ext.len()];
             if let Some(href_pos) = prefix.rfind("href=\"") {
-                let url = &prefix[href_pos + 6..];
-                let url = url.trim_matches('"');
-                return Some(url.to_string());
+                let after_quote = &prefix[href_pos + 6..];
+                // URL must end at the next closing quote
+                let url = match after_quote.find('"') {
+                    Some(end) => &after_quote[..end],
+                    None => after_quote,
+                };
+                if url.starts_with("http") || url.starts_with("/sites/") {
+                    let full = if url.starts_with('/') {
+                        format!("https://opengameart.org{url}")
+                    } else {
+                        url.to_string()
+                    };
+                    // Sanity-check: the URL should actually end with the extension
+                    let lc = full.to_ascii_lowercase();
+                    if lc.ends_with(ext) {
+                        return Some(full);
+                    }
+                }
             }
+            search_from = pos + ext.len();
         }
     }
     None
+}
+
+fn extract_from_zip(zip_bytes: &[u8], dest_dir: &Path, asset_id: &str) -> Result<PathBuf, AssetError> {
+    use std::io::Cursor;
+    let cursor = Cursor::new(zip_bytes);
+    let mut archive = zip::ZipArchive::new(cursor).map_err(|e| AssetError::ProviderFailed {
+        provider: "opengameart".to_string(),
+        message: format!("ZIP open failed: {e}"),
+    })?;
+
+    let names: Vec<String> = (0..archive.len())
+        .filter_map(|i| archive.by_index(i).ok().map(|f| f.name().to_string()))
+        .collect();
+
+    let primary = names.iter()
+        .find(|n| n.ends_with(".glb"))
+        .or_else(|| names.iter().find(|n| n.ends_with(".gltf")))
+        .or_else(|| names.iter().find(|n| n.ends_with(".obj")))
+        .ok_or_else(|| AssetError::ProviderFailed {
+            provider: "opengameart".to_string(),
+            message: format!("no usable 3D file in ZIP for {asset_id:?}"),
+        })?
+        .clone();
+
+    let mut primary_out: Option<PathBuf> = None;
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i).map_err(|e| AssetError::ProviderFailed {
+            provider: "opengameart".to_string(),
+            message: format!("ZIP index {i}: {e}"),
+        })?;
+        let zip_name = file.name().to_string();
+        let basename = std::path::Path::new(&zip_name)
+            .file_name()
+            .map(|n| n.to_string_lossy().to_string())
+            .unwrap_or_default();
+        if basename.is_empty() { continue; }
+        let out_path = dest_dir.join(&basename);
+        let mut out = std::fs::File::create(&out_path)?;
+        std::io::copy(&mut file, &mut out)?;
+        if zip_name == primary { primary_out = Some(out_path); }
+    }
+
+    primary_out.ok_or_else(|| AssetError::ProviderFailed {
+        provider: "opengameart".to_string(),
+        message: format!("failed to extract {primary:?}"),
+    })
 }
 
 fn urlenc(s: &str) -> String {

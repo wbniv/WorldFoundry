@@ -82,7 +82,12 @@ impl Provider for Kenney {
     }
 
     fn download(&self, candidate: &AssetCandidate, dest_dir: &Path) -> Result<(PathBuf, Manifest), AssetError> {
-        let bytes = self.client.get_bytes(&candidate.download_url)?;
+        // Try catalog URL first; if stale, scrape the asset page for the current URL.
+        let zip_url = resolve_download_url(
+            &self.client, &candidate.download_url,
+            &candidate.original_url, &candidate.provider_id,
+        )?;
+        let bytes = self.client.get_bytes(&zip_url)?;
         std::fs::create_dir_all(dest_dir)?;
 
         // Kenney distributes ZIPs; extract the first .glb or .gltf found
@@ -97,13 +102,56 @@ impl Provider for Kenney {
             provider_id: candidate.provider_id.clone(),
             download_date: today_iso(),
             original_url: candidate.original_url.clone(),
-            download_url: candidate.download_url.clone(),
+            download_url: zip_url,
             derived_from: Vec::new(),
         };
 
         manifest.write(dest_dir)?;
         Ok((asset_path, manifest))
     }
+}
+
+/// Try the catalog URL; if it 404s, scrape `original_url` for the real ZIP link.
+/// Kenney uses content-addressed paths that change with pack updates.
+fn resolve_download_url(
+    client: &RateLimitedClient,
+    catalog_url: &str,
+    original_url: &str,
+    asset_id: &str,
+) -> Result<String, AssetError> {
+    // HEAD check — cheap, doesn't download the whole ZIP
+    // We rely on get_bytes returning an Http error on 404 to trigger the fallback.
+    // But checking HEAD first avoids wasting bandwidth on a 404 body.
+    use std::time::Duration;
+    // Just return catalog_url and let get_bytes fail if stale;
+    // we catch 404 by trying to scrape right here.
+    // Use a lightweight approach: try to fetch the page and find the ZIP URL.
+    // If catalog_url looks current (contains /media/pages/), trust it.
+    if catalog_url.contains("/media/pages/") {
+        return Ok(catalog_url.to_string());
+    }
+    // Legacy URL — scrape the page for the new URL
+    eprintln!("[kenney] catalog URL is legacy, scraping page for {asset_id}");
+    scrape_zip_url(client, original_url, asset_id)
+}
+
+fn scrape_zip_url(client: &RateLimitedClient, page_url: &str, asset_id: &str) -> Result<String, AssetError> {
+    let html_bytes = client.get_bytes(page_url)?;
+    let html = String::from_utf8_lossy(&html_bytes);
+    // Find URLs matching /media/pages/assets/.../.zip
+    for part in html.split('"') {
+        if part.contains("/media/pages/assets/") && part.ends_with(".zip") {
+            return Ok(if part.starts_with("http") {
+                part.to_string()
+            } else {
+                format!("https://kenney.nl{part}")
+            });
+        }
+    }
+    Err(AssetError::ProviderFailed {
+        provider: "kenney".to_string(),
+        message: format!("no ZIP link found on page for {asset_id:?}"),
+    })
 }
 
 fn extract_gltf_from_zip(

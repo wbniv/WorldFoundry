@@ -163,32 +163,46 @@ fn pick_gltf_download(files: &AssetFiles, slug: &str) -> Result<(String, String,
     })
 }
 
-/// Parse gltf_bytes as glTF JSON and download every relative buffer URI.
+/// Parse gltf_bytes as glTF JSON and download all relative buffer + image URIs.
 /// base_url is the URL the .gltf was fetched from, used to resolve relative URIs.
 fn fetch_gltf_buffers(client: &RateLimitedClient, gltf_bytes: &[u8], dest_dir: &Path, base_url: &str) -> Result<(), AssetError> {
     let json: serde_json::Value = match serde_json::from_slice(gltf_bytes) {
         Ok(v) => v,
-        Err(_) => return Ok(()), // not valid JSON gltf — skip
+        Err(_) => return Ok(()),
     };
 
     let base = base_url.rfind('/').map(|i| &base_url[..=i]).unwrap_or(base_url);
 
-    if let Some(buffers) = json.get("buffers").and_then(|b| b.as_array()) {
-        for buf in buffers {
-            if let Some(uri) = buf.get("uri").and_then(|u| u.as_str()) {
-                if uri.starts_with("data:") { continue; } // embedded, no fetch needed
-                let buf_url = if uri.starts_with("http://") || uri.starts_with("https://") {
-                    uri.to_string()
-                } else {
-                    format!("{base}{uri}")
-                };
-                let bin_name = std::path::Path::new(uri)
-                    .file_name()
-                    .map(|n| n.to_string_lossy().to_string())
-                    .unwrap_or_else(|| uri.to_string());
-                let bin_bytes = client.get_bytes(&buf_url)?;
-                std::fs::write(dest_dir.join(&bin_name), &bin_bytes)?;
+    let mut uris: Vec<String> = Vec::new();
+    for section in &["buffers", "images"] {
+        if let Some(arr) = json.get(section).and_then(|v| v.as_array()) {
+            for entry in arr {
+                if let Some(uri) = entry.get("uri").and_then(|u| u.as_str()) {
+                    if !uri.starts_with("data:") {
+                        uris.push(uri.to_string());
+                    }
+                }
             }
+        }
+    }
+
+    for uri in uris {
+        let fetch_url = if uri.starts_with("http://") || uri.starts_with("https://") {
+            uri.clone()
+        } else {
+            format!("{base}{uri}")
+        };
+        // Preserve relative path (e.g. "textures/foo.png") under dest_dir
+        let out_path = dest_dir.join(&uri);
+        if let Some(parent) = out_path.parent() {
+            if let Err(e) = std::fs::create_dir_all(parent) {
+                eprintln!("[polyhaven] warning: could not create dir for {uri}: {e}");
+                continue;
+            }
+        }
+        match client.get_bytes(&fetch_url) {
+            Ok(bytes) => { let _ = std::fs::write(&out_path, &bytes); }
+            Err(e) => eprintln!("[polyhaven] warning: skipping {uri}: {e}"),
         }
     }
     Ok(())
