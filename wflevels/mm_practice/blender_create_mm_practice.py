@@ -85,15 +85,31 @@ def move(obj, x, y, z):
 move(find_by_class('director'),  0, 10,  5)
 move(find_by_class('levelobj'),  0, 10,  5)
 move(find_by_class('matte'),     0, 10,  5)
-move(find_by_class('camera'),   20, -10, 15)
-move(find_by_class('light'),     0,  10, 20)
+move(find_by_class('camera'),    0,  -2,  7)
+move(find_by_class('light'),     0,  10,  6)
 move(find_by_class('player'),    0,   0,  5)
 
-# Room — large box covering the ramp
+# Room — replace snowgoons mesh with a box sized for mm_practice.
+# World bounds wanted: X:[-12,12], Y:[-4,24], Z:[-3,8]
+# Room position=(0,10,3), so box relative to position: X:[-12,12], Y:[-14,14], Z:[-6,5]
 room = find_by_class('room')
 if room:
     room.location = (0, 10, 3)
-    room.scale = (1, 1, 1)
+    # Replace the mesh so the Blender bounding box matches our desired WF bounds.
+    box_verts = [
+        (-12, -14, -6), ( 12, -14, -6), ( 12,  14, -6), (-12,  14, -6),
+        (-12, -14,  5), ( 12, -14,  5), ( 12,  14,  5), (-12,  14,  5),
+    ]
+    box_faces = [(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]
+    # The exporter reads BOX3 from wf_original_bbox, not the mesh geometry.
+    room["wf_original_bbox"] = (-12.0, -14.0, -6.0, 12.0, 14.0, 5.0)
+    new_mesh = bpy.data.meshes.new("RoomBounds")
+    new_mesh.from_pydata(box_verts, [], box_faces)
+    new_mesh.update()
+    old_mesh = room.data
+    room.data = new_mesh
+    if old_mesh and old_mesh.users == 0:
+        bpy.data.meshes.remove(old_mesh)
 
 # Actboxor — camera activation box covering whole level
 actboxor = find_by_class('actboxor')
@@ -103,15 +119,23 @@ if actboxor:
 # CamShot — isometric view
 camshot = find_by_class('camshot')
 if camshot:
-    camshot.location = (20, -10, 15)
+    camshot.location = (0, -2, 7)
 
-# Targets
+# Targets — CamShot needs both Target01 (follow/position) and Target02 (look-at).
+# Snowgoons only exports one target; create Target02 by duplicating Target01.
 targets = [o for o in bpy.data.objects if get_class(o) == 'target']
 if len(targets) >= 1:
-    targets[0].location = (5, 0, 4.5)   # Target01: camera position reference
+    targets[0].location = (5, 0, 4.5)
     targets[0].name = 'Target01'
+if len(targets) == 1:
+    # No second target imported — duplicate Target01 and rename it
+    t1 = targets[0]
+    t2 = t1.copy()
+    t2.data = t1.data.copy() if t1.data else None
+    scene.collection.objects.link(t2)
+    targets.append(t2)
 if len(targets) >= 2:
-    targets[1].location = (0, 10, 2)    # Target02: look-at
+    targets[1].location = (0, 10, 2)
     targets[1].name = 'Target02'
 
 # Player

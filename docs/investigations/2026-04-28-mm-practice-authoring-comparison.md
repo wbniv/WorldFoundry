@@ -92,11 +92,8 @@ struct layout.
 - The imported actboxor retained the original (snowgoons) bounding box — for
   mm_practice, this needs to be corrected by resizing the object.
 
-**Compile result:** ✓ `mm_practice_blender.lev` passes iffcomp (not yet
-run through the full pipeline — the Ramp object was exported but its
-`wf_Mesh Name` custom property was not seeded via `_seed_defaults`, so
-levcomp may not pick up the mesh reference correctly without a full schema
-attach).
+**Compile result:** ✓ `mm_practice_blender.iff` (24 576 bytes) produced by full
+pipeline (iffcomp → levcomp → textile → iffcomp).
 
 **Pro:** Inherits correct OAD field ordering and default values automatically.
 Perfect for iterating on layout, positioning, and property tweaks in a visual
@@ -167,10 +164,30 @@ when rooms had no adjacency declarations.
 ## Next steps for mm_practice
 
 - [x] Smoke test: `wf_game -L mm_practice-standalone.iff` boots and renders (2026-04-28).
+- [x] Smoke test: `wf_game -L mm_practice_blender-standalone.iff` boots, player
+      grounds at feet_z=3.998 by frame 14, no crash (2026-04-28).
 - [ ] Add bounding-box correction to the Blender script (actboxor bbox still
-      references the snowgoons field size).
+      references the snowgoons field size: -81.38 to 81.38).
 - [ ] Author a proper marble mesh (sphere.iff) — currently using player.iff
       (snowman model) as a placeholder.
 - [ ] Add the director script timer logic for the 90 s practice countdown.
 - [ ] Tune player physics for marble rolling (Vertical Elasticity 0.3,
       Horizontal Elasticity 0.7, Running Acceleration 5 N).
+
+## Blender variant fixes (2026-04-28)
+
+Three issues were found and fixed during the blender smoke test:
+
+1. **Room BOX3 not updated** — the exporter reads BOX3 from `wf_original_bbox` custom
+   property (set at import from source .lev), not from mesh geometry. Fix: set
+   `room["wf_original_bbox"] = (-12.0, -14.0, -6.0, 12.0, 14.0, 5.0)` directly.
+
+2. **Target02 missing** — snowgoons has one target (GMACamTar); after dedup only
+   Target01 exists. BungeeCameraHandler dereferences Target02 (null) → crash. Fix:
+   duplicate Target01 to create Target02 in the blender script.
+
+3. **Ramp Z too high** — ramp at position (0,10,4) puts the high end at world Z=6,
+   above the player spawn Z=5. Player starts below the ramp and falls through the level.
+   Fix: `ramp_obj.location = (0, 10, 2)`. With the room BOX3 now correctly set to
+   (-12,-14,-6,12,14,5), world Z=[-3,8], the ramp at world Z=[0,4] is inside the room
+   so levcomp assigns it to RM0 (no TOC assertion).
