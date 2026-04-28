@@ -57,6 +57,15 @@ class WF_AssetProviderToggles(PropertyGroup):
     opengameart: BoolProperty(name="OpenGameArt",    default=True)
 
 
+# ── Search trigger (property update — does NOT close popups, unlike operators) ─
+
+def _on_search_trigger(self, context):
+    if not self.search_pending:
+        return
+    self.search_pending = False
+    _do_search(self, context)   # resolved at call time; defined below
+
+
 # ── Scene-level state ─────────────────────────────────────────────────────────
 
 class WF_AssetBrowserState(PropertyGroup):
@@ -69,6 +78,7 @@ class WF_AssetBrowserState(PropertyGroup):
     policy_path:     StringProperty(default="")
     policy_accept:   StringProperty(default="")
     providers:       bpy.props.PointerProperty(type=WF_AssetProviderToggles)
+    search_pending:  BoolProperty(default=False, update=_on_search_trigger)
 
 
 # ── Thumbnail preview collection ──────────────────────────────────────────────
@@ -176,6 +186,88 @@ class WF_UL_AssetResults(UIList):
         _load_thumbnail(item)
 
 
+# ── Shared search logic ───────────────────────────────────────────────────────
+
+def _do_search(state, context):
+    """Kick off an async search. Safe to call from operators or property updates."""
+    if not _WAP_OK:
+        return
+
+    query = state.query.strip()
+    if not query:
+        return
+
+    state.is_searching = True
+    state.status_text = f'Querying providers for "{query}"…'
+    state.results.clear()
+    state.result_index = 0
+    _pending_thumbs.clear()
+    _failed_thumbs.clear()
+    _icon_ids.clear()
+
+    blend_dir = os.path.dirname(bpy.data.filepath) if bpy.data.filepath else os.getcwd()
+    policy = _wap.load_policy(blend_dir)
+    state.policy_path = policy.policy_path or "(fallback — no licence_policy.toml found)"
+    state.policy_accept = ", ".join(sorted(policy.accept_ids))
+
+    toggles = state.providers
+    enabled = [
+        p for p, en in [
+            ("polyhaven",   toggles.polyhaven),
+            ("kenney",      toggles.kenney),
+            ("ambientcg",   toggles.ambientcg),
+            ("opengameart", toggles.opengameart),
+        ]
+        if en
+    ]
+
+    def do_search():
+        return _wap.search(query, policy, providers=enabled, limit=50)
+
+    def on_results(candidates):
+        state.is_searching = False
+        state.results.clear()
+        for c in candidates:
+            item = state.results.add()
+            item.provider_id   = c.provider_id
+            item.provider      = c.provider
+            item.title         = c.title
+            item.thumbnail_url = c.thumbnail_url
+            item.licence_id    = c.licence_id
+            item.download_url  = c.download_url
+            item.original_url  = c.original_url
+            item.lower_trust   = c.lower_trust
+            item.thumb_loaded  = False
+        count = len(state.results)
+        state.status_text = f"{count} result{'s' if count != 1 else ''} from {len(enabled)} providers"
+
+        def _finish_search():
+            state.is_searching = False
+            _redraw_3d()
+            return None
+
+        bpy.app.timers.register(_finish_search, first_interval=0.4)
+
+    def on_error(exc):
+        state.is_searching = False
+        state.status_text = f"Search failed: {exc}"
+        _redraw_3d()
+
+    asset_threading.submit(do_search, on_result=on_results, on_error=on_error)
+
+    def _redraw_pulse():
+        try:
+            scene = bpy.context.scene
+            if not scene or not scene.wf_asset_browser.is_searching:
+                return None
+            _redraw_3d()
+        except Exception:
+            return None
+        return 0.15
+
+    bpy.app.timers.register(_redraw_pulse, first_interval=0.15)
+
+
 # ── Browse operator ───────────────────────────────────────────────────────────
 
 class WF_OT_browse_assets(Operator):
@@ -187,101 +279,11 @@ class WF_OT_browse_assets(Operator):
         if not _WAP_OK:
             self.report({'ERROR'}, f"wf_asset_provider not loaded: {_WAP_ERROR}")
             return {'CANCELLED'}
-
         state = context.scene.wf_asset_browser
-        query = state.query.strip()
-        if not query:
+        if not state.query.strip():
             self.report({'WARNING'}, "Enter a search term first")
             return {'CANCELLED'}
-
-        state.is_searching = True
-        state.status_text = f'Querying providers for "{query}"…'
-        state.results.clear()
-        state.result_index = 0
-        _pending_thumbs.clear()
-        _failed_thumbs.clear()
-        _icon_ids.clear()
-
-        # Resolve policy
-        blend_dir = os.path.dirname(bpy.data.filepath) if bpy.data.filepath else os.getcwd()
-        policy = _wap.load_policy(blend_dir)
-        state.policy_path = policy.policy_path or "(fallback — no licence_policy.toml found)"
-        state.policy_accept = ", ".join(sorted(policy.accept_ids))
-
-        # Collect enabled providers
-        toggles = state.providers
-        enabled = [
-            p for p, enabled in [
-                ("polyhaven",   toggles.polyhaven),
-                ("kenney",      toggles.kenney),
-                ("ambientcg",   toggles.ambientcg),
-                ("opengameart", toggles.opengameart),
-            ]
-            if enabled
-        ]
-
-        def do_search():
-            return _wap.search(query, policy, providers=enabled, limit=50)
-
-        def on_results(candidates):
-            state.is_searching = False
-            state.results.clear()
-            for c in candidates:
-                item = state.results.add()
-                item.provider_id   = c.provider_id
-                item.provider      = c.provider
-                item.title         = c.title
-                item.thumbnail_url = c.thumbnail_url
-                item.licence_id    = c.licence_id
-                item.download_url  = c.download_url
-                item.original_url  = c.original_url
-                item.lower_trust   = c.lower_trust
-                item.thumb_loaded  = False
-            count = len(state.results)
-            state.status_text = f"{count} result{'s' if count != 1 else ''} from {len(enabled)} providers"
-
-            def _finish_search():
-                state.is_searching = False
-                try:
-                    ctx = bpy.context
-                    if ctx and ctx.screen:
-                        for area in ctx.screen.areas:
-                            if area.type == 'VIEW_3D':
-                                area.tag_redraw()
-                except Exception:
-                    pass
-                return None
-
-            bpy.app.timers.register(_finish_search, first_interval=0.4)
-
-        def on_error(exc):
-            state.is_searching = False
-            state.status_text = f"Search failed: {exc}"
-            try:
-                for area in context.screen.areas:
-                    if area.type == 'VIEW_3D':
-                        area.tag_redraw()
-            except Exception:
-                pass
-
-        asset_threading.submit(do_search, on_result=on_results, on_error=on_error)
-
-        # Pulse redraws while searching so the spinner animates.
-        # Runs only as long as is_searching is True.
-        def _redraw_pulse():
-            try:
-                scene = bpy.context.scene
-                if not scene or not scene.wf_asset_browser.is_searching:
-                    return None
-                for window in bpy.context.window_manager.windows:
-                    for area in window.screen.areas:
-                        if area.type == 'VIEW_3D':
-                            area.tag_redraw()
-            except Exception:
-                return None
-            return 0.15
-
-        bpy.app.timers.register(_redraw_pulse, first_interval=0.15)
+        _do_search(state, context)
         return {'FINISHED'}
 
 
@@ -457,19 +459,6 @@ class WF_OT_import_asset(Operator):
         state.status_text = f'Imported "{item.title}"'
 
 
-# ── New OS window ────────────────────────────────────────────────────────────
-
-class WF_OT_open_browser_window(Operator):
-    """Open the WF Asset Browser in a new resizable OS window"""
-    bl_idname  = "wf.open_browser_window"
-    bl_label   = "Open in New Window"
-    bl_options = {'REGISTER'}
-
-    def execute(self, context):
-        bpy.ops.wm.window_new()
-        return {'FINISHED'}
-
-
 # ── Wide popup ───────────────────────────────────────────────────────────────
 
 class WF_OT_open_browser_popup(Operator):
@@ -494,13 +483,13 @@ class WF_OT_open_browser_popup(Operator):
             layout.label(text="wf_asset_provider not loaded", icon='ERROR')
             return
 
-        # Search bar
+        # Search bar — use search_pending prop so popup stays open
         row = layout.row(align=True)
         row.prop(state, "query", text="", icon='VIEWZOOM')
         if state.is_searching:
-            row.operator("wf.cancel_asset_search", text="", icon='X')
+            row.label(text="Searching…", icon='TIME')
         else:
-            row.operator("wf.browse_assets", text="", icon='VIEWZOOM')
+            row.prop(state, "search_pending", text="", icon='VIEWZOOM', toggle=True)
 
         # Provider toggles
         box = layout.box()
@@ -577,9 +566,7 @@ class WF_PT_asset_browser(Panel):
             layout.label(text=f"  {_WAP_ERROR}")
             return
 
-        row = layout.row(align=True)
-        row.operator("wf.open_browser_popup",  text="Wide Popup",    icon='ASSET_MANAGER')
-        row.operator("wf.open_browser_window", text="New Window",    icon='WINDOW')
+        layout.operator("wf.open_browser_popup", text="Open Wide Browser", icon='ASSET_MANAGER')
         layout.separator()
 
         # Search bar
@@ -661,7 +648,6 @@ _CLASSES = [
     WF_OT_browse_assets,
     WF_OT_cancel_search,
     WF_OT_import_asset,
-    WF_OT_open_browser_window,
     WF_OT_open_browser_popup,
     WF_PT_asset_browser,
 ]
