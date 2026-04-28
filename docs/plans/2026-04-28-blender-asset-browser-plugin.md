@@ -307,3 +307,36 @@ Subtotal: ~6 days.
 **Total: ~16–17 working days (~3.25 weeks)** assuming uninterrupted focus. Real-world pad to ~4 weeks. Higher than the original ~2 weeks because we're building the Rust crate up-front instead of punting it — but this avoids the duplicate-implementation tax (the Python provider modules would have needed to be rewritten in Rust anyway when `wf_audit` lands), and the licence-mapping table — the bug-prone part — has a single source of truth from day one.
 
 The cross-platform `.so` bundling is the highest-risk item in the plugin-side estimate. Mitigation: use `maturin build --release --features python` for build, and ship the per-platform wheels in `wftools/wf_blender/wheels/` with a small loader stanza in `__init__.py` that picks the right one. Precedent: `wf_core.so` is already shipped this way per the existing plugin's `__init__.py`.
+
+---
+
+## Implemented — 2026-04-28 session
+
+**Status:** v1 shipped on branch `2026-new-level`.
+
+### Rust / wf_asset_provider
+
+- **Poly Haven texture fix**: dropped `fetch_gltf_buffers`; companion files now fetched from the API's `include` map (canonical CDN URLs, stable across CDN reorgs).
+- **OGA thumbnail scraping**: `extract_content_slugs` returns `(slug, title, thumb_url)`; scans forward 2 kB from the title link for `<img src='...'>` (OGA uses single-quoted attrs, preview link follows title link in HTML). Added `extract_img_url_forward`.
+- **OGA fallback-slug thumbnail**: exact-slug fallback entry now fetches the content page to get a real thumbnail rather than returning empty string.
+- **Unit tests**: OGA slug+thumbnail extraction; Poly Haven include-map parsing.
+- Quaternius removed (no glTF/OBJ assets available).
+
+### Blender / asset_browser.py
+
+- **`_icon_ids` dict**: icon IDs stored in a plain Python dict on load; `draw_item` reads from it instead of querying the preview collection (fixes thumbnails not rendering despite valid IDs).
+- **`_pending_thumbs` / `_failed_thumbs`**: prevent duplicate in-flight fetches and infinite retry loop on fetch failure.
+- **Disk cache**: thumbnails cached to `~/.cache/wf_asset_provider/thumbs/` on first fetch; subsequent draws served from disk.
+- **`_redraw_3d()`**: tags all regions in all `VIEW_3D` areas across all open windows.
+- **`_try_load_preview`**: fixed `ImagePreview.__bool__` crash — use `image_pixels_float`, avoid bool-testing the `ImagePreview` object.
+- **"No preview available"**: `IMAGE_ALPHA` icon + label for assets with no thumbnail URL (e.g. OGA `table` which has no screenshot on their site).
+- **Wide popup** (`WF_OT_open_browser_popup`): 880 px `invoke_popup`, two-column layout (list left, large preview + import right). N-panel retains its existing compact UI plus an "Open Wide Browser" button.
+- **Popup search stays open**: extracted `_do_search()` from the operator; added `search_pending: BoolProperty(update=_on_search_trigger)` to `WF_AssetBrowserState`. Popup uses a prop toggle instead of an operator button — property-change callbacks do not dismiss `invoke_popup`.
+- **Progress bar** on both search and import.
+- **`template_list` rows=12**: taller result list in the N-panel.
+
+### Known limitations
+
+- `invoke_popup` cannot be resized or moved — hard Blender constraint.
+- OGA `table` has no preview image on their site — "No preview available" is correct.
+- OGA assets with only `.blend` files (e.g. picnic-table) cannot be imported.
