@@ -49,18 +49,18 @@ impl Provider for OpenGameArt {
         // If the search didn't return the query as an exact slug match, try a direct
         // content page fetch (handles CLI download where query == provider_id).
         let query_is_slug = query.chars().all(|c| c.is_ascii_alphanumeric() || c == '-');
-        if query_is_slug && !slugs.iter().any(|(s, _)| s == query) {
-            slugs.insert(0, (query.to_string(), query.replace('-', " ")));
+        if query_is_slug && !slugs.iter().any(|(s, _, _)| s == query) {
+            slugs.insert(0, (query.to_string(), query.replace('-', " "), String::new()));
         }
 
         let results = slugs
             .into_iter()
             .take(limit)
-            .map(|(slug, title)| AssetCandidate {
+            .map(|(slug, title, thumb_url)| AssetCandidate {
                 provider_id: slug.clone(),
                 provider: "opengameart".to_string(),
                 title,
-                thumbnail_url: String::new(),
+                thumbnail_url: thumb_url,
                 licence_id: LicenceId::Cc0_1_0,
                 download_url: format!("https://opengameart.org/content/{slug}"),
                 original_url: format!("https://opengameart.org/content/{slug}"),
@@ -120,35 +120,78 @@ impl Provider for OpenGameArt {
     }
 }
 
-/// Extract (slug, title) pairs from OGA art-search-advanced HTML.
+/// Extract (slug, title, thumbnail_url) triples from OGA art-search-advanced HTML.
 /// Navigation links have title="..." attributes; asset results do not — skip those.
-fn extract_content_slugs(html: &str, limit: usize) -> Vec<(String, String)> {
+/// The thumbnail is scraped from the <img src="/sites/default/files/..."> that appears
+/// in the result row before each content link.
+fn extract_content_slugs(html: &str, limit: usize) -> Vec<(String, String, String)> {
     let mut seen = std::collections::HashSet::new();
     let mut results = Vec::new();
-    // OGA asset results: href="/content/<slug>">Title<  (no title= attribute)
-    // Navigation links:  href="/content/faq" title="...">FAQ<  (has title= attribute)
-    for part in html.split("href=\"/content/") {
-        if results.len() >= limit { break; }
-        let Some(end) = part.find('"') else { continue };
-        let slug = part[..end].to_string();
+    let needle = "href=\"/content/";
+    let mut pos = 0;
+    while results.len() < limit {
+        let Some(rel) = html[pos..].find(needle) else { break };
+        let abs = pos + rel;
+        let rest = &html[abs + needle.len()..];
+        let Some(end) = rest.find('"') else { pos = abs + 1; continue };
+        let slug = rest[..end].to_string();
+        // validate: no slashes, ascii alnum + hyphen only
         if slug.is_empty() || slug.contains('/') || !slug.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
+            pos = abs + 1;
             continue;
         }
-        // The char immediately after the closing " should be '>' for asset links.
-        // Navigation links have a space then title="..." before '>'.
-        let after_slug = &part[end..];
+        // Asset links: href="/content/<slug>">Title  (no title= attribute before >)
+        // Navigation links: href="/content/faq" title="...">  — has space+title= after slug
+        let after_slug = &rest[end..];
         if !after_slug.starts_with("\">") {
-            continue; // has title= or other attributes — navigation link
+            pos = abs + 1;
+            continue;
         }
-        if !seen.insert(slug.clone()) { continue; }
+        if !seen.insert(slug.clone()) {
+            pos = abs + 1;
+            continue;
+        }
         let title = after_slug.get(2..)
             .and_then(|s| s.find('<').map(|j| &s[..j]))
             .map(|t| html_decode(t.trim()))
             .filter(|t| !t.is_empty())
             .unwrap_or_else(|| slug.replace('-', " "));
-        results.push((slug, title));
+
+        // OGA puts the title link first, then a second anchor with the preview img.
+        // Look forward up to 2 kB from the current position.
+        let window_end = (abs + 2048).min(html.len());
+        let thumb_url = extract_img_url_forward(&html[abs..window_end]);
+
+        results.push((slug, title, thumb_url));
+        pos = abs + 1;
     }
     results
+}
+
+/// Return the first OGA-hosted <img src=...> found scanning forward through `window`.
+/// OGA uses single-quoted src attributes: <img src='...'>.
+fn extract_img_url_forward(window: &str) -> String {
+    let mut search = window;
+    while let Some(img_pos) = search.find("<img ") {
+        let chunk = &search[img_pos..];
+        for (open, close) in &[("src='", '\''), ("src=\"", '"')] {
+            if let Some(src_off) = chunk.find(open) {
+                let src_rest = &chunk[src_off + open.len()..];
+                if let Some(q) = src_rest.find(*close) {
+                    let src = &src_rest[..q];
+                    if src.contains("/sites/default/files/") {
+                        return if src.starts_with('/') {
+                            format!("https://opengameart.org{src}")
+                        } else {
+                            src.to_string()
+                        };
+                    }
+                }
+            }
+        }
+        search = &search[img_pos + 5..];
+    }
+    String::new()
 }
 
 fn html_decode(s: &str) -> String {
@@ -239,4 +282,45 @@ fn urlenc(s: &str) -> String {
         if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c.to_string() }
         else { format!("%{:02X}", c as u32) }
     }).collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Mirrors the real OGA search HTML structure: title link first, preview img link second.
+    const OGA_SEARCH_SNIPPET: &str = r#"
+      <span class="art-preview-title"><a href="/content/night-table">Night table</a></span>
+      </div></div></div>
+      <div class="field field-name-field-art-preview">
+        <a href="/content/night-table"><img src='https://opengameart.org/sites/default/files/styles/thumbnail/public/uv_0.png' alt='Preview'></a>
+      </div>
+    "#;
+
+    #[test]
+    fn extracts_slug_title_and_thumbnail() {
+        let results = extract_content_slugs(OGA_SEARCH_SNIPPET, 5);
+        assert_eq!(results.len(), 1, "should find one slug");
+        let (slug, title, thumb) = &results[0];
+        assert_eq!(slug, "night-table");
+        assert_eq!(title, "Night table");
+        assert!(thumb.contains("uv_0.png"), "thumbnail URL should contain image filename: {thumb}");
+        assert!(thumb.starts_with("https://"), "thumbnail URL should be absolute: {thumb}");
+    }
+
+    #[test]
+    fn navigation_links_skipped() {
+        let html = r#"<a href="/content/faq" title="FAQ">FAQ</a> <a href="/content/night-table">Night table</a>"#;
+        let results = extract_content_slugs(html, 5);
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].0, "night-table");
+    }
+
+    #[test]
+    fn no_thumbnail_yields_empty_string() {
+        let html = r#"<a href="/content/no-thumb">No thumb</a>"#;
+        let results = extract_content_slugs(html, 5);
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].2, "", "should be empty when no img in window");
+    }
 }
