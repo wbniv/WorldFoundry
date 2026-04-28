@@ -1,0 +1,14 @@
+// mm_practice_blender_rt-standalone.iff.txt — round-trip test standalone wrapper.
+// Build:
+//   iffcomp -binary -o=../mm_practice_blender_rt-standalone.iff mm_practice_blender_rt-standalone.iff.txt
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 100000l
+        'PERM' 300000l
+        'ROOM' 300000l
+        'FLAG' 1l 1l
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../mm_practice_blender_rt.iff" ]
+}
