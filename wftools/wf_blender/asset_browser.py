@@ -54,7 +54,6 @@ class WF_AssetProviderToggles(PropertyGroup):
     polyhaven:   BoolProperty(name="Poly Haven",    default=True)
     kenney:      BoolProperty(name="Kenney",         default=True)
     ambientcg:   BoolProperty(name="AmbientCG",      default=True)
-    quaternius:  BoolProperty(name="Quaternius",     default=True)
     opengameart: BoolProperty(name="OpenGameArt",    default=True)
 
 
@@ -83,8 +82,26 @@ def _ensure_previews():
     return _previews
 
 
+def _thumb_cache_path(provider: str, provider_id: str, suffix: str = '.png') -> str:
+    import os
+    cache_dir = os.path.join(os.path.expanduser('~'), '.cache', 'wf_asset_provider', 'thumbs')
+    os.makedirs(cache_dir, exist_ok=True)
+    safe_id = provider_id.replace('/', '_')
+    return os.path.join(cache_dir, f"{provider}__{safe_id}{suffix}")
+
+
+def _redraw_3d():
+    try:
+        for window in bpy.context.window_manager.windows:
+            for area in window.screen.areas:
+                if area.type == 'VIEW_3D':
+                    area.tag_redraw()
+    except Exception:
+        pass
+
+
 def _load_thumbnail(item: WF_AssetResultItem):
-    """Trigger async thumbnail download for an item."""
+    """Load thumbnail from disk cache, or fetch and cache it."""
     if item.thumb_loaded or not item.thumbnail_url:
         return
 
@@ -93,25 +110,43 @@ def _load_thumbnail(item: WF_AssetResultItem):
     if key in previews:
         return
 
+    import os
+    suffix = os.path.splitext(item.thumbnail_url.split('?')[0])[-1] or '.png'
+    cache_path = _thumb_cache_path(item.provider, item.provider_id, suffix)
+
+    # Load from disk cache if present (no network needed)
+    if os.path.exists(cache_path):
+        try:
+            previews.load(key, cache_path, 'IMAGE')
+            _redraw_3d()
+        except Exception:
+            pass
+        return
+
+    # Capture values — PropertyGroup can't be closed over safely
+    url       = item.thumbnail_url
+    thumb_key = key
+    dst       = cache_path
+
     def fetch():
         import urllib.request
         try:
-            with urllib.request.urlopen(item.thumbnail_url, timeout=15) as resp:
-                return resp.read()
+            with urllib.request.urlopen(url, timeout=15) as resp:
+                data = resp.read()
+            with open(dst, 'wb') as f:
+                f.write(data)
+            return dst
         except Exception:
             return None
 
-    def on_result(data):
-        if data is None:
+    def on_result(path):
+        if not path:
             return
         try:
-            previews = _ensure_previews()
-            previews.load(key, item.thumbnail_url, 'URL')
-            item.thumb_loaded = True
-            # Trigger a UI redraw
-            for area in bpy.context.screen.areas:
-                if area.type == 'VIEW_3D':
-                    area.tag_redraw()
+            p = _ensure_previews()
+            if thumb_key not in p:
+                p.load(thumb_key, path, 'IMAGE')
+            _redraw_3d()
         except Exception:
             pass
 
@@ -127,23 +162,16 @@ class WF_UL_AssetResults(UIList):
 
         key = f"{item.provider}:{item.provider_id}"
         previews = _ensure_previews()
-        thumb_icon_id = previews[key].icon_id if key in previews else None
+        icon_id = previews[key].icon_id if key in previews else 0
 
         row = layout.row(align=True)
-        if thumb_icon_id is not None:
-            row.label(text="", icon_value=thumb_icon_id)
+        if icon_id:
+            row.label(text="", icon_value=icon_id)
         else:
             row.label(text="", icon='FILE_IMAGE')
-        col = row.column()
-        col.label(text=item.title)
-        sub = col.row()
-        sub.scale_y = 0.6
-        licence_txt = item.licence_id
-        if item.lower_trust:
-            licence_txt += "  ⚠"
-        sub.label(text=f"{item.provider}  ·  {licence_txt}", icon='NONE')
+        trust = "  ⚠" if item.lower_trust else ""
+        row.label(text=f"{item.title}  [{item.provider}{trust}]")
 
-        # Trigger thumbnail load when item is drawn
         _load_thumbnail(item)
 
 
@@ -183,7 +211,6 @@ class WF_OT_browse_assets(Operator):
                 ("polyhaven",   toggles.polyhaven),
                 ("kenney",      toggles.kenney),
                 ("ambientcg",   toggles.ambientcg),
-                ("quaternius",  toggles.quaternius),
                 ("opengameart", toggles.opengameart),
             ]
             if enabled
@@ -378,6 +405,42 @@ class WF_OT_import_asset(Operator):
         for obj in imported:
             obj["wf_schema_path"] = _DEFAULT_SCHEMA
 
+        # Generate a Blender preview for assets that have no provider thumbnail
+        key = f"{item.provider}:{item.provider_id}"
+        if key not in _ensure_previews():
+            for obj in imported:
+                if obj.type == 'MESH':
+                    try:
+                        obj.asset_mark()
+                        with context.temp_override(id=obj):
+                            bpy.ops.ed.lib_id_generate_preview()
+                        obj_name = obj.name
+
+                        def _try_load_preview(obj_name=obj_name, k=key,
+                                              prov=item.provider, pid=item.provider_id):
+                            o = bpy.data.objects.get(obj_name)
+                            if o and o.preview and any(o.preview.pixels):
+                                w = o.preview.image_size[0]
+                                h = o.preview.image_size[1]
+                                if w > 0 and h > 0:
+                                    cache_path = _thumb_cache_path(prov, pid, '.png')
+                                    img = bpy.data.images.new("_wf_thumb_tmp", w, h)
+                                    img.pixels[:] = o.preview.pixels
+                                    img.filepath_raw = cache_path
+                                    img.file_format = 'PNG'
+                                    img.save()
+                                    bpy.data.images.remove(img)
+                                    p = _ensure_previews()
+                                    if k not in p:
+                                        p.load(k, cache_path, 'IMAGE')
+                                    _redraw_3d()
+                            return None
+
+                        bpy.app.timers.register(_try_load_preview, first_interval=2.5)
+                    except Exception:
+                        pass
+                    break
+
         self.report(
             {'INFO'},
             f'Imported "{item.title}" ({item.licence_id}) from {item.provider}; '
@@ -422,9 +485,7 @@ class WF_PT_asset_browser(Panel):
         row.prop(toggles, "polyhaven",   toggle=True)
         row.prop(toggles, "kenney",      toggle=True)
         row.prop(toggles, "ambientcg",   toggle=True)
-        row2 = box.row()
-        row2.prop(toggles, "quaternius",  toggle=True)
-        row2.prop(toggles, "opengameart", toggle=True)
+        row.prop(toggles, "opengameart", toggle=True)
 
         # Policy info
         if state.policy_path:
@@ -453,8 +514,26 @@ class WF_PT_asset_browser(Panel):
                 "WF_UL_AssetResults", "",
                 state, "results",
                 state, "result_index",
-                rows=6,
+                rows=12, maxrows=20,
             )
+
+            # Large preview + metadata for selected item
+            idx = state.result_index
+            if 0 <= idx < len(state.results):
+                sel = state.results[idx]
+                key = f"{sel.provider}:{sel.provider_id}"
+                previews = _ensure_previews()
+                box = layout.box()
+                if key in previews:
+                    box.template_icon(previews[key].icon_id, scale=9.0)
+                else:
+                    box.label(text="", icon='FILE_IMAGE')
+                box.label(text=sel.title)
+                sub = box.row()
+                sub.scale_y = 0.7
+                licence_txt = sel.licence_id + ("  ⚠ lower trust" if sel.lower_trust else "")
+                sub.label(text=f"{sel.provider}  ·  {licence_txt}")
+
             layout.operator("wf.import_asset", icon='IMPORT')
 
 
