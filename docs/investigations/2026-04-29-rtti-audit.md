@@ -69,6 +69,63 @@ Building with `-fno-rtti` would fail to compile all 51 `dynamic_cast` sites. Rep
 
 All 51 `dynamic_cast` calls arrived in the **[first git commit (2010-05-01)](https://github.com/wbniv/WorldFoundry/commit/a2784f6)** with no platform guards. `git log -S"dynamic_cast"` finds no subsequent commit that added or removed any of them in the affected files. The dead-code removal passes ([Batch 5](https://github.com/wbniv/WorldFoundry/commit/03211f9), [Batch 6](https://github.com/wbniv/WorldFoundry/commit/8760f27)) did not strip any guards from around them — they were already bare.
 
+### What the pre-2003 code looked like
+
+Before the 2003 refactor, iterators returned `Actor*` directly. Type dispatch was a plain `kind()` comparison — no cast involved because the element type was already known:
+
+```cpp
+// Pre-2003 (actor.cc ~Rev 1.42): ActiveRoomsActorIter yields Actor* — no cast needed
+Actor* colActor;
+ActiveRoomsActorIter actIter( theLevel );
+while ( !actIter.Empty() )
+{
+    colActor = &(*actIter);                          // already Actor* — no cast
+    if ( actbox->ActivatedByClass == colActor->kind() )
+    {
+        const PhysicalAttributes& pa = colActor->GetPhysicalAttributes();
+        if ( pa.CheckCollision( GetPhysicalAttributes() ) )
+            return colActor;
+    }
+    ++actIter;
+}
+```
+
+The 2003 refactor generalised `ActiveRoomsActorIter` to `BaseObjectIteratorWrapper` (returning `BaseObject&`). The element type was no longer statically known, so the author reached for `dynamic_cast` rather than restoring the `kind()`-guarded pattern:
+
+```cpp
+// Post-2003 (actor.cc Rev 1.43+): BaseObjectIteratorWrapper yields BaseObject& — cast required
+BaseObjectIteratorWrapper poIter = theRoom.GetCollisionIter();
+while ( !poIter.Empty() )
+{
+    Actor* colActor = dynamic_cast<Actor*>( &(*poIter) );  // dynamic_cast introduced here
+    if ( colActor && actbox->ActivatedByClass == colActor->kind() )
+    {
+        // ...
+    }
+    ++poIter;
+}
+```
+
+The correct fix (which is what the [elimination plan](../plans/deferred/2026-04-29-eliminate-rtti.md) proposes) was always available: check `kind()` first, then `static_cast`. The original pattern already used `kind()` — the 2003 author just didn't apply it to the new downcast:
+
+```cpp
+// Correct pattern (not written in 2003, what the plan restores):
+BaseObjectIteratorWrapper poIter = theRoom.GetCollisionIter();
+while ( !poIter.Empty() )
+{
+    BaseObject& bo = *poIter;
+    if ( bo.kind() != BaseObject::NULL_KIND &&   // or a specific KIND check
+         actbox->ActivatedByClass == bo.kind() )
+    {
+        Actor* colActor = static_cast<Actor*>( &bo );
+        // ...
+    }
+    ++poIter;
+}
+```
+
+---
+
 ### SourceForge CVS confirms: introduced in 2003, not PSX-era
 
 The pre-git history is preserved in the [World Foundry GDK CVS repository on SourceForge](https://sourceforge.net/projects/wf-gdk/) ([snapshot](https://sourceforge.net/code-snapshots/cvs/w/wf/wf-gdk.zip)). Reconstructing revisions from the RCS `.v` files gives the full picture:
