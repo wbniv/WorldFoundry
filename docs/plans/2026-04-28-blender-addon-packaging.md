@@ -1,6 +1,6 @@
 # Plan: Manual rewrite + Packaging (v3 follow-up)
 
-**Status:** ✅ Done (2026-04-29). Part 1 (manual rewrite → provenance-first framing) landed in `docs/wf-asset-browser.md`. Part 2: `blender_manifest.toml` added to both `wf_blender/` and `wf_asset_browser/`; Taskfile tasks `blender-build`, `blender-install`, `blender-validate`, `blender-package` added. The install.sh `.py` gap (`asset_browser.py`, `asset_threading.py`, `providers.py`) was resolved via the addon split (`2026-04-29-addon-split.md`) — those files now live in `wf_asset_browser/` with its own correct install.sh.
+**Status:** ✅ Done (2026-04-29). See addendum below re: 4.0–4.1 legacy install path. Part 1 (manual rewrite → provenance-first framing) landed in `docs/wf-asset-browser.md`. Part 2: `blender_manifest.toml` added to both `wf_blender/` and `wf_asset_browser/`; Taskfile tasks `blender-build`, `blender-install`, `blender-validate`, `blender-package` added. The install.sh `.py` gap (`asset_browser.py`, `asset_threading.py`, `providers.py`) was resolved via the addon split (`2026-04-29-addon-split.md`) — those files now live in `wf_asset_browser/` with its own correct install.sh.
 
 ## Context
 
@@ -206,3 +206,29 @@ blender-build (sources/generates caching — skips maturin if wf_py Rust sources
 4. `task blender-validate` — passes with no errors
 5. `task blender-package` — `dist/wf_blender-0.2.0.zip` produced; open the zip and confirm `wf_core.so` and all `.py` files are present, no `wf_asset_provider.so`
 6. Manual: render `task md -- docs/wf-asset-browser.md` and verify the provenance section appears before the licence tiers, licence descriptions are neutral then WF-specific, and CC-BY-SA notes suitability for open-source projects
+
+---
+
+## Addendum: Blender version distribution and the 4.0–4.1 legacy install path
+
+`INSTALL.md` currently ships two install paths: the 4.2+ extension system and a legacy 4.0–4.1 path. The question is whether the legacy path is worth maintaining.
+
+No public version-breakdown survey exists (blender.org survey data is behind auth). The release timeline is the best proxy:
+
+```mermaid
+pie title Estimated active Blender installs (April 2026)
+    "5.x (current stable, Mar 2026)" : 18
+    "4.5 LTS (Jul 2025, supported to Jul 2027)" : 34
+    "4.4 (Mar 2025, EOL)" : 13
+    "4.3 (Nov 2024, EOL)" : 8
+    "4.2 LTS (Jul 2024, supported to Jul 2026)" : 20
+    "4.1 (Mar 2024, EOL)" : 4
+    "4.0 (Nov 2023, EOL)" : 2
+    "≤3.6 LTS (EOL Jun 2025)" : 1
+```
+
+*These are order-of-magnitude estimates derived from release cadence and LTS retention patterns — not survey data.*
+
+**Reading:** ~94% of active installs are on 4.2 or later (the extension system). 4.0 and 4.1 combined are ~6%, both EOL with no further patches.
+
+**Implication:** The 4.0–4.1 legacy install section in `INSTALL.md` serves ~6% of users on unsupported versions. It costs one extra section of docs to maintain and implies we test on those versions. Consider dropping it and setting `blender_version_min = "4.2.0"` as the hard floor.
