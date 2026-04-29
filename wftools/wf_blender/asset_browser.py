@@ -26,10 +26,10 @@ from bpy.types import Operator, Panel, PropertyGroup, UIList
 
 from . import asset_threading
 
-# ── attempt to import Rust extension ─────────────────────────────────────────
+# ── import provider module ────────────────────────────────────────────────────
 
 try:
-    import wf_asset_provider as _wap
+    from . import providers as _wap
     _WAP_OK = True
 except ImportError as _e:
     _WAP_OK = False
@@ -180,7 +180,7 @@ class WF_OT_browse_assets(Operator):
 
     def execute(self, context):
         if not _WAP_OK:
-            self.report({'ERROR'}, f"wf_asset_provider not loaded: {_WAP_ERROR}")
+            self.report({'ERROR'}, f"providers module not loaded: {_WAP_ERROR}")
             return {'CANCELLED'}
 
         state = context.scene.wf_asset_browser
@@ -203,7 +203,7 @@ class WF_OT_browse_assets(Operator):
         # Build credentials from addon preferences.
         addon_prefs = context.preferences.addons.get(__name__.split('.')[0])
         sketchfab_key = addon_prefs.preferences.sketchfab_api_key if addon_prefs else ""
-        credentials = _wap.make_credentials(sketchfab_api_key=sketchfab_key or None)
+        credentials = _wap.Credentials(sketchfab_api_key=sketchfab_key or None)
 
         # Collect enabled providers
         toggles = state.providers
@@ -288,7 +288,7 @@ class WF_OT_import_asset(Operator):
 
     def invoke(self, context, event):
         if not _WAP_OK:
-            self.report({'ERROR'}, f"wf_asset_provider not loaded: {_WAP_ERROR}")
+            self.report({'ERROR'}, f"providers module not loaded: {_WAP_ERROR}")
             return {'CANCELLED'}
 
         state = context.scene.wf_asset_browser
@@ -319,7 +319,7 @@ class WF_OT_import_asset(Operator):
 
         addon_prefs = context.preferences.addons.get(__name__.split('.')[0])
         sketchfab_key = addon_prefs.preferences.sketchfab_api_key if addon_prefs else ""
-        credentials = _wap.make_credentials(sketchfab_api_key=sketchfab_key or None)
+        credentials = _wap.Credentials(sketchfab_api_key=sketchfab_key or None)
 
         def do_download():
             candidates = _wap.search(provider_id, policy, credentials=credentials,
@@ -389,7 +389,7 @@ class WF_PT_asset_browser(Panel):
         state  = context.scene.wf_asset_browser
 
         if not _WAP_OK:
-            layout.label(text="wf_asset_provider not loaded", icon='ERROR')
+            layout.label(text="providers module not loaded", icon='ERROR')
             layout.label(text=f"  {_WAP_ERROR}")
             return
 

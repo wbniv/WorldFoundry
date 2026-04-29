@@ -192,6 +192,52 @@ tasks:
     cmds:
       - python3 scripts/git-branch-browser.py
 
+  wf-asset:
+    desc: "Run the wf-asset CLI (usage: task wf-asset -- search 'tree')"
+    cmds:
+      - python3 wftools/wf_asset.py {{.CLI_ARGS}}
+
+  blender-build:
+    desc: "Build wf_core Rust native lib for the Blender addon"
+    sources:
+      - wftools/wf_py/src/**/*.rs
+      - wftools/wf_py/Cargo.toml
+    generates:
+      - wftools/wf_py/target/wheels/wf_core*.whl
+    cmds:
+      - cd wftools/wf_py && maturin build --release
+
+  blender-install:
+    desc: "Install Blender addon (symlinks .py, copies wf_core.so and catalog JSONs)"
+    deps: [blender-build]
+    cmds:
+      - bash wftools/wf_blender/install.sh
+
+  blender-validate:
+    desc: "Validate the Blender extension manifest (requires Blender 4.2+)"
+    cmds:
+      - blender --command extension validate --source-dir wftools/wf_blender
+
+  blender-package:
+    desc: "Build distributable .zip (Blender extension format); output in dist/"
+    deps: [blender-build, blender-validate]
+    cmds:
+      - mkdir -p dist
+      - |
+        set -euo pipefail
+        WF_CORE_WHEEL=$(find wftools/wf_py/target/wheels -name "wf_core*.whl" | sort | tail -1)
+        python3 -c "
+        import zipfile, shutil, sys
+        with zipfile.ZipFile('$WF_CORE_WHEEL') as z:
+            sos = [n for n in z.namelist() if n.endswith('.so')]
+            if not sos:
+                print('No .so in wheel', file=sys.stderr); sys.exit(1)
+            z.extract(sos[0], '/tmp/')
+            shutil.copy('/tmp/' + sos[0], 'wftools/wf_blender/wf_core.so')
+        "
+      - blender --command extension build --source-dir wftools/wf_blender --output-dir dist
+      - echo "Package written to dist/"
+
   md:
     desc: "Convert Markdown to HTML and open in browser (usage: task md -- docs/foo.md)"
     cmds:
