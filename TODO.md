@@ -2,6 +2,7 @@
 
 ## SCRIPTING ENGINES
 
+- [ ] zForth dictionary size — append-only dict grows with every unique script word + all INDEXOF_* constants; fixed at `ZF_DICT_SIZE` (32 KB in `zfconf.h`); monitor if level script count grows; remediation is either bumping `ZF_DICT_SIZE` or reinitialising `g_ctx` at level unload and replaying bootstrap + constants — [investigation](docs/investigations/2026-04-29-forth-compile-run-audit.md)
 - [investigated] Forth compile vs. run separation — correctly handled: RunScript splits at last `;`, compiles defs once into persistent `g_ctx`, wraps call body in `_wfsN`. Constants use inline literals not `constant` (correct). Pre-compile pass at level load is feasible (low effort, defer until hitching observed) — [investigation](docs/investigations/2026-04-29-forth-compile-run-audit.md)
 
 
