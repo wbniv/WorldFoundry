@@ -1,7 +1,7 @@
 # Investigation: C++ RTTI usage in wf_game
 
 **Date:** 2026-04-29
-**Conclusion:** Engine uses C++ RTTI pervasively. `-fno-rtti` is not viable without a medium-sized refactor. The "no RTTI" claim was aspirational. The `dynamic_cast` calls were introduced during the PC/Linux port and are not present in PSX-era code.
+**Conclusion:** Engine uses C++ RTTI pervasively. `-fno-rtti` is not viable without a medium-sized refactor. The "no RTTI" claim was aspirational. The `dynamic_cast` calls were **introduced in 2003** when `Actor*` containers were generalised to `BaseObject*` iterators — confirmed via SourceForge CVS history. The PSX/2000-era code used `kind()` throughout and had zero `dynamic_cast`.
 
 ---
 
@@ -69,9 +69,27 @@ Building with `-fno-rtti` would fail to compile all 51 `dynamic_cast` sites. Rep
 
 All 51 `dynamic_cast` calls arrived in the **[first git commit (2010-05-01)](https://github.com/wbniv/WorldFoundry/commit/a2784f6)** with no platform guards. `git log -S"dynamic_cast"` finds no subsequent commit that added or removed any of them in the affected files. The dead-code removal passes ([Batch 5](https://github.com/wbniv/WorldFoundry/commit/03211f9), [Batch 6](https://github.com/wbniv/WorldFoundry/commit/8760f27)) did not strip any guards from around them — they were already bare.
 
-The git repo is a 2010 import of what was already a PC/Linux port. The PSX-era source predates the repo. PS1 toolchains did not support C++ RTTI, so the original code would have relied on `kind()` or explicit `static_cast`s. The most likely explanation: `dynamic_cast` calls were added during the PC port, replacing the manual `kind()`-guarded casts, and `kind()` survived as a rarely-used remnant. This is consistent with `kind()` having only 2 live call sites while `dynamic_cast` dominates.
+### SourceForge CVS confirms: introduced in 2003, not PSX-era
 
-There is no pre-2010 history in this repo to prove it definitively, but the evidence is unambiguous: the calls were not in the PSX codebase.
+The pre-git history is preserved in the [World Foundry GDK CVS repository on SourceForge](https://sourceforge.net/projects/wf-gdk/) ([snapshot](https://sourceforge.net/code-snapshots/cvs/w/wf/wf-gdk.zip)). Reconstructing revisions from the RCS `.v` files gives the full picture:
+
+| File | Feb 2000 (SourceForge import) | First `dynamic_cast` | CVS log message |
+|---|---|---|---|
+| `actor.cc` | 0 | Rev 1.43, **Jan 11, 2003** | "changed Actor::Activated to use PhysicalObjectIterator instead of ActiveRoomsActorIter" |
+| `movecam.cc` | 0 | Rev 1.18, **Jan 11, 2003** | "removed Actor from most movement handler functions" |
+| `level.cc` | 3 (transitional) | Rev 1.62, **May 23, 2003** | "changed all PhysicalObjectIter references to BaseObjectIter, added dynamic_cast where needed" |
+
+The Feb 2000 `actor.cc` used `kind()` directly for all type dispatch:
+
+```cpp
+// PSX-era (2000): pure kind() dispatch, no cast needed
+colActor = theLevel->getActor(*alIter);
+if ( actbox->ActivatedByClass == colActor->kind() )
+```
+
+`baseobject.hp` itself didn't exist until 2003 — it was created as part of the same refactor that introduced `dynamic_cast`, migrating `EActorKind`/`kind()` from `actor.hp` into the new base class.
+
+**Root cause:** in 2003, `Actor*` containers were generalised to `PhysicalObject*` / `BaseObject*` iterators to support the multi-type object system. That made downcasts necessary, and whoever did the refactor reached for `dynamic_cast` rather than `kind()`-guarded `static_cast`. `kind()` survived as a remnant with only 2 call sites.
 
 ---
 
