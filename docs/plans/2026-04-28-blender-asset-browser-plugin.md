@@ -219,6 +219,8 @@ A new sidebar panel `WF_PT_asset_browser` in the 3D Viewport's `WF` category (ex
 
 Implementation: a `bpy.types.UIList` for the result rows (Blender's idiomatic scrollable list), a `bpy.types.PropertyGroup` to hold the result data, `bpy.utils.previews` for the thumbnail icon column. Provider toggles are bool properties on a scene-scope PropertyGroup so they persist per-scene. The "Show waivers" button opens a separate popup listing per-asset waivers — read-only in v1 (waiver creation is part of the v2 elevation flow).
 
+![Blender object gallery organised by licence](blender%20object%20gallery%20by%20license.png)
+
 ### Import flow
 
 1. Designer clicks "Import Selected" with one row selected.
