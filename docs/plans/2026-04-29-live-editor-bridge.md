@@ -55,7 +55,7 @@ flowchart LR
 |---|---|
 | Launch with debug port | `wf_game -Lwflevels/snowgoons.iff --debug-port 7777` |
 | Connect from Blender | "Connect" button in Properties > Scene > WF Live Bridge panel |
-| Teleport an object | Move object in Blender 3D view → engine applies next frame, no restart |
+| Teleport an object | Move object in Blender 3D view → `scene:set_transform` → engine applies next frame, no restart |
 | Watch live positions | Objects in Blender update to reflect runtime positions at ~10 Hz |
 | Read engine log | Engine's log messages stream to Blender's Info bar |
 
@@ -64,8 +64,8 @@ flowchart LR
 **Blender → Engine:**
 
 ```json
-{"op": "set_transform", "idx": 3,   "pos": [1.2, 0, 5.1]}
-{"op": "set_prop",      "idx": 3,   "key": "Speed",   "value": 3.5}
+{"op": "scene:set_transform", "idx": 3,   "pos": [1.2, 0, 5.1]}
+{"op": "scene:set_prop",      "idx": 3,   "key": "Speed",   "value": 3.5}
 {"op": "ping"}
 ```
 
@@ -150,7 +150,7 @@ stateDiagram-v2
     BP --> BP : step (advances one frame, stays paused)
 ```
 
-**`depsgraph_update_post` handler** (registered in `__init__.py`): when an object with a WF schema moves and a bridge is connected, sends `set_transform`. When a WF property changes, sends `set_prop`.
+**`depsgraph_update_post` handler** (registered in `__init__.py`): when an object with a WF schema moves and a bridge is connected, sends `scene:set_transform`. When a WF property changes, sends `scene:set_prop`.
 
 **New addon preferences:** `debug_host` (default `localhost`), `debug_port` (default `7777`).
 
@@ -228,14 +228,14 @@ Godot's schema has two distinct layers, which turns out to be directly relevant 
 
 | WF bridge op | Godot equivalent |
 |---|---|
-| `set_prop` | `scene:set_object_property` |
-| `set_transform` | `scene:set_object_property` (Transform property) |
+| `scene:set_prop` | `scene:set_object_property` |
+| `scene:set_transform` | `scene:set_object_property` (Transform property) |
 | `spawn` | `scene:live_create_node` |
 | `remove` | `scene:live_remove_node` |
 | `pick` | `scene:inspect_objects` (closest analogue) |
 | `state` broadcast | scene tree / profiling broadcasts |
 
-**Decision:** WF should adopt Godot's `scene:` namespace prefix and operation naming convention for Phase 2+ scene-editing ops. Exact wire compatibility is not possible (binary Variant vs JSON, and Godot's object model doesn't map to WF's actor-index scheme), but using the same verb names makes the protocol legible to anyone who has worked with Godot's debugger. Phase 1 ops (`set_transform`, `set_prop`, `ping/pong`) stay as-is; Phase 2+ additions should follow the `scene:` pattern.
+**Decision:** WF adopts Godot's `scene:` namespace prefix for all scene-editing ops. Exact wire compatibility is not possible (binary Variant vs JSON, and Godot's object model doesn't map to WF's actor-index scheme), but using the same verb names makes the protocol legible to anyone who has worked with Godot's debugger. Phase 1 ops have been renamed accordingly (`scene:set_transform`, `scene:set_prop`); `ping`/`pong`/`state`/`log`/`error` remain bare as they are not scene ops.
 
 **No established standard exists for game-state editing** — for the Phase 1/2 bridge concerns (transform sync, property writes, spawn/remove, position broadcast), there is no published open protocol. WF and Godot are the only two engines with out-of-process TCP game-state editing bridges. WF's TCP/newline-delimited JSON is the right shape, and well-positioned to become one:
 - Simple enough to debug with `netcat`
@@ -311,13 +311,13 @@ sequenceDiagram
 
 ### Property writes wired to OAD block (copy-on-write)
 
-Phase 1 acknowledges `set_prop` but doesn't apply it.
+Phase 1 acknowledges `scene:set_prop` but doesn't apply it.
 
 The key complication: OAD block data (`_oadData`, `CommonBlock::_commonBlockBase`) is shared read-only memory loaded from the IFF. Many actors with the same OAD values share the same underlying page — it's a flyweight compression scheme that works both on disk and in RAM. Writing into a shared page would corrupt every other actor that points to it.
 
 Phase 2 must implement **copy-on-write** for bridge-modified actors:
 
-1. On the first `set_prop` for an actor, allocate a fresh copy of its OAD block (from `HALLmalloc` or a dedicated bridge pool).
+1. On the first `scene:set_prop` for an actor, allocate a fresh copy of its OAD block (from `HALLmalloc` or a dedicated bridge pool).
 2. Update `_oadData` and `CommonBlock::_commonBlockBase` on that actor to point to the new copy.
 3. Write the new property value at the correct byte offset (derived from the OAD struct layout, which is available from the exported `.ht` file).
 4. Values take effect on the next frame without any reconstruction.
@@ -358,7 +358,7 @@ The undo stack is shown in the bridge panel (see Phase 1/2 state diagram above �
 ```mermaid
 flowchart TD
     A["User moves object in Blender"] --> B["depsgraph_update_post fires"]
-    B --> C["bridge.set_transform(idx, pos)"]
+    B --> C["bridge.scene:set_transform(idx, pos)"]
     C --> D["Engine: saves original pos\nif first write this session"]
     D --> E["Engine: applies new pos"]
     E --> F["Change pushed to session log\n(Blender + engine both track)"]
