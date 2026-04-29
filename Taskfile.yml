@@ -188,7 +188,19 @@ tasks:
           exit 1
         fi
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
-          engine/wf_game "-L$ARGS" --debug-port 7777
+          engine/wf_game "-L$ARGS" --debug-port 7777 --debug-bind 127.0.0.1
+
+  run-debug-remote:
+    desc: "Run wf_game with debug bridge open on all interfaces (remote device / CI; usage: task run-debug-remote -- wflevels/snowgoons.iff)"
+    cmds:
+      - |
+        ARGS="{{.CLI_ARGS}}"
+        if [ -z "$ARGS" ]; then
+          echo "Usage: task run-debug-remote -- <path/to/level.iff>" >&2
+          exit 1
+        fi
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
+          engine/wf_game "-L$ARGS" --debug-port 7777 --debug-bind 0.0.0.0
 
   dev-setup:
     desc: "Install all dev dependencies (Linux build + Android toolchain)"

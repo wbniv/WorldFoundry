@@ -326,6 +326,8 @@ WFGame::RunLevel(_DiskFile* levelFile)
 #endif
 
 		DebugServer_BroadcastState(*_curLevel);
+		DebugServer_BroadcastPerf(deltaTime.AsFloat() * 1000.0f,
+		                          _curLevel->GetObjectList().Size());
 		DBSTREAM2( cflow << "WFGame::update: page flip" << std::endl; )
 		deltaTime = _display->PageFlip();
 		DBSTREAM2( cflow << "WFGame::update: done" << std::endl; )

@@ -1,7 +1,7 @@
 # Plan: Live Editor Bridge — play-in-editor, scene debugger, remote device debug
 
 **Date:** 2026-04-29
-**Status:** Phases 1, 1.5, 2a, 2b, 3 implemented.
+**Status:** Phases 1, 1.5, 2a, 2b, 3 implemented. Phase 4: perf overlay + --debug-bind done; shader hot-reload + script breakpoints pending.
 **Related:** `docs/plans/2026-04-29-blender-run-operator.md`, `docs/investigations/2026-04-29-blender-game-engine-removal.md`
 
 ---
@@ -397,7 +397,24 @@ When the bridge disconnects (or the user hits "Revert all"), the engine broadcas
 
 ---
 
-## Phase 4: Full remote debug
+## Phase 4: Full remote debug — partial (2026-04-29)
+
+### Performance overlay — IMPLEMENTED
+
+Engine broadcasts `{"op":"perf","frame_ms":16.2,"actors":38}` at ~10 Hz after each `BroadcastState` call. `frame_ms` is the previous frame's PageFlip time in milliseconds; `actors` is the total object count from `GetObjectList().Size()`.
+
+Blender panel shows `CPU 16.1 ms  |  Actors: 38` when connected and at least one `perf` message has arrived.
+
+### `--debug-bind` flag — IMPLEMENTED
+
+`--debug-bind <ADDR>` controls which network interface the debug server listens on.  
+Default is `127.0.0.1` (localhost only — safe default).  
+Pass `--debug-bind 0.0.0.0` for remote device debugging or CI.
+
+```
+task run-debug         -- wflevels/snowgoons.iff   # localhost only
+task run-debug-remote  -- wflevels/snowgoons.iff   # all interfaces
+```
 
 ### Shader hot-reload
 

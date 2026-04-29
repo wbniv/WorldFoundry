@@ -32,6 +32,9 @@
 #include <physics/physicalobject.hp>
 #include <cstddef>
 
+// Bind address: set by --debug-bind in main.cc; defaults to "127.0.0.1".
+extern char gDebugBind[];
+
 //=============================================================================
 // Minimal JSON helpers
 
@@ -352,9 +355,12 @@ static void listener_loop(int port)
     ::setsockopt(gServerFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
     struct sockaddr_in addr {};
-    addr.sin_family      = AF_INET;
-    addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port        = htons((uint16_t)port);
+    addr.sin_family = AF_INET;
+    addr.sin_port   = htons((uint16_t)port);
+    if (gDebugBind[0] == '\0' || strcmp(gDebugBind, "0.0.0.0") == 0)
+        addr.sin_addr.s_addr = INADDR_ANY;
+    else
+        inet_pton(AF_INET, gDebugBind, &addr.sin_addr);
 
     if (::bind(gServerFd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
         std::fprintf(stderr, "[debug] bind(:%d) failed: %s\n", port, strerror(errno));
@@ -611,6 +617,26 @@ void DebugServer_BroadcastState(Level& level)
         std::lock_guard<std::mutex> lk(gQueueMutex);
         send_all_locked(batch);
     }
+}
+
+// Broadcast performance metrics at ~10 Hz (same cadence as BroadcastState).
+void DebugServer_BroadcastPerf(float frame_ms, int actor_count)
+{
+    if (!gRunning) return;
+    {
+        std::lock_guard<std::mutex> lk(gQueueMutex);
+        if (gClients.empty()) return;
+    }
+
+    static int sTick = 0;
+    if (++sTick % 6 != 0) return;
+
+    char buf[128];
+    snprintf(buf, sizeof(buf),
+        "{\"op\":\"perf\",\"frame_ms\":%.2f,\"actors\":%d}\n",
+        frame_ms, actor_count);
+    std::lock_guard<std::mutex> lk(gQueueMutex);
+    send_all_locked(buf);
 }
 
 #endif // WF_DEBUG_BRIDGE

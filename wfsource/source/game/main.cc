@@ -47,7 +47,8 @@
 bool gSoundEnabled = false;
 bool gCDEnabled = false;
 
-int gDebugPort = 0;   // 0 = disabled; set by --debug-port N
+int  gDebugPort = 0;                    // 0 = disabled; set by --debug-port N
+char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
 
 WFGame* theGame = NULL;
 
@@ -175,6 +176,13 @@ ParseCommandLine(int argc, char** argv)
 			gDebugPort = atoi( argv[index+1] );
 			++index;
 			DBSTREAM1( cprogress << "Debug bridge port: " << gDebugPort << std::endl; )
+		}
+		else if ( strncmp( argv[index]+1, "-debug-bind", 11 ) == 0 && argv[index+1] )
+		{
+			strncpy( gDebugBind, argv[index+1], sizeof(gDebugBind) - 1 );
+			gDebugBind[sizeof(gDebugBind)-1] = '\0';
+			++index;
+			DBSTREAM1( cprogress << "Debug bridge bind: " << gDebugBind << std::endl; )
 		}
 		else if ( strncmp( argv[index]+1, (char*)szRate, strlen( szRate ) ) == 0)
 		{

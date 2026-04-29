@@ -295,6 +295,8 @@ class WF_PT_live_bridge(bpy.types.Panel):
 
             if bridge.frame_n:
                 layout.label(text=f"Frame {bridge.frame_n}  |  {bridge.frame_dt_ms:.1f} ms")
+            if bridge.perf_frame_ms > 0:
+                layout.label(text=f"CPU {bridge.perf_frame_ms:.1f} ms  |  Actors: {bridge.perf_actors}")
 
             # Pause / step / resume controls
             row2 = layout.row(align=True)

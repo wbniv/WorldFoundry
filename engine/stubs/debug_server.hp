@@ -22,6 +22,7 @@ class Level;
 void DebugServer_Start(int port);
 void DebugServer_DrainQueue(Level& level);
 void DebugServer_BroadcastState(Level& level);
+void DebugServer_BroadcastPerf(float frame_ms, int actor_count);
 void DebugServer_Stop();
 bool DebugServer_IsPaused();   // true = skip level update this frame
 
@@ -31,6 +32,7 @@ class Level;
 inline void DebugServer_Start(int)                      {}
 inline void DebugServer_DrainQueue(Level&)              {}
 inline void DebugServer_BroadcastState(Level&)          {}
+inline void DebugServer_BroadcastPerf(float, int)       {}
 inline void DebugServer_Stop()                          {}
 inline bool DebugServer_IsPaused()                      { return false; }
 

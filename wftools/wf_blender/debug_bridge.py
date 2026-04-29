@@ -45,6 +45,9 @@ class DebugBridge:
         self.frame_dt_ms: float = 0.0
         # idx → [x, y, z]
         self.positions: dict[int, list] = {}
+        # Performance overlay — updated from perf messages
+        self.perf_frame_ms: float = 0.0
+        self.perf_actors: int = 0
 
         self.connected = False
         self.is_paused = False
@@ -211,6 +214,9 @@ class DebugBridge:
                     obj = bpy.data.objects[name]
                     obj.select_set(True)
                     bpy.context.view_layer.objects.active = obj
+        elif op == "perf":
+            self.perf_frame_ms = msg.get("frame_ms", 0.0)
+            self.perf_actors   = msg.get("actors", 0)
         elif op == "pong":
             pass
         elif op in ("log", "error"):
