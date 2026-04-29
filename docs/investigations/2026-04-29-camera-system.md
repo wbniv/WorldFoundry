@@ -208,6 +208,89 @@ Until the FOV fix lands, all cameras render at the global 60°. Once the fix is 
 
 ---
 
+## Director script examples (Forth)
+
+The `\ wf` sigil marks a Forth script. The Director's script runs every tick. Local mailboxes (2000–3037) are per-actor scratch storage — use them for state that must persist between ticks.
+
+`INDEXOF_CAMSHOT` = 1021. Write a CamShot actor's object index to it to trigger a camera switch. `NormalCameraHandler` reads and clears it each tick.
+
+### Immediate one-shot cut on level start
+
+```forth
+\ wf
+: CAMSHOT_INTRO 3 ;   \ object index of the intro CamShot actor in this level
+CAMSHOT_INTRO INDEXOF_CAMSHOT write-mailbox
+```
+
+Writes once on the first tick (and every tick — harmless after the first since the handler clears it). For a true one-shot, gate on a flag mailbox:
+
+```forth
+\ wf
+: CAMSHOT_INTRO  3 ;
+: MB_FIRED      2000 ;        \ local mailbox — 0 = not yet fired
+
+MB_FIRED read-mailbox 0 = if
+    CAMSHOT_INTRO INDEXOF_CAMSHOT write-mailbox
+    1 MB_FIRED write-mailbox
+fi
+```
+
+---
+
+### Timed sequence — cut to a new shot after N ticks
+
+```forth
+\ wf
+: CAMSHOT_A      3 ;          \ object indices of two CamShot actors
+: CAMSHOT_B      7 ;
+: MB_TICKS      2000 ;        \ tick counter
+: CUT_AT         180 ;        \ switch after 3 s at 60 Hz
+
+MB_TICKS read-mailbox 1 + MB_TICKS write-mailbox   \ increment counter
+
+MB_TICKS read-mailbox CUT_AT = if
+    CAMSHOT_B INDEXOF_CAMSHOT write-mailbox
+fi
+```
+
+---
+
+### Looping sequence — bounce between two shots every 5 seconds
+
+```forth
+\ wf
+: CAMSHOT_A      3 ;
+: CAMSHOT_B      7 ;
+: MB_TICKS      2000 ;
+: MB_PHASE      2001 ;        \ 0 = on A, 1 = on B
+: PERIOD         300 ;        \ 5 s at 60 Hz
+
+MB_TICKS read-mailbox 1 + MB_TICKS write-mailbox
+
+MB_TICKS read-mailbox PERIOD = if
+    0 MB_TICKS write-mailbox                        \ reset counter
+    MB_PHASE read-mailbox 0 = if
+        CAMSHOT_B INDEXOF_CAMSHOT write-mailbox
+        1 MB_PHASE write-mailbox
+    else
+        CAMSHOT_A INDEXOF_CAMSHOT write-mailbox
+        0 MB_PHASE write-mailbox
+    fi
+fi
+```
+
+---
+
+### Notes
+
+- **Object indices** — the CamShot's index in the level object list. Check `lvldump` output or the Blender level importer's object panel. Indices start at 1.
+- **Tick rate** — engine runs at 60 Hz; 60 ticks = 1 second.
+- **zForth uses `fi` not `then`** for `if`/`else` blocks.
+- **`write-mailbox` stack order** — `( val idx -- )`: value first, index second.
+- **Pan time** — the transition duration comes from the destination CamShot's `Pan Time In Seconds` field, not from the script. Set it in the level editor.
+
+---
+
 ## Related
 
 - [Camera projection audit](2026-04-29-camera-system-audit.md) — projection-only focus; confirms perspective-only and FOV gap
