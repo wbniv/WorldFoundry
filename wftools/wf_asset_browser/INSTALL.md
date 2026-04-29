@@ -3,7 +3,7 @@
 ## Requirements
 
 - Blender 4.0 or later
-- Internet connection (for provider searches — Polyhaven, Kenney, AmbientCG, Quaternius, OpenGameArt, Sketchfab)
+- Internet connection (all asset searches are live)
 - A Sketchfab API key if you want to download Sketchfab assets (free account at sketchfab.com)
 
 ---
