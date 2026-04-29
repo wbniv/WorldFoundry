@@ -34,6 +34,7 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 
 ## BUILD / TOOLCHAIN
 
+- [ ] Eliminate RTTI — replace 51 `dynamic_cast` calls with `kind()`-guarded `static_cast`; enables `-fno-rtti` on Android; ~3–4 h mechanical refactor; one exception (`camera.cc:98` CameraHandler cast) — [plan](docs/plans/deferred/2026-04-29-eliminate-rtti.md) [investigation](docs/investigations/2026-04-29-rtti-audit.md)
 - [investigated] RTTI claim — `kind()` / `EActorKind` at `baseobject.hp:71` is enum-dispatch, not C++ RTTI. However, the engine has **51 `dynamic_cast` calls** across `level.cc`, `movecam.cc`, `actor.cc`, `room/`, `movement/`, etc. `-fno-rtti` is not viable without replacing all of them. The "no RTTI" claim was aspirational. `kind()` has only 2 live call sites; `dynamic_cast` is the de-facto pattern. Jolt's `RTTI.cpp` is its own custom type system, unrelated to C++ RTTI.
 
 
