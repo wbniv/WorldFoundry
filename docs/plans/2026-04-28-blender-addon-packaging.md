@@ -231,4 +231,6 @@ pie title Estimated active Blender installs (April 2026)
 
 **Reading:** ~94% of active installs are on 4.2 or later (the extension system). 4.0 and 4.1 combined are ~6%, both EOL with no further patches.
 
-**Implication:** The 4.0–4.1 legacy install section in `INSTALL.md` serves ~6% of users on unsupported versions. It costs one extra section of docs to maintain and implies we test on those versions. Consider dropping it and setting `blender_version_min = "4.2.0"` as the hard floor.
+**4.0–4.1 verdict:** ~6% of users on EOL versions. Dropped — `INSTALL.md` now requires 4.2+; `bl_info` bumped to `(4, 2, 0)` to match `blender_manifest.toml`.
+
+**Why not 5.x?** Blender 5.0 shipped March 2026 — one month before this writing. The current *recommended* release is 4.5 LTS (supported until July 2027), which likely holds the largest single cohort (~34%). Requiring 5.x would exclude roughly 80% of active installs including everyone on the current LTS. Revisit when 4.5 LTS reaches end-of-life (July 2027).
