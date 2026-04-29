@@ -50,6 +50,8 @@ class DebugBridge:
         self.is_paused = False
         self.last_picked_idx: int = -1
         self.error: str = ""
+        # Phase 3: change log — list of {"idx": int, "name": str} in apply order
+        self.change_log: list = []
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -96,6 +98,8 @@ class DebugBridge:
 
     def set_transform(self, idx: int, pos: list):
         self.send({"op": "scene:set_transform", "idx": idx, "pos": pos})
+        name = self.idx_to_name.get(idx, f"idx {idx}")
+        self.change_log.append({"idx": idx, "name": name})
 
     def set_prop(self, idx: int, key: str, value):
         self.send({"op": "scene:set_prop", "idx": idx, "key": key, "value": value})
@@ -111,6 +115,14 @@ class DebugBridge:
 
     def scene_pick(self, ray_origin: list, ray_dir: list):
         self.send({"op": "scene:pick", "ray_origin": ray_origin, "ray_dir": ray_dir})
+
+    def undo_step(self):
+        self.send({"op": "undo_step"})
+        if self.change_log:
+            self.change_log.pop()
+
+    def revert_all(self):
+        self.send({"op": "revert_all"})
 
     def update_index_map(self, mapping: dict[int, str]):
         """Called by the export step with {idx: blender_obj_name, ...}."""
@@ -183,6 +195,8 @@ class DebugBridge:
             self.is_paused = True
         elif op == "resumed":
             self.is_paused = False
+        elif op == "reverted":
+            self.change_log.clear()
         elif op == "picked":
             self.last_picked_idx = msg.get("idx", -1)
             if self.last_picked_idx >= 0:

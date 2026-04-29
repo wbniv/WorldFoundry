@@ -342,13 +342,17 @@ Blender `SpaceView3D` draw handler renders wireframe boxes and velocity arrows u
 
 ---
 
-## Phase 3: Undo of runtime changes
+## Phase 3: Undo of runtime changes — IMPLEMENTED 2026-04-29
 
 Unity PIE and Unreal PIE both discard runtime changes when you exit Play Mode — the editor world is never modified. WF can do better: track every change made via the bridge and offer step-back undo.
 
 ### How it works
 
-The engine maintains a **session change log**: for each actor modified via the bridge, it saves the original state (position and — once Phase 2 COW is done — original OAD block pointer) on first modification. Changes are pushed to a stack.
+The engine maintains a **session change log**: two structures, both game-thread-only in `DrainQueue`:
+- `gOriginals` — per-actor pre-session state (position on first bridge touch this session), for `revert_all`
+- `gChangeStack` — ordered stack of pre-change values, for `undo_step`
+
+On each `scene:set_transform`: save current pos to `gOriginals` (first touch only) and push to `gChangeStack`, then apply.
 
 ```json
 {"op": "undo_step"}

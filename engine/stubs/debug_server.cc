@@ -17,6 +17,7 @@
 #include <thread>
 #include <vector>
 #include <algorithm>
+#include <unordered_map>
 
 // POSIX sockets
 #include <arpa/inet.h>
@@ -105,10 +106,24 @@ static std::atomic<bool> gPaused  { false };
 static std::atomic<int>  gStepN   { 0 };
 
 //=============================================================================
+// Session change log (game-thread only — accessed exclusively in DrainQueue)
+//
+// gOriginals: per-actor pre-session state (for revert_all)
+// gChangeStack: ordered history of pre-change values (for undo_step)
+
+struct ChangeRecord {
+    int   actor_idx;
+    float px, py, pz;   // value BEFORE this change was applied
+};
+
+static std::unordered_map<int, ChangeRecord> gOriginals;
+static std::vector<ChangeRecord>             gChangeStack;
+
+//=============================================================================
 // Pending update queue
 
 struct PendingUpdate {
-    enum Kind { SET_PROP, SET_TRANSFORM, PICK } kind;
+    enum Kind { SET_PROP, SET_TRANSFORM, PICK, UNDO_STEP, REVERT_ALL } kind;
     int  actor_idx;
     std::string key;
     double value;
@@ -211,6 +226,20 @@ static void handle_client(int fd)
                 if (n <= 0) n = 1;
                 gStepN.fetch_add(n);
 
+            } else if (op == "undo_step") {
+                PendingUpdate u;
+                u.kind = PendingUpdate::UNDO_STEP;
+                u.actor_idx = 0;
+                std::lock_guard<std::mutex> lk(gQueueMutex);
+                gQueue.push(u);
+
+            } else if (op == "revert_all") {
+                PendingUpdate u;
+                u.kind = PendingUpdate::REVERT_ALL;
+                u.actor_idx = 0;
+                std::lock_guard<std::mutex> lk(gQueueMutex);
+                gQueue.push(u);
+
             } else if (op == "scene:pick") {
                 PendingUpdate u;
                 u.kind = PendingUpdate::PICK;
@@ -311,6 +340,8 @@ void DebugServer_Stop()
         gClients.clear();
     }
     if (gListenerThread.joinable()) gListenerThread.join();
+    gOriginals.clear();
+    gChangeStack.clear();
 }
 
 bool DebugServer_IsPaused()
@@ -340,6 +371,16 @@ void DebugServer_DrainQueue(Level& level)
         Actor* actor = bo ? dynamic_cast<Actor*>(bo) : nullptr;
 
         if (u.kind == PendingUpdate::SET_TRANSFORM && actor) {
+            const Vector3& cur = actor->currentPos();
+            ChangeRecord rec { u.actor_idx,
+                               cur.X().AsFloat(),
+                               cur.Y().AsFloat(),
+                               cur.Z().AsFloat() };
+            // Save pre-session original on first touch
+            if (gOriginals.find(u.actor_idx) == gOriginals.end())
+                gOriginals[u.actor_idx] = rec;
+            gChangeStack.push_back(rec);
+
             Vector3 pos(Scalar::FromDouble((double)u.px),
                         Scalar::FromDouble((double)u.py),
                         Scalar::FromDouble((double)u.pz));
@@ -384,6 +425,37 @@ void DebugServer_DrainQueue(Level& level)
             snprintf(buf, sizeof(buf), "{\"op\":\"picked\",\"idx\":%d}\n", best_idx);
             std::lock_guard<std::mutex> lk(gQueueMutex);
             send_all_locked(buf);
+
+        } else if (u.kind == PendingUpdate::UNDO_STEP) {
+            if (!gChangeStack.empty()) {
+                const ChangeRecord& r = gChangeStack.back();
+                BaseObject* bo2 = level.GetObject(r.actor_idx);
+                Actor* a = bo2 ? dynamic_cast<Actor*>(bo2) : nullptr;
+                if (a) {
+                    Vector3 prev(Scalar::FromDouble(r.px),
+                                 Scalar::FromDouble(r.py),
+                                 Scalar::FromDouble(r.pz));
+                    a->setCurrentPos(prev);
+                }
+                gChangeStack.pop_back();
+            }
+
+        } else if (u.kind == PendingUpdate::REVERT_ALL) {
+            for (auto& kv : gOriginals) {
+                BaseObject* bo2 = level.GetObject(kv.first);
+                Actor* a = bo2 ? dynamic_cast<Actor*>(bo2) : nullptr;
+                if (a) {
+                    const ChangeRecord& r = kv.second;
+                    Vector3 orig(Scalar::FromDouble(r.px),
+                                 Scalar::FromDouble(r.py),
+                                 Scalar::FromDouble(r.pz));
+                    a->setCurrentPos(orig);
+                }
+            }
+            gOriginals.clear();
+            gChangeStack.clear();
+            std::lock_guard<std::mutex> lk(gQueueMutex);
+            send_all_locked("{\"op\":\"reverted\"}\n");
 
         } else if (!bo) {
             std::string errmsg = "{\"op\":\"error\","

@@ -310,6 +310,15 @@ class WF_PT_live_bridge(bpy.types.Panel):
             if bridge.last_picked_idx >= 0:
                 name = bridge.idx_to_name.get(bridge.last_picked_idx, f"idx {bridge.last_picked_idx}")
                 row3.label(text=name)
+
+            # Undo / revert (Phase 3)
+            n = len(bridge.change_log)
+            if n > 0:
+                layout.separator()
+                row4 = layout.row(align=True)
+                row4.label(text=f"Changes: {n}", icon='TRACKING_BACKWARDS')
+                row4.operator("wf.bridge_undo",       text="↩ Undo",      icon='LOOP_BACK')
+                row4.operator("wf.bridge_revert_all", text="✕ Revert all", icon='X')
         else:
             row = layout.row(align=True)
             row.label(text="Not connected", icon='RADIOBUT_OFF')

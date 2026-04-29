@@ -771,6 +771,28 @@ class WF_OT_bridge_step(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class WF_OT_bridge_undo(bpy.types.Operator):
+    """Undo the last bridge change in the running engine"""
+    bl_idname = "wf.bridge_undo"
+    bl_label  = "Undo Last Change"
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().undo_step()
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_revert_all(bpy.types.Operator):
+    """Revert all bridge changes — restore every actor to its pre-session state"""
+    bl_idname = "wf.bridge_revert_all"
+    bl_label  = "Revert All Changes"
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().revert_all()
+        return {'FINISHED'}
+
+
 class WF_OT_bridge_pick(bpy.types.Operator):
     """Click in the 3D viewport to select the closest engine actor"""
     bl_idname   = "wf.bridge_pick"
@@ -821,6 +843,8 @@ _CLASSES = [
     WF_OT_bridge_resume,
     WF_OT_bridge_step,
     WF_OT_bridge_pick,
+    WF_OT_bridge_undo,
+    WF_OT_bridge_revert_all,
 ]
 
 
