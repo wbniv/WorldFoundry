@@ -72,6 +72,7 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 - [ ] Alternate wasm sigil `#!wat` — deferred pending wabt vendor — [plan](docs/plans/2026-04-14-wasm3-scripting-engine.md) (won't be needed)
 - [ ] ScriptLanguage OAD field — re-add to `common.inc`; blocked on level-pipeline-proof Phase E; revert `language = 3;` stopgap in `engine/stubs/scripting_stub.cc` — [plan](docs/plans/2026-04-16-script-language-oad-field.md)
 - [ ] Strip spurious BOX3 chunks from non-geometry actors in `wflevels/snowgoons/snowgoons.lev` — [plan](docs/plans/2026-04-19-strip-nongeom-box3.md)
+- [ ] Orthographic projection — add `Mat4Ortho` to `backend_modern.cc`, `SetProjectionOrtho()` to `RendererBackend`, projection-type flag to CamShot OAS; blocked on level-pipeline-proof Phase E (OAD schema change) — [investigation](docs/investigations/2026-04-29-camera-system.md)
 
 - [ ] `scripts/check_iff_no_js.py` — JS footprint checker; blocked on JS scripts being authored into assets — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
 - [ ] `WF_JS_ENGINE=jerryscript-nano` footprint build — deferred until footprint pressure — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
