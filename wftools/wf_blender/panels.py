@@ -258,6 +258,10 @@ class WF_PT_level(bpy.types.Panel):
         layout = self.layout
         layout.operator("wf.import_level", icon='IMPORT')
         layout.operator("wf.export_level", icon='EXPORT')
+        layout.separator()
+        scene = context.scene
+        layout.prop(scene, "wf_level_name", text="Level Name")
+        layout.operator("wf.run_level", icon='PLAY')
 
 
 # ── registration ──────────────────────────────────────────────────────────────

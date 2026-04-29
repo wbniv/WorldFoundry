@@ -905,6 +905,156 @@ def _apply_field_chunks(blobj, schema, obj_chunk):
                 blobj[prop_key] = str(data[0])
 
 
+# ── export helper ─────────────────────────────────────────────────────────────
+
+def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
+    """Write the current Blender scene to a .lev text IFF. Returns (ok, message)."""
+    objects = [o for o in context.scene.objects if o.get(SCHEMA_PATH_KEY)]
+    if not objects:
+        return False, "No WF objects in scene (attach schemas first)"
+
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    lines = ["{ 'LVL' "]
+    level_dir = os.path.dirname(filepath)
+
+    for obj in objects:
+        schema_path = obj[SCHEMA_PATH_KEY]
+        typename = os.path.splitext(os.path.basename(bpy.path.abspath(schema_path)))[0]
+
+        orig_bbox = obj.get("wf_original_bbox", None)
+        if orig_bbox is not None and len(orig_bbox) == 6:
+            wf_local_min = (float(orig_bbox[0]), float(orig_bbox[1]), float(orig_bbox[2]))
+            wf_local_max = (float(orig_bbox[3]), float(orig_bbox[4]), float(orig_bbox[5]))
+        else:
+            corners_local = [obj.bound_box[i][:] for i in range(8)]
+            bl_local_min = [min(c[i] for c in corners_local) for i in range(3)]
+            bl_local_max = [max(c[i] for c in corners_local) for i in range(3)]
+            wf_lmn_x, wf_lmn_y, wf_lmn_z = bl_to_wf(bl_local_min[0], bl_local_min[1], bl_local_min[2])
+            wf_lmx_x, wf_lmx_y, wf_lmx_z = bl_to_wf(bl_local_max[0], bl_local_max[1], bl_local_max[2])
+            wf_local_min = (
+                min(wf_lmn_x, wf_lmx_x),
+                min(wf_lmn_y, wf_lmx_y),
+                min(wf_lmn_z, wf_lmx_z),
+            )
+            wf_local_max = (
+                max(wf_lmn_x, wf_lmx_x),
+                max(wf_lmn_y, wf_lmx_y),
+                max(wf_lmn_z, wf_lmx_z),
+            )
+
+        loc_vals = list(obj.matrix_world.to_translation())
+        rot_vals = list(obj.matrix_world.to_euler('XYZ'))
+        if obj.animation_data and obj.animation_data.action:
+            for bl_path, vals in (("location", loc_vals), ("rotation_euler", rot_vals)):
+                for idx in range(3):
+                    fc = obj.animation_data.action.fcurves.find(bl_path, index=idx)
+                    if fc and fc.keyframe_points:
+                        vals[idx] = fc.keyframe_points[0].co.y
+        wf_pos = bl_to_wf(loc_vals[0], loc_vals[1], loc_vals[2])
+        wf_rot = (rot_vals[0], rot_vals[1], rot_vals[2])
+
+        def fp(v):
+            return f"{v:.16f}(1.15.16)"
+
+        lines.append("\t{ 'OBJ' ")
+        lines.append(f'\t\t{{ \'NAME\' "{obj.name}" }}')
+
+        path_lines = _emit_path_block(obj, fp)
+        for pl in path_lines:
+            lines.append("\t\t" + pl)
+
+        lines.append(f"\t\t{{ 'VEC3' {{ 'NAME' \"Position\" }} {{ 'DATA' {fp(wf_pos[0])} {fp(wf_pos[1])} {fp(wf_pos[2])}  //x,y,z\n\t\t}} }}")
+        lines.append(f"\t\t{{ 'EULR' {{ 'NAME' \"Orientation\" }} {{ 'DATA' {fp(wf_rot[0])} {fp(wf_rot[1])} {fp(wf_rot[2])}  //a,b,c\n\t\t}} }}")
+        had_bbox = obj.get("wf_had_authored_bbox", None)
+        if had_bbox is not None:
+            should_emit_bbox = bool(had_bbox)
+        else:
+            should_emit_bbox = bool(obj.data and obj.data.polygons)
+        if should_emit_bbox:
+            lines.append(
+                f"\t\t{{ 'BOX3' {{ 'NAME' \"Global Bounding Box\" }} "
+                f"{{ 'DATA' {fp(wf_local_min[0])} {fp(wf_local_min[1])} {fp(wf_local_min[2])} "
+                f"{fp(wf_local_max[0])} {fp(wf_local_max[1])} {fp(wf_local_max[2])}  //min(x,y,z)-max(x,y,z)\n\t\t}} }}"
+            )
+        lines.append(f'\t\t{{ \'STR\' {{ \'NAME\' "Class Name" }} {{ \'DATA\' "{typename}" }} }}')
+
+        orig_mesh = obj.get("wf_original_mesh_name", None)
+        has_mesh = (orig_mesh != "") if orig_mesh is not None else (obj.data and obj.data.polygons)
+        mesh_filename = ""
+        model_type    = 0  # 0=None/Box
+        if has_mesh and obj.data and obj.data.polygons:
+            mesh_filename = (orig_mesh if orig_mesh else obj.name + ".iff").lower()
+            mesh_out = os.path.join(level_dir, mesh_filename)
+            if _write_mesh_iff(obj, mesh_out):
+                model_type = 1  # Mesh
+            else:
+                mesh_filename = ""
+
+        if has_mesh:
+            lines.append(f'\t\t{{ \'FILE\' {{ \'NAME\' "Mesh Name" }} {{ \'STR\' "{mesh_filename}" }} }}')
+            lines.append(f'\t\t{{ \'I32\'  {{ \'NAME\' "Model Type" }} {{ \'DATA\' {model_type}l }} {{ \'STR\' "{"Mesh" if model_type == 1 else "None"}" }} }}')
+
+        try:
+            resolved = bpy.path.abspath(schema_path)
+            schema = wf_core.load_schema(resolved)
+            for fl in _emit_lev_fields(obj, schema, fp):
+                lines.append("\t\t" + fl)
+        except Exception as e_oad:
+            import traceback
+            with open("/tmp/wf_export_errors.log", "a") as _ef:
+                _ef.write(f"[wf_export] {obj.name}: {e_oad}\n")
+                traceback.print_exc(file=_ef)
+
+        is_light = typename.lower() == "light"
+        if is_light:
+            if obj.type == 'LIGHT' and obj.data:
+                r, g, b = obj.data.color[0], obj.data.color[1], obj.data.color[2]
+                lt = 1 if obj.data.type == 'POINT' else 0
+            else:
+                r = float(obj.get(_prop_key("lightRed"), 1.0))
+                g = float(obj.get(_prop_key("lightGreen"), 1.0))
+                b = float(obj.get(_prop_key("lightBlue"), 1.0))
+                lt_raw = obj.get(_prop_key("lightType"), 0)
+                lt_map = {"directional": 0, "ambient": 1}
+                lt = lt_map.get(str(lt_raw).lower(), int(lt_raw) if str(lt_raw).isdigit() else 0)
+            lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightRed\" }} {{ 'DATA' {fp(r)} }} {{ 'STR' \"{r:f}\" }} }}")
+            lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightGreen\" }} {{ 'DATA' {fp(g)} }} {{ 'STR' \"{g:f}\" }} }}")
+            lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightBlue\" }} {{ 'DATA' {fp(b)} }} {{ 'STR' \"{b:f}\" }} }}")
+            lines.append(f"\t\t{{ 'I32' {{ 'NAME' \"lightType\" }} {{ 'DATA' {lt}l }} {{ 'STR' \"{'Ambient' if lt else 'Directional'}\" }} }}  //Directional|Ambient")
+
+        if obj.data and hasattr(obj.data, 'polygons') and obj.data.polygons:
+            mesh = obj.data
+            nx, ny, nz = 0.0, 0.0, 0.0
+            for poly in mesh.polygons:
+                nx += poly.normal.x
+                ny += poly.normal.y
+                nz += poly.normal.z
+            n = len(mesh.polygons)
+            if n > 0:
+                nx, ny, nz = nx/n, ny/n, nz/n
+                wf_a, wf_b, wf_c = bl_to_wf(nx, ny, nz)
+                loc = obj.matrix_world.to_translation()
+                wf_px, wf_py, wf_pz = bl_to_wf(loc.x, loc.y, loc.z)
+                wf_d = wf_a * wf_px + wf_b * wf_py + wf_c * wf_pz
+                lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeA\" }} {{ 'DATA' {fp(wf_a)} }} {{ 'STR' \"{wf_a:f}\" }} }}")
+                lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeB\" }} {{ 'DATA' {fp(wf_b)} }} {{ 'STR' \"{wf_b:f}\" }} }}")
+                lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeC\" }} {{ 'DATA' {fp(wf_c)} }} {{ 'STR' \"{wf_c:f}\" }} }}")
+                lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeD\" }} {{ 'DATA' {fp(wf_d)} }} {{ 'STR' \"{wf_d:f}\" }} }}")
+
+        lines.append("\t}")
+
+    lines.append("}")
+    text = "\n".join(lines) + "\n"
+
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(text)
+    except OSError as e:
+        return False, f"Cannot write file: {e}"
+
+    return True, f"Exported {len(objects)} objects to {filepath}"
+
+
 # ── export operator ───────────────────────────────────────────────────────────
 
 class WF_OT_export_level(bpy.types.Operator, ExportHelper):
@@ -917,204 +1067,10 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
     filter_glob: StringProperty(default="*.lev", options={'HIDDEN'})
 
     def execute(self, context):
-        objects = [o for o in context.scene.objects if o.get(SCHEMA_PATH_KEY)]
-        if not objects:
-            self.report({'WARNING'}, "No WF objects in scene (attach schemas first)")
-            return {'CANCELLED'}
-
-        lines = ["{ 'LVL' "]
-        for obj in objects:
-            schema_path = obj[SCHEMA_PATH_KEY]
-            # derive type name: strip directory, extension
-            typename = os.path.splitext(os.path.basename(bpy.path.abspath(schema_path)))[0]
-
-            # BOX3 is a LOCAL bbox (unrotated object-local frame).  Prefer
-            # the authored bbox from the source .lev (max2lev often emits
-            # bboxes wider than the mesh extent — collision authoring that
-            # the runtime depends on).  Fall back to mesh-local bbox for
-            # objects created in Blender with no round-trip history.
-            orig_bbox = obj.get("wf_original_bbox", None)
-            if orig_bbox is not None and len(orig_bbox) == 6:
-                wf_local_min = (float(orig_bbox[0]), float(orig_bbox[1]), float(orig_bbox[2]))
-                wf_local_max = (float(orig_bbox[3]), float(orig_bbox[4]), float(orig_bbox[5]))
-            else:
-                corners_local = [obj.bound_box[i][:] for i in range(8)]
-                bl_local_min = [min(c[i] for c in corners_local) for i in range(3)]
-                bl_local_max = [max(c[i] for c in corners_local) for i in range(3)]
-                wf_lmn_x, wf_lmn_y, wf_lmn_z = bl_to_wf(bl_local_min[0], bl_local_min[1], bl_local_min[2])
-                wf_lmx_x, wf_lmx_y, wf_lmx_z = bl_to_wf(bl_local_max[0], bl_local_max[1], bl_local_max[2])
-                wf_local_min = (
-                    min(wf_lmn_x, wf_lmx_x),
-                    min(wf_lmn_y, wf_lmx_y),
-                    min(wf_lmn_z, wf_lmx_z),
-                )
-                wf_local_max = (
-                    max(wf_lmn_x, wf_lmx_x),
-                    max(wf_lmn_y, wf_lmx_y),
-                    max(wf_lmn_z, wf_lmx_z),
-                )
-
-            # Object position (world-space origin → WF)
-            # For animated objects, Blender's evaluated transform at the
-            # current scene frame interpolates between keyframes — which
-            # drifts by the first-frame's interpolation delta if the scene
-            # is not sitting on frame 0.  The canonical Position is the
-            # transform at t=0 (first-keyframe value), matching how the
-            # engine resolves path-driven objects at load time.  Read
-            # from fcurves directly when they exist.
-            loc_vals = list(obj.matrix_world.to_translation())
-            rot_vals = list(obj.matrix_world.to_euler('XYZ'))
-            if obj.animation_data and obj.animation_data.action:
-                for bl_path, vals in (("location", loc_vals), ("rotation_euler", rot_vals)):
-                    for idx in range(3):
-                        fc = obj.animation_data.action.fcurves.find(bl_path, index=idx)
-                        if fc and fc.keyframe_points:
-                            vals[idx] = fc.keyframe_points[0].co.y
-            wf_pos = bl_to_wf(loc_vals[0], loc_vals[1], loc_vals[2])
-            wf_rot = (rot_vals[0], rot_vals[1], rot_vals[2])
-
-            def fp(v):
-                return f"{v:.16f}(1.15.16)"
-
-            lines.append("\t{ 'OBJ' ")
-            lines.append(f'\t\t{{ \'NAME\' "{obj.name}" }}')
-
-            # PATH block — animation keyframes (max2lev/max2lev.cc:158-306)
-            # Emitted before VEC3/EULR, matching the original .lev layout.
-            path_lines = _emit_path_block(obj, fp)
-            for pl in path_lines:
-                lines.append("\t\t" + pl)
-
-            lines.append(f"\t\t{{ 'VEC3' {{ 'NAME' \"Position\" }} {{ 'DATA' {fp(wf_pos[0])} {fp(wf_pos[1])} {fp(wf_pos[2])}  //x,y,z\n\t\t}} }}")
-            lines.append(f"\t\t{{ 'EULR' {{ 'NAME' \"Orientation\" }} {{ 'DATA' {fp(wf_rot[0])} {fp(wf_rot[1])} {fp(wf_rot[2])}  //a,b,c\n\t\t}} }}")
-            # Emit BOX3 only if the source .lev had one.  max2lev's
-            # process_bounding_box (max2lev.cc:374) gates BOX3 on
-            # `os.obj->SuperClassID() == GEOMOBJECT_CLASS_ID`, so
-            # abstract actors (camera, director, camshot, matte, …)
-            # don't get a BOX3 — iff2lvl fills in default (0,0,0)-(0,0,0)
-            # which `expand_thin_bbox` turns into (-0.25,-0.25,-0.25)-
-            # (0,0,0).  `wf_had_authored_bbox` stashed at import time
-            # is our faithful record of "did max2lev emit a BOX3."
-            # Fall back to "has any polygons" for objects newly
-            # created in Blender without a round-trip history.
-            had_bbox = obj.get("wf_had_authored_bbox", None)
-            if had_bbox is not None:
-                should_emit_bbox = bool(had_bbox)
-            else:
-                should_emit_bbox = bool(obj.data and obj.data.polygons)
-            if should_emit_bbox:
-                lines.append(
-                    f"\t\t{{ 'BOX3' {{ 'NAME' \"Global Bounding Box\" }} "
-                    f"{{ 'DATA' {fp(wf_local_min[0])} {fp(wf_local_min[1])} {fp(wf_local_min[2])} "
-                    f"{fp(wf_local_max[0])} {fp(wf_local_max[1])} {fp(wf_local_max[2])}  //min(x,y,z)-max(x,y,z)\n\t\t}} }}"
-                )
-            lines.append(f'\t\t{{ \'STR\' {{ \'NAME\' "Class Name" }} {{ \'DATA\' "{typename}" }} }}')
-
-            # Mesh geometry — export .iff only when the source .lev had a
-            # Mesh Name.  The importer synthesizes a bbox cube for abstract
-            # actors (camera, director, matte…); we must not re-emit those
-            # as meshes on round-trip.
-            level_dir = os.path.dirname(self.filepath)
-            orig_mesh = obj.get("wf_original_mesh_name", None)
-            has_mesh = (orig_mesh != "") if orig_mesh is not None else (obj.data and obj.data.polygons)
-            mesh_filename = ""
-            model_type    = 0  # 0=None/Box
-            if has_mesh and obj.data and obj.data.polygons:
-                # Prefer the source .lev's Mesh Name (preserves the oracle's
-                # filename case); only synthesize `<obj.name>.iff` for
-                # objects newly created in Blender. Then lowercase —
-                # iff2lvl's binary ASMP is always lowercase (it `strlwr()`s
-                # at `iff2lvl/level2.cc:220-222`), so emitting anything
-                # else creates a capitalized-duplicate file that sits
-                # unreferenced next to the real one. See oracle-deps plan
-                # (Natural ASMP order section) for the lowercase policy.
-                mesh_filename = (orig_mesh if orig_mesh else obj.name + ".iff").lower()
-                mesh_out = os.path.join(level_dir, mesh_filename)
-                if _write_mesh_iff(obj, mesh_out):
-                    model_type = 1  # Mesh
-                else:
-                    self.report({'WARNING'}, f"{obj.name}: mesh export failed")
-                    mesh_filename = ""
-
-            if has_mesh:
-                lines.append(f'\t\t{{ \'FILE\' {{ \'NAME\' "Mesh Name" }} {{ \'STR\' "{mesh_filename}" }} }}')
-                lines.append(f'\t\t{{ \'I32\'  {{ \'NAME\' "Model Type" }} {{ \'DATA\' {model_type}l }} {{ \'STR\' "{"Mesh" if model_type == 1 else "None"}" }} }}')
-
-            # OAD fields — walk the schema and emit every stored property
-            # as text-IFF chunks matching the .lev format that iff2lvl and
-            # levcomp-rs consume.
-            try:
-                resolved = bpy.path.abspath(schema_path)
-                schema = wf_core.load_schema(resolved)
-                for fl in _emit_lev_fields(obj, schema, fp):
-                    lines.append("\t\t" + fl)
-            except Exception as e_oad:
-                import traceback
-                with open("/tmp/wf_export_errors.log", "a") as _ef:
-                    _ef.write(f"[wf_export] {obj.name}: {e_oad}\n")
-                    traceback.print_exc(file=_ef)
-                self.report({'WARNING'}, f"{obj.name}: OAD export error: {e_oad}")
-
-            # ── max2lev-injected specials ─────────────────────────────
-            # These fields are NOT in the OAD schema — max2lev injects
-            # them by reading 3DS Max scene data.  We do the Blender
-            # equivalent here.
-
-            # Light properties (max2lev/oadobj.cc:289-393)
-            # Detect lights by class name since the importer creates them
-            # as mesh/empty objects, not Blender LIGHT objects.
-            is_light = typename.lower() == "light"
-            if is_light:
-                if obj.type == 'LIGHT' and obj.data:
-                    r, g, b = obj.data.color[0], obj.data.color[1], obj.data.color[2]
-                    lt = 1 if obj.data.type == 'POINT' else 0
-                else:
-                    # Imported as mesh/empty — use stored OAD values or defaults
-                    r = float(obj.get(_prop_key("lightRed"), 1.0))
-                    g = float(obj.get(_prop_key("lightGreen"), 1.0))
-                    b = float(obj.get(_prop_key("lightBlue"), 1.0))
-                    lt_raw = obj.get(_prop_key("lightType"), 0)
-                    lt_map = {"directional": 0, "ambient": 1}
-                    lt = lt_map.get(str(lt_raw).lower(), int(lt_raw) if str(lt_raw).isdigit() else 0)
-                lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightRed\" }} {{ 'DATA' {fp(r)} }} {{ 'STR' \"{r:f}\" }} }}")
-                lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightGreen\" }} {{ 'DATA' {fp(g)} }} {{ 'STR' \"{g:f}\" }} }}")
-                lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightBlue\" }} {{ 'DATA' {fp(b)} }} {{ 'STR' \"{b:f}\" }} }}")
-                lines.append(f"\t\t{{ 'I32' {{ 'NAME' \"lightType\" }} {{ 'DATA' {lt}l }} {{ 'STR' \"{'Ambient' if lt else 'Directional'}\" }} }}  //Directional|Ambient")
-
-            # Slope plane coefficients (max2lev/oadobj.cc:410-480)
-            if obj.data and hasattr(obj.data, 'polygons') and obj.data.polygons:
-                mesh = obj.data
-                nx, ny, nz = 0.0, 0.0, 0.0
-                for poly in mesh.polygons:
-                    nx += poly.normal.x
-                    ny += poly.normal.y
-                    nz += poly.normal.z
-                n = len(mesh.polygons)
-                if n > 0:
-                    nx, ny, nz = nx/n, ny/n, nz/n
-                    wf_a, wf_b, wf_c = bl_to_wf(nx, ny, nz)
-                    loc = obj.matrix_world.to_translation()
-                    wf_px, wf_py, wf_pz = bl_to_wf(loc.x, loc.y, loc.z)
-                    wf_d = wf_a * wf_px + wf_b * wf_py + wf_c * wf_pz
-                    lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeA\" }} {{ 'DATA' {fp(wf_a)} }} {{ 'STR' \"{wf_a:f}\" }} }}")
-                    lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeB\" }} {{ 'DATA' {fp(wf_b)} }} {{ 'STR' \"{wf_b:f}\" }} }}")
-                    lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeC\" }} {{ 'DATA' {fp(wf_c)} }} {{ 'STR' \"{wf_c:f}\" }} }}")
-                    lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeD\" }} {{ 'DATA' {fp(wf_d)} }} {{ 'STR' \"{wf_d:f}\" }} }}")
-
-            lines.append("\t}")
-
-        lines.append("}")
-        text = "\n".join(lines) + "\n"
-
-        try:
-            with open(self.filepath, 'w', encoding='utf-8') as f:
-                f.write(text)
-        except OSError as e:
-            self.report({'ERROR'}, f"Cannot write file: {e}")
-            return {'CANCELLED'}
-
-        self.report({'INFO'}, f"Exported {len(objects)} objects to {self.filepath}")
-        return {'FINISHED'}
+        ok, msg = export_scene_to_lev(context, self.filepath)
+        level = 'INFO' if ok else 'WARNING'
+        self.report({level}, msg)
+        return {'FINISHED'} if ok else {'CANCELLED'}
 
 
 def _corner(obj, i):

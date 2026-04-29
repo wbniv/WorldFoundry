@@ -606,6 +606,104 @@ class WF_OT_detect_script_language(bpy.types.Operator):
         return {'FINISHED'}
 
 
+# ── repo-root detection ───────────────────────────────────────────────────────
+
+def _find_repo_root(start: str) -> str | None:
+    """Walk up from start looking for Taskfile.yml; return its directory or None."""
+    import os
+    d = os.path.abspath(start)
+    for _ in range(10):
+        if os.path.isfile(os.path.join(d, "Taskfile.yml")):
+            return d
+        parent = os.path.dirname(d)
+        if parent == d:
+            break
+        d = parent
+    return None
+
+
+# ── WF_OT_run_level ───────────────────────────────────────────────────────────
+
+class WF_OT_run_level(bpy.types.Operator):
+    """Export current scene, build level binary, and launch wf_game"""
+    bl_idname  = "wf.run_level"
+    bl_label   = "Run in Engine"
+    bl_options = {'REGISTER'}
+
+    def execute(self, context):
+        import subprocess
+        import os
+        from pathlib import Path
+        from . import export_level as _el
+
+        blend_path = bpy.data.filepath
+        if not blend_path:
+            self.report({'ERROR'}, "Save the .blend file first")
+            return {'CANCELLED'}
+
+        scene      = context.scene
+        level_name = scene.wf_level_name or Path(blend_path).stem
+
+        prefs     = context.preferences.addons[__package__].preferences
+        repo_root = prefs.repo_root or _find_repo_root(os.path.dirname(blend_path))
+        if not repo_root:
+            self.report({'ERROR'},
+                "Cannot find repo root (Taskfile.yml). "
+                "Set it in Edit > Preferences > Add-ons > World Foundry.")
+            return {'CANCELLED'}
+
+        lev_path  = os.path.join(repo_root, "wflevels", level_name, f"{level_name}.lev")
+        iff_path  = os.path.join(repo_root, "wflevels", f"{level_name}.iff")
+        build_sh  = os.path.join(repo_root, "wftools", "wf_blender", "build_level_binary.sh")
+        game_bin  = os.path.join(repo_root, "engine", "wf_game")
+        libs_path = os.path.join(repo_root, "engine", "libs")
+
+        for path, label in [(build_sh, "build_level_binary.sh"), (game_bin, "engine/wf_game")]:
+            if not os.path.isfile(path):
+                self.report({'ERROR'}, f"Not found: {label} ({path})")
+                return {'CANCELLED'}
+
+        wm = context.window_manager
+        wm.progress_begin(0, 3)
+
+        self.report({'INFO'}, f"[1/3] Exporting {level_name}.lev ...")
+        wm.progress_update(1)
+        ok, msg = _el.export_scene_to_lev(context, lev_path)
+        if not ok:
+            self.report({'ERROR'}, f"Export failed: {msg}")
+            wm.progress_end()
+            return {'CANCELLED'}
+
+        self.report({'INFO'}, f"[2/3] Building {level_name}.iff ...")
+        wm.progress_update(2)
+        result = subprocess.run(
+            ["bash", build_sh, level_name],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            self.report({'ERROR'}, f"Build failed: {result.stderr[-400:]}")
+            wm.progress_end()
+            return {'CANCELLED'}
+
+        self.report({'INFO'}, f"[3/3] Launching wf_game ...")
+        wm.progress_update(3)
+        env = os.environ.copy()
+        env["LD_LIBRARY_PATH"] = libs_path
+        env.setdefault("DISPLAY", ":0")
+        subprocess.Popen(
+            [game_bin, f"-L{iff_path}"],
+            cwd=repo_root,
+            env=env,
+            start_new_session=True,
+        )
+
+        wm.progress_end()
+        self.report({'INFO'}, f"Launched {level_name} — Blender stays open")
+        return {'FINISHED'}
+
+
 _CLASSES = [
     WF_OT_attach_schema,
     WF_OT_detach_schema,
@@ -620,6 +718,7 @@ _CLASSES = [
     WF_OT_import_iff_txt,
     WF_OT_export_iff,
     WF_OT_import_iff,
+    WF_OT_run_level,
 ]
 
 

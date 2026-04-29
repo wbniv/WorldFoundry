@@ -62,6 +62,13 @@ from . import asset_browser  # noqa: E402
 class WF_AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
+    repo_root: bpy.props.StringProperty(
+        name="Repo Root",
+        description="Path to WorldFoundry repo root. Leave blank to auto-detect from .blend location.",
+        subtype='DIR_PATH',
+        default="",
+    )
+
     sketchfab_api_key: StringProperty(
         name="Sketchfab API Key",
         description="Bearer token from sketchfab.com/settings#api-token. Required for downloading Sketchfab assets.",
@@ -71,6 +78,7 @@ class WF_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
+        layout.prop(self, "repo_root")
         layout.prop(self, "sketchfab_api_key")
         layout.label(
             text="Get your token at: sketchfab.com/settings#api-token",
@@ -92,6 +100,11 @@ def register():
         return
 
     bpy.utils.register_class(WF_AddonPreferences)
+    bpy.types.Scene.wf_level_name = bpy.props.StringProperty(
+        name="Level Name",
+        description="Level directory name under wflevels/ (defaults to .blend filename stem)",
+        default="",
+    )
     operators.register()
     panels.register()
     export_level.register()
@@ -104,4 +117,5 @@ def unregister():
         export_level.unregister()
         panels.unregister()
         operators.unregister()
+        del bpy.types.Scene.wf_level_name
         bpy.utils.unregister_class(WF_AddonPreferences)
