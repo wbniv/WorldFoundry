@@ -29,6 +29,8 @@
 // Level + Actor API
 #include "level.hp"
 #include "actor.hp"
+#include <physics/physicalobject.hp>
+#include <cstddef>
 
 //=============================================================================
 // Minimal JSON helpers
@@ -108,16 +110,84 @@ static std::atomic<int>  gStepN   { 0 };
 //=============================================================================
 // Session change log (game-thread only — accessed exclusively in DrainQueue)
 //
-// gOriginals: per-actor pre-session state (for revert_all)
-// gChangeStack: ordered history of pre-change values (for undo_step)
+// gOriginals:     per-actor pre-session transform (for revert_all)
+// gChangeStack:   ordered history of all changes (transform + prop) for undo_step
+// gPropOriginals: per-(block, field) first-seen value, for revert_all
 
 struct ChangeRecord {
+    enum Kind { TRANSFORM, PROP } kind;
     int   actor_idx;
-    float px, py, pz;   // value BEFORE this change was applied
+    // TRANSFORM:
+    float px, py, pz;
+    // PROP:
+    char*  block;
+    size_t field_offset;
+    int32  old_raw;
 };
 
-static std::unordered_map<int, ChangeRecord> gOriginals;
-static std::vector<ChangeRecord>             gChangeStack;
+// Key into gPropOriginals: the exact memory address of a specific field.
+struct PropKey {
+    char*  block;
+    size_t field_offset;
+    bool operator==(const PropKey& o) const {
+        return block == o.block && field_offset == o.field_offset;
+    }
+};
+struct PropKeyHash {
+    size_t operator()(const PropKey& k) const {
+        size_t h = std::hash<char*>()(k.block);
+        h ^= std::hash<size_t>()(k.field_offset) + 0x9e3779b9u + (h << 6) + (h >> 2);
+        return h;
+    }
+};
+
+static std::unordered_map<int, ChangeRecord>              gOriginals;
+static std::vector<ChangeRecord>                          gChangeStack;
+static std::unordered_map<PropKey, int32, PropKeyHash>    gPropOriginals;
+
+// ── Property map (block + field → offset + type) ─────────────────────────────
+
+struct PropInfo {
+    enum Block { COMMON, MOVEBLOC, MESH } block;
+    size_t field_offset;
+    bool   is_fixed32;
+};
+
+static const std::unordered_map<std::string, PropInfo> kPropMap = {
+    // common block
+    {"common.hp",                     {PropInfo::COMMON,   offsetof(_Common,   hp),                    true }},
+    {"common.Script",                 {PropInfo::COMMON,   offsetof(_Common,   Script),                false}},
+    {"common.NumberOfLocalMailboxes", {PropInfo::COMMON,   offsetof(_Common,   NumberOfLocalMailboxes), false}},
+    {"common.WriteToMailboxOnDeath",  {PropInfo::COMMON,   offsetof(_Common,   WriteToMailboxOnDeath),  false}},
+    // movebloc block
+    {"movebloc.Mass",                 {PropInfo::MOVEBLOC, offsetof(_Movement, Mass),                  true }},
+    {"movebloc.MaxGroundSpeed",       {PropInfo::MOVEBLOC, offsetof(_Movement, MaxGroundSpeed),        true }},
+    {"movebloc.RunningAcceleration",  {PropInfo::MOVEBLOC, offsetof(_Movement, RunningAcceleration),   true }},
+    {"movebloc.JumpingAcceleration",  {PropInfo::MOVEBLOC, offsetof(_Movement, JumpingAcceleration),   true }},
+    {"movebloc.FallingAcceleration",  {PropInfo::MOVEBLOC, offsetof(_Movement, FallingAcceleration),   true }},
+    {"movebloc.StepSize",             {PropInfo::MOVEBLOC, offsetof(_Movement, StepSize),              true }},
+    {"movebloc.Mobility",             {PropInfo::MOVEBLOC, offsetof(_Movement, Mobility),              false}},
+    {"movebloc.MovementClass",        {PropInfo::MOVEBLOC, offsetof(_Movement, MovementClass),         false}},
+    // mesh block
+    {"mesh.ModelType",                {PropInfo::MESH,     offsetof(_Mesh,     ModelType),             false}},
+    {"mesh.AnimationMailbox",         {PropInfo::MESH,     offsetof(_Mesh,     AnimationMailbox),      false}},
+    {"mesh.VisibilityMailbox",        {PropInfo::MESH,     offsetof(_Mesh,     VisibilityMailbox),     false}},
+};
+
+// Return a mutable pointer to the named sub-block, or nullptr if unavailable.
+static char* debug_get_block(Actor* actor, PropInfo::Block block_id)
+{
+    const void* ptr = nullptr;
+    switch (block_id) {
+        case PropInfo::COMMON:   ptr = actor->GetCommonBlockPtr();    break;
+        case PropInfo::MOVEBLOC: ptr = actor->GetMovementBlockPtr();  break;
+        case PropInfo::MESH:     ptr = actor->GetMeshBlockPtr();      break;
+    }
+    if (!ptr) return nullptr;
+    // The underlying storage is heap-allocated char[] (not truly const).
+    // The existing engine code already strips const via C-style casts in .hpi files.
+    return const_cast<char*>(static_cast<const char*>(ptr));
+}
 
 //=============================================================================
 // Pending update queue
@@ -342,6 +412,7 @@ void DebugServer_Stop()
     if (gListenerThread.joinable()) gListenerThread.join();
     gOriginals.clear();
     gChangeStack.clear();
+    gPropOriginals.clear();
 }
 
 bool DebugServer_IsPaused()
@@ -372,10 +443,13 @@ void DebugServer_DrainQueue(Level& level)
 
         if (u.kind == PendingUpdate::SET_TRANSFORM && actor) {
             const Vector3& cur = actor->currentPos();
-            ChangeRecord rec { u.actor_idx,
-                               cur.X().AsFloat(),
-                               cur.Y().AsFloat(),
-                               cur.Z().AsFloat() };
+            ChangeRecord rec;
+            rec.kind     = ChangeRecord::TRANSFORM;
+            rec.actor_idx = u.actor_idx;
+            rec.px = cur.X().AsFloat();
+            rec.py = cur.Y().AsFloat();
+            rec.pz = cur.Z().AsFloat();
+            rec.block = nullptr; rec.field_offset = 0; rec.old_raw = 0;
             // Save pre-session original on first touch
             if (gOriginals.find(u.actor_idx) == gOriginals.end())
                 gOriginals[u.actor_idx] = rec;
@@ -386,16 +460,41 @@ void DebugServer_DrainQueue(Level& level)
                         Scalar::FromDouble((double)u.pz));
             actor->setCurrentPos(pos);
 
-        } else if (u.kind == PendingUpdate::SET_PROP) {
-            // Phase 1: OAD property writes are acknowledged but not yet applied.
-            // Phase 2 will wire directly into the OAD block once the property
-            // name→offset map is established.
-            std::string msg = "{\"op\":\"log\",\"level\":\"info\","
-                + json_int("idx", u.actor_idx) + ","
-                + json_str("msg", "scene:set_prop queued (Phase 2b): " + u.key)
-                + "}\n";
-            std::lock_guard<std::mutex> lk(gQueueMutex);
-            send_all_locked(msg);
+        } else if (u.kind == PendingUpdate::SET_PROP && actor) {
+            auto pit = kPropMap.find(u.key);
+            if (pit == kPropMap.end()) {
+                std::string errmsg = "{\"op\":\"error\","
+                    + json_str("msg", "unknown property: " + u.key) + ","
+                    + json_int("idx", u.actor_idx) + "}\n";
+                std::lock_guard<std::mutex> lk(gQueueMutex);
+                send_all_locked(errmsg);
+            } else {
+                const PropInfo& info = pit->second;
+                char* block = debug_get_block(actor, info.block);
+                if (block) {
+                    int32 old_raw = *reinterpret_cast<const int32*>(block + info.field_offset);
+                    int32 new_raw = info.is_fixed32
+                        ? static_cast<int32>(u.value * 65536.0)
+                        : static_cast<int32>(u.value);
+
+                    // Record pre-session original (first touch only)
+                    PropKey pk { block, info.field_offset };
+                    if (gPropOriginals.find(pk) == gPropOriginals.end())
+                        gPropOriginals[pk] = old_raw;
+
+                    ChangeRecord rec;
+                    rec.kind         = ChangeRecord::PROP;
+                    rec.actor_idx    = u.actor_idx;
+                    rec.px = rec.py = rec.pz = 0.f;
+                    rec.block        = block;
+                    rec.field_offset = info.field_offset;
+                    rec.old_raw      = old_raw;
+                    gChangeStack.push_back(rec);
+
+                    // In-place write — same pattern as actor.hpi C-style casts.
+                    *reinterpret_cast<int32*>(block + info.field_offset) = new_raw;
+                }
+            }
 
         } else if (u.kind == PendingUpdate::PICK) {
             // Find actor whose position is closest to the ray (within 2 units).
@@ -429,18 +528,23 @@ void DebugServer_DrainQueue(Level& level)
         } else if (u.kind == PendingUpdate::UNDO_STEP) {
             if (!gChangeStack.empty()) {
                 const ChangeRecord& r = gChangeStack.back();
-                BaseObject* bo2 = level.GetObject(r.actor_idx);
-                Actor* a = bo2 ? dynamic_cast<Actor*>(bo2) : nullptr;
-                if (a) {
-                    Vector3 prev(Scalar::FromDouble(r.px),
-                                 Scalar::FromDouble(r.py),
-                                 Scalar::FromDouble(r.pz));
-                    a->setCurrentPos(prev);
+                if (r.kind == ChangeRecord::TRANSFORM) {
+                    BaseObject* bo2 = level.GetObject(r.actor_idx);
+                    Actor* a = bo2 ? dynamic_cast<Actor*>(bo2) : nullptr;
+                    if (a) {
+                        Vector3 prev(Scalar::FromDouble(r.px),
+                                     Scalar::FromDouble(r.py),
+                                     Scalar::FromDouble(r.pz));
+                        a->setCurrentPos(prev);
+                    }
+                } else if (r.kind == ChangeRecord::PROP && r.block) {
+                    *reinterpret_cast<int32*>(r.block + r.field_offset) = r.old_raw;
                 }
                 gChangeStack.pop_back();
             }
 
         } else if (u.kind == PendingUpdate::REVERT_ALL) {
+            // Restore transform originals
             for (auto& kv : gOriginals) {
                 BaseObject* bo2 = level.GetObject(kv.first);
                 Actor* a = bo2 ? dynamic_cast<Actor*>(bo2) : nullptr;
@@ -453,6 +557,11 @@ void DebugServer_DrainQueue(Level& level)
                 }
             }
             gOriginals.clear();
+            // Restore property originals
+            for (auto& kv : gPropOriginals) {
+                *reinterpret_cast<int32*>(kv.first.block + kv.first.field_offset) = kv.second;
+            }
+            gPropOriginals.clear();
             gChangeStack.clear();
             std::lock_guard<std::mutex> lk(gQueueMutex);
             send_all_locked("{\"op\":\"reverted\"}\n");

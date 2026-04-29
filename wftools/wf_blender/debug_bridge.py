@@ -52,6 +52,9 @@ class DebugBridge:
         self.error: str = ""
         # Phase 3: change log — list of {"idx": int, "name": str} in apply order
         self.change_log: list = []
+        # Phase 2b: per-object property snapshot for change detection
+        # { obj_name: { prop_key: last_sent_value } }
+        self.prop_snapshots: dict[str, dict] = {}
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -88,6 +91,7 @@ class DebugBridge:
         if self._thread and self._thread.is_alive():
             self._thread.join(timeout=2.0)
         self._thread = None
+        self.prop_snapshots.clear()
 
     def send(self, msg: dict):
         line = json.dumps(msg, separators=(',', ':')) + '\n'
@@ -197,6 +201,7 @@ class DebugBridge:
             self.is_paused = False
         elif op == "reverted":
             self.change_log.clear()
+            self.prop_snapshots.clear()
         elif op == "picked":
             self.last_picked_idx = msg.get("idx", -1)
             if self.last_picked_idx >= 0:

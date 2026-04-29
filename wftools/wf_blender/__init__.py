@@ -91,6 +91,27 @@ class WF_AddonPreferences(bpy.types.AddonPreferences):
         row.prop(self, "debug_port")
 
 
+# Mapping from Blender custom property key → engine "block.field" key.
+# Mirrors kPropMap in engine/stubs/debug_server.cc — keep in sync.
+_ENGINE_PROP_KEY: dict[str, str] = {
+    "wf_hp":                     "common.hp",
+    "wf_Script":                 "common.Script",
+    "wf_NumberOfLocalMailboxes": "common.NumberOfLocalMailboxes",
+    "wf_WriteToMailboxOnDeath":  "common.WriteToMailboxOnDeath",
+    "wf_Mass":                   "movebloc.Mass",
+    "wf_MaxGroundSpeed":         "movebloc.MaxGroundSpeed",
+    "wf_RunningAcceleration":    "movebloc.RunningAcceleration",
+    "wf_JumpingAcceleration":    "movebloc.JumpingAcceleration",
+    "wf_FallingAcceleration":    "movebloc.FallingAcceleration",
+    "wf_StepSize":               "movebloc.StepSize",
+    "wf_Mobility":               "movebloc.Mobility",
+    "wf_MovementClass":          "movebloc.MovementClass",
+    "wf_ModelType":              "mesh.ModelType",
+    "wf_AnimationMailbox":       "mesh.AnimationMailbox",
+    "wf_VisibilityMailbox":      "mesh.VisibilityMailbox",
+}
+
+
 def _depsgraph_handler(scene, depsgraph):
     """Push transform/property deltas to the debug bridge on scene update."""
     bridge = debug_bridge.get_bridge()
@@ -110,6 +131,15 @@ def _depsgraph_handler(scene, depsgraph):
         if update.is_updated_transform:
             p = obj.location
             bridge.set_transform(idx, [p.x, p.y, p.z])
+        # Detect WF property changes by comparing against per-object snapshot.
+        snap = bridge.prop_snapshots.setdefault(obj.name, {})
+        for prop_key, engine_key in _ENGINE_PROP_KEY.items():
+            current = obj.get(prop_key)
+            if current is None:
+                continue
+            if snap.get(prop_key) != current:
+                snap[prop_key] = current
+                bridge.set_prop(idx, engine_key, float(current))
 
 
 def register():

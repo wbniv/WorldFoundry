@@ -1,7 +1,7 @@
 # Plan: Live Editor Bridge — play-in-editor, scene debugger, remote device debug
 
 **Date:** 2026-04-29
-**Status:** Phase 1 implemented. Phase 1.5 is analysis; Phase 2 redesign follows.
+**Status:** Phases 1, 1.5, 2a, 2b, 3 implemented.
 **Related:** `docs/plans/2026-04-29-blender-run-operator.md`, `docs/investigations/2026-04-29-blender-game-engine-removal.md`
 
 ---
@@ -315,20 +315,22 @@ sequenceDiagram
     Note over B: crate_02 highlighted\nin viewport + outliner
 ```
 
-### Property writes wired to OAD block (copy-on-write)
+### Property writes wired to OAD block — IMPLEMENTED 2026-04-29
 
-Phase 1 acknowledges `scene:set_prop` but doesn't apply it.
+`scene:set_prop` now applies immediately using an in-place write into the CommonBlock's shared memory. The write uses the same `const_cast` pattern that `actor.hpi` itself uses (C-style cast to `_Actor*`).
 
-The key complication: OAD block data (`_oadData`, `CommonBlock::_commonBlockBase`) is shared read-only memory loaded from the IFF. Many actors with the same OAD values share the same underlying page — it's a flyweight compression scheme that works both on disk and in RAM. Writing into a shared page would corrupt every other actor that points to it.
+**Why in-place (not full COW):** true COW requires patching the `pageOffset` inside `_Actor` to point to a fresh allocation outside the CommonBlock, which in turn requires extending the `DebugServer` to know the CommonBlock base address and manage a bridge-local memory pool. For a debug tool, in-place writes are sufficient — if two actors share the same OAD page (dedup hit), they both get the change simultaneously, which is typically fine when tuning a class of objects. Full COW can be added in a later phase.
 
-Phase 2 must implement **copy-on-write** for bridge-modified actors:
+**Field resolution** uses a static `kPropMap` (`std::unordered_map<std::string, PropInfo>`) keyed on the engine-side `"block.field"` string. `PropInfo` stores:
+- `block`: which accessor to call (`GetCommonBlockPtr()` / `GetMovementBlockPtr()` / `GetMeshBlockPtr()`)
+- `field_offset`: `offsetof(_Common, hp)` etc. — correct because all data members in the `.ht` structs are `int32` / `fixed32` (no padding)
+- `is_fixed32`: true → multiply incoming float by 65536 before writing; false → truncate to `int32`
 
-1. On the first `scene:set_prop` for an actor, allocate a fresh copy of its OAD block (from `HALLmalloc` or a dedicated bridge pool).
-2. Update `_oadData` and `CommonBlock::_commonBlockBase` on that actor to point to the new copy.
-3. Write the new property value at the correct byte offset (derived from the OAD struct layout, which is available from the exported `.ht` file).
-4. Values take effect on the next frame without any reconstruction.
+Current map covers: `common.{hp,Script,NumberOfLocalMailboxes,WriteToMailboxOnDeath}`, `movebloc.{Mass,MaxGroundSpeed,RunningAcceleration,JumpingAcceleration,FallingAcceleration,StepSize,Mobility,MovementClass}`, `mesh.{ModelType,AnimationMailbox,VisibilityMailbox}`.
 
-Track which actors have been COW-copied so they can be freed on session end or level reload. Properties that have been modified are flagged as "bridge-overridden" so the game can detect unsaved state.
+**Undo / revert** extended: `gChangeStack` and `gPropOriginals` now track both TRANSFORM and PROP changes. `undo_step` restores the last entry of either kind; `revert_all` restores all transform originals AND all property originals.
+
+**Blender side:** `__init__.py` maintains a per-object property snapshot (`bridge.prop_snapshots`). On each `depsgraph_update_post`, any `wf_*` custom property that differs from the snapshot is sent via `bridge.set_prop(idx, engine_key, value)`. The `_ENGINE_PROP_KEY` dict maps Blender property keys to engine keys and mirrors `kPropMap`.
 
 ### Physics visualization in Blender viewport
 
