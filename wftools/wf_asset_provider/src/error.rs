@@ -30,4 +30,7 @@ pub enum AssetError {
 
     #[error("provider {provider:?} failed after retries: {message}")]
     ProviderFailed { provider: String, message: String },
+
+    #[error("authentication required for {provider}: set your API key in Add-on Preferences (Edit → Preferences → Add-ons → World Foundry)")]
+    AuthRequired { provider: String },
 }

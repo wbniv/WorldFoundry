@@ -7,10 +7,32 @@ use pyo3::prelude::*;
 use std::path::Path;
 
 use crate::candidate::AssetCandidate;
+use crate::credentials::Credentials;
 use crate::licence::LicenceId;
 use crate::manifest::Manifest;
 use crate::policy::{self, Policy};
 use crate::providers;
+
+// ── Credentials ──────────────────────────────────────────────────────────────
+
+#[pyclass(name = "Credentials")]
+#[derive(Clone)]
+pub struct PyCredentials {
+    inner: Credentials,
+}
+
+#[pymethods]
+impl PyCredentials {
+    #[getter]
+    fn sketchfab_api_key(&self) -> Option<&str> {
+        self.inner.sketchfab_api_key.as_deref()
+    }
+
+    fn __repr__(&self) -> String {
+        let has_key = self.inner.sketchfab_api_key.is_some();
+        format!("Credentials(sketchfab_api_key={})", if has_key { "<set>" } else { "None" })
+    }
+}
 
 // ── Python-visible types ─────────────────────────────────────────────────────
 
@@ -100,6 +122,20 @@ impl PyManifest {
 
 // ── Python functions ──────────────────────────────────────────────────────────
 
+/// Build a `Credentials` object from individual API keys.
+///
+/// Pass `sketchfab_api_key` from the Blender add-on preferences.
+/// Any key that is `None` (or an empty string) is treated as absent.
+#[pyfunction]
+#[pyo3(signature = (sketchfab_api_key=None))]
+fn make_credentials(sketchfab_api_key: Option<String>) -> PyCredentials {
+    PyCredentials {
+        inner: Credentials {
+            sketchfab_api_key: sketchfab_api_key.filter(|s| !s.is_empty()),
+        },
+    }
+}
+
 /// Load `licence_policy.toml` by walking up from `blend_dir`.
 ///
 /// Returns a `Policy` object.  If no file is found or the file is malformed,
@@ -117,21 +153,24 @@ fn load_policy(blend_dir: &str) -> PyResult<PyPolicy> {
 /// Search all (or a subset of) providers for assets matching `query`.
 ///
 /// `providers`: list of provider slugs to query; pass empty list for all.
+/// `credentials`: optional `Credentials` object for authenticated providers.
 /// Returns list of `AssetCandidate` objects, policy-filtered.
 #[pyfunction]
-#[pyo3(signature = (query, policy, providers=None, limit=50))]
+#[pyo3(signature = (query, policy, credentials=None, providers=None, limit=50))]
 fn search(
     query: &str,
     policy: &PyPolicy,
+    credentials: Option<&PyCredentials>,
     providers: Option<Vec<String>>,
     limit: usize,
 ) -> PyResult<Vec<PyAssetCandidate>> {
+    let creds = credentials.map(|c| c.inner.clone()).unwrap_or_default();
     let provider_list = match providers {
         Some(ref names) if !names.is_empty() => {
             let slices: Vec<&str> = names.iter().map(|s| s.as_str()).collect();
-            crate::providers::providers_by_name(&slices)
+            crate::providers::providers_by_name(&slices, &creds)
         }
-        _ => crate::providers::all_providers(),
+        _ => crate::providers::all_providers(&creds),
     };
 
     let mut results = Vec::new();
@@ -153,10 +192,13 @@ fn search(
 
 /// Download `candidate` to `dest_dir/<provider>/<asset-id>/`.
 ///
+/// `credentials`: optional `Credentials` for authenticated providers (e.g. Sketchfab).
 /// Returns `(asset_path_str, manifest)`.
 #[pyfunction]
-fn download(candidate: &PyAssetCandidate, dest_dir: &str) -> PyResult<(String, PyManifest)> {
-    let providers_list = crate::providers::all_providers();
+#[pyo3(signature = (candidate, dest_dir, credentials=None))]
+fn download(candidate: &PyAssetCandidate, dest_dir: &str, credentials: Option<&PyCredentials>) -> PyResult<(String, PyManifest)> {
+    let creds = credentials.map(|c| c.inner.clone()).unwrap_or_default();
+    let providers_list = crate::providers::all_providers(&creds);
     let provider = providers_list
         .iter()
         .find(|(name, _)| *name == candidate.inner.provider.as_str())
@@ -191,10 +233,12 @@ fn validate_licence_match(manifest_path: &str, candidate: &PyAssetCandidate) -> 
 
 #[pymodule]
 pub fn wf_asset_provider(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(make_credentials, m)?)?;
     m.add_function(wrap_pyfunction!(load_policy, m)?)?;
     m.add_function(wrap_pyfunction!(search, m)?)?;
     m.add_function(wrap_pyfunction!(download, m)?)?;
     m.add_function(wrap_pyfunction!(validate_licence_match, m)?)?;
+    m.add_class::<PyCredentials>()?;
     m.add_class::<PyPolicy>()?;
     m.add_class::<PyAssetCandidate>()?;
     m.add_class::<PyManifest>()?;

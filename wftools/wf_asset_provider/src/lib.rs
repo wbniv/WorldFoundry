@@ -1,5 +1,6 @@
 pub mod licence;
 pub mod candidate;
+pub mod credentials;
 pub mod manifest;
 pub mod policy;
 pub mod error;

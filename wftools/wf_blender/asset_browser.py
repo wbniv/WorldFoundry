@@ -17,6 +17,11 @@ from bpy.props import (
     BoolProperty, CollectionProperty, EnumProperty,
     IntProperty, StringProperty,
 )
+
+# Licence IDs that are unambiguously free and CC-licensed.
+_CC0_ID = 'CC0-1.0'
+_CC_PREFIX = 'CC-'
+_PAID_ID = 'royalty-free'
 from bpy.types import Operator, Panel, PropertyGroup, UIList
 
 from . import asset_threading
@@ -56,6 +61,7 @@ class WF_AssetProviderToggles(PropertyGroup):
     ambientcg:   BoolProperty(name="AmbientCG",      default=True)
     quaternius:  BoolProperty(name="Quaternius",     default=True)
     opengameart: BoolProperty(name="OpenGameArt",    default=True)
+    sketchfab:   BoolProperty(name="Sketchfab",      default=False)
 
 
 # ── Scene-level state ─────────────────────────────────────────────────────────
@@ -69,6 +75,16 @@ class WF_AssetBrowserState(PropertyGroup):
     policy_path:     StringProperty(default="")
     policy_accept:   StringProperty(default="")
     providers:       bpy.props.PointerProperty(type=WF_AssetProviderToggles)
+    licence_filter:  EnumProperty(
+        name="Licence",
+        items=[
+            ('ALL',        "All",       "Show all policy-allowed licences"),
+            ('CC0',        "CC0 only",  "Only CC0-1.0 (no attribution, no restrictions)"),
+            ('CC_FREE',    "CC (free)", "Any CC licence (may require attribution)"),
+            ('COMMERCIAL', "Paid RF",   "Royalty-free purchased assets (Sketchfab Standard)"),
+        ],
+        default='ALL',
+    )
 
 
 # ── Thumbnail preview collection ──────────────────────────────────────────────
@@ -137,7 +153,19 @@ class WF_UL_AssetResults(UIList):
         licence_txt = item.licence_id
         if item.lower_trust:
             licence_txt += "  ⚠"
-        sub.label(text=f"{item.provider}  ·  {licence_txt}", icon='NONE')
+        # Icon hints at licence category at a glance.
+        lid = item.licence_id
+        if lid == _CC0_ID:
+            lic_icon = 'FUND'
+        elif lid == _PAID_ID:
+            lic_icon = 'SOLO_ON'
+        elif lid in ('editorial-only', 'unknown'):
+            lic_icon = 'ERROR'
+        elif lid.startswith(_CC_PREFIX):
+            lic_icon = 'FAKE_USER_ON'
+        else:
+            lic_icon = 'QUESTION'
+        sub.label(text=f"{item.provider}  ·  {licence_txt}", icon=lic_icon)
 
         # Trigger thumbnail load when item is drawn
         _load_thumbnail(item)
@@ -162,7 +190,7 @@ class WF_OT_browse_assets(Operator):
             return {'CANCELLED'}
 
         state.is_searching = True
-        state.status_text = f"Searching for "{query}"…"
+        state.status_text = f'Searching for "{query}"…'
         state.results.clear()
         state.result_index = 0
 
@@ -172,21 +200,37 @@ class WF_OT_browse_assets(Operator):
         state.policy_path = policy.policy_path or "(fallback — no licence_policy.toml found)"
         state.policy_accept = ", ".join(sorted(policy.accept_ids))
 
+        # Build credentials from addon preferences.
+        addon_prefs = context.preferences.addons.get(__name__.split('.')[0])
+        sketchfab_key = addon_prefs.preferences.sketchfab_api_key if addon_prefs else ""
+        credentials = _wap.make_credentials(sketchfab_api_key=sketchfab_key or None)
+
         # Collect enabled providers
         toggles = state.providers
         enabled = [
-            p for p, enabled in [
+            p for p, on in [
                 ("polyhaven",   toggles.polyhaven),
                 ("kenney",      toggles.kenney),
                 ("ambientcg",   toggles.ambientcg),
                 ("quaternius",  toggles.quaternius),
                 ("opengameart", toggles.opengameart),
+                ("sketchfab",   toggles.sketchfab),
             ]
-            if enabled
+            if on
         ]
 
+        licence_filter = state.licence_filter
+
         def do_search():
-            return _wap.search(query, policy, providers=enabled, limit=50)
+            results = _wap.search(query, policy, credentials=credentials,
+                                  providers=enabled, limit=50)
+            if licence_filter == 'CC0':
+                results = [r for r in results if r.licence_id == _CC0_ID]
+            elif licence_filter == 'CC_FREE':
+                results = [r for r in results if r.licence_id.startswith(_CC_PREFIX)]
+            elif licence_filter == 'COMMERCIAL':
+                results = [r for r in results if r.licence_id == _PAID_ID]
+            return results
 
         def on_results(candidates):
             state.is_searching = False
@@ -273,12 +317,17 @@ class WF_OT_import_asset(Operator):
         # Build a PyAssetCandidate via search to get a proper typed object
         policy = _wap.load_policy(blend_dir)
 
+        addon_prefs = context.preferences.addons.get(__name__.split('.')[0])
+        sketchfab_key = addon_prefs.preferences.sketchfab_api_key if addon_prefs else ""
+        credentials = _wap.make_credentials(sketchfab_api_key=sketchfab_key or None)
+
         def do_download():
-            candidates = _wap.search(provider_id, policy, providers=[provider], limit=5)
+            candidates = _wap.search(provider_id, policy, credentials=credentials,
+                                     providers=[provider], limit=5)
             candidate = next((c for c in candidates if c.provider_id == provider_id), None)
             if candidate is None:
                 raise RuntimeError(f"Could not resolve {provider}/{provider_id} for download")
-            return _wap.download(candidate, dest_dir)
+            return _wap.download(candidate, dest_dir, credentials=credentials)
 
         def on_done(result):
             asset_path, manifest = result
@@ -291,7 +340,7 @@ class WF_OT_import_asset(Operator):
 
         asset_threading.submit(do_download, on_result=on_done, on_error=on_fail)
         context.window_manager.modal_handler_add(self)
-        state.status_text = f"Downloading "{title}"…"
+        state.status_text = f'Downloading "{title}"…'
         return {'RUNNING_MODAL'}
 
     def modal(self, context, event):
@@ -363,6 +412,21 @@ class WF_PT_asset_browser(Panel):
         row2 = box.row()
         row2.prop(toggles, "quaternius",  toggle=True)
         row2.prop(toggles, "opengameart", toggle=True)
+        row3 = box.row()
+        row3.prop(toggles, "sketchfab",   toggle=True)
+
+        # Warn when Sketchfab is enabled but no API key is configured.
+        if toggles.sketchfab:
+            addon_prefs = context.preferences.addons.get(__name__.split('.')[0])
+            has_key = bool(addon_prefs and addon_prefs.preferences.sketchfab_api_key)
+            if not has_key:
+                warn_col = box.column(align=True)
+                warn_col.scale_y = 0.8
+                warn_col.label(text="No API key — search works, download won't.", icon='INFO')
+                warn_col.label(text="Set key in Edit › Preferences › Add-ons › World Foundry.")
+
+        # Licence group filter
+        layout.prop(state, "licence_filter", text="Filter")
 
         # Policy info
         if state.policy_path:

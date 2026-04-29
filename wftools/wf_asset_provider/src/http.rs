@@ -38,6 +38,34 @@ impl RateLimitedClient {
         self.get_json_inner(url, 0)
     }
 
+    /// GET `url` with `Authorization: Bearer` header, deserialising JSON.
+    pub fn get_json_authed<T: serde::de::DeserializeOwned>(&self, url: &str, bearer: &str) -> Result<T, AssetError> {
+        self.throttle();
+        self.get_json_authed_inner(url, bearer, 0)
+    }
+
+    /// GET `url` with `Authorization: Bearer` header, returning raw bytes.
+    pub fn get_bytes_authed(&self, url: &str, bearer: &str) -> Result<Vec<u8>, AssetError> {
+        self.throttle();
+        let resp = self.client.get(url)
+            .header("Authorization", format!("Bearer {bearer}"))
+            .send()
+            .map_err(|e| AssetError::Http {
+                provider: self.provider.clone(),
+                message: e.to_string(),
+            })?;
+        if !resp.status().is_success() {
+            return Err(AssetError::Http {
+                provider: self.provider.clone(),
+                message: format!("HTTP {} for {url}", resp.status()),
+            });
+        }
+        resp.bytes().map(|b| b.to_vec()).map_err(|e| AssetError::Http {
+            provider: self.provider.clone(),
+            message: e.to_string(),
+        })
+    }
+
     /// GET `url` and return raw bytes (for binary assets / images).
     pub fn get_bytes(&self, url: &str) -> Result<Vec<u8>, AssetError> {
         self.throttle();
@@ -66,6 +94,44 @@ impl RateLimitedClient {
             }
         }
         *last = Some(Instant::now());
+    }
+
+    fn get_json_authed_inner<T: serde::de::DeserializeOwned>(
+        &self,
+        url: &str,
+        bearer: &str,
+        attempt: u8,
+    ) -> Result<T, AssetError> {
+        let resp = self.client.get(url)
+            .header("Authorization", format!("Bearer {bearer}"))
+            .send()
+            .map_err(|e| AssetError::Http {
+                provider: self.provider.clone(),
+                message: e.to_string(),
+            });
+        match resp {
+            Ok(r) if r.status().is_success() => {
+                r.json::<T>().map_err(|e| AssetError::JsonParse {
+                    provider: self.provider.clone(),
+                    message: format!("{url}: {e}"),
+                })
+            }
+            Ok(r) if r.status() == 429 && attempt == 0 => {
+                std::thread::sleep(self.min_interval * 2);
+                self.throttle();
+                self.get_json_authed_inner(url, bearer, 1)
+            }
+            Ok(r) => Err(AssetError::Http {
+                provider: self.provider.clone(),
+                message: format!("HTTP {} for {url}", r.status()),
+            }),
+            Err(_) if attempt == 0 => {
+                std::thread::sleep(Duration::from_millis(500));
+                self.throttle();
+                self.get_json_authed_inner(url, bearer, 1)
+            }
+            Err(e) => Err(e),
+        }
     }
 
     fn get_json_inner<T: serde::de::DeserializeOwned>(

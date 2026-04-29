@@ -50,15 +50,36 @@ except ImportError as _e:
 # Sub-module registration
 # ---------------------------------------------------------------------------
 
+import bpy
+from bpy.props import StringProperty
+
 from . import operators      # noqa: E402
 from . import panels         # noqa: E402
 from . import export_level   # noqa: E402
 from . import asset_browser  # noqa: E402
 
 
+class WF_AddonPreferences(bpy.types.AddonPreferences):
+    bl_idname = __name__
+
+    sketchfab_api_key: StringProperty(
+        name="Sketchfab API Key",
+        description="Bearer token from sketchfab.com/settings#api-token. Required for downloading Sketchfab assets.",
+        subtype='PASSWORD',
+        default="",
+    )
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "sketchfab_api_key")
+        layout.label(
+            text="Get your token at: sketchfab.com/settings#api-token",
+            icon='URL',
+        )
+
+
 def register():
     if not _WF_CORE_OK:
-        import bpy
         def draw_error(self, context):
             self.layout.label(
                 text=f"wf_core not found — copy wf_core.so into add-on folder: {_WF_CORE_ERROR}",
@@ -70,6 +91,7 @@ def register():
         )
         return
 
+    bpy.utils.register_class(WF_AddonPreferences)
     operators.register()
     panels.register()
     export_level.register()
@@ -82,3 +104,4 @@ def unregister():
         export_level.unregister()
         panels.unregister()
         operators.unregister()
+        bpy.utils.unregister_class(WF_AddonPreferences)

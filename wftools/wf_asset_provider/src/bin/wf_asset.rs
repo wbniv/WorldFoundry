@@ -8,6 +8,7 @@
 
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
+use wf_asset_provider::credentials::Credentials;
 use wf_asset_provider::policy::load_policy;
 use wf_asset_provider::providers::{all_providers, providers_by_name};
 
@@ -94,11 +95,14 @@ fn main() {
                 None    => eprintln!("policy: fallback (CC0-only — no licence_policy.toml found)"),
             }
 
+            let creds = Credentials {
+                sketchfab_api_key: std::env::var("WF_SKETCHFAB_API_KEY").ok(),
+            };
             let provider_list = if provider.is_empty() {
-                all_providers()
+                all_providers(&creds)
             } else {
                 let slices: Vec<&str> = provider.iter().map(|s| s.as_str()).collect();
-                providers_by_name(&slices)
+                providers_by_name(&slices, &creds)
             };
 
             let mut all_results = Vec::new();
@@ -141,7 +145,10 @@ fn main() {
             }
             let (provider_name, asset_id) = (parts[0], parts[1]);
 
-            let providers = providers_by_name(&[provider_name]);
+            let creds = Credentials {
+                sketchfab_api_key: std::env::var("WF_SKETCHFAB_API_KEY").ok(),
+            };
+            let providers = providers_by_name(&[provider_name], &creds);
             let (_, prov) = providers.first().unwrap_or_else(|| {
                 eprintln!("error: unknown provider {:?}", provider_name);
                 std::process::exit(1);
@@ -213,7 +220,7 @@ fn main() {
 
         Commands::Providers { cmd } => match cmd {
             ProvidersCmd::List => {
-                for (name, _) in all_providers() {
+                for (name, _) in all_providers(&Credentials::empty()) {
                     println!("{name}");
                 }
             }

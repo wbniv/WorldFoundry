@@ -32,6 +32,20 @@ pub enum LicenceId {
     #[serde(rename = "CC-BY-NC-SA-4.0")]
     CcByNcSa4_0,
 
+    /// Creative Commons Attribution-NoDerivatives 4.0.
+    /// Can't remix; not suitable for WF assets that may need conversion.
+    #[serde(rename = "CC-BY-ND-4.0")]
+    CcByNd4_0,
+
+    /// Creative Commons Attribution-NonCommercial-NoDerivatives 4.0.
+    #[serde(rename = "CC-BY-NC-ND-4.0")]
+    CcByNcNd4_0,
+
+    /// Paid royalty-free: one-time purchase, unlimited commercial use, no attribution.
+    /// Used for Sketchfab Standard licence and TurboSquid royalty-free.
+    #[serde(rename = "royalty-free")]
+    RoyaltyFree,
+
     /// GNU General Public License v3.  Share-alike, copyleft.
     #[serde(rename = "GPL-3.0")]
     Gpl3_0,
@@ -63,6 +77,9 @@ impl LicenceId {
             Self::CcBySa4_0       => "CC-BY-SA-4.0",
             Self::CcByNc4_0       => "CC-BY-NC-4.0",
             Self::CcByNcSa4_0     => "CC-BY-NC-SA-4.0",
+            Self::CcByNd4_0       => "CC-BY-ND-4.0",
+            Self::CcByNcNd4_0     => "CC-BY-NC-ND-4.0",
+            Self::RoyaltyFree     => "royalty-free",
             Self::Gpl3_0          => "GPL-3.0",
             Self::Lgpl3_0         => "LGPL-3.0",
             Self::EditorialOnly   => "editorial-only",
@@ -79,9 +96,29 @@ impl LicenceId {
                 | Self::CcBySa4_0
                 | Self::CcByNc4_0
                 | Self::CcByNcSa4_0
+                | Self::CcByNd4_0
+                | Self::CcByNcNd4_0
                 | Self::Gpl3_0
                 | Self::Lgpl3_0
         )
+    }
+
+    /// Canonical URL for the licence text.
+    pub fn licence_url(&self) -> &'static str {
+        match self {
+            Self::Cc0_1_0         => "https://creativecommons.org/publicdomain/zero/1.0/",
+            Self::CcBy4_0         => "https://creativecommons.org/licenses/by/4.0/",
+            Self::CcBySa4_0       => "https://creativecommons.org/licenses/by-sa/4.0/",
+            Self::CcByNc4_0       => "https://creativecommons.org/licenses/by-nc/4.0/",
+            Self::CcByNcSa4_0     => "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+            Self::CcByNd4_0       => "https://creativecommons.org/licenses/by-nd/4.0/",
+            Self::CcByNcNd4_0     => "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+            Self::Gpl3_0          => "https://www.gnu.org/licenses/gpl-3.0.html",
+            Self::Lgpl3_0         => "https://www.gnu.org/licenses/lgpl-3.0.html",
+            Self::EditorialOnly   => "https://sketchfab.com/licenses",
+            Self::RoyaltyFree     => "https://sketchfab.com/licenses",
+            Self::RoyaltyOnRevenue | Self::Unknown => "",
+        }
     }
 }
 
@@ -132,6 +169,17 @@ impl LicenceId {
             // CC-BY-NC-SA 4.0
             "cc-by-nc-sa-4.0" | "cc by-nc-sa 4.0" | "cc by nc sa 4.0"
             | "attribution-noncommercial-sharealike 4.0 international" => Self::CcByNcSa4_0,
+
+            // CC-BY-ND 4.0
+            "cc-by-nd-4.0" | "cc by-nd 4.0" | "cc by nd 4.0"
+            | "attribution-noderivatives 4.0 international" => Self::CcByNd4_0,
+
+            // CC-BY-NC-ND 4.0
+            "cc-by-nc-nd-4.0" | "cc by-nc-nd 4.0" | "cc by nc nd 4.0"
+            | "attribution-noncommercial-noderivatives 4.0 international" => Self::CcByNcNd4_0,
+
+            // Paid royalty-free (Sketchfab Standard, etc.)
+            "royalty-free" | "standard" | "sketchfab" => Self::RoyaltyFree,
 
             // GPL
             "gpl-3.0" | "gpl 3.0" | "gnu gpl v3" | "gnu general public license v3" => Self::Gpl3_0,
