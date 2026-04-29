@@ -67,7 +67,7 @@ Building with `-fno-rtti` would fail to compile all 51 `dynamic_cast` sites. Rep
 
 ## Origin of the `dynamic_cast` calls
 
-All 51 `dynamic_cast` calls arrived in the **first git commit (2010-05-01)** with no platform guards. `git log -S"dynamic_cast"` finds no subsequent commit that added or removed any of them in the affected files. The dead-code removal passes (Batch 5, Batch 6) did not strip any guards from around them — they were already bare.
+All 51 `dynamic_cast` calls arrived in the **[first git commit (2010-05-01)](https://github.com/wbniv/WorldFoundry/commit/a2784f6)** with no platform guards. `git log -S"dynamic_cast"` finds no subsequent commit that added or removed any of them in the affected files. The dead-code removal passes ([Batch 5](https://github.com/wbniv/WorldFoundry/commit/03211f9), [Batch 6](https://github.com/wbniv/WorldFoundry/commit/8760f27)) did not strip any guards from around them — they were already bare.
 
 The git repo is a 2010 import of what was already a PC/Linux port. The PSX-era source predates the repo. PS1 toolchains did not support C++ RTTI, so the original code would have relied on `kind()` or explicit `static_cast`s. The most likely explanation: `dynamic_cast` calls were added during the PC port, replacing the manual `kind()`-guarded casts, and `kind()` survived as a rarely-used remnant. This is consistent with `kind()` having only 2 live call sites while `dynamic_cast` dominates.
 
