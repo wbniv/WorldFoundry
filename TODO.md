@@ -20,6 +20,8 @@
 - [ ] `WF_JS_ENGINE=jerryscript-nano` footprint build — deferred until footprint pressure — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
 - [ ] Collapse wasm sigil `#b64\n` → bare `#` — workaround for cd.iff `##` TCL lines; revert once cd.iff cleaned up
 - [ ] Alternate wasm sigil `#!wat` — deferred pending wabt vendor — [plan](docs/plans/2026-04-14-wasm3-scripting-engine.md)
+- [ ] WAMR Phase 2 — AOT compilation ship path; deferred until ship target is concrete — [plan](docs/plans/2026-04-14-wamr-dev-aot-ship.md)
+- [ ] WAMR Phase 3 — w2c2 AOT backend; deferred until Phase 2 lands — [plan](docs/plans/2026-04-14-wamr-dev-aot-ship.md)
 
 
 ## CONCURRENCY / ASYNC
@@ -31,6 +33,35 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 - [ ] `std::thread` + work queue — simplest; good for background asset loading
 - [ ] C++20 coroutines — stackless; fits scripted AI / state-machine actors well
 - [ ] Fiber library (e.g. Boost.Context or `libco`) — stackful cooperative tasks, closest to the original tasker model; worth revisiting if multiple concurrent game tasks are needed
+
+
+## LEVEL PIPELINE
+
+- [ ] Level pipeline Phase D — decompile the 4 source-less levels (`cube`, `basic`, `cyber`, `main_game`) — [plan](docs/plans/2026-04-17-level-pipeline-proof.md)
+- [ ] Level pipeline Phase E — produce multi-level `cd.iff`, confirm all 7 levels load in `wf_game`; gates `common.inc` breaking rearrangement — [plan](docs/plans/2026-04-17-level-pipeline-proof.md)
+- [ ] levcomp-rs common-block — commit working-tree `snowgoons.lvl` flip (levcomp-rs output → repo copy; 3 heap-pad bytes delta is acceptable) — [plan](docs/plans/2026-04-19-levcomp-common-block-two-phase.md)
+- [ ] ScriptLanguage OAD field — re-add to `common.inc`; blocked on level-pipeline-proof Phase E; revert `language = 3;` stopgap in `engine/stubs/scripting_stub.cc` — [plan](docs/plans/2026-04-16-script-language-oad-field.md)
+- [ ] Strip spurious BOX3 chunks from non-geometry actors in `wflevels/snowgoons/snowgoons.lev` — [plan](docs/plans/2026-04-19-strip-nongeom-box3.md)
+- [ ] textile-rs Phase 2 — diagnose 2 non-square texture mismatches (`G_HedgeWsnowSide`, `G_shakesWsnowRM`); package texture outputs into pipeline — [plan](docs/plans/2026-04-19-textile-rs-validation.md)
+
+
+## PLATFORMS
+
+- [ ] iOS Phase 2C — wire MetalView `CADisplayLink` tick → `SetCurrentEncoder` → engine frame loop → `EndFrame`; first boot of engine main loop on iOS — [plan](docs/plans/2026-04-21-ios-port-codemagic.md)
+- [ ] Android launcher polish — adaptive icon XML, foreground/background drawables — [plan](docs/plans/2026-04-18-android-launcher-polish.md)
+- [ ] Android size trim iter 2 — `-fno-exceptions`, `-fvisibility=hidden`, miniaudio Vorbis trim, Windows-path deletion — [plan](docs/plans/2026-04-18-android-size-trim-iter-2.md)
+- [ ] Audio assets from IFF — bundle MIDI/SF2/WAV inside `cd.iff`; retire loose-file audio loaders — [plan](docs/plans/2026-04-18-audio-assets-from-iff.md)
+- [ ] Steam Phases 3+4 — SteamPipe depot + build script; store page on Steamworks — [plan](docs/plans/2026-04-17-steam.md)
+- [ ] Chromecast/Google TV Phase 2 — on-device verification on physical hardware; banner image; CI — [plan](docs/plans/2026-04-23-chromecast-googletv-port.md)
+
+
+## TOOLS
+
+- [ ] Game ideas dependency graph — extract dependencies from `docs/game-ideas/` docs; build synthesis tooling — [plan](docs/plans/2026-04-28-game-ideas-dependency-graph-and-tooling.md)
+- [ ] Blender addon packaging — manifest/zip rewrite for Blender Extensions platform distribution — [plan](docs/plans/2026-04-28-blender-addon-packaging.md)
+- [ ] WF asset provider pure-Python rewrite — no C extensions; pure-Python `providers.py` and `wf-asset.py` CLI — [plan](docs/plans/2026-04-28-wf-asset-provider-pure-python.md)
+- [ ] Blender run operator — export + build + launch chain from Blender UI (one click: `.blend` → `.iff` → `wf_game`) — [plan](docs/plans/2026-04-29-blender-run-operator.md)
+- [ ] Live editor bridge Phase 2 — bidirectional TCP/JSON protocol; Blender → engine property/transform push without restart — [plan](docs/plans/2026-04-29-live-editor-bridge.md)
 
 
 ## BUILD / TOOLCHAIN
