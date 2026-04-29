@@ -94,7 +94,11 @@ The camera system reads `EMAILBOX_CAMSHOT` every tick. The mailbox is **cleared 
 
 ### Director
 
-Present in the OAS (`director.oas`) with no fields beyond the standard actor block. `director.cc` has no camera logic. Unused.
+An invisible, non-rendering, non-updating actor (`CanRender()=false`, `CanUpdate()=false`) whose only purpose is to carry a **Script**. The C++ class (`director.cc`) is a stub — it never runs its own update logic. All behaviour comes from its `Script` field (inherited from `common.inc` like every other actor).
+
+A Director placed in a level runs its script each tick via the scripting system. That script can write to mailboxes — including `EMAILBOX_CAMSHOT` — to trigger camera cuts, sequence cutscene events, control other actors, start timers, etc. It is the intended mechanism for scripted cinematic sequences that are not driven by player collision (unlike ActBoxOR).
+
+**Director is camera-adjacent, not a camera system component.** It belongs to the scripting system. The OAS has no camera-specific fields because the script itself is the interface.
 
 ---
 
