@@ -58,7 +58,6 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 ## TOOLS
 
 - [ ] Game ideas dependency graph — extract dependencies from `docs/game-ideas/` docs; build synthesis tooling — [plan](docs/plans/2026-04-28-game-ideas-dependency-graph-and-tooling.md)
-- [ ] Blender addon packaging — manifest/zip rewrite for Blender Extensions platform distribution — [plan](docs/plans/2026-04-28-blender-addon-packaging.md)
 - [ ] WF asset provider pure-Python rewrite — no C extensions; pure-Python `providers.py` and `wf-asset.py` CLI — [plan](docs/plans/2026-04-28-wf-asset-provider-pure-python.md)
 - [ ] Blender run operator — export + build + launch chain from Blender UI (one click: `.blend` → `.iff` → `wf_game`) — [plan](docs/plans/2026-04-29-blender-run-operator.md)
 - [ ] Live editor bridge Phase 2 — bidirectional TCP/JSON protocol; Blender → engine property/transform push without restart — [plan](docs/plans/2026-04-29-live-editor-bridge.md)
@@ -92,3 +91,4 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 - [x] movecam crash stabilised — invalid (Actor*)&msgData cast at movecam.cc:964 guarded
 - [x] Jolt physics integration — snowgoons player walks on floor, 60 s soak passed — [plan](docs/plans/2026-04-16-jolt-physics-finish.md)
 - [x] Rust tool ports (`iffcomp`, `iffdump`, `oaddump`, `lvldump`) — all build and pass tests; crates at `wftools/{iffcomp-rs,iffdump-rs,oaddump-rs,lvldump-rs}`; `wf_iff` + `wf_oad` as library foundations
+- [x] Blender addon packaging — `blender_manifest.toml` in both addons; `blender-build/install/validate/package` Taskfile tasks; manual rewritten provenance-first; install.sh gap resolved via addon split — [plan](docs/plans/2026-04-28-blender-addon-packaging.md)
