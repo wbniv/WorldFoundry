@@ -281,11 +281,42 @@ fi
 
 ---
 
+### Real level: snowgoons — ActBoxOR mailbox multiplexer
+
+From `wflevels/snowgoons-blender/snowgoons.lev`. The level has three camera zones; each `ActBoxOR` writes its CamShot index to a dedicated per-zone mailbox (100, 99, 98) rather than directly to `INDEXOF_CAMSHOT`. The Director fans them together:
+
+```forth
+\ wf
+100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then
+ 99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then
+ 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then
+```
+
+**Stack trace for each line** (`read-mailbox ( idx -- val )`):
+
+```
+100 read-mailbox    ( -- val )
+dup                 ( -- val val )
+0 <>                ( -- val flag )
+if                  ( -- val )        \ flag consumed; val remains
+  INDEXOF_CAMSHOT   ( -- val 1021 )
+  write-mailbox     ( -- )            \ ( val idx -- ) — camera switches
+else
+  drop              ( -- )            \ discard val if zero
+then
+```
+
+**Why three mailboxes instead of all writing to `INDEXOF_CAMSHOT` directly?** `ActBoxOR` writes its value once, but `NormalCameraHandler` clears `INDEXOF_CAMSHOT` to zero after reading it each tick. If two zones both wrote to `INDEXOF_CAMSHOT`, one would stomp the other. With per-zone mailboxes, the Director re-asserts the active shot every tick as long as the player stays inside a zone — the value persists in the zone mailbox until `ActBoxOR` overwrites it on the next collision tick.
+
+Note that `then` is used here, not `fi`. Both are valid in this zForth build: `fi` is the zForth native word; `then` is a standard Forth alias defined in `scripting_zforth.cc`.
+
+---
+
 ### Notes
 
 - **Object indices** — the CamShot's index in the level object list. Check `lvldump` output or the Blender level importer's object panel. Indices start at 1.
 - **Tick rate** — engine runs at 60 Hz; 60 ticks = 1 second.
-- **zForth uses `fi` not `then`** for `if`/`else` blocks.
+- **`fi` and `then` are both valid** — `fi` is the zForth native word; `then` is a standard Forth alias. The snowgoons level uses `then`; the examples above use `fi`. Either works.
 - **`write-mailbox` stack order** — `( val idx -- )`: value first, index second.
 - **Pan time** — the transition duration comes from the destination CamShot's `Pan Time In Seconds` field, not from the script. Set it in the level editor.
 
