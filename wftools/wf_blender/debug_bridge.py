@@ -47,6 +47,8 @@ class DebugBridge:
         self.positions: dict[int, list] = {}
 
         self.connected = False
+        self.is_paused = False
+        self.last_picked_idx: int = -1
         self.error: str = ""
 
     # ── Public API ────────────────────────────────────────────────────────────
@@ -97,6 +99,18 @@ class DebugBridge:
 
     def set_prop(self, idx: int, key: str, value):
         self.send({"op": "scene:set_prop", "idx": idx, "key": key, "value": value})
+
+    def pause(self):
+        self.send({"op": "pause"})
+
+    def step(self, frames: int = 1):
+        self.send({"op": "step", "frames": max(1, frames)})
+
+    def resume(self):
+        self.send({"op": "resume"})
+
+    def scene_pick(self, ray_origin: list, ray_dir: list):
+        self.send({"op": "scene:pick", "ray_origin": ray_origin, "ray_dir": ray_dir})
 
     def update_index_map(self, mapping: dict[int, str]):
         """Called by the export step with {idx: blender_obj_name, ...}."""
@@ -165,6 +179,19 @@ class DebugBridge:
         elif op == "frame":
             self.frame_n = msg.get("n", self.frame_n)
             self.frame_dt_ms = msg.get("dt_ms", self.frame_dt_ms)
+        elif op == "paused":
+            self.is_paused = True
+        elif op == "resumed":
+            self.is_paused = False
+        elif op == "picked":
+            self.last_picked_idx = msg.get("idx", -1)
+            if self.last_picked_idx >= 0:
+                name = self.idx_to_name.get(self.last_picked_idx)
+                if name and name in bpy.data.objects:
+                    bpy.ops.object.select_all(action='DESELECT')
+                    obj = bpy.data.objects[name]
+                    obj.select_set(True)
+                    bpy.context.view_layer.objects.active = obj
         elif op == "pong":
             pass
         elif op in ("log", "error"):

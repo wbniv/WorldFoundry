@@ -12,6 +12,7 @@ GroupStop     → closes the GroupStart box.
 import os
 import bpy
 import wf_core
+from . import debug_bridge as _db_mod
 from .operators import (
     SCHEMA_PATH_KEY, SECTION_OPEN_PREFIX,
     _prop_key, _section_key, _get_schema, _seed_defaults,
@@ -264,9 +265,69 @@ class WF_PT_level(bpy.types.Panel):
         layout.operator("wf.run_level", icon='PLAY')
 
 
+# ── WF_PT_live_bridge ─────────────────────────────────────────────────────────
+
+class WF_PT_live_bridge(bpy.types.Panel):
+    """Live debug bridge — connects Blender to a running wf_game instance."""
+    bl_label       = "WF Live Bridge"
+    bl_idname      = "WF_PT_live_bridge"
+    bl_space_type  = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context     = 'scene'
+
+    def draw(self, context):
+        layout = self.layout
+        prefs = context.preferences.addons.get(__package__)
+        prefs = prefs.preferences if prefs else None
+
+        bridge = _db_mod.get_bridge()
+
+        if bridge.connected:
+            # Status row
+            row = layout.row(align=True)
+            icon = 'PAUSE' if bridge.is_paused else 'RADIOBUT_ON'
+            label = "⏸ PAUSED" if bridge.is_paused else "Connected"
+            row.label(text=label, icon=icon)
+            host = getattr(prefs, 'debug_host', 'localhost') if prefs else 'localhost'
+            port = getattr(prefs, 'debug_port', 7777)        if prefs else 7777
+            row.label(text=f"{host}:{port}")
+            row.operator("wf.bridge_disconnect", text="", icon='X')
+
+            if bridge.frame_n:
+                layout.label(text=f"Frame {bridge.frame_n}  |  {bridge.frame_dt_ms:.1f} ms")
+
+            # Pause / step / resume controls
+            row2 = layout.row(align=True)
+            if bridge.is_paused:
+                row2.operator("wf.bridge_step",   text="Step",   icon='FRAME_NEXT')
+                row2.operator("wf.bridge_resume",  text="Resume", icon='PLAY')
+            else:
+                row2.operator("wf.bridge_pause",   text="Pause",  icon='PAUSE')
+
+            # Object picker
+            row3 = layout.row(align=True)
+            row3.operator("wf.bridge_pick", text="Pick Object", icon='RESTRICT_SELECT_OFF')
+            if bridge.last_picked_idx >= 0:
+                name = bridge.idx_to_name.get(bridge.last_picked_idx, f"idx {bridge.last_picked_idx}")
+                row3.label(text=name)
+        else:
+            row = layout.row(align=True)
+            row.label(text="Not connected", icon='RADIOBUT_OFF')
+            if bridge.error:
+                layout.label(text=bridge.error, icon='ERROR')
+            if prefs:
+                layout.prop(prefs, "debug_host", text="Host")
+                layout.prop(prefs, "debug_port", text="Port")
+            row2 = layout.row()
+            row2.operator("wf.bridge_connect", text="Connect", icon='LINKED')
+
+        layout.separator()
+        layout.prop(context.scene, "wf_bridge_sync_transforms", text="Sync transforms (10 Hz)")
+
+
 # ── registration ──────────────────────────────────────────────────────────────
 
-_CLASSES = [WF_PT_attributes, WF_PT_level]
+_CLASSES = [WF_PT_attributes, WF_PT_level, WF_PT_live_bridge]
 
 
 def register():

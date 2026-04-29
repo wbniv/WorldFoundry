@@ -1,0 +1,38 @@
+// debug_server.hp — bidirectional TCP/JSON debug bridge for wf_game.
+//
+// Only active when WF_DEBUG_BRIDGE is defined. Exposes a newline-delimited
+// JSON stream on a configurable port (default 7777) so Blender (or any
+// other tool) can:
+//   - change live OAD properties without restarting
+//   - teleport objects
+//   - watch runtime positions at ~10 Hz
+//   - stream engine log messages to the editor
+//
+// Threading: DebugServer runs a listener thread. Incoming messages are
+// pushed into a mutex-protected queue. The game thread calls DrainQueue()
+// once per frame; after the normal update it calls BroadcastState().
+
+#ifndef WF_DEBUG_SERVER_HP
+#define WF_DEBUG_SERVER_HP
+
+#ifdef WF_DEBUG_BRIDGE
+
+class Level;
+
+void DebugServer_Start(int port);
+void DebugServer_DrainQueue(Level& level);
+void DebugServer_BroadcastState(Level& level);
+void DebugServer_Stop();
+bool DebugServer_IsPaused();   // true = skip level update this frame
+
+#else
+
+class Level;
+inline void DebugServer_Start(int)                      {}
+inline void DebugServer_DrainQueue(Level&)              {}
+inline void DebugServer_BroadcastState(Level&)          {}
+inline void DebugServer_Stop()                          {}
+inline bool DebugServer_IsPaused()                      { return false; }
+
+#endif // WF_DEBUG_BRIDGE
+#endif // WF_DEBUG_SERVER_HP

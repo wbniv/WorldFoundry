@@ -78,15 +78,43 @@ static double parse_jnum(const std::string& line, const char* key)
     return std::stod(line.c_str() + pos);
 }
 
+// Parse a JSON [x,y,z] array after "key": into out[3]. Returns false if missing.
+static bool parse_jvec3(const std::string& line, const char* key, float out[3])
+{
+    std::string needle = std::string("\"") + key + "\"";
+    auto pos = line.find(needle);
+    if (pos == std::string::npos) return false;
+    auto lb = line.find('[', pos + needle.size());
+    if (lb == std::string::npos) return false;
+    try {
+        out[0] = (float)std::stod(line.c_str() + lb + 1);
+        auto c1 = line.find(',', lb + 1);
+        if (c1 == std::string::npos) return false;
+        out[1] = (float)std::stod(line.c_str() + c1 + 1);
+        auto c2 = line.find(',', c1 + 1);
+        if (c2 == std::string::npos) return false;
+        out[2] = (float)std::stod(line.c_str() + c2 + 1);
+    } catch (...) { return false; }
+    return true;
+}
+
+//=============================================================================
+// Pause / step state (written from listener thread, read from game thread)
+
+static std::atomic<bool> gPaused  { false };
+static std::atomic<int>  gStepN   { 0 };
+
 //=============================================================================
 // Pending update queue
 
 struct PendingUpdate {
-    enum Kind { SET_PROP, SET_TRANSFORM } kind;
+    enum Kind { SET_PROP, SET_TRANSFORM, PICK } kind;
     int  actor_idx;
     std::string key;
     double value;
-    float  px, py, pz;
+    float  px, py, pz;              // SET_TRANSFORM: new position
+    float  ray_ox, ray_oy, ray_oz;  // PICK: ray origin
+    float  ray_dx, ray_dy, ray_dz;  // PICK: ray direction (unit)
 };
 
 static std::mutex                gQueueMutex;
@@ -158,22 +186,38 @@ static void handle_client(int fd)
                 PendingUpdate u;
                 u.kind      = PendingUpdate::SET_TRANSFORM;
                 u.actor_idx = (int)parse_jnum(line, "idx");
-                u.px = u.py = u.pz = 0.0f;
-                auto pb = line.find("\"pos\"");
-                if (pb != std::string::npos) {
-                    auto lb = line.find('[', pb);
-                    if (lb != std::string::npos) {
-                        u.px = (float)std::stod(line.c_str() + lb + 1);
-                        auto c1 = line.find(',', lb + 1);
-                        if (c1 != std::string::npos) {
-                            u.py = (float)std::stod(line.c_str() + c1 + 1);
-                            auto c2 = line.find(',', c1 + 1);
-                            if (c2 != std::string::npos)
-                                u.pz = (float)std::stod(line.c_str() + c2 + 1);
-                        }
-                    }
-                }
+                float pos[3] = {};
+                parse_jvec3(line, "pos", pos);
+                u.px = pos[0]; u.py = pos[1]; u.pz = pos[2];
                 if (u.actor_idx > 0) {
+                    std::lock_guard<std::mutex> lk(gQueueMutex);
+                    gQueue.push(u);
+                }
+
+            } else if (op == "pause") {
+                gPaused = true;
+                gStepN  = 0;
+                std::lock_guard<std::mutex> lk(gQueueMutex);
+                send_all_locked("{\"op\":\"paused\"}\n");
+
+            } else if (op == "resume") {
+                gPaused = false;
+                gStepN  = 0;
+                std::lock_guard<std::mutex> lk(gQueueMutex);
+                send_all_locked("{\"op\":\"resumed\"}\n");
+
+            } else if (op == "step") {
+                int n = (int)parse_jnum(line, "frames");
+                if (n <= 0) n = 1;
+                gStepN.fetch_add(n);
+
+            } else if (op == "scene:pick") {
+                PendingUpdate u;
+                u.kind = PendingUpdate::PICK;
+                float ro[3] = {}, rd[3] = {};
+                if (parse_jvec3(line, "ray_origin", ro) && parse_jvec3(line, "ray_dir", rd)) {
+                    u.ray_ox = ro[0]; u.ray_oy = ro[1]; u.ray_oz = ro[2];
+                    u.ray_dx = rd[0]; u.ray_dy = rd[1]; u.ray_dz = rd[2];
                     std::lock_guard<std::mutex> lk(gQueueMutex);
                     gQueue.push(u);
                 }
@@ -269,6 +313,17 @@ void DebugServer_Stop()
     if (gListenerThread.joinable()) gListenerThread.join();
 }
 
+bool DebugServer_IsPaused()
+{
+    if (!gPaused) return false;
+    int steps = gStepN.load();
+    if (steps > 0) {
+        gStepN.fetch_sub(1);
+        return false;  // allow this frame through
+    }
+    return true;
+}
+
 void DebugServer_DrainQueue(Level& level)
 {
     if (!gRunning) return;
@@ -300,6 +355,35 @@ void DebugServer_DrainQueue(Level& level)
                 + "}\n";
             std::lock_guard<std::mutex> lk(gQueueMutex);
             send_all_locked(msg);
+
+        } else if (u.kind == PendingUpdate::PICK) {
+            // Find actor whose position is closest to the ray (within 2 units).
+            float best_dist2 = 4.0f;  // 2-unit pick radius
+            int   best_idx   = -1;
+            BaseObjectList& list = level.GetObjectList();
+            for (int i = 1; i < list.Size(); ++i) {
+                BaseObject* bo2 = list[i];
+                if (!bo2) continue;
+                Actor* a = dynamic_cast<Actor*>(bo2);
+                if (!a) continue;
+                const Vector3& p = a->currentPos();
+                float dx = p.X().AsFloat() - u.ray_ox;
+                float dy = p.Y().AsFloat() - u.ray_oy;
+                float dz = p.Z().AsFloat() - u.ray_oz;
+                float t  = dx*u.ray_dx + dy*u.ray_dy + dz*u.ray_dz;
+                if (t <= 0.0f) continue;  // behind ray origin
+                float dist2 = (dx - t*u.ray_dx)*(dx - t*u.ray_dx)
+                            + (dy - t*u.ray_dy)*(dy - t*u.ray_dy)
+                            + (dz - t*u.ray_dz)*(dz - t*u.ray_dz);
+                if (dist2 < best_dist2) {
+                    best_dist2 = dist2;
+                    best_idx   = i;
+                }
+            }
+            char buf[64];
+            snprintf(buf, sizeof(buf), "{\"op\":\"picked\",\"idx\":%d}\n", best_idx);
+            std::lock_guard<std::mutex> lk(gQueueMutex);
+            send_all_locked(buf);
 
         } else if (!bo) {
             std::string errmsg = "{\"op\":\"error\","

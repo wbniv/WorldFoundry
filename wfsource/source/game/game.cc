@@ -33,6 +33,7 @@
 #include <unistd.h>
 #include <audio/music.hp>
 #include "rest_api.hp"
+#include "debug_server.hp"
 #include "physics_jolt.hp"
 #include "oas/matte.ht"
 #include "gamestrm.hp"
@@ -269,6 +270,10 @@ WFGame::RunLevel(_DiskFile* levelFile)
 	bool _bContinue = true;
 	DBSTREAM1 ( cprogress << "Entering main game loop\n"; );
 	RestApi_Start();
+	{
+		extern int gDebugPort;
+		DebugServer_Start(gDebugPort);
+	}
 
 	while ( !_curLevel->done() && _bContinue )
 	{
@@ -285,6 +290,7 @@ WFGame::RunLevel(_DiskFile* levelFile)
 		}
 
 		RestApi_DrainQueue();
+		DebugServer_DrainQueue(*_curLevel);
 		assert(HALScratchLmalloc.Empty());
 		DBSTREAM1( cframeinfo << char(12) << std::endl << "Frame Info:" << std::endl; )
 		DBSTREAM2( cflow << "Top of WFGame::update" << std::endl; )
@@ -303,7 +309,8 @@ WFGame::RunLevel(_DiskFile* levelFile)
 		assert( ValidPtr(_curLevel ));
 		_curLevel->Validate();
 		DBSTREAM2( cflow << "WFGame::update: curLevel->Update" << std::endl; )
-		_curLevel->update(deltaTime);
+		if ( !DebugServer_IsPaused() )
+			_curLevel->update(deltaTime);
 		DBSTREAM2( cflow << "WFGame::update: render scene" << std::endl; )
 
 		if(_curLevel->camera() && _curLevel->camera()->ValidView())
@@ -318,6 +325,7 @@ WFGame::RunLevel(_DiskFile* levelFile)
 			AssertMsg(_curLevel->LevelClock().Current() < SCALAR_CONSTANT(10),"No Valid View after 10 seconds");
 #endif
 
+		DebugServer_BroadcastState(*_curLevel);
 		DBSTREAM2( cflow << "WFGame::update: page flip" << std::endl; )
 		deltaTime = _display->PageFlip();
 		DBSTREAM2( cflow << "WFGame::update: done" << std::endl; )
@@ -332,6 +340,7 @@ WFGame::RunLevel(_DiskFile* levelFile)
 	DBSTREAM1( std::cout << ", _bContinue = " << _bContinue << ", _curLevel->done() = " << _curLevel->done() << std::endl; )
 
 	RestApi_Stop();
+	DebugServer_Stop();
 	if (gMusicPlayer) gMusicPlayer->stop();
 	MEMORY_DELETE(HALLmalloc,_curLevel,Level);
 	_curLevel = NULL;

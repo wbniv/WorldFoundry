@@ -704,6 +704,102 @@ class WF_OT_run_level(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class WF_OT_bridge_connect(bpy.types.Operator):
+    """Connect to a running wf_game debug bridge"""
+    bl_idname = "wf.bridge_connect"
+    bl_label  = "Connect to Engine"
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        prefs = context.preferences.addons.get(__package__)
+        prefs = prefs.preferences if prefs else None
+        host = getattr(prefs, 'debug_host', 'localhost') if prefs else 'localhost'
+        port = int(getattr(prefs, 'debug_port', 7777))    if prefs else 7777
+        bridge = _db.get_bridge()
+        bridge.connect(host, port)
+        if bridge.connected:
+            self.report({'INFO'}, f"Connected to {host}:{port}")
+        else:
+            self.report({'WARNING'}, f"Connection failed: {bridge.error}")
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_disconnect(bpy.types.Operator):
+    """Disconnect from the wf_game debug bridge"""
+    bl_idname = "wf.bridge_disconnect"
+    bl_label  = "Disconnect from Engine"
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().disconnect()
+        self.report({'INFO'}, "Disconnected")
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_pause(bpy.types.Operator):
+    """Pause the running wf_game simulation"""
+    bl_idname = "wf.bridge_pause"
+    bl_label  = "Pause"
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().pause()
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_resume(bpy.types.Operator):
+    """Resume the paused wf_game simulation"""
+    bl_idname = "wf.bridge_resume"
+    bl_label  = "Resume"
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().resume()
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_step(bpy.types.Operator):
+    """Step the simulation forward one frame"""
+    bl_idname = "wf.bridge_step"
+    bl_label  = "Step"
+
+    frames: bpy.props.IntProperty(name="Frames", default=1, min=1)
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().step(self.frames)
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_pick(bpy.types.Operator):
+    """Click in the 3D viewport to select the closest engine actor"""
+    bl_idname   = "wf.bridge_pick"
+    bl_label    = "Pick Object"
+    bl_options  = {'REGISTER'}
+
+    def modal(self, context, event):
+        if event.type == 'LEFTMOUSE' and event.value == 'PRESS':
+            region = context.region
+            rv3d   = context.region_data
+            if region and rv3d:
+                from bpy_extras.view3d_utils import region_2d_to_ray_3d
+                coord = (event.mouse_region_x, event.mouse_region_y)
+                origin, direction = region_2d_to_ray_3d(region, rv3d, coord)
+                from . import debug_bridge as _db
+                _db.get_bridge().scene_pick(list(origin), list(direction))
+            return {'FINISHED'}
+        if event.type in {'RIGHTMOUSE', 'ESC'}:
+            return {'CANCELLED'}
+        return {'RUNNING_MODAL'}
+
+    def invoke(self, context, event):
+        if context.area and context.area.type == 'VIEW_3D':
+            context.window_manager.modal_handler_add(self)
+            return {'RUNNING_MODAL'}
+        self.report({'WARNING'}, "Must be invoked from the 3D viewport")
+        return {'CANCELLED'}
+
+
 _CLASSES = [
     WF_OT_attach_schema,
     WF_OT_detach_schema,
@@ -719,6 +815,12 @@ _CLASSES = [
     WF_OT_export_iff,
     WF_OT_import_iff,
     WF_OT_run_level,
+    WF_OT_bridge_connect,
+    WF_OT_bridge_disconnect,
+    WF_OT_bridge_pause,
+    WF_OT_bridge_resume,
+    WF_OT_bridge_step,
+    WF_OT_bridge_pick,
 ]
 
 

@@ -257,8 +257,8 @@ The feature gaps that matter are not protocol-level — they are **session contr
 |---|---|---|---|---|
 | Editor scene isolated from runtime | Yes (serialized → restored on exit) | Yes (duplicated → discarded on exit) | Yes (separate process — free) | ✓ already |
 | Runtime changes pushed back to editor | No | Manual ("Keep Simulation Changes", per-property) | No | Phase 3 |
-| Pause / step / resume | Yes | Yes | No | Phase 2 |
-| Click-to-select (pick ray) | Yes | Yes | No | Phase 2 |
+| Pause / step / resume | Yes | Yes | No | ✓ Phase 2a |
+| Click-to-select (pick ray) | Yes | Yes | No | ✓ Phase 2a |
 | Property change latency | 0 (in-process) | 0 (in-process) | ~1 frame | Phase 2 |
 | Remote device | Separate tool | Separate tool | Same protocol | ✓ already |
 | Undo runtime changes | No | No | No | Phase 3 |
@@ -273,7 +273,7 @@ Phase 2 closes the "pause/step/resume" and "click-to-select" gaps, making iterat
 
 ---
 
-## Phase 2: Session control + object inspector
+## Phase 2a: Session control + object picker — IMPLEMENTED 2026-04-29
 
 ### Pause / step / resume
 
@@ -283,29 +283,35 @@ Phase 2 closes the "pause/step/resume" and "click-to-select" gaps, making iterat
 {"op": "resume"}
 ```
 
-Engine: a `_paused` flag in `DebugServer` checked at the top of the game loop. When paused, only the bridge drain runs — physics and scripts don't tick. This makes property tweaking deterministic: change a value, step one frame, observe the result.
+Engine: `gPaused` + `gStepN` atomics in `DebugServer`, checked via `DebugServer_IsPaused()` in the game loop. When paused, only the bridge drain runs — `_curLevel->update()` is skipped, so physics and scripts don't tick. Rendering and `BroadcastState` continue so the viewport stays live. Step decrements `gStepN` and allows that many frames through before re-pausing.
 
-### Object inspector: click in game → select in Blender
+Engine replies `{"op":"paused"}` / `{"op":"resumed"}` so Blender can update the panel immediately.
+
+### Object picker: click in Blender → select engine actor
+
+Blender computes the view ray (no camera-unproject needed in the engine):
 
 ```json
-{"op": "pick", "screen_x": 400, "screen_y": 300}
-{"op": "picked", "idx": 3}
+{"op": "scene:pick", "ray_origin": [1.2, 0.0, 5.1], "ray_dir": [0.0, 0.0, -1.0]}
+{"op": "picked", "idx": 7}
 ```
 
-The engine does a physics raycast from the screen position, responds with the actor index. Blender selects the matching object in the scene.
+Engine iterates all actors, finds the one whose position has the smallest perpendicular distance to the ray (within a 2-unit pick radius), responds with `idx`. Blender's `picked` handler selects the matching object in the scene.
 
 ```mermaid
 sequenceDiagram
-    participant U as User (game window)
-    participant E as wf_game
+    participant U as User (Blender 3D view)
     participant B as Blender
+    participant E as wf_game
 
-    U->>E: clicks at screen (400, 300)
-    Note over B: user triggers "Pick" mode\nin bridge panel
-    B->>E: {"op":"pick","screen_x":400,"screen_y":300}
-    E->>E: physics raycast
+    U->>B: clicks "Pick Object" button
+    Note over B: WF_OT_bridge_pick enters modal mode
+    U->>B: left-click in 3D viewport
+    B->>B: region_2d_to_ray_3d(region, rv3d, coord)
+    B->>E: {"op":"scene:pick","ray_origin":[...],"ray_dir":[...]}
+    E->>E: closest-point-on-ray per actor (2-unit radius)
     E->>B: {"op":"picked","idx":7}
-    B->>B: bpy.context.scene.objects[name].select_set(True)
+    B->>B: bpy.data.objects["crate_02"].select_set(True)
     Note over B: crate_02 highlighted\nin viewport + outliner
 ```
 
