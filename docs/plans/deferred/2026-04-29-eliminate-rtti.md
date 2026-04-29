@@ -99,14 +99,32 @@ objects are ultimately `Actor` subclasses, so these are also always valid.
 
 ### `CameraHandler*` (1 call — `camera.cc:98`)
 
-`CameraHandler` is a `MovementHandler` subclass, **not** a `BaseObject`. It has
-no `kind()` method. This cast cannot use the `EActorKind` pattern.
-Options:
-- Keep as `dynamic_cast` (single exception, isolated to camera.cc)
-- Add a virtual `IsCamera()` predicate to `MovementHandler`
-- Restructure to avoid the cast
+`CameraHandler : public MovementHandler` adds `virtual GetWatchObject()`.
+`Camera::GetWatchObject()` casts the handler to `CameraHandler*` purely to
+call `GetWatchObject()`. The `#pragma message` comment already acknowledges
+this is a camera-only invariant.
 
-Recommendation: keep as `dynamic_cast` for now; document the exception.
+**Fix:** add `virtual const PhysicalObject* GetWatchObject(const MovementObject&) const`
+to `MovementHandler` with a default `return nullptr`. `CameraHandler` already
+overrides it. `Camera::GetWatchObject()` then calls it directly on the
+`MovementHandler&` — no cast needed.
+
+```cpp
+// movement/movement.hp — add to MovementHandler:
+virtual const PhysicalObject* GetWatchObject(const MovementObject&) const { return nullptr; }
+
+// game/camera.cc — replace cast with direct call:
+const PhysicalObject* Camera::GetWatchObject() const {
+    Validate();
+    assert(ValidPtr(_nonStatPlat));
+    auto& handler = _nonStatPlat->_movementManager.GetMovementHandler(*this);
+    const PhysicalObject* wo = handler.GetWatchObject(*this);
+    assert(ValidPtr(wo));
+    return wo;
+}
+```
+
+This eliminates the last `dynamic_cast` with no exceptions.
 
 ---
 
@@ -124,7 +142,7 @@ Recommendation: keep as `dynamic_cast` for now; document the exception.
 | `movement/movefoll.cc` | 2 | Both `MovementObject*` |
 | `movement/movepath.cc` | 2 | Both `MovementObject*` |
 | `physics/activate.cc` | 3 | All `PhysicalObject*` |
-| `game/camera.cc` | 1 | `CameraHandler*` — exception case |
+| `game/camera.cc` | 1 | `CameraHandler*` — push `GetWatchObject()` up into `MovementHandler` |
 | `game/actbox.cc` | 1 | `Actor*` |
 | `game/missile.cc` | 1 | `Actor*` |
 | `game/shadow.cc` | 1 | `PhysicalObject*` |
