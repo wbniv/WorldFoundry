@@ -127,7 +127,7 @@ WF uses newline-delimited JSON. Wire-level compatibility is not a goal; op namin
 
 **Scene tree vs actor list:** Godot's `scene:scene_tree` sends the full hierarchy with parent-child relationships. WF's `BroadcastState` sends a flat list of actor positions. WF has no hierarchy in the level IFF — actors are peers, not trees. No need to emulate `scene:scene_tree`.
 
-**Property access:** Godot uses `property_path` strings that traverse the object graph (e.g. `"position:x"`). WF's OAD schema has natural sub-block scope via `LEVELCONFLAGCOMMONBLOCK(movebloc)`, `LEVELCONFLAGCOMMONBLOCK(common)`, `PROPERTY_SHEET_HEADER(...)` etc. — so dot-separated paths like `"common.Speed"` or `"movebloc.maxVelocity"` map cleanly onto the OAD structure and read well. Godot's path convention should be adopted for the `key` field in `scene:set_prop`.
+**Property access:** Godot uses `property_path` strings that traverse the object graph (e.g. `"position:x"`). WF OAD fields can be addressed either way: as bare names (`"Speed"`) or as scoped paths (`"common.Speed"`, `"movebloc.maxVelocity"`) using the `LEVELCONFLAGCOMMONBLOCK` / `PROPERTY_SHEET_HEADER` block names as a prefix. Both are technically accurate. Scoped paths are preferred: they're unambiguous, make the block structure legible in the wire format, and read better. Use `"common.Speed"` not `"Speed"` for `scene:set_prop`.
 
 **Method calls:** `scene:live_node_call` lets the editor call arbitrary methods on live objects. WF has no equivalent and it's not planned — mailbox writes cover the same use case more safely.
 
