@@ -2,7 +2,7 @@
 
 ## SCRIPTING ENGINES
 
-- [ ] Review Forth compile vs. run separation — Forth conflates compile-time (`:` definitions, immediate words) with run-time (interpret loop); audit how `scripting_zforth.cc` handles this for per-actor scripts and whether a pre-compile pass into a saved dictionary makes sense
+- [investigated] Forth compile vs. run separation — correctly handled: RunScript splits at last `;`, compiles defs once into persistent `g_ctx`, wraps call body in `_wfsN`. Constants use inline literals not `constant` (correct). Pre-compile pass at level load is feasible (low effort, defer until hitching observed) — [investigation](docs/investigations/2026-04-29-forth-compile-run-audit.md)
 
 
 ## LUA ENGINE
