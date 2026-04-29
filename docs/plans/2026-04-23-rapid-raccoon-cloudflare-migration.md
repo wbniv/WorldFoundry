@@ -161,6 +161,12 @@ sudo cloudflared service install
 # You'll want to copy the config.yml + credentials into /etc/cloudflared/ for the root-run service, OR keep it user-level by writing a ~/.config/systemd/user/cloudflared.service unit.
 ```
 
+**TODO (deferred):** the always-on systemd install will happen when we move the
+Party Games relay onto an AWS server (EC2/Lightsail/whatever). Running it on
+this laptop long-term doesn't make sense — sleep, Wi-Fi changes, reboots all
+interrupt the tunnel. For now, run `cloudflared tunnel run party-games`
+by hand when testing. Move to systemd at the same time as the AWS migration.
+
 **Verification after step 3:**
 - `curl -s -o /dev/null -w "%{http_code}\n" https://pg.rapid-raccoon.com/receiver` → 200 (with the Party Games server running locally on :8080).
 - `curl -s --http1.1 -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" https://pg.rapid-raccoon.com/ws | head -1` → `HTTP/1.1 101 Switching Protocols`.
@@ -182,6 +188,30 @@ sudo cloudflared service install
 - AWS Console → Route 53 → Hosted zones → `rapid-raccoon.com` → Delete.
 - Saves ~$0.50/month.
 - Only do this after confirming Cloudflare DNS is resolving everything correctly — the old Route 53 zone is useful as a rollback target until you're confident.
+- **BLOCKED until `gustos-colores` DNS is fully ported to Cloudflare** — the Route 53 zone still holds 10 A ALIAS records (→ CloudFront) + 10 ACM validation CNAMEs for `gustos-colores.*.rapid-raccoon.com` that need to move first. See `scripts/cloudflare-port-gustos-colores.sh` in bumper2bumper.
+
+## Remediation TODO — credential hygiene
+
+Work today (2026-04-24) was expedient-first: Cloudflare API tokens were
+created as **user-scoped** tokens under Profile → API Tokens (tied to
+wbnorris@gmail.com). Cloudflare's recommended pattern for automation and
+for any credential not meant to represent an interactive user is
+**Account API Tokens** (Account → API Tokens), which survive user turnover
+and are the right shape for scripts + CI. Follow-up:
+
+1. Delete the existing user-scoped token(s) ("Edit zone DNS" and any
+   others created today) from https://dash.cloudflare.com/profile/api-tokens.
+2. Recreate equivalents as **Account API Tokens** on the account page —
+   one narrow token per script role (e.g., "DNS edit — rapid-raccoon.com",
+   "zone settings — rapid-raccoon.com").
+3. Update scripts in `~/SRC/bumper2bumper/scripts/` if they hardcode any
+   token-retrieval patterns that assume user scope (current ones just
+   read from env / prompt, so should be a no-op).
+4. Document the token-naming convention somewhere durable so future tokens
+   follow it.
+
+Driver: operational hygiene as the business grows — tokens tied to an
+individual user break when that user's access changes; account tokens don't.
 
 ## Follow-up / revisit triggers
 

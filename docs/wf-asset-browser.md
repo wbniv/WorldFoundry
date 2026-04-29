@@ -1,17 +1,17 @@
 # WF Asset Browser — User Manual
 
 The WF Asset Browser is a Blender sidebar panel that searches licensed 3D assets
-across multiple online providers, filters them against the project's licence policy,
-and imports the chosen asset directly into your scene with a provenance manifest.
-The manual is organised around **licence tiers**, because every decision in the
-browser — what you can see, what you can import, what you owe the author — is
-driven by the asset's licence.
+across multiple online providers and records the **provenance** of everything you
+import — where it came from, who made it, under what terms, and what attribution
+you owe. Whether you ultimately accept or reject a given licence is a policy choice
+you configure per project; the tool's job is to make that choice informed and
+auditable.
 
 ## Quick start
 
 <img src="plans/blender object gallery by license.png" alt="WF Asset Browser — searching 'chair' across four providers. Poly Haven result selected; CC0-1.0 badge and thumbnail visible in the detail pane. OpenGameArt results carry a ⚠ lower-trust marker." style="float: right; width: 50%; margin: 0 0 1.2em 1.8em;">
 
-1. Open a `.blend` file inside the `wflevels/` tree.
+1. Open any `.blend` file, or run from a project directory that contains (or has an ancestor with) a `licence_policy.toml`.
 2. Press **N** in the 3D Viewport to open the sidebar and click the **WF** tab. (Also available via **File → Import → WF Asset Browser**.)
 3. Type a query (`barrel`, `tree`, `crate`) and press the search icon or **Enter**.
 4. Pick a result and click **Import Selected**.
@@ -24,7 +24,13 @@ accepting CC-BY, managing waivers — is covered in the sections below.
 
 ## The policy file
 
-All filtering is driven by `wflevels/licence_policy.toml`. The plugin walks up
+> **The policy file is yours.** The examples throughout this manual show the WF
+> project's configuration for a commercial game. An open-source project might
+> accept CC-BY-SA everywhere; a personal or hobbyist project might accept
+> everything. The fallback (CC0 only) is conservative by design — configure it
+> for your project.
+
+All filtering is driven by a `licence_policy.toml` file. The plugin walks up
 from the active `.blend` file's directory until it finds this file; the first one
 found wins. The path shown in the panel under **Policy:** tells you which file is
 in effect.
@@ -38,7 +44,7 @@ Accept: CC0-1.0
 
 The fallback is intentional: new checkouts work immediately, but only the safest
 possible licence class passes. **Before you import anything other than CC0 assets,
-make sure the panel shows the project policy file, not the fallback.**
+make sure the panel shows your project policy file, not the fallback.**
 
 ### Policy file anatomy
 
@@ -68,6 +74,57 @@ reason = "share-alike incompatible with commercial distribution"
 | `accept` | Assets with this licence appear in results and can be imported |
 | `reject-default` | Blocked unless a `[[waiver]]` record exists for the specific asset |
 | `reject` | Never passes — no waiver possible |
+
+
+## Provenance — what the tool records
+
+Every imported asset gets a `manifest.json` placed alongside it, even CC0 assets
+where attribution is not legally required. The record of origin is always there.
+
+```json
+{
+  "licence_id":           "CC0-1.0",
+  "attribution_required": false,
+  "attribution_string":   "",
+  "licence_url":          "https://creativecommons.org/publicdomain/zero/1.0/",
+  "provider":             "polyhaven",
+  "provider_id":          "oak-tree-01",
+  "download_date":        "2026-04-29",
+  "original_url":         "https://polyhaven.com/a/oak-tree-01",
+  "download_url":         "https://cdn.polyhaven.com/...",
+  "derived_from":         []
+}
+```
+
+**For CC-BY assets:** `attribution_required` is `true` and `attribution_string`
+contains the credit line the author requests (e.g. `"Oak Tree" by Jane Smith
+(sketchfab.com/...)`). This string is what your credits screen must display —
+no guessing, no manual lookup.
+
+**The `derived_from` field** tracks remix chains — if asset B is a modification
+of asset A, that relationship is preserved in the manifest.
+
+**Never delete `manifest.json`.** It is the legal record of where the asset came
+from and under what terms. The future `wf_audit` CI tool will validate every
+asset in the level against its manifest automatically.
+
+### Attribution obligations audit
+
+To see every asset in the project that requires attribution:
+
+```bash
+grep -rl '"attribution_required": true' wflevels/*/assets/
+```
+
+To extract just the credit strings for your credits screen:
+
+```bash
+grep -h '"attribution_string"' wflevels/*/assets/*/manifest.json | \
+  grep -v '""' | sort -u
+```
+
+Run this before any release. Every `attribution_string` in the output is a line
+your credits screen must display.
 
 
 ## Providers and their licence tiers
@@ -119,11 +176,13 @@ them with extra care before shipping.
 
 ### CC0-1.0 — Public domain · no restrictions · no attribution
 
-The green **◈** icon in the results list. These assets are contributed by their
-authors to the public domain. You can use, modify, and ship them with zero
-obligations. No credits line required (though `require_attribution_credits = true`
-in the policy file means the plugin will still write the author's name to
-`manifest.json` for traceability, even if you don't technically need to display it).
+The green **◈** icon in the results list. The author waives all rights; you can
+use, modify, and ship these assets with zero obligations.
+
+**What the tool records:** Even though attribution is not required, the plugin
+writes the author's name and source URL to `manifest.json` for traceability.
+
+**WF project default:** `accept`.
 
 **All five default providers serve CC0-only assets. If you leave the default
 provider set and the default policy, every result you see is CC0.**
@@ -132,10 +191,13 @@ provider set and the default policy, every result you see is CC0.**
 ### CC-BY-4.0 — Attribution required
 
 The yellow **🛡** icon. The author allows any use — commercial, derivative works,
-redistribution — as long as you credit them. The credit line is provided by the
-plugin in `manifest.json` under `attribution_string`.
+redistribution — as long as you credit them.
 
-**Default policy status: `reject-default`.** CC-BY assets do *not* appear in
+**What the tool records:** `attribution_string` contains the exact credit line
+the author requests. `attribution_required` is set to `true`. This is what your
+credits screen must display.
+
+**WF project default: `reject-default`.** CC-BY assets do *not* appear in
 results unless you either:
 
 - Set the licence to `accept` in `licence_policy.toml` (accepts CC-BY globally); or
@@ -143,8 +205,12 @@ results unless you either:
 
 When you enable CC-BY globally or via waiver, you are committing the project to
 maintaining a credits screen that displays the `attribution_string` for every
-imported CC-BY asset. Run `grep -r attribution_string wflevels/*/assets/*/manifest.json`
-to audit outstanding attribution obligations.
+imported CC-BY asset. Run the attribution audit command (see §Provenance) before
+any release.
+
+**When it suits other projects:** Fine for any project that can maintain a
+credits screen — which is most projects. Set `status = "accept"` to enable
+globally.
 
 **How to add a global accept:**
 
@@ -152,7 +218,7 @@ to audit outstanding attribution obligations.
 [[licence]]
 id     = "CC-BY-4.0"
 status = "accept"
-reason = "credits screen maintained; legal sign-off"
+reason = "credits screen maintained"
 ```
 
 **How to add a per-asset waiver** (the safer choice for one-off assets):
@@ -176,25 +242,46 @@ wf-asset policy add-waiver sketchfab/abc123uid CC-BY-4.0 \
 
 ### CC-BY-SA-4.0 — Attribution + ShareAlike
 
-**Hard block. No waiver path.** ShareAlike (SA) requires any derivative work
-to be released under the same licence. For a commercial game, that means releasing
-the entire project under CC-BY-SA — incompatible with the project's commercial intent.
+**What it requires:** Derivatives must be released under the same CC-BY-SA terms.
+The tool records `attribution_string` and `licence_url` for any asset you accept.
 
-Assets with this licence are silently stripped from results. If you explicitly need
-one, that decision requires legal review and is outside the scope of the policy file.
+**WF project default: hard block. No waiver path.** ShareAlike requires any
+derivative work to be released under the same licence. For a commercial game,
+that means releasing the entire project under CC-BY-SA — incompatible with
+commercial distribution.
+
+**When it suits other projects:** Perfect for open-source games that want remixed
+assets to stay open. If your project is open-source, set this to `accept`.
+
+Assets with this licence are silently stripped from results under the WF default
+policy. If you explicitly need one and your project is commercial, that decision
+requires legal review and is outside the scope of the policy file.
 
 
 ### CC-BY-NC-4.0 and CC-BY-NC-SA-4.0 — NonCommercial
 
-**Hard block. No waiver path.** NonCommercial clauses prohibit any
-revenue-generating use, including game sales on Steam or any storefront.
+**What they require:** No commercial use. The tool records full provenance
+regardless of policy outcome.
+
+**WF project default: hard block. No waiver path.** NonCommercial clauses
+prohibit any revenue-generating use, including game sales on any storefront.
+
+**When they suit other projects:** Fine for personal, hobby, or academic work
+with no monetisation. Set to `accept` in your policy file.
 
 
 ### CC-BY-ND-4.0 and CC-BY-NC-ND-4.0 — NoDerivatives
 
-**Hard block.** ND licences prohibit creating derivative works — which includes
-format conversion, scaling, re-texturing, and any modification made during the
-normal level-building pipeline. Almost never appropriate for game assets.
+**What they require:** No derivative works. The tool records provenance and flags
+`attribution_required = true`.
+
+**WF project default: hard block.** ND licences prohibit creating derivative
+works — which includes format conversion, scaling, re-texturing, and any
+modification made during a normal asset pipeline. Almost never appropriate for
+game assets.
+
+**When they suit other projects:** Rare — background decoration used exactly
+as-is. A narrow waiver path via `[[waiver]]` is possible if needed.
 
 
 ### royalty-free — Sketchfab Standard (paid)
@@ -321,7 +408,7 @@ The plugin:
 
 - Downloads the asset to `assets/<provider>/<asset-id>/` relative to the active
   `.blend` file (created automatically).
-- Writes `manifest.json` alongside the asset file (see below).
+- Writes `manifest.json` alongside the asset file (see §Provenance).
 - Invokes Blender's built-in glTF importer.
 - Places the imported mesh at the **3D cursor**.
 - Sets a `wf_schema_path` custom property on the imported objects pointing to
@@ -331,49 +418,6 @@ The status bar at the top of the panel shows progress and the final result:
 
 ```
 Imported "Oak Tree" (CC0-1.0) from Poly Haven; manifest written alongside asset
-```
-
-### The manifest file
-
-Every imported asset gets a `manifest.json` next to it:
-
-```json
-{
-  "licence_id":           "CC0-1.0",
-  "attribution_required": false,
-  "attribution_string":   "",
-  "licence_url":          "https://creativecommons.org/publicdomain/zero/1.0/",
-  "provider":             "polyhaven",
-  "provider_id":          "oak-tree-01",
-  "download_date":        "2026-04-29",
-  "original_url":         "https://polyhaven.com/a/oak-tree-01",
-  "download_url":         "https://cdn.polyhaven.com/...",
-  "derived_from":         []
-}
-```
-
-For CC-BY assets, `attribution_required` is `true` and `attribution_string`
-contains the credit line the author requests (e.g. `"Oak Tree" by Jane Smith
-(sketchfab.com/...)`). This string is what your credits screen must display.
-
-**Never delete `manifest.json`.** It is the legal record of where the asset came
-from and under what terms. The future `wf_audit` CI tool will validate every
-asset in the level against its manifest.
-
-
-## Attribution obligations audit
-
-To see every asset in the project that requires attribution:
-
-```bash
-grep -rl '"attribution_required": true' wflevels/*/assets/
-```
-
-To extract just the credit strings for your credits screen:
-
-```bash
-grep -h '"attribution_string"' wflevels/*/assets/*/manifest.json | \
-  grep -v '""' | sort -u
 ```
 
 
@@ -401,23 +445,24 @@ Set `WF_SKETCHFAB_API_KEY` in the environment to enable Sketchfab downloads.
 
 ## Troubleshooting
 
-### "wf_asset_provider not loaded"
+### "wf_core not found"
 
-The compiled Rust extension (`.so` / `.pyd`) is missing from the add-on directory.
-Build it:
+The compiled native library (`wf_core.so`) is missing from the add-on directory.
+Build and install it:
 
 ```bash
-cd wftools/wf_asset_provider
-maturin develop --features python
+task blender-install
 ```
 
-Then copy the resulting `.so` into `wftools/wf_blender/` and reload the add-on.
+This runs `maturin build --release` if the wheel is missing, then copies
+`wf_core.so` into the add-on directory and symlinks all Python files.
 
 ### Results I expected are missing
 
 Check the **Policy:** line in the panel. If it says `(fallback)`, the plugin
-couldn't find `wflevels/licence_policy.toml` and is accepting only CC0.
-Open the `.blend` file from inside `wflevels/` so the walk-up finds the policy.
+couldn't find a `licence_policy.toml` and is accepting only CC0. Open the
+`.blend` file from a directory that has `licence_policy.toml` in its ancestor
+tree.
 
 Check the **Filter** dropdown — if it is set to "CC0 only" and you are searching
 Sketchfab, non-CC0 results will be hidden even if they passed the policy.
@@ -445,14 +490,6 @@ no waiver path. For `unknown`, check the provider's page for the actual licence
 text; if it maps to a known ID, file an issue so the `LicenceId::from_raw()`
 table can be updated.
 
-### Imported mesh has no WF properties, or has the wrong object type
-
-Every imported asset is tagged with the `statplat` (static platform) schema by
-default. If the asset is something else — a pickup, a door, an NPC spawn point —
-open the **WF** properties panel for the object and use **Attach Schema** to
-select the correct `.oad` file from `wfsource/source/oas/`.
-
-
 ## Licence decision flowchart
 
 ```
@@ -463,7 +500,9 @@ Is the licence CC0-1.0?
                         └─ Yes → Import. Add attribution_string to credits screen.
                         └─ No  → Add waiver in licence_policy.toml, then import.
              └─ No  → Is it CC-BY-SA, CC-BY-NC, CC-BY-ND, GPL, or editorial?
-                        └─ Yes → Hard block. Do not import. Find a different asset.
+                        └─ Yes → With the WF project default policy: hard block.
+                                 For open-source projects: configure your policy.
+                                 For hobby/non-commercial: configure your policy.
              └─ No  → Is it royalty-free (Sketchfab paid Standard)?
                         └─ Yes → Add "royalty-free" as accept in policy. Import.
                                  Keep your purchase receipt separately.

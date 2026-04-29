@@ -36,7 +36,10 @@ wftools/wf_asset_provider/      NEW Rust crate. Single source of truth for provi
 ├── src/
 │   ├── lib.rs                  Crate root; re-exports the provider trait + the canonical licence enum + AssetCandidate / Manifest types.
 │   ├── licence.rs              Canonical `LicenceId` enum (CC0_1_0, CC_BY_4_0, CC_BY_SA_4_0, GPL_3_0, ...) and the licence-mapping table that turns each provider's raw response into a canonical ID. **The single source of truth for provider-string → canonical-ID translation.**
-│   ├── candidate.rs            AssetCandidate struct (provider, provider_id, title, thumbnail_url, licence_id, download_url, original_url, attribution_string, attribution_required).
+│   ├── candidate.rs            AssetCandidate struct (provider, provider_id, title, thumbnail_url, licence_id, download_url, original_url, attribution_string, attribution_required, poly_count, texture_max_res, texture_resolutions).
+│                           poly_count: Option<u32>  — triangle count for the default (highest) LOD. Populated by Poly Haven only (from the `lods[]` array in their API response); None for all other providers.
+│                           texture_max_res: Option<u32>  — max texture dimension in pixels (4096 = 4K). Populated by Poly Haven (`max_resolution` field) and AmbientCG (highest available tier); None for Kenney / Quaternius / OpenGameArt.
+│                           texture_resolutions: Vec<u32>  — download-time selectable tiers, sorted ascending (e.g. [1024, 2048, 4096, 8192]). Non-empty only for Poly Haven and AmbientCG. Empty = no user choice; download at provider default.
 │   ├── manifest.rs             Manifest struct + serde_json serialiser. write_manifest(path, fields) is the single canonical writer.
 │   ├── policy.rs               licence_policy.toml reader. Walks up from a given path to find policy. Same fallback-to-CC0-only behaviour as planned. Uses `toml` crate.
 │   ├── http.rs                 Shared reqwest client with per-provider rate limiter (governor crate or hand-rolled token-bucket); retry-with-backoff helper.
@@ -204,18 +207,30 @@ A new sidebar panel `WF_PT_asset_browser` in the 3D Viewport's `WF` category (ex
 │  ☑ Quaternius   ☑ OpenGameArt           │
 │                                         │
 │ Policy: wflevels/licence_policy.toml    │
-│ Accept: CC0-1.0, CC-BY-4.0, royalty-... │
+│ Accept: CC0-1.0, CC-BY-4.0, ...         │
 │ [Show waivers (0)]                      │
 │                                         │
-│ ┌─ Results (12 / 12 after filter) ──┐  │
-│ │ [thumb] Oak tree  CC0-1.0  Poly..│  │
-│ │ [thumb] Pine tree CC0-1.0  Quat. │  │
-│ │ [thumb] Bare tree CC0-1.0  Kenney│  │
-│ │ ... (lazy-loaded on scroll)      │  │
-│ └──────────────────────────────────┘  │
+│ ┌─ Results (12 / 12 after filter) ────┐ │
+│ │ [▣] Oak tree    CC0  Poly  1.2K▲ 4K│ │
+│ │ [▣] Pine tree   CC0  Quat  0.8K▲  — │ │
+│ │ [▣] Bare tree   CC0  Kenny 0.5K▲  — │ │
+│ │ ... (lazy-loaded on scroll)         │ │
+│ └─────────────────────────────────────┘ │
+│                                         │
+│ ┌─ Oak tree (Poly Haven) ─────────────┐ │
+│ │  Triangles: 1,248    Licence: CC0   │ │
+│ │  Texture:  [4K ▾] (1K · 2K · 4K · 8K)│
+│ │  Attribution: not required          │ │
+│ └─────────────────────────────────────┘ │
 │ [Import Selected]  [Cancel]            │
 └────────────────────────────────────────┘
 ```
+
+Column key in result rows: `[thumb]  name  licence  provider  poly▲  tex-res`
+- Poly count shown as `1.2K▲` (triangle abbreviation; `—` if provider doesn't expose it).
+- Tex res shown as `4K` (max available tier; `—` if unknown or not applicable).
+- Selected-asset detail pane appears below the list when a row is highlighted.
+- Resolution dropdown in the detail pane is only shown when `texture_resolutions` is non-empty (Poly Haven and AmbientCG); for other providers the field shows a fixed label or `—`.
 
 Implementation: a `bpy.types.UIList` for the result rows (Blender's idiomatic scrollable list), a `bpy.types.PropertyGroup` to hold the result data, `bpy.utils.previews` for the thumbnail icon column. Provider toggles are bool properties on a scene-scope PropertyGroup so they persist per-scene. The "Show waivers" button opens a separate popup listing per-asset waivers — read-only in v1 (waiver creation is part of the v2 elevation flow).
 
@@ -224,6 +239,7 @@ Implementation: a `bpy.types.UIList` for the result rows (Blender's idiomatic sc
 ### Import flow
 
 1. Designer clicks "Import Selected" with one row selected.
+1a. **Resolution selection** (Poly Haven and AmbientCG only). If `candidate.texture_resolutions` is non-empty, the operator reads the `wf_asset_texture_res` scene property set by the detail-pane dropdown (default = largest available tier). The selected resolution is passed to `download()` as a hint; the provider adapter appends the appropriate query param before fetching (Poly Haven: `?res=4k`; AmbientCG: `resolution=4096`). Providers with empty `texture_resolutions` (Kenney, Quaternius, OpenGameArt) ignore the hint and download their single available bundle unchanged.
 2. `WF_OT_import_asset.execute()` fires.
 3. Provider's `download()` is called on a worker thread (operator returns `{'RUNNING_MODAL'}`, polls a queue for completion).
 4. Asset bytes land in `wflevels/<level>/assets/<provider>/<asset-id>/`. Subdir layout: `model.glb` or `model.gltf` + textures + `manifest.json`.
