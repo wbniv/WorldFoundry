@@ -132,9 +132,11 @@ The pre-git history is preserved in the [World Foundry GDK CVS repository on Sou
 
 | File | Feb 2000 (SourceForge import) | First `dynamic_cast` | CVS log message |
 |---|---|---|---|
-| `actor.cc` | 0 | Rev 1.43, **Jan 11, 2003** | "changed Actor::Activated to use PhysicalObjectIterator instead of ActiveRoomsActorIter" |
-| `movecam.cc` | 0 | Rev 1.18, **Jan 11, 2003** | "removed Actor from most movement handler functions" |
-| `level.cc` | 3 (transitional) | Rev 1.62, **May 23, 2003** | "changed all PhysicalObjectIter references to BaseObjectIter, added dynamic_cast where needed" |
+| `actor.cc` | 0 | Rev 1.43, **Jan 11, 2003** (kts) | "changed Actor::Activated to use PhysicalObjectIterator instead of ActiveRoomsActorIter" |
+| `movecam.cc` | 0 | Rev 1.18, **Jan 11, 2003** (kts) | "removed Actor from most movement handler functions" |
+| `level.cc` | 3 (transitional) | Rev 1.62, **May 23, 2003** (kts) | "changed all PhysicalObjectIter references to BaseObjectIter, added dynamic_cast where needed" |
+
+All three commits are by **Kevin T. Seghetti** (`kts`), one of the original World Foundry engineers.
 
 The Feb 2000 `actor.cc` used `kind()` directly for all type dispatch:
 
