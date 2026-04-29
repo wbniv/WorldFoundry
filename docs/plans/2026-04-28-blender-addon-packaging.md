@@ -233,4 +233,4 @@ pie title Estimated active Blender installs (April 2026)
 
 **4.0–4.1 verdict:** ~6% of users on EOL versions. Dropped — `INSTALL.md` now requires 4.2+; `bl_info` bumped to `(4, 2, 0)` to match `blender_manifest.toml`.
 
-**Why not 5.x?** Blender 5.0 shipped March 2026 — one month before this writing. The current *recommended* release is 4.5 LTS (supported until July 2027), which likely holds the largest single cohort (~34%). Requiring 5.x would exclude roughly 80% of active installs including everyone on the current LTS. Revisit when 4.5 LTS reaches end-of-life (July 2027).
+**Blender 5.x compatibility:** The addon is compatible with 5.x. Blender 5.0 (March 2026) removed `Image.bindcode` and the animation `fcurves`/`groups` direct API — neither is used here. Thumbnails go through `bpy.utils.previews.ImagePreviewCollection`, which is unchanged. Registration, `AddonPreferences`, `bpy.props`, and `UILayout` are all stable across 4.2–5.x.
