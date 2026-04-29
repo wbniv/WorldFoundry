@@ -15,6 +15,7 @@
 #include <queue>
 #include <string>
 #include <thread>
+#include <unordered_set>
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
@@ -148,6 +149,12 @@ static std::unordered_map<int, ChangeRecord>              gOriginals;
 static std::vector<ChangeRecord>                          gChangeStack;
 static std::unordered_map<PropKey, int32, PropKeyHash>    gPropOriginals;
 
+// Mailbox watchpoints — actor_idx → set of global mailbox indices.
+// Touched exclusively from the game thread (DrainQueue / BroadcastMailboxes).
+static std::unordered_map<int, std::unordered_set<int>> gWatches;
+// Change detection: key = actor_idx * 100000 + mailbox_idx → last-sent float value.
+static std::unordered_map<uint64_t, float>              gMailboxPrev;
+
 // ── Property map (block + field → offset + type) ─────────────────────────────
 
 struct PropInfo {
@@ -196,13 +203,14 @@ static char* debug_get_block(Actor* actor, PropInfo::Block block_id)
 // Pending update queue
 
 struct PendingUpdate {
-    enum Kind { SET_PROP, SET_TRANSFORM, PICK, UNDO_STEP, REVERT_ALL } kind;
+    enum Kind { SET_PROP, SET_TRANSFORM, PICK, UNDO_STEP, REVERT_ALL, WATCH, UNWATCH } kind;
     int  actor_idx;
     std::string key;
     double value;
     float  px, py, pz;              // SET_TRANSFORM: new position
     float  ray_ox, ray_oy, ray_oz;  // PICK: ray origin
     float  ray_dx, ray_dy, ray_dz;  // PICK: ray direction (unit)
+    int    mailbox_idx;             // WATCH / UNWATCH: global mailbox number
 };
 
 static std::mutex                gQueueMutex;
@@ -323,6 +331,16 @@ static void handle_client(int fd)
                     std::lock_guard<std::mutex> lk(gQueueMutex);
                     gQueue.push(u);
                 }
+
+            } else if (op == "watch" || op == "unwatch") {
+                PendingUpdate u;
+                u.kind        = (op == "watch") ? PendingUpdate::WATCH : PendingUpdate::UNWATCH;
+                u.actor_idx   = (int)parse_jnum(line, "idx");
+                u.mailbox_idx = (int)parse_jnum(line, "mailbox");
+                if (u.actor_idx > 0) {
+                    std::lock_guard<std::mutex> lk(gQueueMutex);
+                    gQueue.push(u);
+                }
             }
             // Unknown ops are silently ignored.
         }
@@ -419,6 +437,8 @@ void DebugServer_Stop()
     gOriginals.clear();
     gChangeStack.clear();
     gPropOriginals.clear();
+    gWatches.clear();
+    gMailboxPrev.clear();
 }
 
 bool DebugServer_IsPaused()
@@ -572,6 +592,19 @@ void DebugServer_DrainQueue(Level& level)
             std::lock_guard<std::mutex> lk(gQueueMutex);
             send_all_locked("{\"op\":\"reverted\"}\n");
 
+        } else if (u.kind == PendingUpdate::WATCH) {
+            gWatches[u.actor_idx].insert(u.mailbox_idx);
+            // Erase prev so first broadcast sends immediately.
+            gMailboxPrev.erase((uint64_t)u.actor_idx * 100000ull + (uint64_t)u.mailbox_idx);
+
+        } else if (u.kind == PendingUpdate::UNWATCH) {
+            auto it = gWatches.find(u.actor_idx);
+            if (it != gWatches.end()) {
+                it->second.erase(u.mailbox_idx);
+                if (it->second.empty()) gWatches.erase(it);
+            }
+            gMailboxPrev.erase((uint64_t)u.actor_idx * 100000ull + (uint64_t)u.mailbox_idx);
+
         } else if (!bo) {
             std::string errmsg = "{\"op\":\"error\","
                 + json_str("msg", "actor not found")
@@ -637,6 +670,39 @@ void DebugServer_BroadcastPerf(float frame_ms, int actor_count)
         frame_ms, actor_count);
     std::lock_guard<std::mutex> lk(gQueueMutex);
     send_all_locked(buf);
+}
+
+// Broadcast watched mailbox values — sent whenever a value changes (no rate cap).
+void DebugServer_BroadcastMailboxes(Level& level)
+{
+    if (!gRunning || gWatches.empty()) return;
+    {
+        std::lock_guard<std::mutex> lk(gQueueMutex);
+        if (gClients.empty()) return;
+    }
+
+    std::string batch;
+    for (auto& [actor_idx, mbx_set] : gWatches) {
+        BaseObject* bo = level.GetObject(actor_idx);
+        Actor* actor   = bo ? dynamic_cast<Actor*>(bo) : nullptr;
+        if (!actor) continue;
+        for (int mbx : mbx_set) {
+            float    val = actor->GetMailboxes().ReadMailbox(mbx).AsFloat();
+            uint64_t key = (uint64_t)actor_idx * 100000ull + (uint64_t)mbx;
+            auto pit = gMailboxPrev.find(key);
+            if (pit != gMailboxPrev.end() && pit->second == val) continue;
+            gMailboxPrev[key] = val;
+            char buf[128];
+            snprintf(buf, sizeof(buf),
+                "{\"op\":\"mailbox\",\"idx\":%d,\"mailbox\":%d,\"value\":%.6f}\n",
+                actor_idx, mbx, val);
+            batch += buf;
+        }
+    }
+    if (!batch.empty()) {
+        std::lock_guard<std::mutex> lk(gQueueMutex);
+        send_all_locked(batch);
+    }
 }
 
 #endif // WF_DEBUG_BRIDGE

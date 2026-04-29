@@ -58,6 +58,10 @@ class DebugBridge:
         # Phase 2b: per-object property snapshot for change detection
         # { obj_name: { prop_key: last_sent_value } }
         self.prop_snapshots: dict[str, dict] = {}
+        # Mailbox watchpoints: (actor_idx, mailbox_idx) → last received value
+        self.mailbox_values: dict[tuple, float] = {}
+        # Set of (actor_idx, mailbox_idx) currently watched
+        self.watches: set = set()
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -95,6 +99,8 @@ class DebugBridge:
             self._thread.join(timeout=2.0)
         self._thread = None
         self.prop_snapshots.clear()
+        self.watches.clear()
+        self.mailbox_values.clear()
 
     def send(self, msg: dict):
         line = json.dumps(msg, separators=(',', ':')) + '\n'
@@ -110,6 +116,8 @@ class DebugBridge:
 
     def set_prop(self, idx: int, key: str, value):
         self.send({"op": "scene:set_prop", "idx": idx, "key": key, "value": value})
+        name = self.idx_to_name.get(idx, f"idx {idx}")
+        self.change_log.append({"idx": idx, "name": name, "key": key})
 
     def pause(self):
         self.send({"op": "pause"})
@@ -130,6 +138,15 @@ class DebugBridge:
 
     def revert_all(self):
         self.send({"op": "revert_all"})
+
+    def watch_mailbox(self, idx: int, mailbox_idx: int):
+        self.send({"op": "watch", "idx": idx, "mailbox": mailbox_idx})
+        self.watches.add((idx, mailbox_idx))
+
+    def unwatch_mailbox(self, idx: int, mailbox_idx: int):
+        self.send({"op": "unwatch", "idx": idx, "mailbox": mailbox_idx})
+        self.watches.discard((idx, mailbox_idx))
+        self.mailbox_values.pop((idx, mailbox_idx), None)
 
     def update_index_map(self, mapping: dict[int, str]):
         """Called by the export step with {idx: blender_obj_name, ...}."""
@@ -205,6 +222,9 @@ class DebugBridge:
         elif op == "reverted":
             self.change_log.clear()
             self.prop_snapshots.clear()
+            # Watches survive revert (observation points, not edits); clear cached values
+            # so next broadcast triggers a fresh update for all watched mailboxes.
+            self.mailbox_values.clear()
         elif op == "picked":
             self.last_picked_idx = msg.get("idx", -1)
             if self.last_picked_idx >= 0:
@@ -214,6 +234,12 @@ class DebugBridge:
                     obj = bpy.data.objects[name]
                     obj.select_set(True)
                     bpy.context.view_layer.objects.active = obj
+        elif op == "mailbox":
+            idx = msg.get("idx")
+            mbx = msg.get("mailbox")
+            val = msg.get("value")
+            if isinstance(idx, int) and isinstance(mbx, int) and val is not None:
+                self.mailbox_values[(idx, mbx)] = float(val)
         elif op == "perf":
             self.perf_frame_ms = msg.get("frame_ms", 0.0)
             self.perf_actors   = msg.get("actors", 0)

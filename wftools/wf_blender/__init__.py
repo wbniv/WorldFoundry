@@ -166,6 +166,13 @@ def register():
         description="Send object moves to the running engine via the debug bridge",
         default=True,
     )
+    bpy.types.Scene.wf_watch_mailbox_idx = bpy.props.IntProperty(
+        name="Mailbox Index",
+        description="Mailbox number to watch (2000-2099 local user, 3000+ local system)",
+        default=2000,
+        min=0,
+        max=9999,
+    )
     operators.register()
     panels.register()
     export_level.register()
@@ -179,6 +186,7 @@ def unregister():
         export_level.unregister()
         panels.unregister()
         operators.unregister()
+        del bpy.types.Scene.wf_watch_mailbox_idx
         del bpy.types.Scene.wf_bridge_sync_transforms
         del bpy.types.Scene.wf_level_name
         bpy.utils.unregister_class(WF_AddonPreferences)

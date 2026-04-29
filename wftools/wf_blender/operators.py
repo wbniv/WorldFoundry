@@ -822,6 +822,34 @@ class WF_OT_bridge_pick(bpy.types.Operator):
         return {'CANCELLED'}
 
 
+class WF_OT_bridge_watch_mailbox(bpy.types.Operator):
+    """Start watching a mailbox value in the running engine"""
+    bl_idname = "wf.bridge_watch_mailbox"
+    bl_label  = "Watch Mailbox"
+
+    actor_idx:   bpy.props.IntProperty()
+    mailbox_idx: bpy.props.IntProperty()
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().watch_mailbox(self.actor_idx, self.mailbox_idx)
+        return {'FINISHED'}
+
+
+class WF_OT_bridge_unwatch_mailbox(bpy.types.Operator):
+    """Stop watching a mailbox value"""
+    bl_idname = "wf.bridge_unwatch_mailbox"
+    bl_label  = "Unwatch Mailbox"
+
+    actor_idx:   bpy.props.IntProperty()
+    mailbox_idx: bpy.props.IntProperty()
+
+    def execute(self, context):
+        from . import debug_bridge as _db
+        _db.get_bridge().unwatch_mailbox(self.actor_idx, self.mailbox_idx)
+        return {'FINISHED'}
+
+
 _CLASSES = [
     WF_OT_attach_schema,
     WF_OT_detach_schema,
@@ -845,6 +873,8 @@ _CLASSES = [
     WF_OT_bridge_pick,
     WF_OT_bridge_undo,
     WF_OT_bridge_revert_all,
+    WF_OT_bridge_watch_mailbox,
+    WF_OT_bridge_unwatch_mailbox,
 ]
 
 

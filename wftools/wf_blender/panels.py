@@ -321,6 +321,30 @@ class WF_PT_live_bridge(bpy.types.Panel):
                 row4.label(text=f"Changes: {n}", icon='TRACKING_BACKWARDS')
                 row4.operator("wf.bridge_undo",       text="↩ Undo",      icon='LOOP_BACK')
                 row4.operator("wf.bridge_revert_all", text="✕ Revert all", icon='X')
+
+            # Mailbox watchpoints
+            layout.separator()
+            layout.label(text="Mailbox Watches", icon='DRIVER')
+            for (w_idx, w_mbx) in sorted(bridge.watches):
+                val = bridge.mailbox_values.get((w_idx, w_mbx))
+                actor_name = bridge.idx_to_name.get(w_idx, f"idx {w_idx}")
+                val_str = f"{val:.4g}" if val is not None else "…"
+                row_w = layout.row(align=True)
+                row_w.label(text=f"{actor_name}  mbx {w_mbx}: {val_str}")
+                op_x = row_w.operator("wf.bridge_unwatch_mailbox", text="", icon='X')
+                op_x.actor_idx   = w_idx
+                op_x.mailbox_idx = w_mbx
+
+            # Add-watch row: uses last picked actor + scene-stored mailbox index
+            picked = bridge.last_picked_idx
+            row_add = layout.row(align=True)
+            if picked >= 0:
+                row_add.prop(context.scene, "wf_watch_mailbox_idx", text="mbx")
+                op_add = row_add.operator("wf.bridge_watch_mailbox", text="", icon='ADD')
+                op_add.actor_idx   = picked
+                op_add.mailbox_idx = context.scene.wf_watch_mailbox_idx
+            else:
+                row_add.label(text="Pick an object first", icon='INFO')
         else:
             row = layout.row(align=True)
             row.label(text="Not connected", icon='RADIOBUT_OFF')
