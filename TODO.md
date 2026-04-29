@@ -54,7 +54,6 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 
 - [ ] `WF_JS_ENGINE=jerryscript-nano` footprint build
 - [ ] Alternate wasm sigil `#!wat` — deferred pending wabt vendor — [plan](docs/plans/2026-04-14-wasm3-scripting-engine.md)
-- [ ] Rust tool ports (`iffcomp`, `iffdump`, `oaddump`, `lvldump`) — prerequisite: `worldfoundry-iff` crate (Phase 1), then `worldfoundry-oad` descriptor-reader subset (Phase 1); full OAD editor library (Phase 3) needed only for `attribedit-egui` + Blender addon — [investigation](docs/investigations/2026-04-11-wftools-rewrite-analysis.md)
 
 
 ## DONE
@@ -68,3 +67,4 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 - [x] REST API PoC — cpp-httplib, 5 routes, GL wireframe box renderer, Postman collection playback
 - [x] `wf_game -L<level.iff>` CLI flag — bypass cd.iff for dev iteration
 - [x] movecam crash stabilised — invalid (Actor*)&msgData cast at movecam.cc:964 guarded; physics replacement planned
+- [x] Rust tool ports (`iffcomp`, `iffdump`, `oaddump`, `lvldump`) — all build and pass tests; crates at `wftools/{iffcomp-rs,iffdump-rs,oaddump-rs,lvldump-rs}`; `wf_iff` + `wf_oad` as library foundations
