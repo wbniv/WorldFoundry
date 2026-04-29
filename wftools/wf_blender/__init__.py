@@ -51,12 +51,11 @@ except ImportError as _e:
 # ---------------------------------------------------------------------------
 
 import bpy
-from bpy.props import StringProperty
 
 from . import operators      # noqa: E402
 from . import panels         # noqa: E402
 from . import export_level   # noqa: E402
-from . import asset_browser  # noqa: E402
+from . import debug_bridge   # noqa: E402
 
 
 class WF_AddonPreferences(bpy.types.AddonPreferences):
@@ -69,21 +68,48 @@ class WF_AddonPreferences(bpy.types.AddonPreferences):
         default="",
     )
 
-    sketchfab_api_key: StringProperty(
-        name="Sketchfab API Key",
-        description="Bearer token from sketchfab.com/settings#api-token. Required for downloading Sketchfab assets.",
-        subtype='PASSWORD',
-        default="",
+    debug_host: bpy.props.StringProperty(
+        name="Debug Host",
+        description="Hostname or IP of the running wf_game instance",
+        default="localhost",
+    )
+
+    debug_port: bpy.props.IntProperty(
+        name="Debug Port",
+        description="TCP port for the wf_game debug bridge (--debug-port N)",
+        default=7777,
+        min=1024,
+        max=65535,
     )
 
     def draw(self, context):
         layout = self.layout
         layout.prop(self, "repo_root")
-        layout.prop(self, "sketchfab_api_key")
-        layout.label(
-            text="Get your token at: sketchfab.com/settings#api-token",
-            icon='URL',
-        )
+        layout.separator()
+        row = layout.row(align=True)
+        row.prop(self, "debug_host")
+        row.prop(self, "debug_port")
+
+
+def _depsgraph_handler(scene, depsgraph):
+    """Push transform/property deltas to the debug bridge on scene update."""
+    bridge = debug_bridge.get_bridge()
+    if not bridge.connected:
+        return
+    if not scene.wf_bridge_sync_transforms:
+        return
+    for update in depsgraph.updates:
+        obj = update.id
+        if not isinstance(obj, bpy.types.Object):
+            continue
+        if not obj.get("wf_schema_path"):
+            continue
+        idx = bridge.name_to_idx.get(obj.name)
+        if idx is None:
+            continue
+        if update.is_updated_transform:
+            p = obj.location
+            bridge.set_transform(idx, [p.x, p.y, p.z])
 
 
 def register():
@@ -105,17 +131,25 @@ def register():
         description="Level directory name under wflevels/ (defaults to .blend filename stem)",
         default="",
     )
+    bpy.types.Scene.wf_bridge_sync_transforms = bpy.props.BoolProperty(
+        name="Sync Transforms",
+        description="Send object moves to the running engine via the debug bridge",
+        default=True,
+    )
     operators.register()
     panels.register()
     export_level.register()
-    asset_browser.register()
+    bpy.app.handlers.depsgraph_update_post.append(_depsgraph_handler)
 
 
 def unregister():
     if _WF_CORE_OK:
-        asset_browser.unregister()
+        if _depsgraph_handler in bpy.app.handlers.depsgraph_update_post:
+            bpy.app.handlers.depsgraph_update_post.remove(_depsgraph_handler)
         export_level.unregister()
         panels.unregister()
         operators.unregister()
+        del bpy.types.Scene.wf_bridge_sync_transforms
         del bpy.types.Scene.wf_level_name
         bpy.utils.unregister_class(WF_AddonPreferences)
+        debug_bridge.get_bridge().disconnect()

@@ -47,6 +47,8 @@
 bool gSoundEnabled = false;
 bool gCDEnabled = false;
 
+int gDebugPort = 0;   // 0 = disabled; set by --debug-port N
+
 WFGame* theGame = NULL;
 
 #if defined(DESIGNER_CHEATS)
@@ -167,6 +169,12 @@ ParseCommandLine(int argc, char** argv)
 			extern const char* gLevelOverridePath;
 			gLevelOverridePath = argv[index] + 2;
 			DBSTREAM1( cprogress << "Level override path: " << gLevelOverridePath << std::endl; )
+		}
+		else if ( strncmp( argv[index]+1, "-debug-port", 11 ) == 0 && argv[index+1] )
+		{
+			gDebugPort = atoi( argv[index+1] );
+			++index;
+			DBSTREAM1( cprogress << "Debug bridge port: " << gDebugPort << std::endl; )
 		}
 		else if ( strncmp( argv[index]+1, (char*)szRate, strlen( szRate ) ) == 0)
 		{

@@ -69,14 +69,12 @@ DEST="$ADDONS_DIR/wf_blender"
 mkdir -p "$DEST"
 
 # ── symlink add-on Python files (edits to source are live immediately) ────────
-for pyfile in __init__.py operators.py panels.py export_level.py asset_browser.py asset_threading.py providers.py; do
+for pyfile in __init__.py operators.py panels.py export_level.py extract_iff_chunks.py debug_bridge.py; do
     ln -sf "$SCRIPT_DIR/$pyfile" "$DEST/$pyfile"
 done
 
-# ── copy native library and static data ──────────────────────────────────────
+# ── copy native library ───────────────────────────────────────────────────────
 cp "$SO" "$DEST/wf_core.so"
-cp "$SCRIPT_DIR/kenney_catalog.json"    "$DEST/kenney_catalog.json"
-cp "$SCRIPT_DIR/quaternius_catalog.json" "$DEST/quaternius_catalog.json"
 
 echo ""
 echo "Installed to: $DEST"

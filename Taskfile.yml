@@ -3,7 +3,15 @@ version: '3'
 tasks:
 
   build:
-    desc: "Build wf_game (shell script)"
+    desc: "Build wf_game (Forth + Jolt; canonical config)"
+    env:
+      WF_LUA_ENGINE: none
+      WF_ENABLE_FENNEL: "0"
+      WF_JS_ENGINE: none
+      WF_WASM_ENGINE: none
+      WF_ENABLE_WREN: "0"
+      WF_FORTH_ENGINE: zforth
+      WF_PHYSICS_ENGINE: jolt
     cmds:
       - bash engine/build_game.sh
 
@@ -170,6 +178,18 @@ tasks:
     cmds:
       - LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/snowgoons.iff
 
+  run-debug:
+    desc: "Run wf_game with debug bridge on port 7777 (usage: task run-debug -- wflevels/snowgoons.iff)"
+    cmds:
+      - |
+        ARGS="{{.CLI_ARGS}}"
+        if [ -z "$ARGS" ]; then
+          echo "Usage: task run-debug -- <path/to/level.iff>" >&2
+          exit 1
+        fi
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
+          engine/wf_game "-L$ARGS" --debug-port 7777
+
   dev-setup:
     desc: "Install all dev dependencies (Linux build + Android toolchain)"
     cmds:
@@ -179,6 +199,7 @@ tasks:
           cmake \
           libx11-dev \
           libgl1-mesa-dev \
+          libglu1-mesa-dev \
           gdb \
           xxd \
           python3 \
@@ -208,7 +229,7 @@ tasks:
       - cd wftools/wf_py && maturin build --release
 
   blender-install:
-    desc: "Install Blender addon (symlinks .py, copies wf_core.so and catalog JSONs)"
+    desc: "Install World Foundry level editor addon (symlinks .py, copies wf_core.so; builds if needed)"
     deps: [blender-build]
     cmds:
       - bash wftools/wf_blender/install.sh
@@ -216,7 +237,89 @@ tasks:
   blender-validate:
     desc: "Validate the Blender extension manifest (requires Blender 4.2+)"
     cmds:
-      - blender --command extension validate --source-dir wftools/wf_blender
+      - blender --command extension validate wftools/wf_blender
+
+  asset-browser-install:
+    desc: "Install wf_asset_browser addon for development (symlinks, no build step)"
+    cmds:
+      - bash wftools/wf_asset_browser/install.sh
+
+  asset-browser-install-zip:
+    desc: "Install the built wf_asset_browser zip into Blender (REPO=user_default)"
+    summary: |
+      Installs the packaged zip into Blender's extension system and enables it.
+
+      Usage:
+        task asset-browser-install-zip                   # installs into user_default repo
+        task asset-browser-install-zip REPO=blender_org  # install into a different repo
+
+      To list available repos: blender --command extension repo-list
+    vars:
+      REPO: '{{default "user_default" .REPO}}'
+      ZIP:
+        sh: ls dist/wf_asset_browser-*.zip 2>/dev/null | sort -V | tail -1
+    cmds:
+      - blender --command extension install-file -r {{.REPO}} -e {{.ZIP}}
+
+  asset-browser-validate:
+    desc: "Validate wf_asset_browser extension manifest (requires Blender 4.2+)"
+    cmds:
+      - blender --command extension validate wftools/wf_asset_browser
+
+  asset-browser-package:
+    desc: "Build distributable wf_asset_browser zip; output in dist/"
+    deps: [asset-browser-validate]
+    cmds:
+      - mkdir -p dist
+      - blender --command extension build --source-dir wftools/wf_asset_browser --output-dir dist
+      - echo "Package written to dist/"
+
+  bump-asset-browser:
+    desc: "Bump wf_asset_browser version (default: patch)"
+    summary: |
+      Increment the wf_asset_browser version in blender_manifest.toml.
+
+      Usage:
+        task bump-asset-browser              # patch:  0.2.0 → 0.2.1
+        task bump-asset-browser BUMP=minor   # minor:  0.2.0 → 0.3.0  (resets patch)
+        task bump-asset-browser BUMP=major   # major:  0.2.0 → 1.0.0  (resets minor + patch)
+        task bump-asset-browser -- 1.5.0    # explicit version override
+    vars:
+      BUMP: '{{default "patch" .BUMP}}'
+      NEW_VERSION:
+        sh: |
+          if [ -n "{{.CLI_ARGS}}" ]; then
+            echo "{{.CLI_ARGS}}"
+          else
+            cur=$(grep '^version' wftools/wf_asset_browser/blender_manifest.toml | cut -d'"' -f2)
+            major=$(echo "$cur" | cut -d. -f1)
+            minor=$(echo "$cur" | cut -d. -f2)
+            patch=$(echo "$cur" | cut -d. -f3)
+            case "{{.BUMP}}" in
+              major) echo "$((major + 1)).0.0" ;;
+              minor) echo "$major.$((minor + 1)).0" ;;
+              *)     echo "$major.$minor.$((patch + 1))" ;;
+            esac
+          fi
+    cmds:
+      - sed -i 's/^version = .*/version = "{{.NEW_VERSION}}"/' wftools/wf_asset_browser/blender_manifest.toml
+      - grep '^version' wftools/wf_asset_browser/blender_manifest.toml
+
+  publish-asset-browser:
+    desc: "Create a GitHub release for wf_asset_browser and attach the zip"
+    deps: [asset-browser-package]
+    vars:
+      VERSION:
+        sh: grep '^version' wftools/wf_asset_browser/blender_manifest.toml | cut -d'"' -f2
+    cmds:
+      - gh release create "asset-browser-v{{.VERSION}}"
+          --title "Asset Browser v{{.VERSION}}"
+          --notes "Licence-aware asset browser — pure Python, no build step required."
+          dist/wf_asset_browser-{{.VERSION}}.zip
+
+  package-all:
+    desc: "Package both Blender addons into dist/"
+    deps: [asset-browser-package, blender-package]
 
   blender-package:
     desc: "Build distributable .zip (Blender extension format); output in dist/"

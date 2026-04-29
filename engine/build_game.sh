@@ -118,6 +118,9 @@ JOLT_WF_DIR="$VENDOR/jolt-physics-5.5.0-wf"
 # Requires cpp-httplib (single-header, vendored). Default off.
 WF_REST_API="${WF_REST_API:-1}"
 
+# Feature flag: TCP/JSON debug bridge for live Blender↔engine editing. Default on.
+WF_DEBUG_BRIDGE="${WF_DEBUG_BRIDGE:-1}"
+
 mkdir -p "$OUT"
 
 CXXFLAGS=(
@@ -176,6 +179,10 @@ esac
 
 if [[ "$WF_REST_API" == "1" ]]; then
     CXXFLAGS+=(-DWF_REST_API -I"$HTTPLIB_DIR")
+fi
+
+if [[ "$WF_DEBUG_BRIDGE" == "1" ]]; then
+    CXXFLAGS+=(-DWF_DEBUG_BRIDGE)
 fi
 
 if [[ "$WF_ENABLE_STEAM" == "1" ]]; then
@@ -590,6 +597,13 @@ if [[ "$WF_REST_API" == "1" ]]; then
     echo "  CC (stub) rest_api.cc"
     g++ "${CXXFLAGS[@]}" -O1 -c "$STUB_SRC/rest_api.cc" -o "$OUT/stubs__rest_api.o"
     OBJS+=("$OUT/stubs__rest_api.o")
+fi
+
+# Debug bridge plug — compiled only when WF_DEBUG_BRIDGE=1.
+if [[ "$WF_DEBUG_BRIDGE" == "1" ]]; then
+    echo "  CC (stub) debug_server.cc"
+    g++ "${CXXFLAGS[@]}" -O1 -c "$STUB_SRC/debug_server.cc" -o "$OUT/stubs__debug_server.o"
+    OBJS+=("$OUT/stubs__debug_server.o")
 fi
 
 # Jolt physics plug — compiled and linked only when WF_PHYSICS_ENGINE=jolt.
