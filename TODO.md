@@ -14,14 +14,7 @@
 ## SCRIPTING INFRASTRUCTURE
 
 - [ ] Review actor variable space w.r.t. scripting languages — each actor has a fixed-size mailbox array; audit whether per-actor _ENV tables (Lua), JS object state, wasm linear memory, and Fennel locals all play well with that constraint; document any per-language limits
-- [ ] `WF_DEFAULT_ENGINE` knob — sigil-less script fallback engine selection — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
 - [investigated] Mailbox constants cross-language audit — consistent by design: `scripting_stub.cc` builds one `mailboxIndexArray[]` from `mailbox.inc` and `ScriptRouter` broadcasts it to every engine at init. Lua/JS/WASM use `read_mailbox` (underscore); Forth uses `read-mailbox` (hyphen, idiomatic). WASM imports constants from the `"consts"` module by name rather than as plain globals, but names are identical. No action needed.
-- [ ] `scripts/check_iff_no_js.py` — JS footprint checker; blocked on JS scripts being authored into assets — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
-- [ ] `WF_JS_ENGINE=jerryscript-nano` footprint build — deferred until footprint pressure — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
-- [ ] Collapse wasm sigil `#b64\n` → bare `#` — workaround for cd.iff `##` TCL lines; revert once cd.iff cleaned up
-- [ ] Alternate wasm sigil `#!wat` — deferred pending wabt vendor — [plan](docs/plans/2026-04-14-wasm3-scripting-engine.md)
-- [ ] WAMR Phase 2 — AOT compilation ship path; deferred until ship target is concrete — [plan](docs/plans/2026-04-14-wamr-dev-aot-ship.md)
-- [ ] WAMR Phase 3 — w2c2 AOT backend; deferred until Phase 2 lands — [plan](docs/plans/2026-04-14-wamr-dev-aot-ship.md)
 
 
 ## CONCURRENCY / ASYNC
@@ -40,8 +33,6 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 - [ ] Level pipeline Phase D — decompile the 4 source-less levels (`cube`, `basic`, `cyber`, `main_game`) — [plan](docs/plans/2026-04-17-level-pipeline-proof.md)
 - [ ] Level pipeline Phase E — produce multi-level `cd.iff`, confirm all 7 levels load in `wf_game`; gates `common.inc` breaking rearrangement — [plan](docs/plans/2026-04-17-level-pipeline-proof.md)
 - [ ] levcomp-rs common-block — commit working-tree `snowgoons.lvl` flip (levcomp-rs output → repo copy; 3 heap-pad bytes delta is acceptable) — [plan](docs/plans/2026-04-19-levcomp-common-block-two-phase.md)
-- [ ] ScriptLanguage OAD field — re-add to `common.inc`; blocked on level-pipeline-proof Phase E; revert `language = 3;` stopgap in `engine/stubs/scripting_stub.cc` — [plan](docs/plans/2026-04-16-script-language-oad-field.md)
-- [ ] Strip spurious BOX3 chunks from non-geometry actors in `wflevels/snowgoons/snowgoons.lev` — [plan](docs/plans/2026-04-19-strip-nongeom-box3.md)
 - [ ] textile-rs Phase 2 — diagnose 2 non-square texture mismatches (`G_HedgeWsnowSide`, `G_shakesWsnowRM`); package texture outputs into pipeline — [plan](docs/plans/2026-04-19-textile-rs-validation.md)
 
 
@@ -72,6 +63,20 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 ## NAMING
 
 - [ ] Rename `room` — "room" is a misnomer; the concept is a designer-drawn zone that controls CD asset streaming (load/unload assets as the player moves through the graph). Candidates: **Zone** (most self-explanatory), **Cell** (Elder Scrolls precedent — same mechanism), **Sector** (Doom/Quake lineage, implies spatial partition), **Region** (geographic, no shape implication)
+
+
+## DEFERRED UNTIL LEVEL
+
+- [ ] `WF_DEFAULT_ENGINE` knob — sigil-less script fallback engine selection — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
+- [ ] Collapse wasm sigil `#b64\n` → bare `#` — workaround for cd.iff `##` TCL lines; revert once cd.iff cleaned up
+- [ ] Alternate wasm sigil `#!wat` — deferred pending wabt vendor — [plan](docs/plans/2026-04-14-wasm3-scripting-engine.md) (won't be needed)
+- [ ] ScriptLanguage OAD field — re-add to `common.inc`; blocked on level-pipeline-proof Phase E; revert `language = 3;` stopgap in `engine/stubs/scripting_stub.cc` — [plan](docs/plans/2026-04-16-script-language-oad-field.md)
+- [ ] Strip spurious BOX3 chunks from non-geometry actors in `wflevels/snowgoons/snowgoons.lev` — [plan](docs/plans/2026-04-19-strip-nongeom-box3.md)
+
+- [ ] `scripts/check_iff_no_js.py` — JS footprint checker; blocked on JS scripts being authored into assets — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
+- [ ] `WF_JS_ENGINE=jerryscript-nano` footprint build — deferred until footprint pressure — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
+- [ ] WAMR Phase 2 — AOT compilation ship path; deferred until ship target is concrete — [plan](docs/plans/2026-04-14-wamr-dev-aot-ship.md)
+- [ ] WAMR Phase 3 — w2c2 AOT backend; deferred until Phase 2 lands — [plan](docs/plans/2026-04-14-wamr-dev-aot-ship.md)
 
 
 ## DONE
