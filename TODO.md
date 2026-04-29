@@ -39,12 +39,15 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 
 ## PHYSICS
 
-- [ ] Replace physics engine — Jolt integration; pre-existing bad cast in movecam.cc:964 is the trigger — [investigation](docs/investigations/2026-04-14-jolt-physics-integration.md)
-
 
 ## BUILD / TOOLCHAIN
 
-- [ ] Investigate RTTI claim — engine is supposed to have **no** C++ RTTI (no `dynamic_cast`, no `typeid`), yet `wfsource/source/baseobject/baseobject.hp:71` has `virtual EActorKind kind() const = 0;` with comment "manual RTTI, investigate removing". Confirm the enum-dispatch `kind()` is not actual C++ RTTI, then try building with `-fno-rtti` and measure the size/startup win (Android size-optimisation context). If something else does depend on RTTI, document where and why.
+- [investigated] RTTI claim — `kind()` / `EActorKind` at `baseobject.hp:71` is enum-dispatch, not C++ RTTI. However, the engine has **51 `dynamic_cast` calls** across `level.cc`, `movecam.cc`, `actor.cc`, `room/`, `movement/`, etc. `-fno-rtti` is not viable without replacing all of them. The "no RTTI" claim was aspirational. `kind()` has only 2 live call sites; `dynamic_cast` is the de-facto pattern. Jolt's `RTTI.cpp` is its own custom type system, unrelated to C++ RTTI.
+
+
+## NAMING
+
+- [ ] Rename `room` — "room" is a misnomer; the concept is a designer-drawn zone that controls CD asset streaming (load/unload assets as the player moves through the graph). Candidates: **Zone** (most self-explanatory), **Cell** (Elder Scrolls precedent — same mechanism), **Sector** (Doom/Quake lineage, implies spatial partition), **Region** (geographic, no shape implication)
 
 
 ## TBD?
