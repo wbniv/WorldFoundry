@@ -127,7 +127,7 @@ WF uses newline-delimited JSON. Wire-level compatibility is not a goal; op namin
 
 **Scene tree vs actor list:** Godot's `scene:scene_tree` sends the full hierarchy with parent-child relationships. WF's `BroadcastState` sends a flat list of actor positions. WF has no hierarchy in the level IFF — actors are peers, not trees. No need to emulate `scene:scene_tree`.
 
-**Property access:** Godot uses `property_path` strings that traverse the object graph (e.g. `"position:x"`). WF uses OAD field names from the schema. Both are string-keyed; the path separator syntax is not needed in WF since OAD properties are flat.
+**Property access:** Godot uses `property_path` strings that traverse the object graph (e.g. `"position:x"`). WF's OAD schema has natural sub-block scope via `LEVELCONFLAGCOMMONBLOCK(movebloc)`, `LEVELCONFLAGCOMMONBLOCK(common)`, `PROPERTY_SHEET_HEADER(...)` etc. — so dot-separated paths like `"common.Speed"` or `"movebloc.maxVelocity"` map cleanly onto the OAD structure and read well. Godot's path convention should be adopted for the `key` field in `scene:set_prop`.
 
 **Method calls:** `scene:live_node_call` lets the editor call arbitrary methods on live objects. WF has no equivalent and it's not planned — mailbox writes cover the same use case more safely.
 
@@ -156,10 +156,13 @@ Based on this analysis, Phase 2b should add:
 
 **Editor → Engine:**
 ```json
-{"op": "scene:set_prop",  "idx": 3, "key": "Speed", "value": 3.5}
+{"op": "scene:set_prop",  "idx": 3, "key": "common.Speed",         "value": 3.5}
+{"op": "scene:set_prop",  "idx": 3, "key": "movebloc.maxVelocity", "value": 12.0}
 {"op": "scene:spawn",     "template_idx": 5, "pos": [1.0, 0.0, 2.0]}
 {"op": "scene:remove",    "idx": 7}
 ```
+
+The `key` field uses dot-separated `block.field` notation matching the OAD sub-block structure (`LEVELCONFLAGCOMMONBLOCK` name + field name). Flat properties (no sub-block) use the field name alone.
 
 **Engine → Editor:**
 ```json

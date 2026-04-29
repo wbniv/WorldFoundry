@@ -65,7 +65,7 @@ flowchart LR
 
 ```json
 {"op": "scene:set_transform", "idx": 3,   "pos": [1.2, 0, 5.1]}
-{"op": "scene:set_prop",      "idx": 3,   "key": "Speed",   "value": 3.5}
+{"op": "scene:set_prop",      "idx": 3,   "key": "common.Speed",   "value": 3.5}
 {"op": "ping"}
 ```
 
