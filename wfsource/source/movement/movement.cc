@@ -419,12 +419,20 @@ GroundHandler::predictPosition(MovementManager& movementManager, MovementObject&
 		uint32_t charID = actorAttr.JoltCharacterID();
 		if (charID != kJoltInvalidBodyID)
 		{
-			// Hand the WF-computed velocity to CharacterVirtual and let Jolt resolve
-			// movement against the static world geometry.
+			// With Jolt, supportingObject is never set, so planeFriction is zero and
+			// wheelVelocity never reaches newVelocity. Apply wheelVelocity directly to
+			// the XY components so OAD fields (RunningAcceleration, MaxGroundSpeed,
+			// RunningDeceleration) govern ground movement as intended.
+			newVelocity = Vector3(wheelVelocity.X(), wheelVelocity.Y(), newVelocity.Z());
 			JoltCharacterSetLinVelocity(charID, newVelocity);
 			JoltCharacterUpdate(charID, deltaT.AsFloat());
 			actorAttr.JoltSyncFromCharacter(JoltCharacterGetPosition(charID));
 			actorAttr.SetLinVelocity(JoltCharacterGetLinVelocity(charID));
+			// Sync wheelVelocity.Y from actual Jolt character movement.
+			// On a slope Jolt constrains our Z-axis gravity input to the surface,
+			// producing real Y displacement.  Feeding that back here lets the ball
+			// carry slope momentum onto flat terrain.
+			wheelVelocity.SetY(JoltCharacterGetLinVelocity(charID).Y());
 			handlerData->wheelVelocity = wheelVelocity;
 			if (newMovementHandler)
 				movementManager.SetMovementHandler(newMovementHandler, movementObject);

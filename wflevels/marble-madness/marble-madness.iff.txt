@@ -25,6 +25,7 @@
 	{ 'ASMP'
 		$3fff001l { 'STR' "sphere.iff" }  // IFF PERM fff:001
 		$3000001l { 'STR' "ramp.iff" }  // IFF RM0 000:001
+		$3000002l { 'STR' "floor.iff" }  // IFF RM0 000:002
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "marble-madness.lvl" ] }
@@ -43,6 +44,7 @@
 		{ 'ASS' $5000fffl [ "Room0.ruv" ] }    // RUV RM0 000:fff
 		{ 'ASS' $7000fffl [ "Room0.cyc" ] }    // CYC RM0 000:fff
 		{ 'ASS' $3000001l [ "ramp.iff" ] }  // IFF RM0 000:001
+		{ 'ASS' $3000002l [ "floor.iff" ] }  // IFF RM0 000:002
 	}
 	{ 'ALGN' .align(2048) }
 }

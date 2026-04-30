@@ -26,9 +26,14 @@
 #include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
+#include <Jolt/Physics/Collision/Shape/SphereShape.h>
+#include <Jolt/Physics/Collision/Shape/MeshShape.h>
+#include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
+#include <Jolt/Physics/Collision/Shape/ScaledShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Character/CharacterBase.h>
 #include <Jolt/Physics/Character/CharacterVirtual.h>
+#include <Jolt/Physics/Collision/BroadPhase/BroadPhaseQuery.h>
 #pragma GCC diagnostic pop
 
 JPH_SUPPRESS_WARNINGS
@@ -248,6 +253,72 @@ uint32_t JoltBodyCreateStatic(const Vector3& pos, const Euler& rot,
     return handle;
 }
 
+uint32_t JoltBodyCreateStaticMesh(const Vector3& pos,
+                                   const JoltMeshVertex* verts, int vertCount,
+                                   const JoltMeshFace*   faces, int faceCount)
+{
+    if (!gPhysicsSystem) return kJoltInvalidBodyID;
+
+    JPH::Vec3 worldOffset = ToJph(pos);
+    std::fprintf(stderr, "jolt: mesh actor_pos=(%.3f,%.3f,%.3f)\n",
+                 pos.X().AsFloat(), pos.Y().AsFloat(), pos.Z().AsFloat());
+
+    // Use MeshShape — correctly handles flat and sloped surfaces.
+    // Vertices are in actor-local space; body is placed at actor world position.
+    // Add both windings so the surface is two-sided (ball can approach from either side).
+    for (int i = 0; i < vertCount; i++) {
+        std::fprintf(stderr, "jolt: mesh v%d local=(%.3f,%.3f,%.3f) world=(%.3f,%.3f,%.3f)\n",
+                     i, verts[i].x, verts[i].y, verts[i].z,
+                     verts[i].x + worldOffset.GetX(),
+                     verts[i].y + worldOffset.GetY(),
+                     verts[i].z + worldOffset.GetZ());
+    }
+
+    JPH::TriangleList triangles;
+    triangles.reserve((size_t)(faceCount * 2));
+    for (int i = 0; i < faceCount; i++) {
+        const JoltMeshVertex& a = verts[faces[i].v0];
+        const JoltMeshVertex& b = verts[faces[i].v1];
+        const JoltMeshVertex& c = verts[faces[i].v2];
+        triangles.push_back(JPH::Triangle(
+            JPH::Float3(a.x, a.y, a.z),
+            JPH::Float3(b.x, b.y, b.z),
+            JPH::Float3(c.x, c.y, c.z)));
+        // reverse winding for two-sided collision
+        triangles.push_back(JPH::Triangle(
+            JPH::Float3(a.x, a.y, a.z),
+            JPH::Float3(c.x, c.y, c.z),
+            JPH::Float3(b.x, b.y, b.z)));
+    }
+
+    JPH::MeshShapeSettings meshSettings(triangles);
+    JPH::Shape::ShapeResult result = meshSettings.Create();
+    if (result.HasError()) {
+        std::fprintf(stderr, "jolt: MeshShape error: %s — falling back to bbox\n",
+                     result.GetError().c_str());
+        return kJoltInvalidBodyID;
+    }
+
+    // Body placed at actor world pos; shape uses actor-local vertex coords.
+    JPH::BodyCreationSettings cfg(
+        result.Get(),
+        JPH::RVec3(worldOffset), JPH::Quat::sIdentity(),
+        JPH::EMotionType::Static, WFPhysLayers::STATIC);
+
+    JPH::BodyID id = gBodyInterface->CreateAndAddBody(cfg, JPH::EActivation::DontActivate);
+    std::fprintf(stderr, "jolt: body MESH_STATIC verts=%d faces=%d id=%u\n",
+                 vertCount, faceCount, id.GetIndexAndSequenceNumber());
+
+    uint32_t handle = AllocEntry();
+    BodyEntry& e = gBodies[handle];
+    e.joltID   = id;
+    e.posCache = pos;
+    e.velCache = Vector3::zero;
+    e.rotCache = Euler(Angle::zero, Angle::zero, Angle::zero);
+    e.occupied = true;
+    return handle;
+}
+
 void JoltBodyDestroy(uint32_t handle)
 {
     if (!ValidHandle(handle)) return;
@@ -393,7 +464,8 @@ uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
     JPH::CharacterVirtualSettings settings;
     settings.mUp             = JPH::Vec3::sAxisZ();          // WF is Z-up
     settings.mMaxSlopeAngle  = JPH::DegreesToRadians(45.0f);
-    settings.mShape          = new JPH::BoxShape(halfExt);
+    float radius = std::min({halfExt.GetX(), halfExt.GetY(), halfExt.GetZ()});
+    settings.mShape          = new JPH::SphereShape(radius);
 
     // Colspace centre in local space — same offset CreateJoltBodyImpl uses.
     // Jolt character position = actor_feet_pos + ctr.
@@ -525,36 +597,25 @@ void JoltCharacterUpdate(uint32_t handle, float dt)
     // Refresh caches: convert Jolt centre position back to WF actor feet position.
     JPH::RVec3 p = e.character->GetPosition();
     Vector3 newPos = FromJph(JPH::Vec3(p)) - e.ctr;
-    e.velCache = FromJph(e.character->GetLinearVelocity());
 
-    // When grounded, clamp vel_z to 0. WF's GroundHandler unconditionally
-    // adds (−gravity·dt) to newVelocity every frame; stick-to-floor holds
-    // position fixed but velocity has nowhere to go, so it accumulates
-    // unboundedly and the first time the character leaves the ground they
-    // plummet at terminal absurdity. Zeroing on contact matches legacy
-    // WF's behavior (collision response zeroed vel_z on landing).
+    // CharacterVirtual::GetLinearVelocity returns the input velocity we set, not the
+    // Jolt-resolved velocity after slope constraint.  Use position delta to capture
+    // the true Y movement so slope-induced momentum carries onto flat terrain.
+    e.velCache = FromJph(e.character->GetLinearVelocity());
+    if (dt > 0.0f)
+        e.velCache.SetY((newPos.Y() - e.posCache.Y()) / Scalar(dt));
+
+    // Clamp vel_z to 0 only when grounded on flat terrain (normal ≈ +Z).
+    // On a slope, let gravity accumulate so the marble accelerates downhill.
+    // The threshold cos(15°) ≈ 0.966 separates walkable slopes from flat floors.
     if (e.character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround)
     {
-        if (e.velCache.Z() < Scalar::zero)
+        JPH::Vec3 groundNormal = e.character->GetGroundNormal();
+        bool isFlatGround = groundNormal.GetZ() > 0.966f;
+        if (isFlatGround && e.velCache.Z() < Scalar::zero)
             e.velCache.SetZ(Scalar::zero);
     }
 
-    // Trace first 120 frames so we can see whether the character ever touches the floor.
-    static int sFrameCount = 0;
-    if (sFrameCount < 120) {
-        const char* groundStr = "AIR";
-        if (e.character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround)
-            groundStr = "GROUND";
-        else if (e.character->GetGroundState() == JPH::CharacterBase::EGroundState::OnSteepGround)
-            groundStr = "STEEP";
-        std::fprintf(stderr, "jolt: char f%03d jolt_ctr=(%.3f,%.3f,%.3f) feet=(%.3f,%.3f,%.3f) vel_z=%.3f %s\n",
-            sFrameCount,
-            p.GetX(), p.GetY(), p.GetZ(),
-            newPos.X().AsFloat(), newPos.Y().AsFloat(), newPos.Z().AsFloat(),
-            e.velCache.Z().AsFloat(),
-            groundStr);
-        ++sFrameCount;
-    }
     e.posCache = newPos;
 }
 
