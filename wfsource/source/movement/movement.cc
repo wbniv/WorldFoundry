@@ -297,13 +297,27 @@ GroundHandler::predictPosition(MovementManager& movementManager, MovementObject&
 		if (buttons & EJ_BUTTONF_DOWN)	// Move backwards at Walk speed
 			wheelVelocity -= (currentDir * runningAccel * deltaT);
 
-		if (buttons & EJ_BUTTONF_LEFT)	// Rotate counterclockwise at turnRate
-			//actorAttr.SetRotationC( Angle::Revolution( actorAttr.Rotation().GetC().AsRevolution() + turnRate ) );
-         actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(turnRate)));
+		if (buttons & EJ_BUTTONF_LEFT)
+		{
+			if (turnRate != Scalar::zero)
+				actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(turnRate)));
+			else
+			{	// TurnRate==0: no rotation desired; treat LEFT as strafe-left
+				Vector3 stepVector = currentDir * runningAccel * deltaT;
+				wheelVelocity += Vector3(-stepVector.Y(), stepVector.X(), Scalar::zero);
+			}
+		}
 
-		if (buttons & EJ_BUTTONF_RIGHT)	// Rotate clockwise at turnRate
-         actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(-turnRate)));
-			//actorAttr.SetRotationC( Angle::Revolution( actorAttr.Rotation().GetC().AsRevolution() - turnRate ) );
+		if (buttons & EJ_BUTTONF_RIGHT)
+		{
+			if (turnRate != Scalar::zero)
+				actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(-turnRate)));
+			else
+			{	// TurnRate==0: no rotation desired; treat RIGHT as strafe-right
+				Vector3 stepVector = currentDir * runningAccel * deltaT;
+				wheelVelocity += Vector3(stepVector.Y(), -stepVector.X(), Scalar::zero);
+			}
+		}
 
 		if (buttons & kBtnStepLeft)		// Sidestep left
 		{
