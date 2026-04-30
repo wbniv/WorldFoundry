@@ -179,42 +179,80 @@ However, face normals (computed in `rendobj3.cc` via cross-product during load) 
 
 ---
 
+## Marble actor OAD configuration (MarbleHandler)
+
+A "marble" actor uses `MarbleHandler` instead of `GroundHandler`. The handler is selected automatically when the actor's `TurnRate` OAD field is exactly `0.0`; AirHandler transitions to MarbleHandler (rather than GroundHandler) on landing.
+
+**Required OAD values for a marble actor:**
+
+| Field | Value | Why |
+|-------|-------|-----|
+| `Turn Rate` | `0.0` | Selects MarbleHandler on landing |
+| `Max Air Speed` | ≥ 50 | **Must not be 0** — see gotcha below |
+| `Horiz Air Drag` | `0.0` | Marble keeps horizontal momentum while airborne |
+| `Vert Air Drag` | `0.0` | Falling speed accumulates unimpeded |
+| `Air Acceleration` | `0.0` | No mid-air steering |
+| `Jumping Acceleration` | `0.0` | No jump |
+| `Running Deceleration` | ~0.05 | Rolling friction (lower = less friction) |
+| `Max Ground Speed` | ~20 | XY speed cap while rolling on ground |
+| `Falling Acceleration` | ~9.8 | Gravity magnitude |
+
+MarbleHandler carries the full 3D velocity each frame. Gravity accumulates in Z; Jolt projects the Z component onto the slope normal, producing downhill motion. `Max Ground Speed` caps only the XY components so the ball does not roll infinitely fast.
+
+---
+
+## Marble frozen at spawn — `MaxAirSpeed = 0` kills gravity in AirHandler
+
+**Symptom:** Marble spawns on the ramp but never moves; position is constant every frame.
+
+**Cause:** `AirHandler::predictPosition` applies a speed cap:
+```cpp
+if (newSpeed > maxSpeed)
+    newVelocity *= (maxSpeed / newSpeed);
+```
+When `MaxAirSpeed = 0`, `maxSpeed = 0`, and the condition `newSpeed > 0` is immediately true on the first frame that gravity accumulates any velocity. The entire `newVelocity` vector is zeroed, including the gravity component. The marble can never fall to the ramp surface, so `JoltCharacterIsOnGround` never returns true and MarbleHandler is never selected.
+
+**Fix:** Set `Max Air Speed` to a value large enough that normal free-fall never hits it — `50.0` is a safe default. The value `0.0` does **not** mean "unlimited"; it means the speed cap is zero.
+
+---
+
+## Marble stuck in AirHandler — slope classified as `OnSteepGround`
+
+**Symptom:** Marble spawns above a sloped surface, falls (position decreases in Z), but never transitions to MarbleHandler; it passes through or bounces off the slope indefinitely.
+
+**Cause:** Jolt's `CharacterVirtual` classifies the contact surface as `OnSteepGround` when the slope angle exceeds `mMaxSlopeAngle` (set in `jolt_backend.cc`). `AirHandler` transitions only when `JoltCharacterIsOnGround` returns true, which requires `GetGroundState() == OnGround` — not `OnSteepGround`. With the old default of 45°, a ramp at exactly 45° was classified as steep and the marble never landed.
+
+**Current setting:** `mMaxSlopeAngle = 80°` (raised 2026-04-30). Slopes up to 80° register as `OnGround`.
+
+**Rule of thumb:** Keep ramp angles below 75° to stay safely under the limit. If you need steeper geometry (walls, near-vertical chutes), it will register as `OnSteepGround` and the marble will slide off rather than roll.
+
+---
+
 ## Marble / sphere physics on slopes: velocity accumulation
 
-**Symptom:** Ball lands on a sloped surface but moves extremely slowly (measured: ~0.001 WF-units/frame).
+*(Historical note: this section describes the `GroundHandler` approach that predates `MarbleHandler`. Marble actors now use `MarbleHandler` which is not affected by this issue. The fix described here is still in `jolt_backend.cc` and benefits non-marble characters on slopes.)*
 
-**Cause:** `JoltCharacterUpdate` clamps `vel_z` to 0 whenever `GetGroundState() == OnGround`. WF's `GroundHandler` adds one frame of `−gravity × dt` to `newVelocity` each frame, but since `vel_z` was zeroed after the previous step, the slope only receives a single frame's worth of gravitational impulse projected onto the slope per frame. The projection is tiny (~0.0004 m/frame) and never accumulates.
+**Symptom:** Character on a sloped surface moves extremely slowly (~0.001 WF-units/frame).
 
-**Fix (implemented):** In `jolt_backend.cc:JoltCharacterUpdate`, only clamp `vel_z` when the ground normal is nearly vertical (`normal.z > 0.966`, i.e. slope < 15°). On inclined surfaces, `vel_z` is allowed to accumulate between frames so the marble accelerates downhill at the expected `g × sin(slope)`.
+**Cause:** `JoltCharacterUpdate` clamped `vel_z` to 0 whenever `GetGroundState() == OnGround`. `GroundHandler` adds one frame of `−gravity × dt` to `newVelocity` each frame, but since `vel_z` was zeroed after the previous step, the slope only receives a single frame's worth of gravitational impulse per frame.
+
+**Fix (implemented):** In `jolt_backend.cc:JoltCharacterUpdate`, only clamp `vel_z` when the ground normal is nearly vertical (`normal.z > 0.966`, i.e. slope < 15°). On inclined surfaces, `vel_z` accumulates between frames.
 
 ---
 
 ## Marble stops dead at ramp-to-floor junction
 
+*(Historical note: this section describes a `GroundHandler` + `wheelVelocity` issue. Marble actors now use `MarbleHandler` which carries full 3D velocity directly and is not affected. The `velCache.Y` fix described here is still in `jolt_backend.cc`.)*
+
 **Symptom:** Ball rolls freely down a slope but halts the instant it reaches flat ground.
 
-**Cause:** Two layered issues:
+**Cause:** `CharacterVirtual::GetLinearVelocity()` returns the *input* velocity, not Jolt's resolved post-constraint velocity. `GroundHandler`'s `wheelVelocity.Y` was never updated from the actual slope displacement, so Y velocity dropped to zero at the transition.
 
-1. `CharacterVirtual::GetLinearVelocity()` returns the *input* velocity that WF set — not Jolt's resolved post-constraint velocity. WF feeds the character `(wheelVelocity.X, wheelVelocity.Y, accumulated_Z)`. Jolt constrains this to the slope surface, producing real Y displacement, but `GetLinearVelocity()` still reports the zero-Y input. So `velCache.Y` is always 0.
-
-2. The ground handler in `movement.cc` rebuilds `newVelocity` as `(wheelVelocity.X, wheelVelocity.Y, newVelocity.Z)` (line ~426) and then stores `wheelVelocity` (unchanged) back to `handlerData->wheelVelocity`. Since wheelVelocity.Y was never updated from the slope movement, the ball has zero Y velocity the moment it leaves the slope.
-
-**Fix (implemented):**
-
-In `jolt_backend.cc:JoltCharacterUpdate`, compute effective Y velocity from the position delta rather than from `GetLinearVelocity()`:
+**Fix (implemented):** `jolt_backend.cc:JoltCharacterUpdate` computes effective Y velocity from the position delta:
 ```cpp
-e.velCache = FromJph(e.character->GetLinearVelocity());
 if (dt > 0.0f)
     e.velCache.SetY((newPos.Y() - e.posCache.Y()) / Scalar(dt));
 ```
-
-In `movement.cc` ground handler, sync `wheelVelocity.Y` back from the position-delta-derived velCache after each Jolt step:
-```cpp
-wheelVelocity.SetY(JoltCharacterGetLinVelocity(charID).Y());
-handlerData->wheelVelocity = wheelVelocity;
-```
-
-This feeds the actual slope-induced Y movement back into the wheel velocity each frame, so momentum carries naturally from ramp to flat.
 
 ---
 
