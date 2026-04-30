@@ -1,13 +1,15 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-04-22  
-**Branch:** `2026-ios`
+**As of:** 2026-04-30  
+**Branch:** `2026-new-level`
 
 ---
 
 ## Summary
 
-Eleven days of work (2026-04-12 – 2026-04-22). Newest first:
+Eighteen days of work (2026-04-12 – 2026-04-30). Newest first:
+
+**Marble rolls down ramp — physics working end-to-end (2026-04-30)** — new `MarbleHandler` class (selected when actor `TurnRate==0`) carries full 3D velocity each frame so gravity-driven slope acceleration accumulates naturally; root cause of stuck marble was `MaxAirSpeed=0` in the player OAD, which zeroed all velocity including gravity in `AirHandler` every frame via the speed-cap path; fixed by `MaxAirSpeed 0→50`, `HorizAirDrag 0.5→0`, and `mMaxSlopeAngle 45°→80°` (so the 45° ramp registers `OnGround` rather than `OnSteepGround`); marble now falls ~0.2 s, lands on ramp, and reaches 9.9 m/s downhill within 1.5 s — see [marble-player-sphere](docs/plans/2026-04-28-marble-player-sphere.md).
 
 **iOS port Phase 2B3 verified — Metal RendererBackend compiles and links (2026-04-22)** — new `hal/ios/backend_metal.mm` implements the `RendererBackend` vtable method-for-method against `backend_modern.cc`, with MSL vertex+fragment shaders inline and runtime-compiled via `[MTLDevice newLibraryWithSource:]` (no `.metal` file + Xcode build phase, build stays Codemagic-native). `backend_factory.cc` routes `RendererBackendGet()` through `MetalBackendInstance()` on iOS via `WF_TARGET_IOS` ifdef; CMake pulls that one file in as a one-off since the rest of `gfx/glpipeline/` hard-depends on GLES. Single BGRA8Unorm pipeline state, per-vertex float3 pos/color/normal + float2 uv matching the GL Vert layout. Nothing drives the backend yet — lazy init + MSL compile run only when something calls `DrawTriangle` — so the Codemagic sim-verify still shows cornflower blue and no `MetalBackend ready` log line. Phase 2C next: wire `MetalView`'s `CADisplayLink` tick to hand the backend a live `MTLRenderCommandEncoder` via `SetCurrentEncoder`/`ClearCurrentEncoder`, and boot the engine's main loop.
 
@@ -106,6 +108,7 @@ Eleven days of work (2026-04-12 – 2026-04-22). Newest first:
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
+| 2026-04-28 | [Plan: marble-madness player sphere + rolling physics](docs/plans/2026-04-28-marble-player-sphere.md) | **Complete 2026-04-30** | Player mesh replaced with `sphere.iff` (UV sphere, radius 0.5); `MarbleHandler` drives gravity-based slope rolling via Jolt `CharacterVirtual`; OAD `MaxAirSpeed=50` fix lets marble fall through `AirHandler` onto the ramp; marble accelerates to 9.9 m/s on the 45° test ramp. |
 | 2026-04-19 | [Plan: python-tui-lib extraction](docs/plans/2026-04-19-python-tui-lib-extraction.md) | **Closed 2026-04-19** | **Goal:** carve the reusable TUI subset out of parking-space into a standalone `python-tui-lib` repo and consume it from WorldFoundry. Four phases all landed same-day: tuilib repo stood up at `/home/will/python-tui-lib` (~27K LOC, 68 .py files, commits `2695044` / `1942141` / `82764dd`), imports rewritten to `tuilib.*`, `parkingspace`-hardcoded paths parameterized via `tuilib.APP_NAME`, and WorldFoundry's `git-branch-browser.py` submodules it at `vendor/python-tui-lib/` with a `?`-key help overlay rendered by `DocViewer` (commit `f75e7c7`). Follow-on plans 2/3/4 (parking-space migration, logs.py + LogSource, worker-pool) remain separate. |
 | 2026-04-16 | [Plan: git-branch-browser — curses TUI for browsing a branch pipeline](docs/plans/2026-04-16-git-branch-browser.md) | **Closed 2026-04-19** | **Goal:** A Python curses program at `scripts/git-branch-browser.py` that surfaces branch topology as a chronological waypoint pipeline with strata bars, sideways-fork detection, and three diff modes (vs parent, vs master, compare). v2 (~1260 LOC) shipped 2026-04-19; clean Ctrl+C handling in main loop, diff pager, and compare view verified under a pty. |
 | 2026-04-16 | [Plan: Android port](docs/plans/2026-04-16-android-port.md) | **Closed 2026-04-18** | Phases 0+1+2 + Phase 3 steps 1–7 all landed: legacy GL retired (`ff589c8`, `pre-legacy-gl-retire` tag at `807d1ea`), CMake+NDK build, HAL lifecycle seam, AssetAccessor, `NativeActivity` + EGL 3.0, Gradle project (AGP 8.5.2, leanback, arm64-v8a, min 21 / target 34), gamepad + touch with TV-mode detection, `AAssetManager`-backed `cd.iff`, on-device smoke test on arm64 phone. Post-boot polish shipped (viewport aspect, pause/resume EGL preservation, zForth `here` director fix, on-screen touch HUD). Remaining polish tracked as separate plans: [android-launcher-polish](docs/plans/2026-04-18-android-launcher-polish.md) and [audio-assets-from-iff](docs/plans/2026-04-18-audio-assets-from-iff.md). |

@@ -1,6 +1,7 @@
 # Replace Player Mesh with Sphere (Marble)
 
 **Date:** 2026-04-28  
+**Status:** Complete 2026-04-30 — sphere mesh in place, rolling physics confirmed working.  
 **Level:** `marble-madness`  
 **Script:** `wflevels/marble-madness/blender_update_player_sphere.py`
 
