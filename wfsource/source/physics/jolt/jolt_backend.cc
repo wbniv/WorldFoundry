@@ -463,7 +463,7 @@ uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
 
     JPH::CharacterVirtualSettings settings;
     settings.mUp             = JPH::Vec3::sAxisZ();          // WF is Z-up
-    settings.mMaxSlopeAngle  = JPH::DegreesToRadians(45.0f);
+    settings.mMaxSlopeAngle  = JPH::DegreesToRadians(80.0f);
     float radius = std::min({halfExt.GetX(), halfExt.GetY(), halfExt.GetZ()});
     settings.mShape          = new JPH::SphereShape(radius);
 
