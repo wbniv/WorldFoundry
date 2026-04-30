@@ -21,6 +21,11 @@ bpy.ops.wf.import_level(filepath=LEV)
 player = bpy.data.objects.get("Player")
 assert player, "Player object not found after import"
 
+# Spawn inside Room01 (world BOX3 maxZ=5): position Z=4.5 puts the
+# player bbox [4.5,5.5] overlapping the room, so levcomp assigns it
+# to RM0 rather than PERM (which is outside the room render list).
+player.location.z = 4.5
+
 # Replace mesh: add UV sphere at origin (radius=0.5, centre Z=0.5 → sits on ground)
 old_mesh = player.data
 bpy.ops.object.select_all(action='DESELECT')
