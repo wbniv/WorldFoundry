@@ -9,6 +9,8 @@
 
 Eighteen days of work (2026-04-12 – 2026-04-30). Newest first:
 
+**marble-madness faithful replication plan written + M1 camera done (2026-05-01)** — plan doc at [2026-05-01-marble-madness-faithful](docs/plans/2026-05-01-marble-madness-faithful.md) covers M1–M5+ against the wf-games design docs; M1 landed: gen_level1.py now places camera at (−18,−13,28) — canonical 45° yaw / 30° tilt / 30 m — and patches Player Rotation C = π/4 so `MarbleHandler.fwd = (√2/2, √2/2, 0)`, making UP+LEFT = pure world +Y and DOWN+LEFT = pure −X for the two course legs.
+
 **marble-madness-2 game loop wired: 90-second timer + goal detection (2026-04-30)** — director script initialises a 90-second countdown (global mailbox 2 stores `TIME + 90` on frame 1, fires `END_OF_LEVEL` when `TIME` exceeds it); player script adds position-based goal detection (`X_POS < -17 AND Y_POS > 44` → `END_OF_LEVEL`) so reaching the Mm1Goal platform ends the race; both scripts compile clean with no zForth errors; all binaries rebuilt (`marble-madness-2-standalone.iff`, `marble-madness-standalone.iff`).
 
 **Marble rolls down ramp — physics working end-to-end (2026-04-30)** — new `MarbleHandler` class (selected when actor `TurnRate==0`) carries full 3D velocity each frame so gravity-driven slope acceleration accumulates naturally; root cause of stuck marble was `MaxAirSpeed=0` in the player OAD, which zeroed all velocity including gravity in `AirHandler` every frame via the speed-cap path; fixed by `MaxAirSpeed 0→50`, `HorizAirDrag 0.5→0`, and `mMaxSlopeAngle 45°→80°` (so the 45° ramp registers `OnGround` rather than `OnSteepGround`); marble now falls ~0.2 s, lands on ramp, and reaches 9.9 m/s downhill within 1.5 s — see [marble-player-sphere](docs/plans/2026-04-28-marble-player-sphere.md).

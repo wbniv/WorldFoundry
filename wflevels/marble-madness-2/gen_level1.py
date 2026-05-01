@@ -303,19 +303,36 @@ def generate_lev():
                     if "'VEC3'" in lines[j] and '"Position"' in lines[j]:
                         lines[j] = (f"\t\t{{ 'VEC3' {{ 'NAME' \"Position\" }} "
                                     f"{{ 'DATA' {fxs(x)} {fxs(y)} {fxs(z)}  //x,y,z\n")
-                        print(f"  patched {obj_name} @ ({x},{y},{z})")
+                        print(f"  patched {obj_name} pos @ ({x},{y},{z})")
                         return
         print(f"  WARNING: {obj_name} not found")
 
+    def patch_orient(obj_name, a, b, c):
+        tag = f'\t\t{{ \'NAME\' "{obj_name}" }}'
+        for i, line in enumerate(lines):
+            if line.rstrip() == tag:
+                for j in range(i, min(i+8, len(lines))):
+                    if "'EULR'" in lines[j] and '"Orientation"' in lines[j]:
+                        lines[j] = (f"\t\t{{ 'EULR' {{ 'NAME' \"Orientation\" }} "
+                                    f"{{ 'DATA' {fxs(a)} {fxs(b)} {fxs(c)}  //a,b,c\n")
+                        print(f"  patched {obj_name} orient a={a:.4f} b={b:.4f} c={c:.4f}")
+                        return
+        print(f"  WARNING: {obj_name} orient not found")
+
     # Marble spawns at top of start platform
     patch_pos("Player",    0.0,  5.0, 13.0)
-    # Camera: behind-left-above the start, angled down onto course
-    patch_pos("Camera",    10.0, -8.0, 22.0)
-    patch_pos("CamShot01", 10.0, -8.0, 22.0)
-    # Target01 (follow anchor): at marble spawn
-    patch_pos("Target01",  0.0,  5.0, 12.5)
-    # Target02 (look-at): aimed at start platform surface
-    patch_pos("Target02",  0.0,  5.0, 12.0)
+    # C = π/4 rad so fwd=(sin C, cos C)=(√2/2,√2/2): UP pushes NE, UP+LEFT = pure +Y (leg 1).
+    patch_orient("Player",  0.0,  0.0, math.pi / 4)
+    # Canonical iso camera: 45° yaw, 30° tilt, 30 m from spawn.
+    # Horiz dist = 30*cos(30°) ≈ 26 m split equally across -X and -Y at 45°.
+    # Vertical = 30*sin(30°) = 15 m above spawn Z=13 → Z=28.
+    # Camera at (-18, -13, 28) → view dir (+18,+18,-15) → yaw=45°, tilt≈30°.
+    patch_pos("Camera",    -18.0, -13.0, 28.0)
+    patch_pos("CamShot01", -18.0, -13.0, 28.0)
+    # Target01 (follow anchor): at marble spawn centre
+    patch_pos("Target01",  0.0,  5.0, 13.5)
+    # Target02 (look-at): just above marble centre
+    patch_pos("Target02",  0.0,  5.0, 13.5)
 
     # Cut off old Ramp+Floor, keep 11 infrastructure objects
     obj_starts = [i for i, l in enumerate(lines) if l.strip().startswith("{ 'OBJ'")]
