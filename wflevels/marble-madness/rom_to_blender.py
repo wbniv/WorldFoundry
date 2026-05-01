@@ -46,7 +46,7 @@ import bpy
 # --------------------------------------------------------------------------
 
 H_ZERO     = 5      # goal-zone h_center; subtracted so goal sits at Z=0
-GAME_UNIT  = 0.5    # metres per game unit above H_ZERO
+GAME_UNIT  = 0.1    # metres per game unit above H_ZERO
 SEG_LEN    = 2.5    # metres per path segment
 PATH_HALF  = 4.0    # metres from path centre to each edge vertex
 

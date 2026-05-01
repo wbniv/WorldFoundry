@@ -34,7 +34,7 @@ Path geometry coordinate system (see rom_to_blender.py):
   - Heading angle from type field lower byte: 0° = +X (East), CCW positive
   - Practice segs 0-8: heading 18.28° (ENE, open-sided S-curve — requires joystick)
   - Practice segs 9-10: heading 45° (NE, walled trough — ball rolls to goal)
-  - Spawn above seg 9 (21.36, 7.06, 14.0) so ball rolls downhill without joystick
+  - Spawn above seg 9 (21.36, 7.06, 3.2) — GAME_UNIT=0.1, floor at Z=2.6m
   - Full S-curve play requires joystick input; segs 0-8 are crowned not troughs
 """
 
@@ -60,33 +60,32 @@ def oad(name):
 # --------------------------------------------------------------------------
 # Level layout constants
 # --------------------------------------------------------------------------
-# Practice path (rom_to_blender.py heading-based layout):
+# Practice path (rom_to_blender.py heading-based layout, GAME_UNIT=0.1):
 #   Segs 0-8:  heading 18.28° (ENE), 9 × 2.5m → endpoint ≈ (21.4, 7.1)
 #   Segs 9-10: heading 45° (NE),     2 × 2.5m → endpoint ≈ (24.9, 10.6)
-#   Z range: floor 0–13 m, wall tops up to 23.5 m
+#   Z range: floor 1.2-2.6 m, wall tops up to 4.7 m, goal at Z=0
 #
 # Spawn above seg 9 (first walled downhill trough) so ball rolls toward goal
 # without requiring joystick input in the demo.  Segs 0-8 are open-sided
 # (crowned) and require active steering — they are correct arcade geometry
 # but unplayable without a joystick connected.
 #
-# Room01 position=(13,5,9), local_bbox=(-15,-8,-11)→(14,8,17)
-# → world X:[-2,27], Y:[-3,13], Z:[-2,26]
+# Room01 position=(13,3,9), local_bbox=(-25,-15,-12)→(20,12,15)
+# → world X:[-12,33], Y:[-12,15], Z:[-3,24]
 #
-# Camera behind ball at seg-9 heading (45°): offset (-1.5,-1.5,+5)
-# → camera world pos at spawn = (21.4-1.5, 7.1-1.5, 14+5) = (19.9, 5.6, 19)
-#   all within room bounds ✓
+# Isometric camera offset: (-8,-10,+15) from player
+# → camera world pos at spawn ≈ (13.4, -3.0, 18.2) — well above wall tops (4.7m) ✓
 
-ROOM_POS        = (13.0,  5.0,  9.0)
-ROOM_LOCAL_BBOX = (-15.0, -8.0, -11.0, 14.0, 8.0, 17.0)  # world: X[-2,27] Y[-3,13] Z[-2,26]
+ROOM_POS        = (13.0,  3.0,  9.0)
+ROOM_LOCAL_BBOX = (-25.0, -15.0, -12.0, 20.0, 12.0, 15.0)  # world: X[-12,33] Y[-12,15] Z[-3,24]
 
-SPAWN_POS    = (21.364, 7.058, 14.0)  # 1 m above seg-9 trough floor (Z=13)
-CAM_OFFSET   = (-1.5, -1.5, 5.0)     # behind (−45° heading) + above; stays in room
-CAMSHOT_POS  = (-1.5, -1.5, 5.0)     # same as offset; placed inside room
-TARGET1_POS  = (0.0,   0.0,  0.0)    # world-space follow anchor (inside room ✓)
-TARGET2_POS  = (21.364, 7.058, 14.5) # look-at just above player spawn
-LIGHT_POS    = (13.0,  5.0, 22.0)    # overhead, inside room (Z=22 < 26) ✓
-CAMERA_POS   = (20.0,  6.0, 19.0)    # camera entity, inside room ✓
+SPAWN_POS    = (21.364, 7.058,  3.2)  # 0.6 m above seg-9 trough floor (Z=2.6)
+CAM_OFFSET   = (-8.0, -10.0, 15.0)   # isometric offset SW+above; camera above wall tops
+CAMSHOT_POS  = (-8.0, -10.0, 15.0)   # same as offset; inside room bounds ✓
+TARGET1_POS  = (0.0,    0.0,  0.0)   # world-space follow anchor (inside room ✓)
+TARGET2_POS  = (21.364, 7.058, 3.5)  # look-at just above player spawn
+LIGHT_POS    = (13.0,   3.0, 18.0)   # overhead, inside room (Z=18 < 24) ✓
+CAMERA_POS   = (20.0,   5.0, 10.0)   # camera entity, inside room ✓
 
 # Director script: 90 s timer, 3 lives, respawn + camshot routing
 DIRECTOR_SCRIPT = (
@@ -267,7 +266,7 @@ make_empty(
 # Fills the room; writes CamShot01's index to the camshot mailbox when
 # Player enters.  The engine bootstrap in level.cc already writes the first
 # CamShot index at construction time, so this is belt-and-suspenders.
-actbox_bbox = (-15.0, -8.0, -11.0, 14.0, 8.0, 17.0)  # same as room local bbox
+actbox_bbox = (-25.0, -15.0, -12.0, 20.0, 12.0, 15.0)  # same as room local bbox
 make_box_empty(
     'ActBoxOR', ROOM_POS, actbox_bbox, 'actboxor',
     props={

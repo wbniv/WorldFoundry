@@ -64,6 +64,142 @@ the first-time setup.
 
 ---
 
+## Arcade ROM Level Geometry (Marble Madness)
+
+Level paths are not hand-authored — they are faithfully reproduced from the arcade ROM.
+The pipeline goes: **ROM → JSON → Blender mesh → WF level**.
+
+### Tools
+
+| Script | Location | Purpose |
+|--------|----------|---------|
+| `decode_levels.py` | `wflevels/marble-madness/` | Extracts all 6 level segment records from the ROM ZIP into `levels.json` |
+| `rom_to_blender.py` | `wflevels/marble-madness/` | Converts `levels.json` into a trough mesh in the live Blender scene |
+| `blender_mm_fromscratch.py` | `wflevels/marble-madness/` | Full level build: clear scene, run converter, place all actors, export `.lev` |
+
+### Step 1 — Extract ROM data
+
+```bash
+cd wflevels/marble-madness
+python3 decode_levels.py ../../assets/arcade-roms/marble.zip
+# → levels.json  (all 6 levels; h_left / h_right / h_center per segment)
+```
+
+`levels.json` is committed; only re-run if the ROM source changes.
+
+### Step 2 — Build path mesh in Blender (via MCP)
+
+With a Blender session open and MCP connected:
+
+```python
+import bpy, os
+script = '/path/to/wflevels/marble-madness/blender_mm_fromscratch.py'
+exec(open(script).read(), {'__file__': script, '__name__': 'blender_mm_fromscratch'})
+# → mm_fromscratch.lev
+```
+
+Or run `rom_to_blender.py` alone to add just the path mesh to an existing scene:
+
+```python
+ns = {'__file__': '/path/to/rom_to_blender.py', '__name__': 'rom_to_blender', 'bpy': bpy}
+exec(open('/path/to/rom_to_blender.py').read(), ns)
+ns['build_path_mesh']('Practice', ns['load_levels']())
+```
+
+### Step 3 — Build pipeline (unchanged)
+
+```bash
+cd wflevels/marble-madness
+bash build_level.sh
+```
+
+---
+
+### ROM Segment Format
+
+Level pointer table at `0x01DEC0` → per-level descriptor arrays (6-byte `[type:u16][addr:u32]`
+entries, sentinel `0xFFFF`) → 24-byte segment records.
+
+| Offset | Field | Notes |
+|--------|-------|-------|
+| `+02` | `h_left` | Wall/edge height — left side |
+| `+04` | `h_right` | Wall/edge height — right side |
+| `+0A` | `h_center` | Floor height at path centre |
+
+Segments with `h_center == H_ZERO (5)` are goal zones — replaced by a flat platform.
+
+Full reverse-engineering notes: [`docs/investigations/2026-05-01-marble-madness-rom-level-data.md`](investigations/2026-05-01-marble-madness-rom-level-data.md).
+
+---
+
+### Coordinate Mapping
+
+The 16-bit `type` field encodes the **path heading** in its lower byte:
+
+```
+heading_angle = (type & 0xFF) / 256 × 2π  radians, CCW from +X axis (East = 0°)
+```
+
+Cross-section positions accumulate along the heading:
+
+```
+pos_{i+1} = pos_i + SEG_LEN × (cos θ_i, sin θ_i, 0)
+```
+
+Each cross-section has 3 vertices perpendicular to the heading (`right_perp = (sin θ, −cos θ, 0)`):
+
+```
+left   = (pos − PATH_HALF × right_perp,  Z(h_left))
+center = (pos,                            Z(h_center))
+right  = (pos + PATH_HALF × right_perp,  Z(h_right))
+```
+
+Height conversion: `Z(h) = (h − H_ZERO) × GAME_UNIT`
+
+#### Trough vs. crowned sections
+
+- `h_edge > h_center` → **walled trough**: edges rise above floor — ball is contained.
+- `h_edge < h_center` → **crowned / open-sided**: edges drop below centre — ball rolls off without joystick steering (correct arcade geometry).
+
+#### Practice level heading table
+
+| Segments | `type` | Lower byte | Heading | Geometry |
+|----------|--------|------------|---------|----------|
+| 0–8 | `0x000D` | 13 | 18.28° (ENE) | Crowned S-curve — requires joystick |
+| 9–10 | `0x0320` | 32 | 45.00° (NE) | Walled trough — rolls to goal unaided |
+| 11–12 | `0x0D20` | 32 | — | Goal sentinel (`h_center=5`) → flat platform |
+
+---
+
+### Calibration Constants (`rom_to_blender.py`)
+
+```python
+H_ZERO    = 5      # goal h_center; subtracting puts goal at Z=0
+GAME_UNIT = 0.1    # metres per game height unit  ← tune this
+SEG_LEN   = 2.5    # metres per path segment       ← tune this
+PATH_HALF = 4.0    # metres, centre → edge vertex  ← tune this
+```
+
+With `GAME_UNIT=0.1` the Practice level spans Z ≈ 1.2–2.6 m (floor) and 4.7 m (wall tops).
+Compare viewport screenshots against `assets/arcade-roms/reference/practice_start.png` and
+iterate GAME_UNIT / SEG_LEN until proportions match.
+
+---
+
+### Actor Spawn Placement
+
+Spawn the Player above the **first walled (trough) segment** so the ball rolls toward the goal
+without requiring joystick input during testing.  For Practice this is seg 9:
+
+```python
+# heading-based position of seg-9 start: 9 segs × SEG_LEN × (cos 18.28°, sin 18.28°)
+SPAWN_POS = (21.364, 7.058, 3.2)   # 0.6 m above seg-9 floor at Z=2.6
+```
+
+To play the full S-curve (segs 0–8), a joystick must be connected.
+
+---
+
 ## Level File Format
 
 ### cd.iff — Multi-Level Archive
