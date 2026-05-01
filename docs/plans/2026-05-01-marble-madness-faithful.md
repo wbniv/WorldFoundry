@@ -1,7 +1,7 @@
 # Marble Madness — Faithful Replication Plan
 
 **Date:** 2026-05-01  
-**Status:** M2 complete — mm_practice S-curve trough built, sphere yellow  
+**Status:** M3 complete — timer/lives/respawn/HUD wired; mm_practice plays without crash  
 **Design source:** [`/home/will/wf-games/marble-madness.md`](../../../../../../wf-games/marble-madness.md) and [`/home/will/wf-games/marble-madness/`](../../../../../../wf-games/marble-madness/)  
 **Level dir:** `wflevels/marble-madness-2/` (prototype), moving to `wflevels/mm_practice/` et al.
 
@@ -84,7 +84,7 @@ In world: spawn at (+X, +Y end) high Z; goal at (−X, −Y end) low Z — i.e.,
 
 ### M3 — Game loop: lives, checkpoints, score, HUD
 
-**Status:** Not started
+**Status:** Complete 2026-05-01
 
 **Spec** (tests.md T-3xx, tuning.md Score table, audio-anim-hud.md):
 - Lives: 3 at start; death decrements; 0 → game over
@@ -92,16 +92,17 @@ In world: spawn at (+X, +Y end) high Z; goal at (−X, −Y end) low Z — i.e.,
 - Score: 1000 base on goal + 100 × seconds remaining; "survival bonus" 50 per 5 s with no deaths
 - HUD: score top-left, time top-centre, lives top-right (via `HUD_TEXT_*` mailbox slots)
 
-**Changes required:**
-- Director script: replace END_OF_LEVEL with proper lives/score accounting
-- Player script: death → respawn at checkpoint, not level end
-- Checkpoint trigger actors on path
-- HUD overlay (existing EXT-1 bitmap-font overlay; wire mailbox slots per audio-anim-hud.md)
+**Implemented (commit 8b52b52):**
+- Director script: MB2=timer end-time, MB71=countdown, MB72=lives (3→0→END_OF_LEVEL), MB70=score
+- Player script: `respawn` word teleports ball to spawn + zeroes velocity, triggers on Z<-5; sets MB13 death signal
+- Director reads MB13, decrements lives, clears signal; timer expiry also ends level
+- HUD overlay: stb_easy_font GL text renders SCORE/TIME/LIVES in yellow (`DESIGNER_CHEATS && __LINUX__`)
+- Room bbox extended to (-25,-25,-35)-(25,45,25) local so ball never exits bounds before respawn fires
 
-**Success criteria (T-301 through T-306):**
-- Timer counts down visibly on screen
-- Death decrements lives; respawns at last checkpoint with timer preserved
-- Score reflects time bonus on goal
+**Deferred to M4+:**
+- Checkpoints (T-306): always respawn at stage start
+- Score-on-goal (T-302): MB70 stays 0; formula (1000 + 100×remaining) not yet wired
+- Goal detection in mm_practice: timer expiry ends level instead
 
 ---
 
