@@ -33,6 +33,7 @@ Key gotchas encoded here (see docs/level-design-troubleshooting.md):
 
 import bpy
 import addon_utils
+import math
 import os
 import sys
 
@@ -58,29 +59,29 @@ def oad(name):
 #   WIDTH: PATH_HALF = 4.0 m → X = ±4 m
 #
 # World bounds used for Room01:
-#   X: [-6, 6]   (path ±4 + 2 m margin)
-#   Y: [-3, 33]  (path 0..30 + margins)
-#   Z: [-6, 10]  (path 0..6 + clearance)
+#   X: [-6, 6]     (path ±4 + 2 m margin)
+#   Y: [-3, 33]    (path 0..30 + margins)
+#   Z: [-6, 20]    (path floor 0..6; camera at spawn+offset = 7+5=12; +8m headroom)
 #
-# Room01 position=(0,15,2), local_bbox=(-6,-18,-8)→(6,18,8)
-# → world X:[-6,6], Y:[-3,33], Z:[-6,10]
+# Room01 position=(0,15,2), local_bbox=(-6,-18,-8)→(6,18,18)
+# → world X:[-6,6], Y:[-3,33], Z:[-6,20]
 
 ROOM_POS       = (0.0, 15.0, 2.0)
-ROOM_LOCAL_BBOX = (-6.0, -18.0, -8.0, 6.0, 18.0, 8.0)  # local min/max
+ROOM_LOCAL_BBOX = (-6.0, -18.0, -8.0, 6.0, 18.0, 18.0)  # local min/max; Z-top=20
 
 SPAWN_POS      = (0.0,  0.0, 7.0)   # 1 m above path seg-0 floor (Z=6)
-CAM_OFFSET     = (0.0, -2.0, 7.0)   # camera behind+above player (all-Relative)
-CAMSHOT_POS    = (0.0, -2.0, 7.0)   # placed inside room for levcomp assignment
+CAM_OFFSET     = (0.0, -2.0, 5.0)   # camera behind+above player; Z=7+5=12 < room top 20
+CAMSHOT_POS    = (0.0, -2.0, 5.0)   # placed inside room for levcomp assignment
 TARGET1_POS    = (0.0,  0.0, 0.0)   # world-space anchor
 TARGET2_POS    = (0.0,  0.0, 7.5)   # look-at just above player spawn
-LIGHT_POS      = (0.0, 15.0, 8.0)   # overhead, inside room Z ≤ 10
+LIGHT_POS      = (0.0, 15.0, 8.0)   # overhead, inside room
 CAMERA_POS     = (0.0, -1.0, 7.0)   # camera entity, inside room
 
 # Director script: 90 s timer, 3 lives, respawn + camshot routing
 DIRECTOR_SCRIPT = (
     r'\\ wf' '\n'
     r': init-game  INDEXOF_TIME read-mailbox 90 +  2 write-mailbox'
-    r'  3 72 write-mailbox  0 70 write-mailbox ;' '\n'
+    r'  99 72 write-mailbox  0 70 write-mailbox ;' '\n'
     r'2 read-mailbox 0 = if init-game then' '\n'
     r'2 read-mailbox INDEXOF_TIME read-mailbox -  dup 71 write-mailbox'
     r'  0 <= if 1 INDEXOF_END_OF_LEVEL write-mailbox then' '\n'
@@ -179,12 +180,22 @@ make_empty('LevelObj', ROOM_POS, 'levelobj',
 
 # ── Matte ─────────────────────────────────────────────────────────────────
 make_empty('Matte', ROOM_POS, 'matte',
-    props={'Mobility': 'Anchored', 'MovementClass': 11, 'Model Type': 'Box'})
+    props={
+        'Mobility':           'Anchored',
+        'MovementClass':      11,
+        'Model Type':         'Box',
+        'Matte Type':         'Color',
+        'Background Color':   0,
+        'Visibility Mailbox': 1,
+    })
 
 # ── Light ─────────────────────────────────────────────────────────────────
 # Must be inside room. LIGHT_POS=(0,15,8): world Z=8 < room Z-max=2+8=10. ✓
-make_empty('Light01', LIGHT_POS, 'light',
+# Rotation = π/2 around X axis — Directional light at (0,0,0) doesn't
+# illuminate geometry (all black); same value as working mm_practice light.
+_light = make_empty('Light01', LIGHT_POS, 'light',
     props={'Mobility': 'Anchored', 'MovementClass': 23, 'Model Type': 'None'})
+_light.rotation_euler = (math.pi / 2, 0, 0)
 
 # ── Director ──────────────────────────────────────────────────────────────
 make_empty(

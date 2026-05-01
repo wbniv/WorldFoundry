@@ -372,6 +372,86 @@ Applies to any I32 field with a `//ValueA|ValueB` OAD comment. Numeric I32 field
 
 ---
 
+## Black screen — light orientation wrong
+
+**Symptom:** Level loads and runs but the viewport is completely black. No geometry visible.
+
+**Cause:** A directional light with rotation `(0, 0, 0)` (default Blender orientation) doesn't illuminate mesh geometry. The light direction ends up perpendicular to all surface normals, so the dot-product lighting gives zero illumination.
+
+**Fix:** Set the light object's `rotation_euler` to `(π/2, 0, 0)` in the Blender/MCP script — this is a 90° rotation around X, pointing the light downward along Z:
+
+```python
+import math
+light_obj = make_empty('Light01', LIGHT_POS, 'light', props={...})
+light_obj.rotation_euler = (math.pi / 2, 0, 0)
+```
+
+This matches the orientation used by the working `mm_practice` level. When diagnosing a black screen, check light orientation BEFORE checking textures or visibility mailboxes.
+
+---
+
+## Black screen — Matte actor not configured
+
+**Symptom:** Level loads, geometry is present, but background is black and no background colour is visible.
+
+**Cause:** The Matte actor requires explicit `Matte Type`, `Background Color`, and `Visibility Mailbox` OAD fields. With only `Mobility`/`MovementClass`/`Model Type` set, the matte renders nothing.
+
+**Fix:**
+
+```python
+make_empty('Matte', ROOM_POS, 'matte',
+    props={
+        'Mobility':           'Anchored',
+        'MovementClass':      11,
+        'Model Type':         'Box',
+        'Matte Type':         'Color',
+        'Background Color':   0,
+        'Visibility Mailbox': 1,
+    })
+```
+
+---
+
+## Texture assertion: `width < map.GetXSize()+1` (width = 320)
+
+**Symptom:** Engine crashes immediately at startup with assertion failure:
+
+```
+AssertMsg:width = 320, map.GetXSize()+1 = 257
+|(ptrdiff_t)(width) < (ptrdiff_t)(map.GetXSize()+1)
+|in file "wfsource/source/gfx/texture.cc" on line 74
+```
+
+**Cause:** `textile-rs` generates `pal0.tga` / `palPerm.tga` palette atlas files at 320 pixels wide by default (`pal_x_page = 320` in `config.rs`). On the PC/Linux build, the engine allocates palette PixelMaps at `VRAMPaletteWidth = 256` (see `vmem.hp`). Loading a 320-wide TGA into a 256-wide PixelMap asserts.
+
+**Fix:** Change `pal_x_page` in `wftools/textile-rs/src/config.rs` from `320` to `256` and rebuild textile-rs:
+
+```diff
+-            pal_x_page:           320,
++            pal_x_page:           256,
+```
+
+This matches the engine's `VRAMPaletteWidth` on the PC path. The PSX path uses 320 (the value in `VIDEO_MEMORY_IN_ONE_PIXELMAP` branch of `vmem.hp`); set accordingly when targeting PSX.
+
+---
+
+## Camera exits room → level crashes or stutters
+
+**Symptom:** At runtime: `Room::UpdateRoomContents: object N kind=13 ... fell out of room 0`. Camera actor exits the room bounds and the engine crashes or forces level done.
+
+**Cause:** The BungeeCam entity's world position at runtime is `CamShot_position_offset + player_world_pos`. If the CamShot Z offset is large and the player spawns near the room ceiling, the camera ends up above `room_max_Z` and falls outside the room bbox.
+
+**Fix:** When setting `ROOM_LOCAL_BBOX`, add enough headroom to accommodate the camera at its maximum expected Z:
+
+```
+camera_max_Z = player_spawn_Z + camshot_Z_offset
+room_max_Z   = ROOM_POS.Z + ROOM_LOCAL_BBOX[5]   # must be > camera_max_Z
+```
+
+For example, if spawn is at Z=7 and camshot offset is Z=5, camera can reach Z=12. Set `ROOM_LOCAL_BBOX[5]` so that `ROOM_POS.Z + ROOM_LOCAL_BBOX[5] > 12` with margin.
+
+---
+
 ## Checklist: new actor not showing up
 
 1. Is the actor position strictly inside a room bbox (not on the boundary)?

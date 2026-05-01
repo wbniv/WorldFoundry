@@ -67,7 +67,7 @@ impl Default for Config {
             y_page:               2048,
             perm_x_page:          128,
             perm_y_page:          512,
-            pal_x_page:           320,
+            pal_x_page:           256,
             pal_y_page:           8,
             pal_x_align:          16,
             pal_y_align:          1,

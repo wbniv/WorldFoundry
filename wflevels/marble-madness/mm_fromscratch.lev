@@ -5,7 +5,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -6.0000000000000000(1.15.16) -18.0000000000000000(1.15.16) -8.0000000000000000(1.15.16) 6.0000000000000000(1.15.16) 18.0000000000000000(1.15.16) 8.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -6.0000000000000000(1.15.16) -18.0000000000000000(1.15.16) -8.0000000000000000(1.15.16) 6.0000000000000000(1.15.16) 18.0000000000000000(1.15.16) 18.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "room" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "room01.iff" } }
@@ -39,12 +39,15 @@
 		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 11l } { 'STR' "11" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Box" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Matte Type" } { 'DATA' 1l } { 'STR' "Color" } }  //None|Color|Image
+		{ 'I32' { 'NAME' "Background Color" } { 'DATA' 0l } { 'STR' "0" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "Light01" }
 		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 15.0000000000000000(1.15.16) 8.0000000000000000(1.15.16)  //x,y,z
 		} }
-		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 1.5707963705062866(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "light" } }
 		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 23l } { 'STR' "23" } }
@@ -64,7 +67,7 @@
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "director" } }
 		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 20l } { 'STR' "20" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: init-game  INDEXOF_TIME read-mailbox 90 +  2 write-mailbox  3 72 write-mailbox  0 70 write-mailbox ;\n2 read-mailbox 0 = if init-game then\n2 read-mailbox INDEXOF_TIME read-mailbox -  dup 71 write-mailbox  0 <= if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n13 read-mailbox 0 <> if  0 13 write-mailbox  72 read-mailbox 1 -  dup 72 write-mailbox  0 <= if 1 INDEXOF_END_OF_LEVEL write-mailbox then  then\n100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: init-game  INDEXOF_TIME read-mailbox 90 +  2 write-mailbox  99 72 write-mailbox  0 70 write-mailbox ;\n2 read-mailbox 0 = if init-game then\n2 read-mailbox INDEXOF_TIME read-mailbox -  dup 71 write-mailbox  0 <= if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n13 read-mailbox 0 <> if  0 13 write-mailbox  72 read-mailbox 1 -  dup 72 write-mailbox  0 <= if 1 INDEXOF_END_OF_LEVEL write-mailbox then  then\n100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
 	}
@@ -103,7 +106,7 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "CamShot01" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -2.0000000000000000(1.15.16) 7.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -2.0000000000000000(1.15.16) 5.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
