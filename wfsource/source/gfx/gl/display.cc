@@ -312,7 +312,7 @@ CaptureFrameOpen(int xSize, int ySize)
     snprintf(cmd, sizeof(cmd),
         "ffmpeg -f rawvideo -pixel_format bgr24 "
         "-video_size %dx%d -framerate 30 "
-        "-i pipe:0 -c:v libx264 -pix_fmt yuv420p "
+        "-i pipe:0 -vf vflip -c:v libx264 -pix_fmt yuv420p "
         "-movflags frag_keyframe+empty_moov output.mp4",
         xSize, ySize);
     gCapturePipe = popen(cmd, "w");

@@ -28,6 +28,8 @@ cd wfsource/source/game
 
 ## Design decisions
 
+**`-vf vflip`:** `glReadPixels` returns rows bottom-up (OpenGL origin is bottom-left); ffmpeg's `vflip` filter corrects this during encode with no extra CPU copy.
+
 **Pipe to ffmpeg (`popen`) instead of TGA files:** eliminates intermediate disk files, TGA headers, `frames/` directory, and an assembly script. `GL_BGR` from `glReadPixels` feeds directly as ffmpeg's `bgr24` pixel format — no byte swap. One MP4 on exit.
 
 **Renamed `-record_tga` → `-record_video` / `bRecordTGA` → `bRecordVideo`:** the old name encoded the implementation. The new name captures the intent.
