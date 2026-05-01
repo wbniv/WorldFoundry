@@ -9,22 +9,26 @@ scripts.
 
 ### One-time setup
 
-**1. Install the Blender addon**
-
-Go to [blender.org/lab/mcp-server](https://www.blender.org/lab/mcp-server/).  
-Drag the install link into Blender **twice**: once to add the repository, once to install
-the addon. Requires Blender 4.2+.
-
-**2. Connect Blender**
-
-In the 3D Viewport press **N** → **BlenderMCP** tab → **Connect to Claude**.  
-Keep this panel open while working; it must stay connected.
-
-**3. Install `uv` (once per machine)**
+**1. Install `uv` (once per machine)**
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
+**2. Install the Blender addon (scripted, no GUI needed)**
+
+```bash
+bash wftools/wf_blender/install_blender_mcp.sh
+```
+
+This downloads the addon from [ahujasid/blender-mcp](https://github.com/ahujasid/blender-mcp)
+(Blender 3.0+, works with 4.0.2), installs it headlessly, and verifies it's enabled.
+The official Blender Lab addon requires Blender 5.1+ and isn't usable yet.
+
+**3. Connect Blender each session**
+
+Open Blender, press **N** in the 3D Viewport → **BlenderMCP** tab → **Connect to Claude**.  
+Keep this panel open while working; the socket server runs only while connected.
 
 **4. Project MCP config** (already committed at `.mcp.json` in repo root)
 
@@ -40,7 +44,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 Claude Code picks this up automatically on session start. Restart the session after
-first adding the file.
+the first-time setup.
 
 ### What this replaces
 
