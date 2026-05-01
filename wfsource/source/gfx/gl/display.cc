@@ -67,6 +67,11 @@ int wfWindowHeight = 480;
 #  include <sys/time.h>
 #  include <unistd.h>
 #endif
+#if DESIGNER_CHEATS && defined(__LINUX__)
+#  include <cstdio>
+#  include <cstdlib>
+#  include <csignal>
+#endif
 
 //==============================================================================
 
@@ -282,6 +287,59 @@ Display::RenderEnd()
 
 extern bool	windowActive;		// Window windowActive Flag Set To TRUE By Default
 
+#if DESIGNER_CHEATS && defined(__LINUX__)
+
+extern bool bRecordVideo;
+
+static FILE* gCapturePipe = nullptr;
+
+static void
+CaptureCleanup(int sig)
+{
+    if (gCapturePipe)
+    {
+        pclose(gCapturePipe);
+        gCapturePipe = nullptr;
+    }
+    signal(sig, SIG_DFL);
+    raise(sig);
+}
+
+static void
+CaptureFrameOpen(int xSize, int ySize)
+{
+    char cmd[256];
+    snprintf(cmd, sizeof(cmd),
+        "ffmpeg -f rawvideo -pixel_format bgr24 "
+        "-video_size %dx%d -framerate 30 "
+        "-i pipe:0 -c:v libx264 -pix_fmt yuv420p "
+        "-movflags frag_keyframe+empty_moov output.mp4",
+        xSize, ySize);
+    gCapturePipe = popen(cmd, "w");
+    signal(SIGABRT, CaptureCleanup);
+    signal(SIGSEGV, CaptureCleanup);
+}
+
+static void
+CaptureFrame(int xSize, int ySize)
+{
+    if (!gCapturePipe)
+        CaptureFrameOpen(xSize, ySize);
+    if (!gCapturePipe)
+        return;
+
+    const int pixelBytes = xSize * ySize * 3;
+    uint8_t* pixels = (uint8_t*)malloc(pixelBytes);
+    if (!pixels)
+        return;
+
+    // GL_BGR feeds directly into ffmpeg's bgr24 pixel format — no byte swap needed.
+    glReadPixels(0, 0, xSize, ySize, GL_BGR, GL_UNSIGNED_BYTE, pixels);
+    fwrite(pixels, 1, pixelBytes, gCapturePipe);
+    free(pixels);
+}
+
+#endif // DESIGNER_CHEATS && __LINUX__
 
 Scalar
 Display::PageFlip()
@@ -392,6 +450,11 @@ Display::PageFlip()
 
     glFlush();
     AssertGLOK();
+
+#if DESIGNER_CHEATS && defined(__LINUX__)
+    if (bRecordVideo)
+        CaptureFrame(_xSize, _ySize);
+#endif
 
 #if defined(__ANDROID__)
     AndroidSwapBuffers();

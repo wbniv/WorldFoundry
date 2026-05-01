@@ -53,7 +53,7 @@ char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
 WFGame* theGame = NULL;
 
 #if defined(DESIGNER_CHEATS)
-bool bRecordTGA = false;
+bool bRecordVideo = false;
 #endif
 
 bool bPerspectiveCorrection = false;
@@ -125,7 +125,7 @@ usage( int argc, char* argv[] )
 	std::cout << "\t\t<stream output> (same as above)" << std::endl;
 
     std::cout << "\t-paranoid\tPerform insanely slow error checks" << std::endl;
-    std::cout << "\t-record_tga\tSave every frame as frame#.tga in cwd" << std::endl;
+    std::cout << "\t-record_video\tRecord gameplay to output.mp4 via ffmpeg" << std::endl;
     std::cout << "\t-zs\t\tZ-Sorted" << std::endl;
     std::cout << "\t-zb\t\tZ-Buffered" << std::endl;
 	std::cout << "\t-nologo\t\tDon't display company logos" << std::endl;
@@ -192,8 +192,8 @@ ParseCommandLine(int argc, char** argv)
 			DBSTREAM1( cerror << "Fake clock delta = " << FakeFrameRate << std::endl; )
 		}
 #if defined(DESIGNER_CHEATS)
-        else if ( strcmp( argv[index]+1, "record_tga" ) == 0 )
-            bRecordTGA = true;
+        else if ( strcmp( argv[index]+1, "record_video" ) == 0 )
+            bRecordVideo = true;
 #endif
 		else if ( strcmp( argv[index]+1, "zb" ) == 0 )
 		{
