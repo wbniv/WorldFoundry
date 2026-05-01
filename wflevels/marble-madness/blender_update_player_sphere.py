@@ -38,22 +38,11 @@ bpy.data.objects.remove(sphere_tmp, do_unlink=True)
 if old_mesh and old_mesh.users == 0:
     bpy.data.meshes.remove(old_mesh)
 
-# Add UV unwrap so the exporter has UV data
-bpy.context.view_layer.objects.active = player
-bpy.ops.object.select_all(action='DESELECT')
-player.select_set(True)
-bpy.ops.object.mode_set(mode='EDIT')
-bpy.ops.uv.unwrap(method='ANGLE_BASED', margin=0.001)
-bpy.ops.object.mode_set(mode='OBJECT')
-
-# Assign a basic textured material (reuse the ramp texture)
+# Solid-colour material: yellow, flags=0 (FLAT_SHADED|SOLID_COLOR)
 mat = bpy.data.materials.new("MarbleMat")
 mat.use_nodes = True
 bsdf = next(n for n in mat.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
-tex_node = mat.node_tree.nodes.new('ShaderNodeTexImage')
-tga_path = os.path.join(SCRIPT_DIR, 'G_SnowyGrass1.tga')
-tex_node.image = bpy.data.images.load(tga_path, check_existing=True)
-mat.node_tree.links.new(tex_node.outputs['Color'], bsdf.inputs['Base Color'])
+bsdf.inputs['Base Color'].default_value = (1.0, 1.0, 0.0, 1.0)
 player.data.materials.clear()
 player.data.materials.append(mat)
 

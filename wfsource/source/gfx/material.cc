@@ -262,7 +262,6 @@ Material::InitPrimitive(Primitive& prim, const Vertex3D& vertex0, const Vertex3D
 			setPolyF3(poly);
 			Color color = GetColor();
 			setRGB0(poly, color.Red(),color.Green(),color.Blue());
-//			cout << "-- F3 RGB = " << color << std::endl;
 			break;
 		}
 		case GOURAUD_SHADED|SOLID_COLOR:

@@ -1,7 +1,7 @@
 # Marble Madness — Faithful Replication Plan
 
 **Date:** 2026-05-01  
-**Status:** M1 complete — canonical iso camera + camera-relative input wired  
+**Status:** M2 complete — mm_practice S-curve trough built, sphere yellow  
 **Design source:** [`/home/will/wf-games/marble-madness.md`](../../../../../../wf-games/marble-madness.md) and [`/home/will/wf-games/marble-madness/`](../../../../../../wf-games/marble-madness/)  
 **Level dir:** `wflevels/marble-madness-2/` (prototype), moving to `wflevels/mm_practice/` et al.
 
@@ -63,7 +63,7 @@ Diagonal combos for course legs (marble-madness-2 layout):
 
 ### M2 — `mm_practice` faithful course
 
-**Status:** Not started
+**Status:** Complete 2026-05-01
 
 **Spec** (stages.md): straight ramp, two soft S-curves, wide trough with raised lips, no hazards, 90 s.  
 Size: 30 m × 30 m × 4 m vertical drop.  
