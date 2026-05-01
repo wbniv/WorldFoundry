@@ -309,6 +309,69 @@ Face count = `FACE chunk size / 8`. (Not 6 — a common off-by-one when assuming
 
 ---
 
+## Non-mesh actors need Mobility + MovementClass or engine crashes
+
+**Symptom:** Engine assertion `Actor #N has invalid renderActor` immediately after level load.
+
+**Cause:** Every actor whose OAD inherits from `MovingObject` / `PhysicalObject` requires both `Mobility` and `MovementClass` fields. If these are absent, the engine cannot construct the physics body, and the `renderActor` pointer stays null.
+
+This affects actors created programmatically (e.g., via MCP Python scripts) where only explicitly set properties are exported. Actors edited through the Blender OAD panel automatically populate all OAD defaults, so this bites only scripted creation.
+
+**Fix:** Set `Mobility` and `MovementClass` explicitly for every non-geometry actor. Correct values from `mm_practice_blender.lev`:
+
+| OAD class  | Mobility  | MovementClass | Model Type |
+|------------|-----------|---------------|------------|
+| `director` | Anchored  | 20            | None       |
+| `camera`   | Camera    | 13            | Box        |
+| `light`    | Anchored  | 23            | None       |
+| `levelobj` | Anchored  | 15            | Box        |
+| `matte`    | Anchored  | 11            | Box        |
+| `camshot`  | Anchored  | 16            | Box        |
+| `actboxor` | Anchored  | 17            | None       |
+| `target`   | Anchored  | 3             | Box        |
+| `player`   | Physics   | 22            | Mesh       |
+| `statplat` | Anchored  | (auto)        | Mesh       |
+| `enemy`    | Path      | 6             | Box        |
+| `missile`  | Physics   | 8             | Box        |
+| `tool`     | Anchored  | 19            | None       |
+| `room`     | (not set) | (not set)     | (not set)  |
+
+`room` is a container, not a `PhysicalObject`, and needs none of these.
+
+---
+
+## Bool/enum OAD I32 fields require string labels, not integers
+
+**Symptom:** Boolean OAD field (e.g. `Script Controls Input`) exported as `DATA 0l` even though the Python script set it to `1`. Actor ignores the flag — Player joystick does nothing, or engine asserts "tried to set input ... but 'Script Controls Input' wasn't set".
+
+**Cause:** The wf_blender exporter resolves I32 enum fields by looking up the `STR` value in the OAD's allowed-values list (`False|True`, `Absolute|Relative`, etc.). If the property is set as a Python integer (`obj['wf_Script Controls Input'] = 1`), the exported STR is `"1"`, which doesn't match any enum label, so DATA defaults to `0` (the first option, `False`).
+
+**Fix:** Use the string label from the OAD comment, not a raw integer:
+
+```python
+# Wrong
+obj['wf_Script Controls Input'] = 1
+obj['wf_Moves Between Rooms']   = 1
+
+# Correct
+obj['wf_Script Controls Input'] = 'True'
+obj['wf_Moves Between Rooms']   = 'True'
+```
+
+Applies to any I32 field with a `//ValueA|ValueB` OAD comment. Numeric I32 fields (mailbox indices, MovementClass, etc.) still use Python ints.
+
+---
+
+## Goal-zone segment type 0x0D20 — h_left/h_right are not wall heights
+
+**Symptom:** ROM-decoded path mesh has absurdly tall spikes (30+ m) at the end of the level.
+
+**Cause:** Goal segments (MM segment type `0x0D20`, always `h_center = 5`) use a completely different internal layout from normal path segments. The values at offsets `+02`/`+04` (decoded as `h_left`/`h_right`) likely encode funnel attraction, visual animation, or entrance dimensions — not wall heights. Interpreting them as geometric heights with `GAME_UNIT = 0.5` produces 30+ m walls.
+
+**Fix:** Detect goal segments by `h_center ≤ H_ZERO` (or by checking the segment type's upper byte `= 0x0D`) and replace with level-appropriate flat platform geometry at `Z = 0`. See `rom_to_blender.py` `build_path_mesh()`.
+
+---
+
 ## Checklist: new actor not showing up
 
 1. Is the actor position strictly inside a room bbox (not on the boundary)?
