@@ -60,14 +60,14 @@ def oad(name):
 #
 # World bounds used for Room01:
 #   X: [-6, 6]     (path ±4 + 2 m margin)
-#   Y: [-3, 33]    (path 0..30 + margins)
+#   Y: [-5, 33]    (path 0..30 + margins; camera behind player needs Y > -5)
 #   Z: [-6, 20]    (path floor 0..6; camera at spawn+offset = 7+5=12; +8m headroom)
 #
 # Room01 position=(0,15,2), local_bbox=(-6,-18,-8)→(6,18,18)
 # → world X:[-6,6], Y:[-3,33], Z:[-6,20]
 
 ROOM_POS       = (0.0, 15.0, 2.0)
-ROOM_LOCAL_BBOX = (-6.0, -18.0, -8.0, 6.0, 18.0, 18.0)  # local min/max; Z-top=20
+ROOM_LOCAL_BBOX = (-6.0, -20.0, -8.0, 6.0, 18.0, 18.0)  # local min/max; Y-south=-5, Z-top=20
 
 SPAWN_POS      = (0.0,  0.0, 7.0)   # 1 m above path seg-0 floor (Z=6)
 CAM_OFFSET     = (0.0, -2.0, 5.0)   # camera behind+above player; Z=7+5=12 < room top 20
