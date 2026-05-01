@@ -54,6 +54,9 @@ WFGame* theGame = NULL;
 
 #if defined(DESIGNER_CHEATS)
 bool bRecordVideo = false;
+int  wf_hud_score = 0;
+int  wf_hud_timer = 0;
+int  wf_hud_lives = 0;
 #endif
 
 bool bPerspectiveCorrection = false;

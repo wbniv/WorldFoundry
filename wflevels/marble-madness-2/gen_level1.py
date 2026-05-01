@@ -300,12 +300,15 @@ def generate_lev():
     patch_pos("Target01",   0.0,   5.0, 13.5)
     patch_pos("Target02",   0.0,   5.0, 13.5)
 
-    # ── Goal detection: marble reaches Y > 34 (entering goal platform) ────────
-    # Raw string: \\ stays as two chars (file: \\), \n stays as two chars (file: \n).
+    # ── Player script: input + goal detection + death respawn ───────────────────
+    # Spawn: (0, 5, 13). Death trigger: Z < -90 (room floor is Z = -97).
     player_script = (
-        r'\\ wf\n'
-        r'INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n'
-        r'INDEXOF_Y_POS read-mailbox 34 > if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n'
+        r'\\ wf'
+        r'\n: respawn  0 INDEXOF_X_POS write-mailbox  5 INDEXOF_Y_POS write-mailbox  13 INDEXOF_Z_POS write-mailbox  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;'
+        r'\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox'
+        r'\nINDEXOF_Y_POS read-mailbox 34 > if 1 INDEXOF_END_OF_LEVEL write-mailbox then'
+        r'\nINDEXOF_Z_POS read-mailbox -90 < if respawn then'
+        r'\n'
     )
     patch_script("Player", player_script)
 

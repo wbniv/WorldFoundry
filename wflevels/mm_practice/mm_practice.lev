@@ -802,7 +802,7 @@
 		{ 'BOX3' 
 			{ 'NAME' "Global Bounding Box" 
 			}
-			{ 'DATA' -12.0000000000000000(1.15.16) -14.0000000000000000(1.15.16) -6.0000000000000000(1.15.16) 12.0000000000000000(1.15.16) 14.0000000000000000(1.15.16) 5.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+			{ 'DATA' -25.0000000000000000(1.15.16) -25.0000000000000000(1.15.16) -35.0000000000000000(1.15.16) 25.0000000000000000(1.15.16) 45.0000000000000000(1.15.16) 25.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 					
 			}
 		}
@@ -1993,7 +1993,7 @@
 		{ 'STR' 
 			{ 'NAME' "Script" 
 			}
-			{ 'STR' "\\ wf\n100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then                                                                                                                                                                                                                                    \n"
+			{ 'STR' "\\ wf\n: init-game  INDEXOF_TIME read-mailbox 90 +  2 write-mailbox  3 72 write-mailbox  0 70 write-mailbox ;\n2 read-mailbox 0 = if init-game then\n2 read-mailbox INDEXOF_TIME read-mailbox -  dup 71 write-mailbox  0 <= if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n13 read-mailbox 0 <> if  0 13 write-mailbox  72 read-mailbox 1 -  dup 72 write-mailbox  0 <= if 1 INDEXOF_END_OF_LEVEL write-mailbox then  then\n100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n"
 			}
 		}
 		{ 'I32' 
@@ -3400,7 +3400,7 @@
 		{ 'VEC3' 
 			{ 'NAME' "Position" 
 			}
-			{ 'DATA' 5.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //x,y,z
+			{ 'DATA' 0.0000000000000000(1.15.16) 6.0000000000000000(1.15.16) 8.0000000000000000(1.15.16)  //x,y,z
 					
 			}
 		}
@@ -4146,7 +4146,7 @@
 		{ 'VEC3' 
 			{ 'NAME' "Position" 
 			}
-			{ 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 5.0000000000000000(1.15.16)  //x,y,z
+			{ 'DATA' 0.0000000000000000(1.15.16) 6.0000000000000000(1.15.16) 8.0000000000000000(1.15.16)  //x,y,z
 					
 			}
 		}
@@ -4452,7 +4452,7 @@
 		{ 'STR' 
 			{ 'NAME' "Script" 
 			}
-			{ 'STR' "\n\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n"
+			{ 'STR' "\n\\ wf\n: respawn  0 INDEXOF_X_POS write-mailbox  6 INDEXOF_Y_POS write-mailbox  8 INDEXOF_Z_POS write-mailbox  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\nINDEXOF_Z_POS read-mailbox -5 < if respawn then\n"
 			}
 		}
 		{ 'I32' 

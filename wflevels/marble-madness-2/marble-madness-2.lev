@@ -914,7 +914,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\nINDEXOF_Y_POS read-mailbox 34 > if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n: respawn  0 INDEXOF_X_POS write-mailbox  5 INDEXOF_Y_POS write-mailbox  13 INDEXOF_Z_POS write-mailbox  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\nINDEXOF_Y_POS read-mailbox 34 > if 1 INDEXOF_END_OF_LEVEL write-mailbox then\nINDEXOF_Z_POS read-mailbox -90 < if respawn then\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }

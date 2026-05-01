@@ -226,11 +226,14 @@ def emit_actboxor():
 
 
 # 3. Room01 — the single room
+# Room position (0,10,3); BBox is in room-local space.
+# Ramp world extents: X ±5, Y 6–14, Z -2 to 6.
+# BBox extends well beyond geometry so the marble never falls out.
 def emit_room():
     begin_obj("Room01")
     vec3("Position", 0.0, 10.0, 3.0)
     eulr("Orientation", 0.0, 0.0, 0.0)
-    box3("Global Bounding Box", -12.0, -14.0, -6.0, 12.0, 14.0, 5.0)
+    box3("Global Bounding Box", -25.0, -25.0, -35.0, 25.0, 45.0, 25.0)
     classname("room")
     fx32("hp", 32767.0, "32767.0")
     i32("Number Of Local Mailboxes", 0, "0")
@@ -277,13 +280,21 @@ def emit_camera():
 
 
 # 6. Director
-# Script strings in .lev must be single-line with \\=backslash \n=newline escapes
+# MB layout (global user mailboxes, visible to all actors):
+#   2  = timer end-time (INDEXOF_TIME when 90s expires)
+#   13 = death signal (player sets to 1; director clears after decrementing lives)
+#   70 = score  (HUD top-left)
+#   71 = timer remaining in seconds  (HUD top-centre)
+#   72 = lives  (HUD top-right)
 DIRECTOR_SCRIPT_LIT = (
     r"\\ wf"
+    r"\n: init-game  INDEXOF_TIME read-mailbox 90 +  2 write-mailbox  3 72 write-mailbox  0 70 write-mailbox ;"
+    r"\n2 read-mailbox 0 = if init-game then"
+    r"\n2 read-mailbox INDEXOF_TIME read-mailbox -  dup 71 write-mailbox  0 <= if 1 INDEXOF_END_OF_LEVEL write-mailbox then"
+    r"\n13 read-mailbox 0 <> if  0 13 write-mailbox  72 read-mailbox 1 -  dup 72 write-mailbox  0 <= if 1 INDEXOF_END_OF_LEVEL write-mailbox then  then"
     r"\n100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then"
     r"\n 99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then"
     r"\n 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then"
-    "                                                                                                                                                                                                                                    "
     r"\n"
 )
 
@@ -386,12 +397,20 @@ def emit_target(name, x, y, z):
 
 
 # 12. Player — the marble
-PLAYER_SCRIPT_LIT = r"\n\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n"
+# Spawn world position matches vec3("Position", 0.0, 6.0, 8.0) below.
+# Ramp bottom is at world Z=-2; death trigger Z < -5 catches fall-off with margin.
+PLAYER_SCRIPT_LIT = (
+    r"\n\\ wf"
+    r"\n: respawn  0 INDEXOF_X_POS write-mailbox  6 INDEXOF_Y_POS write-mailbox  8 INDEXOF_Z_POS write-mailbox  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;"
+    r"\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox"
+    r"\nINDEXOF_Z_POS read-mailbox -5 < if respawn then"
+    r"\n"
+)
 
 
 def emit_player():
     begin_obj("Player")
-    vec3("Position", 0.0, 0.0, 5.0)
+    vec3("Position", 0.0, 6.0, 8.0)  # 2 units above ramp top (world Y=6, Z=6)
     eulr("Orientation", 0.0, 0.0, 0.0)
     box3("Global Bounding Box",
          -0.33, -0.33, 0.0,
@@ -453,8 +472,8 @@ emit_director()
 emit_levelobj()
 emit_matte()
 emit_camshot()
-emit_target("Target01", 5.0, 0.0, 4.5)
-emit_target("Target02", 0.0, 10.0, 2.0)
+emit_target("Target01", 0.0, 6.0, 8.0)   # near spawn, used as camera follow-start
+emit_target("Target02", 0.0, 10.0, 2.0)  # mid-ramp look-at
 emit_player()
 emit("}")
 emit()

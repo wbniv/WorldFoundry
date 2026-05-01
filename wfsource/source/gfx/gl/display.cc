@@ -38,6 +38,60 @@
 #include <gfx/pixelmap.hp>
 #include <gfx/rendobj3.hp>
 #include <gfx/renderer_backend.hp>
+
+#if DESIGNER_CHEATS && defined(__LINUX__)
+#define STB_EASY_FONT_IMPLEMENTATION
+#include "../../../../../../engine/vendor/stb_easy_font.h"
+
+extern int wf_hud_score;
+extern int wf_hud_timer;
+extern int wf_hud_lives;
+
+static void DrawHudText(float x, float y, const char* text)
+{
+    static char vbuf[65536];
+    int num_quads = stb_easy_font_print(x, y, (char*)text, nullptr, vbuf, sizeof(vbuf));
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 16, vbuf);
+    glDrawArrays(GL_QUADS, 0, num_quads * 4);
+    glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+static void DrawHud(int xSize, int ySize)
+{
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, xSize, ySize, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glColor3f(1.0f, 1.0f, 0.0f);
+
+    char buf[64];
+
+    snprintf(buf, sizeof(buf), "SCORE %d", wf_hud_score);
+    DrawHudText(8, 8, buf);
+
+    int t = wf_hud_timer > 0 ? wf_hud_timer : 0;
+    snprintf(buf, sizeof(buf), "TIME %d", t);
+    DrawHudText((float)(xSize / 2 - 30), 8, buf);
+
+    snprintf(buf, sizeof(buf), "LIVES %d", wf_hud_lives);
+    DrawHudText((float)(xSize - 70), 8, buf);
+
+    glEnable(GL_DEPTH_TEST);
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+}
+#endif // DESIGNER_CHEATS && __LINUX__
+
 extern bool bFullScreen;
 extern int _halWindowWidth;
 extern int _halWindowHeight;
@@ -447,6 +501,10 @@ Display::PageFlip()
 
 
     RendererBackendGet().EndFrame();
+
+#if DESIGNER_CHEATS && defined(__LINUX__)
+    DrawHud(_xSize, _ySize);
+#endif
 
     glFlush();
     AssertGLOK();

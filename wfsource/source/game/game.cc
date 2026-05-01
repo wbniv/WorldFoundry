@@ -330,6 +330,15 @@ WFGame::RunLevel(_DiskFile* levelFile)
 		                          _curLevel->GetObjectList().Size());
 		DebugServer_BroadcastMailboxes(*_curLevel);
 		DBSTREAM2( cflow << "WFGame::update: page flip" << std::endl; )
+#if DESIGNER_CHEATS
+		{
+			extern int wf_hud_score, wf_hud_timer, wf_hud_lives;
+			Mailboxes& mb = _curLevel->GetMailboxes();
+			wf_hud_score = mb.ReadMailbox(70).WholePart();
+			wf_hud_timer = mb.ReadMailbox(71).WholePart();
+			wf_hud_lives = mb.ReadMailbox(72).WholePart();
+		}
+#endif
 		deltaTime = _display->PageFlip();
 		DBSTREAM2( cflow << "WFGame::update: done" << std::endl; )
 
