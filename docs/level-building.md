@@ -1,5 +1,65 @@
 # WF Level Building & Engine Knowledge
 
+## Blender MCP Connector
+
+The official Blender MCP server (released 2026-04-28, Blender + Anthropic) lets Claude
+directly manipulate a live Blender session — execute Python, introspect the scene, and
+capture viewport screenshots — instead of round-tripping through `blender --background`
+scripts.
+
+### One-time setup
+
+**1. Install the Blender addon**
+
+Go to [blender.org/lab/mcp-server](https://www.blender.org/lab/mcp-server/).  
+Drag the install link into Blender **twice**: once to add the repository, once to install
+the addon. Requires Blender 4.2+.
+
+**2. Connect Blender**
+
+In the 3D Viewport press **N** → **BlenderMCP** tab → **Connect to Claude**.  
+Keep this panel open while working; it must stay connected.
+
+**3. Install `uv` (once per machine)**
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+**4. Project MCP config** (already committed at `.mcp.json` in repo root)
+
+```json
+{
+  "mcpServers": {
+    "blender": {
+      "command": "uvx",
+      "args": ["blender-mcp"]
+    }
+  }
+}
+```
+
+Claude Code picks this up automatically on session start. Restart the session after
+first adding the file.
+
+### What this replaces
+
+| Before | After |
+|--------|-------|
+| Edit `blender_update_player_sphere.py`, run `blender --background --python …` | Ask Claude to modify the scene directly in the open Blender window |
+| Blind iteration — no visual feedback until game runs | Viewport screenshot available immediately after each change |
+| Script must handle import, export, and reload | Claude issues targeted Python API calls; you trigger export when ready |
+
+### Notes
+
+- Only one MCP client may connect at a time (don't run Claude Desktop and Claude Code
+  simultaneously against the same Blender session).
+- The server process (`uvx blender-mcp`) is managed by Claude Code; don't launch it
+  manually in a terminal.
+- The Blender addon listens on `localhost:9876` by default.
+
+---
+
 ## Level File Format
 
 ### cd.iff — Multi-Level Archive
