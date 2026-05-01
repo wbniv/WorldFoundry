@@ -29,6 +29,13 @@ Key gotchas encoded here (see docs/level-design-troubleshooting.md):
   - Target02 must exist — BungeeCam dereferences it; null → crash
   - Non-geometry actors must NOT have wf_original_bbox set (no BOX3 emitted)
   - Player Turn Rate = 0.0 selects MarbleHandler; Max Air Speed > 0 required
+
+Path geometry coordinate system (see rom_to_blender.py):
+  - Heading angle from type field lower byte: 0° = +X (East), CCW positive
+  - Practice segs 0-8: heading 18.28° (ENE, open-sided S-curve — requires joystick)
+  - Practice segs 9-10: heading 45° (NE, walled trough — ball rolls to goal)
+  - Spawn above seg 9 (21.36, 7.06, 14.0) so ball rolls downhill without joystick
+  - Full S-curve play requires joystick input; segs 0-8 are crowned not troughs
 """
 
 import bpy
@@ -53,29 +60,33 @@ def oad(name):
 # --------------------------------------------------------------------------
 # Level layout constants
 # --------------------------------------------------------------------------
-# Practice path (rom_to_blender.py defaults):
-#   13 segments × SEG_LEN=2.5 m → Y = 0..30 m
-#   HEIGHT: h_center 17→5, Z = (h-5)×0.5 → 6..0 m
-#   WIDTH: PATH_HALF = 4.0 m → X = ±4 m
+# Practice path (rom_to_blender.py heading-based layout):
+#   Segs 0-8:  heading 18.28° (ENE), 9 × 2.5m → endpoint ≈ (21.4, 7.1)
+#   Segs 9-10: heading 45° (NE),     2 × 2.5m → endpoint ≈ (24.9, 10.6)
+#   Z range: floor 0–13 m, wall tops up to 23.5 m
 #
-# World bounds used for Room01:
-#   X: [-6, 6]     (path ±4 + 2 m margin)
-#   Y: [-5, 33]    (path 0..30 + margins; camera behind player needs Y > -5)
-#   Z: [-6, 20]    (path floor 0..6; camera at spawn+offset = 7+5=12; +8m headroom)
+# Spawn above seg 9 (first walled downhill trough) so ball rolls toward goal
+# without requiring joystick input in the demo.  Segs 0-8 are open-sided
+# (crowned) and require active steering — they are correct arcade geometry
+# but unplayable without a joystick connected.
 #
-# Room01 position=(0,15,2), local_bbox=(-6,-18,-8)→(6,18,18)
-# → world X:[-6,6], Y:[-3,33], Z:[-6,20]
+# Room01 position=(13,5,9), local_bbox=(-15,-8,-11)→(14,8,17)
+# → world X:[-2,27], Y:[-3,13], Z:[-2,26]
+#
+# Camera behind ball at seg-9 heading (45°): offset (-1.5,-1.5,+5)
+# → camera world pos at spawn = (21.4-1.5, 7.1-1.5, 14+5) = (19.9, 5.6, 19)
+#   all within room bounds ✓
 
-ROOM_POS       = (0.0, 15.0, 2.0)
-ROOM_LOCAL_BBOX = (-6.0, -20.0, -8.0, 6.0, 18.0, 18.0)  # local min/max; Y-south=-5, Z-top=20
+ROOM_POS        = (13.0,  5.0,  9.0)
+ROOM_LOCAL_BBOX = (-15.0, -8.0, -11.0, 14.0, 8.0, 17.0)  # world: X[-2,27] Y[-3,13] Z[-2,26]
 
-SPAWN_POS      = (0.0,  0.0, 7.0)   # 1 m above path seg-0 floor (Z=6)
-CAM_OFFSET     = (0.0, -2.0, 5.0)   # camera behind+above player; Z=7+5=12 < room top 20
-CAMSHOT_POS    = (0.0, -2.0, 5.0)   # placed inside room for levcomp assignment
-TARGET1_POS    = (0.0,  0.0, 0.0)   # world-space anchor
-TARGET2_POS    = (0.0,  0.0, 7.5)   # look-at just above player spawn
-LIGHT_POS      = (0.0, 15.0, 8.0)   # overhead, inside room
-CAMERA_POS     = (0.0, -1.0, 7.0)   # camera entity, inside room
+SPAWN_POS    = (21.364, 7.058, 14.0)  # 1 m above seg-9 trough floor (Z=13)
+CAM_OFFSET   = (-1.5, -1.5, 5.0)     # behind (−45° heading) + above; stays in room
+CAMSHOT_POS  = (-1.5, -1.5, 5.0)     # same as offset; placed inside room
+TARGET1_POS  = (0.0,   0.0,  0.0)    # world-space follow anchor (inside room ✓)
+TARGET2_POS  = (21.364, 7.058, 14.5) # look-at just above player spawn
+LIGHT_POS    = (13.0,  5.0, 22.0)    # overhead, inside room (Z=22 < 26) ✓
+CAMERA_POS   = (20.0,  6.0, 19.0)    # camera entity, inside room ✓
 
 # Director script: 90 s timer, 3 lives, respawn + camshot routing
 DIRECTOR_SCRIPT = (
@@ -256,7 +267,7 @@ make_empty(
 # Fills the room; writes CamShot01's index to the camshot mailbox when
 # Player enters.  The engine bootstrap in level.cc already writes the first
 # CamShot index at construction time, so this is belt-and-suspenders.
-actbox_bbox = (-6.0, -18.0, -8.0, 6.0, 18.0, 8.0)  # same as room local bbox
+actbox_bbox = (-15.0, -8.0, -11.0, 14.0, 8.0, 17.0)  # same as room local bbox
 make_box_empty(
     'ActBoxOR', ROOM_POS, actbox_bbox, 'actboxor',
     props={

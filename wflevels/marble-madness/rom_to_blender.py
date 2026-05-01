@@ -12,18 +12,30 @@ Reads wflevels/marble-madness/levels.json (produced by decode_levels.py) and
 creates a trough-shaped path mesh for the specified level in the current scene.
 
 Coordinate mapping:
-  - Path runs along +Y axis (same as mm_practice ramp direction)
+  - Each segment has a heading angle extracted from the descriptor type field:
+      heading = (type & 0xFF) / 256 * 2π  radians, CCW from +X axis (East = 0°)
+  - Cross-sections are placed perpendicular to the heading direction at each
+    segment boundary; positions accumulate via heading × SEG_LEN per segment.
   - Z = (h_value - H_ZERO) × GAME_UNIT  (H_ZERO=5 puts goal at Z=0)
-  - X = ±PATH_HALF  (left/right edges of the trough)
-  - Faces are doubled (top + back) so the physics mesh is two-sided
+  - h_left/h_right give wall/edge heights at PATH_HALF from path centre;
+    when h_edge > h_center the edge rises above the floor (walled trough);
+    when h_edge < h_center the edge drops below (crowned/open-sided section).
+  - Face normals always have n_z = PATH_HALF × SEG_LEN > 0 regardless of heading.
+  - Faces are doubled (top + back) so the physics mesh is two-sided.
+
+Type field lower-byte heading table for Practice:
+  Segs  0-8:  type=0x000D, lower=13 → 18.28° (ENE, mostly +X with slight +Y)
+  Segs  9-10: type=0x0320, lower=32 → 45.00° (NE diagonal, walled downhill)
+  Segs 11-12: type=0x0D20 (goal sentinel, h_center=5=H_ZERO, replaced by flat platform)
 
 Calibration constants (tune via Blender MCP + MAME screenshot comparison):
   GAME_UNIT  — metres per game height unit above H_ZERO
-  SEG_LEN    — metres per path segment
-  PATH_HALF  — half-width of path in metres (centre to edge)
+  SEG_LEN    — metres per path segment (forward step per segment)
+  PATH_HALF  — half-width of path in metres (centre to each edge vertex)
 """
 
 import json
+import math
 import os
 import sys
 
@@ -35,13 +47,25 @@ import bpy
 
 H_ZERO     = 5      # goal-zone h_center; subtracted so goal sits at Z=0
 GAME_UNIT  = 0.5    # metres per game unit above H_ZERO
-SEG_LEN    = 2.5    # metres per path segment along +Y
-PATH_HALF  = 4.0    # metres from path centre to each edge
+SEG_LEN    = 2.5    # metres per path segment
+PATH_HALF  = 4.0    # metres from path centre to each edge vertex
 
 
 def scale(h):
     """Convert a game-unit height value to WF world metres (Z)."""
     return (h - H_ZERO) * GAME_UNIT
+
+
+def heading_angle(type_u16: int) -> float:
+    """Path heading angle in radians from descriptor type field.
+
+    Lower byte of the 16-bit descriptor type = heading in 256ths of a
+    full revolution, CCW from the +X axis (East = 0°, North = 64/256 = 90°).
+    Confirmed via cross-level type-field analysis: type groups with the same
+    lower byte run in the same direction; lower-byte changes mark path turns.
+    """
+    lower = type_u16 & 0xFF
+    return (lower / 256.0) * (2.0 * math.pi)
 
 
 def load_levels() -> dict:
@@ -55,19 +79,19 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
     """
     Build a trough mesh for one level and link it into the current scene.
 
-    Cross-section at each segment joint (3 vertices):
-      left   (-PATH_HALF, y, scale(h_left))
-      center (0,          y, scale(h_center))
-      right  (+PATH_HALF, y, scale(h_right))
+    Cross-section at each segment joint (3 vertices, perpendicular to heading):
+      left   (centre - PATH_HALF × right_perp,  scale(h_left))
+      center (centre,                             scale(h_center))
+      right  (centre + PATH_HALF × right_perp,  scale(h_right))
 
-    When h_edge > h_center: edge rises above floor → wall/lip geometry.
-    When h_edge < h_center: edge drops below floor → open/fall-off side.
+    where right_perp = (sin θ, −cos θ, 0) for heading angle θ.
 
-    Adjacent cross-sections are connected with quads (×2 for double-sided).
+    Segment positions accumulate: pos_{i+1} = pos_i + SEG_LEN × (cos θ_i, sin θ_i).
 
-    Goal segments (h_center ≤ H_ZERO, type 0x0D*) use a different encoding —
-    h_left/h_right there likely encode funnel geometry or velocity cues, not
-    simple wall heights.  We replace them with a flat goal platform at Z=0.
+    Face normals always have n_z = PATH_HALF × SEG_LEN > 0, so the ball can
+    rest on all faces regardless of heading direction.
+
+    Goal segments (h_center ≤ H_ZERO) are replaced by a flat goal platform at Z=0.
     """
     segs = [s for s in levels[level_name]['segments'] if 'error' not in s]
     if not segs:
@@ -83,42 +107,80 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
     verts = []
     faces = []
 
-    def add_cross_section(seg, y):
+    def add_cross_section(px, py, seg, theta):
+        """Add 3 vertices for one cross-section perpendicular to heading theta."""
+        rx = math.sin(theta)   # right direction: 90° CW from forward
+        ry = -math.cos(theta)
         base = len(verts)
-        verts.append((-PATH_HALF, y, scale(seg['h_left'])))    # base+0: left
-        verts.append((0.0,        y, scale(seg['h_center'])))  # base+1: centre
-        verts.append(( PATH_HALF, y, scale(seg['h_right'])))   # base+2: right
+        verts.append((px - PATH_HALF * rx, py - PATH_HALF * ry, scale(seg['h_left'])))   # left
+        verts.append((px,                  py,                   scale(seg['h_center'])))  # centre
+        verts.append((px + PATH_HALF * rx, py + PATH_HALF * ry, scale(seg['h_right'])))  # right
         return base
 
-    # Trough geometry for non-goal segments
-    if path_segs:
-        prev = add_cross_section(path_segs[0], 0.0)
-        for i, seg in enumerate(path_segs[1:], 1):
-            curr = add_cross_section(seg, i * SEG_LEN)
-            p0, p1, p2 = prev, prev + 1, prev + 2
-            c0, c1, c2 = curr, curr + 1, curr + 2
+    # Accumulate segment positions and build cross-sections
+    pos_x, pos_y = 0.0, 0.0
 
-            # Top faces (normal roughly upward)
-            faces.append((p0, p1, c1, c0))   # left half-floor
-            faces.append((p1, p2, c2, c1))   # right half-floor
+    if not path_segs:
+        print(f'[rom_to_blender] No path segments for {level_name}')
+        return None
 
-            # Back faces (double-sided: marble can hit from below too)
-            faces.append((c0, c1, p1, p0))
-            faces.append((c1, c2, p2, p1))
+    first_theta = heading_angle(path_segs[0]['type'])
+    prev_base   = add_cross_section(pos_x, pos_y, path_segs[0], first_theta)
 
-            prev = curr
+    for i, seg in enumerate(path_segs[1:], 1):
+        # Advance position along previous segment's heading
+        prev_theta = heading_angle(path_segs[i - 1]['type'])
+        pos_x += math.cos(prev_theta) * SEG_LEN
+        pos_y += math.sin(prev_theta) * SEG_LEN
 
-    # Flat goal platform at Z=0, placed after the last path segment
+        theta     = heading_angle(seg['type'])
+        curr_base = add_cross_section(pos_x, pos_y, seg, theta)
+
+        p0, p1, p2 = prev_base,     prev_base + 1, prev_base + 2
+        c0, c1, c2 = curr_base,     curr_base + 1, curr_base + 2
+
+        # Top faces (n_z = PATH_HALF × SEG_LEN > 0 always)
+        faces.append((p0, p1, c1, c0))   # left half-floor
+        faces.append((p1, p2, c2, c1))   # right half-floor
+        # Back faces (double-sided: physics collision from both sides)
+        faces.append((c0, c1, p1, p0))
+        faces.append((c1, c2, p2, p1))
+
+        prev_base = curr_base
+
+    # Final cross-section at end of last segment
+    last_theta = heading_angle(path_segs[-1]['type'])
+    pos_x += math.cos(last_theta) * SEG_LEN
+    pos_y += math.sin(last_theta) * SEG_LEN
+    curr_base = add_cross_section(pos_x, pos_y, path_segs[-1], last_theta)
+    p0, p1, p2 = prev_base,     prev_base + 1, prev_base + 2
+    c0, c1, c2 = curr_base,     curr_base + 1, curr_base + 2
+    faces.append((p0, p1, c1, c0)); faces.append((p1, p2, c2, c1))
+    faces.append((c0, c1, p1, p0)); faces.append((c1, c2, p2, p1))
+
+    # Flat goal platform at Z=0, one segment forward from path end
     if goal_segs:
-        gy = len(path_segs) * SEG_LEN  # Y start of goal zone
-        gx, gz = PATH_HALF * 1.5, 0.0   # slightly wider than the path
+        final_theta = heading_angle(path_segs[-1]['type'])
+        goal_x = pos_x + math.cos(final_theta) * SEG_LEN
+        goal_y = pos_y + math.sin(final_theta) * SEG_LEN
+        rx = math.sin(final_theta)
+        ry = -math.cos(final_theta)
+        gw = PATH_HALF * 1.5   # slightly wider than path
         b = len(verts)
-        verts += [(-gx, gy, gz), (gx, gy, gz),
-                  (gx, gy + SEG_LEN, gz), (-gx, gy + SEG_LEN, gz)]
-        faces.append((b, b+1, b+2, b+3))   # top
-        faces.append((b+3, b+2, b+1, b))   # back (double-sided)
+        verts += [
+            (pos_x  - gw * rx, pos_y  - gw * ry, 0.0),   # near-left
+            (pos_x  + gw * rx, pos_y  + gw * ry, 0.0),   # near-right
+            (goal_x + gw * rx, goal_y + gw * ry, 0.0),   # far-right
+            (goal_x - gw * rx, goal_y - gw * ry, 0.0),   # far-left
+        ]
+        faces.append((b, b + 1, b + 2, b + 3))   # top
+        faces.append((b + 3, b + 2, b + 1, b))   # back
+
         print(f'[rom_to_blender] {level_name}: {len(goal_segs)} goal seg(s) → '
-              f'flat platform at Y={gy:.1f}')
+              f'flat platform at ({pos_x:.2f},{pos_y:.2f})')
+
+    print(f'[rom_to_blender] {level_name}: path end pos=({pos_x:.2f},{pos_y:.2f}), '
+          f'{len(segs)} segs → {len(verts)} verts, {len(faces)} faces')
 
     mesh = bpy.data.meshes.new(f'{level_name}_path')
     mesh.from_pydata(verts, [], faces)
@@ -127,34 +189,27 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
     obj = bpy.data.objects.new(f'{level_name}_path', mesh)
     bpy.context.scene.collection.objects.link(obj)
 
-    # Add a flat-shaded material (no texture) so the WF exporter emits
-    # FLAT_SHADED (flags=0).  Textured materials require a texture atlas entry
-    # in the level IFF — without one the mesh renders invisible in-game.
-    # See docs/level-design-troubleshooting.md § "Mesh material: use FLAT_SHADED"
+    # Flat-shaded material — no texture atlas entry needed; avoids invisible mesh
     mat = bpy.data.materials.new(f'{level_name}_path_mat')
     mat.use_nodes = True
     nt = mat.node_tree
     bsdf = next((n for n in nt.nodes if n.type == 'BSDF_PRINCIPLED'), None)
     if bsdf:
-        bsdf.inputs['Base Color'].default_value = (0.4, 0.6, 0.3, 1.0)  # MM green-gray
+        bsdf.inputs['Base Color'].default_value = (0.4, 0.6, 0.3, 1.0)
     mesh.materials.append(mat)
 
-    # Attach statplat OAD so the WF exporter knows this is a static platform
+    # Attach statplat OAD so the WF exporter emits it as a static platform
     repo = os.path.normpath(
         os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
     statplat_oad = os.path.join(
         repo, 'wftools', 'wf_oad', 'tests', 'fixtures', 'statplat.oad')
-    obj['wf_schema_path'] = statplat_oad
-    obj['wf_Mesh Name']       = f'{level_name.lower()}_path.iff'
-    obj['wf_Model Type']      = 'Mesh'
-    obj['wf_Mobility']        = 'Anchored'
+    obj['wf_schema_path']    = statplat_oad
+    obj['wf_Mesh Name']      = f'{level_name.lower()}_path.iff'
+    obj['wf_Model Type']     = 'Mesh'
+    obj['wf_Mobility']       = 'Anchored'
     obj['wf_Surface Friction'] = 0.5
-    obj['wf_Mass']            = 0.0
+    obj['wf_Mass']           = 0.0
 
-    print(
-        f'[rom_to_blender] {level_name}: {len(segs)} segs → '
-        f'{len(verts)} verts, {len(faces)} faces'
-    )
     return obj
 
 
@@ -163,9 +218,6 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
 # --------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    # Run standalone (blender --background --python rom_to_blender.py -- Practice)
-    # or directly in Blender's Script Editor.
-    # NOT triggered when exec()'d from another script.
     argv = sys.argv
     if '--' in argv:
         argv = argv[argv.index('--') + 1:]

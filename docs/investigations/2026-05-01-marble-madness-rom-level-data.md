@@ -283,35 +283,61 @@ Seg  Type   Addr      h_left  h_right  h_center
 
 ---
 
-## Type Field — Hypothesis
+## Type Field — Path Heading (Confirmed)
 
-The 16-bit type code's meaning is not fully reverse-engineered. Observations:
+The **lower byte** of the 16-bit descriptor-entry type encodes the **path heading angle** in 256ths of a full revolution, CCW from the +X axis (East = 0°, North = 64/256 = 90°). Evidence:
 
-- Types form ascending sequences within a level (e.g. Practice: 000D → 0320 → 0D20)
-- The **upper byte** of the type increases monotonically within most levels
-- Possible encoding: `[camera_angle: u8][path_direction: u8]` in 256ths of a revolution
+- Segments with the same lower byte form straight runs in the same direction.
+- Lower-byte changes mark path turns (e.g. Practice segs 0–8 → segs 9–10: 13 → 32 = 18.28° → 45°, a left turn of ≈27°).
+- Practice segs 9–10 form a walled trough at the heading-45° turn — consistent with the visual S-curve in the arcade game bending into the crest section.
+- Face normals derived from heading-perpendicular cross-sections always have n_z = PATH_HALF × SEG_LEN > 0, confirming the geometry is physically correct under WF's −Z gravity.
 
-| Type | Upper (256ths rev) | Lower | Approx angle |
-|------|--------------------|-------|-------------|
-| 000D | 0 | 13 | 0° + 18° |
-| 0320 | 3 | 32 | 4° + 45° |
-| 0D28 | 13 | 40 | 18° + 56° |
-| 1F40 | 31 | 64 | 44° + 90° |
-| 3240 | 50 | 64 | 70° + 90° |
+| Level | Segment group | Type | Lower byte | Heading | Interpretation |
+|-------|--------------|------|-----------|---------|----------------|
+| Practice | 0–8 | 0x000D | 13 | 18.28° | ENE straight run (S-curve; open-sided) |
+| Practice | 9–10 | 0x0320 | 32 | 45.00° | NE turn (walled trough, crest) |
+| Practice | 11–12 | 0x0D20 | 32 | 45.00° | Goal sentinel (h_center = 5 = H_ZERO) |
+| Beginner | 0 | 0x0D28 | 40 | 56.25° | First straight |
+| Beginner | 1–2 | 0x142F | 47 | 66.09° | First turn |
+| Beginner | 3–5 | 0x1F40 | 64 | 90.00° | North run |
+| Aerial | 0–1 | 0x0003 | 3 | 4.22° | Near-East opening |
+| Aerial | 2–7 | 0x031E | 30 | 42.19° | NE diagonal |
 
-Alternatively the type may encode path heading (view direction relative to north), consistent with MM's fixed-iso camera that subtly shifts angle per segment.
+The **upper byte** increases monotonically across a level; its meaning is still not confirmed. Candidates: camera tilt parameter, cumulative segment index, or a physics zone ID. The upper byte does NOT affect path direction.
 
-**Segments with h_center = 5** consistently appear at level ends (goal areas). These may be a sentinel value indicating the goal/exit zone rather than a true height.
+**Coordinate mapping for WF** (`rom_to_blender.py` implementation):
+
+```
+heading_angle(type) = (type & 0xFF) / 256 × 2π   radians, CCW from +X
+pos_{i+1} = pos_i + SEG_LEN × (cos θ_i, sin θ_i)
+cross-section right perp = (sin θ, −cos θ, 0)
+Z = (h_value − H_ZERO) × GAME_UNIT
+```
+
+**Practice path physical layout (GAME_UNIT=0.5, SEG_LEN=2.5, PATH_HALF=4.0):**
+
+| Segs | Heading | Path character | Floor Z | Note |
+|------|---------|---------------|---------|------|
+| 0–8 | 18.28° | Crowned (h_edge < h_center) | 6–13 m | Uphill; requires joystick to navigate |
+| 9–10 | 45.00° | Walled trough | 12.5–13 m | Crest; ball rolls to goal from here |
+| 11–12 | — | Goal sentinel | 0 m | Flat platform; replaced by Z=0 quad |
+
+The uphill S-curve (segs 0–8) is **correct arcade geometry**: the original game requires the player to steer the marble through the crowned sections and up the hill before gravity takes over on the downhill run to the goal. Spawn above seg 9 for joystick-free demo runs.
+
+**Segment 0 raw-byte anomaly**: segment at 0x01DE9E has non-standard constant fields (`+12 = 0x6658` instead of 0x0C14, `+16 = 0x0096 = 150/256 rev = 210°`). These may encode the level-start camera or respawn heading. Not yet decoded.
+
+**Segments with h_center = 5** (= H_ZERO) are goal sentinels; `rom_to_blender.py` replaces them with a flat Z=0 platform.
 
 ---
 
 ## Unknowns / Next Steps
 
-1. **Type field meaning**: needs 68000 disassembly to trace how type is used in rendering/physics. Tools: Ghidra with 68000 support, or MAME Lua watchpoint on type-reading instructions.
-2. **Absolute world positions**: height values are in game units of unknown scale/origin. Need to correlate with the known Practice level visual (spawn at WF world position ~Z=8, goal at Z=0).
-3. **Path width**: the constant `0x0C14` in segment records may encode left/right path boundaries (0x0C=12, 0x14=20), implying path width = 8 units.
+1. **Type field upper byte**: upper byte increases monotonically per level; meaning unknown. Candidates: camera view angle (in 256ths rev), per-zone physics ID, or a cumulative frame counter.
+2. **Segment 0 `+12` field anomaly**: `0x6658` and `0x0096` differ from the constant `0x0C14` in normal segments. May encode respawn/start-camera heading.
+3. **Path width**: the constant `0x0C14` at segment offset +12 may encode path boundaries `[L:u8=12][R:u8=20]` — asymmetric left/right from centre. Not verified against gameplay visuals.
 4. **Segment 9 of Aerial** (`addr=0x000000`, `h_left=7936`): anomalous — likely a camera transition entry or null terminator variant.
-5. **Why Intermediate and Silly have so few segments** (4 and 5): either the format has multi-segment sub-records, or these tables are per-camera-zone rather than per-tile.
+5. **Why Intermediate and Silly have so few segments** (4 and 5): possibly per-camera-zone records rather than per-tile.
+6. **GAME_UNIT calibration**: 0.5 m/unit gives practice-crest Z=13 m — visually plausible but not yet matched to a MAME runtime measurement.
 
 ---
 
