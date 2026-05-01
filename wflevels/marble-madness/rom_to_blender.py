@@ -64,11 +64,21 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
     When h_edge < h_center: edge drops below floor → open/fall-off side.
 
     Adjacent cross-sections are connected with quads (×2 for double-sided).
+
+    Goal segments (h_center ≤ H_ZERO, type 0x0D*) use a different encoding —
+    h_left/h_right there likely encode funnel geometry or velocity cues, not
+    simple wall heights.  We replace them with a flat goal platform at Z=0.
     """
     segs = [s for s in levels[level_name]['segments'] if 'error' not in s]
     if not segs:
         print(f'[rom_to_blender] No valid segments for {level_name}')
         return None
+
+    def is_goal(seg):
+        return seg['h_center'] <= H_ZERO
+
+    path_segs = [s for s in segs if not is_goal(s)]
+    goal_segs  = [s for s in segs if     is_goal(s)]
 
     verts = []
     faces = []
@@ -80,22 +90,35 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
         verts.append(( PATH_HALF, y, scale(seg['h_right'])))   # base+2: right
         return base
 
-    prev = add_cross_section(segs[0], 0.0)
+    # Trough geometry for non-goal segments
+    if path_segs:
+        prev = add_cross_section(path_segs[0], 0.0)
+        for i, seg in enumerate(path_segs[1:], 1):
+            curr = add_cross_section(seg, i * SEG_LEN)
+            p0, p1, p2 = prev, prev + 1, prev + 2
+            c0, c1, c2 = curr, curr + 1, curr + 2
 
-    for i, seg in enumerate(segs[1:], 1):
-        curr = add_cross_section(seg, i * SEG_LEN)
-        p0, p1, p2 = prev, prev + 1, prev + 2
-        c0, c1, c2 = curr, curr + 1, curr + 2
+            # Top faces (normal roughly upward)
+            faces.append((p0, p1, c1, c0))   # left half-floor
+            faces.append((p1, p2, c2, c1))   # right half-floor
 
-        # Top faces (normal roughly upward)
-        faces.append((p0, p1, c1, c0))   # left half-floor
-        faces.append((p1, p2, c2, c1))   # right half-floor
+            # Back faces (double-sided: marble can hit from below too)
+            faces.append((c0, c1, p1, p0))
+            faces.append((c1, c2, p2, p1))
 
-        # Back faces (double-sided: marble can hit from below too)
-        faces.append((c0, c1, p1, p0))
-        faces.append((c1, c2, p2, p1))
+            prev = curr
 
-        prev = curr
+    # Flat goal platform at Z=0, placed after the last path segment
+    if goal_segs:
+        gy = len(path_segs) * SEG_LEN  # Y start of goal zone
+        gx, gz = PATH_HALF * 1.5, 0.0   # slightly wider than the path
+        b = len(verts)
+        verts += [(-gx, gy, gz), (gx, gy, gz),
+                  (gx, gy + SEG_LEN, gz), (-gx, gy + SEG_LEN, gz)]
+        faces.append((b, b+1, b+2, b+3))   # top
+        faces.append((b+3, b+2, b+1, b))   # back (double-sided)
+        print(f'[rom_to_blender] {level_name}: {len(goal_segs)} goal seg(s) → '
+              f'flat platform at Y={gy:.1f}')
 
     mesh = bpy.data.meshes.new(f'{level_name}_path')
     mesh.from_pydata(verts, [], faces)
@@ -103,6 +126,18 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
 
     obj = bpy.data.objects.new(f'{level_name}_path', mesh)
     bpy.context.scene.collection.objects.link(obj)
+
+    # Add a flat-shaded material (no texture) so the WF exporter emits
+    # FLAT_SHADED (flags=0).  Textured materials require a texture atlas entry
+    # in the level IFF — without one the mesh renders invisible in-game.
+    # See docs/level-design-troubleshooting.md § "Mesh material: use FLAT_SHADED"
+    mat = bpy.data.materials.new(f'{level_name}_path_mat')
+    mat.use_nodes = True
+    nt = mat.node_tree
+    bsdf = next((n for n in nt.nodes if n.type == 'BSDF_PRINCIPLED'), None)
+    if bsdf:
+        bsdf.inputs['Base Color'].default_value = (0.4, 0.6, 0.3, 1.0)  # MM green-gray
+    mesh.materials.append(mat)
 
     # Attach statplat OAD so the WF exporter knows this is a static platform
     repo = os.path.normpath(
@@ -127,9 +162,11 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
 # Entry point — run for one level (default: Practice)
 # --------------------------------------------------------------------------
 
-if __name__ == '__main__' or 'bpy' in dir():
+if __name__ == '__main__':
+    # Run standalone (blender --background --python rom_to_blender.py -- Practice)
+    # or directly in Blender's Script Editor.
+    # NOT triggered when exec()'d from another script.
     argv = sys.argv
-    # Blender passes script args after '--'
     if '--' in argv:
         argv = argv[argv.index('--') + 1:]
     level_name = argv[0] if argv else 'Practice'

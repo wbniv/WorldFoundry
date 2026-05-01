@@ -1,0 +1,18 @@
+// mm_fromscratch-standalone.iff.txt — L4-wrapped form for wf_game -L.
+//
+// Build:
+//   iffcomp-rs -binary -o=mm_fromscratch-standalone.iff mm_fromscratch-standalone.iff.txt
+//
+// Run:
+//   cd wfsource/source/game && wf_game -L<repo>/wflevels/marble-madness/mm_fromscratch-standalone.iff
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 100000l
+        'PERM' 300000l
+        'ROOM' 300000l
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "mm_fromscratch.iff" ]
+}

@@ -1,0 +1,204 @@
+{ 'LVL' 
+	{ 'OBJ' 
+		{ 'NAME' "Room01" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 15.0000000000000000(1.15.16) 2.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -6.0000000000000000(1.15.16) -18.0000000000000000(1.15.16) -8.0000000000000000(1.15.16) 6.0000000000000000(1.15.16) 18.0000000000000000(1.15.16) 8.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "room" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "room01.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'STR' { 'NAME' "Adjacent Room 1" } { 'STR' "" } }
+		{ 'STR' { 'NAME' "Adjacent Room 2" } { 'STR' "" } }
+		{ 'I32' { 'NAME' "Room Loaded Mailbox" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "LevelObj" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 15.0000000000000000(1.15.16) 2.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "levelobj" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 15l } { 'STR' "15" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Box" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Matte" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 15.0000000000000000(1.15.16) 2.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "matte" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 11l } { 'STR' "11" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Box" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Light01" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 15.0000000000000000(1.15.16) 8.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "light" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 23l } { 'STR' "23" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
+		{ 'I32' { 'NAME' "lightType" } { 'DATA' 0l } { 'STR' "Directional" } }  //Directional|Ambient
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Director" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 15.0000000000000000(1.15.16) 2.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "director" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 20l } { 'STR' "20" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: init-game  INDEXOF_TIME read-mailbox 90 +  2 write-mailbox  3 72 write-mailbox  0 70 write-mailbox ;\n2 read-mailbox 0 = if init-game then\n2 read-mailbox INDEXOF_TIME read-mailbox -  dup 71 write-mailbox  0 <= if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n13 read-mailbox 0 <> if  0 13 write-mailbox  72 read-mailbox 1 -  dup 72 write-mailbox  0 <= if 1 INDEXOF_END_OF_LEVEL write-mailbox then  then\n100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Camera" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -1.0000000000000000(1.15.16) 7.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "camera" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 13l } { 'STR' "13" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Camera" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Box" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Target01" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "target" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 3l } { 'STR' "3" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Box" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Target02" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 7.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "target" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 3l } { 'STR' "3" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Box" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "CamShot01" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -2.0000000000000000(1.15.16) 7.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "camshot" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 16l } { 'STR' "16" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Box" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'STR' { 'NAME' "Target" } { 'STR' "Target02" } }
+		{ 'STR' { 'NAME' "Follow" } { 'STR' "Target01" } }
+		{ 'FX32' { 'NAME' "Climb Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
+		{ 'FX32' { 'NAME' "Elasticity" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'STR' { 'NAME' "Track Object" } { 'STR' "Player" } }
+		{ 'I32' { 'NAME' "Rotation" } { 'DATA' 1l } { 'STR' "Track" } }  //Fixed|Track
+		{ 'I32' { 'NAME' "Position X" } { 'DATA' 1l } { 'STR' "Relative" } }  //Absolute|Relative
+		{ 'I32' { 'NAME' "Position Y" } { 'DATA' 1l } { 'STR' "Relative" } }  //Absolute|Relative
+		{ 'I32' { 'NAME' "Position Z" } { 'DATA' 1l } { 'STR' "Relative" } }  //Absolute|Relative
+		{ 'FX32' { 'NAME' "FOV" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
+		{ 'FX32' { 'NAME' "Pan Time In Seconds" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
+		{ 'FX32' { 'NAME' "Hither" } { 'DATA' 0.1000000000000000(1.15.16) } { 'STR' "0.1" } }
+		{ 'FX32' { 'NAME' "Yon" } { 'DATA' 1000.0000000000000000(1.15.16) } { 'STR' "1000.0" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "ActBoxOR" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 15.0000000000000000(1.15.16) 2.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -6.0000000000000000(1.15.16) -18.0000000000000000(1.15.16) -8.0000000000000000(1.15.16) 6.0000000000000000(1.15.16) 18.0000000000000000(1.15.16) 8.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actboxor" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "actboxor.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 17l } { 'STR' "17" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 100l } { 'STR' "100" } }
+		{ 'STR' { 'NAME' "Object" } { 'STR' "CamShot01" } }
+		{ 'I32' { 'NAME' "Activated By" } { 'DATA' 0l } { 'STR' "Player" } }  //All|Actor|Class|List
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Player" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 7.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "player" } }
+		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 22l } { 'STR' "22" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 75.0000000000000000(1.15.16) } { 'STR' "75.0" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
+		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.3000000000000000(1.15.16) } { 'STR' "0.3" } }
+		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.7000000000000000(1.15.16) } { 'STR' "0.7" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9500000000000000(1.15.16) } { 'STR' "0.95" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 15.0000000000000000(1.15.16) } { 'STR' "15.0" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.9000000000000000(1.15.16) } { 'STR' "0.9" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 15.0000000000000000(1.15.16) } { 'STR' "15.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8000000000000007(1.15.16) } { 'STR' "9.8" } }
+		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 6l } { 'STR' "6" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: respawn  0 INDEXOF_X_POS write-mailbox  0 INDEXOF_Y_POS write-mailbox  7 INDEXOF_Z_POS write-mailbox  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\nINDEXOF_Z_POS read-mailbox -5 < if respawn then\n" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "player.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 2002l } { 'STR' "2002" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Practice_path" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -6.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.0000000000000000(1.15.16) 30.0000000000000000(1.15.16) 23.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "practice_path.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "practice_path.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+}
