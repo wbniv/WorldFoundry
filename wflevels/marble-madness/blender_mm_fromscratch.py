@@ -82,9 +82,7 @@ ROOM_LOCAL_BBOX = (-14.0, -20.0, -11.5, 14.0, 20.0, 11.5)
 
 # Spawn midway between seg-5 (peak, y=11.64, Z=0.85m) and seg-6 (y=14.14, Z=0.55m)
 # cross-sections — clearly on the downhill face so gravity pulls toward the goal.
-# Spawning at the seg-5 CS itself (y=11.64) lands the ball on the face behind the peak.
-# Floor Z at y=12.89 ≈ 0.85 - 0.5*0.30 = 0.70m; spawn 0.6m above floor.
-SPAWN_POS    = (3.42, 12.89, 1.30)  # past last hill (seg5); gravity carries to goal
+SPAWN_POS    = (1.39,  3.00, 1.10)  # seg 1 start — cam-remap lets player push over the hill
 
 # Camera: SW isometric, 45° elevation — matches arcade Marble Madness camera angle.
 #   Offset (-6,-8,10): 6m west, 8m south, 10m above marble → 45° elevation.
@@ -95,7 +93,7 @@ CAMSHOT_POS  = (-6.0,  -8.0, 10.0)   # SW isometric offset (~45° elevation, cle
 TARGET1_POS  = (0.0,    0.0,  0.0)   # world-space follow anchor (origin, unused)
 TARGET2_POS  = (3.42,  22.0,  0.0)   # unused; kept so Target02 empty exists
 LIGHT_POS    = (1.0,    7.5, 17.0)   # overhead, inside room ✓
-CAMERA_POS   = (-2.58,  4.89, 11.30) # initial camera pos = SPAWN_POS + CAMSHOT_POS
+CAMERA_POS   = (-4.61,  -5.0, 11.10) # initial camera pos = SPAWN_POS + CAMSHOT_POS
 
 # Director script: 90 s timer, 3 lives, respawn + camshot routing
 DIRECTOR_SCRIPT = (
@@ -127,7 +125,7 @@ PLAYER_SCRIPT = (
     r'  over 8192  & if 12288 | then'
     r'  over 16384 & if 18432 | then'
     r'  swap drop ;' '\n'
-    r': respawn  3 INDEXOF_X_POS write-mailbox  13 INDEXOF_Y_POS write-mailbox'
+    r': respawn  1 INDEXOF_X_POS write-mailbox  3 INDEXOF_Y_POS write-mailbox'
     r'  1 INDEXOF_Z_POS write-mailbox'
     r'  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox'
     r'  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;' '\n'
