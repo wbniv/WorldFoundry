@@ -214,8 +214,17 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
         pos_x += math.cos(prev_theta) * SEG_LEN
         pos_y += math.sin(prev_theta) * SEG_LEN
 
-        theta     = heading_angle(seg['type'])
-        curr_base = add_cross_section(pos_x, pos_y, seg, theta)
+        theta = heading_angle(seg['type'])
+
+        # At heading changes, orient the junction cross-section toward the bisector
+        # of the two adjacent headings.  This keeps all floor quads near-planar so
+        # the ball doesn't fall through the Jolt collision mesh at turns.
+        # When prev_theta == theta the bisector equals theta — no change.
+        bx = math.cos(prev_theta) + math.cos(theta)
+        by = math.sin(prev_theta) + math.sin(theta)
+        junc_theta = math.atan2(by, bx)
+
+        curr_base = add_cross_section(pos_x, pos_y, seg, junc_theta)
 
         add_segment_faces(prev_base, curr_base)
         prev_base = curr_base

@@ -80,12 +80,11 @@ ROOM_POS        = (2.0,  5.0,  8.5)
 ROOM_LOCAL_BBOX = (-14.0, -20.0, -11.5, 14.0, 20.0, 11.5)
 # world: X[-12,16] Y[-15,25] Z[-3,20]  — camera at (-8.6,7,8) when marble at goal ✓
 
-# Spawn above seg-1 start (first trough section after start platform).
-# Seg-1 pos=(1.39, 2.08), h_center=18 → floor Z=(18-5)*0.05=0.65m.
-# Spawn 0.6m above floor so ball drops cleanly onto the trough.
-# NOTE: segs 1-5 slope UPWARD (h_center 18→22); joystick needed to push over hill.
-# Segs 5-6 (Y=11.65→14.15) slope down to goal at Z=0.
-SPAWN_POS    = (1.39, 2.08, 1.25)  # seg-1 start; full course from beginning
+# Spawn midway between seg-5 (peak, y=11.64, Z=0.85m) and seg-6 (y=14.14, Z=0.55m)
+# cross-sections — clearly on the downhill face so gravity pulls toward the goal.
+# Spawning at the seg-5 CS itself (y=11.64) lands the ball on the face behind the peak.
+# Floor Z at y=12.89 ≈ 0.85 - 0.5*0.30 = 0.70m; spawn 0.6m above floor.
+SPAWN_POS    = (3.42, 12.89, 1.30)  # past last hill (seg5); gravity carries to goal
 
 # Camera: SW isometric, 45° elevation — matches arcade Marble Madness camera angle.
 #   Offset (-6,-8,10): 6m west, 8m south, 10m above marble → 45° elevation.
@@ -96,7 +95,7 @@ CAMSHOT_POS  = (-6.0,  -8.0, 10.0)   # SW isometric offset (~45° elevation, cle
 TARGET1_POS  = (0.0,    0.0,  0.0)   # world-space follow anchor (origin, unused)
 TARGET2_POS  = (3.42,  22.0,  0.0)   # unused; kept so Target02 empty exists
 LIGHT_POS    = (1.0,    7.5, 17.0)   # overhead, inside room ✓
-CAMERA_POS   = (-4.61, -5.92, 11.25) # initial camera pos = SPAWN_POS + CAMSHOT_POS
+CAMERA_POS   = (-2.58,  4.89, 11.30) # initial camera pos = SPAWN_POS + CAMSHOT_POS
 
 # Director script: 90 s timer, 3 lives, respawn + camshot routing
 DIRECTOR_SCRIPT = (
@@ -117,7 +116,7 @@ DIRECTOR_SCRIPT = (
 # Player script: forward joystick; respawn above spawn point on Z < -2; signal director
 PLAYER_SCRIPT = (
     r'\\ wf' '\n'
-    r': respawn  1 INDEXOF_X_POS write-mailbox  2 INDEXOF_Y_POS write-mailbox'
+    r': respawn  3 INDEXOF_X_POS write-mailbox  13 INDEXOF_Y_POS write-mailbox'
     r'  1 INDEXOF_Z_POS write-mailbox'
     r'  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox'
     r'  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;' '\n'
