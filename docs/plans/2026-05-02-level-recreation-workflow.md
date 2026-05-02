@@ -147,10 +147,10 @@ For Practice: `ROOM_POS=(12,4,8.5)`, `ROOM_LOCAL_BBOX=(-19,-13,-14, 18,12,9.5)` 
 |-------|-----------|------|----------------|----------------|------|
 | Practice | 13 (segs 0–8 crowned, 9–10 trough) | Tutorial | `blender_mm_practice_rom.py` | `mm_practice_rom-standalone.iff` | ✓ 2026-05-02 |
 | Beginner | 9 (all trough) | Race 1 | `blender_mm_fromscratch.py` | `mm_fromscratch-standalone.iff` | ✓ 2026-05-01 |
-| Intermediate | 4 | Race 2 | — | — | — |
-| Aerial | 12 | Race 3 | — | — | — |
-| Silly | 5 | Race 4 | — | — | — |
-| Ultimate | 23 | Race 5 | — | — | — |
+| Intermediate | 4 | Race 2 | `blender_mm_intermediate.py` | `mm_intermediate-standalone.iff.txt` | — |
+| Aerial | 12 | Race 3 | `blender_mm_aerial.py` | `mm_aerial-standalone.iff.txt` | — |
+| Silly | 5 | Race 4 | `blender_mm_silly.py` | `mm_silly-standalone.iff.txt` | — |
+| Ultimate | 23 | Race 5 | `blender_mm_ultimate.py` | `mm_ultimate-standalone.iff.txt` | — |
 
 ---
 
