@@ -17,11 +17,11 @@ The current WF implementation (`mm_fromscratch`) is built from the **Practice** 
 | `H_ZERO`   | 5      | h_center value → Z = 0 (goal/start platform height) |
 | `GAME_UNIT`| 0.05 m | metres per game-unit above H_ZERO |
 | `SEG_LEN`  | 2.5 m  | metres per segment (forward step) |
-| `PATH_HALF`| 4.0 m  | metres from centre to each edge vertex |
+| `PATH_HALF`| 2.0 m  | metres from centre to each edge vertex |
 
 Z values: `Z = (h_value − 5) × 0.05 m`
 
-**Calibration rationale:** GAME_UNIT was reduced from 0.1 to 0.05 after comparing WF renders against MAME captures (frame_0007 = Beginner race, frame_0018 = Practice). With GAME_UNIT=0.1 the Beginner trough walls hit 49–66° — visually too steep in WF's perspective camera. At 0.05 the wall angles are 30–48°, matching the arcade's visual profile (shallower approach troughs, deeper bowl at seg 6). PATH_HALF=4.0 m was retained; only the vertical scale changed.
+**Calibration rationale:** GAME_UNIT was reduced from 0.1 to 0.05, and PATH_HALF from 4.0 to 2.0, after comparing WF renders against MAME captures (frame_0007 = Beginner race, frame_0018 = Practice). With GAME_UNIT=0.1 the Beginner trough walls hit 49–66° — visually too steep in WF's perspective camera. At 0.05 the wall angles are 30–48°, matching the arcade's visual profile (shallower approach troughs, deeper bowl at seg 6). PATH_HALF=2.0 m gives a ball-to-wall ratio that matches the arcade's marble appearing to nearly touch the trough sides at the widest point.
 
 Cross-section **shape classification**:
 - **crowned** — center higher than both edges; ball must be steered or it rolls off
@@ -98,6 +98,28 @@ The first competitive race. Heading starts at **56.25°**, turns to **66.09°**,
 | Max wall height | +2.35 m | +5.45 m |
 | Max wall angle  | ~18° (trough segs) | ~49° (deep seg 6) |
 | Seg-0 anomaly | h_center = 17 (normal) | h_center = 3 (below H_ZERO — start platform bug) |
+
+---
+
+## Reference screenshots
+
+### Arcade: Beginner race (MAME capture, frame_0007)
+
+This is the target geometry — what the WF level should match. The marble (blue dot, centre-left) sits in a deep trough; wall angles 30–48°.
+
+![Beginner race arcade screenshot](img/mame-beginner-race.png)
+
+### Arcade: Practice level (MAME capture, frame_0018)
+
+Practice for comparison — wide open crowned sections, no containment walls on most of the path. The marble (bottom-right) is on a crowned segment.
+
+![Practice level arcade screenshot](img/mame-practice-level.png)
+
+### WF Blender: Beginner path mesh (GAME_UNIT=0.05, 2026-05-01)
+
+Current calibrated geometry in Blender. Two turns visible (seg 1 +9.8°, seg 3 +23.9°); trough walls grow toward the goal end matching the arcade profile.
+
+![Blender Beginner path mesh](img/blender-beginner-path.png)
 
 ---
 
