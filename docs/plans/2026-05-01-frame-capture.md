@@ -5,17 +5,7 @@
 
 ## What
 
-Wires the dormant `-record_tga` flag (renamed to `-record_video`) to actually capture gameplay footage. Each rendered frame is piped as raw video into an ffmpeg subprocess, which encodes directly to `output.mp4` in the CWD.
-
-## Usage
-
-```bash
-cd wfsource/source/game
-./worldfoundry -record_video        # produces output.mp4 on exit
-ffprobe output.mp4                  # h264, yuv420p, 640x480 @ 30fps
-```
-
-Requires ffmpeg installed on the dev machine.
+Wires the dormant `-record_tga` flag (renamed to `-record_video`) to actually capture gameplay footage. Each rendered frame is read back from the GPU via PBO ping-pong (async DMA) and piped to an ffmpeg subprocess, which encodes directly to `output.mp4` in the CWD.
 
 ## Build and run
 
@@ -24,9 +14,14 @@ cd engine && bash build_game.sh
 cd wfsource/source/game
 /home/will/WorldFoundry.2026-new-level/engine/wf_game -record_video -L<level.iff>
 # output.mp4 written to CWD on exit (or crash)
+ffprobe output.mp4                  # h264, yuv420p, 640x480 @ 30fps
 ```
 
+Requires ffmpeg on `$PATH`.
+
 ## Design decisions
+
+**PBO ping-pong instead of synchronous `glReadPixels`:** `glReadPixels` into a plain pointer stalls the CPU until GPU DMA completes (~5–15 ms/frame). Two alternating PBOs hide this: `glReadPixels(..., nullptr)` kicks an async DMA into the current PBO while the previous PBO (complete from last frame) is mapped and written to the pipe. Zero CPU wait per frame, one frame of latency in the output (not visible).
 
 **`-vf vflip`:** `glReadPixels` returns rows bottom-up (OpenGL origin is bottom-left); ffmpeg's `vflip` filter corrects this during encode with no extra CPU copy.
 
@@ -53,18 +48,6 @@ Two layers:
 **Signal handler (`SIGABRT`/`SIGSEGV`):** registered when the pipe opens. Calls `pclose(gCapturePipe)` to give ffmpeg a proper EOF before re-raising the signal for the default handler (core dump etc.).
 
 **Fragmented MP4 (`-movflags frag_keyframe+empty_moov`):** standard MP4 writes its index atom at the very end — a crash before that produces an unplayable file. Fragmented MP4 commits each keyframe interval as a self-contained chunk; even a truncated file is playable up to the last complete fragment.
-
-## PBO ping-pong (async readback)
-
-`glReadPixels` into a plain `uint8_t*` is synchronous: the CPU blocks until the GPU finishes DMAing the pixel data to system RAM. With two alternating Pixel Buffer Objects the stall disappears:
-
-- Frame N: `glReadPixels(... nullptr)` into `PBO[current]` — non-blocking DMA kick, returns immediately.
-- Frame N: map `PBO[prev]` (frame N−1 data, DMA already complete) → `fwrite` to pipe → unmap.
-- Swap `current`/`prev` and repeat.
-
-The first frame has no previous data and is silently skipped; every frame thereafter is written with zero CPU wait.
-
-`GL_GLEXT_PROTOTYPES` must be defined before any `#include <GL/gl.h>` that reaches this translation unit, otherwise `glGenBuffers`/`glBindBuffer`/`glMapBuffer` are not declared. The define lives in `wfsource/source/gfx/renderer.hp` — the authoritative first GL include on the Linux path.
 
 ## Known limitations
 
