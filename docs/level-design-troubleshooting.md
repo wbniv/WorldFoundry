@@ -447,11 +447,23 @@ cerror << "pos=(" << pp.X().AsFloat() << "," << pp.Y().AsFloat() << "," << pp.Z(
 
 ---
 
-## Multiple face colors require multiple mesh actors
+## Multiple face colors in one mesh — per-face materialIndex
 
-**Cause:** Each WF mesh IFF has exactly one `MATL` chunk (one `_MaterialOnDisk` struct) covering all faces. There is no per-face material index. A single mesh can only have one flat color or one texture.
+A single mesh IFF supports multiple materials.  The `MATL` chunk stores an **array** of `_MaterialOnDisk` structs (one per material), and each face record has a `materialIndex` field (int16) that selects which material applies to that face:
 
-**Fix:** Use separate actors with separate `.iff` files for geometry that needs different colors (e.g., orange ramp + green floor). Each is an independent `statplat` entry in the `.lev` with its own `Mesh Name`.
+```
+_TriFaceOnDisk  (8 bytes)
+  int16  v1Index
+  int16  v2Index
+  int16  v3Index
+  int16  materialIndex   ← index into the MATL array
+```
+
+The renderer batches consecutive faces that share the same materialIndex, then switches when the index changes.  Faces are sorted by materialIndex at load time so all faces for a given material are contiguous.
+
+**To use multiple colors in one mesh:** emit a MATL chunk with N `_MaterialOnDisk` entries, then set each face's `materialIndex` to the appropriate entry (0-based).  The Blender exporter writes materialIndex from Blender's face material slot index — assign different materials to different face selections in Edit Mode and the exporter handles the rest.
+
+**Still need separate actors for:** geometry that must be independently visibility-culled, independently positioned/animated, or that references different OAD schemas.
 
 ---
 
@@ -464,7 +476,7 @@ When editing mesh IFF binaries by hand, the `FACE` chunk stores **8 bytes per fa
 | 0      | uint16  | vertex index 0 |
 | 2      | uint16  | vertex index 1 |
 | 4      | uint16  | vertex index 2 |
-| 6      | uint16  | padding / flags (always 0) |
+| 6      | int16   | materialIndex (0-based index into MATL array) |
 
 Face count = `FACE chunk size / 8`. (Not 6 — a common off-by-one when assuming packed uint16 triples.)
 
