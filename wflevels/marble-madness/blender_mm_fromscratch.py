@@ -318,7 +318,7 @@ player = make_empty(
         'Number Of Local Mailboxes': 6,
         'Script':                PLAYER_SCRIPT,
         'Script Controls Input': 'True',
-        'Mesh Name':             'player.iff',
+        'Mesh Name':             'sphere.iff',
         'Model Type':            'Mesh',
         'Visibility Mailbox':    1,          # EMAILBOX_TRUE — always non-zero → always visible
     }

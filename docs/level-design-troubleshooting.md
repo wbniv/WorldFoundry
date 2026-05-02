@@ -4,6 +4,119 @@ A running log of gotchas encountered building WF levels. Sorted roughly by "how 
 
 ---
 
+## Coordinate systems — game, editor, and screen
+
+### World coordinate system (WF / Jolt)
+
+WF uses a **right-handed, Z-up** system, identical to Blender's default **Z-up** mode.
+This means the same XYZ numbers in the Blender `.lev` export and in the game at runtime.
+
+```
+           Z (up / sky)
+           |
+           |
+           o──────── Y (North / forward)
+          /
+         X (East / right)
+
+Gravity acts in the −Z direction.
+```
+
+| Axis | World meaning         | Screen intuition (iso view from SW) |
+|------|-----------------------|--------------------------------------|
+| +X   | East / right          | Toward lower-right of screen         |
+| +Y   | North / forward       | Toward upper-right of screen         |
+| +Z   | Up                    | Toward top of screen                 |
+| −Z   | Down (gravity)        | Toward bottom of screen              |
+
+### Path headings
+
+MM ROM path segments store heading as the lower byte of the `type` field —
+**256ths of a full revolution, CCW from the +X (East) axis:**
+
+```
+         +Y (North)
+         |   heading = 64/256 = 0.25 rev = 90°
+         |
+−X ──────o──────── +X   heading = 0/256 = 0° (East)
+         |
+         −Y (South)  heading = 192/256 = 0.75 rev = 270°
+
+Heading 32/256 = 45° = NE diagonal (northeast)
+Heading 13/256 ≈ 18° = ENE (Practice level)
+```
+
+### Blender editor vs. WF game
+
+Blender's default orientation matches WF exactly (both Z-up, Y-forward):
+
+```
+Blender viewport (front ortho, default):     WF game (iso camera from SW):
+
+         Z                                              Z
+         |  Y (into screen)                             |   Y (into screen)
+         | /                                            |  /
+         |/                                             | /
+         o──── X                                        o──── X
+
+No axis flip needed.  Numbers authored in Blender are correct in-game.
+```
+
+### Camera offset → screen view
+
+The BungeeCam adds `CamShot` offset to the player's world position each frame.
+Choosing the offset determines what part of the level the player sees:
+
+```
+Top-down view of path going North (+Y):
+
+        N (+Y)
+        ▲
+        │  ← path runs this way
+        │
+ W ─────○───── E (+X)          ○ = player/marble
+        │
+        S
+
+Offset (−8, −8, +10):          Offset (+8, −10, +10):
+Camera is SW + above.          Camera is SE + above.
+Looks NE + down.               Looks NW + down.
+Path goes upper-right.         Path goes upper-left.
+
+     SW camera view:                SE camera view:
+  ┌─────────────────┐           ┌─────────────────┐
+  │       /path     │           │  path\          │
+  │      /          │           │       \         │
+  │     ○ (marble)  │           │  (marble) ○     │
+  │                 │           │                 │
+  └─────────────────┘           └─────────────────┘
+
+For a level going mostly North, the SE camera (+X, −Y, +Z) shows the path
+receding to the upper-left — closest to the classic isometric arcade view.
+```
+
+### Room bbox = global bounding box of all actors
+
+The room bbox must strictly contain:
+- All renderable geometry (path mesh, decorations)
+- The Camera entity position (`SPAWN_POS + CAMSHOT_POS`)
+- The CamShot entity (absolute world position = `CAMSHOT_POS`)
+- All lights
+- All targets, trigger volumes (ActBox), etc.
+
+**Rule:** Set room bbox = bounding box of all scene objects + ~2-unit margin.
+A too-small room causes `fell out of room` crashes when actors drift near the edges.
+
+```python
+# Quick check: for each actor at world pos P,
+# all of these must be true:
+assert ROOM_POS.x - abs(ROOM_LOCAL_BBOX[3]) < P.x < ROOM_POS.x + abs(ROOM_LOCAL_BBOX[3])
+assert ROOM_POS.y - abs(ROOM_LOCAL_BBOX[4]) < P.y < ROOM_POS.y + abs(ROOM_LOCAL_BBOX[4])
+assert ROOM_POS.z - abs(ROOM_LOCAL_BBOX[5]) < P.z < ROOM_POS.z + abs(ROOM_LOCAL_BBOX[5])
+```
+
+---
+
 ## Object not appearing in-game (invisible)
 
 ### 1. Object placed on room bbox boundary → assigned to PERM
@@ -78,6 +191,36 @@ where `Target`, `Follow`, and `TrackObject` are actor world positions.
 **Gotcha:** If `Target` is placed far from the player (e.g. 10 units away in Y), the computed look direction tilts sharply toward `Target`, not toward the player, and the player ends up 30°+ off-screen.
 
 **Rule of thumb:** `Target` should be within ~1 unit of the player's spawn position, with a small upward offset (e.g. `(0, 0, 0.5)`) so the camera looks slightly above the ball's centre.
+
+### Marble Madness specific: CamShot Target = Player, not Target02
+
+**Symptom:** Camera shows the path walls head-on (or looking through them) instead of looking down at the marble; the marble is off-screen or barely visible.
+
+**Cause:** CamShot `Target` set to a fixed world-space empty (`Target02`). As the marble moves along the path the camera look direction stays pinned to the fixed point, not the ball. On a trough level the fixed point may end up inside or behind a wall.
+
+**Fix:** Set CamShot `Target` to `'Player'`:
+
+```python
+obj['wf_Target'] = 'Player'
+```
+
+The BungeeCam then tracks the marble's actual position each frame, so the look direction always points at the ball regardless of where it is on the path.
+
+---
+
+## Camera sight line blocked by trough wall
+
+**Symptom:** Marble is on the path and `Target` = `'Player'`, but the path geometry obscures the marble — the west or south wall fills the viewport.
+
+**Cause:** With a SW isometric camera the sight line from the camera to the marble passes through the west trough wall. The wall top is at `Z = scale(h_left)` while the camera z at the wall's XY position is below that.
+
+**Condition:** Sight line clears the wall when:
+```
+camera_z - 0.5 * (camera_z - marble_z) > wall_top_z
+```
+i.e. the midpoint of the camera-to-marble line is above the wall top.
+
+**Fix:** Increase the CamShot Z offset until the condition holds. For `PATH_HALF=2.0` and `GAME_UNIT=0.05`, west wall tops reach z ≈ 4–5.5 m above the goal plane. A CamShot offset of `(-6, -8, 10)` from the marble puts the sight-line midpoint at z≈6.6, clearing walls of up to 6.6 m.
 
 ---
 
@@ -198,6 +341,24 @@ A "marble" actor uses `MarbleHandler` instead of `GroundHandler`. The handler is
 | `Falling Acceleration` | ~9.8 | Gravity magnitude |
 
 MarbleHandler carries the full 3D velocity each frame. Gravity accumulates in Z; Jolt projects the Z component onto the slope normal, producing downhill motion. `Max Ground Speed` caps only the XY components so the ball does not roll infinitely fast.
+
+---
+
+## Marble barely moves on a gentle slope — `Running Deceleration` too high
+
+**Symptom:** Marble spawns on a downward slope but crawls or stops immediately; reducing friction has no effect.
+
+**Cause:** `Running Deceleration` is applied as an artificial reverse-thrust every frame when the joystick is at rest.  On a 2.2° slope gravity ≈ 0.38 m/s². Any `Running Deceleration` above ~0.35 exceeds this and the net acceleration is negative — the ball decelerates to zero and stays there.
+
+**Fix:** Set `Running Deceleration` to `0.0`.  Let surface friction alone determine rolling resistance.  Typical working values:
+
+| OAD field | Value |
+|-----------|-------|
+| `Running Deceleration` | `0.0` |
+| `Surface Friction` (player) | `0.3` |
+| `Surface Friction` (mesh/statplat) | `0.2` |
+
+Combined friction ≈ 0.06; the ball rolls down grades of 4°+ without joystick input.
 
 ---
 

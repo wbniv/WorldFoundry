@@ -179,7 +179,7 @@
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 6l } { 'STR' "6" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: respawn  3 INDEXOF_X_POS write-mailbox  14 INDEXOF_Y_POS write-mailbox  1 INDEXOF_Z_POS write-mailbox  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\nINDEXOF_Z_POS read-mailbox -2 < if respawn then\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "player.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sphere.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 	}

@@ -1,7 +1,8 @@
 // mm_fromscratch-standalone.iff.txt — L4-wrapped form for wf_game -L.
 //
 // Build:
-//   iffcomp-rs -binary -o=mm_fromscratch-standalone.iff mm_fromscratch-standalone.iff.txt
+//   /home/will/WorldFoundry.2026-new-level/wftools/iffcomp-rs/target/release/iffcomp \
+//     -o=mm_fromscratch-standalone.iff mm_fromscratch-standalone.iff.txt
 //
 // Run:
 //   cd wfsource/source/game && wf_game -L<repo>/wflevels/marble-madness/mm_fromscratch-standalone.iff

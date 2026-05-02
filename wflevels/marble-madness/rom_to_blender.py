@@ -220,10 +220,25 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
         goal_x = pos_x + math.cos(final_theta) * SEG_LEN
         goal_y = pos_y + math.sin(final_theta) * SEG_LEN
         add_flat_platform(pos_x, pos_y, goal_x, goal_y, final_theta, 0.0)
-        pos_x, pos_y = goal_x, goal_y
 
+        # Back wall at far end of goal platform so marble can't roll off
+        rx = math.sin(final_theta)
+        ry = -math.cos(final_theta)
+        gw = PATH_HALF * 1.5
+        wall_h = 2.0
+        b = len(verts)
+        verts.extend([
+            (goal_x - gw * rx, goal_y - gw * ry, 0.0),
+            (goal_x + gw * rx, goal_y + gw * ry, 0.0),
+            (goal_x + gw * rx, goal_y + gw * ry, wall_h),
+            (goal_x - gw * rx, goal_y - gw * ry, wall_h),
+        ])
+        faces.append((b, b + 1, b + 2, b + 3))
+        faces.append((b + 3, b + 2, b + 1, b))
+
+        pos_x, pos_y = goal_x, goal_y
         print(f'[rom_to_blender] {level_name}: {len(goal_segs)} goal seg(s) → '
-              f'flat goal platform at ({pos_x:.2f},{pos_y:.2f})')
+              f'flat goal platform + back wall at ({pos_x:.2f},{pos_y:.2f})')
 
     print(f'[rom_to_blender] {level_name}: path end pos=({pos_x:.2f},{pos_y:.2f}), '
           f'{len(segs)} segs → {len(verts)} verts, {len(faces)} faces')

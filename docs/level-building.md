@@ -212,12 +212,16 @@ Height conversion: `Z(h) = (h − H_ZERO) × GAME_UNIT`
 
 ```python
 H_ZERO    = 5      # goal h_center; subtracting puts goal at Z=0
-GAME_UNIT = 0.1    # metres per game height unit  ← tune this
+GAME_UNIT = 0.05   # metres per game height unit  ← tune this
 SEG_LEN   = 2.5    # metres per path segment       ← tune this
-PATH_HALF = 4.0    # metres, centre → edge vertex  ← tune this
+PATH_HALF = 2.0    # metres, centre → edge vertex  ← tune this
 ```
 
-With `GAME_UNIT=0.1` the Practice level spans Z ≈ 1.2–2.6 m (floor) and 4.7 m (wall tops).
+`GAME_UNIT=0.05` and `PATH_HALF=2.0` (calibrated 2026-05-02 against MAME screenshot):
+trough walls at ΔH≈46–89 units over `PATH_HALF=2.0 m` give 30–48° slope angles, matching
+the ~30–50° trough profiles in `assets/arcade-roms/reference/practice_start.png`.
+`PATH_HALF=4.0` was visually too wide; `GAME_UNIT=0.1` produced 49–66° walls, too steep.
+
 Compare viewport screenshots against `assets/arcade-roms/reference/practice_start.png` and
 iterate GAME_UNIT / SEG_LEN until proportions match.
 
@@ -234,6 +238,107 @@ SPAWN_POS = (21.364, 7.058, 3.2)   # 0.6 m above seg-9 floor at Z=2.6
 ```
 
 To play the full S-curve (segs 0–8), a joystick must be connected.
+
+---
+
+### Camera Setup for Marble Madness (SW Isometric)
+
+The arcade original uses a fixed SW isometric view: camera is above-and-SW of the marble,
+looking NE+down at roughly 45° elevation.  All three BungeeCam axes must be `Relative` so
+the camera offset stays fixed relative to the player position each frame.
+
+**CamShot offset** (`CAMSHOT_POS`): `(-6, -8, 10)` from the marble works for Practice.
+This gives ~45° elevation, camera is SW, and the sight line clears the west trough wall
+(camera z=7.9 at wall crossing vs. wall top z≈5.1).
+
+```python
+SPAWN_POS    = (21.364, 7.058, 3.2)   # marble spawn
+CAMSHOT_POS  = (-6.0, -8.0, 10.0)    # offset from marble
+CAMERA_POS   = tuple(s + c for s, c in zip(SPAWN_POS, CAMSHOT_POS))
+# → (-15.636+21.364, -0.942+7.058, 13.2) = approx (−15.6, −0.9, 13.2)
+```
+
+**CamShot `Target` field must be `'Player'`**, not a fixed Target02 empty.  A fixed world
+point causes the camera to look through the trough walls as the marble moves away from spawn.
+With `Target='Player'` the camera always rotates to face the ball directly.
+
+```python
+props={
+    'X Axis': 'Relative', 'Y Axis': 'Relative', 'Z Axis': 'Relative',
+    'Target': 'Player',
+    'Track Object': 'Target01',  # origin anchor at (0,0,0)
+    'Follow': 'Target01',
+    ...
+}
+```
+
+**Sight-line geometry rule**: camera clears a wall of height `wall_z` when:
+`cam_z - 0.5*(cam_z - marble_z) > wall_z`
+i.e. the midpoint of the sight line is above the wall top.
+With CAMSHOT_Z=10 and marble_z≈3.2: midpoint z = 10+3.2)/2 ≈ 6.6 > 5.1 ✓.
+
+---
+
+### Marble Physics: Friction and Deceleration
+
+The player OAD fields that most affect rolling feel:
+
+| Field | Value | Rationale |
+|-------|-------|-----------|
+| `Running Deceleration` | `0.0` | Let physics (friction) handle braking; non-zero values easily exceed gravity on shallow slopes and freeze the ball |
+| `Surface Friction` (player) | `0.3` | Low enough to roll down grades up to ~2° |
+| `Surface Friction` (mesh) | `0.2` | Combined friction = player × mesh; keep low for smooth rolling |
+
+`Running Deceleration` is applied as an artificial brake every frame when no joystick input
+is present.  On a 2.2° slope gravity = 0.38 m/s²; any `Running Deceleration` above ~0.35
+will freeze the ball.  Setting it to `0.0` leaves all braking to surface friction.
+
+---
+
+### Goal Platform: Back Wall
+
+`rom_to_blender.py` adds a 2 m tall vertical quad face at the far end of the goal platform
+(`PATH_HALF * 1.5` wide) to stop the marble rolling off.  This is separate from the trough
+walls and is always emitted when `goal_segs` is non-empty.  If the marble still escapes,
+increase `wall_h` in `build_path_mesh()`.
+
+---
+
+### Headless Blender Export Fallback
+
+`bpy.ops.wf.export_level` is only registered when MCP is connected (the `debug_bridge`
+module injected by the MCP server is needed by `wf_blender/__init__.py`).  For headless
+`blender --background --python` runs, use the direct module loader:
+
+```python
+try:
+    bpy.ops.wf.export_level(filepath=OUT_LEV)
+except AttributeError:
+    import importlib.util as _ilu
+    _addon = os.path.expanduser('~/.config/blender/4.0/scripts/addons/wf_blender')
+    _spec = _ilu.spec_from_file_location(
+        'wf_blender.export_level', os.path.join(_addon, 'export_level.py'))
+    _mod = _ilu.module_from_spec(_spec)
+    _spec.loader.exec_module(_mod)
+    ok, msg = _mod.export_scene_to_lev(bpy.context, OUT_LEV)
+    if not ok:
+        raise RuntimeError(f'export_scene_to_lev failed: {msg}')
+```
+
+This bypasses `__init__.py` entirely and calls `export_scene_to_lev` directly.
+
+---
+
+### Marble Actor: Use `sphere.iff`, Not `player.iff`
+
+`player.iff` in the `marble-madness/` directory is a cube (8 verts, 576 bytes).  The
+marble must use `sphere.iff` (pre-built UV sphere, 21 KB):
+
+```python
+obj['wf_Mesh Name'] = 'sphere.iff'
+```
+
+`sphere.iff` is committed in `wflevels/marble-madness/` alongside `mm_fromscratch.ini`.
 
 ---
 
