@@ -80,12 +80,16 @@ ROOM_POS        = (13.0,  3.0,  9.0)
 ROOM_LOCAL_BBOX = (-25.0, -15.0, -12.0, 20.0, 12.0, 15.0)  # world: X[-12,33] Y[-12,15] Z[-3,24]
 
 SPAWN_POS    = (21.364, 7.058,  3.2)  # 0.6 m above seg-9 trough floor (Z=2.6)
-CAM_OFFSET   = (-8.0, -10.0, 15.0)   # isometric offset SW+above; camera above wall tops
-CAMSHOT_POS  = (-8.0, -10.0, 15.0)   # same as offset; inside room bounds ✓
+# All-Relative camera: effective camera pos = SPAWN_POS + CAMSHOT_POS.
+#   With GAME_UNIT=0.1 wall tops at 4.7m; Z offset 10 → camera Z = 3.2+10 = 13.2m above them.
+#   Horizontal offset (-8,-8) gives ~41° elevation angle (isometric feel).
+#   Room check (worst case: player at seg0, X=0,Y=0):
+#     camera = (-8,-8,11.2) → inside room [-12,-12,-3]→[33,15,24] ✓
+CAMSHOT_POS  = (-8.0,  -8.0, 10.0)   # iso offset from player (all-Relative)
 TARGET1_POS  = (0.0,    0.0,  0.0)   # world-space follow anchor (inside room ✓)
 TARGET2_POS  = (21.364, 7.058, 3.5)  # look-at just above player spawn
 LIGHT_POS    = (13.0,   3.0, 18.0)   # overhead, inside room (Z=18 < 24) ✓
-CAMERA_POS   = (20.0,   5.0, 10.0)   # camera entity, inside room ✓
+CAMERA_POS   = (13.364, -0.942, 13.2) # camera entity = SPAWN_POS + CAMSHOT_POS ✓
 
 # Director script: 90 s timer, 3 lives, respawn + camshot routing
 DIRECTOR_SCRIPT = (
@@ -166,6 +170,9 @@ def make_box_empty(name, pos, bbox_local, oad_name, props=None):
     if props:
         for k, v in props.items():
             obj[f'wf_{k}'] = v
+    # Bounding-box actors don't render in the game — show as wireframe cage so they
+    # don't obscure actual level geometry in the Blender viewport.
+    obj.display_type = 'WIRE'
     return obj
 
 
@@ -249,8 +256,8 @@ make_empty(
         'Track Object':       'Player',     # dynamic target (marble)
         'Rotation':           'Track',      # orient toward Look At
         'Position X':         'Relative',   # camera X = CamShot X + player X
-        'Position Y':         'Relative',
-        'Position Z':         'Relative',
+        'Position Y':         'Relative',   # camera Y = CamShot Y + player Y
+        'Position Z':         'Relative',   # camera Z = CamShot Z + player Z
         'FOV':                50.0,         # degrees; tune toward 25 for iso look
         'Climb Rate':         5.0,
         'Elasticity':         10.0,         # rigid-ish follow

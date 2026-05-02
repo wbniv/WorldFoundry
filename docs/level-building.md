@@ -64,6 +64,43 @@ the first-time setup.
 
 ---
 
+## Blender Viewport Display by Object Type
+
+Objects whose `wf_Model Type` is `None` (or that have no OAD at all) do not render in the
+game engine. Set their Blender **Display As** to **Wire** so they appear as cages rather
+than solid meshes — otherwise they obscure the actual level geometry in the viewport.
+
+To apply in one shot (run via MCP or in the Blender scripting console):
+
+```python
+import bpy
+for obj in bpy.data.objects:
+    if obj.type == 'MESH' and obj.get('wf_Model Type') in ('None', None):
+        obj.display_type = 'WIRE'
+```
+
+### mm_fromscratch / mm_practice object table
+
+| Object | Class | `wf_Model Type` | Wireframe? |
+|--------|-------|-----------------|-----------|
+| Practice_path | statplat | Mesh | ✗ |
+| Player | player | Mesh | ✗ |
+| Room01 | room | *(no OAD)* | ✓ |
+| ActBoxOR | actboxor | None | ✓ |
+| CamShot01 | camshot | Box | ✗ |
+| Camera | camera | Box | ✗ |
+| Director | director | None | ✗ (EMPTY) |
+| LevelObj | levelobj | Box | ✗ |
+| Light01 | light | None | ✗ (EMPTY) |
+| Matte | matte | Box | ✗ |
+| Target01 | target | Box | ✗ |
+| Target02 | target | Box | ✗ |
+
+`Box` means the object has a bounding box used for physics/triggers but no visual mesh;
+`EMPTY` objects already show as small axis markers regardless of `Display As`.
+
+---
+
 ## Arcade ROM Level Geometry (Marble Madness)
 
 Level paths are not hand-authored — they are faithfully reproduced from the arcade ROM.
