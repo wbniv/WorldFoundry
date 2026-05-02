@@ -103,23 +103,47 @@ The first competitive race. Heading starts at **56.25°**, turns to **66.09°**,
 
 ## Reference screenshots
 
-### Arcade: Beginner race (MAME capture, frame_0007)
+### Practice level — arcade (MAME captures)
 
-This is the target geometry — what the WF level should match. The marble (blue dot, centre-left) sits in a deep trough; wall angles 30–48°.
+**t≈15s** — marble on crowned S-curve (segs 0–8). No containment walls; marble must be actively steered or it rolls into the void. The orange void flanking the path is the defining visual of Practice.
 
-![Beginner race arcade screenshot](img/mame-beginner-race.png)
+![Practice t≈15s — crowned S-curve](mame-screenshots/practice_t15s.png)
 
-### Arcade: Practice level (MAME capture, frame_0018)
+**t≈65s** — later in the run, marble still traversing crowned sections, nearing the trough transition (segs 9–10).
 
-Practice for comparison — wide open crowned sections, no containment walls on most of the path. The marble (bottom-right) is on a crowned segment.
+![Practice t≈65s — still crowned, approaching trough](mame-screenshots/practice_t65s.png)
 
-![Practice level arcade screenshot](img/mame-practice-level.png)
+---
+
+### Beginner level — arcade (MAME captures)
+
+**t≈35s** — marble mid-race in deep trough. Wall height here corresponds roughly to segs 3–4 (Z_wall ≈ +4 m); ball is fully contained.
+
+![Beginner t≈35s — deep trough walls](mame-screenshots/beginner_candidate_t35s.png)
+
+**t≈55s** — near the goal end of Beginner; trough walls at maximum height (seg 6: Z_wall ≈ +5 m). Note: also stored as `img/mame-practice-level.png` (mislabeled there).
+
+![Beginner t≈55s — maximum trough wall height](mame-screenshots/level_t85s.png)
+
+**Finishing** — "FINISH RACE IN THIS TIME"; marble crossing the goal platform (segs 7–8, h_center = H_ZERO → Z = 0).
+
+![Beginner finishing — goal platform](img/mame-beginner-race.png)
+
+---
 
 ### WF Blender: Beginner path mesh (GAME_UNIT=0.05, 2026-05-01)
 
-Current calibrated geometry in Blender. Two turns visible (seg 1 +9.8°, seg 3 +23.9°); trough walls grow toward the goal end matching the arcade profile.
+Two turns visible (seg 1 +9.8°, seg 3 +23.9°); trough walls grow toward the goal end matching the arcade profile.
 
 ![Blender Beginner path mesh](img/blender-beginner-path.png)
+
+---
+
+### Other — "WARNING: CLIFFS!" (MAME capture, Intermediate or later)
+
+Included for reference: the cliff hazard geometry (sharp drop-offs with danger arrows) that does not appear in Practice or Beginner.
+
+![Cliffs warning — later level](mame-screenshots/level_t55s_cliffs.png)
 
 ---
 

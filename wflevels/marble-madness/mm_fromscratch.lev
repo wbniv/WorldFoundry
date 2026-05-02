@@ -177,7 +177,7 @@
 		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8000000000000007(1.15.16) } { 'STR' "9.8" } }
 		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 6l } { 'STR' "6" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: respawn  3 INDEXOF_X_POS write-mailbox  13 INDEXOF_Y_POS write-mailbox  1 INDEXOF_Z_POS write-mailbox  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\nINDEXOF_Z_POS read-mailbox -2 < if respawn then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: cam-remap  0  over 2048  & if 10240 | then  over 4096  & if 20480 | then  over 8192  & if 12288 | then  over 16384 & if 18432 | then  swap drop ;\n: respawn  3 INDEXOF_X_POS write-mailbox  13 INDEXOF_Y_POS write-mailbox  1 INDEXOF_Z_POS write-mailbox  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox cam-remap INDEXOF_INPUT write-mailbox\nINDEXOF_Z_POS read-mailbox -2 < if respawn then\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sphere.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
