@@ -52,7 +52,7 @@ GAME_UNIT  = 0.05   # metres per game unit above H_ZERO
             # matching the ~30–50° trough profiles visible in MAME captures.
             # (0.1 m/unit gave 49–66°, visually too steep in the WF perspective view.)
 SEG_LEN    = 2.5    # metres per path segment
-PATH_HALF  = 4.0    # metres from path centre to each edge vertex
+PATH_HALF  = 2.0    # metres from path centre to each edge vertex
 
 
 def scale(h):
@@ -83,17 +83,21 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
     """
     Build a trough mesh for one level and link it into the current scene.
 
-    Cross-section at each segment joint (3 vertices, perpendicular to heading):
-      left   (centre - PATH_HALF × right_perp,  scale(h_left))
-      center (centre,                             scale(h_center))
-      right  (centre + PATH_HALF × right_perp,  scale(h_right))
+    Cross-section at each segment joint (5 vertices, perpendicular to heading):
+      0: left_wall  (centre - PATH_HALF × right_perp,  scale(h_left))
+      1: left_edge  (centre - PATH_HALF × right_perp,  scale(h_center))  ← floor height
+      2: center     (centre,                             scale(h_center))
+      3: right_edge (centre + PATH_HALF × right_perp,  scale(h_center))  ← floor height
+      4: right_wall (centre + PATH_HALF × right_perp,  scale(h_right))
 
-    where right_perp = (sin θ, −cos θ, 0) for heading angle θ.
+    left_edge and right_edge share XY with the wall vertices but sit at h_center
+    height.  This ensures the floor quads (1-2-2'-1' and 2-3-3'-2') are never
+    twisted even when h_left/h_right change sharply between adjacent segments —
+    the only height variation in a floor face is the forward slope (h_center change),
+    so the face normal always has n_z > 0 and slope-gravity points the ball forward.
 
-    Segment positions accumulate: pos_{i+1} = pos_i + SEG_LEN × (cos θ_i, sin θ_i).
-
-    Face normals always have n_z = PATH_HALF × SEG_LEN > 0, so the ball can
-    rest on all faces regardless of heading direction.
+    Wall faces (0-1-1'-0' and 3-4-4'-3') are near-vertical and provide lateral
+    containment; their normals don't matter for rolling direction.
 
     Goal segments (h_center ≤ H_ZERO) are replaced by a flat goal platform at Z=0.
     """
@@ -121,13 +125,20 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
     faces = []
 
     def add_cross_section(px, py, seg, theta):
-        """Add 3 vertices for one cross-section perpendicular to heading theta."""
+        """Add 5 vertices for one cross-section perpendicular to heading theta."""
         rx = math.sin(theta)   # right direction: 90° CW from forward
         ry = -math.cos(theta)
+        lx = px - PATH_HALF * rx
+        ly = py - PATH_HALF * ry
+        ex = px + PATH_HALF * rx
+        ey = py + PATH_HALF * ry
+        zc = scale(seg['h_center'])
         base = len(verts)
-        verts.append((px - PATH_HALF * rx, py - PATH_HALF * ry, scale(seg['h_left'])))
-        verts.append((px,                  py,                   scale(seg['h_center'])))
-        verts.append((px + PATH_HALF * rx, py + PATH_HALF * ry, scale(seg['h_right'])))
+        verts.append((lx, ly, scale(seg['h_left'])))  # 0: left wall top
+        verts.append((lx, ly, zc))                    # 1: left floor edge
+        verts.append((px, py, zc))                    # 2: center
+        verts.append((ex, ey, zc))                    # 3: right floor edge
+        verts.append((ex, ey, scale(seg['h_right']))) # 4: right wall top
         return base
 
     def add_flat_platform(near_x, near_y, far_x, far_y, theta, z_val):
@@ -165,6 +176,20 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
     first_theta = heading_angle(path_segs[0]['type'])
     prev_base   = add_cross_section(pos_x, pos_y, path_segs[0], first_theta)
 
+    def add_segment_faces(pb, cb):
+        """Connect two adjacent 5-vert cross-sections with floor + wall faces."""
+        # Floor faces: indices 1,2,3 are at h_center height → non-twisted quads
+        # n_z = PATH_HALF * SEG_LEN > 0 guaranteed when h_center decreases forward
+        faces.append((pb+1, pb+2, cb+2, cb+1))   # left half-floor (top)
+        faces.append((pb+2, pb+3, cb+3, cb+2))   # right half-floor (top)
+        faces.append((cb+1, cb+2, pb+2, pb+1))   # left half-floor (back)
+        faces.append((cb+2, cb+3, pb+3, pb+2))   # right half-floor (back)
+        # Wall faces: near-vertical lateral containment
+        faces.append((pb+0, pb+1, cb+1, cb+0))   # left wall (inward)
+        faces.append((pb+3, pb+4, cb+4, cb+3))   # right wall (inward)
+        faces.append((cb+0, cb+1, pb+1, pb+0))   # left wall (outward)
+        faces.append((cb+3, cb+4, pb+4, pb+3))   # right wall (outward)
+
     for i, seg in enumerate(path_segs[1:], 1):
         # Advance position along previous segment's heading
         prev_theta = heading_angle(path_segs[i - 1]['type'])
@@ -174,27 +199,20 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
         theta     = heading_angle(seg['type'])
         curr_base = add_cross_section(pos_x, pos_y, seg, theta)
 
-        p0, p1, p2 = prev_base,     prev_base + 1, prev_base + 2
-        c0, c1, c2 = curr_base,     curr_base + 1, curr_base + 2
-
-        # Top faces (n_z = PATH_HALF × SEG_LEN > 0 always)
-        faces.append((p0, p1, c1, c0))   # left half-floor
-        faces.append((p1, p2, c2, c1))   # right half-floor
-        # Back faces (double-sided: physics collision from both sides)
-        faces.append((c0, c1, p1, p0))
-        faces.append((c1, c2, p2, p1))
-
+        add_segment_faces(prev_base, curr_base)
         prev_base = curr_base
 
-    # Final cross-section at end of last segment
+    # Final cross-section at end of last segment.
+    # If goal segments follow, blend center down to Z=0 so the floor slopes into
+    # the goal platform instead of ending flat at the last path segment's height.
     last_theta = heading_angle(path_segs[-1]['type'])
     pos_x += math.cos(last_theta) * SEG_LEN
     pos_y += math.sin(last_theta) * SEG_LEN
-    curr_base = add_cross_section(pos_x, pos_y, path_segs[-1], last_theta)
-    p0, p1, p2 = prev_base,     prev_base + 1, prev_base + 2
-    c0, c1, c2 = curr_base,     curr_base + 1, curr_base + 2
-    faces.append((p0, p1, c1, c0)); faces.append((p1, p2, c2, c1))
-    faces.append((c0, c1, p1, p0)); faces.append((c1, c2, p2, p1))
+    final_seg = dict(path_segs[-1])
+    if goal_segs:
+        final_seg['h_center'] = H_ZERO  # Z=0 at the goal transition
+    curr_base = add_cross_section(pos_x, pos_y, final_seg, last_theta)
+    add_segment_faces(prev_base, curr_base)
 
     # Flat goal platform at Z=0, one segment forward from path end
     if goal_segs:
@@ -235,7 +253,7 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
     obj['wf_Mesh Name']      = f'{level_name.lower()}_path.iff'
     obj['wf_Model Type']     = 'Mesh'
     obj['wf_Mobility']       = 'Anchored'
-    obj['wf_Surface Friction'] = 0.5
+    obj['wf_Surface Friction'] = 0.2
     obj['wf_Mass']           = 0.0
 
     return obj

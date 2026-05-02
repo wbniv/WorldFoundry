@@ -302,7 +302,7 @@ player = make_empty(
         'Moves Between Rooms':   'True',
         'Turn Rate':             0.0,       # selects MarbleHandler
         'Running Acceleration':  15.0,
-        'Running Deceleration':  0.9,
+        'Running Deceleration':  0.0,   # marble rolls freely; gravity+friction govern speed
         'Max Ground Speed':      15.0,
         'Air Acceleration':      10.0,
         'Horiz Air Drag':        0.0,
@@ -313,7 +313,7 @@ player = make_empty(
         'Horizontal Elasticity': 0.7,
         'Step Size':             0.25,
         'Mass':                  75.0,
-        'Surface Friction':      0.95,
+        'Surface Friction':      0.3,    # low rolling friction; was 0.95 (too grippy)
         'hp':                    32767.0,
         'Number Of Local Mailboxes': 6,
         'Script':                PLAYER_SCRIPT,
@@ -340,7 +340,20 @@ _rtb_ns['build_path_mesh']('Beginner', _rtb_ns['load_levels']())
 # Export
 # --------------------------------------------------------------------------
 print(f'[fromscratch] Exporting to {OUT_LEV}')
-bpy.ops.wf.export_level(filepath=OUT_LEV)
+try:
+    bpy.ops.wf.export_level(filepath=OUT_LEV)
+except AttributeError:
+    # Headless fallback: load export_level.py directly (bypasses __init__.py / debug_bridge)
+    import importlib.util as _ilu
+    _addon_dir = os.path.expanduser('~/.config/blender/4.0/scripts/addons/wf_blender')
+    _spec = _ilu.spec_from_file_location('wf_blender.export_level',
+                                          os.path.join(_addon_dir, 'export_level.py'))
+    _mod = _ilu.module_from_spec(_spec)
+    _spec.loader.exec_module(_mod)
+    ok, msg = _mod.export_scene_to_lev(bpy.context, OUT_LEV)
+    if not ok:
+        raise RuntimeError(f'export_scene_to_lev failed: {msg}')
+    print(f'Info: Exported to {OUT_LEV}')
 print(f'[fromscratch] Done. Objects in scene:')
 for o in bpy.data.objects:
     print(f'  {o.name} @ {tuple(round(x,2) for x in o.location)}')

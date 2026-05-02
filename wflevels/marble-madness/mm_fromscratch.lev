@@ -165,9 +165,9 @@
 		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
 		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.3000000000000000(1.15.16) } { 'STR' "0.3" } }
 		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.7000000000000000(1.15.16) } { 'STR' "0.7" } }
-		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.9500000000000000(1.15.16) } { 'STR' "0.95" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.3000000000000000(1.15.16) } { 'STR' "0.3" } }
 		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 15.0000000000000000(1.15.16) } { 'STR' "15.0" } }
-		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.9000000000000000(1.15.16) } { 'STR' "0.9" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 15.0000000000000000(1.15.16) } { 'STR' "15.0" } }
 		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
@@ -189,14 +189,14 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -4.9888176918029785(1.15.16) -3.3334214687347412(1.15.16) -0.1000000014901161(1.15.16) 9.4151325225830078(1.15.16) 19.1497230529785156(1.15.16) 5.0999999046325684(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -2.4944088459014893(1.15.16) -1.6667107343673706(1.15.16) -0.1000000014901161(1.15.16) 6.4151320457458496(1.15.16) 19.1497230529785156(1.15.16) 5.0999999046325684(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "beginner_path.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.2000000000000000(1.15.16) } { 'STR' "0.2" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "beginner_path.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
