@@ -33,7 +33,7 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 - [ ] Marble-madness: script-based input remapping — `Script Controls Input = True`; script reads mailbox 1008 (`EMAILBOX_HARDWARE_JOYSTICK1`, physical joystick, read-only) to get raw buttons, remaps them (e.g. LEFT/RIGHT → strafe bits), then writes to mailbox 3024 (`EMAILBOX_INPUT`, write-only) so the movement handler sees the remapped state. Current implementation handles LEFT/RIGHT strafe in `movement.cc` (TurnRate==0 branch) instead; the script approach is a viable future refactor. See `player.cc:192` for the 1-line passthrough pattern.
 
 
-## LEVEL PIPELINE
+## PHYSICS
 
 - [ ] Level pipeline Phase D — decompile the 4 source-less levels (`cube`, `basic`, `cyber`, `main_game`) — [plan](docs/plans/2026-04-17-level-pipeline-proof.md)
 - [ ] Level pipeline Phase E — produce multi-level `cd.iff`, confirm all 7 levels load in `wf_game`; gates `common.inc` breaking rearrangement — [plan](docs/plans/2026-04-17-level-pipeline-proof.md)
