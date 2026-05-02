@@ -678,8 +678,21 @@ MarbleHandler::predictPosition(MovementManager& movementManager, MovementObject&
 		vel.SetX(vel.X() * (Scalar::one - friction));
 		vel.SetY(vel.Y() * (Scalar::one - friction));
 
-		// Gravity.
-		vel.SetZ(vel.Z() - gravity * dt);
+		// Gravity — projected onto the floor surface so the marble rolls downhill
+		// on slopes instead of pressing straight into the floor (which Jolt blocks).
+		// On flat ground the normal is (0,0,1) and this reduces to plain -Z gravity.
+		{
+			Vector3 N    = JoltCharacterGetGroundNormal(charID); // floor surface normal
+			float   gF   = gravity.AsFloat() * dt.AsFloat();    // gravity impulse this frame
+			// slope component: G_slope = G - (G·N)N  where G = (0,0,-gF)
+			float   GdotN = -gF * N.Z().AsFloat();              // (0,0,-gF)·N = -gF*Nz
+			float   slopeX = -GdotN * N.X().AsFloat();          // -(-gF*Nz)*Nx
+			float   slopeY = -GdotN * N.Y().AsFloat();
+			float   slopeZ = -gF - GdotN * N.Z().AsFloat();     // -gF - (-gF*Nz)*Nz
+			vel.SetX(vel.X() + Scalar(slopeX));
+			vel.SetY(vel.Y() + Scalar(slopeY));
+			vel.SetZ(vel.Z() + Scalar(slopeZ));
+		}
 
 		// Player input: impulse in world-XY directions relative to actor facing.
 		Vector3 fwd = movementObject.currentDir();          // (sin C, cos C, 0)

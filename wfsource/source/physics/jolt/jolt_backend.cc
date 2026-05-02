@@ -599,25 +599,30 @@ void JoltCharacterUpdate(uint32_t handle, float dt)
     Vector3 newPos = FromJph(JPH::Vec3(p)) - e.ctr;
 
     // CharacterVirtual::GetLinearVelocity returns the input velocity we set, not the
-    // Jolt-resolved velocity after slope constraint.  Use position delta to capture
-    // the true Y movement so slope-induced momentum carries onto flat terrain.
+    // Jolt-resolved velocity after floor/slope contact.  Use position delta to derive
+    // actual velocity when grounded so gravity doesn't accumulate into the floor.
     e.velCache = FromJph(e.character->GetLinearVelocity());
-    if (dt > 0.0f)
-        e.velCache.SetY((newPos.Y() - e.posCache.Y()) / Scalar(dt));
-
-    // Clamp vel_z to 0 only when grounded on flat terrain (normal ≈ +Z).
-    // On a slope, let gravity accumulate so the marble accelerates downhill.
-    // V-shaped troughs average two face normals, giving Z ≈ 0.993 — must not
-    // be classified as flat.  Only clamp on surfaces within 3° of horizontal.
-    if (e.character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround)
+    if (dt > 0.0f && e.character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround)
     {
-        JPH::Vec3 groundNormal = e.character->GetGroundNormal();
-        bool isFlatGround = groundNormal.GetZ() > 0.999f;
-        if (isFlatGround && e.velCache.Z() < Scalar::zero)
-            e.velCache.SetZ(Scalar::zero);
+        // On the ground, all three axes come from actual displacement.
+        float invDt = 1.0f / dt;
+        e.velCache.SetX((newPos.X() - e.posCache.X()) * Scalar(invDt));
+        e.velCache.SetY((newPos.Y() - e.posCache.Y()) * Scalar(invDt));
+        e.velCache.SetZ((newPos.Z() - e.posCache.Z()) * Scalar(invDt));
+    }
+    else if (dt > 0.0f)
+    {
+        // Airborne: Y from position delta (collision-constrained), Z from input (gravity).
+        e.velCache.SetY((newPos.Y() - e.posCache.Y()) * Scalar(1.0f / dt));
     }
 
     e.posCache = newPos;
+
+    // Log ball position every 30 ticks (~1 s at 30 fps).
+    static uint32_t sTick = 0;
+    if (handle == 0 && (++sTick % 30) == 0)
+        std::fprintf(stderr, "ball pos: (%.3f, %.3f, %.3f)\n",
+            newPos.X().AsFloat(), newPos.Y().AsFloat(), newPos.Z().AsFloat());
 }
 
 bool JoltCharacterIsOnGround(uint32_t handle)
@@ -625,6 +630,15 @@ bool JoltCharacterIsOnGround(uint32_t handle)
     if (handle >= (uint32_t)gCharacters.size() || !gCharacters[handle].occupied) return false;
     return gCharacters[handle].character->GetGroundState() ==
            JPH::CharacterBase::EGroundState::OnGround;
+}
+
+Vector3 JoltCharacterGetGroundNormal(uint32_t handle)
+{
+    if (handle >= (uint32_t)gCharacters.size() || !gCharacters[handle].occupied)
+        return Vector3(Scalar::zero, Scalar::zero, Scalar::one);
+    JPH::Vec3 n = gCharacters[handle].character->GetGroundNormal();
+    if (n.LengthSq() < 1e-6f) return Vector3(Scalar::zero, Scalar::zero, Scalar::one);
+    return FromJph(n);
 }
 
 // ---------------------------------------------------------------------------

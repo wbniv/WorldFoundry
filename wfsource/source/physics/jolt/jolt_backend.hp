@@ -89,5 +89,6 @@ void           JoltCharacterSetLinVelocity(uint32_t handle, const Vector3& vel);
 void           JoltCharacterSetPosition(uint32_t handle, const Vector3& pos);
 void           JoltCharacterUpdate(uint32_t handle, float dt);
 bool           JoltCharacterIsOnGround(uint32_t handle);
+Vector3        JoltCharacterGetGroundNormal(uint32_t handle);
 
 #endif // PHYSICS_ENGINE_JOLT
