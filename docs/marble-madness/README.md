@@ -26,37 +26,37 @@ Then pass the standalone IFF with `-L`:
 ### Practice (tutorial)
 
 ```sh
-../../engine/wf_game -L../../wflevels/marble-madness/mm_practice_rom-standalone.iff
+../../../engine/wf_game -L../../../wflevels/marble-madness/mm_practice_rom-standalone.iff
 ```
 
 ### Beginner (Race 1)
 
 ```sh
-../../engine/wf_game -L../../wflevels/marble-madness/mm_fromscratch-standalone.iff
+../../../engine/wf_game -L../../../wflevels/marble-madness/mm_fromscratch-standalone.iff
 ```
 
 ### Intermediate (Race 2)
 
 ```sh
-../../engine/wf_game -L../../wflevels/marble-madness/mm_intermediate-standalone.iff
+../../../engine/wf_game -L../../../wflevels/marble-madness/mm_intermediate-standalone.iff
 ```
 
 ### Aerial (Race 3)
 
 ```sh
-../../engine/wf_game -L../../wflevels/marble-madness/mm_aerial-standalone.iff
+../../../engine/wf_game -L../../../wflevels/marble-madness/mm_aerial-standalone.iff
 ```
 
 ### Silly (Race 4)
 
 ```sh
-../../engine/wf_game -L../../wflevels/marble-madness/mm_silly-standalone.iff
+../../../engine/wf_game -L../../../wflevels/marble-madness/mm_silly-standalone.iff
 ```
 
 ### Ultimate (Race 5)
 
 ```sh
-../../engine/wf_game -L../../wflevels/marble-madness/mm_ultimate-standalone.iff
+../../../engine/wf_game -L../../../wflevels/marble-madness/mm_ultimate-standalone.iff
 ```
 
 ---
