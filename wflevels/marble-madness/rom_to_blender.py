@@ -46,7 +46,11 @@ import bpy
 # --------------------------------------------------------------------------
 
 H_ZERO     = 5      # goal-zone h_center; subtracted so goal sits at Z=0
-GAME_UNIT  = 0.1    # metres per game unit above H_ZERO
+GAME_UNIT  = 0.05   # metres per game unit above H_ZERO
+            # Calibrated against arcade screenshots: Beginner trough walls at
+            # ΔH≈46–89 units over PATH_HALF=4.0 m give 30–48° slope angles,
+            # matching the ~30–50° trough profiles visible in MAME captures.
+            # (0.1 m/unit gave 49–66°, visually too steep in the WF perspective view.)
 SEG_LEN    = 2.5    # metres per path segment
 PATH_HALF  = 4.0    # metres from path centre to each edge vertex
 
@@ -98,11 +102,20 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
         print(f'[rom_to_blender] No valid segments for {level_name}')
         return None
 
-    def is_goal(seg):
-        return seg['h_center'] <= H_ZERO
+    # Classify segments: leading h_center≤H_ZERO = start platform,
+    # trailing h_center≤H_ZERO = goal platform, everything else = path.
+    # A simple is_goal filter would misclassify Beginner seg 0 (h_center=3)
+    # as a goal because it sits below H_ZERO — but it is the start, not the end.
+    first_path = 0
+    while first_path < len(segs) and segs[first_path]['h_center'] <= H_ZERO:
+        first_path += 1
+    last_path = len(segs)
+    while last_path > first_path and segs[last_path - 1]['h_center'] <= H_ZERO:
+        last_path -= 1
 
-    path_segs = [s for s in segs if not is_goal(s)]
-    goal_segs  = [s for s in segs if     is_goal(s)]
+    start_segs = segs[:first_path]
+    path_segs  = segs[first_path:last_path]
+    goal_segs  = segs[last_path:]
 
     verts = []
     faces = []
@@ -112,13 +125,38 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
         rx = math.sin(theta)   # right direction: 90° CW from forward
         ry = -math.cos(theta)
         base = len(verts)
-        verts.append((px - PATH_HALF * rx, py - PATH_HALF * ry, scale(seg['h_left'])))   # left
-        verts.append((px,                  py,                   scale(seg['h_center'])))  # centre
-        verts.append((px + PATH_HALF * rx, py + PATH_HALF * ry, scale(seg['h_right'])))  # right
+        verts.append((px - PATH_HALF * rx, py - PATH_HALF * ry, scale(seg['h_left'])))
+        verts.append((px,                  py,                   scale(seg['h_center'])))
+        verts.append((px + PATH_HALF * rx, py + PATH_HALF * ry, scale(seg['h_right'])))
         return base
+
+    def add_flat_platform(near_x, near_y, far_x, far_y, theta, z_val):
+        rx = math.sin(theta)
+        ry = -math.cos(theta)
+        gw = PATH_HALF * 1.5
+        b = len(verts)
+        verts.extend([
+            (near_x - gw * rx, near_y - gw * ry, z_val),
+            (near_x + gw * rx, near_y + gw * ry, z_val),
+            (far_x  + gw * rx, far_y  + gw * ry, z_val),
+            (far_x  - gw * rx, far_y  - gw * ry, z_val),
+        ])
+        faces.append((b, b + 1, b + 2, b + 3))
+        faces.append((b + 3, b + 2, b + 1, b))
 
     # Accumulate segment positions and build cross-sections
     pos_x, pos_y = 0.0, 0.0
+
+    # Start platform (leading low-h_center segments)
+    for s in start_segs:
+        theta  = heading_angle(s['type'])
+        end_x  = pos_x + math.cos(theta) * SEG_LEN
+        end_y  = pos_y + math.sin(theta) * SEG_LEN
+        add_flat_platform(pos_x, pos_y, end_x, end_y, theta, scale(s['h_center']))
+        pos_x, pos_y = end_x, end_y
+    if start_segs:
+        print(f'[rom_to_blender] {level_name}: {len(start_segs)} start seg(s) → '
+              f'flat start platform, path begins at ({pos_x:.2f},{pos_y:.2f})')
 
     if not path_segs:
         print(f'[rom_to_blender] No path segments for {level_name}')
@@ -163,21 +201,11 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
         final_theta = heading_angle(path_segs[-1]['type'])
         goal_x = pos_x + math.cos(final_theta) * SEG_LEN
         goal_y = pos_y + math.sin(final_theta) * SEG_LEN
-        rx = math.sin(final_theta)
-        ry = -math.cos(final_theta)
-        gw = PATH_HALF * 1.5   # slightly wider than path
-        b = len(verts)
-        verts += [
-            (pos_x  - gw * rx, pos_y  - gw * ry, 0.0),   # near-left
-            (pos_x  + gw * rx, pos_y  + gw * ry, 0.0),   # near-right
-            (goal_x + gw * rx, goal_y + gw * ry, 0.0),   # far-right
-            (goal_x - gw * rx, goal_y - gw * ry, 0.0),   # far-left
-        ]
-        faces.append((b, b + 1, b + 2, b + 3))   # top
-        faces.append((b + 3, b + 2, b + 1, b))   # back
+        add_flat_platform(pos_x, pos_y, goal_x, goal_y, final_theta, 0.0)
+        pos_x, pos_y = goal_x, goal_y
 
         print(f'[rom_to_blender] {level_name}: {len(goal_segs)} goal seg(s) → '
-              f'flat platform at ({pos_x:.2f},{pos_y:.2f})')
+              f'flat goal platform at ({pos_x:.2f},{pos_y:.2f})')
 
     print(f'[rom_to_blender] {level_name}: path end pos=({pos_x:.2f},{pos_y:.2f}), '
           f'{len(segs)} segs → {len(verts)} verts, {len(faces)} faces')

@@ -12,14 +12,16 @@ The current WF implementation (`mm_fromscratch`) is built from the **Practice** 
 
 **Calibration constants** (from `rom_to_blender.py`):
 
-| Constant   | Value | Meaning |
-|------------|-------|---------|
-| `H_ZERO`   | 5     | h_center value → Z = 0 (goal/start platform height) |
-| `GAME_UNIT`| 0.1 m | metres per game-unit above H_ZERO |
-| `SEG_LEN`  | 2.5 m | metres per segment (forward step) |
-| `PATH_HALF`| 4.0 m | metres from centre to each edge vertex |
+| Constant   | Value  | Meaning |
+|------------|--------|---------|
+| `H_ZERO`   | 5      | h_center value → Z = 0 (goal/start platform height) |
+| `GAME_UNIT`| 0.05 m | metres per game-unit above H_ZERO |
+| `SEG_LEN`  | 2.5 m  | metres per segment (forward step) |
+| `PATH_HALF`| 4.0 m  | metres from centre to each edge vertex |
 
-Z values: `Z = (h_value − 5) × 0.1 m`
+Z values: `Z = (h_value − 5) × 0.05 m`
+
+**Calibration rationale:** GAME_UNIT was reduced from 0.1 to 0.05 after comparing WF renders against MAME captures (frame_0007 = Beginner race, frame_0018 = Practice). With GAME_UNIT=0.1 the Beginner trough walls hit 49–66° — visually too steep in WF's perspective camera. At 0.05 the wall angles are 30–48°, matching the arcade's visual profile (shallower approach troughs, deeper bowl at seg 6). PATH_HALF=4.0 m was retained; only the vertical scale changed.
 
 Cross-section **shape classification**:
 - **crowned** — center higher than both edges; ball must be steered or it rolls off
@@ -36,19 +38,19 @@ to **45°** (NE). Segs 11–12 are the goal zone.
 
 | Seg | Type   | Hdg °  | h_L | h_C | h_R | Z_L   | Z_C   | Z_R   | Shape      | Note |
 |-----|--------|--------|-----|-----|-----|-------|-------|-------|------------|------|
-|  0  | 0x000D | 18.28  |  16 |  17 |  16 | +1.10 | +1.20 | +1.10 | crowned    | start |
-|  1  | 0x000D | 18.28  |  24 |  26 |  16 | +1.90 | +2.10 | +1.10 | crowned    | |
-|  2  | 0x000D | 18.28  |  16 |  27 |  24 | +1.10 | +2.20 | +1.90 | crowned    | |
-|  3  | 0x000D | 18.28  |  28 |  28 |  16 | +2.30 | +2.30 | +1.10 | wall-right | |
-|  4  | 0x000D | 18.28  |  16 |  29 |  28 | +1.10 | +2.40 | +2.30 | crowned    | |
-|  5  | 0x000D | 18.28  |  28 |  27 |  24 | +2.30 | +2.20 | +1.90 | wall-left  | |
-|  6  | 0x000D | 18.28  |  24 |  26 |  28 | +1.90 | +2.10 | +2.30 | wall-right | |
-|  7  | 0x000D | 18.28  |  34 |  27 |  24 | +2.90 | +2.20 | +1.90 | wall-left  | |
-|  8  | 0x000D | 18.28  |  24 |  26 |  34 | +1.90 | +2.10 | +2.90 | wall-right | |
-|  9  | 0x0320 | **45.00** | 52 | 31 | 47 | +4.70 | +2.60 | +4.20 | **trough** | TURN +26.7° |
-| 10  | 0x0320 | 45.00  |  48 |  30 |  51 | +4.30 | +2.50 | +4.60 | trough     | crest |
-| 11  | 0x0D20 | 45.00  |  72 |   5 |  64 | +6.70 |  0.00 | +5.90 | GOAL/START | goal platform |
-| 12  | 0x0D20 | 45.00  |  72 |   5 |  68 | +6.70 |  0.00 | +6.30 | GOAL/START | goal platform |
+|  0  | 0x000D | 18.28  |  16 |  17 |  16 | +0.55 | +0.60 | +0.55 | crowned    | start |
+|  1  | 0x000D | 18.28  |  24 |  26 |  16 | +0.95 | +1.05 | +0.55 | crowned    | |
+|  2  | 0x000D | 18.28  |  16 |  27 |  24 | +0.55 | +1.10 | +0.95 | crowned    | |
+|  3  | 0x000D | 18.28  |  28 |  28 |  16 | +1.15 | +1.15 | +0.55 | wall-right | |
+|  4  | 0x000D | 18.28  |  16 |  29 |  28 | +0.55 | +1.20 | +1.15 | crowned    | |
+|  5  | 0x000D | 18.28  |  28 |  27 |  24 | +1.15 | +1.10 | +0.95 | wall-left  | |
+|  6  | 0x000D | 18.28  |  24 |  26 |  28 | +0.95 | +1.05 | +1.15 | wall-right | |
+|  7  | 0x000D | 18.28  |  34 |  27 |  24 | +1.45 | +1.10 | +0.95 | wall-left  | |
+|  8  | 0x000D | 18.28  |  24 |  26 |  34 | +0.95 | +1.05 | +1.45 | wall-right | |
+|  9  | 0x0320 | **45.00** | 52 | 31 | 47 | +2.35 | +1.30 | +2.10 | **trough** | TURN +26.7°; wall 16–18° |
+| 10  | 0x0320 | 45.00  |  48 |  30 |  51 | +2.15 | +1.25 | +2.30 | trough     | crest; wall 14–18° |
+| 11  | 0x0D20 | 45.00  |  72 |   5 |  64 | +3.35 |  0.00 | +2.95 | GOAL/START | goal platform |
+| 12  | 0x0D20 | 45.00  |  72 |   5 |  68 | +3.35 |  0.00 | +3.15 | GOAL/START | goal platform |
 
 **Key observations:**
 - Segs 0–8 are mostly **crowned** — the centre spine is the high point, edges lower. The marble must be actively steered or it falls off the sides. This is the signature S-curve steering challenge.
@@ -62,17 +64,17 @@ to **45°** (NE). Segs 11–12 are the goal zone.
 
 The first competitive race. Heading starts at **56.25°**, turns to **66.09°**, then **90°** (due North).
 
-| Seg | Type   | Hdg °  | h_L | h_C | h_R | Z_L    | Z_C   | Z_R    | Shape      | Note |
-|-----|--------|--------|-----|-----|-----|--------|-------|--------|------------|------|
-|  0  | 0x0D28 | 56.25  |  61 |   3 |  56 | +5.60  | −0.20 | +5.10  | GOAL/START | h_center < H_ZERO — likely start platform |
-|  1  | 0x142F | 66.09  |  64 |  18 |  78 | +5.90  | +1.30 | +7.30  | trough     | TURN +9.8° |
-|  2  | 0x142F | 66.09  |  67 |  21 |  78 | +6.20  | +1.60 | +7.30  | trough     | |
-|  3  | 0x1F40 | **90.00** | 81 | 19 | 86 | +7.60 | +1.40 | +8.10  | trough     | TURN +23.9° |
-|  4  | 0x1F40 | 90.00  |  87 |  20 |  86 | +8.20  | +1.50 | +8.10  | trough     | |
-|  5  | 0x1F40 | 90.00  |  84 |  22 |  94 | +7.90  | +1.70 | +8.90  | trough     | |
-|  6  | 0x2940 | 90.00  | 105 |  16 | 107 | +10.00 | +1.10 | +10.20 | trough     | deep walls |
-|  7  | 0x3240 | 90.00  | 110 |   5 | 109 | +10.50 |  0.00 | +10.40 | GOAL/START | goal platform |
-|  8  | 0x3240 | 90.00  | 114 |   5 | 109 | +10.90 |  0.00 | +10.40 | GOAL/START | goal platform |
+| Seg | Type   | Hdg °  | h_L | h_C | h_R | Z_L   | Z_C   | Z_R   | Wall° L | Wall° R | Shape      | Note |
+|-----|--------|--------|-----|-----|-----|-------|-------|-------|---------|---------|------------|------|
+|  0  | 0x0D28 | 56.25  |  61 |   3 |  56 | +2.90 | −0.10 | +2.65 | —       | —       | GOAL/START | h_center < H_ZERO — start platform |
+|  1  | 0x142F | 66.09  |  64 |  18 |  78 | +2.95 | +0.65 | +3.65 | 30°     | 37°     | trough     | TURN +9.8° |
+|  2  | 0x142F | 66.09  |  67 |  21 |  78 | +3.10 | +0.80 | +3.65 | 29°     | 36°     | trough     | |
+|  3  | 0x1F40 | **90.00** | 81 | 19 | 86 | +3.80 | +0.70 | +4.05 | 38°     | 41°     | trough     | TURN +23.9° |
+|  4  | 0x1F40 | 90.00  |  87 |  20 |  86 | +4.10 | +0.75 | +4.05 | 40°     | 40°     | trough     | |
+|  5  | 0x1F40 | 90.00  |  84 |  22 |  94 | +3.95 | +0.85 | +4.45 | 38°     | 43°     | trough     | spawn here |
+|  6  | 0x2940 | 90.00  | 105 |  16 | 107 | +5.00 | +0.55 | +5.10 | 48°     | 49°     | trough     | deep walls |
+|  7  | 0x3240 | 90.00  | 110 |   5 | 109 | +5.25 |  0.00 | +5.20 | —       | —       | GOAL/START | goal platform |
+|  8  | 0x3240 | 90.00  | 114 |   5 | 109 | +5.45 |  0.00 | +5.20 | —       | —       | GOAL/START | goal platform |
 
 **Key observations:**
 - All 7 path segments (1–6) are **troughs** — the ball is contained on all sides. Beginner is much easier to steer than Practice.
@@ -93,7 +95,8 @@ The first competitive race. Heading starts at **56.25°**, turns to **66.09°**,
 | Starting heading | 18.28° (ENE) | 56.25° (NE-ish) |
 | Final heading | 45.00° (NE) | 90.00° (N) |
 | Goal Z | 0.0 m | 0.0 m |
-| Max wall height | +4.7 m | +10.9 m |
+| Max wall height | +2.35 m | +5.45 m |
+| Max wall angle  | ~18° (trough segs) | ~49° (deep seg 6) |
 | Seg-0 anomaly | h_center = 17 (normal) | h_center = 3 (below H_ZERO — start platform bug) |
 
 ---

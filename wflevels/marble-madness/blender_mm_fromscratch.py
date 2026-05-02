@@ -1,5 +1,5 @@
 """
-blender_mm_fromscratch.py — Build an MM Practice level from scratch in Blender.
+blender_mm_fromscratch.py — Build the MM Beginner Race level from scratch in Blender.
 
 Demonstrates the minimum set of WF infrastructure objects required for a
 playable level — no .lev import; every actor created from first principles.
@@ -7,7 +7,7 @@ playable level — no .lev import; every actor created from first principles.
 Run via Blender MCP (execute_blender_code) or headless:
     blender --background --python blender_mm_fromscratch.py
 
-Level geometry comes from rom_to_blender.py (Practice path mesh).
+Level geometry comes from rom_to_blender.py (Beginner Race path mesh).
 
 What this creates and why:
     Director    — runs the level Forth script (timer, lives, camshot routing)
@@ -32,10 +32,11 @@ Key gotchas encoded here (see docs/level-design-troubleshooting.md):
 
 Path geometry coordinate system (see rom_to_blender.py):
   - Heading angle from type field lower byte: 0° = +X (East), CCW positive
-  - Practice segs 0-8: heading 18.28° (ENE, open-sided S-curve — requires joystick)
-  - Practice segs 9-10: heading 45° (NE, walled trough — ball rolls to goal)
-  - Spawn above seg 9 (21.36, 7.06, 3.2) — GAME_UNIT=0.1, floor at Z=2.6m
-  - Full S-curve play requires joystick input; segs 0-8 are crowned not troughs
+  - Beginner seg 0: start platform (h_center=3 < H_ZERO), heading 56.25°
+  - Beginner segs 1-6: all troughs (ball is contained), headings 66.09° → 90°
+  - Beginner segs 7-8: goal platform (h_center=5=H_ZERO)
+  - Spawn above seg 1 start (1.39, 2.08) — GAME_UNIT=0.1, seg-1 floor at Z=1.3m
+  - All path segments are troughs — ball stays in without steering
 """
 
 import bpy
@@ -60,36 +61,38 @@ def oad(name):
 # --------------------------------------------------------------------------
 # Level layout constants
 # --------------------------------------------------------------------------
-# Practice path (rom_to_blender.py heading-based layout, GAME_UNIT=0.1):
-#   Segs 0-8:  heading 18.28° (ENE), 9 × 2.5m → endpoint ≈ (21.4, 7.1)
-#   Segs 9-10: heading 45° (NE),     2 × 2.5m → endpoint ≈ (24.9, 10.6)
-#   Z range: floor 1.2-2.6 m, wall tops up to 4.7 m, goal at Z=0
+# Beginner path (rom_to_blender.py heading-based layout, GAME_UNIT=0.05):
+#   Seg 0:    start platform, heading 56.25°, ends at (1.39, 2.08)
+#   Segs 1-2: heading 66.09° (NNE), all troughs
+#   Segs 3-6: heading 90.00° (N),   all troughs, ends at (3.42, 16.65)
+#   Segs 7-8: goal platform at Z=0, ends at (3.42, 24.15)
+#   Z range:  floor -0.1–0.85 m, wall tops up to 5.1 m
+#   Wall angles: 30–48° (Beginner troughs), matching arcade MAME captures
 #
-# Spawn above seg 9 (first walled downhill trough) so ball rolls toward goal
-# without requiring joystick input in the demo.  Segs 0-8 are open-sided
-# (crowned) and require active steering — they are correct arcade geometry
-# but unplayable without a joystick connected.
-#
-# Room01 position=(13,3,9), local_bbox=(-25,-15,-12)→(20,12,15)
-# → world X:[-12,33], Y:[-12,15], Z:[-3,24]
-#
-# Isometric camera offset: (-8,-10,+15) from player
-# → camera world pos at spawn ≈ (13.4, -3.0, 18.2) — well above wall tops (4.7m) ✓
+# Isometric camera offset: (-8,-8,+10) from player
 
-ROOM_POS        = (13.0,  3.0,  9.0)
-ROOM_LOCAL_BBOX = (-25.0, -15.0, -12.0, 20.0, 12.0, 15.0)  # world: X[-12,33] Y[-12,15] Z[-3,24]
+# Room = global bounding box of ALL scene objects + 2-unit margin.
+# Path: X[-5,9.4] Y[-3.3,19.2] Z[-0.1,5.1]; CamShot(-8,-8,10); Camera(-4.58,3.65,11.5)
+# Light(1,7.5,17); margin→ X[-10,14] Y[-12,22] Z[-3,20]; center=(2,5,8.5)
+ROOM_POS        = (2.0,  5.0,  8.5)
+ROOM_LOCAL_BBOX = (-12.0, -17.0, -11.5, 12.0, 17.0, 11.5)
+# world: X[-10,14] Y[-12,22] Z[-3,20]  — all actors inside ✓
 
-SPAWN_POS    = (21.364, 7.058,  3.2)  # 0.6 m above seg-9 trough floor (Z=2.6)
-# All-Relative camera: effective camera pos = SPAWN_POS + CAMSHOT_POS.
-#   With GAME_UNIT=0.1 wall tops at 4.7m; Z offset 10 → camera Z = 3.2+10 = 13.2m above them.
-#   Horizontal offset (-8,-8) gives ~41° elevation angle (isometric feel).
-#   Room check (worst case: player at seg0, X=0,Y=0):
-#     camera = (-8,-8,11.2) → inside room [-12,-12,-3]→[33,15,24] ✓
-CAMSHOT_POS  = (-8.0,  -8.0, 10.0)   # iso offset from player (all-Relative)
-TARGET1_POS  = (0.0,    0.0,  0.0)   # world-space follow anchor (inside room ✓)
-TARGET2_POS  = (21.364, 7.058, 3.5)  # look-at just above player spawn
-LIGHT_POS    = (13.0,   3.0, 18.0)   # overhead, inside room (Z=18 < 24) ✓
-CAMERA_POS   = (13.364, -0.942, 13.2) # camera entity = SPAWN_POS + CAMSHOT_POS ✓
+# Spawn above seg-5→6 transition (first downhill section): path floor drops
+# from Z=0.85m (seg5) to Z=0.55m (seg6) to Z=0m (goal) — ball rolls without input.
+# Seg-5 center pos: (3.42, 11.65), floor Z=0.85m (GAME_UNIT=0.05).
+SPAWN_POS    = (3.42, 11.65, 1.5)   # above seg-5 floor (Z=0.85m), first downhill
+
+# Camera: SW of marble (−X, −Y, +Z) looking NE+down — classic isometric view.
+#   Path going North appears as upper-right on screen (standard MM arcade framing).
+#   Camera at X=−4.58 is west of path left wall (X=−0.58) — no geometry clipping ✓
+#   Room X expanded to −10 so CamShot at X=−8 is strictly inside room ✓
+#   WF/Blender coords: +X=East, +Y=North, +Z=Up (same system — no axis flip)
+CAMSHOT_POS  = (-8.0,  -8.0, 10.0)   # SW+above: camera = player + this offset
+TARGET1_POS  = (0.0,    0.0,  0.0)   # world-space follow anchor (origin)
+TARGET2_POS  = (3.42,  12.65,  1.0)  # look-at: 1m north of spawn, just above floor
+LIGHT_POS    = (1.0,    7.5, 17.0)   # overhead, inside room ✓
+CAMERA_POS   = (-4.58,  3.65, 11.5)  # initial camera pos = SPAWN_POS + CAMSHOT_POS
 
 # Director script: 90 s timer, 3 lives, respawn + camshot routing
 DIRECTOR_SCRIPT = (
@@ -107,15 +110,15 @@ DIRECTOR_SCRIPT = (
     r' 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then' '\n'
 )
 
-# Player script: forward joystick; respawn on Z < -5; signal director on death
+# Player script: forward joystick; respawn above seg-1 start on Z < -2; signal director
 PLAYER_SCRIPT = (
     r'\\ wf' '\n'
-    r': respawn  0 INDEXOF_X_POS write-mailbox  0 INDEXOF_Y_POS write-mailbox'
-    r'  7 INDEXOF_Z_POS write-mailbox'
+    r': respawn  1 INDEXOF_X_POS write-mailbox  2 INDEXOF_Y_POS write-mailbox'
+    r'  2 INDEXOF_Z_POS write-mailbox'
     r'  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox'
     r'  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;' '\n'
     r'INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox' '\n'
-    r'INDEXOF_Z_POS read-mailbox -5 < if respawn then' '\n'
+    r'INDEXOF_Z_POS read-mailbox -2 < if respawn then' '\n'
 )
 
 
@@ -273,7 +276,7 @@ make_empty(
 # Fills the room; writes CamShot01's index to the camshot mailbox when
 # Player enters.  The engine bootstrap in level.cc already writes the first
 # CamShot index at construction time, so this is belt-and-suspenders.
-actbox_bbox = (-25.0, -15.0, -12.0, 20.0, 12.0, 15.0)  # same as room local bbox
+actbox_bbox = (-12.0, -17.0, -11.5, 12.0, 17.0, 11.5)  # same as room local bbox
 make_box_empty(
     'ActBoxOR', ROOM_POS, actbox_bbox, 'actboxor',
     props={
@@ -323,14 +326,14 @@ player = make_empty(
 player['wf_original_bbox'] = (-0.33, -0.33, 0.0, 0.33, 0.33, 0.66)
 
 # --------------------------------------------------------------------------
-# Add Practice path geometry from ROM decoder output
+# Add Beginner Race path geometry from ROM decoder output
 # --------------------------------------------------------------------------
 # exec into a named namespace so the module-level guard (__name__ == '__main__')
 # does NOT fire.  Then call build_path_mesh directly.
 _rtb_path = os.path.join(SCRIPT_DIR, 'rom_to_blender.py')
 _rtb_ns   = {'__file__': _rtb_path, '__name__': 'rom_to_blender', 'bpy': bpy}
 exec(open(_rtb_path).read(), _rtb_ns)
-_rtb_ns['build_path_mesh']('Practice', _rtb_ns['load_levels']())
+_rtb_ns['build_path_mesh']('Beginner', _rtb_ns['load_levels']())
 
 # --------------------------------------------------------------------------
 # Export

@@ -345,10 +345,7 @@ extern bool	windowActive;		// Window windowActive Flag Set To TRUE By Default
 
 extern bool bRecordVideo;
 
-static FILE*   gCapturePipe  = nullptr;
-static GLuint  gCapturePBO[2] = {0, 0};
-static int     gCaptureCurrent = 0;   // index of the PBO being written this frame
-static int     gCaptureFrameCount = 0;
+static FILE* gCapturePipe = nullptr;
 
 static void
 CaptureCleanup(int sig)
@@ -363,60 +360,32 @@ CaptureCleanup(int sig)
 }
 
 static void
-CaptureFrameOpen(int xSize, int ySize)
-{
-    char cmd[256];
-    snprintf(cmd, sizeof(cmd),
-        "ffmpeg -f rawvideo -pixel_format bgr24 "
-        "-video_size %dx%d -framerate 30 "
-        "-i pipe:0 -vf vflip -c:v libx264 -pix_fmt yuv420p "
-        "-movflags frag_keyframe+empty_moov output.mp4",
-        xSize, ySize);
-    gCapturePipe = popen(cmd, "w");
-    signal(SIGABRT, CaptureCleanup);
-    signal(SIGSEGV, CaptureCleanup);
-
-    const int pixelBytes = xSize * ySize * 3;
-    glGenBuffers(2, gCapturePBO);
-    for (int i = 0; i < 2; ++i)
-    {
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, gCapturePBO[i]);
-        glBufferData(GL_PIXEL_PACK_BUFFER, pixelBytes, nullptr, GL_STREAM_READ);
-    }
-    glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-}
-
-static void
 CaptureFrame(int xSize, int ySize)
 {
     if (!gCapturePipe)
-        CaptureFrameOpen(xSize, ySize);
+    {
+        char cmd[256];
+        snprintf(cmd, sizeof(cmd),
+            "ffmpeg -y -f rawvideo -pixel_format bgr24 "
+            "-video_size %dx%d -framerate 30 "
+            "-i pipe:0 -vf vflip -c:v libx264 -pix_fmt yuv420p "
+            "-movflags frag_keyframe+empty_moov output.mp4",
+            xSize, ySize);
+        gCapturePipe = popen(cmd, "w");
+        signal(SIGABRT, CaptureCleanup);
+        signal(SIGSEGV, CaptureCleanup);
+        signal(SIGTERM, CaptureCleanup);
+        signal(SIGINT,  CaptureCleanup);
+    }
     if (!gCapturePipe)
         return;
 
     const int pixelBytes = xSize * ySize * 3;
-    const int prev = 1 - gCaptureCurrent;
-
-    // Kick async DMA readback into the current PBO — returns immediately.
-    glBindBuffer(GL_PIXEL_PACK_BUFFER, gCapturePBO[gCaptureCurrent]);
-    // GL_BGR feeds directly into ffmpeg's bgr24 pixel format — no byte swap needed.
-    glReadPixels(0, 0, xSize, ySize, GL_BGR, GL_UNSIGNED_BYTE, nullptr);
-
-    // Map the previous PBO (DMA from last frame is complete by now) and write to pipe.
-    if (gCaptureFrameCount > 0)
-    {
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, gCapturePBO[prev]);
-        void* ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-        if (ptr)
-        {
-            fwrite(ptr, 1, pixelBytes, gCapturePipe);
-            glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-        }
-    }
-
-    glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-    gCaptureCurrent = prev;
-    ++gCaptureFrameCount;
+    glFinish();
+    uint8_t* pixels = (uint8_t*)malloc(pixelBytes);
+    glReadPixels(0, 0, xSize, ySize, GL_BGR, GL_UNSIGNED_BYTE, pixels);
+    fwrite(pixels, 1, pixelBytes, gCapturePipe);
+    free(pixels);
 }
 
 #endif // DESIGNER_CHEATS && __LINUX__

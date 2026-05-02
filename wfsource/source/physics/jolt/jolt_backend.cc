@@ -607,11 +607,12 @@ void JoltCharacterUpdate(uint32_t handle, float dt)
 
     // Clamp vel_z to 0 only when grounded on flat terrain (normal ≈ +Z).
     // On a slope, let gravity accumulate so the marble accelerates downhill.
-    // The threshold cos(15°) ≈ 0.966 separates walkable slopes from flat floors.
+    // V-shaped troughs average two face normals, giving Z ≈ 0.993 — must not
+    // be classified as flat.  Only clamp on surfaces within 3° of horizontal.
     if (e.character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround)
     {
         JPH::Vec3 groundNormal = e.character->GetGroundNormal();
-        bool isFlatGround = groundNormal.GetZ() > 0.966f;
+        bool isFlatGround = groundNormal.GetZ() > 0.999f;
         if (isFlatGround && e.velCache.Z() < Scalar::zero)
             e.velCache.SetZ(Scalar::zero);
     }
