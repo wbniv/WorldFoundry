@@ -35,7 +35,9 @@
 // API calls themselves never execute on iOS.
 #  include <OpenGLES/ES3/gl.h>
 #else
+#  define GL_GLEXT_PROTOTYPES
 #  include <GL/gl.h>
+#  include <GL/glext.h>
 #endif
 #include <gfx/gl/wfprim.h>
 

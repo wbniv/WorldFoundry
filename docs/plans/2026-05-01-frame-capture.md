@@ -42,8 +42,9 @@ cd wfsource/source/game
 
 ## Files changed
 
-- `wfsource/source/gfx/gl/display.cc` — `CaptureFrame()` + `CaptureFrameOpen()` helpers, call site in `PageFlip()`
+- `wfsource/source/gfx/gl/display.cc` — `CaptureFrame()` + `CaptureFrameOpen()` helpers with PBO ping-pong, call site in `PageFlip()`
 - `wfsource/source/game/main.cc` — rename variable + switch
+- `wfsource/source/gfx/renderer.hp` — added `GL_GLEXT_PROTOTYPES` + `<GL/glext.h>` for PBO API
 
 ## Crash resilience
 
@@ -53,8 +54,20 @@ Two layers:
 
 **Fragmented MP4 (`-movflags frag_keyframe+empty_moov`):** standard MP4 writes its index atom at the very end — a crash before that produces an unplayable file. Fragmented MP4 commits each keyframe interval as a self-contained chunk; even a truncated file is playable up to the last complete fragment.
 
+## PBO ping-pong (async readback)
+
+`glReadPixels` into a plain `uint8_t*` is synchronous: the CPU blocks until the GPU finishes DMAing the pixel data to system RAM. With two alternating Pixel Buffer Objects the stall disappears:
+
+- Frame N: `glReadPixels(... nullptr)` into `PBO[current]` — non-blocking DMA kick, returns immediately.
+- Frame N: map `PBO[prev]` (frame N−1 data, DMA already complete) → `fwrite` to pipe → unmap.
+- Swap `current`/`prev` and repeat.
+
+The first frame has no previous data and is silently skipped; every frame thereafter is written with zero CPU wait.
+
+`GL_GLEXT_PROTOTYPES` must be defined before any `#include <GL/gl.h>` that reaches this translation unit, otherwise `glGenBuffers`/`glBindBuffer`/`glMapBuffer` are not declared. The define lives in `wfsource/source/gfx/renderer.hp` — the authoritative first GL include on the Linux path.
+
 ## Known limitations
 
 - ffmpeg must be on `$PATH`
 - Output is always `output.mp4` in CWD (overwritten each run)
-- `glReadPixels` stalls the GPU pipeline — game runs slower during capture, but output video plays at the specified 30fps regardless
+- One frame of latency between capture and encode (inherent to PBO ping-pong; not visible in output)
