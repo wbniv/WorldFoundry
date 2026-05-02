@@ -73,7 +73,7 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "Camera" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -2.5799999237060547(1.15.16) 5.5000000000000000(1.15.16) 11.1999998092651367(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -4.6100001335144043(1.15.16) -5.9200000762939453(1.15.16) 11.2500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -153,7 +153,7 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "Player" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 3.4200000762939453(1.15.16) 13.5000000000000000(1.15.16) 1.2000000476837158(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 1.3899999856948853(1.15.16) 2.0799999237060547(1.15.16) 1.2500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -177,7 +177,7 @@
 		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8000000000000007(1.15.16) } { 'STR' "9.8" } }
 		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 6l } { 'STR' "6" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: respawn  3 INDEXOF_X_POS write-mailbox  14 INDEXOF_Y_POS write-mailbox  1 INDEXOF_Z_POS write-mailbox  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\nINDEXOF_Z_POS read-mailbox -2 < if respawn then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: respawn  1 INDEXOF_X_POS write-mailbox  2 INDEXOF_Y_POS write-mailbox  1 INDEXOF_Z_POS write-mailbox  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\nINDEXOF_Z_POS read-mailbox -2 < if respawn then\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sphere.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }

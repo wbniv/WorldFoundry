@@ -159,6 +159,24 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
     pos_x, pos_y = 0.0, 0.0
 
     # Start platform (leading low-h_center segments)
+    # A back wall at the near end (pos_x=0,pos_y=0) stops the marble rolling off
+    # backward when the player has not yet applied joystick input.
+    if start_segs:
+        first_start_theta = heading_angle(start_segs[0]['type'])
+        rx = math.sin(first_start_theta)
+        ry = -math.cos(first_start_theta)
+        gw = PATH_HALF * 1.5
+        wall_h = 2.0
+        bw = len(verts)
+        z_start = scale(start_segs[0]['h_center'])
+        verts.extend([
+            (pos_x - gw * rx, pos_y - gw * ry, z_start),
+            (pos_x + gw * rx, pos_y + gw * ry, z_start),
+            (pos_x + gw * rx, pos_y + gw * ry, z_start + wall_h),
+            (pos_x - gw * rx, pos_y - gw * ry, z_start + wall_h),
+        ])
+        faces.append((bw, bw+1, bw+2, bw+3))
+        faces.append((bw+3, bw+2, bw+1, bw))
     for s in start_segs:
         theta  = heading_angle(s['type'])
         end_x  = pos_x + math.cos(theta) * SEG_LEN
@@ -167,7 +185,7 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
         pos_x, pos_y = end_x, end_y
     if start_segs:
         print(f'[rom_to_blender] {level_name}: {len(start_segs)} start seg(s) → '
-              f'flat start platform, path begins at ({pos_x:.2f},{pos_y:.2f})')
+              f'flat start platform + back wall, path begins at ({pos_x:.2f},{pos_y:.2f})')
 
     if not path_segs:
         print(f'[rom_to_blender] No path segments for {level_name}')

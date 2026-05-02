@@ -35,7 +35,9 @@ Path geometry coordinate system (see rom_to_blender.py):
   - Beginner seg 0: start platform (h_center=3 < H_ZERO), heading 56.25°
   - Beginner segs 1-6: all troughs (ball is contained), headings 66.09° → 90°
   - Beginner segs 7-8: goal platform (h_center=5=H_ZERO)
-  - Spawn above seg 1 start (1.39, 2.08) — GAME_UNIT=0.1, seg-1 floor at Z=1.3m
+  - Spawn above seg 1 start (1.39, 2.08) — GAME_UNIT=0.05, seg-1 floor at Z=0.65m
+  - Segs 1-5 slope upward (h_center 18→22); marble needs joystick push over the hill
+  - Segs 5-6 slope down to goal (h_center 22→16→5=goal Z=0)
   - All path segments are troughs — ball stays in without steering
 """
 
@@ -78,11 +80,12 @@ ROOM_POS        = (2.0,  5.0,  8.5)
 ROOM_LOCAL_BBOX = (-14.0, -20.0, -11.5, 14.0, 20.0, 11.5)
 # world: X[-12,16] Y[-15,25] Z[-3,20]  — camera at (-8.6,7,8) when marble at goal ✓
 
-# Spawn mid-way down the seg-5→6 downslope (Y=11.645→14.145, Z=0.85→0.55).
-# Y=13.5 is 1.86m past the crest (cs4 at Y=11.645) — firmly on the downhill face.
-# Floor Z at Y=13.5 ≈ 0.85 - (13.5-11.645)/(14.145-11.645)*0.3 ≈ 0.63m.
-# Spawn Z=1.2 sits ~0.57m above floor (> ball radius 0.33m) so the ball drops cleanly.
-SPAWN_POS    = (3.42, 13.5, 1.2)   # mid-downslope, rolls toward goal without input
+# Spawn above seg-1 start (first trough section after start platform).
+# Seg-1 pos=(1.39, 2.08), h_center=18 → floor Z=(18-5)*0.05=0.65m.
+# Spawn 0.6m above floor so ball drops cleanly onto the trough.
+# NOTE: segs 1-5 slope UPWARD (h_center 18→22); joystick needed to push over hill.
+# Segs 5-6 (Y=11.65→14.15) slope down to goal at Z=0.
+SPAWN_POS    = (1.39, 2.08, 1.25)  # seg-1 start; full course from beginning
 
 # Camera: SW isometric, 45° elevation — matches arcade Marble Madness camera angle.
 #   Offset (-6,-8,10): 6m west, 8m south, 10m above marble → 45° elevation.
@@ -93,7 +96,7 @@ CAMSHOT_POS  = (-6.0,  -8.0, 10.0)   # SW isometric offset (~45° elevation, cle
 TARGET1_POS  = (0.0,    0.0,  0.0)   # world-space follow anchor (origin, unused)
 TARGET2_POS  = (3.42,  22.0,  0.0)   # unused; kept so Target02 empty exists
 LIGHT_POS    = (1.0,    7.5, 17.0)   # overhead, inside room ✓
-CAMERA_POS   = (-2.58,  5.5, 11.2)   # initial camera pos = SPAWN_POS + CAMSHOT_POS
+CAMERA_POS   = (-4.61, -5.92, 11.25) # initial camera pos = SPAWN_POS + CAMSHOT_POS
 
 # Director script: 90 s timer, 3 lives, respawn + camshot routing
 DIRECTOR_SCRIPT = (
@@ -114,7 +117,7 @@ DIRECTOR_SCRIPT = (
 # Player script: forward joystick; respawn above spawn point on Z < -2; signal director
 PLAYER_SCRIPT = (
     r'\\ wf' '\n'
-    r': respawn  3 INDEXOF_X_POS write-mailbox  14 INDEXOF_Y_POS write-mailbox'
+    r': respawn  1 INDEXOF_X_POS write-mailbox  2 INDEXOF_Y_POS write-mailbox'
     r'  1 INDEXOF_Z_POS write-mailbox'
     r'  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox'
     r'  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;' '\n'
@@ -231,7 +234,7 @@ make_empty(
 )
 
 # ── Camera entity ─────────────────────────────────────────────────────────
-# Must be inside room. CAMERA_POS=(0,-1,7): world Y=-1>-3, Z=7<10. ✓
+# Must be inside room. CAMERA_POS=(-4.61,-5.92,11.25): world inside X[-12,16] Y[-15,25] Z[-3,20] ✓
 make_empty('Camera', CAMERA_POS, 'camera',
     props={'Mobility': 'Camera', 'MovementClass': 13, 'Model Type': 'Box'})
 
