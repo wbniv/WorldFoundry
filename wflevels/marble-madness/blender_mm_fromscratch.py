@@ -113,14 +113,25 @@ DIRECTOR_SCRIPT = (
     r' 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then' '\n'
 )
 
-# Player script: forward joystick; respawn above spawn point on Z < -2; signal director
+# Player script: camera-relative input + respawn
+# Camera offset (-6,-8,+10): looks from SW so screen-up = world NE, screen-right = world SE.
+# cam-remap rotates arrow-key bits 45° so movement matches screen orientation:
+#   UP(2048)→NE: UP|RIGHT(10240)   DOWN(4096)→SW: DOWN|LEFT(20480)
+#   RIGHT(8192)→SE: DOWN|RIGHT(12288)   LEFT(16384)→NW: UP|LEFT(18432)
+# Diagonal combos cancel correctly: UP+RIGHT→NE+SE cancel Y → pure East. ✓
 PLAYER_SCRIPT = (
     r'\\ wf' '\n'
+    r': cam-remap  0'
+    r'  over 2048  & if 10240 | then'
+    r'  over 4096  & if 20480 | then'
+    r'  over 8192  & if 12288 | then'
+    r'  over 16384 & if 18432 | then'
+    r'  swap drop ;' '\n'
     r': respawn  3 INDEXOF_X_POS write-mailbox  13 INDEXOF_Y_POS write-mailbox'
     r'  1 INDEXOF_Z_POS write-mailbox'
     r'  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox'
     r'  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;' '\n'
-    r'INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox' '\n'
+    r'INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox cam-remap INDEXOF_INPUT write-mailbox' '\n'
     r'INDEXOF_Z_POS read-mailbox -2 < if respawn then' '\n'
 )
 

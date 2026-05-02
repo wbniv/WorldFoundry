@@ -613,6 +613,36 @@ For example, if spawn is at Z=7 and camshot offset is Z=5, camera can reach Z=12
 
 ---
 
+## zForth: `and`/`or` silently broken — use `&` and `|`
+
+zForth's primitive word for bitwise AND is `&`, not `and`; for bitwise OR it is
+`|`, not `or`.  Writing `and` or `or` in a zForth script compiles without a
+lexer warning but fails at runtime with:
+
+```
+zforth compile error 7 (defs): : myword ... and ...
+```
+
+Error code 7 = `ZF_ABORT_NOT_A_WORD`.  The entire word definition is silently
+discarded — every tick it does nothing.  If the word is `cam-remap` the
+`INDEXOF_INPUT` mailbox stays at 0 and the marble is uncontrollable.
+
+**Fix:** replace `and` → `&` and `or` → `|` throughout.
+
+```forth
+\ WRONG — compiles but silently fails at runtime
+over 2048 and if 10240 or then
+
+\ CORRECT
+over 2048 & if 10240 | then
+```
+
+Other bitwise primitives: `^` (XOR), `<<` (shift left), `>>` (shift right).
+Other logical helpers defined in the WF bootstrap: `not` (= `0 =`), `<`, `>`,
+`<=`, `>=`, `<>`.
+
+---
+
 ## Checklist: new actor not showing up
 
 1. Is the actor position strictly inside a room bbox (not on the boundary)?

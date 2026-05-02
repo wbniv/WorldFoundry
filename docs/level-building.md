@@ -380,7 +380,50 @@ Each `.iff` level embeds `_levelData->objectCount` (37 in snowgoons). Temporary 
 
 ### Original Design
 - **Player script** (per frame): `write-mailbox $INDEXOF_INPUT [read-mailbox $INDEXOF_HARDWARE_JOYSTICK1_RAW]`
-  — just forwards raw joystick to the input mailbox.
+  — just forwards raw joystick to the input mailbox.  For an isometric camera
+  where screen-up ≠ world-N, use a bit-rotation word instead (see below).
+
+### Camera-Relative Input (SW Isometric)
+
+The WF `MarbleHandler` applies button bits as world-axis impulses:
+`EJ_BUTTONF_UP` → world +Y (North), `EJ_BUTTONF_RIGHT` → world +X (East),
+etc.  Arrow keys map to these bits via `INDEXOF_HARDWARE_JOYSTICK1_RAW`.
+
+For the MM SW isometric camera (offset −6,−8,+10 looking NE), screen-up =
+world NE and screen-right = world SE.  The player expects pressing Up to move
+the ball "up the screen" (NE), not world-North.  The fix is to rotate the
+four direction bits 45° CW in a Forth word before writing to `INDEXOF_INPUT`:
+
+```forth
+\ zForth — use & and | for bitwise ops, NOT "and"/"or"
+: cam-remap  0
+  over 2048  & if 10240 | then    \ UP    → UP|RIGHT  (2048+8192)  = NE
+  over 4096  & if 20480 | then    \ DOWN  → DOWN|LEFT (4096+16384) = SW
+  over 8192  & if 12288 | then    \ RIGHT → DOWN|RIGHT(4096+8192)  = SE
+  over 16384 & if 18432 | then    \ LEFT  → UP|LEFT  (2048+16384) = NW
+  swap drop ;
+
+INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox cam-remap INDEXOF_INPUT write-mailbox
+```
+
+Diagonal combos cancel correctly: pressing Up+Right produces
+NE+SE = (UP|RIGHT)|(DOWN|RIGHT) — the NE and SE verticals cancel leaving pure
+East.  No special diagonal handling is needed.
+
+**Bit values** (from `wfsource/source/hal/sjoystic.h`):
+
+| Bit symbol | Value |
+|---|---|
+| `EJ_BUTTONF_UP` | 2048 |
+| `EJ_BUTTONF_DOWN` | 4096 |
+| `EJ_BUTTONF_RIGHT` | 8192 |
+| `EJ_BUTTONF_LEFT` | 16384 |
+
+**zForth operator note:** zForth does NOT have `and` or `or` as named words.
+Use the primitive symbols `&` (bitwise AND) and `|` (bitwise OR).
+Using `and`/`or` compiles silently into a ZF_ABORT_NOT_A_WORD error (code 7)
+that prints `zforth compile error 7 (defs): : cam-remap ...` at runtime —
+the word is simply not executed every tick, leaving `INDEXOF_INPUT` at 0.
 - **Director script** (per frame): reads mailboxes 98/99/100 and writes to `$INDEXOF_CAMSHOT`.
   These mailboxes are set by ActBoxOR trigger zones.
 - **ActBoxOR objects**: write a named object's index to a mailbox when the Player enters
