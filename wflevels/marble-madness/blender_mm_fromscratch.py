@@ -75,24 +75,25 @@ def oad(name):
 # Path: X[-5,9.4] Y[-3.3,19.2] Z[-0.1,5.1]; CamShot(-8,-8,10); Camera(-4.58,3.65,11.5)
 # Light(1,7.5,17); margin→ X[-10,14] Y[-12,22] Z[-3,20]; center=(2,5,8.5)
 ROOM_POS        = (2.0,  5.0,  8.5)
-ROOM_LOCAL_BBOX = (-12.0, -17.0, -11.5, 12.0, 17.0, 11.5)
-# world: X[-10,14] Y[-12,22] Z[-3,20]  — all actors inside ✓
+ROOM_LOCAL_BBOX = (-14.0, -20.0, -11.5, 14.0, 20.0, 11.5)
+# world: X[-12,16] Y[-15,25] Z[-3,20]  — camera at (-8.6,7,8) when marble at goal ✓
 
-# Spawn above seg-5→6 transition (first downhill section): path floor drops
-# from Z=0.85m (seg5) to Z=0.55m (seg6) to Z=0m (goal) — ball rolls without input.
-# Seg-5 center pos: (3.42, 11.65), floor Z=0.85m (GAME_UNIT=0.05).
-SPAWN_POS    = (3.42, 11.65, 1.5)   # above seg-5 floor (Z=0.85m), first downhill
+# Spawn mid-way down the seg-5→6 downslope (Y=11.645→14.145, Z=0.85→0.55).
+# Y=13.5 is 1.86m past the crest (cs4 at Y=11.645) — firmly on the downhill face.
+# Floor Z at Y=13.5 ≈ 0.85 - (13.5-11.645)/(14.145-11.645)*0.3 ≈ 0.63m.
+# Spawn Z=1.2 sits ~0.57m above floor (> ball radius 0.33m) so the ball drops cleanly.
+SPAWN_POS    = (3.42, 13.5, 1.2)   # mid-downslope, rolls toward goal without input
 
-# Camera: SW of marble (−X, −Y, +Z) looking NE+down — classic isometric view.
-#   Path going North appears as upper-right on screen (standard MM arcade framing).
-#   Camera at X=−4.58 is west of path left wall (X=−0.58) — no geometry clipping ✓
-#   Room X expanded to −10 so CamShot at X=−8 is strictly inside room ✓
-#   WF/Blender coords: +X=East, +Y=North, +Z=Up (same system — no axis flip)
-CAMSHOT_POS  = (-8.0,  -8.0, 10.0)   # SW+above: camera = player + this offset
-TARGET1_POS  = (0.0,    0.0,  0.0)   # world-space follow anchor (origin)
-TARGET2_POS  = (3.42,  12.65,  1.0)  # look-at: 1m north of spawn, just above floor
+# Camera: SW isometric, 45° elevation — matches arcade Marble Madness camera angle.
+#   Offset (-6,-8,10): 6m west, 8m south, 10m above marble → 45° elevation.
+#   At west wall (x=-0.58): sight line clears at z=7.9m >> wall top 5.1m ✓
+#   CamShot.Target = 'Player': camera always looks AT the marble.
+#   Room must contain camera at extremes: at goal (y≈19): cam=(-2.6,11,10) inside room ✓
+CAMSHOT_POS  = (-6.0,  -8.0, 10.0)   # SW isometric offset (~45° elevation, clears walls)
+TARGET1_POS  = (0.0,    0.0,  0.0)   # world-space follow anchor (origin, unused)
+TARGET2_POS  = (3.42,  22.0,  0.0)   # unused; kept so Target02 empty exists
 LIGHT_POS    = (1.0,    7.5, 17.0)   # overhead, inside room ✓
-CAMERA_POS   = (-4.58,  3.65, 11.5)  # initial camera pos = SPAWN_POS + CAMSHOT_POS
+CAMERA_POS   = (-2.58,  5.5, 11.2)   # initial camera pos = SPAWN_POS + CAMSHOT_POS
 
 # Director script: 90 s timer, 3 lives, respawn + camshot routing
 DIRECTOR_SCRIPT = (
@@ -110,11 +111,11 @@ DIRECTOR_SCRIPT = (
     r' 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then' '\n'
 )
 
-# Player script: forward joystick; respawn above seg-1 start on Z < -2; signal director
+# Player script: forward joystick; respawn above spawn point on Z < -2; signal director
 PLAYER_SCRIPT = (
     r'\\ wf' '\n'
-    r': respawn  1 INDEXOF_X_POS write-mailbox  2 INDEXOF_Y_POS write-mailbox'
-    r'  2 INDEXOF_Z_POS write-mailbox'
+    r': respawn  3 INDEXOF_X_POS write-mailbox  14 INDEXOF_Y_POS write-mailbox'
+    r'  1 INDEXOF_Z_POS write-mailbox'
     r'  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox'
     r'  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;' '\n'
     r'INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox' '\n'
@@ -254,14 +255,14 @@ make_empty(
     props={
         'Mobility':           'Anchored',
         'MovementClass':      16,
-        'Target':             'Target02',   # Look At
-        'Follow':             'Target01',   # Follow anchor
-        'Track Object':       'Player',     # dynamic target (marble)
+        'Target':             'Player',     # Look At marble directly (fixed world pt caused wall face-on view)
+        'Follow':             'Target01',   # Follow anchor at origin; camera = CamShot + TrackObject
+        'Track Object':       'Player',     # TrackObject = Player → camera = CamShot + Player
         'Rotation':           'Track',      # orient toward Look At
         'Position X':         'Relative',   # camera X = CamShot X + player X
         'Position Y':         'Relative',   # camera Y = CamShot Y + player Y
         'Position Z':         'Relative',   # camera Z = CamShot Z + player Z
-        'FOV':                50.0,         # degrees; tune toward 25 for iso look
+        'FOV':                60.0,         # degrees; wider for better path framing
         'Climb Rate':         5.0,
         'Elasticity':         10.0,         # rigid-ish follow
         'Pan Time In Seconds': 1.0,
@@ -276,7 +277,7 @@ make_empty(
 # Fills the room; writes CamShot01's index to the camshot mailbox when
 # Player enters.  The engine bootstrap in level.cc already writes the first
 # CamShot index at construction time, so this is belt-and-suspenders.
-actbox_bbox = (-12.0, -17.0, -11.5, 12.0, 17.0, 11.5)  # same as room local bbox
+actbox_bbox = (-14.0, -20.0, -11.5, 14.0, 20.0, 11.5)  # same as room local bbox
 make_box_empty(
     'ActBoxOR', ROOM_POS, actbox_bbox, 'actboxor',
     props={
@@ -319,7 +320,7 @@ player = make_empty(
         'Script Controls Input': 'True',
         'Mesh Name':             'player.iff',
         'Model Type':            'Mesh',
-        'Visibility Mailbox':    2002,      # local mailbox; always visible during play
+        'Visibility Mailbox':    1,          # EMAILBOX_TRUE — always non-zero → always visible
     }
 )
 # Player bbox: roughly sphere of radius 0.33 m

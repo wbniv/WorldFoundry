@@ -324,6 +324,14 @@ Z = (h_value − H_ZERO) × GAME_UNIT
 
 The uphill S-curve (segs 0–8) is **correct arcade geometry**: the original game requires the player to steer the marble through the crowned sections and up the hill before gravity takes over on the downhill run to the goal. Spawn above seg 9 for joystick-free demo runs.
 
+**Turn angles — world space vs. visual appearance (2026-05-02):**
+
+The ROM gives only one heading change for Practice (13→32 = 18.28°→45° = **27° world turn**) and one for Beginner (40→47→64 = 56.25°→66.09°→90° = **34° world turn** total). Viewed overhead, these produce gentle bends, NOT right angles. The **visual S-curve** in the arcade Practice screenshot is entirely due to alternating h_left/h_right wall heights (walls swing left↔right each segment while the path spine runs nearly straight). The wall geometry creates the impression of winding when viewed in isometric perspective.
+
+- Practice has exactly 1 world-space turn; max change = 27°. Overhead view: a gentle bend.
+- Beginner's long run at heading=90° (due North) arrives via a 34° approach angle; looks like "straight section with diagonal entry" overhead.
+- No 90° world-space turn exists in Practice per current decoding. If the arcade game shows a right-angle bend visible overhead, it would indicate the segment-descriptor list is incomplete and additional path topology data exists in a different ROM structure (not yet found).
+
 **Segment 0 raw-byte anomaly**: segment at 0x01DE9E has non-standard constant fields (`+12 = 0x6658` instead of 0x0C14, `+16 = 0x0096 = 150/256 rev = 210°`). These may encode the level-start camera or respawn heading. Not yet decoded.
 
 **Segments with h_center = 5** (= H_ZERO) are goal sentinels; `rom_to_blender.py` replaces them with a flat Z=0 platform.
