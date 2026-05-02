@@ -121,6 +121,20 @@ public:
 };
 
 //============================================================================
+// Handler for marble / sphere physics: full 3D velocity carries over each frame,
+// gravity drives slope rolling, player input adds impulses.  Selected when
+// TurnRate == 0 (set in actor OAD).
+class MarbleHandler : public MovementHandler
+{
+public:
+    virtual void init(MovementManager& movementManager, MovementObject& movementObject);
+    virtual bool check();
+    virtual bool update(MovementManager& movementManager, MovementObject& movementObject, const BaseObjectList& baseObjectList);
+    virtual void predictPosition(MovementManager& movementManager, MovementObject& movementObject, const Clock& clock, const BaseObjectList& baseObjectList);
+    virtual void SetStunTime(MovementManager& movementManager, Scalar newTime);
+};
+
+//============================================================================
 // "Catch-all" handler for states no other handler can deal with.  If this is
 // ever selected by an object of MOBILITY == PHYSICS, something is wrong.
 class NullHandler : public MovementHandler
@@ -137,6 +151,7 @@ public:
 
 extern GroundHandler	theGroundHandler;
 extern AirHandler		theAirHandler;
+extern MarbleHandler	theMarbleHandler;
 extern ClimbHandler		theClimbHandler;
 extern NullHandler		theNullHandler;
 

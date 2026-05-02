@@ -25,6 +25,14 @@
 // ===========================================================================
                                                          
 #include <pigsys/pigsys.hp>
+#include <hal/hal.h>
+#include <iff/iffread.hp>
+#include <gfx/rendobj3.hp>
+#include <gfx/face.hp>
+#include <vector>
+#ifdef PHYSICS_ENGINE_JOLT
+#include <physics/jolt/jolt_backend.hp>
+#endif
 #include <particle/emitter.hp>
 #include <movement/movement.hp>
 #include <mailbox/mailbox.hp>
@@ -499,6 +507,59 @@ Actor::BindAssets(Memory& memory)
 	_renderActor->Validate();
 	DBSTREAM3(casset << "BindAssets: actor:" << *this << ",now has a renderActor =" << _renderActor << std::endl; )
 
+#ifdef PHYSICS_ENGINE_JOLT
+	// For StatPlat mesh actors: replace the constructor's box-body placeholder
+	// with a trimesh body now that the room's asset slot is loaded.
+	if (_nonStatPlat == &_statPlatData &&
+	    GetMeshBlockPtr()->ModelType == MODEL_TYPE_MESH && GetMeshName() != 0)
+	{
+		packedAssetID meshID(GetMeshName());
+		binistream meshBinis = theLevel->GetAssetManager().GetAssetStream(meshID);
+		if (meshBinis.good())
+		{
+			IFFChunkIter meshIter(meshBinis);
+			if (meshIter.GetChunkID().ID() == IFFTAG('M','O','D','L'))
+			{
+				std::vector<JoltMeshVertex> jverts;
+				std::vector<JoltMeshFace>   jfaces;
+				while (meshIter.BytesLeft() > 0)
+				{
+					IFFChunkIter* chunk = meshIter.GetChunkIter(HALScratchLmalloc);
+					if (chunk->GetChunkID().ID() == IFFTAG('V','R','T','X'))
+					{
+						int count = chunk->Size() / (int)sizeof(Vertex3DOnDisk);
+						for (int i = 0; i < count; i++)
+						{
+							Vertex3DOnDisk v;
+							chunk->ReadBytes(&v, sizeof(v));
+							jverts.push_back({(float)v.x / 65536.0f,
+							                  (float)v.y / 65536.0f,
+							                  (float)v.z / 65536.0f});
+						}
+					}
+					else if (chunk->GetChunkID().ID() == IFFTAG('F','A','C','E'))
+					{
+						int count = chunk->Size() / (int)sizeof(_TriFaceOnDisk);
+						for (int i = 0; i < count; i++)
+						{
+							_TriFaceOnDisk f;
+							chunk->ReadBytes(&f, sizeof(f));
+							jfaces.push_back({(uint32_t)f.v1Index,
+							                  (uint32_t)f.v2Index,
+							                  (uint32_t)f.v3Index});
+						}
+					}
+					MEMORY_DELETE(HALScratchLmalloc, chunk, IFFChunkIter);
+				}
+				if (!jverts.empty() && !jfaces.empty())
+					_physicalAttributes.JoltMakeStaticMesh(
+						jverts.data(), (int)jverts.size(),
+						jfaces.data(), (int)jfaces.size());
+			}
+		}
+	}
+#endif
+
 }
 
 //============================================================================
@@ -606,8 +667,9 @@ Actor::Actor( const SObjectStartupData* startupData ) :
 		AssertMsg( GetCommonBlockPtr()->NumberOfLocalMailboxes == 0, *this << " -- No local mailboxes allowed on StatPlat's" );
 		AssertMsg( GetMovementBlockPtr()->Mobility == MOBILITY_ANCHORED, *this << " -- StatPlat's must be anchored -- Mobility is " << GetMovementBlockPtr()->Mobility );
 #ifdef PHYSICS_ENGINE_JOLT
-		// StatPlats are immovable world geometry — make the Jolt body STATIC so
-		// Jolt can use it for collision queries (CharacterVirtual, ray casts).
+		// Create a box body as a placeholder; BindAssets() will replace it
+		// with a trimesh body for MODEL_TYPE_MESH actors once the room's
+		// asset slot is available.
 		_physicalAttributes.JoltMakeStatic();
 #endif
 	}

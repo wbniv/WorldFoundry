@@ -33,6 +33,9 @@
 #include <timer/clock.hp>
 #include <oas/levelcon.h>
 #include <cstdint>
+#ifdef PHYSICS_ENGINE_JOLT
+#include <physics/jolt/jolt_backend.hp>
+#endif
 
 //#define PHYSICAL_INTERNAL_MATRIX
 #define PHYSICAL_INTERNAL_EULER
@@ -122,6 +125,10 @@ public:
     // Recreate the Jolt body as STATIC (immovable world geometry).
     // Call once, immediately after construction, for MOBILITY_ANCHORED actors.
     void JoltMakeStatic();
+    // Trimesh variant: use mesh triangle data instead of the bbox.
+    // Vertices are in actor local space; pos is added at body-create time.
+    void JoltMakeStaticMesh(const JoltMeshVertex* verts, int vertCount,
+                            const JoltMeshFace*   faces, int faceCount);
     // Replace the kinematic body with a CharacterVirtual controller.
     // Call once, immediately after construction, for MOBILITY_PHYSICS actors.
     void JoltMakeCharacter();

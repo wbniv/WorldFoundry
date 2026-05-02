@@ -42,6 +42,11 @@ struct GltfEntry {
 #[derive(Deserialize)]
 struct GltfFile {
     url: String,
+    /// Companion files keyed by relative path (e.g. "textures/foo_diff_1k.jpg").
+    /// The API provides canonical CDN URLs here — use these instead of reconstructing
+    /// paths from the gltf's internal URIs (which drift when Poly Haven reorganises CDN).
+    #[serde(default)]
+    include: HashMap<String, GltfFile>,
 }
 
 impl Provider for PolyHaven {
@@ -91,13 +96,26 @@ impl Provider for PolyHaven {
         let files_url = format!("https://api.polyhaven.com/files/{}", candidate.provider_id);
         let files: AssetFiles = self.client.get_json(&files_url)?;
 
-        // Prefer 1k glb for speed, fall back to gltf
-        let (download_url, filename) = pick_gltf_download(&files, &candidate.provider_id)?;
+        let (download_url, filename, companions) = pick_gltf_download(&files, &candidate.provider_id)?;
 
         let bytes = self.client.get_bytes(&download_url)?;
         std::fs::create_dir_all(dest_dir)?;
         let asset_path = dest_dir.join(&filename);
         std::fs::write(&asset_path, &bytes)?;
+
+        // Download all companion files (textures, bin) using the canonical URLs
+        // from the API's include map — these are authoritative and stable even
+        // when Poly Haven reorganises their CDN directory structure.
+        for (rel_path, companion) in &companions {
+            let out_path = dest_dir.join(rel_path);
+            if let Some(parent) = out_path.parent() {
+                let _ = std::fs::create_dir_all(parent);
+            }
+            match self.client.get_bytes(&companion.url) {
+                Ok(data) => { let _ = std::fs::write(&out_path, &data); }
+                Err(e) => eprintln!("[polyhaven] warning: skipping {rel_path}: {e}"),
+            }
+        }
 
         let manifest = Manifest {
             licence_id: "CC0-1.0".to_string(),
@@ -117,23 +135,29 @@ impl Provider for PolyHaven {
     }
 }
 
-fn pick_gltf_download(files: &AssetFiles, slug: &str) -> Result<(String, String), AssetError> {
-    // Try 1k first, then 2k, then any resolution
+/// Returns (primary_url, filename, include_map).
+/// include_map: relative path → GltfFile with canonical CDN URL for each companion file.
+fn pick_gltf_download(files: &AssetFiles, slug: &str) -> Result<(String, String, HashMap<String, GltfFile>), AssetError> {
     if let Some(gltf_map) = &files.gltf {
         for res in &["1k", "2k", "4k"] {
             if let Some(entry) = gltf_map.get(*res) {
                 if let Some(glb) = &entry.glb {
-                    return Ok((glb.url.clone(), format!("{slug}_{res}.glb")));
+                    return Ok((glb.url.clone(), format!("{slug}_{res}.glb"), HashMap::new()));
                 }
-                if let Some(gltf) = &entry.gltf {
-                    return Ok((gltf.url.clone(), format!("{slug}_{res}.gltf")));
+                if let Some(gltf) = entry.gltf.as_ref() {
+                    return Ok((gltf.url.clone(), format!("{slug}_{res}.gltf"),
+                               gltf.include.iter().map(|(k, v)| (k.clone(), GltfFile { url: v.url.clone(), include: HashMap::new() })).collect()));
                 }
             }
         }
         // Any available resolution
-        if let Some((res, entry)) = gltf_map.iter().next() {
+        for (res, entry) in gltf_map.iter() {
             if let Some(glb) = &entry.glb {
-                return Ok((glb.url.clone(), format!("{slug}_{res}.glb")));
+                return Ok((glb.url.clone(), format!("{slug}_{res}.glb"), HashMap::new()));
+            }
+            if let Some(gltf) = entry.gltf.as_ref() {
+                return Ok((gltf.url.clone(), format!("{slug}_{res}.gltf"),
+                           gltf.include.iter().map(|(k, v)| (k.clone(), GltfFile { url: v.url.clone(), include: HashMap::new() })).collect()));
             }
         }
     }
@@ -141,4 +165,104 @@ fn pick_gltf_download(files: &AssetFiles, slug: &str) -> Result<(String, String)
         provider: "polyhaven".to_string(),
         message: format!("no glTF download found for {slug:?}"),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn parse_files(json: &str) -> AssetFiles {
+        serde_json::from_str(json).expect("parse failed")
+    }
+
+    #[test]
+    fn prefers_glb_over_gltf() {
+        let files = parse_files(r#"{
+            "gltf": {
+                "1k": {
+                    "glb": {"url": "https://cdn.polyhaven.com/model_1k.glb"},
+                    "gltf": {"url": "https://cdn.polyhaven.com/model_1k.gltf"},
+                    "bin": {"url": "https://cdn.polyhaven.com/model_1k.bin"}
+                }
+            }
+        }"#);
+        let (url, name, companions) = pick_gltf_download(&files, "test_model").unwrap();
+        assert!(url.ends_with(".glb"), "should pick glb");
+        assert_eq!(name, "test_model_1k.glb");
+        assert!(companions.is_empty(), "glb is self-contained, no companions needed");
+    }
+
+    #[test]
+    fn falls_back_to_gltf_with_include_map() {
+        let files = parse_files(r#"{
+            "gltf": {
+                "1k": {
+                    "gltf": {
+                        "url": "https://dl.polyhaven.org/model_1k.gltf",
+                        "include": {
+                            "textures/model_diff_1k.jpg": {"url": "https://dl.polyhaven.org/Models/jpg/1k/model/model_diff_1k.jpg"},
+                            "model_1k.bin":               {"url": "https://dl.polyhaven.org/Models/gltf/1k/model/model_1k.bin"}
+                        }
+                    }
+                }
+            }
+        }"#);
+        let (url, name, companions) = pick_gltf_download(&files, "model").unwrap();
+        assert!(url.ends_with(".gltf"));
+        assert_eq!(name, "model_1k.gltf");
+        assert_eq!(companions.len(), 2);
+        assert!(companions.contains_key("textures/model_diff_1k.jpg"));
+        assert!(companions.contains_key("model_1k.bin"));
+        assert!(companions["textures/model_diff_1k.jpg"].url.contains("/jpg/"));
+    }
+
+    #[test]
+    fn gltf_without_include_yields_empty_map() {
+        let files = parse_files(r#"{
+            "gltf": {
+                "1k": {
+                    "gltf": {"url": "https://dl.polyhaven.org/model_1k.gltf"}
+                }
+            }
+        }"#);
+        let (_url, _name, companions) = pick_gltf_download(&files, "model").unwrap();
+        assert!(companions.is_empty());
+    }
+
+    #[test]
+    fn prefers_1k_over_2k() {
+        let files = parse_files(r#"{
+            "gltf": {
+                "2k": {"glb": {"url": "https://cdn.polyhaven.com/model_2k.glb"}},
+                "1k": {"glb": {"url": "https://cdn.polyhaven.com/model_1k.glb"}}
+            }
+        }"#);
+        let (url, name, _) = pick_gltf_download(&files, "model").unwrap();
+        assert!(url.contains("1k"), "should pick 1k: {url}");
+        assert_eq!(name, "model_1k.glb");
+    }
+
+    #[test]
+    fn no_gltf_section_returns_error() {
+        let files = parse_files(r#"{"hdri": {}}"#);
+        assert!(pick_gltf_download(&files, "model").is_err());
+    }
+
+    #[test]
+    fn search_filters_by_slug() {
+        let list_json = r#"{
+            "outdoor_table_chair_set_01": {},
+            "wooden_chair_01": {},
+            "coffee_table_round": {}
+        }"#;
+        let list: std::collections::HashMap<String, serde_json::Value> =
+            serde_json::from_str(list_json).unwrap();
+        let q = "table";
+        let matched: Vec<_> = list.keys()
+            .filter(|k| k.to_ascii_lowercase().contains(q))
+            .collect();
+        assert_eq!(matched.len(), 2);
+        assert!(matched.iter().any(|k| k.contains("outdoor_table")));
+        assert!(matched.iter().any(|k| k.contains("coffee_table")));
+    }
 }

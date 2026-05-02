@@ -59,6 +59,7 @@ extern bool gDoomStick;
 // Instances of movement handlers
 GroundHandler  theGroundHandler;
 AirHandler     theAirHandler;
+MarbleHandler  theMarbleHandler;
 ClimbHandler   theClimbHandler;
 NullHandler    theNullHandler;
 //
@@ -297,13 +298,27 @@ GroundHandler::predictPosition(MovementManager& movementManager, MovementObject&
 		if (buttons & EJ_BUTTONF_DOWN)	// Move backwards at Walk speed
 			wheelVelocity -= (currentDir * runningAccel * deltaT);
 
-		if (buttons & EJ_BUTTONF_LEFT)	// Rotate counterclockwise at turnRate
-			//actorAttr.SetRotationC( Angle::Revolution( actorAttr.Rotation().GetC().AsRevolution() + turnRate ) );
-         actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(turnRate)));
+		if (buttons & EJ_BUTTONF_LEFT)
+		{
+			if (turnRate != Scalar::zero)
+				actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(turnRate)));
+			else
+			{	// TurnRate==0: no rotation desired; treat LEFT as strafe-left
+				Vector3 stepVector = currentDir * runningAccel * deltaT;
+				wheelVelocity += Vector3(-stepVector.Y(), stepVector.X(), Scalar::zero);
+			}
+		}
 
-		if (buttons & EJ_BUTTONF_RIGHT)	// Rotate clockwise at turnRate
-         actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(-turnRate)));
-			//actorAttr.SetRotationC( Angle::Revolution( actorAttr.Rotation().GetC().AsRevolution() - turnRate ) );
+		if (buttons & EJ_BUTTONF_RIGHT)
+		{
+			if (turnRate != Scalar::zero)
+				actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(-turnRate)));
+			else
+			{	// TurnRate==0: no rotation desired; treat RIGHT as strafe-right
+				Vector3 stepVector = currentDir * runningAccel * deltaT;
+				wheelVelocity += Vector3(stepVector.Y(), -stepVector.X(), Scalar::zero);
+			}
+		}
 
 		if (buttons & kBtnStepLeft)		// Sidestep left
 		{
@@ -419,12 +434,20 @@ GroundHandler::predictPosition(MovementManager& movementManager, MovementObject&
 		uint32_t charID = actorAttr.JoltCharacterID();
 		if (charID != kJoltInvalidBodyID)
 		{
-			// Hand the WF-computed velocity to CharacterVirtual and let Jolt resolve
-			// movement against the static world geometry.
+			// With Jolt, supportingObject is never set, so planeFriction is zero and
+			// wheelVelocity never reaches newVelocity. Apply wheelVelocity directly to
+			// the XY components so OAD fields (RunningAcceleration, MaxGroundSpeed,
+			// RunningDeceleration) govern ground movement as intended.
+			newVelocity = Vector3(wheelVelocity.X(), wheelVelocity.Y(), newVelocity.Z());
 			JoltCharacterSetLinVelocity(charID, newVelocity);
 			JoltCharacterUpdate(charID, deltaT.AsFloat());
 			actorAttr.JoltSyncFromCharacter(JoltCharacterGetPosition(charID));
 			actorAttr.SetLinVelocity(JoltCharacterGetLinVelocity(charID));
+			// Sync wheelVelocity.Y from actual Jolt character movement.
+			// On a slope Jolt constrains our Z-axis gravity input to the surface,
+			// producing real Y displacement.  Feeding that back here lets the ball
+			// carry slope momentum onto flat terrain.
+			wheelVelocity.SetY(JoltCharacterGetLinVelocity(charID).Y());
 			handlerData->wheelVelocity = wheelVelocity;
 			if (newMovementHandler)
 				movementManager.SetMovementHandler(newMovementHandler, movementObject);
@@ -549,10 +572,15 @@ AirHandler::update(MovementManager& movementManager,  MovementObject& movementOb
 			if (JoltCharacterIsOnGround(charID) && handlerData->jumpDuration <= Scalar::zero)
 			{
 				handlerData->stunnedUntil = Scalar::zero;
+				// TurnRate==0 actors use MarbleHandler; others use GroundHandler.
+				MovementHandler* landHandler =
+				    (movementManager.MovementBlock()->GetTurnRate() == Scalar::zero)
+				    ? (MovementHandler*)&theMarbleHandler
+				    : (MovementHandler*)&theGroundHandler;
 				Vector3 newWheelVelocity = actorAttr.LinVelocity();
 				newWheelVelocity.SetZ(Scalar::zero);
 				handlerData->wheelVelocity = newWheelVelocity;
-				movementManager.SetMovementHandler(&theGroundHandler, movementObject);
+				movementManager.SetMovementHandler(landHandler, movementObject);
 			}
 			return true;
 		}
@@ -574,6 +602,109 @@ AirHandler::update(MovementManager& movementManager,  MovementObject& movementOb
 	}
 
 	return true;
+}
+
+//============================================================================
+// MarbleHandler — physics-based rolling for sphere actors (TurnRate == 0).
+// Unlike GroundHandler the full 3D velocity carries over each frame so
+// gravity-driven slope momentum accumulates without button presses.
+
+void
+MarbleHandler::init(MovementManager& movementManager, MovementObject& movementObject)
+{
+	AssertMsg(movementManager.MovementBlock()->Mobility == MOBILITY_PHYSICS, movementObject);
+	MovementHandlerData* handlerData = movementManager.GetMovementHandlerData();
+	assert(ValidPtr(handlerData));
+	handlerData->supportingObject = NULL;
+	movementObject.MovementStateChanged(MovementObject::Ground_state);
+}
+
+bool MarbleHandler::check() { assert(0); return false; }
+
+bool
+MarbleHandler::update(MovementManager& movementManager, MovementObject& movementObject,
+                      const BaseObjectList& /*baseObjectList*/)
+{
+#ifdef PHYSICS_ENGINE_JOLT
+	{
+		const PhysicalAttributes& actorAttr = movementObject.GetPhysicalAttributes();
+		uint32_t charID = actorAttr.JoltCharacterID();
+		if (charID != kJoltInvalidBodyID)
+		{
+			if (!JoltCharacterIsOnGround(charID))
+				movementManager.SetMovementHandler(&theAirHandler, movementObject);
+			return true;
+		}
+	}
+#endif
+	return true;
+}
+
+void
+MarbleHandler::SetStunTime(MovementManager& movementManager, Scalar newTime)
+{
+	MovementHandlerData* handlerData = movementManager.GetMovementHandlerData();
+	handlerData->stunnedUntil = newTime;
+}
+
+void
+MarbleHandler::predictPosition(MovementManager& movementManager, MovementObject& movementObject,
+                                const Clock& clock, const BaseObjectList& /*baseObjectList*/)
+{
+	PhysicalAttributes& actorAttr = movementObject.GetWritablePhysicalAttributes();
+	assert(ValidPtr(movementManager.MovementBlock()));
+	Scalar dt = clock.Delta();
+
+#ifdef PHYSICS_ENGINE_JOLT
+	{
+		uint32_t charID = actorAttr.JoltCharacterID();
+		if (charID == kJoltInvalidBodyID) return;
+
+		const QInputDigital* inputDevice = movementObject.GetInputDevice();
+		joystickButtonsF buttons = inputDevice->arePressed();
+
+		Scalar accel   = movementManager.MovementBlock()->GetRunningAcceleration();
+		Scalar decel   = movementManager.MovementBlock()->GetRunningDeceleration();
+		Scalar maxSpd  = movementManager.MovementBlock()->GetMaxGroundSpeed();
+		Scalar gravity = movementManager.MovementBlock()->GetFallingAcceleration();
+
+		// Carry the full 3D velocity from the last frame.  velCache.Y was corrected
+		// from the position delta in JoltCharacterUpdate so slope momentum is real.
+		Vector3 vel = actorAttr.LinVelocity();
+
+		// Surface friction on XY only; gravity accumulates freely on Z.
+		Scalar friction = decel * dt * SCALAR_CONSTANT(30);
+		if (friction > Scalar::one) friction = Scalar::one;
+		vel.SetX(vel.X() * (Scalar::one - friction));
+		vel.SetY(vel.Y() * (Scalar::one - friction));
+
+		// Gravity.
+		vel.SetZ(vel.Z() - gravity * dt);
+
+		// Player input: impulse in world-XY directions relative to actor facing.
+		Vector3 fwd = movementObject.currentDir();          // (sin C, cos C, 0)
+		Vector3 right(fwd.Y(), -fwd.X(), Scalar::zero);    // 90° CW in XY
+
+		if (buttons & EJ_BUTTONF_UP)    vel += fwd   * accel * dt;
+		if (buttons & EJ_BUTTONF_DOWN)  vel -= fwd   * accel * dt;
+		if (buttons & EJ_BUTTONF_LEFT)  vel -= right * accel * dt;
+		if (buttons & EJ_BUTTONF_RIGHT) vel += right * accel * dt;
+
+		// Cap XY speed.
+		Scalar xySpd = Vector3(vel.X(), vel.Y(), Scalar::zero).Length();
+		if (xySpd > maxSpd)
+		{
+			Scalar scale = maxSpd / xySpd;
+			vel.SetX(vel.X() * scale);
+			vel.SetY(vel.Y() * scale);
+		}
+
+		JoltCharacterSetLinVelocity(charID, vel);
+		JoltCharacterUpdate(charID, dt.AsFloat());
+		actorAttr.JoltSyncFromCharacter(JoltCharacterGetPosition(charID));
+		actorAttr.SetLinVelocity(JoltCharacterGetLinVelocity(charID));
+	}
+#endif // PHYSICS_ENGINE_JOLT
 }
 
 //============================================================================

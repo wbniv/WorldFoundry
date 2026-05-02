@@ -268,7 +268,8 @@ Room::UpdateRoomContents(int updateIndex, LevelRooms& levelRooms)
 		if (!CheckCollision(*po))
 		 {
 			int32 objectIndex = *alIter;
-			cerror << "Room::UpdateRoomContents: object " << objectIndex << " kind=" << object->kind() << " fell out of room " << GetRoomIndex() << "; re-adding" << std::endl;
+			Vector3 pp = po->GetPhysicalAttributes().Position();
+			cerror << "Room::UpdateRoomContents: object " << objectIndex << " kind=" << object->kind() << " pos=(" << pp.X().AsFloat() << "," << pp.Y().AsFloat() << "," << pp.Z().AsFloat() << ") fell out of room " << GetRoomIndex() << " roompos=(" << _physicalAttributes.Position().X().AsFloat() << "," << _physicalAttributes.Position().Y().AsFloat() << "," << _physicalAttributes.Position().Z().AsFloat() << ") roombox=(" << _physicalAttributes.GetColSpace().Min().X().AsFloat() << "," << _physicalAttributes.GetColSpace().Min().Y().AsFloat() << "," << _physicalAttributes.GetColSpace().Min().Z().AsFloat() << ")-(" << _physicalAttributes.GetColSpace().Max().X().AsFloat() << "," << _physicalAttributes.GetColSpace().Max().Y().AsFloat() << "," << _physicalAttributes.GetColSpace().Max().Z().AsFloat() << "); re-adding" << std::endl;
 			RemoveObject(objectIndex);
 
          Validate();

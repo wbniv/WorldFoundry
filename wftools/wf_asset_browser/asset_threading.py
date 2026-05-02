@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 _Q: queue.Queue = queue.Queue()
 _EXECUTOR: ThreadPoolExecutor | None = None
 _TIMER_RUNNING = False
-_TICK_INTERVAL = 0.1  # seconds
+_TICK_INTERVAL = 0.3  # seconds — long enough for spinner to be visible
 
 # How many provider searches can fly at once across all workers
 _MAX_WORKERS = 8

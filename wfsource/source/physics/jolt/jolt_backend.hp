@@ -26,6 +26,16 @@ uint32_t JoltBodyCreate(const Vector3& pos, const Euler& rot,
 uint32_t JoltBodyCreateStatic(const Vector3& pos, const Euler& rot,
                                const Vector3& minPt, const Vector3& maxPt);
 
+// Triangle mesh vertex/face types — plain POD, no Jolt headers needed here.
+struct JoltMeshVertex { float x, y, z; };
+struct JoltMeshFace   { uint32_t v0, v1, v2; };
+
+// Create an immovable triangle-mesh body (sloped ramps, arbitrary surfaces).
+// Vertices are in the actor's local coordinate space; pos is the world offset.
+uint32_t JoltBodyCreateStaticMesh(const Vector3& pos,
+                                   const JoltMeshVertex* verts, int vertCount,
+                                   const JoltMeshFace*   faces, int faceCount);
+
 // Release body; safe to call with kJoltInvalidBodyID (no-op).
 void JoltBodyDestroy(uint32_t handle);
 

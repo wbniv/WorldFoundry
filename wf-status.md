@@ -1,6 +1,6 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-04-29  
+**As of:** 2026-04-30  
 **Branch:** `2026-new-level`
 
 ---
@@ -8,6 +8,10 @@
 ## Summary
 
 Newest first:
+
+**marble-madness-2 game loop wired: 90-second timer + goal detection (2026-04-30)** — director script initialises a 90-second countdown (global mailbox 2 stores `TIME + 90` on frame 1, fires `END_OF_LEVEL` when `TIME` exceeds it); player script adds position-based goal detection (`X_POS < -17 AND Y_POS > 44` → `END_OF_LEVEL`) so reaching the Mm1Goal platform ends the race; both scripts compile clean with no zForth errors; all binaries rebuilt (`marble-madness-2-standalone.iff`, `marble-madness-standalone.iff`).
+
+**Marble rolls down ramp — physics working end-to-end (2026-04-30)** — new `MarbleHandler` class (selected when actor `TurnRate==0`) carries full 3D velocity each frame so gravity-driven slope acceleration accumulates naturally; root cause of stuck marble was `MaxAirSpeed=0` in the player OAD, which zeroed all velocity including gravity in `AirHandler` every frame via the speed-cap path; fixed by `MaxAirSpeed 0→50`, `HorizAirDrag 0.5→0`, and `mMaxSlopeAngle 45°→80°` (so the 45° ramp registers `OnGround` rather than `OnSteepGround`); marble now falls ~0.2 s, lands on ramp, and reaches 9.9 m/s downhill within 1.5 s — see [marble-player-sphere](docs/plans/2026-04-28-marble-player-sphere.md).
 
 **"Run in Engine" Blender operator (2026-04-29)** — `WF_OT_run_level` added to `wftools/wf_blender/`. One click in Properties > Scene > World Foundry Level: exports the current scene to `.lev` (via new `export_scene_to_lev()` helper extracted from the export operator), builds the binary `.iff` via the Rust chain (`build_level_binary.sh`), and launches `wf_game` as a detached process. Blender stays open and interactive while the game runs. Progress bar advances 1→2→3 in the status bar. Level name defaults to `.blend` filename stem but can be overridden via a new `wf_level_name` scene property. Repo root auto-detected by walking up from the `.blend` file looking for `Taskfile.yml`, with a `repo_root` fallback preference in the addon. Plan: [2026-04-29-blender-run-operator](docs/plans/2026-04-29-blender-run-operator.md).
 
@@ -118,6 +122,7 @@ Newest first:
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
 | 2026-04-29 | [Plan: "Run in Engine" Blender operator](docs/plans/2026-04-29-blender-run-operator.md) | **Closed 2026-04-29** | `WF_OT_run_level` implemented in `wftools/wf_blender/`. `export_scene_to_lev()` extracted from export operator; operator runs export → `build_level_binary.sh` → detached `wf_game`. Level name scene property + repo-root addon pref. |
+| 2026-04-28 | [Plan: marble-madness player sphere + rolling physics](docs/plans/2026-04-28-marble-player-sphere.md) | **Complete 2026-04-30** | Player mesh replaced with `sphere.iff` (UV sphere, radius 0.5); `MarbleHandler` drives gravity-based slope rolling via Jolt `CharacterVirtual`; OAD `MaxAirSpeed=50` fix lets marble fall through `AirHandler` onto the ramp; marble accelerates to 9.9 m/s on the 45° test ramp. |
 | 2026-04-28 | [Plan: wf_asset_provider pure Python](docs/plans/2026-04-28-wf-asset-provider-pure-python.md) | **Status unknown** | `providers.py` and `wf_asset.py` exist on disk and a commit claims this was done, but plan has no completion marker and the Rust crate still exists. Needs verification. |
 | 2026-04-28 | [Plan: Blender asset browser plugin](docs/plans/2026-04-28-blender-asset-browser-plugin.md) | **Closed 2026-04-28** | v1 (Poly Haven CC0) → v2 (+ Sketchfab, licence-filter UI) → pure-Python rewrite all landed. Asset browser sidebar with thumbnail previews, policy enforcement, `manifest.json` provenance. |
 | 2026-04-19 | [Plan: python-tui-lib extraction](docs/plans/2026-04-19-python-tui-lib-extraction.md) | **Closed 2026-04-19** | **Goal:** carve the reusable TUI subset out of parking-space into a standalone `python-tui-lib` repo and consume it from WorldFoundry. Four phases all landed same-day: tuilib repo stood up at `/home/will/python-tui-lib` (~27K LOC, 68 .py files, commits `2695044` / `1942141` / `82764dd`), imports rewritten to `tuilib.*`, `parkingspace`-hardcoded paths parameterized via `tuilib.APP_NAME`, and WorldFoundry's `git-branch-browser.py` submodules it at `vendor/python-tui-lib/` with a `?`-key help overlay rendered by `DocViewer` (commit `f75e7c7`). Follow-on plans 2/3/4 (parking-space migration, logs.py + LogSource, worker-pool) remain separate. |

@@ -160,7 +160,6 @@ fn cc0_fallback(path: Option<PathBuf>) -> Policy {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::Write;
     use tempfile::TempDir;
 
     fn write_policy(dir: &Path, content: &str) -> PathBuf {

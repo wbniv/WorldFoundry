@@ -207,6 +207,24 @@ PhysicalAttributes::JoltMakeStatic()
 }
 
 INLINE void
+PhysicalAttributes::JoltMakeStaticMesh(const JoltMeshVertex* verts, int vertCount,
+                                        const JoltMeshFace*   faces, int faceCount)
+{
+    if (_joltBodyID != kJoltInvalidBodyID)
+    {
+        JoltBodyDestroy(_joltBodyID);
+        _joltBodyID = kJoltInvalidBodyID;
+    }
+    _joltBodyID = JoltBodyCreateStaticMesh(
+        _position, verts, vertCount, faces, faceCount);
+    // Fall back to bbox body if mesh creation failed.
+    if (_joltBodyID == kJoltInvalidBodyID)
+        _joltBodyID = JoltBodyCreateStatic(
+            _position, _orientation,
+            _colSpace.UnExpMin(), _colSpace.UnExpMax());
+}
+
+INLINE void
 PhysicalAttributes::JoltMakeCharacter()
 {
     // Discard the KINEMATIC body — CharacterVirtual replaces it for PHYSICS actors.
