@@ -379,9 +379,12 @@ Each `.iff` level embeds `_levelData->objectCount` (37 in snowgoons). Temporary 
 ## Scripting System
 
 ### Original Design
-- **Player script** (per frame): `write-mailbox $INDEXOF_INPUT [read-mailbox $INDEXOF_HARDWARE_JOYSTICK1_RAW]`
-  — just forwards raw joystick to the input mailbox.  For an isometric camera
-  where screen-up ≠ world-N, use a bit-rotation word instead (see below).
+- **Player script** (per frame): forwards raw joystick to the input mailbox:
+  ```forth
+  \\ wf
+  INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox
+  ```
+  For an isometric camera where screen-up ≠ world-N, use a bit-rotation word instead (see below).
 
 ### Camera-Relative Input (SW Isometric)
 
@@ -397,10 +400,10 @@ four direction bits 45° CW in a Forth word before writing to `INDEXOF_INPUT`:
 ```forth
 \ zForth — use & and | for bitwise ops, NOT "and"/"or"
 : cam-remap  0
-  over 2048  & if 10240 | then    \ UP    → UP|RIGHT  (2048+8192)  = NE
-  over 4096  & if 20480 | then    \ DOWN  → DOWN|LEFT (4096+16384) = SW
-  over 8192  & if 12288 | then    \ RIGHT → DOWN|RIGHT(4096+8192)  = SE
-  over 16384 & if 18432 | then    \ LEFT  → UP|LEFT  (2048+16384) = NW
+  over 0x0800 & if 0x2800 | then    \ UP    → UP|RIGHT  (0x0800|0x2000) = NE
+  over 0x1000 & if 0x5000 | then    \ DOWN  → DOWN|LEFT (0x1000|0x4000) = SW
+  over 0x2000 & if 0x3000 | then    \ RIGHT → DOWN|RIGHT(0x1000|0x2000) = SE
+  over 0x4000 & if 0x4800 | then    \ LEFT  → UP|LEFT  (0x0800|0x4000) = NW
   swap drop ;
 
 INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox cam-remap INDEXOF_INPUT write-mailbox
@@ -414,10 +417,10 @@ East.  No special diagonal handling is needed.
 
 | Bit symbol | Value |
 |---|---|
-| `EJ_BUTTONF_UP` | 2048 |
-| `EJ_BUTTONF_DOWN` | 4096 |
-| `EJ_BUTTONF_RIGHT` | 8192 |
-| `EJ_BUTTONF_LEFT` | 16384 |
+| `EJ_BUTTONF_UP` | `0x0800` |
+| `EJ_BUTTONF_DOWN` | `0x1000` |
+| `EJ_BUTTONF_RIGHT` | `0x2000` |
+| `EJ_BUTTONF_LEFT` | `0x4000` |
 
 **zForth operator note:** zForth does NOT have `and` or `or` as named words.
 Use the primitive symbols `&` (bitwise AND) and `|` (bitwise OR).

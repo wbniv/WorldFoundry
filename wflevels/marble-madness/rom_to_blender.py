@@ -193,20 +193,30 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
 
     first_theta = heading_angle(path_segs[0]['type'])
     prev_base   = add_cross_section(pos_x, pos_y, path_segs[0], first_theta)
+    prev_seg    = path_segs[0]
 
-    def add_segment_faces(pb, cb):
-        """Connect two adjacent 5-vert cross-sections with floor + wall faces."""
+    def add_segment_faces(pb, cb, seg_a, seg_b):
+        """Connect two adjacent 5-vert cross-sections with floor + wall faces.
+
+        Wall faces are skipped when h_edge == h_center at EITHER cross-section
+        end — that makes vert[0]==vert[1] (or vert[3]==vert[4]) coincide, which
+        produces a zero-area quad and a zero-length normal → Vector3::Normalize()
+        assertion failure.  Crowned segments often have h_edge == h_center.
+        """
         # Floor faces: indices 1,2,3 are at h_center height → non-twisted quads
         # n_z = PATH_HALF * SEG_LEN > 0 guaranteed when h_center decreases forward
         faces.append((pb+1, pb+2, cb+2, cb+1))   # left half-floor (top)
         faces.append((pb+2, pb+3, cb+3, cb+2))   # right half-floor (top)
         faces.append((cb+1, cb+2, pb+2, pb+1))   # left half-floor (back)
         faces.append((cb+2, cb+3, pb+3, pb+2))   # right half-floor (back)
-        # Wall faces: near-vertical lateral containment
-        faces.append((pb+0, pb+1, cb+1, cb+0))   # left wall (inward)
-        faces.append((pb+3, pb+4, cb+4, cb+3))   # right wall (inward)
-        faces.append((cb+0, cb+1, pb+1, pb+0))   # left wall (outward)
-        faces.append((cb+3, cb+4, pb+4, pb+3))   # right wall (outward)
+        # Wall faces: near-vertical lateral containment.
+        # Only emit when neither end has a zero-height wall (h_edge != h_center).
+        if seg_a['h_left'] != seg_a['h_center'] and seg_b['h_left'] != seg_b['h_center']:
+            faces.append((pb+0, pb+1, cb+1, cb+0))   # left wall (inward)
+            faces.append((cb+0, cb+1, pb+1, pb+0))   # left wall (outward)
+        if seg_a['h_right'] != seg_a['h_center'] and seg_b['h_right'] != seg_b['h_center']:
+            faces.append((pb+3, pb+4, cb+4, cb+3))   # right wall (inward)
+            faces.append((cb+3, cb+4, pb+4, pb+3))   # right wall (outward)
 
     for i, seg in enumerate(path_segs[1:], 1):
         # Advance position along previous segment's heading
@@ -226,8 +236,9 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
 
         curr_base = add_cross_section(pos_x, pos_y, seg, junc_theta)
 
-        add_segment_faces(prev_base, curr_base)
+        add_segment_faces(prev_base, curr_base, prev_seg, seg)
         prev_base = curr_base
+        prev_seg  = seg
 
     # Final cross-section at end of last segment.
     # If goal segments follow, blend center down to Z=0 so the floor slopes into
@@ -239,7 +250,7 @@ def build_path_mesh(level_name: str, levels: dict) -> bpy.types.Object:
     if goal_segs:
         final_seg['h_center'] = H_ZERO  # Z=0 at the goal transition
     curr_base = add_cross_section(pos_x, pos_y, final_seg, last_theta)
-    add_segment_faces(prev_base, curr_base)
+    add_segment_faces(prev_base, curr_base, prev_seg, final_seg)
 
     # Flat goal platform at Z=0, one segment forward from path end
     if goal_segs:
