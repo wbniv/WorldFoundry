@@ -45,6 +45,12 @@ int  HALIsSuspended(void);   // 0 = running, nonzero = suspended
 // without it we'd never receive the resume command and stay stuck forever.
 void HALPumpSuspendedEvents(void);
 
+// True after the user has clicked the window manager's close button (X).
+// Set from inside the X event handler; the main game loop polls it and
+// exits cleanly via the normal shutdown path. On platforms with no
+// window-close concept (Android), always returns false.
+int  HALWindowCloseRequested(void);   // 0 = not requested, nonzero = close requested
+
 #if defined(__cplusplus)
 }
 #endif

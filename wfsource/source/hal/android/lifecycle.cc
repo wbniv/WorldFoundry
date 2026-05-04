@@ -49,3 +49,12 @@ HALPumpSuspendedEvents(void)
     // stuck on resume.
     WFAndroidPumpEvents();
 }
+
+// Android has no window-close button — onDestroy / back-button paths use
+// the lifecycle callbacks instead. Stub returns 0 so the shared main loop
+// condition compiles on every platform.
+extern "C" WF_ANDROID_EXPORT int
+HALWindowCloseRequested(void)
+{
+    return 0;
+}

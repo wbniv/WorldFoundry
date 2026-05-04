@@ -26,8 +26,10 @@
 //============================================================================
 
 #include <time.h>
+#include <atomic>
+#include <hal/lifecycle.h>
 
-// kts major kludge, both GL and WF should use namespaces              
+// kts major kludge, both GL and WF should use namespaces
 #define Display XDisplay
 #include <GL/gl.h>
 #include <GL/glx.h>
@@ -46,6 +48,13 @@ struct HalDisplay
 
 HalDisplay halDisplay;
 static Atom _wmDeleteWindow;
+
+// User clicked the window-manager close (X) button. The X event handler
+// only sets this flag; the main game loop polls it via
+// HALWindowCloseRequested() and exits via the normal shutdown path —
+// avoiding the half-broken "exit() from inside the event handler"
+// behaviour that was here before.
+static std::atomic<int> _closeRequested{0};
 
 //==============================================================================
 
@@ -424,7 +433,7 @@ void ProcessXEvents(XEvent event)
 
         case ClientMessage:
             if ((Atom)event.xclient.data.l[0] == _wmDeleteWindow)
-                sys_exit(0);
+                _closeRequested.store(1);
             break;
 
         default:
@@ -452,6 +461,12 @@ void XEventLoop()
     }
 
     // printf("_joystickButtons = %x\n", _joystickButtons);
+}
+
+// Called by the main game loop to know when to break out cleanly.
+extern "C" int HALWindowCloseRequested(void)
+{
+    return _closeRequested.load();
 }
 
 //==============================================================================
