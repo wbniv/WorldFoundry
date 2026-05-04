@@ -316,7 +316,12 @@ void ProcessXEvents(XEvent event)
                     _joystickButtons |= EJ_BUTTONF_K;
                     break;
                 case XK_Escape:
-                    sys_exit(0);
+                    // Same shutdown path as the WM-close button — set the
+                    // flag, let the main loop run its full cleanup. Calling
+                    // sys_exit() here ran atexit handlers from inside the
+                    // event handler and was unreliable for the same reason
+                    // the WM-close path was.
+                    _closeRequested.store(1);
 //                 case XK_Escape:
 //                     _joystickButtons |= 0x80000000;
                     break;
