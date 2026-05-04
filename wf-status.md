@@ -1,6 +1,6 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-04-30  
+**As of:** 2026-05-04  
 **Branch:** `2026-new-level`
 
 ---
@@ -8,6 +8,18 @@
 ## Summary
 
 Eighteen days of work (2026-04-12 – 2026-04-30). Newest first:
+
+**Room::~Room double-free root cause + fix (2026-05-04, unverified)** — clean shutdown after the X-close fix surfaced `free(): invalid pointer` traced via gdb to `Room::~Room` calling libc `delete[]` on `_objectLists` allocated from the WF Memory pool, fix on disk replaces the call with `MEMORY_DELETE_ARRAY` + remembers the pool in a new `Room::_memory` field, but verification was aborted after my `pkill -f "wf_game.*qbert_practice-standalone"` accidentally killed the user's pre-existing `-record_video` session.
+
+**ESC-key migrated to the same close-requested flag (2026-05-04)** — `mesa.cc:319` `sys_exit(0)` on `XK_Escape` now stores into `_closeRequested` so ESC takes the same clean shutdown path as the WM-close button (built green, not yet runtime-verified end-to-end).
+
+**X-close button reliability fix landed (2026-05-04, commit 7084a70)** — replaced the mid-event `sys_exit(0)` in `mesa.cc:ProcessXEvents` with a polled `_closeRequested` atomic + new HAL accessor `HALWindowCloseRequested()` that the main loop checks each frame, so close goes through the existing clean shutdown path (post-loop `PageFlip` x2, `RestApi_Stop`, `DebugServer_Stop`, level destruction); manually verified with WM_DELETE_WINDOW from python-xlib.
+
+**Debug-bridge Phase B2 — `reload_script` (zForth hot-swap) landed (2026-05-03, commit 636310d)** — bridge can compile and swap a per-actor zForth script at runtime via append-leak dictionary management (~100 reloads/session before engine restart), `common.Script` `set_prop` now hard-errors with "use reload_script instead", and 4 new pytest cases against qbert_practice cover happy-path / compile-error / guard / revert_all (full bridge suite 10/10 in 17s).
+
+**Debug-bridge Phase B1 — `set_shader` (GLSL hot-reload) landed (2026-05-03, commit 905a75a)** — spike found `backend_modern.cc` has no shader cache (single embedded `kVS`/`kFS`, one `_prog`), so the op collapsed to ~80 LOC of non-aborting compile/link helpers + uniform-fetch refactor + bridge plumbing instead of the planned 1–2 days, with broken GLSL reported as `{"op":"error","what":"shader_compile","log":"..."}` and the prior shader staying live.
+
+**Debug-bridge Phase A — `set_mailbox` + `inject_input` landed (2026-05-03, commits 63f01d7, 1e0098e)** — bridge now writes any global or per-actor mailbox (with `undo_step` support) and overrides `EMAILBOX_HARDWARE_JOYSTICK*` slots ahead of the live HID via a per-frame override table, with a new pytest harness in `tests/` that boots qbert_practice headless on port 7778 and exercises both ops end-to-end.
 
 **marble-madness faithful replication plan written + M1 camera done (2026-05-01)** — plan doc at [2026-05-01-marble-madness-faithful](docs/plans/2026-05-01-marble-madness-faithful.md) covers M1–M5+ against the wf-games design docs; M1 landed: gen_level1.py now places camera at (−18,−13,28) — canonical 45° yaw / 30° tilt / 30 m — and patches Player Rotation C = π/4 so `MarbleHandler.fwd = (√2/2, √2/2, 0)`, making UP+LEFT = pure world +Y and DOWN+LEFT = pure −X for the two course legs.
 
