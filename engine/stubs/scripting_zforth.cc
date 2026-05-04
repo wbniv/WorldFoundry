@@ -52,6 +52,35 @@ static int                 g_curObj  = 0;
 // Scripts are compiled once on first call; subsequent calls just invoke the word.
 static std::unordered_map<const char*, std::string> g_scriptCache;
 
+// Debug-bridge per-actor script overrides: actor_idx → compiled word name.
+// Populated by ReloadActorScript; consulted by RunScript before the
+// src-pointer cache. zForth's dict is append-only, so reloads accumulate
+// orphaned definitions in the global dict — restart the engine after
+// ~100 reloads (ZF_DICT_SIZE = 64 KB).
+static std::unordered_map<int, std::string> g_actorOverride;
+static int g_reloadCounter = 0;
+
+// Map zForth result codes to printable strings for error replies.
+static const char* zf_result_str(zf_result r)
+{
+    switch (r) {
+        case ZF_OK:                       return "ok";
+        case ZF_ABORT_INTERNAL_ERROR:     return "internal_error";
+        case ZF_ABORT_OUTSIDE_MEM:        return "outside_mem";
+        case ZF_ABORT_DSTACK_UNDERRUN:    return "dstack_underrun";
+        case ZF_ABORT_DSTACK_OVERRUN:     return "dstack_overrun";
+        case ZF_ABORT_RSTACK_UNDERRUN:    return "rstack_underrun";
+        case ZF_ABORT_RSTACK_OVERRUN:     return "rstack_overrun";
+        case ZF_ABORT_NOT_A_WORD:         return "not_a_word";
+        case ZF_ABORT_COMPILE_ONLY_WORD:  return "compile_only_word";
+        case ZF_ABORT_INVALID_SIZE:       return "invalid_size";
+        case ZF_ABORT_DIVISION_BY_ZERO:   return "division_by_zero";
+        case ZF_ABORT_INVALID_USERVAR:    return "invalid_uservar";
+        case ZF_ABORT_EXTERNAL:           return "external";
+        default:                          return "unknown";
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Required zForth host callbacks
 
@@ -238,6 +267,8 @@ void Shutdown()
     g_mgr    = nullptr;
     g_curObj = 0;
     g_scriptCache.clear();
+    g_actorOverride.clear();
+    g_reloadCounter = 0;
 }
 
 void AddConstantArray(IntArrayEntry* entryList)
@@ -271,6 +302,23 @@ float RunScript(const char* src, int objectIndex)
     if (!src || !*src) return 0.0f;
 
     g_curObj = objectIndex;
+
+    // Debug-bridge override: if a hot-reloaded script is registered for this
+    // actor, dispatch to it instead of the OAD-baked source. The override
+    // word was compiled by ReloadActorScript and lives in the global dict.
+    auto ov = g_actorOverride.find(objectIndex);
+    if (ov != g_actorOverride.end()) {
+        zf_result r = zf_eval(&g_ctx, ov->second.c_str());
+        if (r != ZF_OK) {
+            fprintf(stderr, "zforth error %d calling override %s\n",
+                    r, ov->second.c_str());
+            return 0.0f;
+        }
+        zf_cell dsp = 0;
+        zf_uservar_get(&g_ctx, ZF_USERVAR_DSP, &dsp);
+        if ((int)dsp > 0) return (float)zf_pop(&g_ctx);
+        return 0.0f;
+    }
 
     // Skip leading whitespace, then the `\ wf` sigil line.
     while (*src == ' ' || *src == '\t' || *src == '\r' || *src == '\n') ++src;
@@ -344,6 +392,70 @@ float RunScript(const char* src, int objectIndex)
         return (float)zf_pop(&g_ctx);
     }
     return 0.0f;
+}
+
+// ---------------------------------------------------------------------------
+// Debug-bridge hot reload (B2)
+
+bool ReloadActorScript(int actor_idx, const char* source, std::string& log_out)
+{
+    if (!source || !*source) {
+        log_out = "empty source";
+        return false;
+    }
+
+    // Skip leading whitespace + optional `\ wf` sigil line (same as RunScript).
+    const char* src = source;
+    while (*src == ' ' || *src == '\t' || *src == '\r' || *src == '\n') ++src;
+    if (src[0] == '\\') {
+        while (*src && *src != '\n') ++src;
+        if (*src == '\n') ++src;
+    }
+
+    // Split definitions (everything up to last `;`) from the call body.
+    const char* lastSemi = nullptr;
+    for (const char* p = src; *p; ++p)
+        if (*p == ';') lastSemi = p;
+
+    const char* callBody = src;
+    if (lastSemi) {
+        std::string defs(src, static_cast<size_t>(lastSemi + 1 - src));
+        zf_result rc = zf_eval(&g_ctx, defs.c_str());
+        if (rc != ZF_OK) {
+            log_out = std::string("defs: ") + zf_result_str(rc);
+            return false;
+        }
+        callBody = lastSemi + 1;
+        while (*callBody == ' ' || *callBody == '\t' || *callBody == '\r' || *callBody == '\n')
+            ++callBody;
+    }
+
+    char wordName[40];
+    snprintf(wordName, sizeof(wordName), "_wfsRld%d", g_reloadCounter++);
+    std::string def = ": ";
+    def += wordName;
+    def += " ";
+    def += (*callBody) ? callBody : "";
+    def += " ;";
+    zf_result rc = zf_eval(&g_ctx, def.c_str());
+    if (rc != ZF_OK) {
+        log_out = std::string("call: ") + zf_result_str(rc);
+        return false;
+    }
+
+    g_actorOverride[actor_idx] = wordName;
+    return true;
+}
+
+void ClearActorScriptOverrides()
+{
+    g_actorOverride.clear();
+    // Note: orphaned _wfsRld* definitions remain in the dict (append-only).
+}
+
+void ClearActorScriptOverride(int actor_idx)
+{
+    g_actorOverride.erase(actor_idx);
 }
 
 } // namespace forth_engine

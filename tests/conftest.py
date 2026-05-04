@@ -39,14 +39,16 @@ def bridge():
     env = os.environ.copy()
     env["LD_LIBRARY_PATH"] = f"{LIB_DIR}:{env.get('LD_LIBRARY_PATH', '')}"
 
+    log_path = REPO_ROOT / "tests" / ".wf_game.log"
+    log_fp = open(log_path, "w")
     proc = subprocess.Popen(
         [str(WF_GAME), f"-L{LEVEL}",
          "--debug-port", str(BRIDGE_PORT),
          "--debug-bind", "127.0.0.1"],
         cwd=str(GAME_CWD),
         env=env,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stdout=log_fp,
+        stderr=subprocess.STDOUT,
     )
 
     client: BridgeClient | None = None

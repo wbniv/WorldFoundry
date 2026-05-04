@@ -42,3 +42,7 @@ engine/wf_game
 wflevels/*/asset.inc
 wflevels/*/textile.log.htm
 wflevels/*/*.lev.bin
+
+# pytest debug-bridge harness artifacts
+tests/.wf_game.log
+tests/.pytest_cache/

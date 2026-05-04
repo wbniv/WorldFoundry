@@ -6,8 +6,8 @@
 
 **Status:**
 - Phase A — **landed** 2026-05-03 (commits 63f01d7, 1e0098e); pytest harness in [tests/test_phase_a.py](../../tests/test_phase_a.py) covers `set_mailbox` + `inject_input` end-to-end against qbert_practice.
-- Phase B1 (`set_shader`) — spiked 2026-05-03 (see revised section below); ready to land.
-- Phase B2 (`reload_script`) — gated on a design discussion before any zForth changes.
+- Phase B1 (`set_shader`) — **landed** 2026-05-03 (905a75a). Spike found there is no shader cache; ~80 LOC instead of 1–2 days. Tests in [tests/test_phase_b.py](../../tests/test_phase_b.py).
+- Phase B2 (`reload_script`) — design agreed 2026-05-03: append-leak, dev/debug-only feature; per-actor override map keyed by `actor_idx` (not src pointer); ~100 reload budget per session before engine restart.
 - Phase C — deferred per plan; see Phase C section.
 
 ## Goal
@@ -158,16 +158,19 @@ These two need the same architectural piece — a **main-thread deferred-work qu
 - **Approach 2 — per-actor dictionaries (correct, big change).** Each actor gets its own zForth interpreter instance with its own dict. Memory cost = `ZF_DICT_SIZE` × actors; ~10 KB × hundreds of actors = MB-scale. Probably too expensive for the engine's mobile targets but fine on Linux desktop.
 - **Approach 3 — dictionary checkpoints (pragmatic).** Snapshot the dict pointer before compiling each actor's initial script at level load. On `reload_script`, rewind the dict pointer to that actor's checkpoint, recompile. Safe **only** if scripts don't define globally-visible words after their checkpoint — which the zForth scripts in `mm_practice` and `qbert_practice` happen not to do.
 
-**Recommendation:** Approach 1 for the first cut. Document the leak. If a session iterates a script > 100 times the engine restart is trivial.
+**Decision (2026-05-03):** Approach 1 (append + leak). User-confirmed dev/debug-only feature; restart after ~100 reloads is acceptable. `ZF_DICT_SIZE = 65536` and a typical qbert script is ~500 bytes → ~200–400 dict bytes per reload.
+
+**Implementation choice — override map, not pointer overwrite.** The plan originally said to overwrite `actor->GetCommonBlockPtr()->Script`. Implementation goes the other way: keep the OAD pointer untouched, maintain `actor_idx → wordName` override map inside `scripting_zforth.cc`, and have `RunScript` consult it before falling through to the existing src-pointer cache. Localises every reload-related change to one file and one map; `revert_all` just clears the map. No new lifetime story, no chance of corrupting `_pScript`.
 
 **Engine-side changes:**
-- `engine/stubs/scripting_zforth.cc` exposes the compile/eval entry points used at level load. Add `int RecompileScript(Actor* actor, const std::string& source) -> int /* new script handle, or -1 on error */`.
-- `actor->GetCommonBlockPtr()->Script` field gets overwritten with the new handle.
-- The Phase 3 undo table needs a `SCRIPT` `ChangeRecord::Kind` that stores `{ actor_idx, old_handle }`. `revert_all` on disconnect is important — otherwise a botched reload survives the bridge session.
+- [`scripting_forth.hp`](../../engine/stubs/scripting_forth.hp): add `bool ReloadActorScript(int actor_idx, const char* src, std::string& log_out)`, `void ClearActorScriptOverrides()`, `void ClearActorScriptOverride(int)`.
+- [`scripting_zforth.cc`](../../engine/stubs/scripting_zforth.cc): `g_actorOverride` map; `RunScript` consults it first. Reload compiles a fresh `_wfsRldN` wrapper word with N from a session-monotonic counter; on success registers the override, on `zf_eval` failure returns the `zf_result` name in `log_out` and leaves the prior override intact.
+- [`debug_server.cc`](../../engine/stubs/debug_server.cc): `RELOAD_SCRIPT` op. Tracks `gLastReloadSource[idx]` so `undo_step` can recompile the prior source (also leaks dict bytes — acceptable for debug). New `ChangeRecord::SCRIPT` records the prior source; undo restores it (or clears the override if there was no prior). `revert_all` calls `ClearActorScriptOverrides()`.
+- [`debug_server.cc`](../../engine/stubs/debug_server.cc): **`common.Script` guard** — `SET_PROP` rejects `common.Script` with an explanatory error pointing the caller at `reload_script` instead.
 
-**Why this is bigger than `set_mailbox`:** zForth state is shared globally; Forth has no module system. The "right" answer (per-actor interpreters) is expensive; the "easy" answer (append + leak) needs operator buy-in to ship as a debug-only tool.
+**Helper-word collision is correct.** zForth allows redefinition (new word wins). When actor 5's reload defines `: stick ...`, the new `stick` shadows the old. **But** wrapper words for OTHER actors (e.g. `_wfs7`) were *compiled* against the old `stick`'s dict address, so they keep using the old definition. Result: actor 5 gets the new helpers, every other actor undisturbed. Falls out of zForth's append-only model for free.
 
-**Critical constraint inherited from the parent plan:** `scene:set_prop` on `common.Script` already exists (`debug_server.cc:166` `kPropMap` includes `common.Script`) and **must be removed or hard-errored** — it writes a 4-byte int into the Script handle field, corrupting it. The parent plan's "What it does NOT do" already flags this; Phase B2 should land alongside a guard that rejects `set_prop` on `common.Script`.
+**Critical constraint inherited from the parent plan:** `scene:set_prop` on `common.Script` was previously routable through `kPropMap` and corrupted the Script handle field. Landed alongside B2: `SET_PROP` drain handler hard-errors on `common.Script` with an explanatory "use reload_script instead" message. The `kPropMap` entry stays (so the lookup still finds it and we can produce a specific error rather than a generic "unknown property") but never reaches the writer.
 
 **Verification:**
 - Edit the qbert director script's win-counter loop to count differently (e.g. count cubes where state == 0 instead of != 2), push via `reload_script` mid-game, watch mailbox 412 change.
@@ -191,7 +194,7 @@ This phase is large enough that it warrants **its own plan document** rather tha
 
 **Effort estimate:** 2–4 weeks. **Recommendation:** do not start until Phase A and B are landed and there is a concrete "I keep needing this" pain point — DAP is high effort and the simpler ops above cover ~80% of debug needs.
 
-**This plan defers Phase C** to a follow-up plan. The work item from this plan's perspective: write `docs/plans/2026-XX-XX-script-debugger-dap.md` once Phase A and B have been used in anger for ~1 week.
+**This plan defers Phase C** to a follow-up plan: [2026-05-03-script-debugger-dap.md](2026-05-03-script-debugger-dap.md). That doc is written but **not started** — trigger to begin work is "Phase A and B have been used in anger for ~1 week and a concrete pain point has surfaced".
 
 ---
 

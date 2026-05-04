@@ -33,6 +33,7 @@
 #include <mailbox/mailbox.hp>
 #include <physics/physicalobject.hp>
 #include <gfx/renderer_backend.hp>
+#include "scripting_forth.hp"
 #include <cstddef>
 
 // Bind address: set by --debug-bind in main.cc; defaults to "127.0.0.1".
@@ -148,7 +149,7 @@ static std::atomic<int>  gStepN   { 0 };
 // gPropOriginals: per-(block, field) first-seen value, for revert_all
 
 struct ChangeRecord {
-    enum Kind { TRANSFORM, PROP, MAILBOX } kind;
+    enum Kind { TRANSFORM, PROP, MAILBOX, SCRIPT } kind;
     int   actor_idx;
     // TRANSFORM:
     float px, py, pz;
@@ -159,6 +160,10 @@ struct ChangeRecord {
     // MAILBOX:
     int    mailbox_idx;
     float  old_mbx_value;
+    // SCRIPT: prior reloaded source for this actor (empty = no prior
+    // override; undo restores OAD source). Re-compiled on undo via
+    // ReloadActorScript — costs extra dict bytes (acceptable for debug).
+    std::string script_prev_source;
 };
 
 // Key into gPropOriginals: the exact memory address of a specific field.
@@ -184,6 +189,11 @@ static std::unordered_map<PropKey, int32, PropKeyHash>    gPropOriginals;
 // Mailbox watchpoints — actor_idx → set of global mailbox indices.
 // Touched exclusively from the game thread (DrainQueue / BroadcastMailboxes).
 static std::unordered_map<int, std::unordered_set<int>> gWatches;
+
+// Last reloaded source per actor — needed so undo_step can recompile the
+// previous override (zForth has no dict-rewind). Empty string in the map
+// means "actor was reloaded at least once but currently has no override".
+static std::unordered_map<int, std::string> gLastReloadSource;
 // Change detection: key = actor_idx * 100000 + mailbox_idx → last-sent float value.
 static std::unordered_map<uint64_t, float>              gMailboxPrev;
 
@@ -236,7 +246,8 @@ static char* debug_get_block(Actor* actor, PropInfo::Block block_id)
 
 struct PendingUpdate {
     enum Kind { SET_PROP, SET_TRANSFORM, PICK, UNDO_STEP, REVERT_ALL,
-                WATCH, UNWATCH, SET_MAILBOX, INJECT_INPUT, SET_SHADER } kind;
+                WATCH, UNWATCH, SET_MAILBOX, INJECT_INPUT, SET_SHADER,
+                RELOAD_SCRIPT } kind;
     int  actor_idx;
     std::string key;
     double value;
@@ -247,6 +258,7 @@ struct PendingUpdate {
     int    duration_frames;         // INJECT_INPUT: 0=this frame, N>0=N frames, -1=sticky
     std::string vert_src;           // SET_SHADER: vertex shader GLSL
     std::string frag_src;           // SET_SHADER: fragment shader GLSL
+    std::string script_src;         // RELOAD_SCRIPT: zForth source
 };
 
 // Input override table for inject_input. Game-thread only — read by
@@ -415,6 +427,16 @@ static void handle_client(int fd)
                     gQueue.push(u);
                 }
 
+            } else if (op == "reload_script") {
+                PendingUpdate u;
+                u.kind       = PendingUpdate::RELOAD_SCRIPT;
+                u.actor_idx  = (int)parse_jnum(line, "idx");
+                u.script_src = parse_jstr(line, "source");
+                if (u.actor_idx > 0 && !u.script_src.empty()) {
+                    std::lock_guard<std::mutex> lk(gQueueMutex);
+                    gQueue.push(u);
+                }
+
             } else if (op == "set_shader") {
                 PendingUpdate u;
                 u.kind     = PendingUpdate::SET_SHADER;
@@ -533,6 +555,10 @@ void DebugServer_Stop()
     gWatches.clear();
     gMailboxPrev.clear();
     gInputOverrides.clear();
+#ifdef WF_WITH_FORTH
+    forth_engine::ClearActorScriptOverrides();
+#endif
+    gLastReloadSource.clear();
 }
 
 bool DebugServer_IsPaused()
@@ -594,6 +620,18 @@ void DebugServer_DrainQueue(Level& level)
             actor->setCurrentPos(pos);
 
         } else if (u.kind == PendingUpdate::SET_PROP && actor) {
+            // common.Script is a resolved pointer/handle into level data —
+            // a raw int32 write here corrupts script dispatch. Use the
+            // reload_script op instead.
+            if (u.key == "common.Script") {
+                std::string errmsg = "{\"op\":\"error\","
+                    + json_str("msg", "common.Script is read-only over set_prop; use reload_script") + ","
+                    + json_int("idx", u.actor_idx) + "}\n";
+                std::lock_guard<std::mutex> lk(gQueueMutex);
+                send_all_locked(errmsg);
+                local.pop();
+                continue;
+            }
             auto pit = kPropMap.find(u.key);
             if (pit == kPropMap.end()) {
                 std::string errmsg = "{\"op\":\"error\","
@@ -672,6 +710,18 @@ void DebugServer_DrainQueue(Level& level)
                     }
                 } else if (r.kind == ChangeRecord::PROP && r.block) {
                     *reinterpret_cast<int32*>(r.block + r.field_offset) = r.old_raw;
+                } else if (r.kind == ChangeRecord::SCRIPT) {
+#ifdef WF_WITH_FORTH
+                    if (r.script_prev_source.empty()) {
+                        forth_engine::ClearActorScriptOverride(r.actor_idx);
+                        gLastReloadSource.erase(r.actor_idx);
+                    } else {
+                        std::string log;
+                        forth_engine::ReloadActorScript(
+                            r.actor_idx, r.script_prev_source.c_str(), log);
+                        gLastReloadSource[r.actor_idx] = r.script_prev_source;
+                    }
+#endif
                 } else if (r.kind == ChangeRecord::MAILBOX) {
                     Mailboxes* boxes = nullptr;
                     if (r.actor_idx == 0) {
@@ -707,6 +757,11 @@ void DebugServer_DrainQueue(Level& level)
                 *reinterpret_cast<int32*>(kv.first.block + kv.first.field_offset) = kv.second;
             }
             gPropOriginals.clear();
+            // Clear hot-reloaded script overrides (revert to OAD-baked source).
+#ifdef WF_WITH_FORTH
+            forth_engine::ClearActorScriptOverrides();
+#endif
+            gLastReloadSource.clear();
             gChangeStack.clear();
             std::lock_guard<std::mutex> lk(gQueueMutex);
             send_all_locked("{\"op\":\"reverted\"}\n");
@@ -742,6 +797,50 @@ void DebugServer_DrainQueue(Level& level)
                 std::lock_guard<std::mutex> lk(gQueueMutex);
                 send_all_locked(errmsg);
             }
+
+        } else if (u.kind == PendingUpdate::RELOAD_SCRIPT) {
+#ifdef WF_WITH_FORTH
+            std::string log;
+            // Capture prior source for undo BEFORE we overwrite it.
+            std::string prev;
+            auto pit = gLastReloadSource.find(u.actor_idx);
+            if (pit != gLastReloadSource.end()) prev = pit->second;
+
+            bool ok = forth_engine::ReloadActorScript(
+                u.actor_idx, u.script_src.c_str(), log);
+            std::string reply;
+            if (ok) {
+                ChangeRecord rec;
+                rec.kind          = ChangeRecord::SCRIPT;
+                rec.actor_idx     = u.actor_idx;
+                rec.px = rec.py = rec.pz = 0.f;
+                rec.block         = nullptr;
+                rec.field_offset  = 0;
+                rec.old_raw       = 0;
+                rec.mailbox_idx   = 0;
+                rec.old_mbx_value = 0.f;
+                rec.script_prev_source = prev;
+                gChangeStack.push_back(rec);
+                gLastReloadSource[u.actor_idx] = u.script_src;
+
+                reply = "{\"op\":\"script_reloaded\","
+                      + json_int("idx", u.actor_idx) + "}\n";
+            } else {
+                reply = "{\"op\":\"error\","
+                      + json_str("what", "script_compile") + ","
+                      + json_int("idx", u.actor_idx) + ","
+                      + json_str("log", log) + "}\n";
+            }
+            std::lock_guard<std::mutex> lk(gQueueMutex);
+            send_all_locked(reply);
+#else
+            std::string reply = "{\"op\":\"error\","
+                + json_str("what", "script_compile") + ","
+                + json_int("idx", u.actor_idx) + ","
+                + json_str("log", "Forth engine not compiled in") + "}\n";
+            std::lock_guard<std::mutex> lk(gQueueMutex);
+            send_all_locked(reply);
+#endif
 
         } else if (u.kind == PendingUpdate::SET_SHADER) {
             std::string log;

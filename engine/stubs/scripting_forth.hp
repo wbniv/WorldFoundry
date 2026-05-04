@@ -34,6 +34,8 @@
     defined(WF_FORTH_ENGINE_PFORTH)
 #define WF_WITH_FORTH 1
 
+#include <string>
+
 class MailboxesManager;
 struct IntArrayEntry;
 
@@ -53,6 +55,23 @@ void  DeleteConstantArray(IntArrayEntry* entryList);  // no-op (dict not shrunk)
 // current actor for read-mailbox / write-mailbox. Returns TOS as float after
 // execution (0.0f if the stack is empty or on error).
 float RunScript(const char* src, int objectIndex);
+
+// Debug-bridge hot reload: recompile a per-actor script body. Future
+// RunScript calls for `actor_idx` will dispatch to the new compiled word
+// instead of the OAD-baked source. Returns true on success; on failure
+// leaves the prior override (or the OAD source) in place and writes a
+// diagnostic into log_out. Only the zForth backend implements this; other
+// Forth backends return false with an "unsupported" message.
+bool ReloadActorScript(int actor_idx, const char* source, std::string& log_out);
+
+// Wipe all per-actor script overrides (revert to OAD-baked scripts).
+// Called by debug_server's revert_all. Note: dictionary entries from
+// past reloads are NOT freed (zForth dict is append-only) — those leak
+// until the engine restarts.
+void ClearActorScriptOverrides();
+
+// Clear a single actor's override (for undo_step when no prior reload exists).
+void ClearActorScriptOverride(int actor_idx);
 
 } // namespace forth_engine
 
