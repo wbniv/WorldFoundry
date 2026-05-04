@@ -2,7 +2,13 @@
 
 **Date:** 2026-05-03
 
-**Parent plan:** `docs/plans/2026-04-29-live-editor-bridge.md` — Phases 1–3 + parts of Phase 4 are landed. This plan covers the five remaining capabilities.
+**Parent plan:** [2026-04-29-live-editor-bridge.md](2026-04-29-live-editor-bridge.md) — Phases 1–3 + parts of Phase 4 are landed. This plan covers the five remaining capabilities.
+
+**Status:**
+- Phase A — **landed** 2026-05-03 (commits 63f01d7, 1e0098e); pytest harness in [tests/test_phase_a.py](../../tests/test_phase_a.py) covers `set_mailbox` + `inject_input` end-to-end against qbert_practice.
+- Phase B1 (`set_shader`) — spiked 2026-05-03 (see revised section below); ready to land.
+- Phase B2 (`reload_script`) — gated on a design discussion before any zForth changes.
+- Phase C — deferred per plan; see Phase C section.
 
 ## Goal
 
@@ -114,27 +120,30 @@ These two need the same architectural piece — a **main-thread deferred-work qu
 
 ### B1. `set_shader` (Phase 4 of parent plan)
 
-**Op:** as in `docs/plans/2026-04-29-live-editor-bridge.md:418`:
+**Spike findings (2026-05-03):** there is no shader cache. [`backend_modern.cc`](../../wfsource/source/gfx/glpipeline/backend_modern.cc) holds a single program (`_prog`) compiled once in `LazyInit()` from two embedded `const char*` strings (`kVS`, `kFS`). The legacy fixed-function path was retired post-Phase 0 4c(f) per the file header — there's only one backend. No name-keyed map, no material system above. Threading is also free: the renderer runs on the same thread as `Level::update()` ([game.cc:319](../../wfsource/source/game/game.cc)), so the existing `DrainQueue` is the right place to invoke a reload — no second queue needed.
+
+**Op:**
 ```json
-{"op":"set_shader", "name":"terrain", "vert":"...", "frag":"..."}
+{"op":"set_shader", "vert":"...", "frag":"..."}
 ```
+`name` is omitted because there's only one program. Forward-compat: a future per-pass shader system can add `name` and treat the absence as "main".
 
-**Engine-side changes:**
-- The GL backend lives at `wfsource/source/gfx/glpipeline/backend_modern.cc`. Find the shader cache (program-by-name map) and add a `Reload(name, vert_src, frag_src) -> bool` entry point that:
-  1. Compiles a new vert + frag shader.
-  2. Links a new program.
-  3. On success: atomically swaps the cache entry's program ID, deletes the old program, returns true.
-  4. On failure: leaves the old program live, captures `glGetShaderInfoLog` output, returns false + the error string.
-- Bridge plumbing: `PendingUpdate::Kind::SET_SHADER`, two `std::string` fields for vert/frag source. The drain handler enqueues onto a *separate* queue consumed at the top of the next render frame on the GL thread (the game thread, in WF's case — `_curLevel->update()` and the renderer share a thread per `game.cc`). If the GL thread is the same as the game thread, no second queue is needed; just ensure the reload runs after `update()` and before the first draw call of the frame.
-- Replies: `{"op":"shader_reloaded","name":"terrain"}` or `{"op":"error","what":"shader_compile","name":"terrain","log":"..."}`.
-
-**Why this is bigger than it looks:** WF's shader cache key/lookup is not yet documented in the bridge plan. Step 1 of B1 is a half-day spike to **read `backend_modern.cc` and write up the shader-cache structure** — needed before the bridge op can target a specific program.
+**Engine-side changes (~80 LOC):**
+- [`renderer_backend.hp`](../../wfsource/source/gfx/renderer_backend.hp): add a virtual `bool ReloadProgram(const char* vert, const char* frag, std::string& log_out)` to `RendererBackend`, with a default no-op base impl so non-modern backends (none today) don't have to implement it.
+- [`backend_modern.cc`](../../wfsource/source/gfx/glpipeline/backend_modern.cc):
+  1. Refactor `CompileShader` and `LinkProgram` to non-aborting variants — return `0` on failure, write the log into a `std::string&` out-param. The old aborting behavior is kept inside `LazyInit()` (a compile failure at startup is still fatal).
+  2. Implement `ReloadProgram`: `Flush()` first, compile new vs+fs, link new program, on success swap `_prog` and re-fetch all 12 uniform locations, delete the old program; on failure leave `_prog` untouched and write the log to `log_out`.
+- [`debug_server.cc`](../../engine/stubs/debug_server.cc):
+  - `PendingUpdate::Kind::SET_SHADER`, two `std::string` fields for vert/frag source.
+  - Parse handler alongside `set_mailbox`.
+  - Drain handler calls `RendererBackendGet().ReloadProgram(...)` and replies `{"op":"shader_reloaded"}` or `{"op":"error","what":"shader_compile","log":"..."}`.
 
 **Verification:**
-- Edit the cube fragment shader to multiply output by `vec3(1, 0, 0)`, push via the bridge, expect every cube on screen to turn red on the next frame. Push the original back, cubes return to normal.
-- Push deliberately broken GLSL, expect an error reply and unchanged scene.
+- Push GLSL that multiplies output by `vec3(1, 0, 0)`, expect everything to turn red on the next frame. Push the original back, scene returns to normal.
+- Push deliberately broken GLSL, expect an error reply with the log and an unchanged scene.
+- Pytest case in [tests/test_phase_b.py](../../tests/test_phase_b.py) covers both happy + sad paths.
 
-**Estimated effort:** 1 day if the shader cache is simple, 2 days if there's a material-system layer above it.
+**Estimated effort (revised):** ~3 hours including pytest. The original 1–2 day estimate assumed a shader cache that doesn't exist.
 
 ### B2. `reload_script` (zForth hot-swap)
 

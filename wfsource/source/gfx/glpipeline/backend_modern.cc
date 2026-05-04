@@ -35,6 +35,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 #include <vector>
 
 namespace
@@ -180,7 +181,10 @@ static void Matrix34ToFloat16(const Matrix34& matrix, float out[16])
 
 // ---- shader compile helpers -------------------------------------------------
 
-static GLuint CompileShader(GLenum type, const char* src)
+// TryCompileShader / TryLinkProgram: non-aborting variants. Return 0 on
+// failure and write the GL log into `log_out`. The aborting wrappers below
+// keep the original startup-fatal behavior for LazyInit.
+static GLuint TryCompileShader(GLenum type, const char* src, std::string& log_out)
 {
     const char* parts[2] = { kShaderHeader, src };
     GLuint s = glCreateShader(type);
@@ -192,14 +196,14 @@ static GLuint CompileShader(GLenum type, const char* src)
     {
         char log[2048] = { 0 };
         glGetShaderInfoLog(s, sizeof(log) - 1, nullptr, log);
-        std::fprintf(stderr, "modern backend: shader compile failed:\n%s\n", log);
+        log_out = log;
         glDeleteShader(s);
-        std::abort();
+        return 0;
     }
     return s;
 }
 
-static GLuint LinkProgram(GLuint vs, GLuint fs)
+static GLuint TryLinkProgram(GLuint vs, GLuint fs, std::string& log_out)
 {
     GLuint p = glCreateProgram();
     glAttachShader(p, vs);
@@ -211,12 +215,36 @@ static GLuint LinkProgram(GLuint vs, GLuint fs)
     {
         char log[2048] = { 0 };
         glGetProgramInfoLog(p, sizeof(log) - 1, nullptr, log);
-        std::fprintf(stderr, "modern backend: program link failed:\n%s\n", log);
+        log_out = log;
         glDeleteProgram(p);
-        std::abort();
+        return 0;
     }
     glDetachShader(p, vs);
     glDetachShader(p, fs);
+    return p;
+}
+
+static GLuint CompileShader(GLenum type, const char* src)
+{
+    std::string log;
+    GLuint s = TryCompileShader(type, src, log);
+    if (!s)
+    {
+        std::fprintf(stderr, "modern backend: shader compile failed:\n%s\n", log.c_str());
+        std::abort();
+    }
+    return s;
+}
+
+static GLuint LinkProgram(GLuint vs, GLuint fs)
+{
+    std::string log;
+    GLuint p = TryLinkProgram(vs, fs, log);
+    if (!p)
+    {
+        std::fprintf(stderr, "modern backend: program link failed:\n%s\n", log.c_str());
+        std::abort();
+    }
     return p;
 }
 
@@ -337,6 +365,36 @@ public:
         Flush();
     }
 
+    // Hot-reload the program from new GLSL. Called from the game thread
+    // (which is also the GL thread); safe to call any time DrainQueue runs
+    // because it Flush()es first and then atomically swaps _prog. On failure
+    // the current program stays live and log_out gets the GL info-log.
+    bool ReloadProgram(const char* vert, const char* frag,
+                       std::string& log_out) override
+    {
+        if (!_inited)
+        {
+            // No GL context yet — nothing to reload, and we don't have a
+            // valid context to compile in either.
+            log_out = "renderer not yet initialised";
+            return false;
+        }
+        Flush();
+        GLuint vs = TryCompileShader(GL_VERTEX_SHADER,   vert, log_out);
+        if (!vs) return false;
+        GLuint fs = TryCompileShader(GL_FRAGMENT_SHADER, frag, log_out);
+        if (!fs) { glDeleteShader(vs); return false; }
+        GLuint p = TryLinkProgram(vs, fs, log_out);
+        glDeleteShader(vs);
+        glDeleteShader(fs);
+        if (!p) return false;
+
+        glDeleteProgram(_prog);
+        _prog = p;
+        FetchUniformLocations();
+        return true;
+    }
+
     // Called from the Android lifecycle hook (WFAndroidEglTerm) when the
     // EGL surface is destroyed. Reset all GL-object handles; the next draw
     // call's LazyInit will recompile the program + recreate VAO/VBO in the
@@ -409,16 +467,8 @@ private:
         dst.nx = nx; dst.ny = ny; dst.nz = nz;
     }
 
-    void LazyInit()
+    void FetchUniformLocations()
     {
-        if (_inited) return;
-
-        GLuint vs = CompileShader(GL_VERTEX_SHADER,   kVS);
-        GLuint fs = CompileShader(GL_FRAGMENT_SHADER, kFS);
-        _prog = LinkProgram(vs, fs);
-        glDeleteShader(vs);
-        glDeleteShader(fs);
-
         _uMvp        = glGetUniformLocation(_prog, "u_mvp");
         _uMv         = glGetUniformLocation(_prog, "u_mv");
         _uTex        = glGetUniformLocation(_prog, "u_tex");
@@ -431,6 +481,19 @@ private:
         _uFogColor   = glGetUniformLocation(_prog, "u_fog_color");
         _uFogStart   = glGetUniformLocation(_prog, "u_fog_start");
         _uFogEnd     = glGetUniformLocation(_prog, "u_fog_end");
+    }
+
+    void LazyInit()
+    {
+        if (_inited) return;
+
+        GLuint vs = CompileShader(GL_VERTEX_SHADER,   kVS);
+        GLuint fs = CompileShader(GL_FRAGMENT_SHADER, kFS);
+        _prog = LinkProgram(vs, fs);
+        glDeleteShader(vs);
+        glDeleteShader(fs);
+
+        FetchUniformLocations();
 
         glGenVertexArrays(1, &_vao);
         glGenBuffers(1, &_vbo);

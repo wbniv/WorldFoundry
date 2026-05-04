@@ -118,9 +118,15 @@ class BridgeClient:
     # ── Test helpers ─────────────────────────────────────────────────────────
 
     def wait_for(self, predicate: Callable[[dict], bool], timeout: float = 5.0) -> dict | None:
-        """Block until a message matching predicate arrives, or timeout."""
+        """Block until a NEW message matching predicate arrives, or timeout.
+
+        Only considers messages that arrive on/after this call — prior
+        replies sitting in the inbox are skipped, so back-to-back ops don't
+        accidentally match the previous reply.
+        """
         deadline = time.time() + timeout
-        seen = 0
+        with self._lock:
+            seen = len(self._inbox)
         while time.time() < deadline:
             with self._lock:
                 while seen < len(self._inbox):

@@ -13,6 +13,8 @@
 #ifndef _RENDERER_BACKEND_HP
 #define _RENDERER_BACKEND_HP
 
+#include <string>
+
 class Matrix34;
 class PixelMap;
 
@@ -77,6 +79,18 @@ public:
     // the swap-buffers. Legacy fixed-function backend is a no-op; modern
     // VBO backend uses this to drain its accumulated vertex buffer.
     virtual void EndFrame() = 0;
+
+    // Debug-bridge hot reload: recompile the backend's shader program from
+    // the given GLSL sources. Returns true on success; on failure leaves the
+    // current program live and writes the GL info-log into log_out.
+    // Default no-op base impl: backends without a shader program return
+    // false with an explanatory log.
+    virtual bool ReloadProgram(const char* /*vert*/, const char* /*frag*/,
+                               std::string& log_out)
+    {
+        log_out = "backend has no shader program to reload";
+        return false;
+    }
 };
 
 // Must match camera.cc's MAX_LIGHTS.

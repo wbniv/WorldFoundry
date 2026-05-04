@@ -32,6 +32,7 @@
 #include "actor.hp"
 #include <mailbox/mailbox.hp>
 #include <physics/physicalobject.hp>
+#include <gfx/renderer_backend.hp>
 #include <cstddef>
 
 // Bind address: set by --debug-bind in main.cc; defaults to "127.0.0.1".
@@ -44,9 +45,23 @@ static std::string json_str(const char* key, const std::string& val)
 {
     std::string out;
     out += '"'; out += key; out += "\":\"";
-    for (char c : val) {
-        if (c == '"' || c == '\\') out += '\\';
-        out += c;
+    for (unsigned char c : val) {
+        switch (c) {
+            case '"':  out += "\\\""; break;
+            case '\\': out += "\\\\"; break;
+            case '\n': out += "\\n";  break;
+            case '\r': out += "\\r";  break;
+            case '\t': out += "\\t";  break;
+            default:
+                if (c < 0x20) {
+                    char buf[8];
+                    snprintf(buf, sizeof(buf), "\\u%04x", c);
+                    out += buf;
+                } else {
+                    out += (char)c;
+                }
+                break;
+        }
     }
     out += '"';
     return out;
@@ -69,8 +84,21 @@ static std::string parse_jstr(const std::string& line, const char* key)
     std::string out;
     ++pos;
     while (pos < line.size() && line[pos] != '"') {
-        if (line[pos] == '\\' && pos + 1 < line.size()) ++pos;
-        out += line[pos++];
+        if (line[pos] == '\\' && pos + 1 < line.size()) {
+            char esc = line[++pos];
+            switch (esc) {
+                case 'n':  out += '\n'; break;
+                case 't':  out += '\t'; break;
+                case 'r':  out += '\r'; break;
+                case '"':  out += '"';  break;
+                case '\\': out += '\\'; break;
+                case '/':  out += '/';  break;
+                default:   out += esc;  break;
+            }
+            ++pos;
+        } else {
+            out += line[pos++];
+        }
     }
     return out;
 }
@@ -208,7 +236,7 @@ static char* debug_get_block(Actor* actor, PropInfo::Block block_id)
 
 struct PendingUpdate {
     enum Kind { SET_PROP, SET_TRANSFORM, PICK, UNDO_STEP, REVERT_ALL,
-                WATCH, UNWATCH, SET_MAILBOX, INJECT_INPUT } kind;
+                WATCH, UNWATCH, SET_MAILBOX, INJECT_INPUT, SET_SHADER } kind;
     int  actor_idx;
     std::string key;
     double value;
@@ -217,6 +245,8 @@ struct PendingUpdate {
     float  ray_dx, ray_dy, ray_dz;  // PICK: ray direction (unit)
     int    mailbox_idx;             // WATCH / UNWATCH / SET_MAILBOX: mailbox number
     int    duration_frames;         // INJECT_INPUT: 0=this frame, N>0=N frames, -1=sticky
+    std::string vert_src;           // SET_SHADER: vertex shader GLSL
+    std::string frag_src;           // SET_SHADER: fragment shader GLSL
 };
 
 // Input override table for inject_input. Game-thread only — read by
@@ -381,6 +411,16 @@ static void handle_client(int fd)
                 u.value           = parse_jnum(line, "value");
                 u.duration_frames = (int)parse_jnum(line, "duration_frames");
                 if (slot_id != 0) {
+                    std::lock_guard<std::mutex> lk(gQueueMutex);
+                    gQueue.push(u);
+                }
+
+            } else if (op == "set_shader") {
+                PendingUpdate u;
+                u.kind     = PendingUpdate::SET_SHADER;
+                u.vert_src = parse_jstr(line, "vert");
+                u.frag_src = parse_jstr(line, "frag");
+                if (!u.vert_src.empty() && !u.frag_src.empty()) {
                     std::lock_guard<std::mutex> lk(gQueueMutex);
                     gQueue.push(u);
                 }
@@ -702,6 +742,21 @@ void DebugServer_DrainQueue(Level& level)
                 std::lock_guard<std::mutex> lk(gQueueMutex);
                 send_all_locked(errmsg);
             }
+
+        } else if (u.kind == PendingUpdate::SET_SHADER) {
+            std::string log;
+            bool ok = RendererBackendGet().ReloadProgram(
+                u.vert_src.c_str(), u.frag_src.c_str(), log);
+            std::string reply;
+            if (ok) {
+                reply = "{\"op\":\"shader_reloaded\"}\n";
+            } else {
+                reply = "{\"op\":\"error\","
+                      + json_str("what", "shader_compile") + ","
+                      + json_str("log", log) + "}\n";
+            }
+            std::lock_guard<std::mutex> lk(gQueueMutex);
+            send_all_locked(reply);
 
         } else if (u.kind == PendingUpdate::INJECT_INPUT) {
             InputOverride ov;
