@@ -55,7 +55,9 @@ RoomCallbacks::Validate() const
 //============================================================================
 
 Room::Room() :
-	_physicalAttributes()
+	_physicalAttributes(),
+	_objectLists(NULL),
+	_memory(NULL)
 {
 	for( int roomIndex=0; roomIndex < MAX_ACTIVE_ROOMS; ++roomIndex )
 		adjacentRooms[ roomIndex ] = 0;
@@ -66,7 +68,14 @@ Room::Room() :
 Room::~Room()
 {
    Validate();
-   delete [] _objectLists;
+   // _objectLists was allocated via `new (memory) Int16List[N]` — a placement
+   // array-new from the WF Memory pool, NOT libc malloc. Calling `delete[]`
+   // here used to call libc free on a pool pointer → "free(): invalid pointer"
+   // on every clean shutdown. Use MEMORY_DELETE_ARRAY (manual element dtor
+   // loop + pool free) instead. Skip if Construct never ran.
+   if (_objectLists && _memory) {
+      MEMORY_DELETE_ARRAY((*_memory), _objectLists, Int16List, _checkListEntries);
+   }
 }
 
 //============================================================================
@@ -110,6 +119,7 @@ Room::Construct
    _roomCallbacks = roomCallbacks;
    _masterObjectList = &masterObjectList;
    assert(ValidPtr(_masterObjectList));
+   _memory = &memory;                       // remember pool for ~Room
    _objectLists = new (memory) Int16List[_checkListEntries];
 
 	DBSTREAM1( croom << "Room::Construct: roomIndex  = " << roomIndex << std::endl; )

@@ -111,7 +111,8 @@ private:
 	PhysicalAttributes _physicalAttributes;			// Collision space for this room
 
 	Room* adjacentRooms[MAX_ACTIVE_ROOMS];		// pointers to rooms adjacent to this one
-   Int16List* _objectLists;               // array of lists of objects
+   Int16List* _objectLists;               // array of lists of objects (pool-allocated; freed in ~Room via _memory)
+   Memory*    _memory;                    // pool that owns _objectLists; NULL until Construct runs
 
    int _checkListEntries;
    PRoomObjectListCheckFunc* _listCheckFuncList;
