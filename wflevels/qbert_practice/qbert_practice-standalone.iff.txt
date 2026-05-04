@@ -1,0 +1,19 @@
+// qbert_practice-standalone.iff.txt — L4-wrapped form of qbert_practice for wf_game -L.
+//
+// Build:
+//   ../../wftools/iffcomp-rs/target/release/iffcomp -binary \
+//     -o=qbert_practice-standalone.iff qbert_practice-standalone.iff.txt
+//
+// Run:
+//   cd wfsource/source/game && wf_game -L<repo>/wflevels/qbert_practice/qbert_practice-standalone.iff
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 200000l
+        'PERM' 500000l
+        'ROOM' 500000l
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../qbert_practice.iff" ]
+}
