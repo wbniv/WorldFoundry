@@ -15,6 +15,8 @@
 #ifndef WF_DEBUG_SERVER_HP
 #define WF_DEBUG_SERVER_HP
 
+#include <cstdint>
+
 #ifdef WF_DEBUG_BRIDGE
 
 class Level;
@@ -27,6 +29,11 @@ void DebugServer_BroadcastMailboxes(Level& level);
 void DebugServer_Stop();
 bool DebugServer_IsPaused();   // true = skip level update this frame
 
+// Input-override hook for inject_input — consulted by Level::ReadSystemMailbox
+// at the EMAILBOX_HARDWARE_JOYSTICK* read sites. Returns true (and writes the
+// override value) when an override is currently active for that mailbox.
+bool DebugServer_GetInputOverride(int mailbox_id, int32_t* out_value);
+
 #else
 
 class Level;
@@ -37,6 +44,7 @@ inline void DebugServer_BroadcastPerf(float, int)       {}
 inline void DebugServer_BroadcastMailboxes(Level&)      {}
 inline void DebugServer_Stop()                          {}
 inline bool DebugServer_IsPaused()                      { return false; }
+inline bool DebugServer_GetInputOverride(int, int32_t*) { return false; }
 
 #endif // WF_DEBUG_BRIDGE
 #endif // WF_DEBUG_SERVER_HP

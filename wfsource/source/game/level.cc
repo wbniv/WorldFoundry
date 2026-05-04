@@ -61,6 +61,8 @@
 #include "game.hp"
 #include "gamestrm.hp"
 
+#include "debug_server.hp"
+
 //==============================================================================
 // objects.inc contains a list of includes to include all .hp files for game objects
 
@@ -1403,52 +1405,49 @@ Level::ReadSystemMailbox( int boxnum ) const
             return LevelClock().Delta();
 
     case EMAILBOX_HARDWARE_JOYSTICK1:
-        assert( ValidPtr( _hardwareInput1 ) );
-        return Scalar( _hardwareInput1->arePressed(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK1_RAW:
-        assert( ValidPtr( _hardwareInput1 ) );
-        return Scalar( _hardwareInput1->arePressedRaw(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED:
-        assert( ValidPtr( _hardwareInput1 ) );
-        return Scalar( _hardwareInput1->justPressedRaw(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK2:
-        assert( ValidPtr( _hardwareInput2 ) );
-        return Scalar( _hardwareInput2->arePressed(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK2_RAW:
-        assert( ValidPtr( _hardwareInput2 ) );
-        return Scalar( _hardwareInput2->arePressedRaw(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK2_RAW_JUSTPRESSED:
-        assert( ValidPtr( _hardwareInput2 ) );
-        return Scalar( _hardwareInput2->justPressedRaw(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK3:
-        assert( ValidPtr( _hardwareInput3 ) );
-        return Scalar( _hardwareInput3->arePressed(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK3_RAW:
-        assert( ValidPtr( _hardwareInput3 ) );
-        return Scalar( _hardwareInput3->arePressedRaw(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK3_RAW_JUSTPRESSED:
-        assert( ValidPtr( _hardwareInput3 ) );
-        return Scalar( _hardwareInput3->justPressedRaw(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK4:
-        assert( ValidPtr( _hardwareInput4 ) );
-        return Scalar( _hardwareInput4->arePressed(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK4_RAW:
-        assert( ValidPtr( _hardwareInput4 ) );
-        return Scalar( _hardwareInput4->arePressedRaw(), 0 );
-
     case EMAILBOX_HARDWARE_JOYSTICK4_RAW_JUSTPRESSED:
-        assert( ValidPtr( _hardwareInput4 ) );
-        return Scalar( _hardwareInput4->justPressedRaw(), 0 );
+    {
+        int32_t _ov;
+        if (DebugServer_GetInputOverride(boxnum, &_ov))
+            return Scalar(_ov, 0);
+        QInputDigital* hi = nullptr;
+        switch (boxnum) {
+            case EMAILBOX_HARDWARE_JOYSTICK1:
+            case EMAILBOX_HARDWARE_JOYSTICK1_RAW:
+            case EMAILBOX_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED: hi = _hardwareInput1; break;
+            case EMAILBOX_HARDWARE_JOYSTICK2:
+            case EMAILBOX_HARDWARE_JOYSTICK2_RAW:
+            case EMAILBOX_HARDWARE_JOYSTICK2_RAW_JUSTPRESSED: hi = _hardwareInput2; break;
+            case EMAILBOX_HARDWARE_JOYSTICK3:
+            case EMAILBOX_HARDWARE_JOYSTICK3_RAW:
+            case EMAILBOX_HARDWARE_JOYSTICK3_RAW_JUSTPRESSED: hi = _hardwareInput3; break;
+            case EMAILBOX_HARDWARE_JOYSTICK4:
+            case EMAILBOX_HARDWARE_JOYSTICK4_RAW:
+            case EMAILBOX_HARDWARE_JOYSTICK4_RAW_JUSTPRESSED: hi = _hardwareInput4; break;
+        }
+        assert( ValidPtr( hi ) );
+        switch (boxnum) {
+            case EMAILBOX_HARDWARE_JOYSTICK1:
+            case EMAILBOX_HARDWARE_JOYSTICK2:
+            case EMAILBOX_HARDWARE_JOYSTICK3:
+            case EMAILBOX_HARDWARE_JOYSTICK4:                 return Scalar( hi->arePressed(), 0 );
+            case EMAILBOX_HARDWARE_JOYSTICK1_RAW:
+            case EMAILBOX_HARDWARE_JOYSTICK2_RAW:
+            case EMAILBOX_HARDWARE_JOYSTICK3_RAW:
+            case EMAILBOX_HARDWARE_JOYSTICK4_RAW:             return Scalar( hi->arePressedRaw(), 0 );
+            default:                                          return Scalar( hi->justPressedRaw(), 0 );
+        }
+    }
 
     default:
         if ( boxnum < EMAILBOX_GLOBAL_SYSTEM_MAX )

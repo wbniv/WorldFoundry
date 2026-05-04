@@ -30,6 +30,7 @@
 // Level + Actor API
 #include "level.hp"
 #include "actor.hp"
+#include <mailbox/mailbox.hp>
 #include <physics/physicalobject.hp>
 #include <cstddef>
 
@@ -119,7 +120,7 @@ static std::atomic<int>  gStepN   { 0 };
 // gPropOriginals: per-(block, field) first-seen value, for revert_all
 
 struct ChangeRecord {
-    enum Kind { TRANSFORM, PROP } kind;
+    enum Kind { TRANSFORM, PROP, MAILBOX } kind;
     int   actor_idx;
     // TRANSFORM:
     float px, py, pz;
@@ -127,6 +128,9 @@ struct ChangeRecord {
     char*  block;
     size_t field_offset;
     int32  old_raw;
+    // MAILBOX:
+    int    mailbox_idx;
+    float  old_mbx_value;
 };
 
 // Key into gPropOriginals: the exact memory address of a specific field.
@@ -203,15 +207,27 @@ static char* debug_get_block(Actor* actor, PropInfo::Block block_id)
 // Pending update queue
 
 struct PendingUpdate {
-    enum Kind { SET_PROP, SET_TRANSFORM, PICK, UNDO_STEP, REVERT_ALL, WATCH, UNWATCH } kind;
+    enum Kind { SET_PROP, SET_TRANSFORM, PICK, UNDO_STEP, REVERT_ALL,
+                WATCH, UNWATCH, SET_MAILBOX, INJECT_INPUT } kind;
     int  actor_idx;
     std::string key;
     double value;
     float  px, py, pz;              // SET_TRANSFORM: new position
     float  ray_ox, ray_oy, ray_oz;  // PICK: ray origin
     float  ray_dx, ray_dy, ray_dz;  // PICK: ray direction (unit)
-    int    mailbox_idx;             // WATCH / UNWATCH: global mailbox number
+    int    mailbox_idx;             // WATCH / UNWATCH / SET_MAILBOX: mailbox number
+    int    duration_frames;         // INJECT_INPUT: 0=this frame, N>0=N frames, -1=sticky
 };
+
+// Input override table for inject_input. Game-thread only — read by
+// DebugServer_GetInputOverride from inside Level::ReadSystemMailbox, written
+// by DrainQueue when applying an INJECT_INPUT op, ticked by DrainQueue once
+// per frame. Both happen on the game thread, so no mutex needed.
+struct InputOverride {
+    int32 value;
+    int   frames_remaining;  // -1 = sticky forever
+};
+static std::unordered_map<int, InputOverride> gInputOverrides;
 
 static std::mutex                gQueueMutex;
 static std::queue<PendingUpdate> gQueue;
@@ -332,6 +348,43 @@ static void handle_client(int fd)
                     gQueue.push(u);
                 }
 
+            } else if (op == "set_mailbox") {
+                PendingUpdate u;
+                u.kind        = PendingUpdate::SET_MAILBOX;
+                u.actor_idx   = (int)parse_jnum(line, "idx");      // 0 = global
+                u.mailbox_idx = (int)parse_jnum(line, "mailbox");
+                u.value       = parse_jnum(line, "value");
+                std::lock_guard<std::mutex> lk(gQueueMutex);
+                gQueue.push(u);
+
+            } else if (op == "inject_input") {
+                PendingUpdate u;
+                u.kind = PendingUpdate::INJECT_INPUT;
+                // Either "slot_id" (raw mailbox enum int) or "slot" (string name).
+                int slot_id = (int)parse_jnum(line, "slot_id");
+                if (slot_id == 0) {
+                    std::string slot = parse_jstr(line, "slot");
+                    if      (slot == "joystick1")                slot_id = EMAILBOX_HARDWARE_JOYSTICK1;
+                    else if (slot == "joystick1_raw")            slot_id = EMAILBOX_HARDWARE_JOYSTICK1_RAW;
+                    else if (slot == "joystick1_raw_justpressed") slot_id = EMAILBOX_HARDWARE_JOYSTICK1_RAW_JUSTPRESSED;
+                    else if (slot == "joystick2")                slot_id = EMAILBOX_HARDWARE_JOYSTICK2;
+                    else if (slot == "joystick2_raw")            slot_id = EMAILBOX_HARDWARE_JOYSTICK2_RAW;
+                    else if (slot == "joystick2_raw_justpressed") slot_id = EMAILBOX_HARDWARE_JOYSTICK2_RAW_JUSTPRESSED;
+                    else if (slot == "joystick3")                slot_id = EMAILBOX_HARDWARE_JOYSTICK3;
+                    else if (slot == "joystick3_raw")            slot_id = EMAILBOX_HARDWARE_JOYSTICK3_RAW;
+                    else if (slot == "joystick3_raw_justpressed") slot_id = EMAILBOX_HARDWARE_JOYSTICK3_RAW_JUSTPRESSED;
+                    else if (slot == "joystick4")                slot_id = EMAILBOX_HARDWARE_JOYSTICK4;
+                    else if (slot == "joystick4_raw")            slot_id = EMAILBOX_HARDWARE_JOYSTICK4_RAW;
+                    else if (slot == "joystick4_raw_justpressed") slot_id = EMAILBOX_HARDWARE_JOYSTICK4_RAW_JUSTPRESSED;
+                }
+                u.mailbox_idx     = slot_id;
+                u.value           = parse_jnum(line, "value");
+                u.duration_frames = (int)parse_jnum(line, "duration_frames");
+                if (slot_id != 0) {
+                    std::lock_guard<std::mutex> lk(gQueueMutex);
+                    gQueue.push(u);
+                }
+
             } else if (op == "watch" || op == "unwatch") {
                 PendingUpdate u;
                 u.kind        = (op == "watch") ? PendingUpdate::WATCH : PendingUpdate::UNWATCH;
@@ -439,6 +492,7 @@ void DebugServer_Stop()
     gPropOriginals.clear();
     gWatches.clear();
     gMailboxPrev.clear();
+    gInputOverrides.clear();
 }
 
 bool DebugServer_IsPaused()
@@ -455,6 +509,19 @@ bool DebugServer_IsPaused()
 void DebugServer_DrainQueue(Level& level)
 {
     if (!gRunning) return;
+
+    // Per-frame tick of input overrides. Runs BEFORE this frame's update reads
+    // the joystick mailboxes — so an override applied in frame N stays alive
+    // through frame N's reads, and is decremented at the start of frame N+1.
+    for (auto it = gInputOverrides.begin(); it != gInputOverrides.end(); ) {
+        if (it->second.frames_remaining > 0) {
+            if (--it->second.frames_remaining == 0) {
+                it = gInputOverrides.erase(it);
+                continue;
+            }
+        }
+        ++it;
+    }
 
     std::queue<PendingUpdate> local;
     {
@@ -565,6 +632,18 @@ void DebugServer_DrainQueue(Level& level)
                     }
                 } else if (r.kind == ChangeRecord::PROP && r.block) {
                     *reinterpret_cast<int32*>(r.block + r.field_offset) = r.old_raw;
+                } else if (r.kind == ChangeRecord::MAILBOX) {
+                    Mailboxes* boxes = nullptr;
+                    if (r.actor_idx == 0) {
+                        boxes = &level.GetMailboxes();
+                    } else {
+                        BaseObject* bo2 = level.GetObject(r.actor_idx);
+                        Actor* a = bo2 ? dynamic_cast<Actor*>(bo2) : nullptr;
+                        if (a) boxes = &a->GetMailboxes();
+                    }
+                    if (boxes)
+                        boxes->WriteMailbox(r.mailbox_idx,
+                                            Scalar::FromDouble((double)r.old_mbx_value));
                 }
                 gChangeStack.pop_back();
             }
@@ -591,6 +670,49 @@ void DebugServer_DrainQueue(Level& level)
             gChangeStack.clear();
             std::lock_guard<std::mutex> lk(gQueueMutex);
             send_all_locked("{\"op\":\"reverted\"}\n");
+
+        } else if (u.kind == PendingUpdate::SET_MAILBOX) {
+            // idx==0 means the global mailbox space; nonzero is per-actor.
+            // Either way, GetMailboxes() handles the routing (per-actor falls
+            // through to the parent for non-local indices).
+            Mailboxes* boxes = nullptr;
+            if (u.actor_idx == 0) {
+                boxes = &level.GetMailboxes();
+            } else if (actor) {
+                boxes = &actor->GetMailboxes();
+            }
+            if (boxes) {
+                float old_val = boxes->ReadMailbox(u.mailbox_idx).AsFloat();
+                ChangeRecord rec;
+                rec.kind          = ChangeRecord::MAILBOX;
+                rec.actor_idx     = u.actor_idx;
+                rec.px = rec.py = rec.pz = 0.f;
+                rec.block         = nullptr;
+                rec.field_offset  = 0;
+                rec.old_raw       = 0;
+                rec.mailbox_idx   = u.mailbox_idx;
+                rec.old_mbx_value = old_val;
+                gChangeStack.push_back(rec);
+
+                boxes->WriteMailbox(u.mailbox_idx, Scalar::FromDouble(u.value));
+            } else {
+                std::string errmsg = "{\"op\":\"error\","
+                    + json_str("msg", "set_mailbox: actor not found")
+                    + "," + json_int("idx", u.actor_idx) + "}\n";
+                std::lock_guard<std::mutex> lk(gQueueMutex);
+                send_all_locked(errmsg);
+            }
+
+        } else if (u.kind == PendingUpdate::INJECT_INPUT) {
+            InputOverride ov;
+            ov.value = (int32)u.value;
+            // duration_frames: 0 → one frame (this frame), N>0 → N frames,
+            // -1 → sticky until cleared by another inject_input on the same slot.
+            if (u.duration_frames == 0)
+                ov.frames_remaining = 1;
+            else
+                ov.frames_remaining = u.duration_frames;
+            gInputOverrides[u.mailbox_idx] = ov;
 
         } else if (u.kind == PendingUpdate::WATCH) {
             gWatches[u.actor_idx].insert(u.mailbox_idx);
@@ -703,6 +825,18 @@ void DebugServer_BroadcastMailboxes(Level& level)
         std::lock_guard<std::mutex> lk(gQueueMutex);
         send_all_locked(batch);
     }
+}
+
+// Called from Level::ReadSystemMailbox at the EMAILBOX_HARDWARE_JOYSTICK*
+// case branches. Game-thread only — same thread that mutates gInputOverrides
+// from DrainQueue, so no synchronization needed.
+bool DebugServer_GetInputOverride(int mailbox_id, int32_t* out_value)
+{
+    if (!gRunning || gInputOverrides.empty()) return false;
+    auto it = gInputOverrides.find(mailbox_id);
+    if (it == gInputOverrides.end()) return false;
+    *out_value = it->second.value;
+    return true;
 }
 
 #endif // WF_DEBUG_BRIDGE
