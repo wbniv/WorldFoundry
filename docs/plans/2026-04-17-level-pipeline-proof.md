@@ -16,7 +16,7 @@ rebuildable from source through the new pipeline. That requires:
 - Producing a multi-level cd.iff and confirming all 7 load in wf_game
 - Only then making the breaking rearrangement and rebuilding everything
 
-The `ScriptLanguage` field from `docs/plans/2026-04-16-script-language-oad-field.md` has
+The `ScriptLanguage` field from [docs/plans/2026-04-16-script-language-oad-field.md](2026-04-16-script-language-oad-field.md) has
 **not been added to common.inc yet** — that becomes the first structural change after
 the rearrangement capability is proved.
 
@@ -188,7 +188,7 @@ If any level can't be rebuilt cleanly, fix it before proceeding.
 
 ## Next step after this plan
 
-Once the gate passes, execute `docs/plans/2026-04-16-script-language-oad-field.md`.
+Once the gate passes, execute [docs/plans/2026-04-16-script-language-oad-field.md](2026-04-16-script-language-oad-field.md).
 That plan handles the `common.inc` rearrangement, `ScriptLanguage` field addition,
 `EvalScript`/`RunScript` signature change, sigil-sniff removal, and rebuilding all
 7 levels. The rebuild step there is unblocked once Phase E of this plan is done.

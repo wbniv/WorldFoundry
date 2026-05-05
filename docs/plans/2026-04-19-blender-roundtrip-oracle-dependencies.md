@@ -351,7 +351,7 @@ for CamShots that max2lev would never have written.  Fix in
 BOX3.  Blender import/export gate then works naturally.
 
 **e. ScriptLanguage OAD field — see separate plan.**
-`docs/plans/2026-04-16-script-language-oad-field.md` already
+[docs/plans/2026-04-16-script-language-oad-field.md](2026-04-16-script-language-oad-field.md) already
 tracks this.  Same gate.
 
 **f. Drop NULL_Object (index 0) from room entry lists.**

@@ -6,7 +6,7 @@
 
 ## Context
 
-The 2026-04-15 ScriptRouter refactor (captured in `docs/plans/2026-04-15-lua-engine-fixes.md` and the "As built" callout in `docs/plans/2026-04-14-pluggable-scripting-engine.md`) changed the shape of every scripting engine in `wftools/engine/stubs/scripting_stub.cc`:
+The 2026-04-15 ScriptRouter refactor (captured in [docs/plans/2026-04-15-lua-engine-fixes.md](2026-04-15-lua-engine-fixes.md) and the "As built" callout in [docs/plans/2026-04-14-pluggable-scripting-engine.md](2026-04-14-pluggable-scripting-engine.md)) changed the shape of every scripting engine in `wftools/engine/stubs/scripting_stub.cc`:
 
 - `LuaInterpreter` is gone. A `ScriptRouter : public ScriptInterpreter` owns every engine's lifecycle as a peer.
 - Each engine lives as a file-scope `<engine>_engine` namespace with module-level globals (not a class, not member variables), exposing `Init(mgr) / Shutdown() / AddConstantArray(list) / DeleteConstantArray(list) / RunScript(src, objectIndex)`.
@@ -31,7 +31,7 @@ The older scripting plans (Lua spike, Fennel, JS, wasm3) describe a `LuaInterpre
 | 8 | `2026-04-14-forth-scripting-engine.md` | zForth/ficl/Atlast/embed/libforth/pForth (pluggable) | **landed 2026-04-15** (zForth default; needs smoke test) | `zforth-*/`, `ficl-*/`, etc. | `scripting_forth.hp`, `scripting_zforth.cc` | yes — `forth_engine` namespace |
 | 9 | `2026-04-15-lua-engine-fixes.md` | Lua (fixes #1–#6) | **landed 2026-04-15** (#1–#5 shipped; #6 coroutines landed, needs smoke test) | n/a | n/a | yes — defines the convention |
 
-A row-for-row version of this table should also land at the top of `docs/scripting-languages.md` (user-visible status reference). That is included in Phase C below.
+A row-for-row version of this table should also land at the top of [docs/scripting-languages.md](../scripting-languages.md) (user-visible status reference). That is included in Phase C below.
 
 ## Approach
 
@@ -88,13 +88,13 @@ For each pending plan (rows 6–8) rewrite every snippet that names `LuaInterpre
 
 **Plan 8 (Forth):** same retargeting — the `\` dispatch arm goes into `ScriptRouter::RunScript` first (it's the most specific one-byte sigil for a backslash). Phase 6 ("Integrate into `scripting_stub.cc`") becomes "add `forth_engine::Init / Shutdown / AddConstantArray` calls into `ScriptRouter` and the `\` arm into `ScriptRouter::RunScript`". Keep the backend-selection mechanism (`WF_FORTH_ENGINE=zforth|ficl|…`) unchanged — each selected backend compiles into a single `forth_engine` namespace with the chosen implementation.
 
-### Phase C — Add a unified status table to `docs/scripting-languages.md`
+### Phase C — Add a unified status table to [docs/scripting-languages.md](../scripting-languages.md)
 
-Prepend a **Status** table (the one in this plan) to `docs/scripting-languages.md`. Each pending row links to its plan; each landed row links to the plan **and** to the source file in `wftools/engine/stubs/`.
+Prepend a **Status** table (the one in this plan) to [docs/scripting-languages.md](../scripting-languages.md). Each pending row links to its plan; each landed row links to the plan **and** to the source file in `wftools/engine/stubs/`.
 
 ### Phase D — Implement pending scripting engines
 
-**Definition of done for each engine:** code compiles, snowgoons player + director smoke test passes, `docs/scripting-languages.md` updated (engine row, sigil, compile switch, binary cost, status → "shipping"), snowgoons reference scripts added to the doc.
+**Definition of done for each engine:** code compiles, snowgoons player + director smoke test passes, [docs/scripting-languages.md](../scripting-languages.md) updated (engine row, sigil, compile switch, binary cost, status → "shipping"), snowgoons reference scripts added to the doc.
 
 #### D.1 Lua fixes (#1–#6) — see `2026-04-15-lua-engine-fixes.md`
 
@@ -109,7 +109,7 @@ No new vendor. All changes in `scripting_stub.cc` (`lua_engine` namespace).
 | #3 Fennel pre-compilation cache (`fennel.compileString`) | medium | 1 h |
 | #6 Multi-tick coroutine continuations (`lua_resume`) | high | half-day — land separately after #1–#5 |
 
-Land order: #4+#5 → #1+#2+#3 together → #6 separately. Update Lua + Fennel rows in `docs/scripting-languages.md` with a status footnote once fixes land. No new sigil or switch.
+Land order: #4+#5 → #1+#2+#3 together → #6 separately. Update Lua + Fennel rows in [docs/scripting-languages.md](../scripting-languages.md) with a status footnote once fixes land. No new sigil or switch.
 
 #### D.2 JerryScript smoke test
 
@@ -147,7 +147,7 @@ Sigil: `\` (Forth line-comment; dispatch before `//`).
 6. `scripts/patch_snowgoons_forth.py` — patch snowgoons IFF with `\`-sigil scripts
 7. Remaining backends: `scripting_{ficl,atlast,embed,libforth,pforth}.cc` (same ABI, one at a time)
 
-**Doc updates:** add Forth section to `docs/scripting-languages.md` — one row per backend, sigil `\`, `WF_FORTH_ENGINE` / `WF_ENABLE_FORTH` switches, binary cost per engine, status. Add snowgoons player + director examples in Forth (valid for all backends — shared word definitions).
+**Doc updates:** add Forth section to [docs/scripting-languages.md](../scripting-languages.md) — one row per backend, sigil `\`, `WF_FORTH_ENGINE` / `WF_ENABLE_FORTH` switches, binary cost per engine, status. Add snowgoons player + director examples in Forth (valid for all backends — shared word definitions).
 
 **Effort:** 1–2 days.
 
@@ -164,7 +164,7 @@ Sigil: `//wren\n` (checked before generic `//` to avoid false dispatch to JS).
 5. Smoke test
 6. `scripts/patch_snowgoons_wren.py`
 
-**Doc updates:** add Wren row to `docs/scripting-languages.md` — sigil `//wren\n`, `WF_ENABLE_WREN`, binary cost (~100 KB), status, foreign-class mailbox bridge note (`Env.read_mailbox` / `Env.write_mailbox`). Add snowgoons player + director examples in Wren.
+**Doc updates:** add Wren row to [docs/scripting-languages.md](../scripting-languages.md) — sigil `//wren\n`, `WF_ENABLE_WREN`, binary cost (~100 KB), status, foreign-class mailbox bridge note (`Env.read_mailbox` / `Env.write_mailbox`). Add snowgoons player + director examples in Wren.
 
 **Effort:** 1–2 days.
 
@@ -203,9 +203,9 @@ AOT path (phase 2) deferred.
 6. **WAMR** — last; largest lift; 2–3 days
 7. **Lua fix #6** — separate, after everything else stable
 
-### Phase E — Reference scripts in `docs/scripting-languages.md`
+### Phase E — Reference scripts in [docs/scripting-languages.md](../scripting-languages.md)
 
-`docs/scripting-languages.md` carries the canonical player + director
+[docs/scripting-languages.md](../scripting-languages.md) carries the canonical player + director
 snowgoons scripts for every engine WF supports.  The doc currently has
 working, committed scripts for **Lua**, **Fennel**, **QuickJS**, and
 **wasm3**.  Phase E extends it with the remaining engines.
@@ -314,7 +314,7 @@ For each engine block added:
 
 **Definition of done:** `wf_game -Lwflevels/snowgoons.iff` runs with the given engine
 compiled in, player moves under joystick input, director cuts cameras on trigger.
-Once passed, flip the engine's status to "shipping" in `docs/scripting-languages.md`.
+Once passed, flip the engine's status to "shipping" in [docs/scripting-languages.md](../scripting-languages.md).
 
 | Engine | Build switch | Status |
 |--------|-------------|--------|
@@ -330,16 +330,16 @@ Once passed, flip the engine's status to "shipping" in `docs/scripting-languages
 ## Critical files
 
 **Docs (Phases A, B, C):**
-- `docs/plans/2026-04-13-lua-interpreter-spike.md`
-- `docs/plans/2026-04-14-vendor-lua.md`
-- `docs/plans/2026-04-14-fennel-on-lua.md`
-- `docs/plans/2026-04-14-pluggable-scripting-engine.md`
-- `docs/plans/2026-04-14-wasm3-scripting-engine.md`
-- `docs/plans/2026-04-14-wamr-dev-aot-ship.md`
-- `docs/plans/2026-04-14-wren-scripting-engine.md`
-- `docs/plans/2026-04-14-forth-scripting-engine.md`
-- `docs/plans/2026-04-15-lua-engine-fixes.md` (cosmetic cross-reference)
-- `docs/scripting-languages.md` — host for the unified status table + per-engine rows and snowgoons reference scripts.
+- [docs/plans/2026-04-13-lua-interpreter-spike.md](2026-04-13-lua-interpreter-spike.md)
+- [docs/plans/2026-04-14-vendor-lua.md](2026-04-14-vendor-lua.md)
+- [docs/plans/2026-04-14-fennel-on-lua.md](2026-04-14-fennel-on-lua.md)
+- [docs/plans/2026-04-14-pluggable-scripting-engine.md](2026-04-14-pluggable-scripting-engine.md)
+- [docs/plans/2026-04-14-wasm3-scripting-engine.md](2026-04-14-wasm3-scripting-engine.md)
+- [docs/plans/2026-04-14-wamr-dev-aot-ship.md](2026-04-14-wamr-dev-aot-ship.md)
+- [docs/plans/2026-04-14-wren-scripting-engine.md](2026-04-14-wren-scripting-engine.md)
+- [docs/plans/2026-04-14-forth-scripting-engine.md](2026-04-14-forth-scripting-engine.md)
+- [docs/plans/2026-04-15-lua-engine-fixes.md](2026-04-15-lua-engine-fixes.md) (cosmetic cross-reference)
+- [docs/scripting-languages.md](../scripting-languages.md) — host for the unified status table + per-engine rows and snowgoons reference scripts.
 
 **Code (Phase A′ — rename):**
 - `wftools/engine/stubs/scripting_js.hp` — wrap decls in `namespace js_engine { ... }`
@@ -365,6 +365,6 @@ Once passed, flip the engine's status to "shipping" in `docs/scripting-languages
 1. Each landed plan clearly says `**Status:** landed <date>` at the top.
 2. `grep -n LuaInterpreter docs/plans/2026-04-*-scripting*.md 2026-04-14-fennel*.md 2026-04-14-wamr*.md 2026-04-14-wren*.md 2026-04-14-forth*.md` returns either zero hits, or only hits inside historical "As built" callouts or code-archaeology notes (explicitly flagged as pre-refactor).
 3. Every pending plan's "Integrate into `scripting_stub.cc`" / "Dispatch" section names `ScriptRouter`, not `LuaInterpreter`.
-4. Status table in `docs/scripting-languages.md` (or `docs/plans/README.md`) lists all nine plans with correct status; cross-links resolve.
+4. Status table in [docs/scripting-languages.md](../scripting-languages.md) (or [docs/plans/README.md](README.md)) lists all nine plans with correct status; cross-links resolve.
 5. Sigil priority in the pending plans matches: `\` > `//wren\n` > `//` > `#…\n` > `;` > fallthrough.
 6. Phase A′ code rename (JS + wasm3 plugs → `js_engine` / `wasm3_engine` namespaces) builds clean under both `WF_JS_ENGINE=quickjs` and `WF_WASM_ENGINE=wasm3`; snowgoons still runs. Phase D engine implementations carry their own per-engine verification (see D.1–D.5).

@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-29
 **Status:** Phases 1, 1.5, 2a, 2b, 3 implemented. Phase 4: perf overlay + --debug-bind done; shader hot-reload + script breakpoints pending.
-**Related:** `docs/plans/2026-04-29-blender-run-operator.md`, `docs/investigations/2026-04-29-blender-game-engine-removal.md`
+**Related:** [docs/plans/2026-04-29-blender-run-operator.md](2026-04-29-blender-run-operator.md), [docs/investigations/2026-04-29-blender-game-engine-removal.md](../investigations/2026-04-29-blender-game-engine-removal.md)
 
 ---
 
@@ -499,7 +499,7 @@ The engine's generator/template system (`ConstructTemplateObject`) can only inst
 | Modify | `wftools/wf_blender/panels.py` — add `WF_PT_live_bridge` panel |
 | Modify | `wftools/wf_blender/install.sh` — symlink `debug_bridge.py` |
 | Modify | `Taskfile.yml` — add `run-debug` task |
-| **New** (planned) | `docs/wf-live-bridge.md` — user manual |
+| **New** (planned) | [docs/wf-live-bridge.md](../wf-live-bridge.md) — user manual |
 
 ---
 

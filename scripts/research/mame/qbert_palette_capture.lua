@@ -7,14 +7,22 @@ local round = 0
 local FIRST_ADVANCE = 600    -- frames before first advance (game boots + attract)
 local ADVANCE_INTERVAL = 1800 -- frames between round advances (~30 sec at 60fps)
 local last_advance = -1
-local palette_dev = nil
-local input_dev = nil
+local dip_set = false
+
+-- Lazy lookup — emu.register_start fires before machine devices are ready
+local function palette_dev()
+    return manager.machine.devices[":palette"]
+end
 
 local function dump_palette(label)
+    local dev = palette_dev()
+    if not dev then
+        print("[ERROR] :palette device not found at frame " .. frame)
+        return
+    end
     io.write("\n=== PALETTE " .. label .. " (frame=" .. frame .. ") ===\n")
-    -- palette has 16 hardware colors (pens 0-15)
     for i = 0, 15 do
-        local c = palette_dev:pen_color(i)
+        local c = dev:pen_color(i)
         -- MAME pen_color returns ARGB as integer: 0xAARRGGBB
         local r = (c >> 16) & 0xFF
         local g = (c >>  8) & 0xFF
@@ -35,22 +43,16 @@ local function set_input(name, val)
     end
 end
 
-emu.register_start(function()
-    palette_dev = manager.machine.devices[":palette"]
-    if not palette_dev then
-        print("[ERROR] :palette device not found")
-        manager.machine:exit()
-        return
-    end
-    print("[INFO] :palette device found: " .. tostring(palette_dev.shortname))
-
-    -- Set Demo Mode DIP: unlimited lives + Start=advance round
-    set_input("Demo Mode (Unlim Lives, Start=Adv (Cheat)", 1)
-    print("[INFO] DIP cheat set")
-end)
-
 emu.register_frame_done(function()
     frame = frame + 1
+
+    -- Set DIP on first frame (machine is ready by then)
+    if not dip_set and frame == 1 then
+        set_input("Demo Mode (Unlim Lives, Start=Adv (Cheat)", 1)
+        local dev = palette_dev()
+        print("[INFO] DIP cheat set; :palette device = " .. tostring(dev and dev.shortname or "NOT FOUND"))
+        dip_set = true
+    end
 
     -- Advance round by pressing Start
     if frame >= FIRST_ADVANCE then
@@ -66,7 +68,6 @@ emu.register_frame_done(function()
             round = round + 1
             last_advance = this_advance
             dump_palette("R" .. round)
-            -- Screenshot
             manager.machine:save("/home/will/.mame/snap/qbert/palette_r" .. round .. ".png")
         end
     end

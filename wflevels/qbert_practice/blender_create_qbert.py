@@ -65,6 +65,8 @@ CUBE_BASE_Z = 1.0  # bottom row centre Z (cubes extend ±1 around their centre)
 #   422        LAST_STICK (player edge-detect snapshot for restart-button trigger)
 #   424        ROUND_CLEAR_TIMER (director internal — counts down 90→0 on win, then resets)
 #   425        ROUND_NUMBER (0-based; increments on each clear)
+#   430        AUTOPILOT_ON (0=joystick mode, 1=autopilot demo mode)
+#   431        AUTOPILOT_STEP (current step index 0..31; reset on respawn/restart)
 INDEXOF_CUBE_STATE_BASE = 200
 INDEXOF_VIS_BASE = 300
 
@@ -275,6 +277,39 @@ if player:
         ": stick INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox ;\n"
         ": cd 402 read-mailbox ;\n"
         ": tick-cd cd dup 0 > if 1 - 402 write-mailbox else drop then ;\n"
+        ": step-move "
+        "dup  0 = if drop  1  0 exit then "
+        "dup  1 = if drop -1  0 exit then "
+        "dup  2 = if drop  1  1 exit then "
+        "dup  3 = if drop  1  0 exit then "
+        "dup  4 = if drop -1 -1 exit then "
+        "dup  5 = if drop  1  0 exit then "
+        "dup  6 = if drop  1  0 exit then "
+        "dup  7 = if drop  1  0 exit then "
+        "dup  8 = if drop -1  0 exit then "
+        "dup  9 = if drop  1  1 exit then "
+        "dup 10 = if drop -1  0 exit then "
+        "dup 11 = if drop  1  1 exit then "
+        "dup 12 = if drop -1  0 exit then "
+        "dup 13 = if drop -1  0 exit then "
+        "dup 14 = if drop  1  1 exit then "
+        "dup 15 = if drop  1  0 exit then "
+        "dup 16 = if drop  1  1 exit then "
+        "dup 17 = if drop -1  0 exit then "
+        "dup 18 = if drop  1  1 exit then "
+        "dup 19 = if drop  1  1 exit then "
+        "dup 20 = if drop -1 -1 exit then "
+        "dup 21 = if drop  1  0 exit then "
+        "dup 22 = if drop -1 -1 exit then "
+        "dup 23 = if drop  1  0 exit then "
+        "dup 24 = if drop -1 -1 exit then "
+        "dup 25 = if drop  1  0 exit then "
+        "dup 26 = if drop -1 -1 exit then "
+        "dup 27 = if drop  1  0 exit then "
+        "dup 28 = if drop -1 -1 exit then "
+        "dup 29 = if drop  1  0 exit then "
+        "dup 30 = if drop -1 -1 exit then "
+        "drop  1  0 ;\n"
         ": do-hop 401 read-mailbox + swap 400 read-mailbox + "
         "dup 400 write-mailbox over 401 write-mailbox "
         "over over swap 2 * swap - INDEXOF_X_POS write-mailbox "  # 2dup not in bootstrap; over over does the same
@@ -303,6 +338,7 @@ if player:
         "0 416 write-mailbox 0 417 write-mailbox 0 418 write-mailbox "
         "0 419 write-mailbox 0 420 write-mailbox "
         "0 400 write-mailbox 0 401 write-mailbox 0 402 write-mailbox "
+        "0 431 write-mailbox "
         "28 0 do 0 200 i + write-mailbox loop "
         "0 INDEXOF_X_POS write-mailbox "
         "6 INDEXOF_Y_POS write-mailbox "
@@ -318,7 +354,7 @@ if player:
         # exit prevents joystick processing on the same tick as the teleport.
         "426 read-mailbox 1 = if "
         "0 INDEXOF_X_POS write-mailbox 6 INDEXOF_Y_POS write-mailbox 15 INDEXOF_Z_POS write-mailbox "
-        "0 426 write-mailbox exit "
+        "0 431 write-mailbox 0 426 write-mailbox exit "
         "then\n"
         # 2. Fall-animation state machine. While mb 419 > 0:
         #    1..29 → ramp Z down 1 per tick, increment FALL_PHASE.
@@ -338,9 +374,19 @@ if player:
         "exit "
         "else drop "
         "then\n"
-        # 3. Joystick processing — gated on cooldown and INTRO_DONE.
+        # 3. Autopilot or joystick — gated on cooldown and INTRO_DONE.
+        # When AUTOPILOT_ON (mb 430) != 0, execute the next step of the 32-hop
+        # coverage sequence (step-move) instead of reading the joystick.
+        # Both paths share do-hop and the 12-tick cooldown.
         "cd 0 = if "
         "418 read-mailbox 1 = if "
+        "430 read-mailbox 0 <> if "
+        "431 read-mailbox dup 32 < if "
+        "step-move do-hop "
+        "431 read-mailbox 1 + 431 write-mailbox "
+        "else drop then "
+        "exit "
+        "then "
         "stick 0x0800 & if -1 0 do-hop exit then "
         "stick 0x2000 & if 1 1 do-hop exit then "
         "stick 0x1000 & if 1 0 do-hop exit then "

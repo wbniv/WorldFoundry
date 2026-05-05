@@ -121,4 +121,4 @@ Update [`docs/investigations/2026-04-18-android-port-size-and-ram.md`](../invest
 - `wfsource/source/hal/android/asset_accessor_aasset.cc` (annotate 1)
 - `wfsource/source/hal/android/lifecycle.cc` (annotate 4)
 - `wfsource/source/gfx/gl/android_window.cc` (annotate 3)
-- `docs/investigations/2026-04-18-android-port-size-and-ram.md` (new column + text updates)
+- [docs/investigations/2026-04-18-android-port-size-and-ram.md](../investigations/2026-04-18-android-port-size-and-ram.md) (new column + text updates)

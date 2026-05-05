@@ -2,13 +2,13 @@
 
 **Date:** 2026-04-28
 **Status:** **Snapshot** — descriptive, not normative. Captures what the engine does on `party-games-platform` HEAD; new genres are routinely added.
-**Depends on:** `docs/scripting-languages.md`, `docs/investigations/2026-04-14-jolt-physics-integration.md`, `docs/investigations/2026-04-19-snowgoons-build-pipeline.md`
+**Depends on:** [docs/scripting-languages.md](../scripting-languages.md), [docs/investigations/2026-04-14-jolt-physics-integration.md](2026-04-14-jolt-physics-integration.md), [docs/investigations/2026-04-19-snowgoons-build-pipeline.md](2026-04-19-snowgoons-build-pipeline.md)
 
 ## Context
 
 This survey was prompted by a question about which 1980s arcade/console games would make good conversions to World Foundry 3D. To answer that grounded in the engine's actual shape (rather than nostalgia), this document characterises what WF is, what it natively supports today, and what would have to be added for genres outside its current sweet spot. The user has been explicit that conversions are not constrained to today's capabilities — engine work happens to enable level work — so the framing here is "current strengths vs. what each genre would require," not "what's already possible."
 
-Findings come from reading `wfsource/source/` directory layout, `docs/scripting-languages.md`, the existing investigation set, and a top-level survey of `wflevels/`. Specific numeric claims (object counts, mailbox slot counts, binary sizes) are sourced from the docs cited above; this file does not re-measure them.
+Findings come from reading `wfsource/source/` directory layout, [docs/scripting-languages.md](../scripting-languages.md), the existing investigation set, and a top-level survey of `wflevels/`. Specific numeric claims (object counts, mailbox slot counts, binary sizes) are sourced from the docs cited above; this file does not re-measure them.
 
 ## Engine profile
 
@@ -25,9 +25,9 @@ The directory list alone is informative: physics + movement are first-class peer
 - **Character control**: walk, run, jump, crawl, fall, stun/knockdown, hitpoints. Ground/air/falling have separate physics parameters. Jolt's `CharacterVirtual` handles slopes, steps, snap-to-ground (per `2026-04-14-jolt-physics-integration.md`).
 - **World structure**: room graph; actors move between rooms. Levels are typically tens of game objects (see snowgoons in `2026-04-19-snowgoons-build-pipeline.md`).
 - **Movement on rails**: path-following with ping-pong, stop, jumpback, delete, derail, warp-back endpoints. This is the system that backs the existing `minecart` level.
-- **Camera**: multiple `CamShot` objects per level; `BungeeCameraHandler` follow camera; per-frame camera switching via mailbox writes (the script-side Director pattern shown in `docs/scripting-languages.md`).
+- **Camera**: multiple `CamShot` objects per level; `BungeeCameraHandler` follow camera; per-frame camera switching via mailbox writes (the script-side Director pattern shown in [docs/scripting-languages.md](../scripting-languages.md)).
 - **Projectiles**: missiles with arming delay, impact explosion, configurable timing. *Not* a general weapon system — no aiming reticle, ammo model, or hitscan.
-- **Audio**: per-level MIDI music; fire-and-forget 3D-positional SFX. (See `docs/investigations/2026-04-14-audio-sound-music.md`.)
+- **Audio**: per-level MIDI music; fire-and-forget 3D-positional SFX. (See [docs/investigations/2026-04-14-audio-sound-music.md](2026-04-14-audio-sound-music.md).)
 - **Inter-actor messaging**: mailbox bus (thousands of slots) — every cross-actor signal goes through it. Scripts only ever read/write mailboxes; the engine reacts.
 - **Scripting**: Lua 5.4 (primary), Fennel (compiles to Lua), JavaScript (QuickJS or JerryScript — pick one), WebAssembly (WAMR; thus AssemblyScript / Rust / C / C++ / Zig / TinyGo as source languages), Forth (six interchangeable backends: zForth, ficl, Atlast, embed, libforth, pForth), Wren. Multi-tick scripts via Lua coroutines, JS generators, Wren fibers; Forth and JerryScript are single-tick. Each language is independently selectable at compile time; scriptless builds are valid.
 
@@ -44,7 +44,7 @@ These are not condemnations — each is a known-shape engine project, not a rese
 - **Hitscan or aimable ranged combat**: missiles exist but there is no aiming/reticle/ammo system. Shooters and gallery games would need one.
 - **2D / orthographic gameplay framing**: the engine is fundamentally 3D. A faithful 2D-feel game (single-screen arcade, side-scroller) is achievable via a fixed orthographic camera + locked-axis movement, but nothing in `wflevels/` does this today.
 - **Grid / turn-based logic**: no tile grid, no turn manager. Buildable in scripts, but from scratch.
-- **Networking / multiplayer**: see `docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md` — exploratory, not landed.
+- **Networking / multiplayer**: see [docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md](2026-04-14-multiplayer-voice-mobile-input.md) — exploratory, not landed.
 - **AI / pathfinding**: enemies have movement and physics, but there is no nav-mesh or A* in-tree that I observed. Scripted patrols and triggered behaviours, yes; emergent navigation, no.
 
 ### Platforms

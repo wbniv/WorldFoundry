@@ -90,7 +90,7 @@ There are ~45 doc files with path references. Four substitutions cover all cases
 | `wf_viewer/stubs` | `engine/stubs` |
 | `wf_viewer/include` | `engine/include` |
 
-Files affected: `docs/**/*.md`, `wf-status.md`, `TODO.md`.
+Files affected: [docs/**/*.md](../**/*.md), `wf-status.md`, `TODO.md`.
 
 ## 8. Update memory
 
@@ -104,10 +104,10 @@ Update project memory notes that reference old paths:
 | File | Change |
 |---|---|
 | `engine/build_game.sh` | 4 path variable/comment updates |
-| `docs/plans/2026-04-engine-start-snowgoons-directly.md` | moved from `wftools/wf_engine/PLAN.md` |
+| [docs/plans/2026-04-engine-start-snowgoons-directly.md](2026-04-engine-start-snowgoons-directly.md) | moved from `wftools/wf_engine/PLAN.md` |
 | `.gitignore` | 1 pattern update |
 | `Taskfile.yml` | 5 path updates |
-| `docs/**/*.md` (~45 files) | bulk text replacement (4 patterns) |
+| [docs/**/*.md](../**/*.md) (~45 files) | bulk text replacement (4 patterns) |
 | `wf-status.md`, `TODO.md` | bulk text replacement |
 
 ---

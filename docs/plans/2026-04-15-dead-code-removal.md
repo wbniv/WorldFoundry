@@ -10,7 +10,7 @@ item, also left as future opt-in work.
 
 LOC claims verified against git history: Batch 5 commit `03211f9` shows
 −20,967 across 208 files; the `e2dcc98` milestone in
-`docs/investigations/2026-04-15-loc-tracking.md` records the 36,199
+[docs/investigations/2026-04-15-loc-tracking.md](../investigations/2026-04-15-loc-tracking.md) records the 36,199
 total after Batch 7. Current HEAD has accreted ~1,700 LOC of new value
 (Jolt, Android HAL, audio backend, gfx renderer seam) on top — the
 dead-code removals themselves still hold.
@@ -27,7 +27,7 @@ batch.
 
 | Target | Code LOC | Reason |
 |--------|---------|--------|
-| `wfsource/source/audio/` | ~350 | `SoundBuffer::play()` is an empty stub on Linux; DirectSound `orig.cc` and `.WAV` samples are dead. Full plan: `docs/investigations/2026-04-14-remove-audio.md` |
+| `wfsource/source/audio/` | ~350 | `SoundBuffer::play()` is an empty stub on Linux; DirectSound `orig.cc` and `.WAV` samples are dead. Full plan: [docs/investigations/2026-04-14-remove-audio.md](../investigations/2026-04-14-remove-audio.md) |
 | `wfsource/source/audiofmt/` | ~0 (vendor) | Vendored 1990s sox library; nothing links against it |
 | `wftools/attribedit/` | ~2,500 | Standalone GTK+ attribute editor superseded by Blender port |
 | `wfsource/source/attrib/` | 3,747 | Windows-only tool-side UI (`windows.h`/`commctrl.h`); zero game engine usage |
@@ -100,7 +100,7 @@ were removed and their `#elif defined PHYSICS_ENGINE_WF` branches promoted to un
 
 | Target | Code LOC | Reason |
 |--------|---------|--------|
-| `wfsource/source/cdda/` | 46 | Windows-only CD-DA audio test (`cddatest.cc` + `win/`); zero external includes. See `docs/investigations/2026-04-14-remove-audio.md` |
+| `wfsource/source/cdda/` | 46 | Windows-only CD-DA audio test (`cddatest.cc` + `win/`); zero external includes. See [docs/investigations/2026-04-14-remove-audio.md](../investigations/2026-04-14-remove-audio.md) |
 | `wfsource/source/shell/` | 240 | Interactive shell / command parser; zero external includes in source or tools |
 | `wfsource/source/orphaned/` | 146 | Self-describing name; zero external includes |
 
@@ -482,8 +482,8 @@ python3 scripts/loc_report.py --compare scripts/loc_baseline_74d1a47.json
 ## Batch 8 — physics engine replacement (planned)
 
 Replace the custom WF physics engine with Jolt Physics.  Survey and integration plan:
-`docs/investigations/2026-04-14-physics-engine-survey.md` (Jolt recommended),
-`docs/investigations/2026-04-14-jolt-physics-integration.md` (integration plan, deferred).
+[docs/investigations/2026-04-14-physics-engine-survey.md](../investigations/2026-04-14-physics-engine-survey.md) (Jolt recommended),
+[docs/investigations/2026-04-14-jolt-physics-integration.md](../investigations/2026-04-14-jolt-physics-integration.md) (integration plan, deferred).
 
 The Lua spike exposed a bad `reinterpret_cast` in `BungeeCameraHandler`/`SPECIAL_COLLISION`
 (`movecam.cc:1007`).  Patching that in isolation is not the goal — replacing physics wholesale

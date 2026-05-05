@@ -2,8 +2,8 @@
 
 **Date:** 2026-04-14
 **Status:** Deferred — plan captured for future work, not scheduled. Depends on the mobile port landing.
-**Depends on:** `docs/investigations/2026-04-14-mobile-port-android-ios.md`.
-**Related:** `docs/investigations/2026-04-14-jolt-physics-integration.md` (variable tick rate is load-bearing; constrains multiplayer sync model).
+**Depends on:** [docs/investigations/2026-04-14-mobile-port-android-ios.md](2026-04-14-mobile-port-android-ios.md).
+**Related:** [docs/investigations/2026-04-14-jolt-physics-integration.md](2026-04-14-jolt-physics-integration.md) (variable tick rate is load-bearing; constrains multiplayer sync model).
 
 ## Context
 
@@ -178,7 +178,7 @@ Not "must use all of these" — a menu the game designer picks from per mini-gam
 | `wfsource/source/hal/android/`, `wfsource/source/hal/ios/` | New sensor and mic input impls |
 | `wfsource/source/hal/` (interface) | Haptic output surface |
 | Lobby signalling server (language TBD) | New, out of the WF repo — its own small service |
-| Docs | `docs/multiplayer.md` (wire protocol), `docs/mobile-input.md` (input surface) |
+| Docs | [docs/multiplayer.md](../multiplayer.md) (wire protocol), [docs/mobile-input.md](../mobile-input.md) (input surface) |
 
 ## Verification
 

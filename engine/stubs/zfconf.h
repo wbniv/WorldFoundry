@@ -29,10 +29,12 @@ typedef int zf_int;
 typedef unsigned int zf_addr;
 #define ZF_ADDR_FMT "%04x"
 
-/* Dictionary: 16 KB — room for ~150 INDEXOF_xx / JOYSTICK_BUTTON_xx constants
- * (~4 KB) plus bootstrap words and user game scripts.
+/* Dictionary: 64 KB — bumped 2026-05-03 from 16 KB after Q*bert MVP's
+ * director + player scripts overran the limit (8 word definitions across
+ * the two scripts plus the ~150 INDEXOF/JOYSTICK constants pushed past
+ * 16 KB and triggered ZF_ABORT_OUTSIDE_MEM at compile time).
  * Stack sizes enlarged from the Linux default (8 each) to handle nesting. */
-#define ZF_DICT_SIZE   16384
+#define ZF_DICT_SIZE   65536
 #define ZF_DSTACK_SIZE 64
 #define ZF_RSTACK_SIZE 64
 

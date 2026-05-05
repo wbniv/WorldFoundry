@@ -1,4 +1,9 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(/usr/games/mame *)"
+    ]
+  },
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -41,7 +46,7 @@
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "bash ../python-tui-lib/hooks/todo-reminder.sh", "timeout": 5 }
+          { "type": "command", "command": "cd \"$(git rev-parse --show-toplevel)\" && bash ../python-tui-lib/hooks/todo-reminder.sh", "timeout": 5 }
         ]
       }
     ]

@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-29
 **Status:** Snapshot — WF side sourced from `wfsource/`, investigation set, and plan docs on `2026-new-level`. Godot side sourced from Godot 4.4 documentation and source; version is noted where it matters.
-**Depends on:** `docs/investigations/2026-04-28-engine-capabilities-survey.md` (WF capability baseline), `docs/investigations/2026-04-14-jolt-physics-integration.md`
+**Depends on:** [docs/investigations/2026-04-28-engine-capabilities-survey.md](2026-04-28-engine-capabilities-survey.md) (WF capability baseline), [docs/investigations/2026-04-14-jolt-physics-integration.md](2026-04-14-jolt-physics-integration.md)
 
 **Scope:** Technical comparison only — renderer, physics, scripting, tooling, world model, audio, networking, platforms, asset pipeline, licensing. Community size, ecosystem maturity, and hiring-market considerations are excluded by intent.
 
@@ -95,7 +95,7 @@ The `wf-asset-browser` plugin (source: `wftools/wf_blender/`) provides something
 
 **Godot** has a first-class audio engine: `AudioStreamPlayer` (2D), `AudioStreamPlayer3D` (positional with attenuation models), `AudioStreamPlayer` (non-positional), effect buses (reverb, EQ, compressor, chorus, delay, limiter), dynamic mixing, `AudioStreamGenerator` for procedural audio. Streams can be OGG, MP3, WAV, or generated. AnimationPlayer can drive audio cues.
 
-**World Foundry** has MIDI music (per-level) and fire-and-forget 3D-positional sound effects. The audio subsystem investigation (`docs/investigations/2026-04-14-audio-sound-music.md`) notes these as the current capabilities. No effect buses, no dynamic mixing, no procedural audio.
+**World Foundry** has MIDI music (per-level) and fire-and-forget 3D-positional sound effects. The audio subsystem investigation ([docs/investigations/2026-04-14-audio-sound-music.md](2026-04-14-audio-sound-music.md)) notes these as the current capabilities. No effect buses, no dynamic mixing, no procedural audio.
 
 **WF advantage:** none.
 
@@ -105,7 +105,7 @@ The `wf-asset-browser` plugin (source: `wftools/wf_blender/`) provides something
 
 **Godot** has a high-level multiplayer API: `MultiplayerPeer` abstraction over ENet, WebSocket, and WebRTC transports; `@rpc` annotation for remote procedure calls; `MultiplayerSpawner` and `MultiplayerSynchronizer` for scene replication; authoritative server + client prediction patterns are documented and community-validated.
 
-**World Foundry** has no networking in-tree. The multiplayer/voice/mobile-input investigation (`docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md`) is exploratory; nothing has landed.
+**World Foundry** has no networking in-tree. The multiplayer/voice/mobile-input investigation ([docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md](2026-04-14-multiplayer-voice-mobile-input.md)) is exploratory; nothing has landed.
 
 **WF advantage:** none.
 

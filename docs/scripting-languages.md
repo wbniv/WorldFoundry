@@ -105,8 +105,8 @@ JerryScript (ES5.1) has no generator support and is omitted from these examples.
 Forth (zForth) has no native coroutine — `zf_eval` runs to completion each tick and
 resumable context save/restore is not implemented. Forth examples show the equivalent
 per-tick state machine: phase and tick counters live in mailboxes (Forth `variable`
-is append-only and would be re-allocated each tick). The pattern is `dup N = if ... fi`
-dispatch per phase. `fi` terminates conditionals — zForth has no `then`.
+is append-only and would be re-allocated each tick). The pattern is `dup N = if ... then`
+dispatch per phase; `then` closes conditionals (standard Forth).
 
 **Triggered alarm sequence** — three ordered phases: wait for player to enter
 zone, sound alarm for ~2 s, seal the door. Without a coroutine: explicit `state`
@@ -154,6 +154,13 @@ Script ends; mailbox persists.
 | Wren | <pre>var _thread = Fiber.new {&#10;    while (Env.read_mailbox(INDEXOF_PLAYER_DIST) >= 100) Fiber.yield()&#10;&#10;    var frame = 0&#10;    while (frame &lt;= 7) {&#10;        Env.write_mailbox(INDEXOF_DOOR_FRAME, frame)&#10;        Fiber.yield()&#10;        Fiber.yield()&#10;        frame = frame + 1&#10;    }&#10;&#10;    Env.write_mailbox(INDEXOF_DOOR_OPEN, 1)&#10;}</pre> |
 | JS (QuickJS) | <pre>(function*() {&#10;    while (read_mailbox(INDEXOF_PLAYER_DIST) >= 100) yield&#10;&#10;    for (let frame = 0; frame &lt;= 7; frame++) {&#10;        write_mailbox(INDEXOF_DOOR_FRAME, frame)&#10;        yield&#10;        yield&#10;    }&#10;&#10;    write_mailbox(INDEXOF_DOOR_OPEN, 1)&#10;})()</pre> |
 | Forth (zForth) | <pre>\ 1 tick per frame; for 2 ticks/frame add an INDEXOF_SUBTICK mailbox&#10;INDEXOF_PHASE read-mailbox&#10;dup 0 = if&#10;  INDEXOF_PLAYER_DIST read-mailbox 100 &lt; if&#10;    0 INDEXOF_DOOR_FRAME write-mailbox&#10;    1 INDEXOF_PHASE write-mailbox&#10;  fi&#10;fi&#10;dup 1 = if&#10;  INDEXOF_DOOR_FRAME read-mailbox 1 + dup INDEXOF_DOOR_FRAME write-mailbox&#10;  8 &gt;= if&#10;    1 INDEXOF_DOOR_OPEN write-mailbox&#10;    2 INDEXOF_PHASE write-mailbox&#10;  fi&#10;fi&#10;drop</pre> |
+
+**Coverage autopilot (Q\*bert, 32 hops)** — a long fixed sequence where coroutines show their biggest gain. In Lua the sequence is a flat table; the coroutine walks it top-to-bottom, waiting on the hop cooldown between steps. In zForth a 32-entry `dup N = if ... then` chain would fill the entire script body; the dispatch-table variant compresses it: a `step-move` word encodes the sequence once at load time, and a single `AUTOPILOT_STEP` mailbox acts as the saved program counter between ticks — the idiomatic Forth substitute for `pause`/`resume`. Full path derivation (why a Hamiltonian path from the apex is impossible, 5-revisit solution) and testing instructions in [docs/investigations/2026-05-05-qbert-autopilot.md](investigations/2026-05-05-qbert-autopilot.md).
+
+| Language | Script |
+|----------|--------|
+| Lua | <pre>return coroutine.create(function()&#10;    local steps = {  -- 32 hops covering all 28 pyramid cubes&#10;        { 1, 0},{-1, 0},{ 1, 1},{ 1, 0},{-1,-1},{ 1, 0},{ 1, 0},{ 1, 0},&#10;        {-1, 0},{ 1, 1},{-1, 0},{ 1, 1},{-1, 0},{-1, 0},{ 1, 1},{ 1, 0},&#10;        { 1, 1},{-1, 0},{ 1, 1},{ 1, 1},{-1,-1},{ 1, 0},{-1,-1},{ 1, 0},&#10;        {-1,-1},{ 1, 0},{-1,-1},{ 1, 0},{-1,-1},{ 1, 0},{-1,-1},{ 1, 0},&#10;    }&#10;    while true do&#10;        for _, m in ipairs(steps) do&#10;            repeat coroutine.yield()&#10;            until read_mailbox(INDEXOF_COOLDOWN) == 0&#10;            do_hop(m[1], m[2])&#10;            coroutine.yield()&#10;        end&#10;    end&#10;end)</pre> |
+| Forth (zForth) | <pre>( step-move — dispatch table, compiled once at script load )&#10;: step-move  ( step -- dr dc )&#10;  dup  0 = if drop  1  0 exit then&#10;  dup  1 = if drop -1  0 exit then&#10;  dup  2 = if drop  1  1 exit then&#10;  ( ... 29 more entries; see investigation doc linked above )&#10;  drop  1  0 ;&#10;&#10;( per-tick body — AUTOPILOT_ON=430  AUTOPILOT_STEP=431 )&#10;430 read-mailbox 0 &lt;&gt; if&#10;  431 read-mailbox dup 32 &lt; if&#10;    step-move do-hop&#10;    431 read-mailbox 1 + 431 write-mailbox&#10;  else drop then&#10;then</pre> |
 
 ### Rules
 

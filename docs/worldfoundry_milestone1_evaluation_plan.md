@@ -39,7 +39,7 @@ Use these specific fields from `player.oad` to hit every kind and key UI behavio
 - Re-import via `WF_OT_import_iff_txt` into a fresh object; confirm round-trip equality.
 
 ### 6. Answer the §9 evaluation questions
-Record answers in `docs/worldfoundry_milestone1_evaluation.md` (new file):
+Record answers in [docs/worldfoundry_milestone1_evaluation.md](worldfoundry_milestone1_evaluation.md) (new file):
 
 1. **Does schema → UI generation feel clean?** — note any awkward renders on `player.oad` (many sections, deep `show_as` conditions, STOP separators).
 2. **Is Rust ↔ Python binding tolerable?** — note ergonomics of `wf_core.load_schema` / `fields()` / error surfaces.
@@ -48,7 +48,7 @@ Record answers in `docs/worldfoundry_milestone1_evaluation.md` (new file):
 5. **Which old button types are next-most-important?** — based on what `player.oad` needed but the slice doesn't cleanly support (e.g. mailbox pickers, slope plane coefficients, script path w/ browse).
 
 ## Critical files (read-only during eval)
-- `docs/worldfoundry_milestone1_checklist.md` — source of truth
+- [docs/worldfoundry_milestone1_checklist.md](worldfoundry_milestone1_checklist.md) — source of truth
 - `wftools/wf_blender/operators.py:33-309` — attach, validate, export
 - `wftools/wf_blender/panels.py:140-237` — dynamic field rendering
 - `wftools/wf_attr_schema/src/lib.rs:100-141` — FieldDescriptor shape
@@ -57,7 +57,7 @@ Record answers in `docs/worldfoundry_milestone1_evaluation.md` (new file):
 
 ## Deliverable
 - `/tmp/player.iff.txt` produced from edited-in-Blender values, round-trippable via import.
-- `docs/worldfoundry_milestone1_evaluation.md` with answers to the five questions and a go/no-go recommendation for Milestone 2 scope.
+- [docs/worldfoundry_milestone1_evaluation.md](worldfoundry_milestone1_evaluation.md) with answers to the five questions and a go/no-go recommendation for Milestone 2 scope.
 
 ## Verification
 - Blender panel renders all 5 kinds without Python errors in the console.

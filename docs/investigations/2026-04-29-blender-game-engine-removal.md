@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-29
 **Status:** Research + opinion. Not a commitment to any specific workstream — more a "huh, is this interesting?" evaluation.
-**Related:** `docs/investigations/2026-04-28-engine-capabilities-survey.md`, `docs/investigations/2026-04-28-level-construction-tooling.md`, `wftools/wf_blender/`
+**Related:** [docs/investigations/2026-04-28-engine-capabilities-survey.md](2026-04-28-engine-capabilities-survey.md), [docs/investigations/2026-04-28-level-construction-tooling.md](2026-04-28-level-construction-tooling.md), `wftools/wf_blender/`
 
 ---
 
@@ -114,7 +114,7 @@ Realistic income paths, roughly in order of probability:
 
 These are speculative — not committed work, just logical next steps if this direction is interesting:
 
-1. ~~**Add a "Run in WF" Blender operator.**~~ **DONE (2026-04-29).** `WF_OT_run_level` ("Run in Engine") is implemented in `wftools/wf_blender/`. One click in Properties > Scene > World Foundry Level: export → build `.iff` → launch `wf_game` detached. Progress bar advances 1→2→3 in the status bar; Blender stays open. See `docs/plans/2026-04-29-blender-run-operator.md`.
+1. ~~**Add a "Run in WF" Blender operator.**~~ **DONE (2026-04-29).** `WF_OT_run_level` ("Run in Engine") is implemented in `wftools/wf_blender/`. One click in Properties > Scene > World Foundry Level: export → build `.iff` → launch `wf_game` detached. Progress bar advances 1→2→3 in the status bar; Blender stays open. See [docs/plans/2026-04-29-blender-run-operator.md](../plans/2026-04-29-blender-run-operator.md).
 
    The remaining 20% — **live object manipulation / hot-reload** — requires engine-side IFF watching and a reload path so changes propagate without restarting. This is a wanted workstream but not ready to plan yet.
 

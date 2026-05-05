@@ -5,7 +5,7 @@
 **Depends on:** wasm3 spike (landed in cfa739c) — proved the dispatch,
 sigil, base64 wrapper, host-import ABI, and snowgoons-as-wasm end-to-end.
 **Source investigation:** Conversation captured in the wasm3 spike thread;
-`docs/plans/2026-04-14-wasm3-scripting-engine.md` §Follow-ups.
+[docs/plans/2026-04-14-wasm3-scripting-engine.md](2026-04-14-wasm3-scripting-engine.md) §Follow-ups.
 
 ## Why this follow-up
 
@@ -86,7 +86,7 @@ flowchart LR
 3. **Constant-globals import** — walk `mailboxIndexArray` + `joystickArray`
    at instantiate-time, register each as a host global. Authors can now
    write `import "consts" "INDEXOF_INPUT" (global i32)` instead of baking
-   `3024`. Update `docs/scripting-languages.md` with the new author story.
+   `3024`. Update [docs/scripting-languages.md](../scripting-languages.md) with the new author story.
 4. **`build_game.sh`** — extend the `WF_WASM_ENGINE` switch to accept
    `wamr`. WAMR builds via its own CMake; add the invocation alongside
    JerryScript's (the JS plan's model).
@@ -102,7 +102,7 @@ flowchart LR
 >   `build_game.sh` builds `libvmlib.a` (~519 KB at MinSizeRel) with
 >   `WAMR_BUILD_INTERP=1 WAMR_BUILD_WASM_C_API=1` and all other modules off.
 >   Measured `-O2` `.text` size in `wf_game`: ~107 KB (see
->   `docs/scripting-languages.md`).
+>   [docs/scripting-languages.md](../scripting-languages.md)).
 > - **API divergence:** implementation uses the **wasm-C-API** (`wasm_engine_new /
 >   wasm_module_new / wasm_instance_new / wasm_func_new / wasm_global_new`) rather
 >   than WAMR's proprietary `wasm_runtime_load / wasm_runtime_instantiate` ABI.
@@ -175,7 +175,7 @@ not drop-in data."
 5. **wasm3 ↔ WAMR parity** — identical trace lines for snowgoons
    director across both engines (proves the spec-level behaviour hasn't
    drifted).
-6. **Size matrix** — publish a table in `docs/scripting-languages.md`:
+6. **Size matrix** — publish a table in [docs/scripting-languages.md](../scripting-languages.md):
    `none`, `wasm3`, `wamr`, `wamr-aot`, `w2c2`. Absolute stripped
    binary size per configuration.
 7. **Measure and compare all options under consideration.** Produce one
@@ -203,7 +203,7 @@ not drop-in data."
    - **RAM footprint, peak during call** — stack high-water for one
      `main()` invocation on the snowgoons director. Useful for the 2 MB
      target's headroom math.
-   Publish as a single table in `docs/scripting-languages.md`, with the
+   Publish as a single table in [docs/scripting-languages.md](../scripting-languages.md), with the
    measurement methodology in a footnote so future engines can land
    next to the same numbers. All measurements at `-O2` on x86_64 Linux
    and (if the cross-toolchain is ready) a representative 32-bit ARM

@@ -6,11 +6,11 @@ plug is being renamed from the free-function `JsRuntimeInit / JsRunScript
 / JsAddConstantArray / JsRuntimeShutdown` shape into a `js_engine`
 namespace (`Init / RunScript / AddConstantArray / DeleteConstantArray /
 Shutdown`) as part of the
-`docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md` sweep, to
+[docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md](2026-04-15-scripting-plans-align-scriptrouter.md) sweep, to
 match `lua_engine` and every engine that comes after. Other deviations
 from the as-designed plan are captured inline below under *"As built:"* call-outs.
-**Depends on:** Lua spike (landed); `docs/plans/2026-04-14-fennel-on-lua.md` (concurrent, owns Lua vendoring).
-**Source investigation:** `docs/investigations/2026-04-14-scripting-language-replacement.md`
+**Depends on:** Lua spike (landed); [docs/plans/2026-04-14-fennel-on-lua.md](2026-04-14-fennel-on-lua.md) (concurrent, owns Lua vendoring).
+**Source investigation:** [docs/investigations/2026-04-14-scripting-language-replacement.md](../investigations/2026-04-14-scripting-language-replacement.md)
 
 **Framing note (clarification, 2026-04-14):** an earlier draft of this
 plan described JS as plugging into an always-on Lua host. That was wrong.
@@ -302,7 +302,7 @@ Reuse:
 
 ## Follow-ups (out of scope)
 
-- **Update `docs/scripting-languages.md`** with the QuickJS port of every script in the snowgoons level — paired side-by-side with the existing Lua / Fennel rows so authors can see the same gameplay logic in all three languages. Source of truth is whatever `tcl_to_lua_in_dump.py` produces from the snowgoons IFF; convert each by hand (no `lua_to_js_in_dump.py` yet — see next bullet).
+- **Update [docs/scripting-languages.md](../scripting-languages.md)** with the QuickJS port of every script in the snowgoons level — paired side-by-side with the existing Lua / Fennel rows so authors can see the same gameplay logic in all three languages. Source of truth is whatever `tcl_to_lua_in_dump.py` produces from the snowgoons IFF; convert each by hand (no `lua_to_js_in_dump.py` yet — see next bullet).
 - `scripts/lua_to_js_in_dump.py` — bulk Lua→JS converter mirroring `tcl_to_lua_in_dump.py`.
 - Wire selection into `Taskfile.yml` (`task build`, `task build:quickjs`, `task build:jerryscript`).
 - **Debug vs. shipping JerryScript builds.** The `wf-minimal` profile turns off `JERRY_ERROR_MESSAGES` and `JERRY_LINE_INFO` because this flavor exists to be the smallest JS option. Add a `WF_JS_DEBUG_BUILD=1` toggle that flips those two flags back on (adds ~10–15 KB) so authors have readable stack traces during development; shipping builds stay lean.

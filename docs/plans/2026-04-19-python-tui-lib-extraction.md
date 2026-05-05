@@ -285,7 +285,7 @@ Update WorldFoundry's `wf-status.md` row + this plan's `**Status:**` line to ref
 - `scripts/git-branch-browser.py` — `?` key, `sys.path` bootstrap, `DocViewer` import
 - New: `scripts/git-branch-browser.help.md`
 - Add `.gitmodules` entry for `vendor/python-tui-lib`
-- Update: `docs/plans/2026-04-16-git-branch-browser.md` (`**Status:**` line), `wf-status.md` (Summary rolling entry + Complete row), `docs/plans/2026-04-19-python-tui-lib-extraction.md` (this plan's `**Status:**` line)
+- Update: [docs/plans/2026-04-16-git-branch-browser.md](2026-04-16-git-branch-browser.md) (`**Status:**` line), `wf-status.md` (Summary rolling entry + Complete row), [docs/plans/2026-04-19-python-tui-lib-extraction.md](2026-04-19-python-tui-lib-extraction.md) (this plan's `**Status:**` line)
 
 **NOT modified by this plan:** parking-space. Kept completely intact. See follow-on migration plan.
 

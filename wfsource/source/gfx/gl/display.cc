@@ -46,6 +46,7 @@
 extern int wf_hud_score;
 extern int wf_hud_timer;
 extern int wf_hud_lives;
+extern int wf_hud_game_over;
 
 static void DrawHudText(float x, float y, const char* text)
 {
@@ -83,6 +84,38 @@ static void DrawHud(int xSize, int ySize)
 
     snprintf(buf, sizeof(buf), "LIVES %d", wf_hud_lives);
     DrawHudText((float)(xSize - 70), 8, buf);
+
+    // Game-over overlay — driven by mb 420 via wf_hud_game_over (game.cc HUD glue).
+    // Two centred lines, scaled up over the live pyramid view; red to match the
+    // arcade GAME OVER colour (see docs/plans/screenshots/qbert-arcade-game-over-reference.png).
+    if (wf_hud_game_over != 0)
+    {
+        glColor3f(1.0f, 0.0f, 0.0f);
+        const float cx = (float)xSize * 0.5f;
+        const float cy = (float)ySize * 0.5f;
+
+        // Line 1: "GAME OVER" — large prominence (3x scale).
+        char line1[] = "GAME OVER";
+        const float scale1 = 3.0f;
+        const float w1 = (float)stb_easy_font_width(line1) * scale1;
+        glPushMatrix();
+        glTranslatef(cx - w1 * 0.5f, cy - 24.0f * scale1, 0.0f);
+        glScalef(scale1, scale1, 1.0f);
+        DrawHudText(0.0f, 0.0f, line1);
+        glPopMatrix();
+
+        // Line 2: restart prompt — smaller (1.5x), below.
+        char line2[] = "PRESS ANY BUTTON TO RESTART";
+        const float scale2 = 1.5f;
+        const float w2 = (float)stb_easy_font_width(line2) * scale2;
+        glPushMatrix();
+        glTranslatef(cx - w2 * 0.5f, cy + 12.0f, 0.0f);
+        glScalef(scale2, scale2, 1.0f);
+        DrawHudText(0.0f, 0.0f, line2);
+        glPopMatrix();
+
+        glColor3f(1.0f, 1.0f, 0.0f);  // restore HUD yellow for any later draws
+    }
 
     glEnable(GL_DEPTH_TEST);
     glMatrixMode(GL_PROJECTION);

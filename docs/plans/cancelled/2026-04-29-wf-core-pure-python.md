@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-29
 **Status:** Cancelled — not proceeding. The asset browser (`wf_asset_browser/`) is already pure Python (no `wf_core` dependency). `wf_core.so` is only used by the level editor (`wf_blender/`), which is expected to have native deps and is not targeted for zero-native-dep packaging.
-**Predecessor:** `docs/plans/2026-04-28-wf-asset-provider-pure-python.md` — eliminated `wf_asset_provider.so`. This plan eliminates `wf_core.so`, completing the "zero native dependencies" goal.
+**Predecessor:** [docs/plans/2026-04-28-wf-asset-provider-pure-python.md](../2026-04-28-wf-asset-provider-pure-python.md) — eliminated `wf_asset_provider.so`. This plan eliminates `wf_core.so`, completing the "zero native dependencies" goal.
 
 ---
 
@@ -350,7 +350,7 @@ The `oaddump.cc` parser (`QObjectAttributeData::Load`) is also useful to read al
 | Modify | `wftools/wf_blender/install.sh` — remove `wf_core.so` copy; add `wf_core.py` symlink |
 | Modify | `wftools/wf_blender/__init__.py` — remove `.so` existence check; `import wf_core` now resolves to `wf_core.py` |
 | Modify | `Taskfile.yml` — remove `blender-build` dep from `blender-install`; remove `blender-build` from `blender-package` |
-| Modify | `docs/plans/2026-04-28-blender-addon-packaging.md` — update: no `wf_core.so`, no maturin build step |
+| Modify | [docs/plans/2026-04-28-blender-addon-packaging.md](../2026-04-28-blender-addon-packaging.md) — update: no `wf_core.so`, no maturin build step |
 
 The `wf_py/` Rust crate and all five dependency crates remain on disk — they're still used by other tools (`oaddump-rs`, test harnesses, etc.). We're only replacing the Blender-facing Python binding.
 

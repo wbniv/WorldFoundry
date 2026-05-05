@@ -1,13 +1,13 @@
 # Investigation: Level-construction tooling — skills, Blender plugins, pluggable LLM, licensed-asset sourcing
 
 **Date:** 2026-04-28
-**Status:** Survey + scoped plan. Not committed; intended as the reference doc for "what tooling investments accelerate brief → playable level for World Foundry?" The companion to the dependency overview at the top of `docs/game-ideas/README.md`.
-**Depends on:** `docs/investigations/2026-04-19-snowgoons-build-pipeline.md` (canonical end-to-end build pipeline reference), `docs/investigations/2026-04-28-engine-capabilities-survey.md` (engine profile).
-**Related:** `docs/game-ideas/README.md` (32-brief catalog with dependency graph), `wftools/wf_blender/` (existing Blender plugin).
+**Status:** Survey + scoped plan. Not committed; intended as the reference doc for "what tooling investments accelerate brief → playable level for World Foundry?" The companion to the dependency overview at the top of [docs/game-ideas/README.md](../game-ideas/README.md).
+**Depends on:** [docs/investigations/2026-04-19-snowgoons-build-pipeline.md](2026-04-19-snowgoons-build-pipeline.md) (canonical end-to-end build pipeline reference), [docs/investigations/2026-04-28-engine-capabilities-survey.md](2026-04-28-engine-capabilities-survey.md) (engine profile).
+**Related:** [docs/game-ideas/README.md](../game-ideas/README.md) (32-brief catalog with dependency graph), `wftools/wf_blender/` (existing Blender plugin).
 
 ## Context
 
-The dependency overview in `docs/game-ideas/README.md` enumerates 32 conversion briefs and identifies six foundational projects whose engine subsystems unlock everything else. That answers *what to build*. This doc answers the orthogonal question: *how do we build it faster than 10–20 hours of hand-graft per Blender stage, per brief?*
+The dependency overview in [docs/game-ideas/README.md](../game-ideas/README.md) enumerates 32 conversion briefs and identifies six foundational projects whose engine subsystems unlock everything else. That answers *what to build*. This doc answers the orthogonal question: *how do we build it faster than 10–20 hours of hand-graft per Blender stage, per brief?*
 
 The current pipeline (validated 2026-04-19, reproducible — see `2026-04-19-snowgoons-build-pipeline.md`) is:
 
@@ -41,7 +41,7 @@ This investigation enumerates five seams where tooling could land, ranks them by
 | `director` | Per-tick driver — runs the level's master script | `Director` | exactly 1 |
 | `room` | Room-graph node; every actor is parented to a room | `Room01`, `Room02` | ≥ 1 (one per logical area) |
 | `camera` | Active rendering camera; reads its target/CamShot from a mailbox | `Camera` | ≥ 1 |
-| `camshot` | Camera-anchor object; the engine asserts a valid `CamShot` index is written to mailbox 1021 within 5 frames or `movecam.cc:885` fires (per `docs/level-building.md:63`) | `CamShot01`, `GMACamShot` | ≥ 1 |
+| `camshot` | Camera-anchor object; the engine asserts a valid `CamShot` index is written to mailbox 1021 within 5 frames or `movecam.cc:885` fires (per [docs/level-building.md](../level-building.md):63) | `CamShot01`, `GMACamShot` | ≥ 1 |
 | `target` | Camera look-at anchor (paired with camshot for follow-cameras) | `GMACamTar`, `Target01` | ≥ 1 (typically one per camshot that needs aim) |
 | `light` | Scene illumination; multiple supported | `Omni01`, `Omni02` | ≥ 1 |
 | `matte` | Skybox / background billboard | `Matte` | ≥ 1 (a level without a matte renders bare clear-color) |
@@ -99,7 +99,7 @@ The engine-side telemetry harness is the load-bearing dependency for (3); (1) an
 
 **Today:** Source `.tga` textures and `.blend` meshes are hand-authored or borrowed from existing levels (snowgoons reuses `house.iff`, `tree02.iff`, etc.).
 
-**Opportunity:** Once the Zork / Adventure brief's runtime image-generator client + runtime PNG/JPEG decode subsystem ships (~6 weeks of fresh engine work; see `docs/game-ideas/zork-adventure.md`), the same plumbing can run *at bake time* to fill texture slots a designer hasn't supplied. Out of scope for v1 of this tooling plan; explicitly waits on the Zork engine work.
+**Opportunity:** Once the Zork / Adventure brief's runtime image-generator client + runtime PNG/JPEG decode subsystem ships (~6 weeks of fresh engine work; see [docs/game-ideas/zork-adventure.md](../game-ideas/zork-adventure.md)), the same plumbing can run *at bake time* to fill texture slots a designer hasn't supplied. Out of scope for v1 of this tooling plan; explicitly waits on the Zork engine work.
 
 ### Seam 5 — Licensed-asset sourcing (the seam this section was originally missing)
 
@@ -240,7 +240,7 @@ Prompt templates live in `wftools/wf_blender/llm_prompts/*.md`, one per skill (`
 
 ## Format note — Forth + parking-space patterns
 
-zForth is the project's scripting choice (see `docs/scripting-languages.md` and the "WF World Foundry engine project" memory). A separate parking-space project recently designed a TUI-scripting DSL and ended up at multi-bracket LISP after rejecting iffcomp's FOURCC-named verbs. The relevant *patterns* — homoiconic source as artifact, dispatch-table extensibility, record-edit-replay — are not LISP-specific; Forth has them natively. So the parking-space design notes are useful as *evidence* that the patterns work in real systems, but the implementation in WF is straight Forth-on-zForth, no LISP detour. Mentioned here only because the user asked us to consider parking-space's chat as an input.
+zForth is the project's scripting choice (see [docs/scripting-languages.md](../scripting-languages.md) and the "WF World Foundry engine project" memory). A separate parking-space project recently designed a TUI-scripting DSL and ended up at multi-bracket LISP after rejecting iffcomp's FOURCC-named verbs. The relevant *patterns* — homoiconic source as artifact, dispatch-table extensibility, record-edit-replay — are not LISP-specific; Forth has them natively. So the parking-space design notes are useful as *evidence* that the patterns work in real systems, but the implementation in WF is straight Forth-on-zForth, no LISP detour. Mentioned here only because the user asked us to consider parking-space's chat as an input.
 
 ---
 

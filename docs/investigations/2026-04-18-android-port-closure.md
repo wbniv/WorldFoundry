@@ -29,7 +29,7 @@ Source art: reuse whatever WF logo/mark exists in-repo; if none at the right res
 
 ### 2. Asset-pipeline remediation (not just a comment fix)
 
-`android/app/build.gradle.kts:60-62` described the packaged APK as shipping no assets and asked the operator to sideload cd.iff. That's now inaccurate — `android/app/src/main/assets/` bundles three symlinks (cd.iff, level0.mid, florestan-subset.sf2) into `wfsource/source/game/`. But the symlinks are a **dev shortcut, not the real target state**: loose `.mid` + `.sf2` alongside `cd.iff` is a second asset pipeline that shouldn't exist. See `docs/plans/2026-04-18-audio-assets-from-iff.md`.
+`android/app/build.gradle.kts:60-62` described the packaged APK as shipping no assets and asked the operator to sideload cd.iff. That's now inaccurate — `android/app/src/main/assets/` bundles three symlinks (cd.iff, level0.mid, florestan-subset.sf2) into `wfsource/source/game/`. But the symlinks are a **dev shortcut, not the real target state**: loose `.mid` + `.sf2` alongside `cd.iff` is a second asset pipeline that shouldn't exist. See [docs/plans/2026-04-18-audio-assets-from-iff.md](../plans/2026-04-18-audio-assets-from-iff.md).
 
 **Action:**
 - Short-term (comment rewrite, landed): describe the transitional three-symlink state and point at the audio-assets-from-iff plan.
@@ -44,7 +44,7 @@ Source art: reuse whatever WF logo/mark exists in-repo; if none at the right res
 
 ### 4. wf-status.md rolling summary
 
-When the port is closed, prepend a new topical paragraph to the top of `docs/wf-status.md`'s Summary section noting Android port closure (per the reverse-chronological convention).
+When the port is closed, prepend a new topical paragraph to the top of [docs/wf-status.md](../wf-status.md)'s Summary section noting Android port closure (per the reverse-chronological convention).
 
 ## Intentionally out of scope
 
@@ -62,7 +62,7 @@ When the port is closed, prepend a new topical paragraph to the top of `docs/wf-
 - `android/app/src/main/res/drawable/` — foreground/background vector drawables for adaptive icon.
 - `android/app/build.gradle.kts` — delete stale comment (lines 60–62).
 - `android/README.md` — refresh status table.
-- `docs/wf-status.md` — prepend port-closure paragraph to Summary section.
+- [docs/wf-status.md](../wf-status.md) — prepend port-closure paragraph to Summary section.
 
 ## Verification
 

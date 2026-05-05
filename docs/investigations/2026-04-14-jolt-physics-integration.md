@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-14
 **Status:** **Functional** — `WF_PHYSICS_ENGINE=jolt` is the default; snowgoons is playable. Legacy `physics/wf/` retained pending parity on a second level.
-**Depends on:** `docs/investigations/2026-04-14-physics-engine-survey.md` (Jolt selected over Bullet/PhysX/Rapier on size, license, character-controller quality, and maintenance trajectory).
+**Depends on:** [docs/investigations/2026-04-14-physics-engine-survey.md](2026-04-14-physics-engine-survey.md) (Jolt selected over Bullet/PhysX/Rapier on size, license, character-controller quality, and maintenance trajectory).
 
 ## Context
 
@@ -97,7 +97,7 @@ Goal: Delete the `reinterpret_cast` in `movecam.cc:1007` as part of rewriting `B
 
 ### Phase 5 — Size matrix and retirement gate
 
-1. Run the same per-engine measurement methodology from the wasm3 plan (§Verification step 7). Add a `Physics` section to `docs/scripting-languages.md` (or a new `docs/engine-size-matrix.md`): whole-binary stripped delta `legacy` vs. `jolt`, per-.o runtime size, static RAM, per-body RAM.
+1. Run the same per-engine measurement methodology from the wasm3 plan (§Verification step 7). Add a `Physics` section to [docs/scripting-languages.md](../scripting-languages.md) (or a new [docs/engine-size-matrix.md](../engine-size-matrix.md)): whole-binary stripped delta `legacy` vs. `jolt`, per-.o runtime size, static RAM, per-body RAM.
 2. Retirement gate: once snowgoons and at least one other level run cleanly under `jolt`, write a follow-up commit that removes `physics/wf/`, the `PHYSICS_ENGINE_WF` compile branches, and the `legacy` arm of `WF_PHYSICS_ENGINE`. Keep this change small and isolated so history stays clean.
 
 ## Critical files
@@ -130,7 +130,7 @@ Goal: Delete the `reinterpret_cast` in `movecam.cc:1007` as part of rewriting `B
 2. **`jolt` selftest.** `WF_PHYSICS_ENGINE=jolt ./build_game.sh` succeeds; `wf_game` prints `jolt: selftest ok` at startup.
 3. **Snowgoons parity under `jolt`.** Player walks, jumps, collides with slopes and walls, camera clamps, scripted mailbox state readbacks (position/rotation/velocity) match legacy within float tolerance.
 4. **Substep scheduler stability.** Log substep count per frame under normal and artificially-stalled conditions; confirm bounded, no spiral-of-death, no visible judder across realistic frame-rate swings.
-5. **Size matrix.** Published to `docs/engine-size-matrix.md`:
+5. **Size matrix.** Published to [docs/engine-size-matrix.md](../engine-size-matrix.md):
    - whole-binary stripped delta (`legacy` vs `jolt`) at `-O2`
    - per-.o text/data/bss for the physics runtime TUs alone (same methodology as wasm3 plan §7)
    - static RAM (RSS delta across `JoltRuntimeInit`)

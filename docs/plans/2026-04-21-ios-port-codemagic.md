@@ -99,7 +99,7 @@ This is the first phase that costs real money. Only start after Phase 3 is green
 | `wfsource/source/gfx/gl/mesa.cc` | No change (Linux-only); iOS gets its own surface source in `hal/ios/`. |
 | `CMakeLists.txt` | **Extend** — add `elseif(IOS)` branch parallel to `if(ANDROID)` (lines 26–35, 51–57, 66–86, 372–379, 413–424). |
 | `ios/` | **New** — Xcode project wrapper, `Info.plist`, launch storyboard, asset copy-files phase. Template cribbed from `android/` layout. |
-| `docs/plans/2026-04-16-ios-port.md` | **Replace** — supersede with the Codemagic-era plan (this file). |
+| [docs/plans/2026-04-16-ios-port.md](2026-04-16-ios-port.md) | **Replace** — supersede with the Codemagic-era plan (this file). |
 | `wf-status.md` | **Update** — flip the row from "Backlog — blocked on lack of a Mac" to "In progress — Codemagic-driven". |
 
 ## Reused from existing code

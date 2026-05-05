@@ -101,7 +101,7 @@ Removed `wfsource/source/audio/`, `wfsource/source/audiofmt/`,
 `wfsource/source/attrib/`, `wftools/attribedit/`, and
 `wfsource/source/physics/ode/`, plus dead `#if` blocks in `game/` for
 `DO_STEREOGRAM`, `DO_SLOW_STEREOGRAM`, `MIDI_MUSIC`, and
-`RENDERER_BRENDER`.  See `docs/plans/2026-04-15-dead-code-removal.md`
+`RENDERER_BRENDER`.  See [docs/plans/2026-04-15-dead-code-removal.md](../plans/2026-04-15-dead-code-removal.md)
 for the full change list.
 
 ### Batch 5 (`03211f9`) — dead subsystems + HAL tasker/IPC cluster (−4,217 code LOC vs prev HEAD)
@@ -120,7 +120,7 @@ Largest drops:
 
 All `DO_MULTITASKING` preprocessor guards removed (macro never defined; dead code deleted
 rather than wrapped).  `_signal.cc/h` and `timer.cc/h` were stubbed to `assert(0)` then
-**deleted entirely** — no callers outside themselves.  See `docs/plans/2026-04-15-dead-code-removal.md`.
+**deleted entirely** — no callers outside themselves.  See [docs/plans/2026-04-15-dead-code-removal.md](../plans/2026-04-15-dead-code-removal.md).
 
 ## Saved snapshots
 

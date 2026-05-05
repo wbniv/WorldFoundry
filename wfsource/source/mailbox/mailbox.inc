@@ -9,8 +9,11 @@ Comment("=====================================================================")
 	MAILBOXENTRY(FALSE,0)			Comment("always 0, false")
 	MAILBOXENTRY(TRUE,1)			Comment("always 1, true" )
 
-	MAILBOXENTRY(GLOBAL_USER_MAX,199)
-	Comment(" the game actually allocates this array at run time based on a field in the level object, so this is just the maximum ")
+	MAILBOXENTRY(GLOBAL_USER_MAX,999)
+	Comment(" Bumped 2026-05-03 from 199 → 999 (raises level-global user mailbox cap to 1000 slots). ")
+	Comment(" Must remain strictly less than GLOBAL_SYSTEM_START to avoid overlap. The levelobj's     ")
+	Comment(" 'Number Of Mailboxes' OAD field is currently informational; the runtime allocates the    ")
+	Comment(" full GLOBAL_USER_MAX slots regardless. Cost is ~4KB per level (Scalar=4 bytes × 1000).   ")
 
 	MAILBOXENTRY( GLOBAL_SYSTEM_START,1000)
 	MAILBOXENTRY( MIDI,1002)

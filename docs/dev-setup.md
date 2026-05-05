@@ -68,7 +68,7 @@ LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 \
   ../../../engine/wf_game
 ```
 
-`cd.iff` is read from the current directory. Snowgoons is the hardcoded default boot level (see `docs/plans/2026-04-engine-start-snowgoons-directly.md`).
+`cd.iff` is read from the current directory. Snowgoons is the hardcoded default boot level (see [docs/plans/2026-04-engine-start-snowgoons-directly.md](plans/2026-04-engine-start-snowgoons-directly.md)).
 
 ### Rust-port pipeline tools
 

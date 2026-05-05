@@ -4,7 +4,7 @@ This doc is organised level-designer-first: start here, set up tooling,
 follow authoring conventions, wire the engine systems your level needs,
 crib from a worked example, and (for engine maintainers only) read the
 internals at the bottom. For per-symptom debugging recipes, see
-`docs/level-design-troubleshooting.md`.
+[docs/level-design-troubleshooting.md](level-design-troubleshooting.md).
 
 ## Contents
 
@@ -44,7 +44,7 @@ Three documents to keep open while building any level. They cover
 "what actors are available," "what a finished port looks like," and
 "how to verify behaviour at runtime without rebuilding."
 
-- **`docs/2026-05-03-oas-actor-types.md`** — Index of every shipped
+- **[docs/2026-05-03-oas-actor-types.md](2026-05-03-oas-actor-types.md)** — Index of every shipped
   OAS actor type, its OAD fields, and what game patterns it enables.
   Read this *first* before planning any level — the engine's
   ecosystem is wider than the headline classes (`player`, `room`,
@@ -60,7 +60,7 @@ Three documents to keep open while building any level. They cover
   - `Enemy` — generic NPC base with path-follow support.
 - **Worked-example port plans** — read these to see how shipped
   primitives actually wire together end-to-end:
-  - **`docs/plans/2026-05-03-qbert-mvp.md`** — content-only port (no
+  - **[docs/plans/2026-05-03-qbert-mvp.md](plans/2026-05-03-qbert-mvp.md)** — content-only port (no
     engine changes): 28-cube pyramid + hop state machine + colour-flip
     win condition + fall-and-respawn, built entirely from shipped OAS
     types + Forth scripts in actor Script fields + mailboxes. The
@@ -78,13 +78,13 @@ Three documents to keep open while building any level. They cover
   `task run-debug-remote ...` (binds 0.0.0.0). Pending bridge ops
   (mailbox-write, input-inject, shader hot-reload, script hot-swap,
   DAP breakpoints) are tracked in
-  `docs/plans/2026-05-03-debug-bridge-gap-features.md`.
+  [docs/plans/2026-05-03-debug-bridge-gap-features.md](plans/2026-05-03-debug-bridge-gap-features.md).
 
 For gotchas hit during real level work — coordinate systems, BungeeCam
 target placement, Mesh face-normal rules, `Mobility`+`MovementClass`
 requirements, zForth bitwise-op pitfalls, the `Model Type=Box` random-
 debug-cube behaviour, the wf_blender exporter's dual-`Mesh Name`
-field, etc. — see `docs/level-design-troubleshooting.md`.
+field, etc. — see [docs/level-design-troubleshooting.md](level-design-troubleshooting.md).
 
 ---
 
@@ -423,7 +423,7 @@ With scripting disabled this is suppressed — the mailbox stays set to the init
 so the camera keeps working without per-frame ActBoxOR writes.
 
 For deeper camera investigation (per-axis Absolute/Relative, runtime switching via
-`INDEXOF_CAMSHOT`, target tracking) see `docs/investigations/2026-04-29-camera-system.md`.
+`INDEXOF_CAMSHOT`, target tracking) see [docs/investigations/2026-04-29-camera-system.md](investigations/2026-04-29-camera-system.md).
 
 ---
 

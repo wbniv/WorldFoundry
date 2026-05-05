@@ -248,6 +248,6 @@ Phase A done when:
 Phase B done when:
 1. `set_shader` swaps a live program with no flicker; broken GLSL leaves the prior shader running and reports the compile log.
 2. `reload_script` swaps a live actor's Forth without disturbing other actors; mailboxes survive the swap; broken Forth leaves the prior script running and reports the compile log.
-3. Documentation updated in `docs/scripting-languages.md` ("hot-reload caveats: dictionary leaks per session, restart engine after ~100 reloads").
+3. Documentation updated in [docs/scripting-languages.md](../scripting-languages.md) ("hot-reload caveats: dictionary leaks per session, restart engine after ~100 reloads").
 
 Phase C done when: covered by its own plan document.

@@ -18,7 +18,7 @@ is no mailbox or closure for scripts to play a sound.
 Mailboxes are the cross-engine scripting primitive: every engine can read
 and write them with a uniform pair of verbs. Wiring audio into the mailbox
 surface is what Phase 4 of the original audio plan
-(`docs/investigations/2026-04-14-audio-sound-music.md`) called for before
+([docs/investigations/2026-04-14-audio-sound-music.md](../../investigations/2026-04-14-audio-sound-music.md)) called for before
 shipping as a Lua-only stopgap.
 
 The engine originally had exactly this integration. It was deleted on
