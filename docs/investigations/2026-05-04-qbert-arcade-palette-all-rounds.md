@@ -30,7 +30,7 @@ pen directly in Lua. No write-tap needed.
 
 ### MAME palette device — definitive approach (current)
 
-Script: `scripts/research/qbert_palette_capture.lua`
+Script: `scripts/research/mame/qbert_palette_capture.lua`
 
 ```lua
 palette_dev = manager.machine.devices[":palette"]
@@ -252,8 +252,8 @@ For levels 3–4 (2-step mechanic, added in Phase E), all three states are meani
 
 ## Lua scripts used
 
-All scripts checked in under `scripts/research/`.
-Run via: `mame qbert -rompath assets/arcade-roms -autoboot_script scripts/research/<name>.lua -window -sound none -skip_gameinfo`
+All scripts checked in under `scripts/research/mame/`.
+Run via: `mame qbert -rompath assets/arcade-roms -autoboot_script scripts/research/mame/<name>.lua -window -sound none -skip_gameinfo`
 
 | Script | Purpose | Status |
 |--------|---------|--------|
