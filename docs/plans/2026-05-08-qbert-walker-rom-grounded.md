@@ -1,7 +1,7 @@
 # Plan — ROM-grounded Q*bert walker (closes L4R1 gap, unifies MAME ↔ WF regression)
 
 **Date:** 2026-05-08
-**Status:** Not started
+**Status:** Phase A done. Phase B done. Phase C: walker captures L1R1 cleanly; multi-round operation hits position drift. Phase D: blocked on RAM-to-visual-round mismatch.
 
 ## Context
 
@@ -168,3 +168,48 @@ End-to-end pass:
   identify which byte ROM uses internally for round number.
 - **Walker takes too long** — 56 hops × 16 rounds × ~50 frames = 45000
   frames = 12.5 minutes at speed=10 = 1.25 minutes wall. Should be fine.
+
+## 2026-05-08 progress notes (during initial Phase 2 attempt)
+
+- **Phase A done**: position byte found at `0x0D64`. Apex value = `0xB8`.
+  Each cube position has a unique value (verified in
+  `scripts/research/mame/position_hunt.txt`). Tool:
+  `scripts/research/mame/qbert_position_hunt.lua`.
+- **Phase B done**: palette-tap round-clear detection works. Threshold
+  `pal_writes` delta ≥ 32 since last round.
+- **Phase C partial**: `scripts/research/mame/qbert_walker.lua` captures
+  L1R1 state-0 + state-1 cleanly. But multi-round operation accumulates
+  position drift — bot tracks `qrow=6,qcol=6` while ROM has Q*bert at
+  `pos=0xF5` (= (1,1)). Result: bot's `cubes_fully=28` doesn't correspond
+  to ROM having all 28 cubes at state-2, so ROM never round-clears.
+  - **Drift cause**: dead-reckoning `qrow,qcol` from issued direction is
+    incorrect when ROM rejects a hop (e.g. enemy push, edge of pyramid).
+    Hop-verify catches "didn't move" cases but not "moved somewhere
+    unexpected".
+  - **Drift fix path** (Phase C.5, deferred): build a `pos_byte → (row,col)`
+    lookup table during a calibration walk, then on each iteration sync
+    `qrow,qcol` from the real ROM position rather than dead-reckoning.
+- **Phase D blocked**: hybrid `qbert_l4r1_walker.lua` (DIP cheat advances
+  to L4R1 + walker snap-dance) reaches `round_num=16` (= ram `0x13`) but
+  ROM HUD shows L3R4 at the snap moment, not L4R1. Tried settle delays
+  of 0/30/60/90/180 frames — short delays show L3R4, longer delays show
+  L1R1 (Demo AI restarts). The doc's
+  [`docs/investigations/qbert_cube_face_colors.md`](../investigations/qbert_cube_face_colors.md)
+  ram-to-round table (line 184) does not match observed behavior under
+  cheat-driven advance.
+  - **Phase D fix path**: find the *visual* round counter byte (different
+    from `0x0081`). Likely the byte the HUD actually reads. Use
+    `qbert_full_diff.lua` style snapshot-diff with known visual rounds.
+
+### Useful artifacts left in repo
+
+- `scripts/research/mame/qbert_position_hunt.lua` — Phase A tool
+- `scripts/research/mame/qbert_walker.lua` — Phase C walker (L1R1 works)
+- `scripts/research/mame/qbert_l4r1_walker.lua` — Phase D hybrid attempt
+- `scripts/research/mame/walker_snaps.txt` — snap log format
+- `docs/investigations/qbert_walker_run.log` — Phase C run log
+
+The L1R1 capture from `qbert_walker.lua` is **proof the walker mechanism
+is sound** — Q*bert lands at apex via real RAM detection, dance produces
+clean state-0 / state-1 / state-2 captures with score advancing in ROM
+exactly as expected.

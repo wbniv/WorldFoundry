@@ -1,0 +1,22 @@
+[INFO] walker boot
+[INFO] PLAY at frame 1200
+[snap] idx=0000 L1R1 state0 frame=1340
+[snap] idx=0001 L1R1 state1 frame=1440
+[status] frame=1800 L1R1 at(5,0) pos=0xA6 cubes=8/28 fully=2 phase=DONE pending=DR hop=DR pal=6336 cool_left=40
+[status] frame=2400 L1R1 at(5,5) pos=0xA6 cubes=18/28 fully=2 phase=DONE pending=DR hop=DR pal=6336 cool_left=40
+[status] frame=3000 L1R1 at(3,3) pos=0x2C cubes=24/28 fully=4 phase=DONE pending=DR hop=DR pal=6336 cool_left=40
+[status] frame=3600 L1R1 at(3,0) pos=0x6F cubes=27/28 fully=10 phase=DONE pending=DL hop=DL pal=6336 cool_left=40
+[status] frame=4200 L1R1 at(5,2) pos=0x32 cubes=27/28 fully=16 phase=DONE pending=DR hop=DR pal=6336 cool_left=40
+[status] frame=4800 L1R1 at(1,1) pos=0xFB cubes=28/28 fully=20 phase=DONE pending=DR hop=DR pal=6336 cool_left=40
+[status] frame=5400 L1R1 at(2,0) pos=0xFB cubes=28/28 fully=25 phase=DONE pending=UR hop=UR pal=6336 cool_left=40
+[status] frame=6000 L1R1 at(5,5) pos=0xEF cubes=28/28 fully=27 phase=DONE pending=DR hop=DR pal=6336 cool_left=40
+[status] frame=6600 L1R1 at(6,6) pos=0xF5 cubes=28/28 fully=28 phase=DONE pending=nil hop=nil pal=6336 cool_left=40
+[status] frame=7200 L1R1 at(6,6) pos=0xF5 cubes=28/28 fully=28 phase=DONE pending=nil hop=nil pal=6336 cool_left=40
+[status] frame=7800 L1R1 at(6,6) pos=0xF5 cubes=28/28 fully=28 phase=DONE pending=nil hop=nil pal=6336 cool_left=40
+[status] frame=8400 L1R1 at(6,6) pos=0xF5 cubes=28/28 fully=28 phase=DONE pending=nil hop=nil pal=6336 cool_left=40
+[status] frame=9000 L1R1 at(6,6) pos=0xF5 cubes=28/28 fully=28 phase=DONE pending=nil hop=nil pal=6336 cool_left=40
+[status] frame=9600 L1R1 at(6,6) pos=0xF5 cubes=28/28 fully=28 phase=DONE pending=nil hop=nil pal=6336 cool_left=40
+[status] frame=10200 L1R1 at(6,6) pos=0xF5 cubes=28/28 fully=28 phase=DONE pending=nil hop=nil pal=6336 cool_left=40
+[status] frame=10800 L1R1 at(6,6) pos=0xF5 cubes=28/28 fully=28 phase=DONE pending=nil hop=nil pal=6336 cool_left=40
+[status] frame=11400 L1R1 at(6,6) pos=0xF5 cubes=28/28 fully=28 phase=DONE pending=nil hop=nil pal=6336 cool_left=40
+[status] frame=12000 L1R1 at(6,6) pos=0xF5 cubes=28/28 fully=28 phase=DONE pending=nil hop=nil pal=6336 cool_left=40
