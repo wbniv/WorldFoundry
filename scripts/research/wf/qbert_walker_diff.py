@@ -28,11 +28,14 @@ WF_CAM_LOOKAT = (0.0, 3.0, 8.5)
 WF_FOV_Y_DEG  = 60.0   # default; refine empirically if cube positions miss
 
 # World coords of the two sample cubes (top centers, +1 above cube center).
-# Mirrors cube_world_position(0,0) and cube_world_position(1,1) with the
-# diamond layout: apex at (0, 6√2, 13), cube(1,1) at (√2, 5√2, 11).
+# Mirrors cube_world_position(0,0) and cube_world_position(1,0) with the
+# diamond layout: apex at (0, 6√2, 13), cube(1,0) at (-√2, 5√2, 11).
+# WF walker hops DL on step 1 (= cube(1,0)) to get state-1 captures; MAME
+# walker hops DR (= cube(1,1)) — the colour is the same per round, only
+# the on-screen sample location differs.
 SQRT2 = math.sqrt(2.0)
-APEX_TOP_WORLD   = (0.0,         6.0 * SQRT2, 14.0)   # 13 + 1 (top face)
-CUBE11_TOP_WORLD = (SQRT2 * 1.0, 5.0 * SQRT2, 12.0)   # 11 + 1
+APEX_TOP_WORLD     = (0.0,          6.0 * SQRT2, 14.0)   # 13 + 1 (top face)
+CUBE_FLIPPED_WORLD = (-SQRT2 * 1.0, 5.0 * SQRT2, 12.0)   # cube(1,0) top — DL hop dest
 
 
 def vec_sub(a, b):
@@ -102,7 +105,7 @@ def diff_round(L, R, mame_dir, wf_dir, fov_deg, threshold):
     rows = []
     for state, mame_name, mame_xy, wf_world in [
         ("state0", f"qbert_L{L}R{R}.png",     MAME_APEX,   APEX_TOP_WORLD),
-        ("state1", f"qbert_hop_L{L}R{R}.png", MAME_CUBE11, CUBE11_TOP_WORLD),
+        ("state1", f"qbert_hop_L{L}R{R}.png", MAME_CUBE11, CUBE_FLIPPED_WORLD),
     ]:
         mame_path = mame_dir / mame_name
         wf_path   = wf_dir / f"wf_walker_L{L}R{R}_{state}.png"

@@ -403,23 +403,23 @@ if player:
         "else drop "
         "then\n"
         # 3. Autopilot or joystick — gated on cooldown and INTRO_DONE.
-        # When AUTOPILOT_ON (mb 430) != 0, execute the walker protocol:
-        #   step 0: write CAPTURE_TRIGGER=1 (state-0 snap at apex), pause 30 frames
-        #   step 1: hop DR (1,1)
-        #   step 2: hop UL (-1,-1) back to apex, cube (1,1) flipped once
-        #   step 3: write CAPTURE_TRIGGER=2 (state-1 snap), pause 30 frames
-        #   step 4..31: normal Warnsdorff coverage via step-move(step-4)
-        # CAPTURE_TRIGGER is reset to 0 between captures so the host sees
-        # clean 0->{1,2} transitions. Round-clear writes 3 (see win/clear block).
+        # When AUTOPILOT_ON (mb 430) != 0, walker protocol piggybacks on the
+        # existing 32-step Warnsdorff coverage:
+        #   step 0:    write CAPTURE_TRIGGER=1 (state-0 snap at apex, no hop),
+        #              hold 30 frames so host has time to screenshot.
+        #   step 1:    run step-move(0)+do-hop (= DL to cube (1,0)), then
+        #              write CAPTURE_TRIGGER=2 (state-1 snap with cube (1,0)
+        #              flipped), hold 30 frames.
+        #   step 2..32: existing coverage via step-move(step-1)+do-hop.
+        # CAPTURE_TRIGGER reset to 0 on every Warnsdorff frame so host sees
+        # clean transitions. Round-clear writes 3 (see win/clear block).
         "cd 0 = if "
         "418 read-mailbox 1 = if "
         "430 read-mailbox 0 <> if "
         "431 read-mailbox "
         "dup  0 = if drop 1 432 write-mailbox 1 431 write-mailbox 30 402 write-mailbox exit then "
-        "dup  1 = if drop 0 432 write-mailbox  1  1 do-hop 2 431 write-mailbox exit then "
-        "dup  2 = if drop -1 -1 do-hop 3 431 write-mailbox exit then "
-        "dup  3 = if drop 2 432 write-mailbox 4 431 write-mailbox 30 402 write-mailbox exit then "
-        "dup 32 < if 4 - step-move do-hop 0 432 write-mailbox "
+        "dup  1 = if drop 0 step-move do-hop 2 432 write-mailbox 2 431 write-mailbox 30 402 write-mailbox exit then "
+        "dup 33 < if 1 - step-move do-hop 0 432 write-mailbox "
         "431 read-mailbox 1 + 431 write-mailbox else drop then "
         "exit "
         "then "
