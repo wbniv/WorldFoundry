@@ -1,140 +1,82 @@
--- qbert_walker.lua: ROM-grounded Q*bert Warnsdorff bot.
+-- qbert_walker.lua: DIP-cheat-driven multi-round walker. Captures state-0
+-- and state-1 screenshots for all 16 visual rounds using the same +119-frame
+-- timing window proven by qbert_round_byte_hunt.lua and qbert_l4r1_walker.lua.
 --
--- Plays through L1R1 → L4R4 capturing 2 screenshots per round (state-0 at apex,
--- state-1 at apex after a DR+UL dance). No DIP cheat — boots clean, pokes
--- 0x0D00=9 every frame for unlim lives.
+-- Why DIP cheat (and not bot-driven Warnsdorff):
 --
--- Key fix vs qbert_bot.lua: position is read from RAM 0x0D64 (per
--- qbert_position_hunt.lua), so hops are verified, not dead-reckoned. Round
--- transitions are detected via palette write-tap delta (≥16 writes = palette
--- changed = ROM advanced rounds).
+--   The bot-driven approach (Phase C) hit drift — sprite X/Y position bytes
+--   have animation transients so per-cube tracking is unreliable; ROM never
+--   round-cleared because some cubes weren't actually visited 2x in ROM. DIP
+--   "Demo Mode (Unlim Lives, Start=Adv)" cheat sidesteps both issues:
+--   - Demo AI handles round-clearing internally.
+--   - Start=Adv lets us shortcut to the next round whenever we want.
+--
+-- Per round (round_num 1..19, see VISUAL_TAG mapping for off-by-one):
+--   1. WAIT_RAM: detect ram[0x081] change.
+--   2. AT ram-change frame X: snap("state0") — apex pristine.
+--   3. X+30: inject DR hop. X+42: release.
+--   4. X+77: inject UL hop. X+89: release.
+--   5. X+119: snap("state1") — apex with (1,1) cube flipped exactly once.
+--      HUD has updated to current visual round by this frame.
+--   6. ADVANCE: press Start to trigger cheat-advance.
+--
+-- Output: walker_snaps.txt logs each snap with index, round_num, label, frame.
+-- Use sample_cube_colors.py to extract per-round state colors from the saved
+-- PNGs.
 
 local BASE = "/home/will/WorldFoundry.2026-new-level"
-local LOG_PATH = BASE .. "/docs/investigations/qbert_walker_run.log"
+local LOG = BASE .. "/docs/investigations/qbert_walker_run.log"
 local SNAP_LOG = BASE .. "/scripts/research/mame/walker_snaps.txt"
-local logfile = io.open(LOG_PATH, "w")
+local logfile = io.open(LOG, "w")
 local snaplog = io.open(SNAP_LOG, "w")
 local function log(s) io.write(s); io.flush(); if logfile then logfile:write(s); logfile:flush() end end
 
--- Topology
-local DIRS = {
-    DR = {dr= 1, dc= 1, name="P1 Right (Down-Right)"},
-    DL = {dr= 1, dc= 0, name="P1 Down (Down-Left)"},
-    UR = {dr=-1, dc= 0, name="P1 Up (Up-Right)"},
-    UL = {dr=-1, dc=-1, name="P1 Left (Up-Left)"},
+local CHEAT = "Demo Mode (Unlim Lives, Start=Adv (Cheat)"
+
+-- Timing (matches qbert_round_shots.lua's proven hop_snap_at = X+119)
+local HOP_DELAY     = 30
+local HOP_HOLD      = 12
+local INTER_HOP     = 35
+local POST_HOP_WAIT = 30
+local ADVANCE_DELAY = 5
+local ADVANCE_HOLD  = 30
+
+-- Per qbert_round_byte_hunt: round_num 1..19 maps to visual rounds with
+-- L2/L3/L4 transitions interleaved at indices 5/10/15.
+local VISUAL_TAG = {
+    [1]="L1R1", [2]="L1R2", [3]="L1R3", [4]="L1R4",
+    [5]="L2-trans", [6]="L2R1", [7]="L2R2", [8]="L2R3", [9]="L2R4",
+    [10]="L3-trans", [11]="L3R1", [12]="L3R2", [13]="L3R3", [14]="L3R4",
+    [15]="L4-trans", [16]="L4R1", [17]="L4R2", [18]="L4R3", [19]="L4R4",
 }
-local function cidx(r, c) return r * (r + 1) / 2 + c end
-local function valid_cube(r, c) return r >= 0 and r <= 6 and c >= 0 and c <= r end
-local function neighbors_of(r, c)
-    local res = {}
-    for name, d in pairs(DIRS) do
-        local nr, nc = r + d.dr, c + d.dc
-        if valid_cube(nr, nc) then res[#res+1] = {dir=name, r=nr, c=nc} end
-    end
-    return res
-end
+-- Skip transition rounds (their HUD shows e.g. "LEVEL 4" zoom, not gameplay)
+local IS_TRANSITION = {[5]=true, [10]=true, [15]=true}
+local MAX_ROUND = 19
 
--- ── State ────────────────────────────────────────────────────────────────────
 local frame, fields, mem = 0, {}, nil
-local STATE = "BOOT"
-local qrow, qcol = 0, 0
-local visited = {}        -- visited[ci] = visit count
-local cubes_done = 0      -- cubes with visit_count >= 1
-local cubes_fully = 0     -- cubes with visit_count >= 2
-local hop_dir = nil
-local hop_start_frame = 0
-local last_hop_frame = 0
-local pending_dir = nil   -- direction issued last; verify on next iteration
-local pos_at_hop_start = 0
-local stuck_retries = 0
-local deaths = 0
-
-local level, round, total_rounds = 1, 1, 0
-
--- Snap protocol: PRE → AFTER_DR → AFTER_UL → DONE per round
-local snap_phase = "PRE"
+local PHASE = "BOOT"
+local round_num = 0
+local last_ram = -1
+local hop1_at, hop1_rel_at, hop2_at, hop2_rel_at, hop_snap_at = -1,-1,-1,-1,-1
+local adv_at, adv_rel_at = -1, -1
 local snap_idx = 0
-local pending_snap_label = nil   -- snap on the frame the bot is back at apex
+local done = false
 
--- RAM addresses
-local POS_ADDR  = 0x0D64  -- Q*bert position byte (verified via qbert_position_hunt)
-local APEX_VAL  = 0xB8    -- value of POS_ADDR when at apex
-local LIVES_ADDR = 0x0D00
-
--- Palette write-tap (round-clear detection)
-local pal_writes = 0
-local pal_writes_last_round = 0
-
-local HOP_HOLD = 12
-local HOP_COOLDOWN = 50
-
-local function set_input(name, val) if fields[name] then fields[name]:set_value(val and 1 or 0) end end
+local function set(name, on) if fields[name] then fields[name]:set_value(on and 1 or 0) end end
 
 local function snap_record(label)
     snap_idx = snap_idx + 1
     manager.machine.video:snapshot()
+    local tag = VISUAL_TAG[round_num] or "?"
     if snaplog then
-        snaplog:write(string.format("%04d L%dR%d %s frame=%d pos=0x%02X\n",
-            snap_idx-1, level, round, label, frame,
-            mem and mem:read_u8(POS_ADDR) or 0))
+        snaplog:write(string.format("%04d round_num=%d %s %s frame=%d\n",
+            snap_idx-1, round_num, tag, label, frame))
         snaplog:flush()
     end
-    log(string.format("[snap] idx=%04d L%dR%d %s frame=%d\n", snap_idx-1, level, round, label, frame))
+    log(string.format("[snap] idx=%04d round=%d %s %s frame=%d\n",
+        snap_idx-1, round_num, tag, label, frame))
 end
 
--- Warnsdorff: prefer cubes with fewer visits, then fewer unvisited neighbors, then deeper row
-local function warnsdorff_next(r, c)
-    local cands = {}
-    for _, n in ipairs(neighbors_of(r, c)) do
-        local vc = visited[cidx(n.r, n.c)] or 0
-        if vc < 2 then
-            local score = 0
-            for _, nn in ipairs(neighbors_of(n.r, n.c)) do
-                if (visited[cidx(nn.r, nn.c)] or 0) < 2 then score = score + 1 end
-            end
-            cands[#cands+1] = {dir=n.dir, r=n.r, c=n.c, vc=vc, score=score}
-        end
-    end
-    if #cands == 0 then return nil end
-    table.sort(cands, function(a, b)
-        if a.vc ~= b.vc then return a.vc < b.vc end
-        if a.score ~= b.score then return a.score < b.score end
-        return a.r > b.r
-    end)
-    return cands[1]
-end
-
--- BFS to nearest non-fully-visited cube (for when neighbors are all done)
-local function bfs_to_unvisited(r, c)
-    local q = {{r=r, c=c, first=nil}}
-    local seen = {[cidx(r, c)] = true}
-    while #q > 0 do
-        local cur = table.remove(q, 1)
-        if (visited[cidx(cur.r, cur.c)] or 0) < 2 and cur.first then return cur.first end
-        for _, n in ipairs(neighbors_of(cur.r, cur.c)) do
-            local ni = cidx(n.r, n.c)
-            if not seen[ni] then
-                seen[ni] = true
-                q[#q+1] = {r=n.r, c=n.c, first=cur.first or n.dir}
-            end
-        end
-    end
-    return nil
-end
-
-local function reset_round()
-    qrow, qcol = 0, 0
-    visited = {[cidx(0,0)] = 1}
-    cubes_done = 1
-    cubes_fully = 0
-    hop_dir = nil
-    pending_dir = nil
-    snap_phase = "PRE"
-    stuck_retries = 0
-    last_hop_frame = frame + 90  -- spawn drop-in settle
-end
-
--- ── Main loop ────────────────────────────────────────────────────────────────
 emu.register_frame_done(function()
     frame = frame + 1
 
@@ -144,158 +86,99 @@ emu.register_frame_done(function()
         end
         local cpu = manager.machine.devices[":maincpu"]
         mem = cpu and cpu.spaces["program"]
-        if mem then
-            mem:install_write_tap(0x5000, 0x501F, "pal_walker", function(off, data, mask)
-                pal_writes = pal_writes + 1
-            end)
+        if fields[CHEAT] then
+            fields[CHEAT]:set_value(1)
+            log("[INFO] cheat ON (Demo Mode + Unlim Lives + Start=Adv)\n")
+        else
+            log("[ERR] cheat field not found!\n")
         end
-        log("[INFO] walker boot\n")
     end
 
-    set_input("Coin 1",         frame >= 500 and frame < 530)
-    set_input("1 Player Start", frame >= 700 and frame < 730)
-    if mem and frame > 700 then pcall(function() mem:write_u8(LIVES_ADDR, 9) end) end
-
-    -- Release held hop input
-    if hop_dir and frame - hop_start_frame >= HOP_HOLD then
-        set_input(DIRS[hop_dir].name, false)
-        hop_dir = nil
+    -- Boot inputs (explicit conditional-set so Start releases properly)
+    set("Coin 1",         frame >= 500 and frame < 560)
+    if PHASE == "BOOT" or PHASE == "WAIT_RAM" or PHASE == "ADVANCE" then
+        -- Start press is managed below for ADVANCE; otherwise just boot window
+        if PHASE == "BOOT" or PHASE == "WAIT_RAM" then
+            set("1 Player Start", frame >= 700 and frame < 760)
+        end
     end
 
-    if STATE == "BOOT" then
-        if frame >= 1200 then
-            STATE = "PLAY"
-            reset_round()
-            pal_writes_last_round = pal_writes
-            log(string.format("[INFO] PLAY at frame %d\n", frame))
-        end
+    -- Default joystick low (HOP phase overrides)
+    if PHASE ~= "HOP" then
+        set("P1 Right (Down-Right)", false)
+        set("P1 Left (Up-Left)", false)
+    end
+
+    if done then return end
+
+    if PHASE == "BOOT" then
+        if frame >= 1100 then PHASE = "WAIT_RAM"; log("[INFO] WAIT_RAM\n") end
         return
     end
 
-    if STATE ~= "PLAY" then return end
+    local cur_ram = mem and mem:read_u8(0x081) or 0
 
-    -- Periodic status (logs always, even during cooldown waits)
-    if frame % 600 == 0 then
-        local p = mem and mem:read_u8(POS_ADDR) or 0
-        log(string.format("[status] frame=%d L%dR%d at(%d,%d) pos=0x%02X cubes=%d/28 fully=%d phase=%s pending=%s hop=%s pal=%d cool_left=%d\n",
-            frame, level, round, qrow, qcol, p, cubes_done, cubes_fully,
-            snap_phase, tostring(pending_dir), tostring(hop_dir), pal_writes,
-            (last_hop_frame + HOP_COOLDOWN) - frame))
-    end
+    if PHASE == "WAIT_RAM" then
+        if cur_ram >= 0x04 and cur_ram ~= last_ram then
+            round_num = round_num + 1
+            last_ram = cur_ram
+            log(string.format("[round %d] %s ram=0x%02X frame=%d\n",
+                round_num, VISUAL_TAG[round_num] or "?", cur_ram, frame))
 
-    -- Detect round-clear: palette delta ≥16 since last round
-    if pal_writes - pal_writes_last_round >= 32 then
-        log(string.format("[bot] ROUND CLEAR detected (pal_writes %d→%d)  L%dR%d  frame=%d\n",
-            pal_writes_last_round, pal_writes, level, round, frame))
-        pal_writes_last_round = pal_writes
-        total_rounds = total_rounds + 1
-        round = round + 1
-        if round > 4 then round = 1; level = level + 1 end
-        reset_round()
-        last_hop_frame = frame + 360  -- transition animation buffer
-        return
-    end
-
-    -- Wait while held hop or cooldown
-    if hop_dir or frame < last_hop_frame + HOP_COOLDOWN then return end
-
-    -- Read true Q*bert position from ROM
-    local cur_pos = mem and mem:read_u8(POS_ADDR) or 0
-
-    -- ── Verify pending hop landed (or retry) ─────────────────────────────────
-    if pending_dir then
-        if cur_pos == pos_at_hop_start then
-            -- Hop dropped — retry same direction. Cap retries.
-            stuck_retries = stuck_retries + 1
-            if stuck_retries > 6 then
-                log(string.format("[bot] STUCK (>6 retries) — assuming death; reset frame=%d\n", frame))
-                reset_round()
-                deaths = deaths + 1
+            if round_num > MAX_ROUND then
+                log("[done]\n")
+                done = true
+                if logfile then logfile:close() end
+                if snaplog then snaplog:close() end
+                manager.machine:exit()
                 return
             end
-            -- Reissue same dir without changing qrow/qcol
-            hop_dir = pending_dir
-            hop_start_frame = frame
-            last_hop_frame = frame
-            pos_at_hop_start = cur_pos
-            set_input(DIRS[pending_dir].name, true)
-            return
+
+            -- Skip transition screens (no usable cube state to capture)
+            if IS_TRANSITION[round_num] then
+                log(string.format("[skip] %s transition\n", VISUAL_TAG[round_num]))
+                PHASE = "ADVANCE"
+                adv_at = frame + ADVANCE_DELAY
+                adv_rel_at = adv_at + ADVANCE_HOLD
+                return
+            end
+
+            -- DON'T snap state0 at ram-change — schedule it to fire DURING
+            -- the HOP phase a few frames later, so we don't disrupt ROM
+            -- transition timing. State0 fires at frame X+5 (still pristine,
+            -- before any hop input).
+            PHASE = "HOP"
+            hop1_at = frame + HOP_DELAY
+            hop1_rel_at = hop1_at + HOP_HOLD
+            hop2_at = hop1_rel_at + INTER_HOP
+            hop2_rel_at = hop2_at + HOP_HOLD
+            hop_snap_at = hop2_rel_at + POST_HOP_WAIT
         end
-        -- Hop confirmed — advance bot's qrow/qcol per the issued direction.
-        local d = DIRS[pending_dir]
-        qrow, qcol = qrow + d.dr, qcol + d.dc
-        stuck_retries = 0
-        pending_dir = nil
-
-        -- If we arrived back at apex AND were waiting to snap state-1, do it now.
-        if pending_snap_label and cur_pos == APEX_VAL then
-            snap_record(pending_snap_label)
-            pending_snap_label = nil
-            snap_phase = "DONE"
-        end
-    end
-
-    -- ── Mark current cube ────────────────────────────────────────────────────
-    local ci = cidx(qrow, qcol)
-    local prev = visited[ci] or 0
-    visited[ci] = prev + 1
-    if prev == 0 then cubes_done = cubes_done + 1
-    elseif prev == 1 then cubes_fully = cubes_fully + 1 end
-
-    -- ── Walker snap state machine ────────────────────────────────────────────
-    if snap_phase == "PRE" and qrow == 0 and qcol == 0 and cur_pos == APEX_VAL then
-        snap_record("state0")
-        -- Force DR hop
-        snap_phase = "AFTER_DR"
-        pending_dir = "DR"
-        pos_at_hop_start = cur_pos
-        hop_dir = "DR"; hop_start_frame = frame; last_hop_frame = frame
-        set_input(DIRS["DR"].name, true)
         return
     end
 
-    if snap_phase == "AFTER_DR" and qrow == 1 and qcol == 1 then
-        -- Force UL back to apex
-        snap_phase = "AFTER_UL"
-        pending_dir = "UL"
-        pos_at_hop_start = cur_pos
-        hop_dir = "UL"; hop_start_frame = frame; last_hop_frame = frame
-        set_input(DIRS["UL"].name, true)
-        pending_snap_label = "state1"  -- snap when we land back at apex
-        return
-    end
-
-    -- ── Normal Warnsdorff move ───────────────────────────────────────────────
-    local move = warnsdorff_next(qrow, qcol)
-    if not move then
-        local d = bfs_to_unvisited(qrow, qcol)
-        if d then
-            local dd = DIRS[d]
-            move = {dir=d, r=qrow + dd.dr, c=qcol + dd.dc}
+    if PHASE == "HOP" then
+        -- Fire state0 a few frames into HOP (before any input goes), giving
+        -- ROM time to settle past the ram-change instant
+        if frame == hop1_at - HOP_DELAY + 5 then
+            snap_record("state0")
         end
-    end
-
-    if not move then
-        -- All cubes visited 2x — wait for round transition (palette tap will fire)
-        last_hop_frame = frame  -- spin until palette change
+        set("P1 Right (Down-Right)", frame >= hop1_at and frame < hop1_rel_at)
+        set("P1 Left (Up-Left)",     frame >= hop2_at and frame < hop2_rel_at)
+        if frame == hop_snap_at then
+            snap_record("state1")
+            PHASE = "ADVANCE"
+            adv_at = frame + ADVANCE_DELAY
+            adv_rel_at = adv_at + ADVANCE_HOLD
+        end
         return
     end
 
-    -- Issue hop
-    pending_dir = move.dir
-    pos_at_hop_start = cur_pos
-    hop_dir = move.dir
-    hop_start_frame = frame
-    last_hop_frame = frame
-    set_input(DIRS[move.dir].name, true)
-
-
-    -- Exit
-    if level > 4 or frame >= 200000 then
-        log(string.format("[done] L%dR%d rounds=%d deaths=%d pal_writes=%d frame=%d\n",
-            level, round, total_rounds, deaths, pal_writes, frame))
-        if logfile then logfile:close() end
-        if snaplog then snaplog:close() end
-        manager.machine:exit()
+    if PHASE == "ADVANCE" then
+        set("1 Player Start", frame >= adv_at and frame < adv_rel_at)
+        if frame >= adv_rel_at then
+            PHASE = "WAIT_RAM"
+        end
+        return
     end
 end)

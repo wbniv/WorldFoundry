@@ -2,11 +2,11 @@
 
 **Date:** 2026-05-08
 **Status:**
-- **A** ✅ position byte found at `0x0D64`, apex value `0xB8`
+- **A** ✅ position byte hunt — `0x0D64` works for snap dance triggers (apex check) but collides across cubes; sprite X/Y pair (`0x0D58`, `0x0D59`) has animation transients so unreliable for cube-level tracking
 - **B** ✅ palette write-tap delta ≥ 32 = round-clear signal
-- **C** partial — single-round walker works (L1R1 captured cleanly via real RAM detection); multi-round operation hits dead-reckoning drift
-- **D** ✅ L4R1 captured 2026-05-08 — state-1 = `#EFDE77` (golden yellow); doc updated; 16/16 rounds complete
-- **E** not started — WF-side parity (separate plan)
+- **C** ✅ multi-round walker (DIP-cheat-driven, drift-immune) — captures state-0 + state-1 for all 16 rounds in a single run; 15/16 rounds match doc exactly; L4R1 in multi-round mode hits transition timing (state-0 captures L4 zoom screen instead of pristine apex). Standalone `qbert_l4r1_walker.lua` captures L4R1 cleanly.
+- **D** ✅ L4R1 state-1 = `#EFDE77` captured and committed
+- **E** not started — WF-side parity (separate plan; protocol now well-defined)
 
 ## Context
 
@@ -124,31 +124,65 @@ Build on `qbert_bot.lua`'s Warnsdorff core but add:
 
 ### Phase E — WF-side parity (separate follow-up; ~half day)
 
-Out of scope for this plan but enabled by it:
+Now well-scoped — the MAME-side walker protocol is fully defined:
 
-1. WF-side autopilot already exists (`mb[430]` in
+**Walker protocol** (one round):
+
+1. At round entry, Q*bert is at apex with all cubes in state-0.
+2. Capture frame: `state0` snap. Sample at apex top (`(120, 56)`) and
+   target cube top (`(137, 80)` for cube (1,1)).
+3. Force DR hop. Cube (1,1) flips state.
+4. Force UL hop back to apex.
+5. Capture frame: `state1` snap. Cube (1,1) sample now shows state-1 color
+   (intermediate for 2-step rounds, state-2 for 1-step).
+6. Round-clear via gameplay (or director script for WF side); next round
+   begins; loop.
+
+**WF-side implementation:**
+
+1. WF autopilot already exists (`mb[430]` in
    [`wflevels/qbert_practice/blender_create_qbert.py`](../../wflevels/qbert_practice/blender_create_qbert.py)
-   `DIRECTOR_SCRIPT`).
-2. Add `mb[431] CAPTURE_TRIGGER` mailbox; director writes 1/2/3 at the same
-   moments the MAME walker snaps.
-3. Wire a debug-bridge `screenshot` op (Phase B-style addition) that reads
-   the WF framebuffer and writes a PNG.
-4. Run `wf_walker.py` (a thin pytest harness) that drives the WF level
-   through all 16 rounds, captures `wf_walker_L{lv}R{rnd}_{state}.png`.
-5. Compare-tool: pixel-diff `walker_L*R*_*.png` (MAME) vs `wf_walker_*.png`
-   (WF) at the cube-top sample points. Pass = matching colors at sample
-   points; visual diff acceptable elsewhere (different sprites, same palette).
+   `DIRECTOR_SCRIPT`). It currently runs a 32-hop coverage path.
+2. Add `mb[431] CAPTURE_TRIGGER` mailbox: director writes `1` at apex
+   pre-hop (= state0 snap point), `2` at apex post-DR-UL-dance (= state1
+   snap point), `3` at round-clear, `0` otherwise.
+3. Wire a debug-bridge `screenshot` op (Phase B-style addition to
+   `engine/debug_bridge.cc`) that reads WF framebuffer via
+   `glReadPixels` and writes a PNG. Bind to `mb[431]` transitions.
+4. Test harness `scripts/test/qbert_wf_walker.py`: connects to debug
+   bridge port 7777, watches for `mb[431]` events, captures PNGs as
+   `wf_walker_L{lv}R{rnd}_{state}.png`.
+5. Compare-tool `scripts/test/qbert_walker_diff.py`: pixel-diff at
+   sample points `(120,56)`, `(137,80)`, `(40,55)` between MAME and WF
+   captures. Pass = matching colors. Background/sprite differences
+   ignored — only cube-top sample points matter for palette regression.
+
+**Determinism**: clear NVRAM before MAME run; WF side has no equivalent
+state — director script + autopilot fully replay-deterministic.
+
+**Edge cases**:
+- L4R1 multi-round capture has the transition-zoom timing issue. Use
+  `qbert_l4r1_walker.lua` standalone for this round, OR accept that WF
+  side has no equivalent transition delay so the WF capture's "state-0"
+  is automatically clean.
+- For 1-step rounds, state-1 = state-2 (no intermediate); the
+  `kind=1-step` classifier already handles this in `sample_cube_colors.py`.
 
 ## Critical files
 
-| File | Phase | Action |
+| File | Phase | Status |
 |---|---|---|
-| `scripts/research/mame/qbert_full_diff.lua` | A | Adapt for position-byte hunt |
-| `scripts/research/mame/qbert_bot.lua` | C | Refactor: real position read, palette-tap round-clear |
-| `scripts/research/mame/qbert_walker.lua` | C | New file (or rename qbert_bot.lua) |
-| `docs/investigations/qbert_position_ram.md` | A | New file documenting the position byte(s) |
-| `docs/investigations/qbert_cube_face_colors.md` | D | Update L4R1 state-1 cell |
-| `docs/investigations/mame-screenshots/qbert_hop_L4R1.png` | D | Replace with walker-captured frame |
+| `scripts/research/mame/qbert_position_hunt.lua` | A | ✅ created |
+| `scripts/research/mame/qbert_pos_calibrate.lua` | A | ✅ created (revealed position-byte limits) |
+| `scripts/research/mame/qbert_walker.lua` | C | ✅ multi-round walker (DIP-cheat-driven) |
+| `scripts/research/mame/qbert_l4r1_walker.lua` | D | ✅ standalone L4R1 capture |
+| `scripts/research/mame/qbert_round_byte_hunt.lua` | D | ✅ proved +119 timing |
+| `docs/investigations/qbert_cube_face_colors.md` | D | ✅ L4R1 state-1 = `#EFDE77` |
+| `docs/investigations/mame-screenshots/qbert_hop_L4R1.png` | D | ✅ replaced with clean capture |
+| `engine/debug_bridge.cc` (screenshot op) | E | TODO |
+| `wflevels/qbert_practice/blender_create_qbert.py` (mb[431]) | E | TODO |
+| `scripts/test/qbert_wf_walker.py` | E | TODO |
+| `scripts/test/qbert_walker_diff.py` | E | TODO |
 
 ## Verification
 
@@ -246,6 +280,88 @@ tracker while ROM never had Q*bert there. ROM only round-clears when
 3. **Round-clear via palette tap** (already wired): when `pal_writes`
    delta ≥ 32, transition to next-round state, wait 360 frames for the
    transition animation, resume.
+
+### Phase C.5 done — multi-round walker (architecture pivot)
+
+The original Phase C plan was a Warnsdorff bot that round-clears in ROM via
+real position tracking. We tried it. It doesn't work, for two reasons:
+
+1. **The position byte at `0x0D64` collides across cubes.** Phase A's
+   strict-uniqueness test missed this because the test sequence only visited
+   5 specific cubes. A fuller calibration walk (`qbert_pos_calibrate.lua`)
+   visiting all 28 cubes shows e.g. `(6,0)`, `(6,2)`, `(6,4)`, `(6,6)` all
+   share `0x26`; `(5,0)`, `(5,2)`, `(5,4)` all share `0x69`. The byte appears
+   to encode something like row-Y-coordinate, not unique cube ID.
+2. **The 16-bit sprite X/Y pair (`0x0D58`, `0x0D59`) has animation
+   transients.** During a run, apex was registered with multiple distinct
+   16-bit keys (`0x257D` and `0x917D` both → `(0,0)`). Q*bert's sprite-X
+   shifts between idle/hop frames. So the bot's learned table mis-merges
+   cubes and fragments apex across keys.
+
+A real fix would require finding the cube-state RAM array (28 bytes, one per
+cube) and using state-change events as the position signal. That's a
+deeper hunt than fits in this plan.
+
+**Pivot**: drop Warnsdorff control entirely. Use **DIP cheat** to advance
+rounds (the same proven mechanism `qbert_round_byte_hunt.lua` validated for
+8 known visual rounds). Per round, inject the same `+119`-frame snap dance
+that closed L4R1. Multi-round walker = `qbert_round_byte_hunt.lua` +
+state-0/state-1 snap pair per round.
+
+**The NVRAM-determinism finding** (load-bearing):
+
+Early attempts at the multi-round walker showed L4R1 producing the wrong
+visual round (HUD said L1R1 with score 50) — even though `qbert_l4r1_walker.lua`
+standalone had captured L4R1 cleanly. Hours of debugging suggested
+non-determinism between MAME runs. The cause: **MAME persists NVRAM at
+`~/.mame/nvram/qbert/nvram` across runs**, and the saved state subtly
+shifts demo-mode timing. Coin counter, high-score table, and DIP defaults
+all live there.
+
+Fix: clear NVRAM and config before each walker run:
+
+```bash
+rm -f ~/.mame/nvram/qbert/nvram ~/.mame/cfg/qbert.cfg
+```
+
+After the clear, walker is fully deterministic — same run produces same
+captures bit-for-bit. **This applies to all MAME-Q*bert scripts; every
+research script in this plan should preface its run with the cleanup.**
+
+Per-round results from `qbert_walker.lua` after NVRAM clear (sample at
+`(137, 80)` on each state-1 snap):
+
+```
+L1R1 state1=#DEDE00 (= state-2, 1-step round)  ✓
+L1R2 state1=#0046DE (= state-2, 1-step)        ✓
+L1R3 state1=#464646 (= state-2, 1-step)        ✓
+L1R4 state1=#A9B910 (= state-2, 1-step)        ✓
+L2R1 state1=#EFDE77 (intermediate, 2-step)     ✓ matches doc
+L2R2 state1=#0066EF                            ✓ matches doc
+L2R3 state1=#5646EF                            ✓ matches doc
+L2R4 state1=#0046EF                            ✓ matches doc
+L3R1 state1=#003199 (= state-2, 1-step)        ✓
+L3R2 state1=#B9CECE                            ✓
+L3R3 state1=#EFDE77                            ✓
+L3R4 state1=#5646EF                            ✓
+L4R1 state1=#21B931  ← state-0 green (Demo AI active during multi-round dance)
+L4R2 state1=#FF6666                            ✓ matches doc
+L4R3 state1=#FF6666                            ✓ matches doc
+L4R4 state1=#0066EF                            ✓ matches doc
+```
+
+15/16 rounds match the doc canonical values. L4R1 in multi-round mode hits
+a known edge case: the L4-entry transition zoom animation eats ~120 frames,
+during which Demo AI plays L4R1 ahead of our scripted dance. Standalone
+`qbert_l4r1_walker.lua` (which exits after L4R1) doesn't have this issue
+because it doesn't progress further; the snap-dance timing perfectly
+captures the moment HUD updates to L4R1 with cube (1,1) freshly flipped.
+
+For Phase E (WF parity) the L4R1 case is moot — WF's autopilot directly
+controls the level/round transition with no Demo AI to fight, and no
+HUD-update lag to time around. Both engines can converge on the same
+"snap state-0 at apex; force DR; snap state-1 after UL back" protocol
+trivially.
 
 ### Phase D done — L4R1 captured
 
@@ -348,18 +464,57 @@ A few false starts worth noting so we don't repeat them:
 - **Decode the position byte to (row, col).** Spent some time trying
   to figure out what `0x0D64`'s values mean (apex=`0xB8`, (1,1)=`0xF5`,
   (2,1)=`0xB2`, etc — not a clean encoding). Turned out we don't need
-  to decode it for the L4R1 capture; uniqueness alone is enough. Phase
-  C.5 (drift fix) would benefit from the full decode but it's not on
-  the critical path for closing this gap.
+  to decode it for the L4R1 capture; uniqueness alone is enough.
+- **`0x0D64` as a unique cube identifier (Phase C original plan).**
+  Phase A's strict-uniqueness test only visited 5 cubes — `qbert_pos_calibrate.lua`
+  later revealed collisions: `(6,0)=(6,2)=(6,4)=(6,6)=0x26`. The byte
+  encodes something like row-Y, not unique cube ID.
+- **16-bit X/Y key (`0x0D58`, `0x0D59`) as unique identifier.** Sprite
+  X/Y are unique per cube *at rest* but have animation transients —
+  apex registered with both `0x257D` and `0x917D` keys during a single
+  run. Bot's learned table fragments cubes across keys.
+- **Dynamic-learned `pos_to_cube` table.** Walker started with apex
+  seeded and learned other cubes via dead-reckoning. Early
+  registrations (during the snap dance) are correct, but later hops
+  with edge no-ops or enemy interference register wrong (cube X
+  mapped to key Y, but actual cube at key Y was something else).
+  Table corruption propagates.
+- **`cubes_fully >= 28` as round-clear heuristic.** Bot's view of
+  visit counts diverges from ROM's view due to drift. Bot reports
+  "all 28 visited 2x" while ROM has some cubes still at state-0.
+  Palette-write-tap is the only reliable round-clear signal.
+
+#### NVRAM persistence — the silent non-determinism gotcha
+
+After the architecture pivot to DIP-cheat-driven walker, the multi-round
+script worked once, then started capturing wrong rounds on subsequent
+runs. Same script, same MAME version, same ROM, *different output*.
+
+Cause: MAME persists `~/.mame/nvram/qbert/nvram` across runs (high-score
+table, coin counter — `qbert.cfg` shows `coins index="0" number="58"`
+after a few runs). The persisted state subtly shifts demo-mode timing
+on subsequent boots.
+
+Always preface MAME research scripts with:
+
+```bash
+rm -f ~/.mame/nvram/qbert/nvram ~/.mame/cfg/qbert.cfg
+```
+
+Or pass `-nvram_directory /tmp/empty_nvram` to MAME for a per-run
+ephemeral location. Cleared NVRAM = fully deterministic walker output
+across runs.
 
 ### Useful artifacts in repo
 
-- [`scripts/research/mame/qbert_position_hunt.lua`](../../scripts/research/mame/qbert_position_hunt.lua) — Phase A position-byte tool
-- [`scripts/research/mame/qbert_walker.lua`](../../scripts/research/mame/qbert_walker.lua) — Phase C walker (L1R1 works; multi-round needs C.5)
+- [`scripts/research/mame/qbert_position_hunt.lua`](../../scripts/research/mame/qbert_position_hunt.lua) — Phase A position-byte tool (5-cube subset)
+- [`scripts/research/mame/qbert_pos_calibrate.lua`](../../scripts/research/mame/qbert_pos_calibrate.lua) — full 28-cube calibration walk (revealed `0x0D64` collisions and X/Y transients)
+- [`scripts/research/mame/qbert_walker.lua`](../../scripts/research/mame/qbert_walker.lua) — final multi-round walker (DIP-cheat-driven, 15/16 rounds clean)
 - [`scripts/research/mame/qbert_round_byte_hunt.lua`](../../scripts/research/mame/qbert_round_byte_hunt.lua) — diagnostic that proved the +119 timing
-- [`scripts/research/mame/qbert_l4r1_walker.lua`](../../scripts/research/mame/qbert_l4r1_walker.lua) — final L4R1 hybrid (cheat-advance + fixed-timing dance)
-- [`docs/investigations/qbert_walker_run.log`](../investigations/qbert_walker_run.log) — Phase C multi-round drift evidence
-- [`scripts/research/mame/round_byte_hunt.txt`](../../scripts/research/mame/round_byte_hunt.txt), [`l4r1_walker.txt`](../../scripts/research/mame/l4r1_walker.txt), [`position_hunt.txt`](../../scripts/research/mame/position_hunt.txt) — log artifacts
+- [`scripts/research/mame/qbert_l4r1_walker.lua`](../../scripts/research/mame/qbert_l4r1_walker.lua) — standalone L4R1 capture (cheat-advance + fixed-timing dance)
+- [`scripts/research/mame/walker_snaps.txt`](../../scripts/research/mame/walker_snaps.txt) — snap log per run (idx → round/label/frame)
+- [`docs/investigations/qbert_walker_run.log`](../investigations/qbert_walker_run.log) — multi-round walker run log
+- [`scripts/research/mame/round_byte_hunt.txt`](../../scripts/research/mame/round_byte_hunt.txt), [`l4r1_walker.txt`](../../scripts/research/mame/l4r1_walker.txt), [`position_hunt.txt`](../../scripts/research/mame/position_hunt.txt), [`pos_calibrate.txt`](../../scripts/research/mame/pos_calibrate.txt) — log artifacts
 
 ### Things that turned out to be dead ends
 
