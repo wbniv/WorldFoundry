@@ -1007,20 +1007,33 @@ def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
 
         is_light = typename.lower() == "light"
         if is_light:
+            # Engine: AMBIENT_LIGHT=0, DIRECTIONAL_LIGHT=1, POINT_LIGHT=2, SPOT_LIGHT=3
+            # (see wfsource/source/oas/levelcon.h)
+            _LT_AMBIENT, _LT_DIRECTIONAL, _LT_POINT, _LT_SPOT = 0, 1, 2, 3
+            _BLENDER_LAMP_MAP = {
+                "POINT": _LT_POINT,
+                "SUN":   _LT_DIRECTIONAL,
+                "SPOT":  _LT_SPOT,
+                "AREA":  _LT_POINT,  # best-effort; WF doesn't model area lights yet
+            }
+            _LT_LABEL = {0: "Ambient", 1: "Directional", 2: "Point", 3: "Spot"}
+
             if obj.type == 'LIGHT' and obj.data:
                 r, g, b = obj.data.color[0], obj.data.color[1], obj.data.color[2]
-                lt = 0 if obj.data.type == 'POINT' else 1
+                lt = _BLENDER_LAMP_MAP.get(obj.data.type, _LT_DIRECTIONAL)
             else:
                 r = float(obj.get(_prop_key("lightRed"), 1.0))
                 g = float(obj.get(_prop_key("lightGreen"), 1.0))
                 b = float(obj.get(_prop_key("lightBlue"), 1.0))
                 lt_raw = obj.get(_prop_key("lightType"), 0)
-                lt_map = {"ambient": 0, "directional": 1}
-                lt = lt_map.get(str(lt_raw).lower(), int(lt_raw) if str(lt_raw).isdigit() else 0)
+                lt_map = {"ambient": _LT_AMBIENT, "directional": _LT_DIRECTIONAL,
+                          "point": _LT_POINT, "spot": _LT_SPOT}
+                lt = lt_map.get(str(lt_raw).lower(),
+                                int(lt_raw) if str(lt_raw).isdigit() else _LT_AMBIENT)
             lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightRed\" }} {{ 'DATA' {fp(r)} }} {{ 'STR' \"{r:f}\" }} }}")
             lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightGreen\" }} {{ 'DATA' {fp(g)} }} {{ 'STR' \"{g:f}\" }} }}")
             lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightBlue\" }} {{ 'DATA' {fp(b)} }} {{ 'STR' \"{b:f}\" }} }}")
-            lines.append(f"\t\t{{ 'I32' {{ 'NAME' \"lightType\" }} {{ 'DATA' {lt}l }} {{ 'STR' \"{'Directional' if lt else 'Ambient'}\" }} }}  //Ambient|Directional")
+            lines.append(f"\t\t{{ 'I32' {{ 'NAME' \"lightType\" }} {{ 'DATA' {lt}l }} {{ 'STR' \"{_LT_LABEL.get(lt, 'Ambient')}\" }} }}  //Ambient|Directional|Point|Spot")
 
         if obj.data and hasattr(obj.data, 'polygons') and obj.data.polygons:
             mesh = obj.data
