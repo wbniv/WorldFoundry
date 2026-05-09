@@ -705,6 +705,10 @@ DIRECTOR_SCRIPT = (
     # Stack tracing is critical because the depth shifts as values are
     # pushed during each iteration; comments below show stack at each step
     # with `T:` indicating the topmost element.
+    # CRITICAL: zForth `/` is FLOAT division (per
+    # ~/.claude/memory/feedback_zforth_int_divide.md). `i 3 /` returns 1.667
+    # for i=5; comparisons like `combo_r = cur_pal` silently fail. Cast to
+    # int via `i dup 3 % - 3 /` so combo_r is a real integer.
     "425 read-mailbox 4 % "     # ( cur_pal )  T:cur_pal
     "28 0 do "                  # outer: i = cube N, 0..27
     "200 i + read-mailbox "     # ( cur_pal cube_state )  T:cube_state
@@ -712,8 +716,8 @@ DIRECTOR_SCRIPT = (
     "12 0 do "                  # inner: i = combo 0..11
     # Inner-body stack at entry: ( cur_pal cube_state cube_N )
     # Depths from top: 0=cube_N, 1=cube_state, 2=cur_pal
-    "i 3 / 3 pick = "           # combo_r==cur_pal?
-    # After `i 3 /`:  ( cur_pal cube_state cube_N combo_r )  depths 0..3
+    "i dup 3 % - 3 / 3 pick = "  # combo_r (int-divided) ==cur_pal?
+    # After int-cast: ( cur_pal cube_state cube_N combo_r )  depths 0..3
     # `3 pick` reaches cur_pal (depth 3): ( ... combo_r cur_pal )
     # `=` consumes both: ( cur_pal cube_state cube_N bool_r )
     "i 3 % 3 pick = & "         # combo_s==cube_state? AND
@@ -722,7 +726,7 @@ DIRECTOR_SCRIPT = (
     # `=` then `&`: ( cur_pal cube_state cube_N flag )
     "if 1 else 0 then "         # ( cur_pal cube_state cube_N vis_flag )
     # Address: 440 + (combo/3)*84 + cube_N*3 + (combo%3)
-    "440 i 3 / 84 * + "         # ( ... vis_flag base )  base = 440 + r*84
+    "440 i dup 3 % - 3 / 84 * + "  # int-cast i/3 for the address too
     "2 pick 3 * + "             # cube_N at depth 2 → multiply by 3, add
     # After `2 pick`: ( ... vis_flag base cube_N )
     # `3 *`: ( ... vis_flag base cube_N*3 )
