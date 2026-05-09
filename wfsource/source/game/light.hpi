@@ -53,7 +53,7 @@ Light::Set(Camera& camera,int index) const
 	else
 	{
 		assert(myOAD->lightType == AMBIENT_LIGHT);
-		assert(index = -1);
+		assert(index == -1);
 		camera.GetRenderCamera().SetAmbientColor(_color);
 	}
 }

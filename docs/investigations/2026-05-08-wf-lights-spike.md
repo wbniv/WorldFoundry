@@ -118,3 +118,33 @@ Effort revised: optimistic 3.5 days → 4 days; realistic 4–5 days → 5–6 d
 3. Bisect using DBSTREAM logging at each chain link until `_ambientColor` is found to drop out.
 4. Patch the dropout. Verify both Ambient-only and Ambient+Directional levels light correctly.
 5. Then proceed to Phase 0.5 enum fix, then Phase 1 fallback.
+
+---
+
+## 2026-05-09 update: Phase 0.5 done, Phase 0.7 reaches a different conclusion than expected
+
+**Phase 0.5 (enum-inversion fix) committed** in `6a2e248`. light.oas label flipped to `"Ambient|Directional"` to match engine `AMBIENT_LIGHT=0, DIRECTIONAL_LIGHT=1`. Blender exporter dict, Lamp-type mapping, and STR-label string all flipped to match. light.oad regenerated via oas2oad-rs; same byte count (label-only delta). Engine rebuilt clean; marble-madness still renders identically.
+
+**Phase 0.7: Ambient is actually working.** Diagnostic `fprintf(stderr, ...)` added at `ModernRendererBackend::SetAmbient` and binary rebuilt. Running `snowgoons-blender/snowgoons-standalone.iff` produced:
+
+```
+[diag-ambient] SetAmbient(0.996, 0.996, 0.996)
+[diag-ambient] SetAmbient(0.996, 0.996, 0.996)
+[diag-ambient] SetAmbient(0.996, 0.996, 0.996)
+[diag-ambient] SetAmbient(0.996, 0.996, 0.996)
+[diag-ambient] SetAmbient(0.996, 0.996, 0.996)
+```
+
+`0.996` = 255/256.0 (Color::Red() returns 255 for FX32 lightRed=1.0; ConvertToGLColor divides by 256). The chain works. The shader receives `u_ambient = (0.996, 0.996, 0.996)` every frame — basically full white — and snowgoons-blender renders fully lit (white snow ground, textured houses). Visual evidence consistent with the diagnostic.
+
+**Memory revision:** The user-memory entry "Ambient lights don't actually work — use Directional" appears to be a misattribution. qbert's `feat: per-face lit/shadow shading for arcade-style fixed colours` (commit 238df2a) was authored as an arcade-aesthetic choice — Q*bert's iconic three-tone-per-cube look mandated explicit per-face colours regardless of any lighting state — not as a workaround for a broken Ambient path. The Ambient propagation chain (`Light::Set` → `RenderCamera::SetAmbientColor` → `RenderCamera::RenderBegin::ConvertToGLColor` → `ModernRendererBackend::SetAmbient` → `glUniform3fv(_uAmbient)`) is intact and functional.
+
+**Bonus bug fix:** while reading `wfsource/source/game/light.hpi:56`, found `assert(index = -1)` (assignment, not comparison). Always passes; harmless because `index` is unused after the assert. Fixed to `assert(index == -1)` as part of this Phase 0.7 commit.
+
+## Phase 0.7 status — REVISED
+
+- ❌ ~~Ambient propagation broken~~ → ✅ Ambient propagation works; memory entry retired.
+- ✅ Bonus fix: `assert(index = -1)` typo corrected.
+- ✅ Diagnostic removed before commit.
+
+Phase 0.7 collapses to a one-line typo fix + memory cleanup. **Phase 1 (unlit fallback when no lights authored) is now unblocked** as the next thing to tackle. Effort estimate revises back down: realistic 4–5 days.
