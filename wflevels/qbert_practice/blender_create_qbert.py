@@ -684,26 +684,44 @@ DIRECTOR_SCRIPT = (
     "0 411 write-mailbox then\n"
     # Visibility fan-out: for each cube, show only the actor for
     # (cur_palette, cube_state); hide all 12 variants (4 rounds * 3 states).
-    # cur_palette = ROUND_NUMBER % 4.
-    # Vis mailbox = 440 + r*84 + cube*3 + s.
-    # Two nested do/loops: outer=cube (j in inner), inner=combo (i in inner).
-    # r = combo/3, s = combo mod 3.
-    "425 read-mailbox 4 % "     # ( cur_pal )  — % is zForth modulo primitive
-    "28 0 do "                  # outer: i=cube 0..27 (j inside inner loop)
-    "200 i + read-mailbox "     # ( cur_pal cube_state ) — read before inner loop
-    "12 0 do "                  # inner: i=combo 0..11
-    # Stack at this point: ( cur_pal cube_state ).
-    # Test 1: combo_r == cur_pal? cur_pal is the 3rd item from top, so reach
-    # it via `2 pick` (NOT `over`, which would grab cube_state instead).
-    "i 3 / 2 pick = "           # r==cur_pal?  ( cur_pal cube_state bool1 )
-    # Test 2: combo_s == cube_state? cube_state is now the 3rd item; `2 pick`.
-    "i 3 % 2 pick = & "         # s==cube_state? AND  ( cur_pal cube_state flag )
-    "if 1 else 0 then "
-    "440 i 3 / 84 * + j 3 * + i 3 % + write-mailbox "
+    # cur_palette = ROUND_NUMBER % 4.  Vis mailbox = 440 + r*84 + N*3 + s.
+    #
+    # IMPORTANT: we push cube_N onto the DATA stack and reach it via `pick`
+    # (not via `j` outer-loop counter). zForth's `j` is `pickr 2`, defined
+    # in engine/stubs/scripting_zforth.cc:234 — this codebase's only use of
+    # `j` was here, and it's not unit-tested. Avoid it for safety.
+    #
+    # Stack tracing is critical because the depth shifts as values are
+    # pushed during each iteration; comments below show stack at each step
+    # with `T:` indicating the topmost element.
+    "425 read-mailbox 4 % "     # ( cur_pal )  T:cur_pal
+    "28 0 do "                  # outer: i = cube N, 0..27
+    "200 i + read-mailbox "     # ( cur_pal cube_state )  T:cube_state
+    "i "                        # ( cur_pal cube_state cube_N )  T:cube_N
+    "12 0 do "                  # inner: i = combo 0..11
+    # Inner-body stack at entry: ( cur_pal cube_state cube_N )
+    # Depths from top: 0=cube_N, 1=cube_state, 2=cur_pal
+    "i 3 / 3 pick = "           # combo_r==cur_pal?
+    # After `i 3 /`:  ( cur_pal cube_state cube_N combo_r )  depths 0..3
+    # `3 pick` reaches cur_pal (depth 3): ( ... combo_r cur_pal )
+    # `=` consumes both: ( cur_pal cube_state cube_N bool_r )
+    "i 3 % 3 pick = & "         # combo_s==cube_state? AND
+    # After `i 3 %`:  ( cur_pal cube_state cube_N bool_r combo_s )
+    # `3 pick` reaches cube_state (depth 3): ( ... combo_s cube_state )
+    # `=` then `&`: ( cur_pal cube_state cube_N flag )
+    "if 1 else 0 then "         # ( cur_pal cube_state cube_N vis_flag )
+    # Address: 440 + (combo/3)*84 + cube_N*3 + (combo%3)
+    "440 i 3 / 84 * + "         # ( ... vis_flag base )  base = 440 + r*84
+    "2 pick 3 * + "             # cube_N at depth 2 → multiply by 3, add
+    # After `2 pick`: ( ... vis_flag base cube_N )
+    # `3 *`: ( ... vis_flag base cube_N*3 )
+    # `+`:   ( ... vis_flag base+cube_N*3 )
+    "i 3 % + "                  # ( ... vis_flag addr )
+    "write-mailbox "            # pops vis_flag, addr → ( cur_pal cube_state cube_N )
     "loop "
-    "drop "                     # drop cube_state
+    "drop drop "                # drop cube_N, cube_state → ( cur_pal )
     "loop "
-    "drop\n"                    # drop cur_pal
+    "drop\n"                    # drop cur_pal → ( )
     # Win check: count cubes whose state != 2; write count to mb 412, win flag to 413
     "0 28 0 do 200 i + read-mailbox 2 <> if 1 + then loop "
     "dup 412 write-mailbox 0 = if 1 413 write-mailbox then\n"
