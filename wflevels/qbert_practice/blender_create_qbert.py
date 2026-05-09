@@ -739,11 +739,14 @@ DIRECTOR_SCRIPT = (
     # Round-clear: start 90-tick countdown when win latches (one-shot — only if
     # timer is not already running), then on expiry reset all cube states,
     # clear the win flag, increment the round counter, and respawn at apex.
-    "413 read-mailbox 1 = if 424 read-mailbox 0 = if 90 424 write-mailbox then then\n"
+    # capture-trigger fires at LATCH so the host snaps the won state (all
+    # 28 cubes in state-2) BEFORE the 90-frame countdown resets them.
+    "413 read-mailbox 1 = if 424 read-mailbox 0 = if "
+    "90 424 write-mailbox 3 432 write-mailbox "
+    "then then\n"
     "424 read-mailbox dup 0 > if "
     "1 - dup 424 write-mailbox "
     "0 = if "
-    "3 432 write-mailbox "      # CAPTURE_TRIGGER=3 — host snaps round-clear PNG
     "28 0 do 0 200 i + write-mailbox loop "
     "0 411 write-mailbox "
     "0 413 write-mailbox "
