@@ -79,7 +79,7 @@ private:
 	Matrix34 _position;
 	Matrix34 _invertedPosition;
 
-	enum { MAX_LIGHTS = 3 };
+	enum { MAX_LIGHTS = 8 };  // must match RB_MAX_LIGHTS in renderer_backend.hp
 	Vector3	_dirLightDirections[MAX_LIGHTS];
 	Color48	_dirLightColors[MAX_LIGHTS];
 	Color	_ambientColor;

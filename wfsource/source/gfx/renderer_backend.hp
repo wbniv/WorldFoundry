@@ -55,6 +55,29 @@ public:
                              float dirX, float dirY, float dirZ,
                              float r, float g, float b) = 0;
 
+    // Point light. `posX/Y/Z` is the light position in world space; the
+    // backend transforms it by the current modelview so the shader uses
+    // eye-space. `radius` is the falloff distance (linear, clamps to 0 at
+    // length>=radius). `index` in [0 .. RB_MAX_LIGHTS).
+    virtual void SetPointLight(int index,
+                               float posX, float posY, float posZ,
+                               float r, float g, float b,
+                               float radius) = 0;
+
+    // Spot light. Position + direction (toward target), radius for distance
+    // falloff, and `coneRev` is the half-angle in revolutions (per project
+    // convention; not radians/degrees). `index` in [0 .. RB_MAX_LIGHTS).
+    virtual void SetSpotLight(int index,
+                              float posX, float posY, float posZ,
+                              float dirX, float dirY, float dirZ,
+                              float r, float g, float b,
+                              float radius, float coneRev) = 0;
+
+    // Disable a light slot (after this frame, the slot contributes nothing
+    // until re-set). Used by camera setup when fewer than RB_MAX_LIGHTS
+    // lights are authored in the room.
+    virtual void DisableLight(int index) = 0;
+
     // Global lighting on/off (for matte / unlit passes).
     virtual void SetLightingEnabled(bool enabled) = 0;
 
@@ -93,8 +116,11 @@ public:
     }
 };
 
-// Must match camera.cc's MAX_LIGHTS.
-constexpr int RB_MAX_LIGHTS = 3;
+// Must match camera.cc's MAX_LIGHTS. Bumped 3 → 8 (PSX-era cap retired);
+// matches Unity URP Mobile / Godot 4 Mobile defaults; safe on Mali-G31
+// (weakest realistic Google TV target). See
+// docs/plans/2026-05-08-blender-lights-spike.md.
+constexpr int RB_MAX_LIGHTS = 8;
 
 RendererBackend& RendererBackendGet();
 

@@ -56,6 +56,16 @@ static const char* kShaderHeader =
 static const char* kShaderHeader = "#version 330 core\n";
 #endif
 
+// Per-light type encoding (matches RB_LIGHT_* in renderer_backend.hp):
+//   0 = disabled slot
+//   1 = directional (uses u_light_dir, u_light_color)
+//   2 = point       (uses u_light_pos, u_light_color, u_light_radius)
+//   3 = spot        (uses u_light_pos, u_light_dir, u_light_color,
+//                    u_light_radius, u_light_cone — cone is the cosine of
+//                    the half-angle, precomputed on the host)
+//
+// Array size 8 matches RB_MAX_LIGHTS. If that constant changes, update the
+// `[8]` and `< 8` literals in this shader source.
 static const char* kVS =
     "layout(location=0) in vec3 a_pos;\n"
     "layout(location=1) in vec3 a_color;\n"
@@ -67,10 +77,14 @@ static const char* kVS =
     "out float v_fog_factor;\n"
     "uniform mat4 u_mvp;\n"
     "uniform mat4 u_mv;\n"
-    "uniform int  u_lighting;\n"
-    "uniform vec3 u_ambient;\n"
-    "uniform vec3 u_light_dir[3];\n"
-    "uniform vec3 u_light_color[3];\n"
+    "uniform int   u_lighting;\n"
+    "uniform vec3  u_ambient;\n"
+    "uniform int   u_light_type[8];\n"
+    "uniform vec3  u_light_dir[8];\n"
+    "uniform vec3  u_light_pos[8];\n"
+    "uniform vec3  u_light_color[8];\n"
+    "uniform float u_light_radius[8];\n"
+    "uniform float u_light_cone[8];\n"
     "uniform int   u_fog;\n"
     "uniform float u_fog_start;\n"
     "uniform float u_fog_end;\n"
@@ -81,9 +95,27 @@ static const char* kVS =
     "    v_uv = a_uv;\n"
     "    if (u_lighting != 0) {\n"
     "        vec3 N = normalize((u_mv * vec4(a_normal, 0.0)).xyz);\n"
+    "        vec3 P = (u_mv * vec4(a_pos, 1.0)).xyz;\n"
     "        vec3 lit = u_ambient;\n"
-    "        for (int i = 0; i < 3; ++i) {\n"
-    "            lit += u_light_color[i] * max(0.0, dot(N, u_light_dir[i]));\n"
+    "        for (int i = 0; i < 8; ++i) {\n"
+    "            int t = u_light_type[i];\n"
+    "            if (t == 1) {\n"
+    "                lit += u_light_color[i] * max(0.0, dot(N, u_light_dir[i]));\n"
+    "            } else if (t == 2) {\n"
+    "                vec3 Lv = u_light_pos[i] - P;\n"
+    "                float d = length(Lv);\n"
+    "                vec3 Ln = Lv / max(d, 1e-6);\n"
+    "                float atten = max(0.0, 1.0 - d / max(u_light_radius[i], 1e-6));\n"
+    "                lit += u_light_color[i] * max(0.0, dot(N, Ln)) * atten;\n"
+    "            } else if (t == 3) {\n"
+    "                vec3 Lv = u_light_pos[i] - P;\n"
+    "                float d = length(Lv);\n"
+    "                vec3 Ln = Lv / max(d, 1e-6);\n"
+    "                float atten = max(0.0, 1.0 - d / max(u_light_radius[i], 1e-6));\n"
+    "                float spotCos = dot(-u_light_dir[i], Ln);\n"
+    "                float cone = step(u_light_cone[i], spotCos);\n"
+    "                lit += u_light_color[i] * max(0.0, dot(N, Ln)) * atten * cone;\n"
+    "            }\n"
     "        }\n"
     "        v_lit = lit;\n"
     "    } else {\n"
@@ -261,9 +293,13 @@ public:
         _ambient[0] = _ambient[1] = _ambient[2] = 0.0f;
         for (int i = 0; i < RB_MAX_LIGHTS; ++i)
         {
+            _lightType[i] = 0;
             _lightDir[i][0] = _lightDir[i][1] = 0.0f;
             _lightDir[i][2] = 1.0f;
+            _lightPos[i][0] = _lightPos[i][1] = _lightPos[i][2] = 0.0f;
             _lightColor[i][0] = _lightColor[i][1] = _lightColor[i][2] = 0.0f;
+            _lightRadius[i] = 0.0f;
+            _lightCone[i] = 0.0f;
         }
     }
 
@@ -310,12 +346,76 @@ public:
         const float ez = _mv[2]*dirX + _mv[6]*dirY + _mv[10]*dirZ;
         const float len = std::sqrt(ex*ex + ey*ey + ez*ez);
         const float inv = (len > 1e-6f) ? (1.0f / len) : 1.0f;
+        _lightType[index] = 1;
         _lightDir[index][0] = ex * inv;
         _lightDir[index][1] = ey * inv;
         _lightDir[index][2] = ez * inv;
         _lightColor[index][0] = r;
         _lightColor[index][1] = g;
         _lightColor[index][2] = b;
+    }
+
+    void SetPointLight(int index,
+                       float posX, float posY, float posZ,
+                       float r, float g, float b,
+                       float radius) override
+    {
+        if (index < 0 || index >= RB_MAX_LIGHTS) return;
+        Flush();
+        // Transform world-space position into eye space (full 4x4 mul).
+        const float ex = _mv[0]*posX + _mv[4]*posY + _mv[8]*posZ  + _mv[12];
+        const float ey = _mv[1]*posX + _mv[5]*posY + _mv[9]*posZ  + _mv[13];
+        const float ez = _mv[2]*posX + _mv[6]*posY + _mv[10]*posZ + _mv[14];
+        _lightType[index] = 2;
+        _lightPos[index][0] = ex;
+        _lightPos[index][1] = ey;
+        _lightPos[index][2] = ez;
+        _lightColor[index][0] = r;
+        _lightColor[index][1] = g;
+        _lightColor[index][2] = b;
+        _lightRadius[index] = radius;
+    }
+
+    void SetSpotLight(int index,
+                      float posX, float posY, float posZ,
+                      float dirX, float dirY, float dirZ,
+                      float r, float g, float b,
+                      float radius, float coneRev) override
+    {
+        if (index < 0 || index >= RB_MAX_LIGHTS) return;
+        Flush();
+        // Position: full 4x4 mul.
+        const float epx = _mv[0]*posX + _mv[4]*posY + _mv[8]*posZ  + _mv[12];
+        const float epy = _mv[1]*posX + _mv[5]*posY + _mv[9]*posZ  + _mv[13];
+        const float epz = _mv[2]*posX + _mv[6]*posY + _mv[10]*posZ + _mv[14];
+        // Direction: upper 3x3, normalized.
+        const float edx = _mv[0]*dirX + _mv[4]*dirY + _mv[8]*dirZ;
+        const float edy = _mv[1]*dirX + _mv[5]*dirY + _mv[9]*dirZ;
+        const float edz = _mv[2]*dirX + _mv[6]*dirY + _mv[10]*dirZ;
+        const float dlen = std::sqrt(edx*edx + edy*edy + edz*edz);
+        const float dinv = (dlen > 1e-6f) ? (1.0f / dlen) : 1.0f;
+        _lightType[index] = 3;
+        _lightPos[index][0] = epx;
+        _lightPos[index][1] = epy;
+        _lightPos[index][2] = epz;
+        _lightDir[index][0] = edx * dinv;
+        _lightDir[index][1] = edy * dinv;
+        _lightDir[index][2] = edz * dinv;
+        _lightColor[index][0] = r;
+        _lightColor[index][1] = g;
+        _lightColor[index][2] = b;
+        _lightRadius[index] = radius;
+        // Convert cone half-angle from revolutions to cosine for the shader.
+        // Revolutions → radians: × 2π. cos(2π·rev) is what step() compares
+        // against dot(-spotDir, lightDirToFrag).
+        _lightCone[index] = std::cos(coneRev * 6.28318530717958647692f);
+    }
+
+    void DisableLight(int index) override
+    {
+        if (index < 0 || index >= RB_MAX_LIGHTS) return;
+        Flush();
+        _lightType[index] = 0;
     }
 
     void SetLightingEnabled(bool enabled) override
@@ -410,10 +510,14 @@ public:
         _uMv         = -1;
         _uTex        = -1;
         _uUseTex     = -1;
-        _uLighting   = -1;
-        _uAmbient    = -1;
-        _uLightDir   = -1;
-        _uLightColor = -1;
+        _uLighting    = -1;
+        _uAmbient     = -1;
+        _uLightType   = -1;
+        _uLightDir    = -1;
+        _uLightPos    = -1;
+        _uLightColor  = -1;
+        _uLightRadius = -1;
+        _uLightCone   = -1;
         _uFog        = -1;
         _uFogColor   = -1;
         _uFogStart   = -1;
@@ -431,10 +535,14 @@ private:
     GLint  _uMv         = -1;
     GLint  _uTex        = -1;
     GLint  _uUseTex     = -1;
-    GLint  _uLighting   = -1;
-    GLint  _uAmbient    = -1;
-    GLint  _uLightDir   = -1;
-    GLint  _uLightColor = -1;
+    GLint  _uLighting    = -1;
+    GLint  _uAmbient     = -1;
+    GLint  _uLightType   = -1;
+    GLint  _uLightDir    = -1;
+    GLint  _uLightPos    = -1;
+    GLint  _uLightColor  = -1;
+    GLint  _uLightRadius = -1;
+    GLint  _uLightCone   = -1;
     GLint  _uFog        = -1;
     GLint  _uFogColor   = -1;
     GLint  _uFogStart   = -1;
@@ -447,8 +555,12 @@ private:
 
     bool  _lightingEnabled = false;
     float _ambient[3];
-    float _lightDir  [RB_MAX_LIGHTS][3];
-    float _lightColor[RB_MAX_LIGHTS][3];
+    int   _lightType  [RB_MAX_LIGHTS];      // 0=none, 1=dir, 2=point, 3=spot
+    float _lightDir   [RB_MAX_LIGHTS][3];   // eye-space, unit length
+    float _lightPos   [RB_MAX_LIGHTS][3];   // eye-space
+    float _lightColor [RB_MAX_LIGHTS][3];
+    float _lightRadius[RB_MAX_LIGHTS];      // world units
+    float _lightCone  [RB_MAX_LIGHTS];      // cos(2π·coneRev) — precomputed
 
     bool  _fogEnabled = false;
     float _fogColor[3] = { 0.0f, 0.0f, 0.0f };
@@ -469,18 +581,22 @@ private:
 
     void FetchUniformLocations()
     {
-        _uMvp        = glGetUniformLocation(_prog, "u_mvp");
-        _uMv         = glGetUniformLocation(_prog, "u_mv");
-        _uTex        = glGetUniformLocation(_prog, "u_tex");
-        _uUseTex     = glGetUniformLocation(_prog, "u_use_tex");
-        _uLighting   = glGetUniformLocation(_prog, "u_lighting");
-        _uAmbient    = glGetUniformLocation(_prog, "u_ambient");
-        _uLightDir   = glGetUniformLocation(_prog, "u_light_dir");
-        _uLightColor = glGetUniformLocation(_prog, "u_light_color");
-        _uFog        = glGetUniformLocation(_prog, "u_fog");
-        _uFogColor   = glGetUniformLocation(_prog, "u_fog_color");
-        _uFogStart   = glGetUniformLocation(_prog, "u_fog_start");
-        _uFogEnd     = glGetUniformLocation(_prog, "u_fog_end");
+        _uMvp         = glGetUniformLocation(_prog, "u_mvp");
+        _uMv          = glGetUniformLocation(_prog, "u_mv");
+        _uTex         = glGetUniformLocation(_prog, "u_tex");
+        _uUseTex      = glGetUniformLocation(_prog, "u_use_tex");
+        _uLighting    = glGetUniformLocation(_prog, "u_lighting");
+        _uAmbient     = glGetUniformLocation(_prog, "u_ambient");
+        _uLightType   = glGetUniformLocation(_prog, "u_light_type");
+        _uLightDir    = glGetUniformLocation(_prog, "u_light_dir");
+        _uLightPos    = glGetUniformLocation(_prog, "u_light_pos");
+        _uLightColor  = glGetUniformLocation(_prog, "u_light_color");
+        _uLightRadius = glGetUniformLocation(_prog, "u_light_radius");
+        _uLightCone   = glGetUniformLocation(_prog, "u_light_cone");
+        _uFog         = glGetUniformLocation(_prog, "u_fog");
+        _uFogColor    = glGetUniformLocation(_prog, "u_fog_color");
+        _uFogStart    = glGetUniformLocation(_prog, "u_fog_start");
+        _uFogEnd      = glGetUniformLocation(_prog, "u_fog_end");
     }
 
     void LazyInit()
@@ -542,8 +658,12 @@ private:
         glUniformMatrix4fv(_uMv,  1, GL_FALSE, _mv);
         glUniform1i(_uLighting, _lightingEnabled ? 1 : 0);
         glUniform3fv(_uAmbient, 1, _ambient);
-        glUniform3fv(_uLightDir,   RB_MAX_LIGHTS, &_lightDir[0][0]);
-        glUniform3fv(_uLightColor, RB_MAX_LIGHTS, &_lightColor[0][0]);
+        glUniform1iv(_uLightType,   RB_MAX_LIGHTS, _lightType);
+        glUniform3fv(_uLightDir,    RB_MAX_LIGHTS, &_lightDir[0][0]);
+        glUniform3fv(_uLightPos,    RB_MAX_LIGHTS, &_lightPos[0][0]);
+        glUniform3fv(_uLightColor,  RB_MAX_LIGHTS, &_lightColor[0][0]);
+        glUniform1fv(_uLightRadius, RB_MAX_LIGHTS, _lightRadius);
+        glUniform1fv(_uLightCone,   RB_MAX_LIGHTS, _lightCone);
         glUniform1i(_uFog, _fogEnabled ? 1 : 0);
         glUniform3fv(_uFogColor, 1, _fogColor);
         glUniform1f(_uFogStart, _fogStart);
