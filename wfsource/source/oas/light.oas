@@ -26,7 +26,7 @@ TYPEHEADER(Light)
 @*	TYPEENTRYFIXED32(lightY,, FIXED32(-32768), FIXED32(32767), FIXED32(0), SHOW_AS_HIDDEN, "Directional light vector Y")
 @*	TYPEENTRYFIXED32(lightZ,, FIXED32(-32768), FIXED32(32767), FIXED32(0), SHOW_AS_HIDDEN, "Directional light vector Z")
 
-@*	TYPEENTRYINT32(lightType,, 0, 1, 0, "Directional|Ambient", SHOW_AS_HIDDEN, "Light type (directional/ambient)")
+@*	TYPEENTRYINT32(lightType,, 0, 1, 0, "Ambient|Directional", SHOW_AS_HIDDEN, "Light type (directional/ambient)")
 	
 
 	TYPEENTRYFIXED32(lightRed,, FIXED32(0), FIXED32(1), FIXED32(0),   , "Directional light RED color value")
@@ -37,7 +37,7 @@ TYPEHEADER(Light)
 	TYPEENTRYFIXED32(lightY,, FIXED32(-32768), FIXED32(32767), FIXED32(0), , "Directional light vector Y")
 	TYPEENTRYFIXED32(lightZ,, FIXED32(-32768), FIXED32(32767), FIXED32(0), , "Directional light vector Z")
 
-	TYPEENTRYINT32(lightType,, 0, 1, 0, "Directional|Ambient", , "Light type (directional/ambient)")
+	TYPEENTRYINT32(lightType,, 0, 1, 0, "Ambient|Directional", , "Light type (directional/ambient)")
 
 
 

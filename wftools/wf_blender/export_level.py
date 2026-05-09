@@ -1009,18 +1009,18 @@ def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
         if is_light:
             if obj.type == 'LIGHT' and obj.data:
                 r, g, b = obj.data.color[0], obj.data.color[1], obj.data.color[2]
-                lt = 1 if obj.data.type == 'POINT' else 0
+                lt = 0 if obj.data.type == 'POINT' else 1
             else:
                 r = float(obj.get(_prop_key("lightRed"), 1.0))
                 g = float(obj.get(_prop_key("lightGreen"), 1.0))
                 b = float(obj.get(_prop_key("lightBlue"), 1.0))
                 lt_raw = obj.get(_prop_key("lightType"), 0)
-                lt_map = {"directional": 0, "ambient": 1}
+                lt_map = {"ambient": 0, "directional": 1}
                 lt = lt_map.get(str(lt_raw).lower(), int(lt_raw) if str(lt_raw).isdigit() else 0)
             lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightRed\" }} {{ 'DATA' {fp(r)} }} {{ 'STR' \"{r:f}\" }} }}")
             lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightGreen\" }} {{ 'DATA' {fp(g)} }} {{ 'STR' \"{g:f}\" }} }}")
             lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightBlue\" }} {{ 'DATA' {fp(b)} }} {{ 'STR' \"{b:f}\" }} }}")
-            lines.append(f"\t\t{{ 'I32' {{ 'NAME' \"lightType\" }} {{ 'DATA' {lt}l }} {{ 'STR' \"{'Ambient' if lt else 'Directional'}\" }} }}  //Directional|Ambient")
+            lines.append(f"\t\t{{ 'I32' {{ 'NAME' \"lightType\" }} {{ 'DATA' {lt}l }} {{ 'STR' \"{'Directional' if lt else 'Ambient'}\" }} }}  //Ambient|Directional")
 
         if obj.data and hasattr(obj.data, 'polygons') and obj.data.polygons:
             mesh = obj.data
