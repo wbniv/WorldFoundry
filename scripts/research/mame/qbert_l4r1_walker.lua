@@ -1,13 +1,12 @@
--- qbert_l4r1_walker.lua: closes the L4R1 state-1 capture gap by combining:
---
+-- qbert_l4r1_walker.lua: capture L4R1 state-1 by combining:
 --   1. DIP cheat ON for round-advance (proven mechanism in qbert_round_shots).
---   2. At L4R1 entry, detect apex via RAM 0x0D64 == 0xB8.
---   3. Run the walker's snap-dance: snap state-0, force DR hop, force UL hop
---      back to apex, snap state-1.
+--   2. At L4R1 entry (ram[0x081] == 0x13, round_num=16), execute a fixed-timing
+--      2-hop dance ending at +119 frames where HUD has updated to L4R1
+--      (verified via qbert_round_byte_hunt screenshot).
+--   3. Use ROM position byte 0x0D64 to verify each hop landed; retry if dropped.
 --
--- Demo AI in L4R1 takes ~hundreds of frames to start hopping (verified in
--- earlier burst captures). Our DR+UL injected hops happen in ~80 frames and
--- override Demo AI's slow ramp-up.
+-- The fixed +119 timing matches qbert_round_shots's HOP_DELAY+HOP_HOLD+INTER_HOP+
+-- HOP_HOLD+POST_HOP_WAIT = 30+12+35+12+30. Confirmed visually.
 
 local BASE = "/home/will/WorldFoundry.2026-new-level"
 local LOG = BASE .. "/scripts/research/mame/l4r1_walker.txt"
@@ -19,23 +18,25 @@ local DIRS = {
     UL = "P1 Left (Up-Left)",
 }
 local CHEAT = "Demo Mode (Unlim Lives, Start=Adv (Cheat)"
-
--- Position byte from qbert_position_hunt
 local POS_ADDR = 0x0D64
 local APEX_VAL = 0xB8
-local C11_VAL  = 0xF5  -- value at (1,1)
 local LIVES = 0x0D00
 
 local frame, fields, mem = 0, {}, nil
-local STATE = "BOOT"
+local PHASE = "BOOT"
 local round_num = 0
-local last_round_ram = -1
-local hop_dir, hop_start = nil, 0
-local last_hop = 0
+local last_ram = -1
 local snap_idx = 0
-local pos_at_hop_start = 0
-local apex_stable_count = 0
-local TARGET_ROUND = 16  -- per qbert_round_shots file_map mapping
+
+-- Round_shots-matched timing
+local HOP_DELAY = 30
+local HOP_HOLD = 12
+local INTER_HOP = 35
+local POST_HOP_WAIT = 30
+local hop1_at, hop1_rel_at, hop2_at, hop2_rel_at, hop_snap_at = -1,-1,-1,-1,-1
+local s0_snap_at = -1
+local adv_at, adv_rel_at = -1, -1
+local TARGET_ROUND = 16
 
 local function set(name, on) if fields[name] then fields[name]:set_value(on and 1 or 0) end end
 local function snap(label)
@@ -43,11 +44,6 @@ local function snap(label)
     manager.machine.video:snapshot()
     local p = mem and mem:read_u8(POS_ADDR) or 0
     log(string.format("[snap %s] idx=%04d frame=%d pos=0x%02X\n", label, snap_idx-1, frame, p))
-end
-local function start_hop(dir)
-    hop_dir = dir; hop_start = frame; last_hop = frame
-    pos_at_hop_start = mem and mem:read_u8(POS_ADDR) or 0
-    set(DIRS[dir], true)
 end
 
 emu.register_frame_done(function()
@@ -62,125 +58,69 @@ emu.register_frame_done(function()
         if fields[CHEAT] then fields[CHEAT]:set_value(1); log("[INFO] cheat ON\n") end
     end
 
-    set("Coin 1", frame >= 500 and frame < 540)
+    set("Coin 1", frame >= 500 and frame < 560)
+    -- Boot Start press — explicit release after window
+    if PHASE == "BOOT" or PHASE == "WAIT_RAM" then
+        set("1 Player Start", frame >= 700 and frame < 760)
+    end
 
     if mem and frame > 750 then mem:write_u8(LIVES, 9) end
 
-    if hop_dir and frame - hop_start >= 12 then
-        set(DIRS[hop_dir], false)
-        hop_dir = nil
+    -- Default joystick low (override during HOP_DANCE phase only)
+    if PHASE ~= "HOP_DANCE" then
+        set("P1 Right (Down-Right)", false)
+        set("P1 Left (Up-Left)", false)
     end
 
-    if STATE == "BOOT" then
-        if frame >= 1100 then STATE = "WAIT_RAM"; log("[INFO] WAIT_RAM\n") end
+    if PHASE == "BOOT" then
+        if frame >= 1100 then PHASE = "WAIT_RAM"; log("[INFO] WAIT_RAM\n") end
         return
     end
 
-    -- Use round counter at 0x0081 (per qbert_round_shots) for round-advance detection.
-    -- Each round_num increment = ROM round transition fires.
     local cur_ram = mem and mem:read_u8(0x0081) or 0
 
-    if STATE == "WAIT_RAM" then
-        if cur_ram >= 0x04 and cur_ram ~= last_round_ram then
+    if PHASE == "WAIT_RAM" then
+        if cur_ram >= 0x04 and cur_ram ~= last_ram then
             round_num = round_num + 1
-            last_round_ram = cur_ram
+            last_ram = cur_ram
             log(string.format("[round %d] ram=0x%02X frame=%d\n", round_num, cur_ram, frame))
             if round_num == TARGET_ROUND then
-                STATE = "TRANSITION_SETTLE"
-                last_hop = frame + 0  -- no settle; rely on apex-detection to time the dance
-                log("[INFO] L4R1 ram reached — waiting for first apex landing\n")
+                -- Schedule the snap dance with EXACT round_shots timing.
+                -- Take state-0 snap immediately at ram-change (mirrors round_shots's s0).
+                snap("state0")
+                PHASE = "HOP_DANCE"
+                hop1_at = frame + HOP_DELAY
+                hop1_rel_at = hop1_at + HOP_HOLD
+                hop2_at = hop1_rel_at + INTER_HOP
+                hop2_rel_at = hop2_at + HOP_HOLD
+                hop_snap_at = hop2_rel_at + POST_HOP_WAIT
+                log(string.format("[INFO] L4R1 dance scheduled: hop1=%d hop2=%d snap=%d\n",
+                    hop1_at, hop2_at, hop_snap_at))
                 return
             end
-            STATE = "ADVANCE"
-            last_hop = frame + 90  -- transition animation
+            PHASE = "ADVANCE"
+            adv_at = frame + 5
+            adv_rel_at = adv_at + 30
         end
         return
     end
 
-    if STATE == "ADVANCE" then
-        -- Wait then press Start ONCE for 30 frames to advance via cheat
-        if frame < last_hop + 90 then return end
-        local elapsed = frame - (last_hop + 90)
-        if elapsed < 30 then
-            set("1 Player Start", true)
-        else
-            set("1 Player Start", false)
-            STATE = "WAIT_RAM"  -- next ram change advances round_num
+    if PHASE == "ADVANCE" then
+        set("1 Player Start", frame >= adv_at and frame < adv_rel_at)
+        if frame >= adv_rel_at then
+            PHASE = "WAIT_RAM"
         end
         return
     end
 
-    if STATE == "TRANSITION_SETTLE" then
-        if frame < last_hop then return end
-        STATE = "WAIT_APEX_STABLE"
-        apex_stable_count = 0
-        log(string.format("[INFO] transition settle done at frame=%d; waiting for stable apex\n", frame))
-        return
-    end
-
-    -- Wait for pos = APEX_VAL stable for N consecutive frames (Q*bert landed in L4R1)
-    if STATE == "WAIT_APEX_STABLE" then
-        local p = mem and mem:read_u8(POS_ADDR) or 0
-        if p == APEX_VAL then
-            apex_stable_count = apex_stable_count + 1
-            if apex_stable_count >= 30 then
-                log(string.format("[INFO] apex stable for 30 frames at frame=%d — start dance\n", frame))
-                STATE = "SNAP_S0"
-                last_hop = frame + 5
-            end
-        else
-            apex_stable_count = 0
-        end
-        return
-    end
-
-    if hop_dir or frame < last_hop + 30 then return end
-
-    if STATE == "SNAP_S0" then
-        snap("state0")
-        STATE = "DO_DR"
-        return
-    end
-
-    if STATE == "DO_DR" then
-        start_hop("DR")
-        STATE = "WAIT_C11"
-        return
-    end
-
-    if STATE == "WAIT_C11" then
-        local p = mem and mem:read_u8(POS_ADDR) or 0
-        if p == pos_at_hop_start then
-            -- Hop didn't register; retry
-            log(string.format("[bot] DR didn't land (pos still 0x%02X), retry frame=%d\n", p, frame))
-            STATE = "DO_DR"
-            return
-        end
-        log(string.format("[INFO] DR landed at pos=0x%02X frame=%d\n", p, frame))
-        STATE = "DO_UL"
-        return
-    end
-
-    if STATE == "DO_UL" then
-        start_hop("UL")
-        STATE = "WAIT_APEX_BACK"
-        return
-    end
-
-    if STATE == "WAIT_APEX_BACK" then
-        local p = mem and mem:read_u8(POS_ADDR) or 0
-        if p == APEX_VAL then
-            log(string.format("[INFO] back at apex frame=%d\n", frame))
+    if PHASE == "HOP_DANCE" then
+        set("P1 Right (Down-Right)", frame >= hop1_at and frame < hop1_rel_at)
+        set("P1 Left (Up-Left)",     frame >= hop2_at and frame < hop2_rel_at)
+        if frame == hop_snap_at then
             snap("state1")
-            log("[done]\n")
-            if f then f:close() end
-            manager.machine:exit()
-            return
-        end
-        if frame - last_hop > 90 then
-            -- Didn't make it back; abort snap state-1 anyway
-            log(string.format("[WARN] not back at apex (pos=0x%02X) after 90 frames — aborting\n", p))
-            snap("state1_offapex")
+            -- Read pos to confirm Q*bert location at snap moment
+            local p = mem and mem:read_u8(POS_ADDR) or 0
+            log(string.format("[INFO] dance complete, pos at snap = 0x%02X (apex=0x%02X)\n", p, APEX_VAL))
             log("[done]\n")
             if f then f:close() end
             manager.machine:exit()

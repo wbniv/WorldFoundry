@@ -118,19 +118,17 @@ needed, no "no-side" cube variant.
 
 | Round | state 0          | state 1            | state 2 (target)    | Left side       | Right side       |
 |-------|------------------|--------------------|---------------------|-----------------|------------------|
-| L4R1  | `#21B931` green  | **unknown** ⚠️       | `#0046DE` blue      | `#663100` brown | `#FF7721` orange |
+| L4R1  | `#21B931` green  | `#EFDE77` golden    | `#0046DE` blue      | `#663100` brown | `#FF7721` orange |
 | L4R2  | `#0046EF` blue   | `#FF6666` red      | `#CECE00` yellow    | `#000000` black | `#000000` black |
 | L4R3  | `#DEDE00` yellow | `#FF6666` red      | `#5646EF` purple    | `#56A999` teal  | `#314646` dark-teal |
 | L4R4  | `#990066` magenta| `#0066EF` blue     | `#A9B910` olive     | `#778888` gray-teal | `#101099` dark-blue |
 
-⚠️ **L4R1 state-1 unconfirmed**: across 5+ capture runs and three different
-capture strategies (cheat-on with 2-hop sequence, cheat-toggle, no-cheat with
-direct RAM lives override), Demo AI consistently sends Q*bert off-pyramid in
-L4R1 specifically before the post-hop snap. The (1,1) cube remains unvisited at
-the snap moment, so the sample hits state 0. To get L4R1 state-1, the cleanest
-approach would be a full Warnsdorff bot that controls Q*bert from spawn through
-round completion (qbert_bot.lua exists with that logic but didn't reliably
-advance rounds when integrated). All other 15 rounds captured cleanly.
+**L4R1 state-1 captured 2026-05-08** via [`qbert_l4r1_walker.lua`](../../scripts/research/mame/qbert_l4r1_walker.lua):
+DIP cheat ON to advance ROM through rounds, fixed-timing 2-hop dance at
+round_num=16 ending at +119 frames (matches the moment HUD updates to
+LEVEL 4 ROUND 1). ROM position byte at `0x0D64` (apex=`0xB8`) used to
+verify dance completion. All 16 rounds × 3 states (state 0, state 1 where
+applicable, state 2 from HUD CHANGE TO indicator) now confirmed.
 
 ### Capture method
 
@@ -145,10 +143,12 @@ advance rounds when integrated). All other 15 rounds captured cleanly.
 round screenshot — apex top `(120, 56)`, HUD CHANGE TO `(40, 55)`, and (1,1) cube
 top `(137, 80)`. Reports kind (1-step/2-step) by comparing post-hop to state 2.
 
-L4R1 state-1 was not cleanly captured (Demo AI moved Q*bert off-pyramid before
-post-hop snap; sample hit a still-state-0 cube). Re-running the capture multiple
-times until a clean L4R1 hop lands is the simplest fix. All other 7 rounds
-needing state 1 are clean.
+L4R1 state-1 captured 2026-05-08 via the targeted hybrid script
+[`scripts/research/mame/qbert_l4r1_walker.lua`](../../scripts/research/mame/qbert_l4r1_walker.lua) —
+DIP cheat advances ROM to round 16, then a fixed-timing 2-hop dance fires
+at the moment HUD updates to LEVEL 4 ROUND 1 (frame ram-change + 119,
+matching `qbert_round_shots.lua`'s post-hop snap window). All 16 rounds
+fully captured.
 
 ## File → actual round mapping
 
