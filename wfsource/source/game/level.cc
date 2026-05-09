@@ -1293,7 +1293,7 @@ Level::LoadLevelData()
    DBSTREAM2(clevel << "asmaptoc: seek to " << asmaptocEntry._offsetInDiskFile << std::endl; )
 	// now read asset map into memory
 
-	const int MAX_ASMP_SIZE = DiskFileCD::_SECTOR_SIZE * 4;  // kts abritrary
+	const int MAX_ASMP_SIZE = DiskFileCD::_SECTOR_SIZE * 16;  // bumped 4→16 for qbert 336-actor pyramid (2026-05-08)
 	char* mapMem = new ( HALScratchLmalloc ) char[MAX_ASMP_SIZE];
 	assert(ValidPtr(mapMem));
 	DBSTREAM2( cflow <<"Level::loadLevelData:reading map" << std::endl; )

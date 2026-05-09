@@ -33,7 +33,7 @@ static void PIGSInitStartupTask();
 LMalloc* _HALLmalloc;
 LMalloc* _HALScratchLmalloc;
 DMalloc* _HALDmalloc;
-int32 cbHalLmalloc = 3500000;
+int32 cbHalLmalloc = 8000000;  // bumped 3.5MB→8MB for qbert (Room=2MB + OBJD=0.8MB + assets, 2026-05-08)
 int32 cbHalScratchLmalloc = 180000;
 
 //============================================================================

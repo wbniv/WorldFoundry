@@ -215,7 +215,7 @@ AssetManager::FreeRoomSlot(int slotNum)
 void
 AssetManager::ReadAssetMap(binistream& mapStream)
 {
-	const int MAX_ASMP_SIZE = DiskFileCD::_SECTOR_SIZE * 4;  // kts abritrary
+	const int MAX_ASMP_SIZE = DiskFileCD::_SECTOR_SIZE * 16;  // bumped 4→16 for qbert 336-actor pyramid (2026-05-08)
 
 	IFFChunkIter mapChunkIter(mapStream);
 	assert(mapChunkIter.GetChunkID().ID() == IFFTAG('A','S','M','P'));
@@ -230,7 +230,7 @@ AssetManager::ReadAssetMap(binistream& mapStream)
 		stringIter->ReadBytes(&_assetStringMap[_assetStringMapEntries]._name,stringIter->BytesLeft());
 		MEMORY_DELETE(HALScratchLmalloc,stringIter,IFFChunkIter);
 		_assetStringMapEntries++;
-		assert(_assetStringMapEntries <= 300);
+		assert(_assetStringMapEntries <= 1024);
 	}
 
 }
