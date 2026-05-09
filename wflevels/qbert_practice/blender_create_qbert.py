@@ -113,9 +113,11 @@ PLAYER_SPAWN_XYZ = (APEX_X, APEX_Y, APEX_Z + 1.5)
 # visible (the diamond-on-top view), front faces show as parallelograms.
 # (Earlier (12, -15, 14) was 3-quarters offset + only 17° down — too
 # horizontal; pyramid rendered as a thin triangle.)
-CAMSHOT_POS = (0.0, -15.0, 19.0)   # ~21 units from look-at; pyramid fills ~70% of frame
+CAMSHOT_POS = (0.0, -22.0, 23.0)   # ~28 units from look-at — pulled back from
+                                   # (0,-15,19) so Q*bert's head isn't clipped
+                                   # at the top of the framebuffer.
 CAMSHOT_LOOKAT = (0.0, 3.0, 8.5)   # apex+player in frame; offset above pyramid centre
-# Iso-angle check: down-angle = atan((19-8.5)/(3-(-15))) = atan(10.5/18) = 30.3°.
+# Iso-angle check: down-angle = atan((23-8.5)/(3-(-22))) = atan(14.5/25) = 30.1°.
 
 # Room bbox is **relative to the room's position** in the exported BOX3.
 # Must strictly enclose every actor (no equality on edges, or levcomp drops
