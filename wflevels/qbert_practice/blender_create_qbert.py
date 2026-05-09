@@ -13,8 +13,8 @@ camshot (cs_death) for the fall cutscene. Export to qbert_practice.lev.
 
 MVP scope (per docs/plans/2026-05-03-qbert-mvp.md):
   - 28-cube pyramid in a 7-row triangular layout.
-  - Per-cube colour state via 3 child meshes each with a one-line Forth
-    visibility script keyed off INDEXOF_CUBE_STATE_BASE+N.
+  - Per-cube colour state via 4*3=12 child mesh variants; director drives
+    visibility mailboxes 440..775 (round*84 + cube*3 + state).
   - Player as an Anchored actor with the hop state machine in its Script.
   - Director script for cube-state advance and win check (colour rule 0).
   - Two CamShots (cs_pyramid and cs_death) wired through INDEXOF_CAMSHOT.
@@ -39,6 +39,10 @@ NUM_ROWS = 7  # rows 0 (apex) through 6 (bottom)
 TOTAL_CUBES = NUM_ROWS * (NUM_ROWS + 1) // 2  # 28
 CUBE_SIZE = 2.0  # matches gen_cube.py — 2×2×2 cube
 CUBE_BASE_Z = 1.0  # bottom row centre Z (cubes extend ±1 around their centre)
+# Cubes are rotated 45° about Z (diamond presentation); their footprint
+# extends √2 along the new X/Y axes. Multiply XY centre offsets by √2 so
+# adjacent diamonds touch corner-to-corner with no overlap.
+SQRT2 = math.sqrt(2.0)
 
 # Mailbox layout — engine cap was bumped to GLOBAL_USER_MAX=999 on 2026-05-03,
 # so the original spacious plan from docs/plans/2026-05-03-qbert-mvp.md applies:
@@ -47,7 +51,7 @@ CUBE_BASE_Z = 1.0  # bottom row centre Z (cubes extend ±1 around their centre)
 #   70..72     HUD score/timer/lives (mm convention; mb 72 LIVES rendered by DrawHud)
 #   100..101   camshot zone signals from ActBoxOR (mm convention)
 #   200..227   CUBE_STATE_BASE (28 slots, cube N at 200+N)
-#   300..383   VIS_BASE (84 slots, cube N variant V at 300+N*3+V)
+#   440..775   VIS_BASE (336 slots, round R cube N state S at 440+R*84+N*3+S)
 #   400        QBERT_ROW
 #   401        QBERT_COL
 #   402        HOP_COOLDOWN
@@ -68,9 +72,10 @@ CUBE_BASE_Z = 1.0  # bottom row centre Z (cubes extend ±1 around their centre)
 #   430        AUTOPILOT_ON (0=joystick mode, 1=autopilot demo mode)
 #   431        AUTOPILOT_STEP (current step index 0..31; reset on respawn/restart)
 INDEXOF_CUBE_STATE_BASE = 200
-INDEXOF_VIS_BASE = 300
+INDEXOF_VIS_BASE = 440   # 440 + r*84 + i*3 + s; max = 440+3*84+27*3+2 = 775
+NUM_ROUNDS = 4           # palette cycles; matches gen_cube.py ROUND_COLORS
 
-NUM_MAILBOXES = 500  # >= highest used slot (422), per the original plan
+NUM_MAILBOXES = 800  # >= 775 (highest vis slot)
 
 
 def cube_index(row, col):
@@ -86,9 +91,9 @@ def cube_world_position(row, col):
     CUBE_SIZE in +Z. This gives the staircase look where the cube tops
     are all visible from a 3/4 camera angle.
     """
-    world_x = (col - row / 2.0) * CUBE_SIZE
+    world_x = SQRT2 * (col - row / 2.0) * CUBE_SIZE
     # Apex row (r=0) is furthest back in +Y; bottom row (r=NUM_ROWS-1) is at Y=0.
-    world_y = (NUM_ROWS - 1 - row) * (CUBE_SIZE / 2.0)
+    world_y = SQRT2 * (NUM_ROWS - 1 - row) * (CUBE_SIZE / 2.0)
     # Apex highest Z; bottom row at CUBE_BASE_Z.
     world_z = CUBE_BASE_Z + (NUM_ROWS - 1 - row) * CUBE_SIZE
     return (world_x, world_y, world_z)
@@ -96,7 +101,7 @@ def cube_world_position(row, col):
 
 # ── Player + camera positions ─────────────────────────────────────────────────
 # Apex cube is at world (0, 6, 13). Player sits on top of it.
-APEX_X, APEX_Y, APEX_Z = 0.0, (NUM_ROWS - 1) * (CUBE_SIZE / 2.0), CUBE_BASE_Z + (NUM_ROWS - 1) * CUBE_SIZE
+APEX_X, APEX_Y, APEX_Z = 0.0, SQRT2 * (NUM_ROWS - 1) * (CUBE_SIZE / 2.0), CUBE_BASE_Z + (NUM_ROWS - 1) * CUBE_SIZE
 PLAYER_SPAWN_XYZ = (APEX_X, APEX_Y, APEX_Z + 1.5)
 # Arcade-Q*bert framing: symmetric in X (x=0), 30° iso down-tilt. Look-at is
 # the pyramid centroid; camera is south (-Y) and elevated (+Z) so the down-
@@ -312,8 +317,8 @@ if player:
         "drop  1  0 ;\n"
         ": do-hop 401 read-mailbox + swap 400 read-mailbox + "
         "dup 400 write-mailbox over 401 write-mailbox "
-        "over over swap 2 * swap - INDEXOF_X_POS write-mailbox "  # 2dup not in bootstrap; over over does the same
-        "6 over - INDEXOF_Y_POS write-mailbox "
+        "over over swap 2 * swap - 1.4142136 * INDEXOF_X_POS write-mailbox "  # 2dup not in bootstrap; over over does the same; * sqrt(2) for diamond layout
+        "6 over - 1.4142136 * INDEXOF_Y_POS write-mailbox "
         "6 swap - 2 * 1 + 2 + INDEXOF_Z_POS write-mailbox "
         "drop 1 411 write-mailbox 12 402 write-mailbox "
         "400 read-mailbox dup 0 < swap 6 > | "
@@ -341,7 +346,7 @@ if player:
         "0 431 write-mailbox "
         "28 0 do 0 200 i + write-mailbox loop "
         "0 INDEXOF_X_POS write-mailbox "
-        "6 INDEXOF_Y_POS write-mailbox "
+        "6 1.4142136 * INDEXOF_Y_POS write-mailbox "
         "15 INDEXOF_Z_POS write-mailbox "
         "then "
         "then "
@@ -353,7 +358,7 @@ if player:
         # writes go to the player actor's position, not the director's.
         # exit prevents joystick processing on the same tick as the teleport.
         "426 read-mailbox 1 = if "
-        "0 INDEXOF_X_POS write-mailbox 6 INDEXOF_Y_POS write-mailbox 15 INDEXOF_Z_POS write-mailbox "
+        "0 INDEXOF_X_POS write-mailbox 6 1.4142136 * INDEXOF_Y_POS write-mailbox 15 INDEXOF_Z_POS write-mailbox "
         "0 431 write-mailbox 0 426 write-mailbox exit "
         "then\n"
         # 2. Fall-animation state machine. While mb 419 > 0:
@@ -367,7 +372,7 @@ if player:
         "drop "
         "0 419 write-mailbox 1 414 write-mailbox "
         "0 INDEXOF_X_POS write-mailbox "
-        "6 INDEXOF_Y_POS write-mailbox "
+        "6 1.4142136 * INDEXOF_Y_POS write-mailbox "
         "15 INDEXOF_Z_POS write-mailbox "
         "0 400 write-mailbox 0 401 write-mailbox "
         "then "
@@ -399,7 +404,7 @@ if player:
         # machine isn't pre-empted while ramping Z down past -2.
         "INDEXOF_Z_POS read-mailbox -2 < if "
         "419 read-mailbox 0 = if "
-        "0 INDEXOF_X_POS write-mailbox 6 INDEXOF_Y_POS write-mailbox "
+        "0 INDEXOF_X_POS write-mailbox 6 1.4142136 * INDEXOF_Y_POS write-mailbox "
         "15 INDEXOF_Z_POS write-mailbox "
         "0 400 write-mailbox 0 401 write-mailbox 1 414 write-mailbox "
         "then "
@@ -657,13 +662,24 @@ DIRECTOR_SCRIPT = (
     "400 read-mailbox dup 1 + * 2 / 401 read-mailbox + 200 + "
     "dup read-mailbox 0 = if 2 swap write-mailbox else drop then "
     "0 411 write-mailbox then\n"
-    # Visibility fan-out: write 1 to the matching cube_NN_sC vis slot, 0 to the other two
-    "28 0 do "
-    "200 i + read-mailbox "
-    "dup 0 = if 1 else 0 then 300 i 3 * + write-mailbox "
-    "dup 1 = if 1 else 0 then 300 i 3 * + 1 + write-mailbox "
-    "2 = if 1 else 0 then 300 i 3 * + 2 + write-mailbox "
-    "loop\n"
+    # Visibility fan-out: for each cube, show only the actor for
+    # (cur_palette, cube_state); hide all 12 variants (4 rounds * 3 states).
+    # cur_palette = ROUND_NUMBER % 4.
+    # Vis mailbox = 440 + r*84 + cube*3 + s.
+    # Two nested do/loops: outer=cube (j in inner), inner=combo (i in inner).
+    # r = combo/3, s = combo mod 3.
+    "425 read-mailbox 4 % "     # ( cur_pal )  — % is zForth modulo primitive
+    "28 0 do "                  # outer: i=cube 0..27
+    "200 i + read-mailbox "     # ( cur_pal cube_state ) — read before inner loop
+    "12 0 do "                  # inner: i=combo 0..11; j=cube (outer i promoted to j)
+    "i 3 / over = "             # r==cur_pal?   (/ is integer divide in zForth)
+    "i 3 % 2 pick = & "         # also s==cube_state?
+    "if 1 else 0 then "
+    "440 i 3 / 84 * + j 3 * + i 3 % + write-mailbox "
+    "loop "
+    "drop "                     # drop cube_state
+    "loop "
+    "drop\n"                    # drop cur_pal
     # Win check: count cubes whose state != 2; write count to mb 412, win flag to 413
     "0 28 0 do 200 i + read-mailbox 2 <> if 1 + then loop "
     "dup 412 write-mailbox 0 = if 1 413 write-mailbox then\n"
@@ -680,6 +696,14 @@ DIRECTOR_SCRIPT = (
     "425 read-mailbox 1 + 425 write-mailbox "
     "0 400 write-mailbox 0 401 write-mailbox 0 402 write-mailbox "
     "0 414 write-mailbox 0 415 write-mailbox 0 419 write-mailbox "
+    # Re-init visibility for the new palette: hide all 336 vis slots, then
+    # show only state-0 actors for cur_palette (ROUND_NUMBER % 4).
+    "336 0 do 0 440 i + write-mailbox loop "  # zero all vis slots
+    # Now show round's state-0 row.  Compute base = 440 + cur_pal*84 once,
+    # then write 1 to base+i*3 for each cube.
+    "440 425 read-mailbox 4 % 84 * + "    # ( vis_base ) — % is zForth modulo
+    "28 0 do 1 over i 3 * + write-mailbox loop "
+    "drop "
     "1 426 write-mailbox "
     "then "
     "else drop then\n"
@@ -687,45 +711,44 @@ DIRECTOR_SCRIPT = (
 if director:
     director['wf_Script'] = DIRECTOR_SCRIPT
 
-# ── 7. Create the 28 × 3 = 84 cube child-mesh actors ──────────────────────────
-print(f"[qbert] Creating {TOTAL_CUBES} cubes × 3 colour variants = {TOTAL_CUBES * 3} actors...")
+# ── 7. Create the 28 × 4 rounds × 3 states = 336 cube child-mesh actors ────────
+print(f"[qbert] Creating {TOTAL_CUBES} cubes × {NUM_ROUNDS} rounds × 3 states = "
+      f"{TOTAL_CUBES * NUM_ROUNDS * 3} actors...")
 created_count = 0
 for row in range(NUM_ROWS):
     for col in range(row + 1):
         N = cube_index(row, col)
         wx, wy, wz = cube_world_position(row, col)
-        for state_idx in range(3):
-            obj_name = f"cube_{N:02d}_s{state_idx}"
-            mesh_data = bpy.data.meshes.new(f"cube_mesh_{N:02d}_s{state_idx}")
-            # Visual placeholder mesh for editor — actual game data comes from
-            # cube_state{state_idx}.iff via wf_Mesh Name.
-            s = CUBE_SIZE / 2
-            box_verts = [
-                (-s, -s, -s), (s, -s, -s), (s, s, -s), (-s, s, -s),
-                (-s, -s,  s), (s, -s,  s), (s, s,  s), (-s, s,  s),
-            ]
-            box_faces = [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4),
-                         (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
-            mesh_data.from_pydata(box_verts, [], box_faces)
-            mesh_data.update()
+        for r in range(NUM_ROUNDS):
+            for state_idx in range(3):
+                obj_name = f"cube_{N:02d}_r{r}_s{state_idx}"
+                mesh_data = bpy.data.meshes.new(f"cube_mesh_{N:02d}_r{r}_s{state_idx}")
+                s = CUBE_SIZE / 2
+                box_verts = [
+                    (-s, -s, -s), (s, -s, -s), (s, s, -s), (-s, s, -s),
+                    (-s, -s,  s), (s, -s,  s), (s, s,  s), (-s, s,  s),
+                ]
+                box_faces = [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4),
+                             (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
+                mesh_data.from_pydata(box_verts, [], box_faces)
+                mesh_data.update()
 
-            obj = bpy.data.objects.new(obj_name, mesh_data)
-            obj.location = (wx, wy, wz)
-            scene.collection.objects.link(obj)
+                obj = bpy.data.objects.new(obj_name, mesh_data)
+                obj.location = (wx, wy, wz)
+                obj.rotation_euler = (0.0, 0.0, math.pi / 4)  # diamond top
+                scene.collection.objects.link(obj)
 
-            vis_mb = INDEXOF_VIS_BASE + N * 3 + state_idx
+                vis_mb = INDEXOF_VIS_BASE + r * 84 + N * 3 + state_idx
+                # Only round-0, state-0 actors start visible.
+                initial_vis = 1 if (r == 0 and state_idx == 0) else 0
 
-            # Cubes are statplats — engine forbids scripts on statplats
-            # (actor.cc:665). Visibility is driven *externally* by the director's
-            # fan-out loop, which reads each cube's INDEXOF_CUBE_STATE_BASE+N
-            # value and writes 0/1 to the right child's vis_mb each tick.
-            obj['wf_schema_path'] = STATPLAT_OAD
-            obj['wf_Mesh Name'] = f'cube_state{state_idx}.iff'
-            obj['wf_Model Type'] = 'Mesh'
-            obj['wf_Mobility'] = 'Anchored'
-            obj['wf_Mass'] = 0.0
-            obj['wf_Visibility Mailbox'] = vis_mb
-            created_count += 1
+                obj['wf_schema_path'] = STATPLAT_OAD
+                obj['wf_Mesh Name'] = f'cube_state{state_idx}_r{r}.iff'
+                obj['wf_Model Type'] = 'Mesh'
+                obj['wf_Mobility'] = 'Anchored'
+                obj['wf_Mass'] = 0.0
+                obj['wf_Visibility Mailbox'] = vis_mb
+                created_count += 1
 
 print(f"[qbert] Created {created_count} cube actors.")
 
@@ -753,20 +776,21 @@ bpy.ops.wm.save_as_mainfile(filepath=OUT_BLEND)
 print(f"[qbert] Exporting to {OUT_LEV}")
 bpy.ops.wf.export_level(filepath=OUT_LEV)
 
-# The exporter writes a Blender-side mesh IFF for every actor with mesh data,
-# named after the actor (cube_NN_sC.iff). The Blender mesh has a default white
-# material (0xFFFFFF), so all cubes render white regardless of the wf_Mesh Name
-# override. Overwrite each per-cube IFF with the gen_cube.py-generated cube_state*.iff
-# so the correct material colour reaches the engine.
+# The exporter writes a Blender-side mesh IFF for every actor (cube_NN_rR_sS.iff)
+# with a white default material. Overwrite each with the gen_cube.py-generated
+# cube_state{s}_r{r}.iff so the correct per-round material colour reaches the engine.
 import shutil
+overwrite_count = 0
 for row in range(NUM_ROWS):
     for col in range(row + 1):
         N = cube_index(row, col)
-        for state_idx in range(3):
-            src = os.path.join(SCRIPT_DIR, f'cube_state{state_idx}.iff')
-            dst = os.path.join(SCRIPT_DIR, f'cube_{N:02d}_s{state_idx}.iff')
-            shutil.copyfile(src, dst)
-print(f"[qbert] Overwrote {TOTAL_CUBES * 3} per-cube IFFs with coloured gen_cube.py output.")
+        for r in range(NUM_ROUNDS):
+            for state_idx in range(3):
+                src = os.path.join(SCRIPT_DIR, f'cube_state{state_idx}_r{r}.iff')
+                dst = os.path.join(SCRIPT_DIR, f'cube_{N:02d}_r{r}_s{state_idx}.iff')
+                shutil.copyfile(src, dst)
+                overwrite_count += 1
+print(f"[qbert] Overwrote {overwrite_count} per-cube IFFs with coloured gen_cube.py output.")
 
 # Same dual-Mesh-Name workaround for the player: the exporter writes player.iff
 # from the Blender object's geometry (white default-material box), overriding

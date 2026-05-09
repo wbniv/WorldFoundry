@@ -9,9 +9,9 @@
 { 'L4'
     { 'ALGN' .align( 2048 ) }
     { 'RAM'
-        'OBJD' 200000l
+        'OBJD' 800000l                  // bumped 200000→800000 for 336 actors (2026-05-08)
         'PERM' 500000l
-        'ROOM' 500000l
+        'ROOM' 2000000l                 // bumped 500000→2000000 for 336 cube meshes (2026-05-08)
         'FLAG' 1l 1l                    // doomstick, bungeecam
     }
     { 'ALGN' .align( 2048 ) }

@@ -24,90 +24,342 @@
 	// Example: `$3fff001` = `IFF` + room `fff` (`PERM`) + slot `001`.
 	{ 'ASMP'
 		$3fff001l { 'STR' "player.iff" }  // IFF PERM fff:001
-		$3000001l { 'STR' "cube_00_s0.iff" }  // IFF RM0 000:001
-		$3000002l { 'STR' "cube_00_s1.iff" }  // IFF RM0 000:002
-		$3000003l { 'STR' "cube_00_s2.iff" }  // IFF RM0 000:003
-		$3000004l { 'STR' "cube_01_s0.iff" }  // IFF RM0 000:004
-		$3000005l { 'STR' "cube_01_s1.iff" }  // IFF RM0 000:005
-		$3000006l { 'STR' "cube_01_s2.iff" }  // IFF RM0 000:006
-		$3000007l { 'STR' "cube_02_s0.iff" }  // IFF RM0 000:007
-		$3000008l { 'STR' "cube_02_s1.iff" }  // IFF RM0 000:008
-		$3000009l { 'STR' "cube_02_s2.iff" }  // IFF RM0 000:009
-		$300000al { 'STR' "cube_03_s0.iff" }  // IFF RM0 000:00a
-		$300000bl { 'STR' "cube_03_s1.iff" }  // IFF RM0 000:00b
-		$300000cl { 'STR' "cube_03_s2.iff" }  // IFF RM0 000:00c
-		$300000dl { 'STR' "cube_04_s0.iff" }  // IFF RM0 000:00d
-		$300000el { 'STR' "cube_04_s1.iff" }  // IFF RM0 000:00e
-		$300000fl { 'STR' "cube_04_s2.iff" }  // IFF RM0 000:00f
-		$3000010l { 'STR' "cube_05_s0.iff" }  // IFF RM0 000:010
-		$3000011l { 'STR' "cube_05_s1.iff" }  // IFF RM0 000:011
-		$3000012l { 'STR' "cube_05_s2.iff" }  // IFF RM0 000:012
-		$3000013l { 'STR' "cube_06_s0.iff" }  // IFF RM0 000:013
-		$3000014l { 'STR' "cube_06_s1.iff" }  // IFF RM0 000:014
-		$3000015l { 'STR' "cube_06_s2.iff" }  // IFF RM0 000:015
-		$3000016l { 'STR' "cube_07_s0.iff" }  // IFF RM0 000:016
-		$3000017l { 'STR' "cube_07_s1.iff" }  // IFF RM0 000:017
-		$3000018l { 'STR' "cube_07_s2.iff" }  // IFF RM0 000:018
-		$3000019l { 'STR' "cube_08_s0.iff" }  // IFF RM0 000:019
-		$300001al { 'STR' "cube_08_s1.iff" }  // IFF RM0 000:01a
-		$300001bl { 'STR' "cube_08_s2.iff" }  // IFF RM0 000:01b
-		$300001cl { 'STR' "cube_09_s0.iff" }  // IFF RM0 000:01c
-		$300001dl { 'STR' "cube_09_s1.iff" }  // IFF RM0 000:01d
-		$300001el { 'STR' "cube_09_s2.iff" }  // IFF RM0 000:01e
-		$300001fl { 'STR' "cube_10_s0.iff" }  // IFF RM0 000:01f
-		$3000020l { 'STR' "cube_10_s1.iff" }  // IFF RM0 000:020
-		$3000021l { 'STR' "cube_10_s2.iff" }  // IFF RM0 000:021
-		$3000022l { 'STR' "cube_11_s0.iff" }  // IFF RM0 000:022
-		$3000023l { 'STR' "cube_11_s1.iff" }  // IFF RM0 000:023
-		$3000024l { 'STR' "cube_11_s2.iff" }  // IFF RM0 000:024
-		$3000025l { 'STR' "cube_12_s0.iff" }  // IFF RM0 000:025
-		$3000026l { 'STR' "cube_12_s1.iff" }  // IFF RM0 000:026
-		$3000027l { 'STR' "cube_12_s2.iff" }  // IFF RM0 000:027
-		$3000028l { 'STR' "cube_13_s0.iff" }  // IFF RM0 000:028
-		$3000029l { 'STR' "cube_13_s1.iff" }  // IFF RM0 000:029
-		$300002al { 'STR' "cube_13_s2.iff" }  // IFF RM0 000:02a
-		$300002bl { 'STR' "cube_14_s0.iff" }  // IFF RM0 000:02b
-		$300002cl { 'STR' "cube_14_s1.iff" }  // IFF RM0 000:02c
-		$300002dl { 'STR' "cube_14_s2.iff" }  // IFF RM0 000:02d
-		$300002el { 'STR' "cube_15_s0.iff" }  // IFF RM0 000:02e
-		$300002fl { 'STR' "cube_15_s1.iff" }  // IFF RM0 000:02f
-		$3000030l { 'STR' "cube_15_s2.iff" }  // IFF RM0 000:030
-		$3000031l { 'STR' "cube_16_s0.iff" }  // IFF RM0 000:031
-		$3000032l { 'STR' "cube_16_s1.iff" }  // IFF RM0 000:032
-		$3000033l { 'STR' "cube_16_s2.iff" }  // IFF RM0 000:033
-		$3000034l { 'STR' "cube_17_s0.iff" }  // IFF RM0 000:034
-		$3000035l { 'STR' "cube_17_s1.iff" }  // IFF RM0 000:035
-		$3000036l { 'STR' "cube_17_s2.iff" }  // IFF RM0 000:036
-		$3000037l { 'STR' "cube_18_s0.iff" }  // IFF RM0 000:037
-		$3000038l { 'STR' "cube_18_s1.iff" }  // IFF RM0 000:038
-		$3000039l { 'STR' "cube_18_s2.iff" }  // IFF RM0 000:039
-		$300003al { 'STR' "cube_19_s0.iff" }  // IFF RM0 000:03a
-		$300003bl { 'STR' "cube_19_s1.iff" }  // IFF RM0 000:03b
-		$300003cl { 'STR' "cube_19_s2.iff" }  // IFF RM0 000:03c
-		$300003dl { 'STR' "cube_20_s0.iff" }  // IFF RM0 000:03d
-		$300003el { 'STR' "cube_20_s1.iff" }  // IFF RM0 000:03e
-		$300003fl { 'STR' "cube_20_s2.iff" }  // IFF RM0 000:03f
-		$3000040l { 'STR' "cube_21_s0.iff" }  // IFF RM0 000:040
-		$3000041l { 'STR' "cube_21_s1.iff" }  // IFF RM0 000:041
-		$3000042l { 'STR' "cube_21_s2.iff" }  // IFF RM0 000:042
-		$3000043l { 'STR' "cube_22_s0.iff" }  // IFF RM0 000:043
-		$3000044l { 'STR' "cube_22_s1.iff" }  // IFF RM0 000:044
-		$3000045l { 'STR' "cube_22_s2.iff" }  // IFF RM0 000:045
-		$3000046l { 'STR' "cube_23_s0.iff" }  // IFF RM0 000:046
-		$3000047l { 'STR' "cube_23_s1.iff" }  // IFF RM0 000:047
-		$3000048l { 'STR' "cube_23_s2.iff" }  // IFF RM0 000:048
-		$3000049l { 'STR' "cube_24_s0.iff" }  // IFF RM0 000:049
-		$300004al { 'STR' "cube_24_s1.iff" }  // IFF RM0 000:04a
-		$300004bl { 'STR' "cube_24_s2.iff" }  // IFF RM0 000:04b
-		$300004cl { 'STR' "cube_25_s0.iff" }  // IFF RM0 000:04c
-		$300004dl { 'STR' "cube_25_s1.iff" }  // IFF RM0 000:04d
-		$300004el { 'STR' "cube_25_s2.iff" }  // IFF RM0 000:04e
-		$300004fl { 'STR' "cube_26_s0.iff" }  // IFF RM0 000:04f
-		$3000050l { 'STR' "cube_26_s1.iff" }  // IFF RM0 000:050
-		$3000051l { 'STR' "cube_26_s2.iff" }  // IFF RM0 000:051
-		$3000052l { 'STR' "cube_27_s0.iff" }  // IFF RM0 000:052
-		$3000053l { 'STR' "cube_27_s1.iff" }  // IFF RM0 000:053
-		$3000054l { 'STR' "cube_27_s2.iff" }  // IFF RM0 000:054
+		$3000001l { 'STR' "cube_00_r0_s0.iff" }  // IFF RM0 000:001
+		$3000002l { 'STR' "cube_00_r0_s1.iff" }  // IFF RM0 000:002
+		$3000003l { 'STR' "cube_00_r0_s2.iff" }  // IFF RM0 000:003
+		$3000004l { 'STR' "cube_00_r1_s0.iff" }  // IFF RM0 000:004
+		$3000005l { 'STR' "cube_00_r1_s1.iff" }  // IFF RM0 000:005
+		$3000006l { 'STR' "cube_00_r1_s2.iff" }  // IFF RM0 000:006
+		$3000007l { 'STR' "cube_00_r2_s0.iff" }  // IFF RM0 000:007
+		$3000008l { 'STR' "cube_00_r2_s1.iff" }  // IFF RM0 000:008
+		$3000009l { 'STR' "cube_00_r2_s2.iff" }  // IFF RM0 000:009
+		$300000al { 'STR' "cube_00_r3_s0.iff" }  // IFF RM0 000:00a
+		$300000bl { 'STR' "cube_00_r3_s1.iff" }  // IFF RM0 000:00b
+		$300000cl { 'STR' "cube_00_r3_s2.iff" }  // IFF RM0 000:00c
+		$300000dl { 'STR' "cube_01_r0_s0.iff" }  // IFF RM0 000:00d
+		$300000el { 'STR' "cube_01_r0_s1.iff" }  // IFF RM0 000:00e
+		$300000fl { 'STR' "cube_01_r0_s2.iff" }  // IFF RM0 000:00f
+		$3000010l { 'STR' "cube_01_r1_s0.iff" }  // IFF RM0 000:010
+		$3000011l { 'STR' "cube_01_r1_s1.iff" }  // IFF RM0 000:011
+		$3000012l { 'STR' "cube_01_r1_s2.iff" }  // IFF RM0 000:012
+		$3000013l { 'STR' "cube_01_r2_s0.iff" }  // IFF RM0 000:013
+		$3000014l { 'STR' "cube_01_r2_s1.iff" }  // IFF RM0 000:014
+		$3000015l { 'STR' "cube_01_r2_s2.iff" }  // IFF RM0 000:015
+		$3000016l { 'STR' "cube_01_r3_s0.iff" }  // IFF RM0 000:016
+		$3000017l { 'STR' "cube_01_r3_s1.iff" }  // IFF RM0 000:017
+		$3000018l { 'STR' "cube_01_r3_s2.iff" }  // IFF RM0 000:018
+		$3000019l { 'STR' "cube_02_r0_s0.iff" }  // IFF RM0 000:019
+		$300001al { 'STR' "cube_02_r0_s1.iff" }  // IFF RM0 000:01a
+		$300001bl { 'STR' "cube_02_r0_s2.iff" }  // IFF RM0 000:01b
+		$300001cl { 'STR' "cube_02_r1_s0.iff" }  // IFF RM0 000:01c
+		$300001dl { 'STR' "cube_02_r1_s1.iff" }  // IFF RM0 000:01d
+		$300001el { 'STR' "cube_02_r1_s2.iff" }  // IFF RM0 000:01e
+		$300001fl { 'STR' "cube_02_r2_s0.iff" }  // IFF RM0 000:01f
+		$3000020l { 'STR' "cube_02_r2_s1.iff" }  // IFF RM0 000:020
+		$3000021l { 'STR' "cube_02_r2_s2.iff" }  // IFF RM0 000:021
+		$3000022l { 'STR' "cube_02_r3_s0.iff" }  // IFF RM0 000:022
+		$3000023l { 'STR' "cube_02_r3_s1.iff" }  // IFF RM0 000:023
+		$3000024l { 'STR' "cube_02_r3_s2.iff" }  // IFF RM0 000:024
+		$3000025l { 'STR' "cube_03_r0_s0.iff" }  // IFF RM0 000:025
+		$3000026l { 'STR' "cube_03_r0_s1.iff" }  // IFF RM0 000:026
+		$3000027l { 'STR' "cube_03_r0_s2.iff" }  // IFF RM0 000:027
+		$3000028l { 'STR' "cube_03_r1_s0.iff" }  // IFF RM0 000:028
+		$3000029l { 'STR' "cube_03_r1_s1.iff" }  // IFF RM0 000:029
+		$300002al { 'STR' "cube_03_r1_s2.iff" }  // IFF RM0 000:02a
+		$300002bl { 'STR' "cube_03_r2_s0.iff" }  // IFF RM0 000:02b
+		$300002cl { 'STR' "cube_03_r2_s1.iff" }  // IFF RM0 000:02c
+		$300002dl { 'STR' "cube_03_r2_s2.iff" }  // IFF RM0 000:02d
+		$300002el { 'STR' "cube_03_r3_s0.iff" }  // IFF RM0 000:02e
+		$300002fl { 'STR' "cube_03_r3_s1.iff" }  // IFF RM0 000:02f
+		$3000030l { 'STR' "cube_03_r3_s2.iff" }  // IFF RM0 000:030
+		$3000031l { 'STR' "cube_04_r0_s0.iff" }  // IFF RM0 000:031
+		$3000032l { 'STR' "cube_04_r0_s1.iff" }  // IFF RM0 000:032
+		$3000033l { 'STR' "cube_04_r0_s2.iff" }  // IFF RM0 000:033
+		$3000034l { 'STR' "cube_04_r1_s0.iff" }  // IFF RM0 000:034
+		$3000035l { 'STR' "cube_04_r1_s1.iff" }  // IFF RM0 000:035
+		$3000036l { 'STR' "cube_04_r1_s2.iff" }  // IFF RM0 000:036
+		$3000037l { 'STR' "cube_04_r2_s0.iff" }  // IFF RM0 000:037
+		$3000038l { 'STR' "cube_04_r2_s1.iff" }  // IFF RM0 000:038
+		$3000039l { 'STR' "cube_04_r2_s2.iff" }  // IFF RM0 000:039
+		$300003al { 'STR' "cube_04_r3_s0.iff" }  // IFF RM0 000:03a
+		$300003bl { 'STR' "cube_04_r3_s1.iff" }  // IFF RM0 000:03b
+		$300003cl { 'STR' "cube_04_r3_s2.iff" }  // IFF RM0 000:03c
+		$300003dl { 'STR' "cube_05_r0_s0.iff" }  // IFF RM0 000:03d
+		$300003el { 'STR' "cube_05_r0_s1.iff" }  // IFF RM0 000:03e
+		$300003fl { 'STR' "cube_05_r0_s2.iff" }  // IFF RM0 000:03f
+		$3000040l { 'STR' "cube_05_r1_s0.iff" }  // IFF RM0 000:040
+		$3000041l { 'STR' "cube_05_r1_s1.iff" }  // IFF RM0 000:041
+		$3000042l { 'STR' "cube_05_r1_s2.iff" }  // IFF RM0 000:042
+		$3000043l { 'STR' "cube_05_r2_s0.iff" }  // IFF RM0 000:043
+		$3000044l { 'STR' "cube_05_r2_s1.iff" }  // IFF RM0 000:044
+		$3000045l { 'STR' "cube_05_r2_s2.iff" }  // IFF RM0 000:045
+		$3000046l { 'STR' "cube_05_r3_s0.iff" }  // IFF RM0 000:046
+		$3000047l { 'STR' "cube_05_r3_s1.iff" }  // IFF RM0 000:047
+		$3000048l { 'STR' "cube_05_r3_s2.iff" }  // IFF RM0 000:048
+		$3000049l { 'STR' "cube_06_r0_s0.iff" }  // IFF RM0 000:049
+		$300004al { 'STR' "cube_06_r0_s1.iff" }  // IFF RM0 000:04a
+		$300004bl { 'STR' "cube_06_r0_s2.iff" }  // IFF RM0 000:04b
+		$300004cl { 'STR' "cube_06_r1_s0.iff" }  // IFF RM0 000:04c
+		$300004dl { 'STR' "cube_06_r1_s1.iff" }  // IFF RM0 000:04d
+		$300004el { 'STR' "cube_06_r1_s2.iff" }  // IFF RM0 000:04e
+		$300004fl { 'STR' "cube_06_r2_s0.iff" }  // IFF RM0 000:04f
+		$3000050l { 'STR' "cube_06_r2_s1.iff" }  // IFF RM0 000:050
+		$3000051l { 'STR' "cube_06_r2_s2.iff" }  // IFF RM0 000:051
+		$3000052l { 'STR' "cube_06_r3_s0.iff" }  // IFF RM0 000:052
+		$3000053l { 'STR' "cube_06_r3_s1.iff" }  // IFF RM0 000:053
+		$3000054l { 'STR' "cube_06_r3_s2.iff" }  // IFF RM0 000:054
+		$3000055l { 'STR' "cube_07_r0_s0.iff" }  // IFF RM0 000:055
+		$3000056l { 'STR' "cube_07_r0_s1.iff" }  // IFF RM0 000:056
+		$3000057l { 'STR' "cube_07_r0_s2.iff" }  // IFF RM0 000:057
+		$3000058l { 'STR' "cube_07_r1_s0.iff" }  // IFF RM0 000:058
+		$3000059l { 'STR' "cube_07_r1_s1.iff" }  // IFF RM0 000:059
+		$300005al { 'STR' "cube_07_r1_s2.iff" }  // IFF RM0 000:05a
+		$300005bl { 'STR' "cube_07_r2_s0.iff" }  // IFF RM0 000:05b
+		$300005cl { 'STR' "cube_07_r2_s1.iff" }  // IFF RM0 000:05c
+		$300005dl { 'STR' "cube_07_r2_s2.iff" }  // IFF RM0 000:05d
+		$300005el { 'STR' "cube_07_r3_s0.iff" }  // IFF RM0 000:05e
+		$300005fl { 'STR' "cube_07_r3_s1.iff" }  // IFF RM0 000:05f
+		$3000060l { 'STR' "cube_07_r3_s2.iff" }  // IFF RM0 000:060
+		$3000061l { 'STR' "cube_08_r0_s0.iff" }  // IFF RM0 000:061
+		$3000062l { 'STR' "cube_08_r0_s1.iff" }  // IFF RM0 000:062
+		$3000063l { 'STR' "cube_08_r0_s2.iff" }  // IFF RM0 000:063
+		$3000064l { 'STR' "cube_08_r1_s0.iff" }  // IFF RM0 000:064
+		$3000065l { 'STR' "cube_08_r1_s1.iff" }  // IFF RM0 000:065
+		$3000066l { 'STR' "cube_08_r1_s2.iff" }  // IFF RM0 000:066
+		$3000067l { 'STR' "cube_08_r2_s0.iff" }  // IFF RM0 000:067
+		$3000068l { 'STR' "cube_08_r2_s1.iff" }  // IFF RM0 000:068
+		$3000069l { 'STR' "cube_08_r2_s2.iff" }  // IFF RM0 000:069
+		$300006al { 'STR' "cube_08_r3_s0.iff" }  // IFF RM0 000:06a
+		$300006bl { 'STR' "cube_08_r3_s1.iff" }  // IFF RM0 000:06b
+		$300006cl { 'STR' "cube_08_r3_s2.iff" }  // IFF RM0 000:06c
+		$300006dl { 'STR' "cube_09_r0_s0.iff" }  // IFF RM0 000:06d
+		$300006el { 'STR' "cube_09_r0_s1.iff" }  // IFF RM0 000:06e
+		$300006fl { 'STR' "cube_09_r0_s2.iff" }  // IFF RM0 000:06f
+		$3000070l { 'STR' "cube_09_r1_s0.iff" }  // IFF RM0 000:070
+		$3000071l { 'STR' "cube_09_r1_s1.iff" }  // IFF RM0 000:071
+		$3000072l { 'STR' "cube_09_r1_s2.iff" }  // IFF RM0 000:072
+		$3000073l { 'STR' "cube_09_r2_s0.iff" }  // IFF RM0 000:073
+		$3000074l { 'STR' "cube_09_r2_s1.iff" }  // IFF RM0 000:074
+		$3000075l { 'STR' "cube_09_r2_s2.iff" }  // IFF RM0 000:075
+		$3000076l { 'STR' "cube_09_r3_s0.iff" }  // IFF RM0 000:076
+		$3000077l { 'STR' "cube_09_r3_s1.iff" }  // IFF RM0 000:077
+		$3000078l { 'STR' "cube_09_r3_s2.iff" }  // IFF RM0 000:078
+		$3000079l { 'STR' "cube_10_r0_s0.iff" }  // IFF RM0 000:079
+		$300007al { 'STR' "cube_10_r0_s1.iff" }  // IFF RM0 000:07a
+		$300007bl { 'STR' "cube_10_r0_s2.iff" }  // IFF RM0 000:07b
+		$300007cl { 'STR' "cube_10_r1_s0.iff" }  // IFF RM0 000:07c
+		$300007dl { 'STR' "cube_10_r1_s1.iff" }  // IFF RM0 000:07d
+		$300007el { 'STR' "cube_10_r1_s2.iff" }  // IFF RM0 000:07e
+		$300007fl { 'STR' "cube_10_r2_s0.iff" }  // IFF RM0 000:07f
+		$3000080l { 'STR' "cube_10_r2_s1.iff" }  // IFF RM0 000:080
+		$3000081l { 'STR' "cube_10_r2_s2.iff" }  // IFF RM0 000:081
+		$3000082l { 'STR' "cube_10_r3_s0.iff" }  // IFF RM0 000:082
+		$3000083l { 'STR' "cube_10_r3_s1.iff" }  // IFF RM0 000:083
+		$3000084l { 'STR' "cube_10_r3_s2.iff" }  // IFF RM0 000:084
+		$3000085l { 'STR' "cube_11_r0_s0.iff" }  // IFF RM0 000:085
+		$3000086l { 'STR' "cube_11_r0_s1.iff" }  // IFF RM0 000:086
+		$3000087l { 'STR' "cube_11_r0_s2.iff" }  // IFF RM0 000:087
+		$3000088l { 'STR' "cube_11_r1_s0.iff" }  // IFF RM0 000:088
+		$3000089l { 'STR' "cube_11_r1_s1.iff" }  // IFF RM0 000:089
+		$300008al { 'STR' "cube_11_r1_s2.iff" }  // IFF RM0 000:08a
+		$300008bl { 'STR' "cube_11_r2_s0.iff" }  // IFF RM0 000:08b
+		$300008cl { 'STR' "cube_11_r2_s1.iff" }  // IFF RM0 000:08c
+		$300008dl { 'STR' "cube_11_r2_s2.iff" }  // IFF RM0 000:08d
+		$300008el { 'STR' "cube_11_r3_s0.iff" }  // IFF RM0 000:08e
+		$300008fl { 'STR' "cube_11_r3_s1.iff" }  // IFF RM0 000:08f
+		$3000090l { 'STR' "cube_11_r3_s2.iff" }  // IFF RM0 000:090
+		$3000091l { 'STR' "cube_12_r0_s0.iff" }  // IFF RM0 000:091
+		$3000092l { 'STR' "cube_12_r0_s1.iff" }  // IFF RM0 000:092
+		$3000093l { 'STR' "cube_12_r0_s2.iff" }  // IFF RM0 000:093
+		$3000094l { 'STR' "cube_12_r1_s0.iff" }  // IFF RM0 000:094
+		$3000095l { 'STR' "cube_12_r1_s1.iff" }  // IFF RM0 000:095
+		$3000096l { 'STR' "cube_12_r1_s2.iff" }  // IFF RM0 000:096
+		$3000097l { 'STR' "cube_12_r2_s0.iff" }  // IFF RM0 000:097
+		$3000098l { 'STR' "cube_12_r2_s1.iff" }  // IFF RM0 000:098
+		$3000099l { 'STR' "cube_12_r2_s2.iff" }  // IFF RM0 000:099
+		$300009al { 'STR' "cube_12_r3_s0.iff" }  // IFF RM0 000:09a
+		$300009bl { 'STR' "cube_12_r3_s1.iff" }  // IFF RM0 000:09b
+		$300009cl { 'STR' "cube_12_r3_s2.iff" }  // IFF RM0 000:09c
+		$300009dl { 'STR' "cube_13_r0_s0.iff" }  // IFF RM0 000:09d
+		$300009el { 'STR' "cube_13_r0_s1.iff" }  // IFF RM0 000:09e
+		$300009fl { 'STR' "cube_13_r0_s2.iff" }  // IFF RM0 000:09f
+		$30000a0l { 'STR' "cube_13_r1_s0.iff" }  // IFF RM0 000:0a0
+		$30000a1l { 'STR' "cube_13_r1_s1.iff" }  // IFF RM0 000:0a1
+		$30000a2l { 'STR' "cube_13_r1_s2.iff" }  // IFF RM0 000:0a2
+		$30000a3l { 'STR' "cube_13_r2_s0.iff" }  // IFF RM0 000:0a3
+		$30000a4l { 'STR' "cube_13_r2_s1.iff" }  // IFF RM0 000:0a4
+		$30000a5l { 'STR' "cube_13_r2_s2.iff" }  // IFF RM0 000:0a5
+		$30000a6l { 'STR' "cube_13_r3_s0.iff" }  // IFF RM0 000:0a6
+		$30000a7l { 'STR' "cube_13_r3_s1.iff" }  // IFF RM0 000:0a7
+		$30000a8l { 'STR' "cube_13_r3_s2.iff" }  // IFF RM0 000:0a8
+		$30000a9l { 'STR' "cube_14_r0_s0.iff" }  // IFF RM0 000:0a9
+		$30000aal { 'STR' "cube_14_r0_s1.iff" }  // IFF RM0 000:0aa
+		$30000abl { 'STR' "cube_14_r0_s2.iff" }  // IFF RM0 000:0ab
+		$30000acl { 'STR' "cube_14_r1_s0.iff" }  // IFF RM0 000:0ac
+		$30000adl { 'STR' "cube_14_r1_s1.iff" }  // IFF RM0 000:0ad
+		$30000ael { 'STR' "cube_14_r1_s2.iff" }  // IFF RM0 000:0ae
+		$30000afl { 'STR' "cube_14_r2_s0.iff" }  // IFF RM0 000:0af
+		$30000b0l { 'STR' "cube_14_r2_s1.iff" }  // IFF RM0 000:0b0
+		$30000b1l { 'STR' "cube_14_r2_s2.iff" }  // IFF RM0 000:0b1
+		$30000b2l { 'STR' "cube_14_r3_s0.iff" }  // IFF RM0 000:0b2
+		$30000b3l { 'STR' "cube_14_r3_s1.iff" }  // IFF RM0 000:0b3
+		$30000b4l { 'STR' "cube_14_r3_s2.iff" }  // IFF RM0 000:0b4
+		$30000b5l { 'STR' "cube_15_r0_s0.iff" }  // IFF RM0 000:0b5
+		$30000b6l { 'STR' "cube_15_r0_s1.iff" }  // IFF RM0 000:0b6
+		$30000b7l { 'STR' "cube_15_r0_s2.iff" }  // IFF RM0 000:0b7
+		$30000b8l { 'STR' "cube_15_r1_s0.iff" }  // IFF RM0 000:0b8
+		$30000b9l { 'STR' "cube_15_r1_s1.iff" }  // IFF RM0 000:0b9
+		$30000bal { 'STR' "cube_15_r1_s2.iff" }  // IFF RM0 000:0ba
+		$30000bbl { 'STR' "cube_15_r2_s0.iff" }  // IFF RM0 000:0bb
+		$30000bcl { 'STR' "cube_15_r2_s1.iff" }  // IFF RM0 000:0bc
+		$30000bdl { 'STR' "cube_15_r2_s2.iff" }  // IFF RM0 000:0bd
+		$30000bel { 'STR' "cube_15_r3_s0.iff" }  // IFF RM0 000:0be
+		$30000bfl { 'STR' "cube_15_r3_s1.iff" }  // IFF RM0 000:0bf
+		$30000c0l { 'STR' "cube_15_r3_s2.iff" }  // IFF RM0 000:0c0
+		$30000c1l { 'STR' "cube_16_r0_s0.iff" }  // IFF RM0 000:0c1
+		$30000c2l { 'STR' "cube_16_r0_s1.iff" }  // IFF RM0 000:0c2
+		$30000c3l { 'STR' "cube_16_r0_s2.iff" }  // IFF RM0 000:0c3
+		$30000c4l { 'STR' "cube_16_r1_s0.iff" }  // IFF RM0 000:0c4
+		$30000c5l { 'STR' "cube_16_r1_s1.iff" }  // IFF RM0 000:0c5
+		$30000c6l { 'STR' "cube_16_r1_s2.iff" }  // IFF RM0 000:0c6
+		$30000c7l { 'STR' "cube_16_r2_s0.iff" }  // IFF RM0 000:0c7
+		$30000c8l { 'STR' "cube_16_r2_s1.iff" }  // IFF RM0 000:0c8
+		$30000c9l { 'STR' "cube_16_r2_s2.iff" }  // IFF RM0 000:0c9
+		$30000cal { 'STR' "cube_16_r3_s0.iff" }  // IFF RM0 000:0ca
+		$30000cbl { 'STR' "cube_16_r3_s1.iff" }  // IFF RM0 000:0cb
+		$30000ccl { 'STR' "cube_16_r3_s2.iff" }  // IFF RM0 000:0cc
+		$30000cdl { 'STR' "cube_17_r0_s0.iff" }  // IFF RM0 000:0cd
+		$30000cel { 'STR' "cube_17_r0_s1.iff" }  // IFF RM0 000:0ce
+		$30000cfl { 'STR' "cube_17_r0_s2.iff" }  // IFF RM0 000:0cf
+		$30000d0l { 'STR' "cube_17_r1_s0.iff" }  // IFF RM0 000:0d0
+		$30000d1l { 'STR' "cube_17_r1_s1.iff" }  // IFF RM0 000:0d1
+		$30000d2l { 'STR' "cube_17_r1_s2.iff" }  // IFF RM0 000:0d2
+		$30000d3l { 'STR' "cube_17_r2_s0.iff" }  // IFF RM0 000:0d3
+		$30000d4l { 'STR' "cube_17_r2_s1.iff" }  // IFF RM0 000:0d4
+		$30000d5l { 'STR' "cube_17_r2_s2.iff" }  // IFF RM0 000:0d5
+		$30000d6l { 'STR' "cube_17_r3_s0.iff" }  // IFF RM0 000:0d6
+		$30000d7l { 'STR' "cube_17_r3_s1.iff" }  // IFF RM0 000:0d7
+		$30000d8l { 'STR' "cube_17_r3_s2.iff" }  // IFF RM0 000:0d8
+		$30000d9l { 'STR' "cube_18_r0_s0.iff" }  // IFF RM0 000:0d9
+		$30000dal { 'STR' "cube_18_r0_s1.iff" }  // IFF RM0 000:0da
+		$30000dbl { 'STR' "cube_18_r0_s2.iff" }  // IFF RM0 000:0db
+		$30000dcl { 'STR' "cube_18_r1_s0.iff" }  // IFF RM0 000:0dc
+		$30000ddl { 'STR' "cube_18_r1_s1.iff" }  // IFF RM0 000:0dd
+		$30000del { 'STR' "cube_18_r1_s2.iff" }  // IFF RM0 000:0de
+		$30000dfl { 'STR' "cube_18_r2_s0.iff" }  // IFF RM0 000:0df
+		$30000e0l { 'STR' "cube_18_r2_s1.iff" }  // IFF RM0 000:0e0
+		$30000e1l { 'STR' "cube_18_r2_s2.iff" }  // IFF RM0 000:0e1
+		$30000e2l { 'STR' "cube_18_r3_s0.iff" }  // IFF RM0 000:0e2
+		$30000e3l { 'STR' "cube_18_r3_s1.iff" }  // IFF RM0 000:0e3
+		$30000e4l { 'STR' "cube_18_r3_s2.iff" }  // IFF RM0 000:0e4
+		$30000e5l { 'STR' "cube_19_r0_s0.iff" }  // IFF RM0 000:0e5
+		$30000e6l { 'STR' "cube_19_r0_s1.iff" }  // IFF RM0 000:0e6
+		$30000e7l { 'STR' "cube_19_r0_s2.iff" }  // IFF RM0 000:0e7
+		$30000e8l { 'STR' "cube_19_r1_s0.iff" }  // IFF RM0 000:0e8
+		$30000e9l { 'STR' "cube_19_r1_s1.iff" }  // IFF RM0 000:0e9
+		$30000eal { 'STR' "cube_19_r1_s2.iff" }  // IFF RM0 000:0ea
+		$30000ebl { 'STR' "cube_19_r2_s0.iff" }  // IFF RM0 000:0eb
+		$30000ecl { 'STR' "cube_19_r2_s1.iff" }  // IFF RM0 000:0ec
+		$30000edl { 'STR' "cube_19_r2_s2.iff" }  // IFF RM0 000:0ed
+		$30000eel { 'STR' "cube_19_r3_s0.iff" }  // IFF RM0 000:0ee
+		$30000efl { 'STR' "cube_19_r3_s1.iff" }  // IFF RM0 000:0ef
+		$30000f0l { 'STR' "cube_19_r3_s2.iff" }  // IFF RM0 000:0f0
+		$30000f1l { 'STR' "cube_20_r0_s0.iff" }  // IFF RM0 000:0f1
+		$30000f2l { 'STR' "cube_20_r0_s1.iff" }  // IFF RM0 000:0f2
+		$30000f3l { 'STR' "cube_20_r0_s2.iff" }  // IFF RM0 000:0f3
+		$30000f4l { 'STR' "cube_20_r1_s0.iff" }  // IFF RM0 000:0f4
+		$30000f5l { 'STR' "cube_20_r1_s1.iff" }  // IFF RM0 000:0f5
+		$30000f6l { 'STR' "cube_20_r1_s2.iff" }  // IFF RM0 000:0f6
+		$30000f7l { 'STR' "cube_20_r2_s0.iff" }  // IFF RM0 000:0f7
+		$30000f8l { 'STR' "cube_20_r2_s1.iff" }  // IFF RM0 000:0f8
+		$30000f9l { 'STR' "cube_20_r2_s2.iff" }  // IFF RM0 000:0f9
+		$30000fal { 'STR' "cube_20_r3_s0.iff" }  // IFF RM0 000:0fa
+		$30000fbl { 'STR' "cube_20_r3_s1.iff" }  // IFF RM0 000:0fb
+		$30000fcl { 'STR' "cube_20_r3_s2.iff" }  // IFF RM0 000:0fc
+		$30000fdl { 'STR' "cube_21_r0_s0.iff" }  // IFF RM0 000:0fd
+		$30000fel { 'STR' "cube_21_r0_s1.iff" }  // IFF RM0 000:0fe
+		$30000ffl { 'STR' "cube_21_r0_s2.iff" }  // IFF RM0 000:0ff
+		$3000100l { 'STR' "cube_21_r1_s0.iff" }  // IFF RM0 000:100
+		$3000101l { 'STR' "cube_21_r1_s1.iff" }  // IFF RM0 000:101
+		$3000102l { 'STR' "cube_21_r1_s2.iff" }  // IFF RM0 000:102
+		$3000103l { 'STR' "cube_21_r2_s0.iff" }  // IFF RM0 000:103
+		$3000104l { 'STR' "cube_21_r2_s1.iff" }  // IFF RM0 000:104
+		$3000105l { 'STR' "cube_21_r2_s2.iff" }  // IFF RM0 000:105
+		$3000106l { 'STR' "cube_21_r3_s0.iff" }  // IFF RM0 000:106
+		$3000107l { 'STR' "cube_21_r3_s1.iff" }  // IFF RM0 000:107
+		$3000108l { 'STR' "cube_21_r3_s2.iff" }  // IFF RM0 000:108
+		$3000109l { 'STR' "cube_22_r0_s0.iff" }  // IFF RM0 000:109
+		$300010al { 'STR' "cube_22_r0_s1.iff" }  // IFF RM0 000:10a
+		$300010bl { 'STR' "cube_22_r0_s2.iff" }  // IFF RM0 000:10b
+		$300010cl { 'STR' "cube_22_r1_s0.iff" }  // IFF RM0 000:10c
+		$300010dl { 'STR' "cube_22_r1_s1.iff" }  // IFF RM0 000:10d
+		$300010el { 'STR' "cube_22_r1_s2.iff" }  // IFF RM0 000:10e
+		$300010fl { 'STR' "cube_22_r2_s0.iff" }  // IFF RM0 000:10f
+		$3000110l { 'STR' "cube_22_r2_s1.iff" }  // IFF RM0 000:110
+		$3000111l { 'STR' "cube_22_r2_s2.iff" }  // IFF RM0 000:111
+		$3000112l { 'STR' "cube_22_r3_s0.iff" }  // IFF RM0 000:112
+		$3000113l { 'STR' "cube_22_r3_s1.iff" }  // IFF RM0 000:113
+		$3000114l { 'STR' "cube_22_r3_s2.iff" }  // IFF RM0 000:114
+		$3000115l { 'STR' "cube_23_r0_s0.iff" }  // IFF RM0 000:115
+		$3000116l { 'STR' "cube_23_r0_s1.iff" }  // IFF RM0 000:116
+		$3000117l { 'STR' "cube_23_r0_s2.iff" }  // IFF RM0 000:117
+		$3000118l { 'STR' "cube_23_r1_s0.iff" }  // IFF RM0 000:118
+		$3000119l { 'STR' "cube_23_r1_s1.iff" }  // IFF RM0 000:119
+		$300011al { 'STR' "cube_23_r1_s2.iff" }  // IFF RM0 000:11a
+		$300011bl { 'STR' "cube_23_r2_s0.iff" }  // IFF RM0 000:11b
+		$300011cl { 'STR' "cube_23_r2_s1.iff" }  // IFF RM0 000:11c
+		$300011dl { 'STR' "cube_23_r2_s2.iff" }  // IFF RM0 000:11d
+		$300011el { 'STR' "cube_23_r3_s0.iff" }  // IFF RM0 000:11e
+		$300011fl { 'STR' "cube_23_r3_s1.iff" }  // IFF RM0 000:11f
+		$3000120l { 'STR' "cube_23_r3_s2.iff" }  // IFF RM0 000:120
+		$3000121l { 'STR' "cube_24_r0_s0.iff" }  // IFF RM0 000:121
+		$3000122l { 'STR' "cube_24_r0_s1.iff" }  // IFF RM0 000:122
+		$3000123l { 'STR' "cube_24_r0_s2.iff" }  // IFF RM0 000:123
+		$3000124l { 'STR' "cube_24_r1_s0.iff" }  // IFF RM0 000:124
+		$3000125l { 'STR' "cube_24_r1_s1.iff" }  // IFF RM0 000:125
+		$3000126l { 'STR' "cube_24_r1_s2.iff" }  // IFF RM0 000:126
+		$3000127l { 'STR' "cube_24_r2_s0.iff" }  // IFF RM0 000:127
+		$3000128l { 'STR' "cube_24_r2_s1.iff" }  // IFF RM0 000:128
+		$3000129l { 'STR' "cube_24_r2_s2.iff" }  // IFF RM0 000:129
+		$300012al { 'STR' "cube_24_r3_s0.iff" }  // IFF RM0 000:12a
+		$300012bl { 'STR' "cube_24_r3_s1.iff" }  // IFF RM0 000:12b
+		$300012cl { 'STR' "cube_24_r3_s2.iff" }  // IFF RM0 000:12c
+		$300012dl { 'STR' "cube_25_r0_s0.iff" }  // IFF RM0 000:12d
+		$300012el { 'STR' "cube_25_r0_s1.iff" }  // IFF RM0 000:12e
+		$300012fl { 'STR' "cube_25_r0_s2.iff" }  // IFF RM0 000:12f
+		$3000130l { 'STR' "cube_25_r1_s0.iff" }  // IFF RM0 000:130
+		$3000131l { 'STR' "cube_25_r1_s1.iff" }  // IFF RM0 000:131
+		$3000132l { 'STR' "cube_25_r1_s2.iff" }  // IFF RM0 000:132
+		$3000133l { 'STR' "cube_25_r2_s0.iff" }  // IFF RM0 000:133
+		$3000134l { 'STR' "cube_25_r2_s1.iff" }  // IFF RM0 000:134
+		$3000135l { 'STR' "cube_25_r2_s2.iff" }  // IFF RM0 000:135
+		$3000136l { 'STR' "cube_25_r3_s0.iff" }  // IFF RM0 000:136
+		$3000137l { 'STR' "cube_25_r3_s1.iff" }  // IFF RM0 000:137
+		$3000138l { 'STR' "cube_25_r3_s2.iff" }  // IFF RM0 000:138
+		$3000139l { 'STR' "cube_26_r0_s0.iff" }  // IFF RM0 000:139
+		$300013al { 'STR' "cube_26_r0_s1.iff" }  // IFF RM0 000:13a
+		$300013bl { 'STR' "cube_26_r0_s2.iff" }  // IFF RM0 000:13b
+		$300013cl { 'STR' "cube_26_r1_s0.iff" }  // IFF RM0 000:13c
+		$300013dl { 'STR' "cube_26_r1_s1.iff" }  // IFF RM0 000:13d
+		$300013el { 'STR' "cube_26_r1_s2.iff" }  // IFF RM0 000:13e
+		$300013fl { 'STR' "cube_26_r2_s0.iff" }  // IFF RM0 000:13f
+		$3000140l { 'STR' "cube_26_r2_s1.iff" }  // IFF RM0 000:140
+		$3000141l { 'STR' "cube_26_r2_s2.iff" }  // IFF RM0 000:141
+		$3000142l { 'STR' "cube_26_r3_s0.iff" }  // IFF RM0 000:142
+		$3000143l { 'STR' "cube_26_r3_s1.iff" }  // IFF RM0 000:143
+		$3000144l { 'STR' "cube_26_r3_s2.iff" }  // IFF RM0 000:144
+		$3000145l { 'STR' "cube_27_r0_s0.iff" }  // IFF RM0 000:145
+		$3000146l { 'STR' "cube_27_r0_s1.iff" }  // IFF RM0 000:146
+		$3000147l { 'STR' "cube_27_r0_s2.iff" }  // IFF RM0 000:147
+		$3000148l { 'STR' "cube_27_r1_s0.iff" }  // IFF RM0 000:148
+		$3000149l { 'STR' "cube_27_r1_s1.iff" }  // IFF RM0 000:149
+		$300014al { 'STR' "cube_27_r1_s2.iff" }  // IFF RM0 000:14a
+		$300014bl { 'STR' "cube_27_r2_s0.iff" }  // IFF RM0 000:14b
+		$300014cl { 'STR' "cube_27_r2_s1.iff" }  // IFF RM0 000:14c
+		$300014dl { 'STR' "cube_27_r2_s2.iff" }  // IFF RM0 000:14d
+		$300014el { 'STR' "cube_27_r3_s0.iff" }  // IFF RM0 000:14e
+		$300014fl { 'STR' "cube_27_r3_s1.iff" }  // IFF RM0 000:14f
+		$3000150l { 'STR' "cube_27_r3_s2.iff" }  // IFF RM0 000:150
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "qbert_practice.lvl" ] }
@@ -125,90 +377,342 @@
 		{ 'ASS' $1000fffl [ "Room0.tga" ] }    // TGA RM0 000:fff
 		{ 'ASS' $5000fffl [ "Room0.ruv" ] }    // RUV RM0 000:fff
 		{ 'ASS' $7000fffl [ "Room0.cyc" ] }    // CYC RM0 000:fff
-		{ 'ASS' $3000001l [ "cube_00_s0.iff" ] }  // IFF RM0 000:001
-		{ 'ASS' $3000002l [ "cube_00_s1.iff" ] }  // IFF RM0 000:002
-		{ 'ASS' $3000003l [ "cube_00_s2.iff" ] }  // IFF RM0 000:003
-		{ 'ASS' $3000004l [ "cube_01_s0.iff" ] }  // IFF RM0 000:004
-		{ 'ASS' $3000005l [ "cube_01_s1.iff" ] }  // IFF RM0 000:005
-		{ 'ASS' $3000006l [ "cube_01_s2.iff" ] }  // IFF RM0 000:006
-		{ 'ASS' $3000007l [ "cube_02_s0.iff" ] }  // IFF RM0 000:007
-		{ 'ASS' $3000008l [ "cube_02_s1.iff" ] }  // IFF RM0 000:008
-		{ 'ASS' $3000009l [ "cube_02_s2.iff" ] }  // IFF RM0 000:009
-		{ 'ASS' $300000al [ "cube_03_s0.iff" ] }  // IFF RM0 000:00a
-		{ 'ASS' $300000bl [ "cube_03_s1.iff" ] }  // IFF RM0 000:00b
-		{ 'ASS' $300000cl [ "cube_03_s2.iff" ] }  // IFF RM0 000:00c
-		{ 'ASS' $300000dl [ "cube_04_s0.iff" ] }  // IFF RM0 000:00d
-		{ 'ASS' $300000el [ "cube_04_s1.iff" ] }  // IFF RM0 000:00e
-		{ 'ASS' $300000fl [ "cube_04_s2.iff" ] }  // IFF RM0 000:00f
-		{ 'ASS' $3000010l [ "cube_05_s0.iff" ] }  // IFF RM0 000:010
-		{ 'ASS' $3000011l [ "cube_05_s1.iff" ] }  // IFF RM0 000:011
-		{ 'ASS' $3000012l [ "cube_05_s2.iff" ] }  // IFF RM0 000:012
-		{ 'ASS' $3000013l [ "cube_06_s0.iff" ] }  // IFF RM0 000:013
-		{ 'ASS' $3000014l [ "cube_06_s1.iff" ] }  // IFF RM0 000:014
-		{ 'ASS' $3000015l [ "cube_06_s2.iff" ] }  // IFF RM0 000:015
-		{ 'ASS' $3000016l [ "cube_07_s0.iff" ] }  // IFF RM0 000:016
-		{ 'ASS' $3000017l [ "cube_07_s1.iff" ] }  // IFF RM0 000:017
-		{ 'ASS' $3000018l [ "cube_07_s2.iff" ] }  // IFF RM0 000:018
-		{ 'ASS' $3000019l [ "cube_08_s0.iff" ] }  // IFF RM0 000:019
-		{ 'ASS' $300001al [ "cube_08_s1.iff" ] }  // IFF RM0 000:01a
-		{ 'ASS' $300001bl [ "cube_08_s2.iff" ] }  // IFF RM0 000:01b
-		{ 'ASS' $300001cl [ "cube_09_s0.iff" ] }  // IFF RM0 000:01c
-		{ 'ASS' $300001dl [ "cube_09_s1.iff" ] }  // IFF RM0 000:01d
-		{ 'ASS' $300001el [ "cube_09_s2.iff" ] }  // IFF RM0 000:01e
-		{ 'ASS' $300001fl [ "cube_10_s0.iff" ] }  // IFF RM0 000:01f
-		{ 'ASS' $3000020l [ "cube_10_s1.iff" ] }  // IFF RM0 000:020
-		{ 'ASS' $3000021l [ "cube_10_s2.iff" ] }  // IFF RM0 000:021
-		{ 'ASS' $3000022l [ "cube_11_s0.iff" ] }  // IFF RM0 000:022
-		{ 'ASS' $3000023l [ "cube_11_s1.iff" ] }  // IFF RM0 000:023
-		{ 'ASS' $3000024l [ "cube_11_s2.iff" ] }  // IFF RM0 000:024
-		{ 'ASS' $3000025l [ "cube_12_s0.iff" ] }  // IFF RM0 000:025
-		{ 'ASS' $3000026l [ "cube_12_s1.iff" ] }  // IFF RM0 000:026
-		{ 'ASS' $3000027l [ "cube_12_s2.iff" ] }  // IFF RM0 000:027
-		{ 'ASS' $3000028l [ "cube_13_s0.iff" ] }  // IFF RM0 000:028
-		{ 'ASS' $3000029l [ "cube_13_s1.iff" ] }  // IFF RM0 000:029
-		{ 'ASS' $300002al [ "cube_13_s2.iff" ] }  // IFF RM0 000:02a
-		{ 'ASS' $300002bl [ "cube_14_s0.iff" ] }  // IFF RM0 000:02b
-		{ 'ASS' $300002cl [ "cube_14_s1.iff" ] }  // IFF RM0 000:02c
-		{ 'ASS' $300002dl [ "cube_14_s2.iff" ] }  // IFF RM0 000:02d
-		{ 'ASS' $300002el [ "cube_15_s0.iff" ] }  // IFF RM0 000:02e
-		{ 'ASS' $300002fl [ "cube_15_s1.iff" ] }  // IFF RM0 000:02f
-		{ 'ASS' $3000030l [ "cube_15_s2.iff" ] }  // IFF RM0 000:030
-		{ 'ASS' $3000031l [ "cube_16_s0.iff" ] }  // IFF RM0 000:031
-		{ 'ASS' $3000032l [ "cube_16_s1.iff" ] }  // IFF RM0 000:032
-		{ 'ASS' $3000033l [ "cube_16_s2.iff" ] }  // IFF RM0 000:033
-		{ 'ASS' $3000034l [ "cube_17_s0.iff" ] }  // IFF RM0 000:034
-		{ 'ASS' $3000035l [ "cube_17_s1.iff" ] }  // IFF RM0 000:035
-		{ 'ASS' $3000036l [ "cube_17_s2.iff" ] }  // IFF RM0 000:036
-		{ 'ASS' $3000037l [ "cube_18_s0.iff" ] }  // IFF RM0 000:037
-		{ 'ASS' $3000038l [ "cube_18_s1.iff" ] }  // IFF RM0 000:038
-		{ 'ASS' $3000039l [ "cube_18_s2.iff" ] }  // IFF RM0 000:039
-		{ 'ASS' $300003al [ "cube_19_s0.iff" ] }  // IFF RM0 000:03a
-		{ 'ASS' $300003bl [ "cube_19_s1.iff" ] }  // IFF RM0 000:03b
-		{ 'ASS' $300003cl [ "cube_19_s2.iff" ] }  // IFF RM0 000:03c
-		{ 'ASS' $300003dl [ "cube_20_s0.iff" ] }  // IFF RM0 000:03d
-		{ 'ASS' $300003el [ "cube_20_s1.iff" ] }  // IFF RM0 000:03e
-		{ 'ASS' $300003fl [ "cube_20_s2.iff" ] }  // IFF RM0 000:03f
-		{ 'ASS' $3000040l [ "cube_21_s0.iff" ] }  // IFF RM0 000:040
-		{ 'ASS' $3000041l [ "cube_21_s1.iff" ] }  // IFF RM0 000:041
-		{ 'ASS' $3000042l [ "cube_21_s2.iff" ] }  // IFF RM0 000:042
-		{ 'ASS' $3000043l [ "cube_22_s0.iff" ] }  // IFF RM0 000:043
-		{ 'ASS' $3000044l [ "cube_22_s1.iff" ] }  // IFF RM0 000:044
-		{ 'ASS' $3000045l [ "cube_22_s2.iff" ] }  // IFF RM0 000:045
-		{ 'ASS' $3000046l [ "cube_23_s0.iff" ] }  // IFF RM0 000:046
-		{ 'ASS' $3000047l [ "cube_23_s1.iff" ] }  // IFF RM0 000:047
-		{ 'ASS' $3000048l [ "cube_23_s2.iff" ] }  // IFF RM0 000:048
-		{ 'ASS' $3000049l [ "cube_24_s0.iff" ] }  // IFF RM0 000:049
-		{ 'ASS' $300004al [ "cube_24_s1.iff" ] }  // IFF RM0 000:04a
-		{ 'ASS' $300004bl [ "cube_24_s2.iff" ] }  // IFF RM0 000:04b
-		{ 'ASS' $300004cl [ "cube_25_s0.iff" ] }  // IFF RM0 000:04c
-		{ 'ASS' $300004dl [ "cube_25_s1.iff" ] }  // IFF RM0 000:04d
-		{ 'ASS' $300004el [ "cube_25_s2.iff" ] }  // IFF RM0 000:04e
-		{ 'ASS' $300004fl [ "cube_26_s0.iff" ] }  // IFF RM0 000:04f
-		{ 'ASS' $3000050l [ "cube_26_s1.iff" ] }  // IFF RM0 000:050
-		{ 'ASS' $3000051l [ "cube_26_s2.iff" ] }  // IFF RM0 000:051
-		{ 'ASS' $3000052l [ "cube_27_s0.iff" ] }  // IFF RM0 000:052
-		{ 'ASS' $3000053l [ "cube_27_s1.iff" ] }  // IFF RM0 000:053
-		{ 'ASS' $3000054l [ "cube_27_s2.iff" ] }  // IFF RM0 000:054
+		{ 'ASS' $3000001l [ "cube_00_r0_s0.iff" ] }  // IFF RM0 000:001
+		{ 'ASS' $3000002l [ "cube_00_r0_s1.iff" ] }  // IFF RM0 000:002
+		{ 'ASS' $3000003l [ "cube_00_r0_s2.iff" ] }  // IFF RM0 000:003
+		{ 'ASS' $3000004l [ "cube_00_r1_s0.iff" ] }  // IFF RM0 000:004
+		{ 'ASS' $3000005l [ "cube_00_r1_s1.iff" ] }  // IFF RM0 000:005
+		{ 'ASS' $3000006l [ "cube_00_r1_s2.iff" ] }  // IFF RM0 000:006
+		{ 'ASS' $3000007l [ "cube_00_r2_s0.iff" ] }  // IFF RM0 000:007
+		{ 'ASS' $3000008l [ "cube_00_r2_s1.iff" ] }  // IFF RM0 000:008
+		{ 'ASS' $3000009l [ "cube_00_r2_s2.iff" ] }  // IFF RM0 000:009
+		{ 'ASS' $300000al [ "cube_00_r3_s0.iff" ] }  // IFF RM0 000:00a
+		{ 'ASS' $300000bl [ "cube_00_r3_s1.iff" ] }  // IFF RM0 000:00b
+		{ 'ASS' $300000cl [ "cube_00_r3_s2.iff" ] }  // IFF RM0 000:00c
+		{ 'ASS' $300000dl [ "cube_01_r0_s0.iff" ] }  // IFF RM0 000:00d
+		{ 'ASS' $300000el [ "cube_01_r0_s1.iff" ] }  // IFF RM0 000:00e
+		{ 'ASS' $300000fl [ "cube_01_r0_s2.iff" ] }  // IFF RM0 000:00f
+		{ 'ASS' $3000010l [ "cube_01_r1_s0.iff" ] }  // IFF RM0 000:010
+		{ 'ASS' $3000011l [ "cube_01_r1_s1.iff" ] }  // IFF RM0 000:011
+		{ 'ASS' $3000012l [ "cube_01_r1_s2.iff" ] }  // IFF RM0 000:012
+		{ 'ASS' $3000013l [ "cube_01_r2_s0.iff" ] }  // IFF RM0 000:013
+		{ 'ASS' $3000014l [ "cube_01_r2_s1.iff" ] }  // IFF RM0 000:014
+		{ 'ASS' $3000015l [ "cube_01_r2_s2.iff" ] }  // IFF RM0 000:015
+		{ 'ASS' $3000016l [ "cube_01_r3_s0.iff" ] }  // IFF RM0 000:016
+		{ 'ASS' $3000017l [ "cube_01_r3_s1.iff" ] }  // IFF RM0 000:017
+		{ 'ASS' $3000018l [ "cube_01_r3_s2.iff" ] }  // IFF RM0 000:018
+		{ 'ASS' $3000019l [ "cube_02_r0_s0.iff" ] }  // IFF RM0 000:019
+		{ 'ASS' $300001al [ "cube_02_r0_s1.iff" ] }  // IFF RM0 000:01a
+		{ 'ASS' $300001bl [ "cube_02_r0_s2.iff" ] }  // IFF RM0 000:01b
+		{ 'ASS' $300001cl [ "cube_02_r1_s0.iff" ] }  // IFF RM0 000:01c
+		{ 'ASS' $300001dl [ "cube_02_r1_s1.iff" ] }  // IFF RM0 000:01d
+		{ 'ASS' $300001el [ "cube_02_r1_s2.iff" ] }  // IFF RM0 000:01e
+		{ 'ASS' $300001fl [ "cube_02_r2_s0.iff" ] }  // IFF RM0 000:01f
+		{ 'ASS' $3000020l [ "cube_02_r2_s1.iff" ] }  // IFF RM0 000:020
+		{ 'ASS' $3000021l [ "cube_02_r2_s2.iff" ] }  // IFF RM0 000:021
+		{ 'ASS' $3000022l [ "cube_02_r3_s0.iff" ] }  // IFF RM0 000:022
+		{ 'ASS' $3000023l [ "cube_02_r3_s1.iff" ] }  // IFF RM0 000:023
+		{ 'ASS' $3000024l [ "cube_02_r3_s2.iff" ] }  // IFF RM0 000:024
+		{ 'ASS' $3000025l [ "cube_03_r0_s0.iff" ] }  // IFF RM0 000:025
+		{ 'ASS' $3000026l [ "cube_03_r0_s1.iff" ] }  // IFF RM0 000:026
+		{ 'ASS' $3000027l [ "cube_03_r0_s2.iff" ] }  // IFF RM0 000:027
+		{ 'ASS' $3000028l [ "cube_03_r1_s0.iff" ] }  // IFF RM0 000:028
+		{ 'ASS' $3000029l [ "cube_03_r1_s1.iff" ] }  // IFF RM0 000:029
+		{ 'ASS' $300002al [ "cube_03_r1_s2.iff" ] }  // IFF RM0 000:02a
+		{ 'ASS' $300002bl [ "cube_03_r2_s0.iff" ] }  // IFF RM0 000:02b
+		{ 'ASS' $300002cl [ "cube_03_r2_s1.iff" ] }  // IFF RM0 000:02c
+		{ 'ASS' $300002dl [ "cube_03_r2_s2.iff" ] }  // IFF RM0 000:02d
+		{ 'ASS' $300002el [ "cube_03_r3_s0.iff" ] }  // IFF RM0 000:02e
+		{ 'ASS' $300002fl [ "cube_03_r3_s1.iff" ] }  // IFF RM0 000:02f
+		{ 'ASS' $3000030l [ "cube_03_r3_s2.iff" ] }  // IFF RM0 000:030
+		{ 'ASS' $3000031l [ "cube_04_r0_s0.iff" ] }  // IFF RM0 000:031
+		{ 'ASS' $3000032l [ "cube_04_r0_s1.iff" ] }  // IFF RM0 000:032
+		{ 'ASS' $3000033l [ "cube_04_r0_s2.iff" ] }  // IFF RM0 000:033
+		{ 'ASS' $3000034l [ "cube_04_r1_s0.iff" ] }  // IFF RM0 000:034
+		{ 'ASS' $3000035l [ "cube_04_r1_s1.iff" ] }  // IFF RM0 000:035
+		{ 'ASS' $3000036l [ "cube_04_r1_s2.iff" ] }  // IFF RM0 000:036
+		{ 'ASS' $3000037l [ "cube_04_r2_s0.iff" ] }  // IFF RM0 000:037
+		{ 'ASS' $3000038l [ "cube_04_r2_s1.iff" ] }  // IFF RM0 000:038
+		{ 'ASS' $3000039l [ "cube_04_r2_s2.iff" ] }  // IFF RM0 000:039
+		{ 'ASS' $300003al [ "cube_04_r3_s0.iff" ] }  // IFF RM0 000:03a
+		{ 'ASS' $300003bl [ "cube_04_r3_s1.iff" ] }  // IFF RM0 000:03b
+		{ 'ASS' $300003cl [ "cube_04_r3_s2.iff" ] }  // IFF RM0 000:03c
+		{ 'ASS' $300003dl [ "cube_05_r0_s0.iff" ] }  // IFF RM0 000:03d
+		{ 'ASS' $300003el [ "cube_05_r0_s1.iff" ] }  // IFF RM0 000:03e
+		{ 'ASS' $300003fl [ "cube_05_r0_s2.iff" ] }  // IFF RM0 000:03f
+		{ 'ASS' $3000040l [ "cube_05_r1_s0.iff" ] }  // IFF RM0 000:040
+		{ 'ASS' $3000041l [ "cube_05_r1_s1.iff" ] }  // IFF RM0 000:041
+		{ 'ASS' $3000042l [ "cube_05_r1_s2.iff" ] }  // IFF RM0 000:042
+		{ 'ASS' $3000043l [ "cube_05_r2_s0.iff" ] }  // IFF RM0 000:043
+		{ 'ASS' $3000044l [ "cube_05_r2_s1.iff" ] }  // IFF RM0 000:044
+		{ 'ASS' $3000045l [ "cube_05_r2_s2.iff" ] }  // IFF RM0 000:045
+		{ 'ASS' $3000046l [ "cube_05_r3_s0.iff" ] }  // IFF RM0 000:046
+		{ 'ASS' $3000047l [ "cube_05_r3_s1.iff" ] }  // IFF RM0 000:047
+		{ 'ASS' $3000048l [ "cube_05_r3_s2.iff" ] }  // IFF RM0 000:048
+		{ 'ASS' $3000049l [ "cube_06_r0_s0.iff" ] }  // IFF RM0 000:049
+		{ 'ASS' $300004al [ "cube_06_r0_s1.iff" ] }  // IFF RM0 000:04a
+		{ 'ASS' $300004bl [ "cube_06_r0_s2.iff" ] }  // IFF RM0 000:04b
+		{ 'ASS' $300004cl [ "cube_06_r1_s0.iff" ] }  // IFF RM0 000:04c
+		{ 'ASS' $300004dl [ "cube_06_r1_s1.iff" ] }  // IFF RM0 000:04d
+		{ 'ASS' $300004el [ "cube_06_r1_s2.iff" ] }  // IFF RM0 000:04e
+		{ 'ASS' $300004fl [ "cube_06_r2_s0.iff" ] }  // IFF RM0 000:04f
+		{ 'ASS' $3000050l [ "cube_06_r2_s1.iff" ] }  // IFF RM0 000:050
+		{ 'ASS' $3000051l [ "cube_06_r2_s2.iff" ] }  // IFF RM0 000:051
+		{ 'ASS' $3000052l [ "cube_06_r3_s0.iff" ] }  // IFF RM0 000:052
+		{ 'ASS' $3000053l [ "cube_06_r3_s1.iff" ] }  // IFF RM0 000:053
+		{ 'ASS' $3000054l [ "cube_06_r3_s2.iff" ] }  // IFF RM0 000:054
+		{ 'ASS' $3000055l [ "cube_07_r0_s0.iff" ] }  // IFF RM0 000:055
+		{ 'ASS' $3000056l [ "cube_07_r0_s1.iff" ] }  // IFF RM0 000:056
+		{ 'ASS' $3000057l [ "cube_07_r0_s2.iff" ] }  // IFF RM0 000:057
+		{ 'ASS' $3000058l [ "cube_07_r1_s0.iff" ] }  // IFF RM0 000:058
+		{ 'ASS' $3000059l [ "cube_07_r1_s1.iff" ] }  // IFF RM0 000:059
+		{ 'ASS' $300005al [ "cube_07_r1_s2.iff" ] }  // IFF RM0 000:05a
+		{ 'ASS' $300005bl [ "cube_07_r2_s0.iff" ] }  // IFF RM0 000:05b
+		{ 'ASS' $300005cl [ "cube_07_r2_s1.iff" ] }  // IFF RM0 000:05c
+		{ 'ASS' $300005dl [ "cube_07_r2_s2.iff" ] }  // IFF RM0 000:05d
+		{ 'ASS' $300005el [ "cube_07_r3_s0.iff" ] }  // IFF RM0 000:05e
+		{ 'ASS' $300005fl [ "cube_07_r3_s1.iff" ] }  // IFF RM0 000:05f
+		{ 'ASS' $3000060l [ "cube_07_r3_s2.iff" ] }  // IFF RM0 000:060
+		{ 'ASS' $3000061l [ "cube_08_r0_s0.iff" ] }  // IFF RM0 000:061
+		{ 'ASS' $3000062l [ "cube_08_r0_s1.iff" ] }  // IFF RM0 000:062
+		{ 'ASS' $3000063l [ "cube_08_r0_s2.iff" ] }  // IFF RM0 000:063
+		{ 'ASS' $3000064l [ "cube_08_r1_s0.iff" ] }  // IFF RM0 000:064
+		{ 'ASS' $3000065l [ "cube_08_r1_s1.iff" ] }  // IFF RM0 000:065
+		{ 'ASS' $3000066l [ "cube_08_r1_s2.iff" ] }  // IFF RM0 000:066
+		{ 'ASS' $3000067l [ "cube_08_r2_s0.iff" ] }  // IFF RM0 000:067
+		{ 'ASS' $3000068l [ "cube_08_r2_s1.iff" ] }  // IFF RM0 000:068
+		{ 'ASS' $3000069l [ "cube_08_r2_s2.iff" ] }  // IFF RM0 000:069
+		{ 'ASS' $300006al [ "cube_08_r3_s0.iff" ] }  // IFF RM0 000:06a
+		{ 'ASS' $300006bl [ "cube_08_r3_s1.iff" ] }  // IFF RM0 000:06b
+		{ 'ASS' $300006cl [ "cube_08_r3_s2.iff" ] }  // IFF RM0 000:06c
+		{ 'ASS' $300006dl [ "cube_09_r0_s0.iff" ] }  // IFF RM0 000:06d
+		{ 'ASS' $300006el [ "cube_09_r0_s1.iff" ] }  // IFF RM0 000:06e
+		{ 'ASS' $300006fl [ "cube_09_r0_s2.iff" ] }  // IFF RM0 000:06f
+		{ 'ASS' $3000070l [ "cube_09_r1_s0.iff" ] }  // IFF RM0 000:070
+		{ 'ASS' $3000071l [ "cube_09_r1_s1.iff" ] }  // IFF RM0 000:071
+		{ 'ASS' $3000072l [ "cube_09_r1_s2.iff" ] }  // IFF RM0 000:072
+		{ 'ASS' $3000073l [ "cube_09_r2_s0.iff" ] }  // IFF RM0 000:073
+		{ 'ASS' $3000074l [ "cube_09_r2_s1.iff" ] }  // IFF RM0 000:074
+		{ 'ASS' $3000075l [ "cube_09_r2_s2.iff" ] }  // IFF RM0 000:075
+		{ 'ASS' $3000076l [ "cube_09_r3_s0.iff" ] }  // IFF RM0 000:076
+		{ 'ASS' $3000077l [ "cube_09_r3_s1.iff" ] }  // IFF RM0 000:077
+		{ 'ASS' $3000078l [ "cube_09_r3_s2.iff" ] }  // IFF RM0 000:078
+		{ 'ASS' $3000079l [ "cube_10_r0_s0.iff" ] }  // IFF RM0 000:079
+		{ 'ASS' $300007al [ "cube_10_r0_s1.iff" ] }  // IFF RM0 000:07a
+		{ 'ASS' $300007bl [ "cube_10_r0_s2.iff" ] }  // IFF RM0 000:07b
+		{ 'ASS' $300007cl [ "cube_10_r1_s0.iff" ] }  // IFF RM0 000:07c
+		{ 'ASS' $300007dl [ "cube_10_r1_s1.iff" ] }  // IFF RM0 000:07d
+		{ 'ASS' $300007el [ "cube_10_r1_s2.iff" ] }  // IFF RM0 000:07e
+		{ 'ASS' $300007fl [ "cube_10_r2_s0.iff" ] }  // IFF RM0 000:07f
+		{ 'ASS' $3000080l [ "cube_10_r2_s1.iff" ] }  // IFF RM0 000:080
+		{ 'ASS' $3000081l [ "cube_10_r2_s2.iff" ] }  // IFF RM0 000:081
+		{ 'ASS' $3000082l [ "cube_10_r3_s0.iff" ] }  // IFF RM0 000:082
+		{ 'ASS' $3000083l [ "cube_10_r3_s1.iff" ] }  // IFF RM0 000:083
+		{ 'ASS' $3000084l [ "cube_10_r3_s2.iff" ] }  // IFF RM0 000:084
+		{ 'ASS' $3000085l [ "cube_11_r0_s0.iff" ] }  // IFF RM0 000:085
+		{ 'ASS' $3000086l [ "cube_11_r0_s1.iff" ] }  // IFF RM0 000:086
+		{ 'ASS' $3000087l [ "cube_11_r0_s2.iff" ] }  // IFF RM0 000:087
+		{ 'ASS' $3000088l [ "cube_11_r1_s0.iff" ] }  // IFF RM0 000:088
+		{ 'ASS' $3000089l [ "cube_11_r1_s1.iff" ] }  // IFF RM0 000:089
+		{ 'ASS' $300008al [ "cube_11_r1_s2.iff" ] }  // IFF RM0 000:08a
+		{ 'ASS' $300008bl [ "cube_11_r2_s0.iff" ] }  // IFF RM0 000:08b
+		{ 'ASS' $300008cl [ "cube_11_r2_s1.iff" ] }  // IFF RM0 000:08c
+		{ 'ASS' $300008dl [ "cube_11_r2_s2.iff" ] }  // IFF RM0 000:08d
+		{ 'ASS' $300008el [ "cube_11_r3_s0.iff" ] }  // IFF RM0 000:08e
+		{ 'ASS' $300008fl [ "cube_11_r3_s1.iff" ] }  // IFF RM0 000:08f
+		{ 'ASS' $3000090l [ "cube_11_r3_s2.iff" ] }  // IFF RM0 000:090
+		{ 'ASS' $3000091l [ "cube_12_r0_s0.iff" ] }  // IFF RM0 000:091
+		{ 'ASS' $3000092l [ "cube_12_r0_s1.iff" ] }  // IFF RM0 000:092
+		{ 'ASS' $3000093l [ "cube_12_r0_s2.iff" ] }  // IFF RM0 000:093
+		{ 'ASS' $3000094l [ "cube_12_r1_s0.iff" ] }  // IFF RM0 000:094
+		{ 'ASS' $3000095l [ "cube_12_r1_s1.iff" ] }  // IFF RM0 000:095
+		{ 'ASS' $3000096l [ "cube_12_r1_s2.iff" ] }  // IFF RM0 000:096
+		{ 'ASS' $3000097l [ "cube_12_r2_s0.iff" ] }  // IFF RM0 000:097
+		{ 'ASS' $3000098l [ "cube_12_r2_s1.iff" ] }  // IFF RM0 000:098
+		{ 'ASS' $3000099l [ "cube_12_r2_s2.iff" ] }  // IFF RM0 000:099
+		{ 'ASS' $300009al [ "cube_12_r3_s0.iff" ] }  // IFF RM0 000:09a
+		{ 'ASS' $300009bl [ "cube_12_r3_s1.iff" ] }  // IFF RM0 000:09b
+		{ 'ASS' $300009cl [ "cube_12_r3_s2.iff" ] }  // IFF RM0 000:09c
+		{ 'ASS' $300009dl [ "cube_13_r0_s0.iff" ] }  // IFF RM0 000:09d
+		{ 'ASS' $300009el [ "cube_13_r0_s1.iff" ] }  // IFF RM0 000:09e
+		{ 'ASS' $300009fl [ "cube_13_r0_s2.iff" ] }  // IFF RM0 000:09f
+		{ 'ASS' $30000a0l [ "cube_13_r1_s0.iff" ] }  // IFF RM0 000:0a0
+		{ 'ASS' $30000a1l [ "cube_13_r1_s1.iff" ] }  // IFF RM0 000:0a1
+		{ 'ASS' $30000a2l [ "cube_13_r1_s2.iff" ] }  // IFF RM0 000:0a2
+		{ 'ASS' $30000a3l [ "cube_13_r2_s0.iff" ] }  // IFF RM0 000:0a3
+		{ 'ASS' $30000a4l [ "cube_13_r2_s1.iff" ] }  // IFF RM0 000:0a4
+		{ 'ASS' $30000a5l [ "cube_13_r2_s2.iff" ] }  // IFF RM0 000:0a5
+		{ 'ASS' $30000a6l [ "cube_13_r3_s0.iff" ] }  // IFF RM0 000:0a6
+		{ 'ASS' $30000a7l [ "cube_13_r3_s1.iff" ] }  // IFF RM0 000:0a7
+		{ 'ASS' $30000a8l [ "cube_13_r3_s2.iff" ] }  // IFF RM0 000:0a8
+		{ 'ASS' $30000a9l [ "cube_14_r0_s0.iff" ] }  // IFF RM0 000:0a9
+		{ 'ASS' $30000aal [ "cube_14_r0_s1.iff" ] }  // IFF RM0 000:0aa
+		{ 'ASS' $30000abl [ "cube_14_r0_s2.iff" ] }  // IFF RM0 000:0ab
+		{ 'ASS' $30000acl [ "cube_14_r1_s0.iff" ] }  // IFF RM0 000:0ac
+		{ 'ASS' $30000adl [ "cube_14_r1_s1.iff" ] }  // IFF RM0 000:0ad
+		{ 'ASS' $30000ael [ "cube_14_r1_s2.iff" ] }  // IFF RM0 000:0ae
+		{ 'ASS' $30000afl [ "cube_14_r2_s0.iff" ] }  // IFF RM0 000:0af
+		{ 'ASS' $30000b0l [ "cube_14_r2_s1.iff" ] }  // IFF RM0 000:0b0
+		{ 'ASS' $30000b1l [ "cube_14_r2_s2.iff" ] }  // IFF RM0 000:0b1
+		{ 'ASS' $30000b2l [ "cube_14_r3_s0.iff" ] }  // IFF RM0 000:0b2
+		{ 'ASS' $30000b3l [ "cube_14_r3_s1.iff" ] }  // IFF RM0 000:0b3
+		{ 'ASS' $30000b4l [ "cube_14_r3_s2.iff" ] }  // IFF RM0 000:0b4
+		{ 'ASS' $30000b5l [ "cube_15_r0_s0.iff" ] }  // IFF RM0 000:0b5
+		{ 'ASS' $30000b6l [ "cube_15_r0_s1.iff" ] }  // IFF RM0 000:0b6
+		{ 'ASS' $30000b7l [ "cube_15_r0_s2.iff" ] }  // IFF RM0 000:0b7
+		{ 'ASS' $30000b8l [ "cube_15_r1_s0.iff" ] }  // IFF RM0 000:0b8
+		{ 'ASS' $30000b9l [ "cube_15_r1_s1.iff" ] }  // IFF RM0 000:0b9
+		{ 'ASS' $30000bal [ "cube_15_r1_s2.iff" ] }  // IFF RM0 000:0ba
+		{ 'ASS' $30000bbl [ "cube_15_r2_s0.iff" ] }  // IFF RM0 000:0bb
+		{ 'ASS' $30000bcl [ "cube_15_r2_s1.iff" ] }  // IFF RM0 000:0bc
+		{ 'ASS' $30000bdl [ "cube_15_r2_s2.iff" ] }  // IFF RM0 000:0bd
+		{ 'ASS' $30000bel [ "cube_15_r3_s0.iff" ] }  // IFF RM0 000:0be
+		{ 'ASS' $30000bfl [ "cube_15_r3_s1.iff" ] }  // IFF RM0 000:0bf
+		{ 'ASS' $30000c0l [ "cube_15_r3_s2.iff" ] }  // IFF RM0 000:0c0
+		{ 'ASS' $30000c1l [ "cube_16_r0_s0.iff" ] }  // IFF RM0 000:0c1
+		{ 'ASS' $30000c2l [ "cube_16_r0_s1.iff" ] }  // IFF RM0 000:0c2
+		{ 'ASS' $30000c3l [ "cube_16_r0_s2.iff" ] }  // IFF RM0 000:0c3
+		{ 'ASS' $30000c4l [ "cube_16_r1_s0.iff" ] }  // IFF RM0 000:0c4
+		{ 'ASS' $30000c5l [ "cube_16_r1_s1.iff" ] }  // IFF RM0 000:0c5
+		{ 'ASS' $30000c6l [ "cube_16_r1_s2.iff" ] }  // IFF RM0 000:0c6
+		{ 'ASS' $30000c7l [ "cube_16_r2_s0.iff" ] }  // IFF RM0 000:0c7
+		{ 'ASS' $30000c8l [ "cube_16_r2_s1.iff" ] }  // IFF RM0 000:0c8
+		{ 'ASS' $30000c9l [ "cube_16_r2_s2.iff" ] }  // IFF RM0 000:0c9
+		{ 'ASS' $30000cal [ "cube_16_r3_s0.iff" ] }  // IFF RM0 000:0ca
+		{ 'ASS' $30000cbl [ "cube_16_r3_s1.iff" ] }  // IFF RM0 000:0cb
+		{ 'ASS' $30000ccl [ "cube_16_r3_s2.iff" ] }  // IFF RM0 000:0cc
+		{ 'ASS' $30000cdl [ "cube_17_r0_s0.iff" ] }  // IFF RM0 000:0cd
+		{ 'ASS' $30000cel [ "cube_17_r0_s1.iff" ] }  // IFF RM0 000:0ce
+		{ 'ASS' $30000cfl [ "cube_17_r0_s2.iff" ] }  // IFF RM0 000:0cf
+		{ 'ASS' $30000d0l [ "cube_17_r1_s0.iff" ] }  // IFF RM0 000:0d0
+		{ 'ASS' $30000d1l [ "cube_17_r1_s1.iff" ] }  // IFF RM0 000:0d1
+		{ 'ASS' $30000d2l [ "cube_17_r1_s2.iff" ] }  // IFF RM0 000:0d2
+		{ 'ASS' $30000d3l [ "cube_17_r2_s0.iff" ] }  // IFF RM0 000:0d3
+		{ 'ASS' $30000d4l [ "cube_17_r2_s1.iff" ] }  // IFF RM0 000:0d4
+		{ 'ASS' $30000d5l [ "cube_17_r2_s2.iff" ] }  // IFF RM0 000:0d5
+		{ 'ASS' $30000d6l [ "cube_17_r3_s0.iff" ] }  // IFF RM0 000:0d6
+		{ 'ASS' $30000d7l [ "cube_17_r3_s1.iff" ] }  // IFF RM0 000:0d7
+		{ 'ASS' $30000d8l [ "cube_17_r3_s2.iff" ] }  // IFF RM0 000:0d8
+		{ 'ASS' $30000d9l [ "cube_18_r0_s0.iff" ] }  // IFF RM0 000:0d9
+		{ 'ASS' $30000dal [ "cube_18_r0_s1.iff" ] }  // IFF RM0 000:0da
+		{ 'ASS' $30000dbl [ "cube_18_r0_s2.iff" ] }  // IFF RM0 000:0db
+		{ 'ASS' $30000dcl [ "cube_18_r1_s0.iff" ] }  // IFF RM0 000:0dc
+		{ 'ASS' $30000ddl [ "cube_18_r1_s1.iff" ] }  // IFF RM0 000:0dd
+		{ 'ASS' $30000del [ "cube_18_r1_s2.iff" ] }  // IFF RM0 000:0de
+		{ 'ASS' $30000dfl [ "cube_18_r2_s0.iff" ] }  // IFF RM0 000:0df
+		{ 'ASS' $30000e0l [ "cube_18_r2_s1.iff" ] }  // IFF RM0 000:0e0
+		{ 'ASS' $30000e1l [ "cube_18_r2_s2.iff" ] }  // IFF RM0 000:0e1
+		{ 'ASS' $30000e2l [ "cube_18_r3_s0.iff" ] }  // IFF RM0 000:0e2
+		{ 'ASS' $30000e3l [ "cube_18_r3_s1.iff" ] }  // IFF RM0 000:0e3
+		{ 'ASS' $30000e4l [ "cube_18_r3_s2.iff" ] }  // IFF RM0 000:0e4
+		{ 'ASS' $30000e5l [ "cube_19_r0_s0.iff" ] }  // IFF RM0 000:0e5
+		{ 'ASS' $30000e6l [ "cube_19_r0_s1.iff" ] }  // IFF RM0 000:0e6
+		{ 'ASS' $30000e7l [ "cube_19_r0_s2.iff" ] }  // IFF RM0 000:0e7
+		{ 'ASS' $30000e8l [ "cube_19_r1_s0.iff" ] }  // IFF RM0 000:0e8
+		{ 'ASS' $30000e9l [ "cube_19_r1_s1.iff" ] }  // IFF RM0 000:0e9
+		{ 'ASS' $30000eal [ "cube_19_r1_s2.iff" ] }  // IFF RM0 000:0ea
+		{ 'ASS' $30000ebl [ "cube_19_r2_s0.iff" ] }  // IFF RM0 000:0eb
+		{ 'ASS' $30000ecl [ "cube_19_r2_s1.iff" ] }  // IFF RM0 000:0ec
+		{ 'ASS' $30000edl [ "cube_19_r2_s2.iff" ] }  // IFF RM0 000:0ed
+		{ 'ASS' $30000eel [ "cube_19_r3_s0.iff" ] }  // IFF RM0 000:0ee
+		{ 'ASS' $30000efl [ "cube_19_r3_s1.iff" ] }  // IFF RM0 000:0ef
+		{ 'ASS' $30000f0l [ "cube_19_r3_s2.iff" ] }  // IFF RM0 000:0f0
+		{ 'ASS' $30000f1l [ "cube_20_r0_s0.iff" ] }  // IFF RM0 000:0f1
+		{ 'ASS' $30000f2l [ "cube_20_r0_s1.iff" ] }  // IFF RM0 000:0f2
+		{ 'ASS' $30000f3l [ "cube_20_r0_s2.iff" ] }  // IFF RM0 000:0f3
+		{ 'ASS' $30000f4l [ "cube_20_r1_s0.iff" ] }  // IFF RM0 000:0f4
+		{ 'ASS' $30000f5l [ "cube_20_r1_s1.iff" ] }  // IFF RM0 000:0f5
+		{ 'ASS' $30000f6l [ "cube_20_r1_s2.iff" ] }  // IFF RM0 000:0f6
+		{ 'ASS' $30000f7l [ "cube_20_r2_s0.iff" ] }  // IFF RM0 000:0f7
+		{ 'ASS' $30000f8l [ "cube_20_r2_s1.iff" ] }  // IFF RM0 000:0f8
+		{ 'ASS' $30000f9l [ "cube_20_r2_s2.iff" ] }  // IFF RM0 000:0f9
+		{ 'ASS' $30000fal [ "cube_20_r3_s0.iff" ] }  // IFF RM0 000:0fa
+		{ 'ASS' $30000fbl [ "cube_20_r3_s1.iff" ] }  // IFF RM0 000:0fb
+		{ 'ASS' $30000fcl [ "cube_20_r3_s2.iff" ] }  // IFF RM0 000:0fc
+		{ 'ASS' $30000fdl [ "cube_21_r0_s0.iff" ] }  // IFF RM0 000:0fd
+		{ 'ASS' $30000fel [ "cube_21_r0_s1.iff" ] }  // IFF RM0 000:0fe
+		{ 'ASS' $30000ffl [ "cube_21_r0_s2.iff" ] }  // IFF RM0 000:0ff
+		{ 'ASS' $3000100l [ "cube_21_r1_s0.iff" ] }  // IFF RM0 000:100
+		{ 'ASS' $3000101l [ "cube_21_r1_s1.iff" ] }  // IFF RM0 000:101
+		{ 'ASS' $3000102l [ "cube_21_r1_s2.iff" ] }  // IFF RM0 000:102
+		{ 'ASS' $3000103l [ "cube_21_r2_s0.iff" ] }  // IFF RM0 000:103
+		{ 'ASS' $3000104l [ "cube_21_r2_s1.iff" ] }  // IFF RM0 000:104
+		{ 'ASS' $3000105l [ "cube_21_r2_s2.iff" ] }  // IFF RM0 000:105
+		{ 'ASS' $3000106l [ "cube_21_r3_s0.iff" ] }  // IFF RM0 000:106
+		{ 'ASS' $3000107l [ "cube_21_r3_s1.iff" ] }  // IFF RM0 000:107
+		{ 'ASS' $3000108l [ "cube_21_r3_s2.iff" ] }  // IFF RM0 000:108
+		{ 'ASS' $3000109l [ "cube_22_r0_s0.iff" ] }  // IFF RM0 000:109
+		{ 'ASS' $300010al [ "cube_22_r0_s1.iff" ] }  // IFF RM0 000:10a
+		{ 'ASS' $300010bl [ "cube_22_r0_s2.iff" ] }  // IFF RM0 000:10b
+		{ 'ASS' $300010cl [ "cube_22_r1_s0.iff" ] }  // IFF RM0 000:10c
+		{ 'ASS' $300010dl [ "cube_22_r1_s1.iff" ] }  // IFF RM0 000:10d
+		{ 'ASS' $300010el [ "cube_22_r1_s2.iff" ] }  // IFF RM0 000:10e
+		{ 'ASS' $300010fl [ "cube_22_r2_s0.iff" ] }  // IFF RM0 000:10f
+		{ 'ASS' $3000110l [ "cube_22_r2_s1.iff" ] }  // IFF RM0 000:110
+		{ 'ASS' $3000111l [ "cube_22_r2_s2.iff" ] }  // IFF RM0 000:111
+		{ 'ASS' $3000112l [ "cube_22_r3_s0.iff" ] }  // IFF RM0 000:112
+		{ 'ASS' $3000113l [ "cube_22_r3_s1.iff" ] }  // IFF RM0 000:113
+		{ 'ASS' $3000114l [ "cube_22_r3_s2.iff" ] }  // IFF RM0 000:114
+		{ 'ASS' $3000115l [ "cube_23_r0_s0.iff" ] }  // IFF RM0 000:115
+		{ 'ASS' $3000116l [ "cube_23_r0_s1.iff" ] }  // IFF RM0 000:116
+		{ 'ASS' $3000117l [ "cube_23_r0_s2.iff" ] }  // IFF RM0 000:117
+		{ 'ASS' $3000118l [ "cube_23_r1_s0.iff" ] }  // IFF RM0 000:118
+		{ 'ASS' $3000119l [ "cube_23_r1_s1.iff" ] }  // IFF RM0 000:119
+		{ 'ASS' $300011al [ "cube_23_r1_s2.iff" ] }  // IFF RM0 000:11a
+		{ 'ASS' $300011bl [ "cube_23_r2_s0.iff" ] }  // IFF RM0 000:11b
+		{ 'ASS' $300011cl [ "cube_23_r2_s1.iff" ] }  // IFF RM0 000:11c
+		{ 'ASS' $300011dl [ "cube_23_r2_s2.iff" ] }  // IFF RM0 000:11d
+		{ 'ASS' $300011el [ "cube_23_r3_s0.iff" ] }  // IFF RM0 000:11e
+		{ 'ASS' $300011fl [ "cube_23_r3_s1.iff" ] }  // IFF RM0 000:11f
+		{ 'ASS' $3000120l [ "cube_23_r3_s2.iff" ] }  // IFF RM0 000:120
+		{ 'ASS' $3000121l [ "cube_24_r0_s0.iff" ] }  // IFF RM0 000:121
+		{ 'ASS' $3000122l [ "cube_24_r0_s1.iff" ] }  // IFF RM0 000:122
+		{ 'ASS' $3000123l [ "cube_24_r0_s2.iff" ] }  // IFF RM0 000:123
+		{ 'ASS' $3000124l [ "cube_24_r1_s0.iff" ] }  // IFF RM0 000:124
+		{ 'ASS' $3000125l [ "cube_24_r1_s1.iff" ] }  // IFF RM0 000:125
+		{ 'ASS' $3000126l [ "cube_24_r1_s2.iff" ] }  // IFF RM0 000:126
+		{ 'ASS' $3000127l [ "cube_24_r2_s0.iff" ] }  // IFF RM0 000:127
+		{ 'ASS' $3000128l [ "cube_24_r2_s1.iff" ] }  // IFF RM0 000:128
+		{ 'ASS' $3000129l [ "cube_24_r2_s2.iff" ] }  // IFF RM0 000:129
+		{ 'ASS' $300012al [ "cube_24_r3_s0.iff" ] }  // IFF RM0 000:12a
+		{ 'ASS' $300012bl [ "cube_24_r3_s1.iff" ] }  // IFF RM0 000:12b
+		{ 'ASS' $300012cl [ "cube_24_r3_s2.iff" ] }  // IFF RM0 000:12c
+		{ 'ASS' $300012dl [ "cube_25_r0_s0.iff" ] }  // IFF RM0 000:12d
+		{ 'ASS' $300012el [ "cube_25_r0_s1.iff" ] }  // IFF RM0 000:12e
+		{ 'ASS' $300012fl [ "cube_25_r0_s2.iff" ] }  // IFF RM0 000:12f
+		{ 'ASS' $3000130l [ "cube_25_r1_s0.iff" ] }  // IFF RM0 000:130
+		{ 'ASS' $3000131l [ "cube_25_r1_s1.iff" ] }  // IFF RM0 000:131
+		{ 'ASS' $3000132l [ "cube_25_r1_s2.iff" ] }  // IFF RM0 000:132
+		{ 'ASS' $3000133l [ "cube_25_r2_s0.iff" ] }  // IFF RM0 000:133
+		{ 'ASS' $3000134l [ "cube_25_r2_s1.iff" ] }  // IFF RM0 000:134
+		{ 'ASS' $3000135l [ "cube_25_r2_s2.iff" ] }  // IFF RM0 000:135
+		{ 'ASS' $3000136l [ "cube_25_r3_s0.iff" ] }  // IFF RM0 000:136
+		{ 'ASS' $3000137l [ "cube_25_r3_s1.iff" ] }  // IFF RM0 000:137
+		{ 'ASS' $3000138l [ "cube_25_r3_s2.iff" ] }  // IFF RM0 000:138
+		{ 'ASS' $3000139l [ "cube_26_r0_s0.iff" ] }  // IFF RM0 000:139
+		{ 'ASS' $300013al [ "cube_26_r0_s1.iff" ] }  // IFF RM0 000:13a
+		{ 'ASS' $300013bl [ "cube_26_r0_s2.iff" ] }  // IFF RM0 000:13b
+		{ 'ASS' $300013cl [ "cube_26_r1_s0.iff" ] }  // IFF RM0 000:13c
+		{ 'ASS' $300013dl [ "cube_26_r1_s1.iff" ] }  // IFF RM0 000:13d
+		{ 'ASS' $300013el [ "cube_26_r1_s2.iff" ] }  // IFF RM0 000:13e
+		{ 'ASS' $300013fl [ "cube_26_r2_s0.iff" ] }  // IFF RM0 000:13f
+		{ 'ASS' $3000140l [ "cube_26_r2_s1.iff" ] }  // IFF RM0 000:140
+		{ 'ASS' $3000141l [ "cube_26_r2_s2.iff" ] }  // IFF RM0 000:141
+		{ 'ASS' $3000142l [ "cube_26_r3_s0.iff" ] }  // IFF RM0 000:142
+		{ 'ASS' $3000143l [ "cube_26_r3_s1.iff" ] }  // IFF RM0 000:143
+		{ 'ASS' $3000144l [ "cube_26_r3_s2.iff" ] }  // IFF RM0 000:144
+		{ 'ASS' $3000145l [ "cube_27_r0_s0.iff" ] }  // IFF RM0 000:145
+		{ 'ASS' $3000146l [ "cube_27_r0_s1.iff" ] }  // IFF RM0 000:146
+		{ 'ASS' $3000147l [ "cube_27_r0_s2.iff" ] }  // IFF RM0 000:147
+		{ 'ASS' $3000148l [ "cube_27_r1_s0.iff" ] }  // IFF RM0 000:148
+		{ 'ASS' $3000149l [ "cube_27_r1_s1.iff" ] }  // IFF RM0 000:149
+		{ 'ASS' $300014al [ "cube_27_r1_s2.iff" ] }  // IFF RM0 000:14a
+		{ 'ASS' $300014bl [ "cube_27_r2_s0.iff" ] }  // IFF RM0 000:14b
+		{ 'ASS' $300014cl [ "cube_27_r2_s1.iff" ] }  // IFF RM0 000:14c
+		{ 'ASS' $300014dl [ "cube_27_r2_s2.iff" ] }  // IFF RM0 000:14d
+		{ 'ASS' $300014el [ "cube_27_r3_s0.iff" ] }  // IFF RM0 000:14e
+		{ 'ASS' $300014fl [ "cube_27_r3_s1.iff" ] }  // IFF RM0 000:14f
+		{ 'ASS' $3000150l [ "cube_27_r3_s2.iff" ] }  // IFF RM0 000:150
 	}
 	{ 'ALGN' .align(2048) }
 }
