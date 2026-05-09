@@ -353,3 +353,57 @@ RenderCamera::RenderMatte(ScrollingMatte& _matte, const TileMap& map, Scalar xMu
 
 //============================================================================
 
+
+//============================================================================
+// Phase 5: Point / Spot light pass-throughs to the backend.
+//
+// Unlike SetDirectionalLight (which stores into _dirLight* and gets uploaded
+// in RenderBegin), Point/Spot push directly to the backend. The backend owns
+// the per-slot type+pos+radius+cone state introduced in Phase 4. RenderCamera
+// remains the level.cc-facing API surface for symmetry with the rest of
+// lighting.
+
+void
+RenderCamera::SetPointLight(int index, const Vector3& pos, const Color& color,
+                            Scalar radius)
+{
+    assert(!_renderInProgress);
+    color.Validate();
+    GLfloat c[4];
+    ConvertToGLColor(color, c);
+    RendererBackendGet().SetPointLight(index,
+                                       pos.X().AsFloat(),
+                                       pos.Y().AsFloat(),
+                                       pos.Z().AsFloat(),
+                                       c[0], c[1], c[2],
+                                       radius.AsFloat());
+}
+
+void
+RenderCamera::SetSpotLight(int index, const Vector3& pos, const Vector3& dir,
+                           const Color& color, Scalar radius, Scalar coneRev)
+{
+    assert(!_renderInProgress);
+    color.Validate();
+    GLfloat c[4];
+    ConvertToGLColor(color, c);
+    RendererBackendGet().SetSpotLight(index,
+                                      pos.X().AsFloat(),
+                                      pos.Y().AsFloat(),
+                                      pos.Z().AsFloat(),
+                                      dir.X().AsFloat(),
+                                      dir.Y().AsFloat(),
+                                      dir.Z().AsFloat(),
+                                      c[0], c[1], c[2],
+                                      radius.AsFloat(),
+                                      coneRev.AsFloat());
+}
+
+void
+RenderCamera::DisableLight(int index)
+{
+    assert(!_renderInProgress);
+    RendererBackendGet().DisableLight(index);
+}
+
+//============================================================================

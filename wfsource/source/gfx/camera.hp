@@ -79,7 +79,19 @@ private:
 	Matrix34 _position;
 	Matrix34 _invertedPosition;
 
+public:
 	enum { MAX_LIGHTS = 8 };  // must match RB_MAX_LIGHTS in renderer_backend.hp
+
+	// Point and Spot pass through directly to the backend — host-side
+	// per-light state for these is owned by the backend (`_lightType[]`
+	// etc. in backend_modern.cc), unlike Directional/Ambient which use
+	// the legacy _dirLight* arrays uploaded in RenderBegin().
+	void SetPointLight(int index, const Vector3& pos, const Color& color,
+	                   Scalar radius);
+	void SetSpotLight (int index, const Vector3& pos, const Vector3& dir,
+	                   const Color& color, Scalar radius, Scalar coneRev);
+	void DisableLight (int index);
+private:
 	Vector3	_dirLightDirections[MAX_LIGHTS];
 	Color48	_dirLightColors[MAX_LIGHTS];
 	Color	_ambientColor;

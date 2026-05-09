@@ -1087,13 +1087,18 @@ Level::RenderScene()
 		else
 		{
 			RendererBackendGet().SetLightingEnabled(true);
+			// Reset per-frame light state. Ambient is global; the 8 directional/
+			// point/spot slots all reset to "disabled" so any not populated by
+			// the room's Lights this frame contribute nothing.
 			_camera->GetRenderCamera().SetAmbientColor( Color::black );
-			_camera->GetRenderCamera().SetDirectionalLight(0,Vector3::unitX,Color48(PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0)));
-			_camera->GetRenderCamera().SetDirectionalLight(1,Vector3::unitX,Color48(PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0)));
-			_camera->GetRenderCamera().SetDirectionalLight(2,Vector3::unitX,Color48(PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0)));
+			for(int i = 0; i < RenderCamera::MAX_LIGHTS; ++i)
+				_camera->GetRenderCamera().DisableLight(i);
 
 			BaseObjectIteratorWrapper lightIter = cur_room->ListIter(ROOM_OBJECT_LIST_LIGHT);
-			int directionalLightIndex = 0;
+			// One unified slot counter for all directional/point/spot lights —
+			// each consumes one of RB_MAX_LIGHTS slots regardless of type. The
+			// shader branches per-slot on the type uniform set by the backend.
+			int slotIndex = 0;
 			int ambientLightIndex = 0;
 			while(!lightIter.Empty())
 			{
@@ -1103,18 +1108,22 @@ Level::RenderScene()
 				assert(actor->kind() == Actor::Light_KIND);
 				const Light* light = (const Light*)actor;
 
-				if(light->Type() == DIRECTIONAL_LIGHT)
+				if(light->Type() == AMBIENT_LIGHT)
 				{
-					assert(directionalLightIndex < 3);
-					light->Set(*_camera,directionalLightIndex);
-					directionalLightIndex++;
-				}
-				else
-				{
-					assert(light->Type() == AMBIENT_LIGHT);
 					assert(ambientLightIndex < 1);
 					light->Set(*_camera,-1);
 					ambientLightIndex++;
+				}
+				else
+				{
+					if(slotIndex < RenderCamera::MAX_LIGHTS)
+					{
+						light->Set(*_camera,slotIndex);
+						slotIndex++;
+					}
+					// Lights past the cap are silently dropped — the room
+					// authored more than RB_MAX_LIGHTS, which is a level-design
+					// concern, not an engine bug.
 				}
 				++lightIter;
 			}

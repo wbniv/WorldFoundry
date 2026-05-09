@@ -32,29 +32,51 @@ Light::Set(Camera& camera,int index) const
 {
 	const _Light* myOAD = getOad();
 
-	if(myOAD->lightType == DIRECTIONAL_LIGHT)
-	{
-//#pragma message ("KTS: how do I convert eulers to a unit vector?")
-		Vector3 src( Vector3::unitX );
-#if 0
-		const Euler& e = GetPhysicalAttributes().Rotation();
-		//Vector3 src(SCALAR_CONSTANT(1.0),0,0);
-		Matrix34 m(e,Vector3::zero);
-		src *= m;
-#else
-      Matrix34 temp = GetPhysicalAttributes().Matrix();
-      temp[3] = Vector3::zero;
-      src *= GetPhysicalAttributes().Matrix();
-#endif
+	// Hardcoded defaults for Point/Spot until OAS gains lightRadius +
+	// lightConeAngle fields (deferred until first new level ships — see
+	// docs/plans/2026-05-08-blender-lights-spike.md "Follow-ups").
+	const Scalar kDefaultPointRadius = SCALAR_CONSTANT(10.0);
+	const Scalar kDefaultSpotCone    = SCALAR_CONSTANT(0.083);  // rev (~30°)
 
-		camera.GetRenderCamera().SetDirectionalLight(index,src,Color48(_color));
-//		camera.GetRenderCamera().SetDirectionalLight(index,Vector3(SCALAR_CONSTANT(1),SCALAR_CONSTANT(0),SCALAR_CONSTANT(0)),Color48(_color));
-	}
-	else
+	switch(myOAD->lightType)
 	{
-		assert(myOAD->lightType == AMBIENT_LIGHT);
-		assert(index == -1);
-		camera.GetRenderCamera().SetAmbientColor(_color);
+		case DIRECTIONAL_LIGHT:
+		{
+			Vector3 src( Vector3::unitX );
+			Matrix34 temp = GetPhysicalAttributes().Matrix();
+			temp[3] = Vector3::zero;
+			src *= GetPhysicalAttributes().Matrix();
+			camera.GetRenderCamera().SetDirectionalLight(index,src,Color48(_color));
+			break;
+		}
+		case AMBIENT_LIGHT:
+		{
+			assert(index == -1);
+			camera.GetRenderCamera().SetAmbientColor(_color);
+			break;
+		}
+		case POINT_LIGHT:
+		{
+			Vector3 pos = GetPhysicalAttributes().Matrix()[3];
+			camera.GetRenderCamera().SetPointLight(index, pos, _color,
+			                                       kDefaultPointRadius);
+			break;
+		}
+		case SPOT_LIGHT:
+		{
+			Matrix34 m = GetPhysicalAttributes().Matrix();
+			Vector3 pos = m[3];
+			// Spot forward axis: rotated unitX, mirroring Directional.
+			Vector3 dir( Vector3::unitX );
+			dir *= m;
+			camera.GetRenderCamera().SetSpotLight(index, pos, dir, _color,
+			                                      kDefaultPointRadius,
+			                                      kDefaultSpotCone);
+			break;
+		}
+		default:
+			// Unknown lightType — leave the slot untouched.
+			break;
 	}
 }
 
