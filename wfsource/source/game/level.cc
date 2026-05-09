@@ -45,6 +45,7 @@
 #include <math/angle.hp>
 #include <gfx/material.hp>
 #include <gfx/rendmatt.hp>
+#include <gfx/renderer_backend.hp>
 #include <cpplib/libstrm.hp>
 #include <cpplib/algo.hp>
 #include <math/vector3.hp>
@@ -1066,51 +1067,58 @@ Level::RenderScene()
 	while(!roomIter.Empty())
 	{
 		DBSTREAM3( cdebug << "----- room " << *roomIter << " -----" << std::endl; )
-				// in case there are none in this room
-		_camera->GetRenderCamera().SetAmbientColor( Color::black );
-		_camera->GetRenderCamera().SetDirectionalLight(0,Vector3::unitX,Color48(PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0)));
-		_camera->GetRenderCamera().SetDirectionalLight(1,Vector3::unitX,Color48(PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0)));
-		_camera->GetRenderCamera().SetDirectionalLight(2,Vector3::unitX,Color48(PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0)));
-//		_camera->GetRenderCamera().SetFog(Color(0,0,0),SCALAR_CONSTANT(10),SCALAR_CONSTANT(30));
 
 		Validate();
 		const Room * cur_room = &(*roomIter);
 		ValidatePtr( cur_room );
 		cur_room->Validate();
 
-		// kts set up lights for this room
-      BaseObjectIteratorWrapper lightIter = cur_room->ListIter(ROOM_OBJECT_LIST_LIGHT);
+		// Lights are exclusively authored in the level (.lev) — the engine
+		// never provides defaults. If a room has no Light objects, render
+		// unlit (full-bright albedo) instead of black; otherwise zero the
+		// per-frame light state and populate from the room's Light actors.
+		BaseObjectIteratorWrapper lightProbe = cur_room->ListIter(ROOM_OBJECT_LIST_LIGHT);
+		const bool roomHasLights = !lightProbe.Empty();
 
-		int directionalLightIndex = 0;
-		int ambientLightIndex = 0;
-		while(!lightIter.Empty())
+		if(!roomHasLights)
 		{
-         BaseObject& bo = *lightIter;
-	  		const Actor* actor = dynamic_cast<Actor*>(&bo);
-			assert(ValidPtr(actor));
-			assert(actor->kind() == Actor::Light_KIND);
-			const Light* light = (const Light*)actor;
-
-			if(light->Type() == DIRECTIONAL_LIGHT)
-			{
-				assert(directionalLightIndex < 3);
-				light->Set(*_camera,directionalLightIndex);
-				directionalLightIndex++;
-			}
-			else
-			{
-				assert(light->Type() == AMBIENT_LIGHT);
-				assert(ambientLightIndex < 1);
-				light->Set(*_camera,-1);
-				ambientLightIndex++;
-			}
-			++lightIter;
+			RendererBackendGet().SetLightingEnabled(false);
 		}
+		else
+		{
+			RendererBackendGet().SetLightingEnabled(true);
+			_camera->GetRenderCamera().SetAmbientColor( Color::black );
+			_camera->GetRenderCamera().SetDirectionalLight(0,Vector3::unitX,Color48(PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0)));
+			_camera->GetRenderCamera().SetDirectionalLight(1,Vector3::unitX,Color48(PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0)));
+			_camera->GetRenderCamera().SetDirectionalLight(2,Vector3::unitX,Color48(PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0),PS_SCALAR_CONSTANT12(  0)));
 
-#if SW_DBSTREAM
-		if(directionalLightIndex == 0 && ambientLightIndex == 0)
-			std::cerr << "room " << *roomIter << " has no lights, gonna be hard to see!" << std::endl;
-#endif
+			BaseObjectIteratorWrapper lightIter = cur_room->ListIter(ROOM_OBJECT_LIST_LIGHT);
+			int directionalLightIndex = 0;
+			int ambientLightIndex = 0;
+			while(!lightIter.Empty())
+			{
+				BaseObject& bo = *lightIter;
+				const Actor* actor = dynamic_cast<Actor*>(&bo);
+				assert(ValidPtr(actor));
+				assert(actor->kind() == Actor::Light_KIND);
+				const Light* light = (const Light*)actor;
+
+				if(light->Type() == DIRECTIONAL_LIGHT)
+				{
+					assert(directionalLightIndex < 3);
+					light->Set(*_camera,directionalLightIndex);
+					directionalLightIndex++;
+				}
+				else
+				{
+					assert(light->Type() == AMBIENT_LIGHT);
+					assert(ambientLightIndex < 1);
+					light->Set(*_camera,-1);
+					ambientLightIndex++;
+				}
+				++lightIter;
+			}
+		}
 
 		_camera->RenderBegin();
 		BaseObjectIteratorWrapper poIter = cur_room->ListIter(ROOM_OBJECT_LIST_RENDER);
