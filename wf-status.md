@@ -1,6 +1,6 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-05-04  
+**As of:** 2026-05-09  
 **Branch:** `2026-new-level`
 
 ---
@@ -8,6 +8,8 @@
 ## Summary
 
 Eighteen days of work (2026-04-12 – 2026-04-30). Newest first:
+
+**Q*bert walker WF-side parity scaffolding landed (2026-05-09)** — Phase E of the ROM-grounded walker plan now has all four pieces in place: vendored `stb_image_write.h` for PNG encoding, new `screenshot` op in the debug bridge that does `glReadPixels` + vertical-flip + `stbi_write_png`, mb[432] CAPTURE_TRIGGER writes woven into the qbert director's autopilot dance (state-0 / state-1 / round-clear), and host harness + diff tool under `scripts/research/wf/` that mirror the existing MAME-side walker — end-to-end run pending against [2026-05-09-qbert-walker-wf-parity](docs/plans/2026-05-09-qbert-walker-wf-parity.md).
 
 **Room::~Room double-free root cause + fix (2026-05-04, unverified)** — clean shutdown after the X-close fix surfaced `free(): invalid pointer` traced via gdb to `Room::~Room` calling libc `delete[]` on `_objectLists` allocated from the WF Memory pool, fix on disk replaces the call with `MEMORY_DELETE_ARRAY` + remembers the pool in a new `Room::_memory` field, but verification was aborted after my `pkill -f "wf_game.*qbert_practice-standalone"` accidentally killed the user's pre-existing `-record_video` session.
 

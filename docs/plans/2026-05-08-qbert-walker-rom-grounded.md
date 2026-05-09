@@ -6,7 +6,7 @@
 - **B** ✅ palette write-tap delta ≥ 32 = round-clear signal
 - **C** ✅ multi-round walker (DIP-cheat-driven, drift-immune) — captures state-0 + state-1 for all 16 rounds in a single run; 15/16 rounds match doc exactly; L4R1 in multi-round mode hits transition timing (state-0 captures L4 zoom screen instead of pristine apex). Standalone `qbert_l4r1_walker.lua` captures L4R1 cleanly.
 - **D** ✅ L4R1 state-1 = `#EFDE77` captured and committed
-- **E** not started — WF-side parity (separate plan; protocol now well-defined)
+- **E** in progress — WF-side parity scaffolding landed (engine `screenshot` op, mb[432] CAPTURE_TRIGGER in director, host harness + diff tool); end-to-end run pending. See [2026-05-09-qbert-walker-wf-parity.md](2026-05-09-qbert-walker-wf-parity.md).
 
 ## Context
 
