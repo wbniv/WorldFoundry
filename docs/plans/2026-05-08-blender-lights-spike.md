@@ -1,5 +1,23 @@
 # Spike: Blender-authored ambient lights (and friends) in WF engine
 
+**Status:** Phases 0–6 landed on `2026-new-level` 2026-05-08 to 2026-05-09. All code work complete; new OAS fields (radius/cone/energy) deferred per the "Follow-ups — DEFERRED UNTIL LEVEL" section below. Verified end-to-end on snowgoons-blender (lit path); empty-light room and Point/Spot rendering will be exercised by the first new Blender-authored level.
+
+**Implementation log (chronological):**
+- `a3cda19` / `e54b1e2` — plan + Phase 0 investigation
+- `6a2e248` — Phase 0.5: enum-inversion fix
+- `6babf44` — Phase 0.7: confirmed Ambient chain works (memory entry retired) + `assert(index = -1)` typo fix
+- `83d5b36` — Phase 1: unlit fallback when no Light objects authored
+- `562d10a` — Phase 2: extend `lightType` enum to Ambient|Directional|Point|Spot
+- `28598dc` — Phase 3: Blender exporter emits Point/Spot
+- `8f90a02` — Phase 4: backend Point/Spot + RB_MAX_LIGHTS 3→8
+- `a212e2e` — Phase 5: dispatch Point/Spot from `Light::Set`
+- `d2d6a59` — Phase 5.5: dir-light upload moved out of RenderBegin so Point/Spot slots survive
+
+**Carry-over follow-ups (beyond OAS-field deferrals):**
+- iOS Metal backend (`wfsource/source/hal/ios/backend_metal.mm`) needs the Phase-4 treatment — unified light type + per-slot pos/radius/cone state. The `2026-ios` branch will pick this up when it merges in this spike.
+
+---
+
 ## Context
 
 The WF engine already has a half-wired light path: a `Light` actor class, an OAD schema (`lightRed/Green/Blue` + `lightType` enum `Directional|Ambient`), a Blender exporter that emits those fields, a per-frame loop in `Level::RenderScene` that iterates `ROOM_OBJECT_LIST_LIGHT`, and a modern GL backend that consumes 1 ambient + 3 directional lights via shader uniforms. End-to-end, an Ambient or Directional light authored in Blender today *should* light a scene.
