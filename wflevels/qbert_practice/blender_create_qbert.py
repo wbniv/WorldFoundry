@@ -203,7 +203,7 @@ matte = find_by_class('matte')
 if matte:
     matte.location = (0, 0, 6)
     matte['wf_Matte Type'] = 'Color'
-    matte['wf_Background Color'] = 0x000020  # very dark blue
+    matte['wf_Background Color'] = 0x101830  # subtle dark blue — gives shadow-side cubes a contrast against BG (arcade L1R1 is pure black, but our shadow side renders slightly darker than authored due to engine lighting)
     matte['wf_Visibility Mailbox'] = 1  # always visible
     # The matte renders the background via its own backdrop logic. Without this
     # override, Model Type defaults to "Box" and RenderActor3DBox draws the
@@ -228,7 +228,18 @@ if camera:
 light = find_by_class('light')
 if light:
     light.location = (0, -5, 16)
-    light.rotation_euler = (math.pi / 2, 0, 0)  # required for surfaces to be lit
+    # mm_practice uses (π/2, 0, 0) but that one-direction tilt only lights
+    # one of our 45°-rotated cube's two visible side faces; the other renders
+    # near-black. Add a 45° Z-rotation so the source vector points midway
+    # between the two visible-face normals, giving both sides equal
+    # (~0.707) directional contribution → both lit + shadow side colours
+    # render at consistent half-brightness instead of one being fully dark.
+    light.rotation_euler = (math.pi / 2, 0, math.pi / 4)
+    light.name = 'Light01'
+    light['wf_lightType'] = 'Directional'
+    light['wf_lightRed']   = 1.0
+    light['wf_lightGreen'] = 1.0
+    light['wf_lightBlue']  = 1.0
 
 # Player — Anchored, Q*bert hop state machine in Script
 player = find_by_class('player')
@@ -337,14 +348,23 @@ if player:
         "0 = if "  # consumes prev_stick: prev was zero?
         "stick 0 <> if "
         # Restart: reset every per-game mailbox + snap player to apex.
+        # CRITICAL: also reset ROUND_NUMBER=0 so play resumes at L1R1, not
+        # at whatever round the previous game-over happened on. Re-init the
+        # visibility fan-out by zeroing all 336 vis slots and showing the
+        # L1R1 (palette 0) state-0 row.
         "3 72 write-mailbox "
         "0 411 write-mailbox 0 412 write-mailbox 0 413 write-mailbox "
         "0 414 write-mailbox 0 415 write-mailbox "
         "0 416 write-mailbox 0 417 write-mailbox 0 418 write-mailbox "
         "0 419 write-mailbox 0 420 write-mailbox "
         "0 400 write-mailbox 0 401 write-mailbox 0 402 write-mailbox "
+        "0 425 write-mailbox "                    # ROUND_NUMBER → 0 (restart at L1R1)
+        "0 426 write-mailbox "                    # round-clear-pending flag
+        "0 424 write-mailbox "                    # round-clear timer
         "0 431 write-mailbox "
         "28 0 do 0 200 i + write-mailbox loop "
+        "336 0 do 0 440 i + write-mailbox loop "  # clear all vis slots
+        "28 0 do 1 440 i 3 * + write-mailbox loop "  # show L1R1 state-0 row (pal=0)
         "0 INDEXOF_X_POS write-mailbox "
         "6 1.4142136 * INDEXOF_Y_POS write-mailbox "
         "15 INDEXOF_Z_POS write-mailbox "
@@ -669,11 +689,15 @@ DIRECTOR_SCRIPT = (
     # Two nested do/loops: outer=cube (j in inner), inner=combo (i in inner).
     # r = combo/3, s = combo mod 3.
     "425 read-mailbox 4 % "     # ( cur_pal )  — % is zForth modulo primitive
-    "28 0 do "                  # outer: i=cube 0..27
+    "28 0 do "                  # outer: i=cube 0..27 (j inside inner loop)
     "200 i + read-mailbox "     # ( cur_pal cube_state ) — read before inner loop
-    "12 0 do "                  # inner: i=combo 0..11; j=cube (outer i promoted to j)
-    "i 3 / over = "             # r==cur_pal?   (/ is integer divide in zForth)
-    "i 3 % 2 pick = & "         # also s==cube_state?
+    "12 0 do "                  # inner: i=combo 0..11
+    # Stack at this point: ( cur_pal cube_state ).
+    # Test 1: combo_r == cur_pal? cur_pal is the 3rd item from top, so reach
+    # it via `2 pick` (NOT `over`, which would grab cube_state instead).
+    "i 3 / 2 pick = "           # r==cur_pal?  ( cur_pal cube_state bool1 )
+    # Test 2: combo_s == cube_state? cube_state is now the 3rd item; `2 pick`.
+    "i 3 % 2 pick = & "         # s==cube_state? AND  ( cur_pal cube_state flag )
     "if 1 else 0 then "
     "440 i 3 / 84 * + j 3 * + i 3 % + write-mailbox "
     "loop "

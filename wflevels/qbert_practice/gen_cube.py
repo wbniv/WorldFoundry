@@ -48,41 +48,59 @@ CORNERS = [
 
 # Each face is two triangles, CCW from outside. UV doesn't matter for
 # flat-shaded so we use (0,0) on every vertex.
+#
+# Material layout (matches arcade Q*bert's 3-tone iso shading):
+#   mat 0 = top face (+Z) — state-dependent colour
+#   mat 1 = lit-side material (faces toward upper-left in iso view)
+#   mat 2 = shadow-side material (faces toward lower-right in iso view)
+#
+# Cubes are rotated 45° about Z by blender_create_qbert.py. After that
+# rotation:
+#   pre-rotation -X face → LEFT visible side  → LIT  (mat 1)
+#   pre-rotation -Y face → RIGHT visible side → SHADOW (mat 2)
+#   pre-rotation +X face → back-right (hidden) → SHADOW (mat 2, for symmetry)
+#   pre-rotation +Y face → back-left  (hidden) → LIT    (mat 1, for symmetry)
+# Bottom face is hidden by the staircase below it; assign it shadow.
 FACES = [
-    # Bottom (-Z), winding viewed from outside (below) is 0,3,2,1  — mat 1 (side)
-    (0, 3, 2, 1),
-    (0, 2, 1, 1),
-    # Top (+Z)  — mat 0 (top, state-dependent colour)
+    # Bottom (-Z), winding viewed from outside (below) is 0,3,2,1
+    (0, 3, 2, 2),
+    (0, 2, 1, 2),
+    # Top (+Z)  — state-dependent colour
     (4, 5, 6, 0),
     (4, 6, 7, 0),
-    # Front (-Y)  — mat 1 (side)
-    (0, 1, 5, 1),
-    (0, 5, 4, 1),
-    # Right (+X)  — mat 1 (side)
-    (1, 2, 6, 1),
-    (1, 6, 5, 1),
-    # Back (+Y)  — mat 1 (side)
+    # Front (-Y)  — right-visible after 45° rot → SHADOW
+    (0, 1, 5, 2),
+    (0, 5, 4, 2),
+    # Right (+X)  — back-right (hidden) → SHADOW
+    (1, 2, 6, 2),
+    (1, 6, 5, 2),
+    # Back (+Y)  — back-left (hidden) → LIT
     (2, 3, 7, 1),
     (2, 7, 6, 1),
-    # Left (-X)  — mat 1 (side)
+    # Left (-X)  — left-visible after 45° rot → LIT
     (3, 0, 4, 1),
     (3, 4, 7, 1),
 ]
 
 
-def build_modl(top_rgb, side_rgb=None):
-    """Build a complete MODL chunk for a cube with two materials.
+def build_modl(top_rgb, lit_side_rgb, shadow_side_rgb):
+    """Build a complete MODL chunk for a cube with three materials.
 
-    `top_rgb` is the +Z face colour (state-dependent). `side_rgb` is the
-    colour for all other faces (constant across states). Both are 24-bit
-    integers in 0xRRGGBB order.
+    `top_rgb` is the +Z face colour (state-dependent). `lit_side_rgb` and
+    `shadow_side_rgb` are the lit/shadow side colours (round-dependent,
+    constant across states — only the top changes on hop). All three
+    are 24-bit integers in 0xRRGGBB order.
+
+    Materials use `LIGHTING_PRELIT` (Material::LIGHTING_PRELIT = 4 in
+    wfsource/source/gfx/material.hp) so the renderer treats colours as
+    pre-lit and skips the dynamic-lighting attenuation that was rendering
+    shadow-side teal as near-black. With this flag, authored RGB reaches
+    the framebuffer untouched — matching the arcade's fixed lit/shadow
+    palette per face.
 
     Vertex colours are white (0xFFFFFF) so each face inherits its material
-    colour cleanly under the engine's multiplicative lighting model.
+    colour cleanly.
     """
-    if side_rgb is None:
-        side_rgb = SIDE_RGB
-
     # ── VRTX chunk ────────────────────────────────────────────────────────────
     vrtx = bytearray()
     for x, y, z in CORNERS:
@@ -97,14 +115,17 @@ def build_modl(top_rgb, side_rgb=None):
     for v1, v2, v3, mat in FACES:
         face_data += struct.pack('<hhhh', v1, v2, v3, mat)
 
-    # ── MATL chunk: 2 materials ───────────────────────────────────────────────
+    # ── MATL chunk: 3 materials ───────────────────────────────────────────────
     # mat 0 = top face (state-dependent colour)
-    # mat 1 = all side faces (arcade lit teal; engine lighting darkens oblique faces)
-    mat_flags = 0
+    # mat 1 = lit side  (constant per round, arcade #56A999 for L1R1)
+    # mat 2 = shadow side (constant per round, arcade #314646 for L1R1)
+    LIGHTING_PRELIT = 4
+    mat_flags = LIGHTING_PRELIT
     tex_bytes = b'\x00' * 256
     matl = (
-        struct.pack('<iI', mat_flags, top_rgb) + tex_bytes +
-        struct.pack('<iI', mat_flags, side_rgb) + tex_bytes
+        struct.pack('<iI', mat_flags, top_rgb)         + tex_bytes +
+        struct.pack('<iI', mat_flags, lit_side_rgb)    + tex_bytes +
+        struct.pack('<iI', mat_flags, shadow_side_rgb) + tex_bytes
     )
 
     # ── Assemble MODL ─────────────────────────────────────────────────────────
@@ -116,37 +137,38 @@ def build_modl(top_rgb, side_rgb=None):
     return iff_chunk('MODL', inner)
 
 
-# ── Palette — Arcade Q*bert level 1 round 1 (ROM-verified) ───────────────────
-# All values pixel-sampled from lossless MAME 0.264 PNG against the vendored
-# qbert.zip ROM. Source: docs/plans/screenshots/qbert-arcade-attract-gameplay-reference.png
-# (240×256 attract-mode frame, 13 unique colours — matches Gottlieb 16-colour CLUT).
+# ── Per-round palette ─────────────────────────────────────────────────────────
+# 4 rounds per level cycle.  Each entry: (state0_top, state2_top, side_rgb).
+# State 1 (mid-hop intermediate) is a shared orange placeholder for all rounds.
 #
-# Side: arcade fakes 3D with two baked shades (lit #56A999, shadow #314646).
-# We use the lit value and let engine multiplicative lighting darken oblique faces.
-SIDE_RGB = 0x56A999   # arcade lit teal
-
-VARIANTS = [
-    (0, 0x5646EF),  # state 0 — untouched: purple (ROM-verified; NOT teal)
-    (1, 0xCC7733),  # state 1 — intermediate: orange placeholder (L2+ only; unused under L1 rule)
-    (2, 0xDEDE00),  # state 2 — target: yellow (ROM-verified)
+# Source: docs/investigations/2026-05-04-qbert-arcade-palette-all-rounds.md
+#   R0 (L1R1): ROM-verified, complete.
+#   R1 (L1R2): target confirmed; start is a placeholder (original not captured).
+#   R2 (L1R3): start confirmed; target is a placeholder (late-round not captured).
+#   R3 (L1R4): start confirmed; target is a placeholder (late-round not captured).
+# Re-run scripts/research/mame/qbert_palette_capture.lua to fill gaps.
+ROUND_COLORS = [
+    # (state0_top,  state2_top,  lit_side,  shadow_side)
+    (0x5646EF,     0xDEDE00,    0x56A999,  0x314646),  # R0 L1R1 — purple→yellow,    teal  / dark-teal  (all 4 ROM-confirmed)
+    (0xAC46AC,     0xEFDE77,    0xFF7721,  0x663100),  # R1 L1R2 — magenta→golden,   orange / dark-orange (start_top placeholder)
+    (0xB9CECE,     0x3399CC,    0x777777,  0x212121),  # R2 L1R3 — silver→blue,      gray   / near-black  (target_top placeholder)
+    (0x0066EF,     0xCC8822,    0x778888,  0x101099),  # R3 L1R4 — blue→amber,       gray-teal / dark-blue (target_top placeholder)
 ]
+STATE1_TOP = 0xCC7733  # intermediate orange placeholder, all rounds
 
 
 if __name__ == '__main__':
-    import glob, shutil
+    import shutil
     out_dir = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.abspath(__file__))
     os.makedirs(out_dir, exist_ok=True)
-    for state, top_rgb in VARIANTS:
-        modl = build_modl(top_rgb)
-        proto = os.path.join(out_dir, f'cube_state{state}.iff')
-        with open(proto, 'wb') as f:
-            f.write(modl)
-        print(f'Wrote {len(modl):4d} bytes → {proto}  (top 0x{top_rgb:06X}  side 0x{SIDE_RGB:06X})')
-        # Propagate to per-instance IFFs (cube_NN_sS.iff) so the build is
-        # always in sync without needing a full Blender re-export.
-        copied = 0
-        for dst in sorted(glob.glob(os.path.join(out_dir, f'cube_??_s{state}.iff'))):
-            shutil.copyfile(proto, dst)
-            copied += 1
-        if copied:
-            print(f'  → propagated to {copied} per-instance IFFs')
+    total = 0
+    for r, (s0_top, s2_top, lit_side, shadow_side) in enumerate(ROUND_COLORS):
+        for state, top_rgb in [(0, s0_top), (1, STATE1_TOP), (2, s2_top)]:
+            modl = build_modl(top_rgb, lit_side, shadow_side)
+            proto = os.path.join(out_dir, f'cube_state{state}_r{r}.iff')
+            with open(proto, 'wb') as f:
+                f.write(modl)
+            print(f'Wrote {len(modl):4d} bytes → {proto}  '
+                  f'(top 0x{top_rgb:06X}  lit 0x{lit_side:06X}  shadow 0x{shadow_side:06X})')
+            total += 1
+    print(f'Generated {total} source IFFs ({len(ROUND_COLORS)} rounds × 3 states).')
