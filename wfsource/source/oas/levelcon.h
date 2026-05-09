@@ -55,7 +55,9 @@ enum { LEVEL_VERSION = 28 };
 enum	// These go in the lightType field of a Light OAD
 {
 	AMBIENT_LIGHT=0,
-	DIRECTIONAL_LIGHT
+	DIRECTIONAL_LIGHT,
+	POINT_LIGHT,
+	SPOT_LIGHT
 };
 
 /*============================================================================*/
