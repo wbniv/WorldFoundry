@@ -64,17 +64,9 @@ RenderCamera::SetFog(const Color& color,Scalar fogNear, Scalar fogFar)
 
 //============================================================================
 
-INLINE void
-RenderCamera::SetDirectionalLight(int lightIndex,const Vector3& direction, Color48 color)
-{
-//	cout << "SetDirLight: index = " << lightIndex << ", dir = " << direction << ", color = " << color << endl;
-	assert(!_renderInProgress);			// cannot update lights while rendering
-	RangeCheck(0,lightIndex,MAX_LIGHTS);
-	_dirLightColors[lightIndex] = color;
-	_dirLightDirections[lightIndex] = direction;
-	assert(_dirLightDirections[lightIndex].Length() > SCALAR_CONSTANT(0.1));
-	_dirLightDirections[lightIndex].Normalize();
-}
+// SetDirectionalLight implementation moved to camera.cc (Phase 5.5) so it
+// can use ConvertToGLColor + RendererBackendGet without dragging GL
+// internals into every translation unit that includes camera.hp.
 
 //============================================================================
 

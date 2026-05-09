@@ -213,26 +213,15 @@ RenderCamera::RenderBegin()
 #error scripting constants mismatch: MAX_LIGHTS > RB_MAX_LIGHTS
 #endif
 
-   // View matrix must be the current modelview before SetDirLight below —
-   // the backend transforms light directions by the active modelview so the
-   // shader can consume them in eye space.
+   // Phase 5.5: SetModelView + SetAmbient need to come before any Light::Set
+   // call (handled by PrepareLighting() in level.cc). RenderBegin only does
+   // ambient (in case PrepareLighting wasn't called for some legacy path)
+   // and fog finalization here. The per-slot dir-light upload moved into
+   // RenderCamera::SetDirectionalLight (camera.cc) so it doesn't clobber
+   // Point/Spot slots set by Light::Set.
    RendererBackendGet().SetModelView(_invertedPosition);
-
    ConvertToGLColor(_ambientColor, lightColor);
    RendererBackendGet().SetAmbient(lightColor[0], lightColor[1], lightColor[2]);
-
-    for(int index=0;index < MAX_LIGHTS;index++)
-    {
-        // negate because we store the direction the light travels, where the
-        // backend (like GL) expects the direction toward the light source.
-        const float dx = -_dirLightDirections[index].X().AsFloat();
-        const float dy = -_dirLightDirections[index].Y().AsFloat();
-        const float dz = -_dirLightDirections[index].Z().AsFloat();
-
-        ConvertToGLColor(_dirLightColors[index], lightColor);
-        RendererBackendGet().SetDirLight(index, dx, dy, dz,
-                                        lightColor[0], lightColor[1], lightColor[2]);
-    }
 
    ConvertToGLColor(_fogColor, lightColor);
    RendererBackendGet().SetFog(lightColor[0], lightColor[1], lightColor[2],
@@ -355,13 +344,49 @@ RenderCamera::RenderMatte(ScrollingMatte& _matte, const TileMap& map, Scalar xMu
 
 
 //============================================================================
-// Phase 5: Point / Spot light pass-throughs to the backend.
+// Phase 5+5.5: per-light setters push directly to the backend.
 //
-// Unlike SetDirectionalLight (which stores into _dirLight* and gets uploaded
-// in RenderBegin), Point/Spot push directly to the backend. The backend owns
-// the per-slot type+pos+radius+cone state introduced in Phase 4. RenderCamera
-// remains the level.cc-facing API surface for symmetry with the rest of
-// lighting.
+// PrepareLighting() must be called per-frame before any per-light setter so
+// the backend's modelview reflects this camera's view matrix — the backend
+// transforms light pos/dir from world to eye space using that modelview.
+// RenderBegin then handles fog and the rendering-in-progress flag; it no
+// longer does the per-slot dir-light upload (that moved into the per-call
+// SetDirectionalLight path so Point/Spot slots set by Light::Set survive).
+
+void
+RenderCamera::PrepareLighting()
+{
+    assert(!_renderInProgress);
+    _invertedPosition.Inverse(_position);
+    RendererBackendGet().SetModelView(_invertedPosition);
+}
+
+void
+RenderCamera::SetDirectionalLight(int lightIndex, const Vector3& direction,
+                                  Color48 color)
+{
+    assert(!_renderInProgress);
+    RangeCheck(0, lightIndex, MAX_LIGHTS);
+    _dirLightColors[lightIndex] = color;
+    _dirLightDirections[lightIndex] = direction;
+    assert(_dirLightDirections[lightIndex].Length() > SCALAR_CONSTANT(0.1));
+    _dirLightDirections[lightIndex].Normalize();
+
+    // Phase 5.5: push immediately to the backend so Point/Spot slots set
+    // afterward by Light::Set survive — the old per-frame SetDirLight loop
+    // in RenderBegin would have unconditionally overridden them.
+    // PrepareLighting() must have set the modelview this frame already; the
+    // backend transforms `direction` by it internally. We negate because
+    // _dirLightDirections stores "direction the light travels", but the
+    // backend (and shader) want "direction toward the light source".
+    GLfloat c[4];
+    ConvertToGLColor(color, c);
+    RendererBackendGet().SetDirLight(lightIndex,
+                                     -_dirLightDirections[lightIndex].X().AsFloat(),
+                                     -_dirLightDirections[lightIndex].Y().AsFloat(),
+                                     -_dirLightDirections[lightIndex].Z().AsFloat(),
+                                     c[0], c[1], c[2]);
+}
 
 void
 RenderCamera::SetPointLight(int index, const Vector3& pos, const Color& color,

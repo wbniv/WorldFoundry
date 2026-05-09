@@ -1087,6 +1087,10 @@ Level::RenderScene()
 		else
 		{
 			RendererBackendGet().SetLightingEnabled(true);
+			// Phase 5.5: set the backend's modelview before any per-light
+			// setter so the world→eye transform inside SetDirLight /
+			// SetPointLight / SetSpotLight reads the right matrix.
+			_camera->GetRenderCamera().PrepareLighting();
 			// Reset per-frame light state. Ambient is global; the 8 directional/
 			// point/spot slots all reset to "disabled" so any not populated by
 			// the room's Lights this frame contribute nothing.

@@ -82,10 +82,12 @@ private:
 public:
 	enum { MAX_LIGHTS = 8 };  // must match RB_MAX_LIGHTS in renderer_backend.hp
 
-	// Point and Spot pass through directly to the backend — host-side
-	// per-light state for these is owned by the backend (`_lightType[]`
-	// etc. in backend_modern.cc), unlike Directional/Ambient which use
-	// the legacy _dirLight* arrays uploaded in RenderBegin().
+	// All per-light setters (Directional/Point/Spot/Ambient) push directly
+	// to the backend — they share the per-slot type+state owned by the
+	// backend (`_lightType[]` etc. in backend_modern.cc). Caller MUST call
+	// PrepareLighting() first so the backend's modelview is current; the
+	// world→eye transform on light positions/directions reads it.
+	void PrepareLighting();
 	void SetPointLight(int index, const Vector3& pos, const Color& color,
 	                   Scalar radius);
 	void SetSpotLight (int index, const Vector3& pos, const Vector3& dir,
