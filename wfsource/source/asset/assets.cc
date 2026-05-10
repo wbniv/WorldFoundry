@@ -230,7 +230,7 @@ AssetManager::ReadAssetMap(binistream& mapStream)
 		stringIter->ReadBytes(&_assetStringMap[_assetStringMapEntries]._name,stringIter->BytesLeft());
 		MEMORY_DELETE(HALScratchLmalloc,stringIter,IFFChunkIter);
 		_assetStringMapEntries++;
-		assert(_assetStringMapEntries <= 1024);
+		assert(_assetStringMapEntries <= 1024);   // bumped to 4000 on 2026-05-10 for qbert fan-out, reverted 2026-05-10 after Phase 1 (pair with assets.hp:116)
 	}
 
 }

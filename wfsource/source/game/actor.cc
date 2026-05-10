@@ -1172,6 +1172,15 @@ Actor::ReadSystemMailbox( int boxnum ) const
             return Scalar::zero;
         }
 
+        case EMAILBOX_FACE_COLOR_TOP:
+        case EMAILBOX_FACE_COLOR_LIT:
+        case EMAILBOX_FACE_COLOR_SHADOW:
+            // Per-face color overrides are write-only — the renderer reads them
+            // through the actor's RenderObject3D, not through ReadMailbox. Return
+            // 0 instead of asserting so the debug bridge's set_mailbox handler
+            // (which reads old_val before writing for undo support) doesn't trip.
+            return Scalar::zero;
+
         case EMAILBOX_KEYFRAME:
         {
             UNIMPLEMENTED( "read keyframe mailbox" );
@@ -1426,6 +1435,28 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
           _physicalAttributes.SetLinVelocity( linVelocity );
        }
             break;
+
+        case EMAILBOX_FACE_COLOR_TOP:
+        case EMAILBOX_FACE_COLOR_LIT:
+        case EMAILBOX_FACE_COLOR_SHADOW:
+        {
+            // Per-face material color override. Value = packed 24-bit RGB
+            // (0xRRGGBB). Material index = mailbox enum offset (0/1/2).
+            // Re-bakes the actor's RenderObject3D primitives with the new color.
+            // No-op for actors without a RenderActor3D (default RenderActor base
+            // SetMaterialColor is a no-op).
+            // (qbert cube consolidation, 2026-05-10.)
+            if (ValidPtr(_renderActor))
+            {
+                const int idx = boxnum - EMAILBOX_FACE_COLOR_TOP;
+                const uint32 packed = (uint32)value.WholePart();
+                Color color((uint8)((packed >> 16) & 0xFF),
+                            (uint8)((packed >>  8) & 0xFF),
+                            (uint8)( packed        & 0xFF));
+                _renderActor->SetMaterialColor(idx, color);
+            }
+            break;
+        }
 
         case EMAILBOX_INPUT :
         {

@@ -90,8 +90,16 @@ Comment( "MAILBOXENTR( ANIMATION_DATA, 3027)" )
 	MAILBOXENTRY( DELTA_PITCH, 3035 )			Comment("Modify current actor-relative PITCH angle")
 	MAILBOXENTRY( DELTA_ROLL, 3036 )			Comment("Modify current actor-relative ROLL angle")
 
-	MAILBOXENTRY( LOCAL_SYSTEM_MAX, 3037)
-	MAILBOXENTRY( LOCAL_MAX, 3037)
+	Comment("Per-face material color override (write only). Value = 24-bit packed RGB (0xRRGGBB).")
+	Comment("Triggers a re-bake of the actor's RenderObject3D primitives with the new color.")
+	Comment("Materials by face index 0/1/2; intended for STAT actors with up to 3 colored materials.")
+	Comment("Added 2026-05-10 for qbert cube consolidation; see docs/plans/2026-05-10-qbert-cube-consolidation.md")
+	MAILBOXENTRY( FACE_COLOR_TOP, 3037 )		Comment("override material[0] color (top face on cube)")
+	MAILBOXENTRY( FACE_COLOR_LIT, 3038 )		Comment("override material[1] color (lit side on cube)")
+	MAILBOXENTRY( FACE_COLOR_SHADOW, 3039 )		Comment("override material[2] color (shadow side on cube)")
+
+	MAILBOXENTRY( LOCAL_SYSTEM_MAX, 3040)
+	MAILBOXENTRY( LOCAL_MAX, 3040)
 
 	Comment("scratch mailboxes are only valid from inside of a script, they are for temporary storage")
 	MAILBOXENTRY( SCRATCH_START, 4000)			Comment(" any mailbox in the 4000 series is SCRATCH" )

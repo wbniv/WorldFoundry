@@ -11,6 +11,7 @@
 // Bridge words (eval'd at Init):
 //   : read-mailbox  128 sys ;   \ ZF_SYSCALL_USER+0: ( idx -- val )
 //   : write-mailbox 129 sys ;   \ ZF_SYSCALL_USER+1: ( val idx -- )
+//   : write-actor-mailbox 130 sys ;   \ ZF_SYSCALL_USER+2: ( val idx actor_idx -- )
 //
 // Control flow (zForth uses `fi` not `then`):
 //   if ... fi        ( flag -- )
@@ -129,6 +130,20 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                 float val = (float)zf_pop(ctx);
                 if (g_mgr) {
                     Mailboxes& mb = g_mgr->LookupMailboxes(g_curObj);
+                    mb.WriteMailbox(idx, Scalar::FromFloat(val));
+                }
+            } else if (custom == 2) {
+                // write-actor-mailbox ( val idx actor_idx -- )
+                // Writes mailbox `idx` on the actor identified by `actor_idx`,
+                // not the currently-running actor. Needed for the qbert
+                // director to set per-cube material color overrides
+                // (LOCAL_SYSTEM mailboxes 3037..3039) — a normal write-mailbox
+                // would target the director's own override, not the cube's.
+                int   actorIdx = (int)zf_pop(ctx);
+                int   idx      = (int)zf_pop(ctx);
+                float val      = (float)zf_pop(ctx);
+                if (g_mgr) {
+                    Mailboxes& mb = g_mgr->LookupMailboxes(actorIdx);
                     mb.WriteMailbox(idx, Scalar::FromFloat(val));
                 }
             } else {
@@ -259,6 +274,9 @@ void Init(MailboxesManager& mgr)
     r = zf_eval(&g_ctx, ": write-mailbox 129 sys ;");
     if (r != ZF_OK)
         fprintf(stderr, "zforth: init failed (write-mailbox): %d\n", r);
+    r = zf_eval(&g_ctx, ": write-actor-mailbox 130 sys ;");
+    if (r != ZF_OK)
+        fprintf(stderr, "zforth: init failed (write-actor-mailbox): %d\n", r);
 }
 
 void Shutdown()

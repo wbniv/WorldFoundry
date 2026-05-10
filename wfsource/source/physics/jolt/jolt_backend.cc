@@ -663,6 +663,8 @@ void JoltBackendInit()
     // 10 MB temp allocator (Jolt's recommended default); 1024 physics bodies;
     // large-enough body pairs / constraints. ContactConstraintManager grows
     // with body count + step substeps; 2 MB was not enough for snowgoons.
+    // Bumped to 4096 on 2026-05-10 for qbert 1344-cube fan-out; reverted to
+    // 1024 same day after Phase 1 cube consolidation dropped to 28 bodies.
     gTempAllocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
     gJobSystem     = new JPH::JobSystemSingleThreaded(JPH::cMaxPhysicsJobs);
     gPhysicsSystem = new JPH::PhysicsSystem();
