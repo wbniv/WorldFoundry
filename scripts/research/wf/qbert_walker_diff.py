@@ -27,7 +27,7 @@ MAME_CUBE11 = (137, 80)        # down-right cube (1,1) top — flipped after MAM
 
 # WF 640×640 hand-tuned sample coordinates (eyeballed from L1R1 captures;
 # stable across rounds because the camera doesn't track Q*bert).
-WF_APEX_TOP   = (320, 240)     # apex cube (0,0) top centre
+WF_APEX_TOP   = (320, 217)     # apex cube (0,0) top centre — y=240 hit shadow side
 WF_CUBE10_TOP = (290, 285)     # cube (1,0) top — DL hop dest, flipped on WF's step 1
 
 
