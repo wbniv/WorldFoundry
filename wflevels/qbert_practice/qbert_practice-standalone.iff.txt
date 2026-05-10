@@ -9,9 +9,9 @@
 { 'L4'
     { 'ALGN' .align( 2048 ) }
     { 'RAM'
-        'OBJD' 4000000l                 // bumped 800000→4000000 for 1344 actors (2026-05-09; 16-round palettes)
+        'OBJD' 4000000l                // 1344 actors (16-round palettes); restored from HEAD after working-tree drift to 200000
         'PERM' 500000l
-        'ROOM' 8000000l                 // bumped 2000000→8000000 for 1344 cube meshes (2026-05-09; 16-round palettes)
+        'ROOM' 8000000l                // 1344 cube meshes (16-round palettes); restored from HEAD after working-tree drift to 500000
         'FLAG' 1l 1l                    // doomstick, bungeecam
     }
     { 'ALGN' .align( 2048 ) }

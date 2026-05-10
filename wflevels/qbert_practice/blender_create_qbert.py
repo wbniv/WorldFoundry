@@ -272,41 +272,44 @@ def _build_qbert_player_mesh():
 
     parts = []  # (object, material)
 
-    # Body — UV sphere
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.55, segments=16, ring_count=12, location=(0, 0, 0.55))
+    # Low-poly budget: the level memory pool is tight (~28 cubes share the
+    # same Level DMalloc), so keep total verts well under ~250.
+
+    # Body — UV sphere (~80 verts)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.55, segments=10, ring_count=6, location=(0, 0, 0.55))
     parts.append((bpy.context.object, mat_orange))
 
-    # Head — smaller UV sphere
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.40, segments=14, ring_count=10, location=(0, 0, 1.25))
+    # Head — smaller UV sphere (~50 verts)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.40, segments=8, ring_count=5, location=(0, 0, 1.25))
     parts.append((bpy.context.object, mat_orange))
 
-    # Snout — cone pointing +Y (rotate 90° about X)
+    # Snout — cone pointing +Y (rotate 90° about X) (~9 verts)
     bpy.ops.mesh.primitive_cone_add(
-        vertices=12, radius1=0.18, radius2=0.10, depth=0.45,
+        vertices=8, radius1=0.18, radius2=0.10, depth=0.45,
         location=(0, 0.40, 1.20), rotation=(math.pi / 2, 0, 0)
     )
     parts.append((bpy.context.object, mat_snout))
 
-    # Legs — two cylinders
+    # Legs — two cylinders (~12 verts each)
     for x in (-0.22, 0.22):
         bpy.ops.mesh.primitive_cylinder_add(
-            vertices=10, radius=0.13, depth=0.30, location=(x, 0, 0.15)
+            vertices=6, radius=0.13, depth=0.30, location=(x, 0, 0.15)
         )
         parts.append((bpy.context.object, mat_orange))
 
-    # Feet — flattened spheres in front of legs
+    # Feet — flattened spheres in front of legs (~24 verts each)
     for x in (-0.22, 0.22):
         bpy.ops.mesh.primitive_uv_sphere_add(
-            radius=0.20, segments=10, ring_count=6, location=(x, 0.05, 0.04)
+            radius=0.20, segments=6, ring_count=4, location=(x, 0.05, 0.04)
         )
         bpy.context.object.scale = (1.0, 1.2, 0.4)
         bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
         parts.append((bpy.context.object, mat_feet))
 
-    # Eyes — two small white spheres on the front of the head
+    # Eyes — two small white spheres on the front of the head (~12 verts each)
     for x in (-0.14, 0.14):
         bpy.ops.mesh.primitive_uv_sphere_add(
-            radius=0.07, segments=8, ring_count=6, location=(x, 0.30, 1.40)
+            radius=0.07, segments=6, ring_count=4, location=(x, 0.30, 1.40)
         )
         parts.append((bpy.context.object, mat_eye))
 
