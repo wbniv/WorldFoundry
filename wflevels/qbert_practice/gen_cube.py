@@ -138,21 +138,33 @@ def build_modl(top_rgb, lit_side_rgb, shadow_side_rgb):
 
 
 # ── Per-round palette ─────────────────────────────────────────────────────────
-# 4 rounds per level cycle.  Each entry: (state0_top, state2_top, side_rgb).
-# State 1 (mid-hop intermediate) is a shared orange placeholder for all rounds.
+# 16 rounds: arcade Q*bert is 4 levels × 4 rounds. Each entry is
+# (state0_top, state2_top, lit_side, shadow_side).
+# State 1 (mid-hop intermediate, only used on L2/L4) is a shared orange
+# placeholder for all rounds — per-round state-1 fidelity is a follow-up.
 #
-# Source: docs/investigations/2026-05-04-qbert-arcade-palette-all-rounds.md
-#   R0 (L1R1): ROM-verified, complete.
-#   R1 (L1R2): target confirmed; start is a placeholder (original not captured).
-#   R2 (L1R3): start confirmed; target is a placeholder (late-round not captured).
-#   R3 (L1R4): start confirmed; target is a placeholder (late-round not captured).
-# Re-run scripts/research/mame/qbert_palette_capture.lua to fill gaps.
+# Source: docs/investigations/qbert_cube_face_colors.md (pixel-sampled from
+# MAME screenshots; all 16 rounds captured 2026-05-08).
+# L2R4 and L4R2 are "flat" rounds — sides are #000000 (black background)
+# in the arcade. No special geometry, just black side faces.
 ROUND_COLORS = [
     # (state0_top,  state2_top,  lit_side,  shadow_side)
-    (0x5646EF,     0xDEDE00,    0x56A999,  0x314646),  # R0 L1R1 — purple→yellow,    teal  / dark-teal  (all 4 ROM-confirmed)
-    (0xAC46AC,     0xEFDE77,    0xFF7721,  0x663100),  # R1 L1R2 — magenta→golden,   orange / dark-orange (start_top placeholder)
-    (0xB9CECE,     0x3399CC,    0x777777,  0x212121),  # R2 L1R3 — silver→blue,      gray   / near-black  (target_top placeholder)
-    (0x0066EF,     0xCC8822,    0x778888,  0x101099),  # R3 L1R4 — blue→amber,       gray-teal / dark-blue (target_top placeholder)
+    (0x5646EF,     0xDEDE00,    0x56A999,  0x314646),  # R00 L1R1 — purple→yellow
+    (0xEFDE77,     0x0046DE,    0x663100,  0xFF7721),  # R01 L1R2 — golden→blue
+    (0xB9CECE,     0x464646,    0x777777,  0x212121),  # R02 L1R3 — silver→dark-gray
+    (0x0066EF,     0xA9B910,    0x778888,  0x101099),  # R03 L1R4 — blue→olive
+    (0x0046DE,     0x21B931,    0x663100,  0xFF7721),  # R04 L2R1 — blue→green
+    (0x990066,     0xA9B910,    0x778888,  0x101099),  # R05 L2R2 — magenta→olive
+    (0xFF6666,     0xDEDE00,    0x56A999,  0x314646),  # R06 L2R3 — red→yellow
+    (0xCECE00,     0xFF6666,    0x000000,  0x000000),  # R07 L2R4 — yellow→red (flat)
+    (0x2188CE,     0x003199,    0xB9B921,  0xEF1021),  # R08 L3R1 — blue→dark-blue
+    (0x464646,     0xB9CECE,    0x777777,  0x212121),  # R09 L3R2 — dark-gray→light-gray
+    (0x0046DE,     0xEFDE77,    0x663100,  0xFF7721),  # R10 L3R3 — blue→golden
+    (0xDEDE00,     0x5646EF,    0x56A999,  0x314646),  # R11 L3R4 — yellow→purple
+    (0x21B931,     0x0046DE,    0x663100,  0xFF7721),  # R12 L4R1 — green→blue
+    (0x0046EF,     0xCECE00,    0x000000,  0x000000),  # R13 L4R2 — blue→yellow (flat)
+    (0xDEDE00,     0x5646EF,    0x56A999,  0x314646),  # R14 L4R3 — yellow→purple
+    (0x990066,     0xA9B910,    0x778888,  0x101099),  # R15 L4R4 — magenta→olive
 ]
 STATE1_TOP = 0xCC7733  # intermediate orange placeholder, all rounds
 

@@ -75,10 +75,10 @@ SQRT2 = math.sqrt(2.0)
 #              3=round-clear, 0 otherwise. Host watches transitions and issues
 #              `screenshot` ops over the debug bridge.)
 INDEXOF_CUBE_STATE_BASE = 200
-INDEXOF_VIS_BASE = 440   # 440 + r*84 + i*3 + s; max = 440+3*84+27*3+2 = 775
-NUM_ROUNDS = 4           # palette cycles; matches gen_cube.py ROUND_COLORS
+INDEXOF_VIS_BASE = 440   # 440 + r*84 + i*3 + s; max = 440+15*84+27*3+2 = 1783
+NUM_ROUNDS = 16          # palette cycles; matches gen_cube.py ROUND_COLORS
 
-NUM_MAILBOXES = 800  # >= 775 (highest vis slot)
+NUM_MAILBOXES = 1800  # >= 1784 (highest vis slot for 16 rounds)
 
 
 def cube_index(row, col):
@@ -696,8 +696,8 @@ DIRECTOR_SCRIPT = (
     "dup read-mailbox 0 = if 2 swap write-mailbox else drop then "
     "0 411 write-mailbox then\n"
     # Visibility fan-out: for each cube, show only the actor for
-    # (cur_palette, cube_state); hide all 12 variants (4 rounds * 3 states).
-    # cur_palette = ROUND_NUMBER % 4.  Vis mailbox = 440 + r*84 + N*3 + s.
+    # (cur_palette, cube_state); hide all 48 variants (16 rounds * 3 states).
+    # cur_palette = ROUND_NUMBER (clamped at 15).  Vis mailbox = 440 + r*84 + N*3 + s.
     #
     # IMPORTANT: we push cube_N onto the DATA stack and reach it via `pick`
     # (not via `j` outer-loop counter). zForth's `j` is `pickr 2`, defined
@@ -711,11 +711,11 @@ DIRECTOR_SCRIPT = (
     # ~/.claude/memory/feedback_zforth_int_divide.md). `i 3 /` returns 1.667
     # for i=5; comparisons like `combo_r = cur_pal` silently fail. Cast to
     # int via `i dup 3 % - 3 /` so combo_r is a real integer.
-    "425 read-mailbox 4 % "     # ( cur_pal )  T:cur_pal
+    "425 read-mailbox "         # ( cur_pal )  T:cur_pal — round counter clamped at 15 below
     "28 0 do "                  # outer: i = cube N, 0..27
     "200 i + read-mailbox "     # ( cur_pal cube_state )  T:cube_state
     "i "                        # ( cur_pal cube_state cube_N )  T:cube_N
-    "12 0 do "                  # inner: i = combo 0..11
+    "48 0 do "                  # inner: i = combo 0..47 (16 rounds * 3 states)
     # Inner-body stack at entry: ( cur_pal cube_state cube_N )
     # Depths from top: 0=cube_N, 1=cube_state, 2=cur_pal
     "i dup 3 % - 3 / 3 pick = "  # combo_r (int-divided) ==cur_pal?
@@ -756,15 +756,15 @@ DIRECTOR_SCRIPT = (
     "28 0 do 0 200 i + write-mailbox loop "
     "0 411 write-mailbox "
     "0 413 write-mailbox "
-    "425 read-mailbox 1 + 425 write-mailbox "
+    "425 read-mailbox dup 15 < if 1 + then 425 write-mailbox "
     "0 400 write-mailbox 0 401 write-mailbox 0 402 write-mailbox "
     "0 414 write-mailbox 0 415 write-mailbox 0 419 write-mailbox "
-    # Re-init visibility for the new palette: hide all 336 vis slots, then
-    # show only state-0 actors for cur_palette (ROUND_NUMBER % 4).
-    "336 0 do 0 440 i + write-mailbox loop "  # zero all vis slots
+    # Re-init visibility for the new palette: hide all 1344 vis slots, then
+    # show only state-0 actors for cur_palette (ROUND_NUMBER, clamped at 15).
+    "1344 0 do 0 440 i + write-mailbox loop "  # zero all vis slots
     # Now show round's state-0 row.  Compute base = 440 + cur_pal*84 once,
     # then write 1 to base+i*3 for each cube.
-    "440 425 read-mailbox 4 % 84 * + "    # ( vis_base ) — % is zForth modulo
+    "440 425 read-mailbox 84 * + "    # ( vis_base )
     "28 0 do 1 over i 3 * + write-mailbox loop "
     "drop "
     "1 426 write-mailbox "
