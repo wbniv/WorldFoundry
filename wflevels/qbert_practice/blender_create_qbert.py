@@ -246,15 +246,111 @@ if light:
     light['wf_lightGreen'] = 1.0
     light['wf_lightBlue']  = 1.0
 
+def _make_principled_material(name, rgb):
+    """Create a Principled-BSDF material with Base Color set to rgb (0..1 tuple)."""
+    mat = bpy.data.materials.new(name=name)
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes.get('Principled BSDF')
+    if bsdf:
+        bsdf.inputs['Base Color'].default_value = (rgb[0], rgb[1], rgb[2], 1.0)
+    mat.diffuse_color = (rgb[0], rgb[1], rgb[2], 1.0)  # viewport solid-shade colour
+    return mat
+
+
+def _build_qbert_player_mesh():
+    """Build a 3D Q*bert from primitives, return the joined mesh object.
+
+    Silhouette: orange UV-sphere body, smaller orange head, peach conical
+    snout pointing +Y, two orange cylinder legs, dark-orange flattened feet.
+    All primitives joined into one mesh with per-face material assignments.
+    Origin at (0,0,0) = ground level (feet bottom).
+    """
+    mat_orange = _make_principled_material('qbert_orange',    (1.00, 0.53, 0.00))
+    mat_snout  = _make_principled_material('qbert_snout',     (1.00, 0.67, 0.40))
+    mat_feet   = _make_principled_material('qbert_feet',      (0.80, 0.33, 0.00))
+    mat_eye    = _make_principled_material('qbert_eye_white', (1.00, 1.00, 1.00))
+
+    parts = []  # (object, material)
+
+    # Body — UV sphere
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.55, segments=16, ring_count=12, location=(0, 0, 0.55))
+    parts.append((bpy.context.object, mat_orange))
+
+    # Head — smaller UV sphere
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.40, segments=14, ring_count=10, location=(0, 0, 1.25))
+    parts.append((bpy.context.object, mat_orange))
+
+    # Snout — cone pointing +Y (rotate 90° about X)
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=12, radius1=0.18, radius2=0.10, depth=0.45,
+        location=(0, 0.40, 1.20), rotation=(math.pi / 2, 0, 0)
+    )
+    parts.append((bpy.context.object, mat_snout))
+
+    # Legs — two cylinders
+    for x in (-0.22, 0.22):
+        bpy.ops.mesh.primitive_cylinder_add(
+            vertices=10, radius=0.13, depth=0.30, location=(x, 0, 0.15)
+        )
+        parts.append((bpy.context.object, mat_orange))
+
+    # Feet — flattened spheres in front of legs
+    for x in (-0.22, 0.22):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=0.20, segments=10, ring_count=6, location=(x, 0.05, 0.04)
+        )
+        bpy.context.object.scale = (1.0, 1.2, 0.4)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((bpy.context.object, mat_feet))
+
+    # Eyes — two small white spheres on the front of the head
+    for x in (-0.14, 0.14):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=0.07, segments=8, ring_count=6, location=(x, 0.30, 1.40)
+        )
+        parts.append((bpy.context.object, mat_eye))
+
+    # Smooth-shade everything, assign each part's single material to all its faces.
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for poly in obj.data.polygons:
+            poly.material_index = 0
+            poly.use_smooth = True
+
+    # Join into one mesh with the body as the active/target object.
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    body.name = 'QbertPlayerMesh'
+    body.data.name = 'QbertPlayerMesh'
+    return body
+
+
 # Player — Anchored, Q*bert hop state machine in Script
 player = find_by_class('player')
 if player:
     player.location = PLAYER_SPAWN_XYZ
     player['wf_Mobility'] = 'Anchored'
     player['wf_Mass'] = 0.0
-    player['wf_Mesh Name'] = 'qbert_player.iff'
+    player['wf_Mesh Name'] = 'player.iff'
     player['wf_Model Type'] = 'Mesh'
     player['wf_Visibility Mailbox'] = 1  # always visible
+
+    # Replace the imported snowgoons placeholder mesh with a real 3D Q*bert
+    # built from primitives. The export pipeline (wf_blender/export_level.py
+    # _write_mesh_iff) reads materials + per-face material_index off the mesh
+    # data and writes a multi-material player.iff — no manual binary IFF
+    # writing required.
+    qbert_mesh_obj = _build_qbert_player_mesh()
+    old_mesh = player.data
+    player.data = qbert_mesh_obj.data
+    bpy.data.objects.remove(qbert_mesh_obj, do_unlink=True)
+    if old_mesh and old_mesh.users == 0:
+        bpy.data.meshes.remove(old_mesh)
     # MVP hop state machine: one-tick teleport per stick edge, with cooldown
     # to prevent rapid-fire hops. Mailbox slots (per the original plan):
     #   400 ROW, 401 COL, 402 COOLDOWN, 411 LANDED, 414 FALL_DEATH
@@ -854,16 +950,5 @@ for row in range(NUM_ROWS):
                 shutil.copyfile(src, dst)
                 overwrite_count += 1
 print(f"[qbert] Overwrote {overwrite_count} per-cube IFFs with coloured gen_cube.py output.")
-
-# Same dual-Mesh-Name workaround for the player: the exporter writes player.iff
-# from the Blender object's geometry (white default-material box), overriding
-# the wf_Mesh Name='qbert_player.iff'. Copy the gen_player.py output over
-# player.iff so the engine's first Mesh Name resolves to the orange Q*bert
-# placeholder, not a white box.
-shutil.copyfile(
-    os.path.join(SCRIPT_DIR, 'qbert_player.iff'),
-    os.path.join(SCRIPT_DIR, 'player.iff'),
-)
-print(f"[qbert] Overwrote player.iff with gen_player.py output.")
 
 print(f"[qbert] Done — {OUT_LEV}")
