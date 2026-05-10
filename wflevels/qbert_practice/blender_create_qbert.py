@@ -7,14 +7,25 @@ Run headlessly:
 Strategy: import snowgoons-blender.lev (gets all infrastructure objects with
 correct OAD schemas attached), strip everything except the reusable
 infrastructure, reposition objects for the Q*bert pyramid layout, then
-generate 28 cube actors × 3 colour variants = 84 statplat instances at
-axial-coordinate positions, plus the player at the apex, plus a second
-camshot (cs_death) for the fall cutscene. Export to qbert_practice.lev.
+generate 28 cube actors at pyramid positions plus the player at the apex,
+plus a second camshot (cs_death) for the fall cutscene. Export to
+qbert_practice.lev.
+
+Phase-1 cube consolidation (2026-05-10, docs/plans/2026-05-10-qbert-cube-consolidation.md):
+  - 28 cube actors (one per pyramid position), all referencing the same
+    cube.iff (3-material mesh: top / lit-side / shadow-side).
+  - Per-face material color is mutated at runtime via the new
+    EMAILBOX_FACE_COLOR_TOP/LIT/SHADOW slots (mailbox.inc:3037..3039),
+    written from the director script via `write-actor-mailbox`.
+  - Director maintains the per-cube state (200..227) and a 16-round x
+    3-state top-color LUT, plus the per-level lit/shadow side colors;
+    on cube-state changes it writes the new top color to that cube; on
+    level transitions it writes new side colors to all 28 cubes.
+  - Replaces the prior 1344-actor visibility-fan-out (28 positions x 16
+    rounds x 3 states) which baked colors into prebaked .iff variants.
 
 MVP scope (per docs/plans/2026-05-03-qbert-mvp.md):
   - 28-cube pyramid in a 7-row triangular layout.
-  - Per-cube colour state via 4*3=12 child mesh variants; director drives
-    visibility mailboxes 440..775 (round*84 + cube*3 + state).
   - Player as an Anchored actor with the hop state machine in its Script.
   - Director script for cube-state advance and win check (colour rule 0).
   - Two CamShots (cs_pyramid and cs_death) wired through INDEXOF_CAMSHOT.
@@ -44,14 +55,16 @@ CUBE_BASE_Z = 1.0  # bottom row centre Z (cubes extend ±1 around their centre)
 # adjacent diamonds touch corner-to-corner with no overlap.
 SQRT2 = math.sqrt(2.0)
 
-# Mailbox layout — engine cap was bumped to GLOBAL_USER_MAX=999 on 2026-05-03,
-# so the original spacious plan from docs/plans/2026-05-03-qbert-mvp.md applies:
+# Mailbox layout (qbert_practice).
 #   2          END_TIME (engine sentinel — mm convention)
 #   13         DEATH (engine signal — mm convention)
 #   70..72     HUD score/timer/lives (mm convention; mb 72 LIVES rendered by DrawHud)
 #   100..101   camshot zone signals from ActBoxOR (mm convention)
-#   200..227   CUBE_STATE_BASE (28 slots, cube N at 200+N)
-#   440..775   VIS_BASE (336 slots, round R cube N state S at 440+R*84+N*3+S)
+#   200..227   CUBE_STATE_BASE (28 slots, cube N's per-frame state at 200+N — values 0/1/2)
+#   228..255   CUBE_PREV_STATE_BASE (28 slots, last-frame value of CUBE_STATE — director
+#              compares to detect state changes and re-write that cube's TOP color)
+#   256..303   ROUND_TOP_LUT (48 slots, round R state S top RGB at 256 + R*3 + S — populated
+#              once at level init from gen_cube.ROUND_TOP_COLORS)
 #   400        QBERT_ROW
 #   401        QBERT_COL
 #   402        HOP_COOLDOWN
@@ -68,17 +81,31 @@ SQRT2 = math.sqrt(2.0)
 #   421        LEVEL_INITIALIZED (director one-shot init flag — sets lives=3 once)
 #   422        LAST_STICK (player edge-detect snapshot for restart-button trigger)
 #   424        ROUND_CLEAR_TIMER (director internal — counts down 90→0 on win, then resets)
-#   425        ROUND_NUMBER (0-based; increments on each clear)
+#   425        ROUND_NUMBER (0-based; increments on each clear, 0..15)
+#   426        ROUND_CHANGED (director-internal one-shot — set when round counter
+#              advances; next-tick handler broadcasts the new round's TOP colors
+#              to all 28 cubes; cleared after broadcast)
+#   427        LAST_LEVEL (director-internal — last level index whose side colors
+#              were broadcast; compared to ROUND_NUMBER//4 to detect level changes)
 #   430        AUTOPILOT_ON (0=joystick mode, 1=autopilot demo mode)
 #   431        AUTOPILOT_STEP (current step index 0..31; reset on respawn/restart)
 #   432        CAPTURE_TRIGGER (Phase E walker — 1=state-0 snap, 2=state-1 snap,
 #              3=round-clear, 0 otherwise. Host watches transitions and issues
 #              `screenshot` ops over the debug bridge.)
-INDEXOF_CUBE_STATE_BASE = 200
-INDEXOF_VIS_BASE = 440   # 440 + r*84 + i*3 + s; max = 440+15*84+27*3+2 = 1783
-NUM_ROUNDS = 16          # palette cycles; matches gen_cube.py ROUND_COLORS
+#
+# Per-cube color overrides live on each cube actor's local mailboxes:
+#   3037 / 3038 / 3039 = EMAILBOX_FACE_COLOR_TOP / LIT / SHADOW (mailbox.inc)
+# The director writes them via the `write-actor-mailbox` zForth primitive,
+# addressing each cube by its actor index. CUBE_ACTOR_BASE is computed at
+# export time and embedded into the director Forth as a constant.
+INDEXOF_CUBE_STATE_BASE      = 200
+INDEXOF_CUBE_PREV_STATE_BASE = 228   # 228..255
+INDEXOF_ROUND_TOP_LUT_BASE   = 256   # 256..303 (16 rounds × 3 states)
+INDEXOF_ROUND_NUMBER         = 425
+INDEXOF_ROUND_CHANGED        = 426
+INDEXOF_LAST_LEVEL           = 427
 
-NUM_MAILBOXES = 1800  # >= 1784 (highest vis slot for 16 rounds)
+NUM_MAILBOXES = 500  # well above the highest mailbox we use (~432)
 
 
 def cube_index(row, col):
@@ -283,10 +310,13 @@ def _build_qbert_player_mesh():
     bpy.ops.mesh.primitive_uv_sphere_add(radius=0.40, segments=8, ring_count=5, location=(0, 0, 1.25))
     parts.append((bpy.context.object, mat_orange))
 
-    # Snout — cone pointing +Y (rotate 90° about X) (~9 verts)
+    # Camera is at (0, -22, 23) looking +Y at the pyramid (apex at +Y),
+    # so Q*bert's "front" (toward viewer) is -Y. Snout, eyes, feet point -Y.
+
+    # Snout — cone pointing -Y (rotate -90° about X) (~9 verts)
     bpy.ops.mesh.primitive_cone_add(
         vertices=8, radius1=0.18, radius2=0.10, depth=0.45,
-        location=(0, 0.40, 1.20), rotation=(math.pi / 2, 0, 0)
+        location=(0, -0.40, 1.20), rotation=(-math.pi / 2, 0, 0)
     )
     parts.append((bpy.context.object, mat_snout))
 
@@ -297,19 +327,19 @@ def _build_qbert_player_mesh():
         )
         parts.append((bpy.context.object, mat_orange))
 
-    # Feet — flattened spheres in front of legs (~24 verts each)
+    # Feet — flattened spheres in front of legs (-Y is "front") (~24 verts each)
     for x in (-0.22, 0.22):
         bpy.ops.mesh.primitive_uv_sphere_add(
-            radius=0.20, segments=6, ring_count=4, location=(x, 0.05, 0.04)
+            radius=0.20, segments=6, ring_count=4, location=(x, -0.05, 0.04)
         )
         bpy.context.object.scale = (1.0, 1.2, 0.4)
         bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
         parts.append((bpy.context.object, mat_feet))
 
-    # Eyes — two small white spheres on the front of the head (~12 verts each)
+    # Eyes — two small white spheres on the front (-Y) of the head (~12 verts each)
     for x in (-0.14, 0.14):
         bpy.ops.mesh.primitive_uv_sphere_add(
-            radius=0.07, segments=6, ring_count=4, location=(x, 0.30, 1.40)
+            radius=0.07, segments=6, ring_count=4, location=(x, -0.30, 1.40)
         )
         parts.append((bpy.context.object, mat_eye))
 
@@ -725,192 +755,248 @@ CS_DEATH_HOLD_FRAMES = 60
 # Total: 1 + 72 + 30 + 18 + 30 + 72 = 223 frames ≈ 3.72 s at 60 Hz.
 INTRO_LEG_FRAMES = [1, 72, 30, 18, 30, 72]
 
-DIRECTOR_SCRIPT = (
-    "\\ wf qbert director MVP\n"  # first line skipped as sigil
+# ── Import Phase-1 color tables from gen_cube (data-only import) ──────────────
+# We need the per-round/per-state TOP color LUT and the per-level LIT/SHADOW
+# colors for the director Forth. gen_cube.py exposes them as module globals.
+import importlib.util as _ilu
+_spec = _ilu.spec_from_file_location("_gen_cube", os.path.join(SCRIPT_DIR, "gen_cube.py"))
+_gen_cube = _ilu.module_from_spec(_spec)
+_spec.loader.exec_module(_gen_cube)
+ROUND_TOP_COLORS    = _gen_cube.ROUND_TOP_COLORS    # 16 × (s0, s1, s2)
+LEVEL_SIDE_COLORS   = _gen_cube.LEVEL_SIDE_COLORS   # 4 × (lit, shadow)
+ROUND_SIDE_OVERRIDES = _gen_cube.ROUND_SIDE_OVERRIDES  # {round_idx: (lit, shadow)}
+
+# Compute CUBE_ACTOR_BASE here (before the director script needs it). The
+# level loader assigns 1-based actor indices in scene-collection order.
+# Cubes are appended last, so cube N's actor index = pre-cube count + 1 + N.
+SCHEMA_PATH_KEY = 'wf_schema_path'
+_pre_cube_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+CUBE_ACTOR_BASE = _pre_cube_actor_count + 1
+print(f"[qbert] Pre-cube actor count = {_pre_cube_actor_count}; "
+      f"CUBE_ACTOR_BASE = {CUBE_ACTOR_BASE} (first cube's actor index)")
+
+# Forth fragment: populate ROUND_TOP_LUT (mb 256..303) at level init.
+#   slot 256 + r*3 + s = top RGB for (round r, state s)
+_top_lut_init = ""
+for _r, (_s0, _s1, _s2) in enumerate(ROUND_TOP_COLORS):
+    for _s, _rgb in enumerate((_s0, _s1, _s2)):
+        _slot = INDEXOF_ROUND_TOP_LUT_BASE + _r * 3 + _s
+        _top_lut_init += f"0x{_rgb:06X} {_slot} write-mailbox "
+
+def _broadcast_color_to_all_cubes(rgb, mb_idx):
+    """Forth fragment: write packed RGB to `mb_idx` on every one of the 28 cubes."""
+    return (
+        f"28 0 do "
+        f"0x{rgb:06X} {mb_idx} {CUBE_ACTOR_BASE} i + write-actor-mailbox "
+        f"loop "
+    )
+
+DIRECTOR_SCRIPT = "".join([
+    "\\ wf qbert director MVP\n",  # first line skipped as sigil
     # One-shot level init — sets lives = 3 once on first tick. The player's
     # restart trigger ALSO writes lives=3 directly (mb 72=3) without
     # touching mb 421, so subsequent runs of this block are no-ops. Also
-    # touches mb 70/71 so the HUD shows SCORE/TIMER lines from the start
-    # (not strictly required — DrawHud reads zero as zero — but explicit
-    # is clearer, and pre-allocates the slots for future scoring work).
-    "421 read-mailbox 0 = if "
-    "3 72 write-mailbox "
-    "0 70 write-mailbox 0 71 write-mailbox "
-    "1 421 write-mailbox "
-    "then\n"
+    # touches mb 70/71 so the HUD shows SCORE/TIMER lines from the start.
+    # Phase 1 cube consolidation also populates the ROUND_TOP_LUT and writes
+    # initial TOP/LIT/SHADOW colors to all 28 cubes so the first rendered
+    # frame shows the L1R1 palette.
+    "421 read-mailbox 0 = if ",
+    "3 72 write-mailbox ",
+    "0 70 write-mailbox 0 71 write-mailbox ",
+    # Populate ROUND_TOP_LUT (mb 256..303) — 48 entries.
+    _top_lut_init,
+    # Initialize CUBE_PREV_STATE_BASE[N] to a sentinel (99) so the per-tick
+    # state-change detector below fires once for every cube on the next tick
+    # and writes their (R0, S0) TOP color.
+    "28 0 do 99 228 i + write-mailbox loop ",
+    # Write initial LIT/SHADOW for L1 to all 28 cubes.
+    _broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[0][0], 3038),  # LIT
+    _broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[0][1], 3039),  # SHADOW
+    "0 427 write-mailbox ",   # LAST_LEVEL = 0 (L1)
+    "1 421 write-mailbox ",   # LEVEL_INITIALIZED
+    "then\n",
     # Intro state machine — runs only while phase 0..5; gates the rest of
     # the camera routing via mb 418 (INTRO_DONE). See the per-phase
     # narrative in the Python comments above INTRO_LEG_FRAMES.
-    "416 read-mailbox 6 < if "
+    "416 read-mailbox 6 < if ",
     # First tick of this phase (timer==0): write the matching CamShot index.
     # Phase 0..4 → cs_intro_0..4 (indices 13..17). Phase 5 → cs_pyramid (8).
-    "417 read-mailbox 0 = if "
-    f"416 read-mailbox dup 5 < if {CS_INTRO_BASE_IDX} + else drop {CS_PYRAMID_IDX} then "
-    "INDEXOF_CAMSHOT write-mailbox "
-    "then "
+    "417 read-mailbox 0 = if ",
+    f"416 read-mailbox dup 5 < if {CS_INTRO_BASE_IDX} + else drop {CS_PYRAMID_IDX} then ",
+    "INDEXOF_CAMSHOT write-mailbox ",
+    "then ",
     # Increment timer (every tick).
-    "417 read-mailbox 1 + 417 write-mailbox "
+    "417 read-mailbox 1 + 417 write-mailbox ",
     # Compare timer to this phase's leg-duration threshold.
-    "417 read-mailbox 416 read-mailbox "
-    f"dup 0 = if drop {INTRO_LEG_FRAMES[0]} else "
-    f"dup 1 = if drop {INTRO_LEG_FRAMES[1]} else "
-    f"dup 2 = if drop {INTRO_LEG_FRAMES[2]} else "
-    f"dup 3 = if drop {INTRO_LEG_FRAMES[3]} else "
-    f"dup 4 = if drop {INTRO_LEG_FRAMES[4]} else "
-    f"drop {INTRO_LEG_FRAMES[5]} "
-    "then then then then then "
-    # Threshold met (timer == leg duration): advance to next phase, reset
-    # timer. If we just entered phase 6, latch INTRO_DONE.
-    "= if "
-    "416 read-mailbox 1 + dup 416 write-mailbox "
-    "0 417 write-mailbox "
-    "6 = if 1 418 write-mailbox then "
-    "then "
-    "then\n"
-    # Camshot routing: when death timer (mb 415) > 0, hold cs_death.
-    # When 414 (FALL_DEATH) fires, latch cs_death and start countdown.
-    # Otherwise pass actboxor's signal (mb 100) through to INDEXOF_CAMSHOT.
-    # Gated on INTRO_DONE so the intro state machine has exclusive control of
-    # INDEXOF_CAMSHOT during the sweep.
-    #
-    # Also fold lives decrement + game-over latch into the FALL_DEATH branch
-    # — both fire in the same tick FALL_DEATH=1 latches, so this is the
-    # natural single-source one-shot. Decrement mb 72; if it hits 0, latch
-    # mb 420 (GAME_OVER) which the player picks up to freeze input + arm
-    # the restart-button trigger.
-    f"414 read-mailbox 1 = if {CS_DEATH_IDX} INDEXOF_CAMSHOT write-mailbox "
-    f"{CS_DEATH_HOLD_FRAMES} 415 write-mailbox "
-    "72 read-mailbox 1 - dup 72 write-mailbox "
-    "0 = if 1 420 write-mailbox then "
-    "0 414 write-mailbox then\n"
-    "418 read-mailbox 1 = if "
-    "415 read-mailbox dup 0 > if 1 - dup 415 write-mailbox "
-    f"0 = if {CS_PYRAMID_IDX} INDEXOF_CAMSHOT write-mailbox then "
-    "else drop 100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then "
-    "then "
-    "then\n"
-    # Cube-state advance on landed event
-    "411 read-mailbox 0 <> if "
-    "400 read-mailbox dup 1 + * 2 / 401 read-mailbox + 200 + "
-    "dup read-mailbox 0 = if 2 swap write-mailbox else drop then "
-    "0 411 write-mailbox then\n"
-    # Visibility fan-out: for each cube, show only the actor for
-    # (cur_palette, cube_state); hide all 48 variants (16 rounds * 3 states).
-    # cur_palette = ROUND_NUMBER (clamped at 15).  Vis mailbox = 440 + r*84 + N*3 + s.
-    #
-    # IMPORTANT: we push cube_N onto the DATA stack and reach it via `pick`
-    # (not via `j` outer-loop counter). zForth's `j` is `pickr 2`, defined
-    # in engine/stubs/scripting_zforth.cc:234 — this codebase's only use of
-    # `j` was here, and it's not unit-tested. Avoid it for safety.
-    #
-    # Stack tracing is critical because the depth shifts as values are
-    # pushed during each iteration; comments below show stack at each step
-    # with `T:` indicating the topmost element.
-    # CRITICAL: zForth `/` is FLOAT division (per
-    # ~/.claude/memory/feedback_zforth_int_divide.md). `i 3 /` returns 1.667
-    # for i=5; comparisons like `combo_r = cur_pal` silently fail. Cast to
-    # int via `i dup 3 % - 3 /` so combo_r is a real integer.
-    "425 read-mailbox "         # ( cur_pal )  T:cur_pal — round counter clamped at 15 below
-    "28 0 do "                  # outer: i = cube N, 0..27
-    "200 i + read-mailbox "     # ( cur_pal cube_state )  T:cube_state
-    "i "                        # ( cur_pal cube_state cube_N )  T:cube_N
-    "48 0 do "                  # inner: i = combo 0..47 (16 rounds * 3 states)
-    # Inner-body stack at entry: ( cur_pal cube_state cube_N )
-    # Depths from top: 0=cube_N, 1=cube_state, 2=cur_pal
-    "i dup 3 % - 3 / 3 pick = "  # combo_r (int-divided) ==cur_pal?
-    # After int-cast: ( cur_pal cube_state cube_N combo_r )  depths 0..3
-    # `3 pick` reaches cur_pal (depth 3): ( ... combo_r cur_pal )
-    # `=` consumes both: ( cur_pal cube_state cube_N bool_r )
-    "i 3 % 3 pick = & "         # combo_s==cube_state? AND
-    # After `i 3 %`:  ( cur_pal cube_state cube_N bool_r combo_s )
-    # `3 pick` reaches cube_state (depth 3): ( ... combo_s cube_state )
-    # `=` then `&`: ( cur_pal cube_state cube_N flag )
-    "if 1 else 0 then "         # ( cur_pal cube_state cube_N vis_flag )
-    # Address: 440 + (combo/3)*84 + cube_N*3 + (combo%3)
-    "440 i dup 3 % - 3 / 84 * + "  # int-cast i/3 for the address too
-    "2 pick 3 * + "             # cube_N at depth 2 → multiply by 3, add
-    # After `2 pick`: ( ... vis_flag base cube_N )
-    # `3 *`: ( ... vis_flag base cube_N*3 )
-    # `+`:   ( ... vis_flag base+cube_N*3 )
-    "i 3 % + "                  # ( ... vis_flag addr )
-    "write-mailbox "            # pops vis_flag, addr → ( cur_pal cube_state cube_N )
-    "loop "
-    "drop drop "                # drop cube_N, cube_state → ( cur_pal )
-    "loop "
-    "drop\n"                    # drop cur_pal → ( )
-    # Win check: count cubes whose state != 2; write count to mb 412, win flag to 413
-    "0 28 0 do 200 i + read-mailbox 2 <> if 1 + then loop "
-    "dup 412 write-mailbox 0 = if 1 413 write-mailbox then\n"
-    # Round-clear: start 90-tick countdown when win latches (one-shot — only if
-    # timer is not already running), then on expiry reset all cube states,
-    # clear the win flag, increment the round counter, and respawn at apex.
-    # capture-trigger fires at LATCH so the host snaps the won state (all
-    # 28 cubes in state-2) BEFORE the 90-frame countdown resets them.
-    "413 read-mailbox 1 = if 424 read-mailbox 0 = if "
-    "90 424 write-mailbox 3 432 write-mailbox "
-    "then then\n"
-    "424 read-mailbox dup 0 > if "
-    "1 - dup 424 write-mailbox "
-    "0 = if "
-    "28 0 do 0 200 i + write-mailbox loop "
-    "0 411 write-mailbox "
-    "0 413 write-mailbox "
-    "425 read-mailbox dup 15 < if 1 + then 425 write-mailbox "
-    "0 400 write-mailbox 0 401 write-mailbox 0 402 write-mailbox "
-    "0 414 write-mailbox 0 415 write-mailbox 0 419 write-mailbox "
-    # Re-init visibility for the new palette: hide all 1344 vis slots, then
-    # show only state-0 actors for cur_palette (ROUND_NUMBER, clamped at 15).
-    "1344 0 do 0 440 i + write-mailbox loop "  # zero all vis slots
-    # Now show round's state-0 row.  Compute base = 440 + cur_pal*84 once,
-    # then write 1 to base+i*3 for each cube.
-    "440 425 read-mailbox 84 * + "    # ( vis_base )
-    "28 0 do 1 over i 3 * + write-mailbox loop "
-    "drop "
-    "1 426 write-mailbox "
-    "then "
-    "else drop then\n"
-)
+    "417 read-mailbox 416 read-mailbox ",
+    f"dup 0 = if drop {INTRO_LEG_FRAMES[0]} else ",
+    f"dup 1 = if drop {INTRO_LEG_FRAMES[1]} else ",
+    f"dup 2 = if drop {INTRO_LEG_FRAMES[2]} else ",
+    f"dup 3 = if drop {INTRO_LEG_FRAMES[3]} else ",
+    f"dup 4 = if drop {INTRO_LEG_FRAMES[4]} else ",
+    f"drop {INTRO_LEG_FRAMES[5]} ",
+    "then then then then then ",
+    # Threshold met: advance phase, reset timer. If just entered phase 6,
+    # latch INTRO_DONE.
+    "= if ",
+    "416 read-mailbox 1 + dup 416 write-mailbox ",
+    "0 417 write-mailbox ",
+    "6 = if 1 418 write-mailbox then ",
+    "then ",
+    "then\n",
+    # Camshot routing: cs_death hold + FALL_DEATH latch + game-over fold-in.
+    f"414 read-mailbox 1 = if {CS_DEATH_IDX} INDEXOF_CAMSHOT write-mailbox ",
+    f"{CS_DEATH_HOLD_FRAMES} 415 write-mailbox ",
+    "72 read-mailbox 1 - dup 72 write-mailbox ",
+    "0 = if 1 420 write-mailbox then ",
+    "0 414 write-mailbox then\n",
+    "418 read-mailbox 1 = if ",
+    "415 read-mailbox dup 0 > if 1 - dup 415 write-mailbox ",
+    f"0 = if {CS_PYRAMID_IDX} INDEXOF_CAMSHOT write-mailbox then ",
+    "else drop 100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then ",
+    "then ",
+    "then\n",
+    # Cube-state advance on landed event (unchanged from prior design).
+    "411 read-mailbox 0 <> if ",
+    "400 read-mailbox dup 1 + * 2 / 401 read-mailbox + 200 + ",
+    "dup read-mailbox 0 = if 2 swap write-mailbox else drop then ",
+    "0 411 write-mailbox then\n",
+    # ── Per-cube TOP-color update on state change ───────────────────────────
+    # Every tick, for each cube N (0..27):
+    #   cur  = read CUBE_STATE_BASE + N         ( 200..227 )
+    #   prev = read CUBE_PREV_STATE_BASE + N    ( 228..255 )
+    #   if cur != prev:
+    #     rgb = read ROUND_TOP_LUT[ROUND_NUMBER * 3 + cur]
+    #     write rgb to actor (CUBE_ACTOR_BASE + N) mailbox 3037 (FACE_COLOR_TOP)
+    #     write cur to CUBE_PREV_STATE_BASE + N
+    # Inner body stack notes inline.
+    "28 0 do ",
+    # ( -- )
+    "200 i + read-mailbox ",      # ( cur )
+    "228 i + read-mailbox ",      # ( cur prev )
+    "over over <> if ",           # ( cur prev )  — branch if cur != prev
+    "drop ",                      # ( cur ) — drop prev
+    # Look up rgb = ROUND_TOP_LUT[ROUND_NUMBER * 3 + cur]
+    "425 read-mailbox 3 * over + 256 + read-mailbox ",  # ( cur rgb )
+    # write rgb 3037 (CUBE_ACTOR_BASE + i) write-actor-mailbox
+    f"3037 {CUBE_ACTOR_BASE} i + write-actor-mailbox ",  # ( cur ) — rgb consumed
+    # Update prev: 228 + i = i + 228, i is loop index. Actually we still have cur on stack.
+    "228 i + write-mailbox ",     # ( ) — wrote `cur` to mb 228+i
+    "else ",
+    "drop drop ",                 # ( ) — drop cur and prev (no change)
+    "then ",
+    "loop\n",
+    # ── Level-transition LIT/SHADOW broadcast ───────────────────────────────
+    # cur_level = ROUND_NUMBER // 4 (with int-cast, since `/` is float in zForth).
+    # If cur_level != LAST_LEVEL, broadcast new lit/shadow to all 28 cubes,
+    # then set LAST_LEVEL = cur_level.
+    # zForth int-divide trick: `n dup 4 % - 4 /` → integer (n // 4).
+    "425 read-mailbox dup 4 % - 4 / ",   # ( cur_level )
+    "dup 427 read-mailbox <> if ",       # ( cur_level )
+    # Save cur_level to LAST_LEVEL first, then look up colors.
+    "dup 427 write-mailbox ",            # ( cur_level ) — wrote LAST_LEVEL
+    # Look up lit/shadow per level via if/else cascade (4 levels).
+    "dup 0 = if drop ",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[0][0], 3038)}",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[0][1], 3039)}",
+    "else dup 1 = if drop ",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[1][0], 3038)}",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[1][1], 3039)}",
+    "else dup 2 = if drop ",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[2][0], 3038)}",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[2][1], 3039)}",
+    "else drop ",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[3][0], 3038)}",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[3][1], 3039)}",
+    "then then then ",
+    "else drop then\n",
+    # Win check: count cubes with state != 2. Latch ROUND_CLEAR when count == 0.
+    "0 28 0 do 200 i + read-mailbox 2 <> if 1 + then loop ",
+    "dup 412 write-mailbox 0 = if 1 413 write-mailbox then\n",
+    # Round-clear countdown — start 90-tick timer on win latch, on expiry
+    # reset cube states, clear win flag, increment ROUND_NUMBER, respawn.
+    # capture-trigger fires at LATCH so the host snaps the won state.
+    "413 read-mailbox 1 = if 424 read-mailbox 0 = if ",
+    "90 424 write-mailbox 3 432 write-mailbox ",
+    "then then\n",
+    "424 read-mailbox dup 0 > if ",
+    "1 - dup 424 write-mailbox ",
+    "0 = if ",
+    # Reset per-cube state to 0 — the per-tick state-change detector above
+    # will see (cur=0, prev=2) on the next tick and re-write the new round's
+    # state-0 TOP color to every cube. No visibility fan-out needed.
+    "28 0 do 0 200 i + write-mailbox loop ",
+    "0 411 write-mailbox ",
+    "0 413 write-mailbox ",
+    "425 read-mailbox dup 15 < if 1 + then 425 write-mailbox ",
+    "0 400 write-mailbox 0 401 write-mailbox 0 402 write-mailbox ",
+    "0 414 write-mailbox 0 415 write-mailbox 0 419 write-mailbox ",
+    "1 426 write-mailbox ",   # apex respawn flag for player
+    "then ",
+    "else drop then\n",
+])
 if director:
     director['wf_Script'] = DIRECTOR_SCRIPT
 
-# ── 7. Create the 28 × 4 rounds × 3 states = 336 cube child-mesh actors ────────
-print(f"[qbert] Creating {TOTAL_CUBES} cubes × {NUM_ROUNDS} rounds × 3 states = "
-      f"{TOTAL_CUBES * NUM_ROUNDS * 3} actors...")
+# ── 7. Create 28 cube actors at pyramid positions ────────────────────────────
+# Phase 1 (2026-05-10) collapsed the prior 1344-actor visibility-fan-out (28
+# positions × 16 rounds × 3 states) down to 28 actors. Per-frame face colors
+# come from runtime EMAILBOX_FACE_COLOR_TOP/LIT/SHADOW writes by the director,
+# not from baked-in .iff variants. All 28 actors reference the same cube.iff.
+#
+# CUBE_ACTOR_BASE was computed above (before the director script generation)
+# from the count of objects already in scene.objects when the cube creation
+# loop runs. The director uses CUBE_ACTOR_BASE + N to address cube N.
+#
+# Verify that the count we captured still matches now. If anything between
+# the count and this point added/removed actors, the indices will be wrong.
+_now_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+assert _now_actor_count == _pre_cube_actor_count, (
+    f"Actor count drifted between CUBE_ACTOR_BASE capture ({_pre_cube_actor_count}) "
+    f"and cube creation ({_now_actor_count}); director Forth will address the "
+    f"wrong actors. Move the CUBE_ACTOR_BASE calculation closer to here.")
+
+# One shared mesh datablock for all 28 cubes (saves Blender memory; engine
+# reads geometry from cube.iff regardless).
+_cube_mesh = bpy.data.meshes.new('cube_mesh_shared')
+_s = CUBE_SIZE / 2
+_box_verts = [
+    (-_s, -_s, -_s), ( _s, -_s, -_s), ( _s,  _s, -_s), (-_s,  _s, -_s),
+    (-_s, -_s,  _s), ( _s, -_s,  _s), ( _s,  _s,  _s), (-_s,  _s,  _s),
+]
+_box_faces = [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4),
+              (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
+_cube_mesh.from_pydata(_box_verts, [], _box_faces)
+_cube_mesh.update()
+
+print(f"[qbert] Creating {TOTAL_CUBES} cube actors (one per pyramid position, "
+      f"all referencing cube.iff)...")
 created_count = 0
 for row in range(NUM_ROWS):
     for col in range(row + 1):
         N = cube_index(row, col)
         wx, wy, wz = cube_world_position(row, col)
-        for r in range(NUM_ROUNDS):
-            for state_idx in range(3):
-                obj_name = f"cube_{N:02d}_r{r}_s{state_idx}"
-                mesh_data = bpy.data.meshes.new(f"cube_mesh_{N:02d}_r{r}_s{state_idx}")
-                s = CUBE_SIZE / 2
-                box_verts = [
-                    (-s, -s, -s), (s, -s, -s), (s, s, -s), (-s, s, -s),
-                    (-s, -s,  s), (s, -s,  s), (s, s,  s), (-s, s,  s),
-                ]
-                box_faces = [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4),
-                             (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
-                mesh_data.from_pydata(box_verts, [], box_faces)
-                mesh_data.update()
+        obj_name = f"cube_{N:02d}"
+        obj = bpy.data.objects.new(obj_name, _cube_mesh)
+        obj.location = (wx, wy, wz)
+        obj.rotation_euler = (0.0, 0.0, math.pi / 4)  # diamond top
+        scene.collection.objects.link(obj)
 
-                obj = bpy.data.objects.new(obj_name, mesh_data)
-                obj.location = (wx, wy, wz)
-                obj.rotation_euler = (0.0, 0.0, math.pi / 4)  # diamond top
-                scene.collection.objects.link(obj)
-
-                vis_mb = INDEXOF_VIS_BASE + r * 84 + N * 3 + state_idx
-                # Only round-0, state-0 actors start visible.
-                initial_vis = 1 if (r == 0 and state_idx == 0) else 0
-
-                obj['wf_schema_path'] = STATPLAT_OAD
-                obj['wf_Mesh Name'] = f'cube_state{state_idx}_r{r}.iff'
-                obj['wf_Model Type'] = 'Mesh'
-                obj['wf_Mobility'] = 'Anchored'
-                obj['wf_Mass'] = 0.0
-                obj['wf_Visibility Mailbox'] = vis_mb
-                created_count += 1
+        obj['wf_schema_path'] = STATPLAT_OAD
+        obj['wf_Mesh Name'] = 'cube.iff'
+        # The exporter (export_level.py:986) chooses mesh_filename from
+        # wf_original_mesh_name if set, else obj.name + ".iff". Without setting
+        # this, each cube would get its own cube_NN.iff entry — defeating the
+        # whole point of consolidation. Force the shared name.
+        obj['wf_original_mesh_name'] = 'cube.iff'
+        obj['wf_Model Type'] = 'Mesh'
+        obj['wf_Mobility'] = 'Anchored'
+        obj['wf_Mass'] = 0.0
+        # Visibility: always-visible. mb 1 is hardwired to TRUE
+        # (mailbox.inc:10), so this slot reads 1 forever and the cube stays
+        # rendered. Per-cube hide/show is no longer needed in Phase 1.
+        obj['wf_Visibility Mailbox'] = 1
+        created_count += 1
 
 print(f"[qbert] Created {created_count} cube actors.")
 
@@ -938,20 +1024,38 @@ bpy.ops.wm.save_as_mainfile(filepath=OUT_BLEND)
 print(f"[qbert] Exporting to {OUT_LEV}")
 bpy.ops.wf.export_level(filepath=OUT_LEV)
 
-# The exporter writes a Blender-side mesh IFF for every actor (cube_NN_rR_sS.iff)
-# with a white default material. Overwrite each with the gen_cube.py-generated
-# cube_state{s}_r{r}.iff so the correct per-round material colour reaches the engine.
-import shutil
-overwrite_count = 0
-for row in range(NUM_ROWS):
-    for col in range(row + 1):
-        N = cube_index(row, col)
-        for r in range(NUM_ROUNDS):
-            for state_idx in range(3):
-                src = os.path.join(SCRIPT_DIR, f'cube_state{state_idx}_r{r}.iff')
-                dst = os.path.join(SCRIPT_DIR, f'cube_{N:02d}_r{r}_s{state_idx}.iff')
-                shutil.copyfile(src, dst)
-                overwrite_count += 1
-print(f"[qbert] Overwrote {overwrite_count} per-cube IFFs with coloured gen_cube.py output.")
+# Phase 1 cube consolidation (2026-05-10):
+# All 28 cube actors reference the same cube.iff via wf_Mesh Name. The Blender
+# exporter writes a placeholder cube.iff with the shared mesh's default
+# (white) materials; we overwrite it with the gen_cube.py output (proper
+# 3-material MATL chunk). One file replaces the prior 1344-file fan-out.
+import subprocess
+gen_cube_py = os.path.join(SCRIPT_DIR, 'gen_cube.py')
+print(f"[qbert] Generating cube.iff via gen_cube.py")
+subprocess.check_call([sys.executable, gen_cube_py, SCRIPT_DIR])
+
+# Clean up stale per-actor cube .iff files from the prior fan-out design so
+# build_level_binary.sh / iffcomp doesn't pick them up by accident.
+import glob
+stale_count = 0
+# Old fan-out: cube_NN_rR_sS.iff (1344 files)
+for stale in glob.glob(os.path.join(SCRIPT_DIR, 'cube_[0-9][0-9]_r*_s*.iff')):
+    os.remove(stale)
+    stale_count += 1
+# Old gen_cube.py output: cube_state{0,1,2}_r{0..15}.iff (48 files) and the
+# even older cube_state{0,1,2}.iff (3 files) from before the per-round expansion.
+for stale in glob.glob(os.path.join(SCRIPT_DIR, 'cube_state*.iff')):
+    os.remove(stale)
+    stale_count += 1
+# Per-actor placeholders the exporter may also have written from earlier runs
+# before we set wf_original_mesh_name='cube.iff' — cube_NN.iff and cube_NN_sN.iff.
+for stale in glob.glob(os.path.join(SCRIPT_DIR, 'cube_[0-9][0-9].iff')):
+    os.remove(stale)
+    stale_count += 1
+for stale in glob.glob(os.path.join(SCRIPT_DIR, 'cube_[0-9][0-9]_s*.iff')):
+    os.remove(stale)
+    stale_count += 1
+if stale_count:
+    print(f"[qbert] Removed {stale_count} stale cube .iff files from prior designs.")
 
 print(f"[qbert] Done — {OUT_LEV}")

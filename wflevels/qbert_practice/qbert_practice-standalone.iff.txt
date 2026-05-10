@@ -1,6 +1,20 @@
 // qbert_practice-standalone.iff.txt — L4-wrapped form of qbert_practice for wf_game -L.
 //
-// Build:
+// NOTE (2026-05-10): iffcomp-rs's `[ "..." ]` inlining produces a standalone
+// binary the engine refuses to load (`_chunkID.Valid()` assertion when the
+// inner iff exceeds ~120 KB). Until that's fixed, the working
+// qbert_practice-standalone.iff is hand-built by a small Python wrap that
+// copies the L4 header + RAM block from the previously-working committed
+// standalone and concatenates the freshly-built inner. See
+// docs/investigations/2026-05-10-qbert-engine-caps.md, "Files modified"
+// section. This .txt is preserved as the canonical source for when
+// iffcomp-rs inlining is fixed.
+//
+// Phase 1 (cube consolidation, 2026-05-10) drops the inner iff from 1.93 MB
+// to ~45 KB. Budgets below are sized for the current 28-cube design, with
+// snowgoons-class margin.
+//
+// Build (when iffcomp-rs inlining works):
 //   ../../wftools/iffcomp-rs/target/release/iffcomp -binary \
 //     -o=qbert_practice-standalone.iff qbert_practice-standalone.iff.txt
 //
@@ -9,9 +23,9 @@
 { 'L4'
     { 'ALGN' .align( 2048 ) }
     { 'RAM'
-        'OBJD' 4000000l                // 1344 actors (16-round palettes); restored from HEAD after working-tree drift to 200000
+        'OBJD' 200000l                  // ~45 actors total post-Phase-1; matches snowgoons
         'PERM' 500000l
-        'ROOM' 8000000l                // 1344 cube meshes (16-round palettes); restored from HEAD after working-tree drift to 500000
+        'ROOM' 500000l                  // 28 cube actors, all sharing one cube.iff (~1.1 KB)
         'FLAG' 1l 1l                    // doomstick, bungeecam
     }
     { 'ALGN' .align( 2048 ) }
