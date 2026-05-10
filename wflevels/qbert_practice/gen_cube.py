@@ -139,34 +139,36 @@ def build_modl(top_rgb, lit_side_rgb, shadow_side_rgb):
 
 # ── Per-round palette ─────────────────────────────────────────────────────────
 # 16 rounds: arcade Q*bert is 4 levels × 4 rounds. Each entry is
-# (state0_top, state2_top, lit_side, shadow_side).
-# State 1 (mid-hop intermediate, only used on L2/L4) is a shared orange
-# placeholder for all rounds — per-round state-1 fidelity is a follow-up.
+# (state0_top, state1_top, state2_top, lit_side, shadow_side).
 #
-# Source: docs/investigations/qbert_cube_face_colors.md (pixel-sampled from
-# MAME screenshots; all 16 rounds captured 2026-05-08).
+# State 1 (mid-hop intermediate) only renders on L2/L4 rounds (2-hop levels).
+# For L1/L3 rounds (1-hop), state-1 is set equal to state-2 since the cube
+# transitions directly state-0 → state-2 on first hop and state-1 is never
+# observed. State-1 colors for L2/L4 rounds were pixel-sampled from MAME
+# captures (cube (1,1) at (137,80) after the 2-hop dance lands there once);
+# see docs/investigations/qbert_cube_face_colors.md.
+#
 # L2R4 and L4R2 are "flat" rounds — sides are #000000 (black background)
 # in the arcade. No special geometry, just black side faces.
 ROUND_COLORS = [
-    # (state0_top,  state2_top,  lit_side,  shadow_side)
-    (0x5646EF,     0xDEDE00,    0x56A999,  0x314646),  # R00 L1R1 — purple→yellow
-    (0xEFDE77,     0x0046DE,    0x663100,  0xFF7721),  # R01 L1R2 — golden→blue
-    (0xB9CECE,     0x464646,    0x777777,  0x212121),  # R02 L1R3 — silver→dark-gray
-    (0x0066EF,     0xA9B910,    0x778888,  0x101099),  # R03 L1R4 — blue→olive
-    (0x0046DE,     0x21B931,    0x663100,  0xFF7721),  # R04 L2R1 — blue→green
-    (0x990066,     0xA9B910,    0x778888,  0x101099),  # R05 L2R2 — magenta→olive
-    (0xFF6666,     0xDEDE00,    0x56A999,  0x314646),  # R06 L2R3 — red→yellow
-    (0xCECE00,     0xFF6666,    0x000000,  0x000000),  # R07 L2R4 — yellow→red (flat)
-    (0x2188CE,     0x003199,    0xB9B921,  0xEF1021),  # R08 L3R1 — blue→dark-blue
-    (0x464646,     0xB9CECE,    0x777777,  0x212121),  # R09 L3R2 — dark-gray→light-gray
-    (0x0046DE,     0xEFDE77,    0x663100,  0xFF7721),  # R10 L3R3 — blue→golden
-    (0xDEDE00,     0x5646EF,    0x56A999,  0x314646),  # R11 L3R4 — yellow→purple
-    (0x21B931,     0x0046DE,    0x663100,  0xFF7721),  # R12 L4R1 — green→blue
-    (0x0046EF,     0xCECE00,    0x000000,  0x000000),  # R13 L4R2 — blue→yellow (flat)
-    (0xDEDE00,     0x5646EF,    0x56A999,  0x314646),  # R14 L4R3 — yellow→purple
-    (0x990066,     0xA9B910,    0x778888,  0x101099),  # R15 L4R4 — magenta→olive
+    # (state0_top,  state1_top,  state2_top,  lit_side,  shadow_side)
+    (0x5646EF,     0xDEDE00,    0xDEDE00,    0x56A999,  0x314646),  # R00 L1R1 — purple→yellow            (1-hop, s1≡s2)
+    (0xEFDE77,     0x0046DE,    0x0046DE,    0x663100,  0xFF7721),  # R01 L1R2 — golden→blue              (1-hop, s1≡s2)
+    (0xB9CECE,     0x464646,    0x464646,    0x777777,  0x212121),  # R02 L1R3 — silver→dark-gray         (1-hop, s1≡s2)
+    (0x0066EF,     0xA9B910,    0xA9B910,    0x778888,  0x101099),  # R03 L1R4 — blue→olive               (1-hop, s1≡s2)
+    (0x0046DE,     0xEFDE77,    0x21B931,    0x663100,  0xFF7721),  # R04 L2R1 — blue→golden→green
+    (0x990066,     0x0066EF,    0xA9B910,    0x778888,  0x101099),  # R05 L2R2 — magenta→blue→olive
+    (0xFF6666,     0x5646EF,    0xDEDE00,    0x56A999,  0x314646),  # R06 L2R3 — red→purple→yellow
+    (0xCECE00,     0x0046EF,    0xFF6666,    0x000000,  0x000000),  # R07 L2R4 — yellow→blue→red (flat)
+    (0x2188CE,     0x003199,    0x003199,    0xB9B921,  0xEF1021),  # R08 L3R1 — blue→dark-blue           (1-hop, s1≡s2)
+    (0x464646,     0xB9CECE,    0xB9CECE,    0x777777,  0x212121),  # R09 L3R2 — dark-gray→light-gray     (1-hop, s1≡s2)
+    (0x0046DE,     0xEFDE77,    0xEFDE77,    0x663100,  0xFF7721),  # R10 L3R3 — blue→golden              (1-hop, s1≡s2)
+    (0xDEDE00,     0x5646EF,    0x5646EF,    0x56A999,  0x314646),  # R11 L3R4 — yellow→purple            (1-hop, s1≡s2)
+    (0x21B931,     0xEFDE77,    0x0046DE,    0x663100,  0xFF7721),  # R12 L4R1 — green→golden→blue
+    (0x0046EF,     0xFF6666,    0xCECE00,    0x000000,  0x000000),  # R13 L4R2 — blue→red→yellow (flat)
+    (0xDEDE00,     0xFF6666,    0x5646EF,    0x56A999,  0x314646),  # R14 L4R3 — yellow→red→purple
+    (0x990066,     0x0066EF,    0xA9B910,    0x778888,  0x101099),  # R15 L4R4 — magenta→blue→olive
 ]
-STATE1_TOP = 0xCC7733  # intermediate orange placeholder, all rounds
 
 
 if __name__ == '__main__':
@@ -174,8 +176,8 @@ if __name__ == '__main__':
     out_dir = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.abspath(__file__))
     os.makedirs(out_dir, exist_ok=True)
     total = 0
-    for r, (s0_top, s2_top, lit_side, shadow_side) in enumerate(ROUND_COLORS):
-        for state, top_rgb in [(0, s0_top), (1, STATE1_TOP), (2, s2_top)]:
+    for r, (s0_top, s1_top, s2_top, lit_side, shadow_side) in enumerate(ROUND_COLORS):
+        for state, top_rgb in [(0, s0_top), (1, s1_top), (2, s2_top)]:
             modl = build_modl(top_rgb, lit_side, shadow_side)
             proto = os.path.join(out_dir, f'cube_state{state}_r{r}.iff')
             with open(proto, 'wb') as f:
