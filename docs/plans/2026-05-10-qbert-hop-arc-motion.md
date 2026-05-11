@@ -1,13 +1,13 @@
 ---
 plan: qbert-hop-arc-motion
 date: 2026-05-10
-status: Not started
+status: Parked 2026-05-11
 scope: ~30 LOC of zForth in [wflevels/qbert_practice/blender_create_qbert.py](../../wflevels/qbert_practice/blender_create_qbert.py); 6 new local mailboxes (435–440); no engine, no mailbox.inc, no OAS.
 ---
 
 # Q*bert hop-arc motion (Phase 1.5)
 
-**Status:** Not started. Phase 2 substitute — user opted to do the parabolic hop arc now and defer mesh-level stretch-and-squash until per-actor scale is wired into the engine (separate plan).
+**Status:** Parked 2026-05-11 — lerp-based hop motion is acceptable for now; revisit once enemy AI / cube logic is further along, or fold into the deferred [physics-hops plan](2026-05-10-qbert-physics-hops.md).
 
 ## Context
 

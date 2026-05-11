@@ -1,6 +1,6 @@
 # Rebuild `wflevels/qbert_practice-standalone.iff` from source
 
-**Status:** Not started
+**Status:** Done 2026-05-11 — `build_level_binary.sh` step [5/5] in place; rebuild is byte-identical to HEAD; engine boots qbert standalone cleanly (no `_chunkID.Valid()` assertion). The misdiagnosis cleanup in `qbert_practice-standalone.iff.txt` and `2026-05-10-qbert-engine-caps.md` had already landed prior to this plan's implementation.
 
 ## Context
 

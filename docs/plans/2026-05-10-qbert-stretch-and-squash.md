@@ -1,13 +1,13 @@
 ---
 plan: qbert-stretch-and-squash
 date: 2026-05-10
-status: Not started
+status: Deferred 2026-05-11
 scope: Engine wiring (~50-75 LOC across 5 files) + script consumer (~10 LOC of zForth in qbert player)
 ---
 
 # Q*bert stretch-and-squash (Phase 2)
 
-**Status:** Not started.
+**Status:** Deferred 2026-05-11 — waits on per-actor scale wiring in the engine; revisit after enemy AI / cube logic lands.
 
 ## Context
 

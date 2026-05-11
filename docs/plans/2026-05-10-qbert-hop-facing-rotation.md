@@ -1,13 +1,13 @@
 ---
 plan: qbert-hop-facing-rotation
 date: 2026-05-10
-status: Not started
+status: Done 2026-05-11
 scope: ~30 LOC of zForth in [wflevels/qbert_practice/blender_create_qbert.py](../../wflevels/qbert_practice/blender_create_qbert.py)
 ---
 
 # Q*bert hop-direction facing rotation (Phase 1: smooth yaw)
 
-**Status:** Not started.
+**Status:** Done 2026-05-11 — `HOP_FACING` (mb 433) + DELTA_YAW lerp block landed in [blender_create_qbert.py](../../wflevels/qbert_practice/blender_create_qbert.py); resets wired into restart + apex-respawn paths.
 
 ## Context
 
