@@ -70,6 +70,15 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 - [ ] Rename `room` — "room" is a misnomer; the concept is a designer-drawn zone that controls CD asset streaming (load/unload assets as the player moves through the graph). Candidates: **Zone** (most self-explanatory), **Cell** (Elder Scrolls precedent — same mechanism), **Sector** (Doom/Quake lineage, implies spatial partition), **Region** (geographic, no shape implication)
 
 
+## QBERT 3D ENHANCEMENTS
+
+Polish ideas that go beyond a faithful arcade reproduction. Hold these until the
+arcade copy is complete; revisit as a second pass. Add new entries here as we
+encounter them while implementing the arcade port.
+
+- [ ] Up-hop vs down-hop arc asymmetry — climbing leaps heavier (higher/slower), falling leaps snappier (lower/faster); arcade uses one fixed sprite parabola for all four directions, so this is a 3D-only embellishment
+
+
 ## DEFERRED UNTIL LEVEL
 
 - [ ] `WF_DEFAULT_ENGINE` knob — sigil-less script fallback engine selection — [plan](docs/plans/2026-04-14-pluggable-scripting-engine.md)
