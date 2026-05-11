@@ -16,7 +16,18 @@ Landed in two commits on 2026-05-10:
   - `EMAILBOX_FACE_COLOR_LIT` = 3038 (material[1], lit side)
   - `EMAILBOX_FACE_COLOR_SHADOW` = 3039 (material[2], shadow side)
 - **Write handlers** at [actor.cc:1460-1480](../../wfsource/source/game/actor.cc) decode packed 24-bit RGB (0xRRGGBB) from the mailbox value's `.WholePart()` and call `_renderActor->SetMaterialColor(idx, color)` where `idx = boxnum - EMAILBOX_FACE_COLOR_TOP` (0/1/2). Read handlers (around [:1189-1191](../../wfsource/source/game/actor.cc)) are write-only stubs returning 0.
-- **Storage deviation from plan**: the plan called for a per-Actor 3 × uint32 override array + dirty bit checked by the renderer. The actual landing instead **mutates the material colors in place** on `RenderObject3D::_materialList` (changed from `const Material*` to `Material*`), then re-runs `ApplyMaterials()` so the pre-baked Primitive RGBs pick up the new value on the next frame. Simpler than the override array; cost is recomputing primitive colors on each write rather than each draw (acceptable given write frequency — once per cube state transition).
+- **Storage deviation from plan**: the plan called for a per-Actor 3 × uint32 override array + dirty bit checked by the renderer. The actual landing instead **mutates the material colors in place** on `RenderObject3D::_materialList` (changed from `const Material*` to `Material*`), then re-runs `ApplyMaterials()` so the pre-baked Primitive RGBs pick up the new value on the next frame. Simpler than the override array — no override storage, no dirty bit, no per-draw branch.
+
+  **Cost analysis.** `ApplyMaterials()` ([rendobj3.cc:120-136](../../wfsource/source/gfx/rendobj3.cc)) walks `ORDER_TABLES × _faceCount` and calls `Material::InitPrimitive()` for each triangle. Each `InitPrimitive` writes the material's RGB into the platform-specific Primitive struct used by the renderer's draw path (e.g. the per-vertex color the GL backend feeds into the vertex stream). After this re-bake, the GL `Render()` path is unchanged — it reads from `_primList` exactly as before. So the override is "free" at draw time; the work is paid up-front, at the moment of the mailbox write.
+
+  For a cube: 12 faces × `ORDER_TABLES` (1 on Linux, 2 on PSX-class double-buffered targets, 4 with quad-buffer-of-double-buffer). So one TOP-color write costs ~12 InitPrimitive calls on Linux (per-cube), times 28 cubes if the director broadcasts to all of them in one tick.
+
+  **Why this is acceptable for our write pattern:**
+  - Per-cube TOP color: flips when a single cube's state advances 0→1→2 — at most 2 writes per cube per round, scattered across the ~20s a player takes to clear a round. Negligible.
+  - Level transition (every 4 rounds): broadcast LIT + SHADOW to all 28 cubes = 56 writes × 12 InitPrimitive each = 672 InitPrimitive calls in one tick. Even at ~1 µs/call this is sub-millisecond; one-time cost per ~80-second level. Invisible at 60 Hz.
+  - First-tick init: 28 cubes × 3 colors = 84 writes × 12 = ~1k InitPrimitive calls. Also one-time, well under a frame.
+
+  Contrast with the plan's override-array approach: that would have paid `ORDER_TABLES × _faceCount × 28 cubes × 60 Hz` worth of per-draw branches forever (the dirty-bit check is cheap but non-zero, and override fan-in on every triangle adds an indirection). For a write frequency this low, write-time re-bake wins decisively. If a future use case ever sweeps colors per-frame (e.g. animated palette cycle), revisit — at that point the override-array tradeoff inverts.
 - **New zForth primitive** `write-actor-mailbox ( val idx actor_idx -- )` — lets a script on one actor write a mailbox on another. The director needs this to address each of the 28 cubes individually. (`746bfac` Forth-side support; without this, the consolidation isn't expressible from a single director script.)
 
 ### Asset side (commit `f3d2fe6`, [gen_cube.py](../../wflevels/qbert_practice/gen_cube.py))
