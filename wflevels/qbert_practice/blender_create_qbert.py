@@ -1279,7 +1279,16 @@ _COILY_SEG_COUNT   = 4
 _COILY_SEG_RADIUS  = 0.40
 _COILY_SEG_HEIGHT  = 0.30   # half-height of each compressed segment
 _COILY_SEG_SPACING = 0.55   # vertical distance between segment centres
-_COILY_CENTRE_OFFSET_Z = 1.0   # actor Z = cube_top + 1.0 (places stack ON the cube)
+# Snake half-height: from center to topmost segment top
+# = ((SEG_COUNT-1)/2) * SPACING + SEG_HEIGHT
+_COILY_HALF_HEIGHT = ((_COILY_SEG_COUNT - 1) * _COILY_SEG_SPACING) / 2 + _COILY_SEG_HEIGHT
+# Snake actor Z relative to cube CENTER: half-cube + half-snake puts the
+# snake's bottom exactly on the cube's top.
+_COILY_CENTRE_OFFSET_Z = CUBE_SIZE / 2 + _COILY_HALF_HEIGHT
+# Z formula: snake_actor_z(row) = CUBE_BASE_Z + CUBE_SIZE*(6-row) + _COILY_CENTRE_OFFSET_Z
+_COILY_Z_BASE = CUBE_BASE_Z + CUBE_SIZE * (NUM_ROWS - 1) + _COILY_CENTRE_OFFSET_Z
+_COILY_SNAKE_HOP_TICKS = 24   # slower than player (12), faster than nothing
+_COILY_SNAKE_HOP_DENOM_F = float(_COILY_SNAKE_HOP_TICKS - 1)
 
 def _coily_build_mesh():
     verts = []
@@ -1341,19 +1350,110 @@ _pre_snake_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KE
 COILY_SNAKE_ACTOR_IDX = _pre_snake_actor_count + 1
 
 def coily_snake_script():
-    """Phase B: snake stands where the egg landed. Per-tick contact check
-    against player; on match, latch FALL_DEATH. No movement (Phase C will
-    add chase AI here)."""
+    """Phase C: snake chases Q*bert via greedy Manhattan-distance pursuit.
+
+    Per tick:
+      1. Phase gate (0 = idle).
+      2. Decrement COOLDOWN; compute t_raw + smoothstep t'.
+      3. Lerp position (row_now, col_now) in cube-space; write world XYZ.
+      4. Apply subdued S&S (same coefficients as red ball).
+      5. Contact check vs player.
+      6. On landing tick (cd<=0): pick greedy next hop, advance row/col,
+         re-arm cooldown.
+
+    Direction picking is sign-based, not min-over-4-candidates:
+      - dRow_sign = sign(qb_row - cy_row)  (down if Q*bert below, up if above)
+      - dCol depends on dRow_sign + sign(qb_col - cy_col)
+      - If chosen (new_row, new_col) is off-pyramid, snake stays put.
+    """
+    mb_row      = _CS_MB_ROW
+    mb_col      = _CS_MB_COL
+    mb_cd       = _CS_MB_COOLDOWN
+    mb_phase    = _CS_MB_PHASE
+    mb_start_z  = _CS_MB_START_Z
+    mb_end_z    = _CS_MB_END_Z
+    mb_from_row = _CS_MB_FROM_ROW
+    mb_from_col = _CS_MB_FROM_COL
+
     return (
-        f"\\\\ wf coily snake (Phase B — standing)\n"
-        f"{_CS_MB_PHASE} read-mailbox 0 = if exit then\n"
+        f"\\\\ wf coily snake (Phase C — chase)\n"
+        f"{mb_phase} read-mailbox 0 = if exit then\n"
+        # Decrement COOLDOWN.
+        f"{mb_cd} read-mailbox 1 - dup {mb_cd} write-mailbox\n"
+        # t_raw / t'.
+        f"{_COILY_SNAKE_HOP_TICKS} swap - {_COILY_SNAKE_HOP_DENOM_F} /\n"
+        f"dup dup dup * swap 2.0 * 3.0 swap - *\n"
+        # row_now / col_now via row-space lerp.
+        f"dup {mb_row} read-mailbox {mb_from_row} read-mailbox - * "
+        f"{mb_from_row} read-mailbox +\n"
+        f"over {mb_col} read-mailbox {mb_from_col} read-mailbox - * "
+        f"{mb_from_col} read-mailbox +\n"
+        # y = (6 - row_now) * Y_MUL → 3010
+        f"over 6.0 swap - {_RB_Y_MUL} * 3010 write-mailbox\n"
+        # x = (col_now - row_now/2) * X_MUL → 3009
+        f"swap 0.5 * - {_RB_X_MUL} * 3009 write-mailbox\n"
+        # z_linear = start_z + t' * (end_z - start_z)
+        f"{mb_end_z} read-mailbox {mb_start_z} read-mailbox - * "
+        f"{mb_start_z} read-mailbox +\n"
+        # z_final = z_linear + 8*t_raw*(1-t_raw) parabolic arc
+        f"swap dup 1.0 swap - * 8.0 * +\n"
+        f"3011 write-mailbox\n"
         # Contact check vs player.
-        f"{_CS_MB_ROW} read-mailbox 400 read-mailbox = if "
-        f"{_CS_MB_COL} read-mailbox 401 read-mailbox = if "
+        f"{mb_row} read-mailbox 400 read-mailbox = if "
+        f"{mb_col} read-mailbox 401 read-mailbox = if "
         f"1 414 write-mailbox "
         f"then then\n"
-        # Hold scale at identity.
-        f"1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox\n"
+        # Stretch-and-squash (same 0.5 strength as ball).
+        f"{mb_cd} read-mailbox 0 <= if "
+        f"1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
+        f"else "
+        f"{_COILY_SNAKE_HOP_TICKS} {mb_cd} read-mailbox - {_COILY_SNAKE_HOP_DENOM_F} / "
+        f"dup 2.0 * 1.0 - dup * swap dup 1.0 swap - 4.0 * * "
+        f"over {_RB_SS_Z_IMP} * over {_RB_SS_Z_BELL} * + 1.0 + 3042 write-mailbox "
+        f"{_RB_SS_XY_BELL} * swap {_RB_SS_XY_IMP} * + 1.0 + "
+        f"dup 3040 write-mailbox 3041 write-mailbox "
+        f"then\n"
+        # Landing tick → pick next hop greedy.
+        f"{mb_cd} read-mailbox 0 <= if "
+        # dr_sign: 1 if qb_row >= cy_row, else -1.
+        # 400=qb_row, 401=qb_col. cy_row=mb_row, cy_col=mb_col.
+        f"400 read-mailbox {mb_row} read-mailbox - 0 < if -1 else 1 then "  # ( dr_sign )
+        # Branch on dr_sign for dc selection.
+        f"dup 0 > if "
+        # Moving down: dc = (qb_col > cy_col) ? 1 : 0
+        f"401 read-mailbox {mb_col} read-mailbox - 0 > if 1 else 0 then "
+        f"else "
+        # Moving up: dc = (qb_col < cy_col) ? -1 : 0
+        f"401 read-mailbox {mb_col} read-mailbox - 0 < if -1 else 0 then "
+        f"then "                                # ( dr_sign dc )
+        # Compute new_row and new_col.
+        f"{mb_col} read-mailbox + "             # ( dr_sign new_col )
+        f"swap {mb_row} read-mailbox + "        # ( new_col new_row )
+        # Validate: 0 <= new_row <= 6 AND 0 <= new_col <= new_row.
+        # Stack:  ( new_col new_row )
+        f"dup 0 < if drop drop "                # invalid: new_row < 0
+        f"else dup 6 > if drop drop "           # invalid: new_row > 6
+        f"else "
+        # Stack: ( new_col new_row )  with 0 <= new_row <= 6 guaranteed.
+        # Check new_col bounds: 0 <= new_col <= new_row.
+        f"over 0 < if drop drop "               # invalid: new_col < 0
+        f"else over over > if drop drop "       # invalid: new_col > new_row
+        f"else "
+        # Valid! Commit the move.
+        # Stack: ( new_col new_row )
+        # Stash FROM_ROW = cy_row; ROW := new_row.
+        f"{mb_row} read-mailbox {mb_from_row} write-mailbox "
+        f"{mb_row} write-mailbox "
+        # Stash FROM_COL = cy_col; COL := new_col.
+        f"{mb_col} read-mailbox {mb_from_col} write-mailbox "
+        f"{mb_col} write-mailbox "
+        # Stash START_Z (current Z, mb 3011) and END_Z (Z@new_row).
+        f"3011 read-mailbox {mb_start_z} write-mailbox "
+        f"{_COILY_Z_BASE} {mb_row} read-mailbox {_RB_Z_MUL} * - {mb_end_z} write-mailbox "
+        f"then then then then "
+        # Always re-arm cooldown (whether moved or stayed).
+        f"{_COILY_SNAKE_HOP_TICKS} {mb_cd} write-mailbox "
+        f"then\n"
     )
 
 _snake = bpy.data.objects.new('coily_snake', _coily_mesh)
@@ -1616,9 +1716,18 @@ DIRECTOR_SCRIPT = "".join([
     f"{_RB_X_MUL} * 3009 {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
     f"6.0 {_CE_MB_FROM_ROW} read-mailbox - "
     f"{_RB_Y_MUL} * 3010 {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
-    f"{_RB_Z_BASE + _COILY_CENTRE_OFFSET_Z} "
+    f"{_COILY_Z_BASE} "
     f"{_CE_MB_FROM_ROW} read-mailbox {_RB_Z_MUL} * - "
     f"3011 {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    # Initialize snake hop state for Phase C: COOLDOWN, FROM_(ROW,COL),
+    # START_Z, END_Z so the first chase hop reads valid stash values.
+    f"{_COILY_SNAKE_HOP_TICKS} {_CS_MB_COOLDOWN} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"{_CE_MB_FROM_ROW} read-mailbox {_CS_MB_FROM_ROW} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"{_CE_MB_FROM_COL} read-mailbox {_CS_MB_FROM_COL} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    # START_Z = END_Z = snake-Z@spawn-row (no hop in flight yet).
+    f"{_COILY_Z_BASE} {_CE_MB_FROM_ROW} read-mailbox {_RB_Z_MUL} * - "
+    f"dup {_CS_MB_START_Z} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"{_CS_MB_END_Z} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
     # Activate snake.
     f"1 {_CS_MB_PHASE} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
     # PHASE_GLOBAL := 1 sentinel? No — keep at 2 to mean "snake active".
