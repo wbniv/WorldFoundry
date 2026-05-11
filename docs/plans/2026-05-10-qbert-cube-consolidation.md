@@ -1,7 +1,73 @@
 # Plan — Q*bert cube consolidation via runtime material swap
 
 **Date:** 2026-05-10
-**Status:** Not started
+**Status:** Done 2026-05-10 (commit [`f3d2fe6`](../../) feat(qbert): Phase 1 cube consolidation — 1344 actors → 28 + runtime colors)
+
+## Implementation summary (added 2026-05-11)
+
+Landed in two commits on 2026-05-10:
+- [`746bfac`](../../) `feat(engine): runtime per-face material color override + write-actor-mailbox` — engine side
+- [`f3d2fe6`](../../) `feat(qbert): Phase 1 cube consolidation — 1344 actors → 28 + runtime colors` — asset + director side, 448 files changed, −30188 LOC net
+
+### Engine wiring (commit `746bfac`)
+
+- **Mailboxes** in [mailbox.inc:97-99](../../wfsource/source/mailbox/mailbox.inc):
+  - `EMAILBOX_FACE_COLOR_TOP` = 3037 (material[0], cube top)
+  - `EMAILBOX_FACE_COLOR_LIT` = 3038 (material[1], lit side)
+  - `EMAILBOX_FACE_COLOR_SHADOW` = 3039 (material[2], shadow side)
+- **Write handlers** at [actor.cc:1460-1480](../../wfsource/source/game/actor.cc) decode packed 24-bit RGB (0xRRGGBB) from the mailbox value's `.WholePart()` and call `_renderActor->SetMaterialColor(idx, color)` where `idx = boxnum - EMAILBOX_FACE_COLOR_TOP` (0/1/2). Read handlers (around [:1189-1191](../../wfsource/source/game/actor.cc)) are write-only stubs returning 0.
+- **Storage deviation from plan**: the plan called for a per-Actor 3 × uint32 override array + dirty bit checked by the renderer. The actual landing instead **mutates the material colors in place** on `RenderObject3D::_materialList` (changed from `const Material*` to `Material*`), then re-runs `ApplyMaterials()` so the pre-baked Primitive RGBs pick up the new value on the next frame. Simpler than the override array; cost is recomputing primitive colors on each write rather than each draw (acceptable given write frequency — once per cube state transition).
+- **New zForth primitive** `write-actor-mailbox ( val idx actor_idx -- )` — lets a script on one actor write a mailbox on another. The director needs this to address each of the 28 cubes individually. (`746bfac` Forth-side support; without this, the consolidation isn't expressible from a single director script.)
+
+### Asset side (commit `f3d2fe6`, [gen_cube.py](../../wflevels/qbert_practice/gen_cube.py))
+
+- Dropped the `16 rounds × 3 states` outer loop. Emits **one** 1112-byte `cube.iff` with 3 placeholder white materials (`#FFFFFF`).
+- Per-round color data moved out of gen_cube.py into Python module-level constants `ROUND_TOP_COLORS`, `LEVEL_SIDE_COLORS`, `ROUND_SIDE_OVERRIDES` (per-round side overrides exist for L2R4, L4R2 flat rounds, plus a few other arcade-quirk rounds where the arcade deviates from the level-default side palette).
+- Removed 447 prebaked variant .iff files (`cube_NN_rN_sN.iff`, `cube_stateN_rN.iff`, etc.) — visible in the commit's deleted-file list.
+
+### Level / director side (commit `f3d2fe6`, [blender_create_qbert.py](../../wflevels/qbert_practice/blender_create_qbert.py))
+
+- **Cube creation loop**: 1344 actor creates → 28. All 28 reference the same `cube.iff` (single mesh datablock in Blender; iffcomp deduplicates the on-disk asset).
+- **Mailbox layout**: `INDEXOF_VIS_BASE` (1344 slots) deleted; `NUM_MAILBOXES` drops 1800 → 500.
+- **`CUBE_ACTOR_BASE`** is computed at Blender-export time from the count of actors emitted before the cube loop, then embedded as a constant into the director's Forth source. The director reaches each cube N with `write-actor-mailbox` to actor index `CUBE_ACTOR_BASE + N`.
+- **Director Forth rewrites**:
+  - First-tick init: populate the `ROUND_TOP_LUT` from the in-script LUT data, write initial TOP/LIT/SHADOW colors to all 28 cubes.
+  - Per-tick: detect cube state changes (0→1→2 hop progression) and write the new TOP color for that cube.
+  - Level transition (`ROUND_NUMBER // 4` change): broadcast new LIT/SHADOW side colors to all 28 cubes (28 × 2 = 56 mailbox writes per transition × 3 transitions per game).
+
+### Cap-bump reverts (commit `f3d2fe6`, in-source comments)
+
+| File | Constant | Pre-bump | Post-revert (current) |
+|---|---|---|---|
+| [level.cc:1296](../../wfsource/source/game/level.cc) | `MAX_ASMP_SIZE` | 16 sectors | 16 sectors (annotated: "was bumped to 64 on 2026-05-10 for the qbert 1344-actor pyramid, reverted 2026-05-10 after Phase 1 cube consolidation dropped ASS chunk count to 18") |
+| [assets.hp:88](../../wfsource/source/asset/assets.hp) | `MAX_ASSETS_PER_ROOM` | 1024 | 1024 (annotated: "bumped to 4000 on 2026-05-10 for fan-out, reverted 2026-05-10") |
+| [assets.hp:116](../../wfsource/source/asset/assets.hp) | `_assetStringMap[]` | 1024 | 1024 (same annotation) |
+
+### Measured savings (from commit message)
+
+HalLmalloc post-load (64 MB cbHalLmalloc, snowgoons-class OBJD=200K ROOM=500K):
+
+| Build | Used | Free |
+|---|---|---|
+| Baseline (May-9 fan-out, 1344 cubes) | **29.24 MB** | 34.76 MB |
+| Phase 1 (28 cubes, runtime swap) | **2.47 MB** | 61.53 MB |
+| snowgoons (for comparison) | 1.56 MB | 62.44 MB |
+
+**92% reduction.** Inner iff drops 1.93 MB → 45 KB; ASS chunks 1353 → 18.
+
+### Follow-on work (also landed)
+
+Subsequent commits on 2026-05-10 stacked cleanly on the 28-actor layout:
+- `78c4eb6` hop-direction facing rotation with smooth lerp
+- `6a13ad3` 180° hop-turn camera-visibility fix; off-edge cube flip suppression
+- `16e0668` hop-arc motion (smoothstep XY + parabolic Z); LANDED on landing; restart re-colors all cubes
+- `ce1e193` Phase 2 stretch-and-squash — per-actor non-uniform scale
+- `26580bb` low-poly player mesh + restore Level/Room pool sizes
+- `9c6695f` autopilot via joystick injection
+
+The detailed plan below is preserved for historical reference.
+
+---
 
 ## Context
 
