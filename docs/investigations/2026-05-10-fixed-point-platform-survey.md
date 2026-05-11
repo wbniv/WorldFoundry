@@ -230,6 +230,7 @@ The original WF target was PS1 (2 MB, no CPU FPU, GTE coprocessor for fixed-poi
 - Loses the ability to retarget PS1/Saturn/GBA/DS without writing a fixed-point math layer from scratch.
 - The fixed-point `Angle` representation (16-bit revolutions stored as `uint16`) is *also* the on-disk and on-the-wire representation. That has to stay regardless of `Scalar`'s internal type.
 - Any oracle-byte-identical test that round-trips a level through fixed-point Scalar arithmetic would need to be re-baselined.
+- Loses **exact equality comparison**. Fixed-point `Scalar` values compare with `==` deterministically — same input bits, same answer, regardless of how each side was computed. Under `SCALAR_TYPE_FLOAT` the same sites become hazardous: arithmetic results rarely round-trip exactly, and NaN never compares equal to anything including itself. Every existing `Scalar a == b` (and `!=`) site would need audit; today they're scattered across animation, asset, baseobject, anim-channel and dozens of other subsystems. Mitigation: overload `Scalar::operator==` / `!=` with an epsilon-based comparison so call sites keep reading naturally — the underlying float still has the precision pitfalls but the *site-level* semantics stay close to the fixed-point version. Picking the right epsilon is itself a per-context judgement call (world-space positions vs. normalised weights need very different tolerances), so this isn't a free swap.
 
 ### Storage: on-disk fixed-point doesn't save bytes at the same width
 
