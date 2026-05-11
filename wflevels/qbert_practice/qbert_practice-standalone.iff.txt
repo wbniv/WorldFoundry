@@ -1,25 +1,18 @@
 // qbert_practice-standalone.iff.txt — L4-wrapped form of qbert_practice for wf_game -L.
 //
-// NOTE (2026-05-10): iffcomp-rs's `[ "..." ]` inlining produces a standalone
-// binary the engine refuses to load (`_chunkID.Valid()` assertion when the
-// inner iff exceeds ~120 KB). Until that's fixed, the working
-// qbert_practice-standalone.iff is hand-built by a small Python wrap that
-// copies the L4 header + RAM block from the previously-working committed
-// standalone and concatenates the freshly-built inner. See
-// docs/investigations/2026-05-10-qbert-engine-caps.md, "Files modified"
-// section. This .txt is preserved as the canonical source for when
-// iffcomp-rs inlining is fixed.
+// Build (via the standard pipeline, which emits both inner and standalone):
+//   bash wftools/wf_blender/build_level_binary.sh qbert_practice
 //
-// Phase 1 (cube consolidation, 2026-05-10) drops the inner iff from 1.93 MB
-// to ~45 KB. Budgets below are sized for the current 28-cube design, with
-// snowgoons-class margin.
-//
-// Build (when iffcomp-rs inlining works):
+// Or directly:
 //   ../../wftools/iffcomp-rs/target/release/iffcomp -binary \
-//     -o=qbert_practice-standalone.iff qbert_practice-standalone.iff.txt
+//     -o=../qbert_practice-standalone.iff qbert_practice-standalone.iff.txt
 //
 // Run:
-//   cd wfsource/source/game && wf_game -L<repo>/wflevels/qbert_practice/qbert_practice-standalone.iff
+//   task run-level -- wflevels/qbert_practice-standalone.iff
+//
+// Phase 1 (cube consolidation, 2026-05-10) dropped the inner iff from
+// 1.93 MB to ~45 KB; pool budgets below are sized for the 28-cube design
+// with snowgoons-class margin.
 { 'L4'
     { 'ALGN' .align( 2048 ) }
     { 'RAM'

@@ -131,6 +131,30 @@ wfsource/source/streams/binstrm.cc           | 2 +-
 
 The cap bumps were the right move for the day (they unblocked the running engine), but they were a workaround for the May-9 fan-out's inflated demands. Phase 1 cube consolidation removed the demand at its source, so the bumps were rolled back. The diff above no longer corresponds to the current tree — it's preserved for historical context. Files that DO carry forward are the Phase 1 changes documented in [docs/plans/2026-05-10-qbert-cube-consolidation.md](../plans/2026-05-10-qbert-cube-consolidation.md).
 
+## Follow-up: iffcomp-rs is not buggy at Phase-1 size (2026-05-10 evening)
+
+A working-tree note had been added to `qbert_practice-standalone.iff.txt` claiming that "iffcomp-rs's `[ "..." ]` inlining produces a standalone binary the engine refuses to load (`_chunkID.Valid()` assertion when the inner iff exceeds ~120 KB)" and that the working standalone was hand-built by a Python wrap. **That claim is unsupported at the current Phase-1 size.**
+
+Verification:
+
+```
+cd wflevels/qbert_practice
+../../wftools/iffcomp-rs/target/release/iffcomp -binary \
+  -o=/tmp/qbert_test_standalone.iff qbert_practice-standalone.iff.txt
+cmp /tmp/qbert_test_standalone.iff ../qbert_practice-standalone.iff
+# → exit 0 (byte-identical, both 49152 bytes)
+```
+
+The committed working `wflevels/qbert_practice-standalone.iff` is bit-for-bit what iffcomp-rs produces from the current `qbert_practice-standalone.iff.txt`. So at the 45 KB inner size:
+
+- iffcomp-rs's `[ "..." ]` inlining works.
+- No Python wrap is needed.
+- The `_chunkID.Valid()` symptom from the May-10 morning chase was caused by the buffer overruns documented above (the five engine caps), not by iffcomp-rs output. The "120 KB threshold" was inferred from the broken-then-working ranges but is most plausibly a coincidence: at the 1.93 MB regime the overruns clobbered the chunk header; at 45 KB they don't.
+
+The rebuild pipeline now runs iffcomp-rs as `[5/5]` in [`wftools/wf_blender/build_level_binary.sh`](../../wftools/wf_blender/build_level_binary.sh) and produces both inner and standalone in a single `bash wftools/wf_blender/build_level_binary.sh qbert_practice` invocation. The misleading NOTE in `qbert_practice-standalone.iff.txt` has been removed.
+
+If a future level grows the inner past some threshold and `_chunkID.Valid()` returns, treat it as a *new* investigation, not a recurrence of an iffcomp-rs bug — re-check the engine caps first.
+
 ## Follow-ups
 
 1. **Defensive nullity in JoltBodyCreateStaticMesh** — refuse to register a handle when the underlying Jolt body comes back invalid (segfault → clean OOM diagnostic).
