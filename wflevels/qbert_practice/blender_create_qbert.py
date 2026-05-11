@@ -855,6 +855,16 @@ RB_MB_SPAWN_TIMER   = 512
 RB_MB_ACTIVE_BASE   = 514      # RB_ACTIVE[K] = mb 514+K (K ∈ {0,1,2})
 RB_MB_SPAWN_CLAIMED = 517
 
+# Green ball — arcade-faithful: contact freezes all enemies for FREEZE_TICKS.
+# Same 8-slot layout as a red ball at base 486 (mb 462+8*3 = 486..493).
+GB_MB_BASE        = 486
+GB_MB_FREEZE_TIMER = 546        # global; >0 → all enemies skip movement
+GB_MB_SPAWN_TIMER = 547         # director countdown to next green spawn
+GB_MB_ACTIVE      = 548         # director mirror: 1 = green ball alive
+GB_FREEZE_TICKS   = 300         # 5 s at 60 Hz
+GB_SPAWN_INTERVAL = 1500        # 25 s between green-ball spawns
+GB_FIRST_DELAY    = 600         # 10 s after intro before first green spawns
+
 # LFSR step — Galois LFSR-16, polynomial x^16+x^14+x^13+x^11+1 (tap mask 0xB400).
 # Side-effect: advance mb 511; result: lsb (0 or 1) left on stack.
 # zForth has `&`, `|`, `^`, `<<`, `>>` (PRIM_AND/OR/XOR/SHL/SHR in zforth.c).
@@ -869,24 +879,37 @@ _RB_LFSR_STEP = (
     f"1 & "
 )
 
-def redball_script(k):
-    """Generate the wf_Script for redball K (0..REDBALL_COUNT-1).
+def redball_script(k, variant='red'):
+    """Generate the wf_Script for a hopping ball.
 
-    Phase 0: idle (off-screen). Director will wake by writing initial state.
-    Phase 1: hopping. Each tick decrements cooldown and writes interpolated XYZ.
-             On landing tick (cooldown <= 0): contact-check vs player; if
-             off-pyramid, retire to PHASE 0; otherwise pick next direction
-             via shared LFSR and re-arm cooldown.
+    variant='red'   → k indexes into red-ball state at 462+8k; contact kills player.
+    variant='green' → k is ignored; state lives at GB_MB_BASE (486); contact
+                      latches GB_MB_FREEZE_TIMER and consumes self instead of
+                      killing the player.
+
+    Both variants exit early when GB_MB_FREEZE_TIMER > 0 (an active green-ball
+    touch has frozen all enemies).
     """
-    mb_row      = _rb_mb(k, _RB_OFF_ROW)
-    mb_col      = _rb_mb(k, _RB_OFF_COL)
-    mb_cd       = _rb_mb(k, _RB_OFF_COOLDOWN)
-    mb_phase    = _rb_mb(k, _RB_OFF_PHASE)
-    mb_start_z  = _rb_mb(k, _RB_OFF_START_Z)
-    mb_end_z    = _rb_mb(k, _RB_OFF_END_Z)
-    mb_from_row = _rb_mb(k, _RB_OFF_FROM_ROW)
-    mb_from_col = _rb_mb(k, _RB_OFF_FROM_COL)
-    mb_active   = RB_MB_ACTIVE_BASE + k
+    if variant == 'green':
+        mb_row      = GB_MB_BASE + _RB_OFF_ROW
+        mb_col      = GB_MB_BASE + _RB_OFF_COL
+        mb_cd       = GB_MB_BASE + _RB_OFF_COOLDOWN
+        mb_phase    = GB_MB_BASE + _RB_OFF_PHASE
+        mb_start_z  = GB_MB_BASE + _RB_OFF_START_Z
+        mb_end_z    = GB_MB_BASE + _RB_OFF_END_Z
+        mb_from_row = GB_MB_BASE + _RB_OFF_FROM_ROW
+        mb_from_col = GB_MB_BASE + _RB_OFF_FROM_COL
+        mb_active   = GB_MB_ACTIVE
+    else:
+        mb_row      = _rb_mb(k, _RB_OFF_ROW)
+        mb_col      = _rb_mb(k, _RB_OFF_COL)
+        mb_cd       = _rb_mb(k, _RB_OFF_COOLDOWN)
+        mb_phase    = _rb_mb(k, _RB_OFF_PHASE)
+        mb_start_z  = _rb_mb(k, _RB_OFF_START_Z)
+        mb_end_z    = _rb_mb(k, _RB_OFF_END_Z)
+        mb_from_row = _rb_mb(k, _RB_OFF_FROM_ROW)
+        mb_from_col = _rb_mb(k, _RB_OFF_FROM_COL)
+        mb_active   = RB_MB_ACTIVE_BASE + k
 
     # t_raw = (HOP_TICKS - cd) / (HOP_TICKS - 1)  — float, in [1/17 .. 1]
     # t'    = smoothstep(t_raw) = t_raw² · (3 − 2·t_raw)
@@ -912,8 +935,22 @@ def redball_script(k):
     #      advance row/col, refresh START_Z/END_Z, re-arm COOLDOWN.
     #
     # Stack notation: ( ... -- ... ) tracks values across each line.
+    contact_action = (
+        # Green: latch freeze, retire self, exit so we skip landing logic.
+        f"{GB_FREEZE_TICKS} {GB_MB_FREEZE_TIMER} write-mailbox "
+        f"0 {mb_phase} write-mailbox "
+        f"0 {mb_active} write-mailbox "
+        f"{REDBALL_PARK_Z} 3011 write-mailbox "
+        f"exit "
+    ) if variant == 'green' else (
+        # Red: kill player.
+        f"1 414 write-mailbox "
+    )
+
     return (
-        f"\\\\ wf redball {k}\n"
+        f"\\\\ wf {variant}ball {k}\n"
+        # Frozen by a recent green-ball touch → all enemies skip the tick.
+        f"{GB_MB_FREEZE_TIMER} read-mailbox 0 > if exit then\n"
         # ── Phase 0: idle (off-screen). Director writes our initial state to wake us.
         f"{mb_phase} read-mailbox 0 = if exit then\n"
         # ── Phase 1: hopping. Decrement COOLDOWN.
@@ -960,10 +997,10 @@ def redball_script(k):
         f"{_RB_SS_XY_BELL} * swap {_RB_SS_XY_IMP} * + 1.0 + "             # ( xy_scale )
         f"dup 3040 write-mailbox 3041 write-mailbox "
         f"then\n"
-        # ── Contact check (every frame). Same (row, col) as player → FALL_DEATH.
+        # ── Contact check (every frame). Same (row, col) as player → variant action.
         f"{mb_row} read-mailbox 400 read-mailbox = if "
         f"{mb_col} read-mailbox 401 read-mailbox = if "
-        f"1 414 write-mailbox "
+        f"{contact_action}"
         f"then then\n"
         # ── Landing tick? cd_new <= 0.
         f"{mb_cd} read-mailbox 0 <= if "
@@ -1103,6 +1140,37 @@ print(f"[qbert] Created {REDBALL_COUNT} red balls "
       f"per-ball mailbox bases "
       f"{', '.join(str(_rb_mb(k, 0)) for k in range(REDBALL_COUNT))}")
 
+# ── 5c.5. Green Ball — bounces like a red ball; touch freezes all enemies ────
+# Same icosphere mesh as the red ball, green material. State at mb 486..493
+# (shares the per-ball 8-slot layout via redball_script(0, variant='green')).
+_greenball_mesh = bpy.data.meshes.new('greenball_mesh')
+_greenball_mesh.from_pydata(_REDBALL_VERTS, [], _REDBALL_FACES)
+_greenball_mesh.update()
+_greenball_mat = bpy.data.materials.new('greenball_green')
+_greenball_mat.use_nodes = True
+_greenball_bsdf = _greenball_mat.node_tree.nodes.get('Principled BSDF')
+_greenball_bsdf.inputs['Base Color'].default_value = (0.10, 0.85, 0.20, 1.0)
+_greenball_mesh.materials.append(_greenball_mat)
+
+_pre_greenball_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+GB_ACTOR_IDX = _pre_greenball_actor_count + 1
+
+_gball = bpy.data.objects.new('greenball', _greenball_mesh)
+_gball.location = (0.0, 0.0, REDBALL_PARK_Z)
+scene.collection.objects.link(_gball)
+_gball['wf_schema_path']         = ENEMY_OAD
+_gball['wf_Mesh Name']           = 'greenball.iff'
+_gball['wf_original_mesh_name']  = 'greenball.iff'
+_gball['wf_Model Type']          = 'Mesh'
+_gball['wf_Mobility']            = 'Anchored'
+_gball['wf_Mass']                = 0.0
+_gball['wf_Visibility Mailbox']  = 1
+_gball['wf_NumberOfLocalMailboxes'] = 0
+_gball['wf_Script']              = redball_script(0, variant='green')
+
+print(f"[qbert] Created green ball (actor index {GB_ACTOR_IDX}); "
+      f"mailbox base {GB_MB_BASE}; freeze {GB_FREEZE_TICKS} ticks on contact")
+
 # ── 5d. Coily egg (Phase A) ──────────────────────────────────────────────────
 # Single purple ball that spawns once per round, bounces down from the apex
 # like a red ball, then retires off-pyramid. Phase B will transform it into
@@ -1165,6 +1233,8 @@ def coily_egg_script():
 
     return (
         f"\\\\ wf coily egg (Phase A)\n"
+        # Frozen by a recent green-ball touch → skip the tick.
+        f"{GB_MB_FREEZE_TIMER} read-mailbox 0 > if exit then\n"
         # Phase 0: idle. Director writes initial state to wake.
         f"{mb_phase} read-mailbox 0 = if exit then\n"
         # Arcade flash: alternate purple/red every COILY_EGG_FLASH_HALF ticks
@@ -1393,6 +1463,8 @@ def coily_snake_script():
 
     return (
         f"\\\\ wf coily snake (Phase C — chase)\n"
+        # Frozen by a recent green-ball touch → skip the tick.
+        f"{GB_MB_FREEZE_TIMER} read-mailbox 0 > if exit then\n"
         f"{mb_phase} read-mailbox 0 = if exit then\n"
         # Decrement COOLDOWN.
         f"{mb_cd} read-mailbox 1 - dup {mb_cd} write-mailbox\n"
@@ -1730,6 +1802,10 @@ DIRECTOR_SCRIPT = "".join([
     f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox ",
     # Phase D: arm both discs as present (PHASE=1).
     f"1 {_DL_MB_PHASE} write-mailbox 1 {_DR_MB_PHASE} write-mailbox ",
+    # Green Ball: clear freeze + active mirror, arm first-green delay.
+    f"0 {GB_MB_FREEZE_TIMER} write-mailbox "
+    f"0 {GB_MB_ACTIVE} write-mailbox "
+    f"{GB_FIRST_DELAY} {GB_MB_SPAWN_TIMER} write-mailbox ",
     "1 421 write-mailbox ",   # LEVEL_INITIALIZED
     "then\n",
     # Intro state machine — runs only while phase 0..5; gates the rest of
@@ -1807,6 +1883,35 @@ DIRECTOR_SCRIPT = "".join([
     # Re-arm timer = max(60, 300 - 12 * ROUND_NUMBER)
     f"425 read-mailbox 12 * 300 swap - dup 60 < if drop 60 then {RB_MB_SPAWN_TIMER} write-mailbox "
     f"then then\n",
+    # ── Green Ball: freeze timer + per-round spawn ────────────────────────────
+    # Gated on INTRO_DONE. Each tick: decrement freeze timer if active; otherwise
+    # decrement green spawn timer; on hitting 0 with green idle, wake green.
+    f"418 read-mailbox 1 = if "
+    # Decrement FREEZE_TIMER if > 0.
+    f"{GB_MB_FREEZE_TIMER} read-mailbox dup 0 > if "
+    f"1 - {GB_MB_FREEZE_TIMER} write-mailbox "
+    f"else drop "
+    f"then "
+    # Green-ball spawn (only when not currently freezing).
+    f"{GB_MB_FREEZE_TIMER} read-mailbox 0 = if "
+    f"{GB_MB_ACTIVE} read-mailbox 0 = if "
+    f"{GB_MB_SPAWN_TIMER} read-mailbox dup 0 > if "
+    f"1 - {GB_MB_SPAWN_TIMER} write-mailbox "
+    f"else drop "
+    # SPAWN! LFSR step for col (0 or 1). Activate green at (row=1, col=lfsr_bit).
+    f"{_RB_LFSR_STEP}"                                                          # ( bit )
+    f"{GB_MB_BASE + _RB_OFF_COL} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"1 {GB_MB_BASE + _RB_OFF_ROW} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"0 {GB_MB_BASE + _RB_OFF_FROM_ROW} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"0 {GB_MB_BASE + _RB_OFF_FROM_COL} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"{REDBALL_HOP_TICKS} {GB_MB_BASE + _RB_OFF_COOLDOWN} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"{_RB_Z_AT_ROW_0} {GB_MB_BASE + _RB_OFF_START_Z} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"{_RB_Z_AT_ROW_1} {GB_MB_BASE + _RB_OFF_END_Z} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"1 {GB_MB_BASE + _RB_OFF_PHASE} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"1 {GB_MB_ACTIVE} write-mailbox "
+    f"{GB_SPAWN_INTERVAL} {GB_MB_SPAWN_TIMER} write-mailbox "
+    f"then then then "
+    f"then\n",
     # ── Coily egg per-round spawn (Phase A) ───────────────────────────────────
     # Gated on INTRO_DONE. If neither egg nor snake is active (PHASE_GLOBAL==0)
     # and the per-round spawn delay has elapsed, wake the egg at apex (row 0,
@@ -1975,7 +2080,13 @@ DIRECTOR_SCRIPT = "".join([
     # they were consumed last round).
     f"1 {_DL_MB_PHASE} write-mailbox 1 {_DR_MB_PHASE} write-mailbox "
     f"{_disc_world_xyz(DISC_L_ROW, DISC_L_COL)[2]} 3011 {DISC_L_ACTOR_IDX} write-actor-mailbox "
-    f"{_disc_world_xyz(DISC_R_ROW, DISC_R_COL)[2]} 3011 {DISC_R_ACTOR_IDX} write-actor-mailbox ",
+    f"{_disc_world_xyz(DISC_R_ROW, DISC_R_COL)[2]} 3011 {DISC_R_ACTOR_IDX} write-actor-mailbox "
+    # Green Ball round refresh: retire ball, clear freeze, rearm spawn timer.
+    f"0 {GB_MB_BASE + _RB_OFF_PHASE} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"{REDBALL_PARK_Z} 3011 {GB_ACTOR_IDX} write-actor-mailbox "
+    f"0 {GB_MB_ACTIVE} write-mailbox "
+    f"0 {GB_MB_FREEZE_TIMER} write-mailbox "
+    f"{GB_FIRST_DELAY} {GB_MB_SPAWN_TIMER} write-mailbox ",
     "then ",
     "else drop then\n",
 ])
