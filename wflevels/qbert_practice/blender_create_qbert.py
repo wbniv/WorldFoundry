@@ -965,25 +965,35 @@ def redball_script(k):
 # Build the shared mesh + material once; clone the Blender object for each
 # ball. The engine reads geometry from redball.iff (written by the wf_blender
 # exporter from the Blender mesh+material).
-_REDBALL_PHI = (1.0 + math.sqrt(5.0)) / 2.0
-_REDBALL_NORM = math.sqrt(1.0 + _REDBALL_PHI * _REDBALL_PHI)
+#
+# Geometry is an icosphere — icosahedron base + REDBALL_SUBDIV recursive
+# loop-subdivisions, each new midpoint normalised back onto the sphere.
+# Subdiv counts:
+#   0 → 12 verts / 20 faces (icosahedron, blocky)
+#   1 → 42 verts / 80 faces (default — recognisably round)
+#   2 → 162 verts / 320 faces (smoother; heavier)
+REDBALL_SUBDIV = 1
 _REDBALL_RADIUS = 0.5
-def _redball_v(x, y, z):
-    s = _REDBALL_RADIUS / _REDBALL_NORM
-    return (x * s, y * s, z * s)
+_REDBALL_PHI = (1.0 + math.sqrt(5.0)) / 2.0
+
+def _normalise_to_radius(x, y, z, r):
+    n = math.sqrt(x*x + y*y + z*z)
+    return (x * r / n, y * r / n, z * r / n)
+
+# Base icosahedron (12 verts, 20 faces, golden-rectangle construction).
 _REDBALL_VERTS = [
-    _redball_v( 0.0,  1.0,  _REDBALL_PHI),  # 0
-    _redball_v( 0.0,  1.0, -_REDBALL_PHI),  # 1
-    _redball_v( 0.0, -1.0,  _REDBALL_PHI),  # 2
-    _redball_v( 0.0, -1.0, -_REDBALL_PHI),  # 3
-    _redball_v( 1.0,  _REDBALL_PHI,  0.0),  # 4
-    _redball_v( 1.0, -_REDBALL_PHI,  0.0),  # 5
-    _redball_v(-1.0,  _REDBALL_PHI,  0.0),  # 6
-    _redball_v(-1.0, -_REDBALL_PHI,  0.0),  # 7
-    _redball_v( _REDBALL_PHI,  0.0,  1.0),  # 8
-    _redball_v( _REDBALL_PHI,  0.0, -1.0),  # 9
-    _redball_v(-_REDBALL_PHI,  0.0,  1.0),  # 10
-    _redball_v(-_REDBALL_PHI,  0.0, -1.0),  # 11
+    _normalise_to_radius( 0.0,  1.0,  _REDBALL_PHI, _REDBALL_RADIUS),
+    _normalise_to_radius( 0.0,  1.0, -_REDBALL_PHI, _REDBALL_RADIUS),
+    _normalise_to_radius( 0.0, -1.0,  _REDBALL_PHI, _REDBALL_RADIUS),
+    _normalise_to_radius( 0.0, -1.0, -_REDBALL_PHI, _REDBALL_RADIUS),
+    _normalise_to_radius( 1.0,  _REDBALL_PHI,  0.0, _REDBALL_RADIUS),
+    _normalise_to_radius( 1.0, -_REDBALL_PHI,  0.0, _REDBALL_RADIUS),
+    _normalise_to_radius(-1.0,  _REDBALL_PHI,  0.0, _REDBALL_RADIUS),
+    _normalise_to_radius(-1.0, -_REDBALL_PHI,  0.0, _REDBALL_RADIUS),
+    _normalise_to_radius( _REDBALL_PHI,  0.0,  1.0, _REDBALL_RADIUS),
+    _normalise_to_radius( _REDBALL_PHI,  0.0, -1.0, _REDBALL_RADIUS),
+    _normalise_to_radius(-_REDBALL_PHI,  0.0,  1.0, _REDBALL_RADIUS),
+    _normalise_to_radius(-_REDBALL_PHI,  0.0, -1.0, _REDBALL_RADIUS),
 ]
 _REDBALL_FACES = [
     (0, 2, 8),  (0, 8, 4),  (0, 4, 6),  (0, 6, 10), (0, 10, 2),
@@ -991,6 +1001,37 @@ _REDBALL_FACES = [
     (2, 5, 8),  (8, 5, 9),  (8, 9, 4),  (4, 9, 1),  (4, 1, 6),
     (6, 1, 11), (6, 11, 10),(10, 11, 7),(10, 7, 2), (2, 7, 5),
 ]
+
+# Loop-subdivide REDBALL_SUBDIV times: each tri (a,b,c) becomes 4 tris
+# {(a,ab,ca), (b,bc,ab), (c,ca,bc), (ab,bc,ca)} where ab/bc/ca are
+# midpoints of the original edges, each pushed back onto the sphere.
+def _redball_subdivide(verts, faces):
+    cache = {}      # (i,j) → new vertex index, with i<j
+    def midpoint(i, j):
+        key = (min(i, j), max(i, j))
+        idx = cache.get(key)
+        if idx is not None:
+            return idx
+        ax, ay, az = verts[i]
+        bx, by, bz = verts[j]
+        mx, my, mz = _normalise_to_radius(
+            (ax + bx) * 0.5, (ay + by) * 0.5, (az + bz) * 0.5,
+            _REDBALL_RADIUS)
+        idx = len(verts)
+        verts.append((mx, my, mz))
+        cache[key] = idx
+        return idx
+    new_faces = []
+    for a, b, c in faces:
+        ab = midpoint(a, b)
+        bc = midpoint(b, c)
+        ca = midpoint(c, a)
+        new_faces += [(a, ab, ca), (b, bc, ab), (c, ca, bc), (ab, bc, ca)]
+    return new_faces
+
+for _ in range(REDBALL_SUBDIV):
+    _REDBALL_VERTS = list(_REDBALL_VERTS)  # ensure mutable
+    _REDBALL_FACES = _redball_subdivide(_REDBALL_VERTS, _REDBALL_FACES)
 
 _redball_mesh = bpy.data.meshes.new('redball_mesh')
 _redball_mesh.from_pydata(_REDBALL_VERTS, [], _REDBALL_FACES)
