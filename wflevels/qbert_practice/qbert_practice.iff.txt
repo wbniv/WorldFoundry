@@ -26,7 +26,8 @@
 		$3fff001l { 'STR' "player.iff" }  // IFF PERM fff:001
 		$3000001l { 'STR' "redball.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "coily_egg_mesh.iff" }  // IFF RM0 000:002
-		$3000003l { 'STR' "cube.iff" }  // IFF RM0 000:003
+		$3000003l { 'STR' "coily_snake_mesh.iff" }  // IFF RM0 000:003
+		$3000004l { 'STR' "cube.iff" }  // IFF RM0 000:004
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "qbert_practice.lvl" ] }
@@ -46,7 +47,8 @@
 		{ 'ASS' $7000fffl [ "Room0.cyc" ] }    // CYC RM0 000:fff
 		{ 'ASS' $3000001l [ "redball.iff" ] }  // IFF RM0 000:001
 		{ 'ASS' $3000002l [ "coily_egg_mesh.iff" ] }  // IFF RM0 000:002
-		{ 'ASS' $3000003l [ "cube.iff" ] }  // IFF RM0 000:003
+		{ 'ASS' $3000003l [ "coily_snake_mesh.iff" ] }  // IFF RM0 000:003
+		{ 'ASS' $3000004l [ "cube.iff" ] }  // IFF RM0 000:004
 	}
 	{ 'ALGN' .align(2048) }
 }

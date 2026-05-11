@@ -1199,10 +1199,12 @@ def coily_egg_script():
         f"then\n"
         # Landing tick? cd <= 0.
         f"{mb_cd} read-mailbox 0 <= if "
-        # Off-pyramid: retire. Phase A always retires; Phase B will divert to snake-transform here.
+        # Off-pyramid (Phase B): signal transform-to-snake. Director picks up
+        # PHASE_GLOBAL==2 and wakes the snake at egg's FROM_(ROW,COL) (the
+        # last on-pyramid cube, since ROW was already advanced to 7).
         f"{mb_row} read-mailbox 6 > if "
         f"0 {mb_phase} write-mailbox "
-        f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+        f"2 {COILY_MB_PHASE_GLOBAL} write-mailbox "
         f"{REDBALL_PARK_Z} 3011 write-mailbox "
         f"exit "
         f"then "
@@ -1252,6 +1254,124 @@ _egg['wf_Script']              = coily_egg_script()
 print(f"[qbert] Created Coily egg (actor index {COILY_EGG_ACTOR_IDX}); "
       f"hop {COILY_EGG_HOP_TICKS} ticks; "
       f"globals 518..525 + 542..544")
+
+# ── 5e. Coily snake (Phase B — egg transforms here at bottom row) ────────────
+# Stacked purple sphere segments. For Phase B it just stands on whichever
+# cube the egg landed on, killing Q*bert on contact. Phase C will add the
+# greedy-chase hop logic.
+#
+# Mailboxes 526..533 (same 8-slot layout as the egg), but for Phase B only
+# ROW/COL/PHASE are touched.
+
+_CS_MB_ROW       = 526
+_CS_MB_COL       = 527
+_CS_MB_COOLDOWN  = 528
+_CS_MB_PHASE     = 529
+_CS_MB_START_Z   = 530
+_CS_MB_END_Z     = 531
+_CS_MB_FROM_ROW  = 532
+_CS_MB_FROM_COL  = 533
+
+# Coily mesh: 4 purple-icosahedron segments stacked vertically, slightly
+# flattened. Each segment is a subdiv-0 icosahedron (20 faces). Total: 48
+# verts / 80 faces — same poly budget as the red ball.
+_COILY_SEG_COUNT   = 4
+_COILY_SEG_RADIUS  = 0.40
+_COILY_SEG_HEIGHT  = 0.30   # half-height of each compressed segment
+_COILY_SEG_SPACING = 0.55   # vertical distance between segment centres
+_COILY_CENTRE_OFFSET_Z = 1.0   # actor Z = cube_top + 1.0 (places stack ON the cube)
+
+def _coily_build_mesh():
+    verts = []
+    faces = []
+    # Base icosahedron pattern (12 verts), Z-flattened.
+    base_phi = (1.0 + math.sqrt(5.0)) / 2.0
+    base = [
+        ( 0.0,  1.0,  base_phi),
+        ( 0.0,  1.0, -base_phi),
+        ( 0.0, -1.0,  base_phi),
+        ( 0.0, -1.0, -base_phi),
+        ( 1.0,  base_phi,  0.0),
+        ( 1.0, -base_phi,  0.0),
+        (-1.0,  base_phi,  0.0),
+        (-1.0, -base_phi,  0.0),
+        ( base_phi,  0.0,  1.0),
+        ( base_phi,  0.0, -1.0),
+        (-base_phi,  0.0,  1.0),
+        (-base_phi,  0.0, -1.0),
+    ]
+    base_faces = [
+        (0, 2, 8),  (0, 8, 4),  (0, 4, 6),  (0, 6, 10), (0, 10, 2),
+        (3, 1, 9),  (3, 9, 5),  (3, 5, 7),  (3, 7, 11), (3, 11, 1),
+        (2, 5, 8),  (8, 5, 9),  (8, 9, 4),  (4, 9, 1),  (4, 1, 6),
+        (6, 1, 11), (6, 11, 10),(10, 11, 7),(10, 7, 2), (2, 7, 5),
+    ]
+    # Normalise each base vert to unit sphere, then scale: X/Y by SEG_RADIUS,
+    # Z by SEG_HEIGHT (flatten).
+    norm_factor = math.sqrt(1.0 + base_phi * base_phi)
+    # Stack along Z; segment K centred at (0, 0, K * SEG_SPACING - centre).
+    # Centre the whole stack on the actor origin so the actor's location
+    # specifies the geometric centre of the snake.
+    stack_total_height = (_COILY_SEG_COUNT - 1) * _COILY_SEG_SPACING
+    z_offset = -stack_total_height / 2.0
+    for seg in range(_COILY_SEG_COUNT):
+        seg_z = z_offset + seg * _COILY_SEG_SPACING
+        base_idx = len(verts)
+        for x, y, z in base:
+            verts.append((
+                (x / norm_factor) * _COILY_SEG_RADIUS,
+                (y / norm_factor) * _COILY_SEG_RADIUS,
+                (z / norm_factor) * _COILY_SEG_HEIGHT + seg_z,
+            ))
+        for a, b, c in base_faces:
+            faces.append((base_idx + a, base_idx + b, base_idx + c))
+    return verts, faces
+
+_COILY_VERTS, _COILY_FACES = _coily_build_mesh()
+_coily_mesh = bpy.data.meshes.new('coily_snake_mesh')
+_coily_mesh.from_pydata(_COILY_VERTS, [], _COILY_FACES)
+_coily_mesh.update()
+_coily_mat = bpy.data.materials.new('coily_snake_purple')
+_coily_mat.use_nodes = True
+_coily_bsdf = _coily_mat.node_tree.nodes.get('Principled BSDF')
+_coily_bsdf.inputs['Base Color'].default_value = (0.45, 0.08, 0.75, 1.0)
+_coily_mesh.materials.append(_coily_mat)
+
+_pre_snake_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+COILY_SNAKE_ACTOR_IDX = _pre_snake_actor_count + 1
+
+def coily_snake_script():
+    """Phase B: snake stands where the egg landed. Per-tick contact check
+    against player; on match, latch FALL_DEATH. No movement (Phase C will
+    add chase AI here)."""
+    return (
+        f"\\\\ wf coily snake (Phase B — standing)\n"
+        f"{_CS_MB_PHASE} read-mailbox 0 = if exit then\n"
+        # Contact check vs player.
+        f"{_CS_MB_ROW} read-mailbox 400 read-mailbox = if "
+        f"{_CS_MB_COL} read-mailbox 401 read-mailbox = if "
+        f"1 414 write-mailbox "
+        f"then then\n"
+        # Hold scale at identity.
+        f"1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox\n"
+    )
+
+_snake = bpy.data.objects.new('coily_snake', _coily_mesh)
+_snake.location = (0.0, 0.0, REDBALL_PARK_Z)
+scene.collection.objects.link(_snake)
+_snake['wf_schema_path']         = ENEMY_OAD
+_snake['wf_Mesh Name']           = 'coily_snake_mesh.iff'
+_snake['wf_original_mesh_name']  = 'coily_snake_mesh.iff'
+_snake['wf_Model Type']          = 'Mesh'
+_snake['wf_Mobility']            = 'Anchored'
+_snake['wf_Mass']                = 0.0
+_snake['wf_Visibility Mailbox']  = 1
+_snake['wf_NumberOfLocalMailboxes'] = 0
+_snake['wf_Script']              = coily_snake_script()
+
+print(f"[qbert] Created Coily snake (actor index {COILY_SNAKE_ACTOR_IDX}); "
+      f"stacked {_COILY_SEG_COUNT}-segment mesh "
+      f"({len(_COILY_VERTS)} verts / {len(_COILY_FACES)} faces)")
 
 # ── 6. Director — wire its Script for the game loop ───────────────────────────
 # MVP director: cube-state advance, visibility fan-out, win check, camera
@@ -1477,6 +1597,33 @@ DIRECTOR_SCRIPT = "".join([
     f"then "
     f"then "
     f"then\n",
+    # ── Coily egg → snake transformation (Phase B) ─────────────────────────────
+    # PHASE_GLOBAL == 2 means the egg just retired off-pyramid; wake the snake
+    # at the egg's last on-pyramid cube (FROM_ROW/FROM_COL) and compute its
+    # world position. Gated on snake PHASE still 0 so the activation is
+    # one-shot per egg-to-snake transition.
+    f"{COILY_MB_PHASE_GLOBAL} read-mailbox 2 = "
+    f"{_CS_MB_PHASE} read-mailbox 0 = & if "
+    # Pick up the egg's final position from its globals (518/519 ROW/COL — but
+    # ROW was advanced to 7 before retire; use FROM_ROW=524, FROM_COL=525).
+    # Write snake ROW = FROM_ROW, COL = FROM_COL.
+    f"{_CE_MB_FROM_ROW} read-mailbox {_CS_MB_ROW} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"{_CE_MB_FROM_COL} read-mailbox {_CS_MB_COL} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    # Write snake world XYZ (row=FROM_ROW gives cube position; offset for stack-centre Z).
+    # X = X_MUL * (col - row/2); Y = Y_MUL * (6 - row); Z = Z_BASE - row*Z_MUL + CENTRE_OFFSET_Z.
+    f"{_CE_MB_FROM_COL} read-mailbox "
+    f"{_CE_MB_FROM_ROW} read-mailbox 0.5 * - "
+    f"{_RB_X_MUL} * 3009 {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"6.0 {_CE_MB_FROM_ROW} read-mailbox - "
+    f"{_RB_Y_MUL} * 3010 {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"{_RB_Z_BASE + _COILY_CENTRE_OFFSET_Z} "
+    f"{_CE_MB_FROM_ROW} read-mailbox {_RB_Z_MUL} * - "
+    f"3011 {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    # Activate snake.
+    f"1 {_CS_MB_PHASE} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    # PHASE_GLOBAL := 1 sentinel? No — keep at 2 to mean "snake active".
+    # Director's later round-clear logic resets to 0.
+    f"then\n",
     # Camshot routing: cs_death hold + FALL_DEATH latch + game-over fold-in.
     f"414 read-mailbox 1 = if {CS_DEATH_IDX} INDEXOF_CAMSHOT write-mailbox ",
     f"{CS_DEATH_HOLD_FRAMES} 415 write-mailbox ",
@@ -1565,9 +1712,11 @@ DIRECTOR_SCRIPT = "".join([
     "0 400 write-mailbox 0 401 write-mailbox 0 402 write-mailbox ",
     "0 414 write-mailbox 0 415 write-mailbox 0 419 write-mailbox ",
     "1 426 write-mailbox ",   # apex respawn flag for player
-    # Coily Phase A round refresh: retire any in-flight egg, clear ROUND_DONE,
+    # Coily round refresh: retire egg + snake, clear ROUND_DONE,
     # rearm SPAWN_DELAY so the next round spawns a fresh egg.
     f"0 {_CE_MB_PHASE} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"0 {_CS_MB_PHASE} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"{REDBALL_PARK_Z} 3011 {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
     f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
     f"0 {COILY_MB_ROUND_DONE} write-mailbox "
     f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox ",
