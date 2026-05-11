@@ -792,114 +792,179 @@ if camshot:
         cs_intro['wf_Pan Time In Seconds'] = pan_time
         intro_camshot_objs.append(cs_intro)
 
-# ── 5c. Red Ball enemy ───────────────────────────────────────────────────────
-# First enemy: a small red ball that bounces diagonally down the pyramid.
-# Strict downward motion (alternates left-down and right-down each hop),
-# despawns when it walks off the bottom (row > NUM_ROWS - 1), respawns at
-# (row=1, col=0) after a cooldown. Kills Q*bert on contact (same cube).
+# ── 5c. Red Ball enemies (Phase B) ───────────────────────────────────────────
+# N = 3 red balls bouncing down the pyramid. The director enables (wakes) one
+# idle ball at a time on a per-round spawn cadence; each ball owns its own
+# movement script — randomised left/right per hop, parabolic Z arc mid-hop,
+# off-pyramid retire. Director-side globals (mb 511..517) carry the LFSR,
+# spawn timer, and per-ball "active" mirror so the director can re-decide
+# which ball to wake next without needing to read peer mailboxes.
 #
-# All state and respawn logic lives in the ball's own wf_Script — the
-# director doesn't know about the ball. The ball reads the player's
-# global ROW/COL (mb 400/401) for contact detection and writes
-# FALL_DEATH (mb 414) on hit, routing into the existing death pipeline.
+# Architecture: each ball is a separate enemy actor (redball_0/1/2) created
+# at level build, linked at park-Z (off-screen) so it's invisible until the
+# director writes its initial state via write-actor-mailbox.
 #
-# Placed BEFORE section 6 so the ball is counted in pre-cube actor totals
-# and the cube-actor-index assertion in section 7 still passes.
-#
-# See docs/plans/2026-05-11-qbert-red-ball-enemy.md.
+# See docs/plans/2026-05-11-qbert-red-ball-phase-b.md.
 
-REDBALL_INITIAL_ROW  = 1
-REDBALL_INITIAL_COL  = 0
+REDBALL_COUNT        = 3
 REDBALL_HOP_TICKS    = 18      # ~0.3 s/hop at 60 Hz; arcade is ~3 hops/s
-REDBALL_RESPAWN_TICKS = 60     # ~1 s between despawn and respawn
 REDBALL_HEIGHT_OFFSET = CUBE_SIZE / 2 + 0.5   # ball centre above cube centre
 
-_rb_init_x, _rb_init_y, _rb_init_z_cube_center = cube_world_position(
-    REDBALL_INITIAL_ROW, REDBALL_INITIAL_COL)
-REDBALL_INITIAL_Z = _rb_init_z_cube_center + REDBALL_HEIGHT_OFFSET
-# Park position when off-pyramid — stays within the room bbox (min Z = -38)
-# so the engine doesn't spam "fell out of room" warnings every tick.
+# Park position when idle (in PHASE 0) — stays within the room bbox
+# (min Z = -38) so the engine doesn't spam "fell out of room" warnings.
 REDBALL_PARK_Z = -30.0
 
 # Forth-side constants matching cube_world_position():
 #   X = SQRT2 * CUBE_SIZE * (col - row/2)         = 2.82843 * (col - row*0.5)
 #   Y = SQRT2 * (CUBE_SIZE/2) * (NUM_ROWS - 1 - row) = 1.41421 * (6 - row)
 #   Z = CUBE_BASE_Z + CUBE_SIZE * (NUM_ROWS - 1 - row) + REDBALL_HEIGHT_OFFSET
-#     = 1.0 + 2.0 * (6 - row) + 1.5
 #     = 14.5 - 2 * row                                          (NUM_ROWS=7, CUBE_BASE_Z=1, CUBE_SIZE=2)
 _RB_X_MUL  = SQRT2 * CUBE_SIZE                       # 2.82843
 _RB_Y_MUL  = SQRT2 * (CUBE_SIZE / 2)                 # 1.41421
 _RB_Z_BASE = CUBE_BASE_Z + CUBE_SIZE * (NUM_ROWS - 1) + REDBALL_HEIGHT_OFFSET  # 14.5
 _RB_Z_MUL  = CUBE_SIZE                               # 2.0
+# Z values at the ball's initial spawn row (apex Z=14.5; row-1 Z=12.5).
+_RB_Z_AT_ROW_0 = _RB_Z_BASE - 0 * _RB_Z_MUL                # 14.5 (used as initial START_Z)
+_RB_Z_AT_ROW_1 = _RB_Z_BASE - 1 * _RB_Z_MUL                # 12.5 (used as initial END_Z)
 
-_RB_MB_ROW       = 462
-_RB_MB_COL       = 463
-_RB_MB_COOLDOWN  = 464
-_RB_MB_PATTERN   = 465
-_RB_MB_PHASE     = 466
+# Per-ball mailbox layout: base = 462 + 8*K. Each ball owns 8 cells.
+_RB_OFF_ROW       = 0
+_RB_OFF_COL       = 1
+_RB_OFF_COOLDOWN  = 2
+_RB_OFF_PHASE     = 3
+_RB_OFF_START_Z   = 4
+_RB_OFF_END_Z     = 5
+_RB_OFF_FROM_ROW  = 6
+_RB_OFF_FROM_COL  = 7
+_RB_PER_BALL      = 8
 
-REDBALL_SCRIPT = (
-    "\\\\ wf redball — bouncing enemy MVP\n"
-    # Global mailboxes (mb 0..1 are FALSE_M/TRUE_M sentinels per mailbox.inc:43,
-    # local user range starts at 2000; we follow the player/director convention
-    # of using globals in the 400+ range):
-    #   462 RB_ROW       current row in pyramid (0=apex)
-    #   463 RB_COL       current col in pyramid
-    #   464 RB_COOLDOWN  ticks until next event (hop, or respawn)
-    #   465 RB_PATTERN   0 = next hop is left-down (dr,dc=+1,0)
-    #                    1 = next hop is right-down (+1,+1)
-    #   466 RB_PHASE     0 = respawning (waiting to spawn)
-    #                    1 = bouncing
-    # ── Phase 0: respawning — count down RB_COOLDOWN; on 0 reset to start.
-    f"{_RB_MB_PHASE} read-mailbox 0 = if "
-    f"{_RB_MB_COOLDOWN} read-mailbox 1 - dup {_RB_MB_COOLDOWN} write-mailbox 0 <= if "
-    f"{REDBALL_INITIAL_ROW} {_RB_MB_ROW} write-mailbox "
-    f"{REDBALL_INITIAL_COL} {_RB_MB_COL} write-mailbox "
-    f"{REDBALL_HOP_TICKS} {_RB_MB_COOLDOWN} write-mailbox "
-    f"0 {_RB_MB_PATTERN} write-mailbox "
-    f"1 {_RB_MB_PHASE} write-mailbox "
-    f"{_rb_init_x} 3009 write-mailbox "
-    f"{_rb_init_y} 3010 write-mailbox "
-    f"{REDBALL_INITIAL_Z} 3011 write-mailbox "
-    "then "
-    "exit "
-    "then\n"
-    # ── Phase 1: bouncing — cooldown gate.
-    f"{_RB_MB_COOLDOWN} read-mailbox 1 - dup {_RB_MB_COOLDOWN} write-mailbox 0 > if exit then\n"
-    # Hop: ROW++; if PATTERN==1, COL++; flip PATTERN; reset cooldown.
-    f"{_RB_MB_ROW} read-mailbox 1 + {_RB_MB_ROW} write-mailbox "
-    f"{_RB_MB_PATTERN} read-mailbox 1 = if "
-    f"{_RB_MB_COL} read-mailbox 1 + {_RB_MB_COL} write-mailbox "
-    f"0 {_RB_MB_PATTERN} write-mailbox "
-    "else "
-    f"1 {_RB_MB_PATTERN} write-mailbox "
-    "then "
-    f"{REDBALL_HOP_TICKS} {_RB_MB_COOLDOWN} write-mailbox\n"
-    # Off-pyramid: ROW > 6 → enter respawn phase, park below floor.
-    f"{_RB_MB_ROW} read-mailbox 6 > if "
-    f"{REDBALL_RESPAWN_TICKS} {_RB_MB_COOLDOWN} write-mailbox "
-    f"0 {_RB_MB_PHASE} write-mailbox "
-    f"{REDBALL_PARK_Z} 3011 write-mailbox "
-    "exit "
-    "then\n"
-    # Write new world position (X, Y, Z) from updated (row, col).
-    f"{_RB_MB_COL} read-mailbox {_RB_MB_ROW} read-mailbox 0.5 * - "
-    f"{_RB_X_MUL} * 3009 write-mailbox\n"
-    f"6 {_RB_MB_ROW} read-mailbox - "
-    f"{_RB_Y_MUL} * 3010 write-mailbox\n"
-    f"{_RB_Z_BASE} {_RB_MB_ROW} read-mailbox {_RB_Z_MUL} * - 3011 write-mailbox\n"
-    # Contact check vs player: same (row, col) → latch FALL_DEATH.
-    f"{_RB_MB_ROW} read-mailbox 400 read-mailbox = if "
-    f"{_RB_MB_COL} read-mailbox 401 read-mailbox = if "
-    "1 414 write-mailbox "
-    "then "
-    "then\n"
+def _rb_mb(k, off):
+    return 462 + _RB_PER_BALL * k + off
+
+# Director-owned globals (shared across all balls).
+RB_MB_LFSR          = 511
+RB_MB_SPAWN_TIMER   = 512
+RB_MB_ACTIVE_BASE   = 514      # RB_ACTIVE[K] = mb 514+K (K ∈ {0,1,2})
+RB_MB_SPAWN_CLAIMED = 517
+
+# LFSR step — Galois LFSR-16, polynomial x^16+x^14+x^13+x^11+1 (tap mask 0xB400).
+# Side-effect: advance mb 511; result: lsb (0 or 1) left on stack.
+# zForth has `&`, `|`, `^`, `<<`, `>>` (PRIM_AND/OR/XOR/SHL/SHR in zforth.c).
+_RB_LFSR_STEP = (
+    f"{RB_MB_LFSR} read-mailbox "
+    f"dup 1 & 0 <> if "
+    f"1 >> 0xB400 ^ "
+    f"else "
+    f"1 >> "
+    f"then "
+    f"dup {RB_MB_LFSR} write-mailbox "
+    f"1 & "
 )
 
-# Build the ball's Blender object — icosahedron geometry + a red material.
-# Both come from Blender source (mesh datablock + Principled BSDF material);
-# wf_blender's _write_mesh_iff translates these into redball.iff at export.
-# (Blender is the authoring source of truth; we do not post-patch the .iff.)
+def redball_script(k):
+    """Generate the wf_Script for redball K (0..REDBALL_COUNT-1).
+
+    Phase 0: idle (off-screen). Director will wake by writing initial state.
+    Phase 1: hopping. Each tick decrements cooldown and writes interpolated XYZ.
+             On landing tick (cooldown <= 0): contact-check vs player; if
+             off-pyramid, retire to PHASE 0; otherwise pick next direction
+             via shared LFSR and re-arm cooldown.
+    """
+    mb_row      = _rb_mb(k, _RB_OFF_ROW)
+    mb_col      = _rb_mb(k, _RB_OFF_COL)
+    mb_cd       = _rb_mb(k, _RB_OFF_COOLDOWN)
+    mb_phase    = _rb_mb(k, _RB_OFF_PHASE)
+    mb_start_z  = _rb_mb(k, _RB_OFF_START_Z)
+    mb_end_z    = _rb_mb(k, _RB_OFF_END_Z)
+    mb_from_row = _rb_mb(k, _RB_OFF_FROM_ROW)
+    mb_from_col = _rb_mb(k, _RB_OFF_FROM_COL)
+    mb_active   = RB_MB_ACTIVE_BASE + k
+
+    # t_raw = (HOP_TICKS - cd) / (HOP_TICKS - 1)  — float, in [1/17 .. 1]
+    # t'    = smoothstep(t_raw) = t_raw² · (3 − 2·t_raw)
+    # (Forth idiom matches player's hop arc at blender_create_qbert.py:596.)
+    #
+    # Position interpolation: cube-space lerp on (row, col), then convert to
+    # world XY via the same X/Y formula used in cube_world_position().
+    #   row_now = from_row + t' * (row - from_row)
+    #   col_now = from_col + t' * (col - from_col)
+    #   x = X_MUL * (col_now - row_now * 0.5)
+    #   y = Y_MUL * (6 - row_now)
+    #   z_linear = start_z + t' * (end_z - start_z)
+    #   z_arc    = z_linear + 4*t_raw*(1-t_raw) * 2.0   (peak +2 at t=0.5)
+    hop_denom_f = float(REDBALL_HOP_TICKS - 1)
+
+    # Per-tick algorithm:
+    #   1. Phase 0 (idle): early exit; director will wake.
+    #   2. Phase 1: decrement COOLDOWN; compute t_raw ∈ [1/17..1] and smoothstep t'.
+    #   3. Lerp row_now/col_now in cube-space using t'; convert to world XY; write.
+    #   4. Z = lerp(start_z, end_z, t') + 8 * t_raw * (1 - t_raw) parabolic bonus.
+    #   5. Contact check vs player (every frame).
+    #   6. On landing tick: retire if off-pyramid; else pick next direction via LFSR,
+    #      advance row/col, refresh START_Z/END_Z, re-arm COOLDOWN.
+    #
+    # Stack notation: ( ... -- ... ) tracks values across each line.
+    return (
+        f"\\\\ wf redball {k}\n"
+        # ── Phase 0: idle (off-screen). Director writes our initial state to wake us.
+        f"{mb_phase} read-mailbox 0 = if exit then\n"
+        # ── Phase 1: hopping. Decrement COOLDOWN.
+        f"{mb_cd} read-mailbox 1 - dup {mb_cd} write-mailbox\n"
+        # t_raw = (HOP_TICKS - cd_new) / (HOP_TICKS - 1)             ( cd_new -- t_raw )
+        f"{REDBALL_HOP_TICKS} swap - {hop_denom_f} /\n"
+        # Smoothstep, preserving t_raw under t':                     ( t_raw -- t_raw t' )
+        # Top-of-stack smoothstep idiom mirrors player at line ~596.
+        f"dup dup dup * swap 2.0 * 3.0 swap - *\n"
+        # row_now = from_row + t' * (row - from_row)                 ( t_raw t' -- t_raw t' row_now )
+        f"dup {mb_row} read-mailbox {mb_from_row} read-mailbox - * "
+        f"{mb_from_row} read-mailbox +\n"
+        # col_now = from_col + t' * (col - from_col)                 ( t_raw t' row_now -- t_raw t' row_now col_now )
+        f"over {mb_col} read-mailbox {mb_from_col} read-mailbox - * "
+        f"{mb_from_col} read-mailbox +\n"
+        # y = (6 - row_now) * Y_MUL → write 3010, stack unchanged
+        # `over` copies row_now to top; `6.0 swap -` computes (6 - row_now).
+        f"over 6.0 swap - {_RB_Y_MUL} * 3010 write-mailbox\n"
+        # x = (col_now - row_now*0.5) * X_MUL → write 3009           ( ... row_now col_now -- ... t_raw t' )
+        f"swap 0.5 * - {_RB_X_MUL} * 3009 write-mailbox\n"
+        # z_linear = start_z + t' * (end_z - start_z)                ( t_raw t' -- t_raw z_linear )
+        f"{mb_end_z} read-mailbox {mb_start_z} read-mailbox - * "
+        f"{mb_start_z} read-mailbox +\n"
+        # arc bonus = 8 * t_raw * (1 - t_raw); z_final = z_linear + bonus   ( t_raw z_linear -- z_final )
+        f"swap dup 1.0 swap - * 8.0 * +\n"
+        # write Z.                                                   ( z_final -- )
+        f"3011 write-mailbox\n"
+        # ── Contact check (every frame). Same (row, col) as player → FALL_DEATH.
+        f"{mb_row} read-mailbox 400 read-mailbox = if "
+        f"{mb_col} read-mailbox 401 read-mailbox = if "
+        f"1 414 write-mailbox "
+        f"then then\n"
+        # ── Landing tick? cd_new <= 0.
+        f"{mb_cd} read-mailbox 0 <= if "
+        # Off-pyramid: row > 6 → retire to PHASE 0, park, clear director's mirror.
+        f"{mb_row} read-mailbox 6 > if "
+        f"0 {mb_phase} write-mailbox "
+        f"0 {mb_active} write-mailbox "
+        f"{REDBALL_PARK_Z} 3011 write-mailbox "
+        f"exit "
+        f"then "
+        # Pick next direction via LFSR.                                 ( -- bit )
+        f"{_RB_LFSR_STEP}"
+        # Stash FROM_ROW, advance ROW (always +1).                    ( bit -- bit )
+        f"{mb_row} read-mailbox dup {mb_from_row} write-mailbox 1 + {mb_row} write-mailbox "
+        # Stash FROM_COL, advance COL if bit != 0.                    ( bit -- )
+        f"{mb_col} read-mailbox dup {mb_from_col} write-mailbox "
+        f"swap if 1 + then {mb_col} write-mailbox "
+        # Stash START_Z (current Z at end of hop) and END_Z (Z at new row).
+        f"3011 read-mailbox {mb_start_z} write-mailbox "
+        f"{_RB_Z_BASE} {mb_row} read-mailbox {_RB_Z_MUL} * - {mb_end_z} write-mailbox "
+        # Re-arm cooldown for the next hop.
+        f"{REDBALL_HOP_TICKS} {mb_cd} write-mailbox "
+        f"then\n"
+    )
+
+# Build the shared mesh + material once; clone the Blender object for each
+# ball. The engine reads geometry from redball.iff (written by the wf_blender
+# exporter from the Blender mesh+material).
 _REDBALL_PHI = (1.0 + math.sqrt(5.0)) / 2.0
 _REDBALL_NORM = math.sqrt(1.0 + _REDBALL_PHI * _REDBALL_PHI)
 _REDBALL_RADIUS = 0.5
@@ -920,7 +985,6 @@ _REDBALL_VERTS = [
     _redball_v(-_REDBALL_PHI,  0.0,  1.0),  # 10
     _redball_v(-_REDBALL_PHI,  0.0, -1.0),  # 11
 ]
-# 20 CCW-from-outside triangle faces of a standard icosahedron.
 _REDBALL_FACES = [
     (0, 2, 8),  (0, 8, 4),  (0, 4, 6),  (0, 6, 10), (0, 10, 2),
     (3, 1, 9),  (3, 9, 5),  (3, 5, 7),  (3, 7, 11), (3, 11, 1),
@@ -931,30 +995,45 @@ _REDBALL_FACES = [
 _redball_mesh = bpy.data.meshes.new('redball_mesh')
 _redball_mesh.from_pydata(_REDBALL_VERTS, [], _REDBALL_FACES)
 _redball_mesh.update()
-
-# Red material — Principled BSDF base colour drives the on-disk MATL.
 _redball_mat = bpy.data.materials.new('redball_red')
 _redball_mat.use_nodes = True
 _redball_bsdf = _redball_mat.node_tree.nodes.get('Principled BSDF')
 _redball_bsdf.inputs['Base Color'].default_value = (1.0, 0.0, 0.0, 1.0)
 _redball_mesh.materials.append(_redball_mat)
 
-redball = bpy.data.objects.new('redball_1', _redball_mesh)
-redball.location = (_rb_init_x, _rb_init_y, REDBALL_INITIAL_Z)
-scene.collection.objects.link(redball)
-redball['wf_schema_path']         = ENEMY_OAD
-redball['wf_Mesh Name']           = 'redball.iff'
-redball['wf_original_mesh_name']  = 'redball.iff'
-redball['wf_Model Type']          = 'Mesh'
-redball['wf_Mobility']            = 'Anchored'
-redball['wf_Mass']                = 0.0
-redball['wf_Visibility Mailbox']  = 1
-redball['wf_NumberOfLocalMailboxes'] = 0   # state lives in globals 462..466
-redball['wf_Script']              = REDBALL_SCRIPT
+# Capture actor index of the first ball so the director can address each via
+# write-actor-mailbox (REDBALL_ACTOR_BASE + K). Mirrors the CUBE_ACTOR_BASE
+# pattern.  All 3 balls created contiguously in this loop.
+SCHEMA_PATH_KEY = 'wf_schema_path'
+_pre_redball_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+REDBALL_ACTOR_BASE = _pre_redball_actor_count + 1   # 1-based
 
-print(f"[qbert] Created redball_1 at ({_rb_init_x:.2f}, {_rb_init_y:.2f}, "
-      f"{REDBALL_INITIAL_Z:.2f}) — bouncing from row {REDBALL_INITIAL_ROW} "
-      f"col {REDBALL_INITIAL_COL}, hop every {REDBALL_HOP_TICKS} ticks")
+for _k in range(REDBALL_COUNT):
+    _ball = bpy.data.objects.new(f'redball_{_k}', _redball_mesh)
+    # Park off-screen — director will write initial XYZ when waking the ball.
+    _ball.location = (0.0, 0.0, REDBALL_PARK_Z)
+    scene.collection.objects.link(_ball)
+    _ball['wf_schema_path']         = ENEMY_OAD
+    _ball['wf_Mesh Name']           = 'redball.iff'
+    _ball['wf_original_mesh_name']  = 'redball.iff'
+    _ball['wf_Model Type']          = 'Mesh'
+    _ball['wf_Mobility']            = 'Anchored'
+    _ball['wf_Mass']                = 0.0
+    _ball['wf_Visibility Mailbox']  = 1
+    _ball['wf_NumberOfLocalMailboxes'] = 0   # state lives in globals 462..485
+    _ball['wf_Script']              = redball_script(_k)
+
+# Sanity assertion mirroring the cube-base drift check in section 7.
+_post_redball_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+assert _post_redball_actor_count == _pre_redball_actor_count + REDBALL_COUNT, (
+    f"Red ball actor count drift: expected +{REDBALL_COUNT}, got "
+    f"{_post_redball_actor_count - _pre_redball_actor_count}")
+
+print(f"[qbert] Created {REDBALL_COUNT} red balls "
+      f"(actor indices {REDBALL_ACTOR_BASE}..{REDBALL_ACTOR_BASE + REDBALL_COUNT - 1}); "
+      f"hop {REDBALL_HOP_TICKS} ticks; "
+      f"per-ball mailbox bases "
+      f"{', '.join(str(_rb_mb(k, 0)) for k in range(REDBALL_COUNT))}")
 
 # ── 6. Director — wire its Script for the game loop ───────────────────────────
 # MVP director: cube-state advance, visibility fan-out, win check, camera
@@ -1063,6 +1142,11 @@ DIRECTOR_SCRIPT = "".join([
     _broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[0][0], 3038),  # LIT
     _broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[0][1], 3039),  # SHADOW
     "0 427 write-mailbox ",   # LAST_LEVEL = 0 (L1)
+    # Red Ball Phase B: seed LFSR, set first-ball delay, clear per-ball active mirrors.
+    f"0xACE1 {RB_MB_LFSR} write-mailbox "          # LFSR seed (non-zero, arbitrary)
+    f"120 {RB_MB_SPAWN_TIMER} write-mailbox "      # first ball ~2 s after INTRO_DONE
+    + " ".join(f"0 {RB_MB_ACTIVE_BASE + k} write-mailbox" for k in range(REDBALL_COUNT))
+    + " ",
     "1 421 write-mailbox ",   # LEVEL_INITIALIZED
     "then\n",
     # Intro state machine — runs only while phase 0..5; gates the rest of
@@ -1094,6 +1178,52 @@ DIRECTOR_SCRIPT = "".join([
     "6 = if 1 418 write-mailbox then ",
     "then ",
     "then\n",
+    # ── Red Ball Phase B spawn timing ─────────────────────────────────────────
+    # Gated on INTRO_DONE. Each tick:
+    #   - decrement RB_SPAWN_TIMER (mb 512)
+    #   - when timer reaches 0: try to claim and wake the lowest-index idle ball,
+    #     then re-arm timer to max(60, 300 - 12 * ROUND_NUMBER) ticks.
+    # Each ball's activation writes 8 state mailboxes (COL/ROW/FROM_ROW/FROM_COL/
+    # COOLDOWN/START_Z/END_Z/PHASE) via write-actor-mailbox + 1 director-mirror
+    # write (RB_ACTIVE[K]) + 1 claim latch (RB_SPAWN_CLAIMED).
+    f"418 read-mailbox 1 = if "
+    f"{RB_MB_SPAWN_TIMER} read-mailbox dup 0 > if "
+    f"1 - {RB_MB_SPAWN_TIMER} write-mailbox "
+    f"else drop "
+    # claimed := 0
+    f"0 {RB_MB_SPAWN_CLAIMED} write-mailbox "
+    + " ".join(
+        # For each ball K, try to claim. Each block: if not yet claimed AND
+        # ball K is idle, step LFSR, write all 8 ball mailboxes, mirror active,
+        # latch claimed.
+        f"{RB_MB_SPAWN_CLAIMED} read-mailbox 0 = if "
+        f"{RB_MB_ACTIVE_BASE + k} read-mailbox 0 = if "
+        # LFSR step → ( bit )
+        f"{_RB_LFSR_STEP}"
+        # Activate ball K (write-actor-mailbox stack: val mb actor):
+        #   COL := bit (consumes the bit on top of stack)
+        f"{_rb_mb(k, _RB_OFF_COL)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        #   ROW := 1, FROM_ROW := 0, FROM_COL := 0
+        f"1 {_rb_mb(k, _RB_OFF_ROW)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        f"0 {_rb_mb(k, _RB_OFF_FROM_ROW)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        f"0 {_rb_mb(k, _RB_OFF_FROM_COL)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        #   COOLDOWN := HOP_TICKS
+        f"{REDBALL_HOP_TICKS} {_rb_mb(k, _RB_OFF_COOLDOWN)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        #   START_Z := Z@row0 (apex), END_Z := Z@row1
+        f"{_RB_Z_AT_ROW_0} {_rb_mb(k, _RB_OFF_START_Z)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        f"{_RB_Z_AT_ROW_1} {_rb_mb(k, _RB_OFF_END_Z)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        #   PHASE := 1 (start hopping)
+        f"1 {_rb_mb(k, _RB_OFF_PHASE)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        # Director-mirror RB_ACTIVE[K] := 1 ; CLAIMED := 1
+        f"1 {RB_MB_ACTIVE_BASE + k} write-mailbox "
+        f"1 {RB_MB_SPAWN_CLAIMED} write-mailbox "
+        f"then then "
+        for k in range(REDBALL_COUNT)
+    )
+    + " "
+    # Re-arm timer = max(60, 300 - 12 * ROUND_NUMBER)
+    f"425 read-mailbox 12 * 300 swap - dup 60 < if drop 60 then {RB_MB_SPAWN_TIMER} write-mailbox "
+    f"then then\n",
     # Camshot routing: cs_death hold + FALL_DEATH latch + game-over fold-in.
     f"414 read-mailbox 1 = if {CS_DEATH_IDX} INDEXOF_CAMSHOT write-mailbox ",
     f"{CS_DEATH_HOLD_FRAMES} 415 write-mailbox ",
