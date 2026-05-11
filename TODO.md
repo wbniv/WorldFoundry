@@ -42,6 +42,11 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 - [ ] Replace physics engine — Jolt integration; pre-existing bad cast in movecam.cc:964 is the trigger — [investigation](docs/investigations/2026-04-14-jolt-physics-integration.md)
 
 
+## PLATFORMS
+
+- [ ] Retire stale branches/worktrees post-consolidation — once `2026-ios` is verified, delete local `2026-googletv` (worktree `/home/will/WorldFoundry`, primary checkout — needs care) and `party-games-platform` (worktree `/home/will/WorldFoundry.party-games-platform`); leave origin refs alone unless collaborator confirms — [plan](docs/plans/2026-05-11-consolidate-ios-googletv-party.md)
+
+
 ## BUILD / TOOLCHAIN
 
 - [ ] Investigate RTTI claim — engine is supposed to have **no** C++ RTTI (no `dynamic_cast`, no `typeid`), yet `wfsource/source/baseobject/baseobject.hp:71` has `virtual EActorKind kind() const = 0;` with comment "manual RTTI, investigate removing". Confirm the enum-dispatch `kind()` is not actual C++ RTTI, then try building with `-fno-rtti` and measure the size/startup win (Android size-optimisation context). If something else does depend on RTTI, document where and why.
