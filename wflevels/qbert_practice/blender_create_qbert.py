@@ -1358,6 +1358,14 @@ _CS_MB_END_Z     = 531
 _CS_MB_FROM_ROW  = 532
 _CS_MB_FROM_COL  = 533
 
+# Coily S&S: asymmetric — apex Z stretch 3× player (very tall mid-air);
+# takeoff/landing crouch held at player level (no exaggerated flatten).
+# Reads as "springy snake leaping" rather than "cartoon squash".
+_COILY_SS_Z_BELL  =  0.60     # 3× player 0.20  → apex Z scale = 1.60
+_COILY_SS_Z_IMP   = -0.40     # = player          → takeoff/landing Z = 0.60
+_COILY_SS_XY_BELL = -0.10     # = player          → apex XY = 0.90
+_COILY_SS_XY_IMP  =  0.40     # = player          → takeoff/landing XY = 1.40
+
 # Coily mesh: 4 purple-icosahedron segments stacked vertically, slightly
 # flattened. Each segment is a subdiv-0 icosahedron (20 faces). Total: 48
 # verts / 80 faces — same poly budget as the red ball.
@@ -1491,14 +1499,15 @@ def coily_snake_script():
         f"{mb_col} read-mailbox 401 read-mailbox = if "
         f"1 414 write-mailbox "
         f"then then\n"
-        # Stretch-and-squash (same 0.5 strength as ball).
+        # Stretch-and-squash: asymmetric Coily-specific — apex Z 3× player,
+        # takeoff/landing at player level. Snake stretches tall mid-air.
         f"{mb_cd} read-mailbox 0 <= if "
         f"1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
         f"else "
         f"{_COILY_SNAKE_HOP_TICKS} {mb_cd} read-mailbox - {_COILY_SNAKE_HOP_DENOM_F} / "
         f"dup 2.0 * 1.0 - dup * swap dup 1.0 swap - 4.0 * * "
-        f"over {_RB_SS_Z_IMP} * over {_RB_SS_Z_BELL} * + 1.0 + 3042 write-mailbox "
-        f"{_RB_SS_XY_BELL} * swap {_RB_SS_XY_IMP} * + 1.0 + "
+        f"over {_COILY_SS_Z_IMP} * over {_COILY_SS_Z_BELL} * + 1.0 + 3042 write-mailbox "
+        f"{_COILY_SS_XY_BELL} * swap {_COILY_SS_XY_IMP} * + 1.0 + "
         f"dup 3040 write-mailbox 3041 write-mailbox "
         f"then\n"
         # Landing tick → pick next hop greedy.
