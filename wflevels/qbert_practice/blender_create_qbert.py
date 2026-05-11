@@ -1473,6 +1473,124 @@ print(f"[qbert] Created Coily snake (actor index {COILY_SNAKE_ACTOR_IDX}); "
       f"stacked {_COILY_SEG_COUNT}-segment mesh "
       f"({len(_COILY_VERTS)} verts / {len(_COILY_FACES)} faces)")
 
+# ── 5f. Spinning discs (Phase D — Coily-lure mechanic) ───────────────────────
+# Two flat purple-blue cylinders at the off-edge positions adjacent to the
+# row-1 cubes: left at (row=1, col=-1) and right at (row=1, col=2). When the
+# player hops onto a disc cube, the existing off-pyramid detector in the
+# player script writes FALL_PHASE=1; the disc actor (running later in the
+# tick) sees the player's new (row,col) matches its own and overrides:
+# clears FALL_PHASE, latches mb 426 = 1 (the existing apex-respawn flag the
+# player handles at line 534), consumes itself (PHASE=0 + park Z).
+#
+# Coily falling off a disc is deferred — the current Coily AI restricts
+# hops to on-pyramid cubes, so the snake never lands on disc coords.
+
+DISC_L_ROW    = 1
+DISC_L_COL    = -1
+DISC_R_ROW    = 1
+DISC_R_COL    = 2
+DISC_PARK_Z   = -30.0
+
+# Per-disc PHASE mailboxes (0 = consumed, 1 = present).
+_DL_MB_PHASE = 534
+_DR_MB_PHASE = 535
+
+# Disc mesh: flat cylinder, 16-sided, radius 1.0, half-thickness 0.075.
+def _disc_build_mesh():
+    radius = 1.0
+    half_h = 0.075
+    sides = 16
+    verts = []
+    faces = []
+    # Top + bottom rings.
+    for i in range(sides):
+        a = 2.0 * math.pi * i / sides
+        x = radius * math.cos(a)
+        y = radius * math.sin(a)
+        verts.append((x, y,  half_h))
+        verts.append((x, y, -half_h))
+    # Top centre, bottom centre.
+    top_c = len(verts); verts.append((0.0, 0.0,  half_h))
+    bot_c = len(verts); verts.append((0.0, 0.0, -half_h))
+    for i in range(sides):
+        j = (i + 1) % sides
+        ti, bi = 2 * i, 2 * i + 1
+        tj, bj = 2 * j, 2 * j + 1
+        # Top cap (fan).
+        faces.append((top_c, ti, tj))
+        # Bottom cap (reverse winding).
+        faces.append((bot_c, bj, bi))
+        # Side quad as 2 tris.
+        faces.append((ti, bi, bj))
+        faces.append((ti, bj, tj))
+    return verts, faces
+
+_DISC_VERTS, _DISC_FACES = _disc_build_mesh()
+_disc_mesh = bpy.data.meshes.new('disc_mesh')
+_disc_mesh.from_pydata(_DISC_VERTS, [], _DISC_FACES)
+_disc_mesh.update()
+_disc_mat = bpy.data.materials.new('disc_purpleblue')
+_disc_mat.use_nodes = True
+_disc_bsdf = _disc_mat.node_tree.nodes.get('Principled BSDF')
+# Purple-blue, slightly emissive feel — matches arcade disc colour.
+_disc_bsdf.inputs['Base Color'].default_value = (0.30, 0.20, 0.95, 1.0)
+_disc_mesh.materials.append(_disc_mat)
+
+
+def _disc_world_xyz(row, col):
+    """Disc sits at virtual cube top: same XY as cube_world_position, Z = top of cube."""
+    wx = SQRT2 * (col - row / 2.0) * CUBE_SIZE
+    wy = SQRT2 * (NUM_ROWS - 1 - row) * (CUBE_SIZE / 2.0)
+    wz = CUBE_BASE_Z + (NUM_ROWS - 1 - row) * CUBE_SIZE + CUBE_SIZE / 2.0 + 0.08
+    return wx, wy, wz
+
+
+def _disc_script(my_row, my_col, my_phase_mb):
+    """Per-tick script: if present AND player at our (row,col), rescue + consume."""
+    return (
+        "\\ wf disc\n"
+        f"{my_phase_mb} read-mailbox 1 = if "
+        f"400 read-mailbox {my_row} = if "
+        f"401 read-mailbox {my_col} = if "
+        # Player is on us — rescue: clear FALL_PHASE, latch apex respawn,
+        # consume self (PHASE=0 + park Z).
+        f"0 419 write-mailbox "
+        f"1 426 write-mailbox "
+        f"0 {my_phase_mb} write-mailbox "
+        f"{DISC_PARK_Z} 3011 write-mailbox "
+        f"then "
+        f"then "
+        f"then\n"
+    )
+
+
+_pre_disc_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+DISC_L_ACTOR_IDX = _pre_disc_actor_count + 1
+DISC_R_ACTOR_IDX = _pre_disc_actor_count + 2
+
+for _name, _row, _col, _phase_mb in (
+    ('disc_left',  DISC_L_ROW, DISC_L_COL, _DL_MB_PHASE),
+    ('disc_right', DISC_R_ROW, DISC_R_COL, _DR_MB_PHASE),
+):
+    _wx, _wy, _wz = _disc_world_xyz(_row, _col)
+    _d = bpy.data.objects.new(_name, _disc_mesh)
+    _d.location = (_wx, _wy, _wz)
+    scene.collection.objects.link(_d)
+    _d['wf_schema_path']         = ENEMY_OAD
+    _d['wf_Mesh Name']           = 'disc_mesh.iff'
+    _d['wf_original_mesh_name']  = 'disc_mesh.iff'
+    _d['wf_Model Type']          = 'Mesh'
+    _d['wf_Mobility']            = 'Anchored'
+    _d['wf_Mass']                = 0.0
+    _d['wf_Visibility Mailbox']  = 1
+    _d['wf_NumberOfLocalMailboxes'] = 0
+    _d['wf_Script']              = _disc_script(_row, _col, _phase_mb)
+
+print(f"[qbert] Created 2 spinning discs at "
+      f"L(row={DISC_L_ROW},col={DISC_L_COL}) idx={DISC_L_ACTOR_IDX} / "
+      f"R(row={DISC_R_ROW},col={DISC_R_COL}) idx={DISC_R_ACTOR_IDX}; "
+      f"mesh {len(_DISC_VERTS)} verts / {len(_DISC_FACES)} faces")
+
 # ── 6. Director — wire its Script for the game loop ───────────────────────────
 # MVP director: cube-state advance, visibility fan-out, win check, camera
 # fan-out, HUD plumbing. Per actor.cc:665 statplats forbid scripts, so the
@@ -1589,6 +1707,8 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
     f"0 {COILY_MB_ROUND_DONE} write-mailbox "
     f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox ",
+    # Phase D: arm both discs as present (PHASE=1).
+    f"1 {_DL_MB_PHASE} write-mailbox 1 {_DR_MB_PHASE} write-mailbox ",
     "1 421 write-mailbox ",   # LEVEL_INITIALIZED
     "then\n",
     # Intro state machine — runs only while phase 0..5; gates the rest of
@@ -1828,7 +1948,12 @@ DIRECTOR_SCRIPT = "".join([
     f"{REDBALL_PARK_Z} 3011 {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
     f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
     f"0 {COILY_MB_ROUND_DONE} write-mailbox "
-    f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox ",
+    f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox "
+    # Phase D: re-arm both discs (PHASE=1) and restore visible Z (in case
+    # they were consumed last round).
+    f"1 {_DL_MB_PHASE} write-mailbox 1 {_DR_MB_PHASE} write-mailbox "
+    f"{_disc_world_xyz(DISC_L_ROW, DISC_L_COL)[2]} 3011 {DISC_L_ACTOR_IDX} write-actor-mailbox "
+    f"{_disc_world_xyz(DISC_R_ROW, DISC_R_COL)[2]} 3011 {DISC_R_ACTOR_IDX} write-actor-mailbox ",
     "then ",
     "else drop then\n",
 ])

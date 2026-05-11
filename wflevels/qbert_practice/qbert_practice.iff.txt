@@ -27,7 +27,8 @@
 		$3000001l { 'STR' "redball.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "coily_egg_mesh.iff" }  // IFF RM0 000:002
 		$3000003l { 'STR' "coily_snake_mesh.iff" }  // IFF RM0 000:003
-		$3000004l { 'STR' "cube.iff" }  // IFF RM0 000:004
+		$3000004l { 'STR' "disc_mesh.iff" }  // IFF RM0 000:004
+		$3000005l { 'STR' "cube.iff" }  // IFF RM0 000:005
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "qbert_practice.lvl" ] }
@@ -48,7 +49,8 @@
 		{ 'ASS' $3000001l [ "redball.iff" ] }  // IFF RM0 000:001
 		{ 'ASS' $3000002l [ "coily_egg_mesh.iff" ] }  // IFF RM0 000:002
 		{ 'ASS' $3000003l [ "coily_snake_mesh.iff" ] }  // IFF RM0 000:003
-		{ 'ASS' $3000004l [ "cube.iff" ] }  // IFF RM0 000:004
+		{ 'ASS' $3000004l [ "disc_mesh.iff" ] }  // IFF RM0 000:004
+		{ 'ASS' $3000005l [ "cube.iff" ] }  // IFF RM0 000:005
 	}
 	{ 'ALGN' .align(2048) }
 }
