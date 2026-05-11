@@ -652,6 +652,20 @@ Actor::Actor( const SObjectStartupData* startupData ) :
 
 	_renderActor = NULL;
 
+	// Per-actor non-uniform render scale: read from OAS (existing-but-
+	// previously-unread x_scale/y_scale/z_scale fields). Default to 1.0
+	// when the OAS value is zero (which is what every level currently
+	// authors, since no level has explicitly set these). Mutable per-frame
+	// via EMAILBOX_X/Y/Z_SCALE; consumed in RenderActor3D::Render().
+	{
+		const Scalar oadX = Scalar::FromFixed32(objdata->x_scale);
+		const Scalar oadY = Scalar::FromFixed32(objdata->y_scale);
+		const Scalar oadZ = Scalar::FromFixed32(objdata->z_scale);
+		_scaleX = (oadX == Scalar::zero) ? Scalar::one : oadX;
+		_scaleY = (oadY == Scalar::zero) ? Scalar::one : oadY;
+		_scaleZ = (oadZ == Scalar::zero) ? Scalar::one : oadZ;
+	}
+
 	DBSTREAM3( cactor << "Created new Actor #" << _idxActor );
 	DBSTREAM3( cactor << ", Physical Attributes: " << std::endl );
 	DBSTREAM3( cactor << _physicalAttributes << std::endl; )
@@ -1181,6 +1195,13 @@ Actor::ReadSystemMailbox( int boxnum ) const
             // (which reads old_val before writing for undo support) doesn't trip.
             return Scalar::zero;
 
+        case EMAILBOX_X_SCALE:
+            return _scaleX;
+        case EMAILBOX_Y_SCALE:
+            return _scaleY;
+        case EMAILBOX_Z_SCALE:
+            return _scaleZ;
+
         case EMAILBOX_KEYFRAME:
         {
             UNIMPLEMENTED( "read keyframe mailbox" );
@@ -1455,6 +1476,24 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
                             (uint8)( packed        & 0xFF));
                 _renderActor->SetMaterialColor(idx, color);
             }
+            break;
+        }
+
+        case EMAILBOX_X_SCALE:
+        case EMAILBOX_Y_SCALE:
+        case EMAILBOX_Z_SCALE:
+        {
+            // Per-actor non-uniform render scale. Cached on the Actor and
+            // forwarded to RenderActor3D, which applies it in Render() via
+            // column-multiply on the world matrix before draw. No-op on
+            // actors without a RenderActor3D (default RenderActor base
+            // SetActorScale is a no-op).
+            // (qbert stretch-and-squash, 2026-05-10.)
+            if (boxnum == EMAILBOX_X_SCALE) _scaleX = value;
+            else if (boxnum == EMAILBOX_Y_SCALE) _scaleY = value;
+            else                                  _scaleZ = value;
+            if (ValidPtr(_renderActor))
+                _renderActor->SetActorScale(Vector3(_scaleX, _scaleY, _scaleZ));
             break;
         }
 

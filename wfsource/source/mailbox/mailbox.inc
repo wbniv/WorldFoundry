@@ -98,8 +98,16 @@ Comment( "MAILBOXENTR( ANIMATION_DATA, 3027)" )
 	MAILBOXENTRY( FACE_COLOR_LIT, 3038 )		Comment("override material[1] color (lit side on cube)")
 	MAILBOXENTRY( FACE_COLOR_SHADOW, 3039 )		Comment("override material[2] color (shadow side on cube)")
 
-	MAILBOXENTRY( LOCAL_SYSTEM_MAX, 3040)
-	MAILBOXENTRY( LOCAL_MAX, 3040)
+	Comment("Per-actor non-uniform render scale (read/write). Default 1.0 on all axes.")
+	Comment("Wired through actor → RenderActor3D → matrix multiply in Render(). Reuses the")
+	Comment("existing-but-previously-unread x/y/z_scale OAS fields (levelcon.h:87) at level load.")
+	Comment("Added 2026-05-10 for qbert stretch-and-squash; see docs/plans/2026-05-10-qbert-stretch-and-squash.md")
+	MAILBOXENTRY( X_SCALE, 3040 )				Comment("non-uniform scale on actor-local +X (forward)")
+	MAILBOXENTRY( Y_SCALE, 3041 )				Comment("non-uniform scale on actor-local +Y (left)")
+	MAILBOXENTRY( Z_SCALE, 3042 )				Comment("non-uniform scale on actor-local +Z (up)")
+
+	MAILBOXENTRY( LOCAL_SYSTEM_MAX, 3043)
+	MAILBOXENTRY( LOCAL_MAX, 3043)
 
 	Comment("scratch mailboxes are only valid from inside of a script, they are for temporary storage")
 	MAILBOXENTRY( SCRATCH_START, 4000)			Comment(" any mailbox in the 4000 series is SCRATCH" )

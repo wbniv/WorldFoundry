@@ -656,15 +656,41 @@ if player:
         "dup 6 400 read-mailbox - 1.4142136 * "
         "436 read-mailbox - * 436 read-mailbox + INDEXOF_Y_POS write-mailbox "
         # Z lerp + arc bonus = lerp(start_z, end_z, t) + 4*t*(1-t)*2.0
-        "dup 438 read-mailbox 437 read-mailbox - * 437 read-mailbox + "  # lerp_z_base
-        "swap dup 1.0 swap - * 4.0 * 2.0 * + "                  # + arc_bonus (peak 2.0)
-        "INDEXOF_Z_POS write-mailbox "
+        "dup 438 read-mailbox 437 read-mailbox - * 437 read-mailbox + "  # ( t lerp_z_base )
+        "over dup 1.0 swap - * 4.0 * 2.0 * + "                  # ( t final_z ) — keeps t on stack
+        "INDEXOF_Z_POS write-mailbox "                           # ( t )
         # Trigger LANDED 1 frame before exact landing (cd=2) for anticipation
         # feel — cube colour flips just before Q*bert visually touches down.
         # Off-edge hops left mb 434 = 0 (default), so this writes 0 to mb 411
         # = no LANDED trigger (director's `0 <>` gate skips); on-pyramid hops
         # set mb 434 = 1 in do-hop's else branch, which lands here as `1`.
+        # Stack-neutral: pushes/pops cancel out, leaves ( t ) for the scale
+        # block below.
         "402 read-mailbox 2 = if 434 read-mailbox 411 write-mailbox 0 434 write-mailbox then "
+        # Phase 2 stretch-and-squash: classic anticipation → air-stretch →
+        # impact-squash → recover-to-natural sequence over the 12-frame hop.
+        #   bell = 4*t*(1-t)   ∈ [0, 1], peaks at t=0.5 (mid-air)
+        #   imp  = (2t-1)²    ∈ [0, 1], peaks at t=0 and t=1 (takeoff + landing)
+        # On the final landing frame (cd=1, t=1) we snap to identity so
+        # Q*bert is at natural shape post-hop. The remaining 11 frames run:
+        #   z_scale  = 1 + 0.20*bell − 0.40*imp  (taller mid-air, shorter at endpoints)
+        #   xy_scale = 1 − 0.10*bell + 0.40*imp  (narrower mid-air, wider at endpoints)
+        # Visible sequence: wide+short crouch on takeoff → tall+narrow at apex →
+        # wide+short impact on near-landing → snap to (1,1,1) on landing.
+        # Mailboxes 3040/3041/3042 = X/Y/Z_SCALE (wired through actor → RenderActor3D).
+        "402 read-mailbox 1 = if "
+        "drop "                                                  # discard t — landing frame
+        "1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
+        "else "
+        # Compute imp = (2t-1)² and bell = 4*t*(1-t) from t.
+        "dup 2.0 * 1.0 - dup * "                                 # ( t imp )
+        "swap dup 1.0 swap - 4.0 * * "                           # ( imp bell )
+        # Z_SCALE = 1 + 0.20*bell − 0.40*imp.
+        "over 0.40 * over 0.20 * swap - 1.0 + 3042 write-mailbox "
+        # ( imp bell ) still on stack — compute XY_SCALE = 1 + 0.40*imp − 0.10*bell.
+        "0.10 * swap 0.40 * swap - 1.0 + "                       # ( xy_scale )
+        "dup 3040 write-mailbox 3041 write-mailbox "
+        "then "
         "then\n"
         # 4. Cooldown decrement.
         "tick-cd\n"

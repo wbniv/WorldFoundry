@@ -1,6 +1,18 @@
 # Real Q*bert player model
 
-**Status:** Not started
+**Status:** Done 2026-05-10. Originally landed with snout pointing +Y (wrong — see "Coordinate system update" note below); corrected later the same day to author the mesh in WF actor convention (snout = +X = engine forward).
+
+## Coordinate system update (2026-05-10, post-rotation work)
+
+WF's actor convention is **+X forward**, +Y left, +Z up (see [project_wf_axis_convention](../../../.claude/projects/-home-will-WorldFoundry/memory/project_wf_axis_convention.md)). The original draft of this plan authored the mesh with the snout on **+Y** because the camera at `(0, -22, 23)` looks +Y, so "+Y in mesh space = toward the viewer." Visually correct for the rest pose, but **wrong** for the engine — when the [Phase 1 hop-rotation feature](2026-05-10-qbert-hop-facing-rotation.md) shipped, it computed yaw deltas in engine-+X-forward terms, so the visible mesh appeared ~180° off from the script's intended facing.
+
+The corrected wiring (in [blender_create_qbert.py](../../wflevels/qbert_practice/blender_create_qbert.py)):
+
+- Mesh snout / eyes / feet point **+X** in mesh-local space.
+- Legs straddle the **±Y** axis (was ±X).
+- The `player` object's `rotation_euler.z = -π/2` is set at level placement so the engine's +X forward maps to world `-Y` — snout points toward the camera at rest.
+
+This way both the engine's "forward" and the mesh's visible "forward" are the actor-local +X axis. Future rotation/animation code stays consistent.
 
 ## Context
 
@@ -31,10 +43,10 @@ Single mesh object named `Player`, joined from primitives, in object local space
 
 1. **Body** — UV sphere, radius 0.55, segments=16, rings=12, centered z=0.55. Material `qbert_orange`.
 2. **Head** — UV sphere, radius 0.40, centered z=1.25. Material `qbert_orange`.
-3. **Snout** — Cone, r1=0.18, r2=0.10, depth=0.45, rotated 90° about X (points +Y), origin (0, 0.35, 1.20). Material `qbert_snout` (peach 0xFFAA66).
-4. **Legs** — Two cylinders, radius 0.13, depth 0.30, at (±0.22, 0, 0.15). Material `qbert_orange`.
-5. **Feet** — Two flattened spheres, radius 0.20, scale_z 0.4, at (±0.22, 0.05, 0.02). Material `qbert_feet` (darker orange 0xCC5500) so they read against the cube tops.
-6. **Eyes** (optional) — two small white spheres on the head front, material `qbert_eye_white`. Drop if vertex count gets uncomfortable.
+3. **Snout** — Cone, r1=0.18, r2=0.10, depth=0.45, rotated 90° about Y (points **+X** = engine forward), origin (0.40, 0, 1.20). Material `qbert_snout` (peach 0xFFAA66).
+4. **Legs** — Two cylinders, radius 0.13, depth 0.30, at (0, ±0.22, 0.15) — straddling the ±Y axis. Material `qbert_orange`.
+5. **Feet** — Two flattened spheres, radius 0.20, scaled (1.2, 1.0, 0.4) so they elongate along forward (+X), at (0.05, ±0.22, 0.04). Material `qbert_feet` (darker orange 0xCC5500) so they read against the cube tops.
+6. **Eyes** — two small white spheres on the +X (front) of the head at (0.30, ±0.14, 1.40), material `qbert_eye_white`.
 
 Then select all → `bpy.ops.object.join()` → set origin to `(0, 0, 0)` (feet on ground) → apply rotation/scale → name `Player`.
 

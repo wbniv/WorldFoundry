@@ -63,6 +63,10 @@ public:
 	// RenderActor3D overrides to delegate into RenderObject3D::SetMaterialColor.
 	// (qbert cube consolidation, 2026-05-10.)
 	virtual void SetMaterialColor(int /*materialIdx*/, const Color& /*color*/) {}
+	// Per-actor non-uniform render scale; default no-op. RenderActor3D stores
+	// it and applies as a column-scale on the world matrix in Render().
+	// (qbert stretch-and-squash, 2026-05-10.)
+	virtual void SetActorScale(const Vector3& /*scale*/) {}
 	void Validate() const;
 #if DO_VALIDATION
 	virtual void _Validate() const = 0;
@@ -101,12 +105,14 @@ public:
 	virtual void SetAnimationCycle(int cycle);
 	virtual bool GetHandle(const HandleID thisHandle, Vector3& position) const;
 	virtual void SetMaterialColor(int materialIdx, const Color& color) { _object.SetMaterialColor(materialIdx, color); }
+	virtual void SetActorScale(const Vector3& scale) { _scale = scale; }
 #if DO_VALIDATION
 	virtual void _Validate() const;
 #endif
 protected:
 	RenderActor3D(Memory& memory, int vertexCount,Vertex3D* vertexList,int faceCount, TriFace* faceList, Material*  materials);
 	RenderObject3D _object;
+	Vector3 _scale = Vector3::one;
 private:
 };
 
