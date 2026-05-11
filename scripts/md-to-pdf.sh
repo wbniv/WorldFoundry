@@ -486,7 +486,10 @@ body = re.sub(r'\*\*([^*\n]+)\*\*', r'<strong>\1</strong>', body)
 body = re.sub(r'(?<!\*)\*([^*\n]+)\*(?!\*)', r'<em>\1</em>', body)
 body = re.sub(r'(?<![_\w])_([^_\n]+)_(?![_\w])', r'<em>\1</em>', body)
 body = re.sub(r'~~(.+?)~~', r'<del>\1</del>', body)
-body = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href=\"\2\">\1</a>', body)
+# Link URLs may contain balanced parens (e.g. Wikipedia disambiguation like
+# IPhone_(1st_generation)). Match non-paren chars or balanced (...) groups, up
+# to two levels of nesting — enough for any real-world URL.
+body = re.sub(r'\[([^\]]+)\]\(((?:[^()]|\((?:[^()]|\([^()]*\))*\))+)\)', r'<a href=\"\2\">\1</a>', body)
 
 # Restore code spans
 for i, content in enumerate(code_spans):

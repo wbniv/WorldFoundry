@@ -24,3 +24,7 @@
 
 > [!BOGUS]
 > Unknown marker — falls back to plain blockquote.
+
+Paren link: [iPhone](https://en.wikipedia.org/wiki/IPhone_(1st_generation)) — the URL has parens.
+
+Nested paren link: [Foo](https://example.com/wiki/Bar_(a_(nested)_thing)) — two levels.

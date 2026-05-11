@@ -119,3 +119,21 @@ def test_alert_css_present(rendered_html: str) -> None:
 def test_alert_titles_use_unicode_icons(rendered_html: str) -> None:
     for icon in ("ℹ", "✓", "◆", "⚠", "⛔"):
         assert icon in rendered_html, f"missing icon glyph {icon!r}"
+
+
+def test_link_with_parens_in_url(rendered_html: str) -> None:
+    # Wikipedia-style disambiguation URLs contain parens; the link parser must
+    # consume them as part of the href, not stop at the first `)`.
+    assert (
+        '<a href="https://en.wikipedia.org/wiki/IPhone_(1st_generation)">iPhone</a>'
+        in rendered_html
+    )
+    # The trailing `)` of the markdown link must not leak into the rendered text.
+    assert "iPhone)" not in rendered_html
+
+
+def test_link_with_nested_parens_in_url(rendered_html: str) -> None:
+    assert (
+        '<a href="https://example.com/wiki/Bar_(a_(nested)_thing)">Foo</a>'
+        in rendered_html
+    )
