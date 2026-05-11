@@ -865,6 +865,21 @@ GB_FREEZE_TICKS   = 300         # 5 s at 60 Hz
 GB_SPAWN_INTERVAL = 1500        # 25 s between green-ball spawns
 GB_FIRST_DELAY    = 600         # 10 s after intro before first green spawns
 
+# Slick & Sam — cube-flippers. Bounce down like a red ball; on landing-on-cube
+# revert that cube's state (2 → 0). On contact with Q*bert, the flipper dies;
+# player is NOT killed.
+SLICK_MB_BASE       = 494
+SLICK_MB_ACTIVE     = 549
+SLICK_MB_SPAWN_TIMER = 550
+SLICK_SPAWN_INTERVAL = 480       # 8 s between Slick spawns
+SLICK_FIRST_DELAY    = 600       # 10 s after intro
+
+SAM_MB_BASE       = 502
+SAM_MB_ACTIVE     = 551
+SAM_MB_SPAWN_TIMER = 552
+SAM_SPAWN_INTERVAL = 1500        # 25 s between Sam spawns
+SAM_FIRST_DELAY    = 900         # 15 s after intro
+
 # LFSR step — Galois LFSR-16, polynomial x^16+x^14+x^13+x^11+1 (tap mask 0xB400).
 # Side-effect: advance mb 511; result: lsb (0 or 1) left on stack.
 # zForth has `&`, `|`, `^`, `<<`, `>>` (PRIM_AND/OR/XOR/SHL/SHR in zforth.c).
@@ -890,16 +905,21 @@ def redball_script(k, variant='red'):
     Both variants exit early when GB_MB_FREEZE_TIMER > 0 (an active green-ball
     touch has frozen all enemies).
     """
-    if variant == 'green':
-        mb_row      = GB_MB_BASE + _RB_OFF_ROW
-        mb_col      = GB_MB_BASE + _RB_OFF_COL
-        mb_cd       = GB_MB_BASE + _RB_OFF_COOLDOWN
-        mb_phase    = GB_MB_BASE + _RB_OFF_PHASE
-        mb_start_z  = GB_MB_BASE + _RB_OFF_START_Z
-        mb_end_z    = GB_MB_BASE + _RB_OFF_END_Z
-        mb_from_row = GB_MB_BASE + _RB_OFF_FROM_ROW
-        mb_from_col = GB_MB_BASE + _RB_OFF_FROM_COL
-        mb_active   = GB_MB_ACTIVE
+    flat_bases = {
+        'green': (GB_MB_BASE,    GB_MB_ACTIVE),
+        'slick': (SLICK_MB_BASE, SLICK_MB_ACTIVE),
+        'sam':   (SAM_MB_BASE,   SAM_MB_ACTIVE),
+    }
+    if variant in flat_bases:
+        base, mb_active = flat_bases[variant]
+        mb_row      = base + _RB_OFF_ROW
+        mb_col      = base + _RB_OFF_COL
+        mb_cd       = base + _RB_OFF_COOLDOWN
+        mb_phase    = base + _RB_OFF_PHASE
+        mb_start_z  = base + _RB_OFF_START_Z
+        mb_end_z    = base + _RB_OFF_END_Z
+        mb_from_row = base + _RB_OFF_FROM_ROW
+        mb_from_col = base + _RB_OFF_FROM_COL
     else:
         mb_row      = _rb_mb(k, _RB_OFF_ROW)
         mb_col      = _rb_mb(k, _RB_OFF_COL)
@@ -935,17 +955,38 @@ def redball_script(k, variant='red'):
     #      advance row/col, refresh START_Z/END_Z, re-arm COOLDOWN.
     #
     # Stack notation: ( ... -- ... ) tracks values across each line.
-    contact_action = (
+    if variant == 'green':
         # Green: latch freeze, retire self, exit so we skip landing logic.
-        f"{GB_FREEZE_TICKS} {GB_MB_FREEZE_TIMER} write-mailbox "
-        f"0 {mb_phase} write-mailbox "
-        f"0 {mb_active} write-mailbox "
-        f"{REDBALL_PARK_Z} 3011 write-mailbox "
-        f"exit "
-    ) if variant == 'green' else (
+        contact_action = (
+            f"{GB_FREEZE_TICKS} {GB_MB_FREEZE_TIMER} write-mailbox "
+            f"0 {mb_phase} write-mailbox "
+            f"0 {mb_active} write-mailbox "
+            f"{REDBALL_PARK_Z} 3011 write-mailbox "
+            f"exit "
+        )
+    elif variant in ('slick', 'sam'):
+        # Q*bert caught the flipper — enemy dies, player NOT killed.
+        contact_action = (
+            f"0 {mb_phase} write-mailbox "
+            f"0 {mb_active} write-mailbox "
+            f"{REDBALL_PARK_Z} 3011 write-mailbox "
+            f"exit "
+        )
+    else:
         # Red: kill player.
-        f"1 414 write-mailbox "
-    )
+        contact_action = f"1 414 write-mailbox "
+
+    # Slick/Sam revert the cube they land on (state 2 → 0). Encoded as a
+    # cube-state index 200 + row*(row+1)/2 + col (matches the landing
+    # detector at blender_create_qbert.py:~2006).
+    if variant in ('slick', 'sam'):
+        cube_revert_block = (
+            f"{mb_row} read-mailbox dup 1 + * 2 / "
+            f"{mb_col} read-mailbox + 200 + "
+            f"dup read-mailbox 2 = if 0 swap write-mailbox else drop then "
+        )
+    else:
+        cube_revert_block = ""
 
     return (
         f"\\\\ wf {variant}ball {k}\n"
@@ -1011,6 +1052,8 @@ def redball_script(k, variant='red'):
         f"{REDBALL_PARK_Z} 3011 write-mailbox "
         f"exit "
         f"then "
+        # Slick/Sam only: revert the cube we just landed on.
+        f"{cube_revert_block}"
         # Pick next direction via LFSR.                                 ( -- bit )
         f"{_RB_LFSR_STEP}"
         # Stash FROM_ROW, advance ROW (always +1).                    ( bit -- bit )
@@ -1170,6 +1213,115 @@ _gball['wf_Script']              = redball_script(0, variant='green')
 
 print(f"[qbert] Created green ball (actor index {GB_ACTOR_IDX}); "
       f"mailbox base {GB_MB_BASE}; freeze {GB_FREEZE_TICKS} ticks on contact")
+
+# ── 5c.6. Slick & Sam — cube-flippers ─────────────────────────────────────────
+# Hat-on-body proxy mesh: small icosphere body + flat disc "hat" on top. Two
+# materials (hat coloured, body white). Slick = green hat; Sam = red hat.
+def _flipper_build_mesh():
+    """Return (verts, faces, hat_face_indices) for the hat-on-body proxy."""
+    verts = []
+    faces = []
+    # Body: scaled redball icosphere centred so its bottom sits at z = -0.5.
+    body_scale = 0.45
+    body_squash_z = 0.7   # slight vertical squash so it reads as a body, not a ball
+    body_offset_z = -0.05 # body centre slightly below origin
+    body_base = len(verts)
+    for x, y, z in _REDBALL_VERTS:
+        verts.append((x * body_scale, y * body_scale,
+                      z * body_scale * body_squash_z + body_offset_z))
+    for a, b, c in _REDBALL_FACES:
+        faces.append((body_base + a, body_base + b, body_base + c))
+    body_face_count = len(_REDBALL_FACES)
+    # Hat: flat cylinder, radius 0.55, half-thickness 0.05, sitting on top
+    # of the body at z ≈ +0.30.
+    hat_radius = 0.55
+    hat_half_h = 0.05
+    hat_z = 0.32
+    sides = 12
+    hat_base = len(verts)
+    for i in range(sides):
+        a = 2.0 * math.pi * i / sides
+        x = hat_radius * math.cos(a)
+        y = hat_radius * math.sin(a)
+        verts.append((x, y, hat_z + hat_half_h))
+        verts.append((x, y, hat_z - hat_half_h))
+    top_c = len(verts); verts.append((0.0, 0.0, hat_z + hat_half_h))
+    bot_c = len(verts); verts.append((0.0, 0.0, hat_z - hat_half_h))
+    hat_faces_start = len(faces)
+    for i in range(sides):
+        j = (i + 1) % sides
+        ti, bi = hat_base + 2 * i, hat_base + 2 * i + 1
+        tj, bj = hat_base + 2 * j, hat_base + 2 * j + 1
+        faces.append((top_c, ti, tj))
+        faces.append((bot_c, bj, bi))
+        faces.append((ti, bi, bj))
+        faces.append((ti, bj, tj))
+    hat_face_indices = list(range(hat_faces_start, len(faces)))
+    return verts, faces, hat_face_indices
+
+_FLIPPER_VERTS, _FLIPPER_FACES, _FLIPPER_HAT_FACE_INDICES = _flipper_build_mesh()
+
+
+def _build_flipper_actor(name, mesh_name, hat_rgb, location):
+    """Build a flipper Blender object + mesh (with 2 materials: body white,
+    hat coloured). Returns the actor; the caller wires script + schema."""
+    mesh = bpy.data.meshes.new(mesh_name)
+    mesh.from_pydata(_FLIPPER_VERTS, [], _FLIPPER_FACES)
+    mesh.update()
+    # Body material (white).
+    body_mat = bpy.data.materials.new(f'{mesh_name}_body')
+    body_mat.use_nodes = True
+    body_mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value = (1.0, 1.0, 1.0, 1.0)
+    mesh.materials.append(body_mat)  # slot 0
+    # Hat material (coloured).
+    hat_mat = bpy.data.materials.new(f'{mesh_name}_hat')
+    hat_mat.use_nodes = True
+    hat_mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value = (*hat_rgb, 1.0)
+    mesh.materials.append(hat_mat)   # slot 1
+    # Assign hat faces to slot 1.
+    for fi in _FLIPPER_HAT_FACE_INDICES:
+        mesh.polygons[fi].material_index = 1
+    obj = bpy.data.objects.new(name, mesh)
+    obj.location = location
+    scene.collection.objects.link(obj)
+    return obj
+
+
+_pre_slick_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+SLICK_ACTOR_IDX = _pre_slick_actor_count + 1
+
+_slick = _build_flipper_actor('slick', 'slick_mesh',
+                              hat_rgb=(0.10, 0.85, 0.20),
+                              location=(0.0, 0.0, REDBALL_PARK_Z))
+_slick['wf_schema_path']         = ENEMY_OAD
+_slick['wf_Mesh Name']           = 'slick_mesh.iff'
+_slick['wf_original_mesh_name']  = 'slick_mesh.iff'
+_slick['wf_Model Type']          = 'Mesh'
+_slick['wf_Mobility']            = 'Anchored'
+_slick['wf_Mass']                = 0.0
+_slick['wf_Visibility Mailbox']  = 1
+_slick['wf_NumberOfLocalMailboxes'] = 0
+_slick['wf_Script']              = redball_script(0, variant='slick')
+
+_pre_sam_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+SAM_ACTOR_IDX = _pre_sam_actor_count + 1
+
+_sam = _build_flipper_actor('sam', 'sam_mesh',
+                            hat_rgb=(0.85, 0.10, 0.10),
+                            location=(0.0, 0.0, REDBALL_PARK_Z))
+_sam['wf_schema_path']         = ENEMY_OAD
+_sam['wf_Mesh Name']           = 'sam_mesh.iff'
+_sam['wf_original_mesh_name']  = 'sam_mesh.iff'
+_sam['wf_Model Type']          = 'Mesh'
+_sam['wf_Mobility']            = 'Anchored'
+_sam['wf_Mass']                = 0.0
+_sam['wf_Visibility Mailbox']  = 1
+_sam['wf_NumberOfLocalMailboxes'] = 0
+_sam['wf_Script']              = redball_script(0, variant='sam')
+
+print(f"[qbert] Created Slick (idx {SLICK_ACTOR_IDX}) + Sam (idx {SAM_ACTOR_IDX}); "
+      f"mailbox bases {SLICK_MB_BASE} / {SAM_MB_BASE}; "
+      f"spawn cadence {SLICK_SPAWN_INTERVAL}/{SAM_SPAWN_INTERVAL} ticks")
 
 # ── 5d. Coily egg (Phase A) ──────────────────────────────────────────────────
 # Single purple ball that spawns once per round, bounces down from the apex
@@ -1815,6 +1967,11 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {GB_MB_FREEZE_TIMER} write-mailbox "
     f"0 {GB_MB_ACTIVE} write-mailbox "
     f"{GB_FIRST_DELAY} {GB_MB_SPAWN_TIMER} write-mailbox ",
+    # Slick & Sam: clear active mirrors + arm first-spawn delays.
+    f"0 {SLICK_MB_ACTIVE} write-mailbox "
+    f"{SLICK_FIRST_DELAY} {SLICK_MB_SPAWN_TIMER} write-mailbox "
+    f"0 {SAM_MB_ACTIVE} write-mailbox "
+    f"{SAM_FIRST_DELAY} {SAM_MB_SPAWN_TIMER} write-mailbox ",
     "1 421 write-mailbox ",   # LEVEL_INITIALIZED
     "then\n",
     # Intro state machine — runs only while phase 0..5; gates the rest of
@@ -1921,6 +2078,34 @@ DIRECTOR_SCRIPT = "".join([
     f"{GB_SPAWN_INTERVAL} {GB_MB_SPAWN_TIMER} write-mailbox "
     f"then then then "
     f"then\n",
+    # ── Slick & Sam spawn blocks ──────────────────────────────────────────────
+    # Same pattern as the green-ball spawn block, with a per-flipper base and
+    # interval. Gated on INTRO_DONE; suppressed while a freeze is active.
+    *[
+        f"418 read-mailbox 1 = if "
+        f"{GB_MB_FREEZE_TIMER} read-mailbox 0 = if "
+        f"{_active_mb} read-mailbox 0 = if "
+        f"{_timer_mb} read-mailbox dup 0 > if "
+        f"1 - {_timer_mb} write-mailbox "
+        f"else drop "
+        f"{_RB_LFSR_STEP}"                                                          # ( bit )
+        f"{_base + _RB_OFF_COL} {_actor_idx} write-actor-mailbox "
+        f"1 {_base + _RB_OFF_ROW} {_actor_idx} write-actor-mailbox "
+        f"0 {_base + _RB_OFF_FROM_ROW} {_actor_idx} write-actor-mailbox "
+        f"0 {_base + _RB_OFF_FROM_COL} {_actor_idx} write-actor-mailbox "
+        f"{REDBALL_HOP_TICKS} {_base + _RB_OFF_COOLDOWN} {_actor_idx} write-actor-mailbox "
+        f"{_RB_Z_AT_ROW_0} {_base + _RB_OFF_START_Z} {_actor_idx} write-actor-mailbox "
+        f"{_RB_Z_AT_ROW_1} {_base + _RB_OFF_END_Z} {_actor_idx} write-actor-mailbox "
+        f"1 {_base + _RB_OFF_PHASE} {_actor_idx} write-actor-mailbox "
+        f"1 {_active_mb} write-mailbox "
+        f"{_interval} {_timer_mb} write-mailbox "
+        f"then then then "
+        f"then\n"
+        for (_base, _active_mb, _timer_mb, _interval, _actor_idx) in [
+            (SLICK_MB_BASE, SLICK_MB_ACTIVE, SLICK_MB_SPAWN_TIMER, SLICK_SPAWN_INTERVAL, SLICK_ACTOR_IDX),
+            (SAM_MB_BASE,   SAM_MB_ACTIVE,   SAM_MB_SPAWN_TIMER,   SAM_SPAWN_INTERVAL,   SAM_ACTOR_IDX),
+        ]
+    ],
     # ── Coily egg per-round spawn (Phase A) ───────────────────────────────────
     # Gated on INTRO_DONE. If neither egg nor snake is active (PHASE_GLOBAL==0)
     # and the per-round spawn delay has elapsed, wake the egg at apex (row 0,
@@ -2095,7 +2280,16 @@ DIRECTOR_SCRIPT = "".join([
     f"{REDBALL_PARK_Z} 3011 {GB_ACTOR_IDX} write-actor-mailbox "
     f"0 {GB_MB_ACTIVE} write-mailbox "
     f"0 {GB_MB_FREEZE_TIMER} write-mailbox "
-    f"{GB_FIRST_DELAY} {GB_MB_SPAWN_TIMER} write-mailbox ",
+    f"{GB_FIRST_DELAY} {GB_MB_SPAWN_TIMER} write-mailbox "
+    # Slick & Sam round refresh: retire both, rearm spawn timers.
+    f"0 {SLICK_MB_BASE + _RB_OFF_PHASE} {SLICK_ACTOR_IDX} write-actor-mailbox "
+    f"{REDBALL_PARK_Z} 3011 {SLICK_ACTOR_IDX} write-actor-mailbox "
+    f"0 {SLICK_MB_ACTIVE} write-mailbox "
+    f"{SLICK_FIRST_DELAY} {SLICK_MB_SPAWN_TIMER} write-mailbox "
+    f"0 {SAM_MB_BASE + _RB_OFF_PHASE} {SAM_ACTOR_IDX} write-actor-mailbox "
+    f"{REDBALL_PARK_Z} 3011 {SAM_ACTOR_IDX} write-actor-mailbox "
+    f"0 {SAM_MB_ACTIVE} write-mailbox "
+    f"{SAM_FIRST_DELAY} {SAM_MB_SPAWN_TIMER} write-mailbox ",
     "then ",
     "else drop then\n",
 ])
