@@ -1347,6 +1347,17 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             tVect.SetX(value);
             _physicalAttributes.SetPosition(tVect);
             _physicalAttributes.SetPredictedPosition(tVect);
+#ifdef PHYSICS_ENGINE_JOLT
+            // For Jolt character actors, the per-tick movement sync at
+            // movement.cc overwrites _position with the character body's
+            // pose unless we also push the teleport into Jolt. See plan
+            // docs/plans/2026-05-11-mailbox-pos-write-bypasses-jolt.md.
+            {
+                uint32_t charID = _physicalAttributes.JoltCharacterID();
+                if (charID != kJoltInvalidBodyID)
+                    JoltCharacterSetPosition(charID, tVect);
+            }
+#endif
             break;
         }
         case EMAILBOX_Y_POS:
@@ -1356,6 +1367,13 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             tVect.SetY(value);
             _physicalAttributes.SetPosition(tVect);
             _physicalAttributes.SetPredictedPosition(tVect);
+#ifdef PHYSICS_ENGINE_JOLT
+            {
+                uint32_t charID = _physicalAttributes.JoltCharacterID();
+                if (charID != kJoltInvalidBodyID)
+                    JoltCharacterSetPosition(charID, tVect);
+            }
+#endif
             break;
         }
         case EMAILBOX_Z_POS:
@@ -1365,6 +1383,13 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             tVect.SetZ(value);
             _physicalAttributes.SetPosition(tVect);
             _physicalAttributes.SetPredictedPosition(tVect);
+#ifdef PHYSICS_ENGINE_JOLT
+            {
+                uint32_t charID = _physicalAttributes.JoltCharacterID();
+                if (charID != kJoltInvalidBodyID)
+                    JoltCharacterSetPosition(charID, tVect);
+            }
+#endif
             break;
         }
         case EMAILBOX_ROTATION_A:

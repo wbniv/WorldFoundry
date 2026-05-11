@@ -1,7 +1,7 @@
 # Plan — Mailbox `X/Y/Z_POS` writes bypass Jolt character body
 
 **Date:** 2026-05-11
-**Status:** Diagnosed; naive fix attempted and reverted — needs colSpace-aware approach.
+**Status:** Done 2026-05-11. The naive fix from the original plan now lands cleanly because the underlying Validate strict-equality false-positive was fixed independently in commit [`a56cd51`](../../) ([physical-validate-float-tolerance plan](2026-05-11-physical-validate-float-tolerance.md)). Re-applied the `JoltCharacterSetPosition` call in all three `EMAILBOX_X/Y/Z_POS` handlers at [actor.cc:1343-1395](../../wfsource/source/game/actor.cc); engine boots the qbert standalone through gameplay with no Validate assert and no observable position-write loss.
 
 ## Symptom
 

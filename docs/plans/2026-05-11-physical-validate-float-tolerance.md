@@ -1,7 +1,7 @@
 # Plan — relax `PhysicalAttributes::Validate()` strict-equality check
 
 **Date:** 2026-05-11
-**Status:** In progress.
+**Status:** Done 2026-05-11 — landed in commit [`a56cd51`](../../) `fix(physics): tolerate float-precision drift in PhysicalAttributes::Validate`. Implementation matches the plan: `Scalar::FromDouble(1e-3)` per-axis abs-diff check at [physical.hpi:69](../../wfsource/source/physics/physical.hpi), no-op for fixed-point Scalar targets.
 
 ## Symptom
 
