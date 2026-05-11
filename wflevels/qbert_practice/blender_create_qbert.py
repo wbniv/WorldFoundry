@@ -487,16 +487,26 @@ if player:
         #   DOWN  ( 1, 0) SW = -X-Y → +0.625 rev
         #   RIGHT ( 1, 1) SE = +X-Y → +0.875 rev
         #   LEFT  (-1,-1) NW = -X+Y → +0.375 rev
+        # Hop-arc motion (Phase 1.5): instead of teleporting INDEXOF_X/Y/Z_POS
+        # to the destination on frame 0, save the current position to mb 435/
+        # 436/437 (HOP_START_*), save target Z to mb 438 (HOP_END_Z; X and Y
+        # are recomputed each frame from mb 400/401), and bump HOP_COOLDOWN to
+        # 13 so the per-frame lerp block (added below) gets exactly 12 ticks
+        # at t = (13-cd)/12 ∈ [1/12, 12/12], landing exactly on target.
+        # Note: mb 440+ is the global cube vis-slot range (see clear-all-vis
+        # loop in the restart block), so we can't use mb 440 here; HOP_END_X/Y
+        # are recomputed from row/col rather than stored.
         ": do-hop "
         "over over "
         "dup 0 = if drop 0 < if 0.125 else 0.625 then else swap drop 0 > if 0.875 else 0.375 then then "
         "433 write-mailbox "
+        "INDEXOF_X_POS read-mailbox 435 write-mailbox "
+        "INDEXOF_Y_POS read-mailbox 436 write-mailbox "
+        "INDEXOF_Z_POS read-mailbox 437 write-mailbox "
         "401 read-mailbox + swap 400 read-mailbox + "
         "dup 400 write-mailbox over 401 write-mailbox "
-        "over over swap 2 * swap - 1.4142136 * INDEXOF_X_POS write-mailbox "  # 2dup not in bootstrap; over over does the same; * sqrt(2) for diamond layout
-        "6 over - 1.4142136 * INDEXOF_Y_POS write-mailbox "
-        "6 swap - 2 * 1 + 2 + INDEXOF_Z_POS write-mailbox "
-        "drop 12 402 write-mailbox "
+        "6 swap - 2 * 1 + 2 + 438 write-mailbox "        # HOP_END_Z (lerped to)
+        "drop 13 402 write-mailbox "
         "400 read-mailbox dup 0 < swap 6 > | "
         "401 read-mailbox 0 < | "
         "401 read-mailbox 400 read-mailbox > | "
@@ -506,9 +516,9 @@ if player:
         # handler indexes CUBE_STATE by (row,col); off-pyramid coords would
         # compute into prev-state / wrong-cube slots and flip an unrelated cube.
         "400 read-mailbox dup 0 < if drop 0 then dup 6 > if drop 6 then "
-        "6 swap - 2 * 1 + 2 + INDEXOF_Z_POS write-mailbox "
+        "6 swap - 2 * 1 + 2 + 438 write-mailbox "        # clamped safe-Z → HOP_END_Z (lerp animates toward it before FALL_PHASE takes over)
         "1 419 write-mailbox "
-        "else 1 411 write-mailbox then ;\n"
+        "else 1 434 write-mailbox then ;\n"      # PENDING_LAND set on-pyramid only; lerp promotes to mb 411 (LANDED) on landing
         # 1. Game-over restart trigger. Snapshot prev-stick before updating
         # mb 422 so edge-detect can compare; then update mb 422 = current.
         "422 read-mailbox stick 422 write-mailbox\n"
@@ -532,6 +542,13 @@ if player:
         "0 424 write-mailbox "                    # round-clear timer
         "0 431 write-mailbox "
         "28 0 do 0 200 i + write-mailbox loop "
+        # Re-arm CUBE_PREV_STATE_BASE to sentinel 99 so the director's
+        # state-change detector fires a re-color for every cube on the next
+        # tick — mirrors the LEVEL_INIT path. Without this, cubes visited in
+        # the previous game retain their state-2 (cleared / blue) TOP colour
+        # because cur=0 vs prev=0 wouldn't differ either, and we can't trust
+        # the lingering prev=2 from cleared cubes to always trigger.
+        "28 0 do 99 228 i + write-mailbox loop "
         "336 0 do 0 440 i + write-mailbox loop "  # clear all vis slots
         "28 0 do 1 440 i 3 * + write-mailbox loop "  # show L1R1 state-0 row (pal=0)
         "0 INDEXOF_X_POS write-mailbox "
@@ -620,6 +637,34 @@ if player:
         "0.5 > if 0.5 else -0.5 then "
         "then "
         "402 read-mailbox / 3034 write-mailbox "
+        "then\n"
+        # 3.7. Hop-arc position interpolation across HOP_COOLDOWN frames.
+        # Smoothstepped XY lerp + parabolic Z arc with peak +2 at mid-hop.
+        # t_raw = (13 - cd) / 12 ∈ [1/12, 12/12]; smoothed via t*t*(3-2t)
+        # for ease-in-out (lifts off slowly, decelerates onto landing).
+        # cd=1 ⇒ t_raw=1 ⇒ smoothstep(1)=1 ⇒ exact landing on target.
+        # Target X/Y are recomputed each frame from mb 400/401 (row/col were
+        # already updated in do-hop); target Z lives in mb 438 (clamped on
+        # off-edge hops by the do-hop fall path).
+        "402 read-mailbox 0 > if "
+        "13 402 read-mailbox - 12.0 / "                        # t_raw
+        "dup dup * swap 2.0 * 3.0 swap - * "                    # t = smoothstep(t_raw)
+        # X lerp: pos_x = start_x + t * ((2*col - row)*sqrt(2) - start_x)
+        "dup 401 read-mailbox 2 * 400 read-mailbox - 1.4142136 * "
+        "435 read-mailbox - * 435 read-mailbox + INDEXOF_X_POS write-mailbox "
+        # Y lerp: pos_y = start_y + t * ((6 - row)*sqrt(2) - start_y)
+        "dup 6 400 read-mailbox - 1.4142136 * "
+        "436 read-mailbox - * 436 read-mailbox + INDEXOF_Y_POS write-mailbox "
+        # Z lerp + arc bonus = lerp(start_z, end_z, t) + 4*t*(1-t)*2.0
+        "dup 438 read-mailbox 437 read-mailbox - * 437 read-mailbox + "  # lerp_z_base
+        "swap dup 1.0 swap - * 4.0 * 2.0 * + "                  # + arc_bonus (peak 2.0)
+        "INDEXOF_Z_POS write-mailbox "
+        # Trigger LANDED 1 frame before exact landing (cd=2) for anticipation
+        # feel — cube colour flips just before Q*bert visually touches down.
+        # Off-edge hops left mb 434 = 0 (default), so this writes 0 to mb 411
+        # = no LANDED trigger (director's `0 <>` gate skips); on-pyramid hops
+        # set mb 434 = 1 in do-hop's else branch, which lands here as `1`.
+        "402 read-mailbox 2 = if 434 read-mailbox 411 write-mailbox 0 434 write-mailbox then "
         "then\n"
         # 4. Cooldown decrement.
         "tick-cd\n"
