@@ -134,3 +134,25 @@ case EMAILBOX_X_POS:
 ## Smoke-test result
 
 Engine boots `wflevels/qbert_practice-standalone.iff` and runs through the camshot intro pan + gameplay for the full 12-second timeout window with no `FATAL ERROR: PhysicalAttributes::Validate()` assert and no terminate. Z-coordinate Forth writes (`15 INDEXOF_Z_POS write-mailbox`) now take effect — Q*bert sits at his scripted Z on apex respawn instead of falling back to the previous Jolt-resolved pose.
+
+## End-to-end walker verification (2026-05-11)
+
+Ran the autopilot walker harness [`scripts/research/wf/qbert_wf_walker.py`](../../scripts/research/wf/qbert_wf_walker.py) against the rebuilt engine, with the debug bridge on port 7777:
+
+```
+cd wfsource/source/game && DISPLAY=:0 ../../../engine/wf_game \
+    -L../../../wflevels/qbert_practice-standalone.iff --debug-port 7777 &
+python3 scripts/research/wf/qbert_wf_walker.py --max-rounds 1 --no-screenshots --port 7777
+```
+
+Result: **all 32 hops of the Warnsdorff coverage path completed successfully**; ROUND_CLEAR latched at step 31; the round counter incremented from 0 → 1; `lives` stayed at `3.0` for every step (no deaths). Compare to the plan's original symptom — "Qbert practice autopilot dies within ~10 s every run." Engine log contains no `FATAL` / `Validate` / `abort` / `terminate` strings.
+
+| Metric | Before fix (plan symptom) | After fix |
+|---|---|---|
+| Time to first death | ~10 s | none — full round cleared |
+| `lives` value | dropped from 3 | stayed at **3.0** every step |
+| Z teleport behaviour | Q*bert sat at Z≈7 (Jolt overwrite) | scripted apex/Z writes honoured |
+| ROUND_CLEAR | never reached | **latched at step 31** |
+| Engine log FATAL/Validate/terminate | crash in plan reproduction | **none** |
+
+Plan verification steps 1–4 all pass.
