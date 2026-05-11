@@ -11,7 +11,9 @@ tasks:
   build:
     desc: "Build wf_game (Forth + Jolt; canonical config)"
     env:
-      WF_LUA_ENGINE: none
+      # Lua is linked into the Linux debug build so the in-engine Lua step
+      # debugger (MobDebug) has a host to bind to. Override with
+      # WF_LUA_ENGINE=none if you need a Forth-only binary.
       WF_ENABLE_FENNEL: "0"
       WF_JS_ENGINE: none
       WF_WASM_ENGINE: none
