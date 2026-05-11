@@ -154,9 +154,9 @@ private:
 	int _xSize;						// x & y size of display
 	int _ySize;
 #if   defined(__LINUX__) || defined(__ANDROID__)
-	float _backgroundColorRed;
-	float _backgroundColorGreen;
-	float _backgroundColorBlue;
+	float _backgroundColorRed = 0.0f;
+	float _backgroundColorGreen = 0.0f;
+	float _backgroundColorBlue = 0.0f;
     struct timeval _clockLastTime;
 #else
 #error platform not defined

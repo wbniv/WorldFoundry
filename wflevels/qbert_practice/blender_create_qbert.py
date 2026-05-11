@@ -87,8 +87,8 @@ SQRT2 = math.sqrt(2.0)
 #              to all 28 cubes; cleared after broadcast)
 #   427        LAST_LEVEL (director-internal — last level index whose side colors
 #              were broadcast; compared to ROUND_NUMBER//4 to detect level changes)
-#   430        AUTOPILOT_ON (0=joystick mode, 1=autopilot demo mode)
-#   431        AUTOPILOT_STEP (current step index 0..31; reset on respawn/restart)
+#   430        (reserved; was AUTOPILOT_ON — autopilot now host-driven via inject_input)
+#   431        (reserved; was AUTOPILOT_STEP)
 #   432        CAPTURE_TRIGGER (Phase E walker — 1=state-0 snap, 2=state-1 snap,
 #              3=round-clear, 0 otherwise. Host watches transitions and issues
 #              `screenshot` ops over the debug bridge.)
@@ -442,39 +442,6 @@ if player:
         ": stick INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox ;\n"
         ": cd 402 read-mailbox ;\n"
         ": tick-cd cd dup 0 > if 1 - 402 write-mailbox else drop then ;\n"
-        ": step-move "
-        "dup  0 = if drop  1  0 exit then "
-        "dup  1 = if drop -1  0 exit then "
-        "dup  2 = if drop  1  1 exit then "
-        "dup  3 = if drop  1  0 exit then "
-        "dup  4 = if drop -1 -1 exit then "
-        "dup  5 = if drop  1  0 exit then "
-        "dup  6 = if drop  1  0 exit then "
-        "dup  7 = if drop  1  0 exit then "
-        "dup  8 = if drop -1  0 exit then "
-        "dup  9 = if drop  1  1 exit then "
-        "dup 10 = if drop -1  0 exit then "
-        "dup 11 = if drop  1  1 exit then "
-        "dup 12 = if drop -1  0 exit then "
-        "dup 13 = if drop -1  0 exit then "
-        "dup 14 = if drop  1  1 exit then "
-        "dup 15 = if drop  1  0 exit then "
-        "dup 16 = if drop  1  1 exit then "
-        "dup 17 = if drop -1  0 exit then "
-        "dup 18 = if drop  1  1 exit then "
-        "dup 19 = if drop  1  1 exit then "
-        "dup 20 = if drop -1 -1 exit then "
-        "dup 21 = if drop  1  0 exit then "
-        "dup 22 = if drop -1 -1 exit then "
-        "dup 23 = if drop  1  0 exit then "
-        "dup 24 = if drop -1 -1 exit then "
-        "dup 25 = if drop  1  0 exit then "
-        "dup 26 = if drop -1 -1 exit then "
-        "dup 27 = if drop  1  0 exit then "
-        "dup 28 = if drop -1 -1 exit then "
-        "dup 29 = if drop  1  0 exit then "
-        "dup 30 = if drop -1 -1 exit then "
-        "drop  1  0 ;\n"
         # do-hop: on stack ( dr dc ). Before consuming dr/dc to update position,
         # compute the target yaw in revolutions (CCW from engine-+X-forward)
         # for the hop direction and store it in mb 433. The new tick block
@@ -587,27 +554,13 @@ if player:
         "exit "
         "else drop "
         "then\n"
-        # 3. Autopilot or joystick — gated on cooldown and INTRO_DONE.
-        # When AUTOPILOT_ON (mb 430) != 0, walker protocol piggybacks on the
-        # existing 32-step Warnsdorff coverage:
-        #   step 0:    write CAPTURE_TRIGGER=1 (state-0 snap at apex, no hop),
-        #              hold 30 frames so host has time to screenshot.
-        #   step 1:    run step-move(0)+do-hop (= DL to cube (1,0)), then
-        #              write CAPTURE_TRIGGER=2 (state-1 snap with cube (1,0)
-        #              flipped), hold 30 frames.
-        #   step 2..32: existing coverage via step-move(step-1)+do-hop.
-        # CAPTURE_TRIGGER reset to 0 on every Warnsdorff frame so host sees
-        # clean transitions. Round-clear writes 3 (see win/clear block).
+        # 3. Joystick → diagonal hop. Cardinal joystick bits map to qbert
+        # diagonals because the original arcade cabinet was rotated 45°.
+        # Gated on cooldown==0 and INTRO_DONE so the player can't queue hops.
+        # Host-side automation (walker / record harness) drives this via
+        # the debug bridge inject_input op on HARDWARE_JOYSTICK1_RAW.
         "cd 0 = if "
         "418 read-mailbox 1 = if "
-        "430 read-mailbox 0 <> if "
-        "431 read-mailbox "
-        "dup  0 = if drop 1 432 write-mailbox 1 431 write-mailbox 30 402 write-mailbox exit then "
-        "dup  1 = if drop 0 step-move do-hop 2 432 write-mailbox 2 431 write-mailbox 30 402 write-mailbox exit then "
-        "dup 33 < if 1 - step-move do-hop 0 432 write-mailbox "
-        "431 read-mailbox 1 + 431 write-mailbox else drop then "
-        "exit "
-        "then "
         "stick 0x0800 & if -1 0 do-hop exit then "
         "stick 0x2000 & if 1 1 do-hop exit then "
         "stick 0x1000 & if 1 0 do-hop exit then "
