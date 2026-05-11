@@ -1133,6 +1133,13 @@ COILY_MB_ROUND_DONE   = 542
 COILY_MB_PHASE_GLOBAL = 543
 COILY_MB_SPAWN_DELAY  = 544    # countdown to next egg spawn (set on round init)
 
+# Arcade-faithful purple/red flash while egg is bouncing. ~3.75 Hz at 60 Hz tick.
+_CE_MB_FLASH_TICK         = 545
+COILY_EGG_FLASH_PERIOD    = 16
+COILY_EGG_FLASH_HALF      = 8
+_CE_FLASH_COLOR_PURPLE    = 0x8c1adb
+_CE_FLASH_COLOR_RED       = 0xff2020
+
 _CE_HOP_DENOM_F = float(COILY_EGG_HOP_TICKS - 1)
 # Z values: same as red ball (egg sits 0.5 above cube top → row 0 Z = 14.5).
 _CE_Z_AT_ROW_0 = _RB_Z_BASE - 0 * _RB_Z_MUL
@@ -1160,6 +1167,15 @@ def coily_egg_script():
         f"\\\\ wf coily egg (Phase A)\n"
         # Phase 0: idle. Director writes initial state to wake.
         f"{mb_phase} read-mailbox 0 = if exit then\n"
+        # Arcade flash: alternate purple/red every COILY_EGG_FLASH_HALF ticks
+        # while the egg is bouncing. tick = (prev + 1) mod COILY_EGG_FLASH_PERIOD.
+        f"{_CE_MB_FLASH_TICK} read-mailbox 1 + {COILY_EGG_FLASH_PERIOD} % "
+        f"{_CE_MB_FLASH_TICK} write-mailbox\n"
+        f"{_CE_MB_FLASH_TICK} read-mailbox {COILY_EGG_FLASH_HALF} < if "
+        f"0x{_CE_FLASH_COLOR_PURPLE:06X} 3037 write-mailbox "
+        f"else "
+        f"0x{_CE_FLASH_COLOR_RED:06X} 3037 write-mailbox "
+        f"then\n"
         # Phase 1: hopping. Decrement COOLDOWN.
         f"{mb_cd} read-mailbox 1 - dup {mb_cd} write-mailbox\n"
         # t_raw = (HOP_TICKS - cd_new) / DENOM
@@ -1490,6 +1506,8 @@ DISC_L_COL    = -1
 DISC_R_ROW    = 1
 DISC_R_COL    = 2
 DISC_PARK_Z   = -30.0
+# Per-tick yaw delta in revolutions. 0.005 rev/tick * 60 Hz ≈ 0.3 rev/s.
+DISC_SPIN_RATE = 0.005
 
 # Per-disc PHASE mailboxes (0 = consumed, 1 = present).
 _DL_MB_PHASE = 534
@@ -1546,10 +1564,13 @@ def _disc_world_xyz(row, col):
 
 
 def _disc_script(my_row, my_col, my_phase_mb):
-    """Per-tick script: if present AND player at our (row,col), rescue + consume."""
+    """Per-tick script: spin while present; if player at our (row,col), rescue + consume."""
     return (
         "\\ wf disc\n"
+        # While present: spin about Z (yaw).
         f"{my_phase_mb} read-mailbox 1 = if "
+        f"{DISC_SPIN_RATE} 3034 write-mailbox "
+        # Rescue check.
         f"400 read-mailbox {my_row} = if "
         f"401 read-mailbox {my_col} = if "
         # Player is on us — rescue: clear FALL_PHASE, latch apex respawn,
@@ -1810,6 +1831,7 @@ DIRECTOR_SCRIPT = "".join([
     f"{COILY_EGG_HOP_TICKS} {_CE_MB_COOLDOWN} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
     f"{_CE_Z_AT_ROW_0} {_CE_MB_START_Z} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
     f"{_CE_Z_AT_ROW_1} {_CE_MB_END_Z} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"0 {_CE_MB_FLASH_TICK} write-mailbox "
     f"1 {_CE_MB_PHASE} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
     f"1 {COILY_MB_PHASE_GLOBAL} write-mailbox "
     f"1 {COILY_MB_ROUND_DONE} write-mailbox "
