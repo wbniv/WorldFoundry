@@ -496,16 +496,19 @@ if player:
         "over over swap 2 * swap - 1.4142136 * INDEXOF_X_POS write-mailbox "  # 2dup not in bootstrap; over over does the same; * sqrt(2) for diamond layout
         "6 over - 1.4142136 * INDEXOF_Y_POS write-mailbox "
         "6 swap - 2 * 1 + 2 + INDEXOF_Z_POS write-mailbox "
-        "drop 1 411 write-mailbox 12 402 write-mailbox "
+        "drop 12 402 write-mailbox "
         "400 read-mailbox dup 0 < swap 6 > | "
         "401 read-mailbox 0 < | "
         "401 read-mailbox 400 read-mailbox > | "
         "if "
         # Off-edge: re-clamp row for safe-Z computation, then trigger fall.
+        # Crucially do NOT set QBERT_LANDED (mb 411): the director's landing
+        # handler indexes CUBE_STATE by (row,col); off-pyramid coords would
+        # compute into prev-state / wrong-cube slots and flip an unrelated cube.
         "400 read-mailbox dup 0 < if drop 0 then dup 6 > if drop 6 then "
         "6 swap - 2 * 1 + 2 + INDEXOF_Z_POS write-mailbox "
         "1 419 write-mailbox "
-        "then ;\n"
+        "else 1 411 write-mailbox then ;\n"
         # 1. Game-over restart trigger. Snapshot prev-stick before updating
         # mb 422 so edge-detect can compare; then update mb 422 = current.
         "422 read-mailbox stick 422 write-mailbox\n"
@@ -599,10 +602,23 @@ if player:
         # computes shortest-path remaining delta in (-0.5, 0.5] revolutions,
         # and writes (delta / frames-left) to DELTA_YAW (mb 3034). Self-
         # corrects each frame so it lands exactly on target as cd hits zero.
+        # 180° special case: shortest-path sign is ambiguous (just the lexical
+        # sign of target-current). The camera at (0,-22,23) looks +Y, so
+        # face-visible = midpoint forward.Y < 0 = midpoint yaw mod 1 in
+        # (0.5, 1.0). When |delta|^2 > 0.249 (≈ |delta| > 0.499; squared
+        # because `abs` isn't in the zForth bootstrap, see scripting_zforth.cc
+        # kCoreBootstrap), pick the sweep whose CCW midpoint (current + 0.25)
+        # lands in the face hemisphere, else use CW.
         "402 read-mailbox 0 > if "
         "433 read-mailbox 3014 read-mailbox - "
         "dup 0.5 > if 1.0 - then "
         "dup -0.5 < if 1.0 + then "
+        "dup dup * 0.249 > if "
+        "drop 3014 read-mailbox 0.25 + "
+        "dup 1.0 >= if 1.0 - then "
+        "dup 0.0 < if 1.0 + then "
+        "0.5 > if 0.5 else -0.5 then "
+        "then "
         "402 read-mailbox / 3034 write-mailbox "
         "then\n"
         # 4. Cooldown decrement.
