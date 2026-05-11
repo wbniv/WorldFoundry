@@ -288,9 +288,17 @@ def _build_qbert_player_mesh():
     """Build a 3D Q*bert from primitives, return the joined mesh object.
 
     Silhouette: orange UV-sphere body, smaller orange head, peach conical
-    snout pointing +Y, two orange cylinder legs, dark-orange flattened feet.
-    All primitives joined into one mesh with per-face material assignments.
-    Origin at (0,0,0) = ground level (feet bottom).
+    snout pointing **+X** (engine forward), two orange cylinder legs, dark-
+    orange flattened feet. All primitives joined into one mesh with per-face
+    material assignments. Origin at (0,0,0) = ground level (feet bottom).
+
+    Axis convention: WF actor forward = +X, left = +Y, up = +Z (see
+    project_wf_axis_convention memory). The camera at (0,-22,23) looks +Y;
+    Q*bert at the apex spawns with rest yaw rotated so engine-+X aligns
+    with world-(-Y), i.e. the snout points toward the viewer at rest. We
+    do the alignment by setting the actor's authored rotation to +90° yaw
+    rather than by rotating the mesh — that way the engine and the script
+    both agree that "forward = +X" in actor-local space.
     """
     mat_orange = _make_principled_material('qbert_orange',    (1.00, 0.53, 0.00))
     mat_snout  = _make_principled_material('qbert_snout',     (1.00, 0.67, 0.40))
@@ -310,36 +318,38 @@ def _build_qbert_player_mesh():
     bpy.ops.mesh.primitive_uv_sphere_add(radius=0.40, segments=8, ring_count=5, location=(0, 0, 1.25))
     parts.append((bpy.context.object, mat_orange))
 
-    # Camera is at (0, -22, 23) looking +Y at the pyramid (apex at +Y),
-    # so Q*bert's "front" (toward viewer) is -Y. Snout, eyes, feet point -Y.
+    # Mesh-local "forward" = +X (engine convention). Snout, eyes, feet point +X.
+    # Left-right is the Y axis. The actor's authored rest rotation handles the
+    # +X-forward → toward-camera alignment in world space (see player setup
+    # below where we set rotation_euler.z so the snout faces the camera).
 
-    # Snout — cone pointing -Y (rotate -90° about X) (~9 verts)
+    # Snout — cone pointing +X (default cone points +Z; rotate +90° about Y) (~9 verts)
     bpy.ops.mesh.primitive_cone_add(
         vertices=8, radius1=0.18, radius2=0.10, depth=0.45,
-        location=(0, -0.40, 1.20), rotation=(-math.pi / 2, 0, 0)
+        location=(0.40, 0, 1.20), rotation=(0, math.pi / 2, 0)
     )
     parts.append((bpy.context.object, mat_snout))
 
-    # Legs — two cylinders (~12 verts each)
-    for x in (-0.22, 0.22):
+    # Legs — two cylinders, straddling the Y axis (~12 verts each)
+    for y in (-0.22, 0.22):
         bpy.ops.mesh.primitive_cylinder_add(
-            vertices=6, radius=0.13, depth=0.30, location=(x, 0, 0.15)
+            vertices=6, radius=0.13, depth=0.30, location=(0, y, 0.15)
         )
         parts.append((bpy.context.object, mat_orange))
 
-    # Feet — flattened spheres in front of legs (-Y is "front") (~24 verts each)
-    for x in (-0.22, 0.22):
+    # Feet — flattened spheres in front of legs (+X is "front") (~24 verts each)
+    for y in (-0.22, 0.22):
         bpy.ops.mesh.primitive_uv_sphere_add(
-            radius=0.20, segments=6, ring_count=4, location=(x, -0.05, 0.04)
+            radius=0.20, segments=6, ring_count=4, location=(0.05, y, 0.04)
         )
-        bpy.context.object.scale = (1.0, 1.2, 0.4)
+        bpy.context.object.scale = (1.2, 1.0, 0.4)
         bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
         parts.append((bpy.context.object, mat_feet))
 
-    # Eyes — two small white spheres on the front (-Y) of the head (~12 verts each)
-    for x in (-0.14, 0.14):
+    # Eyes — two small white spheres on the front (+X) of the head (~12 verts each)
+    for y in (-0.14, 0.14):
         bpy.ops.mesh.primitive_uv_sphere_add(
-            radius=0.07, segments=6, ring_count=4, location=(x, -0.30, 1.40)
+            radius=0.07, segments=6, ring_count=4, location=(0.30, y, 1.40)
         )
         parts.append((bpy.context.object, mat_eye))
 
@@ -367,6 +377,11 @@ def _build_qbert_player_mesh():
 player = find_by_class('player')
 if player:
     player.location = PLAYER_SPAWN_XYZ
+    # Authored rest yaw: rotate -90° about Z so engine-local +X (mesh "front",
+    # i.e. snout/eyes/feet) aligns with world -Y, which is "toward the camera"
+    # at (0, -22, 23). Engine and script both treat +X as forward; this
+    # rotation only affects the visual placement at rest.
+    player.rotation_euler = (0.0, 0.0, -math.pi / 2)
     player['wf_Mobility'] = 'Anchored'
     player['wf_Mass'] = 0.0
     player['wf_Mesh Name'] = 'player.iff'
@@ -460,7 +475,23 @@ if player:
         "dup 29 = if drop  1  0 exit then "
         "dup 30 = if drop -1 -1 exit then "
         "drop  1  0 ;\n"
-        ": do-hop 401 read-mailbox + swap 400 read-mailbox + "
+        # do-hop: on stack ( dr dc ). Before consuming dr/dc to update position,
+        # compute the target yaw in revolutions (CCW from engine-+X-forward)
+        # for the hop direction and store it in mb 433. The new tick block
+        # below reads mb 433 + the actor's current ROTATION_C (mb 3014) each
+        # cooldown frame and writes the shortest-path remaining-delta /
+        # frames-left into DELTA_YAW (mb 3034) — so the lerp self-corrects
+        # and lands exactly on the target as the cooldown hits zero.
+        # Direction → target yaw (engine convention +X=forward, +Y=left):
+        #   UP    (-1, 0) NE = +X+Y → +0.125 rev
+        #   DOWN  ( 1, 0) SW = -X-Y → +0.625 rev
+        #   RIGHT ( 1, 1) SE = +X-Y → +0.875 rev
+        #   LEFT  (-1,-1) NW = -X+Y → +0.375 rev
+        ": do-hop "
+        "over over "
+        "dup 0 = if drop 0 < if 0.125 else 0.625 then else swap drop 0 > if 0.875 else 0.375 then then "
+        "433 write-mailbox "
+        "401 read-mailbox + swap 400 read-mailbox + "
         "dup 400 write-mailbox over 401 write-mailbox "
         "over over swap 2 * swap - 1.4142136 * INDEXOF_X_POS write-mailbox "  # 2dup not in bootstrap; over over does the same; * sqrt(2) for diamond layout
         "6 over - 1.4142136 * INDEXOF_Y_POS write-mailbox "
@@ -492,6 +523,7 @@ if player:
         "0 416 write-mailbox 0 417 write-mailbox 0 418 write-mailbox "
         "0 419 write-mailbox 0 420 write-mailbox "
         "0 400 write-mailbox 0 401 write-mailbox 0 402 write-mailbox "
+        "-0.25 3014 write-mailbox -0.25 433 write-mailbox "  # snap yaw back to rest pose (-90°)
         "0 425 write-mailbox "                    # ROUND_NUMBER → 0 (restart at L1R1)
         "0 426 write-mailbox "                    # round-clear-pending flag
         "0 424 write-mailbox "                    # round-clear timer
@@ -513,6 +545,7 @@ if player:
         # exit prevents joystick processing on the same tick as the teleport.
         "426 read-mailbox 1 = if "
         "0 INDEXOF_X_POS write-mailbox 6 1.4142136 * INDEXOF_Y_POS write-mailbox 15 INDEXOF_Z_POS write-mailbox "
+        "0 402 write-mailbox -0.25 3014 write-mailbox -0.25 433 write-mailbox "
         "0 431 write-mailbox 0 426 write-mailbox exit "
         "then\n"
         # 2. Fall-animation state machine. While mb 419 > 0:
@@ -529,6 +562,7 @@ if player:
         "6 1.4142136 * INDEXOF_Y_POS write-mailbox "
         "15 INDEXOF_Z_POS write-mailbox "
         "0 400 write-mailbox 0 401 write-mailbox "
+        "0 402 write-mailbox -0.25 3014 write-mailbox -0.25 433 write-mailbox "
         "then "
         "exit "
         "else drop "
@@ -559,6 +593,17 @@ if player:
         "stick 0x1000 & if 1 0 do-hop exit then "
         "stick 0x4000 & if -1 -1 do-hop exit then "
         "then "
+        "then\n"
+        # 3.5. Smooth yaw across remaining HOP_COOLDOWN frames.
+        # Reads current ROTATION_C (mb 3014) and target (mb 433) each frame,
+        # computes shortest-path remaining delta in (-0.5, 0.5] revolutions,
+        # and writes (delta / frames-left) to DELTA_YAW (mb 3034). Self-
+        # corrects each frame so it lands exactly on target as cd hits zero.
+        "402 read-mailbox 0 > if "
+        "433 read-mailbox 3014 read-mailbox - "
+        "dup 0.5 > if 1.0 - then "
+        "dup -0.5 < if 1.0 + then "
+        "402 read-mailbox / 3034 write-mailbox "
         "then\n"
         # 4. Cooldown decrement.
         "tick-cd\n"

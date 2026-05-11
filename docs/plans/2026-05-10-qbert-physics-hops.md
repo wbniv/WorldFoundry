@@ -1,7 +1,11 @@
 # Plan — Q*bert physics-based player hops
 
 **Date:** 2026-05-10
-**Status:** Not started
+**Status:** Not started — follow-up to [Q*bert hop-direction facing rotation](2026-05-10-qbert-hop-facing-rotation.md).
+
+## Relationship to the rotation plan
+
+The [hop-facing-rotation plan](2026-05-10-qbert-hop-facing-rotation.md) lands first and adds a smooth yaw interpolation across the existing 12-frame `HOP_COOLDOWN`. When this plan replaces the cooldown-based hop with a physics arc, swap the rotation block's trigger from `HOP_COOLDOWN > 0` to whatever this plan's mid-hop signal is (~1 LOC) and the yaw interpolation continues to work unchanged. The two plans are otherwise independent.
 
 ## Context
 
