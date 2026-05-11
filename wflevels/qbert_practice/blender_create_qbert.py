@@ -906,6 +906,12 @@ WW_X_OFFSET  = -(CUBE_SIZE / 2 + _CLIMBER_BODY_HALF_X)   # -X side face
 # on world +X (outward from right edge); -0.25 tips it onto world -X.
 UGG_PITCH = +0.25
 WW_PITCH  = -0.25
+# After the pitch, body local +X (forward) is along world -Z (Ugg) or +Z (WW).
+# Add a yaw (about local +Z which now equals the cube-face normal) to swing
+# forward up the slope. Ugg needs +0.5 (180°) to flip forward to world +Z; WW
+# already faces +Z after its pitch and needs no extra yaw.
+UGG_YAW_AFTER_PITCH = 0.5
+WW_YAW_AFTER_PITCH  = 0.0
 # Z at cube centre (not above cube top): Z_BASE - row * Z_MUL.
 _CLIMBER_Z_BASE = CUBE_BASE_Z + CUBE_SIZE * (NUM_ROWS - 1)   # 13 (cube-centre Z at row 0)
 _CLIMBER_Z_MUL  = CUBE_SIZE                                  # 2.0
@@ -2335,20 +2341,22 @@ DIRECTOR_SCRIPT = "".join([
         # START_Z = below bottom (Z_BASE - 7*Z_MUL = -1.0); END_Z = bottom-row centre (1.0).
         f"{_CLIMBER_Z_BASE - 7 * _CLIMBER_Z_MUL} {_base + _RB_OFF_START_Z} {_actor_idx} write-actor-mailbox "
         f"{_CLIMBER_Z_BASE - 6 * _CLIMBER_Z_MUL} {_base + _RB_OFF_END_Z} {_actor_idx} write-actor-mailbox "
-        # Reset Euler (A/B/C) and apply DELTA_PITCH for side-face orientation.
+        # Reset Euler (A/B/C); apply DELTA_PITCH for side-face gravity; then
+        # apply DELTA_YAW so forward direction points up the pyramid slope.
         f"0 3012 {_actor_idx} write-actor-mailbox "
         f"0 3013 {_actor_idx} write-actor-mailbox "
         f"0 3014 {_actor_idx} write-actor-mailbox "
         f"{_pitch} 3035 {_actor_idx} write-actor-mailbox "
+        f"{_yaw} 3034 {_actor_idx} write-actor-mailbox "
         # PHASE := 1, ACTIVE := 1, re-arm spawn timer.
         f"1 {_base + _RB_OFF_PHASE} {_actor_idx} write-actor-mailbox "
         f"1 {_active_mb} write-mailbox "
         f"{_interval} {_timer_mb} write-mailbox "
         f"then then then "
         f"then\n"
-        for (_base, _active_mb, _timer_mb, _interval, _actor_idx, _spawn_col, _pitch) in [
-            (UGG_MB_BASE, UGG_MB_ACTIVE, UGG_MB_SPAWN_TIMER, UGG_SPAWN_INTERVAL, UGG_ACTOR_IDX, 6, UGG_PITCH),
-            (WW_MB_BASE,  WW_MB_ACTIVE,  WW_MB_SPAWN_TIMER,  WW_SPAWN_INTERVAL,  WW_ACTOR_IDX,  0, WW_PITCH),
+        for (_base, _active_mb, _timer_mb, _interval, _actor_idx, _spawn_col, _pitch, _yaw) in [
+            (UGG_MB_BASE, UGG_MB_ACTIVE, UGG_MB_SPAWN_TIMER, UGG_SPAWN_INTERVAL, UGG_ACTOR_IDX, 6, UGG_PITCH, UGG_YAW_AFTER_PITCH),
+            (WW_MB_BASE,  WW_MB_ACTIVE,  WW_MB_SPAWN_TIMER,  WW_SPAWN_INTERVAL,  WW_ACTOR_IDX,  0, WW_PITCH,  WW_YAW_AFTER_PITCH),
         ]
     ],
     # ── Coily egg per-round spawn (Phase A) ───────────────────────────────────
