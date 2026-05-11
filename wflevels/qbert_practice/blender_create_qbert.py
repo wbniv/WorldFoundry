@@ -1103,6 +1103,156 @@ print(f"[qbert] Created {REDBALL_COUNT} red balls "
       f"per-ball mailbox bases "
       f"{', '.join(str(_rb_mb(k, 0)) for k in range(REDBALL_COUNT))}")
 
+# ── 5d. Coily egg (Phase A) ──────────────────────────────────────────────────
+# Single purple ball that spawns once per round, bounces down from the apex
+# like a red ball, then retires off-pyramid. Phase B will transform it into
+# Coily at the bottom row; for Phase A it just despawns. Kills Q*bert on
+# contact (same FALL_DEATH path as red balls).
+#
+# Mailbox layout (globals, 8 slots starting at 518 per
+# docs/plans/2026-05-11-qbert-coily-and-discs.md):
+#   518 EGG_ROW, 519 EGG_COL, 520 EGG_COOLDOWN, 521 EGG_PHASE,
+#   522 EGG_START_Z, 523 EGG_END_Z, 524 EGG_FROM_ROW, 525 EGG_FROM_COL
+# Director globals:
+#   542 COILY_ROUND_DONE  (1 once egg has spawned this round)
+#   543 COILY_PHASE_GLOBAL (0=idle, 1=egg, 2=snake — Phase A only uses 0/1)
+
+COILY_EGG_HOP_TICKS = 24      # slower than red ball (~0.4 s/hop), arcade-ish cadence
+COILY_EGG_SPAWN_DELAY = 90    # ticks after INTRO_DONE / round-start before egg appears
+
+_CE_MB_ROW       = 518
+_CE_MB_COL       = 519
+_CE_MB_COOLDOWN  = 520
+_CE_MB_PHASE     = 521
+_CE_MB_START_Z   = 522
+_CE_MB_END_Z     = 523
+_CE_MB_FROM_ROW  = 524
+_CE_MB_FROM_COL  = 525
+
+COILY_MB_ROUND_DONE   = 542
+COILY_MB_PHASE_GLOBAL = 543
+COILY_MB_SPAWN_DELAY  = 544    # countdown to next egg spawn (set on round init)
+
+_CE_HOP_DENOM_F = float(COILY_EGG_HOP_TICKS - 1)
+# Z values: same as red ball (egg sits 0.5 above cube top → row 0 Z = 14.5).
+_CE_Z_AT_ROW_0 = _RB_Z_BASE - 0 * _RB_Z_MUL
+_CE_Z_AT_ROW_1 = _RB_Z_BASE - 1 * _RB_Z_MUL
+
+def coily_egg_script():
+    """Per-tick script for the Coily egg.
+
+    Same shape as redball_script: phase gate, cooldown decrement, smoothstep
+    XYZ writes with parabolic Z arc, contact check, landing-tick decision
+    (off-pyramid retire OR LFSR coin flip for next direction). Uses player-
+    strength stretch-and-squash on the ball; Phase B will swap behavior for
+    the snake.
+    """
+    mb_row      = _CE_MB_ROW
+    mb_col      = _CE_MB_COL
+    mb_cd       = _CE_MB_COOLDOWN
+    mb_phase    = _CE_MB_PHASE
+    mb_start_z  = _CE_MB_START_Z
+    mb_end_z    = _CE_MB_END_Z
+    mb_from_row = _CE_MB_FROM_ROW
+    mb_from_col = _CE_MB_FROM_COL
+
+    return (
+        f"\\\\ wf coily egg (Phase A)\n"
+        # Phase 0: idle. Director writes initial state to wake.
+        f"{mb_phase} read-mailbox 0 = if exit then\n"
+        # Phase 1: hopping. Decrement COOLDOWN.
+        f"{mb_cd} read-mailbox 1 - dup {mb_cd} write-mailbox\n"
+        # t_raw = (HOP_TICKS - cd_new) / DENOM
+        f"{COILY_EGG_HOP_TICKS} swap - {_CE_HOP_DENOM_F} /\n"
+        # Smoothstep keeping t_raw: ( t_raw -- t_raw t' )
+        f"dup dup dup * swap 2.0 * 3.0 swap - *\n"
+        # row_now = from_row + t' * (row - from_row)
+        f"dup {mb_row} read-mailbox {mb_from_row} read-mailbox - * "
+        f"{mb_from_row} read-mailbox +\n"
+        # col_now = from_col + t' * (col - from_col)
+        f"over {mb_col} read-mailbox {mb_from_col} read-mailbox - * "
+        f"{mb_from_col} read-mailbox +\n"
+        # y = (6 - row_now) * Y_MUL → 3010
+        f"over 6.0 swap - {_RB_Y_MUL} * 3010 write-mailbox\n"
+        # x = (col_now - row_now*0.5) * X_MUL → 3009
+        f"swap 0.5 * - {_RB_X_MUL} * 3009 write-mailbox\n"
+        # z_linear = start_z + t' * (end_z - start_z)
+        f"{mb_end_z} read-mailbox {mb_start_z} read-mailbox - * "
+        f"{mb_start_z} read-mailbox +\n"
+        # z_final = z_linear + 8*t_raw*(1-t_raw)
+        f"swap dup 1.0 swap - * 8.0 * +\n"
+        f"3011 write-mailbox\n"
+        # Contact check vs player.
+        f"{mb_row} read-mailbox 400 read-mailbox = if "
+        f"{mb_col} read-mailbox 401 read-mailbox = if "
+        f"1 414 write-mailbox "
+        f"then then\n"
+        # Stretch-and-squash (Phase A: same intensity as red ball, 0.5 strength).
+        f"{mb_cd} read-mailbox 0 <= if "
+        f"1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
+        f"else "
+        f"{COILY_EGG_HOP_TICKS} {mb_cd} read-mailbox - {_CE_HOP_DENOM_F} / "
+        f"dup 2.0 * 1.0 - dup * swap dup 1.0 swap - 4.0 * * "
+        f"over {_RB_SS_Z_IMP} * over {_RB_SS_Z_BELL} * + 1.0 + 3042 write-mailbox "
+        f"{_RB_SS_XY_BELL} * swap {_RB_SS_XY_IMP} * + 1.0 + "
+        f"dup 3040 write-mailbox 3041 write-mailbox "
+        f"then\n"
+        # Landing tick? cd <= 0.
+        f"{mb_cd} read-mailbox 0 <= if "
+        # Off-pyramid: retire. Phase A always retires; Phase B will divert to snake-transform here.
+        f"{mb_row} read-mailbox 6 > if "
+        f"0 {mb_phase} write-mailbox "
+        f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+        f"{REDBALL_PARK_Z} 3011 write-mailbox "
+        f"exit "
+        f"then "
+        # Pick next direction via shared LFSR.
+        f"{_RB_LFSR_STEP}"
+        # Advance ROW, conditionally COL.
+        f"{mb_row} read-mailbox dup {mb_from_row} write-mailbox 1 + {mb_row} write-mailbox "
+        f"{mb_col} read-mailbox dup {mb_from_col} write-mailbox "
+        f"swap if 1 + then {mb_col} write-mailbox "
+        # Stash START_Z / END_Z.
+        f"3011 read-mailbox {mb_start_z} write-mailbox "
+        f"{_RB_Z_BASE} {mb_row} read-mailbox {_RB_Z_MUL} * - {mb_end_z} write-mailbox "
+        # Re-arm cooldown.
+        f"{COILY_EGG_HOP_TICKS} {mb_cd} write-mailbox "
+        f"then\n"
+    )
+
+# Egg mesh: same icosphere geometry as the red ball, but with a purple material.
+# Different mesh datablock so the wf_blender exporter emits a separate
+# coilyegg.iff with its own MATL.
+_egg_mesh = bpy.data.meshes.new('coily_egg_mesh')
+_egg_mesh.from_pydata(_REDBALL_VERTS, [], _REDBALL_FACES)
+_egg_mesh.update()
+_egg_mat = bpy.data.materials.new('coily_egg_purple')
+_egg_mat.use_nodes = True
+_egg_bsdf = _egg_mat.node_tree.nodes.get('Principled BSDF')
+# Deep purple, slightly toward magenta — matches arcade Coily egg.
+_egg_bsdf.inputs['Base Color'].default_value = (0.55, 0.10, 0.85, 1.0)
+_egg_mesh.materials.append(_egg_mat)
+
+_pre_egg_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+COILY_EGG_ACTOR_IDX = _pre_egg_actor_count + 1
+
+_egg = bpy.data.objects.new('coily_egg', _egg_mesh)
+_egg.location = (0.0, 0.0, REDBALL_PARK_Z)
+scene.collection.objects.link(_egg)
+_egg['wf_schema_path']         = ENEMY_OAD
+_egg['wf_Mesh Name']           = 'coily_egg_mesh.iff'
+_egg['wf_original_mesh_name']  = 'coily_egg_mesh.iff'
+_egg['wf_Model Type']          = 'Mesh'
+_egg['wf_Mobility']            = 'Anchored'
+_egg['wf_Mass']                = 0.0
+_egg['wf_Visibility Mailbox']  = 1
+_egg['wf_NumberOfLocalMailboxes'] = 0
+_egg['wf_Script']              = coily_egg_script()
+
+print(f"[qbert] Created Coily egg (actor index {COILY_EGG_ACTOR_IDX}); "
+      f"hop {COILY_EGG_HOP_TICKS} ticks; "
+      f"globals 518..525 + 542..544")
+
 # ── 6. Director — wire its Script for the game loop ───────────────────────────
 # MVP director: cube-state advance, visibility fan-out, win check, camera
 # fan-out, HUD plumbing. Per actor.cc:665 statplats forbid scripts, so the
@@ -1215,6 +1365,10 @@ DIRECTOR_SCRIPT = "".join([
     f"120 {RB_MB_SPAWN_TIMER} write-mailbox "      # first ball ~2 s after INTRO_DONE
     + " ".join(f"0 {RB_MB_ACTIVE_BASE + k} write-mailbox" for k in range(REDBALL_COUNT))
     + " ",
+    # Coily Phase A: clear globals + arm first-egg delay.
+    f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+    f"0 {COILY_MB_ROUND_DONE} write-mailbox "
+    f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox ",
     "1 421 write-mailbox ",   # LEVEL_INITIALIZED
     "then\n",
     # Intro state machine — runs only while phase 0..5; gates the rest of
@@ -1292,6 +1446,37 @@ DIRECTOR_SCRIPT = "".join([
     # Re-arm timer = max(60, 300 - 12 * ROUND_NUMBER)
     f"425 read-mailbox 12 * 300 swap - dup 60 < if drop 60 then {RB_MB_SPAWN_TIMER} write-mailbox "
     f"then then\n",
+    # ── Coily egg per-round spawn (Phase A) ───────────────────────────────────
+    # Gated on INTRO_DONE. If neither egg nor snake is active (PHASE_GLOBAL==0)
+    # and the per-round spawn delay has elapsed, wake the egg at apex (row 0,
+    # col 0) and latch PHASE_GLOBAL := 1. Egg-retire (off-pyramid) clears
+    # PHASE_GLOBAL back to 0; round-clear refreshes SPAWN_DELAY so the next
+    # round spawns a fresh egg.
+    f"418 read-mailbox 1 = if "
+    f"{COILY_MB_PHASE_GLOBAL} read-mailbox 0 = if "
+    f"{COILY_MB_ROUND_DONE} read-mailbox 0 = if "
+    f"{COILY_MB_SPAWN_DELAY} read-mailbox dup 0 > if "
+    f"1 - {COILY_MB_SPAWN_DELAY} write-mailbox "
+    f"else drop "
+    # SPAWN! Step LFSR for col (0 or 1). Activate egg at (row=1, col=lfsr_bit)
+    # — same starting cubes as red balls, so the egg can't kill Q*bert on
+    # spawn at the apex. The egg's mid-hop start is FROM apex (row=0, col=0)
+    # so visually it appears to dive from the top.
+    f"{_RB_LFSR_STEP}"                                  # ( bit )
+    f"{_CE_MB_COL} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "  # COL := bit
+    f"1 {_CE_MB_ROW} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"0 {_CE_MB_FROM_ROW} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"0 {_CE_MB_FROM_COL} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"{COILY_EGG_HOP_TICKS} {_CE_MB_COOLDOWN} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"{_CE_Z_AT_ROW_0} {_CE_MB_START_Z} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"{_CE_Z_AT_ROW_1} {_CE_MB_END_Z} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"1 {_CE_MB_PHASE} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"1 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+    f"1 {COILY_MB_ROUND_DONE} write-mailbox "
+    f"then "
+    f"then "
+    f"then "
+    f"then\n",
     # Camshot routing: cs_death hold + FALL_DEATH latch + game-over fold-in.
     f"414 read-mailbox 1 = if {CS_DEATH_IDX} INDEXOF_CAMSHOT write-mailbox ",
     f"{CS_DEATH_HOLD_FRAMES} 415 write-mailbox ",
@@ -1380,6 +1565,12 @@ DIRECTOR_SCRIPT = "".join([
     "0 400 write-mailbox 0 401 write-mailbox 0 402 write-mailbox ",
     "0 414 write-mailbox 0 415 write-mailbox 0 419 write-mailbox ",
     "1 426 write-mailbox ",   # apex respawn flag for player
+    # Coily Phase A round refresh: retire any in-flight egg, clear ROUND_DONE,
+    # rearm SPAWN_DELAY so the next round spawns a fresh egg.
+    f"0 {_CE_MB_PHASE} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+    f"0 {COILY_MB_ROUND_DONE} write-mailbox "
+    f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox ",
     "then ",
     "else drop then\n",
 ])
