@@ -185,6 +185,27 @@ tasks:
     cmds:
       - LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/snowgoons.iff
 
+  build-level:
+    desc: "Build a level's inner + standalone .iff (usage: task build-level -- qbert_practice)"
+    cmds:
+      - |
+        set -- {{.CLI_ARGS}}
+        if [ -z "${1:-}" ]; then
+          echo "Usage: task build-level -- <level-name>" >&2
+          echo "Example: task build-level -- qbert_practice" >&2
+          exit 1
+        fi
+        bash wftools/wf_blender/build_level_binary.sh "$1"
+
+  qbert:
+    desc: "Rebuild qbert_practice (Blender → lev → iff → standalone) and run wf_game on it"
+    cmds:
+      - |
+        blender --background wflevels/qbert_practice/qbert_practice.blend \
+                --python wflevels/qbert_practice/blender_create_qbert.py
+      - bash wftools/wf_blender/build_level_binary.sh qbert_practice
+      - LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/qbert_practice-standalone.iff
+
   run-debug:
     desc: "Run wf_game with debug bridge on port 7777 (usage: task run-debug -- wflevels/snowgoons.iff)"
     cmds:
