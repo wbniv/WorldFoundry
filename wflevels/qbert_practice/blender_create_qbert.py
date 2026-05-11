@@ -880,6 +880,36 @@ SAM_MB_SPAWN_TIMER = 552
 SAM_SPAWN_INTERVAL = 1500        # 25 s between Sam spawns
 SAM_FIRST_DELAY    = 900         # 15 s after intro
 
+# Ugg & Wrong-Way — climb the SIDES of the pyramid. Ugg on right edge cubes
+# (r, r); Wrong-Way on left edge cubes (r, 0). Both spawn at the bottom row
+# and hop upward toward the apex. Killed if Q*bert lands on their cube (same
+# FALL_DEATH path as red ball). Their bodies are pitch-rotated 90° at spawn so
+# their feet rest on the side face of the cube; their X position is offset
+# outward by CUBE_SIZE/2 + body half-thickness.
+UGG_MB_BASE        = 553
+UGG_MB_ACTIVE      = 569
+UGG_MB_SPAWN_TIMER = 570
+UGG_SPAWN_INTERVAL = 1200         # 20 s between Ugg spawns
+UGG_FIRST_DELAY    = 1200         # 20 s after intro
+
+WW_MB_BASE         = 561
+WW_MB_ACTIVE       = 571
+WW_MB_SPAWN_TIMER  = 572
+WW_SPAWN_INTERVAL  = 1500         # 25 s between Wrong-Way spawns
+WW_FIRST_DELAY     = 1800         # 30 s after intro
+
+# Side-face offsets and rotations.
+_CLIMBER_BODY_HALF_X = 0.4
+UGG_X_OFFSET = +(CUBE_SIZE / 2 + _CLIMBER_BODY_HALF_X)   # +X side face
+WW_X_OFFSET  = -(CUBE_SIZE / 2 + _CLIMBER_BODY_HALF_X)   # -X side face
+# Pitch rotates about local +Y. +0.25 rev tips body so its local +Z (up) lands
+# on world +X (outward from right edge); -0.25 tips it onto world -X.
+UGG_PITCH = +0.25
+WW_PITCH  = -0.25
+# Z at cube centre (not above cube top): Z_BASE - row * Z_MUL.
+_CLIMBER_Z_BASE = CUBE_BASE_Z + CUBE_SIZE * (NUM_ROWS - 1)   # 13 (cube-centre Z at row 0)
+_CLIMBER_Z_MUL  = CUBE_SIZE                                  # 2.0
+
 # LFSR step — Galois LFSR-16, polynomial x^16+x^14+x^13+x^11+1 (tap mask 0xB400).
 # Side-effect: advance mb 511; result: lsb (0 or 1) left on stack.
 # zForth has `&`, `|`, `^`, `<<`, `>>` (PRIM_AND/OR/XOR/SHL/SHR in zforth.c).
@@ -906,10 +936,21 @@ def redball_script(k, variant='red'):
     touch has frozen all enemies).
     """
     flat_bases = {
-        'green': (GB_MB_BASE,    GB_MB_ACTIVE),
-        'slick': (SLICK_MB_BASE, SLICK_MB_ACTIVE),
-        'sam':   (SAM_MB_BASE,   SAM_MB_ACTIVE),
+        'green':    (GB_MB_BASE,    GB_MB_ACTIVE),
+        'slick':    (SLICK_MB_BASE, SLICK_MB_ACTIVE),
+        'sam':      (SAM_MB_BASE,   SAM_MB_ACTIVE),
+        'ugg':      (UGG_MB_BASE,   UGG_MB_ACTIVE),
+        'wrongway': (WW_MB_BASE,    WW_MB_ACTIVE),
     }
+    # Per-variant X-offset (added to the world-X write) for side-face climbers.
+    x_offset = {'ugg': UGG_X_OFFSET, 'wrongway': WW_X_OFFSET}.get(variant, 0.0)
+    # Per-variant Z formula: climbers sit at cube centre Z; descenders sit on top.
+    if variant in ('ugg', 'wrongway'):
+        z_base = _CLIMBER_Z_BASE
+        z_mul  = _CLIMBER_Z_MUL
+    else:
+        z_base = _RB_Z_BASE
+        z_mul  = _RB_Z_MUL
     if variant in flat_bases:
         base, mb_active = flat_bases[variant]
         mb_row      = base + _RB_OFF_ROW
@@ -973,7 +1014,7 @@ def redball_script(k, variant='red'):
             f"exit "
         )
     else:
-        # Red: kill player.
+        # Red / Ugg / Wrong-Way: kill player.
         contact_action = f"1 414 write-mailbox "
 
     # Slick/Sam revert the cube they land on (state 2 → 0). Encoded as a
@@ -987,6 +1028,34 @@ def redball_script(k, variant='red'):
         )
     else:
         cube_revert_block = ""
+
+    # Per-variant landing-tick direction + retire condition.
+    #   descending (red/green/slick/sam): LFSR diagonal, ROW++; retire when ROW > 6.
+    #   ugg right-edge: fixed (ROW-1, COL-1); retire when ROW < 0.
+    #   wrongway left-edge: fixed (ROW-1, COL unchanged); retire when ROW < 0.
+    if variant == 'ugg':
+        retire_check = f"{mb_row} read-mailbox 0 < if "
+        # Stash FROM and decrement ROW & COL by 1 each.
+        direction_block = (
+            f"{mb_row} read-mailbox dup {mb_from_row} write-mailbox 1 - {mb_row} write-mailbox "
+            f"{mb_col} read-mailbox dup {mb_from_col} write-mailbox 1 - {mb_col} write-mailbox "
+        )
+    elif variant == 'wrongway':
+        retire_check = f"{mb_row} read-mailbox 0 < if "
+        # Stash FROM and decrement ROW; COL stays at 0.
+        direction_block = (
+            f"{mb_row} read-mailbox dup {mb_from_row} write-mailbox 1 - {mb_row} write-mailbox "
+            f"{mb_col} read-mailbox {mb_from_col} write-mailbox "
+        )
+    else:
+        retire_check = f"{mb_row} read-mailbox 6 > if "
+        # LFSR pick + descend.
+        direction_block = (
+            f"{_RB_LFSR_STEP}"
+            f"{mb_row} read-mailbox dup {mb_from_row} write-mailbox 1 + {mb_row} write-mailbox "
+            f"{mb_col} read-mailbox dup {mb_from_col} write-mailbox "
+            f"swap if 1 + then {mb_col} write-mailbox "
+        )
 
     return (
         f"\\\\ wf {variant}ball {k}\n"
@@ -1010,8 +1079,8 @@ def redball_script(k, variant='red'):
         # y = (6 - row_now) * Y_MUL → write 3010, stack unchanged
         # `over` copies row_now to top; `6.0 swap -` computes (6 - row_now).
         f"over 6.0 swap - {_RB_Y_MUL} * 3010 write-mailbox\n"
-        # x = (col_now - row_now*0.5) * X_MUL → write 3009           ( ... row_now col_now -- ... t_raw t' )
-        f"swap 0.5 * - {_RB_X_MUL} * 3009 write-mailbox\n"
+        # x = (col_now - row_now*0.5) * X_MUL + x_offset → 3009     ( ... row_now col_now -- ... t_raw t' )
+        f"swap 0.5 * - {_RB_X_MUL} * {x_offset} + 3009 write-mailbox\n"
         # z_linear = start_z + t' * (end_z - start_z)                ( t_raw t' -- t_raw z_linear )
         f"{mb_end_z} read-mailbox {mb_start_z} read-mailbox - * "
         f"{mb_start_z} read-mailbox +\n"
@@ -1045,8 +1114,9 @@ def redball_script(k, variant='red'):
         f"then then\n"
         # ── Landing tick? cd_new <= 0.
         f"{mb_cd} read-mailbox 0 <= if "
-        # Off-pyramid: row > 6 → retire to PHASE 0, park, clear director's mirror.
-        f"{mb_row} read-mailbox 6 > if "
+        # Off-pyramid retire (variant-specific threshold: ROW > 6 for descenders,
+        # ROW < 0 for climbers).
+        f"{retire_check}"
         f"0 {mb_phase} write-mailbox "
         f"0 {mb_active} write-mailbox "
         f"{REDBALL_PARK_Z} 3011 write-mailbox "
@@ -1054,16 +1124,11 @@ def redball_script(k, variant='red'):
         f"then "
         # Slick/Sam only: revert the cube we just landed on.
         f"{cube_revert_block}"
-        # Pick next direction via LFSR.                                 ( -- bit )
-        f"{_RB_LFSR_STEP}"
-        # Stash FROM_ROW, advance ROW (always +1).                    ( bit -- bit )
-        f"{mb_row} read-mailbox dup {mb_from_row} write-mailbox 1 + {mb_row} write-mailbox "
-        # Stash FROM_COL, advance COL if bit != 0.                    ( bit -- )
-        f"{mb_col} read-mailbox dup {mb_from_col} write-mailbox "
-        f"swap if 1 + then {mb_col} write-mailbox "
+        # Pick next direction + advance ROW/COL (variant-specific).
+        f"{direction_block}"
         # Stash START_Z (current Z at end of hop) and END_Z (Z at new row).
         f"3011 read-mailbox {mb_start_z} write-mailbox "
-        f"{_RB_Z_BASE} {mb_row} read-mailbox {_RB_Z_MUL} * - {mb_end_z} write-mailbox "
+        f"{z_base} {mb_row} read-mailbox {z_mul} * - {mb_end_z} write-mailbox "
         # Re-arm cooldown for the next hop.
         f"{REDBALL_HOP_TICKS} {mb_cd} write-mailbox "
         f"then\n"
@@ -1322,6 +1387,143 @@ _sam['wf_Script']              = redball_script(0, variant='sam')
 print(f"[qbert] Created Slick (idx {SLICK_ACTOR_IDX}) + Sam (idx {SAM_ACTOR_IDX}); "
       f"mailbox bases {SLICK_MB_BASE} / {SAM_MB_BASE}; "
       f"spawn cadence {SLICK_SPAWN_INTERVAL}/{SAM_SPAWN_INTERVAL} ticks")
+
+# ── 5c.7. Ugg & Wrong-Way — side-of-pyramid climbers ─────────────────────────
+# Distinct procedural mesh from the flipper proxy: small icosphere body with
+# two horns on top + two stubby feet on the bottom. Built once; instanced for
+# both Ugg (orange) and Wrong-Way (purple) via per-actor materials.
+def _climber_build_mesh():
+    """Body + 2 horns + 2 feet → verts/faces."""
+    verts = []
+    faces = []
+    # Body: icosahedron scaled to ~0.40 radius (chunky), Z-flattened slightly.
+    body_radius = 0.40
+    body_squash = 0.85
+    phi = (1.0 + math.sqrt(5.0)) / 2.0
+    norm = math.sqrt(1.0 + phi * phi)
+    base = [
+        ( 0.0,  1.0,  phi), ( 0.0,  1.0, -phi),
+        ( 0.0, -1.0,  phi), ( 0.0, -1.0, -phi),
+        ( 1.0,  phi,  0.0), ( 1.0, -phi,  0.0),
+        (-1.0,  phi,  0.0), (-1.0, -phi,  0.0),
+        ( phi,  0.0,  1.0), ( phi,  0.0, -1.0),
+        (-phi,  0.0,  1.0), (-phi,  0.0, -1.0),
+    ]
+    base_faces = [
+        (0, 2, 8),  (0, 8, 4),  (0, 4, 6),  (0, 6, 10), (0, 10, 2),
+        (3, 1, 9),  (3, 9, 5),  (3, 5, 7),  (3, 7, 11), (3, 11, 1),
+        (2, 5, 8),  (8, 5, 9),  (8, 9, 4),  (4, 9, 1),  (4, 1, 6),
+        (6, 1, 11), (6, 11, 10),(10, 11, 7),(10, 7, 2), (2, 7, 5),
+    ]
+    body_base = len(verts)
+    for x, y, z in base:
+        verts.append((
+            (x / norm) * body_radius,
+            (y / norm) * body_radius,
+            (z / norm) * body_radius * body_squash,
+        ))
+    for a, b, c in base_faces:
+        faces.append((body_base + a, body_base + b, body_base + c))
+
+    # Horns: two small cones at the top of the body (+Y/-Y, +Z direction).
+    def _cone(centre_x, centre_y, base_z, height, radius, sides=6):
+        idx_apex = len(verts)
+        verts.append((centre_x, centre_y, base_z + height))
+        ring_base = len(verts)
+        for i in range(sides):
+            a = 2.0 * math.pi * i / sides
+            verts.append((centre_x + radius * math.cos(a),
+                          centre_y + radius * math.sin(a),
+                          base_z))
+        for i in range(sides):
+            j = (i + 1) % sides
+            faces.append((idx_apex, ring_base + i, ring_base + j))
+
+    horn_base_z = body_radius * body_squash * 0.85
+    _cone(-0.12, 0.0, horn_base_z, 0.22, 0.08)
+    _cone(+0.12, 0.0, horn_base_z, 0.22, 0.08)
+
+    # Feet: two flat discs at the bottom.
+    def _flat_disc(centre_x, centre_y, top_z, half_h, radius, sides=8):
+        ring_top = len(verts)
+        for i in range(sides):
+            a = 2.0 * math.pi * i / sides
+            verts.append((centre_x + radius * math.cos(a),
+                          centre_y + radius * math.sin(a),
+                          top_z + half_h))
+            verts.append((centre_x + radius * math.cos(a),
+                          centre_y + radius * math.sin(a),
+                          top_z - half_h))
+        idx_top_c = len(verts); verts.append((centre_x, centre_y, top_z + half_h))
+        idx_bot_c = len(verts); verts.append((centre_x, centre_y, top_z - half_h))
+        for i in range(sides):
+            j = (i + 1) % sides
+            ti, bi = ring_top + 2 * i, ring_top + 2 * i + 1
+            tj, bj = ring_top + 2 * j, ring_top + 2 * j + 1
+            faces.append((idx_top_c, ti, tj))
+            faces.append((idx_bot_c, bj, bi))
+            faces.append((ti, bi, bj))
+            faces.append((ti, bj, tj))
+
+    foot_top_z = -body_radius * body_squash * 0.9
+    _flat_disc(-0.15, 0.0, foot_top_z, 0.05, 0.10)
+    _flat_disc(+0.15, 0.0, foot_top_z, 0.05, 0.10)
+
+    return verts, faces
+
+
+_CLIMBER_VERTS, _CLIMBER_FACES = _climber_build_mesh()
+
+
+def _build_climber_actor(name, mesh_name, body_rgb, location):
+    mesh = bpy.data.meshes.new(mesh_name)
+    mesh.from_pydata(_CLIMBER_VERTS, [], _CLIMBER_FACES)
+    mesh.update()
+    mat = bpy.data.materials.new(f'{mesh_name}_mat')
+    mat.use_nodes = True
+    mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value = (*body_rgb, 1.0)
+    mesh.materials.append(mat)
+    obj = bpy.data.objects.new(name, mesh)
+    obj.location = location
+    scene.collection.objects.link(obj)
+    return obj
+
+
+_pre_ugg_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+UGG_ACTOR_IDX = _pre_ugg_actor_count + 1
+
+_ugg = _build_climber_actor('ugg', 'ugg_mesh',
+                            body_rgb=(1.00, 0.55, 0.10),
+                            location=(0.0, 0.0, REDBALL_PARK_Z))
+_ugg['wf_schema_path']         = ENEMY_OAD
+_ugg['wf_Mesh Name']           = 'ugg_mesh.iff'
+_ugg['wf_original_mesh_name']  = 'ugg_mesh.iff'
+_ugg['wf_Model Type']          = 'Mesh'
+_ugg['wf_Mobility']            = 'Anchored'
+_ugg['wf_Mass']                = 0.0
+_ugg['wf_Visibility Mailbox']  = 1
+_ugg['wf_NumberOfLocalMailboxes'] = 0
+_ugg['wf_Script']              = redball_script(0, variant='ugg')
+
+_pre_ww_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+WW_ACTOR_IDX = _pre_ww_actor_count + 1
+
+_ww = _build_climber_actor('wrongway', 'wrongway_mesh',
+                           body_rgb=(0.55, 0.10, 0.85),
+                           location=(0.0, 0.0, REDBALL_PARK_Z))
+_ww['wf_schema_path']         = ENEMY_OAD
+_ww['wf_Mesh Name']           = 'wrongway_mesh.iff'
+_ww['wf_original_mesh_name']  = 'wrongway_mesh.iff'
+_ww['wf_Model Type']          = 'Mesh'
+_ww['wf_Mobility']            = 'Anchored'
+_ww['wf_Mass']                = 0.0
+_ww['wf_Visibility Mailbox']  = 1
+_ww['wf_NumberOfLocalMailboxes'] = 0
+_ww['wf_Script']              = redball_script(0, variant='wrongway')
+
+print(f"[qbert] Created Ugg (idx {UGG_ACTOR_IDX}) + Wrong-Way (idx {WW_ACTOR_IDX}); "
+      f"mailbox bases {UGG_MB_BASE} / {WW_MB_BASE}; "
+      f"climber mesh {len(_CLIMBER_VERTS)} verts / {len(_CLIMBER_FACES)} faces")
 
 # ── 5d. Coily egg (Phase A) ──────────────────────────────────────────────────
 # Single purple ball that spawns once per round, bounces down from the apex
@@ -1972,6 +2174,11 @@ DIRECTOR_SCRIPT = "".join([
     f"{SLICK_FIRST_DELAY} {SLICK_MB_SPAWN_TIMER} write-mailbox "
     f"0 {SAM_MB_ACTIVE} write-mailbox "
     f"{SAM_FIRST_DELAY} {SAM_MB_SPAWN_TIMER} write-mailbox ",
+    # Ugg & Wrong-Way: clear active mirrors + arm first-spawn delays.
+    f"0 {UGG_MB_ACTIVE} write-mailbox "
+    f"{UGG_FIRST_DELAY} {UGG_MB_SPAWN_TIMER} write-mailbox "
+    f"0 {WW_MB_ACTIVE} write-mailbox "
+    f"{WW_FIRST_DELAY} {WW_MB_SPAWN_TIMER} write-mailbox ",
     "1 421 write-mailbox ",   # LEVEL_INITIALIZED
     "then\n",
     # Intro state machine — runs only while phase 0..5; gates the rest of
@@ -2104,6 +2311,44 @@ DIRECTOR_SCRIPT = "".join([
         for (_base, _active_mb, _timer_mb, _interval, _actor_idx) in [
             (SLICK_MB_BASE, SLICK_MB_ACTIVE, SLICK_MB_SPAWN_TIMER, SLICK_SPAWN_INTERVAL, SLICK_ACTOR_IDX),
             (SAM_MB_BASE,   SAM_MB_ACTIVE,   SAM_MB_SPAWN_TIMER,   SAM_SPAWN_INTERVAL,   SAM_ACTOR_IDX),
+        ]
+    ],
+    # ── Ugg & Wrong-Way spawn blocks (climbers) ───────────────────────────────
+    # Spawn at the BOTTOM of their edge (row=6, col=6 for Ugg / col=0 for WW),
+    # lerping in from one row "below" (FROM_ROW=7) and Z below the bottom cube
+    # so they appear to climb up from out of frame. At activation: reset Euler
+    # (write 0 to A/B/C — C commits identity), then DELTA_PITCH ±0.25 to tip
+    # the body onto its side face.
+    *[
+        f"418 read-mailbox 1 = if "
+        f"{GB_MB_FREEZE_TIMER} read-mailbox 0 = if "
+        f"{_active_mb} read-mailbox 0 = if "
+        f"{_timer_mb} read-mailbox dup 0 > if "
+        f"1 - {_timer_mb} write-mailbox "
+        f"else drop "
+        # Activate climber:
+        f"{_spawn_col} {_base + _RB_OFF_COL} {_actor_idx} write-actor-mailbox "
+        f"6 {_base + _RB_OFF_ROW} {_actor_idx} write-actor-mailbox "
+        f"7 {_base + _RB_OFF_FROM_ROW} {_actor_idx} write-actor-mailbox "
+        f"{_spawn_col} {_base + _RB_OFF_FROM_COL} {_actor_idx} write-actor-mailbox "
+        f"{REDBALL_HOP_TICKS} {_base + _RB_OFF_COOLDOWN} {_actor_idx} write-actor-mailbox "
+        # START_Z = below bottom (Z_BASE - 7*Z_MUL = -1.0); END_Z = bottom-row centre (1.0).
+        f"{_CLIMBER_Z_BASE - 7 * _CLIMBER_Z_MUL} {_base + _RB_OFF_START_Z} {_actor_idx} write-actor-mailbox "
+        f"{_CLIMBER_Z_BASE - 6 * _CLIMBER_Z_MUL} {_base + _RB_OFF_END_Z} {_actor_idx} write-actor-mailbox "
+        # Reset Euler (A/B/C) and apply DELTA_PITCH for side-face orientation.
+        f"0 3012 {_actor_idx} write-actor-mailbox "
+        f"0 3013 {_actor_idx} write-actor-mailbox "
+        f"0 3014 {_actor_idx} write-actor-mailbox "
+        f"{_pitch} 3035 {_actor_idx} write-actor-mailbox "
+        # PHASE := 1, ACTIVE := 1, re-arm spawn timer.
+        f"1 {_base + _RB_OFF_PHASE} {_actor_idx} write-actor-mailbox "
+        f"1 {_active_mb} write-mailbox "
+        f"{_interval} {_timer_mb} write-mailbox "
+        f"then then then "
+        f"then\n"
+        for (_base, _active_mb, _timer_mb, _interval, _actor_idx, _spawn_col, _pitch) in [
+            (UGG_MB_BASE, UGG_MB_ACTIVE, UGG_MB_SPAWN_TIMER, UGG_SPAWN_INTERVAL, UGG_ACTOR_IDX, 6, UGG_PITCH),
+            (WW_MB_BASE,  WW_MB_ACTIVE,  WW_MB_SPAWN_TIMER,  WW_SPAWN_INTERVAL,  WW_ACTOR_IDX,  0, WW_PITCH),
         ]
     ],
     # ── Coily egg per-round spawn (Phase A) ───────────────────────────────────
@@ -2289,7 +2534,16 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {SAM_MB_BASE + _RB_OFF_PHASE} {SAM_ACTOR_IDX} write-actor-mailbox "
     f"{REDBALL_PARK_Z} 3011 {SAM_ACTOR_IDX} write-actor-mailbox "
     f"0 {SAM_MB_ACTIVE} write-mailbox "
-    f"{SAM_FIRST_DELAY} {SAM_MB_SPAWN_TIMER} write-mailbox ",
+    f"{SAM_FIRST_DELAY} {SAM_MB_SPAWN_TIMER} write-mailbox "
+    # Ugg & Wrong-Way round refresh: retire both, rearm spawn timers.
+    f"0 {UGG_MB_BASE + _RB_OFF_PHASE} {UGG_ACTOR_IDX} write-actor-mailbox "
+    f"{REDBALL_PARK_Z} 3011 {UGG_ACTOR_IDX} write-actor-mailbox "
+    f"0 {UGG_MB_ACTIVE} write-mailbox "
+    f"{UGG_FIRST_DELAY} {UGG_MB_SPAWN_TIMER} write-mailbox "
+    f"0 {WW_MB_BASE + _RB_OFF_PHASE} {WW_ACTOR_IDX} write-actor-mailbox "
+    f"{REDBALL_PARK_Z} 3011 {WW_ACTOR_IDX} write-actor-mailbox "
+    f"0 {WW_MB_ACTIVE} write-mailbox "
+    f"{WW_FIRST_DELAY} {WW_MB_SPAWN_TIMER} write-mailbox ",
     "then ",
     "else drop then\n",
 ])
