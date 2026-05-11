@@ -24,7 +24,8 @@
 	// Example: `$3fff001` = `IFF` + room `fff` (`PERM`) + slot `001`.
 	{ 'ASMP'
 		$3fff001l { 'STR' "player.iff" }  // IFF PERM fff:001
-		$3000001l { 'STR' "cube.iff" }  // IFF RM0 000:001
+		$3000001l { 'STR' "redball.iff" }  // IFF RM0 000:001
+		$3000002l { 'STR' "cube.iff" }  // IFF RM0 000:002
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "qbert_practice.lvl" ] }
@@ -42,7 +43,8 @@
 		{ 'ASS' $1000fffl [ "Room0.tga" ] }    // TGA RM0 000:fff
 		{ 'ASS' $5000fffl [ "Room0.ruv" ] }    // RUV RM0 000:fff
 		{ 'ASS' $7000fffl [ "Room0.cyc" ] }    // CYC RM0 000:fff
-		{ 'ASS' $3000001l [ "cube.iff" ] }  // IFF RM0 000:001
+		{ 'ASS' $3000001l [ "redball.iff" ] }  // IFF RM0 000:001
+		{ 'ASS' $3000002l [ "cube.iff" ] }  // IFF RM0 000:002
 	}
 	{ 'ALGN' .align(2048) }
 }

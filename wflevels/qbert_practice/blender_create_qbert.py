@@ -44,6 +44,7 @@ SNOWGOONS_LEV = os.path.join(REPO, 'wflevels', 'snowgoons-blender', 'snowgoons-b
 OUT_LEV = os.path.join(SCRIPT_DIR, 'qbert_practice.lev')
 OAD_DIR = os.path.join(REPO, 'wfsource', 'source', 'oas')
 STATPLAT_OAD = os.path.join(REPO, 'wftools', 'wf_oad', 'tests', 'fixtures', 'statplat.oad')
+ENEMY_OAD    = os.path.join(REPO, 'wftools', 'wf_oad', 'tests', 'fixtures', 'enemy.oad')
 
 # ── Pyramid geometry ──────────────────────────────────────────────────────────
 NUM_ROWS = 7  # rows 0 (apex) through 6 (bottom)
@@ -790,6 +791,170 @@ if camshot:
         cs_intro['wf_FOV'] = 60.0
         cs_intro['wf_Pan Time In Seconds'] = pan_time
         intro_camshot_objs.append(cs_intro)
+
+# ── 5c. Red Ball enemy ───────────────────────────────────────────────────────
+# First enemy: a small red ball that bounces diagonally down the pyramid.
+# Strict downward motion (alternates left-down and right-down each hop),
+# despawns when it walks off the bottom (row > NUM_ROWS - 1), respawns at
+# (row=1, col=0) after a cooldown. Kills Q*bert on contact (same cube).
+#
+# All state and respawn logic lives in the ball's own wf_Script — the
+# director doesn't know about the ball. The ball reads the player's
+# global ROW/COL (mb 400/401) for contact detection and writes
+# FALL_DEATH (mb 414) on hit, routing into the existing death pipeline.
+#
+# Placed BEFORE section 6 so the ball is counted in pre-cube actor totals
+# and the cube-actor-index assertion in section 7 still passes.
+#
+# See docs/plans/2026-05-11-qbert-red-ball-enemy.md.
+
+REDBALL_INITIAL_ROW  = 1
+REDBALL_INITIAL_COL  = 0
+REDBALL_HOP_TICKS    = 18      # ~0.3 s/hop at 60 Hz; arcade is ~3 hops/s
+REDBALL_RESPAWN_TICKS = 60     # ~1 s between despawn and respawn
+REDBALL_HEIGHT_OFFSET = CUBE_SIZE / 2 + 0.5   # ball centre above cube centre
+
+_rb_init_x, _rb_init_y, _rb_init_z_cube_center = cube_world_position(
+    REDBALL_INITIAL_ROW, REDBALL_INITIAL_COL)
+REDBALL_INITIAL_Z = _rb_init_z_cube_center + REDBALL_HEIGHT_OFFSET
+# Park position when off-pyramid — stays within the room bbox (min Z = -38)
+# so the engine doesn't spam "fell out of room" warnings every tick.
+REDBALL_PARK_Z = -30.0
+
+# Forth-side constants matching cube_world_position():
+#   X = SQRT2 * CUBE_SIZE * (col - row/2)         = 2.82843 * (col - row*0.5)
+#   Y = SQRT2 * (CUBE_SIZE/2) * (NUM_ROWS - 1 - row) = 1.41421 * (6 - row)
+#   Z = CUBE_BASE_Z + CUBE_SIZE * (NUM_ROWS - 1 - row) + REDBALL_HEIGHT_OFFSET
+#     = 1.0 + 2.0 * (6 - row) + 1.5
+#     = 14.5 - 2 * row                                          (NUM_ROWS=7, CUBE_BASE_Z=1, CUBE_SIZE=2)
+_RB_X_MUL  = SQRT2 * CUBE_SIZE                       # 2.82843
+_RB_Y_MUL  = SQRT2 * (CUBE_SIZE / 2)                 # 1.41421
+_RB_Z_BASE = CUBE_BASE_Z + CUBE_SIZE * (NUM_ROWS - 1) + REDBALL_HEIGHT_OFFSET  # 14.5
+_RB_Z_MUL  = CUBE_SIZE                               # 2.0
+
+_RB_MB_ROW       = 462
+_RB_MB_COL       = 463
+_RB_MB_COOLDOWN  = 464
+_RB_MB_PATTERN   = 465
+_RB_MB_PHASE     = 466
+
+REDBALL_SCRIPT = (
+    "\\\\ wf redball — bouncing enemy MVP\n"
+    # Global mailboxes (mb 0..1 are FALSE_M/TRUE_M sentinels per mailbox.inc:43,
+    # local user range starts at 2000; we follow the player/director convention
+    # of using globals in the 400+ range):
+    #   462 RB_ROW       current row in pyramid (0=apex)
+    #   463 RB_COL       current col in pyramid
+    #   464 RB_COOLDOWN  ticks until next event (hop, or respawn)
+    #   465 RB_PATTERN   0 = next hop is left-down (dr,dc=+1,0)
+    #                    1 = next hop is right-down (+1,+1)
+    #   466 RB_PHASE     0 = respawning (waiting to spawn)
+    #                    1 = bouncing
+    # ── Phase 0: respawning — count down RB_COOLDOWN; on 0 reset to start.
+    f"{_RB_MB_PHASE} read-mailbox 0 = if "
+    f"{_RB_MB_COOLDOWN} read-mailbox 1 - dup {_RB_MB_COOLDOWN} write-mailbox 0 <= if "
+    f"{REDBALL_INITIAL_ROW} {_RB_MB_ROW} write-mailbox "
+    f"{REDBALL_INITIAL_COL} {_RB_MB_COL} write-mailbox "
+    f"{REDBALL_HOP_TICKS} {_RB_MB_COOLDOWN} write-mailbox "
+    f"0 {_RB_MB_PATTERN} write-mailbox "
+    f"1 {_RB_MB_PHASE} write-mailbox "
+    f"{_rb_init_x} 3009 write-mailbox "
+    f"{_rb_init_y} 3010 write-mailbox "
+    f"{REDBALL_INITIAL_Z} 3011 write-mailbox "
+    "then "
+    "exit "
+    "then\n"
+    # ── Phase 1: bouncing — cooldown gate.
+    f"{_RB_MB_COOLDOWN} read-mailbox 1 - dup {_RB_MB_COOLDOWN} write-mailbox 0 > if exit then\n"
+    # Hop: ROW++; if PATTERN==1, COL++; flip PATTERN; reset cooldown.
+    f"{_RB_MB_ROW} read-mailbox 1 + {_RB_MB_ROW} write-mailbox "
+    f"{_RB_MB_PATTERN} read-mailbox 1 = if "
+    f"{_RB_MB_COL} read-mailbox 1 + {_RB_MB_COL} write-mailbox "
+    f"0 {_RB_MB_PATTERN} write-mailbox "
+    "else "
+    f"1 {_RB_MB_PATTERN} write-mailbox "
+    "then "
+    f"{REDBALL_HOP_TICKS} {_RB_MB_COOLDOWN} write-mailbox\n"
+    # Off-pyramid: ROW > 6 → enter respawn phase, park below floor.
+    f"{_RB_MB_ROW} read-mailbox 6 > if "
+    f"{REDBALL_RESPAWN_TICKS} {_RB_MB_COOLDOWN} write-mailbox "
+    f"0 {_RB_MB_PHASE} write-mailbox "
+    f"{REDBALL_PARK_Z} 3011 write-mailbox "
+    "exit "
+    "then\n"
+    # Write new world position (X, Y, Z) from updated (row, col).
+    f"{_RB_MB_COL} read-mailbox {_RB_MB_ROW} read-mailbox 0.5 * - "
+    f"{_RB_X_MUL} * 3009 write-mailbox\n"
+    f"6 {_RB_MB_ROW} read-mailbox - "
+    f"{_RB_Y_MUL} * 3010 write-mailbox\n"
+    f"{_RB_Z_BASE} {_RB_MB_ROW} read-mailbox {_RB_Z_MUL} * - 3011 write-mailbox\n"
+    # Contact check vs player: same (row, col) → latch FALL_DEATH.
+    f"{_RB_MB_ROW} read-mailbox 400 read-mailbox = if "
+    f"{_RB_MB_COL} read-mailbox 401 read-mailbox = if "
+    "1 414 write-mailbox "
+    "then "
+    "then\n"
+)
+
+# Build the ball's Blender object — icosahedron geometry + a red material.
+# Both come from Blender source (mesh datablock + Principled BSDF material);
+# wf_blender's _write_mesh_iff translates these into redball.iff at export.
+# (Blender is the authoring source of truth; we do not post-patch the .iff.)
+_REDBALL_PHI = (1.0 + math.sqrt(5.0)) / 2.0
+_REDBALL_NORM = math.sqrt(1.0 + _REDBALL_PHI * _REDBALL_PHI)
+_REDBALL_RADIUS = 0.5
+def _redball_v(x, y, z):
+    s = _REDBALL_RADIUS / _REDBALL_NORM
+    return (x * s, y * s, z * s)
+_REDBALL_VERTS = [
+    _redball_v( 0.0,  1.0,  _REDBALL_PHI),  # 0
+    _redball_v( 0.0,  1.0, -_REDBALL_PHI),  # 1
+    _redball_v( 0.0, -1.0,  _REDBALL_PHI),  # 2
+    _redball_v( 0.0, -1.0, -_REDBALL_PHI),  # 3
+    _redball_v( 1.0,  _REDBALL_PHI,  0.0),  # 4
+    _redball_v( 1.0, -_REDBALL_PHI,  0.0),  # 5
+    _redball_v(-1.0,  _REDBALL_PHI,  0.0),  # 6
+    _redball_v(-1.0, -_REDBALL_PHI,  0.0),  # 7
+    _redball_v( _REDBALL_PHI,  0.0,  1.0),  # 8
+    _redball_v( _REDBALL_PHI,  0.0, -1.0),  # 9
+    _redball_v(-_REDBALL_PHI,  0.0,  1.0),  # 10
+    _redball_v(-_REDBALL_PHI,  0.0, -1.0),  # 11
+]
+# 20 CCW-from-outside triangle faces of a standard icosahedron.
+_REDBALL_FACES = [
+    (0, 2, 8),  (0, 8, 4),  (0, 4, 6),  (0, 6, 10), (0, 10, 2),
+    (3, 1, 9),  (3, 9, 5),  (3, 5, 7),  (3, 7, 11), (3, 11, 1),
+    (2, 5, 8),  (8, 5, 9),  (8, 9, 4),  (4, 9, 1),  (4, 1, 6),
+    (6, 1, 11), (6, 11, 10),(10, 11, 7),(10, 7, 2), (2, 7, 5),
+]
+
+_redball_mesh = bpy.data.meshes.new('redball_mesh')
+_redball_mesh.from_pydata(_REDBALL_VERTS, [], _REDBALL_FACES)
+_redball_mesh.update()
+
+# Red material — Principled BSDF base colour drives the on-disk MATL.
+_redball_mat = bpy.data.materials.new('redball_red')
+_redball_mat.use_nodes = True
+_redball_bsdf = _redball_mat.node_tree.nodes.get('Principled BSDF')
+_redball_bsdf.inputs['Base Color'].default_value = (1.0, 0.0, 0.0, 1.0)
+_redball_mesh.materials.append(_redball_mat)
+
+redball = bpy.data.objects.new('redball_1', _redball_mesh)
+redball.location = (_rb_init_x, _rb_init_y, REDBALL_INITIAL_Z)
+scene.collection.objects.link(redball)
+redball['wf_schema_path']         = ENEMY_OAD
+redball['wf_Mesh Name']           = 'redball.iff'
+redball['wf_original_mesh_name']  = 'redball.iff'
+redball['wf_Model Type']          = 'Mesh'
+redball['wf_Mobility']            = 'Anchored'
+redball['wf_Mass']                = 0.0
+redball['wf_Visibility Mailbox']  = 1
+redball['wf_NumberOfLocalMailboxes'] = 0   # state lives in globals 462..466
+redball['wf_Script']              = REDBALL_SCRIPT
+
+print(f"[qbert] Created redball_1 at ({_rb_init_x:.2f}, {_rb_init_y:.2f}, "
+      f"{REDBALL_INITIAL_Z:.2f}) — bouncing from row {REDBALL_INITIAL_ROW} "
+      f"col {REDBALL_INITIAL_COL}, hop every {REDBALL_HOP_TICKS} ticks")
 
 # ── 6. Director — wire its Script for the game loop ───────────────────────────
 # MVP director: cube-state advance, visibility fan-out, win check, camera
