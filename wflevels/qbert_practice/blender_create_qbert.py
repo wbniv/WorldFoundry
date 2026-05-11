@@ -814,6 +814,14 @@ REDBALL_HEIGHT_OFFSET = CUBE_SIZE / 2 + 0.5   # ball centre above cube centre
 # (min Z = -38) so the engine doesn't spam "fell out of room" warnings.
 REDBALL_PARK_Z = -30.0
 
+# Stretch-and-squash strength relative to the player (player = 1.0). At 0.5
+# the ball is visibly springy but more subdued than the character.
+REDBALL_SS_STRENGTH = 0.5
+_RB_SS_Z_BELL  =  0.20 * REDBALL_SS_STRENGTH   # taller at mid-air
+_RB_SS_Z_IMP   = -0.40 * REDBALL_SS_STRENGTH   # shorter at takeoff/landing (signed)
+_RB_SS_XY_BELL = -0.10 * REDBALL_SS_STRENGTH   # narrower at mid-air (signed)
+_RB_SS_XY_IMP  =  0.40 * REDBALL_SS_STRENGTH   # wider at takeoff/landing
+
 # Forth-side constants matching cube_world_position():
 #   X = SQRT2 * CUBE_SIZE * (col - row/2)         = 2.82843 * (col - row*0.5)
 #   Y = SQRT2 * (CUBE_SIZE/2) * (NUM_ROWS - 1 - row) = 1.41421 * (6 - row)
@@ -933,6 +941,25 @@ def redball_script(k):
         f"swap dup 1.0 swap - * 8.0 * +\n"
         # write Z.                                                   ( z_final -- )
         f"3011 write-mailbox\n"
+        # ── Stretch-and-squash (subdued, ~50% player intensity).
+        # Snap to identity on the landing tick; otherwise drive scale from t_raw.
+        # Mailboxes 3040/3041/3042 = X/Y/Z_SCALE (per-actor system slots,
+        # wired through RenderActor3D — same path the player uses).
+        f"{mb_cd} read-mailbox 0 <= if "
+        f"1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
+        f"else "
+        # t_raw = (HOP_TICKS - cd_new) / DENOM    ( -- t_raw )
+        f"{REDBALL_HOP_TICKS} {mb_cd} read-mailbox - {hop_denom_f} / "
+        # imp = (2t-1)², bell = 4*t*(1-t)         ( t_raw -- imp bell )
+        f"dup 2.0 * 1.0 - dup * "                                          # ( t imp )
+        f"swap dup 1.0 swap - 4.0 * * "                                    # ( imp bell )
+        # Z_SCALE = 1 + Z_BELL*bell + Z_IMP*imp   (Z_IMP < 0; bonus + penalty + 1)
+        # Stack starts ( imp bell ); compute then write 3042. Keep ( imp bell ) for XY.
+        f"over {_RB_SS_Z_IMP} * over {_RB_SS_Z_BELL} * + 1.0 + 3042 write-mailbox "
+        # XY_SCALE = 1 + XY_BELL*bell + XY_IMP*imp ; consume ( imp bell ).
+        f"{_RB_SS_XY_BELL} * swap {_RB_SS_XY_IMP} * + 1.0 + "             # ( xy_scale )
+        f"dup 3040 write-mailbox 3041 write-mailbox "
+        f"then\n"
         # ── Contact check (every frame). Same (row, col) as player → FALL_DEATH.
         f"{mb_row} read-mailbox 400 read-mailbox = if "
         f"{mb_col} read-mailbox 401 read-mailbox = if "
