@@ -229,6 +229,19 @@ uses for physics / triggers / messaging but draws nothing.
 > `level-design-troubleshooting.md` § "Infrastructure actors render as
 > random-coloured debug cubes" for the full diagnosis.
 
+> ⚠️ **OAD schema choice silently controls rendering.** A `Mesh`-type actor
+> with `Mass=0`, `Mobility=Anchored`, `Visibility Mailbox=1`, and a valid
+> `.iff` mesh will still **not appear** if its `wf_schema_path` is wrong
+> for a static prop. Use `STATPLAT_OAD` for anchored decorative actors —
+> the same schema cubes use. `ENEMY_OAD` (the Enemy class) silently drops
+> single-instance script-less actors from the render set; the actor takes
+> a slot in `Level::Level: leveldata=..., object count = N` and consumes
+> a mailbox bank, but never creates a `RenderActor3D`. Diagnose by
+> comparing `grep -c RenderActor3DAnimates wf_game.log` to your expected
+> animated-actor count — one short means a schema mismatch on an actor
+> you intended to render. See [docs/plans/2026-05-11-qbert-player-death-and-curse-bubble.md](plans/2026-05-11-qbert-player-death-and-curse-bubble.md) § "2026-05-12 implementation notes" for the
+> full incident.
+
 Wire-displayed objects in Blender should be everything that doesn't render
 in-engine (`Mesh` / `Matte` excluded). The `display_type='WIRE'` automation
 below applies to all non-rendering classes.

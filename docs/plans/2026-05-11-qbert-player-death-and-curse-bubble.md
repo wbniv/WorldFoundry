@@ -1,7 +1,23 @@
 # Plan — Q✱bert player death animation + curse bubble
 
 **Date:** 2026-05-11
-**Status:** Not started
+**Status:** Implemented (commit `e3a50b4`, 2026-05-12) — Forth wiring complete; visual fine-detail verification pending higher-res viewport.
+
+## 2026-05-12 implementation notes
+
+Built end-to-end on a verified plumbing staircase:
+
+- **Step 1 ✓** — bridge writes to player X/Y/Z_SCALE (mb 3040/3041/3042) visibly stretch him.
+- **Step 2 ✓** — bridge writes to bubble actor's X/Y/Z_POS (mb 3009/3010/3011) visibly move it.
+- **Step 3 ✓** — `write-actor-mailbox 30` from inside the player's Forth script visibly relocates the bubble.
+
+**Schema fix — critical lesson:** the curse bubble must use `STATPLAT_OAD` (cube schema), **not** `ENEMY_OAD`. With ENEMY_OAD the actor loads, takes a slot in the object table (count 59), but is silently dropped from the render set (`RenderActor3DAnimates` count stuck at 41 instead of 42). Visible only by counting renders or by the bubble simply not appearing despite valid position writes. Direct verification: switched the schema, RenderActor3DAnimates count went to 42 and the white sphere appeared above the apex on the next build.
+
+**Actor index hardcoded:** the player Forth script writes to actor `30` (the bubble's index in scene-collection order). If any new actor is added before the bubble, update the literal in `blender_create_qbert.py` at the death-state-machine writes alongside `CURSE_BUBBLE_ACTOR_IDX`.
+
+**Visual verification limitation:** at the engine's 640×480 viewport, fine scale changes (0.85× → 1.20× → 0.20×) on a small-mesh player are below single-screenshot detection threshold. The death animation runs (no zForth errors logged; Forth syntax was kept paren-free for zForth compatibility), but a definitive eyeball pass needs either a larger viewport or video capture at higher fps.
+
+
 
 ## Context
 
