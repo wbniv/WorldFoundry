@@ -1286,76 +1286,78 @@ print(f"[qbert] Created green ball (actor index {GB_ACTOR_IDX}); "
       f"mailbox base {GB_MB_BASE}; freeze {GB_FREEZE_TICKS} ticks on contact")
 
 # ── 5c.6. Slick & Sam — cube-flippers ─────────────────────────────────────────
-# Hat-on-body proxy mesh: small icosphere body + flat disc "hat" on top. Two
-# materials (hat coloured, body white). Slick = green hat; Sam = red hat.
-def _flipper_build_mesh():
-    """Return (verts, faces, hat_face_indices) for the hat-on-body proxy."""
-    verts = []
-    faces = []
-    # Body: scaled redball icosphere centred so its bottom sits at z = -0.5.
-    body_scale = 0.45
-    body_squash_z = 0.7   # slight vertical squash so it reads as a body, not a ball
-    body_offset_z = -0.05 # body centre slightly below origin
-    body_base = len(verts)
-    for x, y, z in _REDBALL_VERTS:
-        verts.append((x * body_scale, y * body_scale,
-                      z * body_scale * body_squash_z + body_offset_z))
-    for a, b, c in _REDBALL_FACES:
-        faces.append((body_base + a, body_base + b, body_base + c))
-    body_face_count = len(_REDBALL_FACES)
-    # Hat: flat cylinder, radius 0.55, half-thickness 0.05, sitting on top
-    # of the body at z ≈ +0.30.
-    hat_radius = 0.55
-    hat_half_h = 0.05
-    hat_z = 0.32
-    sides = 12
-    hat_base = len(verts)
-    for i in range(sides):
-        a = 2.0 * math.pi * i / sides
-        x = hat_radius * math.cos(a)
-        y = hat_radius * math.sin(a)
-        verts.append((x, y, hat_z + hat_half_h))
-        verts.append((x, y, hat_z - hat_half_h))
-    top_c = len(verts); verts.append((0.0, 0.0, hat_z + hat_half_h))
-    bot_c = len(verts); verts.append((0.0, 0.0, hat_z - hat_half_h))
-    hat_faces_start = len(faces)
-    for i in range(sides):
-        j = (i + 1) % sides
-        ti, bi = hat_base + 2 * i, hat_base + 2 * i + 1
-        tj, bj = hat_base + 2 * j, hat_base + 2 * j + 1
-        faces.append((top_c, ti, tj))
-        faces.append((bot_c, bj, bi))
-        faces.append((ti, bi, bj))
-        faces.append((ti, bj, tj))
-    hat_face_indices = list(range(hat_faces_start, len(faces)))
-    return verts, faces, hat_face_indices
-
-_FLIPPER_VERTS, _FLIPPER_FACES, _FLIPPER_HAT_FACE_INDICES = _flipper_build_mesh()
-
+# Humanoid cube-flipper silhouette: small white body (icosphere) + coloured
+# flat-disc hat + two white eyes with black pupils on the +X face + two flat-
+# oval feet at the bottom. Slick = green hat; Sam = blue hat (arcade-faithful).
+# Built per-actor via bpy.ops primitives + join (matches the player-mesh
+# pattern in _build_qbert_player_mesh); per-actor material instances so the
+# hat colour is the only delta between Slick and Sam.
 
 def _build_flipper_actor(name, mesh_name, hat_rgb, location):
-    """Build a flipper Blender object + mesh (with 2 materials: body white,
-    hat coloured). Returns the actor; the caller wires script + schema."""
-    mesh = bpy.data.meshes.new(mesh_name)
-    mesh.from_pydata(_FLIPPER_VERTS, [], _FLIPPER_FACES)
-    mesh.update()
-    # Body material (white).
-    body_mat = bpy.data.materials.new(f'{mesh_name}_body')
-    body_mat.use_nodes = True
-    body_mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value = (1.0, 1.0, 1.0, 1.0)
-    mesh.materials.append(body_mat)  # slot 0
-    # Hat material (coloured).
-    hat_mat = bpy.data.materials.new(f'{mesh_name}_hat')
-    hat_mat.use_nodes = True
-    hat_mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value = (*hat_rgb, 1.0)
-    mesh.materials.append(hat_mat)   # slot 1
-    # Assign hat faces to slot 1.
-    for fi in _FLIPPER_HAT_FACE_INDICES:
-        mesh.polygons[fi].material_index = 1
-    obj = bpy.data.objects.new(name, mesh)
-    obj.location = location
-    scene.collection.objects.link(obj)
-    return obj
+    """Build a flipper humanoid mesh + Blender object. Returns the actor;
+    caller wires schema + script.
+
+    Components (each a bpy.ops primitive, joined into one mesh):
+      - Body: white icosphere, scale ~0.45, slight Z-squash. Centre at z=0.
+      - Hat: 12-sided flat cylinder, radius 0.55, depth 0.1. Top of body.
+      - Eyes: two white UV-spheres on the +X face of the body.
+      - Pupils: two smaller black spheres in front of the eyes.
+      - Feet: two flat ovals (scaled UV-spheres) at the bottom, dark grey.
+    """
+    mat_body  = _make_principled_material(f'{mesh_name}_body',  (1.00, 1.00, 1.00))
+    mat_hat   = _make_principled_material(f'{mesh_name}_hat',   hat_rgb)
+    mat_eye   = _make_principled_material(f'{mesh_name}_eye',   (1.00, 1.00, 1.00))
+    mat_pupil = _make_principled_material(f'{mesh_name}_pupil', (0.05, 0.05, 0.05))
+    mat_feet  = _make_principled_material(f'{mesh_name}_feet',  (0.20, 0.20, 0.20))
+
+    parts = []  # (object, material)
+
+    # Body — icosphere subdiv 1 (42 verts), squashed in Z to read as a torso.
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.45, location=(0, 0, 0))
+    bpy.context.object.scale = (1.0, 1.0, 0.75)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    parts.append((bpy.context.object, mat_body))
+
+    # Hat — flat 12-sided cylinder on top.
+    bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.55, depth=0.10, location=(0, 0, 0.37))
+    parts.append((bpy.context.object, mat_hat))
+
+    # Eyes — two small white UV-spheres on +X face of the body (~24 verts each).
+    for y in (-0.16, 0.16):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.09, segments=6, ring_count=4, location=(0.30, y, 0.12))
+        parts.append((bpy.context.object, mat_eye))
+
+    # Pupils — smaller black spheres in front of the eyes.
+    for y in (-0.16, 0.16):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.045, segments=5, ring_count=3, location=(0.36, y, 0.12))
+        parts.append((bpy.context.object, mat_pupil))
+
+    # Feet — flat ovals at the bottom (squashed UV-spheres), straddling ±Y.
+    for y in (-0.22, 0.22):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.18, segments=6, ring_count=3, location=(0.04, y, -0.34))
+        bpy.context.object.scale = (1.3, 1.0, 0.35)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((bpy.context.object, mat_feet))
+
+    # Assign each part's material; flat-shade everything for a chunky read.
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for poly in obj.data.polygons:
+            poly.material_index = 0
+            poly.use_smooth = False
+
+    # Join into one mesh, with the body as the active/target.
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    body.name = name
+    body.data.name = mesh_name
+    body.location = location
+    return body
 
 
 _pre_slick_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
@@ -1378,7 +1380,7 @@ _pre_sam_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY)
 SAM_ACTOR_IDX = _pre_sam_actor_count + 1
 
 _sam = _build_flipper_actor('sam', 'sam_mesh',
-                            hat_rgb=(0.85, 0.10, 0.10),
+                            hat_rgb=(0.05, 0.55, 0.12),
                             location=(0.0, 0.0, REDBALL_PARK_Z))
 _sam['wf_schema_path']         = ENEMY_OAD
 _sam['wf_Mesh Name']           = 'sam_mesh.iff'
