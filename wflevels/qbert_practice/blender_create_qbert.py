@@ -1370,8 +1370,8 @@ _pre_slick_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KE
 SLICK_ACTOR_IDX = _pre_slick_actor_count + 1
 
 _slick = _build_flipper_actor('slick', 'slick_mesh',
-                              body_rgb=(0.10, 0.85, 0.20),
-                              top_rgb=(1.00, 0.55, 0.10),
+                              body_rgb=(0.13, 0.73, 0.19),   # arcade #21BA31 (HG101-04)
+                              top_rgb=(1.00, 0.47, 0.13),    # arcade #FF7721
                               location=(0.0, 0.0, REDBALL_PARK_Z))
 _slick['wf_schema_path']         = ENEMY_OAD
 _slick['wf_Mesh Name']           = 'slick_mesh.iff'
@@ -1387,8 +1387,8 @@ _pre_sam_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY)
 SAM_ACTOR_IDX = _pre_sam_actor_count + 1
 
 _sam = _build_flipper_actor('sam', 'sam_mesh',
-                            body_rgb=(0.05, 0.55, 0.12),
-                            top_rgb=(0.95, 0.40, 0.05),
+                            body_rgb=(0.08, 0.55, 0.13),    # darker green so Sam reads distinct from Slick
+                            top_rgb=(0.90, 0.38, 0.08),     # slightly redder orange
                             location=(0.0, 0.0, REDBALL_PARK_Z))
 _sam['wf_schema_path']         = ENEMY_OAD
 _sam['wf_Mesh Name']           = 'sam_mesh.iff'
@@ -1482,7 +1482,7 @@ _pre_ugg_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY)
 UGG_ACTOR_IDX = _pre_ugg_actor_count + 1
 
 _ugg = _build_climber_actor('ugg', 'ugg_mesh',
-                            body_rgb=(0.95, 0.25, 0.55),
+                            body_rgb=(0.73, 0.00, 0.73),    # arcade #BA00BA — pure magenta
                             location=(0.0, 0.0, REDBALL_PARK_Z))
 _ugg['wf_schema_path']         = ENEMY_OAD
 _ugg['wf_Mesh Name']           = 'ugg_mesh.iff'
@@ -1498,7 +1498,7 @@ _pre_ww_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
 WW_ACTOR_IDX = _pre_ww_actor_count + 1
 
 _ww = _build_climber_actor('wrongway', 'wrongway_mesh',
-                           body_rgb=(0.85, 0.15, 0.45),
+                           body_rgb=(0.73, 0.00, 0.73),     # same magenta as Ugg (arcade sprites are identical; differ only by which side they climb)
                            location=(0.0, 0.0, REDBALL_PARK_Z))
 _ww['wf_schema_path']         = ENEMY_OAD
 _ww['wf_Mesh Name']           = 'wrongway_mesh.iff'
@@ -1754,9 +1754,9 @@ def _build_coily_snake_actor(name, mesh_name, location):
       - 2 white UV-sphere eyes on +X face of the head.
       - 2 small black UV-sphere pupils in front of the eyes.
     """
-    # Arcade Coily snake is closer to magenta than deep purple — see
-    # docs/plans/screenshots/qbert-arcade-ref-coily-snake.png.
-    mat_body  = _make_principled_material(f'{mesh_name}_body',  (0.85, 0.15, 0.70))
+    # Arcade Coily snake is pure magenta (#BA00BA = 186, 0, 186), pixel-
+    # sampled from docs/plans/screenshots/qbert-arcade-hg101-04.png.
+    mat_body  = _make_principled_material(f'{mesh_name}_body',  (0.73, 0.00, 0.73))
     mat_eye   = _make_principled_material(f'{mesh_name}_eye',   (1.00, 1.00, 1.00))
     mat_pupil = _make_principled_material(f'{mesh_name}_pupil', (0.05, 0.05, 0.05))
 
