@@ -17,9 +17,17 @@ This plan upgrades the three remaining enemy silhouettes to arcade-recognisable 
 
 Reference comes from **MAME screenshots and web reference images**, not from ROM sprite extraction. Pixel-tile extraction adds no value for 3D-mesh authoring — we just need the silhouette and the palette, both of which a screenshot delivers directly.
 
-**Higher-res reference search outcome (commit `7ebac47`):** the arcade game itself rendered at 240×256, so "higher res" is a category error — every authentic source is the same native resolution. Best frames sourced from [Hardcore Gaming 101](http://www.hardcoregaming101.net/qbert/) (saved as `qbert-arcade-hg101-{03,04,05}.png`) and the [Wikipedia article infobox](https://en.wikipedia.org/wiki/Q*bert) (`qbert-arcade-wikipedia.png`). [HG101-04](screenshots/qbert-arcade-hg101-04.png) turned out to be near-ideal — every enemy visible together at arcade-native resolution, allowing programmatic pixel-sampling of canonical RGB values. [The Spriters Resource](https://www.spriters-resource.com/arcade/qbert/) was queried but blocks direct fetch behind Cloudflare; useful for manual reference but not for scripted extraction.
+**Higher-res reference search outcome (commit `7ebac47`):** the arcade game itself rendered at 240×256, so "higher res" is a category error — every authentic source is the same native resolution. Best frames sourced from [Hardcore Gaming 101](http://www.hardcoregaming101.net/qbert/) and the [Wikipedia article infobox](https://en.wikipedia.org/wiki/Q*bert). [The Spriters Resource](https://www.spriters-resource.com/arcade/qbert/) was queried but blocks direct fetch behind Cloudflare; useful for manual reference but not for scripted extraction.
 
-Reference-sheet crops per-enemy (zoomed 6× nearest-neighbour) live at `docs/plans/screenshots/qbert-arcade-ref-{slick-sam,ugg-wrongway,coily-egg,coily-snake,discs}.png`.
+**Gold reference — HG101-04** (L2R1 mid-gameplay; every enemy visible together at arcade-native resolution, allowing programmatic pixel-sampling of canonical RGB values):
+
+![Arcade Q*bert L2R1 — Slick (green/orange, left), Sam (centre), Coily snake (magenta coil, right), Wrong-Way (magenta climber, mid-bottom), Q*bert (orange, top-right), spinning discs at edges](screenshots/qbert-arcade-hg101-04.png)
+
+**Secondary reference — Wikipedia infobox** (L1R1; Coily-snake-in-motion clearly visible):
+
+![Arcade Q*bert L1R1 from Wikipedia — Coily coiled magenta snake near apex, red ball mid-left, Q*bert on cube top](screenshots/qbert-arcade-wikipedia.png)
+
+Per-enemy crop sheets (each crop zoomed 6× nearest-neighbour from the sources above) are embedded inline in their respective phase sections below.
 
 | Enemy | Arcade silhouette + colour (post pixel-sampling) |
 |---|---|
@@ -82,8 +90,13 @@ Each phase is self-contained: one mesh builder swap, one rebuild, one capture fo
 
 **Status:** Done — Blender mesh + build pipeline green; in-engine verify pending capture.
 
-![Slick (left, lighter green) and Sam (right, slightly darker green) — humanoid mesh with hat, eyes with pupils, and feet](screenshots/qbert-slick-sam-mesh-2026-05-11.png)
-*Slick & Sam rest-pose mesh, Blender EEVEE render. White icosphere body, 12-sided cylinder hat, white-sphere eyes with black-sphere pupils, flat-oval feet.*
+**Arcade reference** (6× zoom from L2R2 and L2R1 — Slick clearly visible as a green-bodied humanoid with an orange head-dome and white eye-pixels):
+
+![Arcade Slick/Sam — green body with orange dome on top, white eyes, dark feet](screenshots/qbert-arcade-ref-slick-sam.png)
+
+**3D mesh** (rest pose, Blender EEVEE):
+
+![Slick (left) and Sam (right) — green body, orange flat-cylinder dome, white-sphere eyes with black-sphere pupils, flat-oval feet](screenshots/qbert-slick-sam-mesh-2026-05-11.png)
 
 Goal: cube-flipper humanoid silhouette.
 
@@ -101,8 +114,13 @@ Goal: cube-flipper humanoid silhouette.
 
 **Status:** Done — Blender mesh + build pipeline green; in-engine Escher-tip verify pending capture.
 
-![Ugg (left, orange) and Wrong-Way (right, purple) — upright rest pose with body, smaller head, big eyes with pupils, flat feet](screenshots/qbert-ugg-wrongway-mesh-2026-05-11.png)
-*Ugg & Wrong-Way rest-pose mesh, Blender EEVEE render. The engine applies a DELTA_PITCH ±0.25 rev + DELTA_YAW 0.5/0 rev at runtime to tip these onto the cube's side face — see [2026-05-11-qbert-ugg-wrongway.md](2026-05-11-qbert-ugg-wrongway.md).*
+**Arcade reference** (6× zoom from L1R3; the right-low crop shows the climber clearly on a cube's side face, magenta body with white eye-pixels):
+
+![Arcade Ugg/Wrong-Way — magenta climber body on side face of cube, white eyes](screenshots/qbert-arcade-ref-ugg-wrongway.png)
+
+**3D mesh** (upright rest pose; runtime engine rotation tips it onto the cube side face — see [2026-05-11-qbert-ugg-wrongway.md](2026-05-11-qbert-ugg-wrongway.md)):
+
+![Ugg (left) and Wrong-Way (right) — magenta body, smaller head, big white eyes with black pupils, flat feet](screenshots/qbert-ugg-wrongway-mesh-2026-05-11.png)
 
 Goal: humanoid climber that reads as "creature standing on the side of a cube" after the Escher pitch+yaw rotation.
 
@@ -121,8 +139,17 @@ Goal: humanoid climber that reads as "creature standing on the side of a cube" a
 
 **Status:** Done — Blender mesh + build pipeline green; in-engine verify pending capture.
 
-![Coily egg (left, elongated icosphere) and Coily snake (right, 4 tapered segments with head + eyes + pupils)](screenshots/qbert-coily-mesh-2026-05-11.png)
-*Coily egg + snake rest-pose mesh, Blender EEVEE render. Egg: subdiv-1 icosphere scaled (0.72, 0.72, 1.30). Snake: 4 icosphere segments stacked along Z with radii (0.22, 0.30, 0.38, 0.50) bottom→top, plus white eye-spheres and black pupils on the head.*
+**Arcade reference — Coily egg** (6× zoom from L1R3; purple/magenta sphere, no face):
+
+![Arcade Coily egg — purple sphere on cube top](screenshots/qbert-arcade-ref-coily-egg.png)
+
+**Arcade reference — Coily snake** (6× zoom from L2R1 and L2R2; magenta coiled body with eyes on the head). Note: the arcade snake is *coiled* (spiral), while our 3D interpretation is a tapered *vertical stack* — see Out of scope.
+
+![Arcade Coily snake — magenta segments with face-pixels](screenshots/qbert-arcade-ref-coily-snake.png)
+
+**3D mesh** (rest pose; egg left, snake right):
+
+![Coily egg (left, elongated icosphere) and Coily snake (right, 4 tapered magenta segments with head + eyes + pupils)](screenshots/qbert-coily-mesh-2026-05-11.png)
 
 Goal: visibly snake-like Coily; egg distinct from a plain ball.
 
