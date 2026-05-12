@@ -95,20 +95,24 @@ Goal: humanoid climber that reads as "creature standing on the side of a cube" a
 
 ### Phase C — Coily (egg + snake)
 
+**Status:** Done — Blender mesh + build pipeline green; in-engine verify pending capture.
+
+![Coily egg (left, elongated icosphere) and Coily snake (right, 4 tapered segments with head + eyes + pupils)](screenshots/qbert-coily-mesh-2026-05-11.png)
+*Coily egg + snake rest-pose mesh, Blender EEVEE render. Egg: subdiv-1 icosphere scaled (0.72, 0.72, 1.30). Snake: 4 icosphere segments stacked along Z with radii (0.22, 0.30, 0.38, 0.50) bottom→top, plus white eye-spheres and black pupils on the head.*
+
 Goal: visibly snake-like Coily; egg distinct from a plain ball.
 
 **Coily egg:**
 
-1. Replace the stacked-icosphere variant with a single elongated icosphere (Z scale ~1.3, XY scale ~0.7). Material flashes purple/red as today (3.75 Hz oscillator already in place at lines 1564–1568) — no script change.
-2. ~42 verts.
+1. Replace the unit icosphere with an elongated variant: `_EGG_VERTS = [(x*0.72, y*0.72, z*1.30) for (x,y,z) in _REDBALL_VERTS]`. Same face indices, so 42 verts / 80 faces. Material flashes purple/red as today (3.75 Hz oscillator at lines 1564–1568) — no script change.
 
 **Coily snake:**
 
-1. Replace 4-equal-stack with a tapered stack of **3 body balls + 1 head**:
-   - Head: larger icosphere (radius ~0.50) on top, with two eye spheres on the +X face and an optional small antenna/tongue cone.
-   - 3 body segments: radii 0.40, 0.32, 0.24, decreasing downward.
-2. Total vert budget target: ~130 verts (head with eyes adds ~30 verts).
-3. Material: purple body, white+black eyes. Optional bright red antenna/tongue accent.
+1. Replace `_coily_build_mesh()` (and the shared `_coily_mesh` datablock + assignment) with a per-actor `_build_coily_snake_actor()` builder that mirrors the Slick/Sam/Ugg/WW primitive pattern.
+2. Stack 4 icosphere segments at the same `_COILY_SEG_SPACING` as before (preserves the actor-positioning math via `_COILY_HALF_HEIGHT`), but with per-segment radii in `_COILY_SEG_RADII = [0.22, 0.30, 0.38, 0.50]` bottom→top — tail is small, head is large. Each segment is Z-squashed to `_COILY_SEG_HEIGHT / radius` so heights stay consistent.
+3. Add eyes on the head (top segment): two white UV-spheres at `(0.32, ±0.18, head_z)` + two black-sphere pupils at `(0.40, ±0.18, head_z)`.
+4. Material: purple body, white+black eyes.
+5. Total verts: ~150 (4 icospheres × 12 verts + 2 eye spheres + 2 pupils).
 
 ## Verification
 

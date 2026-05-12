@@ -1642,11 +1642,16 @@ def coily_egg_script():
         f"then\n"
     )
 
-# Egg mesh: same icosphere geometry as the red ball, but with a purple material.
-# Different mesh datablock so the wf_blender exporter emits a separate
-# coilyegg.iff with its own MATL.
+# Egg mesh: elongated icosphere (taller than wide) — reads as an egg, not a
+# plain ball. Same vertex count as the red ball (42 verts / 80 faces).
+_EGG_XY_SCALE = 0.72
+_EGG_Z_SCALE  = 1.30
+_EGG_VERTS = [
+    (x * _EGG_XY_SCALE, y * _EGG_XY_SCALE, z * _EGG_Z_SCALE)
+    for (x, y, z) in _REDBALL_VERTS
+]
 _egg_mesh = bpy.data.meshes.new('coily_egg_mesh')
-_egg_mesh.from_pydata(_REDBALL_VERTS, [], _REDBALL_FACES)
+_egg_mesh.from_pydata(_EGG_VERTS, [], _REDBALL_FACES)
 _egg_mesh.update()
 _egg_mat = bpy.data.materials.new('coily_egg_purple')
 _egg_mat.use_nodes = True
@@ -1700,13 +1705,17 @@ _COILY_SS_Z_IMP   = -0.40     # = player          → takeoff/landing Z = 0.60
 _COILY_SS_XY_BELL = -0.10     # = player          → apex XY = 0.90
 _COILY_SS_XY_IMP  =  0.40     # = player          → takeoff/landing XY = 1.40
 
-# Coily mesh: 4 purple-icosahedron segments stacked vertically, slightly
-# flattened. Each segment is a subdiv-0 icosahedron (20 faces). Total: 48
-# verts / 80 faces — same poly budget as the red ball.
+# Coily mesh: 4 purple-icosahedron segments stacked vertically, tapering from
+# a larger head at the top (with eyes + pupils) down to a smaller tail at the
+# bottom. Reads as "snake stretching up to look around" instead of the prior
+# uniform stack of balls. Each body segment is a subdiv-0 icosahedron (20
+# faces); the head adds 2 small UV-sphere eyes + 2 black-sphere pupils.
 _COILY_SEG_COUNT   = 4
-_COILY_SEG_RADIUS  = 0.40
-_COILY_SEG_HEIGHT  = 0.30   # half-height of each compressed segment
-_COILY_SEG_SPACING = 0.55   # vertical distance between segment centres
+# Per-segment XY radius, BOTTOM (tail) → TOP (head). Head is meaningfully
+# larger than the body balls — that's the personality.
+_COILY_SEG_RADII   = [0.22, 0.30, 0.38, 0.50]
+_COILY_SEG_HEIGHT  = 0.30   # half-height of each compressed segment (Z-squash)
+_COILY_SEG_SPACING = 0.55   # vertical distance between segment centres (unchanged)
 # Snake half-height: from center to topmost segment top
 # = ((SEG_COUNT-1)/2) * SPACING + SEG_HEIGHT
 _COILY_HALF_HEIGHT = ((_COILY_SEG_COUNT - 1) * _COILY_SEG_SPACING) / 2 + _COILY_SEG_HEIGHT
@@ -1718,61 +1727,76 @@ _COILY_Z_BASE = CUBE_BASE_Z + CUBE_SIZE * (NUM_ROWS - 1) + _COILY_CENTRE_OFFSET_
 _COILY_SNAKE_HOP_TICKS = 24   # slower than player (12), faster than nothing
 _COILY_SNAKE_HOP_DENOM_F = float(_COILY_SNAKE_HOP_TICKS - 1)
 
-def _coily_build_mesh():
-    verts = []
-    faces = []
-    # Base icosahedron pattern (12 verts), Z-flattened.
-    base_phi = (1.0 + math.sqrt(5.0)) / 2.0
-    base = [
-        ( 0.0,  1.0,  base_phi),
-        ( 0.0,  1.0, -base_phi),
-        ( 0.0, -1.0,  base_phi),
-        ( 0.0, -1.0, -base_phi),
-        ( 1.0,  base_phi,  0.0),
-        ( 1.0, -base_phi,  0.0),
-        (-1.0,  base_phi,  0.0),
-        (-1.0, -base_phi,  0.0),
-        ( base_phi,  0.0,  1.0),
-        ( base_phi,  0.0, -1.0),
-        (-base_phi,  0.0,  1.0),
-        (-base_phi,  0.0, -1.0),
-    ]
-    base_faces = [
-        (0, 2, 8),  (0, 8, 4),  (0, 4, 6),  (0, 6, 10), (0, 10, 2),
-        (3, 1, 9),  (3, 9, 5),  (3, 5, 7),  (3, 7, 11), (3, 11, 1),
-        (2, 5, 8),  (8, 5, 9),  (8, 9, 4),  (4, 9, 1),  (4, 1, 6),
-        (6, 1, 11), (6, 11, 10),(10, 11, 7),(10, 7, 2), (2, 7, 5),
-    ]
-    # Normalise each base vert to unit sphere, then scale: X/Y by SEG_RADIUS,
-    # Z by SEG_HEIGHT (flatten).
-    norm_factor = math.sqrt(1.0 + base_phi * base_phi)
-    # Stack along Z; segment K centred at (0, 0, K * SEG_SPACING - centre).
-    # Centre the whole stack on the actor origin so the actor's location
-    # specifies the geometric centre of the snake.
+# Eye placement on the head (top segment). Head centre is at the top of the
+# stack — the eyes sit on its +X face.
+_COILY_HEAD_Z = ((_COILY_SEG_COUNT - 1) * _COILY_SEG_SPACING) / 2.0   # same as topmost seg_z
+_COILY_EYE_OFFSET_X = 0.32
+_COILY_EYE_OFFSET_Y = 0.18
+_COILY_EYE_RADIUS   = 0.11
+_COILY_PUPIL_OFFSET_X = 0.40
+_COILY_PUPIL_RADIUS   = 0.055
+
+
+def _build_coily_snake_actor(name, mesh_name, location):
+    """Build the Coily snake mesh + Blender object via primitives.
+
+    Components (joined):
+      - 4 tapered icosphere body segments (radii from _COILY_SEG_RADII),
+        stacked at _COILY_SEG_SPACING along Z, Z-squashed to _COILY_SEG_HEIGHT.
+      - 2 white UV-sphere eyes on +X face of the head.
+      - 2 small black UV-sphere pupils in front of the eyes.
+    """
+    mat_body  = _make_principled_material(f'{mesh_name}_body',  (0.45, 0.08, 0.75))
+    mat_eye   = _make_principled_material(f'{mesh_name}_eye',   (1.00, 1.00, 1.00))
+    mat_pupil = _make_principled_material(f'{mesh_name}_pupil', (0.05, 0.05, 0.05))
+
+    parts = []
+
+    # Stack 4 tapered segments. Centre the stack on the actor origin so the
+    # actor's location specifies the geometric centre of the snake.
     stack_total_height = (_COILY_SEG_COUNT - 1) * _COILY_SEG_SPACING
     z_offset = -stack_total_height / 2.0
     for seg in range(_COILY_SEG_COUNT):
         seg_z = z_offset + seg * _COILY_SEG_SPACING
-        base_idx = len(verts)
-        for x, y, z in base:
-            verts.append((
-                (x / norm_factor) * _COILY_SEG_RADIUS,
-                (y / norm_factor) * _COILY_SEG_RADIUS,
-                (z / norm_factor) * _COILY_SEG_HEIGHT + seg_z,
-            ))
-        for a, b, c in base_faces:
-            faces.append((base_idx + a, base_idx + b, base_idx + c))
-    return verts, faces
+        radius = _COILY_SEG_RADII[seg]
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=radius, location=(0, 0, seg_z))
+        # Z-squash to flatten each segment so the chain reads as articulated.
+        bpy.context.object.scale = (1.0, 1.0, _COILY_SEG_HEIGHT / radius)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((bpy.context.object, mat_body))
 
-_COILY_VERTS, _COILY_FACES = _coily_build_mesh()
-_coily_mesh = bpy.data.meshes.new('coily_snake_mesh')
-_coily_mesh.from_pydata(_COILY_VERTS, [], _COILY_FACES)
-_coily_mesh.update()
-_coily_mat = bpy.data.materials.new('coily_snake_purple')
-_coily_mat.use_nodes = True
-_coily_bsdf = _coily_mat.node_tree.nodes.get('Principled BSDF')
-_coily_bsdf.inputs['Base Color'].default_value = (0.45, 0.08, 0.75, 1.0)
-_coily_mesh.materials.append(_coily_mat)
+    # Eyes on the head (top segment).
+    head_z = z_offset + (_COILY_SEG_COUNT - 1) * _COILY_SEG_SPACING
+    for y in (-_COILY_EYE_OFFSET_Y, +_COILY_EYE_OFFSET_Y):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=_COILY_EYE_RADIUS, segments=6, ring_count=4,
+            location=(_COILY_EYE_OFFSET_X, y, head_z))
+        parts.append((bpy.context.object, mat_eye))
+
+    # Pupils slightly in front of and inside the eyes.
+    for y in (-_COILY_EYE_OFFSET_Y, +_COILY_EYE_OFFSET_Y):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=_COILY_PUPIL_RADIUS, segments=5, ring_count=3,
+            location=(_COILY_PUPIL_OFFSET_X, y, head_z))
+        parts.append((bpy.context.object, mat_pupil))
+
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for poly in obj.data.polygons:
+            poly.material_index = 0
+            poly.use_smooth = False
+
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    body.name = name
+    body.data.name = mesh_name
+    body.location = location
+    return body
 
 _pre_snake_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
 COILY_SNAKE_ACTOR_IDX = _pre_snake_actor_count + 1
@@ -1887,9 +1911,8 @@ def coily_snake_script():
         f"then\n"
     )
 
-_snake = bpy.data.objects.new('coily_snake', _coily_mesh)
-_snake.location = (0.0, 0.0, REDBALL_PARK_Z)
-scene.collection.objects.link(_snake)
+_snake = _build_coily_snake_actor('coily_snake', 'coily_snake_mesh',
+                                   location=(0.0, 0.0, REDBALL_PARK_Z))
 _snake['wf_schema_path']         = ENEMY_OAD
 _snake['wf_Mesh Name']           = 'coily_snake_mesh.iff'
 _snake['wf_original_mesh_name']  = 'coily_snake_mesh.iff'
@@ -1901,8 +1924,8 @@ _snake['wf_NumberOfLocalMailboxes'] = 0
 _snake['wf_Script']              = coily_snake_script()
 
 print(f"[qbert] Created Coily snake (actor index {COILY_SNAKE_ACTOR_IDX}); "
-      f"stacked {_COILY_SEG_COUNT}-segment mesh "
-      f"({len(_COILY_VERTS)} verts / {len(_COILY_FACES)} faces)")
+      f"tapered {_COILY_SEG_COUNT}-segment mesh with head + eyes; "
+      f"segment radii {_COILY_SEG_RADII}")
 
 # ── 5f. Spinning discs (Phase D — Coily-lure mechanic) ───────────────────────
 # Two flat purple-blue cylinders at the off-edge positions adjacent to the
