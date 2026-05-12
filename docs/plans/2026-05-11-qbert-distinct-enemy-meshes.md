@@ -13,7 +13,7 @@ Functionally the enemies are all in (see today's retro plans and the multi-enemy
 
 This plan upgrades the three remaining enemy silhouettes to arcade-recognisable 3D forms, following the established procedural-Blender-primitives pattern used by the player mesh.
 
-## Reference (arcade Q\*bert)
+## Reference (arcade Q✱bert)
 
 Reference comes from **MAME screenshots and web reference images**, not from ROM sprite extraction. Pixel-tile extraction adds no value for 3D-mesh authoring — we just need the silhouette and the palette, both of which a screenshot delivers directly. Save reference images to `docs/plans/screenshots/qbert-arcade-ref-*.png` as we collect them.
 
@@ -28,7 +28,7 @@ Reference comes from **MAME screenshots and web reference images**, not from ROM
 
 References:
 
-- [Wikipedia — Q\*bert](https://en.wikipedia.org/wiki/Q*bert) — enemy roster and visual descriptions.
+- [Wikipedia — Q✱bert](https://en.wikipedia.org/wiki/Q*bert) — enemy roster and visual descriptions.
 - Existing arcade-palette extraction work: [2026-05-04-qbert-arcade-palette-all-rounds.md](../investigations/2026-05-04-qbert-arcade-palette-all-rounds.md).
 
 ## Critical files
@@ -85,12 +85,12 @@ Goal: cube-flipper humanoid silhouette.
 
 1. Replace the shared-mesh `_flipper_build_mesh()` + `_build_flipper_actor()` pair with a single per-actor `_build_flipper_actor(name, mesh_name, hat_rgb, location)` that uses `bpy.ops.mesh.primitive_*` + `bpy.ops.object.join()` (matches the player-mesh pattern at [`_build_qbert_player_mesh`](../../wflevels/qbert_practice/blender_create_qbert.py)).
 2. Components:
-   - Body: icosphere subdiv 1 (42 verts), scale 0.45, Z-squash 0.75. White.
-   - Hat: 12-sided flat cylinder, radius 0.55, depth 0.10. Coloured per actor.
-   - **Eyes:** two small white UV-spheres on +X face of body, segments=6.
+   - Body: icosphere subdiv 2 (42 verts), scale 0.45, Z-squash 0.75. **Green** (arcade-faithful; see [qbert-arcade-ref-slick-sam.png](screenshots/qbert-arcade-ref-slick-sam.png)).
+   - Top dome: 16-sided flat cylinder, radius 0.55, depth 0.10. **Orange/yellow** — this is the creature's face dome, not a hat (the arcade sprite has an orange head sitting on a green body, which our 3D interpretation renders as a hat-shape on a body-sphere).
+   - **Eyes:** two small white UV-spheres on +X face of body.
    - **Pupils:** smaller black UV-spheres just in front of the eyes.
    - **Feet:** two flat ovals (scaled UV-spheres), straddling ±Y, dark grey.
-3. Hat colour: arcade has Slick & Sam **both green-hatted** ([L2R1 attract reference](screenshots/qbert-arcade-L2R1-early.png)). Distinguish via subtle brightness — Slick brighter `(0.10, 0.85, 0.20)`, Sam slightly darker `(0.05, 0.55, 0.12)`. (Original Python had Sam red `(0.85, 0.10, 0.10)` — arcade-wrong; fixed here.)
+3. Colours: arcade has Slick & Sam **both green-bodied + orange-domed**, visually near-identical. Distinguish via subtle palette delta — Slick: body `(0.10, 0.85, 0.20)` + dome `(1.00, 0.55, 0.10)`; Sam: body `(0.05, 0.55, 0.12)` + dome `(0.95, 0.40, 0.05)`. **Arcade-colour-correction note:** the initial Phase-A commit had body=white + hat=green, which inverted which part should be green; corrected here.
 4. Final mesh: **234 verts / 290 faces** per actor (subdiv-2 body 42v/80f + 16-sided hat + 8-seg-5-ring eyes + 6-seg-4-ring pupils + 8-seg-4-ring feet).
 
 ### Phase B — Ugg & Wrong-Way (side-of-pyramid climbers)
@@ -110,7 +110,7 @@ Goal: humanoid climber that reads as "creature standing on the side of a cube" a
    - **Pupils:** smaller black spheres in front of the eyes.
    - **Feet:** two flat ovals at the bottom, dark grey.
    - **Horns removed** — not arcade-faithful for either Ugg or Wrong-Way.
-3. Per-variant body colour: Ugg `(1.00, 0.55, 0.10)` orange, Wrong-Way `(0.55, 0.10, 0.85)` purple (preserved from prior code; arcade-faithful confirmation deferred to a colour-grading pass).
+3. Per-variant body colour: Ugg `(0.95, 0.25, 0.55)` magenta, Wrong-Way `(0.85, 0.15, 0.45)` pink-magenta. **Arcade-colour-correction note:** initial Phase-B commit had Ugg=orange, WW=purple; arcade reference ([qbert-arcade-ref-ugg-wrongway.png](screenshots/qbert-arcade-ref-ugg-wrongway.png)) shows both as pink/magenta — corrected here.
 4. Final mesh: **244 verts / 352 faces** per actor (subdiv-2 body + subdiv-2 head + 8-seg-5-ring eyes + 6-seg-4-ring pupils + 8-seg-4-ring feet).
 
 ### Phase C — Coily (egg + snake)
@@ -131,7 +131,7 @@ Goal: visibly snake-like Coily; egg distinct from a plain ball.
 1. Replace `_coily_build_mesh()` (and the shared `_coily_mesh` datablock + assignment) with a per-actor `_build_coily_snake_actor()` builder that mirrors the Slick/Sam/Ugg/WW primitive pattern.
 2. Stack 4 icosphere segments at the same `_COILY_SEG_SPACING` as before (preserves the actor-positioning math via `_COILY_HALF_HEIGHT`), but with per-segment radii in `_COILY_SEG_RADII = [0.22, 0.30, 0.38, 0.50]` bottom→top — tail is small, head is large. Each segment is Z-squashed to `_COILY_SEG_HEIGHT / radius` so heights stay consistent.
 3. Add eyes on the head (top segment): two white UV-spheres at `(0.32, ±0.18, head_z)` + two black-sphere pupils at `(0.40, ±0.18, head_z)`.
-4. Material: purple body, white+black eyes.
+4. Material: magenta body `(0.85, 0.15, 0.70)`, white+black eyes. (Initial commit used deep purple `(0.45, 0.08, 0.75)`; arcade ref shows the snake is closer to magenta — corrected here. Egg stays deep-purple since arcade egg also reads as purple-leaning.)
 5. Final mesh: **232 verts / 398 faces** (4 tapered subdiv-2 icosphere segments + 2 eyes + 2 pupils). Egg: **42 verts / 80 faces** (elongated icosphere).
 
 ## Verification
