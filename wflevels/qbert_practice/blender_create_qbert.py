@@ -1286,12 +1286,10 @@ print(f"[qbert] Created green ball (actor index {GB_ACTOR_IDX}); "
       f"mailbox base {GB_MB_BASE}; freeze {GB_FREEZE_TICKS} ticks on contact")
 
 # ── 5c.6. Slick & Sam — cube-flippers ─────────────────────────────────────────
-# Humanoid cube-flipper silhouette: small white body (icosphere) + coloured
-# flat-disc hat + two white eyes with black pupils on the +X face + two flat-
-# oval feet at the bottom. Slick = green hat; Sam = blue hat (arcade-faithful).
-# Built per-actor via bpy.ops primitives + join (matches the player-mesh
-# pattern in _build_qbert_player_mesh); per-actor material instances so the
-# hat colour is the only delta between Slick and Sam.
+# Humanoid cube-flipper silhouette: green icosphere body + spiky orange hair
+# cluster + two white eyes with black pupils + two flat-oval feet. Slick and
+# Sam differ only by slight body/hair colour shift. Built per-actor via
+# bpy.ops primitives + join.
 
 def _build_flipper_actor(name, mesh_name, body_rgb, top_rgb, location):
     """Build a flipper humanoid mesh + Blender object. Returns the actor;
@@ -1299,11 +1297,10 @@ def _build_flipper_actor(name, mesh_name, body_rgb, top_rgb, location):
 
     Components (each a bpy.ops primitive, joined into one mesh):
       - Body: green icosphere, scale ~0.45, slight Z-squash. Centre at z=0.
-        (Arcade-faithful: the green is the body, NOT a hat — see
-        docs/plans/screenshots/qbert-arcade-ref-slick-sam.png.)
-      - "Top": 12-sided flat cylinder on the body, radius 0.55, depth 0.10.
-        Orange/yellow — corresponds to the orange face-dome in the arcade
-        sprite (looks hat-like in 3D but is actually the creature's head).
+      - Hair: cluster of 7 orange cones radiating up + slightly out from the
+        top of the body — reads as spiky hair in arcade-sprite style
+        (docs/plans/screenshots/qbert-arcade-ref-slick-sam.png shows orange
+        hair, not a flat hat).
       - Eyes: two white UV-spheres on the +X face of the body.
       - Pupils: two smaller black spheres in front of the eyes.
       - Feet: two flat ovals (scaled UV-spheres) at the bottom, dark grey.
@@ -1324,9 +1321,24 @@ def _build_flipper_actor(name, mesh_name, body_rgb, top_rgb, location):
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     parts.append((bpy.context.object, mat_body))
 
-    # Hat — flat 16-sided cylinder on top.
-    bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.55, depth=0.10, location=(0, 0, 0.37))
+    # Hair — cluster of orange cones on top of the head. One taller centre
+    # spike + 6 shorter cones in a ring around it, each tilted slightly
+    # outward so they fan out like punk-rock hair.
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=7, radius1=0.12, radius2=0.0, depth=0.30,
+        location=(0.0, 0.0, 0.50))
     parts.append((bpy.context.object, mat_hat))
+    for i in range(6):
+        ang = i * (2.0 * math.pi / 6)
+        rx = 0.20 * math.cos(ang)
+        ry = 0.20 * math.sin(ang)
+        bpy.ops.mesh.primitive_cone_add(
+            vertices=6, radius1=0.07, radius2=0.0, depth=0.22,
+            location=(rx, ry, 0.42),
+            rotation=(math.radians(20) * math.sin(ang),
+                      -math.radians(20) * math.cos(ang),
+                      0))
+        parts.append((bpy.context.object, mat_hat))
 
     # Eyes — two small white UV-spheres on +X face of the body.
     for y in (-0.16, 0.16):
