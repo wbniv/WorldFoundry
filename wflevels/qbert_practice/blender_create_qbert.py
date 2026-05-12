@@ -541,6 +541,22 @@ if player:
         #    >=30  → snap player to apex, latch FALL_DEATH=1, reset FALL_PHASE.
         "419 read-mailbox dup 0 > if "
         "dup 30 < if "
+        # Curse bubble tracks the falling player (+2 in Z so it hovers above).
+        # Bubble actor idx = 30 (CURSE_BUBBLE_ACTOR_IDX, hardcoded here; if
+        # the actor list shifts, update this literal).
+        "INDEXOF_X_POS read-mailbox 3009 30 write-actor-mailbox "
+        "INDEXOF_Y_POS read-mailbox 3010 30 write-actor-mailbox "
+        "INDEXOF_Z_POS read-mailbox 2 + 3011 30 write-actor-mailbox "
+        # Phases 28..29 = splat (last two falling ticks): wide flat pancake,
+        # rotation rates → 0 so the player lands still. Phases 1..27 = airborne
+        # tumble + prolate stretch.
+        "dup 27 > if "
+        "0.20 3042 write-mailbox 1.80 3040 write-mailbox 1.80 3041 write-mailbox "
+        "0 3034 write-mailbox 0 3035 write-mailbox "
+        "else "
+        "0.05 3035 write-mailbox 0.02 3034 write-mailbox "
+        "1.20 3042 write-mailbox 0.85 3040 write-mailbox 0.85 3041 write-mailbox "
+        "then "
         "INDEXOF_Z_POS read-mailbox 1 - INDEXOF_Z_POS write-mailbox "
         "1 + 419 write-mailbox "
         "else "
@@ -551,6 +567,12 @@ if player:
         "15 INDEXOF_Z_POS write-mailbox "
         "0 400 write-mailbox 0 401 write-mailbox "
         "0 402 write-mailbox -0.25 3014 write-mailbox -0.25 433 write-mailbox "
+        # Reset scale + clear rotation rates so the player respawns at apex
+        # in identity shape and orientation.
+        "1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
+        "0 3034 write-mailbox 0 3035 write-mailbox "
+        # Park bubble far below (out of view) on respawn.
+        "-100.0 3011 30 write-actor-mailbox "
         "then "
         "exit "
         "else drop "
@@ -2132,6 +2154,34 @@ print(f"[qbert] Created 2 spinning discs at "
       f"L(row={DISC_L_ROW},col={DISC_L_COL}) idx={DISC_L_ACTOR_IDX} / "
       f"R(row={DISC_R_ROW},col={DISC_R_COL}) idx={DISC_R_ACTOR_IDX}; "
       f"mesh {len(_DISC_VERTS)} verts / {len(_DISC_FACES)} faces")
+
+# ── 5c.8. Curse bubble (plumbing verification) ──────────────────────────────
+# Minimal script-less actor parked above the apex (Z=20) so we can verify it
+# renders. Will be repositioned to Z=-100 once the test passes.
+mat_bubble_white = _make_principled_material('bubble_white', (1.00, 1.00, 1.00))
+bpy.ops.mesh.primitive_uv_sphere_add(radius=0.7, segments=10, ring_count=6, location=(0,0,0))
+_bubble_obj = bpy.context.object
+_bubble_obj.data.materials.clear()
+_bubble_obj.data.materials.append(mat_bubble_white)
+_bubble_obj.data.name = 'BubbleMesh'
+_bubble_mesh_data = _bubble_obj.data
+bpy.data.objects.remove(_bubble_obj, do_unlink=True)
+
+_pre_bubble_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+CURSE_BUBBLE_ACTOR_IDX = _pre_bubble_count + 1
+
+_bubble = bpy.data.objects.new('curse_bubble', _bubble_mesh_data)
+_bubble.location = (0.0, 0.0, -100.0)    # parked far below; player death script pops it to (player_x,y,z+2)
+scene.collection.objects.link(_bubble)
+_bubble['wf_schema_path']         = STATPLAT_OAD
+_bubble['wf_Mesh Name']           = 'curse_bubble.iff'
+_bubble['wf_original_mesh_name']  = 'curse_bubble.iff'
+_bubble['wf_Model Type']          = 'Mesh'
+_bubble['wf_Mobility']            = 'Anchored'
+_bubble['wf_Mass']                = 0.0
+_bubble['wf_Visibility Mailbox']  = 1
+print(f"[qbert] Created curse bubble actor idx={CURSE_BUBBLE_ACTOR_IDX} at {tuple(_bubble.location)}")
+
 
 # ── 6. Director — wire its Script for the game loop ───────────────────────────
 # MVP director: cube-state advance, visibility fan-out, win check, camera
