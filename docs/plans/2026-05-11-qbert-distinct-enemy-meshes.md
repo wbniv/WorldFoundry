@@ -159,15 +159,26 @@ Goal: visibly snake-like Coily; egg distinct from a plain ball.
 
 1. Replace the unit icosphere with an elongated variant: `_EGG_VERTS = [(x*0.72, y*0.72, z*1.30) for (x,y,z) in _REDBALL_VERTS]`. Same face indices, so 42 verts / 80 faces. Material flashes purple/red as today (3.75 Hz oscillator at lines 1564–1568) — no script change.
 
-**Coily snake:**
+**Coily snake — planned redesign (not yet implemented):**
 
-1. Restore the **original in-game body**: 4 equal-radius (`_COILY_SEG_RADIUS = 0.40`) magenta icospheres stacked at `_COILY_SEG_SPACING = 0.55` spacing, each Z-squashed to `_COILY_SEG_HEIGHT = 0.30`. The stack itself reads as a tight coil — that's what the arcade sprite depicts. Builder migrated from the shared `_coily_build_mesh()` + `_coily_mesh` datablock to a per-actor `_build_coily_snake_actor()` so eyes/pupils/tongue can be added as primitives.
-2. **Eyes on the top segment** at the +X surface: two white UV-spheres at `(0.38, ±0.18, head_z)` + two black-sphere pupils at `(0.46, ±0.18, head_z)`.
-3. **Forked tongue** (`1c3a4ac`): two narrow red cones protruding +X from below the eyes, splayed ±Y to read as a snake's forked tongue. Material red `(0.90, 0.05, 0.10)`.
-4. Material: magenta body `#BA00BA` `(0.73, 0.00, 0.73)` (same as Ugg/WW, pixel-sampled from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png)); white + black eyes; red tongue. Egg stays at its existing flashing purple/red (already arcade-accurate via the 3.75 Hz flash oscillator).
-5. Final mesh: snake **124 verts / 170 faces** (4 equal subdiv-1 icospheres + 2 eyes + 2 pupils + 2 forked-tongue cones). Egg: **42 verts / 80 faces** (elongated icosphere).
+After reviewing every prior iteration ([docs/investigations/2026-05-11-qbert-coily-mesh-versions.md](../investigations/2026-05-11-qbert-coily-mesh-versions.md)), the user confirmed that **none of the ball-based variants are correct**. Arcade Coily is a **spiral** — a continuous coiled body, no discrete spheres.
 
-> Body-shape history: my initial commit `1527e14` *tapered* the segments (radii 0.22 → 0.50 bottom→top) as an unrequested redesign. A later attempt to reshape into a literal helix-of-small-spheres (`346b5b0`) was reverted (`4674820`). The user clarified that the pre-everything equal-stack mesh was the arcade-faithful silhouette; restored in `e91321a`.
+Target silhouette: a half-helix (≈½ to 1 turn of a coiled tube) viewed from the side, like a snake curled into a watch-spring shape. Single magenta swept tube, not a stack and not a string of small balls.
+
+**Approach (TBD — to be designed before implementing):**
+
+1. **Curve-and-bevel sweep:** author a Bezier or NURBS curve in Python that traces the spiral path; assign a small circular bevel profile (`bevel_depth` + `bevel_resolution`) so the curve renders as a magenta tube. Convert to mesh via `bpy.ops.object.convert(target='MESH')` before exporting to IFF (the WF exporter only handles mesh data, not curves).
+2. **Spiral parameters (rough starting points; will tune visually):**
+   - Half-helix: 1 turn, height ≈ 1.7, radius ≈ 0.30 from central axis.
+   - Tube cross-section radius: ≈ 0.12–0.15 (thick enough to read as a snake body, thin enough to show the coil shape).
+   - Direction: starts at the bottom, winds up and over, ends at the top with the head facing forward.
+3. **Head, eyes, tongue:** add **after** the basic spiral shape is right. Probably a small magenta sphere at the top end of the curve for the head, then eyes/pupils/tongue per the V5/V7 pattern.
+4. **Material:** magenta `#BA00BA` (unchanged from `7ebac47` pixel-sampled colour).
+5. **Actor-positioning math:** must keep `_COILY_HALF_HEIGHT` and `_COILY_CENTRE_OFFSET_Z` consistent so the director / chase-AI continues to place Coily correctly on cube tops.
+
+Egg unchanged — already arcade-faithful (elongated icosphere with 3.75 Hz flash).
+
+> **Body-shape history:** every committed Coily variant to date (V0 through V7 in the investigation doc) was ball-based, which is wrong. The plan from here is to discard the stack-of-spheres model entirely and author a true spiral. The eyes-and-tongue work from V5/V7 (commit `1c3a4ac`) is keepable detail to graft on once the spiral shape is right.
 
 ## Verification
 
