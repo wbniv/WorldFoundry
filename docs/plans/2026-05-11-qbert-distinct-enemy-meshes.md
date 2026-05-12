@@ -75,16 +75,23 @@ Goal: cube-flipper humanoid silhouette.
 
 ### Phase B — Ugg & Wrong-Way (side-of-pyramid climbers)
 
-Goal: humanoid climber that reads as "creature standing on the side of a cube" after the Escher pitch+yaw rotation (DELTA_PITCH ±0.25 rev + DELTA_YAW 0.5/0 rev — see [2026-05-11-qbert-ugg-wrongway.md](2026-05-11-qbert-ugg-wrongway.md)).
+**Status:** Done — Blender mesh + build pipeline green; in-engine Escher-tip verify pending capture.
 
-1. Replace `_climber_build_mesh()`. The rotation is applied at the actor level **after** mesh build, so model the mesh in upright rest pose (+X forward, +Z up, like the player) — the engine will tip it.
+![Ugg (left, orange) and Wrong-Way (right, purple) — upright rest pose with body, smaller head, big eyes with pupils, flat feet](screenshots/qbert-ugg-wrongway-mesh-2026-05-11.png)
+*Ugg & Wrong-Way rest-pose mesh, Blender EEVEE render. The engine applies a DELTA_PITCH ±0.25 rev + DELTA_YAW 0.5/0 rev at runtime to tip these onto the cube's side face — see [2026-05-11-qbert-ugg-wrongway.md](2026-05-11-qbert-ugg-wrongway.md).*
+
+Goal: humanoid climber that reads as "creature standing on the side of a cube" after the Escher pitch+yaw rotation.
+
+1. Replace `_climber_build_mesh()` + `_build_climber_actor()` with a single per-actor primitive-based builder, same pattern as Slick/Sam. The rotation is applied at the actor level **after** mesh build, so model the mesh in upright rest pose (+X forward, +Z up, like the player) — the engine tips it.
 2. Components:
-   - Body: squashed icosphere (current proxy is close — but **remove the horns**, they're not arcade-faithful for either Ugg or Wrong-Way).
-   - Head: smaller sphere on top with two large round eyes (white + dark pupil materials).
-   - Arms: optional — two small flattened spheres at ±Y body sides, low priority.
-   - Feet: two flat ovals, current proxy is fine.
-3. Per-variant material delta is purely body colour: Ugg purple, Wrong-Way yellow/orange. (Verify arcade colours; current Python has Ugg orange / WW purple — sprite extraction will confirm which is which.)
-4. Total vert budget target: ~110 verts.
+   - Body: icosphere subdiv 1, scale 0.40, Z-squash 0.85. Variant body colour.
+   - Head: smaller icosphere on top, same body colour.
+   - **Eyes:** two large white UV-spheres on +X face of the head.
+   - **Pupils:** smaller black spheres in front of the eyes.
+   - **Feet:** two flat ovals at the bottom, dark grey.
+   - **Horns removed** — not arcade-faithful for either Ugg or Wrong-Way.
+3. Per-variant body colour: Ugg `(1.00, 0.55, 0.10)` orange, Wrong-Way `(0.55, 0.10, 0.85)` purple (preserved from prior code; arcade-faithful confirmation deferred to a colour-grading pass).
+4. Total vert budget: ~150 verts.
 
 ### Phase C — Coily (egg + snake)
 

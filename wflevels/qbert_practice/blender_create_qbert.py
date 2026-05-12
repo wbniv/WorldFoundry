@@ -1397,104 +1397,77 @@ print(f"[qbert] Created Slick (idx {SLICK_ACTOR_IDX}) + Sam (idx {SAM_ACTOR_IDX}
       f"spawn cadence {SLICK_SPAWN_INTERVAL}/{SAM_SPAWN_INTERVAL} ticks")
 
 # ── 5c.7. Ugg & Wrong-Way — side-of-pyramid climbers ─────────────────────────
-# Distinct procedural mesh from the flipper proxy: small icosphere body with
-# two horns on top + two stubby feet on the bottom. Built once; instanced for
-# both Ugg (orange) and Wrong-Way (purple) via per-actor materials.
-def _climber_build_mesh():
-    """Body + 2 horns + 2 feet → verts/faces."""
-    verts = []
-    faces = []
-    # Body: icosahedron scaled to ~0.40 radius (chunky), Z-flattened slightly.
-    body_radius = 0.40
-    body_squash = 0.85
-    phi = (1.0 + math.sqrt(5.0)) / 2.0
-    norm = math.sqrt(1.0 + phi * phi)
-    base = [
-        ( 0.0,  1.0,  phi), ( 0.0,  1.0, -phi),
-        ( 0.0, -1.0,  phi), ( 0.0, -1.0, -phi),
-        ( 1.0,  phi,  0.0), ( 1.0, -phi,  0.0),
-        (-1.0,  phi,  0.0), (-1.0, -phi,  0.0),
-        ( phi,  0.0,  1.0), ( phi,  0.0, -1.0),
-        (-phi,  0.0,  1.0), (-phi,  0.0, -1.0),
-    ]
-    base_faces = [
-        (0, 2, 8),  (0, 8, 4),  (0, 4, 6),  (0, 6, 10), (0, 10, 2),
-        (3, 1, 9),  (3, 9, 5),  (3, 5, 7),  (3, 7, 11), (3, 11, 1),
-        (2, 5, 8),  (8, 5, 9),  (8, 9, 4),  (4, 9, 1),  (4, 1, 6),
-        (6, 1, 11), (6, 11, 10),(10, 11, 7),(10, 7, 2), (2, 7, 5),
-    ]
-    body_base = len(verts)
-    for x, y, z in base:
-        verts.append((
-            (x / norm) * body_radius,
-            (y / norm) * body_radius,
-            (z / norm) * body_radius * body_squash,
-        ))
-    for a, b, c in base_faces:
-        faces.append((body_base + a, body_base + b, body_base + c))
-
-    # Horns: two small cones at the top of the body (+Y/-Y, +Z direction).
-    def _cone(centre_x, centre_y, base_z, height, radius, sides=6):
-        idx_apex = len(verts)
-        verts.append((centre_x, centre_y, base_z + height))
-        ring_base = len(verts)
-        for i in range(sides):
-            a = 2.0 * math.pi * i / sides
-            verts.append((centre_x + radius * math.cos(a),
-                          centre_y + radius * math.sin(a),
-                          base_z))
-        for i in range(sides):
-            j = (i + 1) % sides
-            faces.append((idx_apex, ring_base + i, ring_base + j))
-
-    horn_base_z = body_radius * body_squash * 0.85
-    _cone(-0.12, 0.0, horn_base_z, 0.22, 0.08)
-    _cone(+0.12, 0.0, horn_base_z, 0.22, 0.08)
-
-    # Feet: two flat discs at the bottom.
-    def _flat_disc(centre_x, centre_y, top_z, half_h, radius, sides=8):
-        ring_top = len(verts)
-        for i in range(sides):
-            a = 2.0 * math.pi * i / sides
-            verts.append((centre_x + radius * math.cos(a),
-                          centre_y + radius * math.sin(a),
-                          top_z + half_h))
-            verts.append((centre_x + radius * math.cos(a),
-                          centre_y + radius * math.sin(a),
-                          top_z - half_h))
-        idx_top_c = len(verts); verts.append((centre_x, centre_y, top_z + half_h))
-        idx_bot_c = len(verts); verts.append((centre_x, centre_y, top_z - half_h))
-        for i in range(sides):
-            j = (i + 1) % sides
-            ti, bi = ring_top + 2 * i, ring_top + 2 * i + 1
-            tj, bj = ring_top + 2 * j, ring_top + 2 * j + 1
-            faces.append((idx_top_c, ti, tj))
-            faces.append((idx_bot_c, bj, bi))
-            faces.append((ti, bi, bj))
-            faces.append((ti, bj, tj))
-
-    foot_top_z = -body_radius * body_squash * 0.9
-    _flat_disc(-0.15, 0.0, foot_top_z, 0.05, 0.10)
-    _flat_disc(+0.15, 0.0, foot_top_z, 0.05, 0.10)
-
-    return verts, faces
-
-
-_CLIMBER_VERTS, _CLIMBER_FACES = _climber_build_mesh()
-
+# Humanoid climber silhouette: squashed body (icosphere), smaller head with two
+# big eyes + black pupils, two flat-oval feet. The actor-level pitch+yaw
+# rotation tips the mesh sideways onto the cube face after build (see
+# 2026-05-11-qbert-ugg-wrongway.md), so the mesh is authored in upright rest
+# pose (+X forward, +Z up) like the player.
+#
+# Built per-actor via bpy.ops primitives + join, with per-variant body colour.
+# Ugg = purple, Wrong-Way = yellow/orange (arcade-faithful contrast pair).
 
 def _build_climber_actor(name, mesh_name, body_rgb, location):
-    mesh = bpy.data.meshes.new(mesh_name)
-    mesh.from_pydata(_CLIMBER_VERTS, [], _CLIMBER_FACES)
-    mesh.update()
-    mat = bpy.data.materials.new(f'{mesh_name}_mat')
-    mat.use_nodes = True
-    mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value = (*body_rgb, 1.0)
-    mesh.materials.append(mat)
-    obj = bpy.data.objects.new(name, mesh)
-    obj.location = location
-    scene.collection.objects.link(obj)
-    return obj
+    """Build a climber humanoid mesh + Blender object. Returns the actor;
+    caller wires schema + script.
+
+    Mesh is authored upright (+X forward, +Z up). The Ugg/Wrong-Way actor
+    rotation (DELTA_PITCH ±0.25, DELTA_YAW 0.5/0) tips the body onto the
+    cube's side face at runtime — that math expects the mesh's local +Z to
+    be the "up the slope" axis.
+    """
+    mat_body  = _make_principled_material(f'{mesh_name}_body',  body_rgb)
+    mat_eye   = _make_principled_material(f'{mesh_name}_eye',   (1.00, 1.00, 1.00))
+    mat_pupil = _make_principled_material(f'{mesh_name}_pupil', (0.05, 0.05, 0.05))
+    mat_feet  = _make_principled_material(f'{mesh_name}_feet',  (0.20, 0.20, 0.20))
+
+    parts = []
+
+    # Body — icosphere subdiv 1, scale 0.40, Z-squash 0.85.
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.40, location=(0, 0, 0))
+    bpy.context.object.scale = (1.0, 1.0, 0.85)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    parts.append((bpy.context.object, mat_body))
+
+    # Head — smaller icosphere on top.
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.28, location=(0, 0, 0.55))
+    parts.append((bpy.context.object, mat_body))
+
+    # Eyes — two large white UV-spheres on +X face of the head.
+    for y in (-0.13, 0.13):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.10, segments=6, ring_count=4, location=(0.18, y, 0.58))
+        parts.append((bpy.context.object, mat_eye))
+
+    # Pupils — smaller black spheres in front of the eyes.
+    for y in (-0.13, 0.13):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.05, segments=5, ring_count=3, location=(0.25, y, 0.58))
+        parts.append((bpy.context.object, mat_pupil))
+
+    # Feet — two flat ovals at the bottom of the body.
+    for y in (-0.18, 0.18):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.16, segments=6, ring_count=3, location=(0.04, y, -0.38))
+        bpy.context.object.scale = (1.3, 1.0, 0.35)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((bpy.context.object, mat_feet))
+
+    # Assign each part's material; flat-shade.
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for poly in obj.data.polygons:
+            poly.material_index = 0
+            poly.use_smooth = False
+
+    # Join into one mesh.
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    body.name = name
+    body.data.name = mesh_name
+    body.location = location
+    return body
 
 
 _pre_ugg_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
@@ -1530,8 +1503,7 @@ _ww['wf_NumberOfLocalMailboxes'] = 0
 _ww['wf_Script']              = redball_script(0, variant='wrongway')
 
 print(f"[qbert] Created Ugg (idx {UGG_ACTOR_IDX}) + Wrong-Way (idx {WW_ACTOR_IDX}); "
-      f"mailbox bases {UGG_MB_BASE} / {WW_MB_BASE}; "
-      f"climber mesh {len(_CLIMBER_VERTS)} verts / {len(_CLIMBER_FACES)} faces")
+      f"mailbox bases {UGG_MB_BASE} / {WW_MB_BASE}")
 
 # ── 5d. Coily egg (Phase A) ──────────────────────────────────────────────────
 # Single purple ball that spawns once per round, bounces down from the apex
