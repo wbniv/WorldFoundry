@@ -36,7 +36,7 @@ Per-enemy crop sheets (each crop zoomed 6× nearest-neighbour from the sources a
 | **Ugg** | Humanoid climber: **pure magenta** body + smaller head + two big white eyes with pupils + flat feet. Body `#BA00BA` `(0.73, 0.00, 0.73)`. Runtime DELTA_PITCH +0.25 + DELTA_YAW +0.5 rev tips the mesh onto the right side face. |
 | **Wrong-Way** | Identical mesh and colour to Ugg; only the side-face climbed (left vs. right) and the actor rotation differ. Body `#BA00BA`. |
 | **Coily egg** | Single elongated icosphere (Z scale 1.3, XY 0.72). Material flashes purple/red at 3.75 Hz via the existing oscillator — arcade-faithful. |
-| **Coily snake** | Coiled spring — 14 small magenta icospheres wound around a helix (radius 0.30, 2.5 turns) plus a bigger head sphere on top with eyes, pupils, and a red forked tongue. Body `#BA00BA` magenta — same as Ugg/WW. |
+| **Coily snake** | Tapered stack of 4 subdiv-2 magenta icospheres (radii 0.22 / 0.30 / 0.38 / 0.50 bottom→top) plus eyes + pupils + red forked tongue on the head. Body `#BA00BA` magenta — same as Ugg/WW. |
 
 References:
 
@@ -66,9 +66,9 @@ Measured post-Phase-C (commit `1527e14`) from the Blender scene:
 | Ugg | 284 | 378 | Body + head subdiv-2 + snout cone + 2 antennae cones + smoother eyes/pupils/feet |
 | Wrong-Way | 284 | 378 | Same mesh shape as Ugg, same magenta (only climb side differs) |
 | Coily egg | 42 | 80 | Elongated subdiv-1 icosphere |
-| Coily snake | 286 | 450 | 14 helix-body icospheres + 1 head sphere + 2 eyes + 2 pupils + 2 forked-tongue cones |
+| Coily snake | 244 | 410 | 4 tapered subdiv-2 icosphere segments + 2 eyes + 2 pupils + 2 forked-tongue cones |
 | Spinning disc (each of 2) | 34 | 64 | Pre-existing — flat cylinder; unchanged |
-| **Total dynamic-actor footprint** | **~1966** | **~2578** | Player + 3 red balls + green + Slick + Sam + Ugg + WW + Coily egg + snake + 2 discs |
+| **Total dynamic-actor footprint** | **~1924** | **~2538** | Player + 3 red balls + green + Slick + Sam + Ugg + WW + Coily egg + snake + 2 discs |
 
 After the 2026-05-11 face-count doubling pass, each humanoid enemy lands at ~234–244 verts and 290–398 faces — comparable to the player's 206v/222f reference. Worst-case all-actors-on-screen footprint is ~1846 verts / ~2470 faces; the static 28-cube pyramid adds more on top, but the level-pool budget bumps from [2026-05-09-qbert-cube-palettes-16-rounds.md](2026-05-09-qbert-cube-palettes-16-rounds.md) (1344-cube fan-out) already accommodate it.
 
@@ -79,7 +79,7 @@ From `_build_qbert_player_mesh` ([2026-05-10-qbert-player-mesh.md](2026-05-10-qb
 1. Single mesh object per enemy, primitives joined with `bpy.ops.object.join()`.
 2. Multiple material slots; per-face `material_index` for colour partitioning. The existing flipper builder ([blender_create_qbert.py:1336–1358](../../wflevels/qbert_practice/blender_create_qbert.py)) already shows the multi-material idiom.
 3. Materials use `Principled BSDF` `Base Color`; the exporter `_write_mesh_iff` ([wftools/wf_blender/export_level.py:422–537](../../wftools/wf_blender/export_level.py)) reads them.
-4. Vert budget: cubes / redball / coily are all sub-100 verts; player aims for ~250. **Per-enemy target: stay under ~150 verts** to leave headroom for the 8-enemy-on-screen worst case. Final actuals are in the [Mesh budgets](#mesh-budgets--actual-vertface-counts) table above (112–128 verts per humanoid enemy).
+4. Vert budget: cubes / red ball / green ball are all 42 verts; player is 206. **Original per-enemy target was "stay under ~150 verts"**, but after the face-doubling pass (`cb42484`) and arcade-faithful detail additions (hair / snout / antennae / coil / tongue) the humanoid enemies settled at 252–286 verts — see [Mesh budgets](#mesh-budgets--actual-vertface-counts) table above. Still well under the 28-cube static pyramid's contribution to the level pool.
 5. Reuse `_REDBALL_VERTS` / `_REDBALL_FACES` (~42 verts, 80 faces) as a stock icosphere primitive for "body ball" components — already imported above the flipper builder.
 
 ## Approach — three independent phases
@@ -145,13 +145,13 @@ Goal: humanoid climber that reads as "creature standing on the side of a cube" a
 
 ![Arcade Coily egg — purple sphere on cube top](screenshots/qbert-arcade-ref-coily-egg.png)
 
-**Arcade reference — Coily snake** (6× zoom from L2R1 and L2R2; magenta coiled body with eyes on the head). Our 3D interpretation matches this shape — a helix of small spheres with a larger head on top.
+**Arcade reference — Coily snake** (6× zoom from L2R1 and L2R2; magenta coiled body with eyes on the head):
 
 ![Arcade Coily snake — magenta segments with face-pixels](screenshots/qbert-arcade-ref-coily-snake.png)
 
 **3D mesh** (rest pose; egg left, snake right):
 
-![Coily egg (left, elongated icosphere) and Coily snake (right, 4 tapered magenta segments with head + eyes + pupils)](screenshots/qbert-coily-mesh-2026-05-11.png)
+![Coily egg (left, elongated icosphere) and Coily snake (right, 4 tapered magenta segments + head with eyes, pupils, and red forked tongue)](screenshots/qbert-coily-mesh-2026-05-11.png)
 
 Goal: visibly snake-like Coily; egg distinct from a plain ball.
 
@@ -162,13 +162,13 @@ Goal: visibly snake-like Coily; egg distinct from a plain ball.
 **Coily snake:**
 
 1. Replace `_coily_build_mesh()` + shared `_coily_mesh` datablock with a per-actor `_build_coily_snake_actor()` builder.
-2. **Body: actual coiled spring (`346b5b0`).** Wind 14 small subdiv-1 icospheres (each radius `_COILY_SEG_BALL_R = 0.18`) around a helix — radius `_COILY_COIL_RADIUS = 0.30` from the Z axis, `_COILY_COIL_TURNS = 2.5` revolutions over a coil height of `_COILY_COIL_HEIGHT = 1.70`. Arcade Coily is a coiled snake, not a stack; the prior tapered-stack interpretation (commits up to `1c3a4ac`) was a placeholder.
-3. **Head:** larger subdiv-2 icosphere (`_COILY_HEAD_RADIUS = 0.42`) sitting on top of the coil, leaning forward by `_COILY_HEAD_FWD_X = 0.10` so the face features point +X.
-4. **Eyes** at the head-sphere surface: two white UV-spheres at `(HEAD_FWD_X + 0.48, ±0.22, head_z)` + two black-sphere pupils slightly further forward.
-5. **Forked tongue:** two narrow red cones protruding +X from the mouth, splayed ±Y.
-6. Material: magenta body `#BA00BA` `(0.73, 0.00, 0.73)`; white + black eyes; red tongue `(0.90, 0.05, 0.10)`.
-7. `_COILY_HALF_HEIGHT` recomputed from helix height + head radius, so the actor-Z math (`_COILY_CENTRE_OFFSET_Z`, `_COILY_Z_BASE`) stays consistent with director / chase-AI code.
-8. Final mesh: snake **286 verts / 450 faces** (14 coil-segment icospheres + 1 head sphere + 2 eyes + 2 pupils + 2 tongue cones). Egg: **42 verts / 80 faces** (elongated icosphere).
+2. Stack 4 icosphere segments at the same `_COILY_SEG_SPACING` as before (preserves the actor-positioning math via `_COILY_HALF_HEIGHT`), but with per-segment radii in `_COILY_SEG_RADII = [0.22, 0.30, 0.38, 0.50]` bottom→top — tail is small, head is large. Each segment Z-squashed to `_COILY_SEG_HEIGHT / radius` so heights stay consistent. The arcade Coily *coil* silhouette is implied by the segmented body — vertical stack of tapered balls reads as a coiled snake from the player's view.
+3. Add eyes on the head (top segment) at the head-sphere **surface**: two white UV-spheres at `(0.48, ±0.22, head_z)` + two black-sphere pupils at `(0.58, ±0.22, head_z)`. Initial commit placed eyes at x=0.32 inside the 0.50-radius head — they were buried; pushed out + grown in `1c3a4ac`.
+4. **Forked tongue** (`1c3a4ac`): two narrow red cones protruding +X from below the eyes, splayed ±Y. Material red `(0.90, 0.05, 0.10)`. This is the single biggest "reads as snake" cue.
+5. Material: magenta body `#BA00BA` `(0.73, 0.00, 0.73)` (same as Ugg/WW, pixel-sampled from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png)), white + black eyes, red tongue. Egg stays at its existing flashing purple/red (already arcade-accurate via the 3.75 Hz flash oscillator).
+6. Final mesh: snake **244 verts / 410 faces** (4 tapered subdiv-2 icosphere segments + 2 eyes + 2 pupils + 2 forked-tongue cones). Egg: **42 verts / 80 faces** (elongated icosphere).
+
+> Note: an attempt to reshape the body into a literal helix of small spheres (commit `346b5b0`) was reverted (`4674820`) — the helix-of-balls read as "string of beads", not a snake. The tapered stack is the correct silhouette.
 
 ## Verification
 
@@ -214,7 +214,7 @@ Per phase, add to this plan doc:
 Embed inline in the relevant phase section using Markdown image syntax with descriptive alt text and a caption line, e.g.:
 
 ```markdown
-![Slick — humanoid flipper mesh with green hat, eyes, feet](screenshots/qbert-slick-mesh-2026-05-11.png)
+![Slick — green humanoid flipper mesh with orange spiky hair, eyes, feet](screenshots/qbert-slick-sam-mesh-2026-05-11.png)
 *Slick rest-pose mesh in Blender, viewport side view + 3/4 perspective.*
 ```
 
@@ -240,6 +240,9 @@ Optional preamble commit if reference screenshots are gathered as a separate ste
 - Replacing the red ball mesh (it's already a proper icosphere) or the green ball (same mesh, tinted).
 - Rewriting `redball_script` or any director logic.
 
-## Open questions
+## Resolved questions
 
-- **Arcade colour ground truth for Slick/Sam/Ugg/WW:** the current Python may have the per-enemy colours wrong (Sam red vs. blue, Ugg orange vs. purple, etc.). Confirm via MAME or web screenshots *before* committing the new mesh colours; otherwise the visual upgrade will encode the wrong palette and need a second pass.
+- **Arcade colour ground truth (resolved `7ebac47`)** — initial colour guesses for Slick/Sam/Ugg/WW were wrong (white-bodied + green-hatted; Ugg=orange; WW=purple). Pixel-sampled the correct values from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png): Slick/Sam body `#21BA31` + hair `#FF7721`; Ugg/Wrong-Way + Coily snake body `#BA00BA`. Per-enemy palette table in the [Reference](#reference-arcade-qbert) section.
+- **Coily shape (resolved on the tapered stack, `1c3a4ac`)** — initial mesh was 4 equal-sized stacked balls. Updated to a *tapered* stack of subdiv-2 icospheres (radii 0.22 → 0.50 bottom→top) so the largest sphere reads as a snake head sitting on a coiled body. A subsequent attempt to make the body a literal helix-of-small-spheres (`346b5b0`) was reverted (`4674820`) — it read as "string of beads" rather than a snake.
+- **Slick "hat" vs. hair (resolved `bf3f61f`)** — initial mesh had a flat cylinder reading as a saucer-hat. Arcade has orange spiky hair on a green head. Replaced with a 7-cone hair cluster.
+- **Ugg/WW snout & antennae (resolved `e24025d`)** — initial mesh had a plain round head. Arcade sprites have a small forward snout and two antennae on top.
