@@ -15,16 +15,20 @@ This plan upgrades the three remaining enemy silhouettes to arcade-recognisable 
 
 ## Reference (arcade Q✱bert)
 
-Reference comes from **MAME screenshots and web reference images**, not from ROM sprite extraction. Pixel-tile extraction adds no value for 3D-mesh authoring — we just need the silhouette and the palette, both of which a screenshot delivers directly. Save reference images to `docs/plans/screenshots/qbert-arcade-ref-*.png` as we collect them.
+Reference comes from **MAME screenshots and web reference images**, not from ROM sprite extraction. Pixel-tile extraction adds no value for 3D-mesh authoring — we just need the silhouette and the palette, both of which a screenshot delivers directly.
 
-| Enemy | Arcade silhouette (3D interpretation) |
+**Higher-res reference search outcome (commit `7ebac47`):** the arcade game itself rendered at 240×256, so "higher res" is a category error — every authentic source is the same native resolution. Best frames sourced from [Hardcore Gaming 101](http://www.hardcoregaming101.net/qbert/) (saved as `qbert-arcade-hg101-{03,04,05}.png`) and the [Wikipedia article infobox](https://en.wikipedia.org/wiki/Q*bert) (`qbert-arcade-wikipedia.png`). [HG101-04](screenshots/qbert-arcade-hg101-04.png) turned out to be near-ideal — every enemy visible together at arcade-native resolution, allowing programmatic pixel-sampling of canonical RGB values. [The Spriters Resource](https://www.spriters-resource.com/arcade/qbert/) was queried but blocks direct fetch behind Cloudflare; useful for manual reference but not for scripted extraction.
+
+Reference-sheet crops per-enemy (zoomed 6× nearest-neighbour) live at `docs/plans/screenshots/qbert-arcade-ref-{slick-sam,ugg-wrongway,coily-egg,coily-snake,discs}.png`.
+
+| Enemy | Arcade silhouette + colour (post pixel-sampling) |
 |---|---|
-| **Slick** | Green-hatted small humanoid: white/cream body, broad flat green hat, big eyes, stubby feet. Reads as a "cube-flipper" — small enough to ride a cube top. |
-| **Sam** | Same body as Slick, blue hat (arcade uses blue, not red — verify against ROM; current Python uses red `0.85/0.10/0.10`). |
-| **Ugg** | Purple humanoid climber: round purple body, two prominent eyes (top side when climbing the face), small feet. Arcade has him as a yellow-orange creature with a red face — verify. |
-| **Wrong-Way** | Mirror of Ugg, opposite colour palette (yellow/orange body if Ugg is purple, or vice-versa). |
-| **Coily egg** | Single purple-flashing egg shape — taller than wide, slight taper. Replace stacked-icospheres proxy with a single elongated sphere. |
-| **Coily snake** | Stack of segments **with a head**: 3–4 body balls tapering from larger head (with eyes, antenna/forked tongue optional) down to smaller tail. Top ball ≠ body balls — that's the personality. Arcade Coily curls/uncurls; static stack is fine for v1. |
+| **Slick** | Small humanoid: **green** icosphere body + **orange** flat-dome on top (the "dome" is the creature's face/head, not a hat) + two white eyes with black pupils + stubby dark-grey feet. Body `#21BA31` `(0.13, 0.73, 0.19)`, dome `#FF7721` `(1.00, 0.47, 0.13)`. |
+| **Sam** | Identical mesh to Slick; slightly darker green body + redder orange dome so Slick/Sam are visually distinguishable in 3D. Arcade sprites are pixel-identical between Slick and Sam — only the spawn-cadence differs. |
+| **Ugg** | Humanoid climber: **pure magenta** body + smaller head + two big white eyes with pupils + flat feet. Body `#BA00BA` `(0.73, 0.00, 0.73)`. Runtime DELTA_PITCH +0.25 + DELTA_YAW +0.5 rev tips the mesh onto the right side face. |
+| **Wrong-Way** | Identical mesh and colour to Ugg; only the side-face climbed (left vs. right) and the actor rotation differ. Body `#BA00BA`. |
+| **Coily egg** | Single elongated icosphere (Z scale 1.3, XY 0.72). Material flashes purple/red at 3.75 Hz via the existing oscillator — arcade-faithful. |
+| **Coily snake** | Stacked tapered icospheres (radii 0.22 / 0.30 / 0.38 / 0.50 bottom→top) with two white-sphere eyes + black pupils on the largest top segment. Body `#BA00BA` magenta — same as Ugg/WW. (Arcade Coily is actually a *coiled* spiral; our 3D interpretation is a tapered stack for v1.) |
 
 References:
 
@@ -90,7 +94,7 @@ Goal: cube-flipper humanoid silhouette.
    - **Eyes:** two small white UV-spheres on +X face of body.
    - **Pupils:** smaller black UV-spheres just in front of the eyes.
    - **Feet:** two flat ovals (scaled UV-spheres), straddling ±Y, dark grey.
-3. Colours: arcade has Slick & Sam **both green-bodied + orange-domed**, visually near-identical. Distinguish via subtle palette delta — Slick: body `(0.10, 0.85, 0.20)` + dome `(1.00, 0.55, 0.10)`; Sam: body `(0.05, 0.55, 0.12)` + dome `(0.95, 0.40, 0.05)`. **Arcade-colour-correction note:** the initial Phase-A commit had body=white + hat=green, which inverted which part should be green; corrected here.
+3. Colours (pixel-sampled from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png), commit `7ebac47`): arcade has Slick & Sam **both green-bodied + orange-domed**, visually identical in the arcade sprites. Distinguish via subtle palette delta — Slick: body `#21BA31` `(0.13, 0.73, 0.19)` + dome `#FF7721` `(1.00, 0.47, 0.13)`; Sam: body `(0.08, 0.55, 0.13)` darker green + dome `(0.90, 0.38, 0.08)` redder orange. **Colour-correction history:** initial Phase-A commit had body=white + hat=green (inverted); first correction pass swapped them (`6a5dc2e`); pixel-accurate values landed in `7ebac47`.
 4. Final mesh: **234 verts / 290 faces** per actor (subdiv-2 body 42v/80f + 16-sided hat + 8-seg-5-ring eyes + 6-seg-4-ring pupils + 8-seg-4-ring feet).
 
 ### Phase B — Ugg & Wrong-Way (side-of-pyramid climbers)
@@ -110,7 +114,7 @@ Goal: humanoid climber that reads as "creature standing on the side of a cube" a
    - **Pupils:** smaller black spheres in front of the eyes.
    - **Feet:** two flat ovals at the bottom, dark grey.
    - **Horns removed** — not arcade-faithful for either Ugg or Wrong-Way.
-3. Per-variant body colour: Ugg `(0.95, 0.25, 0.55)` magenta, Wrong-Way `(0.85, 0.15, 0.45)` pink-magenta. **Arcade-colour-correction note:** initial Phase-B commit had Ugg=orange, WW=purple; arcade reference ([qbert-arcade-ref-ugg-wrongway.png](screenshots/qbert-arcade-ref-ugg-wrongway.png)) shows both as pink/magenta — corrected here.
+3. Body colour (pixel-sampled from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png)): both Ugg and Wrong-Way use the same pure magenta `#BA00BA` `(0.73, 0.00, 0.73)` — the arcade sprites are identical; the only difference is which side of the pyramid each climbs. **Colour-correction history:** initial Phase-B commit had Ugg=orange / WW=purple; first correction swapped to pink-magenta variants (`6a5dc2e`); pixel-accurate `#BA00BA` landed in `7ebac47`.
 4. Final mesh: **244 verts / 352 faces** per actor (subdiv-2 body + subdiv-2 head + 8-seg-5-ring eyes + 6-seg-4-ring pupils + 8-seg-4-ring feet).
 
 ### Phase C — Coily (egg + snake)
@@ -131,7 +135,7 @@ Goal: visibly snake-like Coily; egg distinct from a plain ball.
 1. Replace `_coily_build_mesh()` (and the shared `_coily_mesh` datablock + assignment) with a per-actor `_build_coily_snake_actor()` builder that mirrors the Slick/Sam/Ugg/WW primitive pattern.
 2. Stack 4 icosphere segments at the same `_COILY_SEG_SPACING` as before (preserves the actor-positioning math via `_COILY_HALF_HEIGHT`), but with per-segment radii in `_COILY_SEG_RADII = [0.22, 0.30, 0.38, 0.50]` bottom→top — tail is small, head is large. Each segment is Z-squashed to `_COILY_SEG_HEIGHT / radius` so heights stay consistent.
 3. Add eyes on the head (top segment): two white UV-spheres at `(0.32, ±0.18, head_z)` + two black-sphere pupils at `(0.40, ±0.18, head_z)`.
-4. Material: magenta body `(0.85, 0.15, 0.70)`, white+black eyes. (Initial commit used deep purple `(0.45, 0.08, 0.75)`; arcade ref shows the snake is closer to magenta — corrected here. Egg stays deep-purple since arcade egg also reads as purple-leaning.)
+4. Material: magenta body `#BA00BA` `(0.73, 0.00, 0.73)` (same as Ugg/WW, pixel-sampled from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png)), white + black eyes. **Colour-correction history:** initial commit used deep purple `(0.45, 0.08, 0.75)`; first correction landed `(0.85, 0.15, 0.70)` in `6a5dc2e`; pixel-accurate `#BA00BA` landed in `7ebac47`. Egg stays at its existing flashing purple/red (already arcade-accurate via the 3.75 Hz flash oscillator).
 5. Final mesh: **232 verts / 398 faces** (4 tapered subdiv-2 icosphere segments + 2 eyes + 2 pupils). Egg: **42 verts / 80 faces** (elongated icosphere).
 
 ## Verification
