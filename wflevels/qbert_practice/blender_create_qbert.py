@@ -162,13 +162,18 @@ CAMSHOT_LOOKAT = (0.0, 3.0, 8.5)   # apex+player in frame; offset above pyramid 
 #   director/levelobj: (0, -10, 7)
 #   matte:           (0, 0, 6)
 ROOM_CENTRE = (0.0, 0.0, 7.0)
-ROOM_BBOX_REL = (-15.0, -100.0, -45.0, 75.0, 15.0, 45.0)
-# Resulting absolute bbox: (-15, -100, -38) to (75, 15, 52).
-# Z floor extended to -38 so the 30-tick fall animation completes before the
-# actor exits the room. Worst-case fall starts at z=3 (bottom-row cube top)
-# and reaches z=-27 at tick 30; floor at -38 gives 11 units of margin.
-# Asymmetric in Y because the intro sweep starts deep in -Y; centre stays
-# at world origin for editor sanity.
+ROOM_BBOX_REL = (-200.0, -200.0, -207.0, 200.0, 200.0, 193.0)
+# Resulting absolute bbox: (-200, -200, -200) to (200, 200, 200).
+# Single global room — there's only one room in this level so we make its
+# bbox huge enough that any authored actor position (including the curse
+# bubble's far-below park location for the death animation) lands inside.
+# Why this matters: levcomp-rs assigns each actor to the first room whose
+# bbox contains the actor's world-space *centre* at level-export time
+# (wftools/levcomp-rs/src/rooms.rs:168). Actors authored outside every
+# room's bbox never get added to any room's render list and are silently
+# skipped by Room::AddObject → CanRender path; their `RenderActor3DAnimates`
+# is never constructed. Diagnose via `grep -c RenderActor3DAnimates
+# wf_game.log` vs expected animated-actor count.
 
 # ── 1. Start with a clean scene ─────────────────────────────────────────────────
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -2171,9 +2176,9 @@ _pre_bubble_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
 CURSE_BUBBLE_ACTOR_IDX = _pre_bubble_count + 1
 
 _bubble = bpy.data.objects.new('curse_bubble', _bubble_mesh_data)
-_bubble.location = (0.0, 0.0, -100.0)    # parked far below; player death script pops it to (player_x,y,z+2)
+_bubble.location = (0.0, 0.0, -100.0)    # parked below the pyramid; death script pops it to (player_x, y, z+2)
 scene.collection.objects.link(_bubble)
-_bubble['wf_schema_path']         = STATPLAT_OAD
+_bubble['wf_schema_path']         = ENEMY_OAD
 _bubble['wf_Mesh Name']           = 'curse_bubble.iff'
 _bubble['wf_original_mesh_name']  = 'curse_bubble.iff'
 _bubble['wf_Model Type']          = 'Mesh'

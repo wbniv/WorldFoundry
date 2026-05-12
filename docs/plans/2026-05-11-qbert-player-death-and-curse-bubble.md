@@ -11,7 +11,17 @@ Built end-to-end on a verified plumbing staircase:
 - **Step 2 ✓** — bridge writes to bubble actor's X/Y/Z_POS (mb 3009/3010/3011) visibly move it.
 - **Step 3 ✓** — `write-actor-mailbox 30` from inside the player's Forth script visibly relocates the bubble.
 
-**Schema fix — observed but not yet root-caused:** the curse bubble must use `STATPLAT_OAD` (cube schema), **not** `ENEMY_OAD`. OAS class is more than a field-default container: each class maps to a different C++ `Actor` subclass via `Oad<Class>()` factory functions in `wfsource/source/game/<class>.cc`. `StatPlat` and `Enemy` take materially different construction paths in `Actor::Actor(...)` (statplat uses inline `_statPlatData`, asserts on Mobility/hp/Script/local-mailboxes; non-statplat heap-allocates `NonStatPlatData` and runs `_InitInput`/`_InitScript`/animation-manager setup). With `ENEMY_OAD` the bubble loaded (object count 59 unchanged) but `grep -c RenderActor3DAnimates wf_game.log` was stuck at 41 instead of 42. Switching to `STATPLAT_OAD` bumped it to 42 and the white sphere appeared above the apex on the next build. *Why ENEMY_OAD skipped render-actor construction for this script-less, hp-unset, anchored mesh is not yet confirmed — leading candidates are the `hp>0` assert (might pass at 0 if the engine isn't in DO_ASSERTIONS mode) or the `_InitScript()` path with an empty Script field. Filed in TODO.md for a proper trace.*
+**Root cause — actor authored outside every room's bbox:** the curse bubble simply needs its authored position inside the level's room bounding box. The OAS schema (ENEMY_OAD vs STATPLAT_OAD) is irrelevant to rendering — that was a red herring I introduced when I changed both schema *and* authored position in the same build cycle and mis-attributed the fix.
+
+The actual mechanism, traced through the build pipeline + engine:
+
+1. **levcomp-rs** ([`wftools/levcomp-rs/src/rooms.rs:168-178`](../../wftools/levcomp-rs/src/rooms.rs)) assigns each non-room object to the first room whose bbox contains the object's world-space *center*. Objects whose center falls outside every room's bbox get no `room.entries` push — they're absent from the `.lev` room-entry lists.
+2. **Level::Level** loads the `.lev` and constructs every actor (`object count` includes them all), but only objects listed in a room's entries get added to that room's `ROOM_OBJECT_LIST_RENDER` via `Room::AddObject` / `CanRender`.
+3. **ActiveRooms** ([`wfsource/source/room/actrooms.cc:83`](../../wfsource/source/room/actrooms.cc)) walks `ROOM_OBJECT_LIST_RENDER` to call `BindAssets` on each entry — that's the path that constructs `RenderActor3DAnimates` for `MODEL_TYPE_MESH` actors. Objects not in any room never get `BindAssets` called, so no render-actor is created.
+
+Diagnose via `grep -c RenderActor3DAnimates wf_game.log` against the expected animated-mesh count — one short means an actor's authored center is outside every room's bbox.
+
+**Fix for qbert_practice (committed in this branch):** expand the level's single room bbox to a global one (`ROOM_BBOX_REL = (-200, -200, -207, 200, 200, 193)` around `ROOM_CENTRE = (0, 0, 7)`) so any authored position — including the curse bubble's `Z=-100` park location — lands inside. With the global room, the death animation's `write-actor-mailbox` writes can move the bubble freely between off-camera and visible Z without ever placing it outside a room.
 
 **Actor index hardcoded:** the player Forth script writes to actor `30` (the bubble's index in scene-collection order). If any new actor is added before the bubble, update the literal in `blender_create_qbert.py` at the death-state-machine writes alongside `CURSE_BUBBLE_ACTOR_IDX`.
 

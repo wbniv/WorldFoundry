@@ -229,38 +229,37 @@ uses for physics / triggers / messaging but draws nothing.
 > `level-design-troubleshooting.md` § "Infrastructure actors render as
 > random-coloured debug cubes" for the full diagnosis.
 
-> ⚠️ **OAS class determines the C++ actor subclass; not all classes are
-> interchangeable for the same role.** Each `.oas` file maps to a different
-> `Actor` subclass via the `Oad<ClassName>()` factory in
-> `wfsource/source/game/<class>.cc` — `OadStatPlat()` returns a `StatPlat`,
-> `OadEnemy()` returns an `Enemy`, etc. The two subclasses take materially
-> different construction paths in `Actor::Actor(...)`
-> ([actor.cc:670+](../wfsource/source/game/actor.cc)):
+> ⚠️ **Actors authored outside every room's bbox silently don't render.**
+> The room bbox isn't just a runtime culling volume — it controls
+> render-set membership at level-export time. levcomp-rs
+> ([`wftools/levcomp-rs/src/rooms.rs:168-178`](../wftools/levcomp-rs/src/rooms.rs))
+> assigns each non-room actor to the first room whose bbox contains the
+> actor's world-space *center*. Actors whose center falls outside every
+> room's bbox get no `room.entries` push, so the `.lev` lists them in the
+> level's object table but not in any room. At engine load,
+> `Room::AddObject` / `ROOM_OBJECT_LIST_RENDER` walks only the room's
+> listed entries, so `BindAssets` (which calls `new
+> RenderActor3DAnimates(...)`) is never called for orphaned actors. They
+> stay invisible no matter what their `wf_Model Type`, `Visibility
+> Mailbox`, `Mass`, `Mobility`, or schema says.
 >
-> - **`StatPlat_KIND`** points `_nonStatPlat` at a small inline
->   `_statPlatData`, asserts `Mobility==ANCHORED`, `hp==INDESTRUCTIBLE_HP`
->   (32767), `Script==-1`, `NumberOfLocalMailboxes==0`. No input manager,
->   no animation manager. The Jolt body is created as a static placeholder.
-> - **`Enemy_KIND`** (and every other non-statplat) heap-allocates
->   `NonStatPlatData`, reads `hp` from the common block (asserts `hp>0`),
->   calls `_InitInput()` and `_InitScript()`, attaches an animation
->   manager, and (for `MOBILITY_PHYSICS`) creates a Jolt
->   `CharacterVirtual` body.
+> Diagnose with `grep -c RenderActor3DAnimates wf_game.log` against your
+> expected animated-mesh count. One short → an actor's authored center is
+> outside every room's bbox. Compare against `object count = N` in the
+> same log — that's the total actor count, so the diff "object count
+> non-NULL minus rendered" tells you how many actors fell off the map.
 >
-> For a static decorative mesh (e.g. the qbert_practice curse bubble),
-> `STATPLAT_OAD` is the right schema — same as the cubes. Empirically,
-> using `ENEMY_OAD` for a script-less, anchored, `Mass=0` decorative mesh
-> left the actor in the object table (`Level::Level: ..., object count`
-> unchanged) but with `grep -c RenderActor3DAnimates wf_game.log` one
-> short of the expected animated-actor count; switching to `STATPLAT_OAD`
-> restored the missing render-actor and the mesh appeared. *Root cause is
-> still unconfirmed — possibly an `hp`-default or `_InitScript()` path
-> issue when the Enemy actor has no script and no health field — flagged
-> in TODO.md for follow-up.* Until that's traced, the practical rule is:
-> match the schema to the actor's role per the type guide
-> ([docs/2026-05-03-oas-actor-types.md](2026-05-03-oas-actor-types.md)),
-> and use the `RenderActor3DAnimates` log-count diff as a quick smoke test
-> when an actor refuses to render.
+> **Fix:** either move the actor's authored center inside an existing
+> room's bbox, *or* expand the room. For single-room levels (like the
+> qbert_practice pyramid) the cleanest fix is a global-ish room bbox
+> (e.g. `±200` in every axis around the room centre) so that any
+> authored position — including off-camera "parking" locations the
+> scripts want to teleport actors to — lands inside the room.
+> Worked example: see
+> [docs/plans/2026-05-11-qbert-player-death-and-curse-bubble.md](plans/2026-05-11-qbert-player-death-and-curse-bubble.md)
+> § "2026-05-12 implementation notes" — the curse bubble at authored
+> `Z=-100` was outside the room and didn't render until the room bbox
+> was expanded.
 
 Wire-displayed objects in Blender should be everything that doesn't render
 in-engine (`Mesh` / `Matte` excluded). The `display_type='WIRE'` automation
