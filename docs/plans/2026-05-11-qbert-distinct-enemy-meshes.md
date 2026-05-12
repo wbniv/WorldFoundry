@@ -13,7 +13,7 @@ Functionally the enemies are all in (see today's retro plans and the multi-enemy
 
 This plan upgrades the three remaining enemy silhouettes to arcade-recognisable 3D forms, following the established procedural-Blender-primitives pattern used by the player mesh.
 
-## Reference (arcade Q*bert)
+## Reference (arcade Q\*bert)
 
 Reference comes from **MAME screenshots and web reference images**, not from ROM sprite extraction. Pixel-tile extraction adds no value for 3D-mesh authoring — we just need the silhouette and the palette, both of which a screenshot delivers directly. Save reference images to `docs/plans/screenshots/qbert-arcade-ref-*.png` as we collect them.
 
@@ -28,7 +28,7 @@ Reference comes from **MAME screenshots and web reference images**, not from ROM
 
 References:
 
-- [Wikipedia — Q*bert](https://en.wikipedia.org/wiki/Q*bert) — enemy roster and visual descriptions.
+- [Wikipedia — Q\*bert](https://en.wikipedia.org/wiki/Q*bert) — enemy roster and visual descriptions.
 - Existing arcade-palette extraction work: [2026-05-04-qbert-arcade-palette-all-rounds.md](../investigations/2026-05-04-qbert-arcade-palette-all-rounds.md).
 
 ## Critical files
@@ -49,16 +49,16 @@ Measured post-Phase-C (commit `1527e14`) from the Blender scene:
 | Player | 206 | 222 | Reference budget — set by [2026-05-10-qbert-player-mesh.md](2026-05-10-qbert-player-mesh.md) |
 | Red ball (each of 3) | 42 | 80 | Subdiv-1 icosphere; unchanged |
 | Green ball | 42 | 80 | Same mesh as red, different material |
-| Slick | 128 | 148 | Body 42 + hat 26 + 2 eyes + 2 pupils + 2 feet |
-| Sam | 128 | 148 | Same mesh shape as Slick, different hat colour |
-| Ugg | 116 | 154 | Body 42 + head 42 + 2 eyes + 2 pupils + 2 feet |
-| Wrong-Way | 116 | 154 | Same mesh shape as Ugg, different body colour |
+| Slick | 234 | 290 | Body subdiv-2 icosphere (42v/80f) + 16-sided hat + smoother eyes/pupils/feet |
+| Sam | 234 | 290 | Same mesh shape as Slick, different hat colour |
+| Ugg | 244 | 352 | Body + head both subdiv-2 (42v each) + smoother eyes/pupils/feet |
+| Wrong-Way | 244 | 352 | Same mesh shape as Ugg, different body colour |
 | Coily egg | 42 | 80 | Elongated subdiv-1 icosphere |
-| Coily snake | 112 | 158 | 4 tapered icosphere segments (12v each) + 2 eyes + 2 pupils |
+| Coily snake | 232 | 398 | 4 tapered subdiv-2 icosphere segments + 2 eyes + 2 pupils |
 | Spinning disc (each of 2) | 34 | 64 | Pre-existing — flat cylinder; unchanged |
-| **Total enemy mesh footprint** | **~1024** | **~1316** | 8 enemies + 2 discs + 3 red balls + green ball (worst-case all on-screen) |
+| **Total dynamic-actor footprint** | **~1846** | **~2470** | Player + 3 red balls + green + Slick + Sam + Ugg + WW + Coily egg + snake + 2 discs |
 
-All enemy meshes are well under the player's 206-vert reference budget. The 8-enemy + 2-disc + 4-ball worst case sums to ~1024 verts of dynamic-actor geometry; the static 28-cube pyramid plus the player adds more on top, but the level-pool budget bumps from [2026-05-09-qbert-cube-palettes-16-rounds.md](2026-05-09-qbert-cube-palettes-16-rounds.md) already accommodate it (1344-cube fan-out fits in the bumped pool).
+After the 2026-05-11 face-count doubling pass, each humanoid enemy lands at ~234–244 verts and 290–398 faces — comparable to the player's 206v/222f reference. Worst-case all-actors-on-screen footprint is ~1846 verts / ~2470 faces; the static 28-cube pyramid adds more on top, but the level-pool budget bumps from [2026-05-09-qbert-cube-palettes-16-rounds.md](2026-05-09-qbert-cube-palettes-16-rounds.md) (1344-cube fan-out) already accommodate it.
 
 ## Pattern to mirror
 
@@ -91,7 +91,7 @@ Goal: cube-flipper humanoid silhouette.
    - **Pupils:** smaller black UV-spheres just in front of the eyes.
    - **Feet:** two flat ovals (scaled UV-spheres), straddling ±Y, dark grey.
 3. Hat colour: arcade has Slick & Sam **both green-hatted** ([L2R1 attract reference](screenshots/qbert-arcade-L2R1-early.png)). Distinguish via subtle brightness — Slick brighter `(0.10, 0.85, 0.20)`, Sam slightly darker `(0.05, 0.55, 0.12)`. (Original Python had Sam red `(0.85, 0.10, 0.10)` — arcade-wrong; fixed here.)
-4. Final mesh: **128 verts / 148 faces** per actor (body 42 + hat 26 + 2 eyes + 2 pupils + 2 feet).
+4. Final mesh: **234 verts / 290 faces** per actor (subdiv-2 body 42v/80f + 16-sided hat + 8-seg-5-ring eyes + 6-seg-4-ring pupils + 8-seg-4-ring feet).
 
 ### Phase B — Ugg & Wrong-Way (side-of-pyramid climbers)
 
@@ -111,7 +111,7 @@ Goal: humanoid climber that reads as "creature standing on the side of a cube" a
    - **Feet:** two flat ovals at the bottom, dark grey.
    - **Horns removed** — not arcade-faithful for either Ugg or Wrong-Way.
 3. Per-variant body colour: Ugg `(1.00, 0.55, 0.10)` orange, Wrong-Way `(0.55, 0.10, 0.85)` purple (preserved from prior code; arcade-faithful confirmation deferred to a colour-grading pass).
-4. Final mesh: **116 verts / 154 faces** per actor (body 42 + head 42 + 2 eyes + 2 pupils + 2 feet).
+4. Final mesh: **244 verts / 352 faces** per actor (subdiv-2 body + subdiv-2 head + 8-seg-5-ring eyes + 6-seg-4-ring pupils + 8-seg-4-ring feet).
 
 ### Phase C — Coily (egg + snake)
 
@@ -132,7 +132,7 @@ Goal: visibly snake-like Coily; egg distinct from a plain ball.
 2. Stack 4 icosphere segments at the same `_COILY_SEG_SPACING` as before (preserves the actor-positioning math via `_COILY_HALF_HEIGHT`), but with per-segment radii in `_COILY_SEG_RADII = [0.22, 0.30, 0.38, 0.50]` bottom→top — tail is small, head is large. Each segment is Z-squashed to `_COILY_SEG_HEIGHT / radius` so heights stay consistent.
 3. Add eyes on the head (top segment): two white UV-spheres at `(0.32, ±0.18, head_z)` + two black-sphere pupils at `(0.40, ±0.18, head_z)`.
 4. Material: purple body, white+black eyes.
-5. Final mesh: **112 verts / 158 faces** (4 tapered icosphere segments + 2 eyes + 2 pupils). Egg: **42 verts / 80 faces** (elongated icosphere).
+5. Final mesh: **232 verts / 398 faces** (4 tapered subdiv-2 icosphere segments + 2 eyes + 2 pupils). Egg: **42 verts / 80 faces** (elongated icosphere).
 
 ## Verification
 

@@ -1312,29 +1312,31 @@ def _build_flipper_actor(name, mesh_name, hat_rgb, location):
 
     parts = []  # (object, material)
 
-    # Body — icosphere subdiv 1 (42 verts), squashed in Z to read as a torso.
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.45, location=(0, 0, 0))
+    # Body — icosphere subdiv 2 (162 verts / 320 faces), squashed in Z to read
+    # as a torso. Higher subdiv than the ball enemies for a smoother humanoid
+    # silhouette.
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.45, location=(0, 0, 0))
     bpy.context.object.scale = (1.0, 1.0, 0.75)
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     parts.append((bpy.context.object, mat_body))
 
-    # Hat — flat 12-sided cylinder on top.
-    bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.55, depth=0.10, location=(0, 0, 0.37))
+    # Hat — flat 16-sided cylinder on top.
+    bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.55, depth=0.10, location=(0, 0, 0.37))
     parts.append((bpy.context.object, mat_hat))
 
-    # Eyes — two small white UV-spheres on +X face of the body (~24 verts each).
+    # Eyes — two small white UV-spheres on +X face of the body.
     for y in (-0.16, 0.16):
-        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.09, segments=6, ring_count=4, location=(0.30, y, 0.12))
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.09, segments=8, ring_count=5, location=(0.30, y, 0.12))
         parts.append((bpy.context.object, mat_eye))
 
     # Pupils — smaller black spheres in front of the eyes.
     for y in (-0.16, 0.16):
-        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.045, segments=5, ring_count=3, location=(0.36, y, 0.12))
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.045, segments=6, ring_count=4, location=(0.36, y, 0.12))
         parts.append((bpy.context.object, mat_pupil))
 
     # Feet — flat ovals at the bottom (squashed UV-spheres), straddling ±Y.
     for y in (-0.22, 0.22):
-        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.18, segments=6, ring_count=3, location=(0.04, y, -0.34))
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.18, segments=8, ring_count=4, location=(0.04, y, -0.34))
         bpy.context.object.scale = (1.3, 1.0, 0.35)
         bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
         parts.append((bpy.context.object, mat_feet))
@@ -1422,29 +1424,29 @@ def _build_climber_actor(name, mesh_name, body_rgb, location):
 
     parts = []
 
-    # Body — icosphere subdiv 1, scale 0.40, Z-squash 0.85.
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.40, location=(0, 0, 0))
+    # Body — icosphere subdiv 2, scale 0.40, Z-squash 0.85.
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.40, location=(0, 0, 0))
     bpy.context.object.scale = (1.0, 1.0, 0.85)
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     parts.append((bpy.context.object, mat_body))
 
-    # Head — smaller icosphere on top.
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.28, location=(0, 0, 0.55))
+    # Head — smaller icosphere subdiv 2 on top.
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.28, location=(0, 0, 0.55))
     parts.append((bpy.context.object, mat_body))
 
     # Eyes — two large white UV-spheres on +X face of the head.
     for y in (-0.13, 0.13):
-        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.10, segments=6, ring_count=4, location=(0.18, y, 0.58))
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.10, segments=8, ring_count=5, location=(0.18, y, 0.58))
         parts.append((bpy.context.object, mat_eye))
 
     # Pupils — smaller black spheres in front of the eyes.
     for y in (-0.13, 0.13):
-        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.05, segments=5, ring_count=3, location=(0.25, y, 0.58))
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.05, segments=6, ring_count=4, location=(0.25, y, 0.58))
         parts.append((bpy.context.object, mat_pupil))
 
     # Feet — two flat ovals at the bottom of the body.
     for y in (-0.18, 0.18):
-        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.16, segments=6, ring_count=3, location=(0.04, y, -0.38))
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.16, segments=8, ring_count=4, location=(0.04, y, -0.38))
         bpy.context.object.scale = (1.3, 1.0, 0.35)
         bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
         parts.append((bpy.context.object, mat_feet))
@@ -1759,7 +1761,8 @@ def _build_coily_snake_actor(name, mesh_name, location):
     for seg in range(_COILY_SEG_COUNT):
         seg_z = z_offset + seg * _COILY_SEG_SPACING
         radius = _COILY_SEG_RADII[seg]
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=radius, location=(0, 0, seg_z))
+        # subdiv=2 (42v/80f per segment) — smoother body chain.
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=radius, location=(0, 0, seg_z))
         # Z-squash to flatten each segment so the chain reads as articulated.
         bpy.context.object.scale = (1.0, 1.0, _COILY_SEG_HEIGHT / radius)
         bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
