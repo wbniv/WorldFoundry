@@ -5,19 +5,19 @@ status: Done 2026-05-11
 scope: ~30 LOC of zForth in [wflevels/qbert_practice/blender_create_qbert.py](../../wflevels/qbert_practice/blender_create_qbert.py)
 ---
 
-# Q*bert hop-direction facing rotation (Phase 1: smooth yaw)
+# Q✱bert hop-direction facing rotation (Phase 1: smooth yaw)
 
 **Status:** Done 2026-05-11 — `HOP_FACING` (mb 433) + DELTA_YAW lerp block landed in [blender_create_qbert.py](../../wflevels/qbert_practice/blender_create_qbert.py); resets wired into restart + apex-respawn paths.
 
 ## Context
 
-In the original arcade Q*bert, the character snaps to face the diagonal he's about to hop toward — there's a dedicated sprite facing for each of NE / SE / SW / NW. Our 3D player mesh currently teleports to the next cube without ever rotating, which reads as "sliding," not "hopping."
+In the original arcade Q✱bert, the character snaps to face the diagonal he's about to hop toward — there's a dedicated sprite facing for each of NE / SE / SW / NW. Our 3D player mesh currently teleports to the next cube without ever rotating, which reads as "sliding," not "hopping."
 
 User direction: since we're in real 3D rather than 2D sprite cels, **smoothly interpolate** the yaw across the hop's 12-frame cooldown ("keyframed" rather than snap). Stretch-and-squash deformation is a Phase 2 follow-up — out of scope here.
 
 ## Existing facts to reuse
 
-- **Hop state machine** lives in the Q*bert player wf_Script at [blender_create_qbert.py:366–572](../../wflevels/qbert_practice/blender_create_qbert.py). The hop is currently *instant* — `do-hop` ([line 463](../../wflevels/qbert_practice/blender_create_qbert.py)) writes the new XYZ in one tick, then sets `mb 402 HOP_COOLDOWN = 12` to gate further input.
+- **Hop state machine** lives in the Q✱bert player wf_Script at [blender_create_qbert.py:366–572](../../wflevels/qbert_practice/blender_create_qbert.py). The hop is currently *instant* — `do-hop` ([line 463](../../wflevels/qbert_practice/blender_create_qbert.py)) writes the new XYZ in one tick, then sets `mb 402 HOP_COOLDOWN = 12` to gate further input.
 - **Hop-direction deltas** already exist as `(dr, dc)` pairs passed into `do-hop`:
   - `(-1, 0)` UP → NE diagonal
   - `( 1, 1)` RIGHT → SE diagonal
@@ -49,7 +49,7 @@ Right before the existing `12 402 write-mailbox` cooldown set:
 4. Compute per-frame increment `delta * 0.25 / 12` revolutions and store in mb 434.
 5. Update `HOP_FACING := target-facing` (mb 433).
 
-For a U-turn (`delta = -2`), Q*bert rotates 180° over 12 frames — slightly faster angular speed, but acceptable because U-turns are rare. Phase 2 can revisit easing.
+For a U-turn (`delta = -2`), Q✱bert rotates 180° over 12 frames — slightly faster angular speed, but acceptable because U-turns are rare. Phase 2 can revisit easing.
 
 ### New tick block — interpolate yaw across cooldown (~2 LOC added)
 
@@ -91,12 +91,12 @@ Per memory: after editing the .blend's Forth, run steps 2–3 of the qbert build
    - RIGHT (SE): rotates to face SE.
 3. **Reverse direction test**: hop SW, then immediately hop NE on landing → 180° turn animates over 12 frames in one consistent direction (script picks CCW).
 4. **Adjacent direction test**: hop SW → hop SE → hop NE → hop NW. Each is a 90° turn; all should look symmetrical (no visible 270° "long way" rotation — that's what the signed-shortest math guards against).
-5. **Death + respawn test**: drive Q*bert off the edge (ball falls), wait for FALL_PHASE to snap to apex. Apex Q*bert should be back at the canonical rest yaw, not whatever heading he had when he fell (mb 433/434 reset confirms).
+5. **Death + respawn test**: drive Q✱bert off the edge (ball falls), wait for FALL_PHASE to snap to apex. Apex Q✱bert should be back at the canonical rest yaw, not whatever heading he had when he fell (mb 433/434 reset confirms).
 6. **Autopilot mode**: enable the walker autopilot (`mb 430 != 0`) — autopilot calls `do-hop` directly so rotations should animate the same way during the screenshot capture sweep. No test artefacts expected (CAPTURE_TRIGGER fires at frame 0 and frame post-hop, both at rest between hops).
 
 ## Follow-up plans
 
-- [Q*bert physics-based player hops](2026-05-10-qbert-physics-hops.md) — replaces today's teleport `do-hop` with velocity-driven parabolic arcs. At integration time, swap the rotation block's trigger from `HOP_COOLDOWN > 0` to the physics-hops "mid-hop" signal (~1 LOC). Yaw interpolation logic is reusable as-is.
+- [Q✱bert physics-based player hops](2026-05-10-qbert-physics-hops.md) — replaces today's teleport `do-hop` with velocity-driven parabolic arcs. At integration time, swap the rotation block's trigger from `HOP_COOLDOWN > 0` to the physics-hops "mid-hop" signal (~1 LOC). Yaw interpolation logic is reusable as-is.
 
 ## Out of scope (Phase 2+)
 

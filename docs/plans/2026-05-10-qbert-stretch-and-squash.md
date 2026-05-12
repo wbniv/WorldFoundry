@@ -5,13 +5,13 @@ status: Deferred 2026-05-11
 scope: Engine wiring (~50-75 LOC across 5 files) + script consumer (~10 LOC of zForth in qbert player)
 ---
 
-# Q*bert stretch-and-squash (Phase 2)
+# Q✱bert stretch-and-squash (Phase 2)
 
 **Status:** Deferred 2026-05-11 — waits on per-actor scale wiring in the engine; revisit after enemy AI / cube logic lands.
 
 ## Context
 
-[Phase 1 hop rotation](2026-05-10-qbert-hop-facing-rotation.md) and [Phase 1.5 hop-arc motion](2026-05-10-qbert-hop-arc-motion.md) shipped — Q*bert now visibly hops in a smoothstepped XY trajectory plus a parabolic Z arc, rotating to face each diagonal as he goes. He still hops as a *rigid* shape, though. Traditional animation calls for stretch-and-squash on every hop: vertical elongation as he leaps, horizontal compression on landing — sells the "alive, springy" feel.
+[Phase 1 hop rotation](2026-05-10-qbert-hop-facing-rotation.md) and [Phase 1.5 hop-arc motion](2026-05-10-qbert-hop-arc-motion.md) shipped — Q✱bert now visibly hops in a smoothstepped XY trajectory plus a parabolic Z arc, rotating to face each diagonal as he goes. He still hops as a *rigid* shape, though. Traditional animation calls for stretch-and-squash on every hop: vertical elongation as he leaps, horizontal compression on landing — sells the "alive, springy" feel.
 
 This requires per-actor non-uniform scale, which WF doesn't currently support at runtime. The OAS schema already has `x_scale / y_scale / z_scale` ([levelcon.h:87](../../wfsource/source/oas/levelcon.h)) as load-time fields, but they're *stored but never read* — confirmed by `grep` returning only the debug `offsetof` print at [level.cc:391](../../wfsource/source/game/level.cc). So the engine wiring is greenfield.
 
@@ -42,7 +42,7 @@ Five files:
 
 **Default safety**: actors that never write a scale mailbox keep `_scale = (1,1,1)`, render exactly as today. No regression risk on snowgoons / marble-madness / any existing level.
 
-### Part B — Q*bert script consumer (~10 LOC of zForth)
+### Part B — Q✱bert script consumer (~10 LOC of zForth)
 
 In the existing per-tick lerp block in [blender_create_qbert.py](../../wflevels/qbert_practice/blender_create_qbert.py) (right after the position writes, before the `then\n` of the lerp's outer if), compute scale from `t`:
 
@@ -51,7 +51,7 @@ In the existing per-tick lerp block in [blender_create_qbert.py](../../wflevels/
 
 Both curves use the same `4*t*(1-t)` profile (already computed for the Z arc bonus — can reuse). Both write to mailboxes 3040 (X), 3041 (Y), 3042 (Z) per frame.
 
-When cooldown is 0 (between hops), no script writes happen — scale stays at whatever the last lerp wrote, which for `t=1` is exactly `1.0` for both. Q*bert returns to natural shape at rest. ✓
+When cooldown is 0 (between hops), no script writes happen — scale stays at whatever the last lerp wrote, which for `t=1` is exactly `1.0` for both. Q✱bert returns to natural shape at rest. ✓
 
 Anticipation squash + landing impact squash are deferred to a Phase 3 follow-up.
 
@@ -79,19 +79,19 @@ No new OAS fields. No new physics path. No new render passes.
 
 1. **Engine builds clean** with `bash engine/build_game.sh`.
 2. **Snowgoons regression check**: boot snowgoons standalone, verify player and floor render at normal scale (no scale mailbox writes anywhere → `_scale = (1,1,1)` everywhere).
-3. **Q*bert smoke**: boot qbert standalone with no script changes (Part A only), verify all 28 cubes + player render at normal scale.
-4. **Q*bert visual** (Part A + B): drive Q*bert through hops, verify visible vertical stretch mid-hop and horizontal narrowing. At rest, Q*bert should return to natural proportions. Try several hop directions to confirm scale isn't "stuck" anywhere.
-5. **Death + respawn**: drive into a fall. Q*bert ramps Z down (FALL_PHASE) — should keep natural shape (no lerp running, scale stays at last value = `(1,1,1)`).
+3. **Q✱bert smoke**: boot qbert standalone with no script changes (Part A only), verify all 28 cubes + player render at normal scale.
+4. **Q✱bert visual** (Part A + B): drive Q✱bert through hops, verify visible vertical stretch mid-hop and horizontal narrowing. At rest, Q✱bert should return to natural proportions. Try several hop directions to confirm scale isn't "stuck" anywhere.
+5. **Death + respawn**: drive into a fall. Q✱bert ramps Z down (FALL_PHASE) — should keep natural shape (no lerp running, scale stays at last value = `(1,1,1)`).
 6. **Memory budget**: no new RAM. 3 new mailbox slots × ~4 bytes per slot per actor = ~12 bytes per actor. 28 cubes + ~17 other actors = ~540 bytes total — negligible.
 
 ## Follow-up plans
 
-- **Wire up EMAILBOX_KEYFRAME for vertex-level morphs** — `EMAILBOX_KEYFRAME` ([mailbox.inc:64](../../wfsource/source/mailbox/mailbox.inc), local id 3015) currently has UNIMPLEMENTED stubs at [actor.cc:1184 + 1401](../../wfsource/source/game/actor.cc). The `AnimateRenderObject3D` vertex-blending machinery at `wfsource/source/anim/anim.cc:34-180` already supports per-frame vertex interpolation via `RenderObject3D::GetWrittableVertexList()`. Wiring this up enables arbitrary mesh deformation beyond what scale alone can express: twists, asymmetric squash, custom poses per hop direction, blink/wave gestures, etc. Heavier than scale (engine + mesh-bake + per-actor keyframe storage) but strictly more powerful — pursue once a use case emerges that scale can't cover. Q*bert specifically might use this in Phase 4+ for the "swearing-fit" idle animation when the player hesitates.
+- **Wire up EMAILBOX_KEYFRAME for vertex-level morphs** — `EMAILBOX_KEYFRAME` ([mailbox.inc:64](../../wfsource/source/mailbox/mailbox.inc), local id 3015) currently has UNIMPLEMENTED stubs at [actor.cc:1184 + 1401](../../wfsource/source/game/actor.cc). The `AnimateRenderObject3D` vertex-blending machinery at `wfsource/source/anim/anim.cc:34-180` already supports per-frame vertex interpolation via `RenderObject3D::GetWrittableVertexList()`. Wiring this up enables arbitrary mesh deformation beyond what scale alone can express: twists, asymmetric squash, custom poses per hop direction, blink/wave gestures, etc. Heavier than scale (engine + mesh-bake + per-actor keyframe storage) but strictly more powerful — pursue once a use case emerges that scale can't cover. Q✱bert specifically might use this in Phase 4+ for the "swearing-fit" idle animation when the player hesitates.
 
 ## Out of scope (Phase 3+)
 
 - **Anticipation squash** at hop start (frame 0 has slight crouch before leap).
-- **Landing impact squash** (final frame compresses Q*bert horizontally before recovery).
+- **Landing impact squash** (final frame compresses Q✱bert horizontally before recovery).
 - **Recovery oscillation** — spring-back damped sine after landing (would need cooldown-extending state, currently cd=0 = "ready for next hop").
 - **Per-actor uniform scale** as a separate single-axis convenience mailbox (probably not needed).
 - **Authoring scale via OAS** in level files — Phase 2 wires up the load path but no levels currently set non-default scale; once the first level wants it, the Blender exporter writes the OAS values.

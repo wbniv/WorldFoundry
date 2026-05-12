@@ -600,7 +600,7 @@ make_empty('Matte', ROOM_POS, 'matte',
 
 The OAS schemas for several "abstract" actor types (camera, levelobj, matte, camshot, target, etc.) default `Model Type` to `Box`. Any such actor inside the camera frustum will render as one of these random debug cubes.
 
-In the Q\*bert MVP, the matte at `(0, 0, 6)` was inside the frustum and drew a magenta hex on top of the apex cube; four other Box actors (Camera, Level, cs_pyramid, cs_death) rendered offscreen but still occupied poly slots in the renderer.
+In the Q✱bert MVP, the matte at `(0, 0, 6)` was inside the frustum and drew a magenta hex on top of the apex cube; four other Box actors (Camera, Level, cs_pyramid, cs_death) rendered offscreen but still occupied poly slots in the renderer.
 
 **Fix:** Override `Model Type` to `'None'` on every infrastructure actor that has no real mesh:
 
@@ -618,7 +618,7 @@ The proper long-term fix is to gate `RenderActor3DBox`'s random-material renderi
 
 ## wf_blender exporter writes two `Mesh Name` fields per actor — the first wins
 
-**Symptom:** Mesh actor that has both real Blender mesh data and a `wf_Mesh Name` property override (pointing at a hand-authored `.iff`) renders with the *Blender* mesh's material — not the override file's material. In the Q\*bert MVP this caused all 84 cubes to render white instead of their intended palette colours, even though `cube_state{0,1,2}.iff` had the right `MATL` chunks on disk.
+**Symptom:** Mesh actor that has both real Blender mesh data and a `wf_Mesh Name` property override (pointing at a hand-authored `.iff`) renders with the *Blender* mesh's material — not the override file's material. In the Q✱bert MVP this caused all 84 cubes to render white instead of their intended palette colours, even though `cube_state{0,1,2}.iff` had the right `MATL` chunks on disk.
 
 **Cause:** `wftools/wf_blender/export_level.py:994` writes a `Mesh Name` line **before** iterating the OAS schema fields, exporting the Blender geometry to `<obj_name>.iff` (overwriting any same-named file in the level dir!). The schema iteration then emits a *second* `Mesh Name` line from the `wf_Mesh Name` override. The engine's lev parser uses the first occurrence; the override is silently ignored.
 
@@ -754,7 +754,7 @@ Every `: word ... ;` definition consumes dictionary slots; same word in two
 actors compiles twice. If you see `zforth compile error 2` (`ZF_ABORT_OUTSIDE_MEM`)
 at compile time, the dict is full. Remediation: bump `ZF_DICT_SIZE` in
 `engine/stubs/zfconf.h` and rebuild the engine. Default raised 2026-05-03 from
-16 KB to 64 KB to fit the Q*bert MVP director + player scripts.
+16 KB to 64 KB to fit the Q✱bert MVP director + player scripts.
 
 **Diagnosing all of the above:** watch engine stderr after each level boot for
 `zforth compile error N` lines. Engine continues running with broken/missing

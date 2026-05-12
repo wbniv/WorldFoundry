@@ -8,7 +8,7 @@
 
 The Phase E walker captured 30 state-pair PNGs across L1R1..L4R3 and surfaced a real authoring bug the user has called out:
 
-1. **Cube goes BLACK / disappears when Q*bert lands on it** — instead of flipping from state-0 colour to the round's state-2 colour.
+1. **Cube goes BLACK / disappears when Q✱bert lands on it** — instead of flipping from state-0 colour to the round's state-2 colour.
 2. **The cube top doesn't show the level-correct colour** when it does flip — secondary symptom of the same wiring issue.
 
 The state-0 (round-start) colours are fine; the bug is on the state transition specifically. Reading [scripts/research/wf/qbert_walker_diff.py](../../scripts/research/wf/qbert_walker_diff.py) output, the WF state-1 column reads `#000000` for most rounds, with three rounds (L3R3, L4R2, L4R3) showing some non-canonical colour — all 32 cells fail the diff vs MAME.

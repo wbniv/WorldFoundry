@@ -9,7 +9,7 @@ dispatch table: a mailbox stores the current step index, and every tick the scri
 compares it against each arm and jumps to the right one.
 
 ```forth
-\ current style — Q*bert autopilot sketch
+\ current style — Q✱bert autopilot sketch
 : autopilot
   STEP @ 0 = if  1  0 do-hop  1 STEP !  exit  then
   STEP @ 1 = if  -1 0 do-hop  2 STEP !  exit  then
@@ -280,7 +280,7 @@ be proposed as a standalone engine improvement after the current port ships, wit
 ## Open questions
 
 1. **Multiple coroutines per actor?** Probably not needed — one per actor is sufficient
-   for the Q*bert use case. A pool would be needed for e.g. cutscene directors that
+   for the Q✱bert use case. A pool would be needed for e.g. cutscene directors that
    sequence multiple sub-routines.
 
 2. **`pause` with arguments on the data stack?** If the coroutine needs to yield a
@@ -554,7 +554,7 @@ layer.
 
 ## Updated recommendation
 
-**For Q*bert ports (now):** Use Option A (preprocessor) for zForth — it requires no
+**For Q✱bert ports (now):** Use Option A (preprocessor) for zForth — it requires no
 engine changes and keeps Forth source readable. The dispatch-table output is the same
 code that works today.
 

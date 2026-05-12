@@ -13,7 +13,7 @@ scope: ~30-50 LOC in [wfsource/source/physics/jolt/jolt_backend.cc](../../wfsour
 
 The 2026-05-10 cap-bump investigation ([docs/investigations/2026-05-10-qbert-engine-caps.md](../investigations/2026-05-10-qbert-engine-caps.md)) found that when the Jolt body pool is exhausted, `gBodyInterface->CreateAndAddBody()` returns `JPH::BodyID(0xFFFFFFFF)` (invalid). The previous wrapper code stored the invalid id in a registered `BodyEntry` and returned a valid wrapper handle anyway. Later, when the next `JoltMakeStaticMesh` ran and saw a non-invalid wrapper handle, `JoltBodyDestroy` called `RemoveBody(invalidID)` → segfault inside `JPH::BodyManager::DestroyBodies`.
 
-Yesterday's symptom: Q*bert with 1344 cube actors and Jolt pool sized for 1024 → cubes 1025–1344 silently registered with invalid joltID → segfault on the next destroy. Diagnosed via gdb backtrace; the pool was bumped to 4096 to unblock the day, then reverted to 1024 once Phase 1 cube consolidation dropped to 28 bodies. The silent-failure-then-segfault behaviour is a footgun the next pool-exhaustion incident would rediscover.
+Yesterday's symptom: Q✱bert with 1344 cube actors and Jolt pool sized for 1024 → cubes 1025–1344 silently registered with invalid joltID → segfault on the next destroy. Diagnosed via gdb backtrace; the pool was bumped to 4096 to unblock the day, then reverted to 1024 once Phase 1 cube consolidation dropped to 28 bodies. The silent-failure-then-segfault behaviour is a footgun the next pool-exhaustion incident would rediscover.
 
 This plan adds the defensive check at every Jolt body-creation site so future exhaustion produces a clean, loggable diagnostic ("jolt: body pool exhausted, returning kJoltInvalidBodyID") instead of an obscure crash.
 

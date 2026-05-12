@@ -1,7 +1,7 @@
 # Plan — Walker diff sample-point nudge
 
 **Date:** 2026-05-09
-**Status:** Obsolete 2026-05-11 — hardcoded pixel-sample points only made sense under the original 2D-ish fixed-camera capture. With Q*bert now in real 3D (per-hop camera changes, parabolic Z arc, hop-direction rotation, perspective foreshortening), `(x, y)` sample points no longer land on a fixed cube face across frames. Cube-colour parity should be verified by reading the live `EMAILBOX_FACE_COLOR_TOP` mailbox via the debug bridge, not by pixel-sampling the framebuffer.
+**Status:** Obsolete 2026-05-11 — hardcoded pixel-sample points only made sense under the original 2D-ish fixed-camera capture. With Q✱bert now in real 3D (per-hop camera changes, parabolic Z arc, hop-direction rotation, perspective foreshortening), `(x, y)` sample points no longer land on a fixed cube face across frames. Cube-colour parity should be verified by reading the live `EMAILBOX_FACE_COLOR_TOP` mailbox via the debug bridge, not by pixel-sampling the framebuffer.
 
 ## Context
 

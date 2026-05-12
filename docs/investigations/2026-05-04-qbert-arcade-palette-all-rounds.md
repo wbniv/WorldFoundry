@@ -1,4 +1,4 @@
-# Q*bert Arcade Palette — All Rounds (MAME palette investigation)
+# Q✱bert Arcade Palette — All Rounds (MAME palette investigation)
 
 **Date:** 2026-05-04  
 **Updated:** 2026-05-05  
@@ -138,7 +138,7 @@ Screenshot source: `qbert-arcade-L3R1-mid.png`
 
 ### Gottlieb hardware palette
 
-The Q*bert cabinet uses a Gottlieb System 2 board with a runtime-programmable 16-color palette:
+The Q✱bert cabinet uses a Gottlieb System 2 board with a runtime-programmable 16-color palette:
 
 - **Palette RAM address:** CPU 0x5000–0x57FF (programmed by the 6809 CPU)
 - **Read behavior:** write-only hardware — reads always return `0x00` regardless of what was written
@@ -262,7 +262,7 @@ Run via: `mame qbert -rompath assets/arcade-roms -autoboot_script scripts/resear
 | `qbert_dip_cheat.lua` | DIP cheat + screenshot every 1500 frames — produced original pixel-sample table | Done |
 | `qbert_palette_tap.lua` | Write-tap on 0x5000–0x501F — installs correctly; had `off` vs `off-0x5000` index bug | Superseded |
 | `qbert_wide_scan.lua` | Full RAM range scan — found lives counter at 0x0D00 | Done |
-| `qbert_lives_hunt.lua` | RAM diff across a Q*bert death to isolate lives address | Done |
+| `qbert_lives_hunt.lua` | RAM diff across a Q✱bert death to isolate lives address | Done |
 | `qbert_find_state_and_palette.lua` | RAM snapshot diff before/after one hop to find cube-state address | Done |
 | `qbert_get_colors.lua` | Earlier `:palette` device prototype; coin-insert timing + live palette reads | Superseded by capture |
 | `qbert_level_colors.lua` | `:palette` device + candidate cube-state RAM scan in one pass | Superseded by capture |

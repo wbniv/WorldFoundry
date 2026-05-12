@@ -6,7 +6,7 @@
 
 ## Context
 
-Phase B's red balls hop on a smoothstep XY lerp + parabolic Z arc, but the mesh stays at scale (1, 1, 1) throughout. Q*bert's player has a stretch-and-squash deformation across each hop ([blender_create_qbert.py:624-648](../../wflevels/qbert_practice/blender_create_qbert.py)) which sells the "alive, springy" feel; the balls currently look rigid by comparison. The user wants the same idiom applied to the ball but **at a reduced amplitude — more subdued than the player**, since the ball should read as a bouncing object rather than a character.
+Phase B's red balls hop on a smoothstep XY lerp + parabolic Z arc, but the mesh stays at scale (1, 1, 1) throughout. Q✱bert's player has a stretch-and-squash deformation across each hop ([blender_create_qbert.py:624-648](../../wflevels/qbert_practice/blender_create_qbert.py)) which sells the "alive, springy" feel; the balls currently look rigid by comparison. The user wants the same idiom applied to the ball but **at a reduced amplitude — more subdued than the player**, since the ball should read as a bouncing object rather than a character.
 
 Concrete goal: per hop, the ball compresses at takeoff, stretches mid-air, compresses at landing, snaps back to unit scale on the landing frame — mirroring the player but with half the deformation magnitude.
 

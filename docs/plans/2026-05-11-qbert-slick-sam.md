@@ -1,4 +1,4 @@
-# Plan — Q*bert Slick &amp; Sam (cube-flippers)
+# Plan — Q✱bert Slick &amp; Sam (cube-flippers)
 
 **Date:** 2026-05-11
 **Status:** Done (2026-05-11, commit `5c93811`)
@@ -7,19 +7,19 @@
 
 ## Context
 
-Slick and Sam are the **purple cube-flipper** enemies in arcade Q*bert. They bounce down the pyramid like a Red Ball, but on landing they *revert* the cube they touch (state 2 → state 0), undoing Q*bert's progress. They don't kill the player on contact — Q*bert kills *them* by landing on the same cube.
+Slick and Sam are the **purple cube-flipper** enemies in arcade Q✱bert. They bounce down the pyramid like a Red Ball, but on landing they *revert* the cube they touch (state 2 → state 0), undoing Q✱bert's progress. They don't kill the player on contact — Q✱bert kills *them* by landing on the same cube.
 
 Gameplay-wise they're the first enemy that interacts with the cube-state grid, which is the substantive new system here.
 
-## Reference (arcade Q*bert)
+## Reference (arcade Q✱bert)
 
 - Both Slick and Sam are visually identical purple humanoids; only their spawn cadence and round-appearance differ.
 - Bounce down the pyramid using the same hop cadence and (row+1, col) / (row+1, col+1) alternation as Red Ball.
 - On landing on a cube that's been flipped (state 2 or state 3), reset it to state 0 ("undoing" the player's progress).
 - Vanish off the bottom of the pyramid (same as Red Ball).
-- Killed if Q*bert lands on their cube (no death animation needed — they just disappear).
+- Killed if Q✱bert lands on their cube (no death animation needed — they just disappear).
 
-See: [Wikipedia — Q*bert](https://en.wikipedia.org/wiki/Q*bert) and arcade attract-mode reference.
+See: [Wikipedia — Q✱bert](https://en.wikipedia.org/wiki/Q*bert) and arcade attract-mode reference.
 
 ## Design
 
@@ -65,7 +65,7 @@ Cube-state mailboxes live in the existing per-cube grid established by the [16-r
 
 ## Verification
 
-Smoke-tested in `qbert_practice`: spawn Slick on a flipped cube, observe state reverting to 0; land Q*bert on Slick's current cube mid-hop, observe Slick vanishing without triggering player death.
+Smoke-tested in `qbert_practice`: spawn Slick on a flipped cube, observe state reverting to 0; land Q✱bert on Slick's current cube mid-hop, observe Slick vanishing without triggering player death.
 
 ## Files touched
 

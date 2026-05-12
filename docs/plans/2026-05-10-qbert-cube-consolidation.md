@@ -1,4 +1,4 @@
-# Plan — Q*bert cube consolidation via runtime material swap
+# Plan — Q✱bert cube consolidation via runtime material swap
 
 **Date:** 2026-05-10
 **Status:** Done 2026-05-10 (commit [`f3d2fe6`](../../) feat(qbert): Phase 1 cube consolidation — 1344 actors → 28 + runtime colors)
@@ -82,7 +82,7 @@ The detailed plan below is preserved for historical reference.
 
 ## Context
 
-The Q*bert level today materialises 1344 distinct cube actors (28 pyramid positions × 16 round palettes × 3 hop states), with the level director toggling visibility flags every round so exactly one of 48 prebaked-color variants per position is rendered. This was the only way to get per-round palette changes without a runtime material API.
+The Q✱bert level today materialises 1344 distinct cube actors (28 pyramid positions × 16 round palettes × 3 hop states), with the level director toggling visibility flags every round so exactly one of 48 prebaked-color variants per position is rendered. This was the only way to get per-round palette changes without a runtime material API.
 
 It works, but it's expensive: post-load HalLmalloc sits at **29.24 MB** for qbert vs **1.67 MB** for snowgoons (measured 2026-05-10, [2026-05-10-qbert-engine-caps.md](../investigations/2026-05-10-qbert-engine-caps.md)). The recent cap-chase (`MAX_ASSETS_PER_ROOM`, `MAX_ASMP_SIZE`, Jolt body pool, asset string map, binstrm length) was all downstream of this fan-out.
 

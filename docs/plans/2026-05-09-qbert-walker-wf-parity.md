@@ -1,14 +1,14 @@
-# Plan — Q*bert walker WF-side parity (Phase E)
+# Plan — Q✱bert walker WF-side parity (Phase E)
 
 **Date:** 2026-05-09
 **Status:** In progress — scaffolding complete and end-to-end run done (12 round-clears across L1–L4 + R1–R3 of L4, 30 state captures). Two follow-ups before this can land as a regression:
-1. **Q*bert floats after round 1** — L1R1 captures place him correctly on apex (state-0) and on cube (1,0) (state-1). From L2R1 onward, every state-0 / state-1 PNG shows him drifting well above the pyramid. Suspect: `step-move` defaults to DL beyond step 30, so the existing 32-step Warnsdorff path keeps hopping DL once it falls off the table → off-pyramid → FALL_PHASE → Z ramps down → director's round-clear cleanup zeros FALL_PHASE but doesn't restore Z, and the ROUND_INITIALIZED handler that does restore Z races with something. Need to trace via debug bridge `set_mailbox` queries on mb[419]/INDEXOF_Z_POS during the L1R4→L2R1 transition.
+1. **Q✱bert floats after round 1** — L1R1 captures place him correctly on apex (state-0) and on cube (1,0) (state-1). From L2R1 onward, every state-0 / state-1 PNG shows him drifting well above the pyramid. Suspect: `step-move` defaults to DL beyond step 30, so the existing 32-step Warnsdorff path keeps hopping DL once it falls off the table → off-pyramid → FALL_PHASE → Z ramps down → director's round-clear cleanup zeros FALL_PHASE but doesn't restore Z, and the ROUND_INITIALIZED handler that does restore Z races with something. Need to trace via debug bridge `set_mailbox` queries on mb[419]/INDEXOF_Z_POS during the L1R4→L2R1 transition.
 2. **Diff sample points are off** — projected apex pixel-coord lands at y≈137 in the 640×640 PNG; actual apex top is at y≈250. Either the auto-projection's FOV/up-vector is wrong for WF's camera, or BungeeCameraHandler is doing something the projection math doesn't capture. Working fix: read the actual on-disk PNG once, hand-tune pixel coords, hardcode in the diff tool. Auto-projection from cube positions can land later when a `scene:get_actor_pos` op is available.
 **Parent plan:** [2026-05-08-qbert-walker-rom-grounded.md](2026-05-08-qbert-walker-rom-grounded.md) (Phase E)
 
 ## Context
 
-Phases A–D of the parent plan produced ROM-grounded MAME captures of cube colors for all 16 Q*bert rounds (15/16 in `qbert_walker.lua`, L4R1 via standalone `qbert_l4r1_walker.lua`). The MAME-side walker protocol is now fully specified: at each round entry, snap state-0 at apex, force a DR hop, force UL back to apex, snap state-1, advance round, repeat. Sample points `(120,56)` apex / `(137,80)` cube(1,1) / `(40,55)` HUD-target give a 3-pixel signature that distinguishes 1-step from 2-step rounds (see [scripts/research/mame/sample_cube_colors.py](../../scripts/research/mame/sample_cube_colors.py)).
+Phases A–D of the parent plan produced ROM-grounded MAME captures of cube colors for all 16 Q✱bert rounds (15/16 in `qbert_walker.lua`, L4R1 via standalone `qbert_l4r1_walker.lua`). The MAME-side walker protocol is now fully specified: at each round entry, snap state-0 at apex, force a DR hop, force UL back to apex, snap state-1, advance round, repeat. Sample points `(120,56)` apex / `(137,80)` cube(1,1) / `(40,55)` HUD-target give a 3-pixel signature that distinguishes 1-step from 2-step rounds (see [scripts/research/mame/sample_cube_colors.py](../../scripts/research/mame/sample_cube_colors.py)).
 
 Phase E mirrors the same protocol in WF so the two engines emit comparable image pairs. WF already has the pieces: an autopilot Forth director (`mb[430] AUTOPILOT_ON`), no Demo AI to fight, no HUD-update lag — the protocol is "trivial" on the WF side per the parent plan. What's missing: a way for the engine to dump a PNG at the moment the director reaches each capture point, plus host-side glue to drive the run and diff against MAME.
 
@@ -38,7 +38,7 @@ In [wflevels/qbert_practice/blender_create_qbert.py](../../wflevels/qbert_practi
 
 - Add **mb[432] CAPTURE_TRIGGER** to the mailbox-constant comment block at :72–76.
 - Per round, woven into existing autopilot:
-  1. Round entry, Q*bert at apex stable: `1 432 write-mailbox` (state-0). Hold ~30 frames.
+  1. Round entry, Q✱bert at apex stable: `1 432 write-mailbox` (state-0). Hold ~30 frames.
   2. Force DR hop. Wait for landing.
   3. Force UL hop. Wait for `pos == apex`.
   4. `2 432 write-mailbox` (state-1). Hold ~30 frames.
@@ -91,7 +91,7 @@ The parent plan's NVRAM-clear note doesn't apply to WF (no NVRAM). WF determinis
 
 End-to-end pass:
 
-1. `task build && cd wfsource/source/game && ./wf_game cd_qbert.iff` boots Q*bert level.
+1. `task build && cd wfsource/source/game && ./wf_game cd_qbert.iff` boots Q✱bert level.
 2. `python3 scripts/research/wf/qbert_wf_walker.py` connects, drives autopilot, dumps 32 PNGs (16 rounds × 2 states) plus 16 round-clear markers. Run completes well under 10 minutes.
 3. `ls docs/investigations/wf-screenshots/wf_walker_L*R*_state*.png | wc -l` → 32.
 4. `python3 scripts/research/wf/qbert_walker_diff.py` prints a 16-row table with ≥ 15/16 passing on both state-0 and state-1 columns. (L4R1 is the known edge case; investigate if it fails specifically on that row.)

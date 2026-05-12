@@ -1,4 +1,4 @@
-# Plan — ROM-grounded Q*bert walker (closes L4R1 gap, unifies MAME ↔ WF regression)
+# Plan — ROM-grounded Q✱bert walker (closes L4R1 gap, unifies MAME ↔ WF regression)
 
 **Date:** 2026-05-08
 **Status:**
@@ -27,7 +27,7 @@ documents per-round cube colors captured from MAME for all 16 rounds. **15 of
   was on L1R1 the whole run.
 - **Burst-snap during L4R1**: with no joystick stimulation Demo AI is frozen
   at apex; with stimulation Demo AI activates but ROM transitions to attract
-  mode within ~80 frames (Q*bert dies offscreen).
+  mode within ~80 frames (Q✱bert dies offscreen).
 
 The same closing-the-gap problem and the WF-port regression problem reduce to
 the same primitive: a **ROM-grounded Warnsdorff bot** that actually clears
@@ -43,9 +43,9 @@ rounds in the arcade ROM. Once we have that, we can:
 
 A Lua script `scripts/research/mame/qbert_walker.lua` that:
 
-1. Boots Q*bert with **cheat OFF** (no Demo Mode).
+1. Boots Q✱bert with **cheat OFF** (no Demo Mode).
 2. Pokes RAM `0x0D00 = 9` every frame (unlim lives — works without DIP cheat).
-3. Reads Q*bert's **real** position from RAM (not dead-reckoned).
+3. Reads Q✱bert's **real** position from RAM (not dead-reckoned).
 4. Detects **real** round-clear via palette write-tap (signal: `pal_writes`
    delta > threshold, not bot's internal counter).
 5. Drives Warnsdorff coverage through all 16 rounds, retrying dropped hops.
@@ -57,16 +57,16 @@ two engines produce comparable image pairs.
 
 ## Plan
 
-### Phase A — find Q*bert's real position byte(s) (1–2 hours)
+### Phase A — find Q✱bert's real position byte(s) (1–2 hours)
 
-The qbert ROM almost certainly has a single byte (or pair) holding Q*bert's
+The qbert ROM almost certainly has a single byte (or pair) holding Q✱bert's
 current `(row, col)` or cube index. [`qbert_bot.lua`](../../scripts/research/mame/qbert_bot.lua)
 notes "0x0081 increments with hops" — that's a *hop counter*, not position.
 We need true position.
 
 Strategy: extend the existing
 [`qbert_full_diff.lua`](../../scripts/research/mame/qbert_full_diff.lua)
-diff-scan tool to capture RAM snapshots at known Q*bert positions:
+diff-scan tool to capture RAM snapshots at known Q✱bert positions:
 
 1. Boot, drive to `(0,0)` apex, snapshot RAM. Tag = `apex`.
 2. Inject DR hop, wait for landing, snapshot RAM. Tag = `(1,1)`.
@@ -128,7 +128,7 @@ Now well-scoped — the MAME-side walker protocol is fully defined:
 
 **Walker protocol** (one round):
 
-1. At round entry, Q*bert is at apex with all cubes in state-0.
+1. At round entry, Q✱bert is at apex with all cubes in state-0.
 2. Capture frame: `state0` snap. Sample at apex top (`(120, 56)`) and
    target cube top (`(137, 80)` for cube (1,1)).
 3. Force DR hop. Cube (1,1) flips state.
@@ -199,7 +199,7 @@ End-to-end pass:
 ## Risks
 
 - **Position byte hunt finds nothing** — fall back to reading the on-screen
-  Q*bert sprite location from sprite RAM at `0x3000` (already partially
+  Q✱bert sprite location from sprite RAM at `0x3000` (already partially
   decoded in `qbert_bot.lua` lines 271–282). Slower but always available.
 - **Palette doesn't change every round** (e.g. L1R1→L1R2 might keep same
   palette) — fall back to the actual round counter byte if palette-tap is
@@ -210,12 +210,12 @@ End-to-end pass:
 
 ## 2026-05-08 progress notes
 
-### Phase A done — Q*bert position byte
+### Phase A done — Q✱bert position byte
 
 - Address: `0x0D64`. Apex value `0xB8`. Each cube has a unique value
   (verified across (0,0), (1,1), (2,1), (3,2), (1,0)).
 - Tool: [`scripts/research/mame/qbert_position_hunt.lua`](../../scripts/research/mame/qbert_position_hunt.lua).
-  Drives Q*bert through a known position sequence with revisits, finds
+  Drives Q✱bert through a known position sequence with revisits, finds
   bytes that are stable per-position and distinct between positions.
 - Note: byte appears to be a sprite-Y or cube-pixel-Y coordinate, not a
   `(row,col)` encoding. For walker purposes we only need uniqueness, not
@@ -241,7 +241,7 @@ state-1 captures via real RAM detection:
 3. Force DR hop. Verify via `0x0D64` change to `0xF5` (= (1,1) per Phase A).
    If unchanged, retry same direction.
 4. Force UL hop. Wait for `0x0D64 == 0xB8` again.
-5. `snap("state1")` — Q*bert at apex, (1,1) cube flipped exactly once.
+5. `snap("state1")` — Q✱bert at apex, (1,1) cube flipped exactly once.
 
 **This works perfectly on L1R1.** Score 50, HUD = LEVEL 1 ROUND 1, sample
 at (137, 80) gives the documented L1R1 state-1 color.
@@ -266,12 +266,12 @@ Bot's `cubes_fully == 28` claim doesn't match reality.
 all" — it misses "moved somewhere unexpected" (edge-of-pyramid no-op,
 enemy push, Coily blocks destination). After several mis-tracked hops,
 bot's view diverges from ROM. Bot may "visit" a cube twice in its
-tracker while ROM never had Q*bert there. ROM only round-clears when
+tracker while ROM never had Q✱bert there. ROM only round-clears when
 *all 28* cubes hit state-2; bot's lopsided coverage never satisfies that.
 
 **Phase C.5 fix path** (deferred):
 
-1. **Calibration walk at game start**: drive Q*bert through every cube
+1. **Calibration walk at game start**: drive Q✱bert through every cube
    in a known sequence, build a `pos_byte → (row, col)` lookup table.
    Apex confirmed `0xB8`; (1,1) confirmed `0xF5`; need 26 more.
 2. **Replace dead-reckoning**: every iteration, read `0x0D64`, look up
@@ -294,7 +294,7 @@ real position tracking. We tried it. It doesn't work, for two reasons:
    to encode something like row-Y-coordinate, not unique cube ID.
 2. **The 16-bit sprite X/Y pair (`0x0D58`, `0x0D59`) has animation
    transients.** During a run, apex was registered with multiple distinct
-   16-bit keys (`0x257D` and `0x917D` both → `(0,0)`). Q*bert's sprite-X
+   16-bit keys (`0x257D` and `0x917D` both → `(0,0)`). Q✱bert's sprite-X
    shifts between idle/hop frames. So the bot's learned table mis-merges
    cubes and fragments apex across keys.
 
@@ -325,7 +325,7 @@ rm -f ~/.mame/nvram/qbert/nvram ~/.mame/cfg/qbert.cfg
 ```
 
 After the clear, walker is fully deterministic — same run produces same
-captures bit-for-bit. **This applies to all MAME-Q*bert scripts; every
+captures bit-for-bit. **This applies to all MAME-Q✱bert scripts; every
 research script in this plan should preface its run with the cleanup.**
 
 Per-round results from `qbert_walker.lua` after NVRAM clear (sample at
@@ -533,7 +533,7 @@ across runs.
 
 ### What this enables
 
-L4R1 closure unblocks the per-round palette swap work for the WF Q*bert
+L4R1 closure unblocks the per-round palette swap work for the WF Q✱bert
 port — `wflevels/qbert_practice/gen_cube.py` and
 `wflevels/qbert_practice/blender_create_qbert.py` now have a complete
 table to consume. Phase E (WF parity) is the natural follow-up.

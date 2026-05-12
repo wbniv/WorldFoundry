@@ -1,4 +1,4 @@
-# Plan — Q*bert fall animation + lives + game-over
+# Plan — Q✱bert fall animation + lives + game-over
 
 ## Visual reference — arcade ROM vs. WF runtime
 
@@ -6,15 +6,15 @@ Side-by-side comparisons drive faithfulness decisions. Arcade frames captured fr
 
 ### Title / attract loop (arcade only — WF port doesn't ship a title screen yet)
 
-![Arcade title — yellow Q*bert logo on purple, copyright, "1 COIN = 1 PLAY"](screenshots/qbert-arcade-attract-reference.jpg)
+![Arcade title — yellow Q✱bert logo on purple, copyright, "1 COIN = 1 PLAY"](screenshots/qbert-arcade-attract-reference.jpg)
 
 ### LEVEL 1 ROUND 1 mid-game (arcade) vs. WF gameplay framing
 
 | Arcade (MAME, `q-bert-32127.jpg`) | WF runtime (cs_pyramid, post-intro) |
 |---|---|
-| ![Arcade L1R1 mid: pyramid green/yellow, full HUD with PLAYER 1, CHANGE TO swatch, score 525, LEVEL 1 ROUND 1, Coily on pyramid](screenshots/qbert-arcade-level1-mid-reference.jpg) | ![WF runtime: full pyramid centred, Q*bert orange placeholder at apex, plain teal cubes (state 0), 30° iso framing](screenshots/qbert-runtime-gameplay.png) |
+| ![Arcade L1R1 mid: pyramid green/yellow, full HUD with PLAYER 1, CHANGE TO swatch, score 525, LEVEL 1 ROUND 1, Coily on pyramid](screenshots/qbert-arcade-level1-mid-reference.jpg) | ![WF runtime: full pyramid centred, Q✱bert orange placeholder at apex, plain teal cubes (state 0), 30° iso framing](screenshots/qbert-runtime-gameplay.png) |
 
-The WF framing matches the arcade's 30° dimetric iso (cube tops visible as diamonds, front faces as parallelograms). Differences: WF still uses placeholder orange box for Q*bert (no sprite), no Coily yet, no HUD-text overlay visible in the captured frame (DrawHud is wired and confirmed via `[hud-debug]` stderr that mb 72=3 is reaching `wf_hud_lives` each frame, but stb_easy_font quads aren't reaching the captured framebuffer — see "Risks & open questions"). All-teal pyramid is correct: that's the LEVEL 1 ROUND 1 starting state before any cubes have been hopped on. Compare to the arcade's mid-game frame where ~half the cubes have flipped to yellow.
+The WF framing matches the arcade's 30° dimetric iso (cube tops visible as diamonds, front faces as parallelograms). Differences: WF still uses placeholder orange box for Q✱bert (no sprite), no Coily yet, no HUD-text overlay visible in the captured frame (DrawHud is wired and confirmed via `[hud-debug]` stderr that mb 72=3 is reaching `wf_hud_lives` each frame, but stb_easy_font quads aren't reaching the captured framebuffer — see "Risks & open questions"). All-teal pyramid is correct: that's the LEVEL 1 ROUND 1 starting state before any cubes have been hopped on. Compare to the arcade's mid-game frame where ~half the cubes have flipped to yellow.
 
 ### Cinematic intro sweep (WF runtime — chained CamShots)
 
@@ -36,11 +36,11 @@ A WF-runtime GAME OVER capture isn't included here yet — triggering it require
 
 ## Context
 
-Two related issues with the current Q*bert build need fixing as one
+Two related issues with the current Q✱bert build need fixing as one
 piece of work:
 
 1. **The fall animation is invisible.** The MVP plan promised a ~1 s
-   visible fall when Q\*bert hops off-edge
+   visible fall when Q✱bert hops off-edge
    ([docs/plans/2026-05-03-qbert-mvp.md](2026-05-03-qbert-mvp.md):280 verification #5;
    line 321 calls out "the fall-off-edge animation also has to be
    scripted manually (~20 lines of Forth)"). What actually shipped
@@ -133,7 +133,7 @@ game-over scope question, which spelled out "small runtime change,
 would need explicit permission per the no-runtime-changes rule for
 ports"). Total ~12 LOC across two files.
 
-**Visual-faithfulness caveat.** The arcade-museum.com Q*bert gallery
+**Visual-faithfulness caveat.** The arcade-museum.com Q✱bert gallery
 (images 32125 / 32126 / 32127 / 32128) does **not** include a GAME
 OVER frame — only title (32125), LEVEL 1 ROUND 1 idle (32126), and
 two mid-gameplay shots (32127 / 32128). So the stb_easy_font overlay
@@ -146,7 +146,7 @@ is captured below in §4 from MAME against the vendored ROM.
 
 Three pre-implementation steps to lock in source material:
 
-- **Vendor the Q*bert arcade ROMs** by copying:
+- **Vendor the Q✱bert arcade ROMs** by copying:
   - `~/Downloads/qbert.zip` → `assets/arcade-roms/qbert.zip`
   - `~/Downloads/votrsc01a.7z` → `assets/arcade-roms/votrsc01a.7z`
     (Votrax SC-01-A speech-synth chip ROM — required device-set;
@@ -312,7 +312,7 @@ End-to-end. Each step depends on the previous passing.
 2. **HUD shows lives.** Launch and observe `LIVES 3` in the upper-
    right after the intro completes (mb 72 init by director).
 3. **Visible fall animation.** Hop off any edge after the intro
-   completes. Q\*bert visibly drops over ~30 frames (Z decreases
+   completes. Q✱bert visibly drops over ~30 frames (Z decreases
    each tick); `cs_death` framing follows the falling body (Track
    Object = Player). Bridge dump should show `mb[419]` (FALL_PHASE)
    ramping 1→30 then resetting to 0 simultaneously with `mb[414]`
@@ -341,7 +341,7 @@ End-to-end. Each step depends on the previous passing.
   to the "off-edge step" (one cube further than the last legal cube
   in the hop direction) requires careful arithmetic in `do-hop` —
   hops in 4 directions, edge cases at corners. If the visual is off
-  (Q\*bert drops from the wrong position), simplify to "snap X/Y to
+  (Q✱bert drops from the wrong position), simplify to "snap X/Y to
   the last-legal cube's edge + 1 unit in the hop direction, then
   drop."
 - **`cs_death` follow vs intro state machine.** The intro state
@@ -385,7 +385,7 @@ End-to-end. Each step depends on the previous passing.
   context is core-profile (where GL_QUADS is removed) — though
   `glXCreateContext` in `mesa.cc:124` should give a compatibility
   context. Pre-existing tech debt, not introduced by this plan; the
-  Q*bert-status memory note from 2026-05-03 ("DrawHud + stb_easy_font
+  Q✱bert-status memory note from 2026-05-03 ("DrawHud + stb_easy_font
   rasterises mb 70/71/72 today") was not actually verified visually.
   Tracked as a follow-up since the lives counter mailbox plumbing
   (mb 72 ↔ wf_hud_lives) is correct end-to-end and the GAME OVER
@@ -401,7 +401,7 @@ End-to-end. Each step depends on the previous passing.
   / wording / line spacing now, so this followup is just "swap the
   rasteriser" rather than "redesign the overlay."
 - **arcade-museum.com gallery doesn't have a GAME OVER frame** for
-  Q*bert (only attract / mid-game frames at IDs 32125–32128) — that's
+  Q✱bert (only attract / mid-game frames at IDs 32125–32128) — that's
   why §4 uses MAME capture as the source. Alternative was a YouTube
   longplay frame (e.g. `https://www.youtube.com/watch?v=HKIbhaQfs-A`)
   but emulating the licensed-by-fair-use ROM ourselves is cleaner

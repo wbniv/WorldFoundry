@@ -5,13 +5,13 @@ status: Deferred 2026-05-11
 scope: ~50 LOC engine (audio API + mailbox handler) + 3 placeholder WAVs + ~3 LOC script writes
 ---
 
-# Q*bert hop / land / fall sound effects
+# Q✱bert hop / land / fall sound effects
 
 **Status:** Deferred 2026-05-11 — focus is on enemy AI / cube logic before audio polish; revisit once gameplay loop is closer to arcade-complete.
 
 ## Context
 
-Phase 1 + Phase 1.5 + Phase 2 of the Q*bert player polish (rotation, hop arc, stretch-and-squash) all shipped. The character now visibly hops, rotates, and squashes — but the world is silent. miniaudio is initialised and functional ([per memory `project_engine_runnable`](../../../.claude/projects/-home-will-WorldFoundry/memory/project_engine_runnable.md)) and `SoundBuffer::play()` works ([wfsource/source/audio/linux/buffer.cc:62-94](../../wfsource/source/audio/linux/buffer.cc)) — but `EMAILBOX_SOUND` (3017, [mailbox.inc:66](../../wfsource/source/mailbox/mailbox.inc)) has no write-handler today; the comment at [actor.cc:851](../../wfsource/source/game/actor.cc) explicitly notes this is unimplemented.
+Phase 1 + Phase 1.5 + Phase 2 of the Q✱bert player polish (rotation, hop arc, stretch-and-squash) all shipped. The character now visibly hops, rotates, and squashes — but the world is silent. miniaudio is initialised and functional ([per memory `project_engine_runnable`](../../../.claude/projects/-home-will-WorldFoundry/memory/project_engine_runnable.md)) and `SoundBuffer::play()` works ([wfsource/source/audio/linux/buffer.cc:62-94](../../wfsource/source/audio/linux/buffer.cc)) — but `EMAILBOX_SOUND` (3017, [mailbox.inc:66](../../wfsource/source/mailbox/mailbox.inc)) has no write-handler today; the comment at [actor.cc:851](../../wfsource/source/game/actor.cc) explicitly notes this is unimplemented.
 
 This plan wires three hop-relevant SFX through that gap:
 
@@ -23,11 +23,11 @@ Per memory `project_audio_verify`: actual sound needs a different machine to ver
 
 ## What this does NOT do (out of scope)
 
-- **Q*bert "swearing" voice samples** (the iconic Votrax SC-01 vocals) — `assets/arcade-roms/votrsc01a.7z` exists but extraction + WAV conversion is its own plan; placeholder for Phase 2 follow-up.
+- **Q✱bert "swearing" voice samples** (the iconic Votrax SC-01 vocals) — `assets/arcade-roms/votrsc01a.7z` exists but extraction + WAV conversion is its own plan; placeholder for Phase 2 follow-up.
 - **Music** — the `florestan-subset.sf2` MIDI soundfont path exists but is unused by qbert; separate concern.
 - **3D positional audio** — using 2D `SoundBuffer::play()` (no spatialization) for Phase 1; positional via `play(x,y,z)` is a trivial follow-up if needed.
 - **Asset bundling into the level IFF** — Phase 1 loads WAVs directly from `wflevels/qbert_practice/sfx/` via `HALGetAssetAccessor()`, same path the music loader uses ([music.cc:41-55](../../wfsource/source/audio/linux/music.cc)). IFF-bundled SFX is a future infrastructure plan.
-- **ROM-extracted authentic Q*bert sounds** — Phase 1 uses placeholder WAVs (programmatically generated tones with envelopes). Authentic sounds via ROM extraction is a follow-up.
+- **ROM-extracted authentic Q✱bert sounds** — Phase 1 uses placeholder WAVs (programmatically generated tones with envelopes). Authentic sounds via ROM extraction is a follow-up.
 
 ## Approach
 
@@ -88,13 +88,13 @@ No new mailboxes (3017 already exists, just unimplemented). No new OAS fields. N
 2. **Generate WAVs**: `python3 wflevels/qbert_practice/sfx/gen_sfx.py`. Verify 3 .wav files appear, each ~5-20 KB, valid WAV header (`xxd` first 44 bytes).
 3. **Boot snowgoons**: regression check — no SFX writes anywhere → silent → no SfxLibrary calls → engine boots clean. (SfxLibrary should fail to load qbert SFX silently in non-qbert contexts; logs a warning but doesn't crash.)
 4. **Boot qbert**: SfxLibrary loads 3 SFX at level init, stderr logs "audio: loaded sfx[0] = sfx/qbert_hop.wav (N bytes)", etc.
-5. **Drive Q*bert through hops**: stderr logs "audio: play sfx[0]" at each hop start, "audio: play sfx[1]" at each landing. Hop off-edge: logs "audio: play sfx[2]" at fall start.
+5. **Drive Q✱bert through hops**: stderr logs "audio: play sfx[0]" at each hop start, "audio: play sfx[1]" at each landing. Hop off-edge: logs "audio: play sfx[2]" at fall start.
 6. **Audio verification on different machine** (per memory `project_audio_verify`): user takes the built binary + assets to an audio-capable machine and confirms the boings, thuds, and falls actually play.
 
 ## Out of scope (Phase 2+)
 
-- **Authentic Q*bert SFX from arcade ROM** — `assets/arcade-roms/qbert.zip` likely contains the original samples (the AY-3-8910 sound chip output + Votrax SC-01 voice samples). Extraction needs ROM-archaeology tooling; separate plan.
-- **Q*bert swearing on death** — Votrax SC-01 voice samples in `assets/arcade-roms/votrsc01a.7z`. Same extraction problem as above.
+- **Authentic Q✱bert SFX from arcade ROM** — `assets/arcade-roms/qbert.zip` likely contains the original samples (the AY-3-8910 sound chip output + Votrax SC-01 voice samples). Extraction needs ROM-archaeology tooling; separate plan.
+- **Q✱bert swearing on death** — Votrax SC-01 voice samples in `assets/arcade-roms/votrsc01a.7z`. Same extraction problem as above.
 - **Music** — qbert arcade had a level-clear jingle and a death fanfare. Out of scope; Phase 2.
 - **3D positional audio** — 2D for now; trivial swap to `play(x,y,z)` later if cubes get directional sound.
 - **IFF-bundled SFX** — current plan loads WAVs from disk. Future: bundle into the level IFF, load from `binistream`.

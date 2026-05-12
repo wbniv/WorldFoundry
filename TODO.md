@@ -70,6 +70,43 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 - [ ] Rename `room` — "room" is a misnomer; the concept is a designer-drawn zone that controls CD asset streaming (load/unload assets as the player moves through the graph). Candidates: **Zone** (most self-explanatory), **Cell** (Elder Scrolls precedent — same mechanism), **Sector** (Doom/Quake lineage, implies spatial partition), **Region** (geographic, no shape implication)
 
 
+## QBERT ARCADE FIDELITY
+
+Remaining gaps for a faithful arcade reproduction. Player + 28 cubes + intro
+camera + all 8 enemies (red ball, Coily egg+snake, green ball, Slick, Sam, Ugg,
+Wrong-Way) + 2 spinning discs are in place; cube state machine handles L1R1
+single-step cycles. Items below are what still separates `qbert_practice` from
+a one-to-one arcade copy.
+
+### Core gameplay
+
+- [ ] Multi-step cube cycles — round 2+ requires N touches per cube; round 3+ reverts a cube on the touch after it's "done". Currently the player landing handler is single-flip `state==0 → state=2` ([blender_create_qbert.py:~2006](wflevels/qbert_practice/blender_create_qbert.py)); needs per-round LUT-driven state transition rules.
+- [ ] Per-round difficulty scaling — flat spawn cadences right now; arcade ramps red-ball / Slick / Coily frequency per round and adds enemies (e.g. 2 Coily eggs at L4+).
+- [ ] Score & lives HUD — `mb 70/71/72` (score / timer / lives) are tracked but not rendered. Needs digit-glyph rendering wired through CamShot overlay or screen-space actor.
+- [ ] High-score persistence — save/load top scores to disk; surface in attract mode + game-over screen.
+- [ ] Bonus-points popups — floating "+25" / "+300" / "+500" labels on cube-flip, Slick/Sam catch, Coily-off-disc.
+- [ ] Coily-falls-off-disc — Coily's chase AI currently restricts to on-pyramid cubes; extend to allow landing on disc coords + retire with bonus.
+- [ ] Bonus letter "S" — rare cube pickup that grants a freeze / extra life / bonus points (arcade behaviour varies by round).
+- [ ] Enemy coexistence rules — arcade restricts which enemies can spawn together (e.g. no Ugg + Coily simultaneously); current implementation lets all 8 spawn freely.
+
+### Audio
+
+- [ ] Sound effects — hop, fall, death, disc-catch, Coily-thud, round-clear, intro jingle. Use the existing ROM-extracted PCM WAV pipeline.
+- [ ] Q✱bert curse bubble ("@!#?*") on death — iconic speech-bubble visual + audio cue.
+
+### Visual polish
+
+- [ ] Distinct enemy meshes — Slick/Sam currently use a hat-on-body flipper proxy; Ugg/Wrong-Way use a climber blob; Coily is stacked spheres. Replace with arcade-recognizable 3D characters.
+- [ ] Player death animation — currently a Z-ramp + apex teleport; arcade has a discrete fall + explosion.
+- [ ] Disc spin VFX — currently steady yaw rotation; arcade flashes colours on the disc rim.
+- [ ] Game-over screen + name entry — current restart is functional but goes straight to attract; needs game-over hold, name entry for new high scores, transition to attract.
+
+### Verification / breadth
+
+- [ ] End-to-end test of all 16 rounds (L1R1..L4R4) — round palette LUT is populated but only L1R1 has been actively played; verify each round's cube state cycle, palette, and enemy mix.
+- [ ] L2-L4 per-level behaviour confirmation — each level changes cube-cycle complexity and enemy mix; spot-check at least one round per level.
+
+
 ## QBERT 3D ENHANCEMENTS
 
 Polish ideas that go beyond a faithful arcade reproduction. Hold these until the

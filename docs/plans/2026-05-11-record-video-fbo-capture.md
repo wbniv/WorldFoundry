@@ -5,7 +5,7 @@
 
 ## Problem
 
-`qbert-2-rounds.mp4` (the recording from commit `9c6695f`) renders normally for the first ~11 s, then cuts to solid black for the remainder of the file even though the engine is still rendering Q*bert correctly and the walker is still issuing hops.
+`qbert-2-rounds.mp4` (the recording from commit `9c6695f`) renders normally for the first ~11 s, then cuts to solid black for the remainder of the file even though the engine is still rendering Q✱bert correctly and the walker is still issuing hops.
 
 Root cause: `CaptureFrame()` in [`wfsource/source/gfx/gl/display.cc:396-422`](../../wfsource/source/gfx/gl/display.cc) calls `glReadPixels(0, 0, xSize, ySize, GL_BGR, …)` against the **default framebuffer**. On Linux/X11 without a compositor (or with a compositor that excludes the wf_game window), the back buffer is part of the X drawable, so occluded regions read back whatever the obscuring window painted there — or nothing.
 

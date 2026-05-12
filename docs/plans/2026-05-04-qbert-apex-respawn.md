@@ -1,11 +1,11 @@
-# Plan — Q*bert apex respawn on round clear
+# Plan — Q✱bert apex respawn on round clear
 
 ## Context
 
 Round-clear reset ships (2026-05-04): all 28 cubes flipping to state 2 triggers a
 90-tick countdown, after which cube states reset to 0 and `mb[425]` (ROUND_NUMBER)
-increments. Q*bert is left wherever they were when the last cube flipped. The arcade
-always respawns Q*bert at the pyramid apex at the start of each round. This plan wires
+increments. Q✱bert is left wherever they were when the last cube flipped. The arcade
+always respawns Q✱bert at the pyramid apex at the start of each round. This plan wires
 that into the existing round-clear expiry block.
 
 ## Scope
@@ -15,7 +15,7 @@ only. No engine/runtime changes.
 
 Out of scope:
 - Drop-in animation on respawn (the intro animation plays only on level load;
-  for now Q*bert simply teleports to the apex position — same behaviour as the
+  for now Q✱bert simply teleports to the apex position — same behaviour as the
   game-over restart block)
 - Per-round palette swap (separate plan)
 - Suppressing fall-death during the 90-tick window (noted as future work in the
@@ -34,7 +34,7 @@ Out of scope:
 | `INDEXOF_Y_POS` | 6 | world y |
 | `INDEXOF_Z_POS` | 15 | world z (top of apex cube) |
 
-Also clear residual fall state that may be live if Q*bert fell during the countdown:
+Also clear residual fall state that may be live if Q✱bert fell during the countdown:
 
 | Mailbox | Name | Value |
 |---------|------|-------|
@@ -45,7 +45,7 @@ Also clear residual fall state that may be live if Q*bert fell during the countd
 ### Change — as implemented (diverged from original plan)
 
 `INDEXOF_X/Y/Z` (3009–3011) are LOCAL_SYSTEM mailboxes. Writing them from the director
-only moves the director actor, not Q*bert. The director can write global user mailboxes
+only moves the director actor, not Q✱bert. The director can write global user mailboxes
 (2–999) but cannot teleport another actor. A signal mailbox is required.
 
 **Director expiry block** — append after `425 read-mailbox 1 + 425 write-mailbox`:
@@ -72,9 +72,9 @@ then
 - **mb[400/401]**: grid position used by the hop-address formula
   (`col*(col+1)/2 + row + 200`). Must match world position or the next hop calculates
   from the wrong cell.
-- **mb[402]**: hop cooldown. May be nonzero if Q*bert hopped just before the last cube
+- **mb[402]**: hop cooldown. May be nonzero if Q✱bert hopped just before the last cube
   flipped. Clearing it lets the player move immediately in the new round.
-- **mb[414/415/419]**: fall-death, camera death-hold, fall-animation timer. If Q*bert
+- **mb[414/415/419]**: fall-death, camera death-hold, fall-animation timer. If Q✱bert
   fell during the 90-tick celebration these may be live; clearing prevents a stale death
   sequence running after the reset.
 - **mb[426]**: RESPAWN_REQUESTED signal. Set by director, cleared by player after
@@ -112,12 +112,12 @@ Use the same automated injection approach as round-clear verification:
    `mb[425]=1`.
 5. Remove test injection and rebuild clean.
 
-Manual check: play to the last cube, wait ~1.5 s — Q*bert should snap to the apex
+Manual check: play to the last cube, wait ~1.5 s — Q✱bert should snap to the apex
 (top of the pyramid) at the moment the cubes turn purple.
 
 ## Risks
 
-- **Mid-fall at reset**: if Q*bert is falling when the expiry fires, clearing mb[419]
+- **Mid-fall at reset**: if Q✱bert is falling when the expiry fires, clearing mb[419]
   mid-animation may produce a visual jump. Acceptable for MVP; fix later by only
   teleporting when `mb[414] == 0` (not in a fall).
 - **mb[420] GAME_OVER conflict**: if the player ran out of lives during the countdown,

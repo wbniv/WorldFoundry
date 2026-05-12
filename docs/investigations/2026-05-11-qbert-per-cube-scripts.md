@@ -1,4 +1,4 @@
-# Per-cube scripts vs. director-only — Q*bert cube logic shape
+# Per-cube scripts vs. director-only — Q✱bert cube logic shape
 
 **Date:** 2026-05-11
 **Context:** [Phase 1 cube consolidation plan](../plans/2026-05-10-qbert-cube-consolidation.md) shipped with all cube logic centralised in the director script. This investigation explores what it would look like if each of the 28 cubes had its own script instead — what gets simpler, what gets harder, and what the engine actually forbids today.

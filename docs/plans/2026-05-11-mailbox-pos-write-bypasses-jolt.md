@@ -5,7 +5,7 @@
 
 ## Symptom
 
-Qbert practice autopilot dies within ~10 s every run. Q*bert visibly sits at Z≈7 even though the player script writes `15 INDEXOF_Z_POS write-mailbox` on every apex respawn / round-clear / FALL_PHASE end.
+Qbert practice autopilot dies within ~10 s every run. Q✱bert visibly sits at Z≈7 even though the player script writes `15 INDEXOF_Z_POS write-mailbox` on every apex respawn / round-clear / FALL_PHASE end.
 
 Verified via debug bridge: `mb[3011]` (`INDEXOF_Z_POS`) reads back 7.0 immediately after the script writes 15.
 
@@ -13,7 +13,7 @@ Verified via debug bridge: `mb[3011]` (`INDEXOF_Z_POS`) reads back 7.0 immediate
 
 [`wfsource/source/game/actor.cc:1343-1369`](../../wfsource/source/game/actor.cc) handles `EMAILBOX_X_POS / Y_POS / Z_POS` by calling `_physicalAttributes.SetPosition(...) + SetPredictedPosition(...)`. Those just update the C++ `_position` field.
 
-For actors with a Jolt character body (Q*bert is one — `JoltMakeCharacter` at [actor.cc:707](../../wfsource/source/game/actor.cc)), the per-tick movement code at [`movement.cc:441-448`](../../wfsource/source/movement/movement.cc) calls `JoltSyncFromCharacter(JoltCharacterGetPosition(charID))` — which writes Jolt's authoritative position back into `_position`. So any write made through the mailbox is silently overwritten on the next physics tick.
+For actors with a Jolt character body (Q✱bert is one — `JoltMakeCharacter` at [actor.cc:707](../../wfsource/source/game/actor.cc)), the per-tick movement code at [`movement.cc:441-448`](../../wfsource/source/movement/movement.cc) calls `JoltSyncFromCharacter(JoltCharacterGetPosition(charID))` — which writes Jolt's authoritative position back into `_position`. So any write made through the mailbox is silently overwritten on the next physics tick.
 
 `JoltCharacterSetPosition` exists at [`jolt/jolt_backend.cc:593`](../../wfsource/source/physics/jolt/jolt_backend.cc) but is currently unused by the mailbox write path.
 
@@ -33,14 +33,14 @@ Same shape for X, Y, Z.
 
 ## Why this matters beyond autopilot
 
-Every place in the Forth script that teleports a player (apex respawn after death, round-clear reset, game-over restart) is currently broken — the script writes target position, the engine ignores it, Q*bert keeps wherever Jolt last placed him. Fixing this restores all the existing position-write paths the script already has.
+Every place in the Forth script that teleports a player (apex respawn after death, round-clear reset, game-over restart) is currently broken — the script writes target position, the engine ignores it, Q✱bert keeps wherever Jolt last placed him. Fixing this restores all the existing position-write paths the script already has.
 
 ## Verification
 
 1. Rebuild `wf_game` (`engine/build_game.sh`).
 2. Launch standalone; via debug bridge, set `mb[3011]=15` on the player actor.
 3. Probe `mb[3011]` 100 ms later — expect 15 (or whatever physics resolves to after one step with gravity), not 7.
-4. Re-run the autopilot walker. Expect Q*bert to visibly hop across cubes.
+4. Re-run the autopilot walker. Expect Q✱bert to visibly hop across cubes.
 
 ## Risks
 
@@ -59,7 +59,7 @@ predictedMotionVector = 22.78765297, -30.6890564, 7.993789673
 
 The Validate at [physical.hpi:67](../../wfsource/source/physics/physical.hpi) does strict-equality `Vector3` comparison. The two vectors match to 5 decimal places but differ in the 6th — looks like a Scalar→Vector3 conversion precision issue *or* an accumulated-colSpace-expansion vs. recomputed-motion mismatch. Reverted the actor.cc edit (`display.hp` BG init kept).
 
-The investigation surfaced that the Validate was triggering on the **cam intro pan**, not on Q*bert's teleport — the additional `JoltCharacterSetPosition` calls just changed tick timing enough to expose a pre-existing float-precision false-positive that's been in `ColSpace::Expand()` round-trip arithmetic all along. That bug was then fixed independently in commit `a56cd51` ([physical-validate-float-tolerance plan](2026-05-11-physical-validate-float-tolerance.md)) — `PhysicalAttributes::Validate()` now uses a per-axis `Scalar::FromDouble(1e-3)` abs-diff threshold instead of bitwise `Vector3::operator==`. With that landed, the naive fix re-applies cleanly.
+The investigation surfaced that the Validate was triggering on the **cam intro pan**, not on Q✱bert's teleport — the additional `JoltCharacterSetPosition` calls just changed tick timing enough to expose a pre-existing float-precision false-positive that's been in `ColSpace::Expand()` round-trip arithmetic all along. That bug was then fixed independently in commit `a56cd51` ([physical-validate-float-tolerance plan](2026-05-11-physical-validate-float-tolerance.md)) — `PhysicalAttributes::Validate()` now uses a per-axis `Scalar::FromDouble(1e-3)` abs-diff threshold instead of bitwise `Vector3::operator==`. With that landed, the naive fix re-applies cleanly.
 
 ## How Jolt handles teleporting (added 2026-05-11)
 
@@ -96,9 +96,9 @@ Internally `e.character->SetPosition(...)` is Jolt's [public API](https://jrouwe
 
 For non-character Jolt actors (the rigid-body path used by `STATIC` and `KINEMATIC` bodies in WF), teleport would go through `BodyInterface::SetPosition(bodyID, pos, EActivation::Activate)` or `MoveKinematic(bodyID, pos, rot, dt)` instead. `MoveKinematic` interpolates the body's velocity over `dt` so it sweeps to the target — useful for moving platforms (it pushes other bodies it intersects). `SetPosition` is the equivalent of `CharacterVirtual::SetPosition` — instant relocation, no sweep, penetration unresolved until the next step. Today only the character path is wired into the mailbox-pos handlers (the explicit "Risks" call-out in this plan); rigid-body actors that need mailbox teleport later will need a parallel `JoltBodySetPosition` call.
 
-### Why this is the right pattern for Q*bert's use case
+### Why this is the right pattern for Q✱bert's use case
 
-Q*bert's script writes target positions in three situations: apex respawn (after a death fall), round-clear reset (back to apex when a round is won), and game-over restart (reset to apex with full lives). All three are **discontinuous** teleports — there's no semantically meaningful velocity carrying from the old pose to the new one, no "sweep through everything between" semantics needed, and the target is always free space (the apex cube, above the pyramid). `CharacterVirtual::SetPosition` is the exact match: instant relocation, the next `ExtendedUpdate` settles the character onto the apex cube via the standard ground-detection path, gravity continues from there. Q*bert's `linVelocity` was probably zero already at the moment the script writes the teleport (or will be in the next tick once the script also writes `Z_SPEED = 0`); either way, preserving velocity through the teleport is correct.
+Q✱bert's script writes target positions in three situations: apex respawn (after a death fall), round-clear reset (back to apex when a round is won), and game-over restart (reset to apex with full lives). All three are **discontinuous** teleports — there's no semantically meaningful velocity carrying from the old pose to the new one, no "sweep through everything between" semantics needed, and the target is always free space (the apex cube, above the pyramid). `CharacterVirtual::SetPosition` is the exact match: instant relocation, the next `ExtendedUpdate` settles the character onto the apex cube via the standard ground-detection path, gravity continues from there. Q✱bert's `linVelocity` was probably zero already at the moment the script writes the teleport (or will be in the next tick once the script also writes `Z_SPEED = 0`); either way, preserving velocity through the teleport is correct.
 
 ## Implementation details (added 2026-05-11)
 
@@ -133,7 +133,7 @@ case EMAILBOX_X_POS:
 
 ## Smoke-test result
 
-Engine boots `wflevels/qbert_practice-standalone.iff` and runs through the camshot intro pan + gameplay for the full 12-second timeout window with no `FATAL ERROR: PhysicalAttributes::Validate()` assert and no terminate. Z-coordinate Forth writes (`15 INDEXOF_Z_POS write-mailbox`) now take effect — Q*bert sits at his scripted Z on apex respawn instead of falling back to the previous Jolt-resolved pose.
+Engine boots `wflevels/qbert_practice-standalone.iff` and runs through the camshot intro pan + gameplay for the full 12-second timeout window with no `FATAL ERROR: PhysicalAttributes::Validate()` assert and no terminate. Z-coordinate Forth writes (`15 INDEXOF_Z_POS write-mailbox`) now take effect — Q✱bert sits at his scripted Z on apex respawn instead of falling back to the previous Jolt-resolved pose.
 
 ## End-to-end walker verification (2026-05-11)
 
@@ -151,7 +151,7 @@ Result: **all 32 hops of the Warnsdorff coverage path completed successfully**; 
 |---|---|---|
 | Time to first death | ~10 s | none — full round cleared |
 | `lives` value | dropped from 3 | stayed at **3.0** every step |
-| Z teleport behaviour | Q*bert sat at Z≈7 (Jolt overwrite) | scripted apex/Z writes honoured |
+| Z teleport behaviour | Q✱bert sat at Z≈7 (Jolt overwrite) | scripted apex/Z writes honoured |
 | ROUND_CLEAR | never reached | **latched at step 31** |
 | Engine log FATAL/Validate/terminate | crash in plan reproduction | **none** |
 

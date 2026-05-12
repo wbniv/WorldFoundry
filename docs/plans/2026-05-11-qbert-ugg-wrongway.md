@@ -1,4 +1,4 @@
-# Plan — Q*bert Ugg &amp; Wrong-Way (side-of-pyramid climbers)
+# Plan — Q✱bert Ugg &amp; Wrong-Way (side-of-pyramid climbers)
 
 **Date:** 2026-05-11
 **Status:** Done (2026-05-11, commits `4799990` initial implementation + `9116d4e` Escher orientation fix)
@@ -7,16 +7,16 @@
 
 ## Context
 
-Ugg and Wrong-Way are the two **side-of-pyramid climbers** in arcade Q*bert. Unlike the descenders (Red, Green, Slick, Sam) that bounce down the *top* of the cubes, Ugg and Wrong-Way climb up the *side faces* of the pyramid in an [Escher-style](https://en.wikipedia.org/wiki/M._C._Escher) gravity flip — body rotated 90° so their "feet" rest on the vertical face of a cube, "up" pointing outward from the pyramid.
+Ugg and Wrong-Way are the two **side-of-pyramid climbers** in arcade Q✱bert. Unlike the descenders (Red, Green, Slick, Sam) that bounce down the *top* of the cubes, Ugg and Wrong-Way climb up the *side faces* of the pyramid in an [Escher-style](https://en.wikipedia.org/wiki/M._C._Escher) gravity flip — body rotated 90° so their "feet" rest on the vertical face of a cube, "up" pointing outward from the pyramid.
 
-They're killed if Q*bert lands on their cube (same FALL_DEATH path as Red Ball — i.e., Q*bert dies on contact). Spawn at the bottom row and hop upward toward the apex.
+They're killed if Q✱bert lands on their cube (same FALL_DEATH path as Red Ball — i.e., Q✱bert dies on contact). Spawn at the bottom row and hop upward toward the apex.
 
-## Reference (arcade Q*bert)
+## Reference (arcade Q✱bert)
 
 - **Ugg** (purple) climbs the **right** side face (cubes at column == row, the right edge of each row).
 - **Wrong-Way** (green) climbs the **left** side face (cubes at column 0, the left edge).
 - Both bodies are rendered as if gravity has rotated 90° — they appear to walk *up* the slope of the pyramid side, feet on the vertical face. Wikipedia describes it as ["along the sides of the cubes in an Escheresque manner"](https://en.wikipedia.org/wiki/Q*bert).
-- Q*bert dies on contact (not the climber — these are real threats).
+- Q✱bert dies on contact (not the climber — these are real threats).
 - Despawn when they reach the apex or fall off.
 
 ## Design
@@ -43,7 +43,7 @@ The yaw step was the **9116d4e fixup**: before that commit, the climbers were on
 
 ### Killing the climber
 
-Q*bert lands on a cube; the player's hop-completion logic writes `FALL_DEATH = 1` if the cube is occupied by an Ugg/WW. Same death pipeline as Red Ball — no special-case for the climbers.
+Q✱bert lands on a cube; the player's hop-completion logic writes `FALL_DEATH = 1` if the cube is occupied by an Ugg/WW. Same death pipeline as Red Ball — no special-case for the climbers.
 
 ## Mailbox layout
 
@@ -74,7 +74,7 @@ Q*bert lands on a cube; the player's hop-completion logic writes `FALL_DEATH = 1
 Smoke-tested in `qbert_practice`:
 1. Spawn Ugg → body is upright on the right side face, "forward" points up the slope, hops climb toward apex.
 2. Same for Wrong-Way on the left.
-3. Land Q*bert on a cube currently occupied by Ugg → player dies, lives counter decrements, respawn at apex.
+3. Land Q✱bert on a cube currently occupied by Ugg → player dies, lives counter decrements, respawn at apex.
 4. Captured to `qbert-all-enemies.mp4` showing all 7 arcade enemies in flight together.
 
 ## Files touched

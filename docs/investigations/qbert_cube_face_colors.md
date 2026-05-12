@@ -1,4 +1,4 @@
-# Q*bert Cube Face Colors (pixel-sampled from MAME screenshots)
+# Q✱bert Cube Face Colors (pixel-sampled from MAME screenshots)
 
 Per-round cube face colors for the WF `qbert_practice` level port. Sampled from the
 apex cube (row 0, col 0) of each round in MAME headless screenshots at 240×256
@@ -59,14 +59,14 @@ Level 4:
 
 **Highest hops needed in any level: 2** (Levels 2 and 4).
 
-Sampled by hopping Down-Right then Up-Left (Q*bert returns to apex with cube
+Sampled by hopping Down-Right then Up-Left (Q✱bert returns to apex with cube
 (1,1) visited exactly once), then sampling cube (1,1)'s top face at `(137, 80)`.
 
 **L1 and L3 are 1-step** in this ROM: post-1-hop sample equals the HUD CHANGE TO
 target. L2 and L4 are 2-step: post-1-hop is a distinct intermediate color
 (state 1) that differs from both state 0 and the target.
 
-(This differs from common Q*bert lore which says L1/L2 are 1-step and L3/L4 are
+(This differs from common Q✱bert lore which says L1/L2 are 1-step and L3/L4 are
 2-step. The empirical capture says L1/L3 are 1-step and L2/L4 are 2-step. WF
 port should use the empirically-measured behavior.)
 
@@ -78,7 +78,7 @@ L2/L4. L2 and L4 also need revert-on-extra-visits logic.
 State 0 = unvisited cube top (sampled from apex `(120, 56)` of round-start frame).
 State 2 = target color from HUD "CHANGE TO:" indicator (sampled at `(40, 55)`).
 State 1 = intermediate, sampled from cube (1,1) at `(137, 80)` after a 2-hop
-sequence (Down-Right then Up-Left, Q*bert returns to apex with (1,1) visited
+sequence (Down-Right then Up-Left, Q✱bert returns to apex with (1,1) visited
 exactly once). Side faces are constant across all states within a round.
 
 **"Flat" rounds (L2R4, L4R2)**: in the arcade these rounds render with the cube
@@ -135,7 +135,7 @@ applicable, state 2 from HUD CHANGE TO indicator) now confirmed.
 `scripts/research/mame/qbert_round_shots.lua`:
 1. Enables DIP "Start=Adv" cheat for round-by-round advancement
 2. Detects round transitions via RAM 0x081 changes → triggers state-0 snap
-3. Injects 2-hop sequence (Down-Right, Up-Left) → Q*bert returns to apex
+3. Injects 2-hop sequence (Down-Right, Up-Left) → Q✱bert returns to apex
 4. Snaps post-hop with cube (1,1) cleanly visible
 5. Repeats for all 16 rounds + 3 transition snaps + 1 trailing
 
@@ -205,7 +205,7 @@ that interval shows the transition screen rather than gameplay.
 
 ## Hardware note
 
-Gottlieb Q*bert uses a fixed 16-pen DAC palette for the entire game. Different round
+Gottlieb Q✱bert uses a fixed 16-pen DAC palette for the entire game. Different round
 "colors" come from cube tiles being assigned different pens, **not** from DAC values
 changing. A palette write-tap on `0x5000–0x501F` cannot detect round transitions —
 the tap only sees identical writes every reset. Pixel-sampling from screenshots is

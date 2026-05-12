@@ -1,4 +1,4 @@
-# Plan — Q*bert Green Ball (enemy-freeze pickup)
+# Plan — Q✱bert Green Ball (enemy-freeze pickup)
 
 **Date:** 2026-05-11
 **Status:** Done (2026-05-11, commit `2ad0459`)
@@ -7,16 +7,16 @@
 
 ## Context
 
-After Red Ball ([red-ball-enemy](2026-05-11-qbert-red-ball-enemy.md)) and Coily ([coily-and-discs](2026-05-11-qbert-coily-and-discs.md)) shipped, the next arcade-faithful enemy was the **Green Ball** — visually a red-ball look-alike that on player contact does *not* kill Q*bert but freezes every enemy on the pyramid for ~5 seconds. It's a defensive pickup rather than a threat, and gameplay-wise it gates the difficulty curve in later rounds.
+After Red Ball ([red-ball-enemy](2026-05-11-qbert-red-ball-enemy.md)) and Coily ([coily-and-discs](2026-05-11-qbert-coily-and-discs.md)) shipped, the next arcade-faithful enemy was the **Green Ball** — visually a red-ball look-alike that on player contact does *not* kill Q✱bert but freezes every enemy on the pyramid for ~5 seconds. It's a defensive pickup rather than a threat, and gameplay-wise it gates the difficulty curve in later rounds.
 
-## Reference (arcade Q*bert)
+## Reference (arcade Q✱bert)
 
 - Spawns at the same apex-adjacent cubes as the Red Ball.
 - Bounces straight down with the same gravity / hop cadence as a Red Ball — it is *indistinguishable* from a Red Ball in motion, only by colour.
-- On Q*bert contact: all enemies on the board freeze for ~5 s, ball is consumed, no death.
+- On Q✱bert contact: all enemies on the board freeze for ~5 s, ball is consumed, no death.
 - Spawn rate ~25 s in the arcade attract loop; appears less often than Red Balls.
 
-See: [Wikipedia — Q*bert](https://en.wikipedia.org/wiki/Q*bert) "green balls slow the action".
+See: [Wikipedia — Q✱bert](https://en.wikipedia.org/wiki/Q*bert) "green balls slow the action".
 
 ## Design
 

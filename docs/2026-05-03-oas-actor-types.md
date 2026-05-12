@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-03
 **Source:** `wfsource/source/oas/*.oas`
-**Purpose:** Quick reference for every shipped actor type, its fields, and what game patterns it enables. Built so port plans (Q\*bert and the rest of the catalogue under `~/wf-games/`) can pull from existing primitives instead of reinventing them.
+**Purpose:** Quick reference for every shipped actor type, its fields, and what game patterns it enables. Built so port plans (Q✱bert and the rest of the catalogue under `~/wf-games/`) can pull from existing primitives instead of reinventing them.
 
 ## How to read this index
 
@@ -58,7 +58,7 @@ Sections sorted alphabetically by class name.
 - `ActivatedBy` — Enum (`All | Actor | Class | List`).
 - **FieldFX group:** Vector X/Y/Z directional field effect (hidden until ActivatedBy filter set).
 
-**Likely uses for arcade ports:** Generic trigger zone for level progression (Q\*bert level transitions, Pac-Man pellet-pickup zones, Space Invaders wave boundaries).
+**Likely uses for arcade ports:** Generic trigger zone for level progression (Q✱bert level transitions, Pac-Man pellet-pickup zones, Space Invaders wave boundaries).
 
 ### `Activation Box Object Reference` — Mailbox-triggered camera switcher
 
@@ -92,7 +92,7 @@ Sections sorted alphabetically by class name.
 - **Stereogram group:** `EyeDistance` (fixed, 0–10, default 0.025), `EyeAngle` (fixed, 0–360°, default 2.5°).
 - **Fogging group:** `FoggingColor` (RGB 0xRRGGBB), `FoggingStartDistance` (fixed, 0–1000), `FoggingCompleteDistance` (fixed, 0–1000).
 
-**Likely uses for arcade ports:** Smooth follow-cam with fogging for depth (Galaga / Space Invaders zoomed viewport, Q\*bert isometric camera).
+**Likely uses for arcade ports:** Smooth follow-cam with fogging for depth (Galaga / Space Invaders zoomed viewport, Q✱bert isometric camera).
 
 ### `Camera Shot` — Camera placement preset
 
@@ -112,7 +112,7 @@ Sections sorted alphabetically by class name.
 - **Mode: Switching Camshots:** `Pan Time In Seconds` (0–10 fixed, transition duration on cut).
 - **Clipping Planes:** `Hither` (near, 0–1000, default 0.1), `Yon` (far, 0–1000, default 100).
 
-**Likely uses for arcade ports:** Death cutscenes, level-clear pans, boss reveal pans (Q\*bert snake approach, Galaga boss entry).
+**Likely uses for arcade ports:** Death cutscenes, level-clear pans, boss reveal pans (Q✱bert snake approach, Galaga boss entry).
 
 ### `Common` — Common-block schema shim
 
@@ -132,7 +132,7 @@ Sections sorted alphabetically by class name.
 - `Activation MailBox` — Mailbox to trigger destruction (0–3999, default 1).
 - `ActivatedBy` — Enum (`All | Actor | Class | List`).
 
-**Likely uses for arcade ports:** Despawning ball/Coily actors when the player hits them (Q\*bert), enemy cleanup on wave end (Galaga / Space Invaders), destructible walls.
+**Likely uses for arcade ports:** Despawning ball/Coily actors when the player hits them (Q✱bert), enemy cleanup on wave end (Galaga / Space Invaders), destructible walls.
 
 ### `Dir` — Editor-only directory/folder marker
 
@@ -150,7 +150,7 @@ Sections sorted alphabetically by class name.
 
 **Key OAD fields:** Empty custom block — full power comes from the `Script` field via `common.inc`. (Not the same as `dir.oas` above — `dir.oas` is a folder marker.)
 
-**Likely uses for arcade ports:** Game-loop coordinator (every port). Ball-spawn cadence (Q\*bert), wave director (Galaga / Space Invaders), level state machine (Pac-Man pellet count, Q\*bert round-clear).
+**Likely uses for arcade ports:** Game-loop coordinator (every port). Ball-spawn cadence (Q✱bert), wave director (Galaga / Space Invaders), level state machine (Pac-Man pellet count, Q✱bert round-clear).
 
 ### `Disabled` — Stub for disabled types
 
@@ -168,7 +168,7 @@ Sections sorted alphabetically by class name.
 
 **Key OAD fields:** (inherited from `actor.inc`).
 
-**Likely uses for arcade ports:** Galaga / Space Invaders enemy ships, Pac-Man ghosts, Q\*bert bestiary (red/purple/green balls, Coily-snake form, Slick / Sam / Ugg / Wrongway).
+**Likely uses for arcade ports:** Galaga / Space Invaders enemy ships, Pac-Man ghosts, Q✱bert bestiary (red/purple/green balls, Coily-snake form, Slick / Sam / Ugg / Wrongway).
 
 ### `Explosion` — Explosion template
 
@@ -215,7 +215,7 @@ Sections sorted alphabetically by class name.
 - **Object Velocity group:** X/Y/Z velocity at spawn (fixed, -100 to +100 m/s).
 - **Random Displacement group:** X/Y/Z range for spawn-position variance (fixed, -100 to +100).
 
-**Likely uses for arcade ports:** Ball / Coily spawner (Q\*bert), bullet generator (Galaga / Space Invaders), pellet drop (Pac-Man), bomb drops (Bomberman).
+**Likely uses for arcade ports:** Ball / Coily spawner (Q✱bert), bullet generator (Galaga / Space Invaders), pellet drop (Pac-Man), bomb drops (Bomberman).
 
 ### `Gold` — Collectible-pickup stub
 
@@ -225,7 +225,7 @@ Sections sorted alphabetically by class name.
 
 **Key OAD fields:** (inherited from `actor.inc`; empty custom block).
 
-**Likely uses for arcade ports:** Score bonuses (Q\*bert bonus tiles, Galaga power-ups), pellets (Pac-Man).
+**Likely uses for arcade ports:** Score bonuses (Q✱bert bonus tiles, Galaga power-ups), pellets (Pac-Man).
 
 ### `Handle` — Level-data handle
 
@@ -259,7 +259,7 @@ Sections sorted alphabetically by class name.
 - **Music:** `MusicVh` (.vh vab header), `MusicVb` (.vb vab body), `MusicSeq` (.seq MIDI sequence).
 - `Sound Yon` — Sound attenuation distance (fixed, 0–500, default 20).
 
-**Likely uses for arcade ports:** Exactly one per level. Q\*bert needs `Number Of Mailboxes ≥ 500` per the MVP plan; SFX bank slots reserved for future audio phase.
+**Likely uses for arcade ports:** Exactly one per level. Q✱bert needs `Number Of Mailboxes ≥ 500` per the MVP plan; SFX bank slots reserved for future audio phase.
 
 ### `Light` — Directional light
 
@@ -280,7 +280,7 @@ Sections sorted alphabetically by class name.
 
 **Key OAD fields:** Inherited from `mesh.inc` Matte groups (colour picker or tile/map config).
 
-**Likely uses for arcade ports:** Single-colour starfield / sky (Q\*bert pyramid backdrop, Galaga starfield, Pac-Man maze surround). `mm_practice` uses one with `Matte Type=Color`.
+**Likely uses for arcade ports:** Single-colour starfield / sky (Q✱bert pyramid backdrop, Galaga starfield, Pac-Man maze surround). `mm_practice` uses one with `Matte Type=Color`.
 
 ### `Mesh` — Mesh-block schema shim
 
@@ -319,7 +319,7 @@ Sections sorted alphabetically by class name.
 - `Arming Delay` — Time before active (fixed, 0–100s, default 0.2s).
 - `Explosion Delay` — Time to detonate after impact (fixed, 0–3600s, default 2s).
 
-**Likely uses for arcade ports:** Galaga / Space Invaders bullets, Bomberman bombs (delayed-fuse variant), Q\*bert ball-as-projectile if treated mechanically.
+**Likely uses for arcade ports:** Galaga / Space Invaders bullets, Bomberman bombs (delayed-fuse variant), Q✱bert ball-as-projectile if treated mechanically.
 
 ### `Movement` — Movement-block schema shim
 
@@ -362,7 +362,7 @@ Sections sorted alphabetically by class name.
 
 **Key OAD fields:** Inherited from `actor.inc` and `movebloc.inc`.
 
-**Likely uses for arcade ports:** Q\*bert player (note: Q\*bert MVP plan considers `Mobility=Anchored` to avoid Jolt fighting per-frame `X/Y/Z_POS` writes during the hop arc), Pac-Man (grid-locked movement), Galaga fighter (X-axis-restricted).
+**Likely uses for arcade ports:** Q✱bert player (note: Q✱bert MVP plan considers `Mobility=Anchored` to avoid Jolt fighting per-frame `X/Y/Z_POS` writes during the hop arc), Pac-Man (grid-locked movement), Galaga fighter (X-axis-restricted).
 
 ### `Pole` — Climbable / swingable pole
 
@@ -374,7 +374,7 @@ Sections sorted alphabetically by class name.
 - `Swing Push` — Initial push velocity on mount (fixed, -100 to +100, default 1.5).
 - **Momentum Transfer Ratio group:** `Mount Ratio` (fixed, -100 to +100, default 1.0), `Dismount Ratio` (fixed, -100 to +100, default 1.0).
 
-**Likely uses for arcade ports:** Pitfall vines, Donkey Kong ladders/poles, Q\*bert disc warp (probably better served by `warp` though — see below).
+**Likely uses for arcade ports:** Pitfall vines, Donkey Kong ladders/poles, Q✱bert disc warp (probably better served by `warp` though — see below).
 
 ### `Room` — Level-room container
 
@@ -386,7 +386,7 @@ Sections sorted alphabetically by class name.
 - **Adjacent Rooms group:** `Adjacent Room 1`, `Adjacent Room 2` (object references; null = dead end).
 - `Room Loaded Mailbox` — Mailbox set when the room loads (0–3999, default 0).
 
-**Likely uses for arcade ports:** One room per screen / level (Q\*bert level1–4, Pac-Man maze, single-screen arcade games).
+**Likely uses for arcade ports:** One room per screen / level (Q✱bert level1–4, Pac-Man maze, single-screen arcade games).
 
 ### `Shadow` — Dynamic shadow template
 
@@ -396,7 +396,7 @@ Sections sorted alphabetically by class name.
 
 **Key OAD fields:** Inherited.
 
-**Likely uses for arcade ports:** Depth cue under flying actors — **immediately relevant to Zaxxon's iconic ground-shadow primitive** (the difficulty-score report's friction-callout for Zaxxon may collapse if `shadow` already does what we need). Q\*bert's flying balls could use one too.
+**Likely uses for arcade ports:** Depth cue under flying actors — **immediately relevant to Zaxxon's iconic ground-shadow primitive** (the difficulty-score report's friction-callout for Zaxxon may collapse if `shadow` already does what we need). Q✱bert's flying balls could use one too.
 
 ### `Shadowp` — Shadow plane variant
 
@@ -416,7 +416,7 @@ Sections sorted alphabetically by class name.
 - `Blink Frequency` — Blink rate (fixed, 0–100, default 0.2s per blink).
 - **Display group:** `Shield Purchase Display` (fixed, 0–100, default 1s), `Invulnerability Display` (fixed, 0–100, default 3s).
 
-**Likely uses for arcade ports:** Galaga power-up invulnerability, Q\*bert green-ball freeze-window for the player, Pac-Man power-pellet "ghosts vulnerable" mode (the inverse — the *enemies* get a state, but the same mechanism applies to the player).
+**Likely uses for arcade ports:** Galaga power-up invulnerability, Q✱bert green-ball freeze-window for the player, Pac-Man power-pellet "ghosts vulnerable" mode (the inverse — the *enemies* get a state, but the same mechanism applies to the player).
 
 ### `Spike` — Damage hazard
 
@@ -428,7 +428,7 @@ Sections sorted alphabetically by class name.
 - `Health Modifier` — Damage (fixed, -100 to +100, default -1).
 - `ActivatedBy` — Enum (`All | Actor | Class | List`).
 
-**Likely uses for arcade ports:** Deadly terrain (Q\*bert spikes / lava), enemy contact damage, wall collisions (Pac-Man).
+**Likely uses for arcade ports:** Deadly terrain (Q✱bert spikes / lava), enemy contact damage, wall collisions (Pac-Man).
 
 ### `Stationary Platform` — Static walkable surface
 
@@ -438,7 +438,7 @@ Sections sorted alphabetically by class name.
 
 **Key OAD fields:** Inherited; mobility disabled, mesh configuration is the primary lever.
 
-**Likely uses for arcade ports:** Level geometry — Q\*bert pyramid cube tops, Pac-Man maze walls, Galaga playfield base. `mm_practice` uses a `statplat` for the ramp.
+**Likely uses for arcade ports:** Level geometry — Q✱bert pyramid cube tops, Pac-Man maze walls, Galaga playfield base. `mm_practice` uses a `statplat` for the ramp.
 
 ### `Target Position` — Named point in space
 
@@ -458,7 +458,7 @@ Sections sorted alphabetically by class name.
 
 **Key OAD fields:** Empty custom block.
 
-**Likely uses for arcade ports:** Source pool for spawn-by-mailbox patterns: ball/Coily/disc templates (Q\*bert), enemy variants (Galaga), pellet types (Pac-Man), bomb (Bomberman).
+**Likely uses for arcade ports:** Source pool for spawn-by-mailbox patterns: ball/Coily/disc templates (Q✱bert), enemy variants (Galaga), pellet types (Pac-Man), bomb (Bomberman).
 
 ### `Test` — Editor field-type test harness
 
@@ -486,7 +486,7 @@ Sections sorted alphabetically by class name.
 - `Horiz Speed`, `Vert Speed` — Projectile / beam speed (fixed, 0–360).
 - **Needle Gun group:** `Max Range` (fixed, 0–10000, default 800), `Beam Spread Angle` (fixed, 0–1 radians, default 0.125).
 
-**Likely uses for arcade ports:** Galaga / Space Invaders blaster, Q\*bert disc-jump (as a "tool" of the player), Bomberman bomb-place ability.
+**Likely uses for arcade ports:** Galaga / Space Invaders blaster, Q✱bert disc-jump (as a "tool" of the player), Bomberman bomb-place ability.
 
 ### `Toolset` — Tool-block schema shim
 
@@ -506,7 +506,7 @@ Sections sorted alphabetically by class name.
 - `Target` — Destination actor (object reference; spawn point in the next room or a specific position).
 - `ActivatedBy` — Enum (`All | Actor | Class | List`).
 
-**Likely uses for arcade ports:** Pac-Man tunnel wrap, Q\*bert disc-warp-to-apex (the side-disc primitive in the GDD — `warp` looks like the right answer; this should be tried before scripting the warp animation manually), boss-arena entry (Galaga), level transitions in general.
+**Likely uses for arcade ports:** Pac-Man tunnel wrap, Q✱bert disc-warp-to-apex (the side-disc primitive in the GDD — `warp` looks like the right answer; this should be tried before scripting the warp animation manually), boss-arena entry (Galaga), level transitions in general.
 
 ---
 
@@ -521,7 +521,7 @@ These are bindings from common port-implementation needs to the actor types abov
 | Teleport the player to another actor's position | `Warp` |
 | Cut to a different camera view when the player enters a region | `Activation Box Object Reference` (writes a `Camshot` index into a mailbox) |
 | Trigger a scripted event when the player enters a region | `Activation Box` (writes a value into a mailbox) |
-| Dynamic shadow under a flying actor (Zaxxon ground-shadow, Q\*bert ball shadow) | `Shadow` (template) — investigate; may collapse Zaxxon's friction callout |
+| Dynamic shadow under a flying actor (Zaxxon ground-shadow, Q✱bert ball shadow) | `Shadow` (template) — investigate; may collapse Zaxxon's friction callout |
 | Damage the player / enemy on contact | `Spike` |
 | On-screen score / health gauge driven by a mailbox | **Today (3 slots only):** `DrawHud` (`display.cc:42-93`) reads mb 70/71/72 as score/timer/lives via `stb_easy_font`, Linux dev only. **Per-actor configurable form:** `Meter` OAS schema exists but is **not implemented** (no `meter.cc`, registration commented out in `objects.mac:42`) — needs ~100 LOC. |
 | Temporary invulnerability or blink effect | `Shield` (template) |
@@ -540,14 +540,14 @@ These are bindings from common port-implementation needs to the actor types abov
 | Player character | `Player` |
 | Generic enemy AI base | `Enemy` |
 
-## Notes on the Q\*bert MVP plan in light of this index
+## Notes on the Q✱bert MVP plan in light of this index
 
 Two specific friction items in [docs/plans/2026-05-03-qbert-mvp.md](plans/2026-05-03-qbert-mvp.md) should be re-evaluated against this index before being implemented as listed:
 
 1. **§ 2 "Cube colour state" friction (84 actors / scripts).** The plan considers a "Visibility = mailbox value matches integer N" predicate as a hypothetical runtime helper. It does not exist in the index above — the visibility model in `mesh.inc` uses a single `Visibility Mailbox` slot (0=hidden, 1=shown). The 84-actor approach stands. (No reduction.)
 
-2. **HUD deferral.** The plan defers visible HUD on the assumption that the engine doesn't render mailboxes 70/71/72. **In fact `DrawHud` already does** — `wfsource/source/gfx/gl/display.cc:42-93` reads those exact slots and rasterises score/timer/lives via the vendored `stb_easy_font`. Linux dev only (`DESIGNER_CHEATS`). The `Meter` OAS actor (which would let any level place per-actor configurable readouts) is **schema-only and disabled in `objects.mac:42`** — needs ~100 LOC to ship. For Q*bert MVP+ the 3-slot path covers score/timer/lives today; level/round/cubes-to-target need the Meter renderer first.
+2. **HUD deferral.** The plan defers visible HUD on the assumption that the engine doesn't render mailboxes 70/71/72. **In fact `DrawHud` already does** — `wfsource/source/gfx/gl/display.cc:42-93` reads those exact slots and rasterises score/timer/lives via the vendored `stb_easy_font`. Linux dev only (`DESIGNER_CHEATS`). The `Meter` OAS actor (which would let any level place per-actor configurable readouts) is **schema-only and disabled in `objects.mac:42`** — needs ~100 LOC to ship. For Q✱bert MVP+ the 3-slot path covers score/timer/lives today; level/round/cubes-to-target need the Meter renderer first.
 
-3. **Disc-warp animation in the bestiary phase.** `warp` is in the index. The disc-warp-to-apex primitive in the Q\*bert GDD is most likely just a `Warp` with `Target=apex-cube`. The custom Forth handler may not be needed.
+3. **Disc-warp animation in the bestiary phase.** `warp` is in the index. The disc-warp-to-apex primitive in the Q✱bert GDD is most likely just a `Warp` with `Target=apex-cube`. The custom Forth handler may not be needed.
 
 4. **Spawn-by-mailbox** (already corrected in the plan): `Generator` + `Template` is the path.

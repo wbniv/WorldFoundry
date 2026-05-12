@@ -5,15 +5,15 @@ status: Parked 2026-05-11
 scope: ~30 LOC of zForth in [wflevels/qbert_practice/blender_create_qbert.py](../../wflevels/qbert_practice/blender_create_qbert.py); 6 new local mailboxes (435–440); no engine, no mailbox.inc, no OAS.
 ---
 
-# Q*bert hop-arc motion (Phase 1.5)
+# Q✱bert hop-arc motion (Phase 1.5)
 
 **Status:** Parked 2026-05-11 — lerp-based hop motion is acceptable for now; revisit once enemy AI / cube logic is further along, or fold into the deferred [physics-hops plan](2026-05-10-qbert-physics-hops.md).
 
 ## Context
 
-After [Phase 1 hop-rotation](2026-05-10-qbert-hop-facing-rotation.md) (commits `78c4eb6` + `ff14144`), Q*bert smoothly rotates to face each diagonal during the 12-frame `HOP_COOLDOWN`. But position-wise, `do-hop` still **teleports** XYZ to the destination cube on frame 0 — Q*bert blinks instantly to the new cube and then sits there for 12 frames while only the rotation animates. Looks wrong.
+After [Phase 1 hop-rotation](2026-05-10-qbert-hop-facing-rotation.md) (commits `78c4eb6` + `ff14144`), Q✱bert smoothly rotates to face each diagonal during the 12-frame `HOP_COOLDOWN`. But position-wise, `do-hop` still **teleports** XYZ to the destination cube on frame 0 — Q✱bert blinks instantly to the new cube and then sits there for 12 frames while only the rotation animates. Looks wrong.
 
-User-approved approach (from Phase 2 question, 2026-05-10): defer mesh stretch-and-squash (would require wiring per-actor scale through engine, plan TBD), and instead implement the **parabolic Z arc + XY straight-line lerp** across the existing cooldown. Q*bert visibly hops through the air over the 12 frames — gives a partial "stretch effect" just from being airborne.
+User-approved approach (from Phase 2 question, 2026-05-10): defer mesh stretch-and-squash (would require wiring per-actor scale through engine, plan TBD), and instead implement the **parabolic Z arc + XY straight-line lerp** across the existing cooldown. Q✱bert visibly hops through the air over the 12 frames — gives a partial "stretch effect" just from being airborne.
 
 This is a teleport-based fix (still no Jolt physics on the player). The [physics-hops follow-up plan](2026-05-10-qbert-physics-hops.md) will eventually replace this with velocity-driven arcs through CharacterVirtual; this plan is the cheap visual win in the meantime.
 
@@ -30,7 +30,7 @@ This is a teleport-based fix (still no Jolt physics on the player). The [physics
 
 | mb | Name | Set by | Read by |
 |---|---|---|---|
-| 434 | `HOP_PENDING_LAND` | `do-hop` (sets to 1 on on-pyramid hops only; 0 left untouched on off-edge) | lerp block on **second-to-last** frame (cd=2, ~1 frame before exact landing) promotes to mb 411 — gives a slight "anticipation" feel as the cube colour flips just before Q*bert touches down. Easy to change to cd=1 (exact landing) if anticipation looks worse. |
+| 434 | `HOP_PENDING_LAND` | `do-hop` (sets to 1 on on-pyramid hops only; 0 left untouched on off-edge) | lerp block on **second-to-last** frame (cd=2, ~1 frame before exact landing) promotes to mb 411 — gives a slight "anticipation" feel as the cube colour flips just before Q✱bert touches down. Easy to change to cd=1 (exact landing) if anticipation looks worse. |
 | 435 | `HOP_START_X` | `do-hop` (saves current `INDEXOF_X_POS`) | per-frame lerp |
 | 436 | `HOP_START_Y` | `do-hop` | per-frame lerp |
 | 437 | `HOP_START_Z` | `do-hop` | per-frame lerp |
@@ -77,7 +77,7 @@ then
 
 Stack budget: peak depth ~5 — well within zForth defaults.
 
-`arc_height = 2.0` is a tunable constant. With cube vertical spacing `Δz = 2`, an arc peak of +2 above start means Q*bert clearly leaves the cube top, peaks ~2 units above, and lands. If it looks too floaty, lower to 1.5 or 1.0.
+`arc_height = 2.0` is a tunable constant. With cube vertical spacing `Δz = 2`, an arc peak of +2 above start means Q✱bert clearly leaves the cube top, peaks ~2 units above, and lands. If it looks too floaty, lower to 1.5 or 1.0.
 
 ### Respawn paths
 
@@ -104,10 +104,10 @@ No engine changes. No `mailbox.inc` changes. No new OAS. No new Forth word defin
 Per memory: edit script → blender headless → `build_level_binary.sh qbert_practice` → run.
 
 1. **Build clean**: no engine rebuild needed; only level binaries regenerate.
-2. **Visible arc**: from rest, hop DOWN. Q*bert leaves apex Z, rises ~2 units, comes down on the next-row cube top. Smooth XY translate to the SE position concurrent with the arc.
-3. **Land exact**: at cooldown end, Q*bert is sitting exactly on the destination cube top (no Z drift, no XY offset). Verify by hopping back and forth between two cubes — no gradual drift.
-4. **Hop UP the pyramid**: Q*bert hops to higher cube — arc goes up to *above* the higher cube and lands. (Arc height is added on top of the lerp, so hopping to a higher-Z cube means rising even higher mid-arc.)
-5. **Off-edge fall**: drive Q*bert off the pyramid edge. Arc starts toward the (off-pyramid) target, but the existing off-edge clamp updates the end-Z. Q*bert visibly arcs toward the clamped destination, then FALL_PHASE takes over and ramps Z down.
+2. **Visible arc**: from rest, hop DOWN. Q✱bert leaves apex Z, rises ~2 units, comes down on the next-row cube top. Smooth XY translate to the SE position concurrent with the arc.
+3. **Land exact**: at cooldown end, Q✱bert is sitting exactly on the destination cube top (no Z drift, no XY offset). Verify by hopping back and forth between two cubes — no gradual drift.
+4. **Hop UP the pyramid**: Q✱bert hops to higher cube — arc goes up to *above* the higher cube and lands. (Arc height is added on top of the lerp, so hopping to a higher-Z cube means rising even higher mid-arc.)
+5. **Off-edge fall**: drive Q✱bert off the pyramid edge. Arc starts toward the (off-pyramid) target, but the existing off-edge clamp updates the end-Z. Q✱bert visibly arcs toward the clamped destination, then FALL_PHASE takes over and ramps Z down.
 6. **Rotation still works**: shipped Phase 1 + Phase 1.1 (180° fix) rotation continues to lerp concurrently with the position arc. Both lerps share the same `cd > 0` gate.
 7. **Death + respawn**: drive into a fall, wait for FALL_PHASE to snap to apex. Next hop should arc cleanly from apex (no stale start/end leak).
 

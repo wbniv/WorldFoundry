@@ -1,7 +1,7 @@
 # Camera path support — what the engine has, what was deleted, what's needed
 
 **Date:** 2026-05-04
-**Context:** While planning the Q*bert intro cinematic
+**Context:** While planning the Q✱bert intro cinematic
 ([docs/plans/2026-05-04-qbert-intro-camera-sweep.md](../plans/2026-05-04-qbert-intro-camera-sweep.md), planned but not
 yet filed under that name — see `~/.claude/plans/elegant-gliding-glacier.md`),
 the question came up: instead of approximating a curved sweep with a
@@ -220,7 +220,7 @@ linear approach:
 | Verification level (synthetic curve, watch the camera traverse it) | 0.5 day | New tiny test level; bridge dump of camera position over time. |
 | **Total** | **~3 days** | Plus ~1 day of slop for unknowns in the levcomp pipeline. |
 
-For comparison, the chained-CamShot intro that ships with the Q*bert
+For comparison, the chained-CamShot intro that ships with the Q✱bert
 work is **~1 evening** (5 keyframe shots, 30 lines of Forth, no
 exporter or engine work).
 
@@ -229,7 +229,7 @@ exporter or engine work).
 Ship the chained-CamShot intro now (it's not throwaway — even with
 full path support, you'd still want CamShots for static framing
 shots). Treat path-camera support as a separate, bounded ~3-day
-deliverable that benefits *every* future level, not just Q*bert.
+deliverable that benefits *every* future level, not just Q✱bert.
 
 Pick it up if either of these triggers:
 - The chained-CamShot intro looks too "stair-stepped" once tuned and

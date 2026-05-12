@@ -5,9 +5,9 @@
 
 ## Context
 
-The arcade Q*bert game's iconic enemy is **Coily** — a purple snake that hatches from a bouncing egg, then chases Q*bert across the pyramid with the same hop pattern Q*bert uses. The most distinctive interaction is the **spinning discs** at the top-left and top-right of the pyramid: Q*bert can lure Coily onto a disc, and Coily falls off the bottom for bonus points.
+The arcade Q✱bert game's iconic enemy is **Coily** — a purple snake that hatches from a bouncing egg, then chases Q✱bert across the pyramid with the same hop pattern Q✱bert uses. The most distinctive interaction is the **spinning discs** at the top-left and top-right of the pyramid: Q✱bert can lure Coily onto a disc, and Coily falls off the bottom for bonus points.
 
-Currently the level has the player, 28 cubes, and 3 red balls. Nothing chases Q*bert deterministically; there's no per-round single-threat enemy and no way for the player to *defeat* an enemy. This plan adds Coily (egg + snake + chase) and the discs that complete the lure mechanic.
+Currently the level has the player, 28 cubes, and 3 red balls. Nothing chases Q✱bert deterministically; there's no per-round single-threat enemy and no way for the player to *defeat* an enemy. This plan adds Coily (egg + snake + chase) and the discs that complete the lure mechanic.
 
 Four sequenced phases, each shippable as its own commit:
 
@@ -15,8 +15,8 @@ Four sequenced phases, each shippable as its own commit:
 |---|---|---|
 | **A** | Coily egg (purple ball bouncing down from apex) | Visual hint of a new enemy; no chase yet |
 | **B** | Egg → Coily transformation at bottom row | Coily exists; just stands there |
-| **C** | Coily greedy-chase AI | Coily chases Q*bert; death on contact |
-| **D** | 2 spinning discs + lure-and-die mechanic | Q*bert can defeat Coily |
+| **C** | Coily greedy-chase AI | Coily chases Q✱bert; death on contact |
+| **D** | 2 spinning discs + lure-and-die mechanic | Q✱bert can defeat Coily |
 
 ## Architecture
 
@@ -61,11 +61,11 @@ Filter to pyramid-valid: `0 <= new_col <= new_row <= 6`.
 
 Score each by Manhattan distance to player `(qb_row, qb_col)`: `|new_row - qb_row| + |new_col - qb_col|`. Pick the minimum (tiebreak: prefer down moves, then left). Encode as a 4-branch Forth cascade — each branch tests validity and scores; final winner is one mb-slot's worth of (new_row, new_col).
 
-Hop cadence: 12 ticks (matches Q*bert player's HOP_COOLDOWN). Arc-Z and S&S identical to the ball at full player-strength (Coily is character-class, not bouncy-ball).
+Hop cadence: 12 ticks (matches Q✱bert player's HOP_COOLDOWN). Arc-Z and S&S identical to the ball at full player-strength (Coily is character-class, not bouncy-ball).
 
 ### Coily death paths
 
-- **Caught Q*bert**: same as red ball — Coily writes 1 to mb 414. Player's FALL_DEATH machinery runs.
+- **Caught Q✱bert**: same as red ball — Coily writes 1 to mb 414. Player's FALL_DEATH machinery runs.
 - **Fell off disc**: disc detects Coily on its (row, col), writes Coily's PHASE=0 + parks. No player death.
 - **Round cleared**: director retires both egg and snake (PHASE=0 + park) when ROUND_CLEAR latches.
 
@@ -93,12 +93,12 @@ World positions computed via the same `cube_world_position(row, col)` formula (w
 
 Disc activation: director on round-init wakes both discs (PHASE=1). On round-clear, refresh both.
 
-**Q*bert hopping ONTO a disc** — the player's existing edge-hop logic writes FALL_PHASE=1 when Q*bert hops past the pyramid. We need to intercept that:
+**Q✱bert hopping ONTO a disc** — the player's existing edge-hop logic writes FALL_PHASE=1 when Q✱bert hops past the pyramid. We need to intercept that:
 
 - Easiest: have the player's hop-arc landing tick check if there's a disc at the target (row, col) BEFORE FALL_PHASE fires. If yes, snap to apex instead of fall.
 - This requires reading disc state from the player's script. Use a global "disc-at" lookup: 2 mailboxes (DISC_LEFT_ROW=534, DISC_LEFT_COL=535, etc.) the player's landing logic can check.
 
-OR (cleaner): the disc itself owns the intercept. On every tick, the disc reads player ROW/COL; if match, write player back to apex + park self. The player's FALL_PHASE will still fire one tick (until apex teleport overrides) — visual: Q*bert briefly tilts off-edge before being snatched back. Acceptable for v1.
+OR (cleaner): the disc itself owns the intercept. On every tick, the disc reads player ROW/COL; if match, write player back to apex + park self. The player's FALL_PHASE will still fire one tick (until apex teleport overrides) — visual: Q✱bert briefly tilts off-edge before being snatched back. Acceptable for v1.
 
 I'll go with the disc-owns-the-intercept design — simpler, no player-script changes.
 
@@ -135,15 +135,15 @@ Bounding box authored to be tall-skinny so the engine's collision approximation 
 
 ### Phase C (chase)
 
-1. After transform, drive Q*bert via the walker harness or manual joystick. Coily hops once per ~12 ticks; the new (row, col) reduces Manhattan distance.
-2. Drive Q*bert directly INTO Coily; expect FALL_DEATH latch + cs_death + lives--.
-3. Visual: Coily clearly follows Q*bert across the pyramid.
+1. After transform, drive Q✱bert via the walker harness or manual joystick. Coily hops once per ~12 ticks; the new (row, col) reduces Manhattan distance.
+2. Drive Q✱bert directly INTO Coily; expect FALL_DEATH latch + cs_death + lives--.
+3. Visual: Coily clearly follows Q✱bert across the pyramid.
 
 ### Phase D (discs)
 
 1. 2 discs visible at left/right edges next to row 1 cubes.
-2. Drive Q*bert onto a disc cube (left or right off-edge hop): expect snap-to-apex instead of FALL_DEATH; disc PHASE flips to 0 (visually disappears).
-3. Lure Coily: drive Q*bert onto the disc with Coily one step away on the side; Coily's next greedy hop should target the disc cube; on landing there, expect Coily death (PHASE=0 + retire).
+2. Drive Q✱bert onto a disc cube (left or right off-edge hop): expect snap-to-apex instead of FALL_DEATH; disc PHASE flips to 0 (visually disappears).
+3. Lure Coily: drive Q✱bert onto the disc with Coily one step away on the side; Coily's next greedy hop should target the disc cube; on landing there, expect Coily death (PHASE=0 + retire).
 4. Round-clear: clear a round (drive all cubes to state 2); discs refresh to PHASE=1 next round; egg + snake retire.
 
 ### Regression
@@ -166,6 +166,6 @@ Each phase as a separate commit:
 - Coily egg's purple-and-red **flashing** visual (arcade shows alternating frames during the bounce-down) — defer to a follow-up
 - **Multiple Coily eggs per round** at higher levels — arcade scales to 2 eggs at L4+. Defer.
 - **Disc spinning animation** — currently static visual; add a per-frame rotation later
-- **Disc-jump anticipation arc** — Q*bert's arcade hop to a disc is a longer arc; we'll use the standard hop for now
+- **Disc-jump anticipation arc** — Q✱bert's arcade hop to a disc is a longer arc; we'll use the standard hop for now
 - **Coily speech** ("@#!*?") on disc-death — arcade shows a speech bubble; defer
 - **Green Ball / Slick / Sam / Ugg / Wrong-Way** — separate enemy plans

@@ -16,7 +16,7 @@ mailbox-at-cap crash retest both deferred to follow-ups.
 
 ## Context
 
-Q*bert arcade has 4 levels × 4 rounds = 16 distinct cube colour palettes.
+Q✱bert arcade has 4 levels × 4 rounds = 16 distinct cube colour palettes.
 Today [`wflevels/qbert_practice/gen_cube.py`](../../wflevels/qbert_practice/gen_cube.py)
 only ships 4 (L1R1..L1R4), and
 [`blender_create_qbert.py`](../../wflevels/qbert_practice/blender_create_qbert.py)

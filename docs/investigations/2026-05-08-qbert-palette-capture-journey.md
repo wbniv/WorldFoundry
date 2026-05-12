@@ -1,9 +1,9 @@
-# Capturing Q*bert's per-round cube palette — the path to 16×3 ROM-grounded colors
+# Capturing Q✱bert's per-round cube palette — the path to 16×3 ROM-grounded colors
 
 **Date:** 2026-05-08
 
 This is the trip report. We needed the exact RGB values for every cube top
-state (0/1/2) across all 16 of Q*bert's rounds (L1R1–L4R4), to drive the
+state (0/1/2) across all 16 of Q✱bert's rounds (L1R1–L4R4), to drive the
 WF port's per-round palette swap in
 [`wflevels/qbert_practice/`](../../wflevels/qbert_practice/). Final result:
 all 48 cube-top color cells filled in
@@ -58,10 +58,10 @@ enemies). L2/L3/L4 each have four DISTINCT palettes (R1–R4 within a level
 differ in cube colors). To capture all 16, we needed to make ROM advance
 through them — one MAME run can't sit at L1R1 forever.
 
-The Q*bert ROM has a documented DIP switch:
+The Q✱bert ROM has a documented DIP switch:
 `"Demo Mode (Unlim Lives, Start=Adv (Cheat)"` — when active, every
 1P-Start press advances to the next round. Demo Mode also makes the ROM
-auto-play (Demo AI hops Q*bert), and Unlim Lives prevents game-over.
+auto-play (Demo AI hops Q✱bert), and Unlim Lives prevents game-over.
 
 [`scripts/research/mame/qbert_round_shots.lua`](../../scripts/research/mame/qbert_round_shots.lua)
 is the script that uses this:
@@ -72,7 +72,7 @@ is the script that uses this:
    each Demo-AI round-clear).
 4. Each time `0x0081` changes, snap state-0 (apex pristine), inject a
    2-hop dance (DR to (1,1), UL back to apex) over 119 frames, snap
-   state-1 (cube (1,1) flipped exactly once, Q*bert clear of (137,80)),
+   state-1 (cube (1,1) flipped exactly once, Q✱bert clear of (137,80)),
    then press Start to advance to the next round.
 
 This produced 15 of 16 visually-correct round captures
@@ -91,7 +91,7 @@ L4R1 stayed unknown. ⚠️
 
 ## Step 3 — L4R1: the +119 frame window
 
-L4R1 was the holdout. Demo AI in L4R1 plays aggressively — Q*bert is off
+L4R1 was the holdout. Demo AI in L4R1 plays aggressively — Q✱bert is off
 the pyramid within a few hundred frames, often dying. By the time
 `qbert_round_shots.lua`'s 119-frame snap window closed, Demo AI had
 already hopped many cubes; the (137, 80) sample showed multi-state
@@ -110,7 +110,7 @@ The RAM/visual relationship is subtle. When `ram[0x0081]` changes from
 `0x12` to `0x13`, the ROM has *internally* entered round 16 (= L4R1 per
 the file_map), but the on-screen HUD still shows L3R4 because the L4
 zoom transition animation hasn't completed. At about 90–120 frames in,
-the transition completes, the HUD updates, and Q*bert is at apex with
+the transition completes, the HUD updates, and Q✱bert is at apex with
 all cubes in L4R1's state-0 green.
 
 [`scripts/research/mame/qbert_l4r1_walker.lua`](../../scripts/research/mame/qbert_l4r1_walker.lua)
@@ -125,7 +125,7 @@ X + 89                 → UL hop input off
 X + 119                → snap("state1")        ← HUD = LEVEL 4 ROUND 1
 ```
 
-Position byte at `0x0D64` reads `0xB8` at both snaps, confirming Q*bert
+Position byte at `0x0D64` reads `0xB8` at both snaps, confirming Q✱bert
 was at apex. Score at state-1 is 30 (apex flipped + (1,1) flipped, two
 cubes worth at L4's 25-points-per-cube rate, plus a small bonus).
 
@@ -222,7 +222,7 @@ rm -f ~/.mame/nvram/qbert/nvram ~/.mame/cfg/qbert.cfg
 location.) After the clear, walker output is bit-for-bit deterministic
 across runs.
 
-This applies to **every** MAME-Q*bert research script in this repo. If
+This applies to **every** MAME-Q✱bert research script in this repo. If
 you're debugging a script that "stopped working," check NVRAM first.
 
 ---
@@ -316,7 +316,7 @@ collapsed in dead-end #5 below.
 ### <a name="dead-end-5"></a>5. Position byte hunt — `0x0D64` collisions
 
 [`scripts/research/mame/qbert_position_hunt.lua`](../../scripts/research/mame/qbert_position_hunt.lua)
-ran a strict-uniqueness diff: drive Q*bert through a known sequence of 5
+ran a strict-uniqueness diff: drive Q✱bert through a known sequence of 5
 cubes (apex / (1,1) / (2,1) / (3,2) / (1,0)), find bytes whose values
 are stable per position and distinct between positions. Found *one*
 strict candidate: `0x0D64`, with apex `0xB8`, (1,1) `0xF5`, etc. We
@@ -343,7 +343,7 @@ walker around a `pos_to_cube` lookup keyed on the 16-bit value.
 
 Failure mode: **animation transients.** During a single multi-round
 run, the bot registered apex with two distinct keys (`0x257D` and
-`0x917D`) at different times. Q*bert's sprite-X shifts by ~12 pixels
+`0x917D`) at different times. Q✱bert's sprite-X shifts by ~12 pixels
 between idle and hop animation frames; if we sample during one frame
 we get one X, during the next animation frame a different X. The bot's
 learned table fragmented apex across keys, then mis-merged distinct
@@ -378,9 +378,9 @@ for 1200 frames (20 seconds). Surely *some* of those frames would catch
 cube (1,1) in state-1 cleanly?
 
 What we found: with no joystick stimulation, **Demo AI in L4R1 is
-frozen at apex**. Q*bert sits there indefinitely. With stimulation
+frozen at apex**. Q✱bert sits there indefinitely. With stimulation
 (injected DR/UL hops), Demo AI activates but ROM transitions to attract
-mode within ~80 frames — Q*bert dies offscreen and the title sequence
+mode within ~80 frames — Q✱bert dies offscreen and the title sequence
 takes over.
 
 The "catch L4R1 by spamming screenshots" approach assumes there's *some*
@@ -395,7 +395,7 @@ the burst.
 Variation on the L4R1 capture: wait for `0x0D64 == 0xB8` (apex value)
 for 30 consecutive frames before starting the snap dance. Intent: "let
 Demo AI's queued actions settle into a stable rest state." Reality:
-in L4R1, Demo AI gives us *zero* stable apex frames; Q*bert is moving
+in L4R1, Demo AI gives us *zero* stable apex frames; Q✱bert is moving
 constantly until he dies. The detector waits forever, then ROM transitions
 to attract.
 

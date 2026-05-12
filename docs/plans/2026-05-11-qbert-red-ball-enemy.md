@@ -1,4 +1,4 @@
-# Plan — Q*bert Red Ball enemy (first enemy actor)
+# Plan — Q✱bert Red Ball enemy (first enemy actor)
 
 **Date:** 2026-05-11
 **Status:** Done (2026-05-11, commits `2752d41` → `15705d1`; Phase B multi-ball + icosphere mesh + subdued stretch-and-squash all shipped)
@@ -7,20 +7,20 @@
 
 ![Red Ball mesh — low-poly icosahedron, Blender-authored](screenshots/qbert-redball-2026-05-11.png)
 
-The qbert_practice level header explicitly notes "No enemies, no discs, no HUD, no audio." The biggest gameplay gap from real Q*bert is **enemies** — that's what turns the current colour-flipping demo into an actual game.
+The qbert_practice level header explicitly notes "No enemies, no discs, no HUD, no audio." The biggest gameplay gap from real Q✱bert is **enemies** — that's what turns the current colour-flipping demo into an actual game.
 
 Of the arcade enemy roster (Red Ball, Green Ball, Coily, Slick, Sam, Ugg, Wrong-Way), **Red Ball** is the simplest: purely scripted motion down a diagonal, no chase AI, no state machine beyond bounce-down-and-respawn. It's the natural first enemy to wire up — it exercises every piece of infrastructure (per-actor script, per-tick movement, contact detection, player death trigger) without needing AI.
 
 This plan implements one Red Ball that bounces continuously down the pyramid in a single arcade-style cycle. Iteration to two-balls / proper spawn timing / Green Ball / Coily comes later.
 
-## Reference (arcade Q*bert)
+## Reference (arcade Q✱bert)
 
 - Red Ball spawns at the cube one below the apex (row 1, either col 0 or col 1).
 - It bounces straight down — always `(row+1, col)` or `(row+1, col+1)` — never sideways or up.
 - One hop per ~½ second (arcade ~30 frames at 60 Hz; in WF a 12-tick HOP_COOLDOWN matches the player, so 12 ticks/hop is fine for v1).
 - It despawns when it reaches the bottom row (row 6) or falls off the side (col > row).
 - A new Red Ball spawns periodically. For v1 we use a continuous-respawn loop (despawn → wait → respawn at apex).
-- Touching the same cube as Q*bert at the same time = Q*bert dies.
+- Touching the same cube as Q✱bert at the same time = Q✱bert dies.
 
 ## What's already in place
 
@@ -126,7 +126,7 @@ Since zForth scripts on one actor can only *write* (not read) another actor's ma
 1. Build level binary; engine builds clean (no engine changes anyway).
 2. Boot qbert standalone — confirm one extra actor in the level (29 actors instead of 28).
 3. Visual: a small red cube bounces from one-below-apex down to the bottom row, ~12-tick hop cadence. Despawn at row 7; respawn ~60 ticks later.
-4. Death: drive Q*bert manually into the red ball's path; expect FALL_DEATH to fire, cs_death camshot, lives decrement. After 3 deaths, game-over.
+4. Death: drive Q✱bert manually into the red ball's path; expect FALL_DEATH to fire, cs_death camshot, lives decrement. After 3 deaths, game-over.
 5. Autopilot regression: run the walker harness. With a single red ball running, the walker will sometimes die (collision); confirm that *if* the run completes without collision, ROUND_CLEAR still fires the same way. (Walker isn't enemy-aware; that's expected.)
 
 ## Risks
@@ -142,7 +142,7 @@ Since zForth scripts on one actor can only *write* (not read) another actor's ma
 - Coily (chase AI, much bigger)
 - Slick & Sam (cube-flippers, mechanic that interacts with the existing cube-state machine)
 - Ugg & Wrong-Way (side-of-pyramid movement)
-- Spinning discs (extra cubes on the pyramid edges that transport Q*bert; needs new mesh + bespoke transport state)
+- Spinning discs (extra cubes on the pyramid edges that transport Q✱bert; needs new mesh + bespoke transport state)
 - Proper spawn timing per arcade rules (Red Balls have a per-round spawn frequency)
 - Per-frame physics-based ball motion (parabolic arc like the player's hop) — v2 follow-up
 

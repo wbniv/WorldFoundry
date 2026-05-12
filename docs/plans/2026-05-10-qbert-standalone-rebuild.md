@@ -61,7 +61,7 @@ fi
    ```
    task run-level -- wflevels/qbert_practice-standalone.iff
    ```
-   Boots into Q*bert; no `_chunkID.Valid()` assertion, no DMalloc OOM.
+   Boots into Q✱bert; no `_chunkID.Valid()` assertion, no DMalloc OOM.
 
 5. **Snowgoons regression** (shared build script):
    ```

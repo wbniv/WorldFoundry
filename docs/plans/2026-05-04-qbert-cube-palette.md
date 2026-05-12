@@ -1,4 +1,4 @@
-# Plan — Q*bert per-face cube palette (arcade-faithful, ROM-verified)
+# Plan — Q✱bert per-face cube palette (arcade-faithful, ROM-verified)
 
 ## Context
 
@@ -57,7 +57,7 @@ A 240×256 attract-mode-gameplay frame contains **only 13 unique colours** (matc
 | `#56A999` | (86, 169, 153) | 7195 | Cube side — **lit decoration** (left-front in iso). Teal. |
 | `#314646` | (49, 70, 70) | 7209 | Cube side — **shadow decoration** (right side in iso). Dark teal. |
 | `#000000` | (0, 0, 0) | 38914 | Background. |
-| `#EF1021`, `#A900A9`, `#FF7700`, ... | — | small | Sprite colours (Q*bert, Coily, Slick, etc.). Out of scope. |
+| `#EF1021`, `#A900A9`, `#FF7700`, ... | — | small | Sprite colours (Q✱bert, Coily, Slick, etc.). Out of scope. |
 
 **Insight from user**: the arcade fakes 3D depth via two pre-shaded side colours (lit `#56A999` + shadow `#314646`). Our WF engine has actual 3D geometry + dynamic lighting, so we don't need to bake the lit/shadow split into the texture. **Use the LIT teal directly and let the engine darken it for shadowed faces** — i.e. use `#56A999` as the cube-side base.
 
@@ -147,7 +147,7 @@ Then `task run-level -- wflevels/qbert_practice-standalone.iff -record_video`, f
 1. **Build cleanly.** `python3 gen_cube.py` emits 3 IFFs with 2-material MATL (size grows ~264 bytes per cube file). Level rebuild succeeds. Engine rebuild NOT required.
 2. **Cube top colour visible at runtime.** Capture WF runtime via `-record_video` + ffmpeg extract. Each unhopped cube's TOP face renders **purple** (state 0); each hopped cube's TOP renders **yellow** (state 2). Sides render with the engine's lit/shadow split applied to `#43776F`.
 3. **Side-by-side compare.** Embed the runtime frame next to `qbert-arcade-attract-gameplay-reference.png` in the visual-reference table of [docs/plans/2026-05-04-qbert-fall-lives-gameover.md](2026-05-04-qbert-fall-lives-gameover.md). Cube tops should match colour-for-colour. Sides will differ stylistically (engine lighting rather than baked shading) but the overall hue should match the arcade's mid-tone.
-4. **Existing flip behaviour unchanged.** Hopping Q*bert onto a cube flips its top from purple to yellow; sides stay constant. Bridge: `mb[200..227]` ramps 0 → 2.
+4. **Existing flip behaviour unchanged.** Hopping Q✱bert onto a cube flips its top from purple to yellow; sides stay constant. Bridge: `mb[200..227]` ramps 0 → 2.
 5. **Round-clear still triggers.** Full 28-cube playthrough still sets `mb[413] = 1`. No Forth changed.
 
 ## Risks & open questions

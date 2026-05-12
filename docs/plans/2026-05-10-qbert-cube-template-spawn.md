@@ -1,4 +1,4 @@
-# Plan — Q*bert cube template-spawn via Generator (Phase 2 follow-up)
+# Plan — Q✱bert cube template-spawn via Generator (Phase 2 follow-up)
 
 **Date:** 2026-05-10
 **Status:** Not started — sequenced AFTER [2026-05-10-qbert-cube-consolidation.md](2026-05-10-qbert-cube-consolidation.md)
@@ -105,7 +105,7 @@ This is genuinely optional — 4 KB is noise next to Phase 1's 25-MB savings. Li
 3. **Generators load as 28 actors** — debug log shows 28 generators in the live actor list at load.
 4. **First-tick spawn fires** — debug log shows 28 calls to `Generato::update` triggering `ConstructTemplateObject`; live actor count grows by 28 within the first frame.
 5. **Activation mailbox cycles** — `mb[460]` reads as 1 on tick 0, 0 from tick 1 onwards.
-6. **Visual identity with Phase 1**: pyramid renders identically; Q*bert hops the same; round palettes flip at the same beat. The change is invisible to the player.
+6. **Visual identity with Phase 1**: pyramid renders identically; Q✱bert hops the same; round palettes flip at the same beat. The change is invisible to the player.
 7. **Re-measure HalLmalloc post-first-tick** — expect within ~4 KB of the Phase 1 number (slight regression from idle generators); for Phase 2.5, expect within ~0 of Phase 1 (or slightly better, since 28 generators self-destroy).
 8. **Re-measure LVL chunk size** in qbert_practice.iff — expect ~4-11 KB smaller than Phase 1.
 9. **Procedural test**: temporarily change the generator-placement loop to spawn a 5-row pyramid (15 generators) instead of 7-row (28). Verify it works without engine or asset rebuild. Revert.

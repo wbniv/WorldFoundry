@@ -191,7 +191,7 @@ LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 ../../../engine/wf_game
 `build_game.sh` compiles all source dirs, skips test/Windows files, uses the scripting stub
 and platform stubs from `wftools/engine/stubs/`.
 
-For per-level builds (Q*bert / mm_practice / etc.) use the four-stage Rust pipeline:
+For per-level builds (Q✱bert / mm_practice / etc.) use the four-stage Rust pipeline:
 
 ```bash
 bash wftools/wf_blender/build_level_binary.sh <level-name>
@@ -349,7 +349,7 @@ WF mailboxes form a hierarchy. Understanding scope prevents the most common cros
 | Range | Name | Scope | Notes |
 |---|---|---|---|
 | 0–1 | `EMAILBOX_FALSE` / `EMAILBOX_TRUE` | Global, read-only | Set by engine at level load; write attempts are silently dropped (assert in debug builds). Use mb[1] as a "always-true" visibility mailbox. |
-| 2–999 | Global user | **Shared across all actors** | Director, player, cube actors, etc. all read/write the same cells. Q*bert's cube-state mailboxes (200–227), round counter (425), etc. live here. |
+| 2–999 | Global user | **Shared across all actors** | Director, player, cube actors, etc. all read/write the same cells. Q✱bert's cube-state mailboxes (200–227), round counter (425), etc. live here. |
 | 1000–1021 | Global system | Global, side-effects | `INDEXOF_CAMSHOT` = 1021 writes the active camera. |
 | 2000–2099 | Local user | Per-actor | Each actor has its own storage at this range. Rarely needed for game logic. |
 | 3000–3036 | Local system | Per-actor, side-effects | **`INDEXOF_X_POS` = 3009, `INDEXOF_Y_POS` = 3010, `INDEXOF_Z_POS` = 3011.** Writing here moves the *calling actor's* position. |
@@ -362,7 +362,7 @@ WF mailboxes form a hierarchy. Understanding scope prevents the most common cros
 0 INDEXOF_X_POS write-mailbox
 ```
 
-`INDEXOF_X_POS` = 3009 is in the local-system range. A `write-mailbox` syscall routes through `LookupMailboxes(callerActorIndex)` → that actor's `WriteSystemMailbox` → moves *that* actor. From the director script, this moves the (invisible) director, not Q*bert.
+`INDEXOF_X_POS` = 3009 is in the local-system range. A `write-mailbox` syscall routes through `LookupMailboxes(callerActorIndex)` → that actor's `WriteSystemMailbox` → moves *that* actor. From the director script, this moves the (invisible) director, not Q✱bert.
 
 **Pattern for cross-actor teleport — use a signal mailbox:**
 
@@ -431,7 +431,7 @@ For deeper camera investigation (per-axis Absolute/Relative, runtime switching v
 
 Marble Madness level paths are not hand-authored — they are faithfully reproduced from the
 arcade ROM. The pipeline goes: **ROM → JSON → Blender mesh → WF level**. Treat this section
-as a worked example of "reproducing arcade geometry from extracted data" — the Q*bert MVP
+as a worked example of "reproducing arcade geometry from extracted data" — the Q✱bert MVP
 is the worked example for "synthesising a pyramid from a Python loop", and `mm_practice` is
 the worked example for "the simplest possible WF level."
 

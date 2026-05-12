@@ -101,7 +101,7 @@ For `idx == 0` (or omitted) and a global mailbox index (≥ `MAILBOX_USER_BASE` 
 **Why an override layer instead of just calling `set_mailbox` on `EMAILBOX_HARDWARE_JOYSTICK1_RAW`:** the HID poll runs every frame and would clobber a one-shot `set_mailbox` write before any script could read it. The override layer is what makes injection actually testable; otherwise it races the HID.
 
 **Verification:**
-- Launch qbert_practice on the bridge, send `{"op":"inject_input","slot":"joystick1_raw","value":2048,"duration_frames":1}` (2048 = `EJ_BUTTONF_UP`). Expect Q\*bert to start a hop arc on the next frame.
+- Launch qbert_practice on the bridge, send `{"op":"inject_input","slot":"joystick1_raw","value":2048,"duration_frames":1}` (2048 = `EJ_BUTTONF_UP`). Expect Q✱bert to start a hop arc on the next frame.
 - Watch `INDEXOF_HOP_PHASE` (402) transition 0 → 1 → ... → 0 over ~24 frames.
 - Verify that injecting nonsense (e.g. value `-1`) doesn't crash anything.
 
@@ -236,13 +236,13 @@ A regression test in `wftools/wf_blender/debug_bridge.py` (or a new `tests/` dir
 - **Shader cache structure.** Same: half-day spike at start of B1 to read `backend_modern.cc` end-to-end and document the cache key.
 - **zForth dictionary management.** Approach 1 (leak on reload) is the recommended path, but it requires explicit operator buy-in — calling out here so it isn't quietly chosen at implementation time.
 - **`common.Script` guard.** Removing `common.Script` from `kPropMap` is a behavior change for any existing tool that pushes property writes. Today no such tool exists (the property is corrupted by the write, so nothing relies on it), but worth a `git grep set_prop.*Script` before landing.
-- **Phase C deferral.** If a port project (e.g. Q\*bert beyond MVP, or a heavier-Forth game like Bomberman) hits a script bug that takes > 1 hour to diagnose without a debugger, that's the signal to start the DAP plan early.
+- **Phase C deferral.** If a port project (e.g. Q✱bert beyond MVP, or a heavier-Forth game like Bomberman) hits a script bug that takes > 1 hour to diagnose without a debugger, that's the signal to start the DAP plan early.
 
 ## Acceptance criteria
 
 Phase A done when:
 1. `set_mailbox` works against global and per-actor mailboxes, with undo.
-2. `inject_input` lets a Python script make Q\*bert hop in all four diagonals from the bridge with no joystick connected.
+2. `inject_input` lets a Python script make Q✱bert hop in all four diagonals from the bridge with no joystick connected.
 3. Both ops covered by automated tests against qbert_practice.
 
 Phase B done when:

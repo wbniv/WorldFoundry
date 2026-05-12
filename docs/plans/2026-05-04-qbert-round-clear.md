@@ -1,9 +1,9 @@
-# Plan — Q*bert round-clear reset and level progression
+# Plan — Q✱bert round-clear reset and level progression
 
 ## Context
 
 After the per-face cube palette work (2026-05-04), the level plays correctly: all 28 cubes
-flip from purple (state 0) to yellow (state 2) as Q*bert hops each one. When the last cube
+flip from purple (state 0) to yellow (state 2) as Q✱bert hops each one. When the last cube
 flips, mb[413] (ROUND_CLEAR) latches to 1. Currently nothing happens after that — the game
 sits there.
 
@@ -12,8 +12,8 @@ Goal: when mb[413] = 1, celebrate briefly, reset the cubes, and let the player p
 
 ## Arcade behaviour (verified from cabinet instructions + StrategyWiki)
 
-- On round clear the pyramid flashes, Q*bert bounces briefly, then the next round starts.
-- Q*bert respawns at the apex.
+- On round clear the pyramid flashes, Q✱bert bounces briefly, then the next round starts.
+- Q✱bert respawns at the apex.
 - Within Level 1 (R1–R4) the layout and rules are identical: same 28 cubes, same
   single-hop flip (state 0 → state 2). Only the cube colours and enemy roster change
   between rounds.
@@ -27,7 +27,7 @@ all cube states to 0, clear the win flag, increment the round counter, continue.
 
 Out of scope:
 - Per-round palette swap (requires L1R2+ MAME palette sampling + gen_cube.py variants)
-- Q*bert respawn at apex on round clear (requires position mailbox write from director)
+- Q✱bert respawn at apex on round clear (requires position mailbox write from director)
 - Enemy actors (Coily, Slick/Sam) — future plan
 - cd.iff level sequencing for L2+ (future plan, when L2 rules implemented)
 
@@ -110,11 +110,11 @@ that was set when Blender last ran.
 
 ## Risks
 
-- **Player position after reset**: Q*bert stays wherever they were when the last cube
+- **Player position after reset**: Q✱bert stays wherever they were when the last cube
   flipped. They are NOT respawned at the apex. For arcade faithfulness, a future step
   should write to the player's position mailboxes and re-run the intro. For now,
   the player just starts hopping from their current position.
-- **Lives during countdown**: Q*bert can still fall off the pyramid during the 90-tick
+- **Lives during countdown**: Q✱bert can still fall off the pyramid during the 90-tick
   celebration window, which would decrement lives and potentially trigger game-over.
   Acceptable for MVP. Fix: set a ROUND_CLEAR_ACTIVE flag that suppresses fall-death.
 - **mb[411] (QBERT_LANDED) flush**: cleared in the reset block to avoid a spurious cube

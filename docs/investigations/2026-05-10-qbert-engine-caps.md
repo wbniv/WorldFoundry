@@ -1,7 +1,7 @@
-# Q*bert engine caps — 16-round palette regression chase
+# Q✱bert engine caps — 16-round palette regression chase
 
 **Date:** 2026-05-10
-**Trigger:** After commit `0048211` (16-round arcade palette cycling, 2026-05-09) the Q*bert level couldn't be re-loaded — the engine asserted on `_chunkID.Valid()` immediately after `jolt: init complete`. The committed `qbert_practice-standalone.iff` was stale (from May 4, embedding pre-diamond cubes), and every fresh rebuild produced a binary the engine refused.
+**Trigger:** After commit `0048211` (16-round arcade palette cycling, 2026-05-09) the Q✱bert level couldn't be re-loaded — the engine asserted on `_chunkID.Valid()` immediately after `jolt: init complete`. The committed `qbert_practice-standalone.iff` was stale (from May 4, embedding pre-diamond cubes), and every fresh rebuild produced a binary the engine refused.
 
 This investigation tracks down five distinct hardcoded caps that fire when actor count rises from snowgoons-scale (~70 actors) to qbert-16-round-scale (1344 cube actors + ~200 misc), captures the actual HalLmalloc usage of each level, and explains why the May-9 commit half-fixed the problem (it bumped the visible pool sizes but missed several internal caps that surface only when an even larger inner iff is loaded).
 
@@ -18,7 +18,7 @@ Five engine-side caps were silently undersized relative to the May-9 actor-count
 | `wfsource/source/streams/binstrm.cc:301` | `binistream(len)` assert | `< 512000` | `< 8000000` | Generic safety check on stream construction |
 | `wfsource/source/physics/jolt/jolt_backend.cc:669` | Jolt body pool | 1024 | 4096 | Max simultaneous Jolt physics bodies |
 
-After all five bumps the engine boots Q*bert cleanly with the 1344-actor diamond pyramid + 16 round palettes. snowgoons still boots fine — the bumps are strictly a ceiling raise.
+After all five bumps the engine boots Q✱bert cleanly with the 1344-actor diamond pyramid + 16 round palettes. snowgoons still boots fine — the bumps are strictly a ceiling raise.
 
 `cbHalLmalloc` does **not** need to be bumped for the current actor count (see RAM table below); the May-9 bump from 16 MB → 64 MB is sufficient.
 
@@ -40,7 +40,7 @@ A separate copy of the same constant in [assets.cc:218](../../wfsource/source/as
 
 ### 2 & 3 & 4. `MAX_ASSETS_PER_ROOM` / `_assetStringMap[1024]` / `assetStringMapEntries <= 1024`
 
-Three coupled caps in [assets.hp:88,116](../../wfsource/source/asset/assets.hp) and [assets.cc:233](../../wfsource/source/asset/assets.cc). All three were 1024. Q*bert has 1344 cube actor variants (28 cubes × 16 rounds × 3 states) plus a handful of perm assets — 1345 string-map entries.
+Three coupled caps in [assets.hp:88,116](../../wfsource/source/asset/assets.hp) and [assets.cc:233](../../wfsource/source/asset/assets.cc). All three were 1024. Q✱bert has 1344 cube actor variants (28 cubes × 16 rounds × 3 states) plus a handful of perm assets — 1345 string-map entries.
 
 The May-9 commit bumped the related `maxAsset < 4000` asserts at assets.cc:138/189 (which gate the ASS-chunk loop count) but missed the per-room *string* map. After bumping the string map to 4000 the engine cleared this assert.
 
@@ -50,7 +50,7 @@ The May-9 commit bumped the related `maxAsset < 4000` asserts at assets.cc:138/1
 
 ### 6. Jolt body pool
 
-[jolt_backend.cc:669](../../wfsource/source/physics/jolt/jolt_backend.cc) — `gPhysicsSystem->Init(1024, ...)` reserves space for 1024 physics bodies. Q*bert creates 1344 static-mesh bodies (one per cube-actor variant). Body 1025 onwards comes back as JPH `BodyID(0xFFFFFFFF)` — invalid, but the WF wrapper at [jolt_backend.cc:312-319](../../wfsource/source/physics/jolt/jolt_backend.cc) stores the handle anyway. Later when the next `JoltMakeStaticMesh` runs and sees a non-invalid handle, it calls `JoltBodyDestroy` → `RemoveBody(0xFFFFFFFF)` → segfault inside `JPH::BodyManager::DestroyBodies`.
+[jolt_backend.cc:669](../../wfsource/source/physics/jolt/jolt_backend.cc) — `gPhysicsSystem->Init(1024, ...)` reserves space for 1024 physics bodies. Q✱bert creates 1344 static-mesh bodies (one per cube-actor variant). Body 1025 onwards comes back as JPH `BodyID(0xFFFFFFFF)` — invalid, but the WF wrapper at [jolt_backend.cc:312-319](../../wfsource/source/physics/jolt/jolt_backend.cc) stores the handle anyway. Later when the next `JoltMakeStaticMesh` runs and sees a non-invalid handle, it calls `JoltBodyDestroy` → `RemoveBody(0xFFFFFFFF)` → segfault inside `JPH::BodyManager::DestroyBodies`.
 
 Bumped to 4096. **Defensive follow-up** (not done in this pass): the wrapper at jolt_backend.cc:312 should detect `id.IsInvalid()` and bail out with `kJoltInvalidBodyID` instead of storing a handle that points at a non-existent body — silently accepting the failure is what turned a clean OOM into an obscure segfault.
 
@@ -91,7 +91,7 @@ The Phase 1 budget that boots cleanly is now `OBJD=200K ROOM=500K PERM=500K` —
 
 ### What's allocated
 
-The AssetManager's char[] (line [assets.cc:41](../../wfsource/source/asset/assets.cc)) reserves `cbPerm + MAX_ACTIVE_ROOMS × cbRoom` upfront — for our `OBJD=4M ROOM=8M`, that's 0.5M + 3 × 8M = **24.5 MB** consumed before any level data is loaded. `MAX_ACTIVE_ROOMS = MAX_ADJACENT_ROOMS + 1 = 3` is a compile-time constant from [levelcon.h:52](../../wfsource/source/oas/levelcon.h); Q*bert only ever uses 1 room, so 2/3 of that reservation is wasted memory.
+The AssetManager's char[] (line [assets.cc:41](../../wfsource/source/asset/assets.cc)) reserves `cbPerm + MAX_ACTIVE_ROOMS × cbRoom` upfront — for our `OBJD=4M ROOM=8M`, that's 0.5M + 3 × 8M = **24.5 MB** consumed before any level data is loaded. `MAX_ACTIVE_ROOMS = MAX_ADJACENT_ROOMS + 1 = 3` is a compile-time constant from [levelcon.h:52](../../wfsource/source/oas/levelcon.h); Q✱bert only ever uses 1 room, so 2/3 of that reservation is wasted memory.
 
 Jolt's PhysicsSystem allocates ~5–8 MB for its body pool, broad-phase, and contact constraints (sized for 4096 bodies post-fix). The `Level DMalloc` pool is created from OBJD (4 MB).
 

@@ -1,4 +1,4 @@
-# Plan — Q*bert Red Ball Phase B (multi-ball, spawning, timing, arc)
+# Plan — Q✱bert Red Ball Phase B (multi-ball, spawning, timing, arc)
 
 **Status:** Done (2026-05-11, commit `ba8d606`)
 **Phase A baseline:** commit `2752d41` — one self-respawning ball, mb 462..466, strict alternation, no Z arc.
@@ -7,7 +7,7 @@
 
 Phase A landed a single Red Ball that bounces in a self-respawning loop. It proved the per-actor script + global mailbox + FALL_DEATH pipeline works, but it isn't arcade-faithful:
 
-1. **Only one ball at a time.** Arcade Q*bert runs 2–3 balls simultaneously on a per-round spawn cadence.
+1. **Only one ball at a time.** Arcade Q✱bert runs 2–3 balls simultaneously on a per-round spawn cadence.
 2. **No director involvement.** Per user direction, the director should *enable* enemies (decide when to wake one) while each enemy owns its own movement script. Phase A's "ball loops itself forever" is the wrong shape.
 3. **Strict left-right alternation.** Arcade picks the next hop direction randomly per step.
 4. **No parabolic Z arc.** Player has a smoothstep + arc lerp; ball teleports flat between cubes.
@@ -207,7 +207,7 @@ Spawn-interval curve: `max(60, 300 - 12 * ROUND_NUMBER)` ticks. At ROUND 0 → 5
    - `mb 511` (LFSR): changes between sampled ticks; never stuck.
    - Force `mb 425 := 15` (ROUND_NUMBER): verify next spawn interval is 120 ticks (~2 s).
    - Force `mb 425 := 99` overflow case: interval clamps to 60.
-5. **Death pipeline:** Drive Q*bert under an active ball with the inject-input bridge; verify `mb 414` latches and standard FALL_DEATH path (cs_death + lives--) runs.
+5. **Death pipeline:** Drive Q✱bert under an active ball with the inject-input bridge; verify `mb 414` latches and standard FALL_DEATH path (cs_death + lives--) runs.
 6. **3-balls-simultaneous stress:** Force `mb 512 := 1` three times back-to-back; verify all three balls are active on the pyramid concurrently and each retires independently.
 
 ## Out of scope (future plans)

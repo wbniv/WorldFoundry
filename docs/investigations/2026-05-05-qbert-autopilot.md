@@ -1,4 +1,4 @@
-# Q*bert autopilot — coverage path and Forth script
+# Q✱bert autopilot — coverage path and Forth script
 
 **Date:** 2026-05-05  
 **Level:** `wflevels/qbert_practice`  
@@ -8,7 +8,7 @@
 
 ## What this is
 
-A Forth autopilot mode embedded in the Q*bert player script. When mailbox 430
+A Forth autopilot mode embedded in the Q✱bert player script. When mailbox 430
 (`AUTOPILOT_ON`) is set to 1, the player ignores the joystick and instead executes a
 hardcoded 32-hop sequence that flips all 28 pyramid cubes to state 2, triggering
 `ROUND_CLEAR`. Useful for demo mode, regression testing, and tuning the director's
@@ -82,7 +82,7 @@ an interior node. Minimum revisits needed from (0,0): 2. The path below uses 5 (
 extras cover the apex-flip and the row-6 dead-end corners).
 
 **Apex note:** the cube at (0,0) starts at state 0 (OFF). `QBERT_LANDED` (mb 411) fires
-only on hops, not on spawn, so the apex is never flipped unless Q*bert hops back onto
+only on hops, not on spawn, so the apex is never flipped unless Q✱bert hops back onto
 it. Steps 0–1 deliberately bounce off (1,0) and back to (0,0) to flip the apex.
 
 ### 32-hop sequence
