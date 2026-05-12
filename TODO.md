@@ -57,6 +57,8 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 - [ ] WF asset provider pure-Python rewrite — no C extensions; pure-Python `providers.py` and `wf-asset.py` CLI — [plan](docs/plans/2026-04-28-wf-asset-provider-pure-python.md)
 - [ ] Blender run operator — export + build + launch chain from Blender UI (one click: `.blend` → `.iff` → `wf_game`) — [plan](docs/plans/2026-04-29-blender-run-operator.md)
 - [ ] Live editor bridge Phase 2 — bidirectional TCP/JSON protocol; Blender → engine property/transform push without restart — [plan](docs/plans/2026-04-29-live-editor-bridge.md)
+- [ ] Move OAD schema fixtures out of test path — production code (e.g. `wflevels/qbert_practice/blender_create_qbert.py:46-47`) loads `STATPLAT_OAD` and `ENEMY_OAD` from `wftools/wf_oad/tests/fixtures/*.oad`. Schemas are first-class production artefacts, not test fixtures; relocate to e.g. `wftools/wf_oad/schemas/` and update consumers.
+- [ ] Root-cause why ENEMY_OAD on a script-less anchored Mass=0 mesh skips render-actor construction. Observed 2026-05-12 on the qbert_practice curse bubble: object count unchanged but `grep -c RenderActor3DAnimates` one short of expected; STATPLAT_OAD fixes it. Construction paths differ in `Actor::Actor` at [actor.cc:670+](wfsource/source/game/actor.cc) — leading candidates are the non-statplat `hp>0` assert (line 739) with default `hp=0`, or `_InitScript()` with an empty `Script` field. Trace, file the actual cause, and document in [docs/level-building.md](docs/level-building.md) § OAS class warning.
 
 
 ## BUILD / TOOLCHAIN

@@ -229,29 +229,38 @@ uses for physics / triggers / messaging but draws nothing.
 > `level-design-troubleshooting.md` § "Infrastructure actors render as
 > random-coloured debug cubes" for the full diagnosis.
 
-> ⚠️ **OAS classes carry different field defaults; match the schema to the
-> intended role.** Every OAD inherits its field set and default values from
-> its OAS class (`statplat.oas`, `enemy.oas`, etc.). The same Blender custom
-> property — `wf_Visibility Mailbox`, `wf_Mass`, `wf_Mobility`, etc. — only
-> overrides the OAS's default if the OAS *has* that field; fields the OAS
-> doesn't expose silently take their class default. Pick the class that
-> matches the actor's job:
+> ⚠️ **OAS class determines the C++ actor subclass; not all classes are
+> interchangeable for the same role.** Each `.oas` file maps to a different
+> `Actor` subclass via the `Oad<ClassName>()` factory in
+> `wfsource/source/game/<class>.cc` — `OadStatPlat()` returns a `StatPlat`,
+> `OadEnemy()` returns an `Enemy`, etc. The two subclasses take materially
+> different construction paths in `Actor::Actor(...)`
+> ([actor.cc:670+](../wfsource/source/game/actor.cc)):
 >
-> - **Static decorative mesh** (cubes, the qbert_practice curse bubble) →
->   `STATPLAT_OAD`. Defaults to always-visible, no AI, no phase wiring.
-> - **Hostile / scripted agent** (redball, slick, sam, coily, discs in this
->   project) → `ENEMY_OAD`. Defaults expect Enemy-class lifecycle wiring
->   (spawn / active / despawn phase), so a script-less ENEMY_OAD actor can
->   end up in a "not-yet-active" state where rendering is suppressed even
->   though `Mass=0` and `Visibility Mailbox=1` look right in the Blender
->   custom-property panel.
+> - **`StatPlat_KIND`** points `_nonStatPlat` at a small inline
+>   `_statPlatData`, asserts `Mobility==ANCHORED`, `hp==INDESTRUCTIBLE_HP`
+>   (32767), `Script==-1`, `NumberOfLocalMailboxes==0`. No input manager,
+>   no animation manager. The Jolt body is created as a static placeholder.
+> - **`Enemy_KIND`** (and every other non-statplat) heap-allocates
+>   `NonStatPlatData`, reads `hp` from the common block (asserts `hp>0`),
+>   calls `_InitInput()` and `_InitScript()`, attaches an animation
+>   manager, and (for `MOBILITY_PHYSICS`) creates a Jolt
+>   `CharacterVirtual` body.
 >
-> Diagnose schema mismatches by comparing `grep -c RenderActor3DAnimates
-> wf_game.log` to your expected animated-actor count — one short means an
-> actor isn't in the render set despite being in the object table
-> (`Level::Level: ..., object count = N` is unchanged). The 2026-05-12
-> qbert curse-bubble incident is the worked example: see
-> [docs/plans/2026-05-11-qbert-player-death-and-curse-bubble.md](plans/2026-05-11-qbert-player-death-and-curse-bubble.md) § "2026-05-12 implementation notes".
+> For a static decorative mesh (e.g. the qbert_practice curse bubble),
+> `STATPLAT_OAD` is the right schema — same as the cubes. Empirically,
+> using `ENEMY_OAD` for a script-less, anchored, `Mass=0` decorative mesh
+> left the actor in the object table (`Level::Level: ..., object count`
+> unchanged) but with `grep -c RenderActor3DAnimates wf_game.log` one
+> short of the expected animated-actor count; switching to `STATPLAT_OAD`
+> restored the missing render-actor and the mesh appeared. *Root cause is
+> still unconfirmed — possibly an `hp`-default or `_InitScript()` path
+> issue when the Enemy actor has no script and no health field — flagged
+> in TODO.md for follow-up.* Until that's traced, the practical rule is:
+> match the schema to the actor's role per the type guide
+> ([docs/2026-05-03-oas-actor-types.md](2026-05-03-oas-actor-types.md)),
+> and use the `RenderActor3DAnimates` log-count diff as a quick smoke test
+> when an actor refuses to render.
 
 Wire-displayed objects in Blender should be everything that doesn't render
 in-engine (`Mesh` / `Matte` excluded). The `display_type='WIRE'` automation
