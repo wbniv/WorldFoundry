@@ -36,7 +36,7 @@ Per-enemy crop sheets (each crop zoomed 6× nearest-neighbour from the sources a
 | **Ugg** | Humanoid climber: **pure magenta** body + smaller head + two big white eyes with pupils + flat feet. Body `#BA00BA` `(0.73, 0.00, 0.73)`. Runtime DELTA_PITCH +0.25 + DELTA_YAW +0.5 rev tips the mesh onto the right side face. |
 | **Wrong-Way** | Identical mesh and colour to Ugg; only the side-face climbed (left vs. right) and the actor rotation differ. Body `#BA00BA`. |
 | **Coily egg** | Single elongated icosphere (Z scale 1.3, XY 0.72). Material flashes purple/red at 3.75 Hz via the existing oscillator — arcade-faithful. |
-| **Coily snake** | 4 equal-radius (0.40) magenta icospheres stacked at 0.55 spacing — the original in-game silhouette, which reads as the arcade's tight coil. Eyes + pupils + red forked tongue on the top segment. Body `#BA00BA` magenta — same as Ugg/WW. |
+| **Coily snake** | 2.5-turn curve-swept magenta spiral tube (radius 0.32, height 1.65, tube radius 0.13) — authored as a Bezier curve with a circular bevel profile, converted to mesh. Head sphere on top with two white eyes + black pupils + red forked tongue. Body `#BA00BA` magenta — same as Ugg/WW. |
 
 References:
 
@@ -66,9 +66,9 @@ Measured post-Phase-C (commit `1527e14`) from the Blender scene:
 | Ugg | 284 | 378 | Body + head subdiv-2 + snout cone + 2 antennae cones + smoother eyes/pupils/feet |
 | Wrong-Way | 284 | 378 | Same mesh shape as Ugg, same magenta (only climb side differs) |
 | Coily egg | 42 | 80 | Elongated subdiv-1 icosphere |
-| Coily snake | 124 | 170 | 4 equal subdiv-1 icosphere segments (original in-game shape) + 2 eyes + 2 pupils + 2 forked-tongue cones |
+| Coily snake | 510 | 562 | Curve-swept spiral body (2.5 turns, 20 bezier pts, octagonal cross-section) + head sphere + 2 eyes + 2 pupils + 2 forked-tongue cones |
 | Spinning disc (each of 2) | 34 | 64 | Pre-existing — flat cylinder; unchanged |
-| **Total dynamic-actor footprint** | **~1804** | **~2298** | Player + 3 red balls + green + Slick + Sam + Ugg + WW + Coily egg + snake + 2 discs |
+| **Total dynamic-actor footprint** | **~2190** | **~2690** | Player + 3 red balls + green + Slick + Sam + Ugg + WW + Coily egg + snake + 2 discs |
 
 After the 2026-05-11 face-count doubling pass, each humanoid enemy lands at ~234–244 verts and 290–398 faces — comparable to the player's 206v/222f reference. Worst-case all-actors-on-screen footprint is ~1846 verts / ~2470 faces; the static 28-cube pyramid adds more on top, but the level-pool budget bumps from [2026-05-09-qbert-cube-palettes-16-rounds.md](2026-05-09-qbert-cube-palettes-16-rounds.md) (1344-cube fan-out) already accommodate it.
 
@@ -151,7 +151,7 @@ Goal: humanoid climber that reads as "creature standing on the side of a cube" a
 
 **3D mesh** (rest pose; egg left, snake right):
 
-![Coily egg (left, elongated icosphere) and Coily snake (right, 4 equal magenta segments stacked + eyes, pupils, and red forked tongue on top)](screenshots/qbert-coily-mesh-2026-05-11.png)
+![Coily egg (left, elongated icosphere) and Coily snake (right, 2.5-turn curve-swept magenta spiral with head sphere + eyes + pupils + red forked tongue)](screenshots/qbert-coily-mesh-2026-05-11.png)
 
 Goal: visibly snake-like Coily; egg distinct from a plain ball.
 
@@ -159,9 +159,9 @@ Goal: visibly snake-like Coily; egg distinct from a plain ball.
 
 1. Replace the unit icosphere with an elongated variant: `_EGG_VERTS = [(x*0.72, y*0.72, z*1.30) for (x,y,z) in _REDBALL_VERTS]`. Same face indices, so 42 verts / 80 faces. Material flashes purple/red as today (3.75 Hz oscillator at lines 1564–1568) — no script change.
 
-**Coily snake — planned redesign (not yet implemented):**
+**Coily snake — final design (`11800ff`):**
 
-After reviewing every prior iteration ([docs/investigations/2026-05-11-qbert-coily-mesh-versions.md](../investigations/2026-05-11-qbert-coily-mesh-versions.md)), the user confirmed that **none of the ball-based variants (V0 through V7) are correct**. Arcade Coily is a **spiral** — a continuous coiled body, not a stack and not a string of small balls.
+After reviewing every prior iteration ([docs/investigations/2026-05-11-qbert-coily-mesh-versions.md](../investigations/2026-05-11-qbert-coily-mesh-versions.md)), the user confirmed that **none of the ball-based variants (V0 through V7) were correct**. Arcade Coily is a **spiral** — a continuous coiled body, not a stack and not a string of small balls. Landed as a curve-swept tube + grafted head/face features.
 
 Target silhouette: a half-helix viewed from the side, like a snake's body curled into a watch-spring shape. **One continuous magenta tube**, with eyes and a forked tongue at the top end.
 
@@ -174,15 +174,19 @@ Switch from `bpy.ops.mesh.primitive_*` to a curve-based authoring approach. The 
 3. Convert the resulting curve object to mesh with `bpy.ops.object.convert(target='MESH')` so the WF IFF exporter (which only handles mesh data, not curve objects) can serialize it.
 4. Then `bpy.ops.object.join()` the converted mesh with the head/eyes/pupils/tongue primitives.
 
-#### Spiral parameters (starting point; iterate visually)
+#### Final spiral parameters (commit `d45bd5e`)
 
 ```python
 _COILY_TUBE_RADIUS    = 0.13           # cross-section thickness of the body
 _COILY_SPIRAL_RADIUS  = 0.32           # XY distance of the spiral path from the central axis
-_COILY_SPIRAL_TURNS   = 1.0            # how many full revolutions over the height (start with 1 — "half-helix")
+_COILY_SPIRAL_TURNS   = 2.5            # full revolutions of the helix (tuned visually)
 _COILY_SPIRAL_HEIGHT  = 1.65           # bottom of spiral to top of spiral
-_COILY_SPIRAL_PTS     = 32             # control-point count along the helix (more = smoother curve)
+_COILY_SPIRAL_PTS     = 20             # bezier control points along the helix
+_COILY_CURVE_RES_U    = 3              # path-direction resolution between control points
+_COILY_BEVEL_RES      = 1              # circular cross-section (8-vert octagonal ring)
 ```
+
+Turn count was iterated visually: 1.0 → 3.5 (too many) → 2.5 (just right). Resolution params dialed down progressively (1410f → 736f → 348f at this stage) until the body was both readable as a coil and cheap on poly count.
 
 Path generation:
 
@@ -196,16 +200,14 @@ for i in range(_COILY_SPIRAL_PTS):
     # add as bezier control point with handle_type='AUTO'
 ```
 
-#### Head + eyes + tongue (deferred until the body shape is approved)
+#### Head + eyes + tongue (commit `11800ff`)
 
-Once the basic spiral renders correctly:
+Grafted on after the body shape was approved:
 
-- **Head:** a small magenta sphere placed at the spiral's top endpoint, oriented so its +X face leans toward the camera.
-- **Eyes:** two white UV-spheres on the head's +X face, sized to read at distance.
-- **Pupils:** two smaller black spheres just in front of the eyes.
-- **Forked tongue:** two narrow red cones protruding +X, splayed ±Y.
-
-(All this graft-on detail is keepable from V5/V7 commit `1c3a4ac`; only the *body* part needs redesigning.)
+- **Head:** subdiv-2 icosphere radius `_COILY_HEAD_RADIUS = 0.30`, placed at the top of the spiral centred on the actor axis (head faces +X regardless of spiral endpoint, so the face features always face the player camera).
+- **Eyes:** two white UV-spheres at `(0.26, ±0.16, head_z)` radius `0.10`.
+- **Pupils:** two smaller black UV-spheres at `(0.34, ±0.16, head_z)` radius `0.05`.
+- **Forked tongue:** two narrow red cones (`(0.90, 0.05, 0.10)`) protruding +X from `(0.42, ±0.06)`, splayed ±Y.
 
 #### Materials
 
@@ -213,7 +215,7 @@ Magenta body `#BA00BA` `(0.73, 0.00, 0.73)` (unchanged from `7ebac47` pixel-samp
 
 #### Actor-positioning math
 
-Recompute `_COILY_HALF_HEIGHT` from `_COILY_SPIRAL_HEIGHT / 2 + head_radius` so the director / chase-AI continues to place Coily correctly on cube tops without script changes. `_COILY_CENTRE_OFFSET_Z` and `_COILY_Z_BASE` derive from `_COILY_HALF_HEIGHT` and stay correct automatically.
+`_COILY_HALF_HEIGHT = _COILY_SPIRAL_HEIGHT / 2 + _COILY_HEAD_RADIUS` — half-spiral plus head sphere. `_COILY_CENTRE_OFFSET_Z` and `_COILY_Z_BASE` derive from `_COILY_HALF_HEIGHT` automatically, so the director / chase-AI continues to place Coily correctly on cube tops with no script changes.
 
 #### Egg
 
@@ -298,6 +300,6 @@ Optional preamble commit if reference screenshots are gathered as a separate ste
 ## Resolved questions
 
 - **Arcade colour ground truth (resolved `7ebac47`)** — initial colour guesses for Slick/Sam/Ugg/WW were wrong (white-bodied + green-hatted; Ugg=orange; WW=purple). Pixel-sampled the correct values from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png): Slick/Sam body `#21BA31` + hair `#FF7721`; Ugg/Wrong-Way + Coily snake body `#BA00BA`. Per-enemy palette table in the [Reference](#reference-arcade-qbert) section.
-- **Coily shape (final: original equal-stack, `e91321a`)** — the original in-game mesh (4 equal-radius stacked icospheres) was already the arcade-faithful coil silhouette. My `1527e14` tapered redesign and `346b5b0` literal-helix attempt were both unrequested detours; both were undone. Final state: equal stack + eyes + tongue.
+- **Coily shape (final: curve-swept spiral, `11800ff`)** — every ball-based attempt (V0 equal-stack, V1–V5 tapered, V6 helix-of-balls, V7 equal-stack-with-face) read wrong. Final design is a Bezier-curve-swept tube (2.5 turns, 20 control points, octagonal cross-section), converted to mesh, plus a head sphere + eyes + pupils + forked tongue grafted on. See [coily-mesh-versions investigation](../investigations/2026-05-11-qbert-coily-mesh-versions.md) for the full V0–V7 lineage.
 - **Slick "hat" vs. hair (resolved `bf3f61f`)** — initial mesh had a flat cylinder reading as a saucer-hat. Arcade has orange spiky hair on a green head. Replaced with a 7-cone hair cluster.
 - **Ugg/WW snout & antennae (resolved `e24025d`)** — initial mesh had a plain round head. Arcade sprites have a small forward snout and two antennae on top.
