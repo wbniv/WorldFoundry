@@ -23,13 +23,20 @@ workflows:
 
     # python-tui-lib submodule points at a local dev path; not needed for engine
     # build, so skip submodule init on CI.
+    #
+    # STOP-BLEED 2026-05-12: 490/500 Mac-min used by day 12. Auto-trigger
+    # disabled (events list emptied) until 2026-06-01. Manual builds from the
+    # Codemagic dashboard still work. To restore: uncomment the events + branch
+    # blocks below.
+    # See docs/plans/2026-05-12-codemagic-budget-monitor.md.
     triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: '2026-ios'
-          include: true
-          source: true
+      events: []
+      # events:
+      #   - push
+      # branch_patterns:
+      #   - pattern: '2026-ios'
+      #     include: true
+      #     source: true
       cancel_previous_builds: true
 
     cache:
