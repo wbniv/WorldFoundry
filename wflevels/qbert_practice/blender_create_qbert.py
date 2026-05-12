@@ -1763,13 +1763,17 @@ _COILY_SNAKE_HOP_TICKS = 24   # slower than player (12), faster than nothing
 _COILY_SNAKE_HOP_DENOM_F = float(_COILY_SNAKE_HOP_TICKS - 1)
 
 # Eye placement on the head (top segment). Head centre is at the top of the
-# stack — the eyes sit on its +X face.
-_COILY_HEAD_Z = ((_COILY_SEG_COUNT - 1) * _COILY_SEG_SPACING) / 2.0   # same as topmost seg_z
-_COILY_EYE_OFFSET_X = 0.32
-_COILY_EYE_OFFSET_Y = 0.18
-_COILY_EYE_RADIUS   = 0.11
-_COILY_PUPIL_OFFSET_X = 0.40
-_COILY_PUPIL_RADIUS   = 0.055
+# stack — the eyes sit on the +X face just outside the head sphere (radius
+# 0.50) so they read as protruding "snake eyes" rather than getting buried
+# in the body. Forked tongue protrudes further forward to sell the snake.
+_COILY_HEAD_Z = ((_COILY_SEG_COUNT - 1) * _COILY_SEG_SPACING) / 2.0   # topmost seg_z
+_COILY_EYE_OFFSET_X = 0.48          # at head sphere surface (was 0.32, buried inside)
+_COILY_EYE_OFFSET_Y = 0.22
+_COILY_EYE_RADIUS   = 0.13          # slightly larger so they read at distance
+_COILY_PUPIL_OFFSET_X = 0.58
+_COILY_PUPIL_RADIUS   = 0.07
+_COILY_TONGUE_TIP_X = 0.90          # forked tongue tip
+_COILY_TONGUE_HALF_Y = 0.06         # fork half-spread
 
 
 def _build_coily_snake_actor(name, mesh_name, location):
@@ -1817,6 +1821,18 @@ def _build_coily_snake_actor(name, mesh_name, location):
             radius=_COILY_PUPIL_RADIUS, segments=5, ring_count=3,
             location=(_COILY_PUPIL_OFFSET_X, y, head_z))
         parts.append((bpy.context.object, mat_pupil))
+
+    # Forked tongue — two narrow red cones sticking forward (+X) from the
+    # mouth, splayed slightly ±Y to look like a snake's forked tongue.
+    mat_tongue = _make_principled_material(f'{mesh_name}_tongue', (0.90, 0.05, 0.10))
+    for y_tip in (-_COILY_TONGUE_HALF_Y, +_COILY_TONGUE_HALF_Y):
+        bpy.ops.mesh.primitive_cone_add(
+            vertices=5, radius1=0.035, radius2=0.0, depth=0.32,
+            location=((0.55 + _COILY_TONGUE_TIP_X) / 2.0,
+                      y_tip / 2.0,
+                      head_z - 0.05),
+            rotation=(0, math.pi / 2, math.atan2(y_tip, 0.35)))
+        parts.append((bpy.context.object, mat_tongue))
 
     for obj, mat in parts:
         obj.data.materials.clear()
