@@ -66,9 +66,9 @@ Measured post-Phase-C (commit `1527e14`) from the Blender scene:
 | Ugg | 284 | 378 | Body + head subdiv-2 + snout cone + 2 antennae cones + smoother eyes/pupils/feet |
 | Wrong-Way | 284 | 378 | Same mesh shape as Ugg, same magenta (only climb side differs) |
 | Coily egg | 42 | 80 | Elongated subdiv-1 icosphere |
-| Coily snake | 232 | 398 | 4 tapered subdiv-2 icosphere segments + 2 eyes + 2 pupils |
+| Coily snake | 244 | 410 | 4 tapered subdiv-2 icosphere segments + 2 eyes + 2 pupils + 2 forked-tongue cones |
 | Spinning disc (each of 2) | 34 | 64 | Pre-existing — flat cylinder; unchanged |
-| **Total dynamic-actor footprint** | **~1954** | **~2566** | Player + 3 red balls + green + Slick + Sam + Ugg + WW + Coily egg + snake + 2 discs |
+| **Total dynamic-actor footprint** | **~1966** | **~2578** | Player + 3 red balls + green + Slick + Sam + Ugg + WW + Coily egg + snake + 2 discs |
 
 After the 2026-05-11 face-count doubling pass, each humanoid enemy lands at ~234–244 verts and 290–398 faces — comparable to the player's 206v/222f reference. Worst-case all-actors-on-screen footprint is ~1846 verts / ~2470 faces; the static 28-cube pyramid adds more on top, but the level-pool budget bumps from [2026-05-09-qbert-cube-palettes-16-rounds.md](2026-05-09-qbert-cube-palettes-16-rounds.md) (1344-cube fan-out) already accommodate it.
 
@@ -163,9 +163,10 @@ Goal: visibly snake-like Coily; egg distinct from a plain ball.
 
 1. Replace `_coily_build_mesh()` (and the shared `_coily_mesh` datablock + assignment) with a per-actor `_build_coily_snake_actor()` builder that mirrors the Slick/Sam/Ugg/WW primitive pattern.
 2. Stack 4 icosphere segments at the same `_COILY_SEG_SPACING` as before (preserves the actor-positioning math via `_COILY_HALF_HEIGHT`), but with per-segment radii in `_COILY_SEG_RADII = [0.22, 0.30, 0.38, 0.50]` bottom→top — tail is small, head is large. Each segment is Z-squashed to `_COILY_SEG_HEIGHT / radius` so heights stay consistent.
-3. Add eyes on the head (top segment): two white UV-spheres at `(0.32, ±0.18, head_z)` + two black-sphere pupils at `(0.40, ±0.18, head_z)`.
-4. Material: magenta body `#BA00BA` `(0.73, 0.00, 0.73)` (same as Ugg/WW, pixel-sampled from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png)), white + black eyes. **Colour-correction history:** initial commit used deep purple `(0.45, 0.08, 0.75)`; first correction landed `(0.85, 0.15, 0.70)` in `6a5dc2e`; pixel-accurate `#BA00BA` landed in `7ebac47`. Egg stays at its existing flashing purple/red (already arcade-accurate via the 3.75 Hz flash oscillator).
-5. Final mesh: **232 verts / 398 faces** (4 tapered subdiv-2 icosphere segments + 2 eyes + 2 pupils). Egg: **42 verts / 80 faces** (elongated icosphere).
+3. Add eyes on the head (top segment) at the head-sphere **surface**: two white UV-spheres at `(0.48, ±0.22, head_z)` + two black-sphere pupils at `(0.58, ±0.22, head_z)`. Initial commit placed eyes at x=0.32 inside the 0.50-radius head — they were buried and the snake just read as 4 stacked balls; pushed out + grown in `1c3a4ac`.
+4. **Forked tongue** (`1c3a4ac`): two narrow red cones protruding +X from below the eyes, splayed ±Y to look like a snake's tongue. Material red `(0.90, 0.05, 0.10)`. This is the single biggest "reads as snake" cue.
+5. Material: magenta body `#BA00BA` `(0.73, 0.00, 0.73)` (same as Ugg/WW, pixel-sampled from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png)), white + black eyes, red tongue. **Colour-correction history:** initial commit used deep purple `(0.45, 0.08, 0.75)`; first correction landed `(0.85, 0.15, 0.70)` in `6a5dc2e`; pixel-accurate `#BA00BA` landed in `7ebac47`. Egg stays at its existing flashing purple/red (already arcade-accurate via the 3.75 Hz flash oscillator).
+6. Final mesh: snake **244 verts / 410 faces** (4 tapered subdiv-2 icosphere segments + 2 eyes + 2 pupils + 2 tongue cones). Egg: **42 verts / 80 faces** (elongated icosphere).
 
 ## Verification
 
