@@ -1777,11 +1777,11 @@ _COILY_SS_XY_IMP  =  0.40     # = player          → takeoff/landing XY = 1.40
 # graft-on pass once the body shape is approved.
 _COILY_TUBE_RADIUS    = 0.13           # cross-section thickness of the body
 _COILY_SPIRAL_RADIUS  = 0.32           # XY distance of the spiral path from the central axis
-_COILY_SPIRAL_TURNS   = 3.5            # full revolutions of the helix
+_COILY_SPIRAL_TURNS   = 2.5            # full revolutions of the helix
 _COILY_SPIRAL_HEIGHT  = 1.65           # bottom of spiral to top of spiral
-_COILY_SPIRAL_PTS     = 36             # bezier control points along the helix (~10 per turn for smoothness)
-_COILY_CURVE_RES_U    = 4              # path-direction resolution between control points
-_COILY_BEVEL_RES      = 3              # circular cross-section resolution (rings of bevel_res*2 verts)
+_COILY_SPIRAL_PTS     = 20             # bezier control points along the helix (~8 per turn)
+_COILY_CURVE_RES_U    = 3              # path-direction resolution between control points
+_COILY_BEVEL_RES      = 1              # circular cross-section resolution (8-vert octagonal ring)
 # Snake half-height: spiral runs from -H/2 to +H/2, with the tube extending
 # ±TUBE_RADIUS at each end, so half-height is H/2 + tube radius.
 _COILY_HALF_HEIGHT = _COILY_SPIRAL_HEIGHT / 2 + _COILY_TUBE_RADIUS
