@@ -229,18 +229,29 @@ uses for physics / triggers / messaging but draws nothing.
 > `level-design-troubleshooting.md` § "Infrastructure actors render as
 > random-coloured debug cubes" for the full diagnosis.
 
-> ⚠️ **OAD schema choice silently controls rendering.** A `Mesh`-type actor
-> with `Mass=0`, `Mobility=Anchored`, `Visibility Mailbox=1`, and a valid
-> `.iff` mesh will still **not appear** if its `wf_schema_path` is wrong
-> for a static prop. Use `STATPLAT_OAD` for anchored decorative actors —
-> the same schema cubes use. `ENEMY_OAD` (the Enemy class) silently drops
-> single-instance script-less actors from the render set; the actor takes
-> a slot in `Level::Level: leveldata=..., object count = N` and consumes
-> a mailbox bank, but never creates a `RenderActor3D`. Diagnose by
-> comparing `grep -c RenderActor3DAnimates wf_game.log` to your expected
-> animated-actor count — one short means a schema mismatch on an actor
-> you intended to render. See [docs/plans/2026-05-11-qbert-player-death-and-curse-bubble.md](plans/2026-05-11-qbert-player-death-and-curse-bubble.md) § "2026-05-12 implementation notes" for the
-> full incident.
+> ⚠️ **OAS classes carry different field defaults; match the schema to the
+> intended role.** Every OAD inherits its field set and default values from
+> its OAS class (`statplat.oas`, `enemy.oas`, etc.). The same Blender custom
+> property — `wf_Visibility Mailbox`, `wf_Mass`, `wf_Mobility`, etc. — only
+> overrides the OAS's default if the OAS *has* that field; fields the OAS
+> doesn't expose silently take their class default. Pick the class that
+> matches the actor's job:
+>
+> - **Static decorative mesh** (cubes, the qbert_practice curse bubble) →
+>   `STATPLAT_OAD`. Defaults to always-visible, no AI, no phase wiring.
+> - **Hostile / scripted agent** (redball, slick, sam, coily, discs in this
+>   project) → `ENEMY_OAD`. Defaults expect Enemy-class lifecycle wiring
+>   (spawn / active / despawn phase), so a script-less ENEMY_OAD actor can
+>   end up in a "not-yet-active" state where rendering is suppressed even
+>   though `Mass=0` and `Visibility Mailbox=1` look right in the Blender
+>   custom-property panel.
+>
+> Diagnose schema mismatches by comparing `grep -c RenderActor3DAnimates
+> wf_game.log` to your expected animated-actor count — one short means an
+> actor isn't in the render set despite being in the object table
+> (`Level::Level: ..., object count = N` is unchanged). The 2026-05-12
+> qbert curse-bubble incident is the worked example: see
+> [docs/plans/2026-05-11-qbert-player-death-and-curse-bubble.md](plans/2026-05-11-qbert-player-death-and-curse-bubble.md) § "2026-05-12 implementation notes".
 
 Wire-displayed objects in Blender should be everything that doesn't render
 in-engine (`Mesh` / `Matte` excluded). The `display_type='WIRE'` automation
