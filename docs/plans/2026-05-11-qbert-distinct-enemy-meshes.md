@@ -161,24 +161,69 @@ Goal: visibly snake-like Coily; egg distinct from a plain ball.
 
 **Coily snake — planned redesign (not yet implemented):**
 
-After reviewing every prior iteration ([docs/investigations/2026-05-11-qbert-coily-mesh-versions.md](../investigations/2026-05-11-qbert-coily-mesh-versions.md)), the user confirmed that **none of the ball-based variants are correct**. Arcade Coily is a **spiral** — a continuous coiled body, no discrete spheres.
+After reviewing every prior iteration ([docs/investigations/2026-05-11-qbert-coily-mesh-versions.md](../investigations/2026-05-11-qbert-coily-mesh-versions.md)), the user confirmed that **none of the ball-based variants (V0 through V7) are correct**. Arcade Coily is a **spiral** — a continuous coiled body, not a stack and not a string of small balls.
 
-Target silhouette: a half-helix (≈½ to 1 turn of a coiled tube) viewed from the side, like a snake curled into a watch-spring shape. Single magenta swept tube, not a stack and not a string of small balls.
+Target silhouette: a half-helix viewed from the side, like a snake's body curled into a watch-spring shape. **One continuous magenta tube**, with eyes and a forked tongue at the top end.
 
-**Approach (TBD — to be designed before implementing):**
+#### Approach: curve sweep, not primitive boolean
 
-1. **Curve-and-bevel sweep:** author a Bezier or NURBS curve in Python that traces the spiral path; assign a small circular bevel profile (`bevel_depth` + `bevel_resolution`) so the curve renders as a magenta tube. Convert to mesh via `bpy.ops.object.convert(target='MESH')` before exporting to IFF (the WF exporter only handles mesh data, not curves).
-2. **Spiral parameters (rough starting points; will tune visually):**
-   - Half-helix: 1 turn, height ≈ 1.7, radius ≈ 0.30 from central axis.
-   - Tube cross-section radius: ≈ 0.12–0.15 (thick enough to read as a snake body, thin enough to show the coil shape).
-   - Direction: starts at the bottom, winds up and over, ends at the top with the head facing forward.
-3. **Head, eyes, tongue:** add **after** the basic spiral shape is right. Probably a small magenta sphere at the top end of the curve for the head, then eyes/pupils/tongue per the V5/V7 pattern.
-4. **Material:** magenta `#BA00BA` (unchanged from `7ebac47` pixel-sampled colour).
-5. **Actor-positioning math:** must keep `_COILY_HALF_HEIGHT` and `_COILY_CENTRE_OFFSET_Z` consistent so the director / chase-AI continues to place Coily correctly on cube tops.
+Switch from `bpy.ops.mesh.primitive_*` to a curve-based authoring approach. The shape is fundamentally a swept tube along a 3D path, which Blender models natively:
 
-Egg unchanged — already arcade-faithful (elongated icosphere with 3.75 Hz flash).
+1. Build a Bezier curve in Python (`bpy.data.curves.new('coily_spiral', type='CURVE')` → `splines.new('BEZIER')` → add N control points along the helix path).
+2. Set `curve.bevel_depth = TUBE_RADIUS` and `curve.bevel_resolution = 4` to give it a thick circular cross-section.
+3. Convert the resulting curve object to mesh with `bpy.ops.object.convert(target='MESH')` so the WF IFF exporter (which only handles mesh data, not curve objects) can serialize it.
+4. Then `bpy.ops.object.join()` the converted mesh with the head/eyes/pupils/tongue primitives.
 
-> **Body-shape history:** every committed Coily variant to date (V0 through V7 in the investigation doc) was ball-based, which is wrong. The plan from here is to discard the stack-of-spheres model entirely and author a true spiral. The eyes-and-tongue work from V5/V7 (commit `1c3a4ac`) is keepable detail to graft on once the spiral shape is right.
+#### Spiral parameters (starting point; iterate visually)
+
+```python
+_COILY_TUBE_RADIUS    = 0.13           # cross-section thickness of the body
+_COILY_SPIRAL_RADIUS  = 0.32           # XY distance of the spiral path from the central axis
+_COILY_SPIRAL_TURNS   = 1.0            # how many full revolutions over the height (start with 1 — "half-helix")
+_COILY_SPIRAL_HEIGHT  = 1.65           # bottom of spiral to top of spiral
+_COILY_SPIRAL_PTS     = 32             # control-point count along the helix (more = smoother curve)
+```
+
+Path generation:
+
+```python
+for i in range(_COILY_SPIRAL_PTS):
+    t = i / (_COILY_SPIRAL_PTS - 1)
+    theta = t * _COILY_SPIRAL_TURNS * 2.0 * math.pi
+    x = _COILY_SPIRAL_RADIUS * math.cos(theta)
+    y = _COILY_SPIRAL_RADIUS * math.sin(theta)
+    z = -_COILY_SPIRAL_HEIGHT/2 + t * _COILY_SPIRAL_HEIGHT
+    # add as bezier control point with handle_type='AUTO'
+```
+
+#### Head + eyes + tongue (deferred until the body shape is approved)
+
+Once the basic spiral renders correctly:
+
+- **Head:** a small magenta sphere placed at the spiral's top endpoint, oriented so its +X face leans toward the camera.
+- **Eyes:** two white UV-spheres on the head's +X face, sized to read at distance.
+- **Pupils:** two smaller black spheres just in front of the eyes.
+- **Forked tongue:** two narrow red cones protruding +X, splayed ±Y.
+
+(All this graft-on detail is keepable from V5/V7 commit `1c3a4ac`; only the *body* part needs redesigning.)
+
+#### Materials
+
+Magenta body `#BA00BA` `(0.73, 0.00, 0.73)` (unchanged from `7ebac47` pixel-sampled value); white + black eyes; red forked tongue.
+
+#### Actor-positioning math
+
+Recompute `_COILY_HALF_HEIGHT` from `_COILY_SPIRAL_HEIGHT / 2 + head_radius` so the director / chase-AI continues to place Coily correctly on cube tops without script changes. `_COILY_CENTRE_OFFSET_Z` and `_COILY_Z_BASE` derive from `_COILY_HALF_HEIGHT` and stay correct automatically.
+
+#### Egg
+
+Unchanged — already arcade-faithful (elongated icosphere with 3.75 Hz flash). No work needed.
+
+#### Lessons learned from V0–V7
+
+- **Use the right primitive for the shape, not the most familiar one.** Every prior iteration reached for `primitive_ico_sphere_add` because that's how the original mesh was built and how the other enemies are built. A snake body is fundamentally a swept curve, not a discrete set of spheres — Blender's curve API + bevel profile is the natural tool. Recorded as a [[feedback]] memory candidate.
+- **Validate the abstraction before iterating on details.** I doubled face counts, tapered radii, adjusted colours, and added eyes — all tweaks on top of an incorrect base shape. A single "does this read as a snake?" check after V0 would have flagged the problem before V1–V7 accumulated.
+- **Low-res pixel art is ambiguous; cross-check against higher-fidelity references.** The 16×16 arcade sprite reads either as "stack of balls" or "tight spiral" depending on assumption. The Wikipedia infobox screenshot makes the spiral interpretation unambiguous — but I didn't weight it heavily enough when I started.
 
 ## Verification
 
