@@ -1782,9 +1782,20 @@ _COILY_SPIRAL_HEIGHT  = 1.65           # bottom of spiral to top of spiral
 _COILY_SPIRAL_PTS     = 20             # bezier control points along the helix (~8 per turn)
 _COILY_CURVE_RES_U    = 3              # path-direction resolution between control points
 _COILY_BEVEL_RES      = 1              # circular cross-section resolution (8-vert octagonal ring)
-# Snake half-height: spiral runs from -H/2 to +H/2, with the tube extending
-# ±TUBE_RADIUS at each end, so half-height is H/2 + tube radius.
-_COILY_HALF_HEIGHT = _COILY_SPIRAL_HEIGHT / 2 + _COILY_TUBE_RADIUS
+
+# Head + eyes + forked tongue grafted at the top of the spiral.
+_COILY_HEAD_RADIUS    = 0.30           # snake head sphere on top of the coil
+_COILY_EYE_X          = 0.26           # eye +X offset from head centre (~head radius)
+_COILY_EYE_Y          = 0.16           # eye ±Y offset
+_COILY_EYE_R          = 0.10           # eye sphere radius
+_COILY_PUPIL_X        = 0.34           # pupil +X (in front of eye)
+_COILY_PUPIL_R        = 0.05
+_COILY_TONGUE_BASE_X  = 0.42           # tongue base just in front of pupils
+_COILY_TONGUE_Y       = 0.06           # tongue fork half-spread
+
+# Snake half-height: spiral runs from -H/2 to +H/2, head sits on top, so
+# half-height includes the spiral half + head sphere top.
+_COILY_HALF_HEIGHT = _COILY_SPIRAL_HEIGHT / 2 + _COILY_HEAD_RADIUS
 # Snake actor Z relative to cube CENTER: half-cube + half-snake puts the
 # snake's bottom exactly on the cube's top.
 _COILY_CENTRE_OFFSET_Z = CUBE_SIZE / 2 + _COILY_HALF_HEIGHT
@@ -1796,14 +1807,18 @@ _COILY_SNAKE_HOP_DENOM_F = float(_COILY_SNAKE_HOP_TICKS - 1)
 def _build_coily_snake_actor(name, mesh_name, location):
     """Build the Coily snake mesh + Blender object.
 
-    Body is a single continuous magenta tube wound in a half-helix. Authored
-    as a Bezier curve with a circular bevel profile, then converted to a
-    mesh for the IFF exporter. NO eyes / pupils / tongue yet — those will
-    be grafted on once the body shape is approved.
+    Body is a single continuous magenta tube wound as a 2.5-turn helix
+    (authored as a Bezier curve with circular bevel, converted to mesh).
+    Head + eyes + pupils + forked tongue grafted on at the top of the
+    spiral, with the head facing +X so the eyes/tongue are visible from
+    the player's camera angle.
     """
     # Arcade Coily is pure magenta (#BA00BA = 186, 0, 186), pixel-sampled
     # from docs/plans/screenshots/qbert-arcade-hg101-04.png.
-    mat_body = _make_principled_material(f'{mesh_name}_body', (0.73, 0.00, 0.73))
+    mat_body   = _make_principled_material(f'{mesh_name}_body',   (0.73, 0.00, 0.73))
+    mat_eye    = _make_principled_material(f'{mesh_name}_eye',    (1.00, 1.00, 1.00))
+    mat_pupil  = _make_principled_material(f'{mesh_name}_pupil',  (0.05, 0.05, 0.05))
+    mat_tongue = _make_principled_material(f'{mesh_name}_tongue', (0.90, 0.05, 0.10))
 
     # ── Author the spiral as a Bezier curve ────────────────────────────────
     curve_data = bpy.data.curves.new(f'{mesh_name}_curve', type='CURVE')
@@ -1832,19 +1847,68 @@ def _build_coily_snake_actor(name, mesh_name, location):
     curve_obj.select_set(True)
     bpy.context.view_layer.objects.active = curve_obj
     bpy.ops.object.convert(target='MESH')
-    body = bpy.context.active_object
-    body.name = name
-    body.data.name = mesh_name
-
-    # Assign material; flat-shade for chunky low-poly read.
-    body.data.materials.clear()
-    body.data.materials.append(mat_body)
-    for poly in body.data.polygons:
+    body_obj = bpy.context.active_object
+    body_obj.data.materials.clear()
+    body_obj.data.materials.append(mat_body)
+    for poly in body_obj.data.polygons:
         poly.material_index = 0
         poly.use_smooth = False
 
-    body.location = location
-    return body
+    parts = [(body_obj, mat_body)]
+
+    # ── Head at the top of the spiral, facing +X ───────────────────────────
+    # Spiral endpoint is at theta = TURNS * 2π. For 2.5 turns that's 5π →
+    # (cos π, sin π) = (-1, 0). Place head a bit inboard of that and slightly
+    # above; the eyes / tongue face +X regardless of spiral endpoint so they
+    # read from the camera angle.
+    head_x = 0.0
+    head_y = 0.0
+    head_z = _COILY_SPIRAL_HEIGHT / 2.0 + _COILY_HEAD_RADIUS * 0.6
+    bpy.ops.mesh.primitive_ico_sphere_add(
+        subdivisions=2, radius=_COILY_HEAD_RADIUS,
+        location=(head_x, head_y, head_z))
+    parts.append((bpy.context.object, mat_body))
+
+    # Eyes — two white UV-spheres on +X face of the head.
+    for y in (-_COILY_EYE_Y, +_COILY_EYE_Y):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=_COILY_EYE_R, segments=8, ring_count=5,
+            location=(head_x + _COILY_EYE_X, y, head_z))
+        parts.append((bpy.context.object, mat_eye))
+
+    # Pupils slightly in front of the eyes.
+    for y in (-_COILY_EYE_Y, +_COILY_EYE_Y):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=_COILY_PUPIL_R, segments=6, ring_count=4,
+            location=(head_x + _COILY_PUPIL_X, y, head_z))
+        parts.append((bpy.context.object, mat_pupil))
+
+    # Forked tongue — two narrow red cones protruding +X from below the eyes.
+    for y_tip in (-_COILY_TONGUE_Y, +_COILY_TONGUE_Y):
+        bpy.ops.mesh.primitive_cone_add(
+            vertices=5, radius1=0.035, radius2=0.0, depth=0.32,
+            location=(head_x + _COILY_TONGUE_BASE_X, y_tip / 2.0, head_z - 0.08),
+            rotation=(0, math.pi / 2, math.atan2(y_tip, 0.30)))
+        parts.append((bpy.context.object, mat_tongue))
+
+    # Assign each grafted-on primitive's material, flat-shade.
+    for obj, mat in parts[1:]:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for poly in obj.data.polygons:
+            poly.material_index = 0
+            poly.use_smooth = False
+
+    # Join everything into the body object, place at the actor location.
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = body_obj
+    bpy.ops.object.join()
+    body_obj.name = name
+    body_obj.data.name = mesh_name
+    body_obj.location = location
+    return body_obj
 
 _pre_snake_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
 COILY_SNAKE_ACTOR_IDX = _pre_snake_actor_count + 1
@@ -1973,7 +2037,7 @@ _snake['wf_Script']              = coily_snake_script()
 
 print(f"[qbert] Created Coily snake (actor index {COILY_SNAKE_ACTOR_IDX}); "
       f"spiral bezier-curve mesh ({_COILY_SPIRAL_TURNS} turns × {_COILY_SPIRAL_PTS} pts, "
-      f"tube radius {_COILY_TUBE_RADIUS}); head/eyes/tongue deferred")
+      f"tube radius {_COILY_TUBE_RADIUS}) + head, eyes, pupils, forked tongue")
 
 # ── 5f. Spinning discs (Phase D — Coily-lure mechanic) ───────────────────────
 # Two flat purple-blue cylinders at the off-edge positions adjacent to the
