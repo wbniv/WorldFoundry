@@ -24,7 +24,6 @@
 	// Example: `$3fff001` = `IFF` + room `fff` (`PERM`) + slot `001`.
 	{ 'ASMP'
 		$3fff001l { 'STR' "player.iff" }  // IFF PERM fff:001
-		$3fff002l { 'STR' "curse_bubble.iff" }  // IFF PERM fff:002
 		$3000001l { 'STR' "redball.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "greenball.iff" }  // IFF RM0 000:002
 		$3000003l { 'STR' "slick_mesh.iff" }  // IFF RM0 000:003
@@ -45,7 +44,6 @@
 		{ 'ASS' $5ffffffl [ "Perm.ruv" ] }     // RUV PERM fff:fff
 		{ 'ASS' $7ffffffl [ "Perm.cyc" ] }     // CYC PERM fff:fff
 		{ 'ASS' $3fff001l [ "player.iff" ] }  // IFF PERM fff:001
-		{ 'ASS' $3fff002l [ "curse_bubble.iff" ] }  // IFF PERM fff:002
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'

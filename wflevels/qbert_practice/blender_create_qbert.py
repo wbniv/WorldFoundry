@@ -537,37 +537,12 @@ if player:
         "0 431 write-mailbox 0 426 write-mailbox exit "
         "then\n"
         # 2. Fall-animation state machine. While mb 419 > 0:
-        #    1..26 → ramp Z down 1 per tick, increment FALL_PHASE.
-        #            Tumble (DELTA_PITCH + DELTA_YAW), prolate air-stretch
-        #            (Z_SCALE=1.20, X/Y=0.85), curse-bubble follows the
-        #            falling player at (player_xy, player_z + 2.0).
-        #    27..29→ Same as above PLUS pancake "splat" override
-        #            (Z_SCALE=0.20, X/Y=1.80) and zero tumble. Three frames
-        #            of impact feel before respawn.
-        #    >=30  → Snap player to apex, latch FALL_DEATH=1, reset FALL_PHASE.
-        #            Reset scale/rotation rates to identity. Park curse bubble
-        #            back at Z=-100 so it disappears.
-        # Curse-bubble actor index injected after-the-fact via .replace() once
-        # the bubble actor is created (see "Curse bubble" section below).
+        #    1..29 → ramp Z down 1 per tick, increment FALL_PHASE.
+        #    >=30  → snap player to apex, latch FALL_DEATH=1, reset FALL_PHASE.
         "419 read-mailbox dup 0 > if "
         "dup 30 < if "
-        # Z decrement + FALL_PHASE++ (dup keeps fp on stack for splat check)
         "INDEXOF_Z_POS read-mailbox 1 - INDEXOF_Z_POS write-mailbox "
-        "dup 1 + 419 write-mailbox "
-        # Splat vs air-stretch based on pre-increment FALL_PHASE
-        "27 >= if "
-        # Splat: pancake + zero tumble for last 3 frames
-        "1.80 3040 write-mailbox 1.80 3041 write-mailbox 0.20 3042 write-mailbox "
-        "0 3034 write-mailbox 0 3035 write-mailbox "
-        "else "
-        # Air-stretch + tumble for the falling frames
-        "0.85 3040 write-mailbox 0.85 3041 write-mailbox 1.20 3042 write-mailbox "
-        "0.02 3034 write-mailbox 0.05 3035 write-mailbox "
-        "then "
-        # Curse bubble tracks player (x, y, z+2.0)
-        "INDEXOF_X_POS read-mailbox INDEXOF_X_POS __CURSE_BUBBLE_ACTOR_IDX__ write-actor-mailbox "
-        "INDEXOF_Y_POS read-mailbox INDEXOF_Y_POS __CURSE_BUBBLE_ACTOR_IDX__ write-actor-mailbox "
-        "INDEXOF_Z_POS read-mailbox 2.0 + INDEXOF_Z_POS __CURSE_BUBBLE_ACTOR_IDX__ write-actor-mailbox "
+        "1 + 419 write-mailbox "
         "else "
         "drop "
         "0 419 write-mailbox 1 414 write-mailbox "
@@ -576,10 +551,6 @@ if player:
         "15 INDEXOF_Z_POS write-mailbox "
         "0 400 write-mailbox 0 401 write-mailbox "
         "0 402 write-mailbox -0.25 3014 write-mailbox -0.25 433 write-mailbox "
-        # Reset scale to identity, zero tumble, park curse bubble.
-        "1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
-        "0 3034 write-mailbox 0 3035 write-mailbox "
-        "-100 INDEXOF_Z_POS __CURSE_BUBBLE_ACTOR_IDX__ write-actor-mailbox "
         "then "
         "exit "
         "else drop "
@@ -2161,122 +2132,6 @@ print(f"[qbert] Created 2 spinning discs at "
       f"L(row={DISC_L_ROW},col={DISC_L_COL}) idx={DISC_L_ACTOR_IDX} / "
       f"R(row={DISC_R_ROW},col={DISC_R_COL}) idx={DISC_R_ACTOR_IDX}; "
       f"mesh {len(_DISC_VERTS)} verts / {len(_DISC_FACES)} faces")
-
-# ── 5c.8. Curse bubble — death-animation speech-balloon overlay ──────────────
-# 3D speech balloon (squashed UV sphere + downward cone tail + small extruded
-# glyph cluster on +X) parked off-screen at Z=-100. On death the player script
-# repositions it to (player_x, player_y, player_z + 2.0) every tick of the
-# fall, then parks it again on respawn. Arcade-faithful colours: white bubble,
-# black glyphs, black outline (verified against MAME capture at
-# docs/plans/screenshots/qbert-curse-bubble-arcade-ref.png).
-#
-# Reuses the existing actor3d / ENEMY_OAD class — no new schema. Script-free,
-# Anchored, Mass=0. Position-only driven by the player script via
-# write-actor-mailbox.
-
-CURSE_BUBBLE_PARK_Z = -100.0
-
-def _build_curse_bubble_mesh():
-    """Build a 3D speech-bubble mesh: squashed sphere body + cone tail +
-    extruded glyph cluster on +X face. Returns the joined mesh object.
-
-    Components:
-      - Bubble body: UV sphere segments=20 rings=12, scaled (1.2, 1.2, 0.7)
-        for a rounded lozenge silhouette with real volume.
-      - Tail: 8-sided cone, pointed down toward the player.
-      - Glyphs `@!#?@!`: six small extruded primitives on +X face, all black.
-      - Outline ring: thin torus around the bubble equator.
-    """
-    mat_white = _make_principled_material('curse_bubble_white', (0.95, 0.95, 0.95))
-    mat_black = _make_principled_material('curse_bubble_black', (0.05, 0.05, 0.05))
-
-    parts = []  # (object, material)
-
-    # Bubble body — squashed UV sphere. Low-poly to stay within level-pool
-    # budget (the qbert level pool is tight; targets ≤ 100 verts total).
-    bpy.ops.mesh.primitive_uv_sphere_add(
-        radius=0.7, segments=10, ring_count=6, location=(0, 0, 0)
-    )
-    bpy.context.object.scale = (1.2, 1.2, 0.7)
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-    parts.append((bpy.context.object, mat_white))
-
-    # Tail — small cone, pointed down (default cone points +Z; flip with 180°
-    # rotation about X). Tip at (0, 0, -0.85), base joined to the bubble.
-    bpy.ops.mesh.primitive_cone_add(
-        vertices=6, radius1=0.18, radius2=0.0, depth=0.40,
-        location=(0, 0, -0.55), rotation=(math.pi, 0, 0)
-    )
-    parts.append((bpy.context.object, mat_white))
-
-    # Glyphs — three small black blobs on the +X face, spaced left to right.
-    # Read as "speech-content" generically from the iso camera; finer per-
-    # character rendering blows the vert budget. Centre glyph is slightly
-    # larger to draw the eye, mimicking the visual weight of `#` in the
-    # arcade `@!#?@!` string.
-    GLYPH_X = 0.71
-    GLYPH_POSITIONS = (
-        (GLYPH_X, -0.30, 0.0, 0.06),  # left
-        (GLYPH_X,  0.00, 0.0, 0.09),  # centre (bigger)
-        (GLYPH_X,  0.30, 0.0, 0.06),  # right
-    )
-    for gx, gy, gz, gr in GLYPH_POSITIONS:
-        bpy.ops.mesh.primitive_uv_sphere_add(
-            radius=gr, segments=6, ring_count=4, location=(gx, gy, gz)
-        )
-        parts.append((bpy.context.object, mat_black))
-
-    # Smooth-shade, assign single material per part.
-    for obj, mat in parts:
-        obj.data.materials.clear()
-        obj.data.materials.append(mat)
-        for poly in obj.data.polygons:
-            poly.material_index = 0
-            poly.use_smooth = True
-
-    # Join everything into one mesh.
-    bpy.ops.object.select_all(action='DESELECT')
-    for obj, _ in parts:
-        obj.select_set(True)
-    body = parts[0][0]
-    bpy.context.view_layer.objects.active = body
-    bpy.ops.object.join()
-    body.name = 'CurseBubbleMesh'
-    body.data.name = 'CurseBubbleMesh'
-    return body
-
-_curse_bubble_mesh = _build_curse_bubble_mesh().data
-_curse_bubble_verts = len(_curse_bubble_mesh.vertices)
-_curse_bubble_faces = len(_curse_bubble_mesh.polygons)
-
-# Remove the temp object created during mesh build (we'll re-link the mesh on
-# the real actor below).
-bpy.data.objects.remove(bpy.data.objects['CurseBubbleMesh'], do_unlink=True)
-
-_pre_curse_bubble_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
-CURSE_BUBBLE_ACTOR_IDX = _pre_curse_bubble_count + 1
-
-_curse_bubble = bpy.data.objects.new('curse_bubble', _curse_bubble_mesh)
-_curse_bubble.location = (0.0, 0.0, CURSE_BUBBLE_PARK_Z)
-scene.collection.objects.link(_curse_bubble)
-_curse_bubble['wf_schema_path']         = ENEMY_OAD
-_curse_bubble['wf_Mesh Name']           = 'curse_bubble.iff'
-_curse_bubble['wf_original_mesh_name']  = 'curse_bubble.iff'
-_curse_bubble['wf_Model Type']          = 'Mesh'
-_curse_bubble['wf_Mobility']            = 'Anchored'
-_curse_bubble['wf_Mass']                = 0.0
-_curse_bubble['wf_Visibility Mailbox']  = 1
-_curse_bubble['wf_NumberOfLocalMailboxes'] = 0
-_curse_bubble['wf_Script']              = ''  # no script — position is driven from player
-
-print(f"[qbert] Created curse bubble actor idx={CURSE_BUBBLE_ACTOR_IDX}; "
-      f"mesh {_curse_bubble_verts} verts / {_curse_bubble_faces} faces")
-
-# Patch the player script with the resolved curse-bubble actor index.
-player['wf_Script'] = player['wf_Script'].replace(
-    '__CURSE_BUBBLE_ACTOR_IDX__', str(CURSE_BUBBLE_ACTOR_IDX)
-)
-
 
 # ── 6. Director — wire its Script for the game loop ───────────────────────────
 # MVP director: cube-state advance, visibility fan-out, win check, camera
