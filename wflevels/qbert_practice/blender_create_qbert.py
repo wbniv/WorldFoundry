@@ -1440,6 +1440,21 @@ def _build_climber_actor(name, mesh_name, body_rgb, location):
     bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.28, location=(0, 0, 0.55))
     parts.append((bpy.context.object, mat_body))
 
+    # Snout — small cone protruding on +X face of the head (arcade-faithful
+    # detail visible in qbert-arcade-hg101-03.png and -ref-ugg-wrongway.png).
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=8, radius1=0.08, radius2=0.03, depth=0.20,
+        location=(0.30, 0, 0.50), rotation=(0, math.pi / 2, 0))
+    parts.append((bpy.context.object, mat_body))
+
+    # Antennae — two short stalks on top of head, +Z direction. Same body
+    # colour, splayed slightly outward along ±Y.
+    for y, tilt in ((-0.10, -0.15), (0.10, 0.15)):
+        bpy.ops.mesh.primitive_cone_add(
+            vertices=6, radius1=0.04, radius2=0.02, depth=0.22,
+            location=(0, y, 0.92), rotation=(tilt, 0, 0))
+        parts.append((bpy.context.object, mat_body))
+
     # Eyes — two large white UV-spheres on +X face of the head.
     for y in (-0.13, 0.13):
         bpy.ops.mesh.primitive_uv_sphere_add(radius=0.10, segments=8, ring_count=5, location=(0.18, y, 0.58))
