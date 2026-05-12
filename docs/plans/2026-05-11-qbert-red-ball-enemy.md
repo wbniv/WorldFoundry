@@ -1,9 +1,11 @@
 # Plan — Q*bert Red Ball enemy (first enemy actor)
 
 **Date:** 2026-05-11
-**Status:** Not started
+**Status:** Done (2026-05-11, commits `2752d41` → `15705d1`; Phase B multi-ball + icosphere mesh + subdued stretch-and-squash all shipped)
 
 ## Context
+
+![Red Ball mesh — low-poly icosahedron, Blender-authored](screenshots/qbert-redball-2026-05-11.png)
 
 The qbert_practice level header explicitly notes "No enemies, no discs, no HUD, no audio." The biggest gameplay gap from real Q*bert is **enemies** — that's what turns the current colour-flipping demo into an actual game.
 

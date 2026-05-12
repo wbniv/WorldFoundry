@@ -1,6 +1,6 @@
 # Plan — Coily + Spinning Discs (full arcade-faithful)
 
-**Status:** Not started
+**Status:** Done (2026-05-11, commits `1e300a1` egg → `3f0e1d5` snake transform → `43c7718` chase AI → `930b066` spinning discs → `bad66a1` polish → `5d2b345` apex stretch)
 **Stacks on:** Red Ball Phase B (`ba8d606`), 80-face mesh (`35ee402`), S&S (`15705d1`).
 
 ## Context

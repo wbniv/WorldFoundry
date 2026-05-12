@@ -1,7 +1,7 @@
 # Plan — Red Ball subdued stretch-and-squash
 
 **Date:** 2026-05-11
-**Status:** Not started
+**Status:** Done (2026-05-11, commit `15705d1`)
 **Phase B baseline:** commits `ba8d606` (multi-ball + spawning + arc-Z) + `35ee402` (80-face mesh).
 
 ## Context

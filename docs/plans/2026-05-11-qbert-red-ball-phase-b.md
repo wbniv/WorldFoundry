@@ -1,6 +1,6 @@
 # Plan — Q*bert Red Ball Phase B (multi-ball, spawning, timing, arc)
 
-**Status:** Not started
+**Status:** Done (2026-05-11, commit `ba8d606`)
 **Phase A baseline:** commit `2752d41` — one self-respawning ball, mb 462..466, strict alternation, no Z arc.
 
 ## Context
