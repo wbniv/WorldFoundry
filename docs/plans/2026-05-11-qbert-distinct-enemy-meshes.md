@@ -40,6 +40,26 @@ References:
 
 **No changes** to: `enemy.oad`, `redball_script` Forth source, mailbox layouts, the `_build_*_actor` wiring (only the mesh-building helper signatures change). Slick/Sam keep `wf_Mesh Name = 'slick_mesh.iff'` / `'sam_mesh.iff'`, etc.
 
+## Mesh budgets — actual vert/face counts
+
+Measured post-Phase-C (commit `1527e14`) from the Blender scene:
+
+| Actor | Verts | Faces | Notes |
+|---|---:|---:|---|
+| Player | 206 | 222 | Reference budget — set by [2026-05-10-qbert-player-mesh.md](2026-05-10-qbert-player-mesh.md) |
+| Red ball (each of 3) | 42 | 80 | Subdiv-1 icosphere; unchanged |
+| Green ball | 42 | 80 | Same mesh as red, different material |
+| Slick | 128 | 148 | Body 42 + hat 26 + 2 eyes + 2 pupils + 2 feet |
+| Sam | 128 | 148 | Same mesh shape as Slick, different hat colour |
+| Ugg | 116 | 154 | Body 42 + head 42 + 2 eyes + 2 pupils + 2 feet |
+| Wrong-Way | 116 | 154 | Same mesh shape as Ugg, different body colour |
+| Coily egg | 42 | 80 | Elongated subdiv-1 icosphere |
+| Coily snake | 112 | 158 | 4 tapered icosphere segments (12v each) + 2 eyes + 2 pupils |
+| Spinning disc (each of 2) | 34 | 64 | Pre-existing — flat cylinder; unchanged |
+| **Total enemy mesh footprint** | **~1024** | **~1316** | 8 enemies + 2 discs + 3 red balls + green ball (worst-case all on-screen) |
+
+All enemy meshes are well under the player's 206-vert reference budget. The 8-enemy + 2-disc + 4-ball worst case sums to ~1024 verts of dynamic-actor geometry; the static 28-cube pyramid plus the player adds more on top, but the level-pool budget bumps from [2026-05-09-qbert-cube-palettes-16-rounds.md](2026-05-09-qbert-cube-palettes-16-rounds.md) already accommodate it (1344-cube fan-out fits in the bumped pool).
+
 ## Pattern to mirror
 
 From `_build_qbert_player_mesh` ([2026-05-10-qbert-player-mesh.md](2026-05-10-qbert-player-mesh.md) §"Mesh construction"):
@@ -47,7 +67,7 @@ From `_build_qbert_player_mesh` ([2026-05-10-qbert-player-mesh.md](2026-05-10-qb
 1. Single mesh object per enemy, primitives joined with `bpy.ops.object.join()`.
 2. Multiple material slots; per-face `material_index` for colour partitioning. The existing flipper builder ([blender_create_qbert.py:1336–1358](../../wflevels/qbert_practice/blender_create_qbert.py)) already shows the multi-material idiom.
 3. Materials use `Principled BSDF` `Base Color`; the exporter `_write_mesh_iff` ([wftools/wf_blender/export_level.py:422–537](../../wftools/wf_blender/export_level.py)) reads them.
-4. Vert budget: cubes / redball / coily are all sub-100 verts; player aims for ~250. **Per-enemy budget: stay under ~150 verts** to leave headroom for the 8-enemy-on-screen worst case.
+4. Vert budget: cubes / redball / coily are all sub-100 verts; player aims for ~250. **Per-enemy target: stay under ~150 verts** to leave headroom for the 8-enemy-on-screen worst case. Final actuals are in the [Mesh budgets](#mesh-budgets--actual-vertface-counts) table above (112–128 verts per humanoid enemy).
 5. Reuse `_REDBALL_VERTS` / `_REDBALL_FACES` (~42 verts, 80 faces) as a stock icosphere primitive for "body ball" components — already imported above the flipper builder.
 
 ## Approach — three independent phases
@@ -71,7 +91,7 @@ Goal: cube-flipper humanoid silhouette.
    - **Pupils:** smaller black UV-spheres just in front of the eyes.
    - **Feet:** two flat ovals (scaled UV-spheres), straddling ±Y, dark grey.
 3. Hat colour: arcade has Slick & Sam **both green-hatted** ([L2R1 attract reference](screenshots/qbert-arcade-L2R1-early.png)). Distinguish via subtle brightness — Slick brighter `(0.10, 0.85, 0.20)`, Sam slightly darker `(0.05, 0.55, 0.12)`. (Original Python had Sam red `(0.85, 0.10, 0.10)` — arcade-wrong; fixed here.)
-4. Total verts: ~150 (body 42 + hat 26 + 2 eyes ~24 each + 2 pupils ~15 each + 2 feet ~30 each).
+4. Final mesh: **128 verts / 148 faces** per actor (body 42 + hat 26 + 2 eyes + 2 pupils + 2 feet).
 
 ### Phase B — Ugg & Wrong-Way (side-of-pyramid climbers)
 
@@ -91,7 +111,7 @@ Goal: humanoid climber that reads as "creature standing on the side of a cube" a
    - **Feet:** two flat ovals at the bottom, dark grey.
    - **Horns removed** — not arcade-faithful for either Ugg or Wrong-Way.
 3. Per-variant body colour: Ugg `(1.00, 0.55, 0.10)` orange, Wrong-Way `(0.55, 0.10, 0.85)` purple (preserved from prior code; arcade-faithful confirmation deferred to a colour-grading pass).
-4. Total vert budget: ~150 verts.
+4. Final mesh: **116 verts / 154 faces** per actor (body 42 + head 42 + 2 eyes + 2 pupils + 2 feet).
 
 ### Phase C — Coily (egg + snake)
 
@@ -112,7 +132,7 @@ Goal: visibly snake-like Coily; egg distinct from a plain ball.
 2. Stack 4 icosphere segments at the same `_COILY_SEG_SPACING` as before (preserves the actor-positioning math via `_COILY_HALF_HEIGHT`), but with per-segment radii in `_COILY_SEG_RADII = [0.22, 0.30, 0.38, 0.50]` bottom→top — tail is small, head is large. Each segment is Z-squashed to `_COILY_SEG_HEIGHT / radius` so heights stay consistent.
 3. Add eyes on the head (top segment): two white UV-spheres at `(0.32, ±0.18, head_z)` + two black-sphere pupils at `(0.40, ±0.18, head_z)`.
 4. Material: purple body, white+black eyes.
-5. Total verts: ~150 (4 icospheres × 12 verts + 2 eye spheres + 2 pupils).
+5. Final mesh: **112 verts / 158 faces** (4 tapered icosphere segments + 2 eyes + 2 pupils). Egg: **42 verts / 80 faces** (elongated icosphere).
 
 ## Verification
 
