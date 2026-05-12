@@ -61,14 +61,14 @@ Measured post-Phase-C (commit `1527e14`) from the Blender scene:
 | Player | 206 | 222 | Reference budget — set by [2026-05-10-qbert-player-mesh.md](2026-05-10-qbert-player-mesh.md) |
 | Red ball (each of 3) | 42 | 80 | Subdiv-1 icosphere; unchanged |
 | Green ball | 42 | 80 | Same mesh as red, different material |
-| Slick | 234 | 290 | Body subdiv-2 icosphere (42v/80f) + 16-sided hat + smoother eyes/pupils/feet |
-| Sam | 234 | 290 | Same mesh shape as Slick, different hat colour |
-| Ugg | 244 | 352 | Body + head both subdiv-2 (42v each) + smoother eyes/pupils/feet |
-| Wrong-Way | 244 | 352 | Same mesh shape as Ugg, different body colour |
+| Slick | 252 | 322 | Body subdiv-2 (42v/80f) + 7 orange hair-cones + smoother eyes/pupils/feet |
+| Sam | 252 | 322 | Same mesh shape as Slick, slightly darker green + redder orange |
+| Ugg | 284 | 378 | Body + head subdiv-2 + snout cone + 2 antennae cones + smoother eyes/pupils/feet |
+| Wrong-Way | 284 | 378 | Same mesh shape as Ugg, same magenta (only climb side differs) |
 | Coily egg | 42 | 80 | Elongated subdiv-1 icosphere |
 | Coily snake | 232 | 398 | 4 tapered subdiv-2 icosphere segments + 2 eyes + 2 pupils |
 | Spinning disc (each of 2) | 34 | 64 | Pre-existing — flat cylinder; unchanged |
-| **Total dynamic-actor footprint** | **~1846** | **~2470** | Player + 3 red balls + green + Slick + Sam + Ugg + WW + Coily egg + snake + 2 discs |
+| **Total dynamic-actor footprint** | **~1954** | **~2566** | Player + 3 red balls + green + Slick + Sam + Ugg + WW + Coily egg + snake + 2 discs |
 
 After the 2026-05-11 face-count doubling pass, each humanoid enemy lands at ~234–244 verts and 290–398 faces — comparable to the player's 206v/222f reference. Worst-case all-actors-on-screen footprint is ~1846 verts / ~2470 faces; the static 28-cube pyramid adds more on top, but the level-pool budget bumps from [2026-05-09-qbert-cube-palettes-16-rounds.md](2026-05-09-qbert-cube-palettes-16-rounds.md) (1344-cube fan-out) already accommodate it.
 
@@ -102,13 +102,13 @@ Goal: cube-flipper humanoid silhouette.
 
 1. Replace the shared-mesh `_flipper_build_mesh()` + `_build_flipper_actor()` pair with a single per-actor `_build_flipper_actor(name, mesh_name, hat_rgb, location)` that uses `bpy.ops.mesh.primitive_*` + `bpy.ops.object.join()` (matches the player-mesh pattern at [`_build_qbert_player_mesh`](../../wflevels/qbert_practice/blender_create_qbert.py)).
 2. Components:
-   - Body: icosphere subdiv 2 (42 verts), scale 0.45, Z-squash 0.75. **Green** (arcade-faithful; see [qbert-arcade-ref-slick-sam.png](screenshots/qbert-arcade-ref-slick-sam.png)).
-   - Top dome: 16-sided flat cylinder, radius 0.55, depth 0.10. **Orange/yellow** — this is the creature's face dome, not a hat (the arcade sprite has an orange head sitting on a green body, which our 3D interpretation renders as a hat-shape on a body-sphere).
+   - Body: icosphere subdiv 2, scale 0.45, Z-squash 0.75. **Green**.
+   - **Hair:** cluster of 7 orange cones on top of the body — one tall centre spike (radius1=0.12, depth=0.30) plus 6 shorter cones (radius1=0.07, depth=0.22) in a ring around it, each tilted ~20° outward so they fan out like punk-rock hair. Initial commit (`bf3f61f`) replaced an earlier flat 16-sided cylinder which read as a saucer-hat — the arcade sprite has orange spiky **hair**, not a hat.
    - **Eyes:** two small white UV-spheres on +X face of body.
    - **Pupils:** smaller black UV-spheres just in front of the eyes.
    - **Feet:** two flat ovals (scaled UV-spheres), straddling ±Y, dark grey.
 3. Colours (pixel-sampled from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png), commit `7ebac47`): arcade has Slick & Sam **both green-bodied + orange-domed**, visually identical in the arcade sprites. Distinguish via subtle palette delta — Slick: body `#21BA31` `(0.13, 0.73, 0.19)` + dome `#FF7721` `(1.00, 0.47, 0.13)`; Sam: body `(0.08, 0.55, 0.13)` darker green + dome `(0.90, 0.38, 0.08)` redder orange. **Colour-correction history:** initial Phase-A commit had body=white + hat=green (inverted); first correction pass swapped them (`6a5dc2e`); pixel-accurate values landed in `7ebac47`.
-4. Final mesh: **234 verts / 290 faces** per actor (subdiv-2 body 42v/80f + 16-sided hat + 8-seg-5-ring eyes + 6-seg-4-ring pupils + 8-seg-4-ring feet).
+4. Final mesh: **252 verts / 322 faces** per actor (subdiv-2 body 42v/80f + 7 hair-cones + 8-seg-5-ring eyes + 6-seg-4-ring pupils + 8-seg-4-ring feet).
 
 ### Phase B — Ugg & Wrong-Way (side-of-pyramid climbers)
 
@@ -126,14 +126,16 @@ Goal: humanoid climber that reads as "creature standing on the side of a cube" a
 
 1. Replace `_climber_build_mesh()` + `_build_climber_actor()` with a single per-actor primitive-based builder, same pattern as Slick/Sam. The rotation is applied at the actor level **after** mesh build, so model the mesh in upright rest pose (+X forward, +Z up, like the player) — the engine tips it.
 2. Components:
-   - Body: icosphere subdiv 1, scale 0.40, Z-squash 0.85. Variant body colour.
-   - Head: smaller icosphere on top, same body colour.
+   - Body: icosphere subdiv 2, scale 0.40, Z-squash 0.85. Magenta.
+   - Head: smaller icosphere subdiv 2 on top, same magenta.
+   - **Snout:** small cone (radius1=0.08, radius2=0.03, depth=0.20) protruding along +X from the head, same body magenta. Added in commit `e24025d` after arcade reference showed the climbers have a visible snout/face-spike.
+   - **Antennae:** two short cones (radius1=0.04, radius2=0.02, depth=0.22) on top of head at y=±0.10, tilted outward 0.15 rad. Also added in `e24025d`.
    - **Eyes:** two large white UV-spheres on +X face of the head.
    - **Pupils:** smaller black spheres in front of the eyes.
    - **Feet:** two flat ovals at the bottom, dark grey.
-   - **Horns removed** — not arcade-faithful for either Ugg or Wrong-Way.
+   - **History note:** initial Phase-B commit had two horns on top + a smaller blob proxy; the proxy was replaced with body+head in `447b37d` (horns removed at that time), then snout + antennae added in `e24025d` after closer review of the arcade reference.
 3. Body colour (pixel-sampled from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png)): both Ugg and Wrong-Way use the same pure magenta `#BA00BA` `(0.73, 0.00, 0.73)` — the arcade sprites are identical; the only difference is which side of the pyramid each climbs. **Colour-correction history:** initial Phase-B commit had Ugg=orange / WW=purple; first correction swapped to pink-magenta variants (`6a5dc2e`); pixel-accurate `#BA00BA` landed in `7ebac47`.
-4. Final mesh: **244 verts / 352 faces** per actor (subdiv-2 body + subdiv-2 head + 8-seg-5-ring eyes + 6-seg-4-ring pupils + 8-seg-4-ring feet).
+4. Final mesh: **284 verts / 378 faces** per actor (subdiv-2 body + subdiv-2 head + snout cone + 2 antennae cones + 8-seg-5-ring eyes + 6-seg-4-ring pupils + 8-seg-4-ring feet).
 
 ### Phase C — Coily (egg + snake)
 
