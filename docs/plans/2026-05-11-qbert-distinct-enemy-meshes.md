@@ -36,7 +36,7 @@ Per-enemy crop sheets (each crop zoomed 6× nearest-neighbour from the sources a
 | **Ugg** | Humanoid climber: **pure magenta** body + smaller head + two big white eyes with pupils + flat feet. Body `#BA00BA` `(0.73, 0.00, 0.73)`. Runtime DELTA_PITCH +0.25 + DELTA_YAW +0.5 rev tips the mesh onto the right side face. |
 | **Wrong-Way** | Identical mesh and colour to Ugg; only the side-face climbed (left vs. right) and the actor rotation differ. Body `#BA00BA`. |
 | **Coily egg** | Single elongated icosphere (Z scale 1.3, XY 0.72). Material flashes purple/red at 3.75 Hz via the existing oscillator — arcade-faithful. |
-| **Coily snake** | Stacked tapered icospheres (radii 0.22 / 0.30 / 0.38 / 0.50 bottom→top) with two white-sphere eyes + black pupils on the largest top segment. Body `#BA00BA` magenta — same as Ugg/WW. (Arcade Coily is actually a *coiled* spiral; our 3D interpretation is a tapered stack for v1.) |
+| **Coily snake** | Coiled spring — 14 small magenta icospheres wound around a helix (radius 0.30, 2.5 turns) plus a bigger head sphere on top with eyes, pupils, and a red forked tongue. Body `#BA00BA` magenta — same as Ugg/WW. |
 
 References:
 
@@ -66,7 +66,7 @@ Measured post-Phase-C (commit `1527e14`) from the Blender scene:
 | Ugg | 284 | 378 | Body + head subdiv-2 + snout cone + 2 antennae cones + smoother eyes/pupils/feet |
 | Wrong-Way | 284 | 378 | Same mesh shape as Ugg, same magenta (only climb side differs) |
 | Coily egg | 42 | 80 | Elongated subdiv-1 icosphere |
-| Coily snake | 244 | 410 | 4 tapered subdiv-2 icosphere segments + 2 eyes + 2 pupils + 2 forked-tongue cones |
+| Coily snake | 286 | 450 | 14 helix-body icospheres + 1 head sphere + 2 eyes + 2 pupils + 2 forked-tongue cones |
 | Spinning disc (each of 2) | 34 | 64 | Pre-existing — flat cylinder; unchanged |
 | **Total dynamic-actor footprint** | **~1966** | **~2578** | Player + 3 red balls + green + Slick + Sam + Ugg + WW + Coily egg + snake + 2 discs |
 
@@ -145,7 +145,7 @@ Goal: humanoid climber that reads as "creature standing on the side of a cube" a
 
 ![Arcade Coily egg — purple sphere on cube top](screenshots/qbert-arcade-ref-coily-egg.png)
 
-**Arcade reference — Coily snake** (6× zoom from L2R1 and L2R2; magenta coiled body with eyes on the head). Note: the arcade snake is *coiled* (spiral), while our 3D interpretation is a tapered *vertical stack* — see Out of scope.
+**Arcade reference — Coily snake** (6× zoom from L2R1 and L2R2; magenta coiled body with eyes on the head). Our 3D interpretation matches this shape — a helix of small spheres with a larger head on top.
 
 ![Arcade Coily snake — magenta segments with face-pixels](screenshots/qbert-arcade-ref-coily-snake.png)
 
@@ -161,12 +161,14 @@ Goal: visibly snake-like Coily; egg distinct from a plain ball.
 
 **Coily snake:**
 
-1. Replace `_coily_build_mesh()` (and the shared `_coily_mesh` datablock + assignment) with a per-actor `_build_coily_snake_actor()` builder that mirrors the Slick/Sam/Ugg/WW primitive pattern.
-2. Stack 4 icosphere segments at the same `_COILY_SEG_SPACING` as before (preserves the actor-positioning math via `_COILY_HALF_HEIGHT`), but with per-segment radii in `_COILY_SEG_RADII = [0.22, 0.30, 0.38, 0.50]` bottom→top — tail is small, head is large. Each segment is Z-squashed to `_COILY_SEG_HEIGHT / radius` so heights stay consistent.
-3. Add eyes on the head (top segment) at the head-sphere **surface**: two white UV-spheres at `(0.48, ±0.22, head_z)` + two black-sphere pupils at `(0.58, ±0.22, head_z)`. Initial commit placed eyes at x=0.32 inside the 0.50-radius head — they were buried and the snake just read as 4 stacked balls; pushed out + grown in `1c3a4ac`.
-4. **Forked tongue** (`1c3a4ac`): two narrow red cones protruding +X from below the eyes, splayed ±Y to look like a snake's tongue. Material red `(0.90, 0.05, 0.10)`. This is the single biggest "reads as snake" cue.
-5. Material: magenta body `#BA00BA` `(0.73, 0.00, 0.73)` (same as Ugg/WW, pixel-sampled from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png)), white + black eyes, red tongue. **Colour-correction history:** initial commit used deep purple `(0.45, 0.08, 0.75)`; first correction landed `(0.85, 0.15, 0.70)` in `6a5dc2e`; pixel-accurate `#BA00BA` landed in `7ebac47`. Egg stays at its existing flashing purple/red (already arcade-accurate via the 3.75 Hz flash oscillator).
-6. Final mesh: snake **244 verts / 410 faces** (4 tapered subdiv-2 icosphere segments + 2 eyes + 2 pupils + 2 tongue cones). Egg: **42 verts / 80 faces** (elongated icosphere).
+1. Replace `_coily_build_mesh()` + shared `_coily_mesh` datablock with a per-actor `_build_coily_snake_actor()` builder.
+2. **Body: actual coiled spring (`346b5b0`).** Wind 14 small subdiv-1 icospheres (each radius `_COILY_SEG_BALL_R = 0.18`) around a helix — radius `_COILY_COIL_RADIUS = 0.30` from the Z axis, `_COILY_COIL_TURNS = 2.5` revolutions over a coil height of `_COILY_COIL_HEIGHT = 1.70`. Arcade Coily is a coiled snake, not a stack; the prior tapered-stack interpretation (commits up to `1c3a4ac`) was a placeholder.
+3. **Head:** larger subdiv-2 icosphere (`_COILY_HEAD_RADIUS = 0.42`) sitting on top of the coil, leaning forward by `_COILY_HEAD_FWD_X = 0.10` so the face features point +X.
+4. **Eyes** at the head-sphere surface: two white UV-spheres at `(HEAD_FWD_X + 0.48, ±0.22, head_z)` + two black-sphere pupils slightly further forward.
+5. **Forked tongue:** two narrow red cones protruding +X from the mouth, splayed ±Y.
+6. Material: magenta body `#BA00BA` `(0.73, 0.00, 0.73)`; white + black eyes; red tongue `(0.90, 0.05, 0.10)`.
+7. `_COILY_HALF_HEIGHT` recomputed from helix height + head radius, so the actor-Z math (`_COILY_CENTRE_OFFSET_Z`, `_COILY_Z_BASE`) stays consistent with director / chase-AI code.
+8. Final mesh: snake **286 verts / 450 faces** (14 coil-segment icospheres + 1 head sphere + 2 eyes + 2 pupils + 2 tongue cones). Egg: **42 verts / 80 faces** (elongated icosphere).
 
 ## Verification
 
