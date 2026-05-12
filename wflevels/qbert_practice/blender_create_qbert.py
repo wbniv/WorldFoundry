@@ -1746,11 +1746,9 @@ _COILY_SS_XY_IMP  =  0.40     # = player          → takeoff/landing XY = 1.40
 # uniform stack of balls. Each body segment is a subdiv-0 icosahedron (20
 # faces); the head adds 2 small UV-sphere eyes + 2 black-sphere pupils.
 _COILY_SEG_COUNT   = 4
-# Per-segment XY radius, BOTTOM (tail) → TOP (head). Head is meaningfully
-# larger than the body balls — that's the personality.
-_COILY_SEG_RADII   = [0.22, 0.30, 0.38, 0.50]
+_COILY_SEG_RADIUS  = 0.40   # all segments equal — this stack IS the coil silhouette
 _COILY_SEG_HEIGHT  = 0.30   # half-height of each compressed segment (Z-squash)
-_COILY_SEG_SPACING = 0.55   # vertical distance between segment centres (unchanged)
+_COILY_SEG_SPACING = 0.55   # vertical distance between segment centres
 # Snake half-height: from center to topmost segment top
 # = ((SEG_COUNT-1)/2) * SPACING + SEG_HEIGHT
 _COILY_HALF_HEIGHT = ((_COILY_SEG_COUNT - 1) * _COILY_SEG_SPACING) / 2 + _COILY_SEG_HEIGHT
@@ -1767,23 +1765,27 @@ _COILY_SNAKE_HOP_DENOM_F = float(_COILY_SNAKE_HOP_TICKS - 1)
 # 0.50) so they read as protruding "snake eyes" rather than getting buried
 # in the body. Forked tongue protrudes further forward to sell the snake.
 _COILY_HEAD_Z = ((_COILY_SEG_COUNT - 1) * _COILY_SEG_SPACING) / 2.0   # topmost seg_z
-_COILY_EYE_OFFSET_X = 0.48          # at head sphere surface (was 0.32, buried inside)
-_COILY_EYE_OFFSET_Y = 0.22
-_COILY_EYE_RADIUS   = 0.13          # slightly larger so they read at distance
-_COILY_PUPIL_OFFSET_X = 0.58
-_COILY_PUPIL_RADIUS   = 0.07
-_COILY_TONGUE_TIP_X = 0.90          # forked tongue tip
-_COILY_TONGUE_HALF_Y = 0.06         # fork half-spread
+# Top segment is radius 0.40 — eyes sit at the +X surface.
+_COILY_EYE_OFFSET_X = 0.38          # at top-sphere surface (just inside so the eye-sphere protrudes)
+_COILY_EYE_OFFSET_Y = 0.18
+_COILY_EYE_RADIUS   = 0.12
+_COILY_PUPIL_OFFSET_X = 0.46
+_COILY_PUPIL_RADIUS   = 0.06
+_COILY_TONGUE_TIP_X = 0.80          # forked tongue tip
+_COILY_TONGUE_HALF_Y = 0.06
 
 
 def _build_coily_snake_actor(name, mesh_name, location):
     """Build the Coily snake mesh + Blender object via primitives.
 
     Components (joined):
-      - 4 tapered icosphere body segments (radii from _COILY_SEG_RADII),
+      - 4 equal-radius (_COILY_SEG_RADIUS) icosphere body segments,
         stacked at _COILY_SEG_SPACING along Z, Z-squashed to _COILY_SEG_HEIGHT.
-      - 2 white UV-sphere eyes on +X face of the head.
+        This is the original in-game silhouette — the stack itself reads
+        as a tight coil from arcade perspective.
+      - 2 white UV-sphere eyes on +X face of the top segment.
       - 2 small black UV-sphere pupils in front of the eyes.
+      - 2 narrow red cones forming a forked tongue protruding +X.
     """
     # Arcade Coily snake is pure magenta (#BA00BA = 186, 0, 186), pixel-
     # sampled from docs/plans/screenshots/qbert-arcade-hg101-04.png.
@@ -1799,11 +1801,10 @@ def _build_coily_snake_actor(name, mesh_name, location):
     z_offset = -stack_total_height / 2.0
     for seg in range(_COILY_SEG_COUNT):
         seg_z = z_offset + seg * _COILY_SEG_SPACING
-        radius = _COILY_SEG_RADII[seg]
-        # subdiv=2 (42v/80f per segment) — smoother body chain.
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=radius, location=(0, 0, seg_z))
+        # subdiv=1 (42v/80f) — matches the original in-game density.
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=_COILY_SEG_RADIUS, location=(0, 0, seg_z))
         # Z-squash to flatten each segment so the chain reads as articulated.
-        bpy.context.object.scale = (1.0, 1.0, _COILY_SEG_HEIGHT / radius)
+        bpy.context.object.scale = (1.0, 1.0, _COILY_SEG_HEIGHT / _COILY_SEG_RADIUS)
         bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
         parts.append((bpy.context.object, mat_body))
 
@@ -1979,7 +1980,7 @@ _snake['wf_Script']              = coily_snake_script()
 
 print(f"[qbert] Created Coily snake (actor index {COILY_SNAKE_ACTOR_IDX}); "
       f"tapered {_COILY_SEG_COUNT}-segment mesh with head + eyes; "
-      f"segment radii {_COILY_SEG_RADII}")
+      f"segment radius {_COILY_SEG_RADIUS}")
 
 # ── 5f. Spinning discs (Phase D — Coily-lure mechanic) ───────────────────────
 # Two flat purple-blue cylinders at the off-edge positions adjacent to the
