@@ -1740,20 +1740,23 @@ _COILY_SS_Z_IMP   = -0.40     # = player          → takeoff/landing Z = 0.60
 _COILY_SS_XY_BELL = -0.10     # = player          → apex XY = 0.90
 _COILY_SS_XY_IMP  =  0.40     # = player          → takeoff/landing XY = 1.40
 
-# Coily mesh: 4 purple-icosahedron segments stacked vertically, tapering from
-# a larger head at the top (with eyes + pupils) down to a smaller tail at the
-# bottom. Reads as "snake stretching up to look around" instead of the prior
-# uniform stack of balls. Each body segment is a subdiv-0 icosahedron (20
-# faces); the head adds 2 small UV-sphere eyes + 2 black-sphere pupils.
-_COILY_SEG_COUNT   = 4
-# Per-segment XY radius, BOTTOM (tail) → TOP (head). Head is meaningfully
-# larger than the body balls — that's the personality.
-_COILY_SEG_RADII   = [0.22, 0.30, 0.38, 0.50]
-_COILY_SEG_HEIGHT  = 0.30   # half-height of each compressed segment (Z-squash)
-_COILY_SEG_SPACING = 0.55   # vertical distance between segment centres (unchanged)
-# Snake half-height: from center to topmost segment top
-# = ((SEG_COUNT-1)/2) * SPACING + SEG_HEIGHT
-_COILY_HALF_HEIGHT = ((_COILY_SEG_COUNT - 1) * _COILY_SEG_SPACING) / 2 + _COILY_SEG_HEIGHT
+# Coily mesh: arcade Coily is a coiled spring/spiral, not a stack. We model
+# this as a helix of small body segments wound around the Z axis, plus a
+# bigger head segment sitting on top of the coil with eyes and a forked
+# tongue. Helix winds 2.5 turns from bottom to top.
+_COILY_COIL_SEGS    = 14         # body segments around the helix
+_COILY_COIL_RADIUS  = 0.30       # XY distance of each coil segment from Z axis
+_COILY_COIL_TURNS   = 2.5        # how many full revolutions over the coil height
+_COILY_SEG_BALL_R   = 0.18       # icosphere radius for each coil-body segment
+_COILY_SEG_SPACING  = 0.55       # used by Z math below — kept identical to prior
+_COILY_HEAD_RADIUS  = 0.42       # bigger head sphere on top
+_COILY_HEAD_FWD_X   = 0.10       # head leans forward slightly
+# Half-height covering the coil from base to head-top.
+_COILY_COIL_HEIGHT  = 1.70       # bottom of coil to top of coil (head excluded)
+_COILY_HALF_HEIGHT  = _COILY_COIL_HEIGHT / 2.0 + _COILY_HEAD_RADIUS
+# Keep the legacy SEG_COUNT name pointing at "number of meaningful chunks"
+# for any debug print statements that reference it.
+_COILY_SEG_COUNT    = _COILY_COIL_SEGS + 1   # body segments + head
 # Snake actor Z relative to cube CENTER: half-cube + half-snake puts the
 # snake's bottom exactly on the cube's top.
 _COILY_CENTRE_OFFSET_Z = CUBE_SIZE / 2 + _COILY_HALF_HEIGHT
@@ -1779,11 +1782,13 @@ _COILY_TONGUE_HALF_Y = 0.06         # fork half-spread
 def _build_coily_snake_actor(name, mesh_name, location):
     """Build the Coily snake mesh + Blender object via primitives.
 
-    Components (joined):
-      - 4 tapered icosphere body segments (radii from _COILY_SEG_RADII),
-        stacked at _COILY_SEG_SPACING along Z, Z-squashed to _COILY_SEG_HEIGHT.
-      - 2 white UV-sphere eyes on +X face of the head.
-      - 2 small black UV-sphere pupils in front of the eyes.
+    Arcade Coily is a coiled spring with a small head poking up. Mesh:
+      - Body: N small icospheres wound around a helix (Z axis is vertical;
+        each segment offset on a circle of radius _COILY_COIL_RADIUS, theta
+        increments give _COILY_COIL_TURNS revolutions over the height).
+      - Head: bigger icosphere on top of the coil, offset slightly forward
+        so the eyes/tongue face the camera (+X).
+      - Eyes + pupils + forked tongue on the head.
     """
     # Arcade Coily snake is pure magenta (#BA00BA = 186, 0, 186), pixel-
     # sampled from docs/plans/screenshots/qbert-arcade-hg101-04.png.
@@ -1793,44 +1798,52 @@ def _build_coily_snake_actor(name, mesh_name, location):
 
     parts = []
 
-    # Stack 4 tapered segments. Centre the stack on the actor origin so the
-    # actor's location specifies the geometric centre of the snake.
-    stack_total_height = (_COILY_SEG_COUNT - 1) * _COILY_SEG_SPACING
-    z_offset = -stack_total_height / 2.0
-    for seg in range(_COILY_SEG_COUNT):
-        seg_z = z_offset + seg * _COILY_SEG_SPACING
-        radius = _COILY_SEG_RADII[seg]
-        # subdiv=2 (42v/80f per segment) — smoother body chain.
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=radius, location=(0, 0, seg_z))
-        # Z-squash to flatten each segment so the chain reads as articulated.
-        bpy.context.object.scale = (1.0, 1.0, _COILY_SEG_HEIGHT / radius)
-        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    # Coil body — wind small icospheres around a helix from z=-H/2 to z=+H/2.
+    coil_top    = +_COILY_COIL_HEIGHT / 2.0
+    coil_bottom = -_COILY_COIL_HEIGHT / 2.0
+    for seg in range(_COILY_COIL_SEGS):
+        t = seg / float(_COILY_COIL_SEGS - 1)        # 0..1
+        seg_z = coil_bottom + t * _COILY_COIL_HEIGHT
+        theta = t * _COILY_COIL_TURNS * 2.0 * math.pi
+        seg_x = _COILY_COIL_RADIUS * math.cos(theta)
+        seg_y = _COILY_COIL_RADIUS * math.sin(theta)
+        bpy.ops.mesh.primitive_ico_sphere_add(
+            subdivisions=1, radius=_COILY_SEG_BALL_R,
+            location=(seg_x, seg_y, seg_z))
         parts.append((bpy.context.object, mat_body))
 
-    # Eyes on the head (top segment).
-    head_z = z_offset + (_COILY_SEG_COUNT - 1) * _COILY_SEG_SPACING
+    # Head — larger sphere sitting on top of the coil, leaning forward (+X).
+    head_z = coil_top + _COILY_HEAD_RADIUS * 0.6
+    bpy.ops.mesh.primitive_ico_sphere_add(
+        subdivisions=2, radius=_COILY_HEAD_RADIUS,
+        location=(_COILY_HEAD_FWD_X, 0.0, head_z))
+    parts.append((bpy.context.object, mat_body))
+
+    # Adjust eye/pupil/tongue origin so they sit on the head (which is offset
+    # forward by _COILY_HEAD_FWD_X). They reference head_z computed above.
     for y in (-_COILY_EYE_OFFSET_Y, +_COILY_EYE_OFFSET_Y):
         bpy.ops.mesh.primitive_uv_sphere_add(
             radius=_COILY_EYE_RADIUS, segments=6, ring_count=4,
-            location=(_COILY_EYE_OFFSET_X, y, head_z))
+            location=(_COILY_HEAD_FWD_X + _COILY_EYE_OFFSET_X, y, head_z))
         parts.append((bpy.context.object, mat_eye))
 
     # Pupils slightly in front of and inside the eyes.
     for y in (-_COILY_EYE_OFFSET_Y, +_COILY_EYE_OFFSET_Y):
         bpy.ops.mesh.primitive_uv_sphere_add(
             radius=_COILY_PUPIL_RADIUS, segments=5, ring_count=3,
-            location=(_COILY_PUPIL_OFFSET_X, y, head_z))
+            location=(_COILY_HEAD_FWD_X + _COILY_PUPIL_OFFSET_X, y, head_z))
         parts.append((bpy.context.object, mat_pupil))
 
     # Forked tongue — two narrow red cones sticking forward (+X) from the
     # mouth, splayed slightly ±Y to look like a snake's forked tongue.
     mat_tongue = _make_principled_material(f'{mesh_name}_tongue', (0.90, 0.05, 0.10))
+    tongue_base_x = _COILY_HEAD_FWD_X + 0.45
     for y_tip in (-_COILY_TONGUE_HALF_Y, +_COILY_TONGUE_HALF_Y):
         bpy.ops.mesh.primitive_cone_add(
             vertices=5, radius1=0.035, radius2=0.0, depth=0.32,
-            location=((0.55 + _COILY_TONGUE_TIP_X) / 2.0,
+            location=(tongue_base_x + 0.18,
                       y_tip / 2.0,
-                      head_z - 0.05),
+                      head_z - 0.10),
             rotation=(0, math.pi / 2, math.atan2(y_tip, 0.35)))
         parts.append((bpy.context.object, mat_tongue))
 
@@ -1978,8 +1991,8 @@ _snake['wf_NumberOfLocalMailboxes'] = 0
 _snake['wf_Script']              = coily_snake_script()
 
 print(f"[qbert] Created Coily snake (actor index {COILY_SNAKE_ACTOR_IDX}); "
-      f"tapered {_COILY_SEG_COUNT}-segment mesh with head + eyes; "
-      f"segment radii {_COILY_SEG_RADII}")
+      f"helix mesh ({_COILY_COIL_SEGS} body segments × {_COILY_COIL_TURNS} turns) "
+      f"+ head with eyes & forked tongue")
 
 # ── 5f. Spinning discs (Phase D — Coily-lure mechanic) ───────────────────────
 # Two flat purple-blue cylinders at the off-edge positions adjacent to the
