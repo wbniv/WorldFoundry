@@ -1,0 +1,18 @@
+name: Notify worldfoundry.org
+
+on:
+  push:
+    branches: [2026-new-level]
+    paths: [wf-status.md]
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger worldfoundry.org rebuild
+        run: |
+          curl -fsSX POST \
+            -H "Authorization: token ${{ secrets.WORLDFOUNDRY_ORG_DEPLOY_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/wbniv/worldfoundry.org/dispatches \
+            -d '{"event_type":"wf-status-updated"}'
