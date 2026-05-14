@@ -139,6 +139,7 @@ Eleven days of work (2026-04-12 – 2026-04-22). Newest first:
 
 | Date | Investigation | Status | Summary |
 |------|---------------|--------|---------|
+| 2026-04-23 | [World Foundry / Project Velocity — Public History](docs/investigations/2026-04-23-world-foundry-history.md) | **In progress** | An aggregation of externally available references to the World Foundry GDK and its predecessor game projects. |
 | 2026-04-19 | [Snowgoons build pipeline — Blender to running game](docs/investigations/2026-04-19-snowgoons-build-pipeline.md) | **Working end-to-end. Validated 2026-04-19: `./wftools/wf_blender/build_level_binary.sh snowgoons` produces `wflevels/snowgoons.iff` (md5 `010b6b97a9019fdc14f07ad9127a9cf9`, reproducible); `wf_game -L wflevels/snowgoons-standalone.iff` boots and plays.** | One-stop reference for every tool in the snowgoons build chain, in the order they actually run, with inputs, outputs, and what each one does. Useful when onboarding, debugging a mid-chain … |
 | 2026-04-19 | [OAD ButtonType audit — iff2lvl vs levcomp-rs](docs/investigations/2026-04-19-oad-buttontype-audit.md) | **In progress** | **Purpose:** cross-reference every `ButtonType` variant from `wf_oad::ButtonType` (29 total) against how `wftools/iff2lvl` emits it and how `wftools/levcomp-rs/src/oad_loader.rs` emits it, to catch … |
 | 2026-04-19 | [`.offsetof` arithmetic in iffcomp — oracle vs current behavior](docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md) | **Recommendation accepted; iffcomp-rs arithmetic implementation in** | **Context:** Reconstructing `wflevels/snowgoons.iff.txt` as a proper compile-source text-IFF file (mirror-first, deviate-later), chunk-by-chunk, so iffcomp-rs can produce byte-identical output … |
@@ -223,4 +224,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-22 08:07** — [`docs/plans/2026-04-21-ios-port-codemagic.md`](docs/plans/2026-04-21-ios-port-codemagic.md): Plan: iOS port (via Codemagic)
+**2026-04-23 10:46** — [`docs/investigations/2026-04-23-world-foundry-history.md`](docs/investigations/2026-04-23-world-foundry-history.md): World Foundry / Project Velocity — Public History
