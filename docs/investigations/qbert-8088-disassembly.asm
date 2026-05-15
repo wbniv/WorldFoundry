@@ -3552,65 +3552,65 @@ SCORE_TABLE:
   0000:ad6d  ?? 0Fh                              
   0000:ad6e  ?? 4Eh    N                         
   0000:ad6f  ?? 00h                              
-  0000:ad70  MOV DI,0xaa81                       
-  0000:ad73  MOV word ptr [0xbbb],0x0            
-  0000:ad79  JMP 0x0000:ad8d                     
+  0000:ad70  MOV DI,0xaa81                                      ; DI = 0xAA81  (fallback config when STAGE >= 18)
+  0000:ad73  MOV word ptr [0xbbb],0x0                           ; [0xBBB] = 0  (clear sub-sequence adjustment offset)
+  0000:ad79  JMP 0x0000:ad8d                                    ; JMP ad8d     (skip BL load; use fallback DI)
   0000:ad7b  ?? 90h                              
-  0000:ad7c  MOV BL,byte ptr [0xd1f]             
-  0000:ad80  XOR BH,BH                           
-  0000:ad82  CMP BX,0x12                         
-  0000:ad85  JGE 0x0000:ad70                     
-  0000:ad87  SHL BX,0x1                          
-  0000:ad89  MOV DI,word ptr [BX + 0xa899]       
+  0000:ad7c  MOV BL,byte ptr [0xd1f]                            ; BL = STAGE   [0x0D1F]  stage index 0..17
+  0000:ad80  XOR BH,BH                                          ; BH = 0       (zero-extend BL to BX)
+  0000:ad82  CMP BX,0x12                                        ; CMP BX,18    (0x12)  — is stage out of range?
+  0000:ad85  JGE 0x0000:ad70                                    ; JGE ad70     — yes: use fallback config
+  0000:ad87  SHL BX,0x1                                         ; BX <<= 1     (×2 because STAGE_TABLE has 2-byte LE16 pointers)
+  0000:ad89  MOV DI,word ptr [BX + 0xa899]                      ; DI = STAGE_TABLE[BX]  ([0xA899+BX])  stage config struct ptr
   0000:ad8d  PUSH SI                             
   0000:ad8e  MOV BP,0xac54                       
-  0000:ad91  TEST byte ptr [0xd01],0x1           
-  0000:ad96  JNZ 0x0000:ad9f                     
-  0000:ad98  ADD DI,word ptr [0xbbb]             
-  0000:ad9c  MOV BP,word ptr [DI + 0x11]         
-  0000:ad9f  MOV BX,0x0                          
-  0000:ada2  CALL 0x0000:aef1                    
-  0000:ada5  MOV BP,0xac6c                       
-  0000:ada8  TEST byte ptr [0xd01],0x1           
-  0000:adad  JNZ 0x0000:adb2                     
-  0000:adaf  MOV BP,word ptr [DI + 0x13]         
-  0000:adb2  MOV BX,0x2                          
-  0000:adb5  CALL 0x0000:aef1                    
-  0000:adb8  MOV BP,word ptr [DI + 0x15]         
-  0000:adbb  MOV BX,0x4                          
-  0000:adbe  CALL 0x0000:aef1                    
-  0000:adc1  MOV BP,word ptr [DI + 0x17]         
-  0000:adc4  MOV BX,0x6                          
-  0000:adc7  CALL 0x0000:aef1                    
-  0000:adca  MOV BX,word ptr [DI + 0xd]          
-  0000:adcd  MOV word ptr [0xd11],BX             
-  0000:add1  MOV word ptr [0xd13],BX             
-  0000:add5  MOV CL,byte ptr [DI + 0x4]          
-  0000:add8  MOV byte ptr [0xd19],CL             
-  0000:addc  MOV BX,0x1c                         
-  0000:addf  SHL BX,CL                           
-  0000:ade1  MOV AL,byte ptr [DI + 0x3]          
-  0000:ade4  XOR AH,AH                           
-  0000:ade6  MOV [0xd1a],AX                      
-  0000:ade9  ADD BX,AX                           
-  0000:adeb  MOV word ptr [0xd17],BX             
-  0000:adef  TEST byte ptr [0xd01],0x1           
-  0000:adf4  JNZ 0x0000:adfa                     
-  0000:adf6  SUB DI,word ptr [0xbbb]             
-  0000:adfa  CALL 0x0000:b369                    
-  0000:adfd  CMP byte ptr [0xd1f],0x12           
-  0000:ae02  JL 0x0000:ae15                      
-  0000:ae04  MOV AX,[0xd1c]                      
-  0000:ae07  MOV DL,byte ptr [0xd1e]             
-  0000:ae0b  MOV byte ptr [0xd1c],DL             
-  0000:ae0f  MOV [0xd1d],AX                      
-  0000:ae12  JMP 0x0000:ae24                     
+  0000:ad91  TEST byte ptr [0xd01],0x1                          ; TEST [0xD01],0x01  (coin/attract mode flag)
+  0000:ad96  JNZ 0x0000:ad9f                                    ; JNZ ad9f     (coin mode: skip sub-sequence override)
+  0000:ad98  ADD DI,word ptr [0xbbb]                            ; DI += [0xBBB]  (apply sub-sequence offset)
+  0000:ad9c  MOV BP,word ptr [DI + 0x11]                        ; BP = word[DI+0x11]  — sub-sequence A ptr from config
+  0000:ad9f  MOV BX,0x0                                         ; BX = 0       (entity index 0)
+  0000:ada2  CALL 0x0000:aef1                                   ; CALL aef1    — SPAWN_ENTITY_SETUP with BP=sub-seq A
+  0000:ada5  MOV BP,0xac6c                                      ; BP = 0xAC6C  (default sub-sequence B)
+  0000:ada8  TEST byte ptr [0xd01],0x1                          ; TEST [0xD01],0x01
+  0000:adad  JNZ 0x0000:adb2                                    ; JNZ adb2
+  0000:adaf  MOV BP,word ptr [DI + 0x13]                        ; BP = word[DI+0x13]  — override with config sub-sequence B
+  0000:adb2  MOV BX,0x2                                         ; BX = 2       (entity index 2)
+  0000:adb5  CALL 0x0000:aef1                                   ; CALL aef1    — setup sub-sequence B entity
+  0000:adb8  MOV BP,word ptr [DI + 0x15]                        ; BP = word[DI+0x15]  — sub-sequence C ptr
+  0000:adbb  MOV BX,0x4                                         ; BX = 4
+  0000:adbe  CALL 0x0000:aef1                                   ; CALL aef1
+  0000:adc1  MOV BP,word ptr [DI + 0x17]                        ; BP = word[DI+0x17]  — sub-sequence D ptr
+  0000:adc4  MOV BX,0x6                                         ; BX = 6
+  0000:adc7  CALL 0x0000:aef1                                   ; CALL aef1
+  0000:adca  MOV BX,word ptr [DI + 0xd]                         ; BX = word[DI+0x0D]  — spawn SEQUENCE base address (ROM ptr)
+  0000:adcd  MOV word ptr [0xd11],BX                            ; SEQ_START [0x0D11] = BX  (sequence start addr for this stage)
+  0000:add1  MOV word ptr [0xd13],BX                            ; SEQ_PTR   [0x0D13] = BX  (current ptr = start on round init)
+  0000:add5  MOV CL,byte ptr [DI + 0x4]                         ; CL = byte[DI+0x04]  — speed_exponent
+  0000:add8  MOV byte ptr [0xd19],CL                            ; SEQ_SPEED [0x0D19] = CL
+  0000:addc  MOV BX,0x1c                                        ; BX = 28 (0x1C)  — base multiplier for reload formula
+  0000:addf  SHL BX,CL                                          ; BX <<= CL          — BX = 28 << speed_exponent
+  0000:ade1  MOV AL,byte ptr [DI + 0x3]                         ; AL = byte[DI+0x03]  — base_offset
+  0000:ade4  XOR AH,AH                                          ; AH = 0
+  0000:ade6  MOV [0xd1a],AX                                     ; SEQ_BASE [0x0D1A] = AX  (save base offset)
+  0000:ade9  ADD BX,AX                                          ; BX += AX           — BX = (28 << speed_exp) + base_offset
+  0000:adeb  MOV word ptr [0xd17],BX                            ; SEQ_RELOAD [0x0D17] = BX  *** THE SPAWN INTERVAL ***
+  0000:adef  TEST byte ptr [0xd01],0x1                          ; TEST [0xD01],0x01
+  0000:adf4  JNZ 0x0000:adfa                                    ; JNZ adfa
+  0000:adf6  SUB DI,word ptr [0xbbb]                            ; DI -= [0xBBB]  (undo sub-sequence adjustment)
+  0000:adfa  CALL 0x0000:b369                                   ; CALL b369  — ROUND_CLEAR_CHECK
+  0000:adfd  CMP byte ptr [0xd1f],0x12                          ; CMP STAGE [0xD1F],18  (0x12)
+  0000:ae02  JL 0x0000:ae15                                     ; JL ae15   — if stage < 18 load round colour state
+  0000:ae04  MOV AX,[0xd1c]                                     ; AX = ROUND [0x0D1C]
+  0000:ae07  MOV DL,byte ptr [0xd1e]                            ; DL = [0xD1E]
+  0000:ae0b  MOV byte ptr [0xd1c],DL                            ; ROUND [0x0D1C] = DL  (advance colour cycle)
+  0000:ae0f  MOV [0xd1d],AX                                     ; [0x0D1D] = AX  (save old round for transition)
+  0000:ae12  JMP 0x0000:ae24                                    ; JMP ae24
   0000:ae14  ?? 90h                              
-  0000:ae15  MOV AX,word ptr [DI]                
-  0000:ae17  MOV [0xd1c],AL                      
-  0000:ae1a  MOV byte ptr [0xd1d],AH             
-  0000:ae1e  MOV AL,byte ptr [DI + 0x2]          
-  0000:ae21  MOV [0xd1e],AL                      
+  0000:ae15  MOV AX,word ptr [DI]                               ; AL = byte[DI+0]   — cube cycle target-0 from config
+  0000:ae17  MOV [0xd1c],AL                                     ; ROUND [0x0D1C] = AL
+  0000:ae1a  MOV byte ptr [0xd1d],AH                            ; AH = byte[DI+1]
+  0000:ae1e  MOV AL,byte ptr [DI + 0x2]                         ; AL = byte[DI+2]   — cube cycle target-2
+  0000:ae21  MOV [0xd1e],AL                                     ; [0x0D1E] = AL
   0000:ae24  CALL 0x0000:af20                    
   0000:ae27  MOV AL,byte ptr [DI + 0x5]          
   0000:ae2a  MOV [0xd20],AL                      
@@ -3774,14 +3774,14 @@ SCORE_TABLE:
 ;   DMA [0x0EAC..] -> palette RAM 0x5000 (16 colours x 2 bytes)
 ; ─────────────────────────────────────────────────────────────
 NMI_VBLANK_HANDLER:
-  0000:af70  MOV [0x5800],AL                     
-  0000:af73  CMP byte ptr [0xc],0x0              
-  0000:af78  JZ 0x0000:af7f                      
-  0000:af7a  INC byte ptr [0x82]                 
-  0000:af7e  IRET                                
-  0000:af7f  MOV byte ptr [0xc],0xf              
-  0000:af84  PUSH SI                             
-  0000:af85  PUSH DI                             
+  0000:af70  MOV [0x5800],AL                                    ; MOV [0x5800],AL -> write to WATCHDOG (value of AL irrelevant)
+  0000:af73  CMP byte ptr [0xc],0x0                             ; CMP [0x000C],0  -> test init_phase flag
+  0000:af78  JZ 0x0000:af7f                                     ; JZ af7f         -> if init_phase==0 skip early-IRET
+  0000:af7a  INC byte ptr [0x82]                                ; INC [0x0082]    -> frame_counter++
+  0000:af7e  IRET                                               ; IRET            -> early return (init phase only)
+  0000:af7f  MOV byte ptr [0xc],0xf                             ; [0x000C] = 0x0F -> reload init countdown
+  0000:af84  PUSH SI                                            ; PUSH SI
+  0000:af85  PUSH DI                                            ; PUSH DI
   0000:af86  PUSH CX                             
   0000:af87  CLD                                 
   0000:af88  MOV SI,0xecc                        
@@ -4184,21 +4184,21 @@ HISCORE_DEFAULT_TABLE:
 ;   Falls into main game loop at 0xB308
 ; ─────────────────────────────────────────────────────────────
 STARTUP:
-  0000:b259  MOV SP,0x1ff0                       
-  0000:b25c  XOR AX,AX                           
-  0000:b25e  MOV ES,AX                           
-  0000:b260  MOV DS,AX                           
-  0000:b262  MOV SS,AX                           
-  0000:b264  MOV BX,0xaf70                       
-  0000:b267  MOV word ptr [0x8],BX               
-  0000:b26b  MOV [0xa],AX                        
-  0000:b26e  MOV [0xc],AL                        
-  0000:b271  MOV [0x82],AL                       
-  0000:b274  MOV [0x84],AL                       
-  0000:b277  MOV BX,0xd0a                        
-  0000:b27a  MOV byte ptr [BX],AL                
-  0000:b27c  SUB BX,0xd00                        
-  0000:b280  MOV SI,0x1101                       
+  0000:b259  MOV SP,0x1ff0                                      ; SP = 0x1FF0  (stack top, just below SPRITE_WA at $0ECC)
+  0000:b25c  XOR AX,AX                                          ; AX = 0  (used to zero all segments)
+  0000:b25e  MOV ES,AX                                          ; ES = 0
+  0000:b260  MOV DS,AX                                          ; DS = 0  (flat 64KB: DS=ES=SS=CS=0 throughout game)
+  0000:b262  MOV SS,AX                                          ; SS = 0
+  0000:b264  MOV BX,0xaf70                                      ; BX = 0xAF70  (address of NMI_VBLANK_HANDLER)
+  0000:b267  MOV word ptr [0x8],BX                              ; [0x0008] = 0xAF70  -> installs NMI vector (vblank ISR)
+  0000:b26b  MOV [0xa],AX                                       ; [0x000A] = 0       -> segment word of NMI vector
+  0000:b26e  MOV [0xc],AL                                       ; [0x000C] = 0       -> init_phase flag; NMI checks this
+  0000:b271  MOV [0x82],AL                                      ; [0x0082] = 0       -> frame_counter
+  0000:b274  MOV [0x84],AL                                      ; [0x0084] = 0       -> (timing var)
+  0000:b277  MOV BX,0xd0a                                       ; BX = 0x0D0A        -> loop counter for RAM clear
+  0000:b27a  MOV byte ptr [BX],AL                               ; [BX] = 0           -> zero RAM $0D00-$0D0A range
+  0000:b27c  SUB BX,0xd00                                       ; BX -= 0x0D00       -> BX now = offset into zero range
+  0000:b280  MOV SI,0x1101                                      ; SI = 0x1101        -> source for NVRAM validity check
   0000:b283  MOV byte ptr [BX + SI],AL           
   0000:b285  MOV [0x83],AL                       
   0000:b288  MOV [0x80],AX                       
@@ -4418,25 +4418,25 @@ MAIN_GAME_LOOP:
   0000:b465  ?? 00h                              
   0000:b466  ?? 00h                              
   0000:b467  ?? 00h                              
-  0000:b468  TEST byte ptr [0xd5e],0x10          
-  0000:b46d  JNZ 0x0000:b475                     
-  0000:b46f  DEC word ptr [0x85]                 
-  0000:b473  JZ 0x0000:b476                      
-  0000:b475  RET                                 
-  0000:b476  MOV AX,[0xd17]                      
-  0000:b479  MOV [0x85],AX                       
-  0000:b47c  MOV DI,word ptr [0xd13]             
-  0000:b480  MOV AX,word ptr [DI]                
-  0000:b482  CMP AX,0xffff                       
-  0000:b485  JNZ 0x0000:b48d                     
-  0000:b487  MOV DI,word ptr [0xd11]             
-  0000:b48b  MOV AX,word ptr [DI]                
-  0000:b48d  ADD DI,0x2                          
-  0000:b490  MOV word ptr [0xd13],DI             
-  0000:b494  MOV CL,AL                           
-  0000:b496  AND CL,0xe0                         
-  0000:b499  CMP CL,0x60                         
-  0000:b49c  JNZ 0x0000:b4ad                     
+  0000:b468  TEST byte ptr [0xd5e],0x10                         ; TEST FREEZE [0x0D5E],0x10  — bit4 = global spawn-freeze
+  0000:b46d  JNZ 0x0000:b475                                    ; JNZ b475  — if frozen: return without spawning
+  0000:b46f  DEC word ptr [0x85]                                ; DEC SPAWN_TIMER [0x0085]  — countdown tick
+  0000:b473  JZ 0x0000:b476                                     ; JZ b476   — timer hit 0: fire spawn event
+  0000:b475  RET                                                ; RET       — timer still counting; do nothing
+  0000:b476  MOV AX,[0xd17]                                     ; AX = SEQ_RELOAD [0x0D17]
+  0000:b479  MOV [0x85],AX                                      ; SPAWN_TIMER [0x0085] = AX  — reload for next spawn
+  0000:b47c  MOV DI,word ptr [0xd13]                            ; DI = SEQ_PTR [0x0D13]  — current sequence position
+  0000:b480  MOV AX,word ptr [DI]                               ; AX = word[DI]  — read 16-bit sequence entry
+  0000:b482  CMP AX,0xffff                                      ; CMP AX,0xFFFF  — end-of-sequence sentinel?
+  0000:b485  JNZ 0x0000:b48d                                    ; JNZ b48d  — not end: process entry
+  0000:b487  MOV DI,word ptr [0xd11]                            ; DI = SEQ_START [0x0D11]  — wrap: reload start address
+  0000:b48b  MOV AX,word ptr [DI]                               ; AX = word[DI]  — read first entry of sequence
+  0000:b48d  ADD DI,0x2                                         ; DI += 2        — advance sequence pointer
+  0000:b490  MOV word ptr [0xd13],DI                            ; SEQ_PTR [0x0D13] = DI  — save advanced pointer
+  0000:b494  MOV CL,AL                                          ; CL = AL  — low byte of entry (holds type in top 3 bits)
+  0000:b496  AND CL,0xe0                                        ; CL &= 0xE0  — mask to top 3 bits
+  0000:b499  CMP CL,0x60                                        ; CMP CL,0x60  — type $60xx = round/level event?
+  0000:b49c  JNZ 0x0000:b4ad                                    ; JNZ b4ad  — not level event: go to enemy spawn handler
   0000:b49e  TEST byte ptr [0xd01],0xc           
   0000:b4a3  JNZ 0x0000:b47c                     
   0000:b4a5  OR byte ptr [0xd01],0x4             
@@ -4987,32 +4987,32 @@ MAIN_GAME_LOOP:
   0000:baa9  MOV word ptr [BX + SI],AX           
   0000:baab  MOV byte ptr [BX + SI + 0x2],0x2c   
   0000:baaf  CALL 0x0000:be2e                    
-  0000:bab2  TEST byte ptr [0xd01],0x20          
-  0000:bab7  JZ 0x0000:bada                      
-  0000:bab9  MOV word ptr [0x85],0x64            
-  0000:babf  TEST byte ptr [0xd01],0x1           
-  0000:bac4  JZ 0x0000:bacc                      
-  0000:bac6  MOV word ptr [0x85],0x1e            
-  0000:bacc  AND byte ptr [0xd01],0xd            
-  0000:bad1  MOV AL,0xd3                         
-  0000:bad3  CALL 0x0000:c280                    
-  0000:bad6  CALL 0x0000:bc6b                    
-  0000:bad9  RET                                 
-  0000:bada  MOV byte ptr [0x8f],0x4             
-  0000:badf  TEST byte ptr [0xd01],0x41          
-  0000:bae4  JNZ 0x0000:bb0a                     
-  0000:bae6  MOV byte ptr [0xd01],0x0            
-  0000:baeb  MOV AL,0xd3                         
-  0000:baed  CALL 0x0000:c280                    
-  0000:baf0  MOV byte ptr [0xd7d],0x0            
-  0000:baf5  MOV DI,word ptr [0xd24]             
-  0000:baf9  MOV word ptr [0x85],0x4b            
-  0000:baff  MOV AX,0x2424                       
+  0000:bab2  TEST byte ptr [0xd01],0x20                         ; TEST FLAGS [0xD01],0x20  — normal-spawn-active bit
+  0000:bab7  JZ 0x0000:bada                                     ; JZ bada   — not normal spawn: other path
+  0000:bab9  MOV word ptr [0x85],0x64                           ; SPAWN_TIMER = 100 (0x64)  — fast-spawn after level event
+  0000:babf  TEST byte ptr [0xd01],0x1                          ; TEST FLAGS [0xD01],0x01  — coin/attract mode?
+  0000:bac4  JZ 0x0000:bacc                                     ; JZ bacc   — not coin: keep 100-tick timer
+  0000:bac6  MOV word ptr [0x85],0x1e                           ; SPAWN_TIMER = 30 (0x1E)  — very fast in coin/attract
+  0000:bacc  AND byte ptr [0xd01],0xd                           ; FLAGS [0xD01] &= 0x0D  — clear bits 1 and 4
+  0000:bad1  MOV AL,0xd3                                        ; AL = 0xD3  — sound command: level-complete jingle
+  0000:bad3  CALL 0x0000:c280                                   ; CALL c280  — PLAY_SOUND(AL) -> writes AL to $5802
+  0000:bad6  CALL 0x0000:bc6b                                   ; CALL bc6b  — ADVANCE_ROUND()
+  0000:bad9  RET                                                ; RET
+  0000:bada  MOV byte ptr [0x8f],0x4                            ; [0x008F] = 4  — set some state counter
+  0000:badf  TEST byte ptr [0xd01],0x41                         ; TEST FLAGS [0xD01],0x41  — Coily-off-disc bits (0+6)?
+  0000:bae4  JNZ 0x0000:bb0a                                    ; JNZ bb0a  — yes: quick resume path
+  0000:bae6  MOV byte ptr [0xd01],0x0                           ; FLAGS [0xD01] = 0  — clear all spawn flags
+  0000:baeb  MOV AL,0xd3                                        ; AL = 0xD3
+  0000:baed  CALL 0x0000:c280                                   ; CALL c280  — PLAY_SOUND
+  0000:baf0  MOV byte ptr [0xd7d],0x0                           ; [0xD7D] = 0
+  0000:baf5  MOV DI,word ptr [0xd24]                            ; DI = [0xD24]
+  0000:baf9  MOV word ptr [0x85],0x4b                           ; SPAWN_TIMER = 75 (0x4B)  — grace period after Coily retires
+  0000:baff  MOV AX,0x2424                                      ; AX = 0x2424  (ASCII "$$" — cursor chars)
   0000:bb02  MOV word ptr [DI],AX                
-  0000:bb04  MOV CX,0x14                         
-  0000:bb07  JMP 0x0000:b378                     
-  0000:bb0a  MOV word ptr [0x85],0x1e            
-  0000:bb10  RET                                 
+  0000:bb04  MOV CX,0x14                                        ; CX = 0x14
+  0000:bb07  JMP 0x0000:b378                                    ; JMP b378
+  0000:bb0a  MOV word ptr [0x85],0x1e                           ; SPAWN_TIMER = 30 (0x1E)  — quick resume after Coily off disc
+  0000:bb10  RET                                                ; RET
   0000:bb11  AND byte ptr [0xd01],0xf3           
   0000:bb16  MOV byte ptr [0xd7d],0x0            
   0000:bb1b  RET                                 
@@ -19578,7 +19578,7 @@ MAIN_GAME_LOOP:
 ; the board wraps this to 0xFFF0 in the 64KB map.
 ; ─────────────────────────────────────────────────────────────
 RESET_VECTOR:
-  0000:fff0  JMPF 0x0000:a000                    
+  0000:fff0  JMPF 0x0000:a000                                   ; FAR JMP opcode (8088 EA)
   0000:fff5  ?? 00h                              
   0000:fff6  ?? FFh                              
   0000:fff7  ?? FFh                              
