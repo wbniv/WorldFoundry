@@ -93,6 +93,13 @@ SQRT2 = math.sqrt(2.0)
 #   432        CAPTURE_TRIGGER (Phase E walker — 1=state-0 snap, 2=state-1 snap,
 #              3=round-clear, 0 otherwise. Host watches transitions and issues
 #              `screenshot` ops over the debug bridge.)
+#   434        PENDING_LAND (player internal one-shot; promoted to mb 411 on landing)
+#   435..437   QBERT_STASH_X/Y/Z (player→enemy contact position snapshot)
+#   580        POPUP_TIMER (countdown ticks; 0 = idle)
+#   581        POPUP_VALUE (pending trigger: 0=none, 25, 100, 300)
+#   582        POPUP_PENDING_X
+#   583        POPUP_PENDING_Y
+#   584        POPUP_PENDING_Z (includes +1.5 Z offset above cube top)
 #
 # Per-cube color overrides live on each cube actor's local mailboxes:
 #   3037 / 3038 / 3039 = EMAILBOX_FACE_COLOR_TOP / LIT / SHADOW (mailbox.inc)
@@ -106,7 +113,14 @@ INDEXOF_ROUND_NUMBER         = 425
 INDEXOF_ROUND_CHANGED        = 426
 INDEXOF_LAST_LEVEL           = 427
 
-NUM_MAILBOXES = 500  # well above the highest mailbox we use (~432)
+POPUP_TIMER_MB     = 580
+POPUP_VALUE_MB     = 581
+POPUP_PENDING_X_MB = 582
+POPUP_PENDING_Y_MB = 583
+POPUP_PENDING_Z_MB = 584
+POPUP_HOLD_TICKS   = 90   # 1.5 s at 60 Hz
+
+NUM_MAILBOXES = 600  # well above the highest mailbox we use (~584)
 
 
 def cube_index(row, col):
@@ -944,6 +958,16 @@ _CLIMBER_Z_MUL  = CUBE_SIZE                                  # 2.0
 # At R=4: 384 ticks (~6.4s); R=8: 288 (~4.8s); R=12: 192 (~3.2s); R=15: 120 (~2s).
 _SPAWN_INTERVAL_FORTH = "425 read-mailbox 24 * 480 swap - dup 120 < if drop 120 then "
 
+# Forth: trigger a popup from the player's current cube position (row=mb400, col=mb401).
+# Writes POPUP_VALUE_MB and POPUP_PENDING_X/Y/Z then the director activates on next tick.
+def _popup_trigger_forth(value):
+    return (
+        f"{value} {POPUP_VALUE_MB} write-mailbox "
+        f"401 read-mailbox 400 read-mailbox 0.5 * - 2.82843 * {POPUP_PENDING_X_MB} write-mailbox "
+        f"6 400 read-mailbox - 1.41421 * {POPUP_PENDING_Y_MB} write-mailbox "
+        f"14.5 400 read-mailbox 2.0 * - 1.5 + {POPUP_PENDING_Z_MB} write-mailbox "
+    )
+
 # LFSR step — Galois LFSR-16, polynomial x^16+x^14+x^13+x^11+1 (tap mask 0xB400).
 # Side-effect: advance mb 511; result: lsb (0 or 1) left on stack.
 # zForth has `&`, `|`, `^`, `<<`, `>>` (PRIM_AND/OR/XOR/SHL/SHR in zforth.c).
@@ -1031,8 +1055,13 @@ def redball_script(k, variant='red'):
     #
     # Stack notation: ( ... -- ... ) tracks values across each line.
     if variant == 'green':
-        # Green: latch freeze, retire self, exit so we skip landing logic.
+        # Green: stash position for popup, +100 score, freeze, retire.
         contact_action = (
+            f"INDEXOF_X_POS read-mailbox {POPUP_PENDING_X_MB} write-mailbox "
+            f"INDEXOF_Y_POS read-mailbox {POPUP_PENDING_Y_MB} write-mailbox "
+            f"INDEXOF_Z_POS read-mailbox 1.5 + {POPUP_PENDING_Z_MB} write-mailbox "
+            f"100 {POPUP_VALUE_MB} write-mailbox "
+            f"70 read-mailbox 100 + 70 write-mailbox "
             f"{GB_FREEZE_TICKS} {GB_MB_FREEZE_TIMER} write-mailbox "
             f"0 {mb_phase} write-mailbox "
             f"0 {mb_active} write-mailbox "
@@ -1040,8 +1069,13 @@ def redball_script(k, variant='red'):
             f"exit "
         )
     elif variant in ('slick', 'sam'):
-        # Q*bert caught the flipper — enemy dies, player NOT killed.
+        # Q*bert caught the flipper — stash position for popup, +300 score, enemy dies.
         contact_action = (
+            f"INDEXOF_X_POS read-mailbox {POPUP_PENDING_X_MB} write-mailbox "
+            f"INDEXOF_Y_POS read-mailbox {POPUP_PENDING_Y_MB} write-mailbox "
+            f"INDEXOF_Z_POS read-mailbox 1.5 + {POPUP_PENDING_Z_MB} write-mailbox "
+            f"300 {POPUP_VALUE_MB} write-mailbox "
+            f"70 read-mailbox 300 + 70 write-mailbox "
             f"0 {mb_phase} write-mailbox "
             f"0 {mb_active} write-mailbox "
             f"{REDBALL_PARK_Z} 3011 write-mailbox "
@@ -2189,6 +2223,61 @@ _bubble['wf_Visibility Mailbox']  = 1
 print(f"[qbert] Created curse bubble actor idx={CURSE_BUBBLE_ACTOR_IDX} at {tuple(_bubble.location)}")
 
 
+# ── 5c.9. Bonus-points popup actors ──────────────────────────────────────────
+# Three flat text meshes (+25 / +100 / +300), parked below pyramid until a
+# score event fires. Director writes world XYZ and parks them via write-actor-mailbox.
+def _make_popup_actor(label, text_body, rgb):
+    mat = _make_principled_material(f'popup_mat_{label}', rgb)
+    bpy.ops.object.text_add(location=(0, 0, 0))
+    txt = bpy.context.object
+    txt.data.body      = text_body
+    txt.data.align_x   = 'CENTER'
+    txt.data.size      = 0.55
+    txt.data.extrude   = 0.04
+    txt.data.materials.clear()
+    txt.data.materials.append(mat)
+    bpy.ops.object.convert(target='MESH')
+    # Text-to-mesh leaves tiny edges and collinear faces from curve tessellation.
+    # Vector3::Normalize() in WF asserts on zero-area face normals. Fix: merge
+    # nearby vertices, then delete any zero-area faces that remain.
+    import bmesh as _bmesh
+    _bm = _bmesh.new()
+    _bm.from_mesh(bpy.context.object.data)
+    _bmesh.ops.remove_doubles(_bm, verts=_bm.verts, dist=0.005)
+    # WF's face-normal path asserts cross_len > Scalar(0,4) = 6.1e-5.
+    # Text-curve tessellation leaves thin triangles with area < 3e-5
+    # (cross_len < 6e-5). Delete them; the gaps are sub-pixel at camera distance.
+    _thin = [f for f in _bm.faces if f.calc_area() < 5e-5]
+    if _thin:
+        _bmesh.ops.delete(_bm, geom=_thin, context='FACES')
+    _bm.to_mesh(bpy.context.object.data)
+    _bm.free()
+    mesh_data = bpy.context.object.data
+    bpy.data.objects.remove(bpy.context.object, do_unlink=True)
+
+    actor = bpy.data.objects.new(f'popup_{label}', mesh_data)
+    actor.location = (0.0, 0.0, REDBALL_PARK_Z)
+    scene.collection.objects.link(actor)
+    actor['wf_schema_path']        = ENEMY_OAD
+    actor['wf_Mesh Name']          = f'popup_{label}.iff'
+    actor['wf_original_mesh_name'] = f'popup_{label}.iff'
+    actor['wf_Model Type']         = 'Mesh'
+    actor['wf_Mobility']           = 'Anchored'
+    actor['wf_Mass']               = 0.0
+    actor['wf_Visibility Mailbox'] = 1
+    return actor
+
+_pre_popup_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+_make_popup_actor('25',  '+25',  (1.00, 0.85, 0.00))   # gold
+POPUP25_ACTOR_IDX  = _pre_popup_count + 1
+_make_popup_actor('100', '+100', (0.40, 1.00, 0.20))   # lime
+POPUP100_ACTOR_IDX = _pre_popup_count + 2
+_make_popup_actor('300', '+300', (0.20, 0.90, 1.00))   # cyan
+POPUP300_ACTOR_IDX = _pre_popup_count + 3
+print(f"[qbert] Created popup actors: +25 idx={POPUP25_ACTOR_IDX}, "
+      f"+100 idx={POPUP100_ACTOR_IDX}, +300 idx={POPUP300_ACTOR_IDX}")
+
+
 # ── 6. Director — wire its Script for the game loop ───────────────────────────
 # MVP director: cube-state advance, visibility fan-out, win check, camera
 # fan-out, HUD plumbing. Per actor.cc:665 statplats forbid scripts, so the
@@ -2324,6 +2413,9 @@ DIRECTOR_SCRIPT = "".join([
     f"{_SPAWN_INTERVAL_FORTH}{UGG_MB_SPAWN_TIMER} write-mailbox "
     f"{_SPAWN_INTERVAL_FORTH}{WW_MB_SPAWN_TIMER} write-mailbox "
     f"then ",
+    # Popup init: clear timer and pending value.
+    f"0 {POPUP_TIMER_MB} write-mailbox "
+    f"0 {POPUP_VALUE_MB} write-mailbox ",
     "1 421 write-mailbox ",   # LEVEL_INITIALIZED
     "then\n",
     "71 read-mailbox 1 + 71 write-mailbox ",
@@ -2587,11 +2679,42 @@ DIRECTOR_SCRIPT = "".join([
     "411 read-mailbox 0 <> if ",
     "400 read-mailbox dup 1 + * 2 / 401 read-mailbox + 200 + ",
     "dup read-mailbox ",
-    "dup 0 = if drop 425 read-mailbox dup 4 % - 4 / 2 % 0 = if 2 swap write-mailbox else 1 swap write-mailbox then 70 read-mailbox 25 + 70 write-mailbox ",
-    "else dup 1 = if drop 2 swap write-mailbox 70 read-mailbox 50 + 70 write-mailbox ",
+    f"dup 0 = if drop 425 read-mailbox dup 4 % - 4 / 2 % 0 = if 2 swap write-mailbox else 1 swap write-mailbox then 70 read-mailbox 25 + 70 write-mailbox {_popup_trigger_forth(25)}",
+    f"else dup 1 = if drop 2 swap write-mailbox 70 read-mailbox 50 + 70 write-mailbox {_popup_trigger_forth(25)}",
     "else drop 425 read-mailbox dup 4 % - 4 / dup 1 = if drop 0 swap write-mailbox else dup 3 = if drop 1 swap write-mailbox else drop drop then then ",
     "then then ",
     "0 411 write-mailbox then\n",
+    # ── Popup tick: activate pending popup; countdown; auto-park ────────────
+    # POPUP_VALUE_MB != 0 means a score event fired this tick. Park all three,
+    # then position the matching one. Separate countdown block runs every tick.
+    f"{POPUP_VALUE_MB} read-mailbox dup 0 <> if ",
+    f"-30.0 3011 {POPUP25_ACTOR_IDX} write-actor-mailbox ",
+    f"-30.0 3011 {POPUP100_ACTOR_IDX} write-actor-mailbox ",
+    f"-30.0 3011 {POPUP300_ACTOR_IDX} write-actor-mailbox ",
+    f"dup 300 = if drop "
+    f"{POPUP_PENDING_X_MB} read-mailbox 3009 {POPUP300_ACTOR_IDX} write-actor-mailbox "
+    f"{POPUP_PENDING_Y_MB} read-mailbox 3010 {POPUP300_ACTOR_IDX} write-actor-mailbox "
+    f"{POPUP_PENDING_Z_MB} read-mailbox 3011 {POPUP300_ACTOR_IDX} write-actor-mailbox ",
+    f"else dup 100 = if drop "
+    f"{POPUP_PENDING_X_MB} read-mailbox 3009 {POPUP100_ACTOR_IDX} write-actor-mailbox "
+    f"{POPUP_PENDING_Y_MB} read-mailbox 3010 {POPUP100_ACTOR_IDX} write-actor-mailbox "
+    f"{POPUP_PENDING_Z_MB} read-mailbox 3011 {POPUP100_ACTOR_IDX} write-actor-mailbox ",
+    f"else drop "
+    f"{POPUP_PENDING_X_MB} read-mailbox 3009 {POPUP25_ACTOR_IDX} write-actor-mailbox "
+    f"{POPUP_PENDING_Y_MB} read-mailbox 3010 {POPUP25_ACTOR_IDX} write-actor-mailbox "
+    f"{POPUP_PENDING_Z_MB} read-mailbox 3011 {POPUP25_ACTOR_IDX} write-actor-mailbox ",
+    "then then ",
+    f"{POPUP_HOLD_TICKS} {POPUP_TIMER_MB} write-mailbox "
+    f"0 {POPUP_VALUE_MB} write-mailbox ",
+    "else drop then\n",
+    f"{POPUP_TIMER_MB} read-mailbox dup 0 > if ",
+    f"1 - dup {POPUP_TIMER_MB} write-mailbox ",
+    f"0 = if "
+    f"-30.0 3011 {POPUP25_ACTOR_IDX} write-actor-mailbox "
+    f"-30.0 3011 {POPUP100_ACTOR_IDX} write-actor-mailbox "
+    f"-30.0 3011 {POPUP300_ACTOR_IDX} write-actor-mailbox ",
+    "then ",
+    "else drop then\n",
     # ── Per-cube TOP-color update on state change ───────────────────────────
     # Every tick, for each cube N (0..27):
     #   cur  = read CUBE_STATE_BASE + N         ( 200..227 )
@@ -2704,7 +2827,13 @@ DIRECTOR_SCRIPT = "".join([
     f"425 read-mailbox 7 > if "
     f"{_SPAWN_INTERVAL_FORTH}{UGG_MB_SPAWN_TIMER} write-mailbox "
     f"{_SPAWN_INTERVAL_FORTH}{WW_MB_SPAWN_TIMER} write-mailbox "
-    f"then ",
+    f"then "
+    # Park any active popup and reset timer on round clear.
+    f"0 {POPUP_TIMER_MB} write-mailbox "
+    f"0 {POPUP_VALUE_MB} write-mailbox "
+    f"-30.0 3011 {POPUP25_ACTOR_IDX} write-actor-mailbox "
+    f"-30.0 3011 {POPUP100_ACTOR_IDX} write-actor-mailbox "
+    f"-30.0 3011 {POPUP300_ACTOR_IDX} write-actor-mailbox ",
     "then ",
     "else drop then\n",
 ])
