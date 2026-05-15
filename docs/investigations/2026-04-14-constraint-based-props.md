@@ -3,9 +3,9 @@
 **Date:** 2026-04-14
 **Status:** Deferred — plan captured for future work, not scheduled. Depends on Jolt integration landing first.
 **Depends on:**
-- `docs/investigations/2026-04-14-jolt-physics-integration.md` (this plan assumes `WF_PHYSICS_ENGINE=jolt` is the default by the time this work starts).
+- [docs/investigations/2026-04-14-jolt-physics-integration.md](2026-04-14-jolt-physics-integration.md) (this plan assumes `WF_PHYSICS_ENGINE=jolt` is the default by the time this work starts).
 - **IFF binary chunk support** (referenced in the wasm3 plan's follow-ups). Hard prerequisite — this plan does not ship a text-encoded interim format. See Open questions for rationale.
-**Related:** `docs/reference/2026-04-13-blender-to-cd-iff-pipeline.md`, `docs/reference/2026-04-13-oas-oad-format.md`, `docs/2026-04-10-worldfoundry-iffcomp-format.md`.
+**Related:** [docs/reference/2026-04-13-blender-to-cd-iff-pipeline.md](../reference/2026-04-13-blender-to-cd-iff-pipeline.md), [docs/reference/2026-04-13-oas-oad-format.md](../reference/2026-04-13-oas-oad-format.md), [docs/2026-04-10-worldfoundry-iffcomp-format.md](../2026-04-10-worldfoundry-iffcomp-format.md).
 
 ## Context
 
@@ -90,7 +90,7 @@ Goal: Prove the constraint runtime by hand-writing a `CNST` chunk into a test if
 
 Goal: Author the same test props in Blender, export via the existing Blender→CD-IFF pipeline, and produce a byte-identical (or equivalent) `CNST` chunk to the hand-authored one.
 
-1. Extend the pipeline's exporter (see `docs/reference/2026-04-13-blender-to-cd-iff-pipeline.md`) to walk `bpy.data.objects` looking for `obj.rigid_body_constraint`.
+1. Extend the pipeline's exporter (see [docs/reference/2026-04-13-blender-to-cd-iff-pipeline.md](../reference/2026-04-13-blender-to-cd-iff-pipeline.md)) to walk `bpy.data.objects` looking for `obj.rigid_body_constraint`.
 2. Map Blender constraint types to the `CnstRecord.type` enum:
    - `HINGE` → 0
    - `SLIDER` → 1
@@ -114,9 +114,9 @@ Goal: A `doors/` level in `wflevels/` that demonstrates every v1 constraint type
 
 ### Phase 4 — Documentation and follow-ups
 
-1. New section in `docs/scripting-languages.md` (or a dedicated `docs/constraints.md`) documenting the `CONSTRAINT_*` mailbox surface for script authors.
+1. New section in [docs/scripting-languages.md](../scripting-languages.md) (or a dedicated [docs/constraints.md](../constraints.md)) documenting the `CONSTRAINT_*` mailbox surface for script authors.
 2. Update the Blender pipeline docs with the rigid-body-constraint authoring story — screenshots of the Blender UI, custom-property names for WF-specific fields (motor mode, script name override if different from object name).
-3. Backport to `docs/engine-size-matrix.md` the delta from constraints-enabled vs constraints-empty level (should be negligible; the Jolt constraint solver is already linked in Phase 2 of the Jolt plan).
+3. Backport to [docs/engine-size-matrix.md](../engine-size-matrix.md) the delta from constraints-enabled vs constraints-empty level (should be negligible; the Jolt constraint solver is already linked in Phase 2 of the Jolt plan).
 
 ## Critical files
 
@@ -128,7 +128,7 @@ Goal: A `doors/` level in `wflevels/` that demonstrates every v1 constraint type
 | `wftools/` Blender exporter (location TBD — see blender-pipeline plan) | Walk `rigid_body_constraint`, emit `CNST` records |
 | `scripts/make_test_cnst.py` | New — hand-author test chunk for Phase 1 |
 | `wflevels/doors/` | New test level |
-| `docs/scripting-languages.md` or `docs/constraints.md` | Document `CONSTRAINT_*` mailbox surface |
+| [docs/scripting-languages.md](../scripting-languages.md) or [docs/constraints.md](../constraints.md) | Document `CONSTRAINT_*` mailbox surface |
 
 ## Reuses
 

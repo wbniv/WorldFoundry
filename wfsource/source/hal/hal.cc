@@ -33,7 +33,7 @@ static void PIGSInitStartupTask();
 LMalloc* _HALLmalloc;
 LMalloc* _HALScratchLmalloc;
 DMalloc* _HALDmalloc;
-int32 cbHalLmalloc = 3500000;
+int32 cbHalLmalloc = 64000000;  // bumped 16MB→64MB for qbert 16-round palettes (1344 cube actors, 2026-05-09)
 int32 cbHalScratchLmalloc = 180000;
 
 //============================================================================

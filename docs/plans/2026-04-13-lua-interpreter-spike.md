@@ -8,8 +8,8 @@ and `ScriptInterpreterFactory` now returns a `ScriptRouter` that
 dispatches to `lua_engine` (and any other compiled-in engines) by sigil.
 The spike's *behaviour* — Lua 5.4 running snowgoons' player + director —
 is unchanged; only the C++ shape moved. See
-`docs/plans/2026-04-15-lua-engine-fixes.md` for the canonical convention.
-**Source investigation:** `docs/investigations/2026-04-14-scripting-language-replacement.md`
+[docs/plans/2026-04-15-lua-engine-fixes.md](2026-04-15-lua-engine-fixes.md) for the canonical convention.
+**Source investigation:** [docs/investigations/2026-04-14-scripting-language-replacement.md](../investigations/2026-04-14-scripting-language-replacement.md)
 **Decision being spiked:** Lua 5.4 as the WF scripting language, replacing the stubbed `NullInterpreter` (and, in history, TCL).
 
 ## Context

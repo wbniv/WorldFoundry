@@ -9,10 +9,10 @@ sigil) lives inside `lua_engine::RunScript` in
 as a `LuaInterpreter` member `int _fennelEvalRef` now lives as a
 file-scope static inside the `lua_engine` namespace. The compilation-
 cache story described in §3 below is superseded by
-`docs/plans/2026-04-15-lua-engine-fixes.md` fix #3 (Fennel
+[docs/plans/2026-04-15-lua-engine-fixes.md](2026-04-15-lua-engine-fixes.md) fix #3 (Fennel
 pre-compilation via `fennel.compileString` + `luaL_ref`).
-**Depends on:** `docs/plans/2026-04-13-lua-interpreter-spike.md` (landed)
-**Source investigation:** `docs/investigations/2026-04-14-scripting-language-replacement.md:335-343`
+**Depends on:** [docs/plans/2026-04-13-lua-interpreter-spike.md](2026-04-13-lua-interpreter-spike.md) (landed)
+**Source investigation:** [docs/investigations/2026-04-14-scripting-language-replacement.md](../investigations/2026-04-14-scripting-language-replacement.md):335-343
 
 ## Context
 
@@ -128,7 +128,7 @@ The dispatch is a one-byte sniff — no language tag, no file extension.
 ### 1. Vendor fennel.lua
 Fennel 1.6.1 `bootstrap/fennel.lua`, MIT. Copied to
 `wftools/engine/stubs/fennel.lua`. Record version + SHA256 in
-`docs/dev-setup.md`.
+[docs/dev-setup.md](../dev-setup.md).
 
 ### 2. Codegen + minification in `build_game.sh`
 Feature-gated on `WF_ENABLE_FENNEL` (env var, default `0`):
@@ -248,7 +248,7 @@ task run
   (always), `#ifdef WF_ENABLE_FENNEL` guards around load + sigil dispatch.
 - `scripts/patch_snowgoons_fennel.py` — new.
 - `wflevels/snowgoons.iff`, `wfsource/source/game/cd.iff` — re-patched.
-- `docs/dev-setup.md` — Fennel version + SHA note.
+- [docs/dev-setup.md](../dev-setup.md) — Fennel version + SHA note.
 
 ## Follow-ups
 

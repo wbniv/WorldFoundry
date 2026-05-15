@@ -46,3 +46,6 @@ wflevels/*/*.lev.bin
 # pytest debug-bridge harness artifacts
 tests/.wf_game.log
 tests/.pytest_cache/
+
+# Phase E walker captures (regenerable via scripts/research/wf/qbert_wf_walker.py)
+docs/investigations/wf-screenshots/wf_walker_*.png

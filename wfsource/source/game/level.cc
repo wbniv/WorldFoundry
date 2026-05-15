@@ -1293,7 +1293,7 @@ Level::LoadLevelData()
    DBSTREAM2(clevel << "asmaptoc: seek to " << asmaptocEntry._offsetInDiskFile << std::endl; )
 	// now read asset map into memory
 
-	const int MAX_ASMP_SIZE = DiskFileCD::_SECTOR_SIZE * 4;  // kts abritrary
+	const int MAX_ASMP_SIZE = DiskFileCD::_SECTOR_SIZE * 16;  // 16 sectors = 32 KB; was bumped to 64 on 2026-05-10 for the qbert 1344-actor pyramid, reverted 2026-05-10 after Phase 1 cube consolidation dropped ASS chunk count to 18
 	char* mapMem = new ( HALScratchLmalloc ) char[MAX_ASMP_SIZE];
 	assert(ValidPtr(mapMem));
 	DBSTREAM2( cflow <<"Level::loadLevelData:reading map" << std::endl; )
@@ -1305,6 +1305,7 @@ Level::LoadLevelData()
 //		IFFChunkIter mapChunkIter(mapStream);
 		mapStreamSize = *((long*) (mapMem+4));
 		mapStreamSize += DiskFileCD::_SECTOR_SIZE - (mapStreamSize % DiskFileCD::_SECTOR_SIZE);
+		AssertMsg( mapStreamSize <= MAX_ASMP_SIZE, "ASMP chunk exceeds MAX_ASMP_SIZE; bump cap at level.cc:1296 or shrink chunk" );
 		if(mapStreamSize > DiskFileCD::_SECTOR_SIZE)
 		{			                        // need to read more sectors
 			_levelFile->SeekForward((asmaptocEntry._offsetInDiskFile)+DiskFileCD::_SECTOR_SIZE);

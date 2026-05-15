@@ -66,7 +66,15 @@ PhysicalAttributes::Validate() const
 		expansionVector.SetZ( expminpoint.Z() - unexpminpoint.Z() );
 
 
-	if ( !(expansionVector == predictedMotionVector) )
+	// Strict `==` on Vector3 (bitwise per Scalar) fires spuriously when
+	// SCALAR_TYPE_FLOAT is in use: expansionVector recomputes the delta via
+	// (origMax + delta) - origMax, which loses a few ULPs of precision
+	// against the freshly-computed PredictedPosition() - Position(). On a
+	// fixed-point Scalar the two computations are bit-identical and this
+	// tolerance is a no-op. See docs/plans/2026-05-11-physical-validate-float-tolerance.md.
+	const Scalar tol = Scalar::FromDouble(1e-3);
+	const Vector3 diff = expansionVector - predictedMotionVector;
+	if ( diff.X().Abs() >= tol || diff.Y().Abs() >= tol || diff.Z().Abs() >= tol )
 	{
 		DBSTREAM1(
 			cerror << "FATAL ERROR: PhysicalAttributes::Validate() failed." << std::endl;

@@ -263,6 +263,15 @@ protected:
 	PhysicalAttributes			_physicalAttributes;
 	RenderActor*				_renderActor;
 
+	// Per-actor non-uniform render scale. Default (1,1,1). Initialised from
+	// the OAS x_scale/y_scale/z_scale fields at level load (if non-zero) and
+	// mutable per-frame via EMAILBOX_X_SCALE/Y_SCALE/Z_SCALE (3040..3042).
+	// Applied in RenderActor3D::Render() via column-scale of the world matrix.
+	// Added 2026-05-10 for qbert stretch-and-squash.
+	Scalar						_scaleX;
+	Scalar						_scaleY;
+	Scalar						_scaleZ;
+
 	// DATA END
 
 #if SW_DBSTREAM

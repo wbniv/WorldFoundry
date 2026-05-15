@@ -2,8 +2,8 @@
 
 **Date:** 2026-04-28
 **Status:** Survey + scoped plan. Not committed; intended as the reference doc for any future "should we put WF on a headset?" conversation. Two artifacts: (a) an engine-side gap analysis — what WF would have to grow to ship a VR or AR build — and (b) an exhaustive catalog of headset hardware still in production as of 2026-04, to ground "which targets first" decisions in actual market reality rather than nostalgia.
-**Depends on:** `docs/investigations/2026-04-28-engine-capabilities-survey.md` (engine profile), `docs/investigations/2026-04-14-jolt-physics-integration.md` (variable tick rate is load-bearing).
-**Related:** `docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md` (mobile input + AR back-camera scenarios), `docs/investigations/2026-04-28-mainline-console-controllers-since-1996.md` (sibling catalog format).
+**Depends on:** [docs/investigations/2026-04-28-engine-capabilities-survey.md](2026-04-28-engine-capabilities-survey.md) (engine profile), [docs/investigations/2026-04-14-jolt-physics-integration.md](2026-04-14-jolt-physics-integration.md) (variable tick rate is load-bearing).
+**Related:** [docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md](2026-04-14-multiplayer-voice-mobile-input.md) (mobile input + AR back-camera scenarios), [docs/investigations/2026-04-28-mainline-console-controllers-since-1996.md](2026-04-28-mainline-console-controllers-since-1996.md) (sibling catalog format).
 
 ## Context
 
@@ -23,7 +23,7 @@ Headset support is not one feature; it's a stack. A faithful list, ordered by ho
 
 1. **Stereo rendering.** Render the scene twice per frame (once per eye) with per-eye view + projection matrices supplied by the runtime. Single-pass-stereo (multiview) and two-pass implementations both exist; multiview saves ~20–40% GPU cost and is the modern default.
 2. **Head pose tracking.** Read predicted head pose every frame (position + orientation in room space) and drive the camera matrices from it. Pose source is the runtime (OpenXR on most platforms, Apple's `CompositorServices` / ARKit on visionOS).
-3. **Frame-rate floor.** VR demands 72 Hz minimum, 90 Hz typical, 120 Hz on flagship hardware. WF's tick rate is variable (`docs/investigations/2026-04-14-jolt-physics-integration.md`). Variable-tick is fine for *gameplay logic*; for *rendering* the engine must hit a rock-steady headset cadence or the runtime drops frames into reprojection. This is the single hardest constraint to retrofit.
+3. **Frame-rate floor.** VR demands 72 Hz minimum, 90 Hz typical, 120 Hz on flagship hardware. WF's tick rate is variable ([docs/investigations/2026-04-14-jolt-physics-integration.md](2026-04-14-jolt-physics-integration.md)). Variable-tick is fine for *gameplay logic*; for *rendering* the engine must hit a rock-steady headset cadence or the runtime drops frames into reprojection. This is the single hardest constraint to retrofit.
 4. **Lens distortion + chromatic aberration + reprojection.** All handled by the runtime in OpenXR; the engine submits a flat-projected image per eye and the runtime warps. Free (in the sense that no engine code has to do it), but the engine must submit correctly-sized targets and respect the runtime's expected color space (usually linear sRGB or HDR10).
 5. **6DoF controller input.** Tracked controllers report position + orientation + buttons + analog axes. WF's input layer is a joystick bitmask (`INDEXOF_HARDWARE_JOYSTICK*`); 6DoF pose is a different shape and needs new mailbox slots. Same axis question as the mobile-input doc's gyro/accelerometer slots.
 6. **Locomotion + comfort.** VR-specific movement modes: smooth locomotion with head-relative direction, teleport, snap-turn, optional vignette-on-acceleration. These are *gameplay primitives*, not engine subsystems — but the existing character controller assumes a fixed forward axis from a third-person camera, so adapting it for head-relative control is a small but real refactor.
@@ -71,13 +71,13 @@ Stopping after Phase B is a defensible "PCVR-only" outcome with most of the valu
 - **Treadmill / locomotion hardware** (Virtuix, KAT VR). Niche.
 - **Webcam-based positional tracking** (early Pico, Windows Mixed Reality). Hardware deprecated.
 - **Cloud-streamed VR** (CloudXR, Resolution Games' streaming). Tail-end use case; Phase A's PCVR streaming path covers most of it.
-- **Cross-headset session multiplayer.** That's a multiplayer concern, covered by `docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md`.
+- **Cross-headset session multiplayer.** That's a multiplayer concern, covered by [docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md](2026-04-14-multiplayer-voice-mobile-input.md).
 
 ---
 
 ## Part 2 — Hardware market survey (still in production, 2026-04)
 
-This is the catalog the engine work targets. Same shape as `docs/investigations/2026-04-28-mainline-console-controllers-since-1996.md`: per-category tables, MSRP at the manufacturer's storefront, production status, link to the canonical purchase page (or eBay search if discontinued).
+This is the catalog the engine work targets. Same shape as [docs/investigations/2026-04-28-mainline-console-controllers-since-1996.md](2026-04-28-mainline-console-controllers-since-1996.md): per-category tables, MSRP at the manufacturer's storefront, production status, link to the canonical purchase page (or eBay search if discontinued).
 
 **Caveats.** "In production" means the manufacturer ships new units through their direct channel as of 2026-04. Prices are USD MSRP; some are recent (Quest 3 increase to $619 effective 2026-04-19) and some are stable from launch. I have not personally verified every spec line against datasheets — fact-check before quoting in commitments. URLs are storefront category pages where deep-product URLs are unstable.
 

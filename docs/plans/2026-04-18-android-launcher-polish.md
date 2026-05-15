@@ -6,7 +6,7 @@
 
 ## Context
 
-The Android port plan (`docs/plans/2026-04-16-android-port.md`) closed 2026-04-18. The closure audit (`docs/investigations/2026-04-18-android-port-closure.md`) named launcher icons as the main remaining polish item. Legacy `res/mipmap-*/ic_launcher.png` PNGs landed as part of closure. Android 8+ prefers **adaptive icons** (XML pointing at separate foreground + background drawables) so the launcher can apply its own shape mask, monochrome theme, etc. Without the adaptive XML the phone falls back to the legacy PNG and can't do round/themed forms.
+The Android port plan ([docs/plans/2026-04-16-android-port.md](2026-04-16-android-port.md)) closed 2026-04-18. The closure audit ([docs/investigations/2026-04-18-android-port-closure.md](../investigations/2026-04-18-android-port-closure.md)) named launcher icons as the main remaining polish item. Legacy `res/mipmap-*/ic_launcher.png` PNGs landed as part of closure. Android 8+ prefers **adaptive icons** (XML pointing at separate foreground + background drawables) so the launcher can apply its own shape mask, monochrome theme, etc. Without the adaptive XML the phone falls back to the legacy PNG and can't do round/themed forms.
 
 ## Scope
 

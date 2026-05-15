@@ -5,7 +5,7 @@
 `build_game.sh` compiles the Lua TUs directly; `wf_game` no longer links
 `-llua5.4`. Post-2026-04-15, the Lua plug is the file-scope `lua_engine`
 namespace in `scripting_stub.cc`, called by `ScriptRouter` — see
-`docs/plans/2026-04-15-lua-engine-fixes.md` for the convention.
+[docs/plans/2026-04-15-lua-engine-fixes.md](2026-04-15-lua-engine-fixes.md) for the convention.
 
 ## Context
 
@@ -42,14 +42,14 @@ Intended outcome: `build_game.sh` no longer needs `liblua5.4-dev` installed. The
    - snowgoons runs — Fennel, Lua scripts, every existing test behaves identically.
    - `ldd wf_game` does **not** list `liblua5.4.so`.
    - `size wf_game` delta vs. pre-change binary is ~+180-220 KB.
-8. **Documentation.** Update `docs/scripting-languages.md` — Lua row's Runtime column from `-llua5.4 (system) → to-vendor` to `vendored engine/vendor/lua-5.4.8/, statically linked`. Remove `liblua5.4-dev` from `docs/dev-setup.md` if present.
+8. **Documentation.** Update [docs/scripting-languages.md](../scripting-languages.md) — Lua row's Runtime column from `-llua5.4 (system) → to-vendor` to `vendored engine/vendor/lua-5.4.8/, statically linked`. Remove `liblua5.4-dev` from [docs/dev-setup.md](../dev-setup.md) if present.
 
 ## Verification
 
 1. **No system Lua at link time.** `grep lua5.4 engine/build_game.sh` returns nothing.
 2. **No system Lua at runtime.** `ldd engine/wf_game | grep lua` is empty.
 3. **Snowgoons parity.** Full play-through matches pre-change behaviour. Lua error messages readable; Fennel's embedded Lua eval still works.
-4. **Size delta recorded** in the commit message so `docs/scripting-languages.md`'s size column stays honest.
+4. **Size delta recorded** in the commit message so [docs/scripting-languages.md](../scripting-languages.md)'s size column stays honest.
 
 ## Out of scope
 

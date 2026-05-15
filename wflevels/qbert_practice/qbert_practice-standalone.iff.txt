@@ -1,17 +1,25 @@
 // qbert_practice-standalone.iff.txt — L4-wrapped form of qbert_practice for wf_game -L.
 //
-// Build:
+// Build (via the standard pipeline, which emits both inner and standalone):
+//   bash wftools/wf_blender/build_level_binary.sh qbert_practice
+//
+// Or directly:
 //   ../../wftools/iffcomp-rs/target/release/iffcomp -binary \
-//     -o=qbert_practice-standalone.iff qbert_practice-standalone.iff.txt
+//     -o=../qbert_practice-standalone.iff qbert_practice-standalone.iff.txt
 //
 // Run:
-//   cd wfsource/source/game && wf_game -L<repo>/wflevels/qbert_practice/qbert_practice-standalone.iff
+//   task run-level -- wflevels/qbert_practice-standalone.iff
+//
+// Phase 1 (cube consolidation, 2026-05-10) dropped the inner iff from
+// 1.93 MB to ~45 KB; pool budgets below are sized for the 28-cube design
+// with snowgoons-class margin.
 { 'L4'
     { 'ALGN' .align( 2048 ) }
     { 'RAM'
-        'OBJD' 200000l
-        'PERM' 500000l
-        'ROOM' 500000l
+        'OBJD' 200000l                  // ~45 actors total post-Phase-1; matches snowgoons
+        'PERM' 1000000l                 // player.iff + curse_bubble.iff (death-anim overlay)
+        'ROOM' 1500000l                 // 28 cubes + 8 detailed enemy meshes (Slick/Sam/Ugg/WW
+                                        // grew to ~15-16 KB each in the 2026-05-11 detail pass)
         'FLAG' 1l 1l                    // doomstick, bungeecam
     }
     { 'ALGN' .align( 2048 ) }

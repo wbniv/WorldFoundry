@@ -46,6 +46,14 @@
 extern int wf_hud_score;
 extern int wf_hud_timer;
 extern int wf_hud_lives;
+extern int wf_hud_game_over;
+
+// Forward declarations for the offscreen capture FBO — definitions live in
+// the second DESIGNER_CHEATS block below (with CaptureFrame). RenderBegin
+// (much earlier in the file) needs to bind the FBO when bRecordVideo.
+extern bool bRecordVideo;
+extern GLuint gCaptureFBO;
+static void EnsureCaptureFBO(int w, int h);
 
 static void DrawHudText(float x, float y, const char* text)
 {
@@ -83,6 +91,38 @@ static void DrawHud(int xSize, int ySize)
 
     snprintf(buf, sizeof(buf), "LIVES %d", wf_hud_lives);
     DrawHudText((float)(xSize - 70), 8, buf);
+
+    // Game-over overlay — driven by mb 420 via wf_hud_game_over (game.cc HUD glue).
+    // Two centred lines, scaled up over the live pyramid view; red to match the
+    // arcade GAME OVER colour (see docs/plans/screenshots/qbert-arcade-game-over-reference.png).
+    if (wf_hud_game_over != 0)
+    {
+        glColor3f(1.0f, 0.0f, 0.0f);
+        const float cx = (float)xSize * 0.5f;
+        const float cy = (float)ySize * 0.5f;
+
+        // Line 1: "GAME OVER" — large prominence (3x scale).
+        char line1[] = "GAME OVER";
+        const float scale1 = 3.0f;
+        const float w1 = (float)stb_easy_font_width(line1) * scale1;
+        glPushMatrix();
+        glTranslatef(cx - w1 * 0.5f, cy - 24.0f * scale1, 0.0f);
+        glScalef(scale1, scale1, 1.0f);
+        DrawHudText(0.0f, 0.0f, line1);
+        glPopMatrix();
+
+        // Line 2: restart prompt — smaller (1.5x), below.
+        char line2[] = "PRESS ANY BUTTON TO RESTART";
+        const float scale2 = 1.5f;
+        const float w2 = (float)stb_easy_font_width(line2) * scale2;
+        glPushMatrix();
+        glTranslatef(cx - w2 * 0.5f, cy + 12.0f, 0.0f);
+        glScalef(scale2, scale2, 1.0f);
+        DrawHudText(0.0f, 0.0f, line2);
+        glPopMatrix();
+
+        glColor3f(1.0f, 1.0f, 0.0f);  // restore HUD yellow for any later draws
+    }
 
     glEnable(GL_DEPTH_TEST);
     glMatrixMode(GL_PROJECTION);
@@ -277,6 +317,13 @@ Display::RenderBegin()
    Validate();
    AssertGLOK();
    AssertMsg( _drawPage == 0 || _drawPage == 1, "_drawPage = " << _drawPage );
+#if DESIGNER_CHEATS && defined(__LINUX__)
+   if (bRecordVideo)
+   {
+       EnsureCaptureFBO(_xSize, _ySize);
+       glBindFramebuffer(GL_FRAMEBUFFER, gCaptureFBO);
+   }
+#endif
    glClearColor( _backgroundColorRed, _backgroundColorGreen, _backgroundColorBlue, 1.0 );
    AssertGLOK();
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);     // Clear the window with current clearing color
@@ -345,7 +392,16 @@ extern bool	windowActive;		// Window windowActive Flag Set To TRUE By Default
 
 extern bool bRecordVideo;
 
-static FILE* gCapturePipe = nullptr;
+static FILE* gCapturePipe  = nullptr;
+// Offscreen capture target — see docs/plans/2026-05-11-record-video-fbo-capture.md.
+// Rendering goes here when bRecordVideo is set, so the captured frame is
+// immune to X11 window occlusion (the back buffer's occluded regions on
+// non-composited X11 contain whatever the obscuring window painted).
+// File-scope (not static) so the forward decl at the top of the file can
+// refer to them.
+GLuint gCaptureFBO   = 0;
+static GLuint gCaptureColor = 0;
+static GLuint gCaptureDepth = 0;
 
 static void
 CaptureCleanup(int sig)
@@ -357,6 +413,31 @@ CaptureCleanup(int sig)
     }
     signal(sig, SIG_DFL);
     raise(sig);
+}
+
+static void
+EnsureCaptureFBO(int w, int h)
+{
+    if (gCaptureFBO) return;
+    glGenFramebuffers(1, &gCaptureFBO);
+    glGenRenderbuffers(1, &gCaptureColor);
+    glGenRenderbuffers(1, &gCaptureDepth);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, gCaptureColor);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB8, w, h);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, gCaptureDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, gCaptureFBO);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                              GL_RENDERBUFFER, gCaptureColor);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                              GL_RENDERBUFFER, gCaptureDepth);
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    AssertMsg(status == GL_FRAMEBUFFER_COMPLETE,
+              "capture FBO incomplete: 0x" << std::hex << status);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 static void
@@ -382,10 +463,27 @@ CaptureFrame(int xSize, int ySize)
 
     const int pixelBytes = xSize * ySize * 3;
     glFinish();
+
+    // When rendering to the offscreen capture FBO, blit it onto the back
+    // buffer (so the user still sees the game) and then read from the FBO
+    // (still bound as READ) so the captured pixels are immune to X11
+    // window occlusion.
+    if (gCaptureFBO)
+    {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, gCaptureFBO);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glBlitFramebuffer(0, 0, xSize, ySize, 0, 0, xSize, ySize,
+                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        // FBO remains bound as the READ framebuffer for glReadPixels below.
+    }
+
     uint8_t* pixels = (uint8_t*)malloc(pixelBytes);
     glReadPixels(0, 0, xSize, ySize, GL_BGR, GL_UNSIGNED_BYTE, pixels);
     fwrite(pixels, 1, pixelBytes, gCapturePipe);
     free(pixels);
+
+    if (gCaptureFBO)
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 #endif // DESIGNER_CHEATS && __LINUX__

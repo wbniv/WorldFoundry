@@ -38,8 +38,17 @@ DiskTOC::DiskTOC()
 
 DiskTOC::~DiskTOC()
 {
+	// _toc is NULL when LoadTOC was never called — happens on the -L<path>
+	// dev bypass (game.cc:155–162 returns before reaching _gameTOC.LoadTOC).
+	// DO_CD_IFF is currently only #defined inside game.cc, so this assert
+	// compiles out here; it stays as a marker for if/when the macro is
+	// promoted to a build-wide flag for a cd.iff-only build configuration.
+#if defined(DO_CD_IFF)
 	assert(ValidPtr(_toc));
-	HALLmalloc.Free(_toc);
+#endif
+	if (_toc) {
+		HALLmalloc.Free(_toc);
+	}
 }
 
 //=============================================================================

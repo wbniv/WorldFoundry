@@ -135,7 +135,7 @@ AssetManager::LoadPermanents()
 			assert(roomStream.good());
 			IFFChunkIter roomChunkIter(roomStream);
 			maxAsset++;
-			assert(maxAsset < 1000);	// arbitrary
+			assert(maxAsset < 4000);	// arbitrary; bumped 1000→4000 for qbert 1344-actor pyramid (2026-05-09)
 		}
 	}
 	binistream roomStream((void*)(((char*)streamBuffer)+sizeof(CHUNKHDR)),chdr.size);
@@ -186,7 +186,7 @@ AssetManager::LoadRoomSlot(int roomIndex, int slotNum)
 			assert(roomStream.good());
 			IFFChunkIter roomChunkIter(roomStream);
 			maxAsset++;
-			assert(maxAsset < 1000);	// arbitrary
+			assert(maxAsset < 4000);	// arbitrary; bumped 1000→4000 for qbert 1344-actor pyramid (2026-05-09)
 		}
 	}
 	binistream roomStream((void*)(((char*)streamBuffer)+sizeof(CHUNKHDR)),chdr.size);
@@ -215,7 +215,7 @@ AssetManager::FreeRoomSlot(int slotNum)
 void
 AssetManager::ReadAssetMap(binistream& mapStream)
 {
-	const int MAX_ASMP_SIZE = DiskFileCD::_SECTOR_SIZE * 4;  // kts abritrary
+	const int MAX_ASMP_SIZE = DiskFileCD::_SECTOR_SIZE * 64;  // bumped 16→64 for qbert 1344-actor pyramid (2026-05-09; 16-round palettes)
 
 	IFFChunkIter mapChunkIter(mapStream);
 	assert(mapChunkIter.GetChunkID().ID() == IFFTAG('A','S','M','P'));
@@ -230,7 +230,7 @@ AssetManager::ReadAssetMap(binistream& mapStream)
 		stringIter->ReadBytes(&_assetStringMap[_assetStringMapEntries]._name,stringIter->BytesLeft());
 		MEMORY_DELETE(HALScratchLmalloc,stringIter,IFFChunkIter);
 		_assetStringMapEntries++;
-		assert(_assetStringMapEntries <= 300);
+		assert(_assetStringMapEntries <= 1024);   // bumped to 4000 on 2026-05-10 for qbert fan-out, reverted 2026-05-10 after Phase 1 (pair with assets.hp:116)
 	}
 
 }

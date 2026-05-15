@@ -576,12 +576,70 @@ make_empty('Matte', ROOM_POS, 'matte',
     props={
         'Mobility':           'Anchored',
         'MovementClass':      11,
-        'Model Type':         'Box',
+        'Model Type':         'None',   # NOT 'Box' — see "debug box gotcha" below
         'Matte Type':         'Color',
         'Background Color':   0,
         'Visibility Mailbox': 1,
     })
 ```
+
+> **Note:** Earlier guidance here suggested `Model Type='Box'`. That causes a
+> random-coloured debug cube to render at the matte's world position, on top
+> of the real geometry. Always use `'None'` for matte (and any other
+> infrastructure actor with no real mesh). See "Infrastructure actors render
+> as random-coloured debug cubes" below.
+
+---
+
+## Infrastructure actors render as random-coloured debug cubes (Model Type=Box)
+
+**Symptom:** A small, oddly-coloured cube (often magenta, lime, olive, or grey) appears in front of real geometry. Sometimes appears to "obscure" a cube, an apex, or a target, and the colour is different on different runs.
+
+**Cause:** `wfsource/source/game/actor.cc:398` (`MODEL_TYPE_BOX` branch in
+`Actor::ConstructRenderActor`) instantiates `RenderActor3DBox(memory, min, max)` for any actor with `Model Type=Box`.  That class calls `MakeRandMaterialList(memory, 6)`, so the actor draws as a 6-material cube with **random colours generated at engine startup**. This is debug visualisation that was never gated off.
+
+The OAS schemas for several "abstract" actor types (camera, levelobj, matte, camshot, target, etc.) default `Model Type` to `Box`. Any such actor inside the camera frustum will render as one of these random debug cubes.
+
+In the Q✱bert MVP, the matte at `(0, 0, 6)` was inside the frustum and drew a magenta hex on top of the apex cube; four other Box actors (Camera, Level, cs_pyramid, cs_death) rendered offscreen but still occupied poly slots in the renderer.
+
+**Fix:** Override `Model Type` to `'None'` on every infrastructure actor that has no real mesh:
+
+```python
+for obj in (levelobj, matte, camera, camshot, cs_death,
+            target01, target02, director):
+    obj['wf_Model Type'] = 'None'
+```
+
+The `player` and any `statplat`-mesh children should keep `Model Type='Mesh'` (they actually point at a `.iff`).
+
+The proper long-term fix is to gate `RenderActor3DBox`'s random-material rendering behind a `SHOW_ABSTRACT_ACTORS_AS_BOXES` debug flag — but that is an engine change, out of scope for content-only level work.
+
+---
+
+## wf_blender exporter writes two `Mesh Name` fields per actor — the first wins
+
+**Symptom:** Mesh actor that has both real Blender mesh data and a `wf_Mesh Name` property override (pointing at a hand-authored `.iff`) renders with the *Blender* mesh's material — not the override file's material. In the Q✱bert MVP this caused all 84 cubes to render white instead of their intended palette colours, even though `cube_state{0,1,2}.iff` had the right `MATL` chunks on disk.
+
+**Cause:** `wftools/wf_blender/export_level.py:994` writes a `Mesh Name` line **before** iterating the OAS schema fields, exporting the Blender geometry to `<obj_name>.iff` (overwriting any same-named file in the level dir!). The schema iteration then emits a *second* `Mesh Name` line from the `wf_Mesh Name` override. The engine's lev parser uses the first occurrence; the override is silently ignored.
+
+**Fix (until the exporter is fixed upstream):** After `bpy.ops.wf.export_level`, overwrite the auto-generated per-actor `.iff` with the intended hand-authored content. Example from `wflevels/qbert_practice/blender_create_qbert.py`:
+
+```python
+import shutil
+bpy.ops.wf.export_level(filepath=OUT_LEV)
+
+for row in range(NUM_ROWS):
+    for col in range(row + 1):
+        N = cube_index(row, col)
+        for state_idx in range(3):
+            src = os.path.join(SCRIPT_DIR, f'cube_state{state_idx}.iff')
+            dst = os.path.join(SCRIPT_DIR, f'cube_{N:02d}_s{state_idx}.iff')
+            shutil.copyfile(src, dst)
+```
+
+Alternative: use Empty Blender objects (no `obj.data.polygons`). Untested, but the exporter's `has_mesh` guard should skip the Blender-mesh emit path entirely. Verify by checking the exported `.lev` for duplicate `{ 'NAME' "Mesh Name" }` entries — a properly-routed Empty actor should have exactly one.
+
+If the exporter is later fixed (e.g. by skipping the Blender mesh emit when `wf_Mesh Name` is non-empty), the post-export `shutil.copyfile` workaround becomes redundant and should be removed.
 
 ---
 
@@ -663,3 +721,86 @@ Other logical helpers defined in the WF bootstrap: `not` (= `0 =`), `<`, `>`,
 4. Is the camera actually pointing toward the actor? Check Target/TrackObject positions.
 5. Is the mesh file (`sphere.iff`, etc.) present in the level's asset list and built into the `.iff`?
 6. Does the mesh material use `FLAT_SHADED` (flags=0) or does it reference a texture in the level atlas?
+
+---
+
+## zForth scripts: `\n`, `\` comments, ASCII, dictionary size
+
+Authoring `wf_Script` content from a Blender create-script (`blender_create_*.py`)
+hits four traps that all silently break script execution. Fix all four together
+when bringing up a new actor with non-trivial Forth.
+
+**1. Use real `\n` newlines in Python strings, not `"\\n"` text.**
+The wf_blender exporter (`export_level.py:1304`) escapes literal `\` to `\\` when
+writing the .lev STR field. Python `"\n"` (1 char) round-trips to a real newline
+at runtime. Python `"\\n"` (2 chars) round-trips to `\n` (backslash + n) — which
+zForth treats as the unknown word `\` followed by `n`. Symptom: the first
+statement in a script runs, the rest is silently skipped because zForth has no
+`\` line-comment word.
+
+**2. zForth has no `\` line-comment word. Only the FIRST line of an actor script is auto-skipped.**
+The script handler (`engine/stubs/scripting_zforth.cc:275-279`) skips one leading
+line as the sigil (typically `\ wf` or `\ wf description`). Every subsequent line
+is fed to `zf_eval` verbatim. Starting a non-first line with `\` triggers
+`ZF_ABORT_NOT_A_WORD` (error code 7) at compile time. For inline comments use
+`( ... )` — `(` is the `_(` primitive (PRIM_COMMENT).
+
+**3. Stay within ASCII inside script bodies.**
+The tokenizer chokes on multi-byte UTF-8 (`→`, `—`, smart quotes, em-dashes).
+Use plain `->`, `--`, `'`, `"`.
+
+**4. `ZF_DICT_SIZE` is fixed and append-only.**
+Every `: word ... ;` definition consumes dictionary slots; same word in two
+actors compiles twice. If you see `zforth compile error 2` (`ZF_ABORT_OUTSIDE_MEM`)
+at compile time, the dict is full. Remediation: bump `ZF_DICT_SIZE` in
+`engine/stubs/zfconf.h` and rebuild the engine. Default raised 2026-05-03 from
+16 KB to 64 KB to fit the Q✱bert MVP director + player scripts.
+
+**Diagnosing all of the above:** watch engine stderr after each level boot for
+`zforth compile error N` lines. Engine continues running with broken/missing
+script handlers, so visual symptoms are misleading (e.g. "only one cube visible"
+looks like a vis_mb misconfig but is actually rule 1).
+
+**5. `if/else/then` only works inside a colon definition (compile mode).**
+The script handler (`engine/stubs/scripting_zforth.cc` `RunScript`) splits the
+Script field at the **last `;`**:
+- Code **before** the last `;` is the "defs" section, eval'd directly in
+  interpret mode.
+- Code **after** the last `;` is wrapped in an auto-generated
+  `: _wfsN ... ;` word that runs in compile mode.
+
+zForth's `if/else/fi/then` are immediate words that emit jump targets — they
+require compile mode. So this works:
+
+```forth
+\ wf
+: stick INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox ;
+stick 0x0800 & if 1 411 write-mailbox then    \ <-- after the last `;`, OK
+```
+
+But this fails with `zforth compile error 7 (defs)`:
+
+```forth
+\ wf
+416 read-mailbox 0 = if 1 414 write-mailbox then   \ <-- BEFORE the first `:`, FAILS
+: stick INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox ;
+```
+
+The error message is misleading — error 7 is `NOT_A_WORD`, but the actual
+problem is `if` running in interpret mode where it doesn't know how to emit
+its jump patch. Workaround: move the `if/else/then` lines *after* the last
+`;`, or wrap them in their own `: name ... ;` definition.
+
+## zForth standard-Forth gaps
+
+The WF bootstrap is deliberately small. Words you may reach for that are
+**not** defined: `2dup`, `2drop`, `2swap`, `nip`, `tuck`, `?dup`, `abs`,
+`negate`, `min`, `max`, `+!`, `inc`, `dec`, `mod`. See
+`memory/reference_zforth_bootstrap_words.md` for the full catalog and 1-line
+inline workarounds. Common substitutions:
+
+- `2dup` → `over over`
+- `nip` → `swap drop`
+- `abs` → `dup 0 < if 0 swap - then`
+- `min` / `max` → `over over > if swap then drop` (min) / `<` (max)
+- `+!` → `dup @ rot + swap !`

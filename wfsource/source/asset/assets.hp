@@ -85,7 +85,7 @@ public:
 	{
 		PERM_SLOT_INDEX = MAX_ACTIVE_ROOMS,  	// this is the active rooms enumeration
 		MAX_ACTIVE_SLOTS = MAX_ACTIVE_ROOMS+1,	// +1 for perm, perm index = MAX_ACTIVE_ROOMS
-		MAX_ASSETS_PER_ROOM = 200,
+		MAX_ASSETS_PER_ROOM = 1024,  // bumped 200→1024 on 2026-05-08 for qbert; bumped to 4000 on 2026-05-10 for fan-out, reverted 2026-05-10 after Phase 1 cube consolidation dropped per-room asset count to ~30
 		TOC_ASMAP_INDEX = 0,
 		TOC_LEVEL_INDEX = 1,
 		TOC_PERM_INDEX = 2,
@@ -112,8 +112,8 @@ private:
     AssetCallback& _callback;
 
     int32		_assetStringMapEntries;
- #pragma message ("KTS " __FILE__ ": can only have 300 assets until this kludge is removed ")
-    AssetStringMap	_assetStringMap[300];
+ #pragma message ("KTS " __FILE__ ": can only have 1024 assets until this kludge is removed ")
+    AssetStringMap	_assetStringMap[1024];   // bumped to 4000 on 2026-05-10 for qbert 1344-actor fan-out, reverted 2026-05-10 after Phase 1 cube consolidation
 };
 
 //=============================================================================

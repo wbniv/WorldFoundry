@@ -652,6 +652,20 @@ Actor::Actor( const SObjectStartupData* startupData ) :
 
 	_renderActor = NULL;
 
+	// Per-actor non-uniform render scale: read from OAS (existing-but-
+	// previously-unread x_scale/y_scale/z_scale fields). Default to 1.0
+	// when the OAS value is zero (which is what every level currently
+	// authors, since no level has explicitly set these). Mutable per-frame
+	// via EMAILBOX_X/Y/Z_SCALE; consumed in RenderActor3D::Render().
+	{
+		const Scalar oadX = Scalar::FromFixed32(objdata->x_scale);
+		const Scalar oadY = Scalar::FromFixed32(objdata->y_scale);
+		const Scalar oadZ = Scalar::FromFixed32(objdata->z_scale);
+		_scaleX = (oadX == Scalar::zero) ? Scalar::one : oadX;
+		_scaleY = (oadY == Scalar::zero) ? Scalar::one : oadY;
+		_scaleZ = (oadZ == Scalar::zero) ? Scalar::one : oadZ;
+	}
+
 	DBSTREAM3( cactor << "Created new Actor #" << _idxActor );
 	DBSTREAM3( cactor << ", Physical Attributes: " << std::endl );
 	DBSTREAM3( cactor << _physicalAttributes << std::endl; )
@@ -1172,6 +1186,22 @@ Actor::ReadSystemMailbox( int boxnum ) const
             return Scalar::zero;
         }
 
+        case EMAILBOX_FACE_COLOR_TOP:
+        case EMAILBOX_FACE_COLOR_LIT:
+        case EMAILBOX_FACE_COLOR_SHADOW:
+            // Per-face color overrides are write-only — the renderer reads them
+            // through the actor's RenderObject3D, not through ReadMailbox. Return
+            // 0 instead of asserting so the debug bridge's set_mailbox handler
+            // (which reads old_val before writing for undo support) doesn't trip.
+            return Scalar::zero;
+
+        case EMAILBOX_X_SCALE:
+            return _scaleX;
+        case EMAILBOX_Y_SCALE:
+            return _scaleY;
+        case EMAILBOX_Z_SCALE:
+            return _scaleZ;
+
         case EMAILBOX_KEYFRAME:
         {
             UNIMPLEMENTED( "read keyframe mailbox" );
@@ -1317,6 +1347,17 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             tVect.SetX(value);
             _physicalAttributes.SetPosition(tVect);
             _physicalAttributes.SetPredictedPosition(tVect);
+#ifdef PHYSICS_ENGINE_JOLT
+            // For Jolt character actors, the per-tick movement sync at
+            // movement.cc overwrites _position with the character body's
+            // pose unless we also push the teleport into Jolt. See plan
+            // docs/plans/2026-05-11-mailbox-pos-write-bypasses-jolt.md.
+            {
+                uint32_t charID = _physicalAttributes.JoltCharacterID();
+                if (charID != kJoltInvalidBodyID)
+                    JoltCharacterSetPosition(charID, tVect);
+            }
+#endif
             break;
         }
         case EMAILBOX_Y_POS:
@@ -1326,6 +1367,13 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             tVect.SetY(value);
             _physicalAttributes.SetPosition(tVect);
             _physicalAttributes.SetPredictedPosition(tVect);
+#ifdef PHYSICS_ENGINE_JOLT
+            {
+                uint32_t charID = _physicalAttributes.JoltCharacterID();
+                if (charID != kJoltInvalidBodyID)
+                    JoltCharacterSetPosition(charID, tVect);
+            }
+#endif
             break;
         }
         case EMAILBOX_Z_POS:
@@ -1335,6 +1383,13 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             tVect.SetZ(value);
             _physicalAttributes.SetPosition(tVect);
             _physicalAttributes.SetPredictedPosition(tVect);
+#ifdef PHYSICS_ENGINE_JOLT
+            {
+                uint32_t charID = _physicalAttributes.JoltCharacterID();
+                if (charID != kJoltInvalidBodyID)
+                    JoltCharacterSetPosition(charID, tVect);
+            }
+#endif
             break;
         }
         case EMAILBOX_ROTATION_A:
@@ -1426,6 +1481,46 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
           _physicalAttributes.SetLinVelocity( linVelocity );
        }
             break;
+
+        case EMAILBOX_FACE_COLOR_TOP:
+        case EMAILBOX_FACE_COLOR_LIT:
+        case EMAILBOX_FACE_COLOR_SHADOW:
+        {
+            // Per-face material color override. Value = packed 24-bit RGB
+            // (0xRRGGBB). Material index = mailbox enum offset (0/1/2).
+            // Re-bakes the actor's RenderObject3D primitives with the new color.
+            // No-op for actors without a RenderActor3D (default RenderActor base
+            // SetMaterialColor is a no-op).
+            // (qbert cube consolidation, 2026-05-10.)
+            if (ValidPtr(_renderActor))
+            {
+                const int idx = boxnum - EMAILBOX_FACE_COLOR_TOP;
+                const uint32 packed = (uint32)value.WholePart();
+                Color color((uint8)((packed >> 16) & 0xFF),
+                            (uint8)((packed >>  8) & 0xFF),
+                            (uint8)( packed        & 0xFF));
+                _renderActor->SetMaterialColor(idx, color);
+            }
+            break;
+        }
+
+        case EMAILBOX_X_SCALE:
+        case EMAILBOX_Y_SCALE:
+        case EMAILBOX_Z_SCALE:
+        {
+            // Per-actor non-uniform render scale. Cached on the Actor and
+            // forwarded to RenderActor3D, which applies it in Render() via
+            // column-multiply on the world matrix before draw. No-op on
+            // actors without a RenderActor3D (default RenderActor base
+            // SetActorScale is a no-op).
+            // (qbert stretch-and-squash, 2026-05-10.)
+            if (boxnum == EMAILBOX_X_SCALE) _scaleX = value;
+            else if (boxnum == EMAILBOX_Y_SCALE) _scaleY = value;
+            else                                  _scaleZ = value;
+            if (ValidPtr(_renderActor))
+                _renderActor->SetActorScale(Vector3(_scaleX, _scaleY, _scaleZ));
+            break;
+        }
 
         case EMAILBOX_INPUT :
         {

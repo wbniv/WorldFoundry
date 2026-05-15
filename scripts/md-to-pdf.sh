@@ -115,6 +115,16 @@ in_code = False
 in_table = False
 table_aligns = []
 in_blockquote = False
+# When a blockquote starts with > [!TYPE], this holds the lowercase type
+# ('note', 'tip', 'important', 'warning', 'caution'); None for plain blockquotes.
+alert_type = None
+ALERT_META = {
+    'note':      ('Note',      'ℹ'),  # information source
+    'tip':       ('Tip',       '✓'),  # check mark
+    'important': ('Important', '◆'),  # black diamond
+    'warning':   ('Warning',   '⚠'),  # warning sign
+    'caution':   ('Caution',   '⛔'),  # no entry
+}
 code_lines = []
 code_lang = ''
 # Stack of open list tags, e.g. [('ul', 0), ('ol', 2)]
@@ -154,8 +164,11 @@ def close_table():
     if in_table: html_lines.append('</tbody></table>'); in_table = False; table_aligns = []
 
 def close_blockquote():
-    global in_blockquote
-    if in_blockquote: html_lines.append('</blockquote>'); in_blockquote = False
+    global in_blockquote, alert_type
+    if in_blockquote:
+        html_lines.append('</div>' if alert_type else '</blockquote>')
+        in_blockquote = False
+        alert_type = None
 
 def flush_para():
     global para_lines
@@ -325,13 +338,23 @@ for line in lines:
     if in_table and not stripped.startswith('|'):
         close_table()
 
-    # Blockquotes
+    # Blockquotes (with optional GitHub-style alert callouts: > [!NOTE], etc.)
     if stripped.startswith('> '):
         flush_para(); close_lists(); close_table()
+        body = stripped[2:]
         if not in_blockquote:
+            # First line of a new blockquote: check for [!TYPE] marker
+            m = re.match(r'^\[!([A-Za-z]+)\]\s*$', body)
+            if m and m.group(1).lower() in ALERT_META:
+                alert_type = m.group(1).lower()
+                title, icon = ALERT_META[alert_type]
+                html_lines.append(f'<div class=\"alert alert-{alert_type}\">')
+                html_lines.append(f'<p class=\"alert-title\">{icon} {title}</p>')
+                in_blockquote = True
+                continue  # skip emitting the marker as body
             html_lines.append('<blockquote>')
             in_blockquote = True
-        html_lines.append(f'<p>{stripped[2:]}</p>')
+        html_lines.append(f'<p>{body}</p>')
         continue
     elif in_blockquote and stripped != '':
         close_blockquote()
@@ -463,7 +486,10 @@ body = re.sub(r'\*\*([^*\n]+)\*\*', r'<strong>\1</strong>', body)
 body = re.sub(r'(?<!\*)\*([^*\n]+)\*(?!\*)', r'<em>\1</em>', body)
 body = re.sub(r'(?<![_\w])_([^_\n]+)_(?![_\w])', r'<em>\1</em>', body)
 body = re.sub(r'~~(.+?)~~', r'<del>\1</del>', body)
-body = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href=\"\2\">\1</a>', body)
+# Link URLs may contain balanced parens (e.g. Wikipedia disambiguation like
+# IPhone_(1st_generation)). Match non-paren chars or balanced (...) groups, up
+# to two levels of nesting — enough for any real-world URL.
+body = re.sub(r'\[([^\]]+)\]\(((?:[^()]|\((?:[^()]|\([^()]*\))*\))+)\)', r'<a href=\"\2\">\1</a>', body)
 
 # Restore code spans
 for i, content in enumerate(code_spans):
@@ -503,6 +529,19 @@ html = f'''<!DOCTYPE html>
   pre code {{ background: none; padding: 0; }}
   blockquote {{ border-left: 4px solid #d1d9e0; margin: 16px 0; padding: 4px 16px; color: #656d76; }}
   blockquote p {{ margin: 4px 0; }}
+  .alert {{ border-left: 4px solid; margin: 16px 0; padding: 8px 16px; border-radius: 0 6px 6px 0; }}
+  .alert p {{ margin: 4px 0; }}
+  .alert-title {{ font-weight: 600; margin: 0 0 4px 0 !important; }}
+  .alert-note      {{ border-color: #0969da; background: #ddf4ff66; }}
+  .alert-note      .alert-title {{ color: #0969da; }}
+  .alert-tip       {{ border-color: #1a7f37; background: #dafbe166; }}
+  .alert-tip       .alert-title {{ color: #1a7f37; }}
+  .alert-important {{ border-color: #8250df; background: #fbefff66; }}
+  .alert-important .alert-title {{ color: #8250df; }}
+  .alert-warning   {{ border-color: #9a6700; background: #fff8c566; }}
+  .alert-warning   .alert-title {{ color: #9a6700; }}
+  .alert-caution   {{ border-color: #cf222e; background: #ffebe966; }}
+  .alert-caution   .alert-title {{ color: #cf222e; }}
   del {{ color: #656d76; }}
   table {{ border-collapse: collapse; width: 100%; margin: 16px 0; }}
   th, td {{ border: 1px solid #d1d9e0; padding: 8px 12px; text-align: left; vertical-align: top; overflow-wrap: break-word; }}

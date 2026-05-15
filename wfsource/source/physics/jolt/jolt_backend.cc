@@ -122,6 +122,11 @@ static std::vector<BodyEntry> gBodies;
 
 static const Vector3 kZeroVec = Vector3::zero;
 
+// Jolt body-pool size — passed to PhysicsSystem::Init below. Captured as a
+// file-scope constant so the pool-exhaustion log message can reference it
+// without re-querying the PhysicsSystem.
+static constexpr unsigned int kJoltBodyPoolMax = 1024;
+
 // ---------------------------------------------------------------------------
 // Internal helpers
 
@@ -214,13 +219,20 @@ uint32_t JoltBodyCreate(const Vector3& pos, const Euler& rot,
                         const Vector3& minPt, const Vector3& maxPt)
 {
     if (!gPhysicsSystem) return kJoltInvalidBodyID;
-    uint32_t handle = AllocEntry();
-    BodyEntry& e = gBodies[handle];
     // All actor bodies start as KINEMATIC — Jolt maintains the collision
     // structure but WF drives position/velocity via Update() each frame.
     // When CharacterVirtual is wired (Phase 3), PHYSICS actors will be
     // upgraded to DYNAMIC.
-    e.joltID  = CreateJoltBodyKinematic(pos, rot, minPt, maxPt);
+    JPH::BodyID id = CreateJoltBodyKinematic(pos, rot, minPt, maxPt);
+    if (id.IsInvalid()) {
+        std::fprintf(stderr,
+            "jolt: body pool exhausted (max=%u); returning kJoltInvalidBodyID for JoltBodyCreate\n",
+            kJoltBodyPoolMax);
+        return kJoltInvalidBodyID;
+    }
+    uint32_t handle = AllocEntry();
+    BodyEntry& e = gBodies[handle];
+    e.joltID  = id;
     e.posCache = pos;
     e.velCache = Vector3::zero;
     e.rotCache = rot;
@@ -243,9 +255,16 @@ uint32_t JoltBodyCreateStatic(const Vector3& pos, const Euler& rot,
                                const Vector3& minPt, const Vector3& maxPt)
 {
     if (!gPhysicsSystem) return kJoltInvalidBodyID;
+    JPH::BodyID id = CreateJoltBody(pos, rot, minPt, maxPt, /*isStatic=*/true);
+    if (id.IsInvalid()) {
+        std::fprintf(stderr,
+            "jolt: body pool exhausted (max=%u); returning kJoltInvalidBodyID for JoltBodyCreateStatic\n",
+            kJoltBodyPoolMax);
+        return kJoltInvalidBodyID;
+    }
     uint32_t handle = AllocEntry();
     BodyEntry& e = gBodies[handle];
-    e.joltID  = CreateJoltBody(pos, rot, minPt, maxPt, /*isStatic=*/true);
+    e.joltID  = id;
     e.posCache = pos;
     e.velCache = Vector3::zero;
     e.rotCache = rot;
@@ -306,6 +325,12 @@ uint32_t JoltBodyCreateStaticMesh(const Vector3& pos,
         JPH::EMotionType::Static, WFPhysLayers::STATIC);
 
     JPH::BodyID id = gBodyInterface->CreateAndAddBody(cfg, JPH::EActivation::DontActivate);
+    if (id.IsInvalid()) {
+        std::fprintf(stderr,
+            "jolt: body pool exhausted (max=%u); returning kJoltInvalidBodyID for JoltBodyCreateStaticMesh\n",
+            kJoltBodyPoolMax);
+        return kJoltInvalidBodyID;
+    }
     std::fprintf(stderr, "jolt: body MESH_STATIC verts=%d faces=%d id=%u\n",
                  vertCount, faceCount, id.GetIndexAndSequenceNumber());
 
@@ -323,6 +348,14 @@ void JoltBodyDestroy(uint32_t handle)
 {
     if (!ValidHandle(handle)) return;
     BodyEntry& e = gBodies[handle];
+    // Belt-and-suspenders: if a registered entry's joltID is invalid (which
+    // shouldn't be possible after the per-wrapper IsInvalid checks above),
+    // skip the Jolt calls — RemoveBody(invalidID) segfaults inside
+    // BodyManager::DestroyBodies. Still free the wrapper-handle slot.
+    if (e.joltID.IsInvalid()) {
+        e.occupied = false;
+        return;
+    }
     gBodyInterface->RemoveBody(e.joltID);
     gBodyInterface->DestroyBody(e.joltID);
     e.occupied = false;
@@ -663,10 +696,12 @@ void JoltBackendInit()
     // 10 MB temp allocator (Jolt's recommended default); 1024 physics bodies;
     // large-enough body pairs / constraints. ContactConstraintManager grows
     // with body count + step substeps; 2 MB was not enough for snowgoons.
+    // Bumped to 4096 on 2026-05-10 for qbert 1344-cube fan-out; reverted to
+    // 1024 same day after Phase 1 cube consolidation dropped to 28 bodies.
     gTempAllocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
     gJobSystem     = new JPH::JobSystemSingleThreaded(JPH::cMaxPhysicsJobs);
     gPhysicsSystem = new JPH::PhysicsSystem();
-    gPhysicsSystem->Init(1024, 0, 4096, 4096,
+    gPhysicsSystem->Init(kJoltBodyPoolMax, 0, 4096, 4096,
                          gBPLayerInterface, gObjVsBPFilter, gObjPairFilter);
     gPhysicsSystem->SetGravity(JPH::Vec3(0.0f, 0.0f, -9.81f));
     gBodyInterface = &gPhysicsSystem->GetBodyInterface();
@@ -682,8 +717,10 @@ void JoltBackendShutdown()
     {
         if (e.occupied)
         {
-            gBodyInterface->RemoveBody(e.joltID);
-            gBodyInterface->DestroyBody(e.joltID);
+            if (!e.joltID.IsInvalid()) {
+                gBodyInterface->RemoveBody(e.joltID);
+                gBodyInterface->DestroyBody(e.joltID);
+            }
             e.occupied = false;
         }
     }

@@ -7,14 +7,25 @@ Run headlessly:
 Strategy: import snowgoons-blender.lev (gets all infrastructure objects with
 correct OAD schemas attached), strip everything except the reusable
 infrastructure, reposition objects for the Q*bert pyramid layout, then
-generate 28 cube actors × 3 colour variants = 84 statplat instances at
-axial-coordinate positions, plus the player at the apex, plus a second
-camshot (cs_death) for the fall cutscene. Export to qbert_practice.lev.
+generate 28 cube actors at pyramid positions plus the player at the apex,
+plus a second camshot (cs_death) for the fall cutscene. Export to
+qbert_practice.lev.
+
+Phase-1 cube consolidation (2026-05-10, docs/plans/2026-05-10-qbert-cube-consolidation.md):
+  - 28 cube actors (one per pyramid position), all referencing the same
+    cube.iff (3-material mesh: top / lit-side / shadow-side).
+  - Per-face material color is mutated at runtime via the new
+    EMAILBOX_FACE_COLOR_TOP/LIT/SHADOW slots (mailbox.inc:3037..3039),
+    written from the director script via `write-actor-mailbox`.
+  - Director maintains the per-cube state (200..227) and a 16-round x
+    3-state top-color LUT, plus the per-level lit/shadow side colors;
+    on cube-state changes it writes the new top color to that cube; on
+    level transitions it writes new side colors to all 28 cubes.
+  - Replaces the prior 1344-actor visibility-fan-out (28 positions x 16
+    rounds x 3 states) which baked colors into prebaked .iff variants.
 
 MVP scope (per docs/plans/2026-05-03-qbert-mvp.md):
   - 28-cube pyramid in a 7-row triangular layout.
-  - Per-cube colour state via 3 child meshes each with a one-line Forth
-    visibility script keyed off INDEXOF_CUBE_STATE_BASE+N.
   - Player as an Anchored actor with the hop state machine in its Script.
   - Director script for cube-state advance and win check (colour rule 0).
   - Two CamShots (cs_pyramid and cs_death) wired through INDEXOF_CAMSHOT.
@@ -33,21 +44,28 @@ SNOWGOONS_LEV = os.path.join(REPO, 'wflevels', 'snowgoons-blender', 'snowgoons-b
 OUT_LEV = os.path.join(SCRIPT_DIR, 'qbert_practice.lev')
 OAD_DIR = os.path.join(REPO, 'wfsource', 'source', 'oas')
 STATPLAT_OAD = os.path.join(REPO, 'wftools', 'wf_oad', 'tests', 'fixtures', 'statplat.oad')
+ENEMY_OAD    = os.path.join(REPO, 'wftools', 'wf_oad', 'tests', 'fixtures', 'enemy.oad')
 
 # ── Pyramid geometry ──────────────────────────────────────────────────────────
 NUM_ROWS = 7  # rows 0 (apex) through 6 (bottom)
 TOTAL_CUBES = NUM_ROWS * (NUM_ROWS + 1) // 2  # 28
 CUBE_SIZE = 2.0  # matches gen_cube.py — 2×2×2 cube
 CUBE_BASE_Z = 1.0  # bottom row centre Z (cubes extend ±1 around their centre)
+# Cubes are rotated 45° about Z (diamond presentation); their footprint
+# extends √2 along the new X/Y axes. Multiply XY centre offsets by √2 so
+# adjacent diamonds touch corner-to-corner with no overlap.
+SQRT2 = math.sqrt(2.0)
 
-# Mailbox layout — engine cap was bumped to GLOBAL_USER_MAX=999 on 2026-05-03,
-# so the original spacious plan from docs/plans/2026-05-03-qbert-mvp.md applies:
+# Mailbox layout (qbert_practice).
 #   2          END_TIME (engine sentinel — mm convention)
 #   13         DEATH (engine signal — mm convention)
 #   70..72     HUD score/timer/lives (mm convention; mb 72 LIVES rendered by DrawHud)
 #   100..101   camshot zone signals from ActBoxOR (mm convention)
-#   200..227   CUBE_STATE_BASE (28 slots, cube N at 200+N)
-#   300..383   VIS_BASE (84 slots, cube N variant V at 300+N*3+V)
+#   200..227   CUBE_STATE_BASE (28 slots, cube N's per-frame state at 200+N — values 0/1/2)
+#   228..255   CUBE_PREV_STATE_BASE (28 slots, last-frame value of CUBE_STATE — director
+#              compares to detect state changes and re-write that cube's TOP color)
+#   256..303   ROUND_TOP_LUT (48 slots, round R state S top RGB at 256 + R*3 + S — populated
+#              once at level init from gen_cube.ROUND_TOP_COLORS)
 #   400        QBERT_ROW
 #   401        QBERT_COL
 #   402        HOP_COOLDOWN
@@ -64,11 +82,31 @@ CUBE_BASE_Z = 1.0  # bottom row centre Z (cubes extend ±1 around their centre)
 #   421        LEVEL_INITIALIZED (director one-shot init flag — sets lives=3 once)
 #   422        LAST_STICK (player edge-detect snapshot for restart-button trigger)
 #   424        ROUND_CLEAR_TIMER (director internal — counts down 90→0 on win, then resets)
-#   425        ROUND_NUMBER (0-based; increments on each clear)
-INDEXOF_CUBE_STATE_BASE = 200
-INDEXOF_VIS_BASE = 300
+#   425        ROUND_NUMBER (0-based; increments on each clear, 0..15)
+#   426        ROUND_CHANGED (director-internal one-shot — set when round counter
+#              advances; next-tick handler broadcasts the new round's TOP colors
+#              to all 28 cubes; cleared after broadcast)
+#   427        LAST_LEVEL (director-internal — last level index whose side colors
+#              were broadcast; compared to ROUND_NUMBER//4 to detect level changes)
+#   430        (reserved; was AUTOPILOT_ON — autopilot now host-driven via inject_input)
+#   431        (reserved; was AUTOPILOT_STEP)
+#   432        CAPTURE_TRIGGER (Phase E walker — 1=state-0 snap, 2=state-1 snap,
+#              3=round-clear, 0 otherwise. Host watches transitions and issues
+#              `screenshot` ops over the debug bridge.)
+#
+# Per-cube color overrides live on each cube actor's local mailboxes:
+#   3037 / 3038 / 3039 = EMAILBOX_FACE_COLOR_TOP / LIT / SHADOW (mailbox.inc)
+# The director writes them via the `write-actor-mailbox` zForth primitive,
+# addressing each cube by its actor index. CUBE_ACTOR_BASE is computed at
+# export time and embedded into the director Forth as a constant.
+INDEXOF_CUBE_STATE_BASE      = 200
+INDEXOF_CUBE_PREV_STATE_BASE = 228   # 228..255
+INDEXOF_ROUND_TOP_LUT_BASE   = 256   # 256..303 (16 rounds × 3 states)
+INDEXOF_ROUND_NUMBER         = 425
+INDEXOF_ROUND_CHANGED        = 426
+INDEXOF_LAST_LEVEL           = 427
 
-NUM_MAILBOXES = 500  # >= highest used slot (422), per the original plan
+NUM_MAILBOXES = 500  # well above the highest mailbox we use (~432)
 
 
 def cube_index(row, col):
@@ -84,9 +122,9 @@ def cube_world_position(row, col):
     CUBE_SIZE in +Z. This gives the staircase look where the cube tops
     are all visible from a 3/4 camera angle.
     """
-    world_x = (col - row / 2.0) * CUBE_SIZE
+    world_x = SQRT2 * (col - row / 2.0) * CUBE_SIZE
     # Apex row (r=0) is furthest back in +Y; bottom row (r=NUM_ROWS-1) is at Y=0.
-    world_y = (NUM_ROWS - 1 - row) * (CUBE_SIZE / 2.0)
+    world_y = SQRT2 * (NUM_ROWS - 1 - row) * (CUBE_SIZE / 2.0)
     # Apex highest Z; bottom row at CUBE_BASE_Z.
     world_z = CUBE_BASE_Z + (NUM_ROWS - 1 - row) * CUBE_SIZE
     return (world_x, world_y, world_z)
@@ -94,7 +132,7 @@ def cube_world_position(row, col):
 
 # ── Player + camera positions ─────────────────────────────────────────────────
 # Apex cube is at world (0, 6, 13). Player sits on top of it.
-APEX_X, APEX_Y, APEX_Z = 0.0, (NUM_ROWS - 1) * (CUBE_SIZE / 2.0), CUBE_BASE_Z + (NUM_ROWS - 1) * CUBE_SIZE
+APEX_X, APEX_Y, APEX_Z = 0.0, SQRT2 * (NUM_ROWS - 1) * (CUBE_SIZE / 2.0), CUBE_BASE_Z + (NUM_ROWS - 1) * CUBE_SIZE
 PLAYER_SPAWN_XYZ = (APEX_X, APEX_Y, APEX_Z + 1.5)
 # Arcade-Q*bert framing: symmetric in X (x=0), 30° iso down-tilt. Look-at is
 # the pyramid centroid; camera is south (-Y) and elevated (+Z) so the down-
@@ -103,9 +141,11 @@ PLAYER_SPAWN_XYZ = (APEX_X, APEX_Y, APEX_Z + 1.5)
 # visible (the diamond-on-top view), front faces show as parallelograms.
 # (Earlier (12, -15, 14) was 3-quarters offset + only 17° down — too
 # horizontal; pyramid rendered as a thin triangle.)
-CAMSHOT_POS = (0.0, -15.0, 19.0)   # ~21 units from look-at; pyramid fills ~70% of frame
+CAMSHOT_POS = (0.0, -22.0, 23.0)   # ~28 units from look-at — pulled back from
+                                   # (0,-15,19) so Q*bert's head isn't clipped
+                                   # at the top of the framebuffer.
 CAMSHOT_LOOKAT = (0.0, 3.0, 8.5)   # apex+player in frame; offset above pyramid centre
-# Iso-angle check: down-angle = atan((19-8.5)/(3-(-15))) = atan(10.5/18) = 30.3°.
+# Iso-angle check: down-angle = atan((23-8.5)/(3-(-22))) = atan(14.5/25) = 30.1°.
 
 # Room bbox is **relative to the room's position** in the exported BOX3.
 # Must strictly enclose every actor (no equality on edges, or levcomp drops
@@ -122,13 +162,18 @@ CAMSHOT_LOOKAT = (0.0, 3.0, 8.5)   # apex+player in frame; offset above pyramid 
 #   director/levelobj: (0, -10, 7)
 #   matte:           (0, 0, 6)
 ROOM_CENTRE = (0.0, 0.0, 7.0)
-ROOM_BBOX_REL = (-15.0, -100.0, -45.0, 75.0, 15.0, 45.0)
-# Resulting absolute bbox: (-15, -100, -38) to (75, 15, 52).
-# Z floor extended to -38 so the 30-tick fall animation completes before the
-# actor exits the room. Worst-case fall starts at z=3 (bottom-row cube top)
-# and reaches z=-27 at tick 30; floor at -38 gives 11 units of margin.
-# Asymmetric in Y because the intro sweep starts deep in -Y; centre stays
-# at world origin for editor sanity.
+ROOM_BBOX_REL = (-200.0, -200.0, -207.0, 200.0, 200.0, 193.0)
+# Resulting absolute bbox: (-200, -200, -200) to (200, 200, 200).
+# Single global room — there's only one room in this level so we make its
+# bbox huge enough that any authored actor position (including the curse
+# bubble's far-below park location for the death animation) lands inside.
+# Why this matters: levcomp-rs assigns each actor to the first room whose
+# bbox contains the actor's world-space *centre* at level-export time
+# (wftools/levcomp-rs/src/rooms.rs:168). Actors authored outside every
+# room's bbox never get added to any room's render list and are silently
+# skipped by Room::AddObject → CanRender path; their `RenderActor3DAnimates`
+# is never constructed. Diagnose via `grep -c RenderActor3DAnimates
+# wf_game.log` vs expected animated-actor count.
 
 # ── 1. Start with a clean scene ─────────────────────────────────────────────────
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -196,7 +241,7 @@ matte = find_by_class('matte')
 if matte:
     matte.location = (0, 0, 6)
     matte['wf_Matte Type'] = 'Color'
-    matte['wf_Background Color'] = 0x000020  # very dark blue
+    matte['wf_Background Color'] = 0x101830  # subtle dark blue — gives shadow-side cubes a contrast against BG (arcade L1R1 is pure black, but our shadow side renders slightly darker than authored due to engine lighting)
     matte['wf_Visibility Mailbox'] = 1  # always visible
     # The matte renders the background via its own backdrop logic. Without this
     # override, Model Type defaults to "Box" and RenderActor3DBox draws the
@@ -221,17 +266,145 @@ if camera:
 light = find_by_class('light')
 if light:
     light.location = (0, -5, 16)
-    light.rotation_euler = (math.pi / 2, 0, 0)  # required for surfaces to be lit
+    # mm_practice uses (π/2, 0, 0) but that one-direction tilt only lights
+    # one of our 45°-rotated cube's two visible side faces; the other renders
+    # near-black. Add a 45° Z-rotation so the source vector points midway
+    # between the two visible-face normals, giving both sides equal
+    # (~0.707) directional contribution → both lit + shadow side colours
+    # render at consistent half-brightness instead of one being fully dark.
+    light.rotation_euler = (math.pi / 2, 0, math.pi / 4)
+    light.name = 'Light01'
+    light['wf_lightType'] = 'Directional'
+    light['wf_lightRed']   = 1.0
+    light['wf_lightGreen'] = 1.0
+    light['wf_lightBlue']  = 1.0
+
+def _make_principled_material(name, rgb):
+    """Create a Principled-BSDF material with Base Color set to rgb (0..1 tuple)."""
+    mat = bpy.data.materials.new(name=name)
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes.get('Principled BSDF')
+    if bsdf:
+        bsdf.inputs['Base Color'].default_value = (rgb[0], rgb[1], rgb[2], 1.0)
+    mat.diffuse_color = (rgb[0], rgb[1], rgb[2], 1.0)  # viewport solid-shade colour
+    return mat
+
+
+def _build_qbert_player_mesh():
+    """Build a 3D Q*bert from primitives, return the joined mesh object.
+
+    Silhouette: orange UV-sphere body, smaller orange head, peach conical
+    snout pointing **+X** (engine forward), two orange cylinder legs, dark-
+    orange flattened feet. All primitives joined into one mesh with per-face
+    material assignments. Origin at (0,0,0) = ground level (feet bottom).
+
+    Axis convention: WF actor forward = +X, left = +Y, up = +Z (see
+    project_wf_axis_convention memory). The camera at (0,-22,23) looks +Y;
+    Q*bert at the apex spawns with rest yaw rotated so engine-+X aligns
+    with world-(-Y), i.e. the snout points toward the viewer at rest. We
+    do the alignment by setting the actor's authored rotation to +90° yaw
+    rather than by rotating the mesh — that way the engine and the script
+    both agree that "forward = +X" in actor-local space.
+    """
+    mat_orange = _make_principled_material('qbert_orange',    (1.00, 0.53, 0.00))
+    mat_snout  = _make_principled_material('qbert_snout',     (1.00, 0.67, 0.40))
+    mat_feet   = _make_principled_material('qbert_feet',      (0.80, 0.33, 0.00))
+    mat_eye    = _make_principled_material('qbert_eye_white', (1.00, 1.00, 1.00))
+
+    parts = []  # (object, material)
+
+    # Low-poly budget: the level memory pool is tight (~28 cubes share the
+    # same Level DMalloc), so keep total verts well under ~250.
+
+    # Body — UV sphere (~80 verts)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.55, segments=10, ring_count=6, location=(0, 0, 0.55))
+    parts.append((bpy.context.object, mat_orange))
+
+    # Head — smaller UV sphere (~50 verts)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.40, segments=8, ring_count=5, location=(0, 0, 1.25))
+    parts.append((bpy.context.object, mat_orange))
+
+    # Mesh-local "forward" = +X (engine convention). Snout, eyes, feet point +X.
+    # Left-right is the Y axis. The actor's authored rest rotation handles the
+    # +X-forward → toward-camera alignment in world space (see player setup
+    # below where we set rotation_euler.z so the snout faces the camera).
+
+    # Snout — cone pointing +X (default cone points +Z; rotate +90° about Y) (~9 verts)
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=8, radius1=0.18, radius2=0.10, depth=0.45,
+        location=(0.40, 0, 1.20), rotation=(0, math.pi / 2, 0)
+    )
+    parts.append((bpy.context.object, mat_snout))
+
+    # Legs — two cylinders, straddling the Y axis (~12 verts each)
+    for y in (-0.22, 0.22):
+        bpy.ops.mesh.primitive_cylinder_add(
+            vertices=6, radius=0.13, depth=0.30, location=(0, y, 0.15)
+        )
+        parts.append((bpy.context.object, mat_orange))
+
+    # Feet — flattened spheres in front of legs (+X is "front") (~24 verts each)
+    for y in (-0.22, 0.22):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=0.20, segments=6, ring_count=4, location=(0.05, y, 0.04)
+        )
+        bpy.context.object.scale = (1.2, 1.0, 0.4)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((bpy.context.object, mat_feet))
+
+    # Eyes — two small white spheres on the front (+X) of the head (~12 verts each)
+    for y in (-0.14, 0.14):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=0.07, segments=6, ring_count=4, location=(0.30, y, 1.40)
+        )
+        parts.append((bpy.context.object, mat_eye))
+
+    # Smooth-shade everything, assign each part's single material to all its faces.
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for poly in obj.data.polygons:
+            poly.material_index = 0
+            poly.use_smooth = True
+
+    # Join into one mesh with the body as the active/target object.
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    body.name = 'QbertPlayerMesh'
+    body.data.name = 'QbertPlayerMesh'
+    return body
+
 
 # Player — Anchored, Q*bert hop state machine in Script
 player = find_by_class('player')
 if player:
     player.location = PLAYER_SPAWN_XYZ
+    # Authored rest yaw: rotate -90° about Z so engine-local +X (mesh "front",
+    # i.e. snout/eyes/feet) aligns with world -Y, which is "toward the camera"
+    # at (0, -22, 23). Engine and script both treat +X as forward; this
+    # rotation only affects the visual placement at rest.
+    player.rotation_euler = (0.0, 0.0, -math.pi / 2)
     player['wf_Mobility'] = 'Anchored'
     player['wf_Mass'] = 0.0
-    player['wf_Mesh Name'] = 'qbert_player.iff'
+    player['wf_Mesh Name'] = 'player.iff'
     player['wf_Model Type'] = 'Mesh'
     player['wf_Visibility Mailbox'] = 1  # always visible
+
+    # Replace the imported snowgoons placeholder mesh with a real 3D Q*bert
+    # built from primitives. The export pipeline (wf_blender/export_level.py
+    # _write_mesh_iff) reads materials + per-face material_index off the mesh
+    # data and writes a multi-material player.iff — no manual binary IFF
+    # writing required.
+    qbert_mesh_obj = _build_qbert_player_mesh()
+    old_mesh = player.data
+    player.data = qbert_mesh_obj.data
+    bpy.data.objects.remove(qbert_mesh_obj, do_unlink=True)
+    if old_mesh and old_mesh.users == 0:
+        bpy.data.meshes.remove(old_mesh)
     # MVP hop state machine: one-tick teleport per stick edge, with cooldown
     # to prevent rapid-fire hops. Mailbox slots (per the original plan):
     #   400 ROW, 401 COL, 402 COOLDOWN, 411 LANDED, 414 FALL_DEATH
@@ -275,21 +448,50 @@ if player:
         ": stick INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox ;\n"
         ": cd 402 read-mailbox ;\n"
         ": tick-cd cd dup 0 > if 1 - 402 write-mailbox else drop then ;\n"
-        ": do-hop 401 read-mailbox + swap 400 read-mailbox + "
+        # do-hop: on stack ( dr dc ). Before consuming dr/dc to update position,
+        # compute the target yaw in revolutions (CCW from engine-+X-forward)
+        # for the hop direction and store it in mb 433. The new tick block
+        # below reads mb 433 + the actor's current ROTATION_C (mb 3014) each
+        # cooldown frame and writes the shortest-path remaining-delta /
+        # frames-left into DELTA_YAW (mb 3034) — so the lerp self-corrects
+        # and lands exactly on the target as the cooldown hits zero.
+        # Direction → target yaw (engine convention +X=forward, +Y=left):
+        #   UP    (-1, 0) NE = +X+Y → +0.125 rev
+        #   DOWN  ( 1, 0) SW = -X-Y → +0.625 rev
+        #   RIGHT ( 1, 1) SE = +X-Y → +0.875 rev
+        #   LEFT  (-1,-1) NW = -X+Y → +0.375 rev
+        # Hop-arc motion (Phase 1.5): instead of teleporting INDEXOF_X/Y/Z_POS
+        # to the destination on frame 0, save the current position to mb 435/
+        # 436/437 (HOP_START_*), save target Z to mb 438 (HOP_END_Z; X and Y
+        # are recomputed each frame from mb 400/401), and bump HOP_COOLDOWN to
+        # 13 so the per-frame lerp block (added below) gets exactly 12 ticks
+        # at t = (13-cd)/12 ∈ [1/12, 12/12], landing exactly on target.
+        # Note: mb 440+ is the global cube vis-slot range (see clear-all-vis
+        # loop in the restart block), so we can't use mb 440 here; HOP_END_X/Y
+        # are recomputed from row/col rather than stored.
+        ": do-hop "
+        "over over "
+        "dup 0 = if drop 0 < if 0.125 else 0.625 then else swap drop 0 > if 0.875 else 0.375 then then "
+        "433 write-mailbox "
+        "INDEXOF_X_POS read-mailbox 435 write-mailbox "
+        "INDEXOF_Y_POS read-mailbox 436 write-mailbox "
+        "INDEXOF_Z_POS read-mailbox 437 write-mailbox "
+        "401 read-mailbox + swap 400 read-mailbox + "
         "dup 400 write-mailbox over 401 write-mailbox "
-        "over over swap 2 * swap - INDEXOF_X_POS write-mailbox "  # 2dup not in bootstrap; over over does the same
-        "6 over - INDEXOF_Y_POS write-mailbox "
-        "6 swap - 2 * 1 + 2 + INDEXOF_Z_POS write-mailbox "
-        "drop 1 411 write-mailbox 12 402 write-mailbox "
+        "6 swap - 2 * 1 + 2 + 438 write-mailbox "        # HOP_END_Z (lerped to)
+        "drop 13 402 write-mailbox "
         "400 read-mailbox dup 0 < swap 6 > | "
         "401 read-mailbox 0 < | "
         "401 read-mailbox 400 read-mailbox > | "
         "if "
         # Off-edge: re-clamp row for safe-Z computation, then trigger fall.
+        # Crucially do NOT set QBERT_LANDED (mb 411): the director's landing
+        # handler indexes CUBE_STATE by (row,col); off-pyramid coords would
+        # compute into prev-state / wrong-cube slots and flip an unrelated cube.
         "400 read-mailbox dup 0 < if drop 0 then dup 6 > if drop 6 then "
-        "6 swap - 2 * 1 + 2 + INDEXOF_Z_POS write-mailbox "
+        "6 swap - 2 * 1 + 2 + 438 write-mailbox "        # clamped safe-Z → HOP_END_Z (lerp animates toward it before FALL_PHASE takes over)
         "1 419 write-mailbox "
-        "then ;\n"
+        "else 1 434 write-mailbox then ;\n"      # PENDING_LAND set on-pyramid only; lerp promotes to mb 411 (LANDED) on landing
         # 1. Game-over restart trigger. Snapshot prev-stick before updating
         # mb 422 so edge-detect can compare; then update mb 422 = current.
         "422 read-mailbox stick 422 write-mailbox\n"
@@ -297,15 +499,33 @@ if player:
         "0 = if "  # consumes prev_stick: prev was zero?
         "stick 0 <> if "
         # Restart: reset every per-game mailbox + snap player to apex.
+        # CRITICAL: also reset ROUND_NUMBER=0 so play resumes at L1R1, not
+        # at whatever round the previous game-over happened on. Re-init the
+        # visibility fan-out by zeroing all 336 vis slots and showing the
+        # L1R1 (palette 0) state-0 row.
         "3 72 write-mailbox "
         "0 411 write-mailbox 0 412 write-mailbox 0 413 write-mailbox "
         "0 414 write-mailbox 0 415 write-mailbox "
         "0 416 write-mailbox 0 417 write-mailbox 0 418 write-mailbox "
         "0 419 write-mailbox 0 420 write-mailbox "
         "0 400 write-mailbox 0 401 write-mailbox 0 402 write-mailbox "
+        "-0.25 3014 write-mailbox -0.25 433 write-mailbox "  # snap yaw back to rest pose (-90°)
+        "0 425 write-mailbox "                    # ROUND_NUMBER → 0 (restart at L1R1)
+        "0 426 write-mailbox "                    # round-clear-pending flag
+        "0 424 write-mailbox "                    # round-clear timer
+        "0 431 write-mailbox "
         "28 0 do 0 200 i + write-mailbox loop "
+        # Re-arm CUBE_PREV_STATE_BASE to sentinel 99 so the director's
+        # state-change detector fires a re-color for every cube on the next
+        # tick — mirrors the LEVEL_INIT path. Without this, cubes visited in
+        # the previous game retain their state-2 (cleared / blue) TOP colour
+        # because cur=0 vs prev=0 wouldn't differ either, and we can't trust
+        # the lingering prev=2 from cleared cubes to always trigger.
+        "28 0 do 99 228 i + write-mailbox loop "
+        "336 0 do 0 440 i + write-mailbox loop "  # clear all vis slots
+        "28 0 do 1 440 i 3 * + write-mailbox loop "  # show L1R1 state-0 row (pal=0)
         "0 INDEXOF_X_POS write-mailbox "
-        "6 INDEXOF_Y_POS write-mailbox "
+        "6 1.4142136 * INDEXOF_Y_POS write-mailbox "
         "15 INDEXOF_Z_POS write-mailbox "
         "then "
         "then "
@@ -317,28 +537,56 @@ if player:
         # writes go to the player actor's position, not the director's.
         # exit prevents joystick processing on the same tick as the teleport.
         "426 read-mailbox 1 = if "
-        "0 INDEXOF_X_POS write-mailbox 6 INDEXOF_Y_POS write-mailbox 15 INDEXOF_Z_POS write-mailbox "
-        "0 426 write-mailbox exit "
+        "0 INDEXOF_X_POS write-mailbox 6 1.4142136 * INDEXOF_Y_POS write-mailbox 15 INDEXOF_Z_POS write-mailbox "
+        "0 402 write-mailbox -0.25 3014 write-mailbox -0.25 433 write-mailbox "
+        "0 431 write-mailbox 0 426 write-mailbox exit "
         "then\n"
         # 2. Fall-animation state machine. While mb 419 > 0:
         #    1..29 → ramp Z down 1 per tick, increment FALL_PHASE.
         #    >=30  → snap player to apex, latch FALL_DEATH=1, reset FALL_PHASE.
         "419 read-mailbox dup 0 > if "
         "dup 30 < if "
+        # Curse bubble tracks the falling player (+2 in Z so it hovers above).
+        # Bubble actor idx = 30 (CURSE_BUBBLE_ACTOR_IDX, hardcoded here; if
+        # the actor list shifts, update this literal).
+        "INDEXOF_X_POS read-mailbox 3009 30 write-actor-mailbox "
+        "INDEXOF_Y_POS read-mailbox 3010 30 write-actor-mailbox "
+        "INDEXOF_Z_POS read-mailbox 2 + 3011 30 write-actor-mailbox "
+        # Phases 28..29 = splat (last two falling ticks): wide flat pancake,
+        # rotation rates → 0 so the player lands still. Phases 1..27 = airborne
+        # tumble + prolate stretch.
+        "dup 27 > if "
+        "0.20 3042 write-mailbox 1.80 3040 write-mailbox 1.80 3041 write-mailbox "
+        "0 3034 write-mailbox 0 3035 write-mailbox "
+        "else "
+        "0.05 3035 write-mailbox 0.02 3034 write-mailbox "
+        "1.20 3042 write-mailbox 0.85 3040 write-mailbox 0.85 3041 write-mailbox "
+        "then "
         "INDEXOF_Z_POS read-mailbox 1 - INDEXOF_Z_POS write-mailbox "
         "1 + 419 write-mailbox "
         "else "
         "drop "
         "0 419 write-mailbox 1 414 write-mailbox "
         "0 INDEXOF_X_POS write-mailbox "
-        "6 INDEXOF_Y_POS write-mailbox "
+        "6 1.4142136 * INDEXOF_Y_POS write-mailbox "
         "15 INDEXOF_Z_POS write-mailbox "
         "0 400 write-mailbox 0 401 write-mailbox "
+        "0 402 write-mailbox -0.25 3014 write-mailbox -0.25 433 write-mailbox "
+        # Reset scale + clear rotation rates so the player respawns at apex
+        # in identity shape and orientation.
+        "1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
+        "0 3034 write-mailbox 0 3035 write-mailbox "
+        # Park bubble far below (out of view) on respawn.
+        "-100.0 3011 30 write-actor-mailbox "
         "then "
         "exit "
         "else drop "
         "then\n"
-        # 3. Joystick processing — gated on cooldown and INTRO_DONE.
+        # 3. Joystick → diagonal hop. Cardinal joystick bits map to qbert
+        # diagonals because the original arcade cabinet was rotated 45°.
+        # Gated on cooldown==0 and INTRO_DONE so the player can't queue hops.
+        # Host-side automation (walker / record harness) drives this via
+        # the debug bridge inject_input op on HARDWARE_JOYSTICK1_RAW.
         "cd 0 = if "
         "418 read-mailbox 1 = if "
         "stick 0x0800 & if -1 0 do-hop exit then "
@@ -347,13 +595,91 @@ if player:
         "stick 0x4000 & if -1 -1 do-hop exit then "
         "then "
         "then\n"
+        # 3.5. Smooth yaw across remaining HOP_COOLDOWN frames.
+        # Reads current ROTATION_C (mb 3014) and target (mb 433) each frame,
+        # computes shortest-path remaining delta in (-0.5, 0.5] revolutions,
+        # and writes (delta / frames-left) to DELTA_YAW (mb 3034). Self-
+        # corrects each frame so it lands exactly on target as cd hits zero.
+        # 180° special case: shortest-path sign is ambiguous (just the lexical
+        # sign of target-current). The camera at (0,-22,23) looks +Y, so
+        # face-visible = midpoint forward.Y < 0 = midpoint yaw mod 1 in
+        # (0.5, 1.0). When |delta|^2 > 0.249 (≈ |delta| > 0.499; squared
+        # because `abs` isn't in the zForth bootstrap, see scripting_zforth.cc
+        # kCoreBootstrap), pick the sweep whose CCW midpoint (current + 0.25)
+        # lands in the face hemisphere, else use CW.
+        "402 read-mailbox 0 > if "
+        "433 read-mailbox 3014 read-mailbox - "
+        "dup 0.5 > if 1.0 - then "
+        "dup -0.5 < if 1.0 + then "
+        "dup dup * 0.249 > if "
+        "drop 3014 read-mailbox 0.25 + "
+        "dup 1.0 >= if 1.0 - then "
+        "dup 0.0 < if 1.0 + then "
+        "0.5 > if 0.5 else -0.5 then "
+        "then "
+        "402 read-mailbox / 3034 write-mailbox "
+        "then\n"
+        # 3.7. Hop-arc position interpolation across HOP_COOLDOWN frames.
+        # Smoothstepped XY lerp + parabolic Z arc with peak +2 at mid-hop.
+        # t_raw = (13 - cd) / 12 ∈ [1/12, 12/12]; smoothed via t*t*(3-2t)
+        # for ease-in-out (lifts off slowly, decelerates onto landing).
+        # cd=1 ⇒ t_raw=1 ⇒ smoothstep(1)=1 ⇒ exact landing on target.
+        # Target X/Y are recomputed each frame from mb 400/401 (row/col were
+        # already updated in do-hop); target Z lives in mb 438 (clamped on
+        # off-edge hops by the do-hop fall path).
+        "402 read-mailbox 0 > if "
+        "13 402 read-mailbox - 12.0 / "                        # t_raw
+        "dup dup * swap 2.0 * 3.0 swap - * "                    # t = smoothstep(t_raw)
+        # X lerp: pos_x = start_x + t * ((2*col - row)*sqrt(2) - start_x)
+        "dup 401 read-mailbox 2 * 400 read-mailbox - 1.4142136 * "
+        "435 read-mailbox - * 435 read-mailbox + INDEXOF_X_POS write-mailbox "
+        # Y lerp: pos_y = start_y + t * ((6 - row)*sqrt(2) - start_y)
+        "dup 6 400 read-mailbox - 1.4142136 * "
+        "436 read-mailbox - * 436 read-mailbox + INDEXOF_Y_POS write-mailbox "
+        # Z lerp + arc bonus = lerp(start_z, end_z, t) + 4*t*(1-t)*2.0
+        "dup 438 read-mailbox 437 read-mailbox - * 437 read-mailbox + "  # ( t lerp_z_base )
+        "over dup 1.0 swap - * 4.0 * 2.0 * + "                  # ( t final_z ) — keeps t on stack
+        "INDEXOF_Z_POS write-mailbox "                           # ( t )
+        # Trigger LANDED 1 frame before exact landing (cd=2) for anticipation
+        # feel — cube colour flips just before Q*bert visually touches down.
+        # Off-edge hops left mb 434 = 0 (default), so this writes 0 to mb 411
+        # = no LANDED trigger (director's `0 <>` gate skips); on-pyramid hops
+        # set mb 434 = 1 in do-hop's else branch, which lands here as `1`.
+        # Stack-neutral: pushes/pops cancel out, leaves ( t ) for the scale
+        # block below.
+        "402 read-mailbox 2 = if 434 read-mailbox 411 write-mailbox 0 434 write-mailbox then "
+        # Phase 2 stretch-and-squash: classic anticipation → air-stretch →
+        # impact-squash → recover-to-natural sequence over the 12-frame hop.
+        #   bell = 4*t*(1-t)   ∈ [0, 1], peaks at t=0.5 (mid-air)
+        #   imp  = (2t-1)²    ∈ [0, 1], peaks at t=0 and t=1 (takeoff + landing)
+        # On the final landing frame (cd=1, t=1) we snap to identity so
+        # Q*bert is at natural shape post-hop. The remaining 11 frames run:
+        #   z_scale  = 1 + 0.20*bell − 0.40*imp  (taller mid-air, shorter at endpoints)
+        #   xy_scale = 1 − 0.10*bell + 0.40*imp  (narrower mid-air, wider at endpoints)
+        # Visible sequence: wide+short crouch on takeoff → tall+narrow at apex →
+        # wide+short impact on near-landing → snap to (1,1,1) on landing.
+        # Mailboxes 3040/3041/3042 = X/Y/Z_SCALE (wired through actor → RenderActor3D).
+        "402 read-mailbox 1 = if "
+        "drop "                                                  # discard t — landing frame
+        "1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
+        "else "
+        # Compute imp = (2t-1)² and bell = 4*t*(1-t) from t.
+        "dup 2.0 * 1.0 - dup * "                                 # ( t imp )
+        "swap dup 1.0 swap - 4.0 * * "                           # ( imp bell )
+        # Z_SCALE = 1 + 0.20*bell − 0.40*imp.
+        "over 0.40 * over 0.20 * swap - 1.0 + 3042 write-mailbox "
+        # ( imp bell ) still on stack — compute XY_SCALE = 1 + 0.40*imp − 0.10*bell.
+        "0.10 * swap 0.40 * swap - 1.0 + "                       # ( xy_scale )
+        "dup 3040 write-mailbox 3041 write-mailbox "
+        "then "
+        "then\n"
         # 4. Cooldown decrement.
         "tick-cd\n"
         # 5. Safety-net Z<-2 — gated on FALL_PHASE==0 so the fall state
         # machine isn't pre-empted while ramping Z down past -2.
         "INDEXOF_Z_POS read-mailbox -2 < if "
         "419 read-mailbox 0 = if "
-        "0 INDEXOF_X_POS write-mailbox 6 INDEXOF_Y_POS write-mailbox "
+        "0 INDEXOF_X_POS write-mailbox 6 1.4142136 * INDEXOF_Y_POS write-mailbox "
         "15 INDEXOF_Z_POS write-mailbox "
         "0 400 write-mailbox 0 401 write-mailbox 1 414 write-mailbox "
         "then "
@@ -493,6 +819,1375 @@ if camshot:
         cs_intro['wf_Pan Time In Seconds'] = pan_time
         intro_camshot_objs.append(cs_intro)
 
+# ── 5c. Red Ball enemies (Phase B) ───────────────────────────────────────────
+# N = 3 red balls bouncing down the pyramid. The director enables (wakes) one
+# idle ball at a time on a per-round spawn cadence; each ball owns its own
+# movement script — randomised left/right per hop, parabolic Z arc mid-hop,
+# off-pyramid retire. Director-side globals (mb 511..517) carry the LFSR,
+# spawn timer, and per-ball "active" mirror so the director can re-decide
+# which ball to wake next without needing to read peer mailboxes.
+#
+# Architecture: each ball is a separate enemy actor (redball_0/1/2) created
+# at level build, linked at park-Z (off-screen) so it's invisible until the
+# director writes its initial state via write-actor-mailbox.
+#
+# See docs/plans/2026-05-11-qbert-red-ball-phase-b.md.
+
+REDBALL_COUNT        = 3
+REDBALL_HOP_TICKS    = 18      # ~0.3 s/hop at 60 Hz; arcade is ~3 hops/s
+REDBALL_HEIGHT_OFFSET = CUBE_SIZE / 2 + 0.5   # ball centre above cube centre
+
+# Park position when idle (in PHASE 0) — stays within the room bbox
+# (min Z = -38) so the engine doesn't spam "fell out of room" warnings.
+REDBALL_PARK_Z = -30.0
+
+# Stretch-and-squash strength relative to the player (player = 1.0). At 0.5
+# the ball is visibly springy but more subdued than the character.
+REDBALL_SS_STRENGTH = 0.5
+_RB_SS_Z_BELL  =  0.20 * REDBALL_SS_STRENGTH   # taller at mid-air
+_RB_SS_Z_IMP   = -0.40 * REDBALL_SS_STRENGTH   # shorter at takeoff/landing (signed)
+_RB_SS_XY_BELL = -0.10 * REDBALL_SS_STRENGTH   # narrower at mid-air (signed)
+_RB_SS_XY_IMP  =  0.40 * REDBALL_SS_STRENGTH   # wider at takeoff/landing
+
+# Forth-side constants matching cube_world_position():
+#   X = SQRT2 * CUBE_SIZE * (col - row/2)         = 2.82843 * (col - row*0.5)
+#   Y = SQRT2 * (CUBE_SIZE/2) * (NUM_ROWS - 1 - row) = 1.41421 * (6 - row)
+#   Z = CUBE_BASE_Z + CUBE_SIZE * (NUM_ROWS - 1 - row) + REDBALL_HEIGHT_OFFSET
+#     = 14.5 - 2 * row                                          (NUM_ROWS=7, CUBE_BASE_Z=1, CUBE_SIZE=2)
+_RB_X_MUL  = SQRT2 * CUBE_SIZE                       # 2.82843
+_RB_Y_MUL  = SQRT2 * (CUBE_SIZE / 2)                 # 1.41421
+_RB_Z_BASE = CUBE_BASE_Z + CUBE_SIZE * (NUM_ROWS - 1) + REDBALL_HEIGHT_OFFSET  # 14.5
+_RB_Z_MUL  = CUBE_SIZE                               # 2.0
+# Z values at the ball's initial spawn row (apex Z=14.5; row-1 Z=12.5).
+_RB_Z_AT_ROW_0 = _RB_Z_BASE - 0 * _RB_Z_MUL                # 14.5 (used as initial START_Z)
+_RB_Z_AT_ROW_1 = _RB_Z_BASE - 1 * _RB_Z_MUL                # 12.5 (used as initial END_Z)
+
+# Per-ball mailbox layout: base = 462 + 8*K. Each ball owns 8 cells.
+_RB_OFF_ROW       = 0
+_RB_OFF_COL       = 1
+_RB_OFF_COOLDOWN  = 2
+_RB_OFF_PHASE     = 3
+_RB_OFF_START_Z   = 4
+_RB_OFF_END_Z     = 5
+_RB_OFF_FROM_ROW  = 6
+_RB_OFF_FROM_COL  = 7
+_RB_PER_BALL      = 8
+
+def _rb_mb(k, off):
+    return 462 + _RB_PER_BALL * k + off
+
+# Director-owned globals (shared across all balls).
+RB_MB_LFSR          = 511
+RB_MB_SPAWN_TIMER   = 512
+RB_MB_ACTIVE_BASE   = 514      # RB_ACTIVE[K] = mb 514+K (K ∈ {0,1,2})
+RB_MB_SPAWN_CLAIMED = 517
+
+# Green ball — arcade-faithful: contact freezes all enemies for FREEZE_TICKS.
+# Same 8-slot layout as a red ball at base 486 (mb 462+8*3 = 486..493).
+GB_MB_BASE        = 486
+GB_MB_FREEZE_TIMER = 546        # global; >0 → all enemies skip movement
+GB_MB_SPAWN_TIMER = 547         # director countdown to next green spawn
+GB_MB_ACTIVE      = 548         # director mirror: 1 = green ball alive
+GB_FREEZE_TICKS   = 300         # 5 s at 60 Hz
+GB_SPAWN_INTERVAL = 1500        # 25 s between green-ball spawns
+GB_FIRST_DELAY    = 600         # 10 s after intro before first green spawns
+
+# Slick & Sam — cube-flippers. Bounce down like a red ball; on landing-on-cube
+# revert that cube's state (2 → 0). On contact with Q*bert, the flipper dies;
+# player is NOT killed.
+SLICK_MB_BASE       = 494
+SLICK_MB_ACTIVE     = 549
+SLICK_MB_SPAWN_TIMER = 550
+SLICK_SPAWN_INTERVAL = 480       # 8 s between Slick spawns
+SLICK_FIRST_DELAY    = 600       # 10 s after intro
+
+SAM_MB_BASE       = 502
+SAM_MB_ACTIVE     = 551
+SAM_MB_SPAWN_TIMER = 552
+SAM_SPAWN_INTERVAL = 1500        # 25 s between Sam spawns
+SAM_FIRST_DELAY    = 900         # 15 s after intro
+
+# Ugg & Wrong-Way — climb the SIDES of the pyramid. Ugg on right edge cubes
+# (r, r); Wrong-Way on left edge cubes (r, 0). Both spawn at the bottom row
+# and hop upward toward the apex. Killed if Q*bert lands on their cube (same
+# FALL_DEATH path as red ball). Their bodies are pitch-rotated 90° at spawn so
+# their feet rest on the side face of the cube; their X position is offset
+# outward by CUBE_SIZE/2 + body half-thickness.
+UGG_MB_BASE        = 553
+UGG_MB_ACTIVE      = 569
+UGG_MB_SPAWN_TIMER = 570
+UGG_SPAWN_INTERVAL = 1200         # 20 s between Ugg spawns
+UGG_FIRST_DELAY    = 1200         # 20 s after intro
+
+WW_MB_BASE         = 561
+WW_MB_ACTIVE       = 571
+WW_MB_SPAWN_TIMER  = 572
+WW_SPAWN_INTERVAL  = 1500         # 25 s between Wrong-Way spawns
+WW_FIRST_DELAY     = 1800         # 30 s after intro
+
+# Side-face offsets and rotations.
+_CLIMBER_BODY_HALF_X = 0.4
+UGG_X_OFFSET = +(CUBE_SIZE / 2 + _CLIMBER_BODY_HALF_X)   # +X side face
+WW_X_OFFSET  = -(CUBE_SIZE / 2 + _CLIMBER_BODY_HALF_X)   # -X side face
+# Pitch rotates about local +Y. +0.25 rev tips body so its local +Z (up) lands
+# on world +X (outward from right edge); -0.25 tips it onto world -X.
+UGG_PITCH = +0.25
+WW_PITCH  = -0.25
+# After the pitch, body local +X (forward) is along world -Z (Ugg) or +Z (WW).
+# Add a yaw (about local +Z which now equals the cube-face normal) to swing
+# forward up the slope. Ugg needs +0.5 (180°) to flip forward to world +Z; WW
+# already faces +Z after its pitch and needs no extra yaw.
+UGG_YAW_AFTER_PITCH = 0.5
+WW_YAW_AFTER_PITCH  = 0.0
+# Z at cube centre (not above cube top): Z_BASE - row * Z_MUL.
+_CLIMBER_Z_BASE = CUBE_BASE_Z + CUBE_SIZE * (NUM_ROWS - 1)   # 13 (cube-centre Z at row 0)
+_CLIMBER_Z_MUL  = CUBE_SIZE                                  # 2.0
+
+# LFSR step — Galois LFSR-16, polynomial x^16+x^14+x^13+x^11+1 (tap mask 0xB400).
+# Side-effect: advance mb 511; result: lsb (0 or 1) left on stack.
+# zForth has `&`, `|`, `^`, `<<`, `>>` (PRIM_AND/OR/XOR/SHL/SHR in zforth.c).
+_RB_LFSR_STEP = (
+    f"{RB_MB_LFSR} read-mailbox "
+    f"dup 1 & 0 <> if "
+    f"1 >> 0xB400 ^ "
+    f"else "
+    f"1 >> "
+    f"then "
+    f"dup {RB_MB_LFSR} write-mailbox "
+    f"1 & "
+)
+
+def redball_script(k, variant='red'):
+    """Generate the wf_Script for a hopping ball.
+
+    variant='red'   → k indexes into red-ball state at 462+8k; contact kills player.
+    variant='green' → k is ignored; state lives at GB_MB_BASE (486); contact
+                      latches GB_MB_FREEZE_TIMER and consumes self instead of
+                      killing the player.
+
+    Both variants exit early when GB_MB_FREEZE_TIMER > 0 (an active green-ball
+    touch has frozen all enemies).
+    """
+    flat_bases = {
+        'green':    (GB_MB_BASE,    GB_MB_ACTIVE),
+        'slick':    (SLICK_MB_BASE, SLICK_MB_ACTIVE),
+        'sam':      (SAM_MB_BASE,   SAM_MB_ACTIVE),
+        'ugg':      (UGG_MB_BASE,   UGG_MB_ACTIVE),
+        'wrongway': (WW_MB_BASE,    WW_MB_ACTIVE),
+    }
+    # Per-variant X-offset (added to the world-X write) for side-face climbers.
+    x_offset = {'ugg': UGG_X_OFFSET, 'wrongway': WW_X_OFFSET}.get(variant, 0.0)
+    # Per-variant Z formula: climbers sit at cube centre Z; descenders sit on top.
+    if variant in ('ugg', 'wrongway'):
+        z_base = _CLIMBER_Z_BASE
+        z_mul  = _CLIMBER_Z_MUL
+    else:
+        z_base = _RB_Z_BASE
+        z_mul  = _RB_Z_MUL
+    if variant in flat_bases:
+        base, mb_active = flat_bases[variant]
+        mb_row      = base + _RB_OFF_ROW
+        mb_col      = base + _RB_OFF_COL
+        mb_cd       = base + _RB_OFF_COOLDOWN
+        mb_phase    = base + _RB_OFF_PHASE
+        mb_start_z  = base + _RB_OFF_START_Z
+        mb_end_z    = base + _RB_OFF_END_Z
+        mb_from_row = base + _RB_OFF_FROM_ROW
+        mb_from_col = base + _RB_OFF_FROM_COL
+    else:
+        mb_row      = _rb_mb(k, _RB_OFF_ROW)
+        mb_col      = _rb_mb(k, _RB_OFF_COL)
+        mb_cd       = _rb_mb(k, _RB_OFF_COOLDOWN)
+        mb_phase    = _rb_mb(k, _RB_OFF_PHASE)
+        mb_start_z  = _rb_mb(k, _RB_OFF_START_Z)
+        mb_end_z    = _rb_mb(k, _RB_OFF_END_Z)
+        mb_from_row = _rb_mb(k, _RB_OFF_FROM_ROW)
+        mb_from_col = _rb_mb(k, _RB_OFF_FROM_COL)
+        mb_active   = RB_MB_ACTIVE_BASE + k
+
+    # t_raw = (HOP_TICKS - cd) / (HOP_TICKS - 1)  — float, in [1/17 .. 1]
+    # t'    = smoothstep(t_raw) = t_raw² · (3 − 2·t_raw)
+    # (Forth idiom matches player's hop arc at blender_create_qbert.py:596.)
+    #
+    # Position interpolation: cube-space lerp on (row, col), then convert to
+    # world XY via the same X/Y formula used in cube_world_position().
+    #   row_now = from_row + t' * (row - from_row)
+    #   col_now = from_col + t' * (col - from_col)
+    #   x = X_MUL * (col_now - row_now * 0.5)
+    #   y = Y_MUL * (6 - row_now)
+    #   z_linear = start_z + t' * (end_z - start_z)
+    #   z_arc    = z_linear + 4*t_raw*(1-t_raw) * 2.0   (peak +2 at t=0.5)
+    hop_denom_f = float(REDBALL_HOP_TICKS - 1)
+
+    # Per-tick algorithm:
+    #   1. Phase 0 (idle): early exit; director will wake.
+    #   2. Phase 1: decrement COOLDOWN; compute t_raw ∈ [1/17..1] and smoothstep t'.
+    #   3. Lerp row_now/col_now in cube-space using t'; convert to world XY; write.
+    #   4. Z = lerp(start_z, end_z, t') + 8 * t_raw * (1 - t_raw) parabolic bonus.
+    #   5. Contact check vs player (every frame).
+    #   6. On landing tick: retire if off-pyramid; else pick next direction via LFSR,
+    #      advance row/col, refresh START_Z/END_Z, re-arm COOLDOWN.
+    #
+    # Stack notation: ( ... -- ... ) tracks values across each line.
+    if variant == 'green':
+        # Green: latch freeze, retire self, exit so we skip landing logic.
+        contact_action = (
+            f"{GB_FREEZE_TICKS} {GB_MB_FREEZE_TIMER} write-mailbox "
+            f"0 {mb_phase} write-mailbox "
+            f"0 {mb_active} write-mailbox "
+            f"{REDBALL_PARK_Z} 3011 write-mailbox "
+            f"exit "
+        )
+    elif variant in ('slick', 'sam'):
+        # Q*bert caught the flipper — enemy dies, player NOT killed.
+        contact_action = (
+            f"0 {mb_phase} write-mailbox "
+            f"0 {mb_active} write-mailbox "
+            f"{REDBALL_PARK_Z} 3011 write-mailbox "
+            f"exit "
+        )
+    else:
+        # Red / Ugg / Wrong-Way: kill player.
+        contact_action = f"1 414 write-mailbox "
+
+    # Slick/Sam revert the cube they land on (state 2 → 0). Encoded as a
+    # cube-state index 200 + row*(row+1)/2 + col (matches the landing
+    # detector at blender_create_qbert.py:~2006).
+    if variant in ('slick', 'sam'):
+        cube_revert_block = (
+            f"{mb_row} read-mailbox dup 1 + * 2 / "
+            f"{mb_col} read-mailbox + 200 + "
+            f"dup read-mailbox 2 = if 0 swap write-mailbox else drop then "
+        )
+    else:
+        cube_revert_block = ""
+
+    # Per-variant landing-tick direction + retire condition.
+    #   descending (red/green/slick/sam): LFSR diagonal, ROW++; retire when ROW > 6.
+    #   ugg right-edge: fixed (ROW-1, COL-1); retire when ROW < 0.
+    #   wrongway left-edge: fixed (ROW-1, COL unchanged); retire when ROW < 0.
+    if variant == 'ugg':
+        retire_check = f"{mb_row} read-mailbox 0 < if "
+        # Stash FROM and decrement ROW & COL by 1 each.
+        direction_block = (
+            f"{mb_row} read-mailbox dup {mb_from_row} write-mailbox 1 - {mb_row} write-mailbox "
+            f"{mb_col} read-mailbox dup {mb_from_col} write-mailbox 1 - {mb_col} write-mailbox "
+        )
+    elif variant == 'wrongway':
+        retire_check = f"{mb_row} read-mailbox 0 < if "
+        # Stash FROM and decrement ROW; COL stays at 0.
+        direction_block = (
+            f"{mb_row} read-mailbox dup {mb_from_row} write-mailbox 1 - {mb_row} write-mailbox "
+            f"{mb_col} read-mailbox {mb_from_col} write-mailbox "
+        )
+    else:
+        retire_check = f"{mb_row} read-mailbox 6 > if "
+        # LFSR pick + descend.
+        direction_block = (
+            f"{_RB_LFSR_STEP}"
+            f"{mb_row} read-mailbox dup {mb_from_row} write-mailbox 1 + {mb_row} write-mailbox "
+            f"{mb_col} read-mailbox dup {mb_from_col} write-mailbox "
+            f"swap if 1 + then {mb_col} write-mailbox "
+        )
+
+    return (
+        f"\\\\ wf {variant}ball {k}\n"
+        # Frozen by a recent green-ball touch → all enemies skip the tick.
+        f"{GB_MB_FREEZE_TIMER} read-mailbox 0 > if exit then\n"
+        # ── Phase 0: idle (off-screen). Director writes our initial state to wake us.
+        f"{mb_phase} read-mailbox 0 = if exit then\n"
+        # ── Phase 1: hopping. Decrement COOLDOWN.
+        f"{mb_cd} read-mailbox 1 - dup {mb_cd} write-mailbox\n"
+        # t_raw = (HOP_TICKS - cd_new) / (HOP_TICKS - 1)             ( cd_new -- t_raw )
+        f"{REDBALL_HOP_TICKS} swap - {hop_denom_f} /\n"
+        # Smoothstep, preserving t_raw under t':                     ( t_raw -- t_raw t' )
+        # Top-of-stack smoothstep idiom mirrors player at line ~596.
+        f"dup dup dup * swap 2.0 * 3.0 swap - *\n"
+        # row_now = from_row + t' * (row - from_row)                 ( t_raw t' -- t_raw t' row_now )
+        f"dup {mb_row} read-mailbox {mb_from_row} read-mailbox - * "
+        f"{mb_from_row} read-mailbox +\n"
+        # col_now = from_col + t' * (col - from_col)                 ( t_raw t' row_now -- t_raw t' row_now col_now )
+        f"over {mb_col} read-mailbox {mb_from_col} read-mailbox - * "
+        f"{mb_from_col} read-mailbox +\n"
+        # y = (6 - row_now) * Y_MUL → write 3010, stack unchanged
+        # `over` copies row_now to top; `6.0 swap -` computes (6 - row_now).
+        f"over 6.0 swap - {_RB_Y_MUL} * 3010 write-mailbox\n"
+        # x = (col_now - row_now*0.5) * X_MUL + x_offset → 3009     ( ... row_now col_now -- ... t_raw t' )
+        f"swap 0.5 * - {_RB_X_MUL} * {x_offset} + 3009 write-mailbox\n"
+        # z_linear = start_z + t' * (end_z - start_z)                ( t_raw t' -- t_raw z_linear )
+        f"{mb_end_z} read-mailbox {mb_start_z} read-mailbox - * "
+        f"{mb_start_z} read-mailbox +\n"
+        # arc bonus = 8 * t_raw * (1 - t_raw); z_final = z_linear + bonus   ( t_raw z_linear -- z_final )
+        f"swap dup 1.0 swap - * 8.0 * +\n"
+        # write Z.                                                   ( z_final -- )
+        f"3011 write-mailbox\n"
+        # ── Stretch-and-squash (subdued, ~50% player intensity).
+        # Snap to identity on the landing tick; otherwise drive scale from t_raw.
+        # Mailboxes 3040/3041/3042 = X/Y/Z_SCALE (per-actor system slots,
+        # wired through RenderActor3D — same path the player uses).
+        f"{mb_cd} read-mailbox 0 <= if "
+        f"1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
+        f"else "
+        # t_raw = (HOP_TICKS - cd_new) / DENOM    ( -- t_raw )
+        f"{REDBALL_HOP_TICKS} {mb_cd} read-mailbox - {hop_denom_f} / "
+        # imp = (2t-1)², bell = 4*t*(1-t)         ( t_raw -- imp bell )
+        f"dup 2.0 * 1.0 - dup * "                                          # ( t imp )
+        f"swap dup 1.0 swap - 4.0 * * "                                    # ( imp bell )
+        # Z_SCALE = 1 + Z_BELL*bell + Z_IMP*imp   (Z_IMP < 0; bonus + penalty + 1)
+        # Stack starts ( imp bell ); compute then write 3042. Keep ( imp bell ) for XY.
+        f"over {_RB_SS_Z_IMP} * over {_RB_SS_Z_BELL} * + 1.0 + 3042 write-mailbox "
+        # XY_SCALE = 1 + XY_BELL*bell + XY_IMP*imp ; consume ( imp bell ).
+        f"{_RB_SS_XY_BELL} * swap {_RB_SS_XY_IMP} * + 1.0 + "             # ( xy_scale )
+        f"dup 3040 write-mailbox 3041 write-mailbox "
+        f"then\n"
+        # ── Contact check (every frame). Same (row, col) as player → variant action.
+        f"{mb_row} read-mailbox 400 read-mailbox = if "
+        f"{mb_col} read-mailbox 401 read-mailbox = if "
+        f"{contact_action}"
+        f"then then\n"
+        # ── Landing tick? cd_new <= 0.
+        f"{mb_cd} read-mailbox 0 <= if "
+        # Off-pyramid retire (variant-specific threshold: ROW > 6 for descenders,
+        # ROW < 0 for climbers).
+        f"{retire_check}"
+        f"0 {mb_phase} write-mailbox "
+        f"0 {mb_active} write-mailbox "
+        f"{REDBALL_PARK_Z} 3011 write-mailbox "
+        f"exit "
+        f"then "
+        # Slick/Sam only: revert the cube we just landed on.
+        f"{cube_revert_block}"
+        # Pick next direction + advance ROW/COL (variant-specific).
+        f"{direction_block}"
+        # Stash START_Z (current Z at end of hop) and END_Z (Z at new row).
+        f"3011 read-mailbox {mb_start_z} write-mailbox "
+        f"{z_base} {mb_row} read-mailbox {z_mul} * - {mb_end_z} write-mailbox "
+        # Re-arm cooldown for the next hop.
+        f"{REDBALL_HOP_TICKS} {mb_cd} write-mailbox "
+        f"then\n"
+    )
+
+# Build the shared mesh + material once; clone the Blender object for each
+# ball. The engine reads geometry from redball.iff (written by the wf_blender
+# exporter from the Blender mesh+material).
+#
+# Geometry is an icosphere — icosahedron base + REDBALL_SUBDIV recursive
+# loop-subdivisions, each new midpoint normalised back onto the sphere.
+# Subdiv counts:
+#   0 → 12 verts / 20 faces (icosahedron, blocky)
+#   1 → 42 verts / 80 faces (default — recognisably round)
+#   2 → 162 verts / 320 faces (smoother; heavier)
+REDBALL_SUBDIV = 1
+_REDBALL_RADIUS = 0.5
+_REDBALL_PHI = (1.0 + math.sqrt(5.0)) / 2.0
+
+def _normalise_to_radius(x, y, z, r):
+    n = math.sqrt(x*x + y*y + z*z)
+    return (x * r / n, y * r / n, z * r / n)
+
+# Base icosahedron (12 verts, 20 faces, golden-rectangle construction).
+_REDBALL_VERTS = [
+    _normalise_to_radius( 0.0,  1.0,  _REDBALL_PHI, _REDBALL_RADIUS),
+    _normalise_to_radius( 0.0,  1.0, -_REDBALL_PHI, _REDBALL_RADIUS),
+    _normalise_to_radius( 0.0, -1.0,  _REDBALL_PHI, _REDBALL_RADIUS),
+    _normalise_to_radius( 0.0, -1.0, -_REDBALL_PHI, _REDBALL_RADIUS),
+    _normalise_to_radius( 1.0,  _REDBALL_PHI,  0.0, _REDBALL_RADIUS),
+    _normalise_to_radius( 1.0, -_REDBALL_PHI,  0.0, _REDBALL_RADIUS),
+    _normalise_to_radius(-1.0,  _REDBALL_PHI,  0.0, _REDBALL_RADIUS),
+    _normalise_to_radius(-1.0, -_REDBALL_PHI,  0.0, _REDBALL_RADIUS),
+    _normalise_to_radius( _REDBALL_PHI,  0.0,  1.0, _REDBALL_RADIUS),
+    _normalise_to_radius( _REDBALL_PHI,  0.0, -1.0, _REDBALL_RADIUS),
+    _normalise_to_radius(-_REDBALL_PHI,  0.0,  1.0, _REDBALL_RADIUS),
+    _normalise_to_radius(-_REDBALL_PHI,  0.0, -1.0, _REDBALL_RADIUS),
+]
+_REDBALL_FACES = [
+    (0, 2, 8),  (0, 8, 4),  (0, 4, 6),  (0, 6, 10), (0, 10, 2),
+    (3, 1, 9),  (3, 9, 5),  (3, 5, 7),  (3, 7, 11), (3, 11, 1),
+    (2, 5, 8),  (8, 5, 9),  (8, 9, 4),  (4, 9, 1),  (4, 1, 6),
+    (6, 1, 11), (6, 11, 10),(10, 11, 7),(10, 7, 2), (2, 7, 5),
+]
+
+# Loop-subdivide REDBALL_SUBDIV times: each tri (a,b,c) becomes 4 tris
+# {(a,ab,ca), (b,bc,ab), (c,ca,bc), (ab,bc,ca)} where ab/bc/ca are
+# midpoints of the original edges, each pushed back onto the sphere.
+def _redball_subdivide(verts, faces):
+    cache = {}      # (i,j) → new vertex index, with i<j
+    def midpoint(i, j):
+        key = (min(i, j), max(i, j))
+        idx = cache.get(key)
+        if idx is not None:
+            return idx
+        ax, ay, az = verts[i]
+        bx, by, bz = verts[j]
+        mx, my, mz = _normalise_to_radius(
+            (ax + bx) * 0.5, (ay + by) * 0.5, (az + bz) * 0.5,
+            _REDBALL_RADIUS)
+        idx = len(verts)
+        verts.append((mx, my, mz))
+        cache[key] = idx
+        return idx
+    new_faces = []
+    for a, b, c in faces:
+        ab = midpoint(a, b)
+        bc = midpoint(b, c)
+        ca = midpoint(c, a)
+        new_faces += [(a, ab, ca), (b, bc, ab), (c, ca, bc), (ab, bc, ca)]
+    return new_faces
+
+for _ in range(REDBALL_SUBDIV):
+    _REDBALL_VERTS = list(_REDBALL_VERTS)  # ensure mutable
+    _REDBALL_FACES = _redball_subdivide(_REDBALL_VERTS, _REDBALL_FACES)
+
+_redball_mesh = bpy.data.meshes.new('redball_mesh')
+_redball_mesh.from_pydata(_REDBALL_VERTS, [], _REDBALL_FACES)
+_redball_mesh.update()
+_redball_mat = bpy.data.materials.new('redball_red')
+_redball_mat.use_nodes = True
+_redball_bsdf = _redball_mat.node_tree.nodes.get('Principled BSDF')
+_redball_bsdf.inputs['Base Color'].default_value = (1.0, 0.0, 0.0, 1.0)
+_redball_mesh.materials.append(_redball_mat)
+
+# Capture actor index of the first ball so the director can address each via
+# write-actor-mailbox (REDBALL_ACTOR_BASE + K). Mirrors the CUBE_ACTOR_BASE
+# pattern.  All 3 balls created contiguously in this loop.
+SCHEMA_PATH_KEY = 'wf_schema_path'
+_pre_redball_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+REDBALL_ACTOR_BASE = _pre_redball_actor_count + 1   # 1-based
+
+for _k in range(REDBALL_COUNT):
+    _ball = bpy.data.objects.new(f'redball_{_k}', _redball_mesh)
+    # Park off-screen — director will write initial XYZ when waking the ball.
+    _ball.location = (0.0, 0.0, REDBALL_PARK_Z)
+    scene.collection.objects.link(_ball)
+    _ball['wf_schema_path']         = ENEMY_OAD
+    _ball['wf_Mesh Name']           = 'redball.iff'
+    _ball['wf_original_mesh_name']  = 'redball.iff'
+    _ball['wf_Model Type']          = 'Mesh'
+    _ball['wf_Mobility']            = 'Anchored'
+    _ball['wf_Mass']                = 0.0
+    _ball['wf_Visibility Mailbox']  = 1
+    _ball['wf_NumberOfLocalMailboxes'] = 0   # state lives in globals 462..485
+    _ball['wf_Script']              = redball_script(_k)
+
+# Sanity assertion mirroring the cube-base drift check in section 7.
+_post_redball_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+assert _post_redball_actor_count == _pre_redball_actor_count + REDBALL_COUNT, (
+    f"Red ball actor count drift: expected +{REDBALL_COUNT}, got "
+    f"{_post_redball_actor_count - _pre_redball_actor_count}")
+
+print(f"[qbert] Created {REDBALL_COUNT} red balls "
+      f"(actor indices {REDBALL_ACTOR_BASE}..{REDBALL_ACTOR_BASE + REDBALL_COUNT - 1}); "
+      f"hop {REDBALL_HOP_TICKS} ticks; "
+      f"per-ball mailbox bases "
+      f"{', '.join(str(_rb_mb(k, 0)) for k in range(REDBALL_COUNT))}")
+
+# ── 5c.5. Green Ball — bounces like a red ball; touch freezes all enemies ────
+# Same icosphere mesh as the red ball, green material. State at mb 486..493
+# (shares the per-ball 8-slot layout via redball_script(0, variant='green')).
+_greenball_mesh = bpy.data.meshes.new('greenball_mesh')
+_greenball_mesh.from_pydata(_REDBALL_VERTS, [], _REDBALL_FACES)
+_greenball_mesh.update()
+_greenball_mat = bpy.data.materials.new('greenball_green')
+_greenball_mat.use_nodes = True
+_greenball_bsdf = _greenball_mat.node_tree.nodes.get('Principled BSDF')
+_greenball_bsdf.inputs['Base Color'].default_value = (0.10, 0.85, 0.20, 1.0)
+_greenball_mesh.materials.append(_greenball_mat)
+
+_pre_greenball_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+GB_ACTOR_IDX = _pre_greenball_actor_count + 1
+
+_gball = bpy.data.objects.new('greenball', _greenball_mesh)
+_gball.location = (0.0, 0.0, REDBALL_PARK_Z)
+scene.collection.objects.link(_gball)
+_gball['wf_schema_path']         = ENEMY_OAD
+_gball['wf_Mesh Name']           = 'greenball.iff'
+_gball['wf_original_mesh_name']  = 'greenball.iff'
+_gball['wf_Model Type']          = 'Mesh'
+_gball['wf_Mobility']            = 'Anchored'
+_gball['wf_Mass']                = 0.0
+_gball['wf_Visibility Mailbox']  = 1
+_gball['wf_NumberOfLocalMailboxes'] = 0
+_gball['wf_Script']              = redball_script(0, variant='green')
+
+print(f"[qbert] Created green ball (actor index {GB_ACTOR_IDX}); "
+      f"mailbox base {GB_MB_BASE}; freeze {GB_FREEZE_TICKS} ticks on contact")
+
+# ── 5c.6. Slick & Sam — cube-flippers ─────────────────────────────────────────
+# Humanoid cube-flipper silhouette: green icosphere body + spiky orange hair
+# cluster + two white eyes with black pupils + two flat-oval feet. Slick and
+# Sam differ only by slight body/hair colour shift. Built per-actor via
+# bpy.ops primitives + join.
+
+def _build_flipper_actor(name, mesh_name, body_rgb, top_rgb, location):
+    """Build a flipper humanoid mesh + Blender object. Returns the actor;
+    caller wires schema + script.
+
+    Components (each a bpy.ops primitive, joined into one mesh):
+      - Body: green icosphere, scale ~0.45, slight Z-squash. Centre at z=0.
+      - Hair: cluster of 7 orange cones radiating up + slightly out from the
+        top of the body — reads as spiky hair in arcade-sprite style
+        (docs/plans/screenshots/qbert-arcade-ref-slick-sam.png shows orange
+        hair, not a flat hat).
+      - Eyes: two white UV-spheres on the +X face of the body.
+      - Pupils: two smaller black spheres in front of the eyes.
+      - Feet: two flat ovals (scaled UV-spheres) at the bottom, dark grey.
+    """
+    mat_body  = _make_principled_material(f'{mesh_name}_body',  body_rgb)
+    mat_hat   = _make_principled_material(f'{mesh_name}_top',   top_rgb)
+    mat_eye   = _make_principled_material(f'{mesh_name}_eye',   (1.00, 1.00, 1.00))
+    mat_pupil = _make_principled_material(f'{mesh_name}_pupil', (0.05, 0.05, 0.05))
+    mat_feet  = _make_principled_material(f'{mesh_name}_feet',  (0.20, 0.20, 0.20))
+
+    parts = []  # (object, material)
+
+    # Body — icosphere subdiv 2 (162 verts / 320 faces), squashed in Z to read
+    # as a torso. Higher subdiv than the ball enemies for a smoother humanoid
+    # silhouette.
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.45, location=(0, 0, 0))
+    bpy.context.object.scale = (1.0, 1.0, 0.75)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    parts.append((bpy.context.object, mat_body))
+
+    # Hair — cluster of orange cones on top of the head. One taller centre
+    # spike + 6 shorter cones in a ring around it, each tilted slightly
+    # outward so they fan out like punk-rock hair.
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=7, radius1=0.12, radius2=0.0, depth=0.30,
+        location=(0.0, 0.0, 0.50))
+    parts.append((bpy.context.object, mat_hat))
+    for i in range(6):
+        ang = i * (2.0 * math.pi / 6)
+        rx = 0.20 * math.cos(ang)
+        ry = 0.20 * math.sin(ang)
+        bpy.ops.mesh.primitive_cone_add(
+            vertices=6, radius1=0.07, radius2=0.0, depth=0.22,
+            location=(rx, ry, 0.42),
+            rotation=(math.radians(20) * math.sin(ang),
+                      -math.radians(20) * math.cos(ang),
+                      0))
+        parts.append((bpy.context.object, mat_hat))
+
+    # Eyes — two small white UV-spheres on +X face of the body.
+    for y in (-0.16, 0.16):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.09, segments=8, ring_count=5, location=(0.30, y, 0.12))
+        parts.append((bpy.context.object, mat_eye))
+
+    # Pupils — smaller black spheres in front of the eyes.
+    for y in (-0.16, 0.16):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.045, segments=6, ring_count=4, location=(0.36, y, 0.12))
+        parts.append((bpy.context.object, mat_pupil))
+
+    # Feet — flat ovals at the bottom (squashed UV-spheres), straddling ±Y.
+    for y in (-0.22, 0.22):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.18, segments=8, ring_count=4, location=(0.04, y, -0.34))
+        bpy.context.object.scale = (1.3, 1.0, 0.35)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((bpy.context.object, mat_feet))
+
+    # Assign each part's material; flat-shade everything for a chunky read.
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for poly in obj.data.polygons:
+            poly.material_index = 0
+            poly.use_smooth = False
+
+    # Join into one mesh, with the body as the active/target.
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    body.name = name
+    body.data.name = mesh_name
+    body.location = location
+    return body
+
+
+_pre_slick_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+SLICK_ACTOR_IDX = _pre_slick_actor_count + 1
+
+_slick = _build_flipper_actor('slick', 'slick_mesh',
+                              body_rgb=(0.13, 0.73, 0.19),   # arcade #21BA31 (HG101-04)
+                              top_rgb=(1.00, 0.47, 0.13),    # arcade #FF7721
+                              location=(0.0, 0.0, REDBALL_PARK_Z))
+_slick['wf_schema_path']         = ENEMY_OAD
+_slick['wf_Mesh Name']           = 'slick_mesh.iff'
+_slick['wf_original_mesh_name']  = 'slick_mesh.iff'
+_slick['wf_Model Type']          = 'Mesh'
+_slick['wf_Mobility']            = 'Anchored'
+_slick['wf_Mass']                = 0.0
+_slick['wf_Visibility Mailbox']  = 1
+_slick['wf_NumberOfLocalMailboxes'] = 0
+_slick['wf_Script']              = redball_script(0, variant='slick')
+
+_pre_sam_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+SAM_ACTOR_IDX = _pre_sam_actor_count + 1
+
+_sam = _build_flipper_actor('sam', 'sam_mesh',
+                            body_rgb=(0.08, 0.55, 0.13),    # darker green so Sam reads distinct from Slick
+                            top_rgb=(0.90, 0.38, 0.08),     # slightly redder orange
+                            location=(0.0, 0.0, REDBALL_PARK_Z))
+_sam['wf_schema_path']         = ENEMY_OAD
+_sam['wf_Mesh Name']           = 'sam_mesh.iff'
+_sam['wf_original_mesh_name']  = 'sam_mesh.iff'
+_sam['wf_Model Type']          = 'Mesh'
+_sam['wf_Mobility']            = 'Anchored'
+_sam['wf_Mass']                = 0.0
+_sam['wf_Visibility Mailbox']  = 1
+_sam['wf_NumberOfLocalMailboxes'] = 0
+_sam['wf_Script']              = redball_script(0, variant='sam')
+
+print(f"[qbert] Created Slick (idx {SLICK_ACTOR_IDX}) + Sam (idx {SAM_ACTOR_IDX}); "
+      f"mailbox bases {SLICK_MB_BASE} / {SAM_MB_BASE}; "
+      f"spawn cadence {SLICK_SPAWN_INTERVAL}/{SAM_SPAWN_INTERVAL} ticks")
+
+# ── 5c.7. Ugg & Wrong-Way — side-of-pyramid climbers ─────────────────────────
+# Humanoid climber silhouette: squashed body (icosphere), smaller head with two
+# big eyes + black pupils, two flat-oval feet. The actor-level pitch+yaw
+# rotation tips the mesh sideways onto the cube face after build (see
+# 2026-05-11-qbert-ugg-wrongway.md), so the mesh is authored in upright rest
+# pose (+X forward, +Z up) like the player.
+#
+# Built per-actor via bpy.ops primitives + join, with per-variant body colour.
+# Ugg = purple, Wrong-Way = yellow/orange (arcade-faithful contrast pair).
+
+def _build_climber_actor(name, mesh_name, body_rgb, location):
+    """Build a climber humanoid mesh + Blender object. Returns the actor;
+    caller wires schema + script.
+
+    Mesh is authored upright (+X forward, +Z up). The Ugg/Wrong-Way actor
+    rotation (DELTA_PITCH ±0.25, DELTA_YAW 0.5/0) tips the body onto the
+    cube's side face at runtime — that math expects the mesh's local +Z to
+    be the "up the slope" axis.
+    """
+    mat_body  = _make_principled_material(f'{mesh_name}_body',  body_rgb)
+    mat_eye   = _make_principled_material(f'{mesh_name}_eye',   (1.00, 1.00, 1.00))
+    mat_pupil = _make_principled_material(f'{mesh_name}_pupil', (0.05, 0.05, 0.05))
+    mat_feet  = _make_principled_material(f'{mesh_name}_feet',  (0.20, 0.20, 0.20))
+
+    parts = []
+
+    # Body — icosphere subdiv 2, scale 0.40, Z-squash 0.85.
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.40, location=(0, 0, 0))
+    bpy.context.object.scale = (1.0, 1.0, 0.85)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    parts.append((bpy.context.object, mat_body))
+
+    # Head — smaller icosphere subdiv 2 on top.
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.28, location=(0, 0, 0.55))
+    parts.append((bpy.context.object, mat_body))
+
+    # Snout — small cone protruding on +X face of the head (arcade-faithful
+    # detail visible in qbert-arcade-hg101-03.png and -ref-ugg-wrongway.png).
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=8, radius1=0.08, radius2=0.03, depth=0.20,
+        location=(0.30, 0, 0.50), rotation=(0, math.pi / 2, 0))
+    parts.append((bpy.context.object, mat_body))
+
+    # Antennae — two short stalks on top of head, +Z direction. Same body
+    # colour, splayed slightly outward along ±Y.
+    for y, tilt in ((-0.10, -0.15), (0.10, 0.15)):
+        bpy.ops.mesh.primitive_cone_add(
+            vertices=6, radius1=0.04, radius2=0.02, depth=0.22,
+            location=(0, y, 0.92), rotation=(tilt, 0, 0))
+        parts.append((bpy.context.object, mat_body))
+
+    # Eyes — two large white UV-spheres on +X face of the head.
+    for y in (-0.13, 0.13):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.10, segments=8, ring_count=5, location=(0.18, y, 0.58))
+        parts.append((bpy.context.object, mat_eye))
+
+    # Pupils — smaller black spheres in front of the eyes.
+    for y in (-0.13, 0.13):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.05, segments=6, ring_count=4, location=(0.25, y, 0.58))
+        parts.append((bpy.context.object, mat_pupil))
+
+    # Feet — two flat ovals at the bottom of the body.
+    for y in (-0.18, 0.18):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.16, segments=8, ring_count=4, location=(0.04, y, -0.38))
+        bpy.context.object.scale = (1.3, 1.0, 0.35)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((bpy.context.object, mat_feet))
+
+    # Assign each part's material; flat-shade.
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for poly in obj.data.polygons:
+            poly.material_index = 0
+            poly.use_smooth = False
+
+    # Join into one mesh.
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    body.name = name
+    body.data.name = mesh_name
+    body.location = location
+    return body
+
+
+_pre_ugg_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+UGG_ACTOR_IDX = _pre_ugg_actor_count + 1
+
+_ugg = _build_climber_actor('ugg', 'ugg_mesh',
+                            body_rgb=(0.73, 0.00, 0.73),    # arcade #BA00BA — pure magenta
+                            location=(0.0, 0.0, REDBALL_PARK_Z))
+_ugg['wf_schema_path']         = ENEMY_OAD
+_ugg['wf_Mesh Name']           = 'ugg_mesh.iff'
+_ugg['wf_original_mesh_name']  = 'ugg_mesh.iff'
+_ugg['wf_Model Type']          = 'Mesh'
+_ugg['wf_Mobility']            = 'Anchored'
+_ugg['wf_Mass']                = 0.0
+_ugg['wf_Visibility Mailbox']  = 1
+_ugg['wf_NumberOfLocalMailboxes'] = 0
+_ugg['wf_Script']              = redball_script(0, variant='ugg')
+
+_pre_ww_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+WW_ACTOR_IDX = _pre_ww_actor_count + 1
+
+_ww = _build_climber_actor('wrongway', 'wrongway_mesh',
+                           body_rgb=(0.73, 0.00, 0.73),     # same magenta as Ugg (arcade sprites are identical; differ only by which side they climb)
+                           location=(0.0, 0.0, REDBALL_PARK_Z))
+_ww['wf_schema_path']         = ENEMY_OAD
+_ww['wf_Mesh Name']           = 'wrongway_mesh.iff'
+_ww['wf_original_mesh_name']  = 'wrongway_mesh.iff'
+_ww['wf_Model Type']          = 'Mesh'
+_ww['wf_Mobility']            = 'Anchored'
+_ww['wf_Mass']                = 0.0
+_ww['wf_Visibility Mailbox']  = 1
+_ww['wf_NumberOfLocalMailboxes'] = 0
+_ww['wf_Script']              = redball_script(0, variant='wrongway')
+
+print(f"[qbert] Created Ugg (idx {UGG_ACTOR_IDX}) + Wrong-Way (idx {WW_ACTOR_IDX}); "
+      f"mailbox bases {UGG_MB_BASE} / {WW_MB_BASE}")
+
+# ── 5d. Coily egg (Phase A) ──────────────────────────────────────────────────
+# Single purple ball that spawns once per round, bounces down from the apex
+# like a red ball, then retires off-pyramid. Phase B will transform it into
+# Coily at the bottom row; for Phase A it just despawns. Kills Q*bert on
+# contact (same FALL_DEATH path as red balls).
+#
+# Mailbox layout (globals, 8 slots starting at 518 per
+# docs/plans/2026-05-11-qbert-coily-and-discs.md):
+#   518 EGG_ROW, 519 EGG_COL, 520 EGG_COOLDOWN, 521 EGG_PHASE,
+#   522 EGG_START_Z, 523 EGG_END_Z, 524 EGG_FROM_ROW, 525 EGG_FROM_COL
+# Director globals:
+#   542 COILY_ROUND_DONE  (1 once egg has spawned this round)
+#   543 COILY_PHASE_GLOBAL (0=idle, 1=egg, 2=snake — Phase A only uses 0/1)
+
+COILY_EGG_HOP_TICKS = 24      # slower than red ball (~0.4 s/hop), arcade-ish cadence
+COILY_EGG_SPAWN_DELAY = 90    # ticks after INTRO_DONE / round-start before egg appears
+
+_CE_MB_ROW       = 518
+_CE_MB_COL       = 519
+_CE_MB_COOLDOWN  = 520
+_CE_MB_PHASE     = 521
+_CE_MB_START_Z   = 522
+_CE_MB_END_Z     = 523
+_CE_MB_FROM_ROW  = 524
+_CE_MB_FROM_COL  = 525
+
+COILY_MB_ROUND_DONE   = 542
+COILY_MB_PHASE_GLOBAL = 543
+COILY_MB_SPAWN_DELAY  = 544    # countdown to next egg spawn (set on round init)
+
+# Arcade-faithful purple/red flash while egg is bouncing. ~3.75 Hz at 60 Hz tick.
+_CE_MB_FLASH_TICK         = 545
+COILY_EGG_FLASH_PERIOD    = 16
+COILY_EGG_FLASH_HALF      = 8
+_CE_FLASH_COLOR_PURPLE    = 0x8c1adb
+_CE_FLASH_COLOR_RED       = 0xff2020
+
+_CE_HOP_DENOM_F = float(COILY_EGG_HOP_TICKS - 1)
+# Z values: same as red ball (egg sits 0.5 above cube top → row 0 Z = 14.5).
+_CE_Z_AT_ROW_0 = _RB_Z_BASE - 0 * _RB_Z_MUL
+_CE_Z_AT_ROW_1 = _RB_Z_BASE - 1 * _RB_Z_MUL
+
+def coily_egg_script():
+    """Per-tick script for the Coily egg.
+
+    Same shape as redball_script: phase gate, cooldown decrement, smoothstep
+    XYZ writes with parabolic Z arc, contact check, landing-tick decision
+    (off-pyramid retire OR LFSR coin flip for next direction). Uses player-
+    strength stretch-and-squash on the ball; Phase B will swap behavior for
+    the snake.
+    """
+    mb_row      = _CE_MB_ROW
+    mb_col      = _CE_MB_COL
+    mb_cd       = _CE_MB_COOLDOWN
+    mb_phase    = _CE_MB_PHASE
+    mb_start_z  = _CE_MB_START_Z
+    mb_end_z    = _CE_MB_END_Z
+    mb_from_row = _CE_MB_FROM_ROW
+    mb_from_col = _CE_MB_FROM_COL
+
+    return (
+        f"\\\\ wf coily egg (Phase A)\n"
+        # Frozen by a recent green-ball touch → skip the tick.
+        f"{GB_MB_FREEZE_TIMER} read-mailbox 0 > if exit then\n"
+        # Phase 0: idle. Director writes initial state to wake.
+        f"{mb_phase} read-mailbox 0 = if exit then\n"
+        # Arcade flash: alternate purple/red every COILY_EGG_FLASH_HALF ticks
+        # while the egg is bouncing. tick = (prev + 1) mod COILY_EGG_FLASH_PERIOD.
+        f"{_CE_MB_FLASH_TICK} read-mailbox 1 + {COILY_EGG_FLASH_PERIOD} % "
+        f"{_CE_MB_FLASH_TICK} write-mailbox\n"
+        f"{_CE_MB_FLASH_TICK} read-mailbox {COILY_EGG_FLASH_HALF} < if "
+        f"0x{_CE_FLASH_COLOR_PURPLE:06X} 3037 write-mailbox "
+        f"else "
+        f"0x{_CE_FLASH_COLOR_RED:06X} 3037 write-mailbox "
+        f"then\n"
+        # Phase 1: hopping. Decrement COOLDOWN.
+        f"{mb_cd} read-mailbox 1 - dup {mb_cd} write-mailbox\n"
+        # t_raw = (HOP_TICKS - cd_new) / DENOM
+        f"{COILY_EGG_HOP_TICKS} swap - {_CE_HOP_DENOM_F} /\n"
+        # Smoothstep keeping t_raw: ( t_raw -- t_raw t' )
+        f"dup dup dup * swap 2.0 * 3.0 swap - *\n"
+        # row_now = from_row + t' * (row - from_row)
+        f"dup {mb_row} read-mailbox {mb_from_row} read-mailbox - * "
+        f"{mb_from_row} read-mailbox +\n"
+        # col_now = from_col + t' * (col - from_col)
+        f"over {mb_col} read-mailbox {mb_from_col} read-mailbox - * "
+        f"{mb_from_col} read-mailbox +\n"
+        # y = (6 - row_now) * Y_MUL → 3010
+        f"over 6.0 swap - {_RB_Y_MUL} * 3010 write-mailbox\n"
+        # x = (col_now - row_now*0.5) * X_MUL → 3009
+        f"swap 0.5 * - {_RB_X_MUL} * 3009 write-mailbox\n"
+        # z_linear = start_z + t' * (end_z - start_z)
+        f"{mb_end_z} read-mailbox {mb_start_z} read-mailbox - * "
+        f"{mb_start_z} read-mailbox +\n"
+        # z_final = z_linear + 8*t_raw*(1-t_raw)
+        f"swap dup 1.0 swap - * 8.0 * +\n"
+        f"3011 write-mailbox\n"
+        # Contact check vs player.
+        f"{mb_row} read-mailbox 400 read-mailbox = if "
+        f"{mb_col} read-mailbox 401 read-mailbox = if "
+        f"1 414 write-mailbox "
+        f"then then\n"
+        # Stretch-and-squash (Phase A: same intensity as red ball, 0.5 strength).
+        f"{mb_cd} read-mailbox 0 <= if "
+        f"1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
+        f"else "
+        f"{COILY_EGG_HOP_TICKS} {mb_cd} read-mailbox - {_CE_HOP_DENOM_F} / "
+        f"dup 2.0 * 1.0 - dup * swap dup 1.0 swap - 4.0 * * "
+        f"over {_RB_SS_Z_IMP} * over {_RB_SS_Z_BELL} * + 1.0 + 3042 write-mailbox "
+        f"{_RB_SS_XY_BELL} * swap {_RB_SS_XY_IMP} * + 1.0 + "
+        f"dup 3040 write-mailbox 3041 write-mailbox "
+        f"then\n"
+        # Landing tick? cd <= 0.
+        f"{mb_cd} read-mailbox 0 <= if "
+        # Off-pyramid (Phase B): signal transform-to-snake. Director picks up
+        # PHASE_GLOBAL==2 and wakes the snake at egg's FROM_(ROW,COL) (the
+        # last on-pyramid cube, since ROW was already advanced to 7).
+        f"{mb_row} read-mailbox 6 > if "
+        f"0 {mb_phase} write-mailbox "
+        f"2 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+        f"{REDBALL_PARK_Z} 3011 write-mailbox "
+        f"exit "
+        f"then "
+        # Pick next direction via shared LFSR.
+        f"{_RB_LFSR_STEP}"
+        # Advance ROW, conditionally COL.
+        f"{mb_row} read-mailbox dup {mb_from_row} write-mailbox 1 + {mb_row} write-mailbox "
+        f"{mb_col} read-mailbox dup {mb_from_col} write-mailbox "
+        f"swap if 1 + then {mb_col} write-mailbox "
+        # Stash START_Z / END_Z.
+        f"3011 read-mailbox {mb_start_z} write-mailbox "
+        f"{_RB_Z_BASE} {mb_row} read-mailbox {_RB_Z_MUL} * - {mb_end_z} write-mailbox "
+        # Re-arm cooldown.
+        f"{COILY_EGG_HOP_TICKS} {mb_cd} write-mailbox "
+        f"then\n"
+    )
+
+# Egg mesh: elongated icosphere (taller than wide) — reads as an egg, not a
+# plain ball. Same vertex count as the red ball (42 verts / 80 faces).
+_EGG_XY_SCALE = 0.72
+_EGG_Z_SCALE  = 1.30
+_EGG_VERTS = [
+    (x * _EGG_XY_SCALE, y * _EGG_XY_SCALE, z * _EGG_Z_SCALE)
+    for (x, y, z) in _REDBALL_VERTS
+]
+_egg_mesh = bpy.data.meshes.new('coily_egg_mesh')
+_egg_mesh.from_pydata(_EGG_VERTS, [], _REDBALL_FACES)
+_egg_mesh.update()
+_egg_mat = bpy.data.materials.new('coily_egg_purple')
+_egg_mat.use_nodes = True
+_egg_bsdf = _egg_mat.node_tree.nodes.get('Principled BSDF')
+# Deep purple, slightly toward magenta — matches arcade Coily egg.
+_egg_bsdf.inputs['Base Color'].default_value = (0.55, 0.10, 0.85, 1.0)
+_egg_mesh.materials.append(_egg_mat)
+
+_pre_egg_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+COILY_EGG_ACTOR_IDX = _pre_egg_actor_count + 1
+
+_egg = bpy.data.objects.new('coily_egg', _egg_mesh)
+_egg.location = (0.0, 0.0, REDBALL_PARK_Z)
+scene.collection.objects.link(_egg)
+_egg['wf_schema_path']         = ENEMY_OAD
+_egg['wf_Mesh Name']           = 'coily_egg_mesh.iff'
+_egg['wf_original_mesh_name']  = 'coily_egg_mesh.iff'
+_egg['wf_Model Type']          = 'Mesh'
+_egg['wf_Mobility']            = 'Anchored'
+_egg['wf_Mass']                = 0.0
+_egg['wf_Visibility Mailbox']  = 1
+_egg['wf_NumberOfLocalMailboxes'] = 0
+_egg['wf_Script']              = coily_egg_script()
+
+print(f"[qbert] Created Coily egg (actor index {COILY_EGG_ACTOR_IDX}); "
+      f"hop {COILY_EGG_HOP_TICKS} ticks; "
+      f"globals 518..525 + 542..544")
+
+# ── 5e. Coily snake (Phase B — egg transforms here at bottom row) ────────────
+# Stacked purple sphere segments. For Phase B it just stands on whichever
+# cube the egg landed on, killing Q*bert on contact. Phase C will add the
+# greedy-chase hop logic.
+#
+# Mailboxes 526..533 (same 8-slot layout as the egg), but for Phase B only
+# ROW/COL/PHASE are touched.
+
+_CS_MB_ROW       = 526
+_CS_MB_COL       = 527
+_CS_MB_COOLDOWN  = 528
+_CS_MB_PHASE     = 529
+_CS_MB_START_Z   = 530
+_CS_MB_END_Z     = 531
+_CS_MB_FROM_ROW  = 532
+_CS_MB_FROM_COL  = 533
+
+# Coily S&S: asymmetric — apex Z stretch 3× player (very tall mid-air);
+# takeoff/landing crouch held at player level (no exaggerated flatten).
+# Reads as "springy snake leaping" rather than "cartoon squash".
+_COILY_SS_Z_BELL  =  0.60     # 3× player 0.20  → apex Z scale = 1.60
+_COILY_SS_Z_IMP   = -0.40     # = player          → takeoff/landing Z = 0.60
+_COILY_SS_XY_BELL = -0.10     # = player          → apex XY = 0.90
+_COILY_SS_XY_IMP  =  0.40     # = player          → takeoff/landing XY = 1.40
+
+# Coily mesh: spiral / coiled tube authored via bpy.data.curves and converted
+# to mesh (NOT stacked spheres — see investigation
+# docs/investigations/2026-05-11-qbert-coily-mesh-versions.md for why V0–V7
+# ball-based variants were all wrong). The body is one continuous magenta
+# tube wound in a half-helix; head + eyes + tongue are deferred to a later
+# graft-on pass once the body shape is approved.
+_COILY_TUBE_RADIUS    = 0.13           # cross-section thickness of the body
+_COILY_SPIRAL_RADIUS  = 0.32           # XY distance of the spiral path from the central axis
+_COILY_SPIRAL_TURNS   = 2.5            # full revolutions of the helix
+_COILY_SPIRAL_HEIGHT  = 1.65           # bottom of spiral to top of spiral
+_COILY_SPIRAL_PTS     = 20             # bezier control points along the helix (~8 per turn)
+_COILY_CURVE_RES_U    = 3              # path-direction resolution between control points
+_COILY_BEVEL_RES      = 1              # circular cross-section resolution (8-vert octagonal ring)
+
+# Head + eyes + forked tongue grafted at the top of the spiral.
+_COILY_HEAD_RADIUS    = 0.30           # snake head sphere on top of the coil
+_COILY_EYE_X          = 0.26           # eye +X offset from head centre (~head radius)
+_COILY_EYE_Y          = 0.16           # eye ±Y offset
+_COILY_EYE_R          = 0.10           # eye sphere radius
+_COILY_PUPIL_X        = 0.34           # pupil +X (in front of eye)
+_COILY_PUPIL_R        = 0.05
+_COILY_TONGUE_BASE_X  = 0.42           # tongue base just in front of pupils
+_COILY_TONGUE_Y       = 0.06           # tongue fork half-spread
+
+# Snake half-height: spiral runs from -H/2 to +H/2, head sits on top, so
+# half-height includes the spiral half + head sphere top.
+_COILY_HALF_HEIGHT = _COILY_SPIRAL_HEIGHT / 2 + _COILY_HEAD_RADIUS
+# Snake actor Z relative to cube CENTER: half-cube + half-snake puts the
+# snake's bottom exactly on the cube's top.
+_COILY_CENTRE_OFFSET_Z = CUBE_SIZE / 2 + _COILY_HALF_HEIGHT
+# Z formula: snake_actor_z(row) = CUBE_BASE_Z + CUBE_SIZE*(6-row) + _COILY_CENTRE_OFFSET_Z
+_COILY_Z_BASE = CUBE_BASE_Z + CUBE_SIZE * (NUM_ROWS - 1) + _COILY_CENTRE_OFFSET_Z
+_COILY_SNAKE_HOP_TICKS = 24   # slower than player (12), faster than nothing
+_COILY_SNAKE_HOP_DENOM_F = float(_COILY_SNAKE_HOP_TICKS - 1)
+
+def _build_coily_snake_actor(name, mesh_name, location):
+    """Build the Coily snake mesh + Blender object.
+
+    Body is a single continuous magenta tube wound as a 2.5-turn helix
+    (authored as a Bezier curve with circular bevel, converted to mesh).
+    Head + eyes + pupils + forked tongue grafted on at the top of the
+    spiral, with the head facing +X so the eyes/tongue are visible from
+    the player's camera angle.
+    """
+    # Arcade Coily is pure magenta (#BA00BA = 186, 0, 186), pixel-sampled
+    # from docs/plans/screenshots/qbert-arcade-hg101-04.png.
+    mat_body   = _make_principled_material(f'{mesh_name}_body',   (0.73, 0.00, 0.73))
+    mat_eye    = _make_principled_material(f'{mesh_name}_eye',    (1.00, 1.00, 1.00))
+    mat_pupil  = _make_principled_material(f'{mesh_name}_pupil',  (0.05, 0.05, 0.05))
+    mat_tongue = _make_principled_material(f'{mesh_name}_tongue', (0.90, 0.05, 0.10))
+
+    # ── Author the spiral as a Bezier curve ────────────────────────────────
+    curve_data = bpy.data.curves.new(f'{mesh_name}_curve', type='CURVE')
+    curve_data.dimensions = '3D'
+    curve_data.resolution_u = _COILY_CURVE_RES_U
+    curve_data.bevel_depth = _COILY_TUBE_RADIUS
+    curve_data.bevel_resolution = _COILY_BEVEL_RES
+    # A bezier spline starts with 1 point; add the rest.
+    spline = curve_data.splines.new('BEZIER')
+    spline.bezier_points.add(_COILY_SPIRAL_PTS - 1)
+    for i, point in enumerate(spline.bezier_points):
+        t = i / float(_COILY_SPIRAL_PTS - 1)
+        theta = t * _COILY_SPIRAL_TURNS * 2.0 * math.pi
+        x = _COILY_SPIRAL_RADIUS * math.cos(theta)
+        y = _COILY_SPIRAL_RADIUS * math.sin(theta)
+        z = -_COILY_SPIRAL_HEIGHT / 2.0 + t * _COILY_SPIRAL_HEIGHT
+        point.co = (x, y, z)
+        point.handle_left_type = 'AUTO'
+        point.handle_right_type = 'AUTO'
+
+    # Create the curve object, link to scene, then convert to mesh so the
+    # WF IFF exporter (mesh-only) can serialize it.
+    curve_obj = bpy.data.objects.new(name, curve_data)
+    scene.collection.objects.link(curve_obj)
+    bpy.ops.object.select_all(action='DESELECT')
+    curve_obj.select_set(True)
+    bpy.context.view_layer.objects.active = curve_obj
+    bpy.ops.object.convert(target='MESH')
+    body_obj = bpy.context.active_object
+    body_obj.data.materials.clear()
+    body_obj.data.materials.append(mat_body)
+    for poly in body_obj.data.polygons:
+        poly.material_index = 0
+        poly.use_smooth = False
+
+    parts = [(body_obj, mat_body)]
+
+    # ── Head at the top of the spiral, facing +X ───────────────────────────
+    # Spiral endpoint is at theta = TURNS * 2π. For 2.5 turns that's 5π →
+    # (cos π, sin π) = (-1, 0). Place head a bit inboard of that and slightly
+    # above; the eyes / tongue face +X regardless of spiral endpoint so they
+    # read from the camera angle.
+    head_x = 0.0
+    head_y = 0.0
+    head_z = _COILY_SPIRAL_HEIGHT / 2.0 + _COILY_HEAD_RADIUS * 0.6
+    bpy.ops.mesh.primitive_ico_sphere_add(
+        subdivisions=2, radius=_COILY_HEAD_RADIUS,
+        location=(head_x, head_y, head_z))
+    parts.append((bpy.context.object, mat_body))
+
+    # Eyes — two white UV-spheres on +X face of the head.
+    for y in (-_COILY_EYE_Y, +_COILY_EYE_Y):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=_COILY_EYE_R, segments=8, ring_count=5,
+            location=(head_x + _COILY_EYE_X, y, head_z))
+        parts.append((bpy.context.object, mat_eye))
+
+    # Pupils slightly in front of the eyes.
+    for y in (-_COILY_EYE_Y, +_COILY_EYE_Y):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=_COILY_PUPIL_R, segments=6, ring_count=4,
+            location=(head_x + _COILY_PUPIL_X, y, head_z))
+        parts.append((bpy.context.object, mat_pupil))
+
+    # Forked tongue — two narrow red cones protruding +X from below the eyes.
+    for y_tip in (-_COILY_TONGUE_Y, +_COILY_TONGUE_Y):
+        bpy.ops.mesh.primitive_cone_add(
+            vertices=5, radius1=0.035, radius2=0.0, depth=0.32,
+            location=(head_x + _COILY_TONGUE_BASE_X, y_tip / 2.0, head_z - 0.08),
+            rotation=(0, math.pi / 2, math.atan2(y_tip, 0.30)))
+        parts.append((bpy.context.object, mat_tongue))
+
+    # Assign each grafted-on primitive's material, flat-shade.
+    for obj, mat in parts[1:]:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for poly in obj.data.polygons:
+            poly.material_index = 0
+            poly.use_smooth = False
+
+    # Join everything into the body object, place at the actor location.
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = body_obj
+    bpy.ops.object.join()
+    body_obj.name = name
+    body_obj.data.name = mesh_name
+    body_obj.location = location
+    return body_obj
+
+_pre_snake_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+COILY_SNAKE_ACTOR_IDX = _pre_snake_actor_count + 1
+
+def coily_snake_script():
+    """Phase C: snake chases Q*bert via greedy Manhattan-distance pursuit.
+
+    Per tick:
+      1. Phase gate (0 = idle).
+      2. Decrement COOLDOWN; compute t_raw + smoothstep t'.
+      3. Lerp position (row_now, col_now) in cube-space; write world XYZ.
+      4. Apply subdued S&S (same coefficients as red ball).
+      5. Contact check vs player.
+      6. On landing tick (cd<=0): pick greedy next hop, advance row/col,
+         re-arm cooldown.
+
+    Direction picking is sign-based, not min-over-4-candidates:
+      - dRow_sign = sign(qb_row - cy_row)  (down if Q*bert below, up if above)
+      - dCol depends on dRow_sign + sign(qb_col - cy_col)
+      - If chosen (new_row, new_col) is off-pyramid, snake stays put.
+    """
+    mb_row      = _CS_MB_ROW
+    mb_col      = _CS_MB_COL
+    mb_cd       = _CS_MB_COOLDOWN
+    mb_phase    = _CS_MB_PHASE
+    mb_start_z  = _CS_MB_START_Z
+    mb_end_z    = _CS_MB_END_Z
+    mb_from_row = _CS_MB_FROM_ROW
+    mb_from_col = _CS_MB_FROM_COL
+
+    return (
+        f"\\\\ wf coily snake (Phase C — chase)\n"
+        # Frozen by a recent green-ball touch → skip the tick.
+        f"{GB_MB_FREEZE_TIMER} read-mailbox 0 > if exit then\n"
+        f"{mb_phase} read-mailbox 0 = if exit then\n"
+        # Decrement COOLDOWN.
+        f"{mb_cd} read-mailbox 1 - dup {mb_cd} write-mailbox\n"
+        # t_raw / t'.
+        f"{_COILY_SNAKE_HOP_TICKS} swap - {_COILY_SNAKE_HOP_DENOM_F} /\n"
+        f"dup dup dup * swap 2.0 * 3.0 swap - *\n"
+        # row_now / col_now via row-space lerp.
+        f"dup {mb_row} read-mailbox {mb_from_row} read-mailbox - * "
+        f"{mb_from_row} read-mailbox +\n"
+        f"over {mb_col} read-mailbox {mb_from_col} read-mailbox - * "
+        f"{mb_from_col} read-mailbox +\n"
+        # y = (6 - row_now) * Y_MUL → 3010
+        f"over 6.0 swap - {_RB_Y_MUL} * 3010 write-mailbox\n"
+        # x = (col_now - row_now/2) * X_MUL → 3009
+        f"swap 0.5 * - {_RB_X_MUL} * 3009 write-mailbox\n"
+        # z_linear = start_z + t' * (end_z - start_z)
+        f"{mb_end_z} read-mailbox {mb_start_z} read-mailbox - * "
+        f"{mb_start_z} read-mailbox +\n"
+        # z_final = z_linear + 8*t_raw*(1-t_raw) parabolic arc
+        f"swap dup 1.0 swap - * 8.0 * +\n"
+        f"3011 write-mailbox\n"
+        # Contact check vs player.
+        f"{mb_row} read-mailbox 400 read-mailbox = if "
+        f"{mb_col} read-mailbox 401 read-mailbox = if "
+        f"1 414 write-mailbox "
+        f"then then\n"
+        # Stretch-and-squash: asymmetric Coily-specific — apex Z 3× player,
+        # takeoff/landing at player level. Snake stretches tall mid-air.
+        f"{mb_cd} read-mailbox 0 <= if "
+        f"1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
+        f"else "
+        f"{_COILY_SNAKE_HOP_TICKS} {mb_cd} read-mailbox - {_COILY_SNAKE_HOP_DENOM_F} / "
+        f"dup 2.0 * 1.0 - dup * swap dup 1.0 swap - 4.0 * * "
+        f"over {_COILY_SS_Z_IMP} * over {_COILY_SS_Z_BELL} * + 1.0 + 3042 write-mailbox "
+        f"{_COILY_SS_XY_BELL} * swap {_COILY_SS_XY_IMP} * + 1.0 + "
+        f"dup 3040 write-mailbox 3041 write-mailbox "
+        f"then\n"
+        # Landing tick → pick next hop greedy.
+        f"{mb_cd} read-mailbox 0 <= if "
+        # dr_sign: 1 if qb_row >= cy_row, else -1.
+        # 400=qb_row, 401=qb_col. cy_row=mb_row, cy_col=mb_col.
+        f"400 read-mailbox {mb_row} read-mailbox - 0 < if -1 else 1 then "  # ( dr_sign )
+        # Branch on dr_sign for dc selection.
+        f"dup 0 > if "
+        # Moving down: dc = (qb_col > cy_col) ? 1 : 0
+        f"401 read-mailbox {mb_col} read-mailbox - 0 > if 1 else 0 then "
+        f"else "
+        # Moving up: dc = (qb_col < cy_col) ? -1 : 0
+        f"401 read-mailbox {mb_col} read-mailbox - 0 < if -1 else 0 then "
+        f"then "                                # ( dr_sign dc )
+        # Compute new_row and new_col.
+        f"{mb_col} read-mailbox + "             # ( dr_sign new_col )
+        f"swap {mb_row} read-mailbox + "        # ( new_col new_row )
+        # Validate: 0 <= new_row <= 6 AND 0 <= new_col <= new_row.
+        # Stack:  ( new_col new_row )
+        f"dup 0 < if drop drop "                # invalid: new_row < 0
+        f"else dup 6 > if drop drop "           # invalid: new_row > 6
+        f"else "
+        # Stack: ( new_col new_row )  with 0 <= new_row <= 6 guaranteed.
+        # Check new_col bounds: 0 <= new_col <= new_row.
+        f"over 0 < if drop drop "               # invalid: new_col < 0
+        f"else over over > if drop drop "       # invalid: new_col > new_row
+        f"else "
+        # Valid! Commit the move.
+        # Stack: ( new_col new_row )
+        # Stash FROM_ROW = cy_row; ROW := new_row.
+        f"{mb_row} read-mailbox {mb_from_row} write-mailbox "
+        f"{mb_row} write-mailbox "
+        # Stash FROM_COL = cy_col; COL := new_col.
+        f"{mb_col} read-mailbox {mb_from_col} write-mailbox "
+        f"{mb_col} write-mailbox "
+        # Stash START_Z (current Z, mb 3011) and END_Z (Z@new_row).
+        f"3011 read-mailbox {mb_start_z} write-mailbox "
+        f"{_COILY_Z_BASE} {mb_row} read-mailbox {_RB_Z_MUL} * - {mb_end_z} write-mailbox "
+        f"then then then then "
+        # Always re-arm cooldown (whether moved or stayed).
+        f"{_COILY_SNAKE_HOP_TICKS} {mb_cd} write-mailbox "
+        f"then\n"
+    )
+
+_snake = _build_coily_snake_actor('coily_snake', 'coily_snake_mesh',
+                                   location=(0.0, 0.0, REDBALL_PARK_Z))
+_snake['wf_schema_path']         = ENEMY_OAD
+_snake['wf_Mesh Name']           = 'coily_snake_mesh.iff'
+_snake['wf_original_mesh_name']  = 'coily_snake_mesh.iff'
+_snake['wf_Model Type']          = 'Mesh'
+_snake['wf_Mobility']            = 'Anchored'
+_snake['wf_Mass']                = 0.0
+_snake['wf_Visibility Mailbox']  = 1
+_snake['wf_NumberOfLocalMailboxes'] = 0
+_snake['wf_Script']              = coily_snake_script()
+
+print(f"[qbert] Created Coily snake (actor index {COILY_SNAKE_ACTOR_IDX}); "
+      f"spiral bezier-curve mesh ({_COILY_SPIRAL_TURNS} turns × {_COILY_SPIRAL_PTS} pts, "
+      f"tube radius {_COILY_TUBE_RADIUS}) + head, eyes, pupils, forked tongue")
+
+# ── 5f. Spinning discs (Phase D — Coily-lure mechanic) ───────────────────────
+# Two flat purple-blue cylinders at the off-edge positions adjacent to the
+# row-1 cubes: left at (row=1, col=-1) and right at (row=1, col=2). When the
+# player hops onto a disc cube, the existing off-pyramid detector in the
+# player script writes FALL_PHASE=1; the disc actor (running later in the
+# tick) sees the player's new (row,col) matches its own and overrides:
+# clears FALL_PHASE, latches mb 426 = 1 (the existing apex-respawn flag the
+# player handles at line 534), consumes itself (PHASE=0 + park Z).
+#
+# Coily falling off a disc is deferred — the current Coily AI restricts
+# hops to on-pyramid cubes, so the snake never lands on disc coords.
+
+DISC_L_ROW    = 1
+DISC_L_COL    = -1
+DISC_R_ROW    = 1
+DISC_R_COL    = 2
+DISC_PARK_Z   = -30.0
+# Per-tick yaw delta in revolutions. 0.005 rev/tick * 60 Hz ≈ 0.3 rev/s.
+DISC_SPIN_RATE = 0.005
+
+# Per-disc PHASE mailboxes (0 = consumed, 1 = present).
+_DL_MB_PHASE = 534
+_DR_MB_PHASE = 535
+
+# Disc mesh: flat cylinder, 16-sided, radius 1.0, half-thickness 0.075.
+def _disc_build_mesh():
+    radius = 1.0
+    half_h = 0.075
+    sides = 16
+    verts = []
+    faces = []
+    # Top + bottom rings.
+    for i in range(sides):
+        a = 2.0 * math.pi * i / sides
+        x = radius * math.cos(a)
+        y = radius * math.sin(a)
+        verts.append((x, y,  half_h))
+        verts.append((x, y, -half_h))
+    # Top centre, bottom centre.
+    top_c = len(verts); verts.append((0.0, 0.0,  half_h))
+    bot_c = len(verts); verts.append((0.0, 0.0, -half_h))
+    for i in range(sides):
+        j = (i + 1) % sides
+        ti, bi = 2 * i, 2 * i + 1
+        tj, bj = 2 * j, 2 * j + 1
+        # Top cap (fan).
+        faces.append((top_c, ti, tj))
+        # Bottom cap (reverse winding).
+        faces.append((bot_c, bj, bi))
+        # Side quad as 2 tris.
+        faces.append((ti, bi, bj))
+        faces.append((ti, bj, tj))
+    return verts, faces
+
+_DISC_VERTS, _DISC_FACES = _disc_build_mesh()
+_disc_mesh = bpy.data.meshes.new('disc_mesh')
+_disc_mesh.from_pydata(_DISC_VERTS, [], _DISC_FACES)
+_disc_mesh.update()
+_disc_mat = bpy.data.materials.new('disc_purpleblue')
+_disc_mat.use_nodes = True
+_disc_bsdf = _disc_mat.node_tree.nodes.get('Principled BSDF')
+# Purple-blue, slightly emissive feel — matches arcade disc colour.
+_disc_bsdf.inputs['Base Color'].default_value = (0.30, 0.20, 0.95, 1.0)
+_disc_mesh.materials.append(_disc_mat)
+
+
+def _disc_world_xyz(row, col):
+    """Disc sits at virtual cube top: same XY as cube_world_position, Z = top of cube."""
+    wx = SQRT2 * (col - row / 2.0) * CUBE_SIZE
+    wy = SQRT2 * (NUM_ROWS - 1 - row) * (CUBE_SIZE / 2.0)
+    wz = CUBE_BASE_Z + (NUM_ROWS - 1 - row) * CUBE_SIZE + CUBE_SIZE / 2.0 + 0.08
+    return wx, wy, wz
+
+
+def _disc_script(my_row, my_col, my_phase_mb):
+    """Per-tick script: spin while present; if player at our (row,col), rescue + consume."""
+    return (
+        "\\ wf disc\n"
+        # While present: spin about Z (yaw).
+        f"{my_phase_mb} read-mailbox 1 = if "
+        f"{DISC_SPIN_RATE} 3034 write-mailbox "
+        # Rescue check.
+        f"400 read-mailbox {my_row} = if "
+        f"401 read-mailbox {my_col} = if "
+        # Player is on us — rescue: clear FALL_PHASE, latch apex respawn,
+        # consume self (PHASE=0 + park Z).
+        f"0 419 write-mailbox "
+        f"1 426 write-mailbox "
+        f"0 {my_phase_mb} write-mailbox "
+        f"{DISC_PARK_Z} 3011 write-mailbox "
+        f"then "
+        f"then "
+        f"then\n"
+    )
+
+
+_pre_disc_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+DISC_L_ACTOR_IDX = _pre_disc_actor_count + 1
+DISC_R_ACTOR_IDX = _pre_disc_actor_count + 2
+
+for _name, _row, _col, _phase_mb in (
+    ('disc_left',  DISC_L_ROW, DISC_L_COL, _DL_MB_PHASE),
+    ('disc_right', DISC_R_ROW, DISC_R_COL, _DR_MB_PHASE),
+):
+    _wx, _wy, _wz = _disc_world_xyz(_row, _col)
+    _d = bpy.data.objects.new(_name, _disc_mesh)
+    _d.location = (_wx, _wy, _wz)
+    scene.collection.objects.link(_d)
+    _d['wf_schema_path']         = ENEMY_OAD
+    _d['wf_Mesh Name']           = 'disc_mesh.iff'
+    _d['wf_original_mesh_name']  = 'disc_mesh.iff'
+    _d['wf_Model Type']          = 'Mesh'
+    _d['wf_Mobility']            = 'Anchored'
+    _d['wf_Mass']                = 0.0
+    _d['wf_Visibility Mailbox']  = 1
+    _d['wf_NumberOfLocalMailboxes'] = 0
+    _d['wf_Script']              = _disc_script(_row, _col, _phase_mb)
+
+print(f"[qbert] Created 2 spinning discs at "
+      f"L(row={DISC_L_ROW},col={DISC_L_COL}) idx={DISC_L_ACTOR_IDX} / "
+      f"R(row={DISC_R_ROW},col={DISC_R_COL}) idx={DISC_R_ACTOR_IDX}; "
+      f"mesh {len(_DISC_VERTS)} verts / {len(_DISC_FACES)} faces")
+
+# ── 5c.8. Curse bubble (plumbing verification) ──────────────────────────────
+# Minimal script-less actor parked above the apex (Z=20) so we can verify it
+# renders. Will be repositioned to Z=-100 once the test passes.
+mat_bubble_white = _make_principled_material('bubble_white', (1.00, 1.00, 1.00))
+bpy.ops.mesh.primitive_uv_sphere_add(radius=0.7, segments=10, ring_count=6, location=(0,0,0))
+_bubble_obj = bpy.context.object
+_bubble_obj.data.materials.clear()
+_bubble_obj.data.materials.append(mat_bubble_white)
+_bubble_obj.data.name = 'BubbleMesh'
+_bubble_mesh_data = _bubble_obj.data
+bpy.data.objects.remove(_bubble_obj, do_unlink=True)
+
+_pre_bubble_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+CURSE_BUBBLE_ACTOR_IDX = _pre_bubble_count + 1
+
+_bubble = bpy.data.objects.new('curse_bubble', _bubble_mesh_data)
+_bubble.location = (0.0, 0.0, -100.0)    # parked below the pyramid; death script pops it to (player_x, y, z+2)
+scene.collection.objects.link(_bubble)
+_bubble['wf_schema_path']         = ENEMY_OAD
+_bubble['wf_Mesh Name']           = 'curse_bubble.iff'
+_bubble['wf_original_mesh_name']  = 'curse_bubble.iff'
+_bubble['wf_Model Type']          = 'Mesh'
+_bubble['wf_Mobility']            = 'Anchored'
+_bubble['wf_Mass']                = 0.0
+_bubble['wf_Visibility Mailbox']  = 1
+print(f"[qbert] Created curse bubble actor idx={CURSE_BUBBLE_ACTOR_IDX} at {tuple(_bubble.location)}")
+
+
 # ── 6. Director — wire its Script for the game loop ───────────────────────────
 # MVP director: cube-state advance, visibility fan-out, win check, camera
 # fan-out, HUD plumbing. Per actor.cc:665 statplats forbid scripts, so the
@@ -542,144 +2237,521 @@ CS_DEATH_HOLD_FRAMES = 60
 # Total: 1 + 72 + 30 + 18 + 30 + 72 = 223 frames ≈ 3.72 s at 60 Hz.
 INTRO_LEG_FRAMES = [1, 72, 30, 18, 30, 72]
 
-DIRECTOR_SCRIPT = (
-    "\\ wf qbert director MVP\n"  # first line skipped as sigil
+# ── Import Phase-1 color tables from gen_cube (data-only import) ──────────────
+# We need the per-round/per-state TOP color LUT and the per-level LIT/SHADOW
+# colors for the director Forth. gen_cube.py exposes them as module globals.
+import importlib.util as _ilu
+_spec = _ilu.spec_from_file_location("_gen_cube", os.path.join(SCRIPT_DIR, "gen_cube.py"))
+_gen_cube = _ilu.module_from_spec(_spec)
+_spec.loader.exec_module(_gen_cube)
+ROUND_TOP_COLORS    = _gen_cube.ROUND_TOP_COLORS    # 16 × (s0, s1, s2)
+LEVEL_SIDE_COLORS   = _gen_cube.LEVEL_SIDE_COLORS   # 4 × (lit, shadow)
+ROUND_SIDE_OVERRIDES = _gen_cube.ROUND_SIDE_OVERRIDES  # {round_idx: (lit, shadow)}
+
+# Compute CUBE_ACTOR_BASE here (before the director script needs it). The
+# level loader assigns 1-based actor indices in scene-collection order.
+# Cubes are appended last, so cube N's actor index = pre-cube count + 1 + N.
+SCHEMA_PATH_KEY = 'wf_schema_path'
+_pre_cube_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+CUBE_ACTOR_BASE = _pre_cube_actor_count + 1
+print(f"[qbert] Pre-cube actor count = {_pre_cube_actor_count}; "
+      f"CUBE_ACTOR_BASE = {CUBE_ACTOR_BASE} (first cube's actor index)")
+
+# Forth fragment: populate ROUND_TOP_LUT (mb 256..303) at level init.
+#   slot 256 + r*3 + s = top RGB for (round r, state s)
+_top_lut_init = ""
+for _r, (_s0, _s1, _s2) in enumerate(ROUND_TOP_COLORS):
+    for _s, _rgb in enumerate((_s0, _s1, _s2)):
+        _slot = INDEXOF_ROUND_TOP_LUT_BASE + _r * 3 + _s
+        _top_lut_init += f"0x{_rgb:06X} {_slot} write-mailbox "
+
+def _broadcast_color_to_all_cubes(rgb, mb_idx):
+    """Forth fragment: write packed RGB to `mb_idx` on every one of the 28 cubes."""
+    return (
+        f"28 0 do "
+        f"0x{rgb:06X} {mb_idx} {CUBE_ACTOR_BASE} i + write-actor-mailbox "
+        f"loop "
+    )
+
+DIRECTOR_SCRIPT = "".join([
+    "\\ wf qbert director MVP\n",  # first line skipped as sigil
     # One-shot level init — sets lives = 3 once on first tick. The player's
     # restart trigger ALSO writes lives=3 directly (mb 72=3) without
     # touching mb 421, so subsequent runs of this block are no-ops. Also
-    # touches mb 70/71 so the HUD shows SCORE/TIMER lines from the start
-    # (not strictly required — DrawHud reads zero as zero — but explicit
-    # is clearer, and pre-allocates the slots for future scoring work).
-    "421 read-mailbox 0 = if "
-    "3 72 write-mailbox "
-    "0 70 write-mailbox 0 71 write-mailbox "
-    "1 421 write-mailbox "
-    "then\n"
+    # touches mb 70/71 so the HUD shows SCORE/TIMER lines from the start.
+    # Phase 1 cube consolidation also populates the ROUND_TOP_LUT and writes
+    # initial TOP/LIT/SHADOW colors to all 28 cubes so the first rendered
+    # frame shows the L1R1 palette.
+    "421 read-mailbox 0 = if ",
+    "3 72 write-mailbox ",
+    "0 70 write-mailbox 0 71 write-mailbox ",
+    # Populate ROUND_TOP_LUT (mb 256..303) — 48 entries.
+    _top_lut_init,
+    # Initialize CUBE_PREV_STATE_BASE[N] to a sentinel (99) so the per-tick
+    # state-change detector below fires once for every cube on the next tick
+    # and writes their (R0, S0) TOP color.
+    "28 0 do 99 228 i + write-mailbox loop ",
+    # Write initial LIT/SHADOW for L1 to all 28 cubes.
+    _broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[0][0], 3038),  # LIT
+    _broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[0][1], 3039),  # SHADOW
+    "0 427 write-mailbox ",   # LAST_LEVEL = 0 (L1)
+    # Red Ball Phase B: seed LFSR, set first-ball delay, clear per-ball active mirrors.
+    f"0xACE1 {RB_MB_LFSR} write-mailbox "          # LFSR seed (non-zero, arbitrary)
+    f"120 {RB_MB_SPAWN_TIMER} write-mailbox "      # first ball ~2 s after INTRO_DONE
+    + " ".join(f"0 {RB_MB_ACTIVE_BASE + k} write-mailbox" for k in range(REDBALL_COUNT))
+    + " ",
+    # Coily Phase A: clear globals + arm first-egg delay.
+    f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+    f"0 {COILY_MB_ROUND_DONE} write-mailbox "
+    f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox ",
+    # Phase D: arm both discs as present (PHASE=1).
+    f"1 {_DL_MB_PHASE} write-mailbox 1 {_DR_MB_PHASE} write-mailbox ",
+    # Green Ball: clear freeze + active mirror, arm first-green delay.
+    f"0 {GB_MB_FREEZE_TIMER} write-mailbox "
+    f"0 {GB_MB_ACTIVE} write-mailbox "
+    f"{GB_FIRST_DELAY} {GB_MB_SPAWN_TIMER} write-mailbox ",
+    # Slick & Sam: clear active mirrors + arm first-spawn delays.
+    f"0 {SLICK_MB_ACTIVE} write-mailbox "
+    f"{SLICK_FIRST_DELAY} {SLICK_MB_SPAWN_TIMER} write-mailbox "
+    f"0 {SAM_MB_ACTIVE} write-mailbox "
+    f"{SAM_FIRST_DELAY} {SAM_MB_SPAWN_TIMER} write-mailbox ",
+    # Ugg & Wrong-Way: clear active mirrors + arm first-spawn delays.
+    f"0 {UGG_MB_ACTIVE} write-mailbox "
+    f"{UGG_FIRST_DELAY} {UGG_MB_SPAWN_TIMER} write-mailbox "
+    f"0 {WW_MB_ACTIVE} write-mailbox "
+    f"{WW_FIRST_DELAY} {WW_MB_SPAWN_TIMER} write-mailbox ",
+    "1 421 write-mailbox ",   # LEVEL_INITIALIZED
+    "then\n",
     # Intro state machine — runs only while phase 0..5; gates the rest of
     # the camera routing via mb 418 (INTRO_DONE). See the per-phase
     # narrative in the Python comments above INTRO_LEG_FRAMES.
-    "416 read-mailbox 6 < if "
+    "416 read-mailbox 6 < if ",
     # First tick of this phase (timer==0): write the matching CamShot index.
     # Phase 0..4 → cs_intro_0..4 (indices 13..17). Phase 5 → cs_pyramid (8).
-    "417 read-mailbox 0 = if "
-    f"416 read-mailbox dup 5 < if {CS_INTRO_BASE_IDX} + else drop {CS_PYRAMID_IDX} then "
-    "INDEXOF_CAMSHOT write-mailbox "
-    "then "
+    "417 read-mailbox 0 = if ",
+    f"416 read-mailbox dup 5 < if {CS_INTRO_BASE_IDX} + else drop {CS_PYRAMID_IDX} then ",
+    "INDEXOF_CAMSHOT write-mailbox ",
+    "then ",
     # Increment timer (every tick).
-    "417 read-mailbox 1 + 417 write-mailbox "
+    "417 read-mailbox 1 + 417 write-mailbox ",
     # Compare timer to this phase's leg-duration threshold.
-    "417 read-mailbox 416 read-mailbox "
-    f"dup 0 = if drop {INTRO_LEG_FRAMES[0]} else "
-    f"dup 1 = if drop {INTRO_LEG_FRAMES[1]} else "
-    f"dup 2 = if drop {INTRO_LEG_FRAMES[2]} else "
-    f"dup 3 = if drop {INTRO_LEG_FRAMES[3]} else "
-    f"dup 4 = if drop {INTRO_LEG_FRAMES[4]} else "
-    f"drop {INTRO_LEG_FRAMES[5]} "
-    "then then then then then "
-    # Threshold met (timer == leg duration): advance to next phase, reset
-    # timer. If we just entered phase 6, latch INTRO_DONE.
-    "= if "
-    "416 read-mailbox 1 + dup 416 write-mailbox "
-    "0 417 write-mailbox "
-    "6 = if 1 418 write-mailbox then "
-    "then "
-    "then\n"
-    # Camshot routing: when death timer (mb 415) > 0, hold cs_death.
-    # When 414 (FALL_DEATH) fires, latch cs_death and start countdown.
-    # Otherwise pass actboxor's signal (mb 100) through to INDEXOF_CAMSHOT.
-    # Gated on INTRO_DONE so the intro state machine has exclusive control of
-    # INDEXOF_CAMSHOT during the sweep.
-    #
-    # Also fold lives decrement + game-over latch into the FALL_DEATH branch
-    # — both fire in the same tick FALL_DEATH=1 latches, so this is the
-    # natural single-source one-shot. Decrement mb 72; if it hits 0, latch
-    # mb 420 (GAME_OVER) which the player picks up to freeze input + arm
-    # the restart-button trigger.
-    f"414 read-mailbox 1 = if {CS_DEATH_IDX} INDEXOF_CAMSHOT write-mailbox "
-    f"{CS_DEATH_HOLD_FRAMES} 415 write-mailbox "
-    "72 read-mailbox 1 - dup 72 write-mailbox "
-    "0 = if 1 420 write-mailbox then "
-    "0 414 write-mailbox then\n"
-    "418 read-mailbox 1 = if "
-    "415 read-mailbox dup 0 > if 1 - dup 415 write-mailbox "
-    f"0 = if {CS_PYRAMID_IDX} INDEXOF_CAMSHOT write-mailbox then "
-    "else drop 100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then "
-    "then "
-    "then\n"
-    # Cube-state advance on landed event
-    "411 read-mailbox 0 <> if "
-    "400 read-mailbox dup 1 + * 2 / 401 read-mailbox + 200 + "
-    "dup read-mailbox 0 = if 2 swap write-mailbox else drop then "
-    "0 411 write-mailbox then\n"
-    # Visibility fan-out: write 1 to the matching cube_NN_sC vis slot, 0 to the other two
-    "28 0 do "
-    "200 i + read-mailbox "
-    "dup 0 = if 1 else 0 then 300 i 3 * + write-mailbox "
-    "dup 1 = if 1 else 0 then 300 i 3 * + 1 + write-mailbox "
-    "2 = if 1 else 0 then 300 i 3 * + 2 + write-mailbox "
-    "loop\n"
-    # Win check: count cubes whose state != 2; write count to mb 412, win flag to 413
-    "0 28 0 do 200 i + read-mailbox 2 <> if 1 + then loop "
-    "dup 412 write-mailbox 0 = if 1 413 write-mailbox then\n"
-    # Round-clear: start 90-tick countdown when win latches (one-shot — only if
-    # timer is not already running), then on expiry reset all cube states,
-    # clear the win flag, increment the round counter, and respawn at apex.
-    "413 read-mailbox 1 = if 424 read-mailbox 0 = if 90 424 write-mailbox then then\n"
-    "424 read-mailbox dup 0 > if "
-    "1 - dup 424 write-mailbox "
-    "0 = if "
-    "28 0 do 0 200 i + write-mailbox loop "
-    "0 411 write-mailbox "
-    "0 413 write-mailbox "
-    "425 read-mailbox 1 + 425 write-mailbox "
-    "0 400 write-mailbox 0 401 write-mailbox 0 402 write-mailbox "
-    "0 414 write-mailbox 0 415 write-mailbox 0 419 write-mailbox "
-    "1 426 write-mailbox "
-    "then "
-    "else drop then\n"
-)
+    "417 read-mailbox 416 read-mailbox ",
+    f"dup 0 = if drop {INTRO_LEG_FRAMES[0]} else ",
+    f"dup 1 = if drop {INTRO_LEG_FRAMES[1]} else ",
+    f"dup 2 = if drop {INTRO_LEG_FRAMES[2]} else ",
+    f"dup 3 = if drop {INTRO_LEG_FRAMES[3]} else ",
+    f"dup 4 = if drop {INTRO_LEG_FRAMES[4]} else ",
+    f"drop {INTRO_LEG_FRAMES[5]} ",
+    "then then then then then ",
+    # Threshold met: advance phase, reset timer. If just entered phase 6,
+    # latch INTRO_DONE.
+    "= if ",
+    "416 read-mailbox 1 + dup 416 write-mailbox ",
+    "0 417 write-mailbox ",
+    "6 = if 1 418 write-mailbox then ",
+    "then ",
+    "then\n",
+    # ── Red Ball Phase B spawn timing ─────────────────────────────────────────
+    # Gated on INTRO_DONE. Each tick:
+    #   - decrement RB_SPAWN_TIMER (mb 512)
+    #   - when timer reaches 0: try to claim and wake the lowest-index idle ball,
+    #     then re-arm timer to max(60, 300 - 12 * ROUND_NUMBER) ticks.
+    # Each ball's activation writes 8 state mailboxes (COL/ROW/FROM_ROW/FROM_COL/
+    # COOLDOWN/START_Z/END_Z/PHASE) via write-actor-mailbox + 1 director-mirror
+    # write (RB_ACTIVE[K]) + 1 claim latch (RB_SPAWN_CLAIMED).
+    f"418 read-mailbox 1 = if "
+    f"{RB_MB_SPAWN_TIMER} read-mailbox dup 0 > if "
+    f"1 - {RB_MB_SPAWN_TIMER} write-mailbox "
+    f"else drop "
+    # claimed := 0
+    f"0 {RB_MB_SPAWN_CLAIMED} write-mailbox "
+    + " ".join(
+        # For each ball K, try to claim. Each block: if not yet claimed AND
+        # ball K is idle, step LFSR, write all 8 ball mailboxes, mirror active,
+        # latch claimed.
+        f"{RB_MB_SPAWN_CLAIMED} read-mailbox 0 = if "
+        f"{RB_MB_ACTIVE_BASE + k} read-mailbox 0 = if "
+        # LFSR step → ( bit )
+        f"{_RB_LFSR_STEP}"
+        # Activate ball K (write-actor-mailbox stack: val mb actor):
+        #   COL := bit (consumes the bit on top of stack)
+        f"{_rb_mb(k, _RB_OFF_COL)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        #   ROW := 1, FROM_ROW := 0, FROM_COL := 0
+        f"1 {_rb_mb(k, _RB_OFF_ROW)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        f"0 {_rb_mb(k, _RB_OFF_FROM_ROW)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        f"0 {_rb_mb(k, _RB_OFF_FROM_COL)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        #   COOLDOWN := HOP_TICKS
+        f"{REDBALL_HOP_TICKS} {_rb_mb(k, _RB_OFF_COOLDOWN)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        #   START_Z := Z@row0 (apex), END_Z := Z@row1
+        f"{_RB_Z_AT_ROW_0} {_rb_mb(k, _RB_OFF_START_Z)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        f"{_RB_Z_AT_ROW_1} {_rb_mb(k, _RB_OFF_END_Z)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        #   PHASE := 1 (start hopping)
+        f"1 {_rb_mb(k, _RB_OFF_PHASE)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+        # Director-mirror RB_ACTIVE[K] := 1 ; CLAIMED := 1
+        f"1 {RB_MB_ACTIVE_BASE + k} write-mailbox "
+        f"1 {RB_MB_SPAWN_CLAIMED} write-mailbox "
+        f"then then "
+        for k in range(REDBALL_COUNT)
+    )
+    + " "
+    # Re-arm timer = max(60, 300 - 12 * ROUND_NUMBER)
+    f"425 read-mailbox 12 * 300 swap - dup 60 < if drop 60 then {RB_MB_SPAWN_TIMER} write-mailbox "
+    f"then then\n",
+    # ── Green Ball: freeze timer + per-round spawn ────────────────────────────
+    # Gated on INTRO_DONE. Each tick: decrement freeze timer if active; otherwise
+    # decrement green spawn timer; on hitting 0 with green idle, wake green.
+    f"418 read-mailbox 1 = if "
+    # Decrement FREEZE_TIMER if > 0.
+    f"{GB_MB_FREEZE_TIMER} read-mailbox dup 0 > if "
+    f"1 - {GB_MB_FREEZE_TIMER} write-mailbox "
+    f"else drop "
+    f"then "
+    # Green-ball spawn (only when not currently freezing).
+    f"{GB_MB_FREEZE_TIMER} read-mailbox 0 = if "
+    f"{GB_MB_ACTIVE} read-mailbox 0 = if "
+    f"{GB_MB_SPAWN_TIMER} read-mailbox dup 0 > if "
+    f"1 - {GB_MB_SPAWN_TIMER} write-mailbox "
+    f"else drop "
+    # SPAWN! LFSR step for col (0 or 1). Activate green at (row=1, col=lfsr_bit).
+    f"{_RB_LFSR_STEP}"                                                          # ( bit )
+    f"{GB_MB_BASE + _RB_OFF_COL} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"1 {GB_MB_BASE + _RB_OFF_ROW} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"0 {GB_MB_BASE + _RB_OFF_FROM_ROW} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"0 {GB_MB_BASE + _RB_OFF_FROM_COL} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"{REDBALL_HOP_TICKS} {GB_MB_BASE + _RB_OFF_COOLDOWN} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"{_RB_Z_AT_ROW_0} {GB_MB_BASE + _RB_OFF_START_Z} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"{_RB_Z_AT_ROW_1} {GB_MB_BASE + _RB_OFF_END_Z} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"1 {GB_MB_BASE + _RB_OFF_PHASE} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"1 {GB_MB_ACTIVE} write-mailbox "
+    f"{GB_SPAWN_INTERVAL} {GB_MB_SPAWN_TIMER} write-mailbox "
+    f"then then then "
+    f"then\n",
+    # ── Slick & Sam spawn blocks ──────────────────────────────────────────────
+    # Same pattern as the green-ball spawn block, with a per-flipper base and
+    # interval. Gated on INTRO_DONE; suppressed while a freeze is active.
+    *[
+        f"418 read-mailbox 1 = if "
+        f"{GB_MB_FREEZE_TIMER} read-mailbox 0 = if "
+        f"{_active_mb} read-mailbox 0 = if "
+        f"{_timer_mb} read-mailbox dup 0 > if "
+        f"1 - {_timer_mb} write-mailbox "
+        f"else drop "
+        f"{_RB_LFSR_STEP}"                                                          # ( bit )
+        f"{_base + _RB_OFF_COL} {_actor_idx} write-actor-mailbox "
+        f"1 {_base + _RB_OFF_ROW} {_actor_idx} write-actor-mailbox "
+        f"0 {_base + _RB_OFF_FROM_ROW} {_actor_idx} write-actor-mailbox "
+        f"0 {_base + _RB_OFF_FROM_COL} {_actor_idx} write-actor-mailbox "
+        f"{REDBALL_HOP_TICKS} {_base + _RB_OFF_COOLDOWN} {_actor_idx} write-actor-mailbox "
+        f"{_RB_Z_AT_ROW_0} {_base + _RB_OFF_START_Z} {_actor_idx} write-actor-mailbox "
+        f"{_RB_Z_AT_ROW_1} {_base + _RB_OFF_END_Z} {_actor_idx} write-actor-mailbox "
+        f"1 {_base + _RB_OFF_PHASE} {_actor_idx} write-actor-mailbox "
+        f"1 {_active_mb} write-mailbox "
+        f"{_interval} {_timer_mb} write-mailbox "
+        f"then then then "
+        f"then\n"
+        for (_base, _active_mb, _timer_mb, _interval, _actor_idx) in [
+            (SLICK_MB_BASE, SLICK_MB_ACTIVE, SLICK_MB_SPAWN_TIMER, SLICK_SPAWN_INTERVAL, SLICK_ACTOR_IDX),
+            (SAM_MB_BASE,   SAM_MB_ACTIVE,   SAM_MB_SPAWN_TIMER,   SAM_SPAWN_INTERVAL,   SAM_ACTOR_IDX),
+        ]
+    ],
+    # ── Ugg & Wrong-Way spawn blocks (climbers) ───────────────────────────────
+    # Spawn at the BOTTOM of their edge (row=6, col=6 for Ugg / col=0 for WW),
+    # lerping in from one row "below" (FROM_ROW=7) and Z below the bottom cube
+    # so they appear to climb up from out of frame. At activation: reset Euler
+    # (write 0 to A/B/C — C commits identity), then DELTA_PITCH ±0.25 to tip
+    # the body onto its side face.
+    *[
+        f"418 read-mailbox 1 = if "
+        f"{GB_MB_FREEZE_TIMER} read-mailbox 0 = if "
+        f"{_active_mb} read-mailbox 0 = if "
+        f"{_timer_mb} read-mailbox dup 0 > if "
+        f"1 - {_timer_mb} write-mailbox "
+        f"else drop "
+        # Activate climber:
+        f"{_spawn_col} {_base + _RB_OFF_COL} {_actor_idx} write-actor-mailbox "
+        f"6 {_base + _RB_OFF_ROW} {_actor_idx} write-actor-mailbox "
+        f"7 {_base + _RB_OFF_FROM_ROW} {_actor_idx} write-actor-mailbox "
+        f"{_spawn_col} {_base + _RB_OFF_FROM_COL} {_actor_idx} write-actor-mailbox "
+        f"{REDBALL_HOP_TICKS} {_base + _RB_OFF_COOLDOWN} {_actor_idx} write-actor-mailbox "
+        # START_Z = below bottom (Z_BASE - 7*Z_MUL = -1.0); END_Z = bottom-row centre (1.0).
+        f"{_CLIMBER_Z_BASE - 7 * _CLIMBER_Z_MUL} {_base + _RB_OFF_START_Z} {_actor_idx} write-actor-mailbox "
+        f"{_CLIMBER_Z_BASE - 6 * _CLIMBER_Z_MUL} {_base + _RB_OFF_END_Z} {_actor_idx} write-actor-mailbox "
+        # Reset Euler (A/B/C); apply DELTA_PITCH for side-face gravity; then
+        # apply DELTA_YAW so forward direction points up the pyramid slope.
+        f"0 3012 {_actor_idx} write-actor-mailbox "
+        f"0 3013 {_actor_idx} write-actor-mailbox "
+        f"0 3014 {_actor_idx} write-actor-mailbox "
+        f"{_pitch} 3035 {_actor_idx} write-actor-mailbox "
+        f"{_yaw} 3034 {_actor_idx} write-actor-mailbox "
+        # PHASE := 1, ACTIVE := 1, re-arm spawn timer.
+        f"1 {_base + _RB_OFF_PHASE} {_actor_idx} write-actor-mailbox "
+        f"1 {_active_mb} write-mailbox "
+        f"{_interval} {_timer_mb} write-mailbox "
+        f"then then then "
+        f"then\n"
+        for (_base, _active_mb, _timer_mb, _interval, _actor_idx, _spawn_col, _pitch, _yaw) in [
+            (UGG_MB_BASE, UGG_MB_ACTIVE, UGG_MB_SPAWN_TIMER, UGG_SPAWN_INTERVAL, UGG_ACTOR_IDX, 6, UGG_PITCH, UGG_YAW_AFTER_PITCH),
+            (WW_MB_BASE,  WW_MB_ACTIVE,  WW_MB_SPAWN_TIMER,  WW_SPAWN_INTERVAL,  WW_ACTOR_IDX,  0, WW_PITCH,  WW_YAW_AFTER_PITCH),
+        ]
+    ],
+    # ── Coily egg per-round spawn (Phase A) ───────────────────────────────────
+    # Gated on INTRO_DONE. If neither egg nor snake is active (PHASE_GLOBAL==0)
+    # and the per-round spawn delay has elapsed, wake the egg at apex (row 0,
+    # col 0) and latch PHASE_GLOBAL := 1. Egg-retire (off-pyramid) clears
+    # PHASE_GLOBAL back to 0; round-clear refreshes SPAWN_DELAY so the next
+    # round spawns a fresh egg.
+    f"418 read-mailbox 1 = if "
+    f"{COILY_MB_PHASE_GLOBAL} read-mailbox 0 = if "
+    f"{COILY_MB_ROUND_DONE} read-mailbox 0 = if "
+    f"{COILY_MB_SPAWN_DELAY} read-mailbox dup 0 > if "
+    f"1 - {COILY_MB_SPAWN_DELAY} write-mailbox "
+    f"else drop "
+    # SPAWN! Step LFSR for col (0 or 1). Activate egg at (row=1, col=lfsr_bit)
+    # — same starting cubes as red balls, so the egg can't kill Q*bert on
+    # spawn at the apex. The egg's mid-hop start is FROM apex (row=0, col=0)
+    # so visually it appears to dive from the top.
+    f"{_RB_LFSR_STEP}"                                  # ( bit )
+    f"{_CE_MB_COL} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "  # COL := bit
+    f"1 {_CE_MB_ROW} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"0 {_CE_MB_FROM_ROW} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"0 {_CE_MB_FROM_COL} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"{COILY_EGG_HOP_TICKS} {_CE_MB_COOLDOWN} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"{_CE_Z_AT_ROW_0} {_CE_MB_START_Z} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"{_CE_Z_AT_ROW_1} {_CE_MB_END_Z} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"0 {_CE_MB_FLASH_TICK} write-mailbox "
+    f"1 {_CE_MB_PHASE} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"1 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+    f"1 {COILY_MB_ROUND_DONE} write-mailbox "
+    f"then "
+    f"then "
+    f"then "
+    f"then\n",
+    # ── Coily egg → snake transformation (Phase B) ─────────────────────────────
+    # PHASE_GLOBAL == 2 means the egg just retired off-pyramid; wake the snake
+    # at the egg's last on-pyramid cube (FROM_ROW/FROM_COL) and compute its
+    # world position. Gated on snake PHASE still 0 so the activation is
+    # one-shot per egg-to-snake transition.
+    f"{COILY_MB_PHASE_GLOBAL} read-mailbox 2 = "
+    f"{_CS_MB_PHASE} read-mailbox 0 = & if "
+    # Pick up the egg's final position from its globals (518/519 ROW/COL — but
+    # ROW was advanced to 7 before retire; use FROM_ROW=524, FROM_COL=525).
+    # Write snake ROW = FROM_ROW, COL = FROM_COL.
+    f"{_CE_MB_FROM_ROW} read-mailbox {_CS_MB_ROW} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"{_CE_MB_FROM_COL} read-mailbox {_CS_MB_COL} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    # Write snake world XYZ (row=FROM_ROW gives cube position; offset for stack-centre Z).
+    # X = X_MUL * (col - row/2); Y = Y_MUL * (6 - row); Z = Z_BASE - row*Z_MUL + CENTRE_OFFSET_Z.
+    f"{_CE_MB_FROM_COL} read-mailbox "
+    f"{_CE_MB_FROM_ROW} read-mailbox 0.5 * - "
+    f"{_RB_X_MUL} * 3009 {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"6.0 {_CE_MB_FROM_ROW} read-mailbox - "
+    f"{_RB_Y_MUL} * 3010 {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"{_COILY_Z_BASE} "
+    f"{_CE_MB_FROM_ROW} read-mailbox {_RB_Z_MUL} * - "
+    f"3011 {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    # Initialize snake hop state for Phase C: COOLDOWN, FROM_(ROW,COL),
+    # START_Z, END_Z so the first chase hop reads valid stash values.
+    f"{_COILY_SNAKE_HOP_TICKS} {_CS_MB_COOLDOWN} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"{_CE_MB_FROM_ROW} read-mailbox {_CS_MB_FROM_ROW} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"{_CE_MB_FROM_COL} read-mailbox {_CS_MB_FROM_COL} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    # START_Z = END_Z = snake-Z@spawn-row (no hop in flight yet).
+    f"{_COILY_Z_BASE} {_CE_MB_FROM_ROW} read-mailbox {_RB_Z_MUL} * - "
+    f"dup {_CS_MB_START_Z} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"{_CS_MB_END_Z} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    # Activate snake.
+    f"1 {_CS_MB_PHASE} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    # PHASE_GLOBAL := 1 sentinel? No — keep at 2 to mean "snake active".
+    # Director's later round-clear logic resets to 0.
+    f"then\n",
+    # Camshot routing: cs_death hold + FALL_DEATH latch + game-over fold-in.
+    f"414 read-mailbox 1 = if {CS_DEATH_IDX} INDEXOF_CAMSHOT write-mailbox ",
+    f"{CS_DEATH_HOLD_FRAMES} 415 write-mailbox ",
+    "72 read-mailbox 1 - dup 72 write-mailbox ",
+    "0 = if 1 420 write-mailbox then ",
+    "0 414 write-mailbox then\n",
+    "418 read-mailbox 1 = if ",
+    "415 read-mailbox dup 0 > if 1 - dup 415 write-mailbox ",
+    f"0 = if {CS_PYRAMID_IDX} INDEXOF_CAMSHOT write-mailbox then ",
+    "else drop 100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then ",
+    "then ",
+    "then\n",
+    # Cube-state advance on landed event (unchanged from prior design).
+    "411 read-mailbox 0 <> if ",
+    "400 read-mailbox dup 1 + * 2 / 401 read-mailbox + 200 + ",
+    "dup read-mailbox 0 = if 2 swap write-mailbox else drop then ",
+    "0 411 write-mailbox then\n",
+    # ── Per-cube TOP-color update on state change ───────────────────────────
+    # Every tick, for each cube N (0..27):
+    #   cur  = read CUBE_STATE_BASE + N         ( 200..227 )
+    #   prev = read CUBE_PREV_STATE_BASE + N    ( 228..255 )
+    #   if cur != prev:
+    #     rgb = read ROUND_TOP_LUT[ROUND_NUMBER * 3 + cur]
+    #     write rgb to actor (CUBE_ACTOR_BASE + N) mailbox 3037 (FACE_COLOR_TOP)
+    #     write cur to CUBE_PREV_STATE_BASE + N
+    # Inner body stack notes inline.
+    "28 0 do ",
+    # ( -- )
+    "200 i + read-mailbox ",      # ( cur )
+    "228 i + read-mailbox ",      # ( cur prev )
+    "over over <> if ",           # ( cur prev )  — branch if cur != prev
+    "drop ",                      # ( cur ) — drop prev
+    # Look up rgb = ROUND_TOP_LUT[ROUND_NUMBER * 3 + cur]
+    "425 read-mailbox 3 * over + 256 + read-mailbox ",  # ( cur rgb )
+    # write rgb 3037 (CUBE_ACTOR_BASE + i) write-actor-mailbox
+    f"3037 {CUBE_ACTOR_BASE} i + write-actor-mailbox ",  # ( cur ) — rgb consumed
+    # Update prev: 228 + i = i + 228, i is loop index. Actually we still have cur on stack.
+    "228 i + write-mailbox ",     # ( ) — wrote `cur` to mb 228+i
+    "else ",
+    "drop drop ",                 # ( ) — drop cur and prev (no change)
+    "then ",
+    "loop\n",
+    # ── Level-transition LIT/SHADOW broadcast ───────────────────────────────
+    # cur_level = ROUND_NUMBER // 4 (with int-cast, since `/` is float in zForth).
+    # If cur_level != LAST_LEVEL, broadcast new lit/shadow to all 28 cubes,
+    # then set LAST_LEVEL = cur_level.
+    # zForth int-divide trick: `n dup 4 % - 4 /` → integer (n // 4).
+    "425 read-mailbox dup 4 % - 4 / ",   # ( cur_level )
+    "dup 427 read-mailbox <> if ",       # ( cur_level )
+    # Save cur_level to LAST_LEVEL first, then look up colors.
+    "dup 427 write-mailbox ",            # ( cur_level ) — wrote LAST_LEVEL
+    # Look up lit/shadow per level via if/else cascade (4 levels).
+    "dup 0 = if drop ",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[0][0], 3038)}",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[0][1], 3039)}",
+    "else dup 1 = if drop ",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[1][0], 3038)}",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[1][1], 3039)}",
+    "else dup 2 = if drop ",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[2][0], 3038)}",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[2][1], 3039)}",
+    "else drop ",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[3][0], 3038)}",
+    f"  {_broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[3][1], 3039)}",
+    "then then then ",
+    "else drop then\n",
+    # Win check: count cubes with state != 2. Latch ROUND_CLEAR when count == 0.
+    "0 28 0 do 200 i + read-mailbox 2 <> if 1 + then loop ",
+    "dup 412 write-mailbox 0 = if 1 413 write-mailbox then\n",
+    # Round-clear countdown — start 90-tick timer on win latch, on expiry
+    # reset cube states, clear win flag, increment ROUND_NUMBER, respawn.
+    # capture-trigger fires at LATCH so the host snaps the won state.
+    "413 read-mailbox 1 = if 424 read-mailbox 0 = if ",
+    "90 424 write-mailbox 3 432 write-mailbox ",
+    "then then\n",
+    "424 read-mailbox dup 0 > if ",
+    "1 - dup 424 write-mailbox ",
+    "0 = if ",
+    # Reset per-cube state to 0 — the per-tick state-change detector above
+    # will see (cur=0, prev=2) on the next tick and re-write the new round's
+    # state-0 TOP color to every cube. No visibility fan-out needed.
+    "28 0 do 0 200 i + write-mailbox loop ",
+    "0 411 write-mailbox ",
+    "0 413 write-mailbox ",
+    "425 read-mailbox dup 15 < if 1 + then 425 write-mailbox ",
+    "0 400 write-mailbox 0 401 write-mailbox 0 402 write-mailbox ",
+    "0 414 write-mailbox 0 415 write-mailbox 0 419 write-mailbox ",
+    "1 426 write-mailbox ",   # apex respawn flag for player
+    # Coily round refresh: retire egg + snake, clear ROUND_DONE,
+    # rearm SPAWN_DELAY so the next round spawns a fresh egg.
+    f"0 {_CE_MB_PHASE} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+    f"0 {_CS_MB_PHASE} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"{REDBALL_PARK_Z} 3011 {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
+    f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+    f"0 {COILY_MB_ROUND_DONE} write-mailbox "
+    f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox "
+    # Phase D: re-arm both discs (PHASE=1) and restore visible Z (in case
+    # they were consumed last round).
+    f"1 {_DL_MB_PHASE} write-mailbox 1 {_DR_MB_PHASE} write-mailbox "
+    f"{_disc_world_xyz(DISC_L_ROW, DISC_L_COL)[2]} 3011 {DISC_L_ACTOR_IDX} write-actor-mailbox "
+    f"{_disc_world_xyz(DISC_R_ROW, DISC_R_COL)[2]} 3011 {DISC_R_ACTOR_IDX} write-actor-mailbox "
+    # Green Ball round refresh: retire ball, clear freeze, rearm spawn timer.
+    f"0 {GB_MB_BASE + _RB_OFF_PHASE} {GB_ACTOR_IDX} write-actor-mailbox "
+    f"{REDBALL_PARK_Z} 3011 {GB_ACTOR_IDX} write-actor-mailbox "
+    f"0 {GB_MB_ACTIVE} write-mailbox "
+    f"0 {GB_MB_FREEZE_TIMER} write-mailbox "
+    f"{GB_FIRST_DELAY} {GB_MB_SPAWN_TIMER} write-mailbox "
+    # Slick & Sam round refresh: retire both, rearm spawn timers.
+    f"0 {SLICK_MB_BASE + _RB_OFF_PHASE} {SLICK_ACTOR_IDX} write-actor-mailbox "
+    f"{REDBALL_PARK_Z} 3011 {SLICK_ACTOR_IDX} write-actor-mailbox "
+    f"0 {SLICK_MB_ACTIVE} write-mailbox "
+    f"{SLICK_FIRST_DELAY} {SLICK_MB_SPAWN_TIMER} write-mailbox "
+    f"0 {SAM_MB_BASE + _RB_OFF_PHASE} {SAM_ACTOR_IDX} write-actor-mailbox "
+    f"{REDBALL_PARK_Z} 3011 {SAM_ACTOR_IDX} write-actor-mailbox "
+    f"0 {SAM_MB_ACTIVE} write-mailbox "
+    f"{SAM_FIRST_DELAY} {SAM_MB_SPAWN_TIMER} write-mailbox "
+    # Ugg & Wrong-Way round refresh: retire both, rearm spawn timers.
+    f"0 {UGG_MB_BASE + _RB_OFF_PHASE} {UGG_ACTOR_IDX} write-actor-mailbox "
+    f"{REDBALL_PARK_Z} 3011 {UGG_ACTOR_IDX} write-actor-mailbox "
+    f"0 {UGG_MB_ACTIVE} write-mailbox "
+    f"{UGG_FIRST_DELAY} {UGG_MB_SPAWN_TIMER} write-mailbox "
+    f"0 {WW_MB_BASE + _RB_OFF_PHASE} {WW_ACTOR_IDX} write-actor-mailbox "
+    f"{REDBALL_PARK_Z} 3011 {WW_ACTOR_IDX} write-actor-mailbox "
+    f"0 {WW_MB_ACTIVE} write-mailbox "
+    f"{WW_FIRST_DELAY} {WW_MB_SPAWN_TIMER} write-mailbox ",
+    "then ",
+    "else drop then\n",
+])
 if director:
     director['wf_Script'] = DIRECTOR_SCRIPT
 
-# ── 7. Create the 28 × 3 = 84 cube child-mesh actors ──────────────────────────
-print(f"[qbert] Creating {TOTAL_CUBES} cubes × 3 colour variants = {TOTAL_CUBES * 3} actors...")
+# ── 7. Create 28 cube actors at pyramid positions ────────────────────────────
+# Phase 1 (2026-05-10) collapsed the prior 1344-actor visibility-fan-out (28
+# positions × 16 rounds × 3 states) down to 28 actors. Per-frame face colors
+# come from runtime EMAILBOX_FACE_COLOR_TOP/LIT/SHADOW writes by the director,
+# not from baked-in .iff variants. All 28 actors reference the same cube.iff.
+#
+# CUBE_ACTOR_BASE was computed above (before the director script generation)
+# from the count of objects already in scene.objects when the cube creation
+# loop runs. The director uses CUBE_ACTOR_BASE + N to address cube N.
+#
+# Verify that the count we captured still matches now. If anything between
+# the count and this point added/removed actors, the indices will be wrong.
+_now_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+assert _now_actor_count == _pre_cube_actor_count, (
+    f"Actor count drifted between CUBE_ACTOR_BASE capture ({_pre_cube_actor_count}) "
+    f"and cube creation ({_now_actor_count}); director Forth will address the "
+    f"wrong actors. Move the CUBE_ACTOR_BASE calculation closer to here.")
+
+# One shared mesh datablock for all 28 cubes (saves Blender memory; engine
+# reads geometry from cube.iff regardless).
+_cube_mesh = bpy.data.meshes.new('cube_mesh_shared')
+_s = CUBE_SIZE / 2
+_box_verts = [
+    (-_s, -_s, -_s), ( _s, -_s, -_s), ( _s,  _s, -_s), (-_s,  _s, -_s),
+    (-_s, -_s,  _s), ( _s, -_s,  _s), ( _s,  _s,  _s), (-_s,  _s,  _s),
+]
+_box_faces = [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4),
+              (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
+_cube_mesh.from_pydata(_box_verts, [], _box_faces)
+_cube_mesh.update()
+
+print(f"[qbert] Creating {TOTAL_CUBES} cube actors (one per pyramid position, "
+      f"all referencing cube.iff)...")
 created_count = 0
 for row in range(NUM_ROWS):
     for col in range(row + 1):
         N = cube_index(row, col)
         wx, wy, wz = cube_world_position(row, col)
-        for state_idx in range(3):
-            obj_name = f"cube_{N:02d}_s{state_idx}"
-            mesh_data = bpy.data.meshes.new(f"cube_mesh_{N:02d}_s{state_idx}")
-            # Visual placeholder mesh for editor — actual game data comes from
-            # cube_state{state_idx}.iff via wf_Mesh Name.
-            s = CUBE_SIZE / 2
-            box_verts = [
-                (-s, -s, -s), (s, -s, -s), (s, s, -s), (-s, s, -s),
-                (-s, -s,  s), (s, -s,  s), (s, s,  s), (-s, s,  s),
-            ]
-            box_faces = [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4),
-                         (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
-            mesh_data.from_pydata(box_verts, [], box_faces)
-            mesh_data.update()
+        obj_name = f"cube_{N:02d}"
+        obj = bpy.data.objects.new(obj_name, _cube_mesh)
+        obj.location = (wx, wy, wz)
+        obj.rotation_euler = (0.0, 0.0, math.pi / 4)  # diamond top
+        scene.collection.objects.link(obj)
 
-            obj = bpy.data.objects.new(obj_name, mesh_data)
-            obj.location = (wx, wy, wz)
-            scene.collection.objects.link(obj)
-
-            vis_mb = INDEXOF_VIS_BASE + N * 3 + state_idx
-
-            # Cubes are statplats — engine forbids scripts on statplats
-            # (actor.cc:665). Visibility is driven *externally* by the director's
-            # fan-out loop, which reads each cube's INDEXOF_CUBE_STATE_BASE+N
-            # value and writes 0/1 to the right child's vis_mb each tick.
-            obj['wf_schema_path'] = STATPLAT_OAD
-            obj['wf_Mesh Name'] = f'cube_state{state_idx}.iff'
-            obj['wf_Model Type'] = 'Mesh'
-            obj['wf_Mobility'] = 'Anchored'
-            obj['wf_Mass'] = 0.0
-            obj['wf_Visibility Mailbox'] = vis_mb
-            created_count += 1
+        obj['wf_schema_path'] = STATPLAT_OAD
+        obj['wf_Mesh Name'] = 'cube.iff'
+        # The exporter (export_level.py:986) chooses mesh_filename from
+        # wf_original_mesh_name if set, else obj.name + ".iff". Without setting
+        # this, each cube would get its own cube_NN.iff entry — defeating the
+        # whole point of consolidation. Force the shared name.
+        obj['wf_original_mesh_name'] = 'cube.iff'
+        obj['wf_Model Type'] = 'Mesh'
+        obj['wf_Mobility'] = 'Anchored'
+        obj['wf_Mass'] = 0.0
+        # Visibility: always-visible. mb 1 is hardwired to TRUE
+        # (mailbox.inc:10), so this slot reads 1 forever and the cube stays
+        # rendered. Per-cube hide/show is no longer needed in Phase 1.
+        obj['wf_Visibility Mailbox'] = 1
+        created_count += 1
 
 print(f"[qbert] Created {created_count} cube actors.")
 
@@ -707,30 +2779,38 @@ bpy.ops.wm.save_as_mainfile(filepath=OUT_BLEND)
 print(f"[qbert] Exporting to {OUT_LEV}")
 bpy.ops.wf.export_level(filepath=OUT_LEV)
 
-# The exporter writes a Blender-side mesh IFF for every actor with mesh data,
-# named after the actor (cube_NN_sC.iff). The Blender mesh has a default white
-# material (0xFFFFFF), so all cubes render white regardless of the wf_Mesh Name
-# override. Overwrite each per-cube IFF with the gen_cube.py-generated cube_state*.iff
-# so the correct material colour reaches the engine.
-import shutil
-for row in range(NUM_ROWS):
-    for col in range(row + 1):
-        N = cube_index(row, col)
-        for state_idx in range(3):
-            src = os.path.join(SCRIPT_DIR, f'cube_state{state_idx}.iff')
-            dst = os.path.join(SCRIPT_DIR, f'cube_{N:02d}_s{state_idx}.iff')
-            shutil.copyfile(src, dst)
-print(f"[qbert] Overwrote {TOTAL_CUBES * 3} per-cube IFFs with coloured gen_cube.py output.")
+# Phase 1 cube consolidation (2026-05-10):
+# All 28 cube actors reference the same cube.iff via wf_Mesh Name. The Blender
+# exporter writes a placeholder cube.iff with the shared mesh's default
+# (white) materials; we overwrite it with the gen_cube.py output (proper
+# 3-material MATL chunk). One file replaces the prior 1344-file fan-out.
+import subprocess
+gen_cube_py = os.path.join(SCRIPT_DIR, 'gen_cube.py')
+print(f"[qbert] Generating cube.iff via gen_cube.py")
+subprocess.check_call([sys.executable, gen_cube_py, SCRIPT_DIR])
 
-# Same dual-Mesh-Name workaround for the player: the exporter writes player.iff
-# from the Blender object's geometry (white default-material box), overriding
-# the wf_Mesh Name='qbert_player.iff'. Copy the gen_player.py output over
-# player.iff so the engine's first Mesh Name resolves to the orange Q*bert
-# placeholder, not a white box.
-shutil.copyfile(
-    os.path.join(SCRIPT_DIR, 'qbert_player.iff'),
-    os.path.join(SCRIPT_DIR, 'player.iff'),
-)
-print(f"[qbert] Overwrote player.iff with gen_player.py output.")
+# Clean up stale per-actor cube .iff files from the prior fan-out design so
+# build_level_binary.sh / iffcomp doesn't pick them up by accident.
+import glob
+stale_count = 0
+# Old fan-out: cube_NN_rR_sS.iff (1344 files)
+for stale in glob.glob(os.path.join(SCRIPT_DIR, 'cube_[0-9][0-9]_r*_s*.iff')):
+    os.remove(stale)
+    stale_count += 1
+# Old gen_cube.py output: cube_state{0,1,2}_r{0..15}.iff (48 files) and the
+# even older cube_state{0,1,2}.iff (3 files) from before the per-round expansion.
+for stale in glob.glob(os.path.join(SCRIPT_DIR, 'cube_state*.iff')):
+    os.remove(stale)
+    stale_count += 1
+# Per-actor placeholders the exporter may also have written from earlier runs
+# before we set wf_original_mesh_name='cube.iff' — cube_NN.iff and cube_NN_sN.iff.
+for stale in glob.glob(os.path.join(SCRIPT_DIR, 'cube_[0-9][0-9].iff')):
+    os.remove(stale)
+    stale_count += 1
+for stale in glob.glob(os.path.join(SCRIPT_DIR, 'cube_[0-9][0-9]_s*.iff')):
+    os.remove(stale)
+    stale_count += 1
+if stale_count:
+    print(f"[qbert] Removed {stale_count} stale cube .iff files from prior designs.")
 
 print(f"[qbert] Done — {OUT_LEV}")

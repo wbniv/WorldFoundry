@@ -15,9 +15,9 @@ implemented and build-verified 2026-04-16. Notable integration issues resolved:
 - **pforth**: `pfInit()` is file-static; `PF_DEFAULT_*` constants are file-scoped
   in pf_core.c. Also needs posix/pf_io_posix.c + stdio/pf_fileio_stdio.c. 
   `system.fth` uses bare `include` filenames — requires `chdir` to fth/ during load.
-**Prior art:** `docs/plans/2026-04-14-pluggable-scripting-engine.md` (JS pattern),
-`docs/plans/2026-04-14-wasm3-scripting-engine.md` (wasm3 pattern),
-`docs/plans/2026-04-14-wren-scripting-engine.md` (Wren pattern)
+**Prior art:** [docs/plans/2026-04-14-pluggable-scripting-engine.md](2026-04-14-pluggable-scripting-engine.md) (JS pattern),
+[docs/plans/2026-04-14-wasm3-scripting-engine.md](2026-04-14-wasm3-scripting-engine.md) (wasm3 pattern),
+[docs/plans/2026-04-14-wren-scripting-engine.md](2026-04-14-wren-scripting-engine.md) (Wren pattern)
 
 ## Ranked shortlist (open-source, WF-viable)
 
@@ -581,14 +581,14 @@ esac
 
 ### Phase 6 — Documentation ✓ DONE
 
-**`docs/scripting-languages.md`:** Forth rows updated; "not yet built" text removed
+**[docs/scripting-languages.md](../scripting-languages.md):** Forth rows updated; "not yet built" text removed
 from all five backends. Runtime memory column (`—`) left pending measured values.
 
 To fill in the memory column: measure actual RAM footprint at steady state
 (dict + stacks) for each backend analogous to the zForth entry
 (`~17 KB` with `ZF_DICT_SIZE=16384`), then update the table rows.
 
-Also add snowgoons player + director Forth scripts to the **reference scripts section** of `docs/scripting-languages.md`, alongside the existing Lua/Fennel/JS/wasm examples:
+Also add snowgoons player + director Forth scripts to the **reference scripts section** of [docs/scripting-languages.md](../scripting-languages.md), alongside the existing Lua/Fennel/JS/wasm examples:
 
 **Player** (forward raw joystick input to the input mailbox):
 ```forth
@@ -603,7 +603,7 @@ INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox
 100 ?cam  99 ?cam  98 ?cam
 ```
 
-Notes for the `docs/scripting-languages.md` entry:
+Notes for the [docs/scripting-languages.md](../scripting-languages.md) entry:
 - The `\ wf` opening line is a standard Forth line comment — zero runtime cost
 - `: ?cam ... ;` defines a helper word in the persistent dictionary; on repeated calls (same engine instance) the word is already defined — add a guard or use `FORGET ?cam` before redefining if needed
 - All four backends produce identical script syntax; the backend choice is invisible to script authors
@@ -651,7 +651,7 @@ Applied to both `wflevels/snowgoons.iff` and `wfsource/source/game/cd.iff`.
 | `wftools/engine/stubs/scripting_pforth.cc` | Create |
 | `wftools/engine/stubs/scripting_stub.cc` | Add `\` dispatch + lifecycle hooks |
 | `engine/build_game.sh` | Add `WF_FORTH_ENGINE` block |
-| `docs/scripting-languages.md` | Add 3 Forth rows + reference scripts |
+| [docs/scripting-languages.md](../scripting-languages.md) | Add 3 Forth rows + reference scripts |
 | `scripts/patch_snowgoons_forth.py` | Create patcher |
 
 ---

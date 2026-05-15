@@ -5,7 +5,7 @@
 
 ## Context
 
-WF ships with a large, unused audio subsystem. On Linux it is entirely stubbed — `SoundBuffer::play()` is an empty function body. The `audiofmt/` directory is a vendored 1990s `sox` library that nothing links against. The `audio/orig.cc` file is a retained DirectSound implementation from the PSX/PC era. The net result is ~1.2 MB of dead source that compiles (or doesn't — it's not even in `build_game.sh`), contributes nothing at runtime, and will be replaced wholesale by the miniaudio plan (`docs/investigations/2026-04-14-audio-sound-music.md`) when that work is scheduled.
+WF ships with a large, unused audio subsystem. On Linux it is entirely stubbed — `SoundBuffer::play()` is an empty function body. The `audiofmt/` directory is a vendored 1990s `sox` library that nothing links against. The `audio/orig.cc` file is a retained DirectSound implementation from the PSX/PC era. The net result is ~1.2 MB of dead source that compiles (or doesn't — it's not even in `build_game.sh`), contributes nothing at runtime, and will be replaced wholesale by the miniaudio plan ([docs/investigations/2026-04-14-audio-sound-music.md](2026-04-14-audio-sound-music.md)) when that work is scheduled.
 
 Goal: delete all of it cleanly so the codebase has no audio surface until a real one is ready to land.
 
@@ -148,4 +148,4 @@ format, which is a separate non-trivial effort.
 
 ## Follow-up
 
-When the miniaudio plan (`docs/investigations/2026-04-14-audio-sound-music.md`) is scheduled, Phase 0 of that plan is this removal — these are the same set of changes. If this investigation lands first, Phase 0 of the miniaudio plan can be skipped.
+When the miniaudio plan ([docs/investigations/2026-04-14-audio-sound-music.md](2026-04-14-audio-sound-music.md)) is scheduled, Phase 0 of that plan is this removal — these are the same set of changes. If this investigation lands first, Phase 0 of the miniaudio plan can be skipped.

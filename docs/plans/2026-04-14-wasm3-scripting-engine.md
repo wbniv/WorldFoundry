@@ -19,12 +19,12 @@ plug is being renamed from the free-function `Wasm3RuntimeInit /
 Wasm3RunScript / Wasm3AddConstantArray / Wasm3RuntimeShutdown` shape
 into a `wasm3_engine` namespace (`Init / RunScript / AddConstantArray /
 DeleteConstantArray / Shutdown`) as part of the
-`docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md` sweep, so
+[docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md](2026-04-15-scripting-plans-align-scriptrouter.md) sweep, so
 every compiled-in engine has the same five-function shape as `lua_engine`.
 **Depends on:** Lua spike (landed); Fennel plan (landed/in-flight);
-JS engines plan (`docs/plans/2026-04-14-pluggable-scripting-engine.md`,
+JS engines plan ([docs/plans/2026-04-14-pluggable-scripting-engine.md](2026-04-14-pluggable-scripting-engine.md),
 which reserved sigil `#` for WebAssembly).
-**Source investigation:** `docs/investigations/2026-04-14-scripting-language-replacement.md`
+**Source investigation:** [docs/investigations/2026-04-14-scripting-language-replacement.md](../investigations/2026-04-14-scripting-language-replacement.md)
 § Tier 7 (WebAssembly).
 
 ## Context
@@ -292,7 +292,7 @@ respectively. Player fit is close — if the player doesn't fit, fall back
 to hand-written `.wat` (smaller than AssemblyScript's output) for the
 player only, keep AssemblyScript for the director.
 
-### 5c. Update `docs/scripting-languages.md`
+### 5c. Update [docs/scripting-languages.md](../scripting-languages.md)
 
 Extend the existing Lua+Fennel side-by-side sections with the
 AssemblyScript-source + wasm-binary story for each snowgoons script.
@@ -382,7 +382,7 @@ Reuse:
   Fennel patcher; share it.
 
 Update:
-- `docs/scripting-languages.md` — per §5c: add AssemblyScript source +
+- [docs/scripting-languages.md](../scripting-languages.md) — per §5c: add AssemblyScript source +
   base64 preview for both snowgoons scripts (player + director), flip
   wasm's table row from "planned" to "shipping" with concrete numbers,
   note the `#` sigil and the `#b64\n` text wrapper.

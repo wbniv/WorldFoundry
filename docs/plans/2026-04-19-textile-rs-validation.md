@@ -48,7 +48,7 @@ The first-pass harness INI committed at `wflevels/snowgoons/snowgoons.ini` — c
 
 ## Context
 
-The Blender → level round-trip currently produces a standalone `LVL` chunk but splices it into the oracle `snowgoons.iff` via `swap_lvl.py`, reusing every other chunk — notably the `PERM` and `RM1` binary IFF chunks, which package textile's texture-atlas outputs (`palN.tga` + `rmN.tga` + `rmN.ruv` + `rmN.cyc`). Until textile can regenerate those from Blender-exported materials, the round-trip has a hard oracle dependency. `docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md` lists textile as the single biggest blocker.
+The Blender → level round-trip currently produces a standalone `LVL` chunk but splices it into the oracle `snowgoons.iff` via `swap_lvl.py`, reusing every other chunk — notably the `PERM` and `RM1` binary IFF chunks, which package textile's texture-atlas outputs (`palN.tga` + `rmN.tga` + `rmN.ruv` + `rmN.cyc`). Until textile can regenerate those from Blender-exported materials, the round-trip has a hard oracle dependency. [docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md](2026-04-19-blender-roundtrip-oracle-dependencies.md) lists textile as the single biggest blocker.
 
 A Rust port **already exists** at `wftools/textile-rs/` (~1.8K LOC, 8 modules, 3 commits dated 2026-04-14, builds clean, CLI-flag-parity with the C++ tool). It was written fast and has never been validated — zero unit tests, zero `testdata/`, zero integration tests, no byte-identity claims versus either the C++ reference or the oracle `snowgoons.iff`. We don't yet know whether running it on a snowgoons-shaped input produces the oracle's bytes.
 
@@ -77,7 +77,7 @@ reinvent it.
 | `wftools/prep/` | Macro preprocessor — expands `@define` / `@include` / `@if()` directives in `.prp` templates. Entry `prep.cc`, globals `global.hp`, macro engine `macro.cc`/`macro.hp`, source iterator `source.cc`. Used to turn `iff.prp` + `asset.inc` into a concrete level text-IFF. Also has `prep.doc` and `CHANGELOG`. |
 | `wftools/iffcomp/` | Text-IFF → binary compiler (oracle only; see `project_iffcomp_rs_surpassed_cpp` memory). |
 | `wftools/iffdump/` | Inverse of iffcomp; oracle reference for `wftools/iffdump-rs/`. |
-| `wftools/iff2lvl/` | **`.lev` → `.lvl` converter.** Reads Max's exported `.lev` text-IFF files and writes the binary `.lvl` format the engine consumes. Per its `README`: originally a 1995 DOS/4G program reading 3DSR4 files, ported to a Max plugin in 1997 (internally named **`max2lvl`**, per the Windows registry path hardcoded in `levelcon.cc:138`), then ported back to a command-line tool in late 1999 — which is the form preserved here. Also the file at the centre of the 2026-04-19 `path.cc` / `Euler`-struct archaeology (see `docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md`). |
+| `wftools/iff2lvl/` | **`.lev` → `.lvl` converter.** Reads Max's exported `.lev` text-IFF files and writes the binary `.lvl` format the engine consumes. Per its `README`: originally a 1995 DOS/4G program reading 3DSR4 files, ported to a Max plugin in 1997 (internally named **`max2lvl`**, per the Windows registry path hardcoded in `levelcon.cc:138`), then ported back to a command-line tool in late 1999 — which is the form preserved here. Also the file at the centre of the 2026-04-19 `path.cc` / `Euler`-struct archaeology (see [docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md](../investigations/2026-04-19-path-base-rot-oracle-mystery.md)). |
 | `wftools/iffwrite/` | Low-level IFF writer used by several old tools. |
 | `wftools/lvldump/` | LVL chunk dumper (oracle for `lvldump-rs`). |
 | `wftools/oaddump/` | OAD dumper (oracle for `oaddump-rs`). |
@@ -213,7 +213,7 @@ Six phases. Phases 1–3 are the core work; 4–5 close the loop; 6 is stretch.
    pal_x_page = 320
    pal_y_page = 8
    ```
-   Enumerate which snowgoons IFF objects belong to PERM / RM0 / RM1 by cross-referencing the ASMP asset-ID packing already documented in `docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md` and inspectable in `wflevels/snowgoons/asset.inc` (emitted by levcomp-rs): `3fff00X` = PERM slots, `3000XXX` / `3001XXX` = RM0 / RM1 slots. Source IFFs already live in `wflevels/snowgoons/`.
+   Enumerate which snowgoons IFF objects belong to PERM / RM0 / RM1 by cross-referencing the ASMP asset-ID packing already documented in [docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md](2026-04-19-blender-roundtrip-oracle-dependencies.md) and inspectable in `wflevels/snowgoons/asset.inc` (emitted by levcomp-rs): `3fff00X` = PERM slots, `3000XXX` / `3001XXX` = RM0 / RM1 slots. Source IFFs already live in `wflevels/snowgoons/`.
 
 3. **Textile-rs output shape: ASS-wrapped `.bin` files per room.** The integration contract is that textile-rs produces `perm.bin` / `rm0.bin` / `rm1.bin` directly — each a ready-to-include ASS-slot payload (ASS chunk header + concatenated palette / atlas / RUV / CYC bytes). If the current textile-rs only writes the individual `palN.tga` / `rmN.tga` / `.ruv` / `.cyc` files, add a packager step (either a new CLI flag `--emit-ass=<room>` or a post-processing pass) that emits the combined `.bin`. Format is whatever matches the oracle's existing `perm.bin` — which means the easiest validation is "produce a candidate .bin, diff against the committed one."
 
@@ -330,7 +330,7 @@ If snowgoons passes, the five other level roots (`L0` cube, `L1` basic, `L2` cyb
 - `wftools/textile/` (all `.cc`/`.hp`) — oracle C++ tool
 - `wflevels/snowgoons.iff` + `wflevels/snowgoons.iff.txt` — oracle binary + reconstructed text source
 - `wflevels/snowgoons/*.tga`, `*.iff` — source art (42 TGAs, 5 object IFFs, per the survey)
-- `docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md` — the plan that calls out textile as a blocker
+- [docs/plans/2026-04-19-blender-roundtrip-oracle-dependencies.md](2026-04-19-blender-roundtrip-oracle-dependencies.md) — the plan that calls out textile as a blocker
 
 **To be modified:**
 - `wftools/textile-rs/src/bitmap.rs` — most likely site of Phase 2 fixes (BGR555 quantization, palette dedup)

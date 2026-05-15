@@ -36,6 +36,15 @@ source ~/.cargo/env
 
 Installs under `~/.cargo` and `~/.rustup`. Needed for the Rust ports of asset-pipeline tools (`iffcomp-rs`, `iffdump-rs`, `textile-rs`, `lvldump-rs`, …).
 
+## Git hooks (one-shot per clone)
+
+```bash
+git config core.hooksPath scripts/git-hooks
+```
+
+Activates the in-repo git hooks. Currently:
+- `pre-commit` — refuses newly added paths whose names contain printf-style format specifiers (e.g. `auto_%04i.png`, `frame_%05d.bin`) — see [docs/plans/2026-05-05-printf-filename-guard.md](plans/2026-05-05-printf-filename-guard.md) for context.
+
 ## Repo state that isn't in git
 
 Two things the repo needs but doesn't ship:
@@ -68,7 +77,7 @@ LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 \
   ../../../engine/wf_game
 ```
 
-`cd.iff` is read from the current directory. Snowgoons is the hardcoded default boot level (see `docs/plans/2026-04-engine-start-snowgoons-directly.md`).
+`cd.iff` is read from the current directory. Snowgoons is the hardcoded default boot level (see [docs/plans/2026-04-engine-start-snowgoons-directly.md](plans/2026-04-engine-start-snowgoons-directly.md)).
 
 ### Rust-port pipeline tools
 

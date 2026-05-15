@@ -3,8 +3,8 @@
 **Date:** 2026-04-29
 **Status:** DONE.
 **Related:**
-- `docs/plans/2026-04-28-blender-addon-packaging.md` — packaging plan that preceded this; its packaging section is superseded here
-- `docs/plans/2026-04-28-wf-asset-provider-pure-python.md` — eliminated `wf_asset_provider.so`; this plan eliminates the remaining asset-browser/level-editor coupling
+- [docs/plans/2026-04-28-blender-addon-packaging.md](2026-04-28-blender-addon-packaging.md) — packaging plan that preceded this; its packaging section is superseded here
+- [docs/plans/2026-04-28-wf-asset-provider-pure-python.md](2026-04-28-wf-asset-provider-pure-python.md) — eliminated `wf_asset_provider.so`; this plan eliminates the remaining asset-browser/level-editor coupling
 
 ---
 

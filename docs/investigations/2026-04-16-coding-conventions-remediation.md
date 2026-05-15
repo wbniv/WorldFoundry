@@ -61,7 +61,7 @@ Severity key:
 | 2 | `physics/jolt/jolt_backend.cc:116,354` | §4 no STL in runtime | **blocker** | `std::vector<BodyEntry>`, `std::vector<CharEntry>` — replace with `Array<BodyEntry>` + explicit `Memory*` (or a fixed-size pool if max counts are known) |
 | 3 | `physics/jolt/jolt_backend.cc` (whole file) | §5 Validate | **blocker** | Module-level `Validate()` equivalent missing. Add per-body and per-character invariant checks (`occupied` consistent with `bodyID` / `character` being non-null; handle < tables size) called on entry of every public function |
 | 4 | `physics/jolt/jolt_backend.cc:469,473,481,489,497,543` | §7 no fallbacks | **blocker** | `if (handle >= gCharacters.size() || !gCharacters[handle].occupied) return <zero>;` — silent zero-return for a required handle is exactly the fallback pattern §7 warns about. Replace with `ValidateHandle(handle);` (asserts). Destroy functions can keep the `kJoltInvalidBodyID` sentinel branch since that's an explicitly-optional contract |
-| 5 | `docs/compile-time-switches.md` | §9 cross-ref | **blocker** | `PHYSICS_ENGINE_JOLT` is not registered. Add a row under "Architectural Switches" |
+| 5 | [docs/compile-time-switches.md](../compile-time-switches.md) | §9 cross-ref | **blocker** | `PHYSICS_ENGINE_JOLT` is not registered. Add a row under "Architectural Switches" |
 | 6 | `physics/jolt/jolt_backend.hp:9`, `jolt_math.hp:15` | §2.2 include guards | cleanup | `#pragma once` → `#ifndef _JOLT_BACKEND_HP` / `#ifndef _JOLT_MATH_HP` |
 | 7 | `physics/jolt/jolt_backend.hp:1`, `jolt_backend.cc:1`, `jolt_math.hp:1` | §2.3 file-header boilerplate | cleanup | No copyright / GPL v2 / Description+Author block. Add the canonical 24-line header |
 | 8 | `physics/jolt/jolt_backend.hp:12` | §4 WF types | cleanup | `#include <cstdint>` — drop; use `uint32` from `pigsys` |
@@ -140,7 +140,7 @@ violates a rule.
 Added item-macro shims for `!DO_VALIDATION` builds. This looks like
 fallback code on first read but isn't: `DO_VALIDATION=0` is a real build
 configuration, and the macros *are* the contract for that configuration
-(see `docs/compile-time-switches.md`). §7's optional-with-defined-no-op
+(see [docs/compile-time-switches.md](../compile-time-switches.md)). §7's optional-with-defined-no-op
 applies. Keep.
 
 ### `hal/haltest.cc`

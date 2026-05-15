@@ -298,7 +298,7 @@ binistream::ConstructBinistreamFromMemory
 
 	assert(ValidPtr(memory));
 	assert(len > 0);
-	assert(len < 512000);				// kts arbitrary large number
+	assert(len < 512000);				// kts arbitrary large number; bumped to 8000000 on 2026-05-10 for qbert fan-out, reverted 2026-05-10 after Phase 1 (largest qbert chunk is now ~30 KB)
 
 	// set up end and current pointers
 	_buf = (const char*)memory;

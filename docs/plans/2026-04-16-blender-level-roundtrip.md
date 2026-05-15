@@ -59,7 +59,7 @@ if not data and tag == 'STR':
 
 ## Gap 3 — ScriptLanguage OAD field ✅ DONE
 
-Implemented per `docs/plans/2026-04-16-script-language-oad-field.md`. All five steps complete:
+Implemented per [docs/plans/2026-04-16-script-language-oad-field.md](2026-04-16-script-language-oad-field.md). All five steps complete:
 
 1. Added `TYPEENTRYINT32(Script Language,ScriptLanguage,0,5,0,"Lua|Fennel|Wren|Forth|JavaScript|WebAssembly",SHOW_AS_DROPMENU)` to `wfsource/source/oas/common.inc` after the `Script` XDATA entry; regenerated `common.oad`; manually updated `common.ht`
 2. Threaded `language` param through `EvalScript` → `RunScript` in `level.hp`, `level.cc`, `actor.cc`, `tool.cc`, `toolshld.cc`, `toolngun.cc`, `game.cc`, `scriptinterpreter.hp`
@@ -99,7 +99,7 @@ The full build pipeline is several tools chained together:
 ### Phase 2a — OAD field serialization (landed)
 
 Four correctness fixes discovered via iterative byte-diff against `iff2lvl` output,
-documented in `docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md`:
+documented in [docs/investigations/2026-04-16-levcomp-rs-reverse-engineering.md](../investigations/2026-04-16-levcomp-rs-reverse-engineering.md):
 
 1. **Thin bbox expansion** — `expand_thin_bbox` in `lvl_writer.rs` ensures every bbox
    axis has `max − min ≥ 0.25` (fixed32 `0x4000 = 0x00004000`).  Mirrors

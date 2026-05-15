@@ -14,7 +14,7 @@ Most briefs are *not* standalone — they explicitly reuse engine subsystems int
 
 ### Deliverables
 
-1. **Mermaid graph(s)** at the top of `docs/game-ideas/README.md` showing brief→brief and subsystem→brief dependencies.
+1. **Mermaid graph(s)** at the top of [docs/game-ideas/README.md](../game-ideas/README.md) showing brief→brief and subsystem→brief dependencies.
 2. **A dependency table** — fully enumerated.
 3. **An idealised implementation order** — recommended waves / parallel tracks.
 4. **Tooling brainstorm** — skills, Blender plugins, pluggable-LLM ideas, in a separate investigation doc with a pointer from the README.
@@ -23,7 +23,7 @@ Most briefs are *not* standalone — they explicitly reuse engine subsystems int
 
 `asteroids`, `bomberman`, `boulder-dash`, `bubble-bobble`, `centipede`, `crystal-castles`, `dig-dug`, `donkey-kong`, `frogger`, `galaga`, `geometry-wars`, `joust`, `lode-runner`, `marble-madness`, `miner-2049er`, `omega-race`, `paperboy`, `pinball-construction-set`, `pole-position-outrun`, `prince-of-persia`, `qbert`, `qix`, `rampage`, `rampart`, `space-invaders`, `super-off-road`, `tempest`, `tron-light-cycles`, `vectrex`, `yars-revenge`, `zaxxon`, `zork-adventure`.
 
-Plus 12 engine-subsystem **investigations** at `docs/game-ideas/investigations/2026-04-28-*.md`.
+Plus 12 engine-subsystem **investigations** at [docs/game-ideas/investigations/2026-04-28-*.md](../game-ideas/investigations/2026-04-28-*.md).
 
 ## Strategy: parallel subagent fan-out + serial synthesis
 
@@ -55,7 +55,7 @@ A markdown response with three sections:
 
 2. **Edge list** in the form `source-brief --(subsystem-name)--> consumer-brief`. One edge per line, no prose. Edges where the source is *outside this group* are still listed; main-agent will resolve them across groups.
 
-3. **Investigation references** — every `docs/game-ideas/investigations/2026-04-28-*.md` file the brief points at, mapped to the brief that points at it.
+3. **Investigation references** — every [docs/game-ideas/investigations/2026-04-28-*.md](../game-ideas/investigations/2026-04-28-*.md) file the brief points at, mapped to the brief that points at it.
 
 The agent prompt explicitly tells it to *quote the brief's own claims* and not infer beyond them. Exact wording in the agent prompt: "Do not invent edges. If a brief says 'reuses Joust's HUD overlay', that's an edge. If a brief looks like it could in principle reuse something, that's not an edge."
 
@@ -126,7 +126,7 @@ Insert new sections at the top, between the existing "Working hub" intro and the
 
 ### Subtask 7 — Write tooling investigation doc
 
-New file: `docs/investigations/2026-04-28-level-construction-tooling.md`. Same shape as `2026-04-28-vr-ar-headset-support.md`. Contents:
+New file: [docs/investigations/2026-04-28-level-construction-tooling.md](../investigations/2026-04-28-level-construction-tooling.md). Same shape as `2026-04-28-vr-ar-headset-support.md`. Contents:
 
 1. **Context** — current snowgoons-blender pipeline (mesh export, IFF compile, texture packing automated; layout, actor placement, Forth scripts, tuning manual). Quote `2026-04-19-snowgoons-build-pipeline.md` rather than re-derive.
 2. **The four authoring seams**:
@@ -151,17 +151,17 @@ New file: `docs/investigations/2026-04-28-level-construction-tooling.md`. Same s
 
 ## Critical files
 
-- **`docs/game-ideas/README.md`** — main edit target.
-- **`docs/investigations/2026-04-28-level-construction-tooling.md`** — new file.
-- **`docs/game-ideas/<game>.md`** for `<game>` ∈ all 32 — read-only at execute time, by parallel Explore agents in Subtask 1.
+- **[docs/game-ideas/README.md](../game-ideas/README.md)** — main edit target.
+- **[docs/investigations/2026-04-28-level-construction-tooling.md](../investigations/2026-04-28-level-construction-tooling.md)** — new file.
+- **[docs/game-ideas/<game>.md](../game-ideas/<game>.md)** for `<game>` ∈ all 32 — read-only at execute time, by parallel Explore agents in Subtask 1.
 
 ## Reuse / existing tooling to lean on
 
 - Mermaid blocks render in `task md --` (verified by recent commit `1514212`).
-- `docs/investigations/2026-04-28-engine-capabilities-survey.md` — quote rather than restate engine state.
-- `docs/game-ideas/investigations/2026-04-28-80s-game-conversion-candidates.md` — pre-existing snapshot of the same shortlist; verify the new graph doesn't contradict it. If contradictions surface, the README graph wins (the snapshot is older).
+- [docs/investigations/2026-04-28-engine-capabilities-survey.md](../investigations/2026-04-28-engine-capabilities-survey.md) — quote rather than restate engine state.
+- [docs/game-ideas/investigations/2026-04-28-80s-game-conversion-candidates.md](../game-ideas/investigations/2026-04-28-80s-game-conversion-candidates.md) — pre-existing snapshot of the same shortlist; verify the new graph doesn't contradict it. If contradictions surface, the README graph wins (the snapshot is older).
 - `wftools/wf_blender/{operators,panels,export_level}.py` — natural extension points for the brief-import operator.
-- `docs/investigations/2026-04-19-snowgoons-build-pipeline.md` — canonical end-to-end build pipeline reference.
+- [docs/investigations/2026-04-19-snowgoons-build-pipeline.md](../investigations/2026-04-19-snowgoons-build-pipeline.md) — canonical end-to-end build pipeline reference.
 
 ## Verification (cross-cutting)
 
@@ -176,4 +176,4 @@ New file: `docs/investigations/2026-04-28-level-construction-tooling.md`. Same s
 
 ## Open question for the user
 
-**Tooling-brainstorm placement.** Recommended: separate investigation doc (`docs/investigations/2026-04-28-level-construction-tooling.md`) with a one-paragraph pointer from the new README "Tooling that would accelerate this" section. Alternative: inline at the bottom of the README. Recommendation rationale: audience separation (README is "browse and pick a level"; tooling doc is "decide what engineering investments accelerate authoring"); existing investigations follow this pattern.
+**Tooling-brainstorm placement.** Recommended: separate investigation doc ([docs/investigations/2026-04-28-level-construction-tooling.md](../investigations/2026-04-28-level-construction-tooling.md)) with a one-paragraph pointer from the new README "Tooling that would accelerate this" section. Alternative: inline at the bottom of the README. Recommendation rationale: audience separation (README is "browse and pick a level"; tooling doc is "decide what engineering investments accelerate authoring"); existing investigations follow this pattern.

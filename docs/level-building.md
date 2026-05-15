@@ -4,7 +4,7 @@ This doc is organised level-designer-first: start here, set up tooling,
 follow authoring conventions, wire the engine systems your level needs,
 crib from a worked example, and (for engine maintainers only) read the
 internals at the bottom. For per-symptom debugging recipes, see
-`docs/level-design-troubleshooting.md`.
+[docs/level-design-troubleshooting.md](level-design-troubleshooting.md).
 
 ## Contents
 
@@ -44,7 +44,7 @@ Three documents to keep open while building any level. They cover
 "what actors are available," "what a finished port looks like," and
 "how to verify behaviour at runtime without rebuilding."
 
-- **`docs/2026-05-03-oas-actor-types.md`** — Index of every shipped
+- **[docs/2026-05-03-oas-actor-types.md](2026-05-03-oas-actor-types.md)** — Index of every shipped
   OAS actor type, its OAD fields, and what game patterns it enables.
   Read this *first* before planning any level — the engine's
   ecosystem is wider than the headline classes (`player`, `room`,
@@ -60,7 +60,7 @@ Three documents to keep open while building any level. They cover
   - `Enemy` — generic NPC base with path-follow support.
 - **Worked-example port plans** — read these to see how shipped
   primitives actually wire together end-to-end:
-  - **`docs/plans/2026-05-03-qbert-mvp.md`** — content-only port (no
+  - **[docs/plans/2026-05-03-qbert-mvp.md](plans/2026-05-03-qbert-mvp.md)** — content-only port (no
     engine changes): 28-cube pyramid + hop state machine + colour-flip
     win condition + fall-and-respawn, built entirely from shipped OAS
     types + Forth scripts in actor Script fields + mailboxes. The
@@ -78,13 +78,13 @@ Three documents to keep open while building any level. They cover
   `task run-debug-remote ...` (binds 0.0.0.0). Pending bridge ops
   (mailbox-write, input-inject, shader hot-reload, script hot-swap,
   DAP breakpoints) are tracked in
-  `docs/plans/2026-05-03-debug-bridge-gap-features.md`.
+  [docs/plans/2026-05-03-debug-bridge-gap-features.md](plans/2026-05-03-debug-bridge-gap-features.md).
 
 For gotchas hit during real level work — coordinate systems, BungeeCam
 target placement, Mesh face-normal rules, `Mobility`+`MovementClass`
 requirements, zForth bitwise-op pitfalls, the `Model Type=Box` random-
 debug-cube behaviour, the wf_blender exporter's dual-`Mesh Name`
-field, etc. — see `docs/level-design-troubleshooting.md`.
+field, etc. — see [docs/level-design-troubleshooting.md](level-design-troubleshooting.md).
 
 ---
 
@@ -191,7 +191,7 @@ LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 ../../../engine/wf_game
 `build_game.sh` compiles all source dirs, skips test/Windows files, uses the scripting stub
 and platform stubs from `wftools/engine/stubs/`.
 
-For per-level builds (Q*bert / mm_practice / etc.) use the four-stage Rust pipeline:
+For per-level builds (Q✱bert / mm_practice / etc.) use the four-stage Rust pipeline:
 
 ```bash
 bash wftools/wf_blender/build_level_binary.sh <level-name>
@@ -228,6 +228,38 @@ uses for physics / triggers / messaging but draws nothing.
 > runs. Always set infrastructure actors to `Model Type='None'`. See
 > `level-design-troubleshooting.md` § "Infrastructure actors render as
 > random-coloured debug cubes" for the full diagnosis.
+
+> ⚠️ **Actors authored outside every room's bbox silently don't render.**
+> The room bbox isn't just a runtime culling volume — it controls
+> render-set membership at level-export time. levcomp-rs
+> ([`wftools/levcomp-rs/src/rooms.rs:168-178`](../wftools/levcomp-rs/src/rooms.rs))
+> assigns each non-room actor to the first room whose bbox contains the
+> actor's world-space *center*. Actors whose center falls outside every
+> room's bbox get no `room.entries` push, so the `.lev` lists them in the
+> level's object table but not in any room. At engine load,
+> `Room::AddObject` / `ROOM_OBJECT_LIST_RENDER` walks only the room's
+> listed entries, so `BindAssets` (which calls `new
+> RenderActor3DAnimates(...)`) is never called for orphaned actors. They
+> stay invisible no matter what their `wf_Model Type`, `Visibility
+> Mailbox`, `Mass`, `Mobility`, or schema says.
+>
+> Diagnose with `grep -c RenderActor3DAnimates wf_game.log` against your
+> expected animated-mesh count. One short → an actor's authored center is
+> outside every room's bbox. Compare against `object count = N` in the
+> same log — that's the total actor count, so the diff "object count
+> non-NULL minus rendered" tells you how many actors fell off the map.
+>
+> **Fix:** either move the actor's authored center inside an existing
+> room's bbox, *or* expand the room. For single-room levels (like the
+> qbert_practice pyramid) the cleanest fix is a global-ish room bbox
+> (e.g. `±200` in every axis around the room centre) so that any
+> authored position — including off-camera "parking" locations the
+> scripts want to teleport actors to — lands inside the room.
+> Worked example: see
+> [docs/plans/2026-05-11-qbert-player-death-and-curse-bubble.md](plans/2026-05-11-qbert-player-death-and-curse-bubble.md)
+> § "2026-05-12 implementation notes" — the curse bubble at authored
+> `Z=-100` was outside the room and didn't render until the room bbox
+> was expanded.
 
 Wire-displayed objects in Blender should be everything that doesn't render
 in-engine (`Mesh` / `Matte` excluded). The `display_type='WIRE'` automation
@@ -349,7 +381,7 @@ WF mailboxes form a hierarchy. Understanding scope prevents the most common cros
 | Range | Name | Scope | Notes |
 |---|---|---|---|
 | 0–1 | `EMAILBOX_FALSE` / `EMAILBOX_TRUE` | Global, read-only | Set by engine at level load; write attempts are silently dropped (assert in debug builds). Use mb[1] as a "always-true" visibility mailbox. |
-| 2–999 | Global user | **Shared across all actors** | Director, player, cube actors, etc. all read/write the same cells. Q*bert's cube-state mailboxes (200–227), round counter (425), etc. live here. |
+| 2–999 | Global user | **Shared across all actors** | Director, player, cube actors, etc. all read/write the same cells. Q✱bert's cube-state mailboxes (200–227), round counter (425), etc. live here. |
 | 1000–1021 | Global system | Global, side-effects | `INDEXOF_CAMSHOT` = 1021 writes the active camera. |
 | 2000–2099 | Local user | Per-actor | Each actor has its own storage at this range. Rarely needed for game logic. |
 | 3000–3036 | Local system | Per-actor, side-effects | **`INDEXOF_X_POS` = 3009, `INDEXOF_Y_POS` = 3010, `INDEXOF_Z_POS` = 3011.** Writing here moves the *calling actor's* position. |
@@ -362,7 +394,7 @@ WF mailboxes form a hierarchy. Understanding scope prevents the most common cros
 0 INDEXOF_X_POS write-mailbox
 ```
 
-`INDEXOF_X_POS` = 3009 is in the local-system range. A `write-mailbox` syscall routes through `LookupMailboxes(callerActorIndex)` → that actor's `WriteSystemMailbox` → moves *that* actor. From the director script, this moves the (invisible) director, not Q*bert.
+`INDEXOF_X_POS` = 3009 is in the local-system range. A `write-mailbox` syscall routes through `LookupMailboxes(callerActorIndex)` → that actor's `WriteSystemMailbox` → moves *that* actor. From the director script, this moves the (invisible) director, not Q✱bert.
 
 **Pattern for cross-actor teleport — use a signal mailbox:**
 
@@ -423,7 +455,7 @@ With scripting disabled this is suppressed — the mailbox stays set to the init
 so the camera keeps working without per-frame ActBoxOR writes.
 
 For deeper camera investigation (per-axis Absolute/Relative, runtime switching via
-`INDEXOF_CAMSHOT`, target tracking) see `docs/investigations/2026-04-29-camera-system.md`.
+`INDEXOF_CAMSHOT`, target tracking) see [docs/investigations/2026-04-29-camera-system.md](investigations/2026-04-29-camera-system.md).
 
 ---
 
@@ -431,7 +463,7 @@ For deeper camera investigation (per-axis Absolute/Relative, runtime switching v
 
 Marble Madness level paths are not hand-authored — they are faithfully reproduced from the
 arcade ROM. The pipeline goes: **ROM → JSON → Blender mesh → WF level**. Treat this section
-as a worked example of "reproducing arcade geometry from extracted data" — the Q*bert MVP
+as a worked example of "reproducing arcade geometry from extracted data" — the Q✱bert MVP
 is the worked example for "synthesising a pyramid from a Python loop", and `mm_practice` is
 the worked example for "the simplest possible WF level."
 

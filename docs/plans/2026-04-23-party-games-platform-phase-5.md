@@ -11,7 +11,7 @@ Phase 5 was scoped in the parent plan as "scaffold the cards game plugin" — a 
 
 Phase 5 therefore became three bundled pieces: (A) build a real per-game client-asset plugin seam, (B) retrofit reaction and image onto it, (C) land Worst Take Wins — a fill-in-the-blank card game (Cards Against Humanity model) — as the first native citizen of the new seam, with its own server state machine, private hands, judge rotation, and the CAH CC BY-NC-SA 2.0 JSON deck wired in.
 
-Chosen name: **Worst Take Wins** (working title in `docs/reference/2026-04-14-party-game-cards.md`). Not "Cards Against Humanity" — CAH content is licensed under CC BY-NC-SA 2.0 so reusing the cards is fine for a non-commercial build, but the product name isn't.
+Chosen name: **Worst Take Wins** (working title in [docs/reference/2026-04-14-party-game-cards.md](../reference/2026-04-14-party-game-cards.md)). Not "Cards Against Humanity" — CAH content is licensed under CC BY-NC-SA 2.0 so reusing the cards is fine for a non-commercial build, but the product name isn't.
 
 ## Scope
 
@@ -249,7 +249,7 @@ All nine sequencing steps completed:
 6. ✅ Worst Take Wins controller UI.
 7. ✅ Worst Take Wins receiver UI.
 8. ✅ Integration + shell-template tests (12 new tests in `platform/server/test/`). **Live browser click-through still owed** — see §Verification.
-9. ✅ Docs: `party-games/README.md` updated (plugin interface now documents the `client/` contract + CAH attribution); `docs/plans/2026-04-22-party-games-platform-phase-1.md` has a Phase 5 completion section appended.
+9. ✅ Docs: `party-games/README.md` updated (plugin interface now documents the `client/` contract + CAH attribution); [docs/plans/2026-04-22-party-games-platform-phase-1.md](2026-04-22-party-games-platform-phase-1.md) has a Phase 5 completion section appended.
 
 ## Mid-flight amendments (discovered while building)
 
@@ -289,7 +289,7 @@ Modified:
 - `party-games/games/reaction/reaction.js` — untouched (server logic stayed).
 - `party-games/games/image/image.js` — untouched.
 - `party-games/README.md` — plugin interface section rewritten with the full `ctx` contract + CAH attribution.
-- `docs/plans/2026-04-22-party-games-platform-phase-1.md` — Phase 5 completion notes appended.
+- [docs/plans/2026-04-22-party-games-platform-phase-1.md](2026-04-22-party-games-platform-phase-1.md) — Phase 5 completion notes appended.
 
 Reused:
 - `services` surface (`platform/server/createServer.js`) — unchanged.

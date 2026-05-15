@@ -220,7 +220,7 @@ Two-phase refactor landed plus five follow-up fixes closed the content-delta to 
 | I32 enum STR-lookup gated on `ShowAs`           | 2            | `4c3e652`|
 | **Total**                                       | **2,769**    | —        |
 
-Down from 2,772 baseline → **3 bytes** remaining. Content-diff reduction: **99.9%**. Remaining 3 bytes are ALL uninitialized heap memory inside iff2lvl's `new char[]` Room allocations — the same pattern as the `_PathOnDisk.base.rot` "Euler garbage" (`docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md`), just in a different struct.
+Down from 2,772 baseline → **3 bytes** remaining. Content-diff reduction: **99.9%**. Remaining 3 bytes are ALL uninitialized heap memory inside iff2lvl's `new char[]` Room allocations — the same pattern as the `_PathOnDisk.base.rot` "Euler garbage" ([docs/investigations/2026-04-19-path-base-rot-oracle-mystery.md](../investigations/2026-04-19-path-base-rot-oracle-mystery.md)), just in a different struct.
 
 ### Remaining 3 byte-diffs (all heap-uninit room-struct pad, same family as Euler garbage)
 
@@ -259,4 +259,4 @@ Map of the 3 remaining cmp-byte diffs:
 ### Follow-up plan items (outside the LVL scope, but worth flagging)
 
 - Blender exporter `.lev` STR-label bug: `wf_blender/export_level.py:1077` writes `'STR' "Ambient"` when DATA=0. Should emit `'STR' "Directional"`. Not load-bearing now that `4c3e652` makes levcomp-rs pick DATA for NUMBER-ShowAs fields, but leaving the contradictory STR is misleading for humans reading the `.lev`.
-- OAD audit sibling fixes from `docs/investigations/2026-04-19-oad-buttontype-audit.md` punch list (items 2+): still open; not required for snowgoons byte-identity.
+- OAD audit sibling fixes from [docs/investigations/2026-04-19-oad-buttontype-audit.md](../investigations/2026-04-19-oad-buttontype-audit.md) punch list (items 2+): still open; not required for snowgoons byte-identity.

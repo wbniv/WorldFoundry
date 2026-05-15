@@ -5,8 +5,8 @@
 All phases complete. Vendor `engine/vendor/wren-0.4.0/`; plug in
 `scripting_wren.{hp,cc}` (`wren_engine` namespace); `//wren\n` dispatch
 arm in `ScriptRouter::RunScript`; `scripts/patch_snowgoons_wren.py`;
-reference scripts in `docs/scripting-languages.md`.
-**Prior art:** `docs/plans/2026-04-14-pluggable-scripting-engine.md` (JS pattern), `docs/plans/2026-04-14-wasm3-scripting-engine.md` (wasm3 pattern)
+reference scripts in [docs/scripting-languages.md](../scripting-languages.md).
+**Prior art:** [docs/plans/2026-04-14-pluggable-scripting-engine.md](2026-04-14-pluggable-scripting-engine.md) (JS pattern), [docs/plans/2026-04-14-wasm3-scripting-engine.md](2026-04-14-wasm3-scripting-engine.md) (wasm3 pattern)
 
 ## Context
 
@@ -241,7 +241,7 @@ fi
 
 ### Phase 6 — Documentation
 
-**File:** `docs/scripting-languages.md`
+**File:** [docs/scripting-languages.md](../scripting-languages.md)
 
 Add row to both engine tables:
 ```
@@ -270,7 +270,7 @@ Following the same pattern as `patch_snowgoons_lua.py` / `patch_snowgoons_fennel
 | `wftools/engine/stubs/scripting_wren.cc` | Create (implementation) |
 | `wftools/engine/stubs/scripting_stub.cc` | Add dispatch block + lifecycle hooks |
 | `engine/build_game.sh` | Add `WF_ENABLE_WREN` flag + compile block |
-| `docs/scripting-languages.md` | Add Wren row + reference scripts |
+| [docs/scripting-languages.md](../scripting-languages.md) | Add Wren row + reference scripts |
 | `scripts/patch_snowgoons_wren.py` | Create patcher |
 
 ## Verification

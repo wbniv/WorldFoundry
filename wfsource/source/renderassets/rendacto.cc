@@ -474,6 +474,14 @@ RenderActor3D::Render(RenderCamera& renderCamera, const PhysicalObject& physical
 //	ciff << "position = " << physicalObject.GetPhysicalAttributes().Position() << std::endl;
 //	ciff << "RenderActor3d::Render: renderCamera matrix = " << renderCamera.GetPosition() << std::endl;
 
+	// Per-actor non-uniform scale: scale each rotation row by the matching
+	// component so the actor's local +X / +Y / +Z basis vectors stretch by
+	// _scale.X / Y / Z. Default _scale is (1,1,1) — no-op for actors that
+	// never write a scale mailbox. (qbert stretch-and-squash, 2026-05-10.)
+	matrix[0] *= _scale.X();
+	matrix[1] *= _scale.Y();
+	matrix[2] *= _scale.Z();
+
 	DBSTREAM3(cgfx << "RenderActor3D::Render: matrix = " << std::endl << matrix << std::endl; )
 	renderCamera.RenderObject(_object,matrix);
 	DBSTREAM2(cgfx << "RenderActor3D::Render: done" << std::endl; )

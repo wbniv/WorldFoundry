@@ -74,11 +74,11 @@ The `Euler` in `global.hp:68-73` violates at least three WF coding conventions, 
 
 `Euler` exposes `a/b/c` directly. That's the only reason `rotEuler.a` compiled at all — a proper class with `GetA()/SetA()` (like `wfsource/source/math/euler.hp`) wouldn't have matched the pattern in `path.cc`.
 
-**2. Canonical form / four special members (`docs/coding-conventions.md §4.1`, older IS C++ §5)**
+**2. Canonical form / four special members ([docs/coding-conventions.md](../coding-conventions.md) §4.1, older IS C++ §5)**
 
 `Euler` declares *none* of the four — no default constructor, no copy, no assignment, no destructor. Modern §4.1 scopes the rule to resource-owning classes, so it doesn't strictly apply here; but the older IS C++ canonical-form rule (which `codingstandards.txt` recommends generally) covers all classes. The author flagged it themselves in the comment: *"This is a replacement (in progress) for br_euler."* It was meant to become a real class and never did. An explicit default constructor would almost certainly have zero-initialized `a/b/c`, the same way `wfsource/source/math/euler.hp`'s constructors do.
 
-**3. `Validate()` discipline (`codingstandards.txt:74-82`, `docs/coding-conventions.md §5`)**
+**3. `Validate()` discipline (`codingstandards.txt:74-82`, [docs/coding-conventions.md](../coding-conventions.md) §5)**
 > *"Every class should have an inline function named `Validate()`. … Constructors should call Validate upon exit."*
 
 `Euler` has no `Validate()`. If it had one that asserted `a/b/c` are finite and within `[0, 1)` revolutions (per the "angles are in revolutions" project rule), and the default constructor called it on exit — the debug build of `iff2lvl` would have asserted the first time `QPath::Save` ran instead of silently emitting garbage.
@@ -89,7 +89,7 @@ So the bug isn't "the compiler did something weird." It's *"a type that should h
 
 ### Not the only uninit-heap site: the `_RoomOnDisk` pad bytes are the same pattern
 
-Update, 2026-04-19 later that day: while chasing the last 3 byte-diffs in snowgoons's `.lvl` (see `docs/plans/2026-04-19-levcomp-common-block-two-phase.md`), we found the SAME C-allocator-heap-garbage pattern in a different struct — `_RoomOnDisk` pads. iff2lvl allocates rooms via `new char[size]`, writes 34 bytes of fields into a `__attribute__((aligned(4)))` 36-byte footprint, and doesn't zero the 2-byte struct-header pad. It also doesn't zero the trailing-entries pad that brings `36 + 2×count` up to the next 4-byte boundary. Both regions end up carrying whatever bytes happened to be in the allocator bucket the OS handed out.
+Update, 2026-04-19 later that day: while chasing the last 3 byte-diffs in snowgoons's `.lvl` (see [docs/plans/2026-04-19-levcomp-common-block-two-phase.md](../plans/2026-04-19-levcomp-common-block-two-phase.md)), we found the SAME C-allocator-heap-garbage pattern in a different struct — `_RoomOnDisk` pads. iff2lvl allocates rooms via `new char[size]`, writes 34 bytes of fields into a `__attribute__((aligned(4)))` 36-byte footprint, and doesn't zero the 2-byte struct-header pad. It also doesn't zero the trailing-entries pad that brings `36 + 2×count` up to the next 4-byte boundary. Both regions end up carrying whatever bytes happened to be in the allocator bucket the OS handed out.
 
 Concrete snowgoons witnesses (see `rooms.rs:61-65`):
 

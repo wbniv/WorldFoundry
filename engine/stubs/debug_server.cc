@@ -36,6 +36,20 @@
 #include "scripting_forth.hp"
 #include <cstddef>
 
+// GL for screenshot op.
+#include <hal/hal.h>
+#ifdef __ANDROID__
+#  include <GLES3/gl3.h>
+#else
+#  include <GL/gl.h>
+#endif
+
+// stb_image_write — vendored single-header PNG encoder. Implementation lives
+// in this TU; no other unit defines STB_IMAGE_WRITE_IMPLEMENTATION.
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STBI_WRITE_NO_STDIO_FILESYSTEM 0
+#include "../vendor/stb/stb_image_write.h"
+
 // Bind address: set by --debug-bind in main.cc; defaults to "127.0.0.1".
 extern char gDebugBind[];
 
@@ -247,7 +261,7 @@ static char* debug_get_block(Actor* actor, PropInfo::Block block_id)
 struct PendingUpdate {
     enum Kind { SET_PROP, SET_TRANSFORM, PICK, UNDO_STEP, REVERT_ALL,
                 WATCH, UNWATCH, SET_MAILBOX, INJECT_INPUT, SET_SHADER,
-                RELOAD_SCRIPT } kind;
+                RELOAD_SCRIPT, SCREENSHOT } kind;
     int  actor_idx;
     std::string key;
     double value;
@@ -259,6 +273,7 @@ struct PendingUpdate {
     std::string vert_src;           // SET_SHADER: vertex shader GLSL
     std::string frag_src;           // SET_SHADER: fragment shader GLSL
     std::string script_src;         // RELOAD_SCRIPT: zForth source
+    std::string filename;           // SCREENSHOT: output path (PNG)
 };
 
 // Input override table for inject_input. Game-thread only — read by
@@ -443,6 +458,15 @@ static void handle_client(int fd)
                 u.vert_src = parse_jstr(line, "vert");
                 u.frag_src = parse_jstr(line, "frag");
                 if (!u.vert_src.empty() && !u.frag_src.empty()) {
+                    std::lock_guard<std::mutex> lk(gQueueMutex);
+                    gQueue.push(u);
+                }
+
+            } else if (op == "screenshot") {
+                PendingUpdate u;
+                u.kind     = PendingUpdate::SCREENSHOT;
+                u.filename = parse_jstr(line, "filename");
+                if (!u.filename.empty()) {
                     std::lock_guard<std::mutex> lk(gQueueMutex);
                     gQueue.push(u);
                 }
@@ -880,6 +904,49 @@ void DebugServer_DrainQueue(Level& level)
                 if (it->second.empty()) gWatches.erase(it);
             }
             gMailboxPrev.erase((uint64_t)u.actor_idx * 100000ull + (uint64_t)u.mailbox_idx);
+
+        } else if (u.kind == PendingUpdate::SCREENSHOT) {
+            // glReadPixels against the default framebuffer at the current
+            // viewport. Game thread; called after the frame has rendered
+            // (DrainQueue runs near top of game loop, so we capture the
+            // *previous* frame's contents — which is what the host expects
+            // when it issues the op in response to a watched mailbox event).
+            GLint vp[4] = {0};
+            glGetIntegerv(GL_VIEWPORT, vp);
+            int w = vp[2], h = vp[3];
+            std::string reply;
+            if (w <= 0 || h <= 0) {
+                reply = "{\"op\":\"error\","
+                      + json_str("what", "screenshot") + ","
+                      + json_str("msg", "viewport not initialised") + "}\n";
+            } else {
+                std::vector<uint8_t> buf((size_t)w * (size_t)h * 4);
+                glPixelStorei(GL_PACK_ALIGNMENT, 1);
+                glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, buf.data());
+                // glReadPixels yields bottom-left origin; PNG wants top-left.
+                std::vector<uint8_t> flipped((size_t)w * (size_t)h * 4);
+                size_t row = (size_t)w * 4;
+                for (int y = 0; y < h; ++y)
+                    std::memcpy(&flipped[(size_t)y * row],
+                                &buf[((size_t)h - 1 - (size_t)y) * row], row);
+                int ok = stbi_write_png(u.filename.c_str(),
+                                        w, h, 4, flipped.data(), (int)row);
+                if (ok) {
+                    char b[256];
+                    snprintf(b, sizeof(b),
+                        "{\"op\":\"screenshot_done\",\"filename\":\"%s\","
+                        "\"w\":%d,\"h\":%d}\n",
+                        u.filename.c_str(), w, h);
+                    reply = b;
+                } else {
+                    reply = "{\"op\":\"error\","
+                          + json_str("what", "screenshot") + ","
+                          + json_str("filename", u.filename) + ","
+                          + json_str("msg", "stbi_write_png failed") + "}\n";
+                }
+            }
+            std::lock_guard<std::mutex> lk(gQueueMutex);
+            send_all_locked(reply);
 
         } else if (!bo) {
             std::string errmsg = "{\"op\":\"error\","

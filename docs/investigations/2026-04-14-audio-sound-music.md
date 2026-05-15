@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-14
 **Status:** Active — Phases 1+2 complete; Phase 3 (music subsystem / per-level tracks) next.
-**Related:** `docs/investigations/2026-04-14-mobile-port-android-ios.md` (mobile backends), `docs/investigations/2026-04-14-jolt-physics-integration.md` (actor position source for 3D audio).
+**Related:** [docs/investigations/2026-04-14-mobile-port-android-ios.md](2026-04-14-mobile-port-android-ios.md) (mobile backends), [docs/investigations/2026-04-14-jolt-physics-integration.md](2026-04-14-jolt-physics-integration.md) (actor position source for 3D audio).
 
 ## Context
 
@@ -222,9 +222,9 @@ Goal: Audio works on Android and iOS. Mostly free — miniaudio already supports
 
 ### Phase 7 — Documentation
 
-1. `docs/audio.md` — authoring guide. File formats, naming conventions for SFX constants, how to add music to a level, volume/rolloff defaults.
-2. Update `docs/scripting-languages.md` with the `play_sound` / `play_music` surface.
-3. `docs/engine-size-matrix.md` — add audio delta (expect ~50-150 KB depending on decoder configuration).
+1. [docs/audio.md](../audio.md) — authoring guide. File formats, naming conventions for SFX constants, how to add music to a level, volume/rolloff defaults.
+2. Update [docs/scripting-languages.md](../scripting-languages.md) with the `play_sound` / `play_music` surface.
+3. [docs/engine-size-matrix.md](../engine-size-matrix.md) — add audio delta (expect ~50-150 KB depending on decoder configuration).
 
 ## Critical files
 
@@ -247,7 +247,7 @@ Goal: Audio works on Android and iOS. Mostly free — miniaudio already supports
 | `wfsource/source/audio/orig.cc`, `test.cc`, `LOADFILE.CC`, `*.WAV` | **Already deleted** (2026-04-15) |
 | `engine/vendor/tsf/` | New — `tsf.h` + `tml.h` (TinySoundFont, MIT) |
 | `engine/vendor/tsf/<name>.sf2` | New — bundled soundfont (TBD; permissive license) |
-| `docs/audio.md` | New — authoring guide |
+| [docs/audio.md](../audio.md) | New — authoring guide |
 
 ## Reuses
 
@@ -267,7 +267,7 @@ Goal: Audio works on Android and iOS. Mostly free — miniaudio already supports
 5. **Phase 4: script-driven SFX** — Fennel/Lua/JS/wasm samples in `wftest/` each trigger a beep.
 6. **Phase 5: pan test.** A source 10 units left of camera is ~fully in the left channel; moving to the right pans smoothly.
 6. **No system audio package.** `ldd wf_game | grep -E 'asound|pulse|jack'` is empty (miniaudio dlopens at runtime).
-7. **Size delta** recorded in `docs/engine-size-matrix.md`.
+7. **Size delta** recorded in [docs/engine-size-matrix.md](../engine-size-matrix.md).
 8. **Mobile parity** (Phase 6): same SFX on Android + iOS.
 
 ## Follow-ups (out of scope)
@@ -286,7 +286,7 @@ Goal: Audio works on Android and iOS. Mostly free — miniaudio already supports
    written).
 1. **HRTF.** Binaural audio for headphone users. miniaudio supports via `ma_hrtf`, dataset is ~40 KB. Ship when a level wants it.
 2. **Reverb / occlusion.** Per-zone reverb presets, raycast-based occlusion against level geometry. Needs level-side authoring.
-3. **Voice chat.** Covered by the multiplayer plan (WebRTC); separate pipeline from this SFX/music plan. See `docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md`.
+3. **Voice chat.** Covered by the multiplayer plan (WebRTC); separate pipeline from this SFX/music plan. See [docs/investigations/2026-04-14-multiplayer-voice-mobile-input.md](2026-04-14-multiplayer-voice-mobile-input.md).
 4. **Dynamic music.** Interactive stems that cross-fade based on game state (combat/exploration). Own design — adaptive-music middleware territory.
 5. **Audio-driven gameplay.** Beat detection, sync-to-music gameplay. Speculative.
 6. **Editor integration.** In-game volume mixer UI; per-level music picker. Depends on editor plan.
@@ -295,6 +295,6 @@ Goal: Audio works on Android and iOS. Mostly free — miniaudio already supports
 ## Open questions
 
 - **Authoring of per-SFX metadata.** Min/max distance, volume, bus assignment — where do these live? Standard IFF already has well-established audio chunk types as reference: `AIFF`/`AIFC` (Apple/EA IFF85, 1985) carries instrument loop points and markers inline; `8SVX` (Amiga) carries volume, octaves, and attack/release per sample; `SMUS` (EA Simple Musical Score, Amiga) carries tempo, instrument assignments, and score events all in one FORM. For WF's case, a new `SFXM` IFF chunk (one record per SFX slot: min/max distance, volume, bus, loop flag) mirrors this established pattern. Alternative: extend the AIFF-inspired level audio block rather than a sidecar. Decide during Phase 5 implementation when the actual fields are known.
-- **Sample rate policy.** miniaudio resamples on the fly. If all assets ship at 48 kHz we save the resample cost; if we allow mixed rates we pay a small per-sound CPU tax. Default: 48 kHz everywhere, documented in `docs/audio.md`.
+- **Sample rate policy.** miniaudio resamples on the fly. If all assets ship at 48 kHz we save the resample cost; if we allow mixed rates we pay a small per-sound CPU tax. Default: 48 kHz everywhere, documented in [docs/audio.md](../audio.md).
 - **Threading.** miniaudio runs audio on its own callback thread. `SoundBuffer::play()` currently has no thread safety story — confirm that fire-and-forget calls from the game thread don't race with the audio thread (miniaudio's high-level API is documented thread-safe; worth verifying once).
 - **Console platforms.** In scope. The `AudioBackend` seam (see Architecture section above) is the plan — write `hal/<platform>/audio_backend.cc` per console using the platform SDK (libSceAudio for PS4/PS5, XAudio2/GDK for Xbox, nn::audio for Switch). Blocked on acquiring developer program access for each platform before any code can be written.

@@ -273,15 +273,13 @@ RenderCamera::RenderObject(RenderObject3D& object,const Matrix34& objectPosition
     DBSTREAM1( cgfx<< "RenderCamera::RenderObject" << std::endl; )
 	_viewPort.Validate();
 	assert(_renderInProgress);
-	// set up lighting
-
-//#error kts write code here
-	Matrix34 invertedObjectMatrix;
-	invertedObjectMatrix[3] = Vector3::zero;
-	invertedObjectMatrix.InverseDetOne(objectPosition);			// rotate lights into local coordinate space
-    //cout << "Object position: " << objectPosition << std::endl;
-    //cout << "invertedObjectMatrix = " << invertedObjectMatrix << std::endl;
-    invertedObjectMatrix[3] = Vector3::zero;
+	// Vestigial light-into-local-space inverse removed 2026-05-10: the local
+	// `invertedObjectMatrix` was computed via `InverseDetOne` then never read,
+	// matching the long-standing "// inverse is not currently working" comment
+	// in rendacto.cc. The assertion `(det - 1).Abs() < EPSILON` inside
+	// InverseDetOne fires on any actor with non-uniform scale (qbert stretch-
+	// and-squash) since scale changes the determinant — removing the dead path
+	// fixes that crash and the lighting transform was already broken / unused.
 
 	Matrix34 temp(objectPosition);
 	temp *= _invertedPosition;

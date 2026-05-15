@@ -11,7 +11,9 @@ tasks:
   build:
     desc: "Build wf_game (Forth + Jolt; canonical config)"
     env:
-      WF_LUA_ENGINE: none
+      # Lua is linked into the Linux debug build so the in-engine Lua step
+      # debugger (MobDebug) has a host to bind to. Override with
+      # WF_LUA_ENGINE=none if you need a Forth-only binary.
       WF_ENABLE_FENNEL: "0"
       WF_JS_ENGINE: none
       WF_WASM_ENGINE: none
@@ -168,33 +170,56 @@ tasks:
           ../../../engine/wf_game 2>&1 | tee /tmp/wfgdb.log
 
   run-level:
-    desc: "Run wf_game with -L<path> (usage: task run-level -- wflevels/snowgoons.iff)"
+    desc: "Run wf_game with -L<path> (usage: task run-level -- wflevels/snowgoons.iff [-record_video ...])"
     cmds:
       - |
-        ARGS="{{.CLI_ARGS}}"
-        if [ -z "$ARGS" ]; then
-          echo "Usage: task run-level -- <path/to/level.iff>" >&2
+        set -- {{.CLI_ARGS}}
+        if [ -z "${1:-}" ]; then
+          echo "Usage: task run-level -- <path/to/level.iff> [extra-flags...]" >&2
           exit 1
         fi
+        LEVEL="$1"; shift
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
-          engine/wf_game "-L$ARGS"
+          engine/wf_game "-L$LEVEL" "$@"
 
   snowgoons:
     desc: "Run wf_game on wflevels/snowgoons.iff directly (bypass cd.iff)"
     cmds:
       - LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/snowgoons.iff
 
+  build-level:
+    desc: "Build a level's inner + standalone .iff (usage: task build-level -- qbert_practice)"
+    cmds:
+      - |
+        set -- {{.CLI_ARGS}}
+        if [ -z "${1:-}" ]; then
+          echo "Usage: task build-level -- <level-name>" >&2
+          echo "Example: task build-level -- qbert_practice" >&2
+          exit 1
+        fi
+        bash wftools/wf_blender/build_level_binary.sh "$1"
+
+  qbert:
+    desc: "Rebuild qbert_practice (Blender → lev → iff → standalone) and run wf_game on it"
+    cmds:
+      - |
+        blender --background wflevels/qbert_practice/qbert_practice.blend \
+                --python wflevels/qbert_practice/blender_create_qbert.py
+      - bash wftools/wf_blender/build_level_binary.sh qbert_practice
+      - LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/qbert_practice-standalone.iff
+
   run-debug:
     desc: "Run wf_game with debug bridge on port 7777 (usage: task run-debug -- wflevels/snowgoons.iff)"
     cmds:
       - |
-        ARGS="{{.CLI_ARGS}}"
-        if [ -z "$ARGS" ]; then
+        set -- {{.CLI_ARGS}}
+        if [ -z "${1:-}" ]; then
           echo "Usage: task run-debug -- <path/to/level.iff>" >&2
           exit 1
         fi
+        LEVEL="$1"; shift
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
-          engine/wf_game "-L$ARGS" --debug-port 7777 --debug-bind 127.0.0.1
+          engine/wf_game "-L$LEVEL" "$@" --debug-port 7777 --debug-bind 127.0.0.1
 
   run-debug-remote:
     desc: "Run wf_game with debug bridge open on all interfaces (remote device / CI; usage: task run-debug-remote -- wflevels/snowgoons.iff)"

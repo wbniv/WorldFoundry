@@ -1,12 +1,12 @@
 # Plan: Manual rewrite + Packaging (v3 follow-up)
 
-**Status:** ✅ Done (2026-04-29). See addendum below re: 4.0–4.1 legacy install path. Part 1 (manual rewrite → provenance-first framing) landed in `docs/wf-asset-browser.md`. Part 2: `blender_manifest.toml` added to both `wf_blender/` and `wf_asset_browser/`; Taskfile tasks `blender-build`, `blender-install`, `blender-validate`, `blender-package` added. The install.sh `.py` gap (`asset_browser.py`, `asset_threading.py`, `providers.py`) was resolved via the addon split (`2026-04-29-addon-split.md`) — those files now live in `wf_asset_browser/` with its own correct install.sh.
+**Status:** ✅ Done (2026-04-29). See addendum below re: 4.0–4.1 legacy install path. Part 1 (manual rewrite → provenance-first framing) landed in [docs/wf-asset-browser.md](../wf-asset-browser.md). Part 2: `blender_manifest.toml` added to both `wf_blender/` and `wf_asset_browser/`; Taskfile tasks `blender-build`, `blender-install`, `blender-validate`, `blender-package` added. The install.sh `.py` gap (`asset_browser.py`, `asset_threading.py`, `providers.py`) was resolved via the addon split (`2026-04-29-addon-split.md`) — those files now live in `wf_asset_browser/` with its own correct install.sh.
 
 ## Context
 
 Two things to address after the Sketchfab v2 implementation:
 
-1. **Manual is too WF-commercial-centric.** The current `docs/wf-asset-browser.md` frames every licence decision as "for a commercial game" and treats WF project defaults as universal law. The tool is (intentionally) useful for any Blender project — open-source, non-commercial, hobbyist. The user also surfaced a reframing: the tool's unique value is *provenance capture*, not just filtering. The manual under-sells this.
+1. **Manual is too WF-commercial-centric.** The current [docs/wf-asset-browser.md](../wf-asset-browser.md) frames every licence decision as "for a commercial game" and treats WF project defaults as universal law. The tool is (intentionally) useful for any Blender project — open-source, non-commercial, hobbyist. The user also surfaced a reframing: the tool's unique value is *provenance capture*, not just filtering. The manual under-sells this.
 
 2. **No packaging/distribution support.** The addon has no `blender_manifest.toml` (required by Blender 4.2+ extension system), the install.sh is incomplete (misses `asset_browser.py` and `asset_threading.py`), and there are no `task` commands for building or packaging the addon.
 
@@ -14,7 +14,7 @@ Two things to address after the Sketchfab v2 implementation:
 
 ---
 
-## Part 1: Manual rewrite (`docs/wf-asset-browser.md`)
+## Part 1: Manual rewrite ([docs/wf-asset-browser.md](../wf-asset-browser.md))
 
 ### What changes
 
@@ -189,7 +189,7 @@ blender-build (sources/generates caching — skips maturin if wf_py Rust sources
 
 | Action | Path |
 |--------|------|
-| Rewrite | `docs/wf-asset-browser.md` |
+| Rewrite | [docs/wf-asset-browser.md](../wf-asset-browser.md) |
 | **New** | `wftools/wf_blender/blender_manifest.toml` |
 | Modify | `wftools/wf_blender/install.sh` — add missing .py symlinks (asset_browser, asset_threading, providers) |
 | Modify | `Taskfile.yml` — add blender-build, blender-install, blender-validate, blender-package |

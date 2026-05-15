@@ -220,7 +220,7 @@ The order matters because every tool depends on `iff` reading or writing — and
 
 1. **`textile`.** Adopt `image` (TGA/BMP/PNG), `etagere` / `crunch_packer` (atlas packing), `clap` (CLI). Replaces ~4 kLoC of C++ with ~1 kLoC of Rust. SGI support dropped — use ImageMagick to convert.
 
-(`chargrab` was originally planned here but dropped — never used in production. Being ported to Rust as `chargrab-rs` as a standalone exercise; see `docs/chargrab-rs-plan.md`.)
+(`chargrab` was originally planned here but dropped — never used in production. Being ported to Rust as `chargrab-rs` as a standalone exercise; see [docs/chargrab-rs-plan.md](../chargrab-rs-plan.md).)
 
 ### Phase 3 — `attribedit`: OAD library and standalone editor
 

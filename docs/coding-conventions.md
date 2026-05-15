@@ -599,7 +599,7 @@ should this value live?**
 - Script-authored, read at runtime? → **Mailbox** (§10).
 - Global knob that differs per build (`debug` vs `release`, platform,
   feature flag)? → **Compile-time switch** — add to
-  `docs/compile-time-switches.md`.
+  [docs/compile-time-switches.md](compile-time-switches.md).
 - Code-internal constant with no authoring surface (loop bound, buffer
   size, enum range)? → `const` or `enum` in the header.
 

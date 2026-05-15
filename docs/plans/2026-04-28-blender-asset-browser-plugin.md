@@ -2,7 +2,7 @@
 
 ## Context
 
-The `docs/investigations/2026-04-28-level-construction-tooling.md` Seam 5 specifies an asset-sourcing system with provider abstractions, per-asset `manifest.json`, project-level `licence_policy.toml` (structured `[[licence]]` records with `id` / `status` / `reason`), and a Blender plugin that searches across providers with the policy as a hard filter. Phase B and Phase D of the investigation cover the Rust crate side and the plugin side respectively. The user's request is the *plugin* deliverable, with the licence-policy schema we just defined as the filter input. The schema lives at `wflevels/licence_policy.toml`:
+The [docs/investigations/2026-04-28-level-construction-tooling.md](../investigations/2026-04-28-level-construction-tooling.md) Seam 5 specifies an asset-sourcing system with provider abstractions, per-asset `manifest.json`, project-level `licence_policy.toml` (structured `[[licence]]` records with `id` / `status` / `reason`), and a Blender plugin that searches across providers with the policy as a hard filter. Phase B and Phase D of the investigation cover the Rust crate side and the plugin side respectively. The user's request is the *plugin* deliverable, with the licence-policy schema we just defined as the filter input. The schema lives at `wflevels/licence_policy.toml`:
 
 ```toml
 # status values:

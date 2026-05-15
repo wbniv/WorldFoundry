@@ -57,6 +57,7 @@ bool bRecordVideo = false;
 int  wf_hud_score = 0;
 int  wf_hud_timer = 0;
 int  wf_hud_lives = 0;
+int  wf_hud_game_over = 0;
 #endif
 
 bool bPerspectiveCorrection = false;

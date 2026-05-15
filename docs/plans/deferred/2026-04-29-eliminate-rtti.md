@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-29
 **Status:** Deferred. Research complete; implementation not started.
-**Related:** `docs/investigations/2026-04-29-rtti-audit.md`
+**Related:** [docs/investigations/2026-04-29-rtti-audit.md](../../investigations/2026-04-29-rtti-audit.md)
 
 ---
 

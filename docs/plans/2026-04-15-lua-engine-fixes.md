@@ -10,7 +10,7 @@
 > a file-scope `<engine>_engine` namespace, module-level globals instead
 > of member variables, lifecycle driven by `ScriptRouter`. The
 > retargeting of every other scripting-engine plan onto this convention
-> is tracked in `docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md`.
+> is tracked in [docs/plans/2026-04-15-scripting-plans-align-scriptrouter.md](2026-04-15-scripting-plans-align-scriptrouter.md).
 
 ## Problems
 
@@ -285,6 +285,6 @@ No other files are affected.
 - `Shutdown` unrefs all thread refs before `lua_close`.
 - Usage: scripts return `coroutine.create(fn)` (not `coroutine.wrap`). Plain scripts
   that return a number are unaffected.
-- Documented in `docs/scripting-languages.md` under "Coroutines — multi-tick scripts"
+- Documented in [docs/scripting-languages.md](../scripting-languages.md) under "Coroutines — multi-tick scripts"
   with four example patterns: wait-N-ticks, repeating state machine, wait-for-condition,
   and Fennel equivalent.

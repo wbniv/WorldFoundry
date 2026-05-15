@@ -24,90 +24,16 @@
 	// Example: `$3fff001` = `IFF` + room `fff` (`PERM`) + slot `001`.
 	{ 'ASMP'
 		$3fff001l { 'STR' "player.iff" }  // IFF PERM fff:001
-		$3000001l { 'STR' "cube_00_s0.iff" }  // IFF RM0 000:001
-		$3000002l { 'STR' "cube_00_s1.iff" }  // IFF RM0 000:002
-		$3000003l { 'STR' "cube_00_s2.iff" }  // IFF RM0 000:003
-		$3000004l { 'STR' "cube_01_s0.iff" }  // IFF RM0 000:004
-		$3000005l { 'STR' "cube_01_s1.iff" }  // IFF RM0 000:005
-		$3000006l { 'STR' "cube_01_s2.iff" }  // IFF RM0 000:006
-		$3000007l { 'STR' "cube_02_s0.iff" }  // IFF RM0 000:007
-		$3000008l { 'STR' "cube_02_s1.iff" }  // IFF RM0 000:008
-		$3000009l { 'STR' "cube_02_s2.iff" }  // IFF RM0 000:009
-		$300000al { 'STR' "cube_03_s0.iff" }  // IFF RM0 000:00a
-		$300000bl { 'STR' "cube_03_s1.iff" }  // IFF RM0 000:00b
-		$300000cl { 'STR' "cube_03_s2.iff" }  // IFF RM0 000:00c
-		$300000dl { 'STR' "cube_04_s0.iff" }  // IFF RM0 000:00d
-		$300000el { 'STR' "cube_04_s1.iff" }  // IFF RM0 000:00e
-		$300000fl { 'STR' "cube_04_s2.iff" }  // IFF RM0 000:00f
-		$3000010l { 'STR' "cube_05_s0.iff" }  // IFF RM0 000:010
-		$3000011l { 'STR' "cube_05_s1.iff" }  // IFF RM0 000:011
-		$3000012l { 'STR' "cube_05_s2.iff" }  // IFF RM0 000:012
-		$3000013l { 'STR' "cube_06_s0.iff" }  // IFF RM0 000:013
-		$3000014l { 'STR' "cube_06_s1.iff" }  // IFF RM0 000:014
-		$3000015l { 'STR' "cube_06_s2.iff" }  // IFF RM0 000:015
-		$3000016l { 'STR' "cube_07_s0.iff" }  // IFF RM0 000:016
-		$3000017l { 'STR' "cube_07_s1.iff" }  // IFF RM0 000:017
-		$3000018l { 'STR' "cube_07_s2.iff" }  // IFF RM0 000:018
-		$3000019l { 'STR' "cube_08_s0.iff" }  // IFF RM0 000:019
-		$300001al { 'STR' "cube_08_s1.iff" }  // IFF RM0 000:01a
-		$300001bl { 'STR' "cube_08_s2.iff" }  // IFF RM0 000:01b
-		$300001cl { 'STR' "cube_09_s0.iff" }  // IFF RM0 000:01c
-		$300001dl { 'STR' "cube_09_s1.iff" }  // IFF RM0 000:01d
-		$300001el { 'STR' "cube_09_s2.iff" }  // IFF RM0 000:01e
-		$300001fl { 'STR' "cube_10_s0.iff" }  // IFF RM0 000:01f
-		$3000020l { 'STR' "cube_10_s1.iff" }  // IFF RM0 000:020
-		$3000021l { 'STR' "cube_10_s2.iff" }  // IFF RM0 000:021
-		$3000022l { 'STR' "cube_11_s0.iff" }  // IFF RM0 000:022
-		$3000023l { 'STR' "cube_11_s1.iff" }  // IFF RM0 000:023
-		$3000024l { 'STR' "cube_11_s2.iff" }  // IFF RM0 000:024
-		$3000025l { 'STR' "cube_12_s0.iff" }  // IFF RM0 000:025
-		$3000026l { 'STR' "cube_12_s1.iff" }  // IFF RM0 000:026
-		$3000027l { 'STR' "cube_12_s2.iff" }  // IFF RM0 000:027
-		$3000028l { 'STR' "cube_13_s0.iff" }  // IFF RM0 000:028
-		$3000029l { 'STR' "cube_13_s1.iff" }  // IFF RM0 000:029
-		$300002al { 'STR' "cube_13_s2.iff" }  // IFF RM0 000:02a
-		$300002bl { 'STR' "cube_14_s0.iff" }  // IFF RM0 000:02b
-		$300002cl { 'STR' "cube_14_s1.iff" }  // IFF RM0 000:02c
-		$300002dl { 'STR' "cube_14_s2.iff" }  // IFF RM0 000:02d
-		$300002el { 'STR' "cube_15_s0.iff" }  // IFF RM0 000:02e
-		$300002fl { 'STR' "cube_15_s1.iff" }  // IFF RM0 000:02f
-		$3000030l { 'STR' "cube_15_s2.iff" }  // IFF RM0 000:030
-		$3000031l { 'STR' "cube_16_s0.iff" }  // IFF RM0 000:031
-		$3000032l { 'STR' "cube_16_s1.iff" }  // IFF RM0 000:032
-		$3000033l { 'STR' "cube_16_s2.iff" }  // IFF RM0 000:033
-		$3000034l { 'STR' "cube_17_s0.iff" }  // IFF RM0 000:034
-		$3000035l { 'STR' "cube_17_s1.iff" }  // IFF RM0 000:035
-		$3000036l { 'STR' "cube_17_s2.iff" }  // IFF RM0 000:036
-		$3000037l { 'STR' "cube_18_s0.iff" }  // IFF RM0 000:037
-		$3000038l { 'STR' "cube_18_s1.iff" }  // IFF RM0 000:038
-		$3000039l { 'STR' "cube_18_s2.iff" }  // IFF RM0 000:039
-		$300003al { 'STR' "cube_19_s0.iff" }  // IFF RM0 000:03a
-		$300003bl { 'STR' "cube_19_s1.iff" }  // IFF RM0 000:03b
-		$300003cl { 'STR' "cube_19_s2.iff" }  // IFF RM0 000:03c
-		$300003dl { 'STR' "cube_20_s0.iff" }  // IFF RM0 000:03d
-		$300003el { 'STR' "cube_20_s1.iff" }  // IFF RM0 000:03e
-		$300003fl { 'STR' "cube_20_s2.iff" }  // IFF RM0 000:03f
-		$3000040l { 'STR' "cube_21_s0.iff" }  // IFF RM0 000:040
-		$3000041l { 'STR' "cube_21_s1.iff" }  // IFF RM0 000:041
-		$3000042l { 'STR' "cube_21_s2.iff" }  // IFF RM0 000:042
-		$3000043l { 'STR' "cube_22_s0.iff" }  // IFF RM0 000:043
-		$3000044l { 'STR' "cube_22_s1.iff" }  // IFF RM0 000:044
-		$3000045l { 'STR' "cube_22_s2.iff" }  // IFF RM0 000:045
-		$3000046l { 'STR' "cube_23_s0.iff" }  // IFF RM0 000:046
-		$3000047l { 'STR' "cube_23_s1.iff" }  // IFF RM0 000:047
-		$3000048l { 'STR' "cube_23_s2.iff" }  // IFF RM0 000:048
-		$3000049l { 'STR' "cube_24_s0.iff" }  // IFF RM0 000:049
-		$300004al { 'STR' "cube_24_s1.iff" }  // IFF RM0 000:04a
-		$300004bl { 'STR' "cube_24_s2.iff" }  // IFF RM0 000:04b
-		$300004cl { 'STR' "cube_25_s0.iff" }  // IFF RM0 000:04c
-		$300004dl { 'STR' "cube_25_s1.iff" }  // IFF RM0 000:04d
-		$300004el { 'STR' "cube_25_s2.iff" }  // IFF RM0 000:04e
-		$300004fl { 'STR' "cube_26_s0.iff" }  // IFF RM0 000:04f
-		$3000050l { 'STR' "cube_26_s1.iff" }  // IFF RM0 000:050
-		$3000051l { 'STR' "cube_26_s2.iff" }  // IFF RM0 000:051
-		$3000052l { 'STR' "cube_27_s0.iff" }  // IFF RM0 000:052
-		$3000053l { 'STR' "cube_27_s1.iff" }  // IFF RM0 000:053
-		$3000054l { 'STR' "cube_27_s2.iff" }  // IFF RM0 000:054
+		$3000001l { 'STR' "redball.iff" }  // IFF RM0 000:001
+		$3000002l { 'STR' "greenball.iff" }  // IFF RM0 000:002
+		$3000003l { 'STR' "slick_mesh.iff" }  // IFF RM0 000:003
+		$3000004l { 'STR' "sam_mesh.iff" }  // IFF RM0 000:004
+		$3000005l { 'STR' "ugg_mesh.iff" }  // IFF RM0 000:005
+		$3000006l { 'STR' "wrongway_mesh.iff" }  // IFF RM0 000:006
+		$3000007l { 'STR' "coily_egg_mesh.iff" }  // IFF RM0 000:007
+		$3000008l { 'STR' "coily_snake_mesh.iff" }  // IFF RM0 000:008
+		$3000009l { 'STR' "disc_mesh.iff" }  // IFF RM0 000:009
+		$300000al { 'STR' "cube.iff" }  // IFF RM0 000:00a
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "qbert_practice.lvl" ] }
@@ -125,90 +51,16 @@
 		{ 'ASS' $1000fffl [ "Room0.tga" ] }    // TGA RM0 000:fff
 		{ 'ASS' $5000fffl [ "Room0.ruv" ] }    // RUV RM0 000:fff
 		{ 'ASS' $7000fffl [ "Room0.cyc" ] }    // CYC RM0 000:fff
-		{ 'ASS' $3000001l [ "cube_00_s0.iff" ] }  // IFF RM0 000:001
-		{ 'ASS' $3000002l [ "cube_00_s1.iff" ] }  // IFF RM0 000:002
-		{ 'ASS' $3000003l [ "cube_00_s2.iff" ] }  // IFF RM0 000:003
-		{ 'ASS' $3000004l [ "cube_01_s0.iff" ] }  // IFF RM0 000:004
-		{ 'ASS' $3000005l [ "cube_01_s1.iff" ] }  // IFF RM0 000:005
-		{ 'ASS' $3000006l [ "cube_01_s2.iff" ] }  // IFF RM0 000:006
-		{ 'ASS' $3000007l [ "cube_02_s0.iff" ] }  // IFF RM0 000:007
-		{ 'ASS' $3000008l [ "cube_02_s1.iff" ] }  // IFF RM0 000:008
-		{ 'ASS' $3000009l [ "cube_02_s2.iff" ] }  // IFF RM0 000:009
-		{ 'ASS' $300000al [ "cube_03_s0.iff" ] }  // IFF RM0 000:00a
-		{ 'ASS' $300000bl [ "cube_03_s1.iff" ] }  // IFF RM0 000:00b
-		{ 'ASS' $300000cl [ "cube_03_s2.iff" ] }  // IFF RM0 000:00c
-		{ 'ASS' $300000dl [ "cube_04_s0.iff" ] }  // IFF RM0 000:00d
-		{ 'ASS' $300000el [ "cube_04_s1.iff" ] }  // IFF RM0 000:00e
-		{ 'ASS' $300000fl [ "cube_04_s2.iff" ] }  // IFF RM0 000:00f
-		{ 'ASS' $3000010l [ "cube_05_s0.iff" ] }  // IFF RM0 000:010
-		{ 'ASS' $3000011l [ "cube_05_s1.iff" ] }  // IFF RM0 000:011
-		{ 'ASS' $3000012l [ "cube_05_s2.iff" ] }  // IFF RM0 000:012
-		{ 'ASS' $3000013l [ "cube_06_s0.iff" ] }  // IFF RM0 000:013
-		{ 'ASS' $3000014l [ "cube_06_s1.iff" ] }  // IFF RM0 000:014
-		{ 'ASS' $3000015l [ "cube_06_s2.iff" ] }  // IFF RM0 000:015
-		{ 'ASS' $3000016l [ "cube_07_s0.iff" ] }  // IFF RM0 000:016
-		{ 'ASS' $3000017l [ "cube_07_s1.iff" ] }  // IFF RM0 000:017
-		{ 'ASS' $3000018l [ "cube_07_s2.iff" ] }  // IFF RM0 000:018
-		{ 'ASS' $3000019l [ "cube_08_s0.iff" ] }  // IFF RM0 000:019
-		{ 'ASS' $300001al [ "cube_08_s1.iff" ] }  // IFF RM0 000:01a
-		{ 'ASS' $300001bl [ "cube_08_s2.iff" ] }  // IFF RM0 000:01b
-		{ 'ASS' $300001cl [ "cube_09_s0.iff" ] }  // IFF RM0 000:01c
-		{ 'ASS' $300001dl [ "cube_09_s1.iff" ] }  // IFF RM0 000:01d
-		{ 'ASS' $300001el [ "cube_09_s2.iff" ] }  // IFF RM0 000:01e
-		{ 'ASS' $300001fl [ "cube_10_s0.iff" ] }  // IFF RM0 000:01f
-		{ 'ASS' $3000020l [ "cube_10_s1.iff" ] }  // IFF RM0 000:020
-		{ 'ASS' $3000021l [ "cube_10_s2.iff" ] }  // IFF RM0 000:021
-		{ 'ASS' $3000022l [ "cube_11_s0.iff" ] }  // IFF RM0 000:022
-		{ 'ASS' $3000023l [ "cube_11_s1.iff" ] }  // IFF RM0 000:023
-		{ 'ASS' $3000024l [ "cube_11_s2.iff" ] }  // IFF RM0 000:024
-		{ 'ASS' $3000025l [ "cube_12_s0.iff" ] }  // IFF RM0 000:025
-		{ 'ASS' $3000026l [ "cube_12_s1.iff" ] }  // IFF RM0 000:026
-		{ 'ASS' $3000027l [ "cube_12_s2.iff" ] }  // IFF RM0 000:027
-		{ 'ASS' $3000028l [ "cube_13_s0.iff" ] }  // IFF RM0 000:028
-		{ 'ASS' $3000029l [ "cube_13_s1.iff" ] }  // IFF RM0 000:029
-		{ 'ASS' $300002al [ "cube_13_s2.iff" ] }  // IFF RM0 000:02a
-		{ 'ASS' $300002bl [ "cube_14_s0.iff" ] }  // IFF RM0 000:02b
-		{ 'ASS' $300002cl [ "cube_14_s1.iff" ] }  // IFF RM0 000:02c
-		{ 'ASS' $300002dl [ "cube_14_s2.iff" ] }  // IFF RM0 000:02d
-		{ 'ASS' $300002el [ "cube_15_s0.iff" ] }  // IFF RM0 000:02e
-		{ 'ASS' $300002fl [ "cube_15_s1.iff" ] }  // IFF RM0 000:02f
-		{ 'ASS' $3000030l [ "cube_15_s2.iff" ] }  // IFF RM0 000:030
-		{ 'ASS' $3000031l [ "cube_16_s0.iff" ] }  // IFF RM0 000:031
-		{ 'ASS' $3000032l [ "cube_16_s1.iff" ] }  // IFF RM0 000:032
-		{ 'ASS' $3000033l [ "cube_16_s2.iff" ] }  // IFF RM0 000:033
-		{ 'ASS' $3000034l [ "cube_17_s0.iff" ] }  // IFF RM0 000:034
-		{ 'ASS' $3000035l [ "cube_17_s1.iff" ] }  // IFF RM0 000:035
-		{ 'ASS' $3000036l [ "cube_17_s2.iff" ] }  // IFF RM0 000:036
-		{ 'ASS' $3000037l [ "cube_18_s0.iff" ] }  // IFF RM0 000:037
-		{ 'ASS' $3000038l [ "cube_18_s1.iff" ] }  // IFF RM0 000:038
-		{ 'ASS' $3000039l [ "cube_18_s2.iff" ] }  // IFF RM0 000:039
-		{ 'ASS' $300003al [ "cube_19_s0.iff" ] }  // IFF RM0 000:03a
-		{ 'ASS' $300003bl [ "cube_19_s1.iff" ] }  // IFF RM0 000:03b
-		{ 'ASS' $300003cl [ "cube_19_s2.iff" ] }  // IFF RM0 000:03c
-		{ 'ASS' $300003dl [ "cube_20_s0.iff" ] }  // IFF RM0 000:03d
-		{ 'ASS' $300003el [ "cube_20_s1.iff" ] }  // IFF RM0 000:03e
-		{ 'ASS' $300003fl [ "cube_20_s2.iff" ] }  // IFF RM0 000:03f
-		{ 'ASS' $3000040l [ "cube_21_s0.iff" ] }  // IFF RM0 000:040
-		{ 'ASS' $3000041l [ "cube_21_s1.iff" ] }  // IFF RM0 000:041
-		{ 'ASS' $3000042l [ "cube_21_s2.iff" ] }  // IFF RM0 000:042
-		{ 'ASS' $3000043l [ "cube_22_s0.iff" ] }  // IFF RM0 000:043
-		{ 'ASS' $3000044l [ "cube_22_s1.iff" ] }  // IFF RM0 000:044
-		{ 'ASS' $3000045l [ "cube_22_s2.iff" ] }  // IFF RM0 000:045
-		{ 'ASS' $3000046l [ "cube_23_s0.iff" ] }  // IFF RM0 000:046
-		{ 'ASS' $3000047l [ "cube_23_s1.iff" ] }  // IFF RM0 000:047
-		{ 'ASS' $3000048l [ "cube_23_s2.iff" ] }  // IFF RM0 000:048
-		{ 'ASS' $3000049l [ "cube_24_s0.iff" ] }  // IFF RM0 000:049
-		{ 'ASS' $300004al [ "cube_24_s1.iff" ] }  // IFF RM0 000:04a
-		{ 'ASS' $300004bl [ "cube_24_s2.iff" ] }  // IFF RM0 000:04b
-		{ 'ASS' $300004cl [ "cube_25_s0.iff" ] }  // IFF RM0 000:04c
-		{ 'ASS' $300004dl [ "cube_25_s1.iff" ] }  // IFF RM0 000:04d
-		{ 'ASS' $300004el [ "cube_25_s2.iff" ] }  // IFF RM0 000:04e
-		{ 'ASS' $300004fl [ "cube_26_s0.iff" ] }  // IFF RM0 000:04f
-		{ 'ASS' $3000050l [ "cube_26_s1.iff" ] }  // IFF RM0 000:050
-		{ 'ASS' $3000051l [ "cube_26_s2.iff" ] }  // IFF RM0 000:051
-		{ 'ASS' $3000052l [ "cube_27_s0.iff" ] }  // IFF RM0 000:052
-		{ 'ASS' $3000053l [ "cube_27_s1.iff" ] }  // IFF RM0 000:053
-		{ 'ASS' $3000054l [ "cube_27_s2.iff" ] }  // IFF RM0 000:054
+		{ 'ASS' $3000001l [ "redball.iff" ] }  // IFF RM0 000:001
+		{ 'ASS' $3000002l [ "greenball.iff" ] }  // IFF RM0 000:002
+		{ 'ASS' $3000003l [ "slick_mesh.iff" ] }  // IFF RM0 000:003
+		{ 'ASS' $3000004l [ "sam_mesh.iff" ] }  // IFF RM0 000:004
+		{ 'ASS' $3000005l [ "ugg_mesh.iff" ] }  // IFF RM0 000:005
+		{ 'ASS' $3000006l [ "wrongway_mesh.iff" ] }  // IFF RM0 000:006
+		{ 'ASS' $3000007l [ "coily_egg_mesh.iff" ] }  // IFF RM0 000:007
+		{ 'ASS' $3000008l [ "coily_snake_mesh.iff" ] }  // IFF RM0 000:008
+		{ 'ASS' $3000009l [ "disc_mesh.iff" ] }  // IFF RM0 000:009
+		{ 'ASS' $300000al [ "cube.iff" ] }  // IFF RM0 000:00a
 	}
 	{ 'ALGN' .align(2048) }
 }
