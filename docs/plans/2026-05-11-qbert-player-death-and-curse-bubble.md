@@ -1,7 +1,7 @@
 # Plan — Q✱bert player death animation + curse bubble
 
 **Date:** 2026-05-11
-**Status:** Implemented (commit `e3a50b4`, 2026-05-12) — Forth wiring complete; visual fine-detail verification pending higher-res viewport.
+**Status:** Implemented (commits `e3a50b4`, `2229963`, 2026-05-12) — Forth wiring complete and verified working end-to-end. Two debugging false trails (OAS-class-controls-rendering, zForth-int-vs-float) along the way are post-mortem'd in [docs/investigations/2026-05-12-curse-bubble-non-bugs.md](../investigations/2026-05-12-curse-bubble-non-bugs.md).
 
 ## 2026-05-12 implementation notes
 

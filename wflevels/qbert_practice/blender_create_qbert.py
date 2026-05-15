@@ -504,6 +504,8 @@ if player:
         # visibility fan-out by zeroing all 336 vis slots and showing the
         # L1R1 (palette 0) state-0 row.
         "3 72 write-mailbox "
+        "0 70 write-mailbox "
+        "0 71 write-mailbox "
         "0 411 write-mailbox 0 412 write-mailbox 0 413 write-mailbox "
         "0 414 write-mailbox 0 415 write-mailbox "
         "0 416 write-mailbox 0 417 write-mailbox 0 418 write-mailbox "
@@ -2322,6 +2324,7 @@ DIRECTOR_SCRIPT = "".join([
     f"{WW_FIRST_DELAY} {WW_MB_SPAWN_TIMER} write-mailbox ",
     "1 421 write-mailbox ",   # LEVEL_INITIALIZED
     "then\n",
+    "71 read-mailbox 1 + 71 write-mailbox ",
     # Intro state machine — runs only while phase 0..5; gates the rest of
     # the camera routing via mb 418 (INTRO_DONE). See the per-phase
     # narrative in the Python comments above INTRO_LEG_FRAMES.
@@ -2577,7 +2580,7 @@ DIRECTOR_SCRIPT = "".join([
     # Cube-state advance on landed event (unchanged from prior design).
     "411 read-mailbox 0 <> if ",
     "400 read-mailbox dup 1 + * 2 / 401 read-mailbox + 200 + ",
-    "dup read-mailbox 0 = if 2 swap write-mailbox else drop then ",
+    "dup read-mailbox 0 = if 2 swap write-mailbox 70 read-mailbox 25 + 70 write-mailbox else drop then ",
     "0 411 write-mailbox then\n",
     # ── Per-cube TOP-color update on state change ───────────────────────────
     # Every tick, for each cube N (0..27):
@@ -2643,6 +2646,8 @@ DIRECTOR_SCRIPT = "".join([
     # Reset per-cube state to 0 — the per-tick state-change detector above
     # will see (cur=0, prev=2) on the next tick and re-write the new round's
     # state-0 TOP color to every cube. No visibility fan-out needed.
+    "70 read-mailbox 1000 + 70 write-mailbox "
+    "0 71 write-mailbox "
     "28 0 do 0 200 i + write-mailbox loop ",
     "0 411 write-mailbox ",
     "0 413 write-mailbox ",

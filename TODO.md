@@ -84,7 +84,7 @@ a one-to-one arcade copy.
 
 - [ ] Multi-step cube cycles — round 2+ requires N touches per cube; round 3+ reverts a cube on the touch after it's "done". Currently the player landing handler is single-flip `state==0 → state=2` ([blender_create_qbert.py:~2006](wflevels/qbert_practice/blender_create_qbert.py)); needs per-round LUT-driven state transition rules.
 - [ ] Per-round difficulty scaling — flat spawn cadences right now; arcade ramps red-ball / Slick / Coily frequency per round and adds enemies (e.g. 2 Coily eggs at L4+).
-- [ ] Score & lives HUD — `mb 70/71/72` (score / timer / lives) are tracked but not rendered. Needs digit-glyph rendering wired through CamShot overlay or screen-space actor.
+- [x] Score & lives HUD — SCORE increments +25/cube and +1000/round-clear; TIMER counts elapsed ticks; LIVES display was already wired (2026-05-14). Enemy-kill scoring (Slick/Sam +300, Green Ball +100, disc rescue +500) deferred.
 - [ ] High-score persistence — save/load top scores to disk; surface in attract mode + game-over screen.
 - [ ] Bonus-points popups — floating "+25" / "+300" / "+500" labels on cube-flip, Slick/Sam catch, Coily-off-disc.
 - [ ] Coily-falls-off-disc — Coily's chase AI currently restricts to on-pyramid cubes; extend to allow landing on disc coords + retire with bonus.
@@ -99,7 +99,7 @@ a one-to-one arcade copy.
 ### Visual polish
 
 - [ ] Distinct enemy meshes — Slick/Sam currently use a hat-on-body flipper proxy; Ugg/Wrong-Way use a climber blob; Coily is stacked spheres. Replace with arcade-recognizable 3D characters.
-- [ ] Player death animation — currently a Z-ramp + apex teleport; arcade has a discrete fall + explosion.
+- [x] Player death animation — tumble + splat + curse bubble implemented (e3a50b4, 2229963, 2026-05-12). Full-sprite explosion deferred.
 - [ ] Disc spin VFX — currently steady yaw rotation; arcade flashes colours on the disc rim.
 - [ ] Game-over screen + name entry — current restart is functional but goes straight to attract; needs game-over hold, name entry for new high scores, transition to attract.
 

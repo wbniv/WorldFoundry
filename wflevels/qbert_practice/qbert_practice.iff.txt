@@ -33,7 +33,8 @@
 		$3000007l { 'STR' "coily_egg_mesh.iff" }  // IFF RM0 000:007
 		$3000008l { 'STR' "coily_snake_mesh.iff" }  // IFF RM0 000:008
 		$3000009l { 'STR' "disc_mesh.iff" }  // IFF RM0 000:009
-		$300000al { 'STR' "cube.iff" }  // IFF RM0 000:00a
+		$300000al { 'STR' "curse_bubble.iff" }  // IFF RM0 000:00a
+		$300000bl { 'STR' "cube.iff" }  // IFF RM0 000:00b
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "qbert_practice.lvl" ] }
@@ -60,7 +61,8 @@
 		{ 'ASS' $3000007l [ "coily_egg_mesh.iff" ] }  // IFF RM0 000:007
 		{ 'ASS' $3000008l [ "coily_snake_mesh.iff" ] }  // IFF RM0 000:008
 		{ 'ASS' $3000009l [ "disc_mesh.iff" ] }  // IFF RM0 000:009
-		{ 'ASS' $300000al [ "cube.iff" ] }  // IFF RM0 000:00a
+		{ 'ASS' $300000al [ "curse_bubble.iff" ] }  // IFF RM0 000:00a
+		{ 'ASS' $300000bl [ "cube.iff" ] }  // IFF RM0 000:00b
 	}
 	{ 'ALGN' .align(2048) }
 }
