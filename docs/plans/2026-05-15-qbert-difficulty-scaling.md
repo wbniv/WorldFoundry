@@ -1,54 +1,71 @@
 # Plan — Q✱bert per-round difficulty scaling
 
 **Date:** 2026-05-15
-**Status:** In progress
+**Status:** In progress — Phase 1 complete; Phase 2 implementation pending
 
 ## Context
 
-Q✱bert currently has only one round-dependent spawn variable: Red Ball interval (`max(60, 300 - 12×ROUND_NUMBER)` ticks). All other enemies use fixed intervals across all 16 rounds. This plan extracts ground-truth spawn timing from the arcade ROM, then implements per-round scaling in the Forth director script.
+Q✱bert currently has per-enemy independent spawn timers (mailboxes 512, 547, 550, 552, 570, 572). This plan extracts ground-truth spawn behaviour from the arcade ROM and implements faithful difficulty scaling.
+
+**Phase 1 complete (2026-05-15):** ROM disassembled via Ghidra headless (x86:LE:16:Real Mode — Q✱bert runs on an **Intel 8088 at 5 MHz**, not a 6809 as commonly cited). Full annotated listing at [`docs/investigations/qbert-8088-disassembly.asm`](../investigations/qbert-8088-disassembly.asm).
 
 ## Critical files
 
 - `wflevels/qbert_practice/blender_create_qbert.py` — all Forth changes
-- `docs/investigations/qbert-z80-disassembly.asm` — full ROM disassembly (Phase 1 output)
-- `docs/investigations/qbert-spawn-timing.csv` — MAME timing probe output (Phase 1 output)
-- `scripts/research/mame/qbert_spawn_timing.lua` — new MAME probe script
+- `docs/investigations/qbert-8088-disassembly.asm` — full annotated ROM disassembly ✓ done
+- `scripts/research/mame/qbert_spawn_timing.lua` — MAME runtime probe (optional, for validation)
 
-## Current spawn mailboxes
+## What the ROM actually does (Phase 1 finding)
 
-| Enemy     | Spawn timer mb | Current interval (ticks) |
-|-----------|---------------|--------------------------|
-| Red Ball  | 512           | `max(60, 300 - 12×R)`    |
-| Green Ball| 547           | 1500 (fixed)             |
-| Slick     | 550           | 480 (fixed)              |
-| Sam       | 552           | 1500 (fixed)             |
-| Ugg       | 570           | 1200 (fixed)             |
-| Wrong-Way | 572           | 1500 (fixed)             |
+The arcade does **not** use per-enemy independent timers. Instead it uses a **scripted spawn sequencer**:
 
-## Arcade rules (to implement)
+- **RAM `$0085`** — shared countdown timer, decremented each game tick
+- **RAM `$0D17`** — reload value (ticks); reloaded each time `$0085` hits zero
+- **RAM `$0D13`** — current position in the spawn sequence table (advances +2 per fire)
+- **RAM `$0D11`** — sequence start address (reset each round; `$FFFF` sentinel wraps here)
 
-**Enemy introduction by level:**
-- L1 (rounds 0–3): Red Ball + Coily only
-- L2 (rounds 4–7): add Slick + Sam
-- L3 (rounds 8–11): add Ugg + Wrong-Way
-- L4 (rounds 12–15): increase Coily eggs (2 simultaneous)
+Each difficulty **stage** (18 total, table at ROM `$A899`) bundles a spawn sequence + reload value. Stage configs:
 
-**Gating pattern** (Forth, at level init):
-```forth
-( Slick: only from L2 = round >= 4 )
-425 read-mailbox 4 < if 32767 550 write-mailbox then
-```
+| Stage | Reload | b[5] | Sequence (enemy IDs: 0=RedBall 2=CoilyEgg 5=Slick 7=Sam) |
+|-------|--------|------|-----------------------------------------------------------|
+| 0     | 200    | 1    | E2 E2 END |
+| 1     | 160    | 1    | E0 E0 E2 END |
+| 2     | 136    | 1    | E5 E7 … E5 E7 … (Slick+Sam heavy) |
+| 3     | 176    | 1    | E2 E0 E0 … (Coily+RedBall) |
+| 4     | 208    | 1    | E5 E7 … (Slick+Sam+Coily) |
+| 5–17  | 124–256| 1–4 | increasing enemy mix; b[5] likely max simultaneous Coily eggs |
 
-**Spawn interval scaling** (per-round values from ROM/MAME probe — filled in after Phase 1):
+Enemy type IDs in sequence (low 5 bits after masking 0x1F):
+- E0 = Red Ball, E2 = Coily egg, E5 = Slick, E7 = Sam, E1 = Ugg(?), E3 = Wrong-Way(?)
 
-| Round | Red Ball | Green Ball | Slick | Sam | Ugg | Wrong-Way |
-|-------|----------|------------|-------|-----|-----|-----------|
-| 0     | 300      | (off)      | (off) |(off)|(off)| (off)     |
-| 4     | 252      | ?          | ?     | ?   |(off)| (off)     |
-| 8     | 204      | ?          | ?     | ?   | ?   | ?         |
-| 12    | 156      | ?          | ?     | ?   | ?   | ?         |
+`b[5]` field (1→4 across stages) likely controls max simultaneous Coily eggs (arcade L4 has 2 eggs).
 
-*Fill in from ROM disassembly / MAME probe.*
+## Current spawn mailboxes (WF implementation — to replace)
+
+| Enemy     | Spawn timer mb | Current interval (ticks) | Arcade approach |
+|-----------|---------------|--------------------------|-----------------|
+| Red Ball  | 512           | `max(60, 300 - 12×R)`   | sequence entry  |
+| Green Ball| 547           | 1500 (fixed)             | sequence entry  |
+| Slick     | 550           | 480 (fixed)              | sequence entry  |
+| Sam       | 552           | 1500 (fixed)             | sequence entry  |
+| Ugg       | 570           | 1200 (fixed)             | sequence entry  |
+| Wrong-Way | 572           | 1500 (fixed)             | sequence entry  |
+
+## Phase 2 implementation plan
+
+Faithful approach: replace independent timers with a single WF spawn sequencer:
+
+1. **Single spawn-seq timer** — one director mailbox as countdown; reloads from a per-stage value
+2. **Stage sequence table** — author the 18-stage sequences as Forth data (or `.lev` data)
+3. **Stage counter** — advances on round clear; wraps at 18
+4. **b[5] gating** — use to cap simultaneous Coily eggs
+
+Simpler interim approach (good enough for now):
+- Keep per-enemy timers but set them to the sequence-implied cadence
+- Stage 0 reload=200 ticks; enemy mix: only Coily eggs initially
+- Stage 1+: add Red Ball
+- Stage 2+: add Slick/Sam
+- etc.
 
 ## Build pipeline
 
