@@ -355,14 +355,26 @@ WFGame::RunLevel(_DiskFile* levelFile)
 			static int s_initials_pos = 0;
 			static char s_initials[4] = {'A','A','A','\0'};
 
+			// GO_HOLD_TIMER (mb 591): C++ decrements each frame; Forth won't
+			// restart while > 0.  GO_BLOCK (mb 590): set 1 while initials entry
+			// is live so Forth ignores joystick for restart entirely.
+			{
+				int hold = mb.ReadMailbox(591).WholePart();
+				if (hold > 0)
+					mb.WriteMailbox(591, Scalar(hold - 1, 0));
+			}
+
 			if (wf_hud_game_over && !s_prev_game_over)
 			{
+				// Arm 3 s minimum hold regardless of whether score qualifies.
+				mb.WriteMailbox(591, Scalar(180, 0));
 				HScore_Load();
 				if (HScore_IsHigh(wf_hud_score))
 				{
 					s_initials_pos = 0;
 					s_initials[0] = s_initials[1] = s_initials[2] = 'A';
 					wf_hud_entering_initials = 1;
+					mb.WriteMailbox(590, Scalar(1, 0));  // block Forth restart
 				}
 			}
 			s_prev_game_over = wf_hud_game_over;
@@ -386,6 +398,8 @@ WFGame::RunLevel(_DiskFile* levelFile)
 						HScore_Save();
 						wf_hud_entering_initials = 0;
 						s_initials_pos = 0;
+						mb.WriteMailbox(590, Scalar(0, 0));   // unblock Forth restart
+						mb.WriteMailbox(591, Scalar(180, 0)); // 3 s to view updated table
 					}
 				}
 				if ((joy & 0x4000) && s_initials_pos > 0)  // LEFT: back

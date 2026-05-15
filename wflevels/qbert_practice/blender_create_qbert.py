@@ -100,6 +100,8 @@ SQRT2 = math.sqrt(2.0)
 #   582        POPUP_PENDING_X
 #   583        POPUP_PENDING_Y
 #   584        POPUP_PENDING_Z (includes +1.5 Z offset above cube top)
+#   590        GO_BLOCK (C++ sets 1 while initials entry live; Forth must not restart)
+#   591        GO_HOLD_TIMER (C++ arms 180 on game-over edge, decrements each frame; Forth restart blocked while > 0)
 #
 # Per-cube color overrides live on each cube actor's local mailboxes:
 #   3037 / 3038 / 3039 = EMAILBOX_FACE_COLOR_TOP / LIT / SHADOW (mailbox.inc)
@@ -119,6 +121,8 @@ POPUP_PENDING_X_MB = 582
 POPUP_PENDING_Y_MB = 583
 POPUP_PENDING_Z_MB = 584
 POPUP_HOLD_TICKS   = 90   # 1.5 s at 60 Hz
+GO_BLOCK_MB        = 590
+GO_HOLD_TIMER_MB   = 591
 
 NUM_MAILBOXES = 600  # well above the highest mailbox we use (~584)
 
@@ -509,9 +513,16 @@ if player:
         # 1. Game-over restart trigger. Snapshot prev-stick before updating
         # mb 422 so edge-detect can compare; then update mb 422 = current.
         "422 read-mailbox stick 422 write-mailbox\n"
-        "420 read-mailbox 1 = if "
-        "0 = if "  # consumes prev_stick: prev was zero?
-        "stick 0 <> if "
+        # Game-over restart guard — three nested checks before allowing restart:
+        #   if [420=1] if [590=0] if [591=0] if [prev=0] if [stick!=0] restart
+        # Each guard has an else drop so prev_stick is consumed in all paths.
+        # exit fires after all inner branches, inside the [420=1] guard.
+        # Stack at entry: ( prev_stick )
+        "420 read-mailbox 1 = if "                # [1] game-over?
+        "590 read-mailbox 0 = if "                # [2] not blocked by C++ initials
+        "591 read-mailbox 0 = if "                # [3] hold timer expired
+        "0 = if "                                 # [4] prev_stick==0? (consumes it)
+        "stick 0 <> if "                          # [5] joystick now pressed?
         # Restart: reset every per-game mailbox + snap player to apex.
         # CRITICAL: also reset ROUND_NUMBER=0 so play resumes at L1R1, not
         # at whatever round the previous game-over happened on. Re-init the
@@ -543,11 +554,16 @@ if player:
         "0 INDEXOF_X_POS write-mailbox "
         "6 1.4142136 * INDEXOF_Y_POS write-mailbox "
         "15 INDEXOF_Z_POS write-mailbox "
-        "then "
-        "then "
-        "exit "
-        "else drop "
-        "then\n"
+        "then "          # [5 close] stick check — no else; silent when stick==0
+        "else drop "     # [4 else] prev_stick was non-zero: discard it
+        "then "          # [4 close]
+        "else drop "     # [3 else] hold timer still running: discard prev_stick
+        "then "          # [3 close]
+        "else drop "     # [2 else] GO_BLOCK set: discard prev_stick
+        "then "          # [2 close]
+        "exit "          # always exit inside game-over guard
+        "else drop "     # [1 else] not game-over: discard prev_stick
+        "then\n"         # [1 close]
         # 1.5. Round-clear apex respawn. Director sets mb[426]=1 when round
         # timer expires; we handle it here (player context) so INDEXOF_X/Y/Z
         # writes go to the player actor's position, not the director's.
