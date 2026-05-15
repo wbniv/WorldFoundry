@@ -100,6 +100,8 @@ SQRT2 = math.sqrt(2.0)
 #   582        POPUP_PENDING_X
 #   583        POPUP_PENDING_Y
 #   584        POPUP_PENDING_Z (includes +1.5 Z offset above cube top)
+#   573        COILY_EGG_ACTIVE (1 while egg is hopping; visibility mailbox for egg actor)
+#   574        COILY_SNAKE_ACTIVE (1 while snake is chasing; visibility mailbox for snake actor)
 #   590        GO_BLOCK (C++ sets 1 while initials entry live; Forth must not restart)
 #   591        GO_HOLD_TIMER (C++ arms 180 on game-over edge, decrements each frame; Forth restart blocked while > 0)
 #
@@ -952,6 +954,9 @@ WW_MB_ACTIVE       = 571
 WW_MB_SPAWN_TIMER  = 572
 WW_SPAWN_INTERVAL  = 1500         # kept for reference; actual interval computed at runtime
 
+COILY_EGG_ACTIVE_MB   = 573   # 1 while egg is hopping; visibility mailbox for egg actor
+COILY_SNAKE_ACTIVE_MB = 574   # 1 while snake is chasing; visibility mailbox for snake actor
+
 # Side-face offsets and rotations.
 _CLIMBER_BODY_HALF_X = 0.4
 UGG_X_OFFSET = +(CUBE_SIZE / 2 + _CLIMBER_BODY_HALF_X)   # +X side face
@@ -1316,7 +1321,7 @@ for _k in range(REDBALL_COUNT):
     _ball['wf_Model Type']          = 'Mesh'
     _ball['wf_Mobility']            = 'Anchored'
     _ball['wf_Mass']                = 0.0
-    _ball['wf_Visibility Mailbox']  = 1
+    _ball['wf_Visibility Mailbox']  = RB_MB_ACTIVE_BASE + _k   # 0=parked, 1=on board
     _ball['wf_NumberOfLocalMailboxes'] = 0   # state lives in globals 462..485
     _ball['wf_Script']              = redball_script(_k)
 
@@ -1738,6 +1743,8 @@ def coily_egg_script():
         f"{mb_row} read-mailbox 6 > if "
         f"0 {mb_phase} write-mailbox "
         f"2 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+        f"0 {COILY_EGG_ACTIVE_MB} write-mailbox "
+        f"1 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
         f"{REDBALL_PARK_Z} 3011 write-mailbox "
         f"exit "
         f"then "
@@ -1785,7 +1792,7 @@ _egg['wf_original_mesh_name']  = 'coily_egg_mesh.iff'
 _egg['wf_Model Type']          = 'Mesh'
 _egg['wf_Mobility']            = 'Anchored'
 _egg['wf_Mass']                = 0.0
-_egg['wf_Visibility Mailbox']  = 1
+_egg['wf_Visibility Mailbox']  = COILY_EGG_ACTIVE_MB   # 0=parked, 1=hopping
 _egg['wf_NumberOfLocalMailboxes'] = 0
 _egg['wf_Script']              = coily_egg_script()
 
@@ -2080,7 +2087,7 @@ _snake['wf_original_mesh_name']  = 'coily_snake_mesh.iff'
 _snake['wf_Model Type']          = 'Mesh'
 _snake['wf_Mobility']            = 'Anchored'
 _snake['wf_Mass']                = 0.0
-_snake['wf_Visibility Mailbox']  = 1
+_snake['wf_Visibility Mailbox']  = COILY_SNAKE_ACTIVE_MB   # 0=parked, 1=chasing
 _snake['wf_NumberOfLocalMailboxes'] = 0
 _snake['wf_Script']              = coily_snake_script()
 
@@ -2408,6 +2415,8 @@ DIRECTOR_SCRIPT = "".join([
     + " ",
     # Coily Phase A: clear globals + arm first-egg delay.
     f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+    f"0 {COILY_EGG_ACTIVE_MB} write-mailbox "
+    f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
     f"0 {COILY_MB_ROUND_DONE} write-mailbox "
     f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox ",
     # Phase D: arm both discs as present (PHASE=1).
@@ -2634,6 +2643,8 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {_CE_MB_FLASH_TICK} write-mailbox "
     f"1 {_CE_MB_PHASE} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
     f"1 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+    f"1 {COILY_EGG_ACTIVE_MB} write-mailbox "
+    f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
     f"1 {COILY_MB_ROUND_DONE} write-mailbox "
     f"then "
     f"then "
@@ -2810,6 +2821,8 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {_CS_MB_PHASE} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
     f"{REDBALL_PARK_Z} 3011 {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
     f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+    f"0 {COILY_EGG_ACTIVE_MB} write-mailbox "
+    f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
     f"0 {COILY_MB_ROUND_DONE} write-mailbox "
     f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox "
     # Phase D: re-arm both discs (PHASE=1) and restore visible Z (in case
