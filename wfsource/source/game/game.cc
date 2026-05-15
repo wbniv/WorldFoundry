@@ -43,6 +43,10 @@
 #include "mailbox.hp"
 #include <gfx/vmem.hp>
 #include <cpplib/libstrm.hp>
+#if DESIGNER_CHEATS
+#include "hscore.h"
+#include <cstring>
+#endif
 
 
 
@@ -333,11 +337,63 @@ WFGame::RunLevel(_DiskFile* levelFile)
 #if DESIGNER_CHEATS
 		{
 			extern int wf_hud_score, wf_hud_timer, wf_hud_lives, wf_hud_game_over;
+			extern int wf_hud_entering_initials, wf_hud_initials_pos;
+			extern char wf_hud_initials[4];
 			Mailboxes& mb = _curLevel->GetMailboxes();
-			wf_hud_score = mb.ReadMailbox(70).WholePart();
-			wf_hud_timer = mb.ReadMailbox(71).WholePart();
-			wf_hud_lives = mb.ReadMailbox(72).WholePart();
+			wf_hud_score     = mb.ReadMailbox(70).WholePart();
+			wf_hud_timer     = mb.ReadMailbox(71).WholePart();
+			wf_hud_lives     = mb.ReadMailbox(72).WholePart();
 			wf_hud_game_over = mb.ReadMailbox(420).WholePart();
+
+			// High-score initials entry — triggered on fresh game-over edge.
+			// Joystick bits from mb 1910 (JUSTPRESSED, already edge-detected):
+			//   0x0800 UP   → prev letter
+			//   0x1000 DOWN → next letter
+			//   0x2000 RIGHT → advance / confirm last char
+			//   0x4000 LEFT  → back one position
+			static int s_prev_game_over = 0;
+			static int s_initials_pos = 0;
+			static char s_initials[4] = {'A','A','A','\0'};
+
+			if (wf_hud_game_over && !s_prev_game_over)
+			{
+				HScore_Load();
+				if (HScore_IsHigh(wf_hud_score))
+				{
+					s_initials_pos = 0;
+					s_initials[0] = s_initials[1] = s_initials[2] = 'A';
+					wf_hud_entering_initials = 1;
+				}
+			}
+			s_prev_game_over = wf_hud_game_over;
+
+			if (wf_hud_entering_initials)
+			{
+				int joy = mb.ReadMailbox(1910).WholePart();
+				if (joy & 0x0800)  // UP: prev letter
+					s_initials[s_initials_pos] = (s_initials[s_initials_pos] - 'A' + 25) % 26 + 'A';
+				if (joy & 0x1000)  // DOWN: next letter
+					s_initials[s_initials_pos] = (s_initials[s_initials_pos] - 'A' + 1) % 26 + 'A';
+				if (joy & 0x2000)  // RIGHT: advance / confirm
+				{
+					if (s_initials_pos < 2)
+					{
+						s_initials_pos++;
+					}
+					else
+					{
+						HScore_Insert(wf_hud_score, mb.ReadMailbox(425).WholePart(), s_initials);
+						HScore_Save();
+						wf_hud_entering_initials = 0;
+						s_initials_pos = 0;
+					}
+				}
+				if ((joy & 0x4000) && s_initials_pos > 0)  // LEFT: back
+					s_initials_pos--;
+
+				memcpy(wf_hud_initials, s_initials, 4);
+				wf_hud_initials_pos = s_initials_pos;
+			}
 		}
 #endif
 		deltaTime = _display->PageFlip();

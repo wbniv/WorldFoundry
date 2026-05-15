@@ -58,6 +58,9 @@ int  wf_hud_score = 0;
 int  wf_hud_timer = 0;
 int  wf_hud_lives = 0;
 int  wf_hud_game_over = 0;
+int  wf_hud_entering_initials = 0;
+char wf_hud_initials[4] = {'A','A','A','\0'};
+int  wf_hud_initials_pos = 0;
 #endif
 
 bool bPerspectiveCorrection = false;

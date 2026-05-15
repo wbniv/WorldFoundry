@@ -84,7 +84,7 @@ a one-to-one arcade copy.
 
 - [ ] Per-round difficulty scaling — flat spawn cadences right now; arcade ramps red-ball / Slick / Coily frequency per round and adds enemies (e.g. 2 Coily eggs at L4+).
 - [x] Score & lives HUD — SCORE increments +25/cube and +1000/round-clear; TIMER counts elapsed ticks; LIVES display was already wired (2026-05-14). Enemy-kill scoring (Slick/Sam +300, Green Ball +100, disc rescue +500) deferred.
-- [ ] High-score persistence — save/load top scores to disk; surface in attract mode + game-over screen.
+- [x] High-score persistence — 23-entry binary file seeded with arcade defaults, AAA initials picker on game-over, two-column overlay table (2026-05-15).
 - [ ] Bonus-points popups — floating "+25" / "+300" / "+500" labels on cube-flip, Slick/Sam catch, Coily-off-disc.
 - [ ] Coily-falls-off-disc — Coily's chase AI currently restricts to on-pyramid cubes; extend to allow landing on disc coords + retire with bonus.
 - [ ] Bonus letter "S" — rare cube pickup that grants a freeze / extra life / bonus points (arcade behaviour varies by round).

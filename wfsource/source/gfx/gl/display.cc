@@ -47,6 +47,11 @@ extern int wf_hud_score;
 extern int wf_hud_timer;
 extern int wf_hud_lives;
 extern int wf_hud_game_over;
+extern int wf_hud_entering_initials;
+extern char wf_hud_initials[4];
+extern int wf_hud_initials_pos;
+
+#include "hscore.h"
 
 // Forward declarations for the offscreen capture FBO — definitions live in
 // the second DESIGNER_CHEATS block below (with CaptureFrame). RenderBegin
@@ -120,6 +125,80 @@ static void DrawHud(int xSize, int ySize)
         glScalef(scale2, scale2, 1.0f);
         DrawHudText(0.0f, 0.0f, line2);
         glPopMatrix();
+
+        // HIGH SCORES table — matches arcade layout:
+        //   Entry #1 centered at top; entries 2-23 in two-column pairs.
+        HScore_Load();
+        const float tscale = 1.0f;
+        const float trow = 9.0f * tscale;
+
+        // Header: "HIGH SCORES" in red, centered just below GAME OVER block.
+        glColor3f(1.0f, 0.1f, 0.1f);
+        {
+            char hdr[] = "HIGH SCORES";
+            float hw = (float)stb_easy_font_width(hdr) * tscale;
+            glPushMatrix();
+            glTranslatef(cx - hw * 0.5f, cy + 28.0f, 0.0f);
+            glScalef(tscale, tscale, 1.0f);
+            DrawHudText(0.0f, 0.0f, hdr);
+            glPopMatrix();
+        }
+
+        // Entry #1 — centered, yellow.
+        glColor3f(1.0f, 1.0f, 0.0f);
+        float ty = cy + 38.0f;
+        {
+            snprintf(buf, sizeof(buf), "1) %s %d", g_hiscores[0].name, g_hiscores[0].score);
+            float w = (float)stb_easy_font_width(buf) * tscale;
+            glPushMatrix();
+            glTranslatef(cx - w * 0.5f, ty, 0.0f);
+            glScalef(tscale, tscale, 1.0f);
+            DrawHudText(0.0f, 0.0f, buf);
+            glPopMatrix();
+        }
+        ty += trow;
+
+        // Entries 2-23: two columns.  Left col = even rank, right col = odd rank.
+        // Each column is 90px wide, centred on cx +/- 55.
+        const float colL = cx - 100.0f;
+        const float colR = cx + 10.0f;
+        int i = 1;  // already rendered index 0
+        while (i < HS_COUNT)
+        {
+            // Left entry
+            snprintf(buf, sizeof(buf), "%2d) %s %d", i + 1,
+                     g_hiscores[i].name, g_hiscores[i].score);
+            DrawHudText(colL, ty, buf);
+            i++;
+            // Right entry (may be absent if count is odd)
+            if (i < HS_COUNT)
+            {
+                snprintf(buf, sizeof(buf), "%2d) %s %d", i + 1,
+                         g_hiscores[i].name, g_hiscores[i].score);
+                DrawHudText(colR, ty, buf);
+                i++;
+            }
+            ty += trow;
+        }
+
+        // AAA initials picker — white, centered below the table.
+        if (wf_hud_entering_initials)
+        {
+            glColor3f(1.0f, 1.0f, 1.0f);
+            char picker[32];
+            // Show current position bracketed: e.g.  [A] B C
+            snprintf(picker, sizeof(picker), "%c%c%c  %c%c%c  %c%c%c",
+                     wf_hud_initials_pos == 0 ? '[' : ' ', wf_hud_initials[0], wf_hud_initials_pos == 0 ? ']' : ' ',
+                     wf_hud_initials_pos == 1 ? '[' : ' ', wf_hud_initials[1], wf_hud_initials_pos == 1 ? ']' : ' ',
+                     wf_hud_initials_pos == 2 ? '[' : ' ', wf_hud_initials[2], wf_hud_initials_pos == 2 ? ']' : ' ');
+            const float scale2 = 2.0f;
+            const float pw = (float)stb_easy_font_width(picker) * scale2;
+            glPushMatrix();
+            glTranslatef(cx - pw * 0.5f, ty + 4.0f, 0.0f);
+            glScalef(scale2, scale2, 1.0f);
+            DrawHudText(0.0f, 0.0f, picker);
+            glPopMatrix();
+        }
 
         glColor3f(1.0f, 1.0f, 0.0f);  // restore HUD yellow for any later draws
     }
