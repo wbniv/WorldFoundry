@@ -891,8 +891,7 @@ GB_MB_FREEZE_TIMER = 546        # global; >0 → all enemies skip movement
 GB_MB_SPAWN_TIMER = 547         # director countdown to next green spawn
 GB_MB_ACTIVE      = 548         # director mirror: 1 = green ball alive
 GB_FREEZE_TICKS   = 300         # 5 s at 60 Hz
-GB_SPAWN_INTERVAL = 1500        # 25 s between green-ball spawns
-GB_FIRST_DELAY    = 600         # 10 s after intro before first green spawns
+# GB/Slick/Sam/Ugg/WW spawn intervals computed at runtime: max(120, 480 - 24*ROUND_NUMBER)
 
 # Slick & Sam — cube-flippers. Bounce down like a red ball; on landing-on-cube
 # revert that cube's state (2 → 0). On contact with Q*bert, the flipper dies;
@@ -900,14 +899,12 @@ GB_FIRST_DELAY    = 600         # 10 s after intro before first green spawns
 SLICK_MB_BASE       = 494
 SLICK_MB_ACTIVE     = 549
 SLICK_MB_SPAWN_TIMER = 550
-SLICK_SPAWN_INTERVAL = 480       # 8 s between Slick spawns
-SLICK_FIRST_DELAY    = 600       # 10 s after intro
+SLICK_SPAWN_INTERVAL = 480       # kept for reference; actual interval computed at runtime
 
 SAM_MB_BASE       = 502
 SAM_MB_ACTIVE     = 551
 SAM_MB_SPAWN_TIMER = 552
-SAM_SPAWN_INTERVAL = 1500        # 25 s between Sam spawns
-SAM_FIRST_DELAY    = 900         # 15 s after intro
+SAM_SPAWN_INTERVAL = 1500        # kept for reference; actual interval computed at runtime
 
 # Ugg & Wrong-Way — climb the SIDES of the pyramid. Ugg on right edge cubes
 # (r, r); Wrong-Way on left edge cubes (r, 0). Both spawn at the bottom row
@@ -918,14 +915,12 @@ SAM_FIRST_DELAY    = 900         # 15 s after intro
 UGG_MB_BASE        = 553
 UGG_MB_ACTIVE      = 569
 UGG_MB_SPAWN_TIMER = 570
-UGG_SPAWN_INTERVAL = 1200         # 20 s between Ugg spawns
-UGG_FIRST_DELAY    = 1200         # 20 s after intro
+UGG_SPAWN_INTERVAL = 1200         # kept for reference; actual interval computed at runtime
 
 WW_MB_BASE         = 561
 WW_MB_ACTIVE       = 571
 WW_MB_SPAWN_TIMER  = 572
-WW_SPAWN_INTERVAL  = 1500         # 25 s between Wrong-Way spawns
-WW_FIRST_DELAY     = 1800         # 30 s after intro
+WW_SPAWN_INTERVAL  = 1500         # kept for reference; actual interval computed at runtime
 
 # Side-face offsets and rotations.
 _CLIMBER_BODY_HALF_X = 0.4
@@ -944,6 +939,10 @@ WW_YAW_AFTER_PITCH  = 0.0
 # Z at cube centre (not above cube top): Z_BASE - row * Z_MUL.
 _CLIMBER_Z_BASE = CUBE_BASE_Z + CUBE_SIZE * (NUM_ROWS - 1)   # 13 (cube-centre Z at row 0)
 _CLIMBER_Z_MUL  = CUBE_SIZE                                  # 2.0
+
+# Forth expression for round-scaled spawn interval: max(120, 480 - 24*ROUND_NUMBER).
+# At R=4: 384 ticks (~6.4s); R=8: 288 (~4.8s); R=12: 192 (~3.2s); R=15: 120 (~2s).
+_SPAWN_INTERVAL_FORTH = "425 read-mailbox 24 * 480 swap - dup 120 < if drop 120 then "
 
 # LFSR step — Galois LFSR-16, polynomial x^16+x^14+x^13+x^11+1 (tap mask 0xB400).
 # Side-effect: advance mb 511; result: lsb (0 or 1) left on stack.
@@ -2314,16 +2313,16 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {SLICK_MB_ACTIVE} write-mailbox "
     f"0 {SAM_MB_ACTIVE} write-mailbox "
     f"425 read-mailbox 3 > if "
-    f"{GB_FIRST_DELAY} {GB_MB_SPAWN_TIMER} write-mailbox "
-    f"{SLICK_FIRST_DELAY} {SLICK_MB_SPAWN_TIMER} write-mailbox "
-    f"{SAM_FIRST_DELAY} {SAM_MB_SPAWN_TIMER} write-mailbox "
+    f"{_SPAWN_INTERVAL_FORTH}{GB_MB_SPAWN_TIMER} write-mailbox "
+    f"{_SPAWN_INTERVAL_FORTH}{SLICK_MB_SPAWN_TIMER} write-mailbox "
+    f"{_SPAWN_INTERVAL_FORTH}{SAM_MB_SPAWN_TIMER} write-mailbox "
     f"then ",
     # Ugg & Wrong-Way: clear active mirrors; arm first-spawn delay only from L3 (round >= 8).
     f"0 {UGG_MB_ACTIVE} write-mailbox "
     f"0 {WW_MB_ACTIVE} write-mailbox "
     f"425 read-mailbox 7 > if "
-    f"{UGG_FIRST_DELAY} {UGG_MB_SPAWN_TIMER} write-mailbox "
-    f"{WW_FIRST_DELAY} {WW_MB_SPAWN_TIMER} write-mailbox "
+    f"{_SPAWN_INTERVAL_FORTH}{UGG_MB_SPAWN_TIMER} write-mailbox "
+    f"{_SPAWN_INTERVAL_FORTH}{WW_MB_SPAWN_TIMER} write-mailbox "
     f"then ",
     "1 421 write-mailbox ",   # LEVEL_INITIALIZED
     "then\n",
@@ -2429,7 +2428,7 @@ DIRECTOR_SCRIPT = "".join([
     f"{_RB_Z_AT_ROW_1} {GB_MB_BASE + _RB_OFF_END_Z} {GB_ACTOR_IDX} write-actor-mailbox "
     f"1 {GB_MB_BASE + _RB_OFF_PHASE} {GB_ACTOR_IDX} write-actor-mailbox "
     f"1 {GB_MB_ACTIVE} write-mailbox "
-    f"{GB_SPAWN_INTERVAL} {GB_MB_SPAWN_TIMER} write-mailbox "
+    f"{_SPAWN_INTERVAL_FORTH}{GB_MB_SPAWN_TIMER} write-mailbox "
     f"then then then "
     f"then\n",
     # ── Slick & Sam spawn blocks ──────────────────────────────────────────────
@@ -2452,12 +2451,12 @@ DIRECTOR_SCRIPT = "".join([
         f"{_RB_Z_AT_ROW_1} {_base + _RB_OFF_END_Z} {_actor_idx} write-actor-mailbox "
         f"1 {_base + _RB_OFF_PHASE} {_actor_idx} write-actor-mailbox "
         f"1 {_active_mb} write-mailbox "
-        f"{_interval} {_timer_mb} write-mailbox "
+        f"{_SPAWN_INTERVAL_FORTH}{_timer_mb} write-mailbox "
         f"then then then "
         f"then\n"
-        for (_base, _active_mb, _timer_mb, _interval, _actor_idx) in [
-            (SLICK_MB_BASE, SLICK_MB_ACTIVE, SLICK_MB_SPAWN_TIMER, SLICK_SPAWN_INTERVAL, SLICK_ACTOR_IDX),
-            (SAM_MB_BASE,   SAM_MB_ACTIVE,   SAM_MB_SPAWN_TIMER,   SAM_SPAWN_INTERVAL,   SAM_ACTOR_IDX),
+        for (_base, _active_mb, _timer_mb, _actor_idx) in [
+            (SLICK_MB_BASE, SLICK_MB_ACTIVE, SLICK_MB_SPAWN_TIMER, SLICK_ACTOR_IDX),
+            (SAM_MB_BASE,   SAM_MB_ACTIVE,   SAM_MB_SPAWN_TIMER,   SAM_ACTOR_IDX),
         ]
     ],
     # ── Ugg & Wrong-Way spawn blocks (climbers) ───────────────────────────────
@@ -2492,12 +2491,12 @@ DIRECTOR_SCRIPT = "".join([
         # PHASE := 1, ACTIVE := 1, re-arm spawn timer.
         f"1 {_base + _RB_OFF_PHASE} {_actor_idx} write-actor-mailbox "
         f"1 {_active_mb} write-mailbox "
-        f"{_interval} {_timer_mb} write-mailbox "
+        f"{_SPAWN_INTERVAL_FORTH}{_timer_mb} write-mailbox "
         f"then then then "
         f"then\n"
-        for (_base, _active_mb, _timer_mb, _interval, _actor_idx, _spawn_col, _pitch, _yaw) in [
-            (UGG_MB_BASE, UGG_MB_ACTIVE, UGG_MB_SPAWN_TIMER, UGG_SPAWN_INTERVAL, UGG_ACTOR_IDX, 6, UGG_PITCH, UGG_YAW_AFTER_PITCH),
-            (WW_MB_BASE,  WW_MB_ACTIVE,  WW_MB_SPAWN_TIMER,  WW_SPAWN_INTERVAL,  WW_ACTOR_IDX,  0, WW_PITCH,  WW_YAW_AFTER_PITCH),
+        for (_base, _active_mb, _timer_mb, _actor_idx, _spawn_col, _pitch, _yaw) in [
+            (UGG_MB_BASE, UGG_MB_ACTIVE, UGG_MB_SPAWN_TIMER, UGG_ACTOR_IDX, 6, UGG_PITCH, UGG_YAW_AFTER_PITCH),
+            (WW_MB_BASE,  WW_MB_ACTIVE,  WW_MB_SPAWN_TIMER,  WW_ACTOR_IDX,  0, WW_PITCH,  WW_YAW_AFTER_PITCH),
         ]
     ],
     # ── Coily egg per-round spawn (Phase A) ───────────────────────────────────
@@ -2691,9 +2690,9 @@ DIRECTOR_SCRIPT = "".join([
     f"{REDBALL_PARK_Z} 3011 {SAM_ACTOR_IDX} write-actor-mailbox "
     f"0 {SAM_MB_ACTIVE} write-mailbox "
     f"425 read-mailbox 3 > if "
-    f"{GB_FIRST_DELAY} {GB_MB_SPAWN_TIMER} write-mailbox "
-    f"{SLICK_FIRST_DELAY} {SLICK_MB_SPAWN_TIMER} write-mailbox "
-    f"{SAM_FIRST_DELAY} {SAM_MB_SPAWN_TIMER} write-mailbox "
+    f"{_SPAWN_INTERVAL_FORTH}{GB_MB_SPAWN_TIMER} write-mailbox "
+    f"{_SPAWN_INTERVAL_FORTH}{SLICK_MB_SPAWN_TIMER} write-mailbox "
+    f"{_SPAWN_INTERVAL_FORTH}{SAM_MB_SPAWN_TIMER} write-mailbox "
     f"then "
     # Ugg & Wrong-Way round refresh: retire both; rearm spawn timers only from L3 (round >= 8).
     f"0 {UGG_MB_BASE + _RB_OFF_PHASE} {UGG_ACTOR_IDX} write-actor-mailbox "
@@ -2703,8 +2702,8 @@ DIRECTOR_SCRIPT = "".join([
     f"{REDBALL_PARK_Z} 3011 {WW_ACTOR_IDX} write-actor-mailbox "
     f"0 {WW_MB_ACTIVE} write-mailbox "
     f"425 read-mailbox 7 > if "
-    f"{UGG_FIRST_DELAY} {UGG_MB_SPAWN_TIMER} write-mailbox "
-    f"{WW_FIRST_DELAY} {WW_MB_SPAWN_TIMER} write-mailbox "
+    f"{_SPAWN_INTERVAL_FORTH}{UGG_MB_SPAWN_TIMER} write-mailbox "
+    f"{_SPAWN_INTERVAL_FORTH}{WW_MB_SPAWN_TIMER} write-mailbox "
     f"then ",
     "then ",
     "else drop then\n",
