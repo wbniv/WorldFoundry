@@ -1307,7 +1307,7 @@ _gball['wf_original_mesh_name']  = 'greenball.iff'
 _gball['wf_Model Type']          = 'Mesh'
 _gball['wf_Mobility']            = 'Anchored'
 _gball['wf_Mass']                = 0.0
-_gball['wf_Visibility Mailbox']  = 1
+_gball['wf_Visibility Mailbox']  = GB_MB_ACTIVE   # 0=parked/invisible, 1=on board
 _gball['wf_NumberOfLocalMailboxes'] = 0
 _gball['wf_Script']              = redball_script(0, variant='green')
 
@@ -1420,7 +1420,7 @@ _slick['wf_original_mesh_name']  = 'slick_mesh.iff'
 _slick['wf_Model Type']          = 'Mesh'
 _slick['wf_Mobility']            = 'Anchored'
 _slick['wf_Mass']                = 0.0
-_slick['wf_Visibility Mailbox']  = 1
+_slick['wf_Visibility Mailbox']  = SLICK_MB_ACTIVE   # 0=parked/invisible, 1=on board
 _slick['wf_NumberOfLocalMailboxes'] = 0
 _slick['wf_Script']              = redball_script(0, variant='slick')
 
@@ -1437,7 +1437,7 @@ _sam['wf_original_mesh_name']  = 'sam_mesh.iff'
 _sam['wf_Model Type']          = 'Mesh'
 _sam['wf_Mobility']            = 'Anchored'
 _sam['wf_Mass']                = 0.0
-_sam['wf_Visibility Mailbox']  = 1
+_sam['wf_Visibility Mailbox']  = SAM_MB_ACTIVE   # 0=parked/invisible, 1=on board
 _sam['wf_NumberOfLocalMailboxes'] = 0
 _sam['wf_Script']              = redball_script(0, variant='sam')
 
@@ -1546,7 +1546,7 @@ _ugg['wf_original_mesh_name']  = 'ugg_mesh.iff'
 _ugg['wf_Model Type']          = 'Mesh'
 _ugg['wf_Mobility']            = 'Anchored'
 _ugg['wf_Mass']                = 0.0
-_ugg['wf_Visibility Mailbox']  = 1
+_ugg['wf_Visibility Mailbox']  = UGG_MB_ACTIVE   # 0=parked/invisible, 1=on board
 _ugg['wf_NumberOfLocalMailboxes'] = 0
 _ugg['wf_Script']              = redball_script(0, variant='ugg')
 
@@ -1562,7 +1562,7 @@ _ww['wf_original_mesh_name']  = 'wrongway_mesh.iff'
 _ww['wf_Model Type']          = 'Mesh'
 _ww['wf_Mobility']            = 'Anchored'
 _ww['wf_Mass']                = 0.0
-_ww['wf_Visibility Mailbox']  = 1
+_ww['wf_Visibility Mailbox']  = WW_MB_ACTIVE   # 0=parked/invisible, 1=on board
 _ww['wf_NumberOfLocalMailboxes'] = 0
 _ww['wf_Script']              = redball_script(0, variant='wrongway')
 
@@ -2308,20 +2308,23 @@ DIRECTOR_SCRIPT = "".join([
     f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox ",
     # Phase D: arm both discs as present (PHASE=1).
     f"1 {_DL_MB_PHASE} write-mailbox 1 {_DR_MB_PHASE} write-mailbox ",
-    # Green Ball: clear freeze + active mirror, arm first-green delay.
+    # Green Ball, Slick, Sam: clear active mirrors; arm first-spawn delay only from L2 (round >= 4).
     f"0 {GB_MB_FREEZE_TIMER} write-mailbox "
     f"0 {GB_MB_ACTIVE} write-mailbox "
-    f"{GB_FIRST_DELAY} {GB_MB_SPAWN_TIMER} write-mailbox ",
-    # Slick & Sam: clear active mirrors + arm first-spawn delays.
     f"0 {SLICK_MB_ACTIVE} write-mailbox "
-    f"{SLICK_FIRST_DELAY} {SLICK_MB_SPAWN_TIMER} write-mailbox "
     f"0 {SAM_MB_ACTIVE} write-mailbox "
-    f"{SAM_FIRST_DELAY} {SAM_MB_SPAWN_TIMER} write-mailbox ",
-    # Ugg & Wrong-Way: clear active mirrors + arm first-spawn delays.
+    f"425 read-mailbox 3 > if "
+    f"{GB_FIRST_DELAY} {GB_MB_SPAWN_TIMER} write-mailbox "
+    f"{SLICK_FIRST_DELAY} {SLICK_MB_SPAWN_TIMER} write-mailbox "
+    f"{SAM_FIRST_DELAY} {SAM_MB_SPAWN_TIMER} write-mailbox "
+    f"then ",
+    # Ugg & Wrong-Way: clear active mirrors; arm first-spawn delay only from L3 (round >= 8).
     f"0 {UGG_MB_ACTIVE} write-mailbox "
-    f"{UGG_FIRST_DELAY} {UGG_MB_SPAWN_TIMER} write-mailbox "
     f"0 {WW_MB_ACTIVE} write-mailbox "
-    f"{WW_FIRST_DELAY} {WW_MB_SPAWN_TIMER} write-mailbox ",
+    f"425 read-mailbox 7 > if "
+    f"{UGG_FIRST_DELAY} {UGG_MB_SPAWN_TIMER} write-mailbox "
+    f"{WW_FIRST_DELAY} {WW_MB_SPAWN_TIMER} write-mailbox "
+    f"then ",
     "1 421 write-mailbox ",   # LEVEL_INITIALIZED
     "then\n",
     "71 read-mailbox 1 + 71 write-mailbox ",
@@ -2676,30 +2679,33 @@ DIRECTOR_SCRIPT = "".join([
     f"1 {_DL_MB_PHASE} write-mailbox 1 {_DR_MB_PHASE} write-mailbox "
     f"{_disc_world_xyz(DISC_L_ROW, DISC_L_COL)[2]} 3011 {DISC_L_ACTOR_IDX} write-actor-mailbox "
     f"{_disc_world_xyz(DISC_R_ROW, DISC_R_COL)[2]} 3011 {DISC_R_ACTOR_IDX} write-actor-mailbox "
-    # Green Ball round refresh: retire ball, clear freeze, rearm spawn timer.
+    # Green Ball, Slick, Sam round refresh: retire all; rearm spawn timers only from L2 (round >= 4).
     f"0 {GB_MB_BASE + _RB_OFF_PHASE} {GB_ACTOR_IDX} write-actor-mailbox "
     f"{REDBALL_PARK_Z} 3011 {GB_ACTOR_IDX} write-actor-mailbox "
     f"0 {GB_MB_ACTIVE} write-mailbox "
     f"0 {GB_MB_FREEZE_TIMER} write-mailbox "
-    f"{GB_FIRST_DELAY} {GB_MB_SPAWN_TIMER} write-mailbox "
-    # Slick & Sam round refresh: retire both, rearm spawn timers.
     f"0 {SLICK_MB_BASE + _RB_OFF_PHASE} {SLICK_ACTOR_IDX} write-actor-mailbox "
     f"{REDBALL_PARK_Z} 3011 {SLICK_ACTOR_IDX} write-actor-mailbox "
     f"0 {SLICK_MB_ACTIVE} write-mailbox "
-    f"{SLICK_FIRST_DELAY} {SLICK_MB_SPAWN_TIMER} write-mailbox "
     f"0 {SAM_MB_BASE + _RB_OFF_PHASE} {SAM_ACTOR_IDX} write-actor-mailbox "
     f"{REDBALL_PARK_Z} 3011 {SAM_ACTOR_IDX} write-actor-mailbox "
     f"0 {SAM_MB_ACTIVE} write-mailbox "
+    f"425 read-mailbox 3 > if "
+    f"{GB_FIRST_DELAY} {GB_MB_SPAWN_TIMER} write-mailbox "
+    f"{SLICK_FIRST_DELAY} {SLICK_MB_SPAWN_TIMER} write-mailbox "
     f"{SAM_FIRST_DELAY} {SAM_MB_SPAWN_TIMER} write-mailbox "
-    # Ugg & Wrong-Way round refresh: retire both, rearm spawn timers.
+    f"then "
+    # Ugg & Wrong-Way round refresh: retire both; rearm spawn timers only from L3 (round >= 8).
     f"0 {UGG_MB_BASE + _RB_OFF_PHASE} {UGG_ACTOR_IDX} write-actor-mailbox "
     f"{REDBALL_PARK_Z} 3011 {UGG_ACTOR_IDX} write-actor-mailbox "
     f"0 {UGG_MB_ACTIVE} write-mailbox "
-    f"{UGG_FIRST_DELAY} {UGG_MB_SPAWN_TIMER} write-mailbox "
     f"0 {WW_MB_BASE + _RB_OFF_PHASE} {WW_ACTOR_IDX} write-actor-mailbox "
     f"{REDBALL_PARK_Z} 3011 {WW_ACTOR_IDX} write-actor-mailbox "
     f"0 {WW_MB_ACTIVE} write-mailbox "
-    f"{WW_FIRST_DELAY} {WW_MB_SPAWN_TIMER} write-mailbox ",
+    f"425 read-mailbox 7 > if "
+    f"{UGG_FIRST_DELAY} {UGG_MB_SPAWN_TIMER} write-mailbox "
+    f"{WW_FIRST_DELAY} {WW_MB_SPAWN_TIMER} write-mailbox "
+    f"then ",
     "then ",
     "else drop then\n",
 ])
