@@ -1,7 +1,7 @@
 # Plan — Q✱bert game-over hold + name-entry fix
 
 **Date:** 2026-05-15
-**Status:** Not started
+**Status:** Complete — 8f2b6a1
 
 ## Problem
 

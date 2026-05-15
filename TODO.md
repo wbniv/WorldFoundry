@@ -100,7 +100,7 @@ a one-to-one arcade copy.
 - [ ] Distinct enemy meshes — Slick/Sam currently use a hat-on-body flipper proxy; Ugg/Wrong-Way use a climber blob; Coily is stacked spheres. Replace with arcade-recognizable 3D characters.
 - [x] Player death animation — tumble + splat + curse bubble implemented (e3a50b4, 2229963, 2026-05-12). Full-sprite explosion deferred.
 - [ ] Disc spin VFX — currently steady yaw rotation; arcade flashes colours on the disc rim.
-- [ ] Game-over screen + name entry — current restart is functional but goes straight to attract; needs game-over hold, name entry for new high scores, transition to attract.
+- [x] Game-over screen + name entry — 8f2b6a1: GO_BLOCK (mb 590) prevents Forth restart during C++ initials entry; GO_HOLD_TIMER (mb 591) enforces 3 s minimum hold on game-over screen; 3 s post-confirm hold shows updated table.
 
 ### Verification / breadth
 
