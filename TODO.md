@@ -82,7 +82,7 @@ a one-to-one arcade copy.
 
 ### Core gameplay
 
-- [ ] Per-round difficulty scaling — ROM disassembly (2026-05-15) revealed arcade uses a **scripted spawn sequencer** (single timer at RAM $0085, 18-stage sequence table at ROM $A899), not per-enemy timers. WF currently uses independent per-enemy timers. Phase A visibility gating done (56c8ee2). Phase B: implement single-timer sequencer — [plan](docs/plans/2026-05-15-qbert-difficulty-scaling.md).
+- [x] Per-round difficulty scaling — Phase A visibility gating (56c8ee2) + Phase B spawn-interval scaling `max(120, 480-24×R)` for all enemies (1326a68). ROM disassembly at [`docs/investigations/qbert-8088-disassembly.asm`](docs/investigations/qbert-8088-disassembly.asm). Deferred: full single-timer sequencer + second Coily egg in L4.
 - [x] Score & lives HUD — SCORE increments +25/cube and +1000/round-clear; TIMER counts elapsed ticks; LIVES display was already wired (2026-05-14). Enemy-kill scoring (Slick/Sam +300, Green Ball +100, disc rescue +500) deferred.
 - [x] High-score persistence — 23-entry binary file seeded with arcade defaults, AAA initials picker on game-over, two-column overlay table (2026-05-15).
 - [ ] Bonus-points popups — floating "+25" / "+300" / "+500" labels on cube-flip, Slick/Sam catch, Coily-off-disc.
