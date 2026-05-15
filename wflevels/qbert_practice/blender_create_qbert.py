@@ -2586,6 +2586,8 @@ DIRECTOR_SCRIPT = "".join([
         f"418 read-mailbox 1 = if "
         f"{GB_MB_FREEZE_TIMER} read-mailbox 0 = if "
         f"{_active_mb} read-mailbox 0 = if "
+        f"{_rival_mb} read-mailbox 0 = if "          # no simultaneous climbers
+        f"{COILY_MB_PHASE_GLOBAL} read-mailbox 0 = if "  # no climber while Coily active
         f"{_timer_mb} read-mailbox dup 0 > if "
         f"1 - {_timer_mb} write-mailbox "
         f"else drop "
@@ -2609,11 +2611,11 @@ DIRECTOR_SCRIPT = "".join([
         f"1 {_base + _RB_OFF_PHASE} {_actor_idx} write-actor-mailbox "
         f"1 {_active_mb} write-mailbox "
         f"{_SPAWN_INTERVAL_FORTH}{_timer_mb} write-mailbox "
-        f"then then then "
+        f"then then then then then "
         f"then\n"
-        for (_base, _active_mb, _timer_mb, _actor_idx, _spawn_col, _pitch, _yaw) in [
-            (UGG_MB_BASE, UGG_MB_ACTIVE, UGG_MB_SPAWN_TIMER, UGG_ACTOR_IDX, 6, UGG_PITCH, UGG_YAW_AFTER_PITCH),
-            (WW_MB_BASE,  WW_MB_ACTIVE,  WW_MB_SPAWN_TIMER,  WW_ACTOR_IDX,  0, WW_PITCH,  WW_YAW_AFTER_PITCH),
+        for (_base, _active_mb, _rival_mb, _timer_mb, _actor_idx, _spawn_col, _pitch, _yaw) in [
+            (UGG_MB_BASE, UGG_MB_ACTIVE, WW_MB_ACTIVE,  UGG_MB_SPAWN_TIMER, UGG_ACTOR_IDX, 6, UGG_PITCH, UGG_YAW_AFTER_PITCH),
+            (WW_MB_BASE,  WW_MB_ACTIVE,  UGG_MB_ACTIVE, WW_MB_SPAWN_TIMER,  WW_ACTOR_IDX,  0, WW_PITCH,  WW_YAW_AFTER_PITCH),
         ]
     ],
     # ── Coily egg per-round spawn (Phase A) ───────────────────────────────────
