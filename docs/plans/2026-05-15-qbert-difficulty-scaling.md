@@ -1,7 +1,7 @@
 # Plan — Q✱bert per-round difficulty scaling
 
 **Date:** 2026-05-15
-**Status:** In progress — Phase 1 complete; Phase 2 implementation pending
+**Status:** Complete — Phase 1 (ROM disassembly) + Phase 2 (spawn interval scaling) done; deferred: second Coily egg in L4
 
 ## Context
 
