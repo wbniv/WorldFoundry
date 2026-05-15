@@ -82,7 +82,6 @@ a one-to-one arcade copy.
 
 ### Core gameplay
 
-- [ ] Multi-step cube cycles — round 2+ requires N touches per cube; round 3+ reverts a cube on the touch after it's "done". Currently the player landing handler is single-flip `state==0 → state=2` ([blender_create_qbert.py:~2006](wflevels/qbert_practice/blender_create_qbert.py)); needs per-round LUT-driven state transition rules.
 - [ ] Per-round difficulty scaling — flat spawn cadences right now; arcade ramps red-ball / Slick / Coily frequency per round and adds enemies (e.g. 2 Coily eggs at L4+).
 - [x] Score & lives HUD — SCORE increments +25/cube and +1000/round-clear; TIMER counts elapsed ticks; LIVES display was already wired (2026-05-14). Enemy-kill scoring (Slick/Sam +300, Green Ball +100, disc rescue +500) deferred.
 - [ ] High-score persistence — save/load top scores to disk; surface in attract mode + game-over screen.
@@ -135,6 +134,7 @@ encounter them while implementing the arcade port.
 
 ## DONE
 
+- [x] Multi-step cube cycles — L1/L3 single-hop (0→2 +25); L2 two-hop (0→1→2 +25+50, done→revert 0); L4 two-hop (done→revert 1) — [plan](docs/plans/2026-05-14-qbert-multi-step-cube-cycles.md)
 - [x] Lua 5.4 interpreter spike — NullInterpreter replaced, snowgoons player + director ported — [plan](docs/plans/2026-04-13-lua-interpreter-spike.md)
 - [x] Fennel on Lua — `;` sigil, embedded fennel.lua, sub-dispatch inside lua_engine — [plan](docs/plans/2026-04-14-fennel-on-lua.md)
 - [x] Vendor Lua 5.4 — statically linked into wf_game — [plan](docs/plans/2026-04-14-vendor-lua.md)

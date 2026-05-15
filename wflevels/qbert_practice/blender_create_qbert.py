@@ -2577,10 +2577,18 @@ DIRECTOR_SCRIPT = "".join([
     "else drop 100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then ",
     "then ",
     "then\n",
-    # Cube-state advance on landed event (unchanged from prior design).
+    # Cube-state advance on landed event — multi-step per arcade rules:
+    #   L1/L3 (level even): 0→2 in one hop (+25); extra hops no-op.
+    #   L2     (level=1):   0→1→2 in two hops (+25,+50); hop done→revert to 0.
+    #   L4     (level=3):   0→1→2 in two hops (+25,+50); hop done→revert to 1.
+    # level = ROUND_NUMBER(425) ÷ 4 (integer); even=1-step, odd=2-step.
     "411 read-mailbox 0 <> if ",
     "400 read-mailbox dup 1 + * 2 / 401 read-mailbox + 200 + ",
-    "dup read-mailbox 0 = if 2 swap write-mailbox 70 read-mailbox 25 + 70 write-mailbox else drop then ",
+    "dup read-mailbox ",
+    "dup 0 = if drop 425 read-mailbox dup 4 % - 4 / 2 % 0 = if 2 swap write-mailbox else 1 swap write-mailbox then 70 read-mailbox 25 + 70 write-mailbox ",
+    "else dup 1 = if drop 2 swap write-mailbox 70 read-mailbox 50 + 70 write-mailbox ",
+    "else drop 425 read-mailbox dup 4 % - 4 / dup 1 = if drop 0 swap write-mailbox else dup 3 = if drop 1 swap write-mailbox else drop drop then then ",
+    "then then ",
     "0 411 write-mailbox then\n",
     # ── Per-cube TOP-color update on state change ───────────────────────────
     # Every tick, for each cube N (0..27):
