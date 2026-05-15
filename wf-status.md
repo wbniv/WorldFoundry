@@ -225,7 +225,7 @@ Eighteen days of work (2026-04-12 – 2026-04-30). Newest first:
 | (early) | [Production pathway diagram](docs/reference/production-pathway.md) | Mermaid diagram of the original pipeline from `.oas` / 3D editor → `cd.iff`. Useful map of where each tool fits. |
 
 
-## Current blockers
+## Blockers
 
 No hard blockers. Jolt is functional and all scripting engines are smoke-tested. Active areas of ongoing work are listed in Open follow-up work below.
 
