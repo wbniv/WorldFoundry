@@ -1,0 +1,372 @@
+# Q*bert palette capture — Wed May  6 02:28:18 2026
+[INFO] DIP set; tap=true
+  pixel apex_top     (118, 57): #312177  [state0-R1]
+  pixel lit_side     ( 91, 89): #312177  [state0-R1]
+  pixel shadow_side  (111, 89): #312177  [state0-R1]
+[diag] 7840 palette writes; first=f1 last=f245
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #56A999  [state2-R1]
+  pixel lit_side     ( 91, 89): #314646  [state2-R1]
+  pixel shadow_side  (111, 89): #56A999  [state2-R1]
+
+=== PALETTE R1 (frame=2350) ===
+  pen00: #312176  (raw: 27 03)
+  pen01: #56A998  (raw: A9 05)
+  pen02: #DEDE00  (raw: D0 0D)
+  pen03: #314646  (raw: 44 03)
+  pen04: #5646EE  (raw: 4E 05)
+  pen05: #FF6666  (raw: 66 0F)
+  pen06: #000000  (raw: 00 00)
+  pen07: #EE1021  (raw: 12 0E)
+  pen08: #EE5600  (raw: 50 0E)
+  pen09: #FF7600  (raw: 70 0F)
+  pen10: #006600  (raw: 60 00)
+  pen11: #008800  (raw: 80 00)
+  pen12: #760066  (raw: 06 07)
+  pen13: #00B900  (raw: B0 00)
+  pen14: #EE6698  (raw: 69 0E)
+  pen15: #FFFFFF  (raw: FF 0F)
+  pixel apex_top     (118, 57): #56A999  [state0-R2]
+  pixel lit_side     ( 91, 89): #314646  [state0-R2]
+  pixel shadow_side  (111, 89): #56A999  [state0-R2]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #312177  [state2-R2]
+  pixel lit_side     ( 91, 89): #00B900  [state2-R2]
+  pixel shadow_side  (111, 89): #312177  [state2-R2]
+
+=== PALETTE R2 (frame=4150) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #312177  [state0-R3]
+  pixel lit_side     ( 91, 89): #00B900  [state0-R3]
+  pixel shadow_side  (111, 89): #312177  [state0-R3]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #000000  [state2-R3]
+  pixel lit_side     ( 91, 89): #000000  [state2-R3]
+  pixel shadow_side  (111, 89): #000000  [state2-R3]
+
+=== PALETTE R3 (frame=5950) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #000000  [state0-R4]
+  pixel lit_side     ( 91, 89): #000000  [state0-R4]
+  pixel shadow_side  (111, 89): #000000  [state0-R4]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #56A999  [state2-R4]
+  pixel lit_side     ( 91, 89): #314646  [state2-R4]
+  pixel shadow_side  (111, 89): #56A999  [state2-R4]
+
+=== PALETTE R4 (frame=7750) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #56A999  [state0-R5]
+  pixel lit_side     ( 91, 89): #314646  [state0-R5]
+  pixel shadow_side  (111, 89): #56A999  [state0-R5]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #312177  [state2-R5]
+  pixel lit_side     ( 91, 89): #00B900  [state2-R5]
+  pixel shadow_side  (111, 89): #312177  [state2-R5]
+
+=== PALETTE R5 (frame=9550) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #312177  [state0-R6]
+  pixel lit_side     ( 91, 89): #312177  [state0-R6]
+  pixel shadow_side  (111, 89): #312177  [state0-R6]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #56A999  [state2-R6]
+  pixel lit_side     ( 91, 89): #314646  [state2-R6]
+  pixel shadow_side  (111, 89): #A900A9  [state2-R6]
+
+=== PALETTE R6 (frame=11350) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #56A999  [state0-R7]
+  pixel lit_side     ( 91, 89): #314646  [state0-R7]
+  pixel shadow_side  (111, 89): #56A999  [state0-R7]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #312177  [state2-R7]
+  pixel lit_side     ( 91, 89): #312177  [state2-R7]
+  pixel shadow_side  (111, 89): #312177  [state2-R7]
+
+=== PALETTE R7 (frame=13150) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #312177  [state0-R8]
+  pixel lit_side     ( 91, 89): #312177  [state0-R8]
+  pixel shadow_side  (111, 89): #312177  [state0-R8]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #56A999  [state2-R8]
+  pixel lit_side     ( 91, 89): #314646  [state2-R8]
+  pixel shadow_side  (111, 89): #56A999  [state2-R8]
+
+=== PALETTE R8 (frame=14950) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #56A999  [state0-R9]
+  pixel lit_side     ( 91, 89): #314646  [state0-R9]
+  pixel shadow_side  (111, 89): #56A999  [state0-R9]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #312177  [state2-R9]
+  pixel lit_side     ( 91, 89): #00B900  [state2-R9]
+  pixel shadow_side  (111, 89): #312177  [state2-R9]
+
+=== PALETTE R9 (frame=16750) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #312177  [state0-R10]
+  pixel lit_side     ( 91, 89): #00B900  [state0-R10]
+  pixel shadow_side  (111, 89): #312177  [state0-R10]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #000000  [state2-R10]
+  pixel lit_side     ( 91, 89): #000000  [state2-R10]
+  pixel shadow_side  (111, 89): #000000  [state2-R10]
+
+=== PALETTE R10 (frame=18550) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #000000  [state0-R11]
+  pixel lit_side     ( 91, 89): #000000  [state0-R11]
+  pixel shadow_side  (111, 89): #000000  [state0-R11]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #56A999  [state2-R11]
+  pixel lit_side     ( 91, 89): #314646  [state2-R11]
+  pixel shadow_side  (111, 89): #56A999  [state2-R11]
+
+=== PALETTE R11 (frame=20350) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #56A999  [state0-R12]
+  pixel lit_side     ( 91, 89): #314646  [state0-R12]
+  pixel shadow_side  (111, 89): #56A999  [state0-R12]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #312177  [state2-R12]
+  pixel lit_side     ( 91, 89): #00B900  [state2-R12]
+  pixel shadow_side  (111, 89): #312177  [state2-R12]
+
+=== PALETTE R12 (frame=22150) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #312177  [state0-R13]
+  pixel lit_side     ( 91, 89): #312177  [state0-R13]
+  pixel shadow_side  (111, 89): #312177  [state0-R13]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #56A999  [state2-R13]
+  pixel lit_side     ( 91, 89): #314646  [state2-R13]
+  pixel shadow_side  (111, 89): #56A999  [state2-R13]
+
+=== PALETTE R13 (frame=23950) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #56A999  [state0-R14]
+  pixel lit_side     ( 91, 89): #314646  [state0-R14]
+  pixel shadow_side  (111, 89): #56A999  [state0-R14]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #312177  [state2-R14]
+  pixel lit_side     ( 91, 89): #312177  [state2-R14]
+  pixel shadow_side  (111, 89): #312177  [state2-R14]
+
+=== PALETTE R14 (frame=25750) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #312177  [state0-R15]
+  pixel lit_side     ( 91, 89): #312177  [state0-R15]
+  pixel shadow_side  (111, 89): #312177  [state0-R15]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #56A999  [state2-R15]
+  pixel lit_side     ( 91, 89): #314646  [state2-R15]
+  pixel shadow_side  (111, 89): #56A999  [state2-R15]
+
+=== PALETTE R15 (frame=27550) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #56A999  [state0-R16]
+  pixel lit_side     ( 91, 89): #314646  [state0-R16]
+  pixel shadow_side  (111, 89): #56A999  [state0-R16]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #312177  [state2-R16]
+  pixel lit_side     ( 91, 89): #00B900  [state2-R16]
+  pixel shadow_side  (111, 89): #312177  [state2-R16]
+
+=== PALETTE R16 (frame=29350) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #312177  [state0-R17]
+  pixel lit_side     ( 91, 89): #00B900  [state0-R17]
+  pixel shadow_side  (111, 89): #312177  [state0-R17]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #000000  [state2-R17]
+  pixel lit_side     ( 91, 89): #000000  [state2-R17]
+  pixel shadow_side  (111, 89): #000000  [state2-R17]
+
+=== PALETTE R17 (frame=31150) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #000000  [state0-R18]
+  pixel lit_side     ( 91, 89): #000000  [state0-R18]
+  pixel shadow_side  (111, 89): #000000  [state0-R18]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #56A999  [state2-R18]
+  pixel lit_side     ( 91, 89): #314646  [state2-R18]
+  pixel shadow_side  (111, 89): #56A999  [state2-R18]
+
+=== PALETTE R18 (frame=32950) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #56A999  [state0-R19]
+  pixel lit_side     ( 91, 89): #314646  [state0-R19]
+  pixel shadow_side  (111, 89): #56A999  [state0-R19]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #312177  [state2-R19]
+  pixel lit_side     ( 91, 89): #00B900  [state2-R19]
+  pixel shadow_side  (111, 89): #312177  [state2-R19]
+
+=== PALETTE R19 (frame=34750) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #312177  [state0-R20]
+  pixel lit_side     ( 91, 89): #312177  [state0-R20]
+  pixel shadow_side  (111, 89): #312177  [state0-R20]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #56A999  [state2-R20]
+  pixel lit_side     ( 91, 89): #314646  [state2-R20]
+  pixel shadow_side  (111, 89): #56A999  [state2-R20]
+
+=== PALETTE R20 (frame=36550) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #56A999  [state0-R21]
+  pixel lit_side     ( 91, 89): #314646  [state0-R21]
+  pixel shadow_side  (111, 89): #56A999  [state0-R21]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #312177  [state2-R21]
+  pixel lit_side     ( 91, 89): #312177  [state2-R21]
+  pixel shadow_side  (111, 89): #312177  [state2-R21]
+
+=== PALETTE R21 (frame=38350) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #312177  [state0-R22]
+  pixel lit_side     ( 91, 89): #312177  [state0-R22]
+  pixel shadow_side  (111, 89): #312177  [state0-R22]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #56A999  [state2-R22]
+  pixel lit_side     ( 91, 89): #314646  [state2-R22]
+  pixel shadow_side  (111, 89): #56A999  [state2-R22]
+
+=== PALETTE R22 (frame=40150) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #000000  [state0-R23]
+  pixel lit_side     ( 91, 89): #000000  [state0-R23]
+  pixel shadow_side  (111, 89): #000000  [state0-R23]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #312177  [state2-R23]
+  pixel lit_side     ( 91, 89): #00B900  [state2-R23]
+  pixel shadow_side  (111, 89): #312177  [state2-R23]
+
+=== PALETTE R23 (frame=41950) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #312177  [state0-R24]
+  pixel lit_side     ( 91, 89): #00B900  [state0-R24]
+  pixel shadow_side  (111, 89): #312177  [state0-R24]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #000000  [state2-R24]
+  pixel lit_side     ( 91, 89): #000000  [state2-R24]
+  pixel shadow_side  (111, 89): #000000  [state2-R24]
+
+=== PALETTE R24 (frame=43750) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #312177  [state0-R25]
+  pixel lit_side     ( 91, 89): #00B900  [state0-R25]
+  pixel shadow_side  (111, 89): #312177  [state0-R25]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #A900A9  [state2-R25]
+  pixel lit_side     ( 91, 89): #314646  [state2-R25]
+  pixel shadow_side  (111, 89): #56A999  [state2-R25]
+
+=== PALETTE R25 (frame=45550) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #56A999  [state0-R26]
+  pixel lit_side     ( 91, 89): #314646  [state0-R26]
+  pixel shadow_side  (111, 89): #56A999  [state0-R26]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #312177  [state2-R26]
+  pixel lit_side     ( 91, 89): #312177  [state2-R26]
+  pixel shadow_side  (111, 89): #312177  [state2-R26]
+
+=== PALETTE R26 (frame=47350) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #312177  [state0-R27]
+  pixel lit_side     ( 91, 89): #312177  [state0-R27]
+  pixel shadow_side  (111, 89): #312177  [state0-R27]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #56A999  [state2-R27]
+  pixel lit_side     ( 91, 89): #314646  [state2-R27]
+  pixel shadow_side  (111, 89): #56A999  [state2-R27]
+
+=== PALETTE R27 (frame=49150) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #56A999  [state0-R28]
+  pixel lit_side     ( 91, 89): #314646  [state0-R28]
+  pixel shadow_side  (111, 89): #56A999  [state0-R28]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #312177  [state2-R28]
+  pixel lit_side     ( 91, 89): #312177  [state2-R28]
+  pixel shadow_side  (111, 89): #312177  [state2-R28]
+
+=== PALETTE R28 (frame=50950) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #312177  [state0-R29]
+  pixel lit_side     ( 91, 89): #00B900  [state0-R29]
+  pixel shadow_side  (111, 89): #312177  [state0-R29]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #56A999  [state2-R29]
+  pixel lit_side     ( 91, 89): #314646  [state2-R29]
+  pixel shadow_side  (111, 89): #56A999  [state2-R29]
+
+=== PALETTE R29 (frame=52750) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #000000  [state0-R30]
+  pixel lit_side     ( 91, 89): #000000  [state0-R30]
+  pixel shadow_side  (111, 89): #000000  [state0-R30]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #312177  [state2-R30]
+  pixel lit_side     ( 91, 89): #00B900  [state2-R30]
+  pixel shadow_side  (111, 89): #312177  [state2-R30]
+
+=== PALETTE R30 (frame=54550) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #56A999  [state0-R31]
+  pixel lit_side     ( 91, 89): #314646  [state0-R31]
+  pixel shadow_side  (111, 89): #56A999  [state0-R31]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #000000  [state2-R31]
+  pixel lit_side     ( 91, 89): #000000  [state2-R31]
+  pixel shadow_side  (111, 89): #000000  [state2-R31]
+
+=== PALETTE R31 (frame=56350) ===
+  (no palette writes captured this round)
+  pixel apex_top     (118, 57): #312177  [state0-R32]
+  pixel lit_side     ( 91, 89): #00B900  [state0-R32]
+  pixel shadow_side  (111, 89): #312177  [state0-R32]
+
+[state2 pixel sample]
+  pixel apex_top     (118, 57): #56A999  [state2-R32]
+  pixel lit_side     ( 91, 89): #314646  [state2-R32]
+  pixel shadow_side  (111, 89): #56A999  [state2-R32]
+
+=== PALETTE R32 (frame=58150) ===
+  (no palette writes captured this round)
+
+=== CAPTURE COMPLETE ===
