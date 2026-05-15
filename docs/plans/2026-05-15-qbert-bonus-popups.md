@@ -1,7 +1,7 @@
 # Plan — Q✱bert bonus-points popups
 
 **Date:** 2026-05-15
-**Status:** Not started
+**Status:** Complete — 454d8c2; +25/+100/+300 actors wired, mesh cleanup for WF Normalize() assertion
 
 ## Goal
 
