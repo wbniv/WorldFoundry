@@ -2218,23 +2218,84 @@ print(f"[qbert] Created 2 spinning discs at "
       f"R(row={DISC_R_ROW},col={DISC_R_COL}) idx={DISC_R_ACTOR_IDX}; "
       f"mesh {len(_DISC_VERTS)} verts / {len(_DISC_FACES)} faces")
 
-# ── 5c.8. Curse bubble (plumbing verification) ──────────────────────────────
-# Minimal script-less actor parked above the apex (Z=20) so we can verify it
-# renders. Will be repositioned to Z=-100 once the test passes.
-mat_bubble_white = _make_principled_material('bubble_white', (1.00, 1.00, 1.00))
-bpy.ops.mesh.primitive_uv_sphere_add(radius=0.7, segments=10, ring_count=6, location=(0,0,0))
-_bubble_obj = bpy.context.object
-_bubble_obj.data.materials.clear()
-_bubble_obj.data.materials.append(mat_bubble_white)
-_bubble_obj.data.name = 'BubbleMesh'
-_bubble_mesh_data = _bubble_obj.data
-bpy.data.objects.remove(_bubble_obj, do_unlink=True)
+# ── 5c.8. Curse bubble ───────────────────────────────────────────────────────
+# Speech-bubble oval (light yellow) with "@!#?@!" text (dark purple) that
+# hovers above Q*bert during the fall animation (FALL_PHASE ticks 1-29).
+# The player script already writes the bubble's XYZ each fall tick and parks
+# it at Z=-100 on respawn. No Forth script needed here.
+#
+# Mesh built in XY plane (facing +Z) to match popup actor convention; the
+# elevated camera angle makes this readable at camera distance.
+
+def _make_curse_bubble_mesh():
+    """Build a low-poly speech-bubble in the XY plane (facing +Z, like popup actors).
+
+    Geometry: 16-vert ellipse (NGON) front face + back face + side quads for
+    depth, plus a triangular tail pointing down-left. No text geometry —
+    Blender text_add generates ~90 KB of triangles for '@!#?@!' which overflows
+    the room asset pool. The oval silhouette alone is arcade-recognisable.
+    """
+    import bmesh as _bmesh
+    import math as _math
+
+    mat_body = _make_principled_material('bubble_body', (1.00, 1.00, 0.70))  # light yellow
+
+    N       = 16        # vertices around the ellipse
+    RX, RY  = 0.85, 0.55  # semi-axes (wide oval)
+    DEPTH   = 0.08      # extrusion depth in +Z
+
+    _bm = _bmesh.new()
+
+    # Front ring (Z = DEPTH), back ring (Z = 0).
+    front_verts = []
+    back_verts  = []
+    for i in range(N):
+        a = 2 * _math.pi * i / N
+        x, y = RX * _math.cos(a), RY * _math.sin(a)
+        front_verts.append(_bm.verts.new((x, y, DEPTH)))
+        back_verts.append(_bm.verts.new( (x, y, 0.0)))
+
+    # Front face (normal +Z).
+    _bm.faces.new(front_verts)
+    # Back face (normal -Z) — reversed winding.
+    _bm.faces.new(list(reversed(back_verts)))
+    # Side quads connecting front ↔ back.
+    for i in range(N):
+        j = (i + 1) % N
+        _bm.faces.new([front_verts[i], front_verts[j],
+                       back_verts[j],  back_verts[i]])
+
+    # Tail: triangle pointer below-left, in both front and back layers + sides.
+    # Tip coords (pointing down, slightly left):
+    tx, ty_front, ty_back = -0.15, DEPTH, 0.0
+    t_tip_z = -0.60   # how far below the oval centre the tip reaches
+
+    tf0 = _bm.verts.new((-0.25, ty_front, -0.52))   # left base, front
+    tf1 = _bm.verts.new(( 0.10, ty_front, -0.52))   # right base, front
+    tf2 = _bm.verts.new((  tx,  ty_front,  t_tip_z))  # tip, front
+    tb0 = _bm.verts.new((-0.25, ty_back,  -0.52))   # left base, back
+    tb1 = _bm.verts.new(( 0.10, ty_back,  -0.52))   # right base, back
+    tb2 = _bm.verts.new((  tx,  ty_back,   t_tip_z))  # tip, back
+
+    _bm.faces.new([tf0, tf1, tf2])                # front face
+    _bm.faces.new([tb0, tb2, tb1])                # back face (reversed)
+    _bm.faces.new([tf0, tf2, tb2, tb0])           # left side
+    _bm.faces.new([tf1, tb1, tb2, tf2])           # right side
+    _bm.faces.new([tf0, tb0, tb1, tf1])           # top edge (joins oval bottom)
+
+    mesh_data = bpy.data.meshes.new('CurseBubbleMesh')
+    mesh_data.materials.append(mat_body)
+    _bm.to_mesh(mesh_data)
+    _bm.free()
+    mesh_data.update()
+    return mesh_data
+
 
 _pre_bubble_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
 CURSE_BUBBLE_ACTOR_IDX = _pre_bubble_count + 1
 
-_bubble = bpy.data.objects.new('curse_bubble', _bubble_mesh_data)
-_bubble.location = (0.0, 0.0, -100.0)    # parked below the pyramid; death script pops it to (player_x, y, z+2)
+_bubble = bpy.data.objects.new('curse_bubble', _make_curse_bubble_mesh())
+_bubble.location = (0.0, 0.0, -100.0)
 scene.collection.objects.link(_bubble)
 _bubble['wf_schema_path']         = ENEMY_OAD
 _bubble['wf_Mesh Name']           = 'curse_bubble.iff'
@@ -2242,7 +2303,7 @@ _bubble['wf_original_mesh_name']  = 'curse_bubble.iff'
 _bubble['wf_Model Type']          = 'Mesh'
 _bubble['wf_Mobility']            = 'Anchored'
 _bubble['wf_Mass']                = 0.0
-_bubble['wf_Visibility Mailbox']  = 1
+_bubble['wf_Visibility Mailbox']  = 419   # FALL_PHASE: 0=idle (invisible), 1-30=falling (visible)
 print(f"[qbert] Created curse bubble actor idx={CURSE_BUBBLE_ACTOR_IDX} at {tuple(_bubble.location)}")
 
 
