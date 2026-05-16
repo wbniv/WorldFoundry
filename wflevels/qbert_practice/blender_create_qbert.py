@@ -2151,6 +2151,11 @@ DISC_SPIN_RATE = 0.005
 # Per-disc PHASE mailboxes (0 = consumed, 1 = present).
 _DL_MB_PHASE = 534
 _DR_MB_PHASE = 535
+# Per-disc FLASH countdown mailboxes (FLASH_DURATION→0; ring visible when > 0).
+_DL_MB_FLASH   = 536
+_DR_MB_FLASH   = 537
+FLASH_DURATION = 8      # frames (~133 ms at 60 Hz)
+FLASH_Z_OFFSET = 0.05  # render ring slightly above disc surface
 
 # Disc mesh: flat cylinder, 16-sided, radius 1.0, half-thickness 0.075.
 def _disc_build_mesh():
@@ -2182,6 +2187,36 @@ def _disc_build_mesh():
         faces.append((ti, bj, tj))
     return verts, faces
 
+def _disc_flash_ring_mesh():
+    """Annular washer: outer_r=1.25, inner_r=0.85, 16 sides, half_h=0.075.
+
+    Four verts per segment: outer-top (4i), outer-bot (4i+1),
+    inner-top (4i+2), inner-bot (4i+3).
+    Four quads per segment: top annular, bottom annular, outer wall, inner wall.
+    """
+    outer_r = 1.25
+    inner_r = 0.85
+    half_h  = 0.075
+    sides   = 16
+    verts   = []
+    faces   = []
+    for i in range(sides):
+        a = 2.0 * math.pi * i / sides
+        cx, cy = math.cos(a), math.sin(a)
+        verts.append((outer_r * cx, outer_r * cy,  half_h))  # 4i+0
+        verts.append((outer_r * cx, outer_r * cy, -half_h))  # 4i+1
+        verts.append((inner_r * cx, inner_r * cy,  half_h))  # 4i+2
+        verts.append((inner_r * cx, inner_r * cy, -half_h))  # 4i+3
+    for i in range(sides):
+        j = (i + 1) % sides
+        ot_i, ob_i, it_i, ib_i = 4*i,   4*i+1, 4*i+2, 4*i+3
+        ot_j, ob_j, it_j, ib_j = 4*j,   4*j+1, 4*j+2, 4*j+3
+        faces.append((ot_i, ot_j, it_j, it_i))   # top annular  (normal +Z)
+        faces.append((ob_i, ib_i, ib_j, ob_j))   # bottom annular (normal -Z)
+        faces.append((ot_i, ob_i, ob_j, ot_j))   # outer wall
+        faces.append((it_i, it_j, ib_j, ib_i))   # inner wall
+    return verts, faces
+
 _DISC_VERTS, _DISC_FACES = _disc_build_mesh()
 _disc_mesh = bpy.data.meshes.new('disc_mesh')
 _disc_mesh.from_pydata(_DISC_VERTS, [], _DISC_FACES)
@@ -2193,6 +2228,13 @@ _disc_bsdf = _disc_mat.node_tree.nodes.get('Principled BSDF')
 _disc_bsdf.inputs['Base Color'].default_value = (0.30, 0.20, 0.95, 1.0)
 _disc_mesh.materials.append(_disc_mat)
 
+_FLASH_RING_VERTS, _FLASH_RING_FACES = _disc_flash_ring_mesh()
+_flash_ring_mesh = bpy.data.meshes.new('disc_flash_ring_mesh')
+_flash_ring_mesh.from_pydata(_FLASH_RING_VERTS, [], _FLASH_RING_FACES)
+_flash_ring_mesh.update()
+_flash_ring_mat = _make_principled_material('disc_flash_yellow', (1.0, 0.9, 0.1))
+_flash_ring_mesh.materials.append(_flash_ring_mat)
+
 
 def _disc_world_xyz(row, col):
     """Disc sits at virtual cube top: same XY as cube_world_position, Z = top of cube."""
@@ -2202,25 +2244,28 @@ def _disc_world_xyz(row, col):
     return wx, wy, wz
 
 
-def _disc_script(my_row, my_col, my_phase_mb):
-    """Per-tick script: spin while present; if player at our (row,col), rescue + consume."""
+def _disc_script(my_row, my_col, my_phase_mb, my_flash_mb):
+    """Per-tick script: spin while present; rescue+flash on boarding; drain flash countdown."""
     return (
         "\\ wf disc\n"
-        # While present: spin about Z (yaw).
+        # Phase gate: spin and rescue-check only while disc is present.
         f"{my_phase_mb} read-mailbox 1 = if "
         f"{DISC_SPIN_RATE} 3034 write-mailbox "
-        # Rescue check.
         f"400 read-mailbox {my_row} = if "
         f"401 read-mailbox {my_col} = if "
-        # Player is on us — rescue: clear FALL_PHASE, latch apex respawn,
-        # consume self (PHASE=0 + park Z).
         f"0 419 write-mailbox "
         f"1 426 write-mailbox "
         f"0 {my_phase_mb} write-mailbox "
         f"{DISC_PARK_Z} 3011 write-mailbox "
+        f"{FLASH_DURATION} {my_flash_mb} write-mailbox "   # arm flash ring
         f"then "
         f"then "
         f"then\n"
+        # Flash countdown — runs every tick so it drains even after disc consumed.
+        # dup 0 > if: true path consumes dup'd value with 1-/write; false path drops it.
+        f"{my_flash_mb} read-mailbox dup 0 > if "
+        f"1 - {my_flash_mb} write-mailbox "
+        f"else drop then\n"
     )
 
 
@@ -2228,9 +2273,9 @@ _pre_disc_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY
 DISC_L_ACTOR_IDX = _pre_disc_actor_count + 1
 DISC_R_ACTOR_IDX = _pre_disc_actor_count + 2
 
-for _name, _row, _col, _phase_mb in (
-    ('disc_left',  DISC_L_ROW, DISC_L_COL, _DL_MB_PHASE),
-    ('disc_right', DISC_R_ROW, DISC_R_COL, _DR_MB_PHASE),
+for _name, _row, _col, _phase_mb, _flash_mb in (
+    ('disc_left',  DISC_L_ROW, DISC_L_COL, _DL_MB_PHASE, _DL_MB_FLASH),
+    ('disc_right', DISC_R_ROW, DISC_R_COL, _DR_MB_PHASE, _DR_MB_FLASH),
 ):
     _wx, _wy, _wz = _disc_world_xyz(_row, _col)
     _d = bpy.data.objects.new(_name, _disc_mesh)
@@ -2244,12 +2289,37 @@ for _name, _row, _col, _phase_mb in (
     _d['wf_Mass']                = 0.0
     _d['wf_Visibility Mailbox']  = 1
     _d['wf_NumberOfLocalMailboxes'] = 0
-    _d['wf_Script']              = _disc_script(_row, _col, _phase_mb)
+    _d['wf_Script']              = _disc_script(_row, _col, _phase_mb, _flash_mb)
 
 print(f"[qbert] Created 2 spinning discs at "
       f"L(row={DISC_L_ROW},col={DISC_L_COL}) idx={DISC_L_ACTOR_IDX} / "
       f"R(row={DISC_R_ROW},col={DISC_R_COL}) idx={DISC_R_ACTOR_IDX}; "
       f"mesh {len(_DISC_VERTS)} verts / {len(_DISC_FACES)} faces")
+
+# Flash ring actors — one per disc, no script, visibility driven by flash countdown.
+DISC_FL_ACTOR_IDX = _pre_disc_actor_count + 3
+DISC_FR_ACTOR_IDX = _pre_disc_actor_count + 4
+for _fname, _frow, _fcol, _fflash_mb in (
+    ('disc_flash_L', DISC_L_ROW, DISC_L_COL, _DL_MB_FLASH),
+    ('disc_flash_R', DISC_R_ROW, DISC_R_COL, _DR_MB_FLASH),
+):
+    _fx, _fy, _fz = _disc_world_xyz(_frow, _fcol)
+    _fr = bpy.data.objects.new(_fname, _flash_ring_mesh)
+    _fr.location = (_fx, _fy, _fz + FLASH_Z_OFFSET)
+    scene.collection.objects.link(_fr)
+    _fr['wf_schema_path']            = ENEMY_OAD
+    _fr['wf_Mesh Name']              = 'disc_flash_ring_mesh.iff'
+    _fr['wf_original_mesh_name']     = 'disc_flash_ring_mesh.iff'
+    _fr['wf_Model Type']             = 'Mesh'
+    _fr['wf_Mobility']               = 'Anchored'
+    _fr['wf_Mass']                   = 0.0
+    _fr['wf_Visibility Mailbox']     = _fflash_mb
+    _fr['wf_NumberOfLocalMailboxes'] = 0
+
+print(f"[qbert] Created 2 disc flash rings: "
+      f"L idx={DISC_FL_ACTOR_IDX} (mb {_DL_MB_FLASH}) / "
+      f"R idx={DISC_FR_ACTOR_IDX} (mb {_DR_MB_FLASH}); "
+      f"washer {len(_FLASH_RING_VERTS)} verts / {len(_FLASH_RING_FACES)} faces")
 
 # ── 5c.8. Curse bubble ───────────────────────────────────────────────────────
 # Speech-bubble oval (light yellow) with "@!#?@!" text (dark purple) that
@@ -2516,8 +2586,9 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
     f"0 {COILY_MB_ROUND_DONE} write-mailbox "
     f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox ",
-    # Phase D: arm both discs as present (PHASE=1).
-    f"1 {_DL_MB_PHASE} write-mailbox 1 {_DR_MB_PHASE} write-mailbox ",
+    # Phase D: arm both discs as present (PHASE=1); clear any stale flash.
+    f"1 {_DL_MB_PHASE} write-mailbox 1 {_DR_MB_PHASE} write-mailbox "
+    f"0 {_DL_MB_FLASH} write-mailbox 0 {_DR_MB_FLASH} write-mailbox ",
     # Green Ball, Slick, Sam: clear active mirrors; arm first-spawn delay only from L2 (round >= 4).
     f"0 {GB_MB_FREEZE_TIMER} write-mailbox "
     f"0 {GB_MB_ACTIVE} write-mailbox "
@@ -2924,9 +2995,9 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
     f"0 {COILY_MB_ROUND_DONE} write-mailbox "
     f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox "
-    # Phase D: re-arm both discs (PHASE=1) and restore visible Z (in case
-    # they were consumed last round).
+    # Phase D: re-arm both discs (PHASE=1), restore Z, clear stale flash.
     f"1 {_DL_MB_PHASE} write-mailbox 1 {_DR_MB_PHASE} write-mailbox "
+    f"0 {_DL_MB_FLASH} write-mailbox 0 {_DR_MB_FLASH} write-mailbox "
     f"{_disc_world_xyz(DISC_L_ROW, DISC_L_COL)[2]} 3011 {DISC_L_ACTOR_IDX} write-actor-mailbox "
     f"{_disc_world_xyz(DISC_R_ROW, DISC_R_COL)[2]} 3011 {DISC_R_ACTOR_IDX} write-actor-mailbox "
     # Green Ball, Slick, Sam round refresh: retire all; rearm spawn timers only from L2 (round >= 4).
