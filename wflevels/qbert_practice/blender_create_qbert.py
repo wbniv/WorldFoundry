@@ -2038,6 +2038,23 @@ def coily_snake_script():
         f"then\n"
         # Landing tick → pick next hop greedy.
         f"{mb_cd} read-mailbox 0 <= if "
+        # Disc-lure retirement: if snake just landed on a disc coord, retire with +500.
+        f"{mb_row} read-mailbox 1 = if "
+        f"{mb_col} read-mailbox -1 = if "
+        f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+        f"0 {mb_phase} write-mailbox "
+        f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
+        f"{REDBALL_PARK_Z} 3011 write-mailbox "
+        f"500 70 read-mailbox + 70 write-mailbox "
+        f"exit then "
+        f"{mb_col} read-mailbox 2 = if "
+        f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+        f"0 {mb_phase} write-mailbox "
+        f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
+        f"{REDBALL_PARK_Z} 3011 write-mailbox "
+        f"500 70 read-mailbox + 70 write-mailbox "
+        f"exit then "
+        f"then "
         # dr_sign: 1 if qb_row >= cy_row, else -1.
         # 400=qb_row, 401=qb_col. cy_row=mb_row, cy_col=mb_col.
         f"400 read-mailbox {mb_row} read-mailbox - 0 < if -1 else 1 then "  # ( dr_sign )
@@ -2058,7 +2075,21 @@ def coily_snake_script():
         f"else dup 6 > if drop drop "           # invalid: new_row > 6
         f"else "
         # Stack: ( new_col new_row )  with 0 <= new_row <= 6 guaranteed.
-        # Check new_col bounds: 0 <= new_col <= new_row.
+        # Disc fast-path: allow exact disc coords (1,-1) or (1,2) to bypass the
+        # normal pyramid bounds check so the snake can follow Q*bert into the void.
+        f"0 "                                                          # flag=false
+        f"over 1 = if over -1 = if drop 1 then then "                 # disc-L?
+        f"over 1 = if over  2 = if drop 1 then then "                 # disc-R?
+        f"if "                                                         # disc: commit
+        # Disc commit (same as normal commit below).
+        f"{mb_row} read-mailbox {mb_from_row} write-mailbox "
+        f"{mb_row} write-mailbox "
+        f"{mb_col} read-mailbox {mb_from_col} write-mailbox "
+        f"{mb_col} write-mailbox "
+        f"3011 read-mailbox {mb_start_z} write-mailbox "
+        f"{_COILY_Z_BASE} {mb_row} read-mailbox {_RB_Z_MUL} * - {mb_end_z} write-mailbox "
+        f"else "
+        # Check new_col bounds: 0 <= new_col <= new_row (normal pyramid).
         f"over 0 < if drop drop "               # invalid: new_col < 0
         f"else over over > if drop drop "       # invalid: new_col > new_row
         f"else "
@@ -2073,7 +2104,9 @@ def coily_snake_script():
         # Stash START_Z (current Z, mb 3011) and END_Z (Z@new_row).
         f"3011 read-mailbox {mb_start_z} write-mailbox "
         f"{_COILY_Z_BASE} {mb_row} read-mailbox {_RB_Z_MUL} * - {mb_end_z} write-mailbox "
-        f"then then then then "
+        f"then then "                           # closes new_col>new_row, new_col<0
+        f"then "                               # closes disc if/else
+        f"then then "                          # closes new_row>6, new_row<0
         # Always re-arm cooldown (whether moved or stayed).
         f"{_COILY_SNAKE_HOP_TICKS} {mb_cd} write-mailbox "
         f"then\n"
