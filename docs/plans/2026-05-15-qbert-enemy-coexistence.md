@@ -1,7 +1,7 @@
 # Plan — Q✱bert enemy coexistence rules
 
 **Date:** 2026-05-15
-**Status:** In progress
+**Status:** Complete — both rules implemented at blender_create_qbert.py:2757-2758
 
 ## Problem
 
@@ -80,6 +80,18 @@ LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game \
 
 ## Verification
 
-1. **L3 gameplay**: Play rounds 9+. Ugg appears. While Ugg is alive, Wrong-Way should not spawn (and vice versa).
-2. **Coily gate**: While Coily egg is hopping or snake is chasing, Ugg and Wrong-Way timers run but don't fire. After Coily dies/round clears, climbers resume spawning.
-3. **Regression**: Slick, Sam, Green Ball unaffected — they have no new guards.
+Verified via debug bridge (`set_mailbox` + `watch` on mb569/mb571).
+
+1. **Coily gate (Rule 1):** Set `COILY_MB_PHASE_GLOBAL=1`, `UGG_MB_SPAWN_TIMER=1` — mb569 stayed 0 (gate held). Coily snake visible on left; no Ugg.
+
+   ![Rule 1 — Coily blocks Ugg](screenshots/qbert-coex-rule1-coily-blocks-ugg.png)
+
+2. **Side-climber mutual exclusion (Rule 2):** Set `WW_MB_ACTIVE=1`, `UGG_MB_SPAWN_TIMER=1` — mb569 stayed 0 (gate held). Wrong-Way climbing; no Ugg.
+
+   ![Rule 2 — WW blocks Ugg](screenshots/qbert-coex-rule2-ww-blocks-ugg.png)
+
+3. **Positive:** Both guards clear — mb569 went to 1 (Ugg spawned). Ugg visible at bottom-right while WW clears frame.
+
+   ![Positive — Ugg spawns when gates clear](screenshots/qbert-coex-positive-ugg-spawns.png)
+
+4. **Regression**: Slick, Sam, Green Ball unaffected — they have no new guards.
