@@ -105,8 +105,10 @@ static void
 _atExitTermDisplay(int code)
 {
 	(void)code;					// suppress unused warnings
-   SetX11AutoRepeat(1);
-   XFlush(halDisplay.mainDisplay);
+    // HALCloseWindow() may have already nulled the display (clean exit path).
+    if (!halDisplay.mainDisplay) return;
+    SetX11AutoRepeat(1);
+    XFlush(halDisplay.mainDisplay);
 }
 
 //==============================================================================
