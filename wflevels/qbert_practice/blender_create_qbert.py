@@ -95,11 +95,12 @@ SQRT2 = math.sqrt(2.0)
 #              `screenshot` ops over the debug bridge.)
 #   434        PENDING_LAND (player internal one-shot; promoted to mb 411 on landing)
 #   435..437   QBERT_STASH_X/Y/Z (player→enemy contact position snapshot)
-#   580        POPUP_TIMER (countdown ticks; 0 = idle)
-#   581        POPUP_VALUE (pending trigger: 0=none, 25, 50, 100, 300, 500)
-#   582        POPUP_PENDING_X
-#   583        POPUP_PENDING_Y
-#   584        POPUP_PENDING_Z (includes +1.5 Z offset above cube top)
+#   575..586   CE2 egg internals (_CE2_MB_ROW .. COILY_EGG2_ACTIVE_MB)
+#   592        POPUP_TIMER (countdown ticks; 0 = idle)
+#   593        POPUP_VALUE (pending trigger: 0=none, 25, 50, 100, 300, 500)
+#   594        POPUP_PENDING_X
+#   595        POPUP_PENDING_Y
+#   596        POPUP_PENDING_Z (includes +1.5 Z offset above cube top)
 #   573        COILY_EGG_ACTIVE (1 while egg is hopping; visibility mailbox for egg actor)
 #   574        COILY_SNAKE_ACTIVE (1 while snake is chasing; visibility mailbox for snake actor)
 #   590        GO_BLOCK (C++ sets 1 while initials entry live; Forth must not restart)
@@ -117,16 +118,16 @@ INDEXOF_ROUND_NUMBER         = 425
 INDEXOF_ROUND_CHANGED        = 426
 INDEXOF_LAST_LEVEL           = 427
 
-POPUP_TIMER_MB     = 580
-POPUP_VALUE_MB     = 581
-POPUP_PENDING_X_MB = 582
-POPUP_PENDING_Y_MB = 583
-POPUP_PENDING_Z_MB = 584
+POPUP_TIMER_MB     = 592   # was 580 — moved to avoid CE2 egg collision (575-586)
+POPUP_VALUE_MB     = 593   # was 581
+POPUP_PENDING_X_MB = 594   # was 582
+POPUP_PENDING_Y_MB = 595   # was 583
+POPUP_PENDING_Z_MB = 596   # was 584
 POPUP_HOLD_TICKS   = 90   # 1.5 s at 60 Hz
 GO_BLOCK_MB        = 590
 GO_HOLD_TIMER_MB   = 591
 
-NUM_MAILBOXES = 600  # well above the highest mailbox we use (~584)
+NUM_MAILBOXES = 600  # well above the highest mailbox we use (~596)
 
 
 def cube_index(row, col):
