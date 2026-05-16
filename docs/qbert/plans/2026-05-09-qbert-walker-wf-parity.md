@@ -1,9 +1,9 @@
 # Plan — Q✱bert walker WF-side parity (Phase E)
 
 **Date:** 2026-05-09
-**Status:** In progress — scaffolding complete and end-to-end run done (12 round-clears across L1–L4 + R1–R3 of L4, 30 state captures). Two follow-ups before this can land as a regression:
-1. **Q✱bert floats after round 1** — L1R1 captures place him correctly on apex (state-0) and on cube (1,0) (state-1). From L2R1 onward, every state-0 / state-1 PNG shows him drifting well above the pyramid. Suspect: `step-move` defaults to DL beyond step 30, so the existing 32-step Warnsdorff path keeps hopping DL once it falls off the table → off-pyramid → FALL_PHASE → Z ramps down → director's round-clear cleanup zeros FALL_PHASE but doesn't restore Z, and the ROUND_INITIALIZED handler that does restore Z races with something. Need to trace via debug bridge `set_mailbox` queries on mb[419]/INDEXOF_Z_POS during the L1R4→L2R1 transition.
-2. **Diff sample points are off** — projected apex pixel-coord lands at y≈137 in the 640×640 PNG; actual apex top is at y≈250. Either the auto-projection's FOV/up-vector is wrong for WF's camera, or BungeeCameraHandler is doing something the projection math doesn't capture. Working fix: read the actual on-disk PNG once, hand-tune pixel coords, hardcode in the diff tool. Auto-projection from cube positions can land later when a `scene:get_actor_pos` op is available.
+**Status:** Abandoned — low ROI. The cube color data was extracted from ROM into `qbert_cube_face_colors.md` (Phases A–D); that table is authoritative. The multi-step cube cycle implementation was already verified manually with screenshots. Building Phase E (PNG screenshot op, CAPTURE_TRIGGER mailbox, host walker + diff scripts) adds no gameplay and tests data that changes rarely. Deferred open issues:
+1. Q✱bert floats after round 1 — Z not restored after round-clear in multi-round autopilot run.
+2. Diff sample pixel coords wrong — auto-projection doesn't match BungeeCameraHandler output.
 **Parent plan:** [2026-05-08-qbert-walker-rom-grounded.md](2026-05-08-qbert-walker-rom-grounded.md) (Phase E)
 
 ## Context
