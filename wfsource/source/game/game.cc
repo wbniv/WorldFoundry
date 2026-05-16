@@ -278,6 +278,7 @@ WFGame::RunLevel(_DiskFile* levelFile)
 	SfxLibrary::Load(0, "wflevels/qbert_practice/sfx/qbert_hop.wav");
 	SfxLibrary::Load(1, "wflevels/qbert_practice/sfx/qbert_land.wav");
 	SfxLibrary::Load(2, "wflevels/qbert_practice/sfx/qbert_fall.wav");
+	SfxLibrary::Load(3, "wflevels/qbert_practice/sfx/qbert_swear.wav");
 
 	Scalar deltaTime = Scalar::zero;
 	bool _bContinue = true;

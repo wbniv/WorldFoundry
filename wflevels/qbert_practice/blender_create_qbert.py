@@ -600,7 +600,7 @@ if player:
         "1 + 419 write-mailbox "
         "else "
         "drop "
-        "0 419 write-mailbox 1 414 write-mailbox "
+        "0 419 write-mailbox 1 414 write-mailbox 3 3017 write-mailbox "
         "0 INDEXOF_X_POS write-mailbox "
         "6 1.4142136 * INDEXOF_Y_POS write-mailbox "
         "15 INDEXOF_Z_POS write-mailbox "
