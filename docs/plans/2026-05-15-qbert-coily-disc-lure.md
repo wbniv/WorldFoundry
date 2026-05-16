@@ -1,7 +1,7 @@
 # Plan — Q✱bert Coily falls off disc
 
 **Date:** 2026-05-15
-**Status:** In progress
+**Status:** Complete — 1f4b272 (impl) + 79de2ee (tests)
 
 ## Problem
 
@@ -103,6 +103,23 @@ LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game \
 ```
 
 ## Verification
+
+Automated: `cd tests && DISPLAY=:0 pytest test_disc_lure.py -v` — 3/3 pass.
+
+Manual proof via debug bridge (screenshots captured 2026-05-15, stored in
+`/home/will/tmp/qbert-screenshots/`):
+
+**disc_lure_mid_hop.png** — Coily snake (purple) mid-hop at disc-L position
+(row=1, col=−1), off the left edge of the pyramid above Q✱bert (orange):
+
+![mid-hop](file:///home/will/tmp/qbert-screenshots/disc_lure_mid_hop.png)
+
+**disc_lure_retired_500.png** — Snake gone after landing tick; bridge confirmed
+`COILY_SNAKE_ACTIVE → 0` and `score → 500`:
+
+![retired +500](file:///home/will/tmp/qbert-screenshots/disc_lure_retired_500.png)
+
+Remaining manual checks (require interactive play):
 
 1. Hop Q✱bert onto the left disc while Coily is chasing — snake should follow
    toward disc coords, overshoot, and disappear with +500 added to score.
