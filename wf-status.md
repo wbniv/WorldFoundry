@@ -9,6 +9,8 @@
 
 Eighteen days of work (2026-04-12 – 2026-04-30). Newest first:
 
+- **Q✱bert popup mailbox collision fixed (2026-05-16)** — Popup system MBs 580–584 (added today) collided with CE2 egg internals (MBs 580–584, added commit 8e55799); in L4 both systems are active simultaneously. Moved popup range to 592–596; all L2/L3/L4 spot-checks pass (b26373f).
+
 - **Q✱bert +50 and +500 popup labels landed (2026-05-16)** — Two missing floating score labels added: orange "+50" for the 2nd cube hop in L2/L4 (was incorrectly showing "+25"), and hot-magenta "+500" for Coily falling off a disc (was showing nothing). Both new popup actors are 3D text meshes with correct colours; `cbRoom` pool bumped to 1,800,000 to fit the extra mesh load. See [plan](docs/plans/2026-05-16-qbert-popup-50-500.md).
 
 - **Q✱bert curse-bubble texture landed — textile-rs RGBA alpha-inversion + false-dedup root cause fixed (2026-05-16)** — `Room0.tga` was 146 bytes (empty atlas) because `rgba_555()` in textile-rs maps fully-opaque RGBA pixels to 0x0000 (transparent key), then `find_existing()` falsely deduplicates the all-zero texture against the all-zero atlas and skips the blit; fix is generating 24-bit RGB TGA (bypasses `rgba_555()` via `try_load_tga_bgr555()`), plus text colour bumped from (20,20,20) to (40,40,40) to avoid the BGR555 transparent key. See [plan](docs/plans/2026-05-16-curse-bubble-texture.md) and [investigation](docs/investigations/2026-05-16-textile-rs-rgba555-dedup-bug.md).
