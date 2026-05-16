@@ -1,7 +1,7 @@
 # Plan — Q✱bert Score HUD wiring
 
 **Date:** 2026-05-14
-**Status:** In progress
+**Status:** Complete — all four Forth writes verified in blender_create_qbert.py (lines 534-535, 2567, 2614, 2879, 2979-2980)
 
 ## Context
 
