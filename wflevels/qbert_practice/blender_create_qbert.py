@@ -1653,6 +1653,21 @@ COILY_MB_ROUND_DONE   = 542
 COILY_MB_PHASE_GLOBAL = 543
 COILY_MB_SPAWN_DELAY  = 544    # countdown to next egg spawn (set on round init)
 
+# Coily egg #2 — L4 only (ROUND_NUMBER >= 12, i.e. rounds 12–15, 0-indexed).
+_CE2_MB_ROW            = 575
+_CE2_MB_COL            = 576
+_CE2_MB_COOLDOWN       = 577
+_CE2_MB_PHASE          = 578
+_CE2_MB_START_Z        = 579
+_CE2_MB_END_Z          = 580
+_CE2_MB_FROM_ROW       = 581
+_CE2_MB_FROM_COL       = 582
+_CE2_MB_FLASH_TICK     = 583
+COILY_EGG2_ROUND_DONE        = 584
+COILY_MB_SPAWN_DELAY_2       = 585   # seeded at 120 ticks (0.5 s after egg1)
+COILY_EGG2_ACTIVE_MB         = 586
+COILY_EGG2_SPAWN_DELAY_TICKS = 120
+
 # Arcade-faithful purple/red flash while egg is bouncing. ~3.75 Hz at 60 Hz tick.
 _CE_MB_FLASH_TICK         = 545
 COILY_EGG_FLASH_PERIOD    = 16
@@ -1762,6 +1777,88 @@ def coily_egg_script():
         f"then\n"
     )
 
+def coily_egg2_script():
+    """Per-tick script for the second Coily egg (L4 only).
+
+    Identical to coily_egg_script() except uses CE2_MB_* mailboxes (575–582).
+    Off-pyramid handler: if snake not yet active, copies egg2 FROM position into
+    egg1's slots so the existing director Phase-B handler places the snake;
+    otherwise retires silently.
+    """
+    mb_row      = _CE2_MB_ROW
+    mb_col      = _CE2_MB_COL
+    mb_cd       = _CE2_MB_COOLDOWN
+    mb_phase    = _CE2_MB_PHASE
+    mb_start_z  = _CE2_MB_START_Z
+    mb_end_z    = _CE2_MB_END_Z
+    mb_from_row = _CE2_MB_FROM_ROW
+    mb_from_col = _CE2_MB_FROM_COL
+
+    return (
+        f"\\\\ wf coily egg 2 (L4)\n"
+        f"{GB_MB_FREEZE_TIMER} read-mailbox 0 > if exit then\n"
+        f"{mb_phase} read-mailbox 0 = if exit then\n"
+        f"{_CE2_MB_FLASH_TICK} read-mailbox 1 + {COILY_EGG_FLASH_PERIOD} % "
+        f"{_CE2_MB_FLASH_TICK} write-mailbox\n"
+        f"{_CE2_MB_FLASH_TICK} read-mailbox {COILY_EGG_FLASH_HALF} < if "
+        f"0x{_CE_FLASH_COLOR_PURPLE:06X} 3037 write-mailbox "
+        f"else "
+        f"0x{_CE_FLASH_COLOR_RED:06X} 3037 write-mailbox "
+        f"then\n"
+        f"{mb_cd} read-mailbox 1 - dup {mb_cd} write-mailbox\n"
+        f"{COILY_EGG_HOP_TICKS} swap - {_CE_HOP_DENOM_F} /\n"
+        f"dup dup dup * swap 2.0 * 3.0 swap - *\n"
+        f"dup {mb_row} read-mailbox {mb_from_row} read-mailbox - * "
+        f"{mb_from_row} read-mailbox +\n"
+        f"over {mb_col} read-mailbox {mb_from_col} read-mailbox - * "
+        f"{mb_from_col} read-mailbox +\n"
+        f"over 6.0 swap - {_RB_Y_MUL} * 3010 write-mailbox\n"
+        f"swap 0.5 * - {_RB_X_MUL} * 3009 write-mailbox\n"
+        f"{mb_end_z} read-mailbox {mb_start_z} read-mailbox - * "
+        f"{mb_start_z} read-mailbox +\n"
+        f"swap dup 1.0 swap - * 8.0 * +\n"
+        f"3011 write-mailbox\n"
+        f"{mb_row} read-mailbox 400 read-mailbox = if "
+        f"{mb_col} read-mailbox 401 read-mailbox = if "
+        f"1 414 write-mailbox "
+        f"then then\n"
+        f"{mb_cd} read-mailbox 0 <= if "
+        f"1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
+        f"else "
+        f"{COILY_EGG_HOP_TICKS} {mb_cd} read-mailbox - {_CE_HOP_DENOM_F} / "
+        f"dup 2.0 * 1.0 - dup * swap dup 1.0 swap - 4.0 * * "
+        f"over {_RB_SS_Z_IMP} * over {_RB_SS_Z_BELL} * + 1.0 + 3042 write-mailbox "
+        f"{_RB_SS_XY_BELL} * swap {_RB_SS_XY_IMP} * + 1.0 + "
+        f"dup 3040 write-mailbox 3041 write-mailbox "
+        f"then\n"
+        f"{mb_cd} read-mailbox 0 <= if "
+        f"{mb_row} read-mailbox 6 > if "
+        f"0 {mb_phase} write-mailbox "
+        # If snake not yet active: copy egg2 FROM pos into egg1 slots so the
+        # director Phase-B handler (which reads _CE_MB_FROM_ROW/COL) places
+        # the snake at the right cube, then signal PHASE_GLOBAL=2.
+        f"{COILY_MB_PHASE_GLOBAL} read-mailbox 2 <> if "
+        f"{mb_from_row} read-mailbox {_CE_MB_FROM_ROW} write-mailbox "
+        f"{mb_from_col} read-mailbox {_CE_MB_FROM_COL} write-mailbox "
+        f"2 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+        f"0 {COILY_EGG2_ACTIVE_MB} write-mailbox "
+        f"1 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
+        f"else "
+        f"0 {COILY_EGG2_ACTIVE_MB} write-mailbox "
+        f"then "
+        f"{REDBALL_PARK_Z} 3011 write-mailbox "
+        f"exit "
+        f"then "
+        f"{_RB_LFSR_STEP}"
+        f"{mb_row} read-mailbox dup {mb_from_row} write-mailbox 1 + {mb_row} write-mailbox "
+        f"{mb_col} read-mailbox dup {mb_from_col} write-mailbox "
+        f"swap if 1 + then {mb_col} write-mailbox "
+        f"3011 read-mailbox {mb_start_z} write-mailbox "
+        f"{_RB_Z_BASE} {mb_row} read-mailbox {_RB_Z_MUL} * - {mb_end_z} write-mailbox "
+        f"{COILY_EGG_HOP_TICKS} {mb_cd} write-mailbox "
+        f"then\n"
+    )
+
 # Egg mesh: elongated icosphere (taller than wide) — reads as an egg, not a
 # plain ball. Same vertex count as the red ball (42 verts / 80 faces).
 _EGG_XY_SCALE = 0.72
@@ -1799,6 +1896,35 @@ _egg['wf_Script']              = coily_egg_script()
 print(f"[qbert] Created Coily egg (actor index {COILY_EGG_ACTOR_IDX}); "
       f"hop {COILY_EGG_HOP_TICKS} ticks; "
       f"globals 518..525 + 542..544")
+
+# Coily egg #2 — shares the same mesh as egg1; only active in L4 (round >= 12).
+_egg2_mesh = bpy.data.meshes.new('coily_egg_2_mesh')
+_egg2_mesh.from_pydata(_EGG_VERTS, [], _REDBALL_FACES)
+_egg2_mesh.update()
+_egg2_mat = bpy.data.materials.new('coily_egg_2_purple')
+_egg2_mat.use_nodes = True
+_egg2_bsdf = _egg2_mat.node_tree.nodes.get('Principled BSDF')
+_egg2_bsdf.inputs['Base Color'].default_value = (0.55, 0.10, 0.85, 1.0)
+_egg2_mesh.materials.append(_egg2_mat)
+
+_pre_egg2_actor_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
+COILY_EGG2_ACTOR_IDX = _pre_egg2_actor_count + 1
+
+_egg2 = bpy.data.objects.new('coily_egg_2', _egg2_mesh)
+_egg2.location = (0.0, 0.0, REDBALL_PARK_Z)
+scene.collection.objects.link(_egg2)
+_egg2['wf_schema_path']         = ENEMY_OAD
+_egg2['wf_Mesh Name']           = 'coily_egg_2_mesh.iff'
+_egg2['wf_original_mesh_name']  = 'coily_egg_2_mesh.iff'
+_egg2['wf_Model Type']          = 'Mesh'
+_egg2['wf_Mobility']            = 'Anchored'
+_egg2['wf_Mass']                = 0.0
+_egg2['wf_Visibility Mailbox']  = COILY_EGG2_ACTIVE_MB   # 0=parked, 1=hopping
+_egg2['wf_NumberOfLocalMailboxes'] = 0
+_egg2['wf_Script']              = coily_egg2_script()
+
+print(f"[qbert] Created Coily egg #2 (actor index {COILY_EGG2_ACTOR_IDX}); "
+      f"L4-only; globals 575..583 + 584..586")
 
 # ── 5e. Coily snake (Phase B — egg transforms here at bottom row) ────────────
 # Stacked purple sphere segments. For Phase B it just stands on whichever
@@ -2044,6 +2170,8 @@ def coily_snake_script():
         f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
         f"0 {mb_phase} write-mailbox "
         f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
+        f"0 {COILY_EGG2_ACTIVE_MB} write-mailbox "
+        f"0 {_CE2_MB_PHASE} write-mailbox "
         f"{REDBALL_PARK_Z} 3011 write-mailbox "
         f"500 70 read-mailbox + 70 write-mailbox "
         f"exit then "
@@ -2051,6 +2179,8 @@ def coily_snake_script():
         f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
         f"0 {mb_phase} write-mailbox "
         f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
+        f"0 {COILY_EGG2_ACTIVE_MB} write-mailbox "
+        f"0 {_CE2_MB_PHASE} write-mailbox "
         f"{REDBALL_PARK_Z} 3011 write-mailbox "
         f"500 70 read-mailbox + 70 write-mailbox "
         f"exit then "
@@ -2585,7 +2715,11 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {COILY_EGG_ACTIVE_MB} write-mailbox "
     f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
     f"0 {COILY_MB_ROUND_DONE} write-mailbox "
-    f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox ",
+    f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox "
+    f"0 {COILY_EGG2_ACTIVE_MB} write-mailbox "
+    f"0 {COILY_EGG2_ROUND_DONE} write-mailbox "
+    f"0 {_CE2_MB_PHASE} write-mailbox "
+    f"{COILY_EGG2_SPAWN_DELAY_TICKS} {COILY_MB_SPAWN_DELAY_2} write-mailbox ",
     # Phase D: arm both discs as present (PHASE=1); clear any stale flash.
     f"1 {_DL_MB_PHASE} write-mailbox 1 {_DR_MB_PHASE} write-mailbox "
     f"0 {_DL_MB_FLASH} write-mailbox 0 {_DR_MB_FLASH} write-mailbox ",
@@ -2820,6 +2954,32 @@ DIRECTOR_SCRIPT = "".join([
     f"then "
     f"then "
     f"then\n",
+    # ── Coily egg #2 per-round spawn (L4 only) ────────────────────────────────
+    # Same logic as egg1 but guarded by ROUND_NUMBER > 11 (L4) and uses
+    # CE2_MB_* mailboxes. Does NOT set COILY_MB_PHASE_GLOBAL on spawn —
+    # egg1 owns that flag. Egg2 acts as an independent extra threat.
+    f"418 read-mailbox 1 = if "
+    f"425 read-mailbox 11 > if "
+    f"{COILY_EGG2_ROUND_DONE} read-mailbox 0 = if "
+    f"{COILY_MB_SPAWN_DELAY_2} read-mailbox dup 0 > if "
+    f"1 - {COILY_MB_SPAWN_DELAY_2} write-mailbox "
+    f"else drop "
+    f"{_RB_LFSR_STEP}"
+    f"{_CE2_MB_COL} {COILY_EGG2_ACTOR_IDX} write-actor-mailbox "
+    f"1 {_CE2_MB_ROW} {COILY_EGG2_ACTOR_IDX} write-actor-mailbox "
+    f"0 {_CE2_MB_FROM_ROW} {COILY_EGG2_ACTOR_IDX} write-actor-mailbox "
+    f"0 {_CE2_MB_FROM_COL} {COILY_EGG2_ACTOR_IDX} write-actor-mailbox "
+    f"{COILY_EGG_HOP_TICKS} {_CE2_MB_COOLDOWN} {COILY_EGG2_ACTOR_IDX} write-actor-mailbox "
+    f"{_CE_Z_AT_ROW_0} {_CE2_MB_START_Z} {COILY_EGG2_ACTOR_IDX} write-actor-mailbox "
+    f"{_CE_Z_AT_ROW_1} {_CE2_MB_END_Z} {COILY_EGG2_ACTOR_IDX} write-actor-mailbox "
+    f"0 {_CE2_MB_FLASH_TICK} write-mailbox "
+    f"1 {_CE2_MB_PHASE} {COILY_EGG2_ACTOR_IDX} write-actor-mailbox "
+    f"1 {COILY_EGG2_ACTIVE_MB} write-mailbox "
+    f"1 {COILY_EGG2_ROUND_DONE} write-mailbox "
+    f"then "
+    f"then "
+    f"then "
+    f"then\n",
     # ── Coily egg → snake transformation (Phase B) ─────────────────────────────
     # PHASE_GLOBAL == 2 means the egg just retired off-pyramid; wake the snake
     # at the egg's last on-pyramid cube (FROM_ROW/FROM_COL) and compute its
@@ -2995,6 +3155,10 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
     f"0 {COILY_MB_ROUND_DONE} write-mailbox "
     f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox "
+    f"0 {COILY_EGG2_ACTIVE_MB} write-mailbox "
+    f"0 {_CE2_MB_PHASE} {COILY_EGG2_ACTOR_IDX} write-actor-mailbox "
+    f"0 {COILY_EGG2_ROUND_DONE} write-mailbox "
+    f"{COILY_EGG2_SPAWN_DELAY_TICKS} {COILY_MB_SPAWN_DELAY_2} write-mailbox "
     # Phase D: re-arm both discs (PHASE=1), restore Z, clear stale flash.
     f"1 {_DL_MB_PHASE} write-mailbox 1 {_DR_MB_PHASE} write-mailbox "
     f"0 {_DL_MB_FLASH} write-mailbox 0 {_DR_MB_FLASH} write-mailbox "
