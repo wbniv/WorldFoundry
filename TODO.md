@@ -102,6 +102,7 @@ a one-to-one arcade copy.
 
 - [ ] Sound effects — hop, fall, death, disc-catch, Coily-thud, round-clear, intro jingle. Use the existing ROM-extracted PCM WAV pipeline.
 - [x] Q✱bert curse bubble ("@!#?*") on death — visual implemented (e3a50b4, 2229963, 2026-05-12); audio cue deferred to SFX pass.
+- [ ] Curse bubble "@!#?*" text — original 3D-text approach produced too many polys; replace with a texture map applied to the bubble mesh instead.
 
 ### Visual polish
 
