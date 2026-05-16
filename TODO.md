@@ -95,7 +95,7 @@ a one-to-one arcade copy.
 - [x] Bonus-points popups — floating "+25" / "+100" / "+300" labels. Done ab00bfd. Deferred: +50 popup (2nd-hop cube flip, L2+), +500 popup (Coily-off-disc).
 - [x] Coily-falls-off-disc — snake chases Q✱bert onto disc coords; retires with +500 score. Done b9639f9. Floating +500 popup label deferred.
 - [x] +50 popup (2nd cube hop, L2+) and +500 popup (Coily-off-disc) — done 0a39ce8 — [plan](docs/plans/2026-05-16-qbert-popup-50-500.md)
-- [ ] Bonus letter "S" — rare cube pickup that grants a freeze / extra life / bonus points (arcade behaviour varies by round).
+- [cancelled] Bonus letter "S" — not in original Gottlieb arcade; cancelled 2026-05-16.
 - [x] Enemy coexistence rules — Rule 1: no climber while Coily active; Rule 2: no simultaneous climbers (Ugg blocks Wrong-Way and vice versa); freeze timer guards all spawns. Done 2026-05-15 — [plan](docs/qbert/plans/2026-05-15-qbert-enemy-coexistence.md)
 - [x] Second Coily egg in L4 — arcade spawns two simultaneous Coily eggs from round 12 onward; deferred from difficulty-scaling plan — done 8e55799 — [plan](docs/qbert/plans/2026-05-16-qbert-second-coily-egg.md)
 
