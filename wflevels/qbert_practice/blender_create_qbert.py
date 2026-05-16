@@ -2968,7 +2968,7 @@ DIRECTOR_SCRIPT = "".join([
     # reset cube states, clear win flag, increment ROUND_NUMBER, respawn.
     # capture-trigger fires at LATCH so the host snaps the won state.
     "413 read-mailbox 1 = if 424 read-mailbox 0 = if ",
-    "90 424 write-mailbox 3 432 write-mailbox ",
+    "90 424 write-mailbox 3 432 write-mailbox 4 3017 write-mailbox ",
     "then then\n",
     "424 read-mailbox dup 0 > if ",
     "1 - dup 424 write-mailbox ",
