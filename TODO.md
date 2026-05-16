@@ -96,11 +96,11 @@ a one-to-one arcade copy.
 - [ ] Coily-falls-off-disc — Coily's chase AI currently restricts to on-pyramid cubes; extend to allow landing on disc coords + retire with bonus.
 - [ ] Bonus letter "S" — rare cube pickup that grants a freeze / extra life / bonus points (arcade behaviour varies by round).
 - [x] Enemy coexistence rules — Rule 1: no climber while Coily active; Rule 2: no simultaneous climbers (Ugg blocks Wrong-Way and vice versa); freeze timer guards all spawns. Done 2026-05-15 — [plan](docs/qbert/plans/2026-05-15-qbert-enemy-coexistence.md)
-- [ ] Second Coily egg in L4 — arcade spawns two simultaneous Coily eggs from round 12 onward; deferred from difficulty-scaling plan — [plan](docs/qbert/plans/2026-05-15-qbert-difficulty-scaling.md)
+- [x] Second Coily egg in L4 — arcade spawns two simultaneous Coily eggs from round 12 onward; deferred from difficulty-scaling plan — done 8e55799 — [plan](docs/qbert/plans/2026-05-16-qbert-second-coily-egg.md)
 
 ### Audio
 
-- [ ] Sound effects — hop, fall, death, disc-catch, Coily-thud, round-clear, intro jingle. Use the existing ROM-extracted PCM WAV pipeline.
+- [x] Sound effects — hop, land, fall, death (Votrax swear), round-clear jingle. MAME-extracted PCM WAVs. Done 46d4c16 + d85d424 + d85d424 + 7557a5e.
 - [x] Q✱bert curse bubble ("@!#?*") on death — visual implemented (e3a50b4, 2229963, 2026-05-12); audio cue deferred to SFX pass.
 - [ ] Curse bubble "@!#?*" text — original 3D-text approach produced too many polys; replace with a texture map applied to the bubble mesh instead.
 
