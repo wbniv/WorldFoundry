@@ -566,7 +566,11 @@ void DebugServer_Stop()
 {
     if (!gRunning) return;
     gRunning = false;
-    if (gServerFd >= 0) { ::close(gServerFd); gServerFd = -1; }
+    if (gServerFd >= 0) {
+        ::shutdown(gServerFd, SHUT_RDWR);  // unblocks accept() in listener thread
+        ::close(gServerFd);
+        gServerFd = -1;
+    }
     {
         std::lock_guard<std::mutex> lk(gQueueMutex);
         for (int fd : gClients) ::close(fd);
