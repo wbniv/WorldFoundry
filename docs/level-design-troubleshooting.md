@@ -344,6 +344,68 @@ iffcomp-rs -binary -o=../<name>-standalone.iff <name>-standalone.iff.txt
 
 ---
 
+## Texture atlas empty / Room0.tga is 146 bytes
+
+**Symptom:** After `textile-rs` runs, `Room0.tga` is only 146 bytes (4×16 pixels). The mesh
+material has `TEXTURE_MAPPED` set and references a TGA file that exists, but the atlas
+contains only zeros. The mesh renders as solid colour with no texture applied.
+
+**Cause:** Two bugs in `wftools/textile-rs/src/bitmap.rs` interact:
+
+1. `rgba_555()` returns `0x0000` (the BGR555 transparent key) when alpha > 170 — i.e. for
+   every fully-opaque pixel in a standard RGBA (32-bit) TGA. Every pixel becomes 0x0000.
+
+2. `find_existing()` compares the all-zero texture pixel data against the newly-initialized
+   all-zero atlas. They match, so the texture is falsely considered "already present." The
+   blit is skipped, the allocation map records no usage, and the atlas crops to its minimum
+   no-data size.
+
+`Room0.ruv` still records the correct texture name and dimensions (from the dedup-match path
+before blitting), so the engine starts without errors but finds only transparent pixels.
+
+**Fix:** Generate textures as **24-bit RGB** TGA, not 32-bit RGBA. PIL uses 24-bit when you
+create the image with `Image.new('RGB', ...)`. `textile-rs` detects `bpp=24` and takes the
+`try_load_tga_bgr555()` fast path which calls `br_colour_rgb_555()` with no alpha logic.
+
+```python
+img = Image.new('RGB', (W, H), (255, 255, 255))   # 24-bit RGB, no alpha channel
+```
+
+**Verification:**
+
+```bash
+ls -lh Room0.tga       # > 1 KB for a real texture
+xxd Room0.tga | head   # first pixels should NOT be 0x0000
+```
+
+`Room0.ruv` having a correct entry does NOT prove the texture was blitted.
+
+---
+
+## Texture colour disappears in-game (transparent key 0x0000)
+
+**Symptom:** Texture looks correct in an image viewer but text or dark regions are invisible
+in-game. Background colour renders fine; dark foreground disappears.
+
+**Cause:** The engine uses BGR555 colour `0x0000` as the transparent pixel key.
+`br_colour_rgb_555(r, g, b)` rounds each channel to 5 bits: any colour with all channels
+below 8 produces `(0, 0, 0)` = 0x0000 = transparent.
+
+```
+(20, 20, 20) → br_colour_rgb_555 → (0, 0, 0) = 0x0000 → transparent (invisible)
+(40, 40, 40) → br_colour_rgb_555 → (1, 1, 1) = 0x0421 → opaque ✓
+```
+
+**Fix:** Use a minimum channel value of 8 in any colour that must be opaque. For dark text,
+`(40, 40, 40)` is a safe minimum that is visually near-black and rounds to a non-zero
+BGR555 value.
+
+**Rule:** no intentionally-opaque colour should have all three RGB channels below 8.
+
+Full root-cause analysis: [docs/investigations/2026-05-16-textile-rs-rgba555-dedup-bug.md](investigations/2026-05-16-textile-rs-rgba555-dedup-bug.md).
+
+---
+
 ## Mesh face normals
 
 WF's `glpipeline` renderer does **not** enable `GL_CULL_FACE`. Faces are always drawn regardless of winding order.
