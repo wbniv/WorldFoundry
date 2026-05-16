@@ -1,7 +1,7 @@
 # Plan — Q✱bert disc rim colour flash VFX
 
 **Date:** 2026-05-15
-**Status:** In progress
+**Status:** Complete — e04fb99
 
 ## Problem
 
@@ -126,11 +126,11 @@ assert b.wait_for_mailbox(idx=1, mailbox=536, expected=0.0, timeout=2.0)
 
 Visual — screenshots captured via bridge screenshot op:
 
-**disc_flash_ring_visible.png** — ring held visible (`set_mailbox(536, 999)`)
-showing yellow washer around the purple-blue disc:
+**disc_flash_ring_visible.png** — ring held visible (`set_mailbox(536, 999)`);
+yellow washer visible off the top-left of the pyramid at disc-L position:
 
 ![flash ring visible](file:///home/will/tmp/qbert-screenshots/disc_flash_ring_visible.png)
 
-**disc_flash_ring_gone.png** — countdown drained, ring invisible:
+**disc_flash_ring_gone.png** — countdown drained to 0, ring invisible:
 
 ![flash ring gone](file:///home/will/tmp/qbert-screenshots/disc_flash_ring_gone.png)
