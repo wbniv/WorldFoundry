@@ -33,6 +33,13 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 - [ ] Marble-madness: script-based input remapping — `Script Controls Input = True`; script reads mailbox 1008 (`EMAILBOX_HARDWARE_JOYSTICK1`, physical joystick, read-only) to get raw buttons, remaps them (e.g. LEFT/RIGHT → strafe bits), then writes to mailbox 3024 (`EMAILBOX_INPUT`, write-only) so the movement handler sees the remapped state. Current implementation handles LEFT/RIGHT strafe in `movement.cc` (TurnRate==0 branch) instead; the script approach is a viable future refactor. See `player.cc:192` for the 1-line passthrough pattern.
 
 
+## ENGINE ROBUSTNESS
+
+- [ ] Jolt defensive null in `JoltBodyCreateStaticMesh` — refuse to register a handle when the underlying body comes back invalid; turns a segfault into a clean OOM diagnostic — [investigation](docs/qbert/investigations/2026-05-10-qbert-engine-caps.md)
+- [ ] LMalloc DEBUG canary — end-of-allocation sentinel; catches buffer overruns at write time rather than at the eventual corrupt read — [investigation](docs/qbert/investigations/2026-05-10-qbert-engine-caps.md)
+- [ ] Per-level `MAX_ACTIVE_ROOMS` — currently compile-time constant; qbert wastes 16 MB on 2 unused adjacent-room slots; plumb a per-level override through AssetManager constructor — [investigation](docs/qbert/investigations/2026-05-10-qbert-engine-caps.md)
+
+
 ## PHYSICS
 
 - [ ] Level pipeline Phase D — decompile the 4 source-less levels (`cube`, `basic`, `cyber`, `main_game`) — [plan](docs/plans/2026-04-17-level-pipeline-proof.md)
@@ -88,18 +95,19 @@ a one-to-one arcade copy.
 - [x] Bonus-points popups — floating "+25" / "+300" / "+500" labels on cube-flip, Slick/Sam catch, Coily-off-disc. Done 454d8c2: +25/+100/+300 actors, 90-tick hold, director tick block. +100/+300 scores also wired (were missing). Deferred: +50 popup (2nd hop), Coily-off-disc (+500).
 - [ ] Coily-falls-off-disc — Coily's chase AI currently restricts to on-pyramid cubes; extend to allow landing on disc coords + retire with bonus.
 - [ ] Bonus letter "S" — rare cube pickup that grants a freeze / extra life / bonus points (arcade behaviour varies by round).
-- [ ] Enemy coexistence rules — arcade restricts which enemies can spawn together (e.g. no Ugg + Coily simultaneously); current implementation lets all 8 spawn freely.
+- [x] Enemy coexistence rules — Rule 1: no climber while Coily active; Rule 2: no simultaneous climbers (Ugg blocks Wrong-Way and vice versa); freeze timer guards all spawns. Done 2026-05-15 — [plan](docs/qbert/plans/2026-05-15-qbert-enemy-coexistence.md)
+- [ ] Second Coily egg in L4 — arcade spawns two simultaneous Coily eggs from round 12 onward; deferred from difficulty-scaling plan — [plan](docs/qbert/plans/2026-05-15-qbert-difficulty-scaling.md)
 
 ### Audio
 
 - [ ] Sound effects — hop, fall, death, disc-catch, Coily-thud, round-clear, intro jingle. Use the existing ROM-extracted PCM WAV pipeline.
-- [ ] Q✱bert curse bubble ("@!#?*") on death — iconic speech-bubble visual + audio cue.
+- [x] Q✱bert curse bubble ("@!#?*") on death — visual implemented (e3a50b4, 2229963, 2026-05-12); audio cue deferred to SFX pass.
 
 ### Visual polish
 
-- [ ] Distinct enemy meshes — Slick/Sam currently use a hat-on-body flipper proxy; Ugg/Wrong-Way use a climber blob; Coily is stacked spheres. Replace with arcade-recognizable 3D characters.
+- [x] Distinct enemy meshes — Slick/Sam (green body + orange spiky hair), Ugg/Wrong-Way (magenta climber + snout + antennae), Coily (2.5-turn bezier spiral + head/tongue). Done 2026-05-11 — [plan](docs/qbert/plans/2026-05-11-qbert-distinct-enemy-meshes.md)
 - [x] Player death animation — tumble + splat + curse bubble implemented (e3a50b4, 2229963, 2026-05-12). Full-sprite explosion deferred.
-- [ ] Disc spin VFX — currently steady yaw rotation; arcade flashes colours on the disc rim.
+- [x] Disc spin VFX — yellow rim flash ring for 8 frames on Q✱bert boarding. Done e04fb99 — [plan](docs/qbert/plans/2026-05-15-qbert-disc-flash-vfx.md)
 - [x] Game-over screen + name entry — 8f2b6a1: GO_BLOCK (mb 590) prevents Forth restart during C++ initials entry; GO_HOLD_TIMER (mb 591) enforces 3 s minimum hold on game-over screen; 3 s post-confirm hold shows updated table.
 
 ### Verification / breadth
