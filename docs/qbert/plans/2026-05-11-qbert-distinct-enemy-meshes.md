@@ -1,7 +1,7 @@
 # Plan — Distinct enemy meshes (Slick/Sam, Ugg/Wrong-Way, Coily)
 
 **Date:** 2026-05-11
-**Status:** Not started
+**Status:** Complete — all three phases shipped; Blender mesh screenshots + in-engine captures confirm distinct silhouettes. Coily spiral in-engine: [qbert-enemies-ingame-coily.png](../screenshots/qbert-enemies-ingame-coily.png). Ugg/Wrong-Way in-engine: see [enemy coexistence screenshots](../screenshots/qbert-coex-positive-ugg-spawns.png). Slick/Sam Blender mesh: [qbert-slick-sam-mesh-2026-05-11.png](../screenshots/qbert-slick-sam-mesh-2026-05-11.png).
 
 ## Context
 
