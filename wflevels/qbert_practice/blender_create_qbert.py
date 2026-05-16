@@ -581,11 +581,11 @@ if player:
         "419 read-mailbox dup 0 > if "
         "dup 30 < if "
         # Curse bubble tracks the falling player (+2 in Z so it hovers above).
-        # Bubble actor idx = 30 (CURSE_BUBBLE_ACTOR_IDX, hardcoded here; if
-        # the actor list shifts, update this literal).
-        "INDEXOF_X_POS read-mailbox 3009 30 write-actor-mailbox "
-        "INDEXOF_Y_POS read-mailbox 3010 30 write-actor-mailbox "
-        "INDEXOF_Z_POS read-mailbox 2 + 3011 30 write-actor-mailbox "
+        # Bubble actor idx = 33 (CURSE_BUBBLE_ACTOR_IDX). Verified by assert
+        # below after the bubble actor is created.
+        "INDEXOF_X_POS read-mailbox 3009 33 write-actor-mailbox "
+        "INDEXOF_Y_POS read-mailbox 3010 33 write-actor-mailbox "
+        "INDEXOF_Z_POS read-mailbox 2 + 3011 33 write-actor-mailbox "
         # Phases 28..29 = splat (last two falling ticks): wide flat pancake,
         # rotation rates → 0 so the player lands still. Phases 1..27 = airborne
         # tumble + prolate stretch.
@@ -611,7 +611,7 @@ if player:
         "1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
         "0 3034 write-mailbox 0 3035 write-mailbox "
         # Park bubble at Z=-30 (same as REDBALL_PARK_Z, within room bbox).
-        "-30.0 3011 30 write-actor-mailbox "
+        "-30.0 3011 33 write-actor-mailbox "
         "then "
         "exit "
         "else drop "
@@ -2460,7 +2460,40 @@ print(f"[qbert] Created 2 disc flash rings: "
 # Mesh built in XY plane (facing +Z) to match popup actor convention; the
 # elevated camera angle makes this readable at camera distance.
 
-def _make_curse_bubble_mesh():
+def _generate_curse_bubble_texture(level_dir):
+    """Render '@!#?@!' into a 128x64 RGB TGA for the bubble front face.
+
+    Must be RGB (24-bit), not RGBA: textile-rs rgba_555() maps alpha>170 to 0
+    (transparent), turning every fully-opaque pixel black.  24-bit TGA takes
+    the fast path (try_load_tga_bgr555) which calls br_colour_rgb_555 and
+    preserves all colours correctly.
+
+    Text colour must be >= (8,8,8) so it doesn't round to 0x0000 in BGR555
+    (the engine transparent-key colour).  (20,20,20) rounds to (0,0,0)=0x0000
+    which disappears; (40,40,40) rounds to (1,1,1)=0x0421, clearly visible.
+    """
+    from PIL import Image, ImageDraw, ImageFont
+    W, H = 128, 64
+    BG   = (255, 255, 255)   # white background — RGB, no alpha
+    FG   = (40,  40,  40)    # dark grey text (rounds to 0x0421 in BGR555, non-transparent)
+    img  = Image.new('RGB', (W, H), BG)
+    draw = ImageDraw.Draw(img)
+    text = "@!#?@!"
+    font_path = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+    try:
+        font = ImageFont.truetype(font_path, 28)
+    except OSError:
+        font = ImageFont.load_default()
+    bb = draw.textbbox((0, 0), text, font=font)
+    x  = (W - (bb[2] - bb[0])) // 2 - bb[0]
+    y  = (H - (bb[3] - bb[1])) // 2 - bb[1]
+    draw.text((x, y), text, fill=FG, font=font)
+    out = os.path.join(level_dir, 'curse_bubble_text.tga')
+    img.save(out)
+    return out
+
+
+def _make_curse_bubble_mesh(tex_path):
     """Low-poly speech-bubble oval in the XZ plane (normal −Y, facing camera).
 
     WF world: +X forward, +Y left, +Z up. Camera sits at Y≈−22 looking in the
@@ -2470,13 +2503,19 @@ def _make_curse_bubble_mesh():
     falling character.
 
     Room-pool note: no text geometry — Blender text_add generates ~90 KB of
-    triangles for '@!#?@!' which overflows cbRoom. Oval silhouette alone is
-    arcade-recognisable.
+    triangles for '@!#?@!' which overflows cbRoom. UV-mapped texture instead.
     """
     import bmesh as _bmesh
     import math as _math
 
-    mat_body = _make_principled_material('bubble_body', (1.00, 1.00, 0.70))  # light yellow
+    mat_body = _make_principled_material('bubble_body', (1.00, 1.00, 1.00))  # white
+
+    mat_text = bpy.data.materials.new('bubble_text')
+    mat_text.use_nodes = True
+    _bsdf_t   = mat_text.node_tree.nodes['Principled BSDF']
+    _tex_node = mat_text.node_tree.nodes.new('ShaderNodeTexImage')
+    _tex_node.image = bpy.data.images.load(tex_path)
+    mat_text.node_tree.links.new(_tex_node.outputs['Color'], _bsdf_t.inputs['Base Color'])
 
     N       = 16      # vertices around the ellipse
     RX      = 0.85    # horizontal semi-axis (X)
@@ -2484,6 +2523,7 @@ def _make_curse_bubble_mesh():
     DEPTH   = 0.08    # thickness in Y (toward/away from camera)
 
     _bm = _bmesh.new()
+    uv_layer = _bm.loops.layers.uv.new('UVMap')
 
     # Front ring (Y=0, toward camera), back ring (Y=DEPTH, away from camera).
     front_verts = []
@@ -2494,9 +2534,19 @@ def _make_curse_bubble_mesh():
         front_verts.append(_bm.verts.new((x, 0.0,   z)))
         back_verts.append( _bm.verts.new((x, DEPTH, z)))
 
+    # Front face: textured material, UV-mapped via planar projection.
     # Parameterisation goes RIGHT→TOP→LEFT→BOTTOM from the −Y viewpoint = CCW
     # from −Y = normal −Y (faces camera).
-    _bm.faces.new(front_verts)
+    front_face = _bm.faces.new(front_verts)
+    front_face.material_index = 1
+    _bm.faces.ensure_lookup_table()
+    for _loop in front_face.loops:
+        _v = _loop.vert.co
+        _loop[uv_layer].uv = (
+            (_v.x / RX + 1.0) / 2.0,
+            1.0 - (_v.z / RZ + 1.0) / 2.0,
+        )
+
     # Back face: reversed winding → normal +Y.
     _bm.faces.new(list(reversed(back_verts)))
     # Side quads: [front[i], back[i], back[j], front[j]] → outward normals.
@@ -2520,17 +2570,20 @@ def _make_curse_bubble_mesh():
     _bm.faces.new([tf0, tf1, tb1, tb0])     # top base   (normal +Z)
 
     mesh_data = bpy.data.meshes.new('CurseBubbleMesh')
-    mesh_data.materials.append(mat_body)
+    mesh_data.materials.append(mat_body)   # slot 0 — back/sides/tail
+    mesh_data.materials.append(mat_text)   # slot 1 — front face (textured)
     _bm.to_mesh(mesh_data)
     _bm.free()
     mesh_data.update()
     return mesh_data
 
 
+_curse_tex_path = _generate_curse_bubble_texture(SCRIPT_DIR)
+
 _pre_bubble_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
 CURSE_BUBBLE_ACTOR_IDX = _pre_bubble_count + 1
 
-_bubble = bpy.data.objects.new('curse_bubble', _make_curse_bubble_mesh())
+_bubble = bpy.data.objects.new('curse_bubble', _make_curse_bubble_mesh(_curse_tex_path))
 _bubble.location = (0.0, 0.0, REDBALL_PARK_Z)  # within room bbox so levcomp-rs adds it to RM0
 scene.collection.objects.link(_bubble)
 _bubble['wf_schema_path']         = ENEMY_OAD
@@ -2541,6 +2594,9 @@ _bubble['wf_Mobility']            = 'Anchored'
 _bubble['wf_Mass']                = 0.0
 _bubble['wf_Visibility Mailbox']  = 419   # FALL_PHASE: 0=idle (invisible), 1-30=falling (visible)
 print(f"[qbert] Created curse bubble actor idx={CURSE_BUBBLE_ACTOR_IDX} at {tuple(_bubble.location)}")
+assert CURSE_BUBBLE_ACTOR_IDX == 33, (
+    f"Bubble actor idx drifted to {CURSE_BUBBLE_ACTOR_IDX} — update hardcoded '33' in player script fall section"
+)
 
 
 # ── 5c.9. Bonus-points popup actors ──────────────────────────────────────────
