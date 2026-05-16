@@ -238,6 +238,8 @@ WFGame::RunGameScript()				// runs the whole game, returns when game (really) ov
 		assert(ValidPtr(diskFile));
 		MEMORY_DELETE( HALLmalloc, diskFile,DiskFile);
 #endif
+		if (HALWindowCloseRequested())
+			break;
 	}
 #if defined(DO_CD_IFF)
 	HALLmalloc.Free((void*)pScript);

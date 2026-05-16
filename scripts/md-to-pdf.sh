@@ -77,6 +77,15 @@ def _read_and_resize(img_path, ext):
         pass  # fall back to original
     return data, mime
 
+# Resolve an image src to an absolute filesystem path.
+# Handles: relative paths, absolute paths, and file:// URLs (with %xx decoding).
+def _resolve_img_path(src, file_dir):
+    if src.startswith('file://'):
+        return urllib.parse.unquote(src[7:])   # strip scheme, decode %xx
+    if os.path.isabs(src):
+        return src
+    return os.path.join(file_dir, src)
+
 # Replace <img src=...> tags with base64-embedded versions
 def replace_img(m):
     full = m.group(0)
@@ -84,10 +93,10 @@ def replace_img(m):
     if not src_match:
         return full
     src = src_match.group(1)
-    img_path = os.path.join(file_dir, src)
+    img_path = _resolve_img_path(src, file_dir)
     if not os.path.exists(img_path):
         return full
-    ext = os.path.splitext(src)[1].lstrip('.') or 'png'
+    ext = os.path.splitext(img_path)[1].lstrip('.') or 'png'
     data, mime = _read_and_resize(img_path, ext)
     b64 = base64.b64encode(data).decode()
     return full.replace(src, f'data:{mime};base64,{b64}')
@@ -98,10 +107,10 @@ md = re.sub(r'<img\s[^>]+>', replace_img, md)
 def replace_md_img(m):
     alt = m.group(1)
     src = m.group(2)
-    img_path = os.path.join(file_dir, src)
+    img_path = _resolve_img_path(src, file_dir)
     if not os.path.exists(img_path):
         return m.group(0)
-    ext = os.path.splitext(src)[1].lstrip('.') or 'png'
+    ext = os.path.splitext(img_path)[1].lstrip('.') or 'png'
     data, mime = _read_and_resize(img_path, ext)
     b64 = base64.b64encode(data).decode()
     return f'<img src=\"data:{mime};base64,{b64}\" alt=\"{alt}\">'

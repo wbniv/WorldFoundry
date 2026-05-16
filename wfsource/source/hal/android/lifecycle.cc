@@ -58,3 +58,9 @@ HALWindowCloseRequested(void)
 {
     return 0;
 }
+
+// No native window to tear down from the app side on Android.
+extern "C" WF_ANDROID_EXPORT void
+HALCloseWindow(void)
+{
+}

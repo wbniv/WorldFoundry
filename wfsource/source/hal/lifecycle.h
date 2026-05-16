@@ -51,6 +51,11 @@ void HALPumpSuspendedEvents(void);
 // window-close concept (Android), always returns false.
 int  HALWindowCloseRequested(void);   // 0 = not requested, nonzero = close requested
 
+// Destroy the platform window immediately so it disappears before destructor
+// cleanup runs. Safe to call multiple times; no-ops after the first call.
+// On platforms with no native window (Android), this is a no-op.
+void HALCloseWindow(void);
+
 #if defined(__cplusplus)
 }
 #endif

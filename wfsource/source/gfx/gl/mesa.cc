@@ -474,4 +474,19 @@ extern "C" int HALWindowCloseRequested(void)
     return _closeRequested.load();
 }
 
+// Destroy the X window immediately so it disappears before process exit.
+extern "C" void HALCloseWindow(void)
+{
+#if defined(__LINUX__)
+    if (halDisplay.win)
+    {
+        glXMakeCurrent(halDisplay.mainDisplay, None, nullptr);
+        XDestroyWindow(halDisplay.mainDisplay, halDisplay.win);
+        XCloseDisplay(halDisplay.mainDisplay);
+        halDisplay.win = 0;
+        halDisplay.mainDisplay = nullptr;
+    }
+#endif
+}
+
 //==============================================================================

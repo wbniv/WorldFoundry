@@ -46,6 +46,38 @@ Heading 32/256 = 45° = NE diagonal (northeast)
 Heading 13/256 ≈ 18° = ENE (Practice level)
 ```
 
+### Player orientation — Euler C and `currentDir()`
+
+`currentDir()` (`physicalobject.hpi:50`) returns **(cos C, sin C, 0)** —
+**not** `(sin C, cos C, 0)` as the comment in `movement.cc:698` claims.
+The comment is wrong; the implementation is authoritative.
+
+| C (radians) | currentDir | faces |
+|-------------|-----------|-------|
+| 0 | (1, 0, 0) | +X |
+| π/2 | (0, 1, 0) | +Y (into depth) |
+| π | (−1, 0, 0) | −X |
+| 3π/2 | (0, −1, 0) | −Y (toward camera) |
+
+Doom-stick strafe (TurnRate=0): **StepRight = (sin C, −cos C, 0)** — 90° clockwise
+from currentDir.
+
+**Side-scroller recipe** (camera at Y < 0 looking toward +Y):
+
+```python
+player.rotation_euler.z = math.pi / 2   # C = π/2
+```
+
+| C | StepLeft | StepRight |
+|---|----------|-----------|
+| 0 (wrong) | (0, +1, 0) away from cam | (0, −1, 0) toward cam |
+| π/2 (correct) | (−1, 0, 0) screen-left | (+1, 0, 0) screen-right |
+
+See [`docs/investigations/2026-05-15-wf-coordinate-system-and-currentdir.md`](investigations/2026-05-15-wf-coordinate-system-and-currentdir.md)
+for the full numeric chain (levcomp-rs u16 encoding → Angle::Sin/Cos → Scalar × 2π).
+
+---
+
 ### Blender editor vs. WF game
 
 Blender's default orientation matches WF exactly (both Z-up, Y-forward):

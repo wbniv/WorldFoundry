@@ -9,6 +9,8 @@
 
 Eighteen days of work (2026-04-12 – 2026-04-30). Newest first:
 
+- **SMB W1-1 movement direction fixed — `currentDir()` comment wrong, C=π/2 needed (2026-05-15)** — Player moved toward camera (−Y) when joystick-RIGHT was pressed. Root cause: `currentDir()` in `physicalobject.hpi:50` returns `(cos C, sin C, 0)`, not `(sin C, cos C, 0)` as the comment in `movement.cc:698` claims. With C=0, the player faces +X and StepRight = −Y (toward camera). Fixed by setting Player Euler C = π/2 (`rotation_euler.z = math.pi/2` in the Blender script), which gives `currentDir=(0,1,0)` (facing +Y into the scene) and StepRight = +X (screen-right). Full numeric chain traced through `Angle::Sin/Cos` → `Scalar::Sin/Cos` → `levcomp-rs radians_fx_to_u16_revs`. See [investigation](docs/investigations/2026-05-15-wf-coordinate-system-and-currentdir.md) and updated `CLAUDE.md`.
+
 - **WF graceful-degrade under Jolt pool exhaustion — investigation closed, already works (2026-05-10)** — Three reruns confirmed the marble parks cleanly when its floor body is lost. WF's existing `_joltBodyID` guards cover the degraded mode end-to-end; no fix needed.
 
 - **Jolt body-pool exhaustion now fails loudly instead of segfaulting (2026-05-10)** — Every `CreateAndAddBody` wrapper now checks `IsInvalid()` and logs a pool-exhausted message instead of registering a bogus handle. Guards added in `JoltBodyDestroy` and `JoltBackendShutdown` cover the `RemoveBody` path too.
@@ -173,6 +175,7 @@ Eighteen days of work (2026-04-12 – 2026-04-30). Newest first:
 
 | Date | Investigation | Status | Summary |
 |------|---------------|--------|---------|
+| 2026-05-15 | [Investigation: WF coordinate system, Euler angles, and `currentDir()`](docs/investigations/2026-05-15-wf-coordinate-system-and-currentdir.md) | **Complete** | `currentDir()` returns `(cos C, sin C, 0)`, not `(sin C, cos C, 0)` as the comment claims. Full chain traced: `.lev` radian → `levcomp-rs` `u16` revolution fraction → `Angle::Sin/Cos` → `Scalar::Sin/Cos` (multiplies by 2π). With C=0 the player faces +X and StepRight = −Y (toward camera). Fix: C=π/2 → faces +Y, StepRight=+X. Side-scroller recipe documented. |
 | 2026-04-29 | [Investigation: Blender Game Engine removal — history, gap, and WF's fit](docs/investigations/2026-04-29-blender-game-engine-removal.md) | **Complete** | History of BGE removal (2018, 916 files, Dalai Felinto), what filled the gap (UPBGE, Armory3D, Godot), why the Godot recommendation missed the point (integration was the product, not the renderer), WF's position in that space. "Run in Engine" operator noted as implemented; live-reload gap documented. |
 | 2026-04-29 | [Investigation: World Foundry vs. Godot — technical comparison](docs/investigations/2026-04-29-world-foundry-vs-godot.md) | **Complete** | Technical snapshot: renderer, physics (Jolt vs Godot Physics/Jolt), scripting (multi-engine vs GDScript/C#), tooling, world model, audio, networking, platforms, asset pipeline, licensing. |
 | 2026-04-29 | [Investigation: WF camera system — projection type, FOV, CamShot, Director](docs/investigations/2026-04-29-camera-system-audit.md) | **Complete** | Whether forced-perspective / isometric camera is possible without an ortho projection. Conclusion: perspective only today; `Mat4Ortho` path is ~½ day work, gated on Phase E OAD schema change. Feeds orthographic projection TODO. |
@@ -270,4 +273,4 @@ No hard blockers. Jolt is functional and all scripting engines are smoke-tested.
 
 ## Last Change
 
-**2026-04-30** — marble-madness-2: `MarbleHandler` physics, `MaxAirSpeed=50` fix, 90-second timer + goal detection in director/player scripts; all `.iff` bundles rebuilt. `wftools/wf_blender/`: "Run in Engine" operator (`WF_OT_run_level`), `export_scene_to_lev()` helper, `wf_level_name` scene property, `repo_root` addon pref. Asset browser: pure-Python providers rewrite, Sketchfab v2, Poly Haven v1.
+**2026-05-15** — SMB W1-1: fixed player movement direction (Euler C 0→π/2); fixed camera off-centre (Camera/camshot/Target02 X from 33.75→4.5); documented WF coordinate system in `CLAUDE.md`; filed coordinate-system investigation.

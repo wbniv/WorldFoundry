@@ -28,6 +28,7 @@
 #include <pigsys/pigsys.hp>
 #include "game.hp"
 #include "version.hp"
+#include <hal/lifecycle.h>
 
 #if defined(__LINUX__) || defined(__ANDROID__)
 	char szOadDir[ _MAX_PATH ];
@@ -363,6 +364,10 @@ PIGSMain( int argc, char* * argv )
 	DBSTREAM1( cprogress << "main::running game script" << std::endl; )
 
 	game->RunGameScript( );
+
+	// Destroy the X window before running destructors so it disappears
+	// immediately rather than lingering until the OS reclaims the connection.
+	HALCloseWindow();
 
 	DBSTREAM1( cprogress << "Game over: shutting down the game" << std::endl; )
 

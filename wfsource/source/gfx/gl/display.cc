@@ -25,6 +25,7 @@
 //============================================================================
 
 #include <hal/hal.h>
+#include <hal/lifecycle.h>
 #if defined(WF_ENABLE_STEAM)
 #  include <hal/linux/steam.h>
 #endif
@@ -338,10 +339,13 @@ _memory(memory)
 Display::~Display()
 {
     Validate();
-    if(_drawPage == 0)
-        PageFlip();
+    // Skip final PageFlips if the X window was already destroyed by HALCloseWindow().
+    if (!HALWindowCloseRequested()) {
+        if(_drawPage == 0)
+            PageFlip();
 
-    PageFlip();
+        PageFlip();
+    }
 
 #if defined(USE_ORDER_TABLES)
     for(int index=ORDER_TABLES-1;index>= 0;index--)
