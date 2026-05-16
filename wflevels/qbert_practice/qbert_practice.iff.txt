@@ -39,7 +39,9 @@
 		$300000dl { 'STR' "popup_25.iff" }  // IFF RM0 000:00d
 		$300000el { 'STR' "popup_100.iff" }  // IFF RM0 000:00e
 		$300000fl { 'STR' "popup_300.iff" }  // IFF RM0 000:00f
-		$3000010l { 'STR' "cube.iff" }  // IFF RM0 000:010
+		$3000010l { 'STR' "popup_50.iff" }  // IFF RM0 000:010
+		$3000011l { 'STR' "popup_500.iff" }  // IFF RM0 000:011
+		$3000012l { 'STR' "cube.iff" }  // IFF RM0 000:012
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "qbert_practice.lvl" ] }
@@ -72,7 +74,9 @@
 		{ 'ASS' $300000dl [ "popup_25.iff" ] }  // IFF RM0 000:00d
 		{ 'ASS' $300000el [ "popup_100.iff" ] }  // IFF RM0 000:00e
 		{ 'ASS' $300000fl [ "popup_300.iff" ] }  // IFF RM0 000:00f
-		{ 'ASS' $3000010l [ "cube.iff" ] }  // IFF RM0 000:010
+		{ 'ASS' $3000010l [ "popup_50.iff" ] }  // IFF RM0 000:010
+		{ 'ASS' $3000011l [ "popup_500.iff" ] }  // IFF RM0 000:011
+		{ 'ASS' $3000012l [ "cube.iff" ] }  // IFF RM0 000:012
 	}
 	{ 'ALGN' .align(2048) }
 }

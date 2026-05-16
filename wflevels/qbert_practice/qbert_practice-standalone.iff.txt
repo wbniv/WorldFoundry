@@ -18,8 +18,9 @@
     { 'RAM'
         'OBJD' 200000l                  // ~45 actors total post-Phase-1; matches snowgoons
         'PERM' 1000000l                 // player.iff + curse_bubble.iff (death-anim overlay)
-        'ROOM' 1500000l                 // 28 cubes + 8 detailed enemy meshes (Slick/Sam/Ugg/WW
-                                        // grew to ~15-16 KB each in the 2026-05-11 detail pass)
+        'ROOM' 1800000l                 // 28 cubes + 8 detailed enemy meshes (Slick/Sam/Ugg/WW
+                                        // grew to ~15-16 KB each in the 2026-05-11 detail pass;
+                                        // +250 KB headroom added 2026-05-16 for popup_50 + popup_500 text meshes
         'FLAG' 1l 1l                    // doomstick, bungeecam
     }
     { 'ALGN' .align( 2048 ) }

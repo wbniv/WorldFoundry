@@ -96,7 +96,7 @@ SQRT2 = math.sqrt(2.0)
 #   434        PENDING_LAND (player internal one-shot; promoted to mb 411 on landing)
 #   435..437   QBERT_STASH_X/Y/Z (player→enemy contact position snapshot)
 #   580        POPUP_TIMER (countdown ticks; 0 = idle)
-#   581        POPUP_VALUE (pending trigger: 0=none, 25, 100, 300)
+#   581        POPUP_VALUE (pending trigger: 0=none, 25, 50, 100, 300, 500)
 #   582        POPUP_PENDING_X
 #   583        POPUP_PENDING_Y
 #   584        POPUP_PENDING_Z (includes +1.5 Z offset above cube top)
@@ -2172,6 +2172,10 @@ def coily_snake_script():
         f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
         f"0 {COILY_EGG2_ACTIVE_MB} write-mailbox "
         f"0 {_CE2_MB_PHASE} write-mailbox "
+        f"INDEXOF_X_POS read-mailbox {POPUP_PENDING_X_MB} write-mailbox "
+        f"INDEXOF_Y_POS read-mailbox {POPUP_PENDING_Y_MB} write-mailbox "
+        f"INDEXOF_Z_POS read-mailbox 1.5 + {POPUP_PENDING_Z_MB} write-mailbox "
+        f"500 {POPUP_VALUE_MB} write-mailbox "
         f"{REDBALL_PARK_Z} 3011 write-mailbox "
         f"500 70 read-mailbox + 70 write-mailbox "
         f"exit then "
@@ -2181,6 +2185,10 @@ def coily_snake_script():
         f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
         f"0 {COILY_EGG2_ACTIVE_MB} write-mailbox "
         f"0 {_CE2_MB_PHASE} write-mailbox "
+        f"INDEXOF_X_POS read-mailbox {POPUP_PENDING_X_MB} write-mailbox "
+        f"INDEXOF_Y_POS read-mailbox {POPUP_PENDING_Y_MB} write-mailbox "
+        f"INDEXOF_Z_POS read-mailbox 1.5 + {POPUP_PENDING_Z_MB} write-mailbox "
+        f"500 {POPUP_VALUE_MB} write-mailbox "
         f"{REDBALL_PARK_Z} 3011 write-mailbox "
         f"500 70 read-mailbox + 70 write-mailbox "
         f"exit then "
@@ -2650,8 +2658,13 @@ _make_popup_actor('100', '+100', (0.40, 1.00, 0.20))   # lime
 POPUP100_ACTOR_IDX = _pre_popup_count + 2
 _make_popup_actor('300', '+300', (0.20, 0.90, 1.00))   # cyan
 POPUP300_ACTOR_IDX = _pre_popup_count + 3
+_make_popup_actor('50',  '+50',  (1.00, 0.55, 0.00))   # orange — 2nd-hop bonus
+POPUP50_ACTOR_IDX  = _pre_popup_count + 4
+_make_popup_actor('500', '+500', (1.00, 0.20, 0.80))   # hot magenta — Coily-off-disc
+POPUP500_ACTOR_IDX = _pre_popup_count + 5
 print(f"[qbert] Created popup actors: +25 idx={POPUP25_ACTOR_IDX}, "
-      f"+100 idx={POPUP100_ACTOR_IDX}, +300 idx={POPUP300_ACTOR_IDX}")
+      f"+100 idx={POPUP100_ACTOR_IDX}, +300 idx={POPUP300_ACTOR_IDX}, "
+      f"+50 idx={POPUP50_ACTOR_IDX}, +500 idx={POPUP500_ACTOR_IDX}")
 
 
 # ── 6. Director — wire its Script for the game loop ───────────────────────────
@@ -3093,7 +3106,7 @@ DIRECTOR_SCRIPT = "".join([
     "400 read-mailbox dup 1 + * 2 / 401 read-mailbox + 200 + ",
     "dup read-mailbox ",
     f"dup 0 = if drop 425 read-mailbox dup 4 % - 4 / 2 % 0 = if 2 swap write-mailbox else 1 swap write-mailbox then 70 read-mailbox 25 + 70 write-mailbox {_popup_trigger_forth(25)}",
-    f"else dup 1 = if drop 2 swap write-mailbox 70 read-mailbox 50 + 70 write-mailbox {_popup_trigger_forth(25)}",
+    f"else dup 1 = if drop 2 swap write-mailbox 70 read-mailbox 50 + 70 write-mailbox {_popup_trigger_forth(50)}",
     "else drop 425 read-mailbox dup 4 % - 4 / dup 1 = if drop 0 swap write-mailbox else dup 3 = if drop 1 swap write-mailbox else drop drop then then ",
     "then then ",
     "0 411 write-mailbox then\n",
@@ -3104,7 +3117,13 @@ DIRECTOR_SCRIPT = "".join([
     f"-30.0 3011 {POPUP25_ACTOR_IDX} write-actor-mailbox ",
     f"-30.0 3011 {POPUP100_ACTOR_IDX} write-actor-mailbox ",
     f"-30.0 3011 {POPUP300_ACTOR_IDX} write-actor-mailbox ",
-    f"dup 300 = if drop "
+    f"-30.0 3011 {POPUP50_ACTOR_IDX} write-actor-mailbox ",
+    f"-30.0 3011 {POPUP500_ACTOR_IDX} write-actor-mailbox ",
+    f"dup 500 = if drop "
+    f"{POPUP_PENDING_X_MB} read-mailbox 3009 {POPUP500_ACTOR_IDX} write-actor-mailbox "
+    f"{POPUP_PENDING_Y_MB} read-mailbox 3010 {POPUP500_ACTOR_IDX} write-actor-mailbox "
+    f"{POPUP_PENDING_Z_MB} read-mailbox 3011 {POPUP500_ACTOR_IDX} write-actor-mailbox ",
+    f"else dup 300 = if drop "
     f"{POPUP_PENDING_X_MB} read-mailbox 3009 {POPUP300_ACTOR_IDX} write-actor-mailbox "
     f"{POPUP_PENDING_Y_MB} read-mailbox 3010 {POPUP300_ACTOR_IDX} write-actor-mailbox "
     f"{POPUP_PENDING_Z_MB} read-mailbox 3011 {POPUP300_ACTOR_IDX} write-actor-mailbox ",
@@ -3112,11 +3131,15 @@ DIRECTOR_SCRIPT = "".join([
     f"{POPUP_PENDING_X_MB} read-mailbox 3009 {POPUP100_ACTOR_IDX} write-actor-mailbox "
     f"{POPUP_PENDING_Y_MB} read-mailbox 3010 {POPUP100_ACTOR_IDX} write-actor-mailbox "
     f"{POPUP_PENDING_Z_MB} read-mailbox 3011 {POPUP100_ACTOR_IDX} write-actor-mailbox ",
+    f"else dup 50 = if drop "
+    f"{POPUP_PENDING_X_MB} read-mailbox 3009 {POPUP50_ACTOR_IDX} write-actor-mailbox "
+    f"{POPUP_PENDING_Y_MB} read-mailbox 3010 {POPUP50_ACTOR_IDX} write-actor-mailbox "
+    f"{POPUP_PENDING_Z_MB} read-mailbox 3011 {POPUP50_ACTOR_IDX} write-actor-mailbox ",
     f"else drop "
     f"{POPUP_PENDING_X_MB} read-mailbox 3009 {POPUP25_ACTOR_IDX} write-actor-mailbox "
     f"{POPUP_PENDING_Y_MB} read-mailbox 3010 {POPUP25_ACTOR_IDX} write-actor-mailbox "
     f"{POPUP_PENDING_Z_MB} read-mailbox 3011 {POPUP25_ACTOR_IDX} write-actor-mailbox ",
-    "then then ",
+    "then then then then ",
     f"{POPUP_HOLD_TICKS} {POPUP_TIMER_MB} write-mailbox "
     f"0 {POPUP_VALUE_MB} write-mailbox ",
     "else drop then\n",
@@ -3125,7 +3148,9 @@ DIRECTOR_SCRIPT = "".join([
     f"0 = if "
     f"-30.0 3011 {POPUP25_ACTOR_IDX} write-actor-mailbox "
     f"-30.0 3011 {POPUP100_ACTOR_IDX} write-actor-mailbox "
-    f"-30.0 3011 {POPUP300_ACTOR_IDX} write-actor-mailbox ",
+    f"-30.0 3011 {POPUP300_ACTOR_IDX} write-actor-mailbox "
+    f"-30.0 3011 {POPUP50_ACTOR_IDX} write-actor-mailbox "
+    f"-30.0 3011 {POPUP500_ACTOR_IDX} write-actor-mailbox ",
     "then ",
     "else drop then\n",
     # ── Per-cube TOP-color update on state change ───────────────────────────
