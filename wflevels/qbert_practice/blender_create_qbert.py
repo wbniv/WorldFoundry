@@ -610,8 +610,8 @@ if player:
         # in identity shape and orientation.
         "1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
         "0 3034 write-mailbox 0 3035 write-mailbox "
-        # Park bubble far below (out of view) on respawn.
-        "-100.0 3011 30 write-actor-mailbox "
+        # Park bubble at Z=-30 (same as REDBALL_PARK_Z, within room bbox).
+        "-30.0 3011 30 write-actor-mailbox "
         "then "
         "exit "
         "else drop "
@@ -2228,60 +2228,63 @@ print(f"[qbert] Created 2 spinning discs at "
 # elevated camera angle makes this readable at camera distance.
 
 def _make_curse_bubble_mesh():
-    """Build a low-poly speech-bubble in the XY plane (facing +Z, like popup actors).
+    """Low-poly speech-bubble oval in the XZ plane (normal −Y, facing camera).
 
-    Geometry: 16-vert ellipse (NGON) front face + back face + side quads for
-    depth, plus a triangular tail pointing down-left. No text geometry —
-    Blender text_add generates ~90 KB of triangles for '@!#?@!' which overflows
-    the room asset pool. The oval silhouette alone is arcade-recognisable.
+    WF world: +X forward, +Y left, +Z up. Camera sits at Y≈−22 looking in the
+    +Y direction, so a face with normal −Y faces the camera directly. The oval
+    spans RX in X (horizontal on screen) and RZ in Z (vertical on screen), with
+    thickness DEPTH in Y. A triangular tail hangs below in −Z toward the
+    falling character.
+
+    Room-pool note: no text geometry — Blender text_add generates ~90 KB of
+    triangles for '@!#?@!' which overflows cbRoom. Oval silhouette alone is
+    arcade-recognisable.
     """
     import bmesh as _bmesh
     import math as _math
 
     mat_body = _make_principled_material('bubble_body', (1.00, 1.00, 0.70))  # light yellow
 
-    N       = 16        # vertices around the ellipse
-    RX, RY  = 0.85, 0.55  # semi-axes (wide oval)
-    DEPTH   = 0.08      # extrusion depth in +Z
+    N       = 16      # vertices around the ellipse
+    RX      = 0.85    # horizontal semi-axis (X)
+    RZ      = 0.55    # vertical semi-axis (Z)
+    DEPTH   = 0.08    # thickness in Y (toward/away from camera)
 
     _bm = _bmesh.new()
 
-    # Front ring (Z = DEPTH), back ring (Z = 0).
+    # Front ring (Y=0, toward camera), back ring (Y=DEPTH, away from camera).
     front_verts = []
     back_verts  = []
     for i in range(N):
         a = 2 * _math.pi * i / N
-        x, y = RX * _math.cos(a), RY * _math.sin(a)
-        front_verts.append(_bm.verts.new((x, y, DEPTH)))
-        back_verts.append(_bm.verts.new( (x, y, 0.0)))
+        x, z = RX * _math.cos(a), RZ * _math.sin(a)
+        front_verts.append(_bm.verts.new((x, 0.0,   z)))
+        back_verts.append( _bm.verts.new((x, DEPTH, z)))
 
-    # Front face (normal +Z).
+    # Parameterisation goes RIGHT→TOP→LEFT→BOTTOM from the −Y viewpoint = CCW
+    # from −Y = normal −Y (faces camera).
     _bm.faces.new(front_verts)
-    # Back face (normal -Z) — reversed winding.
+    # Back face: reversed winding → normal +Y.
     _bm.faces.new(list(reversed(back_verts)))
-    # Side quads connecting front ↔ back.
+    # Side quads: [front[i], back[i], back[j], front[j]] → outward normals.
     for i in range(N):
         j = (i + 1) % N
-        _bm.faces.new([front_verts[i], front_verts[j],
-                       back_verts[j],  back_verts[i]])
+        _bm.faces.new([front_verts[i], back_verts[i],
+                       back_verts[j],  front_verts[j]])
 
-    # Tail: triangle pointer below-left, in both front and back layers + sides.
-    # Tip coords (pointing down, slightly left):
-    tx, ty_front, ty_back = -0.15, DEPTH, 0.0
-    t_tip_z = -0.60   # how far below the oval centre the tip reaches
+    # Tail: triangular pointer hanging below the oval in −Z (toward character).
+    tf0 = _bm.verts.new((-0.20, 0.0,   -RZ))          # left base,  front
+    tf1 = _bm.verts.new(( 0.10, 0.0,   -RZ))          # right base, front
+    tf2 = _bm.verts.new((-0.05, 0.0,   -RZ - 0.35))   # tip,        front
+    tb0 = _bm.verts.new((-0.20, DEPTH, -RZ))           # left base,  back
+    tb1 = _bm.verts.new(( 0.10, DEPTH, -RZ))           # right base, back
+    tb2 = _bm.verts.new((-0.05, DEPTH, -RZ - 0.35))   # tip,        back
 
-    tf0 = _bm.verts.new((-0.25, ty_front, -0.52))   # left base, front
-    tf1 = _bm.verts.new(( 0.10, ty_front, -0.52))   # right base, front
-    tf2 = _bm.verts.new((  tx,  ty_front,  t_tip_z))  # tip, front
-    tb0 = _bm.verts.new((-0.25, ty_back,  -0.52))   # left base, back
-    tb1 = _bm.verts.new(( 0.10, ty_back,  -0.52))   # right base, back
-    tb2 = _bm.verts.new((  tx,  ty_back,   t_tip_z))  # tip, back
-
-    _bm.faces.new([tf0, tf1, tf2])                # front face
-    _bm.faces.new([tb0, tb2, tb1])                # back face (reversed)
-    _bm.faces.new([tf0, tf2, tb2, tb0])           # left side
-    _bm.faces.new([tf1, tb1, tb2, tf2])           # right side
-    _bm.faces.new([tf0, tb0, tb1, tf1])           # top edge (joins oval bottom)
+    _bm.faces.new([tf0, tf2, tf1])          # front face (normal −Y, CCW from −Y)
+    _bm.faces.new([tb0, tb1, tb2])          # back face  (normal +Y)
+    _bm.faces.new([tf0, tb0, tb2, tf2])     # left side
+    _bm.faces.new([tf2, tb2, tb1, tf1])     # right side
+    _bm.faces.new([tf0, tf1, tb1, tb0])     # top base   (normal +Z)
 
     mesh_data = bpy.data.meshes.new('CurseBubbleMesh')
     mesh_data.materials.append(mat_body)
@@ -2295,7 +2298,7 @@ _pre_bubble_count = sum(1 for o in bpy.data.objects if o.get(SCHEMA_PATH_KEY))
 CURSE_BUBBLE_ACTOR_IDX = _pre_bubble_count + 1
 
 _bubble = bpy.data.objects.new('curse_bubble', _make_curse_bubble_mesh())
-_bubble.location = (0.0, 0.0, -100.0)
+_bubble.location = (0.0, 0.0, REDBALL_PARK_Z)  # within room bbox so levcomp-rs adds it to RM0
 scene.collection.objects.link(_bubble)
 _bubble['wf_schema_path']         = ENEMY_OAD
 _bubble['wf_Mesh Name']           = 'curse_bubble.iff'
