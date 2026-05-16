@@ -510,8 +510,8 @@ if player:
         # compute into prev-state / wrong-cube slots and flip an unrelated cube.
         "400 read-mailbox dup 0 < if drop 0 then dup 6 > if drop 6 then "
         "6 swap - 2 * 1 + 2 + 438 write-mailbox "        # clamped safe-Z → HOP_END_Z (lerp animates toward it before FALL_PHASE takes over)
-        "1 419 write-mailbox "
-        "else 1 434 write-mailbox then ;\n"      # PENDING_LAND set on-pyramid only; lerp promotes to mb 411 (LANDED) on landing
+        "2 3017 write-mailbox 1 419 write-mailbox "
+        "else 0 3017 write-mailbox 1 434 write-mailbox then ;\n"      # PENDING_LAND set on-pyramid only; lerp promotes to mb 411 (LANDED) on landing
         # 1. Game-over restart trigger. Snapshot prev-stick before updating
         # mb 422 so edge-detect can compare; then update mb 422 = current.
         "422 read-mailbox stick 422 write-mailbox\n"
@@ -681,7 +681,7 @@ if player:
         # set mb 434 = 1 in do-hop's else branch, which lands here as `1`.
         # Stack-neutral: pushes/pops cancel out, leaves ( t ) for the scale
         # block below.
-        "402 read-mailbox 2 = if 434 read-mailbox 411 write-mailbox 0 434 write-mailbox then "
+        "402 read-mailbox 2 = if 434 read-mailbox dup 0 <> if 1 3017 write-mailbox then 411 write-mailbox 0 434 write-mailbox then "
         # Phase 2 stretch-and-squash: classic anticipation → air-stretch →
         # impact-squash → recover-to-natural sequence over the 12-frame hop.
         #   bell = 4*t*(1-t)   ∈ [0, 1], peaks at t=0.5 (mid-air)

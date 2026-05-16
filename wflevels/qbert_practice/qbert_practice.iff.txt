@@ -33,11 +33,12 @@
 		$3000007l { 'STR' "coily_egg_mesh.iff" }  // IFF RM0 000:007
 		$3000008l { 'STR' "coily_snake_mesh.iff" }  // IFF RM0 000:008
 		$3000009l { 'STR' "disc_mesh.iff" }  // IFF RM0 000:009
-		$300000al { 'STR' "curse_bubble.iff" }  // IFF RM0 000:00a
-		$300000bl { 'STR' "popup_25.iff" }  // IFF RM0 000:00b
-		$300000cl { 'STR' "popup_100.iff" }  // IFF RM0 000:00c
-		$300000dl { 'STR' "popup_300.iff" }  // IFF RM0 000:00d
-		$300000el { 'STR' "cube.iff" }  // IFF RM0 000:00e
+		$300000al { 'STR' "disc_flash_ring_mesh.iff" }  // IFF RM0 000:00a
+		$300000bl { 'STR' "curse_bubble.iff" }  // IFF RM0 000:00b
+		$300000cl { 'STR' "popup_25.iff" }  // IFF RM0 000:00c
+		$300000dl { 'STR' "popup_100.iff" }  // IFF RM0 000:00d
+		$300000el { 'STR' "popup_300.iff" }  // IFF RM0 000:00e
+		$300000fl { 'STR' "cube.iff" }  // IFF RM0 000:00f
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "qbert_practice.lvl" ] }
@@ -64,11 +65,12 @@
 		{ 'ASS' $3000007l [ "coily_egg_mesh.iff" ] }  // IFF RM0 000:007
 		{ 'ASS' $3000008l [ "coily_snake_mesh.iff" ] }  // IFF RM0 000:008
 		{ 'ASS' $3000009l [ "disc_mesh.iff" ] }  // IFF RM0 000:009
-		{ 'ASS' $300000al [ "curse_bubble.iff" ] }  // IFF RM0 000:00a
-		{ 'ASS' $300000bl [ "popup_25.iff" ] }  // IFF RM0 000:00b
-		{ 'ASS' $300000cl [ "popup_100.iff" ] }  // IFF RM0 000:00c
-		{ 'ASS' $300000dl [ "popup_300.iff" ] }  // IFF RM0 000:00d
-		{ 'ASS' $300000el [ "cube.iff" ] }  // IFF RM0 000:00e
+		{ 'ASS' $300000al [ "disc_flash_ring_mesh.iff" ] }  // IFF RM0 000:00a
+		{ 'ASS' $300000bl [ "curse_bubble.iff" ] }  // IFF RM0 000:00b
+		{ 'ASS' $300000cl [ "popup_25.iff" ] }  // IFF RM0 000:00c
+		{ 'ASS' $300000dl [ "popup_100.iff" ] }  // IFF RM0 000:00d
+		{ 'ASS' $300000el [ "popup_300.iff" ] }  // IFF RM0 000:00e
+		{ 'ASS' $300000fl [ "cube.iff" ] }  // IFF RM0 000:00f
 	}
 	{ 'ALGN' .align(2048) }
 }

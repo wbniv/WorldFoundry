@@ -1,7 +1,7 @@
 ---
 plan: qbert-hop-sfx
 date: 2026-05-10
-status: Deferred 2026-05-11
+status: Complete 2026-05-16
 scope: ~50 LOC engine (audio API + mailbox handler) + 3 placeholder WAVs + ~3 LOC script writes
 ---
 

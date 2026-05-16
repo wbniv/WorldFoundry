@@ -51,6 +51,7 @@
 #include <oas/activate.ht>
 #include <oas/matte.ht>
                           
+#include <audio/sfx_library.hp>
 #include "level.hp"
 #include "tool.hp"
 #include "gamestrm.hp"
@@ -1286,6 +1287,9 @@ Actor::ReadSystemMailbox( int boxnum ) const
 #endif
         }
 
+        case EMAILBOX_SOUND:
+            return Scalar::zero;
+
         default:
                 AssertMsg( 0, *this << "Actor::ReadSystemnMailbox(): Write-only local system mailbox " << boxnum << std::endl );
             return Scalar::zero;
@@ -1562,6 +1566,10 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             //SetMailbox( EMAILBOX_HANDLE_Z, vHandle.Z() );
             break;
         }
+
+        case EMAILBOX_SOUND:
+            SfxLibrary::Play(static_cast<int>(value.WholePart()));
+            break;
 
         default:
             AssertMsg( 0, *this << ": (set) Unknown local system mailbox " << boxnum << std::endl );

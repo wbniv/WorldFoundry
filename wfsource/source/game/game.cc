@@ -32,6 +32,7 @@
 #include <hal/lifecycle.h>
 #include <unistd.h>
 #include <audio/music.hp>
+#include <audio/sfx_library.hp>
 #include "rest_api.hp"
 #include "debug_server.hp"
 #include "physics_jolt.hp"
@@ -272,6 +273,12 @@ WFGame::RunLevel(_DiskFile* levelFile)
 		gMusicPlayer->play(midiName);
 	}
 
+	// Load Q*bert SFX. Paths are relative to the process cwd (project root).
+	// Silently no-ops on levels where these files don't exist (e.g. snowgoons).
+	SfxLibrary::Load(0, "wflevels/qbert_practice/sfx/qbert_hop.wav");
+	SfxLibrary::Load(1, "wflevels/qbert_practice/sfx/qbert_land.wav");
+	SfxLibrary::Load(2, "wflevels/qbert_practice/sfx/qbert_fall.wav");
+
 	Scalar deltaTime = Scalar::zero;
 	bool _bContinue = true;
 	DBSTREAM1 ( cprogress << "Entering main game loop\n"; );
@@ -427,6 +434,7 @@ WFGame::RunLevel(_DiskFile* levelFile)
 	RestApi_Stop();
 	DebugServer_Stop();
 	if (gMusicPlayer) gMusicPlayer->stop();
+	SfxLibrary::Clear();
 	MEMORY_DELETE(HALLmalloc,_curLevel,Level);
 	_curLevel = NULL;
 }
