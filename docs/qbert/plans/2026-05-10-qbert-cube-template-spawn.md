@@ -1,7 +1,7 @@
 # Plan — Q✱bert cube template-spawn via Generator (Phase 2 follow-up)
 
 **Date:** 2026-05-10
-**Status:** Not started — sequenced AFTER [2026-05-10-qbert-cube-consolidation.md](2026-05-10-qbert-cube-consolidation.md)
+**Status:** Parked — memory savings negligible (~4–11 KB), pattern already proven by enemy spawning, procedural-pyramid flexibility has no immediate use in Q✱bert. Revisit if/when implementing Pitfall! or another level that needs template-based tile spawning.
 
 ## Context
 
