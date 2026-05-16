@@ -1,13 +1,13 @@
 ---
 plan: qbert-stretch-and-squash
 date: 2026-05-10
-status: Deferred 2026-05-11
+status: Complete
 scope: Engine wiring (~50-75 LOC across 5 files) + script consumer (~10 LOC of zForth in qbert player)
 ---
 
 # Q✱bert stretch-and-squash (Phase 2)
 
-**Status:** Deferred 2026-05-11 — waits on per-actor scale wiring in the engine; revisit after enemy AI / cube logic lands.
+**Status:** Complete — X/Y/Z_SCALE mailboxes (3040/3041/3042) wired in engine; all actors use it: Q✱bert player, red ball, Slick, Sam, Ugg, Wrong-Way (all via `redball_script()` at blender_create_qbert.py:1184–1198), Coily snake and egg (asymmetric 3× Z variant).
 
 ## Context
 
