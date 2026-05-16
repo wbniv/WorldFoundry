@@ -1,7 +1,7 @@
 # Plan — Q✱bert physics-based player hops
 
 **Date:** 2026-05-10
-**Status:** Deferred (2026-05-11) — current lerp-based hop-arc + `FALL_PHASE` machine is sufficient for player-visible gameplay; revisit if enemy AI or physics-interactive elements need real Jolt-driven motion.
+**Status:** Parked — lerp-based hop-arc + `FALL_PHASE` machine is sufficient; Jolt-driven hops add complexity with no visible payoff for Q✱bert.
 
 ## Relationship to the rotation plan
 
