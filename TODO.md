@@ -92,8 +92,9 @@ a one-to-one arcade copy.
 - [x] Per-round difficulty scaling — Phase A visibility gating (56c8ee2) + Phase B spawn-interval scaling `max(120, 480-24×R)` for all enemies (1326a68). ROM disassembly at [`docs/investigations/qbert-8088-disassembly.asm`](docs/investigations/qbert-8088-disassembly.asm). Deferred: full single-timer sequencer + second Coily egg in L4.
 - [x] Score & lives HUD — SCORE increments +25/cube and +1000/round-clear; TIMER counts elapsed ticks; LIVES display was already wired (2026-05-14). Enemy-kill scoring (Slick/Sam +300, Green Ball +100, disc rescue +500) deferred.
 - [x] High-score persistence — 23-entry binary file seeded with arcade defaults, AAA initials picker on game-over, two-column overlay table (2026-05-15).
-- [x] Bonus-points popups — floating "+25" / "+300" / "+500" labels on cube-flip, Slick/Sam catch, Coily-off-disc. Done 454d8c2: +25/+100/+300 actors, 90-tick hold, director tick block. +100/+300 scores also wired (were missing). Deferred: +50 popup (2nd hop), Coily-off-disc (+500).
-- [ ] Coily-falls-off-disc — Coily's chase AI currently restricts to on-pyramid cubes; extend to allow landing on disc coords + retire with bonus.
+- [x] Bonus-points popups — floating "+25" / "+100" / "+300" labels. Done ab00bfd. Deferred: +50 popup (2nd-hop cube flip, L2+), +500 popup (Coily-off-disc).
+- [x] Coily-falls-off-disc — snake chases Q✱bert onto disc coords; retires with +500 score. Done b9639f9. Floating +500 popup label deferred.
+- [ ] +50 popup (2nd cube hop, L2+) and +500 popup (Coily-off-disc) — floating labels only; scores already correct.
 - [ ] Bonus letter "S" — rare cube pickup that grants a freeze / extra life / bonus points (arcade behaviour varies by round).
 - [x] Enemy coexistence rules — Rule 1: no climber while Coily active; Rule 2: no simultaneous climbers (Ugg blocks Wrong-Way and vice versa); freeze timer guards all spawns. Done 2026-05-15 — [plan](docs/qbert/plans/2026-05-15-qbert-enemy-coexistence.md)
 - [x] Second Coily egg in L4 — arcade spawns two simultaneous Coily eggs from round 12 onward; deferred from difficulty-scaling plan — done 8e55799 — [plan](docs/qbert/plans/2026-05-16-qbert-second-coily-egg.md)
