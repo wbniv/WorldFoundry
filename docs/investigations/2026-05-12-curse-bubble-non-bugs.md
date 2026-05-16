@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-12
 **Status:** Resolved (commit `2229963`)
-**Related:** [plan 2026-05-11-qbert-player-death-and-curse-bubble.md](../plans/2026-05-11-qbert-player-death-and-curse-bubble.md), [docs/level-building.md](../level-building.md)
+**Related:** [plan 2026-05-11-qbert-player-death-and-curse-bubble.md](../qbert/plans/2026-05-11-qbert-player-death-and-curse-bubble.md), [docs/level-building.md](../level-building.md)
 
 ## TL;DR
 

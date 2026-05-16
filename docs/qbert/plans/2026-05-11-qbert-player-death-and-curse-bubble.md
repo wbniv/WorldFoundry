@@ -77,7 +77,7 @@ A pre-placed `curse_bubble` actor sits parked off-screen by default (Z = -100). 
 
 **Arcade reference:**
 
-![Q✱bert death curse bubble — white speech balloon with black @!#?@! glyphs](screenshots/qbert-curse-bubble-arcade-ref.png)
+![Q✱bert death curse bubble — white speech balloon with black @!#?@! glyphs](../screenshots/qbert-curse-bubble-arcade-ref.png)
 
 *Captured from MAME demo-mode death, qbert ROM, frame 1280 of the 30-fps extract from [scripts/research/mame/qbert_curse_capture.lua](../../scripts/research/mame/qbert_curse_capture.lua). White bubble, black outline, single-colour black glyphs `@!#?@!`.*
 

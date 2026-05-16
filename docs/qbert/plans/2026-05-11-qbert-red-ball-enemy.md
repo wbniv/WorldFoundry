@@ -5,7 +5,7 @@
 
 ## Context
 
-![Red Ball mesh — low-poly icosahedron, Blender-authored](screenshots/qbert-redball-2026-05-11.png)
+![Red Ball mesh — low-poly icosahedron, Blender-authored](../screenshots/qbert-redball-2026-05-11.png)
 
 The qbert_practice level header explicitly notes "No enemies, no discs, no HUD, no audio." The biggest gameplay gap from real Q✱bert is **enemies** — that's what turns the current colour-flipping demo into an actual game.
 

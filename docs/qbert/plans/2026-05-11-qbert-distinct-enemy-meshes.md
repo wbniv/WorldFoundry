@@ -21,11 +21,11 @@ Reference comes from **MAME screenshots and web reference images**, not from ROM
 
 **Gold reference — HG101-04** (L2R1 mid-gameplay; every enemy visible together at arcade-native resolution, allowing programmatic pixel-sampling of canonical RGB values):
 
-![Arcade Q*bert L2R1 — Slick (green/orange, left), Sam (centre), Coily snake (magenta coil, right), Wrong-Way (magenta climber, mid-bottom), Q*bert (orange, top-right), spinning discs at edges](screenshots/qbert-arcade-hg101-04.png)
+![Arcade Q*bert L2R1 — Slick (green/orange, left), Sam (centre), Coily snake (magenta coil, right), Wrong-Way (magenta climber, mid-bottom), Q*bert (orange, top-right), spinning discs at edges](../screenshots/qbert-arcade-hg101-04.png)
 
 **Secondary reference — Wikipedia infobox** (L1R1; Coily-snake-in-motion clearly visible):
 
-![Arcade Q*bert L1R1 from Wikipedia — Coily coiled magenta snake near apex, red ball mid-left, Q*bert on cube top](screenshots/qbert-arcade-wikipedia.png)
+![Arcade Q*bert L1R1 from Wikipedia — Coily coiled magenta snake near apex, red ball mid-left, Q*bert on cube top](../screenshots/qbert-arcade-wikipedia.png)
 
 Per-enemy crop sheets (each crop zoomed 6× nearest-neighbour from the sources above) are embedded inline in their respective phase sections below.
 
@@ -92,11 +92,11 @@ Each phase is self-contained: one mesh builder swap, one rebuild, one capture fo
 
 **Arcade reference** (6× zoom from L2R2 and L2R1 — Slick clearly visible as a green-bodied humanoid with an orange head-dome and white eye-pixels):
 
-![Arcade Slick/Sam — green body with orange dome on top, white eyes, dark feet](screenshots/qbert-arcade-ref-slick-sam.png)
+![Arcade Slick/Sam — green body with orange dome on top, white eyes, dark feet](../screenshots/qbert-arcade-ref-slick-sam.png)
 
 **3D mesh** (rest pose, Blender EEVEE):
 
-![Slick (left) and Sam (right) — green body, orange flat-cylinder dome, white-sphere eyes with black-sphere pupils, flat-oval feet](screenshots/qbert-slick-sam-mesh-2026-05-11.png)
+![Slick (left) and Sam (right) — green body, orange flat-cylinder dome, white-sphere eyes with black-sphere pupils, flat-oval feet](../screenshots/qbert-slick-sam-mesh-2026-05-11.png)
 
 Goal: cube-flipper humanoid silhouette.
 
@@ -107,7 +107,7 @@ Goal: cube-flipper humanoid silhouette.
    - **Eyes:** two small white UV-spheres on +X face of body.
    - **Pupils:** smaller black UV-spheres just in front of the eyes.
    - **Feet:** two flat ovals (scaled UV-spheres), straddling ±Y, dark grey.
-3. Colours (pixel-sampled from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png), commit `7ebac47`): arcade has Slick & Sam **both green-bodied + orange-domed**, visually identical in the arcade sprites. Distinguish via subtle palette delta — Slick: body `#21BA31` `(0.13, 0.73, 0.19)` + dome `#FF7721` `(1.00, 0.47, 0.13)`; Sam: body `(0.08, 0.55, 0.13)` darker green + dome `(0.90, 0.38, 0.08)` redder orange. **Colour-correction history:** initial Phase-A commit had body=white + hat=green (inverted); first correction pass swapped them (`6a5dc2e`); pixel-accurate values landed in `7ebac47`.
+3. Colours (pixel-sampled from [qbert-arcade-hg101-04.png](../screenshots/qbert-arcade-hg101-04.png), commit `7ebac47`): arcade has Slick & Sam **both green-bodied + orange-domed**, visually identical in the arcade sprites. Distinguish via subtle palette delta — Slick: body `#21BA31` `(0.13, 0.73, 0.19)` + dome `#FF7721` `(1.00, 0.47, 0.13)`; Sam: body `(0.08, 0.55, 0.13)` darker green + dome `(0.90, 0.38, 0.08)` redder orange. **Colour-correction history:** initial Phase-A commit had body=white + hat=green (inverted); first correction pass swapped them (`6a5dc2e`); pixel-accurate values landed in `7ebac47`.
 4. Final mesh: **252 verts / 322 faces** per actor (subdiv-2 body 42v/80f + 7 hair-cones + 8-seg-5-ring eyes + 6-seg-4-ring pupils + 8-seg-4-ring feet).
 
 ### Phase B — Ugg & Wrong-Way (side-of-pyramid climbers)
@@ -116,11 +116,11 @@ Goal: cube-flipper humanoid silhouette.
 
 **Arcade reference** (6× zoom from L1R3; the right-low crop shows the climber clearly on a cube's side face, magenta body with white eye-pixels):
 
-![Arcade Ugg/Wrong-Way — magenta climber body on side face of cube, white eyes](screenshots/qbert-arcade-ref-ugg-wrongway.png)
+![Arcade Ugg/Wrong-Way — magenta climber body on side face of cube, white eyes](../screenshots/qbert-arcade-ref-ugg-wrongway.png)
 
 **3D mesh** (upright rest pose; runtime engine rotation tips it onto the cube side face — see [2026-05-11-qbert-ugg-wrongway.md](2026-05-11-qbert-ugg-wrongway.md)):
 
-![Ugg (left) and Wrong-Way (right) — magenta body, smaller head, big white eyes with black pupils, flat feet](screenshots/qbert-ugg-wrongway-mesh-2026-05-11.png)
+![Ugg (left) and Wrong-Way (right) — magenta body, smaller head, big white eyes with black pupils, flat feet](../screenshots/qbert-ugg-wrongway-mesh-2026-05-11.png)
 
 Goal: humanoid climber that reads as "creature standing on the side of a cube" after the Escher pitch+yaw rotation.
 
@@ -134,7 +134,7 @@ Goal: humanoid climber that reads as "creature standing on the side of a cube" a
    - **Pupils:** smaller black spheres in front of the eyes.
    - **Feet:** two flat ovals at the bottom, dark grey.
    - **History note:** initial Phase-B commit had two horns on top + a smaller blob proxy; the proxy was replaced with body+head in `447b37d` (horns removed at that time), then snout + antennae added in `e24025d` after closer review of the arcade reference.
-3. Body colour (pixel-sampled from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png)): both Ugg and Wrong-Way use the same pure magenta `#BA00BA` `(0.73, 0.00, 0.73)` — the arcade sprites are identical; the only difference is which side of the pyramid each climbs. **Colour-correction history:** initial Phase-B commit had Ugg=orange / WW=purple; first correction swapped to pink-magenta variants (`6a5dc2e`); pixel-accurate `#BA00BA` landed in `7ebac47`.
+3. Body colour (pixel-sampled from [qbert-arcade-hg101-04.png](../screenshots/qbert-arcade-hg101-04.png)): both Ugg and Wrong-Way use the same pure magenta `#BA00BA` `(0.73, 0.00, 0.73)` — the arcade sprites are identical; the only difference is which side of the pyramid each climbs. **Colour-correction history:** initial Phase-B commit had Ugg=orange / WW=purple; first correction swapped to pink-magenta variants (`6a5dc2e`); pixel-accurate `#BA00BA` landed in `7ebac47`.
 4. Final mesh: **284 verts / 378 faces** per actor (subdiv-2 body + subdiv-2 head + snout cone + 2 antennae cones + 8-seg-5-ring eyes + 6-seg-4-ring pupils + 8-seg-4-ring feet).
 
 ### Phase C — Coily (egg + snake)
@@ -143,15 +143,15 @@ Goal: humanoid climber that reads as "creature standing on the side of a cube" a
 
 **Arcade reference — Coily egg** (6× zoom from L1R3; purple/magenta sphere, no face):
 
-![Arcade Coily egg — purple sphere on cube top](screenshots/qbert-arcade-ref-coily-egg.png)
+![Arcade Coily egg — purple sphere on cube top](../screenshots/qbert-arcade-ref-coily-egg.png)
 
 **Arcade reference — Coily snake** (6× zoom from L2R1 and L2R2; magenta coiled body with eyes on the head):
 
-![Arcade Coily snake — magenta segments with face-pixels](screenshots/qbert-arcade-ref-coily-snake.png)
+![Arcade Coily snake — magenta segments with face-pixels](../screenshots/qbert-arcade-ref-coily-snake.png)
 
 **3D mesh** (rest pose; egg left, snake right):
 
-![Coily egg (left, elongated icosphere) and Coily snake (right, 2.5-turn curve-swept magenta spiral with head sphere + eyes + pupils + red forked tongue)](screenshots/qbert-coily-mesh-2026-05-11.png)
+![Coily egg (left, elongated icosphere) and Coily snake (right, 2.5-turn curve-swept magenta spiral with head sphere + eyes + pupils + red forked tongue)](../screenshots/qbert-coily-mesh-2026-05-11.png)
 
 Goal: visibly snake-like Coily; egg distinct from a plain ball.
 
@@ -271,7 +271,7 @@ Per phase, add to this plan doc:
 Embed inline in the relevant phase section using Markdown image syntax with descriptive alt text and a caption line, e.g.:
 
 ```markdown
-![Slick — green humanoid flipper mesh with orange spiky hair, eyes, feet](screenshots/qbert-slick-sam-mesh-2026-05-11.png)
+![Slick — green humanoid flipper mesh with orange spiky hair, eyes, feet](../screenshots/qbert-slick-sam-mesh-2026-05-11.png)
 *Slick rest-pose mesh in Blender, viewport side view + 3/4 perspective.*
 ```
 
@@ -299,7 +299,7 @@ Optional preamble commit if reference screenshots are gathered as a separate ste
 
 ## Resolved questions
 
-- **Arcade colour ground truth (resolved `7ebac47`)** — initial colour guesses for Slick/Sam/Ugg/WW were wrong (white-bodied + green-hatted; Ugg=orange; WW=purple). Pixel-sampled the correct values from [qbert-arcade-hg101-04.png](screenshots/qbert-arcade-hg101-04.png): Slick/Sam body `#21BA31` + hair `#FF7721`; Ugg/Wrong-Way + Coily snake body `#BA00BA`. Per-enemy palette table in the [Reference](#reference-arcade-qbert) section.
+- **Arcade colour ground truth (resolved `7ebac47`)** — initial colour guesses for Slick/Sam/Ugg/WW were wrong (white-bodied + green-hatted; Ugg=orange; WW=purple). Pixel-sampled the correct values from [qbert-arcade-hg101-04.png](../screenshots/qbert-arcade-hg101-04.png): Slick/Sam body `#21BA31` + hair `#FF7721`; Ugg/Wrong-Way + Coily snake body `#BA00BA`. Per-enemy palette table in the [Reference](#reference-arcade-qbert) section.
 - **Coily shape (final: curve-swept spiral, `11800ff`)** — every ball-based attempt (V0 equal-stack, V1–V5 tapered, V6 helix-of-balls, V7 equal-stack-with-face) read wrong. Final design is a Bezier-curve-swept tube (2.5 turns, 20 control points, octagonal cross-section), converted to mesh, plus a head sphere + eyes + pupils + forked tongue grafted on. See [coily-mesh-versions investigation](../investigations/2026-05-11-qbert-coily-mesh-versions.md) for the full V0–V7 lineage.
 - **Slick "hat" vs. hair (resolved `bf3f61f`)** — initial mesh had a flat cylinder reading as a saucer-hat. Arcade has orange spiky hair on a green head. Replaced with a 7-cone hair cluster.
 - **Ugg/WW snout & antennae (resolved `e24025d`)** — initial mesh had a plain round head. Arcade sprites have a small forward snout and two antennae on top.

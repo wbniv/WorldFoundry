@@ -12,15 +12,15 @@ All captured 2026-05-04 from MAME 0.264 against the vendored `assets/arcade-roms
 
 ### Cabinet instructions (rules of the game)
 
-![Arcade cabinet instructions screen — JUMP ON SQUARES / CHANGE THEM TO / THE TARGET COLOR / STAY ON PLAYFIELD / JUMPING OFF RESULTS IN A FATAL PLUMMET / UNLESS A DISC IS THERE / AVOID ALL OBJECTS / AND CREATURES THAT / ARE NOT GREEN / USE SPINNING DISKS / TO LURE SNAKE TO / HIS DEATH / EXTRA LIFE AT 8000 AND EACH ADDITIONAL 14000](screenshots/qbert-arcade-instructions-reference.png)
+![Arcade cabinet instructions screen — JUMP ON SQUARES / CHANGE THEM TO / THE TARGET COLOR / STAY ON PLAYFIELD / JUMPING OFF RESULTS IN A FATAL PLUMMET / UNLESS A DISC IS THERE / AVOID ALL OBJECTS / AND CREATURES THAT / ARE NOT GREEN / USE SPINNING DISKS / TO LURE SNAKE TO / HIS DEATH / EXTRA LIFE AT 8000 AND EACH ADDITIONAL 14000](../screenshots/qbert-arcade-instructions-reference.png)
 
 ### Attract-mode demo gameplay (palette source)
 
-![Arcade attract-mode demo gameplay, L1R1 mid-state: pyramid with mostly purple-top cubes (state 0, untouched) and a few yellow-top cubes (state 2, target). Side faces show the lit teal + shadow dark-teal split that fakes 3D depth.](screenshots/qbert-arcade-attract-gameplay-reference.png)
+![Arcade attract-mode demo gameplay, L1R1 mid-state: pyramid with mostly purple-top cubes (state 0, untouched) and a few yellow-top cubes (state 2, target). Side faces show the lit teal + shadow dark-teal split that fakes 3D depth.](../screenshots/qbert-arcade-attract-gameplay-reference.png)
 
 ### Cube structure zoom (face layout)
 
-![8× zoom of a single purple-top cube. Iso-projection structure clearly visible: rhombus top face (purple #5646EF), lit left-front side (teal #56A999), shadow right side (dark teal #314646).](screenshots/qbert-arcade-cube-zoom-reference.png)
+![8× zoom of a single purple-top cube. Iso-projection structure clearly visible: rhombus top face (purple #5646EF), lit left-front side (teal #56A999), shadow right side (dark teal #314646).](../screenshots/qbert-arcade-cube-zoom-reference.png)
 
 ### Reference table
 

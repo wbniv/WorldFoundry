@@ -3,7 +3,7 @@
 **Date:** 2026-05-11
 **Purpose:** Lay out every distinct Coily snake mesh shape that has been in the codebase so the user can point at the one they originally meant by "the coil that's already there". Each variant rebuilt from the parameters in its commit (verified via `git show <sha>:wflevels/qbert_practice/blender_create_qbert.py`).
 
-![All 8 Coily variants side-by-side, V0 → V7 left to right](screenshots/qbert-coily-history.png)
+![All 8 Coily variants side-by-side, V0 → V7 left to right](../screenshots/qbert-coily-history.png)
 
 ## Side-by-side lineup (left → right)
 

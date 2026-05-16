@@ -94,6 +94,6 @@ bash engine/build_game.sh
 
 Table overlay renders correctly over the live pyramid view:
 
-![HIGH SCORES table](screenshots/qbert-hiscore-overlay.png)
+![HIGH SCORES table](../screenshots/qbert-hiscore-overlay.png)
 
 Real user entry AAB/1000 appears at rank 8 (inserted between BMW/1000 and DMV/950), proving the initials picker ran and persisted successfully. SAM/500 (the former last entry) was correctly bumped off.

@@ -82,27 +82,27 @@ Verified via debug bridge (`set_mailbox` + `watch` op) — mailbox traces and sc
 1. **L1R1 (round 0):** hop a virgin cube once → done-color, SCORE +25. Hop again → no change. Clear all 28 in 28 hops → round-clear fires.
 
    Live pyramid (all virgin, L1 blue palette):
-   ![L1 before](screenshots/qbert-multistep-l1-live.png)
+   ![L1 before](../screenshots/qbert-multistep-l1-live.png)
 
    After hop 1 — apex cube flipped to done-color, `watch mb200=2, mb70=25`:
-   ![L1 hop 1 done](screenshots/qbert-multistep-l1-hop1-done.png)
+   ![L1 hop 1 done](../screenshots/qbert-multistep-l1-hop1-done.png)
 
    After hop 2 — no change (state stays 2, score unchanged):
-   ![L1 hop 2 no-op](screenshots/qbert-multistep-l1-hop2-noop.png)
+   ![L1 hop 2 no-op](../screenshots/qbert-multistep-l1-hop2-noop.png)
 
 2. **L2R1 (round 4):** hop virgin → intermediate color, +25. Hop again → done-color, +50. Hop done cube → reverts to virgin color, no score. Clearing requires two hops per cube.
 
    All virgin (orange tops, L2 palette):
-   ![L2 virgin](screenshots/qbert-multistep-l2-virgin.png)
+   ![L2 virgin](../screenshots/qbert-multistep-l2-virgin.png)
 
    Hop 1 — apex goes intermediate, `watch mb200=1, mb70=25`:
-   ![L2 hop 1 intermediate](screenshots/qbert-multistep-l2-hop1-intermediate.png)
+   ![L2 hop 1 intermediate](../screenshots/qbert-multistep-l2-hop1-intermediate.png)
 
    Hop 2 — apex goes green (done), `watch mb200=2, mb70=75`:
-   ![L2 hop 2 done](screenshots/qbert-multistep-l2-hop2-done.png)
+   ![L2 hop 2 done](../screenshots/qbert-multistep-l2-hop2-done.png)
 
    Hop 3 on done cube — reverts to orange virgin, no score change, `watch mb200=0`:
-   ![L2 hop 3 revert](screenshots/qbert-multistep-l2-hop3-revert.png)
+   ![L2 hop 3 revert](../screenshots/qbert-multistep-l2-hop3-revert.png)
 
 3. **L4R1 (round 12):** hop done cube → reverts to intermediate color (not virgin).
 4. **Score totals:** L1 clear = 1 700; L2 clear = 3 100.

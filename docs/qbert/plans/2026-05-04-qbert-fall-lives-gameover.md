@@ -6,13 +6,13 @@ Side-by-side comparisons drive faithfulness decisions. Arcade frames captured fr
 
 ### Title / attract loop (arcade only — WF port doesn't ship a title screen yet)
 
-![Arcade title — yellow Q✱bert logo on purple, copyright, "1 COIN = 1 PLAY"](screenshots/qbert-arcade-attract-reference.jpg)
+![Arcade title — yellow Q✱bert logo on purple, copyright, "1 COIN = 1 PLAY"](../screenshots/qbert-arcade-attract-reference.jpg)
 
 ### LEVEL 1 ROUND 1 mid-game (arcade) vs. WF gameplay framing
 
 | Arcade (MAME, `q-bert-32127.jpg`) | WF runtime (cs_pyramid, post-intro) |
 |---|---|
-| ![Arcade L1R1 mid: pyramid green/yellow, full HUD with PLAYER 1, CHANGE TO swatch, score 525, LEVEL 1 ROUND 1, Coily on pyramid](screenshots/qbert-arcade-level1-mid-reference.jpg) | ![WF runtime: full pyramid centred, Q✱bert orange placeholder at apex, plain teal cubes (state 0), 30° iso framing](screenshots/qbert-runtime-gameplay.png) |
+| ![Arcade L1R1 mid: pyramid green/yellow, full HUD with PLAYER 1, CHANGE TO swatch, score 525, LEVEL 1 ROUND 1, Coily on pyramid](../screenshots/qbert-arcade-level1-mid-reference.jpg) | ![WF runtime: full pyramid centred, Q✱bert orange placeholder at apex, plain teal cubes (state 0), 30° iso framing](../screenshots/qbert-runtime-gameplay.png) |
 
 The WF framing matches the arcade's 30° dimetric iso (cube tops visible as diamonds, front faces as parallelograms). Differences: WF still uses placeholder orange box for Q✱bert (no sprite), no Coily yet, no HUD-text overlay visible in the captured frame (DrawHud is wired and confirmed via `[hud-debug]` stderr that mb 72=3 is reaching `wf_hud_lives` each frame, but stb_easy_font quads aren't reaching the captured framebuffer — see "Risks & open questions"). All-teal pyramid is correct: that's the LEVEL 1 ROUND 1 starting state before any cubes have been hopped on. Compare to the arcade's mid-game frame where ~half the cubes have flipped to yellow.
 
@@ -22,13 +22,13 @@ The arcade has no equivalent — the cabinet cuts directly from attract to LEVEL
 
 | Phase 0 (cs_intro_0, far back) | Phase 2-3 (mid-sweep) | Phase 5 (cs_pyramid, settled) |
 |---|---|---|
-| ![Frame 1: pyramid small in upper-right, far-back camera at (48, -90, 41)](screenshots/qbert-runtime-intro-start.png) | ![Frame 7: mid-sweep, pyramid medium-size, still off-centre](screenshots/qbert-runtime-intro-mid.png) | ![Frame 13: gameplay framing, pyramid centred, face-on](screenshots/qbert-runtime-gameplay.png) |
+| ![Frame 1: pyramid small in upper-right, far-back camera at (48, -90, 41)](../screenshots/qbert-runtime-intro-start.png) | ![Frame 7: mid-sweep, pyramid medium-size, still off-centre](../screenshots/qbert-runtime-intro-mid.png) | ![Frame 13: gameplay framing, pyramid centred, face-on](../screenshots/qbert-runtime-gameplay.png) |
 
 Total sweep ~3.7 s game time at 60 Hz (1+72+30+18+30+72 frames across 6 legs — phase 5 is the cs_pyramid pan).
 
 ### GAME OVER (arcade-museum doesn't have one — captured from MAME)
 
-![Arcade GAME OVER frame: red "GAME OVER" text centred over the live pyramid, blinking ~10 Hz, mid-game state still visible behind it](screenshots/qbert-arcade-game-over-reference.png)
+![Arcade GAME OVER frame: red "GAME OVER" text centred over the live pyramid, blinking ~10 Hz, mid-game state still visible behind it](../screenshots/qbert-arcade-game-over-reference.png)
 
 Captured 2026-05-04 from MAME 0.264 via Lua autoboot driving Coin → Start → mash UP from apex. Drives WF overlay design: red text (`glColor3f(1, 0, 0)`), drawn over the live scene (no fade-to-black), single-line "GAME OVER" only — the arcade does not show a "PRESS ANY BUTTON TO RESTART" prompt because the cabinet uses coin+start. The WF port adds that second line as a port-only convenience since input semantics differ.
 
