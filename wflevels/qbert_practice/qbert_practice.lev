@@ -959,10 +959,10 @@
 		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0058404929315158(1.15.16) } { 'STR' "0.005840" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000135396738(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000039453024(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000001720948225(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000030469270(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000117821076(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000046442577(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000326327569(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "Target01" }

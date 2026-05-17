@@ -364,85 +364,121 @@ if light:
     light['wf_lightGreen'] = 1.0
     light['wf_lightBlue']  = 1.0
 
+def _srgb_to_linear(c):
+    # sRGB component (0..1) -> linear-light component (0..1).
+    return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+
 def _make_principled_material(name, rgb):
-    """Create a Principled-BSDF material with Base Color set to rgb (0..1 tuple)."""
+    """Create a Principled-BSDF material with Base Color set to rgb (0..1 sRGB tuple).
+
+    Blender's BSDF Base Color socket is in linear-light space; passing sRGB
+    values directly over-brightens mid-tone channels (an authored sRGB orange
+    (1.00, 0.53, 0.00) shifted visibly to yellow before this conversion).
+    diffuse_color (viewport solid-shade) stays sRGB — that channel is sRGB-managed.
+    """
     mat = bpy.data.materials.new(name=name)
     mat.use_nodes = True
     bsdf = mat.node_tree.nodes.get('Principled BSDF')
     if bsdf:
-        bsdf.inputs['Base Color'].default_value = (rgb[0], rgb[1], rgb[2], 1.0)
-    mat.diffuse_color = (rgb[0], rgb[1], rgb[2], 1.0)  # viewport solid-shade colour
+        lin = tuple(_srgb_to_linear(c) for c in rgb)
+        bsdf.inputs['Base Color'].default_value = (lin[0], lin[1], lin[2], 1.0)
+    mat.diffuse_color = (rgb[0], rgb[1], rgb[2], 1.0)
     return mat
 
 
 def _build_qbert_player_mesh():
     """Build a 3D Q*bert from primitives, return the joined mesh object.
 
-    Silhouette: orange UV-sphere body, smaller orange head, peach conical
-    snout pointing **+X** (engine forward), two orange cylinder legs, dark-
-    orange flattened feet. All primitives joined into one mesh with per-face
-    material assignments. Origin at (0,0,0) = ground level (feet bottom).
+    Arcade-faithful per docs/qbert/refs/qbert-spriters-resource-asset-60496.png
+    (Spriters Resource asset 60496): one orange spherical body (no separate
+    head bulge), tightly-packed large eyes with big pupils on top, a SHORT
+    snub muzzle (not a trumpet — earlier "trumpet" reading was wrong) with two
+    black nostril dots on its forward face, two stubby orange feet at the bottom.
+    No visible legs.
 
-    Axis convention: WF actor forward = +X, left = +Y, up = +Z (see
-    project_wf_axis_convention memory). The camera at (0,-22,23) looks +Y;
-    Q*bert at the apex spawns with rest yaw rotated so engine-+X aligns
-    with world-(-Y), i.e. the snout points toward the viewer at rest. We
-    do the alignment by setting the actor's authored rotation to +90° yaw
-    rather than by rotating the mesh — that way the engine and the script
-    both agree that "forward = +X" in actor-local space.
+    Axis convention: WF actor forward = +X, left = +Y, up = +Z. Camera at
+    (0,-22,23) looks +Y; actor's authored rest yaw rotates +X-forward to face
+    the camera.
     """
     mat_orange = _make_principled_material('qbert_orange',    (1.00, 0.53, 0.00))
-    mat_snout  = _make_principled_material('qbert_snout',     (1.00, 0.67, 0.40))
     mat_feet   = _make_principled_material('qbert_feet',      (0.80, 0.33, 0.00))
     mat_eye    = _make_principled_material('qbert_eye_white', (1.00, 1.00, 1.00))
+    mat_pupil  = _make_principled_material('qbert_pupil',     (0.02, 0.02, 0.02))
 
     parts = []  # (object, material)
 
-    # Low-poly budget: the level memory pool is tight (~28 cubes share the
-    # same Level DMalloc), so keep total verts well under ~250.
-
-    # Body — UV sphere (~80 verts)
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.55, segments=10, ring_count=6, location=(0, 0, 0.55))
+    # Body — single orange UV sphere, slight vertical scale. ~52 verts.
+    # Centred at z=0.85; radius 0.65, scale (1.0, 1.0, 1.20) → top of body at
+    # z ≈ 1.63. No separate head — arcade sprite is one continuous sphere.
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.65, segments=10, ring_count=6, location=(0, 0, 0.85))
+    bpy.context.object.scale = (1.0, 1.0, 1.20)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     parts.append((bpy.context.object, mat_orange))
 
-    # Head — smaller UV sphere (~50 verts)
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.40, segments=8, ring_count=5, location=(0, 0, 1.25))
-    parts.append((bpy.context.object, mat_orange))
-
-    # Mesh-local "forward" = +X (engine convention). Snout, eyes, feet point +X.
-    # Left-right is the Y axis. The actor's authored rest rotation handles the
-    # +X-forward → toward-camera alignment in world space (see player setup
-    # below where we set rotation_euler.z so the snout faces the camera).
-
-    # Snout — cone pointing +X (default cone points +Z; rotate +90° about Y) (~9 verts)
-    bpy.ops.mesh.primitive_cone_add(
-        vertices=8, radius1=0.18, radius2=0.10, depth=0.45,
-        location=(0.40, 0, 1.20), rotation=(0, math.pi / 2, 0)
+    # Snout / muzzle — long horizontal-ish cylinder protruding +X from the
+    # body's upper-front, with a very slight downward droop. Side-profile
+    # sprites (rightmost 2 Q*bert poses on the sprite sheet) show the snout
+    # extending forward roughly half the body diameter, near-horizontal, with
+    # a single dark hole at the tip — not two nostrils.
+    # ~20 verts.
+    SNOUT_ANGLE = 0.12  # radians (~7°) — barely-there droop
+    SNOUT_LEN = 0.45
+    SNOUT_DIR = (math.cos(SNOUT_ANGLE), 0.0, -math.sin(SNOUT_ANGLE))
+    # Back end sits just inside the body surface at z ≈ 1.10 (body surface
+    # there is at x ≈ 0.62); tip reaches roughly (1.00, 0, 1.05).
+    snout_center = (
+        0.55 + 0.5 * SNOUT_LEN * SNOUT_DIR[0],
+        0.0,
+        1.10 + 0.5 * SNOUT_LEN * SNOUT_DIR[2],
     )
-    parts.append((bpy.context.object, mat_snout))
+    bpy.ops.mesh.primitive_cylinder_add(
+        vertices=10, radius=0.12, depth=SNOUT_LEN,
+        location=snout_center,
+        rotation=(0.0, math.pi / 2 + SNOUT_ANGLE, 0.0),
+    )
+    parts.append((bpy.context.object, mat_orange))
 
-    # Legs — two cylinders, straddling the Y axis (~12 verts each)
-    for y in (-0.22, 0.22):
-        bpy.ops.mesh.primitive_cylinder_add(
-            vertices=6, radius=0.13, depth=0.30, location=(0, y, 0.15)
-        )
-        parts.append((bpy.context.object, mat_orange))
+    # Nose hole — single black sphere centred on the snout's forward cap,
+    # sized large relative to the cap so it reads as ONE dark opening, not
+    # paired nostrils. Sphere centre is pulled slightly back inside the cap
+    # so only the front-facing hemisphere shows. ~17 verts.
+    snout_tip = (
+        0.55 + SNOUT_LEN * SNOUT_DIR[0],
+        0.0,
+        1.10 + SNOUT_LEN * SNOUT_DIR[2],
+    )
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=0.075, segments=8, ring_count=4,
+        location=(snout_tip[0] - 0.01, 0.0, snout_tip[2]),
+    )
+    parts.append((bpy.context.object, mat_pupil))
 
-    # Feet — flattened spheres in front of legs (+X is "front") (~24 verts each)
-    for y in (-0.22, 0.22):
+    # Eyes — large white spheres packed close together at the top of the body.
+    # Arcade sprite eyes are wide and dominate the upper third of the
+    # silhouette; pupils are very large (most of the eye is black). ~26 verts each.
+    for y in (-0.17, 0.17):
         bpy.ops.mesh.primitive_uv_sphere_add(
-            radius=0.20, segments=6, ring_count=4, location=(0.05, y, 0.04)
-        )
-        bpy.context.object.scale = (1.2, 1.0, 0.4)
-        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-        parts.append((bpy.context.object, mat_feet))
-
-    # Eyes — two small white spheres on the front (+X) of the head (~12 verts each)
-    for y in (-0.14, 0.14):
-        bpy.ops.mesh.primitive_uv_sphere_add(
-            radius=0.07, segments=6, ring_count=4, location=(0.30, y, 1.40)
+            radius=0.18, segments=6, ring_count=4, location=(0.32, y, 1.40)
         )
         parts.append((bpy.context.object, mat_eye))
+
+    # Pupils — large black spheres in front of the whites; their radius is
+    # ~half the eye radius so the white reads as just a ring around each pupil. ~17 verts each.
+    for y in (-0.17, 0.17):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=0.09, segments=5, ring_count=3, location=(0.43, y, 1.40)
+        )
+        parts.append((bpy.context.object, mat_pupil))
+
+    # Feet — flattened spheres at the bottom of the body. Slight forward bias
+    # so both feet read in 3/4 view. No leg cylinders. ~26 verts each.
+    for y in (-0.26, 0.26):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=0.24, segments=6, ring_count=4, location=(0.18, y, 0.05)
+        )
+        bpy.context.object.scale = (1.3, 1.0, 0.35)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((bpy.context.object, mat_feet))
 
     # Smooth-shade everything, assign each part's single material to all its faces.
     for obj, mat in parts:
