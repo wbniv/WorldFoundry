@@ -8,7 +8,7 @@
     "UserPromptSubmit": [
       {
         "hooks": [
-          { "type": "command", "command": "bash ${SRC_ROOT:-$HOME}/python-tui-lib/hooks/transcript-logger.sh", "timeout": 5 }
+          { "type": "command", "command": "bash $HOME/python-tui-lib/hooks/transcript-logger.sh", "timeout": 5 }
         ]
       }
     ],
@@ -16,15 +16,15 @@
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "bash ${SRC_ROOT:-$HOME}/python-tui-lib/hooks/commit-checklist.sh", "timeout": 5 },
-          { "type": "command", "command": "bash ${SRC_ROOT:-$HOME}/python-tui-lib/hooks/sleep-blocker.sh", "timeout": 5 },
-          { "type": "command", "command": "bash ${SRC_ROOT:-$HOME}/python-tui-lib/hooks/git-add-guard.sh", "timeout": 5 }
+          { "type": "command", "command": "bash $HOME/python-tui-lib/hooks/commit-checklist.sh", "timeout": 5 },
+          { "type": "command", "command": "bash $HOME/python-tui-lib/hooks/sleep-blocker.sh", "timeout": 5 },
+          { "type": "command", "command": "bash $HOME/python-tui-lib/hooks/git-add-guard.sh", "timeout": 5 }
         ]
       },
       {
         "matcher": "Write|Edit",
         "hooks": [
-          { "type": "command", "command": "bash ${SRC_ROOT:-$HOME}/python-tui-lib/hooks/plan-first.sh", "timeout": 5 }
+          { "type": "command", "command": "bash $HOME/python-tui-lib/hooks/plan-first.sh", "timeout": 5 }
         ]
       }
     ],
@@ -32,21 +32,21 @@
       {
         "matcher": "Write|Edit",
         "hooks": [
-          { "type": "command", "command": "bash ${SRC_ROOT:-$HOME}/python-tui-lib/hooks/md-preview.sh", "timeout": 30 }
+          { "type": "command", "command": "bash $HOME/python-tui-lib/hooks/md-preview.sh", "timeout": 30 }
         ]
       },
       {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
-          { "type": "command", "command": "bash ${SRC_ROOT:-$HOME}/python-tui-lib/hooks/py-syntax.sh", "timeout": 10 },
-          { "type": "command", "command": "bash ${SRC_ROOT:-$HOME}/python-tui-lib/hooks/shell-strict.sh", "timeout": 5 }
+          { "type": "command", "command": "bash $HOME/python-tui-lib/hooks/py-syntax.sh", "timeout": 10 },
+          { "type": "command", "command": "bash $HOME/python-tui-lib/hooks/shell-strict.sh", "timeout": 5 }
         ]
       }
     ],
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "bash ${SRC_ROOT:-$HOME}/python-tui-lib/hooks/todo-reminder.sh", "timeout": 5 }
+          { "type": "command", "command": "bash $HOME/python-tui-lib/hooks/todo-reminder.sh", "timeout": 5 }
         ]
       }
     ]
