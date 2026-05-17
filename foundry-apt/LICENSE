@@ -1,0 +1,14 @@
+foundry-apt is part of the World Foundry project (https://worldfoundry.org)
+and is released under the GNU General Public License v2.0, matching the
+licence of the WF engine itself.
+
+  https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+This licence applies to the metapackage source (packages/*/DEBIAN/control),
+the helper scripts (scripts/*.sh), the aptly configuration, and the
+GitHub Actions workflows.
+
+Upstream packages we repackage and redistribute via this repo keep their
+original licences. Each repackaged .deb embeds the upstream LICENSE / COPYING
+under /usr/share/doc/<package>/. A roll-up summary lives in
+LICENSES-VENDORED.md (added once we ship the first vendored upstream pkg).

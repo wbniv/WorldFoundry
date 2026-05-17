@@ -1,0 +1,51 @@
+version: '3'
+
+tasks:
+  default:
+    desc: "List available tasks"
+    cmds:
+      - task --list
+
+  build:
+    desc: "Build all .debs into dist/"
+    cmds:
+      - bash scripts/build-all.sh
+
+  clean:
+    desc: "Remove dist/ and public/"
+    cmds:
+      - rm -rf dist public
+
+  publish-local:
+    desc: "Build + publish to ./public/ via aptly (unsigned, smoke test only)"
+    deps: [build]
+    cmds:
+      - bash scripts/init-repo.sh
+      - bash scripts/publish-local.sh
+
+  verify:
+    desc: "dpkg-deb --info every built .deb"
+    deps: [build]
+    cmds:
+      - |
+        for f in dist/*.deb; do
+          echo "=== $f ==="
+          dpkg-deb --info "$f" | head -20
+        done
+
+  apt-test:
+    desc: "After publish-local, point apt at ./public/ and resolve worldfoundry-dev"
+    deps: [publish-local]
+    cmds:
+      - |
+        echo "deb [trusted=yes] file://$(pwd)/public resolute main" \
+          | sudo tee /etc/apt/sources.list.d/foundry-test.list
+        sudo apt-get update -o Dir::Etc::sourceparts=- \
+                            -o APT::Get::List-Cleanup=0 || true
+        apt-cache depends worldfoundry-dev
+        sudo rm /etc/apt/sources.list.d/foundry-test.list
+
+  shellcheck:
+    desc: "Lint all shell scripts"
+    cmds:
+      - shellcheck scripts/*.sh packages/*/build.sh 2>/dev/null || shellcheck scripts/*.sh

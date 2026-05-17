@@ -26,13 +26,23 @@ jobs:
         working-directory: foundry-apt
         run: |
           dpkg-deb --info dist/worldfoundry-dev_1.0.0_all.deb
-          # Make sure the Depends line names every sub-metapackage we ship.
-          for sub in worldfoundry-engine-build-deps worldfoundry-blender worldfoundry-retro-tools; do
+          # Make sure the Depends line names every sub-metapackage we ship,
+          # plus the vendored `task` package (since it's not in Ubuntu repos).
+          for sub in worldfoundry-engine-build-deps worldfoundry-blender worldfoundry-retro-tools task; do
             if ! dpkg-deb --field dist/worldfoundry-dev_1.0.0_all.deb Depends | grep -q "$sub"; then
               echo "ERROR: worldfoundry-dev is missing dependency on $sub" >&2
               exit 1
             fi
           done
+      - name: Sanity-check vendored task package
+        working-directory: foundry-apt
+        run: |
+          set -e
+          ls dist/task_*_amd64.deb dist/task_*_arm64.deb
+          # /usr/bin/task must be present and executable
+          dpkg-deb --contents dist/task_*_amd64.deb | grep -q ' ./usr/bin/task$'
+          # The upstream copyright must travel with the package
+          dpkg-deb --contents dist/task_*_amd64.deb | grep -q ' ./usr/share/doc/task/copyright$'
       - name: Upload built .debs
         uses: actions/upload-artifact@v4
         with:
