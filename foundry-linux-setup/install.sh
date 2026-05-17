@@ -35,6 +35,7 @@ LOG_FILE="${HOME}/.local/state/foundry-install.log"
 WF_GITHUB_ORG="wbniv"
 WF_ENGINE_REPO="WorldFoundry"
 WF_GAMES_REPO="wf-games"
+FOUNDRY_GITHUB_ORG="foundry-linux"
 FOUNDRY_REPOS=(foundry-linux-setup foundry-apt foundry-devbox foundry-linux-iso foundry-docs foundry-linux-branding)
 
 # Defaults (overridable via flags)
@@ -286,11 +287,11 @@ clone_wf_repos() {
     mkdir -p "$PROJECTS_DIR"
 
     if [[ "$ROLE" == "game-dev" || "$ROLE" == "both" || "$ROLE" == "maintainer" ]]; then
-        clone_repo "$WF_GAMES_REPO"
+        clone_repo "$WF_GITHUB_ORG" "$WF_GAMES_REPO"
     fi
 
     if [[ "$ROLE" == "engine-dev" || "$ROLE" == "both" || "$ROLE" == "maintainer" ]]; then
-        clone_repo "$WF_ENGINE_REPO"
+        clone_repo "$WF_GITHUB_ORG" "$WF_ENGINE_REPO"
         if [[ -d "$PROJECTS_DIR/$WF_ENGINE_REPO" ]] && ! $DRY_RUN; then
             (
                 cd "$PROJECTS_DIR/$WF_ENGINE_REPO"
@@ -303,7 +304,7 @@ clone_wf_repos() {
 
     if [[ "$ROLE" == "maintainer" ]]; then
         for repo in "${FOUNDRY_REPOS[@]}"; do
-            clone_repo "$repo"
+            clone_repo "$FOUNDRY_GITHUB_ORG" "$repo"
         done
     fi
 
@@ -321,16 +322,16 @@ clone_wf_repos() {
 }
 
 clone_repo() {
-    local repo="$1"
+    local org="$1" repo="$2"
     local target="$PROJECTS_DIR/$repo"
 
     if [[ -d "$target/.git" ]]; then
         info "$repo already cloned at $target — pulling latest"
         run git -C "$target" pull --rebase || warn "$repo: pull failed, continuing"
     else
-        info "Cloning $repo (shallow + blobless)..."
+        info "Cloning $org/$repo (shallow + blobless)..."
         run git clone --depth 1 --filter=blob:none \
-            "https://github.com/$WF_GITHUB_ORG/$repo.git" "$target" || \
+            "https://github.com/$org/$repo.git" "$target" || \
             warn "$repo: clone failed (does the repo exist yet? non-fatal in Phase 0)"
     fi
 }
