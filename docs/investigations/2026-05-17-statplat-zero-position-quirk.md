@@ -112,6 +112,99 @@ Together these mean the engine can always reconstruct the world extent as `Posit
 
 The `add_box` Blender quirk breaks this on all three of (1)/(3)/bbox: `Position` collapses to `(0,0,0)`, the BOX3 collapses to world-extent (because the mesh-local verts are world-baked), and Jolt happens to build a collider from the world-baked mesh that lands in the right place by accident. The visual renders correctly because both the mesh and the (zero) actor transform agree, but the level data structure has lost the artist's intent.
 
+## What other Blender levels do — Q*bert and Marble Madness already match Max
+
+The Q*bert and Marble Madness Blender scripts predate SMB and **both independently arrive at the Max-correct pattern**. Neither hits the quirk. The two patterns:
+
+### Q*bert pyramid cubes ([`wflevels/qbert_practice/blender_create_qbert.py:3452–3493`](../../wflevels/qbert_practice/blender_create_qbert.py))
+
+```python
+# Build one mesh datablock by hand — no primitive_cube_add, no transform_apply.
+_cube_mesh = bpy.data.meshes.new('cube_mesh_shared')
+_s = CUBE_SIZE / 2
+_box_verts = [
+    (-_s, -_s, -_s), ( _s, -_s, -_s), ( _s,  _s, -_s), (-_s,  _s, -_s),
+    (-_s, -_s,  _s), ( _s, -_s,  _s), ( _s,  _s,  _s), (-_s,  _s,  _s),
+]
+_box_faces = [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4),
+              (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
+_cube_mesh.from_pydata(_box_verts, [], _box_faces)
+_cube_mesh.update()
+
+for row in range(NUM_ROWS):
+    for col in range(row + 1):
+        wx, wy, wz = cube_world_position(row, col)
+        obj = bpy.data.objects.new(f"cube_{N:02d}", _cube_mesh)
+        obj.location = (wx, wy, wz)                # ← world pivot, never re-applied
+        obj.rotation_euler = (0.0, 0.0, math.pi / 4)
+        scene.collection.objects.link(obj)
+        obj['wf_schema_path'] = STATPLAT_OAD
+        # ... obj['wf_Mesh Name'] etc.
+```
+
+Mesh-local verts at `±_s` around the mesh origin, `obj.location` set to the world pivot, no scale, no `transform_apply` ever called. All 28 cubes share one mesh datablock (Phase 1 cube consolidation). Export emits:
+- `Position = (wx, wy, wz)` — true world pivot ✓
+- `Scale` implied (1,1,1) ✓
+- `BOX3 = (-_s, -_s, -_s) → (+_s, +_s, +_s)` — object-local ✓
+
+### MM `mm_practice` ramp ([`wflevels/mm_practice/blender_create_mm_practice.py:149–163`](../../wflevels/mm_practice/blender_create_mm_practice.py))
+
+Same shape, different vertex pattern:
+
+```python
+verts = [
+    (-5, -10,  2), ( 5, -10,  2),
+    ( 5,  10, -2), (-5,  10, -2),   # mesh-local quad coords
+]
+faces = [(0, 1, 2, 3)]
+mesh_data = bpy.data.meshes.new("RampMesh")
+mesh_data.from_pydata(verts, [], faces)
+ramp_obj = bpy.data.objects.new("Ramp", mesh_data)
+ramp_obj.location = (0, 10, 2)                     # ← world pivot
+scene.collection.objects.link(ramp_obj)
+```
+
+### MM ROM-driven `make_box_empty` ([`wflevels/marble-madness/blender_mm_practice_rom.py:129–148`](../../wflevels/marble-madness/blender_mm_practice_rom.py))
+
+The cleanest extraction of the pattern — a helper that takes an explicit `bbox_local` parameter and a world `pos`:
+
+```python
+def make_box_empty(name, pos, bbox_local, oad_name, props=None):
+    lx0, ly0, lz0, lx1, ly1, lz1 = bbox_local
+    verts = [
+        (lx0, ly0, lz0), (lx1, ly0, lz0), (lx1, ly1, lz0), (lx0, ly1, lz0),
+        (lx0, ly0, lz1), (lx1, ly0, lz1), (lx1, ly1, lz1), (lx0, ly1, lz1),
+    ]
+    faces = [(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]
+    m = bpy.data.meshes.new(f'{name}_box')
+    m.from_pydata(verts, [], faces)
+    m.update()
+    obj = bpy.data.objects.new(name, m)
+    obj.location = pos
+    bpy.context.scene.collection.objects.link(obj)
+    obj['wf_schema_path'] = oad(oad_name)
+    obj['wf_original_bbox'] = bbox_local           # ← exporter override (export_level.py:924)
+    # ...
+```
+
+Notable extra: it sets `obj['wf_original_bbox'] = bbox_local`. The exporter checks for this key first (export_level.py:924–927) and uses it verbatim as the BOX3 if present, bypassing `obj.bound_box` derivation entirely. This lets the author tighten / loosen the collision bbox away from the auto-derived visual AABB — a feature the SMB script would benefit from later for "forgiving Mario hitbox" tuning (see [`docs/investigations/2026-05-17-colspace-authoring.md`](2026-05-17-colspace-authoring.md) "Open questions").
+
+### Why SMB regressed
+
+SMB's [`add_box`](../../wflevels/smb_w1_1/blender_create_smb.py) is a newer authoring style — `primitive_cube_add` for the geometry, then `obj.scale = (sx, sy, sz)` + `transform_apply(scale=True)` to bake the cube to size. Cleaner-looking Blender code than building vertex tuples by hand, but it walks straight into the `transform_apply` location-baking quirk. None of the older levels happen to use this pattern.
+
+### Coverage summary
+
+| Level | Box-statplat construction | Hits the quirk? | Position in `.lev` |
+|---|---|---|---|
+| `qbert_practice` | `bpy.data.meshes.new` + `from_pydata` + `bpy.data.objects.new` | NO | true world pivot ✓ |
+| `mm_practice` | same | NO | true world pivot ✓ |
+| `marble-madness` (all five variants) | `make_box_empty` helper (same pattern) | NO | true world pivot ✓ |
+| `snowgoons-blender` | — (no box statplats, all `Anchored` non-physical actors) | n/a | n/a |
+| `smb_w1_1` | `primitive_cube_add` → `obj.scale = …` → `transform_apply(scale=True)` | **YES** | `(0, 0, 0)` ✗ |
+
+So this is a one-level regression, not a systemic bug. Q*bert and MM are already correct and serve as the working reference. The fix is to either port SMB's `add_box` to the from_pydata pattern, or work around the `transform_apply` quirk in place (move-to-origin / apply / restore).
+
 ## Proposed fix
 
 ### (1) Patch `add_box` in `blender_create_smb.py` to preserve `obj.location`
