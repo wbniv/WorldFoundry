@@ -1,7 +1,7 @@
 ---
 title: Foundry Linux — a Debian/Ubuntu derivative for World Foundry game dev
 date: 2026-05-16
-status: proposal — awaiting decisions on naming, desktop, funding, community
+status: Phase 0 complete (2026-05-17); Phase 1 (APT repo) next — naming/desktop/Steam decisions taken, funding/community open
 ---
 
 # Foundry Linux — a Debian/Ubuntu derivative for World Foundry game dev
@@ -387,7 +387,7 @@ The `worldfoundry-android-dev` metapackage covers the toolchain for all of these
 
 <img src="wflogo.png" alt="World Foundry" style="border-radius:0"/>
 
-[Calamares](https://calamares.io/) is heavily themeable via a clean branding-module system, so the install experience and the boot chrome can be fully WF-branded without forking the installer itself. All branding assets live in a separate repo (`github.com/worldfoundry/foundry-linux-branding`) and ship as a `calamares-settings-foundry-linux` deb (Calamares convention) that the ISO build installs at image time — designers can iterate on branding without touching live-build or ISO infrastructure.
+[Calamares](https://calamares.io/) is heavily themeable via a clean branding-module system, so the install experience and the boot chrome can be fully WF-branded without forking the installer itself. All branding assets live in a separate repo (`github.com/foundry-linux/foundry-linux-branding`) and ship as a `calamares-settings-foundry-linux` deb (Calamares convention) that the ISO build installs at image time — designers can iterate on branding without touching live-build or ISO infrastructure.
 
 **During the install itself (Calamares surfaces):**
 - **[QML slideshow](https://github.com/calamares/calamares/wiki/Develop-Branding#qml-slideshow)** — the rotating panel that plays while files copy. Biggest brand surface: a QML file referencing PNG/JPG slide images. Showcases WF games, Blender workflow, retro-porting capabilities, community pointers. (QML is more flexible than the HTML format ubiquity used — animations, transitions, interactivity if we want them.)
@@ -427,7 +427,7 @@ The `worldfoundry-android-dev` metapackage covers the toolchain for all of these
 
 ### Channel 0: setup script
 
-**Repo:** `github.com/worldfoundry/foundry-linux-setup`
+**Repo:** `github.com/foundry-linux/foundry-linux-setup`
 **URL:** `https://worldfoundry.org/install.sh` (a Cloudflare Pages redirect to the raw GitHub script)
 **Usage:** `curl -fsSL https://worldfoundry.org/install.sh | sudo bash`
 
@@ -459,7 +459,7 @@ What the new `install.sh` adds on top:
 
 ### Channel 1: APT repo + metapackage
 
-**Repo (source of truth):** `github.com/worldfoundry/foundry-apt` — `aptly` config, metapackage `debian/` directories, GitHub Actions to build + publish
+**Repo (source of truth):** `github.com/foundry-linux/foundry-apt` — `aptly` config, metapackage `debian/` directories, GitHub Actions to build + publish
 **Hosting (the served apt repo):** **Cloudflare R2** bucket → `apt.worldfoundry.org`
 **Tools:** `aptly` (preferred over `reprepro` — better release-management UX, supports multiple distributions per repo)
 
@@ -560,7 +560,7 @@ sudo apt update && sudo apt install worldfoundry-dev
 ### Channel 2: OCI image + Distrobox
 
 **Image:** `ghcr.io/worldfoundry/devbox:26.04`
-**Repo:** `github.com/worldfoundry/foundry-devbox`
+**Repo:** `github.com/foundry-linux/foundry-devbox`
 
 `Dockerfile`:
 ```dockerfile
@@ -592,7 +592,7 @@ GHCR is free for public images and free from storage limits for popular projects
 
 ### Channel 3: Foundry Linux ISO
 
-**Repo:** `github.com/worldfoundry/foundry-linux-iso`
+**Repo:** `github.com/foundry-linux/foundry-linux-iso`
 **Tool:** `live-build` (Debian's official ISO builder, works fine for Ubuntu bases too)
 **Output:** `foundry-linux-1.0-amd64.iso` (~3.5 GB estimated: 2.5 GB Ubuntu base + 1 GB WF stack)
 
@@ -839,7 +839,7 @@ This keeps the engine host clean (no 400 MB Ghidra install in the user's `/opt`,
 
 ## Contributing upstream: from clone to PR
 
-The auto-cloned repos in `~/Projects/` have `origin = upstream` (i.e. `github.com/worldfoundry/<repo>`). That's the right default — anonymous users can build, run, hack locally, even commit to local branches without ever needing a GitHub account. They get full read access to history, can `git pull` for updates, and never see auth prompts.
+The auto-cloned repos in `~/Projects/` have `origin = upstream` (i.e. `github.com/worldfoundry/<repo>` for engine/games, `github.com/foundry-linux/<repo>` for distro infrastructure). That's the right default — anonymous users can build, run, hack locally, even commit to local branches without ever needing a GitHub account. They get full read access to history, can `git pull` for updates, and never see auth prompts.
 
 For users who *do* want to contribute, the path from "I have an edit" to "I have an open PR" should be a few seconds, not a half-hour of yak-shaving around forks, SSH keys, and remote configs. Foundry Linux makes this turnkey via the GitHub CLI (`gh`) and a one-time welcome-app step.
 
@@ -971,10 +971,13 @@ Under the hood it `podman run`s the canonical Sniper SDK image with the source t
 
 | Asset | Where | Why |
 |-------|-------|-----|
-| Source code, scripts, Dockerfile, live-build configs | github.com/worldfoundry/* | Free, familiar, CI included |
-| APT repo (signed `.deb`s, metapackage, vendored Ghidra/f9dasm/etc.) | Cloudflare R2 → `apt.worldfoundry.org` | Free under R2's 10 GB free tier; no per-file size limit (Ghidra is 400 MB); zero egress fees |
-| Container images | ghcr.io/worldfoundry/* | Free for public; integrated with GH Actions |
-| ISOs | Cloudflare R2 → `iso.worldfoundry.org` | 100 MB Pages limit doesn't apply; zero egress |
+| Engine, games, tools source | github.com/worldfoundry/* | Free, familiar, CI included |
+| Distro infrastructure source (foundry-apt, foundry-linux-iso, foundry-devbox, foundry-docs) | github.com/foundry-linux/* | Free, familiar, CI included |
+| WF tools APT repo (worldfoundry-\* packages) | Cloudflare R2 → `apt.worldfoundry.org` | Free under R2's 10 GB free tier; no per-file size limit (Ghidra is 400 MB); zero egress fees |
+| Distro APT repo (foundry-linux-\* packages, retro tools, Ghidra, etc.) | Cloudflare R2 → `apt.foundrylinux.org` | Same R2 model; separate bucket, separate signing key, separate CI |
+| Container images | ghcr.io/foundry-linux/* | Free for public; integrated with GH Actions |
+| ISOs | Cloudflare R2 → `iso.foundrylinux.org` | 100 MB Pages limit doesn't apply; zero egress |
+| Distro docs + marketing site | Cloudflare Pages → `foundrylinux.org` | Domain registered 2026-05-17, on Cloudflare |
 | ISO signatures, checksums, release notes | GitHub Releases | Versioned, signed, easy to mirror |
 | Documentation | mkdocs-material on Cloudflare Pages → `docs.worldfoundry.org` | Standard for distro docs; well under Pages' 100 MB per-asset limit |
 | Issue tracker | GitHub Issues | Free, low-friction |
@@ -1069,7 +1072,8 @@ Aggregating from the well-documented post-mortems of dead distros (CrunchBang, A
 ## What lives where
 
 ```
-github.com/worldfoundry/
+github.com/worldfoundry/      ← engine, games, tools  →  apt.worldfoundry.org
+github.com/foundry-linux/     ← distro infrastructure →  apt.foundrylinux.org, iso.foundrylinux.org, foundrylinux.org
   foundry-linux-setup/   ← Phase 0: install.sh, docs
   foundry-apt/           ← Phase 1: aptly config, .deb sources, GH Actions to publish
   foundry-devbox/        ← Phase 2: Dockerfile, distrobox recipe

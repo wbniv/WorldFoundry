@@ -85,9 +85,9 @@ jobs:
         run: |
           apt-get update -q
           apt-get install -y curl gnupg ca-certificates
-          curl -fsSL https://foundry.worldfoundry.org/key.gpg \
+          curl -fsSL https://apt.worldfoundry.org/key.gpg \
             | gpg --dearmor -o /etc/apt/keyrings/foundry.gpg
-          echo "deb [signed-by=/etc/apt/keyrings/foundry.gpg] https://foundry.worldfoundry.org resolute main" \
+          echo "deb [signed-by=/etc/apt/keyrings/foundry.gpg] https://apt.worldfoundry.org resolute main" \
             > /etc/apt/sources.list.d/foundry.list
           apt-get update -q
           apt-cache depends worldfoundry-dev

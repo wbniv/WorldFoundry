@@ -36,7 +36,7 @@ shred -u /tmp/foundry-packages.sec.gpg
 The CI workflow uses [OIDC federation](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect/configuring-openid-connect-in-amazon-web-services) so no long-lived AWS access keys ever leave AWS. Steps:
 
 1. Add GitHub as an [OIDC identity provider](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html) in IAM (URL: `https://token.actions.githubusercontent.com`, audience: `sts.amazonaws.com`).
-2. Create an IAM role `foundry-apt-publish` with trust policy restricted to `repo:worldfoundry/foundry-apt:ref:refs/tags/v*` (tag pushes only).
+2. Create an IAM role `foundry-apt-publish` with trust policy restricted to `repo:foundry-linux/foundry-apt:ref:refs/tags/v*` (tag pushes only).
 3. Attach a minimal inline policy: `ssm:GetParameter` on `/foundry-apt/*` only.
 4. Add the role ARN to the foundry-apt repo as the `AWS_ROLE_ARN` secret.
 
@@ -52,9 +52,9 @@ The CI workflow uses [OIDC federation](https://docs.github.com/en/actions/deploy
 
 ## 5. Wire up the custom domain
 
-1. Cloudflare DNS → add a CNAME `foundry` → `pub-xxxxx.r2.dev` (proxied: orange cloud on).
-2. R2 bucket → Settings → Public access → Connect custom domain → `foundry.worldfoundry.org`.
-3. Verify: `curl -I https://foundry.worldfoundry.org/dists/resolute/Release` returns 200.
+1. Cloudflare DNS → add a CNAME `apt` → `pub-xxxxx.r2.dev` (proxied: orange cloud on).
+2. R2 bucket → Settings → Public access → Connect custom domain → `apt.worldfoundry.org`.
+3. Verify: `curl -I https://apt.worldfoundry.org/dists/resolute/Release` returns 200.
 
 ## 6. First release
 
@@ -62,7 +62,7 @@ The CI workflow uses [OIDC federation](https://docs.github.com/en/actions/deploy
 git tag v1.0.0
 git push origin v1.0.0
 # Watch the publish workflow at:
-#   https://github.com/worldfoundry/foundry-apt/actions
+#   https://github.com/foundry-linux/foundry-apt/actions
 ```
 
 After it goes green, the smoke-install job inside the workflow proves a clean Ubuntu 26.04 container can `apt install worldfoundry-dev` from the live repo.

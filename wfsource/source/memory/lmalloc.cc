@@ -31,7 +31,7 @@
 #include <cpplib/libstrm.hp>
 #include <hal/hal.h>
 
-#define LMALLOC_TRACK_SIZE 0
+#define LMALLOC_TRACK_SIZE 1
 #define LMALLOC_TRACK_LINE_AND_FILE 0
 
 #if LMALLOC_TRACK_LINE_AND_FILE
@@ -50,10 +50,11 @@ struct FileLine
 	enum
 	{
 		ALLOCATED = 'ALOC',
-		FREED = 'FREE'
+		FREED = 'FREE',
+		CANARY_VALUE = (int32)0xDEADBEEF
 	};
 	long _state;
-	int _size;			                // size of allocation
+	int _size;			                // size of allocation (includes FileLine header + canary)
 #if LMALLOC_TRACK_LINE_AND_FILE
 	char* _file;						// file and line allocation occured on
 	int _line;
@@ -74,6 +75,18 @@ LMalloc::_Validate() const
 	assert(_currentFree >= _memory);
 	assert(_currentFree < (_endMemory));
 	assert(_flags == 0 || _flags == FLAG_MEMORY_OWNED);
+
+#if LMALLOC_TRACK_SIZE
+	char* p = _memory;
+	while (p < _currentFree)
+	{
+		FileLine* fl = (FileLine*)p;
+		AssertMsg(fl->_state == FileLine::ALLOCATED, "LMalloc _Validate: block not ALLOCATED at " << (void*)p);
+		AssertMsg(*(int32*)((char*)fl + fl->_size - sizeof(int32)) == FileLine::CANARY_VALUE,
+		          "LMalloc _Validate: canary corrupted at " << (void*)p);
+		p += fl->_size;
+	}
+#endif
 }
 
 #endif // DO_ASSERTIONS
@@ -199,6 +212,7 @@ LMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 #if DO_ASSERTIONS
 #if LMALLOC_TRACK_SIZE
 	size += sizeof(FileLine);
+	size += sizeof(int32);		// canary sentinel
 #endif
 #endif
 
@@ -227,6 +241,9 @@ LMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 	_currentFree += size;
 #if DO_ASSERTIONS
 #if LMALLOC_TRACK_SIZE
+	if ((char*)retVal > _memory)
+		AssertMsg(*(int32*)((char*)retVal - sizeof(int32)) == FileLine::CANARY_VALUE,
+		          "LMalloc: canary corrupted — buffer overrun in previous allocation");
 	FileLine* fl = (FileLine*)retVal;
 	fl->_state = FileLine::ALLOCATED;
 #if LMALLOC_TRACK_LINE_AND_FILE
@@ -234,6 +251,7 @@ LMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 	fl->_line = line;
 #endif		// LMALLOC_TRACK_LINE_AND_FILE
 	fl->_size = size;
+	*(int32*)((char*)retVal + size - sizeof(int32)) = FileLine::CANARY_VALUE;
 	retVal = ((char*)retVal) + sizeof(FileLine);
 #endif		// LMALLOC_TRACK_SIZE
 #endif		// DO_ASSERTIONS
@@ -271,6 +289,8 @@ LMalloc::Free(const void* mem)
 #if DO_ASSERTIONS
 #if LMALLOC_TRACK_SIZE
 	FileLine* fl = (FileLine*)mem;
+	AssertMsg(*(int32*)((char*)mem + fl->_size - sizeof(int32)) == FileLine::CANARY_VALUE,
+	          "LMalloc: canary corrupted at Free — buffer overrun detected");
 	assert(fl->_state == FileLine::ALLOCATED);
 
 	FileLine* nextfl = (FileLine*)(((char*)mem)+fl->_size);

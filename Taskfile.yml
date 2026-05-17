@@ -29,6 +29,12 @@ tasks:
       - cmake -S . -B cmake-build-linux -DCMAKE_BUILD_TYPE=Debug
       - cmake --build cmake-build-linux -j
 
+  build-asan:
+    desc: "Build wf_game with AddressSanitizer + UBSan (Linux dev only)"
+    cmds:
+      - cmake -S . -B cmake-build-asan -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=ON
+      - cmake --build cmake-build-asan -j
+
   build-cmake-android:
     desc: "Build libwf_game.so via CMake + NDK (arm64-v8a)"
     vars:
@@ -219,7 +225,7 @@ tasks:
         fi
         LEVEL="$1"; shift
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
-          engine/wf_game "-L$LEVEL" "$@" --debug-port 7777 --debug-bind 127.0.0.1
+          engine/wf_game "-L$LEVEL" "$@" --debug-port 7777 --debug-bind 127.0.0.1 --debug-print-actors
 
   run-debug-remote:
     desc: "Run wf_game with debug bridge open on all interfaces (remote device / CI; usage: task run-debug-remote -- wflevels/snowgoons.iff)"
