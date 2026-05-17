@@ -9,6 +9,8 @@
 
 Eighteen days of work (2026-04-12 – 2026-04-30). Newest first:
 
+- **Q✱bert 16-round end-to-end test complete (2026-05-16)** — `tests/test_16rounds.py` verifies all 88 checks: palette screenshots, cube-state cycle (1-hop L1/L3, 2-hop L2/L4), score increments (+25/+50), mid-round revert, and enemy-mix gating (RB/Coily always; GB/Slick/Sam L2+; Ugg/WW L3+; CE2 L4). See [plan](docs/plans/2026-05-16-qbert-16round-test.md).
+
 - **Q✱bert popup mailbox collision fixed (2026-05-16)** — Popup system MBs 580–584 (added today) collided with CE2 egg internals (MBs 580–584, added commit 8e55799); in L4 both systems are active simultaneously. Moved popup range to 592–596; all L2/L3/L4 spot-checks pass (b26373f).
 
 - **Q✱bert +50 and +500 popup labels landed (2026-05-16)** — Two missing floating score labels added: orange "+50" for the 2nd cube hop in L2/L4 (was incorrectly showing "+25"), and hot-magenta "+500" for Coily falling off a disc (was showing nothing). Both new popup actors are 3D text meshes with correct colours; `cbRoom` pool bumped to 1,800,000 to fit the extra mesh load. See [plan](docs/plans/2026-05-16-qbert-popup-50-500.md).
