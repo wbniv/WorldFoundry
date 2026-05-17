@@ -178,6 +178,27 @@ pub fn sort(objects: &[LevObject], schemas: &OadSchemas) -> Vec<Room> {
         }
     }
 
+    // Warn about non-room actors whose center fell outside every room bbox.
+    // They are in the .lev object table but missing from all room render-entry
+    // lists — the engine never constructs RenderActor3DAnimates for them so
+    // they are invisible in-game with no other diagnostic.
+    // Guard: if no rooms exist the fallback giant-room (below) covers everyone.
+    if !rooms.is_empty() {
+        for (i, obj) in objects.iter().enumerate() {
+            if room_of_obj[i] != -2 { continue; }
+            let center = obj_center(obj);
+            let cx = center[0] as f64 / 65536.0;
+            let cy = center[1] as f64 / 65536.0;
+            let cz = center[2] as f64 / 65536.0;
+            eprintln!(
+                "levcomp-rs: WARNING: actor {:?} world-center ({:.2},{:.2},{:.2}) \
+                 falls outside every room bbox — it will not render in-game. \
+                 Expand the room actor in Blender to contain this actor.",
+                obj.name, cx, cy, cz
+            );
+        }
+    }
+
     // Fallback — if no rooms were found in the .lev, emit one giant room
     // holding every object (matches iff2lvl's default-room behaviour).
     if rooms.is_empty() {

@@ -898,3 +898,29 @@ inline workarounds. Common substitutions:
 - `abs` → `dup 0 < if 0 swap - then`
 - `min` / `max` → `over over > if swap then drop` (min) / `<` (max)
 - `+!` → `dup @ rot + swap !`
+
+## Actor not rendering — "falls outside every room bbox" warning
+
+**Symptom:** An actor is present in your `.blend` and exported to `.lev` but
+invisible at runtime. The levcomp-rs build output contains a line like:
+
+```
+levcomp-rs: WARNING: actor "curse_bubble" world-center (0.00,0.00,-30.00)
+falls outside every room bbox — it will not render in-game.
+Expand the room actor in Blender to contain this actor.
+```
+
+**Cause:** levcomp-rs places each actor into the first room whose bounding box
+contains the actor's world-space center point. If no room bbox covers that
+center, the actor is omitted from all room render-entry lists. The engine never
+constructs the actor's renderer, so it is completely invisible.
+
+**Fix:** In Blender, select the room actor and enlarge its bounding box
+(`RoomMinX/Y/Z`, `RoomMaxX/Y/Z` fields) until it encompasses the offending
+actor's world-space position. Re-export and rebuild.
+
+**Common cases:**
+- Actor parked far off-screen at a "hidden" Z (e.g. Z = −30) while the
+  room bbox only covers the visible play field.
+- Actor added to the scene after the room bbox was last authored and the bbox
+  was never updated to include it.
