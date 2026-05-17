@@ -1,10 +1,17 @@
-"""End-to-end 16-round test for qbert_practice via the debug bridge.
+"""Director mailbox integration test for qbert_practice via the debug bridge.
 
-Verifies palette (screenshot), cube-state cycle, score increments,
-mid-round revert, and enemy-mix active flags for all 16 arcade rounds.
+Tests the director script's logic directly via mailbox injection — the player
+sprite stays at the apex throughout.  Does NOT test player movement, joystick
+input, or hop animation.
+
+Verifies per all 16 rounds:
+  - Palette screenshot (cube top colours)
+  - Cube-state cycle (1-hop L1/L3, 2-hop L2/L4, mid-round revert)
+  - Score increments (+25 hop-1, +50 hop-2 for L2/L4)
+  - Enemy-mix spawn gating (RB/Coily always; GB/Slick/Sam L2+; Ugg/WW L3+; CE2 L4)
 
 Run with the game live on --debug-port 7778:
-    python3 tests/test_16rounds.py
+    python3 tests/test_director_mailbox.py
 """
 from __future__ import annotations
 import os

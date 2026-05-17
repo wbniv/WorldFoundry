@@ -15,7 +15,7 @@ Verify all 16 arcade rounds (L1R1..L4R4) of `qbert_practice` via the debug bridg
 
 ## Approach
 
-All checks driven by `tests/test_16rounds.py` via the debug bridge on port 7778.
+All checks driven by `tests/test_director_mailbox.py` via the debug bridge on port 7778.
 
 ### Per-round loop
 
@@ -86,4 +86,4 @@ For each round `R` in 0..15:
 
 | File | Change |
 |---|---|
-| `tests/test_16rounds.py` | New test script |
+| `tests/test_director_mailbox.py` | New test script |
