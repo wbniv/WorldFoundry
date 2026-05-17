@@ -35,7 +35,7 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 
 ## ENGINE ROBUSTNESS
 
-- [ ] Jolt defensive null in `JoltBodyCreateStaticMesh` — refuse to register a handle when the underlying body comes back invalid; turns a segfault into a clean OOM diagnostic — [investigation](docs/qbert/investigations/2026-05-10-qbert-engine-caps.md)
+- [x] Jolt defensive null in `JoltBodyCreateStaticMesh` — `IsInvalid()` guard already landed in all three `CreateAndAddBody` wrappers (7af255b, 2026-05-10).
 - [ ] LMalloc DEBUG canary — end-of-allocation sentinel; catches buffer overruns at write time rather than at the eventual corrupt read — [investigation](docs/qbert/investigations/2026-05-10-qbert-engine-caps.md)
 - [ ] Per-level `MAX_ACTIVE_ROOMS` — currently compile-time constant; qbert wastes 16 MB on 2 unused adjacent-room slots; plumb a per-level override through AssetManager constructor — [investigation](docs/qbert/investigations/2026-05-10-qbert-engine-caps.md)
 
