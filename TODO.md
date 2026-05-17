@@ -64,7 +64,7 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 - [ ] WF asset provider pure-Python rewrite — no C extensions; pure-Python `providers.py` and `wf-asset.py` CLI — [plan](docs/plans/2026-04-28-wf-asset-provider-pure-python.md)
 - [ ] Blender run operator — export + build + launch chain from Blender UI (one click: `.blend` → `.iff` → `wf_game`) — [plan](docs/plans/2026-04-29-blender-run-operator.md)
 - [ ] Live editor bridge Phase 2 — bidirectional TCP/JSON protocol; Blender → engine property/transform push without restart — [plan](docs/plans/2026-04-29-live-editor-bridge.md)
-- [ ] Debug bridge: clear watches on client disconnect — `debug_server.cc` keeps `gWatches` entries when a client disconnects (`engine/stubs/debug_server.cc:493-498`); stale entries accumulate and make a fresh client see noise; on disconnect, erase all `gWatches` entries and `gMailboxPrev` entries for that fd.
+- [x] Debug bridge: clear watches on client disconnect — `CLIENT_DISCONNECT` sentinel posted to queue on disconnect; `DrainQueue` clears `gWatches` and `gMailboxPrev` (67ae680).
 - [ ] Move OAD schema fixtures out of test path — production code (e.g. `wflevels/qbert_practice/blender_create_qbert.py:46-47`) loads `STATPLAT_OAD` and `ENEMY_OAD` from `wftools/wf_oad/tests/fixtures/*.oad`. Schemas are first-class production artefacts, not test fixtures; relocate to e.g. `wftools/wf_oad/schemas/` and update consumers.
 - [x] Surface "actor outside room bbox" as a visible build warning. levcomp-rs `rooms.rs` now emits a per-actor `eprintln!` warning (name + world-center in Blender units) when a non-room actor's center falls outside every room bbox. Companion section added to `docs/level-design-troubleshooting.md`.
 
