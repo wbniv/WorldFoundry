@@ -71,7 +71,6 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 
 ## BUILD / TOOLCHAIN
 
-- [x] Foundry Linux Phase 0 — per-metapackage install scripts; `install-worldfoundry-retro-tools.sh` answers 6502-emulator question; `foundry-linux` GitHub org; WF workspace setup moved to its own plan (caed61ca)
 - [ ] WF workspace setup — `setup-wf-workspace.sh`: clone `wbniv/{WorldFoundry,wf-games}`, install Rust, build wftools, register Blender addon — [plan](docs/plans/2026-05-17-wf-workspace-setup.md)
 - [ ] Eliminate RTTI — replace all 51 `dynamic_cast` calls with `kind()`-guarded `static_cast`; `camera.cc:98` handled by pushing `GetWatchObject()` up into `MovementHandler`; enables `-fno-rtti` on Android; ~3–4 h — [plan](docs/plans/deferred/2026-04-29-eliminate-rtti.md) [investigation](docs/investigations/2026-04-29-rtti-audit.md)
 - [investigated] RTTI claim — `kind()` / `EActorKind` at `baseobject.hp:71` is enum-dispatch, not C++ RTTI. However, the engine has **51 `dynamic_cast` calls** across `level.cc`, `movecam.cc`, `actor.cc`, `room/`, `movement/`, etc. `-fno-rtti` is not viable without replacing all of them. The "no RTTI" claim was aspirational. `kind()` has only 2 live call sites; `dynamic_cast` is the de-facto pattern. Jolt's `RTTI.cpp` is its own custom type system, unrelated to C++ RTTI.
