@@ -973,9 +973,11 @@ Under the hood it `podman run`s the canonical Sniper SDK image with the source t
 |-------|-------|-----|
 | Engine, games, tools source | github.com/worldfoundry/* | Free, familiar, CI included |
 | Distro infrastructure source (foundry-apt, foundry-linux-iso, foundry-devbox, foundry-docs) | github.com/foundry-linux/* | Free, familiar, CI included |
-| APT repo (signed `.deb`s, metapackage, vendored Ghidra/f9dasm/etc.) | Cloudflare R2 → `apt.worldfoundry.org` | Free under R2's 10 GB free tier; no per-file size limit (Ghidra is 400 MB); zero egress fees |
+| WF tools APT repo (worldfoundry-\* packages) | Cloudflare R2 → `apt.worldfoundry.org` | Free under R2's 10 GB free tier; no per-file size limit (Ghidra is 400 MB); zero egress fees |
+| Distro APT repo (foundry-linux-\* packages, retro tools, Ghidra, etc.) | Cloudflare R2 → `apt.foundrylinux.org` | Same R2 model; separate bucket, separate signing key, separate CI |
 | Container images | ghcr.io/foundry-linux/* | Free for public; integrated with GH Actions |
-| ISOs | Cloudflare R2 → `iso.worldfoundry.org` | 100 MB Pages limit doesn't apply; zero egress |
+| ISOs | Cloudflare R2 → `iso.foundrylinux.org` | 100 MB Pages limit doesn't apply; zero egress |
+| Distro docs + marketing site | Cloudflare Pages → `foundrylinux.org` | Domain registered 2026-05-17, on Cloudflare |
 | ISO signatures, checksums, release notes | GitHub Releases | Versioned, signed, easy to mirror |
 | Documentation | mkdocs-material on Cloudflare Pages → `docs.worldfoundry.org` | Standard for distro docs; well under Pages' 100 MB per-asset limit |
 | Issue tracker | GitHub Issues | Free, low-friction |
@@ -1070,8 +1072,8 @@ Aggregating from the well-documented post-mortems of dead distros (CrunchBang, A
 ## What lives where
 
 ```
-github.com/worldfoundry/      ← engine, games, tools
-github.com/foundry-linux/     ← distro infrastructure
+github.com/worldfoundry/      ← engine, games, tools  →  apt.worldfoundry.org
+github.com/foundry-linux/     ← distro infrastructure →  apt.foundrylinux.org, iso.foundrylinux.org, foundrylinux.org
   foundry-linux-setup/   ← Phase 0: install.sh, docs
   foundry-apt/           ← Phase 1: aptly config, .deb sources, GH Actions to publish
   foundry-devbox/        ← Phase 2: Dockerfile, distrobox recipe

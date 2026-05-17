@@ -38,6 +38,8 @@ Go to [github.com/organizations/new](https://github.com/organizations/new) twice
 | `worldfoundry` | Free | Engine, games, wftools — `WorldFoundry`, `wf-games`, etc. |
 | `foundry-linux` | Free | Distro infrastructure — `foundry-apt`, `foundry-linux-iso`, `foundry-devbox`, `foundry-docs` |
 
+Domain **`foundrylinux.org`** is registered and on Cloudflare. Distro APT endpoint: **`apt.foundrylinux.org`** (R2 bucket, same pattern as `apt.worldfoundry.org`).
+
 Both free, no payment needed.
 
 ---
