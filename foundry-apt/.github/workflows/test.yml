@@ -1,0 +1,41 @@
+name: Build .debs (PR)
+
+on:
+  push:
+    paths:
+      - 'foundry-apt/**'
+  pull_request:
+    paths:
+      - 'foundry-apt/**'
+
+jobs:
+  build-debs:
+    name: Build every metapackage with dpkg-deb
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck scripts
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y shellcheck
+          shellcheck foundry-apt/scripts/*.sh
+      - name: Build all .debs
+        working-directory: foundry-apt
+        run: bash scripts/build-all.sh
+      - name: Sanity-check worldfoundry-dev
+        working-directory: foundry-apt
+        run: |
+          dpkg-deb --info dist/worldfoundry-dev_1.0.0_all.deb
+          # Make sure the Depends line names every sub-metapackage we ship.
+          for sub in worldfoundry-engine-build-deps worldfoundry-blender worldfoundry-retro-tools; do
+            if ! dpkg-deb --field dist/worldfoundry-dev_1.0.0_all.deb Depends | grep -q "$sub"; then
+              echo "ERROR: worldfoundry-dev is missing dependency on $sub" >&2
+              exit 1
+            fi
+          done
+      - name: Upload built .debs
+        uses: actions/upload-artifact@v4
+        with:
+          name: foundry-apt-debs
+          path: foundry-apt/dist/*.deb
+          retention-days: 14
