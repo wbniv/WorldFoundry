@@ -50,6 +50,9 @@ bool gCDEnabled = false;
 
 int  gDebugPort = 0;                    // 0 = disabled; set by --debug-port N
 char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
+#if DO_TEST_CODE
+int  gDebugPrintActors = 0;             // 1 = print idx/mesh/mobility/pos per actor at construction (debug builds only)
+#endif
 
 WFGame* theGame = NULL;
 
@@ -192,6 +195,13 @@ ParseCommandLine(int argc, char** argv)
 			++index;
 			DBSTREAM1( cprogress << "Debug bridge bind: " << gDebugBind << std::endl; )
 		}
+#if DO_TEST_CODE
+		else if ( strcmp( argv[index]+1, "-debug-print-actors" ) == 0 )
+		{
+			gDebugPrintActors = 1;
+			DBSTREAM1( cprogress << "Debug print actors enabled" << std::endl; )
+		}
+#endif
 		else if ( strncmp( argv[index]+1, (char*)szRate, strlen( szRate ) ) == 0)
 		{
 		    int value = atoi( argv[index] + strlen( szRate ) + 1 );

@@ -522,6 +522,27 @@ ground). The Jolt log showed `character 0 created at (4.50, 0.00, 1.50)`
 identifiers for two real things (player + ground). Diagnosis only worked
 because we kept the spaces separated.
 
+#### `--debug-print-actors` (debug builds only)
+
+Add `--debug-print-actors` to the engine command line (already wired into
+`task run-debug`) and the engine prints one stderr line per actor at
+construction time. The flag and its supporting code are guarded by
+`#if DO_TEST_CODE` and so don't exist in `safe-fast`, `release`, `final`,
+or `profile` builds — zero cost in production. See
+[`docs/compile-time-switches.md`](compile-time-switches.md) for the build-mode
+table.
+
+```
+actor idx=9  mesh=player.iff  mobility=Physics  pos=(4.50,0.00,1.50)
+actor idx=19 mesh=(none)      mobility=Anchored pos=(4.50,0.00,1.50)   ← Target02 (camera lookat)
+actor idx=15 mesh=ground.iff  mobility=Anchored pos=(33.75,0.00,-0.75)
+…
+```
+
+This is the canonical way to map bridge `{"op":"state","idx":N}` events
+back to specific WF actors. Off by default — opt-in to keep production
+logs clean.
+
 ---
 
 ## Worked example — Marble Madness arcade-ROM pipeline

@@ -648,6 +648,38 @@ Actor::Actor( const SObjectStartupData* startupData ) :
 	_physicalAttributes.SetPredictedPosition( _physicalAttributes.Position() );
 	_physicalAttributes.Validate();
 
+#if DO_TEST_CODE
+	// --debug-print-actors: one-shot per-actor line for cross-referencing WF
+	// actor indices with bridge {"op":"state","idx":N} events. Off by default;
+	// the bridge prints WF actor idx, not Jolt body id / character handle (see
+	// docs/level-building.md "Identifier spaces"). Skipping kind() here — it's
+	// virtual and unsafe to call from the Actor base constructor (subclass
+	// vtable not yet installed); mesh + mobility + pos are enough to ID in
+	// practice. Guarded by DO_TEST_CODE so the whole block (and the global)
+	// disappear from safe-fast/release/final/console builds — see
+	// docs/compile-time-switches.md.
+	{
+		extern int gDebugPrintActors;
+		if (gDebugPrintActors)
+		{
+			static const char* kMobilityNames[] = {"Anchored","Physics","Path","Camera","Follow"};
+			int mob = GetMovementBlockPtr()->Mobility;
+			const char* mobStr = (mob >= 0 && mob < 5) ? kMobilityNames[mob] : "?";
+			const char* meshStr = "(none)";
+			int32 meshID = GetMeshName();
+			if (meshID != 0) {
+				const char* nm = theLevel->GetAssetManager().LookupAssetName(packedAssetID(meshID));
+				meshStr = nm ? nm : "(unresolved)";
+			}
+			const Vector3& p = _physicalAttributes.Position();
+			std::fprintf(stderr,
+				"actor idx=%d mesh=%s mobility=%s pos=(%.2f,%.2f,%.2f)\n",
+				_idxActor, meshStr, mobStr,
+				p.X().AsFloat(), p.Y().AsFloat(), p.Z().AsFloat());
+		}
+	}
+#endif // DO_TEST_CODE
+
 	_lastVisibility = false;
 	_visibility = false;
 

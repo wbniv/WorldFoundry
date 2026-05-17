@@ -219,7 +219,7 @@ tasks:
         fi
         LEVEL="$1"; shift
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
-          engine/wf_game "-L$LEVEL" "$@" --debug-port 7777 --debug-bind 127.0.0.1
+          engine/wf_game "-L$LEVEL" "$@" --debug-port 7777 --debug-bind 127.0.0.1 --debug-print-actors
 
   run-debug-remote:
     desc: "Run wf_game with debug bridge open on all interfaces (remote device / CI; usage: task run-debug-remote -- wflevels/snowgoons.iff)"
