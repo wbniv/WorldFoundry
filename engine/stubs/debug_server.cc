@@ -261,7 +261,7 @@ static char* debug_get_block(Actor* actor, PropInfo::Block block_id)
 struct PendingUpdate {
     enum Kind { SET_PROP, SET_TRANSFORM, PICK, UNDO_STEP, REVERT_ALL,
                 WATCH, UNWATCH, SET_MAILBOX, INJECT_INPUT, SET_SHADER,
-                RELOAD_SCRIPT, SCREENSHOT } kind;
+                RELOAD_SCRIPT, SCREENSHOT, CLIENT_DISCONNECT } kind;
     int  actor_idx;
     std::string key;
     double value;
@@ -494,6 +494,9 @@ static void handle_client(int fd)
         ::close(fd);
         auto it = std::find(gClients.begin(), gClients.end(), fd);
         if (it != gClients.end()) gClients.erase(it);
+        PendingUpdate disc;
+        disc.kind = PendingUpdate::CLIENT_DISCONNECT;
+        gQueue.push(disc);
     }
     std::fprintf(stderr, "[debug] client disconnected fd=%d\n", fd);
 }
@@ -908,6 +911,10 @@ void DebugServer_DrainQueue(Level& level)
                 if (it->second.empty()) gWatches.erase(it);
             }
             gMailboxPrev.erase((uint64_t)u.actor_idx * 100000ull + (uint64_t)u.mailbox_idx);
+
+        } else if (u.kind == PendingUpdate::CLIENT_DISCONNECT) {
+            gWatches.clear();
+            gMailboxPrev.clear();
 
         } else if (u.kind == PendingUpdate::SCREENSHOT) {
             // glReadPixels against the default framebuffer at the current
