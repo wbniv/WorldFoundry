@@ -1,0 +1,31 @@
+Package: worldfoundry-dev
+Version: 1.0.0
+Architecture: all
+Maintainer: World Foundry <packages@worldfoundry.org>
+Section: metapackages
+Priority: optional
+Depends: worldfoundry-engine-build-deps,
+ worldfoundry-blender,
+ worldfoundry-retro-tools,
+ task,
+ gnupg,
+ ca-certificates,
+ software-properties-common
+Recommends: code,
+ worldfoundry-android-dev
+Suggests: claude-code
+Homepage: https://worldfoundry.org/
+Description: complete World Foundry game-development environment
+ The top-level metapackage — installs everything required for World
+ Foundry game development on Ubuntu-family 26.04: the engine build
+ toolchain, Blender 4.2 with the WF addon, retro-porting tools, and
+ the task runner.
+ .
+ Android cross-compilation tooling and Claude Code CLI are
+ Recommends/Suggests respectively — install worldfoundry-android-dev
+ explicitly if you need Android.
+ .
+ This is Phase 1 of the Foundry Linux distro plan. Phase 0 (the
+ curl-bash installer at https://foundrylinux.org/install.sh) covers
+ the same package set but composes it inline; this metapackage
+ collapses that to a single apt-install.

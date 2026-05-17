@@ -1,0 +1,29 @@
+Package: worldfoundry-engine-build-deps
+Version: 1.0.0
+Architecture: all
+Maintainer: World Foundry <packages@worldfoundry.org>
+Section: metapackages
+Priority: optional
+Depends: build-essential,
+ cmake (>= 3.22),
+ libx11-dev,
+ libgl1-mesa-dev,
+ libglu1-mesa-dev,
+ gdb,
+ xxd,
+ python3,
+ pkg-config,
+ git,
+ curl,
+ wget,
+ unzip
+Homepage: https://worldfoundry.org/
+Description: build dependencies for the World Foundry engine
+ Pulls in everything required to compile the World Foundry C++17 engine
+ (build_game.sh) and its vendored libraries (Jolt, miniaudio, zForth,
+ Lua, QuickJS, etc.). All deps are vendored in-tree; this metapackage
+ covers only the system-side toolchain and headers.
+ .
+ This is the lowest-common-denominator package — install
+ worldfoundry-dev if you also want the asset compilers, Blender addon,
+ and retro-porting tools.
