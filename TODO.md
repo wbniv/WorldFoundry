@@ -90,11 +90,11 @@ a one-to-one arcade copy.
 
 ### Core gameplay
 
-- [x] Per-round difficulty scaling — Phase A visibility gating (56c8ee2) + Phase B spawn-interval scaling `max(120, 480-24×R)` for all enemies (1326a68). ROM disassembly at [`docs/investigations/qbert-8088-disassembly.asm`](docs/investigations/qbert-8088-disassembly.asm). Deferred: full single-timer sequencer + second Coily egg in L4.
-- [x] Score & lives HUD — SCORE increments +25/cube and +1000/round-clear; TIMER counts elapsed ticks; LIVES display was already wired (2026-05-14). Enemy-kill scoring (Slick/Sam +300, Green Ball +100, disc rescue +500) deferred.
+- [x] Per-round difficulty scaling — Phase A visibility gating (56c8ee2) + Phase B spawn-interval scaling; single shared spawn-timer sequencer (16 rounds × ROM-decoded sequences) done 2026-05-16 — [plan](docs/qbert/plans/2026-05-16-qbert-spawn-sequencer.md); second Coily egg in L4 done 8e55799.
+- [x] Score & lives HUD — SCORE increments +25/+50/cube, +1000/round-clear, enemy-kill +100/+300, all wired. TIMER counts elapsed ticks; LIVES display was already wired (2026-05-14).
 - [x] High-score persistence — 23-entry binary file seeded with arcade defaults, AAA initials picker on game-over, two-column overlay table (2026-05-15).
-- [x] Bonus-points popups — floating "+25" / "+100" / "+300" labels. Done ab00bfd. Deferred: +50 popup (2nd-hop cube flip, L2+), +500 popup (Coily-off-disc).
-- [x] Coily-falls-off-disc — snake chases Q✱bert onto disc coords; retires with +500 score. Done b9639f9. Floating +500 popup label deferred.
+- [x] Bonus-points popups — floating +25/+50/+100/+300/+500 labels all done 0a39ce8.
+- [x] Coily-falls-off-disc — snake chases Q✱bert onto disc coords; retires with +500 score + popup. Done b9639f9, 0a39ce8.
 - [x] +50 popup (2nd cube hop, L2+) and +500 popup (Coily-off-disc) — done 0a39ce8 — [plan](docs/plans/2026-05-16-qbert-popup-50-500.md)
 - [cancelled] Bonus letter "S" — not in original Gottlieb arcade; cancelled 2026-05-16.
 - [x] Enemy coexistence rules — Rule 1: no climber while Coily active; Rule 2: no simultaneous climbers (Ugg blocks Wrong-Way and vice versa); freeze timer guards all spawns. Done 2026-05-15 — [plan](docs/qbert/plans/2026-05-15-qbert-enemy-coexistence.md)
