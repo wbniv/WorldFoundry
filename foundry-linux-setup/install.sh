@@ -32,8 +32,8 @@ SUPPORTED_RELEASE="26.04"
 LEGACY_RELEASE="24.04"
 PROJECTS_DIR="${PROJECTS_DIR:-${HOME}/Projects}"
 LOG_FILE="${HOME}/.local/state/foundry-install.log"
-WF_GITHUB_ORG="worldfoundry"
-WF_ENGINE_REPO="WorldFoundry.2026-new-level"
+WF_GITHUB_ORG="wbniv"
+WF_ENGINE_REPO="WorldFoundry"
 WF_GAMES_REPO="wf-games"
 FOUNDRY_REPOS=(foundry-linux-setup foundry-apt foundry-devbox foundry-linux-iso foundry-docs foundry-linux-branding)
 
