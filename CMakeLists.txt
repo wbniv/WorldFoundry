@@ -21,6 +21,7 @@ set(WF_FORTH_ENGINE  "zforth"   CACHE STRING "none | zforth | ficl | atlast | em
 set(WF_PHYSICS_ENGINE "jolt"    CACHE STRING "legacy | jolt")
 option(WF_REST_API        "REST API box PoC"              ON)
 option(WF_ENABLE_STEAM    "Steamworks SDK"                OFF)
+option(WF_ASAN            "AddressSanitizer + UBSan (Linux dev only)" OFF)
 
 # Mobile (Android + iOS): Forth-only scripting, no Steam, no REST API.
 # Matches build_game.sh Android flags. WAMR in particular ships x86_64 assembly
@@ -67,6 +68,12 @@ list(APPEND WF_DEFS
     DO_IOSTREAMS=1 SW_DBSTREAM=1 DEBUG=1 DEBUG_VARIABLES=1
     DO_VALIDATION=0 DO_TEST_CODE=0 DO_DEBUG_FILE_SYSTEM=0
 )
+
+if(WF_ASAN AND NOT ANDROID AND NOT IOS)
+    add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address,undefined)
+    message(STATUS "WF_ASAN: AddressSanitizer + UBSan enabled")
+endif()
 
 # ─── Source directories ───────────────────────────────────────────────────────
 if(ANDROID)

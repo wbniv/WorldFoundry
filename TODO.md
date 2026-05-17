@@ -36,8 +36,8 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 ## ENGINE ROBUSTNESS
 
 - [x] Jolt defensive null in `JoltBodyCreateStaticMesh` — `IsInvalid()` guard already landed in all three `CreateAndAddBody` wrappers (7af255b, 2026-05-10).
-- [ ] LMalloc DEBUG canary — end-of-allocation sentinel; catches buffer overruns at write time rather than at the eventual corrupt read — [investigation](docs/qbert/investigations/2026-05-10-qbert-engine-caps.md)
-- [ ] Per-level `MAX_ACTIVE_ROOMS` — currently compile-time constant; qbert wastes 16 MB on 2 unused adjacent-room slots; plumb a per-level override through AssetManager constructor — [investigation](docs/qbert/investigations/2026-05-10-qbert-engine-caps.md)
+- [x] LMalloc DEBUG canary — `0xDEADBEEF` sentinel + pre-write assertion audit + ASan `task build-asan`; three-layer overrun defence. Done 2026-05-17 — [plan](docs/plans/2026-05-17-engine-caps.md)
+- [ ] Per-level `MAX_ACTIVE_ROOMS` — currently compile-time constant; deferred until after first level ships — [plan](docs/plans/per-level-max-active-rooms.md)
 
 
 ## PHYSICS
