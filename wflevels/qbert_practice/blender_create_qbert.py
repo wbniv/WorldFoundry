@@ -127,7 +127,71 @@ POPUP_HOLD_TICKS   = 90   # 1.5 s at 60 Hz
 GO_BLOCK_MB        = 590
 GO_HOLD_TIMER_MB   = 591
 
-NUM_MAILBOXES = 600  # well above the highest mailbox we use (~596)
+NUM_MAILBOXES = 600  # well above the highest mailbox we use (~599)
+
+# ── Arcade-faithful spawn sequencer (single shared timer) ────────────────────
+# Replaces the six independent per-enemy spawn timers (RB, CE, Slick, Sam) with
+# a single SEQ_TIMER that fires at the per-round reload value and dispatches to
+# the next enemy in the sequence table decoded from the arcade ROM.
+SEQ_TIMER_MB  = 597   # countdown; fires when it hits 0
+SEQ_STEP_MB   = 598   # current position in sequence (0-based, wraps mod seq_len)
+SPAWN_REQ_MB  = 599   # posted by sequencer; 0=none, 1=RB, 3=CE, 6=Slick, 8=Sam
+
+# WF spawn-request IDs: arcade enemy id + 1 (avoids 0 = "no request" collision)
+_SREQ_RB  = 1   # arcade E0 RedBall
+_SREQ_CE  = 3   # arcade E2 CoilyEgg
+_SREQ_S   = 6   # arcade E5 Slick
+_SREQ_SAM = 8   # arcade E7 Sam
+
+# Per-round reload values decoded from STAGE_CONFIG bytes at $A899.
+# Formula: (28 << config.byte[4]) + config.byte[3]; verified against disassembly.
+SPAWN_RELOAD = [
+    200,  # R0  L1R1  Stage 0
+    160,  # R1  L1R2  Stage 1
+    136,  # R2  L1R3  Stage 2
+    176,  # R3  L1R4  Stage 3
+    208,  # R4  L2R1  Stage 4
+    188,  # R5  L2R2  Stage 5
+    172,  # R6  L2R3  Stage 6
+    132,  # R7  L2R4  Stage 7
+    216,  # R8  L3R1  Stage 8  (seq same as Stage 3)
+    186,  # R9  L3R2  Stage 9  (seq same as Stage 5)
+    164,  # R10 L3R3  Stage 10
+    124,  # R11 L3R4  Stage 11 (seq same as Stage 7)
+    256,  # R12 L4R1  Stage 12
+    240,  # R13 L4R2  Stage 13
+    224,  # R14 L4R3  Stage 14 (seq same as Stage 12)
+    208,  # R15 L4R4  Stage 15 (seq same as Stage 7)
+]
+
+# Arcade enemy ids: 0=RB, 2=CE, 5=Slick, 7=Sam.
+# Level/sound events stripped; conditional entries treated as unconditional (v1).
+_SEQ_R3  = [2,0,0,2,0,2,2,2,2,0,2,0,0]   # Stage 3 seq; shared by Stage 8
+_SEQ_R5  = [7,2,5,5,5,7,7,5,7,5,5,5,7]   # Stage 5 seq; shared by Stage 9
+_SEQ_R7  = [2,7,5,7,2,0,5,0,5,7,2,5,7,7,2,2,0,7,5,2,7]  # Stage 7; shared 11,15
+_SEQ_R12 = [0,0,2,0,2,2,2]               # Stage 12 seq; shared by Stage 14
+
+SPAWN_SEQUENCES = [
+    [2,2],                                               # R0  L1R1
+    [0,0,2],                                             # R1  L1R2
+    [5,7,5,7,5,7,5,7,0],                                # R2  L1R3
+    _SEQ_R3,                                             # R3  L1R4
+    [5,7,5,7,5,7,5,7,2,5,7],                            # R4  L2R1
+    _SEQ_R5,                                             # R5  L2R2
+    [2,2,2,2,2,2,2,2,0,0,0,2,2,2,2,2],                 # R6  L2R3
+    _SEQ_R7,                                             # R7  L2R4
+    _SEQ_R3,                                             # R8  L3R1
+    _SEQ_R5,                                             # R9  L3R2
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,7,0,0],      # R10 L3R3
+    _SEQ_R7,                                             # R11 L3R4
+    _SEQ_R12,                                            # R12 L4R1
+    [2,0,2,2,5,7,5,7,5,7,5,7,0],                       # R13 L4R2
+    _SEQ_R12,                                            # R14 L4R3
+    _SEQ_R7,                                             # R15 L4R4
+]
+
+# Map arcade enemy id → WF spawn-request id
+_ARCADE_ID_TO_SREQ = {0: _SREQ_RB, 2: _SREQ_CE, 5: _SREQ_S, 7: _SREQ_SAM}
 
 
 def cube_index(row, col):
@@ -1003,6 +1067,148 @@ _RB_LFSR_STEP = (
     f"dup {RB_MB_LFSR} write-mailbox "
     f"1 & "
 )
+
+def _spawn_rb_forth():
+    """Forth: try to wake one idle red ball. Side effect: advance LFSR."""
+    parts = [f"0 {RB_MB_SPAWN_CLAIMED} write-mailbox "]
+    for k in range(REDBALL_COUNT):
+        parts.append(
+            f"{RB_MB_SPAWN_CLAIMED} read-mailbox 0 = if "
+            f"{RB_MB_ACTIVE_BASE + k} read-mailbox 0 = if "
+            f"{_RB_LFSR_STEP}"
+            f"{_rb_mb(k, _RB_OFF_COL)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+            f"1 {_rb_mb(k, _RB_OFF_ROW)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+            f"0 {_rb_mb(k, _RB_OFF_FROM_ROW)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+            f"0 {_rb_mb(k, _RB_OFF_FROM_COL)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+            f"{REDBALL_HOP_TICKS} {_rb_mb(k, _RB_OFF_COOLDOWN)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+            f"{_RB_Z_AT_ROW_0} {_rb_mb(k, _RB_OFF_START_Z)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+            f"{_RB_Z_AT_ROW_1} {_rb_mb(k, _RB_OFF_END_Z)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+            f"1 {_rb_mb(k, _RB_OFF_PHASE)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
+            f"1 {RB_MB_ACTIVE_BASE + k} write-mailbox "
+            f"1 {RB_MB_SPAWN_CLAIMED} write-mailbox "
+            f"then then "
+        )
+    return "".join(parts)
+
+
+def _spawn_ce_forth():
+    """Forth: try to wake Coily egg (gated on PHASE_GLOBAL==0 and ROUND_DONE==0)."""
+    return (
+        f"{COILY_MB_PHASE_GLOBAL} read-mailbox 0 = if "
+        f"{COILY_MB_ROUND_DONE} read-mailbox 0 = if "
+        f"{_RB_LFSR_STEP}"
+        f"{_CE_MB_COL} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+        f"1 {_CE_MB_ROW} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+        f"0 {_CE_MB_FROM_ROW} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+        f"0 {_CE_MB_FROM_COL} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+        f"{COILY_EGG_HOP_TICKS} {_CE_MB_COOLDOWN} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+        f"{_CE_Z_AT_ROW_0} {_CE_MB_START_Z} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+        f"{_CE_Z_AT_ROW_1} {_CE_MB_END_Z} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+        f"0 {_CE_MB_FLASH_TICK} write-mailbox "
+        f"1 {_CE_MB_PHASE} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
+        f"1 {COILY_MB_PHASE_GLOBAL} write-mailbox "
+        f"1 {COILY_EGG_ACTIVE_MB} write-mailbox "
+        f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
+        f"1 {COILY_MB_ROUND_DONE} write-mailbox "
+        f"then then "
+    )
+
+
+def _spawn_flipper_forth(base, active_mb, actor_idx):
+    """Forth: try to wake a Slick-type flipper (Slick or Sam)."""
+    return (
+        f"{active_mb} read-mailbox 0 = if "
+        f"{_RB_LFSR_STEP}"
+        f"{base + _RB_OFF_COL} {actor_idx} write-actor-mailbox "
+        f"1 {base + _RB_OFF_ROW} {actor_idx} write-actor-mailbox "
+        f"0 {base + _RB_OFF_FROM_ROW} {actor_idx} write-actor-mailbox "
+        f"0 {base + _RB_OFF_FROM_COL} {actor_idx} write-actor-mailbox "
+        f"{REDBALL_HOP_TICKS} {base + _RB_OFF_COOLDOWN} {actor_idx} write-actor-mailbox "
+        f"{_RB_Z_AT_ROW_0} {base + _RB_OFF_START_Z} {actor_idx} write-actor-mailbox "
+        f"{_RB_Z_AT_ROW_1} {base + _RB_OFF_END_Z} {actor_idx} write-actor-mailbox "
+        f"1 {base + _RB_OFF_PHASE} {actor_idx} write-actor-mailbox "
+        f"1 {active_mb} write-mailbox "
+        f"then "
+    )
+
+
+def _gen_seq_reload_forth():
+    """Forth: load SEQ_TIMER from current ROUND_NUMBER. Stack neutral."""
+    parts = ["425 read-mailbox "]
+    for r, reload in enumerate(SPAWN_RELOAD):
+        if r == 0:
+            parts.append(f"dup 0 = if drop {reload} ")
+        elif r < 15:
+            parts.append(f"else dup {r} = if drop {reload} ")
+        else:
+            parts.append(f"else drop {reload} ")
+    parts.append("then " * 15)
+    parts.append(f"{SEQ_TIMER_MB} write-mailbox ")
+    return "".join(parts)
+
+
+def _gen_sequencer_block():
+    """Director blocks A+B: single-timer spawn sequencer replacing per-enemy timers."""
+
+    def _step_dispatch(seq):
+        """Nested if-else dispatch: (step) → write SPAWN_REQ_MB. Stack neutral."""
+        n = len(seq)
+        parts = []
+        for s, eid in enumerate(seq):
+            sreq = _ARCADE_ID_TO_SREQ[eid]
+            if s == 0:
+                parts.append(f"dup 0 = if drop {sreq} {SPAWN_REQ_MB} write-mailbox ")
+            elif s < n - 1:
+                parts.append(f"else dup {s} = if drop {sreq} {SPAWN_REQ_MB} write-mailbox ")
+            else:
+                parts.append(f"else drop {sreq} {SPAWN_REQ_MB} write-mailbox ")
+        parts.append("then " * (n - 1))
+        return "".join(parts)
+
+    parts = []
+
+    # Block A: sequencer dispatch — decrement timer; on fire write SPAWN_REQ
+    parts.append(f"418 read-mailbox 1 = if ")
+    parts.append(f"{SEQ_TIMER_MB} read-mailbox dup 0 > if ")
+    parts.append(f"1 - {SEQ_TIMER_MB} write-mailbox ")
+    parts.append("else drop ")
+
+    # Outer round dispatch: ( round )
+    parts.append("425 read-mailbox ")
+    for r, seq in enumerate(SPAWN_SEQUENCES):
+        reload = SPAWN_RELOAD[r]
+        n = len(seq)
+        if r == 0:
+            parts.append("dup 0 = if drop ")
+        elif r < 15:
+            parts.append(f"else dup {r} = if drop ")
+        else:
+            parts.append("else drop ")
+        # Step dispatch
+        parts.append(f"{SEQ_STEP_MB} read-mailbox ")
+        parts.append(_step_dispatch(seq))
+        # Advance step (modulo wrap)
+        parts.append(f"{SEQ_STEP_MB} read-mailbox 1 + {n} % {SEQ_STEP_MB} write-mailbox ")
+        # Reload timer
+        parts.append(f"{reload} {SEQ_TIMER_MB} write-mailbox ")
+    # Close 15 nested if blocks (rounds 0-14)
+    parts.append("then " * 15)
+
+    parts.append("then ")   # close timer > 0 check
+    parts.append("then\n")  # close INTRO_DONE
+
+    # Block B: spawn handler — read SPAWN_REQ and execute the matching action
+    parts.append(f"{SPAWN_REQ_MB} read-mailbox dup 0 <> if ")
+    parts.append(f"dup {_SREQ_RB} = if drop {_spawn_rb_forth()} else ")
+    parts.append(f"dup {_SREQ_CE} = if drop {_spawn_ce_forth()} else ")
+    parts.append(f"dup {_SREQ_S} = if drop {_spawn_flipper_forth(SLICK_MB_BASE, SLICK_MB_ACTIVE, SLICK_ACTOR_IDX)} else ")
+    parts.append(f"drop {_spawn_flipper_forth(SAM_MB_BASE, SAM_MB_ACTIVE, SAM_ACTOR_IDX)} ")
+    parts.append("then then then ")
+    parts.append(f"0 {SPAWN_REQ_MB} write-mailbox ")
+    parts.append("else drop then\n")
+
+    return "".join(parts)
+
 
 def redball_script(k, variant='red'):
     """Generate the wf_Script for a hopping ball.
@@ -2779,17 +2985,15 @@ DIRECTOR_SCRIPT = "".join([
     _broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[0][0], 3038),  # LIT
     _broadcast_color_to_all_cubes(LEVEL_SIDE_COLORS[0][1], 3039),  # SHADOW
     "0 427 write-mailbox ",   # LAST_LEVEL = 0 (L1)
-    # Red Ball Phase B: seed LFSR, set first-ball delay, clear per-ball active mirrors.
-    f"0xACE1 {RB_MB_LFSR} write-mailbox "          # LFSR seed (non-zero, arbitrary)
-    f"120 {RB_MB_SPAWN_TIMER} write-mailbox "      # first ball ~2 s after INTRO_DONE
+    # Red Ball: seed LFSR; clear per-ball active mirrors (timer replaced by sequencer).
+    f"0xACE1 {RB_MB_LFSR} write-mailbox "
     + " ".join(f"0 {RB_MB_ACTIVE_BASE + k} write-mailbox" for k in range(REDBALL_COUNT))
     + " ",
-    # Coily Phase A: clear globals + arm first-egg delay.
+    # Coily Phase A: clear globals (spawn delay now via sequencer, not per-round timer).
     f"0 {COILY_MB_PHASE_GLOBAL} write-mailbox "
     f"0 {COILY_EGG_ACTIVE_MB} write-mailbox "
     f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
     f"0 {COILY_MB_ROUND_DONE} write-mailbox "
-    f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox "
     f"0 {COILY_EGG2_ACTIVE_MB} write-mailbox "
     f"0 {COILY_EGG2_ROUND_DONE} write-mailbox "
     f"0 {_CE2_MB_PHASE} write-mailbox "
@@ -2797,16 +3001,19 @@ DIRECTOR_SCRIPT = "".join([
     # Phase D: arm both discs as present (PHASE=1); clear any stale flash.
     f"1 {_DL_MB_PHASE} write-mailbox 1 {_DR_MB_PHASE} write-mailbox "
     f"0 {_DL_MB_FLASH} write-mailbox 0 {_DR_MB_FLASH} write-mailbox ",
-    # Green Ball, Slick, Sam: clear active mirrors; arm first-spawn delay only from L2 (round >= 4).
+    # Green Ball: clear active mirror; arm first-spawn delay from L2+ (round >= 4).
+    # Slick/Sam active mirrors cleared here; spawning now driven by sequencer.
     f"0 {GB_MB_FREEZE_TIMER} write-mailbox "
     f"0 {GB_MB_ACTIVE} write-mailbox "
     f"0 {SLICK_MB_ACTIVE} write-mailbox "
     f"0 {SAM_MB_ACTIVE} write-mailbox "
     f"425 read-mailbox 3 > if "
     f"{_SPAWN_INTERVAL_FORTH}{GB_MB_SPAWN_TIMER} write-mailbox "
-    f"{_SPAWN_INTERVAL_FORTH}{SLICK_MB_SPAWN_TIMER} write-mailbox "
-    f"{_SPAWN_INTERVAL_FORTH}{SAM_MB_SPAWN_TIMER} write-mailbox "
     f"then ",
+    # Sequencer init: seed timer with R0 reload; clear step and pending request.
+    f"{SPAWN_RELOAD[0]} {SEQ_TIMER_MB} write-mailbox "
+    f"0 {SEQ_STEP_MB} write-mailbox "
+    f"0 {SPAWN_REQ_MB} write-mailbox ",
     # Ugg & Wrong-Way: clear active mirrors; arm first-spawn delay only from L3 (round >= 8).
     f"0 {UGG_MB_ACTIVE} write-mailbox "
     f"0 {WW_MB_ACTIVE} write-mailbox "
@@ -2849,52 +3056,12 @@ DIRECTOR_SCRIPT = "".join([
     "6 = if 1 418 write-mailbox then ",
     "then ",
     "then\n",
-    # ── Red Ball Phase B spawn timing ─────────────────────────────────────────
-    # Gated on INTRO_DONE. Each tick:
-    #   - decrement RB_SPAWN_TIMER (mb 512)
-    #   - when timer reaches 0: try to claim and wake the lowest-index idle ball,
-    #     then re-arm timer to max(60, 300 - 12 * ROUND_NUMBER) ticks.
-    # Each ball's activation writes 8 state mailboxes (COL/ROW/FROM_ROW/FROM_COL/
-    # COOLDOWN/START_Z/END_Z/PHASE) via write-actor-mailbox + 1 director-mirror
-    # write (RB_ACTIVE[K]) + 1 claim latch (RB_SPAWN_CLAIMED).
-    f"418 read-mailbox 1 = if "
-    f"{RB_MB_SPAWN_TIMER} read-mailbox dup 0 > if "
-    f"1 - {RB_MB_SPAWN_TIMER} write-mailbox "
-    f"else drop "
-    # claimed := 0
-    f"0 {RB_MB_SPAWN_CLAIMED} write-mailbox "
-    + " ".join(
-        # For each ball K, try to claim. Each block: if not yet claimed AND
-        # ball K is idle, step LFSR, write all 8 ball mailboxes, mirror active,
-        # latch claimed.
-        f"{RB_MB_SPAWN_CLAIMED} read-mailbox 0 = if "
-        f"{RB_MB_ACTIVE_BASE + k} read-mailbox 0 = if "
-        # LFSR step → ( bit )
-        f"{_RB_LFSR_STEP}"
-        # Activate ball K (write-actor-mailbox stack: val mb actor):
-        #   COL := bit (consumes the bit on top of stack)
-        f"{_rb_mb(k, _RB_OFF_COL)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-        #   ROW := 1, FROM_ROW := 0, FROM_COL := 0
-        f"1 {_rb_mb(k, _RB_OFF_ROW)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-        f"0 {_rb_mb(k, _RB_OFF_FROM_ROW)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-        f"0 {_rb_mb(k, _RB_OFF_FROM_COL)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-        #   COOLDOWN := HOP_TICKS
-        f"{REDBALL_HOP_TICKS} {_rb_mb(k, _RB_OFF_COOLDOWN)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-        #   START_Z := Z@row0 (apex), END_Z := Z@row1
-        f"{_RB_Z_AT_ROW_0} {_rb_mb(k, _RB_OFF_START_Z)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-        f"{_RB_Z_AT_ROW_1} {_rb_mb(k, _RB_OFF_END_Z)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-        #   PHASE := 1 (start hopping)
-        f"1 {_rb_mb(k, _RB_OFF_PHASE)} {REDBALL_ACTOR_BASE + k} write-actor-mailbox "
-        # Director-mirror RB_ACTIVE[K] := 1 ; CLAIMED := 1
-        f"1 {RB_MB_ACTIVE_BASE + k} write-mailbox "
-        f"1 {RB_MB_SPAWN_CLAIMED} write-mailbox "
-        f"then then "
-        for k in range(REDBALL_COUNT)
-    )
-    + " "
-    # Re-arm timer = max(60, 300 - 12 * ROUND_NUMBER)
-    f"425 read-mailbox 12 * 300 swap - dup 60 < if drop 60 then {RB_MB_SPAWN_TIMER} write-mailbox "
-    f"then then\n",
+    # ── Arcade spawn sequencer (replaces RB + CE + Slick + Sam per-enemy timers) ──
+    # Single shared SEQ_TIMER counts down; on fire: dispatch next enemy from the
+    # per-round sequence table, advance SEQ_STEP, reload from SPAWN_RELOAD[round].
+    # Block B (spawn handler) follows immediately so the request is serviced the
+    # same tick it is posted.
+    _gen_sequencer_block(),
     # ── Green Ball: freeze timer + per-round spawn ────────────────────────────
     # Gated on INTRO_DONE. Each tick: decrement freeze timer if active; otherwise
     # decrement green spawn timer; on hitting 0 with green idle, wake green.
@@ -2924,34 +3091,6 @@ DIRECTOR_SCRIPT = "".join([
     f"{_SPAWN_INTERVAL_FORTH}{GB_MB_SPAWN_TIMER} write-mailbox "
     f"then then then "
     f"then\n",
-    # ── Slick & Sam spawn blocks ──────────────────────────────────────────────
-    # Same pattern as the green-ball spawn block, with a per-flipper base and
-    # interval. Gated on INTRO_DONE; suppressed while a freeze is active.
-    *[
-        f"418 read-mailbox 1 = if "
-        f"{GB_MB_FREEZE_TIMER} read-mailbox 0 = if "
-        f"{_active_mb} read-mailbox 0 = if "
-        f"{_timer_mb} read-mailbox dup 0 > if "
-        f"1 - {_timer_mb} write-mailbox "
-        f"else drop "
-        f"{_RB_LFSR_STEP}"                                                          # ( bit )
-        f"{_base + _RB_OFF_COL} {_actor_idx} write-actor-mailbox "
-        f"1 {_base + _RB_OFF_ROW} {_actor_idx} write-actor-mailbox "
-        f"0 {_base + _RB_OFF_FROM_ROW} {_actor_idx} write-actor-mailbox "
-        f"0 {_base + _RB_OFF_FROM_COL} {_actor_idx} write-actor-mailbox "
-        f"{REDBALL_HOP_TICKS} {_base + _RB_OFF_COOLDOWN} {_actor_idx} write-actor-mailbox "
-        f"{_RB_Z_AT_ROW_0} {_base + _RB_OFF_START_Z} {_actor_idx} write-actor-mailbox "
-        f"{_RB_Z_AT_ROW_1} {_base + _RB_OFF_END_Z} {_actor_idx} write-actor-mailbox "
-        f"1 {_base + _RB_OFF_PHASE} {_actor_idx} write-actor-mailbox "
-        f"1 {_active_mb} write-mailbox "
-        f"{_SPAWN_INTERVAL_FORTH}{_timer_mb} write-mailbox "
-        f"then then then "
-        f"then\n"
-        for (_base, _active_mb, _timer_mb, _actor_idx) in [
-            (SLICK_MB_BASE, SLICK_MB_ACTIVE, SLICK_MB_SPAWN_TIMER, SLICK_ACTOR_IDX),
-            (SAM_MB_BASE,   SAM_MB_ACTIVE,   SAM_MB_SPAWN_TIMER,   SAM_ACTOR_IDX),
-        ]
-    ],
     # ── Ugg & Wrong-Way spawn blocks (climbers) ───────────────────────────────
     # Spawn at the BOTTOM of their edge (row=6, col=6 for Ugg / col=0 for WW),
     # lerping in from one row "below" (FROM_ROW=7) and Z below the bottom cube
@@ -2994,40 +3133,6 @@ DIRECTOR_SCRIPT = "".join([
             (WW_MB_BASE,  WW_MB_ACTIVE,  UGG_MB_ACTIVE, WW_MB_SPAWN_TIMER,  WW_ACTOR_IDX,  0, WW_PITCH,  WW_YAW_AFTER_PITCH),
         ]
     ],
-    # ── Coily egg per-round spawn (Phase A) ───────────────────────────────────
-    # Gated on INTRO_DONE. If neither egg nor snake is active (PHASE_GLOBAL==0)
-    # and the per-round spawn delay has elapsed, wake the egg at apex (row 0,
-    # col 0) and latch PHASE_GLOBAL := 1. Egg-retire (off-pyramid) clears
-    # PHASE_GLOBAL back to 0; round-clear refreshes SPAWN_DELAY so the next
-    # round spawns a fresh egg.
-    f"418 read-mailbox 1 = if "
-    f"{COILY_MB_PHASE_GLOBAL} read-mailbox 0 = if "
-    f"{COILY_MB_ROUND_DONE} read-mailbox 0 = if "
-    f"{COILY_MB_SPAWN_DELAY} read-mailbox dup 0 > if "
-    f"1 - {COILY_MB_SPAWN_DELAY} write-mailbox "
-    f"else drop "
-    # SPAWN! Step LFSR for col (0 or 1). Activate egg at (row=1, col=lfsr_bit)
-    # — same starting cubes as red balls, so the egg can't kill Q*bert on
-    # spawn at the apex. The egg's mid-hop start is FROM apex (row=0, col=0)
-    # so visually it appears to dive from the top.
-    f"{_RB_LFSR_STEP}"                                  # ( bit )
-    f"{_CE_MB_COL} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "  # COL := bit
-    f"1 {_CE_MB_ROW} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
-    f"0 {_CE_MB_FROM_ROW} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
-    f"0 {_CE_MB_FROM_COL} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
-    f"{COILY_EGG_HOP_TICKS} {_CE_MB_COOLDOWN} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
-    f"{_CE_Z_AT_ROW_0} {_CE_MB_START_Z} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
-    f"{_CE_Z_AT_ROW_1} {_CE_MB_END_Z} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
-    f"0 {_CE_MB_FLASH_TICK} write-mailbox "
-    f"1 {_CE_MB_PHASE} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
-    f"1 {COILY_MB_PHASE_GLOBAL} write-mailbox "
-    f"1 {COILY_EGG_ACTIVE_MB} write-mailbox "
-    f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
-    f"1 {COILY_MB_ROUND_DONE} write-mailbox "
-    f"then "
-    f"then "
-    f"then "
-    f"then\n",
     # ── Coily egg #2 per-round spawn (L4 only) ────────────────────────────────
     # Same logic as egg1 but guarded by ROUND_NUMBER > 11 (L4) and uses
     # CE2_MB_* mailboxes. Does NOT set COILY_MB_PHASE_GLOBAL on spawn —
@@ -3231,8 +3336,7 @@ DIRECTOR_SCRIPT = "".join([
     "0 400 write-mailbox 0 401 write-mailbox 0 402 write-mailbox ",
     "0 414 write-mailbox 0 415 write-mailbox 0 419 write-mailbox ",
     "1 426 write-mailbox ",   # apex respawn flag for player
-    # Coily round refresh: retire egg + snake, clear ROUND_DONE,
-    # rearm SPAWN_DELAY so the next round spawns a fresh egg.
+    # Coily round refresh: retire egg + snake, clear ROUND_DONE.
     f"0 {_CE_MB_PHASE} {COILY_EGG_ACTOR_IDX} write-actor-mailbox "
     f"0 {_CS_MB_PHASE} {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
     f"{REDBALL_PARK_Z} 3011 {COILY_SNAKE_ACTOR_IDX} write-actor-mailbox "
@@ -3240,7 +3344,6 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {COILY_EGG_ACTIVE_MB} write-mailbox "
     f"0 {COILY_SNAKE_ACTIVE_MB} write-mailbox "
     f"0 {COILY_MB_ROUND_DONE} write-mailbox "
-    f"{COILY_EGG_SPAWN_DELAY} {COILY_MB_SPAWN_DELAY} write-mailbox "
     f"0 {COILY_EGG2_ACTIVE_MB} write-mailbox "
     f"0 {_CE2_MB_PHASE} {COILY_EGG2_ACTOR_IDX} write-actor-mailbox "
     f"0 {COILY_EGG2_ROUND_DONE} write-mailbox "
@@ -3250,7 +3353,8 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {_DL_MB_FLASH} write-mailbox 0 {_DR_MB_FLASH} write-mailbox "
     f"{_disc_world_xyz(DISC_L_ROW, DISC_L_COL)[2]} 3011 {DISC_L_ACTOR_IDX} write-actor-mailbox "
     f"{_disc_world_xyz(DISC_R_ROW, DISC_R_COL)[2]} 3011 {DISC_R_ACTOR_IDX} write-actor-mailbox "
-    # Green Ball, Slick, Sam round refresh: retire all; rearm spawn timers only from L2 (round >= 4).
+    # Green Ball, Slick, Sam round refresh: retire all actors; rearm GB timer from L2+.
+    # Slick/Sam no longer have independent timers (sequencer drives them).
     f"0 {GB_MB_BASE + _RB_OFF_PHASE} {GB_ACTOR_IDX} write-actor-mailbox "
     f"{REDBALL_PARK_Z} 3011 {GB_ACTOR_IDX} write-actor-mailbox "
     f"0 {GB_MB_ACTIVE} write-mailbox "
@@ -3263,9 +3367,11 @@ DIRECTOR_SCRIPT = "".join([
     f"0 {SAM_MB_ACTIVE} write-mailbox "
     f"425 read-mailbox 3 > if "
     f"{_SPAWN_INTERVAL_FORTH}{GB_MB_SPAWN_TIMER} write-mailbox "
-    f"{_SPAWN_INTERVAL_FORTH}{SLICK_MB_SPAWN_TIMER} write-mailbox "
-    f"{_SPAWN_INTERVAL_FORTH}{SAM_MB_SPAWN_TIMER} write-mailbox "
     f"then "
+    # Sequencer reset: step back to 0; reload timer from new round's reload value.
+    f"0 {SEQ_STEP_MB} write-mailbox "
+    f"0 {SPAWN_REQ_MB} write-mailbox ",
+    _gen_seq_reload_forth(),
     # Ugg & Wrong-Way round refresh: retire both; rearm spawn timers only from L3 (round >= 8).
     f"0 {UGG_MB_BASE + _RB_OFF_PHASE} {UGG_ACTOR_IDX} write-actor-mailbox "
     f"{REDBALL_PARK_Z} 3011 {UGG_ACTOR_IDX} write-actor-mailbox "
