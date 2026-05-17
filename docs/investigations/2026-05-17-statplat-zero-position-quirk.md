@@ -75,6 +75,43 @@ Parsing `wflevels/smb_w1_1/ground.iff` confirms the mesh-local verts span world 
 
 Of these, **the `actboxor` consumer is the silent landmine.** If anyone ever puts an actboxor trigger volume on or near a statplat for collision detection, the trigger zone is computed relative to (0,0,0) instead of the visible position. Hasn't bitten yet because every committed level either (a) doesn't use statplat triggers, or (b) uses single-cube statplats whose `obj.location` was already (0,0,0).
 
+## Gold standard: what the 3ds Max exporter did
+
+The legacy 3ds Max exporter (`wfmaxplugins/max2lvl/level.cc`, deleted in commit [`c5761ca`](https://github.com/wbniv/WorldFoundry/commit/c5761ca) "purge") is the closest thing to a known-correct reference. No real bugs have been reported against it in years. Reading the deleted source:
+
+```cpp
+// QLevel::CreateQObjectFromSceneNode — wfmaxplugins/max2lvl/level.cc:126–550
+
+Matrix3 nodeTM   = thisNode->GetNodeTM(theTime);
+Point3  location = nodeTM.GetTrans();             // (1) Position = node's WORLD translation
+
+// ... rotation extraction, OAD load, path keyframes ...
+
+QColBox collision;
+objTM = thisNode->GetObjTMAfterWSM(theTime);
+objTM.NoTrans();                                  // (2) strip translation
+collision.Bound(*thisMesh, objTM, objOffsetPos);  //     bbox in OBJECT-LOCAL space
+
+// ... thin-floor padding to avoid axis-degenerate bboxes ...
+
+objects.push_back(new QObject(
+    thisObjectName, typeIndex,
+    Point3(location.x, location.y, location.z),   // Position field — node world pos
+    Point3(1.0, 1.0, 1.0),                        // (3) Scale HARDCODED to identity
+    rotEuler, collision, oadFlags, pathIndex, newobjOAD));
+```
+
+| Field | Max-exporter semantic |
+|---|---|
+| `Position` | Node's world-space translation (the pivot point a Max artist sees in the viewport). Never zero unless the artist actually placed the node at the origin. |
+| `Scale` | Always `(1, 1, 1)`. The Max exporter does not pass per-actor scale into the level — geometry is authored at final scale, and any node-level scale is reflected only via the bounding-box derivation. |
+| `Bounding Box` (`QColBox`) | The mesh AABB transformed by `objTM` with translation stripped — i.e., scale + rotation applied around the pivot, no world-position component. **Object-local extents.** A ground slab modelled as 73.5×3×1.5 m emits min=`(-36.75, -1.5, -0.75)` max=`(+36.75, +1.5, +0.75)`, regardless of where the node sits in world space. |
+| Mesh data | Object-local vertices (Max's mesh data is in node-local space; the world pivot adds them up at render time). |
+
+Together these mean the engine can always reconstruct the world extent as `Position + BBox` and the world vertex location as `Position + Rotation×Scale×MeshVert`. Any consumer downstream — Jolt collider construction, `actboxor` trigger overlap math, `INDEXOF_X_POS` script reads, debug picks, the `--debug-print-actors` log — sees a consistent picture.
+
+The `add_box` Blender quirk breaks this on all three of (1)/(3)/bbox: `Position` collapses to `(0,0,0)`, the BOX3 collapses to world-extent (because the mesh-local verts are world-baked), and Jolt happens to build a collider from the world-baked mesh that lands in the right place by accident. The visual renders correctly because both the mesh and the (zero) actor transform agree, but the level data structure has lost the artist's intent.
+
 ## Proposed fix
 
 ### (1) Patch `add_box` in `blender_create_smb.py` to preserve `obj.location`
