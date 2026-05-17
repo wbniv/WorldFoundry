@@ -2,8 +2,9 @@
 # Foundry Linux setup script (Phase 0 of the distro plan)
 #
 # Bootstraps a vanilla Ubuntu-family 26.04 system into a Foundry Linux
-# game-dev workstation: installs apt deps, Rust toolchain, clones WF repos,
-# builds wftools, installs the Blender addon.
+# game-dev workstation. Composes per-metapackage installers (mirroring
+# foundry-apt/packages/) plus non-metapackage Phase 0 steps (rustup, repo
+# cloning, wftools build).
 #
 # Usage:
 #   curl -fsSL https://worldfoundry.org/install.sh | bash
@@ -17,7 +18,7 @@
 #   game-dev   — author WF games (clones wf-games)
 #   engine-dev — hack on the engine (clones WorldFoundry.2026-new-level)
 #   both       — game-dev + engine-dev (default)
-#   maintainer — adds foundry-* distro repos
+#   maintainer — adds foundry-* distro repos + Android dev toolchain
 #
 # Idempotent: safe to re-run.
 # Logs to: ~/.local/state/foundry-install.log
@@ -41,56 +42,16 @@ ROLE="both"
 ALLOW_LEGACY=false
 SKIP_RUST=false
 SKIP_BLENDER=false
+SKIP_RETRO=false
 SKIP_CLONE=false
 SKIP_BUILD=false
+APT_ONLY=false
 FORCE=false
 DRY_RUN=false
 
-# ANSI colors (disabled when not a terminal)
-if [[ -t 1 ]]; then
-    RED=$'\e[31m'; GREEN=$'\e[32m'; YELLOW=$'\e[33m'; BLUE=$'\e[34m'
-    BOLD=$'\e[1m'; RESET=$'\e[0m'
-else
-    RED=; GREEN=; YELLOW=; BLUE=; BOLD=; RESET=
-fi
-
-# ============================================================================
-# Helpers
-# ============================================================================
-log_to_file() {
-    [[ -n "${LOG_FILE_INITIALISED:-}" ]] || return 0
-    echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')] $*" >> "$LOG_FILE"
-}
-
-info()  { echo "${BLUE}ℹ ${RESET}$*"; log_to_file "INFO  $*"; }
-ok()    { echo "${GREEN}✓ ${RESET}$*"; log_to_file "OK    $*"; }
-warn()  { echo "${YELLOW}⚠ ${RESET}$*"; log_to_file "WARN  $*"; }
-err()   { echo "${RED}✗ ${RESET}$*" >&2; log_to_file "ERROR $*"; }
-die()   { err "$*"; exit 1; }
-
-step() {
-    echo
-    echo "${BOLD}${BLUE}━━━ $* ━━━${RESET}"
-    log_to_file "STEP  $*"
-}
-
-run() {
-    log_to_file "RUN   $*"
-    if $DRY_RUN; then
-        echo "  ${YELLOW}[dry-run]${RESET} $*"
-    else
-        "$@"
-    fi
-}
-
-run_sudo() {
-    log_to_file "SUDO  $*"
-    if $DRY_RUN; then
-        echo "  ${YELLOW}[dry-run]${RESET} sudo $*"
-    else
-        sudo "$@"
-    fi
-}
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib.sh
+source "$SCRIPT_DIR/lib.sh"
 
 # ============================================================================
 # Arg parsing
@@ -100,11 +61,13 @@ parse_args() {
         case "$1" in
             --role)         shift; ROLE="$1" ;;
             --role=*)       ROLE="${1#*=}" ;;
-            --allow-24.04|--allow-${LEGACY_RELEASE}) ALLOW_LEGACY=true ;;
+            --allow-24.04|"--allow-${LEGACY_RELEASE}") ALLOW_LEGACY=true ;;
             --skip-rust)    SKIP_RUST=true ;;
             --skip-blender) SKIP_BLENDER=true ;;
+            --skip-retro)   SKIP_RETRO=true ;;
             --skip-clone)   SKIP_CLONE=true ;;
             --skip-build)   SKIP_BUILD=true ;;
+            --apt-only)     APT_ONLY=true ;;
             --force)        FORCE=true ;;
             --dry-run|-n)   DRY_RUN=true ;;
             -h|--help)      show_help; exit 0 ;;
@@ -130,10 +93,12 @@ Options:
                     (default: both)
   --allow-24.04     Allow installation on Ubuntu/Kubuntu 24.04 (default: 26.04)
   --skip-rust       Skip Rust toolchain installation
-  --skip-blender    Skip Blender addon installation
+  --skip-blender    Skip worldfoundry-blender install
+  --skip-retro      Skip worldfoundry-retro-tools install (saves ~400 MB for Ghidra)
   --skip-clone      Skip cloning WF repos
   --skip-build      Skip building wftools
-  --force           Bypass distro / version checks (use at own risk)
+  --apt-only        Forwarded to retro-tools: skip source-build sidecars
+  --force           Bypass distro/version checks (use at own risk)
   -n, --dry-run     Print the plan without executing anything
   -h, --help        Show this help
 
@@ -142,22 +107,16 @@ Examples:
   bash install.sh --role engine-dev
   bash install.sh --role engine-dev --allow-24.04
   bash install.sh --dry-run --role both
+  bash install.sh --role game-dev --apt-only            # fast path, no Ghidra
 
-The script logs to: ~/.local/state/foundry-install.log
+The script logs to: $LOG_FILE
+Per-metapackage installers live next to this script as install-<name>.sh.
 EOF
 }
 
 # ============================================================================
 # Pre-flight checks
 # ============================================================================
-init_logging() {
-    mkdir -p "$(dirname "$LOG_FILE")"
-    : > "$LOG_FILE"
-    LOG_FILE_INITIALISED=1
-    log_to_file "Foundry Linux install — started"
-    log_to_file "Args: ROLE=$ROLE ALLOW_LEGACY=$ALLOW_LEGACY SKIP_RUST=$SKIP_RUST SKIP_BLENDER=$SKIP_BLENDER SKIP_CLONE=$SKIP_CLONE SKIP_BUILD=$SKIP_BUILD FORCE=$FORCE DRY_RUN=$DRY_RUN"
-}
-
 check_distro() {
     step "Checking distribution"
     if [[ ! -f /etc/os-release ]]; then
@@ -208,7 +167,6 @@ check_sudo() {
         die "sudo access required for apt operations"
     fi
     if ! $DRY_RUN; then
-        # Keep sudo alive for the duration of the script
         ( while true; do sleep 50; sudo -n true 2>/dev/null; kill -0 $$ 2>/dev/null || exit; done ) &
         SUDO_KEEPALIVE_PID=$!
         trap '[[ -n "${SUDO_KEEPALIVE_PID:-}" ]] && kill "$SUDO_KEEPALIVE_PID" 2>/dev/null || true' EXIT
@@ -217,34 +175,73 @@ check_sudo() {
 }
 
 # ============================================================================
-# Phase 0 installation steps
+# Per-metapackage dispatch
 # ============================================================================
-install_apt_packages() {
-    step "Installing apt packages (engine build deps)"
-    # Mirrors Taskfile.yml:dev-setup, plus a few we need for the wrapper itself.
-    run_sudo apt-get update -q
-    run_sudo apt-get install -y \
-        build-essential \
-        cmake \
-        libx11-dev \
-        libgl1-mesa-dev \
-        libglu1-mesa-dev \
-        gdb \
-        xxd \
-        python3 \
-        python3-pip \
-        python3-venv \
-        git \
-        curl \
-        wget \
-        unzip \
-        pkg-config \
-        ca-certificates \
-        gnupg \
-        software-properties-common
-    ok "Engine build deps installed"
+run_subscript() {
+    local name="$1"; shift
+    local path="$SCRIPT_DIR/$name"
+    if [[ ! -x "$path" ]]; then
+        die "Sub-installer missing or not executable: $path"
+    fi
+    info "→ $name $*"
+    # Inherit FOUNDRY_LOG_FILE so sub-scripts log to the same file
+    FOUNDRY_LOG_FILE="$LOG_FILE" bash "$path" "$@"
 }
 
+install_metapackages() {
+    local dry=()
+    $DRY_RUN && dry=(--dry-run)
+
+    case "$ROLE" in
+        play)
+            warn "Role 'play': no metapackage covers runtime-only yet — installing nothing via apt"
+            ;;
+        game-dev)
+            run_subscript install-worldfoundry-engine-build-deps.sh "${dry[@]}"
+            run_subscript install-task.sh "${dry[@]}"
+            $SKIP_BLENDER || run_subscript install-worldfoundry-blender.sh "${dry[@]}"
+            if ! $SKIP_RETRO; then
+                local args=("${dry[@]}")
+                $APT_ONLY && args+=(--apt-only)
+                $FORCE    && args+=(--force)
+                run_subscript install-worldfoundry-retro-tools.sh "${args[@]}"
+            fi
+            ;;
+        engine-dev)
+            run_subscript install-worldfoundry-engine-build-deps.sh "${dry[@]}"
+            run_subscript install-task.sh "${dry[@]}"
+            if ! $SKIP_RETRO; then
+                local args=("${dry[@]}")
+                $APT_ONLY && args+=(--apt-only)
+                $FORCE    && args+=(--force)
+                run_subscript install-worldfoundry-retro-tools.sh "${args[@]}"
+            fi
+            ;;
+        both)
+            local dev_args=("${dry[@]}")
+            $SKIP_BLENDER && dev_args+=(--skip-blender)
+            $SKIP_RETRO   && dev_args+=(--skip-retro)
+            $APT_ONLY     && dev_args+=(--apt-only)
+            $FORCE        && dev_args+=(--force)
+            run_subscript install-worldfoundry-dev.sh "${dev_args[@]}"
+            ;;
+        maintainer)
+            local dev_args=("${dry[@]}")
+            $SKIP_BLENDER && dev_args+=(--skip-blender)
+            $SKIP_RETRO   && dev_args+=(--skip-retro)
+            $APT_ONLY     && dev_args+=(--apt-only)
+            $FORCE        && dev_args+=(--force)
+            run_subscript install-worldfoundry-dev.sh "${dev_args[@]}"
+            run_subscript install-worldfoundry-android-dev.sh "${dry[@]}"
+            ;;
+    esac
+}
+
+# ============================================================================
+# Non-metapackage Phase 0 steps
+# (Phase 1 will deprecate these — rustup, repo clones, and the wftools build
+# all go away when wftools binaries ship as .debs from foundry-apt CI.)
+# ============================================================================
 install_rust() {
     if $SKIP_RUST; then
         info "Skipping Rust (--skip-rust)"
@@ -265,33 +262,14 @@ install_rust() {
         ok "rustup installed"
     fi
 
-    # maturin (for wf_core.so build); pip3 --user to avoid touching system Python
     if command -v maturin &>/dev/null; then
         info "maturin already installed: $(maturin --version 2>/dev/null || echo '?')"
     else
         info "Installing maturin via pip --user (PEP 668 break-system-packages)..."
-        # Ubuntu 24.04+ uses PEP 668; --break-system-packages is the documented escape
-        # for user-level pip installs. Cleaner alternative: pipx, but that's another dep.
         run pip3 install --user --break-system-packages maturin || \
             run pip3 install --user maturin || \
             warn "maturin install failed; wf_core.so build will be skipped"
     fi
-}
-
-install_task_runner() {
-    step "Installing task (Taskfile runner)"
-    if command -v task &>/dev/null; then
-        info "task already installed: $(task --version 2>/dev/null || echo '?')"
-        return
-    fi
-    info "Installing task via upstream install.sh (Phase 1+ will ship as our .deb)"
-    if $DRY_RUN; then
-        echo "  ${YELLOW}[dry-run]${RESET} sh -c \"\$(curl --location https://taskfile.dev/install.sh)\" -- -d -b ~/.local/bin"
-    else
-        mkdir -p "$HOME/.local/bin"
-        sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b "$HOME/.local/bin"
-    fi
-    ok "task installed to ~/.local/bin/task"
 }
 
 clone_wf_repos() {
@@ -307,39 +285,32 @@ clone_wf_repos() {
     step "Cloning WF repos into $PROJECTS_DIR (role: $ROLE)"
     mkdir -p "$PROJECTS_DIR"
 
-    # game-dev or both: wf-games
     if [[ "$ROLE" == "game-dev" || "$ROLE" == "both" || "$ROLE" == "maintainer" ]]; then
         clone_repo "$WF_GAMES_REPO"
     fi
 
-    # engine-dev or both: WorldFoundry.2026-new-level
     if [[ "$ROLE" == "engine-dev" || "$ROLE" == "both" || "$ROLE" == "maintainer" ]]; then
         clone_repo "$WF_ENGINE_REPO"
-        # Sparse-checkout excluding engine/vendor (~80% size reduction)
         if [[ -d "$PROJECTS_DIR/$WF_ENGINE_REPO" ]] && ! $DRY_RUN; then
             (
                 cd "$PROJECTS_DIR/$WF_ENGINE_REPO"
                 git sparse-checkout init --cone 2>/dev/null || true
-                # Include everything except engine/vendor
                 git sparse-checkout set '/*' '!/engine/vendor' 2>/dev/null || \
                     info "Note: sparse-checkout did not apply cleanly; full tree pulled. Run wf-vendor-fetch later if you only need source."
             )
         fi
     fi
 
-    # maintainer: add foundry-* repos
     if [[ "$ROLE" == "maintainer" ]]; then
         for repo in "${FOUNDRY_REPOS[@]}"; do
             clone_repo "$repo"
         done
     fi
 
-    # Cross-repo .claude symlinks (per arcade-tooling investigation)
     if [[ -d "$PROJECTS_DIR/$WF_ENGINE_REPO" && -d "$PROJECTS_DIR/$WF_GAMES_REPO" ]] && ! $DRY_RUN; then
         info "Setting up cross-repo .claude/ symlinks (skills/agents)"
         local engine_claude="$PROJECTS_DIR/$WF_ENGINE_REPO/.claude"
         local games_claude="$PROJECTS_DIR/$WF_GAMES_REPO/.claude"
-        # If wf-games has .claude/ and the engine repo doesn't, link from engine to games
         if [[ -d "$games_claude" && ! -e "$engine_claude" ]]; then
             ln -sfn "$games_claude" "$engine_claude"
             ok "Linked $engine_claude → $games_claude"
@@ -375,7 +346,6 @@ build_wftools() {
         return
     fi
     if ! command -v cargo &>/dev/null; then
-        # source cargo env in case rustup just installed it
         [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
     fi
     if ! command -v cargo &>/dev/null; then
@@ -389,29 +359,6 @@ build_wftools() {
         (cd "$engine_dir/wftools" && cargo build --release) || warn "wftools build failed (non-fatal — can re-run later)"
     fi
     ok "wftools built (or attempted)"
-}
-
-install_blender_addon() {
-    if $SKIP_BLENDER; then
-        info "Skipping Blender addon (--skip-blender)"
-        return
-    fi
-    local engine_dir="$PROJECTS_DIR/$WF_ENGINE_REPO"
-    local installer="$engine_dir/wftools/wf_blender/install.sh"
-    if [[ ! -f "$installer" ]]; then
-        info "Skipping Blender addon — installer not found at $installer (engine repo may not be cloned)"
-        return
-    fi
-    if ! command -v blender &>/dev/null; then
-        warn "Blender not installed — addon install will likely fail. Install Blender first (apt install blender), then re-run with bash install.sh --skip-clone --skip-rust"
-    fi
-    step "Installing WF Blender addon"
-    if $DRY_RUN; then
-        echo "  ${YELLOW}[dry-run]${RESET} bash $installer"
-    else
-        bash "$installer" || warn "Blender addon install failed (non-fatal — re-run later or check $LOG_FILE)"
-    fi
-    ok "Blender addon install attempted"
 }
 
 # ============================================================================
@@ -434,7 +381,6 @@ EOF
   • Source the Rust env (or open a new shell):    source ~/.cargo/env
   • Add ~/.local/bin to PATH if needed:           export PATH="\$HOME/.local/bin:\$PATH"
   • cd into the engine repo:                      cd $PROJECTS_DIR/$WF_ENGINE_REPO
-  • Fetch vendored deps if needed:                bash wftools/wf_blender/build_level_binary.sh --help
   • Build the engine:                             task build
   • Run a level:                                  task run-level -- wflevels/smb_w1_1-standalone.iff
 EOF
@@ -453,6 +399,7 @@ EOF
 main() {
     parse_args "$@"
     init_logging
+    log_to_file "Args: ROLE=$ROLE ALLOW_LEGACY=$ALLOW_LEGACY SKIP_RUST=$SKIP_RUST SKIP_BLENDER=$SKIP_BLENDER SKIP_RETRO=$SKIP_RETRO SKIP_CLONE=$SKIP_CLONE SKIP_BUILD=$SKIP_BUILD APT_ONLY=$APT_ONLY FORCE=$FORCE DRY_RUN=$DRY_RUN"
 
     echo
     echo "${BOLD}${BLUE}Foundry Linux setup script${RESET} (Phase 0)"
@@ -463,12 +410,10 @@ main() {
 
     check_distro
     check_sudo
-    install_apt_packages
-    install_task_runner
+    install_metapackages
     install_rust
     clone_wf_repos
     build_wftools
-    install_blender_addon
     summary
 }
 
