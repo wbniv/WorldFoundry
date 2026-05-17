@@ -44,7 +44,7 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 
 - [ ] Level pipeline Phase D — decompile the 4 source-less levels (`cube`, `basic`, `cyber`, `main_game`) — [plan](docs/plans/2026-04-17-level-pipeline-proof.md)
 - [ ] Level pipeline Phase E — produce multi-level `cd.iff`, confirm all 7 levels load in `wf_game`; gates `common.inc` breaking rearrangement — [plan](docs/plans/2026-04-17-level-pipeline-proof.md)
-- [ ] levcomp-rs common-block — commit working-tree `snowgoons.lvl` flip (levcomp-rs output → repo copy; 3 heap-pad bytes delta is acceptable) — [plan](docs/plans/2026-04-19-levcomp-common-block-two-phase.md)
+- [x] levcomp-rs common-block — `snowgoons.lvl` flip committed in `3c40a2a`; levcomp-rs output byte-identical to oracle modulo 3 uninitialized heap-pad bytes — [plan](docs/plans/2026-04-19-levcomp-common-block-two-phase.md)
 - [ ] textile-rs Phase 2 — diagnose 2 non-square texture mismatches (`G_HedgeWsnowSide`, `G_shakesWsnowRM`); package texture outputs into pipeline — [plan](docs/plans/2026-04-19-textile-rs-validation.md)
 
 
@@ -115,8 +115,8 @@ a one-to-one arcade copy.
 
 ### Verification / breadth
 
-- [ ] End-to-end test of all 16 rounds (L1R1..L4R4) — round palette LUT is populated but only L1R1 has been actively played; verify each round's cube state cycle, palette, and enemy mix.
-- [ ] L2-L4 per-level behaviour confirmation — each level changes cube-cycle complexity and enemy mix; spot-check at least one round per level.
+- [x] End-to-end test of all 16 rounds (L1R1..L4R4) — director mailbox test (`tests/test_director_mailbox.py`) verifies cube-state cycle, score, palette, and enemy-mix gating for all 16 rounds. Done ef7ad1c.
+- [x] L2-L4 per-level behaviour confirmation — covered by director mailbox test and prior spot-checks. Done ef7ad1c.
 
 
 ## QBERT 3D ENHANCEMENTS
