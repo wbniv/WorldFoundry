@@ -30,6 +30,8 @@
 #include <Jolt/Physics/Collision/Shape/MeshShape.h>
 #include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
 #include <Jolt/Physics/Collision/Shape/ScaledShape.h>
+#include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
+#include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Character/CharacterBase.h>
 #include <Jolt/Physics/Character/CharacterVirtual.h>
@@ -483,9 +485,28 @@ static uint32_t AllocCharEntry()
 }
 
 uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
-                              const Vector3& minPt, const Vector3& maxPt)
+                              const Vector3& minPtIn, const Vector3& maxPtIn)
 {
     if (!gPhysicsSystem) return kJoltInvalidBodyID;
+
+    // Belt-and-braces fallback: if the authored ColSpace is still the
+    // ColSpace::ColSpace() default (0,0,0)→(1,1,1), substitute a humanoid
+    // Physics default. In practice this shouldn't trigger today — wf_blender
+    // always exports a Global Bounding Box derived from the visual mesh AABB,
+    // which the engine wires into _colSpace via actor.cc:OODMin/OODMax →
+    // PhysicalAttributes::Construct → _colSpace.SetBox. Kept as a safety net
+    // for hand-authored .lev files. See
+    // docs/investigations/2026-05-17-colspace-authoring.md.
+    Vector3 minPt = minPtIn;
+    Vector3 maxPt = maxPtIn;
+    if (minPt == Vector3::zero && maxPt == Vector3::one)
+    {
+        minPt = Vector3(Scalar(-0.5f), Scalar(-0.5f), Scalar( 0.0f));
+        maxPt = Vector3(Scalar( 0.5f), Scalar( 0.5f), Scalar( 1.5f));
+        std::fprintf(stderr,
+            "jolt: character using physics-default ColSpace (1.0x1.0x1.5, feet-at-origin)"
+            " — per-actor ColSpace authoring not yet wired (TODO)\n");
+    }
 
     Vector3 half = (maxPt - minPt) * Scalar(0.5f);
     JPH::Vec3 halfExt(
@@ -497,8 +518,34 @@ uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
     JPH::CharacterVirtualSettings settings;
     settings.mUp             = JPH::Vec3::sAxisZ();          // WF is Z-up
     settings.mMaxSlopeAngle  = JPH::DegreesToRadians(80.0f);
-    float radius = std::min({halfExt.GetX(), halfExt.GetY(), halfExt.GetZ()});
-    settings.mShape          = new JPH::SphereShape(radius);
+
+    // Build a Z-up capsule that fills the ColSpace AABB. JPH::CapsuleShape is
+    // Y-axis-aligned by default (its cylinder runs along ±Y) — wrap it in a
+    // RotatedTranslatedShape that rotates 90° about X so the cylinder runs
+    // along ±Z, matching WF's Z-up world. Without this wrap the capsule's
+    // height ends up sideways and the character behaves like a sphere of
+    // radius=min(halfX,halfY) against the ground (the 2026-05-17 SMB W1-1
+    // "Mario sinks to z=-0.67" bug).
+    //
+    // Total capsule extent (post-rotation) in Z = 2*(halfHeightOfCylinder +
+    // radius), so halfHeight = halfZ - radius. If halfZ <= radiusXY (AABB is
+    // wider than tall — short rolly actor), degenerate to a sphere of
+    // radius=min(halfX,halfY,halfZ) to match the legacy single-radius-sphere
+    // behaviour.
+    float radiusXY = std::min(halfExt.GetX(), halfExt.GetY());
+    if (halfExt.GetZ() > radiusXY)
+    {
+        float halfHeight = halfExt.GetZ() - radiusXY;
+        JPH::Ref<JPH::Shape> capsuleY = new JPH::CapsuleShape(halfHeight, radiusXY);
+        // Rotate Y-up capsule about +X by 90° → Z-up capsule.
+        JPH::Quat zUp = JPH::Quat::sRotation(JPH::Vec3::sAxisX(), JPH::DegreesToRadians(90.0f));
+        settings.mShape = new JPH::RotatedTranslatedShape(JPH::Vec3::sZero(), zUp, capsuleY);
+    }
+    else
+    {
+        float radius = std::min({halfExt.GetX(), halfExt.GetY(), halfExt.GetZ()});
+        settings.mShape = new JPH::SphereShape(radius);
+    }
 
     // Colspace centre in local space — same offset CreateJoltBodyImpl uses.
     // Jolt character position = actor_feet_pos + ctr.

@@ -37,7 +37,10 @@ T = 1.5
 
 GROUND_TOP_Z  = 0.0
 GROUND_THICK  = T                         # 1-tile-thick slab
-MARIO_Z       = GROUND_TOP_Z + T         # Mario centre when standing
+MARIO_Z       = GROUND_TOP_Z + T         # reference "Mario height" — body centre for camera framing, etc.
+# Player actor.pos = feet (WF convention). Spawn 1 tile above ground so the fall is visible.
+MARIO_FEET_Z  = GROUND_TOP_Z
+MARIO_SPAWN_Z = MARIO_FEET_Z + T
 BLOCK_Z       = GROUND_TOP_Z + 4*T + T/2 # ? block centre (4 tiles above ground)
 
 # W1-1 landmark X positions (tile counts × T)
@@ -246,6 +249,11 @@ def _build_mario():
     body = parts[0][0]
     bpy.context.view_layer.objects.active = body
     bpy.ops.object.join()
+    # Bake body.location into the mesh verts so mesh-local origin sits at the
+    # feet (the lowest leg z = 0), not at the head-sphere's location (z=0.80T).
+    # WF's actor.pos = feet convention requires mesh-local feet at z=0;
+    # otherwise Physics-mobility settling leaves Mario buried in the ground.
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
     body.name      = 'player'
     body.data.name = 'player'
     return body
@@ -253,10 +261,10 @@ def _build_mario():
 
 player = find_by_class('player')
 if player:
-    player.location = (MARIO_SPAWN_X, 0.0, MARIO_Z)
+    player.location = (MARIO_SPAWN_X, 0.0, MARIO_SPAWN_Z)
     # Physics mobility = engine handles gravity, ground collision, jump.
     # Mobility value 1 = "Physics" (Anchored|Physics|Path|Camera|Follow).
-    player['wf_Mobility'] = 'Physics'
+    player['wf_Mobility'] = 'Physics'  # restored for diagnosis
     player['wf_Mass']     = 1.0
     player['wf_Model Type'] = 'Mesh'
     player['wf_Visibility Mailbox'] = 1

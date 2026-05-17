@@ -457,6 +457,71 @@ so the camera keeps working without per-frame ActBoxOR writes.
 For deeper camera investigation (per-axis Absolute/Relative, runtime switching via
 `INDEXOF_CAMSHOT`, target tracking) see [docs/investigations/2026-04-29-camera-system.md](investigations/2026-04-29-camera-system.md).
 
+### Physics-mobility actor authoring rules
+
+Actors with `wf_Mobility = 'Physics'` are driven by [Jolt's `CharacterVirtual`](https://jrouwe.github.io/JoltPhysics/class_character_virtual.html) (set up in [`jolt_backend.cc:JoltCharacterCreate`](../wfsource/source/physics/jolt/jolt_backend.cc)). The first level to exercise this code path was SMB W1-1 (Mario, 2026-05-17); the diagnosis that produced these rules is in [`docs/investigations/2026-05-17-colspace-authoring.md`](investigations/2026-05-17-colspace-authoring.md).
+
+**Three rules, all level-side:**
+
+1. **Mesh-local feet at z=0.** WF's convention is `actor.pos = feet position`. The Jolt character settles with `actor.pos.z = ground_top_z`, so anything with mesh-local z < 0 ends up *inside* the ground. In a Blender script, after joining multi-primitive bodies, call `bpy.ops.object.transform_apply(location=True, ...)` so the joined mesh origin sits at the lowest vertex (the feet), then assign `player.data = body.data`. Otherwise the body inherits the active object's pre-join location and the mesh-local feet drift below z=0.
+
+2. **Collision shape = visual-mesh AABB (auto-derived).** The Blender exporter writes a `Global Bounding Box` (BOX3) per actor from the visual mesh AABB, and the engine turns it into a Z-up [`CapsuleShape`](../wfsource/source/physics/jolt/jolt_backend.cc) (radius = `min(halfX, halfY)`, halfHeight = `halfZ − radius`). For Mario-shaped actors (taller than wide) you get a capsule that fills the silhouette; for short, wide actors (halfZ ≤ radiusXY) the engine falls back to a single-radius sphere. There is no separate `wf_ColSpace` override field yet — see [`docs/investigations/2026-05-17-colspace-authoring.md`](investigations/2026-05-17-colspace-authoring.md) for when one might be worth adding.
+
+3. **One Physics actor per level minimum** (today). Mario in `smb_w1_1` is the only Physics actor in any committed level — `qbert_practice`, `mm_practice`, `snowgoons-blender` all use `Anchored` (the script handles all movement). Every aspect of the Physics path is currently exercised by exactly one actor.
+
+**What to verify after authoring a Physics actor:**
+
+| Test | What to watch on the bridge |
+|---|---|
+| Resting on flat ground | `idx=N` Z should equal ground top z, not negative |
+| Walking off a ledge | Z drops, then settles on the next platform |
+| Walking *up* onto a 1-tile box (e.g. SMB `qblock`) | Step-up should work or feel like jumping into a wall — both are valid game-design choices, just be intentional |
+| Jumping | Z arcs up then back down to the resting Z |
+| Head-bonking a low ceiling | Capsule top hits, Z dips, no fall-through |
+| Wall blocking (pipes / actboxor) | X stops at the wall, Z stays constant |
+
+**Mobility values and their physics semantics:**
+
+| Value | What drives position | Use for |
+|---|---|---|
+| `Anchored` | Forth script writes `INDEXOF_X/Y/Z_POS` mailboxes | Most arcade ports (no real physics — Q*bert, MM, snowgoons) |
+| `Physics` | Jolt `CharacterVirtual` with gravity from `wf_Falling Acceleration` | Mario-style platformers, anything needing real ground collision + jump arcs |
+| `Path` | An OAD path animates the actor | Moving platforms, scripted enemy paths |
+| `Camera` | Camera handler in `movecam.cc` | Camera actors only |
+| `Follow` | Follows another actor | Trailing camera, second-player |
+
+---
+
+### Debug bridge
+
+Run with `--debug-port 7777` (or use `task run-debug -- wflevels/<level>.iff`) to
+expose a TCP/JSON port. The bridge broadcasts per-frame state and accepts
+commands (`ping`, `pause`, `step`, `resume`, `pick`, `screenshot`, `set_mailbox`,
+`reload_script`).
+
+#### Identifier spaces — three different "id" fields
+
+When debugging a physics issue you will see **three distinct identifier spaces**
+in the logs, with similar-looking small integers. They are not interchangeable
+and confusing them sends you down the wrong rabbit hole.
+
+| Identifier | Where it appears | What it indexes | Example |
+|---|---|---|---|
+| **WF actor `idx`** | Bridge `{"op":"state","idx":N,"pos":[…]}` and `{"op":"perf","actors":N}` | The current level's actor table (load order) | `idx=9` = "the 9th actor in this level" |
+| **Jolt body `id`** | `jolt_backend.cc` stderr: `jolt: body STATIC pos=… id=N`, `jolt: body MESH_STATIC … id=N` | `JPH::BodyID` — Jolt's internal rigid-body handle (large numbers with high bits set) | `id=8388608` = "Jolt body #0 in the STATIC pool" |
+| **Jolt character `handle`** | `jolt: character N created at (…) ctr=(…)` | Index into `gCharacters` in [`jolt_backend.cc:443`](../wfsource/source/physics/jolt/jolt_backend.cc) — separate namespace from body ids | `handle=0` = "the first `Mobility=Physics` actor" |
+
+**A bridge `idx` is not a Jolt id.** Static colliders have ids; characters have
+handles; bridge events use WF actor indices. There's no direct cross-reference
+printed — correlate by position.
+
+**Practical example.** Investigating the SMB W1-1 invisible-player on
+2026-05-17, the bridge reported `idx=9 pos=(4.5, 0, -0.67)` (player below
+ground). The Jolt log showed `character 0 created at (4.50, 0.00, 1.50)`
+(handle=0) and `body STATIC … id=8388608` (ground). Three different
+identifiers for two real things (player + ground). Diagnosis only worked
+because we kept the spaces separated.
+
 ---
 
 ## Worked example — Marble Madness arcade-ROM pipeline
