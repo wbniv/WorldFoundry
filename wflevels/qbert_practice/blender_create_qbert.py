@@ -511,7 +511,7 @@ if player:
         # compute into prev-state / wrong-cube slots and flip an unrelated cube.
         "400 read-mailbox dup 0 < if drop 0 then dup 6 > if drop 6 then "
         "6 swap - 2 * 1 + 2 + 438 write-mailbox "        # clamped safe-Z → HOP_END_Z (lerp animates toward it before FALL_PHASE takes over)
-        "2 3017 write-mailbox 1 419 write-mailbox "
+        "3 3017 write-mailbox 2 3017 write-mailbox 1 419 write-mailbox "
         "else 0 3017 write-mailbox 1 434 write-mailbox then ;\n"      # PENDING_LAND set on-pyramid only; lerp promotes to mb 411 (LANDED) on landing
         # 1. Game-over restart trigger. Snapshot prev-stick before updating
         # mb 422 so edge-detect can compare; then update mb 422 = current.
@@ -601,7 +601,7 @@ if player:
         "1 + 419 write-mailbox "
         "else "
         "drop "
-        "0 419 write-mailbox 1 414 write-mailbox 3 3017 write-mailbox "
+        "0 419 write-mailbox 1 414 write-mailbox "
         "0 INDEXOF_X_POS write-mailbox "
         "6 1.4142136 * INDEXOF_Y_POS write-mailbox "
         "15 INDEXOF_Z_POS write-mailbox "
@@ -1083,6 +1083,7 @@ def redball_script(k, variant='red'):
             f"INDEXOF_Y_POS read-mailbox {POPUP_PENDING_Y_MB} write-mailbox "
             f"INDEXOF_Z_POS read-mailbox 1.5 + {POPUP_PENDING_Z_MB} write-mailbox "
             f"100 {POPUP_VALUE_MB} write-mailbox "
+            f"5 3017 write-mailbox "
             f"70 read-mailbox 100 + 70 write-mailbox "
             f"{GB_FREEZE_TICKS} {GB_MB_FREEZE_TIMER} write-mailbox "
             f"0 {mb_phase} write-mailbox "
@@ -1097,6 +1098,7 @@ def redball_script(k, variant='red'):
             f"INDEXOF_Y_POS read-mailbox {POPUP_PENDING_Y_MB} write-mailbox "
             f"INDEXOF_Z_POS read-mailbox 1.5 + {POPUP_PENDING_Z_MB} write-mailbox "
             f"300 {POPUP_VALUE_MB} write-mailbox "
+            f"5 3017 write-mailbox "
             f"70 read-mailbox 300 + 70 write-mailbox "
             f"0 {mb_phase} write-mailbox "
             f"0 {mb_active} write-mailbox "
@@ -1105,7 +1107,7 @@ def redball_script(k, variant='red'):
         )
     else:
         # Red / Ugg / Wrong-Way: kill player.
-        contact_action = f"1 414 write-mailbox "
+        contact_action = f"3 3017 write-mailbox 1 414 write-mailbox "
 
     # Slick/Sam revert the cube they land on (state 2 → 0). Encoded as a
     # cube-state index 200 + row*(row+1)/2 + col (matches the landing
@@ -1739,7 +1741,7 @@ def coily_egg_script():
         # Contact check vs player.
         f"{mb_row} read-mailbox 400 read-mailbox = if "
         f"{mb_col} read-mailbox 401 read-mailbox = if "
-        f"1 414 write-mailbox "
+        f"3 3017 write-mailbox 1 414 write-mailbox "
         f"then then\n"
         # Stretch-and-squash (Phase A: same intensity as red ball, 0.5 strength).
         f"{mb_cd} read-mailbox 0 <= if "
@@ -1821,7 +1823,7 @@ def coily_egg2_script():
         f"3011 write-mailbox\n"
         f"{mb_row} read-mailbox 400 read-mailbox = if "
         f"{mb_col} read-mailbox 401 read-mailbox = if "
-        f"1 414 write-mailbox "
+        f"3 3017 write-mailbox 1 414 write-mailbox "
         f"then then\n"
         f"{mb_cd} read-mailbox 0 <= if "
         f"1.0 3040 write-mailbox 1.0 3041 write-mailbox 1.0 3042 write-mailbox "
@@ -2150,7 +2152,7 @@ def coily_snake_script():
         # Contact check vs player.
         f"{mb_row} read-mailbox 400 read-mailbox = if "
         f"{mb_col} read-mailbox 401 read-mailbox = if "
-        f"1 414 write-mailbox "
+        f"3 3017 write-mailbox 1 414 write-mailbox "
         f"then then\n"
         # Stretch-and-squash: asymmetric Coily-specific — apex Z 3× player,
         # takeoff/landing at player level. Snake stretches tall mid-air.
@@ -2177,6 +2179,7 @@ def coily_snake_script():
         f"INDEXOF_Y_POS read-mailbox {POPUP_PENDING_Y_MB} write-mailbox "
         f"INDEXOF_Z_POS read-mailbox 1.5 + {POPUP_PENDING_Z_MB} write-mailbox "
         f"500 {POPUP_VALUE_MB} write-mailbox "
+        f"6 3017 write-mailbox "
         f"{REDBALL_PARK_Z} 3011 write-mailbox "
         f"500 70 read-mailbox + 70 write-mailbox "
         f"exit then "
@@ -2190,6 +2193,7 @@ def coily_snake_script():
         f"INDEXOF_Y_POS read-mailbox {POPUP_PENDING_Y_MB} write-mailbox "
         f"INDEXOF_Z_POS read-mailbox 1.5 + {POPUP_PENDING_Z_MB} write-mailbox "
         f"500 {POPUP_VALUE_MB} write-mailbox "
+        f"6 3017 write-mailbox "
         f"{REDBALL_PARK_Z} 3011 write-mailbox "
         f"500 70 read-mailbox + 70 write-mailbox "
         f"exit then "
