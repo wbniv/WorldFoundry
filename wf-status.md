@@ -1,13 +1,19 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-05-09  
+**As of:** 2026-05-17  
 **Branch:** `2026-new-level`
 
 ---
 
 ## History
 
-Eighteen days of work (2026-04-12 – 2026-04-30). Newest first:
+36 days of work (2026-04-12 – 2026-05-17). Newest first:
+
+- **levcomp-rs actor-outside-room-bbox warning (2026-05-17)** — `levcomp-rs` now prints a per-actor `stderr` warning (name + world-unit center) when an actor's center falls outside every room bbox, preventing the silent-invisible-actor failure that hit the curse bubble on 2026-05-12; companion section added to [docs/level-design-troubleshooting.md](docs/level-design-troubleshooting.md). See [plan](docs/plans/2026-05-16-levcomp-actor-outside-bbox-warning.md).
+
+- **Q✱bert arcade-faithful spawn sequencer landed (2026-05-16)** — Six independent per-enemy spawn timers replaced with a single shared countdown reading ROM-decoded 16-round × N-entry sequence tables; Slick and Sam now correctly appear in L1R3 as in the arcade. See [plan](docs/qbert/plans/2026-05-16-qbert-spawn-sequencer.md).
+
+- **Q✱bert second Coily egg in L4 (2026-05-16)** — Arcade rounds 12–15 now spawn two simultaneous Coily eggs via an independent `COILY_MB_SPAWN_DELAY_2` timer gated by `ROUND_NUMBER ≥ 12`. See [plan](docs/qbert/plans/2026-05-16-qbert-second-coily-egg.md).
 
 - **Q✱bert SFX pass complete (2026-05-16)** — Swear sound now plays at fall initiation (curse bubble frame) instead of 30 frames late; added to all six enemy-contact death sites; kill sound (cmd_13, slot 5) fires on Slick/Sam catch (+300) and Green Ball touch (+100); disc-rescue sound (cmd_18, slot 6) fires when Coily falls off a disc (+500). See [plan](docs/qbert/plans/2026-05-16-qbert-sfx.md).
 
@@ -18,6 +24,14 @@ Eighteen days of work (2026-04-12 – 2026-04-30). Newest first:
 - **Q✱bert +50 and +500 popup labels landed (2026-05-16)** — Two missing floating score labels added: orange "+50" for the 2nd cube hop in L2/L4 (was incorrectly showing "+25"), and hot-magenta "+500" for Coily falling off a disc (was showing nothing). Both new popup actors are 3D text meshes with correct colours; `cbRoom` pool bumped to 1,800,000 to fit the extra mesh load. See [plan](docs/plans/2026-05-16-qbert-popup-50-500.md).
 
 - **Q✱bert curse-bubble texture landed — textile-rs RGBA alpha-inversion + false-dedup root cause fixed (2026-05-16)** — `Room0.tga` was 146 bytes (empty atlas) because `rgba_555()` in textile-rs maps fully-opaque RGBA pixels to 0x0000 (transparent key), then `find_existing()` falsely deduplicates the all-zero texture against the all-zero atlas and skips the blit; fix is generating 24-bit RGB TGA (bypasses `rgba_555()` via `try_load_tga_bgr555()`), plus text colour bumped from (20,20,20) to (40,40,40) to avoid the BGR555 transparent key. See [plan](docs/plans/2026-05-16-curse-bubble-texture.md) and [investigation](docs/investigations/2026-05-16-textile-rs-rgba555-dedup-bug.md).
+
+- **Q✱bert high-score persistence + game-over screen (2026-05-15)** — 23-entry binary high-score file seeded with arcade defaults, AAA initials picker on game-over, two-column overlay table, and `GO_BLOCK`/`GO_HOLD_TIMER` mailboxes enforcing a 3 s minimum hold (commit `8f2b6a1`).
+
+- **Q✱bert Coily-falls-off-disc (2026-05-15)** — Snake tracks Q✱bert onto disc coordinates and retires with +500 score; verified via automated debug-bridge test (`1f4b272`). See [disc flash plan](docs/qbert/plans/2026-05-15-qbert-disc-flash-vfx.md).
+
+- **Q✱bert disc rim flash VFX (2026-05-15)** — Yellow ring mesh pulses for 8 frames via visibility mailbox when Q✱bert boards a disc; automated disc-lure test added (`e04fb99`). See [plan](docs/qbert/plans/2026-05-15-qbert-disc-flash-vfx.md).
+
+- **Q✱bert enemy coexistence rules (2026-05-15)** — No climber (Ugg/Wrong-Way) while Coily is active; no two simultaneous climbers; shared freeze timer pauses all spawns after each kill. See [plan](docs/qbert/plans/2026-05-15-qbert-enemy-coexistence.md).
 
 - **SMB W1-1 movement direction fixed — `currentDir()` comment wrong, C=π/2 needed (2026-05-15)** — Player moved toward camera (−Y) when joystick-RIGHT was pressed. Root cause: `currentDir()` in `physicalobject.hpi:50` returns `(cos C, sin C, 0)`, not `(sin C, cos C, 0)` as the comment in `movement.cc:698` claims. With C=0, the player faces +X and StepRight = −Y (toward camera). Fixed by setting Player Euler C = π/2 (`rotation_euler.z = math.pi/2` in the Blender script), which gives `currentDir=(0,1,0)` (facing +Y into the scene) and StepRight = +X (screen-right). Full numeric chain traced through `Angle::Sin/Cos` → `Scalar::Sin/Cos` → `levcomp-rs radians_fx_to_u16_revs`. See [investigation](docs/investigations/2026-05-15-wf-coordinate-system-and-currentdir.md) and updated `CLAUDE.md`.
 
