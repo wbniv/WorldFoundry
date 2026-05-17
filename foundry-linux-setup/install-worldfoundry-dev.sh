@@ -28,14 +28,13 @@ Runs the per-metapackage installers in this order:
   4. install-worldfoundry-retro-tools.sh
 
 Usage: $(basename "$0") [--dry-run|-n] [--apt-only] [--skip-blender]
-                       [--skip-retro] [--skip-addon] [--force] [-h|--help]
+                       [--skip-retro] [--force] [-h|--help]
 
 Options:
   -n, --dry-run     Print all sub-script commands without executing
   --apt-only        Forwarded to retro-tools: skip its source-build sidecars
   --skip-blender    Skip Blender entirely
   --skip-retro      Skip retro-tools entirely
-  --skip-addon      Forwarded to blender: install Blender but skip WF addon
   --force           Forwarded to retro-tools: rebuild ~/opt/<tool>/ even if present
   -h, --help        Show this help and exit
 EOF
@@ -48,7 +47,6 @@ DRY_RUN=false
 APT_ONLY=false
 SKIP_BLENDER=false
 SKIP_RETRO=false
-SKIP_ADDON=false
 FORCE=false
 for arg in "$@"; do
     case "$arg" in
@@ -56,7 +54,6 @@ for arg in "$@"; do
         --apt-only)     APT_ONLY=true ;;
         --skip-blender) SKIP_BLENDER=true ;;
         --skip-retro)   SKIP_RETRO=true ;;
-        --skip-addon)   SKIP_ADDON=true ;;
         --force)        FORCE=true ;;
         *) echo "Unknown option: $arg (try --help)" >&2; exit 1 ;;
     esac
@@ -97,9 +94,7 @@ if $SKIP_BLENDER; then
     info "Skipping worldfoundry-blender (--skip-blender)"
 else
     step "worldfoundry-dev: Blender"
-    blender_args=("${DRY_FLAG[@]}")
-    $SKIP_ADDON && blender_args+=(--skip-addon)
-    run_subscript install-worldfoundry-blender.sh "${blender_args[@]}"
+    run_subscript install-worldfoundry-blender.sh "${DRY_FLAG[@]}"
 fi
 
 if $SKIP_RETRO; then
