@@ -9,6 +9,8 @@
 
 Eighteen days of work (2026-04-12 – 2026-04-30). Newest first:
 
+- **Q✱bert SFX pass complete (2026-05-16)** — Swear sound now plays at fall initiation (curse bubble frame) instead of 30 frames late; added to all six enemy-contact death sites; kill sound (cmd_13, slot 5) fires on Slick/Sam catch (+300) and Green Ball touch (+100); disc-rescue sound (cmd_18, slot 6) fires when Coily falls off a disc (+500). See [plan](docs/qbert/plans/2026-05-16-qbert-sfx.md).
+
 - **Q✱bert 16-round end-to-end test complete (2026-05-16)** — `tests/test_director_mailbox.py` verifies all 88 checks: palette screenshots, cube-state cycle (1-hop L1/L3, 2-hop L2/L4), score increments (+25/+50), mid-round revert, and enemy-mix gating (RB/Coily always; GB/Slick/Sam L2+; Ugg/WW L3+; CE2 L4). See [plan](docs/plans/2026-05-16-qbert-16round-test.md).
 
 - **Q✱bert popup mailbox collision fixed (2026-05-16)** — Popup system MBs 580–584 (added today) collided with CE2 egg internals (MBs 580–584, added commit 8e55799); in L4 both systems are active simultaneously. Moved popup range to 592–596; all L2/L3/L4 spot-checks pass (b26373f).
