@@ -65,10 +65,11 @@ else
     step() { echo; echo "━━━ $* ━━━"; }
     run()       { if $DRY_RUN; then echo "  [dry-run] $*"; else "$@"; fi; }
     run_sudo()  { if $DRY_RUN; then echo "  [dry-run] sudo $*"; else sudo "$@"; fi; }
+    apt_update() { run_sudo apt-get update -q 2>&1 || echo "⚠ apt-get update had errors; continuing"; }
 fi
 
 step "Installing worldfoundry-blender (apt)"
-run_sudo apt-get update -q
+apt_update
 run_sudo apt-get install -y blender python3
 ok "Blender installed"
 

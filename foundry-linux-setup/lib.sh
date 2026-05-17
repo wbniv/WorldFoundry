@@ -60,6 +60,18 @@ run_sudo() {
     fi
 }
 
+apt_update() {
+    # apt-get update exits non-zero when any configured source fails (e.g. a
+    # stale cloudsmith/PPA entry). That shouldn't abort the whole install — the
+    # cached package lists are still usable for the packages we actually need.
+    log_to_file "SUDO  apt-get update -q"
+    if $DRY_RUN; then
+        echo "  ${YELLOW}[dry-run]${RESET} sudo apt-get update -q"
+    else
+        sudo apt-get update -q 2>&1 || warn "apt-get update had errors (stale repo entry?); using cached package lists — install may still succeed"
+    fi
+}
+
 init_logging() {
     mkdir -p "$(dirname "$LOG_FILE")"
     : > "$LOG_FILE"

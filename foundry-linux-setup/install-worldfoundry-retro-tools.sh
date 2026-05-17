@@ -85,6 +85,7 @@ else
     step() { echo; echo "━━━ $* ━━━"; }
     run()       { if $DRY_RUN; then echo "  [dry-run] $*"; else "$@"; fi; }
     run_sudo()  { if $DRY_RUN; then echo "  [dry-run] sudo $*"; else sudo "$@"; fi; }
+    apt_update() { run_sudo apt-get update -q 2>&1 || echo "⚠ apt-get update had errors; continuing"; }
 fi
 
 OPT_DIR="${HOME}/opt"
@@ -93,7 +94,7 @@ OPT_DIR="${HOME}/opt"
 # Step 1: apt packages
 # ----------------------------------------------------------------------------
 step "Installing worldfoundry-retro-tools (apt)"
-run_sudo apt-get update -q
+apt_update
 # xa65 is not in current Ubuntu repos under that name; install the rest, then
 # pick it up via source-build below.
 run_sudo apt-get install -y \
