@@ -487,6 +487,12 @@ void ProcessXEvents(XEvent event)
 
 void XEventLoop()
 {
+    // Host-owned mode: editor reads X events from its own connection and
+    // routes input via HALInjectJoystickButtons (b0639c5). Engine must not
+    // pump events against a Display* it doesn't own.
+    if (GetHostGLContext().valid)
+        return;
+
     XEvent xev;
     int num_events;
 
@@ -511,6 +517,10 @@ extern "C" int HALWindowCloseRequested(void)
 // Destroy the X window immediately so it disappears before process exit.
 extern "C" void HALCloseWindow(void)
 {
+    // Host-owned mode: the host owns the X11 display / window / context.
+    // Tearing them down here would yank state out from under the editor.
+    if (GetHostGLContext().valid)
+        return;
 #if defined(__LINUX__)
     if (halDisplay.win)
     {
