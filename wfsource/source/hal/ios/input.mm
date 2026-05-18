@@ -19,6 +19,15 @@ _HALSetJoystickButtons(joystickButtonsF joystickButtons)
     _buttons = joystickButtons;
 }
 
+// Public host-injection wrapper — see hal/_input.h. Cross-platform parity:
+// any host that wants to feed button state to the engine without going
+// through the platform event loop calls this.
+void
+HALInjectJoystickButtons(joystickButtonsF joystickButtons)
+{
+    _HALSetJoystickButtons(joystickButtons);
+}
+
 void _InitJoystickInterface(void) {}
 void _TermJoystickInterface(void) {}
 

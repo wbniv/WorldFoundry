@@ -71,6 +71,17 @@ _HALSetJoystickButtons(joystickButtonsF joystickButtons)
 }
 
 //=============================================================================
+// Public host-injection wrapper. See hal/_input.h for the contract: any host
+// (editor, replay driver, test harness) calls this to feed button state into
+// the engine when the engine isn't pumping its own platform event loop.
+
+void
+HALInjectJoystickButtons(joystickButtonsF joystickButtons)
+{
+    _HALSetJoystickButtons(joystickButtons);
+}
+
+//=============================================================================
 
 void
 _InitJoystickInterface()       // save standard kbd handlers, install new one
