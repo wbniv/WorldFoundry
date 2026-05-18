@@ -776,7 +776,38 @@ Tiered by what they block. Tier 1 blocks the start of implementation; tier 2 is 
   **Direct-read cost:** Yrs has a C ABI via cbindgen; binding is "iterate the CRDT tree, install observer callbacks, translate ops to engine scene mutations." Estimate ~1 week to working prototype, more for polish. Pays off for the editor's whole life (microsecond per-op feedback, no debounce engineering).
 
   **Plan:** prototype with file-watch for the first few weeks (proves the data path; reuses existing reload infrastructure; smb_w1_1 is small enough that 1–2 s round-trip will be tolerable for early dev). Switch to direct read before shipping v1 once the data path is settled.
-- **Persistence model for the relay.** Snapshot interval, snapshot format (Yjs binary state, `.iff` text, both?), storage location (relay disk, S3, backed up?), recovery semantics on restart.
+- **Persistence model for the relay — researched: Yjs binary state on local disk, debounced snapshots, hibernation IS a snapshot, BYOK-ready wrap hook from day 1.**
+
+  **Snapshot format: Yjs binary update, not `.iff.txt`.** [`Y.encodeStateAsUpdate(doc)`](https://docs.yjs.dev/api/document-updates) is the native Yjs format — compact, preserves the full op log + per-leaf `_author` / `_ts` attribution, restore is `Y.applyUpdate(newDoc, bytes)`. A `.iff.txt` round-trip is **not** a snapshot format: it captures current state but loses CRDT history (attribution, op-by-op scrubbing, undo-someone-else's-edit). `.iff.txt` is a **publish target** (the human-readable inspection / git-checkin / engine-load format), not a recovery format. Keeping the two roles distinct avoids the trap of "if we just snapshot `.iff.txt` we get debuggable files for free" — that path silently throws away the editor's most architecturally distinctive feature.
+
+  **Snapshot interval: debounced + max-wait.** Match the [Hocuspocus default](https://hocuspocus.dev/api/extensions/database#default-configuration) shape: write after 2 s of edit-quiet, force-flush after 10 s of continuous activity. Per-room debounce; bursty editing on one room doesn't stall snapshots on another. Writes are async, fire-and-forget from the relay's WebSocket handler — no separate snapshot process, no extra TCP connection.
+
+  **Storage location, three tiers (all running the same relay binary):**
+    - **Free self-host:** local disk (`./rooms/<room-uuid>.ydoc`) in the relay's working directory. Backups are the operator's problem; document the path so they can `rsync` it.
+    - **Free community relay:** local disk on our VPS + nightly object-storage push (S3 / [Backblaze B2](https://www.backblaze.com/cloud-storage) / [Cloudflare R2](https://www.cloudflare.com/developer-platform/products/r2/) — all S3-compatible, all commodity, no lock-in per the hosting-tier no-cloud-vendor-lock-in argument).
+    - **Paid managed:** local disk + continuous backup (every snapshot also written to object storage). Per-customer separate bucket. Off-site backup for the paid tier needs an actual durability SLA — pick the SLA before pricing.
+
+  **Recovery semantics on restart.**
+    1. Relay scans `./rooms/` on boot.
+    2. For each room file: load the latest snapshot via `Y.applyUpdate(newDoc, bytes)` into memory.
+    3. **Corruption fallback:** keep N=3 generations (`<uuid>.ydoc`, `<uuid>.ydoc.1`, `<uuid>.ydoc.2`); rotate on each successful write. Try generations in order on load failure. Object storage backup is the last fallback.
+    4. **Missing snapshot:** room starts empty. If the room UUID maps to a level file in the repo (`meta.level_path`), auto-initialise from the `.iff` on first join — same code path as "auto-create on first level open" in the rendezvous section.
+
+  **Hibernation = cheap snapshot, not a separate path.** Room hibernation (per the room-lifecycle section) just IS the snapshot mechanism. When the last participant leaves after N minutes of inactivity, write current state to disk, evict from memory. Reactivation on next join restores from snapshot. No separate "hibernation file" vs "snapshot file" format — same `.ydoc` either way. Hibernation differs from the periodic snapshot only in eviction policy.
+
+  **Storage growth + compaction.** Yjs op logs grow forever unless compacted; `Y.encodeStateAsUpdate(doc)` produces a single compact state vector that supersedes prior history. Trade-off: per-leaf `_author` attribution survives compaction, full op-by-op scrubbing past the compaction point does not.
+    - **Active rooms:** compact daily off-peak, or every K=10 000 edits, whichever comes first.
+    - **Archived rooms:** compact aggressively on hibernation. The canonical long-term record is the `.blend` / `.iff` published to the repo, not the CRDT — the CRDT is *working* state, not authoritative archive. Loss of scrubbing on cold rooms is acceptable; the publish artefacts are forever.
+    - **Per-room storage cap** (community relay): hard cap (e.g. 100 MB) per room; on hit, force-compact, then refuse further edits with a "this room is full, please publish + start fresh" banner. Stops a runaway room from filling the disk.
+
+  **BYOK hook from day 1, even though the feature ships in v2+.** The snapshot writer takes a `wrap: bytes → bytes` function pointer; default tier passes identity, BYOK tier passes "encrypt with customer's KMS-managed key." Symmetric `unwrap` on load. Adding the parameter from day 1 costs one struct field; retrofitting later means re-encrypting every existing snapshot. Recommend designing the interface with the identity wrap in v1, even though BYOK ships in v2+.
+
+  **Plan: roll our own ~200 LOC over [Yrs](https://github.com/y-crdt/y-crdt), not adopt [Hocuspocus](https://hocuspocus.dev/).** Hocuspocus is Node-only; the relay should be Rust for op-footprint reasons (single static binary, no Node runtime to manage on tiny VPSes). Yrs in Rust = same Yjs protocol on the wire, much smaller deploy. Persistence is straightforward bytes-to-file with the debounce shape above. Hocuspocus stays as the reference for protocol details we can copy.
+
+  **Not pursued:**
+    - **Database backend** (Postgres / Redis / LevelDB). Snapshots are bounded-size opaque blobs; SQL/KV adds operational complexity for no benefit at our scale. Hocuspocus has Postgres / Redis providers; we don't need them.
+    - **Object storage as primary** (without local disk). Object-store write latency (~100 ms for small puts) bites the debounce loop; users would feel hiccups on every snapshot. Local disk primary, object storage backup.
+    - **At-rest encryption without BYOK.** E2E client-side encryption is a v2 Matrix-time concern (relay can't fan out updates without seeing plaintext today). Encrypting snapshots at rest with a server-side key buys little — an attacker with relay memory access already wins; an attacker with disk-only access is a non-threat-model.
 
 ### Tier 3 — defer until prototyping
 
