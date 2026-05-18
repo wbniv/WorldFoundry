@@ -1,6 +1,6 @@
 # Engine frame-step API — split `WFGame::RunLevel` into per-frame `StepFrame`
 
-**Status:** Parked (TODO). Plan agreed 2026-05-18; not yet implemented. Sub-task #1 of Phase 0b in the [collaborative editor design doc](../investigations/2026-05-18-collaborative-level-editor-design.md). Trigger to start: editor prototype gets past file-watch and needs direct frame-stepping from a host process. ~1–2 weeks estimated. Independent of [sub-task #2 (external GL context)](2026-05-18-engine-external-gl-context.md) — either can land first.
+**Status:** Implemented 2026-05-18 (commits `8663618`, `d6bc566`, `aa65b79`, `0be94a5`, `c844f4a`, `47ef7cc`). Sub-task #1 of Phase 0b in the [collaborative editor design doc](../investigations/2026-05-18-collaborative-level-editor-design.md). Standalone `wf_game` unchanged — `RunLevel` is now `LoadLevel + while(StepFrame) + UnloadLevel`. Hosts (editor, replay driver, test harness) call the new entry points directly; `--frame-step-smoke=N` CLI flag drives the reference shape. Came in well under the ~1–2 wk estimate (single afternoon, alongside sub-task #2's parallel landing). Independent of [sub-task #2 (external GL context)](2026-05-18-engine-external-gl-context.md), as predicted; both landed the same day.
 
 ## Context
 
