@@ -709,8 +709,16 @@ Display::PageFlip()
 //	wglDeleteContext(hRC);
 //	hRC = 0;
 
-    // now calc how long it has been since last frame
-#if   defined(__LINUX__) || defined(__ANDROID__)
+    return MeasureDelta();
+
+}
+
+//============================================================================
+
+Scalar
+Display::MeasureDelta()
+{
+#if defined(__LINUX__) || defined(__ANDROID__)
     struct timeval tv;
     gettimeofday(&tv,NULL);
 
@@ -752,7 +760,6 @@ Display::PageFlip()
 #else
 #error platform not defined
 #endif
-
 }
 
 //============================================================================

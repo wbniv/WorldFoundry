@@ -100,6 +100,7 @@ public:
 	void RenderEnd();
 
 	Scalar PageFlip();					// switch to other page, and start rendering, returns how much real-time passed since last call
+	Scalar MeasureDelta();				// same delta PageFlip returns, but without swapping buffers; for hosts that drive their own swap
 	void ResetTime();					// used to reset delta timer for PageFlip
 
 	int XSize() const;					// get x size of display
