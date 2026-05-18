@@ -25,17 +25,17 @@ Three actors collaborate via shared global mailboxes:
 
 This **signal-mailbox pattern** is the architecturally clean way to do cross-actor effects in WF — each actor owns its own local state, and the Director communicates intent through globals rather than reaching into other actors. Documented in [`docs/level-building.md`](../../WorldFoundry.2026-new-level/docs/level-building.md#mailbox-scope-rules) § "Pattern for cross-actor teleport". The alternative — Director directly writing the CamShot's `X_POS` via `write-actor-mailbox` — would work but is on the chopping block (see [TODO follow-ups](#todo--follow-ups)).
 
-### Mailbox slot allocations (level-local — no engine edits)
+### Mailbox slot allocations (named — `mailbox.inc` entries added)
 
-The `GLOBAL_USER` range is `0..1899` (`mailbox.inc:8-12`). The SMB level claims three slots near the top of the range:
+Per [`feedback_named_mailbox_constants`](../../.claude/projects/-home-will-WorldFoundry/memory/feedback_named_mailbox_constants.md), new mailbox slots get `MAILBOXENTRY` rows in [`wfsource/source/mailbox/mailbox.inc`](../../wfsource/source/mailbox/mailbox.inc) and Forth scripts use the `INDEXOF_*` names, not bare integers. Three new entries in the `GLOBAL_USER` range (0..1899):
 
-| Slot | Symbolic name in Forth | Written by | Read by | Purpose |
-|------|------------------------|------------|---------|---------|
-| 1800 | `PLAYER_X` | Player script | Director script | Player's current world X |
-| 1801 | `TARGET_CAM_X` | Director script | CamShot script | SMB-shaped target camera X |
-| 1802 | `MAX_CAM_X` | Director script | Director script | One-way ratchet state (camera X never decreases below this) |
+| Slot | Forth symbol | Written by | Read by | Purpose |
+|------|--------------|------------|---------|---------|
+| 1800 | `INDEXOF_SMB_PLAYER_X` | Player script | Director script | Player's current world X |
+| 1801 | `INDEXOF_SMB_TARGET_CAM_X` | Director script | CamShot script | SMB-shaped target camera X |
+| 1802 | `INDEXOF_SMB_MAX_CAM_X` | Director script | Director script | One-way ratchet state (camera X never decreases below this) |
 
-These don't need `mailbox.inc` entries — Forth can use literal integers (e.g. `1800 write-mailbox`).
+Adding these requires a small engine rebuild (`mailbox.inc` is included into compiled headers; the constants table is broadcast to every scripting engine at init).
 
 ### Tuning constants (Forth literals, settable in `blender_create_smb.py`)
 
@@ -57,51 +57,47 @@ SPAWN_CAM_X   = 4.5            \ initial camera X (MARIO_SPAWN_X)
 INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox
 dup 16384 & 256 / over 8192 & 64 / | |
 INDEXOF_INPUT write-mailbox
-INDEXOF_X_POS read-mailbox 1800 write-mailbox   \ broadcast player X to PLAYER_X
+INDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox
 ```
 
-**Director script** (new — set as `wf_Script` on the Director actor):
+**Director script** (new — set as `wf_Script` on the Director actor; this is the actual zForth, copy-paste from the .blend.py):
 
 ```forth
 \ wf
-\ Lazy-init MAX_CAM_X to SPAWN_CAM_X on first tick.
-1802 read-mailbox 0= if 4.5 1802 write-mailbox then
-
-\ Compute desired = PLAYER_X + LEAD.
-1800 read-mailbox 1.5 +                          ( desired )
-
-\ Deadzone gate: if |desired - MAX_CAM_X| < DEAD_HALF, leave MAX_CAM_X alone.
-\ Otherwise apply one-way ratchet + edge clamp and update MAX_CAM_X.
-dup 1802 read-mailbox - dup 0< if -1.0 * then   ( desired |delta| )
+INDEXOF_SMB_MAX_CAM_X read-mailbox 0= if 4.5 INDEXOF_SMB_MAX_CAM_X write-mailbox then
+INDEXOF_SMB_PLAYER_X read-mailbox 1.5 +
+dup INDEXOF_SMB_MAX_CAM_X read-mailbox -
 1.5 <
-if drop
-else
-  dup 1802 read-mailbox max                      ( desired-or-current )
-  dup 9.0 <  if drop  9.0 then                   ( edge clamp: X_MIN + HALF_FRUSTUM = 9.0 )
-  dup 58.5 > if drop 58.5 then                   ( edge clamp: X_MAX - HALF_FRUSTUM = 58.5 )
-  dup 1802 write-mailbox                         ( MAX_CAM_X := target )
+if drop INDEXOF_SMB_MAX_CAM_X read-mailbox
+else 1.5 - dup 9.0 < if drop 9.0 then dup 58.5 > if drop 58.5 then dup INDEXOF_SMB_MAX_CAM_X write-mailbox
 then
-
-\ Write final target to TARGET_CAM_X for the CamShot to consume.
-1801 write-mailbox
+INDEXOF_SMB_TARGET_CAM_X write-mailbox
 ```
 
-(Stack-juggling above is illustrative; final form uses verified zForth idioms. No nested `:` definitions inside the body — see [`feedback_zforth_int_divide`](../../WorldFoundry.2026-new-level/.claude/projects/-home-will-WorldFoundry/memory/feedback_zforth_int_divide.md).)
+How it reads:
+1. **Lazy init**: if `INDEXOF_SMB_MAX_CAM_X` is 0 (uninitialised), seed it to `SPAWN_CAM_X = 4.5`.
+2. Compute `desired = INDEXOF_SMB_PLAYER_X + LEAD` (1.5).
+3. Compute `delta = desired - INDEXOF_SMB_MAX_CAM_X`.
+4. **Deadzone + one-way combined**: if `delta < 1.5` (handles both in-deadzone *and* Mario-behind-camera cases — the one-way ratchet falls out for free), drop the candidate and use the current `INDEXOF_SMB_MAX_CAM_X` as the target. Otherwise compute `new = desired - 1.5` (moves camera to deadzone-right-edge), clamp to `[9.0, 58.5]` (edge bounds: `X_MIN + HALF_FRUSTUM = -3.0 + 12.0 = 9.0`; `X_MAX - HALF_FRUSTUM = 70.5 - 12.0 = 58.5`), update `INDEXOF_SMB_MAX_CAM_X`.
+5. Write target to `INDEXOF_SMB_TARGET_CAM_X`.
+
+No nested `:` definitions ([`feedback_zforth_int_divide`](../../WorldFoundry.2026-new-level/.claude/projects/-home-will-WorldFoundry/memory/feedback_zforth_int_divide.md)). No division, so no `/`-vs-`%` trap.
 
 **CamShot script** (new — set as `wf_Script` on the `cs_side` CamShot actor):
 
 ```forth
 \ wf
-1801 read-mailbox INDEXOF_X_POS write-mailbox    \ apply TARGET_CAM_X to own position
+INDEXOF_SMB_TARGET_CAM_X read-mailbox INDEXOF_X_POS write-mailbox
 ```
 
 ### Files changed
 
 | File | Edit |
 |------|------|
-| `wflevels/smb_w1_1/blender_create_smb.py` | (a) Player script gets one extra line broadcasting `X_POS` to slot 1800. (b) Director's `wf_Script` field set with the scroll logic above. (c) CamShot's `wf_Script` field set with the one-line `TARGET_CAM_X → INDEXOF_X_POS` apply. (d) CamShot keeps `Position X = Absolute` (the CamShot's script moves itself; the engine reads from its position). Set `Follow = player` is unnecessary here since the per-axis path is Absolute on X — Follow stays at `Target02` for the Y/Z look-at math. (e) Update the header comment (currently flags scrolling as "a later milestone"). |
+| `wfsource/source/mailbox/mailbox.inc` | Add three `MAILBOXENTRY` rows for `SMB_PLAYER_X` / `SMB_TARGET_CAM_X` / `SMB_MAX_CAM_X` in the `GLOBAL_USER` range (1800/1801/1802). Per [`feedback_named_mailbox_constants`](../../.claude/projects/-home-will-WorldFoundry/memory/feedback_named_mailbox_constants.md). |
+| `wflevels/smb_w1_1/blender_create_smb.py` | (a) Player script gets one extra line broadcasting `INDEXOF_X_POS` to `INDEXOF_SMB_PLAYER_X`. (b) Director's `wf_Script` set with the scroll logic above. (c) CamShot's `wf_Script` set with the one-line `INDEXOF_SMB_TARGET_CAM_X → INDEXOF_X_POS` apply. (d) CamShot keeps `Position X = Absolute` (the CamShot's script moves itself; the engine reads from its position). `Follow` stays at `Target02` for the Y/Z look-at math. (e) Update the header comment. |
 
-**Zero engine code.** No rebuild of `wf_game`. Only re-run the level pipeline (Blender → .lev → .lvl → .iff).
+**One small engine rebuild** (`mailbox.inc` change) plus the level pipeline rebuild. The constant-table edit is the only engine touch.
 
 ---
 
@@ -114,14 +110,14 @@ then
    - The one-shot seed of `MAX_CAM_X` (0 → 4.5) happens on the first Director tick. At that point `cd.idxOldCamShotActor == 0` and the engine skips the slew (line 510 guard) — so the seed propagates instantly even though it would otherwise exceed the budget.
    - Documented in [`docs/level-building.md`](../../WorldFoundry.2026-new-level/docs/level-building.md) § Per-frame camera slew clamp.
 3. **Per-tick execution order — verified, and there's a 1-tick lag we can't avoid (but it's fine).** Researched: WF has no priority/phase mechanism for actor scripts. The Director is special-cased at [`wfsource/source/game/level.cc:881-888`](../../WorldFoundry.2026-new-level/wfsource/source/game/level.cc) to run *after* the main `UpdatePhysics()` loop, with the literal comment *"FIX - manually update director until we get priorities working in updates"* — an unfinished feature from the original codebase. Tracked as a TODO; see [TODO follow-ups](#todo--follow-ups). What this means for our 3-script chain:
-   - **Player** (main loop, actor-index order): writes `PLAYER_X` to global 1800.
-   - **CamShot script** (main loop, actor-index order): reads `TARGET_CAM_X` from global 1801 and writes own `INDEXOF_X_POS`. The value of `TARGET_CAM_X` it sees was written by Director on the *previous* tick.
-   - **Camera handler** (main loop, runs on the Camera actor's update — calls `SetCameraParametersFromShot` which reads CamShot's position): sees the position the CamShot script just wrote.
-   - **Director** (after main loop): reads `PLAYER_X` (this tick's value, fresh), computes target, writes `TARGET_CAM_X` for next tick.
+   - **Player** (main loop, actor-index order): writes `INDEXOF_SMB_PLAYER_X`.
+   - **CamShot script** (main loop, actor-index order): reads `INDEXOF_SMB_TARGET_CAM_X` and writes own `INDEXOF_X_POS`. The value it sees was written by Director on the *previous* tick.
+   - **Camera handler** (main loop, on the Camera actor's update — `SetCameraParametersFromShot` reads CamShot's position): sees the position the CamShot script just wrote.
+   - **Director** (after main loop): reads `INDEXOF_SMB_PLAYER_X` (this tick's value, fresh), computes target, writes `INDEXOF_SMB_TARGET_CAM_X` for next tick.
    - **Net result:** camera position lags player by exactly 1 tick. 16ms at 60Hz. Invisible.
    - **The alternative — Director-only design writing CamShot.X_POS via `write-actor-mailbox`** — has the *same* 1-tick lag, because the camera handler runs in the main loop before Director runs. So the signal-chain design isn't worse on this metric, and it's architecturally cleaner (no action-at-a-distance). Earlier drafts of this gotcha worried the signal chain was more fragile than the Director-only design; that worry was wrong.
-   - **What we do need to control:** Player's actor index must be ≤ CamShot's actor index in the .lev file, so `PLAYER_X` is written before CamShot's script runs — otherwise CamShot would still see correct data (it reads `TARGET_CAM_X` not `PLAYER_X`), but the lag would be 2 ticks instead of 1 because `PLAYER_X` would also be stale by Director's read. The .blend.py creates Player before CamShot already; confirm exporter preserves creation order.
-4. **Director references CamShot by name only via the Player→Director→CamShot signal chain**, not via actor index. No actor-name-to-index resolution is needed in the script literals — the slot numbers (1800/1801/1802) are plain integers. Simpler than the `write-actor-mailbox` alternative.
+   - **What we do need to control:** Player's actor index must be ≤ CamShot's actor index in the .lev file, so `INDEXOF_SMB_PLAYER_X` is written before CamShot's script runs — otherwise CamShot would still see correct data (it reads `INDEXOF_SMB_TARGET_CAM_X`, not `INDEXOF_SMB_PLAYER_X`), but the lag would be 2 ticks instead of 1 because `INDEXOF_SMB_PLAYER_X` would also be stale by Director's read. The .blend.py creates Player before CamShot already; confirm exporter preserves creation order.
+4. **Cross-actor chain uses only global mailboxes (no actor-name resolution).** No `write-actor-mailbox` in this design; no need for the wf_blender exporter to resolve named actor references in Forth literals. Simpler than the `write-actor-mailbox` alternative.
 5. **Director script size.** The whole scroll routine is ~20 Forth ops. zForth's dictionary cap (32 KB, see TODO.md `SCRIPTING ENGINES`) has lots of room.
 6. **Performance.** Director Forth runs every tick. ~20 ops × 60 Hz < 1 µs. Not a concern.
 
@@ -130,7 +126,7 @@ then
 ## Verification
 
 - [ ] SMB level builds end-to-end (Blender script → .lev → .lvl → .iff).
-- [ ] Run on the debug bridge; tap mailboxes 1800/1801/1802 each frame to confirm the player-X → target-X chain is alive.
+- [ ] Run on the debug bridge; tap `INDEXOF_SMB_PLAYER_X` / `INDEXOF_SMB_TARGET_CAM_X` / `INDEXOF_SMB_MAX_CAM_X` (slots 1800/1801/1802) each frame to confirm the player-X → target-X chain is alive.
 - [ ] Four in-game screenshots ([`feedback_screenshots_for_proof`](../../WorldFoundry.2026-new-level/.claude/projects/-home-will-WorldFoundry/memory/feedback_screenshots_for_proof.md)):
   - t=0: Mario at spawn, camera centred on him (Mario slightly left of frame centre because of the 1-tile lead).
   - Mario walked right past the deadzone: camera has scrolled; Mario stays ~1 tile left of frame centre.

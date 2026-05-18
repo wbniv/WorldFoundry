@@ -9,6 +9,12 @@ Comment("=====================================================================")
 	MAILBOXENTRY(FALSE,0)			Comment("always 0, false")
 	MAILBOXENTRY(TRUE,1)			Comment("always 1, true" )
 
+	Comment(" SMB scrolling camera (smb_w1_1) — Director + signal-mailbox chain. ")
+	Comment(" See docs/plans/2026-05-17-smb-scrolling-camera.md.                  ")
+	MAILBOXENTRY( SMB_PLAYER_X, 1800 )		Comment("Player broadcasts own X each tick")
+	MAILBOXENTRY( SMB_TARGET_CAM_X, 1801 )		Comment("Director writes target cam X; CamShot reads it")
+	MAILBOXENTRY( SMB_MAX_CAM_X, 1802 )		Comment("Director's one-way ratchet state (camera X never decreases)")
+
 	MAILBOXENTRY(GLOBAL_USER_MAX,1900)
 	Comment(" Bumped 2026-05-09 from 999 → 1900 (raises level-global user mailbox cap to 1900 slots) ")
 	Comment(" to fit qbert_practice's 16-round visibility array (440..1783). GLOBAL_SYSTEM range was   ")

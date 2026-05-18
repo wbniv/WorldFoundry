@@ -124,27 +124,29 @@ if director:
     director.location = (0, CAM_Y - 2, MARIO_Z)
     director['wf_Model Type'] = 'None'
     # SMB scroll Director — runs after every main-loop actor each tick
-    # (level.cc:881-888). Reads PLAYER_X (1800), applies deadzone +
-    # one-way ratchet + edge clamp + 1-tile lead, writes TARGET_CAM_X (1801)
-    # for the CamShot to consume next tick. MAX_CAM_X (1802) holds the
-    # ratchet state; 0 means uninitialised → seed to SPAWN_CAM_X=4.5.
+    # (level.cc:881-888). Reads INDEXOF_SMB_PLAYER_X, applies deadzone +
+    # one-way ratchet + edge clamp + 1-tile lead, writes
+    # INDEXOF_SMB_TARGET_CAM_X for the CamShot to consume next tick.
+    # INDEXOF_SMB_MAX_CAM_X holds the ratchet state; 0 means uninitialised
+    # → seed to SPAWN_CAM_X=4.5.
     # Edge bounds: X_MIN+HALF_FRUSTUM = -3.0+12.0 = 9.0;
     #              X_MAX-HALF_FRUSTUM = 70.5-12.0 = 58.5.
     # Deadzone test uses (delta < 1.5) — true for both in-deadzone AND
     # Mario-behind-camera cases (the one-way ratchet falls out for free).
     director['wf_Script'] = (
         "\\ wf\n"
-        "1802 read-mailbox 0= if 4.5 1802 write-mailbox then\n"
-        "1800 read-mailbox 1.5 +\n"
-        "dup 1802 read-mailbox -\n"
+        "INDEXOF_SMB_MAX_CAM_X read-mailbox 0= if "
+        "4.5 INDEXOF_SMB_MAX_CAM_X write-mailbox then\n"
+        "INDEXOF_SMB_PLAYER_X read-mailbox 1.5 +\n"
+        "dup INDEXOF_SMB_MAX_CAM_X read-mailbox -\n"
         "1.5 <\n"
-        "if drop 1802 read-mailbox\n"
+        "if drop INDEXOF_SMB_MAX_CAM_X read-mailbox\n"
         "else 1.5 - "
         "dup 9.0 < if drop 9.0 then "
         "dup 58.5 > if drop 58.5 then "
-        "dup 1802 write-mailbox\n"
+        "dup INDEXOF_SMB_MAX_CAM_X write-mailbox\n"
         "then\n"
-        "1801 write-mailbox\n"
+        "INDEXOF_SMB_TARGET_CAM_X write-mailbox\n"
     )
 
 levelobj = find_by_class('levelobj')
@@ -324,9 +326,9 @@ if player:
         "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox "
         "dup 16384 & 256 / over 8192 & 64 / | | "
         "INDEXOF_INPUT write-mailbox\n"
-        # Broadcast own X to global PLAYER_X (1800) for the SMB scroll
-        # Director (which runs after the main loop) to consume this tick.
-        "INDEXOF_X_POS read-mailbox 1800 write-mailbox\n"
+        # Broadcast own X to INDEXOF_SMB_PLAYER_X for the SMB scroll Director
+        # (which runs after the main loop) to consume this tick.
+        "INDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\n"
     )
 
     mario_mesh = _build_mario()
@@ -492,13 +494,13 @@ if camshot:
     camshot['wf_Model Type']          = 'None'
     camshot['wf_Track Object'] = 'Target02'
     camshot['wf_Follow']       = 'Target02'
-    # SMB scroll: read TARGET_CAM_X (1801) written by the Director on
+    # SMB scroll: read INDEXOF_SMB_TARGET_CAM_X written by the Director on
     # the previous tick (Director runs after main loop, this runs in it),
     # and apply it to our own X via the local INDEXOF_X_POS mailbox. Y and
     # Z stay at the .lev-loaded values (CAM_Y, MARIO_Z+3) untouched.
     camshot['wf_Script'] = (
         "\\ wf\n"
-        "1801 read-mailbox INDEXOF_X_POS write-mailbox\n"
+        "INDEXOF_SMB_TARGET_CAM_X read-mailbox INDEXOF_X_POS write-mailbox\n"
     )
 
 # Target01 — world-origin anchor
