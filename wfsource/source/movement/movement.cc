@@ -649,11 +649,24 @@ MarbleHandler::SetStunTime(MovementManager& movementManager, Scalar newTime)
 
 void
 MarbleHandler::predictPosition(MovementManager& movementManager, MovementObject& movementObject,
-                                const Clock& clock, const BaseObjectList& /*baseObjectList*/)
+                                const Clock& clock, const BaseObjectList& baseObjectList)
 {
 	PhysicalAttributes& actorAttr = movementObject.GetWritablePhysicalAttributes();
 	assert(ValidPtr(movementManager.MovementBlock()));
 	Scalar dt = clock.Delta();
+
+	// Jump: mirror GroundHandler::predictPosition's branch. Doomstick actors
+	// (TurnRate==0) run through MarbleHandler when grounded, so without this
+	// they have no path into AirHandler and kBtnJump is silently ignored.
+	if (movementObject.GetInputDevice()->justPressed(kBtnJump))
+	{
+		MovementHandlerData* handlerData = movementManager.GetMovementHandlerData();
+		assert(ValidPtr(handlerData));
+		handlerData->jumpDuration = SCALAR_CONSTANT(0.2);
+		movementManager.SetMovementHandler(&theAirHandler, movementObject);
+		theAirHandler.predictPosition(movementManager, movementObject, clock, baseObjectList);
+		return;
+	}
 
 #ifdef PHYSICS_ENGINE_JOLT
 	{

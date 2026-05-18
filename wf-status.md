@@ -9,6 +9,8 @@
 
 36 days of work (2026-04-12 – 2026-05-17). Newest first:
 
+- **SMB Mario jumps + walks at NES-Mario pace (2026-05-17)** — Added the missing `kBtnJump` → AirHandler trigger in `MarbleHandler::predictPosition` (doomstick actors had no jump path; `GroundHandler` had the branch, `MarbleHandler` did not), and bumped Mario's OAS speed/jump tuning (Max Ground Speed 6→12, Running Accel 8→16, Jumping Accel 20→70, Air Accel 10→16, Max Air Speed 6→12) so the jump apex reaches `?` block height (~6.3 m). See [plan](docs/plans/2026-05-17-smb-mario-speed-jump-tuning.md).
+
 - **levcomp-rs actor-outside-room-bbox warning (2026-05-17)** — `levcomp-rs` now prints a per-actor `stderr` warning (name + world-unit center) when an actor's center falls outside every room bbox, preventing the silent-invisible-actor failure that hit the curse bubble on 2026-05-12; companion section added to [docs/level-design-troubleshooting.md](docs/level-design-troubleshooting.md). See [plan](docs/plans/2026-05-16-levcomp-actor-outside-bbox-warning.md).
 
 - **Q✱bert arcade-faithful spawn sequencer landed (2026-05-16)** — Six independent per-enemy spawn timers replaced with a single shared countdown reading ROM-decoded 16-round × N-entry sequence tables; Slick and Sam now correctly appear in L1R3 as in the arcade. See [plan](docs/qbert/plans/2026-05-16-qbert-spawn-sequencer.md).

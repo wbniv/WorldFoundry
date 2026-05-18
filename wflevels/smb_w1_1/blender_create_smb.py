@@ -268,13 +268,17 @@ if player:
     player['wf_Mass']     = 1.0
     player['wf_Model Type'] = 'Mesh'
     player['wf_Visibility Mailbox'] = 1
-    # Physics movement parameters — tuned for SMB feel
-    player['wf_Running Acceleration']  = 8.0
+    # Physics movement parameters — tuned for SMB feel.
+    # Jump apex = (JumpAccel × 0.2)² / (2 × FallAccel); 70 × 0.2 = 14 m/s → ~8.2 m
+    # apex, enough to clear a ? block top at z=7.5 m. MaxGroundSpeed 12 m/s ≈ 8
+    # tiles/sec at T=1.5 m. See docs/plans/2026-05-17-smb-mario-speed-jump-tuning.md.
+    player['wf_Running Acceleration']  = 16.0
     player['wf_Running Deceleration']  = 0.85
-    player['wf_Max Ground Speed']      = 6.0
-    player['wf_Jumping Acceleration']  = 20.0
+    player['wf_Max Ground Speed']      = 12.0
+    player['wf_Jumping Acceleration']  = 70.0
     player['wf_Falling Acceleration']  = 12.0
-    player['wf_Max Air Speed']         = 6.0
+    player['wf_Air Acceleration']      = 16.0
+    player['wf_Max Air Speed']         = 12.0
     # TurnRate=0 → doom-stick LEFT/RIGHT strafe instead of rotate.
     # currentDir() = (cos C, sin C, 0) [physicalobject.hpi:52].
     # C=π/2 → currentDir=(0,1,0)=+Y; StepRight=(sin C,-cos C,0)=(1,0,0)=+X ✓
