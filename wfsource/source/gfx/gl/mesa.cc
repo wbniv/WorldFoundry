@@ -28,6 +28,7 @@
 #include <time.h>
 #include <atomic>
 #include <hal/lifecycle.h>
+#include <gfx/host_gl_context.h>
 
 // kts major kludge, both GL and WF should use namespaces
 #define Display XDisplay
@@ -54,7 +55,12 @@ static Atom _wmDeleteWindow;
 // HALWindowCloseRequested() and exits via the normal shutdown path —
 // avoiding the half-broken "exit() from inside the event handler"
 // behaviour that was here before.
-static std::atomic<int> _closeRequested{0};
+//
+// Not `static` — host_gl_context.cc's HALRequestClose() links against this
+// to let editor hosts set the flag (Phase 0b sub-task #2). The standalone
+// X11 WM_DELETE_WINDOW handler in ProcessXEvents below still owns the
+// in-process write path; HALRequestClose is the host-driven alternative.
+std::atomic<int> _closeRequested{0};
 
 //==============================================================================
 
@@ -191,9 +197,22 @@ OpenMainWindow( char *title )
 
 //==============================================================================
 
+// Step 3 fills in the body — for step 2 we just need the symbol so the
+// dispatch in InitWindow compiles. Asserts unreached because step 2
+// doesn't yet have any caller of SetHostGLContext.
+static bool InitWithExistingContext()
+{
+    assert(!"InitWithExistingContext stub — step 3 implements; should not fire until a host calls SetHostGLContext");
+    return true;
+}
+
+//==============================================================================
+
 bool
 InitWindow( int /*xPos*/, int /*yPos*/, int /*xSize*/, int /*ySize*/ )
 {
+    if (GetHostGLContext().valid)
+        return InitWithExistingContext();
     OpenMainWindow( "World Foundry");
     return true;
 }
