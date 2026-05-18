@@ -41,6 +41,9 @@
 #include <gfx/viewport.hp>
 #include "actor.hp"
 
+class Level;
+class GameMailboxes;
+
 //=============================================================================
 
 const int NumJoysticks = 2;
@@ -53,8 +56,15 @@ public:
 	WFGame( const int nStartingLevel = 0 );
 	~WFGame();
 
+	// Per-level lifecycle. RunLevel = LoadLevel + while-loop + UnloadLevel
+	// for standalone wf_game. Hosts (editor, replay driver, test harness)
+	// call LoadLevel + StepFrame... + UnloadLevel directly.
+	void LoadLevel(_DiskFile* levelFile);
+	void UnloadLevel();
 	void RunLevel(_DiskFile* levelFile);		// executes a single level, returns when done
 	void RunGameScript();				// runs the whole game, returns when game (really) over (quit to OS)
+
+	Level* CurrentLevel() const { return _curLevel; }
 
 	SMemPool* MessagePortMemPool();
 
@@ -87,6 +97,13 @@ private:
 	int32				_overrideLevelNum;  // override from the command line
 	_DiskFile* 			_gameFile;				// cd.iff
 	DiskTOC				_gameTOC;
+
+	// Per-level state. Owned by LoadLevel / UnloadLevel; null when no level
+	// is loaded. _gameMailboxes outlives _curLevel because the level's
+	// _scratchMailboxes holds a parent pointer to it.
+	Level*			_curLevel;
+	GameMailboxes*	_gameMailboxes;
+	bool			_bContinue;		// false short-circuits the level loop (PIGSUserAborted)
 
 public:
 //     class LevelActor : public Actor

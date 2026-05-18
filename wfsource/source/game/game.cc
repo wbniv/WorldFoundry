@@ -65,7 +65,10 @@ WFGame::WFGame( const int nStartingLevel )
 	// Memory pool for allocating MsgPort messages
 	_msgPortMemPool( MemPoolConstruct( sizeof( SMsg ), MSGPORTPOOLSIZE, HALLmalloc ) ),
 	_overrideLevelNum( nStartingLevel ),
-	_desiredLevelNum( 0 )		// default to first level in TOC; overridden by -l flag or shell script
+	_desiredLevelNum( 0 ),		// default to first level in TOC; overridden by -l flag or shell script
+	_curLevel( nullptr ),
+	_gameMailboxes( nullptr ),
+	_bContinue( true )
 {
 	DBSTREAM1( cprogress << "WFGame::WFGame" << std::endl; )
 	JoltRuntimeInit();
@@ -107,6 +110,12 @@ WFGame::WFGame( const int nStartingLevel )
 WFGame::~WFGame()
 {
 	DBSTREAM1( cprogress << "WFGame::~WFGame" << std::endl; )
+
+	// Hosts (editor, replay driver) must call UnloadLevel before destructing.
+	// Standalone RunLevel always does. Tripping this assert means a level
+	// was loaded but never unloaded.
+	assert(!_curLevel);
+	assert(!_gameMailboxes);
 
 #if defined(DO_CD_IFF)
 	if ( _gameFile != nullptr )
@@ -253,14 +262,18 @@ WFGame::RunGameScript()				// runs the whole game, returns when game (really) ov
 //-----------------------------------------------------------------------------
 
 void
-WFGame::RunLevel(_DiskFile* levelFile)
+WFGame::LoadLevel(_DiskFile* levelFile)
 {
-    DBSTREAM3( cprogress << "WFGame::RunLevel (sizeof level = " << sizeof(Level) << std::endl; )
-    GameMailboxes gmb(*this);
-    Level* _curLevel = new (HALLmalloc) Level( *this, levelFile, *_viewPort, *_videoMemory, &gmb );
+    DBSTREAM3( cprogress << "WFGame::LoadLevel (sizeof level = " << sizeof(Level) << std::endl; )
+    assert(!_curLevel);
+    assert(!_gameMailboxes);
+
+    _gameMailboxes = new (HALLmalloc) GameMailboxes(*this);
+    assert( ValidPtr(_gameMailboxes));
+    _curLevel = new (HALLmalloc) Level( *this, levelFile, *_viewPort, *_videoMemory, _gameMailboxes );
 	DBSTREAM3( cprogress << "new level at address " << _curLevel << ", sizeof " << sizeof(Level) << std::endl; )
 	assert( ValidPtr(_curLevel));
-	DBSTREAM3( cprogress << "WFGame::loadLevel done" << std::endl; )
+	DBSTREAM3( cprogress << "WFGame::LoadLevel done" << std::endl; )
 
 	// Start per-level music: look for level<N>.mid alongside cd.iff.
 	if (gMusicPlayer) {
@@ -283,15 +296,50 @@ WFGame::RunLevel(_DiskFile* levelFile)
 	SfxLibrary::Load(5, "wflevels/qbert_practice/sfx/qbert_kill.wav");
 	SfxLibrary::Load(6, "wflevels/qbert_practice/sfx/qbert_disc.wav");
 
-	Scalar deltaTime = Scalar::zero;
-	bool _bContinue = true;
+	_bContinue = true;
 	DBSTREAM1 ( cprogress << "Entering main game loop\n"; );
 	RestApi_Start();
 	{
 		extern int gDebugPort;
 		DebugServer_Start(gDebugPort);
 	}
+}
 
+//-----------------------------------------------------------------------------
+
+void
+WFGame::UnloadLevel()
+{
+	DBSTREAM3( cprogress << "WFGame::UnloadLevel" << std::endl; )
+	assert(_curLevel);
+	assert(_gameMailboxes);
+
+	// Flush any in-flight ordertable renderings before tearing down the level.
+	// (Previously the trailing pair of PageFlips at the end of RunLevel.)
+	_display->PageFlip();
+	_display->PageFlip();
+
+	RestApi_Stop();
+	DebugServer_Stop();
+	if (gMusicPlayer) gMusicPlayer->stop();
+	SfxLibrary::Clear();
+
+	// Level must be destroyed before _gameMailboxes — the level's
+	// _scratchMailboxes holds a parent pointer to it.
+	MEMORY_DELETE(HALLmalloc,_curLevel,Level);
+	_curLevel = nullptr;
+	MEMORY_DELETE(HALLmalloc,_gameMailboxes,GameMailboxes);
+	_gameMailboxes = nullptr;
+}
+
+//-----------------------------------------------------------------------------
+
+void
+WFGame::RunLevel(_DiskFile* levelFile)
+{
+	LoadLevel(levelFile);
+
+	Scalar deltaTime = Scalar::zero;
 	while ( !_curLevel->done() && _bContinue && !HALWindowCloseRequested() )
 	{
 		if ( HALIsSuspended() )
@@ -428,19 +476,11 @@ WFGame::RunLevel(_DiskFile* levelFile)
 
 		assert(HALScratchLmalloc.Empty());		// make sure everyone remembered to free their scratch memory
 	}
-	_display->PageFlip();			    // insure no pending ordertable renderings
-	_display->PageFlip();
-
 
 #pragma message ("KTS: write code to handle lives and restarting same level, etc.")
 	DBSTREAM1( std::cout << ", _bContinue = " << _bContinue << ", _curLevel->done() = " << _curLevel->done() << std::endl; )
 
-	RestApi_Stop();
-	DebugServer_Stop();
-	if (gMusicPlayer) gMusicPlayer->stop();
-	SfxLibrary::Clear();
-	MEMORY_DELETE(HALLmalloc,_curLevel,Level);
-	_curLevel = NULL;
+	UnloadLevel();
 }
 
 //==============================================================================
