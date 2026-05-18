@@ -915,7 +915,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\nINDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox not if INDEXOF_SMB_QBLOCK_0_USED read-mailbox not if 1 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox then then\nINDEXOF_COLLIDER_IDX read-mailbox 0<> if INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if INDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox 0<> if 0 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox 1 INDEXOF_SMB_QBLOCK_0_USED write-mailbox then then then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\nINDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox not if INDEXOF_SMB_QBLOCK_0_USED read-mailbox not if 1 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox then then\nINDEXOF_COLLIDER_IDX read-mailbox 0<> if INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if INDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox 0<> if 0 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox 1 INDEXOF_SMB_QBLOCK_0_USED write-mailbox 1 INDEXOF_SMB_QBLOCK_0_COIN_VISIBLE write-mailbox 1 INDEXOF_SMB_QBLOCK_0_COIN_PHASE write-mailbox then then then\nINDEXOF_SMB_QBLOCK_0_COIN_PHASE read-mailbox dup 0<> if 1 + dup 60 > if drop 0 INDEXOF_SMB_QBLOCK_0_COIN_VISIBLE write-mailbox 0 INDEXOF_SMB_QBLOCK_0_COIN_PHASE write-mailbox else dup INDEXOF_SMB_QBLOCK_0_COIN_PHASE write-mailbox dup 30 <= if 0.1 * else 60 swap - 0.1 * then 7.5 + INDEXOF_Z_POS 14 write-actor-mailbox then else drop then\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
@@ -1110,6 +1110,24 @@
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1804l } { 'STR' "1804" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "qblock_00_coin" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 11.6999998092651367(1.15.16) -0.0399999991059303(1.15.16) 7.1999998092651367(1.15.16) 12.3000001907348633(1.15.16) 0.0399999991059303(1.15.16) 7.8000001907348633(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "qblock_00_coin.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1805l } { 'STR' "1805" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }

@@ -333,13 +333,24 @@ ground_obj['wf_Model Type'] = 'Mesh'
 # docs/plans/2026-05-17-per-actor-collision-mailboxes.md.
 mat_qblock      = make_mat('smb_qblock',      (0.94, 0.72, 0.02))  # NES gold
 mat_qblock_used = make_mat('smb_qblock_used', (0.78, 0.49, 0.18))  # flat tan
+mat_coin        = make_mat('smb_coin',        (1.0,  0.84, 0.0))   # NES coin yellow
 BSIZE = T / 2  # half-side of a 1-tile block
+COIN_R, COIN_T = 0.3, 0.04   # coin half-extents — wide in X+Z (faces camera),
+                              # thin in Y (depth) so it looks like a disc edge-on
 
-# Must match SMB_QBLOCK_0_NORMAL / SMB_QBLOCK_0_USED in
+# Must match SMB_QBLOCK_0_NORMAL/USED/COIN_VISIBLE in
 # wfsource/source/mailbox/mailbox.inc. Hardcoded here because Blender custom
 # properties take literals, not `INDEXOF_*` constant names (those are Forth-side).
-MB_SMB_QBLOCK_0_NORMAL = 1803
-MB_SMB_QBLOCK_0_USED   = 1804
+MB_SMB_QBLOCK_0_NORMAL       = 1803
+MB_SMB_QBLOCK_0_USED         = 1804
+MB_SMB_QBLOCK_0_COIN_VISIBLE = 1805
+
+# Runtime actor index of qblock_00_coin — hardcoded into Mario's Forth script
+# because write-actor-mailbox needs it as a literal. Verified via
+# `engine/wf_game --debug-print-actors` after rebuild. Adding the coin after
+# qblock_00_used (idx 13) puts it at idx 14, shifting blocks 1/2 + goomba etc.
+# up by one. Update this if a rebuild changes the layout.
+COIN_ACTOR_IDX = 14
 
 for i, bx in enumerate(QBLOCK_XS):
     block = add_statplat(f'qblock_{i:02d}',
@@ -356,6 +367,18 @@ for i, bx in enumerate(QBLOCK_XS):
                             mat_qblock_used)
         # USED stays at 0 until bump flips it to 1 (hidden by default).
         used['wf_Visibility Mailbox'] = MB_SMB_QBLOCK_0_USED
+
+        # Pre-spawned coin disc at block top. Anchored statplat; Mario's
+        # Forth script writes its Z_POS each tick during the bump animation
+        # window via write-actor-mailbox (same pattern as qbert popup_500).
+        # Hidden by default (mailbox 0); bump sets COIN_VISIBLE = 1 + kicks
+        # off COIN_PHASE = 1, ramps phase to 30, then hides again.
+        coin_z = BLOCK_Z + BSIZE
+        coin = add_statplat(f'qblock_{i:02d}_coin',
+                            bx - COIN_R, -COIN_T, coin_z - COIN_R,
+                            bx + COIN_R,  COIN_T, coin_z + COIN_R,
+                            mat_coin)
+        coin['wf_Visibility Mailbox'] = MB_SMB_QBLOCK_0_COIN_VISIBLE
 
 # ── 7. Mario placeholder ──────────────────────────────────────────────────────
 def _build_mario():
@@ -469,12 +492,42 @@ if player:
         # more than one bumpable block to demo. The per-actor COLLIDER_IDX
         # mailbox is engine-populated by Actor::Collision (actor.cc:1676) and
         # cleared each frame in Actor::StartFrame.
+        # On bump: flip the visibility pair AND kick off the coin animation
+        # (PHASE=1, COIN_VISIBLE=1).
         "INDEXOF_COLLIDER_IDX read-mailbox 0<> if "
         "INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if "
         "INDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox 0<> if "
         "0 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox "
         "1 INDEXOF_SMB_QBLOCK_0_USED write-mailbox "
+        "1 INDEXOF_SMB_QBLOCK_0_COIN_VISIBLE write-mailbox "
+        "1 INDEXOF_SMB_QBLOCK_0_COIN_PHASE write-mailbox "
         "then then then\n"
+        # Coin pop-out animation step. When PHASE > 0, advance one tick.
+        # Lifecycle: PHASE 1..30 = animating (Z arcs +1.5 m peak at phase=15),
+        # PHASE = 0 = idle (coin hidden). Coin's Z_POS is written each tick via
+        # write-actor-mailbox (qbert popup_500 pattern, blender_create_qbert.py
+        # :3269-3271). COIN_ACTOR_IDX is the runtime index of qblock_00_coin
+        # — verified via `--debug-print-actors` post-build.
+        # Coin pop-out animation step. When PHASE > 0, advance one tick.
+        # Lifecycle: PHASE 1..60 = animating (Z arcs +3 m peak at phase=30),
+        # PHASE = 0 = idle (coin hidden). Coin's Z_POS is written each tick via
+        # write-actor-mailbox (qbert popup_500 pattern, blender_create_qbert.py
+        # :3269-3271). COIN_ACTOR_IDX is the runtime index of qblock_00_coin,
+        # verified via `--debug-print-actors` post-build.
+        # 60 ticks at ~60 fps ≈ 1 second total visible window — long enough for
+        # a few bridge screenshots to catch the arc mid-flight.
+        f"INDEXOF_SMB_QBLOCK_0_COIN_PHASE read-mailbox dup 0<> if "
+        f"1 + dup 60 > if "
+        f"drop "
+        f"0 INDEXOF_SMB_QBLOCK_0_COIN_VISIBLE write-mailbox "
+        f"0 INDEXOF_SMB_QBLOCK_0_COIN_PHASE write-mailbox "
+        f"else "
+        f"dup INDEXOF_SMB_QBLOCK_0_COIN_PHASE write-mailbox "
+        f"dup 30 <= if 0.1 * else 60 swap - 0.1 * then "
+        f"7.5 + "
+        f"INDEXOF_Z_POS {COIN_ACTOR_IDX} write-actor-mailbox "
+        f"then "
+        f"else drop then\n"
     )
 
     mario_mesh = _build_mario()

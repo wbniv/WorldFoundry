@@ -23,6 +23,13 @@ Comment("=====================================================================")
 	MAILBOXENTRY( SMB_QBLOCK_0_NORMAL, 1803 )
 	MAILBOXENTRY( SMB_QBLOCK_0_USED,   1804 )
 
+	Comment(" SMB ?-block coin pop-out animation (per-block).")
+	Comment(" COIN_VISIBLE toggles the pre-spawned anchored coin disc actor on/off.")
+	Comment(" COIN_PHASE 0=idle, 1..30=animating — Mario's script advances each tick,")
+	Comment(" writes coin Z via write-actor-mailbox for a piecewise-linear rise/fall arc.")
+	MAILBOXENTRY( SMB_QBLOCK_0_COIN_VISIBLE, 1805 )
+	MAILBOXENTRY( SMB_QBLOCK_0_COIN_PHASE,   1806 )
+
 	MAILBOXENTRY(GLOBAL_USER_MAX,1900)
 	Comment(" Bumped 2026-05-09 from 999 → 1900 (raises level-global user mailbox cap to 1900 slots) ")
 	Comment(" to fit qbert_practice's 16-round visibility array (440..1783). GLOBAL_SYSTEM range was   ")
