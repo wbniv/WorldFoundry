@@ -93,7 +93,8 @@ const Scalar Actor::INDESTRUCTIBLE_HP = Scalar( SCALAR_CONSTANT(32767) );	// grr
 static InputNull theNullInput;
 static QInputDigital theNullInputDigital( &theNullInput, int(0) );
 
-extern bool gCDEnabled;
+// (extern bool gCDEnabled removed 2026-05-18 — was unused here; the global
+// itself was deleted in main.cc as a dead write-only flag.)
 
 extern PathHandler			thePathHandler;
 extern DelayCameraHandler	theDelayCameraHandler;

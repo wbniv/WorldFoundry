@@ -147,7 +147,7 @@ methods, and enum types; and **camelCase** (lower first letter, e.g.
 | Macros            | `ALL_CAPS_SNAKE` | `MEMORY_DELETE`, `DBSTREAM3` |
 | Enum types        | `E` + `WikiWord` | `EActorKind`, `EMovementState` |
 | Enum values       | Enum-local; C-style `ALL_CAPS` acceptable for widely-scoped enums | `MODEL_TYPE_MESH`, `MOBILITY_ANCHORED` |
-| File-scope statics / globals | `camelCase`, optional `g`/`the` prefix | `theGame`, `gCDEnabled` |
+| File-scope statics / globals | `camelCase`, optional `g`/`the` prefix | `gMusicPlayer`, `gDoomStick` |
 
 ### 3.1 Bit flags
 

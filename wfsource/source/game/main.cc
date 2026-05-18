@@ -45,9 +45,6 @@
 
 //==============================================================================
 
-bool gSoundEnabled = false;
-bool gCDEnabled = false;
-
 int  gDebugPort = 0;                    // 0 = disabled; set by --debug-port N
 char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
 #if DO_TEST_CODE
@@ -57,6 +54,11 @@ int  gDebugPrintActors = 0;             // 1 = print idx/mesh/mobility/pos per a
 // theGame global removed 2026-05-18 (Phase 0b WFGame de-globaling). WFGame
 // is now instantiated in PIGSMain (see below) and passed by reference to Level;
 // other engine code that needs WFGame state goes through Level's parent ref.
+//
+// gSoundEnabled / gCDEnabled also removed 2026-05-18 — write-only globals
+// (set by -sound / -cd CLI flags, never read anywhere). The corresponding
+// CLI flag handlers below were also dropped. Audio is governed by gMusicPlayer
+// (audio/linux/music.cc) and gSoundDevice (audio/linux/device.cc) instead.
 
 #if defined(DESIGNER_CHEATS)
 bool bRecordVideo = false;
@@ -261,17 +263,9 @@ ParseCommandLine(int argc, char** argv)
 #if DEBUG > 0
         else if ( strcmp( argv[index]+1, "lmalloc" ) == 0 )
             bLinearMalloc = true;
-		else if ( strcmp( argv[index]+1, "sound" ) == 0 )
-		{
-			gSoundEnabled = true;
-            gCDEnabled = true;
-			//std::cout << "Sound is OFF" << end1;
-		}
-        else if ( strcmp( argv[index]+1, "cd" ) == 0 )
-		{
-            gCDEnabled = true;
-            //std::cout << "CD is OFF" << end1;
-		}
+        // -sound and -cd CLI flags removed 2026-05-18 — they set gSoundEnabled
+        // / gCDEnabled which had no readers. Use the audio-specific globals in
+        // audio/linux/{music,device}.cc to control audio behaviour instead.
 #endif
 #if SW_DBSTREAM > 0
 		else if ( tolower( *( argv[index]+1 ) ) == 'p' )
