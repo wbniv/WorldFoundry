@@ -8,13 +8,18 @@ Super Mario Bros. W1-1 first-pass validation scene (brief §Verification steps 1
   - Goomba placeholder (brown mushroom, static)
   - Koopa Troopa placeholder (green shell, static)
   - Flagpole at level end (grey pole + green flag)
-  - Fixed side-view camera (Y=-20, looking in +Y at X-Z gameplay plane)
+  - Side-scrolling camera (Y=-20, looking in +Y at X-Z gameplay plane)
 
 Geometry: T = 1.5 m per NES tile. Ground surface Z=0. Mario centre Z=T when standing.
 ? blocks centre Z = 4*T + T/2 (4 tiles above ground, block centred in its tile).
 
-Camera: absolute position (SCENE_CENTRE_X, -20, MARIO_Z+3).  All axes Absolute.
-This is a fixed validation view — scrolling camera is a later milestone.
+Camera: classic SMB scroll via Director + signal-mailbox pattern.  CamShot's
+X position is driven by a Forth Director script that reads Mario's X each
+tick, applies a 1-tile deadzone + one-way ratchet + level-edge clamp + 1-tile
+forward lead, and routes the target X through global mailbox 1801; the
+CamShot's own script consumes that mailbox and writes its INDEXOF_X_POS.
+Y/Z stay Absolute at (-20, MARIO_Z+3). Inherent 1-tick lag (16 ms @ 60 Hz,
+invisible). See docs/plans/2026-05-17-smb-scrolling-camera.md.
 
 Run via Blender MCP execute_blender_code, or headlessly:
   blender --background --python blender_create_smb.py
@@ -118,6 +123,29 @@ director = find_by_class('director')
 if director:
     director.location = (0, CAM_Y - 2, MARIO_Z)
     director['wf_Model Type'] = 'None'
+    # SMB scroll Director — runs after every main-loop actor each tick
+    # (level.cc:881-888). Reads PLAYER_X (1800), applies deadzone +
+    # one-way ratchet + edge clamp + 1-tile lead, writes TARGET_CAM_X (1801)
+    # for the CamShot to consume next tick. MAX_CAM_X (1802) holds the
+    # ratchet state; 0 means uninitialised → seed to SPAWN_CAM_X=4.5.
+    # Edge bounds: X_MIN+HALF_FRUSTUM = -3.0+12.0 = 9.0;
+    #              X_MAX-HALF_FRUSTUM = 70.5-12.0 = 58.5.
+    # Deadzone test uses (delta < 1.5) — true for both in-deadzone AND
+    # Mario-behind-camera cases (the one-way ratchet falls out for free).
+    director['wf_Script'] = (
+        "\\ wf\n"
+        "1802 read-mailbox 0= if 4.5 1802 write-mailbox then\n"
+        "1800 read-mailbox 1.5 +\n"
+        "dup 1802 read-mailbox -\n"
+        "1.5 <\n"
+        "if drop 1802 read-mailbox\n"
+        "else 1.5 - "
+        "dup 9.0 < if drop 9.0 then "
+        "dup 58.5 > if drop 58.5 then "
+        "dup 1802 write-mailbox\n"
+        "then\n"
+        "1801 write-mailbox\n"
+    )
 
 levelobj = find_by_class('levelobj')
 if levelobj:
@@ -296,6 +324,9 @@ if player:
         "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox "
         "dup 16384 & 256 / over 8192 & 64 / | | "
         "INDEXOF_INPUT write-mailbox\n"
+        # Broadcast own X to global PLAYER_X (1800) for the SMB scroll
+        # Director (which runs after the main loop) to consume this tick.
+        "INDEXOF_X_POS read-mailbox 1800 write-mailbox\n"
     )
 
     mario_mesh = _build_mario()
@@ -461,6 +492,14 @@ if camshot:
     camshot['wf_Model Type']          = 'None'
     camshot['wf_Track Object'] = 'Target02'
     camshot['wf_Follow']       = 'Target02'
+    # SMB scroll: read TARGET_CAM_X (1801) written by the Director on
+    # the previous tick (Director runs after main loop, this runs in it),
+    # and apply it to our own X via the local INDEXOF_X_POS mailbox. Y and
+    # Z stay at the .lev-loaded values (CAM_Y, MARIO_Z+3) untouched.
+    camshot['wf_Script'] = (
+        "\\ wf\n"
+        "1801 read-mailbox INDEXOF_X_POS write-mailbox\n"
+    )
 
 # Target01 — world-origin anchor
 # Target02 — look-at point (level midpoint at Mario height)

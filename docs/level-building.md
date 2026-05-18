@@ -426,6 +426,26 @@ Most gameplay actors (platform, statplat) default to `VisibilityMailbox = 1` (re
   with a no-op. All `RunScript()` calls return 0. This is intentional pending replacement
   with a non-Tcl scripting system.
 
+#### Per-tick execution order (and why signal chains pick up a 1-tick lag)
+
+There is **no priority/phase/dependency mechanism for actor scripts.** Execution order per tick is:
+
+1. **Main update loop** ([`level.cc:876`](../wfsource/source/game/level.cc) — `UpdatePhysics(...)`) — iterates every active actor in **actor-index order** (= the order the `.lev` file lists them = the order the Blender exporter wrote them = the creation order in the `blender_create_*.py` script). For each actor: physics step, then `Actor::update()` runs the actor's MovementHandler, then `EvalScript()` runs its Forth script.
+2. **`updateRoomContents()`** (room-membership housekeeping).
+3. **Director runs last, alone** ([`level.cc:881-888`](../wfsource/source/game/level.cc)) — hardcoded special case prefixed by the comment *"FIX - manually update director until we get priorities working in updates"*. The Director update is not part of the main loop; it gets its own slot after everything else.
+
+**What this means for cross-actor signal mailbox chains** — the pattern of `actor A writes global → actor B reads, computes, writes another global → actor C reads, applies on self`:
+
+- A producer that runs in the main loop will see its writes consumed by the Director on the **same** tick (Director runs after the main loop completes).
+- A consumer that runs in the main loop will see the Director's writes only on the **next** tick (the Director hasn't run yet when the consumer fires in the main loop).
+- **Net result:** any signal chain that crosses through the Director and back into a main-loop actor accumulates exactly **one tick of lag** at the final consumer. At 60 Hz that's 16 ms — invisible for camera positioning, score updates, colour pulses; potentially relevant for input-driven physics if you're stacking multiple chains.
+
+**The alternative pattern — Director writes another actor's local mailbox directly via [`write-actor-mailbox`](../engine/stubs/scripting_zforth.cc) (custom syscall 2, signature `( val idx actor_idx -- )`)** — *also has the 1-tick lag*, because the target actor's update (which is what reads the changed mailbox) runs in the main loop before the Director's after-loop slot. The signal-chain design isn't slower than the direct-poke design on this metric; it's just architecturally cleaner. The direct-poke primitive is on the chopping block — see `TODO.md` § `SCRIPTING INFRASTRUCTURE`.
+
+**Controlling actor-index order within the main loop** — actors run in the order the Blender script creates them. To get producer-before-consumer ordering inside one tick, create the producer actor first in the `blender_create_*.py` script. If you're not sure, dump actor indices with `--debug-print-actors` (see [§ `--debug-print-actors`](#--debug-print-actors-debug-builds-only) above) and read off the load-order column. Note that this only gates intra-main-loop chains; it can't shorten chains that cross through the Director.
+
+**There is no way to declare a dependency like "run my script after actor X's script."** The closest workaround is to add the dependent logic to the Director's script (so it runs after every main-loop actor). Past that, you accept the 1-tick lag or restructure the chain. A real priority/phase mechanism is the right long-term fix; tracked in `TODO.md` § `SCRIPTING INFRASTRUCTURE` as "Finish 'priorities working in updates'".
+
 #### Level Selection Without Scripts
 
 `_desiredLevelNum` in `WFGame` must be set before `assert(_desiredLevelNum >= 0)` fires.
@@ -453,6 +473,46 @@ actor index to `EMAILBOX_CAMSHOT`. This is a one-time bootstrap; the value persi
 `BungeeCameraHandler::predictPosition()` originally cleared the mailbox after use (line 988).
 With scripting disabled this is suppressed — the mailbox stays set to the initial CamShot
 so the camera keeps working without per-frame ActBoxOR writes.
+
+#### Per-frame camera slew clamp (10 units/frame, hardcoded)
+
+`NormalCameraHandler::_update()` ([`movecam.cc:495-511`](../wfsource/source/game/movecam.cc)) applies a slew clamp to the final camera position vector every tick the active CamShot index is unchanged from last frame:
+
+```cpp
+#define XSLEW SCALAR_CONSTANT(10)
+#define YSLEW SCALAR_CONSTANT(10)
+#define ZSLEW SCALAR_CONSTANT(10)
+…
+destCam.position = LimitRelativeMovementMagnitude(
+    destCam.position, cd.oldCameraPosition, Vector3(XSLEW, YSLEW, ZSLEW));
+```
+
+`LimitRelativeMovementMagnitude` is per-axis: each axis can move at most 10 units between consecutive frames. The clamp is applied **after** the per-axis Absolute/Relative mux (lines 235-248 in `SetCameraParametersFromShot`), so it constrains all three axes regardless of which mode each is in — an Absolute axis is just as clamped as a Relative one.
+
+The original author left a comment beside the constants: *"I don't understand why they are necessary, since we specify the pan time in seconds in the OAD. So, I'm defining them as constants here just to get this code working. — Phil"*. Take this as licence to tune the numbers when a level design needs to.
+
+**When it doesn't bite:**
+
+- **Player-driven follow cameras.** Mario's `Max Ground Speed` is 6 (`wflevels/smb_w1_1/blender_create_smb.py:274`); any speed under 10 leaves the slew dormant for normal tracking. SMB-style scroll, MM iso, and standard 3rd-person follow all stay well under budget.
+- **First-frame handler activation.** Line 510 guards the clamp with `if(cd.idxOldCamShotActor)`, so the very first frame after `DelayCameraHandler` hands off (or after a CamShot switch) is exempt. A script can seed a fresh camera position with any delta on its first tick.
+- **`gBungeeCam` global true.** Line 499 short-circuits the entire else-branch when set, skipping the slew. This is the existing knob for "I want the camera to teleport".
+
+**When it does bite:**
+
+- **Per-frame mailbox-driven camera moves** (e.g. a Director Forth script writing to a CamShot's `INDEXOF_X_POS` via `write-actor-mailbox` to drive scroll behaviour from script). The CamShot's authored position changes per tick, and the slew clamps the resulting camera delta. Fine if per-frame delta < 10; otherwise the camera lags visibly behind the script's intended position.
+- **Cutscene-style jumps mid-level.** A Director that wants to snap the camera 50 units to set up a cutscene will see ~5 frames of slew-limited drift unless it flips `gBungeeCam` true or relies on a CamShot switch (which also resets the slew via the `idxOldCamShotActor != idxShot` else-branch that transitions to `PanCameraHandler`).
+
+**Raising or removing the limit if a game design requires it:**
+
+The slew limit is a 1996-vintage workaround, not a load-bearing invariant. Three routes to change it:
+
+| Route | Mechanism | Trade-off |
+|-------|-----------|-----------|
+| **Edit C++ constants** | Bump `XSLEW`/`YSLEW`/`ZSLEW` at [`movecam.cc:495-497`](../wfsource/source/game/movecam.cc) | One-line engine edit. Affects every level. Easy, blunt instrument. |
+| **Per-CamShot OAS field** | Add `Slew X/Y/Z` (or a single `Slew Max`) to [`camshot.oas`](../wfsource/source/oas/camshot.oas) and read them in `_update()` | Per-CamShot tunability. Currently gated by the "no new OAS fields pre-merge" rule until the first level ships ([`feedback_no_new_oas_fields_premerge`](../../.claude/projects/-home-will-WorldFoundry/memory/feedback_no_new_oas_fields_premerge.md)). |
+| **Toggle `gBungeeCam`** | Set the existing `extern bool gBungeeCam` true (line 49); the slew else-branch is skipped entirely | No engine code change. Crude — bypasses slew globally, not per-axis. Use as runtime escape hatch. |
+
+If a level design hits this clamp, prefer the C++-constant bump for one-off relief and reserve the OAS field for when per-CamShot tuning becomes a recurring need across multiple games.
 
 For deeper camera investigation (per-axis Absolute/Relative, runtime switching via
 `INDEXOF_CAMSHOT`, target tracking) see [docs/investigations/2026-04-29-camera-system.md](investigations/2026-04-29-camera-system.md).
