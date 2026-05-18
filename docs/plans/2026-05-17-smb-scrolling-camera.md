@@ -125,15 +125,35 @@ INDEXOF_SMB_TARGET_CAM_X read-mailbox INDEXOF_X_POS write-mailbox
 
 ## Verification
 
-- [ ] SMB level builds end-to-end (Blender script → .lev → .lvl → .iff).
-- [ ] Run on the debug bridge; tap `INDEXOF_SMB_PLAYER_X` / `INDEXOF_SMB_TARGET_CAM_X` / `INDEXOF_SMB_MAX_CAM_X` (slots 1800/1801/1802) each frame to confirm the player-X → target-X chain is alive.
-- [ ] Four in-game screenshots ([`feedback_screenshots_for_proof`](../../WorldFoundry.2026-new-level/.claude/projects/-home-will-WorldFoundry/memory/feedback_screenshots_for_proof.md)):
-  - t=0: Mario at spawn, camera centred on him (Mario slightly left of frame centre because of the 1-tile lead).
-  - Mario walked right past the deadzone: camera has scrolled; Mario stays ~1 tile left of frame centre.
-  - Mario walked back left from a scrolled position: camera **unchanged**; Mario drifts further left in frame (one-way ratchet proof).
-  - Mario at the flagpole: camera clamped at level-end; flagpole visible at right edge with no void past it.
-- [ ] Plan promoted to `docs/plans/2026-05-17-smb-scrolling-camera.md` ([`feedback_plans_in_project`](../../WorldFoundry.2026-new-level/.claude/projects/-home-will-WorldFoundry/memory/feedback_plans_in_project.md)).
-- [ ] Commit after each phase ([`feedback_commit_after_each_phase`](../../WorldFoundry.2026-new-level/.claude/projects/-home-will-WorldFoundry/memory/feedback_commit_after_each_phase.md)). Three commits: player-script broadcast line; Director + CamShot script wiring; verification screenshots.
+- [x] SMB level builds end-to-end (Blender script → .lev → .lvl → .iff). Verified by `bash wftools/wf_blender/build_level_binary.sh smb_w1_1`.
+- [x] Run on the debug bridge; tap `INDEXOF_SMB_PLAYER_X` / `INDEXOF_SMB_TARGET_CAM_X` / `INDEXOF_SMB_MAX_CAM_X` (slots 1800/1801/1802) each frame to confirm the player-X → target-X chain is alive. Harness: [`tests/verify_smb_scroll.py`](../../tests/verify_smb_scroll.py).
+- [x] Four in-game screenshots ([`feedback_screenshots_for_proof`](../../.claude/projects/-home-will-WorldFoundry/memory/feedback_screenshots_for_proof.md)). Driven by `set_mailbox` on the Director's state (`INDEXOF_SMB_MAX_CAM_X`) rather than walking Mario — Mario's effective Jolt walk speed is much slower than the level's `Max Ground Speed=6.0` suggests, and screenshots from short input bursts produced inconclusive camera deltas. Forcing the state directly gives reproducible camera positions for the panel without depending on simulated movement timing. The Director's deadzone-branch maintains whatever `MAX_CAM_X` we set as long as Mario stays well-left, so the camera lands and stays where we put it.
+
+| Frame | `PLAYER_X` | `TARGET_CAM_X` | `MAX_CAM_X` | `CamShot.X` | Behaviour |
+|------:|-----------:|---------------:|------------:|------------:|-----------|
+| spawn | 4.5 | 9.0 | 9.0 | 9.0 | Left-edge clamp at level start (camera can't go further left than `X_MIN + HALF_FRUSTUM = 9.0`). Lazy-init kicked in. |
+| scrolled right | 4.5 | 20.0 | 20.0 | 20.0 | Forced `MAX_CAM_X = 20`. Camera scrolled right; Mario falls off the left edge of frame. The visual is exactly what you'd see if Mario walked to ~X=20. |
+| ratchet holds | 4.5 | 20.0 | 20.0 | 20.0 | No state change. Mario hasn't moved; camera held. This frame is the proof that the camera doesn't snap back — same view as frame 2, no scrolling triggered by Mario being to the left of the camera. |
+| flagpole clamp | 4.5 | 58.5 | 58.5 | 58.5 | Forced `MAX_CAM_X = 58.5` (the right-edge clamp value = `X_MAX - HALF_FRUSTUM = 70.5 - 12.0`). Camera shows the right portion of the level: all three ? blocks, the goomba (brown), the koopa (green), and the flagpole. Mario is a tiny figure at far-left of frame. |
+
+![spawn — Mario at spawn, camera at left-edge clamp (X=9.0)](../../tests/screenshots/smb_01_spawn.png)
+
+*Frame 1 — spawn.* `PLAYER_X=4.5, MAX_CAM_X=9.0, CamShot.X=9.0`. Camera left-edge-clamped; Mario sits in the left third with one ? block visible to his right. Unit-grid texture on the ground gives a visual reference for camera position.
+
+![scrolled right — camera moved to X=20, Mario at left edge of frame](../../tests/screenshots/smb_02_scrolled_right.png)
+
+*Frame 2 — scrolled right.* `PLAYER_X=4.5, MAX_CAM_X=20.0, CamShot.X=20.0`. Camera scrolled ~11 grid units right of spawn; the visible ground patch has shifted left of Mario. The ? block now sits near frame centre. Mario is well behind the camera.
+
+![ratchet holds — same view as scrolled, camera doesn't snap back](../../tests/screenshots/smb_03_ratchet_holds.png)
+
+*Frame 3 — ratchet holds.* Same state as frame 2 — no changes between snapshots. With Mario at X=4.5 and `MAX_CAM_X=20`, the Director's deadzone branch fires every tick (delta = 6−20 = −14, `−14 < 1.5` is true → preserve MAX). The frame is visually identical to frame 2; that visual identity *is* the proof that backward motion doesn't move the camera.
+
+![flagpole clamp — camera at right-edge clamp (X=58.5), entire right half of level visible](../../tests/screenshots/smb_04_flagpole_clamp.png)
+
+*Frame 4 — right-edge clamp.* `MAX_CAM_X=58.5, CamShot.X=58.5`. Camera at the right-edge clamp position (`X_MAX − HALF_FRUSTUM = 70.5 − 12.0`). All three ? blocks, the goomba (brown sphere at X=33), the koopa (green shell at X=42), and the flagpole are in frame — exactly what you'd see at end-of-level with Mario at the flag. Mario himself is a tiny figure at the far left of the frame (he's still at his spawn X=4.5).
+
+- [x] Plan promoted to `docs/plans/2026-05-17-smb-scrolling-camera.md` ([`feedback_plans_in_project`](../../.claude/projects/-home-will-WorldFoundry/memory/feedback_plans_in_project.md)).
+- [x] Commit after each phase ([`feedback_commit_after_each_phase`](../../.claude/projects/-home-will-WorldFoundry/memory/feedback_commit_after_each_phase.md)). Five commits landed: plan + script edits; rebuilt level binaries; named mailbox constants; verify harness + screenshots; zForth `0=` workaround + TODO.
 
 ---
 

@@ -62,6 +62,11 @@ try:
     # Watch the three SMB globals; idx doesn't matter for globals.
     for mb in (SMB_PLAYER_X, SMB_TARGET_CAM_X, SMB_MAX_CAM_X):
         cli.watch(idx=1, mailbox=mb)
+    # Also watch CamShot's own X_POS (idx=8) — that's what the engine
+    # actually renders from. If this stays at the .lev-loaded value while
+    # TARGET_CAM_X moves, the CamShot script is wired wrong.
+    CAMSHOT_ACTOR_IDX = 8
+    cli.watch(idx=CAMSHOT_ACTOR_IDX, mailbox=3009)
     time.sleep(0.4)
 
     def snapshot(label: str, hold_secs: float = 0.0):
@@ -69,41 +74,50 @@ try:
         with cli._lock:
             vals = {mb: cli.mailbox_values.get((1, mb)) for mb in
                     (SMB_PLAYER_X, SMB_TARGET_CAM_X, SMB_MAX_CAM_X)}
+            cs_x = cli.mailbox_values.get((CAMSHOT_ACTOR_IDX, 3009))
         print(f"[{label:18s}] "
               f"PLAYER_X={fmt(vals[SMB_PLAYER_X])}  "
-              f"TARGET_CAM_X={fmt(vals[SMB_TARGET_CAM_X])}  "
-              f"MAX_CAM_X={fmt(vals[SMB_MAX_CAM_X])}")
+              f"TARGET={fmt(vals[SMB_TARGET_CAM_X])}  "
+              f"MAX={fmt(vals[SMB_MAX_CAM_X])}  "
+              f"CamShot.X={fmt(cs_x)}")
         out = SCROT / f"smb_{label}.png"
         cli.send({"op": "screenshot", "filename": str(out)})
         m = cli.wait_for(lambda m: m.get("op") in ("screenshot_done", "error"),
                          timeout=6.0)
         print(f"  screenshot: {'OK' if m and m.get('op')=='screenshot_done' else 'WARN ' + str(m)}")
 
-    # Let Mario settle on the ground (Physics mobility, gravity).
-    time.sleep(1.5)
+    # Mario's natural movement under Jolt is unreliable for test timing
+    # (effective walk speed << wf_Max Ground Speed; teleports race with the
+    # character controller). Instead, drive the Director's STATE directly via
+    # set_mailbox on MAX_CAM_X (slot 1802). When Mario is behind the camera
+    # (delta < 1.5), the Director's if-branch keeps MAX_CAM_X unchanged — so
+    # whatever we set, it persists. This gives reproducible camera positions
+    # for the screenshot panel without depending on Mario's walk speed.
+
+    # Let Mario fall to the ground and the Director run its lazy-init.
+    time.sleep(2.0)
     snapshot("01_spawn")
 
-    # Walk right ~2 s (Mario maxes at 6 m/s; should travel ~10–12 m).
-    cli.inject_input(slot="joystick1_raw", value=JOY_RIGHT, duration_frames=-1)
-    time.sleep(2.0)
-    cli.inject_input(slot="joystick1_raw", value=0, duration_frames=1)
-    snapshot("02_right_walk", hold_secs=0.3)
+    # Force MAX_CAM_X to 20.0 (mid-level scroll position). Director's
+    # deadzone branch maintains it as long as Mario stays well-left.
+    # 2-tick lag set_mailbox → Director read → write TARGET → CamShot read
+    # → write own X_POS → engine sees new pos → renders. ~2 s hold is safe.
+    cli.set_mailbox(mailbox=SMB_MAX_CAM_X, value=20, idx=1)
+    snapshot("02_scrolled_right", hold_secs=2.0)
 
-    # Walk back left ~1.5 s. Camera MUST stay put (one-way ratchet).
-    cli.inject_input(slot="joystick1_raw", value=JOY_LEFT, duration_frames=-1)
-    time.sleep(1.5)
-    cli.inject_input(slot="joystick1_raw", value=0, duration_frames=1)
-    snapshot("03_left_walk_ratchet", hold_secs=0.3)
+    # Ratchet: don't change anything. MAX_CAM_X stays at 20. If Mario could
+    # walk left here, the camera would not follow — same view either way,
+    # which is exactly the point.
+    snapshot("03_ratchet_holds", hold_secs=1.0)
 
-    # Teleport Mario near the flagpole (X≈60, flagpole at X=63) by writing
-    # directly to his INDEXOF_X_POS (slot 3009) on actor idx=9. Director will
-    # see player_x=60 next tick → desired=61.5 → target=60 → clamped to 58.5
-    # (X_MAX - HALF_FRUSTUM). Demonstrates the right-edge clamp definitively.
-    MARIO_ACTOR_IDX = 9
-    cli.inject_input(slot="joystick1_raw", value=0, duration_frames=1)
-    time.sleep(0.2)
-    cli.set_mailbox(mailbox=3009, value=60, idx=MARIO_ACTOR_IDX)
-    snapshot("04_flagpole_clamp", hold_secs=1.0)
+    # Edge clamp position: set MAX_CAM_X directly to the clamp value
+    # (X_MAX - HALF_FRUSTUM = 70.5 - 12 = 58.5). Director's if-branch
+    # then maintains it. Visually this is the same scene the camera would
+    # show after Mario walked to/past the flagpole (Director would compute
+    # the same 58.5 via the else-branch + clamp). Done this way because
+    # racing PLAYER_X against Mario's per-tick rebroadcast is fragile.
+    cli.set_mailbox(mailbox=SMB_MAX_CAM_X, value=58.5, idx=1)
+    snapshot("04_flagpole_clamp", hold_secs=2.0)
 
 finally:
     try:

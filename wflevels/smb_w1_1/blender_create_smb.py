@@ -217,21 +217,145 @@ def add_statplat(mesh_name, x0, y0, z0, x1, y1, z1, mat):
     return obj
 
 
+def _make_grid_tile_tga(out_path, width=256, height=32, cells_x=64, cells_y=8,
+                         line_px=1):
+    """Pre-tiled grid texture (one image, no mesh subdivision needed):
+    `cells_x` × `cells_y` grid lines baked in, light brown fill with darker
+    brown lines along the top + left edge of each cell.
+
+    Dims forced to {16,32,64,128,256,512,1024}^2 (textile-rs power-of-2
+    constraint at bitmap.rs:507). The whole texture is mapped UV [0, 1]
+    across the ground top face — works around the renderer's atlas-UV
+    uint8 overflow that breaks GL_REPEAT for mesh UVs above ~5
+    (docs/investigations/2026-05-18-texture-uv-uint8-overflow.md).
+
+    Defaults: 256×32 texture, 64 grid cells in X, 8 in Y. Mapped across the
+    73.5 m ground that gives one grid line every 73.5/64 ≈ 1.15 m — close
+    enough to a 1-metre grid for visual position estimation."""
+    from PIL import Image
+    BG = (143, 97, 38)
+    FG = (102, 66, 23)
+    cell_w = width // cells_x
+    cell_h = height // cells_y
+    img = Image.new('RGB', (width, height), BG)
+    px = img.load()
+    for y in range(height):
+        for x in range(width):
+            if (x % cell_w) < line_px or (y % cell_h) < line_px:
+                px[x, y] = FG
+    img.save(out_path)
+    return out_path
+
+
+def build_textured_ground_mesh(name, x0, y0, z0, x1, y1, z1, tex_path):
+    """Box ground with a UV-mapped grid texture on the top face only. Sides
+    and bottom use a solid-brown material (material 0). Top face uses the
+    grid material (material 1). UV is 1:1 with world XY so the tile repeats
+    every 1 m."""
+    import bmesh
+
+    mat_brown = make_mat('smb_ground_side', (0.56, 0.38, 0.15))
+
+    mat_grid = bpy.data.materials.new('smb_ground_grid')
+    mat_grid.use_nodes = True
+    bsdf = mat_grid.node_tree.nodes['Principled BSDF']
+    tex_node = mat_grid.node_tree.nodes.new('ShaderNodeTexImage')
+    tex_node.image = bpy.data.images.load(tex_path)
+    mat_grid.node_tree.links.new(tex_node.outputs['Color'], bsdf.inputs['Base Color'])
+
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new('UVMap')
+    v000 = bm.verts.new((x0, y0, z0))
+    v100 = bm.verts.new((x1, y0, z0))
+    v110 = bm.verts.new((x1, y1, z0))
+    v010 = bm.verts.new((x0, y1, z0))
+    v001 = bm.verts.new((x0, y0, z1))
+    v101 = bm.verts.new((x1, y0, z1))
+    v111 = bm.verts.new((x1, y1, z1))
+    v011 = bm.verts.new((x0, y1, z1))
+
+    # Top face (+Z, grid material) — CCW from above.
+    top = bm.faces.new((v001, v101, v111, v011))
+    top.material_index = 1
+    # Other faces (solid brown).
+    sides = [
+        bm.faces.new((v000, v010, v110, v100)),  # -Z bottom (CCW from below)
+        bm.faces.new((v000, v100, v101, v001)),  # -Y front
+        bm.faces.new((v110, v010, v011, v111)),  # +Y back
+        bm.faces.new((v010, v000, v001, v011)),  # -X left
+        bm.faces.new((v100, v110, v111, v101)),  # +X right
+    ]
+    for f in sides:
+        f.material_index = 0
+
+    bm.faces.ensure_lookup_table()
+    # UV in [0, 1] — pre-tiled grid baked into the texture itself. Keeps
+    # UV in the safe range to dodge the atlas-UV uint8 overflow that
+    # breaks GL_REPEAT for mesh UVs above ~5
+    # (docs/investigations/2026-05-18-texture-uv-uint8-overflow.md).
+    top_uvs = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    for loop, uv_xy in zip(top.loops, top_uvs):
+        loop[uv].uv = uv_xy
+
+    mesh = bpy.data.meshes.new(name)
+    bm.to_mesh(mesh)
+    bm.free()
+    mesh.materials.append(mat_brown)
+    mesh.materials.append(mat_grid)
+    return mesh
+
+
 # ── 5. Ground platform ────────────────────────────────────────────────────────
-mat_ground = make_mat('smb_ground', (0.56, 0.38, 0.15))  # NES brown/tan
-add_statplat('ground',
-             GROUND_X0, -GROUND_Y, GROUND_TOP_Z - GROUND_THICK,
-             GROUND_X1,  GROUND_Y, GROUND_TOP_Z,
-             mat_ground)
+# Texture-mapped 1-unit grid on top of the ground so screenshots can be read
+# off the floor (e.g. camera at X=9 sits at the 9th grid line from origin).
+# Single 32×32 tile, single mesh quad on top, UV scaled so 1 UV unit = 1
+# world metre (relies on GL_REPEAT — see TODO.md § SCRIPTING ENGINES for
+# the atlas-UV-uint8-overflow bug that may bite at high UV).
+grid_tex_path = _make_grid_tile_tga(os.path.join(SCRIPT_DIR, 'grid_tile.tga'))
+ground_mesh = build_textured_ground_mesh(
+    'ground',
+    GROUND_X0, -GROUND_Y, GROUND_TOP_Z - GROUND_THICK,
+    GROUND_X1,  GROUND_Y, GROUND_TOP_Z,
+    grid_tex_path)
+ground_obj = bpy.data.objects.new('ground', ground_mesh)
+ground_obj.location = (0.0, 0.0, 0.0)
+scene.collection.objects.link(ground_obj)
+attach_schema(ground_obj, 'statplat')
+ground_obj['wf_Visibility Mailbox'] = 1
+ground_obj['wf_Model Type'] = 'Mesh'
 
 # ── 6. ? Blocks ───────────────────────────────────────────────────────────────
-mat_qblock = make_mat('smb_qblock', (0.94, 0.72, 0.02))  # NES gold
+# Each block is TWO stacked statplats at the same position: the gold ?-block
+# (visible at start) and a flat-tan "used" block (hidden at start). On bump,
+# Mario's Forth script flips their Visibility Mailboxes. Only block 0 has the
+# stacked-used variant + mailbox wiring today; blocks 1/2 stay as plain
+# always-visible gold for now (follow-up work generalises). See
+# docs/plans/2026-05-17-per-actor-collision-mailboxes.md.
+mat_qblock      = make_mat('smb_qblock',      (0.94, 0.72, 0.02))  # NES gold
+mat_qblock_used = make_mat('smb_qblock_used', (0.78, 0.49, 0.18))  # flat tan
 BSIZE = T / 2  # half-side of a 1-tile block
+
+# Must match SMB_QBLOCK_0_NORMAL / SMB_QBLOCK_0_USED in
+# wfsource/source/mailbox/mailbox.inc. Hardcoded here because Blender custom
+# properties take literals, not `INDEXOF_*` constant names (those are Forth-side).
+MB_SMB_QBLOCK_0_NORMAL = 1803
+MB_SMB_QBLOCK_0_USED   = 1804
+
 for i, bx in enumerate(QBLOCK_XS):
-    add_statplat(f'qblock_{i:02d}',
-                 bx - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
-                 bx + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
-                 mat_qblock)
+    block = add_statplat(f'qblock_{i:02d}',
+                         bx - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                         bx + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
+                         mat_qblock)
+    if i == 0:
+        # Block 0: visibility driven by SMB_QBLOCK_0_NORMAL (Mario script
+        # inits it to 1 on first tick, flips to 0 on bump).
+        block['wf_Visibility Mailbox'] = MB_SMB_QBLOCK_0_NORMAL
+        used = add_statplat(f'qblock_{i:02d}_used',
+                            bx - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                            bx + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
+                            mat_qblock_used)
+        # USED stays at 0 until bump flips it to 1 (hidden by default).
+        used['wf_Visibility Mailbox'] = MB_SMB_QBLOCK_0_USED
 
 # ── 7. Mario placeholder ──────────────────────────────────────────────────────
 def _build_mario():
@@ -329,6 +453,13 @@ if player:
         # Broadcast own X to INDEXOF_SMB_PLAYER_X for the SMB scroll Director
         # (which runs after the main loop) to consume this tick.
         "INDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\n"
+        # Bump-only test — does the bump block alone break Mario?
+        "INDEXOF_COLLIDER_IDX read-mailbox 0<> if "
+        "INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if "
+        "INDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox 0<> if "
+        "0 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox "
+        "1 INDEXOF_SMB_QBLOCK_0_USED write-mailbox "
+        "then then then\n"
     )
 
     mario_mesh = _build_mario()
