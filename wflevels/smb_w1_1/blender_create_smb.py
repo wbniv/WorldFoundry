@@ -135,7 +135,7 @@ if director:
     # Mario-behind-camera cases (the one-way ratchet falls out for free).
     director['wf_Script'] = (
         "\\ wf\n"
-        "INDEXOF_SMB_MAX_CAM_X read-mailbox 0= if "
+        "INDEXOF_SMB_MAX_CAM_X read-mailbox not if "
         "4.5 INDEXOF_SMB_MAX_CAM_X write-mailbox then\n"
         "INDEXOF_SMB_PLAYER_X read-mailbox 1.5 +\n"
         "dup INDEXOF_SMB_MAX_CAM_X read-mailbox -\n"

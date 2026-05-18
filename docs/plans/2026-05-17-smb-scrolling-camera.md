@@ -64,7 +64,7 @@ INDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox
 
 ```forth
 \ wf
-INDEXOF_SMB_MAX_CAM_X read-mailbox 0= if 4.5 INDEXOF_SMB_MAX_CAM_X write-mailbox then
+INDEXOF_SMB_MAX_CAM_X read-mailbox not if 4.5 INDEXOF_SMB_MAX_CAM_X write-mailbox then
 INDEXOF_SMB_PLAYER_X read-mailbox 1.5 +
 dup INDEXOF_SMB_MAX_CAM_X read-mailbox -
 1.5 <

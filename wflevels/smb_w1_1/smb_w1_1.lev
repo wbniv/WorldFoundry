@@ -376,7 +376,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_MAX_CAM_X read-mailbox 0= if 4.5 INDEXOF_SMB_MAX_CAM_X write-mailbox then\nINDEXOF_SMB_PLAYER_X read-mailbox 1.5 +\ndup INDEXOF_SMB_MAX_CAM_X read-mailbox -\n1.5 <\nif drop INDEXOF_SMB_MAX_CAM_X read-mailbox\nelse 1.5 - dup 9.0 < if drop 9.0 then dup 58.5 > if drop 58.5 then dup INDEXOF_SMB_MAX_CAM_X write-mailbox\nthen\nINDEXOF_SMB_TARGET_CAM_X write-mailbox\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_MAX_CAM_X read-mailbox not if 4.5 INDEXOF_SMB_MAX_CAM_X write-mailbox then\nINDEXOF_SMB_PLAYER_X read-mailbox 1.5 +\ndup INDEXOF_SMB_MAX_CAM_X read-mailbox -\n1.5 <\nif drop INDEXOF_SMB_MAX_CAM_X read-mailbox\nelse 1.5 - dup 9.0 < if drop 9.0 then dup 58.5 > if drop 58.5 then dup INDEXOF_SMB_MAX_CAM_X write-mailbox\nthen\nINDEXOF_SMB_TARGET_CAM_X write-mailbox\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
