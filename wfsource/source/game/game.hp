@@ -76,6 +76,14 @@ public:
 	// out_dt, if non-null, receives the deltaTime for this frame.
 	FrameResult StepFrame(bool do_swap = true, Scalar* out_dt = nullptr);
 
+	// Smoke entry-point for the frame-step API. Demonstrates the
+	// "external host drives the engine" path by calling LoadLevel +
+	// N StepFrame + UnloadLevel directly (bypassing RunLevel). The
+	// existing gLevelOverridePath ("-L") supplies the level file.
+	// Used by wf_game's --frame-step-smoke=N CLI flag and as the
+	// reference for editor / replay / test-harness integration.
+	void SmokeRunFrameStep(int frames);
+
 	Level* CurrentLevel() const { return _curLevel; }
 
 	// Level-loop predicates for host-driven loops. LevelDone reads the

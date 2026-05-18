@@ -47,6 +47,7 @@
 
 int  gDebugPort = 0;                    // 0 = disabled; set by --debug-port N
 char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
+int  gFrameStepSmokeCount = 0;          // >0 = run --frame-step-smoke=N path
 #if DO_TEST_CODE
 int  gDebugPrintActors = 0;             // 1 = print idx/mesh/mobility/pos per actor at construction (debug builds only)
 #endif
@@ -198,6 +199,11 @@ ParseCommandLine(int argc, char** argv)
 			gDebugBind[sizeof(gDebugBind)-1] = '\0';
 			++index;
 			DBSTREAM1( cprogress << "Debug bridge bind: " << gDebugBind << std::endl; )
+		}
+		else if ( strncmp( argv[index]+1, "-frame-step-smoke=", 18 ) == 0 )
+		{
+			gFrameStepSmokeCount = atoi( argv[index] + 1 + 18 );
+			DBSTREAM1( cprogress << "Frame-step API smoke: " << gFrameStepSmokeCount << " frames" << std::endl; )
 		}
 #if DO_TEST_CODE
 		else if ( strcmp( argv[index]+1, "-debug-print-actors" ) == 0 )
@@ -366,9 +372,17 @@ PIGSMain( int argc, char* * argv )
 	DBSTREAM1( cprogress << "main::constructing the game" << std::endl; )
    WFGame* game = new (HALLmalloc) WFGame( nStartingLevel );
 	assert( ValidPtr( game ) );
-	DBSTREAM1( cprogress << "main::running game script" << std::endl; )
 
-	game->RunGameScript( );
+	if (gFrameStepSmokeCount > 0)
+	{
+		DBSTREAM1( cprogress << "main::frame-step API smoke (" << gFrameStepSmokeCount << " frames)" << std::endl; )
+		game->SmokeRunFrameStep( gFrameStepSmokeCount );
+	}
+	else
+	{
+		DBSTREAM1( cprogress << "main::running game script" << std::endl; )
+		game->RunGameScript( );
+	}
 
 	// Destroy the X window before running destructors so it disappears
 	// immediately rather than lingering until the OS reclaims the connection.

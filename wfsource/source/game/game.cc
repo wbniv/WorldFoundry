@@ -346,6 +346,38 @@ WFGame::LevelDone() const
 
 //-----------------------------------------------------------------------------
 
+void
+WFGame::SmokeRunFrameStep(int frames)
+{
+	extern const char* gLevelOverridePath;
+	AssertMsg(gLevelOverridePath, "--frame-step-smoke requires -L<level-path>");
+
+	DBSTREAM1(cprogress << "SmokeRunFrameStep: opening " << gLevelOverridePath << std::endl;)
+	_DiskFile* df = ConstructDiskFile(const_cast<char*>(gLevelOverridePath), HALLmalloc);
+	assert(ValidPtr(df));
+	// File is a complete L<N> chunk; RAM lands at SECTOR_SIZE
+	// (matches RunGameScript's -L path).
+	df->SeekRandom(DiskFileCD::_SECTOR_SIZE);
+
+	LoadLevel(df);
+	DBSTREAM1(cprogress << "SmokeRunFrameStep: LoadLevel done, stepping " << frames << " frames" << std::endl;)
+
+	for (int i = 0; i < frames && !HALWindowCloseRequested() && ContinueRequested(); ++i) {
+		Scalar dt;
+		FrameResult r = StepFrame(true, &dt);
+		if (r == FrameResult::Done) {
+			DBSTREAM1(cprogress << "SmokeRunFrameStep: level done at frame " << i << std::endl;)
+			break;
+		}
+	}
+
+	UnloadLevel();
+	MEMORY_DELETE(HALLmalloc, df, _DiskFile);
+	DBSTREAM1(cprogress << "SmokeRunFrameStep: complete" << std::endl;)
+}
+
+//-----------------------------------------------------------------------------
+
 WFGame::FrameResult
 WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 {
