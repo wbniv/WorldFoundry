@@ -78,6 +78,13 @@ public:
 
 	Level* CurrentLevel() const { return _curLevel; }
 
+	// Level-loop predicates for host-driven loops. LevelDone reads the
+	// loaded level's done() flag; ContinueRequested is the inverse of
+	// the abort flag (PIGSUserAborted has set _bContinue=false inside
+	// StepFrame). Defined inline in game.cc to avoid pulling level.hp.
+	bool LevelDone() const;
+	bool ContinueRequested() const { return _bContinue; }
+
 	SMemPool* MessagePortMemPool();
 
 	// mailbox methods

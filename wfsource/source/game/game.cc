@@ -336,6 +336,16 @@ WFGame::UnloadLevel()
 
 //-----------------------------------------------------------------------------
 
+bool
+WFGame::LevelDone() const
+{
+	// Treat "no level loaded" as done — callers can poll between
+	// UnloadLevel and a future LoadLevel without crashing.
+	return !_curLevel || _curLevel->done();
+}
+
+//-----------------------------------------------------------------------------
+
 WFGame::FrameResult
 WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 {
@@ -487,7 +497,7 @@ WFGame::RunLevel(_DiskFile* levelFile)
 {
 	LoadLevel(levelFile);
 
-	while ( !_curLevel->done() && _bContinue && !HALWindowCloseRequested() )
+	while ( !LevelDone() && ContinueRequested() && !HALWindowCloseRequested() )
 	{
 		StepFrame(true);
 	}
