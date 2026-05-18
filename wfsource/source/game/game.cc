@@ -482,6 +482,18 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 		}
 #endif
 	_deltaTime = do_swap ? _display->PageFlip() : _display->MeasureDelta();
+
+	// Host stalls (editor paused on a modal, breakpoint hit, GL hiccup)
+	// would otherwise hand the next StepFrame a multi-second deltaTime.
+	// PageFlip / MeasureDelta already cap at 1/5 s (200 ms); StepFrame
+	// tightens to 100 ms which lines up with Jolt's substep tolerance
+	// (project_variable_tick_rate_loadbearing). Standalone wf_game
+	// rarely trips this — only on real stalls — so its behaviour is
+	// unchanged in practice. Editor-as-host needs the tighter cap to
+	// stay simulable across pauses.
+	if (_deltaTime > SCALAR_CONSTANT(0.1))
+		_deltaTime = SCALAR_CONSTANT(0.1);
+
 	DBSTREAM2( cflow << "WFGame::update: done" << std::endl; )
 
 	assert(HALScratchLmalloc.Empty());		// make sure everyone remembered to free their scratch memory
