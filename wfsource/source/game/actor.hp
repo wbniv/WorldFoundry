@@ -272,6 +272,17 @@ protected:
 	Scalar						_scaleY;
 	Scalar						_scaleZ;
 
+	// Most-recent collision contact this frame. Set by Actor::Collision (the
+	// callback fires for any Actor that participates in a physics contact),
+	// cleared each frame in Actor::Update. COLLIDER_IDX is the freshness
+	// signal — zero means no collision since last clear. Normal vector points
+	// AWAY from the other object (collision.cc:309-310 negates for object2),
+	// so a ?-block hit from below sees NORMAL_Z < 0; landing on top of
+	// something sees NORMAL_Z > 0. Surfaced to scripts via mailbox 3044-3047.
+	// Added 2026-05-17; see docs/plans/2026-05-17-per-actor-collision-mailboxes.md.
+	int32						_lastColliderIdx;
+	Vector3						_lastCollisionNormal;
+
 	// DATA END
 
 #if SW_DBSTREAM

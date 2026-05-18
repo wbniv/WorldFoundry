@@ -915,7 +915,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\nINDEXOF_COLLIDER_IDX read-mailbox 0<> if INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if INDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox 0<> if 0 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox 1 INDEXOF_SMB_QBLOCK_0_USED write-mailbox then then then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\nINDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox not if INDEXOF_SMB_QBLOCK_0_USED read-mailbox not if 1 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox then then\nINDEXOF_COLLIDER_IDX read-mailbox 0<> if INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if INDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox 0<> if 0 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox 1 INDEXOF_SMB_QBLOCK_0_USED write-mailbox then then then\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }

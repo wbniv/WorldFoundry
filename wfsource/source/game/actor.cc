@@ -699,6 +699,9 @@ Actor::Actor( const SObjectStartupData* startupData ) :
 		_scaleZ = (oadZ == Scalar::zero) ? Scalar::one : oadZ;
 	}
 
+	_lastColliderIdx     = 0;
+	_lastCollisionNormal = Vector3::zero;
+
 	DBSTREAM3( cactor << "Created new Actor #" << _idxActor );
 	DBSTREAM3( cactor << ", Physical Attributes: " << std::endl );
 	DBSTREAM3( cactor << _physicalAttributes << std::endl; )
@@ -871,8 +874,6 @@ Actor::update()
 	}
 #endif
 #endif
-    //theLevel->GetMailboxes().WriteMailbox( EMAILBOX_NUM_COLLISIONS, Scalar::zero );
-
     char msgData[msgDataSize];
 	while( GetMsgPort().GetMsgByType( MsgPort::DELTA_HEALTH, &msgData,  msgDataSize) )
 	{
@@ -1058,6 +1059,14 @@ Actor::StartFrame()
 	assert(ValidPtr(_nonStatPlat->_input));
 	_nonStatPlat->_input->update();	// Moved this here so that both PredictPosition() and Update()
 						// agree about isPressed vs. justPressed
+
+	// Clear collision freshness signal at the TOP of the frame. The frame
+	// ordering (level.cc Level::update) is:
+	//   StartFrame → JoltWorldStep + DetectCollision (Collision() fires here,
+	//   sets _lastColliderIdx) → UpdatePhysics (script runs, reads the value).
+	// Clearing in Actor::update() (where the original NUM_COLLISIONS stub
+	// lived) would wipe the value before the script sees it.
+	_lastColliderIdx = 0;
 	DBSTREAM5( cflow << "Actor::StartFrame: done" << std::endl; )
 }
 
@@ -1234,6 +1243,16 @@ Actor::ReadSystemMailbox( int boxnum ) const
             return _scaleY;
         case EMAILBOX_Z_SCALE:
             return _scaleZ;
+
+        // Per-actor collision data — see Actor::Collision and Actor::Update.
+        case EMAILBOX_COLLIDER_IDX:
+            return Scalar(_lastColliderIdx, 0);
+        case EMAILBOX_COLLISION_NORMAL_X:
+            return _lastCollisionNormal.X();
+        case EMAILBOX_COLLISION_NORMAL_Y:
+            return _lastCollisionNormal.Y();
+        case EMAILBOX_COLLISION_NORMAL_Z:
+            return _lastCollisionNormal.Z();
 
         case EMAILBOX_KEYFRAME:
         {
@@ -1558,6 +1577,19 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             break;
         }
 
+        case EMAILBOX_COLLIDER_IDX:
+            _lastColliderIdx = (int32)value.WholePart();
+            break;
+        case EMAILBOX_COLLISION_NORMAL_X:
+            _lastCollisionNormal.SetX(value);
+            break;
+        case EMAILBOX_COLLISION_NORMAL_Y:
+            _lastCollisionNormal.SetY(value);
+            break;
+        case EMAILBOX_COLLISION_NORMAL_Z:
+            _lastCollisionNormal.SetZ(value);
+            break;
+
         case EMAILBOX_INPUT :
         {
 #pragma message( __FILE__ ": can _input be used instead of _inputScript? Then _inputScript wouldn't need to be stored in class Actor" )
@@ -1675,6 +1707,15 @@ Actor::GetMsgPort()
 void 
 Actor::Collision(PhysicalObject& other, const Vector3& normal)
 {
+	// Stash collision data on the actor so scripts can read it via mailboxes
+	// 3044-3047. Cast to Actor* for the index; PhysicalObjects that aren't
+	// Actors stay 0 (the freshness signal also reads as 0).
+	if (Actor* otherActor = dynamic_cast<Actor*>(&other))
+		_lastColliderIdx = otherActor->GetActorIndex();
+	else
+		_lastColliderIdx = 0;
+	_lastCollisionNormal = normal;
+
 	if ( normal.Z() < Scalar::zero )
 	{
 		if (GetMovementManager().GetMovementHandlerData())

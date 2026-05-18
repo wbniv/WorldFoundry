@@ -453,7 +453,22 @@ if player:
         # Broadcast own X to INDEXOF_SMB_PLAYER_X for the SMB scroll Director
         # (which runs after the main loop) to consume this tick.
         "INDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\n"
-        # Bump-only test — does the bump block alone break Mario?
+        # First-tick init for qblock_0 visibility — both mailboxes start at 0
+        # so the gold block is invisible until we kick NORMAL to 1. After a
+        # bump, NORMAL=0 and USED=1, so the inner `not` of USED is false and
+        # the init guard correctly skips on subsequent ticks.
+        # (Using `not` not `0=` — our zForth's bootstrap defines `: not 0 = ;`
+        # but doesn't expose `0=`/`0>`/`0<` directly; TODO surfaces this.)
+        "INDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox not if "
+        "INDEXOF_SMB_QBLOCK_0_USED read-mailbox not if "
+        "1 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox "
+        "then then\n"
+        # Bump detection: nonzero collider + NORMAL_Z > 0 (hit from above) +
+        # qblock_0 still gold. Acts on any hit-from-above against any actor
+        # for now; tightened to an actor-idx check in a follow-up when there's
+        # more than one bumpable block to demo. The per-actor COLLIDER_IDX
+        # mailbox is engine-populated by Actor::Collision (actor.cc:1676) and
+        # cleared each frame in Actor::StartFrame.
         "INDEXOF_COLLIDER_IDX read-mailbox 0<> if "
         "INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if "
         "INDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox 0<> if "

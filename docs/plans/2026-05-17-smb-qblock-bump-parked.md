@@ -1,8 +1,6 @@
-# SMB `?`-block bump mechanic — **PARKED**
+# SMB `?`-block bump mechanic — **SUPERSEDED**
 
-**Status:** Parked 2026-05-17.
-
-**Trigger to unpark:** After SMB W1-1 ships as a screenshot/video (or whichever level next reaches shipped state). The first shipped level is the gate — once it's out the door, come back and implement bump-from-below with the architecture this exploration recommends.
+**Status:** Superseded 2026-05-17 by [2026-05-17-per-actor-collision-mailboxes.md](2026-05-17-per-actor-collision-mailboxes.md). User reopened the design after parking, and a simpler mechanism (per-actor collision mailboxes auto-populated by `Actor::Collision`) turned out to be small enough to implement now without waiting for the level to ship. Both ruled-out options A (new OAS field) and B (new QBlock class) below are obsolete — the replacement uses zero new OAS fields and zero new C++ classes.
 
 ## Context
 
