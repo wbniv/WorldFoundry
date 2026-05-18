@@ -376,7 +376,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then                                                                                                                                                                                                                    \n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n1802 read-mailbox 0= if 4.5 1802 write-mailbox then\n1800 read-mailbox 1.5 +\ndup 1802 read-mailbox -\n1.5 <\nif drop 1802 read-mailbox\nelse 1.5 - dup 9.0 < if drop 9.0 then dup 58.5 > if drop 58.5 then dup 1802 write-mailbox\nthen\n1801 write-mailbox\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
@@ -800,6 +800,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n1801 read-mailbox INDEXOF_X_POS write-mailbox\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
@@ -914,7 +915,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox 1800 write-mailbox\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
