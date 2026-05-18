@@ -12,6 +12,7 @@
 
 #include <hal/lifecycle.h>
 #include <hal/android/wf_android_export.hp>
+#include <gfx/host_gl_context.h>
 
 #include <atomic>
 
@@ -62,5 +63,31 @@ HALWindowCloseRequested(void)
 // No native window to tear down from the app side on Android.
 extern "C" WF_ANDROID_EXPORT void
 HALCloseWindow(void)
+{
+}
+
+// Mobile is single-window standalone; host-supplied GL context isn't a
+// concept here. Stubs satisfy the cross-platform symbol set so editor
+// code that links the engine library compiles on every platform; the
+// editor itself runs on Linux for v1.
+
+extern "C" WF_ANDROID_EXPORT void
+SetHostGLContext(const HostGLContext* /*h*/)
+{
+}
+
+extern "C" WF_ANDROID_EXPORT HostGLContext
+GetHostGLContext(void)
+{
+    return HostGLContext{};   // valid = false
+}
+
+extern "C" WF_ANDROID_EXPORT void
+ClearHostGLContext(void)
+{
+}
+
+extern "C" WF_ANDROID_EXPORT void
+HALRequestClose(void)
 {
 }

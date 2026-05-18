@@ -11,6 +11,7 @@
 //=============================================================================
 
 #include <hal/lifecycle.h>
+#include <gfx/host_gl_context.h>
 
 #include <atomic>
 
@@ -41,5 +42,31 @@ HALIsSuspended(void)
 // to pump — the game loop isn't running yet.
 extern "C" void
 HALPumpSuspendedEvents(void)
+{
+}
+
+// Mobile is single-window standalone; host-supplied GL context isn't a
+// concept here. Stubs satisfy the cross-platform symbol set so editor
+// code that links the engine library compiles on every platform; the
+// editor itself runs on Linux for v1.
+
+extern "C" void
+SetHostGLContext(const HostGLContext* /*h*/)
+{
+}
+
+extern "C" HostGLContext
+GetHostGLContext(void)
+{
+    return HostGLContext{};   // valid = false
+}
+
+extern "C" void
+ClearHostGLContext(void)
+{
+}
+
+extern "C" void
+HALRequestClose(void)
 {
 }
