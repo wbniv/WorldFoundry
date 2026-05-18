@@ -68,7 +68,8 @@ WFGame::WFGame( const int nStartingLevel )
 	_desiredLevelNum( 0 ),		// default to first level in TOC; overridden by -l flag or shell script
 	_curLevel( nullptr ),
 	_gameMailboxes( nullptr ),
-	_bContinue( true )
+	_bContinue( true ),
+	_deltaTime( Scalar::zero )
 {
 	DBSTREAM1( cprogress << "WFGame::WFGame" << std::endl; )
 	JoltRuntimeInit();
@@ -297,6 +298,7 @@ WFGame::LoadLevel(_DiskFile* levelFile)
 	SfxLibrary::Load(6, "wflevels/qbert_practice/sfx/qbert_disc.wav");
 
 	_bContinue = true;
+	_deltaTime = Scalar::zero;
 	DBSTREAM1 ( cprogress << "Entering main game loop\n"; );
 	RestApi_Start();
 	{
@@ -334,67 +336,65 @@ WFGame::UnloadLevel()
 
 //-----------------------------------------------------------------------------
 
-void
-WFGame::RunLevel(_DiskFile* levelFile)
+WFGame::FrameResult
+WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 {
-	LoadLevel(levelFile);
+	assert(_curLevel);
 
-	Scalar deltaTime = Scalar::zero;
-	while ( !_curLevel->done() && _bContinue && !HALWindowCloseRequested() )
+	if ( HALIsSuspended() )
 	{
-		if ( HALIsSuspended() )
-		{
-			// Platform has backgrounded us (Android onPause). Skip render +
-			// PageFlip to avoid touching a torn-down GL context; pump platform
-			// events so APP_CMD_RESUME actually reaches HALNotifyResume and
-			// unsticks us. Linux never enters this branch — HALIsSuspended()
-			// is always false there.
-			HALPumpSuspendedEvents();
-			usleep(16000);
-			continue;
-		}
+		// Platform has backgrounded us (Android onPause). Skip render +
+		// PageFlip to avoid touching a torn-down GL context; pump platform
+		// events so APP_CMD_RESUME actually reaches HALNotifyResume and
+		// unsticks us. Linux never enters this branch — HALIsSuspended()
+		// is always false there.
+		HALPumpSuspendedEvents();
+		usleep(16000);
+		if (out_dt) *out_dt = Scalar::zero;
+		return FrameResult::Suspended;
+	}
 
-		RestApi_DrainQueue();
-		DebugServer_DrainQueue(*_curLevel);
-		assert(HALScratchLmalloc.Empty());
-		DBSTREAM1( cframeinfo << char(12) << std::endl << "Frame Info:" << std::endl; )
-		DBSTREAM2( cflow << "Top of WFGame::update" << std::endl; )
+	RestApi_DrainQueue();
+	DebugServer_DrainQueue(*_curLevel);
+	assert(HALScratchLmalloc.Empty());
+	DBSTREAM1( cframeinfo << char(12) << std::endl << "Frame Info:" << std::endl; )
+	DBSTREAM2( cflow << "Top of WFGame::update" << std::endl; )
 
 
 #if defined(DESIGNER_CHEATS)
-		if ( PIGSUserAborted() )
-		{
-			DBSTREAM1( cwarn << "Level Aborted" << std::endl; )
-			_bContinue = false;
-			while(PIGSUserAborted())
-				;						// wait for buttons to be released
-		}
+	if ( PIGSUserAborted() )
+	{
+		DBSTREAM1( cwarn << "Level Aborted" << std::endl; )
+		_bContinue = false;
+		while(PIGSUserAborted())
+			;						// wait for buttons to be released
+	}
 #endif
 
-		assert( ValidPtr(_curLevel ));
-		_curLevel->Validate();
-		DBSTREAM2( cflow << "WFGame::update: curLevel->Update" << std::endl; )
-		if ( !DebugServer_IsPaused() )
-			_curLevel->update(deltaTime);
-		DBSTREAM2( cflow << "WFGame::update: render scene" << std::endl; )
+	assert( ValidPtr(_curLevel ));
+	_curLevel->Validate();
+	DBSTREAM2( cflow << "WFGame::update: curLevel->Update" << std::endl; )
+	if ( !DebugServer_IsPaused() )
+		_curLevel->update(_deltaTime);
+	DBSTREAM2( cflow << "WFGame::update: render scene" << std::endl; )
 
-		if(_curLevel->camera() && _curLevel->camera()->ValidView())
-		{
-			_display->RenderBegin();
-			_curLevel->RenderScene();
-			RestApi_RenderBoxes();
-			_display->RenderEnd();
-		}
+	if(_curLevel->camera() && _curLevel->camera()->ValidView())
+	{
+		_display->RenderBegin();
+		_curLevel->RenderScene();
+		RestApi_RenderBoxes();
+		_display->RenderEnd();
+	}
 #if DO_ASSERTIONS
-		else if(_curLevel->camera())
-			AssertMsg(_curLevel->LevelClock().Current() < SCALAR_CONSTANT(10),"No Valid View after 10 seconds");
+	else if(_curLevel->camera())
+		AssertMsg(_curLevel->LevelClock().Current() < SCALAR_CONSTANT(10),"No Valid View after 10 seconds");
 #endif
 
-		DebugServer_BroadcastState(*_curLevel);
-		DebugServer_BroadcastPerf(deltaTime.AsFloat() * 1000.0f,
-		                          _curLevel->GetObjectList().Size());
-		DebugServer_BroadcastMailboxes(*_curLevel);
-		DBSTREAM2( cflow << "WFGame::update: page flip" << std::endl; )
+	DebugServer_BroadcastState(*_curLevel);
+	DebugServer_BroadcastPerf(_deltaTime.AsFloat() * 1000.0f,
+	                          _curLevel->GetObjectList().Size());
+	DebugServer_BroadcastMailboxes(*_curLevel);
+	DBSTREAM2( cflow << "WFGame::update: page flip" << std::endl; )
 #if DESIGNER_CHEATS
 		{
 			extern int wf_hud_score, wf_hud_timer, wf_hud_lives, wf_hud_game_over;
@@ -471,10 +471,25 @@ WFGame::RunLevel(_DiskFile* levelFile)
 			}
 		}
 #endif
-		deltaTime = _display->PageFlip();
-		DBSTREAM2( cflow << "WFGame::update: done" << std::endl; )
+	_deltaTime = do_swap ? _display->PageFlip() : _display->MeasureDelta();
+	DBSTREAM2( cflow << "WFGame::update: done" << std::endl; )
 
-		assert(HALScratchLmalloc.Empty());		// make sure everyone remembered to free their scratch memory
+	assert(HALScratchLmalloc.Empty());		// make sure everyone remembered to free their scratch memory
+
+	if (out_dt) *out_dt = _deltaTime;
+	return _curLevel->done() ? FrameResult::Done : FrameResult::Rendered;
+}
+
+//-----------------------------------------------------------------------------
+
+void
+WFGame::RunLevel(_DiskFile* levelFile)
+{
+	LoadLevel(levelFile);
+
+	while ( !_curLevel->done() && _bContinue && !HALWindowCloseRequested() )
+	{
+		StepFrame(true);
 	}
 
 #pragma message ("KTS: write code to handle lives and restarting same level, etc.")

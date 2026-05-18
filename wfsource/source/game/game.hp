@@ -56,6 +56,11 @@ public:
 	WFGame( const int nStartingLevel = 0 );
 	~WFGame();
 
+	// One-tick result. Rendered = normal frame ran; Suspended = platform
+	// backgrounded us (Android onPause), no render/PageFlip happened;
+	// Done = level reported done() (caller should stop the loop).
+	enum class FrameResult { Rendered, Suspended, Done };
+
 	// Per-level lifecycle. RunLevel = LoadLevel + while-loop + UnloadLevel
 	// for standalone wf_game. Hosts (editor, replay driver, test harness)
 	// call LoadLevel + StepFrame... + UnloadLevel directly.
@@ -63,6 +68,13 @@ public:
 	void UnloadLevel();
 	void RunLevel(_DiskFile* levelFile);		// executes a single level, returns when done
 	void RunGameScript();				// runs the whole game, returns when game (really) over (quit to OS)
+
+	// One tick of the inner game loop. do_swap=true (default) drives
+	// _display->PageFlip(); do_swap=false uses _display->MeasureDelta()
+	// so a host that swaps its own buffers (editor compositing widgets
+	// on top of the engine draw) still gets an honest deltaTime.
+	// out_dt, if non-null, receives the deltaTime for this frame.
+	FrameResult StepFrame(bool do_swap = true, Scalar* out_dt = nullptr);
 
 	Level* CurrentLevel() const { return _curLevel; }
 
@@ -104,6 +116,7 @@ private:
 	Level*			_curLevel;
 	GameMailboxes*	_gameMailboxes;
 	bool			_bContinue;		// false short-circuits the level loop (PIGSUserAborted)
+	Scalar			_deltaTime;		// last frame's delta; fed back into next update()
 
 public:
 //     class LevelActor : public Actor
