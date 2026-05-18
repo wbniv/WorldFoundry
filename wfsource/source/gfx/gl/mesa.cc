@@ -197,12 +197,25 @@ OpenMainWindow( char *title )
 
 //==============================================================================
 
-// Step 3 fills in the body — for step 2 we just need the symbol so the
-// dispatch in InitWindow compiles. Asserts unreached because step 2
-// doesn't yet have any caller of SetHostGLContext.
+// Editor-host init path: skip XOpenDisplay / glXChooseVisual /
+// glXCreateContext / XCreateWindow — the host already did those and
+// passed us the handles via SetHostGLContext. We just adopt them into
+// halDisplay and make the context current so the WFInitGL() call that
+// follows in Display::Display sees the host's GL state instead of a
+// default zero state. visInfo stays nullptr — the host already chose
+// the visual; halDisplay.visInfo is only consulted by the standalone
+// init path. The host's GLXContext is bound implicitly via
+// glXMakeCurrent and we never destroy it — HALCloseWindow's step-4
+// early-bail ensures we don't free what the host owns.
 static bool InitWithExistingContext()
 {
-    assert(!"InitWithExistingContext stub — step 3 implements; should not fire until a host calls SetHostGLContext");
+    const HostGLContext h = GetHostGLContext();
+    assert(h.valid);
+    halDisplay.mainDisplay = static_cast<XDisplay*>(h.display);
+    halDisplay.win         = static_cast<Window>(h.win);
+    glXMakeCurrent(halDisplay.mainDisplay, halDisplay.win,
+                   static_cast<GLXContext>(h.context));
+    AssertGLOK();
     return true;
 }
 
