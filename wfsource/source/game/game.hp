@@ -103,9 +103,9 @@ public:
 };
 
 //=============================================================================
-
-extern WFGame* theGame;
-
+// (extern WFGame* theGame removed 2026-05-18 — Phase 0b WFGame de-globaling.
+// Level holds a WFGame& reference; debug-only Actor::Print's level-number
+// lookup uses Actor::SetPrintLevelNum, set by Level::Level.)
 //=============================================================================
 #include "game.hpi"	// include all inline definitions as appropriate
 //=============================================================================

@@ -164,6 +164,13 @@ public:
 	// utility
 	Scalar GetDistanceTo( const Actor *pActor ) const;
 
+#if SW_DBSTREAM
+	// Cached level number for Actor::Print()'s levels.txt lookup. Set by
+	// Level::Level() so Actor::Print no longer needs to consult the (removed)
+	// `theGame` global. Debug-print path only.
+	static void SetPrintLevelNum( int32 n );
+#endif
+
 	// mailbox / messages / inter-object communication
 	Scalar ReadSystemMailbox( int boxnum ) const;
 	void WriteSystemMailbox( int boxnum, const Scalar value );

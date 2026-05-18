@@ -73,6 +73,7 @@ class Path;
 class Level;
 class Director;
 class LevelRoomCallbacks;
+class WFGame;
 
 struct _LevelObj;
 
@@ -120,7 +121,8 @@ class Level
 	// construction/deletion
 	Level
 	(
-		_DiskFile* _diskFile
+		WFGame& game
+		,_DiskFile* _diskFile
 		,ViewPort& _viewPort
         ,VideoMemory& videoMemory
         ,Mailboxes* parentMailboxes
@@ -199,6 +201,7 @@ private:
 	void LoadLevelData();				// assumes _levelFile already set to valid DiskFile
 
 	// data members initialized before constructor body
+	WFGame&							_game;     // parent game instance (de-globaled from theGame, 2026-05-18)
 	ViewPort&						_viewPort;
 	// data members initialized in constructor body
 	void*							_levelOnDiskMemory;  // actual _levelData allcation address

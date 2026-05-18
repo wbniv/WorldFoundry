@@ -257,7 +257,7 @@ WFGame::RunLevel(_DiskFile* levelFile)
 {
     DBSTREAM3( cprogress << "WFGame::RunLevel (sizeof level = " << sizeof(Level) << std::endl; )
     GameMailboxes gmb(*this);
-    Level* _curLevel = new (HALLmalloc) Level( levelFile, *_viewPort, *_videoMemory, &gmb );
+    Level* _curLevel = new (HALLmalloc) Level( *this, levelFile, *_viewPort, *_videoMemory, &gmb );
 	DBSTREAM3( cprogress << "new level at address " << _curLevel << ", sizeof " << sizeof(Level) << std::endl; )
 	assert( ValidPtr(_curLevel));
 	DBSTREAM3( cprogress << "WFGame::loadLevel done" << std::endl; )

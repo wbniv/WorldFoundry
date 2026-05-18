@@ -54,7 +54,9 @@ char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
 int  gDebugPrintActors = 0;             // 1 = print idx/mesh/mobility/pos per actor at construction (debug builds only)
 #endif
 
-WFGame* theGame = NULL;
+// theGame global removed 2026-05-18 (Phase 0b WFGame de-globaling). WFGame
+// is now instantiated in PIGSMain (see below) and passed by reference to Level;
+// other engine code that needs WFGame state goes through Level's parent ref.
 
 #if defined(DESIGNER_CHEATS)
 bool bRecordVideo = false;
@@ -370,7 +372,6 @@ PIGSMain( int argc, char* * argv )
 	DBSTREAM1( cprogress << "main::constructing the game" << std::endl; )
    WFGame* game = new (HALLmalloc) WFGame( nStartingLevel );
 	assert( ValidPtr( game ) );
-   theGame = game;
 	DBSTREAM1( cprogress << "main::running game script" << std::endl; )
 
 	game->RunGameScript( );

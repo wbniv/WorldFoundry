@@ -125,7 +125,17 @@ Actor::Validate() const
 
 #if SW_DBSTREAM
 #include <pigsys/genfh.hp>
-#include "game.hp"
+
+// Set by Level::Level() at level construction time so Actor::Print's
+// levels.txt lookup can find the right line without consulting a global
+// `theGame` pointer (removed 2026-05-18 as part of Phase 0b WFGame
+// de-globaling). Initialised to 0; Level updates per-level.
+static int32 g_actorPrintLevelNum = 0;
+void
+Actor::SetPrintLevelNum( int32 n )
+{
+	g_actorPrintLevelNum = n;
+}
 
 std::ostream&
 Actor::Print( std::ostream& s ) const
@@ -139,7 +149,7 @@ Actor::Print( std::ostream& s ) const
 	static int actorCount = 0;
 	if (!actorNames[0])
 	{
-		int levelNum = theGame->GetLevelNum() + 1;
+		int levelNum = g_actorPrintLevelNum + 1;
 		char szLevelsTxt[ _MAX_PATH ];
 
 		extern char szOadDir[];

@@ -265,7 +265,7 @@ Level::ConstructStartupData( SObjectStartupData& startupData, _ObjectOnDisk* obj
 	startupData.roomNum = ObjectIsInWhichRoom( index, _levelData );
 	startupData.memory = _memory;
     startupData.currentTime = LevelClock();
-    startupData.messagePortMemPool = theGame->MessagePortMemPool();
+    startupData.messagePortMemPool = _game.MessagePortMemPool();
     startupData.mailboxes = &_mailboxes;
 
     //assert(ValidPtr(((char*)_levelData)  + _levelData->channelsOffset ));
@@ -331,12 +331,14 @@ WorldFoundryMailboxesManager::LookupMailboxes(int objectIndex)
 
 Level::Level
 (
-	_DiskFile* diskFile
+	WFGame& game
+	,_DiskFile* diskFile
 	,ViewPort& viewPort
     ,VideoMemory& videoMemory
     ,Mailboxes* parentMailboxes
 )
   :
+	_game( game ),
 	_viewPort( viewPort ),
 	_theLevelRooms( NULL ),
 	_theActiveRooms( NULL ),
@@ -361,6 +363,13 @@ Level::Level
     _mailboxesManager(this->_actors,_mailboxes)
 {
 	DBSTREAM1( cflow << "Level::Level:" << std::endl; )
+
+#if SW_DBSTREAM
+	// Update Actor::Print's cached level number for its levels.txt lookup.
+	// Replaces the prior theGame->GetLevelNum() lookup (theGame removed in
+	// Phase 0b WFGame de-globaling, 2026-05-18).
+	Actor::SetPrintLevelNum( _game.GetLevelNum() );
+#endif
 
 #if 0                   // kts used to check levelcon.h sizes
     std::cout << "sizeof(_CollisionRectOnDisk) = " << sizeof(_CollisionRectOnDisk) << std::endl;
