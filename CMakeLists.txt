@@ -424,46 +424,58 @@ if(WF_ENABLE_STEAM)
 endif()
 
 # ─── android_native_app_glue (Android only) ──────────────────────────────────
+# Lives in the wf_game executable shell, not the wfengine library — it provides
+# ANativeActivity_onCreate, the Android app entry point. The library exposes
+# its include path (Android engine sources include android_native_app_glue.h).
 if(ANDROID)
     set(APP_GLUE_DIR ${ANDROID_NDK}/sources/android/native_app_glue)
-    list(APPEND WF_SOURCES ${APP_GLUE_DIR}/android_native_app_glue.c)
     list(APPEND WF_INCLUDES ${APP_GLUE_DIR})
 endif()
 
-# ─── wf_game target ───────────────────────────────────────────────────────────
+# ─── Platform-shell sources (entry points go in wf_game, not wfengine) ────────
+# Phase 0a (2026-05-18): the engine compiles into a libwfengine.a static library
+# and wf_game is a thin per-platform executable that provides the entry point
+# (main / android_main) and links wfengine. This lets future hosts (e.g. the
+# collaborative editor) link wfengine and supply their own main, without
+# colliding with wf_game's. The library's calls to FatalError /
+# _PlatformSpecificInit / _PlatformSpecificUnInit / etc. (defined in the
+# platform-shell files) are resolved at executable link time as usual for
+# static libraries with unresolved references. See
+# docs/investigations/2026-05-18-collaborative-level-editor-design.md
+# § Engine linkability.
+set(WF_PLATFORM_SHELL_SOURCES)
 if(ANDROID)
-    add_library(wf_game SHARED ${WF_SOURCES})
-    # ANativeActivity_onCreate lives in android_native_app_glue.c and is the
-    # Android loader's entry point. Without -u the linker garbage-collects it.
-    target_link_options(wf_game PRIVATE -u ANativeActivity_onCreate)
+    list(APPEND WF_PLATFORM_SHELL_SOURCES
+        ${SRC}/hal/android/native_app_entry.cc
+        ${APP_GLUE_DIR}/android_native_app_glue.c)
 elseif(IOS)
-    # MACOSX_BUNDLE makes this an .app directory rather than a bare Mach-O.
-    # Phase 1C fills in the Info.plist + launch screen via target properties.
-    add_executable(wf_game MACOSX_BUNDLE ${WF_SOURCES})
+    list(APPEND WF_PLATFORM_SHELL_SOURCES
+        ${SRC}/hal/ios/native_app_entry.mm)
 else()
-    add_executable(wf_game ${WF_SOURCES})
+    list(APPEND WF_PLATFORM_SHELL_SOURCES
+        ${SRC}/hal/linux/platform.cc)
 endif()
+# Remove shell sources from the library's source list (the directory glob above
+# would otherwise pick them up — they live alongside engine-library files).
+list(REMOVE_ITEM WF_SOURCES ${WF_PLATFORM_SHELL_SOURCES})
 
-target_include_directories(wf_game PRIVATE ${WF_INCLUDES})
-target_compile_definitions(wf_game PRIVATE ${WF_DEFS})
-# -fpermissive and tricky macro defines go in compile_options (not definitions).
-# Optimisation is config-dependent: Debug / RelWithDebInfo stay at -O0 -g so
-# the debugger shows real source; Release cranks up -O3 + LTO + section GC.
-target_compile_options(wf_game PRIVATE
+# ─── wfengine library target ──────────────────────────────────────────────────
+# Static library containing all engine code except the platform entry-point
+# shell. Linked by wf_game (below) and, in future, by the collaborative editor.
+add_library(wfengine STATIC ${WF_SOURCES})
+target_include_directories(wfengine PUBLIC ${WF_INCLUDES})
+target_compile_definitions(wfengine PUBLIC ${WF_DEFS})
+target_compile_options(wfengine PRIVATE
     -fpermissive -w
     "-D__GAME__=\"wf_game\""
     "-DERR_DEBUG(x)="
     "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
     "$<$<CONFIG:Release>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>"
 )
-target_link_options(wf_game PRIVATE
-    "$<$<CONFIG:Release>:-flto=thin;-Wl,--gc-sections;-Wl,--icf=safe;-Wl,-O2;-Wl,--export-dynamic-symbol=ANativeActivity_onCreate>"
-)
-
 if(ANDROID OR IOS)
     # Legacy `register` keyword is C++17-removed; WF's pigsys/endian.cc still
     # uses it. Silence to match the Linux build's permissive stance.
-    target_compile_options(wf_game PRIVATE -Wno-register)
+    target_compile_options(wfengine PRIVATE -Wno-register)
 endif()
 
 # iOS: miniaudio.h (included via audio/linux/audio_internal.hp) pulls in
@@ -477,6 +489,42 @@ if(IOS)
             PROPERTIES LANGUAGE OBJCXX
         )
     endforeach()
+endif()
+
+# ─── wf_game target ───────────────────────────────────────────────────────────
+# Thin per-platform executable: provides the entry point (main / android_main)
+# and links wfengine. The platform-shell file also defines symbols the engine
+# library references but doesn't define (FatalError, _PlatformSpecificInit,
+# _PlatformSpecificUnInit) — those resolve at link time.
+if(ANDROID)
+    add_library(wf_game SHARED ${WF_PLATFORM_SHELL_SOURCES})
+    # ANativeActivity_onCreate lives in android_native_app_glue.c and is the
+    # Android loader's entry point. Without -u the linker garbage-collects it.
+    target_link_options(wf_game PRIVATE -u ANativeActivity_onCreate)
+elseif(IOS)
+    # MACOSX_BUNDLE makes this an .app directory rather than a bare Mach-O.
+    # Phase 1C fills in the Info.plist + launch screen via target properties.
+    add_executable(wf_game MACOSX_BUNDLE ${WF_PLATFORM_SHELL_SOURCES})
+else()
+    add_executable(wf_game ${WF_PLATFORM_SHELL_SOURCES})
+endif()
+
+# wf_game's shell file inherits include dirs + compile definitions from
+# wfengine via target_link_libraries (PUBLIC propagation). Compile options
+# don't propagate; re-apply the engine flags to wf_game's shell so it compiles
+# with the same -fpermissive / __GAME__ / etc. as engine sources.
+target_compile_options(wf_game PRIVATE
+    -fpermissive -w
+    "-D__GAME__=\"wf_game\""
+    "-DERR_DEBUG(x)="
+    "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
+    "$<$<CONFIG:Release>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>"
+)
+target_link_options(wf_game PRIVATE
+    "$<$<CONFIG:Release>:-flto=thin;-Wl,--gc-sections;-Wl,--icf=safe;-Wl,-O2;-Wl,--export-dynamic-symbol=ANativeActivity_onCreate>"
+)
+if(ANDROID OR IOS)
+    target_compile_options(wf_game PRIVATE -Wno-register)
 endif()
 
 if(ANDROID)
@@ -494,6 +542,9 @@ if(ANDROID)
 endif()
 
 # ─── Platform link libraries ──────────────────────────────────────────────────
+# OS-level libraries the engine code calls into. PUBLIC on wfengine so they
+# propagate transitively — wf_game (and any future host like the editor) just
+# `target_link_libraries(... wfengine)` and gets them automatically.
 if(ANDROID)
     list(APPEND WF_LINK_LIBS EGL GLESv3 android log m OpenSLES)
 elseif(IOS)
@@ -515,6 +566,8 @@ elseif(IOS)
     )
 else()
     list(APPEND WF_LINK_LIBS GL GLU X11 m pthread dl)
+    # wf_game-specific link option (noexecstack on the final exe, not on the
+    # library — static libraries don't have a stack to mark).
     target_link_options(wf_game PRIVATE -Wl,-z,noexecstack)
     if(WF_ENABLE_STEAM)
         target_link_directories(wf_game PRIVATE
@@ -524,7 +577,8 @@ else()
     endif()
 endif()
 
-target_link_libraries(wf_game PRIVATE ${WF_LINK_LIBS})
+target_link_libraries(wfengine PUBLIC ${WF_LINK_LIBS})
+target_link_libraries(wf_game  PRIVATE wfengine)
 
 # ─── iOS .app bundle resources ────────────────────────────────────────────────
 if(IOS)
