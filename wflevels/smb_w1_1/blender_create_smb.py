@@ -638,7 +638,7 @@ if camshot:
     camshot['wf_FOV']                 = 35.0
     camshot['wf_Pan Time In Seconds'] = 0.1
     camshot['wf_Model Type']          = 'None'
-    camshot['wf_Track Object'] = 'Target02'
+    camshot['wf_Track Object'] = 'Player'
     camshot['wf_Follow']       = 'Target02'
     # SMB scroll: read INDEXOF_SMB_TARGET_CAM_X written by the Director on
     # the previous tick (Director runs after main loop, this runs in it),
