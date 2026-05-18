@@ -1,13 +1,15 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-05-17  
+**As of:** 2026-05-18  
 **Branch:** `2026-new-level`
 
 ---
 
 ## History
 
-36 days of work (2026-04-12 – 2026-05-17). Newest first:
+37 days of work (2026-04-12 – 2026-05-18). Newest first:
+
+- **SMB Mario movement retune + Jolt airborne sync fix (2026-05-18)** — Bumped Mario's ground tuning (Running Accel 16→40, Max Ground Speed 12→24), zeroed Air Acceleration so the joystick has no effect once airborne, dropped Jumping Acceleration 70→60 so a full-hold apex tops out at the `?`-block underside (no landing on top), added SMB-style variable jump (releasing `kBtnJump` mid-jump zeros remaining `jumpDuration` in `AirHandler::predictPosition`), and root-caused the wall/under-block "stuck Mario" bug to `jolt_backend.cc`'s airborne velCache only reconciling Y from displacement — all three axes now derive from actual displacement so contacts zero the blocked component and Mario can rapid-bump from below. See [plan](docs/plans/2026-05-18-smb-mario-movement-retune.md).
 
 - **SMB `?`-block coin pop-out (2026-05-18)** — Added a third stacked actor at block 0 (`qblock_00_coin`, anchored yellow disc) plus a 60-tick Forth animation in Mario's per-tick script that arcs the coin Z up + down via `write-actor-mailbox` to its `INDEXOF_Z_POS` (qbert popup_500 pattern). Two new SMB GLOBAL_USER mailboxes (`SMB_QBLOCK_0_COIN_VISIBLE`, `SMB_QBLOCK_0_COIN_PHASE`) drive visibility + phase. No engine changes — pure level authoring + Forth. The full bump-to-coin loop is in place; bridge-test capture mid-arc is bounded by the engine throttle / screenshot round-trip time, so verify interactively for the smooth visible feel. See [plan](docs/plans/2026-05-18-smb-qblock-coin-pop.md).
 
@@ -165,6 +167,8 @@
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
+| 2026-05-18 | [Plan: Engine frame-step API](docs/plans/2026-05-18-engine-frame-step-api.md) | **Parked** | Phase 0b sub-task #1 of the collaborative editor. Split `WFGame::RunLevel`'s `while` body into `Level::Step(dt)` / `WFGame::StepFrame(do_swap, out_dt)` so a host process (editor, replay driver, test harness) can drive the engine one frame at a time. Promote `_curLevel` / `_bContinue` to `WFGame` members; add `LoadLevel` / `UnloadLevel`. `RunLevel` becomes a thin loop preserving standalone behaviour bit-identical. ~1–2 wks. Independent of [external GL context plan](docs/plans/2026-05-18-engine-external-gl-context.md). |
+| 2026-05-18 | [Plan: Engine external GL context](docs/plans/2026-05-18-engine-external-gl-context.md) | **Parked** | Phase 0b sub-task #2 of the collaborative editor. Add `InitWithExistingContext(XDisplay*, Window, GLXContext)` to `mesa.cc` so an editor host can render the engine into its own GL widget (Dear ImGui overlay, `QOpenGLWidget`, etc.) without the engine opening its own X11 connection. `HALCloseWindow` / `XEventLoop` early-bail in host-owned mode. Linux-only for v1; iOS / Android stub. ~1 wk. Independent of [frame-step API plan](docs/plans/2026-05-18-engine-frame-step-api.md). |
 | 2026-04-18 | [Plan: Android launcher polish — adaptive-icon XML](docs/plans/2026-04-18-android-launcher-polish.md) | **Not started** | **Goal:** Layer `res/mipmap-anydpi-v26/ic_launcher.xml` adaptive-icon XML on top of the legacy mipmap PNGs that just landed, so Android 8+ renders rounded / themed / dynamic-shape forms via foreground + background drawables. Carry-over from the Android port closure audit. |
 | 2026-04-18 | [Plan: audio assets from iff](docs/plans/2026-04-18-audio-assets-from-iff.md) | **Not started** | **Goal:** retire every filesystem / loose-file audio loader — MIDI, soundfont, SFX all come through `cd.iff` / `level<N>.iff` chunks like meshes and textures already do. Current `loadAssetBytes(path)` path stays behind a `-DWF_AUDIO_DEV_LOOSE_FILES=1` opt-in for iteration. Requires new IFF chunk tags (MIDI/SFNT/SFX) + `iffcomp-rs` + `levcomp-rs` + Blender plugin updates. Unblocks the iOS port from needing its own asset-bundling pipeline. |
 | 2026-04-17 | [Plan: Steam release](docs/plans/2026-04-17-steam.md) | **In progress — Phases 1+2 done** | Steamworks SDK lifecycle wired into HAL + PageFlip. Steam Input → `EJ_BUTTONF_*` merged in `_JoystickButtonsF`. `WF_ENABLE_STEAM=1` build flag; SDK not committed (see vendor README). Phases 3 (depot) and 4 (store page) deferred. |
