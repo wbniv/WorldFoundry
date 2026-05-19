@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 id = "wf_blender"
 name = "World Foundry Level Editor"
-tagline = "OAD schema-driven game object attributes for World Foundry"
+tagline = "OAD attributes editor + Level importer/exporter"
 version = "0.2.0"
 type = "add-on"
 blender_version_min = "4.2.0"
