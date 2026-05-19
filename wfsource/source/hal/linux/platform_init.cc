@@ -56,9 +56,11 @@ bool bFullScreen = true;
 
 SAlloc* stacks;
 
-//=============================================================================
-// this is the actual main, which may be pasted into user code if you wish to
-// modify it, or you can just default to this one
+// main() lives in hal/linux/platform_main.cc (split out 2026-05-18 for editor
+// Phase 0b). This file holds engine-needed helpers (_PlatformSpecificInit,
+// FatalError, FPEHandler, ParseWindowSwitches) + platform globals shared with
+// the engine library; the shell file holds only main, so hosts (editor /
+// host-GL e2e test) can link libwfengine.a and supply their own main.
 
 //=============================================================================
 
@@ -162,29 +164,7 @@ ParseWindowSwitches( int __argc, char* __argv[] )
 }
 
 
-int
-main( int argc, char* argv[] )
-{
-	sys_init( &argc, &argv );
-
-	assert( argv[0] );
-	//_splitpath( argv[0], NULL, NULL, szAppName, NULL );
-    strcpy(argv[0],szAppName);              // kts 4/10/99 8:52 
-#if DEBUG
-	strlwr( szAppName );
-#endif
-
-	ParseWindowSwitches( argc, argv );
-#if		defined(DESIGNER_CHEATS)
-	if ( bPrintVersion )
-		printf( "cbHalLmalloc = %ld, cbHalScratchLmalloc = %ld\n", cbHalLmalloc, cbHalScratchLmalloc );
-#endif
-
-	HALStart(argc, argv,HAL_MAX_TASKS,HAL_MAX_MESSAGES,HAL_MAX_PORTS);
-
-//	PIGSMain( argc, argv );
-	return 0;
-}
+// main() moved to platform_main.cc; see file header for rationale.
 
 //=============================================================================
 

@@ -452,8 +452,14 @@ elseif(IOS)
     list(APPEND WF_PLATFORM_SHELL_SOURCES
         ${SRC}/hal/ios/native_app_entry.mm)
 else()
+    # Linux: only platform_main.cc (just main()) goes in the shell.
+    # platform_init.cc (FatalError, _PlatformSpecificInit, FPEHandler,
+    # ParseWindowSwitches, _halWindow* globals) compiles into libwfengine.a
+    # via the hal/linux glob so hosts (editor, host-GL e2e test) can link the
+    # library and supply their own main. Split landed 2026-05-18 (editor
+    # Phase 0b sub-task 3).
     list(APPEND WF_PLATFORM_SHELL_SOURCES
-        ${SRC}/hal/linux/platform.cc)
+        ${SRC}/hal/linux/platform_main.cc)
 endif()
 # Remove shell sources from the library's source list (the directory glob above
 # would otherwise pick them up — they live alongside engine-library files).
