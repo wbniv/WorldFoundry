@@ -56,6 +56,34 @@ Format per entry:
 
 ---
 
+## Harness binary trips SIGTRAP in `JPH::BodyID::operator new[]` (Jolt selftest) — 2026-05-18
+
+**Status:** INVESTIGATING — `wf_host_gl_e2e_test` (the e2e harness built against `libwfengine.a` with its own `main()`) reaches HALStart, gets through pigsys/audio/joystick init, but SIGTRAPs inside the Jolt physics selftest at `BodyManager.cpp:126` (`active_bodies = new BodyID[inMaxBodies]`).
+
+**Symptom:** Stepping through with gdb shows: `JPH::Allocate` global is correctly initialized to `AllocateImpl` (function pointer set by `RegisterDefaultAllocator()` which DID run); the JPH_ASSERT immediately before the failing line passes; the SIGTRAP fires inside the inline `JPH_OVERRIDE_NEW_DELETE` operator. `BodyManager::mActiveBodies[0]` is `nullptr` (correct), but `mActiveBodies[1]` is `0xa9a9a9a900000000` — a debug-fill pattern (low 32 bits zeroed but high 32 stayed as `0xa9`).
+
+**Reproducer:**
+```
+DISPLAY=:0 ./cmake-build-linux/wf_host_gl_e2e_test --frames=5 --cycles=1
+```
+Crashes with exit 133 (SIGTRAP).
+
+**Same code in wf_game:** `./engine/wf_game --frame-step-smoke=5 -L<level>` runs the same `RunSelftest()` code path and prints "selftest ok (sphere fell to z=5.098)" cleanly. So the bug is the harness binary's context, not Jolt's code.
+
+**Hypothesis (unproven):** ODR / stack-init divergence. The harness's TU is compiled with slightly different flags than Jolt.a or wfengine.a. Compiler may emit a different layout for `PhysicsSystem` member offsets, or skip the default-member-initializer `BodyID* mActiveBodies[2] = { }` due to some optimization decision. The `0xa9` pattern looks like a debug-stack-fill from glibc's `MALLOC_PERTURB_` or compiler-injected sentinel.
+
+**Investigation needed:**
+1. Compare assembly of `PhysicsSystem` ctor between Jolt.a (inline) and the harness's instantiation point — verify both zero-init `mActiveBodies`.
+2. Try compiling the harness with `-DJPH_DISABLE_CUSTOM_ALLOCATOR` to bypass the inline op-new entirely.
+3. Try ASAN to see if it's a stack-init read or something more subtle.
+4. As a last-resort workaround: wrap `RunSelftest` so it's only called from wfengine.a (not from harness TU).
+
+**Why this matters:** Blocks the e2e harness end-to-end test. Phase C (the harness) builds and links cleanly — Phase A's `libwfengine.a` split is structurally sound — but the harness can't yet exercise a full Load/Step/Unload because Jolt selftest aborts first.
+
+**Why dormant:** Every prior consumer of Jolt's RunSelftest in this codebase was wf_game (or another translation unit compiled with the exact same flags as wfengine). The e2e harness is the first TU built with materially different flags that nonetheless includes Jolt headers.
+
+---
+
 ## `BungeeCameraHandler` / `SPECIAL_COLLISION` reinterpret_cast type confusion — 2026-04-14
 
 **Status:** OPEN — bypassed by the in-progress physics-engine replacement (Jolt, [`project_jolt_physics_functional`]).

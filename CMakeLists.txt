@@ -586,6 +586,30 @@ endif()
 target_link_libraries(wfengine PUBLIC ${WF_LINK_LIBS})
 target_link_libraries(wf_game  PRIVATE wfengine)
 
+# ─── Host-GL e2e test ────────────────────────────────────────────────────────
+# Drives a real WFGame through Load/Step×N/Unload against a host-supplied
+# X11/GLX context — proves the Phase 0a libwfengine.a split lets external
+# hosts (the upcoming collaborative editor) supply their own main without
+# duplicate-symbol errors, and proves the Phase B LIFO fixes in
+# ~Level/~WFGame hold when driven from outside RunLevel.
+# Linux/desktop only — host GL plumbing is X11/GLX specific.
+if(NOT ANDROID AND NOT IOS)
+    # Same compile-options as wf_game's shell — Jolt's inline JPH_OVERRIDE_NEW_DELETE
+    # operators have ODR sensitivity across translation units that compile with
+    # different optimization levels; matching -O0/-g keeps the inlined op-new in
+    # the harness binary-compatible with the engine library's calls into it.
+    add_executable(wf_host_gl_e2e_test
+        engine/wf_host_gl_test/host_gl_e2e_test.cc)
+    target_link_libraries(wf_host_gl_e2e_test PRIVATE wfengine)
+    target_compile_options(wf_host_gl_e2e_test PRIVATE
+        -fpermissive -w
+        "-D__GAME__=\"wf_host_gl_e2e_test\""
+        "-DERR_DEBUG(x)="
+        "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
+        "$<$<CONFIG:Release>:-O3;-flto=thin>"
+    )
+endif()
+
 # ─── iOS .app bundle resources ────────────────────────────────────────────────
 if(IOS)
     set(IOS_DIR ${CMAKE_SOURCE_DIR}/ios)
