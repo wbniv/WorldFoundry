@@ -8,6 +8,13 @@
 # iOS budget: 500 Mac-min/month (individual plan). Avg 3.4 min/build as of
 # 2026-04-22 — ~100-150 builds/mo feasible.
 # Android budget: Linux minutes are free on the individual plan.
+#
+# WF_ENABLE_CRDT is deliberately OFF here. The CRDT support library
+# (libwfcrdt.a, vendoring y-crdt via Corrosion+Cargo) is editor-only —
+# shipped game binaries on iOS / Android do not link it. Keeping the flag
+# off avoids pulling rustc / cargo into the Codemagic toolchain and
+# preserves the 500 min/mo budget. See
+# docs/plans/2026-05-18-yrs-c-abi-binding.md.
 
 workflows:
   #------------------------------------------------------------------------------
