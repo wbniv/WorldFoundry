@@ -221,7 +221,24 @@ then
 
 ---
 
-### 6. Visibility Mailbox value
+### 6. `write-actor-mailbox` on `X/Y/Z_POS` is mesh-offset, not absolute world position
+
+**Symptom:** A Forth script animates an anchored actor's position by writing `INDEXOF_Z_POS` (3011) — say, an SMB `?`-block coin that should pop up and fall back over 60 ticks — but the actor either teleports off-screen on the first write, or moves by twice the expected amount, or stays put.
+
+**Cause:** `EMAILBOX_Z_POS` writes update `_position`, which the renderer concatenates onto the mesh vertices via `Matrix34(orientation, position)` ([`renderassets/rendacto.cc:466`](../wfsource/source/renderassets/rendacto.cc)). The *visible* world Z is therefore `mesh_vertex_z + _position.z`. Two authoring patterns exist in the codebase, and they need *different* script conventions:
+
+- **Mesh-in-local-space** (qbert popup pattern — [`wflevels/qbert_practice/blender_create_qbert.py`](../wflevels/qbert_practice/blender_create_qbert.py) `_make_popup_actor`): mesh vertices centered at origin, `actor.location` set separately. Exporter records `Position = actor.location`, mesh bbox is local. Z_POS writes are **absolute world Z**. Idle: `actor.location.z = baked`; on write: `_position.z = new_world_z` overrides.
+- **Mesh-in-world-space** (SMB `add_box()` pattern — [`wflevels/smb_w1_1/blender_create_smb.py`](../wflevels/smb_w1_1/blender_create_smb.py)): `bpy.ops.mesh.primitive_cube_add(location=…)` + `transform_apply(scale=True)` bakes location into vertices; `actor.location` ends up at origin. Exporter records `Position = (0,0,0)` and mesh bbox in world coords. Z_POS writes are **additive offsets** on top of the world-baked mesh — writing `world_z` would push the actor to `world_z * 2`.
+
+You can tell which variant any given actor is by reading its `.lev` entry: look at `Position` and the `Global Bounding Box`. If Position is `(0,0,0)` and the bbox is in real world coords, it's the world-baked variant. If Position is the world location and the bbox is centered near origin, it's the local variant.
+
+**Fix:** Match the convention to the authoring style. For world-baked meshes, write just the *delta* (e.g. `0 → 3 → 0` for a 3 m up-then-down arc) and skip any "world Z" addition. For local meshes, write absolute world Z.
+
+**Trap when copying patterns**: the SMB W1-1 coin originally copied the qbert popup_500 snippet *literally* (`7.5 + write-actor-mailbox`) without noticing the authoring difference, and the coin spent ~1 s at world z ≈ 15 m where nobody could see it. Now corrected in [`8a4f822`](https://github.com/anthropics/wf/commit/8a4f822) → [`856f69c`](https://github.com/anthropics/wf/commit/856f69c).
+
+---
+
+### 7. Visibility Mailbox value
 
 **Cause:** `actor.cc isVisible()` reads `GetMeshBlockPtr()->VisibilityMailbox`. Mailbox 0 is *always false*; mailbox 1 is *always true* (hardwired in `mailbox.cc`). Actor-local mailboxes start at index 2000 (`EMAILBOX_LOCAL_START`).
 
