@@ -15,7 +15,7 @@ Format per entry:
 
 ## HAL pool allocators rounded size to 4 bytes — UB on x86_64 / SIGBUS-prone on AArch64 — 2026-05-19
 
-**Status:** FIXED commit `<sha>` (to be filled).
+**Status:** FIXED commit `f10cec5`.
 
 **Symptom:** UBSan run 2026-05-19 (`-DWF_ASAN=ON` + `-fsanitize=address,undefined`) flagged ~3,500 misaligned-access warnings per snowgoons cycle (~2,800 per qbert) across `WFGame`, `Actor`, `Room`, `FreeChunk`, `_MemPoolFreeEntry`, and `FileLine` constructors and field accesses — every one cited a member with 8-byte alignment requirement (pointer, `int64_t`, `std::atomic<T*>`, `double`) sitting on a 4-aligned-but-not-8-aligned address. Benign on x86_64 (1-cycle penalty per misaligned load), but `LDXR`/`STXR` (what `std::atomic` compiles to) and `LDP`/`STP` (load/store pair) on AArch64 fault with SIGBUS on misaligned operands — i.e., this is a latent runtime crash on the iOS / modern-Android port.
 
