@@ -394,7 +394,7 @@ PIGSMain( int argc, char* * argv )
 		                     << " frames × " << gFrameStepCycles << " cycles)" << std::endl; )
 		game->SmokeRunFrameStep( gFrameStepSmokeCount, gFrameStepCycles );
 	}
-#ifdef WF_ENABLE_EDITOR
+#if defined(WF_DEBUG_BRIDGE) || defined(WF_ENABLE_EDITOR)
 	else if (gWfmutSmoke)
 	{
 		DBSTREAM1( cprogress << "main::wfmut smoke" << std::endl; )
@@ -406,7 +406,7 @@ PIGSMain( int argc, char* * argv )
 		if (gWfmutSmoke)
 		{
 			std::fprintf(stderr,
-			    "wf_game: --wfmut-smoke requires WF_ENABLE_EDITOR=ON build (task build-editor)\n");
+			    "wf_game: --wfmut-smoke requires WF_DEBUG_BRIDGE or WF_ENABLE_EDITOR build\n");
 			std::_Exit(2);
 		}
 		DBSTREAM1( cprogress << "main::running game script" << std::endl; )

@@ -132,6 +132,13 @@ class Level
 	// initialization methods
 	Actor* ConstructTemplateObject(int32 templateObjectIndex, int32 idxCreator, Vector3 position=Vector3::zero, Vector3 velocity=Vector3::zero);
 
+	// Safe predicate for wfmut::SpawnActor and similar external callers.
+	// Returns true iff idx is in [1, _numTemplateObjects) and the slot has
+	// a non-null template entry. Avoids the assertion in
+	// FindTemplateObjectData / SafelyConstructTemplateObject when probing
+	// unknown indices.
+	bool HasTemplate(int idx) const;
+
 	inline void Validate() const;
 	// miscellaneous query methods
 	inline const _LevelOnDisk& GetLevelData() const;       // return LevelOnDisk structure

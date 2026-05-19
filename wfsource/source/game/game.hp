@@ -86,14 +86,15 @@ public:
 	// (multi-cycle stability regression coverage).
 	void SmokeRunFrameStep(int frames, int cycles = 1);
 
-#ifdef WF_ENABLE_EDITOR
+#if defined(WF_DEBUG_BRIDGE) || defined(WF_ENABLE_EDITOR)
 	// Smoke entry-point for the wfmut:: engine mutation API. Loads the level
 	// supplied via -L<path>, runs wfmut::RunSmokeTests(level), and unloads.
 	// Returns the number of failed assertions (0 = all green) — used by
-	// wf_game's --wfmut-smoke CLI as the process exit code.
+	// wf_game's --wfmut-smoke CLI as the process exit code. Available under
+	// both consumer flags since wfmut sits at the union.
 	// Plan: docs/plans/2026-05-19-engine-mutation-api.md.
 	int RunWfmutSmoke();
-#endif // WF_ENABLE_EDITOR
+#endif
 
 	Level* CurrentLevel() const { return _curLevel; }
 

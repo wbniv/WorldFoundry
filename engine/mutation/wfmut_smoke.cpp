@@ -36,13 +36,13 @@ void report(const char* tag, bool ok, const std::string& detail = "")
 {
     if (ok) {
         ++g_passed;
-        std::printf("  [PASS] %s\n", tag);
+        std::fprintf(stderr,"  [PASS] %s\n", tag);
     } else {
         ++g_failed;
         if (detail.empty())
-            std::printf("  [FAIL] %s\n", tag);
+            std::fprintf(stderr,"  [FAIL] %s\n", tag);
         else
-            std::printf("  [FAIL] %s — %s\n", tag, detail.c_str());
+            std::fprintf(stderr,"  [FAIL] %s — %s\n", tag, detail.c_str());
     }
 }
 
@@ -80,7 +80,7 @@ Vector3 v3(float x, float y, float z)
 
 void run_transform_tests(Level& level, ActorIdx player)
 {
-    std::printf("--- Transform (T1-T11) ---\n");
+    std::fprintf(stderr,"--- Transform (T1-T11) ---\n");
 
     // Save and restore the player's position around the destructive tests.
     auto saved = GetActorPos(level, player);
@@ -141,7 +141,7 @@ void run_transform_tests(Level& level, ActorIdx player)
                 && fclose_to(got->GetC().AsRevolution().AsFloat(), a, 1e-2f);
             if (!round_trip) {
                 all_ok = false;
-                std::printf("    rev=%.3f: ok_set=%d got_c=%.4f\n",
+                std::fprintf(stderr,"    rev=%.3f: ok_set=%d got_c=%.4f\n",
                             a, (int)ok_set,
                             got ? got->GetC().AsRevolution().AsFloat() : -999.0f);
             }
@@ -166,7 +166,7 @@ void run_transform_tests(Level& level, ActorIdx player)
 
 void run_field_tests(Level& level, ActorIdx player)
 {
-    std::printf("--- Fields (F1-F14) ---\n");
+    std::fprintf(stderr,"--- Fields (F1-F14) ---\n");
 
     // F1: common.hp (fixed32) round-trip
     {
@@ -283,6 +283,76 @@ void run_field_tests(Level& level, ActorIdx player)
     // Manual verification via X8 in the test matrix.
 }
 
+// ── Spawn / Remove tests ────────────────────────────────────────────────────
+
+// Find the first idx in [1, list.Size()) that resolves to a valid template
+// via Level::HasTemplate. Returns 0 if no template is found in the level.
+int find_first_template(Level& level)
+{
+    BaseObjectList& list = level.GetObjectList();
+    for (int i = 1; i < list.Size(); ++i) {
+        if (level.HasTemplate(i)) return i;
+    }
+    return 0;
+}
+
+void run_spawn_remove_tests(Level& level, ActorIdx player)
+{
+    std::fprintf(stderr,"--- Spawn / Remove (SR1-SR14) ---\n");
+
+    int template_idx = find_first_template(level);
+    if (template_idx == 0) {
+        std::fprintf(stderr,"  [SKIP] no template in level — spawn/remove tests need one\n");
+        return;
+    }
+    std::fprintf(stderr,"  first template idx = %d (for reference)\n", template_idx);
+
+    // SR6: invalid templateIdx → nullopt
+    {
+        auto r1 = SpawnActor(level, -1, Vector3::zero, player);
+        auto r2 = SpawnActor(level, 99999, Vector3::zero, player);
+        report("SR6: SpawnActor(bad templateIdx) → nullopt",
+               !r1.has_value() && !r2.has_value());
+    }
+
+    // SR0: parentIdx == 0 rejected pre-engine (engine asserts otherwise)
+    {
+        auto r = SpawnActor(level, template_idx, Vector3::zero, /*parentIdx=*/0);
+        bool err_ok = !r.has_value()
+            && std::strstr(lastError(), "parentIdx must be >= 1") != nullptr;
+        report("SR0: SpawnActor(parentIdx=0) rejected pre-engine", err_ok);
+    }
+
+    // SR11: RemoveActor(0) and out-of-range idx → false
+    {
+        bool a = !RemoveActor(level, 0);
+        bool b = !RemoveActor(level,
+            static_cast<ActorIdx>(level.GetObjectList().Size()) + 100);
+        report("SR11: RemoveActor(bad idx) → false", a && b);
+    }
+
+    // Happy-path spawn tests (SR1, SR2, SR7, SR8, SR10) deferred to manual
+    // verification: smb_w1_1's first runtime-spawnable template (idx 2) has
+    // content-specific spawn requirements — runtime ConstructTemplateObject
+    // calls into oas/objects.c paths that abort with terminate() rather than
+    // a clean assertion when prerequisites aren't met (room placement,
+    // collision boxes, parent-actor state). A generic "spawn the first
+    // template at the player's position" probe is unreliable across levels.
+    //
+    // The bridge's existing "spawn via scene:live_create_node" path (when
+    // wired up in Phase 3 of the live-editor bridge plan) will exercise the
+    // wfmut::SpawnActor / RemoveActor surface for real; smoke covers the
+    // input-validation half of the API (SR0, SR6, SR11).
+    //
+    // SR3 / SR4 / SR5 / SR9 / SR12 / SR13 / SR14 are also deferred per the
+    // plan's test matrix (parent variants, stale-idx mutation, ASan stress,
+    // identity-invariance, re-entrancy).
+    std::fprintf(stderr,
+        "  [SKIP] SR1/SR2/SR7/SR8/SR10 happy-path spawn — needs a known-safe\n"
+        "         template (see plan test matrix; deferred to manual / bridge\n"
+        "         integration verification).\n");
+}
+
 } // namespace
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -292,21 +362,22 @@ int RunSmokeTests(Level& level)
     g_passed = 0;
     g_failed = 0;
 
-    std::printf("=== wfmut smoke ===\n");
+    std::fprintf(stderr,"=== wfmut smoke ===\n");
 
     ActorIdx player = find_first_actor(level);
     if (player == 0) {
-        std::printf("  [FAIL] [setup] no Actor found in level — cannot run smoke\n");
+        std::fprintf(stderr,"  [FAIL] [setup] no Actor found in level — cannot run smoke\n");
         return 1;
     }
-    std::printf("  using player idx = %u\n", player);
+    std::fprintf(stderr,"  using player idx = %u\n", player);
 
     run_transform_tests(level, player);
     run_field_tests(level, player);
+    run_spawn_remove_tests(level, player);
 
-    // Step 4+ tests append here as they land.
+    // Step 5+ tests append here as they land.
 
-    std::printf("=== wfmut smoke: %d passed, %d failed ===\n", g_passed, g_failed);
+    std::fprintf(stderr,"=== wfmut smoke: %d passed, %d failed ===\n", g_passed, g_failed);
     return g_failed;
 }
 

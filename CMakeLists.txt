@@ -19,23 +19,31 @@ set(WF_WASM_ENGINE   "wamr"     CACHE STRING "none | wamr")
 option(WF_ENABLE_WREN     "Wren scripting"                ON)
 set(WF_FORTH_ENGINE  "zforth"   CACHE STRING "none | zforth | ficl | atlast | embed | libforth | pforth")
 set(WF_PHYSICS_ENGINE "jolt"    CACHE STRING "legacy | jolt")
+option(WF_REST_API        "REST API box PoC (HTTP runtime-mutation debug)" ON)
+option(WF_DEBUG_BRIDGE    "TCP/JSON debug bridge — level-design + AI-agent debugging (Blender live edit, etc.). Independent of WF_ENABLE_EDITOR." ON)
 option(WF_ENABLE_STEAM    "Steamworks SDK"                OFF)
 option(WF_ASAN            "AddressSanitizer + UBSan (Linux dev only)" OFF)
 
-# Single master switch for the editor / developer-tooling stack:
-#   - debug_server.cc       (Blender ↔ engine TCP/JSON bridge, port 7777)
-#   - rest_api.cc           (REST API box PoC)
+# Editor stack — collaborative editor app, CRDT bridge, replay UI, etc.
+# Independent of WF_DEBUG_BRIDGE (the bridge is general-purpose debug
+# infrastructure, used by level designers and AI agents alike; the editor is
+# the collaborative-editing application). Default OFF — the "original game
+# engine" is the common case. Editor stack is opt-in via `task build-editor`
+# or `-DWF_ENABLE_EDITOR=ON`. Force OFF on Android/iOS where there is no
+# editor host and the surface won't compile. See
+# feedback_editor_code_compile_gate.md.
+#
+# Covers:
 #   - engine/crdt/          (libwfcrdt.a wrapping libyrs.a via Corrosion+Cargo)
-#   - engine/mutation/      (wfmut:: C++ surface + wfmut_smoke runner)
 #   - future: DAP debugger, replay UI, scene-graph inspection, etc.
 #
-# Default OFF — the "original game engine" is the common case. Editor stack
-# is opt-in via `task build-editor` or `-DWF_ENABLE_EDITOR=ON`. Force OFF on
-# Android/iOS where there is no editor host and the surface won't compile
-# anyway. See feedback_editor_code_compile_gate.md.
-option(WF_ENABLE_EDITOR   "Build the editor / dev stack (debug bridge + REST API + CRDT + mutation API). OFF for shipped game-engine builds; ON for the collaborative editor and developer tooling." OFF)
+# wfmut:: lives at the UNION of WF_DEBUG_BRIDGE and WF_ENABLE_EDITOR — both
+# consumers drive it (bridge for its SET_TRANSFORM / SET_PROP / SET_MAILBOX
+# cases, editor for its CRDT bridge). See the per-source-list gate below.
+option(WF_ENABLE_EDITOR   "Build the collaborative editor stack (CRDT + replay UI + DAP, etc.). OFF for shipped game-engine builds; ON for the editor application." OFF)
 
-# Mobile (Android + iOS): Forth-only scripting, no Steam, no editor stack.
+# Mobile (Android + iOS): Forth-only scripting, no Steam, no editor stack,
+# no debug bridge, no REST API.
 # Matches build_game.sh Android flags. WAMR in particular ships x86_64 assembly
 # (`invokeNative_em64.s`) that fails to build on arm64 mobile targets.
 if(ANDROID OR IOS)
@@ -45,8 +53,19 @@ if(ANDROID OR IOS)
     set(WF_WASM_ENGINE   "none"   CACHE STRING "" FORCE)
     set(WF_ENABLE_WREN   OFF      CACHE BOOL   "" FORCE)
     set(WF_FORTH_ENGINE  "zforth" CACHE STRING "" FORCE)
+    set(WF_REST_API      OFF      CACHE BOOL   "" FORCE)
+    set(WF_DEBUG_BRIDGE  OFF      CACHE BOOL   "" FORCE)
     set(WF_ENABLE_STEAM  OFF      CACHE BOOL   "" FORCE)
     set(WF_ENABLE_EDITOR OFF      CACHE BOOL   "" FORCE)
+endif()
+
+# Debug builds force the bridge ON. The Blender addon's "Live" features
+# (debug_bridge.py / panels.py / operators.py — all default port 7777)
+# rely on it; surprising them with an opt-in flag broke at least one
+# user's workflow when the bridge briefly defaulted off. Mobile is
+# already forced OFF above and the NOT(ANDROID OR IOS) guard preserves that.
+if(NOT (ANDROID OR IOS) AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(WF_DEBUG_BRIDGE ON CACHE BOOL "Debug build forces bridge on" FORCE)
 endif()
 
 # ─── Fennel/Lua consistency check ─────────────────────────────────────────────
@@ -431,18 +450,39 @@ else()
     list(APPEND WF_DEFS PHYSICS_ENGINE_WF)
 endif()
 
-# ─── Editor / dev stack ───────────────────────────────────────────────────────
-# Gated by WF_ENABLE_EDITOR. Covers: REST API box PoC, Blender ↔ engine debug
-# bridge, wfmut:: mutation API, wfmut smoke runner. CRDT support library
-# (libwfcrdt.a) is added later in the file under the same flag.
+# ─── REST API ─────────────────────────────────────────────────────────────────
 set(HTTPLIB_DIR ${VENDOR}/cpp-httplib-v0.20.0)
-if(WF_ENABLE_EDITOR)
-    list(APPEND WF_SOURCES ${STUB_SRC}/rest_api.cc
-                           ${STUB_SRC}/debug_server.cc
-                           ${CMAKE_SOURCE_DIR}/engine/mutation/wfmut.cpp
-                           ${CMAKE_SOURCE_DIR}/engine/mutation/wfmut_smoke.cpp)
+if(WF_REST_API)
+    list(APPEND WF_SOURCES ${STUB_SRC}/rest_api.cc)
     list(APPEND WF_INCLUDES ${HTTPLIB_DIR})
+    list(APPEND WF_DEFS WF_REST_API)
+endif()
+
+# ─── Debug bridge ─────────────────────────────────────────────────────────────
+# Independent of the editor stack — level designers and AI agents depend on
+# the bridge for live debug/iteration. Default ON (off only on mobile).
+if(WF_DEBUG_BRIDGE)
+    list(APPEND WF_SOURCES ${STUB_SRC}/debug_server.cc)
+    list(APPEND WF_DEFS WF_DEBUG_BRIDGE)
+endif()
+
+# ─── Editor stack umbrella define ─────────────────────────────────────────────
+# WF_ENABLE_EDITOR is its own #ifdef gate for editor-app code (CRDT, replay,
+# DAP). The wfmut:: mutation API sits at the UNION below.
+if(WF_ENABLE_EDITOR)
     list(APPEND WF_DEFS WF_ENABLE_EDITOR)
+endif()
+
+# ─── Engine mutation API (wfmut::) ────────────────────────────────────────────
+# Used by BOTH consumers:
+#   - debug_server.cc (step-6 refactor — bridge SET_TRANSFORM / SET_PROP /
+#     SET_MAILBOX cases route through wfmut)
+#   - editor's CRDT bridge (when WF_ENABLE_EDITOR is on)
+# So we compile wfmut sources at the UNION: bridge ON OR editor ON.
+# See docs/plans/2026-05-19-engine-mutation-api.md.
+if(WF_DEBUG_BRIDGE OR WF_ENABLE_EDITOR)
+    list(APPEND WF_SOURCES ${CMAKE_SOURCE_DIR}/engine/mutation/wfmut.cpp
+                           ${CMAKE_SOURCE_DIR}/engine/mutation/wfmut_smoke.cpp)
 endif()
 
 # ─── Steam ────────────────────────────────────────────────────────────────────

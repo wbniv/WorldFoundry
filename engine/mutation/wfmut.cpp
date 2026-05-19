@@ -327,14 +327,41 @@ bool ReloadActorScript(Level& level, ActorIdx idx, const char* forthSource)
 
 // ── Spawn / remove ──────────────────────────────────────────────────────────
 
-std::optional<ActorIdx> SpawnActor(Level&, int, const Vector3&, ActorIdx)
+std::optional<ActorIdx> SpawnActor(Level& level, int templateIdx,
+                                   const Vector3& pos, ActorIdx parentIdx)
 {
-    return failopt<ActorIdx>("wfmut::SpawnActor: not implemented (step 4)");
+    // The engine's SafelyConstructTemplateObject asserts on bad template /
+    // parent indices, so pre-validate here. Level::HasTemplate is the public
+    // probe added alongside this API.
+    if (templateIdx <= 0)
+        return failopt<ActorIdx>("wfmut::SpawnActor: templateIdx must be >= 1");
+    if (!level.HasTemplate(templateIdx))
+        return failopt<ActorIdx>("wfmut::SpawnActor: no template at idx");
+    if (parentIdx == 0)
+        return failopt<ActorIdx>("wfmut::SpawnActor: parentIdx must be >= 1 (engine asserts otherwise)");
+    if (!resolve_actor(level, parentIdx, "wfmut::SpawnActor"))
+        return std::nullopt;  // resolve_actor populated lastError already
+
+    Actor* created = level.ConstructTemplateObject(
+        templateIdx, static_cast<int>(parentIdx), pos, Vector3::zero);
+    if (!created)
+        return failopt<ActorIdx>("wfmut::SpawnActor: ConstructTemplateObject returned null");
+
+    ok();
+    return static_cast<ActorIdx>(created->GetActorIndex());
 }
 
-bool RemoveActor(Level&, ActorIdx)
+bool RemoveActor(Level& level, ActorIdx idx)
 {
-    return fail("wfmut::RemoveActor: not implemented (step 4)");
+    Actor* actor = resolve_actor(level, idx, "wfmut::RemoveActor");
+    if (!actor) return false;
+    // SetPendingRemove asserts on statplats and the camera; the bridge has
+    // happily relied on this behaviour, so we don't second-guess. Callers
+    // wanting to remove non-removable objects will see the engine abort —
+    // that's a level-content bug, not an API bug.
+    level.SetPendingRemove(actor);
+    ok();
+    return true;
 }
 
 // ── Mailbox ─────────────────────────────────────────────────────────────────

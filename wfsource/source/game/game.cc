@@ -394,7 +394,7 @@ WFGame::SmokeRunFrameStep(int frames, int cycles)
 
 //-----------------------------------------------------------------------------
 
-#ifdef WF_ENABLE_EDITOR
+#if defined(WF_DEBUG_BRIDGE) || defined(WF_ENABLE_EDITOR)
 int
 WFGame::RunWfmutSmoke()
 {
@@ -414,7 +414,7 @@ WFGame::RunWfmutSmoke()
 	DBSTREAM1(cprogress << "RunWfmutSmoke: " << failures << " failures" << std::endl;)
 	return failures;
 }
-#endif // WF_ENABLE_EDITOR
+#endif // WF_DEBUG_BRIDGE || WF_ENABLE_EDITOR
 
 //-----------------------------------------------------------------------------
 

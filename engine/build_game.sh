@@ -115,12 +115,19 @@ esac
 JOLT_DIR="$VENDOR/jolt-physics-5.5.0"
 JOLT_WF_DIR="$VENDOR/jolt-physics-5.5.0-wf"
 
-# Master switch for the editor / developer-tooling stack: REST API box PoC,
-# Blender ↔ engine TCP/JSON debug bridge, wfmut:: mutation API, wfmut smoke
-# runner, and (in the CMake path) the CRDT support library. Default OFF —
-# the "original game engine" is the common case. Editor stack is opt-in via
-# `WF_ENABLE_EDITOR=1 task build` or `task build-editor`. Mobile shipped
-# builds force OFF (they have no editor host).
+# Feature flag: embed a minimal HTTP REST API for runtime box manipulation.
+# Requires cpp-httplib (single-header, vendored). Default on for dev builds.
+WF_REST_API="${WF_REST_API:-1}"
+
+# Feature flag: TCP/JSON debug bridge for live Blender ↔ engine editing.
+# Independent of WF_ENABLE_EDITOR — level designers and AI agents debugging
+# alike depend on it. Default on for desktop dev builds; mobile forces off.
+WF_DEBUG_BRIDGE="${WF_DEBUG_BRIDGE:-1}"
+
+# Editor stack — collaborative editor application, CRDT, replay UI, DAP.
+# Default OFF; build via `WF_ENABLE_EDITOR=1 task build` or `task build-editor`.
+# The wfmut:: mutation API is compiled when EITHER WF_DEBUG_BRIDGE or
+# WF_ENABLE_EDITOR is set (both consumers drive it).
 WF_ENABLE_EDITOR="${WF_ENABLE_EDITOR:-0}"
 
 mkdir -p "$OUT"
@@ -180,8 +187,16 @@ case "$WF_FORTH_ENGINE" in
     none)     : ;;
 esac
 
+if [[ "$WF_REST_API" == "1" ]]; then
+    CXXFLAGS+=(-DWF_REST_API -I"$HTTPLIB_DIR")
+fi
+
+if [[ "$WF_DEBUG_BRIDGE" == "1" ]]; then
+    CXXFLAGS+=(-DWF_DEBUG_BRIDGE)
+fi
+
 if [[ "$WF_ENABLE_EDITOR" == "1" ]]; then
-    CXXFLAGS+=(-DWF_ENABLE_EDITOR -I"$HTTPLIB_DIR")
+    CXXFLAGS+=(-DWF_ENABLE_EDITOR)
 fi
 
 if [[ "$WF_ENABLE_STEAM" == "1" ]]; then
@@ -591,19 +606,24 @@ if [[ "$WF_ENABLE_STEAM" == "1" ]]; then
                        "-Wl,-rpath,\$ORIGIN")
 fi
 
-# Editor / dev stack — compiled only when WF_ENABLE_EDITOR=1. Covers the
-# REST API box PoC, the Blender ↔ engine TCP/JSON bridge, the wfmut::
-# mutation API, and its smoke runner. CRDT support library (libwfcrdt.a)
-# isn't built here — it's a CMake-only target (Corrosion + Cargo).
-if [[ "$WF_ENABLE_EDITOR" == "1" ]]; then
+# REST API plug — compiled only when WF_REST_API=1.
+if [[ "$WF_REST_API" == "1" ]]; then
     echo "  CC (stub) rest_api.cc"
     g++ "${CXXFLAGS[@]}" -O1 -c "$STUB_SRC/rest_api.cc" -o "$OUT/stubs__rest_api.o"
     OBJS+=("$OUT/stubs__rest_api.o")
+fi
 
+# Debug bridge plug — compiled only when WF_DEBUG_BRIDGE=1.
+if [[ "$WF_DEBUG_BRIDGE" == "1" ]]; then
     echo "  CC (stub) debug_server.cc"
     g++ "${CXXFLAGS[@]}" -O1 -c "$STUB_SRC/debug_server.cc" -o "$OUT/stubs__debug_server.o"
     OBJS+=("$OUT/stubs__debug_server.o")
+fi
 
+# Engine mutation API + smoke — compiled when EITHER consumer flag is on
+# (bridge consumes wfmut after the step-6 refactor; editor consumes it from
+# the CRDT bridge). See docs/plans/2026-05-19-engine-mutation-api.md.
+if [[ "$WF_DEBUG_BRIDGE" == "1" || "$WF_ENABLE_EDITOR" == "1" ]]; then
     echo "  CC mutation/wfmut.cpp"
     g++ "${CXXFLAGS[@]}" -O1 -c "$REPO_ROOT/engine/mutation/wfmut.cpp" -o "$OUT/mutation__wfmut.o"
     OBJS+=("$OUT/mutation__wfmut.o")

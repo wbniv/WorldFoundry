@@ -7,10 +7,11 @@
 //
 // Plan: docs/plans/2026-05-19-engine-mutation-api.md
 //
-// Compile-time gating: this entire surface is part of the editor stack and
-// is only compiled when WF_ENABLE_EDITOR is defined. Default builds (mobile,
-// shipped, lean desktop) get no-op inline stubs from the #else branch so
-// callers compile cleanly even when the editor is disabled.
+// Compile-time gating: wfmut sits at the UNION of WF_DEBUG_BRIDGE and
+// WF_ENABLE_EDITOR — both consumers drive it (bridge for SET_TRANSFORM /
+// SET_PROP / SET_MAILBOX after step-6 refactor, editor for CRDT bridge).
+// Mobile / shipped builds disable both flags and get no-op inline stubs
+// from the #else branch so callers compile cleanly.
 //
 // Threading: synchronous, single-threaded. Caller is responsible for
 // marshalling onto the game thread. No internal locks. Calling from a
@@ -23,7 +24,7 @@
 #include <optional>
 #include <string>
 
-#ifdef WF_ENABLE_EDITOR
+#if defined(WF_DEBUG_BRIDGE) || defined(WF_ENABLE_EDITOR)
 
 // std::optional<Vector3> / std::optional<Euler> require the complete type at
 // the declaration site, so we include the math headers rather than forward-
@@ -110,7 +111,7 @@ std::optional<double> GetMailbox(const Level& level, ActorIdx idx, int mailboxIn
 
 } // namespace wfmut
 
-#else // !WF_ENABLE_EDITOR — lean engine builds: no-op inline stubs.
+#else // neither WF_DEBUG_BRIDGE nor WF_ENABLE_EDITOR — lean builds: no-op stubs.
 
 class Level;
 class Vector3;
@@ -143,4 +144,4 @@ inline std::optional<double> GetMailbox(const Level&, ActorIdx, int) { return st
 
 } // namespace wfmut
 
-#endif // WF_ENABLE_EDITOR
+#endif // WF_DEBUG_BRIDGE || WF_ENABLE_EDITOR

@@ -5,14 +5,15 @@
 //
 // Test cases mirror the matrix in docs/plans/2026-05-19-engine-mutation-api.md.
 //
-// Editor-stack only — gated by WF_ENABLE_EDITOR. The header provides a no-op
-// stub when the flag is off so the WFGame call site compiles cleanly.
+// Same gate as wfmut: UNION of WF_DEBUG_BRIDGE and WF_ENABLE_EDITOR. The
+// smoke is a CLI tool useful to both designers (verify the bridge wires up
+// wfmut correctly) and editor devs (verify the CRDT bridge path).
 
 #pragma once
 
 class Level;
 
-#ifdef WF_ENABLE_EDITOR
+#if defined(WF_DEBUG_BRIDGE) || defined(WF_ENABLE_EDITOR)
 
 namespace wfmut {
 
@@ -25,7 +26,7 @@ int RunSmokeTests(Level& level);
 
 } // namespace wfmut
 
-#else // !WF_ENABLE_EDITOR
+#else // neither WF_DEBUG_BRIDGE nor WF_ENABLE_EDITOR — lean builds.
 
 namespace wfmut {
 
@@ -33,4 +34,4 @@ inline int RunSmokeTests(Level&) { return 0; }
 
 } // namespace wfmut
 
-#endif // WF_ENABLE_EDITOR
+#endif // WF_DEBUG_BRIDGE || WF_ENABLE_EDITOR
