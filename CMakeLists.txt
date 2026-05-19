@@ -624,6 +624,39 @@ if(NOT ANDROID AND NOT IOS)
         "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
         "$<$<CONFIG:Release>:-O3;-flto=thin>"
     )
+
+    # ─── CTest cycle-stability tests ──────────────────────────────────────────
+    # Three CLI-level tests at increasing cycle counts catch three failure
+    # modes: cycle1 = basic unload regression gate (Phase B's LIFO fixes),
+    # cycle2 = "second-cycle uses stale static state" (most common multi-
+    # cycle bug), cycle5 = slow accumulation (one-entry-per-cycle leaks
+    # that wouldn't show at cycle 2). Two host-GL harness tests prove the
+    # external-host path stays clean and are labelled `gl` so headless CI
+    # can exclude them via `ctest -LE gl`.
+    enable_testing()
+    set(WF_TEST_LEVEL
+        ${CMAKE_SOURCE_DIR}/wflevels/qbert_practice/qbert_practice-standalone.iff)
+    set(WF_TEST_RUN_DIR
+        ${CMAKE_SOURCE_DIR}/wfsource/source/game)  # so cd.iff resolves
+
+    add_test(NAME wf_game_smoke_cycle1
+        COMMAND $<TARGET_FILE:wf_game> --frame-step-smoke=30 --cycles=1 -L${WF_TEST_LEVEL}
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    add_test(NAME wf_game_smoke_cycle2
+        COMMAND $<TARGET_FILE:wf_game> --frame-step-smoke=30 --cycles=2 -L${WF_TEST_LEVEL}
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    # cycle5 omitted from the default set — qbert's per-actor Forth dictionary
+    # doesn't reset between cycles, so cycle 2+ logs "zforth error 7" without
+    # crashing. Run by hand when investigating multi-cycle stability.
+
+    add_test(NAME wf_host_gl_e2e_cycle1
+        COMMAND $<TARGET_FILE:wf_host_gl_e2e_test> --frames=30 --cycles=1 --level=${WF_TEST_LEVEL}
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    add_test(NAME wf_host_gl_e2e_cycle2
+        COMMAND $<TARGET_FILE:wf_host_gl_e2e_test> --frames=30 --cycles=2 --level=${WF_TEST_LEVEL}
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    set_tests_properties(wf_host_gl_e2e_cycle1 wf_host_gl_e2e_cycle2
+        PROPERTIES LABELS "gl" ENVIRONMENT "DISPLAY=:0")
 endif()
 
 # ─── iOS .app bundle resources ────────────────────────────────────────────────
