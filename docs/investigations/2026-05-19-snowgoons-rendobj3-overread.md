@@ -1,7 +1,7 @@
 # Snowgoons crash chase — `RenderObject3D::Render` past-end read + side-effect-assert past-end write
 
 **Date:** 2026-05-19
-**Status:** FIXED — fix landed in commit `<sha>` (to be filled at commit time).
+**Status:** FIXED — fix landed in commit `29d3613`.
 **TL;DR:** Two long-standing bugs in [`gfx/glpipeline/rendobj3.cc`](../../wfsource/source/gfx/glpipeline/rendobj3.cc) — (1) wrong `&&` short-circuit order at line 83 reads `_faceList[_faceCount].materialIndex` (past-end) before the bounds check, and (2) line 101 was `assert(_faceList[_faceCount].materialIndex = -1)` — single `=`, an assignment that writes -1 past the end of the static `cubeFaceList[12]` (with asserts enabled). Surfaced today by running the snowgoons level under the CMake-built `wf_host_gl_e2e_test` harness; manifested as a SIGSEGV inside `DrainDoneSounds` reading a non-canonical `0xffff000000000000` from `sDoneHead`. The makefile-build of `wf_game` happened to mask the SIGSEGV (different defines / different downstream memory layout) but was still doing the past-end write.
 
 ## Premise

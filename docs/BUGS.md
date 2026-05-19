@@ -15,7 +15,7 @@ Format per entry:
 
 ## `RenderObject3D::Render` `&&` short-circuit reads + side-effect-assert writes past end of `_faceList` — 2026-05-19
 
-**Status:** FIXED commit `<sha>` (to be filled).
+**Status:** FIXED commit `29d3613`.
 
 **Symptom:** `wf_host_gl_e2e_test --cycles=2 --level=...snowgoons-standalone.iff` SIGSEGVs at frame ~2 inside `DrainDoneSounds()` (audio/linux/buffer.cc) with `sDoneHead = 0xffff000000000000` (non-canonical pointer). The `wf_game` makefile build (asserts ON) exited 0 on the same input — the bug only surfaces under specific static-data layouts.
 
