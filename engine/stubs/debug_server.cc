@@ -4,7 +4,7 @@
 
 #include "debug_server.hp"
 
-#ifdef WF_ENABLE_EDITOR
+#ifdef WF_DEBUG_BRIDGE
 
 #include <pigsys/pigsys.hp>     // sys_atexit
 
@@ -34,6 +34,7 @@
 #include <physics/physicalobject.hp>
 #include <gfx/renderer_backend.hp>
 #include "scripting_forth.hp"
+#include "wfmut.hpp"
 #include <cstddef>
 
 // GL for screenshot op.
@@ -160,17 +161,21 @@ static std::atomic<int>  gStepN   { 0 };
 //
 // gOriginals:     per-actor pre-session transform (for revert_all)
 // gChangeStack:   ordered history of all changes (transform + prop) for undo_step
-// gPropOriginals: per-(block, field) first-seen value, for revert_all
+// gPropOriginals: per-(actor, field-path) first-seen raw value, for revert_all.
+//                 The (actor, field-path) key is wfmut's abstraction — the
+//                 bridge no longer touches OAD block pointers / field offsets
+//                 directly. See docs/plans/2026-05-19-engine-mutation-api.md.
 
 struct ChangeRecord {
     enum Kind { TRANSFORM, PROP, MAILBOX, SCRIPT } kind;
     int   actor_idx;
     // TRANSFORM:
     float px, py, pz;
-    // PROP:
-    char*  block;
-    size_t field_offset;
-    int32  old_raw;
+    // PROP: identifies the field by its wfmut path. The raw int32 is the
+    // pre-write value (read via wfmut::GetActorFieldInt); undo restores it
+    // via wfmut::SetActorField with the int64 overload.
+    std::string field_key;
+    int32       old_raw;
     // MAILBOX:
     int    mailbox_idx;
     float  old_mbx_value;
@@ -180,18 +185,20 @@ struct ChangeRecord {
     std::string script_prev_source;
 };
 
-// Key into gPropOriginals: the exact memory address of a specific field.
+// Key into gPropOriginals: (actor index, field path). Two writes to the
+// same (actor, field) hit the same key, so only the first write's pre-value
+// is recorded as the session original.
 struct PropKey {
-    char*  block;
-    size_t field_offset;
+    int          actor_idx;
+    std::string  field_key;
     bool operator==(const PropKey& o) const {
-        return block == o.block && field_offset == o.field_offset;
+        return actor_idx == o.actor_idx && field_key == o.field_key;
     }
 };
 struct PropKeyHash {
     size_t operator()(const PropKey& k) const {
-        size_t h = std::hash<char*>()(k.block);
-        h ^= std::hash<size_t>()(k.field_offset) + 0x9e3779b9u + (h << 6) + (h >> 2);
+        size_t h = std::hash<int>()(k.actor_idx);
+        h ^= std::hash<std::string>()(k.field_key) + 0x9e3779b9u + (h << 6) + (h >> 2);
         return h;
     }
 };
@@ -211,49 +218,10 @@ static std::unordered_map<int, std::string> gLastReloadSource;
 // Change detection: key = actor_idx * 100000 + mailbox_idx → last-sent float value.
 static std::unordered_map<uint64_t, float>              gMailboxPrev;
 
-// ── Property map (block + field → offset + type) ─────────────────────────────
-
-struct PropInfo {
-    enum Block { COMMON, MOVEBLOC, MESH } block;
-    size_t field_offset;
-    bool   is_fixed32;
-};
-
-static const std::unordered_map<std::string, PropInfo> kPropMap = {
-    // common block
-    {"common.hp",                     {PropInfo::COMMON,   offsetof(_Common,   hp),                    true }},
-    {"common.Script",                 {PropInfo::COMMON,   offsetof(_Common,   Script),                false}},
-    {"common.NumberOfLocalMailboxes", {PropInfo::COMMON,   offsetof(_Common,   NumberOfLocalMailboxes), false}},
-    {"common.WriteToMailboxOnDeath",  {PropInfo::COMMON,   offsetof(_Common,   WriteToMailboxOnDeath),  false}},
-    // movebloc block
-    {"movebloc.Mass",                 {PropInfo::MOVEBLOC, offsetof(_Movement, Mass),                  true }},
-    {"movebloc.MaxGroundSpeed",       {PropInfo::MOVEBLOC, offsetof(_Movement, MaxGroundSpeed),        true }},
-    {"movebloc.RunningAcceleration",  {PropInfo::MOVEBLOC, offsetof(_Movement, RunningAcceleration),   true }},
-    {"movebloc.JumpingAcceleration",  {PropInfo::MOVEBLOC, offsetof(_Movement, JumpingAcceleration),   true }},
-    {"movebloc.FallingAcceleration",  {PropInfo::MOVEBLOC, offsetof(_Movement, FallingAcceleration),   true }},
-    {"movebloc.StepSize",             {PropInfo::MOVEBLOC, offsetof(_Movement, StepSize),              true }},
-    {"movebloc.Mobility",             {PropInfo::MOVEBLOC, offsetof(_Movement, Mobility),              false}},
-    {"movebloc.MovementClass",        {PropInfo::MOVEBLOC, offsetof(_Movement, MovementClass),         false}},
-    // mesh block
-    {"mesh.ModelType",                {PropInfo::MESH,     offsetof(_Mesh,     ModelType),             false}},
-    {"mesh.AnimationMailbox",         {PropInfo::MESH,     offsetof(_Mesh,     AnimationMailbox),      false}},
-    {"mesh.VisibilityMailbox",        {PropInfo::MESH,     offsetof(_Mesh,     VisibilityMailbox),     false}},
-};
-
-// Return a mutable pointer to the named sub-block, or nullptr if unavailable.
-static char* debug_get_block(Actor* actor, PropInfo::Block block_id)
-{
-    const void* ptr = nullptr;
-    switch (block_id) {
-        case PropInfo::COMMON:   ptr = actor->GetCommonBlockPtr();    break;
-        case PropInfo::MOVEBLOC: ptr = actor->GetMovementBlockPtr();  break;
-        case PropInfo::MESH:     ptr = actor->GetMeshBlockPtr();      break;
-    }
-    if (!ptr) return nullptr;
-    // The underlying storage is heap-allocated char[] (not truly const).
-    // The existing engine code already strips const via C-style casts in .hpi files.
-    return const_cast<char*>(static_cast<const char*>(ptr));
-}
+// Field schema (PropInfo + kPropMap) lives in engine/mutation/wfmut.cpp as
+// the single source of truth. The bridge addresses fields by their wfmut
+// path strings ("common.hp" / "movebloc.Mass" / "mesh.ModelType" / ...)
+// and routes reads + writes through wfmut::Get/SetActorField.
 
 //=============================================================================
 // Pending update queue
@@ -639,7 +607,7 @@ void DebugServer_DrainQueue(Level& level)
             rec.px = cur.X().AsFloat();
             rec.py = cur.Y().AsFloat();
             rec.pz = cur.Z().AsFloat();
-            rec.block = nullptr; rec.field_offset = 0; rec.old_raw = 0;
+            rec.old_raw = 0;
             // Save pre-session original on first touch
             if (gOriginals.find(u.actor_idx) == gOriginals.end())
                 gOriginals[u.actor_idx] = rec;
@@ -651,36 +619,31 @@ void DebugServer_DrainQueue(Level& level)
             actor->setCurrentPos(pos);
 
         } else if (u.kind == PendingUpdate::SET_PROP && actor) {
-            // common.Script is a resolved pointer/handle into level data —
-            // a raw int32 write here corrupts script dispatch. Use the
-            // reload_script op instead.
-            if (u.key == "common.Script") {
+            // Read pre-write raw int32 for undo bookkeeping. wfmut populates
+            // lastError() on unknown-field / read-only-field / bad idx so we
+            // can relay a precise message back to the editor.
+            auto old_raw_opt = wfmut::GetActorFieldInt(level, u.actor_idx, u.key.c_str());
+            if (!old_raw_opt) {
                 std::string errmsg = "{\"op\":\"error\","
-                    + json_str("msg", "common.Script is read-only over set_prop; use reload_script") + ","
-                    + json_int("idx", u.actor_idx) + "}\n";
-                std::lock_guard<std::mutex> lk(gQueueMutex);
-                send_all_locked(errmsg);
-                local.pop();
-                continue;
-            }
-            auto pit = kPropMap.find(u.key);
-            if (pit == kPropMap.end()) {
-                std::string errmsg = "{\"op\":\"error\","
-                    + json_str("msg", "unknown property: " + u.key) + ","
+                    + json_str("msg", std::string("set_prop: ") + wfmut::lastError()) + ","
                     + json_int("idx", u.actor_idx) + "}\n";
                 std::lock_guard<std::mutex> lk(gQueueMutex);
                 send_all_locked(errmsg);
             } else {
-                const PropInfo& info = pit->second;
-                char* block = debug_get_block(actor, info.block);
-                if (block) {
-                    int32 old_raw = *reinterpret_cast<const int32*>(block + info.field_offset);
-                    int32 new_raw = info.is_fixed32
-                        ? static_cast<int32>(u.value * 65536.0)
-                        : static_cast<int32>(u.value);
+                int32 old_raw = static_cast<int32>(*old_raw_opt);
 
+                // Apply the write — wfmut handles fixed32 scaling per its
+                // PropInfo table. Failures (e.g. common.Script numeric write)
+                // come back through lastError().
+                if (!wfmut::SetActorField(level, u.actor_idx, u.key.c_str(), u.value)) {
+                    std::string errmsg = "{\"op\":\"error\","
+                        + json_str("msg", std::string("set_prop: ") + wfmut::lastError()) + ","
+                        + json_int("idx", u.actor_idx) + "}\n";
+                    std::lock_guard<std::mutex> lk(gQueueMutex);
+                    send_all_locked(errmsg);
+                } else {
                     // Record pre-session original (first touch only)
-                    PropKey pk { block, info.field_offset };
+                    PropKey pk { u.actor_idx, u.key };
                     if (gPropOriginals.find(pk) == gPropOriginals.end())
                         gPropOriginals[pk] = old_raw;
 
@@ -688,13 +651,9 @@ void DebugServer_DrainQueue(Level& level)
                     rec.kind         = ChangeRecord::PROP;
                     rec.actor_idx    = u.actor_idx;
                     rec.px = rec.py = rec.pz = 0.f;
-                    rec.block        = block;
-                    rec.field_offset = info.field_offset;
+                    rec.field_key    = u.key;
                     rec.old_raw      = old_raw;
                     gChangeStack.push_back(rec);
-
-                    // In-place write — same pattern as actor.hpi C-style casts.
-                    *reinterpret_cast<int32*>(block + info.field_offset) = new_raw;
                 }
             }
 
@@ -739,8 +698,13 @@ void DebugServer_DrainQueue(Level& level)
                                      Scalar::FromDouble(r.pz));
                         a->setCurrentPos(prev);
                     }
-                } else if (r.kind == ChangeRecord::PROP && r.block) {
-                    *reinterpret_cast<int32*>(r.block + r.field_offset) = r.old_raw;
+                } else if (r.kind == ChangeRecord::PROP && !r.field_key.empty()) {
+                    // Route undo through wfmut so a single mutation pipeline
+                    // owns all field writes (including the script-handle
+                    // rejection). int64 overload writes the raw int32 back
+                    // unscaled, which is exactly what undo needs.
+                    wfmut::SetActorField(level, r.actor_idx, r.field_key.c_str(),
+                                         static_cast<std::int64_t>(r.old_raw));
                 } else if (r.kind == ChangeRecord::SCRIPT) {
 #ifdef WF_WITH_FORTH
                     if (r.script_prev_source.empty()) {
@@ -783,9 +747,12 @@ void DebugServer_DrainQueue(Level& level)
                 }
             }
             gOriginals.clear();
-            // Restore property originals
+            // Restore property originals — route through wfmut so the
+            // bridge owns no OAD-block-pointer math.
             for (auto& kv : gPropOriginals) {
-                *reinterpret_cast<int32*>(kv.first.block + kv.first.field_offset) = kv.second;
+                wfmut::SetActorField(level, kv.first.actor_idx,
+                                     kv.first.field_key.c_str(),
+                                     static_cast<std::int64_t>(kv.second));
             }
             gPropOriginals.clear();
             // Clear hot-reloaded script overrides (revert to OAD-baked source).
@@ -813,8 +780,6 @@ void DebugServer_DrainQueue(Level& level)
                 rec.kind          = ChangeRecord::MAILBOX;
                 rec.actor_idx     = u.actor_idx;
                 rec.px = rec.py = rec.pz = 0.f;
-                rec.block         = nullptr;
-                rec.field_offset  = 0;
                 rec.old_raw       = 0;
                 rec.mailbox_idx   = u.mailbox_idx;
                 rec.old_mbx_value = old_val;
@@ -845,8 +810,6 @@ void DebugServer_DrainQueue(Level& level)
                 rec.kind          = ChangeRecord::SCRIPT;
                 rec.actor_idx     = u.actor_idx;
                 rec.px = rec.py = rec.pz = 0.f;
-                rec.block         = nullptr;
-                rec.field_offset  = 0;
                 rec.old_raw       = 0;
                 rec.mailbox_idx   = 0;
                 rec.old_mbx_value = 0.f;
@@ -1071,4 +1034,4 @@ bool DebugServer_GetInputOverride(int mailbox_id, int32_t* out_value)
     return true;
 }
 
-#endif // WF_ENABLE_EDITOR
+#endif // WF_DEBUG_BRIDGE

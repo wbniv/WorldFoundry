@@ -4,12 +4,13 @@
 // own test cases against the matrix in
 // docs/plans/2026-05-19-engine-mutation-api.md.
 //
-// Editor-stack only — gated by WF_ENABLE_EDITOR. Empty TU when the flag is
-// off; also excluded from the source list in CMakeLists / build_game.sh.
+// Same gate as wfmut: UNION of WF_DEBUG_BRIDGE and WF_ENABLE_EDITOR. Empty
+// TU when neither flag is set; excluded from the source list in CMakeLists
+// and engine/build_game.sh in that case.
 
 #include "wfmut_smoke.hpp"
 
-#ifdef WF_ENABLE_EDITOR
+#if defined(WF_DEBUG_BRIDGE) || defined(WF_ENABLE_EDITOR)
 
 #include "wfmut.hpp"
 
@@ -161,6 +162,127 @@ void run_transform_tests(Level& level, ActorIdx player)
     SetActorPos(level, player, *saved);
 }
 
+// ── Field tests ─────────────────────────────────────────────────────────────
+
+void run_field_tests(Level& level, ActorIdx player)
+{
+    std::printf("--- Fields (F1-F14) ---\n");
+
+    // F1: common.hp (fixed32) round-trip
+    {
+        bool ok_set = SetActorField(level, player, "common.hp", 100.0);
+        auto got = GetActorFieldFloat(level, player, "common.hp");
+        bool round_trip = ok_set && got && fclose_to(static_cast<float>(*got), 100.0f, 1e-3f);
+        report("F1: SetActorField common.hp (fixed32) round-trip", round_trip,
+               round_trip ? "" : std::string("lastError=") + lastError());
+    }
+
+    // F2: movebloc.Mass (fixed32) round-trip
+    {
+        bool ok_set = SetActorField(level, player, "movebloc.Mass", 1.5);
+        auto got = GetActorFieldFloat(level, player, "movebloc.Mass");
+        bool round_trip = ok_set && got && fclose_to(static_cast<float>(*got), 1.5f, 1e-4f);
+        report("F2: SetActorField movebloc.Mass (fixed32) round-trip", round_trip);
+    }
+
+    // F3: movebloc.MovementClass (raw int) round-trip via int64 overload
+    {
+        bool ok_set = SetActorField(level, player, "movebloc.MovementClass",
+                                    static_cast<std::int64_t>(2));
+        auto got = GetActorFieldInt(level, player, "movebloc.MovementClass");
+        bool round_trip = ok_set && got && *got == 2;
+        report("F3: SetActorField movebloc.MovementClass (raw int) round-trip", round_trip);
+    }
+
+    // F4: mesh.ModelType (raw int) — covers mesh.* block
+    {
+        bool ok_set = SetActorField(level, player, "mesh.ModelType",
+                                    static_cast<std::int64_t>(3));
+        auto got = GetActorFieldInt(level, player, "mesh.ModelType");
+        bool round_trip = ok_set && got && *got == 3;
+        report("F4: SetActorField mesh.ModelType round-trip", round_trip);
+    }
+
+    // F5: mesh.AnimationMailbox — second mesh.* raw-int field
+    {
+        bool ok_set = SetActorField(level, player, "mesh.AnimationMailbox",
+                                    static_cast<std::int64_t>(42));
+        auto got = GetActorFieldInt(level, player, "mesh.AnimationMailbox");
+        bool round_trip = ok_set && got && *got == 42;
+        report("F5: SetActorField mesh.AnimationMailbox round-trip", round_trip);
+    }
+
+    // F6: common.Script via string overload — rejected, route to ReloadActorScript
+    {
+        bool ret = SetActorField(level, player, "common.Script", "\\\\ wf\n: tick ;");
+        bool err_ok = std::strstr(lastError(), "ReloadActorScript") != nullptr;
+        report("F6: SetActorField common.Script string rejected → use ReloadActorScript",
+               !ret && err_ok,
+               std::string("ret=") + (ret?"true":"false") + " lastError=" + lastError());
+    }
+
+    // F7: ReloadActorScript happy path — empty script body is valid Forth
+    {
+        bool ret = ReloadActorScript(level, player, "\\ wf\n: tick ;");
+        report("F7: ReloadActorScript happy path", ret,
+               ret ? "" : std::string("lastError=") + lastError());
+    }
+
+    // F8: ReloadActorScript with malformed Forth — should fail with compile log
+    {
+        bool ret = ReloadActorScript(level, player, "\\ wf\n: tick this-word-does-not-exist ;");
+        bool err_ok = ret == false && std::strstr(lastError(), "compile failed") != nullptr;
+        report("F8: ReloadActorScript malformed source rejected", err_ok,
+               std::string("ret=") + (ret?"true":"false") + " lastError=" + lastError());
+    }
+
+    // F9: unknown field path → false + lastError populated
+    {
+        bool ret = SetActorField(level, player, "common.NotARealField",
+                                 static_cast<std::int64_t>(0));
+        bool err_ok = !ret && std::strstr(lastError(), "unknown field path") != nullptr;
+        report("F9: SetActorField unknown field rejected", err_ok);
+    }
+
+    // F10: type-coerce double-to-rawint — write 1.5 to MovementClass (raw int);
+    // expect truncate to 1. Documents the truncation behaviour.
+    {
+        SetActorField(level, player, "movebloc.MovementClass",
+                      static_cast<std::int64_t>(0));  // baseline
+        bool ok_set = SetActorField(level, player, "movebloc.MovementClass", 1.5);
+        auto got = GetActorFieldInt(level, player, "movebloc.MovementClass");
+        bool truncated = ok_set && got && *got == 1;
+        report("F10: SetActorField double-on-raw-int truncates to 1", truncated);
+    }
+
+    // F11: fixed32 overflow saturation — 1e9 × 65536 way past INT32_MAX
+    {
+        bool ok_set = SetActorField(level, player, "movebloc.Mass", 1e9);
+        auto got = GetActorFieldFloat(level, player, "movebloc.Mass");
+        // After saturation: int32 = INT32_MAX (2147483647), fixed32 read =
+        // INT32_MAX / 65536 ≈ 32767.999
+        bool saturated = ok_set && got && fclose_to(static_cast<float>(*got), 32767.999f, 1e-1f);
+        report("F11: SetActorField fixed32 overflow saturates to INT32_MAX", saturated,
+               got ? std::string("got=") + std::to_string(*got) : std::string("no value"));
+    }
+
+    // F12: bad idx on SetActorField
+    {
+        bool ret = SetActorField(level, 0, "common.hp", 50.0);
+        bool err_ok = !ret && std::strstr(lastError(), "must be >= 1") != nullptr;
+        report("F12: SetActorField bad idx rejected", err_ok);
+    }
+
+    // F13 (OAD page sharing) — needs a second actor sharing the same _Common
+    // page as the player to verify in-place behaviour propagates. smb_w1_1
+    // may or may not have such a sharing pattern; skip if we can't find one.
+    // For v1, we document the limitation and leave the test as a manual
+    // verification step. Move on.
+
+    // F14 (bridge gWatches regression) — requires the bridge to be running.
+    // Manual verification via X8 in the test matrix.
+}
+
 } // namespace
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -180,8 +302,9 @@ int RunSmokeTests(Level& level)
     std::printf("  using player idx = %u\n", player);
 
     run_transform_tests(level, player);
+    run_field_tests(level, player);
 
-    // Step 3+ tests append here as they land.
+    // Step 4+ tests append here as they land.
 
     std::printf("=== wfmut smoke: %d passed, %d failed ===\n", g_passed, g_failed);
     return g_failed;
@@ -189,4 +312,4 @@ int RunSmokeTests(Level& level)
 
 } // namespace wfmut
 
-#endif // WF_ENABLE_EDITOR
+#endif // WF_DEBUG_BRIDGE || WF_ENABLE_EDITOR
