@@ -9,6 +9,7 @@
 #include <physics/jolt/jolt_math.hp>
 
 #include <vector>
+#include <memory>
 #include <cstdio>
 #include <cassert>
 #include <limits>
@@ -101,6 +102,7 @@ struct BodyEntry
     Vector3     posCache = Vector3::zero;   // Refreshed after each JoltWorldStep
     Vector3     velCache = Vector3::zero;
     Euler       rotCache = Euler::zero;
+    void*       actor    = nullptr;         // Owning WF Actor; opaque to this layer
     bool        occupied = false;
 };
 
@@ -444,12 +446,19 @@ void JoltWorldStep(float dt)
 // ---------------------------------------------------------------------------
 // CharacterVirtual registry — one entry per MOBILITY_PHYSICS actor.
 
+// Forward decl — defined below; each character owns one listener instance
+// so contact callbacks can identify their owning WF Actor without an extra
+// reverse-lookup.
+class WFCharContactListener;
+
 struct CharEntry
 {
     JPH::Ref<JPH::CharacterVirtual> character;
     Vector3 posCache = Vector3::zero;   // actor "feet" position (WF convention)
     Vector3 velCache = Vector3::zero;
     Vector3 ctr      = Vector3::zero;   // colspace centre offset: Jolt pos = actor pos + ctr
+    void*   actor    = nullptr;         // Owning WF Actor; opaque to this layer
+    std::unique_ptr<WFCharContactListener> listener;
     // Statics that enclose the character at spawn — "zone volume" StatPlats
     // wrapping the play area, not walkable geometry. IgnoreMultipleBodiesFilter
     // is non-copyable (CharEntry goes in a vector), so we hold the list and
@@ -475,6 +484,82 @@ public:
 };
 static WFCharObjLayerFilter gCharObjFilter;
 static WFCharBPLayerFilter  gCharBPFilter;
+
+// ---------------------------------------------------------------------------
+// Contact dispatch — see comment in jolt_backend.hp § "Contact dispatch".
+// One callback, set once by the engine at startup; each character's listener
+// invokes it on every new/persisting contact so per-actor collision mailboxes
+// (f4071a3) can be populated for Jolt-managed actors.
+
+static JoltContactCallback gContactCallback = nullptr;
+
+void JoltSetContactCallback(JoltContactCallback cb) { gContactCallback = cb; }
+
+// Find the Actor* registered against a Jolt body ID. Returns nullptr if the
+// body isn't tracked by BodyEntry (e.g. a static created outside gBodies).
+static void* FindActorForBodyID(JPH::BodyID id)
+{
+    for (const BodyEntry& be : gBodies)
+        if (be.occupied && be.joltID == id) return be.actor;
+    return nullptr;
+}
+
+class WFCharContactListener : public JPH::CharacterContactListener
+{
+public:
+    void* characterActor = nullptr;   // CharEntry::actor, cached at registration
+
+    void OnContactAdded(const JPH::CharacterVirtual* /*inCharacter*/,
+                        const JPH::BodyID&     inBodyID2,
+                        const JPH::SubShapeID& /*inSubShapeID2*/,
+                        JPH::RVec3Arg          /*inContactPosition*/,
+                        JPH::Vec3Arg           inContactNormal,
+                        JPH::CharacterContactSettings& /*ioSettings*/) override
+    {
+        if (!gContactCallback || !characterActor) return;
+        void* otherActor = FindActorForBodyID(inBodyID2);
+        // Jolt's listener already passes `-mContactNormal` (CharacterVirtual.cpp:516),
+        // which equals `+penetrationAxis` — the direction the character pushes
+        // against the contacted body. That's the WF convention: bump-from-below
+        // delivers normal.Z > 0, landing-on-top delivers normal.Z < 0 (matching
+        // Actor::Collision's existing `normal.Z < 0 → supportingObject` test).
+        // No re-negation needed.
+        Vector3 wfNormal = FromJph(inContactNormal);
+        gContactCallback(characterActor, otherActor, wfNormal);
+    }
+
+    void OnContactPersisted(const JPH::CharacterVirtual*    inCharacter,
+                            const JPH::BodyID&              inBodyID2,
+                            const JPH::SubShapeID&          inSubShapeID2,
+                            JPH::RVec3Arg                   inContactPosition,
+                            JPH::Vec3Arg                    inContactNormal,
+                            JPH::CharacterContactSettings&  ioSettings) override
+    {
+        // For now treat persistent contact the same as a fresh add — the
+        // bump-script branch is gated by mailbox state (NORMAL==1) anyway, so
+        // a persisted contact past the trigger frame won't re-fire the bump.
+        // If a future use case wants edge-only semantics, route through a
+        // different callback channel.
+        OnContactAdded(inCharacter, inBodyID2, inSubShapeID2,
+                       inContactPosition, inContactNormal, ioSettings);
+    }
+};
+
+// Public setters — keep the bridge from jolt_backend back to engine-side
+// Actor* pointers so the listener can identify both sides.
+void JoltCharacterSetActor(uint32_t handle, void* actor)
+{
+    if (handle >= (uint32_t)gCharacters.size() || !gCharacters[handle].occupied) return;
+    gCharacters[handle].actor = actor;
+    if (gCharacters[handle].listener)
+        gCharacters[handle].listener->characterActor = actor;
+}
+
+void JoltBodySetActor(uint32_t handle, void* actor)
+{
+    if (handle >= (uint32_t)gBodies.size() || !gBodies[handle].occupied) return;
+    gBodies[handle].actor = actor;
+}
 
 static uint32_t AllocCharEntry()
 {
@@ -564,6 +649,12 @@ uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
     e.velCache  = Vector3::zero;
     e.ctr       = ctr;
     e.occupied  = true;
+
+    // Wire the per-character contact listener; populates the per-actor
+    // collision mailboxes (f4071a3) for this Jolt-managed actor. The Actor*
+    // is registered later via JoltCharacterSetActor (we don't have it here).
+    e.listener = std::unique_ptr<WFCharContactListener>(new WFCharContactListener());
+    e.character->SetListener(e.listener.get());
     std::fprintf(stderr, "jolt: character %u created at (%.2f, %.2f, %.2f) ctr=(%.2f,%.2f,%.2f)\n",
                  handle, pos.X().AsFloat(), pos.Y().AsFloat(), pos.Z().AsFloat(),
                  ctr.X().AsFloat(), ctr.Y().AsFloat(), ctr.Z().AsFloat());
@@ -692,8 +783,16 @@ void JoltCharacterUpdate(uint32_t handle, float dt)
     }
     else if (dt > 0.0f)
     {
-        // Airborne: Y from position delta (collision-constrained), Z from input (gravity).
-        e.velCache.SetY((newPos.Y() - e.posCache.Y()) * Scalar(1.0f / dt));
+        // Airborne: all three axes from position delta so contacts (wall on
+        // X/Y, ceiling/block-underside on +Z) zero out the blocked component
+        // instead of letting the character stay welded to the surface with
+        // a ghost input velocity. WF-side gravity then accumulates from the
+        // actual post-contact state (0 on a fresh contact frame), so the
+        // very next frame is already falling.
+        float invDt = 1.0f / dt;
+        e.velCache.SetX((newPos.X() - e.posCache.X()) * Scalar(invDt));
+        e.velCache.SetY((newPos.Y() - e.posCache.Y()) * Scalar(invDt));
+        e.velCache.SetZ((newPos.Z() - e.posCache.Z()) * Scalar(invDt));
     }
 
     e.posCache = newPos;

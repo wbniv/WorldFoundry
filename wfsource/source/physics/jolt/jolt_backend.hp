@@ -83,6 +83,31 @@ uint32_t JoltCharacterCreate(const Vector3& pos, const Euler& rot,
                               const Vector3& minPt, const Vector3& maxPt);
 void JoltCharacterDestroy(uint32_t handle);
 
+// ---------------------------------------------------------------------------
+// Contact dispatch — populates f4071a3's per-actor collision mailboxes for
+// Jolt-managed characters. WF's legacy collision.cc:513-520 skips the event-
+// list path for Jolt-managed bodies to avoid double-resolving physics, so
+// Actor::Collision() never fires through the legacy route. To restore that
+// signal, the engine registers a callback here; the Jolt CharacterVirtual
+// contact listener invokes it with (character_actor, other_actor, normal).
+//
+// `void*` is used in the signature so this header stays free of game-side
+// types; the engine wires the callback to a small dispatch function that
+// downcasts to Actor* (or PhysicalObject*) and calls Actor::Collision.
+//
+// Normal convention: `normal` passed to the callback is in the WF convention
+// — "direction the character is pushing against the other body" — i.e. the
+// Jolt-supplied "body2 → character" normal negated. A bump from below thus
+// gives normal.Z > 0, matching the SMB W1-1 ?-block script's expectation.
+typedef void (*JoltContactCallback)(void* characterActor, void* otherActor,
+                                     const Vector3& normal);
+void JoltSetContactCallback(JoltContactCallback cb);
+
+// Register the WF Actor that owns a given character / body handle so the
+// contact callback can identify them. `actor` is opaque to jolt_backend.
+void JoltCharacterSetActor(uint32_t handle, void* actor);
+void JoltBodySetActor(uint32_t handle, void* actor);
+
 const Vector3& JoltCharacterGetPosition(uint32_t handle);
 const Vector3& JoltCharacterGetLinVelocity(uint32_t handle);
 void           JoltCharacterSetLinVelocity(uint32_t handle, const Vector3& vel);

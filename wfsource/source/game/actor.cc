@@ -563,10 +563,12 @@ Actor::BindAssets(Memory& memory)
 					}
 					MEMORY_DELETE(HALScratchLmalloc, chunk, IFFChunkIter);
 				}
-				if (!jverts.empty() && !jfaces.empty())
+				if (!jverts.empty() && !jfaces.empty()) {
 					_physicalAttributes.JoltMakeStaticMesh(
 						jverts.data(), (int)jverts.size(),
 						jfaces.data(), (int)jfaces.size());
+					JoltBodySetActor(_physicalAttributes.JoltBodyID(), this);
+				}
 			}
 		}
 	}
@@ -732,6 +734,7 @@ Actor::Actor( const SObjectStartupData* startupData ) :
 		// with a trimesh body for MODEL_TYPE_MESH actors once the room's
 		// asset slot is available.
 		_physicalAttributes.JoltMakeStatic();
+		JoltBodySetActor(_physicalAttributes.JoltBodyID(), this);
 #endif
 	}
 	else
@@ -766,6 +769,7 @@ Actor::Actor( const SObjectStartupData* startupData ) :
 #ifdef PHYSICS_ENGINE_JOLT
          // PHYSICS actors are driven by CharacterVirtual — replaces the kinematic body.
          _physicalAttributes.JoltMakeCharacter();
+         JoltCharacterSetActor(_physicalAttributes.JoltCharacterID(), this);
 #endif
       }
 
@@ -1715,7 +1719,7 @@ Actor::GetMsgPort()
    return _nonStatPlat->_msgPort;
 }
 
-void 
+void
 Actor::Collision(PhysicalObject& other, const Vector3& normal)
 {
 	// Stash collision data on the actor so scripts can read it via mailboxes
@@ -1737,6 +1741,35 @@ Actor::Collision(PhysicalObject& other, const Vector3& normal)
       }
 	}
 }
+
+#ifdef PHYSICS_ENGINE_JOLT
+// Bridge Jolt's CharacterVirtual contacts into Actor::Collision so f4071a3's
+// per-actor collision mailboxes (COLLIDER_IDX / COLLISION_NORMAL_*) get
+// populated for Jolt-managed actors. Without this, collision.cc:513-520
+// skips the legacy event-list path for any actor with a JoltCharacterID,
+// leaving those mailboxes stuck at 0 in interactive play. Registered once
+// at engine startup; jolt_backend invokes it with the WF-convention normal
+// (direction the character pushes the surface), so a bump-from-below
+// arrives as normal.Z > 0 — matching what level scripts already write.
+static void JoltContactDispatch(void* characterActor, void* otherActor,
+                                const Vector3& normal)
+{
+	Actor* charA = static_cast<Actor*>(characterActor);
+	if (!charA) return;
+	if (Actor* otherA = static_cast<Actor*>(otherActor))
+		charA->Collision(*otherA, normal);
+	else
+		charA->Collision(*charA, normal);  // no other-Actor known; collider idx → 0
+}
+
+// Run-once init: registered via a function-static, so the cost is paid on
+// first Actor construction and never repeated. Static-initialization order
+// across translation units is irrelevant — the callback is only invoked
+// after a CharacterVirtual exists, which is after at least one Actor is
+// constructed.
+static const bool g_joltContactCallbackRegistered = (
+	JoltSetContactCallback(&JoltContactDispatch), true);
+#endif
 
 //==============================================================================
 
