@@ -335,8 +335,11 @@ mat_qblock      = make_mat('smb_qblock',      (0.94, 0.72, 0.02))  # NES gold
 mat_qblock_used = make_mat('smb_qblock_used', (0.78, 0.49, 0.18))  # flat tan
 mat_coin        = make_mat('smb_coin',        (1.0,  0.84, 0.0))   # NES coin yellow
 BSIZE = T / 2  # half-side of a 1-tile block
-COIN_R, COIN_T = 0.3, 0.04   # coin half-extents — wide in X+Z (faces camera),
-                              # thin in Y (depth) so it looks like a disc edge-on
+COIN_R, COIN_T = 0.3, 0.2   # Y must be ≥ ~0.2 (40 cm) to render at all from the
+                             # side-camera (Y=-20) — 0.04 was below the renderer's
+                             # camera-depth threshold. See docs/level-design-
+                             # troubleshooting.md § "Object too thin in camera-
+                             # depth axis — invisible".
 
 # Must match SMB_QBLOCK_0_NORMAL/USED/COIN_VISIBLE in
 # wfsource/source/mailbox/mailbox.inc. Hardcoded here because Blender custom
@@ -347,9 +350,14 @@ MB_SMB_QBLOCK_0_COIN_VISIBLE = 1805
 
 # Runtime actor index of qblock_00_coin — hardcoded into Mario's Forth script
 # because write-actor-mailbox needs it as a literal. Verified via
-# `engine/wf_game --debug-print-actors` after rebuild. Adding the coin after
-# qblock_00_used (idx 13) puts it at idx 14, shifting blocks 1/2 + goomba etc.
-# up by one. Update this if a rebuild changes the layout.
+# `engine/wf_game --debug-print-actors`:
+#   idx 12 = qblock_00.iff
+#   idx 13 = qblock_00_used.iff
+#   idx 14 = qblock_00_coin.iff  ← this one
+#   idx 15 = qblock_01.iff
+# Engine actor indices do NOT match the .lev OBJECT ordering; they include
+# implicit actors (level/camera-internal) at low indices. Always check via
+# --debug-print-actors after rebuild, never count by hand from the .lev.
 COIN_ACTOR_IDX = 14
 
 for i, bx in enumerate(QBLOCK_XS):
@@ -373,6 +381,10 @@ for i, bx in enumerate(QBLOCK_XS):
         # window via write-actor-mailbox (same pattern as qbert popup_500).
         # Hidden by default (mailbox 0); bump sets COIN_VISIBLE = 1 + kicks
         # off COIN_PHASE = 1, ramps phase to 30, then hides again.
+        # Coin sits centered on the block top. Y thickness is bumped to 40 cm
+        # (COIN_T=0.2 above) because 8 cm was too thin to render from the
+        # side-scroller camera at Y=-20 — see "Coin too thin in camera-depth
+        # axis (Y) — invisible" in docs/level-design-troubleshooting.md.
         coin_z = BLOCK_Z + BSIZE
         coin = add_statplat(f'qblock_{i:02d}_coin',
                             bx - COIN_R, -COIN_T, coin_z - COIN_R,
@@ -446,16 +458,19 @@ if player:
     player['wf_Model Type'] = 'Mesh'
     player['wf_Visibility Mailbox'] = 1
     # Physics movement parameters — tuned for SMB feel.
-    # Jump apex = (JumpAccel × 0.2)² / (2 × FallAccel); 70 × 0.2 = 14 m/s → ~8.2 m
-    # apex, enough to clear a ? block top at z=7.5 m. MaxGroundSpeed 12 m/s ≈ 8
-    # tiles/sec at T=1.5 m. See docs/plans/2026-05-17-smb-mario-speed-jump-tuning.md.
-    player['wf_Running Acceleration']  = 16.0
+    # OAS custom-prop keys mirror the schema's field.key, which preserves
+    # spaces (e.g. "Running Acceleration"), NOT a WikiWord form.
+    player['wf_Running Acceleration']  = 60.0
     player['wf_Running Deceleration']  = 0.85
-    player['wf_Max Ground Speed']      = 12.0
-    player['wf_Jumping Acceleration']  = 70.0
+    player['wf_Max Ground Speed']      = 32.0
+    player['wf_Jumping Acceleration']  = 60.0
     player['wf_Falling Acceleration']  = 12.0
-    player['wf_Air Acceleration']      = 16.0
-    player['wf_Max Air Speed']         = 12.0
+    player['wf_Air Acceleration']      = 0.0
+    player['wf_Max Air Speed']         = 32.0
+    # No air control (Air Acceleration=0) means takeoff momentum sails for the
+    # whole jump unless damped. HorizAirDrag=3 ≈ 5% per frame at 60Hz, so a
+    # 32 m/s launch decays to ~12 m/s by the time gravity brings Mario back.
+    player['wf_Horiz Air Drag']        = 3.0
     # TurnRate=0 → doom-stick LEFT/RIGHT strafe instead of rotate.
     # currentDir() = (cos C, sin C, 0) [physicalobject.hpi:52].
     # C=π/2 → currentDir=(0,1,0)=+Y; StepRight=(sin C,-cos C,0)=(1,0,0)=+X ✓

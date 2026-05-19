@@ -889,17 +889,17 @@
 		{ 'I32' { 'NAME' "At End Of Path" } { 'STR' "Ping-Pong" } }
 		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
 		{ 'STR' { 'NAME' "Follow Offset" } { 'STR' "" } }
-		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 16.0000000000000000(1.15.16) } { 'STR' "16.0" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 60.0000000000000000(1.15.16) } { 'STR' "60.0" } }
 		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8500000000000000(1.15.16) } { 'STR' "0.85" } }
-		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 32.0000000000000000(1.15.16) } { 'STR' "32.0" } }
 		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Crawling Acceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
-		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 70.0000000000000000(1.15.16) } { 'STR' "70.0" } }
+		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 60.0000000000000000(1.15.16) } { 'STR' "60.0" } }
 		{ 'FX32' { 'NAME' "Jumping Momentum Transfer" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
-		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 16.0000000000000000(1.15.16) } { 'STR' "16.0" } }
-		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 3.0000000000000000(1.15.16) } { 'STR' "3.0" } }
 		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 32.0000000000000000(1.15.16) } { 'STR' "32.0" } }
 		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
 		{ 'FX32' { 'NAME' "Fall Anim Threshold" } { 'DATA' 2.0000000000000000(1.15.16) } { 'STR' "2.0" } }
 		{ 'FX32' { 'NAME' "Stun Threshold" } { 'DATA' 2.5000000000000000(1.15.16) } { 'STR' "2.5" } }
@@ -1121,7 +1121,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 11.6999998092651367(1.15.16) -0.0399999991059303(1.15.16) 7.1999998092651367(1.15.16) 12.3000001907348633(1.15.16) 0.0399999991059303(1.15.16) 7.8000001907348633(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 11.6999998092651367(1.15.16) -0.2000000029802322(1.15.16) 7.1999998092651367(1.15.16) 12.3000001907348633(1.15.16) 0.2000000029802322(1.15.16) 7.8000001907348633(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "qblock_00_coin.iff" } }

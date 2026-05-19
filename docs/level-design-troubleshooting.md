@@ -183,7 +183,45 @@ assert ROOM_POS.z - abs(ROOM_LOCAL_BBOX[5]) < P.z < ROOM_POS.z + abs(ROOM_LOCAL_
 
 ---
 
-### 4. Visibility Mailbox value
+### 4. Object too thin in camera-depth axis — invisible
+
+**Symptom:** Mesh actor has correct `Class Name`, `Model Type = Mesh`, `Visibility Mailbox` set to a true mailbox (or forced `=1`), valid `.iff` mesh on disk with a FLAT_SHADED MATL (`flags=0`, opaque color), and is comfortably inside a room bbox — but is invisible in-game. `RenderActor3DAnimates` log count matches the actor count (so the actor *did* get a renderer constructed). All the usual offenders below check out clean.
+
+**Cause:** The mesh is **too thin along the camera-depth axis** for the rasterizer / depth pass to draw anything. For the SMB side-scroller (camera at Y=−20 looking +Y, X-Z is the screen plane), a coin disc authored as `(X half-extent 0.3, Y half-extent 0.04, Z half-extent 0.3)` — i.e. 8 cm thick in Y — never appears even though the 60 cm × 60 cm X-Z face *is* the camera-facing surface. The pre-shipped commit `8a4f822` SMB `?`-block coin hit this.
+
+Note: this is distinct from the older "wrong-coordinate-system" variant where the *long* axis ended up along Y and the camera saw the thin edge; here the orientation is correct, but the thickness itself is too small.
+
+**Fix:** Bump the thickness in the camera-depth axis until it renders. For SMB W1-1's camera at Y=−20 looking +Y, **Y half-extent ≥ ~0.2 m (40 cm total)** worked; 0.04 (8 cm) did not. The exact threshold is probably renderer + viewport dependent — bisect if you need the minimum.
+
+**How to diagnose quickly:** force `wf_Visibility Mailbox = 1` (always-on hardwired) so script logic is taken out of the loop, blow the geometry up to a 3 m cube to confirm the actor reaches the render path, then shrink it down dimension by dimension until it disappears — the last dimension you shrunk is the camera-depth axis and the threshold lives there.
+
+---
+
+### 5. Per-actor collision mailboxes are dead under Jolt physics
+
+**Symptom:** Forth script that reads `INDEXOF_COLLIDER_IDX`, `INDEXOF_COLLISION_NORMAL_X/Y/Z` (mailboxes 3044–3047, added by [`f4071a3`](https://github.com/anthropics/wf/commit/f4071a3) — per-actor collision mailboxes) never sees a non-zero value during *interactive* play, even though the same script behaves correctly when the bridge directly `set_mailbox`'es those values. SMB W1-1's `?`-block "bump from below" trigger looks like this:
+
+```forth
+INDEXOF_COLLIDER_IDX read-mailbox 0<> if
+  INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if
+    ... flip block to USED, spawn coin ...
+  then
+then
+```
+
+— the `0<>` guard fails every tick because `COLLIDER_IDX` stays 0.
+
+**Cause:** [`wfsource/source/physics/collision.cc:513-520`](../wfsource/source/physics/collision.cc) explicitly *skips* populating the legacy collision event list whenever either object is Jolt-managed (has a valid `JoltCharacterID`). The skip avoids double-resolving physics — but `Actor::Collision()` is *only* called from the legacy event-list path (`collision.cc:309-310`), so for any Jolt-managed actor (the player, anything with a CharacterVirtual), `_lastColliderIdx` and `_lastCollisionNormal` are never written. They stay at their `Actor::StartFrame()` reset values (zero) forever.
+
+`jolt_backend.cc` does not call `Actor::Collision()` or write the per-actor mailbox fields — there's no Jolt contact listener wired to that path.
+
+**Fix:** Engine change — hook Jolt's character/contact callback to call `Actor::Collision(otherActor, normal)` for Jolt-managed actors. Tracked in [TODO.md](../TODO.md) under engine bugs. Until that lands, anything depending on per-actor collision mailboxes only works via bridge `set_mailbox` injection, not interactive play.
+
+**Workaround for level scripts:** Don't rely on `COLLIDER_IDX` / `COLLISION_NORMAL_*` for trigger logic. Use alternatives like Z-velocity sign transitions, Z position thresholds, or pre-placed `ActBoxOr` trigger volumes that fire via their own activation mechanism.
+
+---
+
+### 6. Visibility Mailbox value
 
 **Cause:** `actor.cc isVisible()` reads `GetMeshBlockPtr()->VisibilityMailbox`. Mailbox 0 is *always false*; mailbox 1 is *always true* (hardwired in `mailbox.cc`). Actor-local mailboxes start at index 2000 (`EMAILBOX_LOCAL_START`).
 
@@ -924,3 +962,55 @@ actor's world-space position. Re-export and rebuild.
   room bbox only covers the visible play field.
 - Actor added to the scene after the room bbox was last authored and the bbox
   was never updated to include it.
+
+---
+
+## Runtime actor indices do NOT match the .lev OBJECT ordering
+
+**Symptom:** A Forth script uses `write-actor-mailbox` (or similar per-actor
+write) with an actor index counted by hand from the `.lev` file's OBJECT
+entries. The writes land on the wrong actor — usually one or two slots later
+than expected — and the targeted actor visibly doesn't update (no position
+change, no per-actor mailbox effect).
+
+**Cause:** The engine's runtime actor list includes implicit actors at low
+indices that are not OBJECT entries in the `.lev` (Level metadata actors,
+Director, camera-internal actors, etc.). Indices in the `.lev` text are not the
+indices the engine assigns. Off-by-one or off-by-two errors are common when
+you count `.lev` OBJECTs in your head.
+
+For example, SMB W1-1 currently yields this runtime ordering for the `?`-block
+cluster — the first `?` block is at idx 12, not 8 or 9 (where it sits in the
+`.lev`):
+
+```
+actor idx=12 mesh=qblock_00.iff
+actor idx=13 mesh=qblock_00_used.iff
+actor idx=14 mesh=qblock_00_coin.iff
+actor idx=15 mesh=qblock_01.iff
+```
+
+**Fix:** *Always* read the index from `engine/wf_game --debug-print-actors`
+output after a rebuild. The engine prints one `actor idx=N mesh=... pos=...`
+line per actor at construction time, before the main loop. Grep for the mesh
+filename — that's the canonical mapping.
+
+**Don't:** trust an LLM/code agent's enumeration of OBJECT entries from the
+`.lev` file. The agent will likely miscount and confidently report a wrong
+index. (`feedback_check_class_names_before_comparing` covers the broader
+"don't speculate, verify" principle.)
+
+**Workflow if your hardcoded index might be stale:**
+
+```bash
+# After any level rebuild that adds/removes/reorders actors:
+cd wfsource/source/game
+LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 \
+  timeout 5 ../../../engine/wf_game \
+    -L../../../wflevels/<level>-standalone.iff \
+    --debug-print-actors --debug-port 7780 --debug-bind 127.0.0.1 \
+    > /tmp/actorlist.log 2>&1
+grep "actor idx=" /tmp/actorlist.log
+```
+
+Then update any `<index> write-actor-mailbox` literal in the Blender script.
