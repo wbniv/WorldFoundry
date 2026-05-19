@@ -213,4 +213,98 @@ int Array::len() const {
     return yarray_len(_branch);
 }
 
+// ─── Observer trampolines ─────────────────────────────────────────────────────
+//
+// The C ABI takes (void* state, void (*cb)(void*, YEvent*)). We heap-allocate
+// a Trampoline struct holding the caller's std::function and pass its address
+// as `state`; the C-linkage trampoline below downcasts and invokes.
+//
+// extern "C" on the trampolines guarantees C calling convention. In practice
+// on Linux/x86_64 it's identical to the C++ convention for this signature,
+// but extern "C" is the portable spelling.
+
+namespace {
+
+struct MapTrampoline {
+    std::function<void(const YMapEvent*)> cb;
+};
+struct ArrayTrampoline {
+    std::function<void(const YArrayEvent*)> cb;
+};
+
+extern "C" void wfcrdt_map_trampoline(void* state, const YMapEvent* e) {
+    auto* t = static_cast<MapTrampoline*>(state);
+    t->cb(e);
+}
+extern "C" void wfcrdt_array_trampoline(void* state, const YArrayEvent* e) {
+    auto* t = static_cast<ArrayTrampoline*>(state);
+    t->cb(e);
+}
+
+}  // namespace
+
+Subscription Map::observe(std::function<void(const YMapEvent*)> cb) {
+    auto* t = new MapTrampoline{std::move(cb)};
+    unsigned int subId =
+        ymap_observe(_branch, t, &wfcrdt_map_trampoline);
+    return Subscription(_branch, subId, SubKind::Map, t);
+}
+
+Subscription Array::observe(std::function<void(const YArrayEvent*)> cb) {
+    auto* t = new ArrayTrampoline{std::move(cb)};
+    unsigned int subId =
+        yarray_observe(_branch, t, &wfcrdt_array_trampoline);
+    return Subscription(_branch, subId, SubKind::Array, t);
+}
+
+// ─── Subscription ─────────────────────────────────────────────────────────────
+
+Subscription::Subscription(Branch* target,
+                           unsigned int subId,
+                           SubKind kind,
+                           void* heapTrampoline)
+    : _target(target), _subId(subId), _kind(kind), _heap(heapTrampoline) {}
+
+Subscription::~Subscription() {
+    if (!_target) return;
+    if (_kind == SubKind::Map) {
+        ymap_unobserve(_target, _subId);
+        delete static_cast<MapTrampoline*>(_heap);
+    } else {
+        yarray_unobserve(_target, _subId);
+        delete static_cast<ArrayTrampoline*>(_heap);
+    }
+}
+
+Subscription::Subscription(Subscription&& other) noexcept
+    : _target(other._target),
+      _subId(other._subId),
+      _kind(other._kind),
+      _heap(other._heap) {
+    other._target = nullptr;
+    other._heap = nullptr;
+}
+
+Subscription& Subscription::operator=(Subscription&& other) noexcept {
+    if (this != &other) {
+        // Run our own dtor logic first.
+        if (_target) {
+            if (_kind == SubKind::Map) {
+                ymap_unobserve(_target, _subId);
+                delete static_cast<MapTrampoline*>(_heap);
+            } else {
+                yarray_unobserve(_target, _subId);
+                delete static_cast<ArrayTrampoline*>(_heap);
+            }
+        }
+        _target = other._target;
+        _subId = other._subId;
+        _kind = other._kind;
+        _heap = other._heap;
+        other._target = nullptr;
+        other._heap = nullptr;
+    }
+    return *this;
+}
+
 }  // namespace wfcrdt

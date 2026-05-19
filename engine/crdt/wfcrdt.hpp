@@ -137,6 +137,11 @@ public:
     Output get(const char* key) const;
     int len() const;
 
+    // Subscribe to map changes. Callback fires once per ytransaction_commit
+    // that mutates this map. Destruction of the returned Subscription
+    // unsubscribes; until then the callback persists across commits.
+    Subscription observe(std::function<void(const YMapEvent*)> cb);
+
 private:
     friend class Transaction;
     Map(Branch* branch, YTransaction* txn) : _branch(branch), _txn(txn) {}
@@ -153,6 +158,9 @@ public:
     Output get(int index) const;
     int len() const;
 
+    // See Map::observe.
+    Subscription observe(std::function<void(const YArrayEvent*)> cb);
+
 private:
     friend class Transaction;
     Array(Branch* branch, YTransaction* txn) : _branch(branch), _txn(txn) {}
@@ -160,6 +168,33 @@ private:
     YTransaction* _txn;
 };
 
-// (Subscription body fleshed out in step 5.)
+// Subscription discriminator — selects the right yffi unobserve()
+// + matches the trampoline type so its heap allocation can be freed.
+enum class SubKind { Map, Array };
+
+// RAII handle for an observer subscription. Destruction calls the
+// appropriate yffi unobserve and frees the heap std::function
+// trampoline. Move-only.
+class Subscription {
+public:
+    ~Subscription();
+    Subscription(Subscription&& other) noexcept;
+    Subscription& operator=(Subscription&& other) noexcept;
+    Subscription(const Subscription&) = delete;
+    Subscription& operator=(const Subscription&) = delete;
+
+private:
+    friend class Map;
+    friend class Array;
+    Subscription(Branch* target,
+                 unsigned int subId,
+                 SubKind kind,
+                 void* heapTrampoline);
+
+    Branch* _target;
+    unsigned int _subId;
+    SubKind _kind;
+    void* _heap;  // owned MapTrampoline* / ArrayTrampoline*
+};
 
 }  // namespace wfcrdt

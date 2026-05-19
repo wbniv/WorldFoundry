@@ -117,6 +117,75 @@ static int test_two_doc_state_diff() {
     return 0;
 }
 
+static int test_observer_fires() {
+    // Mirrors C smoke: subscribe via a txn that DOESN'T mutate, commit
+    // that registration txn, then a SECOND txn mutates → observer fires
+    // on that second commit.
+    wfcrdt::Doc doc;
+
+    // First txn creates the array. Commit closes it.
+    Branch* arrBranch = nullptr;
+    {
+        auto txn = doc.begin();
+        auto arr = txn.array("content");
+        (void)arr;
+        // Branch identity is stable across txns for a given root name,
+        // so we can re-fetch it later instead of stashing it.
+    }
+    (void)arrBranch;
+
+    int fireCount = 0;
+    wfcrdt::Subscription sub = [&]() {
+        auto txn = doc.begin();
+        auto arr = txn.array("content");
+        return arr.observe([&](const YArrayEvent*) { ++fireCount; });
+        // ~Transaction commits the registration txn here.
+    }();
+
+    // A separate txn now performs a mutation; commit on scope exit fires
+    // the callback.
+    {
+        auto txn = doc.begin();
+        auto arr = txn.array("content");
+        arr.insertLong(0, 7);
+    }
+    CHECK(fireCount == 1, "observer didn't fire exactly once on commit");
+    return 0;
+}
+
+static int test_observer_cancelled_before_commit() {
+    // Destroying the Subscription before the mutating commit should
+    // prevent the callback from firing.
+    wfcrdt::Doc doc;
+    {
+        auto txn = doc.begin();
+        (void)txn.array("a");
+    }
+
+    int fireCount = 0;
+    {
+        // Register subscription in its own commit-and-discard scope.
+        wfcrdt::Subscription sub = [&]() {
+            auto txn = doc.begin();
+            auto arr = txn.array("a");
+            return arr.observe([&](const YArrayEvent*) { ++fireCount; });
+        }();
+
+        // Now destroy the subscription BEFORE the mutating commit.
+        { wfcrdt::Subscription moved = std::move(sub); }  // ~moved unsubscribes
+
+        // Mutate in a fresh txn — observer is gone, no callback.
+        {
+            auto txn = doc.begin();
+            auto arr = txn.array("a");
+            arr.insertLong(0, 1);
+        }
+    }
+    CHECK(fireCount == 0,
+          "callback fired even after Subscription destroyed pre-commit");
+    return 0;
+}
+
 static int test_map_type_mismatch_returns_nullopt() {
     wfcrdt::Doc doc;
     auto txn = doc.begin();
@@ -140,8 +209,10 @@ int main() {
     rc |= test_array_insert_len();
     rc |= test_array_single_insert();
     rc |= test_two_doc_state_diff();
+    rc |= test_observer_fires();
+    rc |= test_observer_cancelled_before_commit();
     if (rc == 0) {
-        std::printf("wfcrdt_wrapper_test: OK (7/7 tests passed — step 4)\n");
+        std::printf("wfcrdt_wrapper_test: OK (9/9 tests passed — step 5)\n");
     }
     return rc;
 }
