@@ -15,7 +15,7 @@ Format per entry:
 
 ## `BaseObjectIterator` missing virtual destructor — `delete` through base slices off 24-byte subclass members — 2026-05-19
 
-**Status:** FIXED commit `<sha>` (to be filled).
+**Status:** FIXED commit `04b91de`.
 
 **Symptom:** ASan reports `new-delete-type-mismatch` on every `LoadLevel` cycle: a 32-byte `BaseObjectIteratorFromInt16List` allocated by `BaseObjectIteratorFromInt16List::Copy()` (called from `Room::ListIter`) gets freed through the parent `BaseObjectIterator*` pointer stored in `IteratorWrapper<BaseObject, BaseObjectIterator>::_iter` (at [`cpplib/iterwrapper.hp`](../wfsource/source/cpplib/iterwrapper.hp):69 `delete _iter;`). ASan diagnostic: "size of the allocated type: 32 bytes; size of the deallocated type: 8 bytes."
 
