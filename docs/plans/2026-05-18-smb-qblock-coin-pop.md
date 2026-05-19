@@ -1,6 +1,6 @@
 # SMB `?`-block coin pop-out animation
 
-**Status:** Active 2026-05-18. Follow-on to [2026-05-17-per-actor-collision-mailboxes.md](2026-05-17-per-actor-collision-mailboxes.md) — that plan landed the visibility-flip half (gold `?`-block → flat-tan used-block on Mario bump). This adds the missing visible feedback: a yellow coin emerges from the block top on bump, arcs up briefly, then disappears. The full classic SMB "hit `?`, coin pops out, block goes used" loop.
+**Status:** Done 2026-05-18 — landed in 8a4f822. Follow-on to [2026-05-17-per-actor-collision-mailboxes.md](2026-05-17-per-actor-collision-mailboxes.md) — that plan landed the visibility-flip half (gold `?`-block → flat-tan used-block on Mario bump). This adds the missing visible feedback: a yellow coin emerges from the block top on bump, arcs up briefly, then disappears. The full classic SMB "hit `?`, coin pops out, block goes used" loop.
 
 ## Context
 
