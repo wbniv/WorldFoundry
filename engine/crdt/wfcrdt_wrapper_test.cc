@@ -53,6 +53,33 @@ static int test_map_round_trip() {
     return 0;
 }
 
+static int test_array_insert_len() {
+    wfcrdt::Doc doc;
+    auto txn = doc.begin();
+    auto content = txn.array("content");
+
+    long long items[3] = {10, 20, 30};
+    content.insertRange(0, items, 3);
+    CHECK(content.len() == 3, "array len != 3 after insertRange");
+
+    auto got = content.get(1);
+    CHECK(got.valid(), "yarray_get returned empty");
+    auto v = got.readLong();
+    CHECK(v.has_value() && *v == 20, "array[1] != 20");
+    return 0;
+}
+
+static int test_array_single_insert() {
+    wfcrdt::Doc doc;
+    auto txn = doc.begin();
+    auto a = txn.array("a");
+    a.insertLong(0, 99);
+    CHECK(a.len() == 1, "array len != 1 after insertLong");
+    auto v = a.get(0).readLong();
+    CHECK(v.has_value() && *v == 99, "single-insert round-trip mismatch");
+    return 0;
+}
+
 static int test_map_type_mismatch_returns_nullopt() {
     wfcrdt::Doc doc;
     auto txn = doc.begin();
@@ -73,8 +100,10 @@ int main() {
     rc |= test_move_semantics();
     rc |= test_map_round_trip();
     rc |= test_map_type_mismatch_returns_nullopt();
+    rc |= test_array_insert_len();
+    rc |= test_array_single_insert();
     if (rc == 0) {
-        std::printf("wfcrdt_wrapper_test: OK (4/4 tests passed — step 2)\n");
+        std::printf("wfcrdt_wrapper_test: OK (6/6 tests passed — step 3)\n");
     }
     return rc;
 }

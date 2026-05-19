@@ -84,7 +84,11 @@ Map Transaction::map(const char* name) {
     return Map(ymap(_txn, name), _txn);
 }
 
-// Transaction::array / stateVector / stateDiff / apply land in later steps.
+Array Transaction::array(const char* name) {
+    return Array(yarray(_txn, name), _txn);
+}
+
+// Transaction::stateVector / stateDiff / apply land in later steps.
 
 // ─── Output ───────────────────────────────────────────────────────────────────
 
@@ -151,6 +155,32 @@ Output Map::get(const char* key) const {
 
 int Map::len() const {
     return ymap_len(_branch);
+}
+
+// ─── Array ────────────────────────────────────────────────────────────────────
+
+void Array::insertLong(int index, long long value) {
+    YInput v = yinput_long(static_cast<long>(value));
+    yarray_insert_range(_branch, _txn, index, &v, 1);
+}
+
+void Array::insertRange(int index, const long long* values, int count) {
+    // yffi takes an array of YInput. Build one on the heap (small alloc;
+    // count is bounded by caller intent — not concerned about overflow).
+    std::vector<YInput> inputs;
+    inputs.reserve(static_cast<std::size_t>(count));
+    for (int i = 0; i < count; ++i) {
+        inputs.push_back(yinput_long(static_cast<long>(values[i])));
+    }
+    yarray_insert_range(_branch, _txn, index, inputs.data(), count);
+}
+
+Output Array::get(int index) const {
+    return Output(yarray_get(_branch, index));
+}
+
+int Array::len() const {
+    return yarray_len(_branch);
 }
 
 }  // namespace wfcrdt

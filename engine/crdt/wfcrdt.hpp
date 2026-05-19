@@ -144,6 +144,22 @@ private:
     YTransaction* _txn;
 };
 
-// (Array / Subscription bodies fleshed out in subsequent steps.)
+// Borrowed view of a root-level YArray. Same ownership rules as Map.
+class Array {
+public:
+    void insertLong(int index, long long value);
+    void insertRange(int index, const long long* values, int count);
+
+    Output get(int index) const;
+    int len() const;
+
+private:
+    friend class Transaction;
+    Array(Branch* branch, YTransaction* txn) : _branch(branch), _txn(txn) {}
+    Branch* _branch;
+    YTransaction* _txn;
+};
+
+// (Subscription body fleshed out in step 5.)
 
 }  // namespace wfcrdt
