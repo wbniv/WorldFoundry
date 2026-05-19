@@ -22,10 +22,14 @@ corrosion_import_crate(
 # The yffi crate's lib name is "yrs", so Corrosion creates a CMake target
 # named "yrs" that points at target/release/libyrs.a.
 
-add_library(wfcrdt STATIC wfcrdt_stub.c)
+add_library(wfcrdt STATIC
+    wfcrdt_stub.c
+    wfcrdt.cpp)
+target_compile_features(wfcrdt PUBLIC cxx_std_17)
 target_link_libraries(wfcrdt PUBLIC yrs)
 target_include_directories(wfcrdt PUBLIC
-    ${CMAKE_SOURCE_DIR}/wftools/y-crdt/tests-ffi/include)
+    ${CMAKE_SOURCE_DIR}/wftools/y-crdt/tests-ffi/include
+    ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Smoke-test target added in step 5 (wfcrdt_smoke.c).
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/wfcrdt_smoke.c)
