@@ -1031,3 +1031,113 @@ grep "actor idx=" /tmp/actorlist.log
 ```
 
 Then update any `<index> write-actor-mailbox` literal in the Blender script.
+
+## Generator + Template Object spawn position must clear collidable objects by ≥ template half-size
+
+**Symptom:** `Generator` actor activation mailbox fires, FIRING prints, but no
+instance appears in the world. With debug fprintf around
+`Level::ConstructTemplateObject`, you see:
+
+```
+Generato::FIRING objectToGenerate=12 _idxActor=15
+Generato: calling ConstructTemplateObject(idx=12, pos=(11.88,-0.12,7.77), vel=(0,0,8))
+Generato: ConstructTemplateObject returned NULL (collision blocked or out of mem)
+```
+
+**Cause:** `SafelyConstructTemplateObject` (`level.cc:1586`) runs a collision
+check at the *spawn position* before instantiating. If the template's
+collision box (`coarse.minX..maxZ` from the OAD) overlaps *any* collidable
+object in the room at that position, spawn is rejected. If the template has
+no Poof fallback (`commonData->Poof == -1`), NULL is returned and the
+generator silently swallows the failure (no assert, no log without
+instrumentation).
+
+**Specific gotcha — generator anchor vs. spawn position:** the generator
+spawns at `_physicalAttributes.GetColSpace().GetCenter(currentPos()) +
+displacement` (`generator.cc:118`), **not** at the authored Blender `location`.
+The collision-space centre includes the generator's own mesh-offset. In SMB
+W1-1's `coin_spawner_NN`, authored Z = `block_top + 0.4` (= 7.9), but the
+generator's actual spawn Z came out as **7.77** — a 0.13 m drop from the
+anchor. The coin template's half-Z is 0.3, so coin extents reached Z=7.47
+while block top sat at Z=7.5 — a 0.03 m overlap, enough to fail the spawn
+check on every bump.
+
+**Fix / authoring rule:** position the generator so that the *spawn position*
+clears the nearest collidable surface by **at least the template's half-extent
+on the relevant axis, plus margin**. For SMB's coin template (half-Z=0.3),
+anchor Z = `block_top + 1.0` gives ~0.57 m of clearance and reliable spawns.
+
+**Verification workflow:** add a temporary fprintf around
+`SafelyConstructTemplateObject` and `Generato::update`'s spawn site that
+prints the computed `pos` plus the NULL/non-NULL return. The "Mario's bump
+fires the script but no coin appears" failure mode is invisible without it —
+the generator happily fires every pulse and silently drops every spawn.
+
+**Don't:** rely solely on the Blender `location` to predict spawn position.
+The mesh-offset can easily eat your margin if you reuse an existing template
+or schema that anchors below its centroid. Always measure the actual `pos=`
+in the spawn fprintf during bring-up.
+
+## Generator spawn crashes with `terminate called without an active exception` after `AddObject`
+
+**Symptom:** A `Generator` actor fires (`mailbox != 0`), `ConstructTemplateObject` returns non-NULL, `Level::AddObject` completes, then the engine immediately aborts with:
+
+```
+terminate called without an active exception
+Aborted (core dumped)
+```
+
+A gdb backtrace at the crash shows:
+
+```
+#13 0x... in Actor::update at actor.cc:869
+#14 0x... in Missile::update at missile.cc:125
+#15 0x... in ObjectUpdate::operator() at movement/movementobject.cc:135
+```
+
+with `Actor::update`'s first assert (`HasRunPredictPosition()`) failing.
+
+**Cause:** Frame pipeline has two passes that iterate the active-room
+UPDATE list:
+
+1. **PredictPosition** pass — sets each actor's `HasRunPredictPosition` flag.
+2. **UpdatePhysics** pass (`for_each(iter, ObjectUpdate(...))` in
+   `movement/movementobject.cc:159`) — calls each actor's `update()`
+   which asserts `HasRunPredictPosition`.
+
+A `Generator` that spawns a template instance via
+`Level::AddObject` *inside* the UpdatePhysics pass appends the new
+actor to the room's UPDATE list. The same `for_each` iterator picks up
+the freshly-added actor and calls its `update()` — but
+PredictPosition has long since finished, so the new actor has
+`HasRunPredictPosition == false` and the assertion fires.
+
+(Confusingly, the assertion failure routes through `_sys_assert` →
+`exit(-1)` → `__run_exit_handlers` → some module's `std::thread`
+destructor on a joinable thread → `std::terminate`. The "terminate"
+message is the *downstream* symptom; the actual cause is the
+asserted-false-`HasRunPredictPosition` upstairs in `Actor::update`.)
+
+**Fix:** `Level::AddObject` marks the freshly-spawned actor with both
+per-frame flags set to "looks like already ran this frame":
+
+```cpp
+physAttrib.HasRunPredictPosition(true);
+physAttrib.HasRunUpdate(true);
+```
+
+`ObjectUpdate` honours `HasRunUpdate` and skips it; `DoneWithPhysics`
+clears both flags between frames, so the new actor enters the normal
+PredictPosition→Update flow on the *next* frame. Net effect: a
+template-spawned actor sits parked at its spawn position for one tick
+before its own scripts/movement start.
+
+**Don't:** call `actor->update()` manually from `AddObject` to "make
+up for the missed pass" — that re-enters the assertion path. The
+clean handoff to next frame's pipeline is correct.
+
+**Why this surfaces specifically for template instances:** pre-placed
+actors are constructed and added to rooms during level load, before
+any frame pipeline runs. They get their first PredictPosition+Update
+pair cleanly on frame 0. Only runtime-spawned actors (generators,
+explosions, etc.) ever land mid-frame.

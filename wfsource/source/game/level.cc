@@ -1309,6 +1309,17 @@ Level::AddObject( BaseObject* object, const Vector3& posStartAt )
          PhysicalAttributes& physAttrib = actor->GetWritablePhysicalAttributes();
          physAttrib.SetPredictedPosition( posStartAt );
 
+         // Object spawned mid-frame: PredictPosition + Update passes for
+         // this frame have already started (or completed) for pre-existing
+         // actors. If the UpdatePhysics for_each iterator picks up the
+         // newly-added object, Actor::update would assert
+         // HasRunPredictPosition() == true (actor.cc:869). Mark both
+         // per-frame flags so the new actor is skipped this frame;
+         // DoneWithPhysics clears them for the next frame, when normal
+         // pipeline kicks in.
+         physAttrib.HasRunPredictPosition(true);
+         physAttrib.HasRunUpdate(true);
+
          ValidatePtr(_theLevelRooms);
          _theLevelRooms->AddObjectToRoom( idxTempObject );
          DBSTREAM2( clevel << "AddObject: added object #" << idxTempObject << std::endl;)
@@ -1679,6 +1690,16 @@ SafelyConstructTemplateObject(int32 objectToGenerate,
 	startupData->idxCreator = 0;				// kts insure no one else uses it
 	DBSTREAM1( cflow << "Level::SafelyConstructTemplateObject():done" << std::endl; )
 	return retVal;
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+Level::HasTemplate(int idx) const
+{
+    if (idx <= 0) return false;
+    if (idx >= _numTemplateObjects) return false;
+    return _templateObjects[idx] != nullptr;
 }
 
 //-----------------------------------------------------------------------------

@@ -34,6 +34,7 @@
 //
 //============================================================================
 
+#include <cstdio>
 #include <oas/generator.ht>		// get oad structure information
 #include "generator.hp"
 #include "actor.hp"
@@ -104,14 +105,18 @@ Generato::update()
 		Vector3 pos = _physicalAttributes.GetColSpace().GetCenter( currentPos() ) + displacement;
 
 		// generate an object
+		std::fprintf(stderr, "Generato::FIRING obj=%d spawn=(%.2f,%.2f,%.2f) vel=(%.2f,%.2f,%.2f)\n",
+			objectToGenerate, pos.X().AsFloat(), pos.Y().AsFloat(), pos.Z().AsFloat(),
+			_vect.X().AsFloat(), _vect.Y().AsFloat(), _vect.Z().AsFloat());
 		Actor* createdObject = theLevel->ConstructTemplateObject(objectToGenerate, _idxActor, pos,_vect);
+		std::fprintf(stderr, "Generato: ConstructTemplateObject -> %s\n",
+			createdObject ? "non-NULL" : "NULL");
 
-//		const SObjectStartupData* startupData = theLevel->FindTemplateObjectData(objectToGenerate);
-//		assert( ValidPtr( startupData ) );
-//		Actor* createdObject = ConstructTemplateObject( startupData->objectData->type, startupData );
-//		assert( ValidPtr( createdObject ));
-		if(createdObject)			    // in case we are out of memory, or it would be inside of something else
+		if(createdObject) {
 			theLevel->AddObject( createdObject, pos );
+			std::fprintf(stderr, "Generato: AddObject ok, coin actor_idx=%d\n",
+				createdObject->GetActorIndex());
+		}
 	}
 	Actor::update();
 }

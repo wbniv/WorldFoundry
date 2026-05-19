@@ -341,24 +341,78 @@ COIN_R, COIN_T = 0.3, 0.2   # Y must be ≥ ~0.2 (40 cm) to render at all from t
                              # troubleshooting.md § "Object too thin in camera-
                              # depth axis — invisible".
 
-# Must match SMB_QBLOCK_0_NORMAL/USED/COIN_VISIBLE in
+# Must match SMB_QBLOCK_0_NORMAL/USED/COIN_SPAWN in
 # wfsource/source/mailbox/mailbox.inc. Hardcoded here because Blender custom
 # properties take literals, not `INDEXOF_*` constant names (those are Forth-side).
-MB_SMB_QBLOCK_0_NORMAL       = 1803
-MB_SMB_QBLOCK_0_USED         = 1804
-MB_SMB_QBLOCK_0_COIN_VISIBLE = 1805
+MB_SMB_QBLOCK_0_NORMAL     = 1803
+MB_SMB_QBLOCK_0_USED       = 1804
+MB_SMB_QBLOCK_0_COIN_SPAWN = 1805
 
-# Runtime actor index of qblock_00_coin — hardcoded into Mario's Forth script
-# because write-actor-mailbox needs it as a literal. Verified via
-# `engine/wf_game --debug-print-actors`:
-#   idx 12 = qblock_00.iff
-#   idx 13 = qblock_00_used.iff
-#   idx 14 = qblock_00_coin.iff  ← this one
-#   idx 15 = qblock_01.iff
-# Engine actor indices do NOT match the .lev OBJECT ordering; they include
-# implicit actors (level/camera-internal) at low indices. Always check via
-# --debug-print-actors after rebuild, never count by hand from the .lev.
-COIN_ACTOR_IDX = 14
+# Coin template — single Missile-class actor flagged Template Object = True.
+# At level load the engine copies its OAD into _templateObjects[] and skips
+# instantiating it as a live actor. Each ?-block's Generator spawns instances
+# at runtime via Level::ConstructTemplateObject. The coin spawns above the
+# block top with an upward Z velocity; Jolt gravity arcs it back down; the
+# per-instance Forth script suicides via INDEXOF_ALIVE once Z drops below the
+# block bottom.
+import bmesh as _bmesh
+def _make_coin_template():
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(COIN_R*2, COIN_T*2, COIN_R*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new('coin_template')
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat_coin)
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('coin_template', mesh)
+    # Park far off-screen. The Generator chooses the actual spawn position.
+    obj.location = (-50.0, 0.0, 0.0)
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'missile')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'        # template asset lives in PERM
+    obj['wf_Mobility']             = 'Physics'     # gravity + initial velocity
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Max Air Speed']        = 50.0          # don't cap free-fall
+    # Missile defaults: Arming Delay 0.2 s, Explosion Delay 2 s. The 2-second
+    # auto-explode would yank the coin via SetPendingRemove before the script's
+    # Z<5 suicide could fire. Stretch the explosion timer to 30 s so the
+    # script-driven despawn (Z<5 ≈ 2.5 s after spawn) is what actually ends
+    # the coin's life. (See [[feedback_timing_in_seconds_not_ticks]] — 30 s
+    # is real wall time, independent of frame rate.)
+    obj['wf_Explosion Delay']      = 30.0
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1             # always visible when spawned
+    obj['wf_Mesh Name']            = 'coin_template.iff'
+    # Per-instance lifetime + suicide. On first tick, stash spawn time in
+    # SMB_COIN_ELAPSED. On subsequent ticks, suicide if now - spawnT > 0.8 s.
+    #
+    # Using INDEXOF_TIME (absolute LevelClock) rather than accumulating
+    # INDEXOF_DELTA_TIME because dt can be huge on slow dev hosts (we've
+    # seen 1.0 s/tick in debug builds with rendering off the critical path).
+    # Per-tick accumulation then gates trivially over the threshold in one
+    # frame. Absolute clock is robust to frame-rate variance.
+    # [[feedback_timing_in_seconds_not_ticks]] applies regardless.
+    #
+    # First-tick detection: SMB_COIN_ELAPSED reads 0 on a freshly-spawned
+    # actor (local mailboxes zero-init at allocation). If a coin happens to
+    # spawn at LevelClock exactly 0.0 it'd treat every tick as first-tick
+    # and never suicide; in practice game-clock is non-zero before any
+    # bump can fire.
+    obj['wf_Script'] = (
+        "\\ wf\n"
+        "INDEXOF_SMB_COIN_ELAPSED read-mailbox dup 0= if "
+        "drop INDEXOF_TIME read-mailbox INDEXOF_SMB_COIN_ELAPSED write-mailbox "
+        "else "
+        "INDEXOF_TIME read-mailbox swap - 0.8 > if "
+        "0 INDEXOF_ALIVE write-mailbox "
+        "then then\n"
+    )
+    return obj
+
+_make_coin_template()
 
 for i, bx in enumerate(QBLOCK_XS):
     block = add_statplat(f'qblock_{i:02d}',
@@ -376,21 +430,29 @@ for i, bx in enumerate(QBLOCK_XS):
         # USED stays at 0 until bump flips it to 1 (hidden by default).
         used['wf_Visibility Mailbox'] = MB_SMB_QBLOCK_0_USED
 
-        # Pre-spawned coin disc at block top. Anchored statplat; Mario's
-        # Forth script writes its Z_POS each tick during the bump animation
-        # window via write-actor-mailbox (same pattern as qbert popup_500).
-        # Hidden by default (mailbox 0); bump sets COIN_VISIBLE = 1 + kicks
-        # off COIN_PHASE = 1, ramps phase to 30, then hides again.
-        # Coin sits centered on the block top. Y thickness is bumped to 40 cm
-        # (COIN_T=0.2 above) because 8 cm was too thin to render from the
-        # side-scroller camera at Y=-20 — see "Coin too thin in camera-depth
-        # axis (Y) — invisible" in docs/level-design-troubleshooting.md.
-        coin_z = BLOCK_Z + BSIZE
-        coin = add_statplat(f'qblock_{i:02d}_coin',
-                            bx - COIN_R, -COIN_T, coin_z - COIN_R,
-                            bx + COIN_R,  COIN_T, coin_z + COIN_R,
-                            mat_coin)
-        coin['wf_Visibility Mailbox'] = MB_SMB_QBLOCK_0_COIN_VISIBLE
+        # Per-block coin spawner — Generator actor anchored 1.0 m above the
+        # block top, watching SMB_QBLOCK_0_COIN_SPAWN. Mario's bump pulses
+        # the mailbox to 1 for one tick; this Generator fires one coin per
+        # pulse. Generation Rate = 10 s effectively throttles to one shot.
+        # Anchor Z = BLOCK_Z+BSIZE (block top) + 1.0 m. The generator's own
+        # collision-box centre is ~0.13 m below this anchor, so the actual
+        # spawn pos lands at block_top+0.87 m. The coin template has half-Z
+        # 0.3 m, so this clears the block by 0.57 m — well above the
+        # SafelyConstructTemplateObject collision-check threshold (a 0.4 m
+        # offset led to a 0.03 m overlap with the block top → NULL spawn).
+        spawner = bpy.data.objects.new(f'coin_spawner_{i:02d}', None)
+        spawner.location = (bx, 0.0, BLOCK_Z + BSIZE + 1.0)
+        scene.collection.objects.link(spawner)
+        attach_schema(spawner, 'generator')
+        spawner['wf_Mobility']           = 'Anchored'
+        spawner['wf_Model Type']         = 'None'
+        spawner['wf_Visibility Mailbox'] = 0
+        spawner['wf_Activation MailBox'] = MB_SMB_QBLOCK_0_COIN_SPAWN
+        spawner['wf_Object To Throw']    = 'coin_template'
+        spawner['wf_Generation Rate']    = 10.0
+        spawner['wf_Object X Velocity']  = 0.0
+        spawner['wf_Object Y Velocity']  = 0.0
+        spawner['wf_Object Z Velocity']  = 8.0    # peak ≈ 2.7 m above block top under g=12; apex at t≈0.67 s
 
 # ── 7. Mario placeholder ──────────────────────────────────────────────────────
 def _build_mario():
@@ -502,53 +564,29 @@ if player:
         "1 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox "
         "then then\n"
         # Bump detection: nonzero collider + NORMAL_Z > 0 (hit from above) +
-        # qblock_0 still gold. Acts on any hit-from-above against any actor
-        # for now; tightened to an actor-idx check in a follow-up when there's
-        # more than one bumpable block to demo. The per-actor COLLIDER_IDX
-        # mailbox is engine-populated by Actor::Collision (actor.cc:1676) and
-        # cleared each frame in Actor::StartFrame.
-        # On bump: flip the visibility pair AND kick off the coin animation
-        # (PHASE=1, COIN_VISIBLE=1).
+        # Clear COIN_SPAWN pulse from previous tick (one-tick latch). Runs
+        # BEFORE the bump branch so the bump branch's write of 1 lands cleanly:
+        #   Tick N (bump): clear sees 0 (no-op); bump sets SPAWN=1. After
+        #                   Mario's script, the per-block Generator (higher
+        #                   actor idx) sees SPAWN=1 and fires one coin.
+        #   Tick N+1:      clear sees 1 (set last tick), writes 0; bump won't
+        #                   refire (NORMAL=0 now). Generator sees SPAWN=0,
+        #                   resets timer.
+        # Without this clear-before-bump ordering, the spawn mailbox stays at
+        # 1 and the Generator re-fires every Generation Rate seconds.
+        "INDEXOF_SMB_QBLOCK_0_COIN_SPAWN read-mailbox 0<> if "
+        "0 INDEXOF_SMB_QBLOCK_0_COIN_SPAWN write-mailbox "
+        "then\n"
+        # On bump: flip the gold/tan visibility pair AND pulse SMB_QBLOCK_0_COIN_SPAWN
+        # to 1 for one tick. The per-block Generator actor watches that mailbox
+        # and fires one coin_template instance per pulse.
         "INDEXOF_COLLIDER_IDX read-mailbox 0<> if "
         "INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if "
         "INDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox 0<> if "
         "0 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox "
         "1 INDEXOF_SMB_QBLOCK_0_USED write-mailbox "
-        "1 INDEXOF_SMB_QBLOCK_0_COIN_VISIBLE write-mailbox "
-        "1 INDEXOF_SMB_QBLOCK_0_COIN_PHASE write-mailbox "
+        "1 INDEXOF_SMB_QBLOCK_0_COIN_SPAWN write-mailbox "
         "then then then\n"
-        # Coin pop-out animation step. When PHASE > 0, advance one tick.
-        # Lifecycle: PHASE 1..30 = animating (Z arcs +1.5 m peak at phase=15),
-        # PHASE = 0 = idle (coin hidden). Coin's Z_POS is written each tick via
-        # write-actor-mailbox (qbert popup_500 pattern, blender_create_qbert.py
-        # :3269-3271). COIN_ACTOR_IDX is the runtime index of qblock_00_coin
-        # — verified via `--debug-print-actors` post-build.
-        # Coin pop-out animation step. When PHASE > 0, advance one tick.
-        # Lifecycle: PHASE 1..60 = animating (Z arcs +3 m peak at phase=30),
-        # PHASE = 0 = idle (coin hidden). Coin's Z_POS is written each tick via
-        # write-actor-mailbox (qbert popup_500 pattern, blender_create_qbert.py
-        # :3269-3271). COIN_ACTOR_IDX is the runtime index of qblock_00_coin,
-        # verified via `--debug-print-actors` post-build.
-        # 60 ticks at ~60 fps ≈ 1 second total visible window — long enough for
-        # a few bridge screenshots to catch the arc mid-flight.
-        f"INDEXOF_SMB_QBLOCK_0_COIN_PHASE read-mailbox dup 0<> if "
-        f"1 + dup 60 > if "
-        f"drop "
-        f"0 INDEXOF_SMB_QBLOCK_0_COIN_VISIBLE write-mailbox "
-        f"0 INDEXOF_SMB_QBLOCK_0_COIN_PHASE write-mailbox "
-        f"else "
-        f"dup INDEXOF_SMB_QBLOCK_0_COIN_PHASE write-mailbox "
-        f"dup 30 <= if 0.1 * else 60 swap - 0.1 * then "
-        # Coin's mesh is world-baked at z=7.5 (block top); writing Z_POS
-        # acts as an additive translation on top of that, so we write
-        # just the arc offset (0 → 3 → 0), NOT 7.5 + offset. Compare
-        # qbert's popup_500 (mesh in *local* space + actor.location set
-        # separately) — for that pattern Z_POS would be the absolute
-        # world Z instead. Anchored statplats authored via add_box() are
-        # the world-baked variant; the script convention has to match.
-        f"INDEXOF_Z_POS {COIN_ACTOR_IDX} write-actor-mailbox "
-        f"then "
-        f"else drop then\n"
     )
 
     mario_mesh = _build_mario()

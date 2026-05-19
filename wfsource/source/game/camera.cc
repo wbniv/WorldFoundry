@@ -90,14 +90,9 @@ Camera::CanUpdate() const
 const PhysicalObject*
 Camera::GetWatchObject() const
 {
-#pragma message ("KTS: assuming camera always runs something derived from CameraMovementHandler")
-
    Validate();
    assert(ValidPtr(_nonStatPlat));
-	assert(ValidPtr(&_nonStatPlat->_movementManager.GetMovementHandler(*this)));
-	const CameraHandler* cHandler = dynamic_cast<const CameraHandler*>(&_nonStatPlat->_movementManager.GetMovementHandler(*this));
-   assert(ValidPtr(cHandler));
-	return cHandler->GetWatchObject(*this);
+	return _nonStatPlat->_movementManager.GetMovementHandler(*this).GetWatchObject(*this);
 }
 
 //============================================================================

@@ -75,6 +75,11 @@ public:
 	virtual void SetStunTime(MovementManager& movementManager, Scalar duration);
    virtual size_t DataSize();                // returns how much storage this handler uses
 
+	// Pushed up from CameraHandler so Camera::GetWatchObject() can call it
+	// directly on a MovementHandler& without downcasting. Non-camera handlers
+	// inherit the default (no watched object). See docs/plans/2026-04-29-eliminate-rtti.md.
+	virtual const PhysicalObject* GetWatchObject(const MovementObject& movementObject) const { return nullptr; }
+
 protected:
 	// Helper methods for derived handlers
 	Vector3		SumForceVectors(MovementObject& movementObject);

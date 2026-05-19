@@ -24,16 +24,16 @@
 	// Example: `$3fff001` = `IFF` + room `fff` (`PERM`) + slot `001`.
 	{ 'ASMP'
 		$3fff001l { 'STR' "player.iff" }  // IFF PERM fff:001
+		$3fff002l { 'STR' "coin_template.iff" }  // IFF PERM fff:002
 		$3000001l { 'STR' "ground.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "qblock_00.iff" }  // IFF RM0 000:002
 		$3000003l { 'STR' "qblock_00_used.iff" }  // IFF RM0 000:003
-		$3000004l { 'STR' "qblock_00_coin.iff" }  // IFF RM0 000:004
-		$3000005l { 'STR' "qblock_01.iff" }  // IFF RM0 000:005
-		$3000006l { 'STR' "qblock_02.iff" }  // IFF RM0 000:006
-		$3000007l { 'STR' "goomba_00.001.iff" }  // IFF RM0 000:007
-		$3000008l { 'STR' "koopa_00.001.iff" }  // IFF RM0 000:008
-		$3000009l { 'STR' "flagpole_pole.iff" }  // IFF RM0 000:009
-		$300000al { 'STR' "flagpole_flag.iff" }  // IFF RM0 000:00a
+		$3000004l { 'STR' "qblock_01.iff" }  // IFF RM0 000:004
+		$3000005l { 'STR' "qblock_02.iff" }  // IFF RM0 000:005
+		$3000006l { 'STR' "goomba_00.001.iff" }  // IFF RM0 000:006
+		$3000007l { 'STR' "koopa_00.001.iff" }  // IFF RM0 000:007
+		$3000008l { 'STR' "flagpole_pole.iff" }  // IFF RM0 000:008
+		$3000009l { 'STR' "flagpole_flag.iff" }  // IFF RM0 000:009
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "smb_w1_1.lvl" ] }
@@ -44,6 +44,7 @@
 		{ 'ASS' $5ffffffl [ "Perm.ruv" ] }     // RUV PERM fff:fff
 		{ 'ASS' $7ffffffl [ "Perm.cyc" ] }     // CYC PERM fff:fff
 		{ 'ASS' $3fff001l [ "player.iff" ] }  // IFF PERM fff:001
+		{ 'ASS' $3fff002l [ "coin_template.iff" ] }  // IFF PERM fff:002
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'
@@ -54,13 +55,12 @@
 		{ 'ASS' $3000001l [ "ground.iff" ] }  // IFF RM0 000:001
 		{ 'ASS' $3000002l [ "qblock_00.iff" ] }  // IFF RM0 000:002
 		{ 'ASS' $3000003l [ "qblock_00_used.iff" ] }  // IFF RM0 000:003
-		{ 'ASS' $3000004l [ "qblock_00_coin.iff" ] }  // IFF RM0 000:004
-		{ 'ASS' $3000005l [ "qblock_01.iff" ] }  // IFF RM0 000:005
-		{ 'ASS' $3000006l [ "qblock_02.iff" ] }  // IFF RM0 000:006
-		{ 'ASS' $3000007l [ "goomba_00.001.iff" ] }  // IFF RM0 000:007
-		{ 'ASS' $3000008l [ "koopa_00.001.iff" ] }  // IFF RM0 000:008
-		{ 'ASS' $3000009l [ "flagpole_pole.iff" ] }  // IFF RM0 000:009
-		{ 'ASS' $300000al [ "flagpole_flag.iff" ] }  // IFF RM0 000:00a
+		{ 'ASS' $3000004l [ "qblock_01.iff" ] }  // IFF RM0 000:004
+		{ 'ASS' $3000005l [ "qblock_02.iff" ] }  // IFF RM0 000:005
+		{ 'ASS' $3000006l [ "goomba_00.001.iff" ] }  // IFF RM0 000:006
+		{ 'ASS' $3000007l [ "koopa_00.001.iff" ] }  // IFF RM0 000:007
+		{ 'ASS' $3000008l [ "flagpole_pole.iff" ] }  // IFF RM0 000:008
+		{ 'ASS' $3000009l [ "flagpole_flag.iff" ] }  // IFF RM0 000:009
 	}
 	{ 'ALGN' .align(2048) }
 }

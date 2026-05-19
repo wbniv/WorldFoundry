@@ -915,7 +915,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\nINDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox not if INDEXOF_SMB_QBLOCK_0_USED read-mailbox not if 1 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox then then\nINDEXOF_COLLIDER_IDX read-mailbox 0<> if INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if INDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox 0<> if 0 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox 1 INDEXOF_SMB_QBLOCK_0_USED write-mailbox 1 INDEXOF_SMB_QBLOCK_0_COIN_VISIBLE write-mailbox 1 INDEXOF_SMB_QBLOCK_0_COIN_PHASE write-mailbox then then then\nINDEXOF_SMB_QBLOCK_0_COIN_PHASE read-mailbox dup 0<> if 1 + dup 60 > if drop 0 INDEXOF_SMB_QBLOCK_0_COIN_VISIBLE write-mailbox 0 INDEXOF_SMB_QBLOCK_0_COIN_PHASE write-mailbox else dup INDEXOF_SMB_QBLOCK_0_COIN_PHASE write-mailbox dup 30 <= if 0.1 * else 60 swap - 0.1 * then INDEXOF_Z_POS 14 write-actor-mailbox then else drop then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\nINDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox not if INDEXOF_SMB_QBLOCK_0_USED read-mailbox not if 1 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox then then\nINDEXOF_SMB_QBLOCK_0_COIN_SPAWN read-mailbox 0<> if 0 INDEXOF_SMB_QBLOCK_0_COIN_SPAWN write-mailbox then\nINDEXOF_COLLIDER_IDX read-mailbox 0<> if INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if INDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox 0<> if 0 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox 1 INDEXOF_SMB_QBLOCK_0_USED write-mailbox 1 INDEXOF_SMB_QBLOCK_0_COIN_SPAWN write-mailbox then then then\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
@@ -1080,6 +1080,33 @@
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
+		{ 'NAME' "coin_template" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -50.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.2000000029802322(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.2000000029802322(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "missile" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0010000000000000(1.15.16) } { 'STR' "0.001" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_COIN_ELAPSED read-mailbox dup 0= if drop INDEXOF_TIME read-mailbox INDEXOF_SMB_COIN_ELAPSED write-mailbox else INDEXOF_TIME read-mailbox swap - 0.8 > if 0 INDEXOF_ALIVE write-mailbox then then\n" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'FX32' { 'NAME' "Explosion Delay" } { 'DATA' 30.0000000000000000(1.15.16) } { 'STR' "30.0" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
 		{ 'NAME' "qblock_00" }
 		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
 		} }
@@ -1116,22 +1143,21 @@
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
-		{ 'NAME' "qblock_00_coin" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'NAME' "coin_spawner_00" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 12.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 8.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 11.6999998092651367(1.15.16) -0.2000000029802322(1.15.16) 7.1999998092651367(1.15.16) 12.3000001907348633(1.15.16) 0.2000000029802322(1.15.16) 7.8000001907348633(1.15.16)  //min(x,y,z)-max(x,y,z)
-		} }
-		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "qblock_00_coin.iff" } }
-		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1805l } { 'STR' "1805" } }
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "Activation MailBox" } { 'DATA' 1805l } { 'STR' "1805" } }
+		{ 'STR' { 'NAME' "Object To Throw" } { 'STR' "coin_template" } }
+		{ 'FX32' { 'NAME' "Generation Rate" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
+		{ 'FX32' { 'NAME' "Object X Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Object Y Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Object Z Velocity" } { 'DATA' 8.0000000000000000(1.15.16) } { 'STR' "8.0" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "qblock_01" }
