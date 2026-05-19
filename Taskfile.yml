@@ -36,11 +36,21 @@ tasks:
       - cmake --build cmake-build-asan -j
 
   build-editor:
-    desc: "Build wf_game + libwfcrdt.a + run Yrs C ABI smoke test (requires Rust toolchain)"
+    desc: "Build wf_game with the editor / dev stack (debug bridge + REST + CRDT + mutation API). Requires Rust toolchain."
+    env:
+      WF_ENABLE_EDITOR: "1"
+      WF_ENABLE_FENNEL: "0"
+      WF_JS_ENGINE: none
+      WF_WASM_ENGINE: none
+      WF_ENABLE_WREN: "0"
+      WF_FORTH_ENGINE: zforth
+      WF_PHYSICS_ENGINE: jolt
     cmds:
-      - cmake -S . -B cmake-build-editor -DWF_ENABLE_CRDT=ON -DCMAKE_BUILD_TYPE=Release
-      - cmake --build cmake-build-editor --target wfcrdt_smoke -j
+      - bash engine/build_game.sh
+      - cmake -S . -B cmake-build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Release
+      - cmake --build cmake-build-editor --target wfcrdt_smoke wfcrdt_wrapper_test -j
       - ./cmake-build-editor/engine/crdt/wfcrdt_smoke
+      - ./cmake-build-editor/engine/crdt/wfcrdt_wrapper_test
 
   build-cmake-android:
     desc: "Build libwf_game.so via CMake + NDK (arm64-v8a)"

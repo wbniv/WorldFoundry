@@ -4,7 +4,7 @@
 
 #include "debug_server.hp"
 
-#ifdef WF_DEBUG_BRIDGE
+#ifdef WF_ENABLE_EDITOR
 
 #include <pigsys/pigsys.hp>     // sys_atexit
 
@@ -1071,4 +1071,4 @@ bool DebugServer_GetInputOverride(int mailbox_id, int32_t* out_value)
     return true;
 }
 
-#endif // WF_DEBUG_BRIDGE
+#endif // WF_ENABLE_EDITOR

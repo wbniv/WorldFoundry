@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # engine/build_game.sh — build the WF game engine executable from source
 #
-# Run from this directory. Output: wf_game binary here.
+# Run from this directory. Output: wf_game (lean game engine) or wf-edit
+# (editor stack, when WF_ENABLE_EDITOR=1) — the two binaries coexist.
 # To run: cd wfsource/source/game && DISPLAY=:0 ../../../engine/wf_game
 set -euo pipefail
 
@@ -114,12 +115,13 @@ esac
 JOLT_DIR="$VENDOR/jolt-physics-5.5.0"
 JOLT_WF_DIR="$VENDOR/jolt-physics-5.5.0-wf"
 
-# Feature flag: embed a minimal HTTP REST API for runtime box manipulation.
-# Requires cpp-httplib (single-header, vendored). Default off.
-WF_REST_API="${WF_REST_API:-1}"
-
-# Feature flag: TCP/JSON debug bridge for live Blender↔engine editing. Default on.
-WF_DEBUG_BRIDGE="${WF_DEBUG_BRIDGE:-1}"
+# Master switch for the editor / developer-tooling stack: REST API box PoC,
+# Blender ↔ engine TCP/JSON debug bridge, wfmut:: mutation API, wfmut smoke
+# runner, and (in the CMake path) the CRDT support library. Default OFF —
+# the "original game engine" is the common case. Editor stack is opt-in via
+# `WF_ENABLE_EDITOR=1 task build` or `task build-editor`. Mobile shipped
+# builds force OFF (they have no editor host).
+WF_ENABLE_EDITOR="${WF_ENABLE_EDITOR:-0}"
 
 mkdir -p "$OUT"
 
@@ -178,12 +180,8 @@ case "$WF_FORTH_ENGINE" in
     none)     : ;;
 esac
 
-if [[ "$WF_REST_API" == "1" ]]; then
-    CXXFLAGS+=(-DWF_REST_API -I"$HTTPLIB_DIR")
-fi
-
-if [[ "$WF_DEBUG_BRIDGE" == "1" ]]; then
-    CXXFLAGS+=(-DWF_DEBUG_BRIDGE)
+if [[ "$WF_ENABLE_EDITOR" == "1" ]]; then
+    CXXFLAGS+=(-DWF_ENABLE_EDITOR -I"$HTTPLIB_DIR")
 fi
 
 if [[ "$WF_ENABLE_STEAM" == "1" ]]; then
@@ -593,26 +591,27 @@ if [[ "$WF_ENABLE_STEAM" == "1" ]]; then
                        "-Wl,-rpath,\$ORIGIN")
 fi
 
-# REST API plug — compiled only when WF_REST_API=1.
-if [[ "$WF_REST_API" == "1" ]]; then
+# Editor / dev stack — compiled only when WF_ENABLE_EDITOR=1. Covers the
+# REST API box PoC, the Blender ↔ engine TCP/JSON bridge, the wfmut::
+# mutation API, and its smoke runner. CRDT support library (libwfcrdt.a)
+# isn't built here — it's a CMake-only target (Corrosion + Cargo).
+if [[ "$WF_ENABLE_EDITOR" == "1" ]]; then
     echo "  CC (stub) rest_api.cc"
     g++ "${CXXFLAGS[@]}" -O1 -c "$STUB_SRC/rest_api.cc" -o "$OUT/stubs__rest_api.o"
     OBJS+=("$OUT/stubs__rest_api.o")
-fi
 
-# Debug bridge plug — compiled only when WF_DEBUG_BRIDGE=1.
-if [[ "$WF_DEBUG_BRIDGE" == "1" ]]; then
     echo "  CC (stub) debug_server.cc"
     g++ "${CXXFLAGS[@]}" -O1 -c "$STUB_SRC/debug_server.cc" -o "$OUT/stubs__debug_server.o"
     OBJS+=("$OUT/stubs__debug_server.o")
-fi
 
-# Engine mutation API — always compiled. Plain C++ surface consumed by the
-# editor's CRDT bridge, DAP debugger, replay UI, and headless test harness.
-# See docs/plans/2026-05-19-engine-mutation-api.md.
-echo "  CC mutation/wfmut.cpp"
-g++ "${CXXFLAGS[@]}" -O1 -c "$REPO_ROOT/engine/mutation/wfmut.cpp" -o "$OUT/mutation__wfmut.o"
-OBJS+=("$OUT/mutation__wfmut.o")
+    echo "  CC mutation/wfmut.cpp"
+    g++ "${CXXFLAGS[@]}" -O1 -c "$REPO_ROOT/engine/mutation/wfmut.cpp" -o "$OUT/mutation__wfmut.o"
+    OBJS+=("$OUT/mutation__wfmut.o")
+
+    echo "  CC mutation/wfmut_smoke.cpp"
+    g++ "${CXXFLAGS[@]}" -O1 -c "$REPO_ROOT/engine/mutation/wfmut_smoke.cpp" -o "$OUT/mutation__wfmut_smoke.o"
+    OBJS+=("$OUT/mutation__wfmut_smoke.o")
+fi
 
 # Jolt physics plug — compiled and linked only when WF_PHYSICS_ENGINE=jolt.
 # Jolt is built via CMake into a static library (cached in OUT/jolt_build).
@@ -700,11 +699,21 @@ if [[ ${#FAILED_SRCS[@]} -gt 0 ]]; then
 fi
 
 echo "=== Linking ==="
+
+# Editor builds emit a separate binary (wf-edit) so they never overwrite the
+# lean game-engine output (wf_game). Both can coexist side-by-side; running
+# the bridge or the wfmut smoke uses wf-edit, the shipped game uses wf_game.
+if [[ "$WF_ENABLE_EDITOR" == "1" ]]; then
+    WF_BIN_NAME="wf-edit"
+else
+    WF_BIN_NAME="wf_game"
+fi
+
 g++ "${OBJS[@]}" "${JS_LINK_EXTRA[@]}" "${JOLT_LINK_EXTRA[@]}" "${STEAM_LINK_EXTRA[@]}" \
     -lGL -lGLU -lX11 -lm -lpthread -ldl \
     -Wl,-z,noexecstack \
-    -o "$SCRIPT_DIR/wf_game"
+    -o "$SCRIPT_DIR/$WF_BIN_NAME"
 
 echo ""
-echo "Built: $SCRIPT_DIR/wf_game"
-echo "Run:   cd $SRC/game && DISPLAY=:0 $SCRIPT_DIR/wf_game"
+echo "Built: $SCRIPT_DIR/$WF_BIN_NAME"
+echo "Run:   cd $SRC/game && DISPLAY=:0 $SCRIPT_DIR/$WF_BIN_NAME"

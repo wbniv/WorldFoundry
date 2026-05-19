@@ -35,6 +35,7 @@
 #include <audio/sfx_library.hp>
 #include "rest_api.hp"
 #include "debug_server.hp"
+#include "wfmut_smoke.hpp"
 #include "physics_jolt.hp"
 #include "oas/matte.ht"
 #include "gamestrm.hp"
@@ -390,6 +391,30 @@ WFGame::SmokeRunFrameStep(int frames, int cycles)
 	MEMORY_DELETE(HALLmalloc, df, _DiskFile);
 	DBSTREAM1(cprogress << "SmokeRunFrameStep: complete" << std::endl;)
 }
+
+//-----------------------------------------------------------------------------
+
+#ifdef WF_ENABLE_EDITOR
+int
+WFGame::RunWfmutSmoke()
+{
+	extern const char* gLevelOverridePath;
+	AssertMsg(gLevelOverridePath, "--wfmut-smoke requires -L<level-path>");
+
+	DBSTREAM1(cprogress << "RunWfmutSmoke: opening " << gLevelOverridePath << std::endl;)
+	_DiskFile* df = ConstructDiskFile(const_cast<char*>(gLevelOverridePath), HALLmalloc);
+	assert(ValidPtr(df));
+	df->SeekRandom(DiskFileCD::_SECTOR_SIZE);
+
+	LoadLevel(df);
+	int failures = wfmut::RunSmokeTests(*_curLevel);
+	UnloadLevel();
+
+	MEMORY_DELETE(HALLmalloc, df, _DiskFile);
+	DBSTREAM1(cprogress << "RunWfmutSmoke: " << failures << " failures" << std::endl;)
+	return failures;
+}
+#endif // WF_ENABLE_EDITOR
 
 //-----------------------------------------------------------------------------
 

@@ -1,6 +1,6 @@
 // rest_api.hp — compile-time-optional REST HTTP server for WF game engine.
 //
-// Only active when WF_REST_API is defined. Provides four operations via HTTP:
+// Only active when WF_ENABLE_EDITOR is defined. Provides four operations via HTTP:
 //   POST   /boxes              — create a debug box, returns opaque id
 //   PATCH  /boxes/:id/color   — change color
 //   PATCH  /boxes/:id/size    — change any/all of l,w,h
@@ -14,7 +14,7 @@
 #ifndef WF_REST_API_HP
 #define WF_REST_API_HP
 
-#ifdef WF_REST_API
+#ifdef WF_ENABLE_EDITOR
 
 // Start the HTTP server on a background thread. Call once before the game loop.
 void RestApi_Start();
@@ -37,5 +37,5 @@ inline void RestApi_DrainQueue()  {}
 inline void RestApi_RenderBoxes() {}
 inline void RestApi_Stop()        {}
 
-#endif // WF_REST_API
+#endif // WF_ENABLE_EDITOR
 #endif // WF_REST_API_HP

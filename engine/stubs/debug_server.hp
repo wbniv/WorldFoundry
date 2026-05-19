@@ -1,6 +1,6 @@
 // debug_server.hp — bidirectional TCP/JSON debug bridge for wf_game.
 //
-// Only active when WF_DEBUG_BRIDGE is defined. Exposes a newline-delimited
+// Only active when WF_ENABLE_EDITOR is defined. Exposes a newline-delimited
 // JSON stream on a configurable port (default 7777) so Blender (or any
 // other tool) can:
 //   - change live OAD properties without restarting
@@ -17,7 +17,7 @@
 
 #include <cstdint>
 
-#ifdef WF_DEBUG_BRIDGE
+#ifdef WF_ENABLE_EDITOR
 
 class Level;
 
@@ -46,5 +46,5 @@ inline void DebugServer_Stop()                          {}
 inline bool DebugServer_IsPaused()                      { return false; }
 inline bool DebugServer_GetInputOverride(int, int32_t*) { return false; }
 
-#endif // WF_DEBUG_BRIDGE
+#endif // WF_ENABLE_EDITOR
 #endif // WF_DEBUG_SERVER_HP

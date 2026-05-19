@@ -36,6 +36,7 @@
 
 
 #include "level.hp"
+#include <cstdlib>
 
 
 #include <pigsys/pigsys.hp>
@@ -48,6 +49,7 @@
 int  gDebugPort = 7777;                 // default-on; --debug-port N overrides, --debug-port 0 disables
 char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
 int  gFrameStepSmokeCount = 0;          // >0 = run --frame-step-smoke=N path
+bool gWfmutSmoke          = false;      // true = run --wfmut-smoke path
 int  gFrameStepCycles = 1;              // --cycles=N: how many Load/Unload cycles to run
 #if DO_TEST_CODE
 int  gDebugPrintActors = 0;             // 1 = print idx/mesh/mobility/pos per actor at construction (debug builds only)
@@ -205,6 +207,11 @@ ParseCommandLine(int argc, char** argv)
 		{
 			gFrameStepSmokeCount = atoi( argv[index] + 1 + 18 );
 			DBSTREAM1( cprogress << "Frame-step API smoke: " << gFrameStepSmokeCount << " frames" << std::endl; )
+		}
+		else if ( strcmp( argv[index]+1, "-wfmut-smoke" ) == 0 )
+		{
+			gWfmutSmoke = true;
+			DBSTREAM1( cprogress << "wfmut smoke enabled" << std::endl; )
 		}
 		else if ( strncmp( argv[index]+1, "-cycles=", 8 ) == 0 )
 		{
@@ -380,14 +387,28 @@ PIGSMain( int argc, char* * argv )
    WFGame* game = new (HALLmalloc) WFGame( nStartingLevel );
 	assert( ValidPtr( game ) );
 
+	int wfmutFailures = 0;
 	if (gFrameStepSmokeCount > 0)
 	{
 		DBSTREAM1( cprogress << "main::frame-step API smoke (" << gFrameStepSmokeCount
 		                     << " frames × " << gFrameStepCycles << " cycles)" << std::endl; )
 		game->SmokeRunFrameStep( gFrameStepSmokeCount, gFrameStepCycles );
 	}
+#ifdef WF_ENABLE_EDITOR
+	else if (gWfmutSmoke)
+	{
+		DBSTREAM1( cprogress << "main::wfmut smoke" << std::endl; )
+		wfmutFailures = game->RunWfmutSmoke( );
+	}
+#endif
 	else
 	{
+		if (gWfmutSmoke)
+		{
+			std::fprintf(stderr,
+			    "wf_game: --wfmut-smoke requires WF_ENABLE_EDITOR=ON build (task build-editor)\n");
+			std::_Exit(2);
+		}
 		DBSTREAM1( cprogress << "main::running game script" << std::endl; )
 		game->RunGameScript( );
 	}
@@ -408,6 +429,14 @@ PIGSMain( int argc, char* * argv )
 #endif
 
 	DBSTREAM1( cprogress << "Calling PIGSExit()" << std::endl; )
+	if (gWfmutSmoke && wfmutFailures != 0)
+	{
+		// Smoke wants a non-zero exit code so CI / scripts can detect failure.
+		// Skip PIGSExit's normal cleanup-and-return path; std::_Exit avoids
+		// running global destructors that the engine isn't designed to tolerate
+		// after HALCloseWindow.
+		std::_Exit(wfmutFailures);
+	}
 	PIGSExit();
 }
 

@@ -19,13 +19,23 @@ set(WF_WASM_ENGINE   "wamr"     CACHE STRING "none | wamr")
 option(WF_ENABLE_WREN     "Wren scripting"                ON)
 set(WF_FORTH_ENGINE  "zforth"   CACHE STRING "none | zforth | ficl | atlast | embed | libforth | pforth")
 set(WF_PHYSICS_ENGINE "jolt"    CACHE STRING "legacy | jolt")
-option(WF_REST_API        "REST API box PoC"              ON)
-option(WF_DEBUG_BRIDGE    "TCP/JSON debug bridge (port 7777 default)" ON)
 option(WF_ENABLE_STEAM    "Steamworks SDK"                OFF)
 option(WF_ASAN            "AddressSanitizer + UBSan (Linux dev only)" OFF)
-option(WF_ENABLE_CRDT     "Build libwfcrdt.a (Yrs/y-crdt via Corrosion). Editor-only; OFF for shipped builds." OFF)
 
-# Mobile (Android + iOS): Forth-only scripting, no Steam, no REST API.
+# Single master switch for the editor / developer-tooling stack:
+#   - debug_server.cc       (Blender ↔ engine TCP/JSON bridge, port 7777)
+#   - rest_api.cc           (REST API box PoC)
+#   - engine/crdt/          (libwfcrdt.a wrapping libyrs.a via Corrosion+Cargo)
+#   - engine/mutation/      (wfmut:: C++ surface + wfmut_smoke runner)
+#   - future: DAP debugger, replay UI, scene-graph inspection, etc.
+#
+# Default OFF — the "original game engine" is the common case. Editor stack
+# is opt-in via `task build-editor` or `-DWF_ENABLE_EDITOR=ON`. Force OFF on
+# Android/iOS where there is no editor host and the surface won't compile
+# anyway. See feedback_editor_code_compile_gate.md.
+option(WF_ENABLE_EDITOR   "Build the editor / dev stack (debug bridge + REST API + CRDT + mutation API). OFF for shipped game-engine builds; ON for the collaborative editor and developer tooling." OFF)
+
+# Mobile (Android + iOS): Forth-only scripting, no Steam, no editor stack.
 # Matches build_game.sh Android flags. WAMR in particular ships x86_64 assembly
 # (`invokeNative_em64.s`) that fails to build on arm64 mobile targets.
 if(ANDROID OR IOS)
@@ -35,19 +45,8 @@ if(ANDROID OR IOS)
     set(WF_WASM_ENGINE   "none"   CACHE STRING "" FORCE)
     set(WF_ENABLE_WREN   OFF      CACHE BOOL   "" FORCE)
     set(WF_FORTH_ENGINE  "zforth" CACHE STRING "" FORCE)
-    set(WF_REST_API      OFF      CACHE BOOL   "" FORCE)
-    set(WF_DEBUG_BRIDGE  OFF      CACHE BOOL   "" FORCE)
     set(WF_ENABLE_STEAM  OFF      CACHE BOOL   "" FORCE)
-    set(WF_ENABLE_CRDT   OFF      CACHE BOOL   "" FORCE)
-endif()
-
-# Debug builds force the bridge ON. The Blender addon's "Live" features
-# (debug_bridge.py / panels.py / operators.py — all default port 7777)
-# rely on it; surprising them with an opt-in flag broke at least one
-# user's workflow in this session. Mobile is already forced OFF above
-# and the NOT(ANDROID OR IOS) guard preserves that.
-if(NOT (ANDROID OR IOS) AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(WF_DEBUG_BRIDGE ON CACHE BOOL "Debug build forces bridge on" FORCE)
+    set(WF_ENABLE_EDITOR OFF      CACHE BOOL   "" FORCE)
 endif()
 
 # ─── Fennel/Lua consistency check ─────────────────────────────────────────────
@@ -432,24 +431,19 @@ else()
     list(APPEND WF_DEFS PHYSICS_ENGINE_WF)
 endif()
 
-# ─── REST API ─────────────────────────────────────────────────────────────────
+# ─── Editor / dev stack ───────────────────────────────────────────────────────
+# Gated by WF_ENABLE_EDITOR. Covers: REST API box PoC, Blender ↔ engine debug
+# bridge, wfmut:: mutation API, wfmut smoke runner. CRDT support library
+# (libwfcrdt.a) is added later in the file under the same flag.
 set(HTTPLIB_DIR ${VENDOR}/cpp-httplib-v0.20.0)
-if(WF_REST_API)
-    list(APPEND WF_SOURCES ${STUB_SRC}/rest_api.cc)
+if(WF_ENABLE_EDITOR)
+    list(APPEND WF_SOURCES ${STUB_SRC}/rest_api.cc
+                           ${STUB_SRC}/debug_server.cc
+                           ${CMAKE_SOURCE_DIR}/engine/mutation/wfmut.cpp
+                           ${CMAKE_SOURCE_DIR}/engine/mutation/wfmut_smoke.cpp)
     list(APPEND WF_INCLUDES ${HTTPLIB_DIR})
-    list(APPEND WF_DEFS WF_REST_API)
+    list(APPEND WF_DEFS WF_ENABLE_EDITOR)
 endif()
-
-# ─── Debug bridge ─────────────────────────────────────────────────────────────
-if(WF_DEBUG_BRIDGE)
-    list(APPEND WF_SOURCES ${STUB_SRC}/debug_server.cc)
-    list(APPEND WF_DEFS WF_DEBUG_BRIDGE)
-endif()
-
-# ─── Engine mutation API (always built) ───────────────────────────────────────
-# Plain C++ surface used by the editor's CRDT bridge, DAP debugger, replay UI,
-# and headless test harness. See docs/plans/2026-05-19-engine-mutation-api.md.
-list(APPEND WF_SOURCES ${CMAKE_SOURCE_DIR}/engine/mutation/wfmut.cpp)
 
 # ─── Steam ────────────────────────────────────────────────────────────────────
 set(STEAM_DIR ${VENDOR}/steamworks)
@@ -554,6 +548,11 @@ elseif(IOS)
     add_executable(wf_game MACOSX_BUNDLE ${WF_PLATFORM_SHELL_SOURCES})
 else()
     add_executable(wf_game ${WF_PLATFORM_SHELL_SOURCES})
+    # Editor builds emit a separate binary (wf-edit) so they never overwrite
+    # the lean game-engine output (wf_game). Both coexist side-by-side.
+    if(WF_ENABLE_EDITOR)
+        set_target_properties(wf_game PROPERTIES OUTPUT_NAME "wf-edit")
+    endif()
 endif()
 
 # wf_game's shell file inherits include dirs + compile definitions from
@@ -736,17 +735,18 @@ if(NOT ANDROID)
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/engine)
 endif()
 
-# ─── CRDT support library (WF_ENABLE_CRDT) ────────────────────────────────────
-# Yrs/y-crdt binding for the collaborative level editor. Default OFF — when
-# OFF, Corrosion / Cargo / rustc never enter the build graph, so the shipped
-# game binaries (wf_game / Android / iOS / Codemagic CI) stay Rust-free and
-# their build configurations are bit-identical to pre-binding state.
+# ─── CRDT support library (under WF_ENABLE_EDITOR umbrella) ──────────────────
+# Yrs/y-crdt binding for the collaborative level editor. Default OFF via the
+# WF_ENABLE_EDITOR master switch — when OFF, Corrosion / Cargo / rustc never
+# enter the build graph, so the shipped game binaries (wf_game / Android /
+# iOS / Codemagic CI) stay Rust-free and their build configurations are
+# bit-identical to a no-editor build.
 #
 # When ON, builds libwfcrdt.a (thin C wrapper over libyrs.a from
 # wftools/y-crdt's yffi crate). The editor — not the engine — will link this
 # library. libwfcrdt.a must NEVER be linked into libwfengine.a; the editor
-# owns the Y.Doc and the engine exposes a plain C++ mutation API.
-if(WF_ENABLE_CRDT)
+# owns the Y.Doc and the engine exposes a plain C++ mutation API (wfmut::).
+if(WF_ENABLE_EDITOR)
     add_subdirectory(cmake/Corrosion)
     add_subdirectory(engine/crdt)
 endif()

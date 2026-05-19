@@ -7,6 +7,11 @@
 //
 // Plan: docs/plans/2026-05-19-engine-mutation-api.md
 //
+// Compile-time gating: this entire surface is part of the editor stack and
+// is only compiled when WF_ENABLE_EDITOR is defined. Default builds (mobile,
+// shipped, lean desktop) get no-op inline stubs from the #else branch so
+// callers compile cleanly even when the editor is disabled.
+//
 // Threading: synchronous, single-threaded. Caller is responsible for
 // marshalling onto the game thread. No internal locks. Calling from a
 // non-game thread is UB; debug builds capture the first-call thread id
@@ -17,6 +22,8 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+
+#ifdef WF_ENABLE_EDITOR
 
 // std::optional<Vector3> / std::optional<Euler> require the complete type at
 // the declaration site, so we include the math headers rather than forward-
@@ -102,3 +109,38 @@ bool SetMailbox(Level& level, ActorIdx idx, int mailboxIndex, double value);
 std::optional<double> GetMailbox(const Level& level, ActorIdx idx, int mailboxIndex);
 
 } // namespace wfmut
+
+#else // !WF_ENABLE_EDITOR — lean engine builds: no-op inline stubs.
+
+class Level;
+class Vector3;
+class Euler;
+
+namespace wfmut {
+
+using ActorIdx = std::uint32_t;
+
+inline const char* lastError() { return ""; }
+
+inline bool SetActorPos(Level&, ActorIdx, const Vector3&)         { return false; }
+inline std::optional<Vector3> GetActorPos(const Level&, ActorIdx) { return std::nullopt; }
+inline bool SetActorOrientation(Level&, ActorIdx, const Euler&)         { return false; }
+inline std::optional<Euler> GetActorOrientation(const Level&, ActorIdx) { return std::nullopt; }
+
+inline bool SetActorField(Level&, ActorIdx, const char*, std::int64_t) { return false; }
+inline bool SetActorField(Level&, ActorIdx, const char*, double)       { return false; }
+inline bool SetActorField(Level&, ActorIdx, const char*, const char*)  { return false; }
+inline std::optional<std::int64_t> GetActorFieldInt   (const Level&, ActorIdx, const char*) { return std::nullopt; }
+inline std::optional<double>       GetActorFieldFloat (const Level&, ActorIdx, const char*) { return std::nullopt; }
+inline std::optional<std::string>  GetActorFieldString(const Level&, ActorIdx, const char*) { return std::nullopt; }
+inline bool ReloadActorScript(Level&, ActorIdx, const char*) { return false; }
+
+inline std::optional<ActorIdx> SpawnActor(Level&, int, const Vector3&, ActorIdx = 0) { return std::nullopt; }
+inline bool RemoveActor(Level&, ActorIdx) { return false; }
+
+inline bool SetMailbox(Level&, ActorIdx, int, double) { return false; }
+inline std::optional<double> GetMailbox(const Level&, ActorIdx, int) { return std::nullopt; }
+
+} // namespace wfmut
+
+#endif // WF_ENABLE_EDITOR

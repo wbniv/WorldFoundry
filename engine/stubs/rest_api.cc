@@ -1,10 +1,10 @@
-// rest_api.cc — WF REST API implementation (WF_REST_API builds only).
+// rest_api.cc — WF REST API implementation (WF_ENABLE_EDITOR builds only).
 //
 // See rest_api.hp for the public interface.
 
 #include "rest_api.hp"
 
-#ifdef WF_REST_API
+#ifdef WF_ENABLE_EDITOR
 
 #include <pigsys/pigsys.hp>     // sys_atexit — join server thread before libc exit()
 
@@ -407,4 +407,4 @@ void RestApi_Stop()
     }
 }
 
-#endif // WF_REST_API
+#endif // WF_ENABLE_EDITOR
