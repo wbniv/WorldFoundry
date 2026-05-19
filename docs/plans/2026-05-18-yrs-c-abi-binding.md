@@ -1,6 +1,6 @@
 # Plan — Yrs C ABI binding (v1 collaborative editor, sub-task #1)
 
-**Status:** Not started
+**Status:** Done 2026-05-19 (~1 h vs ~1 wk estimate). All 8 steps committed; `task build-editor` produces `libwfcrdt.a` + `wfcrdt_smoke`, smoke prints `wfcrdt_smoke: OK (5/5 tests passed)`. Default-OFF: `cmake -S . -B build` with no flag still produces a Rust-free `wf_game` identical to pre-binding state. One spec correction: the yffi crate's lib name is `yrs`, so the static lib is `libyrs.a` (plan said `libyffi.a`).
 **Scope:** Yrs C ABI binding via cbindgen — the first v1 milestone after Phase 0b shipped.
 **Estimate:** ~1 focused week (matches the [design doc estimate](../investigations/2026-05-18-collaborative-level-editor-design.md)).
 

@@ -764,7 +764,9 @@ Tiered by what they block. Tier 1 blocks the start of implementation; tier 2 is 
 
 ### Tier 2 — needed before substantial implementation
 
-- **Engine ↔ CRDT bridge mechanism.** Direct read (C++ binds to Yrs storage; engine observes CRDT events and mutates scene in response) vs file-watch (CRDT serializes to a derived `.iff`; engine reloads on change). Leaning **direct read for shipped v1**, file-watch only as a prototype-phase shortcut.
+- **Engine ↔ CRDT bridge mechanism.** Direct read (editor owns the Y.Doc, observes CRDT events, translates ops into engine API calls) vs file-watch (CRDT serializes to a derived `.iff`; engine reloads on change). **Locked in 2026-05-19: editor owns the Y.Doc, engine stays Rust-free, engine exposes a plain C++ mutation API that the editor's CRDT bridge drives.** Same surface serves DAP debugger + replay UI + headless test harness, not just the editor. File-watch remains as a prototype-phase shortcut only.
+
+  **Yrs C ABI binding landed 2026-05-19** (plan [docs/plans/2026-05-18-yrs-c-abi-binding.md](../plans/2026-05-18-yrs-c-abi-binding.md)) — `WF_ENABLE_CRDT=ON` builds `libwfcrdt.a` (wrapping `libyrs.a` from y-crdt's yffi crate via Corrosion + Cargo). Default OFF, so shipped game binaries (iOS / Android / Codemagic CI) stay byte-identical and Rust-free. `wfcrdt_smoke` exercises Doc/Map/Array round-trip + Yjs wire-format state-diff compat + observer registration.
 
   **Latency budget:** the file-watch round-trip is `serialize .lev (~10 ms) + levcomp-rs (~50–200 ms) + iffcomp-rs (~50–200 ms) + engine reload (100s of ms)` — roughly **0.5–2 s per edit**, depending on level size. That's acceptable for "I moved an actor; where did it land?" but painful for slider scrubs, drag-to-position, colour pickers, and anything else that wants sub-100 ms feedback.
 
@@ -773,7 +775,7 @@ Tiered by what they block. Tier 1 blocks the start of implementation; tier 2 is 
     - *Incremental engine reload* — teach the engine to apply per-actor patches instead of tearing down/rebuilding the whole level. Substantial engine work; probably half the cost of just doing direct read.
     - *Cheap drag preview* — editor draws ghost-outline during interaction, only commits the real engine-view update on drag-end. Keeps interaction snappy at the cost of "engine view lies during a drag."
 
-  **Direct-read cost:** Yrs has a C ABI via cbindgen; binding is "iterate the CRDT tree, install observer callbacks, translate ops to engine scene mutations." Estimate ~1 week to working prototype, more for polish. Pays off for the editor's whole life (microsecond per-op feedback, no debounce engineering).
+  **Direct-read cost:** Yrs has a C ABI via cbindgen; the binding plumbing is now landed (`libwfcrdt.a` smoke-test green). Remaining work to a working prototype: C++ RAII wrapper (~2–3 d), engine mutation API (`SetActorField` / `SpawnActor` / etc., ~1–2 wk), IFF↔Y.Doc translator (~2–3 wk). Pays off for the editor's whole life (microsecond per-op feedback, no debounce engineering).
 
   **Plan:** prototype with file-watch for the first few weeks (proves the data path; reuses existing reload infrastructure; smb_w1_1 is small enough that 1–2 s round-trip will be tolerable for early dev). Switch to direct read before shipping v1 once the data path is settled.
 - **Persistence model for the relay — researched: Yjs binary state on local disk, debounced snapshots, hibernation IS a snapshot, BYOK-ready wrap hook from day 1.**
