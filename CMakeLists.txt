@@ -20,8 +20,10 @@ option(WF_ENABLE_WREN     "Wren scripting"                ON)
 set(WF_FORTH_ENGINE  "zforth"   CACHE STRING "none | zforth | ficl | atlast | embed | libforth | pforth")
 set(WF_PHYSICS_ENGINE "jolt"    CACHE STRING "legacy | jolt")
 option(WF_REST_API        "REST API box PoC"              ON)
+option(WF_DEBUG_BRIDGE    "TCP/JSON debug bridge (port 7777 default)" ON)
 option(WF_ENABLE_STEAM    "Steamworks SDK"                OFF)
 option(WF_ASAN            "AddressSanitizer + UBSan (Linux dev only)" OFF)
+option(WF_ENABLE_CRDT     "Build libwfcrdt.a (Yrs/y-crdt via Corrosion). Editor-only; OFF for shipped builds." OFF)
 
 # Mobile (Android + iOS): Forth-only scripting, no Steam, no REST API.
 # Matches build_game.sh Android flags. WAMR in particular ships x86_64 assembly
@@ -34,7 +36,18 @@ if(ANDROID OR IOS)
     set(WF_ENABLE_WREN   OFF      CACHE BOOL   "" FORCE)
     set(WF_FORTH_ENGINE  "zforth" CACHE STRING "" FORCE)
     set(WF_REST_API      OFF      CACHE BOOL   "" FORCE)
+    set(WF_DEBUG_BRIDGE  OFF      CACHE BOOL   "" FORCE)
     set(WF_ENABLE_STEAM  OFF      CACHE BOOL   "" FORCE)
+    set(WF_ENABLE_CRDT   OFF      CACHE BOOL   "" FORCE)
+endif()
+
+# Debug builds force the bridge ON. The Blender addon's "Live" features
+# (debug_bridge.py / panels.py / operators.py — all default port 7777)
+# rely on it; surprising them with an opt-in flag broke at least one
+# user's workflow in this session. Mobile is already forced OFF above
+# and the NOT(ANDROID OR IOS) guard preserves that.
+if(NOT (ANDROID OR IOS) AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(WF_DEBUG_BRIDGE ON CACHE BOOL "Debug build forces bridge on" FORCE)
 endif()
 
 # ─── Fennel/Lua consistency check ─────────────────────────────────────────────
@@ -426,6 +439,12 @@ if(WF_REST_API)
     list(APPEND WF_DEFS WF_REST_API)
 endif()
 
+# ─── Debug bridge ─────────────────────────────────────────────────────────────
+if(WF_DEBUG_BRIDGE)
+    list(APPEND WF_SOURCES ${STUB_SRC}/debug_server.cc)
+    list(APPEND WF_DEFS WF_DEBUG_BRIDGE)
+endif()
+
 # ─── Steam ────────────────────────────────────────────────────────────────────
 set(STEAM_DIR ${VENDOR}/steamworks)
 if(WF_ENABLE_STEAM)
@@ -709,4 +728,19 @@ endif()
 if(NOT ANDROID)
     set_target_properties(wf_game PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/engine)
+endif()
+
+# ─── CRDT support library (WF_ENABLE_CRDT) ────────────────────────────────────
+# Yrs/y-crdt binding for the collaborative level editor. Default OFF — when
+# OFF, Corrosion / Cargo / rustc never enter the build graph, so the shipped
+# game binaries (wf_game / Android / iOS / Codemagic CI) stay Rust-free and
+# their build configurations are bit-identical to pre-binding state.
+#
+# When ON, builds libwfcrdt.a (thin C wrapper over libyrs.a from
+# wftools/y-crdt's yffi crate). The editor — not the engine — will link this
+# library. libwfcrdt.a must NEVER be linked into libwfengine.a; the editor
+# owns the Y.Doc and the engine exposes a plain C++ mutation API.
+if(WF_ENABLE_CRDT)
+    add_subdirectory(cmake/Corrosion)
+    add_subdirectory(engine/crdt)
 endif()
