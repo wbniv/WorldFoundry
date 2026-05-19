@@ -68,7 +68,10 @@ public:
 		MAX_OBJECT_TYPES
 	};
 
-	virtual EActorKind kind() const = 0;         // manual RTTI, investigate removing
+	// Type dispatch — replaces C++ `dynamic_cast`, which violates WF's no-RTTI
+	// architectural constraint. Pair `kind()` with `static_cast` for downcasts;
+	// see `IsActor` / `IsMovementObject` / `IsPhysicalObject` below.
+	virtual EActorKind kind() const = 0;
 
 //------------------------------------------------------------------------------
 protected:
@@ -84,8 +87,22 @@ protected:
    // values all point to the same actual data bytes in order to save memory.
    const void*	const _oadData;
 
-   const CommonBlock _commonBlock;           // this is the CommonBlock which the oadData offsets point into (probably the same for all objects) 
+   const CommonBlock _commonBlock;           // this is the CommonBlock which the oadData offsets point into (probably the same for all objects)
 };
+
+//==============================================================================
+// kind()-based type predicates — replace dynamic_cast.
+//
+// Every concrete BaseObject in the engine derives from Actor (which extends
+// MovementObject : PhysicalObject : BaseObject). The five sentinel _KIND
+// values (NULL/Room/LevelObj/Disabled/Alias) are not overridden by any live
+// kind() implementation. Therefore every non-null BaseObject is also a
+// PhysicalObject, MovementObject, and Actor — these predicates are trivial
+// today but provide a single update point if a non-Actor BaseObject is ever
+// added.
+inline bool IsActor(const BaseObject* bo)          { return bo; }
+inline bool IsMovementObject(const BaseObject* bo) { return bo; }
+inline bool IsPhysicalObject(const BaseObject* bo) { return bo; }
 
 //==============================================================================
 
