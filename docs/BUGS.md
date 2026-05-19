@@ -15,7 +15,7 @@ Format per entry:
 
 ## IFF chunk-size read via `long*` — misaligned 8-byte load + truncation-by-luck — 2026-05-19
 
-**Status:** FIXED commit `<sha>` (to be filled).
+**Status:** FIXED commit `ba3bbcb`.
 
 **Symptom:** UBSan reports `load of misaligned address 0x... for type 'long int', which requires 8 byte alignment` inside `Level::LoadLevelData` at [`game/level.cc`](../wfsource/source/game/level.cc):1394 every time a level is loaded. Hex bytes at the cited address: `41 53 4d 50 7c 00 00 00 ...` — an IFF chunk header (`"ASMP"` + size 0x7c = 124).
 
