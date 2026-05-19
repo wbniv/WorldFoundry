@@ -59,6 +59,7 @@ endif()
 # ─── Accumulated lists (filled below) ─────────────────────────────────────────
 set(WF_SOURCES)
 set(WF_INCLUDES  ${SRC} ${SRC}/game ${ENG_INC} ${STUB_SRC}
+                 ${CMAKE_SOURCE_DIR}/engine/mutation
                  ${VENDOR}/miniaudio-0.11.25 ${VENDOR}/tsf)
 set(WF_DEFS)
 set(WF_LINK_LIBS)
@@ -444,6 +445,11 @@ if(WF_DEBUG_BRIDGE)
     list(APPEND WF_SOURCES ${STUB_SRC}/debug_server.cc)
     list(APPEND WF_DEFS WF_DEBUG_BRIDGE)
 endif()
+
+# ─── Engine mutation API (always built) ───────────────────────────────────────
+# Plain C++ surface used by the editor's CRDT bridge, DAP debugger, replay UI,
+# and headless test harness. See docs/plans/2026-05-19-engine-mutation-api.md.
+list(APPEND WF_SOURCES ${CMAKE_SOURCE_DIR}/engine/mutation/wfmut.cpp)
 
 # ─── Steam ────────────────────────────────────────────────────────────────────
 set(STEAM_DIR ${VENDOR}/steamworks)

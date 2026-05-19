@@ -3,7 +3,7 @@
 #
 # Run from this directory. Output: wf_game binary here.
 # To run: cd wfsource/source/game && DISPLAY=:0 ../../../engine/wf_game
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -131,6 +131,7 @@ CXXFLAGS=(
     -DDO_VALIDATION=0 -DDO_TEST_CODE=1 -DDO_DEBUG_FILE_SYSTEM=0
     '-D__GAME__="wf_game"' "-DERR_DEBUG(x)="
     -I"$SRC" -I"$SRC/game" -I"$STUBS" -I"$STUB_SRC"
+    -I"$REPO_ROOT/engine/mutation"
     -I"$VENDOR/miniaudio-0.11.25"
     -I"$VENDOR/tsf"
 )
@@ -605,6 +606,13 @@ if [[ "$WF_DEBUG_BRIDGE" == "1" ]]; then
     g++ "${CXXFLAGS[@]}" -O1 -c "$STUB_SRC/debug_server.cc" -o "$OUT/stubs__debug_server.o"
     OBJS+=("$OUT/stubs__debug_server.o")
 fi
+
+# Engine mutation API — always compiled. Plain C++ surface consumed by the
+# editor's CRDT bridge, DAP debugger, replay UI, and headless test harness.
+# See docs/plans/2026-05-19-engine-mutation-api.md.
+echo "  CC mutation/wfmut.cpp"
+g++ "${CXXFLAGS[@]}" -O1 -c "$REPO_ROOT/engine/mutation/wfmut.cpp" -o "$OUT/mutation__wfmut.o"
+OBJS+=("$OUT/mutation__wfmut.o")
 
 # Jolt physics plug — compiled and linked only when WF_PHYSICS_ENGINE=jolt.
 # Jolt is built via CMake into a static library (cached in OUT/jolt_build).
