@@ -353,6 +353,62 @@ void run_spawn_remove_tests(Level& level, ActorIdx player)
         "         integration verification).\n");
 }
 
+// ── Mailbox tests ───────────────────────────────────────────────────────────
+
+void run_mailbox_tests(Level& level, ActorIdx player)
+{
+    std::fprintf(stderr,"--- Mailbox (M1-M9) ---\n");
+
+    // M1: write/read round-trip on a mid-range slot. Restore after so the
+    // game can continue if the player's local mailboxes have observable
+    // effects.
+    {
+        const int slot = 5;
+        auto saved = GetMailbox(level, player, slot);
+        bool ok_set = SetMailbox(level, player, slot, 42.0);
+        auto got = GetMailbox(level, player, slot);
+        bool round_trip = ok_set && got && fclose_to(static_cast<float>(*got), 42.0f, 1e-3f);
+        if (saved) SetMailbox(level, player, slot, *saved);
+        report("M1: SetMailbox(slot=5, 42.0) → GetMailbox round-trip", round_trip,
+               round_trip ? "" : std::string("lastError=") + lastError());
+    }
+
+    // M2: slot 0 round-trip — DEFERRED. Slot 0 (and nearby low indices) maps
+    // to LOCAL_SYSTEM mailboxes in WF's mailbox model: X_POS / Y_POS / Z_POS,
+    // COLLIDER_IDX, etc. Writes have observable side-effects (teleport,
+    // physics state). The current player actor in smb_w1_1-standalone abort
+    // on a generic write to slot 0 (terminate called) — deferred until a
+    // safer fixture exists. M1 covers the round-trip property at slot 5.
+
+    // M5: negative mailbox index rejected.
+    {
+        bool ret = SetMailbox(level, player, -1, 0.0);
+        bool err_ok = !ret && std::strstr(lastError(), "mailboxIndex must be >= 0") != nullptr;
+        report("M5: SetMailbox negative mailbox index rejected", err_ok);
+    }
+
+    // M9: bad actor idx on SetMailbox / GetMailbox.
+    {
+        bool a = !SetMailbox(level, 0, 5, 1.0);
+        bool b = !GetMailbox(level, 0, 5).has_value();
+        report("M9: Set/GetMailbox bad actor idx rejected", a && b);
+    }
+
+    // M3, M4 (slot at NumberOfLocalMailboxes boundary) — need the actor's
+    // declared mailbox count. The OAD field is accessible via
+    // GetActorFieldInt("common.NumberOfLocalMailboxes"), but the value
+    // sometimes reflects pre-init state; pin behaviour in a follow-up.
+    //
+    // M6 (actor without mailboxes) — needs a non-mailbox-bearing object
+    // type at a known idx; smb_w1_1 may not expose one. Deferred.
+    //
+    // M7 (NaN/Inf), M8 (mailbox 999 crash boundary, GLOBAL_USER_MAX) —
+    // deferred per the plan's test matrix.
+    std::fprintf(stderr,
+        "  [SKIP] M3/M4 (mailbox-count boundary), M6 (no-mailbox actor),\n"
+        "         M7 (NaN/Inf), M8 (mailbox 999 crash) — deferred per plan.\n");
+}
+
 } // namespace
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -374,8 +430,11 @@ int RunSmokeTests(Level& level)
     run_transform_tests(level, player);
     run_field_tests(level, player);
     run_spawn_remove_tests(level, player);
+    run_mailbox_tests(level, player);
 
-    // Step 5+ tests append here as they land.
+    // Cross-cutting tests (X1-X8) land in a follow-up; some require manual
+    // verification (bridge regression, screenshot capture) and are tracked
+    // in docs/plans/2026-05-19-engine-mutation-api.md.
 
     std::fprintf(stderr,"=== wfmut smoke: %d passed, %d failed ===\n", g_passed, g_failed);
     return g_failed;

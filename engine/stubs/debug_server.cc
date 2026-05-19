@@ -766,8 +766,10 @@ void DebugServer_DrainQueue(Level& level)
 
         } else if (u.kind == PendingUpdate::SET_MAILBOX) {
             // idx==0 means the global mailbox space; nonzero is per-actor.
-            // Either way, GetMailboxes() handles the routing (per-actor falls
-            // through to the parent for non-local indices).
+            // wfmut::SetMailbox covers the per-actor path (and provides clean
+            // diagnostics for bad-actor / bad-mailbox cases). The global
+            // mailbox path stays on the level accessor for now — wfmut may
+            // grow a Set/GetGlobalMailbox sibling in a follow-up.
             Mailboxes* boxes = nullptr;
             if (u.actor_idx == 0) {
                 boxes = &level.GetMailboxes();
@@ -785,7 +787,13 @@ void DebugServer_DrainQueue(Level& level)
                 rec.old_mbx_value = old_val;
                 gChangeStack.push_back(rec);
 
-                boxes->WriteMailbox(u.mailbox_idx, Scalar::FromDouble(u.value));
+                if (u.actor_idx != 0) {
+                    // Route through wfmut for the per-actor case — keeps the
+                    // single mutation pipeline honest.
+                    wfmut::SetMailbox(level, u.actor_idx, u.mailbox_idx, u.value);
+                } else {
+                    boxes->WriteMailbox(u.mailbox_idx, Scalar::FromDouble(u.value));
+                }
             } else {
                 std::string errmsg = "{\"op\":\"error\","
                     + json_str("msg", "set_mailbox: actor not found")

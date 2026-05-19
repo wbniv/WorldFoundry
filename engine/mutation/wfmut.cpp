@@ -365,15 +365,32 @@ bool RemoveActor(Level& level, ActorIdx idx)
 }
 
 // ── Mailbox ─────────────────────────────────────────────────────────────────
+// Per-actor mailbox slots only. Level-global mailbox access (idx == 0 in the
+// engine's convention) is deferred to a sibling primitive — keep the API
+// shape "idx is a real actor" consistent with the rest of wfmut.
 
-bool SetMailbox(Level&, ActorIdx, int, double)
+bool SetMailbox(Level& level, ActorIdx idx, int mailboxIndex, double value)
 {
-    return fail("wfmut::SetMailbox: not implemented (step 5)");
+    Actor* actor = resolve_actor(level, idx, "wfmut::SetMailbox");
+    if (!actor) return false;
+    if (mailboxIndex < 0)
+        return fail("wfmut::SetMailbox: mailboxIndex must be >= 0");
+    // Actor exposes its mailbox bank via GetMailboxes(); backing storage is
+    // bounds-checked by MailboxesWithStorage in DBSTREAM builds.
+    actor->GetMailboxes().WriteMailbox(static_cast<long>(mailboxIndex), Scalar::FromDouble(value));
+    ok();
+    return true;
 }
 
-std::optional<double> GetMailbox(const Level&, ActorIdx, int)
+std::optional<double> GetMailbox(const Level& level, ActorIdx idx, int mailboxIndex)
 {
-    return failopt<double>("wfmut::GetMailbox: not implemented (step 5)");
+    Actor* actor = resolve_actor(const_cast<Level&>(level), idx, "wfmut::GetMailbox");
+    if (!actor) return std::nullopt;
+    if (mailboxIndex < 0)
+        return failopt<double>("wfmut::GetMailbox: mailboxIndex must be >= 0");
+    Scalar v = actor->GetMailboxes().ReadMailbox(static_cast<long>(mailboxIndex));
+    ok();
+    return static_cast<double>(v.AsFloat());
 }
 
 } // namespace wfmut
