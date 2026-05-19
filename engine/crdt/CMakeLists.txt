@@ -36,3 +36,9 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/wfcrdt_smoke.c)
     add_executable(wfcrdt_smoke wfcrdt_smoke.c)
     target_link_libraries(wfcrdt_smoke PRIVATE wfcrdt)
 endif()
+
+# C++ RAII wrapper test (plan: 2026-05-19-wfcrdt-cpp-raii-wrapper.md).
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/wfcrdt_wrapper_test.cc)
+    add_executable(wfcrdt_wrapper_test wfcrdt_wrapper_test.cc)
+    target_link_libraries(wfcrdt_wrapper_test PRIVATE wfcrdt)
+endif()

@@ -99,7 +99,51 @@ private:
     YDoc* _doc;
 };
 
-// (Output / Map / Array / Subscription bodies fleshed out in subsequent
-// plan steps. Forward declarations only for now so the header parses.)
+// RAII wrapper around YOutput* (returned by ymap_get / yarray_get).
+// Reads return std::optional<T> — empty when the stored value's type
+// doesn't match the requested read.
+class Output {
+public:
+    Output() : _out(nullptr) {}
+    ~Output();
+
+    Output(Output&& other) noexcept;
+    Output& operator=(Output&& other) noexcept;
+    Output(const Output&) = delete;
+    Output& operator=(const Output&) = delete;
+
+    bool valid() const { return _out != nullptr; }
+
+    std::optional<long long>   readLong()   const;
+    std::optional<std::string> readString() const;
+    std::optional<double>      readFloat()  const;
+
+private:
+    friend class Map;
+    friend class Array;
+    explicit Output(YOutput* out) : _out(out) {}
+    YOutput* _out;
+};
+
+// Borrowed view of a root-level YMap. Does NOT own the Branch* —
+// lifetime is tied to the owning Doc. Routes mutations through the
+// active Transaction supplied at construction.
+class Map {
+public:
+    void insert(const char* key, long long value);
+    void insert(const char* key, const char* value);
+    void insert(const char* key, double value);
+
+    Output get(const char* key) const;
+    int len() const;
+
+private:
+    friend class Transaction;
+    Map(Branch* branch, YTransaction* txn) : _branch(branch), _txn(txn) {}
+    Branch* _branch;
+    YTransaction* _txn;
+};
+
+// (Array / Subscription bodies fleshed out in subsequent steps.)
 
 }  // namespace wfcrdt
