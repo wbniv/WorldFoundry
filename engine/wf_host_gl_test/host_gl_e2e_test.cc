@@ -22,15 +22,13 @@
 //   0 — all cycles completed cleanly, full Load/Unload chain didn't crash.
 //   non-zero — X11 setup failure, level file missing, or HALStart aborted.
 //
-// STATUS (2026-05-18, WORK IN PROGRESS): The harness builds and links cleanly,
-// opens its host X11/GLX, registers the context, and reaches HALStart. The
-// engine then hits SIGTRAP inside JPH::BodyID::operator new[] during
-// PhysicsSystem::Init / Jolt's RunSelftest. wf_game itself runs the same
-// selftest with no issue — the harness-specific failure is under
-// investigation. Hypothesis: ODR / stack-init divergence when JPH headers
-// are compiled into a translation unit (the harness) with a different
-// optimization level / instantiation context than Jolt.a itself. Tracked
-// for follow-up in docs/BUGS.md.
+// Verified 2026-05-18: cycles=1 and cycles=2 on qbert_practice exit 0 with
+// the full Load → StepFrame×N → UnloadLevel chain. Multi-cycle on snowgoons
+// crashes during cycle 2+ — same crash in wf_game, pre-existing snowgoons-
+// specific issue, NOT host-GL specific. See docs/BUGS.md for the Jolt ODR
+// violation that gated this harness for several hours; the fix was to
+// PUBLIC-define NDEBUG on the Jolt CMake target so JPH_ENABLE_ASSERTS is
+// consistently off across Jolt.a and its consumers.
 
 #include <gfx/host_gl_context.h>
 #include <hal/hal.h>

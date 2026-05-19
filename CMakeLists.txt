@@ -397,6 +397,22 @@ if(WF_PHYSICS_ENGINE STREQUAL "jolt")
     set(PHYSICS_REPO_ROOT ${JOLT_DIR})
     include(${JOLT_DIR}/Jolt/Jolt.cmake)
     target_compile_options(Jolt PRIVATE -O2 -w)
+    # Force NDEBUG into Jolt's own TUs and PUBLIC-propagate to consumers.
+    # Without this, Jolt.a was built without NDEBUG (the auto-set NDEBUG in
+    # Jolt.cmake:515 only applies in Release configs), which made JPH_DEBUG
+    # / JPH_ENABLE_ASSERTS define-ON inside Jolt — while wfengine's TUs
+    # (which set NDEBUG via WF_DEFS) see them as define-OFF. The macro
+    # `JPH_IF_ENABLE_ASSERTS` then expands differently across TUs and
+    # `ConstraintManager` even has a ctor that exists only when asserts
+    # are enabled (ConstraintManager.h:32) — silent ODR violation. The
+    # external harness (wf_host_gl_e2e_test) trips SIGTRAP in
+    # `BodyManager::Init` because its stack-resident `PhysicsSystem` was
+    # half-initialised by wfengine's view of the ctor and then asserted-
+    # against by Jolt.a's view of the body. wf_game happens to dodge the
+    # SIGTRAP because its stack pattern leaves mActiveBodies[1] as zero;
+    # the harness's stack has the 0xa9-fill that trips it. The fix:
+    # consistent NDEBUG / JPH_ENABLE_ASSERTS state across all TUs.
+    target_compile_definitions(Jolt PUBLIC NDEBUG)
     list(APPEND WF_LINK_LIBS Jolt)
 else()
     list(APPEND WF_DEFS PHYSICS_ENGINE_WF)

@@ -56,31 +56,35 @@ Format per entry:
 
 ---
 
-## Harness binary trips SIGTRAP in `JPH::BodyID::operator new[]` (Jolt selftest) — 2026-05-18
+## Jolt `JPH_ENABLE_ASSERTS` ODR violation — Jolt.a built without NDEBUG, consumers with NDEBUG — 2026-05-18
 
-**Status:** INVESTIGATING — `wf_host_gl_e2e_test` (the e2e harness built against `libwfengine.a` with its own `main()`) reaches HALStart, gets through pigsys/audio/joystick init, but SIGTRAPs inside the Jolt physics selftest at `BodyManager.cpp:126` (`active_bodies = new BodyID[inMaxBodies]`).
+**Status:** FIXED — `target_compile_definitions(Jolt PUBLIC NDEBUG)` in our top-level [CMakeLists.txt](../CMakeLists.txt) (Jolt section) forces NDEBUG into Jolt.a's own TUs AND propagates to consumers.
 
-**Symptom:** Stepping through with gdb shows: `JPH::Allocate` global is correctly initialized to `AllocateImpl` (function pointer set by `RegisterDefaultAllocator()` which DID run); the JPH_ASSERT immediately before the failing line passes; the SIGTRAP fires inside the inline `JPH_OVERRIDE_NEW_DELETE` operator. `BodyManager::mActiveBodies[0]` is `nullptr` (correct), but `mActiveBodies[1]` is `0xa9a9a9a900000000` — a debug-fill pattern (low 32 bits zeroed but high 32 stayed as `0xa9`).
+**Symptom:** The `wf_host_gl_e2e_test` external-host harness (Phase 0b sub-task #3) reached `HALStart`, got through pigsys/audio/joystick init, then SIGTRAP'd at `BodyManager.cpp:126` (`active_bodies = new BodyID[inMaxBodies]`) inside Jolt's `RunSelftest()`. gdb showed `BodyManager::mActiveBodies[1] = 0xa9a9a9a900000000` (stack-fill pattern) instead of the nullptr the default-member-initializer `BodyID* mActiveBodies[2] = { };` was supposed to produce.
 
-**Reproducer:**
+**Root cause:** Macros in Jolt's headers (`JPH_IF_ENABLE_ASSERTS`, etc.) expand differently depending on whether `NDEBUG` is defined at the include site. `ConstraintManager` even has a constructor that ONLY exists when JPH_ENABLE_ASSERTS is defined ([ConstraintManager.h:32](../engine/vendor/jolt-physics-5.5.0/Jolt/Physics/Constraints/ConstraintManager.h)):
+```cpp
+#ifdef JPH_ENABLE_ASSERTS
+    ConstraintManager(PhysicsLockContext inContext) : mLockContext(inContext) { }
+#endif
 ```
-DISPLAY=:0 ./cmake-build-linux/wf_host_gl_e2e_test --frames=5 --cycles=1
-```
-Crashes with exit 133 (SIGTRAP).
 
-**Same code in wf_game:** `./engine/wf_game --frame-step-smoke=5 -L<level>` runs the same `RunSelftest()` code path and prints "selftest ok (sphere fell to z=5.098)" cleanly. So the bug is the harness binary's context, not Jolt's code.
+Jolt.a's own TUs (BodyManager.cpp etc.) compiled WITHOUT NDEBUG → `JPH_DEBUG` auto-defined → `JPH_ENABLE_ASSERTS` defined → ConstraintManager has the explicit ctor → PhysicsSystem's inline ctor calls `mConstraintManager(&mBodyManager)`.
 
-**Hypothesis (unproven):** ODR / stack-init divergence. The harness's TU is compiled with slightly different flags than Jolt.a or wfengine.a. Compiler may emit a different layout for `PhysicsSystem` member offsets, or skip the default-member-initializer `BodyID* mActiveBodies[2] = { }` due to some optimization decision. The `0xa9` pattern looks like a debug-stack-fill from glibc's `MALLOC_PERTURB_` or compiler-injected sentinel.
+wfengine's TUs (which set NDEBUG via `WF_DEFS`, [CMakeLists.txt:396](../CMakeLists.txt)) saw `JPH_DEBUG` NOT defined → `JPH_ENABLE_ASSERTS` NOT defined → ConstraintManager had NO user-declared ctors → compiler generated an implicit default ctor → PhysicsSystem's inline ctor did NOT explicitly init mConstraintManager.
 
-**Investigation needed:**
-1. Compare assembly of `PhysicsSystem` ctor between Jolt.a (inline) and the harness's instantiation point — verify both zero-init `mActiveBodies`.
-2. Try compiling the harness with `-DJPH_DISABLE_CUSTOM_ALLOCATOR` to bypass the inline op-new entirely.
-3. Try ASAN to see if it's a stack-init read or something more subtle.
-4. As a last-resort workaround: wrap `RunSelftest` so it's only called from wfengine.a (not from harness TU).
+When wfengine's physics_jolt.cc declared `JPH::PhysicsSystem ps;` on the stack, the COMPILER inlined the version of the ctor it could see (the one without `mConstraintManager(...)`), leaving the member half-initialised. Jolt.a's runtime code (BodyManager::Init's `JPH_ASSERT(active_bodies == nullptr)`) was compiled with ASSERTS ON and read the surrounding stack memory expecting properly-initialised state. wf_game's stack happened to have nullptr-like patterns in the right spots; the harness's stack had the 0xa9 fill pattern that tripped the assert.
 
-**Why this matters:** Blocks the e2e harness end-to-end test. Phase C (the harness) builds and links cleanly — Phase A's `libwfengine.a` split is structurally sound — but the harness can't yet exercise a full Load/Step/Unload because Jolt selftest aborts first.
+**Why dormant:** wf_game was the only consumer of Jolt headers compiled with NDEBUG, and its stack frame in `RunSelftest()` happened to be quiet enough that the half-initialised state didn't fire the assert in practice. Adding a second external consumer (the e2e harness) — with even slightly different stack layout — surfaced the violation immediately. Could equally have manifested as silent corruption of physics state in a Release build.
 
-**Why dormant:** Every prior consumer of Jolt's RunSelftest in this codebase was wf_game (or another translation unit compiled with the exact same flags as wfengine). The e2e harness is the first TU built with materially different flags that nonetheless includes Jolt headers.
+**Fix:** [`CMakeLists.txt`](../CMakeLists.txt) Jolt section now calls `target_compile_definitions(Jolt PUBLIC NDEBUG)` so:
+- Jolt.a's TUs compile with NDEBUG → JPH_DEBUG/JPH_ENABLE_ASSERTS off
+- All consumers (wfengine, wf_game, harness, anything linking Jolt) inherit NDEBUG → same view
+- `JPH_IF_ENABLE_ASSERTS` macro expands consistently everywhere
+- `ConstraintManager` has the same ctor set in every TU
+- No more ODR violation
+
+This also removes runtime asserts from Jolt's compiled code, which is fine for our build (we're already on the side of "no asserts" via NDEBUG; the bug was the mismatch, not the asserts themselves).
 
 ---
 
