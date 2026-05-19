@@ -13,6 +13,22 @@ Format per entry:
 
 ---
 
+## HAL pool allocators rounded size to 4 bytes — UB on x86_64 / SIGBUS-prone on AArch64 — 2026-05-19
+
+**Status:** FIXED commit `<sha>` (to be filled).
+
+**Symptom:** UBSan run 2026-05-19 (`-DWF_ASAN=ON` + `-fsanitize=address,undefined`) flagged ~3,500 misaligned-access warnings per snowgoons cycle (~2,800 per qbert) across `WFGame`, `Actor`, `Room`, `FreeChunk`, `_MemPoolFreeEntry`, and `FileLine` constructors and field accesses — every one cited a member with 8-byte alignment requirement (pointer, `int64_t`, `std::atomic<T*>`, `double`) sitting on a 4-aligned-but-not-8-aligned address. Benign on x86_64 (1-cycle penalty per misaligned load), but `LDXR`/`STXR` (what `std::atomic` compiles to) and `LDP`/`STP` (load/store pair) on AArch64 fault with SIGBUS on misaligned operands — i.e., this is a latent runtime crash on the iOS / modern-Android port.
+
+**Root cause:** Both [`memory/lmalloc.cc`](../wfsource/source/memory/lmalloc.cc):223 and [`memory/dmalloc.cc`](../wfsource/source/memory/dmalloc.cc):174 rounded allocation sizes up to **4-byte** boundaries via `size += (4-(size&0x3))&3;`. Correct for the PS1 32-bit-pointer convention these allocators date from — `long` was 4 bytes, pointers were 4 bytes, all natural alignments fit in 4. One bit short on every 64-bit host (x86_64 Linux, AArch64 iOS, AArch64 Android), where the C++ ABI wants 8-byte natural alignment for any type containing a pointer, `int64_t`, or `double`.
+
+**Why dormant:** Engine's been on 64-bit hosts for years (Linux Android-NDK, iOS) but the unaligned accesses are silently tolerated by every consumer on x86_64 and on AArch64-with-unaligned-tolerance. The bug only fires when the misaligned address is the operand of a strict-alignment-required instruction — `std::atomic` operations and compiler-emitted `LDP`/`STP` pairs. We didn't have a `std::atomic` field backed by HAL memory until the audio-thread-safe `sDoneHead` lock-free list landed earlier in 2026 (which itself surfaced today's separate rendobj3 cascade); pre-2026 no consumer triggered the strict-alignment path on Linux. iOS Phase 4-5 would have surfaced this as a load-time SIGBUS.
+
+**Fix:** Two single-line edits, switching both allocator rounds from `(4-(size&0x3))&3` → `ALIGN_POW2(size, 8)` (existing macro at [`cpplib/align.hp`](../wfsource/source/cpplib/align.hp):30). Added a base-pointer 8-byte-alignment assertion to LMalloc's placement constructor and DMalloc's ctor so any future code path handing in misaligned backing memory fails loudly instead of silently. Post-fix UBSan sweep: 3,500 → 1 on snowgoons, 2,800 → 1 on qbert; the single residual is a misaligned `long*` read on an IFF chunk header inside `Level::LoadLevelData` at [`game/level.cc`](../wfsource/source/game/level.cc):1394 — IFF file-format data, separate scope from allocator alignment.
+
+**Investigation:** [`docs/investigations/2026-05-19-snowgoons-rendobj3-overread.md`](investigations/2026-05-19-snowgoons-rendobj3-overread.md) "Follow-ups" section (which tracked the alignment issue before the fix); [`TODO.md`](../TODO.md):97 (entry now resolved).
+
+---
+
 ## `BaseObjectIterator` missing virtual destructor — `delete` through base slices off 24-byte subclass members — 2026-05-19
 
 **Status:** FIXED commit `04b91de`.

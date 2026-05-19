@@ -26,6 +26,8 @@
 
 #define _LMALLOC_CC
 #include <memory/lmalloc.hp>
+#include <cpplib/align.hp>
+#include <cstdint>
 #include <cpplib/stdstrm.hp>
 #include <streams/dbstrm.hp>
 #include <cpplib/libstrm.hp>
@@ -170,6 +172,7 @@ LMalloc::LMalloc(void* memory, size_t size MEMORY_NAMED( COMMA const char* name 
 	assert(size);
 	assert(size >= 4);
 	AssertMsg(ValidPtr(memory),"memory = " << memory);
+	AssertMsg(((uintptr_t)memory & 7) == 0, "LMalloc base pointer must be 8-byte aligned, got " << memory);
 	_memory = (char*)memory;
 	assert(ValidPtr(_memory));
 	_endMemory = _memory + size;
@@ -216,11 +219,11 @@ LMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 #endif
 #endif
 
-	if(size&3)
+	if(size & 7)
 	{
-		DBSTREAM1(cwarn << "LMalloc of " << size << " not long word aligned" << std::endl; )
+		DBSTREAM1(cwarn << "LMalloc of " << size << " not 8-byte aligned, rounding up" << std::endl; )
 	}
-	size += (4-(size&0x3))&3;
+	size = ALIGN_POW2(size, 8);
 	assert(ValidPtr(_memory+size));			// insure the size is ok for this architecture
 
 	if((_currentFree + size) >= (_endMemory))
