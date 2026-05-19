@@ -80,7 +80,7 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 		renderer = globalRendererVariables.currentRenderMaterial->Get3DRenderer();
 		int currentMaterial = globalRendererVariables.currentRenderFace->materialIndex;
 
-		while(currentMaterial == globalRendererVariables.currentRenderFace->materialIndex && faceIndex<_faceCount)
+		while(faceIndex<_faceCount && currentMaterial == globalRendererVariables.currentRenderFace->materialIndex)
 		{
 			globalRendererVariables.gteVect[0] = Vector3ToPS(_vertexList[globalRendererVariables.currentRenderFace->v1Index].position);
 			globalRendererVariables.gteVect[1] = Vector3ToPS(_vertexList[globalRendererVariables.currentRenderFace->v2Index].position);
@@ -98,7 +98,6 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 			globalRendererVariables.currentRenderFace++;
 		}
 	}
-	assert(_faceList[_faceCount].materialIndex = -1);
 //	cout << "RenderObject3D::Render: done" << std::endl;
 }
 

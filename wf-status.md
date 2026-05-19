@@ -7,7 +7,9 @@
 
 ## History
 
-37 days of work (2026-04-12 – 2026-05-18). Newest first:
+38 days of work (2026-04-12 – 2026-05-19). Newest first:
+
+- **Snowgoons "multi-cycle crash" root-caused to a 16-year-old `&&` short-circuit bug (2026-05-19)** — Yesterday's host-GL plan flagged "multi-cycle snowgoons crashes" as a follow-up; today's chase found it's not multi-cycle at all — it's a frame-2 single-cycle crash in the cmake-built harness, masked in the makefile build by static-data layout luck. ASan caught the real bug: `RenderObject3D::Render`'s inner `while(currentMaterial == ...materialIndex && faceIndex<_faceCount)` evaluates `&&`'s left operand first, reading `_faceList[_faceCount].materialIndex` (past-end) before the bounds check. The garbage read flows downstream into `static std::atomic<PlayInstance*> sDoneHead` in audio/buffer.cc; `DrainDoneSounds` then dereferences a non-canonical pointer and SIGSEGVs. Same file also had `assert(_faceList[_faceCount].materialIndex = -1)` — single `=`, a side-effect-write past the end of the static `cubeFaceList[12]` — both date to the 2010 first commit. Fix: swap `&&` operand order + delete the broken assert. Also: made `--debug-port` default-on at 7777 (was 0 = disabled, breaking the wf_blender debug-bridge whenever the cmake build wrote out a fresh `engine/wf_game`). Registered 4 new CTest entries (`wf_game_smoke_snow_cycle{1,2}` + `wf_host_gl_e2e_snow_cycle{1,2}`); 8/8 cycle tests now pass in ~23 s. See [investigation](docs/investigations/2026-05-19-snowgoons-rendobj3-overread.md), [BUGS.md](docs/BUGS.md).
 
 - **Yrs C ABI binding plan written (2026-05-18)** — Plan for v1 collaborative-editor sub-task #1 locked in: editor owns the Y.Doc behind a separate `libwfcrdt.a` (default-OFF `WF_ENABLE_CRDT` CMake option), engine stays Rust-free, engine mutation API exposed as first-class deliverable serving editor + DAP debugger + replay UI + headless test harness. See [plan](docs/plans/2026-05-18-yrs-c-abi-binding.md).
 

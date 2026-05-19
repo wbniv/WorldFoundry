@@ -636,6 +636,8 @@ if(NOT ANDROID AND NOT IOS)
     enable_testing()
     set(WF_TEST_LEVEL
         ${CMAKE_SOURCE_DIR}/wflevels/qbert_practice/qbert_practice-standalone.iff)
+    set(WF_TEST_SNOW_LEVEL
+        ${CMAKE_SOURCE_DIR}/wflevels/snowgoons-blender/snowgoons-standalone.iff)
     set(WF_TEST_RUN_DIR
         ${CMAKE_SOURCE_DIR}/wfsource/source/game)  # so cd.iff resolves
 
@@ -649,13 +651,27 @@ if(NOT ANDROID AND NOT IOS)
     # doesn't reset between cycles, so cycle 2+ logs "zforth error 7" without
     # crashing. Run by hand when investigating multi-cycle stability.
 
+    add_test(NAME wf_game_smoke_snow_cycle1
+        COMMAND $<TARGET_FILE:wf_game> --frame-step-smoke=30 --cycles=1 -L${WF_TEST_SNOW_LEVEL}
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    add_test(NAME wf_game_smoke_snow_cycle2
+        COMMAND $<TARGET_FILE:wf_game> --frame-step-smoke=30 --cycles=2 -L${WF_TEST_SNOW_LEVEL}
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+
     add_test(NAME wf_host_gl_e2e_cycle1
         COMMAND $<TARGET_FILE:wf_host_gl_e2e_test> --frames=30 --cycles=1 --level=${WF_TEST_LEVEL}
         WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
     add_test(NAME wf_host_gl_e2e_cycle2
         COMMAND $<TARGET_FILE:wf_host_gl_e2e_test> --frames=30 --cycles=2 --level=${WF_TEST_LEVEL}
         WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    add_test(NAME wf_host_gl_e2e_snow_cycle1
+        COMMAND $<TARGET_FILE:wf_host_gl_e2e_test> --frames=30 --cycles=1 --level=${WF_TEST_SNOW_LEVEL}
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    add_test(NAME wf_host_gl_e2e_snow_cycle2
+        COMMAND $<TARGET_FILE:wf_host_gl_e2e_test> --frames=30 --cycles=2 --level=${WF_TEST_SNOW_LEVEL}
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
     set_tests_properties(wf_host_gl_e2e_cycle1 wf_host_gl_e2e_cycle2
+                         wf_host_gl_e2e_snow_cycle1 wf_host_gl_e2e_snow_cycle2
         PROPERTIES LABELS "gl" ENVIRONMENT "DISPLAY=:0")
 endif()
 
