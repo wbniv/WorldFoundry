@@ -48,6 +48,7 @@
 int  gDebugPort = 0;                    // 0 = disabled; set by --debug-port N
 char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
 int  gFrameStepSmokeCount = 0;          // >0 = run --frame-step-smoke=N path
+int  gFrameStepCycles = 1;              // --cycles=N: how many Load/Unload cycles to run
 #if DO_TEST_CODE
 int  gDebugPrintActors = 0;             // 1 = print idx/mesh/mobility/pos per actor at construction (debug builds only)
 #endif
@@ -204,6 +205,12 @@ ParseCommandLine(int argc, char** argv)
 		{
 			gFrameStepSmokeCount = atoi( argv[index] + 1 + 18 );
 			DBSTREAM1( cprogress << "Frame-step API smoke: " << gFrameStepSmokeCount << " frames" << std::endl; )
+		}
+		else if ( strncmp( argv[index]+1, "-cycles=", 8 ) == 0 )
+		{
+			gFrameStepCycles = atoi( argv[index] + 1 + 8 );
+			AssertMsg(gFrameStepCycles >= 1, "--cycles=N requires N>=1");
+			DBSTREAM1( cprogress << "Frame-step API cycles: " << gFrameStepCycles << std::endl; )
 		}
 #if DO_TEST_CODE
 		else if ( strcmp( argv[index]+1, "-debug-print-actors" ) == 0 )
@@ -375,8 +382,9 @@ PIGSMain( int argc, char* * argv )
 
 	if (gFrameStepSmokeCount > 0)
 	{
-		DBSTREAM1( cprogress << "main::frame-step API smoke (" << gFrameStepSmokeCount << " frames)" << std::endl; )
-		game->SmokeRunFrameStep( gFrameStepSmokeCount );
+		DBSTREAM1( cprogress << "main::frame-step API smoke (" << gFrameStepSmokeCount
+		                     << " frames × " << gFrameStepCycles << " cycles)" << std::endl; )
+		game->SmokeRunFrameStep( gFrameStepSmokeCount, gFrameStepCycles );
 	}
 	else
 	{

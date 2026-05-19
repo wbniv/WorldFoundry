@@ -81,8 +81,10 @@ public:
 	// N StepFrame + UnloadLevel directly (bypassing RunLevel). The
 	// existing gLevelOverridePath ("-L") supplies the level file.
 	// Used by wf_game's --frame-step-smoke=N CLI flag and as the
-	// reference for editor / replay / test-harness integration.
-	void SmokeRunFrameStep(int frames);
+	// reference for editor / replay / test-harness integration. Pass
+	// cycles>1 to run multiple LoadLevel→StepFrame×N→UnloadLevel cycles
+	// (multi-cycle stability regression coverage).
+	void SmokeRunFrameStep(int frames, int cycles = 1);
 
 	Level* CurrentLevel() const { return _curLevel; }
 
