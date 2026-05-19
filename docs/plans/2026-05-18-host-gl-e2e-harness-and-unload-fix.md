@@ -2,7 +2,7 @@
 
 **Status:** Done 2026-05-18 — ~5 h end-to-end. All five phases shipped; `task test-cycle` runs 4/4 green. Phase B uncovered a deeper chain of dormant LIFO bugs than the plan anticipated (six instead of three), plus a Jolt ODR violation across TUs that gated Phase C for ~1 h. Original "~half a day" estimate from `TODO.md:87` was off by ~10×; recalibrate.
 
-**Commits:** `3094acf` (Phase A: platform.cc split), `254c1d4` (Phase B: six LIFO bugs + Array<T> allocator-misuse), `f174840` (Phase B.2: --cycles=N CLI flag), `622fd81` (Phase C: harness scaffolding), `7a9ff31` (Phase C: Jolt ODR fix — unblocks harness), `e5e3975` (Phase D: CTest + Taskfile registrations).
+**Commits:** `3094acf` (Phase A: platform.cc split), `254c1d4` (Phase B: six LIFO bugs + Array<T> allocator-misuse), `f174840` (Phase B.2: --cycles=N CLI flag), `622fd81` (Phase C: harness scaffolding), `7a9ff31` (Phase C: Jolt ODR fix — unblocks harness), `e5e3975` (Phase D: CTest + Taskfile registrations), `6a13cd6` (Phase E: doc sync — TODO.md, wf-status.md, this plan's Status).
 
 ## Context
 
@@ -25,7 +25,7 @@ This plan splits the Linux platform file into two pieces, with the helpers movin
 
 ## Approach
 
-### Phase A — Split `hal/linux/platform.cc` (Steps 1–3)
+### Phase A — Split `hal/linux/platform.cc` (Steps 1–3) — commit `3094acf`
 
 1. `git mv hal/linux/platform.cc hal/linux/platform_init.cc` (preserves blame for the bulk).
 2. Delete `main()` (lines 165–187) from `platform_init.cc`.
@@ -34,7 +34,7 @@ This plan splits the Linux platform file into two pieces, with the helpers movin
 5. Verify: `task build`, `task snowgoons`, symbol audit (`nm libwfengine.a | grep " T main$"` must be empty).
 6. Commit.
 
-### Phase B — Fix UnloadLevel LMalloc assert + `--cycles=N` CLI (Step 4)
+### Phase B — Fix UnloadLevel LMalloc assert + `--cycles=N` CLI (Step 4) — commits `254c1d4`, `f174840`
 
 1. Reproduce: `./build/wf_game --frame-step-smoke=10 -L wflevels/snowgoons-blender/snowgoons-standalone.iff`.
 2. Diagnose using existing `DBSTREAM1(cprogress << ...)` markers in `Level::~Level`. LMalloc is a stack/bump allocator — `(_currentFree - fl->_size) == mem` means freeing out of LIFO order.
@@ -47,7 +47,7 @@ This plan splits the Linux platform file into two pieces, with the helpers movin
 7. Verify: `./wf_game --frame-step-smoke=30 --cycles=2 -L <small-level>` exits 0.
 8. Commit.
 
-### Phase C — Host-GL e2e harness with multi-cycle (Steps 5 + 5b)
+### Phase C — Host-GL e2e harness with multi-cycle (Steps 5 + 5b) — commits `622fd81` (scaffolding), `7a9ff31` (Jolt ODR fix)
 
 Create `engine/wf_host_gl_test/host_gl_e2e_test.cc`:
 1. Parse `--cycles=N` (default 2).
@@ -74,7 +74,7 @@ Multi-cycle fragility checklist if cycle 2 crashes:
 
 Commit.
 
-### Phase D — Register tests + Taskfile target (Step 7)
+### Phase D — Register tests + Taskfile target (Step 7) — commit `e5e3975`
 
 CTest registrations in [`CMakeLists.txt`](../../CMakeLists.txt) (gated `NOT ANDROID AND NOT IOS`):
 ```cmake
@@ -125,7 +125,7 @@ Rationale for cycle counts (1, 2, 5):
 
 Commit.
 
-### Phase E — Documentation sync
+### Phase E — Documentation sync — commit `6a13cd6`
 
 - Update [`TODO.md`](../../TODO.md):56 → DONE with root-cause + fix commit sha.
 - Update [`TODO.md`](../../TODO.md):87 → DONE with retrospective (Phase 0a + main lift already done; real blockers were platform.cc bundling + LMalloc LIFO).
