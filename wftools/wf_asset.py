@@ -13,8 +13,11 @@ import os
 import sys
 from pathlib import Path
 
-# Locate providers.py relative to this script
-sys.path.insert(0, str(Path(__file__).parent / "wf_blender"))
+# Locate providers.py relative to this script. providers.py lives in the
+# wf_asset_browser Blender add-on (which is where the shared
+# provider-search/download logic was extracted to); the CLI imports it
+# from there so the two front-ends share one source of truth.
+sys.path.insert(0, str(Path(__file__).parent / "wf_asset_browser"))
 import providers as _p
 
 
