@@ -89,9 +89,10 @@ protected:
 
 //==============================================================================
 
-class BaseObjectIterator 
+class BaseObjectIterator
 {
 public:
+    virtual ~BaseObjectIterator() {}
     virtual BaseObject& operator*() = 0;
     virtual BaseObjectIterator& operator++() = 0;
     virtual BaseObjectIterator& operator+=(int offset);              // will do it the slow way by default

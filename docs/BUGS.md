@@ -13,6 +13,22 @@ Format per entry:
 
 ---
 
+## `BaseObjectIterator` missing virtual destructor — `delete` through base slices off 24-byte subclass members — 2026-05-19
+
+**Status:** FIXED commit `<sha>` (to be filled).
+
+**Symptom:** ASan reports `new-delete-type-mismatch` on every `LoadLevel` cycle: a 32-byte `BaseObjectIteratorFromInt16List` allocated by `BaseObjectIteratorFromInt16List::Copy()` (called from `Room::ListIter`) gets freed through the parent `BaseObjectIterator*` pointer stored in `IteratorWrapper<BaseObject, BaseObjectIterator>::_iter` (at [`cpplib/iterwrapper.hp`](../wfsource/source/cpplib/iterwrapper.hp):69 `delete _iter;`). ASan diagnostic: "size of the allocated type: 32 bytes; size of the deallocated type: 8 bytes."
+
+**Root cause:** [`baseobject/baseobject.hp`](../wfsource/source/baseobject/baseobject.hp):92 declares `BaseObjectIterator` as an abstract base with five pure-virtual methods (`operator*`, `operator++`, `Empty`, `Copy`, `_Validate`) but **no virtual destructor**. C++ rule: deleting through a base pointer requires the base to have a virtual destructor; otherwise the static-type destructor is called and the dynamic-type fields' destructors don't fire, with the deallocator using the static type's size. The subclass `BaseObjectIteratorFromInt16List` ([`baseobject.hp`](../wfsource/source/baseobject/baseobject.hp):116) DOES declare `virtual ~BaseObjectIteratorFromInt16List()` — the polymorphic-destructor pattern was understood; the base just missed marking.
+
+**Why dormant:** Predates the 2010 git import; the class is in CVS [`baseobject.hp,v`](sourceforge-cvs-snapshot.md) rev 1.1 dated **2003-05-15** with the missing-virtual-dtor pattern already present. The subclass's added members (`Int16ListIter _listIter`, `Array<BaseObject*>& _objects`) are POD-ish — the missed-destructor call doesn't *crash* on undefined behaviour, it just under-counts the destroyed bytes. On glibc's `malloc`, calling `operator delete(void*, 8)` on a 32-byte allocation reclaims the full chunk anyway (the deallocator reads the chunk header, not the size argument). So no crash, no leak, just silently-wrong-by-the-standard behaviour. ASan is the first tool strict enough to catch it. ~22 years dormant.
+
+**Fix:** Add `virtual ~BaseObjectIterator() {}` to the base class. One line, no behaviour change in practice — only the size argument in the `operator delete(void*, size)` call changes (and the destructor chain becomes well-defined).
+
+**Investigation:** Caught by ASan during the snowgoons-rendobj3 chase ([investigation](investigations/2026-05-19-snowgoons-rendobj3-overread.md)); fix landed separately.
+
+---
+
 ## `RenderObject3D::Render` `&&` short-circuit reads + side-effect-assert writes past end of `_faceList` — 2026-05-19
 
 **Status:** FIXED commit `29d3613`.
