@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install the wf_asset_browser addon (pure Python — no build step needed).
+# Install the blender_asset_finder addon (pure Python — no build step needed).
 #
 # Usage:
 #   ./install.sh [/path/to/blender/scripts/addons]
@@ -7,7 +7,7 @@
 # Python files are installed as symlinks so edits to the source tree are
 # reflected immediately without re-running this script.
 #
-# After running this, enable "Asset Browser" in:
+# After running this, enable "Asset Finder" in:
 #   Blender > Edit > Preferences > Add-ons
 
 set -euo pipefail
@@ -28,7 +28,7 @@ else
     ADDONS_DIR="$CONFIG_BASE/$BLENDER_VER/scripts/addons"
 fi
 
-DEST="$ADDONS_DIR/wf_asset_browser"
+DEST="$ADDONS_DIR/blender_asset_finder"
 mkdir -p "$DEST"
 
 # ── symlink Python files (edits to source are live immediately) ───────────────
@@ -46,5 +46,5 @@ echo ""
 echo "Next steps:"
 echo "  1. Open Blender"
 echo "  2. Edit > Preferences > Add-ons"
-echo "  3. Search 'Asset Browser' and enable it"
-echo "  4. Open the 3D Viewport sidebar (N key) > Asset Browser tab"
+echo "  3. Search 'Asset Finder' and enable it"
+echo "  4. Open the 3D Viewport sidebar (N key) > Asset Finder tab"

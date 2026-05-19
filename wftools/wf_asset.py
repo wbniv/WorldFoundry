@@ -14,10 +14,10 @@ import sys
 from pathlib import Path
 
 # Locate providers.py relative to this script. providers.py lives in the
-# wf_asset_browser Blender add-on (which is where the shared
-# provider-search/download logic was extracted to); the CLI imports it
-# from there so the two front-ends share one source of truth.
-sys.path.insert(0, str(Path(__file__).parent / "wf_asset_browser"))
+# blender_asset_finder Blender add-on (formerly wf_asset_browser; renamed
+# 2026-05-19 because the addon itself isn't WorldFoundry-specific). Both
+# the CLI and the add-on share one source of truth for provider logic.
+sys.path.insert(0, str(Path(__file__).parent / "blender_asset_finder"))
 import providers as _p
 
 
