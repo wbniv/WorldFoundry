@@ -539,7 +539,13 @@ if player:
         f"else "
         f"dup INDEXOF_SMB_QBLOCK_0_COIN_PHASE write-mailbox "
         f"dup 30 <= if 0.1 * else 60 swap - 0.1 * then "
-        f"7.5 + "
+        # Coin's mesh is world-baked at z=7.5 (block top); writing Z_POS
+        # acts as an additive translation on top of that, so we write
+        # just the arc offset (0 → 3 → 0), NOT 7.5 + offset. Compare
+        # qbert's popup_500 (mesh in *local* space + actor.location set
+        # separately) — for that pattern Z_POS would be the absolute
+        # world Z instead. Anchored statplats authored via add_box() are
+        # the world-baked variant; the script convention has to match.
         f"INDEXOF_Z_POS {COIN_ACTOR_IDX} write-actor-mailbox "
         f"then "
         f"else drop then\n"
