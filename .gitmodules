@@ -1,3 +1,6 @@
 [submodule "wftools/y-crdt"]
 	path = wftools/y-crdt
 	url = https://github.com/y-crdt/y-crdt.git
+[submodule "cmake/Corrosion"]
+	path = cmake/Corrosion
+	url = https://github.com/corrosion-rs/corrosion.git
