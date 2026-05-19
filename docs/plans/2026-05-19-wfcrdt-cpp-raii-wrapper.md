@@ -1,7 +1,7 @@
 # Plan — wfcrdt C++ RAII wrapper
 
 **Date:** 2026-05-19
-**Status:** Not started
+**Status:** Done 2026-05-19 (~1 h vs ~2–3 d estimate). Five implementation steps committed (`dbfbe99..e6e4a03`); `wfcrdt_wrapper_test` is green at 9/9, the C smoke stays green at 5/5, and both binaries are clean under `-DWF_ASAN=ON -DCMAKE_BUILD_TYPE=Debug`. One yffi-behaviour discovery: observers don't fire on the txn that registered them — found via a failing first run of `test_observer_fires`, restructured to mirror the C smoke's "register, commit, mutate-in-fresh-txn" pattern.
 **Scope:** Thin C++ wrapper around the Yrs C ABI ([libyrs.h](../../wftools/y-crdt/tests-ffi/include/libyrs.h)) so the editor's CRDT bridge can use `wfcrdt::Doc` / `Map` / `Array` / `Transaction` / `Output` / `Subscription` instead of raw `YDoc*` / `YTransaction*` / `Branch*` / `YOutput*` handles.
 **Estimate:** ~2–3 d per the [parent plan](2026-05-18-yrs-c-abi-binding.md). Likely ~2 h at the [recent vendor-and-glue pace](../../../.claude/projects/-home-will-WorldFoundry/memory/feedback_plan_duration_tracking.md).
 

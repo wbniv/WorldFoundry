@@ -768,6 +768,8 @@ Tiered by what they block. Tier 1 blocks the start of implementation; tier 2 is 
 
   **Yrs C ABI binding landed 2026-05-19** (plan [docs/plans/2026-05-18-yrs-c-abi-binding.md](../plans/2026-05-18-yrs-c-abi-binding.md)) — `WF_ENABLE_CRDT=ON` builds `libwfcrdt.a` (wrapping `libyrs.a` from y-crdt's yffi crate via Corrosion + Cargo). Default OFF, so shipped game binaries (iOS / Android / Codemagic CI) stay byte-identical and Rust-free. `wfcrdt_smoke` exercises Doc/Map/Array round-trip + Yjs wire-format state-diff compat + observer registration.
 
+  **C++ RAII wrapper landed 2026-05-19** (plan [docs/plans/2026-05-19-wfcrdt-cpp-raii-wrapper.md](../plans/2026-05-19-wfcrdt-cpp-raii-wrapper.md)) — `engine/crdt/wfcrdt.hpp` gives the editor's CRDT bridge `wfcrdt::Doc / Transaction / Map / Array / Output / Subscription` instead of raw `YDoc*` / `YTransaction*` / `Branch*` handles. Move-only types, auto-commit on scope exit, `std::optional` for type-mismatch reads, heap `std::function` trampoline for observers. ASan-clean.
+
   **Latency budget:** the file-watch round-trip is `serialize .lev (~10 ms) + levcomp-rs (~50–200 ms) + iffcomp-rs (~50–200 ms) + engine reload (100s of ms)` — roughly **0.5–2 s per edit**, depending on level size. That's acceptable for "I moved an actor; where did it land?" but painful for slider scrubs, drag-to-position, colour pickers, and anything else that wants sub-100 ms feedback.
 
   **Mitigations that narrow the file-watch gap** (but don't close it):
