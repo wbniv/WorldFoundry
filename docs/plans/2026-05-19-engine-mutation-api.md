@@ -1,8 +1,8 @@
 # Plan — Engine mutation API (`wfmut::`)
 
 **Date:** 2026-05-19
-**Status:** In progress — step 1/7 done (skeleton + CMake wiring + plan-doc copy).
-**Estimate:** ~1–2 weeks per the [collaborative editor design doc](../investigations/2026-05-18-collaborative-level-editor-design.md) (line 780). Realistically ~1–2 days at the recent vendor-and-glue pace — most of the work is mechanical extraction from `debug_server.cc`.
+**Status:** **Done 2026-05-19 (~3 h vs ~1–2 wk estimate).** Six implementation commits + one consolidation commit on top of the wfcrdt wrapper, plus the user-feedback-driven WF_DEBUG_BRIDGE-independence refactor. `wfmut::` surface covers Set/GetActorPos + Set/GetActorOrientation + Set/GetActorField (int64/double/string) + Set/GetActorFieldString stub + ReloadActorScript + SpawnActor + RemoveActor + Set/GetMailbox + thread-local lastError. Bridge SET_TRANSFORM / SET_PROP / SET_MAILBOX cases now route through wfmut; the duplicate `kPropMap` in debug_server.cc is gone. `wf-edit` (editor build) smoke = 24/24 green (6 transform + 12 field + 3 spawn/remove + 3 mailbox); `wf_game` (lean) and `wf-edit` (editor stack) coexist as separate binaries. Happy-path spawn tests (SR1/SR2/SR7/SR8/SR10) deferred to manual / bridge-integration verification — first runtime-spawnable template in smb_w1_1 aborts on generic spawn-at-player-pos, needs a known-safe fixture.
+**Estimate:** ~1–2 weeks per the [collaborative editor design doc](../investigations/2026-05-18-collaborative-level-editor-design.md) (line 780). Actual ~3 h.
 
 ---
 
