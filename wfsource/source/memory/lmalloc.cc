@@ -172,7 +172,7 @@ LMalloc::LMalloc(void* memory, size_t size MEMORY_NAMED( COMMA const char* name 
 	assert(size);
 	assert(size >= 4);
 	AssertMsg(ValidPtr(memory),"memory = " << memory);
-	AssertMsg(((uintptr_t)memory & 7) == 0, "LMalloc base pointer must be 8-byte aligned, got " << memory);
+	AssertMsg(((uintptr_t)memory & WF_POINTER_ALIGN_MASK) == 0, "LMalloc base pointer must be " << WF_POINTER_ALIGN << "-byte aligned, got " << memory);
 	_memory = (char*)memory;
 	assert(ValidPtr(_memory));
 	_endMemory = _memory + size;
@@ -219,11 +219,11 @@ LMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 #endif
 #endif
 
-	if(size & 7)
+	if(size & WF_POINTER_ALIGN_MASK)
 	{
-		DBSTREAM1(cwarn << "LMalloc of " << size << " not 8-byte aligned, rounding up" << std::endl; )
+		DBSTREAM1(cwarn << "LMalloc of " << size << " not " << WF_POINTER_ALIGN << "-byte aligned, rounding up" << std::endl; )
 	}
-	size = ALIGN_POW2(size, 8);
+	size = ALIGN_POW2(size, WF_POINTER_ALIGN);
 	assert(ValidPtr(_memory+size));			// insure the size is ok for this architecture
 
 	if((_currentFree + size) >= (_endMemory))

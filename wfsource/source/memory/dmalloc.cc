@@ -102,7 +102,7 @@ DMalloc::DMalloc(Memory& memory, size_t size MEMORY_NAMED ( COMMA const char* na
 	_memory = (char*)memory.Allocate(size ASSERTIONS( COMMA __FILE__ COMMA __LINE__ ));
 	assert(ValidPtr(_memory));
 	AssertMemoryAllocation(_memory);
-	AssertMsg(((uintptr_t)_memory & 7) == 0, "DMalloc base pointer must be 8-byte aligned, got " << (void*)_memory);
+	AssertMsg(((uintptr_t)_memory & WF_POINTER_ALIGN_MASK) == 0, "DMalloc base pointer must be " << WF_POINTER_ALIGN << "-byte aligned, got " << (void*)_memory);
 	//DBSTREAM1( printf("DMalloc::DMalloc: allocated %d bytes from memory at address %p\n",size,_memory); )
 	//printf("New DMalloc ");
 	//MEMORY_NAMED(printf("named %s ",name);)
@@ -172,9 +172,9 @@ DMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 
 	DBSTREAM1( cmem << "NEW," << size << ','; )
 
-	if ( size & 7 )
-		DBSTREAM1(cwarn << "DMalloc of " << size << " not 8-byte aligned, rounding up" << std::endl; )
-	size = ALIGN_POW2(size, 8);
+	if ( size & WF_POINTER_ALIGN_MASK )
+		DBSTREAM1(cwarn << "DMalloc of " << size << " not " << WF_POINTER_ALIGN << "-byte aligned, rounding up" << std::endl; )
+	size = ALIGN_POW2(size, WF_POINTER_ALIGN);
 //	assert(ValidPtr(_memory+size));			// insure the size is ok for this architecture
 
 	DBSTREAM5( cprogress << "DMalloc::Allocate called with size of " << size << std::endl; )
