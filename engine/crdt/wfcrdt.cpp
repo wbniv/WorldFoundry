@@ -88,7 +88,37 @@ Array Transaction::array(const char* name) {
     return Array(yarray(_txn, name), _txn);
 }
 
-// Transaction::stateVector / stateDiff / apply land in later steps.
+// Helper: copy a yffi-allocated byte buffer into an owned std::vector,
+// then release the yffi heap allocation. The vector handles its own dtor.
+static std::vector<std::uint8_t> takeYffiBytes(unsigned char* buf, int len) {
+    if (!buf || len <= 0) {
+        if (buf) ybinary_destroy(buf, len);
+        return {};
+    }
+    std::vector<std::uint8_t> out(buf, buf + len);
+    ybinary_destroy(buf, len);
+    return out;
+}
+
+std::vector<std::uint8_t> Transaction::stateVector() const {
+    int len = 0;
+    unsigned char* buf = ytransaction_state_vector_v1(_txn, &len);
+    return takeYffiBytes(buf, len);
+}
+
+std::vector<std::uint8_t> Transaction::stateDiff(ByteView remoteSv) const {
+    int len = 0;
+    unsigned char* buf = ytransaction_state_diff_v1(
+        _txn,
+        remoteSv.data,
+        static_cast<int>(remoteSv.len),
+        &len);
+    return takeYffiBytes(buf, len);
+}
+
+void Transaction::apply(ByteView diff) {
+    ytransaction_apply(_txn, diff.data, static_cast<int>(diff.len));
+}
 
 // ─── Output ───────────────────────────────────────────────────────────────────
 

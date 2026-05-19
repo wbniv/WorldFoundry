@@ -80,6 +80,43 @@ static int test_array_single_insert() {
     return 0;
 }
 
+static int test_two_doc_state_diff() {
+    // Doc A inserts 3 items, encodes a full diff (empty remote SV),
+    // Doc B applies the diff, both end up with identical state vectors.
+    wfcrdt::Doc a, b;
+
+    {
+        auto atx = a.begin();
+        auto aarr = atx.array("content");
+        long long items[3] = {1, 2, 3};
+        aarr.insertRange(0, items, 3);
+    }  // commit
+
+    std::vector<std::uint8_t> diff;
+    {
+        auto atx = a.begin();
+        diff = atx.stateDiff(wfcrdt::ByteView{nullptr, 0});
+        CHECK(!diff.empty(), "stateDiff returned empty");
+    }
+
+    {
+        auto btx = b.begin();
+        btx.apply(wfcrdt::ByteView{diff.data(), diff.size()});
+        auto barr = btx.array("content");
+        CHECK(barr.len() == 3, "B's array != 3 after apply");
+    }
+
+    {
+        auto atx = a.begin();
+        auto btx = b.begin();
+        auto asv = atx.stateVector();
+        auto bsv = btx.stateVector();
+        CHECK(asv.size() == bsv.size(), "state vector sizes differ");
+        CHECK(asv == bsv, "state vectors differ byte-wise after sync");
+    }
+    return 0;
+}
+
 static int test_map_type_mismatch_returns_nullopt() {
     wfcrdt::Doc doc;
     auto txn = doc.begin();
@@ -102,8 +139,9 @@ int main() {
     rc |= test_map_type_mismatch_returns_nullopt();
     rc |= test_array_insert_len();
     rc |= test_array_single_insert();
+    rc |= test_two_doc_state_diff();
     if (rc == 0) {
-        std::printf("wfcrdt_wrapper_test: OK (6/6 tests passed — step 3)\n");
+        std::printf("wfcrdt_wrapper_test: OK (7/7 tests passed — step 4)\n");
     }
     return rc;
 }
