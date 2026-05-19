@@ -1,6 +1,8 @@
 # Host-GL end-to-end harness + UnloadLevel crash fix + cycle stability tests
 
-**Status:** In progress 2026-05-18 — Phase A (platform.cc split) in flight.
+**Status:** Done 2026-05-18 — ~5 h end-to-end. All five phases shipped; `task test-cycle` runs 4/4 green. Phase B uncovered a deeper chain of dormant LIFO bugs than the plan anticipated (six instead of three), plus a Jolt ODR violation across TUs that gated Phase C for ~1 h. Original "~half a day" estimate from `TODO.md:87` was off by ~10×; recalibrate.
+
+**Commits:** `3094acf` (Phase A: platform.cc split), `254c1d4` (Phase B: six LIFO bugs + Array<T> allocator-misuse), `f174840` (Phase B.2: --cycles=N CLI flag), `622fd81` (Phase C: harness scaffolding), `7a9ff31` (Phase C: Jolt ODR fix — unblocks harness), `e5e3975` (Phase D: CTest + Taskfile registrations).
 
 ## Context
 
