@@ -1,6 +1,6 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-05-18  
+**As of:** 2026-05-19  
 **Branch:** `2026-new-level`
 
 ---
@@ -8,6 +8,8 @@
 ## History
 
 38 days of work (2026-04-12 – 2026-05-19). Newest first:
+
+- **`BaseObjectIterator` virtual-destructor fix + ASan sweep clean (2026-05-19)** — Added the missing `virtual ~BaseObjectIterator() {}` to fix a ~22-year-dormant new-delete-type-mismatch ASan caught during yesterday's rendobj3 chase: 32-byte `BaseObjectIteratorFromInt16List` being freed through an 8-byte parent pointer (commit `04b91de`). Followed by a full ASan + UBSan sweep against snowgoons and qbert with `halt_on_error=0` — zero ASan errors, zero non-alignment UBSan errors on both levels; the only remaining sanitizer noise is HAL pool allocator misalignment (already [TODO'd](TODO.md):97). Today's two ASan-driven fixes plus this sweep prove the engine's full Load → StepFrame → Unload chain is sanitizer-clean on a real level under realistic multi-cycle load. See [BUGS.md](docs/BUGS.md).
 
 - **Snowgoons "multi-cycle crash" root-caused to a 16-year-old `&&` short-circuit bug (2026-05-19)** — Yesterday's host-GL plan flagged "multi-cycle snowgoons crashes" as a follow-up; today's chase found it's not multi-cycle at all — it's a frame-2 single-cycle crash in the cmake-built harness, masked in the makefile build by static-data layout luck. ASan caught the real bug: `RenderObject3D::Render`'s inner `while(currentMaterial == ...materialIndex && faceIndex<_faceCount)` evaluates `&&`'s left operand first, reading `_faceList[_faceCount].materialIndex` (past-end) before the bounds check. The garbage read flows downstream into `static std::atomic<PlayInstance*> sDoneHead` in audio/buffer.cc; `DrainDoneSounds` then dereferences a non-canonical pointer and SIGSEGVs. Same file also had `assert(_faceList[_faceCount].materialIndex = -1)` — single `=`, a side-effect-write past the end of the static `cubeFaceList[12]` — both date to the 2010 first commit. Fix: swap `&&` operand order + delete the broken assert. Also: made `--debug-port` default-on at 7777 (was 0 = disabled, breaking the wf_blender debug-bridge whenever the cmake build wrote out a fresh `engine/wf_game`). Registered 4 new CTest entries (`wf_game_smoke_snow_cycle{1,2}` + `wf_host_gl_e2e_snow_cycle{1,2}`); 8/8 cycle tests now pass in ~23 s. See [investigation](docs/investigations/2026-05-19-snowgoons-rendobj3-overread.md), [BUGS.md](docs/BUGS.md).
 
