@@ -110,13 +110,11 @@ cd cmake-build-linux && ctest --output-on-failure -R cycle
 # 8/8 in ~23 s.
 ```
 
-## Open follow-ups
+## Follow-ups from this chase
 
-These ASan/UBSan findings are in scope for a separate sweep, NOT this fix:
-
-- `IteratorWrapper<BaseObject, BaseObjectIterator>` deletes through base pointer without a virtual destructor — `Room::ListIter` → `ActiveRooms::InitActiveRoom`. ASan "new-delete-type-mismatch" — size 8 (parent) vs 32 (concrete `BaseObjectIteratorFromInt16List`).
-- Dozens of misaligned-access UBSan warnings throughout the HAL pool allocators (`lmalloc.cc`, `dmalloc.cc`, `mempool.cc`, plus `WFGame`, `Actor`, `Room` ctors on those pools). Engine custom allocators don't round to 8-byte alignment for the C++ types they hand out. Probably benign on x86 but a Real Bug for SSE / `std::atomic` consumers.
-- `IteratorWrapper` issue and the alignment issues likely contributed to historical "weird crashes on Linux Release" but never with a clear repro before. ASan run was 7 m wall-clock to build + 12 s to run — cheap enough to wire as a periodic full-game soak target if needed.
+- ~~`IteratorWrapper<BaseObject, BaseObjectIterator>` deletes through base pointer without a virtual destructor~~ — **FIXED commit `04b91de`** (same day). ASan "new-delete-type-mismatch" — size 8 (parent) vs 32 (concrete `BaseObjectIteratorFromInt16List`). See [BUGS.md](../BUGS.md) entry "BaseObjectIterator missing virtual destructor".
+- Misaligned-access UBSan warnings in HAL pool allocators (`lmalloc.cc:223`, `dmalloc.cc:174`, `mempool.cc`) — **still open, parked**. The allocators DO round size up, just to 4-byte boundaries via `size += (4-(size&0x3))&3;` — sufficient for the PS1 32-bit target where the convention dates from, one bit short for x86_64 where pointers, `int64_t`, `std::atomic<T*>`, and `double` want 8-byte alignment. Fix is mechanical: change `0x3` → `0x7` and `4-` → `8-` in those two lines, plus ensure the base `_memory` pointer is 8-byte aligned at construction. UBSan flags ~3.5k accesses per snowgoons cycle, ~2.8k per qbert cycle. Benign on x86 (1-cycle penalty); real bug on strict-alignment ARM/iOS targets. Tracked in [TODO.md](../../TODO.md):97. Cross-cuts BUILD/TOOLCHAIN.
+- Post-fix sanity: ASan + UBSan sweep against snowgoons and qbert with `halt_on_error=0` (2026-05-19) returned zero ASan errors and zero non-alignment UBSan errors. The two ASan-driven fixes from today (this one + `04b91de`) made the engine sanitizer-clean for everything except the alignment warning class.
 
 ## Related
 
