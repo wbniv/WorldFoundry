@@ -45,7 +45,7 @@
 
 //==============================================================================
 
-int  gDebugPort = 0;                    // 0 = disabled; set by --debug-port N
+int  gDebugPort = 7777;                 // default-on; --debug-port N overrides, --debug-port 0 disables
 char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
 int  gFrameStepSmokeCount = 0;          // >0 = run --frame-step-smoke=N path
 int  gFrameStepCycles = 1;              // --cycles=N: how many Load/Unload cycles to run
