@@ -1,0 +1,3 @@
+[submodule "wftools/y-crdt"]
+	path = wftools/y-crdt
+	url = https://github.com/y-crdt/y-crdt.git
