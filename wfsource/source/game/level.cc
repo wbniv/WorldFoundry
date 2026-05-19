@@ -1391,7 +1391,7 @@ Level::LoadLevelData()
 //		binistream mapStream((void*)mapMem,DiskFileCD::_SECTOR_SIZE);
 
 //		IFFChunkIter mapChunkIter(mapStream);
-		mapStreamSize = *((long*) (mapMem+4));
+		mapStreamSize = *((int32*) (mapMem+4));   // IFF chunk-size is 32-bit; was `long*` which is 8 bytes on 64-bit Linux
 		mapStreamSize += DiskFileCD::_SECTOR_SIZE - (mapStreamSize % DiskFileCD::_SECTOR_SIZE);
 		AssertMsg( mapStreamSize <= MAX_ASMP_SIZE, "ASMP chunk exceeds MAX_ASMP_SIZE; bump cap at level.cc:1296 or shrink chunk" );
 		if(mapStreamSize > DiskFileCD::_SECTOR_SIZE)

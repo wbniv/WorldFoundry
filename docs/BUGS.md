@@ -13,6 +13,26 @@ Format per entry:
 
 ---
 
+## IFF chunk-size read via `long*` — misaligned 8-byte load + truncation-by-luck — 2026-05-19
+
+**Status:** FIXED commit `<sha>` (to be filled).
+
+**Symptom:** UBSan reports `load of misaligned address 0x... for type 'long int', which requires 8 byte alignment` inside `Level::LoadLevelData` at [`game/level.cc`](../wfsource/source/game/level.cc):1394 every time a level is loaded. Hex bytes at the cited address: `41 53 4d 50 7c 00 00 00 ...` — an IFF chunk header (`"ASMP"` + size 0x7c = 124).
+
+**Root cause:** The line was:
+```cpp
+mapStreamSize = *((long*) (mapMem+4));
+```
+`mapMem` is HAL-allocated and therefore 8-byte aligned (post-`f10cec5`); `mapMem + 4` is 4-aligned. Reading a `long` (8 bytes on 64-bit Linux x86_64 and AArch64) from a 4-aligned address is UB. The actual IFF chunk-size field is 32-bit (4 bytes on disk; see [`iff/iffread.hp`](../wfsource/source/iff/iffread.hp):128 `int32 _chunkSize`) — the `long*` cast was correct on PS1 and Win32 (where `long` was 4 bytes) but became wrong silently when the engine grew a 64-bit Linux port.
+
+**Why dormant:** The destination variable `mapStreamSize` is declared `int` (4 bytes). On little-endian x86_64, reading 8 bytes and assigning to a 4-byte destination truncates to the low 4 bytes — which is exactly the chunk-size field bytes. So the wrong-type read happened to produce the right value every single time. Misalignment was technically UB but never observed as a crash. AArch64 is more pedantic; on iOS the misaligned `LDR` of an `int64` could in principle fault.
+
+**Fix:** Change `long*` to `int32*` (the canonical IFF chunk-size type used everywhere else in [`wfsource/source/iff/`](../wfsource/source/iff/)). One char of edit, plus a short comment explaining the trap for future readers.
+
+**Investigation:** Surfaced as the single remaining UBSan warning after the HAL-pool alignment fix (this BUGS.md entry above). Bytes-on-disk verification: the `7c 00 00 00 01 f0 ff 03` 8-byte read on little-endian reduces to `0x0000007c = 124` when truncated to int, matching the on-disk 32-bit size correctly.
+
+---
+
 ## HAL pool allocators rounded size to 4 bytes — UB on x86_64 / SIGBUS-prone on AArch64 — 2026-05-19
 
 **Status:** FIXED commit `f10cec5`.
