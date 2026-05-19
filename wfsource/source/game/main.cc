@@ -384,13 +384,15 @@ PIGSMain( int argc, char* * argv )
 		game->RunGameScript( );
 	}
 
-	// Destroy the X window before running destructors so it disappears
-	// immediately rather than lingering until the OS reclaims the connection.
-	HALCloseWindow();
-
 	DBSTREAM1( cprogress << "Game over: shutting down the game" << std::endl; )
 
+	// WFGame destruction needs the GL context + X window alive — Display's
+	// destructor calls into mesa's window-close path (XSetInputFocus, etc.)
+	// which segfaults if HALCloseWindow ran first. Tear down WFGame, then
+	// close the window.
 	MEMORY_DELETE(HALLmalloc,game,WFGame);
+
+	HALCloseWindow();
 
 #if defined(JOYSTICK_RECORDER)
 	if (bJoyPlayback)

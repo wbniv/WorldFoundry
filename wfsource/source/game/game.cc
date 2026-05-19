@@ -131,11 +131,19 @@ WFGame::~WFGame()
 //	DELETE_CLASS( testProfile );
 //#endif
 
-	MemPoolDestruct( _msgPortMemPool );
-
+	// HALLmalloc allocs in WFGame, time order:
+	//   1. _msgPortMemPool obj + buffer (member init line 66, via MemPoolConstruct)
+	//   2. _display (body line 84)
+	//   3. _videoMemory (line 87)
+	//   4. _viewPort (line 91)
+	//   5. _gameFile (line 99, freed above)
+	// LIFO-reverse Free: _gameFile, _viewPort, _videoMemory, _display, then
+	// MemPoolDestruct (which Frees _buffer then memPool obj — both LIFO-
+	// correct since _buffer was alloc'd just after the obj).
 	MEMORY_DELETE(HALLmalloc,_viewPort,ViewPort);
 	MEMORY_DELETE(HALLmalloc,_videoMemory,VideoMemory);
 	MEMORY_DELETE(HALLmalloc,_display,Display);
+	MemPoolDestruct( _msgPortMemPool );
 	JoltRuntimeShutdown();
 	DBSTREAM1( cprogress << "game destructor finished" << std::endl; )
 }

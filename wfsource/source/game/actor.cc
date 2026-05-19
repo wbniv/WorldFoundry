@@ -1780,7 +1780,11 @@ Actor::GetMailboxes() const
 
 
 ActorMailboxes::ActorMailboxes(Actor& actor,long mailboxesBase, long numberOfLocalMailboxes, Mailboxes* parent) :
-MailboxesWithStorage(mailboxesBase, numberOfLocalMailboxes, parent),
+// Route _localMailboxes through the per-level _memory pool (DMalloc), not
+// the default HALLmalloc. Actors are constructed mid-Level-loading and
+// destroyed mid-Level-teardown — their HALLmalloc-backed sub-allocations
+// would otherwise be freed out of LIFO order. See mailbox.hp.
+MailboxesWithStorage(mailboxesBase, numberOfLocalMailboxes, parent, &actor.GetMemory()),
 _actor(actor)
 {
 

@@ -51,9 +51,15 @@ Mailboxes::_Print( std::ostream& s ) const
 
 //==============================================================================
 
-MailboxesWithStorage::MailboxesWithStorage(long mailboxBase, long numberOfLocalMailboxes, Mailboxes* parent) :
+MailboxesWithStorage::MailboxesWithStorage(long mailboxBase, long numberOfLocalMailboxes, Mailboxes* parent, Memory* memory) :
     _mailboxBase(mailboxBase),
-    _localMailboxes(numberOfLocalMailboxes),
+    // Default `memory` is HALLmalloc, which is fine for the long-lived
+    // global/persistent/scratch instances created in deterministic order at
+    // engine startup or Level construction. Per-actor ActorMailboxes (small,
+    // many, destroyed mid-Level-teardown) MUST pass the per-level pool —
+    // see actor.cc ActorMailboxes ctor — otherwise HALLmalloc's LIFO
+    // discipline is violated when actors free out of stack order.
+    _localMailboxes(numberOfLocalMailboxes, memory),
     _parent(parent)
 {
     RangeCheck(0,_mailboxBase,10000);   // kts arbitrary

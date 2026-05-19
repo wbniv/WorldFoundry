@@ -46,8 +46,18 @@ DiskTOC::~DiskTOC()
 #if defined(DO_CD_IFF)
 	assert(ValidPtr(_toc));
 #endif
+	Clear();
+}
+
+//=============================================================================
+
+void
+DiskTOC::Clear()
+{
 	if (_toc) {
 		HALLmalloc.Free(_toc);
+		_toc = NULL;
+		_tocEntries = 0;
 	}
 }
 

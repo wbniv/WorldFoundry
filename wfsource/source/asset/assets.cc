@@ -52,11 +52,23 @@ AssetManager::AssetManager( size_t cbPermMemory, size_t cbRoomMemory, VideoMemor
 
 AssetManager::~AssetManager()
 {
+	// Free the asset slots first (per-level pool — order-independent).
 	for(int index=0;index < MAX_ACTIVE_SLOTS;index++)
 	{
 		if(_assets[index])
 			MEMORY_DELETE(_memory,_assets[index],AssetSlot);
 	}
+	// _levelTOC._toc (HAL) and _assetMemory (HAL) are both members of this
+	// class; LIFO requires the most-recent first. _levelTOC._toc is loaded
+	// during LoadLevelData (well after the ctor allocated _assetMemory), so
+	// _toc sits ABOVE _assetMemory on the HAL stack — Free _toc first via
+	// the explicit Clear() (so the implicit ~DiskTOC after this body is a
+	// no-op), then Free _assetMemory. Both were historically leaked because
+	// UnloadLevel never ran cleanly to completion; the missing Frees would
+	// leave large blocks on top of HALLmalloc that the rest of ~Level can't
+	// get past.
+	_levelTOC.Clear();
+	HALLmalloc.Free(_assetMemory);
 }
 
 //==============================================================================

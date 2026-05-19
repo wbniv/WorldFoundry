@@ -300,6 +300,26 @@ LMalloc::Free(const void* mem)
 	if(nextfl)
 	{
 		cerror << "LMalloc allocation mismatch:" << std::endl;
+		// Enumerate every still-allocated block sitting on top of the block
+		// we're trying to free, so the LIFO-violating allocations can be
+		// identified by size (with -lms to see file:line for those sizes).
+		// Added 2026-05-18 while hunting the UnloadLevel LIFO chain; kept
+		// because the diagnosis trail in docs/investigations/2026-05-18-
+		// unloadlevel-lifo-bug.md depends on it for follow-up bugs in
+		// WFGame::~WFGame and engine shutdown.
+		cerror << "  trying to free block: addr=" << (void*)mem
+		       << " size=" << fl->_size << std::endl;
+		cerror << "  blocks still allocated on top (in stack-top → bottom order):" << std::endl;
+		FileLine* walk = nextfl;
+		int idx = 0;
+		while (walk && walk->_state == FileLine::ALLOCATED && (char*)walk < _currentFree) {
+			cerror << "    [" << idx << "] addr=" << (void*)walk
+			       << " size=" << walk->_size << std::endl;
+			walk = (FileLine*)(((char*)walk) + walk->_size);
+			if (++idx > 20) { cerror << "    ... (truncated)" << std::endl; break; }
+		}
+		cerror << "  _currentFree=" << (void*)_currentFree
+		       << "  expected mem=" << (void*)(_currentFree - fl->_size) << std::endl;
 #if LMALLOC_TRACK_LINE_AND_FILE
 		cerror << "should have freed: file = " << fl->_file << ", line = " << fl->_line << std::endl;
 		cerror << "but tried to free: file = " << nextfl->_file << ", line = " << nextfl->_line << std::endl;

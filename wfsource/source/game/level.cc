@@ -635,6 +635,31 @@ Level::Level
 
 Level::~Level()
 {
+	// HALLmalloc is a stack/bump allocator — Free must happen in strict
+	// reverse-allocation order or lmalloc.cc:308 asserts. The construction
+	// order in Level::Level (and its callees) is, on HALLmalloc:
+	//
+	//   1. _hardwareInput1, _hardwareInput2                  (level.cc:451–459)
+	//   2. _theLevelRooms (outer LevelRooms object)          (level.cc:465)
+	//   3. _theAssetManager                                  (level.cc:474)
+	//   4. _levelOnDiskMemory                                (LoadLevelData,
+	//                                                         level.cc:1334,
+	//                                                         called from :476)
+	//   5. _commonBlock                                      (level.cc:484)
+	//   6. _templateObjects array                            (level.cc:510)
+	//   7. per-template-object SObjectStartupData + objectData
+	//      (loop, level.cc:533, 540; for each templated actor)
+	//   8. _roomSlotMap, _rooms                              (InitRooms,
+	//                                                         rooms.cc:69, 77,
+	//                                                         called from :570)
+	//   9. _theActiveRooms                                   (level.cc:571)
+	//
+	// So Free order must be 9 → 1 (with the per-actor loop iterating in
+	// reverse). Also note: ~LevelRooms() frees both rooms.cc:69 and :77
+	// (#8 above), so we must call ~LevelRooms's body BEFORE freeing #6 and
+	// #7, but defer the outer Free of _theLevelRooms itself (the #2 alloc)
+	// until just before #1 — that means splitting MEMORY_DELETE into the
+	// destructor call and the matching Free.
 #if defined( DESIGNER_CHEATS ) && defined( WRITER )
 	saveTextureBuffer( "textures.tga" );
 #endif
@@ -642,14 +667,24 @@ Level::~Level()
 #if defined(JOYSTICK_RECORDER)
 	MEMORY_DELETE(HALLmalloc, _joystickOutputFile, std::ofstream );
 #endif
+
+	// #9 — _theActiveRooms (last HAL allocation, first Free).
 	ValidatePtr(_theActiveRooms);
 	MEMORY_DELETE(HALLmalloc,_theActiveRooms,ActiveRooms);
 
+	// #8 — ~LevelRooms()'s body frees _rooms then _roomSlotMap. Call it
+	// manually so the outer LevelRooms object (#2) can stay live until
+	// after #6, #7 and #5 are freed.
 	ValidatePtr(_theLevelRooms);
-	MEMORY_DELETE(HALLmalloc,_theLevelRooms,LevelRooms);
+	_theLevelRooms->~LevelRooms();
 
+	// #7 — per-template-object data, iterated in REVERSE alloc order. The
+	// alloc loop ran index = 1 … _levelData->objectCount-1 and allocated
+	// SObjectStartupData (#7a) before objectData (#7b) within each index,
+	// so within an index Free objectData first (most recent) then
+	// SObjectStartupData.
 	DBSTREAM1( cprogress << "~Level:: deleting template objects" << std::endl; )
-	for ( int idxActor = 0; idxActor < _numTemplateObjects; ++idxActor )
+	for ( int idxActor = _numTemplateObjects - 1; idxActor >= 0; --idxActor )
 	{
 		if ( _templateObjects[idxActor] != 0 )
 		{
@@ -657,9 +692,16 @@ Level::~Level()
 			HALLmalloc.Free(_templateObjects[idxActor]);
 		}
 	}
+
+	// #6 — _templateObjects array itself.
 	assert( ValidPtr( _templateObjects ) );
 	HALLmalloc.Free(_templateObjects, sizeof(SObjectStartupData*) * _levelData->objectCount);
 
+	// Actors are allocated from the per-level _memory pool (DMalloc child),
+	// not HALLmalloc, so their teardown is HAL-neutral. Doing it here
+	// (after #6, before #5) preserves the historical order — actor dtors
+	// expect the active/level rooms internals to have been torn down first
+	// and the per-template HAL data to be gone. It does NOT touch HALLmalloc.
 	DBSTREAM1( cprogress << "~Level:: deleting actors" << std::endl; )
 	for ( int actorIndex = 0; actorIndex < _actors.Size(); actorIndex++ )
 	{
@@ -670,6 +712,16 @@ Level::~Level()
 		}
 	}
 
+	// #5 — _actors._items was allocated from HALLmalloc at level.cc:505,
+	// BETWEEN _commonBlock (alloc'd before) and _templateObjects array
+	// (alloc'd after). Free it here so HALLmalloc stays LIFO-disciplined.
+	// The dangling _actors[i] pointers were just MEMORY_DELETEd above, but
+	// Clear() only calls Free on the _items array storage (BaseObject* has
+	// no destructor), so the dangling pointers are not dereferenced.
+	// The implicit ~Array() at end of ~Level becomes a no-op (Clear() nulls
+	// _items).
+	_actors.Clear();
+
 	DBSTREAM1( cprogress << "~Level:: deleting mailboxes" << std::endl; )
 	//assert( ValidPtr( _scratchMailboxes ) );
 
@@ -678,14 +730,41 @@ Level::~Level()
    // HALLmalloc.Free(((char*)(_scratchMailboxes)+sizeof(Scalar)*(_numScratchMailboxes+EMAILBOX_SCRATCH_SYSTEM_MAX-EMAILBOX_SCRATCH_SYSTEM_START)));
 	//HALLmalloc.Free(_scratchMailboxes,sizeof(Scalar)*(_numScratchMailboxes+EMAILBOX_SCRATCH_SYSTEM_MAX-EMAILBOX_SCRATCH_SYSTEM_START));
 
+	// #5 — _commonBlock.
+	MEMORY_DELETE(HALLmalloc,_commonBlock,CommonBlock);
+
+	// #4 — _levelOnDiskMemory (allocated inside LoadLevelData, BEFORE
+	// _commonBlock — see line 1334 invoked from line 476).
 	DBSTREAM1( cprogress << "~Level:: deleting leveldata" << std::endl; )
 	HALLmalloc.Free(_levelOnDiskMemory);
 
-	MEMORY_DELETE(HALLmalloc,_commonBlock,CommonBlock);
+	// #3 — _theAssetManager.
 	MEMORY_DELETE(HALLmalloc,_theAssetManager,AssetManager);
 
+	// #2 — _theLevelRooms outer object. Dtor body already ran above; just
+	// Free the storage now that everything allocated after it has been
+	// freed.
+	HALLmalloc.Free(_theLevelRooms);
+
+	// #1 — _hardwareInput2 then _hardwareInput1 (alloc'd in that order at
+	// level.cc:455/459, so reverse-Free).
 	MEMORY_DELETE(HALLmalloc,_hardwareInput2,QInputDigital);
 	MEMORY_DELETE(HALLmalloc,_hardwareInput1,QInputDigital);
+
+	// Member-init-time HAL allocs (these happen BEFORE the body):
+	//   K+3: _scratchMailboxes._localMailboxes._items   (Level member init)
+	//   K+4: _mailboxes._localMailboxes._items          (Level member init)
+	//   K+5/6: _memory's DMalloc outer + inner          (body, line 436)
+	// must be Freed in reverse: _memory's DMalloc first (most recent), then
+	// _mailboxes, then _scratchMailboxes. Implicit member-dtor order is wrong
+	// (reverse declaration: _mailboxes first, then _scratchMailboxes, then
+	// _memory) — that frees _items before DMalloc, violating LIFO. So
+	// explicitly tear down _memory here while the body still has control.
+	// ~PointerContainer<Memory> is NULL-guarded so the implicit dtor that
+	// fires after this body returns is a no-op. Then _mailboxes' implicit
+	// ~Array frees its _items (LIFO-correct now), then _scratchMailboxes'
+	// implicit ~Array frees its _items.
+	_memory.Delete();
 #if defined(JOYSTICK_RECORDER)
 	if (bJoyPlayback)
 		MEMORY_DELETE(HALLmalloc,_joystickPlaybackInput,InputScript);

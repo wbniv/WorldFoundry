@@ -76,7 +76,11 @@ private:
 class MailboxesWithStorage : public Mailboxes
 {
 public:
-   MailboxesWithStorage(long mailboxBase, long numberOfLocalMailboxes, Mailboxes* parent);
+   // `memory` defaults to HALLmalloc for the long-lived global/persistent
+   // mailboxes. Per-actor ActorMailboxes (created mid-Level-construction and
+   // destroyed mid-teardown) MUST pass the per-level pool so HALLmalloc's
+   // LIFO discipline stays intact — see actor.cc.
+   MailboxesWithStorage(long mailboxBase, long numberOfLocalMailboxes, Mailboxes* parent, Memory* memory = &HALLmalloc);
    ~MailboxesWithStorage();
    virtual Scalar ReadMailbox(long mailbox) const;
    virtual void WriteMailbox(long mailbox, Scalar value);
