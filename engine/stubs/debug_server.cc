@@ -600,7 +600,11 @@ void DebugServer_DrainQueue(Level& level)
         Actor* actor = bo ? dynamic_cast<Actor*>(bo) : nullptr;
 
         if (u.kind == PendingUpdate::SET_TRANSFORM && actor) {
-            const Vector3& cur = actor->currentPos();
+            // Snapshot the pre-write position via wfmut so undo/revert keeps
+            // the single mutation pipeline. Falls back to the raw accessor
+            // if wfmut returns nullopt (shouldn't happen since the actor
+            // resolved above, but defensive).
+            Vector3 cur = wfmut::GetActorPos(level, u.actor_idx).value_or(actor->currentPos());
             ChangeRecord rec;
             rec.kind     = ChangeRecord::TRANSFORM;
             rec.actor_idx = u.actor_idx;
@@ -616,7 +620,7 @@ void DebugServer_DrainQueue(Level& level)
             Vector3 pos(Scalar::FromDouble((double)u.px),
                         Scalar::FromDouble((double)u.py),
                         Scalar::FromDouble((double)u.pz));
-            actor->setCurrentPos(pos);
+            wfmut::SetActorPos(level, u.actor_idx, pos);
 
         } else if (u.kind == PendingUpdate::SET_PROP && actor) {
             // Read pre-write raw int32 for undo bookkeeping. wfmut populates
@@ -690,14 +694,10 @@ void DebugServer_DrainQueue(Level& level)
             if (!gChangeStack.empty()) {
                 const ChangeRecord& r = gChangeStack.back();
                 if (r.kind == ChangeRecord::TRANSFORM) {
-                    BaseObject* bo2 = level.GetObject(r.actor_idx);
-                    Actor* a = bo2 ? dynamic_cast<Actor*>(bo2) : nullptr;
-                    if (a) {
-                        Vector3 prev(Scalar::FromDouble(r.px),
-                                     Scalar::FromDouble(r.py),
-                                     Scalar::FromDouble(r.pz));
-                        a->setCurrentPos(prev);
-                    }
+                    Vector3 prev(Scalar::FromDouble(r.px),
+                                 Scalar::FromDouble(r.py),
+                                 Scalar::FromDouble(r.pz));
+                    wfmut::SetActorPos(level, r.actor_idx, prev);
                 } else if (r.kind == ChangeRecord::PROP && !r.field_key.empty()) {
                     // Route undo through wfmut so a single mutation pipeline
                     // owns all field writes (including the script-handle
@@ -734,17 +734,14 @@ void DebugServer_DrainQueue(Level& level)
             }
 
         } else if (u.kind == PendingUpdate::REVERT_ALL) {
-            // Restore transform originals
+            // Restore transform originals — route through wfmut so the bridge
+            // doesn't touch Actor directly.
             for (auto& kv : gOriginals) {
-                BaseObject* bo2 = level.GetObject(kv.first);
-                Actor* a = bo2 ? dynamic_cast<Actor*>(bo2) : nullptr;
-                if (a) {
-                    const ChangeRecord& r = kv.second;
-                    Vector3 orig(Scalar::FromDouble(r.px),
-                                 Scalar::FromDouble(r.py),
-                                 Scalar::FromDouble(r.pz));
-                    a->setCurrentPos(orig);
-                }
+                const ChangeRecord& r = kv.second;
+                Vector3 orig(Scalar::FromDouble(r.px),
+                             Scalar::FromDouble(r.py),
+                             Scalar::FromDouble(r.pz));
+                wfmut::SetActorPos(level, kv.first, orig);
             }
             gOriginals.clear();
             // Restore property originals — route through wfmut so the
