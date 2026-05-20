@@ -591,11 +591,9 @@ elseif(IOS)
     add_executable(wf_game MACOSX_BUNDLE ${WF_PLATFORM_SHELL_SOURCES})
 else()
     add_executable(wf_game ${WF_PLATFORM_SHELL_SOURCES})
-    # Editor builds emit a separate binary (wf-edit) so they never overwrite
-    # the lean game-engine output (wf_game). Both coexist side-by-side.
-    if(WF_ENABLE_EDITOR)
-        set_target_properties(wf_game PROPERTIES OUTPUT_NAME "wf-edit")
-    endif()
+    # wf_game always keeps its name as the game-engine runtime. The editor is
+    # its own `wf-edit` application target (see the WF_ENABLE_EDITOR block
+    # below), not a renamed engine binary.
 endif()
 
 # wf_game's shell file inherits include dirs + compile definitions from
@@ -827,4 +825,35 @@ endif()
 if(WF_ENABLE_EDITOR)
     add_subdirectory(cmake/Corrosion)
     add_subdirectory(engine/crdt)
+endif()
+
+# ─── Editor application (wf-edit) ─────────────────────────────────────────────
+# The collaborative level editor: a Dear ImGui app that (from M2) embeds the
+# engine viewport via the host-GL-context handshake, and (M4) reads a level
+# into a wfcrdt::Doc to drive the outliner. Linux/X11 only; gated on
+# WF_ENABLE_EDITOR. See docs/plans/2026-05-20-editor-app-shell.md.
+# Windowing is raw X11/GLX (the engine's own approach — only core Xlib + GLX,
+# already present). GLFW is vendored at third_party/glfw but unused for now:
+# its X11 backend needs the Xrandr/Xinerama/Xcursor/Xi -dev packages, which
+# require root to install. Raw X11/GLX avoids that and is exactly what the
+# host-GL-context handshake expects the editor to own (so M2 registers the
+# context directly, no GLFW-handle extraction). To switch back to GLFW, install
+# those -dev packages and restore the add_subdirectory(third_party/glfw) +
+# imgui_impl_glfw path.
+if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
+    set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/third_party/imgui)
+    add_executable(wf_edit
+        engine/wf_edit/main.cc
+        ${IMGUI_DIR}/imgui.cpp
+        ${IMGUI_DIR}/imgui_draw.cpp
+        ${IMGUI_DIR}/imgui_tables.cpp
+        ${IMGUI_DIR}/imgui_widgets.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+    )
+    set_target_properties(wf_edit PROPERTIES OUTPUT_NAME "wf-edit")
+    target_include_directories(wf_edit PRIVATE ${IMGUI_DIR} ${IMGUI_DIR}/backends)
+    # Third-party + app code: own flags, not the engine's -fpermissive/__GAME__.
+    target_compile_options(wf_edit PRIVATE -fno-rtti -w)
+    target_link_libraries(wf_edit PRIVATE X11 GL)
+    # M2+ links wfengine (embed) and wfcrdt (read-only Y.Doc).
 endif()

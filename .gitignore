@@ -54,3 +54,4 @@ docs/investigations/wf-screenshots/wf_walker_*.png
 
 # Harness binaries (built by engine/build_host_gl_test.sh)
 engine/wf_host_gl_test/wf_host_gl_test
+build-editor/
