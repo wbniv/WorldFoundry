@@ -2,26 +2,26 @@
 // engine/wf_edit/main.cc — World Foundry collaborative level editor (wf-edit).
 //
 // Dear ImGui application that hosts the editor. Milestone 1: an ImGui window
-// over an editor-owned X11/GLX context (raw Xlib + GLX, the same handles the
-// engine's host-GL-context handshake expects). Later milestones register that
-// context via SetHostGLContext + drive WFGame::StepFrame, and add a read-only
+// over a GLFW-owned X11/GLX context. Later milestones extract GLFW's native
+// X11/GLX handles, register them via SetHostGLContext, and drive
+// WFGame::StepFrame to embed the engine viewport, then add a read-only
 // wfcrdt::Doc outliner. Linux/X11 only for v1.
 // See docs/plans/2026-05-20-editor-app-shell.md.
-//
-// Windowing is raw X11/GLX rather than GLFW: GLFW's X11 backend needs the
-// Xrandr/Xinerama/Xcursor/Xi -dev packages (root to install). Raw X11/GLX uses
-// only core Xlib + GLX (already present) and is exactly what M2 will register.
 //=============================================================================
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
-#include <X11/Xlib.h>
-#include <GL/glx.h>
-
 #include "imgui.h"
+#include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include <GLFW/glfw3.h>
+
+static void glfw_error(int code, const char* desc)
+{
+    std::fprintf(stderr, "wf-edit: GLFW error %d: %s\n", code, desc);
+}
 
 int main(int argc, char** argv)
 {
@@ -32,102 +32,68 @@ int main(int argc, char** argv)
             max_frames = std::atoi(argv[++i]);
     }
 
-    Display* dpy = XOpenDisplay(nullptr);
-    if (!dpy) {
-        std::fprintf(stderr, "wf-edit: cannot open X display (DISPLAY set?)\n");
+    glfwSetErrorCallback(glfw_error);
+    if (!glfwInit()) {
+        std::fprintf(stderr, "wf-edit: glfwInit failed (no display?)\n");
         return 1;
     }
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    // Compatibility profile: the engine renders with legacy/fixed-function GL,
+    // and from M2 it shares this context, so it must not be core-only.
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 
-    // Visual the engine's host-GL-context handshake requires (mesa.cc:71).
-    int attrs[] = { GLX_RGBA,
-                    GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1, GLX_BLUE_SIZE, 1,
-                    GLX_DOUBLEBUFFER,
-                    GLX_DEPTH_SIZE, 1,
-                    None };
-    XVisualInfo* vi = glXChooseVisual(dpy, DefaultScreen(dpy), attrs);
-    if (!vi) {
-        std::fprintf(stderr, "wf-edit: no suitable GLX visual\n");
-        XCloseDisplay(dpy);
+    GLFWwindow* win = glfwCreateWindow(1280, 800, "WF Editor", nullptr, nullptr);
+    if (!win) {
+        std::fprintf(stderr, "wf-edit: window creation failed\n");
+        glfwTerminate();
         return 1;
     }
-
-    Window root = RootWindow(dpy, vi->screen);
-    Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
-    XSetWindowAttributes swa;
-    swa.colormap = cmap;
-    swa.event_mask = ExposureMask | StructureNotifyMask | KeyPressMask |
-                     KeyReleaseMask | ButtonPressMask | ButtonReleaseMask |
-                     PointerMotionMask;
-    Window win = XCreateWindow(dpy, root, 0, 0, 1280, 800, 0, vi->depth,
-                               InputOutput, vi->visual,
-                               CWColormap | CWEventMask, &swa);
-    XStoreName(dpy, win, "WF Editor");
-    Atom wm_delete = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
-    XSetWMProtocols(dpy, win, &wm_delete, 1);
-    XMapWindow(dpy, win);
-
-    GLXContext ctx = glXCreateContext(dpy, vi, nullptr, GL_TRUE);
-    if (!ctx) {
-        std::fprintf(stderr, "wf-edit: glXCreateContext failed\n");
-        XCloseDisplay(dpy);
-        return 1;
-    }
-    glXMakeCurrent(dpy, win, ctx);
+    glfwMakeContextCurrent(win);
+    glfwSwapInterval(1);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;  // used from M3
     ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(win, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
-    std::printf("wf-edit: shell M1 up (raw X11/GLX, %s)\n",
+    std::printf("wf-edit: shell M1 up (GLFW, %s)\n",
                 max_frames < 0 ? "interactive" : "bounded");
 
-    int w = 1280, h = 800, frame = 0;
-    bool running = true;
-    // (Mouse/keyboard → ImGui IO wiring is M2+; M1 proves window + render.)
-    while (running) {
-        while (XPending(dpy)) {
-            XEvent ev;
-            XNextEvent(dpy, &ev);
-            if (ev.type == ConfigureNotify) {
-                w = ev.xconfigure.width;
-                h = ev.xconfigure.height;
-            } else if (ev.type == ClientMessage &&
-                       (Atom)ev.xclient.data.l[0] == wm_delete) {
-                running = false;
-            }
-        }
-
-        io.DisplaySize = ImVec2((float)w, (float)h);
-        io.DeltaTime = 1.0f / 60.0f;
+    int frame = 0;
+    while (!glfwWindowShouldClose(win)) {
+        glfwPollEvents();
 
         ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
         ImGui::Begin("World Foundry Editor");
         ImGui::TextUnformatted("Collaborative level editor — shell milestone 1");
-        ImGui::Text("raw X11/GLX  |  %dx%d  |  frame %d", w, h, frame);
+        ImGui::Text("%.1f FPS  (frame %d)", io.Framerate, frame);
         ImGui::End();
 
         ImGui::Render();
+        int w, h;
+        glfwGetFramebufferSize(win, &w, &h);
         glViewport(0, 0, w, h);
         glClearColor(0.10f, 0.10f, 0.12f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glXSwapBuffers(dpy, win);
+        glfwSwapBuffers(win);
 
         if (max_frames >= 0 && ++frame >= max_frames)
-            running = false;
+            break;
     }
 
     ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-    glXMakeCurrent(dpy, None, nullptr);
-    glXDestroyContext(dpy, ctx);
-    XDestroyWindow(dpy, win);
-    XCloseDisplay(dpy);
+    glfwDestroyWindow(win);
+    glfwTerminate();
     std::printf("wf-edit: clean exit\n");
     return 0;
 }
