@@ -1,7 +1,7 @@
 # Plan — Editor app shell (`wf-edit`: Dear ImGui host + embedded engine viewport + read-only Y.Doc)
 
 **Date:** 2026-05-20
-**Status:** **M1–M4 done 2026-05-20.** Shell (M1) → embedded engine viewport (M2) → dockspace + panels (M3) → **read-only Y.Doc → Outliner (M4)**. `wf-edit` shells out to `levtree parse <lev>`, builds a `wfcrdt::Doc` (recursive chunk schema), and the Outliner lists actor names read back from the Doc — verified on snowgoons (36 actors; [screenshot](../../tests/screenshots/wfedit_m4_outliner.png)), ASan/UBSan-clean over the parse→Doc→read path. Built via `build-editor/` (CMake Debug; `-flto=thin` is Release/Clang-only). Remaining: M5 lifecycle/stability, M6 status sync. The full CRDT→engine bridge (Option C) is the next plan.
+**Status:** **M1–M5 done 2026-05-20.** Shell (M1) → embedded engine viewport (M2) → dockspace + panels (M3) → **read-only Y.Doc → Outliner (M4)** → **lifecycle + stability (M5)**. `wf-edit` shells out to `levtree parse <lev>`, builds a `wfcrdt::Doc` (recursive chunk schema), and the Outliner lists actor names read back from the Doc — verified on snowgoons (36 actors; [screenshot](../../tests/screenshots/wfedit_m4_outliner.png), selection→Properties [screenshot](../../tests/screenshots/wfedit_m5_select.png)). **M5:** the **full editor lifecycle** (open→load→step×N→unload→close) is **ASan+UBSan+LeakSanitizer-clean** (no leaks, no suppressions) and stable across multi-cycle headless runs; window-close teardown is self-contained (RunEditor breaks its loop when the frame callback returns false → `UnloadLevel`), the frame callback is unregistered on shutdown. Built via `build-editor/` (CMake Debug; `-flto=thin` is Release/Clang-only). Remaining: M6 status sync. The full CRDT→engine bridge (Option C) is the next plan.
 **Estimate:** ~1–2 weeks for the shell ([design doc](../investigations/2026-05-18-collaborative-level-editor-design.md) line 657) + a few days for the read-only Y.Doc population. Kept on the average-programmer scale per [feedback_estimate_average_programmer_scale](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_estimate_average_programmer_scale.md).
 **Owner:** Claude (Will reviewing)
 **Branch:** `2026-new-level`
@@ -81,14 +81,17 @@ Missing is the **application that hosts it**: a windowed Dear ImGui app embeddin
 - **Gate met:** Outliner shows **36** actors for snowgoons, sourced from the CRDT doc ([screenshot](../../tests/screenshots/wfedit_m4_outliner.png)); ASan+UBSan clean over `LoadLevelTreeIntoDoc`→`ReadActorNames`. (The gate's "smb 22" reference is live: `smb_w1_1.lev` is under active authoring — the loader matches the file's current OBJ count whatever it is.)
 - **Notes for M5+:** built in `build-editor/` (CMake **Debug** + GCC; the engine's `-flto=thin` Release flag is Clang-only). The `wfcrdt::Input::Kind` enum's `Bool` enumerator was renamed `Boolean` — Xlib's `#define Bool int` (pulled in ahead of `wfcrdt.hpp` in the editor) would otherwise mangle it; `Map`/`Array::valid()` added for the nested-read views. Required the [yffi nested-map workaround](2026-05-19-wfcrdt-cpp-raii-wrapper.md) (prefilled `yinput_ymap` loops in yrs 0.9.3).
 
-### 5. Lifecycle + stability
+### 5. Lifecycle + stability — ✅ DONE 2026-05-20
 
-- Window-close → `HALRequestClose()` → clean `UnloadLevel` + `WFGame` + `Doc` teardown (reuse [host-GL e2e/UnloadLevel LIFO learnings](2026-05-18-host-gl-e2e-harness-and-unload-fix.md)).
-- ASan over open→load→step→unload→close; multi-cycle stability. X11 focus reaches ImGui (cf. [project_keyboard_focus_fix](/home/will/.claude/projects/-home-will-WorldFoundry/memory/project_keyboard_focus_fix.md)).
+- **Window-close teardown is self-contained** — no `HALRequestClose()` needed for approach (a): `editor_frame` returns false on `glfwWindowShouldClose`, `WFGame::RunEditor` breaks its loop and runs `UnloadLevel()` + diskfile delete; `main()` then unregisters the frame callback (`SetEditorFrameCallback(nullptr,nullptr)` so the engine's stored `ctx` can't dangle past scope), clears the host-GL registry, and tears down ImGui/GLFW. The `Doc` (a `main`-scope local) is destroyed last. (`HALRequestClose` remains the standalone/engine-polled close path; RunEditor doesn't poll it.)
+- **ASan+UBSan+LeakSanitizer-clean** over the **full editor lifecycle** open→load→step×10→unload→close (`build-editor-asan/`, `-DWF_ASAN=ON`): 0 sanitizer reports in 1679 log lines, **no suppressions** — engine + Jolt + ImGui + GLFW + CRDT all clean. Multi-cycle: 5 back-to-back headless runs, all 36-actor + clean-exit.
+- **X11 focus → ImGui:** GLFW owns the window and installs the ImGui platform callbacks (`ImGui_ImplGlfw_InitForOpenGL(win, true)`); mesa.cc adopts the existing context and early-bails on window ops, so it never calls `XSetInputFocus` on the GLFW window — the [keyboard-focus-fix](/home/will/.claude/projects/-home-will-WorldFoundry/memory/project_keyboard_focus_fix.md) `BadMatch` path doesn't apply here. (Live keystroke/click confirmation is an interactive check; the `--select=N` headless aid exercises the Outliner→Properties data path.)
 
 ### 6. Docs + status sync
 
 - Plan `**Status:**` → Done w/ actuals; [wf-status.md](../../wf-status.md) one-sentence Summary + Active row; [design doc](../investigations/2026-05-18-collaborative-level-editor-design.md) "Editor shell" milestone done; next plan = the CRDT→engine bridge (Option C).
+
+> The full **record/replay session demo** is the capstone of the *whole* editor effort, not this shell — see the [design doc roadmap's closing § Capstone demo](../investigations/2026-05-18-collaborative-level-editor-design.md). M6 is the last milestone of this plan; a screenshot is its proof.
 
 ---
 

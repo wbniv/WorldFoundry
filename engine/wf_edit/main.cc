@@ -172,6 +172,7 @@ void glfw_error(int code, const char* desc)
 int main(int argc, char** argv)
 {
     int         max_frames = -1;
+    int         preselect  = -1;   // --select=N: headless aid — preselect actor N
     const char* shot = nullptr;
     // Viewport level (engine LoadLevel) + the .lev parsed into the read-only
     // Y.Doc. Default both to snowgoons-blender so the viewport and Outliner
@@ -187,6 +188,8 @@ int main(int argc, char** argv)
             level = argv[i] + 8;
         else if (std::strncmp(argv[i], "--leveltree=", 12) == 0)
             leveltree = argv[i] + 12;
+        else if (std::strncmp(argv[i], "--select=", 9) == 0)
+            preselect = std::atoi(argv[i] + 9);
     }
 
     // 0. Read-only Y.Doc (M4): shell out to `levtree parse`, build a wfcrdt::Doc
@@ -245,6 +248,8 @@ int main(int argc, char** argv)
     EditorCtx ctx{ win, max_frames, 0, shot };
     ctx.level_name  = std::move(level_name);
     ctx.actor_names = std::move(actor_names);
+    if (preselect >= 0 && preselect < static_cast<int>(ctx.actor_names.size()))
+        ctx.selected = preselect;   // headless: exercise the Outliner→Properties path
     SetEditorFrameCallback(editor_frame, &ctx);
 
     // 4. Drive the engine. HALStart inits HAL/audio + calls PIGSMain, which in
@@ -269,7 +274,11 @@ int main(int argc, char** argv)
     HALStart(hal_argc, hal_argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
     std::printf("wf-edit: HALStart returned\n");
 
-    // 5. Engine released its references; clear the registry + tear down.
+    // 5. Engine released its references; clear the registries + tear down.
+    //    Unregister the frame callback before `ctx` leaves scope so the
+    //    engine's stored ctx pointer can't dangle (no callbacks fire after
+    //    HALStart returns, but keep it tidy — mirrors ClearHostGLContext).
+    SetEditorFrameCallback(nullptr, nullptr);
     ClearHostGLContext();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
