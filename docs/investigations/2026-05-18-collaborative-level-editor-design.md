@@ -467,7 +467,7 @@ The split between container and leaf is **exactly where field-level resolution c
 
 ### Widget + storage selection is OAD-driven, not chunk-type-driven
 
-The chunk_type is the IFF storage type (`STR`, `I32`, `FX32`, etc.). That doesn't have enough resolution to pick an editor widget — two `STR` fields can want very different widgets (single-line property vs multi-line script). The right discriminator is the **OAD's `showAs` field**, declared per OAS field in the object's OAD ([wfsource/source/oas/oad.h:87](../../wfsource/source/oas/oad.h), [wfsource/source/oas/iff.s:22-34](../../wfsource/source/oas/iff.s)). The enum already exists in the OAD wire format:
+The chunk_type is the IFF storage type (`STR`, `I32`, `FX32`, etc.). That doesn't have enough resolution to pick a widget on its own — two `STR` fields can want very different widgets (single-line property vs multi-line script). The discriminator both shipped WF attribute editors actually key on (§ "Prior art", below) is the **(`ButtonType`, `showAs`) pair** from the OAD: `ButtonType` (the field's storage/role — `BUTTON_INT32`, `BUTTON_STRING`, `BUTTON_OBJECT_REFERENCE`, … → a coarse *FieldKind*) picks the widget family, and `showAs` ([wfsource/source/oas/oad.h:87](../../wfsource/source/oas/oad.h), [wfsource/source/oas/iff.s:22-34](../../wfsource/source/oas/iff.s)) refines it. `showAs` **alone is not enough**: `SHOW_AS_N_A` (0) is the most common value and fans out to seven different widgets — float, int, single-line string, object-reference, filename, section, group — separable only by `ButtonType`. The `showAs` enum already exists in the OAD wire format:
 
 ```
 SHOW_AS_N_A          0     (no widget hint)
@@ -552,6 +552,149 @@ SHOW_AS_N_A          → fallback: chunk_type-driven widget choice
 The fallback chain `showAs → chunk_type → raw text` means the editor degrades gracefully when it doesn't have a widget for a field, and gracefully when the OAD itself doesn't provide a hint.
 
 Fallback path means the editor handles chunk types it doesn't have a widget for yet — designers edit them as raw text. New widgets added incrementally.
+
+### Prior art — the widget set is already designed (twice)
+
+This is **not** a green-field design. WorldFoundry has shipped an OAD-driven attribute editor *twice*; both are 99 % authoritative — we mirror them and diverge only with a stated reason.
+
+- **The deleted 3ds Max attributes plugin** — `wfmaxplugins/attrib/` (purged in `c5761ca`; recover any file with `git show c5761ca^:wfmaxplugins/attrib/<file>`, per [project_wfmaxplugins_purged](../../../.claude/projects/-home-will-WorldFoundry/memory/project_wfmaxplugins_purged.md)). A `uiDialog` base class (`oaddlg.h`) with ~14 concrete widget subclasses under `buttons/` (`int`, `fixed`, `string`, `checkbox`, `colorpck`, `dropmenu`, `cycle`, `combobox`, `mailbox`, `filename`, `meshname`, `objref`, `classref`, `xdata`, plus `group`/`propshet` containers), built by a factory in `attrib.cc` that `switch`es on `ButtonType` and sub-dispatches `BUTTON_INT32` on `showAs`.
+- **The live Blender add-on** — [`wftools/wf_blender/panels.py`](../../wftools/wf_blender/panels.py) (`WF_PT_attributes`), a Python re-implementation specified field-by-field by the [(ButtonType × showAs) coverage audit](2026-04-13-showas-coverage.md). It post-dates the Max plugin and carries refinements the Max plugin lacked.
+
+**Dispatch is keyed on the (`ButtonType`, `showAs`) pair**, distilled from both editors (`ButtonType` values from [wftools/wf_oad/src/lib.rs:76](../../wftools/wf_oad/src/lib.rs)):
+
+| `ButtonType` | `showAs` | Widget | FieldKind |
+|---|---|---|---|
+| `INT32` (4) | `COLOR` (7) | colour swatch + hex + Pick | Int |
+| `INT32` | `CHECKBOX` (8) | checkbox (or 2-item-enum toggle) | Bool / Enum |
+| `INT32` | `MAILBOX` (9) | mailbox autocomplete combo | Int |
+| `INT32` | `DROPMENU` (4) | enum (row ≤4 / grid 5+) | Enum |
+| `INT32` | `RADIOBUTTONS` (5) | enum radios | Enum |
+| `INT32` | `COMBOBOX` (10) | dropdown + free text | Enum |
+| `INT32` | else | int spinner | Int |
+| `FIXED16/32` (0/1) | `SLIDER` (2) | slider (OAD min/max) | Float |
+| `FIXED16/32` | else | decimal field + spinner | Float |
+| `STRING` (5) | `TEXTEDITOR` (11) | multi-line editor | Str |
+| `STRING` | else | single-line edit | Str |
+| `OBJECT`/`CAMERA`/`LIGHT`/`CLASS_REFERENCE` (6/14/15/24) | — | searchable ref picker | ObjRef |
+| `FILENAME` (7) | — | file field + browse | FileRef |
+| `MESHNAME` (19) | — | file field + browse + **Create Mesh** | FileRef |
+| `XDATA` (20) / `WAVEFORM` (23) | `TEXTEDITOR` → text; else hidden | raw blob | Str / Skip |
+| `PROPERTY_SHEET` (8) | — | collapsible section (RollUp) | Section |
+| `GROUP_START`/`STOP` (25/26) | — | static group box | Group / GroupEnd |
+| `LEVELCONFLAG_*` (9–13, 16, 22, 23, 27, 28) | (exempt from hidden) | checkbox | Bool |
+| (any) | `HIDDEN` (6) | not drawn | Skip |
+
+**The `uiDialog` interface *is* the [provider/setter abstraction](#future-direction-editor--debugger-convergence) § Future direction asks for.** Each old widget implements `reset(byte*& data)` — read value **from** the stored blob — and `copy_to_xdata(byte*& out)` — write **to** it, returning `DATA_OK`/`DATA_ERROR` — plus `make_dialog_gadgets()`, `eval()`, `enable(bool)`. That `reset` / `copy_to_xdata` pair is literally the `value-provider + value-setter` pair v1 mandates; the only change is that the endpoint becomes a CRDT leaf (v1) or an engine field (v2) instead of a flat `byte*` XData blob. The shape is proven — we abstract the endpoint.
+
+**Refinements to carry forward from the Blender add-on:**
+
+- The four reference `ButtonType`s (object / camera / light / class) collapse to one **searchable** picker with a ⚠ missing-target indicator (Max had four separate browse dialogs).
+- A 2-item enum with `SHOW_AS_CHECKBOX` renders as one checkbox, not a 2-button row.
+- Enum layout scales: **≤4 items → one button row; 5+ → 2-column grid**.
+- `ScriptLanguage` gets a "Detect from script text" helper button.
+- Soft fallbacks — "(not set)", "no `.oad`" — instead of the Max plugin's `assert()` / `OutputDebugString`.
+
+**Justified divergences (the 1 %):**
+
+- **Toolkit** — Dear ImGui immediate-mode, not Win32 (Max) / Qt (the also-deleted `wfi3dplugins/AttribPlugin/`) / Blender RNA. The dispatch table and per-widget behaviour port unchanged; only the draw calls differ.
+- **Backing store** — a CRDT leaf via the provider/setter, not Max XData / Blender ID-properties; required for collaborative editing.
+- **Fallback chain `showAs → chunk_type → raw monospace`** for not-yet-ported widgets — the old editors hard-failed on unknown types; we degrade gracefully (as the Blender add-on already does).
+- **EULR edits in revolutions** (0 ≤ rev < 1) per [feedback_angles_in_revolutions](../../../.claude/projects/-home-will-WorldFoundry/memory/feedback_angles_in_revolutions.md); the Max spinner showed raw units.
+- **Mailbox combo auto-completes `INDEXOF_*` / `MB_*`** names from `mailbox.inc` (per [feedback_named_mailbox_constants](../../../.claude/projects/-home-will-WorldFoundry/memory/feedback_named_mailbox_constants.md); the verbose `INDEXOF_` prefix is slated for removal, [feedback_indexof_prefix_wanted_gone](../../../.claude/projects/-home-will-WorldFoundry/memory/feedback_indexof_prefix_wanted_gone.md)); Max's Mailbox was a bare integer spinner.
+
+### Widget gallery — every type, mocked
+
+ImGui-flavoured sketches of each widget the dispatch table produces. Not pixel-faithful — the point is to pin down what each `(ButtonType, showAs)` pair renders, and where the Blender refinements show up.
+
+**Scalars & numbers**
+
+```
+Int          INT32 / N_A          Lives          [ 3        ][▼▲]
+Fixed slider FIXED32 / SLIDER     Mass           ◄────────●──────────►  120.0
+                                                 min 0   max 1000   fmt 1.15.16
+Fixed field  FIXED32 / N_A        Friction       [ 0.250    ][▼▲]
+Checkbox     INT32 / CHECKBOX     Casts Shadow   [✓]
+Colour       INT32 / COLOR        Background     ▓▓▓▓  #80A0FF   [Pick…]
+Mailbox      INT32 / MAILBOX      Movement Mbox  [ INDEXOF_INPUT          ▼]
+                                                 └ autocompletes mailbox.inc
+                                                   (MB_INPUT, post prefix-rename)
+```
+
+**Vectors (chunk-type fallback under `SHOW_AS_N_A`)**
+
+```
+VEC3   Position                    EULR   Orientation   (revolutions, 0 ≤ rev < 1)
+  X [ 12.345  ][▼▲]                  a [ 0.000 ][▼▲]   pitch
+  Y [ -5.678  ][▼▲]                  b [ 0.000 ][▼▲]   roll
+  Z [  0.100  ][▼▲]                  c [ 0.250 ][▼▲]   heading
+```
+
+**Enums — layout scales with item count (Blender refinement)**
+
+```
+2 items + CHECKBOX     Moves Between Rooms  [✓]        (False│True → on = True)
+
+≤4 items → button row  State:   ( Idle )(•Walk•)( Run )( Jump )
+
+5+ items → 2-col grid  Script Language:
+                         ( Forth   )(•Lua•    )
+                         ( Wren    )( JS      )
+                         ( Squirrel)( Python  )
+                         [ ⌕ Detect from script text ]   ← ScriptLanguage only
+
+COMBOBOX (free text)   Tag      [ player                ▼]   (pick or type)
+```
+
+**References & files**
+
+```
+Obj/Cam/Light/Class ref   Target   [ ⌕ Door_03            ] [→ Go]   ⚠ if missing
+(6/14/15/24 → one ObjRef)
+Class name (dropdown)     Class    [ statplat              ▼]
+Filename                  Sound    [ jump.wav              ] [📁]
+Mesh Name (+ Create)      Mesh     [ House.iff             ] [📁] [✚ Create Mesh]
+```
+
+**Long text — `SHOW_AS_TEXTEDITOR` (Script, Notes)**
+
+```
+Script   STR / TEXTEDITOR                🔒 alice editing (soft-lock — wait / override)
+┌────────────────────────────────────────────────────────────┐
+│  \ wf                                                        │
+│  : tick INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox          │
+│         INDEXOF_INPUT write-mailbox ;                        │
+└────────────────────────────────────────────────────────────┘
+  v1: plain-string LWW   ·   v2+: Y.Text (char-level merge, ghost cursors, per-char author)
+```
+
+**Containers**
+
+```
+▼ Physics ──────────────────────────────   PROPERTY_SHEET → collapsible section
+│   Mass       [ 120.0  ][▼▲]
+│   Friction   [ 0.250  ][▼▲]
+▲ Render ───────────────────────────────   (collapsed)
+
+┌ Movement ────────────────────────────┐   GROUP_START / GROUP_STOP → static box
+│   Speed      [ 4.0    ][▼▲]           │
+│   Turn Rate  [ 0.0    ][▼▲]           │
+└───────────────────────────────────────┘
+```
+
+**Raw / hidden / fallback**
+
+```
+XData / Waveform   XDATA, WAVEFORM       [ ∿ edit raw data… ]
+                                         (hidden unless showAs = TEXTEDITOR)
+SHOW_AS_HIDDEN     anything              not drawn
+unknown / no OAD   ‹BBOX› { 'NAME' "Bounds" } { 'DATA' … }   ← editable monospace fallback
+```
+
+**Per-leaf attribution** — any field a collaborator has touched carries a right-aligned chip (shared with the panel mockup above):
+
+```
+Mass   [ 120.0  ][▼▲]                                              👤 bob · 1m
+```
 
 ### Wire / save / load
 
@@ -654,7 +797,7 @@ The base milestone: editor opens [smb_w1_1](../../wflevels/smb_w1_1/), two desig
 | IFF chunk ↔ `Y.Doc` translator (parser via iffcomp-rs + canonical printer) | 2–3 weeks |
 | WebSocket relay (~200 LOC + snapshot/restore + blob HTTP API) | 1–2 weeks |
 | Editor shell (ImGui window, engine-GL-context viewport, basic panels) | 1–2 weeks |
-| Property panel + widgets (showAs-driven dispatch + ~10 widget types + data-source-agnostic provider/setter abstraction per "Future direction") | 3–4 weeks |
+| Property panel + widgets — **port** the proven attribute editor: (ButtonType × showAs) dispatch, ~14 leaf widgets + 2 containers, data-source-agnostic provider/setter (= the old `reset`/`copy_to_xdata` pair). Design de-risked by two reference impls (§ "Prior art"); the new work is ImGui rendering + CRDT wiring, not the taxonomy. | 3–4 weeks |
 | Outliner / actor-tree + selection / navigation | 1 week |
 | Chat sidebar (plaintext over WebSocket) | 3–5 days |
 | Awareness / presence overlays (ghost cursors, selection rings, viewport ghosts) | 1 week |
@@ -821,6 +964,18 @@ Tiered by what they block. Tier 1 blocks the start of implementation; tier 2 is 
 - **Public-rooms default on the community relay.** Public-discoverable by default vs invite-only-with-opt-in-to-public. Probably invite-only by default; confirm closer to launch.
 - **Pricing model for managed relays.** Per-relay-flat / per-active-user / per-MB-stored / tiered. Defer to closer to launch.
 - **OAD authoring inside the editor (possibility, not committed).** Today OAD schemas (what fields each actor class has, their types, min/max, `showAs`) live in `iff.s` source files and are compiled separately. A future direction: let designers edit OADs in the same editor they use to author instances — add a new field to an actor class, tweak a slider's max, declare a new enum value, all without dropping out to `iff.s` + recompile. Big leverage if it pays off (designers iterate on schemas at design speed, not engineering speed); also a big scope expansion (the OAD wire format is non-trivial; existing OADs in `wftools/wf_oad/tests/fixtures/*.oad` need to round-trip). Worth exploring once the editor + debugger convergence above is more concrete.
+
+---
+
+## Capstone demo — the very end of everything
+
+The final deliverable, once the whole effort is built (v1 collaborative editor + the v2 [journal / event-stream](#the-journal--event-stream-unification) work), is a **fully recorded and replayable session** — not a screen-grab. It exists to prove the thesis that editor edits, runtime inputs, and replay are three drivers of *one* event-stream abstraction:
+
+- **Record:** two designers open [smb_w1_1](../../wflevels/smb_w1_1/) concurrently; one edits actors (positions, properties, spawns) while the other plays the level live in the embedded engine. Object edits are captured for free from the CRDT update stream (it *is* an append-only timestamped journal — per-leaf `_author`/`_ts`; § [replay-to-time-T](#per-leaf-attribution--replay-to-time-t-for-free)). Gameplay keypresses are captured at the HAL boundary as sim-time-tagged `(input, sim_time)` tuples via the v2 HID recorder (§ [recording layer](#recording-layer-raw-hid-at-the-hal-boundary)).
+- **Replay:** play the whole session back deterministically — object edits re-applied from the Y.Doc stream, input re-injected through [`HALInjectJoystickButtons`](../../wfsource/source/hal/_input.h) sim-clock-paced (per [project_variable_tick_rate_loadbearing](../../../.claude/projects/-home-will-WorldFoundry/memory/project_variable_tick_rate_loadbearing.md)) — with a timeline scrubber to seek to any point.
+- **Proof:** record the replay itself as the shipped `.mp4` demo clip (repo-root convention, e.g. `first-generated-level.mp4`), and keep the recorded session file as a regression fixture (the § journal/event-stream "recorded golden run → CI fixture" idea).
+
+This is deliberately the **last** thing built: it can only exist after editing flows (the CRDT→engine bridge — the v1 capstone, named as the [editor-shell plan's](../plans/2026-05-20-editor-app-shell.md) next step) *and* the v2 HID recorder + journal/replay UI land. v1 chose option (c), so the recorder substrate ships in v2+; until then the editor-shell plan's own demo is just the read-only walkthrough screenshot.
 
 ---
 
