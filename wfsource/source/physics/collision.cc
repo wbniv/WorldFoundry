@@ -480,8 +480,8 @@ CollideObjectWithList(PhysicalObject& checkObject, BaseObjectIteratorWrapper poI
  	register PhysicalObject* pObject;
 	while(!poIter.Empty())	// iterate through all objects in this room
 	{
-		pObject = dynamic_cast<PhysicalObject*>(&(*poIter));
-      assert(ValidPtr(pObject));
+		assert(IsPhysicalObject(&(*poIter)));
+		pObject = static_cast<PhysicalObject*>(&(*poIter));
 
 		if( &checkObject != pObject )
 		{

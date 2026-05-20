@@ -187,8 +187,8 @@ CameraHandler::SetCamera(PhysicalObject& physicalObject, const cameraPosition& d
 	pa.SetPosition(destCam.position);
 
 	Matrix34 mat = LookUp( destCam.direction, destCam.up, pa.Position() );
-   Camera* camera = dynamic_cast<Camera*>(&physicalObject);
-   assert(ValidPtr(camera));
+   assert(physicalObject.kind() == BaseObject::Camera_KIND);
+   Camera* camera = static_cast<Camera*>(&physicalObject);
 	camera->SetCameraMatrix( mat );
 
 	DBSTREAM3(
@@ -215,8 +215,8 @@ SetCameraParametersFromShot(const Actor* tempcamShotActor,cameraPosition& outPos
 {
 	assert(ValidPtr(tempcamShotActor));
    
-	const CamShot* camShotActor = dynamic_cast<const CamShot*>(tempcamShotActor);
-	assert(ValidPtr(camShotActor));
+	assert(tempcamShotActor->kind() == BaseObject::CamShot_KIND);
+	const CamShot* camShotActor = static_cast<const CamShot*>(tempcamShotActor);
 
 	const _CamShot* shotData = camShotActor->GetOADData();           // oad shot data for this object
 	assert(shotData);
@@ -224,8 +224,8 @@ SetCameraParametersFromShot(const Actor* tempcamShotActor,cameraPosition& outPos
 
 	BaseObject* bo = bol[shotData->Follow];
    assert(ValidPtr(bo));
-   PhysicalObject* po = dynamic_cast<PhysicalObject*>(bo);
-   assert(ValidPtr(po));
+   assert(IsPhysicalObject(bo));
+   PhysicalObject* po = static_cast<PhysicalObject*>(bo);
 	const Vector3& followVect = po->GetPhysicalAttributes().PredictedPosition();
 
 	Vector3 camShotPos = camShotActor->GetPhysicalAttributes().PredictedPosition();
@@ -430,7 +430,7 @@ NormalCameraHandler::init(MovementManager& movementManager, MovementObject& move
 
 #if DO_ASSERTIONS
 	{
-		const CamShot* camShot = dynamic_cast<CamShot*>(theLevel->GetObject(shotIndex));
+		const CamShot* camShot = static_cast<CamShot*>(theLevel->GetObject(shotIndex));
       assert(ValidPtr(camShot));
 		AssertMsg(ValidPtr(camShot),"shotIndex = " << shotIndex);
 		assert(camShot->kind() == BaseObject::CamShot_KIND);
@@ -557,8 +557,8 @@ NormalCameraHandler::GetWatchObject(const MovementObject& movementObject) const
 	{
 		BaseObject* trackObject = theLevel->GetObject(cd.idxTrackObject);
 		assert(ValidPtr(trackObject));
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(trackObject);
-      assert(ValidPtr(po));
+      assert(IsPhysicalObject(trackObject));
+      PhysicalObject* po = static_cast<PhysicalObject*>(trackObject);
 		return(po);
 	}
 	DBSTREAM1( cerror << "NormalCameraHandler::GetWatchObject: had to return mainCharacter" << std::endl; )
@@ -742,8 +742,8 @@ PanCameraHandler::GetWatchObject(const MovementObject& movementObject) const
 	{
 		BaseObject* trackObject = theLevel->GetObject(cd.idxTrackObject);
 		assert(ValidPtr(trackObject));
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(trackObject);
-      assert(ValidPtr(po));
+      assert(IsPhysicalObject(trackObject));
+      PhysicalObject* po = static_cast<PhysicalObject*>(trackObject);
 		return(po);
 	}
 //	assert(0);
@@ -980,8 +980,8 @@ BungeeCameraHandler::predictPosition(MovementManager& /*movementManager*/, Movem
 			actorAttr.AddLinVelocity( Vector3(Scalar::zero, Scalar::zero, shotData->GetClimbRate()) );
 	}
 
-   Camera* camera = dynamic_cast<Camera*>(&movementObject);
-   assert(ValidPtr(camera));
+   assert(movementObject.kind() == BaseObject::Camera_KIND);
+   Camera* camera = static_cast<Camera*>(&movementObject);
 	camera->cameraPos = destCam;	// store this data for use in update()
 
    Vector3 newPosition(actorAttr.Position() + (((actorAttr.LinVelocity() + origLinVelocity) / Scalar::two) * theLevel->LevelClock().Delta())); 
@@ -997,8 +997,8 @@ BungeeCameraHandler::update(MovementManager& /*movementManager*/, MovementObject
 	DBSTREAM3( ccamera << "BungeeCam::update() entered." << std::endl; )
 
 	cameraData& cd  = GetCameraMovementData(movementObject);
-   Camera* camera = dynamic_cast<Camera*>(&movementObject);
-   assert(ValidPtr(camera));
+   assert(movementObject.kind() == BaseObject::Camera_KIND);
+   Camera* camera = static_cast<Camera*>(&movementObject);
 	cameraPosition destCam = camera->cameraPos;
 
 	// Do collision check loop and don't allow motion if there's something in the way
@@ -1052,8 +1052,8 @@ BungeeCameraHandler::GetWatchObject(const MovementObject& movementObject) const
 	{
 		BaseObject* trackObject = theLevel->GetObject(cd.idxTrackObject);
 		assert(ValidPtr(trackObject));
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(trackObject);
-      assert(ValidPtr(po));
+      assert(IsPhysicalObject(trackObject));
+      PhysicalObject* po = static_cast<PhysicalObject*>(trackObject);
 		return(po);
 	}
 	DBSTREAM1( cerror << "BungeeCameraHandler::GetWatchObject: had to return mainCharacter" << std::endl; )

@@ -137,8 +137,8 @@ ActBox::update()
 	if ( colObject )
 	{
 		assert( ValidPtr( colObject ) );
-      Actor* colActor = dynamic_cast<Actor*>(colObject);
-      assert(ValidPtr(colActor));
+      assert(IsActor(colObject));
+      Actor* colActor = static_cast<Actor*>(colObject);
       activate( colActor );
 		doFieldEffect( *colObject );
 	}

@@ -81,11 +81,11 @@ Warp::update()
 		DBSTREAM5( cdebug << "Warp::update: activated by object " << colObject << std::endl; )
 		const BaseObject* bo = theLevel->GetObject( getOad()->Target );
 		assert( ValidPtr( bo ) );
-      const PhysicalObject* target = dynamic_cast<const PhysicalObject*>(bo);
-		assert( ValidPtr( target ) );
+      assert(IsPhysicalObject(bo));
+      const PhysicalObject* target = static_cast<const PhysicalObject*>(bo);
 
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(colObject);
-      assert(ValidPtr(po)); 
+      assert(IsPhysicalObject(colObject));
+      PhysicalObject* po = static_cast<PhysicalObject*>(colObject);
 
 		DBSTREAM1( if ( !po->GetMovementBlockPtr()->Mobility )
 			cerror << *this << " tried to move anchored " << *colObject << std::endl; )
@@ -116,8 +116,8 @@ Warp::update()
 				{
 					DBSTREAM5( cdebug << "Warp::update: activated by " << colActor << std::endl; )
 					BaseObject* bo = theLevel->GetObject( getOad()->Target );
-               const PhysicalObject* target = dynamic_cast<PhysicalObject*>(bo);
-               assert( ValidPtr( target ) );
+               assert(IsPhysicalObject(bo));
+               const PhysicalObject* target = static_cast<PhysicalObject*>(bo);
 					assert( target );
 					DBSTREAM1
 					(	if ( !target->GetMovementBlockPtr()->Mobility )

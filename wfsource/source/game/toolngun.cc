@@ -88,8 +88,8 @@ ToolNeedleGun::activate()
 
 		while( !objects.Empty() )
 		{
-         Actor* actor = dynamic_cast<Actor*>(&(*objects));
-         assert(ValidPtr(actor));
+         assert(IsActor(&(*objects)));
+         Actor* actor = static_cast<Actor*>(&(*objects));
 			if ( actor->IsNeedleGunTarget() )
 			{
 				candidate.actor = actor;

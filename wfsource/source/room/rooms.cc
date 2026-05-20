@@ -133,8 +133,8 @@ LevelRooms::AddObjectToRoom( int32 objectIndex )
    assert(ValidPtr(object));
 	AssertMsg( object->kind() != BaseObject::StatPlat_KIND, "Cannot generate or move a statplat at runtime (objectIndex=" << objectIndex << ", kind=" << object->kind() << ", object=" << *object << ")" );
 
-   PhysicalObject* po = dynamic_cast<PhysicalObject*>(object);
-   assert(ValidPtr(po));
+   assert(IsPhysicalObject(object));
+   PhysicalObject* po = static_cast<PhysicalObject*>(object);
 
 	int roomnum = -1;
 	// figure out which room to add to
@@ -156,8 +156,8 @@ LevelRooms::AddObjectToRoom( int32 objectIndex )
 	// make sure that the object is permanent or in the room corresponding
 	// to its asset
 
-   Actor* actor = dynamic_cast<Actor*>(object);
-   assert(ValidPtr(actor));
+   assert(IsActor(object));
+   Actor* actor = static_cast<Actor*>(object);
 	if ( actor->HasMesh() )
 	{
 		packedAssetID assetID = actor->GetMeshName();
@@ -187,8 +187,8 @@ LevelRooms::RemoveObjectFromRoom( int32 idxObject )
 	assert(idxObject > 0);
 	BaseObject* object = (*_masterObjectList)[idxObject];
 	assert( ValidPtr( object ) );
-   PhysicalObject* po = dynamic_cast<PhysicalObject*>(object);
-   assert(ValidPtr(po));
+   assert(IsPhysicalObject(object));
+   PhysicalObject* po = static_cast<PhysicalObject*>(object);
 	int roomnum = -1;
 
 	assert( ValidPtr( _rooms ) );

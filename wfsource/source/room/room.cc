@@ -273,8 +273,8 @@ Room::UpdateRoomContents(int updateIndex, LevelRooms& levelRooms)
 	while(!alIter.Empty())
 	 {
 		BaseObject* object = (*_masterObjectList)[*alIter];
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(object);
-      assert(ValidPtr(po));
+      assert(IsPhysicalObject(object));
+      PhysicalObject* po = static_cast<PhysicalObject*>(object);
 		if (!CheckCollision(*po))
 		 {
 			int32 objectIndex = *alIter;
@@ -358,8 +358,8 @@ CheckSameRoom( BaseObjectIteratorWrapper boIter, const Room& room, const Clock& 
 	while( !boIter.Empty() )										// iterate through all objects in this room
 	{
 //		DBSTREAM2( clevel << "QL::dC:CR: cIter loop" << std::endl; )
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(&(*boIter));
-      assert(ValidPtr(po));
+      assert(IsPhysicalObject(&(*boIter)));
+      PhysicalObject* po = static_cast<PhysicalObject*>(&(*boIter));
 		room.CheckCollisionWithObjects( *po,clock, listIndex, count );
 		++boIter;
 		++count;
@@ -378,8 +378,8 @@ CheckOverlappedRoom( BaseObjectIteratorWrapper boIter, const Room& room, const C
 	{
 //		DBSTREAM2( clevel << "QL::dC:CR: cIter loop" << std::endl; )
 
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(&(*boIter));
-      assert(ValidPtr(po));
+      assert(IsPhysicalObject(&(*boIter)));
+      PhysicalObject* po = static_cast<PhysicalObject*>(&(*boIter));
 
 		if ( room.CheckCollision( *po ) )
       {
