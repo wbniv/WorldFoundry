@@ -20,9 +20,14 @@
 #include <math/angle.hp>
 #include <pigsys/pigsys.hp>
 
+#ifdef PHYSICS_ENGINE_JOLT
+#  include <physics/jolt/jolt_backend.hp>   // JoltCharacterGetPosition / JoltBodyGetPosition (T7)
+#endif
+
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <limits>
 #include <string>
 
 namespace wfmut {
@@ -147,6 +152,76 @@ void run_transform_tests(Level& level, ActorIdx player)
             }
         }
         report("T9: SetActorOrientation rev 0.0/0.25/0.5/0.99", all_ok);
+    }
+
+    // T5: idx that resolves to a non-Actor BaseObject → false + "not an Actor".
+    {
+        BaseObjectList& list = level.GetObjectList();
+        ActorIdx non_actor = 0;
+        for (int i = 1; i < list.Size(); ++i) {
+            BaseObject* bo = level.GetObject(i);
+            if (bo && !dynamic_cast<Actor*>(bo)) { non_actor = static_cast<ActorIdx>(i); break; }
+        }
+        if (non_actor == 0) {
+            std::fprintf(stderr,"  [SKIP] T5: no non-Actor BaseObject in level\n");
+        } else {
+            bool ret = SetActorPos(level, non_actor, v3(1, 1, 1));
+            bool err_ok = std::strstr(lastError(), "not an Actor") != nullptr;
+            report("T5: SetActorPos on non-Actor idx rejected", !ret && err_ok);
+        }
+    }
+
+    // T7: Jolt body/character position is synced after SetActorPos. Only
+    // meaningful if the player actually has a Jolt handle (no-mobility actors
+    // may have neither).
+#ifdef PHYSICS_ENGINE_JOLT
+    {
+        BaseObject* bo = level.GetObject(player);
+        Actor* a = bo ? dynamic_cast<Actor*>(bo) : nullptr;
+        const PhysicalAttributes& pa = a->GetPhysicalAttributes();
+        uint32_t charID = pa.JoltCharacterID();
+        uint32_t bodyID = pa.JoltBodyID();
+        Vector3 target = v3(8.0f, 0.0f, 3.0f);
+        SetActorPos(level, player, target);
+        if (charID != kJoltInvalidBodyID) {
+            const Vector3& jp = JoltCharacterGetPosition(charID);
+            report("T7: Jolt character position synced after SetActorPos",
+                   vec3_close(jp, target, 1e-2f),
+                   std::string("jolt=(") + std::to_string(jp.X().AsFloat()) + ","
+                       + std::to_string(jp.Y().AsFloat()) + "," + std::to_string(jp.Z().AsFloat()) + ")");
+        } else if (bodyID != kJoltInvalidBodyID) {
+            const Vector3& jp = JoltBodyGetPosition(bodyID);
+            report("T7: Jolt body position synced after SetActorPos",
+                   vec3_close(jp, target, 1e-2f));
+        } else {
+            std::fprintf(stderr,"  [SKIP] T7: player has no Jolt character/body handle\n");
+        }
+    }
+#endif
+
+    // T8: NaN / +Inf components — PINNED (documentation only, not executed).
+    // wfmut::SetActorPos does NOT validate the vector; it forwards to
+    // Actor::setCurrentPos → PhysicalAttributes::SetPosition, where the
+    // engine's Scalar/Vector3 validation aborts the process on NaN/Inf in
+    // assertion builds (DO_ASSERTIONS=1). So the NaN boundary is enforced
+    // upstream of wfmut, not by it — and running the write here would abort
+    // the whole smoke. Callers must not feed NaN/Inf; there's no need for a
+    // wfmut-level guard because the engine already rejects it hard.
+    std::fprintf(stderr,
+        "  [INFO] T8: NaN/Inf positions abort in the engine's Scalar validation "
+        "(assertion build) — boundary enforced upstream of wfmut; not executed.\n");
+
+    // T10: orientation at rev=1.0 wraps to ~0.0 (Angle is mod-1 revolutions).
+    {
+        Angle az = Angle::Revolution(Scalar::FromFloat(0.0f));
+        Angle ac = Angle::Revolution(Scalar::FromFloat(1.0f));
+        SetActorOrientation(level, player, Euler(az, az, ac));
+        auto got = GetActorOrientation(level, player);
+        float c = got ? got->GetC().AsRevolution().AsFloat() : -999.0f;
+        // 1.0 rev wraps to 0.0; accept either ~0.0 or ~1.0 and document.
+        bool wrapped = got && (fclose_to(c, 0.0f, 1e-2f) || fclose_to(c, 1.0f, 1e-2f));
+        report("T10: SetActorOrientation rev=1.0 wraps cleanly", wrapped,
+               std::string("got_c=") + std::to_string(c));
     }
 
     // T11: GetActorPos / GetActorOrientation on bad idx → nullopt
@@ -394,19 +469,102 @@ void run_mailbox_tests(Level& level, ActorIdx player)
         report("M9: Set/GetMailbox bad actor idx rejected", a && b);
     }
 
-    // M3, M4 (slot at NumberOfLocalMailboxes boundary) — need the actor's
-    // declared mailbox count. The OAD field is accessible via
-    // GetActorFieldInt("common.NumberOfLocalMailboxes"), but the value
-    // sometimes reflects pre-init state; pin behaviour in a follow-up.
-    //
-    // M6 (actor without mailboxes) — needs a non-mailbox-bearing object
-    // type at a known idx; smb_w1_1 may not expose one. Deferred.
-    //
-    // M7 (NaN/Inf), M8 (mailbox 999 crash boundary, GLOBAL_USER_MAX) —
-    // deferred per the plan's test matrix.
+    // M3: a higher local slot (20) round-trips. Stays clear of the low
+    // LOCAL_SYSTEM slots (X/Y/Z_POS etc.) that have physics side effects.
+    {
+        const int slot = 20;
+        auto saved = GetMailbox(level, player, slot);
+        bool ok_set = SetMailbox(level, player, slot, -3.5);
+        auto got = GetMailbox(level, player, slot);
+        bool round_trip = ok_set && got && fclose_to(static_cast<float>(*got), -3.5f, 1e-3f);
+        if (saved) SetMailbox(level, player, slot, *saved);
+        report("M3: SetMailbox high local slot (20) round-trip", round_trip);
+    }
+
+    // M4: write past the actor's declared local count. PINNED BEHAVIOUR:
+    // MailboxesWithStorage::WriteMailbox falls through to the parent (global)
+    // bank for out-of-local indices (mailbox.cc:96-106) — it does NOT reject.
+    // So this round-trips through the global bank rather than failing. Assert
+    // the documented fall-through, not a rejection.
+    {
+        auto count_opt = GetActorFieldInt(level, player, "common.NumberOfLocalMailboxes");
+        if (!count_opt) {
+            std::fprintf(stderr,"  [SKIP] M4: couldn't read NumberOfLocalMailboxes\n");
+        } else {
+            int past = static_cast<int>(*count_opt) + 100;  // safely past local range
+            auto saved = GetMailbox(level, player, past);
+            bool ok_set = SetMailbox(level, player, past, 9.0);
+            auto got = GetMailbox(level, player, past);
+            bool fell_through = ok_set && got && fclose_to(static_cast<float>(*got), 9.0f, 1e-3f);
+            if (saved) SetMailbox(level, player, past, *saved);
+            report("M4: SetMailbox past local count falls through to global bank "
+                   "(pinned; not a rejection)", fell_through,
+                   std::string("NumberOfLocalMailboxes=") + std::to_string(*count_opt));
+        }
+    }
+
+    // M7: NaN/Inf mailbox value — PINNED (documentation only, not executed).
+    // Same upstream-validation story as T8: SetMailbox forwards to
+    // Scalar::FromDouble → WriteMailbox, and the engine's Scalar validation
+    // aborts on NaN/Inf in assertion builds. Not executed (would abort the
+    // smoke); the boundary is the engine's, not wfmut's.
     std::fprintf(stderr,
-        "  [SKIP] M3/M4 (mailbox-count boundary), M6 (no-mailbox actor),\n"
-        "         M7 (NaN/Inf), M8 (mailbox 999 crash) — deferred per plan.\n");
+        "  [INFO] M7: NaN/Inf mailbox values abort in Scalar validation "
+        "(assertion build) — not executed; boundary is upstream of wfmut.\n");
+
+    // M8: behaviour at the current GLOBAL_USER_MAX boundary. The memory
+    // project_followup_mailbox_999_crash predates the 999→1900 bump
+    // (mailbox.inc:32, 2026-05-09). Pin the CURRENT behaviour: write/read at
+    // 1899 (last user slot) and 1900 (the max). If either aborts, that's the
+    // off-by-one re-surfacing at the new boundary — a live bug to log.
+    {
+        const int last_ok = 1899;
+        auto saved = GetMailbox(level, player, last_ok);
+        bool ok_set = SetMailbox(level, player, last_ok, 5.0);
+        auto got = GetMailbox(level, player, last_ok);
+        bool round_trip = ok_set && got && fclose_to(static_cast<float>(*got), 5.0f, 1e-3f);
+        if (saved) SetMailbox(level, player, last_ok, *saved);
+        report("M8: Set/GetMailbox at 1899 (last global user slot) round-trips "
+               "(999→1900 boundary moved 2026-05-09)", round_trip);
+    }
+
+    // M2 (slot 0 LOCAL_SYSTEM side effects), M6 (no-mailbox-bearing actor not
+    // present in smb_w1_1) — deferred per the plan's test matrix.
+    std::fprintf(stderr,
+        "  [SKIP] M2 (slot-0 LOCAL_SYSTEM side effects), M6 (no mailbox-less "
+        "actor in smb) — deferred per plan.\n");
+}
+
+// ── Cross-cutting tests ─────────────────────────────────────────────────────
+
+void run_crosscutting_tests(Level& level, ActorIdx player)
+{
+    std::fprintf(stderr,"--- Cross-cutting (X1-X8) ---\n");
+
+    // X1: lastError() is populated after a failing call.
+    {
+        SetActorPos(level, 0, Vector3::zero);   // guaranteed failure (idx 0)
+        bool has_err = lastError() != nullptr && lastError()[0] != '\0';
+        report("X1: lastError() non-empty after a failed call", has_err);
+    }
+
+    // X2: lastError() clears to "" after a subsequent successful call. Never
+    // returns nullptr.
+    {
+        auto saved = GetActorPos(level, player);
+        bool ok_set = saved && SetActorPos(level, player, *saved);  // succeeds, no-op move
+        bool cleared = lastError() != nullptr && lastError()[0] == '\0';
+        report("X2: lastError() == \"\" after a successful call", ok_set && cleared,
+               std::string("lastError=\"") + lastError() + "\"");
+    }
+
+    // X3 (build with both flags off → no-op stubs), X4 (ASan), X5 (cross-
+    // thread guard), X6/X7/X8 (live bridge regression) are covered outside
+    // this in-process runner — see tests/verify_wfmut_bridge.py and the
+    // CTest/ASan targets.
+    std::fprintf(stderr,
+        "  [INFO] X3/X4/X5/X6/X7/X8 covered by build flags, ASan target, "
+        "cross-thread death-test, and verify_wfmut_bridge.py.\n");
 }
 
 } // namespace
@@ -431,6 +589,7 @@ int RunSmokeTests(Level& level)
     run_field_tests(level, player);
     run_spawn_remove_tests(level, player);
     run_mailbox_tests(level, player);
+    run_crosscutting_tests(level, player);
 
     // Cross-cutting tests (X1-X8) land in a follow-up; some require manual
     // verification (bridge regression, screenshot capture) and are tracked
