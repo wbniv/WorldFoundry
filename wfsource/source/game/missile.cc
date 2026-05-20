@@ -118,8 +118,8 @@ Missile::update()
 	if ( _armed )
 	{
 #pragma message ("KTS: stop using mainChacter")
-		Actor* main = dynamic_cast<Actor*>(theLevel->mainCharacter());
-      assert(ValidPtr(main));
+		assert(IsActor(theLevel->mainCharacter()));
+		Actor* main = static_cast<Actor*>(theLevel->mainCharacter());
 		if ( main->GetInputDevice()->justReleased( kBtnGrenade ) )
 			explodeNow = true;
 

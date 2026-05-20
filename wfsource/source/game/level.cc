@@ -115,8 +115,8 @@ Level::_print( std::ostream& s ) const
 	{
 		if ( _actors[ i ] )
 		{
-         Actor* actor = dynamic_cast<Actor*>(_actors[i]);
-         assert(ValidPtr(actor));
+         assert(IsActor(_actors[i]));
+         Actor* actor = static_cast<Actor*>(_actors[i]);
 			actor->printDetailed( s );
 			s << std::endl;
 		}
@@ -589,8 +589,8 @@ Level::Level
 
       while(!iter.Empty())
       {
-         Actor* actor = dynamic_cast<Actor*>(&(*iter));
-         assert(ValidPtr(actor));
+         assert(IsActor(&(*iter)));
+         Actor* actor = static_cast<Actor*>(&(*iter));
          actor->reset();
          ++iter;
       }
@@ -785,8 +785,8 @@ class ActorStartFrame
 public:
 	inline void operator() (BaseObject& bo)
 	{
-      Actor* actor = dynamic_cast<Actor*>(&bo);
-		assert(ValidPtr(actor));
+      assert(IsActor(&bo));
+      Actor* actor = static_cast<Actor*>(&bo);
 		actor->StartFrame();
 	}
 };
@@ -1046,8 +1046,8 @@ Level::removePendingObjects()
 
       BaseObject* bo = GetObject(idxActor);
       assert(ValidPtr(bo));
-      Actor* actor = dynamic_cast<Actor*>(bo);
-      assert(ValidPtr(actor));
+      assert(IsActor(bo));
+      Actor* actor = static_cast<Actor*>(bo);
 		actor->spawnPoof();
 		DBSTREAM2( clevel << " removeactor " << idxActor << " from room" << std::endl; )
 		ValidatePtr(_theLevelRooms);
@@ -1174,8 +1174,8 @@ Level::RenderScene()
 		while(!lightIter.Empty())
 		{
          BaseObject& bo = *lightIter;
-	  		const Actor* actor = dynamic_cast<Actor*>(&bo);
-			assert(ValidPtr(actor));
+			assert(IsActor(&bo));
+	  		const Actor* actor = static_cast<Actor*>(&bo);
 			assert(actor->kind() == Actor::Light_KIND);
 			const Light* light = (const Light*)actor;
 
@@ -1204,8 +1204,8 @@ Level::RenderScene()
 		BaseObjectIteratorWrapper poIter = cur_room->ListIter(ROOM_OBJECT_LIST_RENDER);
 		while( !poIter.Empty() )
 		{
-	  		Actor* const actor = dynamic_cast<Actor*>(&(*poIter));
-			assert(ValidPtr(actor));
+			assert(IsActor(&(*poIter)));
+	  		Actor* const actor = static_cast<Actor*>(&(*poIter));
 
 			if ( actor && actor->isVisible() )
 			{
@@ -1297,7 +1297,8 @@ Level::AddObject( BaseObject* object, const Vector3& posStartAt )
 		if ( !_actors[idxTempObject] )
 		{
 			_actors[idxTempObject] = object;
-         Actor* actor = dynamic_cast<Actor*>(object);
+         assert(IsActor(object));
+         Actor* actor = static_cast<Actor*>(object);
 			actor->SetActorIndex( idxTempObject );
 			added = true;
          assert(idxTempObject == GetObjectIndex( object ));
@@ -1344,8 +1345,8 @@ Level::SetPendingRemove( const BaseObject* object )
       return;
    }
 
-   const Actor* actor = dynamic_cast<const Actor*>(object);
-	assert( ValidPtr( actor ) );
+   assert(IsActor(object));
+   const Actor* actor = static_cast<const Actor*>(object);
 
 	int32 idxActor = actor->GetActorIndex();
 	assert(idxActor > 0);
@@ -1649,8 +1650,8 @@ SafelyConstructTemplateObject(int32 objectToGenerate,
 
          while ( !colIter.Empty() )
          {
-            PhysicalObject* colObject = dynamic_cast<PhysicalObject*>(&(*colIter));
-            assert(ValidPtr(colObject));
+            assert(IsPhysicalObject(&(*colIter)));
+            PhysicalObject* colObject = static_cast<PhysicalObject*>(&(*colIter));
 
             if ( collisionInteractionTable[startupData->objectData->type][colObject->kind()] )
             {
@@ -1732,7 +1733,7 @@ Level::GetObject( int idxObject ) const
 
    if(_actors[idxObject])
    {
-      BaseObject* po = dynamic_cast<BaseObject*>(_actors[idxObject]);
+      BaseObject* po = _actors[idxObject];
       assert(ValidPtr(po));
       return po;
    }

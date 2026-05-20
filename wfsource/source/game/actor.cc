@@ -230,9 +230,9 @@ Actor::Activated( BaseObjectIteratorWrapper objectIter, const _Activation* actbo
 			while ( !objectIter.Empty() )
 			{
             PhysicalObject* po;
-				po = dynamic_cast<PhysicalObject*>(&(*objectIter));
+				assert(IsPhysicalObject(&(*objectIter)));
+				po = static_cast<PhysicalObject*>(&(*objectIter));
 				//DBSTREAM1( cactor << std::endl << "checking against actor #" << theLevel->GetActorIndex( po ); )
-				assert( ValidPtr( po ) );
 				const PhysicalAttributes& pa = po->GetPhysicalAttributes();
 
 				if ( pa.CheckCollision( GetPhysicalAttributes() ) )
@@ -252,7 +252,8 @@ Actor::Activated( BaseObjectIteratorWrapper objectIter, const _Activation* actbo
 			if ( colObject )
 			{
 				//AssertMsg( colObject, *this << " activated by actor " << *colObject << " activated non-existant actor" << std::endl );
-            PhysicalObject* po = dynamic_cast<PhysicalObject*>(colObject);
+            assert(IsPhysicalObject(colObject));
+            PhysicalObject* po = static_cast<PhysicalObject*>(colObject);
 				const PhysicalAttributes& pa = po->GetPhysicalAttributes();
 				if ( pa.CheckCollision( GetPhysicalAttributes() ) )
             {
@@ -268,8 +269,8 @@ Actor::Activated( BaseObjectIteratorWrapper objectIter, const _Activation* actbo
 
 			while ( !objectIter.Empty() )
 			{
-				PhysicalObject* po = dynamic_cast<PhysicalObject*>(&(*objectIter));
-				assert( ValidPtr( po ) );
+				assert(IsPhysicalObject(&(*objectIter)));
+				PhysicalObject* po = static_cast<PhysicalObject*>(&(*objectIter));
 				if ( actbox->ActivatedByClass == po->kind() )
 				{
 					//DBSTREAM3( cactor << std::endl << "checking against actor #" << theLevel->GetActorIndex( po ); )
@@ -1334,8 +1335,8 @@ Actor::ReadSystemMailbox( int boxnum ) const
             while ( !poIter.Empty() )
             {
 
-                colActor = dynamic_cast<Actor*>(&(*poIter));
-                assert( ValidPtr( colActor ) );
+                assert(IsActor(&(*poIter)));
+                colActor = static_cast<Actor*>(&(*poIter));
                 if ( colActor->CanRender() )
                 {
                     const PhysicalAttributes& colAttr = colActor->GetPhysicalAttributes();
@@ -1735,8 +1736,8 @@ Actor::Collision(PhysicalObject& other, const Vector3& normal)
 	{
 		if (GetMovementManager().GetMovementHandlerData())
       {
-         MovementObject* movementObject = dynamic_cast<MovementObject*>(&other);
-         assert(ValidPtr(movementObject));
+         assert(IsMovementObject(&other));
+         MovementObject* movementObject = static_cast<MovementObject*>(&other);
 			GetMovementManager().GetMovementHandlerData()->supportingObject = movementObject;
       }
 	}
