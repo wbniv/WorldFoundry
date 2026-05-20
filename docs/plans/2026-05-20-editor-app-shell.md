@@ -1,7 +1,7 @@
 # Plan — Editor app shell (`wf-edit`: Dear ImGui host + embedded engine viewport + read-only Y.Doc)
 
 **Date:** 2026-05-20
-**Status:** **Acked 2026-05-20 (Option B). Implementing.** Vendoring confirmed; scope = shell **+ read-only Y.Doc** (Outliner reads the CRDT doc; viewport renders a normally-loaded level; the full CRDT→engine bridge is the next plan).
+**Status:** **M1–M4 done 2026-05-20.** Shell (M1) → embedded engine viewport (M2) → dockspace + panels (M3) → **read-only Y.Doc → Outliner (M4)**. `wf-edit` shells out to `levtree parse <lev>`, builds a `wfcrdt::Doc` (recursive chunk schema), and the Outliner lists actor names read back from the Doc — verified on snowgoons (36 actors; [screenshot](../../tests/screenshots/wfedit_m4_outliner.png)), ASan/UBSan-clean over the parse→Doc→read path. Built via `build-editor/` (CMake Debug; `-flto=thin` is Release/Clang-only). Remaining: M5 lifecycle/stability, M6 status sync. The full CRDT→engine bridge (Option C) is the next plan.
 **Estimate:** ~1–2 weeks for the shell ([design doc](../investigations/2026-05-18-collaborative-level-editor-design.md) line 657) + a few days for the read-only Y.Doc population. Kept on the average-programmer scale per [feedback_estimate_average_programmer_scale](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_estimate_average_programmer_scale.md).
 **Owner:** Claude (Will reviewing)
 **Branch:** `2026-new-level`
@@ -74,11 +74,12 @@ Missing is the **application that hosts it**: a windowed Dear ImGui app embeddin
 - Properties: placeholder showing the selected actor's name.
 - **Gate:** dockable layout, engine live in the Viewport. Screenshot.
 
-### 4. Read-only Y.Doc → Outliner (Option B)
+### 4. Read-only Y.Doc → Outliner (Option B) — ✅ DONE 2026-05-20
 
-- `levtree parse <level>.lev` (subprocess) → JSON → C++ parse → build `wfcrdt::Doc` (`content` = `OBJ` maps with field sub-data, per the CRDT schema).
-- **Outliner lists actor names read from the `Doc`** (not from the engine `Level`). Selecting one shows its name in Properties.
-- **Gate:** Outliner populated from the CRDT doc; counts match the level (snowgoons 36 / smb 22). Screenshot. ASan over the parse→Doc build.
+- `levtree parse <level>.lev` (subprocess via `popen`) → JSON (vendored [nlohmann/json](../../third_party/json/README.md) v3.11.3) → build `wfcrdt::Doc` in [`engine/wf_edit/level_doc.cc`](../../engine/wf_edit/level_doc.cc): `meta { level_name, format_version }` + `content` = `Y.Array<chunk>`, each chunk the recursive `Y.Map { chunk_type, children|text }` node, LVL wrapper dropped.
+- **Outliner lists actor names read back from the `Doc`** (each top-level chunk's `NAME` child text), `--leveltree=` selectable, defaulting to snowgoons-blender (matches the viewport `--level=`, per D7). Selecting one shows its name in Properties.
+- **Gate met:** Outliner shows **36** actors for snowgoons, sourced from the CRDT doc ([screenshot](../../tests/screenshots/wfedit_m4_outliner.png)); ASan+UBSan clean over `LoadLevelTreeIntoDoc`→`ReadActorNames`. (The gate's "smb 22" reference is live: `smb_w1_1.lev` is under active authoring — the loader matches the file's current OBJ count whatever it is.)
+- **Notes for M5+:** built in `build-editor/` (CMake **Debug** + GCC; the engine's `-flto=thin` Release flag is Clang-only). The `wfcrdt::Input::Kind` enum's `Bool` enumerator was renamed `Boolean` — Xlib's `#define Bool int` (pulled in ahead of `wfcrdt.hpp` in the editor) would otherwise mangle it; `Map`/`Array::valid()` added for the nested-read views. Required the [yffi nested-map workaround](2026-05-19-wfcrdt-cpp-raii-wrapper.md) (prefilled `yinput_ymap` loops in yrs 0.9.3).
 
 ### 5. Lifecycle + stability
 
@@ -111,7 +112,7 @@ Missing is the **application that hosts it**: a windowed Dear ImGui app embeddin
 ## Out of scope (each its own later plan)
 
 - **CRDT→engine bridge (Option C)** — observe `Doc` changes → `wfmut`; viewport reflects Y.Doc edits; the next plan.
-- **Property panel widgets** — `showAs`-driven dispatch over the OAD (x/y/z vec3 widget, dropdowns, colour, mailbox picker).
+- **Property panel widgets** — `(ButtonType × showAs)`-keyed dispatch over the OAD. The full widget taxonomy, per-type mockups, and prior-art grounding (the deleted `wfmaxplugins/attrib/` editor + the live `wf_blender` add-on + the [coverage audit](../investigations/2026-04-13-showas-coverage.md)) live in the [design doc § "Prior art" / "Widget gallery"](../investigations/2026-05-18-collaborative-level-editor-design.md). A later plan; the CRDT→engine bridge (Option C) comes first.
 - **Networking/relay, chat, awareness/presence, blob storage, lobby** — separate design-doc milestones.
 - **Wayland / mobile host embedding** — v2+.
 

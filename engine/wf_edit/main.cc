@@ -25,6 +25,9 @@
 #include <hal/hal.h>
 #include <pigsys/pigsys.hp>
 
+#include "level_doc.h"
+#include "wfcrdt.hpp"
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -42,6 +45,11 @@ struct EditorCtx {
     int         max_frames = -1;   // <0 = run until the window closes
     int         frame = 0;
     const char* shot = nullptr;    // --screenshot: PPM dump on the last frame
+
+    // M4 read-only Y.Doc: actor names read out of the CRDT doc (see level_doc).
+    std::string              level_name;
+    std::vector<std::string> actor_names;
+    int                      selected = -1;
 };
 
 // Dump the composited back buffer (engine render + ImGui overlay) to a P6 PPM.
@@ -110,13 +118,25 @@ bool editor_frame(void* p)
     }
 
     ImGui::Begin("Outliner");
-    ImGui::TextUnformatted("Actors");
+    ImGui::Text("%s: %zu actors", c->level_name.c_str(), c->actor_names.size());
+    ImGui::TextDisabled("(read from the Y.Doc)");
     ImGui::Separator();
-    ImGui::TextDisabled("(populated from the Y.Doc in M4)");
+    for (int i = 0; i < static_cast<int>(c->actor_names.size()); ++i) {
+        if (ImGui::Selectable(c->actor_names[i].c_str(), c->selected == i))
+            c->selected = i;
+    }
     ImGui::End();
 
     ImGui::Begin("Properties");
-    ImGui::TextDisabled("(select an actor)");
+    if (c->selected >= 0 && c->selected < static_cast<int>(c->actor_names.size())) {
+        ImGui::Text("Name");
+        ImGui::SameLine(120);
+        ImGui::TextUnformatted(c->actor_names[c->selected].c_str());
+        ImGui::Separator();
+        ImGui::TextDisabled("(OAS field widgets: later milestone)");
+    } else {
+        ImGui::TextDisabled("(select an actor)");
+    }
     ImGui::End();
 
     // Status readout floating over the central (engine) region.
@@ -153,7 +173,11 @@ int main(int argc, char** argv)
 {
     int         max_frames = -1;
     const char* shot = nullptr;
-    std::string level = "wflevels/qbert_practice/qbert_practice-standalone.iff";
+    // Viewport level (engine LoadLevel) + the .lev parsed into the read-only
+    // Y.Doc. Default both to snowgoons-blender so the viewport and Outliner
+    // show the same level (plan D7); override independently for now.
+    std::string level     = "wflevels/snowgoons-blender/snowgoons-standalone.iff";
+    std::string leveltree = "wflevels/snowgoons-blender/snowgoons-blender.lev";
     for (int i = 1; i < argc; ++i) {
         if (std::strcmp(argv[i], "--frames") == 0 && i + 1 < argc)
             max_frames = std::atoi(argv[++i]);
@@ -161,6 +185,28 @@ int main(int argc, char** argv)
             shot = argv[++i];
         else if (std::strncmp(argv[i], "--level=", 8) == 0)
             level = argv[i] + 8;
+        else if (std::strncmp(argv[i], "--leveltree=", 12) == 0)
+            leveltree = argv[i] + 12;
+    }
+
+    // 0. Read-only Y.Doc (M4): shell out to `levtree parse`, build a wfcrdt::Doc
+    //    in the editor CRDT schema, and read the actor names back out of it for
+    //    the Outliner. CPU-only; done before any GL. The Doc is held for the
+    //    program lifetime (read-only here; the CRDT→engine bridge is the next
+    //    plan). A failure here is non-fatal — the shell still runs.
+    wfcrdt::Doc              doc;
+    std::string              level_name;
+    std::vector<std::string> actor_names;
+    if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc)) {
+        actor_names = wfedit::ReadActorNames(doc);
+        level_name  = leveltree;
+        if (auto slash = level_name.find_last_of('/'); slash != std::string::npos)
+            level_name.erase(0, slash + 1);
+        std::printf("wf-edit: Outliner shows %zu actors from the Y.Doc\n",
+                    actor_names.size());
+    } else {
+        std::fprintf(stderr, "wf-edit: Y.Doc population failed for %s "
+                             "(Outliner will be empty)\n", leveltree.c_str());
     }
 
     // 1. Editor-owned GLFW X11/GLX window + context.
@@ -197,6 +243,8 @@ int main(int argc, char** argv)
                       true };
     SetHostGLContext(&hc);
     EditorCtx ctx{ win, max_frames, 0, shot };
+    ctx.level_name  = std::move(level_name);
+    ctx.actor_names = std::move(actor_names);
     SetEditorFrameCallback(editor_frame, &ctx);
 
     // 4. Drive the engine. HALStart inits HAL/audio + calls PIGSMain, which in

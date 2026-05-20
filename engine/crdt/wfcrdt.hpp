@@ -143,12 +143,14 @@ private:
 // "nested types" extension, triggered by the editor's Y.Doc population).
 class Input {
 public:
-    enum class Kind { Str, Long, Double, Bool, Map, Array };
+    // NB: `Boolean`, not `Bool` — Xlib's `#define Bool int` (pulled in by the
+    // editor's X11/GLX headers ahead of this one) would mangle a `Bool` token.
+    enum class Kind { Str, Long, Double, Boolean, Map, Array };
 
     static Input str(std::string s) { Input i; i._k = Kind::Str;    i._s = std::move(s); return i; }
     static Input lng(long long v)   { Input i; i._k = Kind::Long;   i._l = v; return i; }
     static Input dbl(double v)      { Input i; i._k = Kind::Double; i._d = v; return i; }
-    static Input boolean(bool v)    { Input i; i._k = Kind::Bool;   i._b = v; return i; }
+    static Input boolean(bool v)    { Input i; i._k = Kind::Boolean; i._b = v; return i; }
     static Input map()              { Input i; i._k = Kind::Map;    return i; }
     static Input array()            { Input i; i._k = Kind::Array;  return i; }
 
@@ -184,6 +186,9 @@ public:
     void insert(const char* key, double value);
     void insert(const char* key, const Input& value);   // nested map/array
 
+    // False for the view returned by Output::asMap() on a non-map value.
+    bool valid() const { return _branch != nullptr; }
+
     Output get(const char* key) const;
     int len() const;
 
@@ -207,6 +212,9 @@ public:
     void insertRange(int index, const long long* values, int count);
     void insert(int index, const Input& value);   // nested map/array
     void push(const Input& value);                 // append at end
+
+    // False for the view returned by Output::asArray() on a non-array value.
+    bool valid() const { return _branch != nullptr; }
 
     Output get(int index) const;
     int len() const;

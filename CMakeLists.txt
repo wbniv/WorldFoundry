@@ -848,6 +848,7 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/third_party/imgui)
     add_executable(wf_edit
         engine/wf_edit/main.cc
+        engine/wf_edit/level_doc.cc            # M4: levtree -> wfcrdt::Doc
         ${IMGUI_DIR}/imgui.cpp
         ${IMGUI_DIR}/imgui_draw.cpp
         ${IMGUI_DIR}/imgui_tables.cpp
@@ -856,7 +857,10 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
     )
     set_target_properties(wf_edit PROPERTIES OUTPUT_NAME "wf-edit")
-    target_include_directories(wf_edit PRIVATE ${IMGUI_DIR} ${IMGUI_DIR}/backends)
+    target_include_directories(wf_edit PRIVATE
+        ${IMGUI_DIR} ${IMGUI_DIR}/backends
+        ${CMAKE_SOURCE_DIR}/engine/crdt              # wfcrdt.hpp (read-only Y.Doc)
+        ${CMAKE_SOURCE_DIR}/third_party/json)        # <nlohmann/json.hpp>
     # main.cc compiles against engine headers, so the target needs the engine's
     # flags (mirrors wf_host_gl_e2e_test). Harmless for the ImGui TUs alongside.
     target_compile_options(wf_edit PRIVATE
@@ -866,7 +870,7 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
         "$<$<CONFIG:Release>:-O3;-flto=thin>"
     )
-    # Link the engine (host-GL embed via SetHostGLContext + StepFrame).
-    target_link_libraries(wf_edit PRIVATE wfengine glfw GL)
-    # M4 will also link wfcrdt (read-only Y.Doc).
+    # Link the engine (host-GL embed via SetHostGLContext + StepFrame) and
+    # wfcrdt (M4 read-only Y.Doc; pulls in libyrs.a from the editor build).
+    target_link_libraries(wf_edit PRIVATE wfengine wfcrdt glfw GL)
 endif()

@@ -203,7 +203,7 @@ void put_in_map(Branch* m, YTransaction* txn, const char* key, const Input& in) 
         case K::Str:    { YInput v = yinput_string(in.strVal().c_str());              ymap_insert(m, txn, key, &v); return; }
         case K::Long:   { YInput v = yinput_long(static_cast<long>(in.longVal()));     ymap_insert(m, txn, key, &v); return; }
         case K::Double: { YInput v = yinput_float(static_cast<float>(in.doubleVal())); ymap_insert(m, txn, key, &v); return; }
-        case K::Bool:   { YInput v = yinput_bool(in.boolVal() ? 1 : 0);                ymap_insert(m, txn, key, &v); return; }
+        case K::Boolean:   { YInput v = yinput_bool(in.boolVal() ? 1 : 0);                ymap_insert(m, txn, key, &v); return; }
         case K::Map: {
             YInput empty = yinput_ymap(nullptr, nullptr, 0);
             ymap_insert(m, txn, key, &empty);
@@ -230,7 +230,7 @@ void put_in_array(Branch* a, YTransaction* txn, int index, const Input& in) {
         case K::Str:    { YInput v = yinput_string(in.strVal().c_str());              yarray_insert_range(a, txn, index, &v, 1); return; }
         case K::Long:   { YInput v = yinput_long(static_cast<long>(in.longVal()));     yarray_insert_range(a, txn, index, &v, 1); return; }
         case K::Double: { YInput v = yinput_float(static_cast<float>(in.doubleVal())); yarray_insert_range(a, txn, index, &v, 1); return; }
-        case K::Bool:   { YInput v = yinput_bool(in.boolVal() ? 1 : 0);                yarray_insert_range(a, txn, index, &v, 1); return; }
+        case K::Boolean:   { YInput v = yinput_bool(in.boolVal() ? 1 : 0);                yarray_insert_range(a, txn, index, &v, 1); return; }
         case K::Map: {
             YInput empty = yinput_ymap(nullptr, nullptr, 0);
             yarray_insert_range(a, txn, index, &empty, 1);
