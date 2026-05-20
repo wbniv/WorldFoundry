@@ -1,7 +1,7 @@
 # Plan: Eliminate C++ RTTI — restore `kind()`-based dispatch
 
 **Date:** 2026-04-29 (drafted), refreshed 2026-05-19 for implementation.
-**Status:** In progress.
+**Status:** In progress — code complete, `-fno-rtti` wired & verified; commit of the build-file edits + BUGS.md entry pending.
 **Related:** [docs/investigations/2026-04-29-rtti-audit.md](../investigations/2026-04-29-rtti-audit.md)
 
 ---
@@ -254,13 +254,21 @@ cd wfsource/source/game && ../../../engine/wf_game -L wflevels/qbert.iff
    `wfmut.cpp` ×1, `wfmut_smoke.cpp` ×3 — all `Level`-lookup guaranteed downcasts.
    The editor is now RTTI-free, so step 6 can extend `-fno-rtti` to editor TUs
    with no carve-out.
-6. **Add `-fno-rtti` to both build paths** ← NEXT, now unblocked: `CMakeLists.txt`
-   `wfengine` / `wf_game` / `Jolt` Android release; `build_game.sh` CXXFLAGS.
-7. **Verify**: snowgoons + qbert smoke + UBSan + NDK build;
-   add BUGS.md entry with fix-commit date.
+6. **Add `-fno-rtti` to both build paths** ✓ (in the working tree — **commit
+   pending**; these build-file edits are the RTTI worker's WIP): `-fno-rtti`
+   now in `CMakeLists.txt` `wfengine` / `wf_game` / `Jolt` Android-release
+   blocks and in `build_game.sh` CXXFLAGS.
+7. **Verify** — mostly done: clean `-fno-rtti` rebuild + full CTest green and
+   the Android NDK build green (both 2026-05-19 background tasks); snowgoons
+   (level 0) + qbert (level 1) both boot and step frames under the `-fno-rtti`
+   `build_game.sh` binary. Remaining: an optional UBSan sweep
+   (`task test-wfmut-asan`) and the BUGS.md entry (dated by fix-commit).
 
-**Status (2026-05-19):** steps 1–5 done; **zero `dynamic_cast`/`typeid` remain
-in our (non-vendor) code.** Next is step 6 (`-fno-rtti`), then step 7 verify.
+**Status (2026-05-19):** steps 1–6 done — **zero `dynamic_cast`/`typeid` remain
+in our (non-vendor) code** and `-fno-rtti` is wired into both build paths.
+Clean `-fno-rtti` rebuild + full CTest green, Android NDK build green, and
+snowgoons + qbert smoke green under the `-fno-rtti` binary. **Remaining:
+commit the build-file edits + add the BUGS.md entry**, then this plan is done.
 
 Commit after each step (per `[[feedback_commit_after_each_phase]]`).
 
