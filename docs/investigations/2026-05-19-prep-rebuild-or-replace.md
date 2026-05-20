@@ -1,7 +1,7 @@
 # prep — Rebuild from Source vs. Replace
 
 **Date:** 2026-05-19
-**Status:** Investigation only — no implementation
+**Status:** Path 1 implemented (2026-05-19) — `prep` rebuilt self-contained under `wftools/prep/`: `eval/` restored from `330a23d^` (with committed bison/flex output), `recolib`/`regexp` moved in, `build.sh` repointed. Verified via the OAS→OAD oracle test ([`wftools/oas2oad-rs/tests/oas_to_oad.rs`](../../wftools/oas2oad-rs/tests/oas_to_oad.rs)): all 43 `.oas` reproduce their golden `.oad` byte-for-byte, and prep's `.pp` output matches the canonical [apt.worldfoundry.org](http://apt.worldfoundry.org/) build. The in-repo `prep` binary is now gitignored. Path 3 (Rust rewrite) remains the long-term follow-up.
 **Trigger:** `prep` binary's `eval` feature is broken; we need either to fix it (rebuild from source) or retire `prep` in favour of a standard tool such as [GNU m4](https://www.gnu.org/software/m4/) or [GNU cpp](https://gcc.gnu.org/onlinedocs/cpp/). The asset-production pipeline still depends on `prep` for `.oas` → `.oad` compilation, so it cannot simply be dropped.
 
 Related references:
