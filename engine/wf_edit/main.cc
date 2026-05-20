@@ -16,6 +16,7 @@
 #include <GLFW/glfw3native.h>
 
 #include "imgui.h"
+#include "imgui_internal.h"   // DockBuilder API (default panel layout)
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
@@ -75,9 +76,57 @@ bool editor_frame(void* p)
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::Begin("World Foundry Editor");
-    ImGui::TextUnformatted("M2: engine viewport embedded (StepFrame) + ImGui overlay");
-    ImGui::Text("frame %d   %.1f FPS", c->frame, ImGui::GetIO().Framerate);
+    // Dockspace with a pass-through central node: the engine already rendered
+    // fullscreen into the back buffer (StepFrame), and the central node draws
+    // no background, so the engine viewport shows through; panels dock around
+    // it. (Rendering the engine into an FBO for a discrete viewport texture is
+    // a confirmed-viable refinement — the engine renders into whatever FBO is
+    // bound in non-record mode — but not needed for the M3 layout.)
+    ImGuiID dock_id = ImGui::DockSpaceOverViewport(
+        0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+
+    static bool s_layout = false;
+    if (!s_layout) {
+        s_layout = true;
+        ImGui::DockBuilderRemoveNode(dock_id);
+        ImGui::DockBuilderAddNode(dock_id,
+            ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_DockSpace);
+        ImGui::DockBuilderSetNodeSize(dock_id, ImGui::GetMainViewport()->WorkSize);
+        ImGuiID center = dock_id;
+        ImGuiID left   = ImGui::DockBuilderSplitNode(center, ImGuiDir_Left,  0.20f, nullptr, &center);
+        ImGuiID right  = ImGui::DockBuilderSplitNode(center, ImGuiDir_Right, 0.25f, nullptr, &center);
+        ImGui::DockBuilderDockWindow("Outliner",   left);
+        ImGui::DockBuilderDockWindow("Properties", right);
+        ImGui::DockBuilderFinish(dock_id);
+    }
+
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("File")) {
+            ImGui::MenuItem("Publish to .blend", nullptr, false, false);   // M5+
+            ImGui::EndMenu();
+        }
+        ImGui::TextDisabled("   World Foundry Editor");
+        ImGui::EndMainMenuBar();
+    }
+
+    ImGui::Begin("Outliner");
+    ImGui::TextUnformatted("Actors");
+    ImGui::Separator();
+    ImGui::TextDisabled("(populated from the Y.Doc in M4)");
+    ImGui::End();
+
+    ImGui::Begin("Properties");
+    ImGui::TextDisabled("(select an actor)");
+    ImGui::End();
+
+    // Status readout floating over the central (engine) region.
+    ImGui::SetNextWindowBgAlpha(0.35f);
+    if (ImGui::Begin("##status", nullptr,
+            ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
+            ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoNav)) {
+        ImGui::Text("Viewport: engine StepFrame   frame %d   %.1f FPS",
+                    c->frame, ImGui::GetIO().Framerate);
+    }
     ImGui::End();
 
     ImGui::Render();
