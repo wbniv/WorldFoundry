@@ -162,7 +162,7 @@ Enumerate every chunk ID and leaf shape that actually appears across the real le
 | R8 | Nested `OBJ` containers + every leaf chunk type seen in step 0 | all round-trip |
 | R9 | Unknown chunk ID / unknown leaf shape (synthetic) | raw token list passes through (graceful degradation) |
 | R10 | JSON boundary: `parse | print` ≡ `canonical` | idempotent (step 7) |
-| R11 | Special snowgoons chunks (`PATH`/`BROT`/`BPOS`/`TYPE`/`RATE`/`DIM`/`CHAN`) | round-trip via the generic model. (The `.lev` root is `LVL`; `LVAS`-as-root per [project_iffcomp_rs_surpassed_cpp](/home/will/.claude/projects/-home-will-WorldFoundry/memory/project_iffcomp_rs_surpassed_cpp.md) is the *downstream* `.iff.txt` structure, out of scope here.) |
+| R11 | Special snowgoons chunks (`PATH`/`BROT`/`BPOS`/`TYPE`/`RATE`/`DIM`/`CHAN`) | round-trip via the generic model. (The `.lev` root is `LVL`; `LVAS` — "Level Assets" — is the *downstream binary* per-level container, [documented in level-building.md](../level-building.md) § Level File Format, out of scope here.) |
 
 ---
 

@@ -819,6 +819,26 @@ unless you're modifying the engine itself.
 
 ### Level File Format
 
+#### LVAS — Level Assets (per-level container)
+
+**LVAS = "Level Assets".** The IFF container chunk that bundles one level
+together with the binary assets it needs — effectively a list of the IFF
+(binary) files that make up a playable level: the level data (`LVL`) plus its
+asset blobs (`PERM`, `RM0`, `RM1`, … the permanent + per-room texture/mesh
+bundles), indexed by a table of contents (`TOC`) and an asset map (`ASMP`).
+
+Layout (per [`levcomp-rs/decompile.rs`](../wftools/levcomp-rs/src/decompile.rs)):
+
+```
+L4   → [ ALGN, RAM, ALGN, LVAS ]
+LVAS → [ TOC, ALGN, ASMP, ALGN, LVL, PERM, RM0, RM1, … ]
+```
+
+The authored `.lev` text source roots at **`LVL`** (the level data alone);
+**`LVAS`** is the downstream binary wrapper produced when the level and its
+assets are packaged for the engine. `cd.iff` (below) is in turn an archive of
+many such per-level files.
+
 #### cd.iff — Multi-Level Archive
 
 `cd.iff` is an IFF-format table-of-contents archive containing all game levels.

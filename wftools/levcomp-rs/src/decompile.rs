@@ -572,7 +572,7 @@ pub fn run(
     let inner_chunks = read_chunks(&top.payload)
         .map_err(|e| format!("IFF inner parse error: {}", e.message))?;
 
-    // The LVAS chunk is the container that holds TOC, ASMP, LVL, etc.
+    // The LVAS ("Level Assets") chunk is the container that holds TOC, ASMP, LVL, etc.
     // Structure: L4 → [ALGN, RAM, ALGN, LVAS]
     //            LVAS → [TOC, ALGN, ASMP, ALGN, LVL, PERM, RM0, RM1, ...]
     // So we need to recurse into LVAS to find LVL and ASMP.
