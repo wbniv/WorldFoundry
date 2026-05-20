@@ -857,8 +857,16 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     )
     set_target_properties(wf_edit PROPERTIES OUTPUT_NAME "wf-edit")
     target_include_directories(wf_edit PRIVATE ${IMGUI_DIR} ${IMGUI_DIR}/backends)
-    # Third-party + app code: own flags, not the engine's -fpermissive/__GAME__.
-    target_compile_options(wf_edit PRIVATE -fno-rtti -w)
-    target_link_libraries(wf_edit PRIVATE glfw GL)
-    # M2+ links wfengine (embed) and wfcrdt (read-only Y.Doc).
+    # main.cc compiles against engine headers, so the target needs the engine's
+    # flags (mirrors wf_host_gl_e2e_test). Harmless for the ImGui TUs alongside.
+    target_compile_options(wf_edit PRIVATE
+        -fpermissive -w -fno-rtti
+        "-D__GAME__=\"wf-edit\""
+        "-DERR_DEBUG(x)="
+        "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
+        "$<$<CONFIG:Release>:-O3;-flto=thin>"
+    )
+    # Link the engine (host-GL embed via SetHostGLContext + StepFrame).
+    target_link_libraries(wf_edit PRIVATE wfengine glfw GL)
+    # M4 will also link wfcrdt (read-only Y.Doc).
 endif()

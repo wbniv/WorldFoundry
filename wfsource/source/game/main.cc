@@ -52,6 +52,9 @@ int  gFrameStepSmokeCount = 0;          // >0 = run --frame-step-smoke=N path
 bool gWfmutSmoke          = false;      // true = run --wfmut-smoke path
 bool gWfmutThreadTest     = false;      // true = run --wfmut-thread-test (X5 death-test)
 int  gFrameStepCycles = 1;              // --cycles=N: how many Load/Unload cycles to run
+#if defined(WF_ENABLE_EDITOR)
+bool gEditorMode = false;               // --editor: wf-edit drives the engine via RunEditor
+#endif
 #if DO_TEST_CODE
 int  gDebugPrintActors = 0;             // 1 = print idx/mesh/mobility/pos per actor at construction (debug builds only)
 #endif
@@ -225,6 +228,13 @@ ParseCommandLine(int argc, char** argv)
 			AssertMsg(gFrameStepCycles >= 1, "--cycles=N requires N>=1");
 			DBSTREAM1( cprogress << "Frame-step API cycles: " << gFrameStepCycles << std::endl; )
 		}
+#if defined(WF_ENABLE_EDITOR)
+		else if ( strcmp( argv[index]+1, "-editor" ) == 0 )
+		{
+			gEditorMode = true;
+			DBSTREAM1( cprogress << "Editor mode (wf-edit drives RunEditor)" << std::endl; )
+		}
+#endif
 #if DO_TEST_CODE
 		else if ( strcmp( argv[index]+1, "-debug-print-actors" ) == 0 )
 		{
@@ -410,6 +420,13 @@ PIGSMain( int argc, char* * argv )
 	{
 		DBSTREAM1( cprogress << "main::wfmut cross-thread death-test" << std::endl; )
 		game->RunWfmutThreadTest( );   // expected to abort inside the guard
+	}
+#endif
+#if defined(WF_ENABLE_EDITOR)
+	else if (gEditorMode)
+	{
+		DBSTREAM1( cprogress << "main::editor mode (RunEditor)" << std::endl; )
+		game->RunEditor( );
 	}
 #endif
 	else

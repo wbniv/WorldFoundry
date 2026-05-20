@@ -35,6 +35,7 @@
 #include <audio/sfx_library.hp>
 #include "rest_api.hp"
 #include "debug_server.hp"
+#include "editor_hook.h"
 #include "wfmut_smoke.hpp"
 #include "physics_jolt.hp"
 #include "oas/matte.ht"
@@ -435,6 +436,50 @@ WFGame::RunWfmutThreadTest()
 	return r;
 }
 #endif // WF_DEBUG_BRIDGE || WF_ENABLE_EDITOR
+
+//-----------------------------------------------------------------------------
+
+#if defined(WF_ENABLE_EDITOR)
+namespace {
+	EditorFrameCallback sEditorFrame = nullptr;
+	void*               sEditorCtx   = nullptr;
+}
+
+extern "C" void
+SetEditorFrameCallback( EditorFrameCallback fn, void* ctx )
+{
+	sEditorFrame = fn;
+	sEditorCtx   = ctx;
+}
+
+void
+WFGame::RunEditor()
+{
+	extern const char* gLevelOverridePath;
+	AssertMsg(gLevelOverridePath, "--editor requires -L<level-path>");
+
+	_DiskFile* df = ConstructDiskFile(const_cast<char*>(gLevelOverridePath), HALLmalloc);
+	assert(ValidPtr(df));
+	df->SeekRandom(DiskFileCD::_SECTOR_SIZE);
+
+	LoadLevel(df);
+	DBSTREAM1( cprogress << "RunEditor: level loaded, entering editor loop" << std::endl; )
+
+	// Editor owns cadence + the swap. StepFrame(do_swap=false) renders the
+	// engine into the back buffer; the registered callback composites its UI
+	// and swaps. Loop until the callback returns false (window closed).
+	for (;;) {
+		Scalar dt;
+		StepFrame(false, &dt);
+		if (!sEditorFrame || !sEditorFrame(sEditorCtx))
+			break;
+	}
+
+	UnloadLevel();
+	MEMORY_DELETE(HALLmalloc, df, _DiskFile);
+	DBSTREAM1( cprogress << "RunEditor: complete" << std::endl; )
+}
+#endif // WF_ENABLE_EDITOR
 
 //-----------------------------------------------------------------------------
 
