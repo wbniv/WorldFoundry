@@ -138,6 +138,24 @@ impl Lexer {
         Ok(l)
     }
 
+    /// Build a lexer over an in-memory source buffer (no file on disk).
+    /// `name` is used only for error positions. Lets callers tokenize a
+    /// string without a temp file (used by `levtree-rs` and unit tests).
+    pub fn from_source(text: impl Into<Vec<u8>>, name: impl Into<String>) -> Self {
+        let mut l = Lexer {
+            stack: Vec::new(),
+            lookahead: VecDeque::new(),
+        };
+        l.stack.push(Frame {
+            src: text.into(),
+            offset: 0,
+            line: 1,
+            col: 1,
+            filename: name.into(),
+        });
+        l
+    }
+
     /// Push an `include "f"` file onto the frame stack. Absolute or
     /// working-directory-relative.
     pub fn push_include(&mut self, name: &str) -> Result<()> {
