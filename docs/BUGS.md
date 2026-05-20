@@ -13,6 +13,22 @@ Format per entry:
 
 ---
 
+## `Generato` was the only Actor subclass that skipped its `wf_Script` while idle — script-contract inconsistency — 2026-05-20
+
+**Status:** FIXED commit `4d4dff8`.
+
+**Symptom:** A generator's in-level `wf_Script` (the `{ Script }` STR field) silently did **not** run on any tick its activation mailbox read zero. Every other Actor subclass runs its script every tick. No runtime symptom for the engine's entire history — surfaced only when the SMB `?`-block-IS-generator design needed the block's own collision-detect script to run *while* the activation mailbox was still idle (so it could raise the mailbox on a bump); the script never executed and the block could not self-detect.
+
+**Root cause:** A *design* bug, not a coding error — and a hack in the bad sense. `Generato::update()` ([`game/generator.cc`](../wfsource/source/game/generator.cc):67-128) short-circuited its idle branch (activation mailbox `== Scalar::zero`) with `return;` after resetting `_timeToGenerate`. The timer reset is the load-bearing 1996 `kts` anti-over-generation behavior; the `return` was an incidental idle exit whose *side effect* was skipping the trailing `Actor::update()` ([`game/actor.cc`](../wfsource/source/game/actor.cc):882) — the universal per-tick hook through which every actor's script runs. So generators silently violated the "every Actor runs its script every tick" contract that holds for every other subclass. The hack is the construction itself: a bare `return` doing control-flow duty where an `else` belonged, smuggling a consequential class-wide decision (this entire subclass forgoes its script while idle) into what reads as a trivial "bail out early when there's nothing to spawn" shortcut. Nothing at the call site or in the function signature hints that idleness silences the script — the cost is invisible to anyone reading the function, which is exactly why it survived undetected.
+
+**Why dormant:** The idle `return` produced correct *generation* behavior for its entire life (present in first commit `a2784f6`, 2010-05-01; the surrounding logic is `kts` 1996-vintage). The inconsistency was invisible because the one capability it broke — a generator with a meaningful per-tick script — was never exercised: no `.lev` in the repo ever attached a script to a Generator actor (the only Generator instance is the SMB block added 2026-05). The bug "worked anyway" because nothing ever asked a generator to think while idle.
+
+**Fix:** Drop the `return`; wrap the spawn body in an `else`; call `Actor::update()` unconditionally at the end of `Generato::update()`. The 1996 timer-reset (anti-over-generation) is preserved verbatim — only the incidental script-skip is removed, restoring parity with every other Actor subclass. Frame ordering then makes the one-tick activation pulse work: spawn-check reads the mailbox at the top, the script runs (and can set/clear it) at the bottom.
+
+**Investigation:** Engine change #2 of plan [plans/2026-05-19-smb-block-generator-coin.md](plans/2026-05-19-smb-block-generator-coin.md).
+
+---
+
 ## C++ RTTI (`dynamic_cast`) crept in via the 2003 `BaseObject*` generalization — 22-year dormant constraint breach — 2026-05-19
 
 **Status:** FIXED commits `8d5ef7b`..`3fdb124` (casts → `kind()`/`static_cast`) + `fbf9f7d` (`-fno-rtti` enabled).
