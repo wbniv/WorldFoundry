@@ -447,3 +447,12 @@ tasks:
       - cmake -S . -B cmake-build-linux
       - cmake --build cmake-build-linux -j --target wf_game
       - cd cmake-build-linux && ctest --output-on-failure -R "wfmut"
+
+  test-wfmut-asan:
+    desc: "Build wfmut under ASan + UBSan and run the smoke (pre-merge leak/UB gate; needs DISPLAY)"
+    cmds:
+      # NB: the ASan build writes engine/wf_game in place (RUNTIME_OUTPUT_DIRECTORY),
+      # overwriting the regular binary — rebuild with `task build` afterward.
+      - cmake -S . -B cmake-build-asan -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=ON
+      - cmake --build cmake-build-asan -j --target wf_game
+      - cd wfsource/source/game && DISPLAY=:0 ASAN_OPTIONS=halt_on_error=1:detect_leaks=1 UBSAN_OPTIONS=halt_on_error=1 ../../../engine/wf_game -L../../../wflevels/smb_w1_1-standalone.iff --wfmut-smoke

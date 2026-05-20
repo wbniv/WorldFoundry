@@ -1,7 +1,7 @@
 # Plan: Eliminate C++ RTTI — restore `kind()`-based dispatch
 
 **Date:** 2026-04-29 (drafted), refreshed 2026-05-19 for implementation.
-**Status:** In progress — code complete, `-fno-rtti` wired & verified; commit of the build-file edits + BUGS.md entry pending.
+**Status:** Done (2026-05-19).
 **Related:** [docs/investigations/2026-04-29-rtti-audit.md](../investigations/2026-04-29-rtti-audit.md)
 
 ---
@@ -254,23 +254,36 @@ cd wfsource/source/game && ../../../engine/wf_game -L wflevels/qbert.iff
    `wfmut.cpp` ×1, `wfmut_smoke.cpp` ×3 — all `Level`-lookup guaranteed downcasts.
    The editor is now RTTI-free, so step 6 can extend `-fno-rtti` to editor TUs
    with no carve-out.
-6. **Add `-fno-rtti` to both build paths** ✓ (in the working tree — **commit
-   pending**; these build-file edits are the RTTI worker's WIP): `-fno-rtti`
-   now in `CMakeLists.txt` `wfengine` / `wf_game` / `Jolt` Android-release
-   blocks and in `build_game.sh` CXXFLAGS.
-7. **Verify** — mostly done: clean `-fno-rtti` rebuild + full CTest green and
-   the Android NDK build green (both 2026-05-19 background tasks); snowgoons
-   (level 0) + qbert (level 1) both boot and step frames under the `-fno-rtti`
-   `build_game.sh` binary. Remaining: an optional UBSan sweep
-   (`task test-wfmut-asan`) and the BUGS.md entry (dated by fix-commit).
+6. **Add `-fno-rtti` to both build paths** ✓ (`fbf9f7d`): `-fno-rtti` in
+   `CMakeLists.txt` `wfengine` / `wf_game` / `Jolt` / `wf_host_gl_e2e_test`
+   (the e2e harness closes the last coverage gap) and in `build_game.sh`
+   CXXFLAGS.
+7. **Verify** ✓: clean from-scratch `-fno-rtti` `build_game.sh` build links
+   (exit 0) and the binary carries zero `typeinfo for Actor/Camera/...` symbols
+   (`nm`); full CTest green + Android NDK build green (2026-05-19 background
+   tasks); snowgoons (level 0) + qbert (level 1) both boot and step frames under
+   the `-fno-rtti` binary; BUGS.md entry added (2026-05-19). UBSan sweep wired as
+   `task test-wfmut-asan` (optional gate).
 
-**Status (2026-05-19):** steps 1–6 done — **zero `dynamic_cast`/`typeid` remain
-in our (non-vendor) code** and `-fno-rtti` is wired into both build paths.
-Clean `-fno-rtti` rebuild + full CTest green, Android NDK build green, and
-snowgoons + qbert smoke green under the `-fno-rtti` binary. **Remaining:
-commit the build-file edits + add the BUGS.md entry**, then this plan is done.
+**Status: Done (2026-05-19).** Zero `dynamic_cast`/`typeid` (and no
+`std::any`/`type_index`/`type_info`) remain in our non-vendor code; `-fno-rtti`
+is committed across every TU and the `type_info` tables are gone from the
+binary. The closed `BaseObject ← PhysicalObject ← MovementObject ← Actor`
+hierarchy (abstract intermediates) is what makes the `static_cast`s valid; the
+`IsXxx()` helpers are the single update point if a non-`Actor` `BaseObject` is
+ever added. BUGS.md entry landed.
 
 Commit after each step (per `[[feedback_commit_after_each_phase]]`).
+
+---
+
+## Actuals vs estimate
+
+**Estimate:** 4–6 hours. **Actual implementation:** commits span 11:08–21:15 on
+2026-05-19 in two clusters (~2 h active hands-on; the gap was unrelated work),
+plus this close-out. Recorded per `[[feedback_plan_duration_tracking]]`; the
+4–6 h estimate stays on the average-programmer scale per
+`[[feedback_estimate_average_programmer_scale]]` and is **not** revised down.
 
 ---
 

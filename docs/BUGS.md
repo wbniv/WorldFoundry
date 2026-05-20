@@ -13,6 +13,22 @@ Format per entry:
 
 ---
 
+## C++ RTTI (`dynamic_cast`) crept in via the 2003 `BaseObject*` generalization — 22-year dormant constraint breach — 2026-05-19
+
+**Status:** FIXED commits `8d5ef7b`..`3fdb124` (casts → `kind()`/`static_cast`) + `fbf9f7d` (`-fno-rtti` enabled).
+
+**Symptom:** None at runtime — that is the point. WF carries a load-bearing "no C++ RTTI" constraint (costly on the era's fixed-point MCU targets: `type_info` in flash, `dynamic_cast` tree-walks in hot loops, uneven toolchain RTTI support). The PSX/2000-era codebase had zero `dynamic_cast`; by 2026 there were 68 across 25 files, and `-fno-rtti` could not be turned on.
+
+**Root cause:** In 2003 (kts, CVS revs Jan–May 2003), when `Actor*` containers were generalized to `BaseObject*` / `PhysicalObject*` iterators, the refactor reached for `dynamic_cast` to recover the concrete type instead of restoring the existing `kind()` / `EActorKind`-guarded dispatch. Present in the first git commit (`a2784f6`, 2010-05-01) and traceable to the 2003 CVS history.
+
+**Why dormant:** Every site was a *guaranteed* downcast — each followed the cast with `assert(ValidPtr(result))`, and every concrete `BaseObject` is in fact an `Actor` (`PhysicalObject`/`MovementObject` are abstract). So `dynamic_cast` always succeeded and behaved correctly on dev hosts, where RTTI is cheap. The breach stayed invisible for ~22 years because it never misbehaved functionally *and* `-fno-rtti` was never enabled in CI, so nothing flagged the constraint violation. It would have cost flash + cycles on a real fixed-point target build.
+
+**Fix:** Replace each `dynamic_cast<T*>(bo)` with `assert(IsActor/IsPhysicalObject/IsMovementObject(bo))` + `static_cast<T*>`; push `GetWatchObject()` up into `MovementHandler` to kill the lone `CameraHandler*` cast; then enable `-fno-rtti` on every TU (`wfengine`, `wf_game`, `Jolt`, the e2e harness, `build_game.sh`). Correctness rests on the closed single-inheritance hierarchy — the abstract intermediates make every instantiable `BaseObject` an `Actor` — and the `IsXxx()` helpers are the single documented update point if a non-`Actor` `BaseObject` is ever added. Verified: from-scratch `-fno-rtti` build links clean, the binary carries no `typeinfo for Actor/Camera/...` symbols, and snowgoons + qbert run.
+
+**Investigation:** [investigations/2026-04-29-rtti-audit.md](investigations/2026-04-29-rtti-audit.md); plan [plans/2026-04-29-eliminate-rtti.md](plans/2026-04-29-eliminate-rtti.md).
+
+---
+
 ## IFF chunk-size read via `long*` — misaligned 8-byte load + truncation-by-luck — 2026-05-19
 
 **Status:** FIXED commit `ba3bbcb`.
