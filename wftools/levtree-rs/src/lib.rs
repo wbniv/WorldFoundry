@@ -196,9 +196,88 @@ fn format_real(val: f64, precision: Option<SizeSpec>) -> String {
 
 /// Print a [`LevelDoc`] back to canonical `.lev` text.
 ///
-/// TODO(step 4): canonical indentation + spacing, comments dropped.
-pub fn print_lev(_doc: &LevelDoc) -> String {
-    String::new()
+/// Canonical form: tab indentation; a chunk is **block-level** (children on
+/// their own indented lines) iff it contains a child chunk that itself has
+/// child chunks (→ `LVL`/`OBJ`/`PATH`); otherwise it is **inline**
+/// (`{ 'ID' … }` on one line, → leaf fields like `VEC3`/`I32`). Annotation
+/// comments are not emitted (D8). Whitespace/comments don't affect the
+/// compiled `.iff`, so this form recompiles byte-identically (step-5 gate).
+pub fn print_lev(doc: &LevelDoc) -> String {
+    let mut out = String::new();
+    emit(&doc.root, 0, &mut out);
+    out
+}
+
+/// True if `c` should print across multiple lines: it holds a child chunk
+/// that itself holds a child chunk (a structural container of containers).
+fn is_block(c: &Chunk) -> bool {
+    c.items.iter().any(|it| {
+        matches!(it, Item::Chunk(child)
+            if child.items.iter().any(|i| matches!(i, Item::Chunk(_))))
+    })
+}
+
+/// Emit `c` at `indent` tabs, dispatching block vs inline.
+fn emit(c: &Chunk, indent: usize, out: &mut String) {
+    if is_block(c) {
+        push_tabs(indent, out);
+        out.push_str("{ '");
+        out.push_str(&c.id);
+        out.push_str("'\n");
+        for it in &c.items {
+            match it {
+                Item::Chunk(child) => emit(child, indent + 1, out),
+                Item::Literal(lit) => {
+                    push_tabs(indent + 1, out);
+                    push_literal(lit, out);
+                    out.push('\n');
+                }
+            }
+        }
+        push_tabs(indent, out);
+        out.push_str("}\n");
+    } else {
+        push_tabs(indent, out);
+        emit_inline(c, out);
+        out.push('\n');
+    }
+}
+
+/// Emit `c` as a single-line `{ 'ID' item … }` with no trailing newline.
+fn emit_inline(c: &Chunk, out: &mut String) {
+    out.push_str("{ '");
+    out.push_str(&c.id);
+    out.push('\'');
+    for it in &c.items {
+        out.push(' ');
+        match it {
+            Item::Chunk(child) => emit_inline(child, out),
+            Item::Literal(lit) => push_literal(lit, out),
+        }
+    }
+    out.push_str(" }");
+}
+
+fn push_tabs(n: usize, out: &mut String) {
+    for _ in 0..n {
+        out.push('\t');
+    }
+}
+
+fn push_literal(lit: &Literal, out: &mut String) {
+    match lit {
+        Literal::Str { value } => {
+            out.push('"');
+            out.push_str(value);
+            out.push('"');
+        }
+        Literal::Num { text } => out.push_str(text),
+        Literal::FourCC { id } => {
+            out.push('\'');
+            out.push_str(id);
+            out.push('\'');
+        }
+    }
 }
 
 // ── tests ────────────────────────────────────────────────────────────────────
@@ -278,6 +357,77 @@ mod tests {
             let doc = parse_fixture(rel);
             assert_eq!(doc.root.id, "LVL", "{rel}: root must be LVL");
             assert_eq!(count_objs(&doc.root), objs, "{rel}: OBJ count");
+        }
+    }
+
+    #[test]
+    fn print_inline_and_block_forms() {
+        let src = r#"{ 'LVL' { 'OBJ' { 'NAME' "H" } { 'VEC3' { 'NAME' "Position" } { 'DATA' 1.0(1.15.16) } } } }"#;
+        let doc = parse_lev(src).unwrap();
+        let printed = print_lev(&doc);
+        // LVL and OBJ are containers-of-containers → block; VEC3 is a leaf → inline.
+        assert!(printed.contains("{ 'LVL'\n"), "LVL should be block:\n{printed}");
+        assert!(printed.contains("\t{ 'OBJ'\n"), "OBJ block, indented:\n{printed}");
+        assert!(
+            printed.contains("{ 'VEC3' { 'NAME' \"Position\" } { 'DATA' 1.0(1.15.16) } }"),
+            "VEC3 should be inline:\n{printed}"
+        );
+        assert_eq!(doc, parse_lev(&printed).unwrap(), "idempotent");
+    }
+
+    #[test]
+    fn print_parse_idempotent_real_levels() {
+        for rel in [
+            "wflevels/snowgoons-blender/snowgoons-blender.lev",
+            "wflevels/smb_w1_1/smb_w1_1.lev",
+            "wflevels/qbert_practice/qbert_practice.lev",
+        ] {
+            let doc = parse_fixture(rel);
+            let printed = print_lev(&doc);
+            let reparsed =
+                parse_lev(&printed).unwrap_or_else(|e| panic!("reparse printed {rel}: {e}"));
+            assert_eq!(doc, reparsed, "{rel}: parse→print→parse must be idempotent");
+        }
+    }
+
+    /// Compile `.lev` source to its binary IFF bytes via iffcomp's library API
+    /// (the `iffcomp -binary` stage of the build pipeline), in-process.
+    fn compile_lev_bin(src: &str) -> Vec<u8> {
+        use iffcomp::lexer::Lexer;
+        use iffcomp::parser::Parser;
+        use iffcomp::writer::{Mode, Writer};
+        let lex = Lexer::from_source(src.as_bytes().to_vec(), "<lev>");
+        let mut w = Writer::new(Mode::default()); // default = binary
+        let mut p = Parser::new(lex, &mut w);
+        p.parse().expect("iffcomp parse");
+        drop(p);
+        w.resolve_backpatches().expect("resolve backpatches");
+        w.bytes().to_vec()
+    }
+
+    /// THE correctness gate (plan D5/R4): canonicalizing a `.lev` (dropping
+    /// comments, reformatting numbers) must not change the `.lev.bin` the
+    /// engine ultimately loads. iffcomp(`.lev`) is the only pipeline stage
+    /// that consumes the `.lev`, so byte-identity here ⟹ full-`.iff` identity.
+    #[test]
+    fn lev_bin_byte_identity_gate() {
+        for rel in [
+            "wflevels/snowgoons-blender/snowgoons-blender.lev",
+            "wflevels/smb_w1_1/smb_w1_1.lev",
+            "wflevels/qbert_practice/qbert_practice.lev",
+        ] {
+            let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("../..")
+                .join(rel);
+            let orig_src = std::fs::read_to_string(&path).unwrap();
+            let canon_src = print_lev(&parse_lev(&orig_src).unwrap());
+            let orig_bin = compile_lev_bin(&orig_src);
+            let canon_bin = compile_lev_bin(&canon_src);
+            assert_eq!(
+                orig_bin, canon_bin,
+                "{rel}: canonicalized .lev must compile to a byte-identical .lev.bin"
+            );
+            assert!(!orig_bin.is_empty(), "{rel}: .lev.bin should be non-empty");
         }
     }
 }
