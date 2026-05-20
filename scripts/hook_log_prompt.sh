@@ -1,5 +1,6 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # UserPromptSubmit hook: append each prompt to docs/transcripts/YYYY-MM-DD.md
+set -euo pipefail
 INPUT=$(cat)
 PROMPT=$(printf '%s' "$INPUT" | jq -r '.prompt // empty')
 [ -z "$PROMPT" ] && exit 0

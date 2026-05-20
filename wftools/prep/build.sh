@@ -8,7 +8,7 @@
 # the named-parameter branch to fire for every normal parameter token.
 # Fixed by using std::string::size_type instead of unsigned.
 
-set -e
+set -euo pipefail
 cd "$(dirname "$0")"
 WF_SRC="$(cd ../../wfsource/source && pwd)"
 
@@ -26,6 +26,6 @@ g++ -std=c++14 \
     "$WF_SRC/regexp/regexp.cc" \
     "$WF_SRC/regexp/regsub.cc" \
     "$WF_SRC/regexp/regerror.cc" \
-    2>&1 | grep -v "warning:"
+    2>&1 | { grep -v "warning:" || true; }   # grep exits 1 on a warning-free build; don't let that mask g++'s status
 
 echo "prep built successfully"

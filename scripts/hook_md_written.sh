@@ -1,7 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # PostToolUse hook: when a plan/investigation doc is written, update wf-status.md
 # (add body row + LAST CHANGE) and push as README.md to GitHub master.
 # When wf-status.md itself is directly edited, just push it.
+set -euo pipefail
 INPUT=$(cat)
 FILE=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // empty')
 REPO="$(cd "$(dirname "$0")/.." && pwd)"

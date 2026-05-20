@@ -7,7 +7,7 @@
 # Usage: unifdef-sweep.sh <dir-or-file> [<dir-or-file>...]
 # Example: unifdef-sweep.sh wfsource/source/profile wfsource/source/machine.hp
 
-set -u
+set -euo pipefail
 
 UNIFDEF_ARGS=(
     -m
@@ -28,12 +28,14 @@ errors=0
 
 sweep_file() {
     local f="$1"
-    unifdef "${UNIFDEF_ARGS[@]}" "$f"
-    local rc=$?
+    # unifdef exits 1 when a file is modified (a normal outcome, not an error),
+    # so capture its status without tripping `set -e`.
+    local rc=0
+    unifdef "${UNIFDEF_ARGS[@]}" "$f" || rc=$?
     case $rc in
-        0) ((unchanged++)) ;;
-        1) ((changed++)); echo "  CHANGED: $f" ;;
-        *) ((errors++)); echo "  ERROR($rc): $f" >&2 ;;
+        0) unchanged=$((unchanged + 1)) ;;
+        1) changed=$((changed + 1)); echo "  CHANGED: $f" ;;
+        *) errors=$((errors + 1)); echo "  ERROR($rc): $f" >&2 ;;
     esac
 }
 
