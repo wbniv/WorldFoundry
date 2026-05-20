@@ -1760,7 +1760,17 @@ static void JoltContactDispatch(void* characterActor, void* otherActor,
 	Actor* charA = static_cast<Actor*>(characterActor);
 	if (!charA) return;
 	if (Actor* otherA = static_cast<Actor*>(otherActor))
+	{
 		charA->Collision(*otherA, normal);
+		// Engine change #1 (block-IS-generator + Gold pickup): also notify the
+		// struck body so ITS per-actor collision mailboxes (COLLIDER_IDX /
+		// COLLISION_NORMAL_*) populate. Otherwise only the Jolt character
+		// (Mario) ever learns of the contact, so a `?`-block can't self-detect
+		// its bump and a Gold coin can't learn Mario touched it. The normal sign
+		// as seen by the struck body is calibrated in the script's hit-from-below
+		// gate (see docs/plans/2026-05-19-smb-block-generator-coin.md step 8).
+		otherA->Collision(*charA, normal);
+	}
 	else
 		charA->Collision(*charA, normal);  // no other-Actor known; collider idx → 0
 }
