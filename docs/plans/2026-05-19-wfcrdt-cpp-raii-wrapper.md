@@ -211,7 +211,8 @@ Each step is its own commit per [feedback_commit_after_each_phase](../../../.cla
 
 ## Out of scope (deferred)
 
-- **Full `YInput` taxonomy** — bool, binary, JSON-array, JSON-map, nested types, XML types. Add when a consumer needs them.
+- **Full `YInput` taxonomy** — bool, binary, JSON-array, JSON-map, XML types. Add when a consumer needs them.
+  - **Nested types — DONE 2026-05-20** (triggered by the editor's read-only Y.Doc population, [editor-app-shell M4](2026-05-20-editor-app-shell.md)). Added `wfcrdt::Input` (a pure-C++ prelim builder: `str`/`lng`/`dbl`/`boolean`/`map`/`array` + `set`/`push`) plus `Map::insert(key, Input)`, `Array::insert/push(Input)`, and the read side `Output::asMap()`/`asArray()`. `wfcrdt_wrapper_test` now 10/10 (incl. `test_nested_array_of_maps`), clean under ASan/UBSan. **yffi bug found:** prefilled `yinput_ymap` infinite-loops in `<YInput as Prelim>::integrate` ([`yffi/src/lib.rs:1795`](../../wftools/y-crdt/yffi/src/lib.rs) — `let i = 0` never incremented); the wrapper materializes maps via empty-container-then-populate to dodge it (upstream patch: [`docs/patches/yrs-0.9.3-yinput-ymap-integrate-loop.patch`](../patches/yrs-0.9.3-yinput-ymap-integrate-loop.patch); [TODO](../../TODO.md) § Collaborative Editor).
 - **Iterators** — `yarray_iter` / map iter. Editor doesn't need them yet.
 - **`yobserve_deep`** — nested observation. Editor bridge will start with flat top-level observation; deep observation is a v2 line item.
 - **`YText`** — separate type with its own rich-text op model. Not in v1 schema.

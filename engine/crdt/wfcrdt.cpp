@@ -126,15 +126,18 @@ Output::~Output() {
     if (_out) youtput_destroy(_out);
 }
 
-Output::Output(Output&& other) noexcept : _out(other._out) {
+Output::Output(Output&& other) noexcept : _out(other._out), _txn(other._txn) {
     other._out = nullptr;
+    other._txn = nullptr;
 }
 
 Output& Output::operator=(Output&& other) noexcept {
     if (this != &other) {
         if (_out) youtput_destroy(_out);
         _out = other._out;
+        _txn = other._txn;
         other._out = nullptr;
+        other._txn = nullptr;
     }
     return *this;
 }
@@ -162,6 +165,100 @@ std::optional<double> Output::readFloat() const {
     return static_cast<double>(*p);
 }
 
+Map Output::asMap() const {
+    // youtput_read_ymap returns the inner Branch* (owned by the doc, not the
+    // YOutput) or null if the stored value isn't a Y.Map. Bound to the same txn.
+    return Map(_out ? youtput_read_ymap(_out) : nullptr, _txn);
+}
+
+Array Output::asArray() const {
+    return Array(_out ? youtput_read_yarray(_out) : nullptr, _txn);
+}
+
+// ─── nested-input materializer ──────────────────────────────────────────────
+//
+// Materializes a wfcrdt::Input tree into a live branch by inserting an EMPTY
+// nested container (yinput_ymap/yinput_yarray with no entries) and then
+// recursively populating it — rather than handing yffi a prefilled prelim.
+//
+// This deliberately avoids prefilled yinput_ymap: yrs v0.9.3's
+// YInput::integrate has an infinite-loop bug for prefilled shared maps
+// (wftools/y-crdt/yffi/src/lib.rs:1795 — the Y_MAP loop uses `let i = 0`,
+// never increments, and re-inserts the same key/value forever → unbounded
+// allocation; the Y_ARRAY branch right below it correctly uses `let mut i`).
+// Empty-container-then-populate is also the pattern upstream's own FFI tests
+// use for nested shared types, so it stays on a well-exercised code path.
+// Upstream one-line fix kept as a submittable patch (submodule stays pinned):
+//   docs/patches/yrs-0.9.3-yinput-ymap-integrate-loop.patch
+// TODO(crdt): collapse this back to a direct prefilled insert once the y-crdt
+// submodule is bumped past the fix (or our patch is upstreamed).
+namespace {
+void fill_map(Branch* m, YTransaction* txn, const Input& in);
+void fill_array(Branch* a, YTransaction* txn, const Input& in);
+
+// Insert `in` into map branch `m` under `key`.
+void put_in_map(Branch* m, YTransaction* txn, const char* key, const Input& in) {
+    using K = Input::Kind;
+    switch (in.kind()) {
+        case K::Str:    { YInput v = yinput_string(in.strVal().c_str());              ymap_insert(m, txn, key, &v); return; }
+        case K::Long:   { YInput v = yinput_long(static_cast<long>(in.longVal()));     ymap_insert(m, txn, key, &v); return; }
+        case K::Double: { YInput v = yinput_float(static_cast<float>(in.doubleVal())); ymap_insert(m, txn, key, &v); return; }
+        case K::Bool:   { YInput v = yinput_bool(in.boolVal() ? 1 : 0);                ymap_insert(m, txn, key, &v); return; }
+        case K::Map: {
+            YInput empty = yinput_ymap(nullptr, nullptr, 0);
+            ymap_insert(m, txn, key, &empty);
+            YOutput* o = ymap_get(m, key);   // inner branch, owned by the doc
+            fill_map(youtput_read_ymap(o), txn, in);
+            youtput_destroy(o);
+            return;
+        }
+        case K::Array: {
+            YInput empty = yinput_yarray(nullptr, 0);
+            ymap_insert(m, txn, key, &empty);
+            YOutput* o = ymap_get(m, key);
+            fill_array(youtput_read_yarray(o), txn, in);
+            youtput_destroy(o);
+            return;
+        }
+    }
+}
+
+// Insert `in` into array branch `a` at `index`.
+void put_in_array(Branch* a, YTransaction* txn, int index, const Input& in) {
+    using K = Input::Kind;
+    switch (in.kind()) {
+        case K::Str:    { YInput v = yinput_string(in.strVal().c_str());              yarray_insert_range(a, txn, index, &v, 1); return; }
+        case K::Long:   { YInput v = yinput_long(static_cast<long>(in.longVal()));     yarray_insert_range(a, txn, index, &v, 1); return; }
+        case K::Double: { YInput v = yinput_float(static_cast<float>(in.doubleVal())); yarray_insert_range(a, txn, index, &v, 1); return; }
+        case K::Bool:   { YInput v = yinput_bool(in.boolVal() ? 1 : 0);                yarray_insert_range(a, txn, index, &v, 1); return; }
+        case K::Map: {
+            YInput empty = yinput_ymap(nullptr, nullptr, 0);
+            yarray_insert_range(a, txn, index, &empty, 1);
+            YOutput* o = yarray_get(a, index);
+            fill_map(youtput_read_ymap(o), txn, in);
+            youtput_destroy(o);
+            return;
+        }
+        case K::Array: {
+            YInput empty = yinput_yarray(nullptr, 0);
+            yarray_insert_range(a, txn, index, &empty, 1);
+            YOutput* o = yarray_get(a, index);
+            fill_array(youtput_read_yarray(o), txn, in);
+            youtput_destroy(o);
+            return;
+        }
+    }
+}
+
+void fill_map(Branch* m, YTransaction* txn, const Input& in) {
+    for (const auto& kv : in.mapEntries()) put_in_map(m, txn, kv.first.c_str(), kv.second);
+}
+void fill_array(Branch* a, YTransaction* txn, const Input& in) {
+    int i = 0;
+    for (const auto& e : in.arrayElems()) put_in_array(a, txn, i++, e);
+}
+}  // namespace
+
 // ─── Map ──────────────────────────────────────────────────────────────────────
 
 void Map::insert(const char* key, long long value) {
@@ -179,8 +276,12 @@ void Map::insert(const char* key, double value) {
     ymap_insert(_branch, _txn, key, &v);
 }
 
+void Map::insert(const char* key, const Input& value) {
+    put_in_map(_branch, _txn, key, value);
+}
+
 Output Map::get(const char* key) const {
-    return Output(ymap_get(_branch, key));
+    return Output(ymap_get(_branch, key), _txn);
 }
 
 int Map::len() const {
@@ -205,8 +306,16 @@ void Array::insertRange(int index, const long long* values, int count) {
     yarray_insert_range(_branch, _txn, index, inputs.data(), count);
 }
 
+void Array::insert(int index, const Input& value) {
+    put_in_array(_branch, _txn, index, value);
+}
+
+void Array::push(const Input& value) {
+    insert(len(), value);
+}
+
 Output Array::get(int index) const {
-    return Output(yarray_get(_branch, index));
+    return Output(yarray_get(_branch, index), _txn);
 }
 
 int Array::len() const {

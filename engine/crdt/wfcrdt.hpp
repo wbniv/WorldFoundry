@@ -13,6 +13,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 // Forward declarations of the C ABI's opaque types so callers don't need
@@ -33,6 +34,7 @@ struct ByteView {
 };
 
 class Output;
+class Input;
 class Map;
 class Array;
 class Subscription;
@@ -104,7 +106,7 @@ private:
 // doesn't match the requested read.
 class Output {
 public:
-    Output() : _out(nullptr) {}
+    Output() : _out(nullptr), _txn(nullptr) {}
     ~Output();
 
     Output(Output&& other) noexcept;
@@ -118,11 +120,58 @@ public:
     std::optional<std::string> readString() const;
     std::optional<double>      readFloat()  const;
 
+    // Nested-container reads: view a stored Y.Map / Y.Array. The returned view
+    // is valid only within the transaction the parent get() was issued under.
+    // Returns an invalid view if the stored value isn't a map / array.
+    Map   asMap()   const;
+    Array asArray() const;
+
 private:
     friend class Map;
     friend class Array;
-    explicit Output(YOutput* out) : _out(out) {}
+    Output(YOutput* out, YTransaction* txn) : _out(out), _txn(txn) {}
     YOutput* _out;
+    YTransaction* _txn;
+};
+
+// Preliminary value tree for building nested containers in a single insert
+// (the recursive CRDT chunk schema: Y.Map { children: Y.Array<chunk>, … }).
+// Build with the static factories + set()/push(), then hand the root to
+// Map::insert(key, Input) or Array::push(Input). Pure C++ data here; the
+// .cpp materializes it into a yffi prelim YInput tree. Mirrors Yrs prelim
+// values; see docs/plans/2026-05-19-wfcrdt-cpp-raii-wrapper.md (deferred
+// "nested types" extension, triggered by the editor's Y.Doc population).
+class Input {
+public:
+    enum class Kind { Str, Long, Double, Bool, Map, Array };
+
+    static Input str(std::string s) { Input i; i._k = Kind::Str;    i._s = std::move(s); return i; }
+    static Input lng(long long v)   { Input i; i._k = Kind::Long;   i._l = v; return i; }
+    static Input dbl(double v)      { Input i; i._k = Kind::Double; i._d = v; return i; }
+    static Input boolean(bool v)    { Input i; i._k = Kind::Bool;   i._b = v; return i; }
+    static Input map()              { Input i; i._k = Kind::Map;    return i; }
+    static Input array()            { Input i; i._k = Kind::Array;  return i; }
+
+    Input& set(std::string key, Input value) { _m.emplace_back(std::move(key), std::move(value)); return *this; }
+    Input& push(Input value)                 { _a.emplace_back(std::move(value)); return *this; }
+
+    // Read-only accessors used by the .cpp YInput materializer.
+    Kind kind() const { return _k; }
+    const std::string& strVal() const { return _s; }
+    long long longVal() const { return _l; }
+    double doubleVal() const { return _d; }
+    bool boolVal() const { return _b; }
+    const std::vector<std::pair<std::string, Input>>& mapEntries() const { return _m; }
+    const std::vector<Input>& arrayElems() const { return _a; }
+
+private:
+    Kind _k = Kind::Str;
+    std::string _s;
+    long long   _l = 0;
+    double      _d = 0;
+    bool        _b = false;
+    std::vector<std::pair<std::string, Input>> _m;
+    std::vector<Input> _a;
 };
 
 // Borrowed view of a root-level YMap. Does NOT own the Branch* —
@@ -133,6 +182,7 @@ public:
     void insert(const char* key, long long value);
     void insert(const char* key, const char* value);
     void insert(const char* key, double value);
+    void insert(const char* key, const Input& value);   // nested map/array
 
     Output get(const char* key) const;
     int len() const;
@@ -144,6 +194,7 @@ public:
 
 private:
     friend class Transaction;
+    friend class Output;
     Map(Branch* branch, YTransaction* txn) : _branch(branch), _txn(txn) {}
     Branch* _branch;
     YTransaction* _txn;
@@ -154,6 +205,8 @@ class Array {
 public:
     void insertLong(int index, long long value);
     void insertRange(int index, const long long* values, int count);
+    void insert(int index, const Input& value);   // nested map/array
+    void push(const Input& value);                 // append at end
 
     Output get(int index) const;
     int len() const;
@@ -163,6 +216,7 @@ public:
 
 private:
     friend class Transaction;
+    friend class Output;
     Array(Branch* branch, YTransaction* txn) : _branch(branch), _txn(txn) {}
     Branch* _branch;
     YTransaction* _txn;

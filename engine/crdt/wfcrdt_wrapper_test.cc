@@ -200,6 +200,53 @@ static int test_map_type_mismatch_returns_nullopt() {
     return 0;
 }
 
+// Nested containers (the recursive CRDT chunk schema): an array of maps, and a
+// map holding a nested array — built via wfcrdt::Input, read back via
+// Output::asMap / asArray.
+static int test_nested_array_of_maps() {
+    wfcrdt::Doc doc;
+    {
+        auto txn = doc.begin();
+        auto content = txn.array("content");
+        content.push(wfcrdt::Input::map()
+                         .set("name", wfcrdt::Input::str("House"))
+                         .set("hp",   wfcrdt::Input::lng(100)));
+        content.push(wfcrdt::Input::map()
+                         .set("name", wfcrdt::Input::str("Player"))
+                         .set("hp",   wfcrdt::Input::lng(50)));
+        CHECK(content.len() == 2, "content array should have 2 elements");
+    }
+    {
+        auto txn = doc.begin();
+        auto content = txn.array("content");
+        CHECK(content.len() == 2, "content len after commit");
+
+        auto m0 = content.get(0).asMap();
+        auto n0 = m0.get("name").readString();
+        CHECK(n0.has_value() && *n0 == "House", "elem0 name == House");
+        auto h0 = m0.get("hp").readLong();
+        CHECK(h0.has_value() && *h0 == 100, "elem0 hp == 100");
+
+        auto n1 = content.get(1).asMap().get("name").readString();
+        CHECK(n1.has_value() && *n1 == "Player", "elem1 name == Player");
+    }
+    {
+        auto txn = doc.begin();
+        auto root = txn.map("root");
+        root.insert("kids", wfcrdt::Input::array()
+                                .push(wfcrdt::Input::str("a"))
+                                .push(wfcrdt::Input::str("b")));
+    }
+    {
+        auto txn = doc.begin();
+        auto kids = txn.map("root").get("kids").asArray();
+        CHECK(kids.len() == 2, "nested array len == 2");
+        auto k0 = kids.get(0).readString();
+        CHECK(k0.has_value() && *k0 == "a", "nested array [0] == a");
+    }
+    return 0;
+}
+
 int main() {
     int rc = 0;
     rc |= test_doc_lifecycle();
@@ -211,8 +258,9 @@ int main() {
     rc |= test_two_doc_state_diff();
     rc |= test_observer_fires();
     rc |= test_observer_cancelled_before_commit();
+    rc |= test_nested_array_of_maps();
     if (rc == 0) {
-        std::printf("wfcrdt_wrapper_test: OK (9/9 tests passed — step 5)\n");
+        std::printf("wfcrdt_wrapper_test: OK (10/10 tests passed — incl. nested map/array)\n");
     }
     return rc;
 }
