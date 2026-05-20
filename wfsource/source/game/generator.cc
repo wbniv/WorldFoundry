@@ -72,9 +72,14 @@ Generato::update()
 		if( GetMailboxes().ReadMailbox(_generateMailBox) == Scalar::zero )
 		{
 			_timeToGenerate = theLevel->LevelClock().Current();				// reset timer so when goes on doesn't generate tons of objects
-			return;
+			// Engine change #2: was `return;` here. Dropped so Actor::update()
+			// below (and thus this generator's own wf_Script) runs every tick,
+			// like every other Actor subclass — the block-IS-generator self-detect
+			// script lives there. The timer reset above still preserves the kts
+			// anti-over-generation guarantee; only the incidental script skip is gone.
 		}
-
+		else
+		{
 		//[UNUSED]const _Movement* _movementData = GetMovementBlockPtr();
 		int32 objectToGenerate = getOad()->ObjectToThrow;
 		assert(objectToGenerate > 0);
@@ -117,8 +122,9 @@ Generato::update()
 			std::fprintf(stderr, "Generato: AddObject ok, coin actor_idx=%d\n",
 				createdObject->GetActorIndex());
 		}
+		}		// end else (mailbox active) — engine change #2
 	}
-	Actor::update();
+	Actor::update();		// always runs now (was skipped by the idle `return`)
 }
 
 //============================================================================
