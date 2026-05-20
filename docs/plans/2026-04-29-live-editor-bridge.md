@@ -1,7 +1,7 @@
 # Plan: Live Editor Bridge — play-in-editor, scene debugger, remote device debug
 
 **Date:** 2026-04-29
-**Status:** Phases 1, 1.5, 2a, 2b, 3 implemented. Phase 4: perf overlay + --debug-bind done; shader hot-reload + script breakpoints pending.
+**Status:** Phases 1, 1.5, 2a, 2b, 3 implemented. Phase 4: perf overlay + `--debug-bind` done; **shader hot-reload landed** 2026-05-03 (commit `0b8ec36`, Phase B1 of the [debug-bridge gap-features plan](2026-05-03-debug-bridge-gap-features.md) — real `RendererBackend::ReloadProgram`, e2e test [tests/test_phase_b.py](../../tests/test_phase_b.py)). The remaining Phase 4 item, **script breakpoints, is deliberately deferred** to the [DAP script-debugger plan](2026-05-03-script-debugger-dap.md) (Phase C) — a custom `set_breakpoint` op was explicitly rejected in favour of a DAP server (see line 213). That plan is gated on a usage trigger and not yet started.
 **Related:** [docs/plans/2026-04-29-blender-run-operator.md](2026-04-29-blender-run-operator.md), [docs/investigations/2026-04-29-blender-game-engine-removal.md](../investigations/2026-04-29-blender-game-engine-removal.md)
 
 ---
