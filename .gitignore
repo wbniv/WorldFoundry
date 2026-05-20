@@ -27,6 +27,8 @@ wf_game.app.dSYM/
 
 # Built game binary
 engine/wf_game
+# Built editor binary (WF_ENABLE_EDITOR=1)
+engine/wf-edit
 
 # Preprocessor temp files (build artifacts)
 *.pp.tmp

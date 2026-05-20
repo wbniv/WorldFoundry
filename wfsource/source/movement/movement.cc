@@ -840,6 +840,11 @@ AirHandler::predictPosition(MovementManager& movementManager, MovementObject& mo
 	}
 //#endif	// __DOOMSTICK__
 
+	// SMB-style variable jump height: releasing kBtnJump mid-jump truncates
+	// remaining upward impulse so a tap is short and a hold reaches full apex.
+	if (!(buttons & kBtnJump))
+		handlerData->jumpDuration = Scalar::zero;
+
 	if (handlerData->jumpDuration > Scalar::zero)
 	{
 		Scalar jumpDurToApply( handlerData->jumpDuration.Min(deltaT) );
@@ -864,8 +869,21 @@ AirHandler::predictPosition(MovementManager& movementManager, MovementObject& mo
 		newVelocity *= (maxSpeed / newSpeed);
 
 
+	// "Sustain" mode: when AirAcceleration=0 (joystick has no in-air authority
+	// to add velocity), holding a Step direction that matches current X motion
+	// suppresses horizontal drag for the frame, so takeoff momentum persists
+	// while held but decays when released. SMB-style "hold forward to keep
+	// sprint speed mid-jump." Currently X-only — sufficient for sideview play;
+	// generalize via currentDir() projection if Y-axis sustain becomes needed.
+	bool sustainHoriz =
+	    airAccel == Scalar::zero &&
+	    (((buttons & kBtnStepRight) && newVelocity.X() > Scalar::zero) ||
+	     ((buttons & kBtnStepLeft)  && newVelocity.X() < Scalar::zero));
+
 	// Make air drag happen
-	Scalar hDrag = Scalar::one - (movementObject.GetMovementBlockPtr()->GetHorizAirDrag() * deltaT );
+	Scalar hDrag = sustainHoriz
+	                 ? Scalar::one
+	                 : Scalar::one - (movementObject.GetMovementBlockPtr()->GetHorizAirDrag() * deltaT );
 	Scalar vDrag = Scalar::one - (movementObject.GetMovementBlockPtr()->GetVertAirDrag() * deltaT );
 	if ( hDrag < Scalar::zero )
 		hDrag = Scalar::zero;

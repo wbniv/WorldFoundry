@@ -528,21 +528,19 @@ public:
         gContactCallback(characterActor, otherActor, wfNormal);
     }
 
-    void OnContactPersisted(const JPH::CharacterVirtual*    inCharacter,
-                            const JPH::BodyID&              inBodyID2,
-                            const JPH::SubShapeID&          inSubShapeID2,
-                            JPH::RVec3Arg                   inContactPosition,
-                            JPH::Vec3Arg                    inContactNormal,
-                            JPH::CharacterContactSettings&  ioSettings) override
-    {
-        // For now treat persistent contact the same as a fresh add — the
-        // bump-script branch is gated by mailbox state (NORMAL==1) anyway, so
-        // a persisted contact past the trigger frame won't re-fire the bump.
-        // If a future use case wants edge-only semantics, route through a
-        // different callback channel.
-        OnContactAdded(inCharacter, inBodyID2, inSubShapeID2,
-                       inContactPosition, inContactNormal, ioSettings);
-    }
+    // OnContactPersisted is deliberately NOT routed to the dispatcher.
+    // Persisted contacts fire every frame the contact is held (standing on
+    // the ground, rubbing a wall) — if we called Actor::Collision each time
+    // we'd continuously re-set Mario's supportingObject and re-write the
+    // COLLIDER_IDX / COLLISION_NORMAL_* mailboxes. That over-writes the
+    // ground-state tracking that drives GroundHandler ↔ AirHandler transitions
+    // and the per-actor collision mailboxes lose their "fresh contact" signal
+    // (Actor::StartFrame clears _lastColliderIdx each frame; we want the
+    // mailbox to read non-zero only on the edge, not on every persisted tick).
+    //
+    // Edge-only semantics — only OnContactAdded routes through the dispatcher.
+    // For "still in contact this tick" the script can re-derive from Jolt's
+    // ground-state if needed.
 };
 
 // Public setters — keep the bridge from jolt_backend back to engine-side
