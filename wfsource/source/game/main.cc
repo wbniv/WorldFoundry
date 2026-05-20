@@ -50,6 +50,7 @@ int  gDebugPort = 7777;                 // default-on; --debug-port N overrides,
 char gDebugBind[256] = "127.0.0.1";    // bind address; set by --debug-bind ADDR
 int  gFrameStepSmokeCount = 0;          // >0 = run --frame-step-smoke=N path
 bool gWfmutSmoke          = false;      // true = run --wfmut-smoke path
+bool gWfmutThreadTest     = false;      // true = run --wfmut-thread-test (X5 death-test)
 int  gFrameStepCycles = 1;              // --cycles=N: how many Load/Unload cycles to run
 #if DO_TEST_CODE
 int  gDebugPrintActors = 0;             // 1 = print idx/mesh/mobility/pos per actor at construction (debug builds only)
@@ -212,6 +213,11 @@ ParseCommandLine(int argc, char** argv)
 		{
 			gWfmutSmoke = true;
 			DBSTREAM1( cprogress << "wfmut smoke enabled" << std::endl; )
+		}
+		else if ( strcmp( argv[index]+1, "-wfmut-thread-test" ) == 0 )
+		{
+			gWfmutThreadTest = true;
+			DBSTREAM1( cprogress << "wfmut cross-thread death-test enabled" << std::endl; )
 		}
 		else if ( strncmp( argv[index]+1, "-cycles=", 8 ) == 0 )
 		{
@@ -399,6 +405,11 @@ PIGSMain( int argc, char* * argv )
 	{
 		DBSTREAM1( cprogress << "main::wfmut smoke" << std::endl; )
 		wfmutFailures = game->RunWfmutSmoke( );
+	}
+	else if (gWfmutThreadTest)
+	{
+		DBSTREAM1( cprogress << "main::wfmut cross-thread death-test" << std::endl; )
+		game->RunWfmutThreadTest( );   // expected to abort inside the guard
 	}
 #endif
 	else

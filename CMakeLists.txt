@@ -758,7 +758,17 @@ if(NOT ANDROID AND NOT IOS)
         COMMAND python3 ${CMAKE_SOURCE_DIR}/tests/verify_wfmut_bridge.py
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-    set_tests_properties(wfmut_smoke wfmut_bridge
+    # X5 cross-thread guard death-test: drives wfmut from a non-game thread;
+    # the guard's AssertMsg must fire and abort. The process dies via SIGABRT,
+    # which CTest's PASS_REGULAR_EXPRESSION does NOT override (it reports
+    # "Subprocess aborted"). So wrap in a shell that greps the guard message
+    # out of the (captured) output and exits 0 on match — the grep is the
+    # test command, so the upstream abort doesn't fail it.
+    add_test(NAME wfmut_thread_guard
+        COMMAND sh -c "$<TARGET_FILE:wf_game> -L${WF_TEST_SMB_LEVEL} --wfmut-thread-test 2>&1 | grep -q 'must be called on the game thread'"
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+
+    set_tests_properties(wfmut_smoke wfmut_bridge wfmut_thread_guard
         PROPERTIES LABELS "gl" ENVIRONMENT "DISPLAY=:0")
 endif()
 

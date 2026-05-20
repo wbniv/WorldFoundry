@@ -29,6 +29,7 @@
 #include <cstring>
 #include <limits>
 #include <string>
+#include <thread>
 
 namespace wfmut {
 
@@ -597,6 +598,44 @@ int RunSmokeTests(Level& level)
 
     std::fprintf(stderr,"=== wfmut smoke: %d passed, %d failed ===\n", g_passed, g_failed);
     return g_failed;
+}
+
+// X5 death-test. Captures the game thread with one main-thread wfmut call,
+// then calls wfmut from a std::thread — the cross-thread guard's AssertMsg
+// fires and aborts the process. Driven by `wf_game --wfmut-thread-test`; the
+// CTest entry treats the abort + "game thread" message as a PASS.
+//
+// Returns 0 only if the guard FAILED to fire (i.e. in a non-assertion build,
+// or if the guard is broken) — in that case the test should be treated as a
+// non-result, which the CTest PASS_REGULAR_EXPRESSION handles by requiring
+// the abort message.
+int RunThreadGuardDeathTest(Level& level)
+{
+    std::fprintf(stderr,"=== wfmut cross-thread death-test (X5) ===\n");
+
+    ActorIdx player = find_first_actor(level);
+    if (player == 0) {
+        std::fprintf(stderr,"  [FAIL] no Actor found — cannot run death-test\n");
+        return 1;
+    }
+
+    // Capture the game thread as the first-call thread (main thread here).
+    GetActorPos(level, player);
+
+    std::fprintf(stderr,"  spawning off-thread wfmut call — expecting abort...\n");
+    std::thread t([&level, player]() {
+        // This must trip the X5 guard (different thread than the capture).
+        SetActorPos(level, player, Vector3::zero);
+        // If we reach here, the guard did NOT fire (non-assertion build).
+        std::fprintf(stderr,"  [INFO] off-thread call returned without abort "
+                     "(guard compiled out — DO_ASSERTIONS=0)\n");
+    });
+    t.join();
+
+    // Only reached if the guard didn't abort. Not a pass — the CTest entry
+    // requires the abort message in output.
+    std::fprintf(stderr,"  [WARN] cross-thread guard did not fire\n");
+    return 0;
 }
 
 } // namespace wfmut

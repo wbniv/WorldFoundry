@@ -414,6 +414,26 @@ WFGame::RunWfmutSmoke()
 	DBSTREAM1(cprogress << "RunWfmutSmoke: " << failures << " failures" << std::endl;)
 	return failures;
 }
+
+int
+WFGame::RunWfmutThreadTest()
+{
+	extern const char* gLevelOverridePath;
+	AssertMsg(gLevelOverridePath, "--wfmut-thread-test requires -L<level-path>");
+
+	_DiskFile* df = ConstructDiskFile(const_cast<char*>(gLevelOverridePath), HALLmalloc);
+	assert(ValidPtr(df));
+	df->SeekRandom(DiskFileCD::_SECTOR_SIZE);
+
+	LoadLevel(df);
+	// Expected to abort inside the off-thread wfmut call (X5 guard). If it
+	// returns, the guard didn't fire (non-assertion build).
+	int r = wfmut::RunThreadGuardDeathTest(*_curLevel);
+	UnloadLevel();
+
+	MEMORY_DELETE(HALLmalloc, df, _DiskFile);
+	return r;
+}
 #endif // WF_DEBUG_BRIDGE || WF_ENABLE_EDITOR
 
 //-----------------------------------------------------------------------------

@@ -15,6 +15,7 @@
 
 #include "level.hp"
 #include "actor.hp"
+#include <pigsys/pigsys.hp>   // AssertMsg (cross-thread guard)
 
 #ifdef PHYSICS_ENGINE_JOLT
 #  include <physics/jolt/jolt_backend.hp>
@@ -25,6 +26,7 @@
 #endif
 
 #include <cstddef>          // offsetof
+#include <thread>
 #include <unordered_map>
 
 namespace wfmut {
@@ -32,6 +34,33 @@ namespace wfmut {
 namespace {
 
 thread_local std::string g_lastError;
+
+// ── Cross-thread guard (X5) ──────────────────────────────────────────────────
+// wfmut is single-threaded by contract: every call must come from the same
+// thread that made the first call (the game thread in every consumer — the
+// bridge applies its queued ops from DrainQueue on the game loop, the editor
+// drives wfmut from its main loop). Calling from another thread is a bug:
+// the engine's Level/Actor/Jolt state is not thread-safe. In assertion builds
+// we capture the first-call thread and abort with a clear message on any
+// mismatch. Zero overhead in release (compiled out when DO_ASSERTIONS=0).
+#if DO_ASSERTIONS
+std::thread::id g_gameThread;
+bool            g_gameThreadCaptured = false;
+
+void check_game_thread()
+{
+    std::thread::id self = std::this_thread::get_id();
+    if (!g_gameThreadCaptured) {
+        g_gameThread = self;
+        g_gameThreadCaptured = true;
+        return;
+    }
+    AssertMsg(self == g_gameThread,
+              "wfmut must be called on the game thread (the thread of its first call)");
+}
+#else
+inline void check_game_thread() {}
+#endif
 
 bool fail(const char* msg)
 {
@@ -56,6 +85,7 @@ void ok() { g_lastError.clear(); }
 //   - object exists but isn't an Actor  → "object at idx is not an Actor"
 Actor* resolve_actor(const Level& level, ActorIdx idx, const char* func)
 {
+    check_game_thread();   // X5: every actor-touching op funnels through here
     if (idx == 0) {
         g_lastError.assign(func).append(": idx must be >= 1");
         return nullptr;
@@ -330,6 +360,7 @@ bool ReloadActorScript(Level& level, ActorIdx idx, const char* forthSource)
 std::optional<ActorIdx> SpawnActor(Level& level, int templateIdx,
                                    const Vector3& pos, ActorIdx parentIdx)
 {
+    check_game_thread();   // X5 — SpawnActor validates before resolve_actor
     // The engine's SafelyConstructTemplateObject asserts on bad template /
     // parent indices, so pre-validate here. Level::HasTemplate is the public
     // probe added alongside this API.

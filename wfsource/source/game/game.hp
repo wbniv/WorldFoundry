@@ -94,6 +94,10 @@ public:
 	// both consumer flags since wfmut sits at the union.
 	// Plan: docs/plans/2026-05-19-engine-mutation-api.md.
 	int RunWfmutSmoke();
+
+	// X5 death-test: drives wfmut from a non-game thread, expecting the
+	// cross-thread guard to abort. wf_game's --wfmut-thread-test CLI.
+	int RunWfmutThreadTest();
 #endif
 
 	Level* CurrentLevel() const { return _curLevel; }

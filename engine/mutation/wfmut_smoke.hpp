@@ -24,6 +24,10 @@ namespace wfmut {
 // subset), step 3 adds Fields, step 4 adds Spawn/Remove, step 5 adds Mailbox.
 int RunSmokeTests(Level& level);
 
+// X5 cross-thread guard death-test: calls wfmut from a non-game thread and
+// expects the guard's AssertMsg to abort. Driven by --wfmut-thread-test.
+int RunThreadGuardDeathTest(Level& level);
+
 } // namespace wfmut
 
 #else // neither WF_DEBUG_BRIDGE nor WF_ENABLE_EDITOR — lean builds.
