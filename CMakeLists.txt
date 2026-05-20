@@ -428,7 +428,9 @@ if(WF_PHYSICS_ENGINE STREQUAL "jolt")
     list(APPEND WF_DEFS PHYSICS_ENGINE_JOLT NDEBUG)
     set(PHYSICS_REPO_ROOT ${JOLT_DIR})
     include(${JOLT_DIR}/Jolt/Jolt.cmake)
-    target_compile_options(Jolt PRIVATE -O2 -w)
+    # -fno-rtti: Jolt uses its own RTTI macro system (Jolt/Core/RTTI.h), zero
+    # C++ dynamic_cast/typeid in its sources — safe to drop the type_info tables.
+    target_compile_options(Jolt PRIVATE -O2 -w -fno-rtti)
     # Force NDEBUG into Jolt's own TUs and PUBLIC-propagate to consumers.
     # Without this, Jolt.a was built without NDEBUG (the auto-set NDEBUG in
     # Jolt.cmake:515 only applies in Release configs), which made JPH_DEBUG
@@ -548,6 +550,7 @@ target_include_directories(wfengine PUBLIC ${WF_INCLUDES})
 target_compile_definitions(wfengine PUBLIC ${WF_DEFS})
 target_compile_options(wfengine PRIVATE
     -fpermissive -w
+    -fno-rtti   # WF uses kind()/EActorKind dispatch, never dynamic_cast (no-RTTI constraint)
     "-D__GAME__=\"wf_game\""
     "-DERR_DEBUG(x)="
     "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
@@ -601,6 +604,7 @@ endif()
 # with the same -fpermissive / __GAME__ / etc. as engine sources.
 target_compile_options(wf_game PRIVATE
     -fpermissive -w
+    -fno-rtti   # see wfengine block — no-RTTI constraint
     "-D__GAME__=\"wf_game\""
     "-DERR_DEBUG(x)="
     "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
@@ -683,6 +687,7 @@ if(NOT ANDROID AND NOT IOS)
     target_link_libraries(wf_host_gl_e2e_test PRIVATE wfengine)
     target_compile_options(wf_host_gl_e2e_test PRIVATE
         -fpermissive -w
+        -fno-rtti   # no-RTTI constraint applies to every TU, incl. test harness
         "-D__GAME__=\"wf_host_gl_e2e_test\""
         "-DERR_DEBUG(x)="
         "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"

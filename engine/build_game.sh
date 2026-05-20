@@ -134,6 +134,8 @@ mkdir -p "$OUT"
 
 CXXFLAGS=(
     -std=c++17 -fpermissive -w -O0 -g
+    -fno-rtti   # WF dispatches via kind()/EActorKind, never dynamic_cast (no-RTTI constraint).
+                # Safe here: WAMR links as a prebuilt lib, its RTTI-needing C++ AOT TUs aren't compiled.
     -DWF_TARGET_LINUX -D__LINUX__ -DRENDERER_GL -DRENDERER_PIPELINE_GL -DSCALAR_TYPE_FLOAT
     -DBUILDMODE_DEBUG -DDO_ASSERTIONS=1 -DDO_DEBUGGING_INFO=1 -DDESIGNER_CHEATS=1
     -DDO_IOSTREAMS=1 -DSW_DBSTREAM=1 -DDEBUG=1 -DDEBUG_VARIABLES=1
