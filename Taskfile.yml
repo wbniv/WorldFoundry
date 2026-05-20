@@ -448,6 +448,16 @@ tasks:
       - cmake --build cmake-build-linux -j --target wf_game
       - cd cmake-build-linux && ctest --output-on-failure -R "wfmut"
 
+  gen-oas-headers:
+    desc: "Regenerate wfsource/source/oas/*.ht + objects.{c,e,h} from .oas sources (builds prep if absent)"
+    cmds:
+      - bash wfsource/source/oas/regen-headers.sh
+
+  test-codegen:
+    desc: "Oracle test: verify all .ht + objects.{c,e,h} reproduce byte-for-byte from sources (.oad + .ht pipelines)"
+    cmds:
+      - cargo test --manifest-path wftools/oas2oad-rs/Cargo.toml
+
   test-wfmut-asan:
     desc: "Build wfmut under ASan + UBSan and run the smoke (pre-merge leak/UB gate; needs DISPLAY)"
     cmds:
