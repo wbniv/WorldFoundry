@@ -230,6 +230,7 @@ protected:
 		NonStatPlatData(SMemPool * memPool, const _Movement* moveBlock);  
 
 		Scalar 					_hitPoints;
+		Scalar 					_gold;				// per-actor gold/collectible count (EMAILBOX_GOLD 3001); reserved slot, backed 2026-05-20 for SMB Gold pickup
 		Shield* 				_shield;			// pointer to shield if this actor has one	// will go away
 
 		InputScript*			_inputScript;		// contained in _input in case of _input mapping to a mailbox

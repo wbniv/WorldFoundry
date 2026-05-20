@@ -1190,6 +1190,9 @@ Actor::ReadSystemMailbox( int boxnum ) const
         case EMAILBOX_HITPOINTS:
             return _nonStatPlat->_hitPoints;
 
+        case EMAILBOX_GOLD:
+            return _nonStatPlat->_gold;
+
         case EMAILBOX_SHIELD:
             return Scalar( getPower(), 0 );
 
@@ -1383,6 +1386,10 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
         case EMAILBOX_HITPOINTS:
             AssertMsg( _nonStatPlat->_hitPoints != INDESTRUCTIBLE_HP, "Attempted to modify hitpoints for " << *this << ", but is set to indestructible" );
             _nonStatPlat->_hitPoints = value;
+            break;
+
+        case EMAILBOX_GOLD:
+            _nonStatPlat->_gold = value;
             break;
 
         case EMAILBOX_SHIELD:
@@ -1865,6 +1872,7 @@ ActorMailboxes::WriteMailbox(long mailbox, Scalar value)
 #pragma message( "Put assertions in PutMsg() so that no messages are being sent to StatPlat's" )
 Actor::NonStatPlatData::NonStatPlatData(SMemPool * memPool, const _Movement* moveBlock) :
 	_hitPoints( Actor::INDESTRUCTIBLE_HP ),
+	_gold( Scalar::zero ),
 	_shield( NULL ),
 	_inputScript( NULL ),
 	_input( &theNullInputDigital ),
