@@ -1,0 +1,38 @@
+//============================================================================
+// gold.hp:  Collectible Gold coin (SMB `?`-block payout).
+//           See docs/plans/2026-05-19-smb-block-generator-coin.md (engine #3).
+//============================================================================
+
+#ifndef _Gold_HP
+#define _Gold_HP
+
+//============================================================================
+
+#include "actor.hp"
+
+//============================================================================
+
+struct _Gold;
+
+//============================================================================
+
+class Gold: public Actor
+{
+public:
+	Gold(const SObjectStartupData* startupData);
+	virtual ~Gold()			{ }
+
+	virtual EActorKind kind() const;
+
+	// Player touches the coin -> credit the player's GOLD mailbox + remove self.
+	virtual void Collision(PhysicalObject& other, const Vector3& normal);
+};
+
+//============================================================================
+
+Actor*
+OadGold(const SObjectStartupData* startupData);
+
+//============================================================================
+#endif // !_Gold_HP
+//============================================================================

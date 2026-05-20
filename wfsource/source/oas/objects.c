@@ -122,6 +122,9 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 		case Actor::Alias_KIND:
 			object = NULL; 
 			break;
+		case Actor::Gold_KIND:
+			object = NULL; 
+			break;
 
 
 
@@ -264,6 +267,9 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 			break;
 		case Actor::Alias_KIND:
 			object = NULL; 
+			break;
+		case Actor::Gold_KIND:
+			object = OadGold(startData); 
 			break;
 
 

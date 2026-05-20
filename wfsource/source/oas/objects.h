@@ -44,6 +44,7 @@ enum EActorKind {
 	Light_KIND,
 	Disabled_KIND,
 	Alias_KIND,
+	Gold_KIND,
 
 	};
 

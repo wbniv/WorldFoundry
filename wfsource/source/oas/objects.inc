@@ -62,6 +62,8 @@
 #include "light.hp"
 	
 	
+		
+#include "gold.hp"
 
 
 
