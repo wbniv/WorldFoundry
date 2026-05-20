@@ -89,9 +89,8 @@ inline MovementObject&
 UpcastToMovementObject(BaseObject* base)
 {
    assert(ValidPtr(base));
-   MovementObject* result = dynamic_cast<MovementObject*>(base);
-   assert(ValidPtr(result));
-   return *result;
+   assert(IsMovementObject(base));
+   return *static_cast<MovementObject*>(base);
 }
 
 //==============================================================================
