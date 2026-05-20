@@ -531,7 +531,7 @@ The OAD's `showAs` per OAS field selects the widget; the chunk_type informs seri
 SHOW_AS_NUMBER       → numeric input
 SHOW_AS_SLIDER       → range slider (with declared min/max from OAD)
 SHOW_AS_TOGGLE       → two-state toggle
-SHOW_AS_DROPMENU     → enum dropdown (options from OAD or trailing-// comment)
+SHOW_AS_DROPMENU     → enum dropdown (options from OAD's pipe-delimited string)
 SHOW_AS_RADIOBUTTONS → enum radios
 SHOW_AS_HIDDEN       → not shown in property panel
 SHOW_AS_COLOR        → colour picker (24-bit RGB)
@@ -555,9 +555,9 @@ Fallback path means the editor handles chunk types it doesn't have a widget for 
 
 ### Wire / save / load
 
-- **Load** `.iff.txt` or `.iff` → [iffcomp-rs](../../wftools/iffcomp-rs/) parser → walk to produce the `Y.Doc` tree with the splits above, dropping pipeline chunks. One-time canonicalisation pass on first import so subsequent round-trips are byte-identical.
+- **Load** `.lev` (the authored chunk DSL — *not* `.iff.txt`, which is downstream of levcomp) via [levtree-rs](../../wftools/levtree-rs/) → generic chunk-tree JSON → walk to produce the `Y.Doc` tree with the splits above, dropping pipeline chunks. One-time canonicalisation pass on first import so subsequent round-trips are byte-identical. (Landed 2026-05-20; see [plan](../plans/2026-05-20-iff-lev-ydoc-translator.md).)
 - **Wire** = Yjs binary updates over WebSocket (variable-int encoded, much smaller than JSON).
-- **Save** = walk `Y.Doc` → canonical printer emits `.iff.txt` → iffcomp-rs / wf_blender exporter handles packaging and `.blend` round-trip. **v1 trigger is a manual "Publish" button** — the slow Blender round-trip happens only when the user explicitly asks for it. Whether to add autosave-on-idle, Ctrl-S, or every-Nth-edit triggers is a question for after v1 ships, when actual usage patterns reveal what's wanted.
+- **Save** = walk `Y.Doc` → [levtree-rs](../../wftools/levtree-rs/) canonical printer emits `.lev` → `build_level_binary.sh` (iffcomp-rs → levcomp-rs → textile-rs) / wf_blender exporter handles packaging and `.blend` round-trip. **v1 trigger is a manual "Publish" button** — the slow Blender round-trip happens only when the user explicitly asks for it. Whether to add autosave-on-idle, Ctrl-S, or every-Nth-edit triggers is a question for after v1 ships, when actual usage patterns reveal what's wanted.
 
 Format-agnostic at the edges: load from binary or text, save to either. The CRDT lives in the abstract chunk tree regardless. For debugging, `.iff.txt` is the human-readable inspection view; the actual wire bytes are Yjs's own update format.
 
@@ -777,7 +777,7 @@ Tiered by what they block. Tier 1 blocks the start of implementation; tier 2 is 
     - *Incremental engine reload* — teach the engine to apply per-actor patches instead of tearing down/rebuilding the whole level. Substantial engine work; probably half the cost of just doing direct read.
     - *Cheap drag preview* — editor draws ghost-outline during interaction, only commits the real engine-view update on drag-end. Keeps interaction snappy at the cost of "engine view lies during a drag."
 
-  **Direct-read cost:** Yrs has a C ABI via cbindgen; the binding plumbing is now landed (`libwfcrdt.a` smoke-test green). The C++ RAII wrapper [landed 2026-05-19](../plans/2026-05-19-wfcrdt-cpp-raii-wrapper.md) (~1 h vs ~2–3 d estimate). The [engine mutation API](../plans/2026-05-19-engine-mutation-api.md) also landed same day (~3 h vs ~1–2 wk estimate) — `wfmut::SetActorField` / `SpawnActor` / `RemoveActor` / `SetMailbox` / `SetActorPos` / `SetActorOrientation` / `ReloadActorScript` with `lastError()` diagnostics; `engine/stubs/debug_server.cc`'s mutation cases all route through it. Remaining piece: IFF↔Y.Doc translator (~2–3 wk). Pays off for the editor's whole life (microsecond per-op feedback, no debounce engineering).
+  **Direct-read cost:** Yrs has a C ABI via cbindgen; the binding plumbing is now landed (`libwfcrdt.a` smoke-test green). The C++ RAII wrapper [landed 2026-05-19](../plans/2026-05-19-wfcrdt-cpp-raii-wrapper.md) (~1 h vs ~2–3 d estimate). The [engine mutation API](../plans/2026-05-19-engine-mutation-api.md) also landed same day (~3 h vs ~1–2 wk estimate) — `wfmut::SetActorField` / `SpawnActor` / `RemoveActor` / `SetMailbox` / `SetActorPos` / `SetActorOrientation` / `ReloadActorScript` with `lastError()` diagnostics; `engine/stubs/debug_server.cc`'s mutation cases all route through it. Remaining piece **landed 2026-05-20** as [`levtree-rs`](../plans/2026-05-20-iff-lev-ydoc-translator.md) (impl ~2 h vs ~2–3 wk estimate): `.lev` ↔ generic chunk-tree JSON with a `.lev.bin` byte-identity gate green on snowgoons/smb/qbert. So all three direct-read building blocks plus the translator are now in place; the load/save data path is complete. Pays off for the editor's whole life (microsecond per-op feedback, no debounce engineering).
 
   **Plan:** prototype with file-watch for the first few weeks (proves the data path; reuses existing reload infrastructure; smb_w1_1 is small enough that 1–2 s round-trip will be tolerable for early dev). Switch to direct read before shipping v1 once the data path is settled.
 - **Persistence model for the relay — researched: Yjs binary state on local disk, debounced snapshots, hibernation IS a snapshot, BYOK-ready wrap hook from day 1.**
