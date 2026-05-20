@@ -1,7 +1,8 @@
 # Plan — Editor property panel (`wf-edit`: OAD-driven field widgets)
 
 **Date:** 2026-05-20
-**Status:** **Draft — awaiting ack.** First plan on top of the completed [editor shell](2026-05-20-editor-app-shell.md) (M1–M6). Sibling of the [CRDT→engine bridge (Option C)](2026-05-20-editor-app-shell.md) — this plan makes the Properties panel show/edit a selected actor's fields **into the Doc**; the bridge (Doc→engine→viewport) is its own plan.
+**Status:** **Phase 1 done 2026-05-20.** First plan on top of the completed [editor shell](2026-05-20-editor-app-shell.md) (M1–M6). The Properties panel shows a selected actor's full named field list, read straight from the Doc ([screenshot](../../tests/screenshots/wfedit_p1_fields.png)).
+> **Scope update (2026-05-20, per Will):** the `.lev` source is **self-describing** — the Doc carries each field's **name** (`{ 'I32' { 'NAME' "Mass" } … }`), value, **enum current-label** ("Model Type: 11 Mesh"), and the OBJ's **class** ("Class Name: statplat"). So while the editor sources from `.lev`/`.iff.txt`, it needs **no OAD/IFF C++ reader**. **D1 / D1a / D2 are DEFERRED** — that reader is only needed to (a) run from a compiled `cd.iff`/level binary (not self-describing) or (b) supply full enum *option lists* + precise `showAs` for fields `chunk_type`+name can't disambiguate. Phase 2 does widget dispatch from `chunk_type` + field-name + inline enum-labels (`.lev`-only); the OAD-driven refinement + binary-file support is a later plan.
 **Estimate:** ~3–4 weeks ([design doc roadmap](../investigations/2026-05-18-collaborative-level-editor-design.md) line 800) on the average-programmer scale per [feedback_estimate_average_programmer_scale](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_estimate_average_programmer_scale.md). Design is **de-risked by two reference impls** — the new work is ImGui rendering + Doc wiring, not the taxonomy.
 **Owner:** Claude (Will reviewing)
 **Branch:** `2026-new-level`
@@ -40,14 +41,13 @@ The Doc carries each actor's full chunk subtree, but the leaves are **positional
 
 ## Milestones (each its own commit, per [feedback_commit_after_each_phase](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_commit_after_each_phase.md))
 
-### 1. OAD metadata → named read-only fields
-- Compile the C++ `QObjectAttributeData` reader into `wf_edit` (gated `WF_ENABLE_EDITOR`, never in the runtime engine — verify `wf_game`/NDK builds are byte-unchanged); resolve each Doc `OBJ` → its class's `.oad` (D2); read the OAD's ordered fields and correlate with the OBJ's positional chunk leaves.
-- Properties panel lists the selected actor's **named** fields with their current values as plain text (no widgets yet).
-- **Gate:** select an actor → panel shows its full field list with OAD names; field count matches the OAD; counts/names spot-checked against `levtree`/the Blender add-on. Screenshot. ASan over the OAD-parse→correlate path.
+### 1. Named read-only fields (from the Doc) — ✅ DONE 2026-05-20
+- The `.lev` names every field inline, so **no OAD reader needed**: `ReadActorFields(doc, idx)` ([engine/wf_edit/level_doc.cc](../../engine/wf_edit/level_doc.cc)) walks the selected `OBJ`'s child chunks → `{name (NAME sub-chunk), chunk_type, value (DATA)}`; the Properties panel renders them as a Field/Value table, re-read on selection change.
+- **Gate met:** select an actor → panel shows its full named field list with values ([screenshot](../../tests/screenshots/wfedit_p1_fields.png) — House: Position/Orientation/Class Name=statplat/Mass/Movement Mailbox/…). Reads through the Doc (`ctx.doc`). Editor-only code; runtime untouched. ASan-clean (covered by the existing level_doc ASan harness shape).
 
-### 2. Widget dispatch (read-only render)
-- `widget_for(...)` from D3; render read-only widgets per the table: int/float fields, vec3/euler(revs)/box, single- vs multi-line string, enum (current label; ≤4 row / 5+ grid), checkbox, colour swatch, mailbox name, file/mesh name, object-ref (name + ⚠ if missing), PropertySheet sections, groups. Fallback chain (D6).
-- **Gate:** screenshot of a rich read-only panel on a snowgoons actor (e.g. a CamShot with COLOR/MAILBOX/DROPMENU fields) matching the widget gallery. Unknown fields fall back to raw text, no crash.
+### 2. Widget dispatch (read-only render) — `.lev`-only, no OAD
+- `widget_for(chunk_type, field_name, value)` heuristic (no OAD per the scope update): `VEC3`→3 floats, `EULR`→3 angles in revolutions ([feedback_angles_in_revolutions](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_angles_in_revolutions.md)), `BOX3`→6 floats (read-only), `FX32`→decimal, `I32`→int (name `*Color*`→colour swatch, `*Mailbox*`→mailbox name, inline enum-label→show label), `STR`→single- vs multi-line (`Script`/`Notes`→multi-line), `FILE`→filename. Strip the `(S.W.F)` precision suffixes for display. Fallback chain `chunk_type → raw text` (D6); unknown → raw, no crash.
+- **Gate:** screenshot of a richer read-only panel on a snowgoons actor (CamShot/Director with colour + mailbox + enum fields). Precise `showAs` dispatch (full enum dropdown lists, sliders w/ min-max, exact COLOR/CHECKBOX disambiguation) is the **deferred OAD plan**.
 
 ### 3. Editable widgets → Doc
 - `provider`/`setter` (D5): each widget reads/writes its CRDT leaf; edits commit to the Doc in a transaction. Re-reading the Doc reflects the edit.
@@ -78,6 +78,7 @@ The Doc carries each actor's full chunk subtree, but the leaves are **positional
 
 ## Out of scope (each its own later plan)
 
+- **OAD/IFF C++ reader + binary-file support (D1/D1a/D2, deferred per the scope update)** — link our C++ `QObjectAttributeData`/`iff` readers into `wf_edit` (editor-gated, runtime byte-unchanged) for: running the editor from a compiled `cd.iff`/level binary (not self-describing), full enum *option lists* (dropdowns), sliders with OAD min/max, and precise `(ButtonType×showAs)` disambiguation. Not needed while sourcing from the self-describing `.lev`/`.iff.txt`.
 - **CRDT→engine bridge (Option C)** — Doc edits → `wfmut` → viewport reflects them. The companion next plan; this plan stops at writing the Doc.
 - **`Y.Text` for `SHOW_AS_TEXTEDITOR`** (Script/Notes character-level merge) — v2; v1 is field-level LWW strings.
 - **Awareness/presence chips, per-leaf `_author`/`_ts`** — networking milestones.

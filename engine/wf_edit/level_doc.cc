@@ -191,4 +191,61 @@ std::vector<std::string> ReadActorNames(wfcrdt::Doc& doc)
     return names;
 }
 
+namespace {
+// A field chunk is `{ chunk_type, children:[ NAME-leaf, DATA-leaf, … ] }`.
+// Pull the field name (NAME child's text) and value (everything else's text,
+// space-joined — DATA, or a bare leaf, or multi-part).
+ActorField FieldFromChunk(const wfcrdt::Map& chunk)
+{
+    ActorField f;
+    f.chunk_type = chunk.get("chunk_type").readString().value_or("");
+    f.name = f.chunk_type;   // fallback if no NAME sub-chunk
+
+    wfcrdt::Array kids = chunk.get("children").asArray();
+    if (!kids.valid()) {
+        // Leaf chunk (text directly) — value is its text.
+        f.value = chunk.get("text").readString().value_or("");
+        return f;
+    }
+    const int n = kids.len();
+    for (int i = 0; i < n; ++i) {
+        wfcrdt::Map sub = kids.get(i).asMap();
+        if (!sub.valid()) continue;
+        const std::string sct = sub.get("chunk_type").readString().value_or("");
+        const std::string txt = sub.get("text").readString().value_or("");
+        if (sct == "NAME") {
+            if (!txt.empty()) f.name = txt;
+        } else {
+            if (!f.value.empty()) f.value += ' ';
+            f.value += txt;   // DATA (and any other non-NAME leaf)
+        }
+    }
+    return f;
+}
+}  // namespace
+
+std::vector<ActorField> ReadActorFields(wfcrdt::Doc& doc, int actor_index)
+{
+    std::vector<ActorField> fields;
+    auto txn = doc.begin();
+    auto content = txn.array("content");
+    if (actor_index < 0 || actor_index >= content.len()) return fields;
+
+    wfcrdt::Map obj = content.get(actor_index).asMap();
+    if (!obj.valid()) return fields;
+    wfcrdt::Array kids = obj.get("children").asArray();
+    if (!kids.valid()) return fields;
+
+    const int n = kids.len();
+    fields.reserve(static_cast<size_t>(n));
+    for (int i = 0; i < n; ++i) {
+        wfcrdt::Map ch = kids.get(i).asMap();
+        if (!ch.valid()) continue;
+        // Skip the actor's own top-level NAME (it's the title, shown separately).
+        if (ch.get("chunk_type").readString().value_or("") == "NAME") continue;
+        fields.push_back(FieldFromChunk(ch));
+    }
+    return fields;
+}
+
 }  // namespace wfedit

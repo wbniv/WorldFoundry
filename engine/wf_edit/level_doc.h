@@ -31,4 +31,18 @@ bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc);
 // through the Doc (not a side cache), so this exercises the Doc → UI path.
 std::vector<std::string> ReadActorNames(wfcrdt::Doc& doc);
 
+// One field of an actor, as carried by the Doc. The `.lev` names every field
+// inline (a NAME sub-chunk: "Position", "Mass", "Background Color", …), so the
+// Properties panel needs no OAD just to list named fields read-only — that's
+// Phase 1. The OAD-driven (ButtonType×showAs) widget dispatch is Phase 2.
+struct ActorField {
+    std::string name;        // the field's NAME sub-chunk text ("Mass", …)
+    std::string chunk_type;  // IFF storage type: "VEC3" / "I32" / "FX32" / "STR" / "FILE" / …
+    std::string value;       // its DATA value(s), space-joined as stored
+};
+
+// Read every field of content[actor_index] out of the Doc: each child chunk's
+// NAME + DATA. Skips the actor's own top-level NAME (shown separately).
+std::vector<ActorField> ReadActorFields(wfcrdt::Doc& doc, int actor_index);
+
 }  // namespace wfedit
