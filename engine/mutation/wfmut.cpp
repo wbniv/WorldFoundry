@@ -103,7 +103,7 @@ Actor* resolve_actor(const Level& level, ActorIdx idx, const char* func)
         g_lastError.assign(func).append(": no object at idx");
         return nullptr;
     }
-    Actor* actor = dynamic_cast<Actor*>(bo);
+    Actor* actor = IsActor(bo) ? static_cast<Actor*>(bo) : nullptr;
     if (!actor) {
         g_lastError.assign(func).append(": object at idx is not an Actor");
         return nullptr;

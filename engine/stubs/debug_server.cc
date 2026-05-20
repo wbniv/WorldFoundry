@@ -597,7 +597,7 @@ void DebugServer_DrainQueue(Level& level)
     while (!local.empty()) {
         const PendingUpdate& u = local.front();
         BaseObject* bo = level.GetObject(u.actor_idx);
-        Actor* actor = bo ? dynamic_cast<Actor*>(bo) : nullptr;
+        Actor* actor = IsActor(bo) ? static_cast<Actor*>(bo) : nullptr;
 
         if (u.kind == PendingUpdate::SET_TRANSFORM && actor) {
             // Snapshot the pre-write position via wfmut so undo/revert keeps
@@ -669,7 +669,7 @@ void DebugServer_DrainQueue(Level& level)
             for (int i = 1; i < list.Size(); ++i) {
                 BaseObject* bo2 = list[i];
                 if (!bo2) continue;
-                Actor* a = dynamic_cast<Actor*>(bo2);
+                Actor* a = IsActor(bo2) ? static_cast<Actor*>(bo2) : nullptr;
                 if (!a) continue;
                 const Vector3& p = a->currentPos();
                 float dx = p.X().AsFloat() - u.ray_ox;
@@ -723,7 +723,7 @@ void DebugServer_DrainQueue(Level& level)
                         boxes = &level.GetMailboxes();
                     } else {
                         BaseObject* bo2 = level.GetObject(r.actor_idx);
-                        Actor* a = bo2 ? dynamic_cast<Actor*>(bo2) : nullptr;
+                        Actor* a = IsActor(bo2) ? static_cast<Actor*>(bo2) : nullptr;
                         if (a) boxes = &a->GetMailboxes();
                     }
                     if (boxes)
@@ -955,7 +955,7 @@ void DebugServer_BroadcastState(Level& level)
     for (int i = 1; i < list.Size(); ++i) {
         BaseObject* bo = list[i];
         if (!bo) continue;
-        Actor* actor = dynamic_cast<Actor*>(bo);
+        Actor* actor = IsActor(bo) ? static_cast<Actor*>(bo) : nullptr;
         if (!actor) continue;
 
         const Vector3& pos = actor->currentPos();
@@ -1006,7 +1006,7 @@ void DebugServer_BroadcastMailboxes(Level& level)
     std::string batch;
     for (auto& [actor_idx, mbx_set] : gWatches) {
         BaseObject* bo = level.GetObject(actor_idx);
-        Actor* actor   = bo ? dynamic_cast<Actor*>(bo) : nullptr;
+        Actor* actor   = IsActor(bo) ? static_cast<Actor*>(bo) : nullptr;
         if (!actor) continue;
         for (int mbx : mbx_set) {
             float    val = actor->GetMailboxes().ReadMailbox(mbx).AsFloat();

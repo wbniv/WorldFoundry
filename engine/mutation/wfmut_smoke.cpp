@@ -71,7 +71,7 @@ ActorIdx find_first_actor(Level& level)
     BaseObjectList& list = level.GetObjectList();
     for (int i = 1; i < list.Size(); ++i) {
         BaseObject* bo = level.GetObject(i);
-        if (bo && dynamic_cast<Actor*>(bo))
+        if (IsActor(bo))
             return static_cast<ActorIdx>(i);
     }
     return 0;
@@ -161,7 +161,7 @@ void run_transform_tests(Level& level, ActorIdx player)
         ActorIdx non_actor = 0;
         for (int i = 1; i < list.Size(); ++i) {
             BaseObject* bo = level.GetObject(i);
-            if (bo && !dynamic_cast<Actor*>(bo)) { non_actor = static_cast<ActorIdx>(i); break; }
+            if (bo && !IsActor(bo)) { non_actor = static_cast<ActorIdx>(i); break; }
         }
         if (non_actor == 0) {
             std::fprintf(stderr,"  [SKIP] T5: no non-Actor BaseObject in level\n");
@@ -178,7 +178,7 @@ void run_transform_tests(Level& level, ActorIdx player)
 #ifdef PHYSICS_ENGINE_JOLT
     {
         BaseObject* bo = level.GetObject(player);
-        Actor* a = bo ? dynamic_cast<Actor*>(bo) : nullptr;
+        Actor* a = IsActor(bo) ? static_cast<Actor*>(bo) : nullptr;
         const PhysicalAttributes& pa = a->GetPhysicalAttributes();
         uint32_t charID = pa.JoltCharacterID();
         uint32_t bodyID = pa.JoltBodyID();
