@@ -426,3 +426,10 @@ tasks:
       - cmake -S . -B cmake-build-linux
       - cmake --build cmake-build-linux -j --target wf_game
       - cd cmake-build-linux && ctest --output-on-failure -R "cycle" -LE gl
+
+  test-wfmut:
+    desc: "Run the wfmut:: mutation-API tests (smoke + live-bridge regression; needs DISPLAY)"
+    cmds:
+      - cmake -S . -B cmake-build-linux
+      - cmake --build cmake-build-linux -j --target wf_game
+      - cd cmake-build-linux && ctest --output-on-failure -R "wfmut"

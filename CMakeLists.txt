@@ -737,6 +737,29 @@ if(NOT ANDROID AND NOT IOS)
     set_tests_properties(wf_host_gl_e2e_cycle1 wf_host_gl_e2e_cycle2
                          wf_host_gl_e2e_snow_cycle1 wf_host_gl_e2e_snow_cycle2
         PROPERTIES LABELS "gl" ENVIRONMENT "DISPLAY=:0")
+
+    # ─── wfmut mutation-API tests ─────────────────────────────────────────────
+    # The default CMake build has WF_DEBUG_BRIDGE=ON, so wf_game carries the
+    # --wfmut-smoke flag (wfmut sits at the bridge∪editor union). Both tests
+    # need a GL context (they load a level) → labelled "gl", DISPLAY=:0, so
+    # headless CI excludes them via `ctest -LE gl`. See
+    # docs/plans/2026-05-19-engine-mutation-api.md.
+    set(WF_TEST_SMB_LEVEL
+        ${CMAKE_SOURCE_DIR}/wflevels/smb_w1_1-standalone.iff)
+
+    add_test(NAME wfmut_smoke
+        COMMAND $<TARGET_FILE:wf_game> -L${WF_TEST_SMB_LEVEL} --wfmut-smoke
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+
+    # Live TCP-bridge regression. The Python harness launches its own wf_game
+    # subprocess (it points at engine/wf_game), so it depends on the binary
+    # being built first; it picks a private port (7798).
+    add_test(NAME wfmut_bridge
+        COMMAND python3 ${CMAKE_SOURCE_DIR}/tests/verify_wfmut_bridge.py
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+    set_tests_properties(wfmut_smoke wfmut_bridge
+        PROPERTIES LABELS "gl" ENVIRONMENT "DISPLAY=:0")
 endif()
 
 # ─── iOS .app bundle resources ────────────────────────────────────────────────
