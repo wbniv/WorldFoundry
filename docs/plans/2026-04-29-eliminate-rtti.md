@@ -233,22 +233,34 @@ cd wfsource/source/game && ../../../engine/wf_game -L wflevels/qbert.iff
 
 ## Implementation order
 
-1. **Plan & helpers** (commit 1): refresh this plan ✓; add inline
+1. **Plan & helpers** ✓ (`8d5ef7b`): refresh this plan; add inline
    `IsActor()` / `IsPhysicalObject()` / `IsMovementObject()` helpers to
    `baseobject.hp`; update `:71` comment.
-2. **Push `GetWatchObject()` up** (commit 2): add virtual to `MovementHandler`,
+2. **Push `GetWatchObject()` up** ✓ (`0adf1d4`): add virtual to `MovementHandler`,
    simplify `Camera::GetWatchObject()` — eliminates the lone `CameraHandler*` cast.
-3. **Replace `.hpi` inline-template sites** (commit 3): 5 sites across
+3. **Replace `.hpi` inline-template sites** ✓ (`8b83391`): 5 sites across
    `level.hpi`, `physicalobject.hpi`, `movementobject.hpi`; delete the
    commented stub at `movementobject.hp:100`.
-4. **Replace `.cc` sites in `wfsource/source/`** (commits 4–N, batched by
-   subsystem): movement → room → physics → anim → game/.
-5. **Replace `.cc` sites in `engine/`** (commit N+1): `debug_server.cc`,
-   `wfmut.cpp`, `wfmut_smoke.cpp`.
-6. **Add `-fno-rtti` to both build paths** (commit N+2): `CMakeLists.txt`
+4. **Replace `.cc` sites in `wfsource/source/`** ✓ (`6ea4872` 5a collision-free,
+   `38664aa` 5b `level/actor/missile`, `02f583e` 5c-prefix conversions): batched
+   by subsystem. **Including `actor.cc:1729`** — investigated 2026-05-19 and found
+   it is *not* a conditional cast: `PhysicalObject`/`MovementObject` are abstract
+   (neither overrides `kind()`), so the only instantiable types are the 21 `Actor`
+   subclasses and the legacy `collision.cc:309-310` path always passes Actors. Now
+   `IsActor()` + `static_cast`; the `→ 0` else stays as the documented update point.
+   The stale "coordinate with worker" blocker (former `actor.cc:1728`) is closed —
+   the per-actor collision-mailbox feature it depended on landed in `f4071a3`.
+5. **Replace `.cc` sites in `engine/`** ✓ (`02f583e`): `debug_server.cc` ×5,
+   `wfmut.cpp` ×1, `wfmut_smoke.cpp` ×3 — all `Level`-lookup guaranteed downcasts.
+   The editor is now RTTI-free, so step 6 can extend `-fno-rtti` to editor TUs
+   with no carve-out.
+6. **Add `-fno-rtti` to both build paths** ← NEXT, now unblocked: `CMakeLists.txt`
    `wfengine` / `wf_game` / `Jolt` Android release; `build_game.sh` CXXFLAGS.
-7. **Verify** (commit N+3): snowgoons + qbert smoke + UBSan + NDK build;
+7. **Verify**: snowgoons + qbert smoke + UBSan + NDK build;
    add BUGS.md entry with fix-commit date.
+
+**Status (2026-05-19):** steps 1–5 done; **zero `dynamic_cast`/`typeid` remain
+in our (non-vendor) code.** Next is step 6 (`-fno-rtti`), then step 7 verify.
 
 Commit after each step (per `[[feedback_commit_after_each_phase]]`).
 

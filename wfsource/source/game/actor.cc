@@ -1724,10 +1724,12 @@ void
 Actor::Collision(PhysicalObject& other, const Vector3& normal)
 {
 	// Stash collision data on the actor so scripts can read it via mailboxes
-	// 3044-3047. Cast to Actor* for the index; PhysicalObjects that aren't
-	// Actors stay 0 (the freshness signal also reads as 0).
-	if (Actor* otherActor = dynamic_cast<Actor*>(&other))
-		_lastColliderIdx = otherActor->GetActorIndex();
+	// 3044-3047. PhysicalObject/MovementObject are abstract (neither overrides
+	// kind()), so every PhysicalObject reaching here is an Actor and IsActor()
+	// is always true today; the else (→ 0) stays as the single update point if
+	// a non-Actor PhysicalObject is ever added. See baseobject.hp IsActor doc.
+	if (IsActor(&other))
+		_lastColliderIdx = static_cast<Actor&>(other).GetActorIndex();
 	else
 		_lastColliderIdx = 0;
 	_lastCollisionNormal = normal;

@@ -68,9 +68,18 @@ public:
 		MAX_OBJECT_TYPES
 	};
 
-	// Type dispatch — replaces C++ `dynamic_cast`, which violates WF's no-RTTI
-	// architectural constraint. Pair `kind()` with `static_cast` for downcasts;
-	// see `IsActor` / `IsMovementObject` / `IsPhysicalObject` below.
+	// Type dispatch — the engine's load-bearing downcast mechanism, used in
+	// place of C++ `dynamic_cast`. Not a poor-man's-RTTI placeholder to remove
+	// later: RTTI is fine in principle but costs where WF ships. On the
+	// fixed-point MCU targets (Cortex-M7/M33, ESP32; see
+	// docs/investigations/2026-05-10-fixed-point-platform-survey.md) `type_info`
+	// tables eat flash (~5-20 KB, 2026-04-18 audit) and per-contact
+	// `dynamic_cast` tree-walks burn cycles in hot loops, and RTTI support is
+	// uneven across those toolchains. On 64-bit dev hosts the cost is
+	// negligible — but `kind()` + `static_cast` is zero-overhead, greppable,
+	// and `-fno-rtti`-enforceable regardless, so it stays the convention.
+	// Pair `kind()` with `static_cast`; see `IsActor` / `IsMovementObject` /
+	// `IsPhysicalObject` below.
 	virtual EActorKind kind() const = 0;
 
 //------------------------------------------------------------------------------
