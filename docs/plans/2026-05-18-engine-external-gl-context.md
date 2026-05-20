@@ -1,6 +1,6 @@
 # Engine external GL context — accept editor-owned `XDisplay*` / `Window` / `GLXContext`
 
-**Status:** Parked (TODO). Plan agreed 2026-05-18; not yet implemented. Sub-task #2 of Phase 0b in the [collaborative editor design doc](../investigations/2026-05-18-collaborative-level-editor-design.md). Trigger to start: editor prototype gets past file-watch and wants to render the engine into its own widget. ~1 week estimated. Independent of [sub-task #1 (frame-step API)](2026-05-18-engine-frame-step-api.md) — either can land first; both are needed for editor embedding.
+**Status:** Implemented 2026-05-18 (commits `151e2fe`, `2193f77`, `50807a9`, `a68b119`, `3f80c58`, `a816e3b`). Sub-task #2 of Phase 0b in the [collaborative editor design doc](../investigations/2026-05-18-collaborative-level-editor-design.md). Standalone `wf_game` unchanged; new `gfx/host_gl_context.h` lets an editor host register its own `XDisplay*` / `Window` / `GLXContext`, mesa.cc dispatches `InitWindow` accordingly, and `HALCloseWindow` / `XEventLoop` early-bail when host-owned. Mobile (Android / iOS) gets no-op stubs. Smoke test at `engine/wf_host_gl_test/`. Follow-up tracked in [TODO.md](../../TODO.md): end-to-end WFGame integration test needs `main()` lifted out of `libwfengine.a` (or a `-Wl,--allow-multiple-definition` workaround).
 
 ## Context
 
