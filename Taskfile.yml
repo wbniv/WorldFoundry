@@ -222,6 +222,20 @@ tasks:
         fi
         bash wftools/wf_blender/build_level_binary.sh "$1"
 
+  build-cd-iff:
+    desc: "Assemble wfsource/source/game/cd.iff from shell.fth + standalone level IFFs via cdpack-rs (snowgoons=level 0, qbert=level 1)"
+    cmds:
+      - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+      # Feed the *-standalone.iff (L4-rooted) files, NOT the bare LVAS *.iff:
+      # game.cc:250 seeks TOC_offset + one sector before reading each level's RAM
+      # config, so every body needs the standalone wrapper's leading ALGN sector.
+      - |
+        wftools/cdpack-rs/target/release/cdpack \
+          wfsource/source/game/shell.fth \
+          wflevels/snowgoons-standalone.iff \
+          wflevels/qbert_practice-standalone.iff \
+          -o wfsource/source/game/cd.iff
+
   run-qbert:
     desc: "Run wf_game on wflevels/qbert_practice-standalone.iff directly (bypass cd.iff)"
     cmds:

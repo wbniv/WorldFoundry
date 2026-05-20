@@ -365,6 +365,58 @@ iffcomp-rs -binary -o=../<name>-standalone.iff <name>-standalone.iff.txt
 
 ---
 
+## Assembling the `cd.iff` bundle — feed cdpack the **standalone** IFFs, not the bare LVAS
+
+**Symptom:** Running `wf_game` with no `-L` (default `cd.iff` path) aborts immediately
+while opening the bundle:
+
+```
+AssertMsg: Attempted to read past end of chunk: ALGN  count = 12, _bytesLeft = 4
+iff/iffread.cc:108
+```
+
+or, one layer deeper, after the bundle opens:
+
+```
+plmc->tagRam == IFFTAG('R','A','M','\0')   level.cc:426
+```
+
+**Cause:** `cd.iff` is a `GAME` form whose `TOC` lists `SHEL` + N level bodies
+([cdpack-rs](../wftools/cdpack-rs/src/main.rs)). Two ways to get it wrong:
+
+1. **No `GAME`/`TOC` envelope** (the `ALGN count=12` abort). The loader reads
+   each 12-byte TOC entry as `{ tag, offset, size }` ([disktoc.cc](../wfsource/source/iff/disktoc.cc)).
+   If the file is a bare level chunk (e.g. a single `L4`+`ALGN`, what you get by
+   copying a `-standalone.iff` straight to `cd.iff`), the loader reads a phantom
+   12-byte entry out of the alignment padding and runs off the end. Always build
+   `cd.iff` through cdpack, never by hand.
+2. **Wrong level-body flavor** (the `tagRam` abort). `game.cc:250` seeks to
+   `tocLevelEntry._offsetInDiskFile + SECTOR_SIZE` — **one sector past** the TOC
+   offset — before reading the `RAM`/`OBJD`/`PERM`/`ROOM`/`FLAG` config. So each
+   level body needs a leading `ALGN` sector. The **`-standalone.iff`** (`L4`-rooted,
+   `RAM\0` at its own offset 2048) has it; the bare **`*.iff`** (`LVAS`-rooted) does
+   **not**. Feed cdpack the `-standalone.iff` files.
+
+**Fix / reproducible build** (`task build-cd-iff`):
+
+```bash
+cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
+wftools/cdpack-rs/target/release/cdpack \
+  wfsource/source/game/shell.fth \
+  wflevels/snowgoons-standalone.iff \
+  wflevels/qbert_practice-standalone.iff \
+  -o wfsource/source/game/cd.iff
+```
+
+Level order = TOC order: `GetTOCEntry` is a plain array index ([disktoc.hpi:48](../wfsource/source/iff/disktoc.hpi)),
+so the TOC tags are cosmetic — the first level argument becomes level 0 (the
+default `_desiredLevelNum`), the next is level 1, etc. `shell.fth` selects the
+boot level via `INDEXOF_LEVEL_TO_RUN`.
+
+> Regression note: commit `527c15f` (2026-05-16) rebuilt `cd.iff` by hand and
+> dropped the `GAME`/`TOC`/`SHEL` envelope, producing the `ALGN count=12` abort.
+> The `build-cd-iff` task exists so this can't recur silently.
+
 ---
 
 ## Mesh material: use FLAT_SHADED for simple geometry
