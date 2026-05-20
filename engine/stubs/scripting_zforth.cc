@@ -305,7 +305,7 @@ void AddConstantArray(IntArrayEntry* entryList)
     // Spot-check: verify INDEXOF_CAMSHOT loaded correctly.
     if (zf_eval(&g_ctx, "INDEXOF_CAMSHOT") == ZF_OK) {
         zf_cell v = zf_pop(&g_ctx);
-        fprintf(stderr, "zforth: INDEXOF_CAMSHOT = %d (expect 1021)\n", (int)v);
+        fprintf(stderr, "zforth: INDEXOF_CAMSHOT = %d (expect 1921)\n", (int)v);
     }
 }
 
