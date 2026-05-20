@@ -8,20 +8,27 @@
 //! `build_level_binary.sh`) is the correctness proof. Annotation comments
 //! (`//False|True`, `//x,y,z`) are dropped — they're redundant with the OAD,
 //! and iffcomp strips them anyway, so the compiled `.iff` is unaffected.
+//!
+//! The parser reuses iffcomp-rs's `Lexer` (FOURCC, precision-tagged reals,
+//! string escapes, int-width suffixes) and adds only the tree build; number
+//! spellings are canonicalized at parse time so `parse → print → parse` is
+//! idempotent (the `.iff` gate proves the spelling re-quantizes identically).
 
+use iffcomp::lexer::{Lexer, SizeSpec, Token};
+use iffcomp::writer::id_name;
 use serde::{Deserialize, Serialize};
 
 /// A literal token inside a chunk body: a quoted string, a number (with its
-/// `.lev` precision spelling preserved), or a FOURCC char-literal.
+/// canonical `.lev` spelling), or a FOURCC char-literal.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum Literal {
     /// `"..."` — body as written (escapes unresolved, matching iffcomp).
     Str { value: String },
-    /// A `DATA`/value number; `text` keeps the canonical spelling incl. any
+    /// A `DATA`/value number; `text` is the canonical spelling incl. any
     /// `(S.W.F)` precision suffix so iffcomp re-quantizes identically.
     Num { text: String },
-    /// A `'OBJ'`-style four-character code.
+    /// A `'OBJ'`-style four-character code used as a value (rare in `.lev`).
     FourCC { id: String },
 }
 
@@ -73,18 +80,204 @@ impl From<std::io::Error> for LevError {
 
 pub type Result<T> = std::result::Result<T, LevError>;
 
+// ── parse ──────────────────────────────────────────────────────────────────
+
 /// Parse `.lev` source text into a [`LevelDoc`] tree.
 ///
-/// TODO(step 2-3): drive iffcomp-rs's `Lexer` and build the recursive tree.
-pub fn parse_lev(_src: &str) -> Result<LevelDoc> {
-    Err(LevError::Parse(
-        "parse_lev: not implemented yet (plan step 2-3)".into(),
-    ))
+/// Expects exactly one root chunk (`LVL`) followed by EOF. Comments are
+/// dropped (the lexer skips them). Number spellings are canonicalized.
+pub fn parse_lev(src: &str) -> Result<LevelDoc> {
+    let mut lex = Lexer::from_source(src.as_bytes().to_vec(), "<lev>");
+    let root = parse_chunk(&mut lex)?;
+    match lex.peek(0).map_err(lex_err)? {
+        Token::Eof => {}
+        other => {
+            return Err(LevError::Parse(format!(
+                "trailing tokens after root chunk: {}",
+                other.name()
+            )))
+        }
+    }
+    Ok(LevelDoc { root })
 }
+
+fn lex_err(e: iffcomp::IffError) -> LevError {
+    LevError::Parse(format!("lex: {e}"))
+}
+
+/// Parse one `{ 'ID' items… }` chunk. Assumes the next token is `{`.
+fn parse_chunk(lex: &mut Lexer) -> Result<Chunk> {
+    match lex.next().map_err(lex_err)?.tok {
+        Token::LBrace => {}
+        other => {
+            return Err(LevError::Parse(format!(
+                "expected '{{' at chunk start, got {}",
+                other.name()
+            )))
+        }
+    }
+    let id = match lex.next().map_err(lex_err)?.tok {
+        Token::CharLit(packed) => id_name(packed),
+        other => {
+            return Err(LevError::Parse(format!(
+                "expected chunk id (FOURCC) after '{{', got {}",
+                other.name()
+            )))
+        }
+    };
+
+    let mut items = Vec::new();
+    loop {
+        match lex.peek(0).map_err(lex_err)? {
+            Token::RBrace => {
+                lex.next().map_err(lex_err)?; // consume '}'
+                break;
+            }
+            Token::LBrace => items.push(Item::Chunk(parse_chunk(lex)?)),
+            Token::Eof => {
+                return Err(LevError::Parse(format!(
+                    "unexpected EOF inside chunk '{id}'"
+                )))
+            }
+            _ => items.push(Item::Literal(parse_literal(lex)?)),
+        }
+    }
+    Ok(Chunk { id, items })
+}
+
+/// Parse a single value literal (string, number, or bare FOURCC).
+fn parse_literal(lex: &mut Lexer) -> Result<Literal> {
+    let tok = lex.next().map_err(lex_err)?.tok;
+    match tok {
+        Token::String { body, .. } => Ok(Literal::Str { value: body }),
+        Token::Integer { val, width } => Ok(Literal::Num {
+            text: format_int(val, width),
+        }),
+        Token::Real { val, precision } => Ok(Literal::Num {
+            text: format_real(val, precision),
+        }),
+        Token::CharLit(packed) => Ok(Literal::FourCC {
+            id: id_name(packed),
+        }),
+        other => Err(LevError::Parse(format!(
+            "unexpected token in value position: {}",
+            other.name()
+        ))),
+    }
+}
+
+/// Canonical integer spelling: value + size suffix (`y`/`w`/`l` for 1/2/4).
+fn format_int(val: u64, width: u8) -> String {
+    let suffix = match width {
+        1 => "y",
+        2 => "w",
+        4 => "l",
+        _ => "",
+    };
+    format!("{val}{suffix}")
+}
+
+/// Canonical real spelling: shortest round-trip decimal (always with a `.`)
+/// plus the `(sign.whole.fraction)` precision suffix when present. Because the
+/// shortest form denotes the same `f64`, iffcomp quantizes it to the same
+/// fixed-point as the original — proven by the `.iff` byte-identity gate.
+fn format_real(val: f64, precision: Option<SizeSpec>) -> String {
+    let mut s = format!("{val}");
+    if !s.contains('.') && !s.contains('e') && !s.contains('E') && val.is_finite() {
+        s.push_str(".0");
+    }
+    if let Some(p) = precision {
+        s.push_str(&format!("({}.{}.{})", p.sign, p.whole, p.fraction));
+    }
+    s
+}
+
+// ── print ──────────────────────────────────────────────────────────────────
 
 /// Print a [`LevelDoc`] back to canonical `.lev` text.
 ///
-/// TODO(step 4): canonical indentation + number spelling, comments dropped.
+/// TODO(step 4): canonical indentation + spacing, comments dropped.
 pub fn print_lev(_doc: &LevelDoc) -> String {
     String::new()
+}
+
+// ── tests ────────────────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn count_objs(c: &Chunk) -> usize {
+        c.items
+            .iter()
+            .filter(|it| matches!(it, Item::Chunk(ch) if ch.id == "OBJ"))
+            .count()
+    }
+
+    fn parse_fixture(rel: &str) -> LevelDoc {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .join(rel);
+        let src = std::fs::read_to_string(&path)
+            .unwrap_or_else(|e| panic!("read {}: {e}", path.display()));
+        parse_lev(&src).unwrap_or_else(|e| panic!("parse {}: {e}", path.display()))
+    }
+
+    #[test]
+    fn parse_minimal() {
+        let doc = parse_lev("{ 'LVL' }").unwrap();
+        assert_eq!(doc.root.id, "LVL");
+        assert!(doc.root.items.is_empty());
+    }
+
+    #[test]
+    fn parse_leaf_shapes() {
+        // VEC3 with NAME + DATA (3 reals), and an I32 with NAME/DATA/STR.
+        let src = r#"{ 'LVL'
+            { 'OBJ'
+                { 'NAME' "House" }
+                { 'VEC3' { 'NAME' "Position" } { 'DATA' -0.25(1.15.16) 12.0(1.15.16) 0.0(1.15.16)  //x,y,z
+                } }
+                { 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+                { 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+            }
+        }"#;
+        let doc = parse_lev(src).unwrap();
+        assert_eq!(doc.root.id, "LVL");
+        assert_eq!(count_objs(&doc.root), 1);
+        let Item::Chunk(obj) = &doc.root.items[0] else { panic!("expected OBJ") };
+        assert_eq!(obj.id, "OBJ");
+        // NAME leaf carries one string literal.
+        let Item::Chunk(name) = &obj.items[0] else { panic!() };
+        assert_eq!(name.id, "NAME");
+        assert!(matches!(&name.items[0], Item::Literal(Literal::Str { value }) if value == "House"));
+        // VEC3 → DATA has 3 numeric literals; the //x,y,z comment is dropped.
+        let Item::Chunk(vec3) = &obj.items[1] else { panic!() };
+        assert_eq!(vec3.id, "VEC3");
+        let Item::Chunk(data) = &vec3.items[1] else { panic!() };
+        assert_eq!(data.id, "DATA");
+        let nums = data.items.iter().filter(|i| matches!(i, Item::Literal(Literal::Num { .. }))).count();
+        assert_eq!(nums, 3, "DATA should have 3 numbers, comment dropped");
+    }
+
+    #[test]
+    fn serde_round_trip_smb() {
+        let doc = parse_fixture("wflevels/smb_w1_1/smb_w1_1.lev");
+        let json = serde_json::to_string(&doc).unwrap();
+        let back: LevelDoc = serde_json::from_str(&json).unwrap();
+        assert_eq!(doc, back, "serde JSON round-trip must be lossless");
+    }
+
+    #[test]
+    fn parse_real_levels_structure() {
+        for (rel, objs) in [
+            ("wflevels/snowgoons-blender/snowgoons-blender.lev", 36),
+            ("wflevels/smb_w1_1/smb_w1_1.lev", 22),
+            ("wflevels/qbert_practice/qbert_practice.lev", 66),
+        ] {
+            let doc = parse_fixture(rel);
+            assert_eq!(doc.root.id, "LVL", "{rel}: root must be LVL");
+            assert_eq!(count_objs(&doc.root), objs, "{rel}: OBJ count");
+        }
+    }
 }
