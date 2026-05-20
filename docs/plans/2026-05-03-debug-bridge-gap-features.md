@@ -8,7 +8,7 @@
 - Phase A — **landed** 2026-05-03 (commits 63f01d7, 1e0098e); pytest harness in [tests/test_phase_a.py](../../tests/test_phase_a.py) covers `set_mailbox` + `inject_input` end-to-end against qbert_practice.
 - Phase B1 (`set_shader`) — **landed** 2026-05-03 (905a75a). Spike found there is no shader cache; ~80 LOC instead of 1–2 days. Tests in [tests/test_phase_b.py](../../tests/test_phase_b.py).
 - Phase B2 (`reload_script`) — design agreed 2026-05-03: append-leak, dev/debug-only feature; per-actor override map keyed by `actor_idx` (not src pointer); ~100 reload budget per session before engine restart.
-- Phase C — deferred per plan; see Phase C section. **TODO: re-evaluate 2026-05-05.** Check whether a script bug has surfaced that took >1 hour to diagnose without a debugger; if so, kick off [2026-05-03-script-debugger-dap.md](2026-05-03-script-debugger-dap.md). If not, push the re-evaluation date forward by another week.
+- Phase C — deferred per plan; see Phase C section. **TODO: re-evaluate 2026-05-26.** Check whether a script bug has surfaced that took >1 hour to diagnose without a debugger; if so, kick off [2026-05-03-script-debugger-dap.md](2026-05-03-script-debugger-dap.md). If not, push the re-evaluation date forward by another week. _Re-eval 2026-05-19: user kept it deferred — recent debugging pain (snowgoons rendobj3 overread, the `&&` short-circuit bug) was all C++, not script-level, so the gate has not fired._
 
 ## Goal
 
