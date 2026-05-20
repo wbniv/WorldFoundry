@@ -22,7 +22,16 @@ set(WF_PHYSICS_ENGINE "jolt"    CACHE STRING "legacy | jolt")
 option(WF_REST_API        "REST API box PoC (HTTP runtime-mutation debug)" ON)
 option(WF_DEBUG_BRIDGE    "TCP/JSON debug bridge — level-design + AI-agent debugging (Blender live edit, etc.). Independent of WF_ENABLE_EDITOR." ON)
 option(WF_ENABLE_STEAM    "Steamworks SDK"                OFF)
-option(WF_ASAN            "AddressSanitizer + UBSan (Linux dev only)" OFF)
+# AddressSanitizer + UBSan. Default **ON for host Debug builds** — Debug exists
+# to catch bugs, computers are fast, and the whole engine+editor lifecycle is
+# sanitizer-clean (verified 2026-05-20). Release / Android / iOS stay clean and
+# uninstrumented. The "fast-debug" build (Debug symbols, no sanitizer tax) is
+# `-DWF_ASAN=OFF` (see `task build-fast`). Overridable either way.
+set(_WF_ASAN_DEFAULT OFF)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT ANDROID AND NOT IOS)
+    set(_WF_ASAN_DEFAULT ON)
+endif()
+option(WF_ASAN "AddressSanitizer + UBSan (default ON for host Debug; -DWF_ASAN=OFF = fast-debug)" ${_WF_ASAN_DEFAULT})
 
 # Editor stack — collaborative editor app, CRDT bridge, replay UI, etc.
 # Independent of WF_DEBUG_BRIDGE (the bridge is general-purpose debug

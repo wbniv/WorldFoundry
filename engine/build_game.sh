@@ -130,6 +130,14 @@ WF_DEBUG_BRIDGE="${WF_DEBUG_BRIDGE:-1}"
 # WF_ENABLE_EDITOR is set (both consumers drive it).
 WF_ENABLE_EDITOR="${WF_ENABLE_EDITOR:-0}"
 
+# AddressSanitizer + UBSan. Default ON for this debug build (-O0 -g): Debug
+# exists to catch bugs, computers are fast, and the engine+editor lifecycle is
+# sanitizer-clean (verified 2026-05-20). Set WF_ASAN=0 for a fast-debug build
+# (debug symbols, no instrumentation tax). Mirrors the CMake WF_ASAN
+# default-for-Debug. Only the engine TUs are instrumented; vendored C libs
+# (Lua/QuickJS/Wren/zForth/WAMR) + prebuilt Jolt link uninstrumented (fine).
+WF_ASAN="${WF_ASAN:-1}"
+
 mkdir -p "$OUT"
 
 CXXFLAGS=(
@@ -146,6 +154,14 @@ CXXFLAGS=(
     -I"$VENDOR/miniaudio-0.11.25"
     -I"$VENDOR/tsf"
 )
+
+# AddressSanitizer + UBSan (see WF_ASAN above). Instrument the engine TUs and
+# carry -fsanitize onto the final link so the runtime is pulled in.
+declare -a SANITIZE_LINK=()
+if [[ "$WF_ASAN" == "1" ]]; then
+    CXXFLAGS+=(-fsanitize=address,undefined -fno-omit-frame-pointer)
+    SANITIZE_LINK+=(-fsanitize=address,undefined)
+fi
 
 # Physics engine compile-time selection — must come before any other flag block
 # that might read CXXFLAGS so the -DPHYSICS_ENGINE_* define is always present.
@@ -731,7 +747,7 @@ else
     WF_BIN_NAME="wf_game"
 fi
 
-g++ "${OBJS[@]}" "${JS_LINK_EXTRA[@]}" "${JOLT_LINK_EXTRA[@]}" "${STEAM_LINK_EXTRA[@]}" \
+g++ "${SANITIZE_LINK[@]}" "${OBJS[@]}" "${JS_LINK_EXTRA[@]}" "${JOLT_LINK_EXTRA[@]}" "${STEAM_LINK_EXTRA[@]}" \
     -lGL -lGLU -lX11 -lm -lpthread -ldl \
     -Wl,-z,noexecstack \
     -o "$SCRIPT_DIR/$WF_BIN_NAME"

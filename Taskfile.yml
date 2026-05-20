@@ -30,10 +30,16 @@ tasks:
       - cmake --build cmake-build-linux -j
 
   build-asan:
-    desc: "Build wf_game with AddressSanitizer + UBSan (Linux dev only)"
+    desc: "Build wf_game with AddressSanitizer + UBSan (now the Debug default; explicit dir)"
     cmds:
       - cmake -S . -B cmake-build-asan -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=ON
       - cmake --build cmake-build-asan -j
+
+  build-fast:
+    desc: "Fast-debug: Debug symbols, NO sanitizer tax (-DWF_ASAN=OFF) — for chasing logic, not memory"
+    cmds:
+      - cmake -S . -B cmake-build-fast -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=OFF
+      - cmake --build cmake-build-fast -j
 
   build-editor:
     desc: "Build wf_game with the editor / dev stack (debug bridge + REST + CRDT + mutation API). Requires Rust toolchain."
