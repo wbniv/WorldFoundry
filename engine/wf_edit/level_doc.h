@@ -34,6 +34,10 @@ bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc,
 // inverse of `levtree parse`). Used by level_save's SaveDocToLev.
 bool RunLevtreePrint(const std::string& json, std::string& out_lev);
 
+// Run `build_level_binary.sh <level_name>` → `.iff` (the 5-stage .lev→.iff
+// compile). `out_log` gets the script's stdout+stderr. Returns true on exit 0.
+bool RunBuildLevel(const std::string& level_name, std::string& out_log);
+
 // Read actor display names out of doc.content — each top-level chunk's NAME
 // child text (falls back to the chunk_type for an unnamed/odd chunk). Reads
 // through the Doc (not a side cache), so this exercises the Doc → UI path.

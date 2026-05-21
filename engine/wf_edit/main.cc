@@ -81,6 +81,37 @@ void DoSave(EditorCtx* c)
     c->toast_frames = 180;
 }
 
+// File→Save + Compile: save the .lev, then run the .lev→.iff pipeline
+// (build_level_binary.sh). Synchronous — blocks the frame for the few seconds
+// the 5-stage build takes (a deliberate user action). The live engine is NOT
+// reloaded (out of scope); the .iff is produced for the next play/load.
+void SaveAndCompile(EditorCtx* c)
+{
+    if (!c->doc || c->save_path.empty()) {
+        c->toast = "compile: no document / path"; c->toast_frames = 180; return;
+    }
+    if (!wfedit::SaveDocToLev(*c->doc, c->parse_json, c->save_path)) {
+        c->toast = "SAVE FAILED: " + c->save_path; c->toast_frames = 180; return;
+    }
+    std::string name = c->save_path;   // level name = basename without ".lev"
+    if (auto s = name.find_last_of('/'); s != std::string::npos) name.erase(0, s + 1);
+    if (auto d = name.rfind(".lev"); d != std::string::npos) name.erase(d);
+
+    std::string log;
+    const bool ok = wfedit::RunBuildLevel(name, log);
+    std::fprintf(stderr, "%s", log.c_str());
+    std::string last;   // last non-empty line: the script's "built …" or the error
+    for (std::size_t i = 0, b = 0; i <= log.size(); ++i)
+        if (i == log.size() || log[i] == '\n') { if (i > b) last.assign(log, b, i - b); b = i + 1; }
+    // Drop the script's leading ✓ glyph (U+2713) + space — ImGui's default font
+    // has no glyph for it, so it renders as "?".
+    std::size_t k = 0;
+    while (k < last.size() && static_cast<unsigned char>(last[k]) >= 0x80) ++k;
+    if (k < last.size() && last[k] == ' ') ++k;
+    c->toast = ok ? ("compiled: " + last.substr(k)) : "compile FAILED — see stderr";
+    c->toast_frames = 240;
+}
+
 // Dump the composited back buffer (engine render + ImGui overlay) to a P6 PPM.
 // GL rows are bottom-up; flip for top-down PPM. Convert to PNG with ffmpeg.
 void write_ppm(GLFWwindow* win, const char* path)
@@ -145,6 +176,13 @@ bool editor_frame(void* p)
             DoSave(c);
         }
     }
+    // M4 headless: WF_EDIT_COMPILE drives Save + Compile once (saves to the
+    // level's source path, then runs the .lev→.iff pipeline) for the gate.
+    static bool s_compile_ui = false;
+    if (!s_compile_ui && c->doc && std::getenv("WF_EDIT_COMPILE")) {
+        s_compile_ui = true;
+        SaveAndCompile(c);
+    }
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -177,6 +215,7 @@ bool editor_frame(void* p)
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Save Level", "Ctrl+S")) DoSave(c);
+            if (ImGui::MenuItem("Save + Compile (.iff)")) SaveAndCompile(c);
             ImGui::MenuItem("Publish to .blend", nullptr, false, false);   // later: hand off to wf.import_level
             ImGui::EndMenu();
         }

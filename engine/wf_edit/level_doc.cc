@@ -176,6 +176,25 @@ bool RunLevtreePrint(const std::string& json, std::string& out_lev)
     return true;
 }
 
+// ── run `build_level_binary.sh <level>` → .iff (the .lev → .iff compile) ─────
+// Shells out to the existing 5-stage pipeline (iffcomp/levcomp/textile/iffcomp);
+// captures its stdout+stderr into out_log. Used by the editor's Save + Compile.
+bool RunBuildLevel(const std::string& level_name, std::string& out_log)
+{
+    const std::string cmd = "bash " + ShQuote("wftools/wf_blender/build_level_binary.sh")
+                          + " " + ShQuote(level_name) + " 2>&1";
+    FILE* pipe = popen(cmd.c_str(), "r");
+    if (!pipe) {
+        std::fprintf(stderr, "wf-edit: popen failed for: %s\n", cmd.c_str());
+        return false;
+    }
+    std::array<char, 65536> buf;
+    size_t n;
+    while ((n = std::fread(buf.data(), 1, buf.size(), pipe)) > 0)
+        out_log.append(buf.data(), n);
+    return pclose(pipe) == 0;
+}
+
 bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc,
                           std::string* out_parse_json)
 {
