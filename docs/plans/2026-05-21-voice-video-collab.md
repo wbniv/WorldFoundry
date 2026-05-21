@@ -3,6 +3,55 @@
 **Status:** Done — implemented and building (~3 h)  
 **Estimated effort:** ~3–4 days
 
+> The "Architecture Overview" and "Phases" below capture the **original design intent**
+> (a libdatachannel/WebRTC stack). The shipped v1 **diverged** — see § As shipped for what
+> actually landed, which is authoritative.
+
+## As shipped (reconciled 2026-05-21)
+
+The implementation is **simpler than the WebRTC design** below: it dropped
+[libdatachannel](https://github.com/paullouisageneau/libdatachannel) / DTLS-SRTP / ICE /
+STUN entirely in favour of **raw UDP** on the LAN. This is fine for the LAN-only v1 target;
+remote peers (which were what STUN/relay bought) are explicitly v2.
+
+| Aspect | Designed (below) | **As shipped** |
+|---|---|---|
+| Transport | libdatachannel (ICE/DTLS-SRTP/RTP) | **raw UDP sockets** ([voice_track.cc](../../engine/wf_edit/voice_track.cc), [video_track.cc](../../engine/wf_edit/video_track.cc)) |
+| Peer discovery | multicast SDP offer/answer | **multicast heartbeat beacon** `WFEDIT\|room\|peer\|name\|audio_port\|video_port` every 2 s on `239.255.42.99:9877` ([collab_session.cc](../../engine/wf_edit/collab_session.cc)) |
+| Ports | RTP payload types over one connection | **ephemeral OS-assigned** audio + video UDP ports (so multiple instances share a host); the room beacon advertises them — replaced the earlier hardcoded 19400/19401 (`a9600ab1`) |
+| Audio | Opus over libdatachannel | **Opus direct** (48 kHz mono, 20 ms, VOIP preset, 32 kbps) over UDP, miniaudio capture/playback |
+| Video | VP8 over libdatachannel | **VP8 (libvpx) direct** over UDP, fragmented with a `WFV\0` header to fit the MTU; V4L2 capture; decoded → GL texture |
+| Display name | per-user | fixed to **"Editor"** in v1 ([main.cc](../../engine/wf_edit/main.cc)) |
+| STUN / remote peers | `WF_COLLAB_STUN` env | **not implemented** (LAN multicast only) |
+
+### As-shipped Collaborators panel ([collab_panel.cc](../../engine/wf_edit/collab_panel.cc))
+
+```
+┌─ Collaborators ─────────────────────────────┐
+│ Room: studio-1                              │
+│ You      (live)                             │   ← self-preview state
+│  [ Mute mic ]   [ Cam off ]                 │   ← toggles
+│ ─────────────────────────────────────────  │
+│  ┌──────────┐  ┌──────────┐                │
+│  │ [video]  │  │   (B)    │   ← initials    │
+│  │ Alice    │  │  Bob     │     avatar      │
+│  │ ████░░░░ │  │ ░░░░░░░░ │   ← level meter │
+│  └──────────┘  └──────────┘                │
+│  No peers? Share the room ID to invite.     │
+└─────────────────────────────────────────────┘
+```
+
+Differs from the Phase-4 mockup: a real **self-preview** row ("You"), the toggles are
+labelled **Mute mic / Cam off** (no "Leave call" — closing the window leaves), and an
+empty room prints "Share the room ID above to invite collaborators." Usage is documented
+in the [editor user manual § Collaboration](../wf-edit-manual.md#collaboration-voice--video).
+
+> **Screenshot still pending** ([feedback_screenshots_for_proof](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_screenshots_for_proof.md)):
+> the panel needs **two editor instances + a camera/mic**, so it can't be captured by the
+> headless single-instance harness the other editor plans use. Capturing two live
+> instances side-by-side is an interactive task — tracked, not yet done. The ASCII above
+> is the faithful layout in the meantime.
+
 ## Context
 
 wf-edit is a collaborative CRDT-based level editor (ImGui/GLFW/OpenGL). Multiple editors
@@ -26,7 +75,8 @@ Editor A                           Editor B
                   (same room-id)
 ```
 
-**Transport**: [libdatachannel](https://github.com/paullouisageneau/libdatachannel) — lightweight
+**Transport** *(designed — superseded by raw UDP at ship; see § As shipped)*:
+[libdatachannel](https://github.com/paullouisageneau/libdatachannel) — lightweight
 C++ WebRTC that handles ICE, DTLS-SRTP, RTP. LAN-only v1 (UDP multicast signaling); remote
 peers add a public STUN server in v2.
 

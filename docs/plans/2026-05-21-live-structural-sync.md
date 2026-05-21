@@ -76,9 +76,13 @@ object — this offset is a best-effort heuristic for v1.
 
 | Step | Screenshot | Result |
 |------|-----------|--------|
-| Delete House | `tests/screenshots/verify_m2_delete.png` | Outliner shows 35 actors; "actor deleted" toast; Properties live on QuadPatch01 |
-| Dup non-templated (House) | `tests/screenshots/verify_m2_dup_notempl.png` | Outliner shows 37 actors; "reload to see" toast; no crash |
+| Delete House | ![35 actors after delete](../../tests/screenshots/verify_m2_delete.png) | Outliner shows 35 actors; "actor deleted" toast; Properties live on QuadPatch01 |
+| Dup non-templated (House) | ![37 actors after non-templated dup](../../tests/screenshots/verify_m2_dup_notempl.png) | Outliner shows 37 actors; "reload to see" toast; no crash |
 | Dup templated (live spawn) | — needs level with Actor-kind templates | snowgoons/qbert only have Room/Tool templates (confirmed by spawn-test Part A) |
+
+Baseline before either edit (36 actors):
+
+![snowgoons baseline — 36 actors](../../tests/screenshots/verify_m2_before.png)
 
 ### Videos (interactive, deferred)
 - [ ] Delete a House — disappears from viewport live

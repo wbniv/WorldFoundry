@@ -15,6 +15,23 @@ Built on the completed [editor shell](2026-05-20-editor-app-shell.md) (M1–M6).
 
 ---
 
+## Screenshots
+
+**Phase 1 — named read-only fields** (House: Position / Class Name=statplat / Mass / Movement Mailbox / …, straight from the self-describing `.lev`):
+
+![Phase 1 Properties: named field/value list for the House actor](../../tests/screenshots/wfedit_p1_fields.png)
+
+**Phase 2 — OAD-driven widgets, read-only** (`Mobility`→enum, `Moves Between Rooms`→checkbox, `Mass`/elasticities→float, `Mesh Name`→file+Browse; scrolled view shows COLOR swatches + enums):
+
+![Phase 2: OAD-typed widgets on the House](../../tests/screenshots/wfedit_p2_house.png)
+![Phase 2 scrolled: colour swatches and enum dropdowns](../../tests/screenshots/wfedit_p2_color.png)
+
+**Phase 3 — editable** (the edits applied: `Mass` 0.0→5.0, `Mobility` Anchored→Physics, `Movement Mailbox` 1→7):
+
+![Phase 3: editable widgets with edits committed to the Doc](../../tests/screenshots/wfedit_p3_edit.png)
+
+---
+
 ## Context
 
 The [editor shell](2026-05-20-editor-app-shell.md) is complete: `wf-edit` embeds the engine viewport, has a dockspace, and the Outliner lists actors read from a read-only `wfcrdt::Doc`. The **Properties panel currently shows only the selected actor's name** ([engine/wf_edit/main.cc](../../engine/wf_edit/main.cc)). This plan fills it in: every field of the selected actor, rendered with the right widget, editable back into the Doc.

@@ -36,7 +36,15 @@ What's missing is the bridge between them:
         already done (Phase 3)                          ▲ this plan ▲
 ```
 
-**Realized (M3):** editing snowgoons' House `Position` Z −0.125 → 6.0 in the panel propagates through the bridge and the House lifts off the snow — [before](../../tests/screenshots/wfedit_m3_before.png) → [after](../../tests/screenshots/wfedit_m3_after.png).
+**Realized (M3):** editing snowgoons' House `Position` Z −0.125 → 6.0 in the panel propagates through the bridge and the House lifts off the snow:
+
+| Before (`Z = −0.125`) | After (`Z = 6.0`) |
+|---|---|
+| ![House on the snow](../../tests/screenshots/wfedit_m3_before.png) | ![House lifted after the Position edit](../../tests/screenshots/wfedit_m3_after.png) |
+
+The `wfmut` regression suite stays green alongside (Verification #6) — the bridge consumes `wfmut`, it doesn't change it:
+
+![wfmut bridge regression — actors still propagate after the bridge wiring](../../tests/screenshots/wfmut_bridge_regression.png)
 
 Three problems sit in that gap, in rising order of difficulty:
 

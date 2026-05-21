@@ -8,6 +8,18 @@
 
 ---
 
+## Screenshots
+
+**The Outliner's Duplicate / Delete buttons** appear above the actor list when an actor is selected (qbert_practice, 66 actors):
+
+![Outliner with Duplicate / Delete buttons over the actor list](../../tests/screenshots/qbert_editor_load.png)
+
+**M2 — after a duplicate** (snowgoons 36 → 37; the cloned House selected; field→viewport propagation suspended with a toast until reload):
+
+![Outliner after duplicating the House — 37 actors](../../tests/screenshots/wfedit_outliner_struct.png)
+
+---
+
 ## Context
 
 The editor can read/edit/preview/save (field edits). The [lossless Doc schema](2026-05-21-lossless-doc-schema.md) made `content` an arbitrary-length array the save walks faithfully, so **adding/deleting actors in the `Doc` now persists by construction**. This plan wires the Outliner ([main.cc:230](../../engine/wf_edit/main.cc)) to do it.
@@ -44,7 +56,7 @@ Three layers, in rising difficulty:
 - **Outcome:** Outliner Duplicate/Delete buttons + Del key → `DoDuplicate`/`DoDelete` → `RefreshAfterStructural` (re-read names, clamp selection, force props re-resolve, set `structural_dirty`). The guard suspends `PropagateToEngine` while `structural_dirty`. Headless `WF_EDIT_STRUCT_UI=dup|del` drives the UI path for the [screenshot](../../tests/screenshots/wfedit_outliner_struct.png). ASan-clean.
 - Outliner ([main.cc](../../engine/wf_edit/main.cc)): a delete affordance (Del key / right-click "Delete") on the selected actor → `Array::remove`; an "Add (duplicate)" button → `DocActorToInput(selected)` + `push`. Re-read `actor_names`; fix up `selected`.
 - **Identity-map guard (D3):** a `structural_dirty` flag set on any add/delete; `PropagateToEngine` becomes a no-op while set (with a one-time toast: "structural edit — reload to resume live preview"). Cleared on (re)load.
-- **Gate:** add/delete in the Outliner updates the list + persists on save ([screenshot](../../tests/screenshots/) of the Outliner before/after + the saved `.lev` diff); a field edit *after* a structural edit does **not** mutate the wrong actor (guard verified). ASan-clean; runtime byte-unchanged.
+- **Gate:** add/delete in the Outliner updates the list + persists on save ([screenshot](../../tests/screenshots/wfedit_outliner_struct.png) of the Outliner after the duplicate + the saved `.lev` diff); a field edit *after* a structural edit does **not** mutate the wrong actor (guard verified). ASan-clean; runtime byte-unchanged.
 
 ### 3. Docs + status sync — ✅ DONE 2026-05-21
 - Plan Status → Done w/ actuals; [wf-status.md](../../wf-status.md) row → Done; the TODO Outliner-add/delete entry updated (Doc-level done; remaining = live sync + stable-id map); design-doc structural-editing note; the **live-structural-sync** (D4) + **stable-id identity map** (D3 proper fix) follow-ups logged in [TODO.md](../../TODO.md).

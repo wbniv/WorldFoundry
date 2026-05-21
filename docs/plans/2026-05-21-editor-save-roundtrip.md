@@ -59,7 +59,13 @@ So instead of *reconstructing* the JSON from the lossy Doc, **patch the lossless
 └──────────────────────┘      ░░ compile: build_level_binary.sh snow…   ░░
 ```
 
-**Realized (M3):** File→Save flashes the toast (bottom-left) after writing the `.lev` — [screenshot](../../tests/screenshots/wfedit_save_toast.png) (House's OAD property panel visible alongside). Per [feedback_screenshots_beside_mockups](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_screenshots_beside_mockups.md).
+**Realized (M3):** File→Save flashes the toast (bottom-left) after writing the `.lev` (House's OAD property panel visible alongside). Per [feedback_screenshots_beside_mockups](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_screenshots_beside_mockups.md):
+
+![File→Save toast — "saved …​.lev / re-import in Blender (wf.import_level) to refresh the .blend"](../../tests/screenshots/wfedit_save_toast.png)
+
+**Realized (M4):** "Save + Compile (.iff)" runs the `.lev`→`.iff` pipeline and surfaces the built artifact + size in the toast:
+
+![Save + Compile toast — the build_level_binary.sh pipeline finished](../../tests/screenshots/wfedit_save_compile.png)
 
 ---
 

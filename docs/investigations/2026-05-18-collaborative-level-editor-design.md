@@ -1,9 +1,10 @@
 # Collaborative level editor — design exploration
 
 **Date:** 2026-05-18
-**Status:** Design brainstorm, no implementation yet. Captured before details fade.
+**Status:** Design brainstorm → **v1 shipped** (2026-05-20…21): app shell, OAD property panel, CRDT→engine bridge, save round-trip, Outliner add/delete, and voice + video calling all landed. This doc is the design rationale; for *using* the editor see the **[wf-edit user manual](../wf-edit-manual.md)**.
 **Trigger:** Open-ended brainstorm — "I want to design a new application that embeds the wf game engine into something else."
 **Related TODO:** [Research: Qt as the UI toolkit](../../TODO.md) under § TOOLS.
+**Implementation plans:** [app shell](../plans/2026-05-20-editor-app-shell.md) · [property panel](../plans/2026-05-20-editor-property-panel.md) · [CRDT→engine bridge](../plans/2026-05-20-crdt-engine-bridge.md) · [save round-trip](../plans/2026-05-21-editor-save-roundtrip.md) · [outliner add/delete](../plans/2026-05-21-outliner-add-delete.md) · [live structural sync](../plans/2026-05-21-live-structural-sync.md) · [voice + video](../plans/2026-05-21-voice-video-collab.md).
 
 ---
 

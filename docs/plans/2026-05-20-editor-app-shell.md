@@ -8,6 +8,18 @@
 
 ---
 
+## Screenshots
+
+**M4 — read-only Y.Doc → Outliner** (snowgoons; 36 actors read back from the CRDT `Doc`). Menu bar + Outliner (left), live engine Viewport (center), Properties (right):
+
+![wf-edit shell: Outliner, live Viewport, Properties dockspace](../../tests/screenshots/wfedit_m4_outliner.png)
+
+**M5 — selection → Properties** (clicking an Outliner row populates the panel):
+
+![Selecting the House actor highlights it in the Outliner](../../tests/screenshots/wfedit_m5_select.png)
+
+---
+
 ## Context
 
 The collaborative editor's whole **backend** is in place:
