@@ -121,6 +121,16 @@ struct EditorCtx {
     std::unordered_map<std::string, PresenceState> peer_presence;  // peer_id → state
     double last_presence_send = 0.0;
     float  our_colour[3] = {0.5f, 0.5f, 0.5f};   // set on relay connect from peer_id hash
+
+    // Phase 5: chat sidebar (only visible when relay is connected).
+    struct ChatEntry {
+        std::string name;
+        float colour[3] = {0.8f, 0.8f, 0.8f};
+        std::string text;
+    };
+    std::vector<ChatEntry> chat_log;
+    char chat_input[256]   = {};
+    bool chat_scroll_btm   = false;
 };
 
 // File→Save (and Ctrl+S / headless WF_EDIT_SAVE_UI): patch the parse JSON with
@@ -254,8 +264,31 @@ void CollabDrain(EditorCtx* c) {
                     ps.last_seen    = glfwGetTime();
                 }
             } catch (...) {}
+        } else if (ch == 0x03) {
+            // CHAT — append to log.
+            try {
+                using json = nlohmann::json;
+                json j = json::parse(frame.begin() + 1, frame.end());
+                std::string text = j.value("text", "");
+                if (!text.empty()) {
+                    EditorCtx::ChatEntry e;
+                    e.name = j.value("name", "peer");
+                    e.text = std::move(text);
+                    if (j.contains("colour") && j["colour"].is_array()
+                        && j["colour"].size() >= 3) {
+                        e.colour[0] = j["colour"][0].get<float>();
+                        e.colour[1] = j["colour"][1].get<float>();
+                        e.colour[2] = j["colour"][2].get<float>();
+                    } else {
+                        const std::string pid = j.value("peer_id", "");
+                        PeerColourFromId(pid, e.colour);
+                    }
+                    c->chat_log.push_back(std::move(e));
+                    c->chat_scroll_btm = true;
+                }
+            } catch (...) {}
         }
-        // CHAT (0x03) and CONTROL (0x04) are ignored for now.
+        // CONTROL (0x04) is ignored here.
         frame.clear();
     }
     // Evict peers not seen in 8 s.
@@ -583,6 +616,61 @@ bool editor_frame(void* p)
     if (c->collab)
         wfedit::RenderCollabPanel(c->show_collab, *c->collab,
                                   *c->voice, *c->video, c->room_id);
+
+    // Chat panel (only when relay is connected).
+    if (c->relay_client.connected()) {
+        ImGui::Begin("Chat");
+        // Peer presence list above history.
+        if (!c->peer_presence.empty()) {
+            for (const auto& [pid, ps] : c->peer_presence)
+                ImGui::TextColored(
+                    ImVec4(ps.colour[0], ps.colour[1], ps.colour[2], 1.f),
+                    "● %s", ps.name.c_str());
+            ImGui::Separator();
+        }
+        // Scrollable message history.
+        const float reserve = ImGui::GetFrameHeightWithSpacing() + 4;
+        ImGui::BeginChild("##chat_hist", ImVec2(0, -reserve), false);
+        for (const auto& e : c->chat_log) {
+            ImGui::TextColored(ImVec4(e.colour[0], e.colour[1], e.colour[2], 1.f),
+                               "%s:", e.name.c_str());
+            ImGui::SameLine();
+            ImGui::TextWrapped("%s", e.text.c_str());
+        }
+        if (c->chat_scroll_btm) {
+            ImGui::SetScrollHereY(1.0f);
+            c->chat_scroll_btm = false;
+        }
+        ImGui::EndChild();
+        // Input row.
+        ImGui::SetNextItemWidth(-70);
+        const bool send = ImGui::InputText("##chat_in", c->chat_input,
+                                           sizeof(c->chat_input),
+                                           ImGuiInputTextFlags_EnterReturnsTrue);
+        ImGui::SameLine();
+        if ((send || ImGui::Button("Send")) && c->chat_input[0]) {
+            EditorCtx::ChatEntry mine;
+            mine.name = "Me";
+            std::copy(c->our_colour, c->our_colour + 3, mine.colour);
+            mine.text = c->chat_input;
+            c->chat_log.push_back(mine);
+            c->chat_scroll_btm = true;
+
+            using json = nlohmann::json;
+            std::string body = json{
+                {"peer_id", c->our_peer_id},
+                {"name",    "Editor"},
+                {"colour",  json::array({c->our_colour[0], c->our_colour[1], c->our_colour[2]})},
+                {"text",    mine.text}
+            }.dump();
+            std::vector<uint8_t> msg;
+            msg.push_back(0x03);
+            msg.insert(msg.end(), body.begin(), body.end());
+            c->relay_client.send(msg.data(), msg.size());
+            c->chat_input[0] = '\0';
+        }
+        ImGui::End();
+    }
 
     // Status readout floating over the central (engine) region.
     ImGui::SetNextWindowBgAlpha(0.35f);
