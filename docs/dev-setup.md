@@ -79,6 +79,23 @@ LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 \
 
 `cd.iff` is read from the current directory. Snowgoons is the hardcoded default boot level (see [docs/plans/2026-04-engine-start-snowgoons-directly.md](plans/2026-04-engine-start-snowgoons-directly.md)).
 
+### Editor (`wf-edit`)
+
+The collaborative level editor builds only under `WF_ENABLE_EDITOR=ON`, as a **Debug** CMake build (GCC — Release fails on the engine's Clang-only `-flto=thin`):
+
+```bash
+cmake -S . -B build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-editor --target wf-edit -j
+```
+
+Output: `build-editor/wf-edit`. Voice + video calling additionally need:
+
+```bash
+sudo apt install libopus-dev libvpx-dev   # Opus voice + libvpx VP8 video
+```
+
+Full usage — window layout, property editing, save/compile, collaboration, headless hooks — is in the [wf-edit user manual](wf-edit-manual.md).
+
 ### Rust-port pipeline tools
 
 ```bash

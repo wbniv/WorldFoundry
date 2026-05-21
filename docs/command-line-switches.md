@@ -80,3 +80,7 @@ Each takes the form `-X<initial><output>` where:
 | `f<filename>` | write to file |
 
 **Example:** `-sas` routes the actor stream to stdout.
+
+## `wf-edit` (editor) switches
+
+The `wf-edit` editor has its own switches, distinct from the engine's above: `--level=<name>`, `--leveltree=<name>`, `--room=<id>` (join a voice + video call), `--frames <N>` and `--screenshot <path>` (headless — **these take a space, not `=`**), and `--select=<N>`. See the [wf-edit user manual](wf-edit-manual.md#running-wf-edit) for the full option table plus the headless automation env-vars.

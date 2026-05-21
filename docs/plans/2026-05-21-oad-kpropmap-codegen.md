@@ -1,8 +1,8 @@
 # Plan — OAD Codegen for `kPropMap` (M3)
 
 **Date:** 2026-05-21
-**Status:** In progress
-**Branch:** `2026-new-level` (working in `2026-m3-oad-codegen` worktree)
+**Status:** **DONE 2026-05-21** (committed `6c98b1cb`). All four steps landed: `regen-headers.sh` gained the `gen-kpropmap` awk pass over `common.ht`/`movebloc.ht`/`mesh.ht`; the committed [`engine/mutation/kpropmap_generated.inc`](../../engine/mutation/kpropmap_generated.inc) holds **77** entries (COMMON 11 + MOVEBLOC 27 + MESH 39, vs the 15 hand-curated); `wfmut.cpp` now `#include`s it inside `kPropMap`; and the [`.ht` codegen oracle](2026-05-20-ht-codegen-repair.md) (`task test-codegen`) was extended to verify the `.inc` byte-for-byte (both TODO items closed). **Scope was the `wfmut` write surface only** — the editor's [`engine_bridge.cc`](../../engine/wf_edit/engine_bridge.cc) keeps its own ~15-entry name→path table (keyed on the human OAD `name`, e.g. "Step Size", not the struct member "StepSize"), so the editor's *live-viewport* preview still routes ~15 fields even though `wfmut::SetActorField` now accepts 77; generating that bridge table from the same source is a separate follow-up.
+**Branch:** `2026-new-level` (landed; the `2026-m3-oad-codegen` worktree was merged and removed)
 
 ---
 
