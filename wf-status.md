@@ -1,13 +1,17 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-05-20  
+**As of:** 2026-05-21  
 **Branch:** `2026-new-level`
 
 ---
 
 ## History
 
-39 days of work (2026-04-12 – 2026-05-20). Newest first:
+40 days of work (2026-04-12 – 2026-05-21). Newest first:
+
+- **Outliner add/delete actor — first structural editing in `wf-edit` (2026-05-21)** — Actor add (duplicate selected) and delete are now live in the Outliner (Del key + buttons), backed by a new `wfcrdt::Array::remove` primitive wrapping `yarray_remove_range`; structural edits persist by construction through the lossless Doc→JSON save walk; a `structural_dirty` guard suspends field→viewport propagation after a structural edit (guard clears on reload) to avoid the positional `content[i]↔engine i+1` map being stale; `WF_EDIT_STRUCT_TEST` headless proof: snowgoons 36 → dup → 37 → del → 35, ASan-clean; Outliner [screenshot](tests/screenshots/wfedit_outliner_struct.png) shows 37 actors; live structural viewport sync (D4) and stable-id identity map (D3 proper fix) logged as TODO follow-ups. See [plan](docs/plans/2026-05-21-outliner-add-delete.md).
+
+- **Lossless Doc schema — retained-JSON side-channel gone (2026-05-21)** — Each leaf chunk's literals now live as structured `items` maps (`{kind, value|text|id}`) mirroring `levtree`'s `Literal` enum exactly; `PatchJsonWithDoc` + the retained `parse_json` field deleted; `SaveDocToLev` is now a pure `Doc→JSON` walk with no side-channel dependency — verified byte-identical to `levtree print` on snowgoons/smb/qbert with no retained JSON, and field-edit fidelity unchanged; unblocks structural edits (add/delete actor count changes the `content[]` length, which the walk follows faithfully) and future remote/collaborative save. See [plan](docs/plans/2026-05-21-lossless-doc-schema.md).
 
 - **Editor property panel — editable widgets → Doc (Phase 3, 2026-05-20)** — The OAD-driven Properties panel is now editable: each widget commits to the selected actor's Doc leaf (`DATA`/`STR`) via a new `WriteFieldLeaf` (navigates content→actor→children→field→leaf, overwrites the leaf's `text` in one `wfcrdt` transaction) and reads back through an independent transaction — verified on House (`Mass` 0.0→5.0, `Mobility` Anchored→Physics, `Movement Mailbox` 1→7, before→after from two independent Doc reads; [screenshot](tests/screenshots/wfedit_p3_edit.png)), numeric edits preserving the levtree `(1.15.16)`/`l` suffix and clamping to OAD min/max, ASan+UBSan+LSan-clean over edit→commit→read. The full `levtree print`→levcomp round-trip is deferred (needs a Doc→JSON serializer; the plan's "if wired"); the Doc→engine→viewport propagation is the next plan (CRDT→engine bridge, Option C). See [plan](docs/plans/2026-05-20-editor-property-panel.md).
 
