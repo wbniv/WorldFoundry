@@ -1225,3 +1225,78 @@ actors are constructed and added to rooms during level load, before
 any frame pipeline runs. They get their first PredictPosition+Update
 pair cleanly on frame 0. Only runtime-spawned actors (generators,
 explosions, etc.) ever land mid-frame.
+
+---
+
+## Physics tunnelling — Template coins fall through the floor on slow machines
+
+**Symptom:** A physics-mobility template coin (spawned by a Generator from
+`ConstructTemplateObject`) appears to vanish immediately after spawning —
+it never renders. Verified by log: `AddObject ok, coin actor_idx=N`, then
+two frames later the actor is re-added from "fell out of room" with `Z ≈ -11`.
+
+**Cause:** Jolt character physics accumulates velocity per-frame using the full
+frame `dt`. On a slow dev machine running at ~1 fps, `dt ≈ 1.0 s`. With
+`FallingAcceleration = 12`, the coin gains `-12 m/s² × 1 s = -12 m/s` in a
+single frame, plus any initial upward velocity (e.g. 8 m/s), giving a net
+downward displacement of 4–16 m in frame 1. The 1.5 m-thick floor trimesh
+is skipped entirely — **Jolt's character sweep tests the capsule from A to B
+but can miss geometry if the displacement is larger than the shape diameter**.
+
+**Fix:** Give the coin a TTL despawn in `update()` using `LevelClock().Current()`.
+With a 1.5-second TTL the coin self-removes before it can tunnel, and the
+behaviour matches the SMB arcade coin (brief arc then vanish) regardless of
+framerate.
+
+```cpp
+// In constructor:
+_despawnTime = startupData->currentTime.Current() + Scalar(1.5f);
+
+// In update():
+if (theLevel->LevelClock().Current() >= _despawnTime) {
+    theLevel->SetPendingRemove(this);
+    return;
+}
+Actor::update();
+```
+
+Use `LevelClock().Current()` (seconds), never "N ticks" — WF's loop is
+variable-dt; tick counts are meaningless.
+
+**Why the coin was invisible (not just underground):** At ~1 fps the coin spent
+its entire above-floor time within frame 0's `predictPosition` call, before
+`Actor::isVisible()` was ever tested. From the camera's perspective, the coin
+was never rendered at all.
+
+---
+
+## New OAD class — objects.mac / gold.oad order of operations
+
+**Symptom:** Adding a new OAD actor class and running the game causes
+`assert(GetMovementBlockPtr()->MovementClass == Actor::Gold_KIND)` to fire,
+disguised as `"terminate called without an active exception"` because `exit(-1)`
+from the failing assert tears down a still-joinable debug-bridge thread.
+
+**Cause:** `gold.oad` was generated *before* `Gold_KIND` was added to
+`objects.mac`. The `oas2oad` tool writes the `MovementClass` field using the
+enum value from `objects.lc` at generation time. If Gold_KIND doesn't exist
+yet, MovementClass defaults to 0 (NULL_KIND). At runtime, `Gold::kind()`
+asserts `MovementClass == Gold_KIND` and fires.
+
+**Additionally:** `objects.{car,col,ctb}` (collision tables) are derived from
+`objects.mac` via `coltab.pl`. If you add `OBJECTONLYTEMPLATEENTRY(Gold,1)` to
+`objects.mac` but forget to regenerate the collision tables, `Actor::CanCollide()`
+indexes past the end of the collision table (global buffer overflow, caught by
+ASan as a stack-smash or silent wrong-answer).
+
+**Fix — correct order:**
+
+1. Add `OBJECTONLYTEMPLATEENTRY(Gold,1)` + `COLTABLEENTRY(Gold,...)` rows to
+   `objects.mac`.
+2. Run `task gen-oas-headers` (regenerates `objects.{c,e,h,inc,car,col,ctb}`
+   from the `.mas`/`.mac` master files).
+3. Generate `gold.oad` via `task oas2oad` — Gold_KIND now exists in objects.lc.
+4. Rebuild the level binaries (`build_level_binary.sh <level>`).
+5. Build the engine (`task build`).
+
+Steps 3 and 4 must happen *after* step 1, not before.

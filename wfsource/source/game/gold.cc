@@ -18,8 +18,11 @@
 
 //============================================================================
 
+static const float kGoldTTL = 1.5f;
+
 Gold::Gold(const SObjectStartupData* startupData)
 	: Actor(startupData)
+	, _despawnTime(startupData->currentTime.Current() + Scalar(kGoldTTL))
 {
 }
 
@@ -30,6 +33,19 @@ Gold::kind() const
 {
 	assert(GetMovementBlockPtr()->MovementClass == Actor::Gold_KIND);
 	return Actor::Gold_KIND;
+}
+
+//============================================================================
+
+void
+Gold::update()
+{
+	if (theLevel->LevelClock().Current() >= _despawnTime)
+	{
+		theLevel->SetPendingRemove(this);
+		return;
+	}
+	Actor::update();
 }
 
 //============================================================================
