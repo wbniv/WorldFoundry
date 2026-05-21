@@ -49,6 +49,7 @@ struct PropField {
     long                     max = 0;
     std::vector<std::string> options;   // enum option labels
 
+    int       child_index = -1;         // Doc address for write-back (Phase 3)
     FieldKind kind = FieldKind::Raw;
 };
 
@@ -65,7 +66,11 @@ FieldKind WidgetFor(int button_type, int show_as, int option_count,
 // class and cached. Unmatched fields fall back to chunk_type / raw text.
 std::vector<PropField> ResolveProperties(const std::vector<ActorField>& doc_fields);
 
-// Render the resolved fields read-only into the current ImGui window.
-void RenderProperties(const std::vector<PropField>& fields);
+// Render the resolved fields into the current ImGui window as editable widgets
+// (Phase 3). Edits commit to `doc` (the actor at `actor_index`) in a
+// transaction and update the in-memory field for immediate display. Returns
+// true if any field was committed this frame (caller may re-read / mark dirty).
+// The Doc→engine→viewport propagation is the separate CRDT→engine bridge.
+bool RenderProperties(wfcrdt::Doc& doc, int actor_index, std::vector<PropField>& fields);
 
 }  // namespace wfedit

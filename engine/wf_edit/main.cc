@@ -148,11 +148,14 @@ bool editor_frame(void* p)
         ImGui::SameLine(150);
         ImGui::TextUnformatted(c->actor_names[c->selected].c_str());
         ImGui::Separator();
-        // Phase 2: OAD-driven widgets keyed on (ButtonType × showAs), read-only.
-        wfedit::RenderProperties(c->props);
+        // Phase 3: OAD-driven widgets keyed on (ButtonType × showAs), editable —
+        // edits commit to the Doc leaf (the in-memory field mirrors the new value
+        // for display). Doc→engine→viewport propagation is the separate bridge.
+        if (c->doc)
+            wfedit::RenderProperties(*c->doc, c->selected, c->props);
         int matched = 0;
         for (const auto& p : c->props) matched += p.matched;
-        ImGui::TextDisabled("%zu fields (read-only) — %d OAD-matched",
+        ImGui::TextDisabled("%zu fields (editable → Doc) — %d OAD-matched",
                             c->props.size(), matched);
     } else {
         ImGui::TextDisabled("(select an actor)");
@@ -230,6 +233,40 @@ int main(int argc, char** argv)
     } else {
         std::fprintf(stderr, "wf-edit: Y.Doc population failed for %s "
                              "(Outliner will be empty)\n", leveltree.c_str());
+    }
+
+    // 0b. Headless edit proof (env-gated, off by default): WF_EDIT_TEST_SET=
+    //     "Field Name|DATA|new text" writes one leaf on the --select=N actor
+    //     before the UI loop, prints before→after from two independent Doc reads
+    //     (the second reflects the committed write), and leaves the Doc edited so
+    //     the panel/screenshot show it. Exercises WriteFieldLeaf + read-back for
+    //     the Phase-3 gate without UI interaction. Kept until the plan completes.
+    if (const char* spec = std::getenv("WF_EDIT_TEST_SET"); spec && *spec && preselect >= 0) {
+        // One or more ';'-separated edits, each "Field Name|DATA|new text".
+        std::string all = spec;
+        for (std::size_t pos = 0; pos < all.size() + 1; ) {
+            std::size_t semi = all.find(';', pos);
+            std::string s = all.substr(pos, semi == std::string::npos ? std::string::npos : semi - pos);
+            pos = (semi == std::string::npos) ? all.size() + 1 : semi + 1;
+            auto a = s.find('|'), b = s.rfind('|');
+            if (a == std::string::npos || b <= a) continue;
+            std::string fname = s.substr(0, a), leaf = s.substr(a + 1, b - a - 1),
+                        text = s.substr(b + 1);
+            int ci = -1; std::string before;
+            for (auto& f : wfedit::ReadActorFields(doc, preselect)) if (f.name == fname) {
+                ci = f.child_index; before = (leaf == "STR") ? f.label : f.data; break;
+            }
+            if (ci < 0) {
+                std::fprintf(stderr, "[edit] field '%s' not found on actor %d\n", fname.c_str(), preselect);
+                continue;
+            }
+            bool ok = wfedit::WriteFieldLeaf(doc, preselect, ci, leaf.c_str(), text);
+            std::string now;
+            for (auto& f : wfedit::ReadActorFields(doc, preselect))
+                if (f.name == fname) { now = (leaf == "STR") ? f.label : f.data; break; }
+            std::fprintf(stderr, "[edit] %s.%s: '%s' -> '%s' (write %s)\n",
+                         fname.c_str(), leaf.c_str(), before.c_str(), now.c_str(), ok ? "ok" : "FAIL");
+        }
     }
 
     // 1. Editor-owned GLFW X11/GLX window + context.

@@ -50,7 +50,18 @@ struct ActorField {
     std::string value;       // every non-NAME leaf, space-joined (Phase-1 form)
     std::string data;        // DATA leaf(s) only — raw scalar / vector components
     std::string label;       // STR leaf — enum/bool label, filename, or string body
+    int         child_index = -1;  // this field's position in the actor's children array
+                                   // (the Doc address Phase 3 writes edits back to)
 };
+
+// Phase 3 (editable widgets): overwrite the text of one leaf of an actor's
+// field, in a single transaction, and re-read it. `actor_index` indexes
+// content; `child_index` is ActorField::child_index; `leaf_type` is the leaf
+// sub-chunk to write — "DATA" (raw value) or "STR" (label) — or "" to set the
+// field chunk's own text when it's a bare leaf. Returns false if the path /
+// leaf doesn't exist (creates nothing — mirror-the-oracle: edits, never adds).
+bool WriteFieldLeaf(wfcrdt::Doc& doc, int actor_index, int child_index,
+                    const char* leaf_type, const std::string& new_text);
 
 // Read every field of content[actor_index] out of the Doc: each child chunk's
 // NAME + DATA. Skips the actor's own top-level NAME (shown separately).

@@ -5,6 +5,7 @@
 #include "oad_reader.h"
 
 #include "imgui.h"
+#include "misc/cpp/imgui_stdlib.h"   // ImGui::InputText(label, std::string&) — editable strings
 
 #include <oas/oad.h>   // BUTTON_* / SHOW_AS_* dispatch codes (named, not magic)
 
@@ -220,6 +221,7 @@ std::vector<PropField> ResolveProperties(const std::vector<ActorField>& doc_fiel
         pf.data = df.data;
         pf.label = df.label;
         pf.value = df.value;
+        pf.child_index = df.child_index;
 
         if (match[i] >= 0) {
             const OadEntry& e = oad[match[i]];
@@ -251,174 +253,216 @@ std::vector<PropField> ResolveProperties(const std::vector<ActorField>& doc_fiel
     return out;
 }
 
-// ── read-only widget render (Phase 2: display state; Phase 3 makes editable) ──
+// ── editable widget render (Phase 3): edits commit to the Doc leaf ────────────
 namespace {
 
-void DrawColor(const PropField& f)
+// Reformat a number-token, preserving its original spelling decorations so the
+// edit survives the levtree/levcomp round-trip: a fixed-point token keeps its
+// "(1.15.16)" suffix, a long keeps its trailing 'l'. `orig` is the existing
+// Doc text for that component; `num` is the new value already formatted.
+std::string RespellNumber(const std::string& orig, const std::string& num)
 {
-    const long v = AsLong(f.data.empty() ? f.label : f.data);
-    const ImVec4 col(((v >> 16) & 0xFF) / 255.0f, ((v >> 8) & 0xFF) / 255.0f,
-                     (v & 0xFF) / 255.0f, 1.0f);
-    ImGui::ColorButton("##sw", col, ImGuiColorEditFlags_NoTooltip, ImVec2(20, 20));
-    ImGui::SameLine();
-    ImGui::Text("#%06lX", v & 0xFFFFFF);
+    if (auto p = orig.find('('); p != std::string::npos) return num + orig.substr(p);
+    if (!orig.empty() && (orig.back() == 'l' || orig.back() == 'L')) return num + "l";
+    return num;
 }
 
-void DrawEnum(const PropField& f)
+std::vector<std::string> SplitWS(const std::string& s)
 {
-    // Current option = the Doc's STR label; fall back to data-as-index.
-    int cur = -1;
+    std::vector<std::string> out;
+    std::size_t i = 0;
+    while (i < s.size()) {
+        while (i < s.size() && std::isspace((unsigned char)s[i])) ++i;
+        std::size_t j = i;
+        while (j < s.size() && !std::isspace((unsigned char)s[j])) ++j;
+        if (j > i) out.emplace_back(s.substr(i, j - i));
+        i = j;
+    }
+    return out;
+}
+
+std::string FmtFloat(float v) { char b[32]; std::snprintf(b, sizeof b, "%.6f", v); return b; }
+std::string FmtInt(long v)    { char b[32]; std::snprintf(b, sizeof b, "%ld", v);  return b; }
+
+// Re-spell an n-component DATA string from new float values, keeping each
+// component's original suffix (VEC3/EULR/BOX3/scalar float).
+std::string RespellComponents(const std::string& orig_data, const float* vals, int n)
+{
+    std::vector<std::string> toks = SplitWS(orig_data);
+    std::string out;
+    for (int i = 0; i < n; ++i) {
+        const std::string& o = (i < (int)toks.size()) ? toks[i] : std::string();
+        if (i) out += ' ';
+        out += RespellNumber(o, FmtFloat(vals[i]));
+    }
+    return out;
+}
+
+// Commit edited DATA and/or STR leaves for `f` and mirror them into the field
+// for immediate display (next selection re-reads from the Doc anyway). Returns
+// true if any leaf was written.
+bool Commit(wfcrdt::Doc& doc, int actor, PropField& f,
+            const std::string* data_text, const std::string* str_text)
+{
+    bool ok = false;
+    if (data_text && WriteFieldLeaf(doc, actor, f.child_index, "DATA", *data_text)) {
+        f.data = *data_text; ok = true;
+    }
+    if (str_text && WriteFieldLeaf(doc, actor, f.child_index, "STR", *str_text)) {
+        f.label = *str_text; ok = true;
+    }
+    return ok;
+}
+
+int EnumCurrent(const PropField& f)
+{
     for (std::size_t k = 0; k < f.options.size(); ++k)
-        if (f.options[k] == f.label) { cur = static_cast<int>(k); break; }
-    if (cur < 0 && !f.data.empty()) {
+        if (f.options[k] == f.label) return (int)k;
+    if (!f.data.empty()) {
         long idx = AsLong(f.data);
-        if (idx >= 0 && idx < static_cast<long>(f.options.size())) cur = static_cast<int>(idx);
+        if (idx >= 0 && idx < (long)f.options.size()) return (int)idx;
     }
-    const char* cur_label = (cur >= 0) ? f.options[cur].c_str()
-                                       : (f.label.empty() ? "(unset)" : f.label.c_str());
-
-    ImGui::BeginDisabled(true);
-    if (f.options.size() >= 1 && f.options.size() <= 4) {
-        // ≤4 → button row (Blender refinement).
-        for (std::size_t k = 0; k < f.options.size(); ++k) {
-            if (k) ImGui::SameLine();
-            const bool on = (static_cast<int>(k) == cur);
-            if (on) ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
-            ImGui::SmallButton(f.options[k].c_str());
-            if (on) ImGui::PopStyleColor();
-        }
-    } else if (f.options.size() >= 5) {
-        // 5+ → compact preview combo (the 2-col grid is a Phase-3 edit affordance).
-        ImGui::SetNextItemWidth(-FLT_MIN);
-        if (ImGui::BeginCombo("##enum", cur_label)) {
-            for (std::size_t k = 0; k < f.options.size(); ++k)
-                ImGui::Selectable(f.options[k].c_str(), static_cast<int>(k) == cur);
-            ImGui::EndCombo();
-        }
-    } else {
-        ImGui::TextUnformatted(cur_label);   // matched enum but no option list
-    }
-    ImGui::EndDisabled();
+    return -1;
 }
 
-void DrawComponents(const PropField& f, const char* const* labels, int n, const char* suffix)
+// n editable float components → DATA leaf (revolutions for EULR per WF
+// convention; the .lev already stores revolutions, so no conversion needed).
+bool DrawComponents(wfcrdt::Doc& doc, int actor, PropField& f,
+                    const char* const* labels, int n, const char* suffix)
 {
     std::vector<float> v = Floats(f.data);
-    ImGui::BeginDisabled(true);
+    v.resize(n, 0.0f);
+    bool changed = false;
     for (int i = 0; i < n; ++i) {
-        float x = (i < static_cast<int>(v.size())) ? v[i] : 0.0f;
-        ImGui::SetNextItemWidth(90);
-        ImGui::InputFloat(labels[i], &x, 0.0f, 0.0f, "%.4f");
+        ImGui::SetNextItemWidth(80);
+        if (ImGui::InputFloat(labels[i], &v[i], 0.0f, 0.0f, "%.4f",
+                              ImGuiInputTextFlags_EnterReturnsTrue))
+            changed = true;
         if (i + 1 < n) ImGui::SameLine();
     }
-    ImGui::EndDisabled();
     if (suffix && *suffix) { ImGui::SameLine(); ImGui::TextDisabled("%s", suffix); }
+    if (changed) { std::string d = RespellComponents(f.data, v.data(), n); return Commit(doc, actor, f, &d, nullptr); }
+    return false;
 }
 
-void DrawValueWidget(const PropField& f, int row)
+// Returns true if this field committed an edit to the Doc this frame.
+bool DrawValueWidget(wfcrdt::Doc& doc, int actor, PropField& f, int row)
 {
     ImGui::PushID(row);
     ImGui::SetNextItemWidth(-FLT_MIN);
+    bool edited = false;
     switch (f.kind) {
-        case FieldKind::Color:   DrawColor(f); break;
-        case FieldKind::Enum:    DrawEnum(f);  break;
-        case FieldKind::Boolean: {
-            bool on = (f.label == "True") || (!f.data.empty() && AsLong(f.data) != 0);
-            ImGui::BeginDisabled(true); ImGui::Checkbox("##b", &on); ImGui::EndDisabled();
+        case FieldKind::Color: {
+            long v = AsLong(f.data.empty() ? f.label : f.data);
+            float c[3] = { ((v >> 16) & 0xFF) / 255.0f, ((v >> 8) & 0xFF) / 255.0f, (v & 0xFF) / 255.0f };
+            if (ImGui::ColorEdit3("##col", c, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+                long packed = ((long)(c[0] * 255 + 0.5f) << 16) | ((long)(c[1] * 255 + 0.5f) << 8) | (long)(c[2] * 255 + 0.5f);
+                std::string d = RespellNumber(f.data, FmtInt(packed));
+                edited = Commit(doc, actor, f, &d, nullptr);
+            }
+            ImGui::SameLine(); ImGui::Text("#%06lX", v & 0xFFFFFF);
             break;
         }
+        case FieldKind::Enum: {
+            int cur = EnumCurrent(f);
+            const char* cur_label = (cur >= 0) ? f.options[cur].c_str()
+                                               : (f.label.empty() ? "(unset)" : f.label.c_str());
+            if (ImGui::BeginCombo("##enum", cur_label)) {
+                for (std::size_t k = 0; k < f.options.size(); ++k) {
+                    if (ImGui::Selectable(f.options[k].c_str(), (int)k == cur) && (int)k != cur) {
+                        std::string label = f.options[k];
+                        std::string idx = RespellNumber(f.data, FmtInt((long)k));
+                        // Enum value = STR label always; DATA index too when present.
+                        edited = Commit(doc, actor, f, f.data.empty() ? nullptr : &idx, &label);
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            break;
+        }
+        case FieldKind::Boolean: {
+            bool on = (f.label == "True") || (!f.data.empty() && AsLong(f.data) != 0);
+            if (ImGui::Checkbox("##b", &on)) {
+                std::string d = RespellNumber(f.data, FmtInt(on ? 1 : 0));
+                std::string s = on ? "True" : "False";
+                edited = Commit(doc, actor, f, f.data.empty() ? nullptr : &d, &s);
+            }
+            break;
+        }
+        case FieldKind::Int:
         case FieldKind::Mailbox: {
-            ImGui::BeginDisabled(true);
-            char buf[64]; std::snprintf(buf, sizeof(buf), "%s", f.data.empty() ? f.label.c_str() : f.data.c_str());
-            ImGui::InputText("##mb", buf, sizeof(buf));
-            ImGui::EndDisabled();
+            // Mailbox (showAs=MAILBOX) would gain an INDEXOF_*/MB_* autocomplete
+            // combo from mailbox.inc; no snowgoons field uses it, so it shares the
+            // int spinner for now (TODO: mailbox.inc combo when a level needs it).
+            int x = (int)AsLong(f.data.empty() ? f.label : f.data);
+            if (ImGui::InputInt("##i", &x, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue)) {
+                if (f.matched && f.max != f.min) x = std::max((int)f.min, std::min((int)f.max, x));
+                std::string d = RespellNumber(f.data, FmtInt(x));
+                std::string s = FmtInt(x);
+                edited = Commit(doc, actor, f, f.data.empty() ? nullptr : &d,
+                                f.label.empty() ? nullptr : &s);
+            }
             break;
         }
         case FieldKind::Float: {
             std::vector<float> v = Floats(f.data.empty() ? f.label : f.data);
             float x = v.empty() ? 0.0f : v[0];
-            ImGui::BeginDisabled(true);
-            if (f.matched && (f.show_as == SHOW_AS_SLIDER) && f.max != f.min) {
-                float lo = f.min / 65536.0f, hi = f.max / 65536.0f;
-                ImGui::SliderFloat("##s", &x, lo, hi, "%.3f");
-            } else {
-                ImGui::InputFloat("##f", &x, 0.0f, 0.0f, "%.4f");
+            bool ch;
+            if (f.matched && f.show_as == SHOW_AS_SLIDER && f.max != f.min)
+                ch = ImGui::SliderFloat("##s", &x, f.min / 65536.0f, f.max / 65536.0f, "%.3f");
+            else
+                ch = ImGui::InputFloat("##f", &x, 0.0f, 0.0f, "%.4f", ImGuiInputTextFlags_EnterReturnsTrue);
+            if (ch) {
+                if (f.matched && f.max != f.min) {
+                    float lo = f.min / 65536.0f, hi = f.max / 65536.0f;
+                    x = std::max(lo, std::min(hi, x));
+                }
+                std::string d = RespellNumber(f.data, FmtFloat(x));
+                std::string s = FmtFloat(x);
+                edited = Commit(doc, actor, f, &d, f.label.empty() ? nullptr : &s);
             }
-            ImGui::EndDisabled();
             break;
         }
-        case FieldKind::Int: {
-            int x = static_cast<int>(AsLong(f.data.empty() ? f.label : f.data));
-            ImGui::BeginDisabled(true); ImGui::InputInt("##i", &x, 0, 0); ImGui::EndDisabled();
-            break;
-        }
-        case FieldKind::Vec3: {
-            static const char* kXYZ[] = {"x", "y", "z"};
-            DrawComponents(f, kXYZ, 3, nullptr); break;
-        }
-        case FieldKind::Euler: {
-            static const char* kABC[] = {"a", "b", "c"};
-            DrawComponents(f, kABC, 3, "rev"); break;
-        }
-        case FieldKind::Box3: {
-            static const char* kMin[] = {"x", "y", "z"};
-            static const char* kMax[] = {"X", "Y", "Z"};
-            std::vector<float> v = Floats(f.data);
-            PropField lo = f, hi = f;
-            // first 3 components → min, last 3 → max.
-            { std::string a, b; std::vector<float> all = v;
-              for (int i = 0; i < 3 && i < (int)all.size(); ++i) { if(i)a+=' '; a+=std::to_string(all[i]); }
-              for (int i = 3; i < 6 && i < (int)all.size(); ++i){ if(i>3)b+=' '; b+=std::to_string(all[i]); }
-              lo.data = a; hi.data = b; }
-            DrawComponents(lo, kMin, 3, "min"); DrawComponents(hi, kMax, 3, "max");
-            break;
-        }
+        case FieldKind::Vec3:  { static const char* k[] = {"x","y","z"}; edited = DrawComponents(doc, actor, f, k, 3, nullptr); break; }
+        case FieldKind::Euler: { static const char* k[] = {"a","b","c"}; edited = DrawComponents(doc, actor, f, k, 3, "rev"); break; }
+        case FieldKind::Box3:  { static const char* k[] = {"x","y","z","X","Y","Z"}; edited = DrawComponents(doc, actor, f, k, 6, nullptr); break; }
         case FieldKind::FileRef: {
-            ImGui::BeginDisabled(true);
-            char buf[256]; std::snprintf(buf, sizeof(buf), "%s", f.label.c_str());
-            ImGui::SetNextItemWidth(-60); ImGui::InputText("##file", buf, sizeof(buf));
-            ImGui::SameLine(); ImGui::SmallButton("Browse…");
-            ImGui::EndDisabled();
+            ImGui::SetNextItemWidth(-60);
+            if (ImGui::InputText("##file", &f.label, ImGuiInputTextFlags_EnterReturnsTrue))
+                edited = Commit(doc, actor, f, nullptr, &f.label);
+            ImGui::SameLine(); ImGui::BeginDisabled(true); ImGui::SmallButton("Browse…"); ImGui::EndDisabled();
             break;
         }
         case FieldKind::ObjRef: {
-            const std::string& tgt = !f.label.empty() ? f.label : f.data;
-            if (tgt.empty()) ImGui::TextDisabled("(not set)");
-            else { ImGui::TextUnformatted(tgt.c_str()); ImGui::SameLine(); ImGui::TextDisabled("⚠?"); }
+            if (ImGui::InputTextWithHint("##obj", "(not set)", &f.label, ImGuiInputTextFlags_EnterReturnsTrue))
+                edited = Commit(doc, actor, f, nullptr, &f.label);
             break;
         }
-        case FieldKind::MultilineStr: {
-            std::string s = !f.label.empty() ? f.label : f.value;
-            ImGui::BeginDisabled(true);
-            char buf[1024]; std::snprintf(buf, sizeof(buf), "%s", s.c_str());
-            ImGui::InputTextMultiline("##ml", buf, sizeof(buf), ImVec2(-FLT_MIN, 48));
-            ImGui::EndDisabled();
+        case FieldKind::MultilineStr:
+            if (ImGui::InputTextMultiline("##ml", &f.label, ImVec2(-FLT_MIN, 48)))
+                edited = Commit(doc, actor, f, nullptr, &f.label);
             break;
-        }
-        case FieldKind::Str: {
-            std::string s = !f.label.empty() ? f.label : (!f.data.empty() ? f.data : f.value);
-            ImGui::BeginDisabled(true);
-            char buf[512]; std::snprintf(buf, sizeof(buf), "%s", s.c_str());
-            ImGui::InputText("##s", buf, sizeof(buf));
-            ImGui::EndDisabled();
+        case FieldKind::Str:
+            if (ImGui::InputText("##s", &f.label, ImGuiInputTextFlags_EnterReturnsTrue))
+                edited = Commit(doc, actor, f, nullptr, &f.label);
             break;
-        }
         case FieldKind::Raw:
         default:
             ImGui::TextWrapped("%s", f.value.empty() ? "(empty)" : f.value.c_str());
             break;
     }
     ImGui::PopID();
+    return edited;
 }
 
 }  // namespace
 
-void RenderProperties(const std::vector<PropField>& fields)
+bool RenderProperties(wfcrdt::Doc& doc, int actor_index, std::vector<PropField>& fields)
 {
     if (!ImGui::BeginTable("props", 2,
             ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg |
             ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_ScrollY))
-        return;
+        return false;
     ImGui::TableSetupColumn("Field", ImGuiTableColumnFlags_WidthFixed, 150.0f);
     ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
 
@@ -427,8 +471,9 @@ void RenderProperties(const std::vector<PropField>& fields)
     // otherwise be below the fold (e.g. the COLOR swatch ~field 48).
     static const char* s_scroll_to = std::getenv("WF_EDIT_SCROLL_TO");
 
+    bool any_edit = false;
     int row = 0;
-    for (const auto& f : fields) {
+    for (auto& f : fields) {
         ++row;
         if (f.kind == FieldKind::Skip) continue;
 
@@ -451,9 +496,13 @@ void RenderProperties(const std::vector<PropField>& fields)
                               f.matched ? "" : " (chunk-type fallback)");
         }
         ImGui::TableSetColumnIndex(1);
-        DrawValueWidget(f, row);
+        if (f.child_index >= 0)
+            any_edit |= DrawValueWidget(doc, actor_index, f, row);
+        else
+            ImGui::TextWrapped("%s", f.value.empty() ? "(empty)" : f.value.c_str());
     }
     ImGui::EndTable();
+    return any_edit;
 }
 
 }  // namespace wfedit

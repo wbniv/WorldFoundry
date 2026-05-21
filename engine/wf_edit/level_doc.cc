@@ -251,9 +251,45 @@ std::vector<ActorField> ReadActorFields(wfcrdt::Doc& doc, int actor_index)
         if (!ch.valid()) continue;
         // Skip the actor's own top-level NAME (it's the title, shown separately).
         if (ch.get("chunk_type").readString().value_or("") == "NAME") continue;
-        fields.push_back(FieldFromChunk(ch));
+        ActorField f = FieldFromChunk(ch);
+        f.child_index = i;   // Doc address for write-back (Phase 3)
+        fields.push_back(std::move(f));
     }
     return fields;
+}
+
+bool WriteFieldLeaf(wfcrdt::Doc& doc, int actor_index, int child_index,
+                    const char* leaf_type, const std::string& new_text)
+{
+    auto txn = doc.begin();   // commits on scope exit
+    auto content = txn.array("content");
+    if (actor_index < 0 || actor_index >= content.len()) return false;
+
+    wfcrdt::Map obj = content.get(actor_index).asMap();
+    if (!obj.valid()) return false;
+    wfcrdt::Array kids = obj.get("children").asArray();
+    if (!kids.valid() || child_index < 0 || child_index >= kids.len()) return false;
+
+    wfcrdt::Map field = kids.get(child_index).asMap();
+    if (!field.valid()) return false;
+
+    wfcrdt::Array leaves = field.get("children").asArray();
+    if (!leaves.valid()) {
+        // Bare-leaf field (text directly): leaf_type is moot — set its text.
+        field.insert("text", new_text.c_str());
+        return true;
+    }
+    const std::string want = leaf_type ? leaf_type : "";
+    const int n = leaves.len();
+    for (int i = 0; i < n; ++i) {
+        wfcrdt::Map leaf = leaves.get(i).asMap();
+        if (!leaf.valid()) continue;
+        if (leaf.get("chunk_type").readString().value_or("") == want) {
+            leaf.insert("text", new_text.c_str());   // YMap insert overwrites
+            return true;
+        }
+    }
+    return false;   // no such leaf — caller picks a leaf the field actually has
 }
 
 }  // namespace wfedit
