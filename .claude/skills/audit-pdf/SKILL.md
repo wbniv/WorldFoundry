@@ -1,5 +1,6 @@
 ---
 name: audit-pdf
+version: 1
 description: This skill should be used when the user wants to generate (or regenerate) a visual diff audit PDF of the current working tree against a baseline git revision — front matter lists fully-deleted files in columns, body shows every modified-but-still-live file with removed lines/tokens struck through. Use when the user says "generate audit pdf", "regenerate the audit", "audit pdf", or anything similar in the context of reviewing a large sweep of deletions.
 ---
 
