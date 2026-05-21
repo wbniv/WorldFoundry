@@ -9,9 +9,11 @@ name: Blender add-on tests
 
 on:
   push:
-    branches: [main]
+    # Run on any branch — the test matrix is the canonical gate for
+    # widening the worldfoundry-blender-addons apt pin, so we want
+    # validation pre-merge, not only on master pushes.
+    branches: ['**']
   pull_request:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
