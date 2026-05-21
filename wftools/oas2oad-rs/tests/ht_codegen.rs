@@ -95,6 +95,24 @@ fn ht_and_objects_match_golden() {
         }
     }
 
+    // Check kpropmap_generated.inc (generated from the .ht files above).
+    {
+        let name = "kpropmap_generated.inc";
+        let golden = repo_root().join("engine/mutation").join(name);
+        let got_path = tmp.join(name);
+        checked += 1;
+        let got = std::fs::read(&got_path)
+            .unwrap_or_else(|e| panic!("regen did not produce {name}: {e}"));
+        let want = std::fs::read(&golden).expect("read golden kpropmap_generated.inc");
+        if got != want {
+            failures.push(format!(
+                "{name}: got {} bytes, golden is {} bytes (run `task gen-oas-headers` to update)",
+                got.len(),
+                want.len()
+            ));
+        }
+    }
+
     let _ = std::fs::remove_dir_all(&tmp);
 
     assert!(checked > 0, "found no .ht files under {}", dir.display());

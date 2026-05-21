@@ -69,11 +69,15 @@ echo "Regenerating objects.{c,e,h}..." >&2
 "$PREP" objects.hs "$OUTDIR/objects.h"
 echo "  objects.c objects.e objects.h written to $OUTDIR" >&2
 
-# TODO: task test-codegen (wftools/oas2oad-rs) verifies .ht + objects.* byte-for-byte
-# but does NOT verify kpropmap_generated.inc. Extend the oracle test to diff the inc
-# generated here against the committed copy so a stale inc is caught by CI.
 echo "Generating engine/mutation/kpropmap_generated.inc..." >&2
-KPROPMAP_INC="$SCRIPT_DIR/../../../engine/mutation/kpropmap_generated.inc"
+# In normal mode (OUTDIR == SCRIPT_DIR) write to the canonical source-tree location.
+# In oracle/test mode (OUTDIR is a temp dir) write alongside the other outputs so the
+# caller can diff against the committed file without touching the source tree.
+if [ "$OUTDIR" = "$SCRIPT_DIR" ]; then
+    KPROPMAP_INC="$SCRIPT_DIR/../../../engine/mutation/kpropmap_generated.inc"
+else
+    KPROPMAP_INC="$OUTDIR/kpropmap_generated.inc"
+fi
 # Parse data fields from a .ht struct file.
 # $1/$2 = awk fields (type, name;); blk/BLK/Struct = awk -v variables.
 GEN_FIELDS='
