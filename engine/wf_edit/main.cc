@@ -21,6 +21,7 @@
 #include "imgui_impl_opengl3.h"
 
 #include <gfx/host_gl_context.h>
+#include <gfx/renderer_backend.hp>   // RendererBackendGet().SetProjection on resize
 #include <game/editor_hook.h>
 #include <hal/hal.h>
 #include <pigsys/pigsys.hp>
@@ -45,6 +46,12 @@
 extern void ParseWindowSwitches(int argc, char** argv);
 extern char szAppName[];
 
+// gfx/gl/display.cc — drive WFInitGL's glViewport + projection aspect. main()
+// seeds them from the GLFW framebuffer before HALStart; editor_frame re-applies
+// glViewport + SetProjection from them on window resize (the engine's own
+// resize path early-bails in host-owned mode).
+extern int wfWindowWidth, wfWindowHeight;
+
 namespace {
 
 struct EditorCtx {
@@ -52,6 +59,10 @@ struct EditorCtx {
     int         max_frames = -1;   // <0 = run until the window closes
     int         frame = 0;
     const char* shot = nullptr;    // --screenshot: PPM dump on the last frame
+
+    // Last framebuffer size we applied to the engine viewport; 0 forces the
+    // first editor_frame to (re-)fit. See the resize block in editor_frame.
+    int         fb_w = 0, fb_h = 0;
 
     // M4 read-only Y.Doc: actor names read out of the CRDT doc (see level_doc).
     std::string              level_name;
@@ -192,6 +203,25 @@ bool editor_frame(void* p)
     glfwPollEvents();
     if (glfwWindowShouldClose(c->win))
         return false;
+
+    // Follow window resize. WFInitGL set glViewport + projection ONCE from the
+    // initial size and nothing re-applies them per frame (the engine's
+    // ConfigureNotify path early-bails in host-owned mode), so re-fit here when
+    // the framebuffer changes. ImGui's GL3 backend save/restores the viewport
+    // around its draw, so this glViewport persists into the next StepFrame
+    // (one-frame lag). Skip while minimized (0×0 → bad viewport / div-by-zero).
+    {
+        int fbw = 0, fbh = 0;
+        glfwGetFramebufferSize(c->win, &fbw, &fbh);
+        if (fbw > 0 && fbh > 0 && (fbw != c->fb_w || fbh != c->fb_h)) {
+            c->fb_w = fbw; c->fb_h = fbh;
+            wfWindowWidth = fbw; wfWindowHeight = fbh;   // keep engine globals truthful
+            glViewport(0, 0, fbw, fbh);
+            // Mirror WFInitGL (display.cc:283-284): FOV 60°, near 1, far 1000.
+            // Constants duplicated because we must not modify the engine build.
+            RendererBackendGet().SetProjection(60.0f, float(fbw) / float(fbh), 1.0f, 1000.0f);
+        }
+    }
 
     // One-shot GL-state diagnostic (WF_EDIT_GL_DEBUG): the editor renders fine to
     // the back buffer (glReadPixels) yet the window is black on screen, while a
@@ -690,10 +720,8 @@ int main(int argc, char** argv)
     // and WFInitGL runs glViewport(0,0,640,480) + a 640/480 projection aspect, so
     // the level renders into only the bottom-left of our 1280×800 window. Set
     // before HALStart, which constructs Display (→ _xSize/_ySize) and calls
-    // WFInitGL (→ glViewport + aspect). Window resize isn't handled yet — the
-    // engine's ConfigureNotify viewport path (mesa.cc) early-bails in host-owned
-    // mode — so the viewport is fixed at the initial framebuffer size for now.
-    extern int wfWindowWidth, wfWindowHeight;       // gfx/gl/display.cc: GL viewport + aspect
+    // WFInitGL (→ glViewport + aspect). Later resizes are tracked per-frame in
+    // editor_frame (wfWindowWidth/Height is the file-scope extern above).
     extern int _halWindowWidth, _halWindowHeight;   // hal/linux: feeds Display _xSize/_ySize
     int fbw = 0, fbh = 0;
     glfwGetFramebufferSize(win, &fbw, &fbh);
