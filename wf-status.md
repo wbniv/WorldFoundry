@@ -7,7 +7,9 @@
 
 ## History
 
-40 days of work (2026-04-12 – 2026-05-21). Newest first:
+41 days of work (2026-04-12 – 2026-05-21). Newest first:
+
+- **Real-time multi-user co-editing in `wf-edit` (2026-05-21)** — Two+ `wf-edit` instances join a relay room (`--relay ws://host:9900 --room <id>` or `--url=wfedit://host:9900/r/<id>`), sync a shared CRDT Doc via `wf-relay` (Rust tokio+tungstenite server), and see each other's field edits live in both the Properties panel and the engine viewport; structural add/delete (stable `_eid` per actor) also propagates live; the Outliner shows coloured dots for actors selected by other peers (presence, ~10 Hz JSON over the PRESENCE channel); a Chat sidebar lets peers exchange messages; peer identity (UUID, colour) persists across sessions in `~/.config/wf-edit/identity.json`; the relay writes N=3 rotating `.ydoc` snapshots per room (`--snapshot-dir`) so late joiners get prior state after relay restart. See [plan](docs/plans/2026-05-21-realtime-coediting.md).
 
 - **`wf-edit` user manual + editor-plan screenshots (2026-05-21)** — New [docs/wf-edit-manual.md](docs/wf-edit-manual.md) (10 embedded screenshots) documents building/running the editor, the Outliner/Viewport/Properties layout, OAD-driven property editing, live viewport preview, structural add/delete, save + compile, the headless automation hooks, and voice+video collaboration; the six editor implementation plans now embed their proof screenshots inline (which surfaced + fixed a [md-to-pdf.sh](scripts/md-to-pdf.sh) bug — `<img>` tags inside table cells were HTML-escaped to literal text), and the [collaborative-editor design doc](docs/investigations/2026-05-18-collaborative-level-editor-design.md) status flipped from "no implementation yet" to v1-shipped with links to the manual + all seven plans. See [manual](docs/wf-edit-manual.md).
 
