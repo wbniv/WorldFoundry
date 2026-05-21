@@ -35,12 +35,15 @@
 #include "voice_track.h"
 #include "video_track.h"
 #include "collab_panel.h"
+#include "ws_client.h"
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <optional>
 #include <string>
 #include <vector>
+#include <unistd.h>
 
 // Provided by the engine's platform layer (mirrors the host-GL e2e harness).
 extern void ParseWindowSwitches(int argc, char** argv);
@@ -94,6 +97,13 @@ struct EditorCtx {
     wfedit::VideoChat*     video   = nullptr;
     std::string            room_id;
     bool                   show_collab = true;
+
+    // Co-editing relay (Phase 2+). relay_client is connected when relay_url is set.
+    wfedit::WsClient                    relay_client;
+    std::string                         relay_url;
+    std::string                         our_peer_id;
+    std::optional<wfcrdt::Subscription> relay_sub;
+    bool                                suppress_relay_send = false;
 };
 
 // File→Save (and Ctrl+S / headless WF_EDIT_SAVE_UI): patch the parse JSON with
@@ -176,6 +186,35 @@ void DoDuplicate(EditorCtx* c)
     }
 }
 
+// Drain incoming relay SYNC messages and apply them to the local Doc + engine.
+// Called at the top of editor_frame; non-blocking (poll-based, no sleep).
+void CollabDrain(EditorCtx* c) {
+    if (!c->relay_client.connected() || !c->doc) return;
+    std::vector<uint8_t> frame;
+    while (c->relay_client.poll(frame)) {
+        // Channel byte: only handle SYNC (0x01); ignore PRESENCE/CHAT here.
+        if (frame.size() < 2 || frame[0] != 0x01) { frame.clear(); continue; }
+        // Apply remote update without echoing it back to the relay.
+        c->suppress_relay_send = true;
+        {
+            auto txn = c->doc->begin();
+            txn.apply(wfcrdt::ByteView{frame.data() + 1, frame.size() - 1});
+        }  // txn commits → observeUpdates fires → suppressed
+        c->suppress_relay_send = false;
+        // Refresh actor list then re-resolve + propagate the selected actor's state.
+        RefreshActorList(c);
+        if (c->selected >= 0) {
+            c->props = wfedit::ResolveProperties(
+                wfedit::ReadActorFields(*c->doc, c->selected));
+            c->fields_for = c->selected;
+            for (const auto& pf : c->props)
+                if (pf.matched)
+                    wfedit::PropagateToEngine(c->selected, pf);
+        }
+        frame.clear();
+    }
+}
+
 // Dump the composited back buffer (engine render + ImGui overlay) to a P6 PPM.
 // GL rows are bottom-up; flip for top-down PPM. Convert to PNG with ffmpeg.
 void write_ppm(GLFWwindow* win, const char* path)
@@ -255,6 +294,9 @@ bool editor_frame(void* p)
     // M2: initialize the stable doc→engine index map on the first frame the live
     // level is available (theLevel non-null). No-op once initialized.
     if (c->doc) wfedit::InitBridgeMap(*c->doc);
+
+    // Phase 2: drain incoming relay SYNC messages (remote peer field edits).
+    CollabDrain(c);
 
     // M1 CRDT->engine bridge: one-shot identity-map verification dump (Doc
     // actor <-> engine actor idx), gated WF_EDIT_BRIDGE_DEBUG. Runs on the first
@@ -506,6 +548,7 @@ int main(int argc, char** argv)
     int         preselect  = -1;   // --select=N: headless aid — preselect actor N
     const char* shot = nullptr;
     std::string room_id;           // --room=<id>: join a voice+video call room
+    std::string ctx_relay_url;     // --relay=<ws://...>: connect to co-edit relay
     // Viewport level (engine LoadLevel) + the .lev parsed into the read-only
     // Y.Doc. Default both to snowgoons-blender so the viewport and Outliner
     // show the same level (plan D7); override independently for now.
@@ -526,6 +569,10 @@ int main(int argc, char** argv)
             room_id = argv[i] + 7;
         else if (std::strcmp(argv[i], "--room") == 0 && i + 1 < argc)
             room_id = argv[++i];
+        else if (std::strncmp(argv[i], "--relay=", 8) == 0)
+            ctx_relay_url = argv[i] + 8;
+        else if (std::strcmp(argv[i], "--relay") == 0 && i + 1 < argc)
+            ctx_relay_url = argv[++i];
     }
 
     // 0. Read-only Y.Doc (M4): shell out to `levtree parse`, build a wfcrdt::Doc
@@ -693,6 +740,50 @@ int main(int argc, char** argv)
         ctx.voice  = &voice_chat;
         ctx.video  = &video_chat;
         std::printf("wf-edit: collab room '%s' started\n", room_id.c_str());
+    }
+
+    // 3c. Connect to the co-edit relay (Phase 2). Non-fatal on failure.
+    if (!ctx_relay_url.empty() && !room_id.empty()) {
+        ctx.relay_url    = ctx_relay_url;
+        // Reuse the collab session's peer id (already generated above).
+        ctx.our_peer_id  = ctx.collab ? ctx.collab->OurPeerId() : std::string("editor");
+        if (ctx.relay_client.connect(ctx_relay_url.c_str())) {
+            // Send CONTROL join message: [0x04][room_id NUL peer_id].
+            std::vector<uint8_t> ctrl;
+            ctrl.push_back(0x04);
+            for (char ch : room_id)        ctrl.push_back(static_cast<uint8_t>(ch));
+            ctrl.push_back(0);
+            for (char ch : ctx.our_peer_id) ctrl.push_back(static_cast<uint8_t>(ch));
+            ctx.relay_client.send(ctrl.data(), ctrl.size());
+
+            // Wait for the relay's initial full-state SYNC (up to 1 s).
+            {
+                std::vector<uint8_t> frame;
+                for (int t = 0; t < 1000 && !ctx.relay_client.poll(frame); ++t)
+                    usleep(1000);
+                if (!frame.empty() && frame[0] == 0x01 && frame.size() > 1) {
+                    auto txn = doc.begin();
+                    txn.apply(wfcrdt::ByteView{frame.data() + 1, frame.size() - 1});
+                    // Re-read actor names in case the relay had a newer state.
+                    ctx.actor_names = wfedit::ReadActorNames(doc);
+                }
+            }
+
+            // Wire local commits → relay (suppress echo-back of incoming updates).
+            ctx.relay_sub = doc.observeUpdates([&ctx](wfcrdt::ByteView update) {
+                if (ctx.suppress_relay_send) return;
+                std::vector<uint8_t> msg;
+                msg.push_back(0x01);  // CH_SYNC
+                msg.insert(msg.end(), update.data, update.data + update.len);
+                ctx.relay_client.send(msg.data(), msg.size());
+            });
+
+            std::printf("wf-edit: relay connected %s (peer %s)\n",
+                        ctx_relay_url.c_str(), ctx.our_peer_id.c_str());
+        } else {
+            std::fprintf(stderr, "wf-edit: relay connect failed: %s\n",
+                         ctx_relay_url.c_str());
+        }
     }
 
     SetEditorFrameCallback(editor_frame, &ctx);
