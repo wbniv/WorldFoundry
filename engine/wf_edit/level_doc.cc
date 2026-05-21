@@ -12,6 +12,7 @@
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -19,6 +20,21 @@ namespace wfedit {
 namespace {
 
 using json = nlohmann::json;
+
+// ── stable actor ID for the collaborative bridge ────────────────────────────
+// Each actor in the Doc gets a `_eid` key (editor-only UUID). `_eid` is never
+// written to `.lev` (ChunkToJson only reads `chunk_type` + `items`), so it
+// remains an ephemeral in-memory annotation used by the bridge map.
+static std::string GenerateEid()
+{
+    std::mt19937_64 rng(std::random_device{}());
+    std::uniform_int_distribution<uint64_t> d;
+    uint64_t hi = d(rng), lo = d(rng);
+    char buf[33];
+    std::snprintf(buf, sizeof(buf), "%016llx%016llx",
+                  (unsigned long long)hi, (unsigned long long)lo);
+    return buf;
+}
 
 // ── locate the levtree binary ────────────────────────────────────────────────
 // The editor runs from the repo root (like the M2/M3 relative level paths).
@@ -260,6 +276,13 @@ bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc)
     for (const auto& item : root["items"]) {
         if (!IsChunk(item)) continue;          // skip stray literals at LVL level
         content.push(BuildChunk(item));
+        // Stamp a stable per-actor UUID used by the CRDT bridge map. Never saved
+        // to .lev — ChunkToJson only reads chunk_type + items.
+        {
+            wfcrdt::Map actor = content.get(content.len() - 1).asMap();
+            if (actor.valid())
+                actor.insert("_eid", GenerateEid().c_str());
+        }
         ++objs;
     }
     std::printf("wf-edit: Y.Doc populated from %s — %d top-level chunks (schema v2)\n",
@@ -481,8 +504,13 @@ int DuplicateActor(wfcrdt::Doc& doc, int index)
     wfcrdt::Map src = content.get(index).asMap();
     if (!src.valid()) return -1;
     wfcrdt::Input clone = DocChunkToInput(src);
-    content.push(clone);             // append at end
-    return content.len() - 1;        // the new actor's index
+    // Stable identity for the bridge: new eid + source eid so remote peers can
+    // spawn from the same template.
+    const std::string src_eid = src.get("_eid").readString().value_or("");
+    clone.set("_src_eid", wfcrdt::Input::str(src_eid));
+    clone.set("_eid",     wfcrdt::Input::str(GenerateEid()));
+    content.push(clone);
+    return content.len() - 1;
 }
 
 }  // namespace wfedit

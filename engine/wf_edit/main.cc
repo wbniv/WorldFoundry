@@ -163,7 +163,6 @@ void RefreshActorList(EditorCtx* c)
 void DoDelete(EditorCtx* c)
 {
     if (!c->doc || c->selected < 0) return;
-    wfedit::BridgeNotifyDelete(c->selected);   // erase map entry + RemoveActor before Doc mutates
     if (wfedit::DeleteActor(*c->doc, c->selected)) {
         RefreshActorList(c);
         c->toast = "actor deleted";
@@ -177,13 +176,8 @@ void DoDuplicate(EditorCtx* c)
     const int src = c->selected;
     const int ni = wfedit::DuplicateActor(*c->doc, src);
     if (ni < 0) return;
-    const bool live = wfedit::BridgeNotifyDuplicate(src, ni);
     RefreshActorList(c);
-    c->selected = ni;            // select the copy
-    if (!live) {
-        c->toast = "duplicated — non-templated actor: reload to see in viewport";
-        c->toast_frames = 300;
-    }
+    c->selected = ni;
 }
 
 // Drain incoming relay SYNC messages and apply them to the local Doc + engine.
@@ -294,6 +288,7 @@ bool editor_frame(void* p)
     // M2: initialize the stable doc→engine index map on the first frame the live
     // level is available (theLevel non-null). No-op once initialized.
     if (c->doc) wfedit::InitBridgeMap(*c->doc);
+    if (c->doc) wfedit::UpdateBridgeMap(*c->doc);   // Phase 3: apply pending structural changes
 
     // Phase 2: drain incoming relay SYNC messages (remote peer field edits).
     CollabDrain(c);

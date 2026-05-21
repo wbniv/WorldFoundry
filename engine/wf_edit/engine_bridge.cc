@@ -9,6 +9,7 @@
 #include "engine_bridge.h"
 #include "level_doc.h"      // ReadActorNames / ReadActorFields
 #include "property_panel.h" // PropField, FieldKind, ResolveProperties
+#include "wfcrdt.hpp"       // wfcrdt::Doc, Map, Array, Subscription, YArrayEvent
 
 #include <game/level.hp>            // Level, theLevel, GetObject, GetObjectList
 #include <game/actor.hp>            // Actor, currentPos (pulls in Vector3/Scalar)
@@ -24,22 +25,89 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace wfedit {
 
-// Stable doc→engine index map (M2).  Entry i holds the engine 1-based ActorIdx
-// for Doc content[i].  0 = sentinel (no live engine actor — non-templated
-// duplicate or actor removed from the engine).  Filled by InitBridgeMap on the
-// first frame the level is live; maintained by BridgeNotifyDelete/Duplicate.
-static std::vector<wfmut::ActorIdx> s_doc_to_engine;
-static bool                         s_bridge_ready = false;
+// ── stable eid→engine bridge (Phase 3) ──────────────────────────────────────
+// s_eid_to_engine: stable map — survives delete/duplicate of other actors.
+// s_doc_to_engine: positional snapshot rebuilt by RebuildFromDoc; used by
+//                  DocActorToEngineIdx (existing callers unchanged).
+// s_needs_rebuild: set by the content-array observer; cleared by UpdateBridgeMap.
+static std::unordered_map<std::string, wfmut::ActorIdx> s_eid_to_engine;
+static std::vector<wfmut::ActorIdx>                     s_doc_to_engine;
+static std::optional<wfcrdt::Subscription>              s_content_sub;
+static bool                                             s_needs_rebuild = false;
+static bool                                             s_bridge_ready  = false;
 
 int DocActorToEngineIdx(int doc_index)
 {
     if (doc_index < 0 || doc_index >= static_cast<int>(s_doc_to_engine.size()))
         return 0;
     return static_cast<int>(s_doc_to_engine[doc_index]);
+}
+
+// Diff current Doc content against s_eid_to_engine; call wfmut Remove/Spawn
+// as needed; rebuild s_doc_to_engine positional snapshot. Called outside any
+// active transaction (from UpdateBridgeMap → frame loop).
+static void RebuildFromDoc(wfcrdt::Doc& doc)
+{
+    if (!theLevel) return;
+    auto txn = doc.begin();
+    auto content = txn.array("content");
+    const int n = content.len();
+
+    std::vector<std::string> cur_eids;
+    cur_eids.reserve(n);
+    for (int i = 0; i < n; ++i) {
+        wfcrdt::Map m = content.get(i).asMap();
+        cur_eids.push_back(m.valid() ? m.get("_eid").readString().value_or("") : "");
+    }
+
+    std::unordered_set<std::string> cur_set(cur_eids.begin(), cur_eids.end());
+    cur_set.erase("");
+
+    // Remove actors whose eid left the content array.
+    std::vector<std::string> to_remove;
+    for (const auto& [eid, eng] : s_eid_to_engine)
+        if (!cur_set.count(eid)) to_remove.push_back(eid);
+    for (const auto& eid : to_remove) {
+        const wfmut::ActorIdx eng = s_eid_to_engine[eid];
+        if (eng > 0)
+            wfmut::RemoveActor(*theLevel, eng);
+        s_eid_to_engine.erase(eid);
+        std::fprintf(stderr, "[bridge] removed eid %.8s… eng=%u\n", eid.c_str(), eng);
+    }
+
+    // Spawn actors whose eid is new in the content array.
+    for (int i = 0; i < n; ++i) {
+        const std::string& eid = cur_eids[i];
+        if (eid.empty() || s_eid_to_engine.count(eid)) continue;
+        wfcrdt::Map m = content.get(i).asMap();
+        const std::string src_eid = m.valid() ? m.get("_src_eid").readString().value_or("") : "";
+        wfmut::ActorIdx new_eng = 0;
+        auto sit = s_eid_to_engine.find(src_eid);
+        if (!src_eid.empty() && sit != s_eid_to_engine.end() && sit->second > 0) {
+            const wfmut::ActorIdx src = sit->second;
+            if (wfmut::HasTemplate(*theLevel, static_cast<int>(src))) {
+                const auto sp = wfmut::GetActorPos(*theLevel, src);
+                const Vector3 off(Scalar::zero, Scalar::zero, Scalar::FromFloat(0.5f));
+                const Vector3 pos = sp ? (*sp + off) : off;
+                if (auto ni = wfmut::SpawnActor(*theLevel, static_cast<int>(src), pos, 1))
+                    new_eng = *ni;
+            }
+        }
+        s_eid_to_engine[eid] = new_eng;
+        std::fprintf(stderr, "[bridge] new eid %.8s… eng=%u\n", eid.c_str(), new_eng);
+    }
+
+    // Rebuild positional snapshot.
+    s_doc_to_engine.assign(n, 0);
+    for (int i = 0; i < n; ++i) {
+        auto it = s_eid_to_engine.find(cur_eids[i]);
+        if (it != s_eid_to_engine.end()) s_doc_to_engine[i] = it->second;
+    }
 }
 
 // Parse the Doc VEC3 DATA leaf into 3 floats; returns the count read. Each
@@ -73,8 +141,9 @@ void DumpIdentityMap(wfcrdt::Doc& doc)
     const int engine_count = theLevel->GetObjectList().Size() - 1;  // slots 1..Size-1
 
     std::fprintf(stderr,
-        "[bridge] identity map: %zu Doc actors vs %d engine actor slots (stable map, %s)\n",
-        names.size(), engine_count, s_bridge_ready ? "initialized" : "not yet initialized");
+        "[bridge] identity map: %zu Doc actors vs %d engine actor slots (eid map, %s, %zu eids)\n",
+        names.size(), engine_count, s_bridge_ready ? "initialized" : "not yet initialized",
+        s_eid_to_engine.size());
     std::fprintf(stderr,
         "[bridge]  doc  eng  %-22s  Doc Position              engine currentPos()       match\n", "name");
 
@@ -126,59 +195,36 @@ void DumpIdentityMap(wfcrdt::Doc& doc)
 void InitBridgeMap(wfcrdt::Doc& doc)
 {
     if (s_bridge_ready || !theLevel) return;
-    const std::vector<std::string> names = ReadActorNames(doc);
-    const int n = static_cast<int>(names.size());
-    s_doc_to_engine.clear();
-    s_doc_to_engine.reserve(n);
-    for (int i = 0; i < n; ++i)
-        s_doc_to_engine.push_back(static_cast<wfmut::ActorIdx>(i + 1));
+
+    auto txn = doc.begin();
+    auto content = txn.array("content");
+    const int n = content.len();
+
+    s_eid_to_engine.clear();
+    s_doc_to_engine.assign(n, 0);
+    for (int i = 0; i < n; ++i) {
+        wfcrdt::Map m = content.get(i).asMap();
+        const std::string eid = m.valid() ? m.get("_eid").readString().value_or("") : "";
+        const wfmut::ActorIdx eng = static_cast<wfmut::ActorIdx>(i + 1);
+        if (!eid.empty()) s_eid_to_engine[eid] = eng;
+        s_doc_to_engine[i] = eng;
+    }
+
+    // Dirty flag only — no transaction started inside the callback.
+    s_content_sub = content.observe([](const YArrayEvent*) {
+        s_needs_rebuild = true;
+    });
+
     s_bridge_ready = true;
-    std::fprintf(stderr, "[bridge] InitBridgeMap: %d actors mapped to engine indices 1..%d\n", n, n);
+    std::fprintf(stderr, "[bridge] InitBridgeMap: %d actors, %zu eids tracked\n",
+                 n, s_eid_to_engine.size());
 }
 
-void BridgeNotifyDelete(int doc_i)
+void UpdateBridgeMap(wfcrdt::Doc& doc)
 {
-    if (doc_i < 0 || doc_i >= static_cast<int>(s_doc_to_engine.size())) return;
-    const wfmut::ActorIdx engine_idx = s_doc_to_engine[doc_i];
-    s_doc_to_engine.erase(s_doc_to_engine.begin() + doc_i);
-    std::fprintf(stderr, "[bridge] BridgeNotifyDelete: doc %d (eng %u) erased from map (%zu entries remain)\n",
-                 doc_i, engine_idx, s_doc_to_engine.size());
-    if (engine_idx > 0 && theLevel) {
-        if (!wfmut::RemoveActor(*theLevel, engine_idx))
-            std::fprintf(stderr, "[bridge] BridgeNotifyDelete: RemoveActor(%u) rejected — %s (Doc entry removed; viewport unchanged)\n",
-                         engine_idx, wfmut::lastError());
-    }
-}
-
-bool BridgeNotifyDuplicate(int src_doc_i, int /*new_doc_i*/)
-{
-    if (src_doc_i < 0 || src_doc_i >= static_cast<int>(s_doc_to_engine.size())) {
-        s_doc_to_engine.push_back(0);
-        return false;
-    }
-    const wfmut::ActorIdx src_engine_idx = s_doc_to_engine[src_doc_i];
-    if (!theLevel || src_engine_idx == 0 ||
-        !wfmut::HasTemplate(*theLevel, static_cast<int>(src_engine_idx))) {
-        s_doc_to_engine.push_back(0);
-        std::fprintf(stderr, "[bridge] BridgeNotifyDuplicate: src %d (eng %u) — no template, sentinel pushed\n",
-                     src_doc_i, src_engine_idx);
-        return false;
-    }
-    const auto src_pos = wfmut::GetActorPos(*theLevel, src_engine_idx);
-    const Vector3 offset(Scalar::zero, Scalar::zero, Scalar::FromFloat(0.5f));
-    const Vector3 spawn_pos = src_pos ? (*src_pos + offset) : offset;
-    const auto new_idx = wfmut::SpawnActor(*theLevel, static_cast<int>(src_engine_idx), spawn_pos, 1);
-    if (!new_idx) {
-        s_doc_to_engine.push_back(0);
-        std::fprintf(stderr, "[bridge] BridgeNotifyDuplicate: SpawnActor failed — %s\n", wfmut::lastError());
-        return false;
-    }
-    s_doc_to_engine.push_back(*new_idx);
-    std::fprintf(stderr,
-        "[bridge] BridgeNotifyDuplicate: src %d (eng %u) -> new eng %u  spawn pos (%.2f %.2f %.2f)\n",
-        src_doc_i, src_engine_idx, *new_idx,
-        spawn_pos.X().AsFloat(), spawn_pos.Y().AsFloat(), spawn_pos.Z().AsFloat());
-    return true;
+    if (!s_bridge_ready || !s_needs_rebuild) return;
+    s_needs_rebuild = false;
+    RebuildFromDoc(doc);
 }
 
 // ── M2: field translation ────────────────────────────────────────────────────

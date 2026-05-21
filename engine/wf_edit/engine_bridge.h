@@ -32,22 +32,16 @@ struct PropField;  // property_panel.h — a Doc field after OAD correlation
 int DocActorToEngineIdx(int doc_index);
 
 // Call once when both the Doc and the live engine level are first available
-// (first frame after level load). Fills the stable doc→engine index map with
-// {1, 2, ..., N} — the same values the old positional formula produced.
+// (first frame after level load). Populates the stable eid→engine map from each
+// actor's `_eid` key (stamped by LoadLevelTreeIntoDoc) and registers a
+// content-array observer that sets a dirty flag on structural changes.
 void InitBridgeMap(wfcrdt::Doc& doc);
 
-// Call BEFORE DeleteActor(doc, doc_i). Records the engine actor idx, erases
-// the map entry (shifting higher entries down), and calls wfmut::RemoveActor
-// on the live level. No-op if the map entry is the sentinel 0.
-void BridgeNotifyDelete(int doc_i);
-
-// Call AFTER DuplicateActor(doc, src_doc_i) succeeds. If the source engine
-// actor has a spawnable template (wfmut::HasTemplate), calls wfmut::SpawnActor
-// at source_pos + (0,0,0.5) and pushes the new engine idx; returns true
-// (new actor appears live in viewport). Otherwise pushes sentinel 0 and returns
-// false (caller should toast "reload to see" — propagation for that actor is a
-// natural no-op via the 0 sentinel).
-bool BridgeNotifyDuplicate(int src_doc_i, int new_doc_i);
+// Call every frame (immediately after InitBridgeMap). If the content-array
+// observer has flagged a structural change since the last call, re-reads the
+// Doc's content array, diffs against the eid→engine map, and calls
+// wfmut::RemoveActor / wfmut::SpawnActor as needed. No-op when nothing changed.
+void UpdateBridgeMap(wfcrdt::Doc& doc);
 
 // Verification (WF_EDIT_BRIDGE_DEBUG): print, for every Doc actor, its
 // doc_index -> mapped engine_idx -> engine currentPos() alongside the Doc's own
