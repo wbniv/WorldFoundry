@@ -95,6 +95,10 @@ COLTABLEHEADER
 	COLTABLEENTRY(Camera,Platform,CI_SPECIAL,CI_NOTHING)
 	COLTABLEENTRY(Camera,StatPlat,CI_SPECIAL,CI_NOTHING)
 	COLTABLEENTRY(Camera,Spike,CI_SPECIAL,CI_NOTHING)
+@* Gold collectible (SMB ?-block payout): Player picks it up (Gold runs its
+@* Collision handler, player is not blocked); rests on the floor until then.
+	COLTABLEENTRY(Gold,Player,CI_SPECIAL,CI_NOTHING)
+	COLTABLEENTRY(Gold,StatPlat,CI_PHYSICS,CI_PHYSICS)
 @*	COLTABLEENTRY(Missile,Missile,CI_SPECIAL,CI_SPECIAL)
 @*        COLTABLEENTRY(Warp,Player,CI_SPECIAL,CI_NOTHING)
 @*        COLTABLEENTRY(Warp,Enemy,CI_SPECIAL,CI_NOTHING)

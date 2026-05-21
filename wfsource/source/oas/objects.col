@@ -46,6 +46,7 @@ int collisionTable[] =
 		0,	// Light
 		0,	// Disabled
 		0,	// Alias
+		1,	// Gold
 
 	
 };
@@ -78,6 +79,8 @@ int collisionTable[] =
         
         
         
+	
+	
 	
 	
 	

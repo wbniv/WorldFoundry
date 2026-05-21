@@ -1,6 +1,7 @@
 # Template-object Jolt body sync on spawn
 
-**Status:** **Done — verified by play 2026-05-20.** The fix (Jolt-body sync inside
+**Status:** **Done (Jolt position-sync fix) — but it was *not* the sole cause of the
+block→coin crash; see the 2026-05-21 correction below.** The fix (Jolt-body sync inside
 `setCurrentPos`) is in HEAD — see [`actor.hpi`](../../wfsource/source/game/actor.hpi)
 `Actor::setCurrentPos`, which now calls `JoltCharacterSetPosition` / `JoltBodySetPosition`.
 It landed *inside* commit `0adf1d4` ("refactor(rtti): push GetWatchObject up into
@@ -8,8 +9,24 @@ MovementHandler (step 3/7)") — i.e. **bundled into an unrelated RTTI commit**,
 why this plan, the wf-status table, and the [engine-mutation-api](2026-05-19-engine-mutation-api.md)
 status had all lagged at "Not started / spawn aborts." **Runtime confirmed 2026-05-20:**
 Will played the rebuilt binary (engine changes #1+#2 of [smb-block-generator-coin](2026-05-19-smb-block-generator-coin.md)
-compiled in), bumped a `?` block in smb_w1_1, and a coin spawned with **no `terminate`** —
-the position desync *was* the sole cause of the crash. Diagnostic `fprintf`s in
+compiled in) and bumped a `?` block in smb_w1_1 with **no `terminate`**. The Jolt-body
+position-sync fix is correct and stands.
+
+> **Correction (2026-05-21):** the "position desync was the *sole* cause" claim was
+> wrong. That 2026-05-20 play-test predated engine #3 (the `Gold` class, `7bf3de0`), so
+> the `coin_template` it spawned was **not yet a `gold`** — `Gold::kind()` never ran.
+> Once the coin became a `gold`, the block→coin spawn aborted again, this time on a
+> **stale `gold.oad`**: generated Apr 28 before `Gold_KIND` existed, it baked the
+> `MovementClass` default as `0` (`NULL_KIND`) instead of `26` (`Gold_KIND`), failing
+> `Gold::kind()`'s `assert(MovementClass == Gold_KIND)` — disguised as `terminate`
+> because the failing `exit()` tears down the still-joinable debug-bridge thread. Plus
+> `objects.{col,car}` were never regenerated for Gold → a follow-on OOB in
+> `Actor::CanCollide`. Root-caused + fixed 2026-05-21 (regenerate `gold.oad` +
+> `objects.{car,col,ctb}` from the masters); see
+> [smb-block-generator-coin § Status](2026-05-19-smb-block-generator-coin.md) and
+> [docs/level-building.md § Creating a new OAD class](../level-building.md#creating-a-new-oad-actor-class).
+
+Diagnostic `fprintf`s in
 `generator.cc` are intentionally retained until the SMB block-generator + Gold plan
 completes (`feedback_debug_instrumentation_teardown`).
 **Owner:** Claude (Will reviewing)
