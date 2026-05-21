@@ -175,16 +175,20 @@ the snow:
 |---|---|
 | ![House resting on the snow](../tests/screenshots/wfedit_m3_before.png) | ![House lifted off the snow after a Position edit](../tests/screenshots/wfedit_m3_after.png) |
 
-**What propagates live (v1):** `Position`, `Orientation`, and the ~15 movement/physics
-fields the engine's mutation API (`wfmut`) maps — `Mass`, `Mobility`, `Step Size`,
-`Max Ground Speed`, and the rest of that set. Editing these moves/rotates the actor or
-changes its physics behaviour across stepped frames.
+**What propagates live (v1):** `Position`, `Orientation`, and ~15 movement/physics
+fields — `Mass`, `Mobility`, `Step Size`, `Max Ground Speed`, and the rest of that set.
+Editing these moves/rotates the actor or changes its physics behaviour across stepped
+frames.
 
 **What does *not* update the viewport yet:** every other field still edits the `Doc`
 (and saves correctly), but the bridge logs *"no engine mapping yet"* and the on-screen
 actor is unchanged. Most of these (elasticities, bounding box, script, notes) produce no
-visible change even when applied. Full coverage is a planned follow-up (generating the
-field→engine map from the schema).
+visible change even when applied.
+
+> The ~15-field limit is in the **editor's bridge**, not the engine: the engine's mutation
+> API (`wfmut`) now accepts 77 fields (auto-generated from the schema), but the editor's
+> `engine_bridge` keeps its own ~15-entry name→path table for routing panel edits. Widening
+> the editor's live-preview coverage to match is a planned follow-up.
 
 Sync is **one-way**, `Doc` → engine: the viewport reflects your edit because the engine
 re-renders the mutated actor; physics moving an actor does **not** write back into the
