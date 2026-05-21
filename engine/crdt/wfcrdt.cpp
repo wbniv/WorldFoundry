@@ -348,6 +348,9 @@ struct MapTrampoline {
 struct ArrayTrampoline {
     std::function<void(const YArrayEvent*)> cb;
 };
+struct DocUpdatesTrampoline {
+    std::function<void(ByteView)> cb;
+};
 
 extern "C" void wfcrdt_map_trampoline(void* state, const YMapEvent* e) {
     auto* t = static_cast<MapTrampoline*>(state);
@@ -357,8 +360,18 @@ extern "C" void wfcrdt_array_trampoline(void* state, const YArrayEvent* e) {
     auto* t = static_cast<ArrayTrampoline*>(state);
     t->cb(e);
 }
+extern "C" void wfcrdt_doc_updates_trampoline(void* state, int len, const unsigned char* data) {
+    auto* t = static_cast<DocUpdatesTrampoline*>(state);
+    t->cb(ByteView{data, static_cast<std::size_t>(len < 0 ? 0 : len)});
+}
 
 }  // namespace
+
+Subscription Doc::observeUpdates(std::function<void(ByteView)> cb) {
+    auto* t = new DocUpdatesTrampoline{std::move(cb)};
+    unsigned int subId = ydoc_observe_updates_v1(_doc, t, &wfcrdt_doc_updates_trampoline);
+    return Subscription(_doc, subId, t);
+}
 
 Subscription Map::observe(std::function<void(const YMapEvent*)> cb) {
     auto* t = new MapTrampoline{std::move(cb)};
@@ -380,46 +393,57 @@ Subscription::Subscription(Branch* target,
                            unsigned int subId,
                            SubKind kind,
                            void* heapTrampoline)
-    : _target(target), _subId(subId), _kind(kind), _heap(heapTrampoline) {}
+    : _target(target), _doc(nullptr), _subId(subId), _kind(kind), _heap(heapTrampoline) {}
+
+Subscription::Subscription(YDoc* doc, unsigned int subId, void* heapTrampoline)
+    : _target(nullptr), _doc(doc), _subId(subId), _kind(SubKind::DocUpdates), _heap(heapTrampoline) {}
+
+namespace {
+void subscription_destroy(Branch* target, YDoc* doc, SubKind kind, unsigned int subId, void* heap) {
+    if (kind == SubKind::DocUpdates) {
+        if (doc) {
+            ydoc_unobserve_updates_v1(doc, subId);
+            delete static_cast<DocUpdatesTrampoline*>(heap);
+        }
+        return;
+    }
+    if (!target) return;
+    if (kind == SubKind::Map) {
+        ymap_unobserve(target, subId);
+        delete static_cast<MapTrampoline*>(heap);
+    } else {
+        yarray_unobserve(target, subId);
+        delete static_cast<ArrayTrampoline*>(heap);
+    }
+}
+}  // namespace
 
 Subscription::~Subscription() {
-    if (!_target) return;
-    if (_kind == SubKind::Map) {
-        ymap_unobserve(_target, _subId);
-        delete static_cast<MapTrampoline*>(_heap);
-    } else {
-        yarray_unobserve(_target, _subId);
-        delete static_cast<ArrayTrampoline*>(_heap);
-    }
+    subscription_destroy(_target, _doc, _kind, _subId, _heap);
 }
 
 Subscription::Subscription(Subscription&& other) noexcept
     : _target(other._target),
+      _doc(other._doc),
       _subId(other._subId),
       _kind(other._kind),
       _heap(other._heap) {
     other._target = nullptr;
+    other._doc = nullptr;
     other._heap = nullptr;
 }
 
 Subscription& Subscription::operator=(Subscription&& other) noexcept {
     if (this != &other) {
-        // Run our own dtor logic first.
-        if (_target) {
-            if (_kind == SubKind::Map) {
-                ymap_unobserve(_target, _subId);
-                delete static_cast<MapTrampoline*>(_heap);
-            } else {
-                yarray_unobserve(_target, _subId);
-                delete static_cast<ArrayTrampoline*>(_heap);
-            }
-        }
+        subscription_destroy(_target, _doc, _kind, _subId, _heap);
         _target = other._target;
-        _subId = other._subId;
-        _kind = other._kind;
-        _heap = other._heap;
+        _doc    = other._doc;
+        _subId  = other._subId;
+        _kind   = other._kind;
+        _heap   = other._heap;
         other._target = nullptr;
-        other._heap = nullptr;
+        other._doc    = nullptr;
+        other._heap   = nullptr;
     }
     return *this;
 }

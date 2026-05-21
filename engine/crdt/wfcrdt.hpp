@@ -24,6 +24,7 @@ struct Branch;
 struct YOutput;
 struct YMapEvent;
 struct YArrayEvent;
+struct YAfterTransactionEvent;
 
 namespace wfcrdt {
 
@@ -93,6 +94,11 @@ public:
     Doc& operator=(const Doc&) = delete;
 
     Transaction begin();
+
+    // Subscribe to all document updates (v1 encoding). The callback receives
+    // the raw Yrs v1 update bytes every time a transaction commits. Wire the
+    // callback to another Doc's Transaction::apply() for CRDT sync.
+    Subscription observeUpdates(std::function<void(ByteView)> cb);
 
     bool valid() const { return _doc != nullptr; }
     YDoc* raw() const { return _doc; }
@@ -233,7 +239,7 @@ private:
 
 // Subscription discriminator — selects the right yffi unobserve()
 // + matches the trampoline type so its heap allocation can be freed.
-enum class SubKind { Map, Array };
+enum class SubKind { Map, Array, DocUpdates };
 
 // RAII handle for an observer subscription. Destruction calls the
 // appropriate yffi unobserve and frees the heap std::function
@@ -249,15 +255,17 @@ public:
 private:
     friend class Map;
     friend class Array;
-    Subscription(Branch* target,
-                 unsigned int subId,
-                 SubKind kind,
-                 void* heapTrampoline);
+    friend class Doc;
+    // Map / Array subscription.
+    Subscription(Branch* target, unsigned int subId, SubKind kind, void* heapTrampoline);
+    // DocUpdates subscription (ydoc_observe_updates_v1).
+    Subscription(YDoc* doc, unsigned int subId, void* heapTrampoline);
 
-    Branch* _target;
+    Branch* _target;   // non-null for Map/Array subscriptions
+    YDoc*   _doc;      // non-null for DocUpdates subscriptions
     unsigned int _subId;
     SubKind _kind;
-    void* _heap;  // owned MapTrampoline* / ArrayTrampoline*
+    void* _heap;  // owned MapTrampoline* / ArrayTrampoline* / DocUpdatesTrampoline*
 };
 
 }  // namespace wfcrdt

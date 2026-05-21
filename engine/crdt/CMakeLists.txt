@@ -42,3 +42,9 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/wfcrdt_wrapper_test.cc)
     add_executable(wfcrdt_wrapper_test wfcrdt_wrapper_test.cc)
     target_link_libraries(wfcrdt_wrapper_test PRIVATE wfcrdt)
 endif()
+
+# Sync / observeUpdates convergence test (plan: 2026-05-21-realtime-coediting.md Phase 0).
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/wfcrdt_sync_test.cpp)
+    add_executable(wfcrdt_sync wfcrdt_sync_test.cpp)
+    target_link_libraries(wfcrdt_sync PRIVATE wfcrdt)
+endif()
