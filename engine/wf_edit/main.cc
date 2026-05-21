@@ -30,6 +30,10 @@
 #include "engine_bridge.h"
 #include "level_save.h"
 #include "wfcrdt.hpp"
+#include "collab_session.h"
+#include "voice_track.h"
+#include "video_track.h"
+#include "collab_panel.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -72,6 +76,13 @@ struct EditorCtx {
     // edits. Kept for future use (e.g. non-recoverable corruption); currently
     // always false after M2.
     bool structural_dirty = false;
+
+    // Voice + video collaboration (optional; only active when --room is given).
+    wfedit::CollabSession* collab  = nullptr;
+    wfedit::VoiceChat*     voice   = nullptr;
+    wfedit::VideoChat*     video   = nullptr;
+    std::string            room_id;
+    bool                   show_collab = true;
 };
 
 // File→Save (and Ctrl+S / headless WF_EDIT_SAVE_UI): patch the parse JSON with
@@ -279,6 +290,16 @@ bool editor_frame(void* p)
         ImGui::DockBuilderFinish(dock_id);
     }
 
+    // Tick collab session (peer discovery + voice recv + video frame upload).
+    if (c->collab) {
+        double now = wfedit::MonoNow();
+        c->collab->Tick(now);
+        c->voice->SyncPeers(c->collab->Peers());
+        c->video->SyncPeers(c->collab->Peers());
+        c->voice->Tick();
+        c->video->UploadFrames();
+    }
+
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Save Level", "Ctrl+S")) DoSave(c);
@@ -286,7 +307,13 @@ bool editor_frame(void* p)
             ImGui::MenuItem("Publish to .blend", nullptr, false, false);   // later: hand off to wf.import_level
             ImGui::EndMenu();
         }
+        if (c->collab && ImGui::BeginMenu("View")) {
+            ImGui::MenuItem("Collaborators", nullptr, &c->show_collab);
+            ImGui::EndMenu();
+        }
         ImGui::TextDisabled("   World Foundry Editor");
+        if (c->collab)
+            ImGui::TextDisabled("  | room: %s", c->room_id.c_str());
         ImGui::EndMainMenuBar();
     }
 
@@ -356,6 +383,11 @@ bool editor_frame(void* p)
     }
     ImGui::End();
 
+    // Collaborators panel (voice + video; only when a room is active).
+    if (c->collab)
+        wfedit::RenderCollabPanel(c->show_collab, *c->collab,
+                                  *c->voice, *c->video, c->room_id);
+
     // Status readout floating over the central (engine) region.
     ImGui::SetNextWindowBgAlpha(0.35f);
     if (ImGui::Begin("##status", nullptr,
@@ -407,6 +439,7 @@ int main(int argc, char** argv)
     int         max_frames = -1;
     int         preselect  = -1;   // --select=N: headless aid — preselect actor N
     const char* shot = nullptr;
+    std::string room_id;           // --room=<id>: join a voice+video call room
     // Viewport level (engine LoadLevel) + the .lev parsed into the read-only
     // Y.Doc. Default both to snowgoons-blender so the viewport and Outliner
     // show the same level (plan D7); override independently for now.
@@ -423,6 +456,10 @@ int main(int argc, char** argv)
             leveltree = argv[i] + 12;
         else if (std::strncmp(argv[i], "--select=", 9) == 0)
             preselect = std::atoi(argv[i] + 9);
+        else if (std::strncmp(argv[i], "--room=", 7) == 0)
+            room_id = argv[i] + 7;
+        else if (std::strcmp(argv[i], "--room") == 0 && i + 1 < argc)
+            room_id = argv[++i];
     }
 
     // 0. Read-only Y.Doc (M4): shell out to `levtree parse`, build a wfcrdt::Doc
@@ -555,8 +592,29 @@ int main(int argc, char** argv)
     ctx.actor_names = std::move(actor_names);
     ctx.doc         = &doc;   // read field subtrees on selection (read-only)
     ctx.save_path   = leveltree;               // Save writes back to the .lev source
+    ctx.room_id     = room_id;
     if (preselect >= 0 && preselect < static_cast<int>(ctx.actor_names.size()))
         ctx.selected = preselect;   // headless: exercise the Outliner→Properties path
+
+    // 3b. Start voice + video call if a room ID was provided.
+    wfedit::CollabSession collab_session;
+    wfedit::VoiceChat     voice_chat;
+    wfedit::VideoChat     video_chat;
+    if (!room_id.empty()) {
+        // Pick ephemeral UDP ports (OS assigns them; we read back with getsockname).
+        // Use fixed offsets from a base so two instances on the same machine differ.
+        // Simpler: just use fixed ports for now; the room_id disambiguates rooms.
+        const uint16_t audio_port = 19400;
+        const uint16_t video_port = 19401;
+        voice_chat.Start(audio_port);
+        video_chat.Start(video_port);
+        collab_session.Start(room_id, "Editor", audio_port, video_port);
+        ctx.collab = &collab_session;
+        ctx.voice  = &voice_chat;
+        ctx.video  = &video_chat;
+        std::printf("wf-edit: collab room '%s' started\n", room_id.c_str());
+    }
+
     SetEditorFrameCallback(editor_frame, &ctx);
 
     // 4. Drive the engine. HALStart inits HAL/audio + calls PIGSMain, which in
@@ -586,6 +644,11 @@ int main(int argc, char** argv)
     //    engine's stored ctx pointer can't dangle (no callbacks fire after
     //    HALStart returns, but keep it tidy — mirrors ClearHostGLContext).
     SetEditorFrameCallback(nullptr, nullptr);
+    if (!room_id.empty()) {
+        collab_session.Stop();
+        voice_chat.Stop();
+        video_chat.Stop();
+    }
     ClearHostGLContext();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();

@@ -847,6 +847,11 @@ endif()
 # handles and registers them via SetHostGLContext so the engine renders into
 # this context.
 if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
+    # Opus + VP8 for in-editor voice/video chat.
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(OPUS REQUIRED opus)
+    pkg_check_modules(VPX  REQUIRED vpx)
+
     # GLFW — editor-owned X11/GLX window + context (lean build, X11 only).
     set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
     set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
@@ -862,6 +867,10 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         engine/wf_edit/oad_reader.cc           # Phase 2: clean OadEntry adapter
         engine/wf_edit/engine_bridge.cc        # Option C: CRDT -> engine (wfmut) bridge
         engine/wf_edit/level_save.cc           # save round-trip: Doc -> .lev
+        engine/wf_edit/collab_session.cc       # UDP multicast peer discovery
+        engine/wf_edit/voice_track.cc          # Opus voice chat
+        engine/wf_edit/video_track.cc          # VP8 video chat + V4L2 capture
+        engine/wf_edit/collab_panel.cc         # Collaborators ImGui panel
         wftools/oaddump/oad.cc                 # shared OAD reader (editor-gated only)
         ${IMGUI_DIR}/imgui.cpp
         ${IMGUI_DIR}/imgui_draw.cpp
@@ -877,7 +886,10 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         ${CMAKE_SOURCE_DIR}/engine/crdt              # wfcrdt.hpp (read-only Y.Doc)
         ${CMAKE_SOURCE_DIR}/engine/mutation          # wfmut.hpp (M3 CRDT->engine bridge)
         ${CMAKE_SOURCE_DIR}/third_party/json         # <nlohmann/json.hpp>
-        ${CMAKE_SOURCE_DIR}/wftools/oaddump)         # oad.hp (Phase 2 OAD reader)
+        ${CMAKE_SOURCE_DIR}/wftools/oaddump          # oad.hp (Phase 2 OAD reader)
+        ${CMAKE_SOURCE_DIR}/engine/vendor/miniaudio-0.11.25  # <miniaudio/miniaudio.h>
+        ${OPUS_INCLUDE_DIRS}
+        ${VPX_INCLUDE_DIRS})
     # main.cc compiles against engine headers, so the target needs the engine's
     # flags (mirrors wf_host_gl_e2e_test). Harmless for the ImGui TUs alongside.
     target_compile_options(wf_edit PRIVATE
@@ -889,7 +901,8 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     )
     # Link the engine (host-GL embed via SetHostGLContext + StepFrame) and
     # wfcrdt (M4 read-only Y.Doc; pulls in libyrs.a from the editor build).
-    target_link_libraries(wf_edit PRIVATE wfengine wfcrdt glfw GL)
+    target_link_libraries(wf_edit PRIVATE wfengine wfcrdt glfw GL
+        ${OPUS_LIBRARIES} ${VPX_LIBRARIES} pthread)
 
     # SpawnActor runtime-path confirmation: loads snowgoons, finds the first
     # valid template, spawns it, checks the result. Confirms the Jolt
