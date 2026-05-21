@@ -36,6 +36,8 @@ What's missing is the bridge between them:
         already done (Phase 3)                          ▲ this plan ▲
 ```
 
+**Realized (M3):** editing snowgoons' House `Position` Z −0.125 → 6.0 in the panel propagates through the bridge and the House lifts off the snow — [before](../../tests/screenshots/wfedit_m3_before.png) → [after](../../tests/screenshots/wfedit_m3_after.png).
+
 Three problems sit in that gap, in rising order of difficulty:
 
 1. **Identity** — the Doc OBJ at `content[i]` (what the Outliner selects, `EditorCtx::selected`) must map to the engine actor's 1-based `wfmut::ActorIdx`. The Doc is built from `levtree parse <lev>` ([level_doc.cc](../../engine/wf_edit/level_doc.cc)); the engine loaded the `.iff` compiled from the **same** `.lev` ([main.cc:226](../../engine/wf_edit/main.cc)) — so the orderings should correspond, but system/camera actors and the 1-based vs 0-based offset have to be pinned, not assumed.
