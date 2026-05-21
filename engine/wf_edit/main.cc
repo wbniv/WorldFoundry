@@ -601,14 +601,12 @@ int main(int argc, char** argv)
     wfedit::VoiceChat     voice_chat;
     wfedit::VideoChat     video_chat;
     if (!room_id.empty()) {
-        // Pick ephemeral UDP ports (OS assigns them; we read back with getsockname).
-        // Use fixed offsets from a base so two instances on the same machine differ.
-        // Simpler: just use fixed ports for now; the room_id disambiguates rooms.
-        const uint16_t audio_port = 19400;
-        const uint16_t video_port = 19401;
-        voice_chat.Start(audio_port);
-        video_chat.Start(video_port);
-        collab_session.Start(room_id, "Editor", audio_port, video_port);
+        // Bind to port 0 — the OS assigns an ephemeral port. Each editor
+        // instance on the same machine gets a different port automatically.
+        voice_chat.Start();
+        video_chat.Start();
+        collab_session.Start(room_id, "Editor",
+                             voice_chat.ListenPort(), video_chat.ListenPort());
         ctx.collab = &collab_session;
         ctx.voice  = &voice_chat;
         ctx.video  = &video_chat;

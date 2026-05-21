@@ -53,19 +53,22 @@ VideoChat::~VideoChat()
     Stop();
 }
 
-bool VideoChat::Start(uint16_t listen_port)
+bool VideoChat::Start()
 {
-    // UDP receive socket.
+    // UDP receive socket — bind to port 0 for an OS-assigned ephemeral port.
     recv_fd_ = socket(AF_INET, SOCK_DGRAM, 0);
     if (recv_fd_ < 0) { std::perror("video: recv socket"); return false; }
 
     struct sockaddr_in addr{};
     addr.sin_family      = AF_INET;
-    addr.sin_port        = htons(listen_port);
+    addr.sin_port        = 0;   // ephemeral
     addr.sin_addr.s_addr = INADDR_ANY;
     if (bind(recv_fd_, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0) {
         std::perror("video: bind"); close(recv_fd_); recv_fd_ = -1; return false;
     }
+    socklen_t alen = sizeof(addr);
+    getsockname(recv_fd_, reinterpret_cast<sockaddr*>(&addr), &alen);
+    listen_port_ = ntohs(addr.sin_port);
 
     // UDP send socket.
     send_fd_ = socket(AF_INET, SOCK_DGRAM, 0);
@@ -83,7 +86,7 @@ bool VideoChat::Start(uint16_t listen_port)
     cap_thread_  = std::thread(&VideoChat::CaptureThread, this);
     recv_thread_ = std::thread(&VideoChat::RecvThread, this);
 
-    std::printf("video: started on UDP port %u\n", listen_port);
+    std::printf("video: started on UDP port %u\n", listen_port_);
     return true;
 }
 

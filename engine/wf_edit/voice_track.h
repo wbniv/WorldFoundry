@@ -44,10 +44,13 @@ public:
     VoiceChat();
     ~VoiceChat();
 
-    // Bind the receive socket and start the capture device. Returns false if
-    // Opus init or socket creation fails. Does NOT open a mic until unmuted.
-    bool Start(uint16_t listen_port);
+    // Bind the receive socket (on an ephemeral port chosen by the OS) and
+    // start the capture device. Returns false if Opus init or socket creation
+    // fails. Call ListenPort() after a successful Start() to learn the port.
+    bool Start();
     void Stop();
+
+    uint16_t ListenPort() const { return listen_port_; }
 
     // Mute/unmute the microphone capture.
     void SetMuted(bool muted);
@@ -73,10 +76,11 @@ public:
 private:
     void EncodeAndSend(const float* pcm, int frame_samples);
 
-    bool muted_       = true;
-    int  recv_fd_     = -1;
-    int  send_fd_     = -1;  // UDP unicast send socket (connected per-peer)
-    uint32_t seq_     = 0;
+    bool     muted_       = true;
+    int      recv_fd_     = -1;
+    int      send_fd_     = -1;
+    uint32_t seq_         = 0;
+    uint16_t listen_port_ = 0;
 
     OpusEncoder* encoder_ = nullptr;
 

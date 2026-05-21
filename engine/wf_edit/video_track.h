@@ -61,10 +61,13 @@ public:
     VideoChat();
     ~VideoChat();
 
-    // Open /dev/video0 for capture and bind the receive socket.
-    // Returns false if camera or socket setup fails (caller handles fallback).
-    bool Start(uint16_t listen_port);
+    // Bind the receive socket on an OS-assigned ephemeral port, and open
+    // /dev/video0 for capture (non-fatal if absent). Returns false only if the
+    // socket setup fails. Call ListenPort() after a successful Start().
+    bool Start();
     void Stop();
+
+    uint16_t ListenPort() const { return listen_port_; }
 
     void SetCameraEnabled(bool on);
     bool IsCameraEnabled() const { return cam_enabled_.load(); }
@@ -102,9 +105,10 @@ private:
     std::atomic<bool> cam_enabled_{false};
     std::atomic<bool> running_{false};
 
-    int cam_fd_  = -1;    // V4L2 device fd
-    int recv_fd_ = -1;    // UDP receive socket
-    int send_fd_ = -1;    // UDP send socket
+    int      cam_fd_      = -1;
+    int      recv_fd_     = -1;
+    int      send_fd_     = -1;
+    uint16_t listen_port_ = 0;
 
     int cap_w_   = 320;
     int cap_h_   = 240;
