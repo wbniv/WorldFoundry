@@ -146,6 +146,9 @@ li_open = False  # True when a <li> is open and can accept nested content
 li_accepting_text = False
 # Accumulate consecutive text lines into a single paragraph
 para_lines = []
+# Accumulate consecutive blockquote lines so a wrapped quote reflows into one
+# <p> instead of one <p> per source line.
+bq_para = []
 
 def close_li():
     global li_open, li_accepting_text
@@ -172,9 +175,16 @@ def close_table():
     global in_table, table_aligns
     if in_table: html_lines.append('</tbody></table>'); in_table = False; table_aligns = []
 
+def flush_bq_para():
+    global bq_para
+    if bq_para:
+        html_lines.append('<p>' + ' '.join(bq_para) + '</p>')
+        bq_para = []
+
 def close_blockquote():
     global in_blockquote, alert_type
     if in_blockquote:
+        flush_bq_para()
         html_lines.append('</div>' if alert_type else '</blockquote>')
         in_blockquote = False
         alert_type = None
@@ -363,7 +373,7 @@ for line in lines:
                 continue  # skip emitting the marker as body
             html_lines.append('<blockquote>')
             in_blockquote = True
-        html_lines.append(f'<p>{body}</p>')
+        bq_para.append(body)
         continue
     elif in_blockquote and stripped != '':
         close_blockquote()
@@ -491,7 +501,9 @@ for esc, placeholder in ESCAPE_MAP.items():
 # wrap unrelated content in <em>/<strong>. Paragraphs are already collapsed to
 # a single line by flush_para(), so legitimate emphasis fits on one line.
 body = re.sub(r'\*\*\*([^*\n]+)\*\*\*', r'<strong><em>\1</em></strong>', body)
-body = re.sub(r'\*\*([^*\n]+)\*\*', r'<strong>\1</strong>', body)
+# Bold may contain a nested single-* italic (e.g. **a *b* c**): allow lone '*'
+# (not part of a '**') inside the run; the italic pass below converts it.
+body = re.sub(r'\*\*((?:[^*\n]|\*(?!\*))+?)\*\*', r'<strong>\1</strong>', body)
 body = re.sub(r'(?<!\*)\*([^*\n]+)\*(?!\*)', r'<em>\1</em>', body)
 body = re.sub(r'(?<![_\w])_([^_\n]+)_(?![_\w])', r'<em>\1</em>', body)
 body = re.sub(r'~~(.+?)~~', r'<del>\1</del>', body)
