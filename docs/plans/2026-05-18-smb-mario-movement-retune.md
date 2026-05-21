@@ -1,6 +1,6 @@
 # SMB Mario movement retune — faster ground, no air control, variable jump
 
-**Status:** Level-data changes (items 1 & 2) done — applied in a prior session with values exceeding the plan targets (`Running Acceleration`=60.0, `Max Ground Speed`=32.0, `Air Acceleration`=0.0). Item 3 (variable jump height, `movement.cc`) is engine-session work, still pending. Originally active 2026-05-18. Follow-up to interactive test of the previously-landed [SMB Mario speed/jump tuning](2026-05-17-smb-mario-speed-jump-tuning.md) and the qblock bump mechanic.
+**Status:** Done. All three items landed: items 1 & 2 (level data: `Running Acceleration`=60.0, `Max Ground Speed`=32.0, `Air Acceleration`=0.0) in a prior session; item 3 (variable jump height, `AirHandler::predictPosition`) committed in `7eb75acf`. Needs interactive user play-test to confirm feel.
 
 ## User feedback (verbatim)
 
