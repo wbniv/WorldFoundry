@@ -181,24 +181,7 @@ struct PropInfo {
 const std::unordered_map<std::string, PropInfo>& propMap()
 {
     static const std::unordered_map<std::string, PropInfo> kPropMap = {
-        // common block
-        {"common.hp",                     {PropInfo::COMMON,   offsetof(_Common,   hp),                    true }},
-        {"common.Script",                 {PropInfo::COMMON,   offsetof(_Common,   Script),                false}},
-        {"common.NumberOfLocalMailboxes", {PropInfo::COMMON,   offsetof(_Common,   NumberOfLocalMailboxes), false}},
-        {"common.WriteToMailboxOnDeath",  {PropInfo::COMMON,   offsetof(_Common,   WriteToMailboxOnDeath),  false}},
-        // movebloc block
-        {"movebloc.Mass",                 {PropInfo::MOVEBLOC, offsetof(_Movement, Mass),                  true }},
-        {"movebloc.MaxGroundSpeed",       {PropInfo::MOVEBLOC, offsetof(_Movement, MaxGroundSpeed),        true }},
-        {"movebloc.RunningAcceleration",  {PropInfo::MOVEBLOC, offsetof(_Movement, RunningAcceleration),   true }},
-        {"movebloc.JumpingAcceleration",  {PropInfo::MOVEBLOC, offsetof(_Movement, JumpingAcceleration),   true }},
-        {"movebloc.FallingAcceleration",  {PropInfo::MOVEBLOC, offsetof(_Movement, FallingAcceleration),   true }},
-        {"movebloc.StepSize",             {PropInfo::MOVEBLOC, offsetof(_Movement, StepSize),              true }},
-        {"movebloc.Mobility",             {PropInfo::MOVEBLOC, offsetof(_Movement, Mobility),              false}},
-        {"movebloc.MovementClass",        {PropInfo::MOVEBLOC, offsetof(_Movement, MovementClass),         false}},
-        // mesh block
-        {"mesh.ModelType",                {PropInfo::MESH,     offsetof(_Mesh,     ModelType),             false}},
-        {"mesh.AnimationMailbox",         {PropInfo::MESH,     offsetof(_Mesh,     AnimationMailbox),      false}},
-        {"mesh.VisibilityMailbox",        {PropInfo::MESH,     offsetof(_Mesh,     VisibilityMailbox),     false}},
+#include "kpropmap_generated.inc"
     };
     return kPropMap;
 }

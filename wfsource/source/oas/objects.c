@@ -159,6 +159,8 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 	
 	
 	
+	
+	
 
 
 
@@ -302,6 +304,8 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
         
         
         
+	
+	
 	
 	
 	
