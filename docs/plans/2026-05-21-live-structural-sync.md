@@ -72,10 +72,18 @@ object — this offset is a best-effort heuristic for v1.
 2. Duplicate a Generator/enemy: appears live in viewport. Field edits to the duplicate propagate immediately.
 3. Duplicate a non-templated actor: toast "reload to see"; save + reload shows it; other actors unaffected.
 
-### Videos
-- [ ] Delete a House — viewport disappears live, no reload
+### Screenshot evidence (headless)
+
+| Step | Screenshot | Result |
+|------|-----------|--------|
+| Delete House | `tests/screenshots/verify_m2_delete.png` | Outliner shows 35 actors; "actor deleted" toast; Properties live on QuadPatch01 |
+| Dup non-templated (House) | `tests/screenshots/verify_m2_dup_notempl.png` | Outliner shows 37 actors; "reload to see" toast; no crash |
+| Dup templated (live spawn) | — needs level with Actor-kind templates | snowgoons/qbert only have Room/Tool templates (confirmed by spawn-test Part A) |
+
+### Videos (interactive, deferred)
+- [ ] Delete a House — disappears from viewport live
 - [ ] Duplicate a Generator/enemy — appears live; field edits propagate
-- [ ] Duplicate a non-templated actor — toast; reload shows it
+- [ ] Duplicate a non-templated actor — toast; save + reload shows it
 
 ## Files
 
