@@ -47,6 +47,11 @@ bool RunBuildLevel(const std::string& level_name, std::string& out_log);
 // through the Doc (not a side cache), so this exercises the Doc → UI path.
 std::vector<std::string> ReadActorNames(wfcrdt::Doc& doc);
 
+// Read each actor's `_eid` stable UUID (stamped by LoadLevelTreeIntoDoc /
+// DuplicateActor). Used to correlate the Outliner row with presence state.
+// Returns "" for actors that pre-date Phase 3 or have no _eid stamped.
+std::vector<std::string> ReadActorEids(wfcrdt::Doc& doc);
+
 // One field of an actor, as carried by the Doc. The `.lev` names every field
 // inline (a NAME sub-chunk: "Position", "Mass", "Background Color", …), so the
 // Properties panel needs no OAD just to list named fields read-only — that's

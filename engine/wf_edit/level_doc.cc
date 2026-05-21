@@ -304,6 +304,20 @@ std::vector<std::string> ReadActorNames(wfcrdt::Doc& doc)
     return names;
 }
 
+std::vector<std::string> ReadActorEids(wfcrdt::Doc& doc)
+{
+    std::vector<std::string> eids;
+    auto txn = doc.begin();
+    auto content = txn.array("content");
+    const int n = content.len();
+    eids.reserve(static_cast<size_t>(n));
+    for (int i = 0; i < n; ++i) {
+        wfcrdt::Map m = content.get(i).asMap();
+        eids.push_back(m.valid() ? m.get("_eid").readString().value_or("") : "");
+    }
+    return eids;
+}
+
 namespace {
 // A field chunk is `{ chunk_type, items:[ NAME-chunk, DATA-chunk, STR-chunk, … ] }`
 // (each sub-chunk's own items are its literals). Pull the field name (NAME

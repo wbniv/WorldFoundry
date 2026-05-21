@@ -10,6 +10,10 @@
 // per docs/plans/2026-05-20-editor-app-shell.md; Linux/X11 only.
 //=============================================================================
 
+// nlohmann/json must be included before WF engine headers — memory.hp's
+// operator-new macro conflicts with STL internal placement-new in <valarray>.
+#include <nlohmann/json.hpp>
+
 #define GLFW_EXPOSE_NATIVE_X11
 #define GLFW_EXPOSE_NATIVE_GLX
 #include <GLFW/glfw3.h>
@@ -42,6 +46,7 @@
 #include <cstring>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <unistd.h>
 
@@ -104,6 +109,18 @@ struct EditorCtx {
     std::string                         our_peer_id;
     std::optional<wfcrdt::Subscription> relay_sub;
     bool                                suppress_relay_send = false;
+
+    // Phase 4: presence — stable actor eids (parallel to actor_names), peer state.
+    std::vector<std::string> actor_eids;
+    struct PresenceState {
+        std::string name;
+        float colour[3] = {0.8f, 0.8f, 0.8f};
+        std::string selected_eid;
+        double last_seen = 0.0;   // glfwGetTime()
+    };
+    std::unordered_map<std::string, PresenceState> peer_presence;  // peer_id → state
+    double last_presence_send = 0.0;
+    float  our_colour[3] = {0.5f, 0.5f, 0.5f};   // set on relay connect from peer_id hash
 };
 
 // File→Save (and Ctrl+S / headless WF_EDIT_SAVE_UI): patch the parse JSON with
@@ -155,6 +172,7 @@ void SaveAndCompile(EditorCtx* c)
 void RefreshActorList(EditorCtx* c)
 {
     c->actor_names = wfedit::ReadActorNames(*c->doc);
+    c->actor_eids  = wfedit::ReadActorEids(*c->doc);
     if (c->selected >= static_cast<int>(c->actor_names.size()))
         c->selected = static_cast<int>(c->actor_names.size()) - 1;
     c->fields_for = -1;          // force Properties to re-resolve on the next frame
@@ -180,32 +198,71 @@ void DoDuplicate(EditorCtx* c)
     c->selected = ni;
 }
 
-// Drain incoming relay SYNC messages and apply them to the local Doc + engine.
-// Called at the top of editor_frame; non-blocking (poll-based, no sleep).
+// Derive a vibrant RGB colour from a peer_id string for consistent colouring.
+static void PeerColourFromId(const std::string& id, float col[3])
+{
+    std::size_t h = std::hash<std::string>{}(id);
+    // Avoid dark colours by keeping each channel in [0.45, 1.0].
+    col[0] = 0.45f + 0.55f * static_cast<float>((h      ) & 0xFF) / 255.f;
+    col[1] = 0.45f + 0.55f * static_cast<float>((h >>  8) & 0xFF) / 255.f;
+    col[2] = 0.45f + 0.55f * static_cast<float>((h >> 16) & 0xFF) / 255.f;
+}
+
+// Drain incoming relay messages (SYNC + PRESENCE). Non-blocking; called each frame.
 void CollabDrain(EditorCtx* c) {
     if (!c->relay_client.connected() || !c->doc) return;
     std::vector<uint8_t> frame;
     while (c->relay_client.poll(frame)) {
-        // Channel byte: only handle SYNC (0x01); ignore PRESENCE/CHAT here.
-        if (frame.size() < 2 || frame[0] != 0x01) { frame.clear(); continue; }
-        // Apply remote update without echoing it back to the relay.
-        c->suppress_relay_send = true;
-        {
-            auto txn = c->doc->begin();
-            txn.apply(wfcrdt::ByteView{frame.data() + 1, frame.size() - 1});
-        }  // txn commits → observeUpdates fires → suppressed
-        c->suppress_relay_send = false;
-        // Refresh actor list then re-resolve + propagate the selected actor's state.
-        RefreshActorList(c);
-        if (c->selected >= 0) {
-            c->props = wfedit::ResolveProperties(
-                wfedit::ReadActorFields(*c->doc, c->selected));
-            c->fields_for = c->selected;
-            for (const auto& pf : c->props)
-                if (pf.matched)
-                    wfedit::PropagateToEngine(c->selected, pf);
+        if (frame.size() < 2) { frame.clear(); continue; }
+        const uint8_t ch = frame[0];
+
+        if (ch == 0x01) {
+            // SYNC — apply remote CRDT update without echoing it back.
+            c->suppress_relay_send = true;
+            {
+                auto txn = c->doc->begin();
+                txn.apply(wfcrdt::ByteView{frame.data() + 1, frame.size() - 1});
+            }
+            c->suppress_relay_send = false;
+            RefreshActorList(c);
+            if (c->selected >= 0) {
+                c->props = wfedit::ResolveProperties(
+                    wfedit::ReadActorFields(*c->doc, c->selected));
+                c->fields_for = c->selected;
+                for (const auto& pf : c->props)
+                    if (pf.matched)
+                        wfedit::PropagateToEngine(c->selected, pf);
+            }
+        } else if (ch == 0x02) {
+            // PRESENCE — parse JSON and update peer state.
+            try {
+                using json = nlohmann::json;
+                json j = json::parse(frame.begin() + 1, frame.end());
+                const std::string pid = j.value("peer_id", "");
+                if (!pid.empty() && pid != c->our_peer_id) {
+                    auto& ps = c->peer_presence[pid];
+                    ps.name = j.value("name", "peer");
+                    if (j.contains("colour") && j["colour"].is_array()
+                        && j["colour"].size() >= 3) {
+                        ps.colour[0] = j["colour"][0].get<float>();
+                        ps.colour[1] = j["colour"][1].get<float>();
+                        ps.colour[2] = j["colour"][2].get<float>();
+                    } else {
+                        PeerColourFromId(pid, ps.colour);
+                    }
+                    ps.selected_eid = j.value("selected_eid", "");
+                    ps.last_seen    = glfwGetTime();
+                }
+            } catch (...) {}
         }
+        // CHAT (0x03) and CONTROL (0x04) are ignored for now.
         frame.clear();
+    }
+    // Evict peers not seen in 8 s.
+    {
+        const double now = glfwGetTime();
+        for (auto it = c->peer_presence.begin(); it != c->peer_presence.end();)
+            it = (now - it->second.last_seen > 8.0) ? c->peer_presence.erase(it) : ++it;
     }
 }
 
@@ -290,8 +347,31 @@ bool editor_frame(void* p)
     if (c->doc) wfedit::InitBridgeMap(*c->doc);
     if (c->doc) wfedit::UpdateBridgeMap(*c->doc);   // Phase 3: apply pending structural changes
 
-    // Phase 2: drain incoming relay SYNC messages (remote peer field edits).
+    // Phase 2: drain incoming relay SYNC + PRESENCE messages.
     CollabDrain(c);
+
+    // Phase 4: broadcast own presence ~10 Hz when relay is connected.
+    if (c->relay_client.connected()) {
+        const double now = glfwGetTime();
+        if (now - c->last_presence_send >= 0.1) {
+            c->last_presence_send = now;
+            const std::string sel_eid =
+                (c->selected >= 0 && c->selected < static_cast<int>(c->actor_eids.size()))
+                ? c->actor_eids[c->selected] : "";
+            using json = nlohmann::json;
+            const std::string body = json{
+                {"peer_id",      c->our_peer_id},
+                {"name",         "Editor"},
+                {"colour",       json::array({c->our_colour[0], c->our_colour[1], c->our_colour[2]})},
+                {"selected_eid", sel_eid}
+            }.dump();
+            std::vector<uint8_t> msg;
+            msg.reserve(1 + body.size());
+            msg.push_back(0x02);   // PRESENCE channel
+            msg.insert(msg.end(), body.begin(), body.end());
+            c->relay_client.send(msg.data(), msg.size());
+        }
+    }
 
     // M1 CRDT->engine bridge: one-shot identity-map verification dump (Doc
     // actor <-> engine actor idx), gated WF_EDIT_BRIDGE_DEBUG. Runs on the first
@@ -435,9 +515,29 @@ bool editor_frame(void* p)
         ImGui::TextDisabled("(reload for live preview)");
     }
     ImGui::Separator();
+    ImDrawList* dl = ImGui::GetWindowDrawList();
     for (int i = 0; i < static_cast<int>(c->actor_names.size()); ++i) {
+        const std::string& eid = (i < static_cast<int>(c->actor_eids.size()))
+                                 ? c->actor_eids[i] : "";
+        // Find any peer that has this actor selected.
+        const EditorCtx::PresenceState* peer_sel = nullptr;
+        if (!eid.empty()) {
+            for (const auto& [pid, ps] : c->peer_presence)
+                if (ps.selected_eid == eid) { peer_sel = &ps; break; }
+        }
         if (ImGui::Selectable(c->actor_names[i].c_str(), c->selected == i))
             c->selected = i;
+        if (peer_sel) {
+            // Draw a small coloured dot in the right margin of the row.
+            const ImVec2 rmin = ImGui::GetItemRectMin();
+            const ImVec2 rmax = ImGui::GetItemRectMax();
+            const float r = (rmax.y - rmin.y) * 0.28f;
+            dl->AddCircleFilled(
+                ImVec2(rmax.x - r - 2.f, (rmin.y + rmax.y) * 0.5f), r,
+                IM_COL32(static_cast<int>(peer_sel->colour[0] * 255),
+                         static_cast<int>(peer_sel->colour[1] * 255),
+                         static_cast<int>(peer_sel->colour[2] * 255), 220));
+        }
     }
     ImGui::End();
 
@@ -578,8 +678,10 @@ int main(int argc, char** argv)
     wfcrdt::Doc              doc;
     std::string              level_name;
     std::vector<std::string> actor_names;
+    std::vector<std::string> actor_eids;
     if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc)) {
         actor_names = wfedit::ReadActorNames(doc);
+        actor_eids  = wfedit::ReadActorEids(doc);
         level_name  = leveltree;
         if (auto slash = level_name.find_last_of('/'); slash != std::string::npos)
             level_name.erase(0, slash + 1);
@@ -714,6 +816,7 @@ int main(int argc, char** argv)
     EditorCtx ctx{ win, max_frames, 0, shot };
     ctx.level_name  = std::move(level_name);
     ctx.actor_names = std::move(actor_names);
+    ctx.actor_eids  = std::move(actor_eids);
     ctx.doc         = &doc;   // read field subtrees on selection (read-only)
     ctx.save_path   = leveltree;               // Save writes back to the .lev source
     ctx.room_id     = room_id;
@@ -742,6 +845,7 @@ int main(int argc, char** argv)
         ctx.relay_url    = ctx_relay_url;
         // Reuse the collab session's peer id (already generated above).
         ctx.our_peer_id  = ctx.collab ? ctx.collab->OurPeerId() : std::string("editor");
+        PeerColourFromId(ctx.our_peer_id, ctx.our_colour);
         if (ctx.relay_client.connect(ctx_relay_url.c_str())) {
             // Send CONTROL join message: [0x04][room_id NUL peer_id].
             std::vector<uint8_t> ctrl;
@@ -759,8 +863,9 @@ int main(int argc, char** argv)
                 if (!frame.empty() && frame[0] == 0x01 && frame.size() > 1) {
                     auto txn = doc.begin();
                     txn.apply(wfcrdt::ByteView{frame.data() + 1, frame.size() - 1});
-                    // Re-read actor names in case the relay had a newer state.
+                    // Re-read actor names+eids in case the relay had a newer state.
                     ctx.actor_names = wfedit::ReadActorNames(doc);
+                    ctx.actor_eids  = wfedit::ReadActorEids(doc);
                 }
             }
 
