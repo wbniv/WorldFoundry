@@ -27,6 +27,7 @@
 
 #include "level_doc.h"
 #include "property_panel.h"
+#include "engine_bridge.h"
 #include "wfcrdt.hpp"
 
 #include <cstdio>
@@ -87,6 +88,15 @@ bool editor_frame(void* p)
     glfwPollEvents();
     if (glfwWindowShouldClose(c->win))
         return false;
+
+    // M1 CRDT->engine bridge: one-shot identity-map verification dump (Doc
+    // actor <-> engine actor idx), gated WF_EDIT_BRIDGE_DEBUG. Runs on the first
+    // frame, by which point the engine has loaded the level (theLevel valid).
+    static bool s_bridge_dumped = false;
+    if (!s_bridge_dumped && c->doc && std::getenv("WF_EDIT_BRIDGE_DEBUG")) {
+        s_bridge_dumped = true;
+        wfedit::DumpIdentityMap(*c->doc);
+    }
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
