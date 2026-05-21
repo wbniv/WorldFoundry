@@ -217,6 +217,134 @@ def add_statplat(mesh_name, x0, y0, z0, x1, y1, z1, mat):
     return obj
 
 
+def _make_qblock_tga(out_path, scale=2):
+    """Generate a 32×32 NES-style ?-block texture and save as TGA.
+
+    Each "NES pixel" is `scale`×`scale` output pixels so the block reads
+    clearly on a 1.5 m face.  Output is always a power-of-2 square
+    (32×32 at scale=2) per textile-rs bitmap.rs:507.
+
+    Palette:
+      0 = dark border  (101,  47,   0)
+      1 = orange fill  (196, 106,   0)
+      2 = bright edge  (252, 180,  36)  — lighter row inside top/bottom border
+      3 = white mark   (252, 248, 200)  — ? glyph interior
+
+    The ? glyph uses the classic NES double-arch style:
+      rows 3-7  arch (two bumps, right arm closes into stem)
+      row  8    stem
+      row  9    gap
+      rows 10-12 dot
+    """
+    from PIL import Image
+    PALETTE = [
+        (101,  47,   0),   # 0 dark border
+        (196, 106,   0),   # 1 orange fill
+        (252, 180,  36),   # 2 bright edge
+        (252, 248, 200),   # 3 white mark
+    ]
+    # 16×16 NES pixel map (palette indices)
+    MAP = [
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0],
+        [0,2,1,1,1,1,1,1,1,1,1,1,1,2,0,0],
+        [0,2,1,1,0,0,0,1,0,0,0,1,1,2,0,0],  # arch top
+        [0,2,1,1,0,3,3,0,3,3,0,1,1,2,0,0],  # arch interior
+        [0,2,1,1,0,0,0,0,3,3,0,1,1,2,0,0],  # left arm closes
+        [0,2,1,1,1,1,1,0,3,3,0,1,1,2,0,0],  # right arm
+        [0,2,1,1,1,1,0,0,0,1,1,1,1,2,0,0],  # arch closes into stem
+        [0,2,1,1,1,1,0,3,0,1,1,1,1,2,0,0],  # stem
+        [0,2,1,1,1,1,1,1,1,1,1,1,1,2,0,0],  # gap
+        [0,2,1,1,1,1,0,0,0,1,1,1,1,2,0,0],  # dot top
+        [0,2,1,1,1,1,0,3,0,1,1,1,1,2,0,0],  # dot centre
+        [0,2,1,1,1,1,0,0,0,1,1,1,1,2,0,0],  # dot bottom
+        [0,2,1,1,1,1,1,1,1,1,1,1,1,2,0,0],
+        [0,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    ]
+    size = 16 * scale
+    img = Image.new('RGB', (size, size))
+    px  = img.load()
+    for y, row in enumerate(MAP):
+        for x, c in enumerate(row):
+            color = PALETTE[c]
+            for dy in range(scale):
+                for dx in range(scale):
+                    px[x * scale + dx, y * scale + dy] = color
+    img.save(out_path)
+    return out_path
+
+
+def _add_textured_box(mesh_name, x0, y0, z0, x1, y1, z1, tex_path):
+    """Box with a UV-mapped texture on all 6 faces (full [0,1]² per face).
+
+    The front face (-Y, camera-side) gets vertex order chosen so the
+    texture appears right-side-up when the camera is at Y≈-30 looking +Y.
+    UV V=0 = top of the PIL image; V=1 = bottom — opposite of the Blender
+    default but matching the WF/textile-rs VRAM convention where row 0 is
+    the image top.
+    """
+    import bmesh
+
+    mat = bpy.data.materials.new(name=f'{mesh_name}_mat')
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    bsdf  = nodes['Principled BSDF']
+    tex   = nodes.new('ShaderNodeTexImage')
+    tex.image = bpy.data.images.load(tex_path)
+    mat.node_tree.links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
+
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new('UVMap')
+
+    v = [
+        bm.verts.new((x0, y0, z0)),  # 0
+        bm.verts.new((x1, y0, z0)),  # 1
+        bm.verts.new((x1, y1, z0)),  # 2
+        bm.verts.new((x0, y1, z0)),  # 3
+        bm.verts.new((x0, y0, z1)),  # 4
+        bm.verts.new((x1, y0, z1)),  # 5
+        bm.verts.new((x1, y1, z1)),  # 6
+        bm.verts.new((x0, y1, z1)),  # 7
+    ]
+
+    # UV corners per face: (bottom-left, bottom-right, top-right, top-left)
+    # viewed from outside, with V=0=image-top / V=1=image-bottom (WF VRAM convention).
+    # Each face lists (vert, uv) pairs.
+    face_defs = [
+        # front -Y (camera-side): CCW from -Y; bl→br→tr→tl as seen by camera
+        ([v[0], v[1], v[5], v[4]], [(0,1),(1,1),(1,0),(0,0)]),
+        # back +Y: CCW from +Y
+        ([v[2], v[3], v[7], v[6]], [(0,1),(1,1),(1,0),(0,0)]),
+        # top +Z: CCW from +Z (camera looks along +Y, so "near" = -Y edge)
+        ([v[4], v[5], v[6], v[7]], [(0,1),(1,1),(1,0),(0,0)]),
+        # bottom -Z: CCW from -Z
+        ([v[3], v[2], v[1], v[0]], [(0,1),(1,1),(1,0),(0,0)]),
+        # left -X: CCW from -X
+        ([v[3], v[0], v[4], v[7]], [(0,1),(1,1),(1,0),(0,0)]),
+        # right +X: CCW from +X
+        ([v[1], v[2], v[6], v[5]], [(0,1),(1,1),(1,0),(0,0)]),
+    ]
+
+    for verts, uvs in face_defs:
+        f = bm.faces.new(verts)
+        f.material_index = 0
+        for loop, uv_coord in zip(f.loops, uvs):
+            loop[uv].uv = uv_coord
+
+    mesh = bpy.data.meshes.new(mesh_name)
+    bm.to_mesh(mesh)
+    bm.free()
+    mesh.materials.append(mat)
+
+    obj = bpy.data.objects.new(mesh_name, mesh)
+    bpy.context.collection.objects.link(obj)
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.select_all(action='DESELECT')
+    obj.select_set(True)
+    return obj
+
+
 def _make_grid_tile_tga(out_path, width=256, height=32, cells_x=64, cells_y=8,
                          line_px=1):
     """Pre-tiled grid texture (one image, no mesh subdivision needed):
@@ -328,9 +456,9 @@ ground_obj['wf_Model Type'] = 'Mesh'
 # Each ? block is ONE Generator actor: solid visible mesh + 3-state self-detect
 # Forth script + per-actor activation mailbox. The block IS the generator.
 # See docs/plans/2026-05-19-smb-block-generator-coin.md.
-mat_qblock = make_mat('smb_qblock', (0.82, 0.50, 0.12))  # orange-brown (NOT gold)
 mat_coin   = make_mat('smb_coin',   (1.0,  0.84, 0.0))   # gold #FFD600
 BSIZE = T / 2  # half-side of a 1-tile block
+qblock_tex = _make_qblock_tga(os.path.join(SCRIPT_DIR, 'qblock_tex.tga'))
 COIN_R, COIN_T = 0.3, 0.2   # Y must be ≥ ~0.2 (40 cm) to render at all from the
                              # side-camera (Y=-20) — 0.04 was below the renderer's
                              # camera-depth threshold. See docs/level-design-
@@ -420,10 +548,10 @@ def _make_coin_template():
 _make_coin_template()
 
 for i, bx in enumerate(QBLOCK_XS):
-    blk = add_box(f'qblock_{i:02d}',
-                  bx - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
-                  bx + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
-                  mat_qblock)
+    blk = _add_textured_box(f'qblock_{i:02d}',
+                             bx - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                             bx + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
+                             qblock_tex)
     attach_schema(blk, 'generator')
     blk['wf_Mobility']           = 'Anchored'
     blk['wf_Model Type']         = 'Mesh'
