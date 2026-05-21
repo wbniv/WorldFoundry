@@ -94,6 +94,29 @@ def test_lowercase_marker_recognized(rendered_html: str) -> None:
     assert "Lowercase marker" in notes[1]
 
 
+def test_bare_gt_continues_alert(rendered_html: str) -> None:
+    # A bare `>` (or `> `) on its own line is an empty blockquote continuation:
+    # it must NOT close the alert div. Regression for 2026-05-19 housekeeping
+    # report — a `[!TIP]` callout with paragraph breaks rendered the body lines
+    # *outside* the alert because the parser closed the blockquote on `>`.
+    tips = re.findall(
+        r'<div class="alert alert-tip">(.*?)</div>',
+        rendered_html,
+        re.DOTALL,
+    )
+    multi_tip = next(
+        (t for t in tips if "Multi-paragraph tip" in t), None
+    )
+    assert multi_tip is not None, "multi-paragraph tip alert not found"
+    # Every body line from the fixture must be inside the alert div.
+    assert "First body paragraph after a bare" in multi_tip
+    assert "Second body paragraph" in multi_tip
+    assert "all of these must stay inside the alert div" in multi_tip
+    # No stray `>` text should leak as a literal paragraph.
+    assert "<p>&gt;</p>" not in rendered_html
+    assert "<p>></p>" not in rendered_html
+
+
 def test_unknown_marker_falls_back_to_blockquote(rendered_html: str) -> None:
     # [!BOGUS] should appear inside a plain blockquote (preserve marker text)
     assert "[!BOGUS]" in rendered_html
