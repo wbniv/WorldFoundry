@@ -107,7 +107,11 @@ Generato::update()
 			zRandomDisplacement = Scalar::Random( -zRandomDisplacement, zRandomDisplacement );
 
 		Vector3 displacement( xRandomDisplacement, yRandomDisplacement, zRandomDisplacement );
-		Vector3 pos = _physicalAttributes.GetColSpace().GetCenter( currentPos() ) + displacement;
+		// Spawn at the XY centre but the TOP of the colspace so objects emerge
+		// above the generator body (e.g. coins pop out of a ?-block top).
+		Vector3 center = _physicalAttributes.GetColSpace().GetCenter( currentPos() );
+		Scalar  topZ   = _physicalAttributes.GetColSpace().UnExpMax( currentPos() ).Z();
+		Vector3 pos = Vector3( center.X(), center.Y(), topZ ) + displacement;
 
 		// generate an object
 		std::fprintf(stderr, "Generato::FIRING obj=%d spawn=(%.2f,%.2f,%.2f) vel=(%.2f,%.2f,%.2f)\n",

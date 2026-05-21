@@ -52,16 +52,10 @@ def main() -> int:
                             stdout=log_fp, stderr=subprocess.STDOUT)
     print(f"launched wf_game pid={proc.pid}")
 
-    ACTOR_RE = re.compile(r"^actor idx=(\d+) mesh=(\S+)")
-
-    def find_idx(meshes: set[str]) -> dict[str, int]:
-        out: dict[str, int] = {}
-        if LOG.exists():
-            for line in LOG.read_text(errors="replace").splitlines():
-                m = ACTOR_RE.match(line)
-                if m and m.group(2) in meshes:
-                    out[m.group(2)] = int(m.group(1))
-        return out
+    # qblock_00 is stable at actor idx=13 in smb_w1_1-standalone.iff.
+    # (DO_TEST_CODE=0 in current build so --debug-print-actors is compiled out;
+    # verified from repro log where actor idx=13 mesh=qblock_00.iff)
+    QBLOCK_00_IDX = 13
 
     cli = None
     try:
@@ -69,13 +63,7 @@ def main() -> int:
         print(f"bridge connected on {PORT}")
         time.sleep(1.5)
 
-        blocks = find_idx({"qblock_00.iff"})
-        print(f"blocks={blocks}")
-        if not blocks:
-            print("!! qblock_00.iff not found in actor log")
-            return 1
-
-        bidx = blocks["qblock_00.iff"]
+        bidx = QBLOCK_00_IDX
         print(f"targeting block idx={bidx}")
 
         # pre-bump screenshot
@@ -96,15 +84,19 @@ def main() -> int:
         # fires even before the Forth script tick runs (same approach as repro).
         cli.send({"op": "set_mailbox",
                   "idx": bidx, "mailbox": MB_ACTIVATE, "value": 1})
-        time.sleep(0.1)
 
-        # Capture coin arc over ~1.5s (TTL), 0.25s intervals
-        for i, label in enumerate(["01_spawn", "02_rise", "03_apex",
-                                    "04_fall", "05_fall2", "06_ttl_expire"]):
-            time.sleep(0.25)
+        # Coin spawns at Z=7.50 (block top) with vel=(0,0,8), gravity=-12.
+        # At ~1 fps dev machine, spawn+physics happen in one game tick (dt≈1s).
+        # First rendered frame: Z = 7.5 + 8*1 - 0.5*12*1² = 9.5 m — above the block.
+        # TTL=1.5 game-s; coin is despawned on the SECOND game tick (t≈2s real-time).
+        # Wait 1.0 s for the first full tick, then grab 3 shots in the 1-2 s window.
+        for delay, label in [(1.0, "01_above_block"),
+                              (0.3, "02_still_visible"),
+                              (0.3, "03_near_ttl")]:
+            time.sleep(delay)
             cli.send({"op": "screenshot",
                       "filename": str(args.out_dir / f"{label}.png")})
-            time.sleep(0.1)
+            time.sleep(0.15)
             print(f"  captured {label}")
             if proc.poll() is not None:
                 print(f"!! engine exited early: returncode={proc.returncode}")

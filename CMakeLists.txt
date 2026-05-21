@@ -890,4 +890,13 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     # Link the engine (host-GL embed via SetHostGLContext + StepFrame) and
     # wfcrdt (M4 read-only Y.Doc; pulls in libyrs.a from the editor build).
     target_link_libraries(wf_edit PRIVATE wfengine wfcrdt glfw GL)
+
+    # SpawnActor runtime-path confirmation: loads snowgoons, finds the first
+    # valid template, spawns it, checks the result. Confirms the Jolt
+    # position-sync fix (commit 0adf1d4) works end-to-end. Needs GL + DISPLAY.
+    add_test(NAME wf_edit_spawn_confirm
+        COMMAND sh -c "WF_EDIT_SPAWN_CONFIRM_TEST=1 $<TARGET_FILE:wf_edit> --frames 5 --level=${WF_TEST_SNOW_LEVEL} 2>&1 | tee /dev/stderr | grep -q '\\[spawn-test\\] PASS'"
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    set_tests_properties(wf_edit_spawn_confirm
+        PROPERTIES LABELS "gl" ENVIRONMENT "DISPLAY=:0")
 endif()

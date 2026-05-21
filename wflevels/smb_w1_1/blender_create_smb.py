@@ -8,7 +8,7 @@ Super Mario Bros. W1-1 first-pass validation scene (brief §Verification steps 1
   - Goomba placeholder (brown mushroom, static)
   - Koopa Troopa placeholder (green shell, static)
   - Flagpole at level end (grey pole + green flag)
-  - Side-scrolling camera (Y=-20, looking in +Y at X-Z gameplay plane)
+  - Side-scrolling camera (Y=-30, looking in +Y at X-Z gameplay plane)
 
 Geometry: T = 1.5 m per NES tile. Ground surface Z=0. Mario centre Z=T when standing.
 ? blocks centre Z = 4*T + T/2 (4 tiles above ground, block centred in its tile).
@@ -61,10 +61,10 @@ GROUND_Y  = T                             # half-depth of ground slab in Y
 
 SCENE_MID_X = (GROUND_X0 + GROUND_X1) / 2
 
-# Camera: fixed side-view, Y=-20, looking toward +Y at Mario's spawn position.
+# Camera: fixed side-view, Y=-30, looking toward +Y at Mario's spawn position.
 # SCENE_MID_X (33.75) is the level midpoint, but the player starts at MARIO_SPAWN_X
 # (4.5). Centering on MARIO_SPAWN_X keeps Mario in frame at game start.
-CAM_Y = -20.0
+CAM_Y = -30.0
 CAMSHOT_POS = (MARIO_SPAWN_X, CAM_Y, MARIO_Z + 3.0)
 LOOKAT_POS  = (MARIO_SPAWN_X, 0.0,   MARIO_Z)
 
@@ -733,12 +733,12 @@ if actboxor:
 # ── 12. Room bbox ─────────────────────────────────────────────────────────────
 # Absolute extremes of all actor centres:
 #   X: GROUND_X0 ≈ -3   ..  FLAGPOLE_X+7.5 ≈ +70.5
-#   Y: camera at Y=-20, light at Y≈-12       → [-22, +5]
+#   Y: camera at Y=-30, light at Y≈-12       → [-32, +5]
 #   Z: ground bottom -T ≈ -1.5, pole top 15  → [-3, +18]
 # Room placed at (SCENE_MID_X, 0, 5); bbox is relative to that centre.
 ROOM_CENTRE = (SCENE_MID_X, 0.0, 5.0)
 RX0, RX1 = -100.0,  100.0
-RY0, RY1 =  -30.0,   10.0
+RY0, RY1 =  -35.0,   10.0
 RZ0, RZ1 =  -15.0,   20.0
 ROOM_BBOX_REL = (RX0, RY0, RZ0, RX1, RY1, RZ1)
 
