@@ -310,6 +310,10 @@ for line in lines:
             c = re.sub(r'<a\s[^>]*></a>', save_anchor, c)
             c = re.sub(r'<br\s*/?>', save_anchor, c)
             c = re.sub(r'<pre[^>]*>.*?</pre>', save_anchor, c)
+            # Preserve <img> tags (incl. base64 data URIs from the image-inlining
+            # pass above) so images in table cells render instead of being escaped
+            # to literal text. base64 has no '>' so [^>]* is safe.
+            c = re.sub(r'<img\s[^>]*>', save_anchor, c)
             # Handle double-backtick spans (can contain single backticks) before single-backtick spans
             parts = re.split(r'(\`\`.+?\`\`|\`[^\`]+\`)', c)
             result = []
