@@ -53,4 +53,5 @@ Generato::FIRING obj=12 spawn=(12.00,0.00,7.50) vel=(0.00,0.00,8.00)
 
 Build clean (`task build`). Log shows spawn=(12.00,0.00,7.50). Screenshot in
 [gold_coin_spawn_proof.png](../../tests/screenshots/gold_coin_spawn_proof.png) shows
-coin above block after first physics tick.
+coin (smaller bright-yellow square, annotated red box) above block at Z≈9.5 m after
+one physics tick (dt≈1 s on dev machine; coin arc: Z = 7.5 + 8t − 6t²).

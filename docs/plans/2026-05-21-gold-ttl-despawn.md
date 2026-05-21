@@ -32,6 +32,8 @@ No OAD field for TTL per `feedback_no_new_oas_fields_premerge`; hardcoded `kGold
 
 ## Screenshot
 
-Gold coin spawned above the `?` block (qblock_00), arcing upward — Mario visible on platform:
+Gold coin spawned above the `?` block (qblock_00), arcing upward — Mario visible on platform.
+Red box and inset mark the coin (smaller bright-yellow square above the block at Z≈9.5 m after
+one physics tick). Camera pulled back to Y=−30 (was Y=−20) to show full vertical range:
 
 ![coin spawn proof](../../tests/screenshots/gold_coin_spawn_proof.png)
