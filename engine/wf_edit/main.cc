@@ -66,6 +66,12 @@ struct EditorCtx {
     std::string save_path;
     std::string toast;
     int         toast_frames = 0;
+
+    // Set by an Outliner add/delete: the bridge's positional content[i]↔engine
+    // i+1 map is now stale (the Doc structure changed but the live engine didn't),
+    // so field→viewport propagation is suspended until reload. The Doc + save
+    // stay correct. Proper live re-sync is a follow-up (plan D3/D4).
+    bool structural_dirty = false;
 };
 
 // File→Save (and Ctrl+S / headless WF_EDIT_SAVE_UI): patch the parse JSON with
@@ -109,6 +115,33 @@ void SaveAndCompile(EditorCtx* c)
     if (k < last.size() && last[k] == ' ') ++k;
     c->toast = ok ? ("compiled: " + last.substr(k)) : "compile FAILED — see stderr";
     c->toast_frames = 240;
+}
+
+// After an Outliner add/delete: re-read the actor list from the Doc, clamp the
+// selection, force the property cache to re-resolve, and mark the bridge map
+// stale (suspends field→viewport propagation until reload — see structural_dirty).
+void RefreshAfterStructural(EditorCtx* c)
+{
+    c->actor_names = wfedit::ReadActorNames(*c->doc);
+    if (c->selected >= static_cast<int>(c->actor_names.size()))
+        c->selected = static_cast<int>(c->actor_names.size()) - 1;
+    c->fields_for = -1;          // force Properties to re-resolve on the next frame
+    c->structural_dirty = true;
+    c->toast = "structural edit - save persists it; reload to resume live preview";
+    c->toast_frames = 300;
+}
+
+void DoDelete(EditorCtx* c)
+{
+    if (!c->doc || c->selected < 0) return;
+    if (wfedit::DeleteActor(*c->doc, c->selected)) RefreshAfterStructural(c);
+}
+
+void DoDuplicate(EditorCtx* c)
+{
+    if (!c->doc || c->selected < 0) return;
+    const int ni = wfedit::DuplicateActor(*c->doc, c->selected);
+    if (ni >= 0) { RefreshAfterStructural(c); c->selected = ni; }   // select the copy
 }
 
 // Dump the composited back buffer (engine render + ImGui overlay) to a P6 PPM.
@@ -175,6 +208,17 @@ bool editor_frame(void* p)
             DoSave(c);
         }
     }
+    // Outliner-UI screenshot proof: WF_EDIT_STRUCT_UI=dup|del drives a structural
+    // edit via the UI path once (sets structural_dirty + the toast/hint), so the
+    // screenshot shows the post-edit Outliner.
+    static bool s_struct_ui = false;
+    if (!s_struct_ui && c->doc && c->selected >= 0) {
+        if (const char* p = std::getenv("WF_EDIT_STRUCT_UI"); p && *p) {
+            s_struct_ui = true;
+            if (std::string(p) == "dup") DoDuplicate(c);
+            else if (std::string(p) == "del") DoDelete(c);
+        }
+    }
     // M4 headless: WF_EDIT_COMPILE drives Save + Compile once (saves to the
     // level's source path, then runs the .lev→.iff pipeline) for the gate.
     static bool s_compile_ui = false;
@@ -222,14 +266,27 @@ bool editor_frame(void* p)
         ImGui::EndMainMenuBar();
     }
 
-    // Ctrl+S → save (when no text widget is capturing the keypress).
-    if (!ImGui::GetIO().WantTextInput &&
-        ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S, false))
+    // Keyboard shortcuts (when no text widget is capturing the keypress).
+    const bool typing = ImGui::GetIO().WantTextInput;
+    if (!typing && ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S, false))
         DoSave(c);
+    if (!typing && c->selected >= 0 && ImGui::IsKeyPressed(ImGuiKey_Delete, false))
+        DoDelete(c);
 
     ImGui::Begin("Outliner");
     ImGui::Text("%s: %zu actors", c->level_name.c_str(), c->actor_names.size());
     ImGui::TextDisabled("(read from the Y.Doc)");
+    // Add/delete actors (structural; persists on save). Duplicate clones the
+    // selected actor; Delete removes it (or the Del key).
+    ImGui::BeginDisabled(c->selected < 0);
+    if (ImGui::SmallButton("Duplicate")) DoDuplicate(c);
+    ImGui::SameLine();
+    if (ImGui::SmallButton("Delete"))    DoDelete(c);
+    ImGui::EndDisabled();
+    if (c->structural_dirty) {
+        ImGui::SameLine();
+        ImGui::TextDisabled("(reload for live preview)");
+    }
     ImGui::Separator();
     for (int i = 0; i < static_cast<int>(c->actor_names.size()); ++i) {
         if (ImGui::Selectable(c->actor_names[i].c_str(), c->selected == i))
@@ -259,9 +316,13 @@ bool editor_frame(void* p)
         if (c->doc) {
             std::vector<int> committed;
             wfedit::RenderProperties(*c->doc, c->selected, c->props, &committed);
-            for (int ci : committed)
-                if (ci >= 0 && ci < static_cast<int>(c->props.size()))
-                    wfedit::PropagateToEngine(c->selected, c->props[ci]);
+            // Suspend field→viewport propagation after a structural edit — the
+            // positional content[i]↔engine map is stale (D3). Edits still commit
+            // to the Doc and save correctly; only the live preview pauses.
+            if (!c->structural_dirty)
+                for (int ci : committed)
+                    if (ci >= 0 && ci < static_cast<int>(c->props.size()))
+                        wfedit::PropagateToEngine(c->selected, c->props[ci]);
         }
         int matched = 0;
         for (const auto& p : c->props) matched += p.matched;
@@ -395,11 +456,38 @@ int main(int argc, char** argv)
         }
     }
 
-    // 0c. Headless save (env-gated): WF_EDIT_SAVE=<path> patches the retained
-    //     levtree-parse JSON with the Doc (incl. any WF_EDIT_TEST_SET edits
-    //     above), `levtree print`s it to <path>, and exits — no GL. The headless
-    //     mirror of File→Save (M3); the round-trip identity gate (M1) runs this
-    //     with no edits. CPU-only; runs before any window/engine init.
+    // 0b2. Headless structural-edit proof (env-gated): WF_EDIT_STRUCT_TEST=
+    //      "dup=N;del=M;…" duplicates / deletes actors in the Doc `content`
+    //      before save — the lossless schema's payoff (changing the actor count,
+    //      not just field values). Combined with WF_EDIT_SAVE below it proves the
+    //      structural change persists. CPU-only, pre-GL.
+    if (const char* spec = std::getenv("WF_EDIT_STRUCT_TEST"); spec && *spec) {
+        std::string all = spec;
+        for (std::size_t pos = 0; pos < all.size() + 1; ) {
+            std::size_t semi = all.find(';', pos);
+            std::string s = all.substr(pos, semi == std::string::npos ? std::string::npos : semi - pos);
+            pos = (semi == std::string::npos) ? all.size() + 1 : semi + 1;
+            auto eq = s.find('=');
+            if (eq == std::string::npos) continue;
+            std::string op = s.substr(0, eq);
+            int idx = std::atoi(s.substr(eq + 1).c_str());
+            const int before = static_cast<int>(wfedit::ReadActorNames(doc).size());
+            if (op == "del") {
+                bool ok = wfedit::DeleteActor(doc, idx);
+                std::fprintf(stderr, "[struct] del=%d  %d -> %zu actors (%s)\n",
+                             idx, before, wfedit::ReadActorNames(doc).size(), ok ? "ok" : "FAIL");
+            } else if (op == "dup") {
+                int ni = wfedit::DuplicateActor(doc, idx);
+                std::fprintf(stderr, "[struct] dup=%d  %d -> %zu actors (new idx %d)\n",
+                             idx, before, wfedit::ReadActorNames(doc).size(), ni);
+            }
+        }
+    }
+
+    // 0c. Headless save (env-gated): WF_EDIT_SAVE=<path> walks the Doc → canonical
+    //     `.lev` (incl. any WF_EDIT_TEST_SET / WF_EDIT_STRUCT_TEST edits above) and
+    //     exits — no GL. The headless mirror of File→Save (M3); the round-trip
+    //     identity gate runs this with no edits. CPU-only; pre-window/engine init.
     if (const char* save_path = std::getenv("WF_EDIT_SAVE"); save_path && *save_path) {
         const bool ok = wfedit::SaveDocToLev(doc, save_path);
         std::fprintf(stderr, "wf-edit: WF_EDIT_SAVE %s -> %s\n", save_path, ok ? "ok" : "FAIL");

@@ -435,4 +435,54 @@ bool WriteFieldLeaf(wfcrdt::Doc& doc, int actor_index, int child_index,
     return false;   // no such leaf — caller picks a leaf the field actually has
 }
 
+namespace {
+// Deep-copy a Doc chunk map into a wfcrdt::Input so it can be re-pushed (the
+// inverse of the readers) — used to duplicate an actor.
+wfcrdt::Input DocChunkToInput(const wfcrdt::Map& chunk)
+{
+    wfcrdt::Input node = wfcrdt::Input::map();
+    node.set("chunk_type", wfcrdt::Input::str(chunk.get("chunk_type").readString().value_or("")));
+    wfcrdt::Input items = wfcrdt::Input::array();
+    wfcrdt::Array its = chunk.get("items").asArray();
+    if (its.valid()) {
+        const int n = its.len();
+        for (int i = 0; i < n; ++i) {
+            wfcrdt::Map m = its.get(i).asMap();
+            if (!m.valid()) continue;
+            if (IsChunkMap(m)) { items.push(DocChunkToInput(m)); continue; }
+            wfcrdt::Input lit = wfcrdt::Input::map();
+            const std::string kind = m.get("kind").readString().value_or("");
+            lit.set("kind", wfcrdt::Input::str(kind));
+            if (kind == "str")          lit.set("value", wfcrdt::Input::str(m.get("value").readString().value_or("")));
+            else if (kind == "num")     lit.set("text",  wfcrdt::Input::str(m.get("text").readString().value_or("")));
+            else if (kind == "four_cc") lit.set("id",    wfcrdt::Input::str(m.get("id").readString().value_or("")));
+            items.push(std::move(lit));
+        }
+    }
+    node.set("items", std::move(items));
+    return node;
+}
+}  // namespace
+
+bool DeleteActor(wfcrdt::Doc& doc, int index)
+{
+    auto txn = doc.begin();
+    auto content = txn.array("content");
+    if (index < 0 || index >= content.len()) return false;
+    content.remove(index);
+    return true;
+}
+
+int DuplicateActor(wfcrdt::Doc& doc, int index)
+{
+    auto txn = doc.begin();
+    auto content = txn.array("content");
+    if (index < 0 || index >= content.len()) return -1;
+    wfcrdt::Map src = content.get(index).asMap();
+    if (!src.valid()) return -1;
+    wfcrdt::Input clone = DocChunkToInput(src);
+    content.push(clone);             // append at end
+    return content.len() - 1;        // the new actor's index
+}
+
 }  // namespace wfedit

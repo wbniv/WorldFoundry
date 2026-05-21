@@ -212,6 +212,7 @@ public:
     void insertRange(int index, const long long* values, int count);
     void insert(int index, const Input& value);   // nested map/array
     void push(const Input& value);                 // append at end
+    void remove(int index, int count = 1);         // erase count elements at index
 
     // False for the view returned by Output::asArray() on a non-array value.
     bool valid() const { return _branch != nullptr; }

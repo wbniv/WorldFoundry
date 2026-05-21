@@ -310,6 +310,14 @@ void Array::insert(int index, const Input& value) {
     put_in_array(_branch, _txn, index, value);
 }
 
+void Array::remove(int index, int count) {
+    // yffi panics if [index, index+count) escapes the array bounds; guard.
+    if (count <= 0) return;
+    const int n = yarray_len(_branch);
+    if (index < 0 || index + count > n) return;
+    yarray_remove_range(_branch, _txn, index, count);
+}
+
 void Array::push(const Input& value) {
     insert(len(), value);
 }

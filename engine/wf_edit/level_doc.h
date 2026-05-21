@@ -30,6 +30,14 @@ bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc);
 // inverse of `levtree parse`). Used by level_save's SaveDocToLev.
 bool RunLevtreePrint(const std::string& json, std::string& out_lev);
 
+// Structural editing (the lossless v2 schema makes these save faithfully). Both
+// edit the Doc `content` array; the viewport reflects them on reload (live
+// engine sync is a follow-up). Delete removes content[index]; Duplicate clones
+// content[index]'s chunk subtree, appends it, and returns the new index (−1 on
+// failure).
+bool DeleteActor(wfcrdt::Doc& doc, int index);
+int  DuplicateActor(wfcrdt::Doc& doc, int index);
+
 // Run `build_level_binary.sh <level_name>` → `.iff` (the 5-stage .lev→.iff
 // compile). `out_log` gets the script's stdout+stderr. Returns true on exit 0.
 bool RunBuildLevel(const std::string& level_name, std::string& out_log);
