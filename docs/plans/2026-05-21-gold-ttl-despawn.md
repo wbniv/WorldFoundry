@@ -30,10 +30,14 @@ No OAD field for TTL per `feedback_no_new_oas_fields_premerge`; hardcoded `kGold
 - [x] Test: generator fires (coin actors 21-29 created), no crash on spawn; coin visible at spawn point; TTL code verified by inspection (at ~1fps on dev machine physics doesn't step between screenshot intervals, so despawn can't be captured via screenshots but the code path is present and code-reviewed)
 - [x] Update parent plan status — see [2026-05-19-smb-coin-fix-and-template.md](2026-05-19-smb-coin-fix-and-template.md) Phase 2 marked Done
 
-## Screenshot
+## Screenshots
 
-Gold coin spawned above the `?` block (qblock_00), arcing upward — Mario visible on platform.
-Red box and inset mark the coin (smaller bright-yellow square above the block at Z≈9.5 m after
-one physics tick). Camera pulled back to Y=−30 (was Y=−20) to show full vertical range:
+Scene before trigger — camera at Y=−30 shows all three `?`-blocks and Mario on the platform
+(see [2026-05-21-camera-pullback.md](2026-05-21-camera-pullback.md)):
 
-![coin spawn proof](../../tests/screenshots/gold_coin_spawn_proof.png)
+![scene overview pre-trigger](../../tests/screenshots/smb_camera_pullback.png)
+
+After generator fires — red box and inset mark the gold coin (smaller bright-yellow square)
+above qblock_00 at Z≈9.5 m after one physics tick; coin arc: Z = 7.5 + 8t − 6t²:
+
+![coin above block annotated](../../tests/screenshots/gold_coin_spawn_proof.png)

@@ -1,6 +1,6 @@
 # Generator — spawn at colspace top, not center
 
-**Status:** Done — committed (pending commit in this session) 2026-05-21  
+**Status:** Done — committed `0aecb44` 2026-05-21  
 **Context:** Follow-on fix discovered while verifying [2026-05-21-gold-ttl-despawn.md](2026-05-21-gold-ttl-despawn.md)
 
 ## Problem
@@ -51,7 +51,14 @@ Generato::FIRING obj=12 spawn=(12.00,0.00,7.50) vel=(0.00,0.00,8.00)
 
 ## Verification
 
-Build clean (`task build`). Log shows spawn=(12.00,0.00,7.50). Screenshot in
-[gold_coin_spawn_proof.png](../../tests/screenshots/gold_coin_spawn_proof.png) shows
-coin (smaller bright-yellow square, annotated red box) above block at Z≈9.5 m after
-one physics tick (dt≈1 s on dev machine; coin arc: Z = 7.5 + 8t − 6t²).
+Build clean (`task build`). Log shows spawn=(12.00,0.00,7.50).
+
+Scene overview (camera pulled back to Y=−30 per [2026-05-21-camera-pullback.md](2026-05-21-camera-pullback.md);
+all three `?`-blocks visible, coin arc fits in frame):
+
+![scene with all three blocks](../../tests/screenshots/smb_camera_pullback.png)
+
+Coin (annotated red box — smaller bright-yellow square above qblock_00) at Z≈9.5 m
+after one physics tick (dt≈1 s on dev machine; arc: Z = 7.5 + 8t − 6t²):
+
+![coin above block](../../tests/screenshots/gold_coin_spawn_proof.png)
