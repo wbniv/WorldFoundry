@@ -7,7 +7,7 @@
 #define OAD_H
 
 #define FIXED16(n) ( (short)(n * 256) )
-#define FIXED32(n) ( (long)(n * 65536) )
+#define FIXED32(n) ( (int32)(n * 65536) )
 #define RADIOBUTTONNAMELEN 10
 
 

@@ -1,7 +1,7 @@
 # Plan — Runtime `long` audit (PSX/x86-32 → LP64 width hardening)
 
 **Date:** 2026-05-20
-**Status:** **Implementing 2026-05-20 — NOT yet committed (Will reviewing diffs first).** F1 (pigtool.h LP64 guard), F2 (oad.h `_oadHeader`), F3 (mailbox-index API — all 5 overrides **+** the engine callers `wfmut.cpp`/`scripting_lua.cc` **+** members `level.hp`/`generator.hp`/`tool.hp`, caught by the full sweep), F4 (movecam locals), F5 (color.hpi), F6 (collision payload `uintptr_t` + interp fixes). **Flagged suspects also fixed (pass 2):** `rendcrow.cc:155` (`sizeof(long)`→`int32`), `anim/anim.cc` (`long*` copy), `rendobj3.hp`×2, `pixelmap.cc`, `sjoystic.h` (button masks), `lmalloc`/`realmalloc` `_state`, `commonblock.hpi` (`uintptr_t`), `anim/path.cc`, `main.cc`. Reclassified-permitted: `memory.hp:98` (array-new cookie width — correct), `SYS_ULONG`/`SYS_LARGEINT`, `camera.cc`. Comprehensive per-occurrence record: [review doc](../investigations/2026-05-20-long-audit-review.md). Build verifying. Pending: F7 (wfprim — own follow-up), BUGS.md, runtime-verify, commit.
+**Status:** **F1–F6 committed `9375f3f` (2026-05-20); review follow-ups in working tree (build re-verifying).** F1 (pigtool.h LP64 guard), F2 (oad.h `_oadHeader`), F3 (mailbox-index API — all 5 overrides **+** the engine callers `wfmut.cpp`/`scripting_lua.cc` **+** members `level.hp`/`generator.hp`/`tool.hp`, caught by the full sweep), F4 (movecam locals), F5 (color.hpi), F6 (collision payload `uintptr_t` + interp fixes). **Flagged suspects also fixed (pass 2):** `rendcrow.cc:155` (`sizeof(long)`→`int32`), `anim/anim.cc` (`long*` copy), `rendobj3.hp`×2, `pixelmap.cc`, `sjoystic.h` (button masks), `lmalloc`/`realmalloc` `_state`, `anim/path.cc`, `main.cc`. Reclassified-permitted: `commonblock.hpi:32` (`(long)ptr & 3` alignment mask — `long` is pointer-width on all WF ABIs and the low 2 bits survive any width anyway; initially retyped to `uintptr_t`, reverted — not worth `<cstdint>` in a core header for zero behavioural gain), `memory.hp:98` (array-new cookie width — correct), `SYS_ULONG`/`SYS_LARGEINT`, `camera.cc`. Comprehensive per-occurrence record: [review doc](../investigations/2026-05-20-long-audit-review.md). **Follow-up (2026-05-20 review):** F1 guard refined `__LINUX__`/`__ANDROID__` → `__LP64__` so **iOS** (LP64, was getting 64-bit `int32`) is covered + `pigtypes.h` harmonized; `rendcrow.cc` divisor → `sizeof(packedAssetID)`; FOURCC-type cleanup logged ([TODO.md § Engine Robustness](../../TODO.md)). Pending: F7 (wfprim — own follow-up), BUGS.md, runtime-verify, commit follow-ups.
 **Owner:** Claude (Will reviewing)
 **Branch:** `2026-new-level`
 
@@ -31,9 +31,9 @@ Most are **permitted** or **already-safe**; a small set are genuine bugs.
 ### Permitted / already-safe (leave alone)
 - **`scalar.cc`/`scalar.hpi` + `vector2.cc`/`vector3.cc`** — 64-bit intermediates for 16.16 fixed-point **multiply / divide / sqrt / dot** — *required*, not optional (audited below: [§ Fixed-point math intermediates](#fixed-point-math-64-bit-intermediates--audited)). Arguably clearer as `int64_t`; low-priority style, not in scope.
 - **`pigsys.cc`** — `sys_fseek(long off)` etc. match the C stdio `ftell`/`fseek` signatures. Correct interop.
-- **`pigtypes.h`** — `SYS_ULONG`/`SYS_LARGEINT` *are* `long` by definition; `SYS_INT32 signed long` only in the non-LP64 else-branch (the `__LINUX__`/`__ANDROID__` branch already uses `signed int`). Correct.
-- **`particle.cc`** — `long` only inside `/* … */` min/max comments.
-- **`oad.h` `FIXED32(n)` macro** — compile-time literal cast; harmless (could be `int32` for tidiness).
+- **`pigtypes.h`** — `SYS_ULONG`/`SYS_LARGEINT` *are* `long` by definition (correct, leave alone). **Correction (2026-05-20 review):** the original "`SYS_INT32 signed long` only in the *non-LP64* else-branch" claim was **wrong** — the branch was keyed on the *OS name* (`__LINUX__`/`__ANDROID__`), not the data model, so **iOS** (which defines `WF_TARGET_IOS`, not `__LINUX__`/`__ANDROID__`, and is **LP64** on arm64) fell into the `signed long` branch and got a **64-bit `int32`** — the exact bug F1/F2 fix for Linux. Refined to key off `__LP64__` (the thing that actually makes `long` 64-bit). See [§ Follow-up](#follow-up-2026-05-20-review--ios-lp64--rendcrow-element-type).
+- **`particle.cc`** — `long` only inside `/* … */` min/max range comments; **tidied to `(int32)`** (8 occurrences, comment-only — no build impact).
+- **`oad.h` `FIXED32(n)` macro** — **tidied to `(int32)`** (was `(long)`). Cosmetic only: the macro is **unused in compiled C++** (legacy 3DS-plugin / codegen macro; the `.oas` codegen inputs use the separate `.s`-defined `FIXED32`), so no behaviour or build impact.
 
 ---
 
@@ -55,13 +55,15 @@ The verified 64-bit sites are *all* mul/div/reciprocal/muldiv (or the sqrt/dot h
 
 **Adopted rule (the right form of Will's instinct):** a 64-bit intermediate is justified **iff** the operation's exact result can exceed 32 bits — **multiply, pre-shifted divide, sqrt, accumulated dot/cross**. Any 64-bit in an **add / sub / compare / storage** path is a bug → demote to `int32`. By this rule the math core is clean.
 
+Making the math's 64-bit intent *explicit* (bare `long` → `int64`) is a **clarity-only follow-up, deferred to [TODO](../../TODO.md) § Engine Robustness** (2026-05-20, per Will) — it's a behavioural no-op on LP64 and carries two open decisions (the 64-bit-typedef approach + whether the 32-bit value-API `long`s become `int32`).
+
 ---
 
 ## Fixes
 
 | # | Site | Change | Notes |
 |---|---|---|---|
-| F1 | **`oas/pigtool.h`** `SYS_INT32`/`SYS_UINT32` | Add the `__LINUX__`/`__ANDROID__` LP64 guard (use `signed int`/`unsigned int`), mirroring `pigtypes.h`; or `#include`/defer to `pigtypes.h`. | **Systemic root cause** — unguarded `signed long` makes `int32` 8 bytes in any Linux TU that pulls `pigtool.h` (via `oad.h`) before `pigtypes.h`; that's the measured `typeDescriptor` 1503-vs-1491 bloat (3× `int32` × +4). Dormant in the full engine build (include order), latent landmine otherwise. |
+| F1 | **`oas/pigtool.h`** `SYS_INT32`/`SYS_UINT32` | Guard the width with `#if defined(__LP64__)` → `signed int`/`unsigned int`, else `signed long`. **Initially committed (9375f3f) keyed on `__LINUX__`/`__ANDROID__`; refined 2026-05-20 to `__LP64__`** (data model, not OS name) so it also covers **iOS/macOS** (LP64) — see [§ Follow-up](#follow-up-2026-05-20-review--ios-lp64--rendcrow-element-type). Harmonized `pigtypes.h` to the same `__LP64__` form. | **Systemic root cause** — unguarded `signed long` makes `int32` 8 bytes in any LP64 TU that pulls `pigtool.h` (via `oad.h`) before `pigtypes.h`; that's the measured `typeDescriptor` 1503-vs-1491 bloat (3× `int32` × +4). Dormant in the full engine build (include order), latent landmine otherwise. |
 | F2 | **`oas/oad.h` `_oadHeader`** | `long chunkId/chunkSize/version` → `int32`/`uint32`. | Serialized 32-bit IFF header fields; the bug that bit the OAD reader. |
 | F3 | **Mailbox API** — `mailbox/mailbox.hp`, `game/mailbox.{hp,cc}`, `actor.cc` `ActorMailboxes` | `ReadMailbox(long)`/`WriteMailbox(long,…)` params, `long _mailboxBase`/`numberOfLocalMailboxes` → `int32`. | Mailbox **indices** (small ints ≤999). Touches a **virtual** interface — change base + every override consistently (`Mailboxes`, `MailboxesWithStorage`, `LevelMailboxes`, `GameMailboxes`, `ActorMailboxes`) + callers. |
 | F4 | **`game/movecam.cc`** | `long idxShot`/`shotIndex = …WholePart()` → `int32`. | Index locals. |
@@ -72,11 +74,39 @@ The verified 64-bit sites are *all* mul/div/reciprocal/muldiv (or the sqrt/dot h
 ### Deferred follow-up — collision payload by actor index (not pointer)
 Converting the `SPECIAL`/`COLLISION` message payload from a pointer to an **`int32` actor index** (sender posts `GetObjectIndex(&other)`; receivers `GetObject(idx)`) would retire all the `reinterpret_cast`/`uintptr_t` handling and the bug class with it, and matches how the **mailbox** path already exposes the collider (`COLLIDER_IDX` 3044 = `GetActorIndex()` → a `Scalar`, *because a 32-bit fixed-point mailbox can't hold a pointer*). **Tradeoff:** the pointer is a real optimization (direct deref vs a per-message `GetObject` lookup + bounds-check) on the hot collision path / embedded targets; the index is safer (bounds-checked, width-safe, no dangling) at a small lookup cost. Two clean channels today — **message-port = pointer (C++-internal), mailbox = index (script-facing)** — never cross. Lean: index, but it deserves a profile or a deliberate "safety > micro-opt" call, not a snap decision; its own plan.
 
+### Follow-up (2026-05-20 review) — iOS LP64 + rendcrow element type
+
+Two refinements after F1–F6 landed in `9375f3f`, both from Will's review.
+
+**1. The LP64 guard was keyed on the OS name, which silently excluded iOS.** F1 (and the pre-existing `pigtypes.h` guard) used `#if defined(__LINUX__) || defined(__ANDROID__)`. But [iOS is LP64 on arm64](https://developer.apple.com/documentation/xcode/writing-64-bit-arm-code-for-apple-platforms) and the iOS build defines `WF_TARGET_IOS` (not `__LINUX__`/`__ANDROID__` — see [`CMakeLists.txt:98`](../../CMakeLists.txt)), so it fell through to `signed long` and got a **64-bit `int32`** — exactly the bug F1/F2 fix for Linux, latent in the active iOS port (`2026-ios`). The width of `int32` is a function of the **data model, not the OS**, so both headers now key off `__LP64__` (which Clang/GCC define on every LP64 ABI):
+
+| Data model | Platforms | `long` | `__LP64__`? | `SYS_INT32` |
+|---|---|---|---|---|
+| LP64  | Linux x86-64, Android arm64, **iOS/macOS arm64** | 8 | defined | `signed int` ✓ |
+| ILP32 | PSX (MIPS), x86-32 | 4 | — | `signed long` (=32) ✓ |
+| LLP64 | Win64 (if ever) | 4 | — | `signed long` (=32) ✓ |
+
+Strictly better than the OS denylist: it fixes iOS, preempts macOS/Win64, and can't regress the legacy 32-bit targets (where `long`==32 either way). `pigtypes.h` and `oas/pigtool.h` both updated; the `__LINUX__`/`__ANDROID__` guards *elsewhere* (POSIX/GLX feature gates in `streams`, `hal`, `gfx/gl`, …) are a separate concern — those are correctly OS-keyed, and `gfx/display.hp` / `pigsys/pigsys.hp` already add `WF_TARGET_IOS` where iOS needs in.
+
+```diff
+ #ifndef	SYS_INT32
+-#if defined(__LINUX__) || defined(__ANDROID__)
++#if defined(__LP64__)
+ #define	SYS_INT32		signed int      // pigtypes.h + oas/pigtool.h, both files
+ #else
+ #define	SYS_INT32		signed long
+ #endif
+```
+
+**2. `rendcrow.cc` `sizeof(int32)` → `sizeof(packedAssetID)`.** F2-era cleanup retyped `_nTextures = chunkSize / sizeof(long)` to `sizeof(int32)`. The honest divisor is the **on-disk element type**: the `BMPL` chunk under `USE_ASSET_ID` is a packed array of [`packedAssetID`](../../wfsource/source/streams/asset.hp) (a `uint32`, 4 bytes — so byte-identical, but it says *what the bytes are*). Note `sizeof(_texture[0])` would be **wrong** — that's `Texture*` (8 bytes on LP64), which would halve the count; it only looked right on PSX/x86-32 because `sizeof(ptr)`==4 there, the same `long`==ptr coincidence this audit kills. (The branch is dead — `USE_ASSET_ID` is defined nowhere — so no behaviour change; this is a readability fix.)
+
+> **Root cause beyond this audit:** IFF chunk names aren't a first-class [FourCC](https://en.wikipedia.org/wiki/FourCC) type — `IFFTAG` yields a bare `uint32` and `ChunkID` (which wraps an `int32`) is unwrapped via `.ID()` at every `switch`, so element widths get hand-encoded as `sizeof(int32)`/`sizeof(packedAssetID)` instead of being intrinsic to the format. Logged as a cleanup item in [TODO.md § Engine Robustness](../../TODO.md).
+
 ---
 
-## Diff (applied — full `git diff` of every long-audit change; NOT committed)
+## Diff (full `git diff 9375f3f^` of every long-audit change; F1–F6 committed in `9375f3f`, follow-up deltas uncommitted)
 
-> `actor.cc` shows **only my audit hunks** (collision `@@ -1697`, mailbox `@@ -1858/-1875/-1885`); the in-flight SMB hunks (`@@ -521/-650/-786`) are deliberately excluded. `commonblock.hpi` is absent — reverted (reclassified permitted). Everything below is in the working tree only.
+> **Regenerated against the pre-audit baseline (`9375f3f^` = `d69bc13`), so it includes the 2026-05-20 follow-up refinements** — `pigtypes.h`/`pigtool.h` use `__LP64__` (not `__LINUX__`/`__ANDROID__`) and `rendcrow.cc` divides by `sizeof(packedAssetID)` (not `sizeof(int32)`); see [§ Follow-up](#follow-up-2026-05-20-review--ios-lp64--rendcrow-element-type) for why. F1–F6 are committed in `9375f3f`; the follow-up deltas are uncommitted working-tree changes. `actor.cc` shows **only my audit hunks** (collision `@@ -1697`, mailbox `@@ -1858/-1875/-1885`); the in-flight SMB hunks (`@@ -521/-650/-786`) are deliberately excluded. `commonblock.hpi` is absent — reverted (reclassified permitted).
 
 ```diff
 diff --git a/engine/mutation/wfmut.cpp b/engine/mutation/wfmut.cpp
@@ -635,19 +665,23 @@ index aa2a287..303c72d 100644
  
  /*============================================================================*/
 diff --git a/wfsource/source/oas/pigtool.h b/wfsource/source/oas/pigtool.h
-index 1ecc059..aaa3cab 100644
+index 1ecc059..9efab07 100644
 --- a/wfsource/source/oas/pigtool.h
 +++ b/wfsource/source/oas/pigtool.h
-@@ -29,11 +29,24 @@
+@@ -29,11 +29,28 @@
  #endif	/*!defined(SYS_UINT16)*/
  
  #ifndef	SYS_INT32
-+#if defined(__LINUX__) || defined(__ANDROID__)
-+// LP64: `long` is 8 bytes on x86-64 Linux/Android — use `int` so int32 stays
-+// 32 bits (mirrors pigtypes.h). PSX/x86-32 had long==32, which is why the
-+// original `long` worked there. Without this guard, any TU pulling pigtool.h
-+// (via oad.h) before pigtypes.h gets a 64-bit int32 — e.g. it bloated
-+// typeDescriptor by 12 bytes (3× int32 min/max/def), breaking .oad reads.
++#if defined(__LP64__)
++// LP64 (x86-64 Linux/Android, arm64 iOS/macOS): `long` is 8 bytes — use `int`
++// so int32 stays 32 bits (mirrors pigtypes.h). Key off the data model, not the
++// OS: __LP64__ is what actually makes `long` 64-bit, so this also covers iOS,
++// which defines WF_TARGET_IOS (not __LINUX__/__ANDROID__) and would otherwise
++// fall through to the `long` branch. PSX/x86-32 (ILP32) and Win64 (LLP64) have
++// long==32, which is why the original `long` worked there. Without this guard,
++// any TU pulling pigtool.h (via oad.h) before pigtypes.h gets a 64-bit int32 —
++// e.g. it bloated typeDescriptor by 12 bytes (3× int32 min/max/def), breaking
++// .oad reads.
 +#define	SYS_INT32		signed int
 +#else
  #define	SYS_INT32		signed long
@@ -655,7 +689,7 @@ index 1ecc059..aaa3cab 100644
  #endif	/*!defined(SYS_INT32)*/
  
  #ifndef	SYS_UINT32
-+#if defined(__LINUX__) || defined(__ANDROID__)
++#if defined(__LP64__)
 +#define	SYS_UINT32		unsigned int
 +#else
  #define	SYS_UINT32		unsigned long
@@ -663,16 +697,47 @@ index 1ecc059..aaa3cab 100644
  #endif	/*!defined(SYS_UINT32)*/
  
  #ifndef	SYS_UCHAR
+diff --git a/wfsource/source/pigsys/pigtypes.h b/wfsource/source/pigsys/pigtypes.h
+index fbe099c..0a93085 100644
+--- a/wfsource/source/pigsys/pigtypes.h
++++ b/wfsource/source/pigsys/pigtypes.h
+@@ -26,8 +26,11 @@
+ #endif	//!defined(SYS_UINT16)
+ 
+ #ifndef	SYS_INT32
+-#if defined(__LINUX__) || defined(__ANDROID__)
+-// LP64: `long` is 8 bytes on x86-64 Linux, so use `int` to keep int32 at 32 bits.
++#if defined(__LP64__)
++// LP64 (x86-64 Linux/Android, arm64 iOS/macOS): `long` is 8 bytes, so use `int`
++// to keep int32 at 32 bits. Key off the data model, not the OS — __LP64__ is the
++// thing that actually makes `long` 64-bit. ILP32 (PSX/x86-32) and LLP64 (Win64)
++// both have long==32 and fall through to the `long` branch unchanged.
+ #define	SYS_INT32		signed int
+ #else
+ #define	SYS_INT32		signed long
+@@ -35,7 +38,7 @@
+ #endif	//!defined(SYS_INT32)
+ 
+ #ifndef	SYS_UINT32
+-#if defined(__LINUX__) || defined(__ANDROID__)
++#if defined(__LP64__)
+ #define	SYS_UINT32		unsigned int
+ #else
+ #define	SYS_UINT32		unsigned long
 diff --git a/wfsource/source/renderassets/rendcrow.cc b/wfsource/source/renderassets/rendcrow.cc
-index a66a11a..6693419 100755
+index a66a11a..f1c093b 100755
 --- a/wfsource/source/renderassets/rendcrow.cc
 +++ b/wfsource/source/renderassets/rendcrow.cc
-@@ -152,7 +152,7 @@ RenderActorScarecrow::RenderActorScarecrow(Memory& memory, binistream& input,int
+@@ -152,7 +152,11 @@ RenderActorScarecrow::RenderActorScarecrow(Memory& memory, binistream& input,int
  //				std::cout << " bitmapList = [" << bitmapList << ']' << std::endl;
  
  #if defined( USE_ASSET_ID )
 -				_nTextures = chunkIter->Size() / sizeof( long );
-+				_nTextures = chunkIter->Size() / sizeof( int32 );
++				// BMPL holds a packed array of on-disk asset IDs; the count is
++				// (chunk bytes / one ID). Divide by the *source* element type,
++				// not sizeof(_texture[0]) — that's a Texture* (8 bytes on LP64),
++				// which would halve the count. (sizeof(packedAssetID) == 4.)
++				_nTextures = chunkIter->Size() / sizeof( packedAssetID );
  				_texture = new( memory )( Texture*[ _nTextures ] );
  				assert( ValidPtr( _texture ) );
  #else

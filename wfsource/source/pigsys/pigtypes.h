@@ -26,8 +26,11 @@
 #endif	//!defined(SYS_UINT16)
 
 #ifndef	SYS_INT32
-#if defined(__LINUX__) || defined(__ANDROID__)
-// LP64: `long` is 8 bytes on x86-64 Linux, so use `int` to keep int32 at 32 bits.
+#if defined(__LP64__)
+// LP64 (x86-64 Linux/Android, arm64 iOS/macOS): `long` is 8 bytes, so use `int`
+// to keep int32 at 32 bits. Key off the data model, not the OS — __LP64__ is the
+// thing that actually makes `long` 64-bit. ILP32 (PSX/x86-32) and LLP64 (Win64)
+// both have long==32 and fall through to the `long` branch unchanged.
 #define	SYS_INT32		signed int
 #else
 #define	SYS_INT32		signed long
@@ -35,7 +38,7 @@
 #endif	//!defined(SYS_INT32)
 
 #ifndef	SYS_UINT32
-#if defined(__LINUX__) || defined(__ANDROID__)
+#if defined(__LP64__)
 #define	SYS_UINT32		unsigned int
 #else
 #define	SYS_UINT32		unsigned long

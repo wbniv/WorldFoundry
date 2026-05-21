@@ -152,7 +152,11 @@ RenderActorScarecrow::RenderActorScarecrow(Memory& memory, binistream& input,int
 //				std::cout << " bitmapList = [" << bitmapList << ']' << std::endl;
 
 #if defined( USE_ASSET_ID )
-				_nTextures = chunkIter->Size() / sizeof( int32 );
+				// BMPL holds a packed array of on-disk asset IDs; the count is
+				// (chunk bytes / one ID). Divide by the *source* element type,
+				// not sizeof(_texture[0]) — that's a Texture* (8 bytes on LP64),
+				// which would halve the count. (sizeof(packedAssetID) == 4.)
+				_nTextures = chunkIter->Size() / sizeof( packedAssetID );
 				_texture = new( memory )( Texture*[ _nTextures ] );
 				assert( ValidPtr( _texture ) );
 #else
