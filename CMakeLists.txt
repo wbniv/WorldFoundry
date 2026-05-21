@@ -861,6 +861,7 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         engine/wf_edit/property_panel.cc       # Phase 2: OAD-driven Properties panel
         engine/wf_edit/oad_reader.cc           # Phase 2: clean OadEntry adapter
         engine/wf_edit/engine_bridge.cc        # Option C: CRDT -> engine (wfmut) bridge
+        engine/wf_edit/level_save.cc           # save round-trip: Doc -> .lev
         wftools/oaddump/oad.cc                 # shared OAD reader (editor-gated only)
         ${IMGUI_DIR}/imgui.cpp
         ${IMGUI_DIR}/imgui_draw.cpp

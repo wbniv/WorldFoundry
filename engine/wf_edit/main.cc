@@ -28,6 +28,7 @@
 #include "level_doc.h"
 #include "property_panel.h"
 #include "engine_bridge.h"
+#include "level_save.h"
 #include "wfcrdt.hpp"
 
 #include <cstdio>
@@ -257,8 +258,9 @@ int main(int argc, char** argv)
     //    plan). A failure here is non-fatal — the shell still runs.
     wfcrdt::Doc              doc;
     std::string              level_name;
+    std::string              parse_json;   // lossless levtree-parse JSON, for save
     std::vector<std::string> actor_names;
-    if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc)) {
+    if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc, &parse_json)) {
         actor_names = wfedit::ReadActorNames(doc);
         level_name  = leveltree;
         if (auto slash = level_name.find_last_of('/'); slash != std::string::npos)
@@ -302,6 +304,17 @@ int main(int argc, char** argv)
             std::fprintf(stderr, "[edit] %s.%s: '%s' -> '%s' (write %s)\n",
                          fname.c_str(), leaf.c_str(), before.c_str(), now.c_str(), ok ? "ok" : "FAIL");
         }
+    }
+
+    // 0c. Headless save (env-gated): WF_EDIT_SAVE=<path> patches the retained
+    //     levtree-parse JSON with the Doc (incl. any WF_EDIT_TEST_SET edits
+    //     above), `levtree print`s it to <path>, and exits — no GL. The headless
+    //     mirror of File→Save (M3); the round-trip identity gate (M1) runs this
+    //     with no edits. CPU-only; runs before any window/engine init.
+    if (const char* save_path = std::getenv("WF_EDIT_SAVE"); save_path && *save_path) {
+        const bool ok = wfedit::SaveDocToLev(doc, parse_json, save_path);
+        std::fprintf(stderr, "wf-edit: WF_EDIT_SAVE %s -> %s\n", save_path, ok ? "ok" : "FAIL");
+        return ok ? 0 : 1;
     }
 
     // 1. Editor-owned GLFW X11/GLX window + context.

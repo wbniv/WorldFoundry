@@ -36,6 +36,15 @@ std::string FindLevtree()
     return "levtree";   // last resort: rely on PATH
 }
 
+// Shell-quote (paths come from CLI args / built-in defaults; defensive against
+// odd filenames).
+std::string ShQuote(const std::string& s)
+{
+    std::string q = "'";
+    for (char c : s) { if (c == '\'') q += "'\\''"; else q += c; }
+    return q + "'";
+}
+
 // ── run `levtree parse <lev>` and capture stdout ─────────────────────────────
 bool RunLevtreeParse(const std::string& lev_path, std::string& out)
 {
@@ -132,10 +141,47 @@ std::string NameOf(const wfcrdt::Map& obj)
 
 }  // namespace
 
-bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc)
+// ── run `levtree print <json>` → canonical .lev (the inverse of parse) ───────
+// levtree print reads a JSON file arg (or stdin); popen is one-way, so we stage
+// the JSON in a temp file and read the .lev from stdout. Used by level_save.
+bool RunLevtreePrint(const std::string& json, std::string& out_lev)
+{
+    const std::string levtree = FindLevtree();
+    char tmpl[] = "/tmp/wfedit_save_XXXXXX";
+    const int fd = mkstemp(tmpl);
+    if (fd < 0) { std::fprintf(stderr, "wf-edit: mkstemp failed\n"); return false; }
+    {
+        FILE* tf = fdopen(fd, "w");
+        if (!tf) { ::close(fd); ::unlink(tmpl); return false; }
+        std::fwrite(json.data(), 1, json.size(), tf);
+        std::fclose(tf);   // also closes fd
+    }
+    const std::string cmd = ShQuote(levtree) + " print " + ShQuote(tmpl);
+    FILE* pipe = popen(cmd.c_str(), "r");
+    if (!pipe) {
+        std::fprintf(stderr, "wf-edit: popen failed for: %s\n", cmd.c_str());
+        ::unlink(tmpl);
+        return false;
+    }
+    std::array<char, 65536> buf;
+    size_t n;
+    while ((n = std::fread(buf.data(), 1, buf.size(), pipe)) > 0)
+        out_lev.append(buf.data(), n);
+    const int rc = pclose(pipe);
+    ::unlink(tmpl);
+    if (rc != 0) {
+        std::fprintf(stderr, "wf-edit: `%s` exited %d\n", cmd.c_str(), rc);
+        return false;
+    }
+    return true;
+}
+
+bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc,
+                          std::string* out_parse_json)
 {
     std::string raw;
     if (!RunLevtreeParse(lev_path, raw)) return false;
+    if (out_parse_json) *out_parse_json = raw;   // retain the lossless JSON for save
 
     json tree;
     try {
