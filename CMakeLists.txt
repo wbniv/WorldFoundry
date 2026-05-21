@@ -893,6 +893,7 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         engine/wf_edit/voice_track.cc          # Opus voice chat
         engine/wf_edit/video_track.cc          # VP8 video chat + V4L2 capture
         engine/wf_edit/collab_panel.cc         # Collaborators ImGui panel
+        engine/wf_edit/ws_client.cc           # WebSocket transport client (co-edit relay)
         wftools/oaddump/oad.cc                 # shared OAD reader (editor-gated only)
         ${IMGUI_DIR}/imgui.cpp
         ${IMGUI_DIR}/imgui_draw.cpp
@@ -939,4 +940,12 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
     set_tests_properties(wf_edit_spawn_confirm
         PROPERTIES LABELS "gl" ENVIRONMENT "DISPLAY=:0")
+
+    # wf-relay: standalone relay server binary (co-edit Phase 1).
+    # Built via Cargo; not linked into wf_edit (avoids duplicate Rust runtime symbols).
+    add_custom_target(wf_relay
+        COMMAND cargo build --release --bin wf-relay
+                --manifest-path ${CMAKE_SOURCE_DIR}/wftools/wf_collab/Cargo.toml
+        COMMENT "Building wf-relay (co-edit relay server)"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endif()

@@ -1,0 +1,19 @@
+[package]
+name = "wf-relay"
+version = "0.1.0"
+edition = "2021"
+description = "wf-edit real-time co-editing relay server"
+
+[[bin]]
+name = "wf-relay"
+path = "src/bin/relay.rs"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = "0.21"
+futures-util = "0.3"
+yrs = { path = "../y-crdt/yrs", version = "0.9.3" }
+uuid = { version = "1", features = ["v4"] }
+
+[dev-dependencies]
+yrs = { path = "../y-crdt/yrs", version = "0.9.3" }
