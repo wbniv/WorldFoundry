@@ -67,10 +67,10 @@ struct EditorCtx {
     std::string toast;
     int         toast_frames = 0;
 
-    // Set by an Outliner add/delete: the bridge's positional content[i]↔engine
-    // i+1 map is now stale (the Doc structure changed but the live engine didn't),
-    // so field→viewport propagation is suspended until reload. The Doc + save
-    // stay correct. Proper live re-sync is a follow-up (plan D3/D4).
+    // M2: no longer set by delete/duplicate — the stable map (InitBridgeMap +
+    // BridgeNotifyDelete/Duplicate) keeps propagation live through structural
+    // edits. Kept for future use (e.g. non-recoverable corruption); currently
+    // always false after M2.
     bool structural_dirty = false;
 };
 
@@ -118,30 +118,40 @@ void SaveAndCompile(EditorCtx* c)
 }
 
 // After an Outliner add/delete: re-read the actor list from the Doc, clamp the
-// selection, force the property cache to re-resolve, and mark the bridge map
-// stale (suspends field→viewport propagation until reload — see structural_dirty).
-void RefreshAfterStructural(EditorCtx* c)
+// selection, and force the property cache to re-resolve. Does NOT touch
+// structural_dirty — the stable bridge map keeps propagation live (M2).
+void RefreshActorList(EditorCtx* c)
 {
     c->actor_names = wfedit::ReadActorNames(*c->doc);
     if (c->selected >= static_cast<int>(c->actor_names.size()))
         c->selected = static_cast<int>(c->actor_names.size()) - 1;
     c->fields_for = -1;          // force Properties to re-resolve on the next frame
-    c->structural_dirty = true;
-    c->toast = "structural edit - save persists it; reload to resume live preview";
-    c->toast_frames = 300;
 }
 
 void DoDelete(EditorCtx* c)
 {
     if (!c->doc || c->selected < 0) return;
-    if (wfedit::DeleteActor(*c->doc, c->selected)) RefreshAfterStructural(c);
+    wfedit::BridgeNotifyDelete(c->selected);   // erase map entry + RemoveActor before Doc mutates
+    if (wfedit::DeleteActor(*c->doc, c->selected)) {
+        RefreshActorList(c);
+        c->toast = "actor deleted";
+        c->toast_frames = 180;
+    }
 }
 
 void DoDuplicate(EditorCtx* c)
 {
     if (!c->doc || c->selected < 0) return;
-    const int ni = wfedit::DuplicateActor(*c->doc, c->selected);
-    if (ni >= 0) { RefreshAfterStructural(c); c->selected = ni; }   // select the copy
+    const int src = c->selected;
+    const int ni = wfedit::DuplicateActor(*c->doc, src);
+    if (ni < 0) return;
+    const bool live = wfedit::BridgeNotifyDuplicate(src, ni);
+    RefreshActorList(c);
+    c->selected = ni;            // select the copy
+    if (!live) {
+        c->toast = "duplicated — non-templated actor: reload to see in viewport";
+        c->toast_frames = 300;
+    }
 }
 
 // Dump the composited back buffer (engine render + ImGui overlay) to a P6 PPM.
@@ -171,6 +181,10 @@ bool editor_frame(void* p)
     glfwPollEvents();
     if (glfwWindowShouldClose(c->win))
         return false;
+
+    // M2: initialize the stable doc→engine index map on the first frame the live
+    // level is available (theLevel non-null). No-op once initialized.
+    if (c->doc) wfedit::InitBridgeMap(*c->doc);
 
     // M1 CRDT->engine bridge: one-shot identity-map verification dump (Doc
     // actor <-> engine actor idx), gated WF_EDIT_BRIDGE_DEBUG. Runs on the first
@@ -219,6 +233,16 @@ bool editor_frame(void* p)
             else if (std::string(p) == "del") DoDelete(c);
         }
     }
+    // SpawnActor runtime-path confirmation: WF_EDIT_SPAWN_CONFIRM_TEST=1 finds
+    // the first valid template in the live level, spawns it at a safe position,
+    // and logs PASS/FAIL to stderr. Confirms the Jolt position-sync fix
+    // (commit 0adf1d4) works end-to-end. Run with --frames 5 to exit after.
+    static bool s_spawn_tested = false;
+    if (!s_spawn_tested && std::getenv("WF_EDIT_SPAWN_CONFIRM_TEST")) {
+        s_spawn_tested = true;
+        wfedit::RunSpawnConfirmTest();
+    }
+
     // M4 headless: WF_EDIT_COMPILE drives Save + Compile once (saves to the
     // level's source path, then runs the .lev→.iff pipeline) for the gate.
     static bool s_compile_ui = false;
@@ -316,9 +340,8 @@ bool editor_frame(void* p)
         if (c->doc) {
             std::vector<int> committed;
             wfedit::RenderProperties(*c->doc, c->selected, c->props, &committed);
-            // Suspend field→viewport propagation after a structural edit — the
-            // positional content[i]↔engine map is stale (D3). Edits still commit
-            // to the Doc and save correctly; only the live preview pauses.
+            // structural_dirty guard: kept for future cases; currently always
+            // false (M2 stable map keeps propagation live through structural edits).
             if (!c->structural_dirty)
                 for (int ci : committed)
                     if (ci >= 0 && ci < static_cast<int>(c->props.size()))

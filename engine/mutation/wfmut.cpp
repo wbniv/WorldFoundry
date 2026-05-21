@@ -369,13 +369,20 @@ bool RemoveActor(Level& level, ActorIdx idx)
 {
     Actor* actor = resolve_actor(level, idx, "wfmut::RemoveActor");
     if (!actor) return false;
-    // SetPendingRemove asserts on statplats and the camera; the bridge has
-    // happily relied on this behaviour, so we don't second-guess. Callers
-    // wanting to remove non-removable objects will see the engine abort —
-    // that's a level-content bug, not an API bug.
+    // SetPendingRemove asserts on statplats (level.cc:1340). Catch here so
+    // the bridge's BridgeNotifyDelete can attempt removal without crashing
+    // when the user deletes a House/platform actor. Return false so the
+    // caller can decide how to handle it (e.g. log "removed from Doc only").
+    if (actor->kind() == Actor::StatPlat_KIND)
+        return fail("wfmut::RemoveActor: actor is a statplat — cannot remove at runtime");
     level.SetPendingRemove(actor);
     ok();
     return true;
+}
+
+bool HasTemplate(const Level& level, int templateIdx)
+{
+    return level.HasTemplate(templateIdx);
 }
 
 // ── Mailbox ─────────────────────────────────────────────────────────────────

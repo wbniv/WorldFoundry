@@ -1,10 +1,10 @@
 //=============================================================================
-// engine/wf_edit/engine_bridge.cc — CRDT->engine bridge (Option C), M1.
+// engine/wf_edit/engine_bridge.cc — CRDT->engine bridge (Option C).
 //
-// Identity mapping: Doc content[] index <-> engine 1-based actor index, plus a
-// WF_EDIT_BRIDGE_DEBUG verification dump that cross-checks each Doc actor's
-// Position leaf against the live engine actor's currentPos(). No mutation yet
-// (M2 = field translation, M3 = wire the panel commit through wfmut).
+// M1: identity mapping + verification dump.
+// M2: stable doc→engine index map — structural edits (delete/duplicate) keep the
+//     map valid so field→viewport propagation continues without a reload.
+// M3: field translation + panel commit wired through wfmut.
 //=============================================================================
 #include "engine_bridge.h"
 #include "level_doc.h"      // ReadActorNames / ReadActorFields
@@ -28,18 +28,18 @@
 
 namespace wfedit {
 
-// content[i] (0-based, LVL chunk dropped by level_doc) -> engine _actors slot.
-// The engine object list is 1-based (slot 0 is reserved — the mailbox manager
-// returns it when the object index is 0, level.hp:97), so the natural map is
-// content[i] -> i + 1. Verified by DumpIdentityMap on snowgoons (plan M1).
-static constexpr int kDocToEngineIdx = 1;
+// Stable doc→engine index map (M2).  Entry i holds the engine 1-based ActorIdx
+// for Doc content[i].  0 = sentinel (no live engine actor — non-templated
+// duplicate or actor removed from the engine).  Filled by InitBridgeMap on the
+// first frame the level is live; maintained by BridgeNotifyDelete/Duplicate.
+static std::vector<wfmut::ActorIdx> s_doc_to_engine;
+static bool                         s_bridge_ready = false;
 
 int DocActorToEngineIdx(int doc_index)
 {
-    if (!theLevel || doc_index < 0) return 0;
-    const int idx = doc_index + kDocToEngineIdx;
-    if (idx < 1 || idx >= theLevel->GetObjectList().Size()) return 0;
-    return idx;
+    if (doc_index < 0 || doc_index >= static_cast<int>(s_doc_to_engine.size()))
+        return 0;
+    return static_cast<int>(s_doc_to_engine[doc_index]);
 }
 
 // Parse the Doc VEC3 DATA leaf into 3 floats; returns the count read. Each
@@ -73,8 +73,8 @@ void DumpIdentityMap(wfcrdt::Doc& doc)
     const int engine_count = theLevel->GetObjectList().Size() - 1;  // slots 1..Size-1
 
     std::fprintf(stderr,
-        "[bridge] identity map: %zu Doc actors vs %d engine actor slots (offset +%d)\n",
-        names.size(), engine_count, kDocToEngineIdx);
+        "[bridge] identity map: %zu Doc actors vs %d engine actor slots (stable map, %s)\n",
+        names.size(), engine_count, s_bridge_ready ? "initialized" : "not yet initialized");
     std::fprintf(stderr,
         "[bridge]  doc  eng  %-22s  Doc Position              engine currentPos()       match\n", "name");
 
@@ -118,10 +118,67 @@ void DumpIdentityMap(wfcrdt::Doc& doc)
             dp[0], dp[1], dp[2], ep[0], ep[1], ep[2], tag);
     }
     std::fprintf(stderr,
-        "[bridge] identity map (offset +%d): %d matched, %d no-engine-actor, "
-        "%d differ (activation boxes repositioned at load) of %zu — "
-        "index + X confirm content[i] <-> engine idx i+%d\n",
-        kDocToEngineIdx, matched, no_actor, differs, names.size(), kDocToEngineIdx);
+        "[bridge] identity map: %d matched, %d no-engine-actor, "
+        "%d differ (activation boxes repositioned at load) of %zu\n",
+        matched, no_actor, differs, names.size());
+}
+
+void InitBridgeMap(wfcrdt::Doc& doc)
+{
+    if (s_bridge_ready || !theLevel) return;
+    const std::vector<std::string> names = ReadActorNames(doc);
+    const int n = static_cast<int>(names.size());
+    s_doc_to_engine.clear();
+    s_doc_to_engine.reserve(n);
+    for (int i = 0; i < n; ++i)
+        s_doc_to_engine.push_back(static_cast<wfmut::ActorIdx>(i + 1));
+    s_bridge_ready = true;
+    std::fprintf(stderr, "[bridge] InitBridgeMap: %d actors mapped to engine indices 1..%d\n", n, n);
+}
+
+void BridgeNotifyDelete(int doc_i)
+{
+    if (doc_i < 0 || doc_i >= static_cast<int>(s_doc_to_engine.size())) return;
+    const wfmut::ActorIdx engine_idx = s_doc_to_engine[doc_i];
+    s_doc_to_engine.erase(s_doc_to_engine.begin() + doc_i);
+    std::fprintf(stderr, "[bridge] BridgeNotifyDelete: doc %d (eng %u) erased from map (%zu entries remain)\n",
+                 doc_i, engine_idx, s_doc_to_engine.size());
+    if (engine_idx > 0 && theLevel) {
+        if (!wfmut::RemoveActor(*theLevel, engine_idx))
+            std::fprintf(stderr, "[bridge] BridgeNotifyDelete: RemoveActor(%u) rejected — %s (Doc entry removed; viewport unchanged)\n",
+                         engine_idx, wfmut::lastError());
+    }
+}
+
+bool BridgeNotifyDuplicate(int src_doc_i, int /*new_doc_i*/)
+{
+    if (src_doc_i < 0 || src_doc_i >= static_cast<int>(s_doc_to_engine.size())) {
+        s_doc_to_engine.push_back(0);
+        return false;
+    }
+    const wfmut::ActorIdx src_engine_idx = s_doc_to_engine[src_doc_i];
+    if (!theLevel || src_engine_idx == 0 ||
+        !wfmut::HasTemplate(*theLevel, static_cast<int>(src_engine_idx))) {
+        s_doc_to_engine.push_back(0);
+        std::fprintf(stderr, "[bridge] BridgeNotifyDuplicate: src %d (eng %u) — no template, sentinel pushed\n",
+                     src_doc_i, src_engine_idx);
+        return false;
+    }
+    const auto src_pos = wfmut::GetActorPos(*theLevel, src_engine_idx);
+    const Vector3 offset(Scalar::zero, Scalar::zero, Scalar::FromFloat(0.5f));
+    const Vector3 spawn_pos = src_pos ? (*src_pos + offset) : offset;
+    const auto new_idx = wfmut::SpawnActor(*theLevel, static_cast<int>(src_engine_idx), spawn_pos, 1);
+    if (!new_idx) {
+        s_doc_to_engine.push_back(0);
+        std::fprintf(stderr, "[bridge] BridgeNotifyDuplicate: SpawnActor failed — %s\n", wfmut::lastError());
+        return false;
+    }
+    s_doc_to_engine.push_back(*new_idx);
+    std::fprintf(stderr,
+        "[bridge] BridgeNotifyDuplicate: src %d (eng %u) -> new eng %u  spawn pos (%.2f %.2f %.2f)\n",
+        src_doc_i, src_engine_idx, *new_idx,
+        spawn_pos.X().AsFloat(), spawn_pos.Y().AsFloat(), spawn_pos.Z().AsFloat());
+    return true;
 }
 
 // ── M2: field translation ────────────────────────────────────────────────────
@@ -321,6 +378,83 @@ void RunBridgeTest(wfcrdt::Doc& doc, int doc_index,
         doc_index, eidx, field_name.c_str(), new_data.c_str(),
         propagated ? "propagated" : "NOT propagated",
         fmt(before).c_str(), fmt(after).c_str());
+}
+
+void RunSpawnConfirmTest()
+{
+    if (!theLevel) { std::fprintf(stderr, "[spawn-test] no live level\n"); return; }
+
+    // ── Part A: HasTemplate scan ─────────────────────────────────────────────
+    // Identify which slots have template entries. _templateObjects[i] is non-null
+    // for actors the level compiler marked "templated" (not constructed at startup).
+    // In practice these include Rooms, Level, Tool objects as well as runtime-
+    // spawnable actors. The first non-null entry is logged but NOT spawned —
+    // SpawnActor on Room/Level/Tool types aborts via terminate() in the OAS-
+    // generated constructor. SpawnActor confirmation for real Actor templates is
+    // deferred until a level with confirmed-spawnable actor entries is available.
+    int template_idx = -1;
+    const int obj_list_size = theLevel->GetObjectList().Size();
+    for (int i = 1; i < obj_list_size; ++i) {
+        if (wfmut::HasTemplate(*theLevel, i)) { template_idx = i; break; }
+    }
+    if (template_idx < 0) {
+        std::fprintf(stderr, "[spawn-test] HasTemplate: no non-null entries in 1..%d\n",
+                     obj_list_size - 1);
+    } else {
+        std::fprintf(stderr, "[spawn-test] HasTemplate: first non-null entry at idx %d "
+                             "(NOT spawned — Room/Tool types abort in OAS constructor)\n",
+                     template_idx);
+    }
+
+    // ── Part B: RemoveActor on a real startup actor ──────────────────────────
+    // Find the first startup-constructed actor (HasTemplate false + GetActorPos
+    // returns a value) that is safe to remove (not the camera). This confirms the
+    // live-delete path that M2 wired up. Removal is deferred (SetPendingRemove);
+    // the actor stays alive until the next Level::update().
+    int remove_idx = -1;
+    for (int i = 2; i < std::min(obj_list_size, 40); ++i) {
+        if (wfmut::HasTemplate(*theLevel, i)) continue;  // skip templated (Room/Level/Tool)
+        const auto pos = wfmut::GetActorPos(*theLevel, i);
+        if (!pos) continue;     // no live actor at this slot
+        // Skip statplats — engine asserts on SetPendingRemove; Part C covers that path.
+        BaseObject* bo = theLevel->GetObject(i);
+        if (bo && bo->kind() == Actor::StatPlat_KIND) continue;
+        remove_idx = i;
+        break;
+    }
+    if (remove_idx < 0) {
+        std::fprintf(stderr, "[spawn-test] FAIL: no removable startup actor found\n");
+        return;
+    }
+    const auto before = wfmut::GetActorPos(*theLevel, remove_idx);
+    std::fprintf(stderr, "[spawn-test] RemoveActor: target engine idx %d  pos (%.3f %.3f %.3f)\n",
+                 remove_idx,
+                 before->X().AsFloat(), before->Y().AsFloat(), before->Z().AsFloat());
+
+    const bool removed = wfmut::RemoveActor(*theLevel, remove_idx);
+    if (!removed) {
+        std::fprintf(stderr, "[spawn-test] FAIL: RemoveActor(%d) returned false — %s\n",
+                     remove_idx, wfmut::lastError());
+        return;
+    }
+    std::fprintf(stderr, "[spawn-test] B-PASS: RemoveActor queued (deferred deletion confirmed)\n");
+
+    // ── Part C: statplat rejection (regression for wfmut::RemoveActor guard) ──
+    // Engine slot 1 in snowgoons is House — a StatPlat_KIND. wfmut::RemoveActor
+    // must return false (not crash) when asked to remove one. This guards the
+    // fix that prevents BridgeNotifyDelete from aborting on statplat actors.
+    const bool statplat_rejected = !wfmut::RemoveActor(*theLevel, 1);
+    if (!statplat_rejected) {
+        std::fprintf(stderr, "[spawn-test] C-FAIL: RemoveActor(1) should have rejected statplat\n");
+        return;
+    }
+    const char* errmsg = wfmut::lastError();
+    const bool has_error = errmsg && errmsg[0];
+    std::fprintf(stderr, "[spawn-test] C-PASS: statplat rejected gracefully — %s\n",
+                 has_error ? errmsg : "(no error message)");
+    std::fprintf(stderr, "[spawn-test] PASS (all parts)\n"
+                         "[spawn-test] SpawnActor deferred: Room/Tool templates abort; needs "
+                         "a level with confirmed Actor-kind templates\n");
 }
 
 }  // namespace wfedit

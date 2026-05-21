@@ -100,6 +100,12 @@ std::optional<ActorIdx> SpawnActor(Level& level, int templateIdx, const Vector3&
 // resolved to a live actor and was queued.
 bool RemoveActor(Level& level, ActorIdx idx);
 
+// Probe whether a template entry exists at templateIdx — the same check
+// SpawnActor performs before calling ConstructTemplateObject. Useful for
+// callers that want to enumerate spawnable templates without triggering
+// construction. Returns false for startup-constructed (non-templated) actors.
+bool HasTemplate(const Level& level, int templateIdx);
+
 // ── Mailbox ─────────────────────────────────────────────────────────────────
 // Direct mailbox slot access on an actor's local mailbox array. mailboxIndex
 // is an integer slot id; scripting-side callers should resolve names via the
@@ -138,6 +144,7 @@ inline bool ReloadActorScript(Level&, ActorIdx, const char*) { return false; }
 
 inline std::optional<ActorIdx> SpawnActor(Level&, int, const Vector3&, ActorIdx = 0) { return std::nullopt; }
 inline bool RemoveActor(Level&, ActorIdx) { return false; }
+inline bool HasTemplate(const Level&, int) { return false; }
 
 inline bool SetMailbox(Level&, ActorIdx, int, double) { return false; }
 inline std::optional<double> GetMailbox(const Level&, ActorIdx, int) { return std::nullopt; }

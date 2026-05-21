@@ -23,12 +23,31 @@ struct PropField;  // property_panel.h — a Doc field after OAD correlation
 // Map a Doc content[] index (0-based — what the Outliner selects, i.e.
 // EditorCtx::selected) to the engine's 1-based actor index (Actor::GetActorIndex
 // / BaseObjectList slot, the same id wfmut::ActorIdx uses). Returns 0 (an
-// invalid actor index) when there is no live level or the index is out of range.
+// invalid actor index) when there is no live level, the index is out of range,
+// or the actor has no live engine counterpart (non-templated duplicate sentinel).
 //
-// v1 is positional with a verified constant offset: the Doc and the engine load
-// the same .lev source, so content[i] corresponds to engine actor
-// (i + kDocToEngineIdx). DumpIdentityMap is the proof it holds (plan M1).
+// M2: backed by an explicit stable map (InitBridgeMap) rather than a positional
+// formula, so structural edits (BridgeNotifyDelete/Duplicate) don't invalidate
+// surviving actors.
 int DocActorToEngineIdx(int doc_index);
+
+// Call once when both the Doc and the live engine level are first available
+// (first frame after level load). Fills the stable doc→engine index map with
+// {1, 2, ..., N} — the same values the old positional formula produced.
+void InitBridgeMap(wfcrdt::Doc& doc);
+
+// Call BEFORE DeleteActor(doc, doc_i). Records the engine actor idx, erases
+// the map entry (shifting higher entries down), and calls wfmut::RemoveActor
+// on the live level. No-op if the map entry is the sentinel 0.
+void BridgeNotifyDelete(int doc_i);
+
+// Call AFTER DuplicateActor(doc, src_doc_i) succeeds. If the source engine
+// actor has a spawnable template (wfmut::HasTemplate), calls wfmut::SpawnActor
+// at source_pos + (0,0,0.5) and pushes the new engine idx; returns true
+// (new actor appears live in viewport). Otherwise pushes sentinel 0 and returns
+// false (caller should toast "reload to see" — propagation for that actor is a
+// natural no-op via the 0 sentinel).
+bool BridgeNotifyDuplicate(int src_doc_i, int new_doc_i);
 
 // Verification (WF_EDIT_BRIDGE_DEBUG): print, for every Doc actor, its
 // doc_index -> mapped engine_idx -> engine currentPos() alongside the Doc's own
@@ -82,5 +101,15 @@ void PropagateToEngine(int doc_index, const PropField& f);
 // --screenshot captures the moved actor.
 void RunBridgeTest(wfcrdt::Doc& doc, int doc_index,
                    const std::string& field_name, const std::string& new_data);
+
+// WF_EDIT_SPAWN_CONFIRM_TEST headless proof (two parts):
+// A) Scans the live level's template table via HasTemplate and logs the first
+//    non-null entry. Does NOT attempt to spawn it — Room/Level/Tool templates
+//    abort via terminate() in the OAS constructor; Actor-kind confirmation is
+//    deferred until a level with safe spawnable templates is available.
+// B) Finds the first startup-constructed actor (HasTemplate=false + live engine
+//    slot), calls RemoveActor on it, and confirms the deferred-deletion path.
+//    Prints "[spawn-test] PASS" on success or "[spawn-test] FAIL" on failure.
+void RunSpawnConfirmTest();
 
 }  // namespace wfedit
