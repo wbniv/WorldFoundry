@@ -874,6 +874,7 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     target_include_directories(wf_edit PRIVATE
         ${IMGUI_DIR} ${IMGUI_DIR}/backends
         ${CMAKE_SOURCE_DIR}/engine/crdt              # wfcrdt.hpp (read-only Y.Doc)
+        ${CMAKE_SOURCE_DIR}/engine/mutation          # wfmut.hpp (M3 CRDT->engine bridge)
         ${CMAKE_SOURCE_DIR}/third_party/json         # <nlohmann/json.hpp>
         ${CMAKE_SOURCE_DIR}/wftools/oaddump)         # oad.hp (Phase 2 OAD reader)
     # main.cc compiles against engine headers, so the target needs the engine's

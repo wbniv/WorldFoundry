@@ -13,10 +13,15 @@
 #include <game/level.hp>            // Level, theLevel, GetObject, GetObjectList
 #include <game/actor.hp>            // Actor, currentPos (pulls in Vector3/Scalar)
 #include <baseobject/baseobject.hp> // IsActor, BaseObject
+#include <math/euler.hp>            // Euler
+#include <math/angle.hp>            // Angle::Revolution
+#include "wfmut.hpp"                // wfmut::SetActorPos / SetActorOrientation / SetActorField
 
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -238,6 +243,84 @@ void DumpTranslations(wfcrdt::Doc& doc, int doc_index)
     }
     std::fprintf(stderr, "[bridge] translations: %d/%zu mapped to an engine write\n",
                  mapped, props.size());
+}
+
+// ── M3: propagate into the live engine ───────────────────────────────────────
+
+void PropagateToEngine(int doc_index, const PropField& f)
+{
+    if (!theLevel) return;
+    const int idx = DocActorToEngineIdx(doc_index);
+    if (idx < 1) return;
+
+    const EngineWrite w = TranslateField(f);
+    switch (w.kind) {
+        case EngineWrite::Pos:
+            wfmut::SetActorPos(*theLevel, idx,
+                Vector3(Scalar::FromFloat(w.vec[0]),
+                        Scalar::FromFloat(w.vec[1]),
+                        Scalar::FromFloat(w.vec[2])));
+            break;
+        case EngineWrite::Orient: {
+            // Revolutions are [0,1) (per WF convention); a panel edit isn't
+            // clamped, so wrap before constructing the Angle.
+            auto rev = [](float r) { r = std::fmod(r, 1.0f); return Scalar::FromFloat(r < 0 ? r + 1.0f : r); };
+            wfmut::SetActorOrientation(*theLevel, idx,
+                Euler(Angle::Revolution(rev(w.vec[0])),
+                      Angle::Revolution(rev(w.vec[1])),
+                      Angle::Revolution(rev(w.vec[2]))));
+            break;
+        }
+        case EngineWrite::FieldFloat:
+            wfmut::SetActorField(*theLevel, idx, w.path.c_str(), w.d);
+            break;
+        case EngineWrite::FieldInt:
+            wfmut::SetActorField(*theLevel, idx, w.path.c_str(),
+                                 static_cast<std::int64_t>(w.i));
+            break;
+        case EngineWrite::NoOp:
+            break;
+    }
+}
+
+void RunBridgeTest(wfcrdt::Doc& doc, int doc_index,
+                   const std::string& field_name, const std::string& new_data)
+{
+    if (!theLevel) { std::fprintf(stderr, "[bridge-test] no live level\n"); return; }
+    const int eidx = DocActorToEngineIdx(doc_index);
+
+    const auto before = wfmut::GetActorPos(*theLevel, eidx);
+
+    // Locate the field's Doc address and overwrite its DATA leaf, exactly as the
+    // panel's commit would (WriteFieldLeaf).
+    int child = -1;
+    for (const auto& af : ReadActorFields(doc, doc_index))
+        if (af.name == field_name) { child = af.child_index; break; }
+    if (child < 0) {
+        std::fprintf(stderr, "[bridge-test] field '%s' not found on actor %d\n",
+                     field_name.c_str(), doc_index);
+        return;
+    }
+    WriteFieldLeaf(doc, doc_index, child, "DATA", new_data);
+
+    // Re-resolve the actor and propagate the edited field through the bridge.
+    bool propagated = false;
+    for (const auto& pf : ResolveProperties(ReadActorFields(doc, doc_index)))
+        if (pf.name == field_name) { PropagateToEngine(doc_index, pf); propagated = true; break; }
+
+    const auto after = wfmut::GetActorPos(*theLevel, eidx);
+    auto fmt = [](const std::optional<Vector3>& p) -> std::string {
+        if (!p) return "(n/a)";
+        char b[64];
+        std::snprintf(b, sizeof b, "(%.3f %.3f %.3f)",
+                      p->X().AsFloat(), p->Y().AsFloat(), p->Z().AsFloat());
+        return b;
+    };
+    std::fprintf(stderr,
+        "[bridge-test] actor %d (eng %d) %s := \"%s\"  %s  pos before %s  after %s\n",
+        doc_index, eidx, field_name.c_str(), new_data.c_str(),
+        propagated ? "propagated" : "NOT propagated",
+        fmt(before).c_str(), fmt(after).c_str());
 }
 
 }  // namespace wfedit

@@ -70,7 +70,9 @@ std::vector<PropField> ResolveProperties(const std::vector<ActorField>& doc_fiel
 // (Phase 3). Edits commit to `doc` (the actor at `actor_index`) in a
 // transaction and update the in-memory field for immediate display. Returns
 // true if any field was committed this frame (caller may re-read / mark dirty).
-// The Doc→engine→viewport propagation is the separate CRDT→engine bridge.
-bool RenderProperties(wfcrdt::Doc& doc, int actor_index, std::vector<PropField>& fields);
+// If `committed` is non-null, the index (into `fields`) of each field committed
+// this frame is appended — the CRDT→engine bridge propagates those through wfmut.
+bool RenderProperties(wfcrdt::Doc& doc, int actor_index, std::vector<PropField>& fields,
+                      std::vector<int>* committed = nullptr);
 
 }  // namespace wfedit

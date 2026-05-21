@@ -457,7 +457,8 @@ bool DrawValueWidget(wfcrdt::Doc& doc, int actor, PropField& f, int row)
 
 }  // namespace
 
-bool RenderProperties(wfcrdt::Doc& doc, int actor_index, std::vector<PropField>& fields)
+bool RenderProperties(wfcrdt::Doc& doc, int actor_index, std::vector<PropField>& fields,
+                      std::vector<int>* committed)
 {
     if (!ImGui::BeginTable("props", 2,
             ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg |
@@ -496,9 +497,11 @@ bool RenderProperties(wfcrdt::Doc& doc, int actor_index, std::vector<PropField>&
                               f.matched ? "" : " (chunk-type fallback)");
         }
         ImGui::TableSetColumnIndex(1);
-        if (f.child_index >= 0)
-            any_edit |= DrawValueWidget(doc, actor_index, f, row);
-        else
+        if (f.child_index >= 0) {
+            const bool edited = DrawValueWidget(doc, actor_index, f, row);
+            if (edited && committed) committed->push_back(static_cast<int>(&f - fields.data()));
+            any_edit |= edited;
+        } else
             ImGui::TextWrapped("%s", f.value.empty() ? "(empty)" : f.value.c_str());
     }
     ImGui::EndTable();

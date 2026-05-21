@@ -100,6 +100,20 @@ bool editor_frame(void* p)
         // — the richest field set), showing each field's Doc->wfmut mapping.
         wfedit::DumpTranslations(*c->doc, c->selected >= 0 ? c->selected : 0);
     }
+    // M3 headless proof (WF_EDIT_BRIDGE_TEST="Field Name|new DATA"): edit the
+    // --select'd actor's field as the panel commit would, propagate it through
+    // the bridge, and log the engine actor's pos before/after. The change lands
+    // before this frame's swap, so subsequent frames render it and --screenshot
+    // captures the moved actor.
+    static bool s_bridge_tested = false;
+    if (!s_bridge_tested && c->doc && c->selected >= 0) {
+        if (const char* spec = std::getenv("WF_EDIT_BRIDGE_TEST"); spec && *spec) {
+            s_bridge_tested = true;
+            std::string s = spec;
+            if (auto bar = s.find('|'); bar != std::string::npos)
+                wfedit::RunBridgeTest(*c->doc, c->selected, s.substr(0, bar), s.substr(bar + 1));
+        }
+    }
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -162,10 +176,18 @@ bool editor_frame(void* p)
         ImGui::TextUnformatted(c->actor_names[c->selected].c_str());
         ImGui::Separator();
         // Phase 3: OAD-driven widgets keyed on (ButtonType × showAs), editable —
-        // edits commit to the Doc leaf (the in-memory field mirrors the new value
-        // for display). Doc→engine→viewport propagation is the separate bridge.
-        if (c->doc)
-            wfedit::RenderProperties(*c->doc, c->selected, c->props);
+        // edits commit to the Doc leaf. M3 CRDT→engine bridge: each committed
+        // field is propagated through wfmut on the live level (game thread — this
+        // callback runs inside RunEditor), so the next StepFrame re-renders the
+        // change. Transform + the 15 kPropMap fields move the viewport; the rest
+        // edit the Doc only (logged NoOp).
+        if (c->doc) {
+            std::vector<int> committed;
+            wfedit::RenderProperties(*c->doc, c->selected, c->props, &committed);
+            for (int ci : committed)
+                if (ci >= 0 && ci < static_cast<int>(c->props.size()))
+                    wfedit::PropagateToEngine(c->selected, c->props[ci]);
+        }
         int matched = 0;
         for (const auto& p : c->props) matched += p.matched;
         ImGui::TextDisabled("%zu fields (editable → Doc) — %d OAD-matched",

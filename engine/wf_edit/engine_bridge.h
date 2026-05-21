@@ -66,4 +66,21 @@ EngineWrite TranslateField(const PropField& f);
 // visible on real level data. Reads only — no mutation.
 void DumpTranslations(wfcrdt::Doc& doc, int doc_index);
 
+// ── M3: propagate a Doc edit into the live engine ────────────────────────────
+// Translate `f` and dispatch the result through wfmut on the live level
+// (`theLevel`), mapping the Doc actor at `doc_index` to its engine actor idx.
+// No-op when there's no live level / no engine actor / the field is unmapped
+// (NoOp). Call from the game thread (the editor frame callback) — wfmut's
+// contract. The next StepFrame re-renders the mutated actor, so the viewport
+// reflects the edit on the following frame.
+void PropagateToEngine(int doc_index, const PropField& f);
+
+// WF_EDIT_BRIDGE_TEST headless proof: edit one field's DATA leaf on the
+// `doc_index` actor (as the panel's commit would), propagate it through
+// PropagateToEngine, and log the engine actor's position before/after so the
+// full Doc->bridge->wfmut path is visible without UI interaction. A following
+// --screenshot captures the moved actor.
+void RunBridgeTest(wfcrdt::Doc& doc, int doc_index,
+                   const std::string& field_name, const std::string& new_data);
+
 }  // namespace wfedit
