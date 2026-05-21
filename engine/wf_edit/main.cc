@@ -685,6 +685,22 @@ int main(int argc, char** argv)
     std::strcpy(hal_argv[0], szAppName);   // matches platform_main.cc / e2e harness
     ParseWindowSwitches(hal_argc, hal_argv);
 
+    // Tell the engine its real surface size. Otherwise it keeps the 640×480
+    // wfWindow* defaults — ParseWindowSwitches, which would set them, is #if 0'd —
+    // and WFInitGL runs glViewport(0,0,640,480) + a 640/480 projection aspect, so
+    // the level renders into only the bottom-left of our 1280×800 window. Set
+    // before HALStart, which constructs Display (→ _xSize/_ySize) and calls
+    // WFInitGL (→ glViewport + aspect). Window resize isn't handled yet — the
+    // engine's ConfigureNotify viewport path (mesa.cc) early-bails in host-owned
+    // mode — so the viewport is fixed at the initial framebuffer size for now.
+    extern int wfWindowWidth, wfWindowHeight;       // gfx/gl/display.cc: GL viewport + aspect
+    extern int _halWindowWidth, _halWindowHeight;   // hal/linux: feeds Display _xSize/_ySize
+    int fbw = 0, fbh = 0;
+    glfwGetFramebufferSize(win, &fbw, &fbh);
+    wfWindowWidth  = _halWindowWidth  = fbw;
+    wfWindowHeight = _halWindowHeight = fbh;
+    std::printf("wf-edit: engine surface size %dx%d\n", fbw, fbh);
+
     std::printf("wf-edit: HALStart (--editor, level=%s)\n", level.c_str());
     HALStart(hal_argc, hal_argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
     std::printf("wf-edit: HALStart returned\n");
