@@ -474,7 +474,7 @@ NormalCameraHandler::_update(MovementObject& movementObject,cameraPosition& dest
 
 	cameraData& cd  = GetCameraMovementData(movementObject);
 
-	long idxShot = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
+	int32 idxShot = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
 	DBSTREAM3( ccamera << "idxShot = " << idxShot << std::endl; )
 	AssertMsg(idxShot != 0, "Camera " << movementObject << " found no ActBoxOR, possible cause: Player is not in any actboxor");
 	assert(idxShot > 0);
@@ -672,7 +672,7 @@ PanCameraHandler::update(MovementManager& /*movementManager*/,  MovementObject& 
 	assert(cd.panStartTime <= theLevel->LevelClock().Current());
 	assert(cd.idxCamShotActor);
 
-	long shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
+	int32 shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
 	assert(shotIndex);
 	const CamShot* camShot = (CamShot*)theLevel->getActor(shotIndex);
 	assert(ValidPtr(camShot));
@@ -799,7 +799,7 @@ DelayCameraHandler::check()
 {
 	assert(0);
 	DBSTREAM3( ccamera << "DelayCameraHandler check function called." << std::endl; )
-	long shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
+	int32 shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
 	return(shotIndex <= 0);						// only activate if there is no camshot right now
 //	return true;
 }
@@ -822,7 +822,7 @@ DelayCameraHandler::update(MovementManager& movementManager, MovementObject& mov
 	DBSTREAM3( ccamera << "DelayCameraHandler::update function called." << std::endl; )
 	assert( ValidPtr( theLevel ) );
 
-	long shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
+	int32 shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
 	//std::cout << "shotIndex = " << shotIndex << std::endl;
 	if(shotIndex > 0)
 	{
@@ -886,7 +886,7 @@ BungeeCameraHandler::init(MovementManager& movementManager, MovementObject& move
 
 	cameraData& cd = GetCameraMovementData(movementObject);
 
-	long shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
+	int32 shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
 	AssertMsg(shotIndex != 0, "Camera " << movementObject << " found no ActBoxOR, possible cause: Player is not in any actboxor");
 	assert(shotIndex > 0);
 
@@ -930,7 +930,7 @@ BungeeCameraHandler::predictPosition(MovementManager& /*movementManager*/, Movem
 	Scalar deltaT = theLevel->LevelClock().Delta();
 
 	// Get climbRate and Elasticity from camShot data
-	long idxShot = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
+	int32 idxShot = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
 	RangeCheck( 1, idxShot, theLevel->GetMaxObjectIndex() );
 
 	CamShot* camShotActor = (CamShot*)(theLevel->getActor( idxShot ));

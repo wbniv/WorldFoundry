@@ -157,8 +157,8 @@ AnimateRenderObject3D::Animate(Scalar time,RenderObject3D& renderObject)
 
 	int frame = (time*_rate).WholePart() % _frameCount;
 
-	long* source = (long*)&_animArray[frame*vertexCount];
-	long* dest = (long*)vertexList;
+	int32* source = (int32*)&_animArray[frame*vertexCount];
+	int32* dest = (int32*)vertexList;
 	assert(((vertexCount*sizeof(Vertex3D)) % 4) == 0);
 	int count = (vertexCount*sizeof(Vertex3D)) / 4;
 	for(int memIndex=0;memIndex<count;memIndex++)

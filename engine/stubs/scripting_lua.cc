@@ -74,14 +74,14 @@ static int lua_set_music_volume(lua_State* L)
 
 static int lua_read_mailbox(lua_State* L)
 {
-    long mailbox  = static_cast<long>(luaL_checkinteger(L, 1));
+    int  mailbox  = static_cast<int>(luaL_checkinteger(L, 1));   // int32 mailbox index
     int  actorIdx = gCurrentObject;
     if (lua_gettop(L) >= 2)
         actorIdx = static_cast<int>(luaL_checkinteger(L, 2));
     Mailboxes& mb = gMailboxes->LookupMailboxes(actorIdx);
     Scalar v = mb.ReadMailbox(mailbox);
 #ifdef WF_SCRIPT_DEBUG
-    std::fprintf(stderr, "  lua read_mailbox(%ld, actor=%d) -> %g\n",
+    std::fprintf(stderr, "  lua read_mailbox(%d, actor=%d) -> %g\n",
                  mailbox, actorIdx, (double)v.AsFloat());
 #endif
     lua_pushnumber(L, v.AsFloat());
@@ -90,14 +90,14 @@ static int lua_read_mailbox(lua_State* L)
 
 static int lua_write_mailbox(lua_State* L)
 {
-    long   mailbox  = static_cast<long>(luaL_checkinteger(L, 1));
+    int    mailbox  = static_cast<int>(luaL_checkinteger(L, 1));   // int32 mailbox index
     double value    = luaL_checknumber(L, 2);
     int    actorIdx = gCurrentObject;
     if (lua_gettop(L) >= 3)
         actorIdx = static_cast<int>(luaL_checkinteger(L, 3));
     Mailboxes& mb = gMailboxes->LookupMailboxes(actorIdx);
 #ifdef WF_SCRIPT_DEBUG
-    std::fprintf(stderr, "  lua write_mailbox(%ld, %g, actor=%d)\n",
+    std::fprintf(stderr, "  lua write_mailbox(%d, %g, actor=%d)\n",
                  mailbox, value, actorIdx);
 #endif
     mb.WriteMailbox(mailbox, Scalar::FromFloat(static_cast<float>(value)));

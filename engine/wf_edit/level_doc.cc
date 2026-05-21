@@ -215,9 +215,17 @@ ActorField FieldFromChunk(const wfcrdt::Map& chunk)
         const std::string txt = sub.get("text").readString().value_or("");
         if (sct == "NAME") {
             if (!txt.empty()) f.name = txt;
-        } else {
-            if (!f.value.empty()) f.value += ' ';
-            f.value += txt;   // DATA (and any other non-NAME leaf)
+            continue;
+        }
+        // Phase-1 space-joined form (raw fallback) keeps every non-NAME leaf.
+        if (!f.value.empty()) f.value += ' ';
+        f.value += txt;
+        // Phase-2 split: DATA leaf(s) → raw value; STR leaf → display label.
+        if (sct == "DATA") {
+            if (!f.data.empty()) f.data += ' ';
+            f.data += txt;
+        } else if (sct == "STR") {
+            f.label = txt;   // single STR leaf in practice; last wins
         }
     }
     return f;

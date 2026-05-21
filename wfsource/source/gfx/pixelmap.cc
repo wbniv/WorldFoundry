@@ -146,7 +146,7 @@ PixelMap::Load(const void* memory, int xOffset, int yOffset, int xSize, int ySiz
     rect.w = xSize;
     rect.h = ySize;
 
-    long unsigned int * _p = (long unsigned int *)memory;
+    uint32 * _p = (uint32 *)memory;
     ValidatePtr(_pixelBuffer);
     GLubyte* pPB = _pixelBuffer;
 

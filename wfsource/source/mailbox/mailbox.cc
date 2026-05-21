@@ -51,7 +51,7 @@ Mailboxes::_Print( std::ostream& s ) const
 
 //==============================================================================
 
-MailboxesWithStorage::MailboxesWithStorage(long mailboxBase, long numberOfLocalMailboxes, Mailboxes* parent, Memory* memory) :
+MailboxesWithStorage::MailboxesWithStorage(int32 mailboxBase, int32 numberOfLocalMailboxes, Mailboxes* parent, Memory* memory) :
     _mailboxBase(mailboxBase),
     // Default `memory` is HALLmalloc, which is fine for the long-lived
     // global/persistent/scratch instances created in deterministic order at
@@ -76,7 +76,7 @@ MailboxesWithStorage::~MailboxesWithStorage()
 }
 
 Scalar 
-MailboxesWithStorage::ReadMailbox(long mailbox) const
+MailboxesWithStorage::ReadMailbox(int32 mailbox) const
 {
     if(mailbox >= _mailboxBase && mailbox < _localMailboxes.Size()+_mailboxBase)
     {
@@ -93,7 +93,7 @@ MailboxesWithStorage::ReadMailbox(long mailbox) const
 }
 
 void 
-MailboxesWithStorage::WriteMailbox(long mailbox, Scalar value)
+MailboxesWithStorage::WriteMailbox(int32 mailbox, Scalar value)
 {
     if(mailbox >= _mailboxBase && mailbox < _localMailboxes.Size()+_mailboxBase)
     {

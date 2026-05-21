@@ -408,7 +408,7 @@ bool SetMailbox(Level& level, ActorIdx idx, int mailboxIndex, double value)
         return fail("wfmut::SetMailbox: mailboxIndex must be >= 0");
     // Actor exposes its mailbox bank via GetMailboxes(); backing storage is
     // bounds-checked by MailboxesWithStorage in DBSTREAM builds.
-    actor->GetMailboxes().WriteMailbox(static_cast<long>(mailboxIndex), Scalar::FromDouble(value));
+    actor->GetMailboxes().WriteMailbox(mailboxIndex, Scalar::FromDouble(value));   // int -> int32 mailbox index
     ok();
     return true;
 }
@@ -419,7 +419,7 @@ std::optional<double> GetMailbox(const Level& level, ActorIdx idx, int mailboxIn
     if (!actor) return std::nullopt;
     if (mailboxIndex < 0)
         return failopt<double>("wfmut::GetMailbox: mailboxIndex must be >= 0");
-    Scalar v = actor->GetMailboxes().ReadMailbox(static_cast<long>(mailboxIndex));
+    Scalar v = actor->GetMailboxes().ReadMailbox(mailboxIndex);   // int -> int32 mailbox index
     ok();
     return static_cast<double>(v.AsFloat());
 }

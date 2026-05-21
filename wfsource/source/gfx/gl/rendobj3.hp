@@ -31,10 +31,10 @@
 struct RendererVariables
 {
 	ViewPort* viewPort;
-	long flags;
-	long zflag;
-	long sz[3];
-	long ir0[3];
+	int32 flags;
+	int32 zflag;
+	int32 sz[3];
+	int32 ir0[3];
 	const TriFace* currentRenderFace;
 	const Material* currentRenderMaterial;
 	const RotatedVector* rotatedVectorList;

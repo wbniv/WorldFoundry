@@ -13,6 +13,38 @@ Format per entry:
 
 ---
 
+## `Array<T>::operator[]` `_num` high-water off-by-one — odd-sized arrays under-report `Size()` — 2026-05-20
+
+**Status:** FIXED commit (one char: `>` → `>=` in [`cpplib/array.hpi`](../wfsource/source/cpplib/array.hpi):195).
+
+**Symptom:** `wf_game -L wflevels/smb_w1_1-standalone.iff` crashed immediately on the first script tick with `terminate called without an active exception` / `SIGABRT`. Misleading top-of-stack: `std::thread::~thread` destroying the joinable `gListenerThread`. Actual cause three frames down: `_sys_assert(0)` in [`mailbox/mailbox.cc`](../wfsource/source/mailbox/mailbox.cc):90, called when `MailboxesWithStorage::ReadMailbox(2012)` found mailbox 2012 outside the actor's local range — `2012 < 2012` is false — and delegated all the way to `GameMailboxes`, which has no parent and asserts. `assert(0)` → `exit(-1)` → atexit destroys the static joinable thread → `std::terminate()`.
+
+**Root cause:** Non-const `Array<T>::operator[]` ([`cpplib/array.hpi`](../wfsource/source/cpplib/array.hpi):189) tracks the highest-written index in `_num` (the high-water mark used by `Size()` and the `const operator[]` read guard):
+
+```cpp
+if(index > _num)   // BUG: should be >=
+    _num = index+1;
+```
+
+`index > _num` fails when writing to element `[N]` after `_num` has been set to exactly `N` by the previous write (i.e., sequential init). `_num` stays at `N` instead of advancing to `N+1`. For a sequential `[0..N−1]` init:
+
+| N (slots) | `_num` after full init | `Size()` | last slot reachable |
+|---|---|---|---|
+| even | N (correct) | N | ✓ |
+| **odd** | **N−1 (off by one)** | **N−1** | **last slot missed** |
+
+The SMB `?`-block (`Generator`) uses `NumberOfLocalMailboxes = 13` (odd). Init loop writes `[0..12]`; `_num` ends at 12. `Size()` = 12 → range is `[2000, 2012)`. `SMB_QBLOCK_DIE = 2012` (local index 12) is just outside → not found locally → assert.
+
+**Why dormant:** `Array::Size()` returns `_num`, which is wrong for odd-N sequential inits. However, every actor in every pre-SMB level (snowgoons, Q✱bert, MM) had `NumberOfLocalMailboxes = 0`. An empty array never exercises the init loop, so `_num` is always 0, and `Size()` is correctly 0 — every mailbox delegated up the chain. **Local mailbox storage was allocated but never meaningfully accessed**, so the wrong `Size()` could never trigger the range miss. The SMB `?`-block is the first actor in the repo with a non-zero odd `NumberOfLocalMailboxes` whose last slot was actually read.
+
+**Fix:** `>` → `>=` at `array.hpi`:195. `_num` now correctly tracks the first-unwritten high-water mark for all sequential and in-order initializations. In-range writes (index < _num) still leave `_num` unchanged.
+
+**Origin:** CVS `wfsource/source/cpplib/Attic/array.hpi,v` rev **1.3, 2003-05-23** — log: *"added an operator[] which is non-const and allows writting to objects in the Array"*. The bug was born with the feature. Rev 1.7 carried it into the 2010-05-01 git import (`a2784f6`). 23 years dormant.
+
+**Investigation:** [`docs/investigations/2026-05-20-array-subscript-num-off-by-one.md`](investigations/2026-05-20-array-subscript-num-off-by-one.md).
+
+---
+
 ## `Generato` was the only Actor subclass that skipped its `wf_Script` while idle — script-contract inconsistency — 2026-05-20
 
 **Status:** FIXED commit `4d4dff8`.

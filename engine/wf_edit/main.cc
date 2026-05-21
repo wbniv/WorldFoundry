@@ -26,6 +26,7 @@
 #include <pigsys/pigsys.hp>
 
 #include "level_doc.h"
+#include "property_panel.h"
 #include "wfcrdt.hpp"
 
 #include <cstdio>
@@ -51,11 +52,12 @@ struct EditorCtx {
     std::vector<std::string> actor_names;
     int                      selected = -1;
 
-    // Phase 1 property panel: the selected actor's fields, read from the Doc
-    // and cached until the selection changes. `doc` is owned by main().
+    // Property panel: the selected actor's fields, read from the Doc and (Phase
+    // 2) correlated against its class .oad into widget-typed PropFields, cached
+    // until the selection changes. `doc` is owned by main().
     wfcrdt::Doc*                  doc = nullptr;
-    int                           fields_for = -1;   // which actor `fields` holds
-    std::vector<wfedit::ActorField> fields;
+    int                           fields_for = -1;   // which actor `props` holds
+    std::vector<wfedit::PropField> props;
 };
 
 // Dump the composited back buffer (engine render + ImGui overlay) to a P6 PPM.
@@ -135,34 +137,23 @@ bool editor_frame(void* p)
 
     ImGui::Begin("Properties");
     if (c->selected >= 0 && c->selected < static_cast<int>(c->actor_names.size())) {
-        // Re-read this actor's fields from the Doc when the selection changes.
+        // Re-read this actor's fields from the Doc and re-correlate against its
+        // class .oad when the selection changes.
         if (c->doc && c->fields_for != c->selected) {
-            c->fields = wfedit::ReadActorFields(*c->doc, c->selected);
+            c->props = wfedit::ResolveProperties(
+                wfedit::ReadActorFields(*c->doc, c->selected));
             c->fields_for = c->selected;
         }
         ImGui::Text("Name");
         ImGui::SameLine(150);
         ImGui::TextUnformatted(c->actor_names[c->selected].c_str());
         ImGui::Separator();
-        // Phase 1: named read-only fields straight from the Doc. (Phase 2 swaps
-        // these for OAD-driven widgets keyed on ButtonType×showAs.)
-        if (ImGui::BeginTable("fields", 2,
-                ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg |
-                ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_ScrollY)) {
-            ImGui::TableSetupColumn("Field", ImGuiTableColumnFlags_WidthFixed, 140.0f);
-            ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
-            for (const auto& f : c->fields) {
-                ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted(f.name.c_str());
-                if (ImGui::IsItemHovered() && !f.chunk_type.empty())
-                    ImGui::SetTooltip("%s", f.chunk_type.c_str());
-                ImGui::TableSetColumnIndex(1);
-                ImGui::TextWrapped("%s", f.value.empty() ? "(empty)" : f.value.c_str());
-            }
-            ImGui::EndTable();
-        }
-        ImGui::TextDisabled("%zu fields (read-only) — OAD widgets next", c->fields.size());
+        // Phase 2: OAD-driven widgets keyed on (ButtonType × showAs), read-only.
+        wfedit::RenderProperties(c->props);
+        int matched = 0;
+        for (const auto& p : c->props) matched += p.matched;
+        ImGui::TextDisabled("%zu fields (read-only) — %d OAD-matched",
+                            c->props.size(), matched);
     } else {
         ImGui::TextDisabled("(select an actor)");
     }

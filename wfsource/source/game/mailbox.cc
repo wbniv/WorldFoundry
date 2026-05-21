@@ -38,7 +38,7 @@ _level(level)
 //==============================================================================
                      
 Scalar
-LevelMailboxes::ReadMailbox(long mailbox) const
+LevelMailboxes::ReadMailbox(int32 mailbox) const
 {
    DBSTREAM1(cmailbox << "LevelMailboxes::ReadMailbox: mailbox = " << mailbox << std::endl; )
 
@@ -51,7 +51,7 @@ LevelMailboxes::ReadMailbox(long mailbox) const
 //==============================================================================
 
 void
-LevelMailboxes::WriteMailbox(long mailbox, Scalar value)
+LevelMailboxes::WriteMailbox(int32 mailbox, Scalar value)
 {
     if(mailbox >= EMAILBOX_GLOBAL_SYSTEM_START && mailbox < EMAILBOX_GLOBAL_SYSTEM_MAX)
         _level.WriteSystemMailbox(mailbox, value);
@@ -76,7 +76,7 @@ _game(game)
 //==============================================================================
 
 Scalar
-GameMailboxes::ReadMailbox(long mailbox) const
+GameMailboxes::ReadMailbox(int32 mailbox) const
 {
    DBSTREAM1(cmailbox << "GameMailboxes::ReadMailbox: mailbox = " << mailbox << std::endl; )
 
@@ -89,7 +89,7 @@ GameMailboxes::ReadMailbox(long mailbox) const
 //==============================================================================
 
 void
-GameMailboxes::WriteMailbox(long mailbox, Scalar value)
+GameMailboxes::WriteMailbox(int32 mailbox, Scalar value)
 {
    if(mailbox >= EMAILBOX_PERSISTENT_SYSTEM_START && mailbox < EMAILBOX_PERSISTENT_SYSTEM_MAX)
        _game.WriteSystemMailbox(mailbox, value);

@@ -858,6 +858,9 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     add_executable(wf_edit
         engine/wf_edit/main.cc
         engine/wf_edit/level_doc.cc            # M4: levtree -> wfcrdt::Doc
+        engine/wf_edit/property_panel.cc       # Phase 2: OAD-driven Properties panel
+        engine/wf_edit/oad_reader.cc           # Phase 2: clean OadEntry adapter
+        wftools/oaddump/oad.cc                 # shared OAD reader (editor-gated only)
         ${IMGUI_DIR}/imgui.cpp
         ${IMGUI_DIR}/imgui_draw.cpp
         ${IMGUI_DIR}/imgui_tables.cpp
@@ -869,7 +872,8 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     target_include_directories(wf_edit PRIVATE
         ${IMGUI_DIR} ${IMGUI_DIR}/backends
         ${CMAKE_SOURCE_DIR}/engine/crdt              # wfcrdt.hpp (read-only Y.Doc)
-        ${CMAKE_SOURCE_DIR}/third_party/json)        # <nlohmann/json.hpp>
+        ${CMAKE_SOURCE_DIR}/third_party/json         # <nlohmann/json.hpp>
+        ${CMAKE_SOURCE_DIR}/wftools/oaddump)         # oad.hp (Phase 2 OAD reader)
     # main.cc compiles against engine headers, so the target needs the engine's
     # flags (mirrors wf_host_gl_e2e_test). Harmless for the ImGui TUs alongside.
     target_compile_options(wf_edit PRIVATE

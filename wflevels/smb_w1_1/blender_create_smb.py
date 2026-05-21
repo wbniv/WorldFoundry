@@ -83,7 +83,7 @@ bpy.ops.wf.import_level(filepath=SNOWGOONS)
 KEEP_CLASSES   = {'director', 'camera', 'levelobj', 'matte', 'light',
                   'room', 'camshot', 'target', 'actboxor', 'player'}
 DELETE_CLASSES = {'statplat', 'enemy', 'snowman01', 'missile',
-                  'tool', 'tool01', 'ground01', 'hp'}
+                  'tool', 'tool01', 'ground01', 'hp', 'gold', 'generator'}
 
 
 def get_class(obj):
@@ -325,15 +325,11 @@ ground_obj['wf_Visibility Mailbox'] = 1
 ground_obj['wf_Model Type'] = 'Mesh'
 
 # ── 6. ? Blocks ───────────────────────────────────────────────────────────────
-# Each block is TWO stacked statplats at the same position: the gold ?-block
-# (visible at start) and a flat-tan "used" block (hidden at start). On bump,
-# Mario's Forth script flips their Visibility Mailboxes. Only block 0 has the
-# stacked-used variant + mailbox wiring today; blocks 1/2 stay as plain
-# always-visible gold for now (follow-up work generalises). See
-# docs/plans/2026-05-17-per-actor-collision-mailboxes.md.
-mat_qblock      = make_mat('smb_qblock',      (0.94, 0.72, 0.02))  # NES gold
-mat_qblock_used = make_mat('smb_qblock_used', (0.78, 0.49, 0.18))  # flat tan
-mat_coin        = make_mat('smb_coin',        (1.0,  0.84, 0.0))   # NES coin yellow
+# Each ? block is ONE Generator actor: solid visible mesh + 3-state self-detect
+# Forth script + per-actor activation mailbox. The block IS the generator.
+# See docs/plans/2026-05-19-smb-block-generator-coin.md.
+mat_qblock = make_mat('smb_qblock', (0.94, 0.72, 0.02))  # NES gold
+mat_coin   = make_mat('smb_coin',   (1.0,  0.84, 0.0))   # NES coin yellow
 BSIZE = T / 2  # half-side of a 1-tile block
 COIN_R, COIN_T = 0.3, 0.2   # Y must be ≥ ~0.2 (40 cm) to render at all from the
                              # side-camera (Y=-20) — 0.04 was below the renderer's
@@ -341,20 +337,61 @@ COIN_R, COIN_T = 0.3, 0.2   # Y must be ≥ ~0.2 (40 cm) to render at all from t
                              # troubleshooting.md § "Object too thin in camera-
                              # depth axis — invisible".
 
-# Must match SMB_QBLOCK_0_NORMAL/USED/COIN_SPAWN in
-# wfsource/source/mailbox/mailbox.inc. Hardcoded here because Blender custom
-# properties take literals, not `INDEXOF_*` constant names (those are Forth-side).
-MB_SMB_QBLOCK_0_NORMAL     = 1803
-MB_SMB_QBLOCK_0_USED       = 1804
-MB_SMB_QBLOCK_0_COIN_SPAWN = 1805
+# Per-actor local mailbox slots (same index on every block instance; no cross-talk
+# because local mailboxes 2000-2099 are per-actor). Must match mailbox.inc.
+MB_SMB_QBLOCK_ACTIVATE = 2010
+MB_SMB_QBLOCK_USED     = 2011
+MB_SMB_QBLOCK_DIE      = 2012
 
-# Coin template — single Missile-class actor flagged Template Object = True.
-# At level load the engine copies its OAD into _templateObjects[] and skips
-# instantiating it as a live actor. Each ?-block's Generator spawns instances
-# at runtime via Level::ConstructTemplateObject. The coin spawns above the
-# block top with an upward Z velocity; Jolt gravity arcs it back down; the
-# per-instance Forth script suicides via INDEXOF_ALIVE once Z drops below the
-# block bottom.
+# Tan (used-block) color packed as 0xRRGGBB for FACE_COLOR_TOP write-mailbox.
+# (0.78*255, 0.49*255, 0.18*255) = (199, 125, 46) = 0xC77D2E.
+QBLOCK_TAN = 0xC77D2E
+
+# 3-state self-detect script (NORMAL → ACTIVE → USED).
+# State: SMB_QBLOCK_DIE = window-close time (first_hit+4.0); 0 = NORMAL.
+#        SMB_QBLOCK_USED = 1 → permanently dead.
+# Hit-from-below gate: COLLISION_NORMAL_Z > 0. JoltContactDispatch passes the
+# same normal vector to both actor and struck body; bump-from-below is +Z for
+# both (direction Mario pushes the surface). Matches the engine change in
+# docs/plans/2026-05-19-smb-block-generator-coin.md step 8.
+# Activation pulse is one tick (Generator spawn-check at top, script clear at
+# bottom of Generato::update) → exactly one coin per distinct bump.
+# `not` used instead of `0=` (zForth defines `not` as `: not 0 = ;` but
+# doesn't expose `0=` as a named word; `0<>` and `>` are both available).
+QBLOCK_SCRIPT = (
+    "\\ wf\n"
+    f"INDEXOF_SMB_QBLOCK_USED read-mailbox 0<> if\n"
+    f"  0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "else\n"
+    "  INDEXOF_SMB_QBLOCK_ACTIVATE read-mailbox 0<> if\n"
+    "    0 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "  then\n"
+    "  INDEXOF_SMB_QBLOCK_DIE read-mailbox dup not if\n"
+    "    drop\n"
+    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
+    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
+    "        INDEXOF_TIME read-mailbox 4.0 +\n"
+    "        INDEXOF_SMB_QBLOCK_DIE write-mailbox\n"
+    "        1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "      then\n"
+    "    then\n"
+    "  else\n"
+    "    INDEXOF_TIME read-mailbox > if\n"
+    "      INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
+    "        INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
+    "          1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "        then\n"
+    "      then\n"
+    "    else\n"
+    f"      0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "      1 INDEXOF_SMB_QBLOCK_USED write-mailbox\n"
+    "    then\n"
+    "  then\n"
+    "then\n"
+)
+
+# Coin template — Gold collectible class (pickup-driven despawn via
+# Gold::Collision + SetPendingRemove; no suicide script needed).
 import bmesh as _bmesh
 def _make_coin_template():
     bm = _bmesh.new()
@@ -366,93 +403,39 @@ def _make_coin_template():
     for p in mesh.polygons:
         p.material_index = 0
     obj = bpy.data.objects.new('coin_template', mesh)
-    # Park far off-screen. The Generator chooses the actual spawn position.
     obj.location = (-50.0, 0.0, 0.0)
     scene.collection.objects.link(obj)
-    attach_schema(obj, 'missile')
+    attach_schema(obj, 'gold')
     obj['wf_Template Object']      = 'True'
-    obj['wf_Moves Between Rooms']  = 'True'        # template asset lives in PERM
-    obj['wf_Mobility']             = 'Physics'     # gravity + initial velocity
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
     obj['wf_Mass']                 = 0.001
     obj['wf_Falling Acceleration'] = 12.0
-    obj['wf_Max Air Speed']        = 50.0          # don't cap free-fall
-    # Missile defaults: Arming Delay 0.2 s, Explosion Delay 2 s. The 2-second
-    # auto-explode would yank the coin via SetPendingRemove before the script's
-    # Z<5 suicide could fire. Stretch the explosion timer to 30 s so the
-    # script-driven despawn (Z<5 ≈ 2.5 s after spawn) is what actually ends
-    # the coin's life. (See [[feedback_timing_in_seconds_not_ticks]] — 30 s
-    # is real wall time, independent of frame rate.)
-    obj['wf_Explosion Delay']      = 30.0
+    obj['wf_Max Air Speed']        = 50.0
     obj['wf_Model Type']           = 'Mesh'
-    obj['wf_Visibility Mailbox']   = 1             # always visible when spawned
+    obj['wf_Visibility Mailbox']   = 1
     obj['wf_Mesh Name']            = 'coin_template.iff'
-    # Per-instance lifetime + suicide. On first tick, stash spawn time in
-    # SMB_COIN_ELAPSED. On subsequent ticks, suicide if now - spawnT > 0.8 s.
-    #
-    # Using INDEXOF_TIME (absolute LevelClock) rather than accumulating
-    # INDEXOF_DELTA_TIME because dt can be huge on slow dev hosts (we've
-    # seen 1.0 s/tick in debug builds with rendering off the critical path).
-    # Per-tick accumulation then gates trivially over the threshold in one
-    # frame. Absolute clock is robust to frame-rate variance.
-    # [[feedback_timing_in_seconds_not_ticks]] applies regardless.
-    #
-    # First-tick detection: SMB_COIN_ELAPSED reads 0 on a freshly-spawned
-    # actor (local mailboxes zero-init at allocation). If a coin happens to
-    # spawn at LevelClock exactly 0.0 it'd treat every tick as first-tick
-    # and never suicide; in practice game-clock is non-zero before any
-    # bump can fire.
-    obj['wf_Script'] = (
-        "\\ wf\n"
-        "INDEXOF_SMB_COIN_ELAPSED read-mailbox dup 0= if "
-        "drop INDEXOF_TIME read-mailbox INDEXOF_SMB_COIN_ELAPSED write-mailbox "
-        "else "
-        "INDEXOF_TIME read-mailbox swap - 0.8 > if "
-        "0 INDEXOF_ALIVE write-mailbox "
-        "then then\n"
-    )
     return obj
 
 _make_coin_template()
 
 for i, bx in enumerate(QBLOCK_XS):
-    block = add_statplat(f'qblock_{i:02d}',
-                         bx - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
-                         bx + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
-                         mat_qblock)
-    if i == 0:
-        # Block 0: visibility driven by SMB_QBLOCK_0_NORMAL (Mario script
-        # inits it to 1 on first tick, flips to 0 on bump).
-        block['wf_Visibility Mailbox'] = MB_SMB_QBLOCK_0_NORMAL
-        used = add_statplat(f'qblock_{i:02d}_used',
-                            bx - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
-                            bx + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
-                            mat_qblock_used)
-        # USED stays at 0 until bump flips it to 1 (hidden by default).
-        used['wf_Visibility Mailbox'] = MB_SMB_QBLOCK_0_USED
-
-        # Per-block coin spawner — Generator actor anchored 1.0 m above the
-        # block top, watching SMB_QBLOCK_0_COIN_SPAWN. Mario's bump pulses
-        # the mailbox to 1 for one tick; this Generator fires one coin per
-        # pulse. Generation Rate = 10 s effectively throttles to one shot.
-        # Anchor Z = BLOCK_Z+BSIZE (block top) + 1.0 m. The generator's own
-        # collision-box centre is ~0.13 m below this anchor, so the actual
-        # spawn pos lands at block_top+0.87 m. The coin template has half-Z
-        # 0.3 m, so this clears the block by 0.57 m — well above the
-        # SafelyConstructTemplateObject collision-check threshold (a 0.4 m
-        # offset led to a 0.03 m overlap with the block top → NULL spawn).
-        spawner = bpy.data.objects.new(f'coin_spawner_{i:02d}', None)
-        spawner.location = (bx, 0.0, BLOCK_Z + BSIZE + 1.0)
-        scene.collection.objects.link(spawner)
-        attach_schema(spawner, 'generator')
-        spawner['wf_Mobility']           = 'Anchored'
-        spawner['wf_Model Type']         = 'None'
-        spawner['wf_Visibility Mailbox'] = 0
-        spawner['wf_Activation MailBox'] = MB_SMB_QBLOCK_0_COIN_SPAWN
-        spawner['wf_Object To Throw']    = 'coin_template'
-        spawner['wf_Generation Rate']    = 10.0
-        spawner['wf_Object X Velocity']  = 0.0
-        spawner['wf_Object Y Velocity']  = 0.0
-        spawner['wf_Object Z Velocity']  = 8.0    # peak ≈ 2.7 m above block top under g=12; apex at t≈0.67 s
+    blk = add_box(f'qblock_{i:02d}',
+                  bx - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                  bx + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
+                  mat_qblock)
+    attach_schema(blk, 'generator')
+    blk['wf_Mobility']           = 'Anchored'
+    blk['wf_Model Type']         = 'Mesh'
+    blk['wf_Visibility Mailbox'] = 1
+    blk['wf_Number Of Local Mailboxes'] = 13  # LOCAL_USER_START+0..+12 covers 2000-2012
+    blk['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+    blk['wf_Object To Throw']    = 'coin_template'
+    blk['wf_Generation Rate']    = 10.0
+    blk['wf_Object X Velocity']  = 0.0
+    blk['wf_Object Y Velocity']  = 0.0
+    blk['wf_Object Z Velocity']  = 8.0
+    blk['wf_Script']             = QBLOCK_SCRIPT
 
 # ── 7. Mario placeholder ──────────────────────────────────────────────────────
 def _build_mario():
@@ -550,43 +533,7 @@ if player:
         "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox "
         "dup 16384 & 256 / over 8192 & 64 / | | "
         "INDEXOF_INPUT write-mailbox\n"
-        # Broadcast own X to INDEXOF_SMB_PLAYER_X for the SMB scroll Director
-        # (which runs after the main loop) to consume this tick.
         "INDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\n"
-        # First-tick init for qblock_0 visibility — both mailboxes start at 0
-        # so the gold block is invisible until we kick NORMAL to 1. After a
-        # bump, NORMAL=0 and USED=1, so the inner `not` of USED is false and
-        # the init guard correctly skips on subsequent ticks.
-        # (Using `not` not `0=` — our zForth's bootstrap defines `: not 0 = ;`
-        # but doesn't expose `0=`/`0>`/`0<` directly; TODO surfaces this.)
-        "INDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox not if "
-        "INDEXOF_SMB_QBLOCK_0_USED read-mailbox not if "
-        "1 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox "
-        "then then\n"
-        # Bump detection: nonzero collider + NORMAL_Z > 0 (hit from above) +
-        # Clear COIN_SPAWN pulse from previous tick (one-tick latch). Runs
-        # BEFORE the bump branch so the bump branch's write of 1 lands cleanly:
-        #   Tick N (bump): clear sees 0 (no-op); bump sets SPAWN=1. After
-        #                   Mario's script, the per-block Generator (higher
-        #                   actor idx) sees SPAWN=1 and fires one coin.
-        #   Tick N+1:      clear sees 1 (set last tick), writes 0; bump won't
-        #                   refire (NORMAL=0 now). Generator sees SPAWN=0,
-        #                   resets timer.
-        # Without this clear-before-bump ordering, the spawn mailbox stays at
-        # 1 and the Generator re-fires every Generation Rate seconds.
-        "INDEXOF_SMB_QBLOCK_0_COIN_SPAWN read-mailbox 0<> if "
-        "0 INDEXOF_SMB_QBLOCK_0_COIN_SPAWN write-mailbox "
-        "then\n"
-        # On bump: flip the gold/tan visibility pair AND pulse SMB_QBLOCK_0_COIN_SPAWN
-        # to 1 for one tick. The per-block Generator actor watches that mailbox
-        # and fires one coin_template instance per pulse.
-        "INDEXOF_COLLIDER_IDX read-mailbox 0<> if "
-        "INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if "
-        "INDEXOF_SMB_QBLOCK_0_NORMAL read-mailbox 0<> if "
-        "0 INDEXOF_SMB_QBLOCK_0_NORMAL write-mailbox "
-        "1 INDEXOF_SMB_QBLOCK_0_USED write-mailbox "
-        "1 INDEXOF_SMB_QBLOCK_0_COIN_SPAWN write-mailbox "
-        "then then then\n"
     )
 
     mario_mesh = _build_mario()

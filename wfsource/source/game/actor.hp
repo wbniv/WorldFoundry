@@ -73,10 +73,10 @@ class Actor;
 class ActorMailboxes : public MailboxesWithStorage
 {
 public:
-   ActorMailboxes(Actor& actor, long mailboxesBase, long numberOfLocalMailboxes, Mailboxes* parent);
+   ActorMailboxes(Actor& actor, int32 mailboxesBase, int32 numberOfLocalMailboxes, Mailboxes* parent);
    virtual ~ActorMailboxes();
-   virtual Scalar ReadMailbox(long mailbox) const;
-   virtual void WriteMailbox(long mailbox, Scalar value);
+   virtual Scalar ReadMailbox(int32 mailbox) const;
+   virtual void WriteMailbox(int32 mailbox, Scalar value);
 private:
     Actor& _actor;          // kts temporary, eventually I will just put the mbox storage in here
 };

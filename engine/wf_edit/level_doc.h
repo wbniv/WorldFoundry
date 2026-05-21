@@ -35,10 +35,21 @@ std::vector<std::string> ReadActorNames(wfcrdt::Doc& doc);
 // inline (a NAME sub-chunk: "Position", "Mass", "Background Color", …), so the
 // Properties panel needs no OAD just to list named fields read-only — that's
 // Phase 1. The OAD-driven (ButtonType×showAs) widget dispatch is Phase 2.
+//
+// A field chunk's leaves split into a raw value and a display string:
+//   { 'I32'  {NAME "Model Type"} {DATA 1l}  {STR "Mesh"} }   data="1" label="Mesh"
+//   { 'I32'  {NAME "Mobility"}             {STR "Anchored"} }  data=""  label="Anchored"
+//   { 'FX32' {NAME "Mass"}     {DATA 0.0(1.15.16)} {STR "0.0"} }
+//   { 'FILE' {NAME "Mesh Name"}            {STR "House.iff"} }  label="House.iff"
+// `data` is the DATA leaf(s) (raw scalar / VEC3 components); `label` is the STR
+// leaf (enum current-label / bool text / filename / string body). `value` keeps
+// the Phase-1 space-joined form for the no-OAD raw fallback.
 struct ActorField {
     std::string name;        // the field's NAME sub-chunk text ("Mass", …)
     std::string chunk_type;  // IFF storage type: "VEC3" / "I32" / "FX32" / "STR" / "FILE" / …
-    std::string value;       // its DATA value(s), space-joined as stored
+    std::string value;       // every non-NAME leaf, space-joined (Phase-1 form)
+    std::string data;        // DATA leaf(s) only — raw scalar / vector components
+    std::string label;       // STR leaf — enum/bool label, filename, or string body
 };
 
 // Read every field of content[actor_index] out of the Doc: each child chunk's

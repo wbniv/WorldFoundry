@@ -249,8 +249,8 @@ private:
 	SObjectStartupData **		_templateObjects;						// pointer to array of template object pointers, in levelcon order
 	int							_numTemplateObjects;
 	// system mailboxes requiring storage
-	long						_camRollMailBox;						// kts is there a better way?
-	long						_camShotMailBox;						// kts is there a better way?
+	int32						_camRollMailBox;						// mailbox index (was long → 8 bytes on LP64)
+	int32						_camShotMailBox;						// mailbox index (was long → 8 bytes on LP64)
 
    PointerContainer<Memory> _memory;
 

@@ -192,7 +192,7 @@ Array<T>::operator[](int32 index)
 	assert(index < _max);
 	assert(index >= 0);
 	assert(ValidPtr(_items));
-   if(index > _num)
+   if(index >= _num)
       _num = index+1;
 	return(_items[index]);
 }

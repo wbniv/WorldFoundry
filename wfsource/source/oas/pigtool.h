@@ -29,11 +29,24 @@
 #endif	/*!defined(SYS_UINT16)*/
 
 #ifndef	SYS_INT32
+#if defined(__LINUX__) || defined(__ANDROID__)
+// LP64: `long` is 8 bytes on x86-64 Linux/Android — use `int` so int32 stays
+// 32 bits (mirrors pigtypes.h). PSX/x86-32 had long==32, which is why the
+// original `long` worked there. Without this guard, any TU pulling pigtool.h
+// (via oad.h) before pigtypes.h gets a 64-bit int32 — e.g. it bloated
+// typeDescriptor by 12 bytes (3× int32 min/max/def), breaking .oad reads.
+#define	SYS_INT32		signed int
+#else
 #define	SYS_INT32		signed long
+#endif
 #endif	/*!defined(SYS_INT32)*/
 
 #ifndef	SYS_UINT32
+#if defined(__LINUX__) || defined(__ANDROID__)
+#define	SYS_UINT32		unsigned int
+#else
 #define	SYS_UINT32		unsigned long
+#endif
 #endif	/*!defined(SYS_UINT32)*/
 
 #ifndef	SYS_UCHAR

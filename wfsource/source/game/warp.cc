@@ -110,7 +110,7 @@ Warp::update()
 				break;
 			case MsgPort::SPECIAL_COLLISION:
 			{
-				Actor* colActor = (Actor*)msgData;
+				Actor* colActor = reinterpret_cast<Actor*>(*(uintptr_t*)msgData);   // pointer is stored IN msgData, not the buffer's address
 				DBSTREAM4( cdebug << "Warp::update: collision with actor  " << colActor << std::endl; )
 				if ( activation.Activated(theLevel->GetActiveRooms().GetObjectIter(ROOM_OBJECT_LIST_COLLIDE), (struct _Activation*)&GetActivateBlockPtr()->ActivatedBy, colActor, *GetActivationBlockPtr(), theLevel->GetObjectList()) )
 				{

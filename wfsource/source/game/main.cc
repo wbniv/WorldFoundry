@@ -284,7 +284,7 @@ ParseCommandLine(int argc, char** argv)
 			AssertMsg( strlen(argv[index]+1) > 10, "The -breaktime= option requires a time" );
 			extern Scalar WALL_CLOCK_BREAKPOINT_VALUE;
 #if defined(SCALAR_TYPE_FIXED)
-         long value = atoi( argv[index] + 1 + 10 );
+         int32 value = atoi( argv[index] + 1 + 10 );
         WALL_CLOCK_BREAKPOINT_VALUE = Scalar::FromFixed32(value);
 #elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
          double value;

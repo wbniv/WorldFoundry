@@ -152,7 +152,7 @@ RenderActorScarecrow::RenderActorScarecrow(Memory& memory, binistream& input,int
 //				std::cout << " bitmapList = [" << bitmapList << ']' << std::endl;
 
 #if defined( USE_ASSET_ID )
-				_nTextures = chunkIter->Size() / sizeof( long );
+				_nTextures = chunkIter->Size() / sizeof( int32 );
 				_texture = new( memory )( Texture*[ _nTextures ] );
 				assert( ValidPtr( _texture ) );
 #else

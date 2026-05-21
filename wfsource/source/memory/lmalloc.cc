@@ -55,7 +55,7 @@ struct FileLine
 		FREED = 'FREE',
 		CANARY_VALUE = (int32)0xDEADBEEF
 	};
-	long _state;
+	int32 _state;
 	int _size;			                // size of allocation (includes FileLine header + canary)
 #if LMALLOC_TRACK_LINE_AND_FILE
 	char* _file;						// file and line allocation occured on

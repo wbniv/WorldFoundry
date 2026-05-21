@@ -110,7 +110,7 @@
 #	error Unknown platform -- how are the joystick buttons mapped?
 #endif
 
-typedef long joystickButtons;
+typedef uint32 joystickButtons;
 
 // joystickButtonsF
 #define	EJ_BUTTONF_NONE 0
@@ -147,7 +147,7 @@ typedef long joystickButtons;
 #define	EJ_BUTTONF_1 (1<<EJ_BUTTONB_1)
 #define	EJ_BUTTONF_2 (1<<EJ_BUTTONB_2)
 
-typedef long joystickButtonsF;
+typedef uint32 joystickButtonsF;
 
 typedef enum
 {

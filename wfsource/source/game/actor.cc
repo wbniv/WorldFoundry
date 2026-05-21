@@ -521,9 +521,11 @@ Actor::BindAssets(Memory& memory)
 	DBSTREAM3(casset << "BindAssets: actor:" << *this << ",now has a renderActor =" << _renderActor << std::endl; )
 
 #ifdef PHYSICS_ENGINE_JOLT
-	// For StatPlat mesh actors: replace the constructor's box-body placeholder
-	// with a trimesh body now that the room's asset slot is loaded.
-	if (_nonStatPlat == &_statPlatData &&
+	// For StatPlat mesh actors and anchored Generator mesh actors: replace the
+	// constructor's box-body placeholder with a trimesh body now that the
+	// room's asset slot is loaded.
+	if ((_nonStatPlat == &_statPlatData ||
+	     (kind() == Actor::Generator_KIND && GetMovementBlockPtr()->Mobility == MOBILITY_ANCHORED)) &&
 	    GetMeshBlockPtr()->ModelType == MODEL_TYPE_MESH && GetMeshName() != 0)
 	{
 		packedAssetID meshID(GetMeshName());
@@ -650,6 +652,11 @@ Actor::Actor( const SObjectStartupData* startupData ) :
     _mailboxes(*this, EMAILBOX_LOCAL_START,GetCommonBlockPtr()->NumberOfLocalMailboxes,startupData->mailboxes)
 {
 	DBSTREAM3( cactor << "Actor::Actor:" << std::endl; )
+    fprintf(stderr, "[Actor] idx=%d class=%d commonOff=%d NumberOfLocalMailboxes=%d\n",
+        startupData->idxActor,
+        startupData->objectData ? ((int16*)startupData->objectData)[0] : -1,
+        (int)((_Actor*)_oadData)->commonPageOffset,
+        GetCommonBlockPtr()->NumberOfLocalMailboxes);
 	assert( ValidPtr( startupData ) );
     assert(ValidPtr( startupData->mailboxes));
 	assert( ValidPtr( _oadData ) );
@@ -786,6 +793,20 @@ Actor::Actor( const SObjectStartupData* startupData ) :
 			if ( pidxTools[ idxTool ] != -1 )
 				++_nonStatPlat->_nTools;
 		}
+
+#ifdef PHYSICS_ENGINE_JOLT
+		// Anchored Generator actors with a mesh (block-IS-generator pattern) need
+		// a static Jolt body so JoltContactDispatch can find them and populate
+		// the block's per-actor collision mailboxes. BindAssets() replaces this
+		// box placeholder with a trimesh body once the mesh IFF is loaded.
+		if (objdata->type == Actor::Generator_KIND &&
+		    GetMovementBlockPtr()->Mobility == MOBILITY_ANCHORED &&
+		    GetMeshBlockPtr()->ModelType == MODEL_TYPE_MESH)
+		{
+			_physicalAttributes.JoltMakeStatic();
+			JoltBodySetActor(_physicalAttributes.JoltBodyID(), this);
+		}
+#endif
 	}
 
 	AssertMsg( _nonStatPlat->_hitPoints > Scalar::zero, *this << " has an invalid hit point setting of " << _nonStatPlat->_hitPoints );
@@ -1676,10 +1697,15 @@ Actor::GetSpecialCollisionMessage(void * msgData, int32 maxsize)
 {
 	if ( GetMsgPort().GetMsgByType( MsgPort::SPECIAL_COLLISION, msgData,maxsize) )
 	{
-		// re-check this collision to make sure it's still valid
-		const PhysicalAttributes& colAttr = ((Actor*)msgData)->GetPhysicalAttributes();
+		// re-check this collision to make sure it's still valid.
+		// msgData holds an Actor* posted by collision.cc as
+		// reinterpret_cast<uintptr_t>(&object) — read the pointer FROM the
+		// buffer, not (Actor*)msgData (which mis-read the buffer bytes as an
+		// Actor). Keep the pointer optimization (06373f5); just interpret it
+		// correctly, and invalidate via the pointer-width word, not `long`.
+		const PhysicalAttributes& colAttr = reinterpret_cast<Actor*>(*(uintptr_t*)msgData)->GetPhysicalAttributes();
 		if ( !(_physicalAttributes.CheckCollision(colAttr)) )
-			*(long*)msgData = 0;
+			*(uintptr_t*)msgData = 0;
 		return true;
 	}
 	else
@@ -1832,7 +1858,7 @@ Actor::GetMailboxes() const
 }
 
 
-ActorMailboxes::ActorMailboxes(Actor& actor,long mailboxesBase, long numberOfLocalMailboxes, Mailboxes* parent) :
+ActorMailboxes::ActorMailboxes(Actor& actor,int32 mailboxesBase, int32 numberOfLocalMailboxes, Mailboxes* parent) :
 // Route _localMailboxes through the per-level _memory pool (DMalloc), not
 // the default HALLmalloc. Actors are constructed mid-Level-loading and
 // destroyed mid-Level-teardown — their HALLmalloc-backed sub-allocations
@@ -1849,7 +1875,7 @@ ActorMailboxes::~ActorMailboxes()
 }
 
 Scalar 
-ActorMailboxes::ReadMailbox(long mailbox) const
+ActorMailboxes::ReadMailbox(int32 mailbox) const
 {
     if(mailbox >= EMAILBOX_LOCAL_SYSTEM_START && mailbox < EMAILBOX_LOCAL_SYSTEM_MAX)
         return _actor.ReadSystemMailbox(mailbox);
@@ -1859,7 +1885,7 @@ ActorMailboxes::ReadMailbox(long mailbox) const
 
 
 void 
-ActorMailboxes::WriteMailbox(long mailbox, Scalar value)
+ActorMailboxes::WriteMailbox(int32 mailbox, Scalar value)
 {
     if(mailbox >= EMAILBOX_LOCAL_SYSTEM_START && mailbox < EMAILBOX_LOCAL_SYSTEM_MAX)
         _actor.WriteSystemMailbox(mailbox,value);

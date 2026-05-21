@@ -1,6 +1,17 @@
 # Template-object Jolt body sync on spawn
 
-**Status:** Not started
+**Status:** **Done — verified by play 2026-05-20.** The fix (Jolt-body sync inside
+`setCurrentPos`) is in HEAD — see [`actor.hpi`](../../wfsource/source/game/actor.hpi)
+`Actor::setCurrentPos`, which now calls `JoltCharacterSetPosition` / `JoltBodySetPosition`.
+It landed *inside* commit `0adf1d4` ("refactor(rtti): push GetWatchObject up into
+MovementHandler (step 3/7)") — i.e. **bundled into an unrelated RTTI commit**, which is
+why this plan, the wf-status table, and the [engine-mutation-api](2026-05-19-engine-mutation-api.md)
+status had all lagged at "Not started / spawn aborts." **Runtime confirmed 2026-05-20:**
+Will played the rebuilt binary (engine changes #1+#2 of [smb-block-generator-coin](2026-05-19-smb-block-generator-coin.md)
+compiled in), bumped a `?` block in smb_w1_1, and a coin spawned with **no `terminate`** —
+the position desync *was* the sole cause of the crash. Diagnostic `fprintf`s in
+`generator.cc` are intentionally retained until the SMB block-generator + Gold plan
+completes (`feedback_debug_instrumentation_teardown`).
 **Owner:** Claude (Will reviewing)
 **Date:** 2026-05-19
 **Branch:** `2026-new-level`
@@ -61,7 +72,7 @@ For comparison, the existing handlers for `EMAILBOX_X_POS / Y_POS / Z_POS` write
 
 ## Fix
 
-**Option A — push the Jolt sync into `setCurrentPos` itself** *(recommended)*.
+**Option A — push the Jolt sync into `setCurrentPos` itself** *(recommended — ALREADY APPLIED in HEAD via commit `0adf1d4`; see Status above. Verification still pending).*
 
 `setCurrentPos` semantically means "this actor is now at this world position." Anything observable that derives from world position — renderer pose, predicted position, physics body, particle attachments — should agree afterward. The X/Y/Z_POS mailbox handlers had to copy the sync block three times specifically because `setCurrentPos` lacks the invariant; folding the sync into `setCurrentPos` lets those handlers shrink to a single call later (out of scope — separate cleanup).
 

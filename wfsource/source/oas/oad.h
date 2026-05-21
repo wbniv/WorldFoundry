@@ -107,10 +107,10 @@ typedef enum
 
 typedef struct _oadHeader
 {
-	long chunkId;
-	long chunkSize;
+	int32 chunkId;		// 32-bit on disk (PSX/x86-32 origin); `long` was 8 bytes
+	int32 chunkSize;	// on LP64 and mis-sized the header (80 vs 92 bytes).
 	char name[72-4];
-	long version;
+	int32 version;
 } oadHeader;
 
 /*============================================================================*/
