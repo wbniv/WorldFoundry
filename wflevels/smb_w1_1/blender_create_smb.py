@@ -328,8 +328,8 @@ ground_obj['wf_Model Type'] = 'Mesh'
 # Each ? block is ONE Generator actor: solid visible mesh + 3-state self-detect
 # Forth script + per-actor activation mailbox. The block IS the generator.
 # See docs/plans/2026-05-19-smb-block-generator-coin.md.
-mat_qblock = make_mat('smb_qblock', (0.94, 0.72, 0.02))  # NES gold
-mat_coin   = make_mat('smb_coin',   (1.0,  0.84, 0.0))   # NES coin yellow
+mat_qblock = make_mat('smb_qblock', (0.82, 0.50, 0.12))  # orange-brown (NOT gold)
+mat_coin   = make_mat('smb_coin',   (1.0,  0.84, 0.0))   # gold #FFD600
 BSIZE = T / 2  # half-side of a 1-tile block
 COIN_R, COIN_T = 0.3, 0.2   # Y must be ≥ ~0.2 (40 cm) to render at all from the
                              # side-camera (Y=-20) — 0.04 was below the renderer's
@@ -434,7 +434,7 @@ for i, bx in enumerate(QBLOCK_XS):
     blk['wf_Generation Rate']    = 10.0
     blk['wf_Object X Velocity']  = 0.0
     blk['wf_Object Y Velocity']  = 0.0
-    blk['wf_Object Z Velocity']  = 8.0
+    blk['wf_Object Z Velocity']  = 12.0
     blk['wf_Script']             = QBLOCK_SCRIPT
 
 # ── 7. Mario placeholder ──────────────────────────────────────────────────────

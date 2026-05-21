@@ -27,7 +27,7 @@ public:
 	// Player touches the coin -> credit the player's GOLD mailbox + remove self.
 	virtual void Collision(PhysicalObject& other, const Vector3& normal);
 
-	// Despawn after TTL (~1.5 s) regardless of physics outcome.
+	// Despawn after TTL (~3.0 s) regardless of physics outcome.
 	virtual void update();
 
 private:
