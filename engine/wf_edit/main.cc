@@ -60,7 +60,26 @@ struct EditorCtx {
     wfcrdt::Doc*                  doc = nullptr;
     int                           fields_for = -1;   // which actor `props` holds
     std::vector<wfedit::PropField> props;
+
+    // Save round-trip: the lossless levtree-parse JSON the Doc was built from
+    // (patched on save), the .lev path File→Save writes, and a transient toast.
+    std::string parse_json;
+    std::string save_path;
+    std::string toast;
+    int         toast_frames = 0;
 };
+
+// File→Save (and Ctrl+S / headless WF_EDIT_SAVE_UI): patch the parse JSON with
+// the Doc and `levtree print` it to save_path; flash the result as a toast.
+void DoSave(EditorCtx* c)
+{
+    if (!c->doc || c->save_path.empty()) {
+        c->toast = "save: no document / path"; c->toast_frames = 180; return;
+    }
+    const bool ok = wfedit::SaveDocToLev(*c->doc, c->parse_json, c->save_path);
+    c->toast = (ok ? "saved " : "SAVE FAILED: ") + c->save_path;
+    c->toast_frames = 180;
+}
 
 // Dump the composited back buffer (engine render + ImGui overlay) to a P6 PPM.
 // GL rows are bottom-up; flip for top-down PPM. Convert to PNG with ffmpeg.
@@ -115,6 +134,17 @@ bool editor_frame(void* p)
                 wfedit::RunBridgeTest(*c->doc, c->selected, s.substr(0, bar), s.substr(bar + 1));
         }
     }
+    // M3 save-UI screenshot proof: WF_EDIT_SAVE_UI=<path> drives File→Save once
+    // from inside the frame loop (so the toast renders + --screenshot captures
+    // it), unlike the pre-GL WF_EDIT_SAVE which exits before any UI.
+    static bool s_save_ui = false;
+    if (!s_save_ui && c->doc) {
+        if (const char* p = std::getenv("WF_EDIT_SAVE_UI"); p && *p) {
+            s_save_ui = true;
+            c->save_path = p;
+            DoSave(c);
+        }
+    }
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -146,12 +176,18 @@ bool editor_frame(void* p)
 
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            ImGui::MenuItem("Publish to .blend", nullptr, false, false);   // M5+
+            if (ImGui::MenuItem("Save Level", "Ctrl+S")) DoSave(c);
+            ImGui::MenuItem("Publish to .blend", nullptr, false, false);   // later: hand off to wf.import_level
             ImGui::EndMenu();
         }
         ImGui::TextDisabled("   World Foundry Editor");
         ImGui::EndMainMenuBar();
     }
+
+    // Ctrl+S → save (when no text widget is capturing the keypress).
+    if (!ImGui::GetIO().WantTextInput &&
+        ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S, false))
+        DoSave(c);
 
     ImGui::Begin("Outliner");
     ImGui::Text("%s: %zu actors", c->level_name.c_str(), c->actor_names.size());
@@ -207,6 +243,22 @@ bool editor_frame(void* p)
                     c->frame, ImGui::GetIO().Framerate);
     }
     ImGui::End();
+
+    // Save toast (bottom-left), flashed for ~180 frames after a save.
+    if (c->toast_frames > 0) {
+        --c->toast_frames;
+        ImGuiViewport* vp = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x + 16,
+                                       vp->WorkPos.y + vp->WorkSize.y - 56));
+        ImGui::SetNextWindowBgAlpha(0.85f);
+        if (ImGui::Begin("##savetoast", nullptr,
+                ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
+                ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoInputs)) {
+            ImGui::TextUnformatted(c->toast.c_str());
+            ImGui::TextDisabled("re-import in Blender (wf.import_level) to refresh the .blend");
+        }
+        ImGui::End();
+    }
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -354,6 +406,8 @@ int main(int argc, char** argv)
     ctx.level_name  = std::move(level_name);
     ctx.actor_names = std::move(actor_names);
     ctx.doc         = &doc;   // read field subtrees on selection (read-only)
+    ctx.parse_json  = std::move(parse_json);   // lossless source for File→Save
+    ctx.save_path   = leveltree;               // Save writes back to the .lev source
     if (preselect >= 0 && preselect < static_cast<int>(ctx.actor_names.size()))
         ctx.selected = preselect;   // headless: exercise the Outliner→Properties path
     SetEditorFrameCallback(editor_frame, &ctx);
