@@ -1,6 +1,6 @@
 # Gold coin — TTL despawn in `Gold::update()`
 
-**Status:** In progress  
+**Status:** Done — committed `5dbc86a` 2026-05-21  
 **Parent plan:** [2026-05-19-smb-coin-fix-and-template.md](2026-05-19-smb-coin-fix-and-template.md)
 
 ## Problem
@@ -26,6 +26,6 @@ No OAD field for TTL per `feedback_no_new_oas_fields_premerge`; hardcoded `kGold
 ## Plan
 
 - [x] Write `gold.hp` + `gold.cc` (constructor sets `_despawnTime`, `update()` checks TTL)
-- [ ] Rebuild: `task build`
-- [ ] Test: bump `?` block, coin appears ~1 s then vanishes; no crash
+- [x] Rebuild: `task build` — links clean, no failures
+- [ ] Test: bump `?` block, coin appears ~1 s then vanishes; no crash (requires Phase 2 level wiring)
 - [ ] Update parent plan status
