@@ -419,7 +419,18 @@ bool editor_frame(void* p)
 
     if (c->shot && c->max_frames > 0 && c->frame == c->max_frames - 1)
         write_ppm(c->win, c->shot);   // capture the last composited frame
-    glfwSwapBuffers(c->win);   // editor owns the swap (StepFrame ran do_swap=false)
+
+    // Editor owns the swap (StepFrame ran do_swap=false). We must swap the SAME
+    // GLXDrawable the engine renders into — the raw X11 window. GLFW's
+    // glfwSwapBuffers swaps its own GLXWindow (glXCreateWindow over the X11
+    // window), a *distinct* GLXDrawable with its own back buffer. But the engine
+    // adopted our context via glXMakeCurrent on the raw window (mesa.cc
+    // InitWithExistingContext: halDisplay.win = glfwGetX11Window), so StepFrame +
+    // this ImGui overlay both render into the raw-window back buffer. Swapping
+    // GLFW's GLXWindow would present its (never-drawn-into) back buffer → a black
+    // screen, with the engine's teardown PageFlip swap of the raw window flashing
+    // the last frame just before exit. Match the engine's drawable instead.
+    glXSwapBuffers(glfwGetX11Display(), glfwGetX11Window(c->win));
 
     ++c->frame;
     if (c->max_frames >= 0 && c->frame >= c->max_frames)
