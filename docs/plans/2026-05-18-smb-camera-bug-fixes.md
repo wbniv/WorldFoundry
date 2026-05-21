@@ -1,6 +1,6 @@
 # Fix SMB scrolling camera bugs surfaced by Pass 1 video
 
-**Status:** Not started (2026-05-18).
+**Status:** Done 2026-05-21. B1 and B3 fixed and committed in `e3308a2d` (2026-05-18). B2 verified resolved on 2026-05-21 — frame extraction from a fresh walkthrough run shows Mario roughly centred throughout with a horizontal floor (no diagonal skew), and the block layout scrolls correctly. 0 `guard doing damage` events.
 **Supersedes/follows:** [`docs/plans/2026-05-17-smb-scrolling-camera.md`](2026-05-17-smb-scrolling-camera.md) — Route A implementation that this plan fixes.
 
 ## Context

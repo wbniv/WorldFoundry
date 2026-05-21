@@ -410,7 +410,7 @@ def _make_coin_template():
     obj['wf_Moves Between Rooms']  = 'True'
     obj['wf_Mobility']             = 'Physics'
     obj['wf_Mass']                 = 0.001
-    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Falling Acceleration'] = 4.0
     obj['wf_Max Air Speed']        = 50.0
     obj['wf_Model Type']           = 'Mesh'
     obj['wf_Visibility Mailbox']   = 1
@@ -434,7 +434,7 @@ for i, bx in enumerate(QBLOCK_XS):
     blk['wf_Generation Rate']    = 10.0
     blk['wf_Object X Velocity']  = 0.0
     blk['wf_Object Y Velocity']  = 0.0
-    blk['wf_Object Z Velocity']  = 12.0
+    blk['wf_Object Z Velocity']  = 6.0
     blk['wf_Script']             = QBLOCK_SCRIPT
 
 # ── 7. Mario placeholder ──────────────────────────────────────────────────────

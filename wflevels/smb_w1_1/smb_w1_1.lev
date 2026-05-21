@@ -1094,7 +1094,7 @@
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0010000000000000(1.15.16) } { 'STR' "0.001" } }
 		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
-		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 4.0000000000000000(1.15.16) } { 'STR' "4.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -1125,7 +1125,7 @@
 		{ 'FX32' { 'NAME' "Generation Rate" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
 		{ 'FX32' { 'NAME' "Object X Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Object Y Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FX32' { 'NAME' "Object Z Velocity" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
+		{ 'FX32' { 'NAME' "Object Z Velocity" } { 'DATA' 6.0000000000000000(1.15.16) } { 'STR' "6.0" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -1152,7 +1152,7 @@
 		{ 'FX32' { 'NAME' "Generation Rate" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
 		{ 'FX32' { 'NAME' "Object X Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Object Y Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FX32' { 'NAME' "Object Z Velocity" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
+		{ 'FX32' { 'NAME' "Object Z Velocity" } { 'DATA' 6.0000000000000000(1.15.16) } { 'STR' "6.0" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -1179,7 +1179,7 @@
 		{ 'FX32' { 'NAME' "Generation Rate" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
 		{ 'FX32' { 'NAME' "Object X Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Object Y Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FX32' { 'NAME' "Object Z Velocity" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
+		{ 'FX32' { 'NAME' "Object Z Velocity" } { 'DATA' 6.0000000000000000(1.15.16) } { 'STR' "6.0" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
