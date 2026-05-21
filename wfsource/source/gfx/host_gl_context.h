@@ -37,7 +37,11 @@ extern "C" {
 
 struct HostGLContext {
     void*         display;   // cast to XDisplay* inside the GL backend
-    unsigned long win;       // X11 Window — XID is unsigned long per Xlib
+    unsigned long win;       // GLX drawable the engine makes-current + swaps (XID,
+                             // unsigned long per Xlib). On the modern GLX 1.3 path
+                             // pass your GLXWindow (e.g. glfwGetGLXWindow), NOT the
+                             // raw X11 Window — the compositor tracks the GLXWindow,
+                             // so swapping the raw window leaves the viewport black.
     void*         context;   // cast to GLXContext inside the GL backend
     bool          valid;     // false = engine creates its own (standalone)
 };

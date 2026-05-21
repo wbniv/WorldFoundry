@@ -193,6 +193,35 @@ bool editor_frame(void* p)
     if (glfwWindowShouldClose(c->win))
         return false;
 
+    // One-shot GL-state diagnostic (WF_EDIT_GL_DEBUG): the editor renders fine to
+    // the back buffer (glReadPixels) yet the window is black on screen, while a
+    // plain GLFW window presents. Dump the GL/GLX state at callback time to find
+    // what the engine's context adoption changed vs a stock GLFW loop.
+    static bool s_gl_dumped = false;
+    if (!s_gl_dumped && std::getenv("WF_EDIT_GL_DEBUG")) {
+        s_gl_dumped = true;
+        GLint fb = -1, drawbuf = -1, readbuf = -1;
+        GLboolean dbl = GL_FALSE;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fb);
+        glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
+        glGetIntegerv(GL_READ_BUFFER, &readbuf);
+        glGetBooleanv(GL_DOUBLEBUFFER, &dbl);
+        GLXContext  curctx  = glXGetCurrentContext();
+        GLXDrawable curdraw = glXGetCurrentDrawable();
+        std::fprintf(stderr,
+            "[gl-debug] FRAMEBUFFER_BINDING=%d DRAW_BUFFER=0x%04x READ_BUFFER=0x%04x "
+            "DOUBLEBUFFER=%d glErr=0x%04x\n",
+            fb, drawbuf, readbuf, (int)dbl, glGetError());
+        std::fprintf(stderr,
+            "[gl-debug] curGLXctx=%p curGLXdraw=0x%lx | glfwGLXWindow=0x%lx "
+            "glfwX11Window=0x%lx glfwGLXctx=%p glfwCurCtx=%p win=%p\n",
+            (void*)curctx, (unsigned long)curdraw,
+            (unsigned long)glfwGetGLXWindow(c->win),
+            (unsigned long)glfwGetX11Window(c->win),
+            (void*)glfwGetGLXContext(c->win),
+            (void*)glfwGetCurrentContext(), (void*)c->win);
+    }
+
     // M2: initialize the stable doc→engine index map on the first frame the live
     // level is available (theLevel non-null). No-op once initialized.
     if (c->doc) wfedit::InitBridgeMap(*c->doc);
@@ -420,17 +449,13 @@ bool editor_frame(void* p)
     if (c->shot && c->max_frames > 0 && c->frame == c->max_frames - 1)
         write_ppm(c->win, c->shot);   // capture the last composited frame
 
-    // Editor owns the swap (StepFrame ran do_swap=false). We must swap the SAME
-    // GLXDrawable the engine renders into — the raw X11 window. GLFW's
-    // glfwSwapBuffers swaps its own GLXWindow (glXCreateWindow over the X11
-    // window), a *distinct* GLXDrawable with its own back buffer. But the engine
-    // adopted our context via glXMakeCurrent on the raw window (mesa.cc
-    // InitWithExistingContext: halDisplay.win = glfwGetX11Window), so StepFrame +
-    // this ImGui overlay both render into the raw-window back buffer. Swapping
-    // GLFW's GLXWindow would present its (never-drawn-into) back buffer → a black
-    // screen, with the engine's teardown PageFlip swap of the raw window flashing
-    // the last frame just before exit. Match the engine's drawable instead.
-    glXSwapBuffers(glfwGetX11Display(), glfwGetX11Window(c->win));
+    // Editor owns the swap (StepFrame ran do_swap=false). glfwSwapBuffers swaps
+    // GLFW's GLXWindow — the same drawable we hand the engine to render into (see
+    // the HostGLContext below, which passes glfwGetGLXWindow) and the one the X
+    // compositor tracks. Swapping the raw X11 window instead presents to a buffer
+    // the compositor never reads → a black viewport, with only the engine's
+    // teardown PageFlip swap flashing the last frame just before exit.
+    glfwSwapBuffers(c->win);
 
     ++c->frame;
     if (c->max_frames >= 0 && c->frame >= c->max_frames)
@@ -574,6 +599,13 @@ int main(int argc, char** argv)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);  // engine uses legacy GL
+    // Opaque framebuffer (no alpha), matching standalone wf_game's GLX visual
+    // (mesa.cc attributeList omits GLX_ALPHA_SIZE). Defensive: GLFW defaults to
+    // 8 alpha bits, and on a compositing WM a window with alpha can be blended
+    // translucent where the rendered alpha < 1. Not the black-screen fix (that
+    // was the GLX drawable below) — the engine clears alpha to 1.0 each frame —
+    // but it keeps the viewport unconditionally opaque.
+    glfwWindowHint(GLFW_ALPHA_BITS, 0);
     GLFWwindow* win = glfwCreateWindow(1280, 800, "WF Editor", nullptr, nullptr);
     if (!win) {
         std::fprintf(stderr, "wf-edit: window creation failed\n");
@@ -593,8 +625,17 @@ int main(int argc, char** argv)
 
     // 3. Hand the engine our X11/GLX (mesa.cc adopts it via InitWithExistingContext
     //    instead of opening its own window) + register the per-frame callback.
+    // Pass GLFW's GLXWindow (NOT the raw X11 window) as the GLX drawable. GLFW
+    // creates the window via the modern GLX 1.3 path — a glXCreateWindow GLXWindow
+    // layered over the X11 window — and that GLXWindow is what the compositor
+    // tracks and what glfwSwapBuffers presents. The engine glXMakeCurrent +
+    // (teardown) glXSwapBuffers this drawable. Standalone wf_game works because it
+    // makes its own window with a GLX *visual* (legacy 1.2), where the raw window
+    // doubles as a valid GLXDrawable; an adopted GLFW window does not. In editor
+    // (host-owned) mode mesa.cc uses halDisplay.win purely as the GLX drawable —
+    // XEventLoop / HALCloseWindow early-bail — so a GLXWindow XID here is correct.
     HostGLContext hc{ glfwGetX11Display(),
-                      static_cast<unsigned long>(glfwGetX11Window(win)),
+                      static_cast<unsigned long>(glfwGetGLXWindow(win)),
                       glfwGetGLXContext(win),
                       true };
     SetHostGLContext(&hc);

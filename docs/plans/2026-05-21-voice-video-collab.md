@@ -46,11 +46,13 @@ labelled **Mute mic / Cam off** (no "Leave call" — closing the window leaves),
 empty room prints "Share the room ID above to invite collaborators." Usage is documented
 in the [editor user manual § Collaboration](../wf-edit-manual.md#collaboration-voice--video).
 
-> **Screenshot still pending** ([feedback_screenshots_for_proof](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_screenshots_for_proof.md)):
-> the panel needs **two editor instances + a camera/mic**, so it can't be captured by the
-> headless single-instance harness the other editor plans use. Capturing two live
-> instances side-by-side is an interactive task — tracked, not yet done. The ASCII above
-> is the faithful layout in the meantime.
+**Screenshot** ([feedback_screenshots_for_proof](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_screenshots_for_proof.md)): captured with **two `wf-edit` instances in the same room** (`--room=demo-266485`) on one host — multicast discovery over loopback works (each logs `collab: new peer … (Editor)`). Neither instance has a camera, so the peer renders as a coloured initials avatar (**E**) rather than a video thumbnail; the toggles read *Unmute mic* / *Cam on* (both off):
+
+![Collaborators panel — a second editor instance discovered as the "Editor" peer in the same room](../../tests/screenshots/wfedit_collab.png)
+
+> A video-thumbnail capture (peers with live cameras) still needs a host with `/dev/video0`
+> — the discovery + panel + avatar-fallback path is proven here; the VP8 video path is
+> exercised by the same code but not yet shown with a real camera frame.
 
 ## Context
 

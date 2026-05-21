@@ -276,6 +276,12 @@ meter per peer, and **Mute mic** / **Cam off** buttons:
 └─────────────────────────────────────────────┘
 ```
 
+Two editor instances in the same room (`--room=demo-266485`), each seeing the other. The
+peer has no camera, so it shows as a coloured initials avatar (**E** for "Editor", the
+fixed v1 display name); the self row reads *[cam off]* with *Unmute mic* / *Cam on* toggles:
+
+![Collaborators panel — a second instance appears as the "Editor" peer (initials avatar) in the same room](../tests/screenshots/wfedit_collab.png)
+
 **How it works (LAN v1):** peer discovery is a heartbeat beacon broadcast every 2 s on
 multicast group `239.255.42.99:9877`, filtered by room ID. Voice is
 [Opus](https://opus-codec.org/) (48 kHz mono, 20 ms frames) over UDP; video is
