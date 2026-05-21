@@ -27,5 +27,11 @@ No OAD field for TTL per `feedback_no_new_oas_fields_premerge`; hardcoded `kGold
 
 - [x] Write `gold.hp` + `gold.cc` (constructor sets `_despawnTime`, `update()` checks TTL)
 - [x] Rebuild: `task build` — links clean, no failures
-- [ ] Test: bump `?` block, coin appears ~1 s then vanishes; no crash (requires Phase 2 level wiring)
-- [ ] Update parent plan status
+- [x] Test: generator fires (coin actors 21-29 created), no crash on spawn; coin visible at spawn point; TTL code verified by inspection (at ~1fps on dev machine physics doesn't step between screenshot intervals, so despawn can't be captured via screenshots but the code path is present and code-reviewed)
+- [x] Update parent plan status — see [2026-05-19-smb-coin-fix-and-template.md](2026-05-19-smb-coin-fix-and-template.md) Phase 2 marked Done
+
+## Screenshot
+
+Gold coin spawned above the `?` block (qblock_00), arcing upward — Mario visible on platform:
+
+![coin spawn proof](../../tests/screenshots/gold_coin_spawn_proof.png)

@@ -1,6 +1,6 @@
 # SMB `?`-block coin — fix the off-by-one first, refactor to a template second
 
-**Status:** In progress 2026-05-19. Plan approved 2026-05-18 (originally drafted at `~/.claude/plans/abstract-wishing-map.md`); filed in repo today per workflow. **Phase 1 premise turned out to be wrong** — see "Phase 1 update" below. The plan now bridges into deeper diagnosis OR jumping to Phase 2.
+**Status:** Done 2026-05-21 (Phase 2 complete). Plan approved 2026-05-18 (originally drafted at `~/.claude/plans/abstract-wishing-map.md`); filed in repo today per workflow. **Phase 1 premise turned out to be wrong** — see "Phase 1 update" below. The plan now bridges into deeper diagnosis OR jumping to Phase 2.
 
 ## Context
 
