@@ -1779,6 +1779,12 @@ Actor::Collision(PhysicalObject& other, const Vector3& normal)
 }
 
 #ifdef PHYSICS_ENGINE_JOLT
+void Actor::JoltStaticCollision(const Vector3& normal)
+{
+	_lastColliderIdx     = 0;
+	_lastCollisionNormal = normal;
+}
+
 // Bridge Jolt's CharacterVirtual contacts into Actor::Collision so f4071a3's
 // per-actor collision mailboxes (COLLIDER_IDX / COLLISION_NORMAL_*) get
 // populated for Jolt-managed actors. Without this, collision.cc:513-520
@@ -1805,7 +1811,7 @@ static void JoltContactDispatch(void* characterActor, void* otherActor,
 		otherA->Collision(*charA, normal);
 	}
 	else
-		charA->Collision(*charA, normal);  // no other-Actor known; collider idx → 0
+		charA->JoltStaticCollision(normal);  // static geometry — no WF Actor; collider idx = 0
 }
 
 // Run-once init: registered via a function-static, so the cost is paid on

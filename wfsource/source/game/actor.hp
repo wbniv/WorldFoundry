@@ -215,6 +215,12 @@ public:
    virtual const PhysicalAttributes& GetPhysicalAttributes() const;
    virtual PhysicalAttributes& GetWritablePhysicalAttributes();
    void Collision(PhysicalObject& other, const Vector3& normal);
+#ifdef PHYSICS_ENGINE_JOLT
+   // Static-geometry contact (no registered WF Actor). Sets _lastCollisionNormal
+   // and clears _lastColliderIdx to 0. Does NOT update supportingObject — Jolt
+   // tracks ground state via JoltCharacterIsOnGround, not supportingObject.
+   void JoltStaticCollision(const Vector3& normal);
+#endif
 
    // MovementObject interface/overrides
 	virtual const QInputDigital* GetInputDevice() const;
