@@ -279,7 +279,6 @@ Material::InitPrimitive(Primitive& prim, const Vertex3D& vertex0, const Vertex3D
 			POLY_FT3* poly = (POLY_FT3*)&prim;
 			setPolyFT3(poly);
 			Color color = GetColor();
-         color = Color::white;            // kts temp until all models are updated to have proper colors on their textured materials
 			setRGB0(poly, color.Red(),color.Green(),color.Blue());
 #pragma message ("KTS: handle 4 & 8 bit textures as soon as I get data from textile")
 //			poly->tpage = getTPage(TEXTURE_MODE_16BIT_DIRECT,TEXTURE_TRANS_HALF_BACK_HALF_PRIMITIVE,_texture.u,_texture.v);

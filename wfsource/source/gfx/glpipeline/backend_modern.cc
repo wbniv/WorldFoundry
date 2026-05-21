@@ -111,7 +111,10 @@ static const char* kFS =
     "void main()\n"
     "{\n"
     "    vec4 c = vec4(v_color * v_lit, 1.0);\n"
-    "    if (u_use_tex != 0) c = c * texture(u_tex, v_uv);\n"
+    "    if (u_use_tex != 0) {\n"
+    "        float is_white = step(0.99, min(v_color.r, min(v_color.g, v_color.b)));\n"
+    "        c = vec4(mix(v_color, texture(u_tex, v_uv).rgb, is_white) * v_lit, 1.0);\n"
+    "    }\n"
     "    if (u_fog != 0) c.rgb = mix(u_fog_color, c.rgb, v_fog_factor);\n"
     "    frag = c;\n"
     "}\n";

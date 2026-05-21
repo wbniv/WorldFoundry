@@ -65,9 +65,9 @@ RenderObject3D::RenderPoly3DFlatTextureLit(Primitive* primitive)
         v[i].x = gte[i].X().AsFloat();
         v[i].y = gte[i].Y().AsFloat();
         v[i].z = gte[i].Z().AsFloat();
-        v[i].r = 1.0f;
-        v[i].g = 1.0f;
-        v[i].b = 1.0f;
+        v[i].r = poly.r0 / 255.0f;
+        v[i].g = poly.g0 / 255.0f;
+        v[i].b = poly.b0 / 255.0f;
         CalcUV(poly.tpage, uArr[i], vArr[i], *poly.pPixelMap, v[i].u, v[i].v);
     }
 
