@@ -636,6 +636,38 @@ cerror << "pos=(" << pp.X().AsFloat() << "," << pp.Y().AsFloat() << "," << pp.Z(
 
 ---
 
+## Spawning a new OAD class → `terminate called without an active exception`
+
+**Symptom:** The instant a newly-added actor class is *constructed* (e.g. a
+`Generator` throws a new collectible), the engine prints
+`terminate called without an active exception` and dies — with **no** assertion
+message and **no** `fell out of room` line (distinguishing it from the room-bbox
+crash above). The last useful log line is often a benign render warning like
+`RenderActor3DAnimates constructed with no animations!`.
+
+**Cause (the message is a red herring):** it's actually a **failed assertion**
+wearing a disguise. Every actor's `kind()` asserts
+`GetMovementBlockPtr()->MovementClass == <Name>_KIND`. If the new class was added
+to [`objects.mac`](../wfsource/source/oas/objects.mac) but its **generated files
+were hand-patched instead of regenerated** (or its `.ht` is a renamed-stopgap from
+another class), the constructed object's `MovementClass` isn't `<Name>_KIND` and the
+assert fails. `assert` calls `exit()`; during `atexit` the still-joinable debug-bridge
+listener thread (`gListenerThread`) destructs while joinable → `std::terminate`,
+which is what actually prints. The real failure is hidden one frame earlier.
+
+**Confirm it:** run under gdb (`gdb -batch -ex run -ex bt -ex quit --args engine/wf_game …`).
+The backtrace shows `Gold::kind` / `<Name>::kind` → `_sys_assert(... MovementClass == <Name>_KIND ...)`
+→ `Actor::BindAssets` → `Level::ConstructTemplateObject`. (Repro harness:
+[`tests/repro_gold_spawn_crash.py`](../tests/repro_gold_spawn_crash.py).)
+
+**Fix:** don't touch the assert. Regenerate the OAD class properly — see
+[Creating a new OAD (actor) class](level-building.md#creating-a-new-oad-actor-class)
+in the building guide. The class is half-generated: regenerate `objects.*` and
+`<name>.ht` from the masters, and add the `COLTABLEENTRY` rows (without them the
+object also collides with nothing).
+
+---
+
 ## Platform geometry must cover maximum ball overshoot distance
 
 **Symptom:** Ball rolls down a ramp, transitions to a floor at the bottom, then flies off the far end of the floor into the void.

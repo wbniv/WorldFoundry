@@ -31,7 +31,8 @@ internals at the bottom. For per-symptom debugging recipes, see
    - [Marble Physics: Friction and Deceleration](#marble-physics-friction-and-deceleration)
    - [Goal Platform: Back Wall](#goal-platform-back-wall)
    - [Marble Actor: Use `sphere.iff`, Not `player.iff`](#marble-actor-use-sphereiff-not-playeriff)
-6. [Engine internals](#engine-internals)
+6. [Creating a new OAD (actor) class](#creating-a-new-oad-actor-class) — masters (`objects.mac` + `.oas`) vs generated files, the regen pipeline (partly un-revived), the `Gold` "terminate" pitfall
+7. [Engine internals](#engine-internals)
    - [Level File Format](#level-file-format) — cd.iff TOC, DO_CD_IFF, level object count
    - [LP64 Port Issues](#lp64-port-issues)
    - [Level Constructor Ordering Bug (fixed)](#level-constructor-ordering-bug-fixed)
@@ -808,6 +809,125 @@ obj['wf_Mesh Name'] = 'sphere.iff'
 ```
 
 `sphere.iff` is committed in `wflevels/marble-madness/` alongside `mm_fromscratch.ini`.
+
+---
+
+## Creating a new OAD (actor) class
+
+Adding a brand-new actor class (a new `EActorKind`, e.g. the SMB `Gold`
+collectible) is **not** a level-authoring task you do per-level — it touches the
+engine's OAS codegen. But level designers hit it the moment a level needs a
+behaviour no shipped class provides, so the full procedure lives here.
+
+> **The cardinal rule: edit the *masters*, then *regenerate* the derived files.
+> Never hand-edit a generated `objects.*` / `*.ht` file.** Every `objects.*`
+> output and every `<name>.ht` carries a `created from … DO NOT MODIFY` banner
+> for a reason — they are produced from [`objects.mac`](../wfsource/source/oas/objects.mac)
+> + the per-class `.oas` files by `prep`/`coltab.pl`. Hand-patching them is what
+> broke `Gold` (see the case study below).
+
+### The two masters you edit by hand
+
+1. **[`wfsource/source/oas/objects.mac`](../wfsource/source/oas/objects.mac)** —
+   the single master list of every creatable object. Two sections:
+   - **OBJECTS** (`OBJECTSHEADER … OBJECTSFOOTER`): one line per class. Pick the
+     right macro — name **must be ≤ 8 chars**, and a matching `.oas` file must exist:
+     | Macro | Use for |
+     |-------|---------|
+     | `OBJECTENTRY(Name,collidable)` | standard load-time-creatable object |
+     | `OBJECTNOACTORENTRY(Name,collidable)` | never has an Actor (e.g. collision boxes) |
+     | `OBJECTONLYTEMPLATEENTRY(Name,collidable)` | only spawnable from a template (e.g. `Missile`, `Explode`, `Gold`) — not constructed at load time |
+     | `OBJECTSUBENTRY(Child,Parent,collidable)` | derived from another object |
+     `collidable` = 1 if the object does *anything* on intersection (it then
+     receives general collision messages); 0 otherwise.
+   - **COLTABLE** (`COLTABLEHEADER … COLTABLEFOOTER`): one
+     `COLTABLEENTRY(A, B, CI_AtoB, CI_BtoA)` per interacting pair, where each
+     `CI_*` is `CI_NOTHING` / `CI_PHYSICS` / `CI_SPECIAL`. **Any pair you don't
+     list defaults to `CI_NOTHING` both ways** — i.e. the objects pass through
+     each other. A collectible like `Gold` needs at least
+     `COLTABLEENTRY(Gold, Player, CI_SPECIAL, CI_NOTHING)` (pickup) and probably
+     `COLTABLEENTRY(Gold, StatPlat, CI_PHYSICS, CI_PHYSICS)` (lands on floor).
+2. **`wfsource/source/oas/<name>.oas`** — the per-class OAD schema.
+   Minimal example (`gold.oas`): `TYPEHEADER(Gold,Gold)` + `@include actor.inc`
+   + `@define DEFAULT_*`. Field blocks (`actor.inc` → `movebloc.inc`, `meshbloc.inc`,
+   …) supply the standard Position / Mobility / Mesh / Script fields.
+
+You also write the C++ class by hand: **`wfsource/source/game/<name>.{hp,cc}`** —
+an `Actor` subclass with `kind()`, any overridden `Collision()`, and an
+`Oad<Name>(startupData)` factory. Add `<name>.cc` to the engine build
+(CMake / Taskfile).
+
+### What gets generated (and by what) — never edit these
+
+Everything below is derived from `objects.mac` (+ the per-class `.oas` for `.ht`).
+The `objects.<x>s` files are `prep` templates that `@include objects.mac`; the
+`objects.<x>` outputs are what the engine actually compiles.
+
+| Generated output | From (master/template) | Generator | Consumed by |
+|------------------|------------------------|-----------|-------------|
+| `objects.h` (`EActorKind` enum, `<Name>_KIND`) | `objects.hs` | `prep` | actor.cc, level.cc, collision.cc, … |
+| `objects.e` (enum for inclusion) | `objects.es` | `prep` | `coltab.pl` input |
+| `objects.c` (the `Oad<Name>` dispatch/factory cases) | `objects.s` | `prep` | level/object construction |
+| `objects.inc` (list of `#include "<name>.hp"`) | `objects.ins` | `prep` | engine |
+| `objects.ctb` (collision *exception* table) | `objects.cts` | `prep` | `coltab.pl` input |
+| `objects.car` (the real `collisionInteractionTable[MAX_OBJECT_TYPES]²`) | `objects.e` + `objects.ctb` | **`coltab.pl`** | room.cc / level.cc / collision.cc |
+| `objects.col` | `objects.cos` | `prep` | engine |
+| `objects.lc` (ascii class list, name→kind) | `objects.lcs` | `prep` | **levcomp-rs** (maps `.lev` `Class Name` → kind) |
+| `objects.p` / `objects.iff` / `objects.mak` / `objects.xml` | `objects.{ps,ifs,mas,xms}` | `prep` | tooling/build |
+| `<name>.ht` (the read-struct for the OAD binary) | `oadtypes.s` + `<name>.oas` | `prep` → `cstruct`/awk | `#include <oas/<name>.ht>` in `<name>.cc` |
+
+### Regenerating — and the part that still needs reviving
+
+[`wfsource/source/oas/regen-headers.sh`](../wfsource/source/oas/regen-headers.sh)
+(`task gen-oas-headers`) currently regenerates **only** `objects.{c,e,h}` and all
+`*.ht`. The *rest* of the table — `objects.ctb`, `objects.car` (via `coltab.pl`),
+`objects.col`, `objects.lc`, `objects.inc`, `objects.p`, `objects.iff` … — is **not
+yet wired into any task**; those steps were part of the lost GNUmakefile build and
+have to be **revived** before a new class can land cleanly. Until they are, those
+files are the stale checked-in copies, and any class you add by editing only
+`objects.mac` will be invisible to the collision table and to levcomp. (Tracking:
+[TODO § BUILD / TOOLCHAIN](../TODO.md) — the `.ht` codegen repair, dispatched
+2026-05-20, is the first piece.)
+
+### Checklist
+
+1. Add the OBJECTS line to `objects.mac` (≤ 8-char name; matching `.oas` exists).
+2. Add the COLTABLE rows to `objects.mac` for every pair the class interacts with.
+3. Write `wfsource/source/oas/<name>.oas`.
+4. Write `wfsource/source/game/<name>.{hp,cc}` (+ add `.cc` to the build).
+5. **Regenerate** all derived files from the masters (revive the generators if
+   missing) — do *not* hand-edit them. Verify the regen reproduces every other
+   class byte-for-byte first.
+6. Rebuild the engine; verify in-game (the new kind constructs without the
+   `kind()` assert firing, and collides as the COLTABLE says).
+
+### Pitfall case study — `Gold` (2026-05-20): the "terminate" crash
+
+`Gold` was added by editing the OBJECTS list correctly but then **hand-patching the
+generated files** (`objects.{h,e,c,inc}` +rows; `gold.ht` hand-authored as a
+renamed `target.ht` stopgap because the `.ht` codegen is broken) and **omitting the
+COLTABLE rows entirely**. Consequences:
+
+- The constructed coin's `MovementClass` (read through the wrong stopgap layout /
+  ungenerated default) is **not** `Gold_KIND`. Every actor's `kind()` asserts
+  `GetMovementBlockPtr()->MovementClass == <Name>_KIND` (the codegen default,
+  [`movebloc.inc:26`](../wfsource/source/oas/movebloc.inc) `@e0(OASNAME@+_KIND)@-`,
+  is each class's own kind, which doubles as its `collisionInteractionTable` row).
+  So `Gold::kind()` aborts inside `Level::ConstructTemplateObject` → `Actor::BindAssets`
+  the instant a `?`-block tries to throw a coin.
+- The failed `assert` calls `exit()`; during `atexit`, the still-joinable
+  debug-bridge `gListenerThread` destructs while joinable → `std::terminate`. So the
+  symptom is the **misleading** `terminate called without an active exception`,
+  not an assertion message. (Confirmed by `gdb` backtrace; reproduce with
+  [`tests/repro_gold_spawn_crash.py`](../tests/repro_gold_spawn_crash.py).)
+- Even once that's fixed, with no `COLTABLEENTRY(Gold,…)` the coin's collision row
+  is all `CI_NOTHING` — it would fall through the player and floor (never
+  collectible). The collision behaviour *is* the COLTABLE entry.
+
+**Lesson:** the crash isn't in `gold.cc`; it's that the class was half-generated.
+The fix is to revive the masters→derived regeneration (above), not to patch the
+assert. See [docs/level-design-troubleshooting.md](level-design-troubleshooting.md)
+for the symptom-first version of this entry.
 
 ---
 
