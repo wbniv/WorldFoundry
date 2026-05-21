@@ -1,7 +1,7 @@
 # Plan — Fix `JoltContactDispatch` self-index bug (TODO:78)
 
 **Date:** 2026-05-21
-**Status:** In progress
+**Status:** **DONE 2026-05-21 (~0.5 h actual) — `Actor::JoltStaticCollision` added; `COLLIDER_IDX=0` on static-geometry contact; TODO:77 + TODO:78 checked off.**
 **Owner:** Claude (Will reviewing)
 **Branch:** `2026-new-level`
 
