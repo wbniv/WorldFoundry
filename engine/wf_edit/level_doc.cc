@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include <array>
+#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -76,64 +77,88 @@ bool RunLevtreeParse(const std::string& lev_path, std::string& out)
 }
 
 // ── levtree JSON chunk → wfcrdt::Input (the recursive CRDT chunk node) ────────
-// A levtree Chunk is {"id","items":[Chunk|Literal]}; a Literal is
-// {"kind":"str"|"num"|"four_cc", value/text/id}. The CRDT node is
-//   Y.Map { chunk_type, (children: Y.Array<chunk>)  XOR  (text: "...") }
-// — container if it has any sub-chunk, else a leaf whose text is the literal
-// bodies joined by spaces (NAME→"House", VEC3→"0.5 1.0 2.0", …).
-std::string LiteralText(const json& lit)
-{
-    const std::string kind = lit.value("kind", "");
-    if (kind == "str")     return lit.value("value", "");
-    if (kind == "num")     return lit.value("text", "");
-    if (kind == "four_cc") return lit.value("id", "");
-    return "";
-}
-
+// Lossless schema (v2): a levtree Chunk is {"id","items":[Chunk|Literal]}; a
+// Literal is {"kind":"str"|"num"|"four_cc", value/text/id}. The CRDT node mirrors
+// it 1:1 (plan 2026-05-21-lossless-doc-schema, A2):
+//   chunk   : Y.Map { chunk_type, items: Y.Array< chunk | literal > }
+//   literal : Y.Map { kind, value|text|id }   — verbatim mirror of levtree Literal
+// so save is a pure Doc→JSON copy (no retained-parse-JSON side-channel).
 bool IsChunk(const json& item)   { return item.is_object() && item.contains("id") && item.contains("items"); }
 bool IsLiteral(const json& item) { return item.is_object() && item.contains("kind"); }
+
+// One levtree literal → its CRDT map (kind + the kind's body field, verbatim).
+wfcrdt::Input BuildLiteral(const json& lit)
+{
+    wfcrdt::Input m = wfcrdt::Input::map();
+    const std::string kind = lit.value("kind", "");
+    m.set("kind", wfcrdt::Input::str(kind));
+    if (kind == "str")          m.set("value", wfcrdt::Input::str(lit.value("value", "")));
+    else if (kind == "num")     m.set("text",  wfcrdt::Input::str(lit.value("text", "")));
+    else if (kind == "four_cc") m.set("id",    wfcrdt::Input::str(lit.value("id", "")));
+    return m;
+}
 
 wfcrdt::Input BuildChunk(const json& chunk)
 {
     wfcrdt::Input node = wfcrdt::Input::map();
     node.set("chunk_type", wfcrdt::Input::str(chunk.value("id", "")));
-
-    const json& items = chunk["items"];
-    bool has_subchunk = false;
-    for (const auto& it : items) if (IsChunk(it)) { has_subchunk = true; break; }
-
-    if (has_subchunk) {
-        wfcrdt::Input children = wfcrdt::Input::array();
-        for (const auto& it : items)
-            if (IsChunk(it)) children.push(BuildChunk(it));
-        node.set("children", std::move(children));
-    } else {
-        std::string text;
-        for (const auto& it : items) {
-            if (!IsLiteral(it)) continue;
-            if (!text.empty()) text += ' ';
-            text += LiteralText(it);
-        }
-        node.set("text", wfcrdt::Input::str(std::move(text)));
+    wfcrdt::Input items = wfcrdt::Input::array();
+    for (const auto& it : chunk["items"]) {
+        if (IsChunk(it))        items.push(BuildChunk(it));
+        else if (IsLiteral(it)) items.push(BuildLiteral(it));
     }
+    node.set("items", std::move(items));
     return node;
 }
 
-// ── read the NAME leaf out of a chunk map ────────────────────────────────────
+// ── Doc-side readers over the v2 schema ──────────────────────────────────────
+// A child map is a chunk if it carries `chunk_type`; otherwise it's a literal.
+bool IsChunkMap(const wfcrdt::Map& m)
+{
+    return m.valid() && m.get("chunk_type").readString().has_value();
+}
+
+// A literal map's body, by kind (the inverse of BuildLiteral).
+std::string LiteralBody(const wfcrdt::Map& lit)
+{
+    const std::string kind = lit.get("kind").readString().value_or("");
+    if (kind == "str")     return lit.get("value").readString().value_or("");
+    if (kind == "num")     return lit.get("text").readString().value_or("");
+    if (kind == "four_cc") return lit.get("id").readString().value_or("");
+    return "";
+}
+
+// A leaf chunk's literal bodies, space-joined — the old collapsed `text` view.
+std::string LeafText(const wfcrdt::Map& chunk)
+{
+    wfcrdt::Array items = chunk.get("items").asArray();
+    if (!items.valid()) return "";
+    std::string out;
+    const int n = items.len();
+    for (int i = 0; i < n; ++i) {
+        wfcrdt::Map m = items.get(i).asMap();
+        if (!m.valid() || IsChunkMap(m)) continue;   // literals only
+        if (!out.empty()) out += ' ';
+        out += LiteralBody(m);
+    }
+    return out;
+}
+
+// ── read the NAME sub-chunk out of a chunk map ───────────────────────────────
 std::string NameOf(const wfcrdt::Map& obj)
 {
     // chunk_type fallback (for an OBJ with no NAME, or a COMMENT/odd node).
     std::string fallback = obj.get("chunk_type").readString().value_or("(chunk)");
 
-    wfcrdt::Array children = obj.get("children").asArray();
-    if (!children.valid()) return fallback;
-    const int n = children.len();
+    wfcrdt::Array items = obj.get("items").asArray();
+    if (!items.valid()) return fallback;
+    const int n = items.len();
     for (int i = 0; i < n; ++i) {
-        wfcrdt::Map child = children.get(i).asMap();
-        if (!child.valid()) continue;
+        wfcrdt::Map child = items.get(i).asMap();
+        if (!IsChunkMap(child)) continue;
         if (child.get("chunk_type").readString().value_or("") == "NAME") {
-            auto t = child.get("text").readString();
-            if (t && !t->empty()) return *t;
+            std::string body = LeafText(child);   // the NAME's literal body
+            if (!body.empty()) return body;
         }
     }
     return fallback;
@@ -195,12 +220,10 @@ bool RunBuildLevel(const std::string& level_name, std::string& out_log)
     return pclose(pipe) == 0;
 }
 
-bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc,
-                          std::string* out_parse_json)
+bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc)
 {
     std::string raw;
     if (!RunLevtreeParse(lev_path, raw)) return false;
-    if (out_parse_json) *out_parse_json = raw;   // retain the lossless JSON for save
 
     json tree;
     try {
@@ -227,9 +250,11 @@ bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc,
 
     auto meta = txn.map("meta");
     meta.insert("level_name", level_name.c_str());
-    meta.insert("format_version", static_cast<long long>(1));
+    meta.insert("format_version", static_cast<long long>(2));
+    meta.insert("root_chunk_type", root.value("id", "LVL").c_str());  // for the save inverse
 
-    // content = the top-level OBJ chunks, with the LVL wrapper dropped.
+    // content = the top-level OBJ chunks, with the LVL wrapper dropped (its id is
+    // kept in meta.root_chunk_type so save can reconstruct the exact tree).
     auto content = txn.array("content");
     int objs = 0;
     for (const auto& item : root["items"]) {
@@ -237,7 +262,7 @@ bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc,
         content.push(BuildChunk(item));
         ++objs;
     }
-    std::printf("wf-edit: Y.Doc populated from %s — %d top-level chunks\n",
+    std::printf("wf-edit: Y.Doc populated from %s — %d top-level chunks (schema v2)\n",
                 lev_path.c_str(), objs);
     return true;
 }
@@ -257,27 +282,31 @@ std::vector<std::string> ReadActorNames(wfcrdt::Doc& doc)
 }
 
 namespace {
-// A field chunk is `{ chunk_type, children:[ NAME-leaf, DATA-leaf, … ] }`.
-// Pull the field name (NAME child's text) and value (everything else's text,
-// space-joined — DATA, or a bare leaf, or multi-part).
+// A field chunk is `{ chunk_type, items:[ NAME-chunk, DATA-chunk, STR-chunk, … ] }`
+// (each sub-chunk's own items are its literals). Pull the field name (NAME
+// sub-chunk's body) and value (everything else's body, space-joined). Derived
+// `value`/`data`/`label` are identical to the pre-v2 schema, so the property
+// panel + bridge are unchanged.
 ActorField FieldFromChunk(const wfcrdt::Map& chunk)
 {
     ActorField f;
     f.chunk_type = chunk.get("chunk_type").readString().value_or("");
     f.name = f.chunk_type;   // fallback if no NAME sub-chunk
 
-    wfcrdt::Array kids = chunk.get("children").asArray();
-    if (!kids.valid()) {
-        // Leaf chunk (text directly) — value is its text.
-        f.value = chunk.get("text").readString().value_or("");
-        return f;
-    }
-    const int n = kids.len();
+    wfcrdt::Array items = chunk.get("items").asArray();
+    if (!items.valid()) return f;
+    const int n = items.len();
+
+    // Bare-leaf field (its items are literals, not sub-chunks): value = its body.
+    bool has_sub = false;
+    for (int i = 0; i < n; ++i) if (IsChunkMap(items.get(i).asMap())) { has_sub = true; break; }
+    if (!has_sub) { f.value = LeafText(chunk); return f; }
+
     for (int i = 0; i < n; ++i) {
-        wfcrdt::Map sub = kids.get(i).asMap();
-        if (!sub.valid()) continue;
+        wfcrdt::Map sub = items.get(i).asMap();
+        if (!IsChunkMap(sub)) continue;
         const std::string sct = sub.get("chunk_type").readString().value_or("");
-        const std::string txt = sub.get("text").readString().value_or("");
+        const std::string txt = LeafText(sub);   // the sub-chunk's literal body
         if (sct == "NAME") {
             if (!txt.empty()) f.name = txt;
             continue;
@@ -306,22 +335,70 @@ std::vector<ActorField> ReadActorFields(wfcrdt::Doc& doc, int actor_index)
 
     wfcrdt::Map obj = content.get(actor_index).asMap();
     if (!obj.valid()) return fields;
-    wfcrdt::Array kids = obj.get("children").asArray();
-    if (!kids.valid()) return fields;
+    wfcrdt::Array items = obj.get("items").asArray();
+    if (!items.valid()) return fields;
 
-    const int n = kids.len();
+    const int n = items.len();
     fields.reserve(static_cast<size_t>(n));
     for (int i = 0; i < n; ++i) {
-        wfcrdt::Map ch = kids.get(i).asMap();
-        if (!ch.valid()) continue;
+        wfcrdt::Map ch = items.get(i).asMap();
+        if (!IsChunkMap(ch)) continue;
         // Skip the actor's own top-level NAME (it's the title, shown separately).
         if (ch.get("chunk_type").readString().value_or("") == "NAME") continue;
         ActorField f = FieldFromChunk(ch);
-        f.child_index = i;   // Doc address for write-back (Phase 3)
+        f.child_index = i;   // Doc address (index into the OBJ's items) for write-back
         fields.push_back(std::move(f));
     }
     return fields;
 }
+
+namespace {
+
+std::vector<std::string> SplitWS(const std::string& s)
+{
+    std::vector<std::string> out;
+    std::size_t i = 0;
+    while (i < s.size()) {
+        while (i < s.size() && std::isspace(static_cast<unsigned char>(s[i]))) ++i;
+        std::size_t j = i;
+        while (j < s.size() && !std::isspace(static_cast<unsigned char>(s[j]))) ++j;
+        if (j > i) out.emplace_back(s.substr(i, j - i));
+        i = j;
+    }
+    return out;
+}
+
+// Overwrite a literal map's body, by kind (the write-side inverse of LiteralBody).
+void SetLiteralBody(wfcrdt::Map& lit, const std::string& body)
+{
+    const std::string kind = lit.get("kind").readString().value_or("");
+    if (kind == "str")          lit.insert("value", body.c_str());
+    else if (kind == "num")     lit.insert("text",  body.c_str());
+    else if (kind == "four_cc") lit.insert("id",    body.c_str());
+}
+
+// Distribute `new_text` across a leaf chunk's literal items (plan D6 N-rule):
+// N==1 → whole text; N>1 → whitespace-split into N numeric tokens. Returns false
+// on a token/count mismatch (leaves the leaf untouched rather than corrupt it).
+bool SetLeafLiterals(wfcrdt::Array& items, const std::string& new_text)
+{
+    std::vector<int> lit_idx;
+    const int n = items.len();
+    for (int i = 0; i < n; ++i) { wfcrdt::Map m = items.get(i).asMap(); if (m.valid() && !IsChunkMap(m)) lit_idx.push_back(i); }
+    const std::size_t N = lit_idx.size();
+    if (N == 0) return false;
+    if (N == 1) { wfcrdt::Map m = items.get(lit_idx[0]).asMap(); SetLiteralBody(m, new_text); return true; }
+    const std::vector<std::string> toks = SplitWS(new_text);
+    if (toks.size() != N) {
+        std::fprintf(stderr, "wf-edit: WriteFieldLeaf: %zu literals != %zu tokens (\"%s\")\n",
+                     N, toks.size(), new_text.c_str());
+        return false;
+    }
+    for (std::size_t k = 0; k < N; ++k) { wfcrdt::Map m = items.get(lit_idx[k]).asMap(); SetLiteralBody(m, toks[k]); }
+    return true;
+}
+
+}  // namespace
 
 bool WriteFieldLeaf(wfcrdt::Doc& doc, int actor_index, int child_index,
                     const char* leaf_type, const std::string& new_text)
@@ -332,26 +409,27 @@ bool WriteFieldLeaf(wfcrdt::Doc& doc, int actor_index, int child_index,
 
     wfcrdt::Map obj = content.get(actor_index).asMap();
     if (!obj.valid()) return false;
-    wfcrdt::Array kids = obj.get("children").asArray();
-    if (!kids.valid() || child_index < 0 || child_index >= kids.len()) return false;
+    wfcrdt::Array items = obj.get("items").asArray();
+    if (!items.valid() || child_index < 0 || child_index >= items.len()) return false;
 
-    wfcrdt::Map field = kids.get(child_index).asMap();
+    wfcrdt::Map field = items.get(child_index).asMap();
     if (!field.valid()) return false;
+    wfcrdt::Array fitems = field.get("items").asArray();
+    if (!fitems.valid()) return false;
 
-    wfcrdt::Array leaves = field.get("children").asArray();
-    if (!leaves.valid()) {
-        // Bare-leaf field (text directly): leaf_type is moot — set its text.
-        field.insert("text", new_text.c_str());
-        return true;
-    }
+    // Bare-leaf field (its items are literals): leaf_type is moot — set them.
+    bool has_sub = false;
+    const int fn = fitems.len();
+    for (int i = 0; i < fn; ++i) if (IsChunkMap(fitems.get(i).asMap())) { has_sub = true; break; }
+    if (!has_sub) return SetLeafLiterals(fitems, new_text);
+
     const std::string want = leaf_type ? leaf_type : "";
-    const int n = leaves.len();
-    for (int i = 0; i < n; ++i) {
-        wfcrdt::Map leaf = leaves.get(i).asMap();
-        if (!leaf.valid()) continue;
-        if (leaf.get("chunk_type").readString().value_or("") == want) {
-            leaf.insert("text", new_text.c_str());   // YMap insert overwrites
-            return true;
+    for (int i = 0; i < fn; ++i) {
+        wfcrdt::Map sub = fitems.get(i).asMap();
+        if (!IsChunkMap(sub)) continue;
+        if (sub.get("chunk_type").readString().value_or("") == want) {
+            wfcrdt::Array lits = sub.get("items").asArray();
+            return lits.valid() && SetLeafLiterals(lits, new_text);
         }
     }
     return false;   // no such leaf — caller picks a leaf the field actually has

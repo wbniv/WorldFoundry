@@ -61,9 +61,8 @@ struct EditorCtx {
     int                           fields_for = -1;   // which actor `props` holds
     std::vector<wfedit::PropField> props;
 
-    // Save round-trip: the lossless levtree-parse JSON the Doc was built from
-    // (patched on save), the .lev path File→Save writes, and a transient toast.
-    std::string parse_json;
+    // Save round-trip: the .lev path File→Save writes (the Doc is lossless — v2
+    // schema — so save needs no retained JSON), and a transient toast.
     std::string save_path;
     std::string toast;
     int         toast_frames = 0;
@@ -76,7 +75,7 @@ void DoSave(EditorCtx* c)
     if (!c->doc || c->save_path.empty()) {
         c->toast = "save: no document / path"; c->toast_frames = 180; return;
     }
-    const bool ok = wfedit::SaveDocToLev(*c->doc, c->parse_json, c->save_path);
+    const bool ok = wfedit::SaveDocToLev(*c->doc, c->save_path);
     c->toast = (ok ? "saved " : "SAVE FAILED: ") + c->save_path;
     c->toast_frames = 180;
 }
@@ -90,7 +89,7 @@ void SaveAndCompile(EditorCtx* c)
     if (!c->doc || c->save_path.empty()) {
         c->toast = "compile: no document / path"; c->toast_frames = 180; return;
     }
-    if (!wfedit::SaveDocToLev(*c->doc, c->parse_json, c->save_path)) {
+    if (!wfedit::SaveDocToLev(*c->doc, c->save_path)) {
         c->toast = "SAVE FAILED: " + c->save_path; c->toast_frames = 180; return;
     }
     std::string name = c->save_path;   // level name = basename without ".lev"
@@ -349,9 +348,8 @@ int main(int argc, char** argv)
     //    plan). A failure here is non-fatal — the shell still runs.
     wfcrdt::Doc              doc;
     std::string              level_name;
-    std::string              parse_json;   // lossless levtree-parse JSON, for save
     std::vector<std::string> actor_names;
-    if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc, &parse_json)) {
+    if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc)) {
         actor_names = wfedit::ReadActorNames(doc);
         level_name  = leveltree;
         if (auto slash = level_name.find_last_of('/'); slash != std::string::npos)
@@ -403,7 +401,7 @@ int main(int argc, char** argv)
     //     mirror of File→Save (M3); the round-trip identity gate (M1) runs this
     //     with no edits. CPU-only; runs before any window/engine init.
     if (const char* save_path = std::getenv("WF_EDIT_SAVE"); save_path && *save_path) {
-        const bool ok = wfedit::SaveDocToLev(doc, parse_json, save_path);
+        const bool ok = wfedit::SaveDocToLev(doc, save_path);
         std::fprintf(stderr, "wf-edit: WF_EDIT_SAVE %s -> %s\n", save_path, ok ? "ok" : "FAIL");
         return ok ? 0 : 1;
     }
@@ -445,7 +443,6 @@ int main(int argc, char** argv)
     ctx.level_name  = std::move(level_name);
     ctx.actor_names = std::move(actor_names);
     ctx.doc         = &doc;   // read field subtrees on selection (read-only)
-    ctx.parse_json  = std::move(parse_json);   // lossless source for File→Save
     ctx.save_path   = leveltree;               // Save writes back to the .lev source
     if (preselect >= 0 && preselect < static_cast<int>(ctx.actor_names.size()))
         ctx.selected = preselect;   // headless: exercise the Outliner→Properties path

@@ -7,127 +7,83 @@
 #include "wfcrdt.hpp"
 #include <nlohmann/json.hpp>
 
-#include <cctype>
 #include <cstdio>
 #include <string>
-#include <vector>
 
 namespace wfedit {
 namespace {
 
 using json = nlohmann::json;
 
-// levtree parse JSON shapes (mirror level_doc): a chunk is {"id","items":[…]};
-// a literal is {"kind":"str","value":…} or {"kind":"num","text":…}.
-bool IsChunk(const json& it)   { return it.is_object() && it.contains("id") && it.contains("items"); }
-bool IsLiteral(const json& it) { return it.is_object() && it.contains("kind"); }
-
-std::vector<std::string> SplitWS(const std::string& s)
+// v2 schema (lossless): a chunk map carries `chunk_type`; a literal map carries
+// `kind` (+ value/text/id). Doc→JSON is a verbatim copy back to levtree's shape.
+bool IsChunkMap(const wfcrdt::Map& m)
 {
-    std::vector<std::string> out;
-    std::size_t i = 0;
-    while (i < s.size()) {
-        while (i < s.size() && std::isspace(static_cast<unsigned char>(s[i]))) ++i;
-        std::size_t j = i;
-        while (j < s.size() && !std::isspace(static_cast<unsigned char>(s[j]))) ++j;
-        if (j > i) out.emplace_back(s.substr(i, j - i));
-        i = j;
-    }
-    return out;
+    return m.valid() && m.get("chunk_type").readString().has_value();
 }
 
-// Overwrite a literal's value by kind (str→"value", num→"text"); other kinds
-// (none expected) left untouched.
-void SetLiteral(json& lit, const std::string& value)
+json LiteralToJson(const wfcrdt::Map& lit)
 {
-    const std::string kind = lit.value("kind", "");
-    if (kind == "str")      lit["value"] = value;
-    else if (kind == "num") lit["text"]  = value;
+    json j;
+    const std::string kind = lit.get("kind").readString().value_or("");
+    j["kind"] = kind;
+    if (kind == "str")          j["value"] = lit.get("value").readString().value_or("");
+    else if (kind == "num")     j["text"]  = lit.get("text").readString().value_or("");
+    else if (kind == "four_cc") j["id"]    = lit.get("id").readString().value_or("");
+    return j;
 }
 
-// Distribute a leaf chunk's Doc `text` across its JSON literals (plan D3):
-// N==1 → the whole text is the literal's value (handles strings with spaces);
-// N>1 → whitespace-split into N numeric tokens (VEC3/BOX3 components, space-free).
-void PatchLeafLiterals(json& items, const std::string& doc_text)
+// chunk map → { "id": chunk_type, "items": [ chunk|literal … ] }, recursively.
+json ChunkToJson(const wfcrdt::Map& chunk)
 {
-    std::vector<json*> lits;
-    for (auto& it : items) if (IsLiteral(it)) lits.push_back(&it);
-    const std::size_t N = lits.size();
-    if (N == 0) return;
-    if (N == 1) { SetLiteral(*lits[0], doc_text); return; }
-    const std::vector<std::string> toks = SplitWS(doc_text);
-    if (toks.size() != N) {
-        std::fprintf(stderr, "wf-edit: save: %zu literals != %zu tokens (\"%s\") — leaf left unpatched\n",
-                     N, toks.size(), doc_text.c_str());
-        return;
-    }
-    for (std::size_t i = 0; i < N; ++i) SetLiteral(*lits[i], toks[i]);
-}
-
-// Patch one JSON chunk from its Doc chunk-map, in lockstep. A Doc chunk with
-// `children` is a container (recurse into matching sub-chunks, in order); one
-// with `text` is a leaf (overwrite its literals). BuildChunk set exactly one of
-// the two, and edits never change structure, so the trees stay congruent.
-void PatchChunk(json& json_chunk, const wfcrdt::Map& doc_map)
-{
-    if (!doc_map.valid() || !json_chunk.contains("items")) return;
-    json& items = json_chunk["items"];
-
-    wfcrdt::Array children = doc_map.get("children").asArray();
-    if (children.valid()) {
-        int j = 0;
-        for (auto& it : items) {
-            if (!IsChunk(it)) continue;            // literals in a container: untouched
-            PatchChunk(it, children.get(j).asMap());
-            ++j;
+    json j;
+    j["id"] = chunk.get("chunk_type").readString().value_or("");
+    json items = json::array();
+    wfcrdt::Array its = chunk.get("items").asArray();
+    if (its.valid()) {
+        const int n = its.len();
+        for (int i = 0; i < n; ++i) {
+            wfcrdt::Map m = its.get(i).asMap();
+            if (!m.valid()) continue;
+            items.push_back(IsChunkMap(m) ? ChunkToJson(m) : LiteralToJson(m));
         }
-    } else {
-        PatchLeafLiterals(items, doc_map.get("text").readString().value_or(""));
     }
-}
-
-// Patch `parse_json` (the lossless levtree-parse JSON) with the Doc's current
-// leaf values, preserving each literal's kind. The Doc dropped the LVL wrapper,
-// so root's chunk-items map 1:1 to the Doc `content` array.
-std::string PatchJsonWithDoc(const std::string& parse_json, wfcrdt::Doc& doc)
-{
-    json tree;
-    try { tree = json::parse(parse_json); }
-    catch (const std::exception& e) {
-        std::fprintf(stderr, "wf-edit: save: re-parse of retained JSON failed: %s\n", e.what());
-        return parse_json;
-    }
-    if (!tree.contains("root") || !IsChunk(tree["root"]) || !tree["root"].contains("items"))
-        return parse_json;
-
-    auto txn = doc.begin();
-    auto content = txn.array("content");
-    if (!content.valid()) return parse_json;
-
-    int j = 0;
-    for (auto& it : tree["root"]["items"]) {
-        if (!IsChunk(it)) continue;
-        PatchChunk(it, content.get(j).asMap());
-        ++j;
-    }
-    return tree.dump();
+    j["items"] = std::move(items);
+    return j;
 }
 
 }  // namespace
 
-bool SaveDocToLev(wfcrdt::Doc& doc, const std::string& parse_json,
-                  const std::string& out_path)
+bool SaveDocToLev(wfcrdt::Doc& doc, const std::string& out_path)
 {
-    if (parse_json.empty()) {
-        std::fprintf(stderr, "wf-edit: save: no parse JSON retained (load it with the "
-                             "out_parse_json arg)\n");
-        return false;
+    // Reconstruct the levtree JSON straight from the Doc — no retained parse JSON
+    // (the v2 schema is lossless). The LVL wrapper was lifted at load; rebuild it
+    // from meta.root_chunk_type with content[] as its items.
+    json tree;
+    {
+        auto txn = doc.begin();
+        auto meta = txn.map("meta");
+        const std::string root_type = meta.get("root_chunk_type").readString().value_or("LVL");
+
+        auto content = txn.array("content");
+        if (!content.valid()) {
+            std::fprintf(stderr, "wf-edit: save: Doc has no content array\n");
+            return false;
+        }
+        json root;
+        root["id"] = root_type;
+        json items = json::array();
+        const int n = content.len();
+        for (int i = 0; i < n; ++i) {
+            wfcrdt::Map m = content.get(i).asMap();
+            if (m.valid()) items.push_back(ChunkToJson(m));
+        }
+        root["items"] = std::move(items);
+        tree["root"] = std::move(root);
     }
 
-    const std::string patched = PatchJsonWithDoc(parse_json, doc);
-
     std::string lev;
-    if (!RunLevtreePrint(patched, lev)) {
+    if (!RunLevtreePrint(tree.dump(), lev)) {
         std::fprintf(stderr, "wf-edit: save: levtree print failed\n");
         return false;
     }
