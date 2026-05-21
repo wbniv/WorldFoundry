@@ -534,6 +534,7 @@ if player:
         "dup 16384 & 256 / over 8192 & 64 / | | "
         "INDEXOF_INPUT write-mailbox\n"
         "INDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\n"
+        "INDEXOF_GOLD read-mailbox 70 write-mailbox\n"
     )
 
     mario_mesh = _build_mario()
