@@ -48,8 +48,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Install maturin
-        run: pip install maturin
+      - name: Install build + test deps
+        run: pip install maturin pytest
 
       - name: Build wf_core wheel
         run: |
