@@ -44,11 +44,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <fstream>
 #include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include <unistd.h>
+#include <sys/stat.h>
 
 // Provided by the engine's platform layer (mirrors the host-GL e2e harness).
 extern void ParseWindowSwitches(int argc, char** argv);
@@ -61,6 +63,105 @@ extern char szAppName[];
 extern int wfWindowWidth, wfWindowHeight;
 
 namespace {
+
+// ── Phase 6: identity persistence + wfedit:// URL ───────────────────────────
+
+struct RecentRoom { std::string relay_url, room_id; };
+
+struct WfeditIdentity {
+    std::string peer_id;
+    std::string display_name = "Editor";
+    float colour[3] = {0.5f, 0.5f, 0.5f};
+    std::vector<RecentRoom> recent_rooms;
+};
+
+static std::string IdentityPath()
+{
+    const char* home = std::getenv("XDG_CONFIG_HOME");
+    std::string base = home ? home : (std::string(std::getenv("HOME") ?: ".") + "/.config");
+    return base + "/wf-edit/identity.json";
+}
+
+static std::optional<WfeditIdentity> LoadIdentity()
+{
+    const std::string path = IdentityPath();
+    std::ifstream f(path);
+    if (!f.is_open()) return std::nullopt;
+    std::string raw((std::istreambuf_iterator<char>(f)),
+                     std::istreambuf_iterator<char>());
+    try {
+        using json = nlohmann::json;
+        json j = json::parse(raw);
+        WfeditIdentity id;
+        id.peer_id      = j.value("peer_id", "");
+        id.display_name = j.value("display_name", "Editor");
+        if (j.contains("colour") && j["colour"].is_array() && j["colour"].size() >= 3) {
+            id.colour[0] = j["colour"][0].get<float>();
+            id.colour[1] = j["colour"][1].get<float>();
+            id.colour[2] = j["colour"][2].get<float>();
+        }
+        if (j.contains("recent_rooms") && j["recent_rooms"].is_array()) {
+            for (const auto& r : j["recent_rooms"]) {
+                id.recent_rooms.push_back({r.value("relay_url",""), r.value("room_id","")});
+            }
+        }
+        if (id.peer_id.empty()) return std::nullopt;
+        return id;
+    } catch (...) {
+        return std::nullopt;
+    }
+}
+
+static void SaveIdentity(const WfeditIdentity& id)
+{
+    const std::string path = IdentityPath();
+    // Ensure config dir exists.
+    const std::string dir = path.substr(0, path.rfind('/'));
+    ::mkdir(dir.substr(0, dir.rfind('/')).c_str(), 0755);  // ~/.config/
+    ::mkdir(dir.c_str(), 0755);                             // ~/.config/wf-edit/
+    try {
+        using json = nlohmann::json;
+        json rooms = json::array();
+        for (const auto& r : id.recent_rooms)
+            rooms.push_back(json{{"relay_url", r.relay_url}, {"room_id", r.room_id}});
+        json j{
+            {"peer_id",      id.peer_id},
+            {"display_name", id.display_name},
+            {"colour",       json::array({id.colour[0], id.colour[1], id.colour[2]})},
+            {"recent_rooms", rooms}
+        };
+        std::ofstream f(path);
+        f << j.dump(2) << "\n";
+    } catch (...) {}
+}
+
+// Parse wfedit://<host:port>/r/<room-id> → {relay_url="ws://host:port", room_id}.
+static std::optional<std::pair<std::string,std::string>> ParseWfeditUrl(const char* url)
+{
+    static const char kPfx[] = "wfedit://";
+    if (std::strncmp(url, kPfx, sizeof(kPfx) - 1) != 0) return std::nullopt;
+    std::string rest = url + sizeof(kPfx) - 1;
+    // Split on "/r/"
+    const auto rpos = rest.find("/r/");
+    if (rpos == std::string::npos) return std::nullopt;
+    std::string host_port = rest.substr(0, rpos);
+    std::string room = rest.substr(rpos + 3);
+    if (host_port.empty() || room.empty()) return std::nullopt;
+    return std::make_pair("ws://" + host_port, room);
+}
+
+// Add or move room to the front of recent_rooms (capped at 10).
+static void PushRecentRoom(WfeditIdentity& id,
+                            const std::string& relay_url,
+                            const std::string& room_id)
+{
+    auto& r = id.recent_rooms;
+    r.erase(std::remove_if(r.begin(), r.end(),
+        [&](const RecentRoom& x){ return x.relay_url == relay_url && x.room_id == room_id; }),
+        r.end());
+    r.insert(r.begin(), {relay_url, room_id});
+    if (r.size() > 10) r.resize(10);
+}
 
 struct EditorCtx {
     GLFWwindow* win = nullptr;
@@ -756,6 +857,24 @@ int main(int argc, char** argv)
             ctx_relay_url = argv[i] + 8;
         else if (std::strcmp(argv[i], "--relay") == 0 && i + 1 < argc)
             ctx_relay_url = argv[++i];
+        else if (std::strncmp(argv[i], "--url=", 6) == 0) {
+            if (auto parsed = ParseWfeditUrl(argv[i] + 6)) {
+                ctx_relay_url = parsed->first;
+                room_id       = parsed->second;
+            } else {
+                std::fprintf(stderr, "wf-edit: invalid --url (expected wfedit://host:port/r/room)\n");
+            }
+        }
+    }
+
+    // Phase 6: load persisted identity (peer_id, colour, recent rooms).
+    WfeditIdentity identity;
+    if (auto loaded = LoadIdentity()) {
+        identity = *loaded;
+        std::printf("wf-edit: loaded identity peer_id=%.8s… from %s\n",
+                    identity.peer_id.c_str(), IdentityPath().c_str());
+    } else {
+        // No identity yet — peer_id will be assigned at relay-connect time.
     }
 
     // 0. Read-only Y.Doc (M4): shell out to `levtree parse`, build a wfcrdt::Doc
@@ -928,17 +1047,25 @@ int main(int argc, char** argv)
         std::printf("wf-edit: collab room '%s' started\n", room_id.c_str());
     }
 
-    // 3c. Connect to the co-edit relay (Phase 2). Non-fatal on failure.
+    // 3c. Connect to the co-edit relay (Phase 2+). Non-fatal on failure.
     if (!ctx_relay_url.empty() && !room_id.empty()) {
-        ctx.relay_url    = ctx_relay_url;
-        // Reuse the collab session's peer id (already generated above).
-        ctx.our_peer_id  = ctx.collab ? ctx.collab->OurPeerId() : std::string("editor");
-        PeerColourFromId(ctx.our_peer_id, ctx.our_colour);
+        ctx.relay_url = ctx_relay_url;
+        // Phase 6: prefer persisted peer_id over collab-session's ephemeral id.
+        if (!identity.peer_id.empty()) {
+            ctx.our_peer_id = identity.peer_id;
+            std::copy(identity.colour, identity.colour + 3, ctx.our_colour);
+        } else {
+            ctx.our_peer_id = ctx.collab ? ctx.collab->OurPeerId() : std::string("editor-anon");
+            PeerColourFromId(ctx.our_peer_id, ctx.our_colour);
+            // First run — persist the generated id.
+            identity.peer_id = ctx.our_peer_id;
+            std::copy(ctx.our_colour, ctx.our_colour + 3, identity.colour);
+        }
         if (ctx.relay_client.connect(ctx_relay_url.c_str())) {
             // Send CONTROL join message: [0x04][room_id NUL peer_id].
             std::vector<uint8_t> ctrl;
             ctrl.push_back(0x04);
-            for (char ch : room_id)        ctrl.push_back(static_cast<uint8_t>(ch));
+            for (char ch : room_id)         ctrl.push_back(static_cast<uint8_t>(ch));
             ctrl.push_back(0);
             for (char ch : ctx.our_peer_id) ctrl.push_back(static_cast<uint8_t>(ch));
             ctx.relay_client.send(ctrl.data(), ctrl.size());
@@ -951,13 +1078,12 @@ int main(int argc, char** argv)
                 if (!frame.empty() && frame[0] == 0x01 && frame.size() > 1) {
                     auto txn = doc.begin();
                     txn.apply(wfcrdt::ByteView{frame.data() + 1, frame.size() - 1});
-                    // Re-read actor names+eids in case the relay had a newer state.
                     ctx.actor_names = wfedit::ReadActorNames(doc);
                     ctx.actor_eids  = wfedit::ReadActorEids(doc);
                 }
             }
 
-            // Wire local commits → relay (suppress echo-back of incoming updates).
+            // Wire local commits → relay.
             ctx.relay_sub = doc.observeUpdates([&ctx](wfcrdt::ByteView update) {
                 if (ctx.suppress_relay_send) return;
                 std::vector<uint8_t> msg;
@@ -966,12 +1092,20 @@ int main(int argc, char** argv)
                 ctx.relay_client.send(msg.data(), msg.size());
             });
 
-            std::printf("wf-edit: relay connected %s (peer %s)\n",
-                        ctx_relay_url.c_str(), ctx.our_peer_id.c_str());
+            // Phase 6: persist recent room + updated identity.
+            PushRecentRoom(identity, ctx_relay_url, room_id);
+            SaveIdentity(identity);
+            std::printf("wf-edit: relay connected %s room=%s (peer %.8s…)\n",
+                        ctx_relay_url.c_str(), room_id.c_str(), ctx.our_peer_id.c_str());
         } else {
             std::fprintf(stderr, "wf-edit: relay connect failed: %s\n",
                          ctx_relay_url.c_str());
         }
+    } else if (!identity.peer_id.empty() && identity.peer_id != "editor-anon") {
+        // Relay not used this session, but peer_id still available for
+        // display/debugging.
+        ctx.our_peer_id = identity.peer_id;
+        std::copy(identity.colour, identity.colour + 3, ctx.our_colour);
     }
 
     SetEditorFrameCallback(editor_frame, &ctx);

@@ -10,13 +10,16 @@
 // On SYNC:   relay applies update to authoritative doc, fans out to other peers.
 // On PRESENCE/CHAT: relay forwards to all other peers unchanged.
 //
-// Usage: wf-relay [--port <PORT>]   (default: 9900)
+// Usage: wf-relay [--port <PORT>] [--snapshot-dir <PATH>]   (port default: 9900)
+//   --snapshot-dir: enable debounced room snapshots (N=3 rotating .ydoc files).
 //
-// Plan: docs/plans/2026-05-21-realtime-coediting.md Phase 1
+// Plan: docs/plans/2026-05-21-realtime-coediting.md Phase 1 + Phase 7
 
 use std::collections::HashMap;
 use std::net::SocketAddr;
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
 
 use futures_util::{SinkExt, StreamExt};
 use tokio::net::{TcpListener, TcpStream};
@@ -32,6 +35,41 @@ const CH_PRESENCE: u8 = 0x02;
 const CH_CHAT: u8 = 0x03;
 const CH_CONTROL: u8 = 0x04;
 
+// ── Snapshot helpers ──────────────────────────────────────────────────────────
+
+fn snapshot_path(dir: &Path, room_id: &str, epoch: u32) -> PathBuf {
+    dir.join(format!("{}-{}.ydoc", room_id, epoch % 3))
+}
+
+fn load_snapshot(dir: &Path, room_id: &str) -> Option<Doc> {
+    // Try all 3 slots; return the one with the newest mtime.
+    let mut best: Option<(std::time::SystemTime, Vec<u8>)> = None;
+    for slot in 0u32..3 {
+        let path = snapshot_path(dir, room_id, slot);
+        if let Ok(bytes) = std::fs::read(&path) {
+            if let Ok(meta) = std::fs::metadata(&path) {
+                if let Ok(mtime) = meta.modified() {
+                    let newer = best.as_ref().map_or(true, |(bt, _)| mtime > *bt);
+                    if newer { best = Some((mtime, bytes)); }
+                }
+            }
+        }
+    }
+    let bytes = best?.1;
+    let doc = Doc::new();
+    {
+        let upd = Update::decode_v1(&bytes);
+        let mut txn = doc.transact();
+        txn.apply_update(upd);
+    }
+    eprintln!("[relay] loaded snapshot for room {room_id} ({} bytes)", bytes.len());
+    Some(doc)
+}
+
+fn encode_state(doc: &Doc) -> Vec<u8> {
+    doc.encode_state_as_update_v1(&StateVector::default())
+}
+
 // ── Room state ────────────────────────────────────────────────────────────────
 
 type PeerId = String;
@@ -41,31 +79,40 @@ type PeerSender = UnboundedSender<Vec<u8>>;
 struct RoomState {
     doc: Doc,
     peers: HashMap<PeerId, PeerSender>,
+    // Phase 7 persistence bookkeeping.
+    dirty:             bool,
+    save_epoch:        u32,
+    last_save:         Option<Instant>,
+    peers_empty_since: Option<Instant>,
 }
 
 impl RoomState {
-    fn new() -> Self {
-        Self { doc: Doc::new(), peers: HashMap::new() }
+    fn new(doc: Doc) -> Self {
+        Self {
+            doc,
+            peers: HashMap::new(),
+            dirty: false,
+            save_epoch: 0,
+            last_save: None,
+            peers_empty_since: None,
+        }
     }
 
     fn full_state_sync(&self) -> Vec<u8> {
-        let sv = StateVector::default();
-        let update = self.doc.encode_state_as_update_v1(&sv);
+        let update = encode_state(&self.doc);
         let mut msg = vec![CH_SYNC];
         msg.extend_from_slice(&update);
         msg
     }
 
     fn apply_sync(&mut self, payload: &[u8]) {
-        // Empty payload is a no-op (valid after initial join when doc is empty).
         if payload.is_empty() {
             return;
         }
-        // Decode and apply — malformed payloads would panic; callers are
-        // trusted (editor peers on the same LAN/localhost in v1).
         let upd = Update::decode_v1(payload);
         let mut txn = self.doc.transact();
         txn.apply_update(upd);
+        self.dirty = true;
     }
 
     fn fanout(&self, msg: &[u8], exclude: &str) {
@@ -79,9 +126,75 @@ impl RoomState {
 
 type Rooms = Arc<Mutex<HashMap<RoomId, RoomState>>>;
 
+// ── Snapshot saver task (Phase 7) ────────────────────────────────────────────
+
+// Runs every 2 s; saves dirty rooms (quiet ≥ 2 s since last save, or forced
+// every 10 s); evicts rooms with no peers for ≥ 60 s.
+async fn snapshot_task(rooms: Rooms, dir: PathBuf) {
+    let mut interval = tokio::time::interval(Duration::from_secs(2));
+    loop {
+        interval.tick().await;
+        let now = Instant::now();
+
+        // Collect what to save (while holding lock) then write without lock.
+        let to_save: Vec<(String, Vec<u8>, u32)>;
+        let to_evict: Vec<String>;
+        {
+            let mut lock = rooms.lock().unwrap();
+            to_evict = lock
+                .iter()
+                .filter(|(_, r)| {
+                    r.peers.is_empty()
+                        && r.peers_empty_since
+                            .map_or(false, |t| now.duration_since(t) >= Duration::from_secs(60))
+                })
+                .map(|(id, _)| id.clone())
+                .collect();
+
+            to_save = lock
+                .iter_mut()
+                .filter_map(|(id, room)| {
+                    if !room.dirty { return None; }
+                    let since_save = room.last_save
+                        .map(|t| now.duration_since(t))
+                        .unwrap_or(Duration::MAX);
+                    if since_save < Duration::from_secs(2) { return None; }
+                    let bytes = encode_state(&room.doc);
+                    let epoch = room.save_epoch;
+                    room.dirty = false;
+                    room.save_epoch += 1;
+                    room.last_save = Some(now);
+                    Some((id.clone(), bytes, epoch))
+                })
+                .collect();
+
+            for id in &to_evict {
+                lock.remove(id);
+            }
+        }
+
+        // Write snapshots without holding the lock.
+        for (id, bytes, epoch) in &to_save {
+            let path = snapshot_path(&dir, id, *epoch);
+            match std::fs::write(&path, bytes) {
+                Ok(()) => eprintln!("[relay] saved snapshot {}", path.display()),
+                Err(e) => eprintln!("[relay] snapshot write error {}: {e}", path.display()),
+            }
+        }
+        for id in &to_evict {
+            eprintln!("[relay] evicted idle room {id}");
+        }
+    }
+}
+
 // ── Connection handler ────────────────────────────────────────────────────────
 
-async fn handle_tcp(rooms: Rooms, stream: TcpStream, addr: SocketAddr) {
+async fn handle_tcp(
+    rooms: Rooms,
+    snapshot_dir: Option<Arc<PathBuf>>,
+    stream: TcpStream,
+    addr: SocketAddr,
+) {
     let ws = match accept_async(stream).await {
         Ok(ws) => ws,
         Err(e) => {
@@ -113,11 +226,18 @@ async fn handle_tcp(rooms: Rooms, stream: TcpStream, addr: SocketAddr) {
 
     let (send_tx, mut send_rx) = mpsc::unbounded_channel::<Vec<u8>>();
 
-    // Register peer and get full state to send.
+    // Register peer; create room (loading snapshot if available) if not present.
     let full_state = {
         let mut rooms_lock = rooms.lock().unwrap();
-        let room = rooms_lock.entry(room_id.clone()).or_insert_with(RoomState::new);
+        let room = rooms_lock.entry(room_id.clone()).or_insert_with(|| {
+            let doc = snapshot_dir
+                .as_ref()
+                .and_then(|d| load_snapshot(d, &room_id))
+                .unwrap_or_else(Doc::new);
+            RoomState::new(doc)
+        });
         room.peers.insert(peer_id.clone(), send_tx);
+        room.peers_empty_since = None;
         room.full_state_sync()
     };
 
@@ -166,11 +286,18 @@ async fn handle_tcp(rooms: Rooms, stream: TcpStream, addr: SocketAddr) {
         }
     }
 
-    // Cleanup.
+    // Cleanup: remove peer; mark room empty if no peers remain.
     {
         let mut rooms_lock = rooms.lock().unwrap();
         if let Some(room) = rooms_lock.get_mut(&room_id) {
             room.peers.remove(&peer_id);
+            if room.peers.is_empty() {
+                room.peers_empty_since = Some(Instant::now());
+                // Immediately mark dirty so the saver task saves soon.
+                if snapshot_dir.is_some() {
+                    room.dirty = true;
+                }
+            }
         }
     }
     out_task.abort();
@@ -182,13 +309,23 @@ async fn handle_tcp(rooms: Rooms, stream: TcpStream, addr: SocketAddr) {
 #[tokio::main]
 async fn main() {
     let mut port = 9900u16;
+    let mut snapshot_dir: Option<PathBuf> = None;
     let mut args = std::env::args().skip(1);
     while let Some(arg) = args.next() {
         if arg == "--port" {
             port = args.next().expect("missing port").parse().expect("invalid port");
         } else if let Some(s) = arg.strip_prefix("--port=") {
             port = s.parse().expect("invalid port");
+        } else if arg == "--snapshot-dir" {
+            snapshot_dir = Some(PathBuf::from(args.next().expect("missing snapshot-dir")));
+        } else if let Some(s) = arg.strip_prefix("--snapshot-dir=") {
+            snapshot_dir = Some(PathBuf::from(s));
         }
+    }
+
+    if let Some(dir) = &snapshot_dir {
+        std::fs::create_dir_all(dir).expect("cannot create snapshot-dir");
+        eprintln!("[relay] snapshots → {}", dir.display());
     }
 
     let addr = format!("0.0.0.0:{port}");
@@ -196,13 +333,21 @@ async fn main() {
     eprintln!("[relay] listening on {addr}");
 
     let rooms: Rooms = Arc::new(Mutex::new(HashMap::new()));
+    let snap_arc = snapshot_dir.map(Arc::new);
+
+    // Spawn snapshot saver if persistence is enabled.
+    if let Some(dir) = snap_arc.clone() {
+        let rooms_clone = rooms.clone();
+        tokio::spawn(snapshot_task(rooms_clone, (*dir).clone()));
+    }
 
     loop {
         match listener.accept().await {
             Ok((stream, addr)) => {
                 let rooms = rooms.clone();
+                let snap = snap_arc.clone();
                 tokio::spawn(async move {
-                    handle_tcp(rooms, stream, addr).await;
+                    handle_tcp(rooms, snap, stream, addr).await;
                 });
             }
             Err(e) => eprintln!("[relay] accept error: {e}"),
