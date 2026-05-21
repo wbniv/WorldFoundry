@@ -96,6 +96,9 @@ bool editor_frame(void* p)
     if (!s_bridge_dumped && c->doc && std::getenv("WF_EDIT_BRIDGE_DEBUG")) {
         s_bridge_dumped = true;
         wfedit::DumpIdentityMap(*c->doc);
+        // M2: field-translation dump for the selected actor (House/0 by default
+        // — the richest field set), showing each field's Doc->wfmut mapping.
+        wfedit::DumpTranslations(*c->doc, c->selected >= 0 ? c->selected : 0);
     }
 
     ImGui_ImplOpenGL3_NewFrame();
