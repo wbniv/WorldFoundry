@@ -492,6 +492,28 @@ endif()
 # So we compile wfmut sources at the UNION: bridge ON OR editor ON.
 # See docs/plans/2026-05-19-engine-mutation-api.md.
 if(WF_DEBUG_BRIDGE OR WF_ENABLE_EDITOR)
+    set(OAS_INC_DIR ${CMAKE_SOURCE_DIR}/wfsource/source/oas)
+    set(KPROPMAP_OUT ${CMAKE_SOURCE_DIR}/engine/mutation/kpropmap_generated.inc)
+    set(NAMEPATH_OUT ${CMAKE_SOURCE_DIR}/engine/wf_edit/name_to_path_generated.inc)
+    add_custom_command(
+        OUTPUT  ${KPROPMAP_OUT} ${NAMEPATH_OUT}
+        COMMAND bash wfsource/source/oas/regen-headers.sh
+        DEPENDS ${OAS_INC_DIR}/regen-headers.sh
+                ${OAS_INC_DIR}/common.inc
+                ${OAS_INC_DIR}/movebloc.inc
+                ${OAS_INC_DIR}/mesh.inc
+                ${OAS_INC_DIR}/common.oas
+                ${OAS_INC_DIR}/movebloc.oas
+                ${OAS_INC_DIR}/mesh.oas
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Regenerating OAS headers and generated maps"
+    )
+    add_custom_target(gen_oas_headers DEPENDS ${KPROPMAP_OUT} ${NAMEPATH_OUT})
+    # wfmut.cpp #includes kpropmap_generated.inc — tell CMake explicitly so
+    # a schema change triggers a recompile even without a clean build.
+    set_source_files_properties(${CMAKE_SOURCE_DIR}/engine/mutation/wfmut.cpp
+        PROPERTIES OBJECT_DEPENDS ${KPROPMAP_OUT})
+
     list(APPEND WF_SOURCES ${CMAKE_SOURCE_DIR}/engine/mutation/wfmut.cpp
                            ${CMAKE_SOURCE_DIR}/engine/mutation/wfmut_smoke.cpp)
 endif()
@@ -880,6 +902,11 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
         ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
     )
+    add_dependencies(wf_edit gen_oas_headers)
+    # engine_bridge.cc #includes name_to_path_generated.inc — explicit dep so a
+    # schema change recompiles it even without a clean build.
+    set_source_files_properties(${CMAKE_SOURCE_DIR}/engine/wf_edit/engine_bridge.cc
+        PROPERTIES OBJECT_DEPENDS ${NAMEPATH_OUT})
     set_target_properties(wf_edit PROPERTIES OUTPUT_NAME "wf-edit")
     target_include_directories(wf_edit PRIVATE
         ${IMGUI_DIR} ${IMGUI_DIR}/backends
