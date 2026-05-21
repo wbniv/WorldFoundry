@@ -58,3 +58,6 @@ build-editor/
 
 # Dear ImGui runtime layout file (written by wf-edit on exit)
 imgui.ini
+
+# wf_blender test harness cache (built wf_core.so)
+tests/.cache/

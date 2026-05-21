@@ -1,0 +1,71 @@
+name: Blender add-on tests
+
+# Matrix-tests the wf_blender add-on (in particular WF_OT_export_level) against
+# the Blender versions WorldFoundry intends to support. Drives the version-pin
+# in the worldfoundry-blender-addons apt metapackage: green here for a given
+# Blender unblocks widening the apt pin to cover it.
+#
+# Plan: docs/plans/2026-05-21-blender-version-test-matrix.md
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  blender-addon-tests:
+    name: Blender ${{ matrix.blender }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        blender: ["4.0.2", "4.2.21", "4.5.10"]
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        # wf_core is a pyo3 abi3 extension; we build once per CI run and the
+        # resulting .so works across the matrix's Python versions. Caching
+        # the cargo registry + target dir keeps this cheap.
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            wftools/wf_py/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('wftools/wf_py/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Install maturin
+        run: pip install maturin
+
+      - name: Build wf_core wheel
+        run: |
+          cd wftools/wf_py
+          maturin build --release
+
+      - name: Cache Blender install
+        id: cache-blender
+        uses: actions/cache@v4
+        with:
+          path: /tmp/blender-${{ matrix.blender }}
+          key: blender-${{ matrix.blender }}-linux-x64
+
+      - name: Install Blender ${{ matrix.blender }}
+        if: steps.cache-blender.outputs.cache-hit != 'true'
+        run: bash scripts/install-blender.sh ${{ matrix.blender }} /tmp/blender-${{ matrix.blender }}
+
+      - name: Run wf_blender export test
+        env:
+          BLENDER_BIN: /tmp/blender-${{ matrix.blender }}/blender
+        run: python3 -m pytest tests/test_blender_addon_export.py -v
