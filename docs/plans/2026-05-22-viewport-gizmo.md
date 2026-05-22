@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-22
 
-**Status:** Phases 0–3 done (2026-05-22). Translate+rotate gizmo renders on the selected actor and is matrix-aligned with the engine render (proof below) — interactive drag (move/rotate live → persist → co-edit sync) needs a user mouse session to confirm end-to-end. Scale deferred (see bottom).
+**Status:** Done (Phases 0–3, 2026-05-22). Translate+rotate gizmo renders on the selected actor and is matrix-aligned with the engine render (proof below). **Interactive drag verified by the user** — dragging+rotating the snowgoons House moved/rotated it live and File→Save persisted the new Position/Orientation to the `.lev` (confirmed by diff). Verification also surfaced a pre-existing **editor-source path tangle**: the viewport loaded the *oracle* `snowgoons-standalone.iff` while the Doc read the *Blender* `.lev`, so a save+recompile never showed in the viewport. Fixed by adding `snowgoons-blender-standalone.iff.txt` (built by `build_level_binary.sh`) and pointing the editor's default at `snowgoons-blender-standalone.iff`, so viewport + Doc + Save+Compile all reference the same Blender source. Scale deferred (see bottom). Phase 4 polish (G/R keys, snap) not done — optional.
 
 ![wf-edit translate+rotate gizmo on the snowgoons House — origin on the actor, +Z up](../../tests/screenshots/wfedit_gizmo.png)
 
