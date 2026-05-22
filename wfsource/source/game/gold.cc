@@ -57,17 +57,16 @@ Gold::Collision(PhysicalObject& other, const Vector3& normal)
 	// supporting-object bookkeeping.
 	Actor::Collision(other, normal);
 
-	// Picked up by the player: +1 to the player's per-actor GOLD count, then
-	// vanish. Value is implicitly 1 per coin (no OAS field yet,
-	// feedback_no_new_oas_fields_premerge). Pickup detection rides the
-	// bidirectional Jolt dispatch (engine change #1).
+	// Picked up by the player: add Gold Value (OAD, default 1) to the player's
+	// per-actor GOLD count, then vanish. Pickup detection rides the bidirectional
+	// Jolt dispatch (engine change #1).
 	if (IsActor(&other))
 	{
 		Actor& player = static_cast<Actor&>(other);
 		if (player.kind() == Actor::Player_KIND)
 		{
 			Mailboxes& pm = player.GetMailboxes();
-			pm.WriteMailbox(EMAILBOX_GOLD, pm.ReadMailbox(EMAILBOX_GOLD) + Scalar::one);
+			pm.WriteMailbox(EMAILBOX_GOLD, pm.ReadMailbox(EMAILBOX_GOLD) + Scalar(getOad()->GoldValue));
 			theLevel->SetPendingRemove(this);
 		}
 	}

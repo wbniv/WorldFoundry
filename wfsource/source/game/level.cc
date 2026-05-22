@@ -1686,6 +1686,7 @@ SafelyConstructTemplateObject(int32 objectToGenerate,
 
 	}
 	startupData->idxCreator = parentObjectIndex;
+	startupData->currentTime = theLevel->LevelClock();   // stamp actual spawn time so actor constructors see current clock
 	Actor* retVal = ConstructTemplateObject( startupData->objectData->type, startupData );
 	assert(ValidPtr(retVal));
 	startupData->idxCreator = 0;				// kts insure no one else uses it

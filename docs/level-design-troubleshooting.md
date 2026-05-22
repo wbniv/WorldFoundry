@@ -1116,6 +1116,52 @@ grep "actor idx=" /tmp/actorlist.log
 
 Then update any `<index> write-actor-mailbox` literal in the Blender script.
 
+## Spawned actor despawns instantly if it uses `startupData->currentTime` for TTL
+
+**Symptom:** A generator fires and the spawned object appears for a single
+frame (or is invisible entirely), then vanishes — even though the actor's TTL
+(e.g. `kGoldTTL = 3.0f`) should keep it alive for seconds. The object IS
+being constructed (you may see a brief flash), but its `update()` calls
+`SetPendingRemove` on the very first tick.
+
+**Cause:** `SObjectStartupData::currentTime` is a **value-copy** of the level
+clock taken at level-load time (`level.cc:267`):
+
+```cpp
+startupData.currentTime = LevelClock();   // frozen at t≈0
+```
+
+`Clock::Current()` returns `_nWallClock` — a stored `Scalar`, not a live
+reference. An actor constructor that initialises a despawn timer as:
+
+```cpp
+_despawnTime = startupData->currentTime.Current() + Scalar(kGoldTTL)
+```
+
+…produces `_despawnTime ≈ 0 + 3 = 3 s` regardless of when the spawn occurs.
+Any coin spawned after t > 3 s into the session satisfies
+`LevelClock().Current() >= _despawnTime` on the very first `update()` call.
+
+**Engine fix (2026-05-22):** `SafelyConstructTemplateObject` in `level.cc`
+now stamps the current clock onto `startupData` immediately before calling
+the actor constructor:
+
+```cpp
+startupData->currentTime = theLevel->LevelClock();   // actual spawn time
+Actor* retVal = ConstructTemplateObject( ... );
+```
+
+All spawnable actors constructed via `Generator` now receive the correct
+spawn-time clock. Actor constructors that store
+`startupData->currentTime.Current()` for expiry timers work correctly
+without change.
+
+**If you bypass the engine fix** (e.g. constructing actors through a
+different path), use `theLevel->LevelClock().Current()` directly in the
+actor constructor instead of `startupData->currentTime.Current()`.
+
+---
+
 ## Generator + Template Object spawn position must clear collidable objects by ≥ template half-size
 
 **Symptom:** `Generator` actor activation mailbox fires, FIRING prints, but no
@@ -1146,10 +1192,17 @@ anchor. The coin template's half-Z is 0.3, so coin extents reached Z=7.47
 while block top sat at Z=7.5 — a 0.03 m overlap, enough to fail the spawn
 check on every bump.
 
-**Fix / authoring rule:** position the generator so that the *spawn position*
-clears the nearest collidable surface by **at least the template's half-extent
-on the relevant axis, plus margin**. For SMB's coin template (half-Z=0.3),
-anchor Z = `block_top + 1.0` gives ~0.57 m of clearance and reliable spawns.
+**Fix / authoring rule:** As of the 2026-05-22 engine fix in `generator.cc`,
+the generator automatically queries the template's colspace half-Z and offsets
+spawn Z upward by that amount, so the spawned object's **bottom** lands at
+`topZ` rather than its centre. No manual clearance calculation is needed when
+using the qblock-as-generator pattern.
+
+If using a generator without the auto-offset (older build or a different
+spawn axis), position the generator so the *spawn position* clears the nearest
+collidable surface by **at least the template's half-extent on the relevant
+axis, plus margin**. For SMB's coin template (half-Z=0.75 after the NES resize),
+anchor Z = `block_top + 1.0` gives clearance for reliable spawns.
 
 **Verification workflow:** add a temporary fprintf around
 `SafelyConstructTemplateObject` and `Generato::update`'s spawn site that

@@ -1085,7 +1085,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.2000000029802322(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.2000000029802322(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "gold" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
@@ -1093,6 +1093,9 @@
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0010000000000000(1.15.16) } { 'STR' "0.001" } }
 		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
 		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 4.0000000000000000(1.15.16) } { 'STR' "4.0" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
@@ -1123,7 +1126,7 @@
 		{ 'I32' { 'NAME' "Activation MailBox" } { 'DATA' 2010l } { 'STR' "2010" } }
 		{ 'STR' { 'NAME' "Object To Throw" } { 'STR' "coin_template" } }
 		{ 'FX32' { 'NAME' "Generation Rate" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
-		{ 'FX32' { 'NAME' "Object X Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Object X Velocity" } { 'DATA' 1.5000000000000000(1.15.16) } { 'STR' "1.5" } }
 		{ 'FX32' { 'NAME' "Object Y Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Object Z Velocity" } { 'DATA' 6.0000000000000000(1.15.16) } { 'STR' "6.0" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -1150,7 +1153,7 @@
 		{ 'I32' { 'NAME' "Activation MailBox" } { 'DATA' 2010l } { 'STR' "2010" } }
 		{ 'STR' { 'NAME' "Object To Throw" } { 'STR' "coin_template" } }
 		{ 'FX32' { 'NAME' "Generation Rate" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
-		{ 'FX32' { 'NAME' "Object X Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Object X Velocity" } { 'DATA' 1.5000000000000000(1.15.16) } { 'STR' "1.5" } }
 		{ 'FX32' { 'NAME' "Object Y Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Object Z Velocity" } { 'DATA' 6.0000000000000000(1.15.16) } { 'STR' "6.0" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -1177,7 +1180,7 @@
 		{ 'I32' { 'NAME' "Activation MailBox" } { 'DATA' 2010l } { 'STR' "2010" } }
 		{ 'STR' { 'NAME' "Object To Throw" } { 'STR' "coin_template" } }
 		{ 'FX32' { 'NAME' "Generation Rate" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
-		{ 'FX32' { 'NAME' "Object X Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Object X Velocity" } { 'DATA' 1.5000000000000000(1.15.16) } { 'STR' "1.5" } }
 		{ 'FX32' { 'NAME' "Object Y Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Object Z Velocity" } { 'DATA' 6.0000000000000000(1.15.16) } { 'STR' "6.0" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }

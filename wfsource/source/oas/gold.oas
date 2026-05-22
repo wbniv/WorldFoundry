@@ -8,5 +8,6 @@
 
 TYPEHEADER(Gold,Gold)
 	@include actor.inc
+        TYPEENTRYINT32(Gold Value,, 1, 99, 1, "coins awarded per pickup", SHOW_AS_NUMBER)
 
 TYPEFOOTER

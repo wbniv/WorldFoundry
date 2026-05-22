@@ -111,7 +111,18 @@ Generato::update()
 		// above the generator body (e.g. coins pop out of a ?-block top).
 		Vector3 center = _physicalAttributes.GetColSpace().GetCenter( currentPos() );
 		Scalar  topZ   = _physicalAttributes.GetColSpace().UnExpMax( currentPos() ).Z();
-		Vector3 pos = Vector3( center.X(), center.Y(), topZ ) + displacement;
+		// Offset spawn Z by the template's half-height so the spawned object's BOTTOM
+		// lands at topZ rather than its centre (avoids Jolt depenetration ejection).
+		SObjectStartupData* tmplData =
+			(SObjectStartupData*)theLevel->FindTemplateObjectData(objectToGenerate);
+		Scalar tmplHalfZ = Scalar::zero;
+		if (tmplData)
+		{
+			Scalar tMinZ = Scalar::FromFixed32(tmplData->objectData->coarse.minZ);
+			Scalar tMaxZ = Scalar::FromFixed32(tmplData->objectData->coarse.maxZ);
+			tmplHalfZ = (tMaxZ - tMinZ) / Scalar::two;
+		}
+		Vector3 pos = Vector3( center.X(), center.Y(), topZ + tmplHalfZ ) + displacement;
 
 		// generate an object
 		std::fprintf(stderr, "Generato::FIRING obj=%d spawn=(%.2f,%.2f,%.2f) vel=(%.2f,%.2f,%.2f)\n",

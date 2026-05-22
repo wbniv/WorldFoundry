@@ -459,11 +459,11 @@ ground_obj['wf_Model Type'] = 'Mesh'
 mat_coin   = make_mat('smb_coin',   (1.0,  0.84, 0.0))   # gold #FFD600
 BSIZE = T / 2  # half-side of a 1-tile block
 qblock_tex = _make_qblock_tga(os.path.join(SCRIPT_DIR, 'qblock_tex.tga'))
-COIN_R, COIN_T = 0.3, 0.2   # Y must be ≥ ~0.2 (40 cm) to render at all from the
-                             # side-camera (Y=-20) — 0.04 was below the renderer's
-                             # camera-depth threshold. See docs/level-design-
-                             # troubleshooting.md § "Object too thin in camera-
-                             # depth axis — invisible".
+COIN_X = T * 0.25   # half-width:  NES 8px/16px → 50% of block → 0.375 m
+COIN_Z = T * 0.5    # half-height: NES 16px/16px → 100% of block → 0.75 m
+COIN_T = 0.2        # Y-depth: ≥ ~0.2 m to render from side-camera (Y=-20).
+                    # 0.04 was below the renderer's camera-depth threshold; see
+                    # docs/level-design-troubleshooting.md § "Object too thin…".
 
 # Per-actor local mailbox slots (same index on every block instance; no cross-talk
 # because local mailboxes 2000-2099 are per-actor). Must match mailbox.inc.
@@ -524,7 +524,7 @@ import bmesh as _bmesh
 def _make_coin_template():
     bm = _bmesh.new()
     _bmesh.ops.create_cube(bm, size=1.0)
-    _bmesh.ops.scale(bm, vec=(COIN_R*2, COIN_T*2, COIN_R*2), verts=bm.verts)
+    _bmesh.ops.scale(bm, vec=(COIN_X*2, COIN_T*2, COIN_Z*2), verts=bm.verts)
     mesh = bpy.data.meshes.new('coin_template')
     bm.to_mesh(mesh); bm.free()
     mesh.materials.append(mat_coin)
@@ -540,6 +540,9 @@ def _make_coin_template():
     obj['wf_Mass']                 = 0.001
     obj['wf_Falling Acceleration'] = 4.0
     obj['wf_Max Air Speed']        = 50.0
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
     obj['wf_Model Type']           = 'Mesh'
     obj['wf_Visibility Mailbox']   = 1
     obj['wf_Mesh Name']            = 'coin_template.iff'
@@ -560,7 +563,7 @@ for i, bx in enumerate(QBLOCK_XS):
     blk['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
     blk['wf_Object To Throw']    = 'coin_template'
     blk['wf_Generation Rate']    = 10.0
-    blk['wf_Object X Velocity']  = 0.0
+    blk['wf_Object X Velocity']  = 1.5   # slight rightward drift (+X = screen-right)
     blk['wf_Object Y Velocity']  = 0.0
     blk['wf_Object Z Velocity']  = 6.0
     blk['wf_Script']             = QBLOCK_SCRIPT
