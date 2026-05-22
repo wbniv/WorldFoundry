@@ -2,7 +2,11 @@
 
 **Date:** 2026-05-22
 
-**Status:** Not started.
+**Status:** Phases 0–3 done (2026-05-22). Translate+rotate gizmo renders on the selected actor and is matrix-aligned with the engine render (proof below) — interactive drag (move/rotate live → persist → co-edit sync) needs a user mouse session to confirm end-to-end. Scale deferred (see bottom).
+
+![wf-edit translate+rotate gizmo on the snowgoons House — origin on the actor, +Z up](../../tests/screenshots/wfedit_gizmo.png)
+
+*Headless capture (`--select=0 --frames 120 --screenshot`): the gizmo origin sits on the selected House mesh, blue (+Z) axis up, translate arrows + rotation rings projecting into the scene at the actor's world position — confirming the reconstructed view+projection matches the engine's own render.*
 
 ## Context
 

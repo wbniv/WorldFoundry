@@ -23,6 +23,7 @@
 #include "imgui_internal.h"   // DockBuilder API (default panel layout)
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "ImGuizmo.h"          // viewport translate/rotate gizmo
 
 #include <gfx/host_gl_context.h>
 #include <gfx/renderer_backend.hp>   // RendererBackendGet().SetProjection on resize
@@ -40,6 +41,7 @@
 #include "video_track.h"
 #include "collab_panel.h"
 #include "ws_client.h"
+#include "gizmo.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -184,6 +186,10 @@ struct EditorCtx {
     wfcrdt::Doc*                  doc = nullptr;
     int                           fields_for = -1;   // which actor `props` holds
     std::vector<wfedit::PropField> props;
+
+    // Viewport gizmo: true while a drag is in progress, so the Doc leaves are
+    // written once on release (not every frame — that would flood the relay).
+    bool                          gizmo_active = false;
 
     // Save round-trip: the .lev path File→Save writes (the Doc is lossless — v2
     // schema — so save needs no retained JSON), and a transient toast.
@@ -575,6 +581,7 @@ bool editor_frame(void* p)
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
 
     // Dockspace with a pass-through central node: the engine already rendered
     // fullscreen into the back buffer (StepFrame), and the central node draws
@@ -712,6 +719,51 @@ bool editor_frame(void* p)
         ImGui::TextDisabled("(select an actor)");
     }
     ImGui::End();
+
+    // ── Viewport translate/rotate gizmo ──────────────────────────────────────
+    // Drag the selected actor directly in the 3D view. Live preview moves the
+    // engine actor each frame (wfmut, no Doc write); the Doc Position/Orientation
+    // leaves are written ONCE on release — writing every drag frame would emit a
+    // relay SYNC per frame (observeUpdates fires on every Doc commit). The gizmo
+    // is fed the engine's exact view+proj so it projects onto the live actor.
+    // DocActorToEngineIdx + BuildGizmoMats both no-op safely when there's no live
+    // level/camera, so no theLevel reference is needed here.
+    {
+        const int eidx = (c->selected >= 0 && !c->structural_dirty)
+                       ? wfedit::DocActorToEngineIdx(c->selected) : 0;
+        if (eidx > 0) {
+            wfedit::GizmoMats m =
+                wfedit::BuildGizmoMats(eidx, float(c->fb_w), float(c->fb_h));
+            if (m.valid) {
+                ImGuizmo::SetOrthographic(false);
+                ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
+                ImGuiDockNode* central = ImGui::DockBuilderGetCentralNode(dock_id);
+                const ImVec2 rp = central ? central->Pos  : ImGui::GetMainViewport()->WorkPos;
+                const ImVec2 rs = central ? central->Size : ImGui::GetMainViewport()->WorkSize;
+                ImGuizmo::SetRect(rp.x, rp.y, rs.x, rs.y);
+
+                ImGuizmo::Manipulate(m.view, m.proj,
+                    ImGuizmo::TRANSLATE | ImGuizmo::ROTATE, ImGuizmo::WORLD, m.model);
+
+                if (ImGuizmo::IsUsing()) {
+                    wfedit::ApplyGizmoToEngine(eidx, m.model);   // live preview
+                    c->gizmo_active = true;
+                } else if (c->gizmo_active) {
+                    // Drag released: persist + sync once, refresh the panel cache
+                    // so the Position/Orientation widgets reflect the new pose.
+                    c->gizmo_active = false;
+                    if (c->doc) {
+                        wfedit::CommitGizmoToDoc(*c->doc, c->selected, m.model);
+                        c->props = wfedit::ResolveProperties(
+                            wfedit::ReadActorFields(*c->doc, c->selected));
+                        c->fields_for = c->selected;
+                    }
+                }
+            }
+        } else if (c->gizmo_active) {
+            c->gizmo_active = false;   // selection/level lost mid-drag — drop cleanly
+        }
+    }
 
     // Collaborators panel (voice + video; only when a room is active).
     if (c->collab)
