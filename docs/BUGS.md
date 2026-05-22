@@ -88,13 +88,16 @@ The SMB `?`-block (`Generator`) uses `NumberOfLocalMailboxes = 13` (odd). Init l
 
 **Diff** (`wfsource/source/game/generator.cc`):
 ```diff
--            return;
-+        else
-+        {
-+        }   // mailbox active — engine change #2
+     if( GetMailboxes().ReadMailbox(_generateMailBox) == Scalar::zero )
+     {
+         _timeToGenerate = theLevel->LevelClock().Current();
+-        return;
+     }
++    else
++    {
++    }
  
--    Actor::update();
-+    Actor::update();   // always runs now (was skipped by the idle `return`)
+     Actor::update();
 ```
 
 **Investigation:** Engine change #2 of plan [plans/2026-05-19-smb-block-generator-coin.md](plans/2026-05-19-smb-block-generator-coin.md).
