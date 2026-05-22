@@ -234,7 +234,10 @@ Objects will appear in the correct WF-relative positions in Blender. The only or
    output (feet_z ≈ 0, center_z ≈ 1).  Removed the incorrect Y↔Z swap from
    `wf_to_bl`/`bl_to_wf` — transforms are now identity.  Level appears
    upright in Blender.
-6. 🟡 End-to-end proof (2026-04-19, `138c3c2`) — `snowgoons-blender.lev`
+6. ✅ End-to-end proof — **closed 2026-05-22**: renders the tracked colour view +
+   plays 600 frames clean (see the close-out verification section below).
+   Path/channel keyframe fidelity (animated objects) is parked as a Phase 2c
+   item in [TODO.md](../../TODO.md) § TOOLS. Original 2026-04-19 (`138c3c2`) note: `snowgoons-blender.lev`
    through headless Blender + iffcomp-rs + levcomp-rs + in-place LVL
    chunk swap into the original LVAS shell produces a loadable
    `snowgoons-blender.iff`; `wf_game -L` runs through level load,
