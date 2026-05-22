@@ -264,14 +264,18 @@ bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc)
 
     auto txn = doc.begin();
 
+    // Resolve BOTH root types up front, before any insert opens the write txn:
+    // root resolution (ymap/yarray) opens its own internal txn in yffi and would
+    // deadlock against an already-open write txn (wfcrdt's lazy-txn contract).
     auto meta = txn.map("meta");
+    // content = the top-level OBJ chunks, with the LVL wrapper dropped (its id is
+    // kept in meta.root_chunk_type so save can reconstruct the exact tree).
+    auto content = txn.array("content");
+
     meta.insert("level_name", level_name.c_str());
     meta.insert("format_version", static_cast<long long>(2));
     meta.insert("root_chunk_type", root.value("id", "LVL").c_str());  // for the save inverse
 
-    // content = the top-level OBJ chunks, with the LVL wrapper dropped (its id is
-    // kept in meta.root_chunk_type so save can reconstruct the exact tree).
-    auto content = txn.array("content");
     int objs = 0;
     for (const auto& item : root["items"]) {
         if (!IsChunk(item)) continue;          // skip stray literals at LVL level

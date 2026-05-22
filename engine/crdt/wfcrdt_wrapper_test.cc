@@ -101,8 +101,8 @@ static int test_two_doc_state_diff() {
 
     {
         auto btx = b.begin();
+        auto barr = btx.array("content");   // resolve root before apply opens the txn
         btx.apply(wfcrdt::ByteView{diff.data(), diff.size()});
-        auto barr = btx.array("content");
         CHECK(barr.len() == 3, "B's array != 3 after apply");
     }
 

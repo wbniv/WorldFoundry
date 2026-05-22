@@ -6,6 +6,12 @@
  * detect regressions.
  *
  * Plan: docs/plans/2026-05-18-yrs-c-abi-binding.md (step 5)
+ * Yrs 0.9.3 → 0.26.0 ABI: docs/plans/2026-05-22-yrs-upgrade-and-native-undo.md
+ *   - transactions: ytransaction_new(doc) → ydoc_write_transaction(doc, 0, NULL)
+ *   - root types:   ymap/yarray now take the DOC, not the txn
+ *   - reads/mutators on a map take the txn; ymap_get/ymap_len gain a txn arg
+ *   - observers return an owned YSubscription*, freed by yunobserve()
+ *   - binary buffers are char* / uint32_t (were unsigned char* / int)
  *
  * Coverage (matches plan's verification matrix):
  *   - YDoc lifecycle (ydoc_new / ydoc_destroy)
@@ -17,6 +23,7 @@
 
 #include <libyrs.h>
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,20 +53,20 @@ static int test_doc_lifecycle(void) {
 
 static int test_map_round_trip(void) {
     YDoc *doc = ydoc_new();
-    YTransaction *txn = ytransaction_new(doc);
-    Branch *meta = ymap(txn, "meta");
+    Branch *meta = ymap(doc, "meta");
+    YTransaction *txn = ydoc_write_transaction(doc, 0, NULL);
 
     YInput v = yinput_long(42);
     ymap_insert(meta, txn, "answer", &v);
 
-    YOutput *out = ymap_get(meta, "answer");
+    YOutput *out = ymap_get(meta, txn, "answer");
     CHECK(out, "ymap_get returned NULL");
-    const long long *got = youtput_read_long(out);
+    const int64_t *got = youtput_read_long(out);
     CHECK(got, "youtput_read_long returned NULL");
     CHECK(*got == 42, "round-trip value mismatch");
     youtput_destroy(out);
 
-    CHECK(ymap_len(meta) == 1, "ymap_len != 1");
+    CHECK(ymap_len(meta, txn) == 1, "ymap_len != 1");
 
     ytransaction_commit(txn);
     ydoc_destroy(doc);
@@ -68,8 +75,8 @@ static int test_map_round_trip(void) {
 
 static int test_array_insert_len(void) {
     YDoc *doc = ydoc_new();
-    YTransaction *txn = ytransaction_new(doc);
-    Branch *content = yarray(txn, "content");
+    Branch *content = yarray(doc, "content");
+    YTransaction *txn = ydoc_write_transaction(doc, 0, NULL);
 
     YInput items[3];
     items[0] = yinput_long(10);
@@ -90,8 +97,8 @@ static int test_two_doc_state_diff(void) {
     YDoc *a = ydoc_new();
     YDoc *b = ydoc_new();
 
-    YTransaction *atx = ytransaction_new(a);
-    Branch *aarr = yarray(atx, "content");
+    Branch *aarr = yarray(a, "content");
+    YTransaction *atx = ydoc_write_transaction(a, 0, NULL);
     YInput items[3];
     items[0] = yinput_long(1);
     items[1] = yinput_long(2);
@@ -100,27 +107,27 @@ static int test_two_doc_state_diff(void) {
     ytransaction_commit(atx);
 
     /* Encode A's full update (sv = NULL means snapshot of entire state). */
-    YTransaction *atx2 = ytransaction_new(a);
-    int diff_len = 0;
-    unsigned char *diff = ytransaction_state_diff_v1(atx2, NULL, 0, &diff_len);
+    YTransaction *atx2 = ydoc_write_transaction(a, 0, NULL);
+    uint32_t diff_len = 0;
+    char *diff = ytransaction_state_diff_v1(atx2, NULL, 0, &diff_len);
     CHECK(diff, "state_diff returned NULL");
     CHECK(diff_len > 0, "state_diff returned empty payload");
     ytransaction_commit(atx2);
 
     /* Apply A's diff to B. */
-    YTransaction *btx = ytransaction_new(b);
+    Branch *barr = yarray(b, "content");
+    YTransaction *btx = ydoc_write_transaction(b, 0, NULL);
     ytransaction_apply(btx, diff, diff_len);
-    Branch *barr = yarray(btx, "content");
     CHECK(yarray_len(barr) == 3, "B's array != 3 after apply");
     ytransaction_commit(btx);
     ybinary_destroy(diff, diff_len);
 
     /* State vectors must now match. */
-    YTransaction *atx3 = ytransaction_new(a);
-    YTransaction *btx3 = ytransaction_new(b);
-    int asv_len = 0, bsv_len = 0;
-    unsigned char *asv = ytransaction_state_vector_v1(atx3, &asv_len);
-    unsigned char *bsv = ytransaction_state_vector_v1(btx3, &bsv_len);
+    YTransaction *atx3 = ydoc_write_transaction(a, 0, NULL);
+    YTransaction *btx3 = ydoc_write_transaction(b, 0, NULL);
+    uint32_t asv_len = 0, bsv_len = 0;
+    char *asv = ytransaction_state_vector_v1(atx3, &asv_len);
+    char *bsv = ytransaction_state_vector_v1(btx3, &bsv_len);
     CHECK(asv && bsv, "state_vector returned NULL");
     CHECK(asv_len == bsv_len, "state vector lengths differ after sync");
     CHECK(memcmp(asv, bsv, (size_t)asv_len) == 0,
@@ -137,21 +144,19 @@ static int test_two_doc_state_diff(void) {
 
 static int test_observer_fires(void) {
     YDoc *doc = ydoc_new();
-    YTransaction *txn0 = ytransaction_new(doc);
-    Branch *arr = yarray(txn0, "content");
-    ytransaction_commit(txn0);
+    Branch *arr = yarray(doc, "content");
 
     int fire_count = 0;
-    unsigned int sub = yarray_observe(arr, &fire_count, on_array_change);
+    YSubscription *sub = yarray_observe(arr, &fire_count, on_array_change);
 
-    YTransaction *txn1 = ytransaction_new(doc);
+    YTransaction *txn1 = ydoc_write_transaction(doc, 0, NULL);
     YInput item = yinput_long(99);
     yarray_insert_range(arr, txn1, 0, &item, 1);
     ytransaction_commit(txn1);
 
     CHECK(fire_count == 1, "observer didn't fire exactly once");
 
-    yarray_unobserve(arr, sub);
+    yunobserve(sub);
     ydoc_destroy(doc);
     return 0;
 }

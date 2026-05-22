@@ -12,8 +12,8 @@ path = "src/bin/relay.rs"
 tokio = { version = "1", features = ["full"] }
 tokio-tungstenite = "0.21"
 futures-util = "0.3"
-yrs = { path = "../y-crdt/yrs", version = "0.9.3" }
+yrs = { path = "../y-crdt/yrs", version = "0.26.0" }
 uuid = { version = "1", features = ["v4"] }
 
 [dev-dependencies]
-yrs = { path = "../y-crdt/yrs", version = "0.9.3" }
+yrs = { path = "../y-crdt/yrs", version = "0.26.0" }

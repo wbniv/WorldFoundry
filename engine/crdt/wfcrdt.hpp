@@ -13,18 +13,24 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 // Forward declarations of the C ABI's opaque types so callers don't need
 // to include libyrs.h transitively.
 struct YDoc;
-struct YTransaction;
+// yffi ≥0.10 declares this as `typedef struct TransactionInner YTransaction`
+// (an alias to an opaque inner struct), not a `struct YTransaction` tag — so we
+// must mirror that exact spelling or the redeclaration conflicts when this
+// header and libyrs.h are both visible (in wfcrdt.cpp).
+typedef struct TransactionInner YTransaction;
 struct Branch;
 struct YOutput;
 struct YMapEvent;
 struct YArrayEvent;
 struct YAfterTransactionEvent;
+struct YSubscription;   // yffi ≥0.10: observers return an owned YSubscription*
 
 namespace wfcrdt {
 
@@ -34,6 +40,7 @@ struct ByteView {
     std::size_t len;
 };
 
+class Doc;
 class Output;
 class Input;
 class Map;
@@ -43,6 +50,15 @@ class Subscription;
 // RAII wrapper around YTransaction*. Move-only. Commits on scope exit
 // unless commit() or cancel() were called explicitly. Mirrors the
 // lock_guard pattern.
+//
+// LAZY ACQUISITION (yffi ≥0.10): the underlying yffi write transaction is
+// opened on the *first data operation*, not at begin(). Root-type resolution
+// (ymap/yarray(doc,name)) opens its own internal transaction inside yffi, so it
+// would deadlock against an already-open write txn — by deferring our txn until
+// after the caller has fetched its root Map/Array, root resolution always runs
+// with no txn held. See docs/plans/2026-05-22-yrs-upgrade-and-native-undo.md.
+// Consequence: a transaction that touches *two* distinct roots must fetch both
+// (txn.map(...)/txn.array(...)) before its first read/write.
 class Transaction {
 public:
     ~Transaction();
@@ -52,8 +68,9 @@ public:
     Transaction(const Transaction&) = delete;
     Transaction& operator=(const Transaction&) = delete;
 
-    // Commits the txn immediately. Subsequent operations are illegal;
-    // valid() will return false. Safe to skip — dtor commits if needed.
+    // Commits the txn immediately (no-op if it was never lazily opened).
+    // Subsequent operations are illegal; valid() returns false. Safe to skip —
+    // dtor commits if needed.
     void commit();
 
     // Discards the txn. The CRDT effect of an uncommitted txn is
@@ -61,11 +78,16 @@ public:
     // there's no rollback). Reserved for future-proofing.
     void cancel();
 
-    bool valid() const { return _txn != nullptr; }
-    YTransaction* raw() const { return _txn; }
+    bool valid() const { return _docw != nullptr; }
 
-    // Get-or-create root types. The returned Map/Array borrows this
-    // Transaction — its operations route through `_txn`.
+    // Lazily opens (if needed) and returns the underlying yffi write txn.
+    // Returns nullptr only after commit()/cancel()/move. Used by Map/Array/
+    // Output for their data operations.
+    YTransaction* raw() const;
+
+    // Get-or-create root types. Resolves (and caches on the Doc) the root
+    // branch *without* opening this transaction, then returns a Map/Array view
+    // that drives its operations through raw().
     Map map(const char* name);
     Array array(const char* name);
 
@@ -78,8 +100,9 @@ public:
 
 private:
     friend class Doc;
-    explicit Transaction(YDoc* doc);
-    YTransaction* _txn;
+    explicit Transaction(Doc* docw);
+    Doc* _docw;                    // owning Doc wrapper (root cache + YDoc*)
+    mutable YTransaction* _txn;    // lazily opened on first raw(); may be null
 };
 
 // RAII wrapper around YDoc*. The Doc owns the underlying y-crdt document.
@@ -103,8 +126,20 @@ public:
     bool valid() const { return _doc != nullptr; }
     YDoc* raw() const { return _doc; }
 
+    // Resolve (get-or-create) a root Map/Array branch by name, caching the
+    // stable Branch* for the Doc's lifetime. MUST be called with no wfcrdt
+    // Transaction's yffi txn open on this Doc — root resolution opens its own
+    // internal write txn in yffi and would otherwise deadlock. The Transaction
+    // wrapper guarantees this via lazy txn acquisition. Returns nullptr only on
+    // a moved-from Doc.
+    Branch* rootBranch(const char* name, bool asArray);
+
 private:
     YDoc* _doc;
+    // Root branches are permanent for the Doc's lifetime, so we resolve each
+    // name once and cache it; this is also what lets Transaction::map/array
+    // hand back a branch without opening a (deadlock-prone) txn.
+    std::unordered_map<std::string, Branch*> _roots;
 };
 
 // RAII wrapper around YOutput* (returned by ymap_get / yarray_get).
@@ -135,9 +170,9 @@ public:
 private:
     friend class Map;
     friend class Array;
-    Output(YOutput* out, YTransaction* txn) : _out(out), _txn(txn) {}
+    Output(YOutput* out, Transaction* txn) : _out(out), _txn(txn) {}
     YOutput* _out;
-    YTransaction* _txn;
+    Transaction* _txn;   // owning transaction (lazily opens the yffi txn)
 };
 
 // Preliminary value tree for building nested containers in a single insert
@@ -206,9 +241,9 @@ public:
 private:
     friend class Transaction;
     friend class Output;
-    Map(Branch* branch, YTransaction* txn) : _branch(branch), _txn(txn) {}
+    Map(Branch* branch, Transaction* txn) : _branch(branch), _txn(txn) {}
     Branch* _branch;
-    YTransaction* _txn;
+    Transaction* _txn;   // owning transaction (lazily opens the yffi txn)
 };
 
 // Borrowed view of a root-level YArray. Same ownership rules as Map.
@@ -232,9 +267,9 @@ public:
 private:
     friend class Transaction;
     friend class Output;
-    Array(Branch* branch, YTransaction* txn) : _branch(branch), _txn(txn) {}
+    Array(Branch* branch, Transaction* txn) : _branch(branch), _txn(txn) {}
     Branch* _branch;
-    YTransaction* _txn;
+    Transaction* _txn;   // owning transaction (lazily opens the yffi txn)
 };
 
 // Subscription discriminator — selects the right yffi unobserve()
@@ -256,14 +291,12 @@ private:
     friend class Map;
     friend class Array;
     friend class Doc;
-    // Map / Array subscription.
-    Subscription(Branch* target, unsigned int subId, SubKind kind, void* heapTrampoline);
-    // DocUpdates subscription (ydoc_observe_updates_v1).
-    Subscription(YDoc* doc, unsigned int subId, void* heapTrampoline);
+    // yffi ≥0.10: every observe() returns an owned YSubscription*, freed by a
+    // single yunobserve() regardless of source — so one ctor covers all three
+    // kinds. `_kind` only selects which trampoline type to delete.
+    Subscription(YSubscription* sub, SubKind kind, void* heapTrampoline);
 
-    Branch* _target;   // non-null for Map/Array subscriptions
-    YDoc*   _doc;      // non-null for DocUpdates subscriptions
-    unsigned int _subId;
+    YSubscription* _sub;   // owned; freed via yunobserve in the dtor
     SubKind _kind;
     void* _heap;  // owned MapTrampoline* / ArrayTrampoline* / DocUpdatesTrampoline*
 };

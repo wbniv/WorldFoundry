@@ -11,7 +11,7 @@ use tokio::net::TcpListener;
 use tokio::sync::mpsc;
 use tokio::time::timeout;
 use tokio_tungstenite::{accept_async, connect_async, tungstenite::Message};
-use yrs::{Doc, StateVector, Update};
+use yrs::{Doc, StateVector, Update, Transact, ReadTxn};
 use yrs::updates::decoder::Decode;
 
 const CH_SYNC: u8 = 0x01;
@@ -67,7 +67,7 @@ async fn run_relay(listener: TcpListener, rooms: Rooms) {
                 let room = lock.entry(room_id.clone()).or_insert_with(|| Room { doc: Doc::new(), peers: Default::default() });
                 room.peers.insert(peer_id.clone(), send_tx);
                 let sv = StateVector::default();
-                let update = room.doc.encode_state_as_update_v1(&sv);
+                let update = room.doc.transact().encode_state_as_update_v1(&sv);
                 let mut msg = vec![CH_SYNC]; msg.extend_from_slice(&update); msg
             };
             let _ = tx.send(Message::Binary(full_state)).await;
@@ -83,8 +83,10 @@ async fn run_relay(listener: TcpListener, rooms: Rooms) {
                         let mut lock = rooms.lock().unwrap();
                         if let Some(r) = lock.get_mut(&room_id) {
                             if !b[1..].is_empty() {
-                                let upd = Update::decode_v1(&b[1..]);
-                                r.doc.transact().apply_update(upd);
+                                if let Ok(upd) = Update::decode_v1(&b[1..]) {
+                                    let mut txn = r.doc.transact_mut();
+                                    let _ = txn.apply_update(upd);
+                                }
                             }
                             for (id, s) in &r.peers { if id != &peer_id { let _ = s.send(b.clone()); } }
                         }
@@ -145,7 +147,7 @@ async fn sync_fanout_with_valid_update() {
     // Generate a valid Yrs v1 update using the local doc.
     let doc = Doc::new();
     let sv_empty = StateVector::default();
-    let update_bytes = doc.encode_state_as_update_v1(&sv_empty);
+    let update_bytes = doc.transact().encode_state_as_update_v1(&sv_empty);
     // This is a valid (empty) update — no new blocks, no deletes.
 
     let (mut ws_a, _) = connect_async(url.as_str()).await.unwrap();
@@ -182,7 +184,7 @@ async fn late_joiner_gets_full_state() {
     let _ = next_binary(&mut ws_a).await;
 
     let doc = Doc::new();
-    let update_bytes = doc.encode_state_as_update_v1(&StateVector::default());
+    let update_bytes = doc.transact().encode_state_as_update_v1(&StateVector::default());
     let mut msg = vec![CH_SYNC];
     msg.extend_from_slice(&update_bytes);
     ws_a.send(Message::Binary(msg)).await.unwrap();
