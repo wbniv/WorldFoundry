@@ -278,7 +278,7 @@ EngineWrite TranslateField(const PropField& f)
         return w;
     }
     if (key == "Orientation") {
-        w.kind = EngineWrite::Orient;   // revolutions, as stored (no conversion)
+        w.kind = EngineWrite::Orient;   // radians as stored; converted to revs in PropagateToEngine
         ParseVec3(f.data, w.vec);
         return w;
     }
@@ -319,7 +319,7 @@ void DumpTranslations(wfcrdt::Doc& doc, int doc_index)
             case EngineWrite::Pos:
                 k = "Pos";    std::snprintf(val, sizeof val, "(%.3f %.3f %.3f)", w.vec[0], w.vec[1], w.vec[2]); break;
             case EngineWrite::Orient:
-                k = "Orient"; std::snprintf(val, sizeof val, "(%.4f %.4f %.4f) rev", w.vec[0], w.vec[1], w.vec[2]); break;
+                k = "Orient"; std::snprintf(val, sizeof val, "(%.4f %.4f %.4f) rad", w.vec[0], w.vec[1], w.vec[2]); break;
             case EngineWrite::FieldFloat:
                 k = "FieldFloat"; std::snprintf(val, sizeof val, "%s = %.4f", w.path.c_str(), w.d); break;
             case EngineWrite::FieldInt:
@@ -350,13 +350,16 @@ void PropagateToEngine(int doc_index, const PropField& f)
                         Scalar::FromFloat(w.vec[2])));
             break;
         case EngineWrite::Orient: {
-            // Revolutions are [0,1) (per WF convention); a panel edit isn't
-            // clamped, so wrap before constructing the Angle.
+            // The Doc/.lev EULR DATA is in RADIANS (levcomp-rs converts via
+            // radians_fx_to_u16_revs; decompile.rs:56-60 inverse). Convert to
+            // revolutions for Angle::Revolution, wrapping to [0,1) (Validate is
+            // happiest with an in-range fraction; a panel edit isn't clamped).
+            constexpr float kTwoPi = 6.28318530717958647692f;
             auto rev = [](float r) { r = std::fmod(r, 1.0f); return Scalar::FromFloat(r < 0 ? r + 1.0f : r); };
             wfmut::SetActorOrientation(*theLevel, idx,
-                Euler(Angle::Revolution(rev(w.vec[0])),
-                      Angle::Revolution(rev(w.vec[1])),
-                      Angle::Revolution(rev(w.vec[2]))));
+                Euler(Angle::Revolution(rev(w.vec[0] / kTwoPi)),
+                      Angle::Revolution(rev(w.vec[1] / kTwoPi)),
+                      Angle::Revolution(rev(w.vec[2] / kTwoPi))));
             break;
         }
         case EngineWrite::FieldFloat:
