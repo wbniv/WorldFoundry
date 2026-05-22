@@ -302,6 +302,57 @@ static int test_undo_skips_remote_origin() {
     return 0;
 }
 
+// Collab local-only undo across a real sync round-trip. An edit that originated
+// as a LOCAL txn on doc A, after traveling the (Yjs v1) wire to doc B and being
+// applied via beginRemote(), must NOT enter B's undo history — origins aren't in
+// the wire format, so B's apply-txn origin governs B's capture. Mirrors the relay
+// (stateDiff/apply): B's Ctrl+Z can't revert A's edit; A's own Ctrl+Z reverts it
+// and the revert syncs back to B.
+static int test_undo_local_only_across_sync() {
+    wfcrdt::Doc a, b;
+    wfcrdt::UndoManager ua(a, /*captureTimeoutMillis=*/0);
+    wfcrdt::UndoManager ub(b, /*captureTimeoutMillis=*/0);
+    { auto t = a.begin(); ua.addScope(t.array("content")); }
+    { auto t = b.begin(); ub.addScope(t.array("content")); }
+
+    // A makes a local edit.
+    { auto t = a.begin(); t.array("content").insertLong(0, 42); }
+    CHECK(ua.undoStackLen() == 1, "A captured its own local edit");
+
+    // Sync A→B (full diff; B applies as REMOTE — resolve root before apply opens the txn).
+    {
+        std::vector<std::uint8_t> diff;
+        { auto t = a.begin(); diff = t.stateDiff(wfcrdt::ByteView{nullptr, 0}); }
+        auto t = b.beginRemote();
+        auto barr = t.array("content");
+        t.apply(wfcrdt::ByteView{diff.data(), diff.size()});
+        CHECK(barr.len() == 1, "B received A's edit");
+        auto v = barr.get(0).readLong();
+        CHECK(v.has_value() && *v == 42, "B sees A's value");
+    }
+    // The remote edit is NOT in B's undo history — B's Ctrl+Z is a no-op on it.
+    CHECK(ub.undoStackLen() == 0, "remote edit not captured on B");
+    CHECK(!ub.undo(), "B's undo() is a no-op (nothing local to undo)");
+    { auto t = b.begin(); CHECK(t.array("content").len() == 1, "A's edit survives B's undo"); }
+
+    // A undoes its OWN edit; the revert syncs to B (incremental diff vs B's SV).
+    CHECK(ua.undo(), "A reverts its own edit");
+    { auto t = a.begin(); CHECK(t.array("content").len() == 0, "A's edit reverted locally"); }
+    {
+        std::vector<std::uint8_t> bsv;
+        { auto t = b.begin(); bsv = t.stateVector(); }
+        std::vector<std::uint8_t> diff;
+        { auto t = a.begin(); diff = t.stateDiff(wfcrdt::ByteView{bsv.data(), bsv.size()}); }
+        auto t = b.beginRemote();
+        auto barr = t.array("content");
+        t.apply(wfcrdt::ByteView{diff.data(), diff.size()});
+        CHECK(barr.len() == 0, "B sees A's revert");
+    }
+    // B's undo history stayed empty throughout (it never made a local edit).
+    CHECK(ub.undoStackLen() == 0, "B undo stack still empty after sync round-trip");
+    return 0;
+}
+
 int main() {
     int rc = 0;
     rc |= test_doc_lifecycle();
@@ -316,8 +367,9 @@ int main() {
     rc |= test_nested_array_of_maps();
     rc |= test_undo_redo_basic();
     rc |= test_undo_skips_remote_origin();
+    rc |= test_undo_local_only_across_sync();
     if (rc == 0) {
-        std::printf("wfcrdt_wrapper_test: OK (12/12 tests passed — incl. nested map/array + native undo)\n");
+        std::printf("wfcrdt_wrapper_test: OK (13/13 tests passed — incl. nested map/array + native undo + collab local-only)\n");
     }
     return rc;
 }
