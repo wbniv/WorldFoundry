@@ -42,3 +42,12 @@ engine/wf_game
 wflevels/*/asset.inc
 wflevels/*/textile.log.htm
 wflevels/*/*.lev.bin
+
+# Vendored dep checkouts (own repos)
+vendor/
+
+# CI artifact download dirs
+WorldFoundry_*_artifacts/
+
+# scratch test file
+test.wf
