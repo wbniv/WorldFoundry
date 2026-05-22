@@ -61,6 +61,12 @@ struct FileLine
 	char* _file;						// file and line allocation occured on
 	int _line;
 #endif
+	// On 64-bit, sizeof(FileLine)+sizeof(int32 canary)=12, not a multiple of 8.
+	// This pad makes overhead 16 bytes (2×8), eliminating false-positive alignment
+	// warnings for correctly-aligned user allocations.  No-op on 32-bit (SIZE_MAX≤4G).
+#if SIZE_MAX > 0xFFFFFFFFUL
+	int32 _pad;
+#endif
 };
 #endif
 
