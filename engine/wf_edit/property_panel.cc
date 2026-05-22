@@ -79,6 +79,26 @@ const std::vector<std::string>& OadSearchDirs()
     return dirs;
 }
 
+// ── value parsing helpers ─────────────────────────────────────────────────────
+std::vector<float> Floats(const std::string& s)
+{
+    std::vector<float> out;
+    const char* p = s.c_str();
+    char* end = nullptr;
+    while (*p) {
+        double v = std::strtod(p, &end);
+        if (end == p) break;
+        out.push_back(static_cast<float>(v));
+        p = end;
+    }
+    return out;
+}
+
+long AsLong(const std::string& s) { return std::strtol(s.c_str(), nullptr, 0); }
+
+}  // namespace
+
+// ── .oad location + cache (public: called by AddActor in level_doc.cc) ─────────
 std::string FindOad(const std::string& class_name)
 {
     if (class_name.empty()) return "";
@@ -105,25 +125,6 @@ const std::vector<OadEntry>& OadForClass(const std::string& class_name)
         LoadOad(path, entries);   // leaves entries empty on failure (still cached)
     return cache.emplace(class_name, std::move(entries)).first->second;
 }
-
-// ── value parsing helpers ─────────────────────────────────────────────────────
-std::vector<float> Floats(const std::string& s)
-{
-    std::vector<float> out;
-    const char* p = s.c_str();
-    char* end = nullptr;
-    while (*p) {
-        double v = std::strtod(p, &end);
-        if (end == p) break;
-        out.push_back(static_cast<float>(v));
-        p = end;
-    }
-    return out;
-}
-
-long AsLong(const std::string& s) { return std::strtol(s.c_str(), nullptr, 0); }
-
-}  // namespace
 
 // ── (ButtonType × showAs) → FieldKind dispatch (design-doc table) ─────────────
 FieldKind WidgetFor(int bt, int showAs, int option_count,

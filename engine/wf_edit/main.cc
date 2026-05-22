@@ -337,6 +337,23 @@ void DoDuplicate(EditorCtx* c)
     c->selected = ni;
 }
 
+void DoAddActor(EditorCtx* c, const std::string& class_name)
+{
+    if (!c->doc) return;
+    const int ni = wfedit::AddActor(*c->doc, class_name);
+    if (ni < 0) {
+        c->toast = "no .oad for " + class_name;
+        c->toast_frames = 180;
+        return;
+    }
+    RefreshActorList(c);
+    c->selected = ni;
+    c->fields_for = -1;
+    c->structural_dirty = true;
+    c->toast = "added " + class_name;
+    c->toast_frames = 180;
+}
+
 // Ctrl+Z / Ctrl+Y. The native UndoManager mutates the Doc directly (its revert
 // txn fires observeUpdates, so the relay broadcasts it to peers); we just re-
 // sync the UI + engine and flash a toast. Runs at frame top with no live txn —
@@ -595,6 +612,15 @@ bool editor_frame(void* p)
             else if (std::string(p) == "del") DoDelete(c);
         }
     }
+    // Add-actor UI screenshot proof: WF_EDIT_ADD_UI=<class> calls DoAddActor once
+    // so --screenshot captures the new row selected + "added <class>" toast.
+    static bool s_add_ui = false;
+    if (!s_add_ui && c->doc) {
+        if (const char* p = std::getenv("WF_EDIT_ADD_UI"); p && *p) {
+            s_add_ui = true;
+            DoAddActor(c, p);
+        }
+    }
     // Undo-UI screenshot proof: WF_EDIT_UNDO_UI=dup|del|field performs one edit
     // then one DoUndo via the UI path, so the screenshot shows the Outliner /
     // Properties + "undo" toast back in the pre-edit state. (field edits the
@@ -719,12 +745,44 @@ bool editor_frame(void* p)
     ImGui::Text("%s: %zu actors", c->level_name.c_str(), c->actor_names.size());
     ImGui::TextDisabled("(read from the Y.Doc)");
     // Add/delete actors (structural; persists on save). Duplicate clones the
-    // selected actor; Delete removes it (or the Del key).
+    // selected actor; Delete removes it (or the Del key). Add… inserts a new
+    // actor of a user-chosen class populated from OAD defaults.
     ImGui::BeginDisabled(c->selected < 0);
     if (ImGui::SmallButton("Duplicate")) DoDuplicate(c);
     ImGui::SameLine();
     if (ImGui::SmallButton("Delete"))    DoDelete(c);
     ImGui::EndDisabled();
+    ImGui::SameLine();
+    if (ImGui::SmallButton("Add..."))    ImGui::OpenPopup("add_actor");
+
+    // Class-picker popup for "Add..."
+    static const char* kClasses[] = {
+        "NullObject", "actbox", "actboxor", "alias", "camera", "camshot",
+        "destroyer", "director", "disabled", "enemy", "explode", "generator",
+        "gold", "levelobj", "light", "matte", "missile", "platform", "player",
+        "room", "shadow", "shield", "spike", "statplat", "target", "tool", "warp"
+    };
+    static const int kClassCount = static_cast<int>(sizeof(kClasses) / sizeof(kClasses[0]));
+    static std::string s_add_class = "statplat";
+    if (ImGui::BeginPopup("add_actor")) {
+        ImGui::Text("Class:");
+        if (ImGui::BeginCombo("##add_class", s_add_class.c_str())) {
+            for (int k = 0; k < kClassCount; ++k) {
+                bool sel = (s_add_class == kClasses[k]);
+                if (ImGui::Selectable(kClasses[k], sel)) s_add_class = kClasses[k];
+                if (sel) ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+        if (ImGui::Button("Add")) {
+            DoAddActor(c, s_add_class);
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel")) ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+    }
+
     if (c->structural_dirty) {
         ImGui::SameLine();
         ImGui::TextDisabled("(reload for live preview)");
@@ -1096,6 +1154,32 @@ int main(int argc, char** argv)
                              idx, before, wfedit::ReadActorNames(doc).size(), ni);
             }
         }
+    }
+
+    // 0b2b. Headless add-actor proof (env-gated): WF_EDIT_ADD_TEST=<class> inserts
+    //       a new actor of that class and asserts actor count +1, Class Name correct,
+    //       and field count > 4 (OAD defaults populated). CPU-only, pre-GL.
+    //       Honors WF_EDIT_SAVE if also set (falls through); otherwise exits.
+    if (const char* cls = std::getenv("WF_EDIT_ADD_TEST"); cls && *cls) {
+        const int before = static_cast<int>(wfedit::ReadActorNames(doc).size());
+        const int ni = wfedit::AddActor(doc, cls);
+        const int after = static_cast<int>(wfedit::ReadActorNames(doc).size());
+        std::string got_class;
+        int field_count = 0;
+        if (ni >= 0) {
+            for (const auto& f : wfedit::ReadActorFields(doc, ni)) {
+                ++field_count;
+                if (f.name == "Class Name")
+                    got_class = !f.data.empty() ? f.data : f.label;
+            }
+        }
+        const bool pass = (ni >= 0) && (after == before + 1) &&
+                          (got_class == cls) && (field_count > 4);
+        std::fprintf(stderr, "[add] class=%s  %d -> %d actors (ni=%d fields=%d class='%s') %s\n",
+                     cls, before, after, ni, field_count, got_class.c_str(),
+                     pass ? "PASS" : "FAIL");
+        if (!pass) return 1;
+        if (!std::getenv("WF_EDIT_SAVE")) return 0;
     }
 
     // 0b3. Headless undo/redo proof (env-gated): WF_EDIT_UNDO_TEST drives a ';'-

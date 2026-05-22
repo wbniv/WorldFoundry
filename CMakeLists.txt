@@ -953,6 +953,13 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         COMMAND sh -c "WF_EDIT_UNDO_TEST='field:Mass|DATA|2.5;undo;redo;dup:0;undo;del:1;undo' $<TARGET_FILE:wf_edit> --select=0 --leveltree=${CMAKE_SOURCE_DIR}/wflevels/snowgoons-blender/snowgoons-blender.lev 2>&1 | tee /dev/stderr | grep -q '\\[undo\\] all PASS'"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+    # Add-actor logic — CPU-only (exits before GL), no DISPLAY needed. Inserts a
+    # brand-new statplat from OAD defaults and asserts actor count +1, Class Name
+    # correct, and field count > 4 (OAD defaults populated). Runs from repo root.
+    add_test(NAME wf_edit_add
+        COMMAND sh -c "WF_EDIT_ADD_TEST=statplat $<TARGET_FILE:wf_edit> --leveltree=${CMAKE_SOURCE_DIR}/wflevels/snowgoons-blender/snowgoons-blender.lev 2>&1 | tee /dev/stderr | grep -q '\\[add\\].*PASS'"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
     # wf-relay: standalone relay server binary (co-edit Phase 1).
     # Built via Cargo; not linked into wf_edit (avoids duplicate Rust runtime symbols).
     add_custom_target(wf_relay

@@ -38,6 +38,11 @@ bool RunLevtreePrint(const std::string& json, std::string& out_lev);
 bool DeleteActor(wfcrdt::Doc& doc, int index);
 int  DuplicateActor(wfcrdt::Doc& doc, int index);
 
+// Create a brand-new actor of `class_name` in the Doc, populated with the
+// complete set of OAD defaults. Returns the new actor index, or −1 if the class
+// has no resolvable .oad (caller should toast the error).
+int  AddActor(wfcrdt::Doc& doc, const std::string& class_name);
+
 // Run `build_level_binary.sh <level_name>` → `.iff` (the 5-stage .lev→.iff
 // compile). `out_log` gets the script's stdout+stderr. Returns true on exit 0.
 bool RunBuildLevel(const std::string& level_name, std::string& out_log);

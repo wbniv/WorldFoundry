@@ -14,6 +14,7 @@
 #pragma once
 
 #include "level_doc.h"   // wfedit::ActorField
+#include "oad_reader.h"  // wfedit::OadEntry
 
 #include <string>
 #include <vector>
@@ -52,6 +53,14 @@ struct PropField {
     int       child_index = -1;         // Doc address for write-back (Phase 3)
     FieldKind kind = FieldKind::Raw;
 };
+
+// Locate the .oad for `class_name` → absolute path (searches $WF_OAD_DIR then
+// wfsource/source/oas). Returns "" if not found.
+std::string FindOad(const std::string& class_name);
+
+// Load and cache the OAD entry list for `class_name`. Empty on load failure.
+// Used by ResolveProperties and AddActor.
+const std::vector<OadEntry>& OadForClass(const std::string& class_name);
 
 // Map (ButtonType, showAs) → FieldKind, exactly the design-doc dispatch table.
 // `option_count` lets a 2-item CHECKBOX collapse to Bool; `chunk_type` drives
