@@ -61,12 +61,9 @@ struct FileLine
 	char* _file;						// file and line allocation occured on
 	int _line;
 #endif
-	// On 64-bit, sizeof(FileLine)+sizeof(int32 canary)=12, not a multiple of 8.
-	// This pad makes overhead 16 bytes (2×8), eliminating false-positive alignment
-	// warnings for correctly-aligned user allocations.  No-op on 32-bit (SIZE_MAX≤4G).
-#if SIZE_MAX > 0xFFFFFFFFUL
-	int32 _pad;
-#endif
+	// sizeof(FileLine) must be a multiple of WF_POINTER_ALIGN so the user pointer
+	// (retVal + sizeof(FileLine)) inherits the block's alignment.
+	// With LMALLOC_TRACK_SIZE && !LMALLOC_TRACK_LINE_AND_FILE: _state(4)+_size(4)=8 ✓
 };
 #endif
 

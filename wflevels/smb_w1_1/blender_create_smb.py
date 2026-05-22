@@ -629,6 +629,7 @@ def _build_mario():
 
 player = find_by_class('player')
 if player:
+    player.name = 'Player'   # CamShot Track Object references this name
     player.location = (MARIO_SPAWN_X, 0.0, MARIO_SPAWN_Z)
     # Physics mobility = engine handles gravity, ground collision, jump.
     # Mobility value 1 = "Physics" (Anchored|Physics|Path|Camera|Follow).
@@ -833,6 +834,7 @@ if camshot:
     camshot['wf_Pan Time In Seconds'] = 0.1
     camshot['wf_Model Type']          = 'None'
     camshot['wf_Track Object'] = 'Player'
+    camshot['wf_Target']       = 'Target02'
     camshot['wf_Follow']       = 'Target02'
     # SMB scroll: read INDEXOF_SMB_TARGET_CAM_X written by the Director on
     # the previous tick (Director runs after main loop, this runs in it),
@@ -864,6 +866,7 @@ actboxor = find_by_class('actboxor')
 if actboxor:
     actboxor.location = (SCENE_MID_X, 0.0, MARIO_Z + 2)
     actboxor['wf_Object'] = 'cs_side'
+    actboxor['wf_Activated By Actor'] = 'Player'
 
 # ── 12. Room bbox ─────────────────────────────────────────────────────────────
 # Absolute extremes of all actor centres:

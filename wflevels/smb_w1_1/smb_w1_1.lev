@@ -617,7 +617,7 @@
 		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Camera" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Target" } { 'STR' "target_14" } }
+		{ 'STR' { 'NAME' "Target" } { 'STR' "Target02" } }
 		{ 'STR' { 'NAME' "Follow" } { 'STR' "Target02" } }
 		{ 'FX32' { 'NAME' "Climb Rate" } { 'DATA' 5.0000000000000000(1.15.16) } { 'STR' "5.0" } }
 		{ 'FX32' { 'NAME' "Elasticity" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
@@ -850,7 +850,7 @@
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 1021l } { 'STR' "1021" } }
 		{ 'STR' { 'NAME' "Object" } { 'STR' "cs_side" } }
 		{ 'I32' { 'NAME' "Activated By" } { 'DATA' 1l } { 'STR' "Actor" } }  //All|Actor|Class|List
-		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "player_33" } }
+		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
 		{ 'STR' { 'NAME' "Activated By Class" } { 'STR' "" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -965,7 +965,7 @@
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
-		{ 'NAME' "player_33" }
+		{ 'NAME' "Player" }
 		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 4.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 1.5707963705062866(1.15.16)  //a,b,c
