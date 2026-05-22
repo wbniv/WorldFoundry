@@ -518,8 +518,10 @@ QBLOCK_SCRIPT = (
     "then\n"
 )
 
+COIN_SCRIPT = "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"
+
 # Coin template — Gold collectible class (pickup-driven despawn via
-# Gold::Collision + SetPendingRemove; no suicide script needed).
+# Gold::Collision + SetPendingRemove; spins via ROTATION_C each frame).
 import bmesh as _bmesh
 def _make_coin_template():
     bm = _bmesh.new()
@@ -546,6 +548,7 @@ def _make_coin_template():
     obj['wf_Model Type']           = 'Mesh'
     obj['wf_Visibility Mailbox']   = 1
     obj['wf_Mesh Name']            = 'coin_template.iff'
+    obj['wf_Script']               = COIN_SCRIPT
     return obj
 
 _make_coin_template()

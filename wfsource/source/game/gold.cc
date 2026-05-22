@@ -22,7 +22,7 @@
 
 //============================================================================
 
-static const float kGoldTTL = 3.0f;
+static const float kGoldTTL = 5.0f;
 
 Gold::Gold(const SObjectStartupData* startupData)
 	: Actor(startupData)
