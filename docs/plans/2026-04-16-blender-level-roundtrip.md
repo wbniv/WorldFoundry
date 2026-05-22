@@ -285,6 +285,34 @@ to gameplay.  Each surfaced only after the previous one was past:
    characters instead of 1).  Fix: for `field.kind == "Enum"`, map
    nested STR labels back through `field.enum_items()`.
 
+## 2026-05-22 — Step-6 close-out verification
+
+Both acute step-6 blockers are now resolved; what remains is the already-listed
+Phase 2c path/channel fidelity work.
+
+- **Untextured render — RESOLVED.** Root-caused (see
+  [camshot-enum-roundtrip-hardfail](2026-05-22-camshot-enum-roundtrip-hardfail.md))
+  to a CamShot exported Fixed/Absolute instead of Track/Relative — not a texture
+  bug (atlas/RUV/meshes/materials + GL draw streams were byte-identical to the
+  oracle). The importer now hard-fails on `DATA`/`STR` enum disagreement and the
+  regenerated build renders the tracked colour view (`tests/screenshots/ab_blender.png`,
+  committed `c782aa53`: red house, green box, textured snow).
+- **`rooms.cc:134` statplat assertion — no longer reproduces.** The Blender
+  standalone (`wflevels/snowgoons-blender/snowgoons-standalone.iff`) now runs
+  **600 frames headless, exit 0, clean shutdown** (`--frame-step-smoke=600
+  --cycles=1`), past the ~5 s mark where the 2026-04-19 run aborted. The original
+  hypothesis tied the assertion to the animated enemy's runtime-position drift;
+  the intervening Jolt-physics migration (now the default collision/spawn path)
+  changed that path so the assertion no longer fires. It is also already covered
+  by the `wf_game` snowgoons-blender smoke CTests (30 frames × 1–2 cycles).
+- **Still open — Phase 2c path/channel fidelity (below).** The regenerated
+  `snowgoons-blender.lev` carries the `enemy` with `Mobility=Path` (line 2751) but
+  **no PATH/CHAN keyframe chunks**, so that path-follower is effectively static in
+  the round-trip — the enemy doesn't patrol/attack as in the oracle. This is the
+  documented Phase 2c gap, not a regression in the acute blockers; it (plus
+  MeshName packed-asset-ID packing and mesh-bbox extension) is forward-looking
+  work most relevant to fully net-new Blender-authored levels.
+
 ## Remaining gaps
 
 - **Phase 2c of levcomp-rs — real path/channel keyframe extraction.**
