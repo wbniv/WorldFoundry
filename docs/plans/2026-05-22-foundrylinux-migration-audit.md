@@ -1,6 +1,6 @@
 # FoundryLinux migration — pre-reformat audit & backup plan
 
-**Status:** Not started — 2026-05-22
+**Status:** In progress — 2026-05-22 (git clean; cleanup + archive + upload remain)
 **Goal:** Wipe `will-ME-mini` and install [FoundryLinux](https://foundrylinux.org/) without losing anything, by first *proving* every git repo is recoverable and pre-emptively backing up everything that isn't.
 
 ## Context
@@ -28,14 +28,15 @@ Six worktrees share one object store (`~/WorldFoundry/.git`). A naïve `find -ty
 
 | Repo / branch | Risk |
 |---|---|
-| `WorldFoundry.spike` → `spike/nongeom-zero-bbox` | branch never pushed (no upstream) |
-| `WorldFoundry.iff-ydoc-translator` → `2026-iff-ydoc-translator` | branch never pushed (no upstream) |
-| `WorldFoundry` (main) | **3 stashes** — not on any branch, lost on wipe |
-| `WorldFoundry.2026-ios` | 21 unpushed commits |
-| `wf-games` | 9 unpushed |
-| `parking-space` | 5 unpushed |
-| `~` (home repo) | 3 unpushed |
-| `worldfoundry.org` | 1 unpushed |
+| ~~`~/party-games`~~ | ~~**NO REMOTE at all** — entire repo local-only~~ ✓ pushed to `wbniv/party-games` 2026-05-22 |
+| ~~`WorldFoundry.spike` → `spike/nongeom-zero-bbox`~~ | ~~branch never pushed (no upstream)~~ ✓ test branch — deleted 2026-05-22 |
+| ~~`WorldFoundry.iff-ydoc-translator` → `2026-iff-ydoc-translator`~~ | ~~branch never pushed (no upstream)~~ ✓ superseded by `levtree-rs` on `2026-new-level` — deleted 2026-05-22 |
+| `WorldFoundry` (main) | **3 stashes** — captured as `stashbak/{0,1,2}` tags in `WorldFoundry-2026-05-22.bundle` (189 MB); audit false-positive since it can't see bundles |
+| ~~`WorldFoundry.2026-ios`~~ | ~~21 unpushed commits~~ ✓ rebased + pushed 2026-05-22 |
+| ~~`wf-games`~~ | ~~9 unpushed~~ ✓ pushed 2026-05-22 |
+| ~~`parking-space`~~ | ~~5 unpushed~~ ✓ pushed 2026-05-22 |
+| ~~`~` (home repo)~~ | ~~3 unpushed~~ ✓ rebased + pushed 2026-05-22 |
+| ~~`worldfoundry.org`~~ | ~~1 unpushed~~ ✓ pushed 2026-05-22 |
 
 **Uncommitted work** (recoverable only if files are backed up): this worktree (`2026-new-level`) has 12 modified tracked files (incl. `wf-status.md`, `wfsource/source/gfx/camera.cc`, `backend_modern.cc`, the smb `.iff/.lev/.lvl`) + 14 untracked **valuable** docs under `docs/{plans,investigations,transcripts}`. `iff-ydoc-translator` has 5 dirty.
 
@@ -54,7 +55,7 @@ Six worktrees share one object store (`~/WorldFoundry/.git`). A naïve `find -ty
 
 ### Genuinely not-in-git, not-regenerable — back up
 
-`~/.ssh` (has `id_rsa` + legacy `id_dsa` private keys), `~/.gnupg`, `~/.local/share/keyrings` (GNOME keyring → Chrome/login passwords), `~/.gitconfig`, browser bookmarks/logins (Chrome `Default/`, Firefox `o0fv5h2g.default` incl. WhatsApp-Web session), `~/Documents/Obsidian Vault`, `~/Pictures` (54 MB), `~/Downloads` (203 MB, triage). The judgment-call media is **tiny** (gameplay mp4s 3.5 MB, arcade ROM zips 336 KB, polyhaven/opengameart ~5 MB) → keep all. The existing `wf-backup-2026-05-11.bundle` shows this bundle pattern is already in use.
+`~/.ssh` (has `id_rsa` + legacy `id_dsa` private keys), `~/.gnupg`, `~/.local/share/keyrings` (GNOME keyring → Chrome/login passwords), `~/.gitconfig`, browser bookmarks/logins (Chrome `Default/`, Firefox `o0fv5h2g.default` incl. WhatsApp-Web session), `~/Documents/Obsidian Vault`, `~/Pictures` (54 MB), `~/Downloads` (203 MB, triage). Keep all media (gameplay mp4s 3.5 MB, arcade ROM zips 336 KB, polyhaven/opengameart ~5 MB — all tiny). The existing `wf-backup-2026-05-11.bundle` shows this bundle pattern is already in use.
 
 ## Outside `~/` — what else to capture (this box, specifically)
 
@@ -69,6 +70,52 @@ A home-only archive misses root-owned config. On `will-ME-mini` the gap is **sma
 Already covered by the home archive (no extra action): the Obsidian vault, [Thunderbird](https://www.thunderbird.net/)/Firefox/Surfshark snap data (`~/snap/`), and the custom `screenshot-cleanup` **user** systemd timer (`~/.config/systemd/user/`).
 
 ## Deliverable scripts
+
+### `~/foundrylinux-migration/cleanup-before-archive.sh`
+
+Deletes the B1 regenerable items to shrink the home archive. **Dry-run by default** — shows sizes and total reclaim; pass `--go` to actually delete.
+
+```bash
+#!/usr/bin/env bash
+# cleanup-before-archive.sh — delete regenerable caches/build dirs before archiving.
+# Dry-run by default. Pass --go to actually delete.
+set -euo pipefail
+GO=0
+if [[ "${1:-}" == "--go" ]]; then GO=1; fi
+total=0
+rm_it() {
+  local p="$1"
+  if [[ ! -e "$p" ]]; then return 0; fi
+  local sz; sz=$(du -sb "$p" 2>/dev/null | cut -f1)
+  total=$((total + sz))
+  printf "  %6s  %s\n" "$(du -sh "$p" 2>/dev/null | cut -f1)" "${p#$HOME/}"
+  if [[ "$GO" == 1 ]]; then rm -rf "$p"; fi
+}
+echo "=== Regenerable caches / build dirs ($([ "$GO" = 1 ] && echo DELETING || echo DRY RUN)) ==="
+rm_it "$HOME/.cache"
+rm_it "$HOME/.gradle"
+rm_it "$HOME/.rustup"
+rm_it "$HOME/.cargo"
+rm_it "$HOME/.npm"
+rm_it "$HOME/.local/share/Trash"
+rm_it "$HOME/.local/share/claude/versions"   # all versions; Claude re-downloads on launch
+rm_it "$HOME/snap/firefox/common/.cache"
+rm_it "$HOME/.config/google-chrome/OptGuideOnDeviceModel"
+rm_it "$HOME/tmp/mame-snaps"
+rm_it "$HOME/tmp/mame_output"
+# build dirs across all WorldFoundry worktrees
+for wt in "$HOME"/WorldFoundry*; do
+  [[ -e "$wt/.git" ]] || continue
+  for bd in build-editor cmake-build-asan cmake-build-release objs_game; do
+    rm_it "$wt/$bd"
+  done
+  # node_modules anywhere under the worktree (worldfoundry.org etc.)
+  while IFS= read -r nm; do rm_it "$nm"; done \
+    < <(find "$wt" -maxdepth 3 -name node_modules -prune 2>/dev/null)
+done
+printf "\nTotal reclaim: %.1f GB\n" "$(echo "scale=1; $total/1073741824" | bc)"
+[[ "$GO" == 0 ]] && echo "(dry run — re-run with --go to delete)"
+```
 
 ### `~/foundrylinux-migration/audit-before-wipe.sh` (read-only)
 
