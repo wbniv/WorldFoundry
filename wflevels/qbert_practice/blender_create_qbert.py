@@ -997,6 +997,15 @@ _RB_Z_MUL  = CUBE_SIZE                               # 2.0
 _RB_Z_AT_ROW_0 = _RB_Z_BASE - 0 * _RB_Z_MUL                # 14.5 (used as initial START_Z)
 _RB_Z_AT_ROW_1 = _RB_Z_BASE - 1 * _RB_Z_MUL                # 12.5 (used as initial END_Z)
 
+# Slick/Sam are feet-origin humanoids (handle at the feet, like the player), so
+# they rest with feet ON the cube TOP — no ball-radius term. _FLIPPER_Z_BASE is
+# the apex cube-top Z (cube-centre + CUBE_SIZE/2), vs the ball base which adds
+# REDBALL_HEIGHT_OFFSET (= CUBE_SIZE/2 + ball radius). See
+# docs/plans/2026-05-22-qbert-slick-sam-feet-origin.md.
+_FLIPPER_Z_BASE     = CUBE_BASE_Z + CUBE_SIZE * (NUM_ROWS - 1) + CUBE_SIZE / 2   # 14.0
+_FLIPPER_Z_AT_ROW_0 = _FLIPPER_Z_BASE - 0 * _RB_Z_MUL                            # 14.0
+_FLIPPER_Z_AT_ROW_1 = _FLIPPER_Z_BASE - 1 * _RB_Z_MUL                            # 12.0
+
 # Per-ball mailbox layout: base = 462 + 8*K. Each ball owns 8 cells.
 _RB_OFF_ROW       = 0
 _RB_OFF_COL       = 1
@@ -1059,7 +1068,12 @@ COILY_EGG_ACTIVE_MB   = 573   # 1 while egg is hopping; visibility mailbox for e
 COILY_SNAKE_ACTIVE_MB = 574   # 1 while snake is chasing; visibility mailbox for snake actor
 
 # Side-face offsets and rotations.
-_CLIMBER_BODY_HALF_X = 0.4
+# Climber meshes are feet-origin (see _origin_to_feet): the 90 deg pitch maps the
+# mesh's local +Z onto the world face normal (±X), so the feet sit at the actor X
+# position directly. Push out only to the cube face (X = ±CUBE_SIZE/2) — no extra
+# body-thickness term (the old 0.4 was silently compensating for a center-origin
+# mesh, the same bug fixed for Slick/Sam). Small clearance avoids z-fighting.
+_CLIMBER_BODY_HALF_X = 0.0
 UGG_X_OFFSET = +(CUBE_SIZE / 2 + _CLIMBER_BODY_HALF_X)   # +X side face
 WW_X_OFFSET  = -(CUBE_SIZE / 2 + _CLIMBER_BODY_HALF_X)   # -X side face
 # Pitch rotates about local +Y. +0.25 rev tips body so its local +Z (up) lands
@@ -1160,8 +1174,8 @@ def _spawn_flipper_forth(base, active_mb, actor_idx):
         f"0 {base + _RB_OFF_FROM_ROW} {actor_idx} write-actor-mailbox "
         f"0 {base + _RB_OFF_FROM_COL} {actor_idx} write-actor-mailbox "
         f"{REDBALL_HOP_TICKS} {base + _RB_OFF_COOLDOWN} {actor_idx} write-actor-mailbox "
-        f"{_RB_Z_AT_ROW_0} {base + _RB_OFF_START_Z} {actor_idx} write-actor-mailbox "
-        f"{_RB_Z_AT_ROW_1} {base + _RB_OFF_END_Z} {actor_idx} write-actor-mailbox "
+        f"{_FLIPPER_Z_AT_ROW_0} {base + _RB_OFF_START_Z} {actor_idx} write-actor-mailbox "
+        f"{_FLIPPER_Z_AT_ROW_1} {base + _RB_OFF_END_Z} {actor_idx} write-actor-mailbox "
         f"1 {base + _RB_OFF_PHASE} {actor_idx} write-actor-mailbox "
         f"1 {active_mb} write-mailbox "
         f"then "
@@ -1266,10 +1280,14 @@ def redball_script(k, variant='red'):
     }
     # Per-variant X-offset (added to the world-X write) for side-face climbers.
     x_offset = {'ugg': UGG_X_OFFSET, 'wrongway': WW_X_OFFSET}.get(variant, 0.0)
-    # Per-variant Z formula: climbers sit at cube centre Z; descenders sit on top.
+    # Per-variant Z formula: climbers sit at cube centre Z; flippers (feet-origin)
+    # rest with feet on the cube top; balls (centre-origin) sit a radius higher.
     if variant in ('ugg', 'wrongway'):
         z_base = _CLIMBER_Z_BASE
         z_mul  = _CLIMBER_Z_MUL
+    elif variant in ('slick', 'sam'):
+        z_base = _FLIPPER_Z_BASE
+        z_mul  = _RB_Z_MUL
     else:
         z_base = _RB_Z_BASE
         z_mul  = _RB_Z_MUL
@@ -1613,6 +1631,23 @@ _gball['wf_Script']              = redball_script(0, variant='green')
 print(f"[qbert] Created green ball (actor index {GB_ACTOR_IDX}); "
       f"mailbox base {GB_MB_BASE}; freeze {GB_FREEZE_TICKS} ticks on contact")
 
+# ── Humanoid mesh handle convention ───────────────────────────────────────────
+def _origin_to_feet(body):
+    """Re-base a joined mesh so its lowest vertex sits at local Z=0 — putting the
+    actor handle at the feet (the WF ground-contact convention; the player mesh
+    is authored this way). Shifts mesh DATA only; the object's location/origin is
+    untouched, so the exported Position is unchanged. Returns the shift applied.
+
+    Upright actors (Slick/Sam) then land feet-on-surface. The pitched climbers
+    (Ugg/Wrong-Way) have this local-Z shift mapped onto the world face normal by
+    their 90 deg pitch, compensated by _CLIMBER_BODY_HALF_X (see there)."""
+    min_z = min(v.co.z for v in body.data.vertices)
+    if min_z:
+        for v in body.data.vertices:
+            v.co.z -= min_z
+    return min_z
+
+
 # ── 5c.6. Slick & Sam — cube-flippers ─────────────────────────────────────────
 # Humanoid cube-flipper silhouette: green icosphere body + spiky orange hair
 # cluster + two white eyes with black pupils + two flat-oval feet. Slick and
@@ -1700,6 +1735,7 @@ def _build_flipper_actor(name, mesh_name, body_rgb, top_rgb, location):
     body = parts[0][0]
     bpy.context.view_layer.objects.active = body
     bpy.ops.object.join()
+    _origin_to_feet(body)   # handle at feet, not waist — so feet land on the cube top
     body.name = name
     body.data.name = mesh_name
     body.location = location
@@ -1827,6 +1863,7 @@ def _build_climber_actor(name, mesh_name, body_rgb, location):
     body = parts[0][0]
     bpy.context.view_layer.objects.active = body
     bpy.ops.object.join()
+    _origin_to_feet(body)   # handle at feet; pitch maps the shift onto the face normal (see _CLIMBER_BODY_HALF_X)
     body.name = name
     body.data.name = mesh_name
     body.location = location
