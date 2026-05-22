@@ -882,12 +882,14 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     add_subdirectory(third_party/glfw)
 
     set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/third_party/imgui)
+    set(IMGUIZMO_DIR ${CMAKE_SOURCE_DIR}/third_party/imguizmo)  # 3D translate/rotate gizmo
     add_executable(wf_edit
         engine/wf_edit/main.cc
         engine/wf_edit/level_doc.cc            # M4: levtree -> wfcrdt::Doc
         engine/wf_edit/property_panel.cc       # Phase 2: OAD-driven Properties panel
         engine/wf_edit/oad_reader.cc           # Phase 2: clean OadEntry adapter
         engine/wf_edit/engine_bridge.cc        # Option C: CRDT -> engine (wfmut) bridge
+        engine/wf_edit/gizmo.cc                # viewport translate/rotate gizmo (ImGuizmo)
         engine/wf_edit/level_save.cc           # save round-trip: Doc -> .lev
         engine/wf_edit/collab_session.cc       # UDP multicast peer discovery
         engine/wf_edit/voice_track.cc          # Opus voice chat
@@ -902,6 +904,7 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp   # InputText(std::string&) — editable widgets
         ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
         ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+        ${IMGUIZMO_DIR}/ImGuizmo.cpp             # 3D manipulation gizmo
     )
     add_dependencies(wf_edit gen_oas_headers)
     # engine_bridge.cc #includes name_to_path_generated.inc — explicit dep so a
@@ -911,6 +914,7 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     set_target_properties(wf_edit PROPERTIES OUTPUT_NAME "wf-edit")
     target_include_directories(wf_edit PRIVATE
         ${IMGUI_DIR} ${IMGUI_DIR}/backends
+        ${IMGUIZMO_DIR}                              # ImGuizmo.h
         ${CMAKE_SOURCE_DIR}/engine/crdt              # wfcrdt.hpp (read-only Y.Doc)
         ${CMAKE_SOURCE_DIR}/engine/mutation          # wfmut.hpp (M3 CRDT->engine bridge)
         ${CMAKE_SOURCE_DIR}/third_party/json         # <nlohmann/json.hpp>
