@@ -214,6 +214,11 @@ void Init(MailboxesManager& mgr)
     g_mgr    = &mgr;
     g_curObj = 0;
 
+    // zf_init wipes the zforth dictionary; cached src→_wfsN entries from a
+    // prior Init would point to words that no longer exist (NOT_A_WORD at
+    // call time).  Keep cache in sync with context.
+    g_scriptCache.clear();
+
     zf_init(&g_ctx, 0 /* no trace */);
     zf_bootstrap(&g_ctx);
 
@@ -332,7 +337,8 @@ float RunScript(const char* src, int objectIndex)
 
     zf_result r = zf_eval(&g_ctx, it->second.c_str());
     if (r != ZF_OK) {
-        fprintf(stderr, "zforth error %d calling %s\n", r, it->second.c_str());
+        fprintf(stderr, "zforth error %d calling %s (src: %.120s)\n",
+                r, it->second.c_str(), it->first);
         return 0.0f;
     }
 
