@@ -79,6 +79,68 @@ const std::vector<std::string>& OadSearchDirs()
     return dirs;
 }
 
+// ── value parsing helpers ─────────────────────────────────────────────────────
+std::vector<float> Floats(const std::string& s)
+{
+    std::vector<float> out;
+    const char* p = s.c_str();
+    char* end = nullptr;
+    while (*p) {
+        double v = std::strtod(p, &end);
+        if (end == p) break;
+        out.push_back(static_cast<float>(v));
+        p = end;
+    }
+    return out;
+}
+
+long AsLong(const std::string& s) { return std::strtol(s.c_str(), nullptr, 0); }
+
+// A PROPERTY_SHEET / GROUP_START / GROUP_STOP descriptor is a layout marker that
+// carries no instance data, so no Doc field corresponds to it — it's interleaved
+// by OAD position, never matched.
+bool IsHeaderMarker(int bt)
+{
+    return bt == BUTTON_PROPERTY_SHEET || bt == BUTTON_GROUP_START || bt == BUTTON_GROUP_STOP;
+}
+
+// Entries the name-alignment LCS must never consume: the header markers above
+// plus the common-block delimiters (their names — "movebloc", "LEVELCONFLAG_…" —
+// are non-fields that could otherwise spuriously align).
+bool IsUnmatchable(int bt)
+{
+    return IsHeaderMarker(bt)
+        || bt == LEVELCONFLAG_COMMONBLOCK || bt == LEVELCONFLAG_ENDCOMMON;
+}
+
+const char* KindName(FieldKind k)
+{
+    switch (k) {
+        case FieldKind::Int:          return "Int";
+        case FieldKind::Float:        return "Float";
+        case FieldKind::Boolean:      return "Bool";
+        case FieldKind::Enum:         return "Enum";
+        case FieldKind::Mailbox:      return "Mailbox";
+        case FieldKind::Color:        return "Color";
+        case FieldKind::Str:          return "Str";
+        case FieldKind::MultilineStr: return "MultiStr";
+        case FieldKind::ObjRef:       return "ObjRef";
+        case FieldKind::FileRef:      return "FileRef";
+        case FieldKind::Vec3:         return "Vec3";
+        case FieldKind::Euler:        return "Euler";
+        case FieldKind::Box3:         return "Box3";
+        case FieldKind::Section:      return "Section";
+        case FieldKind::GroupStart:   return "GroupStart";
+        case FieldKind::GroupEnd:     return "GroupEnd";
+        case FieldKind::Raw:          return "Raw";
+        case FieldKind::Skip:         return "Skip";
+    }
+    return "?";
+}
+
+}  // namespace
+
+// ── .oad location + cache (public: called by AddActor in level_doc.cc) ─────────
 std::string FindOad(const std::string& class_name)
 {
     if (class_name.empty()) return "";
@@ -105,25 +167,6 @@ const std::vector<OadEntry>& OadForClass(const std::string& class_name)
         LoadOad(path, entries);   // leaves entries empty on failure (still cached)
     return cache.emplace(class_name, std::move(entries)).first->second;
 }
-
-// ── value parsing helpers ─────────────────────────────────────────────────────
-std::vector<float> Floats(const std::string& s)
-{
-    std::vector<float> out;
-    const char* p = s.c_str();
-    char* end = nullptr;
-    while (*p) {
-        double v = std::strtod(p, &end);
-        if (end == p) break;
-        out.push_back(static_cast<float>(v));
-        p = end;
-    }
-    return out;
-}
-
-long AsLong(const std::string& s) { return std::strtol(s.c_str(), nullptr, 0); }
-
-}  // namespace
 
 // ── (ButtonType × showAs) → FieldKind dispatch (design-doc table) ─────────────
 FieldKind WidgetFor(int bt, int showAs, int option_count,
@@ -204,17 +247,50 @@ std::vector<PropField> ResolveProperties(const std::vector<ActorField>& doc_fiel
 
     std::vector<std::string> doc_names(doc_fields.size());
     for (std::size_t i = 0; i < doc_fields.size(); ++i) doc_names[i] = doc_fields[i].name;
+    // Section/group/common-block markers get a blank name so AlignByName's LCS
+    // can't match them to a Doc field (it requires a non-empty name). They reach
+    // the panel only via the header interleave below, keyed by OAD position.
     std::vector<std::string> oad_names(oad.size());
-    for (std::size_t j = 0; j < oad.size(); ++j) oad_names[j] = oad[j].name;
+    for (std::size_t j = 0; j < oad.size(); ++j)
+        oad_names[j] = IsUnmatchable(oad[j].button_type) ? std::string() : oad[j].name;
 
     std::vector<int> match = oad.empty()
         ? std::vector<int>(doc_fields.size(), -1)
         : AlignByName(doc_names, oad_names);
 
+    // Synthesise a header PropField from a section/group marker. The title comes
+    // from `name` — for GROUP_START/STOP the OAD's displayName slot is junk
+    // ("displayName"), so it must NOT be used here.
+    auto make_header = [](const OadEntry& e) {
+        PropField h;
+        h.name = e.name;
+        h.button_type = e.button_type;
+        switch (e.button_type) {
+            case BUTTON_PROPERTY_SHEET: h.kind = FieldKind::Section;    break;
+            case BUTTON_GROUP_START:    h.kind = FieldKind::GroupStart; break;
+            case BUTTON_GROUP_STOP:     h.kind = FieldKind::GroupEnd;   break;
+            default:                    h.kind = FieldKind::Skip;       break;
+        }
+        return h;
+    };
+
     std::vector<PropField> out;
-    out.reserve(doc_fields.size());
+    out.reserve(doc_fields.size() + oad.size());
+    std::vector<PropField> pending;   // headers buffered, flushed before the next real field
+    int last_oad = -1;                // highest OAD index whose headers we've already buffered
+
     for (std::size_t i = 0; i < doc_fields.size(); ++i) {
         const ActorField& df = doc_fields[i];
+
+        // Buffer any section/group markers between the previous matched OAD entry
+        // and this field's match, preserving OAD (== authoring) order.
+        if (match[i] >= 0) {
+            for (int k = last_oad + 1; k < match[i]; ++k)
+                if (IsHeaderMarker(oad[k].button_type))
+                    pending.push_back(make_header(oad[k]));
+            last_oad = match[i];
+        }
+
         PropField pf;
         pf.name = df.name;
         pf.chunk_type = df.chunk_type;
@@ -231,24 +307,41 @@ std::vector<PropField> ResolveProperties(const std::vector<ActorField>& doc_fiel
             pf.min = e.min;
             pf.max = e.max;
             pf.options = e.options;
+            pf.display_label = e.display_name;   // short label; render falls back to name if empty
         }
         pf.kind = WidgetFor(pf.button_type, pf.show_as,
                             static_cast<int>(pf.options.size()), pf.chunk_type, pf.matched);
+
+        // Flush buffered headers immediately before the field they introduce —
+        // a header with no following field (the common-block tail) never flushes
+        // and is silently dropped, so the panel shows no empty sections.
+        for (auto& h : pending) out.push_back(std::move(h));
+        pending.clear();
         out.push_back(std::move(pf));
     }
+    // Any `pending` left here are trailing empty sections — deliberately dropped.
 
     // Env-gated alignment dump — kept until the plan completes (debug teardown
     // is all-at-once, not mid-flight): `WF_EDIT_OAD_DEBUG=1 wf-edit …`.
     if (const char* dbg = std::getenv("WF_EDIT_OAD_DEBUG"); dbg && *dbg) {
         int matched = 0;
         for (const auto& p : out) matched += p.matched;
-        std::fprintf(stderr, "[oad] class=%s  oad_entries=%zu  doc_fields=%zu  matched=%d\n",
-                     class_name.c_str(), oad.size(), doc_fields.size(), matched);
-        for (std::size_t i = 0; i < out.size(); ++i)
-            std::fprintf(stderr, "  %2zu  %-28s  doc=%-5s  %s  bt=%d showAs=%d opts=%zu\n",
-                         i, out[i].name.c_str(), out[i].chunk_type.c_str(),
-                         out[i].matched ? "OAD" : "-- ", out[i].button_type,
-                         out[i].show_as, out[i].options.size());
+        std::fprintf(stderr, "[oad] class=%s  oad_entries=%zu  doc_fields=%zu  rows=%zu  matched=%d\n",
+                     class_name.c_str(), oad.size(), doc_fields.size(), out.size(), matched);
+        for (std::size_t i = 0; i < out.size(); ++i) {
+            const PropField& p = out[i];
+            const bool header = p.kind == FieldKind::Section ||
+                                p.kind == FieldKind::GroupStart || p.kind == FieldKind::GroupEnd;
+            if (header) {
+                std::fprintf(stderr, "  %2zu  ── %-10s %s\n", i, KindName(p.kind), p.name.c_str());
+                continue;
+            }
+            std::fprintf(stderr, "  %2zu  %-28s  label=%-22s  doc=%-5s  %s  %-8s bt=%d showAs=%d\n",
+                         i, p.name.c_str(),
+                         (p.display_label.empty() ? p.name : p.display_label).c_str(),
+                         p.chunk_type.c_str(), p.matched ? "OAD" : "-- ",
+                         KindName(p.kind), p.button_type, p.show_as);
+        }
     }
     return out;
 }
@@ -489,10 +582,12 @@ bool RenderProperties(wfcrdt::Doc& doc, int actor_index, std::vector<PropField>&
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted(f.name.c_str());
+        // Compact, Max-faithful label: the short OAD displayName, full unique name
+        // on hover. `name` stays the identity (scroll target, bridge key).
+        ImGui::TextUnformatted(f.display_label.empty() ? f.name.c_str() : f.display_label.c_str());
         if (s_scroll_to && f.name == s_scroll_to) ImGui::SetScrollHereY(0.2f);
         if (ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("%s  •  %s%s", f.chunk_type.c_str(),
+            ImGui::SetTooltip("%s  •  %s  •  %s%s", f.name.c_str(), f.chunk_type.c_str(),
                               f.matched ? "OAD" : "no OAD match",
                               f.matched ? "" : " (chunk-type fallback)");
         }

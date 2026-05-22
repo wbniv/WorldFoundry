@@ -1,7 +1,41 @@
 # Investigation — Blender-snowgoons renders untextured (vs textured oracle)
 
 **Date:** 2026-05-22
-**Status:** Open — root cause not yet pinned. This doc is an ultrathink-ready brief for a focused investigation session.
+**Status:** ✅ **RESOLVED — it was the camera, not textures.** See resolution below; fix in [camshot-enum-roundtrip-hardfail plan](../plans/2026-05-22-camshot-enum-roundtrip-hardfail.md).
+
+---
+
+## Resolution (2026-05-22)
+
+**There was no texture-pipeline bug.** Proven: atlas/RUV/meshes/materials are
+byte-identical oracle↔Blender (1687-byte `.iff` diff is entirely in the LVL/actor
+region); the GL draw streams are byte-identical (`WF_TRACE_DRAW` instrumentation);
+and forcing the oracle's camera onto the Blender level (`WF_FORCE_CAM`) renders it
+fully textured. The "flat gray" was the **CamShot** parking at a static wide view
+of the snowy (gray) part of the level instead of tracking the player to the
+colourful house — snowgoons is mostly white snow with small red/green accents, so
+the camera viewpoint decides whether you see colour at all.
+
+Root cause: the decompiled import source
+`wflevels/snowgoons-blender/snowgoons.lev` was **internally inconsistent** —
+`camshot_12`'s `Rotation`/`Position X-Z` had `DATA 0` (Fixed/Absolute) but
+`STR "Track"`/`"Relative"` (index 1). The Blender importer's enum branch
+**preferred DATA over STR**, importing Fixed/Absolute, so the BungeeCam lost
+player-tracking. (`Actboxor02 "Activated By"` was corrupt the same way.)
+
+Fix (two parts): (1) the importer now **hard-fails** when an enum field's DATA
+index and STR label disagree, rather than silently trusting the stale DATA;
+(2) the poisoned source was regenerated with the current (consistent) levcomp and
+the import→export round-trip re-run. Verified: rebuilt
+`snowgoons-blender-standalone.iff` renders the tracked colour view (chroma 10.8 ≈
+oracle 8.4; old build 0.3). The earlier "camera euler a↔c shuffle" lead was a
+misread — those EULR deltas are on `statplat_20/21` and are the *same rotation*
+(correction = identity).
+
+---
+
+## Original brief (kept for reference)
+
 
 ## Why this surfaced
 

@@ -230,13 +230,53 @@ OBJS=()
 
 FAILED_SRCS=()
 
+# compile_stub src obj [extra_flags...] — one-shot files (stubs, generated .cc).
+# Simple mtime check: recompile if .o is missing or src is newer than .o.
+# No header-dep tracking; these files rarely change their transitive includes.
+compile_stub() {
+    local src="$1" obj="$2"; shift 2
+    if [[ -f "$obj" && ! "$src" -nt "$obj" ]]; then
+        echo "  skip $src"
+        OBJS+=("$obj")
+        return
+    fi
+    echo "  CC $src"
+    if g++ "${CXXFLAGS[@]}" "$@" -MMD -MP -MF "${obj%.o}.d" -c "$src" -o "$obj" 2>&1; then
+        OBJS+=("$obj")
+    else
+        echo "  *** FAILED: $src"
+        FAILED_SRCS+=("$src")
+    fi
+}
+
 compile() {
     local src="$1"
     # encode directory in object name to avoid basename collisions
     local rel="${src#$SRC/}"
     local obj="$OUT/${rel//\//__}.o"
+    local dep="${obj%.o}.d"
+
+    # Incremental: skip if .o is up-to-date w.r.t. source + all transitive headers.
+    # -MMD -MP wrote $dep on the previous compile; it lists every included header.
+    if [[ -f "$obj" && -f "$dep" ]]; then
+        local stale=0
+        # Flatten backslash-continued lines, strip the "target:" prefix, split on spaces.
+        local prereqs
+        prereqs=$(tr '\\\n' '  ' < "$dep" | sed 's/[^:]*://')
+        for prereq in $prereqs; do
+            [[ -z "$prereq" ]] && continue
+            [[ -f "$prereq" && "$prereq" -nt "$obj" ]] && { stale=1; break; }
+        done
+        if [[ $stale -eq 0 ]]; then
+            echo "  skip $src"
+            OBJS+=("$obj")
+            return
+        fi
+    fi
+
     echo "  CC $src"
-    if g++ "${CXXFLAGS[@]}" -c "$src" -o "$obj" 2>&1; then
+    # -MMD -MP: write dependency file $dep listing all headers this TU includes.
+    if g++ "${CXXFLAGS[@]}" -MMD -MP -MF "$dep" -c "$src" -o "$obj" 2>&1; then
         OBJS+=("$obj")
     else
         echo "  *** FAILED: $src"
@@ -366,9 +406,7 @@ done
 # Lua engine plug — compiled only when WF_LUA_ENGINE=lua54.
 case "$WF_LUA_ENGINE" in
     lua54)
-        echo "  CC (stub) scripting_lua.cc"
-        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_lua.cc" -o "$OUT/stubs__scripting_lua.o"
-        OBJS+=("$OUT/stubs__scripting_lua.o")
+        compile_stub "$STUB_SRC/scripting_lua.cc" "$OUT/stubs__scripting_lua.o"
         # Vendored Lua 5.4 (C, not C++). Compile every .c in src/ except lua.c and
         # luac.c (those are standalone-binary mains, not library TUs). LUA_USE_POSIX +
         # LUA_USE_DLOPEN gives require()/dlopen() support without pulling in readline
@@ -390,21 +428,14 @@ case "$WF_LUA_ENGINE" in
     none) : ;;
 esac
 
-echo "  CC (stub) scripting_stub.cc"
-g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_stub.cc" -o "$OUT/stubs__scripting_stub.o"
-OBJS+=("$OUT/stubs__scripting_stub.o")
-
-echo "  CC (stub) platform_stubs.cc"
-g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/platform_stubs.cc" -o "$OUT/stubs__platform_stubs.o"
-OBJS+=("$OUT/stubs__platform_stubs.o")
+compile_stub "$STUB_SRC/scripting_stub.cc" "$OUT/stubs__scripting_stub.o"
+compile_stub "$STUB_SRC/platform_stubs.cc" "$OUT/stubs__platform_stubs.o"
 
 # JS engine plug — compiled and linked only when a non-`none` flavour is selected.
 declare -a JS_LINK_EXTRA=()
 case "$WF_JS_ENGINE" in
     quickjs)
-        echo "  CC (stub) scripting_quickjs.cc"
-        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_quickjs.cc" -o "$OUT/stubs__scripting_quickjs.o"
-        OBJS+=("$OUT/stubs__scripting_quickjs.o")
+        compile_stub "$STUB_SRC/scripting_quickjs.cc" "$OUT/stubs__scripting_quickjs.o"
         # QuickJS core (C, not C++). Compile each TU once; -O2 to keep the JIT-less
         # interpreter tolerable. Warnings silenced — third-party code.
         QJS_CFLAGS=(-std=gnu11 -O2 -w -fno-strict-aliasing
@@ -417,9 +448,7 @@ case "$WF_JS_ENGINE" in
         done
         ;;
     jerryscript)
-        echo "  CC (stub) scripting_jerryscript.cc"
-        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_jerryscript.cc" -o "$OUT/stubs__scripting_jerryscript.o"
-        OBJS+=("$OUT/stubs__scripting_jerryscript.o")
+        compile_stub "$STUB_SRC/scripting_jerryscript.cc" "$OUT/stubs__scripting_jerryscript.o"
         # Build JerryScript libs via upstream cmake (idempotent; skip if already built).
         JRY_BUILD="$JRY_DIR/build"
         if [[ ! -f "$JRY_BUILD/lib/libjerry-core.a" ]]; then
@@ -445,9 +474,7 @@ esac
 # wasm engine plug — compiled and linked based on WF_WASM_ENGINE.
 case "$WF_WASM_ENGINE" in
     wamr)
-        echo "  CC (stub) scripting_wamr.cc"
-        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_wamr.cc" -o "$OUT/stubs__scripting_wamr.o"
-        OBJS+=("$OUT/stubs__scripting_wamr.o")
+        compile_stub "$STUB_SRC/scripting_wamr.cc" "$OUT/stubs__scripting_wamr.o"
         # WAMR 2.2.0 classic interpreter — build via CMake into a static lib.
         # The build output is cached in OUT/wamr_build so subsequent runs skip cmake.
         WAMR_BUILD="$OUT/wamr_build"
@@ -496,9 +523,7 @@ esac
 FORTH_VENDOR_CFLAGS=(-std=gnu11 -O2 -w -fno-strict-aliasing)
 case "$WF_FORTH_ENGINE" in
     zforth)
-        echo "  CC (stub) scripting_zforth.cc"
-        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_zforth.cc" -o "$OUT/stubs__scripting_zforth.o"
-        OBJS+=("$OUT/stubs__scripting_zforth.o")
+        compile_stub "$STUB_SRC/scripting_zforth.cc" "$OUT/stubs__scripting_zforth.o"
         # zForth core (C). Two source files; -O2; warnings silenced (vendor).
         # zfconf.h is provided by STUB_SRC (listed first in CXXFLAGS -I flags).
         ZF_CFLAGS=(-std=gnu11 -O2 -w -fno-strict-aliasing
@@ -509,9 +534,7 @@ case "$WF_FORTH_ENGINE" in
         OBJS+=("$obj")
         ;;
     ficl)
-        echo "  CC (stub) scripting_ficl.cc"
-        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_ficl.cc" -o "$OUT/stubs__scripting_ficl.o"
-        OBJS+=("$OUT/stubs__scripting_ficl.o")
+        compile_stub "$STUB_SRC/scripting_ficl.cc" "$OUT/stubs__scripting_ficl.o"
         # ficl-3.06 core (C). Compile the non-test, non-platform-specific files.
         # Exclude: testmain.c, unity.c (test framework), wasm_main.c (wasm host).
         FICL_CFLAGS=("${FORTH_VENDOR_CFLAGS[@]}" -I"$FICL_DIR")
@@ -524,9 +547,7 @@ case "$WF_FORTH_ENGINE" in
         done
         ;;
     atlast)
-        echo "  CC (stub) scripting_atlast.cc"
-        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_atlast.cc" -o "$OUT/stubs__scripting_atlast.o"
-        OBJS+=("$OUT/stubs__scripting_atlast.o")
+        compile_stub "$STUB_SRC/scripting_atlast.cc" "$OUT/stubs__scripting_atlast.o"
         # atlast-64: single source file. -DEXPORT makes internal globals
         # non-static so scripting_atlast.cc can access stack pointers via
         # atldef.h macros (stk/stackbot/S0/Pop/Push = atl__sp etc.).
@@ -537,9 +558,7 @@ case "$WF_FORTH_ENGINE" in
         OBJS+=("$obj")
         ;;
     embed)
-        echo "  CC (stub) scripting_embed.cc"
-        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_embed.cc" -o "$OUT/stubs__scripting_embed.o"
-        OBJS+=("$OUT/stubs__scripting_embed.o")
+        compile_stub "$STUB_SRC/scripting_embed.cc" "$OUT/stubs__scripting_embed.o"
         # embed: embed.c (VM + built-in ROM image) and image.c (image utilities).
         # Exclude main.c and util.c (standalone tool, not needed for embedding).
         EMBED_CFLAGS=("${FORTH_VENDOR_CFLAGS[@]}" -I"$EMBED_DIR")
@@ -551,9 +570,7 @@ case "$WF_FORTH_ENGINE" in
         done
         ;;
     libforth)
-        echo "  CC (stub) scripting_libforth.cc"
-        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_libforth.cc" -o "$OUT/stubs__scripting_libforth.o"
-        OBJS+=("$OUT/stubs__scripting_libforth.o")
+        compile_stub "$STUB_SRC/scripting_libforth.cc" "$OUT/stubs__scripting_libforth.o"
         # libforth: single source file. Exclude main.c (standalone REPL).
         LIBFORTH_CFLAGS=("${FORTH_VENDOR_CFLAGS[@]}" -I"$LIBFORTH_DIR")
         obj="$OUT/libforth__libforth.o"
@@ -562,9 +579,7 @@ case "$WF_FORTH_ENGINE" in
         OBJS+=("$obj")
         ;;
     pforth)
-        echo "  CC (stub) scripting_pforth.cc"
-        g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_pforth.cc" -o "$OUT/stubs__scripting_pforth.o"
-        OBJS+=("$OUT/stubs__scripting_pforth.o")
+        compile_stub "$STUB_SRC/scripting_pforth.cc" "$OUT/stubs__scripting_pforth.o"
         # pForth csrc/ files. Exclude:
         #   pf_main.c      — standalone main()
         #   pf_io_none.c   — alternate I/O stub (conflicts with pf_io.c)
@@ -603,9 +618,7 @@ esac
 
 # Wren engine plug — compiled only when WF_ENABLE_WREN=1.
 if [[ "$WF_ENABLE_WREN" == "1" ]]; then
-    echo "  CC (stub) scripting_wren.cc"
-    g++ "${CXXFLAGS[@]}" -c "$STUB_SRC/scripting_wren.cc" -o "$OUT/stubs__scripting_wren.o"
-    OBJS+=("$OUT/stubs__scripting_wren.o")
+    compile_stub "$STUB_SRC/scripting_wren.cc" "$OUT/stubs__scripting_wren.o"
     # Wren 0.4.0 amalgamation (C, not C++). Single TU; -O2; warnings silenced.
     WREN_CFLAGS=(-std=gnu11 -O2 -w -fno-strict-aliasing -I"$WREN_DIR")
     obj="$OUT/wren__wren.o"
@@ -617,38 +630,27 @@ fi
 # Steam plug — compiled only when WF_ENABLE_STEAM=1.
 declare -a STEAM_LINK_EXTRA=()
 if [[ "$WF_ENABLE_STEAM" == "1" ]]; then
-    echo "  CC hal/linux/steam.cc"
-    g++ "${CXXFLAGS[@]}" -c "$SRC/hal/linux/steam.cc" -o "$OUT/hal__linux__steam.o"
-    OBJS+=("$OUT/hal__linux__steam.o")
+    compile_stub "$SRC/hal/linux/steam.cc" "$OUT/hal__linux__steam.o"
     STEAM_LINK_EXTRA+=("-L$STEAM_DIR/redistributable_bin/linux64" "-lsteam_api"
                        "-Wl,-rpath,\$ORIGIN")
 fi
 
 # REST API plug — compiled only when WF_REST_API=1.
 if [[ "$WF_REST_API" == "1" ]]; then
-    echo "  CC (stub) rest_api.cc"
-    g++ "${CXXFLAGS[@]}" -O1 -c "$STUB_SRC/rest_api.cc" -o "$OUT/stubs__rest_api.o"
-    OBJS+=("$OUT/stubs__rest_api.o")
+    compile_stub "$STUB_SRC/rest_api.cc" "$OUT/stubs__rest_api.o" -O1
 fi
 
 # Debug bridge plug — compiled only when WF_DEBUG_BRIDGE=1.
 if [[ "$WF_DEBUG_BRIDGE" == "1" ]]; then
-    echo "  CC (stub) debug_server.cc"
-    g++ "${CXXFLAGS[@]}" -O1 -c "$STUB_SRC/debug_server.cc" -o "$OUT/stubs__debug_server.o"
-    OBJS+=("$OUT/stubs__debug_server.o")
+    compile_stub "$STUB_SRC/debug_server.cc" "$OUT/stubs__debug_server.o" -O1
 fi
 
 # Engine mutation API + smoke — compiled when EITHER consumer flag is on
 # (bridge consumes wfmut after the step-6 refactor; editor consumes it from
 # the CRDT bridge). See docs/plans/2026-05-19-engine-mutation-api.md.
 if [[ "$WF_DEBUG_BRIDGE" == "1" || "$WF_ENABLE_EDITOR" == "1" ]]; then
-    echo "  CC mutation/wfmut.cpp"
-    g++ "${CXXFLAGS[@]}" -O1 -c "$REPO_ROOT/engine/mutation/wfmut.cpp" -o "$OUT/mutation__wfmut.o"
-    OBJS+=("$OUT/mutation__wfmut.o")
-
-    echo "  CC mutation/wfmut_smoke.cpp"
-    g++ "${CXXFLAGS[@]}" -O1 -c "$REPO_ROOT/engine/mutation/wfmut_smoke.cpp" -o "$OUT/mutation__wfmut_smoke.o"
-    OBJS+=("$OUT/mutation__wfmut_smoke.o")
+    compile_stub "$REPO_ROOT/engine/mutation/wfmut.cpp" "$OUT/mutation__wfmut.o" -O1
+    compile_stub "$REPO_ROOT/engine/mutation/wfmut_smoke.cpp" "$OUT/mutation__wfmut_smoke.o" -O1
 fi
 
 # Jolt physics plug — compiled and linked only when WF_PHYSICS_ENGINE=jolt.
@@ -656,13 +658,8 @@ fi
 # The physics_jolt.cc stub owns JoltRuntimeInit/Shutdown and the selftest.
 declare -a JOLT_LINK_EXTRA=()
 if [[ "$WF_PHYSICS_ENGINE" == "jolt" ]]; then
-    echo "  CC (stub) physics_jolt.cc"
-    g++ "${CXXFLAGS[@]}" -O2 -DNDEBUG -c "$STUB_SRC/physics_jolt.cc" -o "$OUT/stubs__physics_jolt.o"
-    OBJS+=("$OUT/stubs__physics_jolt.o")
-    echo "  CC physics/jolt/jolt_backend.cc"
-    g++ "${CXXFLAGS[@]}" -O2 -DNDEBUG -c "$SRC/physics/jolt/jolt_backend.cc" \
-        -o "$OUT/physics__jolt__jolt_backend.o"
-    OBJS+=("$OUT/physics__jolt__jolt_backend.o")
+    compile_stub "$STUB_SRC/physics_jolt.cc" "$OUT/stubs__physics_jolt.o" -O2 -DNDEBUG
+    compile_stub "$SRC/physics/jolt/jolt_backend.cc" "$OUT/physics__jolt__jolt_backend.o" -O2 -DNDEBUG
 
     JOLT_BUILD="$OUT/jolt_build"
     JOLT_LIB="$JOLT_BUILD/libJolt.a"
@@ -722,9 +719,7 @@ if [[ "$WF_ENABLE_FENNEL" == "1" ]]; then
             | sed -E 's/^unsigned char fennel_min_lua\[\]/extern "C" const char kFennelSource[]/;
                       s/^unsigned int fennel_min_lua_len/extern "C" const unsigned int kFennelSourceLen/'
     } > "$FENNEL_CC"
-    echo "  CC fennel_source.cc"
-    g++ "${CXXFLAGS[@]}" -c "$FENNEL_CC" -o "$OUT/fennel_source.o"
-    OBJS+=("$OUT/fennel_source.o")
+    compile_stub "$FENNEL_CC" "$OUT/fennel_source.o"
 fi
 
 echo ""

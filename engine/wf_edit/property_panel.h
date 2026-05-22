@@ -14,6 +14,7 @@
 #pragma once
 
 #include "level_doc.h"   // wfedit::ActorField
+#include "oad_reader.h"  // wfedit::OadEntry
 
 #include <string>
 #include <vector>
@@ -35,7 +36,11 @@ enum class FieldKind {
 // matched, the metadata that drives the widget.
 struct PropField {
     // From the Doc (always present):
-    std::string name;        // display name (OAD name when matched, else Doc name)
+    std::string name;        // Doc field name — the STABLE identity AlignByName and the
+                             // CRDT→engine bridge key on. Never overwritten by the OAD label.
+    std::string display_label; // short OAD displayName for the column-0 label (falls back to
+                               // `name` when empty). Section/group headers stash their title here
+                               // via `name`; only real fields get a displayName.
     std::string chunk_type;  // IFF storage type (VEC3 / I32 / FX32 / STR / FILE / …)
     std::string data;        // raw scalar / vector components (DATA leaf)
     std::string label;       // enum/bool label, filename, or string body (STR leaf)
@@ -52,6 +57,14 @@ struct PropField {
     int       child_index = -1;         // Doc address for write-back (Phase 3)
     FieldKind kind = FieldKind::Raw;
 };
+
+// Locate the .oad for `class_name` → absolute path (searches $WF_OAD_DIR then
+// wfsource/source/oas). Returns "" if not found.
+std::string FindOad(const std::string& class_name);
+
+// Load and cache the OAD entry list for `class_name`. Empty on load failure.
+// Used by ResolveProperties and AddActor.
+const std::vector<OadEntry>& OadForClass(const std::string& class_name);
 
 // Map (ButtonType, showAs) → FieldKind, exactly the design-doc dispatch table.
 // `option_count` lets a 2-item CHECKBOX collapse to Bool; `chunk_type` drives

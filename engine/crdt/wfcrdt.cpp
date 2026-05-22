@@ -1,6 +1,7 @@
 // engine/crdt/wfcrdt.cpp — see wfcrdt.hpp.
 //
 // Plan: docs/plans/2026-05-19-wfcrdt-cpp-raii-wrapper.md
+// Yrs upgrade 0.9.3 → 0.26.0: docs/plans/2026-05-22-yrs-upgrade-and-native-undo.md
 
 #include "wfcrdt.hpp"
 
@@ -12,6 +13,7 @@ extern "C" {
 #include <libyrs.h>
 }
 
+#include <cstdint>
 #include <cstring>
 #include <utility>
 
@@ -25,7 +27,8 @@ Doc::~Doc() {
     if (_doc) ydoc_destroy(_doc);
 }
 
-Doc::Doc(Doc&& other) noexcept : _doc(other._doc) {
+Doc::Doc(Doc&& other) noexcept
+    : _doc(other._doc), _roots(std::move(other._roots)) {
     other._doc = nullptr;
 }
 
@@ -33,31 +36,72 @@ Doc& Doc::operator=(Doc&& other) noexcept {
     if (this != &other) {
         if (_doc) ydoc_destroy(_doc);
         _doc = other._doc;
+        _roots = std::move(other._roots);
         other._doc = nullptr;
     }
     return *this;
 }
 
 Transaction Doc::begin() {
-    return Transaction(_doc);
+    // Local edits carry kOriginLocal so an UndoManager tracking that origin
+    // captures every editor edit path with no per-call-site change.
+    return Transaction(this, kOriginLocal, sizeof(kOriginLocal) - 1);
+}
+
+Transaction Doc::beginRemote() {
+    // Remote applies carry kOriginRemote — never captured by the local
+    // UndoManager (its origin set holds only kOriginLocal).
+    return Transaction(this, kOriginRemote, sizeof(kOriginRemote) - 1);
+}
+
+Branch* Doc::rootBranch(const char* name, bool asArray) {
+    if (!_doc) return nullptr;
+    auto it = _roots.find(name);
+    if (it != _roots.end()) return it->second;
+    // Cache miss: get-or-create the root. NB ymap/yarray each open their OWN
+    // internal write txn in yffi, so this must run with no wfcrdt Transaction's
+    // yffi txn open on this doc — guaranteed by Transaction's lazy acquisition.
+    Branch* b = asArray ? yarray(_doc, name) : ymap(_doc, name);
+    _roots.emplace(name, b);
+    return b;
 }
 
 // ─── Transaction ──────────────────────────────────────────────────────────────
 
-Transaction::Transaction(YDoc* doc) : _txn(ytransaction_new(doc)) {}
+Transaction::Transaction(Doc* docw, const char* origin, std::uint32_t originLen)
+    : _docw(docw), _txn(nullptr), _origin(origin), _originLen(originLen) {}
+
+YTransaction* Transaction::raw() const {
+    // Lazily open the yffi write txn on first use. ydoc_write_transaction()
+    // returns NULL if another write txn is already open on the doc — that only
+    // happens if a caller nests doc.begin() scopes (forbidden: yrs is
+    // single-writer). The origin (kOriginLocal/kOriginRemote, or nullptr) gates
+    // UndoManager capture; it isn't part of the v1 update wire format, so sync
+    // is unaffected.
+    if (!_docw) return nullptr;
+    if (!_txn) _txn = ydoc_write_transaction(_docw->raw(), _originLen, _origin);
+    return _txn;
+}
 
 Transaction::~Transaction() {
     if (_txn) ytransaction_commit(_txn);
 }
 
-Transaction::Transaction(Transaction&& other) noexcept : _txn(other._txn) {
+Transaction::Transaction(Transaction&& other) noexcept
+    : _docw(other._docw), _txn(other._txn),
+      _origin(other._origin), _originLen(other._originLen) {
+    other._docw = nullptr;
     other._txn = nullptr;
 }
 
 Transaction& Transaction::operator=(Transaction&& other) noexcept {
     if (this != &other) {
         if (_txn) ytransaction_commit(_txn);
+        _docw = other._docw;
         _txn = other._txn;
+        _origin = other._origin;
+        _originLen = other._originLen;
+        other._docw = nullptr;
         other._txn = nullptr;
     }
     return *this;
@@ -68,56 +112,60 @@ void Transaction::commit() {
         ytransaction_commit(_txn);
         _txn = nullptr;
     }
+    _docw = nullptr;   // mark not-live: further ops illegal, valid() == false
 }
 
 void Transaction::cancel() {
     // yffi has no rollback; today this is identical to commit().
     // Kept as a separate symbol so future yffi changes don't require
     // a caller-side migration.
-    if (_txn) {
-        ytransaction_commit(_txn);
-        _txn = nullptr;
-    }
+    commit();
 }
 
 Map Transaction::map(const char* name) {
-    return Map(ymap(_txn, name), _txn);
+    // Resolve the root branch via the Doc cache WITHOUT opening this txn (so
+    // ymap's internal txn can't deadlock against ours), then bind the view to
+    // this Transaction — its data ops lazily open the txn via raw().
+    return Map(_docw ? _docw->rootBranch(name, /*asArray=*/false) : nullptr, this);
 }
 
 Array Transaction::array(const char* name) {
-    return Array(yarray(_txn, name), _txn);
+    return Array(_docw ? _docw->rootBranch(name, /*asArray=*/true) : nullptr, this);
 }
 
 // Helper: copy a yffi-allocated byte buffer into an owned std::vector,
 // then release the yffi heap allocation. The vector handles its own dtor.
-static std::vector<std::uint8_t> takeYffiBytes(unsigned char* buf, int len) {
-    if (!buf || len <= 0) {
+static std::vector<std::uint8_t> takeYffiBytes(char* buf, std::uint32_t len) {
+    if (!buf || len == 0) {
         if (buf) ybinary_destroy(buf, len);
         return {};
     }
-    std::vector<std::uint8_t> out(buf, buf + len);
+    const auto* p = reinterpret_cast<const std::uint8_t*>(buf);
+    std::vector<std::uint8_t> out(p, p + len);
     ybinary_destroy(buf, len);
     return out;
 }
 
 std::vector<std::uint8_t> Transaction::stateVector() const {
-    int len = 0;
-    unsigned char* buf = ytransaction_state_vector_v1(_txn, &len);
+    std::uint32_t len = 0;
+    char* buf = ytransaction_state_vector_v1(raw(), &len);
     return takeYffiBytes(buf, len);
 }
 
 std::vector<std::uint8_t> Transaction::stateDiff(ByteView remoteSv) const {
-    int len = 0;
-    unsigned char* buf = ytransaction_state_diff_v1(
-        _txn,
-        remoteSv.data,
-        static_cast<int>(remoteSv.len),
+    std::uint32_t len = 0;
+    char* buf = ytransaction_state_diff_v1(
+        raw(),
+        reinterpret_cast<const char*>(remoteSv.data),
+        static_cast<std::uint32_t>(remoteSv.len),
         &len);
     return takeYffiBytes(buf, len);
 }
 
 void Transaction::apply(ByteView diff) {
-    ytransaction_apply(_txn, diff.data, static_cast<int>(diff.len));
+    ytransaction_apply(raw(),
+                       reinterpret_cast<const char*>(diff.data),
+                       static_cast<std::uint32_t>(diff.len));
 }
 
 // ─── Output ───────────────────────────────────────────────────────────────────
@@ -144,9 +192,9 @@ Output& Output::operator=(Output&& other) noexcept {
 
 std::optional<long long> Output::readLong() const {
     if (!_out) return std::nullopt;
-    const long long* p = youtput_read_long(_out);
+    const int64_t* p = youtput_read_long(_out);
     if (!p) return std::nullopt;
-    return *p;
+    return static_cast<long long>(*p);
 }
 
 std::optional<std::string> Output::readString() const {
@@ -160,9 +208,10 @@ std::optional<std::string> Output::readString() const {
 
 std::optional<double> Output::readFloat() const {
     if (!_out) return std::nullopt;
-    const float* p = youtput_read_float(_out);
+    // yffi ≥0.10: youtput_read_float returns const double* (was float* at 0.9.3).
+    const double* p = youtput_read_float(_out);
     if (!p) return std::nullopt;
-    return static_cast<double>(*p);
+    return *p;
 }
 
 Map Output::asMap() const {
@@ -181,17 +230,13 @@ Array Output::asArray() const {
 // nested container (yinput_ymap/yinput_yarray with no entries) and then
 // recursively populating it — rather than handing yffi a prefilled prelim.
 //
-// This deliberately avoids prefilled yinput_ymap: yrs v0.9.3's
-// YInput::integrate has an infinite-loop bug for prefilled shared maps
-// (wftools/y-crdt/yffi/src/lib.rs:1795 — the Y_MAP loop uses `let i = 0`,
-// never increments, and re-inserts the same key/value forever → unbounded
-// allocation; the Y_ARRAY branch right below it correctly uses `let mut i`).
-// Empty-container-then-populate is also the pattern upstream's own FFI tests
-// use for nested shared types, so it stays on a well-exercised code path.
-// Upstream one-line fix kept as a submittable patch (submodule stays pinned):
-//   docs/patches/yrs-0.9.3-yinput-ymap-integrate-loop.patch
-// TODO(crdt): collapse this back to a direct prefilled insert once the y-crdt
-// submodule is bumped past the fix (or our patch is upstreamed).
+// Historical note: yrs v0.9.3's YInput::integrate had an infinite-loop bug for
+// prefilled shared maps (the Y_MAP loop never incremented its index). That bug
+// is fixed in the current 0.26.0 submodule, so a direct prefilled
+// yinput_ymap insert would now work. We keep the empty-then-populate pattern
+// anyway: it's the same path upstream's own FFI tests exercise for nested
+// shared types, and collapsing it is a pure optimization with no functional
+// payoff. (Stale 0.9.3 patch: docs/patches/yrs-0.9.3-yinput-ymap-integrate-loop.patch.)
 namespace {
 void fill_map(Branch* m, YTransaction* txn, const Input& in);
 void fill_array(Branch* a, YTransaction* txn, const Input& in);
@@ -200,14 +245,14 @@ void fill_array(Branch* a, YTransaction* txn, const Input& in);
 void put_in_map(Branch* m, YTransaction* txn, const char* key, const Input& in) {
     using K = Input::Kind;
     switch (in.kind()) {
-        case K::Str:    { YInput v = yinput_string(in.strVal().c_str());              ymap_insert(m, txn, key, &v); return; }
-        case K::Long:   { YInput v = yinput_long(static_cast<long>(in.longVal()));     ymap_insert(m, txn, key, &v); return; }
-        case K::Double: { YInput v = yinput_float(static_cast<float>(in.doubleVal())); ymap_insert(m, txn, key, &v); return; }
-        case K::Boolean:   { YInput v = yinput_bool(in.boolVal() ? 1 : 0);                ymap_insert(m, txn, key, &v); return; }
+        case K::Str:     { YInput v = yinput_string(in.strVal().c_str()); ymap_insert(m, txn, key, &v); return; }
+        case K::Long:    { YInput v = yinput_long(in.longVal());          ymap_insert(m, txn, key, &v); return; }
+        case K::Double:  { YInput v = yinput_float(in.doubleVal());       ymap_insert(m, txn, key, &v); return; }
+        case K::Boolean: { YInput v = yinput_bool(in.boolVal() ? 1 : 0);  ymap_insert(m, txn, key, &v); return; }
         case K::Map: {
             YInput empty = yinput_ymap(nullptr, nullptr, 0);
             ymap_insert(m, txn, key, &empty);
-            YOutput* o = ymap_get(m, key);   // inner branch, owned by the doc
+            YOutput* o = ymap_get(m, txn, key);   // inner branch, owned by the doc
             fill_map(youtput_read_ymap(o), txn, in);
             youtput_destroy(o);
             return;
@@ -215,7 +260,7 @@ void put_in_map(Branch* m, YTransaction* txn, const char* key, const Input& in) 
         case K::Array: {
             YInput empty = yinput_yarray(nullptr, 0);
             ymap_insert(m, txn, key, &empty);
-            YOutput* o = ymap_get(m, key);
+            YOutput* o = ymap_get(m, txn, key);
             fill_array(youtput_read_yarray(o), txn, in);
             youtput_destroy(o);
             return;
@@ -227,14 +272,14 @@ void put_in_map(Branch* m, YTransaction* txn, const char* key, const Input& in) 
 void put_in_array(Branch* a, YTransaction* txn, int index, const Input& in) {
     using K = Input::Kind;
     switch (in.kind()) {
-        case K::Str:    { YInput v = yinput_string(in.strVal().c_str());              yarray_insert_range(a, txn, index, &v, 1); return; }
-        case K::Long:   { YInput v = yinput_long(static_cast<long>(in.longVal()));     yarray_insert_range(a, txn, index, &v, 1); return; }
-        case K::Double: { YInput v = yinput_float(static_cast<float>(in.doubleVal())); yarray_insert_range(a, txn, index, &v, 1); return; }
-        case K::Boolean:   { YInput v = yinput_bool(in.boolVal() ? 1 : 0);                yarray_insert_range(a, txn, index, &v, 1); return; }
+        case K::Str:     { YInput v = yinput_string(in.strVal().c_str()); yarray_insert_range(a, txn, index, &v, 1); return; }
+        case K::Long:    { YInput v = yinput_long(in.longVal());          yarray_insert_range(a, txn, index, &v, 1); return; }
+        case K::Double:  { YInput v = yinput_float(in.doubleVal());       yarray_insert_range(a, txn, index, &v, 1); return; }
+        case K::Boolean: { YInput v = yinput_bool(in.boolVal() ? 1 : 0);  yarray_insert_range(a, txn, index, &v, 1); return; }
         case K::Map: {
             YInput empty = yinput_ymap(nullptr, nullptr, 0);
             yarray_insert_range(a, txn, index, &empty, 1);
-            YOutput* o = yarray_get(a, index);
+            YOutput* o = yarray_get(a, txn, index);
             fill_map(youtput_read_ymap(o), txn, in);
             youtput_destroy(o);
             return;
@@ -242,7 +287,7 @@ void put_in_array(Branch* a, YTransaction* txn, int index, const Input& in) {
         case K::Array: {
             YInput empty = yinput_yarray(nullptr, 0);
             yarray_insert_range(a, txn, index, &empty, 1);
-            YOutput* o = yarray_get(a, index);
+            YOutput* o = yarray_get(a, txn, index);
             fill_array(youtput_read_yarray(o), txn, in);
             youtput_destroy(o);
             return;
@@ -262,37 +307,37 @@ void fill_array(Branch* a, YTransaction* txn, const Input& in) {
 // ─── Map ──────────────────────────────────────────────────────────────────────
 
 void Map::insert(const char* key, long long value) {
-    YInput v = yinput_long(static_cast<long>(value));
-    ymap_insert(_branch, _txn, key, &v);
+    YInput v = yinput_long(value);
+    ymap_insert(_branch, _txn->raw(), key, &v);
 }
 
 void Map::insert(const char* key, const char* value) {
     YInput v = yinput_string(value);
-    ymap_insert(_branch, _txn, key, &v);
+    ymap_insert(_branch, _txn->raw(), key, &v);
 }
 
 void Map::insert(const char* key, double value) {
-    YInput v = yinput_float(static_cast<float>(value));
-    ymap_insert(_branch, _txn, key, &v);
+    YInput v = yinput_float(value);
+    ymap_insert(_branch, _txn->raw(), key, &v);
 }
 
 void Map::insert(const char* key, const Input& value) {
-    put_in_map(_branch, _txn, key, value);
+    put_in_map(_branch, _txn->raw(), key, value);
 }
 
 Output Map::get(const char* key) const {
-    return Output(ymap_get(_branch, key), _txn);
+    return Output(ymap_get(_branch, _txn->raw(), key), _txn);
 }
 
 int Map::len() const {
-    return ymap_len(_branch);
+    return static_cast<int>(ymap_len(_branch, _txn->raw()));
 }
 
 // ─── Array ────────────────────────────────────────────────────────────────────
 
 void Array::insertLong(int index, long long value) {
-    YInput v = yinput_long(static_cast<long>(value));
-    yarray_insert_range(_branch, _txn, index, &v, 1);
+    YInput v = yinput_long(value);
+    yarray_insert_range(_branch, _txn->raw(), index, &v, 1);
 }
 
 void Array::insertRange(int index, const long long* values, int count) {
@@ -301,21 +346,22 @@ void Array::insertRange(int index, const long long* values, int count) {
     std::vector<YInput> inputs;
     inputs.reserve(static_cast<std::size_t>(count));
     for (int i = 0; i < count; ++i) {
-        inputs.push_back(yinput_long(static_cast<long>(values[i])));
+        inputs.push_back(yinput_long(values[i]));
     }
-    yarray_insert_range(_branch, _txn, index, inputs.data(), count);
+    yarray_insert_range(_branch, _txn->raw(), index, inputs.data(), count);
 }
 
 void Array::insert(int index, const Input& value) {
-    put_in_array(_branch, _txn, index, value);
+    put_in_array(_branch, _txn->raw(), index, value);
 }
 
 void Array::remove(int index, int count) {
     // yffi panics if [index, index+count) escapes the array bounds; guard.
+    // yarray_len takes no txn in yffi ≥0.10 (asymmetric vs ymap_len).
     if (count <= 0) return;
-    const int n = yarray_len(_branch);
+    const int n = static_cast<int>(yarray_len(_branch));
     if (index < 0 || index + count > n) return;
-    yarray_remove_range(_branch, _txn, index, count);
+    yarray_remove_range(_branch, _txn->raw(), index, count);
 }
 
 void Array::push(const Input& value) {
@@ -323,11 +369,11 @@ void Array::push(const Input& value) {
 }
 
 Output Array::get(int index) const {
-    return Output(yarray_get(_branch, index), _txn);
+    return Output(yarray_get(_branch, _txn->raw(), index), _txn);
 }
 
 int Array::len() const {
-    return yarray_len(_branch);
+    return static_cast<int>(yarray_len(_branch));
 }
 
 // ─── Observer trampolines ─────────────────────────────────────────────────────
@@ -360,92 +406,132 @@ extern "C" void wfcrdt_array_trampoline(void* state, const YArrayEvent* e) {
     auto* t = static_cast<ArrayTrampoline*>(state);
     t->cb(e);
 }
-extern "C" void wfcrdt_doc_updates_trampoline(void* state, int len, const unsigned char* data) {
+// yffi ≥0.10 doc-updates callback signature: (void*, uint32_t len, const char* data).
+extern "C" void wfcrdt_doc_updates_trampoline(void* state, std::uint32_t len, const char* data) {
     auto* t = static_cast<DocUpdatesTrampoline*>(state);
-    t->cb(ByteView{data, static_cast<std::size_t>(len < 0 ? 0 : len)});
+    t->cb(ByteView{reinterpret_cast<const std::uint8_t*>(data), static_cast<std::size_t>(len)});
 }
 
 }  // namespace
 
 Subscription Doc::observeUpdates(std::function<void(ByteView)> cb) {
     auto* t = new DocUpdatesTrampoline{std::move(cb)};
-    unsigned int subId = ydoc_observe_updates_v1(_doc, t, &wfcrdt_doc_updates_trampoline);
-    return Subscription(_doc, subId, t);
+    YSubscription* sub = ydoc_observe_updates_v1(_doc, t, &wfcrdt_doc_updates_trampoline);
+    return Subscription(sub, SubKind::DocUpdates, t);
 }
 
 Subscription Map::observe(std::function<void(const YMapEvent*)> cb) {
     auto* t = new MapTrampoline{std::move(cb)};
-    unsigned int subId =
-        ymap_observe(_branch, t, &wfcrdt_map_trampoline);
-    return Subscription(_branch, subId, SubKind::Map, t);
+    YSubscription* sub = ymap_observe(_branch, t, &wfcrdt_map_trampoline);
+    return Subscription(sub, SubKind::Map, t);
 }
 
 Subscription Array::observe(std::function<void(const YArrayEvent*)> cb) {
     auto* t = new ArrayTrampoline{std::move(cb)};
-    unsigned int subId =
-        yarray_observe(_branch, t, &wfcrdt_array_trampoline);
-    return Subscription(_branch, subId, SubKind::Array, t);
+    YSubscription* sub = yarray_observe(_branch, t, &wfcrdt_array_trampoline);
+    return Subscription(sub, SubKind::Array, t);
 }
 
 // ─── Subscription ─────────────────────────────────────────────────────────────
 
-Subscription::Subscription(Branch* target,
-                           unsigned int subId,
-                           SubKind kind,
-                           void* heapTrampoline)
-    : _target(target), _doc(nullptr), _subId(subId), _kind(kind), _heap(heapTrampoline) {}
-
-Subscription::Subscription(YDoc* doc, unsigned int subId, void* heapTrampoline)
-    : _target(nullptr), _doc(doc), _subId(subId), _kind(SubKind::DocUpdates), _heap(heapTrampoline) {}
+Subscription::Subscription(YSubscription* sub, SubKind kind, void* heapTrampoline)
+    : _sub(sub), _kind(kind), _heap(heapTrampoline) {}
 
 namespace {
-void subscription_destroy(Branch* target, YDoc* doc, SubKind kind, unsigned int subId, void* heap) {
-    if (kind == SubKind::DocUpdates) {
-        if (doc) {
-            ydoc_unobserve_updates_v1(doc, subId);
-            delete static_cast<DocUpdatesTrampoline*>(heap);
-        }
-        return;
-    }
-    if (!target) return;
-    if (kind == SubKind::Map) {
-        ymap_unobserve(target, subId);
-        delete static_cast<MapTrampoline*>(heap);
-    } else {
-        yarray_unobserve(target, subId);
-        delete static_cast<ArrayTrampoline*>(heap);
+void subscription_destroy(YSubscription* sub, SubKind kind, void* heap) {
+    if (!sub) return;
+    yunobserve(sub);   // releases the callback; one entry point for all kinds
+    switch (kind) {
+        case SubKind::Map:        delete static_cast<MapTrampoline*>(heap);        break;
+        case SubKind::Array:      delete static_cast<ArrayTrampoline*>(heap);      break;
+        case SubKind::DocUpdates: delete static_cast<DocUpdatesTrampoline*>(heap); break;
     }
 }
 }  // namespace
 
 Subscription::~Subscription() {
-    subscription_destroy(_target, _doc, _kind, _subId, _heap);
+    subscription_destroy(_sub, _kind, _heap);
 }
 
 Subscription::Subscription(Subscription&& other) noexcept
-    : _target(other._target),
-      _doc(other._doc),
-      _subId(other._subId),
-      _kind(other._kind),
-      _heap(other._heap) {
-    other._target = nullptr;
-    other._doc = nullptr;
+    : _sub(other._sub), _kind(other._kind), _heap(other._heap) {
+    other._sub = nullptr;
     other._heap = nullptr;
 }
 
 Subscription& Subscription::operator=(Subscription&& other) noexcept {
     if (this != &other) {
-        subscription_destroy(_target, _doc, _kind, _subId, _heap);
-        _target = other._target;
-        _doc    = other._doc;
-        _subId  = other._subId;
-        _kind   = other._kind;
-        _heap   = other._heap;
-        other._target = nullptr;
-        other._doc    = nullptr;
-        other._heap   = nullptr;
+        subscription_destroy(_sub, _kind, _heap);
+        _sub  = other._sub;
+        _kind = other._kind;
+        _heap = other._heap;
+        other._sub = nullptr;
+        other._heap = nullptr;
     }
     return *this;
+}
+
+// ─── UndoManager ────────────────────────────────────────────────────────────
+
+UndoManager::UndoManager(Doc& doc, int captureTimeoutMillis) : _mgr(nullptr) {
+    YUndoManagerOptions opts{};
+    opts.capture_timeout_millis = captureTimeoutMillis;
+    _mgr = yundo_manager(doc.raw(), &opts);
+    // Track only local edits. With kOriginLocal in the origin set, a txn tagged
+    // kOriginRemote (Doc::beginRemote) is never recorded — undo is local-only.
+    if (_mgr)
+        yundo_manager_add_origin(_mgr, sizeof(kOriginLocal) - 1, kOriginLocal);
+}
+
+UndoManager::~UndoManager() {
+    if (_mgr) yundo_manager_destroy(_mgr);
+}
+
+UndoManager::UndoManager(UndoManager&& other) noexcept : _mgr(other._mgr) {
+    other._mgr = nullptr;
+}
+
+UndoManager& UndoManager::operator=(UndoManager&& other) noexcept {
+    if (this != &other) {
+        if (_mgr) yundo_manager_destroy(_mgr);
+        _mgr = other._mgr;
+        other._mgr = nullptr;
+    }
+    return *this;
+}
+
+void UndoManager::addScope(const Map& root) {
+    if (_mgr && root._branch) yundo_manager_add_scope(_mgr, root._branch);
+}
+
+void UndoManager::addScope(const Array& root) {
+    if (_mgr && root._branch) yundo_manager_add_scope(_mgr, root._branch);
+}
+
+bool UndoManager::undo() {
+    // yundo_manager_undo opens its own internal write txn — the caller must hold
+    // no live wfcrdt txn (true at frame top). Returns Y_FALSE on an empty stack.
+    return _mgr && yundo_manager_undo(_mgr);
+}
+
+bool UndoManager::redo() {
+    return _mgr && yundo_manager_redo(_mgr);
+}
+
+int UndoManager::undoStackLen() const {
+    return _mgr ? static_cast<int>(yundo_manager_undo_stack_len(_mgr)) : 0;
+}
+
+int UndoManager::redoStackLen() const {
+    return _mgr ? static_cast<int>(yundo_manager_redo_stack_len(_mgr)) : 0;
+}
+
+void UndoManager::stopCapturing() {
+    if (_mgr) yundo_manager_stop(_mgr);
+}
+
+void UndoManager::clear() {
+    if (_mgr) yundo_manager_clear(_mgr);
 }
 
 }  // namespace wfcrdt

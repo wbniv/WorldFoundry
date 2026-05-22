@@ -518,8 +518,10 @@ QBLOCK_SCRIPT = (
     "then\n"
 )
 
+COIN_SCRIPT = "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"
+
 # Coin template — Gold collectible class (pickup-driven despawn via
-# Gold::Collision + SetPendingRemove; no suicide script needed).
+# Gold::Collision + SetPendingRemove; spins via ROTATION_C each frame).
 import bmesh as _bmesh
 def _make_coin_template():
     bm = _bmesh.new()
@@ -538,7 +540,7 @@ def _make_coin_template():
     obj['wf_Moves Between Rooms']  = 'True'
     obj['wf_Mobility']             = 'Physics'
     obj['wf_Mass']                 = 0.001
-    obj['wf_Falling Acceleration'] = 4.0
+    obj['wf_Falling Acceleration'] = 12.0
     obj['wf_Max Air Speed']        = 50.0
     obj['wf_Surface Friction']     = 0.0
     obj['wf_Horiz Air Drag']       = 0.0
@@ -546,6 +548,7 @@ def _make_coin_template():
     obj['wf_Model Type']           = 'Mesh'
     obj['wf_Visibility Mailbox']   = 1
     obj['wf_Mesh Name']            = 'coin_template.iff'
+    obj['wf_Script']               = COIN_SCRIPT
     return obj
 
 _make_coin_template()
@@ -626,6 +629,7 @@ def _build_mario():
 
 player = find_by_class('player')
 if player:
+    player.name = 'Player'   # CamShot Track Object references this name
     player.location = (MARIO_SPAWN_X, 0.0, MARIO_SPAWN_Z)
     # Physics mobility = engine handles gravity, ground collision, jump.
     # Mobility value 1 = "Physics" (Anchored|Physics|Path|Camera|Follow).
@@ -830,6 +834,7 @@ if camshot:
     camshot['wf_Pan Time In Seconds'] = 0.1
     camshot['wf_Model Type']          = 'None'
     camshot['wf_Track Object'] = 'Player'
+    camshot['wf_Target']       = 'Target02'
     camshot['wf_Follow']       = 'Target02'
     # SMB scroll: read INDEXOF_SMB_TARGET_CAM_X written by the Director on
     # the previous tick (Director runs after main loop, this runs in it),
@@ -861,6 +866,7 @@ actboxor = find_by_class('actboxor')
 if actboxor:
     actboxor.location = (SCENE_MID_X, 0.0, MARIO_Z + 2)
     actboxor['wf_Object'] = 'cs_side'
+    actboxor['wf_Activated By Actor'] = 'Player'
 
 # ── 12. Room bbox ─────────────────────────────────────────────────────────────
 # Absolute extremes of all actor centres:

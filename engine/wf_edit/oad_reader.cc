@@ -77,6 +77,8 @@ bool LoadOad(const std::string& oad_path, std::vector<OadEntry>& out)
         // Bound the name/option reads to their fixed buffers (defensive: the
         // on-disk strings should be NUL-terminated, but don't run off the end).
         oe.name = std::string(d.name, ::strnlen(d.name, sizeof(d.name)));
+        oe.display_name = std::string(d.xdata.displayName,
+                                      ::strnlen(d.xdata.displayName, sizeof(d.xdata.displayName)));
         oe.show_as = static_cast<int>(d.showAs);
         oe.min = static_cast<long>(d.min);
         oe.max = static_cast<long>(d.max);

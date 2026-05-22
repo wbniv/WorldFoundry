@@ -332,6 +332,33 @@ outPos.direction = targetPos - camShotPos;  // Target02 - CamShot01
 
 ---
 
+## "Blender build renders flat gray / untextured" → check the CamShot toggles first
+
+A level can look completely untextured/gray when the textures are perfectly fine —
+the culprit is often the **CamShot tracking toggles**, not the texture pipeline.
+The BungeeCam `Rotation` (`Fixed|Track`) and `Position X/Y/Z` (`Absolute|Relative`)
+enums decide whether the camera follows the player. With `Fixed`/`Absolute` the
+camera parks at the CamShot's static pose and ignores `Track Object` — on a level
+that's mostly white/gray (e.g. a snow level) that static view shows little colour,
+which reads as "untextured."
+
+Before suspecting textures: confirm faces are actually drawn textured (atlas bound,
+white vertex colour) — e.g. force a known-good camera and look. If the *same* level
+looks colourful from one camera and gray from another, it's the camera. (2026-05-22
+snowgoons-blender investigation: the whole "untextured" symptom was `camshot_12`
+exporting as Fixed/Absolute instead of Track/Relative.)
+
+## A decompiled `.lev` enum field whose DATA and STR disagree is corrupt
+
+A `{ 'I32' { 'NAME' "Rotation" } { 'DATA' 0l } { 'STR' "Track" } }` is **invalid** —
+`DATA 0` means index 0 (`Fixed`) but the label says `Track` (index 1). A stale/buggy
+decompile can emit these; the Blender importer used to silently trust `DATA`, which
+flipped Track→Fixed on round-trip. The importer now **hard-fails** on such a
+mismatch (`export_level.py` enum branch) — regenerate the `.lev` from the binary
+with the current levcomp if you hit it.
+
+---
+
 ## How to run a standalone level
 
 ```bash
@@ -1353,3 +1380,102 @@ ASan as a stack-smash or silent wrong-answer).
 5. Build the engine (`task build`).
 
 Steps 3 and 4 must happen *after* step 1, not before.
+
+---
+
+## Blender re-export: stale object names from the imported base level
+
+**Symptom:** After a headless `blender --background --python blender_create_smb.py`
+re-export, the game crashes with a CamShot assertion, an actboxor "actor not found",
+or a player-tracking failure.
+
+**Cause:** `blender_create_smb.py` imports snowgoons.lev (or another base level) to
+reuse meshes and camera rigs. That import carries the base level's object names —
+`player_33`, `target_14`, etc. — into the `.lev` export. Any OAD `STR` field that
+cross-references an object by name (Track Object, Target, Activated By Actor) will
+reference the old base-level name, which `levcomp-rs` cannot resolve in smb_w1_1's
+name table → silently falls back to index 0 → assert / wrong object selected.
+
+**Affected fields and the fix pattern:**
+
+After every `find_by_class()` / `find_by_name()` lookup in the Blender script, add
+an explicit name and reference override:
+
+```python
+# Rename the imported player so CamShot Track Object + actboxor can find it
+player = find_by_class('player')
+if player:
+    player.name = 'Player'            # override snowgoons "player_33"
+
+# CamShot: set Target explicitly (imported base level had "target_14")
+camshot['wf_Target'] = 'Target02'
+
+# Actboxor: set Activated By Actor to match the renamed player
+actboxor['wf_Activated By Actor'] = 'Player'
+```
+
+**General rule:** every object-reference `STR` field must be set explicitly in the
+generator script. Never rely on the imported value surviving unchanged.
+
+---
+
+## Z-axis coin spin via `ROTATION_C` Forth script
+
+**Goal:** Coin rotates about the WF Z-axis (up) at 1 rev/sec, stateless, no C++
+changes.
+
+**Script:**
+
+```forth
+\ wf
+INDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox
+```
+
+**How it works:**
+
+- `INDEXOF_TIME` (mailbox 1906) returns the current level time in seconds as a float.
+- Writing that value to `INDEXOF_ROTATION_C` (mailbox 3014) sets WF Euler angle C
+  (heading / Z-rotation) in revolutions.
+- `Angle::Revolution(Scalar)` internally calls `AsUnsignedFraction()`, which strips
+  the whole-number part. So time=1.7 s → 0.7 revolutions — wraps cleanly as time
+  grows, no `fmod` needed in the script.
+- Result: exactly 1 rev/sec Z-axis spin driven by absolute time, so even a coin that
+  spawns late has a coherent orientation with no accumulated error.
+
+**In `blender_create_smb.py`:**
+
+```python
+COIN_SCRIPT = "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"
+
+def _make_coin_template():
+    ...
+    obj['wf_Script'] = COIN_SCRIPT
+    return obj
+```
+
+**Note:** WF Euler C is the Z-rotation (heading), not `ROTATION_A` (pitch/X) or
+`ROTATION_B` (roll/Y). See CLAUDE.md "WF Euler angles" for the axis mapping.
+
+---
+
+## LMalloc FileLine alignment invariant
+
+**Symptom:** UBSan or ASan fires with "member access within misaligned address … for
+type 'struct DMalloc'" immediately after the first `LMalloc::Allocate()` returns.
+
+**Invariant:** `sizeof(FileLine)` must be a multiple of `WF_POINTER_ALIGN` (8 on
+64-bit). The allocator layout is `[FileLine header | user data | int32 canary]`; the
+user pointer is `block_start + sizeof(FileLine)`. Since `block_start` is already
+8-byte aligned, user data is only aligned if `sizeof(FileLine) % 8 == 0`.
+
+With `LMALLOC_TRACK_SIZE=1, LMALLOC_TRACK_LINE_AND_FILE=0`:
+
+```
+_state (int32, 4) + _size (int32, 4) = 8 bytes ✓
+```
+
+**Trap:** Adding *any* odd-sized field (e.g. `int32 _pad` on 64-bit only via
+`#if SIZE_MAX > 0xFFFFFFFFUL`) makes `sizeof(FileLine) = 12`, breaking alignment for
+every subsequent allocation. The fix is to leave the struct at the natural 8-byte
+size; the comment in `lmalloc.cc` documents the invariant explicitly so it doesn't
+get broken again.

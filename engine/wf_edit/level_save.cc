@@ -62,10 +62,12 @@ bool SaveDocToLev(wfcrdt::Doc& doc, const std::string& out_path)
     json tree;
     {
         auto txn = doc.begin();
+        // Resolve both roots before the first read opens the write txn (wfcrdt
+        // lazy-txn contract: root resolution can't run with a txn already open).
         auto meta = txn.map("meta");
-        const std::string root_type = meta.get("root_chunk_type").readString().value_or("LVL");
-
         auto content = txn.array("content");
+
+        const std::string root_type = meta.get("root_chunk_type").readString().value_or("LVL");
         if (!content.valid()) {
             std::fprintf(stderr, "wf-edit: save: Doc has no content array\n");
             return false;

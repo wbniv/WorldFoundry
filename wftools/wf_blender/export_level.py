@@ -816,6 +816,11 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
                     _seed_defaults(blobj, schema)
                     # Populate field values from remaining chunks
                     _apply_field_chunks(blobj, schema, obj_chunk)
+                except LevConsistencyError as e_corrupt:
+                    # Corrupt source — abort the whole import loudly rather than
+                    # importing a wrong value (per 2026-05-22 camshot round-trip plan).
+                    self.report({'ERROR'}, str(e_corrupt))
+                    return {'CANCELLED'}
                 except Exception as e:
                     self.report({'WARNING'}, f"{obj_name}: schema error: {e}")
             else:
@@ -825,6 +830,12 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
 
         self.report({'INFO'}, f"Imported {imported} objects ({skipped} skipped)")
         return {'FINISHED'}
+
+
+class LevConsistencyError(Exception):
+    """A .lev field is internally inconsistent (e.g. an enum whose DATA index
+    and STR label disagree). Raised during import to hard-fail rather than
+    silently guess which value is correct — the source must be regenerated."""
 
 
 def _apply_field_chunks(blobj, schema, obj_chunk):
@@ -885,21 +896,34 @@ def _apply_field_chunks(blobj, schema, obj_chunk):
                 except (ValueError, TypeError):
                     pass
         elif field.kind == "Enum":
-            # Enum values may come as DATA int (index) or as nested STR label,
-            # e.g. `{ 'I32' { 'NAME' "Mobility" } { 'STR' "Path" } }`.
-            # Prefer explicit DATA index; otherwise map the label.
+            # Enum values may come as a DATA int (index) and/or a nested STR
+            # label, e.g. `{ 'I32' { 'NAME' "Rotation" } { 'DATA' 1l } { 'STR' "Track" } }`.
+            # When BOTH a DATA index and a STR *label* are present they must
+            # agree: a disagreement means a corrupt .lev (e.g. a stale/buggy
+            # decompile that wrote `DATA 0` alongside `STR "Track"`, which would
+            # otherwise silently import as the wrong enum value — this is what
+            # dropped the snowgoons CamShot from Track/Relative to Fixed/Absolute).
+            # Hard-fail instead of guessing. A numeric STR (e.g. "1") is not a
+            # label, so no cross-check applies and the DATA index is used.
             items = field.enum_items()
-            assigned = False
+            data_idx = None
             if data:
                 try:
-                    idx = int(float(data[0]))
-                    if 0 <= idx < len(items):
-                        blobj[prop_key] = items[idx]
-                        assigned = True
+                    data_idx = int(float(data[0]))
                 except (ValueError, TypeError):
-                    pass
-            if not assigned and str_val is not None and str_val in items:
-                blobj[prop_key] = str_val
+                    data_idx = None
+            str_idx = items.index(str_val) if (str_val is not None and str_val in items) else None
+            if (data_idx is not None and 0 <= data_idx < len(items)
+                    and str_idx is not None and data_idx != str_idx):
+                raise LevConsistencyError(
+                    f"{blobj.name}: enum field {field_name!r} is corrupt — "
+                    f"DATA index {data_idx} ({items[data_idx]!r}) disagrees with "
+                    f"STR label {str_val!r} (index {str_idx}). Regenerate the .lev "
+                    f"source (likely a stale/buggy decompile).")
+            if str_idx is not None:
+                blobj[prop_key] = items[str_idx]
+            elif data_idx is not None and 0 <= data_idx < len(items):
+                blobj[prop_key] = items[data_idx]
         elif field.kind in ("Str", "ObjRef", "FileRef", "Skip", "Annotation"):
             if data:
                 blobj[prop_key] = str(data[0])

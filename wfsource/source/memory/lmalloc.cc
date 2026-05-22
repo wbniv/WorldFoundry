@@ -61,6 +61,9 @@ struct FileLine
 	char* _file;						// file and line allocation occured on
 	int _line;
 #endif
+	// sizeof(FileLine) must be a multiple of WF_POINTER_ALIGN so the user pointer
+	// (retVal + sizeof(FileLine)) inherits the block's alignment.
+	// With LMALLOC_TRACK_SIZE && !LMALLOC_TRACK_LINE_AND_FILE: _state(4)+_size(4)=8 ✓
 };
 #endif
 

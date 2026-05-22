@@ -2,9 +2,13 @@
 // engine/wf_edit/level_doc.cc — see level_doc.h.
 //=============================================================================
 #include "level_doc.h"
+#include "property_panel.h"  // wfedit::OadForClass (for AddActor)
+#include "oad_reader.h"      // wfedit::OadEntry
 
 #include "wfcrdt.hpp"
 #include <nlohmann/json.hpp>
+
+#include <oas/oad.h>   // BUTTON_* / SHOW_AS_* / LEVELCONFLAG_* constants
 
 #include <unistd.h>
 
@@ -12,6 +16,7 @@
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
+#include <optional>
 #include <random>
 #include <string>
 #include <vector>
@@ -264,14 +269,18 @@ bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc)
 
     auto txn = doc.begin();
 
+    // Resolve BOTH root types up front, before any insert opens the write txn:
+    // root resolution (ymap/yarray) opens its own internal txn in yffi and would
+    // deadlock against an already-open write txn (wfcrdt's lazy-txn contract).
     auto meta = txn.map("meta");
+    // content = the top-level OBJ chunks, with the LVL wrapper dropped (its id is
+    // kept in meta.root_chunk_type so save can reconstruct the exact tree).
+    auto content = txn.array("content");
+
     meta.insert("level_name", level_name.c_str());
     meta.insert("format_version", static_cast<long long>(2));
     meta.insert("root_chunk_type", root.value("id", "LVL").c_str());  // for the save inverse
 
-    // content = the top-level OBJ chunks, with the LVL wrapper dropped (its id is
-    // kept in meta.root_chunk_type so save can reconstruct the exact tree).
-    auto content = txn.array("content");
     int objs = 0;
     for (const auto& item : root["items"]) {
         if (!IsChunk(item)) continue;          // skip stray literals at LVL level
@@ -524,6 +533,207 @@ int DuplicateActor(wfcrdt::Doc& doc, int index)
     clone.set("_src_eid", wfcrdt::Input::str(src_eid));
     clone.set("_eid",     wfcrdt::Input::str(GenerateEid()));
     content.push(clone);
+    return content.len() - 1;
+}
+
+namespace {
+// ── AddActor helpers: build CRDT Input nodes from OAD defaults ────────────────
+
+// Format a 16.16 fixed-point default as "%.17g(1.15.16)", with "." guaranteed.
+static std::string FormatFx(long def)
+{
+    char buf[64];
+    double v = static_cast<double>(def) / 65536.0;
+    std::snprintf(buf, sizeof(buf), "%.17g", v);
+    bool has_dot = false;
+    for (const char* p = buf; *p; ++p) if (*p == '.') { has_dot = true; break; }
+    std::string s = buf;
+    if (!has_dot) s += ".0";
+    s += "(1.15.16)";
+    return s;
+}
+
+// Format an integer default with the iffcomp width suffix (l/w/y for 32/16/8).
+static std::string FormatInt(long def, int button_type)
+{
+    char buf[32];
+    if (button_type == BUTTON_INT8)       std::snprintf(buf, sizeof(buf), "%ldy", def);
+    else if (button_type == BUTTON_INT16) std::snprintf(buf, sizeof(buf), "%ldw", def);
+    else                                  std::snprintf(buf, sizeof(buf), "%ldl", def);
+    return buf;
+}
+
+// Literal constructors
+static wfcrdt::Input MkLitStr(const std::string& v)
+{
+    wfcrdt::Input m = wfcrdt::Input::map();
+    m.set("kind", wfcrdt::Input::str("str"));
+    m.set("value", wfcrdt::Input::str(v));
+    return m;
+}
+static wfcrdt::Input MkLitNum(const std::string& t)
+{
+    wfcrdt::Input m = wfcrdt::Input::map();
+    m.set("kind", wfcrdt::Input::str("num"));
+    m.set("text", wfcrdt::Input::str(t));
+    return m;
+}
+
+// Sub-chunk with a single literal: { chunk_type:ct, items:[lit] }
+static wfcrdt::Input MkLeaf1(const char* ct, wfcrdt::Input lit)
+{
+    wfcrdt::Input arr = wfcrdt::Input::array();
+    arr.push(std::move(lit));
+    wfcrdt::Input c = wfcrdt::Input::map();
+    c.set("chunk_type", wfcrdt::Input::str(ct));
+    c.set("items", std::move(arr));
+    return c;
+}
+
+static wfcrdt::Input MkName(const std::string& n)    { return MkLeaf1("NAME", MkLitStr(n)); }
+static wfcrdt::Input MkDataStr(const std::string& v) { return MkLeaf1("DATA", MkLitStr(v)); }
+static wfcrdt::Input MkDataNum(const std::string& t) { return MkLeaf1("DATA", MkLitNum(t)); }
+static wfcrdt::Input MkStrSub(const std::string& v)  { return MkLeaf1("STR",  MkLitStr(v)); }
+
+// DATA sub-chunk with N repeated num literals (VEC3 = 3, EULR = 3, BOX3 = 6).
+static wfcrdt::Input MkDataNumN(int n, const char* t)
+{
+    wfcrdt::Input arr = wfcrdt::Input::array();
+    for (int i = 0; i < n; ++i) arr.push(MkLitNum(t));
+    wfcrdt::Input c = wfcrdt::Input::map();
+    c.set("chunk_type", wfcrdt::Input::str("DATA"));
+    c.set("items", std::move(arr));
+    return c;
+}
+
+// Scaffold transform field: { 'ct' { 'NAME' name } { 'DATA' n×"0.0(1.15.16)" } }
+static wfcrdt::Input MkTransform(const char* ct, const char* name, int n)
+{
+    wfcrdt::Input f = wfcrdt::Input::map();
+    f.set("chunk_type", wfcrdt::Input::str(ct));
+    wfcrdt::Input items = wfcrdt::Input::array();
+    items.push(MkName(name));
+    items.push(MkDataNumN(n, "0.0(1.15.16)"));
+    f.set("items", std::move(items));
+    return f;
+}
+
+// Convert an OAD entry to a field chunk Input. Returns nullopt for entries that
+// produce no per-instance storage (GROUP/COMMONBLOCK/LEVELCONFLAG/XDATA/WAVEFORM).
+static std::optional<wfcrdt::Input> OadEntryToFieldChunk(const OadEntry& e)
+{
+    const int bt = e.button_type;
+
+    // Skip structural / non-stored entry types (mirrors oad_loader.rs `_ => {}`).
+    if (bt == BUTTON_GROUP_START       || bt == BUTTON_GROUP_STOP  ||
+        bt == BUTTON_PROPERTY_SHEET    || bt == BUTTON_XDATA       ||
+        bt == BUTTON_WAVEFORM          || bt == BUTTON_EXTRACT_CAMERA ||
+        bt == LEVELCONFLAG_COMMONBLOCK || bt == LEVELCONFLAG_ENDCOMMON ||
+        bt == LEVELCONFLAG_NOINSTANCES || bt == LEVELCONFLAG_NOMESH ||
+        bt == LEVELCONFLAG_SINGLEINSTANCE || bt == LEVELCONFLAG_TEMPLATE ||
+        bt == LEVELCONFLAG_EXTRACTCAMERA  || bt == LEVELCONFLAG_EXTRACTCAMERANEW ||
+        bt == LEVELCONFLAG_ROOM        || bt == LEVELCONFLAG_EXTRACTLIGHT ||
+        bt == LEVELCONFLAG_SHORTCUT)
+        return std::nullopt;
+
+    if (e.show_as == SHOW_AS_HIDDEN) return std::nullopt;
+
+    const bool is_enum = (e.show_as == SHOW_AS_DROPMENU     ||
+                          e.show_as == SHOW_AS_RADIOBUTTONS ||
+                          e.show_as == SHOW_AS_CHECKBOX     ||
+                          e.show_as == SHOW_AS_COMBOBOX);
+
+    wfcrdt::Input field = wfcrdt::Input::map();
+    wfcrdt::Input items = wfcrdt::Input::array();
+    items.push(MkName(e.name));
+
+    if (bt == BUTTON_FIXED32 || bt == BUTTON_FIXED16) {
+        field.set("chunk_type", wfcrdt::Input::str(bt == BUTTON_FIXED32 ? "FX32" : "FX16"));
+        items.push(MkDataNum(FormatFx(e.def)));
+    } else if (bt == BUTTON_INT32 || bt == BUTTON_INT16 || bt == BUTTON_INT8) {
+        const char* ct = (bt == BUTTON_INT8)  ? "I8"  :
+                         (bt == BUTTON_INT16) ? "I16" : "I32";
+        field.set("chunk_type", wfcrdt::Input::str(ct));
+        items.push(MkDataNum(FormatInt(e.def, bt)));
+        if (is_enum) {
+            const int idx = static_cast<int>(e.def);
+            const std::string label =
+                (idx >= 0 && idx < static_cast<int>(e.options.size()))
+                ? e.options[idx] : std::to_string(e.def);
+            items.push(MkStrSub(label));
+        }
+    } else if (bt == BUTTON_STRING) {
+        field.set("chunk_type", wfcrdt::Input::str("STR"));
+        items.push(MkDataStr(""));   // empty string default
+    } else if (bt == BUTTON_FILENAME || bt == BUTTON_MESHNAME) {
+        field.set("chunk_type", wfcrdt::Input::str("FILE"));
+        items.push(MkStrSub(""));
+    } else if (bt == BUTTON_OBJECT_REFERENCE || bt == BUTTON_CLASS_REFERENCE ||
+               bt == BUTTON_CAMERA_REFERENCE || bt == BUTTON_LIGHT_REFERENCE) {
+        field.set("chunk_type", wfcrdt::Input::str("STR"));
+        items.push(MkStrSub(""));
+    } else {
+        return std::nullopt;   // unknown type — skip
+    }
+
+    field.set("items", std::move(items));
+    return field;
+}
+
+}  // namespace (add-actor helpers)
+
+}  // namespace wfedit
+
+namespace wfedit {
+
+int AddActor(wfcrdt::Doc& doc, const std::string& class_name)
+{
+    const std::vector<OadEntry>& oad = OadForClass(class_name);
+    if (oad.empty()) return -1;
+
+    auto txn = doc.begin();
+    auto content = txn.array("content");
+    const int actor_count = content.len();
+
+    wfcrdt::Input obj = wfcrdt::Input::map();
+    obj.set("chunk_type", wfcrdt::Input::str("OBJ"));
+    wfcrdt::Input items = wfcrdt::Input::array();
+
+    // 1. Instance name: { 'NAME' "<class>_<n+1>" }
+    items.push(MkLeaf1("NAME", MkLitStr(class_name + "_" + std::to_string(actor_count + 1))));
+
+    // 2. Transform scaffold (not OAD fields — standard per-object header)
+    items.push(MkTransform("VEC3", "Position",            3));
+    items.push(MkTransform("EULR", "Orientation",         3));
+    items.push(MkTransform("BOX3", "Global Bounding Box", 6));
+
+    // 3. Class Name STR field: { 'STR' { 'NAME' "Class Name" } { 'DATA' "class" } }
+    {
+        wfcrdt::Input f = wfcrdt::Input::map();
+        f.set("chunk_type", wfcrdt::Input::str("STR"));
+        wfcrdt::Input fi = wfcrdt::Input::array();
+        fi.push(MkName("Class Name"));
+        fi.push(MkDataStr(class_name));
+        f.set("items", std::move(fi));
+        items.push(std::move(f));
+    }
+
+    // 4. OAD CommonBlock fields (skip scaffold names already emitted above)
+    static const char* kScaffold[] = {
+        "Class Name", "Position", "Orientation", "Global Bounding Box"
+    };
+    for (const OadEntry& e : oad) {
+        bool skip = false;
+        for (const char* s : kScaffold)
+            if (e.name == s) { skip = true; break; }
+        if (skip) continue;
+        if (auto f = OadEntryToFieldChunk(e); f) items.push(std::move(*f));
+    }
+
+    obj.set("items", std::move(items));
+    obj.set("_eid",     wfcrdt::Input::str(GenerateEid()));
+    obj.set("_src_eid", wfcrdt::Input::str(""));   // no template src — reload shows it
+    content.push(obj);
     return content.len() - 1;
 }
 

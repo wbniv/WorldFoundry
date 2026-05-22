@@ -25,7 +25,9 @@ use futures_util::{SinkExt, StreamExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::mpsc::{self, UnboundedSender};
 use tokio_tungstenite::{accept_async, tungstenite::Message};
-use yrs::{Doc, StateVector, Update};
+// yrs ≥0.10: Transact provides transact()/transact_mut(); ReadTxn provides
+// encode_state_as_update_v1() (moved off Doc onto the transaction).
+use yrs::{Doc, StateVector, Update, Transact, ReadTxn};
 use yrs::updates::decoder::Decode;
 
 // ── Wire protocol constants ───────────────────────────────────────────────────
@@ -57,17 +59,16 @@ fn load_snapshot(dir: &Path, room_id: &str) -> Option<Doc> {
     }
     let bytes = best?.1;
     let doc = Doc::new();
-    {
-        let upd = Update::decode_v1(&bytes);
-        let mut txn = doc.transact();
-        txn.apply_update(upd);
+    if let Ok(upd) = Update::decode_v1(&bytes) {
+        let mut txn = doc.transact_mut();
+        let _ = txn.apply_update(upd);
     }
     eprintln!("[relay] loaded snapshot for room {room_id} ({} bytes)", bytes.len());
     Some(doc)
 }
 
 fn encode_state(doc: &Doc) -> Vec<u8> {
-    doc.encode_state_as_update_v1(&StateVector::default())
+    doc.transact().encode_state_as_update_v1(&StateVector::default())
 }
 
 // ── Room state ────────────────────────────────────────────────────────────────
@@ -109,9 +110,9 @@ impl RoomState {
         if payload.is_empty() {
             return;
         }
-        let upd = Update::decode_v1(payload);
-        let mut txn = self.doc.transact();
-        txn.apply_update(upd);
+        let Ok(upd) = Update::decode_v1(payload) else { return; };
+        let mut txn = self.doc.transact_mut();
+        let _ = txn.apply_update(upd);
         self.dirty = true;
     }
 

@@ -945,6 +945,21 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     set_tests_properties(wf_edit_spawn_confirm
         PROPERTIES LABELS "gl" ENVIRONMENT "DISPLAY=:0")
 
+    # Native undo/redo logic — CPU-only (exits before GL), so no DISPLAY needed.
+    # Drives a field edit + dup + del through the UndoManager and asserts the Doc
+    # state returns to each checkpoint on undo/redo. Runs from the repo root so
+    # FindLevtree() resolves the levtree binary's relative path.
+    add_test(NAME wf_edit_undo
+        COMMAND sh -c "WF_EDIT_UNDO_TEST='field:Mass|DATA|2.5;undo;redo;dup:0;undo;del:1;undo' $<TARGET_FILE:wf_edit> --select=0 --leveltree=${CMAKE_SOURCE_DIR}/wflevels/snowgoons-blender/snowgoons-blender.lev 2>&1 | tee /dev/stderr | grep -q '\\[undo\\] all PASS'"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+    # Add-actor logic — CPU-only (exits before GL), no DISPLAY needed. Inserts a
+    # brand-new statplat from OAD defaults and asserts actor count +1, Class Name
+    # correct, and field count > 4 (OAD defaults populated). Runs from repo root.
+    add_test(NAME wf_edit_add
+        COMMAND sh -c "WF_EDIT_ADD_TEST=statplat $<TARGET_FILE:wf_edit> --leveltree=${CMAKE_SOURCE_DIR}/wflevels/snowgoons-blender/snowgoons-blender.lev 2>&1 | tee /dev/stderr | grep -q '\\[add\\].*PASS'"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
     # wf-relay: standalone relay server binary (co-edit Phase 1).
     # Built via Cargo; not linked into wf_edit (avoids duplicate Rust runtime symbols).
     add_custom_target(wf_relay

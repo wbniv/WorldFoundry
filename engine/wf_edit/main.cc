@@ -187,6 +187,11 @@ struct EditorCtx {
     int                           fields_for = -1;   // which actor `props` holds
     std::vector<wfedit::PropField> props;
 
+    // Native Ctrl+Z/Ctrl+Y: the Yrs UndoManager (owned by main(), tracking the
+    // Doc's local-origin edits). Reverts whatever transactions hit the "content"
+    // scope — field edits, gizmo moves, add/delete — regardless of code path.
+    wfcrdt::UndoManager*          undo = nullptr;
+
     // Viewport gizmo: true while a drag is in progress, so the Doc leaves are
     // written once on release (not every frame — that would flood the relay).
     bool                          gizmo_active = false;
@@ -295,6 +300,23 @@ void RefreshActorList(EditorCtx* c)
     c->fields_for = -1;          // force Properties to re-resolve on the next frame
 }
 
+// Re-sync the editor's UI + live engine after the Doc was mutated underneath us
+// (a remote SYNC apply, or a native undo/redo). Re-reads the actor list, re-
+// resolves the selected actor's properties, and pushes each OAD-matched field
+// back through the engine bridge so the next StepFrame re-renders the change.
+void ReSyncAfterDocChange(EditorCtx* c)
+{
+    RefreshActorList(c);
+    if (c->selected >= 0) {
+        c->props = wfedit::ResolveProperties(
+            wfedit::ReadActorFields(*c->doc, c->selected));
+        c->fields_for = c->selected;
+        for (const auto& pf : c->props)
+            if (pf.matched)
+                wfedit::PropagateToEngine(c->selected, pf);
+    }
+}
+
 void DoDelete(EditorCtx* c)
 {
     if (!c->doc || c->selected < 0) return;
@@ -313,6 +335,43 @@ void DoDuplicate(EditorCtx* c)
     if (ni < 0) return;
     RefreshActorList(c);
     c->selected = ni;
+}
+
+void DoAddActor(EditorCtx* c, const std::string& class_name)
+{
+    if (!c->doc) return;
+    const int ni = wfedit::AddActor(*c->doc, class_name);
+    if (ni < 0) {
+        c->toast = "no .oad for " + class_name;
+        c->toast_frames = 180;
+        return;
+    }
+    RefreshActorList(c);
+    c->selected = ni;
+    c->fields_for = -1;
+    c->structural_dirty = true;
+    c->toast = "added " + class_name;
+    c->toast_frames = 180;
+}
+
+// Ctrl+Z / Ctrl+Y. The native UndoManager mutates the Doc directly (its revert
+// txn fires observeUpdates, so the relay broadcasts it to peers); we just re-
+// sync the UI + engine and flash a toast. Runs at frame top with no live txn —
+// yundo_manager_undo/redo open their own internal write txn.
+void DoUndo(EditorCtx* c)
+{
+    if (!c->doc || !c->undo) return;
+    if (c->undo->undo()) { ReSyncAfterDocChange(c); c->toast = "undo"; }
+    else                   c->toast = "nothing to undo";
+    c->toast_frames = 120;
+}
+
+void DoRedo(EditorCtx* c)
+{
+    if (!c->doc || !c->undo) return;
+    if (c->undo->redo()) { ReSyncAfterDocChange(c); c->toast = "redo"; }
+    else                   c->toast = "nothing to redo";
+    c->toast_frames = 120;
 }
 
 // Derive a vibrant RGB colour from a peer_id string for consistent colouring.
@@ -334,22 +393,15 @@ void CollabDrain(EditorCtx* c) {
         const uint8_t ch = frame[0];
 
         if (ch == 0x01) {
-            // SYNC — apply remote CRDT update without echoing it back.
+            // SYNC — apply remote CRDT update without echoing it back. Use the
+            // remote-origin txn so peer edits never enter our undo history.
             c->suppress_relay_send = true;
             {
-                auto txn = c->doc->begin();
+                auto txn = c->doc->beginRemote();
                 txn.apply(wfcrdt::ByteView{frame.data() + 1, frame.size() - 1});
             }
             c->suppress_relay_send = false;
-            RefreshActorList(c);
-            if (c->selected >= 0) {
-                c->props = wfedit::ResolveProperties(
-                    wfedit::ReadActorFields(*c->doc, c->selected));
-                c->fields_for = c->selected;
-                for (const auto& pf : c->props)
-                    if (pf.matched)
-                        wfedit::PropagateToEngine(c->selected, pf);
-            }
+            ReSyncAfterDocChange(c);
         } else if (ch == 0x02) {
             // PRESENCE — parse JSON and update peer state.
             try {
@@ -560,6 +612,36 @@ bool editor_frame(void* p)
             else if (std::string(p) == "del") DoDelete(c);
         }
     }
+    // Add-actor UI screenshot proof: WF_EDIT_ADD_UI=<class> calls DoAddActor once
+    // so --screenshot captures the new row selected + "added <class>" toast.
+    static bool s_add_ui = false;
+    if (!s_add_ui && c->doc) {
+        if (const char* p = std::getenv("WF_EDIT_ADD_UI"); p && *p) {
+            s_add_ui = true;
+            DoAddActor(c, p);
+        }
+    }
+    // Undo-UI screenshot proof: WF_EDIT_UNDO_UI=dup|del|field performs one edit
+    // then one DoUndo via the UI path, so the screenshot shows the Outliner /
+    // Properties + "undo" toast back in the pre-edit state. (field edits the
+    // first field's DATA, then undoes it.)
+    static bool s_undo_ui = false;
+    if (!s_undo_ui && c->doc && c->selected >= 0 && c->undo) {
+        if (const char* p = std::getenv("WF_EDIT_UNDO_UI"); p && *p) {
+            s_undo_ui = true;
+            const std::string op = p;
+            if (op == "dup")      DoDuplicate(c);
+            else if (op == "del") DoDelete(c);
+            else if (op == "field") {
+                auto fields = wfedit::ReadActorFields(*c->doc, c->selected);
+                if (!fields.empty())
+                    wfedit::WriteFieldLeaf(*c->doc, c->selected,
+                                           fields.front().child_index, "DATA", "999");
+            }
+            c->undo->stopCapturing();   // ensure the edit is its own undo step
+            DoUndo(c);
+        }
+    }
     // SpawnActor runtime-path confirmation: WF_EDIT_SPAWN_CONFIRM_TEST=1 finds
     // the first valid template in the live level, spawns it at a safe position,
     // and logs PASS/FAIL to stderr. Confirms the Jolt position-sync fix
@@ -624,6 +706,14 @@ bool editor_frame(void* p)
             ImGui::MenuItem("Publish to .blend", nullptr, false, false);   // later: hand off to wf.import_level
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Edit")) {
+            // Greyed out when the corresponding stack is empty.
+            if (ImGui::MenuItem("Undo", "Ctrl+Z", false, c->undo && c->undo->canUndo()))
+                DoUndo(c);
+            if (ImGui::MenuItem("Redo", "Ctrl+Y", false, c->undo && c->undo->canRedo()))
+                DoRedo(c);
+            ImGui::EndMenu();
+        }
         if (c->collab && ImGui::BeginMenu("View")) {
             ImGui::MenuItem("Collaborators", nullptr, &c->show_collab);
             ImGui::EndMenu();
@@ -640,17 +730,59 @@ bool editor_frame(void* p)
         DoSave(c);
     if (!typing && c->selected >= 0 && ImGui::IsKeyPressed(ImGuiKey_Delete, false))
         DoDelete(c);
+    // Ctrl+Z = undo; Ctrl+Shift+Z and Ctrl+Y = redo. Gate plain-Z on !Shift so a
+    // single Ctrl+Shift+Z press can't trip both branches.
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        if (!typing && io.KeyCtrl && !io.KeyShift && ImGui::IsKeyPressed(ImGuiKey_Z, false))
+            DoUndo(c);
+        if (!typing && io.KeyCtrl && (ImGui::IsKeyPressed(ImGuiKey_Y, false)
+                || (io.KeyShift && ImGui::IsKeyPressed(ImGuiKey_Z, false))))
+            DoRedo(c);
+    }
 
     ImGui::Begin("Outliner");
     ImGui::Text("%s: %zu actors", c->level_name.c_str(), c->actor_names.size());
     ImGui::TextDisabled("(read from the Y.Doc)");
     // Add/delete actors (structural; persists on save). Duplicate clones the
-    // selected actor; Delete removes it (or the Del key).
+    // selected actor; Delete removes it (or the Del key). Add… inserts a new
+    // actor of a user-chosen class populated from OAD defaults.
     ImGui::BeginDisabled(c->selected < 0);
     if (ImGui::SmallButton("Duplicate")) DoDuplicate(c);
     ImGui::SameLine();
     if (ImGui::SmallButton("Delete"))    DoDelete(c);
     ImGui::EndDisabled();
+    ImGui::SameLine();
+    if (ImGui::SmallButton("Add..."))    ImGui::OpenPopup("add_actor");
+
+    // Class-picker popup for "Add..."
+    static const char* kClasses[] = {
+        "NullObject", "actbox", "actboxor", "alias", "camera", "camshot",
+        "destroyer", "director", "disabled", "enemy", "explode", "generator",
+        "gold", "levelobj", "light", "matte", "missile", "platform", "player",
+        "room", "shadow", "shield", "spike", "statplat", "target", "tool", "warp"
+    };
+    static const int kClassCount = static_cast<int>(sizeof(kClasses) / sizeof(kClasses[0]));
+    static std::string s_add_class = "statplat";
+    if (ImGui::BeginPopup("add_actor")) {
+        ImGui::Text("Class:");
+        if (ImGui::BeginCombo("##add_class", s_add_class.c_str())) {
+            for (int k = 0; k < kClassCount; ++k) {
+                bool sel = (s_add_class == kClasses[k]);
+                if (ImGui::Selectable(kClasses[k], sel)) s_add_class = kClasses[k];
+                if (sel) ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+        if (ImGui::Button("Add")) {
+            DoAddActor(c, s_add_class);
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel")) ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+    }
+
     if (c->structural_dirty) {
         ImGui::SameLine();
         ImGui::TextDisabled("(reload for live preview)");
@@ -954,6 +1086,14 @@ int main(int argc, char** argv)
                              "(Outliner will be empty)\n", leveltree.c_str());
     }
 
+    // Native undo/redo — constructed AFTER the initial population so the level
+    // load isn't itself an undo step. Tracks the "content" actor array, so every
+    // Doc::begin() edit (panel / gizmo / add / delete) becomes reversible; remote
+    // applies (Doc::beginRemote) stay out of history. Held for the program
+    // lifetime; ctx.undo points at it.
+    wfcrdt::UndoManager undo(doc);
+    { auto txn = doc.begin(); undo.addScope(txn.array("content")); }
+
     // 0b. Headless edit proof (env-gated, off by default): WF_EDIT_TEST_SET=
     //     "Field Name|DATA|new text" writes one leaf on the --select=N actor
     //     before the UI loop, prints before→after from two independent Doc reads
@@ -1014,6 +1154,113 @@ int main(int argc, char** argv)
                              idx, before, wfedit::ReadActorNames(doc).size(), ni);
             }
         }
+    }
+
+    // 0b2b. Headless add-actor proof (env-gated): WF_EDIT_ADD_TEST=<class> inserts
+    //       a new actor of that class and asserts actor count +1, Class Name correct,
+    //       and field count > 4 (OAD defaults populated). CPU-only, pre-GL.
+    //       Honors WF_EDIT_SAVE if also set (falls through); otherwise exits.
+    if (const char* cls = std::getenv("WF_EDIT_ADD_TEST"); cls && *cls) {
+        const int before = static_cast<int>(wfedit::ReadActorNames(doc).size());
+        const int ni = wfedit::AddActor(doc, cls);
+        const int after = static_cast<int>(wfedit::ReadActorNames(doc).size());
+        std::string got_class;
+        int field_count = 0;
+        if (ni >= 0) {
+            for (const auto& f : wfedit::ReadActorFields(doc, ni)) {
+                ++field_count;
+                if (f.name == "Class Name")
+                    got_class = !f.data.empty() ? f.data : f.label;
+            }
+        }
+        const bool pass = (ni >= 0) && (after == before + 1) &&
+                          (got_class == cls) && (field_count > 4);
+        std::fprintf(stderr, "[add] class=%s  %d -> %d actors (ni=%d fields=%d class='%s') %s\n",
+                     cls, before, after, ni, field_count, got_class.c_str(),
+                     pass ? "PASS" : "FAIL");
+        if (!pass) return 1;
+        if (!std::getenv("WF_EDIT_SAVE")) return 0;
+    }
+
+    // 0b3. Headless undo/redo proof (env-gated): WF_EDIT_UNDO_TEST drives a ';'-
+    //      separated step list against the native UndoManager + Doc, asserting the
+    //      Doc's observable state (actor count + the --select'd actor's field
+    //      label:data) returns to the recorded checkpoint after each undo/redo.
+    //      Steps: field:<Name>|<LEAF>|<value> | dup:<idx> | del:<idx> | undo | redo.
+    //      e.g. WF_EDIT_UNDO_TEST="field:Mass|DATA|2.5;undo;redo;dup:0;undo;del:1;undo"
+    //      Prints "[undo] all PASS" and exits — CPU-only, pre-GL (mirrors WF_EDIT_SAVE).
+    if (const char* spec = std::getenv("WF_EDIT_UNDO_TEST"); spec && *spec) {
+        undo.clear();   // start from a clean stack regardless of prior test edits
+        // Observable signature: actor count + the preselect actor's fields.
+        auto sig = [&]() -> std::string {
+            auto names = wfedit::ReadActorNames(doc);
+            std::string s = std::to_string(names.size());
+            if (preselect >= 0 && preselect < static_cast<int>(names.size()))
+                for (auto& f : wfedit::ReadActorFields(doc, preselect))
+                    s += "|" + f.name + "=" + f.label + ":" + f.data;
+            return s;
+        };
+        std::vector<std::string> hist = { sig() };   // hist[cursor] == current state
+        int  cursor = 0;
+        bool pass   = true;
+        auto fail = [&](const std::string& m) {
+            pass = false; std::fprintf(stderr, "[undo] FAIL: %s\n", m.c_str());
+        };
+        auto record = [&]() { hist.resize(cursor + 1); hist.push_back(sig()); ++cursor; };
+
+        std::string all = spec;
+        for (std::size_t pos = 0; pos < all.size() + 1; ) {
+            std::size_t semi = all.find(';', pos);
+            std::string step = all.substr(pos, semi == std::string::npos ? std::string::npos : semi - pos);
+            pos = (semi == std::string::npos) ? all.size() + 1 : semi + 1;
+            if (step.empty()) continue;
+
+            if (step.rfind("field:", 0) == 0) {
+                std::string body = step.substr(6);
+                auto a = body.find('|'), b = body.rfind('|');
+                if (a == std::string::npos || b <= a) { fail("bad field step: " + step); continue; }
+                std::string fname = body.substr(0, a),
+                            leaf  = body.substr(a + 1, b - a - 1),
+                            value = body.substr(b + 1);
+                int ci = -1;
+                for (auto& f : wfedit::ReadActorFields(doc, preselect))
+                    if (f.name == fname) { ci = f.child_index; break; }
+                if (ci < 0) { fail("field not found: " + fname); continue; }
+                wfedit::WriteFieldLeaf(doc, preselect, ci, leaf.c_str(), value);
+                undo.stopCapturing();   // discrete undo step
+                record();
+                std::fprintf(stderr, "[undo] field %s.%s='%s' -> step %d\n",
+                             fname.c_str(), leaf.c_str(), value.c_str(), cursor);
+            } else if (step.rfind("dup:", 0) == 0) {
+                wfedit::DuplicateActor(doc, std::atoi(step.substr(4).c_str()));
+                undo.stopCapturing(); record();
+                std::fprintf(stderr, "[undo] dup -> %s\n", sig().c_str());
+            } else if (step.rfind("del:", 0) == 0) {
+                wfedit::DeleteActor(doc, std::atoi(step.substr(4).c_str()));
+                undo.stopCapturing(); record();
+                std::fprintf(stderr, "[undo] del -> %s\n", sig().c_str());
+            } else if (step == "undo") {
+                const bool had = cursor > 0;
+                const bool ok  = undo.undo();
+                if (had  && !ok) fail("undo() false with a non-empty stack");
+                if (!had &&  ok) fail("undo() true on an empty stack");
+                if (had) --cursor;
+                if (sig() != hist[cursor]) fail("state mismatch after undo (cursor " + std::to_string(cursor) + ")");
+                std::fprintf(stderr, "[undo] undo -> cursor %d %s\n", cursor, ok ? "(ok)" : "(noop)");
+            } else if (step == "redo") {
+                const bool had = cursor < static_cast<int>(hist.size()) - 1;
+                const bool ok  = undo.redo();
+                if (had  && !ok) fail("redo() false with a redoable step");
+                if (!had &&  ok) fail("redo() true with nothing to redo");
+                if (had) ++cursor;
+                if (sig() != hist[cursor]) fail("state mismatch after redo (cursor " + std::to_string(cursor) + ")");
+                std::fprintf(stderr, "[undo] redo -> cursor %d %s\n", cursor, ok ? "(ok)" : "(noop)");
+            } else {
+                fail("unknown step: " + step);
+            }
+        }
+        std::fprintf(stderr, pass ? "[undo] all PASS\n" : "[undo] FAILED\n");
+        return pass ? 0 : 1;
     }
 
     // 0c. Headless save (env-gated): WF_EDIT_SAVE=<path> walks the Doc → canonical
@@ -1080,6 +1327,7 @@ int main(int argc, char** argv)
     ctx.actor_names = std::move(actor_names);
     ctx.actor_eids  = std::move(actor_eids);
     ctx.doc         = &doc;   // read field subtrees on selection (read-only)
+    ctx.undo        = &undo;  // Ctrl+Z / Ctrl+Y
     ctx.save_path   = leveltree;               // Save writes back to the .lev source
     ctx.room_id     = room_id;
     if (preselect >= 0 && preselect < static_cast<int>(ctx.actor_names.size()))
@@ -1131,7 +1379,9 @@ int main(int argc, char** argv)
                 for (int t = 0; t < 1000 && !ctx.relay_client.poll(frame); ++t)
                     usleep(1000);
                 if (!frame.empty() && frame[0] == 0x01 && frame.size() > 1) {
-                    auto txn = doc.begin();
+                    // Remote-origin apply — the initial peer state must not seed
+                    // our undo history.
+                    auto txn = doc.beginRemote();
                     txn.apply(wfcrdt::ByteView{frame.data() + 1, frame.size() - 1});
                     ctx.actor_names = wfedit::ReadActorNames(doc);
                     ctx.actor_eids  = wfedit::ReadActorEids(doc);
