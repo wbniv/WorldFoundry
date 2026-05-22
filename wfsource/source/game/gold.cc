@@ -51,7 +51,7 @@ static void TryPickup(Gold& coin, Actor& player)
 	if (dx*dx + dz*dz > 1.5f * 1.5f) return;
 
 	Mailboxes& pm = player.GetMailboxes();
-	pm.WriteMailbox(EMAILBOX_GOLD, pm.ReadMailbox(EMAILBOX_GOLD) + Scalar((float)coin.getOad()->GoldValue));
+	pm.WriteMailbox(EMAILBOX_GOLD, pm.ReadMailbox(EMAILBOX_GOLD) + Scalar::one);
 	theLevel->SetPendingRemove(&coin);
 }
 
