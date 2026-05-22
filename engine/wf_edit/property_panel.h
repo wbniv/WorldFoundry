@@ -36,7 +36,11 @@ enum class FieldKind {
 // matched, the metadata that drives the widget.
 struct PropField {
     // From the Doc (always present):
-    std::string name;        // display name (OAD name when matched, else Doc name)
+    std::string name;        // Doc field name — the STABLE identity AlignByName and the
+                             // CRDT→engine bridge key on. Never overwritten by the OAD label.
+    std::string display_label; // short OAD displayName for the column-0 label (falls back to
+                               // `name` when empty). Section/group headers stash their title here
+                               // via `name`; only real fields get a displayName.
     std::string chunk_type;  // IFF storage type (VEC3 / I32 / FX32 / STR / FILE / …)
     std::string data;        // raw scalar / vector components (DATA leaf)
     std::string label;       // enum/bool label, filename, or string body (STR leaf)

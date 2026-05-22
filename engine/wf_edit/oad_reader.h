@@ -24,7 +24,10 @@ namespace wfedit {
 // pipe-separated `string` field split into enum labels ("Anchored|Physics|…").
 struct OadEntry {
     int                      button_type = -1;
-    std::string              name;          // field label ("Mobility", "Mass", …)
+    std::string              name;          // full unique field id ("Max Ground Speed")
+    std::string              display_name;  // short UI label ("Max Speed"); xdata.displayName.
+                                            // For GROUP_START/STOP this slot is junk ("displayName")
+                                            // — the group title lives in `name`, not here.
     int                      show_as = 0;
     long                     min = 0;
     long                     max = 0;
