@@ -332,6 +332,33 @@ outPos.direction = targetPos - camShotPos;  // Target02 - CamShot01
 
 ---
 
+## "Blender build renders flat gray / untextured" → check the CamShot toggles first
+
+A level can look completely untextured/gray when the textures are perfectly fine —
+the culprit is often the **CamShot tracking toggles**, not the texture pipeline.
+The BungeeCam `Rotation` (`Fixed|Track`) and `Position X/Y/Z` (`Absolute|Relative`)
+enums decide whether the camera follows the player. With `Fixed`/`Absolute` the
+camera parks at the CamShot's static pose and ignores `Track Object` — on a level
+that's mostly white/gray (e.g. a snow level) that static view shows little colour,
+which reads as "untextured."
+
+Before suspecting textures: confirm faces are actually drawn textured (atlas bound,
+white vertex colour) — e.g. force a known-good camera and look. If the *same* level
+looks colourful from one camera and gray from another, it's the camera. (2026-05-22
+snowgoons-blender investigation: the whole "untextured" symptom was `camshot_12`
+exporting as Fixed/Absolute instead of Track/Relative.)
+
+## A decompiled `.lev` enum field whose DATA and STR disagree is corrupt
+
+A `{ 'I32' { 'NAME' "Rotation" } { 'DATA' 0l } { 'STR' "Track" } }` is **invalid** —
+`DATA 0` means index 0 (`Fixed`) but the label says `Track` (index 1). A stale/buggy
+decompile can emit these; the Blender importer used to silently trust `DATA`, which
+flipped Track→Fixed on round-trip. The importer now **hard-fails** on such a
+mismatch (`export_level.py` enum branch) — regenerate the `.lev` from the binary
+with the current levcomp if you hit it.
+
+---
+
 ## How to run a standalone level
 
 ```bash
