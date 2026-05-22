@@ -1,7 +1,10 @@
 # Plan: CamShot enum round-trip — hard-fail on DATA/STR mismatch
 
 **Date:** 2026-05-22
-**Status:** In progress
+**Status:** ✅ **Done (2026-05-22, ~2 h investigation + fix)** — importer hard-fails on
+`DATA`/`STR` enum mismatch; round-trip regenerated; rebuilt Blender build renders the
+tracked colour view (chroma 10.8 ≈ oracle 8.4). Verified headless round-trip:
+poisoned source now hard-fails, regenerated source imports Track/Relative + re-exports clean.
 **Related:** [investigation](../investigations/2026-05-22-blender-snowgoons-untextured.md),
 [blender-roundtrip-oracle-dependencies](2026-04-19-blender-roundtrip-oracle-dependencies.md)
 

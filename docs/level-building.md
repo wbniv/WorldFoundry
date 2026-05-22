@@ -465,6 +465,23 @@ initializer list, and move the `_overrideLevelNum` check to BEFORE the asserts.
   (relied on ActBoxOR to re-write each frame).
 - **NormalCameraHandler**: validates that the stored shot index is a real CamShot object.
 
+#### CamShot tracking toggles — `Rotation` and `Position X/Y/Z`
+
+For a camera that **follows the player**, the CamShot needs both its `Track Object`
+set (e.g. `Player`) **and** the right mode toggles:
+
+| Field | Value to follow the player | Effect if wrong (0) |
+|-------|----------------------------|---------------------|
+| `Rotation` (`Fixed`\|`Track`) | **`Track` (1)** | `Fixed` → camera orientation static, ignores `Track Object` |
+| `Position X/Y/Z` (`Absolute`\|`Relative`) | **`Relative` (1)** | `Absolute` → camera parked at the CamShot's world position |
+
+With `Fixed`/`Absolute` the BungeeCam ignores the player even though `Track Object`
+is set, parking at a static wide pose. On a mostly-white level (e.g. a snow level)
+that static view can read as "untextured/flat gray" when the textures are actually
+fine — see [troubleshooting](level-design-troubleshooting.md). These toggles are
+`TYPEENTRYBOOLEANTOGGLE` enums; a `.lev` where their `DATA` and `STR` disagree is
+corrupt and now hard-fails on Blender import.
+
 #### EMAILBOX_CAMSHOT Bootstrap (scripting disabled)
 
 With scripting disabled, ActBoxOR trigger zones never fire. Fix in `level.cc::constructObject`:
