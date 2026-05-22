@@ -886,9 +886,12 @@ int main(int argc, char** argv)
     std::string room_id;           // --room=<id>: join a voice+video call room
     std::string ctx_relay_url;     // --relay=<ws://...>: connect to co-edit relay
     // Viewport level (engine LoadLevel) + the .lev parsed into the read-only
-    // Y.Doc. Default both to snowgoons-blender so the viewport and Outliner
-    // show the same level (plan D7); override independently for now.
-    std::string level     = "wflevels/snowgoons-blender/snowgoons-standalone.iff";
+    // Y.Doc. Default both to the BLENDER-built snowgoons so the viewport and
+    // Outliner show the same source — and so File→"Save + Compile (.iff)"
+    // (build_level_binary.sh) regenerates exactly the standalone the viewport
+    // loads. (The byte-oracle snowgoons-standalone.iff is kept for the
+    // engine-stability smoke tests; it is NOT what the editor edits.)
+    std::string level     = "wflevels/snowgoons-blender-standalone.iff";
     std::string leveltree = "wflevels/snowgoons-blender/snowgoons-blender.lev";
     for (int i = 1; i < argc; ++i) {
         if (std::strcmp(argv[i], "--frames") == 0 && i + 1 < argc)
