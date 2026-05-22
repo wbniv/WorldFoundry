@@ -538,7 +538,7 @@ def _make_coin_template():
     obj['wf_Moves Between Rooms']  = 'True'
     obj['wf_Mobility']             = 'Physics'
     obj['wf_Mass']                 = 0.001
-    obj['wf_Falling Acceleration'] = 4.0
+    obj['wf_Falling Acceleration'] = 12.0
     obj['wf_Max Air Speed']        = 50.0
     obj['wf_Surface Friction']     = 0.0
     obj['wf_Horiz Air Drag']       = 0.0

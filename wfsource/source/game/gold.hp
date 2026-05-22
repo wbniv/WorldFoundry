@@ -9,16 +9,14 @@
 //============================================================================
 
 #include "actor.hp"
-
-//============================================================================
-
-struct _Gold;
+#include <oas/gold.ht>
 
 //============================================================================
 
 class Gold: public Actor
 {
 public:
+	INLINE const _Gold* getOad() const { return (const _Gold*)_oadData; }
 	Gold(const SObjectStartupData* startupData);
 	virtual ~Gold()			{ }
 

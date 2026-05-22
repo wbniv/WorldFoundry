@@ -9,7 +9,6 @@
 // See TODO.md (BUILD / TOOLCHAIN) for the broken-.ht-codegen tracking.
 //============================================================================
 
-#include <oas/gold.ht>					// _Gold oad structure
 #include "gold.hp"
 #include "actor.hp"						// object enumeration (Player_KIND)
 #include "level.hp"						// theLevel->SetPendingRemove
@@ -66,7 +65,7 @@ Gold::Collision(PhysicalObject& other, const Vector3& normal)
 		if (player.kind() == Actor::Player_KIND)
 		{
 			Mailboxes& pm = player.GetMailboxes();
-			pm.WriteMailbox(EMAILBOX_GOLD, pm.ReadMailbox(EMAILBOX_GOLD) + Scalar(getOad()->GoldValue));
+			pm.WriteMailbox(EMAILBOX_GOLD, pm.ReadMailbox(EMAILBOX_GOLD) + Scalar((float)getOad()->GoldValue));
 			theLevel->SetPendingRemove(this);
 		}
 	}
