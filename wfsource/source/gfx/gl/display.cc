@@ -32,7 +32,9 @@
 #if defined(__ANDROID__)
 #  include <GLES3/gl3.h>
 #else
+#  define GL_GLEXT_PROTOTYPES 1
 #  include <GL/gl.h>
+#  include <GL/glext.h>
 #endif
 
 #include <memory/memory.hp>
@@ -73,6 +75,15 @@ static void DrawHudText(float x, float y, const char* text)
 
 static void DrawHud(int xSize, int ySize)
 {
+    // The 3D viewport is square (mesa.cc ConfigureNotify clips top/bottom),
+    // so force the HUD to render over the full window surface. This ensures
+    // text at small y values (e.g. y=8 for the score bar) is actually visible.
+    GLint saved_vp[4];
+    glGetIntegerv(GL_VIEWPORT, saved_vp);
+    glViewport(0, 0, xSize, ySize);
+
+    glUseProgram(0);   // ensure fixed-function pipeline; Flush() may have left a program bound
+
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
@@ -87,16 +98,26 @@ static void DrawHud(int xSize, int ySize)
     glColor3f(1.0f, 1.0f, 0.0f);
 
     char buf[64];
+    const float kScale = 2.0f;
 
     snprintf(buf, sizeof(buf), "SCORE %d", wf_hud_score);
-    DrawHudText(8, 8, buf);
+    glPushMatrix(); glTranslatef(8, 8, 0); glScalef(kScale, kScale, 1);
+    DrawHudText(0, 0, buf); glPopMatrix();
 
     int t = wf_hud_timer > 0 ? wf_hud_timer : 0;
     snprintf(buf, sizeof(buf), "TIME %d", t);
-    DrawHudText((float)(xSize / 2 - 30), 8, buf);
+    {
+        float tw = (float)stb_easy_font_width((char*)buf) * kScale;
+        glPushMatrix(); glTranslatef((float)xSize * 0.5f - tw * 0.5f, 8, 0); glScalef(kScale, kScale, 1);
+        DrawHudText(0, 0, buf); glPopMatrix();
+    }
 
     snprintf(buf, sizeof(buf), "LIVES %d", wf_hud_lives);
-    DrawHudText((float)(xSize - 70), 8, buf);
+    {
+        float lw = (float)stb_easy_font_width((char*)buf) * kScale;
+        glPushMatrix(); glTranslatef((float)xSize - lw - 8, 8, 0); glScalef(kScale, kScale, 1);
+        DrawHudText(0, 0, buf); glPopMatrix();
+    }
 
     // Game-over overlay — driven by mb 420 via wf_hud_game_over (game.cc HUD glue).
     // Two centred lines, scaled up over the live pyramid view; red to match the
@@ -209,6 +230,8 @@ static void DrawHud(int xSize, int ySize)
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
+
+    glViewport(saved_vp[0], saved_vp[1], saved_vp[2], saved_vp[3]);
 }
 #endif // DESIGNER_CHEATS && __LINUX__
 
@@ -679,7 +702,7 @@ Display::PageFlip()
     RendererBackendGet().EndFrame();
 
 #if DESIGNER_CHEATS && defined(__LINUX__)
-    DrawHud(_xSize, _ySize);
+    DrawHud(wfWindowWidth, wfWindowHeight);
 #endif
 
     glFlush();
