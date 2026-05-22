@@ -9,7 +9,7 @@ Genuine bugs that have laid dormant for years before something surfaced them. No
 Format per entry:
 - **Title** with the date it was finally surfaced (`YYYY-MM-DD`, used for sorting)
 - **Status:** FIXED `<sha>` | OPEN | INVESTIGATING
-- **Symptom**, **Root cause**, **Why dormant**, **Fix**, **Investigation** (link)
+- **Symptom**, **Root cause**, **Why dormant**, **Fix**, **Diff** (the actual patch), **Investigation** (link)
 
 ---
 
@@ -24,6 +24,12 @@ Format per entry:
 **Why dormant:** The original WorldFoundry levels had no runtime-spawned actors with TTL deadlines. All objects were placed at level-load and never spawned mid-session via `SafelyConstructTemplateObject`. The stale `currentTime` was harmless as long as actor constructors didn't use it for timing — they used it only for one-time initialization (position, velocity) where the stale value was irrelevant or not used at all.
 
 **Fix:** Stamp `startupData->currentTime = theLevel->LevelClock()` immediately before `ConstructTemplateObject` inside `SafelyConstructTemplateObject`. The struct is already transiently mutated there (for `idxCreator`); the clock stamp follows the same pattern. No teardown needed — the next spawn overwrites it.
+
+**Diff** (`wfsource/source/game/level.cc`):
+```diff
++    startupData->currentTime = theLevel->LevelClock();   // stamp actual spawn time so actor constructors see current clock
+     Actor* retVal = ConstructTemplateObject( startupData->objectData->type, startupData );
+```
 
 **Investigation:** [`docs/level-design-troubleshooting.md`](level-design-troubleshooting.md) — "Spawned actor despawns instantly if it uses `startupData->currentTime` for TTL" section.
 
@@ -55,6 +61,13 @@ The SMB `?`-block (`Generator`) uses `NumberOfLocalMailboxes = 13` (odd). Init l
 
 **Fix:** `>` → `>=` at `array.hpi`:195. `_num` now correctly tracks the first-unwritten high-water mark for all sequential and in-order initializations. In-range writes (index < _num) still leave `_num` unchanged.
 
+**Diff** (`wfsource/source/cpplib/array.hpi`):
+```diff
+-   if(index > _num)
++   if(index >= _num)
+        _num = index+1;
+```
+
 **Origin:** CVS `wfsource/source/cpplib/Attic/array.hpi,v` rev **1.3, 2003-05-23** — log: *"added an operator[] which is non-const and allows writting to objects in the Array"*. The bug was born with the feature. Rev 1.7 carried it into the 2010-05-01 git import (`a2784f6`). 23 years dormant.
 
 **Investigation:** [`docs/investigations/2026-05-20-array-subscript-num-off-by-one.md`](investigations/2026-05-20-array-subscript-num-off-by-one.md).
@@ -73,6 +86,17 @@ The SMB `?`-block (`Generator`) uses `NumberOfLocalMailboxes = 13` (odd). Init l
 
 **Fix:** Drop the `return`; wrap the spawn body in an `else`; call `Actor::update()` unconditionally at the end of `Generato::update()`. The 1996 timer-reset (anti-over-generation) is preserved verbatim — only the incidental script-skip is removed, restoring parity with every other Actor subclass. Frame ordering then makes the one-tick activation pulse work: spawn-check reads the mailbox at the top, the script runs (and can set/clear it) at the bottom.
 
+**Diff** (`wfsource/source/game/generator.cc`):
+```diff
+-            return;
++        else
++        {
++        }   // mailbox active — engine change #2
+ 
+-    Actor::update();
++    Actor::update();   // always runs now (was skipped by the idle `return`)
+```
+
 **Investigation:** Engine change #2 of plan [plans/2026-05-19-smb-block-generator-coin.md](plans/2026-05-19-smb-block-generator-coin.md).
 
 ---
@@ -88,6 +112,14 @@ The SMB `?`-block (`Generator`) uses `NumberOfLocalMailboxes = 13` (odd). Init l
 **Why dormant:** Every site was a *guaranteed* downcast — each followed the cast with `assert(ValidPtr(result))`, and every concrete `BaseObject` is in fact an `Actor` (`PhysicalObject`/`MovementObject` are abstract). So `dynamic_cast` always succeeded and behaved correctly on dev hosts, where RTTI is cheap. The breach stayed invisible for ~22 years because it never misbehaved functionally *and* `-fno-rtti` was never enabled in CI, so nothing flagged the constraint violation. It would have cost flash + cycles on a real fixed-point target build.
 
 **Fix:** Replace each `dynamic_cast<T*>(bo)` with `assert(IsActor/IsPhysicalObject/IsMovementObject(bo))` + `static_cast<T*>`; push `GetWatchObject()` up into `MovementHandler` to kill the lone `CameraHandler*` cast; then enable `-fno-rtti` on every TU (`wfengine`, `wf_game`, `Jolt`, the e2e harness, `build_game.sh`). Correctness rests on the closed single-inheritance hierarchy — the abstract intermediates make every instantiable `BaseObject` an `Actor` — and the `IsXxx()` helpers are the single documented update point if a non-`Actor` `BaseObject` is ever added. Verified: from-scratch `-fno-rtti` build links clean, the binary carries no `typeinfo for Actor/Camera/...` symbols, and snowgoons + qbert run.
+
+**Diff** (representative — `wfsource/source/game/actor.cc`, repeated across 68 sites):
+```diff
+-    if (Actor* otherActor = dynamic_cast<Actor*>(&other))
+-        _lastColliderIdx = otherActor->GetActorIndex();
++    if (IsActor(&other))
++        _lastColliderIdx = static_cast<Actor&>(other).GetActorIndex();
+```
 
 **Investigation:** [investigations/2026-04-29-rtti-audit.md](investigations/2026-04-29-rtti-audit.md); plan [plans/2026-04-29-eliminate-rtti.md](plans/2026-04-29-eliminate-rtti.md).
 
@@ -109,6 +141,12 @@ mapStreamSize = *((long*) (mapMem+4));
 
 **Fix:** Change `long*` to `int32*` (the canonical IFF chunk-size type used everywhere else in [`wfsource/source/iff/`](../wfsource/source/iff/)). One char of edit, plus a short comment explaining the trap for future readers.
 
+**Diff** (`wfsource/source/game/level.cc`):
+```diff
+-        mapStreamSize = *((long*) (mapMem+4));
++        mapStreamSize = *((int32*) (mapMem+4));   // IFF chunk-size is 32-bit; was `long*` which is 8 bytes on 64-bit Linux
+```
+
 **Investigation:** Surfaced as the single remaining UBSan warning after the HAL-pool alignment fix (this BUGS.md entry above). Bytes-on-disk verification: the `7c 00 00 00 01 f0 ff 03` 8-byte read on little-endian reduces to `0x0000007c = 124` when truncated to int, matching the on-disk 32-bit size correctly.
 
 ---
@@ -125,6 +163,12 @@ mapStreamSize = *((long*) (mapMem+4));
 
 **Fix:** Two single-line edits, switching both allocator rounds from `(4-(size&0x3))&3` → `ALIGN_POW2(size, 8)` (existing macro at [`cpplib/align.hp`](../wfsource/source/cpplib/align.hp):30). Added a base-pointer 8-byte-alignment assertion to LMalloc's placement constructor and DMalloc's ctor so any future code path handing in misaligned backing memory fails loudly instead of silently. Post-fix UBSan sweep: 3,500 → 1 on snowgoons, 2,800 → 1 on qbert; the single residual is a misaligned `long*` read on an IFF chunk header inside `Level::LoadLevelData` at [`game/level.cc`](../wfsource/source/game/level.cc):1394 — IFF file-format data, separate scope from allocator alignment.
 
+**Diff** (`wfsource/source/memory/lmalloc.cc` and `dmalloc.cc`, same change each):
+```diff
+-    size += (4-(size&0x3))&3;
++    size = ALIGN_POW2(size, 8);
+```
+
 **Investigation:** [`docs/investigations/2026-05-19-snowgoons-rendobj3-overread.md`](investigations/2026-05-19-snowgoons-rendobj3-overread.md) "Follow-ups" section (which tracked the alignment issue before the fix); [`TODO.md`](../TODO.md):97 (entry now resolved).
 
 ---
@@ -140,6 +184,13 @@ mapStreamSize = *((long*) (mapMem+4));
 **Why dormant:** Predates the 2010 git import; the class is in CVS [`baseobject.hp,v`](sourceforge-cvs-snapshot.md) rev 1.1 dated **2003-05-15** with the missing-virtual-dtor pattern already present. The subclass's added members (`Int16ListIter _listIter`, `Array<BaseObject*>& _objects`) are POD-ish — the missed-destructor call doesn't *crash* on undefined behaviour, it just under-counts the destroyed bytes. On glibc's `malloc`, calling `operator delete(void*, 8)` on a 32-byte allocation reclaims the full chunk anyway (the deallocator reads the chunk header, not the size argument). So no crash, no leak, just silently-wrong-by-the-standard behaviour. ASan is the first tool strict enough to catch it. ~22 years dormant.
 
 **Fix:** Add `virtual ~BaseObjectIterator() {}` to the base class. One line, no behaviour change in practice — only the size argument in the `operator delete(void*, size)` call changes (and the destructor chain becomes well-defined).
+
+**Diff** (`wfsource/source/baseobject/baseobject.hp`):
+```diff
+-class BaseObjectIterator 
++class BaseObjectIterator
++    virtual ~BaseObjectIterator() {}
+```
 
 **Investigation:** Caught by ASan during the snowgoons-rendobj3 chase ([investigation](investigations/2026-05-19-snowgoons-rendobj3-overread.md)); fix landed separately.
 
@@ -160,6 +211,14 @@ mapStreamSize = *((long*) (mapMem+4));
 **Why dormant:** Both bugs predate the 2010 git import. CVS history in the [SourceForge `wf-gdk` snapshot](sourceforge-cvs-snapshot.md) shows `glpipeline/rendobj3.cc` rev 1.1 dated **2001-11-24** with both patterns already present in identical form; the sibling `softwarepipeline/rendobj3.cc` carries the same `assert(_faceList[_faceCount].materialIndex = -1)` line, and the parent `gfx/rendobj3.cc` (rev 1.1 dated **2000-02-12**) holds an inline author comment `// kts 3/27/98 9:45AM` on a related materialIndex-sentinel line — putting the bug pattern at **at least 1998-03-27**, about 28 years dormant. The past-end read returns garbage, which is used as a `materialIndex` for comparison — the comparison outcome is moot because the outer `faceIndex<_faceCount` check exits the loop the next iteration regardless. The past-end write lands on whatever's adjacent in `.data` — for the makefile build's static layout, that was benign padding. The cmake build (with NDEBUG-disabled asserts, additional translation units from quickjs/wamr/fennel/wren, and a different `.data` order) happened to place `static std::atomic<PlayInstance*> sDoneHead` (audio buffer.cc) close enough that the past-end-read's downstream consumers eventually wrote a non-canonical pointer there; `DrainDoneSounds` crashed dereferencing it. Yesterday's [host-gl plan](plans/2026-05-18-host-gl-e2e-harness-and-unload-fix.md) noted "multi-cycle snowgoons crashes" — that report was actually a frame-2 single-cycle crash in the cmake-built harness, mis-bucketed as multi-cycle.
 
 **Fix:** Swap `&&` operand order at line 83 so `faceIndex<_faceCount` short-circuits BEFORE the past-end materialIndex read; delete the broken assert at line 101 (the line was either a typo for `==` sentinel-check or stale debug code — no other code reads or writes that sentinel value).
+
+**Diff** (`wfsource/source/gfx/glpipeline/rendobj3.cc`):
+```diff
+-        while(currentMaterial == globalRendererVariables.currentRenderFace->materialIndex && faceIndex<_faceCount)
++        while(faceIndex<_faceCount && currentMaterial == globalRendererVariables.currentRenderFace->materialIndex)
+ 
+-    assert(_faceList[_faceCount].materialIndex = -1);
+```
 
 **Investigation:** [`docs/investigations/2026-05-19-snowgoons-rendobj3-overread.md`](investigations/2026-05-19-snowgoons-rendobj3-overread.md).
 
@@ -196,6 +255,12 @@ mapStreamSize = *((long*) (mapMem+4));
 
 **Fix:** Reorder `~Level::~Level` body to reverse-LIFO; split `MEMORY_DELETE(_theLevelRooms)` into manual `~LevelRooms()` (early) + late `HALLmalloc.Free` of the outer; reverse the per-template-object loop; route `Animate::_channels` and `ActorMailboxes::_localMailboxes` through the per-level DMalloc pool; add `Array<T>::Clear()` so `_actors._items` can be freed at its LIFO position in `~Level` body instead of by the implicit `~Array()` afterward.
 
+**Diff** (`wfsource/source/game/level.cc`, key change — full reorder in commit `254c1d4e`):
+```diff
+-    for ( int idxActor = 0; idxActor < _numTemplateObjects; ++idxActor )
++    for ( int idxActor = _numTemplateObjects - 1; idxActor >= 0; --idxActor )
+```
+
 **Investigation:** [`docs/investigations/2026-05-18-unloadlevel-lifo-bug.md`](investigations/2026-05-18-unloadlevel-lifo-bug.md).
 
 ---
@@ -212,6 +277,14 @@ mapStreamSize = *((long*) (mapMem+4));
 
 **Fix:** `if (stacks) { delete stacks; stacks = NULL; }` — guard instead of assert. Investigation at [`docs/investigations/2026-05-16-stacks-assert-on-clean-exit.md`](investigations/2026-05-16-stacks-assert-on-clean-exit.md).
 
+**Diff** (`wfsource/source/hal/linux/platform_init.cc`):
+```diff
+-    assert(stacks);
+-    delete stacks;
+-    stacks = NULL;
++    if (stacks) { delete stacks; stacks = NULL; }
+```
+
 ---
 
 ## `PhysicalAttributes::Validate()` used strict float-equality on a round-tripped delta — 2026-05-11
@@ -225,6 +298,14 @@ mapStreamSize = *((long*) (mapMem+4));
 **Why dormant:** On a **fixed-point** `Scalar` target (the real-target build per [[project_mailboxes_fixed_point]]) the two computations are bit-identical and the assert never fires — the strict-equality check is correct there. The bug is float-mode-only. PC dev (where Scalar is float) has always had this drift, but `Validate()` is only called in certain tick paths and the false positive requires the specific magnitude ratio that produces a >0-ULP-difference subtraction; gameplay rarely hit it. Surfaced reliably only when the qbert cam intro pan generated the exact coordinate magnitudes the round-trip drifts on. The 2010-vintage strict-equality check has been shipping ULP false-positive risk for the entire history of the float-mode PC dev build.
 
 **Fix:** [`physical.hpi`](../wfsource/source/physics/physical.hpi):69 — replace `expansionVector == predictedMotionVector` with a per-axis `(a - b).Abs() < Scalar::FromDouble(1e-3)` tolerance check. Threshold is well above float drift (a few ULPs of the largest operand ≈ 1e-3 worst case at game-world coordinates) and well below any physically meaningful inaccuracy. No-op for fixed-point Scalar targets where the original strict comparison was always exact. `Vector3::operator==` deliberately untouched — lots of code uses exact equality for legitimate reasons (`v == Vector3::zero`).
+
+**Diff** (`wfsource/source/physics/physical.hpi`):
+```diff
+-    if ( !(expansionVector == predictedMotionVector) )
++    const Scalar tol = Scalar::FromDouble(1e-3);
++    const Vector3 diff = expansionVector - predictedMotionVector;
++    if ( diff.X().Abs() >= tol || diff.Y().Abs() >= tol || diff.Z().Abs() >= tol )
+```
 
 **Investigation:** [`docs/plans/2026-05-11-physical-validate-float-tolerance.md`](plans/2026-05-11-physical-validate-float-tolerance.md).
 
@@ -295,6 +376,17 @@ Net effect: `.offsetof(A) - .offsetof(B)` emits A's offset (4 bytes) AND B's off
 
 **Fix:** Widen `SMsg::_data._message` from `int32` to `uintptr_t` and resize the `binary[]` companion to `sizeof(uintptr_t)`; propagate the type change through `PutMsg` / `sendMsg` signatures in [`msgport.hp`](../wfsource/source/baseobject/msgport.hp) + [`msgport.cc`](../wfsource/source/baseobject/msgport.cc) + [`baseobject.hp`](../wfsource/source/baseobject/baseobject.hp) + [`baseobject.cc`](../wfsource/source/baseobject/baseobject.cc); replace the truncating `int32(&object)` cast in collision.cc with `reinterpret_cast<uintptr_t>(&object)`; update receivers in `enemy.cc` / `explode.cc` / `missile.cc` to read `*(uintptr_t*)msgData`. Small-integer senders (`DELTA_HEALTH`, etc.) still work — they implicitly widen on send, and `*(int32*)msgData` on receive reads the low 4 bytes (little-endian) which equal the original value.
 
+**Diff** (`wfsource/source/baseobject/msgport.hp` + `physics/collision.cc`):
+```diff
+-      int32 _message;
+-      char binary[sizeof(Scalar)];
++      uintptr_t _message;
++      char binary[sizeof(uintptr_t)];
+ 
+-    object1.sendMsg( msg1, static_cast<int32>(reinterpret_cast<intptr_t>(&object2)) );
++    object1.sendMsg( msg1, reinterpret_cast<uintptr_t>(&object2) );
+```
+
 **Investigation:** [`docs/plans/2026-04-17-collision-message-pointer-fix.md`](plans/2026-04-17-collision-message-pointer-fix.md).
 
 ---
@@ -324,5 +416,10 @@ Net effect: `.offsetof(A) - .offsetof(B)` emits A's offset (4 bytes) AND B's off
 **Root cause:** What's actually wrong, with file:line citations.
 **Why dormant:** Which exercise path was missing, or what masked it.
 **Fix:** Minimal description; link the commit / plan.
+**Diff** (`path/to/file.cc`):
+```diff
+- buggy line
++ fixed line
+```
 **Investigation:** Link to docs/investigations/<date>-<slug>.md if there was one.
 ```
