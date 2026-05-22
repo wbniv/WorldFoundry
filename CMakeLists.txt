@@ -18,6 +18,7 @@ set(WF_JS_ENGINE     "quickjs"  CACHE STRING "none | quickjs | jerryscript")
 set(WF_WASM_ENGINE   "wamr"     CACHE STRING "none | wamr")
 option(WF_ENABLE_WREN     "Wren scripting"                ON)
 set(WF_FORTH_ENGINE  "zforth"   CACHE STRING "none | zforth | ficl | atlast | embed | libforth | pforth")
+option(WF_NEURAL_FORTH "Neural-forth AI library — fuzzy logic, neural networks, ∂4 trainable slots. Requires WF_FORTH_ENGINE=zforth." OFF)
 set(WF_PHYSICS_ENGINE "jolt"    CACHE STRING "legacy | jolt")
 option(WF_REST_API        "REST API box PoC (HTTP runtime-mutation debug)" ON)
 option(WF_DEBUG_BRIDGE    "TCP/JSON debug bridge — level-design + AI-agent debugging (Blender live edit, etc.). Independent of WF_ENABLE_EDITOR." ON)
@@ -415,6 +416,23 @@ if(NOT WF_FORTH_ENGINE STREQUAL "none")
             ${PFORTH_DIR}/csrc ${PFORTH_DIR}/csrc/posix ${PFORTH_DIR}/csrc/stdio)
         list(APPEND WF_LINK_LIBS pforth)
     endif()
+endif()
+
+# ─── Neural-forth AI library ──────────────────────────────────────────────────
+if(WF_NEURAL_FORTH)
+    if(NOT WF_FORTH_ENGINE STREQUAL "zforth")
+        message(FATAL_ERROR "WF_NEURAL_FORTH requires WF_FORTH_ENGINE=zforth")
+    endif()
+    set(NF_DIR ${CMAKE_SOURCE_DIR}/engine/neural-forth)
+    list(APPEND WF_SOURCES
+        ${NF_DIR}/dictionary.c
+        ${NF_DIR}/tensor.c
+        ${NF_DIR}/autograd.c
+        ${NF_DIR}/fuzzy.c
+        ${NF_DIR}/nn.c
+        ${NF_DIR}/slot.c)
+    list(APPEND WF_INCLUDES ${NF_DIR})
+    list(APPEND WF_DEFS WF_NEURAL_FORTH)
 endif()
 
 # ─── Jolt Physics ─────────────────────────────────────────────────────────────
@@ -834,6 +852,30 @@ if(IOS)
     target_sources(wf_game PRIVATE ${IOS_RESOURCES})
     set_source_files_properties(${IOS_RESOURCES} PROPERTIES
         MACOSX_PACKAGE_LOCATION Resources)
+endif()
+
+# ─── Neural-forth unit test binary ───────────────────────────────────────────
+# Standalone executable that links against zforth + the neural-forth C files.
+# Provides its own zf_host_* callbacks; does not depend on wf_game.
+# Excluded from the game build (neural_forth_test.cc is not in WF_SOURCES).
+if(WF_NEURAL_FORTH AND NOT ANDROID AND NOT IOS)
+    add_executable(nf_test
+        ${NF_DIR}/neural_forth_test.cc
+        ${NF_DIR}/dictionary.c
+        ${NF_DIR}/tensor.c
+        ${NF_DIR}/autograd.c
+        ${NF_DIR}/fuzzy.c
+        ${NF_DIR}/nn.c
+        ${NF_DIR}/slot.c)
+    target_include_directories(nf_test PRIVATE
+        ${NF_DIR}
+        ${ZFORTH_DIR}/src/zforth
+        ${STUB_SRC}
+        ${ENG_INC})
+    target_compile_options(nf_test PRIVATE -Wall -Wextra -O2)
+    target_compile_definitions(nf_test PRIVATE WF_NEURAL_FORTH WF_FORTH_ENGINE_ZFORTH)
+    target_link_libraries(nf_test PRIVATE zforth)
+    add_test(NAME neural_forth_unit COMMAND nf_test)
 endif()
 
 # ─── Output location matches build_game.sh ────────────────────────────────────
