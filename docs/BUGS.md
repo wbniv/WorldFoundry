@@ -13,6 +13,22 @@ Format per entry:
 
 ---
 
+## `SObjectStartupData::currentTime` stale-clock — spawned actors see level-load time, not spawn time — 2026-05-22
+
+**Status:** FIXED `948c3fbc` (`wfsource/source/game/level.cc` — `SafelyConstructTemplateObject`).
+
+**Symptom:** Any actor that stores a TTL deadline from `startupData->currentTime.Current()` in its constructor despawns instantly when spawned after t > TTL into the session. For the SMB ?-block coin: `_despawnTime = 0 + 3 = 3.0 s`; a coin spawned at t = 5 s fires `LevelClock().Current() >= _despawnTime` on its very first `update()` call and is removed in one frame.
+
+**Root cause:** `SObjectStartupData::currentTime` is initialised once at level-load time (`level.cc:267 startupData.currentTime = LevelClock()`). `Clock::Current()` returns the stored `_nWallClock` scalar — it is **not** a live reference. Every actor spawned via `SafelyConstructTemplateObject` receives a `currentTime` frozen at t ≈ 0, so any deadline computed as `currentTime.Current() + kTTL` is effectively `0 + kTTL` regardless of when the spawn occurs.
+
+**Why dormant:** The original WorldFoundry levels had no runtime-spawned actors with TTL deadlines. All objects were placed at level-load and never spawned mid-session via `SafelyConstructTemplateObject`. The stale `currentTime` was harmless as long as actor constructors didn't use it for timing — they used it only for one-time initialization (position, velocity) where the stale value was irrelevant or not used at all.
+
+**Fix:** Stamp `startupData->currentTime = theLevel->LevelClock()` immediately before `ConstructTemplateObject` inside `SafelyConstructTemplateObject`. The struct is already transiently mutated there (for `idxCreator`); the clock stamp follows the same pattern. No teardown needed — the next spawn overwrites it.
+
+**Investigation:** [`docs/level-design-troubleshooting.md`](level-design-troubleshooting.md) — "Spawned actor despawns instantly if it uses `startupData->currentTime` for TTL" section.
+
+---
+
 ## `Array<T>::operator[]` `_num` high-water off-by-one — odd-sized arrays under-report `Size()` — 2026-05-20
 
 **Status:** FIXED commit (one char: `>` → `>=` in [`cpplib/array.hpi`](../wfsource/source/cpplib/array.hpi):195).
