@@ -31,8 +31,17 @@ struct YMapEvent;
 struct YArrayEvent;
 struct YAfterTransactionEvent;
 struct YSubscription;   // yffi ≥0.10: observers return an owned YSubscription*
+struct YUndoManager;    // native undo/redo (yffi ≥0.16) — see UndoManager below
 
 namespace wfcrdt {
+
+// Transaction origin tags. Local edits — every Doc::begin() — carry kOriginLocal
+// and are the only transactions an UndoManager tracks; remote applies use
+// Doc::beginRemote() (kOriginRemote) and stay out of undo history. This is what
+// makes Ctrl+Z reverse only THIS editor's own edits in a collab session, with
+// zero per-edit bookkeeping. See docs/plans/2026-05-22-yrs-upgrade-and-native-undo.md.
+inline constexpr char kOriginLocal[]  = "local";
+inline constexpr char kOriginRemote[] = "remote";
 
 // Borrowed pointer + length view. Std::span replacement for C++17.
 struct ByteView {
@@ -46,6 +55,7 @@ class Input;
 class Map;
 class Array;
 class Subscription;
+class UndoManager;
 
 // RAII wrapper around YTransaction*. Move-only. Commits on scope exit
 // unless commit() or cancel() were called explicitly. Mirrors the
@@ -100,9 +110,14 @@ public:
 
 private:
     friend class Doc;
-    explicit Transaction(Doc* docw);
+    // `origin` (borrowed; must outlive the txn — in practice a static
+    // kOriginLocal/kOriginRemote) tags the yffi write txn so an UndoManager can
+    // gate capture on it. nullptr/0 leaves the origin unset.
+    Transaction(Doc* docw, const char* origin, std::uint32_t originLen);
     Doc* _docw;                    // owning Doc wrapper (root cache + YDoc*)
     mutable YTransaction* _txn;    // lazily opened on first raw(); may be null
+    const char*   _origin;         // borrowed origin bytes (or nullptr)
+    std::uint32_t _originLen;
 };
 
 // RAII wrapper around YDoc*. The Doc owns the underlying y-crdt document.
@@ -116,7 +131,15 @@ public:
     Doc(const Doc&) = delete;
     Doc& operator=(const Doc&) = delete;
 
+    // Open a local-edit transaction (origin = kOriginLocal). Every editor edit
+    // path goes through here, so an UndoManager tracking kOriginLocal captures
+    // them all with no per-call-site change.
     Transaction begin();
+
+    // Open a transaction for applying a REMOTE update (origin = kOriginRemote).
+    // Use this on the CollabDrain / initial-sync paths so peer edits never enter
+    // this editor's undo history. Functionally identical to begin() otherwise.
+    Transaction beginRemote();
 
     // Subscribe to all document updates (v1 encoding). The callback receives
     // the raw Yrs v1 update bytes every time a transaction commits. Wire the
@@ -241,6 +264,7 @@ public:
 private:
     friend class Transaction;
     friend class Output;
+    friend class UndoManager;   // reads _branch to register an undo scope
     Map(Branch* branch, Transaction* txn) : _branch(branch), _txn(txn) {}
     Branch* _branch;
     Transaction* _txn;   // owning transaction (lazily opens the yffi txn)
@@ -267,6 +291,7 @@ public:
 private:
     friend class Transaction;
     friend class Output;
+    friend class UndoManager;   // reads _branch to register an undo scope
     Array(Branch* branch, Transaction* txn) : _branch(branch), _txn(txn) {}
     Branch* _branch;
     Transaction* _txn;   // owning transaction (lazily opens the yffi txn)
@@ -299,6 +324,52 @@ private:
     YSubscription* _sub;   // owned; freed via yunobserve in the dtor
     SubKind _kind;
     void* _heap;  // owned MapTrampoline* / ArrayTrampoline* / DocUpdatesTrampoline*
+};
+
+// RAII wrapper around YUndoManager*. The native Yrs undo manager records every
+// transaction that (a) mutates a tracked scope root AND (b) carries the tracked
+// origin, making it reversible — undo()/redo() mutate the Doc directly, so the
+// editor just re-syncs its UI/engine view afterwards. Construct AFTER the Doc's
+// initial population so the load isn't itself an undo step. Tracks kOriginLocal,
+// so remote applies (Doc::beginRemote) stay out of history — undo is local-only
+// in collab. See docs/plans/2026-05-22-yrs-upgrade-and-native-undo.md.
+//
+// Constraint: undo()/redo() open their own internal write txn, so they must run
+// with no wfcrdt Transaction's yffi txn live on the Doc (true at frame top).
+class UndoManager {
+public:
+    // captureTimeoutMillis: edits within this window coalesce into a single undo
+    // step — one Ctrl+Z reverses a whole gizmo drag or burst of typing. Call
+    // stopCapturing() to force a step boundary between discrete structural ops.
+    explicit UndoManager(Doc& doc, int captureTimeoutMillis = 500);
+    ~UndoManager();
+
+    UndoManager(UndoManager&& other) noexcept;
+    UndoManager& operator=(UndoManager&& other) noexcept;
+    UndoManager(const UndoManager&) = delete;
+    UndoManager& operator=(const UndoManager&) = delete;
+
+    // Track a root container so edits to it become undoable. Call once per root
+    // (e.g. the "content" actor array) after construction.
+    void addScope(const Map& root);
+    void addScope(const Array& root);
+
+    bool undo();   // revert the last step; false if the stack was empty
+    bool redo();   // replay the last undone step; false if the stack was empty
+
+    // yffi exposes stack lengths, not a can_undo predicate.
+    bool canUndo() const { return undoStackLen() > 0; }
+    bool canRedo() const { return redoStackLen() > 0; }
+    int  undoStackLen() const;
+    int  redoStackLen() const;
+
+    void stopCapturing();   // cut a new undo-step boundary (yundo_manager_stop)
+    void clear();           // drop both stacks
+
+    bool valid() const { return _mgr != nullptr; }
+
+private:
+    YUndoManager* _mgr;
 };
 
 }  // namespace wfcrdt

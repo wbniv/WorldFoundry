@@ -247,6 +247,61 @@ static int test_nested_array_of_maps() {
     return 0;
 }
 
+// Native UndoManager: a tracked-scope array edit is reversible, redoable, and
+// undo() bottoms out on an empty stack. stopCapturing() forces a step boundary
+// so each insert is its own undo step (deterministic regardless of the 500 ms
+// coalescing timer — here disabled with timeout 0).
+static int test_undo_redo_basic() {
+    wfcrdt::Doc doc;
+    wfcrdt::UndoManager undo(doc, /*captureTimeoutMillis=*/0);
+    CHECK(undo.valid(), "UndoManager should be valid");
+    { auto txn = doc.begin(); undo.addScope(txn.array("content")); }
+
+    { auto txn = doc.begin(); txn.array("content").insertLong(0, 10); }
+    undo.stopCapturing();
+    { auto txn = doc.begin(); auto c = txn.array("content"); c.insertLong(c.len(), 20); }
+
+    { auto txn = doc.begin(); CHECK(txn.array("content").len() == 2, "len == 2 before undo"); }
+    CHECK(undo.canUndo() && undo.undoStackLen() == 2, "two undo steps recorded");
+
+    CHECK(undo.undo(), "first undo() returns true");
+    { auto txn = doc.begin(); CHECK(txn.array("content").len() == 1, "len == 1 after one undo"); }
+    CHECK(undo.undo(), "second undo() returns true");
+    { auto txn = doc.begin(); CHECK(txn.array("content").len() == 0, "len == 0 after two undos"); }
+    CHECK(!undo.undo(), "undo() on empty stack returns false");
+
+    CHECK(undo.canRedo(), "canRedo true after undo");
+    CHECK(undo.redo(), "redo() returns true");
+    { auto txn = doc.begin(); CHECK(txn.array("content").len() == 1, "len == 1 after redo"); }
+    return 0;
+}
+
+// Local-only-in-collab: a remote-origin edit (Doc::beginRemote) is NOT captured,
+// so Ctrl+Z never reverts a peer's change — it only removes this editor's own
+// local edit, leaving the remote element intact.
+static int test_undo_skips_remote_origin() {
+    wfcrdt::Doc doc;
+    wfcrdt::UndoManager undo(doc, /*captureTimeoutMillis=*/0);
+    { auto txn = doc.begin(); undo.addScope(txn.array("content")); }
+
+    { auto txn = doc.beginRemote(); txn.array("content").insertLong(0, 99); }   // peer edit
+    CHECK(!undo.canUndo() && undo.undoStackLen() == 0,
+          "remote edit must not enter undo history");
+
+    { auto txn = doc.begin(); auto c = txn.array("content"); c.insertLong(c.len(), 7); }  // local edit
+    CHECK(undo.undoStackLen() == 1, "local edit captured");
+
+    CHECK(undo.undo(), "undo removes the local edit");
+    {
+        auto txn = doc.begin();
+        auto c = txn.array("content");
+        CHECK(c.len() == 1, "remote element survives local undo");
+        auto v = c.get(0).readLong();
+        CHECK(v.has_value() && *v == 99, "surviving element is the remote one");
+    }
+    return 0;
+}
+
 int main() {
     int rc = 0;
     rc |= test_doc_lifecycle();
@@ -259,8 +314,10 @@ int main() {
     rc |= test_observer_fires();
     rc |= test_observer_cancelled_before_commit();
     rc |= test_nested_array_of_maps();
+    rc |= test_undo_redo_basic();
+    rc |= test_undo_skips_remote_origin();
     if (rc == 0) {
-        std::printf("wfcrdt_wrapper_test: OK (10/10 tests passed — incl. nested map/array)\n");
+        std::printf("wfcrdt_wrapper_test: OK (12/12 tests passed — incl. nested map/array + native undo)\n");
     }
     return rc;
 }

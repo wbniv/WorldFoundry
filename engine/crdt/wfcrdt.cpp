@@ -43,7 +43,15 @@ Doc& Doc::operator=(Doc&& other) noexcept {
 }
 
 Transaction Doc::begin() {
-    return Transaction(this);
+    // Local edits carry kOriginLocal so an UndoManager tracking that origin
+    // captures every editor edit path with no per-call-site change.
+    return Transaction(this, kOriginLocal, sizeof(kOriginLocal) - 1);
+}
+
+Transaction Doc::beginRemote() {
+    // Remote applies carry kOriginRemote — never captured by the local
+    // UndoManager (its origin set holds only kOriginLocal).
+    return Transaction(this, kOriginRemote, sizeof(kOriginRemote) - 1);
 }
 
 Branch* Doc::rootBranch(const char* name, bool asArray) {
@@ -60,15 +68,18 @@ Branch* Doc::rootBranch(const char* name, bool asArray) {
 
 // ─── Transaction ──────────────────────────────────────────────────────────────
 
-Transaction::Transaction(Doc* docw) : _docw(docw), _txn(nullptr) {}
+Transaction::Transaction(Doc* docw, const char* origin, std::uint32_t originLen)
+    : _docw(docw), _txn(nullptr), _origin(origin), _originLen(originLen) {}
 
 YTransaction* Transaction::raw() const {
     // Lazily open the yffi write txn on first use. ydoc_write_transaction()
     // returns NULL if another write txn is already open on the doc — that only
     // happens if a caller nests doc.begin() scopes (forbidden: yrs is
-    // single-writer). Passing (0, nullptr) leaves the origin unset.
+    // single-writer). The origin (kOriginLocal/kOriginRemote, or nullptr) gates
+    // UndoManager capture; it isn't part of the v1 update wire format, so sync
+    // is unaffected.
     if (!_docw) return nullptr;
-    if (!_txn) _txn = ydoc_write_transaction(_docw->raw(), 0, nullptr);
+    if (!_txn) _txn = ydoc_write_transaction(_docw->raw(), _originLen, _origin);
     return _txn;
 }
 
@@ -77,7 +88,8 @@ Transaction::~Transaction() {
 }
 
 Transaction::Transaction(Transaction&& other) noexcept
-    : _docw(other._docw), _txn(other._txn) {
+    : _docw(other._docw), _txn(other._txn),
+      _origin(other._origin), _originLen(other._originLen) {
     other._docw = nullptr;
     other._txn = nullptr;
 }
@@ -87,6 +99,8 @@ Transaction& Transaction::operator=(Transaction&& other) noexcept {
         if (_txn) ytransaction_commit(_txn);
         _docw = other._docw;
         _txn = other._txn;
+        _origin = other._origin;
+        _originLen = other._originLen;
         other._docw = nullptr;
         other._txn = nullptr;
     }
@@ -455,6 +469,69 @@ Subscription& Subscription::operator=(Subscription&& other) noexcept {
         other._heap = nullptr;
     }
     return *this;
+}
+
+// ─── UndoManager ────────────────────────────────────────────────────────────
+
+UndoManager::UndoManager(Doc& doc, int captureTimeoutMillis) : _mgr(nullptr) {
+    YUndoManagerOptions opts{};
+    opts.capture_timeout_millis = captureTimeoutMillis;
+    _mgr = yundo_manager(doc.raw(), &opts);
+    // Track only local edits. With kOriginLocal in the origin set, a txn tagged
+    // kOriginRemote (Doc::beginRemote) is never recorded — undo is local-only.
+    if (_mgr)
+        yundo_manager_add_origin(_mgr, sizeof(kOriginLocal) - 1, kOriginLocal);
+}
+
+UndoManager::~UndoManager() {
+    if (_mgr) yundo_manager_destroy(_mgr);
+}
+
+UndoManager::UndoManager(UndoManager&& other) noexcept : _mgr(other._mgr) {
+    other._mgr = nullptr;
+}
+
+UndoManager& UndoManager::operator=(UndoManager&& other) noexcept {
+    if (this != &other) {
+        if (_mgr) yundo_manager_destroy(_mgr);
+        _mgr = other._mgr;
+        other._mgr = nullptr;
+    }
+    return *this;
+}
+
+void UndoManager::addScope(const Map& root) {
+    if (_mgr && root._branch) yundo_manager_add_scope(_mgr, root._branch);
+}
+
+void UndoManager::addScope(const Array& root) {
+    if (_mgr && root._branch) yundo_manager_add_scope(_mgr, root._branch);
+}
+
+bool UndoManager::undo() {
+    // yundo_manager_undo opens its own internal write txn — the caller must hold
+    // no live wfcrdt txn (true at frame top). Returns Y_FALSE on an empty stack.
+    return _mgr && yundo_manager_undo(_mgr);
+}
+
+bool UndoManager::redo() {
+    return _mgr && yundo_manager_redo(_mgr);
+}
+
+int UndoManager::undoStackLen() const {
+    return _mgr ? static_cast<int>(yundo_manager_undo_stack_len(_mgr)) : 0;
+}
+
+int UndoManager::redoStackLen() const {
+    return _mgr ? static_cast<int>(yundo_manager_redo_stack_len(_mgr)) : 0;
+}
+
+void UndoManager::stopCapturing() {
+    if (_mgr) yundo_manager_stop(_mgr);
+}
+
+void UndoManager::clear() {
+    if (_mgr) yundo_manager_clear(_mgr);
 }
 
 }  // namespace wfcrdt

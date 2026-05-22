@@ -1,6 +1,8 @@
 # Upgrade Yrs (0.9.3 → 0.26.0) + Native Undo/Redo for wf-edit
 
-**Status:** Phase A DONE 2026-05-22 (upgraded to v0.26.0, not 0.23.5 — newest stable, identical UndoManager C API); Phase B (native undo) in progress
+**Status:** Phase A + Phase B DONE 2026-05-22 (Yrs at v0.26.0; native Ctrl+Z/Ctrl+Y live, local-only in collab). Phase B took ~1 h (estimate was 0.5 day — the native manager made the wiring as small as predicted).
+
+> **Phase B result:** native [`UndoManager`](https://docs.yjs.dev/api/undo-manager) wrapped in `wfcrdt.hpp`/`.cpp` over the `yundo_manager_*` C ABI (move-only RAII; 500 ms coalescing default). **Local-only undo** realized with zero per-edit bookkeeping: `Doc::begin()` now tags every local edit `kOriginLocal` and the manager `add_origin`s it, while remote applies switched to a new `Doc::beginRemote()` (`kOriginRemote`, never captured) at the two SYNC sites (`CollabDrain` + initial full-state). Editor wiring (`main.cc`): `EditorCtx::undo` → a `main()`-owned manager constructed right after Doc population with `addScope("content")`; `DoUndo`/`DoRedo` call undo/redo then a shared `ReSyncAfterDocChange` (extracted from `CollabDrain`) + a toast; Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y keybindings (gated `!typing`, `!Shift` on plain-Z) + a greying **Edit** menu. Verified: `wfcrdt_wrapper_test` 12/12 (incl. 2 new native-undo cases — basic undo/redo + local-only origin gating), `WF_EDIT_UNDO_TEST` headless harness + `wf_edit_undo` CTest pass (field/dup/del checkpoints restore), and the delete→undo screenshot below shows the Outliner repopulated + "undo" toast. Manual two-instance collab check (peer's Ctrl+Z can't revert our edit) left for a live session.
 
 > **Phase A result:** vendored Yrs bumped 0.9.3 → **v0.26.0** (newest stable; web-search said 0.23.5 was latest but the repo already had up to 0.26.0 with a byte-identical `yundo_manager_*` C API + committed `libyrs.h`, so newest was the better debt payoff). `wfcrdt` re-threaded for the read/write txn split + owned-`YSubscription` observers; a real **root-resolution deadlock** (`ymap/yarray(doc,name)` open their own internal write txn) was fixed with **lazy txn acquisition** — root branches resolve at the `Doc` (cached) before any write lock, the yffi txn opens only on the first data op — keeping the public wrapper API and all ~16 call sites unchanged (3 multi-root sites reordered to fetch both roots before the first op). Verified: `wfcrdt_smoke` 5/5, `wfcrdt_wrapper_test` 10/10, `wfcrdt_sync` 4/4, relay smoke 3/3, and `wf-edit` loads snowgoons (36 actors, bridge map OK).
 
@@ -72,6 +74,10 @@ Goal: Ctrl+Z / Ctrl+Y reverse/replay every edit, local-only in collab. Commit at
      │        │ Redo      Ctrl+Y │        │   ← greyed when canRedo()==false
      │        └──────────────────┘        │
      ```
+
+     **As shipped** (`WF_EDIT_UNDO_UI=del --select=1`: actor deleted, then one DoUndo — the Outliner is back to 36 actors and the "undo" toast shows bottom-left; the **Edit** menu sits between File and View):
+
+     ![delete → undo, Outliner restored + "undo" toast](assets/2026-05-22-undo-del.png)
 4. **Nothing else changes** — no `undo.cc`, no `_eid` anchoring, no `DocChunkToInput` capture, no `WriteFieldLeaf`/`property_panel.cc`/`gizmo.cc` signature changes. The native manager reverses whatever transactions hit the tracked scope, regardless of which code path (panel, gizmo, structural) produced them.
 
 **Critical files (Phase B):** `engine/crdt/wfcrdt.hpp` + `wfcrdt.cpp` (UndoManager class + local-origin txn), `engine/wf_edit/main.cc` (EditorCtx member, DoUndo/DoRedo, keybindings, Edit menu, refresh).
