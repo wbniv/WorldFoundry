@@ -194,15 +194,23 @@ if [[ "$WF_ENABLE_WREN" == "1" ]]; then
     CXXFLAGS+=(-DWF_ENABLE_WREN -I"$WREN_DIR")
 fi
 
+WF_NEURAL_FORTH="${WF_NEURAL_FORTH:-auto}"   # auto → ON when zforth, OFF otherwise
 case "$WF_FORTH_ENGINE" in
-    zforth)   CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_ZFORTH   -I"$STUB_SRC" -I"$ZFORTH_DIR/src/zforth") ;;
-    ficl)     CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_FICL     -I"$FICL_DIR") ;;
-    atlast)   CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_ATLAST   -I"$ATLAST_DIR") ;;
-    embed)    CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_EMBED    -I"$EMBED_DIR") ;;
-    libforth) CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_LIBFORTH -I"$LIBFORTH_DIR") ;;
+    zforth)   CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_ZFORTH   -I"$STUB_SRC" -I"$ZFORTH_DIR/src/zforth")
+              if [[ "$WF_NEURAL_FORTH" == "auto" || "$WF_NEURAL_FORTH" == "1" || "$WF_NEURAL_FORTH" == "ON" ]]; then
+                  WF_NEURAL_FORTH=1
+                  CXXFLAGS+=(-DWF_NEURAL_FORTH -I"$SCRIPT_DIR/neural-forth")
+              else
+                  WF_NEURAL_FORTH=0
+              fi ;;
+    ficl)     CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_FICL     -I"$FICL_DIR"); WF_NEURAL_FORTH=0 ;;
+    atlast)   CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_ATLAST   -I"$ATLAST_DIR"); WF_NEURAL_FORTH=0 ;;
+    embed)    CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_EMBED    -I"$EMBED_DIR"); WF_NEURAL_FORTH=0 ;;
+    libforth) CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_LIBFORTH -I"$LIBFORTH_DIR"); WF_NEURAL_FORTH=0 ;;
     pforth)   CXXFLAGS+=(-DWF_WITH_FORTH -DWF_FORTH_ENGINE_PFORTH   -I"$PFORTH_DIR/csrc"
-                         "-DPFORTH_FTH_DIR=\"$PFORTH_DIR/fth\"") ;;
-    none)     : ;;
+                         "-DPFORTH_FTH_DIR=\"$PFORTH_DIR/fth\"")
+              WF_NEURAL_FORTH=0 ;;
+    none)     WF_NEURAL_FORTH=0 ;;
 esac
 
 if [[ "$WF_REST_API" == "1" ]]; then
@@ -532,6 +540,20 @@ case "$WF_FORTH_ENGINE" in
         echo "  CC (vendor) zforth/zforth.c"
         gcc "${ZF_CFLAGS[@]}" -c "$ZFORTH_DIR/src/zforth/zforth.c" -o "$obj"
         OBJS+=("$obj")
+        # Neural-forth AI library — ON by default when zforth is the Forth engine.
+        # Six C sources: fuzzy logic, neural networks, autograd tape, ∂4 slots.
+        if [[ "$WF_NEURAL_FORTH" == "1" ]]; then
+            NF_DIR="$SCRIPT_DIR/neural-forth"
+            NF_CFLAGS=(-std=gnu11 -O2 -Wall -Wextra
+                       -DWF_NEURAL_FORTH -DWF_FORTH_ENGINE_ZFORTH
+                       -I"$NF_DIR" -I"$ZFORTH_DIR/src/zforth" -I"$STUB_SRC")
+            for nf_src in dictionary.c tensor.c autograd.c fuzzy.c nn.c slot.c; do
+                obj="$OUT/nf__${nf_src%.c}.o"
+                echo "  CC neural-forth/$nf_src"
+                gcc "${NF_CFLAGS[@]}" -c "$NF_DIR/$nf_src" -o "$obj"
+                OBJS+=("$obj")
+            done
+        fi
         ;;
     ficl)
         compile_stub "$STUB_SRC/scripting_ficl.cc" "$OUT/stubs__scripting_ficl.o"

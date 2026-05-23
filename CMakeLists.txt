@@ -18,7 +18,14 @@ set(WF_JS_ENGINE     "quickjs"  CACHE STRING "none | quickjs | jerryscript")
 set(WF_WASM_ENGINE   "wamr"     CACHE STRING "none | wamr")
 option(WF_ENABLE_WREN     "Wren scripting"                ON)
 set(WF_FORTH_ENGINE  "zforth"   CACHE STRING "none | zforth | ficl | atlast | embed | libforth | pforth")
-option(WF_NEURAL_FORTH "Neural-forth AI library — fuzzy logic, neural networks, ∂4 trainable slots. Requires WF_FORTH_ENGINE=zforth." OFF)
+# Default ON when zforth is selected, OFF otherwise. cmake_dependent_option auto-tracks
+# WF_FORTH_ENGINE so reconfiguring to a different Forth engine flips this off cleanly.
+include(CMakeDependentOption)
+cmake_dependent_option(WF_NEURAL_FORTH
+    "Neural-forth AI library — fuzzy logic, neural networks, ∂4 trainable slots."
+    ON
+    "WF_FORTH_ENGINE STREQUAL \"zforth\""
+    OFF)
 set(WF_PHYSICS_ENGINE "jolt"    CACHE STRING "legacy | jolt")
 option(WF_REST_API        "REST API box PoC (HTTP runtime-mutation debug)" ON)
 option(WF_DEBUG_BRIDGE    "TCP/JSON debug bridge — level-design + AI-agent debugging (Blender live edit, etc.). Independent of WF_ENABLE_EDITOR." ON)
