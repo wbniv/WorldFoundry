@@ -8,33 +8,70 @@ This revision narrows v1's 10+ target list to a handful that actually exercise W
 
 ---
 
-## 0. What existing visualizations look like
+## 0. What the vendored papers actually show (post-reading audit)
 
-Before claiming "no one shows this", grounding in what existing tools and papers actually produce. All three figures below are extracted from the open-access PDFs in `docs/papers/`.
+This section was rewritten after reading the vendored PDFs end-to-end. Several v1-and-early-v2 claims about what these papers contain turned out to be wrong; the corrections are explicit below.
 
-### MATLAB's tipping example, as rendered by FuzzyLogic.jl (Ferranti & Boutellier 2023)
+### FuzzyLogic.jl (Ferranti & Boutellier 2023) — the existing library landscape
 
 <img src="../papers/screenshots/ferranti-fig1-tipper-mamdani-mfs.png" width="640">
 
-*Source: FuzzyLogic.jl paper Fig. 1 — the canonical Mamdani tipping example. Six 1D membership-function plots tiled into a grid. This is the standard output across MATLAB Fuzzy Toolbox, scikit-fuzzy, JuzzyPy, and FuzzyLogic.jl: 2D line plots arranged as a small-multiples grid.*
+*FuzzyLogic.jl Fig 1 — the canonical Mamdani tipping example, auto-rendered by `plot(fis)`.*
 
-**What WF would add:** the live, embodied, physics-coupled control loop in §3.3 (Mamdani plant) — not a *better* plot, a *different* representation: the inference pipeline as a 3D stack of surfaces sitting above a navigable plant. Whether that's pedagogically superior is an empirical question (the v2 has been careful not to assert this without evidence).
+**What I learned from reading the paper that I didn't know before:**
 
-### Mendel & John 2002 — type-2 set as a 3D embedded set
+- **The library landscape is rich and mature.** Beyond MATLAB Fuzzy Toolbox: jFuzzyLogic (Java, T1), PyIT2FLS (Python, T1+T2), FuzzyLogic.jl (Julia, T1+T2 incl. Mamdani/Sugeno), FFLL (C, fast), XFuzzy (GUI + VHDL/C synthesis), NEFCLASS (neuro-fuzzy). FuzzyLogic.jl is MIT-licensed, ~10× faster than MATLAB on tipping (6 μs vs 60 μs), supports `.fis` / FCL / FML interchange.
+- **Real Mamdani benchmarks** the paper actually exercises: tipping (toy), Mucientes 2009 wall-following robot (**4 inputs, 9 MFs, 41 rules, 2 outputs** — non-trivial), Russo & Ramponi 1996 image denoising (8 inputs, 26 rules, custom inference pipeline).
+- **What's missing across all libraries:** none of them couple the inference to a live physics-driven plant. Every output is a 2D plot of MFs and rule surfaces. The robot-controller example is described as state transitions in text, not animated in a scene.
+
+**Implication for v2 Mamdani target (§3.3):** the gap isn't "3D rendering of MFs" — FuzzyLogic.jl's auto-generated plots are already clear and well-shaped. The gap is **the controller driving a navigable 3D plant the user can perturb**. Pick the Mucientes wall-following robot, not the tipping toy — it's a real Mamdani problem the libraries already render statically and the physics is simple.
+
+### Mendel & John 2002 — Type-2 representations
 
 <img src="../papers/screenshots/mendel-fig3-type2-fou-3d.png" width="520">
 
-*Source: Mendel & John 2002 Figs 4 (FOU plots) and 5 (embedded type-2 set as 3D spikes). The paper does draw a 3D representation — but as discrete spikes on a 2D primary-variable × primary-membership grid, not as a continuous solid surface μ_Ã(x,u). The continuous-solid form is what §3.4 targets.*
+*Mendel & John 2002 Figs 4 (FOU plots) and 5 (embedded type-2 set as discrete spikes over (x, u)).*
 
-**Implication for v2:** "Type-2 as a 3D object" is not unprecedented — the foundational paper shows it. WF's contribution would specifically be the *continuous, controllable, animated* solid (and its coupling to a plant), not the geometric form itself.
+**What I learned that I didn't know before:**
 
-### Adaptive fuzzy RL for flock systems (Qu et al. 2023)
+- The paper's purpose is *terminology fixing*, not visualization. It establishes "FOU, vertical-slice, wavy-slice, embedded type-2 set, primary membership, secondary grade" as the standard vocabulary.
+- The paper uses **2D figures with flag-and-triangle annotations** (Figs 7–8) and **discrete spikes on a 2D base plane** (Fig 5) to depict type-2 sets. There is **no continuous 3D surface μ_Ã(x,u)** drawn anywhere in the paper.
+- **Interval Type-2 (IT2) dominates real use**, not General Type-2 (GT2). Mendel himself writes (Sec IV-D): "Interval type-2 fuzzy sets are the most widely used type-2 fuzzy sets because they are simple to use and because… it is very difficult to justify the use of any other kind." For IT2, the secondary grades are all 1, so the 3D solid is a flat-topped slab.
+
+**Implication for v2 Type-2 target (§3.4):** the continuous μ_Ã(x,u) surface is genuinely unpublished — but only matters for GT2, which is rare. For IT2 (what practitioners use), the FOU 2D footprint already tells the whole story. Reduces the "novel rendering" value claim; doesn't kill the target, but moves it down.
+
+### Qu, Abouheaf, Gueaieb & Spinello 2023 — fuzzy RL flock
 
 <img src="../papers/screenshots/qu-flock-fig1-scenario1.png" width="510">
 
-*Source: Qu et al. 2023 Fig. 1 — phase-plane plot + tracking error + separation error + average velocity, each as 2D time series with confidence bands. This is the "2D matplotlib trajectory plots" v1 criticized; the criticism stands. Flock behavior reads cleanly from these curves but does not convey the emergent 3D structure (lanes, splits, turbulence) that the controller actually produces.*
+*Qu et al. 2023 Fig 1 (scenario 1) — phase-plane plot + average tracking error + average separation error + average follower velocity, all 2D time series.*
 
-**What WF would add:** the 3D scene the trajectories come from, with per-agent rule activations rendered as halos (§3.2). The 2D plots remain useful as quantitative ground-truth; the 3D scene is the qualitative complement.
+**Corrections vs v1-era claims:**
+
+- ❌ **"The paper itself identifies 3D extension as future work"** — **FALSE.** I fabricated this in v1 and propagated it into v2. The actual conclusion's future-work is about "limitations imposed by time-varying graph topologies", not 3D. Removed.
+- ❌ **"20–100 physics bodies"** — **WRONG.** The paper uses **20 followers + 1 leader, fixed**.
+- ✅ The simulation is strictly 2D — "the mobile agents are set to navigate in a 2D plane" (Sec II). 3D extension requires reformulating the consensus protocol, not just adding a z-axis.
+- ✅ The fuzzy inference is **zero-order TSK** per direction (x, y), not full multi-input. Each agent runs a small per-axis controller.
+- The 2D phase-plane plot (Fig 2a) actually *does* show clustering, orbital convergence, and disturbance recovery readably. v1's claim that "lane formation only appears in 3D" was unsubstantiated assertion.
+
+**Implication for v2 flock target (§3.2):** still a valid demo, but the framing shifts. It's not "the paper invites 3D extension" — it's "we re-implement their 2D fuzzy controllers in 3D space, accept that the consensus math needs work, and demonstrate the result in WF for visualization, not as a paper contribution."
+
+### Wan et al. 2026 — Fuz-RL: this is a NeurIPS 2025 paper, not a preprint
+
+**Critical correction:** the front matter says **"39th Conference on Neural Information Processing Systems (NeurIPS 2025)"**. This is a top-tier ML venue, with code already publicly released (link in the abstract; built on SpinningUp). v1's framing — "we could fill the visualization gap and that's a paper" — collapses entirely. NeurIPS papers are evaluated on theoretical contributions and empirical results, not on visualization aesthetics. Anything WF builds against this paper is a *demo*, not a *contribution*.
+
+**What the paper actually visualizes:**
+
+- Fig 1: Training dynamics — return and cost vs epochs across 4 Safety-Gymnasium tasks (Goal/Button/Circle/Push). 2D line plots.
+- Fig 2: Test comparison — return and cost vs perturbation magnitude ε. 2D line plots.
+- **Fig 3: Ablation on uncertainty level K** (K = 1, 5, 10, 15, 25). 2D line plots of return/risk vs ε per uncertainty type. **This is what v1 claimed "no one shows" — they show exactly this.**
+- Table 1: Quantitative comparison across CartPole-Stab / CartPole-Track / Quadrotor-Stab / Quadrotor-Track × observation/action/dynamics uncertainty.
+
+**The Choquet uncertainty structure is finite**, not a continuous solid. Eq (4) partitions the uncertainty set into K discrete levels. The fuzzy measure assigns weights to combinations of those K levels. v1's "Choquet uncertainty volume + safe-region boundary in 3D" was a misreading — the actual object is a finite K-level partition over a 1D ε axis.
+
+**Implication for v2 Fuz-RL target (§3.1):** drop the "research contribution" framing entirely. If the target is worth keeping at all, it becomes "build a 3D Quadrotor-Stab visualization that *uses* their published Fuz-RL policy and shows the K-level safety bands as visible safety zones around the agent" — pedagogical demo, not novel research.
+
+---
 
 ---
 
@@ -52,18 +89,28 @@ So the most defensible WF demos are the ones that exercise **all three at once**
 
 ---
 
-## 2. Surviving targets, ranked
+## 2. Surviving targets, ranked (post-audit)
+
+This ranking is the **post-paper-reading update**. The original v2 ranking is preserved below for comparison, but §0 corrections move several targets up or down.
 
 | # | Target | Trifecta usage | Audience | Honest bucket |
 |---|--------|---------------|----------|---------------|
 | 1 | ANFIS live training on a balanced pendulum | Scripting + autograd + physics | Researchers, advanced students | Pedagogical tool + demo paper candidate |
-| 2 | Fuzzy controller for a flock — emergent dynamics | Scripting + physics (no autograd) | Researchers, demo audiences | Demo paper candidate |
-| 3 | Mamdani inference pipeline coupled to a live plant | Scripting + physics (no autograd) | Students, course supplement | Pedagogical tool |
-| 4 | Type-2 fuzzy controller for a noisy plant | Scripting + physics (no autograd) | Researchers (T2 community) | Internal demo, possible workshop paper |
+| 2 | **Mamdani wall-following robot (Mucientes 2009, 4×41×2) in 3D** | Scripting + physics (no autograd) | Course supplement, fuzzy-control community | Pedagogical tool + software paper candidate |
+| 3 | Fuzzy flock — 3D extension of the Qu 2023 2D paper | Scripting + physics (no autograd) | Demo audiences | Internal demo only (not a paper) |
+| 4 | Type-2 fuzzy controller for a noisy plant | Scripting + physics (no autograd) | T2 specialists (small audience) | Internal demo |
+| ⌀ | ~~Fuz-RL safety boundary~~ | — | — | **Dropped** — NeurIPS 2025 paper with code released; their ablation Fig 3 already shows what v1 claimed was missing; a WF version is at best a pedagogical demo *consuming* their policy |
 
-Type-2 *static FOU 3D solid* (which v1 ranked highly) is dropped — it renders a beautiful object but exercises none of the trifecta. If someone wants a 3D FOU solid, Open3D or a Three.js page is a better fit than a game engine.
+**Changes from the pre-audit ranking:**
 
-FCM, high-dim TSK, Type-3 UAV, Zadeh's "tall" demo, and the unverified Fuz-RL 2026 paper are all dropped, with reasons in the critique.
+- **Mamdani moved from #3 to #2.** Anchoring on FuzzyLogic.jl's Mucientes wall-following robot example (4 inputs, 41 rules, real published behavior) gives the target a substantial reference implementation, not a toy.
+- **Fuzzy flock moved from #2 to #3** and demoted to "internal demo only". The v1 claim that the paper invites 3D extension was fabricated; the consensus math is 2D-specific.
+- **Type-2 dropped from #4 to #4** (held but with a smaller audience claim). The continuous μ_Ã(x,u) surface is genuinely unpublished, but only matters for GT2; IT2 (what practitioners use) doesn't need it.
+- **Fuz-RL dropped entirely** as a serious target. It's a NeurIPS paper with public code and the visualizations v1 said were missing already exist. If kept, only as a "consume their policy, build a 3D Quadrotor-Stab demo" demo.
+
+Type-2 *static FOU 3D solid* (which v1 ranked highly) was already dropped in v2 because it exercises none of the trifecta. Confirmed.
+
+FCM, high-dim TSK, Type-3 UAV, Zadeh's "tall" demo are still dropped, with reasons in the critique.
 
 ---
 

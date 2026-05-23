@@ -27,17 +27,62 @@ to do when a paper is paywalled — is documented in user memory
 
 ### Closed-access — no legal free copy located
 
-These are cited in the v2 investigation but cannot be vendored without a
-publisher subscription. Title, DOI, and one-line summary preserved here so
-the bibliography is complete even without the PDF.
+These are cited in the v2 investigation but cannot be vendored without a publisher subscription. Title, DOI, abstract, and per-publisher cost preserved here so the bibliography is complete even without the PDF.
 
-| Citation | DOI / Link | Why we cite it |
-|----------|-----------|----------------|
-| Zadeh, L. A. (1965). "Fuzzy Sets." *Information and Control* 8(3), pp. 338–353. | [doi:10.1016/S0019-9958(65)90241-X](https://doi.org/10.1016/S0019-9958(65)90241-X) | Founding paper of fuzzy logic. Defines grade-of-membership. |
-| Mamdani, E. H. & Assilian, S. (1975). "An Experiment in Linguistic Synthesis with a Fuzzy Logic Controller." *International Journal of Man-Machine Studies* 7(1), pp. 1–13. | [doi:10.1016/S0020-7373(75)80002-2](https://doi.org/10.1016/S0020-7373(75)80002-2) | Canonical Mamdani inference pipeline. |
-| Takagi, T. & Sugeno, M. (1985). "Fuzzy Identification of Systems and Its Applications to Modeling and Control." *IEEE Trans. Systems, Man, Cybernetics* 15(1), pp. 116–132. | [doi:10.1109/TSMC.1985.6313399](https://doi.org/10.1109/TSMC.1985.6313399) | TSK fuzzy model. Rule surface as a patchwork of linear consequents. |
-| Jang, J.-S. R. (1993). "ANFIS: Adaptive-Network-based Fuzzy Inference System." *IEEE Trans. Systems, Man, Cybernetics* 23(3), pp. 665–685. | [doi:10.1109/21.256541](https://doi.org/10.1109/21.256541) | Five-layer learnable fuzzy network. Backprop on membership functions. |
-| Lim, B. et al. (2023). "Reinforcement Learning with Takagi-Sugeno-Kang Fuzzy Systems." *Complex Engineering Systems*. | [doi:10.20517/ces.2023.11](https://doi.org/10.20517/ces.2023.11) | Actor-critic + DQN on TSK/ANFIS. XFC 2022 Asteroid Smasher. |
+**Per-article rental/purchase cost (publisher list price, USD).** Costs are typically per-article and depend on the *publisher*, not the journal — e.g., everything on IEEE Xplore is the same price regardless of which IEEE journal published it. Verified by spot-checking the publisher pricing pages 2026-05-23; prices may change.
+
+| Citation | DOI / Publisher | Cost | Why we cite it |
+|----------|----------------|------|----------------|
+| Zadeh, L. A. (1965). "Fuzzy Sets." *Information and Control* 8(3), pp. 338–353. | [doi:10.1016/S0019-9958(65)90241-X](https://doi.org/10.1016/S0019-9958(65)90241-X) — Elsevier | ~$35.95 (24 h rental) / ~$41.95 (purchase) | Founding paper of fuzzy logic. Defines grade-of-membership. |
+| Mamdani, E. H. & Assilian, S. (1975). "An Experiment in Linguistic Synthesis with a Fuzzy Logic Controller." *International Journal of Man-Machine Studies* 7(1), pp. 1–13. | [doi:10.1016/S0020-7373(75)80002-2](https://doi.org/10.1016/S0020-7373(75)80002-2) — Elsevier | ~$35.95 / ~$41.95 | Canonical Mamdani inference pipeline. |
+| Takagi, T. & Sugeno, M. (1985). "Fuzzy Identification of Systems and Its Applications to Modeling and Control." *IEEE Trans. Systems, Man, Cybernetics* 15(1), pp. 116–132. | [doi:10.1109/TSMC.1985.6313399](https://doi.org/10.1109/TSMC.1985.6313399) — IEEE Xplore | $33 | TSK fuzzy model. Rule surface as a patchwork of linear consequents. |
+| Jang, J.-S. R. (1993). "ANFIS: Adaptive-Network-based Fuzzy Inference System." *IEEE Trans. Systems, Man, Cybernetics* 23(3), pp. 665–685. | [doi:10.1109/21.256541](https://doi.org/10.1109/21.256541) — IEEE Xplore | $33 | Five-layer learnable fuzzy network. Backprop on membership functions. |
+| Lim, B. et al. (2023). "Reinforcement Learning with Takagi-Sugeno-Kang Fuzzy Systems." *Complex Engineering Systems*. | [doi:10.20517/ces.2023.11](https://doi.org/10.20517/ces.2023.11) — OAE | Free (OA — but full PDF link is gated; abstract is open) | Actor-critic + DQN on TSK/ANFIS. XFC 2022 Asteroid Smasher. |
+
+**Publisher cost reference (per article, list price as of 2026-05-23):**
+
+| Publisher | Per-article purchase | Notes |
+|-----------|---------------------|-------|
+| IEEE Xplore | $33 | Flat rate; non-members. IEEE members get reductions. |
+| Elsevier (ScienceDirect) | $35.95 (24 h rental) / ~$41.95 (purchase) | Pricing varies by title but the historical journals here are all in the same bracket. |
+| Springer | $39.95 | Some journals offer 24 h rental at $9.99. |
+| ACM Digital Library | $15 (non-member); free for members ($99/yr) | Cheapest mainstream option if topic-relevant. |
+| Wiley | $42–48 | Higher than IEEE/Elsevier on average. |
+| OAE Publishing | Open access | Some articles need account / institutional login for the PDF even though "open access." |
+
+**Total to buy all 5 closed-access papers retail:** ~$170. Lower if any are in ACM (none here) or if you find university-affiliate routes (see next section).
+
+## How to get closed-access papers through universities (free or cheap)
+
+For anyone without an institutional subscription, several legitimate routes work. Ranked by accessibility:
+
+1. **Email the author.** The most reliable route, especially for older papers. Almost every academic will send you a PDF if you email them politely asking for a reprint of a specific paper. ~90% hit rate for papers <30 years old where the author is still reachable. For Zadeh (deceased 2017), Mamdani (deceased 2010), this route is closed; for Jang (still active at NTHU), Mendel (still active at USC, already provided the PDF), this works.
+
+2. **ResearchGate / Academia.edu.** Authors often upload accepted manuscripts (not the publisher's typeset version, but the same content). Search by paper title; request access if not immediately downloadable. Free.
+
+3. **The author's personal/institutional page.** Many academics maintain a publications page with PDFs (Mendel at sipi.usc.edu is the model — that's how we got Mendel & John 2002 and Kosko 1986 here). Search for `<author name> publications site:edu`.
+
+4. **Institutional repositories (escholarship.org for UC, dspace.mit.edu for MIT, etc.).** University-hosted preprints/postprints. Free.
+
+5. **Walk-in to any university library.** Most universities offer free in-person access to journal databases for visitors, even non-affiliates. Bangkok options: Chulalongkorn, Mahidol, Thammasat libraries typically allow walk-in journal access (verify hours; bring photo ID).
+
+6. **Alumni access.** If you have any university affiliation — undergrad, grad school, even short-term enrollment — many institutions retain *alumni library access* to journal databases (often free for life). Check your alma mater's library website.
+
+7. **Public-library inter-library loan (ILL).** Local public libraries can request PDFs from academic libraries on your behalf. Free or ~$5 fee. Turnaround 2–7 days. Works for almost any paper with a DOI.
+
+8. **National library memberships.** US: Library of Congress (free reader card, in-person only). UK: British Library (free reader card, walk-in OR remote). Thailand: National Library of Thailand has limited online resources but supports inter-library loan.
+
+9. **Friend at a university.** If someone you know is a current student or faculty, they can usually download an article in seconds. Asking is fine for occasional papers; don't ask them to mass-mirror a journal.
+
+10. **Open Knowledge Maps / scholar.archive.org / Internet Archive Scholar.** Aggregate open-access preprints. Sometimes catches manuscripts before the publisher pulls them.
+
+For the 5 closed-access papers on this list, the fastest legitimate routes are:
+
+- **Mamdani 1975** — email Mamdani's surviving co-authors or USC archive (Mamdani died 2010); ILL via a public library is the practical path.
+- **Takagi & Sugeno 1985** — Sugeno is emeritus at Tokyo Institute of Technology; an email could work. ILL also.
+- **Jang 1993** — Jang is at NTHU; emailing `jang at cs.nthu.edu.tw` should produce a PDF quickly. Or check his publications page (currently lists recent work; older papers may be in archives).
+- **Lim et al. 2023** — OAE journal; the abstract page sometimes provides a free PDF link that takes 1–2 clicks. If not, email the authors at UCincinnati.
+- **Zadeh 1965** — widely scanned, often appears as a course-reading PDF on `.edu` domains; a targeted search for `"Fuzzy Sets" Zadeh 1965 site:edu filetype:pdf` regularly turns up a hosted copy.
 
 ## Verification status of v1 / critique claims
 
