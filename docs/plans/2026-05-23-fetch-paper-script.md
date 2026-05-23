@@ -126,3 +126,84 @@ Only these two checks matter for the first pass; the rest of the verification su
     PASS — script exits cleanly with "no OA copy via Unpaywall" as expected. Slug `1965-zadeh-fuzzy-sets.pdf` correct.
 
 **Conclusion:** Row #1 (Unpaywall) is implemented and working. Neither test paper was found by Unpaywall (Kosko 1986's author copy isn't Unpaywall-indexed; Zadeh 1965 is paywalled as expected). Proceed to row #2 (OpenAlex) — it may catch the Kosko author-page copy and handle the open Lim 2023 OAE paper differently.
+
+---
+
+## Verification — iteration 2 (rows 2–4b: OpenAlex + Semantic Scholar + publisher page)
+
+Added rows 2 (OpenAlex), 3 (Semantic Scholar), 4b (publisher HTML scrape) in commit `9a9218af`.
+
+**Probe results (before coding):**
+
+| Paper | Unpaywall | OpenAlex | Semantic Scholar | Publisher page |
+|-------|-----------|----------|-----------------|----------------|
+| Kosko 1986 | MISS (is_oa: false) | MISS (is_oa: false) | MISS (CLOSED) | — |
+| Zadeh 1965 | MISS | MISS | HYBRID but url = DOI only | — |
+| Mamdani 1975 | MISS | MISS | MISS (CLOSED) | — |
+| Takagi 1985 | MISS | MISS | MISS (CLOSED) | — |
+| Jang 1993 | MISS | MISS | MISS (CLOSED) | — |
+| Zander/Lim 2023 | MISS | MISS | url = DOI redirect | **HIT** via OAE HTML |
+
+**Zander 2023 acquisition:**
+
+```
+python3 scripts/fetch-paper.py doi:10.20517/ces.2023.11
+```
+
+```
+2026-05-23T06:35:36Z Input: type='doi' value='10.20517/ces.2023.11'
+2026-05-23T06:35:36Z Crossref: GET https://api.crossref.org/works/10.20517/ces.2023.11
+2026-05-23T06:35:36Z Canonical: Zander 2023 — 'Reinforcement learning with Takagi-Sugeno-Kang fuzzy systems'
+2026-05-23T06:35:36Z Target filename: 2023-zander-reinforcement-learning-takagi-sugeno.pdf
+2026-05-23T06:35:38Z Unpaywall: no url_for_pdf found
+2026-05-23T06:35:39Z OpenAlex: no pdf_url in best_oa_location
+2026-05-23T06:35:39Z Semantic Scholar: url is just DOI redirect, skipping
+2026-05-23T06:35:39Z Publisher page: following https://doi.org/10.20517/ces.2023.11
+2026-05-23T06:35:41Z Publisher page: 7 candidate(s): ['https://f.oaes.cc/xmlpdf/84ba3d4d-247a-4fc9-a75e-68a8084efc7e/CES-2023-11.pdf', ...]
+2026-05-23T06:35:42Z PDF validation OK: 16 pages, 1984 KB
+2026-05-23T06:35:42Z Saved: docs/papers/2023-zander-reinforcement-learning-takagi-sugeno.pdf (1984 KB)
+✓ Zander 2023 → docs/papers/2023-zander-reinforcement-learning-takagi-sugeno.pdf (via Publisher page)
+```
+
+PASS. Correction: first author is Eric Zander (Crossref canonical), not "Lim" as the investigation doc had it. OAE CDN URL was embedded in article HTML; not indexed by Unpaywall/OpenAlex.
+
+**Status after iteration 2:** 1 of 5 closed-access papers acquired. 4 remain (Zadeh 1965, Mamdani 1975, Takagi 1985, Jang 1993).
+
+---
+
+## Verification — rows 5 + 9–12 (CORE + failure-output path)
+
+Commit `fe55ab9b` → `9a9218af` → ongoing. Row 5 (CORE) + failure outputs (9–12) added together.
+
+**CORE probe:** CORE DOI-query finds metadata but actual CDN downloads are stale (404) or forbidden (403) for all 4 papers. CORE also returns cross-linked "citing papers" with wrong DOI tags — fixed with Jaccard title filter (threshold ≥ 0.5).
+
+**Full run on all 4 remaining papers:**
+
+```
+python3 scripts/fetch-paper.py doi:10.1016/S0019-9958(65)90241-X
+python3 scripts/fetch-paper.py doi:10.1016/S0020-7373(75)80002-2
+python3 scripts/fetch-paper.py doi:10.1109/TSMC.1985.6313399
+python3 scripts/fetch-paper.py doi:10.1109/21.256541
+```
+
+| Paper | Unpaywall | OpenAlex | Semantic Scholar | CORE | Publisher page | Outcome |
+|-------|-----------|----------|-----------------|------|----------------|---------|
+| Zadeh 1965 | MISS | MISS | DOI-redirect only | 2 title-matched, all URLs dead (404/403) | MISS | drafts emitted |
+| Mamdani 1975 | MISS | MISS | MISS | no results | MISS | drafts emitted |
+| Takagi 1985 | MISS | MISS | MISS | no results | 418 (bot-detect) | drafts emitted |
+| Jang 1993 | MISS | MISS | MISS | 2 title-matched, NTHU 404 + IEEE staging 200 not-PDF | 418 (bot-detect) | drafts emitted |
+
+Drafts emitted to `docs/papers/.drafts/`:
+- `1965-zadeh-fuzzy-sets-ill-request.txt` + `…-author-email.txt` [deceased: note added]
+- `1975-mamdani-experiment-linguistic-synthesis-fuzzy-ill-request.txt` + `…-author-email.txt` [deceased: note added]
+- `1985-takagi-fuzzy-identification-systems-applications-ill-request.txt` + `…-author-email.txt`
+- `1993-jang-anfis-adaptive-network-fuzzy-ill-request.txt` + `…-author-email.txt` (OpenAlex affiliation: UC Berkeley 1993; current: NTHU)
+
+Manual search URLs printed to terminal at runtime:
+```
+[9] Google .edu: https://www.google.com/search?q=%22Fuzzy+sets%22+Zadeh+1965+filetype%3Apdf+site:edu
+[10] ResearchGate: https://www.researchgate.net/search?q=Fuzzy+sets+Zadeh
+```
+(and analogous for the other 3 papers)
+
+**Status after rows 1–5 + 9–12:** 1/5 acquired (Zander 2023). 4 remain, all genuinely paywalled with no programmatic OA copy found. Next step: click the Google .edu URL for Zadeh 1965 (plan notes it "regularly turns up a hosted copy") and/or use the ILL drafts.

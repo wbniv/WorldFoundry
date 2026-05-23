@@ -1,0 +1,17 @@
+To: [Your library's ILL / document delivery department]
+Subject: Interlibrary Loan Request
+
+Dear ILL Librarian,
+
+I am requesting a copy of the following article via interlibrary loan:
+
+  Title:   Fuzzy sets
+  Author:  Zadeh, L.A.
+  Year:    1965
+  Journal: Information and Control
+  DOI:     10.1016/S0019-9958(65)90241-X
+
+Please send as PDF to: wbnorris@gmail.com
+
+Thank you,
+Will Norris

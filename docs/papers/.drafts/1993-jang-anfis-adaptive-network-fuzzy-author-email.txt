@@ -1,0 +1,19 @@
+To: [Author email address — look up at affiliation page]
+Subject: Request for reprint: "ANFIS: adaptive-network-based fuzzy inference system"
+
+Dear Jang,
+
+I am a researcher working on fuzzy logic and reinforcement learning and would
+greatly appreciate a copy of the following paper:
+
+  Jang, J.-S.R. (1993). "ANFIS: adaptive-network-based fuzzy inference system." IEEE Transactions on Systems, Man, and Cybernetics. doi:10.1109/21.256541
+
+Would you be able to send a PDF reprint?
+
+Thank you very much,
+Will Norris
+wbnorris@gmail.com
+
+---
+Author affiliation from OpenAlex: University of California, Berkeley
+
