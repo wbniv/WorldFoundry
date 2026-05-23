@@ -207,3 +207,133 @@ Manual search URLs printed to terminal at runtime:
 (and analogous for the other 3 papers)
 
 **Status after rows 1–5 + 9–12:** 1/5 acquired (Zander 2023). 4 remain, all genuinely paywalled with no programmatic OA copy found. Next step: click the Google .edu URL for Zadeh 1965 (plan notes it "regularly turns up a hosted copy") and/or use the ILL drafts.
+
+---
+
+## Author contact research (2026-05-23)
+
+| Paper | Author status | Best contact |
+|-------|---------------|-------------|
+| Zadeh 1965 | Zadeh died 2017 | UC Berkeley BISC/EECS archives — `eecsoffice@eecs.berkeley.edu` |
+| Mamdani 1975 | Mamdani died 2010; co-author Assilian status unknown | QMUL archives — `archives@qmul.ac.uk` |
+| Takagi 1985 | Sugeno died Aug 2023; Takagi status unknown | Tokyo Tech EECS dept via Tomohiro Takagi search |
+| Jang 1993 | Alive, at NTU Taiwan (moved from NTHU/UCB) | NTU CSIE faculty page; email likely `jang@csie.ntu.edu.tw` |
+
+Sources: IEEE obituary for Sugeno (MCI 2023); NTU CSIE faculty listing for Jang.
+
+---
+
+## Reprint request emails
+
+### 1 — Jang 1993 (highest-probability reply)
+
+To send to: `jang@csie.ntu.edu.tw` — verify at https://csie.ntu.edu.tw/en/member/Faculty/Jyh-Shing-Roger-Jang-13692144 or http://mirlab.org/jang/
+
+```
+To: jang@csie.ntu.edu.tw
+Subject: Request for reprint of ANFIS paper (1993)
+
+Dear Prof. Jang,
+
+I'm working on an implementation of fuzzy inference for a game engine and have been
+studying your 1993 paper closely:
+
+  J.-S. R. Jang, "ANFIS: Adaptive-Network-based Fuzzy Inference System,"
+  IEEE Trans. Systems, Man, and Cybernetics, 23(3), pp. 665–685, 1993.
+  doi:10.1109/21.256541
+
+The paper is behind the IEEE paywall ($33) and I'm unable to access it through an
+institution. Would you be willing to send me a PDF reprint?
+
+Thank you very much,
+Will Norris
+wbnorris@gmail.com
+```
+
+---
+
+### 2 — Takagi 1985 (Takagi status unknown; Sugeno deceased Aug 2023)
+
+To send to: look up Tomohiro Takagi's current affiliation — search `Tomohiro Takagi fuzzy systems Tokyo` or try Tokyo Tech EECS alumni directory. If not findable, use ILL draft instead.
+
+```
+To: [Tomohiro Takagi email — look up current affiliation]
+Subject: Request for reprint of Takagi-Sugeno 1985 paper
+
+Dear Prof. Takagi,
+
+I'm working on an implementation of fuzzy inference for a game engine and have been
+studying the Takagi-Sugeno model. I'd like to read the original paper:
+
+  T. Takagi & M. Sugeno, "Fuzzy Identification of Systems and Its Applications
+  to Modeling and Control," IEEE Trans. Systems, Man, and Cybernetics, 15(1),
+  pp. 116–132, 1985. doi:10.1109/TSMC.1985.6313399
+
+The paper is behind the IEEE paywall ($33) and I have no institutional access.
+Would you be willing to send me a PDF reprint?
+
+(I note that Prof. Sugeno passed away in August 2023 — my condolences.)
+
+Thank you very much,
+Will Norris
+wbnorris@gmail.com
+```
+
+---
+
+### 3 — Zadeh 1965 (deceased 2017 — email BISC at Berkeley)
+
+```
+To: eecsoffice@eecs.berkeley.edu
+Subject: Request for course-reading copy of Zadeh 1965 "Fuzzy Sets"
+
+Dear EECS / BISC team,
+
+I'm a researcher working on fuzzy logic and am trying to obtain a copy of:
+
+  L. A. Zadeh, "Fuzzy Sets," Information and Control, 8(3), pp. 338–353, 1965.
+  doi:10.1016/S0019-9958(65)90241-X
+
+I understand Prof. Zadeh passed away in 2017. I'm hoping the BISC group or EECS
+archives may have a course-reading copy or can point me to a freely accessible
+version. The Elsevier paywall asks ~$36 for a 24 h rental.
+
+Any help would be much appreciated.
+
+Thank you,
+Will Norris
+wbnorris@gmail.com
+```
+
+---
+
+### 4 — Mamdani 1975 (deceased 2010 — email QMUL archives)
+
+```
+To: archives@qmul.ac.uk
+Subject: Request for historical paper reprint — Mamdani & Assilian 1975
+
+Dear QMUL Archives,
+
+I'm hoping you can help me locate a copy of a paper by the late Prof. E. H. Mamdani,
+who was on the faculty at Queen Mary:
+
+  E. H. Mamdani & S. Assilian, "An Experiment in Linguistic Synthesis with a Fuzzy
+  Logic Controller," International Journal of Man-Machine Studies, 7(1), pp. 1–13, 1975.
+  doi:10.1016/S0020-7373(75)80002-2
+
+This paper defined the Mamdani fuzzy inference system, which is a foundational
+algorithm in control engineering. The publisher (Elsevier) charges ~$36 for a
+24 h rental. I'm hoping the university archives may hold a copy as part of
+Prof. Mamdani's deposited papers, or can suggest another route.
+
+Thank you very much,
+Will Norris
+wbnorris@gmail.com
+```
+
+---
+
+### ILL as fallback
+
+If the institutional archive emails don't yield a reply within 2 weeks, use the ILL drafts in `docs/papers/.drafts/` — they're pre-filled and ready to paste into any public-library ILL form.
