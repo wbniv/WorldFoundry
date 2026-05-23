@@ -228,7 +228,7 @@ def fetch_arxiv(arxiv_id):
 
 
 # ---------------------------------------------------------------------------
-# Row 1: Unpaywall
+# Rows 1–3: OA aggregator APIs
 # ---------------------------------------------------------------------------
 
 def try_unpaywall(doi):
@@ -257,6 +257,95 @@ def try_unpaywall(doi):
     else:
         log("Unpaywall: no url_for_pdf found")
     return pdf_url
+
+
+def try_openalex(doi):
+    """Row 2: OpenAlex best_oa_location.pdf_url."""
+    url = f"https://api.openalex.org/works/doi:{urllib.parse.quote(doi, safe='/')}"
+    log(f"OpenAlex: GET {url}")
+    r = requests.get(url, timeout=15,
+                     headers={"User-Agent": f"fetch-paper/1 (mailto:{EMAIL})"})
+    if r.status_code != 200:
+        log(f"OpenAlex: HTTP {r.status_code}")
+        return None
+    data = r.json()
+    best = data.get("best_oa_location") or {}
+    pdf_url = best.get("pdf_url")
+    if pdf_url:
+        log(f"OpenAlex: HIT → {pdf_url}")
+    else:
+        log("OpenAlex: no pdf_url in best_oa_location")
+    return pdf_url
+
+
+def try_semantic_scholar(doi):
+    """Row 3: Semantic Scholar openAccessPdf.url."""
+    url = (f"https://api.semanticscholar.org/graph/v1/paper/"
+           f"{urllib.parse.quote(doi, safe='/')}?fields=openAccessPdf,title")
+    log(f"Semantic Scholar: GET {url}")
+    r = requests.get(url, timeout=15)
+    if r.status_code == 429:
+        log("Semantic Scholar: 429 rate-limited, skipping")
+        return None
+    if r.status_code != 200:
+        log(f"Semantic Scholar: HTTP {r.status_code}")
+        return None
+    data = r.json()
+    pdf_info = data.get("openAccessPdf") or {}
+    pdf_url = pdf_info.get("url")
+    if pdf_url and pdf_url.startswith("https://doi.org/"):
+        log(f"Semantic Scholar: url is just DOI redirect ({pdf_url}), skipping")
+        return None
+    if pdf_url:
+        log(f"Semantic Scholar: HIT → {pdf_url}")
+    else:
+        log("Semantic Scholar: no openAccessPdf.url")
+    return pdf_url
+
+
+def try_publisher_page(doi):
+    """Row 4b: Follow DOI redirect → scrape publisher HTML for embedded PDF links.
+
+    Catches OA publishers (OAE, etc.) that embed the PDF URL in the article
+    HTML but don't register it with Unpaywall/OpenAlex.
+    """
+    doi_url = f"https://doi.org/{urllib.parse.quote(doi, safe='/')}"
+    log(f"Publisher page: following {doi_url}")
+    try:
+        r = requests.get(doi_url, timeout=20, allow_redirects=True,
+                         headers={"User-Agent": "Mozilla/5.0"})
+    except requests.RequestException as e:
+        log(f"Publisher page: request failed: {e}")
+        return None
+    if r.status_code != 200:
+        log(f"Publisher page: HTTP {r.status_code}")
+        return None
+    if "text/html" not in r.headers.get("content-type", ""):
+        log("Publisher page: not HTML, skipping")
+        return None
+    # extract all https PDF links from the HTML
+    candidates = re.findall(r'["\'](https?://[^"\']*\.pdf[^"\']*)["\']', r.text)
+    # also catch CDN/download URLs that don't end in .pdf explicitly
+    candidates += re.findall(
+        r'["\'](https?://[^"\']*(?:xmlpdf|fulltext|download/pdf)[^"\']*)["\']', r.text
+    )
+    # deduplicate, prefer CDN/download URLs over thumbnails/images
+    seen = set()
+    ranked = []
+    for u in candidates:
+        if u in seen:
+            continue
+        seen.add(u)
+        # deprioritize images and tiny assets
+        if re.search(r"\.(png|jpg|gif|svg|ico|css|js)", u, re.IGNORECASE):
+            continue
+        ranked.append(u)
+    if not ranked:
+        log("Publisher page: no PDF URLs found in HTML")
+        return None
+    log(f"Publisher page: {len(ranked)} candidate(s): {ranked[:3]}")
+    # return first (will be validated by caller)
+    return ranked[0]
 
 
 # ---------------------------------------------------------------------------
@@ -426,23 +515,37 @@ def process_one(arg, no_write=False, stdin_bibtex=None):
     log(f"DOI: {doi or '(none)'}")
     log(f"Target filename: {slug}.pdf")
 
-    # Row 1: Unpaywall (or arXiv direct URL)
+    # Rows 1–4b: try OA aggregators then publisher page scrape
     pdf_url = None
     technique = None
+    matrix_log = []  # (row_name, result)
 
     if canonical.get("pdf_url"):
         pdf_url = canonical["pdf_url"]
         technique = "arXiv direct"
         log(f"Using direct arXiv PDF URL: {pdf_url}")
-    elif doi:
-        pdf_url = try_unpaywall(doi)
-        if pdf_url:
-            technique = "Unpaywall"
+        matrix_log.append(("arXiv direct", "HIT"))
+    else:
+        for row_name, row_fn in [
+            ("Unpaywall",       lambda: try_unpaywall(doi) if doi else None),
+            ("OpenAlex",        lambda: try_openalex(doi) if doi else None),
+            ("Semantic Scholar", lambda: try_semantic_scholar(doi) if doi else None),
+            ("Publisher page",  lambda: try_publisher_page(doi) if doi else None),
+        ]:
+            result = row_fn()
+            if result:
+                pdf_url = result
+                technique = row_name
+                matrix_log.append((row_name, "HIT"))
+                break
+            else:
+                matrix_log.append((row_name, "MISS"))
 
     if not pdf_url:
-        print(f"✗ {first_author} {year}: no OA copy via Unpaywall")
-        print(f"  Step 1 (Unpaywall): MISS")
-        print(f"  (rows 2–12 not yet implemented)")
+        print(f"✗ {first_author} {year}: no OA copy found")
+        for name, status in matrix_log:
+            print(f"  {name}: {status}")
+        print(f"  (rows 5–12 not yet implemented)")
         return False
 
     # --no-write: dry run
@@ -482,7 +585,7 @@ def process_one(arg, no_write=False, stdin_bibtex=None):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Fetch open-access PDFs for academic papers (iteration 1: Unpaywall).",
+        description="Fetch open-access PDFs for academic papers (rows 1-4b: Unpaywall/OpenAlex/S2/publisher-page).",
         epilog=(
             "Examples:\n"
             "  fetch-paper.py doi:10.1016/S0020-7373(86)80040-2\n"

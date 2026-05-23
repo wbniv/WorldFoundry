@@ -24,6 +24,7 @@ to do when a paper is paywalled — is documented in user memory
 | `2023-qu-fuzzy-rl-flock.pdf` | Qu, S., Abouheaf, M., Gueaieb, W., Spinello, D. (2023). "An Adaptive Fuzzy Reinforcement Learning Cooperative Approach for the Autonomous Control of Flock Systems." doi 10.1109/ICRA48506.2021.9561204. | [arXiv:2303.09946](https://arxiv.org/abs/2303.09946) |
 | `2025-gu-interpretable-tsk-clustering.pdf` | Gu, S., Wang, Y., Chou, Y., Cong, J., Lu, M., Jiao, Z. (2025). "Interpretable Style Takagi-Sugeno-Kang Fuzzy Clustering." | [arXiv:2504.05125](https://arxiv.org/abs/2504.05125) |
 | `2026-wan-fuz-rl-safe-rl.pdf` | Wan, X., Yang, C., Yang, C., Song, J., Sun, M. (2026). "Fuz-RL: A Fuzzy-Guided Robust Framework for Safe Reinforcement Learning under Uncertainty." | [arXiv:2602.20729](https://arxiv.org/abs/2602.20729) |
+| `2023-zander-reinforcement-learning-takagi-sugeno.pdf` | Zander, E. (2023). "Reinforcement learning with Takagi-Sugeno-Kang fuzzy systems." *Complex Engineering Systems*. | [https://f.oaes.cc/xmlpdf/84ba3d4d-247a-4fc9-a75e-68a8084efc7e/CES-2023-11.pdf](https://f.oaes.cc/xmlpdf/84ba3d4d-247a-4fc9-a75e-68a8084efc7e/CES-2023-11.pdf) (Publisher page) |
 
 ### Closed-access — no legal free copy located
 
@@ -37,7 +38,6 @@ These are cited in the v2 investigation but cannot be vendored without a publish
 | Mamdani, E. H. & Assilian, S. (1975). "An Experiment in Linguistic Synthesis with a Fuzzy Logic Controller." *International Journal of Man-Machine Studies* 7(1), pp. 1–13. | [doi:10.1016/S0020-7373(75)80002-2](https://doi.org/10.1016/S0020-7373(75)80002-2) — Elsevier | ~$35.95 / ~$41.95 | Canonical Mamdani inference pipeline. |
 | Takagi, T. & Sugeno, M. (1985). "Fuzzy Identification of Systems and Its Applications to Modeling and Control." *IEEE Trans. Systems, Man, Cybernetics* 15(1), pp. 116–132. | [doi:10.1109/TSMC.1985.6313399](https://doi.org/10.1109/TSMC.1985.6313399) — IEEE Xplore | $33 | TSK fuzzy model. Rule surface as a patchwork of linear consequents. |
 | Jang, J.-S. R. (1993). "ANFIS: Adaptive-Network-based Fuzzy Inference System." *IEEE Trans. Systems, Man, Cybernetics* 23(3), pp. 665–685. | [doi:10.1109/21.256541](https://doi.org/10.1109/21.256541) — IEEE Xplore | $33 | Five-layer learnable fuzzy network. Backprop on membership functions. |
-| Lim, B. et al. (2023). "Reinforcement Learning with Takagi-Sugeno-Kang Fuzzy Systems." *Complex Engineering Systems*. | [doi:10.20517/ces.2023.11](https://doi.org/10.20517/ces.2023.11) — OAE | Free (OA — but full PDF link is gated; abstract is open) | Actor-critic + DQN on TSK/ANFIS. XFC 2022 Asteroid Smasher. |
 
 **Publisher cost reference (per article, list price as of 2026-05-23):**
 
