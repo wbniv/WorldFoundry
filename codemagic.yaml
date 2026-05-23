@@ -5,16 +5,10 @@
 #   ios-simulator-debug (push to 2026-ios) — Phases 0-3, no signing.
 #   ios-device-release  (manual/tag)       — Phase 4+, signed arm64 IPA.
 #
-# iOS budget: 500 Mac-min/month (individual plan). Avg 3.4 min/build as of
-# 2026-04-22 — ~100-150 builds/mo feasible.
-# Android budget: Linux minutes are free on the individual plan.
-#
-# WF_ENABLE_CRDT is deliberately OFF here. The CRDT support library
-# (libwfcrdt.a, vendoring y-crdt via Corrosion+Cargo) is editor-only —
-# shipped game binaries on iOS / Android do not link it. Keeping the flag
-# off avoids pulling rustc / cargo into the Codemagic toolchain and
-# preserves the 500 min/mo budget. See
-# docs/plans/2026-05-18-yrs-c-abi-binding.md.
+# Build budget: 500 free Mac-min/month on the individual plan (the free-tier
+# hook — Mac runners are the expensive resource elsewhere). Linux minutes
+# are paid. iOS Mac builds avg 3.4 min/build as of 2026-04-22 — ~100-150
+# Mac builds/mo feasible.
 
 workflows:
   #------------------------------------------------------------------------------
@@ -22,7 +16,6 @@ workflows:
   #
   # See docs/plans/2026-04-23-chromecast-googletv-port.md Phase 1.
   # Triggers on every push to 2026-ios so each commit has a downloadable APK.
-  # Linux minutes are free on Codemagic's individual plan.
   #------------------------------------------------------------------------------
   android-apk-debug:
     name: Android APK (Debug, arm64)
@@ -249,7 +242,6 @@ workflows:
   # android-apk-debug — debug APK (arm64-v8a) for phone + Google TV sideload.
   #
   # See docs/plans/2026-04-23-chromecast-googletv-port.md Phase 1.
-  # Linux minutes are free on Codemagic's individual plan.
   # Trigger manually from the Codemagic dashboard (no webhook configured yet).
   #------------------------------------------------------------------------------
   android-apk-debug:
