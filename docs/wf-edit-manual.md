@@ -58,7 +58,8 @@ editor binary itself comes from the `cmake … -B build-editor` invocation above
 
 ### Voice + video prerequisites
 
-Voice and video are compiled in when their system libraries are present:
+Voice and video are **required** on the Linux editor build — CMake configure fails
+if either system library is missing:
 
 ```bash
 sudo apt install libopus-dev libvpx-dev   # Opus (voice) + libvpx VP8 (video)
