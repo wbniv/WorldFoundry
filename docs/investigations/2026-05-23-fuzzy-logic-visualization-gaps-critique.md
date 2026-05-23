@@ -10,7 +10,9 @@
 
 The original was synthesized by a research subagent. Several citations should not be relied on without a manual check.
 
-- **Fuz-RL (arXiv 2602.20729, 2026)** — A 2026 paper, the ID matches the YYMM.NNNNN pattern (Feb 2026), but I did not click through and confirm. If this is a hallucinated reference, the entire §3.1 and priority #3 in the implementation list collapse.
+> **Update (post-vendoring, same day):** A subsequent vendoring pass downloaded the actual PDFs and confirmed most of the suspect citations are in fact real. See `docs/papers/README.md` § "Verification status". The biggest single update: **Fuz-RL 2026 is a real paper**, not a hallucination — my "possibly hallucinated" flag below was over-cautious. The other arXiv-cited papers also checked out. The seminal classics (Zadeh, Mamdani, Takagi-Sugeno, Jang, Mendel-John) all have DOIs that resolve via OpenAlex. The Type-3 UAV "Guo et al." citation and the TSK high-dim multilabel DOI remain unverified.
+
+- **Fuz-RL (arXiv 2602.20729, 2026)** — A 2026 paper, the ID matches the YYMM.NNNNN pattern (Feb 2026), but I did not click through and confirm. ~~If this is a hallucinated reference, the entire §3.1 and priority #3 in the implementation list collapse.~~ **Confirmed real on vendoring.**
 - **TSK-RL doi 10.20517/ces.2023.11** — Plausible but unverified.
 - **TSK high-dim doi 10.1109/TFUZZ.2024.3385464** — Plausible but unverified.
 - **Type-3 UAV (Complex & Intelligent Systems 2024)** — Vague attribution ("Guo et al."), no paper title. The subagent may have conflated multiple Type-3 papers.
@@ -34,7 +36,7 @@ The original repeatedly claims competitors do not exist. Several of these claims
 
 ---
 
-## 3. The "academic contribution" path is naive
+## 3. The "academic contribution" path is naïve
 
 The original treats "build a cool 3D demo" as equivalent to "contribute to fuzzy logic research." This is wrong on several counts:
 

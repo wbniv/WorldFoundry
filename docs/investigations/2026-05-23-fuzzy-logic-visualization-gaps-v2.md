@@ -8,6 +8,36 @@ This revision narrows v1's 10+ target list to a handful that actually exercise W
 
 ---
 
+## 0. What existing visualizations look like
+
+Before claiming "no one shows this", grounding in what existing tools and papers actually produce. All three figures below are extracted from the open-access PDFs in `docs/papers/`.
+
+### MATLAB's tipping example, as rendered by FuzzyLogic.jl (Ferranti & Boutellier 2023)
+
+<img src="../papers/screenshots/ferranti-fig1-tipper-mamdani-mfs.png" width="640">
+
+*Source: FuzzyLogic.jl paper Fig. 1 — the canonical Mamdani tipping example. Six 1D membership-function plots tiled into a grid. This is the standard output across MATLAB Fuzzy Toolbox, scikit-fuzzy, JuzzyPy, and FuzzyLogic.jl: 2D line plots arranged as a small-multiples grid.*
+
+**What WF would add:** the live, embodied, physics-coupled control loop in §3.3 (Mamdani plant) — not a *better* plot, a *different* representation: the inference pipeline as a 3D stack of surfaces sitting above a navigable plant. Whether that's pedagogically superior is an empirical question (the v2 has been careful not to assert this without evidence).
+
+### Mendel & John 2002 — type-2 set as a 3D embedded set
+
+<img src="../papers/screenshots/mendel-fig3-type2-fou-3d.png" width="520">
+
+*Source: Mendel & John 2002 Figs 4 (FOU plots) and 5 (embedded type-2 set as 3D spikes). The paper does draw a 3D representation — but as discrete spikes on a 2D primary-variable × primary-membership grid, not as a continuous solid surface μ_Ã(x,u). The continuous-solid form is what §3.4 targets.*
+
+**Implication for v2:** "Type-2 as a 3D object" is not unprecedented — the foundational paper shows it. WF's contribution would specifically be the *continuous, controllable, animated* solid (and its coupling to a plant), not the geometric form itself.
+
+### Adaptive fuzzy RL for flock systems (Qu et al. 2023)
+
+<img src="../papers/screenshots/qu-flock-fig1-scenario1.png" width="510">
+
+*Source: Qu et al. 2023 Fig. 1 — phase-plane plot + tracking error + separation error + average velocity, each as 2D time series with confidence bands. This is the "2D matplotlib trajectory plots" v1 criticized; the criticism stands. Flock behavior reads cleanly from these curves but does not convey the emergent 3D structure (lanes, splits, turbulence) that the controller actually produces.*
+
+**What WF would add:** the 3D scene the trajectories come from, with per-agent rule activations rendered as halos (§3.2). The 2D plots remain useful as quantitative ground-truth; the 3D scene is the qualitative complement.
+
+---
+
 ## 1. The thesis: what only World Foundry can do easily
 
 The WF-unique combination — small enough that no single competing tool covers it — is the simultaneous presence of all three of:
