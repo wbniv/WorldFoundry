@@ -33,6 +33,10 @@ extern "C" {
 #include <zforth.h>
 }
 
+#ifdef WF_NEURAL_FORTH
+#include "neural_forth.h"
+#endif
+
 #include <scripting/scriptinterpreter.hp>
 #include <mailbox/mailbox.hp>
 #include <cstdio>
@@ -146,6 +150,17 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     Mailboxes& mb = g_mgr->LookupMailboxes(actorIdx);
                     mb.WriteMailbox(idx, Scalar::FromFloat(val));
                 }
+            } else if (custom == 72) {
+                /* Neural-forth dispatch gate: syscall 200 = ZF_SYSCALL_USER + 72.
+                 * Pops word-id from stack and routes to nf_dispatch().
+                 * Syscalls 3-71 are reserved for future WF primitives
+                 * (read-actor-mailbox at custom 3, spawn-template, etc.). */
+#ifdef WF_NEURAL_FORTH
+                int word_id = (int)zf_pop(ctx);
+                nf_dispatch(ctx, word_id);
+#else
+                fprintf(stderr, "zforth: neural-forth syscall (200) received but WF_NEURAL_FORTH not compiled in\n");
+#endif
             } else {
                 fprintf(stderr, "zforth: unknown sys id %d\n", (int)id);
             }
@@ -277,6 +292,10 @@ void Init(MailboxesManager& mgr)
     r = zf_eval(&g_ctx, ": write-actor-mailbox 130 sys ;");
     if (r != ZF_OK)
         fprintf(stderr, "zforth: init failed (write-actor-mailbox): %d\n", r);
+
+#ifdef WF_NEURAL_FORTH
+    nf_init(&g_ctx);
+#endif
 }
 
 void Shutdown()
