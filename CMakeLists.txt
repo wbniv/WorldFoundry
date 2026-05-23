@@ -610,7 +610,7 @@ target_compile_options(wfengine PRIVATE
     "-D__GAME__=\"wf_game\""
     "-DERR_DEBUG(x)="
     "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
-    "$<$<CONFIG:Release>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>"
+    "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>"
 )
 if(ANDROID OR IOS)
     # Legacy `register` keyword is C++17-removed; WF's pigsys/endian.cc still
@@ -662,10 +662,10 @@ target_compile_options(wf_game PRIVATE
     "-D__GAME__=\"wf_game\""
     "-DERR_DEBUG(x)="
     "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
-    "$<$<CONFIG:Release>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>"
+    "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>"
 )
 target_link_options(wf_game PRIVATE
-    "$<$<CONFIG:Release>:-flto=thin;-Wl,--gc-sections;-Wl,--icf=safe;-Wl,-O2;-Wl,--export-dynamic-symbol=ANativeActivity_onCreate>"
+    "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-flto=thin;-Wl,--gc-sections;-Wl,--icf=safe;-Wl,-O2;-Wl,--export-dynamic-symbol=ANativeActivity_onCreate>"
 )
 if(ANDROID OR IOS)
     target_compile_options(wf_game PRIVATE -Wno-register)
@@ -678,10 +678,10 @@ if(ANDROID)
     # .eh_frame / .gcc_except_table entries that C++ template-heavy code
     # generates by default.
     if(TARGET Jolt)
-        target_compile_options(Jolt PRIVATE "$<$<CONFIG:Release>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>")
+        target_compile_options(Jolt PRIVATE "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>")
     endif()
     if(TARGET zforth)
-        target_compile_options(zforth PRIVATE "$<$<CONFIG:Release>:-O3;-flto=thin;-ffunction-sections;-fdata-sections>")
+        target_compile_options(zforth PRIVATE "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin;-ffunction-sections;-fdata-sections>")
     endif()
 endif()
 
@@ -745,7 +745,7 @@ if(NOT ANDROID AND NOT IOS)
         "-D__GAME__=\"wf_host_gl_e2e_test\""
         "-DERR_DEBUG(x)="
         "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
-        "$<$<CONFIG:Release>:-O3;-flto=thin>"
+        "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin>"
     )
 
     # ─── CTest cycle-stability tests ──────────────────────────────────────────
@@ -978,7 +978,7 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         "-D__GAME__=\"wf-edit\""
         "-DERR_DEBUG(x)="
         "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
-        "$<$<CONFIG:Release>:-O3;-flto=thin>"
+        "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin>"
     )
     # Link the engine (host-GL embed via SetHostGLContext + StepFrame) and
     # wfcrdt (M4 read-only Y.Doc; pulls in libyrs.a from the editor build).

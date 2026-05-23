@@ -81,7 +81,7 @@ LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 \
 
 ### Editor (`wf-edit`)
 
-The collaborative level editor builds only under `WF_ENABLE_EDITOR=ON`, as a **Debug** CMake build (GCC — Release fails on the engine's Clang-only `-flto=thin`):
+The collaborative level editor builds only under `WF_ENABLE_EDITOR=ON`. Debug is the typical build type:
 
 ```bash
 cmake -S . -B build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Debug
