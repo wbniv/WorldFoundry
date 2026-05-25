@@ -391,6 +391,47 @@ The shared `activate.inc` block — `Activated By Actor` = *any* / *specific-act
 **Dead stubs — do not author against these** (they have an `.oas` but no backing C++ class and
 aren't registered as a kind): `Pole`, `Meter`, `Movie`. Each would need engine work first.
 
+#### Full actor-class inventory (reference)
+
+The authoritative list of what actually instantiates at runtime is the factory in
+[`objects.c`](../wfsource/source/oas/objects.c) (dispatch on `EActorKind`) + the registration in
+[`objects.lc`](../wfsource/source/oas/objects.lc). As of the 2026-05-25 survey:
+
+**Live actor classes** (you can place/compose these):
+
+| Class | Role |
+|-------|------|
+| `Player` | the playable character (Ground/Air handlers, jump) |
+| `Enemy` | damage-dealing NPC |
+| `StatPlat` | static platform / scenery — **scripts forbidden** (`actor.cc:736` asserts) |
+| `Platform` | movable / path-following surface (C++ minimal; motion via OAS movement block) |
+| `Generator` | spawns its `Object To Throw` template on activation |
+| `Gold` | collectible coin *(template-only — spawned, not placed directly)* |
+| `Shield` | player invulnerability/power-up, follows the player *(template-only)* |
+| `Missile` | projectile *(template-only)* |
+| `Explode` | explosion effect *(template-only)* |
+| `Spike` | applies a `Health Modifier` to whoever contacts it |
+| `Warp` | teleports the entering actor to a referenced `Target` |
+| `Destroyer` | removes objects on activation |
+| `ActBox` | activation-volume trigger — writes `MailBox=MailBoxValue` on filtered overlap |
+| `ActBoxOR` | activation volume that activates a referenced Object (camera zones) |
+| `Target` | position marker (referenced by `Warp`/`CamShot`/`Director`) |
+| `CamShot` | camera shot / keyframe (Track/Target toggles) |
+| `Camera` | camera control actor |
+| `Director` | orchestration; runs *after* the main loop each tick |
+| `Light` | light source (directional/omni) |
+| `Matte` | background fill (e.g. SMB sky colour) |
+| `LevelObj` | level-wide object (mailbox count, etc.) |
+| `Shadow` | drop-shadow caster for a referenced template |
+| `Tool` | held item / weapon |
+
+**Component / data-only** (the `.oas` exists only to generate a `.ht` struct; *not* an
+instantiable actor): `actor`(`.inc`), `common`, `movebloc`, `mesh`, `activate`, `toolset`,
+`shadowp`, `handle`, plus the legacy/marker types `alias`, `dir`, `file`, `font`, `init`,
+`template`, `disabled`, `test`.
+
+**Dead stubs** (no C++ class, not registered): `Pole`, `Meter`, `Movie`.
+
 ### Scripting System
 
 #### Per-frame player script (basic pattern)

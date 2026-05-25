@@ -359,6 +359,37 @@ with the current levcomp if you hit it.
 
 ---
 
+## `ActBox` aborts the instant it fires — "attempt to write to mailbox #0"
+
+**Symptom:** you place an `ActBox` trigger volume (e.g. to write `END_OF_LEVEL`), the player
+enters it, and the engine aborts: `AssertMsg: attempt to write to mailbox #0, which is not
+allowed` ([`mailbox.cc:63`](../wfsource/source/game/mailbox.cc) — mailboxes 0 and 1 are reserved,
+`mailbox >= 2`).
+
+**Cause:** `ActBox::activate` ([`actbox.cc:84`](../wfsource/source/game/actbox.cc)) writes the
+activator's index to the **`Activated Actor Mailbox`** field *unconditionally* — and that field
+**defaults to 0** ([`actbox.oas`](../wfsource/source/oas/actbox.oas)). So an ActBox configured
+with only `MailBox`/`MailBoxValue` (leaving `Activated Actor Mailbox` at its default) crashes the
+moment it triggers. The `MailBox` write (your real payload, e.g. `END_OF_LEVEL`) happens first
+and *succeeds*; the very next line — the activator write to mailbox 0 — is what aborts.
+
+**Fix (level-side):** set `Activated Actor Mailbox` to a valid mailbox (≥ 2). If you don't need
+to record who triggered it, send it to a scratch slot — `SCRATCH_USER_START = 4005` (the 4000s
+are the scratch range). Example from the SMB flagpole
+([`blender_create_smb.py`](../wflevels/smb_w1_1/blender_create_smb.py)):
+
+```python
+flagtrig['wf_MailBox']                 = 1905   # INDEXOF_END_OF_LEVEL
+flagtrig['wf_MailBoxValue']            = 1
+flagtrig['wf_Activated By Actor']      = 'Player'
+flagtrig['wf_Activated Actor Mailbox'] = 4005   # scratch — discard the activator (must be >= 2)
+```
+
+The engine-side alternative (guard the write so `0` means "don't record") is logged in
+[`TODO.md`](../TODO.md) § ENGINE ROBUSTNESS but deferred.
+
+---
+
 ## How to run a standalone level
 
 ```bash
