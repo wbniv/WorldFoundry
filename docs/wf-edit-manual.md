@@ -30,7 +30,7 @@ see and hear each other without leaving the tool.
 | Duplicate / delete actors | ✅ (live for templated actors; otherwise on reload) |
 | Save back to `.lev`; compile `.lev` → `.iff` | ✅ |
 | Voice + video calling between editor instances in the same room | ✅ (LAN, Linux) |
-| Real-time multi-user co-editing over a network (presence, relay, chat) | ⏳ not yet — see [Known limitations](#known-limitations) |
+| Real-time multi-user co-editing over a network (presence, relay, chat, disk persistence) | ✅ (WebSocket relay; only at-rest **BYOK** snapshot encryption is deferred — see [Known limitations](#known-limitations)) |
 
 **Platform:** Linux/X11 only in v1. The editor adopts an existing GLX context; Wayland
 and mobile hosts are v2+. `wf-edit` builds **only** when the engine is configured with
@@ -293,8 +293,9 @@ fit the MTU. Each editor binds **ephemeral** UDP ports (OS-assigned), so several
 can run on one machine. Your display name is currently fixed to *"Editor"*.
 
 **Limitations:** LAN-only (multicast discovery, no STUN/relay yet — remote peers are v2);
-audio is a flat stereo mix (no spatialisation); no text chat in v1. If `/dev/video0` is
-absent you appear with an initials avatar (audio-only).
+audio is a flat stereo mix (no spatialisation). Text chat rides the separate WebSocket
+co-editing relay, not this voice/video path. If `/dev/video0` is absent you appear with an
+initials avatar (audio-only).
 
 ---
 
@@ -329,10 +330,13 @@ workflow — they exist so the editor can be proven headlessly.
 
 ## Known limitations
 
-- **Single-user, local.** v1 is one editor process per level on one machine. Networked
-  co-editing (presence/awareness cursors, a relay server, conflict-free remote merges) is a
-  separate networking milestone — the CRDT `Doc` foundation is in place for it.
-- **Voice/video is LAN-only** (multicast discovery; no STUN/relay/remote peers; no text chat).
+- **Networked co-editing shipped** (presence/awareness cursors, a WebSocket `wf-relay`
+  server, conflict-free remote merges, text chat, and debounced disk persistence of each
+  room). The one deferred piece is **BYOK** at-rest snapshot encryption: the relay's
+  snapshot writer takes a `wrap: bytes → bytes` hook that is identity today, leaving room
+  to drop in customer-key encryption later without re-encoding existing snapshots.
+- **Voice/video is LAN-only** (multicast discovery; no STUN/relay/remote peers). Text chat
+  is available separately over the WebSocket co-editing relay.
 - **Live viewport preview is partial** — Position/Orientation + ~15 movement fields render
   live; other fields edit the `Doc` only (full schema-generated coverage is a follow-up).
 - **No undo** for any edit (field or structural).
