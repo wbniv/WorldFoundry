@@ -554,16 +554,28 @@ bool editor_frame(void* p)
     }
 
     // M2: initialize the stable doc→engine index map on the first frame the live
-    // level is available (theLevel non-null). No-op once initialized.
+    // level is available (theLevel non-null). No-op once initialized. Must run
+    // before CollabDrain so the content + deep observers it registers are live
+    // when the SYNC below fires them.
     if (c->doc) wfedit::InitBridgeMap(*c->doc);
-    if (c->doc) wfedit::UpdateBridgeMap(*c->doc);   // Phase 3: apply pending structural changes
 
-    // Phase 2: drain incoming relay SYNC + PRESENCE messages.
+    // Phase 2: drain incoming relay SYNC + PRESENCE messages. A SYNC fires the
+    // content observer (marks a rebuild) and the deep observer (queues touched
+    // actor indices), so it must precede UpdateBridgeMap + DrainEngineSync.
     CollabDrain(c);
 
+    // Phase 3: apply pending structural changes AFTER CollabDrain, so a SYNC that
+    // carries both a structural add/remove and a field edit in one commit rebuilds
+    // the doc→engine map *this* frame. The rebuild forces s_resync_all, which makes
+    // the field edit below re-propagate against the fresh map rather than the stale
+    // pre-SYNC one (which would mistarget the shifted actor for a frame). Local
+    // structural edits from last frame's Outliner UI are picked up here too.
+    if (c->doc) wfedit::UpdateBridgeMap(*c->doc);
+
     // Flush Doc field edits (local panel, remote SYNC just applied above, undo/
-    // redo, replay, DAP) into the live engine. Must run after UpdateBridgeMap so
-    // it reads the rebuilt doc→engine map, and at frame top (no live txn).
+    // redo, replay, DAP) into the live engine — the single propagation path. Runs
+    // after UpdateBridgeMap so it reads the rebuilt doc→engine map, at frame top
+    // (no live txn).
     if (c->doc) wfedit::DrainEngineSync(*c->doc);
 
     // Phase 4: broadcast own presence ~10 Hz when relay is connected.
