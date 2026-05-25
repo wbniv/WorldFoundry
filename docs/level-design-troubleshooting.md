@@ -1507,3 +1507,27 @@ _state (int32, 4) + _size (int32, 4) = 8 bytes ✓
 every subsequent allocation. The fix is to leave the struct at the natural 8-byte
 size; the comment in `lmalloc.cc` documents the invariant explicitly so it doesn't
 get broken again.
+
+
+## Per-actor scale is visual-only — collision and physics don't scale
+
+**Symptom:** You scale an actor (via the `X/Y/Z_SCALE` mailboxes 3040–3042, or — once
+wired — Blender object scale) and the mesh visibly stretches, but the actor still
+collides, blocks, and is walked on as if it were its original size.
+
+**Why:** The scale is applied **at draw time only** — `Actor` caches `_scaleX/Y/Z`
+and forwards them to `RenderActor3D::SetActorScale`, which column-multiplies the world
+matrix just before rendering (`wfsource/source/game/actor.cc:1606-1622`). Nothing
+propagates that scale to the collision bbox (`coarse` rect in the on-disk record) or
+to the Jolt physics shape, so collision and physics keep the unscaled geometry.
+
+**What to do:**
+
+- For **purely visual** scaling (squash/stretch effects, decorative size variation
+  with no gameplay collision — e.g. qbert), this is fine and intended.
+- For a size change that must **affect gameplay** (a genuinely bigger crate you stand
+  on or bump into), make it a **real mesh edit in Blender** and re-export — the mesh
+  is the golden source of an object's true size.
+- A first-class "scale that also scales collision + physics" (Jolt `ScaledShape`,
+  authored as Blender object scale) is a tracked follow-up, deferred until after the
+  next level ships — see `TODO.md` § *DEFERRED UNTIL LEVEL*.

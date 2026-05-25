@@ -89,12 +89,25 @@ snap. Default is combined translate+rotate on the selected actor.
 4. **Euler convention** — use WF `Matrix34::AsEuler`, not ImGuizmo's decompose.
 5. **`structural_dirty`/stale map** — gated out.
 
-## Deferred — scale (separate follow-up plan)
-Per-actor non-uniform render scale works live (`EMAILBOX_X/Y/Z_SCALE` 3040-3042 → `_scaleX/Y/Z` →
+## Deferred — scale (SHELVED 2026-05-25)
+
+Per-actor scale works live (`EMAILBOX_X/Y/Z_SCALE` 3040-3042 → `_scaleX/Y/Z` →
 `_renderActor->SetActorScale` → `RenderActor3D::Render`; `wfmut::SetMailbox`/`GetMailbox` reach them)
 and is stored in the binary on-disk record ([levelcon.h](../../wftools/lvldump/source/levelcon.h):83,
-`x/y/z_scale` at bytes 16-28), **but has no named leaf in the text `.lev`/Doc**
+`x/y/z_scale` at bytes 16-28) but has no named leaf in the text `.lev`/Doc
 ([decompile.rs](../../wftools/levcomp-rs/src/decompile.rs):24 "scale … not used during decompile").
-Persisting a scale edit requires first surfacing `x/y/z_scale` as a named `"Scale"` VEC3 through
-levtree-rs (parse/print) + levcomp-rs (text→binary) + the Blender exporter + the property panel/Doc;
-only then can a scale gizmo write a Doc leaf like Position/Orientation. Tracked separately.
+
+**Decision (2026-05-25): the scale gizmo is shelved — and the missing leaf is not the real
+blocker.** The mailbox scale is **render-only**: it column-multiplies the world matrix at draw
+time and does **not** scale the collision bbox (`coarse` rect, `_ObjectOnDisk` bytes 36-60) or the
+Jolt physics shape ([actor.cc:1606-1622](../../wfsource/source/game/actor.cc)). So a scale gizmo
+wired to those mailboxes would visually stretch the mesh while collision/physics stay original-size
+— a desync footgun — and persisting a render multiplier into the `.lev` fights the
+Blender-golden-source model (real size = mesh geometry). That collision/physics gap is logged as a
+bug in [TODO.md](../../TODO.md) § *PHYSICS*.
+
+The proper path is **physics-correct instance scale via OAD fields** (render + collision bbox + Jolt
+`ScaledShape`, authored as Blender object scale), deferred to **after the new level ships**
+([TODO.md](../../TODO.md) § *DEFERRED UNTIL LEVEL* — the text/binary pipeline insertion points are
+mapped there). Once that lands, the scale gizmo is a small ImGuizmo `SCALE`-mode add that mirrors
+the translate/rotate `CommitGizmoToDoc` path in [gizmo.cc](../../engine/wf_edit/gizmo.cc).
