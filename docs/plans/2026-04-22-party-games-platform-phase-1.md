@@ -1,7 +1,7 @@
 # Plan: Party Games Platform — Phase 1 (Chromecast foundation)
 
 **Date:** 2026-04-22
-**Status:** In progress
+**Status:** PARTIAL — Phases 1a–3 + Reaction + Image games shipped; Phase 1d physical Cast-device verification pending.
 **Branch:** `party-games-platform` (off `2026-ios` HEAD `da9e5ee`), worktree `/home/will/WorldFoundry.party-games-platform`.
 **Design refs:** [docs/reference/2026-04-14-party-game.md](../reference/2026-04-14-party-game.md) (reaction game — first consumer), [docs/reference/2026-04-14-party-game-cards.md](../reference/2026-04-14-party-game-cards.md) (future).
 

@@ -1,5 +1,7 @@
 # Plan: Replace Player Mesh with Sphere (Marble) in marble-madness
 
+**Status:** DONE — sphere mesh created and used by [`wflevels/marble-madness`](../../wflevels/marble-madness).
+
 ## Context
 The marble-madness level currently uses `player.iff` (snowman model) as a placeholder for
 the marble. The player mesh needs to be replaced with a sphere to match the Marble Madness

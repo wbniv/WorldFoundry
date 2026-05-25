@@ -1,5 +1,7 @@
 # Plan — Q✱bert apex respawn on round clear
 
+**Status:** DONE (commit `eef68018`) — apex respawn on round-clear wired (mb 426).
+
 ## Context
 
 Round-clear reset ships (2026-05-04): all 28 cubes flipping to state 2 triggers a

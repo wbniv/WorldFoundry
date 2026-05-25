@@ -1,5 +1,7 @@
 # Plan: Capture all cube color states for Q*bert (state 0/1/2 per round)
 
+**Status:** DONE — cube-state captures complete (the investigation notes one round's state-1 was elusive); MAME palette colours in hand.
+
 ## Outcome (2026-05-06)
 
 **15 of 16 rounds fully captured.** L4R1 state-1 unconfirmed.

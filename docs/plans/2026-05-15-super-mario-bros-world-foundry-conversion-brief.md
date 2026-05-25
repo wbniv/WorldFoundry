@@ -1,5 +1,7 @@
 # Plan: Super Mario Bros. — World Foundry conversion brief
 
+**Status:** Reference doc (conversion brief) — the in-repo conversion is well underway; SMB W1-1 ships ([`wflevels/smb_w1_1`](../../wflevels/smb_w1_1)).
+
 ## Context
 
 The user has a collection of WF (World Foundry) conversion briefs for classic arcade/console games, each stored as a root-level `.md` file in `/home/will/wf-games/`. These briefs describe how to adapt a classic title to the World Foundry engine using zForth scripting, WF mailboxes, OAD actors, and the existing physics/camera/missile systems. Super Mario Bros. is the natural next entry — it shares the platformer DNA of Donkey Kong (already briefed) and would use or slightly extend many of the same primitives.

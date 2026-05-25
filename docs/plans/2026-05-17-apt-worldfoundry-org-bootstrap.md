@@ -1,7 +1,7 @@
 # Foundry Linux Phase 1 bootstrap
 
 **Date:** 2026-05-17
-**Status:** In progress
+**Status:** DONE — [apt.worldfoundry.org](https://apt.worldfoundry.org/) is live (signed `.deb` archive, `dists/` served; HTTP 200). External infra (Cloudflare R2 + aptly + GitHub Actions); no in-repo artifact by design.
 **Scope:** All setup needed before the GitHub Actions `publish.yml` in `foundry-linux/foundry-apt`
 can build, sign, and serve the APT repo at `apt.foundrylinux.org`.
 

@@ -1,5 +1,7 @@
 # What's Next for the Editor
 
+**Status:** Reference doc (2026-05-22 session snapshot) — most items since shipped; see the [plan-status sweep](2026-05-25-plan-status-sweep.md) for current editor state.
+
 **Date:** 2026-05-22
 
 ## Open editor items (priority order)

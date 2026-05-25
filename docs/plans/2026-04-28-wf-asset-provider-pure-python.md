@@ -1,5 +1,7 @@
 # Plan: Pure-Python Asset Provider for Blender Plugin
 
+**Status:** OPEN — pure-Python provider port not started (the [`wf_blender`](../../wftools/wf_blender) addon exists, but no provider seam).
+
 ## Context
 
 The Blender asset browser currently binds to `wf_asset_provider` via PyO3 (a compiled Rust extension), and the CLI (`wf-asset`) is a Rust binary from the same crate. All the operations both tools perform — HTTP search, JSON parsing, TOML policy loading, file download, manifest writing — are straightforward stdlib Python. There is no performance or capability justification for Rust in either case.

@@ -1,5 +1,7 @@
 # Plan: Voice + Video Calling in wf-edit
 
+**Status:** DONE — LAN voice + video calling shipped ([`collab_session`](../../engine/wf_edit/collab_session.h), [`voice_track`](../../engine/wf_edit/voice_track.h), [`video_track`](../../engine/wf_edit/video_track.h)).
+
 ## Context
 
 wf-edit is a collaborative CRDT-based level editor (ImGui/GLFW/OpenGL). Multiple editors

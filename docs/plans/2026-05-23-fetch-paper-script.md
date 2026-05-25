@@ -1,5 +1,7 @@
 # Plan: `scripts/fetch-paper.py` — closed-access paper acquisition
 
+**Status:** PARTIAL — Unpaywall (row #1) + input normalisation done (`fe55ab9b`); remaining source rows (OpenAlex, Semantic Scholar, arXiv, …) not implemented.
+
 ## Context
 
 We have 5 closed-access papers blocking the v2 fuzzy-logic investigation (`docs/papers/README.md` §"Closed-access — no legal free copy located"). Retail = ~$170. The SOP at `feedback_vendor_research_papers.md` already lists Unpaywall / OpenAlex / Semantic Scholar as preferred APIs, and `docs/papers/README.md` §"How to get closed-access papers through universities (free or cheap)" enumerates 10 acquisition techniques — but every one is currently a manual chore. This script automates the programmable techniques in the right order and emits ready-to-send drafts for the techniques that require a human.

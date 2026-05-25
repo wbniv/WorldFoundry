@@ -1,5 +1,7 @@
 # Camera pullback + diff sample-point nudge
 
+**Status:** DONE (commit `f67774fc`) — camera pull-back landed (screenshot proof in the SMB plans).
+
 User reported Q*bert's head is clipped at the top of the framebuffer. Current `CAMSHOT_POS = (0.0, -15.0, 19.0)` / `CAMSHOT_LOOKAT = (0.0, 3.0, 8.5)` puts the look-direction (0, 18, -10.5) magnitude ~20.85 from camera to lookat. Pull the camera back ~35% along that vector to give head/foot margin: new `CAMSHOT_POS ≈ (0.0, -22.0, 23.0)` keeps the same lookat point and roughly the same down-tilt angle (atan((23-8.5)/(3-(-22))) = atan(0.58) = 30.1° vs the documented 30°).
 
 Edit in [wflevels/qbert_practice/blender_create_qbert.py:113](../../WorldFoundry.2026-new-level/wflevels/qbert_practice/blender_create_qbert.py).

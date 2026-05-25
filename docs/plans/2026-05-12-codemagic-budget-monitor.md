@@ -1,5 +1,7 @@
 # Codemagic budget: caching + monitor + bleed reduction
 
+**Status:** OPEN — design complete; no CI/budget changes implemented (no budget workflow; mac trigger not gated).
+
 ## Context
 
 On day 12 of May 2026 we've burned ~490 of 500 Mac-build minutes on the parkingspace Codemagic account. The header of `codemagic.yaml` (line 8-9) predicted "3.4 min/build, ~100-150 builds/mo feasible"; the current burn rate is consistent with that build count (~144 builds in 12 days ≈ 12 pushes/day) but leaves zero headroom and we'll fall off the cliff in hours.

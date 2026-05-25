@@ -1,7 +1,7 @@
 # Plan — Android size trim, iteration 2
 
 **Date:** 2026-04-18
-**Status:** In progress
+**Status:** OPEN — neural-forth size gating wired; the `-fno-exceptions` / `-fvisibility=hidden` / Vorbis-trim build changes not yet applied.
 **Follow-up to:** [Android port size/RAM report](../investigations/2026-04-18-android-port-size-and-ram.md)
 
 ## Context

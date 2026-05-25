@@ -4,7 +4,7 @@
 
 **Parent plan:** [2026-04-29-live-editor-bridge.md](2026-04-29-live-editor-bridge.md) — Phases 1–3 + parts of Phase 4 are landed. This plan covers the five remaining capabilities.
 
-**Status:**
+**Status:** PARTIAL — Phase A (`set_mailbox` + `inject_input`) shipped (commits `63f01d7`, `1e0098e`); Phase B (`set_shader`/`reload_script`) + Phase C (DAP) deferred.
 - Phase A — **landed** 2026-05-03 (commits 63f01d7, 1e0098e); pytest harness in [tests/test_phase_a.py](../../tests/test_phase_a.py) covers `set_mailbox` + `inject_input` end-to-end against qbert_practice.
 - Phase B1 (`set_shader`) — **landed** 2026-05-03 (905a75a). Spike found there is no shader cache; ~80 LOC instead of 1–2 days. Tests in [tests/test_phase_b.py](../../tests/test_phase_b.py).
 - Phase B2 (`reload_script`) — design agreed 2026-05-03: append-leak, dev/debug-only feature; per-actor override map keyed by `actor_idx` (not src pointer); ~100 reload budget per session before engine restart.

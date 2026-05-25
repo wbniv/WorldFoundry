@@ -1,7 +1,7 @@
 # Plan — capture frames via FBO so `-record_video` survives window occlusion
 
 **Date:** 2026-05-11
-**Status:** In progress.
+**Status:** OPEN — X11-occlusion blackout root-caused; the FBO-render mitigation not coded. Workaround: keep the window unobstructed while recording.
 
 ## Problem
 

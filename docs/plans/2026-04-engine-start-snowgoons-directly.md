@@ -1,5 +1,7 @@
 # WF Engine — Start Snowgoons Level Directly
 
+**Status:** Moot/superseded — level selection now goes through the editor + engine `--level` path; direct-start hack no longer needed.
+
 ## Context
 
 The `wf_game` binary builds and runs. The engine loads `cd.iff`, which is a multi-level

@@ -1,5 +1,7 @@
 # Duplicate marble-madness level for physics/motion co-agent
 
+**Status:** DONE — [`wflevels/marble-madness-2`](../../wflevels/marble-madness-2) created and building.
+
 ## Context
 
 The marble-madness level is the active playground for physics and motion work on the 2026-new-level branch. A co-agent is working independently on physics/motion in that level. Duplicating the map gives the co-agent an isolated sandbox (`marble-madness-2`) without conflicting with the primary `marble-madness` level.

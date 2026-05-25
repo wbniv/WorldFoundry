@@ -1,5 +1,7 @@
 # Plan — Q✱bert per-face cube palette (arcade-faithful, ROM-verified)
 
+**Status:** DONE — per-face (top/side) ROM-verified cube palette shipped via the generator.
+
 ## Context
 
 User pointed out (2026-05-04) that our current cube renders are uniform single-colour blocks: every face the same RGB. In the arcade, each cube has multiple distinctly coloured faces — the iconic "stacked tilted blocks" silhouette. Our existing `gen_cube.py` produces flat-shaded uniform-colour cubes, and the existing palette memory note (`reference_arcade_museum_screenshots.md`) claimed L1R1 starting top is teal `#52A9A3` based on JPG eyeball samples. Both are wrong.

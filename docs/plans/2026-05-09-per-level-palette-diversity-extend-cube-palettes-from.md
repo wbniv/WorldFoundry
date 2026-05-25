@@ -1,5 +1,7 @@
 # Per-level palette diversity: extend cube palettes from 4 to 16 rounds
 
+**Status:** DONE (commit `9f104b28`) — 16-round cube-palette extension shipped.
+
 ## Context
 
 Q*bert arcade has 4 levels × 4 rounds = 16 distinct cube colour palettes.

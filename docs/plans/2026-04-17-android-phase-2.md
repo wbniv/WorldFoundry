@@ -1,5 +1,7 @@
 # Plan: Android port Phase 2 — HAL lifecycle + asset accessor
 
+**Status:** DONE — Android lifecycle + AAsset accessor HAL seams implemented ([`lifecycle.cc`](../../wfsource/source/hal/android/lifecycle.cc), [`asset_accessor_aasset.cc`](../../wfsource/source/hal/android/asset_accessor_aasset.cc)).
+
 **Date:** 2026-04-17  
 **Branch:** 2026-first-working-gap  
 **Depends on:** Phase 1 (CMake) ✅  

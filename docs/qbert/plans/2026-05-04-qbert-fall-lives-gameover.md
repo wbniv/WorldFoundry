@@ -1,5 +1,7 @@
 # Plan — Q✱bert fall animation + lives + game-over
 
+**Status:** DONE — fall animation + lives counter (mb 72) + GAME OVER overlay all wired (curse-bubble death, commits `e5ebb01d`, `c481b368`).
+
 ## Visual reference — arcade ROM vs. WF runtime
 
 Side-by-side comparisons drive faithfulness decisions. Arcade frames captured from the vendored MAME ROM (see §4); runtime frames captured from `wf_game -record_video` against the rebuilt level (post-implementation).

@@ -1,5 +1,7 @@
 # ✅ DONE: Fix UV Seam Distortion in Mesh Exporter (commit b760feb)
 
+**Status:** DONE (commit `b760feb1`) — vertex splitting at UV seams fixes the cylinder round-trip.
+
 ## Context
 
 The World Foundry MODL binary `.iff` format stores one UV coordinate pair per vertex

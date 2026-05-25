@@ -1,5 +1,7 @@
 # Rebuild `wflevels/qbert_practice-standalone.iff` from source
 
+**Status:** DONE (commit `5b02160b`) — iffcomp-rs step added to `build_level_binary.sh`; byte-identity verified.
+
 ## Context
 
 `wflevels/qbert_practice-standalone.iff` is the engine-loadable L4-wrapped form that `task run-level -- wflevels/qbert_practice-standalone.iff` loads. Today it has no automated rebuild step — the existing build pipeline (`wftools/wf_blender/build_level_binary.sh`) stops at step `[4/4]` producing the inner `wflevels/qbert_practice.iff` (45 KB post Phase-1 consolidation). The L4 wrapper around that inner has, per a doc note from today, been "hand-built by a small Python wrap" because of a suspected `iffcomp-rs` inlining bug.
