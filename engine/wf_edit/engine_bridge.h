@@ -104,6 +104,16 @@ void PropagateToEngine(int doc_index, const PropField& f);
 void RunBridgeTest(wfcrdt::Doc& doc, int doc_index,
                    const std::string& field_name, const std::string& new_data);
 
+// WF_EDIT_REMOTE_TEST headless proof for the deep-observer path: edits actor
+// `docB`'s Position via a REMOTE-origin txn (Doc::beginRemote — a peer/replay/DAP
+// edit), then flushes via DrainEngineSync — WITHOUT any direct PropagateToEngine
+// call. Asserts the engine actor moved, so only the deep observer can have driven
+// it. `selectedA` is the locally-selected actor (must differ from docB — the
+// regression was that a remote edit only reached the *selected* actor). Logs
+// "[remote-test] PASS" / "FAIL". Leaves the actor moved so --screenshot captures it.
+void RunRemoteSyncTest(wfcrdt::Doc& doc, int selectedA, int docB,
+                       const std::string& new_pos);
+
 // WF_EDIT_SPAWN_CONFIRM_TEST headless proof (two parts):
 // A) Scans the live level's template table via HasTemplate and logs the first
 //    non-null entry. Does NOT attempt to spawn it — Room/Level/Tool templates

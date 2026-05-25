@@ -276,8 +276,13 @@ void DrainEngineSync(wfcrdt::Doc& doc)
 
     for (int idx : actors) {
         if (DocActorToEngineIdx(idx) < 1) continue;   // no live engine actor
+        // Propagate every field — NOT just OAD-`matched` ones. TranslateField
+        // returns NoOp for the unmapped long tail (and PropagateToEngine skips
+        // those), but the transform fields Position/Orientation are addressed
+        // by name and are NOT OAD-matched (per-instance prefix), so a `matched`
+        // guard would silently drop exactly the edits that move the viewport.
         for (const auto& pf : ResolveProperties(ReadActorFields(doc, idx)))
-            if (pf.matched) PropagateToEngine(idx, pf);
+            PropagateToEngine(idx, pf);
     }
 }
 
@@ -466,6 +471,65 @@ void RunBridgeTest(wfcrdt::Doc& doc, int doc_index,
         doc_index, eidx, field_name.c_str(), new_data.c_str(),
         propagated ? "propagated" : "NOT propagated",
         fmt(before).c_str(), fmt(after).c_str());
+}
+
+void RunRemoteSyncTest(wfcrdt::Doc& doc, int selectedA, int docB,
+                       const std::string& new_pos)
+{
+    if (!theLevel) { std::fprintf(stderr, "[remote-test] no live level\n"); return; }
+    if (docB == selectedA) {
+        std::fprintf(stderr, "[remote-test] FAIL: docB (%d) must differ from "
+                             "selected A (%d) — that's the whole regression\n",
+                     docB, selectedA);
+        return;
+    }
+    const int engB = DocActorToEngineIdx(docB);
+    if (engB < 1) {
+        std::fprintf(stderr, "[remote-test] FAIL: actor %d has no live engine counterpart\n", docB);
+        return;
+    }
+
+    const auto before = wfmut::GetActorPos(*theLevel, engB);
+
+    int child = -1;
+    for (const auto& af : ReadActorFields(doc, docB))
+        if (af.name == "Position") { child = af.child_index; break; }
+    if (child < 0) {
+        std::fprintf(stderr, "[remote-test] FAIL: actor %d has no Position field\n", docB);
+        return;
+    }
+
+    // Apply on a REMOTE-origin txn (a peer/replay/DAP edit). The commit fires the
+    // bridge's deep observer, which queues actor B — there is deliberately NO
+    // PropagateToEngine call here, so only the deep observer + DrainEngineSync can
+    // move the engine actor.
+    if (!WriteFieldLeaf(doc, docB, child, "DATA", new_pos, /*remote=*/true)) {
+        std::fprintf(stderr, "[remote-test] FAIL: WriteFieldLeaf on actor %d failed\n", docB);
+        return;
+    }
+
+    DrainEngineSync(doc);   // exactly what editor_frame calls at frame top
+
+    const auto after = wfmut::GetActorPos(*theLevel, engB);
+    auto fmt = [](const std::optional<Vector3>& p) -> std::string {
+        if (!p) return "(n/a)";
+        char b[64];
+        std::snprintf(b, sizeof b, "(%.3f %.3f %.3f)",
+                      p->X().AsFloat(), p->Y().AsFloat(), p->Z().AsFloat());
+        return b;
+    };
+    auto moved = [](const std::optional<Vector3>& a, const std::optional<Vector3>& b) {
+        if (!a || !b) return false;
+        auto d = [](Scalar x, Scalar y) { return std::fabs(x.AsFloat() - y.AsFloat()); };
+        return d(a->X(), b->X()) > 1e-4f || d(a->Y(), b->Y()) > 1e-4f || d(a->Z(), b->Z()) > 1e-4f;
+    };
+    std::fprintf(stderr,
+        "[remote-test] selected A=%d  remote-edit B=%d (eng %d) Position := \"%s\"  "
+        "before %s  after %s  ==> %s\n",
+        selectedA, docB, engB, new_pos.c_str(), fmt(before).c_str(), fmt(after).c_str(),
+        moved(before, after)
+            ? "PASS (deep observer propagated a remote edit to a NON-selected actor)"
+            : "FAIL (engine actor did not move)");
 }
 
 void RunSpawnConfirmTest()

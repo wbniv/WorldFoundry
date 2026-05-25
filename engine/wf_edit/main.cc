@@ -594,6 +594,22 @@ bool editor_frame(void* p)
                 wfedit::RunBridgeTest(*c->doc, c->selected, s.substr(0, bar), s.substr(bar + 1));
         }
     }
+    // Deep-observer regression proof (WF_EDIT_REMOTE_TEST="<docB>|<x y z>"): with
+    // actor A selected (--select), apply a REMOTE-origin Position edit to a
+    // DIFFERENT actor B and confirm it moves in the engine purely via the deep
+    // observer (no direct PropagateToEngine). The pre-fix bridge only re-synced
+    // the selected actor, so B would not move. See docs/plans/2026-05-25-observe-deep-bridge.md.
+    static bool s_remote_tested = false;
+    if (!s_remote_tested && c->doc && c->selected >= 0) {
+        if (const char* spec = std::getenv("WF_EDIT_REMOTE_TEST"); spec && *spec) {
+            s_remote_tested = true;
+            std::string s = spec;
+            if (auto bar = s.find('|'); bar != std::string::npos)
+                wfedit::RunRemoteSyncTest(*c->doc, c->selected,
+                                          std::atoi(s.substr(0, bar).c_str()),
+                                          s.substr(bar + 1));
+        }
+    }
     // M3 save-UI screenshot proof: WF_EDIT_SAVE_UI=<path> drives File→Save once
     // from inside the frame loop (so the toast renders + --screenshot captures
     // it), unlike the pre-GL WF_EDIT_SAVE which exits before any UI.

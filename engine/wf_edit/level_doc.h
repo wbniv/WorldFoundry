@@ -86,8 +86,13 @@ struct ActorField {
 // sub-chunk to write — "DATA" (raw value) or "STR" (label) — or "" to set the
 // field chunk's own text when it's a bare leaf. Returns false if the path /
 // leaf doesn't exist (creates nothing — mirror-the-oracle: edits, never adds).
+// `remote=true` writes the edit on a Doc::beginRemote() (kOriginRemote)
+// transaction instead of Doc::begin() — used to simulate a peer/replay/DAP edit
+// (it stays out of local undo history and, like a real relay apply, drives the
+// viewport only through the bridge's deep observer). Default false = a local edit.
 bool WriteFieldLeaf(wfcrdt::Doc& doc, int actor_index, int child_index,
-                    const char* leaf_type, const std::string& new_text);
+                    const char* leaf_type, const std::string& new_text,
+                    bool remote = false);
 
 // Read every field of content[actor_index] out of the Doc: each child chunk's
 // NAME + DATA. Skips the actor's own top-level NAME (shown separately).

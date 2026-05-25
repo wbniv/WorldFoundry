@@ -447,9 +447,10 @@ bool SetLeafLiterals(wfcrdt::Array& items, const std::string& new_text)
 }  // namespace
 
 bool WriteFieldLeaf(wfcrdt::Doc& doc, int actor_index, int child_index,
-                    const char* leaf_type, const std::string& new_text)
+                    const char* leaf_type, const std::string& new_text,
+                    bool remote)
 {
-    auto txn = doc.begin();   // commits on scope exit
+    auto txn = remote ? doc.beginRemote() : doc.begin();   // commits on scope exit
     auto content = txn.array("content");
     if (actor_index < 0 || actor_index >= content.len()) return false;
 

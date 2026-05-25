@@ -1,6 +1,6 @@
 # Plan: `observe_deep` true Doc observer for the CRDT→engine bridge
 
-**Status:** In progress (started 2026-05-25)
+**Status:** **DONE 2026-05-25 (~3 h incl. a full clean editor build).** Verified end-to-end: `wfcrdt_wrapper_test` 14/14 under ASan+UBSan (new `test_deep_observer`); `wf-edit` builds + links; the `WF_EDIT_REMOTE_TEST` harness PASSes — a **remote-origin** Position edit to a **non-selected** actor moves it in the engine purely via the deep observer (`before (7.868 -10.566 0.801)` → `after (-7.870 -10.570 0.800)`), with the before/after screenshots below showing the platform's tree mesh sliding right→left while a *different* actor stays selected.
 **TODO:** [TODO.md](../../TODO.md) `## COLLABORATIVE EDITOR` — "CRDT→engine bridge: true Doc observer (`observe_deep`) for remote/replay/DAP edits."
 
 ## Context
@@ -75,8 +75,9 @@ imperceptible. Matches [fix root cause, not symptom](/home/will/.claude/projects
   ```
   (Keep the shallow content observer: structural add/remove fires an event *at* `content` → empty path → skipped here, still rebuilds via `s_needs_rebuild`.)
 - Implement `DrainEngineSync(doc)`: move-and-clear `s_pending_resync`; for each `idx` with `DocActorToEngineIdx(idx) >= 1`:
-  `for (const auto& pf : ResolveProperties(ReadActorFields(doc, idx))) if (pf.matched) PropagateToEngine(idx, pf);`
+  `for (const auto& pf : ResolveProperties(ReadActorFields(doc, idx))) PropagateToEngine(idx, pf);`
   (`ReadActorFields`/`ResolveProperties` are already used here in `DumpTranslations`.)
+  **Do NOT guard on `pf.matched`** — see Finding below.
 - **R2 fix (index-invalidation):** in `UpdateBridgeMap`, when it actually rebuilds (`s_needs_rebuild` was set), `s_pending_resync.clear()` and set a one-shot `s_resync_all` flag so `DrainEngineSync` re-propagates **all** live actors that frame. A field index captured pre-rebuild can otherwise point at a different actor after a concurrent structural insert/delete (re-resolution is positional).
 
 ### 4. [`engine/wf_edit/main.cc`](../../engine/wf_edit/main.cc) — wire the single path
@@ -96,7 +97,17 @@ Build/run green under `-DWF_ASAN=ON -DCMAKE_BUILD_TYPE=Debug` (wrapper-test conv
 
 **Integration — `WF_EDIT_*` headless harness** (mirror `RunBridgeTest`): load snowgoons, select actor A, apply a remote SYNC (`beginRemote` + `txn.apply`, as in [`wfcrdt_sync_test.cpp`](../../engine/crdt/wfcrdt_sync_test.cpp)) that edits **actor B's Position** (B ≠ selected); run one `DrainEngineSync`; assert `wfmut::GetActorPos(B_engine_idx)` changed. Direct regression for the "only selected actor reaches viewport" bug — fails on the current code, passes on the deep path.
 
-**Manual smoke (screenshot proof):** two `wf-edit --relay … --room <id>` instances; on A, move an actor *not selected* on B; B's viewport reflects it without reload. Capture before/after via the screenshot path. (Belt-and-suspenders; the integration test is the gate.) Required per [screenshots-for-proof](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_screenshots_for_proof.md).
+**Screenshot proof (as-run, single instance via `WF_EDIT_REMOTE_TEST`):** `statplat_1` is selected (gizmo); a remote-origin edit slides the *non-selected* `statplat_3` from x=+7.87 to x=−7.87 — its bare-tree mesh jumps right→left, driven only by the deep observer.
+
+| Before (`statplat_3` at x=+7.87) | After (remote edit → x=−7.87) |
+|---|---|
+| ![before](../../tests/screenshots/observe_deep_before.png) | ![after](../../tests/screenshots/observe_deep_after.png) |
+
+(The two-`wf-edit --relay`-instance variant is belt-and-suspenders; the harness above is the gate.) Screenshot proof required per [screenshots-for-proof](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_screenshots_for_proof.md).
+
+## Finding (surfaced during verification)
+
+The first `DrainEngineSync` draft guarded propagation with `if (pf.matched)` (copied from the old `ReSyncAfterDocChange` loop) — the integration test then **FAILED**: the actor didn't move. Root cause: **`Position`/`Orientation` are per-instance transform-prefix fields, absent from the OAD** ([`property_panel.cc:42`](../../engine/wf_edit/property_panel.cc)), so they carry `matched = false`. `TranslateField` handles them **by name** (and returns `NoOp` for the genuinely-unmapped tail, which `PropagateToEngine` skips), so the `matched` guard dropped exactly the transform edits that move the viewport. Fix: propagate **every** field; let `TranslateField`/`NoOp` filter. Note this means the *old* `ReSyncAfterDocChange` path never propagated remote Position/Orientation edits even to the *selected* actor — a latent bug this change also closes.
 
 ## Risks
 - **R2 (handled above):** doc-index keys invalidated by an interleaved structural edit → clear-on-rebuild + `s_resync_all`.
