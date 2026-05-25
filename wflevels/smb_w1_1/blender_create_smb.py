@@ -675,7 +675,28 @@ if player:
         "dup 16384 & 256 / over 8192 & 64 / | | "
         "INDEXOF_INPUT write-mailbox\n"
         "INDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\n"
+        "INDEXOF_Z_POS read-mailbox INDEXOF_SMB_PLAYER_Z write-mailbox\n"   # enemies use proximity
         "INDEXOF_GOLD read-mailbox 70 write-mailbox\n"
+        # seed lives once (guarded so game-over at LIVES=0 never re-seeds)
+        "INDEXOF_SMB_LIVES_INIT read-mailbox not if "
+        "3 INDEXOF_LIVES write-mailbox 1 INDEXOF_SMB_LIVES_INIT write-mailbox then\n"
+        # bounce up when we stomped an enemy this frame
+        "INDEXOF_SMB_STOMP read-mailbox 0<> if "
+        "8.0 INDEXOF_ZSPEED write-mailbox 0 INDEXOF_SMB_STOMP write-mailbox then\n"
+        # enemy side-hit -> lose a life + respawn at spawn (unless still invulnerable)
+        "INDEXOF_SMB_PLAYER_HURT read-mailbox 0<> if\n"
+        "  INDEXOF_TIME read-mailbox INDEXOF_SMB_INVULN_UNTIL read-mailbox > if\n"
+        "    INDEXOF_LIVES read-mailbox 1 - INDEXOF_LIVES write-mailbox\n"
+        f"    {MARIO_SPAWN_X} INDEXOF_X_POS write-mailbox\n"
+        "    0 INDEXOF_Y_POS write-mailbox\n"
+        f"    {MARIO_SPAWN_Z} INDEXOF_Z_POS write-mailbox\n"
+        "    0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox "
+        "0 INDEXOF_ZSPEED write-mailbox\n"
+        "    INDEXOF_TIME read-mailbox 2.0 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n"
+        "    INDEXOF_LIVES read-mailbox 1 < if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n"
+        "  then\n"
+        "  0 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"
+        "then\n"
     )
 
     mario_mesh = _build_mario()
@@ -693,6 +714,23 @@ ENEMY_WALK_SPEED = 4.0
 ENEMY_SCRIPT = (
     "\\ wf\n"
     f"{-ENEMY_WALK_SPEED} INDEXOF_XSPEED write-mailbox\n"   # walk left (toward Mario)
+    # Proximity to the player. Player<->enemy contacts (both CharacterVirtual) do NOT
+    # fire the Jolt collision dispatch (neither is in gBodies — same reason Gold uses
+    # proximity), so compare the broadcast player X/Z to our own position.
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n"    # dx = playerX - myX
+    "dup * 1.0 <\n"                                                       # dx^2 < 1  (close horizontally)
+    "if\n"
+    "  INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"  # dz = playerZ - myZ
+    "  dup 0.7 >\n"                                                       # player clearly ABOVE us?
+    "  if\n"
+    "    drop\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"                # stomped -> die
+    "    1 INDEXOF_SMB_STOMP write-mailbox\n"            # tell the player to bounce
+    "  else\n"
+    "    -1.5 >\n"                                       # roughly level (not far below) = side hit
+    "    if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n"
+    "  then\n"
+    "then\n"
 )
 
 

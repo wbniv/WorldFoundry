@@ -390,6 +390,46 @@ The engine-side alternative (guard the write so `0` means "don't record") is log
 
 ---
 
+## Added a mailbox to `mailbox.inc` but scripts using its `INDEXOF_` fail (`error 7 not_a_word`)
+
+**Symptom:** you add a `MAILBOXENTRY( FOO, … )` row to
+[`mailbox.inc`](../wfsource/source/mailbox/mailbox.inc), rebuild with `task build`, but every
+Forth script referencing `INDEXOF_FOO` is silently rejected (`zforth compile error 7 (...):
+not_a_word`) — and since zForth compiles each script as a unit, the *whole* script dies (even
+unrelated lines), so e.g. an enemy stops moving entirely.
+
+**Cause:** the script-side `INDEXOF_*` constants come from `mailboxIndexArray` in
+[`engine/stubs/scripting_stub.cc`](../engine/stubs/scripting_stub.cc), which `#include`s
+`mailbox.inc`. The incremental build keys on the `.cc` mtime, **not** the `#include`d `.inc`, so
+editing only `mailbox.inc` relinks the binary with a **stale** `scripting_stub.o` — the new
+constants never make it in. (Confirm: `strings engine/wf_game | grep INDEXOF_FOO` → MISSING.)
+
+**Fix:** force the recompile — `touch engine/stubs/scripting_stub.cc wfsource/source/mailbox/mailbox.cc`
+then `task build`. Re-check `strings engine/wf_game | grep INDEXOF_FOO` → PRESENT. (Surfaced
+2026-05-25 adding the SMB enemy/respawn mailboxes; see
+[the plan](plans/2026-05-25-smb-enemy-walk-stomp.md).)
+
+---
+
+## Player↔enemy (and other CharacterVirtual↔CharacterVirtual) contact doesn't fire collision logic
+
+**Symptom:** two `MOBILITY_PHYSICS` actors (e.g. Mario and a Goomba) collide *physically* (they
+push each other) but neither's `COLLIDER_IDX`/`COLLISION_NORMAL_*` mailboxes populate, and any
+`Actor::Collision`-driven logic never runs.
+
+**Cause:** `MOBILITY_PHYSICS` actors are Jolt **CharacterVirtual** bodies, which aren't in
+`gBodies`, so `JoltContactDispatch`'s `FindActorForBodyID` can't resolve the other party — the
+character-vs-character contact is resolved for *movement* but never dispatched to
+`Actor::Collision`. (Same reason the `Gold` coin uses proximity pickup, not `Collision`.)
+
+**Fix:** use **proximity** instead — broadcast the player's X/Z to globals and have the other
+actor compare against its own `X_POS`/`Z_POS` (squared distance avoids needing `abs`). The SMB
+Goomba/Koopa stomp-vs-hurt detection works this way (`blender_create_smb.py` `ENEMY_SCRIPT`).
+Collision mailboxes *do* work for character-vs-**static** (e.g. the `?`-block, an anchored
+Generator in `gBodies`).
+
+---
+
 ## How to run a standalone level
 
 ```bash

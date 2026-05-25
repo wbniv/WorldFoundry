@@ -1013,7 +1013,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\nINDEXOF_GOLD read-mailbox 70 write-mailbox\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\nINDEXOF_Z_POS read-mailbox INDEXOF_SMB_PLAYER_Z write-mailbox\nINDEXOF_GOLD read-mailbox 70 write-mailbox\nINDEXOF_SMB_LIVES_INIT read-mailbox not if 3 INDEXOF_LIVES write-mailbox 1 INDEXOF_SMB_LIVES_INIT write-mailbox then\nINDEXOF_SMB_STOMP read-mailbox 0<> if 8.0 INDEXOF_ZSPEED write-mailbox 0 INDEXOF_SMB_STOMP write-mailbox then\nINDEXOF_SMB_PLAYER_HURT read-mailbox 0<> if\n  INDEXOF_TIME read-mailbox INDEXOF_SMB_INVULN_UNTIL read-mailbox > if\n    INDEXOF_LIVES read-mailbox 1 - INDEXOF_LIVES write-mailbox\n    4.5 INDEXOF_X_POS write-mailbox\n    0 INDEXOF_Y_POS write-mailbox\n    1.5 INDEXOF_Z_POS write-mailbox\n    0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox 0 INDEXOF_ZSPEED write-mailbox\n    INDEXOF_TIME read-mailbox 2.0 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n    INDEXOF_LIVES read-mailbox 1 < if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n  then\n  0 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
@@ -1210,7 +1210,7 @@
 		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
 		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n-4.0 INDEXOF_XSPEED write-mailbox\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n-4.0 INDEXOF_XSPEED write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\ndup * 1.0 <\nif\n  INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n  dup 0.7 >\n  if\n    drop\n    0 INDEXOF_ALIVE write-mailbox\n    1 INDEXOF_SMB_STOMP write-mailbox\n  else\n    -1.5 >\n    if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n  then\nthen\n" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000144997286(1.15.16) } { 'STR' "-0.000000" } }
@@ -1236,7 +1236,7 @@
 		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
 		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n-4.0 INDEXOF_XSPEED write-mailbox\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n-4.0 INDEXOF_XSPEED write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\ndup * 1.0 <\nif\n  INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n  dup 0.7 >\n  if\n    drop\n    0 INDEXOF_ALIVE write-mailbox\n    1 INDEXOF_SMB_STOMP write-mailbox\n  else\n    -1.5 >\n    if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n  then\nthen\n" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000174343586(1.15.16) } { 'STR' "-0.000000" } }

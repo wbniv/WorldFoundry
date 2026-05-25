@@ -15,6 +15,14 @@ Comment("=====================================================================")
 	MAILBOXENTRY( SMB_TARGET_CAM_X, 1801 )		Comment("Director writes target cam X; CamShot reads it")
 	MAILBOXENTRY( SMB_MAX_CAM_X, 1802 )		Comment("Director's one-way ratchet state (camera X never decreases)")
 
+	Comment(" SMB enemy walk + stomp + player hurt/respawn (docs/plans/2026-05-25-smb-enemy-walk-stomp.md) ")
+	MAILBOXENTRY( SMB_PLAYER_Z, 1803 )		Comment("Player broadcasts its Z each tick; enemies use proximity (player<->enemy CharacterVirtuals don't fire collision dispatch)")
+	MAILBOXENTRY( SMB_PLAYER_HURT, 1804 )		Comment("Enemy sets 1 on a side-hit of the player; player script consumes -> respawn")
+	MAILBOXENTRY( SMB_INVULN_UNTIL, 1805 )		Comment("Level-time until which the player ignores hurt (post-respawn i-frames)")
+	MAILBOXENTRY( SMB_STOMP, 1806 )			Comment("Enemy sets 1 when stomped; player script gives a small upward bounce")
+	MAILBOXENTRY( SMB_LIVES_INIT, 1807 )		Comment("0 at load -> player seeds LIVES once; stays 1 so game-over (LIVES 0) never re-seeds")
+	MAILBOXENTRY( LIVES, 72 )			Comment("HUD lives slot (read by game.cc:553 for the LIVES display); player respawn decrements it")
+
 
 	MAILBOXENTRY(GLOBAL_USER_MAX,1900)
 	Comment(" Bumped 2026-05-09 from 999 → 1900 (raises level-global user mailbox cap to 1900 slots) ")
