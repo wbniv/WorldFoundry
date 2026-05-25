@@ -75,6 +75,10 @@ struct WfeditIdentity {
     std::string display_name = "Editor";
     float colour[3] = {0.5f, 0.5f, 0.5f};
     std::vector<RecentRoom> recent_rooms;
+    // Gizmo snap prefs (persisted across sessions).
+    bool  gizmo_snap = false;
+    float gizmo_snap_trans = 1.0f;
+    float gizmo_snap_rot   = 15.0f;
 };
 
 static std::string IdentityPath()
@@ -107,6 +111,9 @@ static std::optional<WfeditIdentity> LoadIdentity()
                 id.recent_rooms.push_back({r.value("relay_url",""), r.value("room_id","")});
             }
         }
+        id.gizmo_snap       = j.value("gizmo_snap", false);
+        id.gizmo_snap_trans = j.value("gizmo_snap_trans", 1.0f);
+        id.gizmo_snap_rot   = j.value("gizmo_snap_rot", 15.0f);
         if (id.peer_id.empty()) return std::nullopt;
         return id;
     } catch (...) {
@@ -130,7 +137,10 @@ static void SaveIdentity(const WfeditIdentity& id)
             {"peer_id",      id.peer_id},
             {"display_name", id.display_name},
             {"colour",       json::array({id.colour[0], id.colour[1], id.colour[2]})},
-            {"recent_rooms", rooms}
+            {"recent_rooms", rooms},
+            {"gizmo_snap",       id.gizmo_snap},
+            {"gizmo_snap_trans", id.gizmo_snap_trans},
+            {"gizmo_snap_rot",   id.gizmo_snap_rot}
         };
         std::ofstream f(path);
         f << j.dump(2) << "\n";
@@ -195,6 +205,14 @@ struct EditorCtx {
     // Viewport gizmo: true while a drag is in progress, so the Doc leaves are
     // written once on release (not every frame — that would flood the relay).
     bool                          gizmo_active = false;
+
+    // Gizmo operation (G = move, R = rotate, W = both) + snap (S toggles).
+    // Snap steps persist in identity.json. Combined mode can't snap (ImGuizmo
+    // shares one snap[0] slot between translate XYZ and rotate degrees).
+    ImGuizmo::OPERATION           gizmo_op = ImGuizmo::TRANSLATE | ImGuizmo::ROTATE;
+    bool                          gizmo_snap = false;
+    float                         gizmo_snap_trans = 1.0f;   // world units (XYZ)
+    float                         gizmo_snap_rot   = 15.0f;  // degrees
 
     // Save round-trip: the .lev path File→Save writes (the Doc is lossless — v2
     // schema — so save needs no retained JSON), and a transient toast.
@@ -760,6 +778,20 @@ bool editor_frame(void* p)
                 || (io.KeyShift && ImGui::IsKeyPressed(ImGuiKey_Z, false))))
             DoRedo(c);
     }
+    // Gizmo mode (Blender-style): G = move-only, R = rotate-only, pressing the
+    // active key again or W returns to combined; S (no Ctrl — Ctrl+S is Save)
+    // toggles snap. All gated on !typing so text fields keep their keystrokes.
+    if (!typing && !ImGui::GetIO().KeyCtrl) {
+        const ImGuizmo::OPERATION both = ImGuizmo::TRANSLATE | ImGuizmo::ROTATE;
+        if (ImGui::IsKeyPressed(ImGuiKey_G, false))
+            c->gizmo_op = (c->gizmo_op == ImGuizmo::TRANSLATE) ? both : ImGuizmo::TRANSLATE;
+        if (ImGui::IsKeyPressed(ImGuiKey_R, false))
+            c->gizmo_op = (c->gizmo_op == ImGuizmo::ROTATE) ? both : ImGuizmo::ROTATE;
+        if (ImGui::IsKeyPressed(ImGuiKey_W, false))
+            c->gizmo_op = both;
+        if (ImGui::IsKeyPressed(ImGuiKey_S, false))
+            c->gizmo_snap = !c->gizmo_snap;
+    }
 
     ImGui::Begin("Outliner");
     ImGui::Text("%s: %zu actors", c->level_name.c_str(), c->actor_names.size());
@@ -864,6 +896,42 @@ bool editor_frame(void* p)
     }
     ImGui::End();
 
+    // ── Gizmo toolbar overlay (mode + snap) ──────────────────────────────────
+    // Pinned to the top-left of the viewport; mirrors the G/R/W/S keys. Runs
+    // before the gizmo below so a click updates the mode the same frame.
+    if (c->selected >= 0) {
+        ImGuiDockNode* cn = ImGui::DockBuilderGetCentralNode(dock_id);
+        const ImVec2 cp = cn ? cn->Pos : ImGui::GetMainViewport()->WorkPos;
+        ImGui::SetNextWindowPos(ImVec2(cp.x + 8, cp.y + 8), ImGuiCond_Always);
+        ImGui::SetNextWindowBgAlpha(0.55f);
+        const ImGuizmo::OPERATION both = ImGuizmo::TRANSLATE | ImGuizmo::ROTATE;
+        if (ImGui::Begin("##gizmo_toolbar", nullptr,
+                ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
+                ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoNav |
+                ImGuiWindowFlags_NoFocusOnAppearing)) {
+            if (ImGui::RadioButton("Move (G)", c->gizmo_op == ImGuizmo::TRANSLATE))
+                c->gizmo_op = ImGuizmo::TRANSLATE;
+            ImGui::SameLine();
+            if (ImGui::RadioButton("Rotate (R)", c->gizmo_op == ImGuizmo::ROTATE))
+                c->gizmo_op = ImGuizmo::ROTATE;
+            ImGui::SameLine();
+            if (ImGui::RadioButton("Both (W)", c->gizmo_op == both))
+                c->gizmo_op = both;
+            ImGui::SameLine(); ImGui::TextDisabled("|"); ImGui::SameLine();
+            ImGui::Checkbox("Snap (S)", &c->gizmo_snap);
+            if (c->gizmo_snap && c->gizmo_op == both)
+                { ImGui::SameLine(); ImGui::TextDisabled("(pick Move/Rotate to snap)"); }
+            else if (c->gizmo_snap) {
+                ImGui::SameLine(); ImGui::SetNextItemWidth(64);
+                if (c->gizmo_op == ImGuizmo::ROTATE)
+                    ImGui::InputFloat("deg", &c->gizmo_snap_rot, 0.0f, 0.0f, "%.0f");
+                else
+                    ImGui::InputFloat("units", &c->gizmo_snap_trans, 0.0f, 0.0f, "%.2f");
+            }
+        }
+        ImGui::End();
+    }
+
     // ── Viewport translate/rotate gizmo ──────────────────────────────────────
     // Drag the selected actor directly in the 3D view. Live preview moves the
     // engine actor each frame (wfmut, no Doc write); the Doc Position/Orientation
@@ -886,8 +954,20 @@ bool editor_frame(void* p)
                 const ImVec2 rs = central ? central->Size : ImGui::GetMainViewport()->WorkSize;
                 ImGuizmo::SetRect(rp.x, rp.y, rs.x, rs.y);
 
-                ImGuizmo::Manipulate(m.view, m.proj,
-                    ImGuizmo::TRANSLATE | ImGuizmo::ROTATE, ImGuizmo::WORLD, m.model);
+                // Snap only in a pure mode — ImGuizmo has one snap[0] slot it
+                // reads as XYZ for translate and degrees for rotate, so combined
+                // mode can't snap both correctly; pass null there.
+                float snap_arr[3];
+                const float* snap = nullptr;
+                if (c->gizmo_snap && c->gizmo_op == ImGuizmo::TRANSLATE) {
+                    snap_arr[0] = snap_arr[1] = snap_arr[2] = c->gizmo_snap_trans;
+                    snap = snap_arr;
+                } else if (c->gizmo_snap && c->gizmo_op == ImGuizmo::ROTATE) {
+                    snap_arr[0] = c->gizmo_snap_rot;
+                    snap = snap_arr;
+                }
+                ImGuizmo::Manipulate(m.view, m.proj, c->gizmo_op, ImGuizmo::WORLD,
+                                     m.model, nullptr, snap);
 
                 if (ImGuizmo::IsUsing()) {
                     wfedit::ApplyGizmoToEngine(eidx, m.model);   // live preview
@@ -1342,6 +1422,9 @@ int main(int argc, char** argv)
     ctx.undo        = &undo;  // Ctrl+Z / Ctrl+Y
     ctx.save_path   = leveltree;               // Save writes back to the .lev source
     ctx.room_id     = room_id;
+    ctx.gizmo_snap       = identity.gizmo_snap;        // restore persisted snap prefs
+    ctx.gizmo_snap_trans = identity.gizmo_snap_trans;
+    ctx.gizmo_snap_rot   = identity.gizmo_snap_rot;
     if (preselect >= 0 && preselect < static_cast<int>(ctx.actor_names.size()))
         ctx.selected = preselect;   // headless: exercise the Outliner→Properties path
 
@@ -1462,6 +1545,16 @@ int main(int argc, char** argv)
     std::printf("wf-edit: HALStart (--editor, level=%s)\n", level.c_str());
     HALStart(hal_argc, hal_argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
     std::printf("wf-edit: HALStart returned\n");
+
+    // Persist gizmo snap prefs. Only when a peer_id exists — LoadIdentity rejects
+    // an identity with an empty one, so saving without one would write a file that
+    // never loads back (solo sessions get a peer_id once they touch a relay).
+    if (!identity.peer_id.empty()) {
+        identity.gizmo_snap       = ctx.gizmo_snap;
+        identity.gizmo_snap_trans = ctx.gizmo_snap_trans;
+        identity.gizmo_snap_rot   = ctx.gizmo_snap_rot;
+        SaveIdentity(identity);
+    }
 
     // 5. Engine released its references; clear the registries + tear down.
     //    Unregister the frame callback before `ctx` leaves scope so the

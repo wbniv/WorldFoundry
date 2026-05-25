@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-22
 
-**Status:** Done (Phases 0–3, 2026-05-22). Translate+rotate gizmo renders on the selected actor and is matrix-aligned with the engine render (proof below). **Interactive drag verified by the user** — dragging+rotating the snowgoons House moved/rotated it live and File→Save persisted the new Position/Orientation to the `.lev` (confirmed by diff). Verification also surfaced a pre-existing **editor-source path tangle**: the viewport loaded the *oracle* `snowgoons-standalone.iff` while the Doc read the *Blender* `.lev`, so a save+recompile never showed in the viewport. Fixed by adding `snowgoons-blender-standalone.iff.txt` (built by `build_level_binary.sh`) and pointing the editor's default at `snowgoons-blender-standalone.iff`, so viewport + Doc + Save+Compile all reference the same Blender source. Scale deferred (see bottom). Phase 4 polish (G/R keys, snap) not done — optional.
+**Status:** Done (Phases 0–3, 2026-05-22). Translate+rotate gizmo renders on the selected actor and is matrix-aligned with the engine render (proof below). **Interactive drag verified by the user** — dragging+rotating the snowgoons House moved/rotated it live and File→Save persisted the new Position/Orientation to the `.lev` (confirmed by diff). Verification also surfaced a pre-existing **editor-source path tangle**: the viewport loaded the *oracle* `snowgoons-standalone.iff` while the Doc read the *Blender* `.lev`, so a save+recompile never showed in the viewport. Fixed by adding `snowgoons-blender-standalone.iff.txt` (built by `build_level_binary.sh`) and pointing the editor's default at `snowgoons-blender-standalone.iff`, so viewport + Doc + Save+Compile all reference the same Blender source. Scale deferred (see bottom). **Phase 4 polish (G/R keys + snap) DONE 2026-05-25** — Blender-style **G**/**R**/**W** mode keys (move / rotate / both, `!WantTextInput`-gated, `!Ctrl` so Ctrl+S still saves), **S** snap toggle, a viewport toolbar overlay (Move/Rotate/Both radios + Snap checkbox + per-mode step field), and snap-pref persistence in `~/.config/wf-edit/identity.json`. Snap is active only in a pure mode (ImGuizmo shares one `snap[0]` slot between translate XYZ and rotate degrees). Toolbar render proof: [`tests/screenshots/gizmo_toolbar.png`](../../tests/screenshots/gizmo_toolbar.png) (drag interaction is user-verified — on-screen GL can't be auto-captured under Wayland).
 
 ![wf-edit translate+rotate gizmo on the snowgoons House — origin on the actor, +Z up](../../tests/screenshots/wfedit_gizmo.png)
 
@@ -70,9 +70,12 @@ Gate `selected>=0 && theLevel && !structural_dirty && DocActorToEngineIdx>0`.
 WORLD, model)`. During `IsUsing()`: `ApplyGizmoToEngine` (live, no Doc) + `gizmo_active=true`. On
 release: `CommitGizmoToDoc` (single SYNC) + refresh cached props + clear flag. New `EditorCtx::gizmo_active`.
 
-### Phase 4 — Polish (optional)
-Optional `G`/`R` keys (translate-only vs rotate-only) guarded by `!WantTextInput`; optional grid/angle
-snap. Default is combined translate+rotate on the selected actor.
+### Phase 4 — Polish (optional) — DONE 2026-05-25
+`G`/`R` keys (translate-only vs rotate-only, press-again or `W` → both) guarded by `!WantTextInput`;
+`S` toggles grid/angle snap. Default is combined translate+rotate on the selected actor. Implemented in
+[`engine/wf_edit/main.cc`](../../engine/wf_edit/main.cc) (`EditorCtx::gizmo_op`/`gizmo_snap*`, the
+keyboard block, the snap-aware `ImGuizmo::Manipulate` call, and the `##gizmo_toolbar` overlay) +
+`WfeditIdentity` persistence.
 
 ## Verification
 - **Build:** `cmake -S . -B build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Debug && cmake --build build-editor --target wf_edit -j` (target `wf_edit` underscore).
