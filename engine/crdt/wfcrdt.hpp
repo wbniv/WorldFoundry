@@ -29,6 +29,7 @@ struct Branch;
 struct YOutput;
 struct YMapEvent;
 struct YArrayEvent;
+struct YEvent;          // yffi deep-observer event (yobserve_deep); tag + union content
 struct YAfterTransactionEvent;
 struct YSubscription;   // yffi ≥0.10: observers return an owned YSubscription*
 struct YUndoManager;    // native undo/redo (yffi ≥0.16) — see UndoManager below
@@ -48,6 +49,18 @@ struct ByteView {
     const std::uint8_t* data;
     std::size_t len;
 };
+
+// One segment of a deep-observer event path (decoded from yffi's YPathSegment,
+// so consumers never touch libyrs.h). A path is relative to the observed root:
+// for a deep sub on the "content" array, path[0] is the actor's content[] index.
+struct PathSegment {
+    bool        isIndex;     // true: `index` valid (sequence); false: `key` valid (map)
+    std::uint32_t index;
+    std::string key;
+};
+// One commit can change several nested nodes; the deep callback receives one
+// path per changed node.
+using DeepPath = std::vector<PathSegment>;
 
 class Doc;
 class Output;
@@ -288,6 +301,14 @@ public:
     // See Map::observe.
     Subscription observe(std::function<void(const YArrayEvent*)> cb);
 
+    // Deep observe: fires once per ytransaction_commit that mutates this array OR
+    // any nested shared type within it (a field-leaf edit many levels down). The
+    // callback receives one decoded path per changed node, each relative to this
+    // array. CONSTRAINT: do NOT open a transaction (read or write) on the owning
+    // Doc inside the callback — Yrs forbids it while the committing txn is live;
+    // record what changed and act at frame top instead.
+    Subscription observeDeep(std::function<void(const std::vector<DeepPath>&)> cb);
+
 private:
     friend class Transaction;
     friend class Output;
@@ -299,7 +320,7 @@ private:
 
 // Subscription discriminator — selects the right yffi unobserve()
 // + matches the trampoline type so its heap allocation can be freed.
-enum class SubKind { Map, Array, DocUpdates };
+enum class SubKind { Map, Array, DocUpdates, Deep };
 
 // RAII handle for an observer subscription. Destruction calls the
 // appropriate yffi unobserve and frees the heap std::function

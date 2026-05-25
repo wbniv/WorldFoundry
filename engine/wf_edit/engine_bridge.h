@@ -43,6 +43,14 @@ void InitBridgeMap(wfcrdt::Doc& doc);
 // wfmut::RemoveActor / wfmut::SpawnActor as needed. No-op when nothing changed.
 void UpdateBridgeMap(wfcrdt::Doc& doc);
 
+// Call every frame (immediately after UpdateBridgeMap). Flushes Doc field edits
+// queued by the deep observer (in InitBridgeMap) into the live engine via
+// PropagateToEngine. This is the SINGLE engine-propagation path for every Doc
+// writer — local panel commits, remote collaborator SYNCs, undo/redo, replay,
+// and DAP edits all reach the viewport here, not just the selected actor. Reads
+// the Doc (opens short read txns) — must run at frame top with no live txn.
+void DrainEngineSync(wfcrdt::Doc& doc);
+
 // Verification (WF_EDIT_BRIDGE_DEBUG): print, for every Doc actor, its
 // doc_index -> mapped engine_idx -> engine currentPos() alongside the Doc's own
 // Position leaf, flagging any mismatch. Called once when the live level is

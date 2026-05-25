@@ -397,6 +397,38 @@ struct ArrayTrampoline {
 struct DocUpdatesTrampoline {
     std::function<void(ByteView)> cb;
 };
+struct DeepTrampoline {
+    std::function<void(const std::vector<DeepPath>&)> cb;
+};
+
+// Decode one yffi event's path (relative to the observed root) into a DeepPath.
+// The path accessor is type-specific (selected by YEvent::tag); the segments are
+// owned by yffi and must be released with ypath_destroy.
+DeepPath decode_event_path(const YEvent& ev) {
+    std::uint32_t len = 0;
+    YPathSegment* segs = nullptr;
+    switch (ev.tag) {
+        case Y_ARRAY: segs = yarray_event_path(&ev.content.array, &len); break;
+        case Y_MAP:   segs = ymap_event_path(&ev.content.map, &len);     break;
+        case Y_TEXT:  segs = ytext_event_path(&ev.content.text, &len);   break;
+        default:      return {};   // XML / weak types don't occur in the level Doc
+    }
+    DeepPath path;
+    path.reserve(len);
+    for (std::uint32_t i = 0; i < len; ++i) {
+        PathSegment ps{};
+        if (segs[i].tag == Y_EVENT_PATH_INDEX) {
+            ps.isIndex = true;
+            ps.index   = segs[i].value.index;
+        } else {  // Y_EVENT_PATH_KEY
+            ps.isIndex = false;
+            ps.key     = segs[i].value.key ? segs[i].value.key : "";
+        }
+        path.push_back(std::move(ps));
+    }
+    if (segs) ypath_destroy(segs, len);
+    return path;
+}
 
 extern "C" void wfcrdt_map_trampoline(void* state, const YMapEvent* e) {
     auto* t = static_cast<MapTrampoline*>(state);
@@ -410,6 +442,15 @@ extern "C" void wfcrdt_array_trampoline(void* state, const YArrayEvent* e) {
 extern "C" void wfcrdt_doc_updates_trampoline(void* state, std::uint32_t len, const char* data) {
     auto* t = static_cast<DocUpdatesTrampoline*>(state);
     t->cb(ByteView{reinterpret_cast<const std::uint8_t*>(data), static_cast<std::size_t>(len)});
+}
+// yobserve_deep callback: (void*, uint32_t count, const YEvent*) — `count`
+// events, one per nested type changed in the committing transaction.
+extern "C" void wfcrdt_deep_trampoline(void* state, std::uint32_t count, const YEvent* evs) {
+    auto* t = static_cast<DeepTrampoline*>(state);
+    std::vector<DeepPath> paths;
+    paths.reserve(count);
+    for (std::uint32_t i = 0; i < count; ++i) paths.push_back(decode_event_path(evs[i]));
+    t->cb(paths);
 }
 
 }  // namespace
@@ -432,6 +473,12 @@ Subscription Array::observe(std::function<void(const YArrayEvent*)> cb) {
     return Subscription(sub, SubKind::Array, t);
 }
 
+Subscription Array::observeDeep(std::function<void(const std::vector<DeepPath>&)> cb) {
+    auto* t = new DeepTrampoline{std::move(cb)};
+    YSubscription* sub = yobserve_deep(_branch, t, &wfcrdt_deep_trampoline);
+    return Subscription(sub, SubKind::Deep, t);
+}
+
 // ─── Subscription ─────────────────────────────────────────────────────────────
 
 Subscription::Subscription(YSubscription* sub, SubKind kind, void* heapTrampoline)
@@ -445,6 +492,7 @@ void subscription_destroy(YSubscription* sub, SubKind kind, void* heap) {
         case SubKind::Map:        delete static_cast<MapTrampoline*>(heap);        break;
         case SubKind::Array:      delete static_cast<ArrayTrampoline*>(heap);      break;
         case SubKind::DocUpdates: delete static_cast<DocUpdatesTrampoline*>(heap); break;
+        case SubKind::Deep:       delete static_cast<DeepTrampoline*>(heap);       break;
     }
 }
 }  // namespace

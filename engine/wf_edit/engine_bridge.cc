@@ -41,6 +41,16 @@ static std::optional<wfcrdt::Subscription>              s_content_sub;
 static bool                                             s_needs_rebuild = false;
 static bool                                             s_bridge_ready  = false;
 
+// Deep-observer field-sync state (single propagation path for ALL Doc writers —
+// local panel, remote collaborator, undo/redo, replay, DAP). s_deep_sub fires on
+// any field-leaf edit under content[]; its callback only records the touched
+// actor's doc index (no Doc access — Yrs forbids a txn inside an observer).
+// DrainEngineSync flushes the set at frame top. s_resync_all forces a full
+// re-propagate after a structural rebuild shifted doc indices (see R2 below).
+static std::unordered_set<int>             s_pending_resync;
+static std::optional<wfcrdt::Subscription> s_deep_sub;
+static bool                                s_resync_all = false;
+
 int DocActorToEngineIdx(int doc_index)
 {
     if (doc_index < 0 || doc_index >= static_cast<int>(s_doc_to_engine.size()))
@@ -215,6 +225,16 @@ void InitBridgeMap(wfcrdt::Doc& doc)
         s_needs_rebuild = true;
     });
 
+    // Deep observer: a field-leaf edit anywhere under content[] fires here with a
+    // path relative to content, so path[0] is the actor's doc index. Record it
+    // and propagate at frame top (DrainEngineSync). A structural add/remove fires
+    // *at* content (empty path) — skipped here; s_content_sub handles the rebuild.
+    s_deep_sub = content.observeDeep([](const std::vector<wfcrdt::DeepPath>& evs) {
+        for (const auto& p : evs)
+            if (!p.empty() && p[0].isIndex)
+                s_pending_resync.insert(static_cast<int>(p[0].index));
+    });
+
     s_bridge_ready = true;
     std::fprintf(stderr, "[bridge] InitBridgeMap: %d actors, %zu eids tracked\n",
                  n, s_eid_to_engine.size());
@@ -225,6 +245,40 @@ void UpdateBridgeMap(wfcrdt::Doc& doc)
     if (!s_bridge_ready || !s_needs_rebuild) return;
     s_needs_rebuild = false;
     RebuildFromDoc(doc);
+    // R2: a structural insert/remove shifts content[] indices, so any actor index
+    // queued by the deep observer before this rebuild may now point at a different
+    // actor. Drop the stale queue and re-propagate every live actor this frame.
+    s_pending_resync.clear();
+    s_resync_all = true;
+}
+
+// Push queued Doc field edits into the live engine. Runs at frame top (after
+// UpdateBridgeMap, with no live txn) — safe to open the read txns ReadActorFields
+// needs. Drives the viewport for EVERY Doc writer; the local panel no longer
+// calls PropagateToEngine directly. Re-reads each touched actor and re-applies
+// its OAD-matched fields (idempotent — the engine never writes back to the Doc).
+void DrainEngineSync(wfcrdt::Doc& doc)
+{
+    if (!s_bridge_ready || !theLevel) return;
+
+    std::vector<int> actors;
+    if (s_resync_all) {
+        s_resync_all = false;
+        s_pending_resync.clear();
+        const int n = static_cast<int>(s_doc_to_engine.size());
+        actors.reserve(n);
+        for (int i = 0; i < n; ++i) actors.push_back(i);
+    } else {
+        if (s_pending_resync.empty()) return;
+        actors.assign(s_pending_resync.begin(), s_pending_resync.end());
+        s_pending_resync.clear();
+    }
+
+    for (int idx : actors) {
+        if (DocActorToEngineIdx(idx) < 1) continue;   // no live engine actor
+        for (const auto& pf : ResolveProperties(ReadActorFields(doc, idx)))
+            if (pf.matched) PropagateToEngine(idx, pf);
+    }
 }
 
 // ── M2: field translation ────────────────────────────────────────────────────

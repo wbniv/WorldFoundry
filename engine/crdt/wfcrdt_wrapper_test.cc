@@ -353,6 +353,75 @@ static int test_undo_local_only_across_sync() {
     return 0;
 }
 
+// Deep observer (yobserve_deep): fires for a field-leaf edit many levels below
+// the observed root, delivering a path whose first segment is the actor's
+// content[] index — the basis for the CRDT→engine bridge's remote/replay/DAP
+// field propagation (docs/plans/2026-05-25-observe-deep-bridge.md). Also checks
+// the structural-vs-field discrimination the bridge relies on: a direct child
+// add to the observed array yields an empty-path (root-level) event.
+static int test_deep_observer() {
+    wfcrdt::Doc doc;
+    // content = [ actor0, actor1 ]; actor1 carries items=[ fieldChunk ].
+    {
+        auto txn = doc.begin();
+        auto content = txn.array("content");
+        content.push(wfcrdt::Input::map().set("name", wfcrdt::Input::str("actor0")));
+        content.push(wfcrdt::Input::map()
+            .set("name", wfcrdt::Input::str("actor1"))
+            .set("items", wfcrdt::Input::array()
+                .push(wfcrdt::Input::map().set("text", wfcrdt::Input::str("old")))));
+    }
+
+    std::vector<wfcrdt::DeepPath> last;
+    int fires = 0;
+    wfcrdt::Subscription sub = [&]() {
+        auto txn = doc.begin();
+        auto content = txn.array("content");
+        return content.observeDeep([&](const std::vector<wfcrdt::DeepPath>& evs) {
+            last = evs;
+            ++fires;
+        });
+    }();
+
+    // (1) Mutate a leaf deep under content[1]: set a key on content[1].items[0].
+    {
+        auto txn = doc.begin();
+        auto content = txn.array("content");
+        auto field = content.get(1).asMap().get("items").asArray().get(0).asMap();
+        CHECK(field.valid(), "navigated to content[1].items[0] map");
+        field.insert("n", static_cast<long long>(7));
+    }
+    CHECK(fires == 1, "deep observer fired once on a nested-leaf edit");
+    bool found = false;
+    for (const auto& p : last) {
+        if (!p.empty() && p[0].isIndex && p[0].index == 1) {
+            found = true;
+            bool key_ok = false;
+            for (const auto& seg : p)
+                if (!seg.isIndex && seg.key == "items") key_ok = true;
+            CHECK(key_ok, "deep path includes the 'items' key segment");
+        }
+    }
+    CHECK(found, "deep path[0] resolves to actor index 1");
+
+    // (2) A direct child add is structural — its event path is empty, which is how
+    // the bridge tells a structural edit (rebuild) from a field edit (propagate).
+    last.clear();
+    fires = 0;
+    {
+        auto txn = doc.begin();
+        auto content = txn.array("content");
+        content.push(wfcrdt::Input::map().set("name", wfcrdt::Input::str("actor2")));
+    }
+    CHECK(fires == 1, "deep observer fired once on a structural add");
+    bool has_empty = false;
+    for (const auto& p : last)
+        if (p.empty()) has_empty = true;
+    CHECK(has_empty, "structural add yields an empty-path (root-level) event");
+
+    return 0;
+}
+
 int main() {
     int rc = 0;
     rc |= test_doc_lifecycle();
@@ -368,8 +437,9 @@ int main() {
     rc |= test_undo_redo_basic();
     rc |= test_undo_skips_remote_origin();
     rc |= test_undo_local_only_across_sync();
+    rc |= test_deep_observer();
     if (rc == 0) {
-        std::printf("wfcrdt_wrapper_test: OK (13/13 tests passed — incl. nested map/array + native undo + collab local-only)\n");
+        std::printf("wfcrdt_wrapper_test: OK (14/14 tests passed — incl. nested map/array + native undo + collab local-only + deep observer)\n");
     }
     return rc;
 }

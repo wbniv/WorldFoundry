@@ -300,10 +300,12 @@ void RefreshActorList(EditorCtx* c)
     c->fields_for = -1;          // force Properties to re-resolve on the next frame
 }
 
-// Re-sync the editor's UI + live engine after the Doc was mutated underneath us
-// (a remote SYNC apply, or a native undo/redo). Re-reads the actor list, re-
-// resolves the selected actor's properties, and pushes each OAD-matched field
-// back through the engine bridge so the next StepFrame re-renders the change.
+// Re-sync the editor's UI after the Doc was mutated underneath us (a remote SYNC
+// apply, or a native undo/redo). Re-reads the actor list and re-resolves the
+// selected actor's properties so the panel shows the new values. Engine/viewport
+// propagation is NOT done here — the bridge's deep observer queued every touched
+// actor (any actor, not just the selected one) and DrainEngineSync flushes it at
+// frame top.
 void ReSyncAfterDocChange(EditorCtx* c)
 {
     RefreshActorList(c);
@@ -311,9 +313,6 @@ void ReSyncAfterDocChange(EditorCtx* c)
         c->props = wfedit::ResolveProperties(
             wfedit::ReadActorFields(*c->doc, c->selected));
         c->fields_for = c->selected;
-        for (const auto& pf : c->props)
-            if (pf.matched)
-                wfedit::PropagateToEngine(c->selected, pf);
     }
 }
 
@@ -541,6 +540,11 @@ bool editor_frame(void* p)
 
     // Phase 2: drain incoming relay SYNC + PRESENCE messages.
     CollabDrain(c);
+
+    // Flush Doc field edits (local panel, remote SYNC just applied above, undo/
+    // redo, replay, DAP) into the live engine. Must run after UpdateBridgeMap so
+    // it reads the rebuilt doc→engine map, and at frame top (no live txn).
+    if (c->doc) wfedit::DrainEngineSync(*c->doc);
 
     // Phase 4: broadcast own presence ~10 Hz when relay is connected.
     if (c->relay_client.connected()) {
@@ -828,21 +832,13 @@ bool editor_frame(void* p)
         ImGui::TextUnformatted(c->actor_names[c->selected].c_str());
         ImGui::Separator();
         // Phase 3: OAD-driven widgets keyed on (ButtonType × showAs), editable —
-        // edits commit to the Doc leaf. M3 CRDT→engine bridge: each committed
-        // field is propagated through wfmut on the live level (game thread — this
-        // callback runs inside RunEditor), so the next StepFrame re-renders the
-        // change. Transform + the 15 kPropMap fields move the viewport; the rest
-        // edit the Doc only (logged NoOp).
-        if (c->doc) {
-            std::vector<int> committed;
-            wfedit::RenderProperties(*c->doc, c->selected, c->props, &committed);
-            // structural_dirty guard: kept for future cases; currently always
-            // false (M2 stable map keeps propagation live through structural edits).
-            if (!c->structural_dirty)
-                for (int ci : committed)
-                    if (ci >= 0 && ci < static_cast<int>(c->props.size()))
-                        wfedit::PropagateToEngine(c->selected, c->props[ci]);
-        }
+        // edits commit to the Doc leaf. The commit fires the bridge's deep
+        // observer, which queues the edit for DrainEngineSync at the next frame
+        // top (see InitBridgeMap / DrainEngineSync) — the SINGLE propagation path,
+        // so a local edit reaches the viewport the same way a remote one does. No
+        // direct PropagateToEngine call here anymore.
+        if (c->doc)
+            wfedit::RenderProperties(*c->doc, c->selected, c->props);
         int matched = 0;
         for (const auto& p : c->props) matched += p.matched;
         ImGui::TextDisabled("%zu fields (editable → Doc) — %d OAD-matched",
