@@ -1,6 +1,6 @@
 # SMB `?`-block coin — block-IS-generator + collectible `Gold`
 
-**Status:** Not started 2026-05-19. Supersedes [`2026-05-19-smb-coin-fix-and-template.md`](2026-05-19-smb-coin-fix-and-template.md) (player-driven Phase 2, committed in `0adf1d4`). Three engine changes (bidirectional collision dispatch, generator-runs-script, new `Gold` collectible class) + level rework. Only the coin pickup **SFX** is deferred.
+**Status:** DONE — three engine changes (bidirectional collision dispatch, generator-runs-script, new `Gold` class) + level rework landed (commits `ccf5f549`, `f4071a34`, `8a4f8226`). Supersedes [smb-coin-fix-and-template](2026-05-19-smb-coin-fix-and-template.md). Only the coin pickup **SFX** is deferred.
 
 ## Context
 

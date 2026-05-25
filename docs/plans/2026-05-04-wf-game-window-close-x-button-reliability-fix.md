@@ -1,5 +1,7 @@
 # Plan — wf_game window-close (X button) reliability fix
 
+**Status:** DONE — Phase 1 (`_closeRequested` flag + `HALWindowCloseRequested()`) landed in commit `987e80fe`; Phase 2 deferred as planned.
+
 ## Phases
 
 - **Phase 1 — close-button flag.** Replace mid-frame `sys_exit(0)` with a polled `_closeRequested` atomic; main loop exits cleanly. Status: **landed.**

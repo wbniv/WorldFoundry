@@ -1,5 +1,7 @@
 # Fix `_oadHeader` long → int32 (LP64 serialization-width bug, F2)
 
+**Status:** DONE (commit `9375f3f`, F2) — `_oadHeader` fields are 32-bit on all data models. Part of the [runtime long audit](2026-05-20-runtime-long-audit.md).
+
 ## Context
 
 `_oadHeader` in `wfsource/source/oas/oad.h` has three `long` fields that map 1:1 to on-disk 32-bit IFF header fields. On PSX/x86-32, `long` == 32 bits. On LP64 (x86-64 Linux / modern Android), `long` == 64 bits, so the C++ OAD reader misreads `.oad` files — each field consumes 8 bytes instead of 4. This is F2 of the systematic `long` audit in [`docs/plans/2026-05-20-runtime-long-audit.md`](../../docs/plans/2026-05-20-runtime-long-audit.md).

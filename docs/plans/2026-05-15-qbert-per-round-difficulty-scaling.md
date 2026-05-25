@@ -1,7 +1,7 @@
 # Plan — Q✱bert per-round difficulty scaling
 
 **Date:** 2026-05-15
-**Status:** Not started
+**Status:** DONE 2026-05-15 (commits `5246ccfa`, `af1b71d4`) — Part A (visibility gating) + Part B (round-scaled spawn intervals).
 **Plan doc:** `docs/plans/2026-05-15-qbert-difficulty-scaling.md`
 
 ## Context

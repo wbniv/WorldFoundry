@@ -1,6 +1,6 @@
 # Per-actor collision mailboxes (enables `?`-block bump + beyond)
 
-**Status:** Active 2026-05-17. Replaces the [parked plan](2026-05-17-smb-qblock-bump-parked.md) — the user reopened the design after parking, and the simpler mechanism makes the work small enough to do now.
+**Status:** DONE 2026-05-17 (commit `f4071a34`) — engine collision dispatch + local mailboxes (3044–3047); SMB W1-1 uses the visibility-flip half. Replaced the [parked qblock-bump plan](2026-05-17-smb-qblock-bump-parked.md).
 
 ## Context
 

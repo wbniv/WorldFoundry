@@ -1,5 +1,7 @@
 # Plan — Coily disc-lure automated test
 
+**Status:** DONE 2026-05-15 (commits `4a6f68c7`, `a33727f6`) — debug-bridge disc-lure test + 3 verified pytest cases.
+
 ## Context
 
 The disc-lure mechanic (commit `1f4b272`) can't be verified by interactive play on the dev machine. The repo already has a debug-bridge test harness (`tests/`, port 7778) that speaks JSON over TCP to a running `wf_game` instance. The bridge can write mailboxes directly — so we can teleport the snake to a disc coord with cooldown=0, then watch for the retirement mailboxes and +500 score without any human input.

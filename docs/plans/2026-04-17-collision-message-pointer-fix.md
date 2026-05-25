@@ -1,5 +1,7 @@
 # Plan: Fix COLLISION/SPECIAL_COLLISION message to carry full pointer
 
+**Status:** DONE (commit `06373f54`) — COLLISION message carries a full `uintptr_t` pointer, not a truncated int32.
+
 **Date:** 2026-04-17  
 **Branch:** 2026-first-working-gap  
 **Trigger:** 64-bit Android build exposed pointer→int32 truncation in collision dispatch

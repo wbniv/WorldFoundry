@@ -1,7 +1,7 @@
 # Plan — Confirm SpawnActor → Live Structural Sync → OAD kPropMap Codegen
 
 **Date:** 2026-05-21  
-**Status:** Not started  
+**Status:** DONE — M1/M2/M3 all landed (commits `addb4a57`, `b5be8492`, `1effceec`); SpawnActor live structural sync + 77-field generated map shipped.
 **Owner:** Claude (Will reviewing)  
 **Branch:** `2026-new-level`
 

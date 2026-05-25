@@ -1,5 +1,7 @@
 # Plan — replace hard-coded HAL allocator alignment with compile-time pointer-sized constant
 
+**Status:** DONE (commit `3f62626a`) — `WF_POINTER_ALIGN` now used across all HAL allocators.
+
 ## Context
 
 Commit `f10cec5` (this session) flipped the HAL pool allocators ([`memory/lmalloc.cc`](/home/will/WorldFoundry.2026-new-level/wfsource/source/memory/lmalloc.cc):222-226 and [`memory/dmalloc.cc`](/home/will/WorldFoundry.2026-new-level/wfsource/source/memory/dmalloc.cc):172-175) from 4-byte to **hard-coded 8-byte** size rounding + base-pointer alignment assertions. Correct for every active 64-bit target (Linux x86_64, AArch64 Android `arm64-v8a` only per `android/app/build.gradle.kts:23` "arm64 only — the port plan's settled decision", AArch64 iOS) — but **wasteful on 32-bit targets**, including the upcoming ESP32 (Xtensa LX6/LX7) port. On a 32-bit target a hard-coded 8 forces each allocation to consume an extra 0-4 bytes of tail padding that the type's actual alignment doesn't require, which matters on a microcontroller with kilobytes of RAM.

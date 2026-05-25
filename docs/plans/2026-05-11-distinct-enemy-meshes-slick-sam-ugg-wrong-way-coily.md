@@ -1,7 +1,7 @@
 # Plan — Distinct enemy meshes (Slick/Sam, Ugg/Wrong-Way, Coily)
 
 **Target plan doc on commit:** `docs/plans/2026-05-11-qbert-distinct-enemy-meshes.md`
-**Status:** Not started
+**Status:** DONE (commits `f56169de`, `47999900`, `36640381`) — Slick/Sam, Ugg/Wrong-Way, and Coily distinct meshes all shipped.
 
 ## Context
 

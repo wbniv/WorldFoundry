@@ -1,5 +1,7 @@
 # Spike: Blender-authored ambient lights (and friends) in WF engine
 
+**Status:** DONE (commit `67c763ca`, Phase 6 close-out) — Ambient/Directional/Point/Spot lights + unlit fallback all wired.
+
 ## Context
 
 The WF engine already has a half-wired light path: a `Light` actor class, an OAD schema (`lightRed/Green/Blue` + `lightType` enum `Directional|Ambient`), a Blender exporter that emits those fields, a per-frame loop in `Level::RenderScene` that iterates `ROOM_OBJECT_LIST_LIGHT`, and a modern GL backend that consumes 1 ambient + 3 directional lights via shader uniforms. End-to-end, an Ambient or Directional light authored in Blender today *should* light a scene.

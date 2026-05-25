@@ -1,5 +1,7 @@
 # Phase 5 — Worst Take Wins + Shell Plugin Seam
 
+**Status:** DONE 2026-04-23 (commit `8c82e591`) — Worst Take Wins + shell plugin seam + session grace.
+
 **Date:** 2026-04-23. **Status:** shipped. See §Status for what actually landed.
 
 ## Context

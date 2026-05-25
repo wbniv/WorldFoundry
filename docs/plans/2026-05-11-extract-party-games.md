@@ -1,7 +1,7 @@
 # Plan A — Extract `party-games/` to a new local repo at `~/party-games/`
 
 **Date:** 2026-05-11
-**Status:** Not started
+**Status:** DONE (local-only per plan scope) — extracted to `~/party-games/` (separate git repo); not pushed to origin by design.
 **Precondition for:** [Plan B — scrub + land master](2026-05-11-land-master-scrub-party-games.md)
 
 ## Context

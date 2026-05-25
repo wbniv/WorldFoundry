@@ -1,6 +1,6 @@
 # Engine caps — LMalloc debug canary
 
-**Status:** Not started  
+**Status:** DONE (commit `e618b4cd`) — pre-write assertions + LMalloc canary + ASan build target all landed.
 **Date:** 2026-05-17  
 **Investigation:** [docs/qbert/investigations/2026-05-10-qbert-engine-caps.md](../../WorldFoundry.2026-new-level/docs/qbert/investigations/2026-05-10-qbert-engine-caps.md)
 

@@ -1,6 +1,6 @@
 # Fix LMalloc alignment warning spam
 
-**Status:** Ready to implement  
+**Status:** DONE (commit `2e0b229a`) — `FileLine` padded to 12 bytes on 64-bit, silencing the alignment-warning spam.
 **Effort:** ~30 min
 
 ## Context

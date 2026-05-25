@@ -1,5 +1,7 @@
 # Repair `.ht` C++ codegen — restore the lost `.pp → .ht` process stage
 
+**Status:** DONE (commit `268fedb3`) — `regen-headers.sh` restores the prep→.pp→awk pipeline; oracle test added (`task test-codegen`).
+
 ## Context
 
 The engine includes per-actor C struct headers `wfsource/source/oas/<stem>.ht`

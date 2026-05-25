@@ -1,5 +1,7 @@
 # Context
 
+**Status:** DONE (commit `4430ffa6`) — engine/vendor/stubs moved to a top-level `engine/` directory.
+
 `wftools/wf_engine/` is the actual game engine executable — not a dev tool. It should not live alongside `iffcomp`, `iffdump`, and friends. Similarly, `wftools/vendor/` contains ~145 MB of scripting/physics/runtime libraries that are consumed **exclusively** by the engine build; nothing in `wftools/` itself uses them. The stubs and backend implementations in `wftools/wf_viewer/stubs/` and `wftools/wf_viewer/include/` are also engine-only code that ended up there for historical reasons (the viewer build predated the engine rewrite). Moving all of these to a top-level `engine/` directory makes the repo's intent clear at a glance: `wfsource/` = original source, `wftools/` = dev tools, `engine/` = the runnable game.
 
 ---

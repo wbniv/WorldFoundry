@@ -1,7 +1,7 @@
 # Plan — Q✱bert player death animation
 
 **Date:** 2026-05-11
-**Status:** Not started
+**Status:** DONE (commits `e5ebb01d`, `c481b368`) — curse-bubble death animation + UV-mapped "@!#?@!" texture.
 
 ## Context
 

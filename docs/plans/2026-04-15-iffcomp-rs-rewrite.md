@@ -1,6 +1,6 @@
 # Plan: Rust rewrite of `wftools/iffcomp`
 
-**Status at time of writing:** Scaffolding on disk, lexer / parser / writer / test file still to be written, Rust toolchain not yet installed. The user asked for a plan file after I'd already started writing code; this is that plan, capturing the design decisions so the implementation can resume from a clean starting point once the toolchain is in place.
+**Status:** DONE — full Rust crate; byte-exact on snowgoons; now the primary iffcomp ([rewrite investigation](../investigations/2026-04-11-iffcomp-rs-rewrite.md)). (This doc was written mid-implementation; the design it captures shipped.)
 
 ## Context
 

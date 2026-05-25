@@ -1,5 +1,7 @@
 # Plan — fix cube-disappears-on-landing in WF Q*bert
 
+**Status:** Presumed resolved during the qbert_practice consolidation — no dedicated fix commit pinned, not re-verified. Reopen if it recurs.
+
 ## Context
 
 In `wflevels/qbert_practice/`, when Q*bert lands on a cube (apex), the

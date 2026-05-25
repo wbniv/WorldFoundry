@@ -1,6 +1,6 @@
 # Plan — Yrs C ABI binding (v1 collaborative editor, sub-task #1)
 
-**Status:** Not started
+**Status:** DONE — submodule + `WF_ENABLE_CRDT` CMake integration landed; see parent [yrs C ABI binding](2026-05-18-yrs-c-abi-binding.md).
 **Scope:** Yrs C ABI binding via cbindgen — the first v1 milestone after Phase 0b shipped.
 **Estimate:** ~1 focused week (matches the [design doc estimate](../../WorldFoundry.2026-new-level/docs/investigations/2026-05-18-collaborative-level-editor-design.md)).
 

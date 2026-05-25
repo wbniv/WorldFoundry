@@ -1,6 +1,6 @@
 # SMB W1-1 — tune Mario's movement + jump so he can hop onto a `?` block
 
-**Status:** In progress (2026-05-17)
+**Status:** DONE 2026-05-17 (commits `9a41e91b`, `61b1d18b`) — MarbleHandler jump path + Mario speed/jump tuning + Z-up capsule.
 
 ## Context
 
