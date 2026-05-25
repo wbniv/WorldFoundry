@@ -1,6 +1,6 @@
 # SMB coin follow-ups: wire OAD Gold Value into the live pickup path + correct stale doc
 
-**Status:** Done (2026-05-25). `TryPickup` (`gold.cc:54`) now awards `getOad()->GoldValue` on the live proximity-pickup path; engine rebuilt clean (exit 0). Stale [coin-fixes plan](2026-05-22-smb-coin-fixes.md) status corrected to Done; dead-`Collision` path logged in `TODO.md`. Definitive +N HUD screenshot needs interactive play-test (headless pickup capture is throttle-bounded, same caveat as the prior coin plans).
+**Status:** Done + verified (2026-05-25). `TryPickup` (`gold.cc:54`) now awards `getOad()->GoldValue` on the live proximity-pickup path; engine rebuilt clean (exit 0). Stale [coin-fixes plan](2026-05-22-smb-coin-fixes.md) status corrected to Done; dead-`Collision` path logged in `TODO.md`. **Verified headless** with a temporary `Gold Value = 3` coin: the player's GOLD mailbox (3001) and the HUD jumped straight to **3** (not 1) on pickup — ![SCORE 3](../../tests/screenshots/smb_gold_value_3.png). Surfaced a separate authoring-pipeline gap (see Verification).
 
 ## Context
 
@@ -76,16 +76,35 @@ task build                      # gold.cc changed
 ls -la engine/wf_game           # confirm binary timestamp advanced (don't trust grep'd output)
 ```
 
-End-to-end proof the `Gold Value` field now takes effect (screenshots as proof):
+**Done — proof captured** ([SCORE 3 screenshot](../../tests/screenshots/smb_gold_value_3.png)).
+Method (all temporary, fully reverted via `git checkout` afterward):
 
-- Temporarily set `coin_template`'s `Gold Value` to `3` in
-  [`wflevels/smb_w1_1/blender_create_smb.py`](../../wflevels/smb_w1_1/blender_create_smb.py),
-  rebuild the level (`blender --background --python .../blender_create_smb.py` →
-  `build_level_binary.sh smb_w1_1` → `iffcomp standalone smb_w1_1`), bump a `?`-block, walk
-  Mario into the coin, and screenshot the HUD jumping by **3** not 1. Then revert `Gold Value`
-  to the faithful default (1) and rebuild the level so the shipped artifact stays
-  arcade-correct.
-- Regression: `python3 tests/verify_smb_scroll.py` → all 4 screenshots pass.
+1. Set `coin_template`'s `Gold Value = 3` in the Blender script and re-export/rebuild.
+2. The fired coin (block-0 generator) arcs and **rests on open ground** at ≈(14.6, 0.75) — it
+   does *not* slide. Driving Mario *under* the block makes the coin land on his **head** (rest
+   Z≈2.6); since Mario's tracked position is his feet (Z≈0), dz>1.5 and the proximity pickup
+   (`TryPickup`, radius 1.5 m XZ) misses. So the test spawns Mario left of the coin and walks
+   him right (`inject_input joystick1_raw=0x2000`) into the ground-resting coin under bridge
+   pause/step (small clamped dt → no tunnel).
+3. At marioX≈13.30 (dx≈1.27, dz≈0.75, dist≈1.47 < 1.5) the player's GOLD mailbox (3001, Mario =
+   actor idx 10) and the HUD both went **0 → 3** — `getOad()->GoldValue` is honored. (mb 70 was
+   read via the player's own 3001; the bridge `watch` doesn't report global-idx-0 changes.)
+
+### Authoring-pipeline gap found (separate from this fix)
+
+`Gold Value` would **not** export from Blender: `blender_create_smb.py:38` points `OAD_DIR` at
+the **stale `wftools/wf_oad/tests/fixtures`** (whose `gold.oad` predates the field, added to
+canonical `wfsource/source/oas/gold.oad` in `948c3fbc`), and the exporter only emits
+`schema.visible_fields()`. The proof worked by temporarily overriding the coin's
+`wf_schema_path` to the canonical `gold.oad`. **Shipped behavior is safe** without that: the
+`.lev` omits the field, but levcomp-rs lays out the common block from the *canonical* OAD and
+emits the default `1`, so the engine reads 1 (not garbage). But the field is currently
+**un-authorable from the golden source** — logged in `TODO.md`; a proper fix repoints
+`OAD_DIR` at `wfsource/source/oas` (needs validating that the other classes' canonical `.oad`s
+match the fixtures so the rest of the level is byte-stable). Relates to
+[feedback_blender_golden_source].
+
+- Regression: `python3 tests/verify_smb_scroll.py` → all 4 screenshots pass (run earlier).
 
 ## Commit
 
