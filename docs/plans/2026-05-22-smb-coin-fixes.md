@@ -1,6 +1,6 @@
 # Fix SMB coin: TTL bug, size, rightward motion, physics params, OAD value
 
-**Status:** Not started
+**Status:** Done. Items 1–4 landed in `948c3fbc` (2026-05-22): TTL stale-clock fixed engine-wide via `level.cc:1689` (`startupData->currentTime` stamped at spawn in `SafelyConstructTemplateObject`); NES coin size (`COIN_X`/`COIN_Z` in `blender_create_smb.py`); rightward drift (`Object X Velocity = 1.5`); zero friction (`Surface Friction`/`Horiz Air Drag`/`Vert Air Drag = 0.0`); spawn-Z offset in `generator.cc`. Item 5 (OAD-configurable value) was only half-wired in `948c3fbc` — the `Gold Value` field reached the dead `Gold::Collision` path but the live `TryPickup` proximity path still hardcoded `+1`; completed 2026-05-25 by routing `TryPickup` (`gold.cc:54`) through `getOad()->GoldValue`. See follow-up [2026-05-25-smb-gold-value-wire-and-doc-fix.md](2026-05-25-smb-gold-value-wire-and-doc-fix.md).
 
 ## Context
 

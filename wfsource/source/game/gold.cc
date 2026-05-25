@@ -51,7 +51,10 @@ static void TryPickup(Gold& coin, Actor& player)
 	if (dx*dx + dz*dz > 1.5f * 1.5f) return;
 
 	Mailboxes& pm = player.GetMailboxes();
-	pm.WriteMailbox(EMAILBOX_GOLD, pm.ReadMailbox(EMAILBOX_GOLD) + Scalar::one);
+	// Award the OAD-configured Gold Value (default 1). This proximity path is the
+	// only one that runs for MOBILITY_PHYSICS coins; Gold::Collision (which also
+	// reads GoldValue) is never called for them — see file header.
+	pm.WriteMailbox(EMAILBOX_GOLD, pm.ReadMailbox(EMAILBOX_GOLD) + Scalar((float)coin.getOad()->GoldValue));
 	theLevel->SetPendingRemove(&coin);
 }
 
