@@ -685,7 +685,30 @@ if player:
     if old and old.users == 0:
         bpy.data.meshes.remove(old)
 
-# ── 8. Goomba placeholder (static visual) ────────────────────────────────────
+# ── 8. Goomba (walks left) ───────────────────────────────────────────────────
+# Enemies walk via the coin-slide pattern: Physics + Turn Rate 0 (→ MarbleHandler)
+# + Running Deceleration 0 (carries velocity), and a per-tick script that forces a
+# constant leftward XSPEED. Stomp + hurt branches are added in later phases.
+ENEMY_WALK_SPEED = 4.0
+ENEMY_SCRIPT = (
+    "\\ wf\n"
+    f"{-ENEMY_WALK_SPEED} INDEXOF_XSPEED write-mailbox\n"   # walk left (toward Mario)
+)
+
+
+def _apply_enemy_movement(obj):
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 1.0
+    obj['wf_Turn Rate']            = 0.0     # → MarbleHandler (no input, carries velocity)
+    obj['wf_Running Deceleration'] = 0.0     # frictionless: keeps walk velocity
+    obj['wf_Max Ground Speed']     = 8.0
+    obj['wf_Max Air Speed']        = 50.0    # don't let the speed cap zero gravity (marble bug)
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Script']               = ENEMY_SCRIPT
+
+
 def _build_goomba():
     mat_br = make_mat('goomba_brown', (0.55, 0.27, 0.06))
     mat_tn = make_mat('goomba_tan',   (0.83, 0.65, 0.34))
@@ -737,11 +760,7 @@ scene.collection.objects.link(goomba_obj)
 bpy.data.objects.remove(goomba_mesh, do_unlink=True)
 goomba_obj.location = (GOOMBA_X, 0.0, MARIO_Z)
 attach_schema(goomba_obj, 'enemy')
-goomba_obj['wf_Mobility']           = 'Anchored'
-goomba_obj['wf_Mass']               = 1.0
-goomba_obj['wf_Model Type']         = 'Mesh'
-goomba_obj['wf_Visibility Mailbox'] = 1
-goomba_obj['wf_Script']             = "\\ smb goomba placeholder\n"
+_apply_enemy_movement(goomba_obj)
 
 # ── 9. Koopa Troopa placeholder (static visual) ───────────────────────────────
 mat_kgreen = make_mat('koopa_green', (0.14, 0.56, 0.20))
@@ -787,11 +806,7 @@ scene.collection.objects.link(koopa_obj)
 bpy.data.objects.remove(koopa_mesh, do_unlink=True)
 koopa_obj.location = (KOOPA_X, 0.0, MARIO_Z)
 attach_schema(koopa_obj, 'enemy')
-koopa_obj['wf_Mobility']           = 'Anchored'
-koopa_obj['wf_Mass']               = 1.0
-koopa_obj['wf_Model Type']         = 'Mesh'
-koopa_obj['wf_Visibility Mailbox'] = 1
-koopa_obj['wf_Script']             = "\\ smb koopa placeholder\n"
+_apply_enemy_movement(koopa_obj)
 
 # ── 10. Flagpole ──────────────────────────────────────────────────────────────
 mat_pole = make_mat('smb_pole', (0.72, 0.72, 0.72))

@@ -1203,9 +1203,14 @@
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.001.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ smb goomba placeholder\n" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 8.0000000000000000(1.15.16) } { 'STR' "8.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n-4.0 INDEXOF_XSPEED write-mailbox\n" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000144997286(1.15.16) } { 'STR' "-0.000000" } }
@@ -1224,9 +1229,14 @@
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "koopa_00.001.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ smb koopa placeholder\n" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 8.0000000000000000(1.15.16) } { 'STR' "8.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
+		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n-4.0 INDEXOF_XSPEED write-mailbox\n" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000174343586(1.15.16) } { 'STR' "-0.000000" } }
