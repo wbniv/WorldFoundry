@@ -2,12 +2,15 @@
 // engine/wf_edit/main.cc — World Foundry collaborative level editor (wf-edit).
 //
 // Milestone 2: embed the engine viewport. The editor owns a GLFW X11/GLX
-// window, registers that context with the engine (SetHostGLContext) and a
-// per-frame UI callback (SetEditorFrameCallback), then calls HALStart. The
+// window, registers that context with the engine (SetHostGLContext) and a pair
+// of per-frame callbacks (SetEditorFrameCallbacks), then calls HALStart. The
 // engine's PIGSMain runs in `--editor` mode → WFGame::RunEditor, which each
-// frame does StepFrame(do_swap=false) (renders the level into the back buffer)
-// then calls back here so we composite an ImGui overlay and swap. Approach (a)
-// per docs/plans/2026-05-20-editor-app-shell.md; Linux/X11 only.
+// iteration calls editor_build (apply edits + build UI), then
+// StepFrame(do_swap=false) (renders the level into the back buffer), then
+// editor_present (composite the ImGui overlay + swap). Build-before-render is
+// what makes a local edit appear the same frame — see
+// docs/plans/2026-05-25-wf-edit-zero-latency-local-edits.md. Approach (a) per
+// docs/plans/2026-05-20-editor-app-shell.md; Linux/X11 only.
 //=============================================================================
 
 // nlohmann/json must be included before WF engine headers — memory.hp's
@@ -60,7 +63,7 @@ extern void ParseWindowSwitches(int argc, char** argv);
 extern char szAppName[];
 
 // gfx/gl/display.cc — drive WFInitGL's glViewport + projection aspect. main()
-// seeds them from the GLFW framebuffer before HALStart; editor_frame re-applies
+// seeds them from the GLFW framebuffer before HALStart; editor_build re-applies
 // glViewport + SetProjection from them on window resize (the engine's own
 // resize path early-bails in host-owned mode).
 extern int wfWindowWidth, wfWindowHeight;
@@ -183,7 +186,7 @@ struct EditorCtx {
     const char* shot = nullptr;    // --screenshot: PPM dump on the last frame
 
     // Last framebuffer size we applied to the engine viewport; 0 forces the
-    // first editor_frame to (re-)fit. See the resize block in editor_frame.
+    // first editor_build to (re-)fit. See the resize block in editor_build.
     int         fb_w = 0, fb_h = 0;
 
     // M4 read-only Y.Doc: actor names read out of the CRDT doc (see level_doc).
@@ -495,14 +498,22 @@ void write_ppm(GLFWwindow* win, const char* path)
     std::printf("wf-edit: screenshot %s (%dx%d)\n", path, w, h);
 }
 
-// Called by WFGame::RunEditor each frame, after StepFrame has rendered the
-// engine into the back buffer (no swap). We composite the ImGui overlay and
-// swap. Return false to quit.
-bool editor_frame(void* p)
+// Build phase (EditorBuildCallback): called by WFGame::RunEditor at the TOP of
+// each iteration, BEFORE StepFrame. We poll input, apply any pending Doc edits
+// to the live engine (the bridge drain), and build the ImGui UI — so the
+// StepFrame render that follows reflects this frame's edits this frame (no
+// render-ahead-of-edit latency). editor_present then composites + swaps.
+// Return false to quit — always BEFORE ImGui::NewFrame so the NewFrame/Render
+// pair stays balanced (present is skipped when build returns false).
+bool editor_build(void* p)
 {
     EditorCtx* c = static_cast<EditorCtx*>(p);
     glfwPollEvents();
     if (glfwWindowShouldClose(c->win))
+        return false;
+    // --frames N: stop after N frames have been presented. Checked here (before
+    // NewFrame) so the quit path never opens an ImGui frame present won't close.
+    if (c->max_frames >= 0 && c->frame >= c->max_frames)
         return false;
 
     // Follow window resize. WFInitGL set glViewport + projection ONCE from the
@@ -1128,6 +1139,20 @@ bool editor_frame(void* p)
         ImGui::End();
     }
 
+    // Build done. RunEditor calls StepFrame next (renders the scene with this
+    // frame's edits applied), then editor_present composites this ImGui frame on
+    // top and swaps.
+    return true;
+}
+
+// Present phase (EditorPresentCallback): composite the ImGui overlay built in
+// editor_build onto the scene StepFrame just rendered, capture --screenshot if
+// due, and swap. Called only when editor_build returned true, so the ImGui
+// NewFrame/Render pair is always balanced.
+void editor_present(void* p)
+{
+    EditorCtx* c = static_cast<EditorCtx*>(p);
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -1143,9 +1168,6 @@ bool editor_frame(void* p)
     glfwSwapBuffers(c->win);
 
     ++c->frame;
-    if (c->max_frames >= 0 && c->frame >= c->max_frames)
-        return false;
-    return true;
 }
 
 void glfw_error(int code, const char* desc)
@@ -1561,7 +1583,7 @@ int main(int argc, char** argv)
         std::copy(identity.colour, identity.colour + 3, ctx.our_colour);
     }
 
-    SetEditorFrameCallback(editor_frame, &ctx);
+    SetEditorFrameCallbacks(editor_build, editor_present, &ctx);
 
     // 4. Drive the engine. HALStart inits HAL/audio + calls PIGSMain, which in
     //    --editor mode constructs WFGame and runs RunEditor (StepFrame + our
@@ -1587,7 +1609,7 @@ int main(int argc, char** argv)
     // the level renders into only the bottom-left of our 1280×800 window. Set
     // before HALStart, which constructs Display (→ _xSize/_ySize) and calls
     // WFInitGL (→ glViewport + aspect). Later resizes are tracked per-frame in
-    // editor_frame (wfWindowWidth/Height is the file-scope extern above).
+    // editor_build (wfWindowWidth/Height is the file-scope extern above).
     extern int _halWindowWidth, _halWindowHeight;   // hal/linux: feeds Display _xSize/_ySize
     int fbw = 0, fbh = 0;
     glfwGetFramebufferSize(win, &fbw, &fbh);
@@ -1613,7 +1635,7 @@ int main(int argc, char** argv)
     //    Unregister the frame callback before `ctx` leaves scope so the
     //    engine's stored ctx pointer can't dangle (no callbacks fire after
     //    HALStart returns, but keep it tidy — mirrors ClearHostGLContext).
-    SetEditorFrameCallback(nullptr, nullptr);
+    SetEditorFrameCallbacks(nullptr, nullptr, nullptr);
     if (!room_id.empty()) {
         collab_session.Stop();
         voice_chat.Stop();

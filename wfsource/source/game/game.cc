@@ -441,15 +441,17 @@ WFGame::RunWfmutThreadTest()
 
 #if defined(WF_ENABLE_EDITOR)
 namespace {
-	EditorFrameCallback sEditorFrame = nullptr;
-	void*               sEditorCtx   = nullptr;
+	EditorBuildCallback   sEditorBuild   = nullptr;
+	EditorPresentCallback sEditorPresent = nullptr;
+	void*                 sEditorCtx     = nullptr;
 }
 
 extern "C" void
-SetEditorFrameCallback( EditorFrameCallback fn, void* ctx )
+SetEditorFrameCallbacks( EditorBuildCallback build, EditorPresentCallback present, void* ctx )
 {
-	sEditorFrame = fn;
-	sEditorCtx   = ctx;
+	sEditorBuild   = build;
+	sEditorPresent = present;
+	sEditorCtx     = ctx;
 }
 
 void
@@ -465,14 +467,19 @@ WFGame::RunEditor()
 	LoadLevel(df);
 	DBSTREAM1( cprogress << "RunEditor: level loaded, entering editor loop" << std::endl; )
 
-	// Editor owns cadence + the swap. StepFrame(do_swap=false) renders the
-	// engine into the back buffer; the registered callback composites its UI
-	// and swaps. Loop until the callback returns false (window closed).
+	// Editor owns cadence + the swap. Each iteration: the editor builds its UI
+	// and applies pending edits to the engine (build), THEN StepFrame renders
+	// the now-up-to-date scene into the back buffer (do_swap=false), THEN the
+	// editor composites its overlay and swaps (present). Build-before-render is
+	// what makes a same-frame edit visible the same frame. Loop until build
+	// returns false (window closed); a null build makes this a no-op loop body.
 	for (;;) {
 		Scalar dt;
-		StepFrame(false, &dt);
-		if (!sEditorFrame || !sEditorFrame(sEditorCtx))
+		if (!sEditorBuild || !sEditorBuild(sEditorCtx))
 			break;
+		StepFrame(false, &dt);
+		if (sEditorPresent)
+			sEditorPresent(sEditorCtx);
 	}
 
 	UnloadLevel();

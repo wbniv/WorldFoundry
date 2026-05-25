@@ -508,7 +508,7 @@ void RunRemoteSyncTest(wfcrdt::Doc& doc, int selectedA, int docB,
         return;
     }
 
-    DrainEngineSync(doc);   // exactly what editor_frame calls at frame top
+    DrainEngineSync(doc);   // exactly what editor_build calls before StepFrame
 
     const auto after = wfmut::GetActorPos(*theLevel, engB);
     auto fmt = [](const std::optional<Vector3>& p) -> std::string {
