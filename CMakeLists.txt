@@ -18,6 +18,14 @@ set(WF_JS_ENGINE     "quickjs"  CACHE STRING "none | quickjs | jerryscript")
 set(WF_WASM_ENGINE   "wamr"     CACHE STRING "none | wamr")
 option(WF_ENABLE_WREN     "Wren scripting"                ON)
 set(WF_FORTH_ENGINE  "zforth"   CACHE STRING "none | zforth | ficl | atlast | embed | libforth | pforth")
+# Default ON when zforth is selected, OFF otherwise. cmake_dependent_option auto-tracks
+# WF_FORTH_ENGINE so reconfiguring to a different Forth engine flips this off cleanly.
+include(CMakeDependentOption)
+cmake_dependent_option(WF_NEURAL_FORTH
+    "Neural-forth AI library — fuzzy logic, neural networks, ∂4 trainable slots."
+    ON
+    "WF_FORTH_ENGINE STREQUAL \"zforth\""
+    OFF)
 set(WF_PHYSICS_ENGINE "jolt"    CACHE STRING "legacy | jolt")
 option(WF_REST_API        "REST API box PoC (HTTP runtime-mutation debug)" ON)
 option(WF_DEBUG_BRIDGE    "TCP/JSON debug bridge — level-design + AI-agent debugging (Blender live edit, etc.). Independent of WF_ENABLE_EDITOR." ON)
@@ -417,6 +425,23 @@ if(NOT WF_FORTH_ENGINE STREQUAL "none")
     endif()
 endif()
 
+# ─── Neural-forth AI library ──────────────────────────────────────────────────
+if(WF_NEURAL_FORTH)
+    if(NOT WF_FORTH_ENGINE STREQUAL "zforth")
+        message(FATAL_ERROR "WF_NEURAL_FORTH requires WF_FORTH_ENGINE=zforth")
+    endif()
+    set(NF_DIR ${CMAKE_SOURCE_DIR}/engine/neural-forth)
+    list(APPEND WF_SOURCES
+        ${NF_DIR}/dictionary.c
+        ${NF_DIR}/tensor.c
+        ${NF_DIR}/autograd.c
+        ${NF_DIR}/fuzzy.c
+        ${NF_DIR}/nn.c
+        ${NF_DIR}/slot.c)
+    list(APPEND WF_INCLUDES ${NF_DIR})
+    list(APPEND WF_DEFS WF_NEURAL_FORTH)
+endif()
+
 # ─── Jolt Physics ─────────────────────────────────────────────────────────────
 set(JOLT_DIR ${VENDOR}/jolt-physics-5.5.0)
 # iOS/Xcode: Jolt's add_library(Jolt ...) does not produce a target our scope
@@ -585,7 +610,7 @@ target_compile_options(wfengine PRIVATE
     "-D__GAME__=\"wf_game\""
     "-DERR_DEBUG(x)="
     "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
-    "$<$<CONFIG:Release>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>"
+    "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>"
 )
 if(ANDROID OR IOS)
     # Legacy `register` keyword is C++17-removed; WF's pigsys/endian.cc still
@@ -637,10 +662,10 @@ target_compile_options(wf_game PRIVATE
     "-D__GAME__=\"wf_game\""
     "-DERR_DEBUG(x)="
     "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
-    "$<$<CONFIG:Release>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>"
+    "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>"
 )
 target_link_options(wf_game PRIVATE
-    "$<$<CONFIG:Release>:-flto=thin;-Wl,--gc-sections;-Wl,--icf=safe;-Wl,-O2;-Wl,--export-dynamic-symbol=ANativeActivity_onCreate>"
+    "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-flto=thin;-Wl,--gc-sections;-Wl,--icf=safe;-Wl,-O2;-Wl,--export-dynamic-symbol=ANativeActivity_onCreate>"
 )
 if(ANDROID OR IOS)
     target_compile_options(wf_game PRIVATE -Wno-register)
@@ -653,10 +678,10 @@ if(ANDROID)
     # .eh_frame / .gcc_except_table entries that C++ template-heavy code
     # generates by default.
     if(TARGET Jolt)
-        target_compile_options(Jolt PRIVATE "$<$<CONFIG:Release>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>")
+        target_compile_options(Jolt PRIVATE "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>")
     endif()
     if(TARGET zforth)
-        target_compile_options(zforth PRIVATE "$<$<CONFIG:Release>:-O3;-flto=thin;-ffunction-sections;-fdata-sections>")
+        target_compile_options(zforth PRIVATE "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin;-ffunction-sections;-fdata-sections>")
     endif()
 endif()
 
@@ -720,7 +745,7 @@ if(NOT ANDROID AND NOT IOS)
         "-D__GAME__=\"wf_host_gl_e2e_test\""
         "-DERR_DEBUG(x)="
         "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
-        "$<$<CONFIG:Release>:-O3;-flto=thin>"
+        "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin>"
     )
 
     # ─── CTest cycle-stability tests ──────────────────────────────────────────
@@ -836,6 +861,30 @@ if(IOS)
         MACOSX_PACKAGE_LOCATION Resources)
 endif()
 
+# ─── Neural-forth unit test binary ───────────────────────────────────────────
+# Standalone executable that links against zforth + the neural-forth C files.
+# Provides its own zf_host_* callbacks; does not depend on wf_game.
+# Excluded from the game build (neural_forth_test.cc is not in WF_SOURCES).
+if(WF_NEURAL_FORTH AND NOT ANDROID AND NOT IOS)
+    add_executable(nf_test
+        ${NF_DIR}/neural_forth_test.cc
+        ${NF_DIR}/dictionary.c
+        ${NF_DIR}/tensor.c
+        ${NF_DIR}/autograd.c
+        ${NF_DIR}/fuzzy.c
+        ${NF_DIR}/nn.c
+        ${NF_DIR}/slot.c)
+    target_include_directories(nf_test PRIVATE
+        ${NF_DIR}
+        ${ZFORTH_DIR}/src/zforth
+        ${STUB_SRC}
+        ${ENG_INC})
+    target_compile_options(nf_test PRIVATE -Wall -Wextra -O2)
+    target_compile_definitions(nf_test PRIVATE WF_NEURAL_FORTH WF_FORTH_ENGINE_ZFORTH)
+    target_link_libraries(nf_test PRIVATE zforth)
+    add_test(NAME neural_forth_unit COMMAND nf_test)
+endif()
+
 # ─── Output location matches build_game.sh ────────────────────────────────────
 if(NOT ANDROID)
     set_target_properties(wf_game PROPERTIES
@@ -929,7 +978,7 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         "-D__GAME__=\"wf-edit\""
         "-DERR_DEBUG(x)="
         "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
-        "$<$<CONFIG:Release>:-O3;-flto=thin>"
+        "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin>"
     )
     # Link the engine (host-GL embed via SetHostGLContext + StepFrame) and
     # wfcrdt (M4 read-only Y.Doc; pulls in libyrs.a from the editor build).

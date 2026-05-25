@@ -41,8 +41,7 @@ and mobile hosts are v2+. `wf-edit` builds **only** when the engine is configure
 ## Building `wf-edit`
 
 The editor is gated behind `WF_ENABLE_EDITOR` and built as a **Debug** CMake build in
-`build-editor/` (GCC). Release fails on the engine's Clang-only `-flto=thin`, so use
-Debug for the editor binary.
+`build-editor/` (GCC). Debug is the typical choice for editor work.
 
 ```bash
 # from the repo root
