@@ -16,6 +16,7 @@ internals at the bottom. For per-symptom debugging recipes, see
 3. [Authoring conventions](#authoring-conventions)
    - [Blender Viewport Display by Object Type](#blender-viewport-display-by-object-type)
 4. [Engine systems you wire from a level](#engine-systems-you-wire-from-a-level)
+   - [Composing actors — sensors + visuals](#composing-actors--sensors--visuals-reach-for-this-before-a-new-class) — prefer composition over new classes; `ActBox` trigger volumes; catalog of live primitives
    - [Scripting System](#scripting-system) — per-frame player script, camera-relative input (SW iso), Director / ActBoxOR pattern, level selection without scripts
    - [Camera System](#camera-system) — state machine, EMAILBOX_CAMSHOT bootstrap
 5. [Worked example — Marble Madness arcade-ROM pipeline](#worked-example--marble-madness-arcade-rom-pipeline)
@@ -316,6 +317,79 @@ These are the runtime systems your level interacts with through OAD
 fields, mailboxes, and Forth scripts. The patterns below are what the
 existing levels (`mm_practice`, `qbert_practice`, `snowgoons`, the MM
 reproduction) actually use.
+
+### Composing actors — sensors + visuals (reach for this *before* a new class)
+
+WF game objects are usually **compositions of small, single-purpose primitive actors**, not
+bespoke classes. A whole category of actors are **sensors / references designed to pair with
+another object**: they detect something and write a mailbox, or they act on a *referenced*
+object. **Before** you write a new `EActorKind` (see [Creating a new OAD class](#creating-a-new-oad-actor-class))
+— or overload an existing class to get "scriptable + collidable" — check whether a composition
+of existing primitives already does the job. It almost always does, and it keeps each actor
+single-purpose.
+
+**The workhorse trigger volume — `ActBox`.** An invisible activation volume (`Model Type =
+None`). When an actor passes its `Activated By Actor` filter and overlaps its bounding volume,
+it writes a configurable value to a configurable mailbox (its `MailBox` / `MailBoxValue`
+fields), with a separate exit value (`ClearOnExit` / `Mailbox Exit Value`) and an optional
+directional `FieldFX` (wind/conveyor). It is the canonical *"when the player reaches **here**,
+fire **this** mailbox"* primitive — you place it **at** the thing it guards, so the placement
+*is* the trigger region. (`ActBoxOR` is the sibling that activates a referenced **Object**,
+e.g. a CamShot — used for camera-zone switches.)
+
+> **ActBox fires under Jolt.** Its overlap test is `Activation::Activated()`
+> ([`activate.cc`](../wfsource/source/physics/activate.cc)) → `PhysicalAttributes::CheckCollision`
+> — a pure AABB test on position + bbox, **independent** of the legacy collision-event pipeline
+> that is dead under Jolt. The player is in `ROOM_OBJECT_LIST_COLLIDE` (`Actor::CanCollide` =
+> `collisionTable[kind] && Mass>0`) and its `PhysicalAttributes` are synced from Jolt each frame
+> *before* `ActBox::update()` runs, so the trigger works. (Contrast the per-actor `COLLIDER_IDX`
+> mailboxes, which *did* need explicit Jolt-contact-listener wiring — see the
+> [troubleshooting guide](level-design-troubleshooting.md).)
+
+**Worked example — flagpole ends the level.** A flagpole is *not* a class; compose it:
+
+- the pole + flag are a plain **`statplat`** (just the art);
+- drop an **`ActBox`** volume on the flagpole with `Activated By Actor = Player`,
+  `MailBox = 1905` (`INDEXOF_END_OF_LEVEL`, [`mailbox.inc:31`](../wfsource/source/mailbox/mailbox.inc)),
+  `MailBoxValue = 1`.
+
+Mario walks into the volume → the ActBox writes `1` to `END_OF_LEVEL` → the level unloads
+([`level.cc`](../wfsource/source/game/level.cc) `EMAILBOX_END_OF_LEVEL` → `_done`). No script,
+no coordinate, no class.
+
+**Anti-patterns this replaces**
+
+- ❌ **Position threshold baked into a script** — e.g. the player's script doing
+  `INDEXOF_X_POS read-mailbox 63 > if … END_OF_LEVEL …`. The author has to read the goal's
+  coordinate off the level and transcribe it into *another* actor's script; it silently breaks
+  the moment the goal moves, and it couples the player to the goal's placement. There's no clean
+  way for the author to "know" that number. Use a trigger volume **co-located** with the goal.
+- ❌ **Overloading a class to get capabilities** — e.g. making the flagpole a `generator` just
+  because `generator` is the only anchored + collidable + **scriptable** class (`statplat`
+  forbids scripts — `actor.cc:736`). That's the actor-kind-vs-capability smell. Compose a sensor
+  (`ActBox`) next to the dumb visual instead.
+
+**Catalog of composable primitives (all LIVE today)** — sensors/references you wire to other
+objects:
+
+| Primitive | Pairs with | Does |
+|-----------|-----------|------|
+| `ActBox` | a mailbox | overlap → write `MailBox = MailBoxValue` (+ exit value, + `FieldFX` push) |
+| `ActBoxOR` | an Object (CamShot) | overlap → activate the referenced object (camera zones) |
+| `Warp` | a `Target` | overlap → teleport the entering actor to the Target's position (← SMB pipes) |
+| `Generator` | a template Object | on activation, spawn its `Object To Throw` (← `?`-block coins) |
+| `Destroyer` | activation | remove objects on trigger |
+| `Spike` | contact | apply a `Health Modifier` to whoever touches it (← hazards) |
+| `Shield` | the Player | follows + absorbs hits (← power-ups) |
+| `Shadow` | a template Object | casts that object's drop-shadow onto the floor |
+| `Platform` | a path | moving / path-following surface |
+| `Target` / `CamShot` / `Director` | referenced by others | position markers, camera shots, mailbox orchestration |
+
+The shared `activate.inc` block — `Activated By Actor` = *any* / *specific-actor* / *class* /
+*list* — is the filter that makes every trigger-style primitive selective.
+
+**Dead stubs — do not author against these** (they have an `.oas` but no backing C++ class and
+aren't registered as a kind): `Pole`, `Meter`, `Movie`. Each would need engine work first.
 
 ### Scripting System
 
@@ -835,6 +909,14 @@ Adding a brand-new actor class (a new `EActorKind`, e.g. the SMB `Gold`
 collectible) is **not** a level-authoring task you do per-level — it touches the
 engine's OAS codegen. But level designers hit it the moment a level needs a
 behaviour no shipped class provides, so the full procedure lives here.
+
+> **Try composition first.** Most "the level needs a behaviour no class provides" cases are
+> actually solved by *combining existing primitives* — a trigger volume + a visual, a `Warp` +
+> `Target`, a `Generator` + a template — not by a new class. See
+> [Composing actors](#composing-actors--sensors--visuals-reach-for-this-before-a-new-class).
+> Only reach for a new `EActorKind` when no composition of live primitives can express the
+> behaviour. `Gold` qualified (a genuinely new collectible-pickup behaviour); a flagpole does
+> **not** (it's `statplat` + `ActBox`).
 
 > **The cardinal rule: edit the *masters*, then *regenerate* the derived files.
 > Never hand-edit a generated `objects.*` / `*.ht` file.** Every `objects.*`
