@@ -31,8 +31,8 @@ in the level-building guide, and the [SMB conversion brief](/home/will/wf-games/
 |---|---|---|
 | Walk / run / jump | `Player` + Ground/Air handlers; variable jump in `AirHandler` | ✅ |
 | Side-scroll camera (left-lock) | `Director` (ratchet script) + `CamShot` + `SMB_*` mailboxes | ✅ |
-| `?`-block → coin | `Generator` (the block) + `Gold` (coin template) | ✅ |
-| Standalone coin | `Gold` (slides on ground, OAD `Gold Value`) | ✅ |
+| `?`-block → coin | `Generator` (the block) + `Gold` (coin template); the **spawned** coin inherits the generator's +X velocity and slides right along the ground | ✅ |
+| Standalone coin (placed at level start) | `Gold` — **spins in place** (Z-axis `ROTATION_C` script); it has no velocity so it does **not** move/slide. OAD `Gold Value` | ✅ |
 | HUD score/coins (basic) | per-actor `GOLD` mailbox → global mb 70 → SCORE overlay | ✅ |
 | **Flagpole → end of level** | `statplat` (pole+flag art) + `ActBox`(`MailBox`=`END_OF_LEVEL`,`=1`, ActivatedBy=Player) | 🧩 *(designed this session)* |
 | **Pipe warp** | `Warp` + `Target` — Warp at pipe mouth teleports the entering actor to the Target in the destination area | 🧩 |
