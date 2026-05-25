@@ -33,6 +33,7 @@
 		$3000006l { 'STR' "koopa_00.001.iff" }  // IFF RM0 000:006
 		$3000007l { 'STR' "flagpole_pole.iff" }  // IFF RM0 000:007
 		$3000008l { 'STR' "flagpole_flag.iff" }  // IFF RM0 000:008
+		$3000009l { 'STR' "flagpole_trigger.iff" }  // IFF RM0 000:009
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "smb_w1_1.lvl" ] }
@@ -59,6 +60,7 @@
 		{ 'ASS' $3000006l [ "koopa_00.001.iff" ] }  // IFF RM0 000:006
 		{ 'ASS' $3000007l [ "flagpole_pole.iff" ] }  // IFF RM0 000:007
 		{ 'ASS' $3000008l [ "flagpole_flag.iff" ] }  // IFF RM0 000:008
+		{ 'ASS' $3000009l [ "flagpole_trigger.iff" ] }  // IFF RM0 000:009
 	}
 	{ 'ALGN' .align(2048) }
 }

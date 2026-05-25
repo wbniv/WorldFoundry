@@ -826,6 +826,30 @@ attach_schema(flag_obj, 'statplat')
 flag_obj['wf_Visibility Mailbox'] = 1
 flag_obj['wf_Model Type'] = 'Mesh'
 
+# ── 10b. Flagpole end-of-level trigger ────────────────────────────────────────
+# Composition, NOT a class: an invisible ActBox sensor volume over the flagpole.
+# On Player overlap it writes END_OF_LEVEL=1 → the level unloads. No script, no
+# coordinate baked into a script (the box's placement IS the trigger region).
+# See docs/plans/2026-05-25-smb-flagpole-end-of-level.md and the composition
+# pattern in docs/level-building.md.
+END_OF_LEVEL = 1905   # INDEXOF_END_OF_LEVEL (wfsource/source/mailbox/mailbox.inc:31)
+
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(FLAGPOLE_X, 0.0, 2 * T))
+flagtrig = bpy.context.object
+flagtrig.name      = 'flagpole_trigger'
+flagtrig.data.name = 'flagpole_trigger'
+flagtrig.scale = (1.5, T, 2.5 * T)   # half-extents X±1.5, Y±T, Z±3.75 (centre Z=3): covers Mario at the pole
+bpy.ops.object.transform_apply(scale=True)
+attach_schema(flagtrig, 'actbox')
+flagtrig['wf_MailBox']            = END_OF_LEVEL   # write-to-mailbox on activation
+flagtrig['wf_MailBoxValue']       = 1
+flagtrig['wf_Activated By Actor'] = 'Player'       # ActivatedBy defaults to 1 (Actor)
+# ActBox::activate unconditionally writes the activator's index to "Activated Actor
+# Mailbox"; its default 0 is a RESERVED mailbox (mailbox.cc asserts >= 2) → abort.
+# We don't need the activator, so send it to a scratch slot (SCRATCH_USER_START=4005).
+flagtrig['wf_Activated Actor Mailbox'] = 4005
+# ActBox DEFAULT_VISIBILITY=0 → invisible; bbox (activation volume) comes from the cube mesh.
+
 # ── 11. CamShot + Targets ─────────────────────────────────────────────────────
 camshot = find_by_class('camshot')
 if camshot:

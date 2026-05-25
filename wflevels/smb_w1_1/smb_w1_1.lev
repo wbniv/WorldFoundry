@@ -1271,6 +1271,26 @@
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
+		{ 'NAME' "flagpole_trigger" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 61.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -0.7500000000000000(1.15.16) 64.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "flagpole_trigger.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
+		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 1905l } { 'STR' "1905" } }
+		{ 'I32' { 'NAME' "MailBoxValue" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Activated Actor Mailbox" } { 'DATA' 4005l } { 'STR' "4005" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
 		{ 'NAME' "Target02" }
 		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 4.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
 		} }
