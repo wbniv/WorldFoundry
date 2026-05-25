@@ -24,6 +24,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "ImGuizmo.h"          // viewport translate/rotate gizmo
+#include "imgui_markdown.h"    // chat sidebar markdown rendering (header-only)
 
 #include <gfx/host_gl_context.h>
 #include <gfx/renderer_backend.hp>   // RendererBackendGet().SetProjection on resize
@@ -259,6 +260,7 @@ struct EditorCtx {
         std::string text;
     };
     std::vector<ChatEntry> chat_log;
+    bool                   chat_demo = false;  // WF_EDIT_CHAT_DEMO: show Chat panel w/o relay
     char chat_input[256]   = {};
     bool chat_scroll_btm   = false;
 };
@@ -659,6 +661,27 @@ bool editor_frame(void* p)
             DoAddActor(c, p);
         }
     }
+    // Chat-markdown screenshot proof: WF_EDIT_CHAT_DEMO=1 seeds sample markdown
+    // messages and forces the Chat panel visible (no relay needed) so
+    // --screenshot captures rendered markdown.
+    static bool s_chat_demo = false;
+    if (!s_chat_demo && std::getenv("WF_EDIT_CHAT_DEMO")) {
+        s_chat_demo = true;
+        c->chat_demo = true;
+        auto push = [&](const char* who, float r, float g, float b, const char* md) {
+            EditorCtx::ChatEntry e;
+            e.name = who;
+            e.colour[0] = r; e.colour[1] = g; e.colour[2] = b;
+            e.text = md;
+            c->chat_log.push_back(std::move(e));
+        };
+        push("Ada", 0.4f, 0.8f, 1.0f,
+             "# Heads up\nMoved the **House** to `(7, 0, 0)` — check the _Outliner_.\n\n"
+             "- bumped Mass\n- re-anchored\n\nSee [docs](http://wf/x).");
+        push("Me", 0.6f, 1.0f, 0.6f,
+             "Nice, that **fixes** the clip. Hit `Ctrl+Z` if it drifts.");
+        c->chat_scroll_btm = true;
+    }
     // Undo-UI screenshot proof: WF_EDIT_UNDO_UI=dup|del|field performs one edit
     // then one DoUndo via the UI path, so the screenshot shows the Outliner /
     // Properties + "undo" toast back in the pre-edit state. (field edits the
@@ -994,8 +1017,18 @@ bool editor_frame(void* p)
         wfedit::RenderCollabPanel(c->show_collab, *c->collab,
                                   *c->voice, *c->video, c->room_id);
 
-    // Chat panel (only when relay is connected).
-    if (c->relay_client.connected()) {
+    // Chat panel (when a relay is connected, or forced by WF_EDIT_CHAT_DEMO).
+    if (c->relay_client.connected() || c->chat_demo) {
+        if (c->chat_demo) {
+            // Demo/screenshot: float it over the viewport so the capture shows it
+            // (normally it's docked once the user drags it into the layout).
+            const ImVec2 wp = ImGui::GetMainViewport()->WorkPos;
+            const ImVec2 ws = ImGui::GetMainViewport()->WorkSize;
+            ImGui::SetNextWindowPos(ImVec2(wp.x + ws.x * 0.30f, wp.y + ws.y * 0.30f),
+                                    ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(ws.x * 0.40f, ws.y * 0.45f), ImGuiCond_Always);
+            ImGui::SetNextWindowFocus();
+        }
         ImGui::Begin("Chat");
         // Peer presence list above history.
         if (!c->peer_presence.empty()) {
@@ -1008,11 +1041,19 @@ bool editor_frame(void* p)
         // Scrollable message history.
         const float reserve = ImGui::GetFrameHeightWithSpacing() + 4;
         ImGui::BeginChild("##chat_hist", ImVec2(0, -reserve), false);
-        for (const auto& e : c->chat_log) {
+        // Body rendered as Markdown (bold/italic/headings/lists/links). The wire
+        // format stays plaintext — rendering is client-side at display time. The
+        // default MarkdownConfig is exactly what we want: default font + heading
+        // separators, and NULL-safe (inert) link clicks. Name stays on its own
+        // line; markdown is block-level so the body renders below it.
+        static ImGui::MarkdownConfig s_md;
+        for (size_t i = 0; i < c->chat_log.size(); ++i) {
+            const auto& e = c->chat_log[i];
+            ImGui::PushID(static_cast<int>(i));
             ImGui::TextColored(ImVec4(e.colour[0], e.colour[1], e.colour[2], 1.f),
                                "%s:", e.name.c_str());
-            ImGui::SameLine();
-            ImGui::TextWrapped("%s", e.text.c_str());
+            ImGui::Markdown(e.text.c_str(), e.text.size(), s_md);
+            ImGui::PopID();
         }
         if (c->chat_scroll_btm) {
             ImGui::SetScrollHereY(1.0f);

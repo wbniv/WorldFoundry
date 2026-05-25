@@ -932,6 +932,7 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
 
     set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/third_party/imgui)
     set(IMGUIZMO_DIR ${CMAKE_SOURCE_DIR}/third_party/imguizmo)  # 3D translate/rotate gizmo
+    set(IMGUI_MARKDOWN_DIR ${CMAKE_SOURCE_DIR}/third_party/imgui_markdown)  # header-only chat markdown
     add_executable(wf_edit
         engine/wf_edit/main.cc
         engine/wf_edit/level_doc.cc            # M4: levtree -> wfcrdt::Doc
@@ -964,6 +965,7 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     target_include_directories(wf_edit PRIVATE
         ${IMGUI_DIR} ${IMGUI_DIR}/backends
         ${IMGUIZMO_DIR}                              # ImGuizmo.h
+        ${IMGUI_MARKDOWN_DIR}                        # imgui_markdown.h (chat rendering)
         ${CMAKE_SOURCE_DIR}/engine/crdt              # wfcrdt.hpp (read-only Y.Doc)
         ${CMAKE_SOURCE_DIR}/engine/mutation          # wfmut.hpp (M3 CRDT->engine bridge)
         ${CMAKE_SOURCE_DIR}/third_party/json         # <nlohmann/json.hpp>
