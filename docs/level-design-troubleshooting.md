@@ -588,6 +588,34 @@ MarbleHandler carries the full 3D velocity each frame. Gravity accumulates in Z;
 
 Combined friction ≈ 0.06; the ball rolls down grades of 4°+ without joystick input.
 
+> **Caveat (Jolt):** the `Surface Friction` rows above are effectively **dead under the Jolt
+> backend** — `MarbleHandler::predictPosition` never reads `Surface Friction`, and the legacy
+> wheel-friction path that did is skipped because `supportingObject` is never set for a Jolt
+> `CharacterVirtual`. The only horizontal-velocity decay that actually applies to a
+> doom-stick/marble actor is `Running Deceleration`. See the next section.
+
+---
+
+## "I set Surface Friction / Air Drag to 0 but the actor still stops dead on landing"
+
+**Symptom:** A coin / projectile / marble has `Surface Friction = 0` **and** `Horiz Air Drag =
+0`, drifts correctly while airborne, but **freezes its horizontal position the instant it lands**
+— it won't slide.
+
+**Cause:** Under Jolt, `Surface Friction` and the air-drag fields are **not consulted** for
+doom-stick/`MarbleHandler` actors (TurnRate == 0). The *only* horizontal decay applied is
+`Running Deceleration` (`movement.cc:689`, `MarbleHandler`: `vel.X *= 1 - RunningDeceleration *
+dt * 30`; `:233`, `GroundHandler`: same). Its movebloc default is **0.90** — that's ≈ a full
+stop within a single frame, so any actor that doesn't override it loses all horizontal momentum
+on contact. (Airborne motion is fine because `AirHandler` doesn't apply this decay.)
+
+**Fix:** Set **`Running Deceleration = 0`** on the actor. Setting `Surface Friction` / `Air
+Drag` to 0 does **not** do it. Example: the SMB `?`-block coin (`blender_create_smb.py`
+`_make_coin_template`) is meant to keep its generator-imparted +X drift and slide rightward
+along the ground; it only does so with `Running Deceleration = 0` (with the 0.90 default it
+froze the moment it landed — verified by [tests/verify_coin_slide.py](../tests/verify_coin_slide.py)).
+See [the gold-value follow-up plan](plans/2026-05-25-smb-gold-value-wire-and-doc-fix.md).
+
 ---
 
 ## Marble frozen at spawn — `MaxAirSpeed = 0` kills gravity in AirHandler

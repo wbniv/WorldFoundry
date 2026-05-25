@@ -542,9 +542,15 @@ def _make_coin_template():
     obj['wf_Mass']                 = 0.001
     obj['wf_Falling Acceleration'] = 12.0
     obj['wf_Max Air Speed']        = 50.0
+    # NOTE: under Jolt, Surface Friction / Air Drag are DEAD (the old wheel-friction
+    # path never runs). The live ground-friction knob for a doom-stick/MarbleHandler
+    # actor is Running Deceleration (movebloc default 0.90 ≈ full stop per frame).
+    # Set it to 0 so the coin keeps its generator-imparted +X drift on the ground
+    # instead of freezing the instant it lands.
     obj['wf_Surface Friction']     = 0.0
     obj['wf_Horiz Air Drag']       = 0.0
     obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = 0.0    # frictionless ground → coin slides right
     obj['wf_Model Type']           = 'Mesh'
     obj['wf_Visibility Mailbox']   = 1
     obj['wf_Mesh Name']            = 'coin_template.iff'
