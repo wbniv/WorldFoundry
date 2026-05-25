@@ -337,9 +337,13 @@ workflow — they exist so the editor can be proven headlessly.
   to drop in customer-key encryption later without re-encoding existing snapshots.
 - **Voice/video is LAN-only** (multicast discovery; no STUN/relay/remote peers). Text chat
   is available separately over the WebSocket co-editing relay.
-- **Live viewport preview is partial** — Position/Orientation + ~15 movement fields render
-  live; other fields edit the `Doc` only (full schema-generated coverage is a follow-up).
-- **No undo** for any edit (field or structural).
+- **Live viewport preview** covers Position/Orientation + all 77 common/movebloc/mesh OAD
+  fields (the full generated field map) — they propagate live through the CRDT→engine
+  bridge. The one exception is **mesh geometry** (Model Type / Tiles / Map): the value
+  reaches the engine's mesh block, but the actor's render mesh is built once at spawn and
+  isn't rebuilt live, so those three need a reload to be *seen*.
+- **Undo/redo** is native (Ctrl+Z / Ctrl+Y) for field, gizmo, and structural edits via the
+  Yrs `UndoManager`; remote peers' edits stay out of your local undo history.
 - **Sources from text `.lev`/`.iff.txt`,** not a compiled `cd.iff` (a binary level isn't
   self-describing).
 - **Linux/X11 only.** Wayland and mobile hosts are v2+.
