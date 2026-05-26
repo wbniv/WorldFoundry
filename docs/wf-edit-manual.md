@@ -350,19 +350,18 @@ workflow — they exist so the editor can be proven headlessly.
 - **While you drag an actor with the gizmo,** a concurrent edit to that actor from a remote peer
   (or your own undo) won't snap it back mid-gesture — the drag owns its transform until you release
   the mouse, then last-writer-wins resolves the transform. Other fields still propagate live.
-- **Loads compiled binary levels, but can't re-pack them into a `cd.iff`.** The editor opens a text
-  `.lev`/`.iff.txt`, a compiled bare `.iff`/`.lvl`, **and** a level selected out of a `cd.iff`
+- **Loads compiled binary levels; saving always produces a new standalone file.** The editor opens a
+  text `.lev`/`.iff.txt`, a compiled bare `.iff`/`.lvl`, **and** a level selected out of a `cd.iff`
   archive (`--leveltree=wflevels/cd.iff:L4`) — a binary input is decompiled on load via
   `levcomp decompile`
   ([`wftools/levcomp-rs/src/decompile.rs`](../wftools/levcomp-rs/src/decompile.rs)). A binary-loaded
   level is fully editable; Save writes *out* to a new `.lev`, and **Save + Compile (.iff)** recompiles
-  that to a bare `.iff` through the normal pipeline. What's *not* wired is writing an edited level
-  back **into** a multi-level `cd.iff` (rebuilding the archive `GAME`/`TOC`) — tractable via
-  `iffwrite`'s `ChunkSizeBackpatch` + `parse_game_toc`, deferred as a follow-up. Also note: binary
-  levels carry no authored object names (cross-references are stored by actor index; the decompiler
-  synthesizes `{Class}_{index}` names), so a `.lev` saved from a binary load is a fresh derivative,
-  not a round-trip to the original Blender/`.lev` source. See the
-  [load-binary-iff plan](plans/2026-05-25-wf-edit-load-binary-iff.md).
+  that to a bare `.iff` through the normal pipeline. Saving back **into** a multi-level `cd.iff`
+  (rebuilding the archive in place) is by design **not** a feature — a `cd.iff` is read-only input,
+  and you always save out as a new file. Also note: binary levels carry no authored object names
+  (cross-references are stored by actor index; the decompiler synthesizes `{Class}_{index}` names),
+  so a `.lev` saved from a binary load is a fresh derivative, not a round-trip to the original
+  Blender/`.lev` source. See the [load-binary-iff plan](plans/2026-05-25-wf-edit-load-binary-iff.md).
 - **Linux/X11 only.** Wayland and mobile hosts are v2+.
 
 ---

@@ -175,30 +175,29 @@ An earlier draft said "there's no binary writer, so binary write-back is out of 
 wrong: WF has **two** IFF writers — the C++ [`wftools/iffwrite/`](../../wftools/iffwrite/iffwrite.hp)
 (`IffWriterBinary`/`IffWriterText` with `enterChunk`/`exitChunk` + `ChunkSizeBackpatch` size
 backpatching, the oracle) and the production Rust
-[`iffcomp-rs`](../../wftools/iffcomp-rs/src/writer.rs). So binary output is a solved problem; the only
-question is *which* binary and *how much re-pack*:
+[`iffcomp-rs`](../../wftools/iffcomp-rs/src/writer.rs). So binary output is a solved problem.
 
-- **Bare standalone `.iff` — already free.** Save the Doc to a `.lev` (`SaveDocToLev`), then run the
-  existing compile pipeline ([`build_level_binary.sh`](../../wftools/wf_blender/build_level_binary.sh):
-  `iffcomp -binary` → `levcomp` → `textile` → `iffcomp -binary`). The editor *already exposes this* as
-  **File → "Save + Compile (.iff)"** ([`RunBuildLevel`](../../engine/wf_edit/level_doc.cc)). So a
-  binary-loaded level can round-trip back to a binary `.iff` today — via `.lev` as the intermediate,
-  not an in-place binary patch.
-- **Re-pack a level back *into* a multi-level `cd.iff`** — the one genuinely missing piece: rebuild
-  the `GAME`/`TOC` archive with the edited level's new offset/size. This is *tractable*, not hard —
-  the `ChunkSizeBackpatch` writer plus the `parse_game_toc` reader this plan already added are the two
-  halves of it — but it's not wired. Deferred as a follow-up (see below).
+**The save model is "save out as a new file" — and that already works.** Save the Doc to a `.lev`
+(`SaveDocToLev`), then, if you want a binary, run the existing compile pipeline
+([`build_level_binary.sh`](../../wftools/wf_blender/build_level_binary.sh): `iffcomp -binary` →
+`levcomp` → `textile` → `iffcomp -binary`). The editor already exposes that as
+**File → "Save + Compile (.iff)"** ([`RunBuildLevel`](../../engine/wf_edit/level_doc.cc)). So a
+binary-loaded level round-trips to a fresh `.lev` or a fresh bare `.iff` today.
 
-So the accurate scope statement is: **load any binary; save out to `.lev` or recompile to a bare
-`.iff` for free; cd.iff archive re-pack is a small, well-supported follow-up — not a wall.**
+**Re-packing a level back *into* a multi-level `cd.iff` is explicitly NOT a goal** (per the user:
+"we don't need to save cd format — just save out the level as a new file"). The archive is an input
+to read levels *out* of; saving always produces a standalone new file, never an in-place archive
+edit. No re-pack work is planned.
 
 ## Out of scope / deferred
 
-- **`cd.iff` archive re-pack** — write an edited level back into the multi-level archive (rebuild
-  `GAME`/`TOC` offsets+sizes). Tractable via `iffwrite`'s `ChunkSizeBackpatch` + `parse_game_toc`;
-  deferred, not blocked. Bare-`.iff` recompile and `.lev` Save-As cover the load feature's needs.
+- **`cd.iff` archive re-pack** — writing an edited level back into the multi-level archive. **Not a
+  goal** (user: "we don't need to save cd format — just save out the level as a new file"). Saving
+  always emits a standalone new file (`.lev`, or a bare `.iff` via recompile); the archive is
+  read-only input. The machinery would exist (`iffwrite`'s `ChunkSizeBackpatch` + `parse_game_toc`),
+  but there's no plan to wire it.
 - **In-place binary patch** — editing bytes inside the original `.iff` without going through `.lev`
-  recompile. Not planned (the recompile path supersedes it).
+  recompile. Not planned (save-out-as-new-file supersedes it).
 - **Recovering authored actor names / comments / source ordering** — not in the binary; synthetic
   names are accepted.
 - **In-editor cd.iff level picker** — CLI selector first; the picker is a follow-up.
