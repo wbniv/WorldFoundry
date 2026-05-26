@@ -2,6 +2,7 @@
 
 **Status:** **DONE 2026-05-25 (~3 h incl. a full clean editor build).** Verified end-to-end: `wfcrdt_wrapper_test` 14/14 under ASan+UBSan (new `test_deep_observer`); `wf-edit` builds + links; the `WF_EDIT_REMOTE_TEST` harness PASSes — a **remote-origin** Position edit to a **non-selected** actor moves it in the engine purely via the deep observer (`before (7.868 -10.566 0.801)` → `after (-7.870 -10.570 0.800)`), with the before/after screenshots below showing the platform's tree mesh sliding right→left while a *different* actor stays selected.
 **TODO:** [TODO.md](../../TODO.md) `## COLLABORATIVE EDITOR` — "CRDT→engine bridge: true Doc observer (`observe_deep`) for remote/replay/DAP edits."
+**Superseded detail (2026-05-25):** this plan's `DrainEngineSync` re-applies *every* field of a touched actor (whole-actor granularity), and `s_pending_resync` is a set of actor indices. The [collab-hardening plan](2026-05-25-collab-hardening.md) (code-review finding #2) later made propagation **leaf-granular** — the observer records which `items[]` child changed (deep `path[2]`), `s_pending_resync` became a map of actor → changed children, and only those leaves are re-applied — plus an active-drag transform lock. The sections below describe the original whole-actor design.
 
 ## Context
 

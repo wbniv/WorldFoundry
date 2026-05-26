@@ -324,6 +324,8 @@ workflow — they exist so the editor can be proven headlessly.
 | `WF_EDIT_STRUCT_UI=dup\|del` | Drive a structural edit once through the Outliner UI path. |
 | `WF_EDIT_BRIDGE_DEBUG=1` | Dump the `Doc`↔engine actor-index map + field translations on the first frame. |
 | `WF_EDIT_BRIDGE_TEST="Field Name\|new DATA"` | Edit a leaf as the panel would, propagate through the bridge, log before/after engine position. |
+| `WF_EDIT_REMOTE_TEST="<docB>\|<x y z>"` | With `--select=A` (A≠B): apply a **remote**-origin Position edit to actor *B* and confirm the deep observer alone moves it in the engine. |
+| `WF_EDIT_DRAGLOCK_TEST=1` | With `--select=N`: prove the active-drag transform lock — a remote edit to a simulated-dragged actor (non-transform *and* Position) leaves it put, and propagation resumes on release. |
 | `WF_EDIT_SPAWN_CONFIRM_TEST=1` | Verify the `SpawnActor` runtime path (run with `--frames 5`). |
 
 ---
@@ -344,6 +346,9 @@ workflow — they exist so the editor can be proven headlessly.
   isn't rebuilt live, so those three need a reload to be *seen*.
 - **Undo/redo** is native (Ctrl+Z / Ctrl+Y) for field, gizmo, and structural edits via the
   Yrs `UndoManager`; remote peers' edits stay out of your local undo history.
+- **While you drag an actor with the gizmo,** a concurrent edit to that actor from a remote peer
+  (or your own undo) won't snap it back mid-gesture — the drag owns its transform until you release
+  the mouse, then last-writer-wins resolves the transform. Other fields still propagate live.
 - **Sources from text `.lev`/`.iff.txt`,** not a compiled `cd.iff` (a binary level isn't
   self-describing).
 - **Linux/X11 only.** Wayland and mobile hosts are v2+.
