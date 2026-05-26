@@ -403,6 +403,80 @@ bool NeedsLevelPicker(const std::string& leveltree_arg)
     return ListCdIffLevels(base).size() >= 2;                        // multi-level archive
 }
 
+std::string ResolveEngineViewportLevel(const std::string& leveltree_arg, bool& out_is_temp)
+{
+    out_is_temp = false;
+    std::string base, sel;
+    const bool has_sel = SplitLevelSelector(leveltree_arg, base, sel);
+
+    if (!has_sel) {
+        // A bare binary .iff/.lvl is already a complete L<N> chunk (what -L wants);
+        // a text .lev has no binary to render.
+        return IsBinaryLevel(base) ? base : std::string();
+    }
+
+    // cd.iff:<tag|index> — find the entry's byte offset, then slice its complete
+    // L<N> chunk to a temp .iff. Use the chunk's OWN little-endian size (the TOC
+    // size is sector-granular and can fall short of the true extent).
+    const std::vector<CdIffLevel> levels = ListCdIffLevels(base);
+    long offset = -1;
+    for (const auto& e : levels)
+        if (e.tag == sel) { offset = e.offset; break; }
+    if (offset < 0) {                       // not a tag — try a decimal index
+        char* end = nullptr;
+        const long idx = std::strtol(sel.c_str(), &end, 10);
+        if (end && *end == '\0')
+            for (const auto& e : levels)
+                if (e.index == static_cast<int>(idx)) { offset = e.offset; break; }
+    }
+    if (offset < 0) {
+        std::fprintf(stderr, "wf-edit: viewport: '%s' not found in %s\n", sel.c_str(), base.c_str());
+        return std::string();
+    }
+
+    FILE* in = std::fopen(base.c_str(), "rb");
+    if (!in) return std::string();
+    unsigned char hdr[8];
+    if (std::fseek(in, offset, SEEK_SET) != 0 || std::fread(hdr, 1, 8, in) != 8) {
+        std::fclose(in);
+        return std::string();
+    }
+    // wf_iff: chunk id big-endian, size little-endian. Extent = header + payload.
+    const unsigned long payload =
+        static_cast<unsigned long>(hdr[4])        | (static_cast<unsigned long>(hdr[5]) << 8) |
+        (static_cast<unsigned long>(hdr[6]) << 16) | (static_cast<unsigned long>(hdr[7]) << 24);
+    const unsigned long extent = 8 + payload;
+
+    char tmpl[] = "/tmp/wfedit_vp_XXXXXX";
+    const int fd = mkstemp(tmpl);
+    if (fd < 0) { std::fclose(in); return std::string(); }
+    FILE* outf = fdopen(fd, "wb");
+    if (!outf) { ::close(fd); ::unlink(tmpl); std::fclose(in); return std::string(); }
+
+    std::fwrite(hdr, 1, 8, outf);            // header already read; payload follows
+    std::array<char, 65536> buf;
+    unsigned long left = payload;
+    while (left > 0) {
+        const size_t want = (left < buf.size()) ? static_cast<size_t>(left) : buf.size();
+        const size_t got  = std::fread(buf.data(), 1, want, in);
+        if (got == 0) break;
+        std::fwrite(buf.data(), 1, got, outf);
+        left -= got;
+    }
+    std::fclose(outf);
+    std::fclose(in);
+    if (left != 0) {                          // short read → don't hand -L a truncated chunk
+        std::fprintf(stderr, "wf-edit: viewport: short read slicing %s (%lu/%lu left)\n",
+                     base.c_str(), left, payload);
+        ::unlink(tmpl);
+        return std::string();
+    }
+    out_is_temp = true;
+    std::fprintf(stderr, "wf-edit: viewport level sliced from %s:%s -> %s (%lu bytes)\n",
+                 base.c_str(), sel.c_str(), tmpl, extent);
+    return tmpl;
+}
+
 bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc,
                           std::string* out_save_path)
 {

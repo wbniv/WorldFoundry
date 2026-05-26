@@ -24,7 +24,7 @@ see and hear each other without leaving the tool.
 |---|---|
 | Open a level and render it live in an embedded viewport | ✅ |
 | Open a text `.lev`, a compiled binary `.iff`/`.lvl`, or a level from a `cd.iff` archive | ✅ (binary decompiled on load; see [limitations](#known-limitations)) |
-| Pick a level from a `cd.iff` at startup with an in-editor picker | ✅ (launch on a bare `cd.iff` → modal level list) |
+| Pick a level from a `cd.iff` at startup with an in-editor picker | ✅ (launch on a bare `cd.iff` → modal level list; viewport tracks the pick) |
 | Outliner: list every actor (read from the CRDT `Doc`) | ✅ |
 | Properties: every field of the selected actor, with the right widget per type | ✅ |
 | Edit a field → it commits to the `Doc` | ✅ |
@@ -84,7 +84,7 @@ Camera capture uses Linux [V4L2](https://www.kernel.org/doc/html/latest/userspac
 
 | Option | Form | Meaning |
 |---|---|---|
-| `--level=<name>` | `=` | Level the **engine** loads into the viewport (default `snowgoons-blender`). |
+| `--level=<name>` | `=` | Level the **engine** loads into the viewport (default `snowgoons-blender`). If omitted, the viewport **auto-tracks** a binary `--leveltree` (a bare `.iff` directly; a `cd.iff:tag` sliced to a temp `.iff`), so the 3D view matches the Outliner. Pass it explicitly to override. |
 | `--leveltree=<name>` | `=` | Level the **Outliner/Properties** `Doc` is built from (defaults to match `--level`). Accepts a text `.lev`, a compiled binary `.iff`/`.lvl` (sniffed by content, decompiled on load), or a `cd.iff` archive with a level selector — `<file.iff>:<TAG\|index>` (e.g. `wflevels/cd.iff:L4` or `:1`). Pass a **bare** `cd.iff` (no `:TAG`) and the editor shows a startup level picker. |
 | `--pick-level=<TAG\|index>` | `=` | Headless aid: auto-confirm the startup cd.iff picker on the chosen level (equivalent to clicking that row + Open), for screenshots/CI. |
 | `--room=<id>` | `=` or space | Join a voice + video call room. Omit to run solo (no call started). |

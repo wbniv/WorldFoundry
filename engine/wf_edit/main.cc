@@ -1329,13 +1329,14 @@ int main(int argc, char** argv)
     // engine-stability smoke tests; it is NOT what the editor edits.)
     std::string level     = "wflevels/snowgoons-blender-standalone.iff";
     std::string leveltree = "wflevels/snowgoons-blender/snowgoons-blender.lev";
+    bool        level_explicit = false;   // --level= given → don't auto-track the viewport
     for (int i = 1; i < argc; ++i) {
         if (std::strcmp(argv[i], "--frames") == 0 && i + 1 < argc)
             max_frames = std::atoi(argv[++i]);
         else if (std::strcmp(argv[i], "--screenshot") == 0 && i + 1 < argc)
             shot = argv[++i];
         else if (std::strncmp(argv[i], "--level=", 8) == 0)
-            level = argv[i] + 8;
+            { level = argv[i] + 8; level_explicit = true; }
         else if (std::strncmp(argv[i], "--leveltree=", 12) == 0)
             leveltree = argv[i] + 12;
         else if (std::strncmp(argv[i], "--select=", 9) == 0)
@@ -1664,6 +1665,21 @@ int main(int argc, char** argv)
         }
     }
 
+    // 2c. Viewport tracks the (now-final) Doc level: when the Doc was sourced from
+    //     a binary level, point the engine's -L at the same level so the 3D
+    //     viewport matches the Outliner/Properties. A bare .iff is itself an L<N>
+    //     chunk (used directly); a cd.iff:tag is sliced to a temp .iff (unlinked
+    //     at exit). A text .lev or an explicit --level= leaves the viewport alone.
+    std::string viewport_temp;   // owns the sliced cd.iff chunk; unlinked before return
+    if (!level_explicit) {
+        bool is_temp = false;
+        if (std::string vp = wfedit::ResolveEngineViewportLevel(leveltree, is_temp); !vp.empty()) {
+            level = vp;
+            if (is_temp) viewport_temp = vp;
+            std::printf("wf-edit: viewport tracks %s\n", level.c_str());
+        }
+    }
+
     // 3. Hand the engine our X11/GLX (mesa.cc adopts it via InitWithExistingContext
     //    instead of opening its own window) + register the per-frame callback.
     // Pass GLFW's GLXWindow (NOT the raw X11 window) as the GLX drawable. GLFW
@@ -1841,6 +1857,7 @@ int main(int argc, char** argv)
     ImGui::DestroyContext();
     glfwDestroyWindow(win);
     glfwTerminate();
+    if (!viewport_temp.empty()) ::unlink(viewport_temp.c_str());   // sliced cd.iff chunk
     std::printf("wf-edit: clean exit\n");
     return 0;
 }

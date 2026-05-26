@@ -64,6 +64,19 @@ std::vector<CdIffLevel> ListCdIffLevels(const std::string& cd_path);
 // `<file>:<tag>` selector all return false (load directly, no picker).
 bool NeedsLevelPicker(const std::string& leveltree_arg);
 
+// Resolve the engine viewport level file (for `HALStart -L<path>`) from the
+// final (post-picker) Doc source, so the 3D viewport shows the same level the
+// Outliner/Properties do. `-L` wants a *complete `L<N>` chunk* file (8-byte
+// header + ALGN + RAM + …, exactly as it appears inside cd.iff):
+//   • a bare binary `.iff` already is one          → returns it; out_is_temp=false
+//   • a level inside `cd.iff` (`<cd.iff>:<tag>`)    → slices that chunk to a temp
+//                                                     `.iff`; out_is_temp=true
+//   • a text `.lev` (no binary to show)            → returns "" (caller keeps its
+//                                                     own --level)
+// When out_is_temp is true the returned temp must outlive the engine session —
+// the caller unlinks it at exit.
+std::string ResolveEngineViewportLevel(const std::string& leveltree_arg, bool& out_is_temp);
+
 // Structural editing (the lossless v2 schema makes these save faithfully). Both
 // edit the Doc `content` array; the viewport reflects them on reload (live
 // engine sync is a follow-up). Delete removes content[index]; Duplicate clones

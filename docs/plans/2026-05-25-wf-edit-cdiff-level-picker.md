@@ -1,10 +1,12 @@
 # wf-edit: in-editor cd.iff level picker (startup)
 
-**Status:** ✅ Done 2026-05-25 (~1 h). Launching `wf-edit` on a bare multi-level `cd.iff` (no `:tag`)
-now shows a startup modal listing the archive's levels (`#`/tag/size/offset); choosing one loads it
-through the existing `cd.iff:<tag>` path. Verified headless: `--pick-level=L4` (by tag) and
-`--pick-level=1` (by index) both load all 36 snowgoons actors, while an explicit `cd.iff:L4`, a bare
-`.iff`, and a text `.lev` skip the picker and load directly (regressions green). Screenshot below.
+**Status:** ✅ Done 2026-05-25 (~1.5 h incl. viewport follow-up). Launching `wf-edit` on a bare
+multi-level `cd.iff` (no `:tag`) shows a startup modal listing the archive's levels
+(`#`/tag/size/offset); choosing one loads it through the existing `cd.iff:<tag>` path **and** the 3D
+viewport tracks it (the cd.iff chunk is sliced into a `-L` temp `.iff` — see "Viewport tracking the
+picked level"). Verified headless: `--pick-level=L4` (by tag) and `--pick-level=1` (by index) load all
+36 snowgoons actors and render the level; an explicit `cd.iff:L4`, a bare `.iff`, and a text `.lev`
+skip the picker and load directly (regressions green). Screenshots below.
 **Date:** 2026-05-25
 **Scope:** When `wf-edit` is launched on a multi-level `cd.iff` archive **without** a level selector,
 show an in-editor picker that lists the archive's levels and lets the user choose **which one to load
@@ -104,18 +106,28 @@ carries everything). Three pieces:
      click (so screenshot/CI runs can drive it); equivalent to the user clicking that row + Open. With
      it set, the loop confirms on frame 1.
 
-The engine viewport (`-L<level>`) is unchanged — see below.
+4. **Engine viewport** — `ResolveEngineViewportLevel` + a `-L` override (see "Viewport tracking the
+   picked level"). The viewport renders the same level the Doc shows.
 
-## Viewport (explicitly out of scope here)
+## Viewport tracking the picked level (done — follow-up, 2026-05-25)
 
-The picker chooses the **Doc** (Outliner/Properties) level. The engine **viewport** still loads
-`--level=`'s value via `HALStart -L<path>` — and `-L` is a single-file path, not a cd.iff+index. So
-when you pick `L4` from `cd.iff`, the Outliner shows `L4`'s actors while the 3D viewport shows
-whatever `--level=` resolved to (the default standalone, unless a matching `--level=` was passed).
-Making the viewport track the picked archive level needs the engine's game-file + `_desiredLevelNum`
-load mode wired into `--editor` (today `--editor` requires `-L<path>`, `game.cc:461`) — that's the
-same level-load-machinery work as runtime switching, and stays deferred. The picker is honest about
-this: it's the Outliner/Properties level chooser.
+Initially deferred, then wired the same day. The insight: the engine's `-L<path>` mode
+([`game.cc:163-184`](../../wfsource/source/game/game.cc)) wants **a complete `L<N>` chunk file —
+"exactly as it would appear inside cd.iff"** (8-byte header + ALGN + RAM + …, RAM landing at
+`SECTOR_SIZE`). So no `_desiredLevelNum` rework is needed: a cd.iff TOC entry's bytes **are** a valid
+`-L` file. `ResolveEngineViewportLevel`
+([`level_doc.cc`](../../engine/wf_edit/level_doc.cc)) maps the final Doc source to a `-L` path:
+
+- a bare binary `.iff` is already an `L<N>` chunk → used directly;
+- a `cd.iff:<tag>` is **sliced** — seek to the entry's offset, read the chunk's own little-endian
+  size (the TOC size is sector-granular and can fall 12 B short of the true extent), write
+  `[header + payload]` to a temp `.iff` (unlinked at exit);
+- a text `.lev` (no binary) or an explicit `--level=` leaves the viewport alone.
+
+`main()` sets the engine `-L` to that file after the picker resolves a tag, so the 3D viewport renders
+the same level the Outliner/Properties show. Verified: the sliced `cd.iff:L4` loads and renders
+snowgoons (house/snow/boxes) with no crash. Full runtime level *switching* (re-pointing `-L` mid-
+session) remains a separate concern — this is still a startup choice.
 
 ## Verification
 
@@ -124,8 +136,14 @@ this: it's the Outliner/Properties level chooser.
 
 ![wf-edit cd.iff level picker — choosing a level from the archive at startup](../../tests/screenshots/wfedit_cdiff_picker.png)
 
+After picking `L4` (here via `--pick-level=L4`, no `--level`), the Doc loads its 36 actors **and** the
+viewport tracks it — the engine renders snowgoons from the sliced `cd.iff` chunk:
+
+![wf-edit after picking L4 — Outliner + viewport both show the cd.iff level](../../tests/screenshots/wfedit_cdiff_picker_loaded.png)
+
 `--pick-level=L4` and `--pick-level=1` both load all 36 snowgoons actors (`picker selected L4` →
-`Outliner shows 36 actors`); explicit `cd.iff:L4`, bare `.iff`, and text `.lev` skip the picker.
+`Outliner shows 36 actors` → `viewport tracks …`); explicit `cd.iff:L4`, bare `.iff`, and text `.lev`
+skip the picker, and an explicit `--level=` keeps the viewport (regressions all green).
 
 Original verification plan (all satisfied):
 
@@ -142,8 +160,8 @@ Original verification plan (all satisfied):
 
 - **Mid-session level switching / File→Open** — needs live-reload + bridge reset (finding #5).
   Explicitly deferred by the user ("not switching levels yet").
-- **Viewport tracking the picked level** — needs the engine game-file/`_desiredLevelNum` load mode in
-  `--editor`; deferred with the switching work.
+- ~~**Viewport tracking the picked level**~~ — **done** (see "Viewport tracking the picked level"
+  above); slicing the cd.iff chunk into a `-L` temp `.iff` avoided the `_desiredLevelNum` rework.
 - **A file-browser to choose the cd.iff itself** — v1 takes the archive path on the CLI; browsing to
   an arbitrary `.iff`/`cd.iff` from within the editor is a later nicety.
 - **Friendly level names** — the archive carries only FOURCC tags; a tag→name map is cosmetic, later.
