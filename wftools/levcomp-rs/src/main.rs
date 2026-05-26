@@ -11,6 +11,8 @@
 //!
 //! Usage (decompile):
 //!   levcomp decompile <input.iff> <objects.lc> [--oad-dir <dir>] [-o <output.lev>]
+//!                       [--list | --level <tag|index>]
+//!   (--list dumps a multi-level cd.iff TOC; --level picks one level to decompile)
 
 mod asset_registry;
 mod common_block;
@@ -31,7 +33,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn usage() -> ! {
     eprintln!("Usage: levcomp <input.lev.bin> <objects.lc> <output.lvl> [<oad_dir>] [--mesh-dir <dir>] [--iff-txt <path>] [--textile-ini <path>]");
-    eprintln!("       levcomp decompile <input.iff> <objects.lc> [--oad-dir <dir>] [-o <output.lev>]");
+    eprintln!("       levcomp decompile <input.iff> <objects.lc> [--oad-dir <dir>] [-o <output.lev>] [--list | --level <tag|index>]");
     eprintln!();
     eprintln!("  oad_dir:        directory of compiled <class>.oad files (optional).");
     eprintln!("                  When present, each object's OAD data block is sized");
@@ -52,7 +54,7 @@ fn usage() -> ! {
 fn run_decompile(args: &[String]) {
     // args[0] = "decompile", args[1..] = remaining
     if args.len() < 3 {
-        eprintln!("Usage: levcomp decompile <input.iff> <objects.lc> [--oad-dir <dir>] [-o <output.lev>]");
+        eprintln!("Usage: levcomp decompile <input.iff> <objects.lc> [--oad-dir <dir>] [-o <output.lev>] [--list | --level <tag|index>]");
         process::exit(1);
     }
     let iff_path = Path::new(&args[1]);
@@ -60,6 +62,8 @@ fn run_decompile(args: &[String]) {
 
     let mut oad_dir_str: Option<String> = None;
     let mut out_str: Option<String> = None;
+    let mut level_sel: Option<String> = None;
+    let mut list_toc = false;
 
     let mut i = 3;
     while i < args.len() {
@@ -79,6 +83,20 @@ fn run_decompile(args: &[String]) {
                     process::exit(1);
                 }
                 out_str = Some(args[i].clone());
+            }
+            // Multi-level GAME archive (cd.iff): pick a level by FOURCC tag (L4)
+            // or decimal TOC index (0=SHEL, 1=L0, …).
+            "--level" => {
+                i += 1;
+                if i >= args.len() {
+                    eprintln!("error: --level requires a tag or index argument");
+                    process::exit(1);
+                }
+                level_sel = Some(args[i].clone());
+            }
+            // Dump the GAME archive's TOC (tag/offset/size) and exit.
+            "--list" => {
+                list_toc = true;
             }
             other => {
                 eprintln!("error: unexpected argument: {}", other);
@@ -103,10 +121,11 @@ fn run_decompile(args: &[String]) {
     eprintln!("  output: {}", out_path.display());
     if let Some(d) = oad_dir { eprintln!("  oad   : {}", d.display()); }
 
-    decompile::run(iff_path, lc_path, oad_dir, out_path).unwrap_or_else(|e| {
-        eprintln!("error: {}", e);
-        process::exit(1);
-    });
+    decompile::run(iff_path, lc_path, oad_dir, out_path, level_sel.as_deref(), list_toc)
+        .unwrap_or_else(|e| {
+            eprintln!("error: {}", e);
+            process::exit(1);
+        });
 }
 
 fn main() {

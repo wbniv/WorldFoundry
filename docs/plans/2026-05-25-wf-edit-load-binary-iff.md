@@ -1,6 +1,10 @@
 # wf-edit: load compiled binary levels (`.iff`, bare or inside `cd.iff`)
 
-**Status:** Not started
+**Status:** In progress. **Tooling done:** `levcomp decompile` now parses/dumps the `cd.iff` archive
+TOC (`--list`) and selects a level to decompile (`--level <tag|index>`) — verified on the real
+`cd_full.iff` (8 entries SHEL/L0–L6; `--level L4` → snowgoons, 36 objects) with unit tests for the
+TOC byte format. **Editor wiring not started** (sniff binary → shell out to `levcomp decompile` →
+existing `levtree`→Doc path).
 **Date:** 2026-05-25
 **Scope:** Let `wf-edit` open a *compiled binary* level — a bare per-level LVAS `.iff` and a level
 selected out of a multi-level `cd.iff` archive. The **binary is load-only** (no in-place binary
@@ -87,29 +91,31 @@ This is nearly free: `levcomp decompile` already handles a single-level LVAS con
 [level-building.md § cd.iff](../level-building.md#cdiff--multi-level-archive)). `decompile.rs` parses
 LVAS but not this archive layer yet.
 
-**Already exists (reference / reuse):** the C++ engine reads this archive natively —
-[`DiskTOC::LoadTOC`](../../wfsource/source/iff/disktoc.cc) parses `LVLHDR` + the `TOCENTRYONDISK`
-array, and [`game.cc:249`](../../wfsource/source/game/game.cc) seeks a level via
-`GAMEFILE_LEVELSTART + _desiredLevelNum`. Since `wf-edit` **links the engine**, `DiskTOC` is
-available in-process. So there are two routes for the archive layer:
+**DONE — TOC parse/dump/select now lives in `levcomp decompile`** (the canonical home, so any
+consumer gets it, not just an engine-linked editor):
 
-1. **Port the TOC parse into the Rust `decompile`** — extend it to accept `cd.iff` + a
-   `--level <tag|index>` selector, seeking the chosen LVAS sub-chunk and reusing the single-level
-   path. `DiskTOC` is the byte-format oracle. *Or*
-2. **Reuse `DiskTOC` in-process** — instantiate it on the chosen `cd.iff`, slice the selected
-   level's LVAS bytes out by `{offset, size}`, write them to a temp `.iff`, and feed that to the
-   existing `levcomp decompile`. No Rust archive code needed. **Caveat:** the in-memory
-   `DiskTOC::TOCEntry` retains only `{_offsetInDiskFile, _size}` and **drops the level tag**, and the
-   entry count is private — so index-based slicing works as-is, but a *named* picker needs a small
-   DiskTOC addition to retain tags (or a separate tag-keeping TOC read).
+- `levcomp decompile <cd.iff> <objects.lc> --list` → dumps the TOC (idx, tag, offset, size).
+- `levcomp decompile <cd.iff> <objects.lc> --oad-dir <dir> --level <tag|index> -o out.lev` →
+  slices the selected level's IFF chunk (reading its own header for the exact extent, since the TOC
+  size is sector-granular) and runs the existing single-level decompile on it.
 
-**Level selection UX — no existing editor picker to reuse.** The only level picker today is the
-in-game **cubemenu** shell (writes `EMAILBOX_LEVEL_TO_RUN` → `_desiredLevelNum`); `wf-edit` itself
-takes a single `--leveltree=`/`--level=` path (the `main.cc:869` popup is the *class* picker for Add
-actor, unrelated). So: start with a CLI selector (`--level=cd.iff:L4` or
-`--cd-iff=<path> --level-index=5`), matching the existing `--leveltree=` ergonomics; an in-editor
-"open level from cd.iff" picker (list the TOC tags/names — needs the tag-retaining read above) is a
-Phase-2.5 follow-up, not required for the first cut.
+Implementation in [`decompile.rs`](../../wftools/levcomp-rs/src/decompile.rs) (`parse_game_toc` /
+`print_toc` / `select_entry`, GAME-archive dispatch in `run`) + flags in
+[`main.rs`](../../wftools/levcomp-rs/src/main.rs). [`DiskTOC::LoadTOC`](../../wfsource/source/iff/disktoc.cc)
+was the byte-format oracle. Verified on the real `cd_full.iff` (SHEL + L0–L6; `--level L4` →
+snowgoons 36 objects) + 3 unit tests pinning the TOC byte layout. **The in-process `DiskTOC` route
+is dropped** — the editor shells out to `levcomp` for the archive, exactly as it already does for
+`levtree`/`levcomp`, so no engine-linkage dependency and no DiskTOC change needed.
+
+**Editor wiring (remaining):** for `cd.iff` input, shell out to `levcomp decompile … --level <sel>`
+(temp `.lev`) then the existing `levtree`→Doc path. A CLI selector (`--level=cd.iff:L4`) comes first.
+
+**Level picker UX — no existing editor picker to reuse.** The only level picker today is the in-game
+**cubemenu** shell (writes `EMAILBOX_LEVEL_TO_RUN` → `_desiredLevelNum`); `wf-edit` itself takes a
+single `--leveltree=`/`--level=` path (the `main.cc:869` popup is the *class* picker for Add actor,
+unrelated). An in-editor "open level from `cd.iff`" picker is a Phase-2.5 follow-up: it can populate
+the level list straight from `levcomp decompile --list` (which now carries the tags), so **no
+`DiskTOC` tag-retaining change is needed** after all.
 
 ## Critical files
 
