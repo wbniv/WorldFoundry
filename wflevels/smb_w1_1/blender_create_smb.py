@@ -320,6 +320,55 @@ def _make_qblock_tga(out_path, scale=2):
     return out_path
 
 
+def _make_brick_tga(out_path, scale=2):
+    """Generate a 32×32 NES-style breakable-brick texture and save as TGA.
+
+    Classic SMB running-bond brick: four 4-pixel courses of orange bricks,
+    each capped by a dark horizontal mortar line and a bright lit top edge,
+    with the vertical mortar seams offset half a brick between alternating
+    courses. Same palette family + scale convention as `_make_qblock_tga`
+    so the brick reads next to the ? blocks. Output is power-of-2 square
+    (32×32 at scale=2).
+
+    Palette:
+      0 = dark mortar  (101,  47,   0)  — shared with the ?-block border
+      1 = orange fill  (196, 106,   0)
+      2 = bright edge  (252, 180,  36)  — lit row just under each mortar line
+    """
+    from PIL import Image
+    PALETTE = [
+        (101,  47,   0),   # 0 dark mortar
+        (196, 106,   0),   # 1 orange fill
+        (252, 180,  36),   # 2 bright edge
+    ]
+    # 16×16 NES pixel map. Courses A (seams at cols 0,8) and B (seams at 4,12)
+    # alternate to make the offset running-bond brickwork.
+    A = [
+        [0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0],   # horizontal mortar
+        [0,2,2,2,2,2,2,2, 0,2,2,2,2,2,2,2],   # lit top edge + vertical seams
+        [0,1,1,1,1,1,1,1, 0,1,1,1,1,1,1,1],
+        [0,1,1,1,1,1,1,1, 0,1,1,1,1,1,1,1],
+    ]
+    B = [
+        [0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0],   # horizontal mortar
+        [2,2,2,2,0,2,2,2, 2,2,2,2,0,2,2,2],   # seams offset half a brick
+        [1,1,1,1,0,1,1,1, 1,1,1,1,0,1,1,1],
+        [1,1,1,1,0,1,1,1, 1,1,1,1,0,1,1,1],
+    ]
+    MAP = A + B + A + B
+    size = 16 * scale
+    img = Image.new('RGB', (size, size))
+    px  = img.load()
+    for y, row in enumerate(MAP):
+        for x, c in enumerate(row):
+            color = PALETTE[c]
+            for dy in range(scale):
+                for dx in range(scale):
+                    px[x * scale + dx, y * scale + dy] = color
+    img.save(out_path)
+    return out_path
+
+
 def _add_textured_box(mesh_name, x0, y0, z0, x1, y1, z1, tex_path):
     """Box with a UV-mapped texture on all 6 faces (full [0,1]² per face).
 
@@ -1431,6 +1480,177 @@ wp['wf_Model Type']         = 'None'
 # volume mesh would render as a white debug box. Activation is independent of
 # rendering, so force always-invisible (Visibility Mailbox 0 = mb[0] = always false).
 wp['wf_Visibility Mailbox'] = 0
+
+# ── 16. Breakable bricks ──────────────────────────────────────────────────────
+# Super Mario shatters a brick from below (4-fragment debris burst + despawn);
+# Small Mario only bumps it (a brief upward nudge, brick stays solid). Each brick
+# is a Generator that throws `debris_template` on a Super hit. Built LAST (right
+# before export) so the new actors take fresh high indices and the existing static
+# indices the test harnesses hardcode (Player, qblock_00) don't shift.
+# See docs/plans/2026-05-26-breakable-bricks-smb-world-1-1.md.
+brick_tex = _make_brick_tga(os.path.join(SCRIPT_DIR, 'brick_tex.tga'))
+
+# Per-actor local brick state (must match mailbox.inc). The brick reuses
+# SMB_QBLOCK_ACTIVATE (2010) as its debris-throw pulse.
+MB_SMB_BRICK_BREAK_END = 2013
+MB_SMB_BRICK_BUMP_END  = 2014
+MB_SMB_BRICK_BUMP_PEAK = 2015
+
+# Debris fragment — a small physics body that arcs up, falls (through the floor,
+# off-screen — generator-vs-ground isn't in objects.mac COLTABLE), and self-despawns
+# after ~1 s. It is a `generator` class (NOT `gold`) on purpose: gold would award a
+# coin on pickup (the stale-OAD path drops Gold Value 0, TODO §63), whereas a
+# generator that throws nothing has no scoring path at all. Activation MailBox 0
+# (mailbox[0] = always-false) means its own spawn branch never runs.
+mat_debris = make_mat('smb_debris', (0.77, 0.42, 0.0))
+DEBRIS_H = 0.18   # half-extent → ~0.36 m cube (quarter-brick chunk)
+
+# DEBRIS_SCRIPT: tumble (ROTATION_C = time) and hold a DETERMINISTIC outward X velocity
+# fanned by the fragment's own actor index — `idx 4 % 1.5 - 3.0 *` → {-4.5,-1.5,+1.5,+4.5}
+# m/s — so fragments split left/right like the NES shatter (set every tick = constant
+# horizontal drift; the generator's +Z launch + gravity gives the arc). Despawn once the
+# fragment has fallen below the floor (Z < -20). Uses ONLY LOCAL_SYSTEM mailboxes
+# (3000+, always allocated), so the template needs no Number Of Local Mailboxes — writing
+# a LOCAL_USER slot (2000-2099) on a default-sized template overflows its array → crash.
+# (The engine's Random Displacement path is unusable: Scalar::Random() asserts via
+# RangeCheck's integer cast — see TODO.) `%` casts to int in zForth.
+DEBRIS_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"
+    "INDEXOF_ACTOR_INDEX read-mailbox 4 % 1.5 - 3.0 * INDEXOF_XSPEED write-mailbox\n"
+    "INDEXOF_Z_POS read-mailbox -20.0 < if\n"
+    "  0 INDEXOF_ALIVE write-mailbox\n"
+    "then\n"
+)
+
+def _make_debris_template():
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(DEBRIS_H*2, DEBRIS_H*2, DEBRIS_H*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new('debris_template')
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat_debris)
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('debris_template', mesh)
+    obj.location = (-60.0, 0.0, 0.0)   # parking spot; generator overrides pos/vel on spawn
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'generator')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Max Air Speed']        = 50.0
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = 0.0
+    obj['wf_Activation MailBox']   = 0      # mailbox[0] = always-false → never spawns anything
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'debris_template.iff'
+    obj['wf_Script']               = DEBRIS_SCRIPT
+    return obj
+
+_make_debris_template()
+
+# BRICK_SCRIPT — three behaviours, gated on the global SMB_MARIO_STATE the player owns:
+#   • break window open (SMB_BRICK_BREAK_END set): keep pulsing the debris generator
+#     until TIME passes the window end, then ALIVE=0 → brick vanishes.
+#   • bump in progress (SMB_BRICK_BUMP_END set): write an ADDITIVE Z offset that rises
+#     (0.30) then settles (0.10 → 0) — never a world Z (world-baked mesh, additive).
+#   • idle/solid: on a hit-from-below (COLLIDER_IDX≠0 & COLLISION_NORMAL_Z>0, the proven
+#     qblock gate), Super (state≠0) opens the break window + pulses; Small latches a bump.
+# Ordering matters: on the first break tick we set the window end AND pulse, but defer
+# ALIVE=0 to a later tick so the Generator (spawn-check runs before the script) actually
+# throws fragments across the window first (plan risk #3).
+BRICK_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_BRICK_BREAK_END read-mailbox 0<> if\n"
+    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BREAK_END read-mailbox > if\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  else\n"
+    "    1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "  then\n"
+    "else\n"
+    "  INDEXOF_SMB_BRICK_BUMP_END read-mailbox 0<> if\n"
+    "    INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BUMP_END read-mailbox > if\n"
+    "      0 INDEXOF_Z_POS write-mailbox\n"
+    "      0 INDEXOF_SMB_BRICK_BUMP_END write-mailbox\n"
+    "    else\n"
+    "      INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BUMP_PEAK read-mailbox > if\n"
+    "        0.10 INDEXOF_Z_POS write-mailbox\n"
+    "      else\n"
+    "        0.30 INDEXOF_Z_POS write-mailbox\n"
+    "      then\n"
+    "    then\n"
+    "  else\n"
+    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
+    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
+    "        INDEXOF_SMB_MARIO_STATE read-mailbox 0<> if\n"
+    "          INDEXOF_TIME read-mailbox 0.4 + INDEXOF_SMB_BRICK_BREAK_END write-mailbox\n"
+    "          1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "        else\n"
+    "          INDEXOF_TIME read-mailbox 0.05 + INDEXOF_SMB_BRICK_BUMP_PEAK write-mailbox\n"
+    "          INDEXOF_TIME read-mailbox 0.10 + INDEXOF_SMB_BRICK_BUMP_END write-mailbox\n"
+    "        then\n"
+    "      then\n"
+    "    then\n"
+    "  then\n"
+    "then\n"
+)
+
+def _add_brick(name, x, z=BLOCK_Z):
+    blk = _add_textured_box(name,
+                            x - BSIZE, -BSIZE, z - BSIZE,
+                            x + BSIZE,  BSIZE, z + BSIZE,
+                            brick_tex)
+    attach_schema(blk, 'generator')
+    blk['wf_Mobility']           = 'Anchored'
+    blk['wf_Model Type']         = 'Mesh'
+    blk['wf_Visibility Mailbox'] = 1
+    blk['wf_Number Of Local Mailboxes'] = 16   # 2000..2015 (qblock slots + brick timers)
+    blk['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+    blk['wf_Object To Throw']    = 'debris_template'
+    blk['wf_Generation Rate']    = 10.0   # 10/s is the generator.oas max; ~4 fragments over the 0.4 s burst
+    blk['wf_Object X Velocity']  = 0.0
+    blk['wf_Object Y Velocity']  = 0.0    # OAS default is 1.0 — zero it or debris drifts into +Y
+    blk['wf_Object Z Velocity']  = 7.0    # pop up; fragments fall back through the floor
+    # NB: no Random Displacement — the engine's Scalar::Random() asserts (RangeCheck
+    # integer-casts a fractional Scalar). The debris fan is done deterministically in
+    # DEBRIS_SCRIPT via the fragment's actor index instead.
+    blk['wf_Script']             = BRICK_SCRIPT
+    return blk
+
+# The iconic 1-1 brick/? row, interleaved with the existing coin ? blocks
+# (qblock_01@21, qblock_02@25.5). New bricks sit on the 1.5 m grid between them,
+# clear of the entry pipe (X[16.5,19.5]) and the pit (X[28.5,31.5]). Reads as
+# B(20.25) ?(21) B(22.5) B(24) ?(25.5).
+_add_brick('brick_0', 20.25)   # tile 13.5 — just right of the entry pipe
+_add_brick('brick_1', 22.5)    # tile 15 — between the two ? blocks
+_add_brick('brick_2', 24.0)    # tile 16
+
+# Hidden-item brick — looks like a plain brick but bumps out one Super Mushroom on the
+# first hit-from-below (any Mario size), then turns tan and stays solid. Reuses the
+# proven one-shot MUSHROOM_BLOCK_SCRIPT + mushroom_template, skinned with brick_tex.
+HIDDEN_BRICK_X = 27.0   # tile 18 — last block before the pit
+hbrick = _add_textured_box('brick_hidden',
+                           HIDDEN_BRICK_X - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                           HIDDEN_BRICK_X + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
+                           brick_tex)
+attach_schema(hbrick, 'generator')
+hbrick['wf_Mobility']           = 'Anchored'
+hbrick['wf_Model Type']         = 'Mesh'
+hbrick['wf_Visibility Mailbox'] = 1
+hbrick['wf_Number Of Local Mailboxes'] = 13   # 2000..2012, like the mushroom block
+hbrick['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+hbrick['wf_Object To Throw']    = 'mushroom_template'
+hbrick['wf_Generation Rate']    = 10.0
+hbrick['wf_Object X Velocity']  = 1.5
+hbrick['wf_Object Y Velocity']  = 0.0
+hbrick['wf_Object Z Velocity']  = 6.0
+hbrick['wf_Script']             = MUSHROOM_BLOCK_SCRIPT
 
 # ── 13. Export ────────────────────────────────────────────────────────────────
 print(f"[smb] Exporting to {OUT_LEV}")

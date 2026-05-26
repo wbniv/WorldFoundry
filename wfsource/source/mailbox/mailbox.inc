@@ -79,6 +79,12 @@ Comment("=====================================================================")
 	MAILBOXENTRY( SMB_QBLOCK_USED, 2011 )		Comment(" latched to 1 when the 4-second window closes; block stays tan and ignores bumps ")
 	MAILBOXENTRY( SMB_QBLOCK_DIE, 2012 )		Comment(" level-time at which the multi-coin window closes (first_hit + 4.0 s); 0 = NORMAL (not yet hit) ")
 
+	Comment(" SMB breakable-brick per-actor state (docs/plans/2026-05-26-breakable-bricks-smb-world-1-1.md). Same per-actor")
+	Comment(" reasoning as the qblock slots above. The brick reuses SMB_QBLOCK_ACTIVATE (2010) as its debris-throw pulse.")
+	MAILBOXENTRY( SMB_BRICK_BREAK_END, 2013 )	Comment(" level-time the Super-hit debris burst closes; on that tick the script writes ALIVE=0 to despawn. 0 = not breaking. (debris_template reuses this slot as its own TTL latch) ")
+	MAILBOXENTRY( SMB_BRICK_BUMP_END, 2014 )	Comment(" level-time a Small-hit bump animation ends (Z offset returns to 0, latch clears). 0 = not bumping ")
+	MAILBOXENTRY( SMB_BRICK_BUMP_PEAK, 2015 )	Comment(" level-time of the bump apex: rising +Z offset before it, settling after; a 2-phase step that needs no float-division easing ")
+
 	MAILBOXENTRY( LOCAL_SYSTEM_START, 3000)
 	MAILBOXENTRY( HITPOINTS, 3000)
 	MAILBOXENTRY( GOLD, 3001)
