@@ -931,6 +931,21 @@ def _apply_field_chunks(blobj, schema, obj_chunk):
 
 # ── export helper ─────────────────────────────────────────────────────────────
 
+def scene_index_map(context) -> dict[int, str]:
+    """{actor_idx: blender_obj_name} for the live debug bridge.
+
+    Mirrors levcomp-rs `lev_parser::name_to_index`: the engine numbers actors
+    1-based in `.lev` write order, and the exporter writes exactly the
+    schema-bearing objects in `context.scene.objects` iteration order (see
+    `export_scene_to_lev` below). Reproducing that order here keeps the bridge's
+    name↔idx map in lockstep with the running level.
+    """
+    return {
+        i + 1: o.name
+        for i, o in enumerate(o for o in context.scene.objects if o.get(SCHEMA_PATH_KEY))
+    }
+
+
 def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
     """Write the current Blender scene to a .lev text IFF. Returns (ok, message)."""
     objects = [o for o in context.scene.objects if o.get(SCHEMA_PATH_KEY)]

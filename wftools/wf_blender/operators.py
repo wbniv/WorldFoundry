@@ -674,6 +674,11 @@ class WF_OT_run_level(bpy.types.Operator):
             wm.progress_end()
             return {'CANCELLED'}
 
+        # Capture the authoritative actor-index map for the live bridge: the
+        # objects just written define the engine's 1-based actor indices.
+        from . import debug_bridge as _db
+        _db.get_bridge().update_index_map(_el.scene_index_map(context))
+
         self.report({'INFO'}, f"[2/3] Building {level_name}.iff ...")
         wm.progress_update(2)
         result = subprocess.run(
@@ -692,15 +697,20 @@ class WF_OT_run_level(bpy.types.Operator):
         env = os.environ.copy()
         env["LD_LIBRARY_PATH"] = libs_path
         env.setdefault("DISPLAY", ":0")
+        debug_port = int(getattr(prefs, "debug_port", 7777))
         subprocess.Popen(
-            [game_bin, f"-L{iff_path}"],
+            [game_bin, f"-L{iff_path}", "--debug-port", str(debug_port)],
             cwd=repo_root,
             env=env,
             start_new_session=True,
         )
 
         wm.progress_end()
-        self.report({'INFO'}, f"Launched {level_name} — Blender stays open")
+        self.report(
+            {'INFO'},
+            f"Launched {level_name} (debug bridge :{debug_port}) — "
+            f"click Connect to push live edits",
+        )
         return {'FINISHED'}
 
 
@@ -718,6 +728,12 @@ class WF_OT_bridge_connect(bpy.types.Operator):
         bridge = _db.get_bridge()
         bridge.connect(host, port)
         if bridge.connected:
+            # Rebuild the name↔idx map from the current scene so connecting to an
+            # already-running engine (without re-running this session) still
+            # resolves object→actor — valid as long as the schema-bearing object
+            # set is unchanged since the level was exported.
+            from . import export_level as _el
+            bridge.update_index_map(_el.scene_index_map(context))
             self.report({'INFO'}, f"Connected to {host}:{port}")
         else:
             self.report({'WARNING'}, f"Connection failed: {bridge.error}")

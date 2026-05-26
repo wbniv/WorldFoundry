@@ -92,10 +92,13 @@ class WF_AddonPreferences(bpy.types.AddonPreferences):
 
 
 # Mapping from Blender custom property key → engine "block.field" key.
-# Mirrors kPropMap in engine/stubs/debug_server.cc — keep in sync.
+# Mirrors the engine kPropMap (engine/mutation/kpropmap_generated.inc) — keep in
+# sync. Only numeric fields belong here: the depsgraph handler coerces values
+# with float(), so string/enum-label fields (e.g. common.Script — which wfmut
+# rejects anyway — and enum fields stored as labels) are deliberately excluded.
+# Live enum→index translation is a tracked follow-up (see TODO.md).
 _ENGINE_PROP_KEY: dict[str, str] = {
     "wf_hp":                     "common.hp",
-    "wf_Script":                 "common.Script",
     "wf_NumberOfLocalMailboxes": "common.NumberOfLocalMailboxes",
     "wf_WriteToMailboxOnDeath":  "common.WriteToMailboxOnDeath",
     "wf_Mass":                   "movebloc.Mass",
@@ -139,7 +142,14 @@ def _depsgraph_handler(scene, depsgraph):
                 continue
             if snap.get(prop_key) != current:
                 snap[prop_key] = current
-                bridge.set_prop(idx, engine_key, float(current))
+                try:
+                    value = float(current)
+                except (TypeError, ValueError):
+                    # Enum-label / string-valued field: not pushable until live
+                    # enum→index translation lands (tracked in TODO.md). Snapshot
+                    # is already updated, so we don't retry every depsgraph tick.
+                    continue
+                bridge.set_prop(idx, engine_key, value)
 
 
 def register():
