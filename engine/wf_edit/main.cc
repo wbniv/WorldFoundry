@@ -221,6 +221,10 @@ struct EditorCtx {
     // Save round-trip: the .lev path File→Save writes (the Doc is lossless — v2
     // schema — so save needs no retained JSON), and a transient toast.
     std::string save_path;
+    // True when the Doc was loaded from a binary source (a compiled .iff or a
+    // cd.iff level): the source binary is read-only, so save_path was redirected
+    // to a fresh .lev and File→Save is really a Save-As. Drives the menu label.
+    bool        binary_source = false;
     std::string toast;
     int         toast_frames = 0;
 
@@ -915,7 +919,13 @@ bool editor_build(void* p)
 
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Save Level", "Ctrl+S")) DoSave(c);
+            // A binary-loaded session is read-only at the source, so Save writes a
+            // fresh .lev (save_path was redirected) — label it Save As to match.
+            if (ImGui::MenuItem(c->binary_source ? "Save As .lev" : "Save Level", "Ctrl+S"))
+                DoSave(c);
+            if (c->binary_source && ImGui::IsItemHovered())
+                ImGui::SetTooltip("Source binary is read-only; writes a new .lev (%s)",
+                                  c->save_path.c_str());
             if (ImGui::MenuItem("Save + Compile (.iff)")) SaveAndCompile(c);
             ImGui::MenuItem("Publish to .blend", nullptr, false, false);   // later: hand off to wf.import_level
             ImGui::EndMenu();
@@ -1706,6 +1716,9 @@ int main(int argc, char** argv)
     // .lev (Save-As) for a binary load — set by LoadLevelTreeIntoDoc. Falls back
     // to the raw arg when the load failed (empty save_path).
     ctx.save_path   = save_path.empty() ? leveltree : save_path;
+    // Binary source ⇔ save was redirected to a fresh .lev (a text .lev saves
+    // in-place, so save_path == leveltree). Drives the Save/Save-As menu label.
+    ctx.binary_source = !save_path.empty() && save_path != leveltree;
     ctx.room_id     = room_id;
     ctx.gizmo_snap       = identity.gizmo_snap;        // restore persisted snap prefs
     ctx.gizmo_snap_trans = identity.gizmo_snap_trans;
