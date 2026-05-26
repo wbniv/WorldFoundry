@@ -46,9 +46,10 @@ in the level-building guide, and the [SMB conversion brief](/home/will/wf-games/
 | **Hammer Bro / hammers** | `Enemy` + `Missile` (the hammers) | 🔧 |
 | **Bullet Bill** | `Generator` (cannon spawns) + `Missile`/`Enemy` moving horizontally | 🔧 |
 | **Fireball (Fire Mario)** | `Missile` spawned on fire-button when in Fire state | 🔧 *(needs spawn path — see backlog)* |
-| **Mushroom / Fire Flower** | collectible like `Gold` (pickup writes a power-up-state mailbox); spawned by a `Generator` block | 🔧 |
+| **Super Mushroom** | a `gold` actor with `Gold Value = 0` + a proximity-pickup script (writes `SMB_MUSHROOM_PICKUP`), thrown by a one-shot `Generator` block; slides on real physics | ✅ *(2026-05-26, [plan](../plans/2026-05-26-smb-super-mushroom-powerup.md))* |
+| **Fire Flower** | same collectible idiom as the mushroom, but Fire Mario needs the `spawn-template` primitive (fireballs) | 🔧 *(state 2 reserved; deferred)* |
 | **Star (invincibility)** | **`Shield`** — the live "follows player + timed invulnerability + blink" primitive; Star = collectible that grants a Shield | 🧩 / 🔧 |
-| **Power-up state machine** (Small/Super/Fire) | pure Forth state machine on `Player` driven by pickup mailboxes (per brief) | 🔧 |
+| **Power-up state machine** (Small/Super/Fire) | pure Forth state machine on `Player`; pickup raises `SMB_MARIO_STATE` + visual scale, a hit powers down instead of dying | ✅ *(Small↔Super 2026-05-26; Fire deferred, [plan](../plans/2026-05-26-smb-super-mushroom-powerup.md))* |
 | **Breakable brick** (Super Mario) | `Generator`-style block + `Destroyer`/visibility on bump-from-below | 🔧 |
 | **Level timer** (countdown) | `Director` script: 400-unit countdown off `TIME` → HUD slot 71; 0 = "TIME UP" → `SMB_PLAYER_HURT` (Mario dies) | ✅ *(2026-05-25, [plan](../plans/2026-05-25-smb-pit-death-and-level-timer.md))* |
 | **Lives / death / respawn** | enemy contact + pit `ActBox` + timeout → `SMB_PLAYER_HURT` → player respawn (−1 life), game-over at 0 | ✅ *(enemy 2026-05-25; pit/timeout 2026-05-25)* |

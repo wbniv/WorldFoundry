@@ -26,6 +26,7 @@
 	{ 'ASMP'
 		$3fff001l { 'STR' "player.iff" }  // IFF PERM fff:001
 		$3fff002l { 'STR' "coin_template.iff" }  // IFF PERM fff:002
+		$3fff003l { 'STR' "mushroom_template.iff" }  // IFF PERM fff:003
 		$3000001l { 'STR' "ground_0.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "ground_1.iff" }  // IFF RM0 000:002
 		$3000003l { 'STR' "ground_2.iff" }  // IFF RM0 000:003
@@ -34,14 +35,15 @@
 		$3000006l { 'STR' "qblock_00.iff" }  // IFF RM0 000:006
 		$3000007l { 'STR' "qblock_01.iff" }  // IFF RM0 000:007
 		$3000008l { 'STR' "qblock_02.iff" }  // IFF RM0 000:008
-		$3000009l { 'STR' "goomba_00.001.iff" }  // IFF RM0 000:009
-		$300000al { 'STR' "koopa_00.001.iff" }  // IFF RM0 000:00a
-		$300000bl { 'STR' "flagpole_pole.iff" }  // IFF RM0 000:00b
-		$300000cl { 'STR' "flagpole_flag.iff" }  // IFF RM0 000:00c
-		$300000dl { 'STR' "flagpole_trigger.iff" }  // IFF RM0 000:00d
-		$300000el { 'STR' "abor_surface.iff" }  // IFF RM0 000:00e
-		$300000fl { 'STR' "entry_pipe.iff" }  // IFF RM0 000:00f
-		$3000010l { 'STR' "pipe_entry_sense.iff" }  // IFF RM0 000:010
+		$3000009l { 'STR' "mushroom_block.iff" }  // IFF RM0 000:009
+		$300000al { 'STR' "goomba_00.001.iff" }  // IFF RM0 000:00a
+		$300000bl { 'STR' "koopa_00.001.iff" }  // IFF RM0 000:00b
+		$300000cl { 'STR' "flagpole_pole.iff" }  // IFF RM0 000:00c
+		$300000dl { 'STR' "flagpole_flag.iff" }  // IFF RM0 000:00d
+		$300000el { 'STR' "flagpole_trigger.iff" }  // IFF RM0 000:00e
+		$300000fl { 'STR' "abor_surface.iff" }  // IFF RM0 000:00f
+		$3000010l { 'STR' "entry_pipe.iff" }  // IFF RM0 000:010
+		$3000011l { 'STR' "pipe_entry_sense.iff" }  // IFF RM0 000:011
 		$3001001l { 'STR' "cr_floor.iff" }  // IFF RM1 001:001
 		$3001002l { 'STR' "cr_wall_l.iff" }  // IFF RM1 001:002
 		$3001003l { 'STR' "cr_wall_r.iff" }  // IFF RM1 001:003
@@ -62,6 +64,7 @@
 		{ 'ASS' $7ffffffl [ "Perm.cyc" ] }     // CYC PERM fff:fff
 		{ 'ASS' $3fff001l [ "player.iff" ] }  // IFF PERM fff:001
 		{ 'ASS' $3fff002l [ "coin_template.iff" ] }  // IFF PERM fff:002
+		{ 'ASS' $3fff003l [ "mushroom_template.iff" ] }  // IFF PERM fff:003
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'
@@ -77,14 +80,15 @@
 		{ 'ASS' $3000006l [ "qblock_00.iff" ] }  // IFF RM0 000:006
 		{ 'ASS' $3000007l [ "qblock_01.iff" ] }  // IFF RM0 000:007
 		{ 'ASS' $3000008l [ "qblock_02.iff" ] }  // IFF RM0 000:008
-		{ 'ASS' $3000009l [ "goomba_00.001.iff" ] }  // IFF RM0 000:009
-		{ 'ASS' $300000al [ "koopa_00.001.iff" ] }  // IFF RM0 000:00a
-		{ 'ASS' $300000bl [ "flagpole_pole.iff" ] }  // IFF RM0 000:00b
-		{ 'ASS' $300000cl [ "flagpole_flag.iff" ] }  // IFF RM0 000:00c
-		{ 'ASS' $300000dl [ "flagpole_trigger.iff" ] }  // IFF RM0 000:00d
-		{ 'ASS' $300000el [ "abor_surface.iff" ] }  // IFF RM0 000:00e
-		{ 'ASS' $300000fl [ "entry_pipe.iff" ] }  // IFF RM0 000:00f
-		{ 'ASS' $3000010l [ "pipe_entry_sense.iff" ] }  // IFF RM0 000:010
+		{ 'ASS' $3000009l [ "mushroom_block.iff" ] }  // IFF RM0 000:009
+		{ 'ASS' $300000al [ "goomba_00.001.iff" ] }  // IFF RM0 000:00a
+		{ 'ASS' $300000bl [ "koopa_00.001.iff" ] }  // IFF RM0 000:00b
+		{ 'ASS' $300000cl [ "flagpole_pole.iff" ] }  // IFF RM0 000:00c
+		{ 'ASS' $300000dl [ "flagpole_flag.iff" ] }  // IFF RM0 000:00d
+		{ 'ASS' $300000el [ "flagpole_trigger.iff" ] }  // IFF RM0 000:00e
+		{ 'ASS' $300000fl [ "abor_surface.iff" ] }  // IFF RM0 000:00f
+		{ 'ASS' $3000010l [ "entry_pipe.iff" ] }  // IFF RM0 000:010
+		{ 'ASS' $3000011l [ "pipe_entry_sense.iff" ] }  // IFF RM0 000:011
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM1'

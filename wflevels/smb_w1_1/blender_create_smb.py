@@ -656,6 +656,103 @@ for i, bx in enumerate(QBLOCK_XS):
     blk['wf_Object Z Velocity']  = 6.0
     blk['wf_Script']             = QBLOCK_SCRIPT
 
+# ── 6b. Super Mushroom power-up ───────────────────────────────────────────────
+# The mushroom REUSES the `gold` collectible class as a "coin worth 0": Gold::update
+# still runs the actor's wf_Script (which raises SMB_MUSHROOM_PICKUP on player
+# proximity) and the C++ pickup removes the actor on contact. Gold Value 0 is meant
+# to suppress the coin credit — but the stale-fixtures OAD export path (TODO §63)
+# drops the field, so today the mushroom also awards its default +1 coin; that clears
+# once OAD_DIR is repointed. It slides on real physics like the coin (Running Decel 0).
+MUSH_X = T * 0.40   # half-width
+MUSH_Z = T * 0.40   # half-height
+MUSH_T = 0.25       # Y-depth (>= ~0.2 m so it renders from the side camera at Y=-20)
+
+mat_mushroom = make_mat('mushroom_red', (0.85, 0.16, 0.12))
+
+# Proximity pickup: dx^2 + dz^2 < 1.5^2 (matches Gold::TryPickup's radius) -> raise
+# the power-up signal. Gold::update removes the actor the same tick.
+MUSHROOM_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "+ 2.25 < if\n"
+    "  1 INDEXOF_SMB_MUSHROOM_PICKUP write-mailbox\n"
+    "then\n"
+)
+
+def _make_mushroom_template():
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(MUSH_X*2, MUSH_T*2, MUSH_Z*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new('mushroom_template')
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat_mushroom)
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('mushroom_template', mesh)
+    obj.location = (-55.0, 0.0, 0.0)   # parking spot; generator velocity overrides on spawn
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'gold')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Max Air Speed']        = 50.0
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = 0.0    # frictionless ground -> mushroom slides right
+    obj['wf_Gold Value']           = 0      # power-up, not a coin (currently dropped by stale OAD export)
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'mushroom_template.iff'
+    obj['wf_Script']               = MUSHROOM_SCRIPT
+    return obj
+
+_make_mushroom_template()
+
+# One-shot mushroom block — a Generator that throws exactly ONE mushroom on the first
+# bump-from-below, then latches USED (tan). Mirrors the qblock authoring but without
+# the 4-second multi-coin window: set the activate pulse on the first bump; the tick
+# after the Generator consumes it, latch USED so no second mushroom can spawn.
+MUSHROOM_BLOCK_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_QBLOCK_USED read-mailbox 0<> if\n"
+    f"  0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "else\n"
+    "  INDEXOF_SMB_QBLOCK_ACTIVATE read-mailbox 0<> if\n"
+    "    0 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"          # generator consumed the pulse last tick
+    f"    0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "    1 INDEXOF_SMB_QBLOCK_USED write-mailbox\n"              # one mushroom only -> latch used
+    "  else\n"
+    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
+    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"     # bump-from-below
+    "        1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "      then\n"
+    "    then\n"
+    "  then\n"
+    "then\n"
+)
+
+MUSHROOM_BLOCK_X = 6 * T   # 9.0 — lone block before the ? cluster (easy to reach for verification)
+mblk = _add_textured_box('mushroom_block',
+                         MUSHROOM_BLOCK_X - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                         MUSHROOM_BLOCK_X + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
+                         qblock_tex)
+attach_schema(mblk, 'generator')
+mblk['wf_Mobility']           = 'Anchored'
+mblk['wf_Model Type']         = 'Mesh'
+mblk['wf_Visibility Mailbox'] = 1
+mblk['wf_Number Of Local Mailboxes'] = 13   # 2000..2012, same as the qblocks
+mblk['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+mblk['wf_Object To Throw']    = 'mushroom_template'
+mblk['wf_Generation Rate']    = 10.0
+mblk['wf_Object X Velocity']  = 1.5   # pops out drifting right
+mblk['wf_Object Y Velocity']  = 0.0
+mblk['wf_Object Z Velocity']  = 6.0   # and upward, like the coin
+mblk['wf_Script']             = MUSHROOM_BLOCK_SCRIPT
+
 # ── 7. Mario placeholder ──────────────────────────────────────────────────────
 def _build_mario():
     mat_red  = make_mat('mario_red',  (0.87, 0.14, 0.07))
@@ -766,19 +863,40 @@ if player:
         # bounce up when we stomped an enemy this frame
         "INDEXOF_SMB_STOMP read-mailbox 0<> if "
         "8.0 INDEXOF_ZSPEED write-mailbox 0 INDEXOF_SMB_STOMP write-mailbox then\n"
-        # enemy side-hit -> lose a life + respawn at spawn (unless still invulnerable)
+        # Super Mushroom pickup -> grow to Super. Small(0)->Super(1) only; already-Super
+        # stays Super. Visual scale only (hitbox-resize deferred); the feet-origin mesh
+        # scales up cleanly from the floor. `not` = state == 0.
+        "INDEXOF_SMB_MUSHROOM_PICKUP read-mailbox 0<> if\n"
+        "  INDEXOF_SMB_MARIO_STATE read-mailbox not if\n"
+        "    1 INDEXOF_SMB_MARIO_STATE write-mailbox\n"
+        "    1.25 INDEXOF_X_SCALE write-mailbox 1.25 INDEXOF_Y_SCALE write-mailbox "
+        "1.9 INDEXOF_Z_SCALE write-mailbox\n"
+        "  then\n"
+        "  0 INDEXOF_SMB_MUSHROOM_PICKUP write-mailbox\n"
+        "then\n"
+        # enemy side-hit -> if Super, power down to Small (no life lost); if Small, lose
+        # a life + respawn at spawn. Both gated on i-frames (unless still invulnerable).
         "INDEXOF_SMB_PLAYER_HURT read-mailbox 0<> if\n"
         "  INDEXOF_TIME read-mailbox INDEXOF_SMB_INVULN_UNTIL read-mailbox > if\n"
-        "    INDEXOF_LIVES read-mailbox 1 - INDEXOF_LIVES write-mailbox\n"
-        f"    {MARIO_SPAWN_X} INDEXOF_X_POS write-mailbox\n"
-        "    0 INDEXOF_Y_POS write-mailbox\n"
-        f"    {MARIO_SPAWN_Z} INDEXOF_Z_POS write-mailbox\n"
-        "    0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox "
+        "    INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n"
+        # Super (or Fire) -> drop one power level; keep the life, reset scale, brief i-frames.
+        "      INDEXOF_SMB_MARIO_STATE read-mailbox 1 - INDEXOF_SMB_MARIO_STATE write-mailbox\n"
+        "      1.0 INDEXOF_X_SCALE write-mailbox 1.0 INDEXOF_Y_SCALE write-mailbox "
+        "1.0 INDEXOF_Z_SCALE write-mailbox\n"
+        "      INDEXOF_TIME read-mailbox 1.5 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n"
+        "    else\n"
+        # Small -> die: lose a life + respawn at spawn.
+        "      INDEXOF_LIVES read-mailbox 1 - INDEXOF_LIVES write-mailbox\n"
+        f"      {MARIO_SPAWN_X} INDEXOF_X_POS write-mailbox\n"
+        "      0 INDEXOF_Y_POS write-mailbox\n"
+        f"      {MARIO_SPAWN_Z} INDEXOF_Z_POS write-mailbox\n"
+        "      0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox "
         "0 INDEXOF_ZSPEED write-mailbox\n"
         # restart the countdown for the new life (any death resets the timer, SMB-faithful)
-        "    INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox\n"
-        "    INDEXOF_TIME read-mailbox 2.0 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n"
-        "    INDEXOF_LIVES read-mailbox 1 < if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n"
+        "      INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox\n"
+        "      INDEXOF_TIME read-mailbox 2.0 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n"
+        "      INDEXOF_LIVES read-mailbox 1 < if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n"
+        "    then\n"
         "  then\n"
         "  0 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"
         "then\n"
