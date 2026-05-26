@@ -349,8 +349,15 @@ workflow — they exist so the editor can be proven headlessly.
 - **While you drag an actor with the gizmo,** a concurrent edit to that actor from a remote peer
   (or your own undo) won't snap it back mid-gesture — the drag owns its transform until you release
   the mouse, then last-writer-wins resolves the transform. Other fields still propagate live.
-- **Sources from text `.lev`/`.iff.txt`,** not a compiled `cd.iff` (a binary level isn't
-  self-describing).
+- **Currently loads text `.lev`/`.iff.txt` only,** not a compiled binary `.iff`/`cd.iff`. This is a
+  convenience, not a hard limit: the compiled `.lvl` is *positional* (no inline field names) but is
+  fully decodable with the OAS/OAD/`objects.lc` schema — and `levcomp decompile`
+  ([`wftools/levcomp-rs/src/decompile.rs`](../wftools/levcomp-rs/src/decompile.rs)) already does
+  exactly that, reconstructing a named-field `.lev` from a binary level. Read-only binary loading
+  (bare `.iff` + level-from-`cd.iff`) is planned — see
+  [load-binary-iff plan](plans/2026-05-25-wf-edit-load-binary-iff.md). Note that binary levels carry
+  no authored object names (cross-references are stored by actor index; the decompiler synthesizes
+  `{Class}_{index}` names), so a binary-loaded level is read-only by design.
 - **Linux/X11 only.** Wayland and mobile hosts are v2+.
 
 ---
