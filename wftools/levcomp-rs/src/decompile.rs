@@ -566,6 +566,9 @@ pub struct TocEntry {
     pub size:   usize,
 }
 
+/// On-disk size of one `TOCENTRYONDISK`: tag + offset + size, three `i32`s.
+const TOC_ENTRY_SIZE: usize = 3 * std::mem::size_of::<i32>();
+
 /// Parse the TOC out of a `GAME` chunk's payload. The TOC is the first sub-chunk.
 fn parse_game_toc(game_payload: &[u8]) -> Result<Vec<TocEntry>, String> {
     if game_payload.len() < 8 {
@@ -578,20 +581,19 @@ fn parse_game_toc(game_payload: &[u8]) -> Result<Vec<TocEntry>, String> {
     let size = u32::from_le_bytes(game_payload[4..8].try_into().unwrap()) as usize;
     let toc = game_payload.get(8..8 + size)
         .ok_or_else(|| format!("TOC chunk size {} exceeds GAME payload {}", size, game_payload.len() - 8))?;
-    if toc.len() % 12 != 0 {
-        return Err(format!("TOC payload {} bytes is not a multiple of 12 (TOCENTRYONDISK)", toc.len()));
+    if toc.len() % TOC_ENTRY_SIZE != 0 {
+        return Err(format!("TOC payload {} bytes is not a multiple of {} (TOCENTRYONDISK)",
+            toc.len(), TOC_ENTRY_SIZE));
     }
-    let mut out = Vec::with_capacity(toc.len() / 12);
-    let mut off = 0;
-    while off + 12 <= toc.len() {
-        let tag    = u32::from_be_bytes(toc[off..off + 4].try_into().unwrap());
-        let offset = i32::from_le_bytes(toc[off + 4..off + 8].try_into().unwrap());
-        let esize  = i32::from_le_bytes(toc[off + 8..off + 12].try_into().unwrap());
+    let mut out = Vec::with_capacity(toc.len() / TOC_ENTRY_SIZE);
+    for rec in toc.chunks_exact(TOC_ENTRY_SIZE) {
+        let tag    = u32::from_be_bytes(rec[0..4].try_into().unwrap());   // field 0: tag
+        let offset = i32::from_le_bytes(rec[4..8].try_into().unwrap());   // field 1: offset
+        let esize  = i32::from_le_bytes(rec[8..12].try_into().unwrap());  // field 2: size
         if offset < 0 || esize < 0 {
             return Err(format!("TOC entry '{}' has negative offset/size", id_to_str(tag)));
         }
         out.push(TocEntry { tag, offset: offset as usize, size: esize as usize });
-        off += 12;
     }
     Ok(out)
 }
