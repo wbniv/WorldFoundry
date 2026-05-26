@@ -78,6 +78,19 @@ TIMER_REAL_SECONDS = 150.0
 
 SCENE_MID_X = (GROUND_X0 + GROUND_X1) / 2
 
+# ── Underground coin room (pipe-warp target) ──────────────────────────────────
+# A genuine SECOND room, placed straight below the surface with a DISJOINT bbox
+# (Z gap -36..-10) so leaving the surface room's bbox triggers a real room switch
+# (ActiveRooms::UpdateRoom loops all rooms — no adjacency needed; hard-switch =
+# the W1-2 "unload surface / load underground" behaviour). The point is to prove
+# WF's room-to-room transition path. See docs/plans/2026-05-25-smb-pipe-warp-coin-room.md.
+SMB_AT_PIPE  = 1809               # INDEXOF_SMB_AT_PIPE (mailbox.inc) — entry ActBox sets 1 on the pipe mouth
+ENTRY_PIPE_X = 12 * T             # = 18, on ground_0 between qblock0 (x12) and qblock1 (x21)
+CR_FLOOR_TOP = -48.0              # coin-room floor top
+CR_X0, CR_X1 = 0.0, 18.0         # coin-room play span (12 tiles)
+CR_ENTRY_X   = 3.0               # entry-warp drop point (left side)
+CR_ENTRY_Z   = CR_FLOOR_TOP + T  # = -46.5, feet drop-in (mirrors surface MARIO_SPAWN_Z)
+
 # Camera: fixed side-view, Y=-30, looking toward +Y at Mario's spawn position.
 # SCENE_MID_X (33.75) is the level midpoint, but the player starts at MARIO_SPAWN_X
 # (4.5). Centering on MARIO_SPAWN_X keeps Mario in frame at game start.
@@ -708,6 +721,10 @@ if player:
     player['wf_Mass']     = 1.0
     player['wf_Model Type'] = 'Mesh'
     player['wf_Visibility Mailbox'] = 1
+    # Survive the coin-room warp: with MovesBetweenRooms the player's mesh binds to
+    # PERM (always loaded), not the surface room's transient slot that unloads on
+    # the room switch. Without this Mario vanishes the instant he warps underground.
+    player['wf_Moves Between Rooms'] = 'True'
     # Physics movement parameters — tuned for SMB feel.
     # OAS custom-prop keys mirror the schema's field.key, which preserves
     # spaces (e.g. "Running Acceleration"), NOT a WikiWord form.
@@ -763,6 +780,18 @@ if player:
         "    INDEXOF_LIVES read-mailbox 1 < if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n"
         "  then\n"
         "  0 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"
+        "then\n"
+        # pipe warp: standing on a pipe mouth (entry ActBox set SMB_AT_PIPE) AND
+        # pressing Down -> drop into the underground coin room. Reuses the proven
+        # respawn teleport (X/Y/Z_POS write + zero velocity); 4096 = EJ_BUTTONF_DOWN.
+        "INDEXOF_SMB_AT_PIPE read-mailbox 0<> if\n"
+        "  INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox 4096 & 0<> if\n"
+        f"    {CR_ENTRY_X} INDEXOF_X_POS write-mailbox\n"
+        "    0 INDEXOF_Y_POS write-mailbox\n"
+        f"    {CR_ENTRY_Z} INDEXOF_Z_POS write-mailbox\n"
+        "    0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox "
+        "0 INDEXOF_ZSPEED write-mailbox\n"
+        "  then\n"
         "then\n"
     )
 
@@ -1030,22 +1059,154 @@ RY0, RY1 =  -35.0,   10.0
 RZ0, RZ1 =  -15.0,   20.0
 ROOM_BBOX_REL = (RX0, RY0, RZ0, RX1, RY1, RZ1)
 
+# Coin-room bbox in WORLD space, DISJOINT from the surface room in Z (gap -36..-10).
+# (centre + rel are derived so the bounds mesh sits in local space like the surface.)
+CR_BBOX_WORLD = (CR_X0 - 4.0, -40.0, CR_FLOOR_TOP - 10.0,
+                 CR_X1 + 4.0,  12.0, CR_FLOOR_TOP + 12.0)   # x[-4,22] y[-40,12] z[-58,-36]
+_cx0,_cy0,_cz0,_cx1,_cy1,_cz1 = CR_BBOX_WORLD
+CR_CENTRE = ((_cx0+_cx1)/2, (_cy0+_cy1)/2, (_cz0+_cz1)/2)    # (9, -14, -47)
+CR_BBOX_REL = (_cx0-CR_CENTRE[0], _cy0-CR_CENTRE[1], _cz0-CR_CENTRE[2],
+               _cx1-CR_CENTRE[0], _cy1-CR_CENTRE[1], _cz1-CR_CENTRE[2])
+
+_box_faces = [(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]
+
+
+def _room_bounds_mesh(name, b):
+    """Build a box-bounds mesh from a (x0,y0,z0,x1,y1,z1) rel-bbox tuple."""
+    x0,y0,z0,x1,y1,z1 = b
+    verts = [(x0,y0,z0),(x1,y0,z0),(x1,y1,z0),(x0,y1,z0),
+             (x0,y0,z1),(x1,y0,z1),(x1,y1,z1),(x0,y1,z1)]
+    m = bpy.data.meshes.new(name)
+    m.from_pydata(verts, [], _box_faces)
+    m.update()
+    return m
+
+
 room = find_by_class('room')
 if room:
+    room.name = 'room_surface'
     room.location = ROOM_CENTRE
     room['wf_original_bbox'] = ROOM_BBOX_REL
-    bvs = [
-        (RX0,RY0,RZ0),(RX1,RY0,RZ0),(RX1,RY1,RZ0),(RX0,RY1,RZ0),
-        (RX0,RY0,RZ1),(RX1,RY0,RZ1),(RX1,RY1,RZ1),(RX0,RY1,RZ1),
-    ]
-    bfs = [(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]
-    nm = bpy.data.meshes.new('RoomBounds')
-    nm.from_pydata(bvs, [], bfs)
-    nm.update()
     old = room.data
-    room.data = nm
+    room.data = _room_bounds_mesh('RoomBounds', ROOM_BBOX_REL)
     if old and old.users == 0:
         bpy.data.meshes.remove(old)
+
+    # Second room: the underground coin room. room.copy() inherits the room schema +
+    # Mobility/MovementClass; we give it its own bounds mesh + disjoint bbox.
+    coin_room = room.copy()
+    scene.collection.objects.link(coin_room)
+    coin_room.name = 'room_coin'
+    coin_room.location = CR_CENTRE
+    coin_room['wf_original_bbox'] = CR_BBOX_REL
+    coin_room.data = _room_bounds_mesh('CoinRoomBounds', CR_BBOX_REL)
+
+    # MUTUAL ADJACENCY is load-bearing here. The room SWITCH is bbox-driven (no
+    # adjacency needed), but the CAMERA entity is updated only via the active
+    # room's update list (level.cc:948-964) — it is not a special/global actor.
+    # With a hard switch the camera (which lives in the surface room) goes inactive
+    # the instant we switch to the coin room and FREEZES at its last surface pose,
+    # so it never adopts cs_coin → the coin room renders off-camera (black screen).
+    # Listing the rooms as each other's neighbour keeps BOTH active simultaneously
+    # (MAX_ACTIVE_ROOMS=3), so the camera keeps ticking and follows cs_coin down.
+    # (room.copy() also carried the snowgoons self-adjacency "room_6"; overwrite it.)
+    room['wf_Adjacent Room 1']      = 'room_coin'
+    room['wf_Adjacent Room 2']      = ''
+    coin_room['wf_Adjacent Room 1'] = 'room_surface'
+    coin_room['wf_Adjacent Room 2'] = ''
+
+# ── 14. Pipe warp → underground coin room ─────────────────────────────────────
+# Entry pipe + ActBox sense (SMB_AT_PIPE), gated by Down in the player script
+# (above). Coin room geometry, a dedicated static CamShot (cs_coin) framing it,
+# and an ActBoxOR zone that switches the camera while Mario is underground.
+# See docs/plans/2026-05-25-smb-pipe-warp-coin-room.md.
+PIPE_GREEN   = make_mat('smb_pipe_green', (0.0, 0.62, 0.0))
+CR_FLOOR_MAT = make_mat('smb_cr_floor',   (0.45, 0.22, 0.05))   # dark brick-brown
+
+# Surface entry pipe: 2 tiles wide x 2 tall, solid (Mario jumps onto the mouth).
+add_statplat('entry_pipe', ENTRY_PIPE_X - T, -GROUND_Y, GROUND_TOP_Z,
+             ENTRY_PIPE_X + T,  GROUND_Y, GROUND_TOP_Z + 2*T, PIPE_GREEN)
+
+# Entry sense: a thin ActBox lid over the pipe mouth. Only Mario standing ON TOP
+# (feet Z=3) overlaps the Z band [2.8,4.0]; walking past on the ground (Z 0) does
+# not. Sets SMB_AT_PIPE=1 on overlap and clears it to 0 on exit.
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(ENTRY_PIPE_X, 0.0, GROUND_TOP_Z + 2*T + 0.4))
+es = bpy.context.object
+es.name = 'pipe_entry_sense'; es.data.name = 'pipe_entry_sense'
+es.scale = (T, GROUND_Y, 0.6)
+bpy.ops.object.transform_apply(scale=True)
+attach_schema(es, 'actbox')
+es['wf_MailBox']                 = SMB_AT_PIPE
+es['wf_MailBoxValue']            = 1
+es['wf_ClearOnExit']             = 'True'    # reset SMB_AT_PIPE when Mario steps off
+es['wf_Mailbox Exit Value']      = 0
+es['wf_Activated By Actor']      = 'Player'
+es['wf_Activated Actor Mailbox'] = 4005      # scratch (must be >=2; default 0 aborts)
+
+# Coin-room floor + side walls (contain Mario; exit pipe gap comes in Phase B).
+add_statplat('cr_floor',  CR_X0 - 1, -GROUND_Y, CR_FLOOR_TOP - T,
+             CR_X1 + 1,    GROUND_Y, CR_FLOOR_TOP,        CR_FLOOR_MAT)
+add_statplat('cr_wall_l', CR_X0 - 1, -GROUND_Y, CR_FLOOR_TOP,
+             CR_X0,        GROUND_Y, CR_FLOOR_TOP + 6*T,  CR_FLOOR_MAT)
+add_statplat('cr_wall_r', CR_X1,     -GROUND_Y, CR_FLOOR_TOP,
+             CR_X1 + 1,    GROUND_Y, CR_FLOOR_TOP + 6*T,  CR_FLOOR_MAT)
+
+
+def _make_target(name, loc):
+    t = bpy.data.objects.new(name, None)
+    scene.collection.objects.link(t)
+    attach_schema(t, 'target')
+    t.location = loc
+    t['wf_Model Type'] = 'None'
+    return t
+
+# Entry landing (where Down warps Mario) + cs_coin look-at point.
+_make_target('Target_cr_entry',  (CR_ENTRY_X, 0.0, CR_ENTRY_Z))
+_make_target('Target_cr_lookat', (9.0, 0.0, CR_FLOOR_TOP + T))
+
+# cs_coin: static shot framing the whole coin room (no scroll script → unlike
+# cs_side it does not read SMB_TARGET_CAM_X). Direction = lookat - campos.
+cs_coin = bpy.data.objects.new('cs_coin', None)
+scene.collection.objects.link(cs_coin)
+attach_schema(cs_coin, 'camshot')
+cs_coin.location = (9.0, -35.0, CR_FLOOR_TOP + 4.5)    # (9,-35,-43.5), inside coin-room bbox
+cs_coin['wf_Position X'] = 'Absolute'
+cs_coin['wf_Position Y'] = 'Absolute'
+cs_coin['wf_Position Z'] = 'Absolute'
+cs_coin['wf_Rotation']   = 'Fixed'
+cs_coin['wf_FOV']                 = 35.0
+cs_coin['wf_Pan Time In Seconds'] = 0.1
+cs_coin['wf_Model Type']          = 'None'
+cs_coin['wf_Track Object'] = 'Player'
+cs_coin['wf_Target']       = 'Target_cr_lookat'
+cs_coin['wf_Follow']       = 'Target_cr_lookat'
+
+# abor_coin: ActBoxOR volume over the coin-room play space (centred on the player
+# plane Y=0, NOT the bbox Y-centre). While Mario is inside it writes cs_coin's
+# index to EMAILBOX_CAMSHOT (1021) each frame, so the camera tracks him underground.
+# Volume is entirely below Z=-37 → disjoint from the surface camera zone.
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(9.0, 0.0, CR_FLOOR_TOP + 4.5))
+ab = bpy.context.object
+ab.name = 'abor_coin'; ab.data.name = 'abor_coin'
+ab.scale = ((CR_X1 - CR_X0)/2 + 1.0, GROUND_Y + 2.0, 6.0)   # X[-1,19] Y[-3.5,3.5] Z[-49.5,-37.5]
+bpy.ops.object.transform_apply(scale=True)
+attach_schema(ab, 'actboxor')
+ab['wf_MailBox']            = 1921        # INDEXOF_CAMSHOT (mailbox.inc:59 — NOT 1021; the
+                                          # level-building.md scope table is wrong, verified
+                                          # against the engine's `zforth: INDEXOF_CAMSHOT = 1921`)
+ab['wf_Object']             = 'cs_coin'
+ab['wf_Activated By Actor'] = 'Player'
+ab['wf_Model Type']         = 'None'
+
+# Coin-room light: the surface Light01 lives in the surface room and unloads on the
+# switch, so without a light here the underground renders pure black (engine warns
+# " has no lights, gonna be hard to see!"). Clone the surface directional light.
+if light:
+    coin_light = light.copy()
+    scene.collection.objects.link(coin_light)
+    coin_light.name = 'Light_coin'
+    coin_light.location = (9.0, -22.0, CR_FLOOR_TOP + 6.0)   # (9,-22,-42), inside coin-room bbox
+    coin_light.rotation_euler = (math.pi / 3, 0, 0)
 
 # ── 13. Export ────────────────────────────────────────────────────────────────
 print(f"[smb] Exporting to {OUT_LEV}")

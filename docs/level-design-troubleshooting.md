@@ -1602,3 +1602,102 @@ to the Jolt physics shape, so collision and physics keep the unscaled geometry.
 - A first-class "scale that also scales collision + physics" (Jolt `ScaledShape`,
   authored as Blender object scale) is a tracked follow-up, deferred until after the
   next level ships — see `TODO.md` § *DEFERRED UNTIL LEVEL*.
+
+
+## Multi-room levels & cross-room warps (the SMB pipe warp)
+
+The SMB W1-1 pipe → underground coin room ([plan](plans/2026-05-25-smb-pipe-warp-coin-room.md))
+is the **first genuinely multi-room WF level**, and the room-transition path had several
+non-obvious gotchas. If you build a second room or a room-to-room warp, read this first.
+
+### How a cross-room warp actually works
+
+A "warp" is just **teleporting the player into a different room's bounding box** — either
+the `Warp` actor (`SetPredictedPosition`) or a script writing `INDEXOF_X/Y/Z_POS`. Both are
+Jolt-safe (`jolt/physical.hpi::Update()` explicitly pushes WF-side warps into the Jolt
+character). The room system then follows on its own:
+
+- `ActiveRooms::UpdateRoom(watchObject)` ([actrooms.cc:293](../wfsource/source/room/actrooms.cc))
+  runs each frame with `_camera->GetWatchObject()` (the player). When the player leaves
+  `_activeRooms[0]`'s bbox it loops over **every** room and switches to the first one whose
+  bbox contains the player. **Adjacency is NOT required for the switch** — it's a full scan.
+- **The two room bboxes MUST be disjoint** (no overlap on *any* axis), or `_activeRooms[0]`
+  still contains the player and the switch never fires. SMB stacks the coin room straight
+  below the surface with a Z gap (surface Z[−10,25], coin Z[−58,−36]).
+- The one transition frame prints `Room::UpdateRoomContents: object N … fell out of room 0
+  … re-adding` — **harmless**; `AddObjectToRoom` re-homes the actor to whatever room now
+  contains it. A `… is not in any room` line is **also not a crash** — it's a graceful
+  `SetPendingRemove` ([rooms.cc:188](../wfsource/source/room/rooms.cc); the old assert is
+  `#if 0`). It means the destination coords missed every room bbox — fix the coords.
+
+### Required objects / properties for a second room (each bit was a real bug)
+
+1. **The player needs `Moves Between Rooms = True`.** Without it the player's mesh binds to
+   the *source* room's transient asset slot and **unloads on the switch** → Mario vanishes
+   underground. (Anchored markers — targets, camshots — have no asset and don't need it.)
+2. **Each room needs its OWN light.** Lights are room-scoped; the surface light unloads on the
+   switch, so the destination renders **pure black** (engine logs ` has no lights, gonna be
+   hard to see!`, [level.cc:1200](../wfsource/source/game/level.cc)). Add a directional light
+   inside each room's bbox. (No matte needed underground — black is SMB-faithful.)
+3. **Each room that the camera visits needs a CamShot framing it.** The surface camera's
+   Position Z is `Absolute`, so it will *not* follow the player down — the underground needs
+   its own camshot (e.g. a static shot over the coin room).
+4. **The rooms must be MUTUALLY ADJACENT for the camera to follow.** This is the subtle one:
+   the **camera entity is updated only via the active room's update list**
+   ([level.cc:948-964](../wfsource/source/game/level.cc); `updateMainCharacter` merely sets
+   `_mainCharacter` — the camera is *not* a special/global actor). With a hard switch the
+   camera lives in the now-inactive source room and **freezes at its last pose**, never
+   adopting the new shot → the destination room renders off-camera (black). Listing the two
+   rooms as each other's `Adjacent Room 1` keeps **both** active simultaneously
+   (`MAX_ACTIVE_ROOMS = MAX_ADJACENT_ROOMS + 1 = 3`, [assets.hp:39](../wfsource/source/asset/assets.hp)),
+   so the camera keeps ticking and follows. `adjacentRooms[0]=self` is implicit
+   ([room.cc:152](../wfsource/source/room/room.cc)) — author only the neighbour.
+   `levcomp-rs` resolves `Adjacent Room 1/2` by name ([rooms.rs](../wftools/levcomp-rs/src/rooms.rs)).
+
+### `INDEXOF_CAMSHOT` is **1921**, not 1021
+
+`MAILBOXENTRY( CAMSHOT, 1921 )` ([mailbox.inc:59](../wfsource/source/mailbox/mailbox.inc)).
+An ActBoxOR (or Director) that switches cameras must write `MailBox = 1921`. The
+`level-building.md` mailbox-scope table said 1021 — **wrong** (now corrected). Writing the
+wrong slot fails *silently*: the camera keeps reading the bootstrapped shot and never
+switches (it looks exactly like a frozen / dead camera). Verify against the engine's
+`zforth: INDEXOF_CAMSHOT = 1921` boot line.
+
+### ActBoxOR fires via C++ overlap, regardless of the script engine
+
+`ActBoxOR::update` ([actboxor.cc](../wfsource/source/game/actboxor.cc)) activates through
+`Activation::Activated()` (a pure AABB overlap test), like `ActBox` — **not** through a
+script. The old `level-building.md` claim that "ActBoxOR zones never fire with scripting
+disabled" is false (corrected). A fresh ActBoxOR switched the camera fine with Tcl disabled.
+Size its activation volume to cover the player's reachable area in the room, centred on the
+**play plane** (Y≈0), not the room-bbox Y-centre (which may sit far back where the camera is).
+
+### `room.copy()` carries a stale `Adjacent Room`
+
+Duplicating the imported room with `room.copy()` is the easy way to get a second room (it
+inherits the room schema + Mobility/MovementClass), but it also copies the snowgoons room's
+self-adjacency name (e.g. `room_6`). **Overwrite `Adjacent Room 1/2` explicitly** on both
+rooms or you get a dangling reference.
+
+### The down-press warp gate (pure composition, no engine change)
+
+The `Warp` actor is **collision-only** — it teleports on overlap with no input gate, so it
+can't do "press Down at the pipe." Compose it instead:
+
+- an **`ActBox`** at the pipe mouth (a thin Z band *above* the pipe top so only standing on
+  top triggers it, not walking past on the ground) sets a mailbox (`SMB_AT_PIPE`) on overlap,
+  with `ClearOnExit=True` to reset it;
+- the player's per-tick script ANDs that mailbox with the joystick **DOWN** bit
+  (`EJ_BUTTONF_DOWN = 0x1000 = 4096`) and reuses the **respawn teleport** (write
+  `X/Y/Z_POS` + zero the velocities) to drop into the coin room.
+
+Use a pure `Warp` + `Target` for the *exit* pipe (walk-into, no gate needed) — that's exactly
+what `Warp` does natively, and it validates the `Warp` class's Jolt teleport.
+
+### Verifying camera moves on the bridge — resume, don't step
+
+In pause/`step` bridge mode each step advances a tiny `dt`, so camera **pans/slews barely
+move** (a CamShot switch pans over its Pan Time, and the per-frame slew clamp is 10 units/axis
+— see the camera-slew section in [level-building.md](level-building.md)). Drive the warp with
+`step` for determinism, then **`resume`** and sleep real-time before screenshotting so the
+camera pan to the new shot completes. (Headless GL is low-fps, so allow a few seconds.)

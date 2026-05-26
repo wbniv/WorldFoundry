@@ -498,7 +498,7 @@ WF mailboxes form a hierarchy. Understanding scope prevents the most common cros
 |---|---|---|---|
 | 0–1 | `EMAILBOX_FALSE` / `EMAILBOX_TRUE` | Global, read-only | Set by engine at level load; write attempts are silently dropped (assert in debug builds). Use mb[1] as a "always-true" visibility mailbox. |
 | 2–999 | Global user | **Shared across all actors** | Director, player, cube actors, etc. all read/write the same cells. Q✱bert's cube-state mailboxes (200–227), round counter (425), etc. live here. |
-| 1000–1021 | Global system | Global, side-effects | `INDEXOF_CAMSHOT` = 1021 writes the active camera. |
+| 1000–1999 | Global system | Global, side-effects | `INDEXOF_CAMSHOT` = **1921** writes the active camera — verified against [`mailbox.inc`](../wfsource/source/mailbox/mailbox.inc) (`MAILBOXENTRY( CAMSHOT, 1921 )`) and the engine's `zforth: INDEXOF_CAMSHOT = 1921` line. **It is NOT 1021** — an earlier revision of this table said 1021; an ActBoxOR/script that writes the wrong slot silently fails to switch the camera. |
 | 2000–2099 | Local user | Per-actor | Each actor has its own storage at this range. Rarely needed for game logic. |
 | 3000–3036 | Local system | Per-actor, side-effects | **`INDEXOF_X_POS` = 3009, `INDEXOF_Y_POS` = 3010, `INDEXOF_Z_POS` = 3011.** Writing here moves the *calling actor's* position. |
 | 4000–4099 | Scratch | Per-script-call | Temporary storage within a single script execution. |
@@ -536,7 +536,7 @@ Most gameplay actors (platform, statplat) default to `VisibilityMailbox = 1` (re
 - **Director script** (per frame): reads mailboxes 98/99/100 and writes to `$INDEXOF_CAMSHOT`.
   These mailboxes are set by ActBoxOR trigger zones.
 - **ActBoxOR objects**: write a named object's index to a mailbox when the Player enters
-  their trigger volume. In snowgoons, one ActBoxOR writes `CamShot01`'s index to mailbox 1021
+  their trigger volume. In snowgoons, one ActBoxOR writes `CamShot01`'s index to mailbox 1921 (`INDEXOF_CAMSHOT`)
   (`EMAILBOX_CAMSHOT`) when the Player enters.
 - **NullInterpreter stub**: `wftools/engine/stubs/scripting_stub.cc` — replaces Tcl scripting
   with a no-op. All `RunScript()` calls return 0. This is intentional pending replacement
@@ -575,7 +575,7 @@ initializer list, and move the `_overrideLevelNum` check to BEFORE the asserts.
 
 - **DelayCameraHandler**: waits up to 5 frames for `EMAILBOX_CAMSHOT > 0` then transitions.
   Assertion at `movecam.cc:885` fires if nobody writes a valid CamShot index within 5 frames.
-- **BungeeCameraHandler**: main follow camera. Each frame reads `EMAILBOX_CAMSHOT` (mailbox 1021)
+- **BungeeCameraHandler**: main follow camera. Each frame reads `EMAILBOX_CAMSHOT` (mailbox 1921)
   to get the active CamShot object's index. Originally cleared the mailbox after reading
   (relied on ActBoxOR to re-write each frame).
 - **NormalCameraHandler**: validates that the stored shot index is a real CamShot object.
@@ -597,15 +597,26 @@ fine — see [troubleshooting](level-design-troubleshooting.md). These toggles a
 `TYPEENTRYBOOLEANTOGGLE` enums; a `.lev` where their `DATA` and `STR` disagree is
 corrupt and now hard-fails on Blender import.
 
-#### EMAILBOX_CAMSHOT Bootstrap (scripting disabled)
+#### EMAILBOX_CAMSHOT Bootstrap
 
-With scripting disabled, ActBoxOR trigger zones never fire. Fix in `level.cc::constructObject`:
-when a `CamShot_KIND` object is constructed and the mailbox is still 0, write the CamShot's
-actor index to `EMAILBOX_CAMSHOT`. This is a one-time bootstrap; the value persists.
+> **Correction (2026-05-25, verified):** an earlier version of this section claimed
+> "with scripting disabled, ActBoxOR trigger zones never fire." **That is wrong.**
+> `ActBoxOR::update` ([actboxor.cc](../wfsource/source/game/actboxor.cc)) activates via a
+> pure **C++ overlap test** (`Activation::Activated()`), *independent* of the script
+> engine — exactly like `ActBox`. A fresh ActBoxOR fired and switched the camera with
+> Tcl scripting disabled (the SMB pipe-warp `abor_coin`). What actually broke that switch
+> the first time was writing the **wrong mailbox** (1021 vs the real `INDEXOF_CAMSHOT` =
+> 1921), not a dead ActBoxOR. Verify capability claims against the code, not this doc.
 
-`BungeeCameraHandler::predictPosition()` originally cleared the mailbox after use (line 988).
-With scripting disabled this is suppressed — the mailbox stays set to the initial CamShot
-so the camera keeps working without per-frame ActBoxOR writes.
+There is still a one-time **bootstrap**: in `level.cc::constructObject`, when a
+`CamShot_KIND` object is constructed and `EMAILBOX_CAMSHOT` is still 0, the engine writes
+that CamShot's actor index. This seeds the *initial* shot (the first CamShot constructed)
+so a level with a single camshot needs no ActBoxOR at all.
+
+`BungeeCameraHandler::predictPosition()` originally cleared the mailbox after use (line 988);
+that clear is suppressed here, so the mailbox **persists** at the last written value. A
+single-camshot level therefore stays on the bootstrapped shot forever; a multi-camshot level
+must have an in-room ActBoxOR (or the Director) overwrite `INDEXOF_CAMSHOT` to switch shots.
 
 #### Per-frame camera slew clamp (10 units/frame, hardcoded)
 
