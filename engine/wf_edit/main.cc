@@ -1254,12 +1254,15 @@ int main(int argc, char** argv)
     //    plan). A failure here is non-fatal — the shell still runs.
     wfcrdt::Doc              doc;
     std::string              level_name;
+    std::string              save_path;   // where Save writes (.lev in-place, or Save-As for a binary load)
     std::vector<std::string> actor_names;
     std::vector<std::string> actor_eids;
-    if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc)) {
+    if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc, &save_path)) {
         actor_names = wfedit::ReadActorNames(doc);
         actor_eids  = wfedit::ReadActorEids(doc);
-        level_name  = leveltree;
+        // Display name = the Save target's basename (clean for a binary load:
+        // cd.iff:L4 → cd_L4.lev; matches the source .lev for a text load).
+        level_name  = save_path;
         if (auto slash = level_name.find_last_of('/'); slash != std::string::npos)
             level_name.erase(0, slash + 1);
         std::printf("wf-edit: Outliner shows %zu actors from the Y.Doc\n",
@@ -1511,7 +1514,10 @@ int main(int argc, char** argv)
     ctx.actor_eids  = std::move(actor_eids);
     ctx.doc         = &doc;   // read field subtrees on selection (read-only)
     ctx.undo        = &undo;  // Ctrl+Z / Ctrl+Y
-    ctx.save_path   = leveltree;               // Save writes back to the .lev source
+    // Save target: the source .lev in-place for a text load, or a fresh sibling
+    // .lev (Save-As) for a binary load — set by LoadLevelTreeIntoDoc. Falls back
+    // to the raw arg when the load failed (empty save_path).
+    ctx.save_path   = save_path.empty() ? leveltree : save_path;
     ctx.room_id     = room_id;
     ctx.gizmo_snap       = identity.gizmo_snap;        // restore persisted snap prefs
     ctx.gizmo_snap_trans = identity.gizmo_snap_trans;

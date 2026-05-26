@@ -24,7 +24,18 @@ namespace wfedit {
 // where each chunk is the recursive node Y.Map { chunk_type, children|text }
 // (design doc § "CRDT schema"). Returns false (and logs to stderr) if levtree
 // can't be found / exits non-zero / emits unparseable JSON.
-bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc);
+//
+// `lev_path` may be a text `.lev`, a compiled binary level (`.iff`/`.lvl`,
+// sniffed by content not extension), or a `cd.iff` archive with a level
+// selector — `<file.iff>:<TAG|index>` (e.g. `wflevels/cd.iff:L4`). A binary
+// input is decompiled to a temp `.lev` via `levcomp decompile` first, then the
+// existing levtree → Doc path runs unchanged.
+//
+// `out_save_path` (optional) reports where the editor should Save: for a text
+// `.lev` it's the source itself (in-place Save); for a binary load it's a fresh
+// sibling `.lev` (Save-As — the binary is read-only, there's no binary writer).
+bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc,
+                          std::string* out_save_path = nullptr);
 
 // Run `levtree print` on a chunk-tree JSON string → canonical `.lev` text (the
 // inverse of `levtree parse`). Used by level_save's SaveDocToLev.

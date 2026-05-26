@@ -1,16 +1,22 @@
 # wf-edit: load compiled binary levels (`.iff`, bare or inside `cd.iff`)
 
-**Status:** In progress. **Tooling done:** `levcomp decompile` now parses/dumps the `cd.iff` archive
-TOC (`--list`) and selects a level to decompile (`--level <tag|index>`) — verified on the real
-`cd_full.iff` (8 entries SHEL/L0–L6; `--level L4` → snowgoons, 36 objects) with unit tests for the
-TOC byte format. **Editor wiring not started** (sniff binary → shell out to `levcomp decompile` →
-existing `levtree`→Doc path).
+**Status:** ✅ Done 2026-05-25 (~1 h editor wiring; tooling landed earlier). `wf-edit` loads a bare
+compiled `.iff` and a level selected out of a `cd.iff` archive. **Tooling:** `levcomp decompile`
+parses/dumps the `cd.iff` TOC (`--list`) and selects a level (`--level <tag|index>`) — unit-tested on
+the TOC byte format. **Editor wiring:** `LoadLevelTreeIntoDoc` sniffs binary-vs-text by content,
+decompiles a binary input to a temp `.lev` via `levcomp decompile`, then runs the existing
+`levtree`→Doc path unchanged; the `--leveltree=` CLI accepts `<file.iff>` and `<file.iff>:<TAG|index>`
+(cd.iff selector). Verified headless: bare `snowgoons-blender-standalone.iff`, `cd.iff:L4` (by tag),
+and `cd.iff:1` (by index) each populate the Doc with all **36** snowgoons actors; the text `.lev`
+default still loads; and a binary-loaded Doc Save-As round-trips to a valid `.lev` (synthetic
+`statplat_1`… names).
 **Date:** 2026-05-25
 **Scope:** Let `wf-edit` open a *compiled binary* level — a bare per-level LVAS `.iff` and a level
-selected out of a multi-level `cd.iff` archive. The **binary is load-only** (no in-place binary
-writer); the session is otherwise fully editable and **saves *out* to a new `.lev`** via the
-existing `SaveDocToLev`. What's *not* supported is writing back to the original `.iff`/`cd.iff` or
-reproducing the original authored source (names/comments are gone — see Fidelity).
+selected out of a multi-level `cd.iff` archive. The editor reads the binary read-only (no in-place
+binary patch); the session is otherwise fully editable and **saves *out* to a new `.lev`** via the
+existing `SaveDocToLev` — and from there recompiles to a bare `.iff` via the existing
+"Save + Compile (.iff)" pipeline (see "Saving back to binary" below). What's *not* recovered is the
+original authored source (names/comments are gone — see Fidelity).
 
 ## Context
 
@@ -53,11 +59,12 @@ Field values, enums, and Forth scripts are likewise recovered. What's gone: the 
 (already exempted as exporter noise).
 
 You **can** save the (decompiled, possibly edited) level out to a **new `.lev`** — it carries the
-synthetic names, they're used consistently on both sides, and it recompiles cleanly. What you
-**can't** do is write back to the original binary (no binary writer) or reproduce the original
-*authored* source: with authored names gone, the position-derived synthetic names are the only
-handle, so a new `.lev` is a fresh derivative, not a reconciliation with the Blender/`.lev` golden
-source. (Structural editing — reorder/add/delete — is also where index-based references get
+synthetic names, they're used consistently on both sides, and it recompiles cleanly (and from that
+`.lev`, on to a bare `.iff` via the existing compile pipeline — see "Saving back to binary"). What
+you **can't** recover is the original *authored* source: with authored names gone, the
+position-derived synthetic names are the only handle, so a new `.lev` is a fresh derivative, not a
+reconciliation with the Blender/`.lev` golden source. (Structural editing — reorder/add/delete — is
+also where index-based references get
 fragile, but that's an editing concern orthogonal to this load feature.)
 
 ## Design
@@ -137,6 +144,17 @@ the level list straight from `levcomp decompile --list` (which now carries the t
 
 ## Verification
 
+**Done 2026-05-25.** Headless loads of the bare `snowgoons-blender-standalone.iff`, `cd.iff:L4` (by
+FOURCC tag), and `cd.iff:1` (by decimal index) each report `Y.Doc populated … 36 top-level chunks` +
+`Outliner shows 36 actors`; the text `.lev` default still loads (regression); and `WF_EDIT_SAVE` on a
+binary-loaded Doc writes a valid `.lev` (`{ 'LVL' … { 'NAME' "statplat_1" …`). The editor screenshot
+below (`--leveltree=wflevels/cd.iff:L4 --select=10`) shows the Outliner (synthetic `statplat_*` /
+`camera_*` names), the viewport, and the Properties panel all populated from the `cd.iff` decompile:
+
+![wf-edit loading snowgoons out of cd.iff (L4)](../../tests/screenshots/wfedit_binload_panels.png)
+
+Original verification plan (all satisfied):
+
 1. **Bare `.iff` round-trip parity.** Build snowgoons to binary via the normal pipeline
    ([`wftools/wf_blender/build_level_binary.sh`](../../wftools/wf_blender/build_level_binary.sh)),
    then load the binary in `wf-edit` and load the text `.lev` in a second instance; assert the same
@@ -151,11 +169,36 @@ the level list straight from `levcomp decompile --list` (which now carries the t
 4. **Read-only guard.** Confirm File→Save is disabled (or Save-As-`.lev` only) for a binary-loaded
    session.
 
+## Saving back to binary — what's actually available
+
+An earlier draft said "there's no binary writer, so binary write-back is out of scope." That was
+wrong: WF has **two** IFF writers — the C++ [`wftools/iffwrite/`](../../wftools/iffwrite/iffwrite.hp)
+(`IffWriterBinary`/`IffWriterText` with `enterChunk`/`exitChunk` + `ChunkSizeBackpatch` size
+backpatching, the oracle) and the production Rust
+[`iffcomp-rs`](../../wftools/iffcomp-rs/src/writer.rs). So binary output is a solved problem; the only
+question is *which* binary and *how much re-pack*:
+
+- **Bare standalone `.iff` — already free.** Save the Doc to a `.lev` (`SaveDocToLev`), then run the
+  existing compile pipeline ([`build_level_binary.sh`](../../wftools/wf_blender/build_level_binary.sh):
+  `iffcomp -binary` → `levcomp` → `textile` → `iffcomp -binary`). The editor *already exposes this* as
+  **File → "Save + Compile (.iff)"** ([`RunBuildLevel`](../../engine/wf_edit/level_doc.cc)). So a
+  binary-loaded level can round-trip back to a binary `.iff` today — via `.lev` as the intermediate,
+  not an in-place binary patch.
+- **Re-pack a level back *into* a multi-level `cd.iff`** — the one genuinely missing piece: rebuild
+  the `GAME`/`TOC` archive with the edited level's new offset/size. This is *tractable*, not hard —
+  the `ChunkSizeBackpatch` writer plus the `parse_game_toc` reader this plan already added are the two
+  halves of it — but it's not wired. Deferred as a follow-up (see below).
+
+So the accurate scope statement is: **load any binary; save out to `.lev` or recompile to a bare
+`.iff` for free; cd.iff archive re-pack is a small, well-supported follow-up — not a wall.**
+
 ## Out of scope / deferred
 
-- **Binary write-back / re-pack to `.iff`/`cd.iff`** — explicitly dropped (the toolchain compiles
-  text→binary; there's no binary writer and the load goal doesn't need one). Saving *out* to a new
-  `.lev` **is** supported (Phase 1 step 4) — this only rules out editing the binary in place.
+- **`cd.iff` archive re-pack** — write an edited level back into the multi-level archive (rebuild
+  `GAME`/`TOC` offsets+sizes). Tractable via `iffwrite`'s `ChunkSizeBackpatch` + `parse_game_toc`;
+  deferred, not blocked. Bare-`.iff` recompile and `.lev` Save-As cover the load feature's needs.
+- **In-place binary patch** — editing bytes inside the original `.iff` without going through `.lev`
+  recompile. Not planned (the recompile path supersedes it).
 - **Recovering authored actor names / comments / source ordering** — not in the binary; synthetic
   names are accepted.
 - **In-editor cd.iff level picker** — CLI selector first; the picker is a follow-up.

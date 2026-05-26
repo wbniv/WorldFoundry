@@ -23,6 +23,7 @@ see and hear each other without leaving the tool.
 | Capability | State |
 |---|---|
 | Open a level and render it live in an embedded viewport | ✅ |
+| Open a text `.lev`, a compiled binary `.iff`/`.lvl`, or a level from a `cd.iff` archive | ✅ (binary decompiled on load; see [limitations](#known-limitations)) |
 | Outliner: list every actor (read from the CRDT `Doc`) | ✅ |
 | Properties: every field of the selected actor, with the right widget per type | ✅ |
 | Edit a field → it commits to the `Doc` | ✅ |
@@ -83,7 +84,7 @@ Camera capture uses Linux [V4L2](https://www.kernel.org/doc/html/latest/userspac
 | Option | Form | Meaning |
 |---|---|---|
 | `--level=<name>` | `=` | Level the **engine** loads into the viewport (default `snowgoons-blender`). |
-| `--leveltree=<name>` | `=` | Level the **Outliner/Properties** `Doc` is built from (defaults to match `--level`). |
+| `--leveltree=<name>` | `=` | Level the **Outliner/Properties** `Doc` is built from (defaults to match `--level`). Accepts a text `.lev`, a compiled binary `.iff`/`.lvl` (sniffed by content, decompiled on load), or a `cd.iff` archive with a level selector — `<file.iff>:<TAG\|index>` (e.g. `wflevels/cd.iff:L4` or `:1`). |
 | `--room=<id>` | `=` or space | Join a voice + video call room. Omit to run solo (no call started). |
 | `--frames <N>` | space | Headless: exit after *N* frames. **Note the space** — `--frames=N` is ignored. |
 | `--screenshot <path.ppm>` | space | Headless: dump the composited frame (engine + UI) to a PPM. **Note the space.** |
@@ -349,17 +350,19 @@ workflow — they exist so the editor can be proven headlessly.
 - **While you drag an actor with the gizmo,** a concurrent edit to that actor from a remote peer
   (or your own undo) won't snap it back mid-gesture — the drag owns its transform until you release
   the mouse, then last-writer-wins resolves the transform. Other fields still propagate live.
-- **Currently loads text `.lev`/`.iff.txt` only,** not a compiled binary `.iff`/`cd.iff`. This is a
-  convenience, not a hard limit: the compiled `.lvl` is *positional* (no inline field names) but is
-  fully decodable with the OAS/OAD/`objects.lc` schema — and `levcomp decompile`
-  ([`wftools/levcomp-rs/src/decompile.rs`](../wftools/levcomp-rs/src/decompile.rs)) already does
-  exactly that, reconstructing a named-field `.lev` from a binary level. Read-only binary loading
-  (bare `.iff` + level-from-`cd.iff`) is planned — see
-  [load-binary-iff plan](plans/2026-05-25-wf-edit-load-binary-iff.md). The binary itself is
-  load-only (no binary writer) — but a binary-loaded level is fully editable and saves *out* to a
-  new `.lev`. Note that binary levels carry no authored object names (cross-references are stored by
-  actor index; the decompiler synthesizes `{Class}_{index}` names), so the new `.lev` is a fresh
-  derivative, not a round-trip to the original Blender/`.lev` source.
+- **Loads compiled binary levels, but can't re-pack them into a `cd.iff`.** The editor opens a text
+  `.lev`/`.iff.txt`, a compiled bare `.iff`/`.lvl`, **and** a level selected out of a `cd.iff`
+  archive (`--leveltree=wflevels/cd.iff:L4`) — a binary input is decompiled on load via
+  `levcomp decompile`
+  ([`wftools/levcomp-rs/src/decompile.rs`](../wftools/levcomp-rs/src/decompile.rs)). A binary-loaded
+  level is fully editable; Save writes *out* to a new `.lev`, and **Save + Compile (.iff)** recompiles
+  that to a bare `.iff` through the normal pipeline. What's *not* wired is writing an edited level
+  back **into** a multi-level `cd.iff` (rebuilding the archive `GAME`/`TOC`) — tractable via
+  `iffwrite`'s `ChunkSizeBackpatch` + `parse_game_toc`, deferred as a follow-up. Also note: binary
+  levels carry no authored object names (cross-references are stored by actor index; the decompiler
+  synthesizes `{Class}_{index}` names), so a `.lev` saved from a binary load is a fresh derivative,
+  not a round-trip to the original Blender/`.lev` source. See the
+  [load-binary-iff plan](plans/2026-05-25-wf-edit-load-binary-iff.md).
 - **Linux/X11 only.** Wayland and mobile hosts are v2+.
 
 ---

@@ -97,6 +97,94 @@ bool RunLevtreeParse(const std::string& lev_path, std::string& out)
     return true;
 }
 
+// ── locate the levcomp binary (the binary-level decompiler) ──────────────────
+// Mirrors FindLevtree. $WF_LEVCOMP overrides; else prefer release, then debug,
+// then PATH.
+std::string FindLevcomp()
+{
+    if (const char* env = std::getenv("WF_LEVCOMP"); env && *env && access(env, X_OK) == 0)
+        return env;
+    static const char* kCandidates[] = {
+        "wftools/levcomp-rs/target/release/levcomp",
+        "wftools/levcomp-rs/target/debug/levcomp",
+    };
+    for (const char* p : kCandidates)
+        if (access(p, X_OK) == 0) return p;
+    return "levcomp";   // last resort: rely on PATH
+}
+
+// Schema inputs the decompiler needs: objects.lc (class names) + the OAD dir
+// (field names/types/enum labels). Both honour the same in-repo OAS tree the
+// property panel runs against (WF_OAD_DIR), plus a dedicated WF_OBJECTS_LC.
+std::string ObjectsLcPath()
+{
+    if (const char* env = std::getenv("WF_OBJECTS_LC"); env && *env) return env;
+    return "wfsource/source/oas/objects.lc";
+}
+std::string OadDirPath()
+{
+    if (const char* env = std::getenv("WF_OAD_DIR"); env && *env) return env;
+    return "wfsource/source/oas";
+}
+
+// First non-whitespace byte distinguishes text from binary: a text `.lev` opens
+// with `{` (after optional whitespace), a compiled level with an IFF FOURCC
+// (`L4`/`GAME`/`LVAS`…). Sniff the bytes — don't trust the extension. An
+// unreadable/empty file → treat as text (let levtree report the real error).
+bool IsBinaryLevel(const std::string& path)
+{
+    FILE* f = std::fopen(path.c_str(), "rb");
+    if (!f) return false;
+    unsigned char buf[16];
+    const size_t n = std::fread(buf, 1, sizeof(buf), f);
+    std::fclose(f);
+    for (size_t i = 0; i < n; ++i) {
+        if (std::isspace(buf[i])) continue;
+        return buf[i] != '{';   // '{' → text .lev; any other leading byte → binary
+    }
+    return false;   // empty / all-whitespace
+}
+
+// ── run `levcomp decompile <in> <objects.lc> --oad-dir <oad> [--level <sel>]
+//    -o <tmp>` → a temp `.lev` (the binary-level decompile pre-step). `sel`
+//    selects a level from a cd.iff archive (FOURCC tag or decimal TOC index);
+//    empty = a bare single-level `.iff`. On success `out_tmp` holds the temp
+//    `.lev` path; the caller unlinks it after levtree consumes it.
+bool RunLevcompDecompile(const std::string& in_path, const std::string& sel,
+                         std::string& out_tmp)
+{
+    char tmpl[] = "/tmp/wfedit_decomp_XXXXXX";
+    const int fd = mkstemp(tmpl);
+    if (fd < 0) { std::fprintf(stderr, "wf-edit: mkstemp failed\n"); return false; }
+    ::close(fd);   // levcomp writes the file itself; we only reserved a unique name
+
+    std::string cmd = ShQuote(FindLevcomp()) + " decompile "
+                    + ShQuote(in_path) + " " + ShQuote(ObjectsLcPath())
+                    + " --oad-dir " + ShQuote(OadDirPath());
+    if (!sel.empty()) cmd += " --level " + ShQuote(sel);
+    cmd += " -o " + ShQuote(tmpl) + " 2>&1";
+
+    FILE* pipe = popen(cmd.c_str(), "r");
+    if (!pipe) {
+        std::fprintf(stderr, "wf-edit: popen failed for: %s\n", cmd.c_str());
+        ::unlink(tmpl);
+        return false;
+    }
+    std::array<char, 65536> buf;   // drain (and, on failure, surface) levcomp's log
+    size_t n;
+    std::string log;
+    while ((n = std::fread(buf.data(), 1, buf.size(), pipe)) > 0)
+        log.append(buf.data(), n);
+    const int rc = pclose(pipe);
+    if (rc != 0) {
+        std::fprintf(stderr, "wf-edit: `%s` exited %d\n%s\n", cmd.c_str(), rc, log.c_str());
+        ::unlink(tmpl);
+        return false;
+    }
+    out_tmp = tmpl;
+    return true;
+}
+
 // ── levtree JSON chunk → wfcrdt::Input (the recursive CRDT chunk node) ────────
 // Lossless schema (v2): a levtree Chunk is {"id","items":[Chunk|Literal]}; a
 // Literal is {"kind":"str"|"num"|"four_cc", value/text/id}. The CRDT node mirrors
@@ -241,10 +329,40 @@ bool RunBuildLevel(const std::string& level_name, std::string& out_log)
     return pclose(pipe) == 0;
 }
 
-bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc)
+bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc,
+                          std::string* out_save_path)
 {
+    // Split an optional cd.iff selector "<file.iff>:<TAG|index>": only when the
+    // suffix carries no '/' (so a ':' inside a directory name isn't mistaken for
+    // a selector) and the base is a readable file. A text .lev / bare .iff has
+    // no selector and falls through unchanged.
+    std::string in_path = lev_path;
+    std::string sel;
+    if (auto colon = lev_path.find_last_of(':'); colon != std::string::npos) {
+        std::string base = lev_path.substr(0, colon), suffix = lev_path.substr(colon + 1);
+        if (!suffix.empty() && suffix.find('/') == std::string::npos &&
+            access(base.c_str(), R_OK) == 0) {
+            in_path = std::move(base);
+            sel     = std::move(suffix);
+        }
+    }
+
+    // Binary level (compiled .iff, bare or inside cd.iff)? Decompile it to a temp
+    // .lev first, then feed that to the existing levtree → Doc path unchanged.
+    std::string parse_path = in_path;
+    std::string tmp_lev;
+    if (IsBinaryLevel(in_path)) {
+        if (!RunLevcompDecompile(in_path, sel, tmp_lev)) {
+            std::fprintf(stderr, "wf-edit: levcomp decompile failed for %s\n", in_path.c_str());
+            return false;
+        }
+        parse_path = tmp_lev;
+    }
+
     std::string raw;
-    if (!RunLevtreeParse(lev_path, raw)) return false;
+    const bool parsed = RunLevtreeParse(parse_path, raw);
+    if (!tmp_lev.empty()) ::unlink(tmp_lev.c_str());   // temp consumed (or failed)
+    if (!parsed) return false;
 
     json tree;
     try {
@@ -260,12 +378,28 @@ bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc)
     }
     const json& root = tree["root"];
 
-    // Derive a level name from the path's basename (drop dir + .lev).
-    std::string level_name = lev_path;
+    // Derive a level name from the INPUT path's basename (not the temp file):
+    // drop the directory + final extension, and qualify with the cd.iff selector
+    // when present (cd → cd_L4).
+    std::string level_name = in_path;
     if (auto slash = level_name.find_last_of('/'); slash != std::string::npos)
         level_name.erase(0, slash + 1);
-    if (auto dot = level_name.rfind(".lev"); dot != std::string::npos)
+    if (auto dot = level_name.find_last_of('.'); dot != std::string::npos && dot != 0)
         level_name.erase(dot);
+    if (!sel.empty()) level_name += "_" + sel;
+
+    // Report where Save should write: the source .lev in-place for a text load;
+    // a fresh sibling .lev (Save-As) for a binary load — the binary is read-only.
+    if (out_save_path) {
+        if (tmp_lev.empty()) {
+            *out_save_path = in_path;
+        } else {
+            std::string dir;
+            if (auto slash = in_path.find_last_of('/'); slash != std::string::npos)
+                dir = in_path.substr(0, slash + 1);
+            *out_save_path = dir + level_name + ".lev";
+        }
+    }
 
     auto txn = doc.begin();
 
@@ -295,7 +429,7 @@ bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc)
         ++objs;
     }
     std::printf("wf-edit: Y.Doc populated from %s — %d top-level chunks (schema v2)\n",
-                lev_path.c_str(), objs);
+                in_path.c_str(), objs);
     return true;
 }
 

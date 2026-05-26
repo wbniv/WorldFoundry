@@ -9,6 +9,7 @@
 
 45 days of work (2026-04-12 – 2026-05-25). Newest first:
 
+- **`wf-edit` loads compiled binary levels (2026-05-25)** — The editor now opens a bare `.iff`/`.lvl` or a level selected out of a `cd.iff` archive (`--leveltree=cd.iff:L4`), decompiling the binary to a temp `.lev` via `levcomp decompile` before the existing `levtree`→Doc path. See [plan](docs/plans/2026-05-25-wf-edit-load-binary-iff.md).
 - **SMB pit/fall death + level countdown timer (2026-05-25)** — A below-gap `ActBox` and a 400-unit Director countdown both feed Mario's existing respawn (−1 life), so falling into a pit or running the HUD timer to "TIME UP" now costs a life. See [plan](docs/plans/2026-05-25-smb-pit-death-and-level-timer.md).
 - **Collab-hardening — leaf-granular, drag-aware propagation (2026-05-25)** — The CRDT→engine bridge now re-applies only the leaves actually flagged changed and a drag-lock stops a peer's or undo's concurrent edit from snapping your in-progress gizmo drag back to a stale pose. See [plan](docs/plans/2026-05-25-collab-hardening.md).
 - **Plan-status sweep (2026-05-25)** — Reconciled all 225 plan docs against git/code, flipping ~50 done-but-mislabeled plans to DONE and giving the genuine backlog accurate status; every plan now carries a Status. See [sweep doc](docs/plans/2026-05-25-plan-status-sweep.md).
@@ -120,6 +121,8 @@
 
 | Date | Plan | Status | Summary |
 |------|------|--------|---------|
+| 2026-05-25 | [Plan: wf-edit load compiled binary levels (`.iff`/`cd.iff`)](docs/plans/2026-05-25-wf-edit-load-binary-iff.md) | **DONE 2026-05-25 (~1 h editor wiring)** | `wf-edit` opens a bare compiled `.iff`/`.lvl` or a level picked from a `cd.iff` archive (`--leveltree=cd.iff:L4`), sniffing binary-vs-text by content and decompiling via `levcomp decompile` before the existing `levtree`→Doc path; verified on snowgoons (36 actors) by tag, index, and bare file. Corrected the plan's wrong "no binary writer" claim — bare-`.iff` recompile already exists; only `cd.iff` re-pack is deferred. |
+| 2026-05-25 | [Plan: SMB pipe warp → underground coin room](docs/plans/2026-05-25-smb-pipe-warp-coin-room.md) | **Not started** | Add an SMB pipe warp (Down-press at the pipe mouth → underground coin room → exit-pipe warp back) built as a genuine second `room` to prove WF's room-to-room transition path; entry uses an ActBox + player-script Down gate, exit uses a pure `Warp`+`Target`, with a dedicated coin-room CamShot switched by an ActBoxOR. No C++ logic change. |
 | 2026-05-25 | [Plan: SMB Gold Value wire-up + coin-doc fix](docs/plans/2026-05-25-smb-gold-value-wire-and-doc-fix.md) | **DONE 2026-05-25** | Confirmed the reported TTL bug was already fixed and wired the dead OAD `Gold Value` field into the live pickup path. Surfaced a gap where the SMB Blender export reads a stale fixtures OAD dir, so new canonical fields silently drop. |
 | 2026-05-22 | [Plan: Upgrade Yrs 0.9.3→0.26.0 + native undo/redo](docs/plans/2026-05-22-yrs-upgrade-and-native-undo.md) | **DONE 2026-05-22 — both phases** | Upgraded the Yrs submodule to v0.26.0 (fixing a root-resolution deadlock with lazy txn acquisition) and added native Ctrl+Z/Y undo, local-only-in-collab via tracked transaction origins. |
 | 2026-05-22 | [Plan: Q✱bert humanoid feet-origin meshes](docs/plans/2026-05-22-qbert-slick-sam-feet-origin.md) | **DONE 2026-05-22 — verified** | Re-based Slick/Sam/Ugg/Wrong-Way to feet-at-origin so they stand on the cubes instead of half-buried, verified with a new debug-bridge screenshot harness. |
@@ -299,4 +302,4 @@ No hard blockers — Jolt is functional and all scripting engines are smoke-test
 
 ## Last Change
 
-**2026-05-21** — `wf-edit` editor docs: wrote the [user manual](docs/wf-edit-manual.md), embedded proof screenshots across the editor plans (fixing a `<img>`-in-table-cell bug in [md-to-pdf.sh](scripts/md-to-pdf.sh)), captured the two-instance Collaborators panel, reconciled the voice+video plan to the as-shipped raw-UDP transport, and marked the OAD `kPropMap` codegen (M3) done.
+**2026-05-25** — SMB pit/fall death + level countdown timer: a below-gap `ActBox` and a 400-unit Director countdown both feed Mario's existing respawn (−1 life), so falling into a pit or running the HUD timer to "TIME UP" now costs a life. See [plan](docs/plans/2026-05-25-smb-pit-death-and-level-timer.md).
