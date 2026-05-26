@@ -87,15 +87,29 @@ This is nearly free: `levcomp decompile` already handles a single-level LVAS con
 [level-building.md § cd.iff](../level-building.md#cdiff--multi-level-archive)). `decompile.rs` parses
 LVAS but not this archive layer yet.
 
-1. **Parse the `cd.iff` TOC** to enumerate levels (tag + name). Natural home: extend
-   `levcomp decompile` to accept `cd.iff` + a `--level <tag|index>` selector (it already owns the
-   LVAS/IFF parsing; the archive TOC is a thin layer on top), seeking the chosen LVAS sub-chunk and
-   then running the existing single-level path. Alternative: a tiny standalone extractor that slices
-   one LVAS out by TOC offset/size and pipes it to the existing decompile.
-2. **Level selection UX:** start with a CLI selector (`--level=cd.iff:L4` or
-   `--cd-iff=<path> --level-index=5`), matching the existing `--leveltree=` ergonomics. An in-editor
-   "open level from cd.iff" picker (list the TOC tags/names) is a nice Phase-2.5 follow-up, not
-   required for the first cut.
+**Already exists (reference / reuse):** the C++ engine reads this archive natively —
+[`DiskTOC::LoadTOC`](../../wfsource/source/iff/disktoc.cc) parses `LVLHDR` + the `TOCENTRYONDISK`
+array, and [`game.cc:249`](../../wfsource/source/game/game.cc) seeks a level via
+`GAMEFILE_LEVELSTART + _desiredLevelNum`. Since `wf-edit` **links the engine**, `DiskTOC` is
+available in-process. So there are two routes for the archive layer:
+
+1. **Port the TOC parse into the Rust `decompile`** — extend it to accept `cd.iff` + a
+   `--level <tag|index>` selector, seeking the chosen LVAS sub-chunk and reusing the single-level
+   path. `DiskTOC` is the byte-format oracle. *Or*
+2. **Reuse `DiskTOC` in-process** — instantiate it on the chosen `cd.iff`, slice the selected
+   level's LVAS bytes out by `{offset, size}`, write them to a temp `.iff`, and feed that to the
+   existing `levcomp decompile`. No Rust archive code needed. **Caveat:** the in-memory
+   `DiskTOC::TOCEntry` retains only `{_offsetInDiskFile, _size}` and **drops the level tag**, and the
+   entry count is private — so index-based slicing works as-is, but a *named* picker needs a small
+   DiskTOC addition to retain tags (or a separate tag-keeping TOC read).
+
+**Level selection UX — no existing editor picker to reuse.** The only level picker today is the
+in-game **cubemenu** shell (writes `EMAILBOX_LEVEL_TO_RUN` → `_desiredLevelNum`); `wf-edit` itself
+takes a single `--leveltree=`/`--level=` path (the `main.cc:869` popup is the *class* picker for Add
+actor, unrelated). So: start with a CLI selector (`--level=cd.iff:L4` or
+`--cd-iff=<path> --level-index=5`), matching the existing `--leveltree=` ergonomics; an in-editor
+"open level from cd.iff" picker (list the TOC tags/names — needs the tag-retaining read above) is a
+Phase-2.5 follow-up, not required for the first cut.
 
 ## Critical files
 
