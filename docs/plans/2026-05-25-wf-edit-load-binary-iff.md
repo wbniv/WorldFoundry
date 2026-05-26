@@ -64,18 +64,24 @@ fragile, but that's an editing concern orthogonal to this load feature.)
 
 ### Phase 1 — bare LVAS `.iff` (a single compiled level)
 
-This is nearly free: `levcomp decompile` already handles a single-level LVAS container directly.
+This is nearly free: `levcomp decompile` already handles a single-level LVAS container directly, and
+the editor already shells out to a Rust tool (`RunLevtreeParse` → `popen("levtree parse …")`,
+[`level_doc.cc:71`](../../engine/wf_edit/level_doc.cc)).
 
-1. **Detect binary vs. text** at load. Sniff the magic (IFF FOURCC / `L4`/`LVAS`) rather than trust
-   the extension — accept `.iff`/`.lvl`. Add a `--level=<path.iff>` arg (or let the existing
-   `--leveltree=`/`--level=` accept a binary and branch on the sniff).
-2. **Decompile to a temp `.lev`** by shelling out to `levcomp decompile` (mirrors the existing
-   `levtree` shell-out in `level_doc.cc`), passing `objects.lc` + the OAD dir. The editor already
-   resolves OADs for the property panel (`OadForClass`), so the schema location is known — reuse
-   that resolution for `--oad-dir`, and point `objects.lc` at
-   [`wfsource/source/oas/objects.lc`](../../wfsource/source/oas/objects.lc).
-3. **Feed the temp `.lev` to the existing pipeline** (`RunLevtreeParse` → `LoadLevelTreeIntoDoc`),
-   unchanged. The Doc, Outliner, property panel, and engine bridge all work as-is.
+1. **Detect binary vs. text** in `LoadLevelTreeIntoDoc` ([`level_doc.cc:244`](../../engine/wf_edit/level_doc.cc)):
+   read the first 4 bytes — a text `.lev` starts with `{`/whitespace, a binary level with an IFF
+   FOURCC (`L0`/`L4`/`GAME`/`LVAS`…). Sniff, don't trust the extension.
+2. **Decompile to a temp `.lev`** via a new `RunLevcompDecompile(in, sel, out_tmp)` mirroring
+   `RunLevtreeParse`/`FindLevtree` ([`level_doc.cc:48`](../../engine/wf_edit/level_doc.cc)) — a
+   `FindLevcomp()` (env `WF_LEVCOMP` → `wftools/levcomp-rs/target/{release,debug}/levcomp` → PATH)
+   then `popen("levcomp decompile <in> <objects.lc> --oad-dir <oad> [--level <sel>] -o <tmp>")`.
+   `objects.lc` = [`wfsource/source/oas/objects.lc`](../../wfsource/source/oas/objects.lc); `--oad-dir`
+   = `wfsource/source/oas` (reuse the property panel's `OadForClass` dir resolution). Write `<tmp>`
+   under `$TMPDIR`/`mkstemp`.
+3. **Feed the temp `.lev` to the existing pipeline** — call `RunLevtreeParse(tmp)` →
+   `LoadLevelTreeIntoDoc`'s existing JSON→Doc body, unchanged. Outliner, property panel, and engine
+   bridge all work as-is. The CLI accepts `--level=<file.iff>` (bare) or `--level=<file.iff>:<TAG>`
+   (a `cd.iff` selector, Phase 2) — split on the last `:` and pass the tag through as `--level`.
 4. **Save goes to a new `.lev`, never back to the binary.** Once the level is in the Doc it's fully
    editable, and `SaveDocToLev` ([`level_save.cc:57`](../../engine/wf_edit/level_save.cc), driven by
    `DoSave`/`save_path` at [`main.cc:273`](../../engine/wf_edit/main.cc)) already `levtree print`s
