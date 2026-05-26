@@ -41,6 +41,29 @@ bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc,
 // inverse of `levtree parse`). Used by level_save's SaveDocToLev.
 bool RunLevtreePrint(const std::string& json, std::string& out_lev);
 
+// One entry of a multi-level `cd.iff` archive's TOC, as the in-editor level
+// picker shows it. `tag` is the FOURCC the engine knows the level by ("L4",
+// "SHEL"); `index` is its TOC position (the decimal `--level` selector);
+// `offset`/`size` are the (sector-granular) byte extent in the archive.
+struct CdIffLevel {
+    int         index = 0;
+    std::string tag;
+    long        offset = 0;
+    long        size   = 0;
+};
+
+// Enumerate the levels in a `cd.iff` archive by shelling out to
+// `levcomp decompile <cd.iff> <objects.lc> --list` and parsing the TOC table.
+// Returns empty on any failure or for a non-archive input (a bare single-level
+// `.iff`, a text `.lev`) — the caller treats empty as "nothing to pick".
+std::vector<CdIffLevel> ListCdIffLevels(const std::string& cd_path);
+
+// True when `leveltree_arg` is a bare multi-level archive that should trigger the
+// startup level picker: no `:<tag>` selector, binary content, and ≥ 2 TOC
+// entries. A text `.lev`, a bare single-level `.iff`, or an explicit
+// `<file>:<tag>` selector all return false (load directly, no picker).
+bool NeedsLevelPicker(const std::string& leveltree_arg);
+
 // Structural editing (the lossless v2 schema makes these save faithfully). Both
 // edit the Doc `content` array; the viewport reflects them on reload (live
 // engine sync is a follow-up). Delete removes content[index]; Duplicate clones

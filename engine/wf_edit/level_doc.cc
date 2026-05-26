@@ -145,6 +145,26 @@ bool IsBinaryLevel(const std::string& path)
     return false;   // empty / all-whitespace
 }
 
+// Split a "<file>:<selector>" argument into base path + cd.iff selector. Returns
+// true (and fills `base`/`sel`) when a selector is present — the suffix carries
+// no '/' (so a ':' inside a directory name isn't mistaken for one) and the base
+// is a readable file. Otherwise returns false with `base` = the whole arg and
+// `sel` empty. Shared by the loader and the picker gate so the syntax lives once.
+bool SplitLevelSelector(const std::string& arg, std::string& base, std::string& sel)
+{
+    base = arg;
+    sel.clear();
+    if (auto colon = arg.find_last_of(':'); colon != std::string::npos) {
+        std::string b = arg.substr(0, colon), s = arg.substr(colon + 1);
+        if (!s.empty() && s.find('/') == std::string::npos && access(b.c_str(), R_OK) == 0) {
+            base = std::move(b);
+            sel  = std::move(s);
+            return true;
+        }
+    }
+    return false;
+}
+
 // ── run `levcomp decompile <in> <objects.lc> --oad-dir <oad> [--level <sel>]
 //    -o <tmp>` → a temp `.lev` (the binary-level decompile pre-step). `sel`
 //    selects a level from a cd.iff archive (FOURCC tag or decimal TOC index);
@@ -329,23 +349,67 @@ bool RunBuildLevel(const std::string& level_name, std::string& out_log)
     return pclose(pipe) == 0;
 }
 
+std::vector<CdIffLevel> ListCdIffLevels(const std::string& cd_path)
+{
+    std::vector<CdIffLevel> out;
+    // `levcomp decompile <cd.iff> <objects.lc> --list` dumps the TOC. The
+    // progress lines go to stderr and the table to stdout; merge both (2>&1) and
+    // pick out the data rows, so we don't depend on which stream a line lands on.
+    const std::string cmd = ShQuote(FindLevcomp()) + " decompile "
+                          + ShQuote(cd_path) + " " + ShQuote(ObjectsLcPath())
+                          + " --list 2>&1";
+    FILE* pipe = popen(cmd.c_str(), "r");
+    if (!pipe) {
+        std::fprintf(stderr, "wf-edit: popen failed for: %s\n", cmd.c_str());
+        return out;
+    }
+    std::string all;
+    std::array<char, 65536> buf;
+    size_t n;
+    while ((n = std::fread(buf.data(), 1, buf.size(), pipe)) > 0)
+        all.append(buf.data(), n);
+    const int rc = pclose(pipe);
+    if (rc != 0) return out;   // not an archive / list failed — nothing to pick
+
+    // Each data row is "  <idx>  <tag>  0x<offset>  <size>" (print_toc in
+    // decompile.rs). The header "  idx  tag  offset  size" and the progress lines
+    // don't parse as `int tag 0xhex int`, so sscanf's field count gates them out.
+    std::size_t pos = 0;
+    while (pos < all.size()) {
+        std::size_t eol = all.find('\n', pos);
+        const std::string line = all.substr(pos, eol == std::string::npos ? std::string::npos : eol - pos);
+        pos = (eol == std::string::npos) ? all.size() : eol + 1;
+
+        int  idx = 0;
+        char tag[16] = {0};
+        long off = 0, sz = 0;
+        if (std::sscanf(line.c_str(), " %d %15s 0x%lx %ld", &idx, tag, &off, &sz) == 4) {
+            CdIffLevel e;
+            e.index  = idx;
+            e.tag    = tag;
+            e.offset = off;
+            e.size   = sz;
+            out.push_back(std::move(e));
+        }
+    }
+    return out;
+}
+
+bool NeedsLevelPicker(const std::string& leveltree_arg)
+{
+    std::string base, sel;
+    if (SplitLevelSelector(leveltree_arg, base, sel)) return false;  // explicit pick
+    if (!IsBinaryLevel(base)) return false;                          // text .lev
+    return ListCdIffLevels(base).size() >= 2;                        // multi-level archive
+}
+
 bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc,
                           std::string* out_save_path)
 {
-    // Split an optional cd.iff selector "<file.iff>:<TAG|index>": only when the
-    // suffix carries no '/' (so a ':' inside a directory name isn't mistaken for
-    // a selector) and the base is a readable file. A text .lev / bare .iff has
-    // no selector and falls through unchanged.
-    std::string in_path = lev_path;
-    std::string sel;
-    if (auto colon = lev_path.find_last_of(':'); colon != std::string::npos) {
-        std::string base = lev_path.substr(0, colon), suffix = lev_path.substr(colon + 1);
-        if (!suffix.empty() && suffix.find('/') == std::string::npos &&
-            access(base.c_str(), R_OK) == 0) {
-            in_path = std::move(base);
-            sel     = std::move(suffix);
-        }
-    }
+    // Split an optional cd.iff selector "<file.iff>:<TAG|index>". A text .lev /
+    // bare .iff has no selector and falls through unchanged.
+    std::string in_path, sel;
+    SplitLevelSelector(lev_path, in_path, sel);
 
     // Binary level (compiled .iff, bare or inside cd.iff)? Decompile it to a temp
     // .lev first, then feed that to the existing levtree → Doc path unchanged.

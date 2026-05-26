@@ -498,6 +498,126 @@ void write_ppm(GLFWwindow* win, const char* path)
     std::printf("wf-edit: screenshot %s (%dx%d)\n", path, w, h);
 }
 
+// ── startup cd.iff level picker ──────────────────────────────────────────────
+// Shown once, at launch, when the editor is given a bare multi-level cd.iff (no
+// `:tag` selector). Lists the archive's levels; the user picks one to load this
+// session — a *startup* choice, NOT runtime level switching (the engine/bridge
+// haven't started yet). Renders pure-ImGui frames on `win` before HALStart.
+// Returns the chosen FOURCC tag via `out_tag` and true; returns false if the user
+// quit (window closed / Quit). `max_frames`/`shot` honour the headless harness;
+// `pick_level` is a headless aid — when non-empty, auto-confirm that tag/index on
+// the first rendered frame (equivalent to clicking that row + Open).
+static bool RunCdIffPickerModal(GLFWwindow* win, const std::string& cd_path,
+                                const std::vector<wfedit::CdIffLevel>& levels,
+                                std::string* out_tag, int max_frames,
+                                const char* shot, const std::string& pick_level)
+{
+    // Default selection: first non-SHEL level (the common "open the level"); else 0.
+    int sel = 0;
+    for (std::size_t i = 0; i < levels.size(); ++i)
+        if (levels[i].tag != "SHEL") { sel = static_cast<int>(i); break; }
+
+    auto resolve_pick = [&](const std::string& p) -> int {       // tag or decimal index
+        for (std::size_t i = 0; i < levels.size(); ++i)
+            if (levels[i].tag == p) return static_cast<int>(i);
+        char* end = nullptr;
+        const long v = std::strtol(p.c_str(), &end, 10);
+        if (end && *end == '\0')
+            for (std::size_t i = 0; i < levels.size(); ++i)
+                if (levels[i].index == static_cast<int>(v)) return static_cast<int>(i);
+        return -1;
+    };
+    auto human_size = [](long b) -> std::string {
+        char buf[32];
+        if (b < 1024)               std::snprintf(buf, sizeof(buf), "%ld B", b);
+        else if (b < 1024 * 1024)   std::snprintf(buf, sizeof(buf), "%.1f KB", b / 1024.0);
+        else                        std::snprintf(buf, sizeof(buf), "%.2f MB", b / (1024.0 * 1024.0));
+        return buf;
+    };
+
+    int  frame = 0;
+    bool confirmed = false, quit = false;
+    for (;;) {
+        if (glfwWindowShouldClose(win)) quit = true;
+        glfwPollEvents();
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        const ImGuiViewport* vp = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x + vp->WorkSize.x * 0.5f,
+                                       vp->WorkPos.y + vp->WorkSize.y * 0.5f),
+                                ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowSize(ImVec2(540, 0), ImGuiCond_Always);
+        ImGui::Begin("Open Level", nullptr,
+                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                     ImGuiWindowFlags_NoCollapse);
+        ImGui::TextUnformatted(("Archive:  " + cd_path).c_str());
+        ImGui::Text("%zu levels in this cd.iff - pick one to open:", levels.size());
+        ImGui::Separator();
+        if (ImGui::BeginTable("toc", 4, ImGuiTableFlags_RowBg |
+                              ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_SizingStretchProp)) {
+            ImGui::TableSetupColumn("#",      ImGuiTableColumnFlags_WidthFixed, 28.0f);
+            ImGui::TableSetupColumn("Tag");
+            ImGui::TableSetupColumn("Size");
+            ImGui::TableSetupColumn("Offset");
+            ImGui::TableHeadersRow();
+            for (int i = 0; i < static_cast<int>(levels.size()); ++i) {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                char label[32];
+                std::snprintf(label, sizeof(label), "%d##row%d", levels[i].index, i);
+                if (ImGui::Selectable(label, i == sel,
+                                      ImGuiSelectableFlags_SpanAllColumns |
+                                      ImGuiSelectableFlags_AllowDoubleClick))
+                    sel = i;
+                if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) { sel = i; confirmed = true; }
+                ImGui::TableSetColumnIndex(1); ImGui::TextUnformatted(levels[i].tag.c_str());
+                ImGui::TableSetColumnIndex(2); ImGui::TextUnformatted(human_size(levels[i].size).c_str());
+                ImGui::TableSetColumnIndex(3); ImGui::Text("0x%06lx", levels[i].offset);
+            }
+            ImGui::EndTable();
+        }
+        ImGui::Separator();
+        if (ImGui::Button("Open", ImVec2(120, 0))) confirmed = true;
+        ImGui::SameLine();
+        if (ImGui::Button("Quit", ImVec2(120, 0))) quit = true;
+        ImGui::End();
+
+        ImGui::Render();
+        int fbw, fbh;
+        glfwGetFramebufferSize(win, &fbw, &fbh);
+        glViewport(0, 0, fbw, fbh);
+        glClearColor(0.10f, 0.10f, 0.11f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ++frame;
+
+        // Headless auto-pick once the modal has rendered (equivalent to Open).
+        if (!confirmed && !quit && !pick_level.empty()) {
+            const int p = resolve_pick(pick_level);
+            if (p >= 0) { sel = p; confirmed = true; }
+            else {
+                std::fprintf(stderr, "wf-edit: --pick-level='%s' not in archive\n", pick_level.c_str());
+                quit = true;
+            }
+        }
+        const bool frame_cap = (max_frames >= 0 && frame >= max_frames);
+        if ((confirmed || quit || frame_cap) && shot) write_ppm(win, shot);   // back buffer, pre-swap
+        glfwSwapBuffers(win);
+
+        if (confirmed || quit) break;
+        if (frame_cap) { quit = true; break; }   // headless, no pick → treat as quit
+    }
+
+    if (confirmed && sel >= 0 && sel < static_cast<int>(levels.size())) {
+        *out_tag = levels[sel].tag;
+        return true;
+    }
+    return false;
+}
+
 // Build phase (EditorBuildCallback): called by WFGame::RunEditor at the TOP of
 // each iteration, BEFORE StepFrame. We poll input, apply any pending Doc edits
 // to the live engine (the bridge drain), and build the ImGui UI — so the
@@ -1200,6 +1320,7 @@ int main(int argc, char** argv)
     const char* shot = nullptr;
     std::string room_id;           // --room=<id>: join a voice+video call room
     std::string ctx_relay_url;     // --relay=<ws://...>: connect to co-edit relay
+    std::string pick_level;        // --pick-level=<tag|index>: headless aid — auto-confirm the cd.iff picker
     // Viewport level (engine LoadLevel) + the .lev parsed into the read-only
     // Y.Doc. Default both to the BLENDER-built snowgoons so the viewport and
     // Outliner show the same source — and so File→"Save + Compile (.iff)"
@@ -1219,6 +1340,8 @@ int main(int argc, char** argv)
             leveltree = argv[i] + 12;
         else if (std::strncmp(argv[i], "--select=", 9) == 0)
             preselect = std::atoi(argv[i] + 9);
+        else if (std::strncmp(argv[i], "--pick-level=", 13) == 0)
+            pick_level = argv[i] + 13;
         else if (std::strncmp(argv[i], "--room=", 7) == 0)
             room_id = argv[i] + 7;
         else if (std::strcmp(argv[i], "--room") == 0 && i + 1 < argc)
@@ -1257,7 +1380,17 @@ int main(int argc, char** argv)
     std::string              save_path;   // where Save writes (.lev in-place, or Save-As for a binary load)
     std::vector<std::string> actor_names;
     std::vector<std::string> actor_eids;
-    if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc, &save_path)) {
+
+    // A bare multi-level cd.iff (no `:tag` selector) defers its load to the
+    // startup picker (run below, after the window/ImGui exist) — the picker needs
+    // a GL window, which must stay AFTER the pre-window headless hooks. So load
+    // early only for an unambiguous source (text .lev / bare .iff / explicit
+    // cd.iff:tag); the picker case loads after the modal resolves a tag.
+    const bool show_picker = wfedit::NeedsLevelPicker(leveltree);
+
+    // Reused by both load sites (early below, and the picker block) to fill the
+    // Outliner state from a populated Doc and seed the save path.
+    auto finish_doc_load = [&]() {
         actor_names = wfedit::ReadActorNames(doc);
         actor_eids  = wfedit::ReadActorEids(doc);
         // Display name = the Save target's basename (clean for a binary load:
@@ -1267,18 +1400,24 @@ int main(int argc, char** argv)
             level_name.erase(0, slash + 1);
         std::printf("wf-edit: Outliner shows %zu actors from the Y.Doc\n",
                     actor_names.size());
-    } else {
-        std::fprintf(stderr, "wf-edit: Y.Doc population failed for %s "
-                             "(Outliner will be empty)\n", leveltree.c_str());
+    };
+
+    if (!show_picker) {
+        if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc, &save_path))
+            finish_doc_load();
+        else
+            std::fprintf(stderr, "wf-edit: Y.Doc population failed for %s "
+                                 "(Outliner will be empty)\n", leveltree.c_str());
     }
 
-    // Native undo/redo — constructed AFTER the initial population so the level
-    // load isn't itself an undo step. Tracks the "content" actor array, so every
-    // Doc::begin() edit (panel / gizmo / add / delete) becomes reversible; remote
-    // applies (Doc::beginRemote) stay out of history. Held for the program
-    // lifetime; ctx.undo points at it.
+    // Native undo/redo — addScope runs AFTER the level is populated so the load
+    // isn't itself an undo step. The UndoManager binds the Doc here; for the
+    // early-load path we register the "content" scope now, for the picker path we
+    // register it after the deferred load (below). Tracks the actor array so every
+    // Doc::begin() edit (panel / gizmo / add / delete) is reversible; remote
+    // applies (Doc::beginRemote) stay out of history. Held for the program lifetime.
     wfcrdt::UndoManager undo(doc);
-    { auto txn = doc.begin(); undo.addScope(txn.array("content")); }
+    if (!show_picker) { auto txn = doc.begin(); undo.addScope(txn.array("content")); }
 
     // 0b. Headless edit proof (env-gated, off by default): WF_EDIT_TEST_SET=
     //     "Field Name|DATA|new text" writes one leaf on the --select=N actor
@@ -1491,6 +1630,39 @@ int main(int argc, char** argv)
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(win, true);
     ImGui_ImplOpenGL3_Init("#version 130");
+
+    // 2b. Startup cd.iff level picker. When launched on a bare multi-level archive
+    //     (no `:tag` selector), show the modal now — the window + ImGui exist but
+    //     the engine hasn't started — and load the chosen level into the Doc. This
+    //     is a startup pick, not runtime switching: nothing is loaded yet, so the
+    //     bridge/engine come up against the picked level like any other launch.
+    if (show_picker) {
+        // NeedsLevelPicker was true ⇒ no valid `:tag` selector ⇒ leveltree is the
+        // bare cd.iff archive path.
+        const std::string& base = leveltree;
+        const std::vector<wfedit::CdIffLevel> levels = wfedit::ListCdIffLevels(base);
+        std::string tag;
+        if (RunCdIffPickerModal(win, base, levels, &tag, max_frames, shot, pick_level)) {
+            std::printf("wf-edit: picker selected %s from %s\n", tag.c_str(), base.c_str());
+            leveltree = base + ":" + tag;
+            if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc, &save_path)) {
+                finish_doc_load();
+                auto txn = doc.begin();
+                undo.addScope(txn.array("content"));   // track AFTER the deferred load
+            } else {
+                std::fprintf(stderr, "wf-edit: Y.Doc population failed for %s\n", leveltree.c_str());
+            }
+        } else {
+            // Quit / window closed with no selection — exit cleanly (no empty session).
+            std::printf("wf-edit: level picker dismissed — nothing selected, exiting\n");
+            ImGui_ImplOpenGL3_Shutdown();
+            ImGui_ImplGlfw_Shutdown();
+            ImGui::DestroyContext();
+            glfwDestroyWindow(win);
+            glfwTerminate();
+            return 0;
+        }
+    }
 
     // 3. Hand the engine our X11/GLX (mesa.cc adopts it via InitWithExistingContext
     //    instead of opening its own window) + register the per-frame callback.
