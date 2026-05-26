@@ -52,9 +52,10 @@ int  gFrameStepSmokeCount = 0;          // >0 = run --frame-step-smoke=N path
 bool gWfmutSmoke          = false;      // true = run --wfmut-smoke path
 bool gWfmutThreadTest     = false;      // true = run --wfmut-thread-test (X5 death-test)
 int  gFrameStepCycles = 1;              // --cycles=N: how many Load/Unload cycles to run
-#if defined(WF_ENABLE_EDITOR)
+// Always defined: rooms.cc/level.cc reference it unconditionally as a runtime
+// guard. Only ever set true under --editor, which is itself WF_ENABLE_EDITOR-gated,
+// so in the game build it stays false (guards behave exactly as before the editor work).
 bool gEditorMode = false;               // --editor: wf-edit drives the engine via RunEditor
-#endif
 #if DO_TEST_CODE
 int  gDebugPrintActors = 0;             // 1 = print idx/mesh/mobility/pos per actor at construction (debug builds only)
 #endif
