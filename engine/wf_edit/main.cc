@@ -827,7 +827,10 @@ bool editor_build(void* p)
     // Gizmo mode (Blender-style): G = move-only, R = rotate-only, pressing the
     // active key again or W returns to combined; S (no Ctrl — Ctrl+S is Save)
     // toggles snap. All gated on !typing so text fields keep their keystrokes.
-    if (!typing && !ImGui::GetIO().KeyCtrl) {
+    // Gated on c->selected >= 0 (like Delete): the gizmo isn't rendered without
+    // a selection, so none of these keys should act — notably S, which otherwise
+    // toggles gizmo_snap into identity.json while nothing is selected.
+    if (!typing && !ImGui::GetIO().KeyCtrl && c->selected >= 0) {
         const ImGuizmo::OPERATION both = ImGuizmo::TRANSLATE | ImGuizmo::ROTATE;
         if (ImGui::IsKeyPressed(ImGuiKey_G, false))
             c->gizmo_op = (c->gizmo_op == ImGuizmo::TRANSLATE) ? both : ImGuizmo::TRANSLATE;
@@ -969,10 +972,13 @@ bool editor_build(void* p)
                 { ImGui::SameLine(); ImGui::TextDisabled("(pick Move/Rotate to snap)"); }
             else if (c->gizmo_snap) {
                 ImGui::SameLine(); ImGui::SetNextItemWidth(64);
-                if (c->gizmo_op == ImGuizmo::ROTATE)
+                if (c->gizmo_op == ImGuizmo::ROTATE) {
                     ImGui::InputFloat("deg", &c->gizmo_snap_rot, 0.0f, 0.0f, "%.0f");
-                else
+                    if (c->gizmo_snap_rot < 1.0f) c->gizmo_snap_rot = 1.0f;
+                } else {
                     ImGui::InputFloat("units", &c->gizmo_snap_trans, 0.0f, 0.0f, "%.2f");
+                    if (c->gizmo_snap_trans < 0.01f) c->gizmo_snap_trans = 0.01f;
+                }
             }
         }
         ImGui::End();

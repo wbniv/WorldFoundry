@@ -1,8 +1,11 @@
 # Code review — wf-edit deep observer, gizmo keys/snap, Markdown chat
 
 **Date:** 2026-05-25
-**Status:** Review complete. No severe bugs found. **Finding #1 (frame ordering) fixed
-2026-05-25** — `UpdateBridgeMap` now runs after `CollabDrain` ([`main.cc:556-575`](../../engine/wf_edit/main.cc)); `wf_edit` rebuilt clean. #2–#5 are minor/latent and left as noted.
+**Status:** Review complete. No severe bugs found. **Findings #1, #3, #4 fixed
+2026-05-25.** #1 (frame ordering) — `UpdateBridgeMap` now runs after `CollabDrain`
+([`main.cc:556-575`](../../engine/wf_edit/main.cc)). #3 (S hotkey selection guard) and
+#4 (snap-step min clamp) — one-line polish, applied. **#2 and #5 remain open**, deferred
+to the collab-hardening and live-reload follow-ups respectively.
 **Reviewer:** Claude (3-angle finder sweep + direct source verification of every load-bearing claim).
 
 ## Scope
@@ -38,8 +41,8 @@ against the source** rather than trusted from the finder — which refuted four 
 |---|----------|----------|-------|
 | 1 | **Medium** | `engine_bridge.cc` ordering vs `main.cc:559-567` | Combined structural+field remote edit mistargets the engine for one frame |
 | 2 | Low-Med | `engine_bridge.cc:284` | A single-field resync re-applies the actor's *whole* transform, fighting an in-progress local gizmo drag |
-| 3 | Low | `main.cc:815` | `S` snap-toggle hotkey fires with no actor selected (unguarded, unlike Delete) |
-| 4 | Low | `main.cc:950,952` | Snap step accepts `0`/negative → snapping silently disabled while the checkbox still reads "on" |
+| 3 | Low ✅ fixed | `main.cc:815` | `S` snap-toggle hotkey fires with no actor selected (unguarded, unlike Delete) |
+| 4 | Low ✅ fixed | `main.cc:950,952` | Snap step accepts `0`/negative → snapping silently disabled while the checkbox still reads "on" |
 | 5 | Low / latent | `engine_bridge.cc:50,245,262` | Bridge state is process-global with no reset path; a future in-session level reload would propagate against a stale map |
 
 ---
@@ -133,6 +136,11 @@ even rendered) still flips `c->gizmo_snap` and that state then persists to `iden
 ([1594-1596](../../engine/wf_edit/main.cc)). Harmless but surprising. Trivial fix: add the same
 selection guard, or accept it as a global preference toggle.
 
+**✅ Fixed 2026-05-25** — added `c->selected >= 0` to the G/R/W/S hotkey block guard
+([`main.cc:830`](../../engine/wf_edit/main.cc)). The gizmo isn't rendered without a selection, so
+none of the mode/snap keys act when nothing is selected, and `gizmo_snap` can no longer be toggled
+into `identity.json` with an empty selection.
+
 > A finder also posited a Ctrl+S-vs-`S` race (release Ctrl a frame before S). **Refuted:**
 > `IsKeyPressed(…, /*repeat=*/false)` fires only on the press edge, and line 790 requires `KeyCtrl`
 > while 807 requires `!KeyCtrl` — mutually exclusive on the same frame.
@@ -151,6 +159,11 @@ reads on while nothing snaps. Optional fix: clamp the input to a small positive 
 > Originally flagged as a NaN-corruption-on-save bug (`fmodf(delta, 0)` → NaN model matrix →
 > `CommitGizmoToDoc` persists NaN to the `.lev`). **Refuted** by reading the vendored ImGuizmo: the
 > `<= FLT_EPSILON` guard makes it a no-op. This is why the snap value never reaches a divide.
+
+**✅ Fixed 2026-05-25** — clamp each stored snap step to a small positive minimum right after its
+`InputFloat` ([`main.cc:973-979`](../../engine/wf_edit/main.cc)): rotation floored at `1.0` deg
+(format is `%.0f`), translation at `0.01` units (format is `%.2f`). Snapping is now always
+effective whenever the "Snap" checkbox reads on, and the clamped value is what persists.
 
 ### 5. Bridge state is process-global with no reset — *Low / latent*
 
@@ -204,5 +217,5 @@ and the C-ABI / lifetime / guard-removal details are right. The one substantive 
 same-frame structural+field SYNC rebuilds before it drains. It self-heals in one frame today, so
 it's a correctness-hygiene fix, not a fire. Findings #2–#5 are minor or latent.
 
-Finding #1's reorder + comment fix is **applied** (2026-05-25). Remaining: #2 and #5 are deferred to
-the collab-hardening / live-reload follow-ups; #3/#4 are one-line polish.
+Findings #1 (reorder + comment), #3 (selection guard), and #4 (snap-step clamp) are **applied**
+(2026-05-25). Remaining: #2 and #5 are deferred to the collab-hardening / live-reload follow-ups.
