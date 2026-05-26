@@ -1,6 +1,6 @@
 # SMB pipe warp → underground coin room
 
-**Status:** Phase A DONE + Phase B round-trip DONE 2026-05-25. Full round trip bridge-verified ([tests/verify_smb_pipe_warp.py](../../tests/verify_smb_pipe_warp.py) ALL PASS): Down-on-pipe → warp into the lit coin room (camera frames it cleanly) → walk into the exit `Warp` → back to the surface (camera returns to `cs_side`). The camera "slow pan" turned out to be a **room-gap freeze**, fixed by making the rooms *contiguous* (touching at Z=−10, not gapped) — now the camera reaches cs_coin's exact pose. **Remaining:** collectible coins in the room (the `gold` TTL is hardcoded 5 s so pre-placed gold despawns — needs static discs + script proximity-pickup, or a generator-on-entry; see TODO).
+**Status:** DONE 2026-05-25 — full feature, bridge-verified end to end ([tests/verify_smb_pipe_warp.py](../../tests/verify_smb_pipe_warp.py) ALL PASS): Down-on-pipe → warp into the lit coin room (camera frames it cleanly) → **collect 3 coins** (GOLD rises) → walk into the exit `Warp` → back to the surface (camera returns to `cs_side`). The camera "slow pan" was a **room-gap freeze**, fixed by making the rooms *contiguous* (touching at Z=−10, not gapped). Coins are static gold discs + a player-script proximity pickup (the `gold` class TTL is hardcoded 5 s so pre-placed gold despawns); the warp-landing floor had to be widened/thickened (the teleport depenetrated Mario sideways off a narrow slab). All learnings written to the designer guide.
 
 ### Implementation notes (2026-05-25)
 

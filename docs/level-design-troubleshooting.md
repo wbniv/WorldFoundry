@@ -1717,3 +1717,34 @@ move** (a CamShot switch pans over its Pan Time, and the per-frame slew clamp is
 — see the camera-slew section in [level-building.md](level-building.md)). Drive the warp with
 `step` for determinism, then **`resume`** and sleep real-time before screenshotting so the
 camera pan to the new shot completes. (Headless GL is low-fps, so allow a few seconds.)
+The same applies to **walking** the player a distance: in `step` mode each frame's `dt` is
+tiny so he barely moves — `resume` + hold the joystick bit (`inject_input` with a long
+`duration_frames`) and poll, instead of one `step` per injected frame.
+
+### A warp-landing floor must be WIDE and THICK
+
+The floor the player warps *onto* needs more margin than a normal walking floor. The teleport
+can land the character a hair inside the slab; Jolt's `CharacterVirtual` then depenetrates him
+— sometimes **sideways**. SMB's first coin-room floor was the usual narrow (Y±1.5) 1-tile-thick
+slab; the warp-landing drifted Mario to Y≈−2.2, off the Y edge, and he fell out the room
+bottom. Make a warp-landing floor wide (Y±5) and thick (≥4 units) so landing jitter can't push
+him off it. (Adding actors elsewhere — e.g. coins → more Jolt static bodies → slower broadphase
+→ bigger `dt` — makes the landing penetrate more, so don't tune this to the bare minimum.)
+
+### Collectible coins in a room (the `gold` TTL blocks pre-placing)
+
+`gold` coins can't be pre-placed: `Gold`'s despawn TTL is a hardcoded `kGoldTTL = 5.0f`
+([gold.cc](../wfsource/source/game/gold.cc), no OAD field) stamped at construction, so a
+coin placed at level-load vanishes 5 s in — long before the player reaches a warp room. Two
+working alternatives:
+
+- **Static disc + player-script proximity pickup** (used by the SMB coin room): a `statplat`
+  gold disc with `Visibility Mailbox = <per-coin global mb>` (seeded to 1 once by the player
+  script, like the lives seed), and the player script awards `GOLD` and flips that mailbox to
+  0 (hides the coin) when close. Gate the proximity on **both** X *and* a player-Z band — the
+  coin room shares the surface's X range, so the Z test (`|z − coinRoomFloorZ|` small) is what
+  stops a surface coin at the same X from firing. **Float the discs clear above the player's
+  head** — a collidable `statplat` at body height shoves him (and can push him through a thin
+  floor); pickup uses the *player's* Z, not the coin's, so coin height is free.
+- **Generator-on-entry**: an ActBox triggers a `Generator` (Object To Throw = a coin template)
+  while the player is in the room, so coins spawn fresh (collectible within their 5 s).

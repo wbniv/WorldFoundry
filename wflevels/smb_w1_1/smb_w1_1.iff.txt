@@ -45,9 +45,12 @@
 		$3001001l { 'STR' "cr_floor.iff" }  // IFF RM1 001:001
 		$3001002l { 'STR' "cr_wall_l.iff" }  // IFF RM1 001:002
 		$3001003l { 'STR' "cr_wall_r.iff" }  // IFF RM1 001:003
-		$3001004l { 'STR' "abor_coin.iff" }  // IFF RM1 001:004
-		$3001005l { 'STR' "exit_pipe.iff" }  // IFF RM1 001:005
-		$3001006l { 'STR' "pipe_exit_warp.iff" }  // IFF RM1 001:006
+		$3001004l { 'STR' "cr_coin_0.iff" }  // IFF RM1 001:004
+		$3001005l { 'STR' "cr_coin_1.iff" }  // IFF RM1 001:005
+		$3001006l { 'STR' "cr_coin_2.iff" }  // IFF RM1 001:006
+		$3001007l { 'STR' "abor_coin.iff" }  // IFF RM1 001:007
+		$3001008l { 'STR' "exit_pipe.iff" }  // IFF RM1 001:008
+		$3001009l { 'STR' "pipe_exit_warp.iff" }  // IFF RM1 001:009
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "smb_w1_1.lvl" ] }
@@ -92,9 +95,12 @@
 		{ 'ASS' $3001001l [ "cr_floor.iff" ] }  // IFF RM1 001:001
 		{ 'ASS' $3001002l [ "cr_wall_l.iff" ] }  // IFF RM1 001:002
 		{ 'ASS' $3001003l [ "cr_wall_r.iff" ] }  // IFF RM1 001:003
-		{ 'ASS' $3001004l [ "abor_coin.iff" ] }  // IFF RM1 001:004
-		{ 'ASS' $3001005l [ "exit_pipe.iff" ] }  // IFF RM1 001:005
-		{ 'ASS' $3001006l [ "pipe_exit_warp.iff" ] }  // IFF RM1 001:006
+		{ 'ASS' $3001004l [ "cr_coin_0.iff" ] }  // IFF RM1 001:004
+		{ 'ASS' $3001005l [ "cr_coin_1.iff" ] }  // IFF RM1 001:005
+		{ 'ASS' $3001006l [ "cr_coin_2.iff" ] }  // IFF RM1 001:006
+		{ 'ASS' $3001007l [ "abor_coin.iff" ] }  // IFF RM1 001:007
+		{ 'ASS' $3001008l [ "exit_pipe.iff" ] }  // IFF RM1 001:008
+		{ 'ASS' $3001009l [ "pipe_exit_warp.iff" ] }  // IFF RM1 001:009
 	}
 	{ 'ALGN' .align(2048) }
 }

@@ -85,6 +85,7 @@ SCENE_MID_X = (GROUND_X0 + GROUND_X1) / 2
 # the W1-2 "unload surface / load underground" behaviour). The point is to prove
 # WF's room-to-room transition path. See docs/plans/2026-05-25-smb-pipe-warp-coin-room.md.
 SMB_AT_PIPE  = 1809               # INDEXOF_SMB_AT_PIPE (mailbox.inc) — entry ActBox sets 1 on the pipe mouth
+SMB_COIN_0, SMB_COIN_1, SMB_COIN_2 = 1811, 1812, 1813   # coin-room coin visibility mailboxes (mailbox.inc)
 ENTRY_PIPE_X = 12 * T             # = 18, on ground_0 between qblock0 (x12) and qblock1 (x21)
 CR_FLOOR_TOP = -48.0              # coin-room floor top
 CR_X0, CR_X1 = 0.0, 18.0         # coin-room play span (12 tiles)
@@ -793,6 +794,30 @@ if player:
         "0 INDEXOF_ZSPEED write-mailbox\n"
         "  then\n"
         "then\n"
+        # coin-room coins: seed visible once, then proximity pickup. The Z test
+        # (player z near -46) disambiguates the coin room from the surface, where
+        # the same X range exists but z ~ 1.5. dup* = squared distance (no abs).
+        "INDEXOF_SMB_COIN_INIT read-mailbox not if\n"
+        "  1 INDEXOF_SMB_COIN_0 write-mailbox 1 INDEXOF_SMB_COIN_1 write-mailbox "
+        "1 INDEXOF_SMB_COIN_2 write-mailbox 1 INDEXOF_SMB_COIN_INIT write-mailbox\n"
+        "then\n"
+        "INDEXOF_Z_POS read-mailbox 46 + dup * 9.0 < if\n"          # in the coin room (|z+46| < 3)
+        "  INDEXOF_SMB_COIN_0 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 6 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_0 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_1 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 8 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_1 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_2 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 10 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_2 write-mailbox\n"
+        "    then\n  then\n"
+        "then\n"
     )
 
     mario_mesh = _build_mario()
@@ -1164,12 +1189,35 @@ es['wf_Activated By Actor']      = 'Player'
 es['wf_Activated Actor Mailbox'] = 4005      # scratch (must be >=2; default 0 aborts)
 
 # Coin-room floor + side walls (contain Mario; exit pipe gap comes in Phase B).
-add_statplat('cr_floor',  CR_X0 - 1, -GROUND_Y, CR_FLOOR_TOP - T,
-             CR_X1 + 1,    GROUND_Y, CR_FLOOR_TOP,        CR_FLOOR_MAT)
+# WIDE in Y (±5) and THICK in Z (4 units) on purpose: the warp-landing can penetrate
+# the floor slightly and Jolt then depenetrates the character *sideways* (it drifted to
+# Y≈-2.2 and fell off a Y±1.5 floor through the room bottom). A wide+thick slab keeps
+# him on it regardless of landing jitter. (Surface ground is narrow because Mario never
+# warp-lands there.)
+add_statplat('cr_floor',  CR_X0 - 1, -5.0, CR_FLOOR_TOP - 4.0,
+             CR_X1 + 1,    5.0, CR_FLOOR_TOP,        CR_FLOOR_MAT)
 add_statplat('cr_wall_l', CR_X0 - 1, -GROUND_Y, CR_FLOOR_TOP,
              CR_X0,        GROUND_Y, CR_FLOOR_TOP + 6*T,  CR_FLOOR_MAT)
 add_statplat('cr_wall_r', CR_X1,     -GROUND_Y, CR_FLOOR_TOP,
              CR_X1 + 1,    GROUND_Y, CR_FLOOR_TOP + 6*T,  CR_FLOOR_MAT)
+
+# Collectible coins: static gold discs the player collects by proximity (the player
+# script awards GOLD and flips each coin's visibility mailbox off). Pre-placed `gold`
+# actors can't be used — the gold class TTL is hardcoded 5 s so they'd despawn before
+# Mario arrives (see TODO). Mario warps in at X=3 and walks RIGHT past these to the
+# exit warp (X=12), collecting them en route.
+COIN_DISC_MAT = make_mat('smb_coinroom_coin', (1.0, 0.84, 0.0))
+CR_COIN_XS = [6.0, 8.0, 10.0]
+# Float the coins ABOVE Mario's head (feet -48, ~1.8 tall → top ~-46.2). The coins are
+# collidable statplats; if they overlap his body he bumps them and gets shoved through
+# the floor. At -44 there's a clear ~1.8 gap. Pickup is X-proximity + a player-Z room
+# gate (uses the PLAYER's Z, not the coin's), so coin height doesn't affect collection.
+CR_COIN_Z  = CR_FLOOR_TOP + 4.0          # -44, floating clear above Mario
+CR_COIN_MB = [SMB_COIN_0, SMB_COIN_1, SMB_COIN_2]
+for _ci, _cxv in enumerate(CR_COIN_XS):
+    _coin = add_statplat(f'cr_coin_{_ci}', _cxv - 0.3, -0.25, CR_COIN_Z - 0.4,
+                         _cxv + 0.3,  0.25, CR_COIN_Z + 0.4, COIN_DISC_MAT)
+    _coin['wf_Visibility Mailbox'] = CR_COIN_MB[_ci]   # seeded to 1, set to 0 on pickup
 
 
 def _make_target(name, loc):

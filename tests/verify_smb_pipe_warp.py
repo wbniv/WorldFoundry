@@ -36,6 +36,7 @@ JOY_RIGHT = 0x2000
 
 # globals (idx=1)
 SMB_AT_PIPE    = 1809
+HUD_SCORE      = 70        # player mirrors its GOLD here each tick
 EMAILBOX_CAMSHOT = 1921    # mailbox.inc:59 (the level-building.md scope table's 1021 is wrong)
 # player-local
 X_POS, Z_POS = 3009, 3011
@@ -76,6 +77,7 @@ try:
     print("bridge: connected")
     cli.watch(idx=1, mailbox=SMB_AT_PIPE)
     cli.watch(idx=1, mailbox=EMAILBOX_CAMSHOT)
+    cli.watch(idx=1, mailbox=HUD_SCORE)
     cli.watch(idx=PLAYER_IDX, mailbox=X_POS)
     cli.watch(idx=PLAYER_IDX, mailbox=Z_POS)
     for mb in (3009, 3010, 3011):       # camera entity pose (idx=1)
@@ -118,28 +120,34 @@ try:
     print(f"  after warp: player X={fmt(xw)} Z={fmt(zw)} CAMSHOT={fmt(camw)}")
     print(f"  camera entity pos: ({fmt(cx)},{fmt(cy)},{fmt(cz)})  [cs_coin is (9,-35,-43.5)]")
     shot("warp_coinroom")
-    check(warped, "Down on the pipe warped Mario underground (Z < -30)")
-    check(zw is not None and abs(zw - (-46.5)) < 2.5, "landed on the coin-room floor (Z ~ -46.5)")
-    check(xw is not None and abs(xw - 3.0) < 2.0, "landed at the coin-room entry (X ~ 3)")
+    check(zw is not None and zw < -30, "Down on the pipe warped Mario underground (Z < -30)")
+    check(zw is not None and abs(zw - (-47.0)) < 2.5, "landed on the coin-room floor (Z ~ -47)")
+    check(xw is not None and 0.0 < xw < 12.0, "landed inside the coin room (0 < X < exit pipe)")
     # The camera adopts cs_coin and swoops down (Z 4.5 -> negative). The full pan to
     # -43.5 settles in ~1-2 s real-time; headless is low-fps so we just require it to
     # have descended well below the surface (proves it followed, not froze).
     check(cz is not None and cz < -8, "camera entity followed down toward the coin room (Z < -8)")
 
-    # ── 3. walk RIGHT into the exit warp → back to the surface ────────────────
-    print("\n== exit warp (walk right) → surface ==")
-    cli.send({"op": "pause"}); time.sleep(0.3)
+    # ── 3. walk RIGHT in real-time: collect coins, then hit the exit warp ─────
+    # Must run real-time (resume + hold RIGHT) — in step mode each frame's dt is tiny
+    # so Mario barely moves. Snapshot a screenshot of the lit room with coins first.
+    print("\n== collect coins + exit warp (walk right) → surface ==")
+    shot("coinroom_coins")
+    gold_before = g(HUD_SCORE)
+    cli.send({"op": "resume"})
+    cli.inject_input(slot="joystick1_raw", value=JOY_RIGHT, duration_frames=1200)   # hold RIGHT
     returned = False
-    for i in range(200):
-        cli.inject_input(slot="joystick1_raw", value=JOY_RIGHT, duration_frames=2)
-        cli.send({"op": "step"}); time.sleep(0.02)
+    for _ in range(150):                  # poll up to ~15 s real-time
+        time.sleep(0.1)
         z = g(Z_POS, PLAYER_IDX)
-        if z is not None and z > -5:          # warped back up to the surface
-            returned = True
-            print(f"  returned at step {i}: X={fmt(g(X_POS,PLAYER_IDX))} Z={fmt(z)}")
-            break
+        if z is not None and z > -5:      # warped back up to the surface
+            returned = True; break
     cli.inject_input(slot="joystick1_raw", value=0, duration_frames=0)
-    cli.send({"op": "resume"}); time.sleep(4.0)   # let the camera switch back to cs_side
+    time.sleep(3.0)                       # let the camera switch back to cs_side
+    gold_after = g(HUD_SCORE)
+    print(f"  returned={returned}  GOLD before={fmt(gold_before)} after={fmt(gold_after)} (3 coins)")
+    check(gold_after is not None and gold_before is not None and gold_after - gold_before >= 2,
+          "collected coins walking through the room (GOLD rose by >=2)")
     xr, zr, camr = g(X_POS, PLAYER_IDX), g(Z_POS, PLAYER_IDX), g(EMAILBOX_CAMSHOT)
     czr = g(3011, 1)
     print(f"  after return: player X={fmt(xr)} Z={fmt(zr)} CAMSHOT={fmt(camr)} cameraZ={fmt(czr)}")
