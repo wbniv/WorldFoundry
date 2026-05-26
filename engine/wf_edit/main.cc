@@ -47,9 +47,12 @@
 #include "ws_client.h"
 #include "gizmo.h"
 
+#include <algorithm>
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <optional>
 #include <string>
@@ -227,6 +230,19 @@ struct EditorCtx {
     bool        binary_source = false;
     std::string toast;
     int         toast_frames = 0;
+
+    // File→Open (#2): re-exec the editor into another level. A fresh process
+    // re-runs the whole startup path (incl. the cd.iff picker for a bare archive),
+    // so we sidestep any in-place engine/bridge reset. exe_path is argv[0] (what we
+    // relaunch); show_open drives the browser modal; browse_dir is the dir it lists;
+    // browse_sel is the highlighted row; pending_open holds a pick awaiting the
+    // discard-changes confirm; open_pick is a headless aid that auto-opens a path.
+    std::string exe_path;
+    bool        show_open = false;
+    std::string browse_dir;
+    int         browse_sel = -1;
+    std::string pending_open;
+    std::string open_pick;
 
     // M2: no longer set by delete/duplicate — the stable map (InitBridgeMap +
     // BridgeNotifyDelete/Duplicate) keeps propagation live through structural
@@ -622,6 +638,145 @@ static bool RunCdIffPickerModal(GLFWwindow* win, const std::string& cd_path,
     return false;
 }
 
+// File→Open: relaunch the editor pointed at `leveltree`, preserving the collab
+// flags (and any headless --screenshot/--frames so a re-exec can still be driven
+// without a window). A fresh process re-runs the whole startup path — including
+// the cd.iff picker when `leveltree` is a bare multi-level archive — so we sidestep
+// any in-place engine/bridge reset. execvp replaces this image; the OS reclaims the
+// GL context + X resources, so no graceful teardown is needed. Returns only on
+// failure (the image was not replaced).
+static void ReExecWithLevel(const EditorCtx* c, const std::string& leveltree)
+{
+    std::vector<std::string> args = { c->exe_path, "--leveltree=" + leveltree };
+    if (!c->room_id.empty())   args.push_back("--room=" + c->room_id);
+    if (!c->relay_url.empty()) args.push_back("--relay=" + c->relay_url);
+    if (c->shot)               { args.emplace_back("--screenshot"); args.emplace_back(c->shot); }
+    if (c->max_frames >= 0)    { args.emplace_back("--frames");
+                                 args.push_back(std::to_string(c->max_frames)); }
+    std::vector<char*> argv;
+    argv.reserve(args.size() + 1);
+    for (auto& s : args) argv.push_back(const_cast<char*>(s.c_str()));
+    argv.push_back(nullptr);
+    std::printf("wf-edit: re-exec into %s\n", leveltree.c_str());
+    std::fflush(nullptr);
+    execvp(c->exe_path.c_str(), argv.data());
+    std::fprintf(stderr, "wf-edit: re-exec '%s' failed: %s\n",
+                 c->exe_path.c_str(), std::strerror(errno));
+}
+
+// The directory File→Open lists first: prefer wflevels/ (where shipped levels
+// live), else the current working directory.
+static std::string DefaultBrowseDir()
+{
+    std::error_code ec;
+    namespace fs = std::filesystem;
+    if (fs::is_directory("wflevels", ec))
+        return fs::weakly_canonical("wflevels", ec).string();
+    return fs::current_path(ec).string();
+}
+
+// Minimal hand-rolled ImGui file browser for File→Open (no vendored dialog). Lists
+// subdirs + .iff/.lev/.lvl files under c->browse_dir; double-click a dir to descend
+// (".." to go up), double-click a file or hit Open to load it. Loading re-execs into
+// the pick, which discards the live Doc — so when there are undoable edits we first
+// require a "discard changes?" confirm (rendered inline to avoid nested popups).
+static void RunOpenBrowserModal(EditorCtx* c)
+{
+    namespace fs = std::filesystem;
+    if (c->show_open && !ImGui::IsPopupOpen("Open Level"))
+        ImGui::OpenPopup("Open Level");
+    if (!ImGui::BeginPopupModal("Open Level", &c->show_open,
+                                ImGuiWindowFlags_AlwaysAutoResize))
+        return;
+
+    // Inline discard-changes confirm: a pending pick is held until the user OKs
+    // losing the current Doc. Replaces the browser body while it's pending.
+    if (!c->pending_open.empty()) {
+        ImGui::TextUnformatted("Unsaved edits in this session will be lost.");
+        ImGui::TextUnformatted(("Open " + c->pending_open + " anyway?").c_str());
+        ImGui::Separator();
+        if (ImGui::Button("Discard & Open", ImVec2(140, 0)))
+            ReExecWithLevel(c, c->pending_open);          // does not return on success
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(110, 0))) {
+            c->pending_open.clear();
+            c->show_open = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+        return;
+    }
+
+    ImGui::TextUnformatted(("Dir:  " + c->browse_dir).c_str());
+    ImGui::Separator();
+
+    // Rebuild the listing each frame: ".." (unless at filesystem root), then dirs,
+    // then level files, each group sorted. Dotfiles skipped.
+    std::error_code ec;
+    fs::path dir(c->browse_dir);
+    std::vector<std::pair<std::string, bool>> entries;   // (name, is_dir)
+    if (dir.has_parent_path() && dir != dir.root_path())
+        entries.emplace_back("..", true);
+    std::vector<std::string> dirs, files;
+    for (const auto& e :
+         fs::directory_iterator(dir, fs::directory_options::skip_permission_denied, ec)) {
+        const std::string name = e.path().filename().string();
+        if (name.empty() || name[0] == '.') continue;
+        if (e.is_directory(ec)) { dirs.push_back(name); continue; }
+        const std::string ext = e.path().extension().string();
+        if (ext == ".iff" || ext == ".lev" || ext == ".lvl") files.push_back(name);
+    }
+    std::sort(dirs.begin(), dirs.end());
+    std::sort(files.begin(), files.end());
+    for (auto& d : dirs)  entries.emplace_back(d, true);
+    for (auto& f : files) entries.emplace_back(f, false);
+
+    std::string chosen;          // set when a file is double-clicked / Open pressed
+    std::string descend;         // set when a dir is double-clicked
+    if (ImGui::BeginListBox("##entries", ImVec2(480, 300))) {
+        for (int i = 0; i < static_cast<int>(entries.size()); ++i) {
+            const bool is_dir = entries[i].second;
+            const std::string label =
+                (is_dir ? "[dir] " : "      ") + entries[i].first + "##e" + std::to_string(i);
+            if (ImGui::Selectable(label.c_str(), c->browse_sel == i,
+                                  ImGuiSelectableFlags_AllowDoubleClick)) {
+                c->browse_sel = i;
+                if (ImGui::IsMouseDoubleClicked(0)) {
+                    if (is_dir) descend = entries[i].first;
+                    else        chosen  = (dir / entries[i].first).string();
+                }
+            }
+        }
+        ImGui::EndListBox();
+    }
+
+    ImGui::Separator();
+    const bool file_sel = c->browse_sel >= 0 &&
+                          c->browse_sel < static_cast<int>(entries.size()) &&
+                          !entries[c->browse_sel].second;
+    ImGui::BeginDisabled(!file_sel);
+    if (ImGui::Button("Open", ImVec2(110, 0)))
+        chosen = (dir / entries[c->browse_sel].first).string();
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    if (ImGui::Button("Cancel", ImVec2(110, 0))) {
+        c->show_open = false;
+        ImGui::CloseCurrentPopup();
+    }
+
+    if (!descend.empty()) {
+        c->browse_dir = fs::weakly_canonical(
+            descend == ".." ? dir.parent_path() : dir / descend, ec).string();
+        c->browse_sel = -1;
+    } else if (!chosen.empty()) {
+        if ((c->undo && c->undo->canUndo()) || c->structural_dirty)
+            c->pending_open = chosen;                     // route through the confirm
+        else
+            ReExecWithLevel(c, chosen);                   // does not return on success
+    }
+    ImGui::EndPopup();
+}
+
 // Build phase (EditorBuildCallback): called by WFGame::RunEditor at the TOP of
 // each iteration, BEFORE StepFrame. We poll input, apply any pending Doc edits
 // to the live engine (the bridge drain), and build the ImGui UI — so the
@@ -639,6 +794,15 @@ bool editor_build(void* p)
     // NewFrame) so the quit path never opens an ImGui frame present won't close.
     if (c->max_frames >= 0 && c->frame >= c->max_frames)
         return false;
+
+    // --open-pick=<path>: headless aid — re-exec into the path on the first build,
+    // exercising the same running-editor re-exec a File→Open click would (engine is
+    // already up here). Not propagated to the child, so it fires exactly once.
+    if (!c->open_pick.empty()) {
+        const std::string p = c->open_pick;
+        c->open_pick.clear();
+        ReExecWithLevel(c, p);   // does not return on success
+    }
 
     // Follow window resize. WFInitGL set glViewport + projection ONCE from the
     // initial size and nothing re-applies them per frame (the engine's
@@ -919,6 +1083,13 @@ bool editor_build(void* p)
 
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
+            if (ImGui::MenuItem("Open Level…", "Ctrl+O")) {
+                if (c->browse_dir.empty()) c->browse_dir = DefaultBrowseDir();
+                c->browse_sel = -1;
+                c->pending_open.clear();
+                c->show_open = true;
+            }
+            ImGui::Separator();
             // A binary-loaded session is read-only at the source, so Save writes a
             // fresh .lev (save_path was redirected) — label it Save As to match.
             if (ImGui::MenuItem(c->binary_source ? "Save As .lev" : "Save Level", "Ctrl+S"))
@@ -948,10 +1119,20 @@ bool editor_build(void* p)
         ImGui::EndMainMenuBar();
     }
 
+    // File→Open browser (renders only while c->show_open). Driven by the menu item,
+    // Ctrl+O, or --open / --open-pick at startup.
+    RunOpenBrowserModal(c);
+
     // Keyboard shortcuts (when no text widget is capturing the keypress).
     const bool typing = ImGui::GetIO().WantTextInput;
     if (!typing && ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S, false))
         DoSave(c);
+    if (!typing && ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_O, false)) {
+        if (c->browse_dir.empty()) c->browse_dir = DefaultBrowseDir();
+        c->browse_sel = -1;
+        c->pending_open.clear();
+        c->show_open = true;
+    }
     if (!typing && c->selected >= 0 && ImGui::IsKeyPressed(ImGuiKey_Delete, false))
         DoDelete(c);
     // Ctrl+Z = undo; Ctrl+Shift+Z and Ctrl+Y = redo. Gate plain-Z on !Shift so a
@@ -1331,6 +1512,8 @@ int main(int argc, char** argv)
     std::string room_id;           // --room=<id>: join a voice+video call room
     std::string ctx_relay_url;     // --relay=<ws://...>: connect to co-edit relay
     std::string pick_level;        // --pick-level=<tag|index>: headless aid — auto-confirm the cd.iff picker
+    bool        open_at_start = false;  // --open: show the File→Open browser at startup
+    std::string open_pick;         // --open-pick=<path>: headless aid — re-exec into <path> on first frame
     // Viewport level (engine LoadLevel) + the .lev parsed into the read-only
     // Y.Doc. Default both to the BLENDER-built snowgoons so the viewport and
     // Outliner show the same source — and so File→"Save + Compile (.iff)"
@@ -1353,6 +1536,10 @@ int main(int argc, char** argv)
             preselect = std::atoi(argv[i] + 9);
         else if (std::strncmp(argv[i], "--pick-level=", 13) == 0)
             pick_level = argv[i] + 13;
+        else if (std::strcmp(argv[i], "--open") == 0)
+            open_at_start = true;
+        else if (std::strncmp(argv[i], "--open-pick=", 12) == 0)
+            open_pick = argv[i] + 12;
         else if (std::strncmp(argv[i], "--room=", 7) == 0)
             room_id = argv[i] + 7;
         else if (std::strcmp(argv[i], "--room") == 0 && i + 1 < argc)
@@ -1719,6 +1906,11 @@ int main(int argc, char** argv)
     // Binary source ⇔ save was redirected to a fresh .lev (a text .lev saves
     // in-place, so save_path == leveltree). Drives the Save/Save-As menu label.
     ctx.binary_source = !save_path.empty() && save_path != leveltree;
+    // File→Open (#2): exe_path is what we re-exec; --open opens the browser at
+    // startup, --open-pick re-execs into a path on the first build frame.
+    ctx.exe_path    = argv[0];
+    ctx.open_pick   = std::move(open_pick);
+    if (open_at_start) { ctx.show_open = true; ctx.browse_dir = DefaultBrowseDir(); }
     ctx.room_id     = room_id;
     ctx.gizmo_snap       = identity.gizmo_snap;        // restore persisted snap prefs
     ctx.gizmo_snap_trans = identity.gizmo_snap_trans;
