@@ -20,6 +20,7 @@ Then enable "World Foundry" in Edit > Preferences > Add-ons.
 
 import sys
 import os
+import functools
 
 bl_info = {
     "name":        "World Foundry",
@@ -93,10 +94,10 @@ class WF_AddonPreferences(bpy.types.AddonPreferences):
 
 # Mapping from Blender custom property key → engine "block.field" key.
 # Mirrors the engine kPropMap (engine/mutation/kpropmap_generated.inc) — keep in
-# sync. Only numeric fields belong here: the depsgraph handler coerces values
-# with float(), so string/enum-label fields (e.g. common.Script — which wfmut
-# rejects anyway — and enum fields stored as labels) are deliberately excluded.
-# Live enum→index translation is a tracked follow-up (see TODO.md).
+# sync. Numeric fields push as-is; enum fields (Mobility, MovementClass,
+# ModelType) push as their OAD option index (see _coerce_prop_value). The
+# unwritable string field common.Script is deliberately excluded (wfmut rejects
+# it).
 _ENGINE_PROP_KEY: dict[str, str] = {
     "wf_hp":                     "common.hp",
     "wf_NumberOfLocalMailboxes": "common.NumberOfLocalMailboxes",
@@ -113,6 +114,43 @@ _ENGINE_PROP_KEY: dict[str, str] = {
     "wf_AnimationMailbox":       "mesh.AnimationMailbox",
     "wf_VisibilityMailbox":      "mesh.VisibilityMailbox",
 }
+
+
+@functools.lru_cache(maxsize=64)
+def _enum_items_by_propkey(resolved_schema_path: str) -> dict[str, tuple]:
+    """{wf_<field> : (option labels …)} for every Enum field in a schema.
+
+    Keyed on the resolved schema path so the handler doesn't re-parse the schema
+    on every depsgraph tick (`_get_schema` is uncached). Schemas are immutable
+    files within a session, so caching is safe.
+    """
+    schema = wf_core.load_schema(resolved_schema_path)
+    return {
+        operators._prop_key(f.key): tuple(f.enum_items())
+        for f in schema.fields()
+        if f.kind == "Enum"
+    }
+
+
+def _coerce_prop_value(current, enum_items):
+    """Blender property value → number for scene:set_prop, or None to skip.
+
+    Mirrors wf-edit's TranslateField (engine_bridge.cc): prefer a numeric value
+    (covers numeric-string enums like MovementClass='17'); otherwise resolve an
+    enum label to its option index — `enum_items` comes from the same wf_core
+    schema as the panel, so the index equals the engine's enum value. An unknown
+    label (stale option) returns None so the caller skips it.
+    """
+    try:
+        return float(current)
+    except (TypeError, ValueError):
+        pass
+    if enum_items and isinstance(current, str):
+        try:
+            return float(enum_items.index(current))
+        except ValueError:
+            return None
+    return None
 
 
 def _depsgraph_handler(scene, depsgraph):
@@ -134,6 +172,13 @@ def _depsgraph_handler(scene, depsgraph):
         if update.is_updated_transform:
             p = obj.location
             bridge.set_transform(idx, [p.x, p.y, p.z])
+        # Enum option lists for this object's schema (cached), so enum-label
+        # fields can be translated to their engine index.
+        try:
+            enum_map = _enum_items_by_propkey(
+                operators._resolve_schema_path(obj["wf_schema_path"]))
+        except Exception:
+            enum_map = {}
         # Detect WF property changes by comparing against per-object snapshot.
         snap = bridge.prop_snapshots.setdefault(obj.name, {})
         for prop_key, engine_key in _ENGINE_PROP_KEY.items():
@@ -142,12 +187,10 @@ def _depsgraph_handler(scene, depsgraph):
                 continue
             if snap.get(prop_key) != current:
                 snap[prop_key] = current
-                try:
-                    value = float(current)
-                except (TypeError, ValueError):
-                    # Enum-label / string-valued field: not pushable until live
-                    # enum→index translation lands (tracked in TODO.md). Snapshot
-                    # is already updated, so we don't retry every depsgraph tick.
+                value = _coerce_prop_value(current, enum_map.get(prop_key))
+                if value is None:
+                    # Unresolvable (non-numeric non-enum, or stale enum label).
+                    # Snapshot is updated so we don't retry every depsgraph tick.
                     continue
                 bridge.set_prop(idx, engine_key, value)
 

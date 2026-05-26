@@ -70,11 +70,20 @@ def run_inner() -> None:
     # read engine broadcasts over a separate plain observer socket instead.
     bpy.app.timers.register = lambda *a, **k: None  # type: ignore[assignment]
 
-    addon = Path(os.path.expanduser("~/.config/blender/4.0/scripts/addons/wf_blender"))
-    sys.path.insert(0, str(addon))
-    sys.path.insert(0, str(REPO / "wftools" / "wf_blender"))
-    import debug_bridge
-    import export_level
+    # Import the installed addon package (its dir holds wf_core.so + symlinks to
+    # the working tree). Going through the package — not loose top-level modules
+    # — means wf_blender._depsgraph_handler and this driver share the SAME
+    # debug_bridge singleton (a second `import debug_bridge` would be a distinct
+    # module with its own bridge).
+    addons = Path(os.path.expanduser("~/.config/blender/4.0/scripts/addons"))
+    sys.path.insert(0, str(addons))
+    import wf_blender
+    debug_bridge = wf_blender.debug_bridge
+    export_level = wf_blender.export_level
+    try:
+        wf_blender.register()  # registers scene.wf_bridge_sync_transforms (True)
+    except Exception:
+        pass  # already registered
 
     ctx = bpy.context
 
@@ -179,6 +188,52 @@ def run_inner() -> None:
             break
     check(f"set_transform moved engine actor idx 1 ('{name1}') to {target}",
           moved is not None, f"engine now at {positions.get(1)}")
+
+    # 5b. Enum live-push: label → OAD option index (the feature under test).
+    coerce = wf_blender._coerce_prop_value
+    check("_coerce_prop_value: numeric passthrough", coerce(75, None) == 75.0)
+    check("_coerce_prop_value: numeric-string enum (MovementClass='17')",
+          coerce("17", None) == 17.0)
+    check("_coerce_prop_value: unknown enum label → None (skipped)",
+          coerce("NoSuchOption", ("A", "B")) is None)
+
+    enum_map = wf_blender._enum_items_by_propkey(
+        wf_blender.operators._resolve_schema_path(obj1["wf_schema_path"]))
+    mob_opts = enum_map.get("wf_Mobility")
+    check("schema exposes Mobility enum options", bool(mob_opts) and len(mob_opts) >= 2,
+          f"options={mob_opts}")
+
+    if mob_opts and len(mob_opts) >= 2:
+        cur = obj1.get("wf_Mobility")
+        new_label = next((o for o in mob_opts if o != cur), mob_opts[-1])
+        want_idx = float(mob_opts.index(new_label))
+        check("_coerce_prop_value: Mobility label → its option index",
+              coerce(new_label, mob_opts) == want_idx, f"{new_label!r} → {want_idx}")
+
+        # Drive the REAL handler with a minimal fake depsgraph and spy the push.
+        sent = []
+        orig = bridge.set_prop
+        bridge.set_prop = lambda i, k, v: (sent.append((i, k, v)), orig(i, k, v))[1]
+
+        class _Upd:
+            def __init__(self, o): self.id = o; self.is_updated_transform = False
+
+        class _Deps:
+            def __init__(self, objs): self.updates = [_Upd(o) for o in objs]
+
+        bridge.prop_snapshots.pop(obj1.name, None)   # force a fresh push
+        obj1["wf_Mobility"] = new_label
+        wf_blender._depsgraph_handler(ctx.scene, _Deps([obj1]))
+        bridge.set_prop = orig
+
+        pushed = [(k, v) for (i, k, v) in sent if i == 1 and k == "movebloc.Mobility"]
+        check("real depsgraph handler pushes Mobility as its option index",
+              ("movebloc.Mobility", want_idx) in pushed,
+              f"pushed={pushed} want={want_idx}")
+
+        # The engine must accept the enum write (no error reply over the bridge).
+        err = pump(1.0, want="error")
+        check("engine accepts the enum set_prop (no error)", err is None, str(err))
 
     # 6. Screenshot proof (engine-side GPU capture).
     if SHOT.exists():
