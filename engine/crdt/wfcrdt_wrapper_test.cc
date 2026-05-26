@@ -400,6 +400,13 @@ static int test_deep_observer() {
             for (const auto& seg : p)
                 if (!seg.isIndex && seg.key == "items") key_ok = true;
             CHECK(key_ok, "deep path includes the 'items' key segment");
+            // The engine bridge's leaf-granular propagation (DrainEngineSync)
+            // relies on this exact path shape: [ {idx:actor}, {key:"items"},
+            // {idx:field}, … ], so path[2] is the field's items[] index. Pin it
+            // here so a future yffi bump can't silently break the extraction.
+            CHECK(p.size() >= 3, "field-edit path has actor/items/field segments");
+            CHECK(!p[1].isIndex && p[1].key == "items", "path[1] is the 'items' key");
+            CHECK(p[2].isIndex && p[2].index == 0, "path[2] is the field's items[] index");
         }
     }
     CHECK(found, "deep path[0] resolves to actor index 1");

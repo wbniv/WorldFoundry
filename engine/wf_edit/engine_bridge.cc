@@ -43,13 +43,25 @@ static bool                                             s_bridge_ready  = false;
 
 // Deep-observer field-sync state (single propagation path for ALL Doc writers —
 // local panel, remote collaborator, undo/redo, replay, DAP). s_deep_sub fires on
-// any field-leaf edit under content[]; its callback only records the touched
-// actor's doc index (no Doc access — Yrs forbids a txn inside an observer).
-// DrainEngineSync flushes the set at frame top. s_resync_all forces a full
-// re-propagate after a structural rebuild shifted doc indices (see R2 below).
-static std::unordered_set<int>             s_pending_resync;
-static std::optional<wfcrdt::Subscription> s_deep_sub;
-static bool                                s_resync_all = false;
+// any field-leaf edit under content[]; its callback records the touched actor's
+// doc index AND which items[] children changed (no Doc access — Yrs forbids a txn
+// inside an observer). DrainEngineSync flushes the map at frame top and re-applies
+// only the changed leaves. s_resync_all forces a full re-propagate after a
+// structural rebuild shifted doc indices (see R2 below).
+struct PendingActor {
+    bool                    all = false;    // ambiguous path → re-apply every field
+    std::unordered_set<int> children;       // specific items[] child indices changed
+};
+static std::unordered_map<int, PendingActor> s_pending_resync;
+static std::optional<wfcrdt::Subscription>   s_deep_sub;
+static bool                                  s_resync_all = false;
+
+// The two per-instance transform fields (handled by-name, not OAD-matched) that a
+// live gizmo drag owns until release — see DrainEngineSync's drag lock.
+static bool IsTransformField(const std::string& name)
+{
+    return name == "Position" || name == "Orientation";
+}
 
 int DocActorToEngineIdx(int doc_index)
 {
@@ -226,13 +238,23 @@ void InitBridgeMap(wfcrdt::Doc& doc)
     });
 
     // Deep observer: a field-leaf edit anywhere under content[] fires here with a
-    // path relative to content, so path[0] is the actor's doc index. Record it
-    // and propagate at frame top (DrainEngineSync). A structural add/remove fires
-    // *at* content (empty path) — skipped here; s_content_sub handles the rebuild.
+    // path relative to content. path[0] is the actor's doc index; for a field edit
+    // the path is [ {idx: actor}, {key:"items"}, {idx: fieldChunk}, … ], so path[2]
+    // is the field's items[] index — the same child_index ReadActorFields stamps
+    // and DrainEngineSync filters on. Record actor + changed field so we re-apply
+    // only that leaf (not all ~90). A path that doesn't match the field shape
+    // (e.g. an actor-level key edit) marks the actor `all` so we never under-sync.
+    // A structural add/remove fires *at* content (empty path) — skipped here;
+    // s_content_sub handles the rebuild.
     s_deep_sub = content.observeDeep([](const std::vector<wfcrdt::DeepPath>& evs) {
-        for (const auto& p : evs)
-            if (!p.empty() && p[0].isIndex)
-                s_pending_resync.insert(static_cast<int>(p[0].index));
+        for (const auto& p : evs) {
+            if (p.empty() || !p[0].isIndex) continue;
+            PendingActor& pa = s_pending_resync[static_cast<int>(p[0].index)];
+            if (p.size() >= 3 && !p[1].isIndex && p[1].key == "items" && p[2].isIndex)
+                pa.children.insert(static_cast<int>(p[2].index));
+            else
+                pa.all = true;
+        }
     });
 
     s_bridge_ready = true;
@@ -255,34 +277,42 @@ void UpdateBridgeMap(wfcrdt::Doc& doc)
 // Push queued Doc field edits into the live engine. Runs at frame top (after
 // UpdateBridgeMap, with no live txn) — safe to open the read txns ReadActorFields
 // needs. Drives the viewport for EVERY Doc writer; the local panel no longer
-// calls PropagateToEngine directly. Re-reads each touched actor and re-applies
-// its OAD-matched fields (idempotent — the engine never writes back to the Doc).
-void DrainEngineSync(wfcrdt::Doc& doc)
+// calls PropagateToEngine directly. Re-reads each touched actor but applies only
+// the changed leaves (idempotent — the engine never writes back to the Doc).
+//
+// drag_locked_doc_idx: the doc index of an actor under an active local gizmo drag
+// (or -1). The drag owns that actor's engine transform until mouse-release, so we
+// skip re-pushing its Position/Orientation — otherwise a concurrent remote edit
+// would rebuild the gizmo's reference pose from the stale Doc and yank the drag.
+void DrainEngineSync(wfcrdt::Doc& doc, int drag_locked_doc_idx)
 {
     if (!s_bridge_ready || !theLevel) return;
 
-    std::vector<int> actors;
+    std::unordered_map<int, PendingActor> work;
     if (s_resync_all) {
         s_resync_all = false;
         s_pending_resync.clear();
         const int n = static_cast<int>(s_doc_to_engine.size());
-        actors.reserve(n);
-        for (int i = 0; i < n; ++i) actors.push_back(i);
+        for (int i = 0; i < n; ++i) work[i].all = true;
     } else {
         if (s_pending_resync.empty()) return;
-        actors.assign(s_pending_resync.begin(), s_pending_resync.end());
-        s_pending_resync.clear();
+        work.swap(s_pending_resync);
     }
 
-    for (int idx : actors) {
+    for (auto& [idx, pa] : work) {
         if (DocActorToEngineIdx(idx) < 1) continue;   // no live engine actor
-        // Propagate every field — NOT just OAD-`matched` ones. TranslateField
-        // returns NoOp for the unmapped long tail (and PropagateToEngine skips
-        // those), but the transform fields Position/Orientation are addressed
-        // by name and are NOT OAD-matched (per-instance prefix), so a `matched`
-        // guard would silently drop exactly the edits that move the viewport.
-        for (const auto& pf : ResolveProperties(ReadActorFields(doc, idx)))
+        // Propagate every changed field — NOT just OAD-`matched` ones. TranslateField
+        // returns NoOp for the unmapped long tail (and PropagateToEngine skips those),
+        // but the transform fields Position/Orientation are addressed by name and are
+        // NOT OAD-matched (per-instance prefix), so a `matched` guard would silently
+        // drop exactly the edits that move the viewport.
+        for (const auto& pf : ResolveProperties(ReadActorFields(doc, idx))) {
+            if (!pa.all && pa.children.find(pf.child_index) == pa.children.end())
+                continue;   // this leaf didn't change
+            if (idx == drag_locked_doc_idx && IsTransformField(pf.name))
+                continue;   // local gizmo drag owns the transform until release
             PropagateToEngine(idx, pf);
+        }
     }
 }
 
@@ -530,6 +560,82 @@ void RunRemoteSyncTest(wfcrdt::Doc& doc, int selectedA, int docB,
         moved(before, after)
             ? "PASS (deep observer propagated a remote edit to a NON-selected actor)"
             : "FAIL (engine actor did not move)");
+}
+
+void RunDragLockTest(wfcrdt::Doc& doc, int docA)
+{
+    if (!theLevel) { std::fprintf(stderr, "[draglock-test] no live level\n"); return; }
+    const int engA = DocActorToEngineIdx(docA);
+    if (engA < 1) {
+        std::fprintf(stderr, "[draglock-test] FAIL: actor %d has no live engine counterpart\n", docA);
+        return;
+    }
+
+    // The dragged actor's Position child + a non-transform field to poke in (1).
+    int posChild = -1, otherChild = -1;
+    std::string otherName;
+    for (const auto& af : ReadActorFields(doc, docA)) {
+        if (af.name == "Position") posChild = af.child_index;
+        else if (otherChild < 0 && !af.name.empty()
+                 && af.name != "Orientation" && af.name != "Class Name") {
+            otherChild = af.child_index; otherName = af.name;
+        }
+    }
+    if (posChild < 0) {
+        std::fprintf(stderr, "[draglock-test] FAIL: actor %d has no Position field\n", docA);
+        return;
+    }
+
+    auto fmt = [](const std::optional<Vector3>& p) -> std::string {
+        if (!p) return "(n/a)";
+        char b[64];
+        std::snprintf(b, sizeof b, "(%.3f %.3f %.3f)",
+                      p->X().AsFloat(), p->Y().AsFloat(), p->Z().AsFloat());
+        return b;
+    };
+    auto same = [](const std::optional<Vector3>& a, const std::optional<Vector3>& b) {
+        if (!a || !b) return false;
+        auto d = [](Scalar x, Scalar y) { return std::fabs(x.AsFloat() - y.AsFloat()); };
+        return d(a->X(), b->X()) <= 1e-4f && d(a->Y(), b->Y()) <= 1e-4f && d(a->Z(), b->Z()) <= 1e-4f;
+    };
+
+    // Simulate a live gizmo drag: the engine actor sits at a drag pose the Doc does
+    // NOT yet know about (the gizmo writes the engine each frame, the Doc only on
+    // release). drag_locked_doc_idx = docA models gizmo_active on this actor.
+    wfmut::SetActorPos(*theLevel, engA,
+                       Vector3(Scalar::FromFloat(11.f), Scalar::FromFloat(22.f), Scalar::FromFloat(33.f)));
+    const auto drag = wfmut::GetActorPos(*theLevel, engA);
+
+    // (1) Fix A — a remote edit to a NON-transform field must not re-push the
+    // transform (leaf-granular: only that field's child is queued).
+    bool p1 = true;
+    if (otherChild >= 0) {
+        WriteFieldLeaf(doc, docA, otherChild, "DATA", "1", /*remote=*/true);
+        DrainEngineSync(doc, /*drag_locked_doc_idx=*/docA);
+        p1 = same(drag, wfmut::GetActorPos(*theLevel, engA));
+    }
+
+    // (2) Fix B — a remote edit to the SAME transform field must not disturb the
+    // drag while the lock holds.
+    WriteFieldLeaf(doc, docA, posChild, "DATA", "1.0 2.0 3.0", /*remote=*/true);
+    DrainEngineSync(doc, /*drag_locked_doc_idx=*/docA);
+    const bool p2 = same(drag, wfmut::GetActorPos(*theLevel, engA));
+
+    // (3) Release — with no lock, a remote transform edit propagates again.
+    WriteFieldLeaf(doc, docA, posChild, "DATA", "4.0 5.0 6.0", /*remote=*/true);
+    DrainEngineSync(doc, /*drag_locked_doc_idx=*/-1);
+    const auto rel = wfmut::GetActorPos(*theLevel, engA);
+    const bool p3 = !same(drag, rel);
+
+    std::fprintf(stderr,
+        "[draglock-test] A=%d (eng %d) drag-pose %s | (1) remote '%s' edit %s | "
+        "(2) locked Position edit %s | (3) released Position edit -> %s %s ==> %s\n",
+        docA, engA, fmt(drag).c_str(),
+        otherChild >= 0 ? otherName.c_str() : "(none)",
+        p1 ? "held" : "DISTURBED",
+        p2 ? "held" : "DISTURBED",
+        fmt(rel).c_str(), p3 ? "moved" : "STUCK",
+        (p1 && p2 && p3) ? "PASS" : "FAIL");
 }
 
 void RunSpawnConfirmTest()

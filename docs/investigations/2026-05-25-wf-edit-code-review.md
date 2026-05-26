@@ -1,11 +1,12 @@
 # Code review — wf-edit deep observer, gizmo keys/snap, Markdown chat
 
 **Date:** 2026-05-25
-**Status:** Review complete. No severe bugs found. **Findings #1, #3, #4 fixed
+**Status:** Review complete. No severe bugs found. **Findings #1, #2, #3, #4 fixed
 2026-05-25.** #1 (frame ordering) — `UpdateBridgeMap` now runs after `CollabDrain`
-([`main.cc:556-575`](../../engine/wf_edit/main.cc)). #3 (S hotkey selection guard) and
-#4 (snap-step min clamp) — one-line polish, applied. **#2 and #5 remain open**, deferred
-to the collab-hardening and live-reload follow-ups respectively.
+([`main.cc:556-575`](../../engine/wf_edit/main.cc)). #2 (whole-actor resync vs. live drag) —
+leaf-granular propagation + active-drag transform lock ([collab-hardening
+plan](../plans/2026-05-25-collab-hardening.md)). #3 (S hotkey selection guard) and #4 (snap-step
+min clamp) — one-line polish. **Only #5 remains open**, deferred to the live-reload follow-up.
 **Reviewer:** Claude (3-angle finder sweep + direct source verification of every load-bearing claim).
 
 ## Scope
@@ -40,7 +41,7 @@ against the source** rather than trusted from the finder — which refuted four 
 | # | Severity | Location | Issue |
 |---|----------|----------|-------|
 | 1 | **Medium** | `engine_bridge.cc` ordering vs `main.cc:559-567` | Combined structural+field remote edit mistargets the engine for one frame |
-| 2 | Low-Med | `engine_bridge.cc:284` | A single-field resync re-applies the actor's *whole* transform, fighting an in-progress local gizmo drag |
+| 2 | Low-Med ✅ fixed | `engine_bridge.cc:284` | A single-field resync re-applies the actor's *whole* transform, fighting an in-progress local gizmo drag |
 | 3 | Low ✅ fixed | `main.cc:815` | `S` snap-toggle hotkey fires with no actor selected (unguarded, unlike Delete) |
 | 4 | Low ✅ fixed | `main.cc:950,952` | Snap step accepts `0`/negative → snapping silently disabled while the checkbox still reads "on" |
 | 5 | Low / latent | `engine_bridge.cc:50,245,262` | Bridge state is process-global with no reset path; a future in-session level reload would propagate against a stale map |
@@ -124,6 +125,16 @@ collab.
 **Fix:** propagate only the changed leaf (the deep path already carries the field key segment), or
 skip `Position`/`Orientation` re-push for the actor currently under an active gizmo drag
 (`c->gizmo_active`).
+
+**✅ Fixed 2026-05-25** — applied **both** options ([collab-hardening plan](../plans/2026-05-25-collab-hardening.md)).
+(A) The deep observer now records *which* `items[]` child changed (path[2]), and `DrainEngineSync`
+re-applies only those leaves instead of the whole actor — so a peer's `Mass` edit no longer
+re-pushes the transform. (B) `DrainEngineSync` takes a `drag_locked_doc_idx`; the call site passes
+`c->gizmo_active ? c->selected : -1`, and the per-field loop skips `Position`/`Orientation` for the
+dragged actor until release — so a concurrent *transform* edit can't yank the drag either. Proven by
+`WF_EDIT_DRAGLOCK_TEST` (drag-pose held through a remote non-transform edit AND a remote Position
+edit, then resumes on release) + a strengthened `test_deep_observer` pinning the path[1]="items"/
+path[2]=field-index contract A relies on.
 
 ### 3. `S` snap-toggle hotkey is unguarded by selection — *Low*
 
@@ -217,5 +228,7 @@ and the C-ABI / lifetime / guard-removal details are right. The one substantive 
 same-frame structural+field SYNC rebuilds before it drains. It self-heals in one frame today, so
 it's a correctness-hygiene fix, not a fire. Findings #2–#5 are minor or latent.
 
-Findings #1 (reorder + comment), #3 (selection guard), and #4 (snap-step clamp) are **applied**
-(2026-05-25). Remaining: #2 and #5 are deferred to the collab-hardening / live-reload follow-ups.
+Findings #1 (reorder + comment), #2 (leaf-granular propagation + active-drag lock — [collab-hardening
+plan](../plans/2026-05-25-collab-hardening.md)), #3 (selection guard), and #4 (snap-step clamp) are
+all **applied** (2026-05-25). Only #5 (process-global bridge state) remains, deferred to the
+live-reload follow-up.

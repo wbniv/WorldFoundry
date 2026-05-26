@@ -586,8 +586,9 @@ bool editor_build(void* p)
     // Flush Doc field edits (local panel, remote SYNC just applied above, undo/
     // redo, replay, DAP) into the live engine — the single propagation path. Runs
     // after UpdateBridgeMap so it reads the rebuilt doc→engine map, at frame top
-    // (no live txn).
-    if (c->doc) wfedit::DrainEngineSync(*c->doc);
+    // (no live txn). While a gizmo drag is live, lock that actor's transform so a
+    // concurrent remote/undo edit can't snap it back mid-gesture.
+    if (c->doc) wfedit::DrainEngineSync(*c->doc, c->gizmo_active ? c->selected : -1);
 
     // Phase 4: broadcast own presence ~10 Hz when relay is connected.
     if (c->relay_client.connected()) {
@@ -651,6 +652,15 @@ bool editor_build(void* p)
                 wfedit::RunRemoteSyncTest(*c->doc, c->selected,
                                           std::atoi(s.substr(0, bar).c_str()),
                                           s.substr(bar + 1));
+        }
+    }
+    // Active-drag transform-lock proof (WF_EDIT_DRAGLOCK_TEST=1): runs the
+    // finding-#2 regression check on the selected actor. See engine_bridge.h.
+    static bool s_draglock_tested = false;
+    if (!s_draglock_tested && c->doc && c->selected >= 0) {
+        if (const char* spec = std::getenv("WF_EDIT_DRAGLOCK_TEST"); spec && *spec) {
+            s_draglock_tested = true;
+            wfedit::RunDragLockTest(*c->doc, c->selected);
         }
     }
     // M3 save-UI screenshot proof: WF_EDIT_SAVE_UI=<path> drives File→Save once
