@@ -355,9 +355,11 @@ workflow — they exist so the editor can be proven headlessly.
   ([`wftools/levcomp-rs/src/decompile.rs`](../wftools/levcomp-rs/src/decompile.rs)) already does
   exactly that, reconstructing a named-field `.lev` from a binary level. Read-only binary loading
   (bare `.iff` + level-from-`cd.iff`) is planned — see
-  [load-binary-iff plan](plans/2026-05-25-wf-edit-load-binary-iff.md). Note that binary levels carry
-  no authored object names (cross-references are stored by actor index; the decompiler synthesizes
-  `{Class}_{index}` names), so a binary-loaded level is read-only by design.
+  [load-binary-iff plan](plans/2026-05-25-wf-edit-load-binary-iff.md). The binary itself is
+  load-only (no binary writer) — but a binary-loaded level is fully editable and saves *out* to a
+  new `.lev`. Note that binary levels carry no authored object names (cross-references are stored by
+  actor index; the decompiler synthesizes `{Class}_{index}` names), so the new `.lev` is a fresh
+  derivative, not a round-trip to the original Blender/`.lev` source.
 - **Linux/X11 only.** Wayland and mobile hosts are v2+.
 
 ---

@@ -1,11 +1,12 @@
-# wf-edit: load compiled binary levels (`.iff`, bare or inside `cd.iff`) — read-only
+# wf-edit: load compiled binary levels (`.iff`, bare or inside `cd.iff`)
 
 **Status:** Not started
 **Date:** 2026-05-25
-**Scope:** Let `wf-edit` open a *compiled binary* level — a bare per-level LVAS `.iff` and a
-level selected out of a multi-level `cd.iff` archive — **read-only**. Binary *save* is explicitly
-out of scope (drop it if round-tripping is hard); a binary-loaded session can save-as-`.lev` if the
-Doc shape lines up, otherwise it opens read-only.
+**Scope:** Let `wf-edit` open a *compiled binary* level — a bare per-level LVAS `.iff` and a level
+selected out of a multi-level `cd.iff` archive. The **binary is load-only** (no in-place binary
+writer); the session is otherwise fully editable and **saves *out* to a new `.lev`** via the
+existing `SaveDocToLev`. What's *not* supported is writing back to the original `.iff`/`cd.iff` or
+reproducing the original authored source (names/comments are gone — see Fidelity).
 
 ## Context
 
@@ -47,11 +48,13 @@ Field values, enums, and Forth scripts are likewise recovered. What's gone: the 
 (only synthetic `{Class}_{index}` remain), source ordering beyond the index order, and comments
 (already exempted as exporter noise).
 
-This is a **second, independent reason save-back is out of scope.** With authored names gone, the
-position-derived synthetic names are the only handle, and structural editing (reorder/add/delete)
-is exactly where index-based references get fragile — you can't safely reconcile a binary-loaded,
-edited level back to its original `.lev` source. Read-only is the correct boundary, and it does not
-conflict with the Blender/`.lev` golden-source convention (loading is inspection, not authoring).
+You **can** save the (decompiled, possibly edited) level out to a **new `.lev`** — it carries the
+synthetic names, they're used consistently on both sides, and it recompiles cleanly. What you
+**can't** do is write back to the original binary (no binary writer) or reproduce the original
+*authored* source: with authored names gone, the position-derived synthetic names are the only
+handle, so a new `.lev` is a fresh derivative, not a reconciliation with the Blender/`.lev` golden
+source. (Structural editing — reorder/add/delete — is also where index-based references get
+fragile, but that's an editing concern orthogonal to this load feature.)
 
 ## Design
 
@@ -69,9 +72,13 @@ This is nearly free: `levcomp decompile` already handles a single-level LVAS con
    [`wfsource/source/oas/objects.lc`](../../wfsource/source/oas/objects.lc).
 3. **Feed the temp `.lev` to the existing pipeline** (`RunLevtreeParse` → `LoadLevelTreeIntoDoc`),
    unchanged. The Doc, Outliner, property panel, and engine bridge all work as-is.
-4. **Mark the session read-only** when loaded from binary: disable File→Save (binary write), or
-   offer **Save As `.lev`** only (the Doc→`.lev` walk `SaveDocToLev` already exists and is pure, so
-   text export is essentially free — gate the feature on load, not on this).
+4. **Save goes to a new `.lev`, never back to the binary.** Once the level is in the Doc it's fully
+   editable, and `SaveDocToLev` ([`level_save.cc:57`](../../engine/wf_edit/level_save.cc), driven by
+   `DoSave`/`save_path` at [`main.cc:273`](../../engine/wf_edit/main.cc)) already `levtree print`s
+   the Doc back to a `.lev` — so Save-As is essentially free and faithful (the lossless Doc schema
+   round-trips the decompiled content exactly; synthetic names are used consistently, so the saved
+   `.lev` recompiles cleanly). Just seed `save_path` to a fresh `.lev` (not the source binary) on a
+   binary load, and surface it as **Save As `.lev`** rather than an in-place Save.
 
 ### Phase 2 — select a level out of `cd.iff` (multi-level archive)
 
@@ -120,8 +127,9 @@ LVAS but not this archive layer yet.
 
 ## Out of scope / deferred
 
-- **Binary save / re-pack to `.iff`/`cd.iff`** — explicitly dropped (the toolchain compiles
-  text→binary; round-tripping binary writes is not needed for the load goal).
+- **Binary write-back / re-pack to `.iff`/`cd.iff`** — explicitly dropped (the toolchain compiles
+  text→binary; there's no binary writer and the load goal doesn't need one). Saving *out* to a new
+  `.lev` **is** supported (Phase 1 step 4) — this only rules out editing the binary in place.
 - **Recovering authored actor names / comments / source ordering** — not in the binary; synthetic
   names are accepted.
 - **In-editor cd.iff level picker** — CLI selector first; the picker is a follow-up.
