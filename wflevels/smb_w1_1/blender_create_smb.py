@@ -51,8 +51,8 @@ BLOCK_Z       = GROUND_TOP_Z + 4*T + T/2 # ? block centre (4 tiles above ground)
 # W1-1 landmark X positions (tile counts × T)
 MARIO_SPAWN_X = 3  * T
 QBLOCK_XS     = [8*T, 14*T, 17*T]        # lone ? block, then cluster pair
-GOOMBA_X      = 22 * T
-KOOPA_X       = 28 * T
+GOOMBA_X      = 29 * T                    # 43.5 — right of pit0; reveals as Mario crosses onto ground_1
+KOOPA_X       = 32 * T                    # 48.0 — staggered deeper into ground_1 (still left of pit1 at 51)
 FLAGPOLE_X    = 42 * T
 
 GROUND_X0 = -2 * T
@@ -834,23 +834,33 @@ if player:
 ENEMY_WALK_SPEED = 4.0
 ENEMY_SCRIPT = (
     "\\ wf\n"
-    f"{-ENEMY_WALK_SPEED} INDEXOF_XSPEED write-mailbox\n"   # walk left (toward Mario)
+    # Faithful SMB: stay DORMANT until we scroll into the camera frame, then do the
+    # dumb leftward walk (so we no longer pre-walk into pit 0 before Mario arrives).
+    # SMB_MAX_CAM_X is the Director's one-way camera ratchet; +12 is the half-frustum,
+    # so (SMB_MAX_CAM_X + 12) is the screen's right edge. Once it passes our X we are
+    # revealed — and since the ratchet only ever increases, this latches on for good
+    # (no per-actor state flag needed).
+    "INDEXOF_SMB_MAX_CAM_X read-mailbox 12.0 + INDEXOF_X_POS read-mailbox > if\n"
+    f"  {-ENEMY_WALK_SPEED} INDEXOF_XSPEED write-mailbox\n"   # on-screen: walk left toward Mario
     # Proximity to the player. Player<->enemy contacts (both CharacterVirtual) do NOT
     # fire the Jolt collision dispatch (neither is in gBodies — same reason Gold uses
     # proximity), so compare the broadcast player X/Z to our own position.
-    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n"    # dx = playerX - myX
-    "dup * 1.0 <\n"                                                       # dx^2 < 1  (close horizontally)
-    "if\n"
-    "  INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"  # dz = playerZ - myZ
-    "  dup 0.7 >\n"                                                       # player clearly ABOVE us?
+    "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n"    # dx = playerX - myX
+    "  dup * 1.0 <\n"                                                       # dx^2 < 1  (close horizontally)
     "  if\n"
-    "    drop\n"
-    "    0 INDEXOF_ALIVE write-mailbox\n"                # stomped -> die
-    "    1 INDEXOF_SMB_STOMP write-mailbox\n"            # tell the player to bounce
-    "  else\n"
-    "    -1.5 >\n"                                       # roughly level (not far below) = side hit
-    "    if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n"
+    "    INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"  # dz = playerZ - myZ
+    "    dup 0.7 >\n"                                                       # player clearly ABOVE us?
+    "    if\n"
+    "      drop\n"
+    "      0 INDEXOF_ALIVE write-mailbox\n"              # stomped -> die
+    "      1 INDEXOF_SMB_STOMP write-mailbox\n"          # tell the player to bounce
+    "    else\n"
+    "      -1.5 >\n"                                     # roughly level (not far below) = side hit
+    "      if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n"
+    "    then\n"
     "  then\n"
+    "else\n"
+    "  0 INDEXOF_XSPEED write-mailbox\n"                 # dormant: stand still until revealed
     "then\n"
 )
 

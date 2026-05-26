@@ -1169,7 +1169,7 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "goomba_00.001" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 33.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 43.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -1185,17 +1185,17 @@
 		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
 		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n-4.0 INDEXOF_XSPEED write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\ndup * 1.0 <\nif\n  INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n  dup 0.7 >\n  if\n    drop\n    0 INDEXOF_ALIVE write-mailbox\n    1 INDEXOF_SMB_STOMP write-mailbox\n  else\n    -1.5 >\n    if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n  then\nthen\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_MAX_CAM_X read-mailbox 12.0 + INDEXOF_X_POS read-mailbox > if\n  -4.0 INDEXOF_XSPEED write-mailbox\n  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n  dup * 1.0 <\n  if\n    INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n    dup 0.7 >\n    if\n      drop\n      0 INDEXOF_ALIVE write-mailbox\n      1 INDEXOF_SMB_STOMP write-mailbox\n    else\n      -1.5 >\n      if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n    then\n  then\nelse\n  0 INDEXOF_XSPEED write-mailbox\nthen\n" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000144997286(1.15.16) } { 'STR' "-0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000130714559(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000019868215(1.15.16) } { 'STR' "-0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000004814712776(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000006337184284(1.15.16) } { 'STR' "-0.000001" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "koopa_00.001" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 42.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 48.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -1211,13 +1211,13 @@
 		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
 		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n-4.0 INDEXOF_XSPEED write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\ndup * 1.0 <\nif\n  INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n  dup 0.7 >\n  if\n    drop\n    0 INDEXOF_ALIVE write-mailbox\n    1 INDEXOF_SMB_STOMP write-mailbox\n  else\n    -1.5 >\n    if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n  then\nthen\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_MAX_CAM_X read-mailbox 12.0 + INDEXOF_X_POS read-mailbox > if\n  -4.0 INDEXOF_XSPEED write-mailbox\n  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n  dup * 1.0 <\n  if\n    INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n    dup 0.7 >\n    if\n      drop\n      0 INDEXOF_ALIVE write-mailbox\n      1 INDEXOF_SMB_STOMP write-mailbox\n    else\n      -1.5 >\n      if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n    then\n  then\nelse\n  0 INDEXOF_XSPEED write-mailbox\nthen\n" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000174343586(1.15.16) } { 'STR' "-0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000013558271(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000065565109(1.15.16) } { 'STR' "-0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000007420778275(1.15.16) } { 'STR' "-0.000001" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000008466839790(1.15.16) } { 'STR' "-0.000001" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "flagpole_pole" }

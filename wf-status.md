@@ -1,14 +1,15 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-05-25  
+**As of:** 2026-05-26  
 **Branch:** `2026-new-level`
 
 ---
 
 ## History
 
-45 days of work (2026-04-12 – 2026-05-25). Newest first:
+45 days of work (2026-04-12 – 2026-05-26). Newest first:
 
+- **SMB enemies dormant until on-screen (2026-05-26)** — Faithful to the arcade, the Goomba/Koopa now stay still until the Director's one-way camera ratchet (`SMB_MAX_CAM_X` + half-frustum) reveals them, so they no longer pre-walk off ground_1 into pit 0 and silently vanish before Mario arrives. See [plan](docs/plans/2026-05-25-smb-w1-1-enemies-dormant-until-on-screen-faithful.md).
 - **`wf-edit` in-editor cd.iff level picker + viewport tracking (2026-05-25)** — Launching the editor on a bare multi-level `cd.iff` (no `:tag`) pops a startup modal listing the archive's levels to choose one this session, and the 3D viewport tracks the pick by slicing that cd.iff chunk into a `-L` temp `.iff` (no `_desiredLevelNum` rework). See [plan](docs/plans/2026-05-25-wf-edit-cdiff-level-picker.md).
 - **`wf-edit` loads compiled binary levels (2026-05-25)** — The editor now opens a bare `.iff`/`.lvl` or a level selected out of a `cd.iff` archive (`--leveltree=cd.iff:L4`), decompiling the binary to a temp `.lev` via `levcomp decompile` before the existing `levtree`→Doc path. See [plan](docs/plans/2026-05-25-wf-edit-load-binary-iff.md).
 - **SMB pit/fall death + level countdown timer (2026-05-25)** — A below-gap `ActBox` and a 400-unit Director countdown both feed Mario's existing respawn (−1 life), so falling into a pit or running the HUD timer to "TIME UP" now costs a life. See [plan](docs/plans/2026-05-25-smb-pit-death-and-level-timer.md).
