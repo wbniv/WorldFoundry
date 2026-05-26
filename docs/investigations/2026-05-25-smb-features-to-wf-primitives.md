@@ -36,7 +36,7 @@ in the level-building guide, and the [SMB conversion brief](/home/will/wf-games/
 | HUD score/coins (basic) | per-actor `GOLD` mailbox → global mb 70 → SCORE overlay | ✅ |
 | **Flagpole → end of level** | `statplat` (pole+flag art) + `ActBox`(`MailBox`=`END_OF_LEVEL`,`=1`, ActivatedBy=Player) | 🧩 *(designed this session)* |
 | **Pipe warp** | `Warp` + `Target` — Warp at pipe mouth teleports the entering actor to the Target in the destination area | 🧩 |
-| **Pit / fall death** | `ActBox` volume across the pit floor → writes a death/respawn mailbox | 🔧 *(respawn script)* |
+| **Pit / fall death** | `ActBox` volume below each gap → writes `SMB_PLAYER_HURT` → existing respawn (−1 life) | ✅ *(2026-05-25, [plan](../plans/2026-05-25-smb-pit-death-and-level-timer.md))* |
 | **Spikes / lava / hazard** | `Spike` (applies `Health Modifier` on contact) | 🧩 |
 | **Moving platform / lift** | `Platform` (path-driven) — see Path/CHAN note below | 🧩 / 🚧 |
 | **Goomba** | `Enemy` + walk (constant velocity / path) + stomp (collision-normal script) | 🔧 |
@@ -50,8 +50,8 @@ in the level-building guide, and the [SMB conversion brief](/home/will/wf-games/
 | **Star (invincibility)** | **`Shield`** — the live "follows player + timed invulnerability + blink" primitive; Star = collectible that grants a Shield | 🧩 / 🔧 |
 | **Power-up state machine** (Small/Super/Fire) | pure Forth state machine on `Player` driven by pickup mailboxes (per brief) | 🔧 |
 | **Breakable brick** (Super Mario) | `Generator`-style block + `Destroyer`/visibility on bump-from-below | 🔧 |
-| **Level timer** (countdown) | `Director` script counting a TIME mailbox → death/`END_OF_LEVEL` at 0 (marble-madness 90 s pattern) | 🔧 |
-| **Lives / death / respawn** | death triggers (`Spike`/pit `ActBox`/enemy contact) → life mailbox → respawn (player script) | 🔧 |
+| **Level timer** (countdown) | `Director` script: 400-unit countdown off `TIME` → HUD slot 71; 0 = "TIME UP" → `SMB_PLAYER_HURT` (Mario dies) | ✅ *(2026-05-25, [plan](../plans/2026-05-25-smb-pit-death-and-level-timer.md))* |
+| **Lives / death / respawn** | enemy contact + pit `ActBox` + timeout → `SMB_PLAYER_HURT` → player respawn (−1 life), game-over at 0 | ✅ *(enemy 2026-05-25; pit/timeout 2026-05-25)* |
 | **Music / SFX per event** | audio system (miniaudio) + SFX-index mailbox writes (qbert SFX pattern) | 🔧 |
 | **Flag slide-down + "COURSE CLEAR"** | flag move via mailbox (script); the *screen* has no infra | 🚧 |
 | **Swim mode** (underwater W1-2) | new gravity/buoyancy movement mode | 🚧 |

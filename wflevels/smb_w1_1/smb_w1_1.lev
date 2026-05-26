@@ -147,7 +147,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_MAX_CAM_X read-mailbox not if 4.5 INDEXOF_SMB_MAX_CAM_X write-mailbox then\nINDEXOF_SMB_PLAYER_X read-mailbox 1.5 +\ndup INDEXOF_SMB_MAX_CAM_X read-mailbox -\n1.5 <\nif drop INDEXOF_SMB_MAX_CAM_X read-mailbox\nelse 1.5 - dup 9.0 < if drop 9.0 then dup 58.5 > if drop 58.5 then dup INDEXOF_SMB_MAX_CAM_X write-mailbox\nthen\nINDEXOF_SMB_TARGET_CAM_X write-mailbox\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_MAX_CAM_X read-mailbox not if 4.5 INDEXOF_SMB_MAX_CAM_X write-mailbox then\nINDEXOF_SMB_PLAYER_X read-mailbox 1.5 +\ndup INDEXOF_SMB_MAX_CAM_X read-mailbox -\n1.5 <\nif drop INDEXOF_SMB_MAX_CAM_X read-mailbox\nelse 1.5 - dup 9.0 < if drop 9.0 then dup 58.5 > if drop 58.5 then dup INDEXOF_SMB_MAX_CAM_X write-mailbox\nthen\nINDEXOF_SMB_TARGET_CAM_X write-mailbox\nINDEXOF_SMB_TIMER_START read-mailbox not if INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox then\n400 INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START read-mailbox - 2.66667 * -\ndup 0 <= if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox drop 0 then\nINDEXOF_HUD_TIMER write-mailbox\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
@@ -1013,7 +1013,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\nINDEXOF_Z_POS read-mailbox INDEXOF_SMB_PLAYER_Z write-mailbox\nINDEXOF_GOLD read-mailbox 70 write-mailbox\nINDEXOF_SMB_LIVES_INIT read-mailbox not if 3 INDEXOF_LIVES write-mailbox 1 INDEXOF_SMB_LIVES_INIT write-mailbox then\nINDEXOF_SMB_STOMP read-mailbox 0<> if 8.0 INDEXOF_ZSPEED write-mailbox 0 INDEXOF_SMB_STOMP write-mailbox then\nINDEXOF_SMB_PLAYER_HURT read-mailbox 0<> if\n  INDEXOF_TIME read-mailbox INDEXOF_SMB_INVULN_UNTIL read-mailbox > if\n    INDEXOF_LIVES read-mailbox 1 - INDEXOF_LIVES write-mailbox\n    4.5 INDEXOF_X_POS write-mailbox\n    0 INDEXOF_Y_POS write-mailbox\n    1.5 INDEXOF_Z_POS write-mailbox\n    0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox 0 INDEXOF_ZSPEED write-mailbox\n    INDEXOF_TIME read-mailbox 2.0 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n    INDEXOF_LIVES read-mailbox 1 < if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n  then\n  0 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\nINDEXOF_Z_POS read-mailbox INDEXOF_SMB_PLAYER_Z write-mailbox\nINDEXOF_GOLD read-mailbox INDEXOF_HUD_SCORE write-mailbox\nINDEXOF_SMB_LIVES_INIT read-mailbox not if 3 INDEXOF_LIVES write-mailbox 1 INDEXOF_SMB_LIVES_INIT write-mailbox then\nINDEXOF_SMB_STOMP read-mailbox 0<> if 8.0 INDEXOF_ZSPEED write-mailbox 0 INDEXOF_SMB_STOMP write-mailbox then\nINDEXOF_SMB_PLAYER_HURT read-mailbox 0<> if\n  INDEXOF_TIME read-mailbox INDEXOF_SMB_INVULN_UNTIL read-mailbox > if\n    INDEXOF_LIVES read-mailbox 1 - INDEXOF_LIVES write-mailbox\n    4.5 INDEXOF_X_POS write-mailbox\n    0 INDEXOF_Y_POS write-mailbox\n    1.5 INDEXOF_Z_POS write-mailbox\n    0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox 0 INDEXOF_ZSPEED write-mailbox\n    INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox\n    INDEXOF_TIME read-mailbox 2.0 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n    INDEXOF_LIVES read-mailbox 1 < if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n  then\n  0 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
@@ -1064,18 +1064,94 @@
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000159250964(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
-		{ 'NAME' "ground" }
+		{ 'NAME' "ground_0" }
 		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -3.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 70.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -3.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 28.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "ground.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "ground_0.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "ground_1" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 31.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 51.0000000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "ground_1.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "ground_2" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 54.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 70.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "ground_2.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "pit_death_0" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 28.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) -15.0000000000000000(1.15.16) 32.0000000000000000(1.15.16) 1.5000000000000000(1.15.16) -1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pit_death_0.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
+		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 1804l } { 'STR' "1804" } }
+		{ 'I32' { 'NAME' "MailBoxValue" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Activated Actor Mailbox" } { 'DATA' 4005l } { 'STR' "4005" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "pit_death_1" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 50.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -15.0000000000000000(1.15.16) 54.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) -1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pit_death_1.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
+		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 1804l } { 'STR' "1804" } }
+		{ 'I32' { 'NAME' "MailBoxValue" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Activated Actor Mailbox" } { 'DATA' 4005l } { 'STR' "4005" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }

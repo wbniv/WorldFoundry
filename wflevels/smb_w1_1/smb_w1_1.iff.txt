@@ -25,15 +25,19 @@
 	{ 'ASMP'
 		$3fff001l { 'STR' "player.iff" }  // IFF PERM fff:001
 		$3fff002l { 'STR' "coin_template.iff" }  // IFF PERM fff:002
-		$3000001l { 'STR' "ground.iff" }  // IFF RM0 000:001
-		$3000002l { 'STR' "qblock_00.iff" }  // IFF RM0 000:002
-		$3000003l { 'STR' "qblock_01.iff" }  // IFF RM0 000:003
-		$3000004l { 'STR' "qblock_02.iff" }  // IFF RM0 000:004
-		$3000005l { 'STR' "goomba_00.001.iff" }  // IFF RM0 000:005
-		$3000006l { 'STR' "koopa_00.001.iff" }  // IFF RM0 000:006
-		$3000007l { 'STR' "flagpole_pole.iff" }  // IFF RM0 000:007
-		$3000008l { 'STR' "flagpole_flag.iff" }  // IFF RM0 000:008
-		$3000009l { 'STR' "flagpole_trigger.iff" }  // IFF RM0 000:009
+		$3000001l { 'STR' "ground_0.iff" }  // IFF RM0 000:001
+		$3000002l { 'STR' "ground_1.iff" }  // IFF RM0 000:002
+		$3000003l { 'STR' "ground_2.iff" }  // IFF RM0 000:003
+		$3000004l { 'STR' "pit_death_0.iff" }  // IFF RM0 000:004
+		$3000005l { 'STR' "pit_death_1.iff" }  // IFF RM0 000:005
+		$3000006l { 'STR' "qblock_00.iff" }  // IFF RM0 000:006
+		$3000007l { 'STR' "qblock_01.iff" }  // IFF RM0 000:007
+		$3000008l { 'STR' "qblock_02.iff" }  // IFF RM0 000:008
+		$3000009l { 'STR' "goomba_00.001.iff" }  // IFF RM0 000:009
+		$300000al { 'STR' "koopa_00.001.iff" }  // IFF RM0 000:00a
+		$300000bl { 'STR' "flagpole_pole.iff" }  // IFF RM0 000:00b
+		$300000cl { 'STR' "flagpole_flag.iff" }  // IFF RM0 000:00c
+		$300000dl { 'STR' "flagpole_trigger.iff" }  // IFF RM0 000:00d
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "smb_w1_1.lvl" ] }
@@ -52,15 +56,19 @@
 		{ 'ASS' $1000fffl [ "Room0.tga" ] }    // TGA RM0 000:fff
 		{ 'ASS' $5000fffl [ "Room0.ruv" ] }    // RUV RM0 000:fff
 		{ 'ASS' $7000fffl [ "Room0.cyc" ] }    // CYC RM0 000:fff
-		{ 'ASS' $3000001l [ "ground.iff" ] }  // IFF RM0 000:001
-		{ 'ASS' $3000002l [ "qblock_00.iff" ] }  // IFF RM0 000:002
-		{ 'ASS' $3000003l [ "qblock_01.iff" ] }  // IFF RM0 000:003
-		{ 'ASS' $3000004l [ "qblock_02.iff" ] }  // IFF RM0 000:004
-		{ 'ASS' $3000005l [ "goomba_00.001.iff" ] }  // IFF RM0 000:005
-		{ 'ASS' $3000006l [ "koopa_00.001.iff" ] }  // IFF RM0 000:006
-		{ 'ASS' $3000007l [ "flagpole_pole.iff" ] }  // IFF RM0 000:007
-		{ 'ASS' $3000008l [ "flagpole_flag.iff" ] }  // IFF RM0 000:008
-		{ 'ASS' $3000009l [ "flagpole_trigger.iff" ] }  // IFF RM0 000:009
+		{ 'ASS' $3000001l [ "ground_0.iff" ] }  // IFF RM0 000:001
+		{ 'ASS' $3000002l [ "ground_1.iff" ] }  // IFF RM0 000:002
+		{ 'ASS' $3000003l [ "ground_2.iff" ] }  // IFF RM0 000:003
+		{ 'ASS' $3000004l [ "pit_death_0.iff" ] }  // IFF RM0 000:004
+		{ 'ASS' $3000005l [ "pit_death_1.iff" ] }  // IFF RM0 000:005
+		{ 'ASS' $3000006l [ "qblock_00.iff" ] }  // IFF RM0 000:006
+		{ 'ASS' $3000007l [ "qblock_01.iff" ] }  // IFF RM0 000:007
+		{ 'ASS' $3000008l [ "qblock_02.iff" ] }  // IFF RM0 000:008
+		{ 'ASS' $3000009l [ "goomba_00.001.iff" ] }  // IFF RM0 000:009
+		{ 'ASS' $300000al [ "koopa_00.001.iff" ] }  // IFF RM0 000:00a
+		{ 'ASS' $300000bl [ "flagpole_pole.iff" ] }  // IFF RM0 000:00b
+		{ 'ASS' $300000cl [ "flagpole_flag.iff" ] }  // IFF RM0 000:00c
+		{ 'ASS' $300000dl [ "flagpole_trigger.iff" ] }  // IFF RM0 000:00d
 	}
 	{ 'ALGN' .align(2048) }
 }

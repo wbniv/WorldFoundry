@@ -59,6 +59,23 @@ GROUND_X0 = -2 * T
 GROUND_X1 = FLAGPOLE_X + 5*T
 GROUND_Y  = T                             # half-depth of ground slab in Y
 
+# Pits (bottomless gaps in the ground). The ground slab is split into solid
+# segments around these X-ranges; an invisible pit-death ActBox sits below each.
+# Real W1-1 has two signature gaps — one mid-level, one on the final approach by
+# the double-pyramid staircase. This level is geometrically compressed (~49 tiles
+# vs the real ~212), so these reproduce the two-pit *structure* proportionally,
+# clear of the ? cluster (tiles 8/14/17), Goomba (22), Koopa (28) and flag (42).
+# Each is a 2-tile (3 m) gap — jumpable under the current jump tuning.
+# See docs/plans/2026-05-25-smb-pit-death-and-level-timer.md.
+PITS = [(28.5, 31.5),   # tiles 19-20: mid-level gap, between the ? cluster and the first Goomba
+        (51.0, 54.0)]   # tiles 34-35: the signature late gap on the final approach to the flag
+
+# Level countdown timer (Director script). SMB starts at 400 "time units"; we
+# drain them over TIMER_REAL_SECONDS of wall-clock so 100-left lines up with the
+# faithful tempo-change point. display = TIMER_UNITS - elapsed * (UNITS/SECONDS).
+TIMER_UNITS        = 400
+TIMER_REAL_SECONDS = 150.0
+
 SCENE_MID_X = (GROUND_X0 + GROUND_X1) / 2
 
 # Camera: fixed side-view, Y=-30, looking toward +Y at Mario's spawn position.
@@ -147,6 +164,20 @@ if director:
         "dup INDEXOF_SMB_MAX_CAM_X write-mailbox\n"
         "then\n"
         "INDEXOF_SMB_TARGET_CAM_X write-mailbox\n"
+        # ── level countdown timer ───────────────────────────────────────────
+        # display = TIMER_UNITS - elapsed*RATE (clamped >=0) -> HUD_TIMER slot.
+        # SMB_TIMER_START anchors the current life; reaching 0 = "TIME UP" fires
+        # SMB_PLAYER_HURT (Mario dies, loses a life via the player respawn) and
+        # restarts the clock. The player respawn also re-anchors it on every death.
+        "INDEXOF_SMB_TIMER_START read-mailbox not if "
+        "INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox then\n"
+        f"{TIMER_UNITS} INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START read-mailbox - "
+        f"{TIMER_UNITS / TIMER_REAL_SECONDS:.5f} * -\n"        # 400 - elapsed*RATE
+        "dup 0 <= if "
+        "1 INDEXOF_SMB_PLAYER_HURT write-mailbox "
+        "INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox "
+        "drop 0 then\n"                                        # clamp display to 0
+        "INDEXOF_HUD_TIMER write-mailbox\n"
     )
 
 levelobj = find_by_class('levelobj')
@@ -440,17 +471,51 @@ def build_textured_ground_mesh(name, x0, y0, z0, x1, y1, z1, tex_path):
 # world metre (relies on GL_REPEAT — see TODO.md § SCRIPTING ENGINES for
 # the atlas-UV-uint8-overflow bug that may bite at high UV).
 grid_tex_path = _make_grid_tile_tga(os.path.join(SCRIPT_DIR, 'grid_tile.tga'))
-ground_mesh = build_textured_ground_mesh(
-    'ground',
-    GROUND_X0, -GROUND_Y, GROUND_TOP_Z - GROUND_THICK,
-    GROUND_X1,  GROUND_Y, GROUND_TOP_Z,
-    grid_tex_path)
-ground_obj = bpy.data.objects.new('ground', ground_mesh)
-ground_obj.location = (0.0, 0.0, 0.0)
-scene.collection.objects.link(ground_obj)
-attach_schema(ground_obj, 'statplat')
-ground_obj['wf_Visibility Mailbox'] = 1
-ground_obj['wf_Model Type'] = 'Mesh'
+SMB_PLAYER_HURT = 1804   # INDEXOF_SMB_PLAYER_HURT (wfsource/source/mailbox/mailbox.inc)
+
+# Build the ground as solid slabs around the pits (the gaps in PITS are skipped,
+# leaving real holes the player can fall through).
+_solid_spans = []
+_cursor = GROUND_X0
+for _pl, _pr in sorted(PITS):
+    if _pl > _cursor:
+        _solid_spans.append((_cursor, _pl))
+    _cursor = max(_cursor, _pr)
+if _cursor < GROUND_X1:
+    _solid_spans.append((_cursor, GROUND_X1))
+
+for _i, (_sx0, _sx1) in enumerate(_solid_spans):
+    seg_mesh = build_textured_ground_mesh(
+        f'ground_{_i}',
+        _sx0, -GROUND_Y, GROUND_TOP_Z - GROUND_THICK,
+        _sx1,  GROUND_Y, GROUND_TOP_Z,
+        grid_tex_path)
+    seg_obj = bpy.data.objects.new(f'ground_{_i}', seg_mesh)
+    seg_obj.location = (0.0, 0.0, 0.0)
+    scene.collection.objects.link(seg_obj)
+    attach_schema(seg_obj, 'statplat')
+    seg_obj['wf_Visibility Mailbox'] = 1
+    seg_obj['wf_Model Type'] = 'Mesh'
+
+# Pit-death sensors: an invisible ActBox below each gap. A falling Player enters
+# the band -> SMB_PLAYER_HURT=1 -> the player script's existing respawn fires
+# (-1 life, back to spawn). Positioned below ground (Z band [-15, -1]) so a Mario
+# standing at the lip doesn't trigger it; only a fall does. Mirrors the flagpole
+# ActBox composition (see §10b).
+for _i, (_pl, _pr) in enumerate(PITS):
+    _cx = (_pl + _pr) / 2.0
+    _hx = (_pr - _pl) / 2.0 + 0.5
+    bpy.ops.mesh.primitive_cube_add(size=2.0, location=(_cx, 0.0, -8.0))
+    pit = bpy.context.object
+    pit.name      = f'pit_death_{_i}'
+    pit.data.name = f'pit_death_{_i}'
+    pit.scale = (_hx, GROUND_Y, 7.0)   # half-extents -> Z band [-15, -1]
+    bpy.ops.object.transform_apply(scale=True)
+    attach_schema(pit, 'actbox')
+    pit['wf_MailBox']            = SMB_PLAYER_HURT
+    pit['wf_MailBoxValue']       = 1
+    pit['wf_Activated By Actor'] = 'Player'
+    pit['wf_Activated Actor Mailbox'] = 4005   # scratch slot (don't care who fell in)
 
 # ── 6. ? Blocks ───────────────────────────────────────────────────────────────
 # Each ? block is ONE Generator actor: solid visible mesh + 3-state self-detect
@@ -676,7 +741,7 @@ if player:
         "INDEXOF_INPUT write-mailbox\n"
         "INDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\n"
         "INDEXOF_Z_POS read-mailbox INDEXOF_SMB_PLAYER_Z write-mailbox\n"   # enemies use proximity
-        "INDEXOF_GOLD read-mailbox 70 write-mailbox\n"
+        "INDEXOF_GOLD read-mailbox INDEXOF_HUD_SCORE write-mailbox\n"
         # seed lives once (guarded so game-over at LIVES=0 never re-seeds)
         "INDEXOF_SMB_LIVES_INIT read-mailbox not if "
         "3 INDEXOF_LIVES write-mailbox 1 INDEXOF_SMB_LIVES_INIT write-mailbox then\n"
@@ -692,6 +757,8 @@ if player:
         f"    {MARIO_SPAWN_Z} INDEXOF_Z_POS write-mailbox\n"
         "    0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox "
         "0 INDEXOF_ZSPEED write-mailbox\n"
+        # restart the countdown for the new life (any death resets the timer, SMB-faithful)
+        "    INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox\n"
         "    INDEXOF_TIME read-mailbox 2.0 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n"
         "    INDEXOF_LIVES read-mailbox 1 < if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n"
         "  then\n"
