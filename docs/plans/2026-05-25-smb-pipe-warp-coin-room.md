@@ -1,6 +1,6 @@
 # SMB pipe warp → underground coin room
 
-**Status:** Phase A DONE 2026-05-25 (cross-room warp + room switch + per-room light + camera-follow, bridge-verified [tests/verify_smb_pipe_warp.py](../../tests/verify_smb_pipe_warp.py) ALL PASS); Phase B (coins + exit Warp) remaining. Camera pan-settle is real-time-fps-dependent — polish tracked in TODO.
+**Status:** Phase A DONE + Phase B round-trip DONE 2026-05-25. Full round trip bridge-verified ([tests/verify_smb_pipe_warp.py](../../tests/verify_smb_pipe_warp.py) ALL PASS): Down-on-pipe → warp into the lit coin room (camera frames it cleanly) → walk into the exit `Warp` → back to the surface (camera returns to `cs_side`). The camera "slow pan" turned out to be a **room-gap freeze**, fixed by making the rooms *contiguous* (touching at Z=−10, not gapped) — now the camera reaches cs_coin's exact pose. **Remaining:** collectible coins in the room (the `gold` TTL is hardcoded 5 s so pre-placed gold despawns — needs static discs + script proximity-pickup, or a generator-on-entry; see TODO).
 
 ### Implementation notes (2026-05-25)
 

@@ -28,9 +28,11 @@ PORT  = 7782
 SCROT = REPO / "tests" / "screenshots"
 SCROT.mkdir(parents=True, exist_ok=True)
 
-PLAYER_IDX  = 10
+PLAYER_IDX  = 9      # shifted from 10 when the broken imported actboxor was replaced
 CS_SIDE_IDX = 5      # surface camshot  (pos 4.5,-30,4.5)
 CS_COIN_IDX = 34     # coin-room camshot (pos 9,-35,-43.5)
+
+JOY_RIGHT = 0x2000
 
 # globals (idx=1)
 SMB_AT_PIPE    = 1809
@@ -124,9 +126,32 @@ try:
     # have descended well below the surface (proves it followed, not froze).
     check(cz is not None and cz < -8, "camera entity followed down toward the coin room (Z < -8)")
 
+    # ── 3. walk RIGHT into the exit warp → back to the surface ────────────────
+    print("\n== exit warp (walk right) → surface ==")
+    cli.send({"op": "pause"}); time.sleep(0.3)
+    returned = False
+    for i in range(200):
+        cli.inject_input(slot="joystick1_raw", value=JOY_RIGHT, duration_frames=2)
+        cli.send({"op": "step"}); time.sleep(0.02)
+        z = g(Z_POS, PLAYER_IDX)
+        if z is not None and z > -5:          # warped back up to the surface
+            returned = True
+            print(f"  returned at step {i}: X={fmt(g(X_POS,PLAYER_IDX))} Z={fmt(z)}")
+            break
+    cli.inject_input(slot="joystick1_raw", value=0, duration_frames=0)
+    cli.send({"op": "resume"}); time.sleep(4.0)   # let the camera switch back to cs_side
+    xr, zr, camr = g(X_POS, PLAYER_IDX), g(Z_POS, PLAYER_IDX), g(EMAILBOX_CAMSHOT)
+    czr = g(3011, 1)
+    print(f"  after return: player X={fmt(xr)} Z={fmt(zr)} CAMSHOT={fmt(camr)} cameraZ={fmt(czr)}")
+    shot("warp_returned")
+    check(returned, "walking into the exit pipe warped Mario back up (Z > -5)")
+    check(xr is not None and abs(xr - 24.0) < 3.0, "returned near the surface return point (X ~ 24)")
+    check(camr == CS_SIDE_IDX, "camera switched back to cs_side on the surface")
+    check(czr is not None and czr > -5, "camera entity back up at the surface (Z > -5)")
+
     # crash check: bridge still alive?
     alive = proc.poll() is None
-    check(alive, "engine still running (no crash on the multi-room switch)")
+    check(alive, "engine still running (no crash on the round-trip)")
 
     print("\n=== RESULT:", "ALL PASS" if not fails else f"{len(fails)} FAILED: {fails}", "===")
 

@@ -1621,9 +1621,18 @@ character). The room system then follows on its own:
   runs each frame with `_camera->GetWatchObject()` (the player). When the player leaves
   `_activeRooms[0]`'s bbox it loops over **every** room and switches to the first one whose
   bbox contains the player. **Adjacency is NOT required for the switch** — it's a full scan.
-- **The two room bboxes MUST be disjoint** (no overlap on *any* axis), or `_activeRooms[0]`
-  still contains the player and the switch never fires. SMB stacks the coin room straight
-  below the surface with a Z gap (surface Z[−10,25], coin Z[−58,−36]).
+- **The rooms must partition space CONTIGUOUSLY — touching, NOT gapped.** Two competing
+  constraints:
+  - For the **switch**: the warp destination must be unambiguously inside the *target*
+    room and outside the source room, so the player leaves `_activeRooms[0]`. SMB drops
+    Mario to Z=−46.5, far below the surface room's Z=−10 floor.
+  - For the **camera**: the rooms' bboxes must **touch with no gap** (SMB: surface
+    Z[−10,25] meets coin Z[−58,**−10**] at the −10 plane). The camera entity *physically
+    pans* between camshot poses; if there's an empty Z band between the rooms it lands in
+    "no room" mid-pan, stops updating, and **freezes** there (it renders the destination
+    room from a wrong, too-high angle, or a black screen). An earlier draft of this note
+    said "disjoint with a gap" — **wrong**; a gap freezes the camera. Make them adjoin.
+    (The shared boundary plane is harmless: the player is never parked exactly on it.)
 - The one transition frame prints `Room::UpdateRoomContents: object N … fell out of room 0
   … re-adding` — **harmless**; `AddObjectToRoom` re-homes the actor to whatever room now
   contains it. A `… is not in any room` line is **also not a crash** — it's a graceful
@@ -1693,6 +1702,13 @@ can't do "press Down at the pipe." Compose it instead:
 
 Use a pure `Warp` + `Target` for the *exit* pipe (walk-into, no gate needed) — that's exactly
 what `Warp` does natively, and it validates the `Warp` class's Jolt teleport.
+
+> **Warp renders its volume as a white box.** Unlike `actbox.oas`/`actboxor.oas` (which
+> `@define DEFAULT_MODEL_TYPE 3` = None), `warp.oas` has no such override, so the box mesh
+> you give the Warp for its activation volume draws as a white debug cube. Setting
+> `wf_Model Type='None'` doesn't help (the exporter doesn't emit it for the warp schema).
+> Force it invisible with **`wf_Visibility Mailbox = 0`** (mb[0] = always false) — activation
+> is independent of rendering, so the Warp still fires.
 
 ### Verifying camera moves on the bridge — resume, don't step
 

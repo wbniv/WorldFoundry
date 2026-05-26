@@ -39,7 +39,16 @@
 - [ ] **Investigate: hybrid Room-bbox fallback for SMB scroll bounds.** The SMB scrolling camera plan adds `Scroll Min X` / `Scroll Max X` per-CamShot OAS fields on `camshot.oas`. The author has to set these explicitly, which duplicates info already implicit in the containing Room's bbox (`ROOM_BBOX_REL` in the level script). Hybrid pattern to evaluate: when `Scroll Min X == Scroll Max X` (both default = 0, "unset"), fall back to reading bounds from the Room actor's bbox; when explicitly set, use those values. Matches the precedent of the existing per-axis `Position X/Y/Z` Absolute/Relative toggles (default behaviour with explicit override available). Trade-off: simpler authoring for the common case (room == scroll region), retains escape hatch for sub-region scroll within a larger room. Investigate after the SMB plan ships — multi-CamShot levels are the case where the explicit-vs-fallback distinction starts to matter, and we won't have one until at least the second 2D level. See [SMB camera plan](.) (TBD location once promoted to `docs/plans/`) Open Question #3 for the original discussion.
 
 
-- [ ] **SMB pipe-warp: camera pan into the coin room settles slowly.** On the surface→coin-room camshot switch (`cs_side`→`cs_coin`, [pipe-warp plan](docs/plans/2026-05-25-smb-pipe-warp-coin-room.md)) the camera follows correctly but the pan to `cs_coin`'s pose (a ~48-unit Z swoop) converges asymptotically rather than snapping — clearly visible in the bridge test ([tests/verify_smb_pipe_warp.py](tests/verify_smb_pipe_warp.py)): camera Z reaches ~−14 after several headless seconds, still short of −43.5. Headless GL is low-fps so real-time is faster, but the swoop is slow either way. Polish options: lower `cs_coin`'s `Pan Time In Seconds`, or flip `gBungeeCam` to snap on the warp frame (see the camera-slew section in [level-building.md](docs/level-building.md)). Not blocking — the room is visible/lit and the camera does follow. Surfaced 2026-05-25.
+- [ ] **SMB pipe-warp: add collectible coins to the coin room.** The underground room
+  ([pipe-warp plan](docs/plans/2026-05-25-smb-pipe-warp-coin-room.md)) is currently empty
+  (warp in/out works). Coins are awkward because the `gold` class TTL is hardcoded
+  (`kGoldTTL = 5.0f`, [gold.cc:25](wfsource/source/game/gold.cc), no OAD field) — so
+  *pre-placed* gold coins despawn 5 s after level load, before the player arrives. Options:
+  (a) static gold-disc statplats + a player-script proximity pickup that awards `GOLD` and
+  hides each via a per-coin visibility mailbox (pure composition, persistent — preferred);
+  (b) a generator-on-entry that spawns collectible gold when the player enters (coins
+  appear, 5 s window); (c) root-cause: gate the `gold` TTL to *spawned* coins only so
+  pre-placed ones persist (small engine change). Surfaced 2026-05-25.
 
 
 ## CONCURRENCY / ASYNC

@@ -1041,11 +1041,26 @@ targets[1].location = LOOKAT_POS
 targets[1].name = 'Target02'
 targets[1]['wf_Model Type'] = 'None'
 
+# Surface camera zone. The imported actboxor's bbox is offset way out of the room
+# (center Z≈52) so it never fires — the surface camera has been running on the
+# construct-time EMAILBOX_CAMSHOT bootstrap alone. That's fine until we ALSO switch
+# to cs_coin underground: on the RETURN nothing would switch back to cs_side (the
+# bootstrap is one-time, abor_coin stops firing). So give the surface zone a real
+# in-room volume that re-asserts cs_side every frame the player is on the surface.
+# MailBox=1921 (INDEXOF_CAMSHOT — NOT 1021; see the room-switch notes in the plan).
 actboxor = find_by_class('actboxor')
 if actboxor:
-    actboxor.location = (SCENE_MID_X, 0.0, MARIO_Z + 2)
-    actboxor['wf_Object'] = 'cs_side'
-    actboxor['wf_Activated By Actor'] = 'Player'
+    bpy.data.objects.remove(actboxor, do_unlink=True)
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(SCENE_MID_X, 0.0, 5.0))
+abs_ = bpy.context.object
+abs_.name = 'abor_surface'; abs_.data.name = 'abor_surface'
+abs_.scale = ((GROUND_X1 - GROUND_X0)/2 + 6.0, GROUND_Y + 2.0, 8.0)   # surface playfield, Z[-3,13]
+bpy.ops.object.transform_apply(scale=True)
+attach_schema(abs_, 'actboxor')
+abs_['wf_MailBox']            = 1921
+abs_['wf_Object']             = 'cs_side'
+abs_['wf_Activated By Actor'] = 'Player'
+abs_['wf_Model Type']         = 'None'
 
 # ── 12. Room bbox ─────────────────────────────────────────────────────────────
 # Absolute extremes of all actor centres:
@@ -1059,10 +1074,15 @@ RY0, RY1 =  -35.0,   10.0
 RZ0, RZ1 =  -15.0,   20.0
 ROOM_BBOX_REL = (RX0, RY0, RZ0, RX1, RY1, RZ1)
 
-# Coin-room bbox in WORLD space, DISJOINT from the surface room in Z (gap -36..-10).
-# (centre + rel are derived so the bounds mesh sits in local space like the surface.)
+# Coin-room bbox in WORLD space. Its TOP touches the surface room's bottom (Z=-10)
+# so room coverage is CONTINUOUS — the camera entity physically pans between camshot
+# poses, and if there were a Z gap between the rooms it would land in "no room" mid-pan,
+# stop updating, and FREEZE (it's updated only via the active room's update list). The
+# player switch still fires: the warp drops Mario to Z=-46.5, well clear of the surface
+# room (Z[-10,25]), so he leaves room 0. The upper part (Z -10..-40) is the empty pipe
+# shaft the camera travels down. (Surface room bottom = ROOM_CENTRE.z 5 + RZ0 -15 = -10.)
 CR_BBOX_WORLD = (CR_X0 - 4.0, -40.0, CR_FLOOR_TOP - 10.0,
-                 CR_X1 + 4.0,  12.0, CR_FLOOR_TOP + 12.0)   # x[-4,22] y[-40,12] z[-58,-36]
+                 CR_X1 + 4.0,  12.0, -10.0)                 # x[-4,22] y[-40,12] z[-58,-10]
 _cx0,_cy0,_cz0,_cx1,_cy1,_cz1 = CR_BBOX_WORLD
 CR_CENTRE = ((_cx0+_cx1)/2, (_cy0+_cy1)/2, (_cz0+_cz1)/2)    # (9, -14, -47)
 CR_BBOX_REL = (_cx0-CR_CENTRE[0], _cy0-CR_CENTRE[1], _cz0-CR_CENTRE[2],
@@ -1207,6 +1227,34 @@ if light:
     coin_light.name = 'Light_coin'
     coin_light.location = (9.0, -22.0, CR_FLOOR_TOP + 6.0)   # (9,-22,-42), inside coin-room bbox
     coin_light.rotation_euler = (math.pi / 3, 0, 0)
+
+# ── 15. Exit pipe → warp back to the surface (Phase B) ────────────────────────
+# A pure Warp + Target: Mario walks RIGHT into the warp volume → teleported to the
+# surface return point (past the entry pipe, so no instant re-trigger; the entry
+# needs Down anyway). The Warp class teleports any overlapping actor in its filter
+# (no input gate needed for a walk-into exit) — this validates Warp's Jolt teleport.
+EXIT_PIPE_X0, EXIT_PIPE_X1 = 15.0, 18.0
+add_statplat('exit_pipe', EXIT_PIPE_X0, -GROUND_Y, CR_FLOOR_TOP,
+             EXIT_PIPE_X1,  GROUND_Y, CR_FLOOR_TOP + 2*T, PIPE_GREEN)
+
+# Surface return marker, on ground_0 right of the entry pipe (X=18).
+_make_target('Target_surface_return', (24.0, 0.0, MARIO_SPAWN_Z))
+
+# Warp volume just LEFT of the exit pipe so walking right triggers it before the
+# pipe wall blocks. Activated By Player; Target resolves by name at compile time.
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(13.5, 0.0, CR_FLOOR_TOP + 1.0))
+wp = bpy.context.object
+wp.name = 'pipe_exit_warp'; wp.data.name = 'pipe_exit_warp'
+wp.scale = (1.5, GROUND_Y, 1.0)        # X[12,15] Z[-48,-46]
+bpy.ops.object.transform_apply(scale=True)
+attach_schema(wp, 'warp')
+wp['wf_Target']             = 'Target_surface_return'
+wp['wf_Activated By Actor'] = 'Player'
+wp['wf_Model Type']         = 'None'
+# warp.oas has no DEFAULT_MODEL_TYPE override (unlike actbox.oas's =3), so the
+# volume mesh would render as a white debug box. Activation is independent of
+# rendering, so force always-invisible (Visibility Mailbox 0 = mb[0] = always false).
+wp['wf_Visibility Mailbox'] = 0
 
 # ── 13. Export ────────────────────────────────────────────────────────────────
 print(f"[smb] Exporting to {OUT_LEV}")
