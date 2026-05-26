@@ -1,5 +1,7 @@
 # wf-edit: finish the level-loading UX (ordered)
 
+**Status:** DONE 2026-05-26 — #1 (Save-As label, `a290f08b`) + #2 (File→Open browser, `f2d3678e`) shipped; #3 (friendly names) dropped.
+
 ## Progress (updated 2026-05-26)
 
 - **#1 Save-As-`.lev` labeling — DONE.** Committed `a290f08b` (main.cc only; the

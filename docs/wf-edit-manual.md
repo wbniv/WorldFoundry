@@ -87,6 +87,8 @@ Camera capture uses Linux [V4L2](https://www.kernel.org/doc/html/latest/userspac
 | `--level=<name>` | `=` | Level the **engine** loads into the viewport (default `snowgoons-blender`). If omitted, the viewport **auto-tracks** a binary `--leveltree` (a bare `.iff` directly; a `cd.iff:tag` sliced to a temp `.iff`), so the 3D view matches the Outliner. Pass it explicitly to override. |
 | `--leveltree=<name>` | `=` | Level the **Outliner/Properties** `Doc` is built from (defaults to match `--level`). Accepts a text `.lev`, a compiled binary `.iff`/`.lvl` (sniffed by content, decompiled on load), or a `cd.iff` archive with a level selector — `<file.iff>:<TAG\|index>` (e.g. `wflevels/cd.iff:L4` or `:1`). Pass a **bare** `cd.iff` (no `:TAG`) and the editor shows a startup level picker. |
 | `--pick-level=<TAG\|index>` | `=` | Headless aid: auto-confirm the startup cd.iff picker on the chosen level (equivalent to clicking that row + Open), for screenshots/CI. |
+| `--open` | flag | Open the File→Open browser at startup (instead of loading straight into a level). |
+| `--open-pick=<path>` | `=` | Headless aid: skip the browser and **re-exec** into `<path>` (a `.iff`/`.lev`/`.lvl`, or `cd.iff:TAG`) on the first frame — the scripted equivalent of picking that file in File→Open. |
 | `--room=<id>` | `=` or space | Join a voice + video call room. Omit to run solo (no call started). |
 | `--frames <N>` | space | Headless: exit after *N* frames. **Note the space** — `--frames=N` is ignored. |
 | `--screenshot <path.ppm>` | space | Headless: dump the composited frame (engine + UI) to a PPM. **Note the space.** |
@@ -106,8 +108,8 @@ Camera capture uses Linux [V4L2](https://www.kernel.org/doc/html/latest/userspac
 The window is an ImGui **dockspace** with a menu bar and three docked panels. Panels are
 dockable/resizable — drag a tab to rearrange.
 
-- **Menu bar** (top) — `File` (Save / Save + Compile), and `View` (toggle the
-  Collaborators panel) when a call is active. The room ID is shown to the right when joined.
+- **Menu bar** (top) — `File` (**Open Level…** / Save / Save + Compile), and `View` (toggle
+  the Collaborators panel) when a call is active. The room ID is shown to the right when joined.
 - **Outliner** (left) — every actor in the level, read from the CRDT `Doc`. The header
   shows the level name and actor count (e.g. *snowgoons-blender.lev: 36 actors*). Click a
   row to select it.
@@ -226,10 +228,17 @@ brings snowgoons to 37 actors):
 
 ## Saving and compiling
 
-The `File` menu has two actions:
+The `File` menu has these actions:
 
+- **Open Level…** (<kbd>Ctrl</kbd>+<kbd>O</kbd>) — opens a file browser rooted at `wflevels/`
+  (subdirs + `.iff`/`.lev`/`.lvl`). Opening a level **re-execs** the editor into the pick
+  (preserving `--room`/`--relay`); a bare `cd.iff` re-shows the startup level picker. A fresh
+  process sidesteps any in-place engine/bridge reset. With unsaved changes, a "discard
+  changes?" confirm fires first.
 - **Save Level** (<kbd>Ctrl</kbd>+<kbd>S</kbd>) — writes the `Doc` back to the level's
-  `.lev` source. A toast confirms the path.
+  `.lev` source. A toast confirms the path. When the session was loaded from a **read-only
+  binary** source (a `.iff`/`.lvl` or a level out of a `cd.iff`), this item reads
+  **"Save As .lev"** instead — the save target is a fresh `.lev`, not a round-trip to the binary.
 - **Save + Compile (.iff)** — saves, then runs the 5-stage `build_level_binary.sh`
   pipeline to produce the engine-loadable `.iff`. This blocks the frame for the few
   seconds the build takes; the live engine is **not** auto-reloaded — the fresh `.iff` is
@@ -306,7 +315,8 @@ initials avatar (audio-only).
 
 | Key | Action |
 |---|---|
-| <kbd>Ctrl</kbd>+<kbd>S</kbd> | Save Level (when not typing in a field) |
+| <kbd>Ctrl</kbd>+<kbd>O</kbd> | Open Level… (file browser; re-execs into the pick) |
+| <kbd>Ctrl</kbd>+<kbd>S</kbd> | Save Level / Save As .lev (when not typing in a field) |
 | <kbd>Delete</kbd> | Delete the selected actor (when not typing in a field) |
 
 ---
