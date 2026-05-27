@@ -1,7 +1,7 @@
 # Plan — WebRTC Phase 4: quick-tunnel reachability ("share a link" calling)
 
 **Date:** 2026-05-27
-**Status:** Planned (not started)
+**Status:** **DONE 2026-05-27** — all four sub-phases landed. 4.1 `fetch-cloudflared` (pinned 2026.5.2, SHA256-verified, idempotent, not committed); 4.2 `task quick-tunnel` (spawn relay+cloudflared, scrape URL, print `wfedit+s://…` link — verified live); 4.3 in-editor **Collaborate → Host a call** re-execs into a `--host-tunnel` session with a **responsive "Establishing secure tunnel…" progress UI** (no WM hang) that resolves the host then shows a copyable share-link modal (`WF_EDIT_HOST_TUNNEL_TEST` headless PASS + user-verified on-screen); 4.4 `relay_default` / `WF_COLLAB_RELAY_DEFAULT` slot (ships empty). **Env caveat:** end-to-end relay *through* the tunnel needs unblocked egress — this dev box blocks cloudflared's QUIC (port 7844), so the tunnel gets a URL but the wss:// relay-connect fails here; the UI + URL generation are proven, the proxy path needs a normal network / two real machines. Durable central relay still deferred (same hosting decision as TURN).
 **Estimated effort:** ~2–3 days — *average-programmer scale* (cloudflared fetch ~0.25 day; `task quick-tunnel` plumbing ~0.5 day; in-editor Host UX + subprocess/scrape ~1–1.5 days; central-host default + docs ~0.5 day)
 **Parent:** Phase 4 of [docs/plans/2026-05-26-internet-voice-video-webrtc.md](2026-05-26-internet-voice-video-webrtc.md)
 **Builds on:** [Phase 3 — generic TURN client](2026-05-27-webrtc-phase3-turn-generic-client.md) (done)
