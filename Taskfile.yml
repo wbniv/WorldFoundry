@@ -32,18 +32,21 @@ tasks:
 
   build-cmake:
     desc: "Build wf_game via CMake (Linux)"
+    deps: [vendor-unpack]
     cmds:
       - cmake -S . -B cmake-build-linux -DCMAKE_BUILD_TYPE=Debug
       - cmake --build cmake-build-linux -j
 
   build-asan:
     desc: "Build wf_game with AddressSanitizer + UBSan (now the Debug default; explicit dir)"
+    deps: [vendor-unpack]
     cmds:
       - cmake -S . -B cmake-build-asan -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=ON
       - cmake --build cmake-build-asan -j
 
   build-fast:
     desc: "Fast-debug: Debug symbols, NO sanitizer tax (-DWF_ASAN=OFF) — for chasing logic, not memory"
+    deps: [vendor-unpack]
     cmds:
       - cmake -S . -B cmake-build-fast -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=OFF
       - cmake --build cmake-build-fast -j
@@ -78,6 +81,7 @@ tasks:
 
   build-cmake-android:
     desc: "Build libwf_game.so via CMake + NDK (arm64-v8a)"
+    deps: [vendor-unpack]
     vars:
       NDK: /usr/lib/android-sdk/ndk/26.2.11394342
     cmds:
