@@ -118,8 +118,7 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 
 ## PLATFORMS
 
-- [ ] macOS desktop — renderer-agnostic headless bring-up landed (`hal/macos/`, `WF_TARGET_MACOS`, `macos-desktop-debug` Codemagic workflow); compiles+links+`--frame-step-smoke` with rendering as a true no-op — [plan](docs/plans/2026-05-26-macos-port-runtime-bringup.md) [investigation](docs/investigations/2026-05-26-macos-port-estimate.md)
-- [ ] macOS `.app` packaging — `MACOSX_BUNDLE` + `Info.plist` + NSBundle asset accessor (reuse `hal/ios/asset_accessor_nsbundle.mm`), bundle `cd.iff` as a resource; iOS-parity packaging deferred from the headless bring-up — [plan](docs/plans/2026-05-26-macos-port-runtime-bringup.md)
+- [ ] macOS desktop — renderer-agnostic headless bring-up + `.app` bundle authored (pending Codemagic `macos-desktop-debug` verify); Phase 2 `.app` packaging also authored (MACOSX_BUNDLE + NSBundle accessor + resource bundling) — [plan](docs/plans/2026-05-26-macos-port-runtime-bringup.md) [investigation](docs/investigations/2026-05-26-macos-port-estimate.md)
 - [ ] macOS renderer — the gfx half: real Metal renderer + window (Metal-direct, shared with iOS once iOS Metal lands); re-enable Jolt + full scripting roster on macOS once headless is green — [investigation](docs/investigations/2026-05-26-macos-port-estimate.md)
 - [ ] iOS Phase 2C — wire MetalView `CADisplayLink` tick → `SetCurrentEncoder` → engine frame loop → `EndFrame`; first boot of engine main loop on iOS — [plan](docs/plans/2026-04-21-ios-port-codemagic.md)
 - [ ] Android launcher polish — adaptive icon XML, foreground/background drawables — [plan](docs/plans/2026-04-18-android-launcher-polish.md)

@@ -40,8 +40,13 @@
 #include <hal/asset_accessor.hp>
 #include <signal.h>
 
-// Installed below by _PlatformSpecificInit. Declared in asset_accessor_posix.cc.
-extern AssetAccessor* HALCreatePosixAssetAccessor();
+// On macOS desktop (.app bundle) use NSBundle to resolve bundled resources;
+// on Linux use the POSIX cwd-relative accessor.
+#if defined(WF_TARGET_MACOS)
+extern "C" AssetAccessor* HALCreateNSBundleAccessor();  // hal/macos/asset_accessor_nsbundle.mm
+#else
+extern AssetAccessor* HALCreatePosixAssetAccessor();    // asset_accessor_posix.cc
+#endif
 extern bool bPrintVersion;
 
 //=============================================================================
@@ -226,7 +231,11 @@ _PlatformSpecificInit(int /*argc*/, char** /*argv*/, int /*maxTasks*/,int /*maxM
 	_HALDmalloc = new (*_HALLmalloc)DMalloc( *_HALLmalloc, HAL_DMALLOC_SIZE MEMORY_NAMED( COMMA "HALDmalloc"));
 	ValidatePtr(_HALDmalloc);
 
+#if defined(WF_TARGET_MACOS)
+	HALSetAssetAccessor(HALCreateNSBundleAccessor());
+#else
 	HALSetAssetAccessor(HALCreatePosixAssetAccessor());
+#endif
 }
 
 //=============================================================================

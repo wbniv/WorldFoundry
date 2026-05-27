@@ -106,8 +106,9 @@ if(ANDROID)
     list(APPEND WF_DEFS WF_TARGET_ANDROID __ANDROID__
                         RENDERER_GLES RENDERER_PIPELINE_GLES SCALAR_TYPE_FLOAT)
 elseif(IOS)
-    # Phase 1: core runtime + HAL only. No RENDERER_* yet — gfx/game/physics
-    # dirs are excluded from the iOS build until Phase 2 lands the Metal backend.
+    # Phase 2B2: most of the engine (incl. game/physics) compiles; only gfx/gl +
+    # gfx/glpipeline (X11/GLX, GL-only) stay out — iOS renders via hal/ios Metal.
+    # No RENDERER_* define yet. Physics is Jolt (the Xcode-safe Jolt block below).
     list(APPEND WF_DEFS WF_TARGET_IOS SCALAR_TYPE_FLOAT)
 elseif(APPLE)
     # macOS desktop — renderer-agnostic bring-up. No RENDERER_* (rendering is a
@@ -269,8 +270,9 @@ elseif(APPLE)
     # macOS desktop — renderer-agnostic bring-up. The 8 RenderPoly3D link stubs +
     # the no-op RendererBackend + backend_factory (picks the headless backend via
     # WF_TARGET_MACOS), plus the portable Linux HAL files reused verbatim
-    # (hal/macos holds only the macOS-specific shell, headless Display, and
-    # GL/window stubs — the rest of the HAL is plain POSIX/miniaudio).
+    # (hal/macos holds the macOS-specific shell, headless Display, GL/window stubs,
+    # and the NSBundle asset accessor). platform_init.cc selects NSBundle vs POSIX
+    # via WF_TARGET_MACOS guard; asset_accessor_posix.cc is NOT compiled on macOS.
     list(APPEND WF_SOURCES
         ${STUB_SRC}/renderpoly3d_stubs.cc
         ${STUB_SRC}/renderer_stub.cc
@@ -279,7 +281,7 @@ elseif(APPLE)
         ${SRC}/hal/linux/audio.cc
         ${SRC}/hal/linux/input.cc
         ${SRC}/hal/linux/lifecycle.cc
-        ${SRC}/hal/linux/asset_accessor_posix.cc
+        ${SRC}/hal/macos/asset_accessor_nsbundle.mm
     )
 endif()
 
@@ -489,15 +491,6 @@ endif()
 
 # ─── Jolt Physics ─────────────────────────────────────────────────────────────
 set(JOLT_DIR ${VENDOR}/jolt-physics-5.5.0)
-# iOS/Xcode: Jolt's add_library(Jolt ...) does not produce a target our scope
-# can modify under -G Xcode + CMAKE_SYSTEM_NAME=iOS (symptom: "Cannot specify
-# compile options for target 'Jolt' which is not built by this project").
-# TODO(ios): investigate Jolt + Xcode generator and re-enable. Until then,
-# fall back to the legacy physics backend for the iOS target.
-if(IOS AND WF_PHYSICS_ENGINE STREQUAL "jolt")
-    message(STATUS "iOS: forcing WF_PHYSICS_ENGINE=legacy (Jolt+Xcode integration deferred)")
-    set(WF_PHYSICS_ENGINE "legacy" CACHE STRING "" FORCE)
-endif()
 if(WF_PHYSICS_ENGINE STREQUAL "jolt")
     list(APPEND WF_SOURCES
         ${STUB_SRC}/physics_jolt.cc
@@ -506,26 +499,38 @@ if(WF_PHYSICS_ENGINE STREQUAL "jolt")
     list(APPEND WF_INCLUDES ${JOLT_DIR})
     list(APPEND WF_DEFS PHYSICS_ENGINE_JOLT NDEBUG)
     set(PHYSICS_REPO_ROOT ${JOLT_DIR})
-    include(${JOLT_DIR}/Jolt/Jolt.cmake)
+    include(${JOLT_DIR}/Jolt/Jolt.cmake)  # populates JOLT_PHYSICS_SRC_FILES + add_library(Jolt ...)
+
+    # Apply Jolt's build modifiers via SOURCE-FILE properties, NOT
+    # target_compile_*(Jolt ...). Under -G Xcode + CMAKE_SYSTEM_NAME=iOS the
+    # target_* form errors ("Cannot specify compile options for target 'Jolt'
+    # which is not built by this project") because Jolt's own cmake deliberately
+    # avoids global per-target flags under Xcode's multi-arch builds
+    # (Jolt/Jolt.cmake:637). Source-file properties are honored by every
+    # generator including Xcode and stay scoped to Jolt's own TUs — no leak onto
+    # wfengine/wf_game, which keep their Debug -O0 -g. This lets iOS build Jolt
+    # like every other target; the old workaround force-flipped iOS to legacy
+    # physics, which is being deleted.
+    #
+    # NDEBUG is LOAD-BEARING: Jolt.cmake:515 only auto-defines NDEBUG in
+    # Release-family configs, so in Debug Jolt's TUs would build WITHOUT it while
+    # wfengine's TUs (which set NDEBUG via WF_DEFS, above) build WITH it. That
+    # makes JPH_ENABLE_ASSERTS expand differently across TUs, and
+    # `ConstraintManager` has a ctor that exists only when asserts are enabled
+    # (ConstraintManager.h:32) — a silent ODR violation. The external harness
+    # (wf_host_gl_e2e_test) then trips SIGTRAP in `BodyManager::Init` because its
+    # stack-resident `PhysicsSystem` was half-initialised by wfengine's view of
+    # the ctor and asserted against by Jolt.a's view. The fix is consistent
+    # NDEBUG / JPH_ENABLE_ASSERTS state across all TUs. The consumer side already
+    # gets NDEBUG from WF_DEFS, so a per-file define (vs the old PUBLIC) suffices.
+    #
+    # -O2: keep Jolt fast even in Debug. -w: silence vendored warnings.
     # -fno-rtti: Jolt uses its own RTTI macro system (Jolt/Core/RTTI.h), zero
-    # C++ dynamic_cast/typeid in its sources — safe to drop the type_info tables.
-    target_compile_options(Jolt PRIVATE -O2 -w -fno-rtti)
-    # Force NDEBUG into Jolt's own TUs and PUBLIC-propagate to consumers.
-    # Without this, Jolt.a was built without NDEBUG (the auto-set NDEBUG in
-    # Jolt.cmake:515 only applies in Release configs), which made JPH_DEBUG
-    # / JPH_ENABLE_ASSERTS define-ON inside Jolt — while wfengine's TUs
-    # (which set NDEBUG via WF_DEFS) see them as define-OFF. The macro
-    # `JPH_IF_ENABLE_ASSERTS` then expands differently across TUs and
-    # `ConstraintManager` even has a ctor that exists only when asserts
-    # are enabled (ConstraintManager.h:32) — silent ODR violation. The
-    # external harness (wf_host_gl_e2e_test) trips SIGTRAP in
-    # `BodyManager::Init` because its stack-resident `PhysicsSystem` was
-    # half-initialised by wfengine's view of the ctor and then asserted-
-    # against by Jolt.a's view of the body. wf_game happens to dodge the
-    # SIGTRAP because its stack pattern leaves mActiveBodies[1] as zero;
-    # the harness's stack has the 0xa9-fill that trips it. The fix:
-    # consistent NDEBUG / JPH_ENABLE_ASSERTS state across all TUs.
-    target_compile_definitions(Jolt PUBLIC NDEBUG)
+    # C++ dynamic_cast/typeid — safe to drop the type_info tables (size only).
+    set_source_files_properties(${JOLT_PHYSICS_SRC_FILES} PROPERTIES
+        COMPILE_DEFINITIONS "NDEBUG"
+        COMPILE_OPTIONS     "-O2;-w;-fno-rtti"
+    )
     list(APPEND WF_LINK_LIBS Jolt)
 else()
     list(APPEND WF_DEFS PHYSICS_ENGINE_WF)
@@ -700,10 +705,12 @@ elseif(IOS)
     # Phase 1C fills in the Info.plist + launch screen via target properties.
     add_executable(wf_game MACOSX_BUNDLE ${WF_PLATFORM_SHELL_SOURCES})
 elseif(APPLE)
-    # macOS desktop — bare Mach-O CLI binary for the headless bring-up (run via
-    # --frame-step-smoke). The .app bundle + NSBundle assets are a later step
-    # (see docs/plans/2026-05-26-macos-port-runtime-bringup.md / TODO).
-    add_executable(wf_game ${WF_PLATFORM_SHELL_SOURCES})
+    # macOS desktop — MACOSX_BUNDLE packages wf_game as a proper .app. Assets
+    # (cd.iff, level0.mid, soundfont) are bundled into Contents/Resources/ and
+    # accessed via the NSBundle accessor installed by platform_init.cc. The
+    # Codemagic smoke test runs the binary inside the bundle directly with -L so
+    # it bypasses the cd.iff AssetAccessor path entirely.
+    add_executable(wf_game MACOSX_BUNDLE ${WF_PLATFORM_SHELL_SOURCES})
 else()
     add_executable(wf_game ${WF_PLATFORM_SHELL_SOURCES})
     # wf_game always keeps its name as the game-engine runtime. The editor is
@@ -935,6 +942,34 @@ if(IOS)
     target_sources(wf_game PRIVATE ${IOS_RESOURCES})
     set_source_files_properties(${IOS_RESOURCES} PROPERTIES
         MACOSX_PACKAGE_LOCATION Resources)
+endif()
+
+# ─── macOS .app bundle resources ─────────────────────────────────────────────
+if(APPLE AND NOT IOS)
+    set(MACOS_DIR ${CMAKE_SOURCE_DIR}/macos)
+    set_target_properties(wf_game PROPERTIES
+        BUNDLE                       TRUE
+        MACOSX_BUNDLE_INFO_PLIST     ${MACOS_DIR}/Info.plist
+        MACOSX_BUNDLE_GUI_IDENTIFIER org.worldfoundry.wf-game-macos
+        MACOSX_BUNDLE_BUNDLE_NAME    WorldFoundry
+        # Deployment target — matches LSMinimumSystemVersion in Info.plist.
+        CMAKE_OSX_DEPLOYMENT_TARGET  "12.0"
+    )
+    # Bundle any assets that exist at configure time (cd.iff, level0.mid, sf2).
+    # The smoke test bypasses cd.iff via -L, so missing assets don't fail CI;
+    # they are needed for a normal launch.
+    set(MACOS_RESOURCES)
+    foreach(asset cd.iff level0.mid florestan-subset.sf2)
+        set(path ${CMAKE_SOURCE_DIR}/wfsource/source/game/${asset})
+        if(EXISTS ${path})
+            list(APPEND MACOS_RESOURCES ${path})
+        endif()
+    endforeach()
+    if(MACOS_RESOURCES)
+        target_sources(wf_game PRIVATE ${MACOS_RESOURCES})
+        set_source_files_properties(${MACOS_RESOURCES} PROPERTIES
+            MACOSX_PACKAGE_LOCATION Resources)
+    endif()
 endif()
 
 # ─── Neural-forth unit test binary ───────────────────────────────────────────

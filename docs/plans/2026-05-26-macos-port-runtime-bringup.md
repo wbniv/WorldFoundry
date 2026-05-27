@@ -41,6 +41,18 @@ The frame loop touches the GPU only through the `Display` object and `RendererBa
 - **Local (free, done):** Linux build green (`build_game.sh`, exit 0 — source edits don't regress Linux); `cmake` configure exit 0 (CMakeLists branches parse); `codemagic.yaml` valid YAML. macOS-only new files can't be compiled off-Mac — that's the Codemagic build's job.
 - **Codemagic (`macos-desktop-debug`, manual trigger):** (1) Ninja configure + `cmake --build` under Apple Clang; (2) `wf_game` links with no unresolved symbols; (3) `--frame-step-smoke=30 --cycles=1 -L snowgoons-standalone.iff` from `wfsource/source/game` exits 0 (Load → 30 Steps → Unload), opening `cd.iff`. Expect Apple-Clang/framework iteration on the first runs (see investigation §Expected iteration points): `-fpermissive`, missing `<limits.h>`/`PATH_MAX`, framework link order, miniaudio ObjC++.
 
+## Phase 2: `.app` bundle + NSBundle accessor (implemented, awaiting Codemagic)
+
+Implemented in the same session, before the first Codemagic run:
+
+- `macos/Info.plist` — macOS desktop bundle plist (`LSMinimumSystemVersion=12.0`, `NSHighResolutionCapable`, no iOS keys).
+- `hal/macos/asset_accessor_nsbundle.mm` — NSBundle asset accessor (clone of `hal/ios/asset_accessor_nsbundle.mm`; Foundation/NSBundle API is identical on macOS).
+- `hal/linux/platform_init.cc` — `#if WF_TARGET_MACOS` guard selects `HALCreateNSBundleAccessor()` (no-op on Linux which keeps `HALCreatePosixAssetAccessor()`); `asset_accessor_posix.cc` removed from macOS sources.
+- `CMakeLists.txt` — macOS `add_executable` switched to `MACOSX_BUNDLE`; macOS bundle properties block (`set_target_properties`); resource bundling loop for `cd.iff`/`level0.mid`/soundfont; `asset_accessor_nsbundle.mm` added to macOS stub sources.
+- `codemagic.yaml` — smoke-test binary path updated to `wf_game.app/Contents/MacOS/wf_game`; comment notes `-L` bypasses the NSBundle cd.iff lookup.
+
+The smoke test still works: `-L` calls `ConstructDiskFile(gLevelOverridePath)` directly, bypassing the AssetAccessor entirely.
+
 ## Deferred (TODO)
 
-`.app` bundle + `Info.plist` + NSBundle asset accessor (iOS-parity packaging); the real Metal renderer + window (the gfx half, Metal-direct, shared with iOS); re-enabling Jolt + the full scripting roster on macOS once the headless bring-up is green.
+The real Metal renderer + window (the gfx half, Metal-direct, shared with iOS); re-enabling Jolt + the full scripting roster on macOS once the headless bring-up is green.

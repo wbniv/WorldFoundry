@@ -391,11 +391,14 @@ workflows:
       - name: Run headless frame-step smoke
         script: |
           set -euo pipefail
-          # wf_game lands in engine/ (RUNTIME_OUTPUT_DIRECTORY). Run from
-          # wfsource/source/game so cd.iff + the standalone level resolve.
+          # wf_game is a .app bundle; the Mach-O lives inside it.
+          # -L bypasses the cd.iff AssetAccessor path so the NSBundle lookup
+          # for cd.iff is never exercised — the smoke verifies compile+link+load
+          # with a standalone level. Level path must be absolute (resolved here).
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/wflevels/snowgoons-blender/snowgoons-standalone.iff"
           cd wfsource/source/game
-          "$CM_BUILD_DIR/engine/wf_game" --frame-step-smoke=30 --cycles=1 \
-            -L"$CM_BUILD_DIR/wflevels/snowgoons-blender/snowgoons-standalone.iff" \
+          "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" \
             2>&1 | tee "$CM_BUILD_DIR/macos-smoke.log"
 
     artifacts:
