@@ -6,8 +6,12 @@
 to relay-only (3.2); a `WF_EDIT_TURN_TEST` headless mode asserts the config precedence/parse and
 connects two in-process sessions P2P over loopback — `wf_edit_turn` ctest passes (3.3); the manual
 documents the config keys with production hosting deferred (3.4). The **force-relay-through-coturn
-leg was not run here** (coturn needs interactive sudo to install) — it is the same harness with
-config flipped, runnable via `task turn-test-relay` on a coturn-equipped box. Also fixed a
+leg was verified against real coturn 4.6.1** (a throwaway loopback `turnserver` on :3479 with static
+`wfedit` creds): with `iceTransportPolicy = Relay` the only ICE candidates are relay candidates, so
+the two sessions connecting at all proves coturn allocated and forwarded the (DTLS-SRTP) media —
+`[turn] two sessions connect via force-relay TURN PASS`. The harness is wrapped as `task
+turn-test-relay` (NOTE: it hardcodes port 3478, which collides with a system coturn daemon; run a
+throwaway `turnserver` on a free port and point `WF_COLLAB_TURN` at it, as done here). Also fixed a
 project-wide root-cause wart: UBSan's `vptr` check is incompatible with the engine's `-fno-rtti`,
 so it now globally excludes `-fno-sanitize=vptr` (was spewing false "invalid vptr" errors on
 libdatachannel); and `WebrtcCleanup()` (rtc::Cleanup) joins libdatachannel's threads so LSan stays
