@@ -1,17 +1,15 @@
 #pragma once
-// engine/wf_edit/video_track.h — V4L2 camera capture → VP8 encode → UDP, and
-// UDP receive → VP8 decode → OpenGL texture, for in-editor video chat.
+// engine/wf_edit/video_track.h — V4L2 camera → VP8 encode → WebRTC RTP, and
+// WebRTC RTP → VP8 decode → OpenGL texture, for in-editor video chat.
 //
-// VideoChat owns a background capture thread (V4L2 → encode → UDP send) and a
-// receive thread (UDP recv → reassemble → decode). Decoded frames are stored as
-// RGB pixel buffers; the main thread uploads them to GL textures each frame.
+// VideoChat owns a background capture thread (V4L2 → encode → send_cb).
+// Incoming VP8 is delivered via OnRemoteVP8Frame (called by WebrtcSession from
+// its track receive callback). Decoded frames are stored as RGB pixel buffers;
+// the main thread uploads them to GL textures each frame.
 //
 // Capture resolution: 320×240 (YUYV), scaled to 160×120 for thumbnails.
-// Fragment size: 1200 bytes (stays under Ethernet MTU).
-// Wire packet header (14 bytes):
-//   [4 bytes: 'WFV\0'] [4 bytes: frame_seq] [2 bytes: frag_idx]
-//   [2 bytes: frag_total] [1 byte: is_keyframe] [1 byte: reserved]
 
+#include <functional>
 #include <string>
 #include <vector>
 #include <map>
@@ -61,13 +59,22 @@ public:
     VideoChat();
     ~VideoChat();
 
-    // Bind the receive socket on an OS-assigned ephemeral port, and open
-    // /dev/video0 for capture (non-fatal if absent). Returns false only if the
-    // socket setup fails. Call ListenPort() after a successful Start().
+    // Open /dev/video0 for capture (non-fatal if absent). Never fails due to
+    // network — media is now routed via WebRTC.
     bool Start();
     void Stop();
 
-    uint16_t ListenPort() const { return listen_port_; }
+    // Always 0; port is no longer advertised (media routed via WebRTC).
+    uint16_t ListenPort() const { return 0; }
+
+    // Set the outgoing send callback. Called from the V4L2 capture thread with
+    // a complete VP8 frame (no RTP header). Pass nullptr to disable sending.
+    void SetSendCallback(std::function<void(const uint8_t*, int, bool)> cb);
+
+    // Deliver an incoming VP8 frame from the named peer. Called by
+    // WebrtcSession from its track receive callback (any thread).
+    void OnRemoteVP8Frame(const std::string& peer_id,
+                          const uint8_t* vp8, int len, bool is_key);
 
     void SetCameraEnabled(bool on);
     bool IsCameraEnabled() const { return cam_enabled_.load(); }
@@ -88,7 +95,6 @@ public:
 
 private:
     void CaptureThread();
-    void RecvThread();
 
     bool OpenCamera();
     void CloseCamera();
@@ -99,16 +105,11 @@ private:
                           std::vector<uint8_t>& rgb_out);
 
     void EncodeAndSend(const std::vector<uint8_t>& i420, bool force_keyframe);
-    void HandleRecvPacket(const uint8_t* buf, int len,
-                          const std::string& sender_ip);
 
     std::atomic<bool> cam_enabled_{false};
     std::atomic<bool> running_{false};
 
-    int      cam_fd_      = -1;
-    int      recv_fd_     = -1;
-    int      send_fd_     = -1;
-    uint16_t listen_port_ = 0;
+    int      cam_fd_ = -1;
 
     int cap_w_   = 320;
     int cap_h_   = 240;
@@ -121,14 +122,14 @@ private:
     uint32_t       frame_seq_ = 0;
     int            frames_since_key_ = 0;
 
+    // Outgoing send callback (set by WebrtcSession). Thread-safe via send_cb_mu_.
+    std::mutex                                         send_cb_mu_;
+    std::function<void(const uint8_t*, int, bool)>    send_cb_;
+
     std::thread cap_thread_;
-    std::thread recv_thread_;
 
     std::mutex                        peers_mu_;
     std::map<std::string, PeerVideo*> peer_video_;
-
-    struct PeerAddr { std::string ip; uint16_t port; };
-    std::map<std::string, PeerAddr> peer_addrs_;
 
     // Self-preview: latest captured frame scaled to 160×120 RGB.
     std::vector<uint8_t> self_preview_;  // main-thread only

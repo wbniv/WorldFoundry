@@ -17,10 +17,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 
-// Networking
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
+// POSIX
 #include <unistd.h>
 
 // OpenGL (for texture upload; only called from main thread)
@@ -55,38 +52,18 @@ VideoChat::~VideoChat()
 
 bool VideoChat::Start()
 {
-    // UDP receive socket — bind to port 0 for an OS-assigned ephemeral port.
-    recv_fd_ = socket(AF_INET, SOCK_DGRAM, 0);
-    if (recv_fd_ < 0) { std::perror("video: recv socket"); return false; }
-
-    struct sockaddr_in addr{};
-    addr.sin_family      = AF_INET;
-    addr.sin_port        = 0;   // ephemeral
-    addr.sin_addr.s_addr = INADDR_ANY;
-    if (bind(recv_fd_, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0) {
-        std::perror("video: bind"); close(recv_fd_); recv_fd_ = -1; return false;
-    }
-    socklen_t alen = sizeof(addr);
-    getsockname(recv_fd_, reinterpret_cast<sockaddr*>(&addr), &alen);
-    listen_port_ = ntohs(addr.sin_port);
-
-    // UDP send socket.
-    send_fd_ = socket(AF_INET, SOCK_DGRAM, 0);
-    if (send_fd_ < 0) { std::perror("video: send socket"); return false; }
-
     running_.store(true);
 
     // Try to open the camera; non-fatal if absent.
     cam_enabled_.store(OpenCamera());
     if (!cam_enabled_.load()) {
-        std::fprintf(stderr, "video: no camera available, video-only receive\n");
+        std::fprintf(stderr, "video: no camera available\n");
     }
 
-    // Launch capture + receive threads.
-    cap_thread_  = std::thread(&VideoChat::CaptureThread, this);
-    recv_thread_ = std::thread(&VideoChat::RecvThread, this);
+    // Launch capture thread (incoming frames arrive via OnRemoteVP8Frame).
+    cap_thread_ = std::thread(&VideoChat::CaptureThread, this);
 
-    std::printf("video: started on UDP port %u\n", listen_port_);
+    std::printf("video: started (WebRTC transport)\n");
     return true;
 }
 
@@ -95,13 +72,9 @@ void VideoChat::Stop()
     running_.store(false);
     cam_enabled_.store(false);
 
-    if (cap_thread_.joinable())  cap_thread_.join();
-    if (recv_thread_.joinable()) recv_thread_.join();
+    if (cap_thread_.joinable()) cap_thread_.join();
 
     CloseCamera();
-
-    if (recv_fd_ >= 0) { close(recv_fd_); recv_fd_ = -1; }
-    if (send_fd_ >= 0) { close(send_fd_); send_fd_ = -1; }
 
     if (encoder_) {
         vpx_codec_destroy(encoder_);
@@ -132,6 +105,7 @@ void VideoChat::SyncPeers(const std::vector<PeerInfo>& peers)
 {
     std::lock_guard<std::mutex> lk(peers_mu_);
 
+    // Add VP8 decoders for new peers.
     for (const auto& pi : peers) {
         if (!peer_video_.count(pi.peer_id)) {
             auto* dec_ctx = new vpx_codec_ctx{};
@@ -146,9 +120,9 @@ void VideoChat::SyncPeers(const std::vector<PeerInfo>& peers)
             peer_video_[pi.peer_id] = pv;
             std::printf("video: added peer %s\n", pi.peer_id.c_str());
         }
-        peer_addrs_[pi.peer_id] = { pi.address, pi.video_port };
     }
 
+    // Remove decoders for departed peers.
     for (auto it = peer_video_.begin(); it != peer_video_.end(); ) {
         bool found = false;
         for (const auto& pi : peers) if (pi.peer_id == it->first) { found = true; break; }
@@ -156,17 +130,87 @@ void VideoChat::SyncPeers(const std::vector<PeerInfo>& peers)
             auto* pv = it->second;
             if (pv) {
                 if (pv->decoder) { vpx_codec_destroy(pv->decoder); delete pv->decoder; }
-                // GL texture deletion happens on the main thread in UploadFrames.
-                // Mark it by zeroing decoder so UploadFrames skips decode but still
-                // deletes the texture.
                 pv->decoder = nullptr;
                 delete pv;
             }
-            peer_addrs_.erase(it->first);
             it = peer_video_.erase(it);
         } else {
             ++it;
         }
+    }
+}
+
+void VideoChat::SetSendCallback(std::function<void(const uint8_t*, int, bool)> cb)
+{
+    std::lock_guard<std::mutex> lk(send_cb_mu_);
+    send_cb_ = std::move(cb);
+}
+
+void VideoChat::OnRemoteVP8Frame(const std::string& peer_id,
+                                  const uint8_t* vp8_data, int len, bool /*is_key*/)
+{
+    std::lock_guard<std::mutex> lk(peers_mu_);
+    auto it = peer_video_.find(peer_id);
+    if (it == peer_video_.end()) return;
+    PeerVideo* pv = it->second;
+    if (!pv || !pv->decoder) return;
+
+    if (vpx_codec_decode(pv->decoder, vp8_data, static_cast<unsigned>(len),
+                          nullptr, 0) != VPX_CODEC_OK)
+        return;
+
+    vpx_codec_iter_t iter = nullptr;
+    vpx_image_t* img;
+    while ((img = vpx_codec_get_frame(pv->decoder, &iter))) {
+        if (img->fmt != VPX_IMG_FMT_I420) continue;
+
+        int src_w = static_cast<int>(img->d_w);
+        int src_h = static_cast<int>(img->d_h);
+        std::vector<uint8_t> i420_flat(static_cast<size_t>(src_w * src_h * 3 / 2));
+        uint8_t* fY = i420_flat.data();
+        uint8_t* fU = fY + src_w * src_h;
+        uint8_t* fV = fU + src_w * src_h / 4;
+
+        for (int row = 0; row < src_h; ++row)
+            std::memcpy(fY + row * src_w,
+                        img->planes[VPX_PLANE_Y] + row * img->stride[VPX_PLANE_Y],
+                        static_cast<size_t>(src_w));
+        for (int row = 0; row < src_h / 2; ++row) {
+            std::memcpy(fU + row * src_w / 2,
+                        img->planes[VPX_PLANE_U] + row * img->stride[VPX_PLANE_U],
+                        static_cast<size_t>(src_w / 2));
+            std::memcpy(fV + row * src_w / 2,
+                        img->planes[VPX_PLANE_V] + row * img->stride[VPX_PLANE_V],
+                        static_cast<size_t>(src_w / 2));
+        }
+
+        std::vector<uint8_t> rgb;
+        rgb.resize(static_cast<size_t>(kThumbW * kThumbH * 3));
+        const uint8_t* sY = i420_flat.data();
+        const uint8_t* sU = sY + src_w * src_h;
+        const uint8_t* sV = sU + src_w * src_h / 4;
+
+        for (int ty = 0; ty < kThumbH; ++ty) {
+            int sy = ty * src_h / kThumbH;
+            for (int tx = 0; tx < kThumbW; ++tx) {
+                int sx = tx * src_w / kThumbW;
+                int y  = sY[sy * src_w + sx];
+                int u  = sU[(sy / 2) * (src_w / 2) + sx / 2] - 128;
+                int v  = sV[(sy / 2) * (src_w / 2) + sx / 2] - 128;
+                int r  = y + (1402 * v) / 1000;
+                int g  = y - (344  * u) / 1000 - (714 * v) / 1000;
+                int b  = y + (1772 * u) / 1000;
+                auto cl = [](int x) -> uint8_t {
+                    return static_cast<uint8_t>(x < 0 ? 0 : x > 255 ? 255 : x);
+                };
+                int idx = (ty * kThumbW + tx) * 3;
+                rgb[idx] = cl(r); rgb[idx+1] = cl(g); rgb[idx+2] = cl(b);
+            }
+        }
+
+        std::lock_guard<std::mutex> flk(pv->frame_mu);
+        pv->rgb         = std::move(rgb);
+        pv->frame_dirty = true;
     }
 }
 
@@ -386,7 +430,7 @@ void VideoChat::I420ToRgb160x120(const uint8_t* i420, int src_w, int src_h,
 void VideoChat::EncodeAndSend(const std::vector<uint8_t>& i420,
                                bool force_keyframe)
 {
-    if (!encoder_ || send_fd_ < 0) return;
+    if (!encoder_) return;
 
     vpx_image_t img{};
     vpx_img_wrap(&img, VPX_IMG_FMT_I420,
@@ -407,40 +451,12 @@ void VideoChat::EncodeAndSend(const std::vector<uint8_t>& i420,
     while ((pkt = vpx_codec_get_cx_data(encoder_, &iter))) {
         if (pkt->kind != VPX_CODEC_CX_FRAME_PKT) continue;
 
-        const uint8_t* data = static_cast<const uint8_t*>(pkt->data.frame.buf);
-        size_t         size = pkt->data.frame.sz;
+        const uint8_t* data  = static_cast<const uint8_t*>(pkt->data.frame.buf);
+        int            size  = static_cast<int>(pkt->data.frame.sz);
         bool           is_key = (pkt->data.frame.flags & VPX_FRAME_IS_KEY) != 0;
 
-        int total_frags = static_cast<int>((size + kMaxFragSize - 1) / kMaxFragSize);
-        if (total_frags == 0) total_frags = 1;
-
-        std::lock_guard<std::mutex> lk(peers_mu_);
-        for (auto& [pid, addr] : peer_addrs_) {
-            struct sockaddr_in dest{};
-            dest.sin_family = AF_INET;
-            dest.sin_port   = htons(addr.port);
-            inet_pton(AF_INET, addr.ip.c_str(), &dest.sin_addr);
-
-            for (int fi = 0; fi < total_frags; ++fi) {
-                size_t offset    = static_cast<size_t>(fi * kMaxFragSize);
-                size_t frag_size = std::min(static_cast<size_t>(kMaxFragSize),
-                                            size - offset);
-                uint8_t pkt_buf[kHdrSize + kMaxFragSize];
-                std::memcpy(pkt_buf, kMagic, 4);
-                uint32_t fs32 = htonl(frame_seq_);
-                std::memcpy(pkt_buf + 4, &fs32, 4);
-                uint16_t fi16  = htons(static_cast<uint16_t>(fi));
-                uint16_t tot16 = htons(static_cast<uint16_t>(total_frags));
-                std::memcpy(pkt_buf + 8,  &fi16,  2);
-                std::memcpy(pkt_buf + 10, &tot16, 2);
-                pkt_buf[12] = is_key ? 1 : 0;
-                pkt_buf[13] = 0;
-                std::memcpy(pkt_buf + kHdrSize, data + offset, frag_size);
-                sendto(send_fd_, pkt_buf,
-                       static_cast<size_t>(kHdrSize) + frag_size, 0,
-                       reinterpret_cast<sockaddr*>(&dest), sizeof(dest));
-            }
-        }
+        std::lock_guard<std::mutex> lk(send_cb_mu_);
+        if (send_cb_) send_cb_(data, size, is_key);
     }
 }
 
@@ -478,147 +494,6 @@ void VideoChat::CaptureThread()
         ++frame_seq_;
 
         usleep(33333);  // ~30 fps cap
-    }
-}
-
-void VideoChat::RecvThread()
-{
-    // Incoming fragment reassembly keyed by (sender_ip, frame_seq).
-    // Simple single-slot assembler per sender — assumes frames arrive in order.
-    std::map<std::string, FrameAssembly> assemblies;
-
-    static uint8_t buf[kHdrSize + kMaxFragSize + 64];
-    struct sockaddr_in src{};
-    socklen_t src_len = sizeof(src);
-
-    while (running_.load()) {
-        // Blocking recv with a short timeout so we can check running_.
-        struct timeval tv{ 0, 50000 };  // 50 ms
-        setsockopt(recv_fd_, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-
-        int n = recvfrom(recv_fd_, buf, sizeof(buf), 0,
-                         reinterpret_cast<sockaddr*>(&src), &src_len);
-        if (n < kHdrSize) continue;
-        if (std::memcmp(buf, kMagic, 4) != 0) continue;
-
-        uint32_t frame_seq;
-        std::memcpy(&frame_seq, buf + 4, 4);
-        frame_seq = ntohl(frame_seq);
-
-        uint16_t frag_idx, frag_total;
-        std::memcpy(&frag_idx,   buf + 8,  2);
-        std::memcpy(&frag_total, buf + 10, 2);
-        frag_idx   = ntohs(frag_idx);
-        frag_total = ntohs(frag_total);
-
-        bool is_key = buf[12] != 0;
-
-        char sender_ip[INET_ADDRSTRLEN]{};
-        inet_ntop(AF_INET, &src.sin_addr, sender_ip, sizeof(sender_ip));
-        std::string key = sender_ip;
-
-        auto& asm_ = assemblies[key];
-        if (asm_.frame_seq != frame_seq || asm_.total_frags != frag_total) {
-            asm_.frame_seq   = frame_seq;
-            asm_.total_frags = frag_total;
-            asm_.is_keyframe = is_key;
-            asm_.data.clear();
-            asm_.frags_seen  = 0;
-        }
-
-        int payload = n - kHdrSize;
-        size_t offset = static_cast<size_t>(frag_idx) * kMaxFragSize;
-        if (asm_.data.size() < offset + static_cast<size_t>(payload))
-            asm_.data.resize(offset + static_cast<size_t>(payload));
-        std::memcpy(asm_.data.data() + offset, buf + kHdrSize,
-                    static_cast<size_t>(payload));
-        ++asm_.frags_seen;
-
-        if (asm_.frags_seen < frag_total) continue;
-
-        // Full frame assembled — decode and store.
-        HandleRecvPacket(asm_.data.data(),
-                         static_cast<int>(asm_.data.size()), sender_ip);
-        asm_.frags_seen = 0;
-    }
-}
-
-void VideoChat::HandleRecvPacket(const uint8_t* vp8_data, int len,
-                                  const std::string& sender_ip)
-{
-    std::lock_guard<std::mutex> lk(peers_mu_);
-
-    PeerVideo* pv = nullptr;
-    for (auto& [pid, addr] : peer_addrs_) {
-        if (addr.ip == sender_ip) {
-            auto it = peer_video_.find(pid);
-            if (it != peer_video_.end()) pv = it->second;
-            break;
-        }
-    }
-    if (!pv || !pv->decoder) return;
-
-    if (vpx_codec_decode(pv->decoder, vp8_data, static_cast<unsigned>(len),
-                          nullptr, 0) != VPX_CODEC_OK)
-        return;
-
-    vpx_codec_iter_t iter = nullptr;
-    vpx_image_t* img;
-    while ((img = vpx_codec_get_frame(pv->decoder, &iter))) {
-        if (img->fmt != VPX_IMG_FMT_I420) continue;
-
-        // Convert decoded I420 to 160×120 RGB.
-        std::vector<uint8_t> rgb;
-        // Reassemble I420 from libvpx planes (Y, U, V may have stride padding).
-        int src_w = static_cast<int>(img->d_w);
-        int src_h = static_cast<int>(img->d_h);
-        std::vector<uint8_t> i420_flat(static_cast<size_t>(src_w * src_h * 3 / 2));
-        uint8_t* fY = i420_flat.data();
-        uint8_t* fU = fY + src_w * src_h;
-        uint8_t* fV = fU + src_w * src_h / 4;
-
-        for (int row = 0; row < src_h; ++row)
-            std::memcpy(fY + row * src_w,
-                        img->planes[VPX_PLANE_Y] + row * img->stride[VPX_PLANE_Y],
-                        static_cast<size_t>(src_w));
-        for (int row = 0; row < src_h / 2; ++row) {
-            std::memcpy(fU + row * src_w / 2,
-                        img->planes[VPX_PLANE_U] + row * img->stride[VPX_PLANE_U],
-                        static_cast<size_t>(src_w / 2));
-            std::memcpy(fV + row * src_w / 2,
-                        img->planes[VPX_PLANE_V] + row * img->stride[VPX_PLANE_V],
-                        static_cast<size_t>(src_w / 2));
-        }
-
-        // Reuse VideoChat::I420ToRgb160x120 via a helper lambda.
-        rgb.resize(static_cast<size_t>(kThumbW * kThumbH * 3));
-        const uint8_t* sY = i420_flat.data();
-        const uint8_t* sU = sY + src_w * src_h;
-        const uint8_t* sV = sU + src_w * src_h / 4;
-
-        for (int ty = 0; ty < kThumbH; ++ty) {
-            int sy = ty * src_h / kThumbH;
-            for (int tx = 0; tx < kThumbW; ++tx) {
-                int sx = tx * src_w / kThumbW;
-                int y  = sY[sy * src_w + sx];
-                int u  = sU[(sy / 2) * (src_w / 2) + sx / 2] - 128;
-                int v  = sV[(sy / 2) * (src_w / 2) + sx / 2] - 128;
-                int r  = y + (1402 * v) / 1000;
-                int g  = y - (344  * u) / 1000 - (714 * v) / 1000;
-                int b  = y + (1772 * u) / 1000;
-                auto cl = [](int x) -> uint8_t {
-                    return static_cast<uint8_t>(x < 0 ? 0 : x > 255 ? 255 : x);
-                };
-                int idx = (ty * kThumbW + tx) * 3;
-                rgb[idx]     = cl(r);
-                rgb[idx + 1] = cl(g);
-                rgb[idx + 2] = cl(b);
-            }
-        }
-
-        std::lock_guard<std::mutex> flk(pv->frame_mu);
-        pv->rgb         = std::move(rgb);
-        pv->frame_dirty = true;
     }
 }
 

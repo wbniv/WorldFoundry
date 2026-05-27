@@ -1,4 +1,4 @@
-// engine/wf_edit/voice_track.cc — Voice chat: mic → Opus → UDP → speaker.
+// engine/wf_edit/voice_track.cc — Voice chat: mic → Opus → WebRTC → speaker.
 //
 // miniaudio is already compiled into the engine (miniaudio_impl.cc defines
 // MINIAUDIO_IMPLEMENTATION). Include the header here for declarations only.
@@ -8,11 +8,6 @@
 
 #include <miniaudio/miniaudio.h>
 #include <opus/opus.h>
-
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <unistd.h>
 
 #include <algorithm>
 #include <cmath>
@@ -106,25 +101,6 @@ bool VoiceChat::Start()
     opus_encoder_ctl(encoder_, OPUS_SET_BITRATE(32000));
     opus_encoder_ctl(encoder_, OPUS_SET_COMPLEXITY(5));
 
-    // UDP receive socket — bind to port 0 so the OS assigns an ephemeral port.
-    recv_fd_ = socket(AF_INET, SOCK_DGRAM, 0);
-    if (recv_fd_ < 0) { std::perror("voice: recv socket"); return false; }
-
-    struct sockaddr_in addr{};
-    addr.sin_family      = AF_INET;
-    addr.sin_port        = 0;   // ephemeral
-    addr.sin_addr.s_addr = INADDR_ANY;
-    if (bind(recv_fd_, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0) {
-        std::perror("voice: bind"); close(recv_fd_); recv_fd_ = -1; return false;
-    }
-    socklen_t alen = sizeof(addr);
-    getsockname(recv_fd_, reinterpret_cast<sockaddr*>(&addr), &alen);
-    listen_port_ = ntohs(addr.sin_port);
-
-    // UDP send socket.
-    send_fd_ = socket(AF_INET, SOCK_DGRAM, 0);
-    if (send_fd_ < 0) { std::perror("voice: send socket"); return false; }
-
     // miniaudio capture device (mic).
     auto* vd = new VoiceDevices{};
     capture_dev_ = vd;
@@ -162,7 +138,7 @@ bool VoiceChat::Start()
         ma_device_start(&pd->playback);
     }
 
-    std::printf("voice: started on UDP port %u\n", listen_port_);
+    std::printf("voice: started (WebRTC transport)\n");
     return true;
 }
 
@@ -180,9 +156,7 @@ void VoiceChat::Stop()
         delete vd;
         playback_dev_ = nullptr;
     }
-    if (recv_fd_ >= 0) { close(recv_fd_); recv_fd_ = -1; }
-    if (send_fd_ >= 0) { close(send_fd_); send_fd_ = -1; }
-    if (encoder_)  { opus_encoder_destroy(encoder_); encoder_ = nullptr; }
+    if (encoder_) { opus_encoder_destroy(encoder_); encoder_ = nullptr; }
 
     std::lock_guard<std::mutex> lk(peers_mu_);
     for (auto& [id, pa] : peer_audio_) {
@@ -207,7 +181,7 @@ void VoiceChat::SyncPeers(const std::vector<PeerInfo>& peers)
 {
     std::lock_guard<std::mutex> lk(peers_mu_);
 
-    // Add new peers.
+    // Add decoders for new peers.
     for (const auto& pi : peers) {
         if (!peer_audio_.count(pi.peer_id)) {
             int err = 0;
@@ -218,21 +192,49 @@ void VoiceChat::SyncPeers(const std::vector<PeerInfo>& peers)
             peer_audio_[pi.peer_id] = pa;
             std::printf("voice: added peer %s\n", pi.peer_id.c_str());
         }
-        peer_addrs_[pi.peer_id] = { pi.address, pi.audio_port };
     }
 
-    // Remove departed peers.
+    // Remove decoders for departed peers.
     for (auto it = peer_audio_.begin(); it != peer_audio_.end(); ) {
         bool found = false;
         for (const auto& pi : peers) if (pi.peer_id == it->first) { found = true; break; }
         if (!found) {
             opus_decoder_destroy(it->second->decoder);
             delete it->second;
-            peer_addrs_.erase(it->first);
             it = peer_audio_.erase(it);
         } else {
             ++it;
         }
+    }
+}
+
+void VoiceChat::SetSendCallback(std::function<void(const uint8_t*, int)> cb)
+{
+    std::lock_guard<std::mutex> lk(send_cb_mu_);
+    send_cb_ = std::move(cb);
+}
+
+void VoiceChat::OnRemoteOpus(const std::string& peer_id,
+                              const uint8_t* opus, int len)
+{
+    std::lock_guard<std::mutex> lk(peers_mu_);
+    auto ait = peer_audio_.find(peer_id);
+    if (ait == peer_audio_.end()) return;
+    PeerAudio* pa = ait->second;
+    if (!pa || !pa->decoder) return;
+
+    float pcm[960]{};
+    int samples = opus_decode_float(pa->decoder, opus, len, pcm, 960, 0);
+    if (samples <= 0) return;
+
+    float rms = 0.f;
+    for (int s = 0; s < samples; ++s) rms += pcm[s] * pcm[s];
+    pa->level = std::sqrt(rms / static_cast<float>(samples));
+
+    std::lock_guard<std::mutex> rlk(pa->ring_mu);
+    for (int s = 0; s < samples; ++s) {
+        pa->ring[pa->ring_write] = pcm[s];
+        pa->ring_write = (pa->ring_write + 1) % PeerAudio::kRingSize;
     }
 }
 
@@ -245,70 +247,12 @@ float VoiceChat::PeerLevel(const std::string& peer_id)
 
 void VoiceChat::EncodeAndSend(const float* pcm, int frame_samples)
 {
-    // Wire format: [4-byte big-endian seq][Opus payload]
-    uint32_t s = htonl(seq_++);
-    std::memcpy(enc_buf_, &s, 4);
-
     int encoded = opus_encode_float(encoder_, pcm, frame_samples,
-                                    enc_buf_ + 4, static_cast<int>(sizeof(enc_buf_)) - 4);
+                                    enc_buf_, static_cast<int>(sizeof(enc_buf_)));
     if (encoded <= 0) return;
 
-    std::lock_guard<std::mutex> lk(peers_mu_);
-    for (auto& [peer_id, addr] : peer_addrs_) {
-        struct sockaddr_in dest{};
-        dest.sin_family = AF_INET;
-        dest.sin_port   = htons(addr.port);
-        inet_pton(AF_INET, addr.ip.c_str(), &dest.sin_addr);
-        sendto(send_fd_, enc_buf_, static_cast<size_t>(4 + encoded), 0,
-               reinterpret_cast<sockaddr*>(&dest), sizeof(dest));
-    }
-}
-
-// Drain the receive socket and decode incoming Opus packets into peer ring
-// buffers. Non-blocking; safe to call from the main thread each frame.
-void VoiceChat::Tick()
-{
-    if (recv_fd_ < 0) return;
-
-    static uint8_t recv_buf[4 + 1500];
-    struct sockaddr_in src{};
-    socklen_t src_len = sizeof(src);
-
-    for (int i = 0; i < 32; ++i) {
-        int n = recvfrom(recv_fd_, recv_buf, sizeof(recv_buf), MSG_DONTWAIT,
-                         reinterpret_cast<sockaddr*>(&src), &src_len);
-        if (n <= 4) break;
-
-        const uint8_t* opus_data = recv_buf + 4;
-        int opus_len = n - 4;
-
-        char sender_ip[INET_ADDRSTRLEN]{};
-        inet_ntop(AF_INET, &src.sin_addr, sender_ip, sizeof(sender_ip));
-        uint16_t sender_port = ntohs(src.sin_port);
-
-        std::lock_guard<std::mutex> lk(peers_mu_);
-        for (auto& [pid, pa] : peer_audio_) {
-            auto ait = peer_addrs_.find(pid);
-            if (ait == peer_addrs_.end()) continue;
-            if (ait->second.ip != sender_ip ||
-                ait->second.port != sender_port) continue;
-
-            float pcm[960]{};
-            int samples = opus_decode_float(pa->decoder, opus_data, opus_len,
-                                            pcm, 960, 0);
-            if (samples <= 0) continue;
-
-            float rms = 0.f;
-            for (int s = 0; s < samples; ++s) rms += pcm[s] * pcm[s];
-            pa->level = std::sqrt(rms / static_cast<float>(samples));
-
-            std::lock_guard<std::mutex> rlk(pa->ring_mu);
-            for (int s = 0; s < samples; ++s) {
-                pa->ring[pa->ring_write] = pcm[s];
-                pa->ring_write = (pa->ring_write + 1) % PeerAudio::kRingSize;
-            }
-        }
-    }
+    std::lock_guard<std::mutex> lk(send_cb_mu_);
+    if (send_cb_) send_cb_(enc_buf_, encoded);
 }
 
 } // namespace wfedit

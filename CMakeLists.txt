@@ -926,6 +926,21 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     # OpenSSL for wss:// relay TLS (ws_client wss:// support).
     find_package(OpenSSL REQUIRED)
 
+    # libdatachannel — WebRTC (ICE + DTLS-SRTP + RTP tracks) for Phase 2 voice/video.
+    # Fetched from source; build artifacts kept out of the repo per [[feedback_no_giant_vendor]].
+    include(FetchContent)
+    FetchContent_Declare(
+        libdatachannel
+        GIT_REPOSITORY https://github.com/paullouisageneau/libdatachannel.git
+        GIT_TAG        v0.21.2
+        GIT_SUBMODULES "deps/libjuice" "deps/libsrtp" "deps/plog"
+        GIT_SHALLOW    TRUE
+    )
+    set(NO_EXAMPLES   ON  CACHE BOOL "" FORCE)
+    set(NO_TESTS      ON  CACHE BOOL "" FORCE)
+    set(NO_WEBSOCKET  ON  CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(libdatachannel)
+
     # GLFW — editor-owned X11/GLX window + context (lean build, X11 only).
     set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
     set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
@@ -949,6 +964,7 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         engine/wf_edit/video_track.cc          # VP8 video chat + V4L2 capture
         engine/wf_edit/collab_panel.cc         # Collaborators ImGui panel
         engine/wf_edit/ws_client.cc           # WebSocket transport client (co-edit relay)
+        engine/wf_edit/webrtc_session.cc      # WebRTC PeerConnection per peer (Phase 2)
         wftools/oaddump/oad.cc                 # shared OAD reader (editor-gated only)
         ${IMGUI_DIR}/imgui.cpp
         ${IMGUI_DIR}/imgui_draw.cpp
@@ -975,7 +991,9 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         ${CMAKE_SOURCE_DIR}/wftools/oaddump          # oad.hp (Phase 2 OAD reader)
         ${CMAKE_SOURCE_DIR}/engine/vendor/miniaudio-0.11.25  # <miniaudio/miniaudio.h>
         ${OPUS_INCLUDE_DIRS}
-        ${VPX_INCLUDE_DIRS})
+        ${VPX_INCLUDE_DIRS}
+        ${libdatachannel_SOURCE_DIR}/include         # <rtc/rtc.hpp>
+    )
     # main.cc compiles against engine headers, so the target needs the engine's
     # flags (mirrors wf_host_gl_e2e_test). Harmless for the ImGui TUs alongside.
     target_compile_options(wf_edit PRIVATE
@@ -990,6 +1008,7 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     target_link_libraries(wf_edit PRIVATE wfengine wfcrdt glfw GL
         ${OPUS_LIBRARIES} ${VPX_LIBRARIES}
         OpenSSL::SSL OpenSSL::Crypto
+        datachannel-static
         pthread)
 
     # SpawnActor runtime-path confirmation: loads snowgoons, finds the first

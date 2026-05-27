@@ -43,6 +43,7 @@
 #include "collab_session.h"
 #include "voice_track.h"
 #include "video_track.h"
+#include "webrtc_session.h"
 #include "collab_panel.h"
 #include "ws_client.h"
 #include "gizmo.h"
@@ -263,11 +264,12 @@ struct EditorCtx {
     bool structural_dirty = false;
 
     // Voice + video collaboration (optional; only active when --room is given).
-    wfedit::CollabSession* collab  = nullptr;
-    wfedit::VoiceChat*     voice   = nullptr;
-    wfedit::VideoChat*     video   = nullptr;
-    std::string            room_id;
-    bool                   show_collab = true;
+    wfedit::CollabSession*  collab  = nullptr;
+    wfedit::VoiceChat*      voice   = nullptr;
+    wfedit::VideoChat*      video   = nullptr;
+    wfedit::WebrtcSession*  webrtc  = nullptr;   // Phase 2: WebRTC media transport
+    std::string             room_id;
+    bool                    show_collab = true;
 
     // Co-editing relay (Phase 2+). relay_client is connected when relay_url is set.
     wfedit::WsClient                    relay_client;
@@ -501,11 +503,27 @@ void CollabDrain(EditorCtx* c) {
                 }
             } catch (...) {}
         } else if (ch == 0x05) {
-            // SIGNAL — WebRTC SDP/ICE signaling. Reserved for Phase 2 WebrtcSession.
-            // Wire format: [0x05][from_peer_id NUL json_payload] — the relay inserts
-            // sender identity in the to→sender routing but does NOT rewrite the payload,
-            // so the JSON must carry "from" for the recipient to know who sent it.
-            // (Phase 2 will call c->webrtc->OnSignal(from, json) here.)
+            // SIGNAL — WebRTC SDP/ICE signaling.
+            // Wire format: [0x05][to_peer_id NUL json_payload]
+            // (relay forwards entire frame unchanged; JSON carries "from" field)
+            if (frame.size() >= 3 && c->webrtc) {
+                const uint8_t* payload = frame.data() + 1;
+                size_t plen = frame.size() - 1;
+                size_t nul  = 0;
+                while (nul < plen && payload[nul] != 0) ++nul;
+                if (nul + 1 < plen) {
+                    std::string json_str(
+                        reinterpret_cast<const char*>(payload + nul + 1),
+                        plen - nul - 1);
+                    try {
+                        using json = nlohmann::json;
+                        json j     = json::parse(json_str);
+                        std::string from = j.value("from", "");
+                        if (!from.empty())
+                            c->webrtc->OnSignal(from, json_str);
+                    } catch (...) {}
+                }
+            }
         }
         // CONTROL (0x04) is ignored here.
         frame.clear();
@@ -1102,12 +1120,31 @@ bool editor_build(void* p)
         ImGui::DockBuilderFinish(dock_id);
     }
 
-    // Tick collab session (peer discovery + voice recv + video frame upload).
+    // Tick collab session (peer discovery + WebRTC SyncPeers + video upload).
     if (c->collab) {
         double now = wfedit::MonoNow();
         c->collab->Tick(now);
-        c->voice->SyncPeers(c->collab->Peers());
-        c->video->SyncPeers(c->collab->Peers());
+        const auto& peers = c->collab->Peers();
+        c->voice->SyncPeers(peers);
+        c->video->SyncPeers(peers);
+        // Sync WebRTC connections (add for new relay peers, remove for departed).
+        if (c->webrtc) {
+            std::vector<std::string> peer_ids;
+            peer_ids.reserve(peers.size());
+            for (const auto& p : peers) peer_ids.push_back(p.peer_id);
+            c->webrtc->SyncPeers(peer_ids, c->our_peer_id);
+            // Send any queued SDP / ICE-candidate signals via the relay.
+            if (c->relay_client.connected()) {
+                for (auto& [to, json] : c->webrtc->DrainSignaling()) {
+                    std::vector<uint8_t> sig;
+                    sig.push_back(0x05);  // CH_SIGNAL
+                    for (char ch : to)   sig.push_back(static_cast<uint8_t>(ch));
+                    sig.push_back(0);     // NUL separator
+                    for (char ch : json) sig.push_back(static_cast<uint8_t>(ch));
+                    c->relay_client.send(sig.data(), sig.size());
+                }
+            }
+        }
         c->voice->Tick();
         c->video->UploadFrames();
     }
@@ -1949,21 +1986,25 @@ int main(int argc, char** argv)
     if (preselect >= 0 && preselect < static_cast<int>(ctx.actor_names.size()))
         ctx.selected = preselect;   // headless: exercise the Outliner→Properties path
 
-    // 3b. Start voice + video call if a room ID was provided.
-    wfedit::CollabSession collab_session;
-    wfedit::VoiceChat     voice_chat;
-    wfedit::VideoChat     video_chat;
+    // 3b. Start voice + video + WebRTC if a room ID was provided.
+    wfedit::CollabSession  collab_session;
+    wfedit::VoiceChat      voice_chat;
+    wfedit::VideoChat      video_chat;
+    // WebrtcSession is constructed after voice/video so it can hook their callbacks.
+    std::unique_ptr<wfedit::WebrtcSession> webrtc_session;
     if (!room_id.empty()) {
-        // Bind to port 0 — the OS assigns an ephemeral port. Each editor
-        // instance on the same machine gets a different port automatically.
         voice_chat.Start();
         video_chat.Start();
         collab_session.Start(room_id, "Editor",
                              voice_chat.ListenPort(), video_chat.ListenPort());
-        ctx.collab = &collab_session;
-        ctx.voice  = &voice_chat;
-        ctx.video  = &video_chat;
-        std::printf("wf-edit: collab room '%s' started\n", room_id.c_str());
+        // WebrtcSession hooks send_cb_ on voice_chat + video_chat to route media
+        // through WebRTC (DTLS-SRTP) instead of raw UDP.
+        webrtc_session = std::make_unique<wfedit::WebrtcSession>(&voice_chat, &video_chat);
+        ctx.collab  = &collab_session;
+        ctx.voice   = &voice_chat;
+        ctx.video   = &video_chat;
+        ctx.webrtc  = webrtc_session.get();
+        std::printf("wf-edit: collab room '%s' started (WebRTC transport)\n", room_id.c_str());
     }
 
     // 3c. Connect to the co-edit relay (Phase 2+). Non-fatal on failure.
