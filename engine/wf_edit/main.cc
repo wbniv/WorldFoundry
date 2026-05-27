@@ -63,6 +63,8 @@
 #include <vector>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/socket.h>
+#include <netdb.h>
 #include <csignal>
 #include <ctime>
 #include <fcntl.h>
@@ -820,7 +822,14 @@ static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
     s_cloudflared_pid = ::fork();
     if (s_cloudflared_pid == 0) {
         ::dup2(logfd, 1); ::dup2(logfd, 2);
-        ::execl(cf.c_str(), cf.c_str(), "tunnel", "--url", url.c_str(), (char*)nullptr);
+        // --protocol http2: force the edge link over TCP :7844 instead of QUIC
+        // (UDP :7844). The tunnel carries SIGNALING only (media is DTLS-SRTP
+        // P2P/TURN), so QUIC's latency edge is irrelevant, and TCP is reachable
+        // on far more networks — many firewalls/NATs block or throttle UDP/QUIC,
+        // which leaves the quick tunnel unregistered (no DNS → "relay connect
+        // failed"). http2 "just works" on restrictive and normal networks alike.
+        ::execl(cf.c_str(), cf.c_str(), "tunnel", "--protocol", "http2",
+                "--url", url.c_str(), (char*)nullptr);
         _exit(127);
     }
     ::close(logfd);
@@ -842,6 +851,20 @@ static std::string PollTunnelUrl(const std::string& logpath)
             return line.substr(p + 8, (q + 18) - (p + 8));   // <rand>.trycloudflare.com
     }
     return "";
+}
+
+// Does `host` resolve yet (A or AAAA)? cloudflared prints the tunnel URL a few
+// seconds before the tunnel finishes registering and Cloudflare publishes its
+// DNS — so the editor must wait for this before connecting, or getaddrinfo
+// fails and the relay connect aborts.
+static bool HostResolves(const std::string& host)
+{
+    struct addrinfo hints{}, *res = nullptr;
+    hints.ai_family   = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    if (getaddrinfo(host.c_str(), "443", &hints, &res) != 0) return false;
+    freeaddrinfo(res);
+    return true;
 }
 
 // Blocking spawn + scrape (≤20 s), used by the headless self-test. Returns the
@@ -2300,6 +2323,7 @@ int main(int argc, char** argv)
     if (tunnel_pending) {
         const double t0 = glfwGetTime();
         std::string host;
+        bool resolved = false;
         int lframe = 0;
         for (;;) {
             glfwPollEvents();
@@ -2315,7 +2339,8 @@ int main(int argc, char** argv)
                          ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                          ImGuiWindowFlags_NoCollapse);
             const double elapsed = glfwGetTime() - t0;
-            ImGui::Text("Establishing secure tunnel…  (%.0f s)", elapsed);
+            ImGui::Text(host.empty() ? "Establishing secure tunnel…  (%.0f s)"
+                                     : "Publishing tunnel address…  (%.0f s)", elapsed);
             ImGui::Spacing();
             // Animated sweep (0→1 each second) — a liveness cue, not a real %.
             ImGui::ProgressBar(static_cast<float>(elapsed - static_cast<long>(elapsed)),
@@ -2332,9 +2357,15 @@ int main(int argc, char** argv)
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             ++lframe;
 
-            host = PollTunnelUrl(tunnel_logpath);
-            const bool done      = !host.empty();
-            const bool timed_out = elapsed >= 30.0;
+            // Scrape the URL, then wait for its DNS to publish (cloudflared
+            // prints the URL a few seconds before the tunnel registers) — only
+            // then is it safe to connect. getaddrinfo is throttled (~3/s) so it
+            // doesn't stutter the bar.
+            if (host.empty()) host = PollTunnelUrl(tunnel_logpath);
+            if (!host.empty() && !resolved && lframe % 20 == 0)
+                resolved = HostResolves(host);
+            const bool done      = resolved;
+            const bool timed_out = elapsed >= 45.0;
             const bool frame_cap = (max_frames >= 0 && lframe >= max_frames);  // headless safety
             const bool closing   = glfwWindowShouldClose(win);
             if ((done || timed_out || frame_cap || closing) && shot)
@@ -2343,12 +2374,13 @@ int main(int argc, char** argv)
             if (done || timed_out || frame_cap || closing) break;
         }
         if (!tunnel_logpath.empty()) ::unlink(tunnel_logpath.c_str());
-        if (!host.empty()) {
+        if (resolved) {
             ctx_relay_url     = "wss://" + host;
             tunnel_share_link = "wfedit+s://" + host + "/r/" + room_id;
             std::printf("wf-edit: quick tunnel up — share %s\n", tunnel_share_link.c_str());
         } else {
-            std::fprintf(stderr, "wf-edit: quick tunnel did not come up — no relay\n");
+            std::fprintf(stderr, "wf-edit: quick tunnel did not come up%s — no relay\n",
+                         host.empty() ? "" : " (DNS not published in time)");
             KillTunnelChildren();
         }
     }

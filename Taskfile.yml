@@ -75,6 +75,19 @@ tasks:
     cmds:
       - cmake -S . -B build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Debug
       - cmake --build build-editor --target wf_edit -j{{.NPROC}}
+      # Stale-binary guard: a failed compile leaves the OLD binary on disk, so a
+      # missed build error silently ships stale code. cmake's non-zero already
+      # halts the task, but assert the binary out-dates every source too, and
+      # print a success marker (only reached on a real build).
+      - |
+        bin=build-editor/wf-edit
+        stale=$(find engine/wf_edit wfsource/source -name '*.cc' -o -name '*.cpp' 2>/dev/null \
+                | while read -r f; do [ "$f" -nt "$bin" ] && { echo "$f"; break; }; done)
+        if [ -n "$stale" ]; then
+          echo "BUILD STALE: $bin is older than $stale — the link did not run; FIX the compile error" >&2
+          exit 1
+        fi
+        echo "✓ wf-edit built → $bin ($(date -r "$bin" +%H:%M:%S), $(stat -c%s "$bin") bytes)"
     vars:
       NPROC:
         sh: nproc
@@ -205,14 +218,18 @@ tasks:
         # which propagates SIGINT to the whole process group, so cloudflared +
         # wf-relay exit directly; this trap is a best-effort log/child sweep.
         cleanup() {
-          pkill -f "cloudflared tunnel --url http://localhost:$PORT" 2>/dev/null || true
+          pkill -f "cloudflared tunnel.*localhost:$PORT" 2>/dev/null || true
           pkill -f "wf-relay --port $PORT" 2>/dev/null || true
           rm -f "$RELAY_LOG" "$CF_LOG"
         }
         trap cleanup EXIT
 
         "$RELAY" --port "$PORT" >"$RELAY_LOG" 2>&1 &
-        "$CF" tunnel --url "http://localhost:$PORT" >"$CF_LOG" 2>&1 &
+        # --protocol http2: edge link over TCP :7844, not QUIC (UDP). The tunnel
+        # carries signaling only, so QUIC's latency edge is moot, and many
+        # networks block/throttle UDP — leaving a QUIC quick tunnel unregistered
+        # (no DNS). http2 works on restrictive and normal networks alike.
+        "$CF" tunnel --protocol http2 --url "http://localhost:$PORT" >"$CF_LOG" 2>&1 &
 
         # Scrape the ephemeral public URL from cloudflared's banner (≤20s).
         URL=""

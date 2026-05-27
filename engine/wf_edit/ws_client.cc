@@ -10,6 +10,7 @@
 #include <netdb.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <cstdio>
 #include <cstring>
 #include <random>
 
@@ -102,21 +103,29 @@ bool WsClient::connect(const char* url) {
     ParsedUrl pu = parseWsUrl(url);
     if (!pu.ok) return false;
 
-    // Resolve hostname.
+    // Resolve hostname. AF_UNSPEC so we accept IPv4 *or* IPv6 — a public relay /
+    // Cloudflare quick-tunnel host can answer AAAA-only, and the old AF_INET
+    // forced IPv4-only (connect failed on such hosts). Try each result until one
+    // connects (the first family may not be routable on a given network).
     struct addrinfo hints{}, *res = nullptr;
-    hints.ai_family   = AF_INET;
+    hints.ai_family   = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    if (getaddrinfo(pu.host.c_str(), pu.port.c_str(), &hints, &res) != 0) return false;
-
-    _fd = ::socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    if (_fd < 0) { freeaddrinfo(res); return false; }
-
-    if (::connect(_fd, res->ai_addr, res->ai_addrlen) != 0) {
-        freeaddrinfo(res);
-        ::close(_fd); _fd = -1;
+    if (getaddrinfo(pu.host.c_str(), pu.port.c_str(), &hints, &res) != 0) {
+        std::fprintf(stderr, "ws: getaddrinfo(%s:%s) failed\n", pu.host.c_str(), pu.port.c_str());
         return false;
     }
+
+    _fd = -1;
+    for (struct addrinfo* rp = res; rp; rp = rp->ai_next) {
+        const int fd = ::socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (fd < 0) continue;
+        if (::connect(fd, rp->ai_addr, rp->ai_addrlen) == 0) { _fd = fd; break; }
+        std::fprintf(stderr, "ws: connect(fam=%d) to %s:%s failed: %s\n",
+                     rp->ai_family, pu.host.c_str(), pu.port.c_str(), std::strerror(errno));
+        ::close(fd);
+    }
     freeaddrinfo(res);
+    if (_fd < 0) return false;
 
     // TLS handshake for wss://.
     _tls = pu.tls;
@@ -129,6 +138,7 @@ bool WsClient::connect(const char* url) {
         SSL_set_fd(ssl, _fd);
         SSL_set_tlsext_host_name(ssl, pu.host.c_str());
         if (SSL_connect(ssl) != 1) {
+            std::fprintf(stderr, "ws: TLS handshake to %s failed\n", pu.host.c_str());
             SSL_free(ssl); SSL_CTX_free(ctx);
             ::close(_fd); _fd = -1; return false;
         }
@@ -169,13 +179,21 @@ bool WsClient::connect(const char* url) {
         ssize_t n;
         if (_tls) n = tls_recv(buf + total, sizeof(buf) - 1 - total);
         else      n = ::recv(_fd, buf + total, sizeof(buf) - 1 - total, 0);
-        if (n <= 0) { disconnect(); return false; }
+        if (n <= 0) {
+            std::fprintf(stderr, "ws: upgrade read failed (recv=%zd) from %s\n", n, pu.host.c_str());
+            disconnect(); return false;
+        }
         total += static_cast<size_t>(n);
         buf[total] = '\0';
         found = (strstr(buf, "\r\n\r\n") != nullptr);
     }
 
-    if (!strstr(buf, "101")) { disconnect(); return false; }
+    if (!strstr(buf, "101")) {
+        char status[80] = {0};
+        std::snprintf(status, sizeof(status), "%.*s", 60, buf);   // first line of the response
+        std::fprintf(stderr, "ws: WS upgrade not accepted by %s — response: %s\n", pu.host.c_str(), status);
+        disconnect(); return false;
+    }
 
     // Switch to non-blocking (plain TCP only; TLS layer handles its own buffering).
     if (!_tls) {
