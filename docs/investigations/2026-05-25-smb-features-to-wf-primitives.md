@@ -40,7 +40,7 @@ in the level-building guide, and the [SMB conversion brief](/home/will/wf-games/
 | **Spikes / lava / hazard** | `Spike` (applies `Health Modifier` on contact) | 🧩 |
 | **Moving platform / lift** | `Platform` (path-driven) — see Path/CHAN note below | 🧩 / 🚧 |
 | **Goomba** | `Enemy` + walk (constant velocity / path) + stomp (collision-normal script) | 🔧 |
-| **Koopa + shell kick** | `Enemy` + shell-state script + kicked-velocity; collision mailboxes | 🔧 |
+| **Koopa + shell kick** | `Enemy` + a 3-state script (walk / shell-rest / shell-slide): stomp retracts, side-touch kicks, sliding shell defeats enemies (live-broadcast proximity) + reverses off walls | ✅ *(2026-05-27, [plan](../plans/2026-05-27-smb-koopa-shell-kick.md))* |
 | **Stomp combat** (jump on enemy) | per-actor `COLLIDER_IDX` + `COLLISION_NORMAL_Z` (enemy detects player landing from above) → enemy dies + player bounce | 🔧 *(mechanism ✅, needs enemy script)* |
 | **Piranha Plant** | `Enemy` + vertical oscillation (path/script) emerging from a pipe | 🔧 |
 | **Hammer Bro / hammers** | `Enemy` + `Missile` (the hammers) | 🔧 |

@@ -1319,6 +1319,84 @@ ENEMY_SCRIPT = (
     "    0 INDEXOF_ALIVE write-mailbox\n"                # fireball kill: die, no bounce, no hurt
     "  then\n"
     "then\n"
+    # Sliding-shell defeat — same fresh-broadcast proximity idiom as the fireball, reading the
+    # Koopa shell's live position (docs/plans/2026-05-27-smb-koopa-shell-kick.md).
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_SHELL_LIVE_UNTIL read-mailbox < if\n"
+    "  INDEXOF_SMB_SHELL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "  INDEXOF_SMB_SHELL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "  + 1.5 < if\n"                                     # both on the ground -> tighter radius
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  then\n"
+    "then\n"
+)
+
+# ── Koopa shell-kick (docs/plans/2026-05-27-smb-koopa-shell-kick.md) ──────────────
+# 3-state machine on SMB_KOOPA_STATE: 0=walk (like the goomba), 1=shell at rest,
+# 2=shell sliding. Stomp retracts (walk->rest, slide->rest) instead of killing; a
+# side touch of a resting shell KICKS it away into a fast slide; a sliding shell
+# reverses off walls (Starman idiom), broadcasts SMB_SHELL_LIVE so the goomba dies
+# to it, and hurts Mario on a side hit.
+SHELL_SPEED = 14.0
+KOOPA_SCRIPT = (
+    "\\ wf\n"
+    # --- movement by state ---
+    "INDEXOF_SMB_KOOPA_STATE read-mailbox not if\n"                # state 0: walk (dormant-until-onscreen)
+    "  INDEXOF_SMB_MAX_CAM_X read-mailbox 12.0 + INDEXOF_X_POS read-mailbox > if\n"
+    f"    {-ENEMY_WALK_SPEED} INDEXOF_XSPEED write-mailbox\n"
+    "  else\n"
+    "    0 INDEXOF_XSPEED write-mailbox\n"
+    "  then\n"
+    "then\n"
+    "INDEXOF_SMB_KOOPA_STATE read-mailbox 1 = if 0 INDEXOF_XSPEED write-mailbox then\n"   # state 1: parked
+    "INDEXOF_SMB_KOOPA_STATE read-mailbox 2 = if\n"                # state 2: sliding shell
+    # reverse off a wall (|NORMAL_X| > 0.5), consume the normal (Starman idiom)
+    "  INDEXOF_COLLISION_NORMAL_X read-mailbox dup * 0.25 > if\n"
+    "    0 INDEXOF_XSPEED read-mailbox - INDEXOF_XSPEED write-mailbox\n"
+    "    0 INDEXOF_COLLISION_NORMAL_X write-mailbox\n"
+    "  then\n"
+    # broadcast the live shell position + freshness so the goomba can die to it
+    "  INDEXOF_X_POS read-mailbox INDEXOF_SMB_SHELL_LIVE_X write-mailbox\n"
+    "  INDEXOF_Z_POS read-mailbox INDEXOF_SMB_SHELL_LIVE_Z write-mailbox\n"
+    "  INDEXOF_TIME read-mailbox 0.1 + INDEXOF_SMB_SHELL_LIVE_UNTIL write-mailbox\n"
+    "then\n"
+    # --- player interaction (proximity), mirroring the goomba's stack discipline ---
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n"   # dx
+    "dup * 1.0 <\n"
+    "if\n"
+    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_STAR_UNTIL read-mailbox < if\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"                # invincible Mario: dies regardless
+    "  else\n"
+    "    INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"   # dz
+    "    dup 0.7 >\n"
+    "    if\n"                                           # STOMP (player above)
+    "      drop\n"
+    "      INDEXOF_SMB_KOOPA_STATE read-mailbox 2 < if 0.5 INDEXOF_Z_SCALE write-mailbox then\n"  # walk->shell: squash
+    "      1 INDEXOF_SMB_KOOPA_STATE write-mailbox\n"    # retract to a resting shell (NOT death)
+    "      0 INDEXOF_XSPEED write-mailbox\n"
+    "      1 INDEXOF_SMB_STOMP write-mailbox\n"          # bounce Mario
+    "    else\n"                                         # side touch (roughly level)
+    "      -1.5 >\n"
+    "      if\n"
+    "        INDEXOF_SMB_KOOPA_STATE read-mailbox 1 = if\n"   # KICK a resting shell, away from Mario
+    "          INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - 0 < if\n"
+    f"            {SHELL_SPEED} INDEXOF_XSPEED write-mailbox\n"        # player on the left -> slide right
+    "          else\n"
+    f"            {-SHELL_SPEED} INDEXOF_XSPEED write-mailbox\n"       # player on the right -> slide left
+    "          then\n"
+    "          2 INDEXOF_SMB_KOOPA_STATE write-mailbox\n"
+    "        else\n"
+    "          1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"  # walking koopa OR moving shell -> hurt Mario
+    "        then\n"
+    "      then\n"
+    "    then\n"
+    "  then\n"
+    "then\n"
+    # --- fireball defeat (any state) ---
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "  + 2.5 < if 0 INDEXOF_ALIVE write-mailbox then\n"
+    "then\n"
 )
 
 
@@ -1433,6 +1511,11 @@ bpy.data.objects.remove(koopa_mesh, do_unlink=True)
 koopa_obj.location = (KOOPA_X, 0.0, MARIO_Z)
 attach_schema(koopa_obj, 'enemy')
 _apply_enemy_movement(koopa_obj)
+# Koopa runs the shell-kick state machine, not the shared goomba walk-and-die script.
+# A kicked shell slides at SHELL_SPEED (14) — raise the ground-speed cap above it (the
+# shared cap is 8, which would clamp the slide).
+koopa_obj['wf_Script']           = KOOPA_SCRIPT
+koopa_obj['wf_Max Ground Speed'] = 16.0
 
 # ── 10. Flagpole ──────────────────────────────────────────────────────────────
 mat_pole = make_mat('smb_pole', (0.72, 0.72, 0.72))
