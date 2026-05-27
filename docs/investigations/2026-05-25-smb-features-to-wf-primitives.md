@@ -45,7 +45,7 @@ in the level-building guide, and the [SMB conversion brief](/home/will/wf-games/
 | **Piranha Plant** | `Enemy` + vertical oscillation (path/script) emerging from a pipe | 🔧 |
 | **Hammer Bro / hammers** | `Enemy` + `Missile` (the hammers) | 🔧 |
 | **Bullet Bill** | `Generator` (cannon spawns) + `Missile`/`Enemy` moving horizontally | 🔧 |
-| **Fireball (Fire Mario)** | `Missile` spawned on fire-button when in Fire state | 🔧 *(needs spawn path — see backlog)* |
+| **Fireball (Fire Mario)** | `Missile` thrown by a hidden, non-solid pool `Generator` that self-parks on Mario's published spawn point (no engine `spawn-template` needed) | ✅ *(2026-05-26, [plan](../plans/2026-05-26-fire-mario-fireball-pooled-generator.md); spawn-path solved by [Approach A](2026-05-26-spawn-template-forth-primitive.md))* |
 | **Super Mushroom** | a `gold` actor with `Gold Value = 0` + a proximity-pickup script (writes `SMB_MUSHROOM_PICKUP`), thrown by a one-shot `Generator` block; slides on real physics | ✅ *(2026-05-26, [plan](../plans/2026-05-26-smb-super-mushroom-powerup.md))* |
 | **Fire Flower** | same collectible idiom as the mushroom, but Fire Mario needs the `spawn-template` primitive (fireballs) | 🔧 *(state 2 reserved; deferred)* |
 | **Star (invincibility)** | **`Shield`** — the live "follows player + timed invulnerability + blink" primitive; Star = collectible that grants a Shield | 🧩 / 🔧 |

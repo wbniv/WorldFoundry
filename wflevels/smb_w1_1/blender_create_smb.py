@@ -86,6 +86,9 @@ SCENE_MID_X = (GROUND_X0 + GROUND_X1) / 2
 # WF's room-to-room transition path. See docs/plans/2026-05-25-smb-pipe-warp-coin-room.md.
 SMB_AT_PIPE  = 1809               # INDEXOF_SMB_AT_PIPE (mailbox.inc) — entry ActBox sets 1 on the pipe mouth
 SMB_COIN_0, SMB_COIN_1, SMB_COIN_2 = 1811, 1812, 1813   # coin-room coin visibility mailboxes (mailbox.inc)
+# Fire Mario fireball globals (mailbox.inc 1820-1827). The generators' Activation
+# MailBox needs the literal index here (an OAS int field); scripts use INDEXOF_ names.
+SMB_FIREBALL_FIRE_R, SMB_FIREBALL_FIRE_L = 1823, 1824
 ENTRY_PIPE_X = 12 * T             # = 18, on ground_0 between qblock0 (x12) and qblock1 (x21)
 CR_FLOOR_TOP = -48.0              # coin-room floor top
 CR_X0, CR_X1 = 0.0, 18.0         # coin-room play span (12 tiles)
@@ -894,6 +897,90 @@ _make_powerup_template('star_template', mat_star, STAR_SCRIPT, 0.0, -59.0)
 STAR_BLOCK_X = 38 * T   # 57.0 — past pit1 (51-54), before the flag (63); a late reward
 _make_powerup_block('star_block', STAR_BLOCK_X, 'star_template', 1.5)
 
+# ── 6c. Fire Mario fireball — first runtime-positioned spawn ───────────────────
+# WF's first spawn at a runtime-chosen position, with ZERO engine code: rather than
+# a new `spawn-template` primitive, two hidden pool Generators self-park on a point
+# Mario publishes each tick and fire a Missile when he pulses their (global)
+# Activation MailBox. Two generators (left/right) cover the Generator's baked-velocity
+# limit (Object X Velocity is fixed at load). See:
+#   docs/plans/2026-05-26-fire-mario-fireball-pooled-generator.md  (Approach A)
+#   docs/investigations/2026-05-26-spawn-template-forth-primitive.md
+#
+# Why a Missile and not a gold-worth-0 clone (the mushroom/flower/star idiom): the
+# COLTABLE has (Player,Missile,CI_NOTHING,CI_SPECIAL) — Mario neither collects nor
+# blocks it (a gold collectible would be self-collected the instant it spawns on him),
+# Missile is Physics + a template by default, and Explosion Delay gives a built-in TTL
+# despawn. CI_SPECIAL vs Enemy is the Phase-2 defeat hook.
+FIREBALL_SPEED = 12.0
+FB = 0.2   # fireball half-extent (small, so it spawns clear of Mario's body)
+mat_fireball = make_mat('fireball_orange', (0.98, 0.45, 0.05))
+
+def _make_fireball_template():
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(FB*2, FB*2, FB*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new('fireball_template')
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat_fireball)
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('fireball_template', mesh)
+    obj.location = (-66.0, 0.0, 0.0)   # parking spot off-screen; generator velocity overrides on spawn
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'missile')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 0.0     # flat travel (v1); a ground-bounce arc is polish
+    obj['wf_Max Air Speed']        = 50.0    # don't let the speed cap zero the velocity (marble bug)
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = 0.0     # frictionless: keeps its launch velocity
+    obj['wf_Explosion Delay']      = 2.0     # built-in TTL despawn (SetPendingRemove)
+    obj['wf_Explode On Impact']    = 'True'
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'fireball_template.iff'
+    return obj
+
+_make_fireball_template()
+
+# Self-park: each tick copy Mario's published spawn point onto our own position. The
+# generators are Anchored (no Jolt character body) so this same-actor X/Y/Z_POS write
+# sticks. Generato::update spawns from currentPos() BEFORE Actor::update() runs this
+# script, so a fireball appears at Mario's previous-tick point — sub-pixel at frame rate.
+FIREBALL_GEN_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_FIREBALL_X read-mailbox INDEXOF_X_POS write-mailbox\n"
+    "INDEXOF_SMB_FIREBALL_Y read-mailbox INDEXOF_Y_POS write-mailbox\n"
+    "INDEXOF_SMB_FIREBALL_Z read-mailbox INDEXOF_Z_POS write-mailbox\n"
+)
+
+def _make_fireball_generator(name, fire_mb, vx):
+    # Empty (no mesh) -> the exporter emits no mesh + Model Type stays the generator
+    # default (Box, not Mesh) -> NO Jolt static body (actor.cc:803) -> non-solid, so the
+    # generator parked on/near Mario never blocks or shoves him.
+    g = bpy.data.objects.new(name, None)
+    scene.collection.objects.link(g)
+    attach_schema(g, 'generator')
+    g.location = (-64.0, 0.0, 0.0)        # parked off-screen until the self-park script tracks Mario
+    g['wf_Mobility']           = 'Anchored'
+    g['wf_Model Type']         = 'None'   # documents intent; the Empty already exports meshless
+    g['wf_Visibility Mailbox'] = 0        # invisible spawner
+    g['wf_Activation MailBox'] = fire_mb  # GLOBAL mailbox: Mario pulses it, no actor-index needed
+    g['wf_Object To Throw']    = 'fireball_template'
+    g['wf_Generation Rate']    = 20.0     # fast: a one-tick activation pulse throws exactly one
+    g['wf_Object X Velocity']  = vx
+    g['wf_Object Y Velocity']  = 0.0
+    g['wf_Object Z Velocity']  = 0.0
+    g['wf_Script']             = FIREBALL_GEN_SCRIPT
+    return g
+
+_make_fireball_generator('fireball_gen_r', SMB_FIREBALL_FIRE_R,  FIREBALL_SPEED)
+_make_fireball_generator('fireball_gen_l', SMB_FIREBALL_FIRE_L, -FIREBALL_SPEED)
+
 # ── 7. Mario placeholder ──────────────────────────────────────────────────────
 def _build_mario():
     mat_red  = make_mat('mario_red',  (0.87, 0.14, 0.07))
@@ -1117,6 +1204,47 @@ if player:
         "0 INDEXOF_SMB_COIN_2 write-mailbox\n"
         "    then\n  then\n"
         "then\n"
+        # ── Fire Mario fireball ───────────────────────────────────────────────
+        # docs/plans/2026-05-26-fire-mario-fireball-pooled-generator.md
+        # Facing latch: RIGHT -> +1, LEFT -> -1, else keep (seed +1 while still 0).
+        "INDEXOF_SMB_MARIO_FACING read-mailbox not if "
+        "1 INDEXOF_SMB_MARIO_FACING write-mailbox then\n"
+        "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_RIGHT & 0<> if "
+        "1 INDEXOF_SMB_MARIO_FACING write-mailbox then\n"
+        "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_LEFT & 0<> if "
+        "-1 INDEXOF_SMB_MARIO_FACING write-mailbox then\n"
+        # Publish the spawn point each tick so the generators self-park on it:
+        #  X: own X + facing*1.2 — in front, so the missile's box clears Mario's body.
+        #  Z: own Z + 0.8 (waist height) — clears the ground slab (top at 0), else the
+        #     spawn pre-check rejects the missile for touching the floor; also where a
+        #     fireball should come from. (Mario's origin is at his feet, Z_POS ~ 0 at rest.)
+        "INDEXOF_X_POS read-mailbox INDEXOF_SMB_MARIO_FACING read-mailbox 1.2 * + "
+        "INDEXOF_SMB_FIREBALL_X write-mailbox\n"
+        "INDEXOF_Y_POS read-mailbox INDEXOF_SMB_FIREBALL_Y write-mailbox\n"
+        "INDEXOF_Z_POS read-mailbox 0.8 + INDEXOF_SMB_FIREBALL_Z write-mailbox\n"
+        # Clear both activation pulses every tick; set one only on the firing tick so
+        # the Generator sees a one-tick pulse and throws exactly one fireball.
+        "0 INDEXOF_SMB_FIREBALL_FIRE_R write-mailbox "
+        "0 INDEXOF_SMB_FIREBALL_FIRE_L write-mailbox\n"
+        # Fire: Fire state (2) + B held + not already latched + cooldown elapsed.
+        "INDEXOF_SMB_MARIO_STATE read-mailbox 2 = if\n"
+        "  INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_B & 0<> if\n"
+        "    INDEXOF_SMB_FIRE_LATCH read-mailbox not if\n"
+        "      INDEXOF_TIME read-mailbox INDEXOF_SMB_FIRE_COOLDOWN read-mailbox > if\n"
+        "        INDEXOF_SMB_MARIO_FACING read-mailbox 0 > if\n"
+        "          1 INDEXOF_SMB_FIREBALL_FIRE_R write-mailbox\n"
+        "        else\n"
+        "          1 INDEXOF_SMB_FIREBALL_FIRE_L write-mailbox\n"
+        "        then\n"
+        "        1 INDEXOF_SMB_FIRE_LATCH write-mailbox\n"
+        "        INDEXOF_TIME read-mailbox 0.5 + INDEXOF_SMB_FIRE_COOLDOWN write-mailbox\n"
+        "      then\n"
+        "    then\n"
+        "  then\n"
+        "then\n"
+        # Release the latch when B is up -> one fireball per distinct press.
+        "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_B & not if "
+        "0 INDEXOF_SMB_FIRE_LATCH write-mailbox then\n"
     )
 
     mario_mesh = _build_mario()

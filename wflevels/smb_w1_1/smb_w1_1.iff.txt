@@ -28,7 +28,8 @@
 		$3fff002l { 'STR' "coin_template.iff" }  // IFF PERM fff:002
 		$3fff003l { 'STR' "powerup_template.iff" }  // IFF PERM fff:003
 		$3fff004l { 'STR' "star_template.iff" }  // IFF PERM fff:004
-		$3fff005l { 'STR' "debris_template.iff" }  // IFF PERM fff:005
+		$3fff005l { 'STR' "fireball_template.iff" }  // IFF PERM fff:005
+		$3fff006l { 'STR' "debris_template.iff" }  // IFF PERM fff:006
 		$3000001l { 'STR' "ground_0.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "ground_1.iff" }  // IFF RM0 000:002
 		$3000003l { 'STR' "ground_2.iff" }  // IFF RM0 000:003
@@ -74,7 +75,8 @@
 		{ 'ASS' $3fff002l [ "coin_template.iff" ] }  // IFF PERM fff:002
 		{ 'ASS' $3fff003l [ "powerup_template.iff" ] }  // IFF PERM fff:003
 		{ 'ASS' $3fff004l [ "star_template.iff" ] }  // IFF PERM fff:004
-		{ 'ASS' $3fff005l [ "debris_template.iff" ] }  // IFF PERM fff:005
+		{ 'ASS' $3fff005l [ "fireball_template.iff" ] }  // IFF PERM fff:005
+		{ 'ASS' $3fff006l [ "debris_template.iff" ] }  // IFF PERM fff:006
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'

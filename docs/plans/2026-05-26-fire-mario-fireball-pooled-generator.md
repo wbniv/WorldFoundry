@@ -1,9 +1,20 @@
 # Fire Mario's fireball — runtime-positioned spawn via a pooled, teleported `Generator`
 
 > Plan authored before implementation (plan-workflow convention). Commit with the code.
-> **Status:** Not started (2026-05-26).
-> **Estimate:** ~half a day to a day (average-programmer scale). **Zero engine C++** — level
-> authoring + Forth only; level rebuild, no engine rebuild.
+> **Status:** **Done** (2026-05-26, ~1 h actual; estimate held at half-day–day average scale).
+> Verified headless ([`tests/verify_smb_fireball.py`](../../tests/verify_smb_fireball.py), 6/6) +
+> screenshots `tests/screenshots/smb_fireball_{01_right,02_left}_in_flight.png`. Approach A worked
+> exactly as designed — no engine logic change. **One fix during bring-up:** the spawn was lifted
+> to waist height (`Z_POS + 0.8`); spawning at Mario's feet (`Z_POS ≈ 0`, origin at feet) put the
+> missile box flush on the ground slab (top `Z=0`) and `SafelyConstructTemplateObject`'s pre-check
+> rejected it (`ConstructTemplateObject -> NULL`). The meshless-generator (no Jolt body), global
+> activation, and facing split all behaved first try.
+> **Estimate:** ~half a day to a day (average-programmer scale). **Zero engine C++ logic** — level
+> authoring + Forth only. One caveat: the new `SMB_FIREBALL_*` constants are added to
+> `mailbox.inc`, and the `INDEXOF_*` table is macro-generated from it at compile time
+> ([`scripting_stub.cc`](../../engine/stubs/scripting_stub.cc)), so the engine must be rebuilt to
+> see them (touch `scripting_stub.cc` — the stub `.o` mtime check ignores `mailbox.inc`). No C++
+> *logic* change.
 
 ## Goal
 
