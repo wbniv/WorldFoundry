@@ -853,10 +853,26 @@ static std::string PollTunnelUrl(const std::string& logpath)
     return "";
 }
 
-// Does `host` resolve yet (A or AAAA)? cloudflared prints the tunnel URL a few
-// seconds before the tunnel finishes registering and Cloudflare publishes its
-// DNS — so the editor must wait for this before connecting, or getaddrinfo
-// fails and the relay connect aborts.
+// Has cloudflared finished registering the tunnel? cloudflared prints the URL a
+// few seconds BEFORE the tunnel is live, so this is the readiness signal to gate
+// the relay connect on. Crucially we DON'T probe DNS here: querying the host
+// name before it's published makes systemd-resolved negatively-cache the
+// NXDOMAIN, and repeated early queries keep that cache poisoned past the whole
+// timeout (confirmed). So we wait on cloudflared's own log line and let the
+// relay connect issue the *first* DNS query — after publish — which resolves.
+static bool PollTunnelRegistered(const std::string& logpath)
+{
+    std::ifstream f(logpath);
+    std::string line;
+    while (std::getline(f, line))
+        if (line.find("Registered tunnel connection") != std::string::npos) return true;
+    return false;
+}
+
+// Does `host` resolve (A or AAAA)? Call this ONLY after registration + a short
+// grace — querying before the local resolver has the record NXDOMAINs and
+// poisons systemd-resolved's negative cache (confirmed). Once propagated, the
+// positive result is cached so the subsequent relay connect resolves instantly.
 static bool HostResolves(const std::string& host)
 {
     struct addrinfo hints{}, *res = nullptr;
@@ -2323,7 +2339,9 @@ int main(int argc, char** argv)
     if (tunnel_pending) {
         const double t0 = glfwGetTime();
         std::string host;
-        bool resolved = false;
+        bool   registered = false;
+        double reg_t = 0, last_check = 0;
+        bool   resolved = false;
         int lframe = 0;
         for (;;) {
             glfwPollEvents();
@@ -2339,8 +2357,9 @@ int main(int argc, char** argv)
                          ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                          ImGuiWindowFlags_NoCollapse);
             const double elapsed = glfwGetTime() - t0;
-            ImGui::Text(host.empty() ? "Establishing secure tunnel…  (%.0f s)"
-                                     : "Publishing tunnel address…  (%.0f s)", elapsed);
+            ImGui::Text(host.empty()     ? "Establishing secure tunnel…  (%.0f s)"
+                        : !registered    ? "Registering tunnel…  (%.0f s)"
+                                         : "Resolving address…  (%.0f s)", elapsed);
             ImGui::Spacing();
             // Animated sweep (0→1 each second) — a liveness cue, not a real %.
             ImGui::ProgressBar(static_cast<float>(elapsed - static_cast<long>(elapsed)),
@@ -2357,15 +2376,23 @@ int main(int argc, char** argv)
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             ++lframe;
 
-            // Scrape the URL, then wait for its DNS to publish (cloudflared
-            // prints the URL a few seconds before the tunnel registers) — only
-            // then is it safe to connect. getaddrinfo is throttled (~3/s) so it
-            // doesn't stutter the bar.
+            // 1) scrape the URL; 2) wait for cloudflared's "Registered" log line
+            // (NOT a DNS probe — probing pre-publish poisons the resolver's
+            // negative cache); 3) after a propagation grace, do the FIRST DNS
+            // query — by now the record has reached the local resolver, so it
+            // resolves and the positive answer is cached for the relay connect.
             if (host.empty()) host = PollTunnelUrl(tunnel_logpath);
-            if (!host.empty() && !resolved && lframe % 20 == 0)
+            if (!host.empty() && !registered) {
+                registered = PollTunnelRegistered(tunnel_logpath);
+                if (registered) reg_t = glfwGetTime();
+            }
+            const double now = glfwGetTime();
+            if (registered && !resolved && (now - reg_t) >= 4.0 && (now - last_check) >= 2.0) {
+                last_check = now;
                 resolved = HostResolves(host);
+            }
             const bool done      = resolved;
-            const bool timed_out = elapsed >= 45.0;
+            const bool timed_out = elapsed >= 75.0;
             const bool frame_cap = (max_frames >= 0 && lframe >= max_frames);  // headless safety
             const bool closing   = glfwWindowShouldClose(win);
             if ((done || timed_out || frame_cap || closing) && shot)
@@ -2373,7 +2400,6 @@ int main(int argc, char** argv)
             glfwSwapBuffers(win);
             if (done || timed_out || frame_cap || closing) break;
         }
-        if (!tunnel_logpath.empty()) ::unlink(tunnel_logpath.c_str());
         if (resolved) {
             ctx_relay_url     = "wss://" + host;
             tunnel_share_link = "wfedit+s://" + host + "/r/" + room_id;
@@ -2381,8 +2407,20 @@ int main(int argc, char** argv)
         } else {
             std::fprintf(stderr, "wf-edit: quick tunnel did not come up%s — no relay\n",
                          host.empty() ? "" : " (DNS not published in time)");
+            // Surface cloudflared's own diagnosis (Phase 2 + debugging).
+            std::ifstream cf(tunnel_logpath);
+            std::vector<std::string> lines; std::string ln;
+            while (std::getline(cf, ln))
+                if (ln.find("ping_group") == std::string::npos &&
+                    ln.find("ICMP") == std::string::npos &&
+                    ln.find("receive buffer") == std::string::npos)
+                    lines.push_back(ln);
+            std::fprintf(stderr, "--- cloudflared log (last 18 lines, %s) ---\n", tunnel_logpath.c_str());
+            for (size_t i = lines.size() > 18 ? lines.size() - 18 : 0; i < lines.size(); ++i)
+                std::fprintf(stderr, "  %s\n", lines[i].c_str());
             KillTunnelChildren();
         }
+        if (!tunnel_logpath.empty()) ::unlink(tunnel_logpath.c_str());
     }
 
     EditorCtx ctx{ win, max_frames, 0, shot };
@@ -2457,7 +2495,14 @@ int main(int argc, char** argv)
             identity.peer_id = ctx.our_peer_id;
             std::copy(ctx.our_colour, ctx.our_colour + 3, identity.colour);
         }
-        if (ctx.relay_client.connect(ctx_relay_url.c_str())) {
+        // Retry: a quick-tunnel relay can need a beat after registration for DNS
+        // to propagate to the local resolver / the proxy to accept connections.
+        bool relay_ok = false;
+        for (int attempt = 0; attempt < 4 && !relay_ok; ++attempt) {
+            if (attempt) sleep(2);
+            relay_ok = ctx.relay_client.connect(ctx_relay_url.c_str());
+        }
+        if (relay_ok) {
             // Send CONTROL join message: [0x04][room_id NUL peer_id].
             std::vector<uint8_t> ctrl;
             ctrl.push_back(0x04);
