@@ -61,6 +61,7 @@ tasks:
   build-wf-edit:
     desc: "Build the wf-edit GUI editor binary (WebRTC voice/video collab). First run: task dev-setup-editor."
     cmds:
+      - git submodule update --init cmake/Corrosion wftools/y-crdt third_party/glfw third_party/imgui
       - cmake -S . -B build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Debug
       - cmake --build build-editor --target wf_edit -j{{.NPROC}}
     vars:
@@ -304,10 +305,10 @@ tasks:
           google-android-ndk-r26c-installer
 
   dev-setup-editor:
-    desc: "Install editor-only dev dependencies (wf-edit: TLS for wss:// signaling)"
+    desc: "Install editor-only dev dependencies (wf-edit: TLS for wss:// signaling, WebRTC VP8/VP9 video)"
     deps: [dev-setup]
     cmds:
-      - sudo apt-get install -y libssl-dev
+      - sudo apt-get install -y libssl-dev libvpx-dev
 
   blender:
     desc: "Launch Blender, print logs to terminal and capture to /tmp/blender.log"
