@@ -190,8 +190,9 @@ engine, per the power-up-block plan note).
 - **Non-mesh generator still needs a colspace.** The spawn center comes from the generator's
   colspace; give it a small authored box extent so `GetColSpace().GetCenter()` resolves to its
   position. Confirm a missile actually spawns (not silently zero-sized).
-- **Interactive keyboard binding for B.** The bridge test injects the raw bit directly; confirm a
-  desktop key is mapped to button B (`0x2`) for hands-on play, or add the binding (follow-up).
+- **Interactive fire key.** Resolved — button B (`0x2`) is already bound to the **`2`** key (and
+  numpad Delete) at [`mesa.cc:312`](../../wfsource/source/gfx/gl/mesa.cc); no new binding needed.
+  The bridge test injects the raw bit directly; hands-on play uses `2` to fire.
 
 ## Follow-ups
 
