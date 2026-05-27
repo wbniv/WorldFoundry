@@ -96,6 +96,10 @@ struct WfeditIdentity {
     std::string  turn_user;
     std::string  turn_pass;
     bool         turn_tls = false;
+    // Default signaling relay used when joining a room with no explicit --relay
+    // (Phase 4). Ships empty — set it to a durable wss:// host, or use "Host a
+    // call" (quick tunnel). WF_COLLAB_RELAY_DEFAULT env overrides.
+    std::string  relay_default;
 };
 
 static std::string IdentityPath()
@@ -136,6 +140,7 @@ static std::optional<WfeditIdentity> LoadIdentity()
         id.turn_user        = j.value("turn_user", "");
         id.turn_pass        = j.value("turn_pass", "");
         id.turn_tls         = j.value("turn_tls", false);
+        id.relay_default    = j.value("relay_default", "");
         if (id.peer_id.empty()) return std::nullopt;
         return id;
     } catch (...) {
@@ -167,7 +172,8 @@ static void SaveIdentity(const WfeditIdentity& id)
             {"turn_port",        id.turn_port},
             {"turn_user",        id.turn_user},
             {"turn_pass",        id.turn_pass},
-            {"turn_tls",         id.turn_tls}
+            {"turn_tls",         id.turn_tls},
+            {"relay_default",    id.relay_default}
         };
         std::ofstream f(path);
         f << j.dump(2) << "\n";
@@ -1755,6 +1761,20 @@ int main(int argc, char** argv)
                     identity.peer_id.c_str(), IdentityPath().c_str());
     } else {
         // No identity yet — peer_id will be assigned at relay-connect time.
+    }
+
+    // Phase 4.4: joining a room without an explicit --relay falls back to a
+    // configured default relay (WF_COLLAB_RELAY_DEFAULT env, else identity.json
+    // `relay_default`). Ships empty — "Host a call" (quick tunnel) is the
+    // zero-config path; a durable wss:// host can be set here for a team.
+    if (!room_id.empty() && ctx_relay_url.empty()) {
+        if (const char* env = std::getenv("WF_COLLAB_RELAY_DEFAULT"); env && *env)
+            ctx_relay_url = env;
+        else if (!identity.relay_default.empty())
+            ctx_relay_url = identity.relay_default;
+        if (!ctx_relay_url.empty())
+            std::printf("wf-edit: using default relay %s for room '%s'\n",
+                        ctx_relay_url.c_str(), room_id.c_str());
     }
 
     // 0. Read-only Y.Doc (M4): shell out to `levtree parse`, build a wfcrdt::Doc
