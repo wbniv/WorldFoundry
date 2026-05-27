@@ -62,6 +62,7 @@ tasks:
     desc: "Build the wf-edit GUI editor binary (WebRTC voice/video collab). First run: task dev-setup-editor."
     cmds:
       - git submodule update --init cmake/Corrosion wftools/y-crdt third_party/glfw third_party/imgui
+      - test -d engine/vendor/jolt-physics-5.5.0 || tar -xzf engine/vendor/jolt-physics-5.5.0.tar.gz --one-top-level=engine/vendor/jolt-physics-5.5.0 --strip-components=1
       - cmake -S . -B build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Debug
       - cmake --build build-editor --target wf_edit -j{{.NPROC}}
     vars:
