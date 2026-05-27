@@ -39,6 +39,20 @@ AssetHandle*
 NSBundleAccessor::OpenForRead(const char* path)
 {
     assert(path);
+
+    // Absolute paths (e.g. -L override from CI or command line) bypass the
+    // bundle lookup and open directly via fopen.
+    if (path[0] == '/') {
+        FILE* fp = fopen(path, "rb");
+        if (!fp) return nullptr;
+        struct stat st;
+        if (fstat(fileno(fp), &st) != 0) { fclose(fp); return nullptr; }
+        AssetHandle* h = new AssetHandle;
+        h->fp   = fp;
+        h->size = st.st_size;
+        return h;
+    }
+
     @autoreleasepool {
         NSString* full = [NSString stringWithUTF8String:path];
         NSString* stem = [[full lastPathComponent] stringByDeletingPathExtension];
