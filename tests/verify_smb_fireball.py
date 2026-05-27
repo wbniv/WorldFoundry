@@ -38,6 +38,15 @@ SCROT = REPO / "tests" / "screenshots"
 LOG   = REPO / "tests" / ".verify_smb_fireball.log"
 PORT  = 7791
 
+# Recording: `--record` (or WF_RECORD=1) launches the engine with the built-in
+# `-record_video` flag (DESIGNER_CHEATS; display.cc pipes the offscreen-FBO frames
+# straight to ffmpeg→x264, occlusion-immune, finalized on SIGTERM). On a passing run
+# we relocate the engine's hardcoded output.mp4 to the checked-in recording. This is
+# the SAME scenario as the assertions — the video IS the passing test.
+RECORD     = ("--record" in sys.argv) or bool(os.environ.get("WF_RECORD"))
+OUTPUT_MP4 = REPO / "wfsource" / "source" / "game" / "output.mp4"   # engine CWD / hardcoded name
+VIDEO      = REPO / "tests" / "recordings" / "smb_fireball.mp4"
+
 SMB_MARIO_STATE = 1814          # global (read at idx=1, written via PLAYER)
 X_POS, Z_POS, XSPEED = 3009, 3011, 3018
 JOY_RAW = 1009                  # EMAILBOX_HARDWARE_JOYSTICK1_RAW
@@ -77,10 +86,14 @@ def main() -> int:
     env["LD_LIBRARY_PATH"] = f"{LIB}:{env.get('LD_LIBRARY_PATH','')}"
     env.setdefault("DISPLAY", ":0")
     log_fp = open(LOG, "w")
+    if RECORD and OUTPUT_MP4.exists():
+        OUTPUT_MP4.unlink()   # stale recording from a prior run
+    argv = [str(WF), f"-L{LEVEL}", "--debug-port", str(PORT),
+            "--debug-bind", "127.0.0.1", "--debug-print-actors"]
+    if RECORD:
+        argv.append("-record_video")   # engine pipes FBO frames -> ffmpeg -> output.mp4
     proc = subprocess.Popen(
-        [str(WF), f"-L{LEVEL}", "--debug-port", str(PORT),
-         "--debug-bind", "127.0.0.1", "--debug-print-actors"],
-        cwd=str(CWD), env=env, stdout=log_fp, stderr=subprocess.STDOUT)
+        argv, cwd=str(CWD), env=env, stdout=log_fp, stderr=subprocess.STDOUT)
 
     cli = None
     fails: list[str] = []
@@ -206,6 +219,14 @@ def main() -> int:
             print(f"   - {f}")
         return 1
     print("PASS — Fire Mario fireball: runtime-positioned spawn, facing-aware, one-per-press")
+    if RECORD:
+        # SIGTERM in the finally above closed the ffmpeg pipe, finalizing output.mp4.
+        if OUTPUT_MP4.exists():
+            VIDEO.parent.mkdir(parents=True, exist_ok=True)
+            os.replace(OUTPUT_MP4, VIDEO)
+            print(f"  record: -> {VIDEO.relative_to(REPO)} ({VIDEO.stat().st_size // 1024} KB)")
+        else:
+            print("  record: WARN — engine produced no output.mp4")
     return 0
 
 

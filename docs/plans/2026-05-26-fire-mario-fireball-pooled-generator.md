@@ -176,6 +176,22 @@ Regression: the existing power-up blocks, bricks, coin, and Star harnesses must 
 don't touch the new mailboxes; run them individually — back-to-back runs starve the headless
 engine, per the power-up-block plan note).
 
+### Recording (checked-in proof)
+
+Run-through video of the passing test — **[`tests/recordings/smb_fireball.mp4`](../../tests/recordings/smb_fireball.mp4)**
+(512×384 H.264, ~4.6 s: fireball thrown right, then left). Regenerate with:
+
+```
+python3 tests/verify_smb_fireball.py --record
+```
+
+`--record` launches the engine with its built-in **`-record_video`** flag (DESIGNER_CHEATS;
+[`display.cc`](../../wfsource/source/gfx/gl/display.cc) pipes the offscreen-FBO frames straight to
+`ffmpeg`→x264, occlusion-immune, finalized on SIGTERM), then relocates the engine's `output.mp4`
+to the checked-in path. Same scenario as the assertion run — the video *is* the passing test. The
+capture FBO is the engine's internal 4:3 render target (no HUD overlay), distinct from the
+letterboxed 640×640 square the `screenshot` op reads.
+
 ## Risks & gotchas
 
 - **Spawn blocked by Mario.** Mitigated by the forward offset (design step 2). If a fireball still
