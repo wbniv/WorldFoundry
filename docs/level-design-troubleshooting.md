@@ -1780,4 +1780,32 @@ INDEXOF_COLLISION_NORMAL_Z read-mailbox -0.5 < if
   0 INDEXOF_COLLISION_NORMAL_Z write-mailbox
 then
 ```
+
+## A fast Generator-thrown object won't spawn near another actor (velocity-expanded spawn box)
+
+`SafelyConstructTemplateObject` ([`level.cc`](../wfsource/source/game/level.cc)) runs a collision
+pre-check before constructing, and **expands the candidate's ColSpace by `velocity × LevelClock
+delta`** before testing — so a *fast* spawned object reserves room in its direction of travel.
+A fireball thrown at +12 reserves ~`12 × dt` ahead of its nominal spawn point (and under the debug
+bridge, where a step can inject a larger dt, that reach grows). If that expanded box overlaps any
+actor the template collides with, the spawn returns **NULL** (or constructs the template's `Poof`).
+Symptom: the Generator logs `FIRING` but there's no `AddObject ok` — intermittently, depending on
+dt and the other actor's exact position.
+
+So when authoring runtime spawns (the SMB fireball pool generators), keep the spawn point clear of
+other collidable actors by **more than `velocity × dt + both half-extents`**, not just the static
+boxes. The SMB Fire Mario fireball spawns `1.8` ahead of Mario (not the original `1.2`) for exactly
+this reason — `1.2` left only ~0.5 of slack, which Mario's idle +X drift plus the velocity
+expansion intermittently closed.
+
+## A killed actor (`ALIVE = 0`) is removed — its change-only mailbox watch freezes at stale values
+
+Writing `0 INDEXOF_ALIVE` self-removes the actor at frame end. The debug bridge's `watch`
+broadcasts are **change-only**, so once the actor is gone, no further updates arrive and the
+watcher keeps reporting the **last pre-death value** — typically `ALIVE = 1` and a frozen position.
+**Do not assert a kill by watching `ALIVE → 0`** (you'll see a stale `1` forever and conclude it
+survived — this cost real debugging time on the SMB fireball-defeat test). Instead probe the
+removal directly: `set_mailbox` on a removed actor replies `{"op":"error", "msg":"... actor not
+found"}` ([`debug_server.cc:796`](../engine/stubs/debug_server.cc)). A frozen position + a
+"not found" reply is the definitive "it died" signal.
 (SMB Fire Flower + Star, 2026-05-26 — [plan](plans/2026-05-26-smb-fire-flower-and-star.md).)

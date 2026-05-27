@@ -915,6 +915,19 @@ FIREBALL_SPEED = 12.0
 FB = 0.2   # fireball half-extent (small, so it spawns clear of Mario's body)
 mat_fireball = make_mat('fireball_orange', (0.98, 0.45, 0.05))
 
+# Phase 2 (docs/plans/2026-05-27-smb-fireball-defeats-enemies.md): a live fireball
+# broadcasts its position + a freshness deadline each tick so enemies can self-defeat
+# by proximity (Missile<->Enemy are both CharacterVirtuals -> no Jolt contact dispatch,
+# same reason enemies track the player by proximity). When no fireball is alive nobody
+# refreshes LIVE_UNTIL, so the stale LIVE_X/Z are ignored. Missile::update ends in
+# Actor::update(), so this script runs each tick.
+FIREBALL_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_X_POS read-mailbox INDEXOF_SMB_FIREBALL_LIVE_X write-mailbox\n"
+    "INDEXOF_Z_POS read-mailbox INDEXOF_SMB_FIREBALL_LIVE_Z write-mailbox\n"
+    "INDEXOF_TIME read-mailbox 0.1 + INDEXOF_SMB_FIREBALL_LIVE_UNTIL write-mailbox\n"
+)
+
 def _make_fireball_template():
     bm = _bmesh.new()
     _bmesh.ops.create_cube(bm, size=1.0)
@@ -943,6 +956,7 @@ def _make_fireball_template():
     obj['wf_Model Type']           = 'Mesh'
     obj['wf_Visibility Mailbox']   = 1
     obj['wf_Mesh Name']            = 'fireball_template.iff'
+    obj['wf_Script']               = FIREBALL_SCRIPT   # broadcast live position for enemy proximity-defeat
     return obj
 
 _make_fireball_template()
@@ -1214,11 +1228,13 @@ if player:
         "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_LEFT & 0<> if "
         "-1 INDEXOF_SMB_MARIO_FACING write-mailbox then\n"
         # Publish the spawn point each tick so the generators self-park on it:
-        #  X: own X + facing*1.2 — in front, so the missile's box clears Mario's body.
+        #  X: own X + facing*1.8 — well in front, so the missile's box reliably clears Mario's
+        #     body. (1.2 was marginal: Mario's slow +X idle drift intermittently closed the gap,
+        #     so the spawn pre-check rejected the fireball inside Mario ~2/3 of the time.)
         #  Z: own Z + 0.8 (waist height) — clears the ground slab (top at 0), else the
         #     spawn pre-check rejects the missile for touching the floor; also where a
         #     fireball should come from. (Mario's origin is at his feet, Z_POS ~ 0 at rest.)
-        "INDEXOF_X_POS read-mailbox INDEXOF_SMB_MARIO_FACING read-mailbox 1.2 * + "
+        "INDEXOF_X_POS read-mailbox INDEXOF_SMB_MARIO_FACING read-mailbox 1.8 * + "
         "INDEXOF_SMB_FIREBALL_X write-mailbox\n"
         "INDEXOF_Y_POS read-mailbox INDEXOF_SMB_FIREBALL_Y write-mailbox\n"
         "INDEXOF_Z_POS read-mailbox 0.8 + INDEXOF_SMB_FIREBALL_Z write-mailbox\n"
@@ -1293,6 +1309,15 @@ ENEMY_SCRIPT = (
     "  then\n"
     "else\n"
     "  0 INDEXOF_XSPEED write-mailbox\n"                 # dormant: stand still until revealed
+    "then\n"
+    # Fireball defeat (independent of the player block — a fireball can hit us anywhere).
+    # Only while a fireball is FRESH (TIME < LIVE_UNTIL); else LIVE_X/Z are stale and ignored.
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"  # dx^2
+    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"  # dz^2
+    "  + 2.5 < if\n"                                     # dx^2 + dz^2 < 2.5 (waist-height fireball vs ground enemy)
+    "    0 INDEXOF_ALIVE write-mailbox\n"                # fireball kill: die, no bounce, no hurt
+    "  then\n"
     "then\n"
 )
 
