@@ -789,19 +789,23 @@ static std::string ToolPath(const std::string& exe_path, const char* name)
     return name;   // PATH
 }
 
-// Returns the public host ("<rand>.trycloudflare.com") or "" on failure.
-static std::string HostQuickTunnel(const std::string& exe_path, int port)
+// Spawn wf-relay + a Cloudflare quick tunnel (non-blocking). cloudflared's
+// banner is written to out_logpath for incremental polling; children are reaped
+// via atexit. Returns false if a prerequisite is missing.
+static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
+                                  std::string& out_logpath)
 {
     const std::string cf = ToolPath(exe_path, "cloudflared");
     const char* relay = "wftools/wf_collab/target/release/wf-relay";
     if (::access(relay, X_OK) != 0) {
         std::fprintf(stderr, "wf-edit: wf-relay not built (%s) — "
                      "run: cargo build --release --bin wf-relay\n", relay);
-        return "";
+        return false;
     }
     char logtmp[] = "/tmp/wfedit-cf-XXXXXX";
     const int logfd = ::mkstemp(logtmp);
-    if (logfd < 0) return "";
+    if (logfd < 0) return false;
+    out_logpath = logtmp;
 
     const std::string ps  = std::to_string(port);
     const std::string url = "http://localhost:" + ps;
@@ -822,23 +826,36 @@ static std::string HostQuickTunnel(const std::string& exe_path, int port)
     ::close(logfd);
     static bool s_atexit_armed = false;
     if (!s_atexit_armed) { std::atexit(KillTunnelChildren); s_atexit_armed = true; }
+    return true;
+}
 
-    // Scrape the ephemeral URL from cloudflared's banner (≤20 s).
-    std::string host;
+// Non-blocking: scan cloudflared's log once for the ephemeral public host
+// ("<rand>.trycloudflare.com"). Returns "" until the URL has been printed.
+static std::string PollTunnelUrl(const std::string& logpath)
+{
+    std::ifstream f(logpath);
+    std::string line;
+    while (std::getline(f, line)) {
+        const auto p = line.find("https://");
+        const auto q = line.find(".trycloudflare.com");
+        if (p != std::string::npos && q != std::string::npos && q > p)
+            return line.substr(p + 8, (q + 18) - (p + 8));   // <rand>.trycloudflare.com
+    }
+    return "";
+}
+
+// Blocking spawn + scrape (≤20 s), used by the headless self-test. Returns the
+// public host or "". The GUI path uses StartQuickTunnelProcs + PollTunnelUrl so
+// the window stays responsive (a progress UI) while the tunnel comes up.
+static std::string HostQuickTunnel(const std::string& exe_path, int port)
+{
+    std::string logpath, host;
+    if (!StartQuickTunnelProcs(exe_path, port, logpath)) return "";
     for (int i = 0; i < 80 && host.empty(); ++i) {
-        std::ifstream f(logtmp);
-        std::string line;
-        while (std::getline(f, line)) {
-            const auto p = line.find("https://");
-            const auto q = line.find(".trycloudflare.com");
-            if (p != std::string::npos && q != std::string::npos && q > p) {
-                host = line.substr(p + 8, (q + 18) - (p + 8));   // <rand>.trycloudflare.com
-                break;
-            }
-        }
+        host = PollTunnelUrl(logpath);
         if (host.empty()) { const struct timespec ts{0, 250'000'000}; ::nanosleep(&ts, nullptr); }
     }
-    ::unlink(logtmp);
+    ::unlink(logpath.c_str());
     if (host.empty()) {
         std::fprintf(stderr, "wf-edit: cloudflared produced no tunnel URL\n");
         KillTunnelChildren();
@@ -1932,24 +1949,21 @@ int main(int argc, char** argv)
                         ctx_relay_url.c_str(), room_id.c_str());
     }
 
-    // Phase 4.3: host a call over a Cloudflare quick tunnel — spawn wf-relay +
-    // cloudflared, resolve the public host, and join our own room through it
-    // (children reaped at exit). Blocks ≤20 s while the tunnel comes up
-    // (console-only here; the editor surfaces the share link in a modal). The
-    // wss:// host overrides any default relay above.
+    // Phase 4.3: host a call over a Cloudflare quick tunnel. Spawn wf-relay +
+    // cloudflared NOW (non-blocking) so the tunnel comes up while the window +
+    // level load; the public host is resolved later by a responsive progress
+    // loop (after the GL context is up) rather than blocking startup here. The
+    // resolved wss:// host overrides any default relay above.
     std::string tunnel_share_link;
+    std::string tunnel_logpath;        // cloudflared banner, polled by the loading loop
+    bool        tunnel_pending = false;
     if (host_tunnel) {
         if (room_id.empty()) room_id = "studio-" + std::to_string(::getpid() % 10000);
         std::printf("wf-edit: starting quick tunnel for room '%s'…\n", room_id.c_str());
         std::fflush(stdout);
-        const std::string host = HostQuickTunnel(argv[0], 9900);
-        if (!host.empty()) {
-            ctx_relay_url     = "wss://" + host;
-            tunnel_share_link = "wfedit+s://" + host + "/r/" + room_id;
-            std::printf("wf-edit: quick tunnel up — share %s\n", tunnel_share_link.c_str());
-        } else {
-            std::fprintf(stderr, "wf-edit: quick tunnel failed — starting without a relay\n");
-        }
+        tunnel_pending = StartQuickTunnelProcs(argv[0], 9900, tunnel_logpath);
+        if (!tunnel_pending)
+            std::fprintf(stderr, "wf-edit: quick tunnel failed to start — no relay\n");
     }
 
     // 0. Read-only Y.Doc (M4): shell out to `levtree parse`, build a wfcrdt::Doc
@@ -2277,6 +2291,68 @@ int main(int argc, char** argv)
                       glfwGetGLXContext(win),
                       true };
     SetHostGLContext(&hc);
+
+    // Phase 4.3: resolve the quick tunnel behind a responsive progress UI instead
+    // of blocking startup. Pure-ImGui frames on `win` (before HALStart, like the
+    // cd.iff picker) while polling cloudflared's banner — so the window keeps
+    // pumping events (no WM "not responding") during the ~10–20 s the tunnel
+    // takes to come up.
+    if (tunnel_pending) {
+        const double t0 = glfwGetTime();
+        std::string host;
+        int lframe = 0;
+        for (;;) {
+            glfwPollEvents();
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+            const ImGuiViewport* vp = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x + vp->WorkSize.x * 0.5f,
+                                           vp->WorkPos.y + vp->WorkSize.y * 0.5f),
+                                    ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+            ImGui::SetNextWindowSize(ImVec2(420, 0), ImGuiCond_Always);
+            ImGui::Begin("Host a call", nullptr,
+                         ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                         ImGuiWindowFlags_NoCollapse);
+            const double elapsed = glfwGetTime() - t0;
+            ImGui::Text("Establishing secure tunnel…  (%.0f s)", elapsed);
+            ImGui::Spacing();
+            // Animated sweep (0→1 each second) — a liveness cue, not a real %.
+            ImGui::ProgressBar(static_cast<float>(elapsed - static_cast<long>(elapsed)),
+                               ImVec2(-1.0f, 0.0f), "");
+            ImGui::Spacing();
+            ImGui::TextDisabled("wf-relay + Cloudflare quick tunnel");
+            ImGui::End();
+
+            ImGui::Render();
+            int fbw, fbh; glfwGetFramebufferSize(win, &fbw, &fbh);
+            glViewport(0, 0, fbw, fbh);
+            glClearColor(0.10f, 0.10f, 0.11f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            ++lframe;
+
+            host = PollTunnelUrl(tunnel_logpath);
+            const bool done      = !host.empty();
+            const bool timed_out = elapsed >= 30.0;
+            const bool frame_cap = (max_frames >= 0 && lframe >= max_frames);  // headless safety
+            const bool closing   = glfwWindowShouldClose(win);
+            if ((done || timed_out || frame_cap || closing) && shot)
+                write_ppm(win, shot);   // back buffer, pre-swap
+            glfwSwapBuffers(win);
+            if (done || timed_out || frame_cap || closing) break;
+        }
+        if (!tunnel_logpath.empty()) ::unlink(tunnel_logpath.c_str());
+        if (!host.empty()) {
+            ctx_relay_url     = "wss://" + host;
+            tunnel_share_link = "wfedit+s://" + host + "/r/" + room_id;
+            std::printf("wf-edit: quick tunnel up — share %s\n", tunnel_share_link.c_str());
+        } else {
+            std::fprintf(stderr, "wf-edit: quick tunnel did not come up — no relay\n");
+            KillTunnelChildren();
+        }
+    }
+
     EditorCtx ctx{ win, max_frames, 0, shot };
     ctx.level_name  = std::move(level_name);
     ctx.actor_names = std::move(actor_names);
