@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
-project(wf_game VERSION 1.0.0 LANGUAGES CXX C)
+# OBJCXX is required for the macOS desktop Ninja build (audio TUs set
+# LANGUAGE OBJCXX for miniaudio's CoreAudio backend). Xcode auto-enables it;
+# Ninja requires it here. Harmless on Linux/Android (clang ignores it).
+project(wf_game VERSION 1.0.0 LANGUAGES CXX C OBJCXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
