@@ -206,6 +206,7 @@
 
 | Date | Investigation | Status | Summary |
 |------|---------------|--------|---------|
+| 2026-05-26 | [macOS port — runtime + engine delta estimate](docs/investigations/2026-05-26-macos-port-estimate.md) | **Estimate** | Two-pass macOS-port estimate — the runtime reuses the working OpenGL 3.3-core renderer (≈3 weeks) while the engine delta adds the editor/CRDT/collab stack via an NSGL host-GL handshake + AVFoundation capture (≈4 weeks); recommends GL over the still-unfinished iOS Metal backend. |
 | 2026-05-22 | [Blender-snowgoons renders untextured](docs/investigations/2026-05-22-blender-snowgoons-untextured.md) | **✅ RESOLVED** | It was the camera, not textures — a CamShot exported Fixed/Absolute instead of Track/Relative, so the cam parked at a static gray view. The earlier euler-shuffle lead was a misread. |
 | 2026-05-15 | [WF coordinate system, Euler angles, and `currentDir()`](docs/investigations/2026-05-15-wf-coordinate-system-and-currentdir.md) | **Complete** | `currentDir()` returns `(cos C, sin C, 0)`, not `(sin C, cos C, 0)` as the comment claims; the full radian→revolution→sin/cos chain is traced and the side-scroller recipe documented. |
 | 2026-04-29 | [Blender Game Engine removal — history, gap, WF's fit](docs/investigations/2026-04-29-blender-game-engine-removal.md) | **Complete** | History of BGE removal and why the Godot recommendation missed the point — integration was the product, not the renderer. |
