@@ -87,6 +87,13 @@ workflows:
     instance_type: mac_mini_m2
     max_build_duration: 45
 
+    cache:
+      cache_paths:
+        # CMake/Xcode project dir — avoids full project re-gen + recompile.
+        - build-ios-sim
+        # Jolt extraction — once the iOS Jolt block lands this avoids re-tar.
+        - engine/vendor/jolt-physics-5.5.0
+
     environment:
       xcode: latest
 
@@ -348,6 +355,15 @@ workflows:
     name: macOS Desktop (Debug, headless)
     instance_type: mac_mini_m2
     max_build_duration: 20
+
+    cache:
+      cache_paths:
+        # CMake build dir — .o files + libwfengine.a + libzforth.a survive
+        # between runs so only changed TUs recompile on fix-iterate cycles.
+        - build-macos
+        # Jolt extraction — not used today (legacy physics) but cached now so
+        # the first Jolt-enabled build skips the tar -xzf step.
+        - engine/vendor/jolt-physics-5.5.0
 
     environment:
       xcode: latest
