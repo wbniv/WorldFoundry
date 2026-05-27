@@ -1,31 +1,39 @@
-# `spawn-template` — a Forth primitive to spawn template actors from script
+# Spawning template actors from script — pooled generator vs. a `spawn-template` primitive
 
 **Date:** 2026-05-26
-**Status:** Investigation / implementation reference (no code yet)
+**Status:** Investigation / implementation reference. **Conclusion: do Approach A first** (reuse a
+pooled, teleported `Generator` — zero engine code); keep Approach B (`spawn-template` syscall) on
+the shelf for the velocity/concurrency cases it alone can express.
 
 ## Context
 
 Today a level can only spawn a template-flagged actor by authoring a [`Generator`](../../wfsource/source/game/generator.cc)
 actor in the `.lev` and firing it through its activation mailbox. That works for fixed
-spawn points (the SMB `?`-block coin pops out of a per-block Generator), but it does not
-work for **runtime-positioned** spawns: a fireball launched from wherever Fire Mario is
-standing, an item dropped from a defeated enemy, a Hammer Bro's hammers, Bullet Bills from a
-cannon. Each of those would need a Generator anchored at a *fixed* position in the level,
-mediated through a mailbox — friction that scales badly with the number of spawn points and
-can't express "spawn at the actor's current position."
+spawn points (the SMB `?`-block coin pops out of a per-block Generator), but the open question
+was **runtime-positioned** spawns: a fireball launched from wherever Fire Mario is standing, an
+item dropped from a defeated enemy, a Hammer Bro's hammers, Bullet Bills from a cannon. The
+assumption was that this needs a new engine primitive.
 
-This is the last engine-work blocker for several SMB World 1-1 enemies and for Fire Mario's
-fireball ([SMB features → WF primitives](2026-05-26-smb-features-to-wf-primitives.md), backlog
-item 3). It's already logged in [TODO.md](../../TODO.md) under SCRIPTING INFRASTRUCTURE. This
-doc settles the design: the syscall mechanics, the layering, the authoring story for *naming* a
-template from script, the edge cases, and a discrepancy it surfaces in the existing
-`wfmut::SpawnActor`.
+It doesn't — or at least not yet. A `Generator` is a full `Actor`, and the engine **already**
+spawns from the generator's *live* `currentPos()` every fire (`generator.cc` `update()`), and a
+script can **already** teleport any actor by writing its `X/Y/Z_POS` mailbox (the write reaches
+`Actor::WriteSystemMailbox`, which calls `SetPosition` and pushes into Jolt — the 2026-05-11 fix,
+see [plan](../plans/2026-05-11-mailbox-pos-write-bypasses-jolt.md)). So "spawn at a runtime
+position" decomposes into **move a pooled generator there, then fire it** — pure composition on
+shipped, proven primitives.
 
-The shape we want, from the TODO:
+This doc therefore presents **two approaches**:
 
-```forth
-( vx vy vz x y z template_idx -- new_actor_idx )
-```
+- **Approach A — reuse a pooled, teleported `Generator`** (recommended). Zero engine C++. Covers
+  the near-term SMB needs (fireball, single-shot drops). Implementation plan:
+  [docs/plans/2026-05-26-fire-mario-fireball-pooled-generator.md](../plans/2026-05-26-fire-mario-fireball-pooled-generator.md).
+- **Approach B — a `spawn-template` Forth syscall** (deferred). Needs a new engine syscall + a
+  cross-layer callback. Earns its cost only for *arbitrary runtime velocity* **and** *concurrent
+  bursts from one logical spawner*, which Approach A can't express cheaply. Designed in full below
+  so it's ready when that trigger fires.
+
+It's logged in [TODO.md](../../TODO.md) under SCRIPTING INFRASTRUCTURE
+([SMB features → WF primitives](2026-05-26-smb-features-to-wf-primitives.md), backlog item 3).
 
 ## How spawning works today
 
@@ -63,9 +71,69 @@ and do both calls.**
 `SafelyConstructTemplateObject` returns **NULL** when the spawn point is occupied by something
 the template would collide with — or, if the template's OAD names a `Poof` object, it recurses
 and spawns the Poof instead (and returns NULL only if the whole Poof chain is blocked). So
-`spawn-template` can legitimately return `0` (no actor created), and **the script must tolerate
-that** (e.g. a fireball that would spawn inside a wall simply doesn't). This is a feature, not a
-failure mode to paper over.
+the spawn can legitimately produce nothing (no actor created) — true for **both** approaches —
+so the trigger logic must tolerate "I fired but nothing appeared" (e.g. a fireball that would
+spawn inside a wall simply doesn't). This is a feature, not a failure mode to paper over.
+
+## Approach A — reuse a pooled, teleported `Generator` (recommended, zero engine)
+
+### Why it works with no engine change
+
+Two facts already shipped make this pure composition:
+
+1. **The generator spawns from its *live* position.** `Generato::update()`
+   ([`generator.cc`](../../wfsource/source/game/generator.cc)) recomputes the spawn point from
+   `currentPos()` every time it fires — `Vector3 center = GetColSpace().GetCenter(currentPos())`
+   — not from a cached anchor. Move the generator's body, and its next spawn emerges from the new
+   spot.
+2. **A script can teleport any actor, and it sticks.** Writing `X/Y/Z_POS` routes through
+   [`Actor::WriteSystemMailbox`](../../wfsource/source/game/actor.cc) (`actor.cc:1396`), which
+   calls `SetPosition` + `SetPredictedPosition` **and** `JoltCharacterSetPosition` for character
+   bodies (the [2026-05-11 fix](../plans/2026-05-11-mailbox-pos-write-bypasses-jolt.md) — before
+   it, Jolt's per-tick sync silently overwrote the write). Cross-actor writes work too:
+   `write-actor-mailbox ( val idx actor_idx -- )` →
+   [`WorldFoundryMailboxesManager::LookupMailboxes`](../../wfsource/source/game/level.cc:318)
+   returns *that actor's* mailbox object, so the same `SetPosition` handler runs on the target.
+
+So the recipe is: **author one hidden, non-collidable pool generator → teleport it to the spawn
+point → pulse its activation mailbox → it fires from there.** No new C++, no rebuild.
+
+### The pattern
+
+- A `pool_generator` actor authored once in the level: `Object To Throw` = the projectile
+  template, `Generation Rate` fast, **non-collidable** (so teleporting its body doesn't
+  depenetrate or shove the player) and **hidden** (`Visibility Mailbox = 0`).
+- The requesting actor's script (e.g. Mario, on fire-button) writes the spawn position into the
+  generator's `X/Y/Z_POS` via `write-actor-mailbox`, then pulses the generator's activation
+  mailbox. Next tick the generator fires a projectile at that position with its baked velocity.
+- The projectile is a short-lived actor (the `gold`-style `LevelClock` TTL despawn idiom, or a
+  `Destroyer`/wall contact) so the temp-object pool doesn't fill.
+
+### What Approach A *cannot* do (and the workarounds)
+
+- **Velocity is baked.** `_vect` is read **once** in the generator constructor from the OAD
+  (`generator.cc:54`); a moved generator still throws at one fixed velocity. Fire Mario's fireball
+  must go left or right with his facing → use **two** pool generators (one per direction) and fire
+  the matching one. A handful of discrete directions is fine; arbitrary runtime velocity is not.
+- **One spawn per fire, throttled.** A single pool generator can be at one place per fire, and
+  `Generation Rate` throttles it. Two enemies dying on the same tick can't both drop an item from
+  one generator that tick — you'd need a *pool* of N generators plus free-list bookkeeping in
+  Forth. Fine for a cooldown-gated fireball; ugly for burst spawns.
+- **1-tick ordering lag.** Set-position-then-fire across actors hits the known Director-after-loop
+  execution-order gap (consumer's slot can run before the writer's). Absorbed by a cooldown; noted
+  in [TODO.md](../../TODO.md) § per-tick execution ordering.
+- **The generator is a physical actor.** It must be authored non-collidable + hidden, else its
+  teleporting body triggers contacts. One-time authoring care, not a runtime cost.
+
+For the SMB roadmap (a cooldown-gated fireball; single-shot enemy drops) these limits are
+acceptable, so **Approach A ships the feature today**. Approach B is what you reach for when the
+velocity or concurrency limits actually bite.
+
+## Approach B — a `spawn-template` Forth primitive (deferred)
+
+> Designed in full so it's ready when Approach A's limits bite (arbitrary runtime velocity,
+> concurrent bursts). Not needed for the near-term SMB work. The shape, from the TODO:
+> `spawn-template ( vx vy vz x y z template_idx -- new_actor_idx )`.
 
 ### The syscall mechanism (zForth)
 
@@ -266,42 +334,45 @@ all 8 engines stay [default-on, all optional](../../CLAUDE.md).)
 
 ## Validation plan
 
-1. **Headless unit via the debug bridge.** New `tests/verify_spawn_template.py`: load SMB W1-1,
-   inject a one-line script on a scratch actor that calls `spawn-template` with a known template
-   index + position, then assert (a) actor count incremented, (b) the new actor exists at the
-   given position (`X_POS`/`Z_POS` mailboxes), (c) a blocked spawn point returns 0 and does
-   **not** increment the count. Watch for the "AddObject ok" stderr line the Generator already
-   emits (and count those lines for the spawn assertion — the bridge's perf-actor counts are
-   pool size, not live actors).
-2. **The real use case — Fire Mario's fireball.** Author a fireball template + a fire-button
-   branch in Mario's per-tick script that spawns it at his position with +X velocity (mirrored on
-   facing), on a cooldown. Screenshot the fireball in flight (gameplay features need a visual
-   capture as proof, not just a passing test). This is the deliverable that justifies the
-   primitive.
-3. **Regression:** the existing Generator-based coin pop-out and brick debris must be unchanged
-   (they don't touch the new syscall, but confirm the `Init` word additions didn't perturb the
-   dict).
+**Approach A (the one we're building — Fire Mario's fireball):** author two pool generators
+(left/right) + a fireball template + a fire-button branch in Mario's per-tick script. Headless via
+the debug bridge: assert a fireball actor appears at Mario's X with the correct ±X velocity, that
+the cooldown gates it to one per interval, and that it despawns. Screenshot the fireball in flight
+(gameplay features need a visual capture as proof, not just a passing test). Full step-by-step in
+the [implementation plan](../plans/2026-05-26-fire-mario-fireball-pooled-generator.md).
+
+**Approach B (when built):** `tests/verify_spawn_template.py` — inject a one-line script on a
+scratch actor that calls `spawn-template` with a known template index + position; assert (a) actor
+count incremented, (b) the new actor exists at the given position, (c) a blocked spawn point
+returns 0 and does **not** increment the count. Watch/count the "AddObject ok" stderr line the
+Generator already emits (the bridge's perf-actor counts are pool size, not live actors).
 
 ## Scope estimate
 
 Average-programmer scale:
 
-- **zForth primitive + injected callback:** ~half a day. ~15 LOC in `scripting_zforth.cc`, ~10
-  LOC for the game-layer callback + registration, a shared typedef/setter in the scripting
-  header, plus the `wfmut::SpawnActor` fix and a shared helper. The mechanism is a direct copy of
-  `write-actor-mailbox` + `wfmut::SpawnActor`.
-- **Headless test + fireball demo (the proof):** ~half a day to a day, including authoring the
-  fireball template and the template-index mailbox plumbing.
-- **Parallel engines (Lua/QuickJS):** ~half a day if/when wanted; not needed for SMB.
-
-No `mailbox.inc` change, but **this does add an engine C++ syscall**, so it needs an engine
-rebuild (`task build`; touch `scripting_zforth.cc` to force the stub recompile, since the stub
-`.o` mtime check ignores some dependency changes).
+- **Approach A — pooled-generator fireball (recommended, do now):** ~half a day to a day, **zero
+  engine C++**. Pure level authoring + Forth (two pool generators, a fireball template, Mario's
+  fire-button branch + cooldown, TTL despawn) + the headless test and screenshot. Level rebuild
+  only. See the [implementation plan](../plans/2026-05-26-fire-mario-fireball-pooled-generator.md).
+- **Approach B — `spawn-template` syscall (deferred):** ~half a day for the primitive (~15 LOC in
+  `scripting_zforth.cc`, ~10 LOC for the game-layer callback + registration, a shared
+  typedef/setter, plus the `wfmut::SpawnActor` fix and a shared helper — a direct copy of
+  `write-actor-mailbox` + `wfmut::SpawnActor`), plus ~half a day for the headless test, plus
+  ~half a day for the parallel Lua/QuickJS bindings if/when wanted. **Adds an engine C++ syscall**,
+  so it needs an engine rebuild (`task build`; touch `scripting_zforth.cc` to force the stub
+  recompile, since the stub `.o` mtime check ignores some dependency changes). No `mailbox.inc`
+  change.
 
 ## Follow-ups this surfaces
 
+- **Trigger for Approach B (`spawn-template`):** build it when a consumer needs *arbitrary runtime
+  velocity* or *concurrent bursts from one logical spawner* — e.g. enemy item-drops at scale,
+  many-projectile patterns — and the pool-of-generators bookkeeping in Approach A gets ugly. The
+  design above is ready to go.
 - **Fix `wfmut::SpawnActor` to call `AddObject`** (or route both spawn entry points through one
-  shared `Level` helper so they can't drift). Closes the "spawn path open" item on the
+  shared `Level` helper so they can't drift). Independent of which approach ships — it's a latent
+  bug in the editor/bridge spawn path. Closes the "spawn path open" item on the
   [engine mutation API plan](../plans/2026-05-19-engine-mutation-api.md).
 - **`read-actor-mailbox` (custom 3)** is the sibling primitive reserved in the same comment block;
   worth landing in the same pass since the enemy↔player scripts want it too
