@@ -1,7 +1,7 @@
 # Plan: SMB scoring system + 1UP mushroom
 
 > Plan authored before implementation (plan-workflow convention). Commit with the code.
-> **Status:** In progress.
+> **Status:** DONE (`567396b2`, 2026-05-27, ~3h)
 
 ## Goal
 
