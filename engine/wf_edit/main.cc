@@ -63,6 +63,9 @@
 #include <vector>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <csignal>
+#include <ctime>
+#include <fcntl.h>
 
 // Provided by the engine's platform layer (mirrors the host-GL e2e harness).
 extern void ParseWindowSwitches(int argc, char** argv);
@@ -295,6 +298,11 @@ struct EditorCtx {
     wfedit::WebrtcSession*  webrtc  = nullptr;   // Phase 2: WebRTC media transport
     std::string             room_id;
     bool                    show_collab = true;
+    // Phase 4: when this session is hosting a quick tunnel, the shareable
+    // wfedit+s://…/r/<room> invite link (drives the "Host a call" modal).
+    std::string             tunnel_share_link;
+    // Current level path (for File→Open / Host re-exec into a fresh process).
+    std::string             leveltree;
 
     // Co-editing relay (Phase 2+). relay_client is connected when relay_url is set.
     wfedit::WsClient                    relay_client;
@@ -736,6 +744,106 @@ static void ReExecWithLevel(const EditorCtx* c, const std::string& leveltree)
     execvp(c->exe_path.c_str(), argv.data());
     std::fprintf(stderr, "wf-edit: re-exec '%s' failed: %s\n",
                  c->exe_path.c_str(), std::strerror(errno));
+}
+
+// Host a call: re-exec into a fresh process that spawns the quick tunnel and
+// joins its own room (keeping the current level). The fresh process owns the
+// relay/cloudflared lifecycle, so we sidestep starting collab mid-session — and
+// the menu item is disabled while already hosting, so this never orphans a
+// running tunnel (execvp does not run atexit handlers).
+static void ReExecHostTunnel(const EditorCtx* c)
+{
+    std::vector<std::string> args = { c->exe_path, "--leveltree=" + c->leveltree, "--host-tunnel" };
+    std::vector<char*> argv;
+    for (auto& s : args) argv.push_back(const_cast<char*>(s.c_str()));
+    argv.push_back(nullptr);
+    std::printf("wf-edit: re-exec to host a call (quick tunnel)\n");
+    std::fflush(nullptr);
+    execvp(c->exe_path.c_str(), argv.data());
+    std::fprintf(stderr, "wf-edit: re-exec failed: %s\n", std::strerror(errno));
+}
+
+// ── Quick-tunnel hosting (Phase 4.3) ───────────────────────────────────────────
+// Spawn a local wf-relay + a Cloudflare quick tunnel and resolve the public
+// wss:// host, so a host can invite a collaborator with one shareable link and
+// no self-hosted infra. The children are tracked here and reaped via atexit, so
+// the editor never leaks them. See docs/plans/2026-05-27-webrtc-phase4-*.
+static pid_t s_relay_pid = -1;
+static pid_t s_cloudflared_pid = -1;
+
+static void KillTunnelChildren()
+{
+    if (s_cloudflared_pid > 0) { ::kill(s_cloudflared_pid, SIGTERM); s_cloudflared_pid = -1; }
+    if (s_relay_pid > 0)       { ::kill(s_relay_pid,       SIGTERM); s_relay_pid = -1; }
+}
+
+// Prefer a tool shipped next to the editor binary (<dir>/tools/<name>, where
+// `task fetch-cloudflared` installs it), else fall back to PATH.
+static std::string ToolPath(const std::string& exe_path, const char* name)
+{
+    const auto slash = exe_path.rfind('/');
+    if (slash != std::string::npos) {
+        const std::string p = exe_path.substr(0, slash) + "/tools/" + name;
+        if (::access(p.c_str(), X_OK) == 0) return p;
+    }
+    return name;   // PATH
+}
+
+// Returns the public host ("<rand>.trycloudflare.com") or "" on failure.
+static std::string HostQuickTunnel(const std::string& exe_path, int port)
+{
+    const std::string cf = ToolPath(exe_path, "cloudflared");
+    const char* relay = "wftools/wf_collab/target/release/wf-relay";
+    if (::access(relay, X_OK) != 0) {
+        std::fprintf(stderr, "wf-edit: wf-relay not built (%s) — "
+                     "run: cargo build --release --bin wf-relay\n", relay);
+        return "";
+    }
+    char logtmp[] = "/tmp/wfedit-cf-XXXXXX";
+    const int logfd = ::mkstemp(logtmp);
+    if (logfd < 0) return "";
+
+    const std::string ps  = std::to_string(port);
+    const std::string url = "http://localhost:" + ps;
+
+    s_relay_pid = ::fork();
+    if (s_relay_pid == 0) {
+        const int dn = ::open("/dev/null", O_WRONLY);
+        if (dn >= 0) { ::dup2(dn, 1); ::dup2(dn, 2); }
+        ::execl(relay, relay, "--port", ps.c_str(), (char*)nullptr);
+        _exit(127);
+    }
+    s_cloudflared_pid = ::fork();
+    if (s_cloudflared_pid == 0) {
+        ::dup2(logfd, 1); ::dup2(logfd, 2);
+        ::execl(cf.c_str(), cf.c_str(), "tunnel", "--url", url.c_str(), (char*)nullptr);
+        _exit(127);
+    }
+    ::close(logfd);
+    static bool s_atexit_armed = false;
+    if (!s_atexit_armed) { std::atexit(KillTunnelChildren); s_atexit_armed = true; }
+
+    // Scrape the ephemeral URL from cloudflared's banner (≤20 s).
+    std::string host;
+    for (int i = 0; i < 80 && host.empty(); ++i) {
+        std::ifstream f(logtmp);
+        std::string line;
+        while (std::getline(f, line)) {
+            const auto p = line.find("https://");
+            const auto q = line.find(".trycloudflare.com");
+            if (p != std::string::npos && q != std::string::npos && q > p) {
+                host = line.substr(p + 8, (q + 18) - (p + 8));   // <rand>.trycloudflare.com
+                break;
+            }
+        }
+        if (host.empty()) { const struct timespec ts{0, 250'000'000}; ::nanosleep(&ts, nullptr); }
+    }
+    ::unlink(logtmp);
+    if (host.empty()) {
+        std::fprintf(stderr, "wf-edit: cloudflared produced no tunnel URL\n");
+        KillTunnelChildren();
+    }
+    return host;
 }
 
 // The directory File→Open lists first: prefer wflevels/ (where shipped levels
@@ -1202,6 +1310,16 @@ bool editor_build(void* p)
                 DoRedo(c);
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Collaborate")) {
+            // Host: re-exec into a quick-tunnel session. Disabled once we're in a
+            // call (or already hosting), since re-exec would orphan a live tunnel.
+            const bool can_host = !c->leveltree.empty() && c->tunnel_share_link.empty() && !c->collab;
+            if (ImGui::MenuItem("Host a call (quick tunnel)", nullptr, false, can_host))
+                ReExecHostTunnel(c);
+            if (!can_host && ImGui::IsItemHovered())
+                ImGui::SetTooltip(c->collab ? "Already in a call" : "Open a level first");
+            ImGui::EndMenu();
+        }
         if (c->collab && ImGui::BeginMenu("View")) {
             ImGui::MenuItem("Collaborators", nullptr, &c->show_collab);
             ImGui::EndMenu();
@@ -1210,6 +1328,25 @@ bool editor_build(void* p)
         if (c->collab)
             ImGui::TextDisabled("  | room: %s", c->room_id.c_str());
         ImGui::EndMainMenuBar();
+    }
+
+    // Phase 4.3: "Host a call" share-link panel — shown while this session is
+    // hosting a quick tunnel. The invite link is ephemeral (this session only).
+    if (!c->tunnel_share_link.empty()) {
+        ImGui::SetNextWindowSize(ImVec2(460, 0), ImGuiCond_Appearing);
+        if (ImGui::Begin("Host a call", nullptr, ImGuiWindowFlags_NoCollapse)) {
+            ImGui::TextWrapped("Share this link to invite a collaborator:");
+            ImGui::Spacing();
+            ImGui::PushTextWrapPos();
+            ImGui::TextUnformatted(c->tunnel_share_link.c_str());
+            ImGui::PopTextWrapPos();
+            ImGui::Spacing();
+            if (ImGui::Button("Copy link"))
+                ImGui::SetClipboardText(c->tunnel_share_link.c_str());
+            ImGui::SameLine();
+            ImGui::TextDisabled("ephemeral · signaling wss:// · media end-to-end encrypted");
+        }
+        ImGui::End();
     }
 
     // File→Open browser (renders only while c->show_open). Driven by the menu item,
@@ -1701,6 +1838,19 @@ int main(int argc, char** argv)
     if (const char* p = std::getenv("WF_EDIT_TURN_TEST"); p && *p)
         return RunTurnTest();
 
+    // Headless quick-tunnel self-test (Phase 4.3): spawn relay + cloudflared,
+    // resolve the public host, print the share link, reap, exit. Needs network +
+    // a built wf-relay; verifies the spawn/scrape/lifecycle without a window.
+    if (const char* p = std::getenv("WF_EDIT_HOST_TUNNEL_TEST"); p && *p) {
+        const std::string host = HostQuickTunnel(argv[0], 9900);
+        if (host.empty()) { std::printf("[host-tunnel] FAIL (no URL)\n"); return 1; }
+        std::printf("[host-tunnel] share: wfedit+s://%s/r/studio-1\n", host.c_str());
+        std::printf("[host-tunnel] relay: wss://%s\n", host.c_str());
+        KillTunnelChildren();
+        std::printf("[host-tunnel] PASS\n");
+        return 0;
+    }
+
     int         max_frames = -1;
     int         preselect  = -1;   // --select=N: headless aid — preselect actor N
     const char* shot = nullptr;
@@ -1708,6 +1858,7 @@ int main(int argc, char** argv)
     std::string ctx_relay_url;     // --relay=<ws://...>: connect to co-edit relay
     std::string pick_level;        // --pick-level=<tag|index>: headless aid — auto-confirm the cd.iff picker
     bool        open_at_start = false;  // --open: show the File→Open browser at startup
+    bool        host_tunnel   = false;  // --host-tunnel[=room]: host a call via a Cloudflare quick tunnel
     std::string open_pick;         // --open-pick=<path>: headless aid — re-exec into <path> on first frame
     // Viewport level (engine LoadLevel) + the .lev parsed into the read-only
     // Y.Doc. Default both to the BLENDER-built snowgoons so the viewport and
@@ -1751,6 +1902,10 @@ int main(int argc, char** argv)
                 std::fprintf(stderr, "wf-edit: invalid --url (expected wfedit://host:port/r/room)\n");
             }
         }
+        else if (std::strcmp(argv[i], "--host-tunnel") == 0)
+            host_tunnel = true;
+        else if (std::strncmp(argv[i], "--host-tunnel=", 14) == 0)
+            { host_tunnel = true; room_id = argv[i] + 14; }
     }
 
     // Phase 6: load persisted identity (peer_id, colour, recent rooms).
@@ -1775,6 +1930,26 @@ int main(int argc, char** argv)
         if (!ctx_relay_url.empty())
             std::printf("wf-edit: using default relay %s for room '%s'\n",
                         ctx_relay_url.c_str(), room_id.c_str());
+    }
+
+    // Phase 4.3: host a call over a Cloudflare quick tunnel — spawn wf-relay +
+    // cloudflared, resolve the public host, and join our own room through it
+    // (children reaped at exit). Blocks ≤20 s while the tunnel comes up
+    // (console-only here; the editor surfaces the share link in a modal). The
+    // wss:// host overrides any default relay above.
+    std::string tunnel_share_link;
+    if (host_tunnel) {
+        if (room_id.empty()) room_id = "studio-" + std::to_string(::getpid() % 10000);
+        std::printf("wf-edit: starting quick tunnel for room '%s'…\n", room_id.c_str());
+        std::fflush(stdout);
+        const std::string host = HostQuickTunnel(argv[0], 9900);
+        if (!host.empty()) {
+            ctx_relay_url     = "wss://" + host;
+            tunnel_share_link = "wfedit+s://" + host + "/r/" + room_id;
+            std::printf("wf-edit: quick tunnel up — share %s\n", tunnel_share_link.c_str());
+        } else {
+            std::fprintf(stderr, "wf-edit: quick tunnel failed — starting without a relay\n");
+        }
     }
 
     // 0. Read-only Y.Doc (M4): shell out to `levtree parse`, build a wfcrdt::Doc
@@ -2118,6 +2293,8 @@ int main(int argc, char** argv)
     // File→Open (#2): exe_path is what we re-exec; --open opens the browser at
     // startup, --open-pick re-execs into a path on the first build frame.
     ctx.exe_path    = argv[0];
+    ctx.leveltree   = leveltree;                       // for File→Open / Host re-exec
+    ctx.tunnel_share_link = tunnel_share_link;         // Phase 4.3: drives the Host-a-call modal
     ctx.open_pick   = std::move(open_pick);
     if (open_at_start) { ctx.show_open = true; ctx.browse_dir = DefaultBrowseDir(); }
     ctx.room_id     = room_id;
