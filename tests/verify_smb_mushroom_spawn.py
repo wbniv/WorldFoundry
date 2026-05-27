@@ -5,7 +5,8 @@ state machine — by injecting SMB_MUSHROOM_PICKUP directly). This one proves th
 full chain:
 
   bump the mushroom block (fake COLLIDER_IDX + COLLISION_NORMAL_Z>0 on the block)
-    -> the one-shot Generator throws exactly ONE mushroom_template (block latches USED)
+    -> the one-shot Generator throws exactly ONE powerup_template (block latches USED);
+       Mario is Small here, so the self-determining template becomes a mushroom
     -> the mushroom pops up and slides right on real physics
     -> the mushroom's own pickup script raises SMB_MUSHROOM_PICKUP when Mario is near
     -> Mario's state machine flips SMB_MARIO_STATE 0 -> 1 (Super)
@@ -67,7 +68,7 @@ def idx_of(mesh_re: str, default: int) -> int:
 
 def count_mushrooms() -> int:
     try:
-        return len(re.findall(r"mesh=mushroom_template\.iff", log_path.read_text(errors="replace")))
+        return len(re.findall(r"mesh=powerup_template\.iff", log_path.read_text(errors="replace")))
     except OSError:
         return 0
 
@@ -118,7 +119,7 @@ try:
     n_spawned = n_after - n_before
     print(f"  block USED={used}  mushrooms spawned (log count delta)={n_spawned}")
     check(used == 1, "mushroom block latched USED after the trigger pulse")
-    check(n_spawned == 1, "exactly one mushroom_template spawned per trigger pulse")
+    check(n_spawned == 1, "exactly one powerup_template (mushroom, Mario Small) spawned per trigger pulse")
 
     print("\n== mushroom slides into Mario -> Super ==")
     deadline = time.time() + 5.0

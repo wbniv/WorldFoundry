@@ -603,15 +603,16 @@ MB_SMB_QBLOCK_DIE      = 2012
 # (0.78*255, 0.49*255, 0.18*255) = (199, 125, 46) = 0xC77D2E.
 QBLOCK_TAN = 0xC77D2E
 
-# Player tint colors (FACE_COLOR_TOP). Fire Mario wears white/red; the Star flicker
-# alternates yellow<->white. MARIO_DEFAULT_TINT (white) restores Mario when leaving
-# Fire or when the Star window closes. NOTE: FACE_COLOR_TOP is proven on single-
-# material blocks; whether it tints the multi-material player mesh is unverified — the
-# Fire/Star *mechanics* (state, invincibility, enemy death) don't depend on it.
+# Tint colors written via FACE_COLOR_TOP (3037 = override material[0]). Fire Mario
+# wears white/red; the Star flicker alternates yellow<->white; MARIO_DEFAULT_TINT
+# (white) restores Mario when leaving Fire or when the Star window closes. Verified
+# 2026-05-26: this tints the multi-material player mesh AND fully recolors a single-
+# material collectible box (every face is material[0]).
 FIRE_TINT          = 0xF8F0E0   # warm white (Fire Mario)
 MARIO_DEFAULT_TINT = 0xFFFFFF   # neutral restore
 STAR_FLASH_A       = 0xFFE000   # yellow
 STAR_FLASH_B       = 0xFFFFFF   # white
+FLOWER_TINT        = 0xF2731A   # orange (fire flower) — repaints the power-up box when Super+
 
 # 3-state self-detect script (NORMAL → ACTIVE → USED).
 # State: SMB_QBLOCK_DIE = window-close time (first_hit+4.0); 0 = NORMAL.
@@ -715,67 +716,22 @@ for i, bx in enumerate(QBLOCK_XS):
     blk['wf_Object Z Velocity']  = 6.0
     blk['wf_Script']             = QBLOCK_SCRIPT
 
-# ── 6b. Super Mushroom power-up ───────────────────────────────────────────────
-# The mushroom REUSES the `gold` collectible class as a "coin worth 0": Gold::update
-# still runs the actor's wf_Script (which raises SMB_MUSHROOM_PICKUP on player
-# proximity) and the C++ pickup removes the actor on contact. Gold Value 0 is meant
-# to suppress the coin credit — but the stale-fixtures OAD export path (TODO §63)
-# drops the field, so today the mushroom also awards its default +1 coin; that clears
-# once OAD_DIR is repointed. It slides on real physics like the coin (Running Decel 0).
+# ── 6b. Power-up collectibles — mushroom / fire flower / star ─────────────────
+# All three REUSE the `gold` collectible class as a "coin worth 0": Gold::update runs
+# the actor's wf_Script (proximity pickup raises a signal) and the C++ pickup removes
+# the actor on contact. They are NOT coins — taxonomy debt logged in TODO §69. The
+# gold/CharacterVirtual collision profile lets Mario walk THROUGH to collect while still
+# landing/sliding on the floor. The mushroom & flower are now ONE self-determining
+# template (see below). See docs/plans/2026-05-26-smb-powerup-block-and-star-reversal.md.
 MUSH_X = T * 0.40   # half-width
 MUSH_Z = T * 0.40   # half-height
 MUSH_T = 0.25       # Y-depth (>= ~0.2 m so it renders from the side camera at Y=-20)
 
-mat_mushroom = make_mat('mushroom_red', (0.85, 0.16, 0.12))
-
-# Proximity pickup: dx^2 + dz^2 < 1.5^2 (matches Gold::TryPickup's radius) -> raise
-# the power-up signal. Gold::update removes the actor the same tick.
-MUSHROOM_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "+ 2.25 < if\n"
-    "  1 INDEXOF_SMB_MUSHROOM_PICKUP write-mailbox\n"
-    "then\n"
-)
-
-def _make_mushroom_template():
-    bm = _bmesh.new()
-    _bmesh.ops.create_cube(bm, size=1.0)
-    _bmesh.ops.scale(bm, vec=(MUSH_X*2, MUSH_T*2, MUSH_Z*2), verts=bm.verts)
-    mesh = bpy.data.meshes.new('mushroom_template')
-    bm.to_mesh(mesh); bm.free()
-    mesh.materials.append(mat_mushroom)
-    for p in mesh.polygons:
-        p.material_index = 0
-    obj = bpy.data.objects.new('mushroom_template', mesh)
-    obj.location = (-55.0, 0.0, 0.0)   # parking spot; generator velocity overrides on spawn
-    scene.collection.objects.link(obj)
-    attach_schema(obj, 'gold')
-    obj['wf_Template Object']      = 'True'
-    obj['wf_Moves Between Rooms']  = 'True'
-    obj['wf_Mobility']             = 'Physics'
-    obj['wf_Mass']                 = 0.001
-    obj['wf_Falling Acceleration'] = 12.0
-    obj['wf_Max Air Speed']        = 50.0
-    obj['wf_Surface Friction']     = 0.0
-    obj['wf_Horiz Air Drag']       = 0.0
-    obj['wf_Vert Air Drag']        = 0.0
-    obj['wf_Running Deceleration'] = 0.0    # frictionless ground -> mushroom slides right
-    obj['wf_Gold Value']           = 0      # power-up, not a coin (currently dropped by stale OAD export)
-    obj['wf_Model Type']           = 'Mesh'
-    obj['wf_Visibility Mailbox']   = 1
-    obj['wf_Mesh Name']            = 'mushroom_template.iff'
-    obj['wf_Script']               = MUSHROOM_SCRIPT
-    return obj
-
-_make_mushroom_template()
-
-# One-shot mushroom block — a Generator that throws exactly ONE mushroom on the first
+# One-shot power-up block — a Generator that throws exactly ONE collectible on the first
 # bump-from-below, then latches USED (tan). Mirrors the qblock authoring but without
 # the 4-second multi-coin window: set the activate pulse on the first bump; the tick
-# after the Generator consumes it, latch USED so no second mushroom can spawn.
-MUSHROOM_BLOCK_SCRIPT = (
+# after the Generator consumes it, latch USED so no second item can spawn.
+POWERUP_BLOCK_SCRIPT = (
     "\\ wf\n"
     "INDEXOF_SMB_QBLOCK_USED read-mailbox 0<> if\n"
     f"  0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
@@ -805,12 +761,12 @@ mblk['wf_Model Type']         = 'Mesh'
 mblk['wf_Visibility Mailbox'] = 1
 mblk['wf_Number Of Local Mailboxes'] = 13   # 2000..2012, same as the qblocks
 mblk['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
-mblk['wf_Object To Throw']    = 'mushroom_template'
+mblk['wf_Object To Throw']    = 'powerup_template'   # state-aware: mushroom while Small
 mblk['wf_Generation Rate']    = 10.0
-mblk['wf_Object X Velocity']  = 1.5   # pops out drifting right
+mblk['wf_Object X Velocity']  = 1.5   # pops out drifting right (the mushroom slides)
 mblk['wf_Object Y Velocity']  = 0.0
 mblk['wf_Object Z Velocity']  = 6.0   # and upward, like the coin
-mblk['wf_Script']             = MUSHROOM_BLOCK_SCRIPT
+mblk['wf_Script']             = POWERUP_BLOCK_SCRIPT
 
 # ── 6b. Fire Flower + Star power-ups ───────────────────────────────────────────
 # Both reuse the gold class (Gold Value 0) like the mushroom — they are NOT coins;
@@ -850,8 +806,8 @@ def _make_powerup_template(name, mat, script, running_decel, park_x):
     obj['wf_Script']               = script
     return obj
 
-# Power-up dispensing block: same one-shot Generator as the mushroom block (bump
-# from below -> throw one collectible -> latch tan), reusing MUSHROOM_BLOCK_SCRIPT.
+# Power-up dispensing block: a one-shot Generator (bump from below -> throw one
+# collectible -> latch tan), using POWERUP_BLOCK_SCRIPT.
 def _make_powerup_block(name, x, throw, vx):
     b = _add_textured_box(name, x - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
                                 x + BSIZE,  BSIZE, BLOCK_Z + BSIZE, qblock_tex)
@@ -866,27 +822,45 @@ def _make_powerup_block(name, x, throw, vx):
     b['wf_Object X Velocity']  = vx
     b['wf_Object Y Velocity']  = 0.0
     b['wf_Object Z Velocity']  = 6.0
-    b['wf_Script']             = MUSHROOM_BLOCK_SCRIPT
+    b['wf_Script']             = POWERUP_BLOCK_SCRIPT
     return b
 
-# Fire Flower — STATIONARY (real flower sits on the block): pops straight up (X vel 0)
-# and rests. Running Decel 0.9 stops any landing drift. Proximity pickup -> Fire.
-mat_fireflower = make_mat('fireflower_orange', (0.95, 0.45, 0.10))
-FIREFLOWER_SCRIPT = (
+# Mushroom-or-flower: ONE self-determining power-up. A Generator's Object To Throw is
+# fixed at load (generator.cc:84), so rather than two templates the single
+# `powerup_template` reads SMB_MARIO_STATE LIVE and BECOMES the right item: Small (0)
+# stays the red mushroom that slides; Super+ (>0) repaints orange and forces stationary
+# (the flower). On pickup it raises the signal for Mario's current tier (mushroom ->
+# Super, flower -> Fire) = the existing player handlers. One-shot blocks mean Mario's
+# tier can't change between bump and catch, so the live read always matches the item.
+mat_powerup = make_mat('powerup_red', (0.85, 0.16, 0.12))   # base colour = mushroom red
+POWERUP_SCRIPT = (
     "\\ wf\n"
+    # Identity from Mario's current tier (Super+ -> flower: orange + stationary).
+    "INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n"
+    "  0 INDEXOF_XSPEED write-mailbox\n"
+    f"  0x{FLOWER_TINT:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "then\n"
+    # Proximity pickup (dx^2 + dz^2 < 1.5^2) -> raise the signal for Mario's tier.
     "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
     "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
     "+ 2.25 < if\n"
-    "  1 INDEXOF_SMB_FIREFLOWER_PICKUP write-mailbox\n"
+    "  INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n"
+    "    1 INDEXOF_SMB_FIREFLOWER_PICKUP write-mailbox\n"
+    "  else\n"
+    "    1 INDEXOF_SMB_MUSHROOM_PICKUP write-mailbox\n"
+    "  then\n"
     "then\n"
 )
-_make_powerup_template('fireflower_template', mat_fireflower, FIREFLOWER_SCRIPT, 0.9, -57.0)
+_make_powerup_template('powerup_template', mat_powerup, POWERUP_SCRIPT, 0.0, -55.0)
+# @15: throws straight up (X vel 0) so the flower sits; by here you've grabbed the
+# mushroom from the @9 block and are Super, so this dispenses a flower. One-shot.
 FIREFLOWER_BLOCK_X = 10 * T   # 15.0 — between qblock_01 (12) and the entry pipe (16.5-19.5)
-_make_powerup_block('fireflower_block', FIREFLOWER_BLOCK_X, 'fireflower_template', 0.0)
+_make_powerup_block('fireflower_block', FIREFLOWER_BLOCK_X, 'powerup_template', 0.0)
 
-# Star — BOUNCES rightward. Running Decel 0 keeps the slide; the per-tick script
-# re-launches ZSPEED on a real floor contact (COLLISION_NORMAL_Z > 0.5), so it is
-# ground-aware (falls into pits) without engine restitution (TODO: PHYSICS). The
+# Star — BOUNCES rightward and reverses off walls. Running Decel 0 keeps the slide; the
+# per-tick script re-launches ZSPEED on a real floor contact (COLLISION_NORMAL_Z < 0,
+# landing normal points down), so it is ground-aware (falls into pits) without engine
+# restitution (TODO: PHYSICS), and flips XSPEED on a side contact (|NORMAL_X| ~ 1). The
 # stomp-bounce proves ZSPEED writes on a CharacterVirtual work.
 mat_star = make_mat('star_yellow', (0.98, 0.85, 0.10))
 STAR_SCRIPT = (
@@ -901,6 +875,13 @@ STAR_SCRIPT = (
     "INDEXOF_COLLISION_NORMAL_Z read-mailbox -0.5 < if\n"
     "  6.0 INDEXOF_ZSPEED write-mailbox\n"
     "  0 INDEXOF_COLLISION_NORMAL_Z write-mailbox\n"
+    "then\n"
+    # Wall/pipe/flagpole reversal: a side contact gives |COLLISION_NORMAL_X| ~ 1 (and
+    # NORMAL_Z ~ 0). Negate XSPEED and consume the X-normal, same idiom as the bounce.
+    # `dup * 0.25 >` tests NX^2 > 0.25 i.e. |NX| > 0.5 (avoids needing abs).
+    "INDEXOF_COLLISION_NORMAL_X read-mailbox dup * 0.25 > if\n"
+    "  0 INDEXOF_XSPEED read-mailbox - INDEXOF_XSPEED write-mailbox\n"
+    "  0 INDEXOF_COLLISION_NORMAL_X write-mailbox\n"
     "then\n"
     # Proximity pickup -> raise the Star signal; Gold::update removes the actor.
     "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
@@ -1787,9 +1768,10 @@ _add_brick('brick_0', 20.25)   # tile 13.5 — just right of the entry pipe
 _add_brick('brick_1', 22.5)    # tile 15 — between the two ? blocks
 _add_brick('brick_2', 24.0)    # tile 16
 
-# Hidden-item brick — looks like a plain brick but bumps out one Super Mushroom on the
-# first hit-from-below (any Mario size), then turns tan and stays solid. Reuses the
-# proven one-shot MUSHROOM_BLOCK_SCRIPT + mushroom_template, skinned with brick_tex.
+# Hidden-item brick — looks like a plain brick but bumps out one power-up on the first
+# hit-from-below, then turns tan and stays solid. Reuses the proven one-shot
+# POWERUP_BLOCK_SCRIPT + the self-determining powerup_template (mushroom while Small,
+# flower while Super+), skinned with brick_tex.
 HIDDEN_BRICK_X = 27.0   # tile 18 — last block before the pit
 hbrick = _add_textured_box('brick_hidden',
                            HIDDEN_BRICK_X - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
@@ -1801,12 +1783,12 @@ hbrick['wf_Model Type']         = 'Mesh'
 hbrick['wf_Visibility Mailbox'] = 1
 hbrick['wf_Number Of Local Mailboxes'] = 13   # 2000..2012, like the mushroom block
 hbrick['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
-hbrick['wf_Object To Throw']    = 'mushroom_template'
+hbrick['wf_Object To Throw']    = 'powerup_template'
 hbrick['wf_Generation Rate']    = 10.0
 hbrick['wf_Object X Velocity']  = 1.5
 hbrick['wf_Object Y Velocity']  = 0.0
 hbrick['wf_Object Z Velocity']  = 6.0
-hbrick['wf_Script']             = MUSHROOM_BLOCK_SCRIPT
+hbrick['wf_Script']             = POWERUP_BLOCK_SCRIPT
 
 # ── 13. Export ────────────────────────────────────────────────────────────────
 print(f"[smb] Exporting to {OUT_LEV}")
