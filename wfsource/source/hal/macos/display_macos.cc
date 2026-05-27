@@ -112,10 +112,19 @@ MeasureAndAdvance(struct timeval& clockLastTime)
 {
     struct timeval tvNow;
     gettimeofday(&tvNow, nullptr);
-    const Scalar now  = ConvertTimeToScalar(tvNow);
-    const Scalar prev = ConvertTimeToScalar(clockLastTime);
+
+    // Compute delta as timeval before converting — absolute tv_sec is ~1.7B
+    // which overflows Scalar's 16-bit integer part. Only the delta is small.
+    struct timeval delta;
+    delta.tv_sec  = tvNow.tv_sec  - clockLastTime.tv_sec;
+    delta.tv_usec = tvNow.tv_usec - clockLastTime.tv_usec;
+    if (delta.tv_usec < 0) {
+        delta.tv_usec += 1000000;
+        delta.tv_sec--;
+    }
+
     clockLastTime = tvNow;
-    return now - prev;
+    return ConvertTimeToScalar(delta);
 }
 
 Scalar

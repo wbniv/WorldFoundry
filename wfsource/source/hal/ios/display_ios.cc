@@ -122,10 +122,17 @@ Display::PageFlip()
 
     struct timeval tvNow;
     gettimeofday(&tvNow, nullptr);
-    const Scalar now  = ConvertTimeToScalar(tvNow);
-    const Scalar prev = ConvertTimeToScalar(_clockLastTime);
+
+    struct timeval delta;
+    delta.tv_sec  = tvNow.tv_sec  - _clockLastTime.tv_sec;
+    delta.tv_usec = tvNow.tv_usec - _clockLastTime.tv_usec;
+    if (delta.tv_usec < 0) {
+        delta.tv_usec += 1000000;
+        delta.tv_sec--;
+    }
+
     _clockLastTime = tvNow;
-    return now - prev;
+    return ConvertTimeToScalar(delta);
 }
 
 //==============================================================================
