@@ -1,0 +1,13 @@
+{
+  "KPlugin": {
+    "Authors": [
+      {
+        "Name": "World Foundry"
+      }
+    ],
+    "Description": "WF logo centred; molten red radiates outward from it into darkness.",
+    "Id": "FoundryLinux-RedFoundry",
+    "License": "CC-BY-SA-4.0",
+    "Name": "Red Foundry"
+  }
+}

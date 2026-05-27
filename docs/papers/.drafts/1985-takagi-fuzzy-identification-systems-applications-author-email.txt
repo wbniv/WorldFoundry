@@ -1,0 +1,19 @@
+To: [Author email address — look up at affiliation page]
+Subject: Request for reprint: "Fuzzy identification of systems and its applications to modeling and control"
+
+Dear Takagi,
+
+I am a researcher working on fuzzy logic and reinforcement learning and would
+greatly appreciate a copy of the following paper:
+
+  Takagi, Tomohiro (1985). "Fuzzy identification of systems and its applications to modeling and control." IEEE Transactions on Systems, Man, and Cybernetics. doi:10.1109/TSMC.1985.6313399
+
+Would you be able to send a PDF reprint?
+
+Thank you very much,
+Will Norris
+wbnorris@gmail.com
+
+---
+Author affiliation from OpenAlex: Tokyo Institute of Technology
+

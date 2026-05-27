@@ -28,6 +28,8 @@ import urllib.parse
 
 try:
     import requests
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 except ImportError:
     sys.exit("requests is required: pip install requests")
 
@@ -228,7 +230,7 @@ def fetch_arxiv(arxiv_id):
 
 
 # ---------------------------------------------------------------------------
-# Row 1: Unpaywall
+# Rows 1–3: OA aggregator APIs
 # ---------------------------------------------------------------------------
 
 def try_unpaywall(doi):
@@ -257,6 +259,326 @@ def try_unpaywall(doi):
     else:
         log("Unpaywall: no url_for_pdf found")
     return pdf_url
+
+
+def try_openalex(doi):
+    """Row 2: OpenAlex best_oa_location.pdf_url."""
+    url = f"https://api.openalex.org/works/doi:{urllib.parse.quote(doi, safe='/')}"
+    log(f"OpenAlex: GET {url}")
+    r = requests.get(url, timeout=15,
+                     headers={"User-Agent": f"fetch-paper/1 (mailto:{EMAIL})"})
+    if r.status_code != 200:
+        log(f"OpenAlex: HTTP {r.status_code}")
+        return None
+    data = r.json()
+    best = data.get("best_oa_location") or {}
+    pdf_url = best.get("pdf_url")
+    if pdf_url:
+        log(f"OpenAlex: HIT → {pdf_url}")
+    else:
+        log("OpenAlex: no pdf_url in best_oa_location")
+    return pdf_url
+
+
+def try_semantic_scholar(doi):
+    """Row 3: Semantic Scholar openAccessPdf.url."""
+    url = (f"https://api.semanticscholar.org/graph/v1/paper/"
+           f"{urllib.parse.quote(doi, safe='/')}?fields=openAccessPdf,title")
+    log(f"Semantic Scholar: GET {url}")
+    r = requests.get(url, timeout=15)
+    if r.status_code == 429:
+        log("Semantic Scholar: 429 rate-limited, skipping")
+        return None
+    if r.status_code != 200:
+        log(f"Semantic Scholar: HTTP {r.status_code}")
+        return None
+    data = r.json()
+    pdf_info = data.get("openAccessPdf") or {}
+    pdf_url = pdf_info.get("url")
+    if pdf_url and pdf_url.startswith("https://doi.org/"):
+        log(f"Semantic Scholar: url is just DOI redirect ({pdf_url}), skipping")
+        return None
+    if pdf_url:
+        log(f"Semantic Scholar: HIT → {pdf_url}")
+    else:
+        log("Semantic Scholar: no openAccessPdf.url")
+    return pdf_url
+
+
+def _title_key_words(title):
+    """Lowercase key words (len≥4, not stopwords) for loose title comparison."""
+    return {w.lower() for w in re.split(r"\W+", title)
+            if len(w) >= 4 and w.lower() not in _STOPWORDS}
+
+
+def _titles_match(canonical, candidate, threshold=0.5):
+    """Jaccard similarity ≥ threshold between key-word sets of the two titles.
+
+    One-sided fraction fails for short canonical titles like "Fuzzy sets" whose
+    key words {"fuzzy","sets"} are a subset of many longer titles. Jaccard
+    (intersection / union) penalises the extra words in the candidate.
+    """
+    kw_a = _title_key_words(canonical)
+    kw_b = _title_key_words(candidate)
+    if not kw_a:
+        return True  # canonical too short to check
+    union = kw_a | kw_b
+    if not union:
+        return True
+    return len(kw_a & kw_b) / len(union) >= threshold
+
+
+def try_core(doi, canonical_title=""):
+    """Row 5: CORE API — DOI-matched records, title-filtered to avoid mis-tagged papers.
+
+    CORE sometimes attaches wrong DOIs to papers (citing papers get tagged with
+    cited-paper DOIs). Only records whose title closely matches the canonical
+    title are trusted. Unauthenticated; set CORE_API_KEY env var for better
+    rate limits.
+    """
+    headers = {"Content-Type": "application/json"}
+    key = os.environ.get("CORE_API_KEY")
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
+    log(f"CORE: DOI query for {doi!r}")
+    try:
+        r = requests.post(
+            "https://api.core.ac.uk/v3/search/outputs",
+            json={"q": f'doi:"{doi}"', "limit": 5},
+            headers=headers,
+            timeout=15,
+        )
+    except requests.RequestException as e:
+        log(f"CORE: request failed: {e}")
+        return None
+    if r.status_code in (401, 403):
+        log(f"CORE: auth error ({r.status_code}); set CORE_API_KEY env var for better access")
+        return None
+    if r.status_code != 200:
+        log(f"CORE: HTTP {r.status_code}")
+        return None
+    items = r.json().get("results", [])
+    if not items:
+        log("CORE: no results")
+        return None
+    log(f"CORE: {len(items)} DOI-matched record(s)")
+    # filter to records whose title plausibly matches the canonical paper
+    matched = []
+    for item in items:
+        rec_title = item.get("title") or ""
+        if canonical_title and not _titles_match(canonical_title, rec_title):
+            log(f"CORE: skipping title mismatch: {rec_title[:60]!r}")
+            continue
+        matched.append(item)
+    if not matched:
+        log("CORE: no records passed title filter")
+        return None
+    log(f"CORE: {len(matched)} title-matched record(s)")
+    # collect download URLs from matched records only, prefer core CDN
+    seen: set = set()
+    ordered: list = []
+    for item in matched:
+        dl = item.get("downloadUrl") or ""
+        if dl and dl.startswith("http") and dl not in seen:
+            seen.add(dl)
+            if "core.ac.uk/download" in dl:
+                ordered.insert(0, dl)
+            else:
+                ordered.append(dl)
+        for u in item.get("sourceFulltextUrls") or []:
+            if u and u.startswith("http") and u not in seen:
+                seen.add(u)
+                ordered.append(u)
+    log(f"CORE: {len(ordered)} URL(s) to try: {ordered[:3]}")
+    for url in ordered[:4]:
+        try:
+            rr = requests.get(url, timeout=20, allow_redirects=True,
+                              headers={"User-Agent": f"fetch-paper/1 (mailto:{EMAIL})"},
+                              verify=False)  # some institutional repos have cert issues
+        except requests.RequestException as e:
+            log(f"CORE: fetch {url[:60]}: {e}")
+            continue
+        if rr.status_code == 200 and rr.content[:5] == b"%PDF-":
+            log(f"CORE: HIT → {url}")
+            return url
+        log(f"CORE: {url[:60]}: HTTP {rr.status_code}, not a PDF")
+    log("CORE: no working download URL found")
+    return None
+
+
+def try_publisher_page(doi):
+    """Row 4b: Follow DOI redirect → scrape publisher HTML for embedded PDF links.
+
+    Catches OA publishers (OAE, etc.) that embed the PDF URL in the article
+    HTML but don't register it with Unpaywall/OpenAlex.
+    """
+    doi_url = f"https://doi.org/{urllib.parse.quote(doi, safe='/')}"
+    log(f"Publisher page: following {doi_url}")
+    try:
+        r = requests.get(doi_url, timeout=20, allow_redirects=True,
+                         headers={"User-Agent": "Mozilla/5.0"})
+    except requests.RequestException as e:
+        log(f"Publisher page: request failed: {e}")
+        return None
+    if r.status_code != 200:
+        log(f"Publisher page: HTTP {r.status_code}")
+        return None
+    if "text/html" not in r.headers.get("content-type", ""):
+        log("Publisher page: not HTML, skipping")
+        return None
+    # extract all https PDF links from the HTML
+    candidates = re.findall(r'["\'](https?://[^"\']*\.pdf[^"\']*)["\']', r.text)
+    # also catch CDN/download URLs that don't end in .pdf explicitly
+    candidates += re.findall(
+        r'["\'](https?://[^"\']*(?:xmlpdf|fulltext|download/pdf)[^"\']*)["\']', r.text
+    )
+    # deduplicate, prefer CDN/download URLs over thumbnails/images
+    seen = set()
+    ranked = []
+    for u in candidates:
+        if u in seen:
+            continue
+        seen.add(u)
+        # deprioritize images and tiny assets
+        if re.search(r"\.(png|jpg|gif|svg|ico|css|js)", u, re.IGNORECASE):
+            continue
+        ranked.append(u)
+    if not ranked:
+        log("Publisher page: no PDF URLs found in HTML")
+        return None
+    log(f"Publisher page: {len(ranked)} candidate(s): {ranked[:3]}")
+    # return first (will be validated by caller)
+    return ranked[0]
+
+
+# ---------------------------------------------------------------------------
+# Rows 9–12: failure-output (URL emit + draft files)
+# ---------------------------------------------------------------------------
+
+_DRAFTS_DIR = os.path.join(PAPERS_DIR, ".drafts")
+
+
+def emit_search_urls(canonical):
+    """Rows 9–10: print manual-click URLs for Google edu search + ResearchGate."""
+    title = canonical.get("title", "Untitled")
+    authors = canonical.get("authors", [])
+    first_last = _family_name(authors[0]) if authors else ""
+    year = canonical.get("year", "")
+    q_google = urllib.parse.quote(f'"{title}" {first_last} {year} filetype:pdf')
+    q_rg = urllib.parse.quote(f"{title} {first_last}")
+    print(f"\n  Manual search URLs:")
+    print(f"  [9] Google .edu: https://www.google.com/search?q={q_google}+site:edu")
+    print(f"  [10] ResearchGate: https://www.researchgate.net/search?q={q_rg}")
+
+
+def emit_ill_draft(canonical, slug):
+    """Row 11: write ILL request draft to docs/papers/.drafts/{slug}-ill-request.txt."""
+    os.makedirs(_DRAFTS_DIR, exist_ok=True)
+    title = canonical.get("title", "Untitled")
+    authors = canonical.get("authors", [])
+    author_str = "; ".join(authors[:3])
+    if len(authors) > 3:
+        author_str += " et al."
+    year = canonical.get("year", "????")
+    journal = canonical.get("journal", "")
+    doi = canonical.get("doi", "")
+    path = os.path.join(_DRAFTS_DIR, f"{slug}-ill-request.txt")
+    content = f"""\
+To: [Your library's ILL / document delivery department]
+Subject: Interlibrary Loan Request
+
+Dear ILL Librarian,
+
+I am requesting a copy of the following article via interlibrary loan:
+
+  Title:   {title}
+  Author:  {author_str}
+  Year:    {year}
+  Journal: {journal}
+  DOI:     {doi}
+
+Please send as PDF to: {EMAIL}
+
+Thank you,
+Will Norris
+"""
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(content)
+    log(f"ILL draft written: {path}")
+    return path
+
+
+def emit_author_email_draft(canonical, slug):
+    """Row 12: write author reprint-request draft.
+
+    Pulls author affiliation from OpenAlex. Marks deceased authors as N/A.
+    """
+    os.makedirs(_DRAFTS_DIR, exist_ok=True)
+    title = canonical.get("title", "Untitled")
+    authors = canonical.get("authors", [])
+    year = canonical.get("year", "????")
+    doi = canonical.get("doi", "")
+    journal = canonical.get("journal", "")
+    path = os.path.join(_DRAFTS_DIR, f"{slug}-author-email.txt")
+
+    # try to get author details from OpenAlex
+    affiliation = ""
+    email_hint = ""
+    author_name = authors[0] if authors else "Author"
+    if doi:
+        try:
+            url = f"https://api.openalex.org/works/doi:{urllib.parse.quote(doi, safe='/')}"
+            r = requests.get(url, timeout=10,
+                             headers={"User-Agent": f"fetch-paper/1 (mailto:{EMAIL})"})
+            if r.status_code == 200:
+                oa_data = r.json()
+                authorships = oa_data.get("authorships", [])
+                if authorships:
+                    first_a = authorships[0]
+                    af_list = first_a.get("institutions", [])
+                    if af_list:
+                        affiliation = af_list[0].get("display_name", "")
+        except requests.RequestException:
+            pass
+
+    # build citation for the draft
+    citation = (f'{author_name} ({year}). "{title}." '
+                f'{journal}. doi:{doi}')
+
+    # note on deceased authors
+    deceased_note = ""
+    author_last = _family_name(author_name).lower()
+    if author_last in {"zadeh", "mamdani"}:
+        deceased_note = (
+            "\n[NOTE: This author is deceased. "
+            "Consider contacting their institution's archive or a surviving co-author.]\n"
+        )
+
+    content = f"""\
+To: [Author email address — look up at affiliation page]
+Subject: Request for reprint: "{title}"
+
+Dear {author_name.split(',')[0].strip()},
+
+I am a researcher working on fuzzy logic and reinforcement learning and would
+greatly appreciate a copy of the following paper:
+
+  {citation}
+
+Would you be able to send a PDF reprint?
+{deceased_note}
+Thank you very much,
+Will Norris
+{EMAIL}
+
+---
+Author affiliation from OpenAlex: {affiliation or '(not found — search manually)'}
+{email_hint}
+"""
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(content)
+    log(f"Author email draft written: {path}")
+    return path
 
 
 # ---------------------------------------------------------------------------
@@ -426,23 +748,45 @@ def process_one(arg, no_write=False, stdin_bibtex=None):
     log(f"DOI: {doi or '(none)'}")
     log(f"Target filename: {slug}.pdf")
 
-    # Row 1: Unpaywall (or arXiv direct URL)
+    # Rows 1–4b: try OA aggregators then publisher page scrape
     pdf_url = None
     technique = None
+    matrix_log = []  # (row_name, result)
 
     if canonical.get("pdf_url"):
         pdf_url = canonical["pdf_url"]
         technique = "arXiv direct"
         log(f"Using direct arXiv PDF URL: {pdf_url}")
-    elif doi:
-        pdf_url = try_unpaywall(doi)
-        if pdf_url:
-            technique = "Unpaywall"
+        matrix_log.append(("arXiv direct", "HIT"))
+    else:
+        for row_name, row_fn in [
+            ("Unpaywall",        lambda: try_unpaywall(doi) if doi else None),
+            ("OpenAlex",         lambda: try_openalex(doi) if doi else None),
+            ("Semantic Scholar", lambda: try_semantic_scholar(doi) if doi else None),
+            ("CORE",             lambda: try_core(doi, title) if doi else None),
+            ("Publisher page",   lambda: try_publisher_page(doi) if doi else None),
+        ]:
+            result = row_fn()
+            if result:
+                pdf_url = result
+                technique = row_name
+                matrix_log.append((row_name, "HIT"))
+                break
+            else:
+                matrix_log.append((row_name, "MISS"))
 
     if not pdf_url:
-        print(f"✗ {first_author} {year}: no OA copy via Unpaywall")
-        print(f"  Step 1 (Unpaywall): MISS")
-        print(f"  (rows 2–12 not yet implemented)")
+        print(f"✗ {first_author} {year}: no OA copy found via programmatic routes")
+        for name, status in matrix_log:
+            print(f"  {name}: {status}")
+        if not no_write:
+            ill_path = emit_ill_draft(canonical, slug)
+            email_path = emit_author_email_draft(canonical, slug)
+            emit_search_urls(canonical)
+            print(f"\n  Drafts ready:")
+            print(f"    ILL:    {ill_path}")
+            print(f"    Email:  {email_path}")
+            print(f"  Verify address in email draft, then paste into your mail client.")
         return False
 
     # --no-write: dry run
@@ -482,7 +826,7 @@ def process_one(arg, no_write=False, stdin_bibtex=None):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Fetch open-access PDFs for academic papers (iteration 1: Unpaywall).",
+        description="Fetch open-access PDFs for academic papers (rows 1-4b: Unpaywall/OpenAlex/S2/publisher-page).",
         epilog=(
             "Examples:\n"
             "  fetch-paper.py doi:10.1016/S0020-7373(86)80040-2\n"

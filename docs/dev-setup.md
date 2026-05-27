@@ -88,7 +88,8 @@ cmake -S . -B build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Debug
 cmake --build build-editor --target wf-edit -j
 ```
 
-Output: `build-editor/wf-edit`. Voice + video calling additionally need:
+Output: `build-editor/wf-edit`. Voice + video calling are **required** — CMake
+configure fails if either system library is missing:
 
 ```bash
 sudo apt install libopus-dev libvpx-dev   # Opus voice + libvpx VP8 video

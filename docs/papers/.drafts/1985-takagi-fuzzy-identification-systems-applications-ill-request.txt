@@ -1,0 +1,17 @@
+To: [Your library's ILL / document delivery department]
+Subject: Interlibrary Loan Request
+
+Dear ILL Librarian,
+
+I am requesting a copy of the following article via interlibrary loan:
+
+  Title:   Fuzzy identification of systems and its applications to modeling and control
+  Author:  Takagi, Tomohiro; Sugeno, Michio
+  Year:    1985
+  Journal: IEEE Transactions on Systems, Man, and Cybernetics
+  DOI:     10.1109/TSMC.1985.6313399
+
+Please send as PDF to: wbnorris@gmail.com
+
+Thank you,
+Will Norris

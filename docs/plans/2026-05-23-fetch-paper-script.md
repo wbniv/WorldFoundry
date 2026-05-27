@@ -128,3 +128,214 @@ Only these two checks matter for the first pass; the rest of the verification su
     PASS — script exits cleanly with "no OA copy via Unpaywall" as expected. Slug `1965-zadeh-fuzzy-sets.pdf` correct.
 
 **Conclusion:** Row #1 (Unpaywall) is implemented and working. Neither test paper was found by Unpaywall (Kosko 1986's author copy isn't Unpaywall-indexed; Zadeh 1965 is paywalled as expected). Proceed to row #2 (OpenAlex) — it may catch the Kosko author-page copy and handle the open Lim 2023 OAE paper differently.
+
+---
+
+## Verification — iteration 2 (rows 2–4b: OpenAlex + Semantic Scholar + publisher page)
+
+Added rows 2 (OpenAlex), 3 (Semantic Scholar), 4b (publisher HTML scrape) in commit `9a9218af`.
+
+**Probe results (before coding):**
+
+| Paper | Unpaywall | OpenAlex | Semantic Scholar | Publisher page |
+|-------|-----------|----------|-----------------|----------------|
+| Kosko 1986 | MISS (is_oa: false) | MISS (is_oa: false) | MISS (CLOSED) | — |
+| Zadeh 1965 | MISS | MISS | HYBRID but url = DOI only | — |
+| Mamdani 1975 | MISS | MISS | MISS (CLOSED) | — |
+| Takagi 1985 | MISS | MISS | MISS (CLOSED) | — |
+| Jang 1993 | MISS | MISS | MISS (CLOSED) | — |
+| Zander/Lim 2023 | MISS | MISS | url = DOI redirect | **HIT** via OAE HTML |
+
+**Zander 2023 acquisition:**
+
+```
+python3 scripts/fetch-paper.py doi:10.20517/ces.2023.11
+```
+
+```
+2026-05-23T06:35:36Z Input: type='doi' value='10.20517/ces.2023.11'
+2026-05-23T06:35:36Z Crossref: GET https://api.crossref.org/works/10.20517/ces.2023.11
+2026-05-23T06:35:36Z Canonical: Zander 2023 — 'Reinforcement learning with Takagi-Sugeno-Kang fuzzy systems'
+2026-05-23T06:35:36Z Target filename: 2023-zander-reinforcement-learning-takagi-sugeno.pdf
+2026-05-23T06:35:38Z Unpaywall: no url_for_pdf found
+2026-05-23T06:35:39Z OpenAlex: no pdf_url in best_oa_location
+2026-05-23T06:35:39Z Semantic Scholar: url is just DOI redirect, skipping
+2026-05-23T06:35:39Z Publisher page: following https://doi.org/10.20517/ces.2023.11
+2026-05-23T06:35:41Z Publisher page: 7 candidate(s): ['https://f.oaes.cc/xmlpdf/84ba3d4d-247a-4fc9-a75e-68a8084efc7e/CES-2023-11.pdf', ...]
+2026-05-23T06:35:42Z PDF validation OK: 16 pages, 1984 KB
+2026-05-23T06:35:42Z Saved: docs/papers/2023-zander-reinforcement-learning-takagi-sugeno.pdf (1984 KB)
+✓ Zander 2023 → docs/papers/2023-zander-reinforcement-learning-takagi-sugeno.pdf (via Publisher page)
+```
+
+PASS. Correction: first author is Eric Zander (Crossref canonical), not "Lim" as the investigation doc had it. OAE CDN URL was embedded in article HTML; not indexed by Unpaywall/OpenAlex.
+
+**Status after iteration 2:** 1 of 5 closed-access papers acquired. 4 remain (Zadeh 1965, Mamdani 1975, Takagi 1985, Jang 1993).
+
+---
+
+## Verification — rows 5 + 9–12 (CORE + failure-output path)
+
+Commit `fe55ab9b` → `9a9218af` → ongoing. Row 5 (CORE) + failure outputs (9–12) added together.
+
+**CORE probe:** CORE DOI-query finds metadata but actual CDN downloads are stale (404) or forbidden (403) for all 4 papers. CORE also returns cross-linked "citing papers" with wrong DOI tags — fixed with Jaccard title filter (threshold ≥ 0.5).
+
+**Full run on all 4 remaining papers:**
+
+```
+python3 scripts/fetch-paper.py doi:10.1016/S0019-9958(65)90241-X
+python3 scripts/fetch-paper.py doi:10.1016/S0020-7373(75)80002-2
+python3 scripts/fetch-paper.py doi:10.1109/TSMC.1985.6313399
+python3 scripts/fetch-paper.py doi:10.1109/21.256541
+```
+
+| Paper | Unpaywall | OpenAlex | Semantic Scholar | CORE | Publisher page | Outcome |
+|-------|-----------|----------|-----------------|------|----------------|---------|
+| Zadeh 1965 | MISS | MISS | DOI-redirect only | 2 title-matched, all URLs dead (404/403) | MISS | drafts emitted |
+| Mamdani 1975 | MISS | MISS | MISS | no results | MISS | drafts emitted |
+| Takagi 1985 | MISS | MISS | MISS | no results | 418 (bot-detect) | drafts emitted |
+| Jang 1993 | MISS | MISS | MISS | 2 title-matched, NTHU 404 + IEEE staging 200 not-PDF | 418 (bot-detect) | drafts emitted |
+
+Drafts emitted to `docs/papers/.drafts/`:
+- `1965-zadeh-fuzzy-sets-ill-request.txt` + `…-author-email.txt` [deceased: note added]
+- `1975-mamdani-experiment-linguistic-synthesis-fuzzy-ill-request.txt` + `…-author-email.txt` [deceased: note added]
+- `1985-takagi-fuzzy-identification-systems-applications-ill-request.txt` + `…-author-email.txt`
+- `1993-jang-anfis-adaptive-network-fuzzy-ill-request.txt` + `…-author-email.txt` (OpenAlex affiliation: UC Berkeley 1993; current: NTHU)
+
+Manual search URLs printed to terminal at runtime:
+```
+[9] Google .edu: https://www.google.com/search?q=%22Fuzzy+sets%22+Zadeh+1965+filetype%3Apdf+site:edu
+[10] ResearchGate: https://www.researchgate.net/search?q=Fuzzy+sets+Zadeh
+```
+(and analogous for the other 3 papers)
+
+**Status after rows 1–5 + 9–12:** 1/5 acquired (Zander 2023). 4 remain, all genuinely paywalled with no programmatic OA copy found. Next step: click the Google .edu URL for Zadeh 1965 (plan notes it "regularly turns up a hosted copy") and/or use the ILL drafts.
+
+---
+
+## Author contact research (2026-05-23)
+
+| Paper | Author status | Best contact |
+|-------|---------------|-------------|
+| Zadeh 1965 | Zadeh died 2017 | UC Berkeley BISC/EECS archives — `eecsoffice@eecs.berkeley.edu` |
+| Mamdani 1975 | Mamdani died 2010; co-author Assilian status unknown | QMUL archives — `archives@qmul.ac.uk` |
+| Takagi 1985 | Sugeno died Aug 2023; Takagi status unknown | Tokyo Tech EECS dept via Tomohiro Takagi search |
+| Jang 1993 | Alive, at NTU Taiwan (moved from NTHU/UCB) | NTU CSIE faculty page; email likely `jang@csie.ntu.edu.tw` |
+
+Sources: IEEE obituary for Sugeno (MCI 2023); NTU CSIE faculty listing for Jang.
+
+---
+
+## Reprint request emails
+
+### 1 — Jang 1993 (highest-probability reply)
+
+To send to: `jang@csie.ntu.edu.tw` — verify at https://csie.ntu.edu.tw/en/member/Faculty/Jyh-Shing-Roger-Jang-13692144 or http://mirlab.org/jang/
+
+```
+To: jang@csie.ntu.edu.tw
+Subject: Request for reprint of ANFIS paper (1993)
+
+Dear Prof. Jang,
+
+I'm working on an implementation of fuzzy inference for a game engine and have been
+studying your 1993 paper closely:
+
+  J.-S. R. Jang, "ANFIS: Adaptive-Network-based Fuzzy Inference System,"
+  IEEE Trans. Systems, Man, and Cybernetics, 23(3), pp. 665–685, 1993.
+  doi:10.1109/21.256541
+
+The paper is behind the IEEE paywall ($33) and I'm unable to access it through an
+institution. Would you be willing to send me a PDF reprint?
+
+Thank you very much,
+Will Norris
+wbnorris@gmail.com
+```
+
+---
+
+### 2 — Takagi 1985 (Takagi status unknown; Sugeno deceased Aug 2023)
+
+To send to: look up Tomohiro Takagi's current affiliation — search `Tomohiro Takagi fuzzy systems Tokyo` or try Tokyo Tech EECS alumni directory. If not findable, use ILL draft instead.
+
+```
+To: [Tomohiro Takagi email — look up current affiliation]
+Subject: Request for reprint of Takagi-Sugeno 1985 paper
+
+Dear Prof. Takagi,
+
+I'm working on an implementation of fuzzy inference for a game engine and have been
+studying the Takagi-Sugeno model. I'd like to read the original paper:
+
+  T. Takagi & M. Sugeno, "Fuzzy Identification of Systems and Its Applications
+  to Modeling and Control," IEEE Trans. Systems, Man, and Cybernetics, 15(1),
+  pp. 116–132, 1985. doi:10.1109/TSMC.1985.6313399
+
+The paper is behind the IEEE paywall ($33) and I have no institutional access.
+Would you be willing to send me a PDF reprint?
+
+(I note that Prof. Sugeno passed away in August 2023 — my condolences.)
+
+Thank you very much,
+Will Norris
+wbnorris@gmail.com
+```
+
+---
+
+### 3 — Zadeh 1965 (deceased 2017 — email BISC at Berkeley)
+
+```
+To: eecsoffice@eecs.berkeley.edu
+Subject: Request for course-reading copy of Zadeh 1965 "Fuzzy Sets"
+
+Dear EECS / BISC team,
+
+I'm a researcher working on fuzzy logic and am trying to obtain a copy of:
+
+  L. A. Zadeh, "Fuzzy Sets," Information and Control, 8(3), pp. 338–353, 1965.
+  doi:10.1016/S0019-9958(65)90241-X
+
+I understand Prof. Zadeh passed away in 2017. I'm hoping the BISC group or EECS
+archives may have a course-reading copy or can point me to a freely accessible
+version. The Elsevier paywall asks ~$36 for a 24 h rental.
+
+Any help would be much appreciated.
+
+Thank you,
+Will Norris
+wbnorris@gmail.com
+```
+
+---
+
+### 4 — Mamdani 1975 (deceased 2010 — email QMUL archives)
+
+```
+To: archives@qmul.ac.uk
+Subject: Request for historical paper reprint — Mamdani & Assilian 1975
+
+Dear QMUL Archives,
+
+I'm hoping you can help me locate a copy of a paper by the late Prof. E. H. Mamdani,
+who was on the faculty at Queen Mary:
+
+  E. H. Mamdani & S. Assilian, "An Experiment in Linguistic Synthesis with a Fuzzy
+  Logic Controller," International Journal of Man-Machine Studies, 7(1), pp. 1–13, 1975.
+  doi:10.1016/S0020-7373(75)80002-2
+
+This paper defined the Mamdani fuzzy inference system, which is a foundational
+algorithm in control engineering. The publisher (Elsevier) charges ~$36 for a
+24 h rental. I'm hoping the university archives may hold a copy as part of
+Prof. Mamdani's deposited papers, or can suggest another route.
+
+Thank you very much,
+Will Norris
+wbnorris@gmail.com
+```
+
+---
+
+### ILL as fallback
+
+If the institutional archive emails don't yield a reply within 2 weeks, use the ILL drafts in `docs/papers/.drafts/` — they're pre-filled and ready to paste into any public-library ILL form.

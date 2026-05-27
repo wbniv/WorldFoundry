@@ -1,0 +1,17 @@
+To: [Your library's ILL / document delivery department]
+Subject: Interlibrary Loan Request
+
+Dear ILL Librarian,
+
+I am requesting a copy of the following article via interlibrary loan:
+
+  Title:   ANFIS: adaptive-network-based fuzzy inference system
+  Author:  Jang, J.-S.R.
+  Year:    1993
+  Journal: IEEE Transactions on Systems, Man, and Cybernetics
+  DOI:     10.1109/21.256541
+
+Please send as PDF to: wbnorris@gmail.com
+
+Thank you,
+Will Norris

@@ -1,0 +1,13 @@
+{
+  "KPlugin": {
+    "Authors": [
+      {
+        "Name": "World Foundry"
+      }
+    ],
+    "Description": "Giant ghost logo behind a red horizon line; small crisp logo lower-left.",
+    "Id": "FoundryLinux-GlobeField",
+    "License": "CC-BY-SA-4.0",
+    "Name": "Globe Field"
+  }
+}
