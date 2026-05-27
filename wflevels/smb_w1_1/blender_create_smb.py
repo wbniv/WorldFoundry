@@ -1517,6 +1517,92 @@ _apply_enemy_movement(koopa_obj)
 koopa_obj['wf_Script']           = KOOPA_SCRIPT
 koopa_obj['wf_Max Ground Speed'] = 16.0
 
+# ── 9b. Piranha Plant (docs/plans/2026-05-27-smb-piranha-plant.md) ────────────────
+# An ANCHORED Enemy (no Jolt body -> non-colliding, passes through the solid pipe and
+# is positioned purely by script) that slides its own Z_POS out of a pipe and back.
+# Motion is RATE*DELTA_TIME (framerate-independent); hurt + fireball-defeat are by
+# proximity like the goomba/koopa. Retracts while Mario stands on the pipe (|dx|<1),
+# so a ground-walking Mario passes safely (the plant is overhead) but jumping into the
+# emerged plant hurts.
+PIRANHA_X         = 16 * T                  # 24.0 — clear lane between qblock1 (21) and pit0 (28.5)
+PIPE_MOUTH_Z      = GROUND_TOP_Z + 2*T      # 3.0 — pipe top
+PIRANHA_HIDDEN_Z  = GROUND_TOP_Z + 0.5      # 0.5 — base inside the pipe (occluded behind it)
+PIRANHA_EMERGED_Z = PIPE_MOUTH_Z            # 3.0 — base at the mouth, head clears the pipe top
+PIRANHA_RATE      = 3.0                      # units/sec rise & fall
+PIRANHA_DWELL     = 1.5                      # sec per up/down phase
+mat_ppipe = make_mat('smb_ppipe_green', (0.0, 0.62, 0.0))
+mat_pstem = make_mat('smb_piranha_stem', (0.20, 0.70, 0.24))
+mat_phead = make_mat('smb_piranha_head', (0.85, 0.16, 0.12))
+
+PIRANHA_SCRIPT = (
+    "\\ wf\n"
+    # phase toggle every DWELL seconds (TIME deadline)
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_PIRANHA_NEXT read-mailbox > if\n"
+    "  INDEXOF_SMB_PIRANHA_UP read-mailbox not INDEXOF_SMB_PIRANHA_UP write-mailbox\n"
+    f"  INDEXOF_TIME read-mailbox {PIRANHA_DWELL} + INDEXOF_SMB_PIRANHA_NEXT write-mailbox\n"
+    "then\n"
+    # GO = phase-up by default
+    "INDEXOF_SMB_PIRANHA_UP read-mailbox 0<> if 1 else 0 then INDEXOF_SMB_PIRANHA_GO write-mailbox\n"
+    # Mario on the pipe (horizontally close) -> force retract this tick
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup * 1.0 < if\n"
+    "  0 INDEXOF_SMB_PIRANHA_GO write-mailbox\n"
+    "then\n"
+    # slide Z_POS toward the limit at RATE*dt (framerate-independent)
+    "INDEXOF_SMB_PIRANHA_GO read-mailbox 0<> if\n"
+    f"  INDEXOF_Z_POS read-mailbox {PIRANHA_EMERGED_Z} < if\n"
+    f"    INDEXOF_Z_POS read-mailbox {PIRANHA_RATE} INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n"
+    "  then\n"
+    "else\n"
+    f"  INDEXOF_Z_POS read-mailbox {PIRANHA_HIDDEN_Z} > if\n"
+    f"    INDEXOF_Z_POS read-mailbox {PIRANHA_RATE} INDEXOF_DELTA_TIME read-mailbox * - INDEXOF_Z_POS write-mailbox\n"
+    "  then\n"
+    "then\n"
+    # hurt: emerged (Z>2) AND Mario at the plant's height + close in X (jumped into it)
+    "INDEXOF_Z_POS read-mailbox 2.0 > if\n"
+    "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup * 1.7 < if\n"
+    "    INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup * 1.5 < if\n"
+    "      1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"
+    "    then\n"
+    "  then\n"
+    "then\n"
+    # fireball defeat (any height) — same idiom as the goomba
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "  + 2.5 < if 0 INDEXOF_ALIVE write-mailbox then\n"
+    "then\n"
+)
+
+# Decorative pipe (solid; Mario can stand on it) — entry_pipe's twin, no warp.
+add_statplat('piranha_pipe', PIRANHA_X - T, -GROUND_Y, GROUND_TOP_Z,
+             PIRANHA_X + T,  GROUND_Y, PIPE_MOUTH_Z, mat_ppipe)
+
+# Plant mesh: green stem + red head (origin at the base, so Z_POS = base height).
+_pparts = []
+bpy.ops.mesh.primitive_cylinder_add(radius=0.22*T, depth=1.4, location=(0, 0, 0.7))
+bpy.context.object.data.materials.clear(); bpy.context.object.data.materials.append(mat_pstem)
+for _p in bpy.context.object.data.polygons: _p.material_index = 0
+_pparts.append(bpy.context.object)
+bpy.ops.mesh.primitive_uv_sphere_add(radius=0.42*T, segments=10, ring_count=6, location=(0, 0, 1.7))
+bpy.context.object.data.materials.clear(); bpy.context.object.data.materials.append(mat_phead)
+for _p in bpy.context.object.data.polygons: _p.material_index = 0; _p.use_smooth = True
+_pparts.append(bpy.context.object)
+bpy.ops.object.select_all(action='DESELECT')
+for _o in _pparts: _o.select_set(True)
+bpy.context.view_layer.objects.active = _pparts[0]
+bpy.ops.object.join()
+_pmesh = bpy.context.object
+_pmesh.name = 'piranha_00'; _pmesh.data.name = 'piranha_00'
+piranha_obj = bpy.data.objects.new('piranha_00', _pmesh.data)
+scene.collection.objects.link(piranha_obj)
+bpy.data.objects.remove(_pmesh, do_unlink=True)
+piranha_obj.location = (PIRANHA_X, 0.0, PIRANHA_HIDDEN_Z)
+attach_schema(piranha_obj, 'enemy')
+piranha_obj['wf_Mobility']           = 'Anchored'   # no Jolt body -> non-colliding, script-driven
+piranha_obj['wf_Model Type']         = 'Mesh'
+piranha_obj['wf_Visibility Mailbox'] = 1
+piranha_obj['wf_Script']             = PIRANHA_SCRIPT
+
 # ── 10. Flagpole ──────────────────────────────────────────────────────────────
 mat_pole = make_mat('smb_pole', (0.72, 0.72, 0.72))
 mat_flag = make_mat('smb_flag', (0.10, 0.65, 0.16))
