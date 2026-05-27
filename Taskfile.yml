@@ -8,8 +8,15 @@ includes:
 
 tasks:
 
+  vendor-unpack:
+    desc: "Unpack vendored source archives and init editor submodules (idempotent)"
+    cmds:
+      - git submodule update --init cmake/Corrosion wftools/y-crdt third_party/glfw third_party/imgui
+      - test -d engine/vendor/jolt-physics-5.5.0 || tar -xzf engine/vendor/jolt-physics-5.5.0.tar.gz --one-top-level=engine/vendor/jolt-physics-5.5.0 --strip-components=1
+
   build:
     desc: "Build wf_game (Forth + Jolt; canonical config)"
+    deps: [vendor-unpack]
     env:
       # Lua is linked into the Linux debug build so the in-engine Lua step
       # debugger (MobDebug) has a host to bind to. Override with
@@ -25,24 +32,28 @@ tasks:
 
   build-cmake:
     desc: "Build wf_game via CMake (Linux)"
+    deps: [vendor-unpack]
     cmds:
       - cmake -S . -B cmake-build-linux -DCMAKE_BUILD_TYPE=Debug
       - cmake --build cmake-build-linux -j
 
   build-asan:
     desc: "Build wf_game with AddressSanitizer + UBSan (now the Debug default; explicit dir)"
+    deps: [vendor-unpack]
     cmds:
       - cmake -S . -B cmake-build-asan -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=ON
       - cmake --build cmake-build-asan -j
 
   build-fast:
     desc: "Fast-debug: Debug symbols, NO sanitizer tax (-DWF_ASAN=OFF) — for chasing logic, not memory"
+    deps: [vendor-unpack]
     cmds:
       - cmake -S . -B cmake-build-fast -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=OFF
       - cmake --build cmake-build-fast -j
 
   build-editor:
     desc: "Build wf_game with the editor / dev stack (debug bridge + REST + CRDT + mutation API). Requires Rust toolchain."
+    deps: [vendor-unpack]
     env:
       WF_ENABLE_EDITOR: "1"
       WF_ENABLE_FENNEL: "0"
@@ -60,9 +71,8 @@ tasks:
 
   build-wf-edit:
     desc: "Build the wf-edit GUI editor binary (WebRTC voice/video collab). First run: task dev-setup-editor."
+    deps: [vendor-unpack]
     cmds:
-      - git submodule update --init cmake/Corrosion wftools/y-crdt third_party/glfw third_party/imgui
-      - test -d engine/vendor/jolt-physics-5.5.0 || tar -xzf engine/vendor/jolt-physics-5.5.0.tar.gz --one-top-level=engine/vendor/jolt-physics-5.5.0 --strip-components=1
       - cmake -S . -B build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Debug
       - cmake --build build-editor --target wf_edit -j{{.NPROC}}
     vars:
@@ -71,6 +81,7 @@ tasks:
 
   build-cmake-android:
     desc: "Build libwf_game.so via CMake + NDK (arm64-v8a)"
+    deps: [vendor-unpack]
     vars:
       NDK: /usr/lib/android-sdk/ndk/26.2.11394342
     cmds:
