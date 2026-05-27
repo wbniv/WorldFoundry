@@ -107,18 +107,31 @@ Display::RenderEnd()
 
 //==============================================================================
 
+static Scalar
+MeasureAndAdvance(struct timeval& clockLastTime)
+{
+    struct timeval tvNow;
+    gettimeofday(&tvNow, nullptr);
+    const Scalar now  = ConvertTimeToScalar(tvNow);
+    const Scalar prev = ConvertTimeToScalar(clockLastTime);
+    clockLastTime = tvNow;
+    return now - prev;
+}
+
 Scalar
 Display::PageFlip()
 {
     // No vsync / swap — rate-limit to ~60 fps and return the measured delta.
     usleep(16000);
+    return MeasureAndAdvance(_clockLastTime);
+}
 
-    struct timeval tvNow;
-    gettimeofday(&tvNow, nullptr);
-    const Scalar now  = ConvertTimeToScalar(tvNow);
-    const Scalar prev = ConvertTimeToScalar(_clockLastTime);
-    _clockLastTime = tvNow;
-    return now - prev;
+//==============================================================================
+
+Scalar
+Display::MeasureDelta()
+{
+    return MeasureAndAdvance(_clockLastTime);
 }
 
 //==============================================================================
