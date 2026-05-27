@@ -58,6 +58,13 @@ Comment("=====================================================================")
 	MAILBOXENTRY( SMB_PIRANHA_UP, 1835 )		Comment("phase target: nonzero = emerge, 0 = retract; toggled on a TIME deadline")
 	MAILBOXENTRY( SMB_PIRANHA_NEXT, 1836 )		Comment("level-time of the next phase toggle")
 	MAILBOXENTRY( SMB_PIRANHA_GO, 1837 )		Comment("per-tick decision (1 = rise, 0 = sink): phase-up AND Mario not standing on the pipe")
+
+	Comment(" SMB scoring + 1UP mushroom. docs/plans/2026-05-27-smb-scoring-and-1up-mushroom.md ")
+	MAILBOXENTRY( SMB_SCORE, 1838 )			Comment("accumulated point bonus: coins×200, stomp×100, fireball×200, shell×100, brick×50, flagpole height+time")
+	MAILBOXENTRY( SMB_LAST_GOLD, 1839 )		Comment("GOLD (3001) value at end of previous player-script tick; delta = GOLD-LAST_GOLD drives per-tick coin scoring")
+	MAILBOXENTRY( SMB_EOL_LATCH, 1840 )		Comment("1 after the end-of-level flagpole bonus has been computed (edge-detect guard so it fires once)")
+	MAILBOXENTRY( SMB_ONEUP_PICKUP, 1841 )		Comment("1UP mushroom sets this on proximity; player script grants +1 life and clears")
+
 	MAILBOXENTRY( HUD_SCORE, 70 )			Comment("HUD score slot (read by game.cc:554); player writes its GOLD here")
 	MAILBOXENTRY( HUD_TIMER, 71 )			Comment("HUD timer slot (read by game.cc:554); Director writes the countdown here")
 	MAILBOXENTRY( LIVES, 72 )			Comment("HUD lives slot (read by game.cc:553 for the LIVES display); player respawn decrements it")

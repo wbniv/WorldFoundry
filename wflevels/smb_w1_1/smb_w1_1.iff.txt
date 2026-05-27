@@ -28,8 +28,9 @@
 		$3fff002l { 'STR' "coin_template.iff" }  // IFF PERM fff:002
 		$3fff003l { 'STR' "powerup_template.iff" }  // IFF PERM fff:003
 		$3fff004l { 'STR' "star_template.iff" }  // IFF PERM fff:004
-		$3fff005l { 'STR' "fireball_template.iff" }  // IFF PERM fff:005
-		$3fff006l { 'STR' "debris_template.iff" }  // IFF PERM fff:006
+		$3fff005l { 'STR' "oneup_template.iff" }  // IFF PERM fff:005
+		$3fff006l { 'STR' "fireball_template.iff" }  // IFF PERM fff:006
+		$3fff007l { 'STR' "debris_template.iff" }  // IFF PERM fff:007
 		$3000001l { 'STR' "ground_0.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "ground_1.iff" }  // IFF RM0 000:002
 		$3000003l { 'STR' "ground_2.iff" }  // IFF RM0 000:003
@@ -55,6 +56,7 @@
 		$3000017l { 'STR' "brick_1.iff" }  // IFF RM0 000:017
 		$3000018l { 'STR' "brick_2.iff" }  // IFF RM0 000:018
 		$3000019l { 'STR' "brick_hidden.iff" }  // IFF RM0 000:019
+		$300001al { 'STR' "brick_1up.iff" }  // IFF RM0 000:01a
 		$3001001l { 'STR' "cr_floor.iff" }  // IFF RM1 001:001
 		$3001002l { 'STR' "cr_wall_l.iff" }  // IFF RM1 001:002
 		$3001003l { 'STR' "cr_wall_r.iff" }  // IFF RM1 001:003
@@ -77,8 +79,9 @@
 		{ 'ASS' $3fff002l [ "coin_template.iff" ] }  // IFF PERM fff:002
 		{ 'ASS' $3fff003l [ "powerup_template.iff" ] }  // IFF PERM fff:003
 		{ 'ASS' $3fff004l [ "star_template.iff" ] }  // IFF PERM fff:004
-		{ 'ASS' $3fff005l [ "fireball_template.iff" ] }  // IFF PERM fff:005
-		{ 'ASS' $3fff006l [ "debris_template.iff" ] }  // IFF PERM fff:006
+		{ 'ASS' $3fff005l [ "oneup_template.iff" ] }  // IFF PERM fff:005
+		{ 'ASS' $3fff006l [ "fireball_template.iff" ] }  // IFF PERM fff:006
+		{ 'ASS' $3fff007l [ "debris_template.iff" ] }  // IFF PERM fff:007
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'
@@ -111,6 +114,7 @@
 		{ 'ASS' $3000017l [ "brick_1.iff" ] }  // IFF RM0 000:017
 		{ 'ASS' $3000018l [ "brick_2.iff" ] }  // IFF RM0 000:018
 		{ 'ASS' $3000019l [ "brick_hidden.iff" ] }  // IFF RM0 000:019
+		{ 'ASS' $300001al [ "brick_1up.iff" ] }  // IFF RM0 000:01a
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM1'

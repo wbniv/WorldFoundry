@@ -897,6 +897,22 @@ _make_powerup_template('star_template', mat_star, STAR_SCRIPT, 0.0, -59.0)
 STAR_BLOCK_X = 38 * T   # 57.0 — past pit1 (51-54), before the flag (63); a late reward
 _make_powerup_block('star_block', STAR_BLOCK_X, 'star_template', 1.5)
 
+# 1UP mushroom — green mushroom that grants +1 life on proximity pickup.
+# Same gold-class template pattern as powerup/star (GoldValue=0, gold.cc despawns on
+# proximity); the script raises SMB_ONEUP_PICKUP; player script grants the life.
+mat_oneup = make_mat('smb_oneup', (0.05, 0.75, 0.05))   # bright green body
+ONEUP_SCRIPT = (
+    "\\ wf\n"
+    # Proximity pickup (dx^2 + dz^2 < 1.5^2 = 2.25) -> signal for +1 life.
+    # gold.cc TryPickup also fires at radius 1.5 and calls SetPendingRemove (despawn).
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "+ 2.25 < if\n"
+    "  1 INDEXOF_SMB_ONEUP_PICKUP write-mailbox\n"
+    "then\n"
+)
+_make_powerup_template('oneup_template', mat_oneup, ONEUP_SCRIPT, 0.0, -65.0)
+
 # ── 6c. Fire Mario fireball — first runtime-positioned spawn ───────────────────
 # WF's first spawn at a runtime-chosen position, with ZERO engine code: rather than
 # a new `spawn-template` primitive, two hidden pool Generators self-park on a point
@@ -1098,13 +1114,15 @@ if player:
         "INDEXOF_INPUT write-mailbox\n"
         "INDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\n"
         "INDEXOF_Z_POS read-mailbox INDEXOF_SMB_PLAYER_Z write-mailbox\n"   # enemies use proximity
-        "INDEXOF_GOLD read-mailbox INDEXOF_HUD_SCORE write-mailbox\n"
         # seed lives once (guarded so game-over at LIVES=0 never re-seeds)
         "INDEXOF_SMB_LIVES_INIT read-mailbox not if "
         "3 INDEXOF_LIVES write-mailbox 1 INDEXOF_SMB_LIVES_INIT write-mailbox then\n"
-        # bounce up when we stomped an enemy this frame
-        "INDEXOF_SMB_STOMP read-mailbox 0<> if "
-        "8.0 INDEXOF_ZSPEED write-mailbox 0 INDEXOF_SMB_STOMP write-mailbox then\n"
+        # bounce up when we stomped an enemy this frame; award 100 pts
+        "INDEXOF_SMB_STOMP read-mailbox 0<> if\n"
+        "  8.0 INDEXOF_ZSPEED write-mailbox\n"
+        "  INDEXOF_SMB_SCORE read-mailbox 100 + INDEXOF_SMB_SCORE write-mailbox\n"
+        "  0 INDEXOF_SMB_STOMP write-mailbox\n"
+        "then\n"
         # Super Mushroom pickup -> grow to Super. Small(0)->Super(1) only; already-Super
         # stays Super. Visual scale only (hitbox-resize deferred); the feet-origin mesh
         # scales up cleanly from the floor. `not` = state == 0.
@@ -1194,6 +1212,31 @@ if player:
         "0 INDEXOF_ZSPEED write-mailbox\n"
         "  then\n"
         "then\n"
+        # 1UP mushroom pickup: raise +1 life, clear signal
+        "INDEXOF_SMB_ONEUP_PICKUP read-mailbox 0<> if\n"
+        "  INDEXOF_LIVES read-mailbox 1 + INDEXOF_LIVES write-mailbox\n"
+        "  0 INDEXOF_SMB_ONEUP_PICKUP write-mailbox\n"
+        "then\n"
+        # Flagpole height + time bonus — one-shot on the tick END_OF_LEVEL fires.
+        # Height tiers: Z≥9→5000, ≥6→2000, ≥4.5→800, ≥3→400, ≥1.5→200, else→100.
+        # Time bonus: HUD_TIMER remaining × 50.
+        # EOL_LATCH prevents re-firing if the level lingers a tick before unloading.
+        "INDEXOF_END_OF_LEVEL read-mailbox 0<> if\n"
+        "  INDEXOF_SMB_EOL_LATCH read-mailbox not if\n"
+        "    1 INDEXOF_SMB_EOL_LATCH write-mailbox\n"
+        "    INDEXOF_Z_POS read-mailbox\n"
+        "    dup 9.0 > if drop 5000\n"
+        "    else dup 6.0 > if drop 2000\n"
+        "    else dup 4.5 > if drop 800\n"
+        "    else dup 3.0 > if drop 400\n"
+        "    else dup 1.5 > if drop 200\n"
+        "    else drop 100\n"
+        "    then then then then then\n"
+        "    INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n"
+        "    INDEXOF_HUD_TIMER read-mailbox 50 *\n"
+        "    INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n"
+        "  then\n"
+        "then\n"
         # coin-room coins: seed visible once, then proximity pickup. The Z test
         # (player z near -46) disambiguates the coin room from the surface, where
         # the same X range exists but z ~ 1.5. dup* = squared distance (no abs).
@@ -1218,6 +1261,26 @@ if player:
         "0 INDEXOF_SMB_COIN_2 write-mailbox\n"
         "    then\n  then\n"
         "then\n"
+        # Coin delta scoring + 100-coin 1UP.
+        # delta = GOLD − LAST_GOLD catches both gold.cc coin pickups and coin-room
+        # script pickups. Score 200 pts per coin. At each 100-coin boundary (GOLD
+        # crosses a multiple of 100, edge-detected via LAST_GOLD mod), grant +1 life.
+        "INDEXOF_GOLD read-mailbox INDEXOF_SMB_LAST_GOLD read-mailbox -\n"  # delta
+        "dup 0 > if\n"
+        "  200 * INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n"
+        "  INDEXOF_GOLD read-mailbox 100 % not if\n"            # GOLD now a multiple of 100
+        "    INDEXOF_SMB_LAST_GOLD read-mailbox 100 % 0<> if\n"  # LAST_GOLD was not
+        "      INDEXOF_GOLD read-mailbox 0 > if\n"               # skip the initial 0
+        "        INDEXOF_LIVES read-mailbox 1 + INDEXOF_LIVES write-mailbox\n"
+        "      then\n"
+        "    then\n"
+        "  then\n"
+        "else\n"
+        "  drop\n"
+        "then\n"
+        "INDEXOF_GOLD read-mailbox INDEXOF_SMB_LAST_GOLD write-mailbox\n"
+        # HUD score: display the accumulated SMB_SCORE (coins×200 + bonus points).
+        "INDEXOF_SMB_SCORE read-mailbox INDEXOF_HUD_SCORE write-mailbox\n"
         # ── Fire Mario fireball ───────────────────────────────────────────────
         # docs/plans/2026-05-26-fire-mario-fireball-pooled-generator.md
         # Facing latch: RIGHT -> +1, LEFT -> -1, else keep (seed +1 while still 0).
@@ -1316,6 +1379,7 @@ ENEMY_SCRIPT = (
     "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"  # dx^2
     "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"  # dz^2
     "  + 2.5 < if\n"                                     # dx^2 + dz^2 < 2.5 (waist-height fireball vs ground enemy)
+    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
     "    0 INDEXOF_ALIVE write-mailbox\n"                # fireball kill: die, no bounce, no hurt
     "  then\n"
     "then\n"
@@ -1325,6 +1389,7 @@ ENEMY_SCRIPT = (
     "  INDEXOF_SMB_SHELL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
     "  INDEXOF_SMB_SHELL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
     "  + 1.5 < if\n"                                     # both on the ground -> tighter radius
+    "    INDEXOF_SMB_SCORE read-mailbox 100 + INDEXOF_SMB_SCORE write-mailbox\n"
     "    0 INDEXOF_ALIVE write-mailbox\n"
     "  then\n"
     "then\n"
@@ -1395,7 +1460,10 @@ KOOPA_SCRIPT = (
     "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
     "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
     "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "  + 2.5 < if 0 INDEXOF_ALIVE write-mailbox then\n"
+    "  + 2.5 < if\n"
+    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  then\n"
     "then\n"
 )
 
@@ -2048,6 +2116,7 @@ BRICK_SCRIPT = (
     "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
     "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
     "        INDEXOF_SMB_MARIO_STATE read-mailbox 0<> if\n"
+    "          INDEXOF_SMB_SCORE read-mailbox 50 + INDEXOF_SMB_SCORE write-mailbox\n"
     "          INDEXOF_TIME read-mailbox 0.4 + INDEXOF_SMB_BRICK_BREAK_END write-mailbox\n"
     "          1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
     "        else\n"
@@ -2111,6 +2180,27 @@ hbrick['wf_Object X Velocity']  = 1.5
 hbrick['wf_Object Y Velocity']  = 0.0
 hbrick['wf_Object Z Velocity']  = 6.0
 hbrick['wf_Script']             = POWERUP_BLOCK_SCRIPT
+
+# Hidden 1UP brick — tile 40 (x=60m), just before the flagpole (x=63m).
+# Looks like a plain brick; hit from below → launches a green 1UP mushroom that
+# slides right; player catches it for +1 life. Faithful to W1-1 hidden 1UP.
+ONEUP_BRICK_X = 40 * T   # 60.0 — between star_block (57) and flagpole (63)
+hbrick_1up = _add_textured_box('brick_1up',
+                               ONEUP_BRICK_X - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                               ONEUP_BRICK_X + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
+                               brick_tex)
+attach_schema(hbrick_1up, 'generator')
+hbrick_1up['wf_Mobility']           = 'Anchored'
+hbrick_1up['wf_Model Type']         = 'Mesh'
+hbrick_1up['wf_Visibility Mailbox'] = 1
+hbrick_1up['wf_Number Of Local Mailboxes'] = 13
+hbrick_1up['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+hbrick_1up['wf_Object To Throw']    = 'oneup_template'
+hbrick_1up['wf_Generation Rate']    = 10.0
+hbrick_1up['wf_Object X Velocity']  = 1.5
+hbrick_1up['wf_Object Y Velocity']  = 0.0
+hbrick_1up['wf_Object Z Velocity']  = 6.0
+hbrick_1up['wf_Script']             = POWERUP_BLOCK_SCRIPT
 
 # ── 13. Export ────────────────────────────────────────────────────────────────
 print(f"[smb] Exporting to {OUT_LEV}")
