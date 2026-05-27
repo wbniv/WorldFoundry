@@ -1,5 +1,7 @@
 # WorldFoundry developer workspace setup
 
+**Status:** DONE (commit `dd989bd3`) — WF workspace setup split out; later relocated to `../linuxfoundry.org/` (`92d5df6c`).
+
 ## Context
 
 `foundry-linux-setup/install.sh` (Phase 0 of the Foundry Linux distro plan) installs

@@ -1,5 +1,7 @@
 # Plan: Level Recreation Workflow + mm_beginner (M4)
 
+**Status:** DONE — ROM extraction complete and the recreation workflow is proven end-to-end; MM Blender levels built ([`wflevels/mm_practice*`](../../wflevels)).
+
 ## Context
 
 We need to faithfully reproduce the original Marble Madness arcade game (Atari, 1984) in WorldFoundry — same path topology, same hazard types, same general gameplay feel. Levels are not designed; they are reproduced from reference.

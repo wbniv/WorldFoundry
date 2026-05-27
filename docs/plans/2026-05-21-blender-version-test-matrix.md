@@ -1,5 +1,7 @@
 # Plan: multi-Blender-version test matrix for the level exporter
 
+**Status:** DONE — [`blender-addon-tests.yml`](../../.github/workflows/blender-addon-tests.yml) + [`tests/test_blender_addon_export.py`](../../tests/test_blender_addon_export.py) cover the version matrix.
+
 ## Context
 
 The `worldfoundry-blender-addons` apt metapackage currently strict-pins Blender to `>= 4.0.2, << 4.0.3` because that's the only Blender release the add-on has been validated against. This blocks Ubuntu 26.04+ users (who get Blender ~4.5 by default) from `apt install worldfoundry-blender-addons` — and any future widening of the pin without test coverage risks silent breakage when Blender's Python API evolves.

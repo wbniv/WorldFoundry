@@ -1,14 +1,16 @@
 #pragma once
-// engine/wf_edit/voice_track.h — Mic capture → Opus encode → UDP send, and
-// UDP recv → Opus decode → speaker, for in-editor voice chat.
+// engine/wf_edit/voice_track.h — Mic capture → Opus encode → WebRTC RTP, and
+// WebRTC RTP → Opus decode → speaker, for in-editor voice chat.
 //
 // VoiceChat owns one miniaudio capture device (microphone) and one playback
 // device (speaker), plus one OpusEncoder and a map of OpusDecoder (one per
 // peer, keyed by peer_id). Audio is 48 kHz mono, 20 ms frames.
 //
-// Packet wire format (UDP, variable length):
-//   [4 bytes big-endian seq] [N bytes Opus payload]
+// Transport: raw Opus bytes delivered via SetSendCallback (WebrtcSession wraps
+// them into RTP). Incoming Opus arrives via OnRemoteOpus (called by WebrtcSession
+// from its track receive callback).
 
+#include <functional>
 #include <string>
 #include <vector>
 #include <map>
@@ -44,13 +46,21 @@ public:
     VoiceChat();
     ~VoiceChat();
 
-    // Bind the receive socket (on an ephemeral port chosen by the OS) and
-    // start the capture device. Returns false if Opus init or socket creation
-    // fails. Call ListenPort() after a successful Start() to learn the port.
+    // Init Opus encoder + miniaudio devices. Returns false on Opus init failure.
     bool Start();
     void Stop();
 
-    uint16_t ListenPort() const { return listen_port_; }
+    // Always 0; port is no longer advertised (media routed via WebRTC).
+    uint16_t ListenPort() const { return 0; }
+
+    // Set the outgoing send callback. Called from the miniaudio capture thread
+    // with raw Opus bytes (no RTP header). WebrtcSession sets this at startup.
+    // Pass nullptr to disable sending.
+    void SetSendCallback(std::function<void(const uint8_t*, int)> cb);
+
+    // Deliver an incoming Opus packet from the named peer. Called by
+    // WebrtcSession from its track receive callback (any thread).
+    void OnRemoteOpus(const std::string& peer_id, const uint8_t* opus, int len);
 
     // Mute/unmute the microphone capture.
     void SetMuted(bool muted);
@@ -60,10 +70,8 @@ public:
     // for new peers, removes decoders for departed peers.
     void SyncPeers(const std::vector<PeerInfo>& peers);
 
-    // Drain the receive socket and decode incoming Opus packets. Call once
-    // per frame from the main thread (non-blocking, safe alongside the capture
-    // callback which runs on a miniaudio thread).
-    void Tick();
+    // No-op in WebRTC mode (incoming packets arrive via OnRemoteOpus).
+    void Tick() {}
 
     // UI: per-peer audio level (0..1). Thread-safe.
     float PeerLevel(const std::string& peer_id);
@@ -76,21 +84,17 @@ public:
 private:
     void EncodeAndSend(const float* pcm, int frame_samples);
 
-    bool     muted_       = true;
-    int      recv_fd_     = -1;
-    int      send_fd_     = -1;
-    uint32_t seq_         = 0;
-    uint16_t listen_port_ = 0;
+    bool     muted_ = true;
 
     OpusEncoder* encoder_ = nullptr;
 
-    // Peer table: peer_id -> state. Protected by peers_mu_.
+    // Outgoing send callback (set by WebrtcSession). Thread-safe via send_cb_mu_.
+    std::mutex                              send_cb_mu_;
+    std::function<void(const uint8_t*, int)> send_cb_;
+
+    // Peer table: peer_id -> decoder state. Protected by peers_mu_.
     std::mutex                        peers_mu_;
     std::map<std::string, PeerAudio*> peer_audio_;
-
-    // Peer addresses for sending: peer_id -> (ip, port).
-    struct PeerAddr { std::string ip; uint16_t port; };
-    std::map<std::string, PeerAddr> peer_addrs_;
 
     // miniaudio device handles (opaque; stored as void* to avoid including
     // miniaudio.h in this header — the implementation includes it).
@@ -98,7 +102,7 @@ private:
     void* playback_dev_ = nullptr;
 
     // Encode scratch buffer (Opus max frame = 1275 bytes).
-    uint8_t enc_buf_[4 + 1275]{};
+    uint8_t enc_buf_[1275]{};
 
     // Accumulate PCM frames until we have a full 20 ms frame (960 samples at
     // 48 kHz). The capture callback may deliver variable-size chunks.

@@ -1,5 +1,7 @@
 # WF Asset Browser — session 2026-04-28 summary
 
+**Status:** Reference doc (session summary) — the asset-browser features it records shipped per the session notes.
+
 **Branch:** `2026-new-level`  
 **Files:** `wftools/wf_blender/asset_browser.py`, `wftools/wf_asset_provider/src/providers/opengameart.rs`, `wftools/wf_asset_provider/src/providers/polyhaven.rs`
 

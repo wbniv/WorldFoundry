@@ -1,5 +1,7 @@
 # Get the party-games platform running locally
 
+**Status:** DONE (ephemeral) — server runs locally, npm deps install clean, game loop operational; live-browser verify is out-of-repo.
+
 ## Context
 
 The repo at `/home/will/party-games/` is a Chromecast-style couch party-game

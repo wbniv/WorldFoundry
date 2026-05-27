@@ -1,6 +1,6 @@
 # Lua remote step debugger — default Lua on in Linux debug build, then wire MobDebug
 
-**Status:** Not started
+**Status:** OPEN — Lua stays OFF in the canonical build; the Taskfile default flip + MobDebug vendor (Phase B) not done.
 **Date:** 2026-05-10
 
 ## Context

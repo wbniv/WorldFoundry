@@ -1,6 +1,6 @@
 # FoundryLinux migration — pre-reformat audit & backup plan
 
-**Status:** In progress — 2026-05-22 (git clean; cleanup + archive + upload remain)
+**Status:** PARTIAL — git safety net complete (cleanup + bundles + commit, `f6252f9c`); home-dir archive + encrypted secrets + Drive upload remain.
 **Goal:** Wipe `will-ME-mini` and install [FoundryLinux](https://foundrylinux.org/) without losing anything, by first *proving* every git repo is recoverable and pre-emptively backing up everything that isn't.
 
 ## Context

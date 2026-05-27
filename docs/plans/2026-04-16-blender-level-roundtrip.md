@@ -1,5 +1,7 @@
 # Plan: Blender ↔ Level Round-Trip
 
+**Status:** DONE (commits `c782aa53`, `138c3c2`) — end-to-end `.blend`→`.lev`→`.iff` round-trip works; close-out per plan §6.
+
 **Date:** 2026-04-16  
 **Branch:** 2026-first-working-gap
 

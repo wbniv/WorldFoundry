@@ -97,6 +97,114 @@ bool RunLevtreeParse(const std::string& lev_path, std::string& out)
     return true;
 }
 
+// ── locate the levcomp binary (the binary-level decompiler) ──────────────────
+// Mirrors FindLevtree. $WF_LEVCOMP overrides; else prefer release, then debug,
+// then PATH.
+std::string FindLevcomp()
+{
+    if (const char* env = std::getenv("WF_LEVCOMP"); env && *env && access(env, X_OK) == 0)
+        return env;
+    static const char* kCandidates[] = {
+        "wftools/levcomp-rs/target/release/levcomp",
+        "wftools/levcomp-rs/target/debug/levcomp",
+    };
+    for (const char* p : kCandidates)
+        if (access(p, X_OK) == 0) return p;
+    return "levcomp";   // last resort: rely on PATH
+}
+
+// Schema inputs the decompiler needs: objects.lc (class names) + the OAD dir
+// (field names/types/enum labels). Both honour the same in-repo OAS tree the
+// property panel runs against (WF_OAD_DIR), plus a dedicated WF_OBJECTS_LC.
+std::string ObjectsLcPath()
+{
+    if (const char* env = std::getenv("WF_OBJECTS_LC"); env && *env) return env;
+    return "wfsource/source/oas/objects.lc";
+}
+std::string OadDirPath()
+{
+    if (const char* env = std::getenv("WF_OAD_DIR"); env && *env) return env;
+    return "wfsource/source/oas";
+}
+
+// First non-whitespace byte distinguishes text from binary: a text `.lev` opens
+// with `{` (after optional whitespace), a compiled level with an IFF FOURCC
+// (`L4`/`GAME`/`LVAS`…). Sniff the bytes — don't trust the extension. An
+// unreadable/empty file → treat as text (let levtree report the real error).
+bool IsBinaryLevel(const std::string& path)
+{
+    FILE* f = std::fopen(path.c_str(), "rb");
+    if (!f) return false;
+    unsigned char buf[16];
+    const size_t n = std::fread(buf, 1, sizeof(buf), f);
+    std::fclose(f);
+    for (size_t i = 0; i < n; ++i) {
+        if (std::isspace(buf[i])) continue;
+        return buf[i] != '{';   // '{' → text .lev; any other leading byte → binary
+    }
+    return false;   // empty / all-whitespace
+}
+
+// Split a "<file>:<selector>" argument into base path + cd.iff selector. Returns
+// true (and fills `base`/`sel`) when a selector is present — the suffix carries
+// no '/' (so a ':' inside a directory name isn't mistaken for one) and the base
+// is a readable file. Otherwise returns false with `base` = the whole arg and
+// `sel` empty. Shared by the loader and the picker gate so the syntax lives once.
+bool SplitLevelSelector(const std::string& arg, std::string& base, std::string& sel)
+{
+    base = arg;
+    sel.clear();
+    if (auto colon = arg.find_last_of(':'); colon != std::string::npos) {
+        std::string b = arg.substr(0, colon), s = arg.substr(colon + 1);
+        if (!s.empty() && s.find('/') == std::string::npos && access(b.c_str(), R_OK) == 0) {
+            base = std::move(b);
+            sel  = std::move(s);
+            return true;
+        }
+    }
+    return false;
+}
+
+// ── run `levcomp decompile <in> <objects.lc> --oad-dir <oad> [--level <sel>]
+//    -o <tmp>` → a temp `.lev` (the binary-level decompile pre-step). `sel`
+//    selects a level from a cd.iff archive (FOURCC tag or decimal TOC index);
+//    empty = a bare single-level `.iff`. On success `out_tmp` holds the temp
+//    `.lev` path; the caller unlinks it after levtree consumes it.
+bool RunLevcompDecompile(const std::string& in_path, const std::string& sel,
+                         std::string& out_tmp)
+{
+    char tmpl[] = "/tmp/wfedit_decomp_XXXXXX";
+    const int fd = mkstemp(tmpl);
+    if (fd < 0) { std::fprintf(stderr, "wf-edit: mkstemp failed\n"); return false; }
+    ::close(fd);   // levcomp writes the file itself; we only reserved a unique name
+
+    std::string cmd = ShQuote(FindLevcomp()) + " decompile "
+                    + ShQuote(in_path) + " " + ShQuote(ObjectsLcPath())
+                    + " --oad-dir " + ShQuote(OadDirPath());
+    if (!sel.empty()) cmd += " --level " + ShQuote(sel);
+    cmd += " -o " + ShQuote(tmpl) + " 2>&1";
+
+    FILE* pipe = popen(cmd.c_str(), "r");
+    if (!pipe) {
+        std::fprintf(stderr, "wf-edit: popen failed for: %s\n", cmd.c_str());
+        ::unlink(tmpl);
+        return false;
+    }
+    std::array<char, 65536> buf;   // drain (and, on failure, surface) levcomp's log
+    size_t n;
+    std::string log;
+    while ((n = std::fread(buf.data(), 1, buf.size(), pipe)) > 0)
+        log.append(buf.data(), n);
+    const int rc = pclose(pipe);
+    if (rc != 0) {
+        std::fprintf(stderr, "wf-edit: `%s` exited %d\n%s\n", cmd.c_str(), rc, log.c_str());
+        ::unlink(tmpl);
+        return false;
+    }
+    out_tmp = tmpl;
+    return true;
+}
+
 // ── levtree JSON chunk → wfcrdt::Input (the recursive CRDT chunk node) ────────
 // Lossless schema (v2): a levtree Chunk is {"id","items":[Chunk|Literal]}; a
 // Literal is {"kind":"str"|"num"|"four_cc", value/text/id}. The CRDT node mirrors
@@ -241,10 +349,158 @@ bool RunBuildLevel(const std::string& level_name, std::string& out_log)
     return pclose(pipe) == 0;
 }
 
-bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc)
+std::vector<CdIffLevel> ListCdIffLevels(const std::string& cd_path)
 {
+    std::vector<CdIffLevel> out;
+    // `levcomp decompile <cd.iff> <objects.lc> --list` dumps the TOC. The
+    // progress lines go to stderr and the table to stdout; merge both (2>&1) and
+    // pick out the data rows, so we don't depend on which stream a line lands on.
+    const std::string cmd = ShQuote(FindLevcomp()) + " decompile "
+                          + ShQuote(cd_path) + " " + ShQuote(ObjectsLcPath())
+                          + " --list 2>&1";
+    FILE* pipe = popen(cmd.c_str(), "r");
+    if (!pipe) {
+        std::fprintf(stderr, "wf-edit: popen failed for: %s\n", cmd.c_str());
+        return out;
+    }
+    std::string all;
+    std::array<char, 65536> buf;
+    size_t n;
+    while ((n = std::fread(buf.data(), 1, buf.size(), pipe)) > 0)
+        all.append(buf.data(), n);
+    const int rc = pclose(pipe);
+    if (rc != 0) return out;   // not an archive / list failed — nothing to pick
+
+    // Each data row is "  <idx>  <tag>  0x<offset>  <size>" (print_toc in
+    // decompile.rs). The header "  idx  tag  offset  size" and the progress lines
+    // don't parse as `int tag 0xhex int`, so sscanf's field count gates them out.
+    std::size_t pos = 0;
+    while (pos < all.size()) {
+        std::size_t eol = all.find('\n', pos);
+        const std::string line = all.substr(pos, eol == std::string::npos ? std::string::npos : eol - pos);
+        pos = (eol == std::string::npos) ? all.size() : eol + 1;
+
+        int  idx = 0;
+        char tag[16] = {0};
+        long off = 0, sz = 0;
+        if (std::sscanf(line.c_str(), " %d %15s 0x%lx %ld", &idx, tag, &off, &sz) == 4) {
+            CdIffLevel e;
+            e.index  = idx;
+            e.tag    = tag;
+            e.offset = off;
+            e.size   = sz;
+            out.push_back(std::move(e));
+        }
+    }
+    return out;
+}
+
+bool NeedsLevelPicker(const std::string& leveltree_arg)
+{
+    std::string base, sel;
+    if (SplitLevelSelector(leveltree_arg, base, sel)) return false;  // explicit pick
+    if (!IsBinaryLevel(base)) return false;                          // text .lev
+    return ListCdIffLevels(base).size() >= 2;                        // multi-level archive
+}
+
+std::string ResolveEngineViewportLevel(const std::string& leveltree_arg, bool& out_is_temp)
+{
+    out_is_temp = false;
+    std::string base, sel;
+    const bool has_sel = SplitLevelSelector(leveltree_arg, base, sel);
+
+    if (!has_sel) {
+        // A bare binary .iff/.lvl is already a complete L<N> chunk (what -L wants);
+        // a text .lev has no binary to render.
+        return IsBinaryLevel(base) ? base : std::string();
+    }
+
+    // cd.iff:<tag|index> — find the entry's byte offset, then slice its complete
+    // L<N> chunk to a temp .iff. Use the chunk's OWN little-endian size (the TOC
+    // size is sector-granular and can fall short of the true extent).
+    const std::vector<CdIffLevel> levels = ListCdIffLevels(base);
+    long offset = -1;
+    for (const auto& e : levels)
+        if (e.tag == sel) { offset = e.offset; break; }
+    if (offset < 0) {                       // not a tag — try a decimal index
+        char* end = nullptr;
+        const long idx = std::strtol(sel.c_str(), &end, 10);
+        if (end && *end == '\0')
+            for (const auto& e : levels)
+                if (e.index == static_cast<int>(idx)) { offset = e.offset; break; }
+    }
+    if (offset < 0) {
+        std::fprintf(stderr, "wf-edit: viewport: '%s' not found in %s\n", sel.c_str(), base.c_str());
+        return std::string();
+    }
+
+    FILE* in = std::fopen(base.c_str(), "rb");
+    if (!in) return std::string();
+    unsigned char hdr[8];
+    if (std::fseek(in, offset, SEEK_SET) != 0 || std::fread(hdr, 1, 8, in) != 8) {
+        std::fclose(in);
+        return std::string();
+    }
+    // wf_iff: chunk id big-endian, size little-endian. Extent = header + payload.
+    const unsigned long payload =
+        static_cast<unsigned long>(hdr[4])        | (static_cast<unsigned long>(hdr[5]) << 8) |
+        (static_cast<unsigned long>(hdr[6]) << 16) | (static_cast<unsigned long>(hdr[7]) << 24);
+    const unsigned long extent = 8 + payload;
+
+    char tmpl[] = "/tmp/wfedit_vp_XXXXXX";
+    const int fd = mkstemp(tmpl);
+    if (fd < 0) { std::fclose(in); return std::string(); }
+    FILE* outf = fdopen(fd, "wb");
+    if (!outf) { ::close(fd); ::unlink(tmpl); std::fclose(in); return std::string(); }
+
+    std::fwrite(hdr, 1, 8, outf);            // header already read; payload follows
+    std::array<char, 65536> buf;
+    unsigned long left = payload;
+    while (left > 0) {
+        const size_t want = (left < buf.size()) ? static_cast<size_t>(left) : buf.size();
+        const size_t got  = std::fread(buf.data(), 1, want, in);
+        if (got == 0) break;
+        std::fwrite(buf.data(), 1, got, outf);
+        left -= got;
+    }
+    std::fclose(outf);
+    std::fclose(in);
+    if (left != 0) {                          // short read → don't hand -L a truncated chunk
+        std::fprintf(stderr, "wf-edit: viewport: short read slicing %s (%lu/%lu left)\n",
+                     base.c_str(), left, payload);
+        ::unlink(tmpl);
+        return std::string();
+    }
+    out_is_temp = true;
+    std::fprintf(stderr, "wf-edit: viewport level sliced from %s:%s -> %s (%lu bytes)\n",
+                 base.c_str(), sel.c_str(), tmpl, extent);
+    return tmpl;
+}
+
+bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc,
+                          std::string* out_save_path)
+{
+    // Split an optional cd.iff selector "<file.iff>:<TAG|index>". A text .lev /
+    // bare .iff has no selector and falls through unchanged.
+    std::string in_path, sel;
+    SplitLevelSelector(lev_path, in_path, sel);
+
+    // Binary level (compiled .iff, bare or inside cd.iff)? Decompile it to a temp
+    // .lev first, then feed that to the existing levtree → Doc path unchanged.
+    std::string parse_path = in_path;
+    std::string tmp_lev;
+    if (IsBinaryLevel(in_path)) {
+        if (!RunLevcompDecompile(in_path, sel, tmp_lev)) {
+            std::fprintf(stderr, "wf-edit: levcomp decompile failed for %s\n", in_path.c_str());
+            return false;
+        }
+        parse_path = tmp_lev;
+    }
+
     std::string raw;
-    if (!RunLevtreeParse(lev_path, raw)) return false;
+    const bool parsed = RunLevtreeParse(parse_path, raw);
+    if (!tmp_lev.empty()) ::unlink(tmp_lev.c_str());   // temp consumed (or failed)
+    if (!parsed) return false;
 
     json tree;
     try {
@@ -260,12 +516,28 @@ bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc)
     }
     const json& root = tree["root"];
 
-    // Derive a level name from the path's basename (drop dir + .lev).
-    std::string level_name = lev_path;
+    // Derive a level name from the INPUT path's basename (not the temp file):
+    // drop the directory + final extension, and qualify with the cd.iff selector
+    // when present (cd → cd_L4).
+    std::string level_name = in_path;
     if (auto slash = level_name.find_last_of('/'); slash != std::string::npos)
         level_name.erase(0, slash + 1);
-    if (auto dot = level_name.rfind(".lev"); dot != std::string::npos)
+    if (auto dot = level_name.find_last_of('.'); dot != std::string::npos && dot != 0)
         level_name.erase(dot);
+    if (!sel.empty()) level_name += "_" + sel;
+
+    // Report where Save should write: the source .lev in-place for a text load;
+    // a fresh sibling .lev (Save-As) for a binary load — the binary is read-only.
+    if (out_save_path) {
+        if (tmp_lev.empty()) {
+            *out_save_path = in_path;
+        } else {
+            std::string dir;
+            if (auto slash = in_path.find_last_of('/'); slash != std::string::npos)
+                dir = in_path.substr(0, slash + 1);
+            *out_save_path = dir + level_name + ".lev";
+        }
+    }
 
     auto txn = doc.begin();
 
@@ -295,7 +567,7 @@ bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc)
         ++objs;
     }
     std::printf("wf-edit: Y.Doc populated from %s — %d top-level chunks (schema v2)\n",
-                lev_path.c_str(), objs);
+                in_path.c_str(), objs);
     return true;
 }
 
@@ -447,9 +719,10 @@ bool SetLeafLiterals(wfcrdt::Array& items, const std::string& new_text)
 }  // namespace
 
 bool WriteFieldLeaf(wfcrdt::Doc& doc, int actor_index, int child_index,
-                    const char* leaf_type, const std::string& new_text)
+                    const char* leaf_type, const std::string& new_text,
+                    bool remote)
 {
-    auto txn = doc.begin();   // commits on scope exit
+    auto txn = remote ? doc.beginRemote() : doc.begin();   // commits on scope exit
     auto content = txn.array("content");
     if (actor_index < 0 || actor_index >= content.len()) return false;
 

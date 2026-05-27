@@ -1,5 +1,7 @@
 # Commit: Phase 0b plan docs + cross-reference wiring
 
+**Status:** DONE — Phase 0b plan docs ([frame-step API](2026-05-18-engine-frame-step-api.md), [external GL context](2026-05-18-engine-external-gl-context.md)) created and cross-linked.
+
 ## Context
 
 This session created two parked plan docs for the still-open Phase 0b sub-tasks of the collaborative editor work (sub-tasks #3 and #4 already shipped earlier today as `b0639c5` / `1a957f7` / `89bcb58`):

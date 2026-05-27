@@ -1,5 +1,7 @@
 # Widen the Editor Bridge to Use the Generated Map
 
+**Status:** DONE (commit `1effceec`) — `nameToPath()` now covers all 77 OAD fields via the generated [`name_to_path_generated.inc`](../../engine/wf_edit/name_to_path_generated.inc).
+
 ## Context
 
 The editor bridge (`engine/wf_edit/engine_bridge.cc`) has a hand-written `nameToPath()` table that maps OAD field names (as they appear in `.lev`/Doc) to wfmut paths (`"block.member"`). It currently covers 14 fields — the ones that were obviously useful and wired manually during M3.

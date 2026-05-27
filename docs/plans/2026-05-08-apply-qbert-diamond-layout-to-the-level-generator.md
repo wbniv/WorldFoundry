@@ -1,5 +1,7 @@
 # Plan: Apply Q*bert diamond layout to the level generator
 
+**Status:** DONE 2026-05-08 (commits `c0b87a25`, `61457243`) — √2 scaling + 45° rotation diamond layout in the generator.
+
 ## Context
 
 The user's interactive Blender experiments confirmed that the iconic Q*bert

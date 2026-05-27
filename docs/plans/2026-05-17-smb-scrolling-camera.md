@@ -1,5 +1,7 @@
 # SMB classic scrolling camera
 
+**Status:** DONE 2026-05-17 (commits `3ea44437`, `6255f465`) — classic SMB scrolling camera (pure-Forth route A) + named scroll mailboxes (1800/1801/1802).
+
 ## Context
 
 `wflevels/smb_w1_1/blender_create_smb.py` (lines 11, 17) currently configures a **fixed all-Absolute** CamShot centred on Mario's spawn (X=4.5). The level extends to X≈70.5; Mario walks off-screen past ~X=15. The script's header explicitly flags scrolling as a deferred milestone — this is that milestone.

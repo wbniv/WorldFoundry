@@ -43,6 +43,19 @@ void InitBridgeMap(wfcrdt::Doc& doc);
 // wfmut::RemoveActor / wfmut::SpawnActor as needed. No-op when nothing changed.
 void UpdateBridgeMap(wfcrdt::Doc& doc);
 
+// Call every frame (immediately after UpdateBridgeMap). Flushes Doc field edits
+// queued by the deep observer (in InitBridgeMap) into the live engine via
+// PropagateToEngine. This is the SINGLE engine-propagation path for every Doc
+// writer — local panel commits, remote collaborator SYNCs, undo/redo, replay,
+// and DAP edits all reach the viewport here, not just the selected actor. Only
+// the leaves that changed are re-applied (the observer records which). Reads the
+// Doc (opens short read txns) — must run at frame top with no live txn.
+//
+// drag_locked_doc_idx (default -1): doc index of an actor under an active local
+// gizmo drag. Its Position/Orientation are skipped so a concurrent remote/undo
+// edit can't yank the in-progress drag; pass `c->gizmo_active ? c->selected : -1`.
+void DrainEngineSync(wfcrdt::Doc& doc, int drag_locked_doc_idx = -1);
+
 // Verification (WF_EDIT_BRIDGE_DEBUG): print, for every Doc actor, its
 // doc_index -> mapped engine_idx -> engine currentPos() alongside the Doc's own
 // Position leaf, flagging any mismatch. Called once when the live level is
@@ -95,6 +108,24 @@ void PropagateToEngine(int doc_index, const PropField& f);
 // --screenshot captures the moved actor.
 void RunBridgeTest(wfcrdt::Doc& doc, int doc_index,
                    const std::string& field_name, const std::string& new_data);
+
+// WF_EDIT_REMOTE_TEST headless proof for the deep-observer path: edits actor
+// `docB`'s Position via a REMOTE-origin txn (Doc::beginRemote — a peer/replay/DAP
+// edit), then flushes via DrainEngineSync — WITHOUT any direct PropagateToEngine
+// call. Asserts the engine actor moved, so only the deep observer can have driven
+// it. `selectedA` is the locally-selected actor (must differ from docB — the
+// regression was that a remote edit only reached the *selected* actor). Logs
+// "[remote-test] PASS" / "FAIL". Leaves the actor moved so --screenshot captures it.
+void RunRemoteSyncTest(wfcrdt::Doc& doc, int selectedA, int docB,
+                       const std::string& new_pos);
+
+// WF_EDIT_DRAGLOCK_TEST headless proof for the active-drag transform lock
+// (code-review finding #2): with actor A under a simulated live gizmo drag,
+// confirm a REMOTE edit to A doesn't snap it back — neither a non-transform
+// edit (Fix A: leaf-granular propagation) nor a Position edit (Fix B: the drag
+// owns the transform until release) — and that propagation resumes once the
+// lock is dropped. Logs "[draglock-test] … PASS/FAIL".
+void RunDragLockTest(wfcrdt::Doc& doc, int docA);
 
 // WF_EDIT_SPAWN_CONFIRM_TEST headless proof (two parts):
 // A) Scans the live level's template table via HasTemplate and logs the first

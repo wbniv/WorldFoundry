@@ -1,5 +1,7 @@
 # Plan: fix oas2oad-rs name_KIND → correct MovementClass default
 
+**Status:** DONE — oas2oad-rs takes `--objects-lc`; `.oad` files rebuilt with correct MovementClass defaults.
+
 **Date:** 2026-04-17
 
 ## Context

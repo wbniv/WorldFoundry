@@ -39,7 +39,12 @@ public:
     // updates the peer list, evicts stale peers (last_seen > 8 s ago).
     void Tick(double now_sec);
 
-    const std::vector<PeerInfo>& Peers()     const { return peers_; }
+    // Overwrite the relay-discovered peer list (called from CollabDrain after
+    // each CH_PRESENCE update). Merged into Peers() alongside multicast peers.
+    void SetRelayPeers(const std::vector<PeerInfo>& relay_peers);
+
+    // Returns the merged peer list (multicast + relay, deduped by peer_id).
+    const std::vector<PeerInfo>& Peers()     const;
     const std::string&           OurPeerId() const { return our_peer_id_; }
     bool                         Active()    const { return recv_fd_ >= 0; }
 
@@ -57,7 +62,12 @@ private:
     uint16_t     video_port_ = 0;
     double       last_beacon_ = -99.0;
 
-    std::vector<PeerInfo> peers_;
+    std::vector<PeerInfo> peers_;         // multicast-discovered peers
+    std::vector<PeerInfo> relay_peers_;   // relay CH_PRESENCE peers (set by SetRelayPeers)
+
+    // Lazy-merged cache returned by Peers().
+    mutable std::vector<PeerInfo> merged_peers_;
+    mutable bool                  merged_dirty_ = true;
 };
 
 // Returns a monotonic seconds value (wraps ~136 years after boot).

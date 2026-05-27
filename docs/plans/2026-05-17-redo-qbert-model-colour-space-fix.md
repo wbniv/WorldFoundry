@@ -1,5 +1,7 @@
 # Redo Q✱bert — model + colour-space fix
 
+**Status:** DONE (commit `0215c30f`) — sRGB→linear colour fix + arcade-faithful Q*bert player model.
+
 ## Context
 
 The catalogue PNG of Q✱bert renders him yellow with a short pale beak — neither matches the arcade. Two root causes, addressed together:

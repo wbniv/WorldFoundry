@@ -2,12 +2,15 @@
 // engine/wf_edit/main.cc — World Foundry collaborative level editor (wf-edit).
 //
 // Milestone 2: embed the engine viewport. The editor owns a GLFW X11/GLX
-// window, registers that context with the engine (SetHostGLContext) and a
-// per-frame UI callback (SetEditorFrameCallback), then calls HALStart. The
+// window, registers that context with the engine (SetHostGLContext) and a pair
+// of per-frame callbacks (SetEditorFrameCallbacks), then calls HALStart. The
 // engine's PIGSMain runs in `--editor` mode → WFGame::RunEditor, which each
-// frame does StepFrame(do_swap=false) (renders the level into the back buffer)
-// then calls back here so we composite an ImGui overlay and swap. Approach (a)
-// per docs/plans/2026-05-20-editor-app-shell.md; Linux/X11 only.
+// iteration calls editor_build (apply edits + build UI), then
+// StepFrame(do_swap=false) (renders the level into the back buffer), then
+// editor_present (composite the ImGui overlay + swap). Build-before-render is
+// what makes a local edit appear the same frame — see
+// docs/plans/2026-05-25-wf-edit-zero-latency-local-edits.md. Approach (a) per
+// docs/plans/2026-05-20-editor-app-shell.md; Linux/X11 only.
 //=============================================================================
 
 // nlohmann/json must be included before WF engine headers — memory.hp's
@@ -24,6 +27,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "ImGuizmo.h"          // viewport translate/rotate gizmo
+#include "imgui_markdown.h"    // chat sidebar markdown rendering (header-only)
 
 #include <gfx/host_gl_context.h>
 #include <gfx/renderer_backend.hp>   // RendererBackendGet().SetProjection on resize
@@ -39,13 +43,17 @@
 #include "collab_session.h"
 #include "voice_track.h"
 #include "video_track.h"
+#include "webrtc_session.h"
 #include "collab_panel.h"
 #include "ws_client.h"
 #include "gizmo.h"
 
+#include <algorithm>
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <optional>
 #include <string>
@@ -59,7 +67,7 @@ extern void ParseWindowSwitches(int argc, char** argv);
 extern char szAppName[];
 
 // gfx/gl/display.cc — drive WFInitGL's glViewport + projection aspect. main()
-// seeds them from the GLFW framebuffer before HALStart; editor_frame re-applies
+// seeds them from the GLFW framebuffer before HALStart; editor_build re-applies
 // glViewport + SetProjection from them on window resize (the engine's own
 // resize path early-bails in host-owned mode).
 extern int wfWindowWidth, wfWindowHeight;
@@ -75,6 +83,10 @@ struct WfeditIdentity {
     std::string display_name = "Editor";
     float colour[3] = {0.5f, 0.5f, 0.5f};
     std::vector<RecentRoom> recent_rooms;
+    // Gizmo snap prefs (persisted across sessions).
+    bool  gizmo_snap = false;
+    float gizmo_snap_trans = 1.0f;
+    float gizmo_snap_rot   = 15.0f;
 };
 
 static std::string IdentityPath()
@@ -107,6 +119,9 @@ static std::optional<WfeditIdentity> LoadIdentity()
                 id.recent_rooms.push_back({r.value("relay_url",""), r.value("room_id","")});
             }
         }
+        id.gizmo_snap       = j.value("gizmo_snap", false);
+        id.gizmo_snap_trans = j.value("gizmo_snap_trans", 1.0f);
+        id.gizmo_snap_rot   = j.value("gizmo_snap_rot", 15.0f);
         if (id.peer_id.empty()) return std::nullopt;
         return id;
     } catch (...) {
@@ -130,7 +145,10 @@ static void SaveIdentity(const WfeditIdentity& id)
             {"peer_id",      id.peer_id},
             {"display_name", id.display_name},
             {"colour",       json::array({id.colour[0], id.colour[1], id.colour[2]})},
-            {"recent_rooms", rooms}
+            {"recent_rooms", rooms},
+            {"gizmo_snap",       id.gizmo_snap},
+            {"gizmo_snap_trans", id.gizmo_snap_trans},
+            {"gizmo_snap_rot",   id.gizmo_snap_rot}
         };
         std::ofstream f(path);
         f << j.dump(2) << "\n";
@@ -138,18 +156,30 @@ static void SaveIdentity(const WfeditIdentity& id)
 }
 
 // Parse wfedit://<host:port>/r/<room-id> → {relay_url="ws://host:port", room_id}.
+// Parse wfedit:// (→ ws://) or wfedit+s:// (→ wss://) URLs.
+// Format: wfedit[+s]://host[:port]/r/<room_id>
 static std::optional<std::pair<std::string,std::string>> ParseWfeditUrl(const char* url)
 {
-    static const char kPfx[] = "wfedit://";
-    if (std::strncmp(url, kPfx, sizeof(kPfx) - 1) != 0) return std::nullopt;
-    std::string rest = url + sizeof(kPfx) - 1;
-    // Split on "/r/"
-    const auto rpos = rest.find("/r/");
+    static const char kPfxTls[]   = "wfedit+s://";
+    static const char kPfxPlain[] = "wfedit://";
+    const char* ws_scheme;
+    const char* rest;
+    if (std::strncmp(url, kPfxTls, sizeof(kPfxTls) - 1) == 0) {
+        ws_scheme = "wss://";
+        rest = url + sizeof(kPfxTls) - 1;
+    } else if (std::strncmp(url, kPfxPlain, sizeof(kPfxPlain) - 1) == 0) {
+        ws_scheme = "ws://";
+        rest = url + sizeof(kPfxPlain) - 1;
+    } else {
+        return std::nullopt;
+    }
+    std::string s(rest);
+    const auto rpos = s.find("/r/");
     if (rpos == std::string::npos) return std::nullopt;
-    std::string host_port = rest.substr(0, rpos);
-    std::string room = rest.substr(rpos + 3);
+    std::string host_port = s.substr(0, rpos);
+    std::string room = s.substr(rpos + 3);
     if (host_port.empty() || room.empty()) return std::nullopt;
-    return std::make_pair("ws://" + host_port, room);
+    return std::make_pair(std::string(ws_scheme) + host_port, room);
 }
 
 // Add or move room to the front of recent_rooms (capped at 10).
@@ -172,7 +202,7 @@ struct EditorCtx {
     const char* shot = nullptr;    // --screenshot: PPM dump on the last frame
 
     // Last framebuffer size we applied to the engine viewport; 0 forces the
-    // first editor_frame to (re-)fit. See the resize block in editor_frame.
+    // first editor_build to (re-)fit. See the resize block in editor_build.
     int         fb_w = 0, fb_h = 0;
 
     // M4 read-only Y.Doc: actor names read out of the CRDT doc (see level_doc).
@@ -196,11 +226,36 @@ struct EditorCtx {
     // written once on release (not every frame — that would flood the relay).
     bool                          gizmo_active = false;
 
+    // Gizmo operation (G = move, R = rotate, W = both) + snap (S toggles).
+    // Snap steps persist in identity.json. Combined mode can't snap (ImGuizmo
+    // shares one snap[0] slot between translate XYZ and rotate degrees).
+    ImGuizmo::OPERATION           gizmo_op = ImGuizmo::TRANSLATE | ImGuizmo::ROTATE;
+    bool                          gizmo_snap = false;
+    float                         gizmo_snap_trans = 1.0f;   // world units (XYZ)
+    float                         gizmo_snap_rot   = 15.0f;  // degrees
+
     // Save round-trip: the .lev path File→Save writes (the Doc is lossless — v2
     // schema — so save needs no retained JSON), and a transient toast.
     std::string save_path;
+    // True when the Doc was loaded from a binary source (a compiled .iff or a
+    // cd.iff level): the source binary is read-only, so save_path was redirected
+    // to a fresh .lev and File→Save is really a Save-As. Drives the menu label.
+    bool        binary_source = false;
     std::string toast;
     int         toast_frames = 0;
+
+    // File→Open (#2): re-exec the editor into another level. A fresh process
+    // re-runs the whole startup path (incl. the cd.iff picker for a bare archive),
+    // so we sidestep any in-place engine/bridge reset. exe_path is argv[0] (what we
+    // relaunch); show_open drives the browser modal; browse_dir is the dir it lists;
+    // browse_sel is the highlighted row; pending_open holds a pick awaiting the
+    // discard-changes confirm; open_pick is a headless aid that auto-opens a path.
+    std::string exe_path;
+    bool        show_open = false;
+    std::string browse_dir;
+    int         browse_sel = -1;
+    std::string pending_open;
+    std::string open_pick;
 
     // M2: no longer set by delete/duplicate — the stable map (InitBridgeMap +
     // BridgeNotifyDelete/Duplicate) keeps propagation live through structural
@@ -209,11 +264,12 @@ struct EditorCtx {
     bool structural_dirty = false;
 
     // Voice + video collaboration (optional; only active when --room is given).
-    wfedit::CollabSession* collab  = nullptr;
-    wfedit::VoiceChat*     voice   = nullptr;
-    wfedit::VideoChat*     video   = nullptr;
-    std::string            room_id;
-    bool                   show_collab = true;
+    wfedit::CollabSession*  collab  = nullptr;
+    wfedit::VoiceChat*      voice   = nullptr;
+    wfedit::VideoChat*      video   = nullptr;
+    wfedit::WebrtcSession*  webrtc  = nullptr;   // Phase 2: WebRTC media transport
+    std::string             room_id;
+    bool                    show_collab = true;
 
     // Co-editing relay (Phase 2+). relay_client is connected when relay_url is set.
     wfedit::WsClient                    relay_client;
@@ -241,6 +297,7 @@ struct EditorCtx {
         std::string text;
     };
     std::vector<ChatEntry> chat_log;
+    bool                   chat_demo = false;  // WF_EDIT_CHAT_DEMO: show Chat panel w/o relay
     char chat_input[256]   = {};
     bool chat_scroll_btm   = false;
 };
@@ -300,10 +357,12 @@ void RefreshActorList(EditorCtx* c)
     c->fields_for = -1;          // force Properties to re-resolve on the next frame
 }
 
-// Re-sync the editor's UI + live engine after the Doc was mutated underneath us
-// (a remote SYNC apply, or a native undo/redo). Re-reads the actor list, re-
-// resolves the selected actor's properties, and pushes each OAD-matched field
-// back through the engine bridge so the next StepFrame re-renders the change.
+// Re-sync the editor's UI after the Doc was mutated underneath us (a remote SYNC
+// apply, or a native undo/redo). Re-reads the actor list and re-resolves the
+// selected actor's properties so the panel shows the new values. Engine/viewport
+// propagation is NOT done here — the bridge's deep observer queued every touched
+// actor (any actor, not just the selected one) and DrainEngineSync flushes it at
+// frame top.
 void ReSyncAfterDocChange(EditorCtx* c)
 {
     RefreshActorList(c);
@@ -311,9 +370,6 @@ void ReSyncAfterDocChange(EditorCtx* c)
         c->props = wfedit::ResolveProperties(
             wfedit::ReadActorFields(*c->doc, c->selected));
         c->fields_for = c->selected;
-        for (const auto& pf : c->props)
-            if (pf.matched)
-                wfedit::PropagateToEngine(c->selected, pf);
     }
 }
 
@@ -446,6 +502,28 @@ void CollabDrain(EditorCtx* c) {
                     c->chat_scroll_btm = true;
                 }
             } catch (...) {}
+        } else if (ch == 0x05) {
+            // SIGNAL — WebRTC SDP/ICE signaling.
+            // Wire format: [0x05][to_peer_id NUL json_payload]
+            // (relay forwards entire frame unchanged; JSON carries "from" field)
+            if (frame.size() >= 3 && c->webrtc) {
+                const uint8_t* payload = frame.data() + 1;
+                size_t plen = frame.size() - 1;
+                size_t nul  = 0;
+                while (nul < plen && payload[nul] != 0) ++nul;
+                if (nul + 1 < plen) {
+                    std::string json_str(
+                        reinterpret_cast<const char*>(payload + nul + 1),
+                        plen - nul - 1);
+                    try {
+                        using json = nlohmann::json;
+                        json j     = json::parse(json_str);
+                        std::string from = j.value("from", "");
+                        if (!from.empty())
+                            c->webrtc->OnSignal(from, json_str);
+                    } catch (...) {}
+                }
+            }
         }
         // CONTROL (0x04) is ignored here.
         frame.clear();
@@ -455,6 +533,19 @@ void CollabDrain(EditorCtx* c) {
         const double now = glfwGetTime();
         for (auto it = c->peer_presence.begin(); it != c->peer_presence.end();)
             it = (now - it->second.last_seen > 8.0) ? c->peer_presence.erase(it) : ++it;
+    }
+    // Sync relay roster into the collab session so Peers() merges multicast + relay.
+    if (c->collab) {
+        std::vector<wfedit::PeerInfo> relay_peers;
+        relay_peers.reserve(c->peer_presence.size());
+        for (const auto& [pid, ps] : c->peer_presence) {
+            wfedit::PeerInfo pi;
+            pi.peer_id      = pid;
+            pi.display_name = ps.name;
+            pi.last_seen    = ps.last_seen;
+            relay_peers.push_back(std::move(pi));
+        }
+        c->collab->SetRelayPeers(relay_peers);
     }
 }
 
@@ -476,15 +567,291 @@ void write_ppm(GLFWwindow* win, const char* path)
     std::printf("wf-edit: screenshot %s (%dx%d)\n", path, w, h);
 }
 
-// Called by WFGame::RunEditor each frame, after StepFrame has rendered the
-// engine into the back buffer (no swap). We composite the ImGui overlay and
-// swap. Return false to quit.
-bool editor_frame(void* p)
+// ── startup cd.iff level picker ──────────────────────────────────────────────
+// Shown once, at launch, when the editor is given a bare multi-level cd.iff (no
+// `:tag` selector). Lists the archive's levels; the user picks one to load this
+// session — a *startup* choice, NOT runtime level switching (the engine/bridge
+// haven't started yet). Renders pure-ImGui frames on `win` before HALStart.
+// Returns the chosen FOURCC tag via `out_tag` and true; returns false if the user
+// quit (window closed / Quit). `max_frames`/`shot` honour the headless harness;
+// `pick_level` is a headless aid — when non-empty, auto-confirm that tag/index on
+// the first rendered frame (equivalent to clicking that row + Open).
+static bool RunCdIffPickerModal(GLFWwindow* win, const std::string& cd_path,
+                                const std::vector<wfedit::CdIffLevel>& levels,
+                                std::string* out_tag, int max_frames,
+                                const char* shot, const std::string& pick_level)
+{
+    // Default selection: first non-SHEL level (the common "open the level"); else 0.
+    int sel = 0;
+    for (std::size_t i = 0; i < levels.size(); ++i)
+        if (levels[i].tag != "SHEL") { sel = static_cast<int>(i); break; }
+
+    auto resolve_pick = [&](const std::string& p) -> int {       // tag or decimal index
+        for (std::size_t i = 0; i < levels.size(); ++i)
+            if (levels[i].tag == p) return static_cast<int>(i);
+        char* end = nullptr;
+        const long v = std::strtol(p.c_str(), &end, 10);
+        if (end && *end == '\0')
+            for (std::size_t i = 0; i < levels.size(); ++i)
+                if (levels[i].index == static_cast<int>(v)) return static_cast<int>(i);
+        return -1;
+    };
+    auto human_size = [](long b) -> std::string {
+        char buf[32];
+        if (b < 1024)               std::snprintf(buf, sizeof(buf), "%ld B", b);
+        else if (b < 1024 * 1024)   std::snprintf(buf, sizeof(buf), "%.1f KB", b / 1024.0);
+        else                        std::snprintf(buf, sizeof(buf), "%.2f MB", b / (1024.0 * 1024.0));
+        return buf;
+    };
+
+    int  frame = 0;
+    bool confirmed = false, quit = false;
+    for (;;) {
+        if (glfwWindowShouldClose(win)) quit = true;
+        glfwPollEvents();
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        const ImGuiViewport* vp = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x + vp->WorkSize.x * 0.5f,
+                                       vp->WorkPos.y + vp->WorkSize.y * 0.5f),
+                                ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowSize(ImVec2(540, 0), ImGuiCond_Always);
+        ImGui::Begin("Open Level", nullptr,
+                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                     ImGuiWindowFlags_NoCollapse);
+        ImGui::TextUnformatted(("Archive:  " + cd_path).c_str());
+        ImGui::Text("%zu levels in this cd.iff - pick one to open:", levels.size());
+        ImGui::Separator();
+        if (ImGui::BeginTable("toc", 4, ImGuiTableFlags_RowBg |
+                              ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_SizingStretchProp)) {
+            ImGui::TableSetupColumn("#",      ImGuiTableColumnFlags_WidthFixed, 28.0f);
+            ImGui::TableSetupColumn("Tag");
+            ImGui::TableSetupColumn("Size");
+            ImGui::TableSetupColumn("Offset");
+            ImGui::TableHeadersRow();
+            for (int i = 0; i < static_cast<int>(levels.size()); ++i) {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                char label[32];
+                std::snprintf(label, sizeof(label), "%d##row%d", levels[i].index, i);
+                if (ImGui::Selectable(label, i == sel,
+                                      ImGuiSelectableFlags_SpanAllColumns |
+                                      ImGuiSelectableFlags_AllowDoubleClick))
+                    sel = i;
+                if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) { sel = i; confirmed = true; }
+                ImGui::TableSetColumnIndex(1); ImGui::TextUnformatted(levels[i].tag.c_str());
+                ImGui::TableSetColumnIndex(2); ImGui::TextUnformatted(human_size(levels[i].size).c_str());
+                ImGui::TableSetColumnIndex(3); ImGui::Text("0x%06lx", levels[i].offset);
+            }
+            ImGui::EndTable();
+        }
+        ImGui::Separator();
+        if (ImGui::Button("Open", ImVec2(120, 0))) confirmed = true;
+        ImGui::SameLine();
+        if (ImGui::Button("Quit", ImVec2(120, 0))) quit = true;
+        ImGui::End();
+
+        ImGui::Render();
+        int fbw, fbh;
+        glfwGetFramebufferSize(win, &fbw, &fbh);
+        glViewport(0, 0, fbw, fbh);
+        glClearColor(0.10f, 0.10f, 0.11f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ++frame;
+
+        // Headless auto-pick once the modal has rendered (equivalent to Open).
+        if (!confirmed && !quit && !pick_level.empty()) {
+            const int p = resolve_pick(pick_level);
+            if (p >= 0) { sel = p; confirmed = true; }
+            else {
+                std::fprintf(stderr, "wf-edit: --pick-level='%s' not in archive\n", pick_level.c_str());
+                quit = true;
+            }
+        }
+        const bool frame_cap = (max_frames >= 0 && frame >= max_frames);
+        if ((confirmed || quit || frame_cap) && shot) write_ppm(win, shot);   // back buffer, pre-swap
+        glfwSwapBuffers(win);
+
+        if (confirmed || quit) break;
+        if (frame_cap) { quit = true; break; }   // headless, no pick → treat as quit
+    }
+
+    if (confirmed && sel >= 0 && sel < static_cast<int>(levels.size())) {
+        *out_tag = levels[sel].tag;
+        return true;
+    }
+    return false;
+}
+
+// File→Open: relaunch the editor pointed at `leveltree`, preserving the collab
+// flags (and any headless --screenshot/--frames so a re-exec can still be driven
+// without a window). A fresh process re-runs the whole startup path — including
+// the cd.iff picker when `leveltree` is a bare multi-level archive — so we sidestep
+// any in-place engine/bridge reset. execvp replaces this image; the OS reclaims the
+// GL context + X resources, so no graceful teardown is needed. Returns only on
+// failure (the image was not replaced).
+static void ReExecWithLevel(const EditorCtx* c, const std::string& leveltree)
+{
+    std::vector<std::string> args = { c->exe_path, "--leveltree=" + leveltree };
+    if (!c->room_id.empty())   args.push_back("--room=" + c->room_id);
+    if (!c->relay_url.empty()) args.push_back("--relay=" + c->relay_url);
+    if (c->shot)               { args.emplace_back("--screenshot"); args.emplace_back(c->shot); }
+    if (c->max_frames >= 0)    { args.emplace_back("--frames");
+                                 args.push_back(std::to_string(c->max_frames)); }
+    std::vector<char*> argv;
+    argv.reserve(args.size() + 1);
+    for (auto& s : args) argv.push_back(const_cast<char*>(s.c_str()));
+    argv.push_back(nullptr);
+    std::printf("wf-edit: re-exec into %s\n", leveltree.c_str());
+    std::fflush(nullptr);
+    execvp(c->exe_path.c_str(), argv.data());
+    std::fprintf(stderr, "wf-edit: re-exec '%s' failed: %s\n",
+                 c->exe_path.c_str(), std::strerror(errno));
+}
+
+// The directory File→Open lists first: prefer wflevels/ (where shipped levels
+// live), else the current working directory.
+static std::string DefaultBrowseDir()
+{
+    std::error_code ec;
+    namespace fs = std::filesystem;
+    if (fs::is_directory("wflevels", ec))
+        return fs::weakly_canonical("wflevels", ec).string();
+    return fs::current_path(ec).string();
+}
+
+// Minimal hand-rolled ImGui file browser for File→Open (no vendored dialog). Lists
+// subdirs + .iff/.lev/.lvl files under c->browse_dir; double-click a dir to descend
+// (".." to go up), double-click a file or hit Open to load it. Loading re-execs into
+// the pick, which discards the live Doc — so when there are undoable edits we first
+// require a "discard changes?" confirm (rendered inline to avoid nested popups).
+static void RunOpenBrowserModal(EditorCtx* c)
+{
+    namespace fs = std::filesystem;
+    if (c->show_open && !ImGui::IsPopupOpen("Open Level"))
+        ImGui::OpenPopup("Open Level");
+    if (!ImGui::BeginPopupModal("Open Level", &c->show_open,
+                                ImGuiWindowFlags_AlwaysAutoResize))
+        return;
+
+    // Inline discard-changes confirm: a pending pick is held until the user OKs
+    // losing the current Doc. Replaces the browser body while it's pending.
+    if (!c->pending_open.empty()) {
+        ImGui::TextUnformatted("Unsaved edits in this session will be lost.");
+        ImGui::TextUnformatted(("Open " + c->pending_open + " anyway?").c_str());
+        ImGui::Separator();
+        if (ImGui::Button("Discard & Open", ImVec2(140, 0)))
+            ReExecWithLevel(c, c->pending_open);          // does not return on success
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(110, 0))) {
+            c->pending_open.clear();
+            c->show_open = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+        return;
+    }
+
+    ImGui::TextUnformatted(("Dir:  " + c->browse_dir).c_str());
+    ImGui::Separator();
+
+    // Rebuild the listing each frame: ".." (unless at filesystem root), then dirs,
+    // then level files, each group sorted. Dotfiles skipped.
+    std::error_code ec;
+    fs::path dir(c->browse_dir);
+    std::vector<std::pair<std::string, bool>> entries;   // (name, is_dir)
+    if (dir.has_parent_path() && dir != dir.root_path())
+        entries.emplace_back("..", true);
+    std::vector<std::string> dirs, files;
+    for (const auto& e :
+         fs::directory_iterator(dir, fs::directory_options::skip_permission_denied, ec)) {
+        const std::string name = e.path().filename().string();
+        if (name.empty() || name[0] == '.') continue;
+        if (e.is_directory(ec)) { dirs.push_back(name); continue; }
+        const std::string ext = e.path().extension().string();
+        if (ext == ".iff" || ext == ".lev" || ext == ".lvl") files.push_back(name);
+    }
+    std::sort(dirs.begin(), dirs.end());
+    std::sort(files.begin(), files.end());
+    for (auto& d : dirs)  entries.emplace_back(d, true);
+    for (auto& f : files) entries.emplace_back(f, false);
+
+    std::string chosen;          // set when a file is double-clicked / Open pressed
+    std::string descend;         // set when a dir is double-clicked
+    if (ImGui::BeginListBox("##entries", ImVec2(480, 300))) {
+        for (int i = 0; i < static_cast<int>(entries.size()); ++i) {
+            const bool is_dir = entries[i].second;
+            const std::string label =
+                (is_dir ? "[dir] " : "      ") + entries[i].first + "##e" + std::to_string(i);
+            if (ImGui::Selectable(label.c_str(), c->browse_sel == i,
+                                  ImGuiSelectableFlags_AllowDoubleClick)) {
+                c->browse_sel = i;
+                if (ImGui::IsMouseDoubleClicked(0)) {
+                    if (is_dir) descend = entries[i].first;
+                    else        chosen  = (dir / entries[i].first).string();
+                }
+            }
+        }
+        ImGui::EndListBox();
+    }
+
+    ImGui::Separator();
+    const bool file_sel = c->browse_sel >= 0 &&
+                          c->browse_sel < static_cast<int>(entries.size()) &&
+                          !entries[c->browse_sel].second;
+    ImGui::BeginDisabled(!file_sel);
+    if (ImGui::Button("Open", ImVec2(110, 0)))
+        chosen = (dir / entries[c->browse_sel].first).string();
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    if (ImGui::Button("Cancel", ImVec2(110, 0))) {
+        c->show_open = false;
+        ImGui::CloseCurrentPopup();
+    }
+
+    if (!descend.empty()) {
+        c->browse_dir = fs::weakly_canonical(
+            descend == ".." ? dir.parent_path() : dir / descend, ec).string();
+        c->browse_sel = -1;
+    } else if (!chosen.empty()) {
+        if ((c->undo && c->undo->canUndo()) || c->structural_dirty)
+            c->pending_open = chosen;                     // route through the confirm
+        else
+            ReExecWithLevel(c, chosen);                   // does not return on success
+    }
+    ImGui::EndPopup();
+}
+
+// Build phase (EditorBuildCallback): called by WFGame::RunEditor at the TOP of
+// each iteration, BEFORE StepFrame. We poll input, apply any pending Doc edits
+// to the live engine (the bridge drain), and build the ImGui UI — so the
+// StepFrame render that follows reflects this frame's edits this frame (no
+// render-ahead-of-edit latency). editor_present then composites + swaps.
+// Return false to quit — always BEFORE ImGui::NewFrame so the NewFrame/Render
+// pair stays balanced (present is skipped when build returns false).
+bool editor_build(void* p)
 {
     EditorCtx* c = static_cast<EditorCtx*>(p);
     glfwPollEvents();
     if (glfwWindowShouldClose(c->win))
         return false;
+    // --frames N: stop after N frames have been presented. Checked here (before
+    // NewFrame) so the quit path never opens an ImGui frame present won't close.
+    if (c->max_frames >= 0 && c->frame >= c->max_frames)
+        return false;
+
+    // --open-pick=<path>: headless aid — re-exec into the path on the first build,
+    // exercising the same running-editor re-exec a File→Open click would (engine is
+    // already up here). Not propagated to the child, so it fires exactly once.
+    if (!c->open_pick.empty()) {
+        const std::string p = c->open_pick;
+        c->open_pick.clear();
+        ReExecWithLevel(c, p);   // does not return on success
+    }
 
     // Follow window resize. WFInitGL set glViewport + projection ONCE from the
     // initial size and nothing re-applies them per frame (the engine's
@@ -535,12 +902,30 @@ bool editor_frame(void* p)
     }
 
     // M2: initialize the stable doc→engine index map on the first frame the live
-    // level is available (theLevel non-null). No-op once initialized.
+    // level is available (theLevel non-null). No-op once initialized. Must run
+    // before CollabDrain so the content + deep observers it registers are live
+    // when the SYNC below fires them.
     if (c->doc) wfedit::InitBridgeMap(*c->doc);
-    if (c->doc) wfedit::UpdateBridgeMap(*c->doc);   // Phase 3: apply pending structural changes
 
-    // Phase 2: drain incoming relay SYNC + PRESENCE messages.
+    // Phase 2: drain incoming relay SYNC + PRESENCE messages. A SYNC fires the
+    // content observer (marks a rebuild) and the deep observer (queues touched
+    // actor indices), so it must precede UpdateBridgeMap + DrainEngineSync.
     CollabDrain(c);
+
+    // Phase 3: apply pending structural changes AFTER CollabDrain, so a SYNC that
+    // carries both a structural add/remove and a field edit in one commit rebuilds
+    // the doc→engine map *this* frame. The rebuild forces s_resync_all, which makes
+    // the field edit below re-propagate against the fresh map rather than the stale
+    // pre-SYNC one (which would mistarget the shifted actor for a frame). Local
+    // structural edits from last frame's Outliner UI are picked up here too.
+    if (c->doc) wfedit::UpdateBridgeMap(*c->doc);
+
+    // Flush Doc field edits (local panel, remote SYNC just applied above, undo/
+    // redo, replay, DAP) into the live engine — the single propagation path. Runs
+    // after UpdateBridgeMap so it reads the rebuilt doc→engine map, at frame top
+    // (no live txn). While a gizmo drag is live, lock that actor's transform so a
+    // concurrent remote/undo edit can't snap it back mid-gesture.
+    if (c->doc) wfedit::DrainEngineSync(*c->doc, c->gizmo_active ? c->selected : -1);
 
     // Phase 4: broadcast own presence ~10 Hz when relay is connected.
     if (c->relay_client.connected()) {
@@ -590,6 +975,31 @@ bool editor_frame(void* p)
                 wfedit::RunBridgeTest(*c->doc, c->selected, s.substr(0, bar), s.substr(bar + 1));
         }
     }
+    // Deep-observer regression proof (WF_EDIT_REMOTE_TEST="<docB>|<x y z>"): with
+    // actor A selected (--select), apply a REMOTE-origin Position edit to a
+    // DIFFERENT actor B and confirm it moves in the engine purely via the deep
+    // observer (no direct PropagateToEngine). The pre-fix bridge only re-synced
+    // the selected actor, so B would not move. See docs/plans/2026-05-25-observe-deep-bridge.md.
+    static bool s_remote_tested = false;
+    if (!s_remote_tested && c->doc && c->selected >= 0) {
+        if (const char* spec = std::getenv("WF_EDIT_REMOTE_TEST"); spec && *spec) {
+            s_remote_tested = true;
+            std::string s = spec;
+            if (auto bar = s.find('|'); bar != std::string::npos)
+                wfedit::RunRemoteSyncTest(*c->doc, c->selected,
+                                          std::atoi(s.substr(0, bar).c_str()),
+                                          s.substr(bar + 1));
+        }
+    }
+    // Active-drag transform-lock proof (WF_EDIT_DRAGLOCK_TEST=1): runs the
+    // finding-#2 regression check on the selected actor. See engine_bridge.h.
+    static bool s_draglock_tested = false;
+    if (!s_draglock_tested && c->doc && c->selected >= 0) {
+        if (const char* spec = std::getenv("WF_EDIT_DRAGLOCK_TEST"); spec && *spec) {
+            s_draglock_tested = true;
+            wfedit::RunDragLockTest(*c->doc, c->selected);
+        }
+    }
     // M3 save-UI screenshot proof: WF_EDIT_SAVE_UI=<path> drives File→Save once
     // from inside the frame loop (so the toast renders + --screenshot captures
     // it), unlike the pre-GL WF_EDIT_SAVE which exits before any UI.
@@ -620,6 +1030,27 @@ bool editor_frame(void* p)
             s_add_ui = true;
             DoAddActor(c, p);
         }
+    }
+    // Chat-markdown screenshot proof: WF_EDIT_CHAT_DEMO=1 seeds sample markdown
+    // messages and forces the Chat panel visible (no relay needed) so
+    // --screenshot captures rendered markdown.
+    static bool s_chat_demo = false;
+    if (!s_chat_demo && std::getenv("WF_EDIT_CHAT_DEMO")) {
+        s_chat_demo = true;
+        c->chat_demo = true;
+        auto push = [&](const char* who, float r, float g, float b, const char* md) {
+            EditorCtx::ChatEntry e;
+            e.name = who;
+            e.colour[0] = r; e.colour[1] = g; e.colour[2] = b;
+            e.text = md;
+            c->chat_log.push_back(std::move(e));
+        };
+        push("Ada", 0.4f, 0.8f, 1.0f,
+             "# Heads up\nMoved the **House** to `(7, 0, 0)` — check the _Outliner_.\n\n"
+             "- bumped Mass\n- re-anchored\n\nSee [docs](http://wf/x).");
+        push("Me", 0.6f, 1.0f, 0.6f,
+             "Nice, that **fixes** the clip. Hit `Ctrl+Z` if it drifts.");
+        c->chat_scroll_btm = true;
     }
     // Undo-UI screenshot proof: WF_EDIT_UNDO_UI=dup|del|field performs one edit
     // then one DoUndo via the UI path, so the screenshot shows the Outliner /
@@ -689,19 +1120,51 @@ bool editor_frame(void* p)
         ImGui::DockBuilderFinish(dock_id);
     }
 
-    // Tick collab session (peer discovery + voice recv + video frame upload).
+    // Tick collab session (peer discovery + WebRTC SyncPeers + video upload).
     if (c->collab) {
         double now = wfedit::MonoNow();
         c->collab->Tick(now);
-        c->voice->SyncPeers(c->collab->Peers());
-        c->video->SyncPeers(c->collab->Peers());
+        const auto& peers = c->collab->Peers();
+        c->voice->SyncPeers(peers);
+        c->video->SyncPeers(peers);
+        // Sync WebRTC connections (add for new relay peers, remove for departed).
+        if (c->webrtc) {
+            std::vector<std::string> peer_ids;
+            peer_ids.reserve(peers.size());
+            for (const auto& p : peers) peer_ids.push_back(p.peer_id);
+            c->webrtc->SyncPeers(peer_ids, c->our_peer_id);
+            // Send any queued SDP / ICE-candidate signals via the relay.
+            if (c->relay_client.connected()) {
+                for (auto& [to, json] : c->webrtc->DrainSignaling()) {
+                    std::vector<uint8_t> sig;
+                    sig.push_back(0x05);  // CH_SIGNAL
+                    for (char ch : to)   sig.push_back(static_cast<uint8_t>(ch));
+                    sig.push_back(0);     // NUL separator
+                    for (char ch : json) sig.push_back(static_cast<uint8_t>(ch));
+                    c->relay_client.send(sig.data(), sig.size());
+                }
+            }
+        }
         c->voice->Tick();
         c->video->UploadFrames();
     }
 
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Save Level", "Ctrl+S")) DoSave(c);
+            if (ImGui::MenuItem("Open Level…", "Ctrl+O")) {
+                if (c->browse_dir.empty()) c->browse_dir = DefaultBrowseDir();
+                c->browse_sel = -1;
+                c->pending_open.clear();
+                c->show_open = true;
+            }
+            ImGui::Separator();
+            // A binary-loaded session is read-only at the source, so Save writes a
+            // fresh .lev (save_path was redirected) — label it Save As to match.
+            if (ImGui::MenuItem(c->binary_source ? "Save As .lev" : "Save Level", "Ctrl+S"))
+                DoSave(c);
+            if (c->binary_source && ImGui::IsItemHovered())
+                ImGui::SetTooltip("Source binary is read-only; writes a new .lev (%s)",
+                                  c->save_path.c_str());
             if (ImGui::MenuItem("Save + Compile (.iff)")) SaveAndCompile(c);
             ImGui::MenuItem("Publish to .blend", nullptr, false, false);   // later: hand off to wf.import_level
             ImGui::EndMenu();
@@ -724,10 +1187,20 @@ bool editor_frame(void* p)
         ImGui::EndMainMenuBar();
     }
 
+    // File→Open browser (renders only while c->show_open). Driven by the menu item,
+    // Ctrl+O, or --open / --open-pick at startup.
+    RunOpenBrowserModal(c);
+
     // Keyboard shortcuts (when no text widget is capturing the keypress).
     const bool typing = ImGui::GetIO().WantTextInput;
     if (!typing && ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S, false))
         DoSave(c);
+    if (!typing && ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_O, false)) {
+        if (c->browse_dir.empty()) c->browse_dir = DefaultBrowseDir();
+        c->browse_sel = -1;
+        c->pending_open.clear();
+        c->show_open = true;
+    }
     if (!typing && c->selected >= 0 && ImGui::IsKeyPressed(ImGuiKey_Delete, false))
         DoDelete(c);
     // Ctrl+Z = undo; Ctrl+Shift+Z and Ctrl+Y = redo. Gate plain-Z on !Shift so a
@@ -739,6 +1212,23 @@ bool editor_frame(void* p)
         if (!typing && io.KeyCtrl && (ImGui::IsKeyPressed(ImGuiKey_Y, false)
                 || (io.KeyShift && ImGui::IsKeyPressed(ImGuiKey_Z, false))))
             DoRedo(c);
+    }
+    // Gizmo mode (Blender-style): G = move-only, R = rotate-only, pressing the
+    // active key again or W returns to combined; S (no Ctrl — Ctrl+S is Save)
+    // toggles snap. All gated on !typing so text fields keep their keystrokes.
+    // Gated on c->selected >= 0 (like Delete): the gizmo isn't rendered without
+    // a selection, so none of these keys should act — notably S, which otherwise
+    // toggles gizmo_snap into identity.json while nothing is selected.
+    if (!typing && !ImGui::GetIO().KeyCtrl && c->selected >= 0) {
+        const ImGuizmo::OPERATION both = ImGuizmo::TRANSLATE | ImGuizmo::ROTATE;
+        if (ImGui::IsKeyPressed(ImGuiKey_G, false))
+            c->gizmo_op = (c->gizmo_op == ImGuizmo::TRANSLATE) ? both : ImGuizmo::TRANSLATE;
+        if (ImGui::IsKeyPressed(ImGuiKey_R, false))
+            c->gizmo_op = (c->gizmo_op == ImGuizmo::ROTATE) ? both : ImGuizmo::ROTATE;
+        if (ImGui::IsKeyPressed(ImGuiKey_W, false))
+            c->gizmo_op = both;
+        if (ImGui::IsKeyPressed(ImGuiKey_S, false))
+            c->gizmo_snap = !c->gizmo_snap;
     }
 
     ImGui::Begin("Outliner");
@@ -828,21 +1318,13 @@ bool editor_frame(void* p)
         ImGui::TextUnformatted(c->actor_names[c->selected].c_str());
         ImGui::Separator();
         // Phase 3: OAD-driven widgets keyed on (ButtonType × showAs), editable —
-        // edits commit to the Doc leaf. M3 CRDT→engine bridge: each committed
-        // field is propagated through wfmut on the live level (game thread — this
-        // callback runs inside RunEditor), so the next StepFrame re-renders the
-        // change. Transform + the 15 kPropMap fields move the viewport; the rest
-        // edit the Doc only (logged NoOp).
-        if (c->doc) {
-            std::vector<int> committed;
-            wfedit::RenderProperties(*c->doc, c->selected, c->props, &committed);
-            // structural_dirty guard: kept for future cases; currently always
-            // false (M2 stable map keeps propagation live through structural edits).
-            if (!c->structural_dirty)
-                for (int ci : committed)
-                    if (ci >= 0 && ci < static_cast<int>(c->props.size()))
-                        wfedit::PropagateToEngine(c->selected, c->props[ci]);
-        }
+        // edits commit to the Doc leaf. The commit fires the bridge's deep
+        // observer, which queues the edit for DrainEngineSync at the next frame
+        // top (see InitBridgeMap / DrainEngineSync) — the SINGLE propagation path,
+        // so a local edit reaches the viewport the same way a remote one does. No
+        // direct PropagateToEngine call here anymore.
+        if (c->doc)
+            wfedit::RenderProperties(*c->doc, c->selected, c->props);
         int matched = 0;
         for (const auto& p : c->props) matched += p.matched;
         ImGui::TextDisabled("%zu fields (editable → Doc) — %d OAD-matched",
@@ -851,6 +1333,45 @@ bool editor_frame(void* p)
         ImGui::TextDisabled("(select an actor)");
     }
     ImGui::End();
+
+    // ── Gizmo toolbar overlay (mode + snap) ──────────────────────────────────
+    // Pinned to the top-left of the viewport; mirrors the G/R/W/S keys. Runs
+    // before the gizmo below so a click updates the mode the same frame.
+    if (c->selected >= 0) {
+        ImGuiDockNode* cn = ImGui::DockBuilderGetCentralNode(dock_id);
+        const ImVec2 cp = cn ? cn->Pos : ImGui::GetMainViewport()->WorkPos;
+        ImGui::SetNextWindowPos(ImVec2(cp.x + 8, cp.y + 8), ImGuiCond_Always);
+        ImGui::SetNextWindowBgAlpha(0.55f);
+        const ImGuizmo::OPERATION both = ImGuizmo::TRANSLATE | ImGuizmo::ROTATE;
+        if (ImGui::Begin("##gizmo_toolbar", nullptr,
+                ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
+                ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoNav |
+                ImGuiWindowFlags_NoFocusOnAppearing)) {
+            if (ImGui::RadioButton("Move (G)", c->gizmo_op == ImGuizmo::TRANSLATE))
+                c->gizmo_op = ImGuizmo::TRANSLATE;
+            ImGui::SameLine();
+            if (ImGui::RadioButton("Rotate (R)", c->gizmo_op == ImGuizmo::ROTATE))
+                c->gizmo_op = ImGuizmo::ROTATE;
+            ImGui::SameLine();
+            if (ImGui::RadioButton("Both (W)", c->gizmo_op == both))
+                c->gizmo_op = both;
+            ImGui::SameLine(); ImGui::TextDisabled("|"); ImGui::SameLine();
+            ImGui::Checkbox("Snap (S)", &c->gizmo_snap);
+            if (c->gizmo_snap && c->gizmo_op == both)
+                { ImGui::SameLine(); ImGui::TextDisabled("(pick Move/Rotate to snap)"); }
+            else if (c->gizmo_snap) {
+                ImGui::SameLine(); ImGui::SetNextItemWidth(64);
+                if (c->gizmo_op == ImGuizmo::ROTATE) {
+                    ImGui::InputFloat("deg", &c->gizmo_snap_rot, 0.0f, 0.0f, "%.0f");
+                    if (c->gizmo_snap_rot < 1.0f) c->gizmo_snap_rot = 1.0f;
+                } else {
+                    ImGui::InputFloat("units", &c->gizmo_snap_trans, 0.0f, 0.0f, "%.2f");
+                    if (c->gizmo_snap_trans < 0.01f) c->gizmo_snap_trans = 0.01f;
+                }
+            }
+        }
+        ImGui::End();
+    }
 
     // ── Viewport translate/rotate gizmo ──────────────────────────────────────
     // Drag the selected actor directly in the 3D view. Live preview moves the
@@ -874,8 +1395,20 @@ bool editor_frame(void* p)
                 const ImVec2 rs = central ? central->Size : ImGui::GetMainViewport()->WorkSize;
                 ImGuizmo::SetRect(rp.x, rp.y, rs.x, rs.y);
 
-                ImGuizmo::Manipulate(m.view, m.proj,
-                    ImGuizmo::TRANSLATE | ImGuizmo::ROTATE, ImGuizmo::WORLD, m.model);
+                // Snap only in a pure mode — ImGuizmo has one snap[0] slot it
+                // reads as XYZ for translate and degrees for rotate, so combined
+                // mode can't snap both correctly; pass null there.
+                float snap_arr[3];
+                const float* snap = nullptr;
+                if (c->gizmo_snap && c->gizmo_op == ImGuizmo::TRANSLATE) {
+                    snap_arr[0] = snap_arr[1] = snap_arr[2] = c->gizmo_snap_trans;
+                    snap = snap_arr;
+                } else if (c->gizmo_snap && c->gizmo_op == ImGuizmo::ROTATE) {
+                    snap_arr[0] = c->gizmo_snap_rot;
+                    snap = snap_arr;
+                }
+                ImGuizmo::Manipulate(m.view, m.proj, c->gizmo_op, ImGuizmo::WORLD,
+                                     m.model, nullptr, snap);
 
                 if (ImGuizmo::IsUsing()) {
                     wfedit::ApplyGizmoToEngine(eidx, m.model);   // live preview
@@ -902,8 +1435,18 @@ bool editor_frame(void* p)
         wfedit::RenderCollabPanel(c->show_collab, *c->collab,
                                   *c->voice, *c->video, c->room_id);
 
-    // Chat panel (only when relay is connected).
-    if (c->relay_client.connected()) {
+    // Chat panel (when a relay is connected, or forced by WF_EDIT_CHAT_DEMO).
+    if (c->relay_client.connected() || c->chat_demo) {
+        if (c->chat_demo) {
+            // Demo/screenshot: float it over the viewport so the capture shows it
+            // (normally it's docked once the user drags it into the layout).
+            const ImVec2 wp = ImGui::GetMainViewport()->WorkPos;
+            const ImVec2 ws = ImGui::GetMainViewport()->WorkSize;
+            ImGui::SetNextWindowPos(ImVec2(wp.x + ws.x * 0.30f, wp.y + ws.y * 0.30f),
+                                    ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(ws.x * 0.40f, ws.y * 0.45f), ImGuiCond_Always);
+            ImGui::SetNextWindowFocus();
+        }
         ImGui::Begin("Chat");
         // Peer presence list above history.
         if (!c->peer_presence.empty()) {
@@ -916,11 +1459,19 @@ bool editor_frame(void* p)
         // Scrollable message history.
         const float reserve = ImGui::GetFrameHeightWithSpacing() + 4;
         ImGui::BeginChild("##chat_hist", ImVec2(0, -reserve), false);
-        for (const auto& e : c->chat_log) {
+        // Body rendered as Markdown (bold/italic/headings/lists/links). The wire
+        // format stays plaintext — rendering is client-side at display time. The
+        // default MarkdownConfig is exactly what we want: default font + heading
+        // separators, and NULL-safe (inert) link clicks. Name stays on its own
+        // line; markdown is block-level so the body renders below it.
+        static ImGui::MarkdownConfig s_md;
+        for (size_t i = 0; i < c->chat_log.size(); ++i) {
+            const auto& e = c->chat_log[i];
+            ImGui::PushID(static_cast<int>(i));
             ImGui::TextColored(ImVec4(e.colour[0], e.colour[1], e.colour[2], 1.f),
                                "%s:", e.name.c_str());
-            ImGui::SameLine();
-            ImGui::TextWrapped("%s", e.text.c_str());
+            ImGui::Markdown(e.text.c_str(), e.text.size(), s_md);
+            ImGui::PopID();
         }
         if (c->chat_scroll_btm) {
             ImGui::SetScrollHereY(1.0f);
@@ -983,6 +1534,20 @@ bool editor_frame(void* p)
         ImGui::End();
     }
 
+    // Build done. RunEditor calls StepFrame next (renders the scene with this
+    // frame's edits applied), then editor_present composites this ImGui frame on
+    // top and swaps.
+    return true;
+}
+
+// Present phase (EditorPresentCallback): composite the ImGui overlay built in
+// editor_build onto the scene StepFrame just rendered, capture --screenshot if
+// due, and swap. Called only when editor_build returned true, so the ImGui
+// NewFrame/Render pair is always balanced.
+void editor_present(void* p)
+{
+    EditorCtx* c = static_cast<EditorCtx*>(p);
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -998,9 +1563,6 @@ bool editor_frame(void* p)
     glfwSwapBuffers(c->win);
 
     ++c->frame;
-    if (c->max_frames >= 0 && c->frame >= c->max_frames)
-        return false;
-    return true;
 }
 
 void glfw_error(int code, const char* desc)
@@ -1017,6 +1579,9 @@ int main(int argc, char** argv)
     const char* shot = nullptr;
     std::string room_id;           // --room=<id>: join a voice+video call room
     std::string ctx_relay_url;     // --relay=<ws://...>: connect to co-edit relay
+    std::string pick_level;        // --pick-level=<tag|index>: headless aid — auto-confirm the cd.iff picker
+    bool        open_at_start = false;  // --open: show the File→Open browser at startup
+    std::string open_pick;         // --open-pick=<path>: headless aid — re-exec into <path> on first frame
     // Viewport level (engine LoadLevel) + the .lev parsed into the read-only
     // Y.Doc. Default both to the BLENDER-built snowgoons so the viewport and
     // Outliner show the same source — and so File→"Save + Compile (.iff)"
@@ -1025,17 +1590,24 @@ int main(int argc, char** argv)
     // engine-stability smoke tests; it is NOT what the editor edits.)
     std::string level     = "wflevels/snowgoons-blender-standalone.iff";
     std::string leveltree = "wflevels/snowgoons-blender/snowgoons-blender.lev";
+    bool        level_explicit = false;   // --level= given → don't auto-track the viewport
     for (int i = 1; i < argc; ++i) {
         if (std::strcmp(argv[i], "--frames") == 0 && i + 1 < argc)
             max_frames = std::atoi(argv[++i]);
         else if (std::strcmp(argv[i], "--screenshot") == 0 && i + 1 < argc)
             shot = argv[++i];
         else if (std::strncmp(argv[i], "--level=", 8) == 0)
-            level = argv[i] + 8;
+            { level = argv[i] + 8; level_explicit = true; }
         else if (std::strncmp(argv[i], "--leveltree=", 12) == 0)
             leveltree = argv[i] + 12;
         else if (std::strncmp(argv[i], "--select=", 9) == 0)
             preselect = std::atoi(argv[i] + 9);
+        else if (std::strncmp(argv[i], "--pick-level=", 13) == 0)
+            pick_level = argv[i] + 13;
+        else if (std::strcmp(argv[i], "--open") == 0)
+            open_at_start = true;
+        else if (std::strncmp(argv[i], "--open-pick=", 12) == 0)
+            open_pick = argv[i] + 12;
         else if (std::strncmp(argv[i], "--room=", 7) == 0)
             room_id = argv[i] + 7;
         else if (std::strcmp(argv[i], "--room") == 0 && i + 1 < argc)
@@ -1071,28 +1643,47 @@ int main(int argc, char** argv)
     //    plan). A failure here is non-fatal — the shell still runs.
     wfcrdt::Doc              doc;
     std::string              level_name;
+    std::string              save_path;   // where Save writes (.lev in-place, or Save-As for a binary load)
     std::vector<std::string> actor_names;
     std::vector<std::string> actor_eids;
-    if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc)) {
+
+    // A bare multi-level cd.iff (no `:tag` selector) defers its load to the
+    // startup picker (run below, after the window/ImGui exist) — the picker needs
+    // a GL window, which must stay AFTER the pre-window headless hooks. So load
+    // early only for an unambiguous source (text .lev / bare .iff / explicit
+    // cd.iff:tag); the picker case loads after the modal resolves a tag.
+    const bool show_picker = wfedit::NeedsLevelPicker(leveltree);
+
+    // Reused by both load sites (early below, and the picker block) to fill the
+    // Outliner state from a populated Doc and seed the save path.
+    auto finish_doc_load = [&]() {
         actor_names = wfedit::ReadActorNames(doc);
         actor_eids  = wfedit::ReadActorEids(doc);
-        level_name  = leveltree;
+        // Display name = the Save target's basename (clean for a binary load:
+        // cd.iff:L4 → cd_L4.lev; matches the source .lev for a text load).
+        level_name  = save_path;
         if (auto slash = level_name.find_last_of('/'); slash != std::string::npos)
             level_name.erase(0, slash + 1);
         std::printf("wf-edit: Outliner shows %zu actors from the Y.Doc\n",
                     actor_names.size());
-    } else {
-        std::fprintf(stderr, "wf-edit: Y.Doc population failed for %s "
-                             "(Outliner will be empty)\n", leveltree.c_str());
+    };
+
+    if (!show_picker) {
+        if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc, &save_path))
+            finish_doc_load();
+        else
+            std::fprintf(stderr, "wf-edit: Y.Doc population failed for %s "
+                                 "(Outliner will be empty)\n", leveltree.c_str());
     }
 
-    // Native undo/redo — constructed AFTER the initial population so the level
-    // load isn't itself an undo step. Tracks the "content" actor array, so every
-    // Doc::begin() edit (panel / gizmo / add / delete) becomes reversible; remote
-    // applies (Doc::beginRemote) stay out of history. Held for the program
-    // lifetime; ctx.undo points at it.
+    // Native undo/redo — addScope runs AFTER the level is populated so the load
+    // isn't itself an undo step. The UndoManager binds the Doc here; for the
+    // early-load path we register the "content" scope now, for the picker path we
+    // register it after the deferred load (below). Tracks the actor array so every
+    // Doc::begin() edit (panel / gizmo / add / delete) is reversible; remote
+    // applies (Doc::beginRemote) stay out of history. Held for the program lifetime.
     wfcrdt::UndoManager undo(doc);
-    { auto txn = doc.begin(); undo.addScope(txn.array("content")); }
+    if (!show_picker) { auto txn = doc.begin(); undo.addScope(txn.array("content")); }
 
     // 0b. Headless edit proof (env-gated, off by default): WF_EDIT_TEST_SET=
     //     "Field Name|DATA|new text" writes one leaf on the --select=N actor
@@ -1306,6 +1897,54 @@ int main(int argc, char** argv)
     ImGui_ImplGlfw_InitForOpenGL(win, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
+    // 2b. Startup cd.iff level picker. When launched on a bare multi-level archive
+    //     (no `:tag` selector), show the modal now — the window + ImGui exist but
+    //     the engine hasn't started — and load the chosen level into the Doc. This
+    //     is a startup pick, not runtime switching: nothing is loaded yet, so the
+    //     bridge/engine come up against the picked level like any other launch.
+    if (show_picker) {
+        // NeedsLevelPicker was true ⇒ no valid `:tag` selector ⇒ leveltree is the
+        // bare cd.iff archive path.
+        const std::string& base = leveltree;
+        const std::vector<wfedit::CdIffLevel> levels = wfedit::ListCdIffLevels(base);
+        std::string tag;
+        if (RunCdIffPickerModal(win, base, levels, &tag, max_frames, shot, pick_level)) {
+            std::printf("wf-edit: picker selected %s from %s\n", tag.c_str(), base.c_str());
+            leveltree = base + ":" + tag;
+            if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc, &save_path)) {
+                finish_doc_load();
+                auto txn = doc.begin();
+                undo.addScope(txn.array("content"));   // track AFTER the deferred load
+            } else {
+                std::fprintf(stderr, "wf-edit: Y.Doc population failed for %s\n", leveltree.c_str());
+            }
+        } else {
+            // Quit / window closed with no selection — exit cleanly (no empty session).
+            std::printf("wf-edit: level picker dismissed — nothing selected, exiting\n");
+            ImGui_ImplOpenGL3_Shutdown();
+            ImGui_ImplGlfw_Shutdown();
+            ImGui::DestroyContext();
+            glfwDestroyWindow(win);
+            glfwTerminate();
+            return 0;
+        }
+    }
+
+    // 2c. Viewport tracks the (now-final) Doc level: when the Doc was sourced from
+    //     a binary level, point the engine's -L at the same level so the 3D
+    //     viewport matches the Outliner/Properties. A bare .iff is itself an L<N>
+    //     chunk (used directly); a cd.iff:tag is sliced to a temp .iff (unlinked
+    //     at exit). A text .lev or an explicit --level= leaves the viewport alone.
+    std::string viewport_temp;   // owns the sliced cd.iff chunk; unlinked before return
+    if (!level_explicit) {
+        bool is_temp = false;
+        if (std::string vp = wfedit::ResolveEngineViewportLevel(leveltree, is_temp); !vp.empty()) {
+            level = vp;
+            if (is_temp) viewport_temp = vp;
+            std::printf("wf-edit: viewport tracks %s\n", level.c_str());
+        }
+    }
+
     // 3. Hand the engine our X11/GLX (mesa.cc adopts it via InitWithExistingContext
     //    instead of opening its own window) + register the per-frame callback.
     // Pass GLFW's GLXWindow (NOT the raw X11 window) as the GLX drawable. GLFW
@@ -1328,26 +1967,44 @@ int main(int argc, char** argv)
     ctx.actor_eids  = std::move(actor_eids);
     ctx.doc         = &doc;   // read field subtrees on selection (read-only)
     ctx.undo        = &undo;  // Ctrl+Z / Ctrl+Y
-    ctx.save_path   = leveltree;               // Save writes back to the .lev source
+    // Save target: the source .lev in-place for a text load, or a fresh sibling
+    // .lev (Save-As) for a binary load — set by LoadLevelTreeIntoDoc. Falls back
+    // to the raw arg when the load failed (empty save_path).
+    ctx.save_path   = save_path.empty() ? leveltree : save_path;
+    // Binary source ⇔ save was redirected to a fresh .lev (a text .lev saves
+    // in-place, so save_path == leveltree). Drives the Save/Save-As menu label.
+    ctx.binary_source = !save_path.empty() && save_path != leveltree;
+    // File→Open (#2): exe_path is what we re-exec; --open opens the browser at
+    // startup, --open-pick re-execs into a path on the first build frame.
+    ctx.exe_path    = argv[0];
+    ctx.open_pick   = std::move(open_pick);
+    if (open_at_start) { ctx.show_open = true; ctx.browse_dir = DefaultBrowseDir(); }
     ctx.room_id     = room_id;
+    ctx.gizmo_snap       = identity.gizmo_snap;        // restore persisted snap prefs
+    ctx.gizmo_snap_trans = identity.gizmo_snap_trans;
+    ctx.gizmo_snap_rot   = identity.gizmo_snap_rot;
     if (preselect >= 0 && preselect < static_cast<int>(ctx.actor_names.size()))
         ctx.selected = preselect;   // headless: exercise the Outliner→Properties path
 
-    // 3b. Start voice + video call if a room ID was provided.
-    wfedit::CollabSession collab_session;
-    wfedit::VoiceChat     voice_chat;
-    wfedit::VideoChat     video_chat;
+    // 3b. Start voice + video + WebRTC if a room ID was provided.
+    wfedit::CollabSession  collab_session;
+    wfedit::VoiceChat      voice_chat;
+    wfedit::VideoChat      video_chat;
+    // WebrtcSession is constructed after voice/video so it can hook their callbacks.
+    std::unique_ptr<wfedit::WebrtcSession> webrtc_session;
     if (!room_id.empty()) {
-        // Bind to port 0 — the OS assigns an ephemeral port. Each editor
-        // instance on the same machine gets a different port automatically.
         voice_chat.Start();
         video_chat.Start();
         collab_session.Start(room_id, "Editor",
                              voice_chat.ListenPort(), video_chat.ListenPort());
-        ctx.collab = &collab_session;
-        ctx.voice  = &voice_chat;
-        ctx.video  = &video_chat;
-        std::printf("wf-edit: collab room '%s' started\n", room_id.c_str());
+        // WebrtcSession hooks send_cb_ on voice_chat + video_chat to route media
+        // through WebRTC (DTLS-SRTP) instead of raw UDP.
+        webrtc_session = std::make_unique<wfedit::WebrtcSession>(&voice_chat, &video_chat);
+        ctx.collab  = &collab_session;
+        ctx.voice   = &voice_chat;
+        ctx.video   = &video_chat;
+        ctx.webrtc  = webrtc_session.get();
+        std::printf("wf-edit: collab room '%s' started (WebRTC transport)\n", room_id.c_str());
     }
 
     // 3c. Connect to the co-edit relay (Phase 2+). Non-fatal on failure.
@@ -1413,7 +2070,7 @@ int main(int argc, char** argv)
         std::copy(identity.colour, identity.colour + 3, ctx.our_colour);
     }
 
-    SetEditorFrameCallback(editor_frame, &ctx);
+    SetEditorFrameCallbacks(editor_build, editor_present, &ctx);
 
     // 4. Drive the engine. HALStart inits HAL/audio + calls PIGSMain, which in
     //    --editor mode constructs WFGame and runs RunEditor (StepFrame + our
@@ -1439,7 +2096,7 @@ int main(int argc, char** argv)
     // the level renders into only the bottom-left of our 1280×800 window. Set
     // before HALStart, which constructs Display (→ _xSize/_ySize) and calls
     // WFInitGL (→ glViewport + aspect). Later resizes are tracked per-frame in
-    // editor_frame (wfWindowWidth/Height is the file-scope extern above).
+    // editor_build (wfWindowWidth/Height is the file-scope extern above).
     extern int _halWindowWidth, _halWindowHeight;   // hal/linux: feeds Display _xSize/_ySize
     int fbw = 0, fbh = 0;
     glfwGetFramebufferSize(win, &fbw, &fbh);
@@ -1451,11 +2108,21 @@ int main(int argc, char** argv)
     HALStart(hal_argc, hal_argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
     std::printf("wf-edit: HALStart returned\n");
 
+    // Persist gizmo snap prefs. Only when a peer_id exists — LoadIdentity rejects
+    // an identity with an empty one, so saving without one would write a file that
+    // never loads back (solo sessions get a peer_id once they touch a relay).
+    if (!identity.peer_id.empty()) {
+        identity.gizmo_snap       = ctx.gizmo_snap;
+        identity.gizmo_snap_trans = ctx.gizmo_snap_trans;
+        identity.gizmo_snap_rot   = ctx.gizmo_snap_rot;
+        SaveIdentity(identity);
+    }
+
     // 5. Engine released its references; clear the registries + tear down.
     //    Unregister the frame callback before `ctx` leaves scope so the
     //    engine's stored ctx pointer can't dangle (no callbacks fire after
     //    HALStart returns, but keep it tidy — mirrors ClearHostGLContext).
-    SetEditorFrameCallback(nullptr, nullptr);
+    SetEditorFrameCallbacks(nullptr, nullptr, nullptr);
     if (!room_id.empty()) {
         collab_session.Stop();
         voice_chat.Stop();
@@ -1467,6 +2134,7 @@ int main(int argc, char** argv)
     ImGui::DestroyContext();
     glfwDestroyWindow(win);
     glfwTerminate();
+    if (!viewport_temp.empty()) ::unlink(viewport_temp.c_str());   // sliced cd.iff chunk
     std::printf("wf-edit: clean exit\n");
     return 0;
 }

@@ -1,5 +1,7 @@
 # Fix: core dump on window close button
 
+**Status:** DONE (commit `ae678d6`) — `XSetWMProtocols` + `WM_DELETE_WINDOW` ClientMessage handler.
+
 ## Context
 When the user clicks the X / close button, the window manager sends a `ClientMessage` event with the `WM_DELETE_WINDOW` atom. Because `mesa.cc` never registered this protocol via `XSetWMProtocols`, the WM forcibly destroyed the X window while the game was still running. The next frame's `XPending()`/`XNextEvent()` call hit an invalid display connection and crashed.
 

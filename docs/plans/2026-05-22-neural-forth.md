@@ -1,5 +1,7 @@
 # neural-forth — fuzzy logic / neural networks / ∂4 slots for WorldFoundry game AI
 
+**Status:** PARTIAL — C implementation + zForth dispatch gate + unit tests shipped; example scripts + papers + in-game use deferred.
+
 ## Context
 
 Game AI in WorldFoundry currently requires dropping to C for anything beyond explicit `IF/THEN` rules — fuzzy NPC controllers, adaptive behaviour trees, agents that learn from player traces. This plan adds `engine/neural-forth/`, a first-party engine module that extends zForth with a dictionary of Forth words covering fuzzy numbers, fuzzy logic, neural networks, and ∂4-style trainable slots.

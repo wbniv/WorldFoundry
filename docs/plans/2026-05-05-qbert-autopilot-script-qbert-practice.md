@@ -1,5 +1,7 @@
 # Plan: Q*bert Autopilot Script (qbert_practice)
 
+**Status:** DONE (commit `9c6695f1`) — 32-step autopilot path + step-move word; respawn handlers reset mb 431.
+
 ## Context
 
 The `qbert_practice` level needs a Forth autopilot that covers all 28 pyramid cubes.

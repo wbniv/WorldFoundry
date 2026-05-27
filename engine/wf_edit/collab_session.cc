@@ -113,6 +113,28 @@ void CollabSession::Stop()
     if (recv_fd_ >= 0) { close(recv_fd_); recv_fd_ = -1; }
     if (send_fd_ >= 0) { close(send_fd_); send_fd_ = -1; }
     peers_.clear();
+    merged_dirty_ = true;
+}
+
+void CollabSession::SetRelayPeers(const std::vector<PeerInfo>& relay_peers)
+{
+    relay_peers_  = relay_peers;
+    merged_dirty_ = true;
+}
+
+const std::vector<PeerInfo>& CollabSession::Peers() const
+{
+    if (!merged_dirty_) return merged_peers_;
+
+    merged_peers_ = peers_;
+    for (const auto& rp : relay_peers_) {
+        bool found = false;
+        for (const auto& p : merged_peers_)
+            if (p.peer_id == rp.peer_id) { found = true; break; }
+        if (!found) merged_peers_.push_back(rp);
+    }
+    merged_dirty_ = false;
+    return merged_peers_;
 }
 
 void CollabSession::SendBeacon(double now_sec)
@@ -184,6 +206,7 @@ void CollabSession::ParseBeacon(const char* buf, int len,
     np.video_port   = vport;
     np.last_seen    = now_sec;
     peers_.push_back(np);
+    merged_dirty_ = true;
     std::printf("collab: new peer %s (%s) at %s audio=%u video=%u\n",
                 peer_id.c_str(), parts[3].c_str(), sender_ip.c_str(),
                 aport, vport);
@@ -212,12 +235,14 @@ void CollabSession::Tick(double now_sec)
     }
 
     // Evict stale peers.
+    size_t before = peers_.size();
     peers_.erase(
         std::remove_if(peers_.begin(), peers_.end(),
                        [&](const PeerInfo& p) {
                            return now_sec - p.last_seen > kStaleSec;
                        }),
         peers_.end());
+    if (peers_.size() != before) merged_dirty_ = true;
 }
 
 } // namespace wfedit

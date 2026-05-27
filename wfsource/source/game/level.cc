@@ -1337,7 +1337,13 @@ void
 Level::SetPendingRemove( const BaseObject* object )
 {
 	assert( ValidPtr( object ) );
-	AssertMsg( object->kind() != BaseObject::StatPlat_KIND, "Cannot remove a statplat" );
+	// As in LevelRooms::AddObjectToRoom: statplats can't be removed mid-game, but
+	// in the EDITOR a statplat dragged out of every room reaches here via the
+	// room-reassignment path. Allow it (it just vanishes from the live preview;
+	// the Doc still holds it, so save+reload restores it) rather than aborting.
+	extern bool gEditorMode;   // game/main.cc — set true under --editor
+	if ( !gEditorMode )
+		AssertMsg( object->kind() != BaseObject::StatPlat_KIND, "Cannot remove a statplat" );
 
    if ( object == (PhysicalObject*)camera() )
    {

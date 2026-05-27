@@ -1,5 +1,7 @@
 # Plan: "Run in Engine" Blender operator
 
+**Status:** OPEN — design documented; the export+build+launch Blender operator is not wired.
+
 ## Goal
 
 Add a "Run in Engine" button to the WF Blender addon's scene panel that does:

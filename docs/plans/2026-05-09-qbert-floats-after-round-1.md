@@ -1,5 +1,7 @@
 # Plan — Q*bert floats after round 1
 
+**Status:** Presumed resolved (defensive Z-restore layering committed; the float bug is not seen in the current multi-round build) — no single fix commit pinned. Reopen if it recurs.
+
 ## Context
 
 The walker-wf-parity Phase E end-to-end run ([docs/plans/2026-05-09-qbert-walker-wf-parity.md](../../home/will/WorldFoundry.2026-new-level/docs/plans/2026-05-09-qbert-walker-wf-parity.md)) captured 32 PNGs across all 16 rounds. **L1R1 captures correctly place Q*bert on apex (state-0) and on cube (1,0) (state-1). From L2R1 onward, every state-0 / state-1 PNG shows him drifting well above the pyramid.** This is the regression blocker preventing the walker-parity plan from landing.

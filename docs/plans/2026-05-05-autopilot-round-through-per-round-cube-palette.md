@@ -1,5 +1,7 @@
 # Plan: Autopilot round-through + per-round cube palette
 
+**Status:** DONE (commit `9c6695f1`) — autopilot completes rounds via joystick injection. Per-round palette extension lives in [per-level-palette-diversity](2026-05-09-per-level-palette-diversity-extend-cube-palettes-from.md).
+
 ## Context
 The debug bridge Phase A ops (`set_mailbox`, `inject_input`) are shipped and
 unit-tested. The user wants: (1) a test that triggers the in-game autopilot

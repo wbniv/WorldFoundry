@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-22
 
-**Status:** Done (Phases 0–3, 2026-05-22). Translate+rotate gizmo renders on the selected actor and is matrix-aligned with the engine render (proof below). **Interactive drag verified by the user** — dragging+rotating the snowgoons House moved/rotated it live and File→Save persisted the new Position/Orientation to the `.lev` (confirmed by diff). Verification also surfaced a pre-existing **editor-source path tangle**: the viewport loaded the *oracle* `snowgoons-standalone.iff` while the Doc read the *Blender* `.lev`, so a save+recompile never showed in the viewport. Fixed by adding `snowgoons-blender-standalone.iff.txt` (built by `build_level_binary.sh`) and pointing the editor's default at `snowgoons-blender-standalone.iff`, so viewport + Doc + Save+Compile all reference the same Blender source. Scale deferred (see bottom). Phase 4 polish (G/R keys, snap) not done — optional.
+**Status:** Done (Phases 0–3, 2026-05-22). Translate+rotate gizmo renders on the selected actor and is matrix-aligned with the engine render (proof below). **Interactive drag verified by the user** — dragging+rotating the snowgoons House moved/rotated it live and File→Save persisted the new Position/Orientation to the `.lev` (confirmed by diff). Verification also surfaced a pre-existing **editor-source path tangle**: the viewport loaded the *oracle* `snowgoons-standalone.iff` while the Doc read the *Blender* `.lev`, so a save+recompile never showed in the viewport. Fixed by adding `snowgoons-blender-standalone.iff.txt` (built by `build_level_binary.sh`) and pointing the editor's default at `snowgoons-blender-standalone.iff`, so viewport + Doc + Save+Compile all reference the same Blender source. Scale deferred (see bottom). **Phase 4 polish (G/R keys + snap) DONE 2026-05-25** — Blender-style **G**/**R**/**W** mode keys (move / rotate / both, `!WantTextInput`-gated, `!Ctrl` so Ctrl+S still saves), **S** snap toggle, a viewport toolbar overlay (Move/Rotate/Both radios + Snap checkbox + per-mode step field), and snap-pref persistence in `~/.config/wf-edit/identity.json`. Snap is active only in a pure mode (ImGuizmo shares one `snap[0]` slot between translate XYZ and rotate degrees). Toolbar render proof: [`tests/screenshots/gizmo_toolbar.png`](../../tests/screenshots/gizmo_toolbar.png) (drag interaction is user-verified — on-screen GL can't be auto-captured under Wayland).
 
 ![wf-edit translate+rotate gizmo on the snowgoons House — origin on the actor, +Z up](../../tests/screenshots/wfedit_gizmo.png)
 
@@ -70,9 +70,12 @@ Gate `selected>=0 && theLevel && !structural_dirty && DocActorToEngineIdx>0`.
 WORLD, model)`. During `IsUsing()`: `ApplyGizmoToEngine` (live, no Doc) + `gizmo_active=true`. On
 release: `CommitGizmoToDoc` (single SYNC) + refresh cached props + clear flag. New `EditorCtx::gizmo_active`.
 
-### Phase 4 — Polish (optional)
-Optional `G`/`R` keys (translate-only vs rotate-only) guarded by `!WantTextInput`; optional grid/angle
-snap. Default is combined translate+rotate on the selected actor.
+### Phase 4 — Polish (optional) — DONE 2026-05-25
+`G`/`R` keys (translate-only vs rotate-only, press-again or `W` → both) guarded by `!WantTextInput`;
+`S` toggles grid/angle snap. Default is combined translate+rotate on the selected actor. Implemented in
+[`engine/wf_edit/main.cc`](../../engine/wf_edit/main.cc) (`EditorCtx::gizmo_op`/`gizmo_snap*`, the
+keyboard block, the snap-aware `ImGuizmo::Manipulate` call, and the `##gizmo_toolbar` overlay) +
+`WfeditIdentity` persistence.
 
 ## Verification
 - **Build:** `cmake -S . -B build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Debug && cmake --build build-editor --target wf_edit -j` (target `wf_edit` underscore).
@@ -89,12 +92,25 @@ snap. Default is combined translate+rotate on the selected actor.
 4. **Euler convention** — use WF `Matrix34::AsEuler`, not ImGuizmo's decompose.
 5. **`structural_dirty`/stale map** — gated out.
 
-## Deferred — scale (separate follow-up plan)
-Per-actor non-uniform render scale works live (`EMAILBOX_X/Y/Z_SCALE` 3040-3042 → `_scaleX/Y/Z` →
+## Deferred — scale (SHELVED 2026-05-25)
+
+Per-actor scale works live (`EMAILBOX_X/Y/Z_SCALE` 3040-3042 → `_scaleX/Y/Z` →
 `_renderActor->SetActorScale` → `RenderActor3D::Render`; `wfmut::SetMailbox`/`GetMailbox` reach them)
 and is stored in the binary on-disk record ([levelcon.h](../../wftools/lvldump/source/levelcon.h):83,
-`x/y/z_scale` at bytes 16-28), **but has no named leaf in the text `.lev`/Doc**
+`x/y/z_scale` at bytes 16-28) but has no named leaf in the text `.lev`/Doc
 ([decompile.rs](../../wftools/levcomp-rs/src/decompile.rs):24 "scale … not used during decompile").
-Persisting a scale edit requires first surfacing `x/y/z_scale` as a named `"Scale"` VEC3 through
-levtree-rs (parse/print) + levcomp-rs (text→binary) + the Blender exporter + the property panel/Doc;
-only then can a scale gizmo write a Doc leaf like Position/Orientation. Tracked separately.
+
+**Decision (2026-05-25): the scale gizmo is shelved — and the missing leaf is not the real
+blocker.** The mailbox scale is **render-only**: it column-multiplies the world matrix at draw
+time and does **not** scale the collision bbox (`coarse` rect, `_ObjectOnDisk` bytes 36-60) or the
+Jolt physics shape ([actor.cc:1606-1622](../../wfsource/source/game/actor.cc)). So a scale gizmo
+wired to those mailboxes would visually stretch the mesh while collision/physics stay original-size
+— a desync footgun — and persisting a render multiplier into the `.lev` fights the
+Blender-golden-source model (real size = mesh geometry). That collision/physics gap is logged as a
+bug in [TODO.md](../../TODO.md) § *PHYSICS*.
+
+The proper path is **physics-correct instance scale via OAD fields** (render + collision bbox + Jolt
+`ScaledShape`, authored as Blender object scale), deferred to **after the new level ships**
+([TODO.md](../../TODO.md) § *DEFERRED UNTIL LEVEL* — the text/binary pipeline insertion points are
+mapped there). Once that lands, the scale gizmo is a small ImGuizmo `SCALE`-mode add that mirrors
+the translate/rotate `CommitGizmoToDoc` path in [gizmo.cc](../../engine/wf_edit/gizmo.cc).

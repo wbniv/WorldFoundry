@@ -1,5 +1,7 @@
 # Plan — diagnose & fix qbert mp4 going black mid-recording
 
+**Status:** PARTIAL — blackout reproduced & root-caused (X11 backbuffer occlusion); diagnostic probes + matte-background fix not landed. See [record-video-fbo-capture](2026-05-11-record-video-fbo-capture.md).
+
 ## Context
 
 The autopilot-via-joystick-injection landed (commit `9c6695f`), and Q*bert clears 2 rounds cleanly. But the resulting mp4 (`qbert-2-rounds.mp4`) renders normally for the first ~11 s (≈7–8 hops) then cuts to solid black for the remainder, even though the walker keeps reporting clean hops and the game logically completes both rounds.

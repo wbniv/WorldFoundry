@@ -1,7 +1,7 @@
 # Plan: Default WF_NEURAL_FORTH=ON when WF_FORTH_ENGINE=zforth
 
 **Date:** 2026-05-23
-**Status:** In progress
+**Status:** PARTIAL — CMake default flipped ON (verified); `engine/build_game.sh` neural-forth integration + `wf_game` symbol check remain.
 
 ## Context
 

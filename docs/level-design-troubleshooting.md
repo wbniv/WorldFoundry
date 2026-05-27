@@ -359,6 +359,77 @@ with the current levcomp if you hit it.
 
 ---
 
+## `ActBox` aborts the instant it fires — "attempt to write to mailbox #0"
+
+**Symptom:** you place an `ActBox` trigger volume (e.g. to write `END_OF_LEVEL`), the player
+enters it, and the engine aborts: `AssertMsg: attempt to write to mailbox #0, which is not
+allowed` ([`mailbox.cc:63`](../wfsource/source/game/mailbox.cc) — mailboxes 0 and 1 are reserved,
+`mailbox >= 2`).
+
+**Cause:** `ActBox::activate` ([`actbox.cc:84`](../wfsource/source/game/actbox.cc)) writes the
+activator's index to the **`Activated Actor Mailbox`** field *unconditionally* — and that field
+**defaults to 0** ([`actbox.oas`](../wfsource/source/oas/actbox.oas)). So an ActBox configured
+with only `MailBox`/`MailBoxValue` (leaving `Activated Actor Mailbox` at its default) crashes the
+moment it triggers. The `MailBox` write (your real payload, e.g. `END_OF_LEVEL`) happens first
+and *succeeds*; the very next line — the activator write to mailbox 0 — is what aborts.
+
+**Fix (level-side):** set `Activated Actor Mailbox` to a valid mailbox (≥ 2). If you don't need
+to record who triggered it, send it to a scratch slot — `SCRATCH_USER_START = 4005` (the 4000s
+are the scratch range). Example from the SMB flagpole
+([`blender_create_smb.py`](../wflevels/smb_w1_1/blender_create_smb.py)):
+
+```python
+flagtrig['wf_MailBox']                 = 1905   # INDEXOF_END_OF_LEVEL
+flagtrig['wf_MailBoxValue']            = 1
+flagtrig['wf_Activated By Actor']      = 'Player'
+flagtrig['wf_Activated Actor Mailbox'] = 4005   # scratch — discard the activator (must be >= 2)
+```
+
+The engine-side alternative (guard the write so `0` means "don't record") is logged in
+[`TODO.md`](../TODO.md) § ENGINE ROBUSTNESS but deferred.
+
+---
+
+## Added a mailbox to `mailbox.inc` but scripts using its `INDEXOF_` fail (`error 7 not_a_word`)
+
+**Symptom:** you add a `MAILBOXENTRY( FOO, … )` row to
+[`mailbox.inc`](../wfsource/source/mailbox/mailbox.inc), rebuild with `task build`, but every
+Forth script referencing `INDEXOF_FOO` is silently rejected (`zforth compile error 7 (...):
+not_a_word`) — and since zForth compiles each script as a unit, the *whole* script dies (even
+unrelated lines), so e.g. an enemy stops moving entirely.
+
+**Cause:** the script-side `INDEXOF_*` constants come from `mailboxIndexArray` in
+[`engine/stubs/scripting_stub.cc`](../engine/stubs/scripting_stub.cc), which `#include`s
+`mailbox.inc`. The incremental build keys on the `.cc` mtime, **not** the `#include`d `.inc`, so
+editing only `mailbox.inc` relinks the binary with a **stale** `scripting_stub.o` — the new
+constants never make it in. (Confirm: `strings engine/wf_game | grep INDEXOF_FOO` → MISSING.)
+
+**Fix:** force the recompile — `touch engine/stubs/scripting_stub.cc wfsource/source/mailbox/mailbox.cc`
+then `task build`. Re-check `strings engine/wf_game | grep INDEXOF_FOO` → PRESENT. (Surfaced
+2026-05-25 adding the SMB enemy/respawn mailboxes; see
+[the plan](plans/2026-05-25-smb-enemy-walk-stomp.md).)
+
+---
+
+## Player↔enemy (and other CharacterVirtual↔CharacterVirtual) contact doesn't fire collision logic
+
+**Symptom:** two `MOBILITY_PHYSICS` actors (e.g. Mario and a Goomba) collide *physically* (they
+push each other) but neither's `COLLIDER_IDX`/`COLLISION_NORMAL_*` mailboxes populate, and any
+`Actor::Collision`-driven logic never runs.
+
+**Cause:** `MOBILITY_PHYSICS` actors are Jolt **CharacterVirtual** bodies, which aren't in
+`gBodies`, so `JoltContactDispatch`'s `FindActorForBodyID` can't resolve the other party — the
+character-vs-character contact is resolved for *movement* but never dispatched to
+`Actor::Collision`. (Same reason the `Gold` coin uses proximity pickup, not `Collision`.)
+
+**Fix:** use **proximity** instead — broadcast the player's X/Z to globals and have the other
+actor compare against its own `X_POS`/`Z_POS` (squared distance avoids needing `abs`). The SMB
+Goomba/Koopa stomp-vs-hurt detection works this way (`blender_create_smb.py` `ENEMY_SCRIPT`).
+Collision mailboxes *do* work for character-vs-**static** (e.g. the `?`-block, an anchored
+Generator in `gBodies`).
+
+---
+
 ## How to run a standalone level
 
 ```bash
@@ -587,6 +658,34 @@ MarbleHandler carries the full 3D velocity each frame. Gravity accumulates in Z;
 | `Surface Friction` (mesh/statplat) | `0.2` |
 
 Combined friction ≈ 0.06; the ball rolls down grades of 4°+ without joystick input.
+
+> **Caveat (Jolt):** the `Surface Friction` rows above are effectively **dead under the Jolt
+> backend** — `MarbleHandler::predictPosition` never reads `Surface Friction`, and the legacy
+> wheel-friction path that did is skipped because `supportingObject` is never set for a Jolt
+> `CharacterVirtual`. The only horizontal-velocity decay that actually applies to a
+> doom-stick/marble actor is `Running Deceleration`. See the next section.
+
+---
+
+## "I set Surface Friction / Air Drag to 0 but the actor still stops dead on landing"
+
+**Symptom:** A coin / projectile / marble has `Surface Friction = 0` **and** `Horiz Air Drag =
+0`, drifts correctly while airborne, but **freezes its horizontal position the instant it lands**
+— it won't slide.
+
+**Cause:** Under Jolt, `Surface Friction` and the air-drag fields are **not consulted** for
+doom-stick/`MarbleHandler` actors (TurnRate == 0). The *only* horizontal decay applied is
+`Running Deceleration` (`movement.cc:689`, `MarbleHandler`: `vel.X *= 1 - RunningDeceleration *
+dt * 30`; `:233`, `GroundHandler`: same). Its movebloc default is **0.90** — that's ≈ a full
+stop within a single frame, so any actor that doesn't override it loses all horizontal momentum
+on contact. (Airborne motion is fine because `AirHandler` doesn't apply this decay.)
+
+**Fix:** Set **`Running Deceleration = 0`** on the actor. Setting `Surface Friction` / `Air
+Drag` to 0 does **not** do it. Example: the SMB `?`-block coin (`blender_create_smb.py`
+`_make_coin_template`) is meant to keep its generator-imparted +X drift and slide rightward
+along the ground; it only does so with `Running Deceleration = 0` (with the 0.90 default it
+froze the moment it landed — verified by [tests/verify_coin_slide.py](../tests/verify_coin_slide.py)).
+See [the gold-value follow-up plan](plans/2026-05-25-smb-gold-value-wire-and-doc-fix.md).
 
 ---
 
@@ -1479,3 +1578,206 @@ _state (int32, 4) + _size (int32, 4) = 8 bytes ✓
 every subsequent allocation. The fix is to leave the struct at the natural 8-byte
 size; the comment in `lmalloc.cc` documents the invariant explicitly so it doesn't
 get broken again.
+
+
+## Per-actor scale is visual-only — collision and physics don't scale
+
+**Symptom:** You scale an actor (via the `X/Y/Z_SCALE` mailboxes 3040–3042, or — once
+wired — Blender object scale) and the mesh visibly stretches, but the actor still
+collides, blocks, and is walked on as if it were its original size.
+
+**Why:** The scale is applied **at draw time only** — `Actor` caches `_scaleX/Y/Z`
+and forwards them to `RenderActor3D::SetActorScale`, which column-multiplies the world
+matrix just before rendering (`wfsource/source/game/actor.cc:1606-1622`). Nothing
+propagates that scale to the collision bbox (`coarse` rect in the on-disk record) or
+to the Jolt physics shape, so collision and physics keep the unscaled geometry.
+
+**What to do:**
+
+- For **purely visual** scaling (squash/stretch effects, decorative size variation
+  with no gameplay collision — e.g. qbert), this is fine and intended.
+- For a size change that must **affect gameplay** (a genuinely bigger crate you stand
+  on or bump into), make it a **real mesh edit in Blender** and re-export — the mesh
+  is the golden source of an object's true size.
+- A first-class "scale that also scales collision + physics" (Jolt `ScaledShape`,
+  authored as Blender object scale) is a tracked follow-up, deferred until after the
+  next level ships — see `TODO.md` § *DEFERRED UNTIL LEVEL*.
+
+
+## Multi-room levels & cross-room warps (the SMB pipe warp)
+
+The SMB W1-1 pipe → underground coin room ([plan](plans/2026-05-25-smb-pipe-warp-coin-room.md))
+is the **first genuinely multi-room WF level**, and the room-transition path had several
+non-obvious gotchas. If you build a second room or a room-to-room warp, read this first.
+
+### How a cross-room warp actually works
+
+A "warp" is just **teleporting the player into a different room's bounding box** — either
+the `Warp` actor (`SetPredictedPosition`) or a script writing `INDEXOF_X/Y/Z_POS`. Both are
+Jolt-safe (`jolt/physical.hpi::Update()` explicitly pushes WF-side warps into the Jolt
+character). The room system then follows on its own:
+
+- `ActiveRooms::UpdateRoom(watchObject)` ([actrooms.cc:293](../wfsource/source/room/actrooms.cc))
+  runs each frame with `_camera->GetWatchObject()` (the player). When the player leaves
+  `_activeRooms[0]`'s bbox it loops over **every** room and switches to the first one whose
+  bbox contains the player. **Adjacency is NOT required for the switch** — it's a full scan.
+- **The rooms must partition space CONTIGUOUSLY — touching, NOT gapped.** Two competing
+  constraints:
+  - For the **switch**: the warp destination must be unambiguously inside the *target*
+    room and outside the source room, so the player leaves `_activeRooms[0]`. SMB drops
+    Mario to Z=−46.5, far below the surface room's Z=−10 floor.
+  - For the **camera**: the rooms' bboxes must **touch with no gap** (SMB: surface
+    Z[−10,25] meets coin Z[−58,**−10**] at the −10 plane). The camera entity *physically
+    pans* between camshot poses; if there's an empty Z band between the rooms it lands in
+    "no room" mid-pan, stops updating, and **freezes** there (it renders the destination
+    room from a wrong, too-high angle, or a black screen). An earlier draft of this note
+    said "disjoint with a gap" — **wrong**; a gap freezes the camera. Make them adjoin.
+    (The shared boundary plane is harmless: the player is never parked exactly on it.)
+- The one transition frame prints `Room::UpdateRoomContents: object N … fell out of room 0
+  … re-adding` — **harmless**; `AddObjectToRoom` re-homes the actor to whatever room now
+  contains it. A `… is not in any room` line is **also not a crash** — it's a graceful
+  `SetPendingRemove` ([rooms.cc:188](../wfsource/source/room/rooms.cc); the old assert is
+  `#if 0`). It means the destination coords missed every room bbox — fix the coords.
+
+### Required objects / properties for a second room (each bit was a real bug)
+
+1. **The player needs `Moves Between Rooms = True`.** Without it the player's mesh binds to
+   the *source* room's transient asset slot and **unloads on the switch** → Mario vanishes
+   underground. (Anchored markers — targets, camshots — have no asset and don't need it.)
+2. **Each room needs its OWN light.** Lights are room-scoped; the surface light unloads on the
+   switch, so the destination renders **pure black** (engine logs ` has no lights, gonna be
+   hard to see!`, [level.cc:1200](../wfsource/source/game/level.cc)). Add a directional light
+   inside each room's bbox. (No matte needed underground — black is SMB-faithful.)
+3. **Each room that the camera visits needs a CamShot framing it.** The surface camera's
+   Position Z is `Absolute`, so it will *not* follow the player down — the underground needs
+   its own camshot (e.g. a static shot over the coin room).
+4. **The rooms must be MUTUALLY ADJACENT for the camera to follow.** This is the subtle one:
+   the **camera entity is updated only via the active room's update list**
+   ([level.cc:948-964](../wfsource/source/game/level.cc); `updateMainCharacter` merely sets
+   `_mainCharacter` — the camera is *not* a special/global actor). With a hard switch the
+   camera lives in the now-inactive source room and **freezes at its last pose**, never
+   adopting the new shot → the destination room renders off-camera (black). Listing the two
+   rooms as each other's `Adjacent Room 1` keeps **both** active simultaneously
+   (`MAX_ACTIVE_ROOMS = MAX_ADJACENT_ROOMS + 1 = 3`, [assets.hp:39](../wfsource/source/asset/assets.hp)),
+   so the camera keeps ticking and follows. `adjacentRooms[0]=self` is implicit
+   ([room.cc:152](../wfsource/source/room/room.cc)) — author only the neighbour.
+   `levcomp-rs` resolves `Adjacent Room 1/2` by name ([rooms.rs](../wftools/levcomp-rs/src/rooms.rs)).
+
+### `INDEXOF_CAMSHOT` is **1921**, not 1021
+
+`MAILBOXENTRY( CAMSHOT, 1921 )` ([mailbox.inc:59](../wfsource/source/mailbox/mailbox.inc)).
+An ActBoxOR (or Director) that switches cameras must write `MailBox = 1921`. The
+`level-building.md` mailbox-scope table said 1021 — **wrong** (now corrected). Writing the
+wrong slot fails *silently*: the camera keeps reading the bootstrapped shot and never
+switches (it looks exactly like a frozen / dead camera). Verify against the engine's
+`zforth: INDEXOF_CAMSHOT = 1921` boot line.
+
+### ActBoxOR fires via C++ overlap, regardless of the script engine
+
+`ActBoxOR::update` ([actboxor.cc](../wfsource/source/game/actboxor.cc)) activates through
+`Activation::Activated()` (a pure AABB overlap test), like `ActBox` — **not** through a
+script. The old `level-building.md` claim that "ActBoxOR zones never fire with scripting
+disabled" is false (corrected). A fresh ActBoxOR switched the camera fine with Tcl disabled.
+Size its activation volume to cover the player's reachable area in the room, centred on the
+**play plane** (Y≈0), not the room-bbox Y-centre (which may sit far back where the camera is).
+
+### `room.copy()` carries a stale `Adjacent Room`
+
+Duplicating the imported room with `room.copy()` is the easy way to get a second room (it
+inherits the room schema + Mobility/MovementClass), but it also copies the snowgoons room's
+self-adjacency name (e.g. `room_6`). **Overwrite `Adjacent Room 1/2` explicitly** on both
+rooms or you get a dangling reference.
+
+### The down-press warp gate (pure composition, no engine change)
+
+The `Warp` actor is **collision-only** — it teleports on overlap with no input gate, so it
+can't do "press Down at the pipe." Compose it instead:
+
+- an **`ActBox`** at the pipe mouth (a thin Z band *above* the pipe top so only standing on
+  top triggers it, not walking past on the ground) sets a mailbox (`SMB_AT_PIPE`) on overlap,
+  with `ClearOnExit=True` to reset it;
+- the player's per-tick script ANDs that mailbox with the joystick **DOWN** bit
+  (`EJ_BUTTONF_DOWN = 0x1000 = 4096`) and reuses the **respawn teleport** (write
+  `X/Y/Z_POS` + zero the velocities) to drop into the coin room.
+
+Use a pure `Warp` + `Target` for the *exit* pipe (walk-into, no gate needed) — that's exactly
+what `Warp` does natively, and it validates the `Warp` class's Jolt teleport.
+
+> **Warp renders its volume as a white box.** Unlike `actbox.oas`/`actboxor.oas` (which
+> `@define DEFAULT_MODEL_TYPE 3` = None), `warp.oas` has no such override, so the box mesh
+> you give the Warp for its activation volume draws as a white debug cube. Setting
+> `wf_Model Type='None'` doesn't help (the exporter doesn't emit it for the warp schema).
+> Force it invisible with **`wf_Visibility Mailbox = 0`** (mb[0] = always false) — activation
+> is independent of rendering, so the Warp still fires.
+
+### Verifying camera moves on the bridge — resume, don't step
+
+In pause/`step` bridge mode each step advances a tiny `dt`, so camera **pans/slews barely
+move** (a CamShot switch pans over its Pan Time, and the per-frame slew clamp is 10 units/axis
+— see the camera-slew section in [level-building.md](level-building.md)). Drive the warp with
+`step` for determinism, then **`resume`** and sleep real-time before screenshotting so the
+camera pan to the new shot completes. (Headless GL is low-fps, so allow a few seconds.)
+The same applies to **walking** the player a distance: in `step` mode each frame's `dt` is
+tiny so he barely moves — `resume` + hold the joystick bit (`inject_input` with a long
+`duration_frames`) and poll, instead of one `step` per injected frame.
+
+### A warp-landing floor must be WIDE and THICK
+
+The floor the player warps *onto* needs more margin than a normal walking floor. The teleport
+can land the character a hair inside the slab; Jolt's `CharacterVirtual` then depenetrates him
+— sometimes **sideways**. SMB's first coin-room floor was the usual narrow (Y±1.5) 1-tile-thick
+slab; the warp-landing drifted Mario to Y≈−2.2, off the Y edge, and he fell out the room
+bottom. Make a warp-landing floor wide (Y±5) and thick (≥4 units) so landing jitter can't push
+him off it. (Adding actors elsewhere — e.g. coins → more Jolt static bodies → slower broadphase
+→ bigger `dt` — makes the landing penetrate more, so don't tune this to the bare minimum.)
+
+### Collectible coins in a room (the `gold` TTL blocks pre-placing)
+
+`gold` coins can't be pre-placed: `Gold`'s despawn TTL is a hardcoded `kGoldTTL = 5.0f`
+([gold.cc](../wfsource/source/game/gold.cc), no OAD field) stamped at construction, so a
+coin placed at level-load vanishes 5 s in — long before the player reaches a warp room. Two
+working alternatives:
+
+- **Static disc + player-script proximity pickup** (used by the SMB coin room): a `statplat`
+  gold disc with `Visibility Mailbox = <per-coin global mb>` (seeded to 1 once by the player
+  script, like the lives seed), and the player script awards `GOLD` and flips that mailbox to
+  0 (hides the coin) when close. Gate the proximity on **both** X *and* a player-Z band — the
+  coin room shares the surface's X range, so the Z test (`|z − coinRoomFloorZ|` small) is what
+  stops a surface coin at the same X from firing. **Float the discs clear above the player's
+  head** — a collidable `statplat` at body height shoves him (and can push him through a thin
+  floor); pickup uses the *player's* Z, not the coin's, so coin height is free.
+- **Generator-on-entry**: an ActBox triggers a `Generator` (Object To Throw = a coin template)
+  while the player is in the room, so coins spawn fresh (collectible within their 5 s).
+
+## Script-driven bounce off the floor — read the contact normal, and consume it
+
+A collectible/actor can bounce off the ground from its own Forth script (no engine
+restitution exists — every `MOBILITY_PHYSICS` actor is a kinematic Jolt `CharacterVirtual`
+that zeroes vertical velocity on landing; `mRestitution` is never set, and the
+`Vertical/Horizontal Elasticity` OAS fields are dead pre-Jolt legacy). The SMB Starman bounce
+does it by re-launching `ZSPEED` on the real landing contact. Three non-obvious facts make or
+break this:
+
+- **Landing on static ground gives `COLLIDER_IDX = 0`, not an actor index.** The ground has no
+  WF `Actor`, so the contact routes through `Actor::JoltStaticCollision(normal)`
+  ([`actor.cc`](../wfsource/source/game/actor.cc)), which sets `_lastColliderIdx = 0`. So a
+  `COLLIDER_IDX != 0` gate (correct for *actor-vs-actor* hits like the `?`-block bump) will
+  **never fire** on a floor landing. Gate on the normal instead.
+- **The landing normal points DOWN: `COLLISION_NORMAL_Z < 0`.** The contact normal is "the
+  direction the character pushes against the contacted body" — falling onto the floor pushes
+  down, so `Z < 0` (a bump-from-*below* gives `Z > 0`). Floor-landing gate: `NORMAL_Z -0.5 <`.
+- **`_lastCollisionNormal` is NOT cleared per-frame** (only `_lastColliderIdx` is, at
+  `StartFrame`, `actor.cc:1106`). So the normal goes **stale** and a bare normal gate re-fires
+  every frame — including mid-air. Either also require descent (`ZSPEED 0 <`) or, cleaner,
+  **consume** it: `COLLISION_NORMAL_Z` is script-writable, so write `0` to it after acting, and
+  it only goes non-zero again on a genuine new contact. This keeps the bounce ground-aware —
+  over a pit there's no contact, the normal stays 0, and the actor falls in.
+
+```forth
+\ Starman: re-launch upward on a real floor contact, then consume the normal.
+INDEXOF_COLLISION_NORMAL_Z read-mailbox -0.5 < if
+  6.0 INDEXOF_ZSPEED write-mailbox
+  0 INDEXOF_COLLISION_NORMAL_Z write-mailbox
+then
+```
+(SMB Fire Flower + Star, 2026-05-26 — [plan](plans/2026-05-26-smb-fire-flower-and-star.md).)

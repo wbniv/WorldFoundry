@@ -1,7 +1,7 @@
 # Plan — ROM-grounded Q✱bert walker (closes L4R1 gap, unifies MAME ↔ WF regression)
 
 **Date:** 2026-05-08
-**Status:**
+**Status:** ABANDONED 2026-05-14 (commit `89761d17`) — walker WF-parity dropped as low-ROI; per-phase progress recorded below.
 - **A** ✅ position byte hunt — `0x0D64` works for snap dance triggers (apex check) but collides across cubes; sprite X/Y pair (`0x0D58`, `0x0D59`) has animation transients so unreliable for cube-level tracking
 - **B** ✅ palette write-tap delta ≥ 32 = round-clear signal
 - **C** ✅ multi-round walker (DIP-cheat-driven, drift-immune) — captures state-0 + state-1 for all 16 rounds in a single run; 15/16 rounds match doc exactly; L4R1 in multi-round mode hits transition timing (state-0 captures L4 zoom screen instead of pristine apex). Standalone `qbert_l4r1_walker.lua` captures L4R1 cleanly.

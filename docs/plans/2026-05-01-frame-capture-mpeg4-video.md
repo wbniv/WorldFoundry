@@ -2,7 +2,7 @@
 
 **Context:** The engine has a dormant `-record_tga` flag (`bRecordTGA` in `main.cc`) with no capture code behind it. This plan wires it up by piping raw frames directly into ffmpeg via `popen()` — no intermediate files, no cleanup step, one MP4 on exit.
 
-**Status:** In progress
+**Status:** OPEN — design complete; the `-record_video` flag rename + ffmpeg-pipe capture not implemented (`-record_tga` still present).
 
 ---
 

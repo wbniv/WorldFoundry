@@ -552,16 +552,126 @@ fn emit_oad_fields(
 
 // ── Top-level decompile ───────────────────────────────────────────────────────
 
+// ── Multi-level GAME archive (cd.iff / cd_full.iff) TOC ──────────────────────
+// A cd.iff is a `GAME` IFF chunk whose payload begins with a `TOC` chunk: an
+// array of TOCENTRYONDISK { tag: i32, offset: i32, size: i32 } (mirror of
+// wfsource/source/iff/disktoc.cc DiskTOC::LoadTOC). `offset` is absolute from
+// file start; `tag` is a FOURCC (SHEL / L0 / L4 / …). The engine's "LVLHDR
+// {lvasTag, fileSize}" is just this outer GAME chunk header reinterpreted.
+
+#[derive(Clone)]
+pub struct TocEntry {
+    pub tag:    u32,
+    pub offset: usize,
+    pub size:   usize,
+}
+
+/// On-disk size of one `TOCENTRYONDISK`: tag + offset + size, three `i32`s.
+const TOC_ENTRY_SIZE: usize = 3 * std::mem::size_of::<i32>();
+
+/// Parse the TOC out of a `GAME` chunk's payload. The TOC is the first sub-chunk.
+fn parse_game_toc(game_payload: &[u8]) -> Result<Vec<TocEntry>, String> {
+    if game_payload.len() < 8 {
+        return Err("GAME payload too short for a TOC chunk header".to_string());
+    }
+    let id = u32::from_be_bytes(game_payload[0..4].try_into().unwrap());
+    if id_to_str(id) != "TOC" {
+        return Err(format!("expected 'TOC' as the first GAME sub-chunk, found '{}'", id_to_str(id)));
+    }
+    let size = u32::from_le_bytes(game_payload[4..8].try_into().unwrap()) as usize;
+    let toc = game_payload.get(8..8 + size)
+        .ok_or_else(|| format!("TOC chunk size {} exceeds GAME payload {}", size, game_payload.len() - 8))?;
+    if toc.len() % TOC_ENTRY_SIZE != 0 {
+        return Err(format!("TOC payload {} bytes is not a multiple of {} (TOCENTRYONDISK)",
+            toc.len(), TOC_ENTRY_SIZE));
+    }
+    let mut out = Vec::with_capacity(toc.len() / TOC_ENTRY_SIZE);
+    for rec in toc.chunks_exact(TOC_ENTRY_SIZE) {
+        let tag    = u32::from_be_bytes(rec[0..4].try_into().unwrap());   // field 0: tag
+        let offset = i32::from_le_bytes(rec[4..8].try_into().unwrap());   // field 1: offset
+        let esize  = i32::from_le_bytes(rec[8..12].try_into().unwrap());  // field 2: size
+        if offset < 0 || esize < 0 {
+            return Err(format!("TOC entry '{}' has negative offset/size", id_to_str(tag)));
+        }
+        out.push(TocEntry { tag, offset: offset as usize, size: esize as usize });
+    }
+    Ok(out)
+}
+
+/// Print the TOC to stdout (the `--list` dump).
+fn print_toc(path: &Path, entries: &[TocEntry]) {
+    println!("TOC of {} — {} entries:", path.display(), entries.len());
+    println!("  {:>3}  {:<8}  {:>10}  {:>10}", "idx", "tag", "offset", "size");
+    for (i, e) in entries.iter().enumerate() {
+        println!("  {:>3}  {:<8}  {:>#10x}  {:>10}", i, id_to_str(e.tag), e.offset, e.size);
+    }
+}
+
+/// Resolve a `--level <sel>` selector: a decimal TOC index, or a FOURCC tag.
+fn select_entry<'a>(entries: &'a [TocEntry], sel: &str) -> Result<&'a TocEntry, String> {
+    if let Ok(idx) = sel.parse::<usize>() {
+        entries.get(idx).ok_or_else(|| format!(
+            "--level index {} out of range (0..{})", idx, entries.len()))
+    } else {
+        entries.iter().find(|e| id_to_str(e.tag) == sel).ok_or_else(|| format!(
+            "--level tag '{}' not found; available tags: {}", sel,
+            entries.iter().map(|e| id_to_str(e.tag)).collect::<Vec<_>>().join(", ")))
+    }
+}
+
 pub fn run(
     iff_path: &Path,
     lc_path: &Path,
     oad_dir: Option<&Path>,
     out_path: &Path,
+    level_sel: Option<&str>,
+    list_toc: bool,
 ) -> Result<(), String> {
-    // ── Load and parse LVAS IFF ───────────────────────────────────────────────
-    let iff_data = std::fs::read(iff_path)
+    let file_data = std::fs::read(iff_path)
         .map_err(|e| format!("cannot read {}: {}", iff_path.display(), e))?;
 
+    // A multi-level GAME archive wraps per-level chunks in a TOC. Detect it and
+    // either dump the TOC (--list) or slice out the selected level (--level);
+    // a bare single-level LVAS file is processed as-is.
+    let iff_data: Vec<u8> = {
+        let top_chunks = read_chunks(&file_data)
+            .map_err(|e| format!("IFF parse error in {}: {}", iff_path.display(), e.message))?;
+        let top = top_chunks.first()
+            .ok_or_else(|| format!("no chunks in {}", iff_path.display()))?;
+        if id_to_str(top.id) == "GAME" {
+            let entries = parse_game_toc(&top.payload)?;
+            if list_toc {
+                print_toc(iff_path, &entries);
+                return Ok(());
+            }
+            let sel = level_sel.ok_or_else(|| format!(
+                "{} is a multi-level GAME archive — pass --level <tag|index> to pick a level, \
+                 or --list to dump the TOC", iff_path.display()))?;
+            let e = select_entry(&entries, sel)?;
+            // The TOC size is sector-granular (DiskTOC rounds it up), so it doesn't
+            // give the level chunk's exact length. The region begins with its own
+            // IFF chunk header — read its declared payload size to slice precisely
+            // that chunk, leaving no trailing padding for read_chunks to choke on.
+            let hdr = file_data.get(e.offset..e.offset + 8).ok_or_else(|| format!(
+                "TOC entry '{}' offset {:#x} past EOF", id_to_str(e.tag), e.offset))?;
+            let chunk_payload = u32::from_le_bytes(hdr[4..8].try_into().unwrap()) as usize;
+            let end = e.offset.checked_add(8 + chunk_payload)
+                .ok_or_else(|| "level chunk extent overflows".to_string())?;
+            if end > file_data.len() {
+                return Err(format!("level '{}' chunk [{:#x}..{:#x}] exceeds file size {}",
+                    id_to_str(e.tag), e.offset, end, file_data.len()));
+            }
+            eprintln!("  selected level '{}' @ {:#x} (chunk {} bytes; TOC size {})",
+                id_to_str(e.tag), e.offset, 8 + chunk_payload, e.size);
+            file_data[e.offset..end].to_vec()
+        } else if list_toc {
+            return Err(format!("{} is not a multi-level GAME archive (no TOC to list)", iff_path.display()));
+        } else {
+            file_data.clone()
+        }
+    };
+
+    // ── Load and parse LVAS IFF ───────────────────────────────────────────────
     // The file is a top-level IFF chunk; its payload contains nested chunks.
     let top_chunks = read_chunks(&iff_data)
         .map_err(|e| format!("IFF parse error in {}: {}", iff_path.display(), e.message))?;
@@ -756,4 +866,52 @@ pub fn run(
 
     eprintln!("  wrote {} bytes → {}", out.len(), out_path.display());
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Build a `GAME` chunk payload: a `TOC` chunk holding two TOCENTRYONDISK
+    /// records (mirrors the cd.iff byte layout — see parse_game_toc).
+    fn make_game_payload() -> Vec<u8> {
+        let mut entries = Vec::new();
+        for (tag, off, sz) in [(b"SHEL", 0x800u32, 0xa4u32), (b"L4\0\0", 0x1000, 0x100)] {
+            entries.extend_from_slice(tag);          // FOURCC, in-order bytes
+            entries.extend_from_slice(&off.to_le_bytes());
+            entries.extend_from_slice(&sz.to_le_bytes());
+        }
+        let mut payload = Vec::new();
+        payload.extend_from_slice(b"TOC\0");                       // chunk id (big-endian FOURCC)
+        payload.extend_from_slice(&(entries.len() as u32).to_le_bytes()); // chunk size (LE)
+        payload.extend_from_slice(&entries);
+        payload
+    }
+
+    #[test]
+    fn parses_toc_entries() {
+        let entries = parse_game_toc(&make_game_payload()).expect("parse");
+        assert_eq!(entries.len(), 2);
+        assert_eq!(id_to_str(entries[0].tag), "SHEL");
+        assert_eq!(entries[0].offset, 0x800);
+        assert_eq!(entries[0].size, 0xa4);
+        assert_eq!(id_to_str(entries[1].tag), "L4");   // trailing nulls trimmed
+        assert_eq!(entries[1].offset, 0x1000);
+    }
+
+    #[test]
+    fn selects_by_tag_and_index() {
+        let entries = parse_game_toc(&make_game_payload()).unwrap();
+        assert_eq!(id_to_str(select_entry(&entries, "L4").unwrap().tag), "L4");
+        assert_eq!(select_entry(&entries, "1").unwrap().offset, 0x1000);   // decimal index
+        assert!(select_entry(&entries, "9").is_err());                    // index out of range
+        assert!(select_entry(&entries, "NOPE").is_err());                 // unknown tag
+    }
+
+    #[test]
+    fn rejects_non_toc_first_chunk() {
+        let mut p = b"ALGN".to_vec();
+        p.extend_from_slice(&0u32.to_le_bytes());
+        assert!(parse_game_toc(&p).is_err());
+    }
 }

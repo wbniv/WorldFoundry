@@ -23,6 +23,8 @@ see and hear each other without leaving the tool.
 | Capability | State |
 |---|---|
 | Open a level and render it live in an embedded viewport | ✅ |
+| Open a text `.lev`, a compiled binary `.iff`/`.lvl`, or a level from a `cd.iff` archive | ✅ (binary decompiled on load; see [limitations](#known-limitations)) |
+| Pick a level from a `cd.iff` at startup with an in-editor picker | ✅ (launch on a bare `cd.iff` → modal level list; viewport tracks the pick) |
 | Outliner: list every actor (read from the CRDT `Doc`) | ✅ |
 | Properties: every field of the selected actor, with the right widget per type | ✅ |
 | Edit a field → it commits to the `Doc` | ✅ |
@@ -30,7 +32,7 @@ see and hear each other without leaving the tool.
 | Duplicate / delete actors | ✅ (live for templated actors; otherwise on reload) |
 | Save back to `.lev`; compile `.lev` → `.iff` | ✅ |
 | Voice + video calling between editor instances in the same room | ✅ (LAN, Linux) |
-| Real-time multi-user co-editing over a network (presence, relay, chat) | ⏳ not yet — see [Known limitations](#known-limitations) |
+| Real-time multi-user co-editing over a network (presence, relay, chat, disk persistence) | ✅ (WebSocket relay; only at-rest **BYOK** snapshot encryption is deferred — see [Known limitations](#known-limitations)) |
 
 **Platform:** Linux/X11 only in v1. The editor adopts an existing GLX context; Wayland
 and mobile hosts are v2+. `wf-edit` builds **only** when the engine is configured with
@@ -83,8 +85,11 @@ Camera capture uses Linux [V4L2](https://www.kernel.org/doc/html/latest/userspac
 
 | Option | Form | Meaning |
 |---|---|---|
-| `--level=<name>` | `=` | Level the **engine** loads into the viewport (default `snowgoons-blender`). |
-| `--leveltree=<name>` | `=` | Level the **Outliner/Properties** `Doc` is built from (defaults to match `--level`). |
+| `--level=<name>` | `=` | Level the **engine** loads into the viewport (default `snowgoons-blender`). If omitted, the viewport **auto-tracks** a binary `--leveltree` (a bare `.iff` directly; a `cd.iff:tag` sliced to a temp `.iff`), so the 3D view matches the Outliner. Pass it explicitly to override. |
+| `--leveltree=<name>` | `=` | Level the **Outliner/Properties** `Doc` is built from (defaults to match `--level`). Accepts a text `.lev`, a compiled binary `.iff`/`.lvl` (sniffed by content, decompiled on load), or a `cd.iff` archive with a level selector — `<file.iff>:<TAG\|index>` (e.g. `wflevels/cd.iff:L4` or `:1`). Pass a **bare** `cd.iff` (no `:TAG`) and the editor shows a startup level picker. |
+| `--pick-level=<TAG\|index>` | `=` | Headless aid: auto-confirm the startup cd.iff picker on the chosen level (equivalent to clicking that row + Open), for screenshots/CI. |
+| `--open` | flag | Open the File→Open browser at startup (instead of loading straight into a level). |
+| `--open-pick=<path>` | `=` | Headless aid: skip the browser and **re-exec** into `<path>` (a `.iff`/`.lev`/`.lvl`, or `cd.iff:TAG`) on the first frame — the scripted equivalent of picking that file in File→Open. |
 | `--room=<id>` | `=` or space | Join a voice + video call room. Omit to run solo (no call started). |
 | `--frames <N>` | space | Headless: exit after *N* frames. **Note the space** — `--frames=N` is ignored. |
 | `--screenshot <path.ppm>` | space | Headless: dump the composited frame (engine + UI) to a PPM. **Note the space.** |
@@ -104,8 +109,8 @@ Camera capture uses Linux [V4L2](https://www.kernel.org/doc/html/latest/userspac
 The window is an ImGui **dockspace** with a menu bar and three docked panels. Panels are
 dockable/resizable — drag a tab to rearrange.
 
-- **Menu bar** (top) — `File` (Save / Save + Compile), and `View` (toggle the
-  Collaborators panel) when a call is active. The room ID is shown to the right when joined.
+- **Menu bar** (top) — `File` (**Open Level…** / Save / Save + Compile), and `View` (toggle
+  the Collaborators panel) when a call is active. The room ID is shown to the right when joined.
 - **Outliner** (left) — every actor in the level, read from the CRDT `Doc`. The header
   shows the level name and actor count (e.g. *snowgoons-blender.lev: 36 actors*). Click a
   row to select it.
@@ -224,10 +229,17 @@ brings snowgoons to 37 actors):
 
 ## Saving and compiling
 
-The `File` menu has two actions:
+The `File` menu has these actions:
 
+- **Open Level…** (<kbd>Ctrl</kbd>+<kbd>O</kbd>) — opens a file browser rooted at `wflevels/`
+  (subdirs + `.iff`/`.lev`/`.lvl`). Opening a level **re-execs** the editor into the pick
+  (preserving `--room`/`--relay`); a bare `cd.iff` re-shows the startup level picker. A fresh
+  process sidesteps any in-place engine/bridge reset. With unsaved changes, a "discard
+  changes?" confirm fires first.
 - **Save Level** (<kbd>Ctrl</kbd>+<kbd>S</kbd>) — writes the `Doc` back to the level's
-  `.lev` source. A toast confirms the path.
+  `.lev` source. A toast confirms the path. When the session was loaded from a **read-only
+  binary** source (a `.iff`/`.lvl` or a level out of a `cd.iff`), this item reads
+  **"Save As .lev"** instead — the save target is a fresh `.lev`, not a round-trip to the binary.
 - **Save + Compile (.iff)** — saves, then runs the 5-stage `build_level_binary.sh`
   pipeline to produce the engine-loadable `.iff`. This blocks the frame for the few
   seconds the build takes; the live engine is **not** auto-reloaded — the fresh `.iff` is
@@ -294,8 +306,9 @@ fit the MTU. Each editor binds **ephemeral** UDP ports (OS-assigned), so several
 can run on one machine. Your display name is currently fixed to *"Editor"*.
 
 **Limitations:** LAN-only (multicast discovery, no STUN/relay yet — remote peers are v2);
-audio is a flat stereo mix (no spatialisation); no text chat in v1. If `/dev/video0` is
-absent you appear with an initials avatar (audio-only).
+audio is a flat stereo mix (no spatialisation). Text chat rides the separate WebSocket
+co-editing relay, not this voice/video path. If `/dev/video0` is absent you appear with an
+initials avatar (audio-only).
 
 ---
 
@@ -303,7 +316,8 @@ absent you appear with an initials avatar (audio-only).
 
 | Key | Action |
 |---|---|
-| <kbd>Ctrl</kbd>+<kbd>S</kbd> | Save Level (when not typing in a field) |
+| <kbd>Ctrl</kbd>+<kbd>O</kbd> | Open Level… (file browser; re-execs into the pick) |
+| <kbd>Ctrl</kbd>+<kbd>S</kbd> | Save Level / Save As .lev (when not typing in a field) |
 | <kbd>Delete</kbd> | Delete the selected actor (when not typing in a field) |
 
 ---
@@ -324,21 +338,43 @@ workflow — they exist so the editor can be proven headlessly.
 | `WF_EDIT_STRUCT_UI=dup\|del` | Drive a structural edit once through the Outliner UI path. |
 | `WF_EDIT_BRIDGE_DEBUG=1` | Dump the `Doc`↔engine actor-index map + field translations on the first frame. |
 | `WF_EDIT_BRIDGE_TEST="Field Name\|new DATA"` | Edit a leaf as the panel would, propagate through the bridge, log before/after engine position. |
+| `WF_EDIT_REMOTE_TEST="<docB>\|<x y z>"` | With `--select=A` (A≠B): apply a **remote**-origin Position edit to actor *B* and confirm the deep observer alone moves it in the engine. |
+| `WF_EDIT_DRAGLOCK_TEST=1` | With `--select=N`: prove the active-drag transform lock — a remote edit to a simulated-dragged actor (non-transform *and* Position) leaves it put, and propagation resumes on release. |
 | `WF_EDIT_SPAWN_CONFIRM_TEST=1` | Verify the `SpawnActor` runtime path (run with `--frames 5`). |
 
 ---
 
 ## Known limitations
 
-- **Single-user, local.** v1 is one editor process per level on one machine. Networked
-  co-editing (presence/awareness cursors, a relay server, conflict-free remote merges) is a
-  separate networking milestone — the CRDT `Doc` foundation is in place for it.
-- **Voice/video is LAN-only** (multicast discovery; no STUN/relay/remote peers; no text chat).
-- **Live viewport preview is partial** — Position/Orientation + ~15 movement fields render
-  live; other fields edit the `Doc` only (full schema-generated coverage is a follow-up).
-- **No undo** for any edit (field or structural).
-- **Sources from text `.lev`/`.iff.txt`,** not a compiled `cd.iff` (a binary level isn't
-  self-describing).
+- **Networked co-editing shipped** (presence/awareness cursors, a WebSocket `wf-relay`
+  server, conflict-free remote merges, text chat, and debounced disk persistence of each
+  room). The one deferred piece is **BYOK** at-rest snapshot encryption: the relay's
+  snapshot writer takes a `wrap: bytes → bytes` hook that is identity today, leaving room
+  to drop in customer-key encryption later without re-encoding existing snapshots.
+- **Voice/video is LAN-only** (multicast discovery; no STUN/relay/remote peers). Text chat
+  is available separately over the WebSocket co-editing relay.
+- **Live viewport preview** covers Position/Orientation + all 77 common/movebloc/mesh OAD
+  fields (the full generated field map) — they propagate live through the CRDT→engine
+  bridge. The one exception is **mesh geometry** (Model Type / Tiles / Map): the value
+  reaches the engine's mesh block, but the actor's render mesh is built once at spawn and
+  isn't rebuilt live, so those three need a reload to be *seen*.
+- **Undo/redo** is native (Ctrl+Z / Ctrl+Y) for field, gizmo, and structural edits via the
+  Yrs `UndoManager`; remote peers' edits stay out of your local undo history.
+- **While you drag an actor with the gizmo,** a concurrent edit to that actor from a remote peer
+  (or your own undo) won't snap it back mid-gesture — the drag owns its transform until you release
+  the mouse, then last-writer-wins resolves the transform. Other fields still propagate live.
+- **Loads compiled binary levels; saving always produces a new standalone file.** The editor opens a
+  text `.lev`/`.iff.txt`, a compiled bare `.iff`/`.lvl`, **and** a level selected out of a `cd.iff`
+  archive (`--leveltree=wflevels/cd.iff:L4`) — a binary input is decompiled on load via
+  `levcomp decompile`
+  ([`wftools/levcomp-rs/src/decompile.rs`](../wftools/levcomp-rs/src/decompile.rs)). A binary-loaded
+  level is fully editable; Save writes *out* to a new `.lev`, and **Save + Compile (.iff)** recompiles
+  that to a bare `.iff` through the normal pipeline. Saving back **into** a multi-level `cd.iff`
+  (rebuilding the archive in place) is by design **not** a feature — a `cd.iff` is read-only input,
+  and you always save out as a new file. Also note: binary levels carry no authored object names
+  (cross-references are stored by actor index; the decompiler synthesizes `{Class}_{index}` names),
+  so a `.lev` saved from a binary load is a fresh derivative, not a round-trip to the original
+  Blender/`.lev` source. See the [load-binary-iff plan](plans/2026-05-25-wf-edit-load-binary-iff.md).
 - **Linux/X11 only.** Wayland and mobile hosts are v2+.
 
 ---

@@ -1,7 +1,7 @@
 # Plan — wfmut test completion (CTest integration + coverage)
 
 **Date:** 2026-05-19
-**Status:** Planning.
+**Status:** DONE (commit `b44601f1`) — wfmut smoke + bridge regression tests registered with CTest.
 **Parent:** [docs/plans/2026-05-19-engine-mutation-api.md](/home/will/WorldFoundry.2026-new-level/docs/plans/2026-05-19-engine-mutation-api.md) (the mutation API itself — **Done**; full Test matrix definitions live there). This plan finishes that plan's deferred test work.
 
 ---

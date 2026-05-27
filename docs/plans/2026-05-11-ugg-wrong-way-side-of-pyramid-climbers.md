@@ -1,6 +1,6 @@
 # Plan — Ugg & Wrong-Way (side-of-pyramid climbers)
 
-**Status:** Not started
+**Status:** DONE (commit `47999900`) — Ugg & Wrong-Way side-of-pyramid climbers.
 **Stacks on:** Slick & Sam (`5c93811`), Green Ball + flash + spin (`2ad0459`, `bad66a1`, `5d2b345`).
 
 ## Context

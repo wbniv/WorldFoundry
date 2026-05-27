@@ -6,6 +6,7 @@
 
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"   // ImGui::InputText(label, std::string&) — editable strings
+#include "imgui_markdown.h"          // ImGui::Markdown — Notes leaf rendering (matches chat sidebar)
 
 #include <oas/oad.h>   // BUTTON_* / SHOW_AS_* dispatch codes (named, not magic)
 
@@ -438,6 +439,18 @@ bool DrawComponents(wfcrdt::Doc& doc, int actor, PropField& f,
     return false;
 }
 
+// ── Notes Markdown rendering (editor-only) ────────────────────────────────────
+// The "Notes" leaf renders as Markdown when idle (matching the chat sidebar in
+// main.cc) and falls back to the InputTextMultiline edit box on click. Only the
+// Notes field — every other MultilineStr field (XDATA/WAVEFORM Forth scripts)
+// keeps the plain box. Default config = inert links + default fonts, exactly
+// like chat's s_md; the wire format stays plaintext (render is display-time).
+static ImGui::MarkdownConfig s_notes_md;
+// Which Notes field (actor index + child_index) is in edit mode; -1/-1 = none.
+static int  s_notes_edit_actor    = -1;
+static int  s_notes_edit_child    = -1;
+static bool s_notes_focus_pending = false;   // grab keyboard focus the first edit frame only
+
 // Returns true if this field committed an edit to the Doc this frame.
 bool DrawValueWidget(wfcrdt::Doc& doc, int actor, PropField& f, int row)
 {
@@ -531,10 +544,49 @@ bool DrawValueWidget(wfcrdt::Doc& doc, int actor, PropField& f, int row)
                 edited = Commit(doc, actor, f, nullptr, &f.label);
             break;
         }
-        case FieldKind::MultilineStr:
+        case FieldKind::MultilineStr: {
+            // Gate on the *display* name: a real Notes field's identity name is
+            // "Cave Logic Studios Notes|" while its OAD display name is "Notes",
+            // so match display_label (and name, defensively). This also keeps the
+            // Forth Script leaf (display "Script", also TEXTEDITOR) plain.
+            // DORMANT: the shipped .oad emits Notes as BUTTON_XDATA + SHOW_AS_N_A
+            // (→ FieldKind::Skip), so Notes isn't drawn yet; this path lights up
+            // once the OAD carries SHOW_AS_TEXTEDITOR (see TODO: OAS codegen).
+            const bool is_notes = Normalize(f.display_label) == "notes" ||
+                                  Normalize(f.name) == "notes";
+            const bool editing  = is_notes &&
+                                  s_notes_edit_actor == actor &&
+                                  s_notes_edit_child == f.child_index;
+            if (is_notes && !editing) {
+                // Idle: render the STR body as Markdown in one group so the
+                // variable-height block has a single clickable bounding box.
+                ImGui::BeginGroup();
+                if (f.label.empty())
+                    ImGui::TextDisabled("(click to add notes)");
+                else
+                    ImGui::Markdown(f.label.c_str(), f.label.size(), s_notes_md);
+                ImGui::EndGroup();
+                if (ImGui::IsItemHovered()) ImGui::SetTooltip("Click to edit (Markdown)");
+                if (ImGui::IsItemClicked()) {
+                    s_notes_edit_actor    = actor;
+                    s_notes_edit_child    = f.child_index;
+                    s_notes_focus_pending = true;
+                }
+                break;
+            }
+            // Edit box: Notes in edit mode, or any non-Notes multiline field.
+            if (editing && s_notes_focus_pending) {
+                ImGui::SetKeyboardFocusHere();   // first edit frame only — else focus can never leave
+                s_notes_focus_pending = false;
+            }
             if (ImGui::InputTextMultiline("##ml", &f.label, ImVec2(-FLT_MIN, 48)))
                 edited = Commit(doc, actor, f, nullptr, &f.label);
+            if (editing && ImGui::IsItemDeactivated()) {   // focus left → back to Markdown next frame
+                s_notes_edit_actor = -1;
+                s_notes_edit_child = -1;
+            }
             break;
+        }
         case FieldKind::Str:
             if (ImGui::InputText("##s", &f.label, ImGuiInputTextFlags_EnterReturnsTrue))
                 edited = Commit(doc, actor, f, nullptr, &f.label);
@@ -559,6 +611,16 @@ bool RenderProperties(wfcrdt::Doc& doc, int actor_index, std::vector<PropField>&
         return false;
     ImGui::TableSetupColumn("Field", ImGuiTableColumnFlags_WidthFixed, 150.0f);
     ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
+
+    // Reset Notes edit-mode when the selected actor changes, so a lingering
+    // edit slot for a no-longer-shown actor can't resurface as an edit box.
+    static int s_last_actor = -1;
+    if (actor_index != s_last_actor) {
+        s_last_actor          = actor_index;
+        s_notes_edit_actor    = -1;
+        s_notes_edit_child    = -1;
+        s_notes_focus_pending = false;
+    }
 
     // Screenshot aid (env-gated, off by default): scroll the panel so a named
     // field is near the top — lets a headless capture frame a widget that would

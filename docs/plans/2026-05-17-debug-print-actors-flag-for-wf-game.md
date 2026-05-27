@@ -1,5 +1,7 @@
 # `--debug-print-actors` flag for `wf_game`
 
+**Status:** DONE — `gDebugPrintActors` + `--debug-print-actors` implemented ([`actor.cc:673`](../../wfsource/source/game/actor.cc)).
+
 ## Context
 
 Debugging WF levels via the engine + debug bridge currently requires correlating bridge `{"op":"state","idx":N,"pos":[…]}` events with WF actor identities by position alone — there's no built-in way to learn that `idx=19` is e.g. `Target02` or that `idx=9` is the player. On 2026-05-17 we spent meaningful time disambiguating two player-shaped indices in SMB W1-1 and only confirmed `idx=19` was the camera lookat target by matching its coordinates against `LOOKAT_POS` in the Blender script. A one-shot construction-time log that prints `idx → mesh/kind/mobility/pos` per actor would make every future bridge session legible.

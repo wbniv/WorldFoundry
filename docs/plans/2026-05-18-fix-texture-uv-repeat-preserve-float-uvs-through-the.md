@@ -1,5 +1,7 @@
 # Fix texture UV repeat — preserve float UVs through the GL path
 
+**Status:** OPEN — float-UV passthrough + `fract` in the modern shader not implemented; tracked as a bug in [TODO.md § Camera/Render](../../TODO.md).
+
 ## Context
 
 [docs/investigations/2026-05-18-texture-uv-uint8-overflow.md](../../WorldFoundry.2026-new-level/docs/investigations/2026-05-18-texture-uv-uint8-overflow.md) documents the root cause: mesh UVs (full-precision `Scalar`s in `vertexList[i].u/v`) get truncated to `unsigned char` when `material.cc` builds a `POLY_GT3`/`POLY_FT3` primitive (`CalcVRAMuv` macro at [rendmatt.cc:69-79](../../WorldFoundry.2026-new-level/wfsource/source/gfx/rendmatt.cc)). On the GL backend the truncated uchar is later divided back to float `[0,1]` of the atlas *page* — losing both the original UV precision and the wrap-modulo semantics the PS1 GPU used to provide. `GL_REPEAT` on the texture object is set but useless: by the time the shader sees `v_uv`, it has already been hammered into `[0,1]`.

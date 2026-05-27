@@ -1,5 +1,7 @@
 # Fix SMB scrolling camera bugs surfaced by Pass 1 video
 
+**Status:** DONE 2026-05-18 (commits `e3308a2d`, `0723fd1c`) — camera tracks Player; coin arc re-tune; walkthrough harness despawns enemies.
+
 ## Context
 
 Pass 1 of the validation plan (scripted walk-through capture) ran cleanly and produced [`tests/screenshots/smb_scroll_walkthrough.mp4`](../../WorldFoundry.2026-new-level/tests/screenshots/smb_scroll_walkthrough.mp4) (583 KB, 104.9 s, 30 fps). Visual review of extracted frames at t=3, 15, 30, 50, 70, 90, 100 s revealed three problems the still-shot panel missed:

@@ -10,7 +10,7 @@ class VoiceChat;
 class VideoChat;
 
 // Render the "Collaborators" dockable ImGui window. Call once per frame from
-// the editor_frame callback after ImGui::NewFrame(). show_collab is toggled by
+// the editor_build callback after ImGui::NewFrame(). show_collab is toggled by
 // View→Collaborators; if false the window is not drawn.
 void RenderCollabPanel(bool& show_collab,
                        CollabSession& session,

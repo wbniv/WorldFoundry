@@ -1,7 +1,7 @@
 # Jolt defensive null — already implemented (no work needed)
 
 **Date:** 2026-05-17
-**Status:** Ready to implement
+**Status:** DONE — already implemented in `7af255b` (predates this plan); confirmed in `dd5497c8`.
 
 ## Context
 

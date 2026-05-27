@@ -24,11 +24,58 @@ namespace wfedit {
 // where each chunk is the recursive node Y.Map { chunk_type, children|text }
 // (design doc § "CRDT schema"). Returns false (and logs to stderr) if levtree
 // can't be found / exits non-zero / emits unparseable JSON.
-bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc);
+//
+// `lev_path` may be a text `.lev`, a compiled binary level (`.iff`/`.lvl`,
+// sniffed by content not extension), or a `cd.iff` archive with a level
+// selector — `<file.iff>:<TAG|index>` (e.g. `wflevels/cd.iff:L4`). A binary
+// input is decompiled to a temp `.lev` via `levcomp decompile` first, then the
+// existing levtree → Doc path runs unchanged.
+//
+// `out_save_path` (optional) reports where the editor should Save: for a text
+// `.lev` it's the source itself (in-place Save); for a binary load it's a fresh
+// sibling `.lev` (Save-As — the binary is read-only, there's no binary writer).
+bool LoadLevelTreeIntoDoc(const std::string& lev_path, wfcrdt::Doc& doc,
+                          std::string* out_save_path = nullptr);
 
 // Run `levtree print` on a chunk-tree JSON string → canonical `.lev` text (the
 // inverse of `levtree parse`). Used by level_save's SaveDocToLev.
 bool RunLevtreePrint(const std::string& json, std::string& out_lev);
+
+// One entry of a multi-level `cd.iff` archive's TOC, as the in-editor level
+// picker shows it. `tag` is the FOURCC the engine knows the level by ("L4",
+// "SHEL"); `index` is its TOC position (the decimal `--level` selector);
+// `offset`/`size` are the (sector-granular) byte extent in the archive.
+struct CdIffLevel {
+    int         index = 0;
+    std::string tag;
+    long        offset = 0;
+    long        size   = 0;
+};
+
+// Enumerate the levels in a `cd.iff` archive by shelling out to
+// `levcomp decompile <cd.iff> <objects.lc> --list` and parsing the TOC table.
+// Returns empty on any failure or for a non-archive input (a bare single-level
+// `.iff`, a text `.lev`) — the caller treats empty as "nothing to pick".
+std::vector<CdIffLevel> ListCdIffLevels(const std::string& cd_path);
+
+// True when `leveltree_arg` is a bare multi-level archive that should trigger the
+// startup level picker: no `:<tag>` selector, binary content, and ≥ 2 TOC
+// entries. A text `.lev`, a bare single-level `.iff`, or an explicit
+// `<file>:<tag>` selector all return false (load directly, no picker).
+bool NeedsLevelPicker(const std::string& leveltree_arg);
+
+// Resolve the engine viewport level file (for `HALStart -L<path>`) from the
+// final (post-picker) Doc source, so the 3D viewport shows the same level the
+// Outliner/Properties do. `-L` wants a *complete `L<N>` chunk* file (8-byte
+// header + ALGN + RAM + …, exactly as it appears inside cd.iff):
+//   • a bare binary `.iff` already is one          → returns it; out_is_temp=false
+//   • a level inside `cd.iff` (`<cd.iff>:<tag>`)    → slices that chunk to a temp
+//                                                     `.iff`; out_is_temp=true
+//   • a text `.lev` (no binary to show)            → returns "" (caller keeps its
+//                                                     own --level)
+// When out_is_temp is true the returned temp must outlive the engine session —
+// the caller unlinks it at exit.
+std::string ResolveEngineViewportLevel(const std::string& leveltree_arg, bool& out_is_temp);
 
 // Structural editing (the lossless v2 schema makes these save faithfully). Both
 // edit the Doc `content` array; the viewport reflects them on reload (live
@@ -86,8 +133,13 @@ struct ActorField {
 // sub-chunk to write — "DATA" (raw value) or "STR" (label) — or "" to set the
 // field chunk's own text when it's a bare leaf. Returns false if the path /
 // leaf doesn't exist (creates nothing — mirror-the-oracle: edits, never adds).
+// `remote=true` writes the edit on a Doc::beginRemote() (kOriginRemote)
+// transaction instead of Doc::begin() — used to simulate a peer/replay/DAP edit
+// (it stays out of local undo history and, like a real relay apply, drives the
+// viewport only through the bridge's deep observer). Default false = a local edit.
 bool WriteFieldLeaf(wfcrdt::Doc& doc, int actor_index, int child_index,
-                    const char* leaf_type, const std::string& new_text);
+                    const char* leaf_type, const std::string& new_text,
+                    bool remote = false);
 
 // Read every field of content[actor_index] out of the Doc: each child chunk's
 // NAME + DATA. Skips the actor's own top-level NAME (shown separately).

@@ -1,5 +1,7 @@
 # Plan — Q✱bert round-clear reset and level progression
 
+**Status:** DONE (commit `eef68018`) — round-clear celebration + cube reset + round-number increment.
+
 ## Context
 
 After the per-face cube palette work (2026-05-04), the level plays correctly: all 28 cubes

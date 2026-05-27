@@ -1,5 +1,7 @@
 # Plan: Promote `DO_CD_IFF` to a togglable build flag
 
+**Status:** OPEN — `DO_CD_IFF` is still file-local in `game.cc`; promotion to a `WF_CD_IFF` build flag not implemented.
+
 ## Context
 
 `DO_CD_IFF` is the toggle that distinguishes "engine loads its asset bundle

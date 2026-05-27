@@ -102,10 +102,11 @@ public:
 
 #if defined(WF_ENABLE_EDITOR)
 	// Editor-mode driver (approach (a), docs/plans/2026-05-20-editor-app-shell.md).
-	// Loads -L<level>, then loops: StepFrame(do_swap=false) renders the level
-	// into the back buffer, then the editor's registered per-frame callback
-	// (SetEditorFrameCallback) composites its ImGui UI and swaps. Returns when
-	// the callback signals quit (editor window closed). wf-edit's --editor CLI.
+	// Loads -L<level>, then loops: the editor's build callback applies pending
+	// edits + builds its UI, StepFrame(do_swap=false) renders the level into the
+	// back buffer, then the editor's present callback composites its ImGui UI and
+	// swaps (SetEditorFrameCallbacks). Returns when build signals quit (editor
+	// window closed). wf-edit's --editor CLI.
 	void RunEditor();
 #endif
 

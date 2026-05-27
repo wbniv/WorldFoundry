@@ -1,5 +1,7 @@
 # Tooling & Claude configuration for arcade-faithful conversions
 
+**Status:** DONE — arcade-faithful tooling/skills live under `~/wf-games/.claude`.
+
 ## Context
 
 WF + wf-games is converting **38 classic arcade games** (Q✱bert in-flight; Marble Madness, Donkey Kong, Centipede, Asteroids, Boulder Dash, etc. queued) to 3D World Foundry. The engine-side pipeline (Blender → `levcomp-rs` → `iffcomp-rs` → engine, with zForth scripts) is mature and proven on `mm_practice` and Q✱bert.

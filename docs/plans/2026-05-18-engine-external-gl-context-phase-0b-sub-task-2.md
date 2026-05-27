@@ -1,5 +1,7 @@
 # Implementation plan — engine external GL context (Phase 0b sub-task #2)
 
+**Status:** DONE (commit `a907d79e`) — all 9 steps; host GL context + `HALRequestClose` + e2e harness.
+
 Executes [`docs/plans/2026-05-18-engine-external-gl-context.md`](../../WorldFoundry.2026-new-level/docs/plans/2026-05-18-engine-external-gl-context.md). That doc is the design + risks; this file is the per-commit execution checklist with corrections from current-code verification.
 
 ## Context

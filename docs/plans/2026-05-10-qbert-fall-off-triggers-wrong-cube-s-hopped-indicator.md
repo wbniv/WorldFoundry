@@ -1,5 +1,7 @@
 # Plan: Qbert fall-off triggers wrong cube's hopped indicator
 
+**Status:** Presumed resolved during the qbert_practice consolidation — no dedicated fix commit pinned, not re-verified. Reopen if it recurs.
+
 ## Context
 
 In `qbert_practice` (post Phase 1 consolidation, commit `f3d2fe6`), hopping off the

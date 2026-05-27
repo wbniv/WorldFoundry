@@ -1,5 +1,7 @@
 # Plan: Add "loss of exact equality comparison" cost to fixed-point survey doc
 
+**Status:** DONE — the exact-equality-cost note is in the [fixed-point platform survey](../investigations/2026-05-10-fixed-point-platform-survey.md) (§ float trade-offs).
+
 ## Context
 
 The fixed-point platform survey

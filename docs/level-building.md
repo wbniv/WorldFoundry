@@ -16,6 +16,7 @@ internals at the bottom. For per-symptom debugging recipes, see
 3. [Authoring conventions](#authoring-conventions)
    - [Blender Viewport Display by Object Type](#blender-viewport-display-by-object-type)
 4. [Engine systems you wire from a level](#engine-systems-you-wire-from-a-level)
+   - [Composing actors — sensors + visuals](#composing-actors--sensors--visuals-reach-for-this-before-a-new-class) — prefer composition over new classes; `ActBox` trigger volumes; catalog of live primitives
    - [Scripting System](#scripting-system) — per-frame player script, camera-relative input (SW iso), Director / ActBoxOR pattern, level selection without scripts
    - [Camera System](#camera-system) — state machine, EMAILBOX_CAMSHOT bootstrap
 5. [Worked example — Marble Madness arcade-ROM pipeline](#worked-example--marble-madness-arcade-rom-pipeline)
@@ -317,6 +318,120 @@ fields, mailboxes, and Forth scripts. The patterns below are what the
 existing levels (`mm_practice`, `qbert_practice`, `snowgoons`, the MM
 reproduction) actually use.
 
+### Composing actors — sensors + visuals (reach for this *before* a new class)
+
+WF game objects are usually **compositions of small, single-purpose primitive actors**, not
+bespoke classes. A whole category of actors are **sensors / references designed to pair with
+another object**: they detect something and write a mailbox, or they act on a *referenced*
+object. **Before** you write a new `EActorKind` (see [Creating a new OAD class](#creating-a-new-oad-actor-class))
+— or overload an existing class to get "scriptable + collidable" — check whether a composition
+of existing primitives already does the job. It almost always does, and it keeps each actor
+single-purpose.
+
+**The workhorse trigger volume — `ActBox`.** An invisible activation volume (`Model Type =
+None`). When an actor passes its `Activated By Actor` filter and overlaps its bounding volume,
+it writes a configurable value to a configurable mailbox (its `MailBox` / `MailBoxValue`
+fields), with a separate exit value (`ClearOnExit` / `Mailbox Exit Value`) and an optional
+directional `FieldFX` (wind/conveyor). It is the canonical *"when the player reaches **here**,
+fire **this** mailbox"* primitive — you place it **at** the thing it guards, so the placement
+*is* the trigger region. (`ActBoxOR` is the sibling that activates a referenced **Object**,
+e.g. a CamShot — used for camera-zone switches.)
+
+> **ActBox fires under Jolt.** Its overlap test is `Activation::Activated()`
+> ([`activate.cc`](../wfsource/source/physics/activate.cc)) → `PhysicalAttributes::CheckCollision`
+> — a pure AABB test on position + bbox, **independent** of the legacy collision-event pipeline
+> that is dead under Jolt. The player is in `ROOM_OBJECT_LIST_COLLIDE` (`Actor::CanCollide` =
+> `collisionTable[kind] && Mass>0`) and its `PhysicalAttributes` are synced from Jolt each frame
+> *before* `ActBox::update()` runs, so the trigger works. (Contrast the per-actor `COLLIDER_IDX`
+> mailboxes, which *did* need explicit Jolt-contact-listener wiring — see the
+> [troubleshooting guide](level-design-troubleshooting.md).)
+
+**Worked example — flagpole ends the level.** A flagpole is *not* a class; compose it:
+
+- the pole + flag are a plain **`statplat`** (just the art);
+- drop an **`ActBox`** volume on the flagpole with `Activated By Actor = Player`,
+  `MailBox = 1905` (`INDEXOF_END_OF_LEVEL`, [`mailbox.inc:31`](../wfsource/source/mailbox/mailbox.inc)),
+  `MailBoxValue = 1`.
+
+Mario walks into the volume → the ActBox writes `1` to `END_OF_LEVEL` → the level unloads
+([`level.cc`](../wfsource/source/game/level.cc) `EMAILBOX_END_OF_LEVEL` → `_done`). No script,
+no coordinate, no class.
+
+**Anti-patterns this replaces**
+
+- ❌ **Position threshold baked into a script** — e.g. the player's script doing
+  `INDEXOF_X_POS read-mailbox 63 > if … END_OF_LEVEL …`. The author has to read the goal's
+  coordinate off the level and transcribe it into *another* actor's script; it silently breaks
+  the moment the goal moves, and it couples the player to the goal's placement. There's no clean
+  way for the author to "know" that number. Use a trigger volume **co-located** with the goal.
+- ❌ **Overloading a class to get capabilities** — e.g. making the flagpole a `generator` just
+  because `generator` is the only anchored + collidable + **scriptable** class (`statplat`
+  forbids scripts — `actor.cc:736`). That's the actor-kind-vs-capability smell. Compose a sensor
+  (`ActBox`) next to the dumb visual instead.
+
+**Catalog of composable primitives (all LIVE today)** — sensors/references you wire to other
+objects:
+
+| Primitive | Pairs with | Does |
+|-----------|-----------|------|
+| `ActBox` | a mailbox | overlap → write `MailBox = MailBoxValue` (+ exit value, + `FieldFX` push) |
+| `ActBoxOR` | an Object (CamShot) | overlap → activate the referenced object (camera zones) |
+| `Warp` | a `Target` | overlap → teleport the entering actor to the Target's position (← SMB pipes) |
+| `Generator` | a template Object | on activation, spawn its `Object To Throw` (← `?`-block coins) |
+| `Destroyer` | activation | remove objects on trigger |
+| `Spike` | contact | apply a `Health Modifier` to whoever touches it (← hazards) |
+| `Shield` | the Player | follows + absorbs hits (← power-ups) |
+| `Shadow` | a template Object | casts that object's drop-shadow onto the floor |
+| `Platform` | a path | moving / path-following surface |
+| `Target` / `CamShot` / `Director` | referenced by others | position markers, camera shots, mailbox orchestration |
+
+The shared `activate.inc` block — `Activated By Actor` = *any* / *specific-actor* / *class* /
+*list* — is the filter that makes every trigger-style primitive selective.
+
+**Dead stubs — do not author against these** (they have an `.oas` but no backing C++ class and
+aren't registered as a kind): `Pole`, `Meter`, `Movie`. Each would need engine work first.
+
+#### Full actor-class inventory (reference)
+
+The authoritative list of what actually instantiates at runtime is the factory in
+[`objects.c`](../wfsource/source/oas/objects.c) (dispatch on `EActorKind`) + the registration in
+[`objects.lc`](../wfsource/source/oas/objects.lc). As of the 2026-05-25 survey:
+
+**Live actor classes** (you can place/compose these):
+
+| Class | Role |
+|-------|------|
+| `Player` | the playable character (Ground/Air handlers, jump) |
+| `Enemy` | damage-dealing NPC |
+| `StatPlat` | static platform / scenery — **scripts forbidden** (`actor.cc:736` asserts) |
+| `Platform` | movable / path-following surface (C++ minimal; motion via OAS movement block) |
+| `Generator` | spawns its `Object To Throw` template on activation |
+| `Gold` | collectible coin *(template-only — spawned, not placed directly)* |
+| `Shield` | player invulnerability/power-up, follows the player *(template-only)* |
+| `Missile` | projectile *(template-only)* |
+| `Explode` | explosion effect *(template-only)* |
+| `Spike` | applies a `Health Modifier` to whoever contacts it |
+| `Warp` | teleports the entering actor to a referenced `Target` |
+| `Destroyer` | removes objects on activation |
+| `ActBox` | activation-volume trigger — writes `MailBox=MailBoxValue` on filtered overlap |
+| `ActBoxOR` | activation volume that activates a referenced Object (camera zones) |
+| `Target` | position marker (referenced by `Warp`/`CamShot`/`Director`) |
+| `CamShot` | camera shot / keyframe (Track/Target toggles) |
+| `Camera` | camera control actor |
+| `Director` | orchestration; runs *after* the main loop each tick |
+| `Light` | light source (directional/omni) |
+| `Matte` | background fill (e.g. SMB sky colour) |
+| `LevelObj` | level-wide object (mailbox count, etc.) |
+| `Shadow` | drop-shadow caster for a referenced template |
+| `Tool` | held item / weapon |
+
+**Component / data-only** (the `.oas` exists only to generate a `.ht` struct; *not* an
+instantiable actor): `actor`(`.inc`), `common`, `movebloc`, `mesh`, `activate`, `toolset`,
+`shadowp`, `handle`, plus the legacy/marker types `alias`, `dir`, `file`, `font`, `init`,
+`template`, `disabled`, `test`.
+
+**Dead stubs** (no C++ class, not registered): `Pole`, `Meter`, `Movie`.
+
 ### Scripting System
 
 #### Per-frame player script (basic pattern)
@@ -383,7 +498,7 @@ WF mailboxes form a hierarchy. Understanding scope prevents the most common cros
 |---|---|---|---|
 | 0–1 | `EMAILBOX_FALSE` / `EMAILBOX_TRUE` | Global, read-only | Set by engine at level load; write attempts are silently dropped (assert in debug builds). Use mb[1] as a "always-true" visibility mailbox. |
 | 2–999 | Global user | **Shared across all actors** | Director, player, cube actors, etc. all read/write the same cells. Q✱bert's cube-state mailboxes (200–227), round counter (425), etc. live here. |
-| 1000–1021 | Global system | Global, side-effects | `INDEXOF_CAMSHOT` = 1021 writes the active camera. |
+| 1000–1999 | Global system | Global, side-effects | `INDEXOF_CAMSHOT` = **1921** writes the active camera — verified against [`mailbox.inc`](../wfsource/source/mailbox/mailbox.inc) (`MAILBOXENTRY( CAMSHOT, 1921 )`) and the engine's `zforth: INDEXOF_CAMSHOT = 1921` line. **It is NOT 1021** — an earlier revision of this table said 1021; an ActBoxOR/script that writes the wrong slot silently fails to switch the camera. |
 | 2000–2099 | Local user | Per-actor | Each actor has its own storage at this range. Rarely needed for game logic. |
 | 3000–3036 | Local system | Per-actor, side-effects | **`INDEXOF_X_POS` = 3009, `INDEXOF_Y_POS` = 3010, `INDEXOF_Z_POS` = 3011.** Writing here moves the *calling actor's* position. |
 | 4000–4099 | Scratch | Per-script-call | Temporary storage within a single script execution. |
@@ -421,7 +536,7 @@ Most gameplay actors (platform, statplat) default to `VisibilityMailbox = 1` (re
 - **Director script** (per frame): reads mailboxes 98/99/100 and writes to `$INDEXOF_CAMSHOT`.
   These mailboxes are set by ActBoxOR trigger zones.
 - **ActBoxOR objects**: write a named object's index to a mailbox when the Player enters
-  their trigger volume. In snowgoons, one ActBoxOR writes `CamShot01`'s index to mailbox 1021
+  their trigger volume. In snowgoons, one ActBoxOR writes `CamShot01`'s index to mailbox 1921 (`INDEXOF_CAMSHOT`)
   (`EMAILBOX_CAMSHOT`) when the Player enters.
 - **NullInterpreter stub**: `wftools/engine/stubs/scripting_stub.cc` — replaces Tcl scripting
   with a no-op. All `RunScript()` calls return 0. This is intentional pending replacement
@@ -460,7 +575,7 @@ initializer list, and move the `_overrideLevelNum` check to BEFORE the asserts.
 
 - **DelayCameraHandler**: waits up to 5 frames for `EMAILBOX_CAMSHOT > 0` then transitions.
   Assertion at `movecam.cc:885` fires if nobody writes a valid CamShot index within 5 frames.
-- **BungeeCameraHandler**: main follow camera. Each frame reads `EMAILBOX_CAMSHOT` (mailbox 1021)
+- **BungeeCameraHandler**: main follow camera. Each frame reads `EMAILBOX_CAMSHOT` (mailbox 1921)
   to get the active CamShot object's index. Originally cleared the mailbox after reading
   (relied on ActBoxOR to re-write each frame).
 - **NormalCameraHandler**: validates that the stored shot index is a real CamShot object.
@@ -482,15 +597,26 @@ fine — see [troubleshooting](level-design-troubleshooting.md). These toggles a
 `TYPEENTRYBOOLEANTOGGLE` enums; a `.lev` where their `DATA` and `STR` disagree is
 corrupt and now hard-fails on Blender import.
 
-#### EMAILBOX_CAMSHOT Bootstrap (scripting disabled)
+#### EMAILBOX_CAMSHOT Bootstrap
 
-With scripting disabled, ActBoxOR trigger zones never fire. Fix in `level.cc::constructObject`:
-when a `CamShot_KIND` object is constructed and the mailbox is still 0, write the CamShot's
-actor index to `EMAILBOX_CAMSHOT`. This is a one-time bootstrap; the value persists.
+> **Correction (2026-05-25, verified):** an earlier version of this section claimed
+> "with scripting disabled, ActBoxOR trigger zones never fire." **That is wrong.**
+> `ActBoxOR::update` ([actboxor.cc](../wfsource/source/game/actboxor.cc)) activates via a
+> pure **C++ overlap test** (`Activation::Activated()`), *independent* of the script
+> engine — exactly like `ActBox`. A fresh ActBoxOR fired and switched the camera with
+> Tcl scripting disabled (the SMB pipe-warp `abor_coin`). What actually broke that switch
+> the first time was writing the **wrong mailbox** (1021 vs the real `INDEXOF_CAMSHOT` =
+> 1921), not a dead ActBoxOR. Verify capability claims against the code, not this doc.
 
-`BungeeCameraHandler::predictPosition()` originally cleared the mailbox after use (line 988).
-With scripting disabled this is suppressed — the mailbox stays set to the initial CamShot
-so the camera keeps working without per-frame ActBoxOR writes.
+There is still a one-time **bootstrap**: in `level.cc::constructObject`, when a
+`CamShot_KIND` object is constructed and `EMAILBOX_CAMSHOT` is still 0, the engine writes
+that CamShot's actor index. This seeds the *initial* shot (the first CamShot constructed)
+so a level with a single camshot needs no ActBoxOR at all.
+
+`BungeeCameraHandler::predictPosition()` originally cleared the mailbox after use (line 988);
+that clear is suppressed here, so the mailbox **persists** at the last written value. A
+single-camshot level therefore stays on the bootstrapped shot forever; a multi-camshot level
+must have an in-room ActBoxOR (or the Director) overwrite `INDEXOF_CAMSHOT` to switch shots.
 
 #### Per-frame camera slew clamp (10 units/frame, hardcoded)
 
@@ -835,6 +961,14 @@ Adding a brand-new actor class (a new `EActorKind`, e.g. the SMB `Gold`
 collectible) is **not** a level-authoring task you do per-level — it touches the
 engine's OAS codegen. But level designers hit it the moment a level needs a
 behaviour no shipped class provides, so the full procedure lives here.
+
+> **Try composition first.** Most "the level needs a behaviour no class provides" cases are
+> actually solved by *combining existing primitives* — a trigger volume + a visual, a `Warp` +
+> `Target`, a `Generator` + a template — not by a new class. See
+> [Composing actors](#composing-actors--sensors--visuals-reach-for-this-before-a-new-class).
+> Only reach for a new `EActorKind` when no composition of live primitives can express the
+> behaviour. `Gold` qualified (a genuinely new collectible-pickup behaviour); a flagpole does
+> **not** (it's `statplat` + `ActBox`).
 
 > **The cardinal rule: edit the *masters*, then *regenerate* the derived files.
 > Never hand-edit a generated `objects.*` / `*.ht` file.** Every `objects.*`

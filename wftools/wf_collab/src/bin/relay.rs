@@ -31,11 +31,18 @@ use yrs::{Doc, StateVector, Update, Transact, ReadTxn};
 use yrs::updates::decoder::Decode;
 
 // ── Wire protocol constants ───────────────────────────────────────────────────
+//   0x01 SYNC     — Yrs v1 update bytes; relay applies + fans out
+//   0x02 PRESENCE — ephemeral peer state (passthrough)
+//   0x03 CHAT     — text chat (passthrough)
+//   0x04 CONTROL  — first message: [0x04][room_id\0peer_id]
+//   0x05 SIGNAL   — WebRTC SDP/ICE: [0x05][to_peer_id\0 json_payload]
+//                   relay unicasts to `to` if non-empty, else fanout (excluding sender)
 
-const CH_SYNC: u8 = 0x01;
+const CH_SYNC: u8     = 0x01;
 const CH_PRESENCE: u8 = 0x02;
-const CH_CHAT: u8 = 0x03;
-const CH_CONTROL: u8 = 0x04;
+const CH_CHAT: u8     = 0x03;
+const CH_CONTROL: u8  = 0x04;
+const CH_SIGNAL: u8   = 0x05;
 
 // ── Snapshot helpers ──────────────────────────────────────────────────────────
 
@@ -279,6 +286,21 @@ async fn handle_tcp(
                 let rooms_lock = rooms.lock().unwrap();
                 if let Some(room) = rooms_lock.get(&room_id) {
                     room.fanout(&bytes, &peer_id);
+                }
+            }
+            CH_SIGNAL => {
+                // Targeted SDP/ICE signaling: payload = [to_peer_id NUL json].
+                // Unicast to named peer if `to` non-empty; fanout (excl. sender) otherwise.
+                let payload = &bytes[1..];
+                let mid = payload.iter().position(|&x| x == 0).unwrap_or(payload.len());
+                let to = String::from_utf8_lossy(&payload[..mid]).into_owned();
+                let rooms_lock = rooms.lock().unwrap();
+                if let Some(room) = rooms_lock.get(&room_id) {
+                    if to.is_empty() {
+                        room.fanout(&bytes, &peer_id);
+                    } else if let Some(tx) = room.peers.get(&to) {
+                        let _ = tx.send(bytes.to_vec());
+                    }
                 }
             }
             other => {

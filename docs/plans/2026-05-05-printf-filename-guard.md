@@ -1,5 +1,7 @@
 # Plan — Guard against printf-style filenames in committed/staged paths
 
+**Status:** PARTIAL — Layer 1 (repo `scripts/git-hooks/pre-commit`) shipped (offending file renamed in `24298e1`); Layer 2 (Claude/tui hook) deferred pending user approval.
+
 **Date:** 2026-05-05
 
 ## Context
