@@ -278,7 +278,7 @@ tasks:
           engine/wf_game "-L$ARGS" --debug-port 7777 --debug-bind 0.0.0.0
 
   dev-setup:
-    desc: "Install all dev dependencies (Linux build + Android toolchain)"
+    desc: "Install runtime dev dependencies (Linux build + Android toolchain)"
     cmds:
       - |
         sudo apt-get install -y \
@@ -293,6 +293,12 @@ tasks:
           openjdk-17-jdk \
           adb \
           google-android-ndk-r26c-installer
+
+  dev-setup-editor:
+    desc: "Install editor-only dev dependencies (wf-edit: TLS for wss:// signaling)"
+    deps: [dev-setup]
+    cmds:
+      - sudo apt-get install -y libssl-dev
 
   blender:
     desc: "Launch Blender, print logs to terminal and capture to /tmp/blender.log"
