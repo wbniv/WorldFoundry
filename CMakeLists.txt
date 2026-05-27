@@ -59,11 +59,13 @@ option(WF_ASAN "AddressSanitizer + UBSan (default ON for host Debug; -DWF_ASAN=O
 # cases, editor for its CRDT bridge). See the per-source-list gate below.
 option(WF_ENABLE_EDITOR   "Build the collaborative editor stack (CRDT + replay UI + DAP, etc.). OFF for shipped game-engine builds; ON for the editor application." OFF)
 
-# Mobile (Android + iOS): Forth-only scripting, no Steam, no editor stack,
-# no debug bridge, no REST API.
+# Mobile (Android + iOS) + macOS desktop bring-up: Forth-only scripting, no
+# Steam, no editor stack, no debug bridge, no REST API.
 # Matches build_game.sh Android flags. WAMR in particular ships x86_64 assembly
-# (`invokeNative_em64.s`) that fails to build on arm64 mobile targets.
-if(ANDROID OR IOS)
+# (`invokeNative_em64.s`) that fails to build on arm64 mobile targets. macOS
+# desktop joins this minimal set while the renderer-agnostic bring-up keeps the
+# link surface small; the extra engines can be re-enabled once it's green.
+if(ANDROID OR IOS OR APPLE)
     set(WF_LUA_ENGINE    "none"   CACHE STRING "" FORCE)
     set(WF_ENABLE_FENNEL OFF      CACHE BOOL   "" FORCE)
     set(WF_JS_ENGINE     "none"   CACHE STRING "" FORCE)
@@ -107,6 +109,11 @@ elseif(IOS)
     # Phase 1: core runtime + HAL only. No RENDERER_* yet — gfx/game/physics
     # dirs are excluded from the iOS build until Phase 2 lands the Metal backend.
     list(APPEND WF_DEFS WF_TARGET_IOS SCALAR_TYPE_FLOAT)
+elseif(APPLE)
+    # macOS desktop — renderer-agnostic bring-up. No RENDERER_* (rendering is a
+    # true no-op via engine/stubs/renderer_stub.cc); gfx/gl + gfx/glpipeline are
+    # excluded like iOS. The real Metal renderer lands later, shared with iOS.
+    list(APPEND WF_DEFS WF_TARGET_MACOS SCALAR_TYPE_FLOAT)
 else()
     list(APPEND WF_DEFS WF_TARGET_LINUX __LINUX__
                         RENDERER_GL RENDERER_PIPELINE_GL SCALAR_TYPE_FLOAT)
@@ -143,6 +150,22 @@ elseif(IOS)
     set(WF_DIRS
         pigsys streams cpplib math memory iff mailbox
         hal hal/ios
+        gfx
+        input asset baseobject movement room physics
+        anim timer scripting game ini loadfile
+        profile renderassets savegame savegame/linux
+        menu particle audio/linux
+    )
+elseif(APPLE)
+    # macOS desktop — mirrors iOS: gfx/gl (X11/GLX) + gfx/glpipeline (GL backend)
+    # excluded; rendering is a no-op. hal/macos provides the entry shell, the
+    # headless Display, and GL/window stubs. The portable Linux HAL files
+    # (platform_init/audio/input/lifecycle/asset_accessor_posix) are reused
+    # explicitly in the macOS stub-sources block below. savegame/linux +
+    # audio/linux are POSIX/miniaudio — Darwin-portable.
+    set(WF_DIRS
+        pigsys streams cpplib math memory iff mailbox
+        hal hal/macos
         gfx
         input asset baseobject movement room physics
         anim timer scripting game ini loadfile
@@ -196,6 +219,12 @@ if(IOS)
     list(APPEND WF_SKIP
         hal/ios/display_ios.cc
     )
+elseif(APPLE)
+    # display_macos.cc is #included from gfx/display.cc (same pattern as
+    # display_ios.cc / gfx/gl/display.cc), not a standalone TU.
+    list(APPEND WF_SKIP
+        hal/macos/display_macos.cc
+    )
 endif()
 
 # ─── Collect sources with skip filter ─────────────────────────────────────────
@@ -235,6 +264,22 @@ if(IOS)
     list(APPEND WF_SOURCES
         ${STUB_SRC}/renderpoly3d_stubs.cc
         ${SRC}/gfx/glpipeline/backend_factory.cc
+    )
+elseif(APPLE)
+    # macOS desktop — renderer-agnostic bring-up. The 8 RenderPoly3D link stubs +
+    # the no-op RendererBackend + backend_factory (picks the headless backend via
+    # WF_TARGET_MACOS), plus the portable Linux HAL files reused verbatim
+    # (hal/macos holds only the macOS-specific shell, headless Display, and
+    # GL/window stubs — the rest of the HAL is plain POSIX/miniaudio).
+    list(APPEND WF_SOURCES
+        ${STUB_SRC}/renderpoly3d_stubs.cc
+        ${STUB_SRC}/renderer_stub.cc
+        ${SRC}/gfx/glpipeline/backend_factory.cc
+        ${SRC}/hal/linux/platform_init.cc
+        ${SRC}/hal/linux/audio.cc
+        ${SRC}/hal/linux/input.cc
+        ${SRC}/hal/linux/lifecycle.cc
+        ${SRC}/hal/linux/asset_accessor_posix.cc
     )
 endif()
 
@@ -584,6 +629,12 @@ if(ANDROID)
 elseif(IOS)
     list(APPEND WF_PLATFORM_SHELL_SOURCES
         ${SRC}/hal/ios/native_app_entry.mm)
+elseif(APPLE)
+    # macOS desktop — thin main() shell (Linux-minus-X11), HALStart on the main
+    # thread. platform_init.cc (engine-needed helpers + globals) is reused from
+    # hal/linux and compiled into libwfengine.a via the stub-sources block.
+    list(APPEND WF_PLATFORM_SHELL_SOURCES
+        ${SRC}/hal/macos/platform_main.cc)
 else()
     # Linux: only platform_main.cc (just main()) goes in the shell.
     # platform_init.cc (FatalError, _PlatformSpecificInit, FPEHandler,
@@ -612,9 +663,10 @@ target_compile_options(wfengine PRIVATE
     "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
     "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>"
 )
-if(ANDROID OR IOS)
+if(ANDROID OR IOS OR APPLE)
     # Legacy `register` keyword is C++17-removed; WF's pigsys/endian.cc still
-    # uses it. Silence to match the Linux build's permissive stance.
+    # uses it. Silence to match the Linux build's permissive stance. (APPLE
+    # covers both iOS and macOS desktop — both are Apple Clang.)
     target_compile_options(wfengine PRIVATE -Wno-register)
 endif()
 
@@ -622,7 +674,9 @@ endif()
 # AVFoundation.framework headers on Darwin, which contain Objective-C syntax.
 # The audio/linux/*.cc files would fail to parse as plain C++, so compile them
 # as Objective-C++ on iOS. (Linux/Android stay on plain C++ — no AVFoundation.)
-if(IOS)
+if(APPLE)
+    # Both iOS and macOS desktop: miniaudio.h pulls in AVFoundation (ObjC) on
+    # Darwin, so the audio/linux/*.cc TUs must compile as Objective-C++.
     foreach(_audio_src miniaudio_impl.cc music.cc buffer.cc device.cc)
         set_source_files_properties(
             ${SRC}/audio/linux/${_audio_src}
@@ -645,6 +699,11 @@ elseif(IOS)
     # MACOSX_BUNDLE makes this an .app directory rather than a bare Mach-O.
     # Phase 1C fills in the Info.plist + launch screen via target properties.
     add_executable(wf_game MACOSX_BUNDLE ${WF_PLATFORM_SHELL_SOURCES})
+elseif(APPLE)
+    # macOS desktop — bare Mach-O CLI binary for the headless bring-up (run via
+    # --frame-step-smoke). The .app bundle + NSBundle assets are a later step
+    # (see docs/plans/2026-05-26-macos-port-runtime-bringup.md / TODO).
+    add_executable(wf_game ${WF_PLATFORM_SHELL_SOURCES})
 else()
     add_executable(wf_game ${WF_PLATFORM_SHELL_SOURCES})
     # wf_game always keeps its name as the game-engine runtime. The editor is
@@ -667,7 +726,7 @@ target_compile_options(wf_game PRIVATE
 target_link_options(wf_game PRIVATE
     "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-flto=thin;-Wl,--gc-sections;-Wl,--icf=safe;-Wl,-O2;-Wl,--export-dynamic-symbol=ANativeActivity_onCreate>"
 )
-if(ANDROID OR IOS)
+if(ANDROID OR IOS OR APPLE)
     target_compile_options(wf_game PRIVATE -Wno-register)
 endif()
 
@@ -708,6 +767,19 @@ elseif(IOS)
         "-framework AudioToolbox"
         "-framework CoreAudio"
     )
+elseif(APPLE)
+    # macOS desktop — renderer-agnostic bring-up. miniaudio uses CoreAudio (it
+    # pulls AVFoundation + AudioToolbox on Darwin). NO Metal/MetalKit/QuartzCore
+    # yet (rendering is a no-op), NO OpenGL.framework (GL entry points are
+    # stubbed in hal/macos/gl_stubs.cc), NO X11.
+    list(APPEND WF_LINK_LIBS
+        "-framework Foundation"
+        "-framework CoreFoundation"
+        "-framework CoreAudio"
+        "-framework AudioToolbox"
+        "-framework AVFoundation"
+        m pthread
+    )
 else()
     list(APPEND WF_LINK_LIBS GL GLU X11 m pthread dl)
     # wf_game-specific link option (noexecstack on the final exe, not on the
@@ -731,7 +803,11 @@ target_link_libraries(wf_game  PRIVATE wfengine)
 # duplicate-symbol errors, and proves the Phase B LIFO fixes in
 # ~Level/~WFGame hold when driven from outside RunLevel.
 # Linux/desktop only — host GL plumbing is X11/GLX specific.
-if(NOT ANDROID AND NOT IOS)
+if(NOT ANDROID AND NOT IOS AND NOT APPLE)
+    # macOS desktop is excluded here: these are X11/GLX host-GL + ctest targets
+    # that don't apply to the headless bring-up. macOS verifies by running the
+    # binary directly (--frame-step-smoke) in the Codemagic workflow. Re-add
+    # once the real renderer + display land.
     # Same compile-options as wf_game's shell — Jolt's inline JPH_OVERRIDE_NEW_DELETE
     # operators have ODR sensitivity across translation units that compile with
     # different optimization levels; matching -O0/-g keeps the inlined op-new in
@@ -865,7 +941,7 @@ endif()
 # Standalone executable that links against zforth + the neural-forth C files.
 # Provides its own zf_host_* callbacks; does not depend on wf_game.
 # Excluded from the game build (neural_forth_test.cc is not in WF_SOURCES).
-if(WF_NEURAL_FORTH AND NOT ANDROID AND NOT IOS)
+if(WF_NEURAL_FORTH AND NOT ANDROID AND NOT IOS AND NOT APPLE)
     add_executable(nf_test
         ${NF_DIR}/neural_forth_test.cc
         ${NF_DIR}/dictionary.c

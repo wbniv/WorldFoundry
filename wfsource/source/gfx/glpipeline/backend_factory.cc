@@ -13,6 +13,8 @@
 
 #if defined(WF_TARGET_IOS)
 RendererBackend* MetalBackendInstance();
+#elif defined(WF_TARGET_MACOS)
+RendererBackend* HeadlessBackendInstance();   // engine/stubs/renderer_stub.cc
 #else
 RendererBackend* ModernBackendInstance();
 #endif
@@ -21,6 +23,8 @@ RendererBackend& RendererBackendGet()
 {
 #if defined(WF_TARGET_IOS)
     static RendererBackend* s = MetalBackendInstance();
+#elif defined(WF_TARGET_MACOS)
+    static RendererBackend* s = HeadlessBackendInstance();
 #else
     static RendererBackend* s = ModernBackendInstance();
 #endif

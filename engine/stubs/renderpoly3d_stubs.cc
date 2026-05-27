@@ -13,7 +13,7 @@
 // impls replace these stubs.
 //==============================================================================
 
-#if defined(WF_TARGET_IOS)
+#if defined(WF_TARGET_IOS) || defined(WF_TARGET_MACOS)
 
 #include <gfx/rendobj3.hp>
 

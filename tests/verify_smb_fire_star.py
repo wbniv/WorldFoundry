@@ -50,7 +50,7 @@ SMB_MARIO_STATE                           = 1814
 SMB_FIREFLOWER_PICKUP, SMB_STAR_PICKUP    = 1816, 1817
 SMB_STAR_UNTIL                            = 1818
 # per-actor (read at the actor's own idx)
-ALIVE, X_POS, Z_POS, ZSPEED               = 3004, 3009, 3011, 3020
+ALIVE, X_POS, Z_POS, XSPEED, ZSPEED       = 3004, 3009, 3011, 3018, 3020
 X_SCALE, Y_SCALE, Z_SCALE                 = 3040, 3041, 3042
 SMB_QBLOCK_ACTIVATE                       = 2010
 
@@ -231,57 +231,93 @@ def main() -> int:
         # than read SMB_PLAYER_HURT, which the player consumes (clears) each tick.
         if KOOPA is not None:
             cli.watch(idx=KOOPA, mailbox=X_POS)
+            cli.watch(idx=KOOPA, mailbox=Z_POS)
             cli.watch(idx=KOOPA, mailbox=ALIVE)
             step(2)
-            kx = g(KOOPA, X_POS) or 48.0
             setg(SMB_STAR_UNTIL, PAST)                  # window closed
             setg(SMB_INVULN_UNTIL, PAST)                # and not in i-frames
             setg(SMB_MARIO_STATE, 1)                    # Super, so a hit powers down (no respawn)
-            setg(SMB_MAX_CAM_X, kx + 5.0)
-            cli.set_mailbox(idx=PLAYER, mailbox=X_POS, value=kx)
-            cli.set_mailbox(idx=PLAYER, mailbox=Z_POS, value=g(KOOPA, Z_POS) or 0.75)
-            st = poll(1, SMB_MARIO_STATE, lambda v: v == 0.0, secs=2.0)
+            kx0 = g(KOOPA, X_POS) or 48.0
+            setg(SMB_MAX_CAM_X, kx0 + 5.0)              # reveal the koopa
+            # Pin Mario onto the koopa at ITS OWN Z each tick (dz=0 -> side hit, NOT a
+            # stomp — a stomp would kill the koopa for reasons unrelated to the Star)
+            # and track its walk so dx stays small. Stop when Mario powers down.
+            st = None
+            for _ in range(40):
+                kxi, kzi = g(KOOPA, X_POS), g(KOOPA, Z_POS)
+                if kxi is not None: cli.set_mailbox(idx=PLAYER, mailbox=X_POS, value=kxi)
+                if kzi is not None: cli.set_mailbox(idx=PLAYER, mailbox=Z_POS, value=kzi)
+                step(1, dt=0.03)
+                st = g(1, SMB_MARIO_STATE)
+                if st == 0.0:
+                    break
             koopa_gone = despawned(KOOPA)
-            print(f"  expired touch koopa (kx={kx}): state={st} koopa_gone={koopa_gone}")
+            print(f"  expired touch koopa (kx={kx0}): state={st} koopa_gone={koopa_gone}")
             check(not koopa_gone, "Expiry: touched Koopa survives (not defeated by touch)")
             check(st == 0.0, f"Expiry: enemy hurts the player again (Super->Small, state={st})")
         else:
             check(False, "Koopa not discovered (expiry check skipped)")
 
-        # ── 7. Star bounce (real physics) ────────────────────────────────────────
-        # Spawn a star and let real-time physics run; the bounce needs a genuine
-        # floor contact (injected contacts are wiped per-frame). Watch a small band
-        # of likely spawn indices for the oscillating Z_POS.
-        band = list(range(50, 56))
+        # ── 7. Star bounce + wall-reversal (real physics) ────────────────────────
+        # Spawn a star and let real-time physics run; the bounce + reversal both need
+        # genuine contacts (injected contacts are wiped per-frame). The star pops from
+        # the block @X=57 moving right, bounces along ground_2 to the flagpole @63,
+        # then reverses. We track Z (bounce), X (reached the flagpole), and XSPEED — a
+        # sign flip (+ -> -) is the direct proof of reversal regardless of distance.
+        band = list(range(51, 56))
         for i in band:
             cli.watch(idx=i, mailbox=Z_POS)
+            cli.watch(idx=i, mailbox=X_POS)
+            cli.watch(idx=i, mailbox=XSPEED)
         cli.set_mailbox(idx=STARBLK, mailbox=SMB_QBLOCK_ACTIVATE, value=1)
         cli.send({"op": "resume"})
-        samples: dict[int, list[float]] = {i: [] for i in band}
-        t_end = time.time() + 2.5
-        while time.time() < t_end:
+        zsamp: dict[int, list[float]] = {i: [] for i in band}
+        xsamp: dict[int, list[float]] = {i: [] for i in band}
+        vsamp: dict[int, list[float]] = {i: [] for i in band}
+        # Poll until a reversal is observed (XSPEED of some mover goes + -> -), rather
+        # than a fixed wall-clock window: headless engine speed varies, so we drive on
+        # simulated progress. Generous cap in case it never reverses. (XSPEED holds its
+        # value between contacts, so once it flips negative the cached read stays < 0.)
+        t_cap = time.time() + 16.0
+        while time.time() < t_cap:
             for i in band:
-                v = g(i, Z_POS)
-                if v is not None:
-                    samples[i].append(v)
+                z = g(i, Z_POS); x = g(i, X_POS); v = g(i, XSPEED)
+                if z is not None: zsamp[i].append(z)
+                if x is not None: xsamp[i].append(x)
+                if v is not None: vsamp[i].append(v)
+            if any(vsamp[i] and max(vsamp[i]) > 0.5 and min(vsamp[i]) < -0.3 for i in band):
+                break   # a mover went right then reversed left — reversal captured
             time.sleep(0.05)
         cli.send({"op": "pause"})
-        # pick the index that actually moved (the spawned star)
+        # the spawned star = the index whose Z moved the most
         mover, span = None, 0.0
-        for i, xs2 in samples.items():
-            if len(xs2) >= 4:
-                s = max(xs2) - min(xs2)
+        for i, zs in zsamp.items():
+            if len(zs) >= 4:
+                s = max(zs) - min(zs)
                 if s > span:
                     mover, span = i, s
+
         bounced = False
         if mover is not None:
-            seq = samples[mover]
+            seq = zsamp[mover]
             lo = min(seq); lo_i = seq.index(lo)
             after = seq[lo_i + 1:]
-            bounced = bool(after) and (max(after) > lo + 0.3)   # rose again after a low
+            bounced = bool(after) and (max(after) > lo + 0.3)   # Z rose again after a low
             print(f"  bounce: star idx={mover} Zspan={span:.2f} min={lo:.2f} rose_after={bool(after) and max(after):.2f}")
         check(bounced, f"Star bounces (Z falls then rises; idx={mover}, span={span:.2f})")
         shot("04_star_bounce")
+
+        # Wall-reversal: XSPEED starts positive (moving right) and goes negative after
+        # the flagpole contact. The sign flip is the reversal; X reaching ~62 confirms
+        # it actually hit the pole (rather than reversing off something spurious).
+        reversed_x = False
+        if mover is not None and len(vsamp[mover]) >= 4:
+            vs = vsamp[mover]; xs3 = xsamp[mover]
+            maxv, minv = max(vs), min(vs)
+            maxx = max(xs3) if xs3 else 0.0
+            reversed_x = maxv > 0.5 and minv < -0.3 and maxx >= 60.0   # sign flip = reversal
+            print(f"  reversal: star XSPEED max={maxv:.2f} min={minv:.2f}  maxX={maxx:.1f}")
+        check(reversed_x, f"Star reverses X off the flagpole (XSPEED flips + -> -; idx={mover})")
 
     finally:
         if cli:

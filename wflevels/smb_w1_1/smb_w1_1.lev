@@ -1168,36 +1168,6 @@
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
-		{ 'NAME' "mushroom_template" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -55.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
-		} }
-		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
-		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6000000238418579(1.15.16) -0.2500000000000000(1.15.16) -0.6000000238418579(1.15.16) 0.6000000238418579(1.15.16) 0.2500000000000000(1.15.16) 0.6000000238418579(1.15.16)  //min(x,y,z)-max(x,y,z)
-		} }
-		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "gold" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "mushroom_template.iff" } }
-		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
-		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0010000000000000(1.15.16) } { 'STR' "0.001" } }
-		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
-		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
-		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 2.25 < if\n  1 INDEXOF_SMB_MUSHROOM_PICKUP write-mailbox\nthen\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "mushroom_template.iff" } }
-		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
-		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-	}
-	{ 'OBJ' 
 		{ 'NAME' "mushroom_block" }
 		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
 		} }
@@ -1214,7 +1184,7 @@
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'I32' { 'NAME' "Activation MailBox" } { 'DATA' 2010l } { 'STR' "2010" } }
-		{ 'STR' { 'NAME' "Object To Throw" } { 'STR' "mushroom_template" } }
+		{ 'STR' { 'NAME' "Object To Throw" } { 'STR' "powerup_template" } }
 		{ 'FX32' { 'NAME' "Generation Rate" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
 		{ 'FX32' { 'NAME' "Object X Velocity" } { 'DATA' 1.5000000000000000(1.15.16) } { 'STR' "1.5" } }
 		{ 'FX32' { 'NAME' "Object Y Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
@@ -1225,27 +1195,27 @@
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
-		{ 'NAME' "fireflower_template" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -57.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'NAME' "powerup_template" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -55.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6000000238418579(1.15.16) -0.2500000000000000(1.15.16) -0.6000000238418579(1.15.16) 0.6000000238418579(1.15.16) 0.2500000000000000(1.15.16) 0.6000000238418579(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "gold" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "fireflower_template.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "powerup_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 0.0010000000000000(1.15.16) } { 'STR' "0.001" } }
 		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FX32' { 'NAME' "Surface Friction" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.9000000000000000(1.15.16) } { 'STR' "0.9" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
 		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 2.25 < if\n  1 INDEXOF_SMB_FIREFLOWER_PICKUP write-mailbox\nthen\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "fireflower_template.iff" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n  0 INDEXOF_XSPEED write-mailbox\n  0xF2731A INDEXOF_FACE_COLOR_TOP write-mailbox\nthen\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 2.25 < if\n  INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n    1 INDEXOF_SMB_FIREFLOWER_PICKUP write-mailbox\n  else\n    1 INDEXOF_SMB_MUSHROOM_PICKUP write-mailbox\n  then\nthen\n" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "powerup_template.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
@@ -1271,7 +1241,7 @@
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'I32' { 'NAME' "Activation MailBox" } { 'DATA' 2010l } { 'STR' "2010" } }
-		{ 'STR' { 'NAME' "Object To Throw" } { 'STR' "fireflower_template" } }
+		{ 'STR' { 'NAME' "Object To Throw" } { 'STR' "powerup_template" } }
 		{ 'FX32' { 'NAME' "Generation Rate" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
 		{ 'FX32' { 'NAME' "Object X Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Object Y Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
@@ -1301,7 +1271,7 @@
 		{ 'FX32' { 'NAME' "Vert Air Drag" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 50.0000000000000000(1.15.16) } { 'STR' "50.0" } }
 		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_COLLISION_NORMAL_Z read-mailbox -0.5 < if\n  6.0 INDEXOF_ZSPEED write-mailbox\n  0 INDEXOF_COLLISION_NORMAL_Z write-mailbox\nthen\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 2.25 < if\n  1 INDEXOF_SMB_STAR_PICKUP write-mailbox\nthen\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_COLLISION_NORMAL_Z read-mailbox -0.5 < if\n  6.0 INDEXOF_ZSPEED write-mailbox\n  0 INDEXOF_COLLISION_NORMAL_Z write-mailbox\nthen\nINDEXOF_COLLISION_NORMAL_X read-mailbox dup * 0.25 > if\n  0 INDEXOF_XSPEED read-mailbox - INDEXOF_XSPEED write-mailbox\n  0 INDEXOF_COLLISION_NORMAL_X write-mailbox\nthen\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 2.25 < if\n  1 INDEXOF_SMB_STAR_PICKUP write-mailbox\nthen\n" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_template.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -1985,7 +1955,7 @@
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'I32' { 'NAME' "Activation MailBox" } { 'DATA' 2010l } { 'STR' "2010" } }
-		{ 'STR' { 'NAME' "Object To Throw" } { 'STR' "mushroom_template" } }
+		{ 'STR' { 'NAME' "Object To Throw" } { 'STR' "powerup_template" } }
 		{ 'FX32' { 'NAME' "Generation Rate" } { 'DATA' 10.0000000000000000(1.15.16) } { 'STR' "10.0" } }
 		{ 'FX32' { 'NAME' "Object X Velocity" } { 'DATA' 1.5000000000000000(1.15.16) } { 'STR' "1.5" } }
 		{ 'FX32' { 'NAME' "Object Y Velocity" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }

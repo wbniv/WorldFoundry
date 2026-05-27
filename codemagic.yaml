@@ -329,3 +329,77 @@ workflows:
     artifacts:
       - android/app/build/outputs/apk/debug/*.apk
       - gradle-build.log
+
+  #------------------------------------------------------------------------------
+  # macos-desktop-debug — native macOS build of wf_game (renderer-agnostic
+  # bring-up: compile + link + headless --frame-step-smoke; rendering is a TRUE
+  # no-op, no window). See docs/plans/2026-05-26-macos-port-runtime-bringup.md.
+  #
+  # Ninja generator (NOT -G Xcode) so Jolt's add_library target stays modifiable
+  # (the Xcode-generator limitation is why iOS fell back to legacy physics).
+  # The first bring-up forces legacy physics (-DWF_PHYSICS_ENGINE=legacy) +
+  # WF_ASAN=OFF so the scarce Mac-min compile the *novel* macOS code rather than
+  # re-compiling Jolt (upstream, known-portable). Re-enable Jolt once green.
+  #
+  # Trigger manually from the Codemagic dashboard (events: [] — no auto-fire;
+  # Mac-budget-sensitive). Build branch: 2026-new-level.
+  #------------------------------------------------------------------------------
+  macos-desktop-debug:
+    name: macOS Desktop (Debug, headless)
+    instance_type: mac_mini_m2
+    max_build_duration: 20
+
+    environment:
+      xcode: latest
+
+    triggering:
+      events: []
+      cancel_previous_builds: true
+
+    scripts:
+      - name: Toolchain versions
+        script: |
+          set -euo pipefail
+          sw_vers
+          clang --version
+          cmake --version
+          ninja --version 2>/dev/null || brew install ninja
+
+      - name: Configure CMake for macOS desktop (arm64, Ninja)
+        script: |
+          set -euo pipefail
+          mkdir -p build-macos
+          cd build-macos
+          # No CMAKE_SYSTEM_NAME -> native macOS (APPLE=true, IOS=false -> the
+          # macOS-desktop branch in CMakeLists.txt). Ninja keeps Jolt's target
+          # modifiable; legacy physics + ASan-off shrink this first build.
+          cmake -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DWF_ASAN=OFF \
+            -DWF_PHYSICS_ENGINE=legacy \
+            .. 2>&1 | tee ../macos-configure.log
+
+      - name: Build wf_game
+        script: |
+          set -euo pipefail
+          cd build-macos
+          # --target wf_game pulls in libwfengine.a + zforth. tee preserves the
+          # exit code via pipefail so a compile/link failure fails the step.
+          cmake --build . --target wf_game 2>&1 | tee ../macos-build.log
+
+      - name: Run headless frame-step smoke
+        script: |
+          set -euo pipefail
+          # wf_game lands in engine/ (RUNTIME_OUTPUT_DIRECTORY). Run from
+          # wfsource/source/game so cd.iff + the standalone level resolve.
+          cd wfsource/source/game
+          "$CM_BUILD_DIR/engine/wf_game" --frame-step-smoke=30 --cycles=1 \
+            -L"$CM_BUILD_DIR/wflevels/snowgoons-blender/snowgoons-standalone.iff" \
+            2>&1 | tee "$CM_BUILD_DIR/macos-smoke.log"
+
+    artifacts:
+      - macos-configure.log
+      - macos-build.log
+      - macos-smoke.log
+      - engine/wf_game
