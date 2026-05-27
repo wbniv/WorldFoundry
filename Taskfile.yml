@@ -175,6 +175,66 @@ tasks:
         mv "$DEST.tmp" "$DEST"
         echo "cloudflared {{.CF_VERSION}} verified → $DEST"
 
+  quick-tunnel:
+    desc: "Host a wf-edit call over the internet: run wf-relay + a Cloudflare quick tunnel, print a shareable link. Ctrl-C to stop."
+    silent: true
+    deps: [fetch-cloudflared]
+    vars:
+      ROOM: '{{.ROOM | default "studio-1"}}'
+      CF: build-editor/tools/cloudflared
+    cmds:
+      - |
+        set -eu
+        CF="{{.CF}}"
+        [ -x "$CF" ] || { echo "cloudflared missing — run: task fetch-cloudflared"; exit 1; }
+        RELAY=wftools/wf_collab/target/release/wf-relay
+        [ -x "$RELAY" ] || cargo build --release --bin wf-relay --manifest-path wftools/wf_collab/Cargo.toml
+
+        # Free loopback TCP port for the relay (only cloudflared dials it, over
+        # localhost — the public hop is the wss:// tunnel).
+        PORT=""
+        for p in 9900 9901 9902 9903 9904; do
+          ss -ltn 2>/dev/null | grep -q ":$p " || { PORT=$p; break; }
+        done
+        [ -n "$PORT" ] || { echo "no free TCP port in 9900-9904"; exit 1; }
+
+        RELAY_LOG="$(mktemp)"; CF_LOG="$(mktemp)"
+        # Reap both children by unique marker (go-task's shell gives neither the
+        # real `&` pid nor reliable EXIT traps, and rejects named signals other
+        # than EXIT; pkill -f excludes its own pid). The main stop path is Ctrl-C,
+        # which propagates SIGINT to the whole process group, so cloudflared +
+        # wf-relay exit directly; this trap is a best-effort log/child sweep.
+        cleanup() {
+          pkill -f "cloudflared tunnel --url http://localhost:$PORT" 2>/dev/null || true
+          pkill -f "wf-relay --port $PORT" 2>/dev/null || true
+          rm -f "$RELAY_LOG" "$CF_LOG"
+        }
+        trap cleanup EXIT
+
+        "$RELAY" --port "$PORT" >"$RELAY_LOG" 2>&1 &
+        "$CF" tunnel --url "http://localhost:$PORT" >"$CF_LOG" 2>&1 &
+
+        # Scrape the ephemeral public URL from cloudflared's banner (≤20s).
+        URL=""
+        for _ in $(seq 1 40); do
+          URL="$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$CF_LOG" | head -1 || true)"
+          [ -n "$URL" ] && break
+          sleep 0.5
+        done
+        [ -n "$URL" ] || { echo "cloudflared produced no tunnel URL:"; cat "$CF_LOG"; exit 1; }
+
+        HOST="${URL#https://}"
+        echo ""
+        echo "  Quick tunnel up. Share this link to invite a collaborator:"
+        echo ""
+        echo "      wfedit+s://$HOST/r/{{.ROOM}}"
+        echo ""
+        echo "  (equivalently:  wf-edit --relay=wss://$HOST --room={{.ROOM}})"
+        echo "  Signaling is wss:// (TLS); media is DTLS-SRTP P2P/TURN, not through the tunnel."
+        echo "  Ctrl-C to stop."
+        echo ""
+        wait
+
   build-cmake-android:
     desc: "Build libwf_game.so via CMake + NDK (arm64-v8a)"
     deps: [vendor-unpack]
