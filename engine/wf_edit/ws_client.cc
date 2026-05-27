@@ -1,5 +1,6 @@
 // ws_client.cc — see ws_client.h.
-// Plan: docs/plans/2026-05-21-realtime-coediting.md Phase 1
+// Plans: docs/plans/2026-05-21-realtime-coediting.md Phase 1
+//        docs/plans/2026-05-26-internet-voice-video-webrtc.md Phase 1 (wss://)
 
 #include "ws_client.h"
 
@@ -11,6 +12,9 @@
 #include <unistd.h>
 #include <cstring>
 #include <random>
+
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 namespace wfedit {
 
@@ -40,14 +44,23 @@ struct ParsedUrl {
     std::string host;
     std::string port;
     std::string path;
-    bool ok = false;
+    bool tls = false;
+    bool ok  = false;
 };
 
 static ParsedUrl parseWsUrl(const char* url) {
     ParsedUrl r;
     std::string s(url);
-    if (s.size() < 5 || s.substr(0, 5) != "ws://") return r;
-    s = s.substr(5);
+
+    if (s.size() >= 6 && s.substr(0, 6) == "wss://") {
+        r.tls = true;
+        s = s.substr(6);
+    } else if (s.size() >= 5 && s.substr(0, 5) == "ws://") {
+        r.tls = false;
+        s = s.substr(5);
+    } else {
+        return r;
+    }
 
     auto slash = s.find('/');
     std::string hostport = (slash == std::string::npos) ? s : s.substr(0, slash);
@@ -55,9 +68,30 @@ static ParsedUrl parseWsUrl(const char* url) {
 
     auto colon = hostport.rfind(':');
     r.host = (colon == std::string::npos) ? hostport : hostport.substr(0, colon);
-    r.port = (colon == std::string::npos) ? "80" : hostport.substr(colon + 1);
+    r.port = (colon == std::string::npos) ? (r.tls ? "443" : "80")
+                                           : hostport.substr(colon + 1);
     r.ok = !r.host.empty();
     return r;
+}
+
+// ── TLS helpers (thin wrappers so send/poll stay generic) ────────────────────
+
+ssize_t WsClient::tls_send(const void* buf, size_t len) {
+    return SSL_write(static_cast<SSL*>(_ssl), buf, static_cast<int>(len));
+}
+
+ssize_t WsClient::tls_recv(void* buf, size_t len) {
+    SSL* ssl = static_cast<SSL*>(_ssl);
+    int n = SSL_read(ssl, buf, static_cast<int>(len));
+    if (n <= 0) {
+        int err = SSL_get_error(ssl, n);
+        if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE) {
+            errno = EAGAIN;
+        } else {
+            errno = EIO;
+        }
+    }
+    return n;
 }
 
 // ── connect ───────────────────────────────────────────────────────────────────
@@ -84,6 +118,24 @@ bool WsClient::connect(const char* url) {
     }
     freeaddrinfo(res);
 
+    // TLS handshake for wss://.
+    _tls = pu.tls;
+    if (_tls) {
+        SSL_CTX* ctx = SSL_CTX_new(TLS_client_method());
+        if (!ctx) { ::close(_fd); _fd = -1; return false; }
+        SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, nullptr);
+        SSL* ssl = SSL_new(ctx);
+        if (!ssl) { SSL_CTX_free(ctx); ::close(_fd); _fd = -1; return false; }
+        SSL_set_fd(ssl, _fd);
+        SSL_set_tlsext_host_name(ssl, pu.host.c_str());
+        if (SSL_connect(ssl) != 1) {
+            SSL_free(ssl); SSL_CTX_free(ctx);
+            ::close(_fd); _fd = -1; return false;
+        }
+        _ssl     = ssl;
+        _ssl_ctx = ctx;
+    }
+
     // WebSocket handshake — send HTTP upgrade request.
     uint8_t key[16];
     std::mt19937 rng(std::random_device{}());
@@ -101,9 +153,12 @@ bool WsClient::connect(const char* url) {
         "Sec-WebSocket-Version: 13\r\n"
         "\r\n";
 
-    ssize_t sent = ::send(_fd, req.c_str(), req.size(), MSG_NOSIGNAL);
-    if (sent < 0 || static_cast<size_t>(sent) != req.size()) {
-        ::close(_fd); _fd = -1; return false;
+    auto raw_send = [&](const char* p, size_t n) -> bool {
+        if (_tls) return tls_send(p, n) == static_cast<ssize_t>(n);
+        return ::send(_fd, p, n, MSG_NOSIGNAL) == static_cast<ssize_t>(n);
+    };
+    if (!raw_send(req.c_str(), req.size())) {
+        disconnect(); return false;
     }
 
     // Read HTTP response until \r\n\r\n.
@@ -111,28 +166,42 @@ bool WsClient::connect(const char* url) {
     size_t total = 0;
     bool found = false;
     while (total < sizeof(buf) - 1 && !found) {
-        ssize_t n = ::recv(_fd, buf + total, sizeof(buf) - 1 - total, 0);
-        if (n <= 0) { ::close(_fd); _fd = -1; return false; }
+        ssize_t n;
+        if (_tls) n = tls_recv(buf + total, sizeof(buf) - 1 - total);
+        else      n = ::recv(_fd, buf + total, sizeof(buf) - 1 - total, 0);
+        if (n <= 0) { disconnect(); return false; }
         total += static_cast<size_t>(n);
         buf[total] = '\0';
         found = (strstr(buf, "\r\n\r\n") != nullptr);
     }
 
-    if (!strstr(buf, "101")) { ::close(_fd); _fd = -1; return false; }
+    if (!strstr(buf, "101")) { disconnect(); return false; }
 
-    // Switch to non-blocking.
-    int flags = fcntl(_fd, F_GETFL, 0);
-    fcntl(_fd, F_SETFL, flags | O_NONBLOCK);
+    // Switch to non-blocking (plain TCP only; TLS layer handles its own buffering).
+    if (!_tls) {
+        int flags = fcntl(_fd, F_GETFL, 0);
+        fcntl(_fd, F_SETFL, flags | O_NONBLOCK);
+    }
     return true;
 }
 
 // ── disconnect ────────────────────────────────────────────────────────────────
 
 void WsClient::disconnect() {
+    if (_ssl) {
+        SSL_shutdown(static_cast<SSL*>(_ssl));
+        SSL_free(static_cast<SSL*>(_ssl));
+        _ssl = nullptr;
+    }
+    if (_ssl_ctx) {
+        SSL_CTX_free(static_cast<SSL_CTX*>(_ssl_ctx));
+        _ssl_ctx = nullptr;
+    }
     if (_fd >= 0) {
         ::close(_fd);
         _fd = -1;
         _recv_buf.clear();
+        _tls = false;
     }
 }
 
@@ -176,12 +245,12 @@ bool WsClient::send(const uint8_t* data, size_t len) {
         masked[i] = data[i] ^ mask[i & 3];
 
     // Send header then payload.
-    if (::send(_fd, header, hdrLen, MSG_NOSIGNAL) < 0) {
-        disconnect(); return false;
-    }
-    if (len > 0 && ::send(_fd, masked.data(), masked.size(), MSG_NOSIGNAL) < 0) {
-        disconnect(); return false;
-    }
+    auto do_send = [&](const void* p, size_t n) -> bool {
+        if (_tls) return tls_send(p, n) == static_cast<ssize_t>(n);
+        return ::send(_fd, p, n, MSG_NOSIGNAL) == static_cast<ssize_t>(n);
+    };
+    if (!do_send(header, hdrLen)) { disconnect(); return false; }
+    if (len > 0 && !do_send(masked.data(), masked.size())) { disconnect(); return false; }
     return true;
 }
 
@@ -195,11 +264,16 @@ bool WsClient::poll(std::vector<uint8_t>& out) {
     // Read available bytes (non-blocking).
     uint8_t tmp[4096];
     ssize_t n;
-    while ((n = ::recv(_fd, tmp, sizeof(tmp), MSG_DONTWAIT)) > 0) {
+    while (true) {
+        if (_tls) {
+            n = tls_recv(tmp, sizeof(tmp));
+        } else {
+            n = ::recv(_fd, tmp, sizeof(tmp), MSG_DONTWAIT);
+        }
+        if (n <= 0) break;
         _recv_buf.insert(_recv_buf.end(), tmp, tmp + n);
     }
     if (n == 0) {
-        // Peer closed connection.
         disconnect();
         return false;
     }
@@ -242,7 +316,8 @@ bool WsClient::poll(std::vector<uint8_t>& out) {
         pong[0] = 0x8a;  // FIN=1, opcode=10 (pong)
         pong[1] = static_cast<uint8_t>(payloadLen);
         memcpy(pong.data() + 2, _recv_buf.data() + headerEnd, static_cast<size_t>(payloadLen));
-        ::send(_fd, pong.data(), pong.size(), MSG_NOSIGNAL);
+        if (_tls) tls_send(pong.data(), pong.size());
+        else      ::send(_fd, pong.data(), pong.size(), MSG_NOSIGNAL);
         _recv_buf.erase(_recv_buf.begin(), _recv_buf.begin() + static_cast<ptrdiff_t>(frameEnd));
         return false;  // no data frame; caller will poll again next iteration
     }

@@ -155,18 +155,30 @@ static void SaveIdentity(const WfeditIdentity& id)
 }
 
 // Parse wfedit://<host:port>/r/<room-id> → {relay_url="ws://host:port", room_id}.
+// Parse wfedit:// (→ ws://) or wfedit+s:// (→ wss://) URLs.
+// Format: wfedit[+s]://host[:port]/r/<room_id>
 static std::optional<std::pair<std::string,std::string>> ParseWfeditUrl(const char* url)
 {
-    static const char kPfx[] = "wfedit://";
-    if (std::strncmp(url, kPfx, sizeof(kPfx) - 1) != 0) return std::nullopt;
-    std::string rest = url + sizeof(kPfx) - 1;
-    // Split on "/r/"
-    const auto rpos = rest.find("/r/");
+    static const char kPfxTls[]   = "wfedit+s://";
+    static const char kPfxPlain[] = "wfedit://";
+    const char* ws_scheme;
+    const char* rest;
+    if (std::strncmp(url, kPfxTls, sizeof(kPfxTls) - 1) == 0) {
+        ws_scheme = "wss://";
+        rest = url + sizeof(kPfxTls) - 1;
+    } else if (std::strncmp(url, kPfxPlain, sizeof(kPfxPlain) - 1) == 0) {
+        ws_scheme = "ws://";
+        rest = url + sizeof(kPfxPlain) - 1;
+    } else {
+        return std::nullopt;
+    }
+    std::string s(rest);
+    const auto rpos = s.find("/r/");
     if (rpos == std::string::npos) return std::nullopt;
-    std::string host_port = rest.substr(0, rpos);
-    std::string room = rest.substr(rpos + 3);
+    std::string host_port = s.substr(0, rpos);
+    std::string room = s.substr(rpos + 3);
     if (host_port.empty() || room.empty()) return std::nullopt;
-    return std::make_pair("ws://" + host_port, room);
+    return std::make_pair(std::string(ws_scheme) + host_port, room);
 }
 
 // Add or move room to the front of recent_rooms (capped at 10).
@@ -488,6 +500,12 @@ void CollabDrain(EditorCtx* c) {
                     c->chat_scroll_btm = true;
                 }
             } catch (...) {}
+        } else if (ch == 0x05) {
+            // SIGNAL — WebRTC SDP/ICE signaling. Reserved for Phase 2 WebrtcSession.
+            // Wire format: [0x05][from_peer_id NUL json_payload] — the relay inserts
+            // sender identity in the to→sender routing but does NOT rewrite the payload,
+            // so the JSON must carry "from" for the recipient to know who sent it.
+            // (Phase 2 will call c->webrtc->OnSignal(from, json) here.)
         }
         // CONTROL (0x04) is ignored here.
         frame.clear();
@@ -497,6 +515,19 @@ void CollabDrain(EditorCtx* c) {
         const double now = glfwGetTime();
         for (auto it = c->peer_presence.begin(); it != c->peer_presence.end();)
             it = (now - it->second.last_seen > 8.0) ? c->peer_presence.erase(it) : ++it;
+    }
+    // Sync relay roster into the collab session so Peers() merges multicast + relay.
+    if (c->collab) {
+        std::vector<wfedit::PeerInfo> relay_peers;
+        relay_peers.reserve(c->peer_presence.size());
+        for (const auto& [pid, ps] : c->peer_presence) {
+            wfedit::PeerInfo pi;
+            pi.peer_id      = pid;
+            pi.display_name = ps.name;
+            pi.last_seen    = ps.last_seen;
+            relay_peers.push_back(std::move(pi));
+        }
+        c->collab->SetRelayPeers(relay_peers);
     }
 }
 

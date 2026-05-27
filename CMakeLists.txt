@@ -923,6 +923,9 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     pkg_check_modules(OPUS REQUIRED opus)
     pkg_check_modules(VPX  REQUIRED vpx)
 
+    # OpenSSL for wss:// relay TLS (ws_client wss:// support).
+    find_package(OpenSSL REQUIRED)
+
     # GLFW — editor-owned X11/GLX window + context (lean build, X11 only).
     set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
     set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
@@ -985,7 +988,9 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     # Link the engine (host-GL embed via SetHostGLContext + StepFrame) and
     # wfcrdt (M4 read-only Y.Doc; pulls in libyrs.a from the editor build).
     target_link_libraries(wf_edit PRIVATE wfengine wfcrdt glfw GL
-        ${OPUS_LIBRARIES} ${VPX_LIBRARIES} pthread)
+        ${OPUS_LIBRARIES} ${VPX_LIBRARIES}
+        OpenSSL::SSL OpenSSL::Crypto
+        pthread)
 
     # SpawnActor runtime-path confirmation: loads snowgoons, finds the first
     # valid template, spawns it, checks the result. Confirms the Jolt

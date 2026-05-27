@@ -92,6 +92,7 @@ Output: `build-editor/wf-edit`. Voice + video calling additionally need:
 
 ```bash
 sudo apt install libopus-dev libvpx-dev   # Opus voice + libvpx VP8 video
+sudo apt install libssl-dev               # OpenSSL for wss:// relay TLS (editor only)
 ```
 
 Full usage — window layout, property editing, save/compile, collaboration, headless hooks — is in the [wf-edit user manual](wf-edit-manual.md).
