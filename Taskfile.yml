@@ -144,6 +144,37 @@ tasks:
         echo "turn-test-relay: $RESULT"
         exit "$RC"
 
+  fetch-cloudflared:
+    desc: "Fetch + SHA256-verify cloudflared (wf-edit quick-tunnel 'share a link' calling). Not committed."
+    silent: true
+    vars:
+      CF_VERSION: "2026.5.2"
+      CF_DEST: build-editor/tools/cloudflared
+    cmds:
+      - |
+        set -eu
+        # Pinned per-arch SHA256 — the fetched binary is rejected on mismatch and
+        # never committed (~37 MB), per the no-giant-vendor rule.
+        case "$(uname -m)" in
+          x86_64|amd64)  ARCH=amd64; SHA=5286698547f03df745adb2355f04c12dde52ef425491e81f433642d695521886 ;;
+          aarch64|arm64) ARCH=arm64; SHA=5a4e8ce2701105271412059f44b6a0bf1ae4542b4d98ff3180c0c019443a5815 ;;
+          *) echo "unsupported arch $(uname -m) for cloudflared fetch"; exit 1 ;;
+        esac
+        DEST="{{.CF_DEST}}"
+        # Idempotent: skip if the pinned binary is already present + verified.
+        if [ -f "$DEST" ] && printf '%s  %s\n' "$SHA" "$DEST" | sha256sum -c - >/dev/null 2>&1; then
+          echo "cloudflared {{.CF_VERSION}} already present + verified ($DEST)"; exit 0
+        fi
+        mkdir -p "$(dirname "$DEST")"
+        URL="https://github.com/cloudflare/cloudflared/releases/download/{{.CF_VERSION}}/cloudflared-linux-$ARCH"
+        echo "fetching cloudflared {{.CF_VERSION}} ($ARCH)…"
+        curl -fL --no-progress-meter "$URL" -o "$DEST.tmp"
+        printf '%s  %s\n' "$SHA" "$DEST.tmp" | sha256sum -c - \
+          || { echo "SHA256 mismatch — refusing $URL"; rm -f "$DEST.tmp"; exit 1; }
+        chmod +x "$DEST.tmp"
+        mv "$DEST.tmp" "$DEST"
+        echo "cloudflared {{.CF_VERSION}} verified → $DEST"
+
   build-cmake-android:
     desc: "Build libwf_game.so via CMake + NDK (arm64-v8a)"
     deps: [vendor-unpack]
@@ -382,8 +413,8 @@ tasks:
           google-android-ndk-r26c-installer
 
   dev-setup-editor:
-    desc: "Install editor-only dev dependencies (wf-edit: TLS for wss:// signaling, WebRTC VP8/VP9 video)"
-    deps: [dev-setup]
+    desc: "Install editor-only dev dependencies (wf-edit: TLS for wss:// signaling, WebRTC VP8/VP9 video, quick-tunnel calling)"
+    deps: [dev-setup, fetch-cloudflared]
     cmds:
       - sudo apt-get install -y libssl-dev libvpx-dev
 
