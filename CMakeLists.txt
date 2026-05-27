@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(wf_game CXX C)
+project(wf_game VERSION 1.0.0 LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -933,7 +933,7 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         libdatachannel
         GIT_REPOSITORY https://github.com/paullouisageneau/libdatachannel.git
         GIT_TAG        v0.21.2
-        GIT_SUBMODULES "deps/libjuice" "deps/libsrtp" "deps/plog"
+        GIT_SUBMODULES "deps/libjuice" "deps/libsrtp" "deps/usrsctp" "deps/plog" "deps/json"
         GIT_SHALLOW    TRUE
     )
     set(NO_EXAMPLES   ON  CACHE BOOL "" FORCE)
