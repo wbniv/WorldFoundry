@@ -84,9 +84,9 @@ endif()
 # Debug builds force the bridge ON. The Blender addon's "Live" features
 # (debug_bridge.py / panels.py / operators.py — all default port 7777)
 # rely on it; surprising them with an opt-in flag broke at least one
-# user's workflow when the bridge briefly defaulted off. Mobile is
-# already forced OFF above and the NOT(ANDROID OR IOS) guard preserves that.
-if(NOT (ANDROID OR IOS) AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+# user's workflow when the bridge briefly defaulted off. Mobile + macOS
+# bring-up are already forced OFF above; APPLE excluded here to preserve that.
+if(NOT (ANDROID OR IOS OR APPLE) AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(WF_DEBUG_BRIDGE ON CACHE BOOL "Debug build forces bridge on" FORCE)
 endif()
 
