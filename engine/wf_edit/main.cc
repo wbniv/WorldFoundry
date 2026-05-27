@@ -50,6 +50,7 @@
 
 #include <algorithm>
 #include <cerrno>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -57,6 +58,7 @@
 #include <fstream>
 #include <optional>
 #include <string>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 #include <unistd.h>
@@ -87,6 +89,13 @@ struct WfeditIdentity {
     bool  gizmo_snap = false;
     float gizmo_snap_trans = 1.0f;
     float gizmo_snap_rot   = 15.0f;
+    // TURN relay for collab calls (Phase 3). Empty host = STUN-only (default).
+    // The WF_COLLAB_TURN* env vars override these per-field at session start.
+    std::string  turn_host;
+    unsigned int turn_port = 3478;
+    std::string  turn_user;
+    std::string  turn_pass;
+    bool         turn_tls = false;
 };
 
 static std::string IdentityPath()
@@ -122,6 +131,11 @@ static std::optional<WfeditIdentity> LoadIdentity()
         id.gizmo_snap       = j.value("gizmo_snap", false);
         id.gizmo_snap_trans = j.value("gizmo_snap_trans", 1.0f);
         id.gizmo_snap_rot   = j.value("gizmo_snap_rot", 15.0f);
+        id.turn_host        = j.value("turn_host", "");
+        id.turn_port        = j.value("turn_port", 3478u);
+        id.turn_user        = j.value("turn_user", "");
+        id.turn_pass        = j.value("turn_pass", "");
+        id.turn_tls         = j.value("turn_tls", false);
         if (id.peer_id.empty()) return std::nullopt;
         return id;
     } catch (...) {
@@ -148,7 +162,12 @@ static void SaveIdentity(const WfeditIdentity& id)
             {"recent_rooms", rooms},
             {"gizmo_snap",       id.gizmo_snap},
             {"gizmo_snap_trans", id.gizmo_snap_trans},
-            {"gizmo_snap_rot",   id.gizmo_snap_rot}
+            {"gizmo_snap_rot",   id.gizmo_snap_rot},
+            {"turn_host",        id.turn_host},
+            {"turn_port",        id.turn_port},
+            {"turn_user",        id.turn_user},
+            {"turn_pass",        id.turn_pass},
+            {"turn_tls",         id.turn_tls}
         };
         std::ofstream f(path);
         f << j.dump(2) << "\n";
@@ -1572,8 +1591,110 @@ void glfw_error(int code, const char* desc)
 
 }  // namespace
 
+// ── Headless TURN/ICE test (WF_EDIT_TURN_TEST) ─────────────────────────────────
+// Phase 3.3 of docs/plans/2026-05-27-webrtc-phase3-turn-generic-client.md.
+// Prints "[turn] all PASS" only if every check passes. Three parts:
+//   1. ResolveIceConfig: identity.json defaults + WF_COLLAB_* env precedence and
+//      the host[:port] parse. Pure logic — runs anywhere.
+//   2. Loopback P2P: two in-process WebrtcSessions connect over host candidates
+//      (no STUN/TURN needed on loopback) — exercises the signaling/connectivity
+//      harness and proves the ICE-config change didn't break the P2P path.
+//   3. Relay (only if WF_COLLAB_TURN is set): the SAME harness with force-relay
+//      through the configured TURN server. Run on a coturn-equipped box; skipped
+//      with a clear message otherwise.
+static int RunTurnTest()
+{
+    using namespace wfedit;
+    int fails = 0;
+    auto check = [&](bool ok, const char* what) {
+        std::printf("[turn] %-44s %s\n", what, ok ? "PASS" : "FAIL");
+        if (!ok) ++fails;
+    };
+
+    // Drive two in-process sessions to ICE-connected by shuttling signaling
+    // (the relay's job) between them; returns true if both reach Connected.
+    auto connect_pair = [](WebrtcSession& a, WebrtcSession& b, int timeout_s) {
+        a.SyncPeers({"peer-b"}, "peer-a");   // "peer-a" < "peer-b" → a is offerer
+        b.SyncPeers({"peer-a"}, "peer-b");
+        const auto deadline =
+            std::chrono::steady_clock::now() + std::chrono::seconds(timeout_s);
+        while (std::chrono::steady_clock::now() < deadline) {
+            for (auto& s : a.DrainSignaling()) b.OnSignal("peer-a", s.second);
+            for (auto& s : b.DrainSignaling()) a.OnSignal("peer-b", s.second);
+            if (a.ConnectedPeerCount() == 1 && b.ConnectedPeerCount() == 1) return true;
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+        return false;
+    };
+
+    // ── Part 1: ResolveIceConfig precedence + parsing ─────────────────────────
+    const char* orig_turn = std::getenv("WF_COLLAB_TURN");
+    const std::string saved_turn = orig_turn ? orig_turn : "";
+    const char* kEnv[] = {"WF_COLLAB_STUN","WF_COLLAB_TURN","WF_COLLAB_TURN_USER",
+                          "WF_COLLAB_TURN_PASS","WF_COLLAB_TURN_TLS","WF_COLLAB_FORCE_RELAY"};
+    for (const char* k : kEnv) ::unsetenv(k);
+
+    {   IceConfig d; d.turn_host = "cfg.example"; d.turn_port = 5000;
+        IceConfig r = ResolveIceConfig(d);
+        check(r.stun_url == "stun:stun.l.google.com:19302" &&
+              r.turn_host == "cfg.example" && r.turn_port == 5000 && !r.force_relay,
+              "defaults pass through (no env)"); }
+    {   ::setenv("WF_COLLAB_TURN", "turn.test:3478", 1);
+        ::setenv("WF_COLLAB_TURN_USER", "u", 1);
+        ::setenv("WF_COLLAB_TURN_PASS", "p", 1);
+        ::setenv("WF_COLLAB_TURN_TLS", "1", 1);
+        ::setenv("WF_COLLAB_FORCE_RELAY", "1", 1);
+        IceConfig r = ResolveIceConfig(IceConfig{});
+        check(r.turn_host == "turn.test" && r.turn_port == 3478 &&
+              r.turn_user == "u" && r.turn_pass == "p" && r.turn_tls && r.force_relay,
+              "env host:port + creds + tls + force-relay");
+        ::unsetenv("WF_COLLAB_TURN_USER"); ::unsetenv("WF_COLLAB_TURN_PASS");
+        ::unsetenv("WF_COLLAB_TURN_TLS");  ::unsetenv("WF_COLLAB_FORCE_RELAY"); }
+    {   ::setenv("WF_COLLAB_TURN", "host.only", 1);
+        IceConfig r = ResolveIceConfig(IceConfig{});
+        check(r.turn_host == "host.only" && r.turn_port == 3478,
+              "host without port keeps default 3478"); }
+    {   ::setenv("WF_COLLAB_TURN", "host:notaport", 1);
+        IceConfig r = ResolveIceConfig(IceConfig{});
+        check(r.turn_host == "host:notaport", "non-numeric :suffix stays in host"); }
+    {   ::unsetenv("WF_COLLAB_TURN");
+        ::setenv("WF_COLLAB_STUN", "stun:my.stun:3478", 1);
+        IceConfig r = ResolveIceConfig(IceConfig{});
+        check(r.stun_url == "stun:my.stun:3478" && r.turn_host.empty(),
+              "STUN override, no TURN"); }
+
+    // ── Part 2: loopback P2P connectivity (no STUN/TURN) ──────────────────────
+    for (const char* k : kEnv) ::unsetenv(k);
+    {   WebrtcSession a(nullptr, nullptr);
+        WebrtcSession b(nullptr, nullptr);
+        check(connect_pair(a, b, 20), "two sessions connect P2P over loopback"); }
+
+    // ── Part 3: relay through TURN (only if WF_COLLAB_TURN is set) ─────────────
+    if (!saved_turn.empty()) {
+        ::setenv("WF_COLLAB_TURN", saved_turn.c_str(), 1);
+        ::setenv("WF_COLLAB_FORCE_RELAY", "1", 1);   // succeed ONLY via the relay
+        WebrtcSession a(nullptr, nullptr);
+        WebrtcSession b(nullptr, nullptr);
+        check(connect_pair(a, b, 30), "two sessions connect via force-relay TURN");
+    } else {
+        std::printf("[turn] %-44s SKIP (set WF_COLLAB_TURN to run)\n",
+                    "force-relay through TURN");
+    }
+
+    // Join libdatachannel's threads / free its globals so LSan stays quiet.
+    WebrtcCleanup();
+    std::printf("[turn] %s\n", fails == 0 ? "all PASS" : "FAIL");
+    std::fflush(stdout);
+    return fails == 0 ? 0 : 1;
+}
+
 int main(int argc, char** argv)
 {
+    // Headless TURN/ICE self-test — needs no level, GL, or args. Must run before
+    // any window/engine setup.
+    if (const char* p = std::getenv("WF_EDIT_TURN_TEST"); p && *p)
+        return RunTurnTest();
+
     int         max_frames = -1;
     int         preselect  = -1;   // --select=N: headless aid — preselect actor N
     const char* shot = nullptr;
@@ -1998,8 +2119,18 @@ int main(int argc, char** argv)
         collab_session.Start(room_id, "Editor",
                              voice_chat.ListenPort(), video_chat.ListenPort());
         // WebrtcSession hooks send_cb_ on voice_chat + video_chat to route media
-        // through WebRTC (DTLS-SRTP) instead of raw UDP.
-        webrtc_session = std::make_unique<wfedit::WebrtcSession>(&voice_chat, &video_chat);
+        // through WebRTC (DTLS-SRTP) instead of raw UDP. TURN defaults come from
+        // identity.json; WF_COLLAB_TURN* env vars override per-field (Phase 3).
+        wfedit::IceConfig ice;
+        if (!identity.turn_host.empty()) {
+            ice.turn_host = identity.turn_host;
+            ice.turn_port = static_cast<uint16_t>(identity.turn_port);
+            ice.turn_user = identity.turn_user;
+            ice.turn_pass = identity.turn_pass;
+            ice.turn_tls  = identity.turn_tls;
+        }
+        webrtc_session = std::make_unique<wfedit::WebrtcSession>(
+            &voice_chat, &video_chat, ice);
         ctx.collab  = &collab_session;
         ctx.voice   = &voice_chat;
         ctx.video   = &video_chat;

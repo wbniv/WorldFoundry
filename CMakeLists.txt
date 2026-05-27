@@ -127,9 +127,14 @@ list(APPEND WF_DEFS
 )
 
 if(WF_ASAN AND NOT ANDROID AND NOT IOS)
-    add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
-    add_link_options(-fsanitize=address,undefined)
-    message(STATUS "WF_ASAN: AddressSanitizer + UBSan enabled")
+    # vptr is excluded: the whole project builds -fno-rtti (Jolt, wfengine,
+    # wf_game, wf_edit, the test harness), and UBSan's vptr check cannot validate
+    # vtables without RTTI — it emits false "invalid vptr" runtime errors on every
+    # polymorphic object (notably libdatachannel + std::future in wf-edit's WebRTC
+    # path). vptr checking is meaningless under -fno-rtti, so turn it off.
+    add_compile_options(-fsanitize=address,undefined -fno-sanitize=vptr -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address,undefined -fno-sanitize=vptr)
+    message(STATUS "WF_ASAN: AddressSanitizer + UBSan enabled (vptr excluded — project is -fno-rtti)")
 endif()
 
 # ─── Source directories ───────────────────────────────────────────────────────
@@ -1160,6 +1165,14 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     # correct, and field count > 4 (OAD defaults populated). Runs from repo root.
     add_test(NAME wf_edit_add
         COMMAND sh -c "WF_EDIT_ADD_TEST=statplat $<TARGET_FILE:wf_edit> --leveltree=${CMAKE_SOURCE_DIR}/wflevels/snowgoons-blender/snowgoons-blender.lev 2>&1 | tee /dev/stderr | grep -q '\\[add\\].*PASS'"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+    # ICE/TURN config + WebRTC connectivity (Phase 3). CPU/network-only — returns
+    # before GL, no DISPLAY. Asserts ResolveIceConfig env precedence + a loopback
+    # P2P connect. The force-relay-through-TURN leg runs only when WF_COLLAB_TURN
+    # is set (a coturn box); see `task turn-test-relay`.
+    add_test(NAME wf_edit_turn
+        COMMAND sh -c "WF_EDIT_TURN_TEST=1 $<TARGET_FILE:wf_edit> 2>&1 | tee /dev/stderr | grep -q '\\[turn\\] all PASS'"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
     # wf-relay: standalone relay server binary (co-edit Phase 1).

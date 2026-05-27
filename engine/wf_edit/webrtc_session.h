@@ -29,12 +29,44 @@ namespace wfedit {
 class VoiceChat;
 class VideoChat;
 
+// ICE/TURN configuration for every PeerConnection this session creates.
+// Defaults come from identity.json (passed to the constructor); the WF_COLLAB_*
+// environment variables override per-field at construction time (see
+// ResolveIceConfig in webrtc_session.cc). Plan:
+// docs/plans/2026-05-27-webrtc-phase3-turn-generic-client.md
+struct IceConfig {
+    // STUN server URL. Empty disables STUN; default is Google's public STUN.
+    std::string stun_url = "stun:stun.l.google.com:19302";
+    // TURN relay (Phase 3). turn_host empty = no TURN (STUN-only, the default).
+    // Credentials are plain strings here; whether they are static or minted by
+    // an ephemeral-credential service lives behind this struct (deferred).
+    std::string turn_host;            // host only (port is separate)
+    uint16_t    turn_port = 3478;     // 5349 is the conventional TURNS port
+    std::string turn_user;
+    std::string turn_pass;
+    bool        turn_tls   = false;   // true → RelayType::TurnTls (TURN-over-TLS)
+    // Force ICE to use ONLY relay candidates (TransportPolicy::Relay). Off by
+    // default; used to prove the TURN path without a real symmetric NAT.
+    bool        force_relay = false;
+};
+
+// Resolve identity.json defaults + WF_COLLAB_* environment overrides into the
+// effective IceConfig (env wins per-field). The single source of the env
+// precedence; exposed for the headless WF_EDIT_TURN_TEST.
+IceConfig ResolveIceConfig(IceConfig defaults);
+
+// Join libdatachannel's global threads and free its globals (wraps rtc::Cleanup).
+// Call once after all WebrtcSessions are destroyed and before process exit so
+// LeakSanitizer doesn't flag the framework's otherwise-persistent globals. No
+// rtc object may be created afterwards without a fresh Preload.
+void WebrtcCleanup();
+
 class WebrtcSession {
 public:
     // Constructor wires the send callbacks on vc/vd so that encoded media is
     // routed through WebRTC rather than raw UDP. Keeps pointers but does NOT
-    // take ownership.
-    explicit WebrtcSession(VoiceChat* vc, VideoChat* vd);
+    // take ownership. `ice` supplies the STUN/TURN defaults (env overrides).
+    explicit WebrtcSession(VoiceChat* vc, VideoChat* vd, IceConfig ice = {});
     ~WebrtcSession();
 
     // Update the set of known peers. Adds PeerConnections for new peers
@@ -52,6 +84,10 @@ public:
     // Returns pairs of {to_peer_id, json_payload} ready to be sent via relay.
     std::vector<std::pair<std::string,std::string>> DrainSignaling();
 
+    // Number of peers whose PeerConnection has reached the ICE Connected state.
+    // Thread-safe; used by the headless TURN test to confirm connectivity.
+    size_t ConnectedPeerCount();
+
 private:
     struct PeerState;
     using PeerStatePtr = std::shared_ptr<PeerState>;
@@ -67,6 +103,7 @@ private:
     VoiceChat*  vc_ = nullptr;
     VideoChat*  vd_ = nullptr;
     std::string our_peer_id_;
+    IceConfig   ice_;   // resolved (identity.json defaults + env overrides)
 
     std::mutex  peers_mu_;
     std::map<std::string, PeerStatePtr> peers_;

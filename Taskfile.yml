@@ -79,6 +79,35 @@ tasks:
       NPROC:
         sh: nproc
 
+  turn-test-relay:
+    desc: "Prove wf-edit's WebRTC TURN path: run a local coturn + force-relay connectivity test (needs `coturn`)."
+    deps: [build-wf-edit]
+    vars:
+      TURN_USER: wfedit
+      TURN_PASS: wfeditpass
+      TURN_REALM: wfedit.test
+      TURN_PORT: "3478"
+    cmds:
+      - |
+        set -euo pipefail
+        command -v turnserver >/dev/null 2>&1 || {
+          echo "coturn not installed — run: sudo apt-get install -y coturn"; exit 1; }
+        # Throwaway loopback coturn with static long-term credentials. (Static
+        # creds are fine for this test ONLY; production needs ephemeral creds —
+        # see docs/plans/2026-05-27-webrtc-phase3-turn-generic-client.md.)
+        turnserver -n --lt-cred-mech --user={{.TURN_USER}}:{{.TURN_PASS}} \
+          --realm={{.TURN_REALM}} --listening-ip=127.0.0.1 --relay-ip=127.0.0.1 \
+          --listening-port={{.TURN_PORT}} --no-tls --no-dtls --no-cli \
+          --min-port=49160 --max-port=49200 --simple-log --log-file=stdout &
+        TURN_PID=$!
+        trap 'kill "$TURN_PID" 2>/dev/null || true' EXIT
+        sleep 1
+        WF_EDIT_TURN_TEST=1 \
+        WF_COLLAB_TURN=127.0.0.1:{{.TURN_PORT}} \
+        WF_COLLAB_TURN_USER={{.TURN_USER}} \
+        WF_COLLAB_TURN_PASS={{.TURN_PASS}} \
+          ./build-editor/wf-edit 2>&1 | tee /dev/stderr | grep -q '\[turn\] all PASS'
+
   build-cmake-android:
     desc: "Build libwf_game.so via CMake + NDK (arm64-v8a)"
     deps: [vendor-unpack]

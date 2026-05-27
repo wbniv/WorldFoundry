@@ -305,10 +305,55 @@ multicast group `239.255.42.99:9877`, filtered by room ID. Voice is
 fit the MTU. Each editor binds **ephemeral** UDP ports (OS-assigned), so several instances
 can run on one machine. Your display name is currently fixed to *"Editor"*.
 
-**Limitations:** LAN-only (multicast discovery, no STUN/relay yet — remote peers are v2);
-audio is a flat stereo mix (no spatialisation). Text chat rides the separate WebSocket
-co-editing relay, not this voice/video path. If `/dev/video0` is absent you appear with an
-initials avatar (audio-only).
+**Limitations:** audio is a flat stereo mix (no spatialisation). Text chat rides the separate
+WebSocket co-editing relay, not this voice/video path. If `/dev/video0` is absent you appear
+with an initials avatar (audio-only).
+
+> **Note:** the "How it works (LAN v1)" description above predates the WebRTC transport. Media
+> now flows over **WebRTC (DTLS-SRTP, ICE + STUN)** rather than raw multicast UDP, so calls
+> reach peers across the internet — see [Calls over the internet](#calls-over-the-internet-stun--turn).
+
+### Calls over the internet (STUN + TURN)
+
+Media uses **WebRTC**: ICE picks the best path between peers, **STUN** (a public Google server
+by default) discovers each peer's public address for hole-punching, and **DTLS-SRTP** encrypts
+all audio/video end-to-end — a relay only ever sees ciphertext. This connects ~75–85 % of peer
+pairs directly (peer-to-peer, no media server).
+
+The remaining pairs (symmetric NAT / CGNAT) need a **TURN relay** to forward the encrypted
+media. Point the editor at one with these settings — environment variables override the
+persisted values in `~/.config/wf-edit/identity.json` per-field, so a single run can target a
+test server without editing the file:
+
+| Setting | `identity.json` key | Environment variable | Default |
+|---------|--------------------|----------------------|---------|
+| STUN server URL | `stun_url`† | `WF_COLLAB_STUN` | `stun:stun.l.google.com:19302` |
+| TURN host (`host` or `host:port`) | `turn_host` / `turn_port` | `WF_COLLAB_TURN` | *(none → STUN-only)* |
+| TURN username | `turn_user` | `WF_COLLAB_TURN_USER` | — |
+| TURN password | `turn_pass` | `WF_COLLAB_TURN_PASS` | — |
+| TURN-over-TLS (TURNS) | `turn_tls` | `WF_COLLAB_TURN_TLS` | off |
+| Force relay-only path | *(env only)* | `WF_COLLAB_FORCE_RELAY` | off |
+
+> † `stun_url` is set via env; only the TURN fields persist to `identity.json` in this version.
+
+```bash
+# Point a session at a TURN server for this run only:
+WF_COLLAB_TURN=turn.example.com:3478 \
+WF_COLLAB_TURN_USER=demo WF_COLLAB_TURN_PASS=secret \
+  ./build-editor/wf-edit --level=qbert_practice --room=studio-1
+```
+
+`WF_COLLAB_FORCE_RELAY=1` makes ICE use **only** the relay path — useful for confirming a TURN
+server works (on a LAN, ICE would otherwise pick a direct path and never touch the relay).
+Force-relay does **not** weaken encryption: the relay still only forwards DTLS-SRTP ciphertext.
+
+**Deferred:** running a *production* TURN server (a public host carrying media bandwidth) and the
+choice between self-hosting [coturn](https://github.com/coturn/coturn) and a managed service like
+[Cloudflare Calls](https://developers.cloudflare.com/calls/) — along with ephemeral, time-limited
+TURN credentials (long-term shared secrets shipped in a client are unsafe). The client code is
+identical for either host, so this decision stays open. See
+[the hosting investigation](investigations/2026-05-26-internet-voice-video-nat-traversal.md) and
+[Phase 3 plan](plans/2026-05-27-webrtc-phase3-turn-generic-client.md).
 
 ---
 

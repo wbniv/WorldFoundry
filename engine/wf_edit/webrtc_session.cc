@@ -12,8 +12,10 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <random>
+#include <utility>
 
 namespace wfedit {
 
@@ -80,11 +82,75 @@ struct WebrtcSession::PeerState {
     std::vector<uint8_t> vp8_accum;
 };
 
+// ── ICE / TURN configuration (Phase 3) ────────────────────────────────────────
+
+// Apply WF_COLLAB_* env overrides on top of the identity.json defaults. Env
+// wins per-field so a single run can be pointed at a test TURN server without
+// editing identity.json. WF_COLLAB_TURN is "host" or "host:port".
+IceConfig ResolveIceConfig(IceConfig cfg)
+{
+    auto env = [](const char* k) -> const char* {
+        const char* v = std::getenv(k);
+        return (v && *v) ? v : nullptr;
+    };
+    if (const char* s = env("WF_COLLAB_STUN"))      cfg.stun_url  = s;
+    if (const char* t = env("WF_COLLAB_TURN")) {
+        std::string hp = t;
+        const auto colon = hp.rfind(':');
+        if (colon != std::string::npos && colon + 1 < hp.size()) {
+            const std::string port_s = hp.substr(colon + 1);
+            const bool numeric = port_s.find_first_not_of("0123456789") == std::string::npos;
+            if (numeric) {
+                const int p = std::atoi(port_s.c_str());
+                if (p > 0 && p <= 65535) {
+                    cfg.turn_port = static_cast<uint16_t>(p);
+                    hp = hp.substr(0, colon);
+                }
+            }
+        }
+        cfg.turn_host = hp;
+    }
+    if (const char* u = env("WF_COLLAB_TURN_USER")) cfg.turn_user = u;
+    if (const char* p = env("WF_COLLAB_TURN_PASS")) cfg.turn_pass = p;
+    if (env("WF_COLLAB_TURN_TLS"))    cfg.turn_tls    = true;
+    if (env("WF_COLLAB_FORCE_RELAY")) cfg.force_relay = true;
+    return cfg;
+}
+
+// Translate our plain IceConfig into a libdatachannel rtc::Configuration. The
+// DTLS-SRTP media encryption is independent of this — a TURN relay only ever
+// forwards ciphertext, so force_relay does not weaken end-to-end encryption.
+static rtc::Configuration BuildRtcConfig(const IceConfig& ice)
+{
+    rtc::Configuration config;
+    if (!ice.stun_url.empty())
+        config.iceServers.emplace_back(ice.stun_url);
+    if (!ice.turn_host.empty()) {
+        config.iceServers.emplace_back(
+            ice.turn_host, ice.turn_port, ice.turn_user, ice.turn_pass,
+            ice.turn_tls ? rtc::IceServer::RelayType::TurnTls
+                         : rtc::IceServer::RelayType::TurnUdp);
+    }
+    if (ice.force_relay)
+        config.iceTransportPolicy = rtc::TransportPolicy::Relay;
+    return config;
+}
+
 // ── WebrtcSession ─────────────────────────────────────────────────────────────
 
-WebrtcSession::WebrtcSession(VoiceChat* vc, VideoChat* vd)
-    : vc_(vc), vd_(vd)
+WebrtcSession::WebrtcSession(VoiceChat* vc, VideoChat* vd, IceConfig ice)
+    : vc_(vc), vd_(vd), ice_(ResolveIceConfig(std::move(ice)))
 {
+    if (!ice_.turn_host.empty()) {
+        std::printf("wf-edit: WebRTC TURN relay %s:%u (%s)%s\n",
+                    ice_.turn_host.c_str(), ice_.turn_port,
+                    ice_.turn_tls ? "turns/tls" : "turn/udp",
+                    ice_.force_relay ? " [force-relay]" : "");
+    } else if (ice_.force_relay) {
+        std::printf("wf-edit: WebRTC force-relay set but no TURN configured — "
+                    "connections will fail (no relay candidate).\n");
+    }
+
     // Random SSRC values.
     std::mt19937 rng(std::random_device{}());
     std::uniform_int_distribution<uint32_t> d;
@@ -133,8 +199,7 @@ WebrtcSession::GetOrCreate(const std::string& peer_id, bool is_offerer)
     state->peer_id   = peer_id;
     state->is_offerer = is_offerer;
 
-    rtc::Configuration config;
-    config.iceServers.push_back(rtc::IceServer{"stun:stun.l.google.com:19302"});
+    rtc::Configuration config = BuildRtcConfig(ice_);
 
     state->pc = std::make_shared<rtc::PeerConnection>(config);
 
@@ -319,6 +384,19 @@ std::vector<std::pair<std::string,std::string>> WebrtcSession::DrainSignaling()
 {
     std::lock_guard<std::mutex> lk(sig_mu_);
     return std::exchange(pending_signals_, {});
+}
+
+size_t WebrtcSession::ConnectedPeerCount()
+{
+    std::lock_guard<std::mutex> lk(peers_mu_);
+    size_t n = 0;
+    for (auto& [id, st] : peers_) { (void)id; if (st->connected.load()) ++n; }
+    return n;
+}
+
+void WebrtcCleanup()
+{
+    rtc::Cleanup().wait();
 }
 
 // ── SendOpus ─────────────────────────────────────────────────────────────────
