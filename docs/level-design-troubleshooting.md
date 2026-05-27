@@ -1809,3 +1809,14 @@ removal directly: `set_mailbox` on a removed actor replies `{"op":"error", "msg"
 found"}` ([`debug_server.cc:796`](../engine/stubs/debug_server.cc)). A frozen position + a
 "not found" reply is the definitive "it died" signal.
 (SMB Fire Flower + Star, 2026-05-26 — [plan](plans/2026-05-26-smb-fire-flower-and-star.md).)
+
+## Bridge tests: drive timed windows by level-`TIME`, not by step count
+
+The debug bridge's `step` op injects a **wildly variable `_deltaTime`** per step (it is *not* a
+fixed frame). So "step N times" is not a fixed amount of level-time — sometimes N steps is a few
+hundred ms, sometimes seconds. Any test that waits for a level-time-driven behaviour (an
+oscillation phase on a `TIME` deadline, a cooldown, a countdown) with a fixed *step count* is
+flaky: the behaviour may not have advanced within those steps. **Loop on elapsed level-`TIME`
+(mailbox `1906`) instead.** The SMB Piranha test (a plant that toggles emerge/retract on a 1.5 s
+`TIME` deadline) was flaky on step-count windows and rock-solid once every window became
+"step until `TIME` advanced by N seconds." Pairs with the resume-don't-step dt-spike note above.

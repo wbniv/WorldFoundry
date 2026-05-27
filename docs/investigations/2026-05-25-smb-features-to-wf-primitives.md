@@ -42,7 +42,7 @@ in the level-building guide, and the [SMB conversion brief](/home/will/wf-games/
 | **Goomba** | `Enemy` + walk (constant velocity / path) + stomp (collision-normal script) | 🔧 |
 | **Koopa + shell kick** | `Enemy` + a 3-state script (walk / shell-rest / shell-slide): stomp retracts, side-touch kicks, sliding shell defeats enemies (live-broadcast proximity) + reverses off walls | ✅ *(2026-05-27, [plan](../plans/2026-05-27-smb-koopa-shell-kick.md))* |
 | **Stomp combat** (jump on enemy) | per-actor `COLLIDER_IDX` + `COLLISION_NORMAL_Z` (enemy detects player landing from above) → enemy dies + player bounce | 🔧 *(mechanism ✅, needs enemy script)* |
-| **Piranha Plant** | `Enemy` + vertical oscillation (path/script) emerging from a pipe | 🔧 |
+| **Piranha Plant** | Anchored (non-colliding) `Enemy` that slides its own `Z_POS` out of a pipe (`RATE*DELTA_TIME`); proximity hurt + fireball-defeat; retracts while Mario's on the pipe | ✅ *(2026-05-27, [plan](../plans/2026-05-27-smb-piranha-plant.md))* |
 | **Hammer Bro / hammers** | `Enemy` + `Missile` (the hammers) | 🔧 |
 | **Bullet Bill** | `Generator` (cannon spawns) + `Missile`/`Enemy` moving horizontally | 🔧 |
 | **Fireball (Fire Mario)** | `Missile` thrown by a hidden, non-solid pool `Generator` that self-parks on Mario's published spawn point (no engine `spawn-template` needed) | ✅ *(2026-05-26, [plan](../plans/2026-05-26-fire-mario-fireball-pooled-generator.md); spawn-path solved by [Approach A](2026-05-26-spawn-template-forth-primitive.md))* |

@@ -1,7 +1,25 @@
 # SMB Piranha Plant
 
 > Plan authored before implementation (plan-workflow convention). Commit with the code.
-> **Status:** Not started (2026-05-27).
+> **Status:** **Done** (2026-05-27, ~3 h — feature behaviourally correct early; the time went into
+> a flaky *test*). Verified headless ([`tests/verify_smb_piranha.py`](../../tests/verify_smb_piranha.py),
+> 4/4 across runs) + recording
+> **[`tests/recordings/smb_piranha.mp4`](../../tests/recordings/smb_piranha.mp4)** (512×384, ~7 s).
+> 3 new `mailbox.inc` globals, no C++ logic. The engine-fact bets all held: an **Anchored `Enemy`
+> runs its `wf_Script`, has no Jolt body (non-colliding), and its `X/Z_POS` read+write both work**
+> — so a script-driven, pipe-piercing, `DELTA_TIME`-smooth plant works exactly as designed.
+>
+> **What the bring-up surfaced (test-side, all now handled):**
+> 1. **`discover_substr("piranha")` matched the *pipe* (`piranha_pipe`), not the plant
+>    (`piranha_00`)** — and statplats don't broadcast `Z_POS`, so I saw a frozen 0 and wrongly
+>    suspected the Anchored actor. Match the specific mesh.
+> 2. **The bridge's per-step dt is wildly variable**, so step-COUNT windows ≠ level-TIME windows;
+>    the plant's TIME-deadline oscillation sometimes didn't advance within N steps. Fixed by driving
+>    every test window by **elapsed `TIME` (mailbox 1906)**, not step count — this was the real flake.
+> 3. **Teleporting Mario onto an already-emerged plant bites him** (faithful), and those i-frames
+>    masked the later hurt check. Fixed by ordering (hurt before retract) and pinning Mario *high
+>    above* the pipe for the retract check (horizontal-only retract gate → still retracts, too high
+>    to be bitten).
 > **Estimate:** ~half a day (average-programmer scale). Compose + Forth; engine cost: three new
 > `mailbox.inc` globals (rebuild to regenerate `INDEXOF_` — no C++ logic).
 
@@ -90,8 +108,14 @@ New `tests/verify_smb_piranha.py` (debug bridge):
    `SMB_PLAYER_HURT` fires.
 4. **Fireball defeat:** drop a fireball's live broadcast onto the plant (or fire at it) → assert the
    plant despawns (`set_mailbox` → "actor not found"; reuse the despawn probe).
-5. **Record** `tests/recordings/smb_piranha.mp4` via `--record`, per the
+5. **Recording:** `python3 tests/verify_smb_piranha.py --record` →
+   **[`tests/recordings/smb_piranha.mp4`](../../tests/recordings/smb_piranha.mp4)**, per the
    [recording convention](2026-05-26-fire-mario-fireball-pooled-generator.md#recording-checked-in-proof).
+
+> Test-harness note: drive every window by **elapsed `TIME` (mailbox 1906)**, not step count — the
+> bridge's per-step dt is too variable for step-count windows. And `discover` the plant by its
+> specific mesh (`piranha_00`), not `piranha` (which also matches `piranha_pipe`, a statplat that
+> doesn't broadcast `Z_POS`).
 
 Reuse the despawn-probe + onto-the-projectile idioms from the
 [fireball-defeat test](../../tests/verify_smb_fireball_defeat.py); both gotchas are in the
