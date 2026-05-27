@@ -1,6 +1,6 @@
 # Plan: Internet (WAN) Voice + Video for `wf-edit` via WebRTC
 
-**Status:** Planned (not started)
+**Status:** Done (Phases 1–2, 2026-05-26); Phases 3–4 deferred
 **Estimated effort:** ~1.5–2.5 wk core (Phases 1–2) + ~1 day TURN (Phase 3) + ~2–3 days demo polish (Phase 4) — *average-programmer scale*
 **Investigation / rationale:** [docs/investigations/2026-05-26-internet-voice-video-nat-traversal.md](../investigations/2026-05-26-internet-voice-video-nat-traversal.md)
 **Supersedes (for WAN):** the v2 remote-peer goal of [docs/plans/2026-05-21-voice-video-collab.md](2026-05-21-voice-video-collab.md) (LAN, as-shipped)
