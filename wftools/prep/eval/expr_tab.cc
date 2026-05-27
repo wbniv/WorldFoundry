@@ -70,7 +70,6 @@
 #line 1 "expr.y"
 
 #include "expr.h"
-#include <malloc.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

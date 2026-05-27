@@ -385,20 +385,12 @@ workflows:
         script: |
           set -euo pipefail
           mkdir -p build-macos
-          # Wipe CMake metadata so a stale CMakeCache.txt (e.g. from a cached
-          # failed run before OBJCXX was added to project()) doesn't interfere.
-          # Compiled .o files in subdirectories survive and the build stays
-          # incremental; only language detection + feature probes re-run (~2s).
           rm -rf build-macos/CMakeCache.txt build-macos/CMakeFiles
           cd build-macos
-          # No CMAKE_SYSTEM_NAME -> native macOS (APPLE=true, IOS=false -> the
-          # macOS-desktop branch in CMakeLists.txt). Ninja keeps Jolt's target
-          # modifiable; legacy physics + ASan-off shrink this first build.
           cmake -G Ninja \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
             -DWF_ASAN=OFF \
-            -DWF_PHYSICS_ENGINE=legacy \
             .. 2>&1 | tee ../macos-configure.log
 
       - name: Build wf_game

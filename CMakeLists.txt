@@ -59,13 +59,9 @@ option(WF_ASAN "AddressSanitizer + UBSan (default ON for host Debug; -DWF_ASAN=O
 # cases, editor for its CRDT bridge). See the per-source-list gate below.
 option(WF_ENABLE_EDITOR   "Build the collaborative editor stack (CRDT + replay UI + DAP, etc.). OFF for shipped game-engine builds; ON for the editor application." OFF)
 
-# Mobile (Android + iOS) + macOS desktop bring-up: Forth-only scripting, no
-# Steam, no editor stack, no debug bridge, no REST API.
-# Matches build_game.sh Android flags. WAMR in particular ships x86_64 assembly
-# (`invokeNative_em64.s`) that fails to build on arm64 mobile targets. macOS
-# desktop joins this minimal set while the renderer-agnostic bring-up keeps the
-# link surface small; the extra engines can be re-enabled once it's green.
-if(ANDROID OR IOS OR APPLE)
+# Mobile (Android + iOS): Forth-only, no scripting roster, no bridge/REST/editor.
+# WAMR ships x86_64 assembly (invokeNative_em64.s) that fails on arm64 mobile.
+if(ANDROID OR IOS)
     set(WF_LUA_ENGINE    "none"   CACHE STRING "" FORCE)
     set(WF_ENABLE_FENNEL OFF      CACHE BOOL   "" FORCE)
     set(WF_JS_ENGINE     "none"   CACHE STRING "" FORCE)
@@ -76,14 +72,22 @@ if(ANDROID OR IOS OR APPLE)
     set(WF_DEBUG_BRIDGE  OFF      CACHE BOOL   "" FORCE)
     set(WF_ENABLE_STEAM  OFF      CACHE BOOL   "" FORCE)
     set(WF_ENABLE_EDITOR OFF      CACHE BOOL   "" FORCE)
+elseif(APPLE)
+    # macOS desktop: full scripting roster (Lua/Fennel/QuickJS/Wren + zForth)
+    # and debug bridge enabled. WAMR deferred (macOS arm64 unverified). Editor
+    # and Steam not yet ported.
+    set(WF_WASM_ENGINE   "none"   CACHE STRING "" FORCE)
+    set(WF_ENABLE_EDITOR OFF      CACHE BOOL   "" FORCE)
+    set(WF_ENABLE_STEAM  OFF      CACHE BOOL   "" FORCE)
+    set(WF_FORTH_ENGINE  "zforth" CACHE STRING "" FORCE)
 endif()
 
 # Debug builds force the bridge ON. The Blender addon's "Live" features
 # (debug_bridge.py / panels.py / operators.py — all default port 7777)
 # rely on it; surprising them with an opt-in flag broke at least one
-# user's workflow when the bridge briefly defaulted off. Mobile + macOS
-# bring-up are already forced OFF above; APPLE excluded here to preserve that.
-if(NOT (ANDROID OR IOS OR APPLE) AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+# user's workflow when the bridge briefly defaulted off. Mobile is already
+# forced OFF above; the NOT(ANDROID OR IOS) guard preserves that.
+if(NOT (ANDROID OR IOS) AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(WF_DEBUG_BRIDGE ON CACHE BOOL "Debug build forces bridge on" FORCE)
 endif()
 
