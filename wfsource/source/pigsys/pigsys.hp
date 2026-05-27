@@ -81,10 +81,10 @@ typedef enum _MachineType
 
 // include directives from the makefile
 #ifndef _MKINC
-#if   defined(__LINUX__) || defined(__ANDROID__) || defined(WF_TARGET_IOS)
-// iOS is Darwin/POSIX — reuse the Linux cf header for now. cf_linux.h unconditionally
-// #defines __LINUX__, which is fine: the iOS-specific HAL lives in hal/ios/,
-// and the shared core treats iOS as another POSIX target.
+#if   defined(__LINUX__) || defined(__ANDROID__) || defined(WF_TARGET_IOS) || defined(WF_TARGET_MACOS)
+// iOS + macOS are Darwin/POSIX — reuse the Linux cf header. cf_linux.h
+// unconditionally #defines __LINUX__, which is fine: the Apple-specific HAL
+// lives in hal/ios/ + hal/macos/, and the shared core treats them as POSIX.
 #define _MKINC "cf_linux.h"
 #elif defined( __ANDROID__ )
 #define _MKINC "cf_android.h"

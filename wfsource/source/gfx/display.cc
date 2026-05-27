@@ -31,6 +31,10 @@
 // hal/ios/metal_view.mm rather than gfx/gl/mesa.cc. Display on iOS is a
 // thin timer + projection-setup wrapper over the Metal RendererBackend.
 #  include <hal/ios/display_ios.cc>
+#elif defined(WF_TARGET_MACOS)
+// macOS desktop (renderer-agnostic bring-up): headless Display — no window, no
+// GL context. Thin timer + projection wrapper over the no-op RendererBackend.
+#  include <hal/macos/display_macos.cc>
 #else
 #  include <gfx/gl/display.cc>
 #endif

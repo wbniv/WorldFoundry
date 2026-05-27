@@ -34,6 +34,13 @@
 // that need to compile. Phase 2+ Metal backend renders through MTL*; the GL
 // API calls themselves never execute on iOS.
 #  include <OpenGLES/ES3/gl.h>
+#elif defined(WF_TARGET_MACOS)
+// macOS desktop (renderer-agnostic bring-up): rendering is a no-op, but gfx/
+// code references GL types (GLuint, GLenum, …) + constants (GL_TEXTURE_2D, …).
+// Use the legacy OpenGL.framework header for that vocabulary; the GL entry
+// points are stubbed in hal/macos/gl_stubs.cc and OpenGL.framework is NOT linked.
+#  define GL_SILENCE_DEPRECATION
+#  include <OpenGL/gl.h>
 #else
 #  define GL_GLEXT_PROTOTYPES
 #  include <GL/gl.h>
