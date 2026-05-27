@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-# OBJCXX is required for the macOS desktop Ninja build (audio TUs set
-# LANGUAGE OBJCXX for miniaudio's CoreAudio backend). Xcode auto-enables it;
-# Ninja requires it here. Harmless on Linux/Android (clang ignores it).
-project(wf_game VERSION 1.0.0 LANGUAGES CXX C OBJCXX)
+project(wf_game VERSION 1.0.0 LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -695,6 +692,10 @@ endif()
 # The audio/linux/*.cc files would fail to parse as plain C++, so compile them
 # as Objective-C++ on iOS. (Linux/Android stay on plain C++ — no AVFoundation.)
 if(APPLE)
+    # OBJCXX is only needed on Apple: miniaudio.h pulls in AVFoundation (ObjC)
+    # on Darwin. Ninja doesn't auto-enable it the way Xcode does, so we enable
+    # it explicitly here. Linux/Android use plain C++ — gobjc++ not required.
+    enable_language(OBJCXX)
     # Both iOS and macOS desktop: miniaudio.h pulls in AVFoundation (ObjC) on
     # Darwin, so the audio/linux/*.cc TUs must compile as Objective-C++.
     foreach(_audio_src miniaudio_impl.cc music.cc buffer.cc device.cc)
