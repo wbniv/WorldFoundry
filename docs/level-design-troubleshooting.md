@@ -1748,3 +1748,36 @@ working alternatives:
   floor); pickup uses the *player's* Z, not the coin's, so coin height is free.
 - **Generator-on-entry**: an ActBox triggers a `Generator` (Object To Throw = a coin template)
   while the player is in the room, so coins spawn fresh (collectible within their 5 s).
+
+## Script-driven bounce off the floor — read the contact normal, and consume it
+
+A collectible/actor can bounce off the ground from its own Forth script (no engine
+restitution exists — every `MOBILITY_PHYSICS` actor is a kinematic Jolt `CharacterVirtual`
+that zeroes vertical velocity on landing; `mRestitution` is never set, and the
+`Vertical/Horizontal Elasticity` OAS fields are dead pre-Jolt legacy). The SMB Starman bounce
+does it by re-launching `ZSPEED` on the real landing contact. Three non-obvious facts make or
+break this:
+
+- **Landing on static ground gives `COLLIDER_IDX = 0`, not an actor index.** The ground has no
+  WF `Actor`, so the contact routes through `Actor::JoltStaticCollision(normal)`
+  ([`actor.cc`](../wfsource/source/game/actor.cc)), which sets `_lastColliderIdx = 0`. So a
+  `COLLIDER_IDX != 0` gate (correct for *actor-vs-actor* hits like the `?`-block bump) will
+  **never fire** on a floor landing. Gate on the normal instead.
+- **The landing normal points DOWN: `COLLISION_NORMAL_Z < 0`.** The contact normal is "the
+  direction the character pushes against the contacted body" — falling onto the floor pushes
+  down, so `Z < 0` (a bump-from-*below* gives `Z > 0`). Floor-landing gate: `NORMAL_Z -0.5 <`.
+- **`_lastCollisionNormal` is NOT cleared per-frame** (only `_lastColliderIdx` is, at
+  `StartFrame`, `actor.cc:1106`). So the normal goes **stale** and a bare normal gate re-fires
+  every frame — including mid-air. Either also require descent (`ZSPEED 0 <`) or, cleaner,
+  **consume** it: `COLLISION_NORMAL_Z` is script-writable, so write `0` to it after acting, and
+  it only goes non-zero again on a genuine new contact. This keeps the bounce ground-aware —
+  over a pit there's no contact, the normal stays 0, and the actor falls in.
+
+```forth
+\ Starman: re-launch upward on a real floor contact, then consume the normal.
+INDEXOF_COLLISION_NORMAL_Z read-mailbox -0.5 < if
+  6.0 INDEXOF_ZSPEED write-mailbox
+  0 INDEXOF_COLLISION_NORMAL_Z write-mailbox
+then
+```
+(SMB Fire Flower + Star, 2026-05-26 — [plan](plans/2026-05-26-smb-fire-flower-and-star.md).)

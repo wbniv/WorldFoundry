@@ -603,6 +603,16 @@ MB_SMB_QBLOCK_DIE      = 2012
 # (0.78*255, 0.49*255, 0.18*255) = (199, 125, 46) = 0xC77D2E.
 QBLOCK_TAN = 0xC77D2E
 
+# Player tint colors (FACE_COLOR_TOP). Fire Mario wears white/red; the Star flicker
+# alternates yellow<->white. MARIO_DEFAULT_TINT (white) restores Mario when leaving
+# Fire or when the Star window closes. NOTE: FACE_COLOR_TOP is proven on single-
+# material blocks; whether it tints the multi-material player mesh is unverified — the
+# Fire/Star *mechanics* (state, invincibility, enemy death) don't depend on it.
+FIRE_TINT          = 0xF8F0E0   # warm white (Fire Mario)
+MARIO_DEFAULT_TINT = 0xFFFFFF   # neutral restore
+STAR_FLASH_A       = 0xFFE000   # yellow
+STAR_FLASH_B       = 0xFFFFFF   # white
+
 # 3-state self-detect script (NORMAL → ACTIVE → USED).
 # State: SMB_QBLOCK_DIE = window-close time (first_hit+4.0); 0 = NORMAL.
 #        SMB_QBLOCK_USED = 1 → permanently dead.
@@ -802,6 +812,107 @@ mblk['wf_Object Y Velocity']  = 0.0
 mblk['wf_Object Z Velocity']  = 6.0   # and upward, like the coin
 mblk['wf_Script']             = MUSHROOM_BLOCK_SCRIPT
 
+# ── 6b. Fire Flower + Star power-ups ───────────────────────────────────────────
+# Both reuse the gold class (Gold Value 0) like the mushroom — they are NOT coins;
+# their pickup scripts signal the player state machine. Logged as taxonomy debt
+# (TODO §69). See docs/plans/2026-05-26-smb-fire-flower-and-star.md.
+#
+# Shared collectible-template factory (the mushroom keeps its own fn, untouched, to
+# avoid perturbing its export). Same gold/CharacterVirtual collision profile: walks
+# through the player to be collected, lands + slides/rests on the floor.
+def _make_powerup_template(name, mat, script, running_decel, park_x):
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(MUSH_X*2, MUSH_T*2, MUSH_Z*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new(name)
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat)
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new(name, mesh)
+    obj.location = (park_x, 0.0, 0.0)   # parking spot; generator velocity overrides on spawn
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'gold')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Max Air Speed']        = 50.0
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = running_decel
+    obj['wf_Gold Value']           = 0
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = name + '.iff'
+    obj['wf_Script']               = script
+    return obj
+
+# Power-up dispensing block: same one-shot Generator as the mushroom block (bump
+# from below -> throw one collectible -> latch tan), reusing MUSHROOM_BLOCK_SCRIPT.
+def _make_powerup_block(name, x, throw, vx):
+    b = _add_textured_box(name, x - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                                x + BSIZE,  BSIZE, BLOCK_Z + BSIZE, qblock_tex)
+    attach_schema(b, 'generator')
+    b['wf_Mobility']           = 'Anchored'
+    b['wf_Model Type']         = 'Mesh'
+    b['wf_Visibility Mailbox'] = 1
+    b['wf_Number Of Local Mailboxes'] = 13   # 2000..2012, same as the qblocks
+    b['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+    b['wf_Object To Throw']    = throw
+    b['wf_Generation Rate']    = 10.0
+    b['wf_Object X Velocity']  = vx
+    b['wf_Object Y Velocity']  = 0.0
+    b['wf_Object Z Velocity']  = 6.0
+    b['wf_Script']             = MUSHROOM_BLOCK_SCRIPT
+    return b
+
+# Fire Flower — STATIONARY (real flower sits on the block): pops straight up (X vel 0)
+# and rests. Running Decel 0.9 stops any landing drift. Proximity pickup -> Fire.
+mat_fireflower = make_mat('fireflower_orange', (0.95, 0.45, 0.10))
+FIREFLOWER_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "+ 2.25 < if\n"
+    "  1 INDEXOF_SMB_FIREFLOWER_PICKUP write-mailbox\n"
+    "then\n"
+)
+_make_powerup_template('fireflower_template', mat_fireflower, FIREFLOWER_SCRIPT, 0.9, -57.0)
+FIREFLOWER_BLOCK_X = 10 * T   # 15.0 — between qblock_01 (12) and the entry pipe (16.5-19.5)
+_make_powerup_block('fireflower_block', FIREFLOWER_BLOCK_X, 'fireflower_template', 0.0)
+
+# Star — BOUNCES rightward. Running Decel 0 keeps the slide; the per-tick script
+# re-launches ZSPEED on a real floor contact (COLLISION_NORMAL_Z > 0.5), so it is
+# ground-aware (falls into pits) without engine restitution (TODO: PHYSICS). The
+# stomp-bounce proves ZSPEED writes on a CharacterVirtual work.
+mat_star = make_mat('star_yellow', (0.98, 0.85, 0.10))
+STAR_SCRIPT = (
+    "\\ wf\n"
+    # Starman bounce: re-launch upward on a real floor contact. Landing on static
+    # ground routes through Actor::JoltStaticCollision -> COLLIDER_IDX=0 (no actor)
+    # and COLLISION_NORMAL_Z < 0 (the normal points DOWN, the way the char pushes
+    # into the floor). We gate on that, then ZERO the normal to consume it: it is
+    # NOT cleared per-frame (only COLLIDER_IDX is, actor.cc:1106), so without the
+    # consume the stale value would re-fire mid-air. Ground-aware: over a pit there
+    # is no contact, the normal stays 0, and the star falls in.
+    "INDEXOF_COLLISION_NORMAL_Z read-mailbox -0.5 < if\n"
+    "  6.0 INDEXOF_ZSPEED write-mailbox\n"
+    "  0 INDEXOF_COLLISION_NORMAL_Z write-mailbox\n"
+    "then\n"
+    # Proximity pickup -> raise the Star signal; Gold::update removes the actor.
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "+ 2.25 < if\n"
+    "  1 INDEXOF_SMB_STAR_PICKUP write-mailbox\n"
+    "then\n"
+)
+_make_powerup_template('star_template', mat_star, STAR_SCRIPT, 0.0, -59.0)
+STAR_BLOCK_X = 38 * T   # 57.0 — past pit1 (51-54), before the flag (63); a late reward
+_make_powerup_block('star_block', STAR_BLOCK_X, 'star_template', 1.5)
+
 # ── 7. Mario placeholder ──────────────────────────────────────────────────────
 def _build_mario():
     mat_red  = make_mat('mario_red',  (0.87, 0.14, 0.07))
@@ -923,15 +1034,55 @@ if player:
         "  then\n"
         "  0 INDEXOF_SMB_MUSHROOM_PICKUP write-mailbox\n"
         "then\n"
+        # Fire Flower -> Fire (state 2). From Small OR Super, jump to Fire + super-size
+        # (faithful: a flower picked up small makes you big + fire directly). >=Fire stays.
+        "INDEXOF_SMB_FIREFLOWER_PICKUP read-mailbox 0<> if\n"
+        "  INDEXOF_SMB_MARIO_STATE read-mailbox 2 < if\n"
+        "    2 INDEXOF_SMB_MARIO_STATE write-mailbox\n"
+        "    1.25 INDEXOF_X_SCALE write-mailbox 1.25 INDEXOF_Y_SCALE write-mailbox "
+        "1.9 INDEXOF_Z_SCALE write-mailbox\n"
+        f"    0x{FIRE_TINT:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+        "  then\n"
+        "  0 INDEXOF_SMB_FIREFLOWER_PICKUP write-mailbox\n"
+        "then\n"
+        # Star -> ~10 s invincibility. Orthogonal to size: do NOT touch state/scale.
+        # Reuse the existing INVULN gate for damage-immunity (no edit to the hurt logic);
+        # SMB_STAR_UNTIL drives the enemy defeat-on-touch + the flicker.
+        "INDEXOF_SMB_STAR_PICKUP read-mailbox 0<> if\n"
+        "  INDEXOF_TIME read-mailbox 10.0 + INDEXOF_SMB_STAR_UNTIL write-mailbox\n"
+        "  INDEXOF_TIME read-mailbox 10.0 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n"
+        "  0 INDEXOF_SMB_STAR_PICKUP write-mailbox\n"
+        "then\n"
+        # Flicker Mario's tint while the Star window is open; restore once when it closes.
+        # `%` casts to int in zForth; (TIME*8)%2 -> 0/1 toggle.
+        "INDEXOF_TIME read-mailbox INDEXOF_SMB_STAR_UNTIL read-mailbox < if\n"
+        f"  INDEXOF_TIME read-mailbox 8.0 * 2 % if 0x{STAR_FLASH_A:06X} else 0x{STAR_FLASH_B:06X} then "
+        "INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+        "  1 INDEXOF_SMB_STAR_FLICKER_LATCH write-mailbox\n"
+        "else\n"
+        "  INDEXOF_SMB_STAR_FLICKER_LATCH read-mailbox 0<> if\n"
+        f"    INDEXOF_SMB_MARIO_STATE read-mailbox 2 = if 0x{FIRE_TINT:06X} else 0x{MARIO_DEFAULT_TINT:06X} then "
+        "INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+        "    0 INDEXOF_SMB_STAR_FLICKER_LATCH write-mailbox\n"
+        "  then\n"
+        "then\n"
         # enemy side-hit -> if Super, power down to Small (no life lost); if Small, lose
         # a life + respawn at spawn. Both gated on i-frames (unless still invulnerable).
         "INDEXOF_SMB_PLAYER_HURT read-mailbox 0<> if\n"
         "  INDEXOF_TIME read-mailbox INDEXOF_SMB_INVULN_UNTIL read-mailbox > if\n"
         "    INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n"
-        # Super (or Fire) -> drop one power level; keep the life, reset scale, brief i-frames.
-        "      INDEXOF_SMB_MARIO_STATE read-mailbox 1 - INDEXOF_SMB_MARIO_STATE write-mailbox\n"
-        "      1.0 INDEXOF_X_SCALE write-mailbox 1.0 INDEXOF_Y_SCALE write-mailbox "
+        # Super (or Fire) -> drop one power level; keep the life, brief i-frames.
+        # Scale-aware: Fire->Super stays big (1.25/1.9); Super->Small shrinks to 1.0.
+        # `dup` keeps newstate on the stack to branch the scale; clear the fire tint either way.
+        "      INDEXOF_SMB_MARIO_STATE read-mailbox 1 - dup INDEXOF_SMB_MARIO_STATE write-mailbox\n"
+        "      0 > if\n"
+        "        1.25 INDEXOF_X_SCALE write-mailbox 1.25 INDEXOF_Y_SCALE write-mailbox "
+        "1.9 INDEXOF_Z_SCALE write-mailbox\n"
+        "      else\n"
+        "        1.0 INDEXOF_X_SCALE write-mailbox 1.0 INDEXOF_Y_SCALE write-mailbox "
         "1.0 INDEXOF_Z_SCALE write-mailbox\n"
+        "      then\n"
+        f"      0x{MARIO_DEFAULT_TINT:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
         "      INDEXOF_TIME read-mailbox 1.5 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n"
         "    else\n"
         # Small -> die: lose a life + respawn at spawn.
@@ -1015,15 +1166,20 @@ ENEMY_SCRIPT = (
     "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n"    # dx = playerX - myX
     "  dup * 1.0 <\n"                                                       # dx^2 < 1  (close horizontally)
     "  if\n"
-    "    INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"  # dz = playerZ - myZ
-    "    dup 0.7 >\n"                                                       # player clearly ABOVE us?
-    "    if\n"
-    "      drop\n"
-    "      0 INDEXOF_ALIVE write-mailbox\n"              # stomped -> die
-    "      1 INDEXOF_SMB_STOMP write-mailbox\n"          # tell the player to bounce
+    # Star active? touching Mario defeats us — no bounce, no hurt. Else the normal dz logic.
+    "    INDEXOF_TIME read-mailbox INDEXOF_SMB_STAR_UNTIL read-mailbox < if\n"
+    "      0 INDEXOF_ALIVE write-mailbox\n"                # invincible Mario: defeated by touch
     "    else\n"
-    "      -1.5 >\n"                                     # roughly level (not far below) = side hit
-    "      if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n"
+    "      INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"  # dz = playerZ - myZ
+    "      dup 0.7 >\n"                                                       # player clearly ABOVE us?
+    "      if\n"
+    "        drop\n"
+    "        0 INDEXOF_ALIVE write-mailbox\n"              # stomped -> die
+    "        1 INDEXOF_SMB_STOMP write-mailbox\n"          # tell the player to bounce
+    "      else\n"
+    "        -1.5 >\n"                                     # roughly level (not far below) = side hit
+    "        if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n"
+    "      then\n"
     "    then\n"
     "  then\n"
     "else\n"
