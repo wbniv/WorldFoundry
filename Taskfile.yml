@@ -8,8 +8,15 @@ includes:
 
 tasks:
 
+  vendor-unpack:
+    desc: "Unpack vendored source archives and init editor submodules (idempotent)"
+    cmds:
+      - git submodule update --init cmake/Corrosion wftools/y-crdt third_party/glfw third_party/imgui
+      - test -d engine/vendor/jolt-physics-5.5.0 || tar -xzf engine/vendor/jolt-physics-5.5.0.tar.gz --one-top-level=engine/vendor/jolt-physics-5.5.0 --strip-components=1
+
   build:
     desc: "Build wf_game (Forth + Jolt; canonical config)"
+    deps: [vendor-unpack]
     env:
       # Lua is linked into the Linux debug build so the in-engine Lua step
       # debugger (MobDebug) has a host to bind to. Override with
@@ -43,6 +50,7 @@ tasks:
 
   build-editor:
     desc: "Build wf_game with the editor / dev stack (debug bridge + REST + CRDT + mutation API). Requires Rust toolchain."
+    deps: [vendor-unpack]
     env:
       WF_ENABLE_EDITOR: "1"
       WF_ENABLE_FENNEL: "0"
@@ -60,9 +68,8 @@ tasks:
 
   build-wf-edit:
     desc: "Build the wf-edit GUI editor binary (WebRTC voice/video collab). First run: task dev-setup-editor."
+    deps: [vendor-unpack]
     cmds:
-      - git submodule update --init cmake/Corrosion wftools/y-crdt third_party/glfw third_party/imgui
-      - test -d engine/vendor/jolt-physics-5.5.0 || tar -xzf engine/vendor/jolt-physics-5.5.0.tar.gz --one-top-level=engine/vendor/jolt-physics-5.5.0 --strip-components=1
       - cmake -S . -B build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Debug
       - cmake --build build-editor --target wf_edit -j{{.NPROC}}
     vars:
