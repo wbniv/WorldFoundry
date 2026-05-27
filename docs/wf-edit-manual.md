@@ -313,6 +313,31 @@ with an initials avatar (audio-only).
 > now flows over **WebRTC (DTLS-SRTP, ICE + STUN)** rather than raw multicast UDP, so calls
 > reach peers across the internet — see [Calls over the internet](#calls-over-the-internet-stun--turn).
 
+### Host a call (quick tunnel) — zero-config "share a link"
+
+The easiest way to call a collaborator across the internet: **Collaborate → Host a call (quick
+tunnel)**. The editor re-launches into the call, spins up a local signalling relay (`wf-relay`)
+and a [Cloudflare quick tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/)
+(`cloudflared`), and shows a copyable invite link:
+
+```
+wfedit+s://<random>.trycloudflare.com/r/<room>
+```
+
+Send that link to a collaborator; they paste it (or run `wf-edit … <link>`) and join. No
+self-hosted relay, no router config. Signalling is `wss://` (TLS); media stays DTLS-SRTP
+peer-to-peer (or via TURN), never through the tunnel.
+
+- **First run:** `task fetch-cloudflared` (also pulled in by `task dev-setup-editor`) downloads
+  the pinned, SHA256-verified `cloudflared` to `build-editor/tools/`. It is not committed.
+- **From the shell:** `task quick-tunnel` does the same and prints the link, without the editor.
+- **Works behind a VPN:** the tunnel is forced onto `--protocol http2` (TCP), so it survives
+  VPNs that block QUIC/UDP (e.g. WireGuard). It can take ~10–20 s to come up — the loading panel
+  shows *Establishing → Registering → Resolving*; if it can't (outbound port 7844 blocked, or
+  Cloudflare rate-limited the account-less tunnel), it reports the reason instead of hanging.
+- **Ephemeral:** the link lives only for that session, and account-less quick tunnels are
+  rate-limited. For durable/team hosting, run a named tunnel or a fixed relay (planned).
+
 ### Calls over the internet (STUN + TURN)
 
 Media uses **WebRTC**: ICE picks the best path between peers, **STUN** (a public Google server
