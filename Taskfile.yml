@@ -82,31 +82,67 @@ tasks:
   turn-test-relay:
     desc: "Prove wf-edit's WebRTC TURN path: run a local coturn + force-relay connectivity test (needs `coturn`)."
     deps: [build-wf-edit]
+    silent: true
     vars:
       TURN_USER: wfedit
       TURN_PASS: wfeditpass
       TURN_REALM: wfedit.test
-      TURN_PORT: "3478"
     cmds:
       - |
-        set -euo pipefail
+        set -eu
         command -v turnserver >/dev/null 2>&1 || {
           echo "coturn not installed — run: sudo apt-get install -y coturn"; exit 1; }
+
+        # Pick a free loopback UDP port for the throwaway coturn, so a system
+        # coturn daemon already on 3478 (the apt package auto-starts one) doesn't
+        # collide. ss is the source of truth for what's already bound.
+        PORT=""
+        for p in 3478 3479 3480 3481 3482 3483; do
+          ss -lun 2>/dev/null | grep -q "127.0.0.1:$p " || { PORT=$p; break; }
+        done
+        [ -n "$PORT" ] || { echo "no free UDP port in 3478-3483"; exit 1; }
+        echo "turn-test-relay: throwaway coturn on 127.0.0.1:$PORT"
+
         # Throwaway loopback coturn with static long-term credentials. (Static
         # creds are fine for this test ONLY; production needs ephemeral creds —
         # see docs/plans/2026-05-27-webrtc-phase3-turn-generic-client.md.)
+        LOG="$(mktemp)"
         turnserver -n --lt-cred-mech --user={{.TURN_USER}}:{{.TURN_PASS}} \
           --realm={{.TURN_REALM}} --listening-ip=127.0.0.1 --relay-ip=127.0.0.1 \
-          --listening-port={{.TURN_PORT}} --no-tls --no-dtls --no-cli \
-          --min-port=49160 --max-port=49200 --simple-log --log-file=stdout &
-        TURN_PID=$!
-        trap 'kill "$TURN_PID" 2>/dev/null || true' EXIT
-        sleep 1
-        WF_EDIT_TURN_TEST=1 \
-        WF_COLLAB_TURN=127.0.0.1:{{.TURN_PORT}} \
-        WF_COLLAB_TURN_USER={{.TURN_USER}} \
-        WF_COLLAB_TURN_PASS={{.TURN_PASS}} \
-          ./build-editor/wf-edit 2>&1 | tee /dev/stderr | grep -q '\[turn\] all PASS'
+          --listening-port="$PORT" --no-tls --no-dtls --no-cli \
+          --min-port=49300 --max-port=49340 --simple-log --log-file="$LOG" >/dev/null 2>&1 &
+        # Tear down by the UNIQUE realm, not $!: go-task's shell does not return
+        # the real OS pid for a `&` job nor reliably run EXIT traps. pkill -f on
+        # the realm can't match a system coturn daemon (it reads
+        # /etc/turnserver.conf, no such realm) and pkill excludes its own pid, so
+        # it never self-matches. cleanup is called explicitly below; the trap is
+        # a best-effort backup for shells that honour it.
+        cleanup() { pkill -f "turnserver .*realm={{.TURN_REALM}}" 2>/dev/null || true; rm -f "$LOG"; }
+        trap cleanup EXIT
+
+        # Wait (≤5s) for coturn to actually bind before driving the test, and
+        # fail loudly with its log if it never does.
+        for _ in 1 2 3 4 5 6 7 8 9 10; do
+          ss -lun 2>/dev/null | grep -q "127.0.0.1:$PORT " && break
+          sleep 0.5
+        done
+        ss -lun 2>/dev/null | grep -q "127.0.0.1:$PORT " || {
+          echo "coturn failed to bind 127.0.0.1:$PORT"; cat "$LOG"; cleanup; exit 1; }
+
+        # WF_EDIT_TURN_TEST runs the force-relay leg when WF_COLLAB_TURN is set.
+        # grep -q is the arbiter (wf-edit's own exit is irrelevant); tee echoes
+        # the per-check results to the console.
+        RC=0
+        if WF_EDIT_TURN_TEST=1 WF_COLLAB_TURN="127.0.0.1:$PORT" \
+           WF_COLLAB_TURN_USER={{.TURN_USER}} WF_COLLAB_TURN_PASS={{.TURN_PASS}} \
+           ./build-editor/wf-edit 2>/dev/null | tee /dev/stderr | grep -q '\[turn\] all PASS'; then
+          RESULT=PASS
+        else
+          RESULT=FAIL; RC=1
+        fi
+        cleanup
+        echo "turn-test-relay: $RESULT"
+        exit "$RC"
 
   build-cmake-android:
     desc: "Build libwf_game.so via CMake + NDK (arm64-v8a)"
