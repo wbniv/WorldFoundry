@@ -30,6 +30,12 @@ CC_BY_NC    = "CC-BY-NC-4.0"
 CC_BY_NC_SA = "CC-BY-NC-SA-4.0"
 CC_BY_ND    = "CC-BY-ND-4.0"
 CC_BY_NC_ND = "CC-BY-NC-ND-4.0"
+MIT         = "MIT"
+APACHE2     = "Apache-2.0"
+BSD2        = "BSD-2-Clause"
+BSD3        = "BSD-3-Clause"
+GPL2        = "GPL-2.0"
+GPL3        = "GPL-3.0"
 ROYALTY_FREE = "royalty-free"
 EDITORIAL    = "editorial-only"
 UNKNOWN      = "unknown"
@@ -42,12 +48,22 @@ _LICENCE_URLS: dict[str, str] = {
     CC_BY_NC_SA: "https://creativecommons.org/licenses/by-nc-sa/4.0/",
     CC_BY_ND:    "https://creativecommons.org/licenses/by-nd/4.0/",
     CC_BY_NC_ND: "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+    MIT:         "https://opensource.org/licenses/MIT",
+    APACHE2:     "https://www.apache.org/licenses/LICENSE-2.0",
+    BSD2:        "https://opensource.org/licenses/BSD-2-Clause",
+    BSD3:        "https://opensource.org/licenses/BSD-3-Clause",
+    GPL2:        "https://www.gnu.org/licenses/old-licenses/gpl-2.0.html",
+    GPL3:        "https://www.gnu.org/licenses/gpl-3.0.html",
     ROYALTY_FREE: "",
     EDITORIAL:   "",
     UNKNOWN:     "",
 }
 
-_ATTRIBUTION_REQUIRED = {CC_BY, CC_BY_SA, CC_BY_NC, CC_BY_NC_SA, CC_BY_ND, CC_BY_NC_ND}
+# MIT/Apache/BSD require preserving copyright notices (attribution in spirit if not CC name)
+_ATTRIBUTION_REQUIRED = {
+    CC_BY, CC_BY_SA, CC_BY_NC, CC_BY_NC_SA, CC_BY_ND, CC_BY_NC_ND,
+    MIT, APACHE2, BSD2, BSD3,
+}
 
 _RAW_TO_LICENCE: dict[str, str] = {
     # CC0
@@ -69,9 +85,20 @@ _RAW_TO_LICENCE: dict[str, str] = {
     "cc-by-nd": CC_BY_ND, "cc-by-nd-4.0": CC_BY_ND,
     # CC-BY-NC-ND
     "cc-by-nc-nd": CC_BY_NC_ND, "cc-by-nc-nd-4.0": CC_BY_NC_ND,
+    # Permissive OSS (attribution required — keep copyright notice)
+    "mit": MIT,
+    "apache-2.0": APACHE2, "apache 2.0": APACHE2, "apache2": APACHE2,
+    "bsd-2-clause": BSD2, "bsd 2-clause": BSD2, "bsd2": BSD2,
+    "bsd-3-clause": BSD3, "bsd 3-clause": BSD3, "bsd3": BSD3,
+    # Copyleft OSS — usable but derivative works must remain GPL
+    "gpl-2.0": GPL2, "gplv2": GPL2, "gpl2": GPL2, "gpl v2": GPL2,
+    "gpl-3.0": GPL3, "gplv3": GPL3, "gpl3": GPL3, "gpl v3": GPL3,
+    "gpl": GPL3,
     # Paid / editorial
     "royalty-free": ROYALTY_FREE, "sketchfab": ROYALTY_FREE,
     "editorial-only": EDITORIAL, "ed": EDITORIAL,
+    # Truly unknown
+    "custom": UNKNOWN,
 }
 
 # Sketchfab API licence slug → canonical ID
@@ -624,6 +651,71 @@ class Sketchfab(Provider):
         return out
 
 
+# ── Godot Asset Library ───────────────────────────────────────────────────────
+
+class GodotAssetLibrary(Provider):
+    name = "godot"
+    _BASE = "https://asset-library.godotengine.org"
+    # TODO: update to store.godotengine.org endpoint when Asset Store API ships
+
+    def search(self, query: str, policy: Policy, limit: int) -> list:
+        url = (
+            f"{self._BASE}/asset"
+            f"?filter={urllib.parse.quote(query)}"
+            f"&max_results={limit * 3}"
+            f"&type=any&support=official,community"
+        )
+        try:
+            data = _get_json(url)
+        except Exception:
+            return []
+        results = []
+        for a in data.get("result", []):
+            lid = licence_from_raw(a.get("cost") or "")
+            if not policy.allows(lid):
+                continue
+            asset_id = str(a.get("asset_id", ""))
+            author   = a.get("author", "")
+            attr_req = _requires_attribution(lid)
+            attr_str = f'"{a.get("title", asset_id)}" by {author}' if attr_req else ""
+            results.append(AssetCandidate(
+                provider="godot",
+                provider_id=asset_id,
+                title=a.get("title", asset_id),
+                thumbnail_url=a.get("icon_url") or "",
+                licence_id=lid,
+                download_url=f"{self._BASE}/asset/{asset_id}",
+                original_url=f"https://godotengine.org/asset-library/asset/{asset_id}",
+                attribution_string=attr_str,
+                attribution_required=attr_req,
+                lower_trust=True,
+            ))
+            if len(results) >= limit:
+                break
+        return results
+
+    def download(self, candidate: AssetCandidate, dest_dir: Path, creds: Credentials) -> Path:
+        detail = _get_json(candidate.download_url)
+        zip_url = detail.get("download_url") or ""
+        if not zip_url:
+            raise RuntimeError(f"godot: no download_url for asset {candidate.provider_id!r}")
+        data = _http_get(zip_url)
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        _IMPORTABLE = {".glb", ".gltf", ".obj", ".fbx"}
+        with zipfile.ZipFile(io.BytesIO(data)) as zf:
+            for name in zf.namelist():
+                if Path(name).suffix.lower() in _IMPORTABLE:
+                    out = dest_dir / Path(name).name
+                    out.write_bytes(zf.read(name))
+                    _write_manifest(candidate, dest_dir, zip_url)
+                    return out
+            sample = zf.namelist()[:10]
+        raise RuntimeError(
+            f"godot: zip for {candidate.provider_id!r} contains no importable 3D file "
+            f"(found: {sample})"
+        )
+
+
 # ── Registry and top-level API ────────────────────────────────────────────────
 
 _ALL_PROVIDERS: dict[str, Provider] = {
@@ -633,6 +725,7 @@ _ALL_PROVIDERS: dict[str, Provider] = {
     "quaternius":  Quaternius(),
     "opengameart": OpenGameArt(),
     "sketchfab":   Sketchfab(),
+    "godot":       GodotAssetLibrary(),
 }
 
 PROVIDER_NAMES = list(_ALL_PROVIDERS)

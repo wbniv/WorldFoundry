@@ -56,11 +56,12 @@ class WF_AssetResultItem(PropertyGroup):
 # ── Provider toggle property group ───────────────────────────────────────────
 
 class WF_AssetProviderToggles(PropertyGroup):
-    polyhaven:   BoolProperty(name="Poly Haven",    default=True)
-    kenney:      BoolProperty(name="Kenney",         default=True)
-    ambientcg:   BoolProperty(name="AmbientCG",      default=True)
-    opengameart: BoolProperty(name="OpenGameArt",    default=True)
-    sketchfab:   BoolProperty(name="Sketchfab",      default=False)
+    polyhaven:   BoolProperty(name="Poly Haven",     default=True)
+    kenney:      BoolProperty(name="Kenney",          default=True)
+    ambientcg:   BoolProperty(name="AmbientCG",       default=True)
+    opengameart: BoolProperty(name="OpenGameArt",     default=True)
+    sketchfab:   BoolProperty(name="Sketchfab",       default=False)
+    godot:       BoolProperty(name="Godot Asset Lib", default=False)
 
 
 # ── Search trigger (property update — does NOT close popups, unlike operators) ─
@@ -90,6 +91,8 @@ class WF_AssetBrowserState(PropertyGroup):
             ('ALL',        "All",       "Show all policy-allowed licences"),
             ('CC0',        "CC0 only",  "Only CC0-1.0 (no attribution, no restrictions)"),
             ('CC_FREE',    "CC (free)", "Any CC licence (may require attribution)"),
+            ('MIT_OSS',    "MIT/OSS",   "MIT, Apache-2.0, BSD — permissive, keep copyright notice"),
+            ('GPL',        "GPL",       "GPLv2/GPLv3 — copyleft, derivative works must remain GPL"),
             ('COMMERCIAL', "Paid RF",   "Royalty-free purchased assets (Sketchfab Standard)"),
         ],
         default='ALL',
@@ -183,6 +186,10 @@ def _load_thumbnail(item: WF_AssetResultItem):
 
 # ── UIList ────────────────────────────────────────────────────────────────────
 
+_MIT_OSS_IDS = {"MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause"}
+_GPL_IDS     = {"GPL-2.0", "GPL-3.0"}
+
+
 class WF_UL_AssetResults(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
         if self.layout_type not in {'DEFAULT', 'COMPACT'}:
@@ -200,6 +207,32 @@ class WF_UL_AssetResults(UIList):
         row.label(text=f"{item.title}  [{item.provider}{trust}]")
 
         _load_thumbnail(item)
+
+    def filter_items(self, context, data, propname):
+        items = getattr(data, propname)
+        try:
+            lf = context.scene.wf_asset_browser.licence_filter
+        except AttributeError:
+            return [], []
+        if lf == 'ALL':
+            return [], []
+        flags = []
+        for item in items:
+            lid = item.licence_id
+            if lf == 'CC0':
+                show = lid == "CC0-1.0"
+            elif lf == 'CC_FREE':
+                show = lid.startswith("CC-")
+            elif lf == 'MIT_OSS':
+                show = lid in _MIT_OSS_IDS
+            elif lf == 'GPL':
+                show = lid in _GPL_IDS
+            elif lf == 'COMMERCIAL':
+                show = lid == "royalty-free"
+            else:
+                show = True
+            flags.append(self.bitflag_filter_item if show else 0)
+        return flags, []
 
 
 # ── Shared search logic ───────────────────────────────────────────────────────
@@ -233,6 +266,8 @@ def _do_search(state, context):
             ("kenney",      toggles.kenney),
             ("ambientcg",   toggles.ambientcg),
             ("opengameart", toggles.opengameart),
+            ("sketchfab",   toggles.sketchfab),
+            ("godot",       toggles.godot),
         ]
         if en
     ]
@@ -538,6 +573,8 @@ class WF_OT_open_browser_popup(Operator):
         row.prop(toggles, "kenney",      toggle=True)
         row.prop(toggles, "ambientcg",   toggle=True)
         row.prop(toggles, "opengameart", toggle=True)
+        row.prop(toggles, "sketchfab",   toggle=True)
+        row.prop(toggles, "godot",       toggle=True)
 
         # Progress / status
         if state.is_searching or state.is_importing:
@@ -629,6 +666,7 @@ class WF_PT_asset_browser(Panel):
         row2 = box.row()
         row2.prop(toggles, "opengameart", toggle=True)
         row2.prop(toggles, "sketchfab",   toggle=True)
+        row2.prop(toggles, "godot",       toggle=True)
 
         # Warn when Sketchfab is enabled but no API key is configured.
         if toggles.sketchfab:
