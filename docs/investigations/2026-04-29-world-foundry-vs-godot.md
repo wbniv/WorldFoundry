@@ -1,7 +1,7 @@
 # Investigation: World Foundry vs. Godot — technical comparison
 
 **Date:** 2026-04-29
-**Status:** Snapshot — WF side sourced from `wfsource/`, investigation set, and plan docs on `2026-new-level`. Godot side sourced from Godot 4.4 documentation and source; version is noted where it matters.
+**Status:** Snapshot — WF side sourced from `wfsource/`, investigation set, and plan docs on `2026-new-level`. Godot side sourced from Godot 4.4 documentation and source; version is noted where it matters. **Updated 2026-05-28:** Godot Asset Store launched May 2026 (integrates with Godot 4.7), replacing the Asset Library (now read-only for backward compatibility). Asset Store section updated below.
 **Depends on:** [docs/investigations/2026-04-28-engine-capabilities-survey.md](2026-04-28-engine-capabilities-survey.md) (WF capability baseline), [docs/investigations/2026-04-14-jolt-physics-integration.md](2026-04-14-jolt-physics-integration.md)
 
 **Scope:** Technical comparison only — renderer, physics, scripting, tooling, world model, audio, networking, platforms, asset pipeline, licensing. Community size, ecosystem maturity, and hiring-market considerations are excluded by intent.
@@ -24,7 +24,7 @@
 | **Networking** | None in-tree | High-level multiplayer API; RPC; scene replication; ENet / WebSocket / WebRTC |
 | **UI** | No UI system (menus are level objects) | `Control` node tree; full UI toolkit; theming; layout containers |
 | **Animation** | Per-actor keyframe; no blend tree | `AnimationPlayer`; `AnimationTree` (state machines, blend spaces); retargeting |
-| **Asset pipeline** | Blender → IFF binary; OAD schema system; provenance manifest per asset; format support = Blender's (GLTF, FBX, OBJ, USD, Alembic, …) | Import from GLTF/FBX/OBJ/PNG/etc.; reimport on change; no provenance tracking |
+| **Asset pipeline** | Blender → IFF binary; OAD schema system; provenance manifest per asset; format support = Blender's (GLTF, FBX, OBJ, USD, Alembic, …) | Import from GLTF/FBX/OBJ/PNG/etc.; reimport on change; no per-asset licence provenance. Asset Store (May 2026) adds reviews, ratings, analytics, changelogs, tagging — paid assets not yet live |
 | **Platforms** | Linux (primary), Android, iOS (in progress) | Windows, macOS, Linux, Android, iOS, Web; consoles via third-party exporters |
 | **Binary size** | Small custom engine; mobile-budget ceiling is a design constraint | ~50–100 MB export templates; heavier runtime |
 | **License** | GPL-2.0 | MIT |
@@ -84,7 +84,7 @@ Both engines now use **Jolt Physics** as the recommended backend, so the underly
 
 **World Foundry** uses **Blender as its editor** via `wftools/wf_blender/`. Blender is a professional 3D tool with a much stronger modeling and rigging story than Godot's editor — but it is not a game editor. There is no scene debugger, no live play mode, no property inspector for mailbox values, no in-editor preview of physics. The workflow is: build in Blender → export → run `wf_game` as a separate binary → observe → return to Blender. Iteration loops are longer. The OAD schema system (`.oad` files, validated per-object attribute definitions) partially compensates — it gives type safety and structured data authoring per object inside Blender — but it's not a replacement for a live editor.
 
-The `wf-asset-browser` plugin (source: `wftools/wf_blender/`) provides something Godot does not: a **licence-aware asset browser** with per-asset provenance manifests, policy-file-driven filtering, and a structured attribution audit trail. Godot's asset library has no provenance tracking.
+The `wf-asset-browser` plugin (source: `wftools/wf_blender/`) provides something Godot does not: a **licence-aware asset browser** with per-asset provenance manifests, policy-file-driven filtering, and a structured attribution audit trail. Godot's Asset Store (launched May 2026, replacing the deprecated Asset Library) adds reviews, ratings, publisher analytics, multiple version downloads, changelog tracking, and custom tagging — but still has no per-asset licence provenance, no policy-file filtering, and no attribution audit trail.
 
 **WF advantage:** Blender modeling quality; OAD schema system; asset provenance/licensing infrastructure.
 **Godot advantage:** everything else about editing — live play, debugging, profiling, shader authoring, animation editing, device remote debug.
@@ -123,7 +123,7 @@ The `wf-asset-browser` plugin (source: `wftools/wf_blender/`) provides something
 
 ## Asset pipeline
 
-**Godot** imports assets natively: GLTF 2.0, FBX, OBJ, Collada, PNG/WebP/JPEG/EXR (with compression and mipmap options), WAV/OGG/MP3, TTF fonts. On-import configuration via `.import` sidecar files. The import system reruns automatically when source files change. No per-asset licence tracking.
+**Godot** imports assets natively: GLTF 2.0, FBX, OBJ, Collada, PNG/WebP/JPEG/EXR (with compression and mipmap options), WAV/OGG/MP3, TTF fonts. On-import configuration via `.import` sidecar files. The import system reruns automatically when source files change. No per-asset licence tracking. The **Godot Asset Store** (May 2026, replaces the now-read-only Asset Library) is a live marketplace integrated with Godot 4.7 — user reviews, ratings, publisher analytics, multiple-version downloads, changelog tracking, and custom tagging. Free distribution only at launch; paid asset sales are on the roadmap. No provenance or licence compliance infrastructure.
 
 **World Foundry** converts assets through a custom pipeline: Blender scenes export to `.lev` (level descriptor) + per-mesh `.iff` (Interchange File Format) files via `iffcomp-rs` / `levcomp-rs` / `textile-rs`. Textures are packed into IFF chunks. The pipeline is explicit and reproducible (driven by `build_level_binary.sh`) but requires a build step between Blender edits and engine runs. The OAD schema system attaches typed attribute definitions to objects at export time. The `wf-asset-browser` plugin (Poly Haven, Kenney, AmbientCG, Quaternius, OpenGameArt, Sketchfab) provides provenance-tracked asset sourcing with per-asset `manifest.json` records (licence, attribution string, source URL, download date) — a capability Godot has no equivalent of.
 
@@ -163,7 +163,7 @@ The `wf-asset-browser` plugin (source: `wftools/wf_blender/`) provides something
 
 4. **OAD schema system.** Per-object typed attribute definitions, validated at export time. Godot has `@export` annotations; OAD is more structured and tool-checked.
 
-5. **Asset provenance.** Every imported asset carries a `manifest.json` with licence, attribution string, source URL, and download date. The policy file controls which licences are accepted per project. Godot has no equivalent.
+5. **Asset provenance.** Every imported asset carries a `manifest.json` with licence, attribution string, source URL, and download date. The policy file controls which licences are accepted per project. The Godot Asset Store (May 2026) adds discovery and distribution infrastructure but has no per-asset licence provenance, no policy-file filtering, and no attribution audit trail — the gap remains.
 
 6. **Blender as editor.** Modeling, UV unwrapping, rigging, animation editing are all first-class in Blender. Godot's 3D editor is functional but not a DCC tool.
 
