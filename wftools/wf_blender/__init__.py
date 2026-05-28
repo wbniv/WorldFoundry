@@ -26,7 +26,7 @@ bl_info = {
     "name":        "World Foundry",
     "author":      "World Foundry",
     "version":     (0, 1, 0),
-    "blender":     (4, 0, 0),
+    "blender":     (4, 2, 0),
     "location":    "Properties > Object > World Foundry",
     "description": "OAD schema-driven game object attributes",
     "category":    "Game Engine",
