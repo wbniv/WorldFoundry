@@ -1,0 +1,14 @@
+R:pilot
+R:@tier vm
+R:@desc U:/E: — control transfers to the subroutine and returns to the caller
+R:@expect-exit 0
+R:@expect-out before
+R:@expect-out in-sub
+R:@expect-out after
+T:before
+U:*sub
+T:after
+E:
+*sub
+T:in-sub
+E:

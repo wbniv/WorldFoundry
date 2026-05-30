@@ -1,0 +1,27 @@
+R:pilot
+R:@tier engine
+R:@desc player walks RIGHT under injected input — the headline verification scenario
+R:@level smb_w1_1-standalone.iff
+R:@needs player as #P
+R:@expect-exit 0
+R:@expect-out PASS
+R:@screenshot walk_right.png
+C:#THRESH = 40.0
+C:#FRAMES = 30
+PS:
+WA:#P X_POS
+ST:8
+C:#x0 = mb(X_POS, #P)
+T:start X = $#x0  (need > $#THRESH)
+IN:joystick1_raw BTN_RIGHT held #FRAMES
+ST:30
+WM:#P X_POS > #THRESH timeout 5.0
+M:#last > #THRESH
+SH:walk_right.png
+ST:1
+TY:PASS — player reached X=$#last
+TN:FAIL — player stalled at X=$#last
+JN:*fail
+E:
+*fail
+EX:1
