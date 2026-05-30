@@ -57,10 +57,24 @@ echo "[2/5] levcomp-rs  $LEVEL.lev.bin  →  $LEVEL.lvl + asset.inc + $LEVEL.iff
 echo "[3/5] textile-rs  -ini=$LEVEL.ini  →  palN.tga / RoomN.{tga,ruv,cyc} / Perm.{tga,ruv,cyc}"
 # Options mirror the historical Makefile recipe at
 # wfsource/levels.src/unixmakelvl.pl:130-137.
+#
+# Per-level texture-page-size override: if wflevels/<level>/textile.flags
+# exists, source it to set PAGEX / PAGEY / PERMPAGEX / PERMPAGEY. Existing
+# levels with no flags file keep the historical 256² defaults. See
+# docs/plans/2026-05-30-runtime-vram-cli-overrides.md.
+PAGEX=256
+PAGEY=256
+PERMPAGEX=256
+PERMPAGEY=256
+if [[ -f "$LEVEL_DIR/textile.flags" ]]; then
+  # shellcheck disable=SC1091
+  source "$LEVEL_DIR/textile.flags"
+  echo "    textile.flags overrides: PAGEX=$PAGEX PAGEY=$PAGEY PERMPAGEX=$PERMPAGEX PERMPAGEY=$PERMPAGEY"
+fi
 "$TEXTILE" -ini="$LEVEL.ini" -Tlinux \
   -transparent=0,0,0 \
-  -pagex=256 -pagey=256 \
-  -permpagex=256 -permpagey=256 \
+  -pagex=$PAGEX -pagey=$PAGEY \
+  -permpagex=$PERMPAGEX -permpagey=$PERMPAGEY \
   -palx=256 -paly=8 \
   -alignx=w -aligny=h \
   -flipyout -powerof2size \
