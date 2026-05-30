@@ -39,6 +39,8 @@
 - [ ] **Investigate: hybrid Room-bbox fallback for SMB scroll bounds.** The SMB scrolling camera plan adds `Scroll Min X` / `Scroll Max X` per-CamShot OAS fields on `camshot.oas`. The author has to set these explicitly, which duplicates info already implicit in the containing Room's bbox (`ROOM_BBOX_REL` in the level script). Hybrid pattern to evaluate: when `Scroll Min X == Scroll Max X` (both default = 0, "unset"), fall back to reading bounds from the Room actor's bbox; when explicitly set, use those values. Matches the precedent of the existing per-axis `Position X/Y/Z` Absolute/Relative toggles (default behaviour with explicit override available). Trade-off: simpler authoring for the common case (room == scroll region), retains escape hatch for sub-region scroll within a larger room. Investigate after the SMB plan ships — multi-CamShot levels are the case where the explicit-vs-fallback distinction starts to matter, and we won't have one until at least the second 2D level. See [SMB camera plan](.) (TBD location once promoted to `docs/plans/`) Open Question #3 for the original discussion.
 
 
+- [x] **SMB: score pop-up actor** — floating yellow diamond above enemies/coins/bricks when scored. Pre-placed pool actor at (0,0,−5) controlled via SMB_POPUP_X/Z/TRIGGER/UNTIL mailboxes (1842–1845). [plan](docs/plans/2026-05-27-smb-score-pop-up-actors.md)
+
 - [ ] **SMB: Mario drifts slowly +X with no input after a warp-land.** Minor — after the
   pipe warp drops him at X=3 (zeroed velocity) he creeps to X≈6 over a few seconds with no
   joystick. Likely residual MarbleHandler velocity / `Running Deceleration` not fully

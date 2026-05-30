@@ -1267,6 +1267,9 @@ if player:
         # crosses a multiple of 100, edge-detected via LAST_GOLD mod), grant +1 life.
         "INDEXOF_GOLD read-mailbox INDEXOF_SMB_LAST_GOLD read-mailbox -\n"  # delta
         "dup 0 > if\n"
+        "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+        "  INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+        "  1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
         "  200 * INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n"
         "  INDEXOF_GOLD read-mailbox 100 % not if\n"            # GOLD now a multiple of 100
         "    INDEXOF_SMB_LAST_GOLD read-mailbox 100 % 0<> if\n"  # LAST_GOLD was not
@@ -1362,6 +1365,9 @@ ENEMY_SCRIPT = (
     "      dup 0.7 >\n"                                                       # player clearly ABOVE us?
     "      if\n"
     "        drop\n"
+    "        INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "        INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "        1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
     "        0 INDEXOF_ALIVE write-mailbox\n"              # stomped -> die
     "        1 INDEXOF_SMB_STOMP write-mailbox\n"          # tell the player to bounce
     "      else\n"
@@ -1379,6 +1385,9 @@ ENEMY_SCRIPT = (
     "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"  # dx^2
     "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"  # dz^2
     "  + 2.5 < if\n"                                     # dx^2 + dz^2 < 2.5 (waist-height fireball vs ground enemy)
+    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
     "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
     "    0 INDEXOF_ALIVE write-mailbox\n"                # fireball kill: die, no bounce, no hurt
     "  then\n"
@@ -1389,6 +1398,9 @@ ENEMY_SCRIPT = (
     "  INDEXOF_SMB_SHELL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
     "  INDEXOF_SMB_SHELL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
     "  + 1.5 < if\n"                                     # both on the ground -> tighter radius
+    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
     "    INDEXOF_SMB_SCORE read-mailbox 100 + INDEXOF_SMB_SCORE write-mailbox\n"
     "    0 INDEXOF_ALIVE write-mailbox\n"
     "  then\n"
@@ -1436,6 +1448,9 @@ KOOPA_SCRIPT = (
     "    if\n"                                           # STOMP (player above)
     "      drop\n"
     "      INDEXOF_SMB_KOOPA_STATE read-mailbox 2 < if 0.5 INDEXOF_Z_SCALE write-mailbox then\n"  # walk->shell: squash
+    "      INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "      INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "      1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
     "      1 INDEXOF_SMB_KOOPA_STATE write-mailbox\n"    # retract to a resting shell (NOT death)
     "      0 INDEXOF_XSPEED write-mailbox\n"
     "      1 INDEXOF_SMB_STOMP write-mailbox\n"          # bounce Mario
@@ -1461,6 +1476,9 @@ KOOPA_SCRIPT = (
     "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
     "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
     "  + 2.5 < if\n"
+    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
     "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
     "    0 INDEXOF_ALIVE write-mailbox\n"
     "  then\n"
@@ -2116,6 +2134,9 @@ BRICK_SCRIPT = (
     "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
     "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
     "        INDEXOF_SMB_MARIO_STATE read-mailbox 0<> if\n"
+    "          INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "          INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "          1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
     "          INDEXOF_SMB_SCORE read-mailbox 50 + INDEXOF_SMB_SCORE write-mailbox\n"
     "          INDEXOF_TIME read-mailbox 0.4 + INDEXOF_SMB_BRICK_BREAK_END write-mailbox\n"
     "          1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
@@ -2201,6 +2222,72 @@ hbrick_1up['wf_Object X Velocity']  = 1.5
 hbrick_1up['wf_Object Y Velocity']  = 0.0
 hbrick_1up['wf_Object Z Velocity']  = 6.0
 hbrick_1up['wf_Script']             = POWERUP_BLOCK_SCRIPT
+
+# ── 12b. Score pop-up actor (docs/plans/2026-05-27-smb-score-pop-up-actors.md) ─
+# Pre-placed diamond actor parked underground at (0,0,-5), inside the surface room
+# bbox (x[-66,133] z[-10,25]) so its script runs every tick.  Scoring events write
+# SMB_POPUP_X/Z + pulse SMB_POPUP_TRIGGER=1; this script teleports the diamond
+# above the event, floats it up for 0.75 s, then parks it back underground.
+# Uses `enemy` schema (Anchored) so gold.cc::TryPickup never despawns it.
+POPUP_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_POPUP_TRIGGER read-mailbox 0<> if\n"
+    "  INDEXOF_SMB_POPUP_X read-mailbox INDEXOF_X_POS write-mailbox\n"
+    "  0 INDEXOF_Y_POS write-mailbox\n"
+    "  INDEXOF_SMB_POPUP_Z read-mailbox 1.5 + INDEXOF_Z_POS write-mailbox\n"
+    "  INDEXOF_TIME read-mailbox 0.75 + INDEXOF_SMB_POPUP_UNTIL write-mailbox\n"
+    "  0 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "then\n"
+    "INDEXOF_SMB_POPUP_UNTIL read-mailbox 0<> if\n"
+    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_POPUP_UNTIL read-mailbox < if\n"
+    "    INDEXOF_Z_POS read-mailbox 3.0 INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n"
+    "  else\n"
+    "    0.0 INDEXOF_X_POS write-mailbox\n"
+    "    -5.0 INDEXOF_Z_POS write-mailbox\n"
+    "    0 INDEXOF_SMB_POPUP_UNTIL write-mailbox\n"
+    "  then\n"
+    "then\n"
+)
+
+
+def _make_popup_template():
+    POP_W = T * 0.35
+    POP_H = T * 0.45
+    POP_T = 0.12
+    bm = _bmesh.new()
+    tf = bm.verts.new((0,      POP_T,  POP_H))
+    rf = bm.verts.new((POP_W,  POP_T,  0))
+    bf = bm.verts.new((0,      POP_T, -POP_H))
+    lf = bm.verts.new((-POP_W, POP_T,  0))
+    tb = bm.verts.new((0,     -POP_T,  POP_H))
+    rb = bm.verts.new((POP_W, -POP_T,  0))
+    bb = bm.verts.new((0,     -POP_T, -POP_H))
+    lb = bm.verts.new((-POP_W,-POP_T,  0))
+    bm.faces.new([tf, rf, bf, lf])
+    bm.faces.new([tb, lb, bb, rb])
+    bm.faces.new([tf, tb, rb, rf])
+    bm.faces.new([rf, rb, bb, bf])
+    bm.faces.new([bf, bb, lb, lf])
+    bm.faces.new([lf, lb, tb, tf])
+    mesh = bpy.data.meshes.new('popup_score')
+    bm.to_mesh(mesh); bm.free()
+    mat = make_mat('smb_popup', (1.0, 0.95, 0.2))
+    mesh.materials.append(mat)
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('popup_score', mesh)
+    obj.location = (0.0, 0.0, -5.0)   # underground inside room bbox so script runs
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'enemy')
+    obj['wf_Mobility']             = 'Anchored'
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'popup_score.iff'
+    obj['wf_Script']               = POPUP_SCRIPT
+    return obj
+
+
+_make_popup_template()
 
 # ── 13. Export ────────────────────────────────────────────────────────────────
 print(f"[smb] Exporting to {OUT_LEV}")

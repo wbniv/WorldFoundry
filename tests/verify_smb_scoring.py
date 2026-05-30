@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Verify the SMB scoring system and 1UP mushroom.
+"""Verify the SMB scoring system, 1UP mushroom, and score pop-up actor.
 
-Companion to docs/plans/2026-05-27-smb-scoring-and-1up-mushroom.md.
+Companion to docs/plans/2026-05-27-smb-scoring-and-1up-mushroom.md
+and docs/plans/2026-05-27-smb-score-pop-up-actors.md.
 
 Checks:
   1. HUD_SCORE comes from SMB_SCORE (not raw GOLD count).
   2. Coin pickup (GOLD increment) → HUD_SCORE += 200 per coin.
   3. Stomp event (SMB_STOMP = 1) → HUD_SCORE += 100.
   4. 1UP signal (SMB_ONEUP_PICKUP = 1) → LIVES += 1.
-  5. Flagpole / END_OF_LEVEL edge → HUD_SCORE increases by at least 100.
+  5. popup_score script: POPUP_TRIGGER cleared + POPUP_UNTIL set after trigger.
+  6. Flagpole / END_OF_LEVEL edge → HUD_SCORE increases by at least 100.
+     (Must be last: END_OF_LEVEL=1 permanently terminates the level.)
 
 All checks use mailbox injection (no physics) — fast and deterministic.
 """
@@ -26,6 +29,7 @@ LEVEL = REPO / "wflevels" / "smb_w1_1-standalone.iff"
 LIB   = REPO / "engine" / "libs"
 CWD   = REPO / "wfsource" / "source" / "game"
 LOG   = REPO / "tests" / ".verify_smb_scoring.log"
+SCROT = REPO / "tests" / "screenshots"
 PORT  = 7793
 
 # Global mailboxes (read at idx=1)
@@ -39,9 +43,15 @@ SMB_ONEUP_PICKUP = 1841
 SMB_STOMP       = 1806
 SMB_LIVES_INIT  = 1807
 END_OF_LEVEL    = 1905
+SMB_POPUP_X     = 1842
+SMB_POPUP_Z     = 1843
+SMB_POPUP_TRIGGER = 1844
+SMB_POPUP_UNTIL = 1845
 
 # Per-actor mailboxes (offset >= 3000)
 GOLD_MB         = 3001   # player's cumulative coin count
+X_POS_MB        = 3009
+Z_POS_MB        = 3011
 
 _MESH_RE = re.compile(r"actor idx=(\d+) mesh=([^\s]+)")
 
@@ -90,6 +100,14 @@ def main() -> int:
             cli.send({"op": "step"})
             time.sleep(dt)
 
+    def shot(label):
+        SCROT.mkdir(parents=True, exist_ok=True)
+        out = SCROT / f"smb_popup_{label}.png"
+        cli.send({"op": "screenshot", "filename": str(out)})
+        m = cli.wait_for(lambda m: m.get("op") in ("screenshot_done", "error"), timeout=6.0)
+        ok = m and m.get("op") == "screenshot_done"
+        print(f"  screenshot {label}: {'OK' if ok else 'WARN'} → {out.name}")
+
     def cached(idx, mb):
         with cli._lock:
             return cli.mailbox_values.get((idx, mb)) or 0
@@ -106,11 +124,12 @@ def main() -> int:
         return cached(idx, mb)
 
     try:
-        idx = discover_substr({"player"})
+        idx = discover_substr({"player", "popup_score"})
         if "player" not in idx:
             print("FATAL: could not find player"); return 1
         PLAYER = idx["player"]
-        print(f"discovered: player={PLAYER}")
+        POPUP  = idx.get("popup_score")
+        print(f"discovered: player={PLAYER}  popup_score={POPUP}")
 
         cli = BridgeClient("127.0.0.1", PORT, timeout=15.0)
         print("bridge: connected")
@@ -202,13 +221,46 @@ def main() -> int:
         print(f"  lives after 1UP: {lives1}")
         check(lives1 == 4, f"1UP signal → LIVES {lives0} → {lives1}")
 
-        # ── 5. Flagpole / END_OF_LEVEL → HUD_SCORE += height + time bonus ────
+        # ── 5. popup_score script fires: TRIGGER cleared + UNTIL set ─────────
+        # Run BEFORE the flagpole check because END_OF_LEVEL=1 permanently
+        # sets _done=true and the engine exits on the next game-loop iteration;
+        # there's no way to reset it.
+        # Bridge step() injects ~1s dt, so the teleport+park would happen in 2
+        # frames. We check the two persistent side-effects of the trigger fire:
+        # POPUP_TRIGGER cleared to 0 (script ran) and POPUP_UNTIL set nonzero
+        # (expiry timer armed), using step(1) so the timer hasn't expired yet.
+        if POPUP is None:
+            check(False, "popup_score actor not found in log")
+        else:
+            cli.watch(idx=1, mailbox=SMB_POPUP_TRIGGER)
+            cli.watch(idx=1, mailbox=SMB_POPUP_UNTIL)
+            time.sleep(0.3)
+
+            cli.set_mailbox(idx=1, mailbox=SMB_POPUP_X, value=25.0)
+            cli.set_mailbox(idx=1, mailbox=SMB_POPUP_Z, value=3.0)
+            # Sentinel: ensure UNTIL is 0 before trigger so change is detectable
+            cli.set_mailbox(idx=1, mailbox=SMB_POPUP_UNTIL, value=0.0)
+            cli.set_mailbox(idx=1, mailbox=SMB_POPUP_TRIGGER, value=1.0)
+            step(1)  # one frame: script runs, clears TRIGGER, sets UNTIL
+            found_trigger = cli.wait_for_mailbox(1, SMB_POPUP_TRIGGER, 0.0, timeout=5.0)
+            trigger_val = cached(1, SMB_POPUP_TRIGGER) or 0.0
+            until_val   = cached(1, SMB_POPUP_UNTIL)
+            print(f"  popup after trigger step: TRIGGER={trigger_val}  UNTIL={until_val}")
+            check(found_trigger or trigger_val == 0.0,
+                  f"POPUP_TRIGGER cleared by script (got {trigger_val})")
+            check(until_val is not None and until_val > 0,
+                  f"POPUP_UNTIL nonzero (timer armed, got {until_val})")
+            # screenshot while popup is mid-float (UNTIL still set)
+            shot("stomp")
+
+        # ── 6. Flagpole / END_OF_LEVEL → HUD_SCORE += height + time bonus ────
+        # NOTE: END_OF_LEVEL=1 permanently exits the level — keep this LAST.
         hud_before_eol = cached(1, HUD_SCORE)
         # clear latch so the EOL edge fires once
         cli.set_mailbox(idx=1, mailbox=SMB_EOL_LATCH, value=0.0)
         step(2)
         cli.set_mailbox(idx=1, mailbox=END_OF_LEVEL, value=1.0)
-        step(4)
+        step(1)  # engine exits after this frame — don't send more steps
         hud_after_eol = wait_gt(1, HUD_SCORE, hud_before_eol + 99, timeout=5.0)
         bonus = hud_after_eol - hud_before_eol
         print(f"  flagpole bonus: HUD_SCORE {hud_before_eol} → {hud_after_eol}  bonus={bonus}")
@@ -232,7 +284,7 @@ def main() -> int:
         for f in fails:
             print(f"  - {f}")
         return 1
-    print(f"ALL PASS (5 checks)")
+    print(f"ALL PASS (6 checks)")
     return 0
 
 

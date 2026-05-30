@@ -57,6 +57,7 @@
 		$3000018l { 'STR' "brick_2.iff" }  // IFF RM0 000:018
 		$3000019l { 'STR' "brick_hidden.iff" }  // IFF RM0 000:019
 		$300001al { 'STR' "brick_1up.iff" }  // IFF RM0 000:01a
+		$300001bl { 'STR' "popup_score.iff" }  // IFF RM0 000:01b
 		$3001001l { 'STR' "cr_floor.iff" }  // IFF RM1 001:001
 		$3001002l { 'STR' "cr_wall_l.iff" }  // IFF RM1 001:002
 		$3001003l { 'STR' "cr_wall_r.iff" }  // IFF RM1 001:003
@@ -115,6 +116,7 @@
 		{ 'ASS' $3000018l [ "brick_2.iff" ] }  // IFF RM0 000:018
 		{ 'ASS' $3000019l [ "brick_hidden.iff" ] }  // IFF RM0 000:019
 		{ 'ASS' $300001al [ "brick_1up.iff" ] }  // IFF RM0 000:01a
+		{ 'ASS' $300001bl [ "popup_score.iff" ] }  // IFF RM0 000:01b
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM1'

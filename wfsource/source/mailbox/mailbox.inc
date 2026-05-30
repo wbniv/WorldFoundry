@@ -65,6 +65,12 @@ Comment("=====================================================================")
 	MAILBOXENTRY( SMB_EOL_LATCH, 1840 )		Comment("1 after the end-of-level flagpole bonus has been computed (edge-detect guard so it fires once)")
 	MAILBOXENTRY( SMB_ONEUP_PICKUP, 1841 )		Comment("1UP mushroom sets this on proximity; player script grants +1 life and clears")
 
+	Comment(" SMB score pop-up actor. docs/plans/2026-05-27-smb-score-pop-up-actors.md ")
+	MAILBOXENTRY( SMB_POPUP_X, 1842 )		Comment("X position for the floating score indicator spawn")
+	MAILBOXENTRY( SMB_POPUP_Z, 1843 )		Comment("Z position; popup teleports to (POPUP_X, 0, POPUP_Z+1.5) on trigger")
+	MAILBOXENTRY( SMB_POPUP_TRIGGER, 1844 )		Comment("pulse to 1 to spawn popup; popup script reads + clears each tick")
+	MAILBOXENTRY( SMB_POPUP_UNTIL, 1845 )		Comment("level-clock time when popup expires (now+0.75s on spawn); 0 = idle/parked")
+
 	MAILBOXENTRY( HUD_SCORE, 70 )			Comment("HUD score slot (read by game.cc:554); player writes its GOLD here")
 	MAILBOXENTRY( HUD_TIMER, 71 )			Comment("HUD timer slot (read by game.cc:554); Director writes the countdown here")
 	MAILBOXENTRY( LIVES, 72 )			Comment("HUD lives slot (read by game.cc:553 for the LIVES display); player respawn decrements it")
