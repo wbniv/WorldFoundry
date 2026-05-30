@@ -85,12 +85,13 @@ public:
 		DISPLAY_PAGES=2				// double buffering is usually all that is needed
 	};
 
-	// define the size & shape of video ram for this platform
-	enum
-	{
-		VRAMWidth		= 1024,
-		VRAMHeight		= 512
-	};
+	// Total VRAM box. Default 1024×512 (legacy fixed-target layout). Both
+	// fields are runtime-settable via `--vram-width`/`--vram-height` CLI
+	// flags (see main.cc) so high-detail levels can opt into a larger
+	// layout without touching defaults. See
+	// docs/plans/2026-05-30-runtime-vram-cli-overrides.md.
+	static int VRAMWidth;
+	static int VRAMHeight;
 
 	Display(int orderTableSize, int xPos, int yPos, int xSize, int ySize,Memory& memory, bool interlace=false);
 	~Display();

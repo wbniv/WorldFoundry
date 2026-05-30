@@ -26,6 +26,12 @@
 
 #include <gfx/display.hp>
 
+// Runtime VRAM box dimensions. Defaults preserve the historical 1024×512
+// layout; main.cc overrides before Display construction when CLI flags
+// are passed. See docs/plans/2026-05-30-runtime-vram-cli-overrides.md.
+int Display::VRAMWidth  = 1024;
+int Display::VRAMHeight = 512;
+
 #if defined(WF_TARGET_IOS)
 // iOS uses the Metal backend; windowing/drawable acquisition live in
 // hal/ios/metal_view.mm rather than gfx/gl/mesa.cc. Display on iOS is a
