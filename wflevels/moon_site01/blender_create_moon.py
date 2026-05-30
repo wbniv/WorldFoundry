@@ -38,13 +38,13 @@ heights = np.load(HEIGHTS_NPY)
 with open(HEIGHTS_JSON) as f:
     meta = json.load(f)
 
-# Engine caps both vertex and FACE counts at <10000 (rendobj3.hpi:30-32).
-# Quads triangulate 1:2 in the renderer, so N×N verts produce 2·(N-1)² tris;
-# the binding constraint is tris<10000, giving N ≤ 71. Decimate the input
-# grid uniformly until it fits.
+# Engine caps both vertex and FACE counts at <32000 (rendobj3.hpi:30-32) —
+# hard ceiling is int16 v?Index (face.hp:35). Quads triangulate 1:2, so
+# the binding constraint is 2·(N-1)² < 32000, giving N ≤ 127. Decimate the
+# input grid uniformly until it fits.
 src_cell = float(meta['cell_size_m'])
 decim = 1
-while heights[::decim, ::decim].shape[0] > 71:
+while heights[::decim, ::decim].shape[0] > 127:
     decim += 1
 heights = heights[::decim, ::decim]
 N         = heights.shape[0]                # samples per side

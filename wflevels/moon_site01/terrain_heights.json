@@ -1,8 +1,8 @@
 {
   "source": "data/Site01_final_adj_5mpp_surf.tif",
   "side_m": 1000.0,
-  "samples": 100,
-  "cell_size_m": 10.0,
+  "samples": 200,
+  "cell_size_m": 5.0,
   "centre_pixel": [
     1600,
     1600
