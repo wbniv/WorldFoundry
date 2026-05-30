@@ -586,6 +586,46 @@ CaptureFrame(int xSize, int ySize)
     uint8_t* pixels = (uint8_t*)malloc(pixelBytes);
     glReadPixels(0, 0, xSize, ySize, GL_BGR, GL_UNSIGNED_BYTE, pixels);
     fwrite(pixels, 1, pixelBytes, gCapturePipe);
+
+    // Optional one-shot PPM dump (env WF_GAME_SCREENSHOT_PPM=path). The
+    // ffmpeg pipe occasionally buffers indefinitely under fragmented mp4 +
+    // SIGTERM, leaving a 36-byte header file — PPM bypasses libx264 and
+    // mp4 entirely. Wait a few frames so the first textured frame is
+    // ready (the FBO blits are immediate, but the level-load cascade can
+    // present a partial frame on frame 0).
+    static int  gPpmFrame    = 0;
+    static bool gPpmDone     = false;
+    if (!gPpmDone)
+    {
+        const char* ppm_path = getenv("WF_GAME_SCREENSHOT_PPM");
+        if (ppm_path && ++gPpmFrame >= 30)
+        {
+            FILE* fp = fopen(ppm_path, "wb");
+            if (fp)
+            {
+                fprintf(fp, "P6\n%d %d\n255\n", xSize, ySize);
+                // glReadPixels gives BGR bottom-up; PPM wants RGB top-down.
+                uint8_t* row = (uint8_t*)malloc(xSize * 3);
+                for (int y = ySize - 1; y >= 0; --y)
+                {
+                    const uint8_t* src = pixels + y * xSize * 3;
+                    for (int x = 0; x < xSize; ++x)
+                    {
+                        row[x*3+0] = src[x*3+2];   // R = B-channel
+                        row[x*3+1] = src[x*3+1];   // G
+                        row[x*3+2] = src[x*3+0];   // B = R-channel
+                    }
+                    fwrite(row, 1, xSize * 3, fp);
+                }
+                free(row);
+                fclose(fp);
+                gPpmDone = true;
+                std::fprintf(stderr, "wf_game: wrote screenshot %s (%dx%d)\n",
+                             ppm_path, xSize, ySize);
+            }
+        }
+    }
+
     free(pixels);
 
     if (gCaptureFBO)
