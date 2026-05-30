@@ -338,6 +338,35 @@ peer-to-peer (or via TURN), never through the tunnel.
 - **Ephemeral:** the link lives only for that session, and account-less quick tunnels are
   rate-limited. For durable/team hosting, run a named tunnel or a fixed relay (planned).
 
+#### Two computers
+
+The minimum for a real cross-network call between two people:
+
+```bash
+# computer 1 — host (needs cloudflared, fetched once by task fetch-cloudflared)
+./build-editor/wf-edit --host-tunnel
+# → copy the printed   wfedit+s://<random>.trycloudflare.com/r/<room>   link
+
+# computer 2 — joiner (needs only wf-edit built; no cloudflared)
+./build-editor/wf-edit --url=<that link>
+```
+
+Each machine has its own `~/.config/wf-edit/identity.json` (auto-generated on
+first run), so the two appear as distinct collaborators (different `peer_id` +
+colour) in the Collaborators panel. Edits you make on one — drag the move/rotate
+gizmo, change a field — sync live to the other through the same `wss://` relay;
+voice/video go peer-to-peer (DTLS-SRTP) or via a configured TURN (see below).
+
+#### Trying it on one machine (testing)
+
+For two editors **on the same machine** you must give them distinct config dirs,
+otherwise they share an `identity.json` and look like one peer:
+
+```bash
+XDG_CONFIG_HOME=/tmp/wfedit-A  ./build-editor/wf-edit --host-tunnel        # host
+XDG_CONFIG_HOME=/tmp/wfedit-B  ./build-editor/wf-edit --url=<link>         # joiner
+```
+
 ### Calls over the internet (STUN + TURN)
 
 Media uses **WebRTC**: ICE picks the best path between peers, **STUN** (a public Google server
