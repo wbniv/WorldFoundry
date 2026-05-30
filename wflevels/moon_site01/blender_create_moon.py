@@ -37,9 +37,19 @@ HEIGHTS_JSON= os.path.join(SCRIPT_DIR, 'terrain_heights.json')
 heights = np.load(HEIGHTS_NPY)
 with open(HEIGHTS_JSON) as f:
     meta = json.load(f)
+
+# Engine caps both vertex and FACE counts at <10000 (rendobj3.hpi:30-32).
+# Quads triangulate 1:2 in the renderer, so N×N verts produce 2·(N-1)² tris;
+# the binding constraint is tris<10000, giving N ≤ 71. Decimate the input
+# grid uniformly until it fits.
+src_cell = float(meta['cell_size_m'])
+decim = 1
+while heights[::decim, ::decim].shape[0] > 71:
+    decim += 1
+heights = heights[::decim, ::decim]
 N         = heights.shape[0]                # samples per side
-CELL_M    = float(meta['cell_size_m'])      # metres per sample
-SIDE_M    = float(meta['side_m'])
+CELL_M    = src_cell * decim                # metres per sample after decimation
+SIDE_M    = (N - 1) * CELL_M                # span between outermost vertices
 HALF_M    = SIDE_M / 2.0
 print(f"[moon] heightfield: {N}x{N} samples @ {CELL_M} m/sample, "
       f"Z range {heights.min():+.1f} to {heights.max():+.1f} m")
@@ -196,22 +206,63 @@ if player:
     )
 
 # ── 7. Camera ────────────────────────────────────────────────────────────────
+target = find_by_class('target')
+if target:
+    target.name = 'CamTarget'
+    target.location = LOOK_TARGET
+
 camshot = find_by_class('camshot')
 if camshot:
+    camshot.name = 'cs_chase'
     camshot.location = (PLAYER_SPAWN[0] + CAM_OFFSET[0],
                         PLAYER_SPAWN[1] + CAM_OFFSET[1],
                         PLAYER_SPAWN[2] + CAM_OFFSET[2])
-    # Track the player so the camera follows the fall.
+    # Mirror smb_w1_1's static-camera setup: absolute world position, fixed
+    # rotation, look at a Target actor. (Relative positioning seems to leave
+    # the BungeeCameraHandler in an inconsistent state during init.)
+    camshot['wf_Position X'] = 'Absolute'
+    camshot['wf_Position Y'] = 'Absolute'
+    camshot['wf_Position Z'] = 'Absolute'
+    camshot['wf_Rotation']   = 'Fixed'
+    camshot['wf_FOV']                 = 45.0
+    camshot['wf_Pan Time In Seconds'] = 0.1
+    camshot['wf_Model Type']          = 'None'
     camshot['wf_Track Object'] = 'Player'
-    camshot['wf_X Position Type'] = 'Relative'
-    camshot['wf_Y Position Type'] = 'Relative'
-    camshot['wf_Z Position Type'] = 'Relative'
-
-target = find_by_class('target')
-if target:
-    target.location = LOOK_TARGET
+    camshot['wf_Target']       = 'CamTarget'
+    camshot['wf_Follow']       = 'CamTarget'
 
 # ── 8. Level object ──────────────────────────────────────────────────────────
+# ── 7b. Room bounds ──────────────────────────────────────────────────────────
+# Must enclose terrain extent + player jump headroom + camera offset so levcomp
+# doesn't warn "actor falls outside every room bbox — it will not render".
+
+room = find_by_class('room')
+if room:
+    z_min = float(heights.min()) - 10.0      # 10 m below lowest terrain pixel
+    z_max = max(50.0, float(heights.max()) + 50.0)  # headroom for jumps / cam
+    centre = (0.0, 0.0, (z_min + z_max) / 2.0)
+    rel = (-HALF_M - 10.0, -HALF_M - 10.0, z_min - centre[2],
+           +HALF_M + 10.0, +HALF_M + 10.0, z_max - centre[2])
+
+    room.name = 'room_moon'
+    room.location = centre
+    room['wf_original_bbox'] = rel
+
+    # Replace the imported room-bounds mesh with one matching our rel-bbox.
+    verts = [(rel[0], rel[1], rel[2]), (rel[3], rel[1], rel[2]),
+             (rel[3], rel[4], rel[2]), (rel[0], rel[4], rel[2]),
+             (rel[0], rel[1], rel[5]), (rel[3], rel[1], rel[5]),
+             (rel[3], rel[4], rel[5]), (rel[0], rel[4], rel[5])]
+    faces = [(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]
+    new_mesh = bpy.data.meshes.new('RoomBounds')
+    new_mesh.from_pydata(verts, [], faces)
+    new_mesh.update()
+    old = room.data
+    room.data = new_mesh
+    if old and old.users == 0:
+        bpy.data.meshes.remove(old)
+    print(f"[moon] room bounds: centre {centre}, rel-bbox {rel}")
+
 levelobj = find_by_class('levelobj')
 if levelobj:
     levelobj['wf_Num Mailboxes'] = NUM_MAILBOXES
