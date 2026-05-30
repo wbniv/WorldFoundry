@@ -60,9 +60,12 @@ PLAYER_HEIGHT = 1.8
 # collision). Centre vertex of the heightfield is at Z=0 by construction.
 PLAYER_SPAWN  = (0.0, 0.0, 5.0)
 
-# Camera: third-person follow from −Y, ~3 m above the player.
-CAM_OFFSET    = (0.0, -8.0, 3.5)
-LOOK_TARGET   = PLAYER_SPAWN
+# Camera: third-person from −Y. Tuned 2026-05-30 by iteration on engine
+# screenshots: (0, -8, 3.5) was too low + close (player filled frame, no
+# terrain visible); (0, -25, 18) was too high + far (player lost in distant
+# terrain). (0, -12, 6) framing the player at ~25° downward angle works.
+CAM_OFFSET    = (0.0, -12.0, 6.0)
+LOOK_TARGET   = (PLAYER_SPAWN[0], PLAYER_SPAWN[1], 1.5)
 
 NUM_MAILBOXES = 100
 
@@ -195,7 +198,11 @@ if matte:
 light = find_by_class('light')
 if light:
     light.name = 'Sun'
-    light.location = (0.0, 0.0, 200.0)
+    # Position has to sit inside the room's bbox or level.cc's room-iter
+    # skips this actor and the room reports "no lights" — Z=200 was outside
+    # the rel-bbox z=±99 around centre Z≈-35. (Directional-light position is
+    # cosmetic; only the orientation matters for shading.)
+    light.location = (0.0, 0.0, 50.0)
     # In SMB's lighting convention (blender_create_smb.py:225 calls
     # rotation_euler.x = π/3 "sun ~60° above horizon"), the X rotation tilts
     # the beam off zenith. South-pole sun at altitude 2° → X = π/2 − 2°.
@@ -259,7 +266,7 @@ if camshot:
     camshot['wf_Position Y'] = 'Absolute'
     camshot['wf_Position Z'] = 'Absolute'
     camshot['wf_Rotation']   = 'Fixed'
-    camshot['wf_FOV']                 = 45.0
+    camshot['wf_FOV']                 = 60.0
     camshot['wf_Pan Time In Seconds'] = 0.1
     camshot['wf_Model Type']          = 'None'
     camshot['wf_Track Object'] = 'Player'
