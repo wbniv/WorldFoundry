@@ -29,6 +29,8 @@
 #include "game.hp"
 #include "version.hp"
 #include <hal/lifecycle.h>
+#include <gfx/display.hp>
+#include <gfx/vmem.hp>
 
 #if defined(__LINUX__) || defined(__ANDROID__)
 	char szOadDir[ _MAX_PATH ];
@@ -150,6 +152,10 @@ usage( int argc, char* argv[] )
 
     std::cout << "\t-paranoid\tPerform insanely slow error checks" << std::endl;
     std::cout << "\t-record_video\tRecord gameplay to output.mp4 via ffmpeg" << std::endl;
+    std::cout << "\t--vram-width N\t\tTotal VRAM box width  (default " << Display::VRAMWidth  << ")" << std::endl;
+    std::cout << "\t--vram-height N\t\tTotal VRAM box height (default " << Display::VRAMHeight << ")" << std::endl;
+    std::cout << "\t--vram-slot-width N\tTransient texture slot width  (default " << VideoMemory::VRAMTransientWidth  << ")" << std::endl;
+    std::cout << "\t--vram-slot-height N\tTransient texture slot height (default " << VideoMemory::VRAMTransientHeight << ")" << std::endl;
     std::cout << "\t-zs\t\tZ-Sorted" << std::endl;
     std::cout << "\t-zb\t\tZ-Buffered" << std::endl;
 	std::cout << "\t-nologo\t\tDon't display company logos" << std::endl;
@@ -254,6 +260,17 @@ ParseCommandLine(int argc, char** argv)
         else if ( strcmp( argv[index]+1, "record_video" ) == 0 )
             bRecordVideo = true;
 #endif
+        // Runtime VRAM overrides — must be applied before Display/VideoMemory
+        // is constructed below. See
+        // docs/plans/2026-05-30-runtime-vram-cli-overrides.md.
+        else if ( strncmp( argv[index]+1, "-vram-width=", 12 ) == 0 )
+            Display::VRAMWidth  = atoi( argv[index] + 13 );
+        else if ( strncmp( argv[index]+1, "-vram-height=", 13 ) == 0 )
+            Display::VRAMHeight = atoi( argv[index] + 14 );
+        else if ( strncmp( argv[index]+1, "-vram-slot-width=", 17 ) == 0 )
+            VideoMemory::VRAMTransientWidth  = atoi( argv[index] + 18 );
+        else if ( strncmp( argv[index]+1, "-vram-slot-height=", 18 ) == 0 )
+            VideoMemory::VRAMTransientHeight = atoi( argv[index] + 19 );
 		else if ( strcmp( argv[index]+1, "zb" ) == 0 )
 		{
 			bRenderZb = true;

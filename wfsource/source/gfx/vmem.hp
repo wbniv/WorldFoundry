@@ -80,11 +80,15 @@ private:
 		VRAMTransientHeight		= 512,
 	};
 #else
+public:
 	// Modern (GL) build — slot/page sizes are runtime-overridable via CLI
 	// (--vram-slot-width / --vram-slot-height etc.) so high-detail levels
 	// can opt into a larger layout. Defaults preserve the historical 256²
 	// values that ship snowgoons/SMB/qbert/MM untouched. See
 	// docs/plans/2026-05-30-runtime-vram-cli-overrides.md.
+	//
+	// Public so main.cc's CLI parser can write them before VideoMemory is
+	// constructed.
 	static int VRAMPaletteWidth;     // default 256
 	static int VRAMPaletteHeight;    // default 8
 	static int VRAMPermanentWidth;   // default 256
@@ -93,6 +97,7 @@ private:
 	static int VRAMTransientHeight;  // default 256
 	// VRAMTransientBaseX is just VRAMPermanentBaseX + VRAMPermanentWidth at the
 	// one call site (vmem.cc); no longer stored to keep this list flat.
+private:
 #endif
 
 	void AllocateTextureSlots(Display& display);
