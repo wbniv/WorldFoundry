@@ -108,6 +108,36 @@ Smoke-test each of the four other shipping levels with no CLI overrides:
 
 Diff `cd_*.iff` / `cd.iff` byte-sizes against pre-change to confirm no encoding shift.
 
+## Update 2026-05-30: Phase 4 blocked on int8 UV pipeline
+
+Implementation through Phase 3 landed clean (commits 66398700, 8702c551,
+6ec1f2b9). Phase 4 attempt with `--vram-slot-width=1024` hit a structural
+cap **beneath** the slot-size knob: per-primitive UV coordinates are
+stored as **`int8`** through the rendering pipeline.
+
+Trace:
+1. `material.cc:217-220` `#define TEXTURE_PAGE_XSIZE 256` (matches the
+   old hardcoded slot size).
+2. `material.cc:242` asserts `vramU < SCALAR_CONSTANT(TEXTURE_PAGE_XSIZE)`
+   — fires at u=0.25 × texture.w=1023 ≈ 258 > 256.
+3. `material.cc:327-337` declares `int8 u0,v0,…u2,v2;`. Even if the
+   assert were softened, `WholePart()` truncated to `int8` (= `SYS_INT8`
+   per `pigtypes.h:74`) caps the addressable page at ±127 / 0–255.
+4. The int8 UVs flow into `setUV3(poly,u0,v0,…)` (`material.cc:345`),
+   which writes to PSX-shaped `POLY_F3` / `POLY_GT3` structs whose UV
+   fields are also uint8 — see [the atlas-UV-uint8 overflow memory](../../../.claude/projects/-home-will-WorldFoundry/memory/feedback_check_existing_constants.md).
+   The whole rasterizer chain expects 8-bit UVs.
+
+Widening to int16 is a much bigger refactor than this plan estimated:
+~10–15 source files touching every consumer of `POLY_F3.u0/v0` style
+fields, plus the inner-loop UV math in the rasterizer. It's a worthwhile
+piece of work but not a one-day job.
+
+**Decision:** keep Phases 1-3 in place as the foundation; revert the
+moon level to 256² (the pre-1024 NAC composite, committed in `fabb9efb`).
+Open a follow-up plan for the int8→int16 UV widening; Phase 4-5 here
+get marked deferred behind that work.
+
 ## Risks / open questions
 
 - **Static-init order**: `Display::VRAMWidth` is referenced in inline functions in `pixelmap.hpi` etc. — those need to compile against a non-constexpr value. Should be fine (regular int read), but if any expression is in a place requiring constexpr (e.g. an enum initializer somewhere else, or an array size), it'll surface as a compile error in Phase 1. Fix: keep that specific value as enum, replace the rest.

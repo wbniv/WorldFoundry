@@ -26,6 +26,7 @@ tasks:
       WF_WASM_ENGINE: none
       WF_ENABLE_WREN: "0"
       WF_FORTH_ENGINE: zforth
+      WF_PILOT_ENGINE: builtin
       WF_PHYSICS_ENGINE: jolt
     cmds:
       - bash engine/build_game.sh
@@ -61,6 +62,7 @@ tasks:
       WF_WASM_ENGINE: none
       WF_ENABLE_WREN: "0"
       WF_FORTH_ENGINE: zforth
+      WF_PILOT_ENGINE: builtin
       WF_PHYSICS_ENGINE: jolt
     cmds:
       - bash engine/build_game.sh
@@ -450,6 +452,9 @@ tasks:
   run-moon:
     desc: "Run wf_game on wflevels/moon_site01-standalone.iff (PGDA Site 01 Connecting Ridge — LOLA terrain + NAC texture, lunar gravity)"
     cmds:
+      # The --vram-* flags exist (see docs/plans/2026-05-30-runtime-vram-cli-overrides.md)
+      # but a 1024² texture also needs the int8 → int16 UV widening that's
+      # still TODO. Until that lands, run at the 256² default.
       - LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/moon_site01-standalone.iff
 
   run-debug:
