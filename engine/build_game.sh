@@ -54,6 +54,15 @@ case "$WF_FORTH_ENGINE" in
     *) echo "error: WF_FORTH_ENGINE must be one of: none, zforth, ficl, atlast, embed, libforth, pforth (got: '$WF_FORTH_ENGINE')" >&2
        exit 2 ;;
 esac
+# PILOT — from-scratch C++ interpreter (engine/pilot), no vendored library.
+# Default on; opt out with WF_PILOT_ENGINE=none.
+WF_PILOT_ENGINE="${WF_PILOT_ENGINE:-builtin}"
+case "$WF_PILOT_ENGINE" in
+    none|builtin) ;;
+    *) echo "error: WF_PILOT_ENGINE must be one of: none, builtin (got: '$WF_PILOT_ENGINE')" >&2
+       exit 2 ;;
+esac
+PILOT_DIR="$REPO_ROOT/engine/pilot"
 ZFORTH_DIR="$VENDOR/zforth-41db72d1"
 FICL_DIR="$VENDOR/ficl-3.06"
 ATLAST_DIR="$VENDOR/atlast-08ff0e1a/atlast-64"
@@ -211,6 +220,11 @@ case "$WF_FORTH_ENGINE" in
                          "-DPFORTH_FTH_DIR=\"$PFORTH_DIR/fth\"")
               WF_NEURAL_FORTH=0 ;;
     none)     WF_NEURAL_FORTH=0 ;;
+esac
+
+case "$WF_PILOT_ENGINE" in
+    builtin) CXXFLAGS+=(-DWF_WITH_PILOT -DWF_PILOT_ENGINE_BUILTIN -I"$PILOT_DIR") ;;
+    none)    : ;;
 esac
 
 if [[ "$WF_REST_API" == "1" ]]; then
@@ -437,6 +451,15 @@ case "$WF_LUA_ENGINE" in
 esac
 
 compile_stub "$STUB_SRC/scripting_stub.cc" "$OUT/stubs__scripting_stub.o"
+
+# PILOT engine plug + core — pure C++, no vendored library, no editor deps.
+case "$WF_PILOT_ENGINE" in
+    builtin)
+        compile_stub "$STUB_SRC/scripting_pilot.cc" "$OUT/stubs__scripting_pilot.o"
+        compile_stub "$PILOT_DIR/pilot_core.cc"     "$OUT/pilot__pilot_core.o"
+        ;;
+    none) : ;;
+esac
 compile_stub "$STUB_SRC/platform_stubs.cc" "$OUT/stubs__platform_stubs.o"
 
 # JS engine plug — compiled and linked only when a non-`none` flavour is selected.

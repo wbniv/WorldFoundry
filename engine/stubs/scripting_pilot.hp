@@ -1,0 +1,46 @@
+// scripting_pilot.hp — PILOT engine plug interface used by ScriptRouter.
+//
+// PILOT is a from-scratch C++ interpreter (engine/pilot/pilot_core.*) — no
+// vendored library, nothing from the editor. Compiled in when WF_PILOT_ENGINE
+// is `builtin` (default; opt out with WF_PILOT_ENGINE=none).
+//
+// Sigil: the first non-blank line `R:pilot` — a valid PILOT remark (ignored by
+// the interpreter), analogous to zForth's `\ wf`. ScriptRouter::RunScript
+// content-sniffs it (when the caller passes the Forth language id) and re-routes
+// to this engine; see scripting_stub.cc.
+
+#ifndef WF_SCRIPTING_PILOT_HP
+#define WF_SCRIPTING_PILOT_HP
+
+#if defined(WF_PILOT_ENGINE_BUILTIN)
+#define WF_WITH_PILOT 1
+
+class MailboxesManager;
+struct IntArrayEntry;
+
+namespace pilot_engine {
+
+// Lifetime hooks — called from ScriptRouter ctor/dtor.
+void  Init(MailboxesManager& mgr);
+void  Shutdown();
+
+// Register INDEXOF_* / JOYSTICK_BUTTON_* as PILOT constants. PILOT also exposes
+// each mailbox PREFIX-FREE (INDEXOF_GOLD -> GOLD) and buttons as BTN_* — the
+// first engine to preview the project's INDEXOF_-prefix removal.
+void  AddConstantArray(IntArrayEntry* entryList);
+void  DeleteConstantArray(IntArrayEntry* entryList);  // no-op
+
+// Execute/resume a PILOT script for `objectIndex`. The VM is frame-resumable:
+// per-actor program counter persists across frames; blocking verbs (A:/PA:/WM:)
+// suspend and resume next frame. Returns the VM's last value.
+float RunScript(const char* src, int objectIndex);
+
+// True if `src` looks like PILOT (first non-blank line is the `R:pilot` sigil).
+// Used by ScriptRouter's content-sniff. Safe to call without Init.
+bool  LooksLikePilot(const char* src);
+
+} // namespace pilot_engine
+
+#endif // WF_PILOT_ENGINE_BUILTIN
+
+#endif // WF_SCRIPTING_PILOT_HP

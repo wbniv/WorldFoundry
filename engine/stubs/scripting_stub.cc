@@ -18,6 +18,7 @@
 #include "scripting_wren.hp"
 #include "scripting_js.hp"
 #include "scripting_wamr.hp"
+#include "scripting_pilot.hp"
 #include "physics_jolt.hp"
 
 #include <cstdio>
@@ -157,6 +158,9 @@ ScriptRouter::ScriptRouter(MailboxesManager& mgr)
     wasm3_engine::Init(mgr);
 #  endif
 #endif
+#ifdef WF_WITH_PILOT
+    pilot_engine::Init(mgr);
+#endif
     AddConstantArray(mailboxIndexArray);
     AddConstantArray(joystickArray);
 }
@@ -165,6 +169,9 @@ ScriptRouter::~ScriptRouter()
 {
     DeleteConstantArray(joystickArray);
     DeleteConstantArray(mailboxIndexArray);
+#ifdef WF_WITH_PILOT
+    pilot_engine::Shutdown();
+#endif
 #ifdef WF_WITH_WASM
 #  ifdef WF_WASM_ENGINE_WAMR
     wamr_engine::Shutdown();
@@ -191,7 +198,7 @@ Scalar ScriptRouter::RunScript(const void* script, int objectIndex, int language
     const char* src = static_cast<const char*>(script);
     if (!src || !*src) return Scalar::FromFloat(0.0f);
 
-    // language enum: 0=Lua 1=Fennel 2=Wren 3=Forth 4=JS 5=Wasm
+    // language enum: 0=Lua 1=Fennel 2=Wren 3=Forth 4=JS 5=Wasm 6=PILOT
     // Slots for engines not compiled in are null; assert rather than crash.
     using RunFn = float(*)(const char*, int);
     static const RunFn kDispatch[] = {
@@ -229,7 +236,22 @@ Scalar ScriptRouter::RunScript(const void* script, int objectIndex, int language
 #else
         /* 5 wasm   */ nullptr,
 #endif
+#ifdef WF_WITH_PILOT
+        /* 6 pilot  */ pilot_engine::RunScript,
+#else
+        /* 6 pilot  */ nullptr,
+#endif
     };
+
+#ifdef WF_WITH_PILOT
+    // Content-sniff: per-actor scripts are dispatched with the Forth language id
+    // (actor.cc hardcodes language=3); a script whose first line is the `R:pilot`
+    // sigil is PILOT, not Forth — re-route it to slot 6. (Forth's own `\ wf`
+    // sigil never matches.) The OAD ScriptLanguage-field restore (plan fix B)
+    // will eventually make this explicit.
+    if (language == 3 && pilot_engine::LooksLikePilot(src))
+        language = 6;
+#endif
 
     RangeCheck(0, language, std::size(kDispatch));
     if (!kDispatch[language])
@@ -273,6 +295,9 @@ void ScriptRouter::AddConstantArray(IntArrayEntry* entryList)
     wasm3_engine::AddConstantArray(entryList);
 #  endif
 #endif
+#ifdef WF_WITH_PILOT
+    pilot_engine::AddConstantArray(entryList);
+#endif
 }
 
 void ScriptRouter::DeleteConstantArray(IntArrayEntry* entryList)
@@ -295,6 +320,9 @@ void ScriptRouter::DeleteConstantArray(IntArrayEntry* entryList)
 #  else
     wasm3_engine::DeleteConstantArray(entryList);
 #  endif
+#endif
+#ifdef WF_WITH_PILOT
+    pilot_engine::DeleteConstantArray(entryList);
 #endif
 }
 

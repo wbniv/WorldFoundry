@@ -1,0 +1,101 @@
+// host_mailbox.hp — MailboxHost: in-process PilotHost backed by MailboxesManager.
+//
+// Header-only (only scripting_pilot.cc includes it). This is the only PILOT TU
+// that touches engine headers (Scalar, MailboxesManager); pilot_core stays pure.
+//
+// In-engine semantics: T:/TH: -> stderr (no HUD-text mailbox exists yet — plan
+// Phase 4); the engine-control verbs (PS/PR/ST/SH/WA) are no-ops an actor can't
+// drive its own engine; Await is a NON-BLOCKING poll so the per-actor VM parks
+// its program counter and resumes next frame (frame-resumable state machine).
+
+#ifndef WF_PILOT_HOST_MAILBOX_HP
+#define WF_PILOT_HOST_MAILBOX_HP
+
+#include "pilot_host.hp"
+
+#include <mailbox/mailbox.hp>
+#include <math/scalar.hp>
+
+#include <cstdio>
+#include <string>
+
+namespace pilot {
+
+class MailboxHost : public PilotHost
+{
+public:
+    void setManager(MailboxesManager* m) { _mgr = m; }
+    void setCurObj(int o) { _curObj = o; }
+
+    void Type(const std::string& t, bool nl) override
+    {
+        std::fputs(t.c_str(), stderr);
+        if (nl) std::fputc('\n', stderr);
+    }
+
+    double ReadMailbox(int actor, int mbx) override
+    {
+        return _mgr ? _mgr->LookupMailboxes(actor).ReadMailbox(mbx).AsFloat() : 0.0;
+    }
+
+    void SetMailbox(int actor, int mbx, double v) override
+    {
+        if (_mgr) _mgr->LookupMailboxes(actor).WriteMailbox(mbx, Scalar::FromFloat((float)v));
+    }
+
+    double ClockSeconds() override
+    {
+        return _mgr ? _mgr->LookupMailboxes(_curObj).ReadMailbox(EMAILBOX_TIME).AsFloat() : 0.0;
+    }
+
+    AwaitState CheckAwait(const AwaitReq& r, double& out) override
+    {
+        if (r.kind == AwaitKind::ClockSeconds) {
+            double now = ClockSeconds();
+            out = now;
+            return now >= r.value ? AwaitState::Satisfied : AwaitState::Pending;
+        }
+        double cur = ReadMailbox(r.actorIdx, r.mailbox);
+        out = cur;
+        if (rel(r.op, cur, r.value)) return AwaitState::Satisfied;
+        if (r.timeoutSecs > 0 && (ClockSeconds() - r.startSecs) > r.timeoutSecs)
+            return AwaitState::TimedOut;
+        return AwaitState::Pending;
+    }
+
+    void SetTransform(int actor, double x, double y, double z) override
+    {
+        if (!_mgr) return;
+        Mailboxes& mb = _mgr->LookupMailboxes(actor);
+        mb.WriteMailbox(EMAILBOX_X_POS, Scalar::FromFloat((float)x));
+        mb.WriteMailbox(EMAILBOX_Y_POS, Scalar::FromFloat((float)y));
+        mb.WriteMailbox(EMAILBOX_Z_POS, Scalar::FromFloat((float)z));
+    }
+
+    void InjectInput(const std::string& /*slot*/, int bits, int /*held*/) override
+    {
+        if (_mgr)
+            _mgr->LookupMailboxes(_curObj).WriteMailbox(
+                EMAILBOX_HARDWARE_JOYSTICK1_RAW, Scalar::FromFloat((float)bits));
+    }
+
+private:
+    static bool rel(RelOp o, double a, double b)
+    {
+        switch (o) {
+            case RelOp::Eq: return a == b;
+            case RelOp::Ne: return a != b;
+            case RelOp::Lt: return a <  b;
+            case RelOp::Le: return a <= b;
+            case RelOp::Gt: return a >  b;
+            default:        return a >= b;
+        }
+    }
+
+    MailboxesManager* _mgr = nullptr;
+    int _curObj = 0;
+};
+
+} // namespace pilot
+
+#endif // WF_PILOT_HOST_MAILBOX_HP

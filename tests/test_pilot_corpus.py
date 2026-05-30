@@ -28,9 +28,12 @@ def test_vm(path):
     assert ok, f"{path.name}: {fails}\n--- output ---\n{out}"
 
 
-@pytest.mark.parametrize("path", ENGINE_CASES, ids=[p.name for p in ENGINE_CASES])
-def test_engine(path):
-    res = pd.run_engine_scenario(path)
+@pytest.mark.parametrize("idx,path", list(enumerate(ENGINE_CASES)),
+                         ids=[p.name for p in ENGINE_CASES])
+def test_engine(idx, path):
+    # Unique port per scenario so back-to-back engine launches in one session
+    # don't collide while a prior engine is still releasing its socket.
+    res = pd.run_engine_scenario(path, port=7796 + idx)
     if res is None:
         pytest.skip("engine prereqs missing (wf_game / level / DISPLAY)")
     ok, fails, code, out = res
