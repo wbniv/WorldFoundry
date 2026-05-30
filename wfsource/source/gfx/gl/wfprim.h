@@ -5,6 +5,8 @@
 #ifndef GFX_WFPRIM_H
 #define GFX_WFPRIM_H
 
+#include <pigsys/pigtypes.h>   // uint16 for POLY_*T3 UV fields
+
 //==============================================================================
 
 //#if DO_ASSERTIONS
@@ -124,32 +126,37 @@ typedef struct
     Point3D point0,point1,point2;                   // 3D version of this point
 } POLY_G3;                              // Gouraud Triangle 
 
-typedef struct 
+typedef struct
 {
 	P_TAG* tag;
 	unsigned char  r0, g0, b0, code;
 	short   x0,     y0;
-	unsigned char  u0, v0; unsigned short clut;
+	// UV widened from `unsigned char` to `uint16` 2026-05-30 — see
+	// docs/plans/2026-05-30-uv-int16-widening.md. Lets a single texture
+	// slot exceed 256 px so high-detail levels (e.g. moon Site 01 at
+	// 1024² NAC composite) survive UV transport through CalcVRAMuv →
+	// setUV3 → POLY_GT3 → glpipeline CalcUV.
+	uint16  u0, v0; unsigned short clut;
 	unsigned char  r1, g1, b1, p1;
 	short   x1,     y1;
-	unsigned char  u1, v1; unsigned short tpage;
+	uint16  u1, v1; unsigned short tpage;
 	unsigned char  r2, g2, b2, p2;
 	short   x2,     y2;
-	unsigned char  u2, v2; unsigned short pad2;
+	uint16  u2, v2; unsigned short pad2;
     const PixelMap* pPixelMap;
     Point3D point0,point1,point2;                   // 3D version of this point
-} POLY_GT3;                             // Gouraud Textured Triangle 
+} POLY_GT3;                             // Gouraud Textured Triangle
 
-typedef struct 
+typedef struct
 {
 	P_TAG* tag;
 	unsigned char  r0, g0, b0, code;
 	short   x0,     y0;
-	unsigned char  u0, v0; unsigned short clut;
+	uint16  u0, v0; unsigned short clut;     // UV widened — see POLY_GT3 above
 	short   x1,     y1;
-	unsigned char  u1, v1; unsigned short tpage;
+	uint16  u1, v1; unsigned short tpage;
 	short   x2,     y2;
-	unsigned char  u2, v2; unsigned short pad1;
+	uint16  u2, v2; unsigned short pad1;
     const PixelMap* pPixelMap;
     Point3D point0,point1,point2;                   // 3D version of this point
 } POLY_FT3;                             // Flat Textured Triangle
@@ -160,12 +167,12 @@ typedef struct
 	short w, h;		// width and height 
 } psxRECT;
 
-typedef struct 
+typedef struct
 {
 	unsigned long	tag;
 	unsigned char	r0, g0, b0, code;
 	short	x0, 	y0;
-	unsigned char	u0, v0;	unsigned short	clut;
+	uint16	u0, v0;	unsigned short	clut;     // UV widened — see POLY_GT3 above
 } SPRT_16;				/* 16x16 Sprite */
 
 typedef struct 
