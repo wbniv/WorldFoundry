@@ -179,9 +179,11 @@ terrain_obj['wf_Visibility Mailbox'] = 1
 print(f"[moon] terrain mesh: {len(terrain_mesh.vertices)} verts, "
       f"{len(terrain_mesh.polygons)} quads")
 
-# ── 5. Sky / lighting ────────────────────────────────────────────────────────
-# Black sky (no atmosphere). Phase 6 will tighten the lighting; for now keep
-# the snowgoons defaults so we can see something.
+# ── 5. Sky / lighting (Phase 6: astronaut polish) ────────────────────────────
+# The Moon has no atmosphere → black sky, hard-edged shadows, no ambient fill.
+# At Site 01 (~89.5° S) the sun stays a few degrees above the horizon all
+# "day"; we use az 20° / alt 2° to match the texture bake.
+
 matte = find_by_class('matte')
 if matte:
     matte.location = (0.0, 0.0, 50.0)
@@ -189,6 +191,24 @@ if matte:
     matte['wf_Background Color']  = 0x000000      # space-black
     matte['wf_Visibility Mailbox']= 1
     matte['wf_Model Type']        = 'None'
+
+light = find_by_class('light')
+if light:
+    light.name = 'Sun'
+    light.location = (0.0, 0.0, 200.0)
+    # In SMB's lighting convention (blender_create_smb.py:225 calls
+    # rotation_euler.x = π/3 "sun ~60° above horizon"), the X rotation tilts
+    # the beam off zenith. South-pole sun at altitude 2° → X = π/2 − 2°.
+    # Z rotation rotates the cast-shadow azimuth around the vertical.
+    SUN_AZ_DEG  = 20.0
+    SUN_ALT_DEG = 2.0
+    light.rotation_euler = (math.pi / 2 - math.radians(SUN_ALT_DEG),
+                            0.0,
+                            math.radians(SUN_AZ_DEG))
+    light['wf_lightType']  = 'Directional'
+    light['wf_lightRed']   = 1.0
+    light['wf_lightGreen'] = 1.0
+    light['wf_lightBlue']  = 1.0
 
 # ── 6. Player ────────────────────────────────────────────────────────────────
 player = find_by_class('player')
@@ -287,7 +307,46 @@ if levelobj:
     # updates (jolt_backend.cc:744-745), so the backend default doesn't
     # leak through. No engine change needed for Tier 2.
 
-# ── 9. Export ────────────────────────────────────────────────────────────────
+# ── 9. Render preview (Phase 6 verification) ─────────────────────────────────
+# Render a still from the camshot POV so we can eyeball what the engine should
+# display — Blender's Eevee approximates the WF GL renderer closely enough for
+# a sanity check (black sky + low-az sun direction).
+preview_cam_data = bpy.data.cameras.new('PreviewCam')
+preview_cam      = bpy.data.objects.new('PreviewCam', preview_cam_data)
+scene.collection.objects.link(preview_cam)
+preview_cam.location = (CAM_OFFSET[0], CAM_OFFSET[1], CAM_OFFSET[2])
+# Aim at player spawn — translate look-vector to Euler.
+import mathutils
+direction = mathutils.Vector(LOOK_TARGET) - mathutils.Vector(preview_cam.location)
+preview_cam.rotation_euler = direction.to_track_quat('-Z', 'Y').to_euler()
+preview_cam_data.lens = 25  # ~70° FOV horizontally — closer to wf game cam
+scene.camera = preview_cam
+
+# Black world background — match the matte's space-black.
+world = bpy.data.worlds.new('SpaceBlack') if 'SpaceBlack' not in bpy.data.worlds else bpy.data.worlds['SpaceBlack']
+world.use_nodes = True
+world.node_tree.nodes['Background'].inputs['Color'].default_value = (0, 0, 0, 1)
+world.node_tree.nodes['Background'].inputs['Strength'].default_value = 0.0
+scene.world = world
+
+scene.render.resolution_x = 800
+scene.render.resolution_y = 600
+scene.render.engine = 'BLENDER_EEVEE'
+scene.render.image_settings.file_format = 'PNG'
+PREVIEW_PNG = os.path.join(SCRIPT_DIR, 'preview.png')
+scene.render.filepath = PREVIEW_PNG
+try:
+    bpy.ops.render.render(write_still=True)
+    print(f"[moon] preview rendered → {PREVIEW_PNG}")
+except Exception as e:
+    print(f"[moon] preview render skipped: {e}")
+
+# ── 10. Export ───────────────────────────────────────────────────────────────
+# Remove the preview camera so it doesn't pollute the .lev export.
+scene.collection.objects.unlink(preview_cam)
+bpy.data.objects.remove(preview_cam)
+bpy.data.cameras.remove(preview_cam_data)
+
 print(f"[moon] Exporting to {OUT_LEV}")
 bpy.ops.wf.export_level(filepath=OUT_LEV)
 print(f"[moon] Done — {OUT_LEV}")
