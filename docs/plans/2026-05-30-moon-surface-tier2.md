@@ -100,22 +100,27 @@ reprojected to match the play area's coordinate frame.
 **Verify:** render the textured terrain in Blender; rocks and crater rims
 in the texture should line up with elevation peaks/dips.
 
-### Phase 4 — Lunar gravity (~0.5 day)
+### Phase 4 — Lunar gravity (**RESOLVED — no engine change required**)
 
-Currently `jolt_backend.cc:850` hardcodes `-9.81` m/s². We need a
-per-level override.
+Initial plan called for a per-level `Gravity` field through the OAS
+schema feeding `JoltBackendSetGravity()`. On inspection, WF gravity is
+already **per-actor** — `MovementBlock::FallingAcceleration`
+(`wfsource/source/oas/movebloc.inc:67`) — and Jolt's global gravity is
+explicitly passed as zero to character updates
+(`jolt_backend.cc:744-745`) so the backend default never leaks through.
+Setting `player['wf_Falling Acceleration'] = 1.62` in
+`blender_create_moon.py` is the complete fix.
 
-- Add a new optional level-config field `Gravity` (m/s², default 9.81)
-  read at level load.
-- Plumb through the Jolt backend `SetGravity()` call so it uses the
-  level's value if present.
-- Snowgoons / SMB / qbert / MM all keep Earth gravity by omitting the
-  field — confirm no regression via a smoke build.
-- Moon level sets `Gravity 1.62`.
+Aligns with the [OAD/IFF compat policy](../../wfsource/source/oas/) of
+not adding new OAS fields ahead of the Blender-export-primary cutover.
 
-**Verify:** unit-style — drop a test object from a known height, measure
-time-to-impact via debug bridge; should be 6× longer on the Moon level
-than on snowgoons.
+**Verify:** in Phase 5's drop test, time-to-impact from h=5 m should be
+~2.5 s under lunar g (`sqrt(2h/g)`), vs ~1.0 s under Earth g — easily
+distinguishable.
+
+Future per-level gravity (atmospheric drag, varying-g sequences) can
+revisit this through the OAS schema once the post-Blender cutover lifts
+the field-add freeze.
 
 ### Phase 5 — Build & first drop (~0.5–1 day)
 

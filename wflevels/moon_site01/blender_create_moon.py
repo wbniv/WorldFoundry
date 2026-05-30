@@ -215,12 +215,11 @@ if target:
 levelobj = find_by_class('levelobj')
 if levelobj:
     levelobj['wf_Num Mailboxes'] = NUM_MAILBOXES
-    # NB: per-level gravity override (Phase 4 of the plan) lives on this
-    # actor's schema. Until that lands, gravity stays the Jolt backend
-    # default (-9.81); Mario-level falling acceleration on the player
-    # compensates by reducing apparent gravity. After Phase 4 the field
-    # below activates lunar 1.62 m/s².
-    levelobj['wf_Gravity'] = 1.62
+    # NB: WF gravity is per-actor via MovementBlock.FallingAcceleration,
+    # not per-level. The player above already has FallingAcceleration=1.62
+    # (lunar g). Jolt's global gravity is passed as zero to character
+    # updates (jolt_backend.cc:744-745), so the backend default doesn't
+    # leak through. No engine change needed for Tier 2.
 
 # ── 9. Export ────────────────────────────────────────────────────────────────
 print(f"[moon] Exporting to {OUT_LEV}")
