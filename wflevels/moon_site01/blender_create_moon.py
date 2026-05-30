@@ -1,0 +1,229 @@
+"""
+blender_create_moon.py — create the Moon Site 01 (Connecting Ridge) walkable level.
+
+Tier 2 of docs/plans/2026-05-30-moon-surface-tier2.md: a single Artemis III
+candidate site rendered as a static terrain mesh that an astronaut-scale player
+falls onto and walks around.
+
+Pipeline:
+  python3 dem_to_grid.py             # reads PGDA GeoTIFF, writes terrain_heights.npy
+  blender --background --python blender_create_moon.py
+  bash build_level_binary.sh
+  task run -- wflevels/moon_site01/moon_site01-standalone.iff
+
+The Blender step assumes terrain_heights.npy already exists (built by
+dem_to_grid.py, which needs rasterio outside Blender). Blender's bundled Python
+ships with numpy, so reading the .npy is free here.
+"""
+
+import bpy
+import bmesh
+import os
+import math
+import json
+import addon_utils
+import numpy as np
+
+# ── Paths ─────────────────────────────────────────────────────────────────────
+SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
+REPO        = os.path.normpath(os.path.join(SCRIPT_DIR, '..', '..'))
+SNOWGOONS   = os.path.join(REPO, 'wflevels', 'snowgoons-blender', 'snowgoons-blender.lev')
+OAD_DIR     = os.path.join(REPO, 'wftools', 'wf_oad', 'tests', 'fixtures')
+OUT_LEV     = os.path.join(SCRIPT_DIR, 'moon_site01.lev')
+HEIGHTS_NPY = os.path.join(SCRIPT_DIR, 'terrain_heights.npy')
+HEIGHTS_JSON= os.path.join(SCRIPT_DIR, 'terrain_heights.json')
+
+# ── Load heightfield ──────────────────────────────────────────────────────────
+heights = np.load(HEIGHTS_NPY)
+with open(HEIGHTS_JSON) as f:
+    meta = json.load(f)
+N         = heights.shape[0]                # samples per side
+CELL_M    = float(meta['cell_size_m'])      # metres per sample
+SIDE_M    = float(meta['side_m'])
+HALF_M    = SIDE_M / 2.0
+print(f"[moon] heightfield: {N}x{N} samples @ {CELL_M} m/sample, "
+      f"Z range {heights.min():+.1f} to {heights.max():+.1f} m")
+
+# ── Player (astronaut) — 1.8 m tall, WF unit = 1 m ───────────────────────────
+PLAYER_HEIGHT = 1.8
+# Spawn at centre of play area, 5 m above terrain centre (drop is the proof of
+# collision). Centre vertex of the heightfield is at Z=0 by construction.
+PLAYER_SPAWN  = (0.0, 0.0, 5.0)
+
+# Camera: third-person follow from −Y, ~3 m above the player.
+CAM_OFFSET    = (0.0, -8.0, 3.5)
+LOOK_TARGET   = PLAYER_SPAWN
+
+NUM_MAILBOXES = 100
+
+# ── 1. Clean scene & enable addon ─────────────────────────────────────────────
+bpy.ops.wm.read_factory_settings(use_empty=True)
+addon_utils.enable("wf_blender", default_set=False, persistent=False)
+scene = bpy.context.scene
+
+# ── 2. Import snowgoons for infrastructure ────────────────────────────────────
+print(f"[moon] Importing snowgoons scaffold from {SNOWGOONS}")
+bpy.ops.wf.import_level(filepath=SNOWGOONS)
+
+# ── 3. Strip everything except bare infrastructure ────────────────────────────
+KEEP_CLASSES   = {'director', 'camera', 'levelobj', 'matte', 'light',
+                  'room', 'camshot', 'target', 'player'}
+DELETE_CLASSES = {'statplat', 'enemy', 'snowman01', 'missile', 'actboxor',
+                  'tool', 'tool01', 'ground01', 'hp', 'gold', 'generator'}
+
+
+def get_class(obj):
+    schema = obj.get('wf_schema_path', '')
+    return os.path.splitext(os.path.basename(schema))[0] if schema else ''
+
+
+for obj in list(bpy.data.objects):
+    if get_class(obj) in DELETE_CLASSES:
+        bpy.data.objects.remove(obj, do_unlink=True)
+
+seen = set()
+for obj in list(bpy.data.objects):
+    cn = get_class(obj)
+    if cn in KEEP_CLASSES:
+        if cn in seen:
+            bpy.data.objects.remove(obj, do_unlink=True)
+        else:
+            seen.add(cn)
+
+print("[moon] Classes after strip:", sorted({get_class(o) for o in bpy.data.objects}))
+
+
+def find_by_class(cn):
+    for obj in bpy.data.objects:
+        if get_class(obj) == cn:
+            return obj
+    return None
+
+
+def attach_schema(obj, oad_name):
+    obj['wf_schema_path'] = os.path.join(OAD_DIR, oad_name + '.oad')
+
+
+# ── 4. Build the terrain mesh ─────────────────────────────────────────────────
+# Subdivided plane: N×N vertices at (col*CELL_M − HALF_M, row*CELL_M − HALF_M,
+# heights[row, col]). (N−1)² quads. Centre vertex sits exactly at the world
+# origin (0, 0, 0) by construction.
+
+def build_terrain_mesh(name):
+    bm = bmesh.new()
+
+    # Vertices, indexed by (row, col) → grid[row][col]
+    grid = [[None] * N for _ in range(N)]
+    for row in range(N):
+        y = row * CELL_M - HALF_M
+        for col in range(N):
+            x = col * CELL_M - HALF_M
+            z = float(heights[row, col])
+            grid[row][col] = bm.verts.new((x, y, z))
+    bm.verts.ensure_lookup_table()
+
+    # Quads — CCW from above (+Z).
+    for row in range(N - 1):
+        for col in range(N - 1):
+            v00 = grid[row    ][col    ]
+            v10 = grid[row    ][col + 1]
+            v11 = grid[row + 1][col + 1]
+            v01 = grid[row + 1][col    ]
+            bm.faces.new((v00, v10, v11, v01))
+
+    bm.normal_update()
+    mesh = bpy.data.meshes.new(name)
+    bm.to_mesh(mesh)
+    bm.free()
+
+    # Single grey material — lunar regolith. Phase 3 will swap this for a
+    # NAC/WAC-baked texture.
+    mat = bpy.data.materials.new('lunar_regolith')
+    mat.diffuse_color = (0.55, 0.54, 0.52, 1.0)
+    mesh.materials.append(mat)
+    return mesh
+
+
+terrain_mesh = build_terrain_mesh('lunar_terrain')
+terrain_obj  = bpy.data.objects.new('lunar_terrain', terrain_mesh)
+scene.collection.objects.link(terrain_obj)
+attach_schema(terrain_obj, 'statplat')
+terrain_obj['wf_Mobility']         = 'Anchored'
+terrain_obj['wf_Model Type']       = 'Mesh'
+terrain_obj['wf_Visibility Mailbox'] = 1
+print(f"[moon] terrain mesh: {len(terrain_mesh.vertices)} verts, "
+      f"{len(terrain_mesh.polygons)} quads")
+
+# ── 5. Sky / lighting ────────────────────────────────────────────────────────
+# Black sky (no atmosphere). Phase 6 will tighten the lighting; for now keep
+# the snowgoons defaults so we can see something.
+matte = find_by_class('matte')
+if matte:
+    matte.location = (0.0, 0.0, 50.0)
+    matte['wf_Matte Type']        = 'Color'
+    matte['wf_Background Color']  = 0x000000      # space-black
+    matte['wf_Visibility Mailbox']= 1
+    matte['wf_Model Type']        = 'None'
+
+# ── 6. Player ────────────────────────────────────────────────────────────────
+player = find_by_class('player')
+if player:
+    player.name = 'Player'
+    player.location = PLAYER_SPAWN
+    player['wf_Mobility']             = 'Physics'
+    player['wf_Mass']                 = 80.0       # ~80 kg astronaut
+    player['wf_Model Type']           = 'Mesh'
+    player['wf_Visibility Mailbox']   = 1
+    # 1.8 m astronaut. Player.location is feet; capsule extends +Z.
+    player.scale = (PLAYER_HEIGHT, PLAYER_HEIGHT, PLAYER_HEIGHT)
+    # Walking on the Moon at ~1 m/s — slower than SMB Mario.
+    player['wf_Running Acceleration']  = 8.0
+    player['wf_Running Deceleration']  = 0.85
+    player['wf_Max Ground Speed']      = 2.5       # m/s
+    player['wf_Jumping Acceleration']  = 15.0
+    player['wf_Falling Acceleration']  = 1.62      # lunar g (set per-level in Phase 4)
+    player['wf_Air Acceleration']      = 0.0
+    player['wf_Max Air Speed']         = 8.0
+    player['wf_Horiz Air Drag']        = 1.5
+    player['wf_Turn Rate']             = 0.0
+    player.rotation_euler.z            = math.pi / 2     # face +Y so LEFT/RIGHT are ±X
+    # Joystick → INPUT mailbox. Same doom-stick mapping as smb_w1_1.
+    player['wf_Script'] = (
+        "\\ wf\n"
+        "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox "
+        "dup 16384 & 256 / over 8192 & 64 / | | "
+        "INDEXOF_INPUT write-mailbox\n"
+    )
+
+# ── 7. Camera ────────────────────────────────────────────────────────────────
+camshot = find_by_class('camshot')
+if camshot:
+    camshot.location = (PLAYER_SPAWN[0] + CAM_OFFSET[0],
+                        PLAYER_SPAWN[1] + CAM_OFFSET[1],
+                        PLAYER_SPAWN[2] + CAM_OFFSET[2])
+    # Track the player so the camera follows the fall.
+    camshot['wf_Track Object'] = 'Player'
+    camshot['wf_X Position Type'] = 'Relative'
+    camshot['wf_Y Position Type'] = 'Relative'
+    camshot['wf_Z Position Type'] = 'Relative'
+
+target = find_by_class('target')
+if target:
+    target.location = LOOK_TARGET
+
+# ── 8. Level object ──────────────────────────────────────────────────────────
+levelobj = find_by_class('levelobj')
+if levelobj:
+    levelobj['wf_Num Mailboxes'] = NUM_MAILBOXES
+    # NB: per-level gravity override (Phase 4 of the plan) lives on this
+    # actor's schema. Until that lands, gravity stays the Jolt backend
+    # default (-9.81); Mario-level falling acceleration on the player
+    # compensates by reducing apparent gravity. After Phase 4 the field
+    # below activates lunar 1.62 m/s².
+    levelobj['wf_Gravity'] = 1.62
+
+# ── 9. Export ────────────────────────────────────────────────────────────────
+print(f"[moon] Exporting to {OUT_LEV}")
+bpy.ops.wf.export_level(filepath=OUT_LEV)
+print(f"[moon] Done — {OUT_LEV}")
+print("[moon] Objects in scene:", [o.name for o in bpy.data.objects])

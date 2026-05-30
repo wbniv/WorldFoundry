@@ -1,0 +1,12 @@
+{
+  "source": "data/Site01_final_adj_5mpp_surf.tif",
+  "side_m": 1000.0,
+  "samples": 100,
+  "cell_size_m": 10.0,
+  "centre_pixel": [
+    1600,
+    1600
+  ],
+  "centre_z_m": 1944.76708984375,
+  "note": "Z is metres relative to the centre pixel; centre vertex sits at Z=0"
+}
