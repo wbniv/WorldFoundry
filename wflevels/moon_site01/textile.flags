@@ -1,0 +1,15 @@
+# Per-level textile-rs page-size overrides for moon_site01.
+# Sourced by wftools/wf_blender/build_level_binary.sh (from the
+# runtime-VRAM CLI overrides plan). See
+# docs/plans/2026-05-30-runtime-vram-cli-overrides.md +
+# docs/plans/2026-05-30-uv-int16-widening.md.
+#
+# Site 01 ships a 1024² terrain texture so NAC's 1.2 m/px detail
+# survives down to 1 m/texel over the 1 km play area. Requires the
+# matching --vram-* CLI args (set in Taskfile run-moon) and the
+# UV int16 widening that landed in commits d9265015..e0482866.
+
+PAGEX=1024
+PAGEY=1024
+PERMPAGEX=1024
+PERMPAGEY=1024

@@ -450,12 +450,15 @@ tasks:
       - LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/smb_w1_1-standalone.iff
 
   run-moon:
-    desc: "Run wf_game on wflevels/moon_site01-standalone.iff (PGDA Site 01 Connecting Ridge — LOLA terrain + NAC texture, lunar gravity)"
+    desc: "Run wf_game on wflevels/moon_site01-standalone.iff (PGDA Site 01 Connecting Ridge — LOLA terrain + NAC texture at 1024², lunar gravity)"
     cmds:
-      # The --vram-* flags exist (see docs/plans/2026-05-30-runtime-vram-cli-overrides.md)
-      # but a 1024² texture also needs the int8 → int16 UV widening that's
-      # still TODO. Until that lands, run at the 256² default.
-      - LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/moon_site01-standalone.iff
+      # 1024² NAC composite — needs the wider transient VRAM slot (Phase 1-3
+      # of docs/plans/2026-05-30-runtime-vram-cli-overrides.md) AND the
+      # int16 UV pipeline (docs/plans/2026-05-30-uv-int16-widening.md).
+      - LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game
+          --vram-width=4096 --vram-height=2048
+          --vram-slot-width=1024 --vram-slot-height=1024
+          -Lwflevels/moon_site01-standalone.iff
 
   run-debug:
     desc: "Run wf_game with debug bridge on port 7777 (usage: task run-debug -- wflevels/snowgoons.iff)"
