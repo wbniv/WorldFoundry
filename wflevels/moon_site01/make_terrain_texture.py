@@ -145,6 +145,44 @@ def bake_nac_composite(meta, size, sun_az_deg, sun_alt_deg):
     return Image.fromarray((out * 255).astype(np.uint8))
 
 
+def overlay_grid(img, side_m, minor_m=10.0, major_m=100.0,
+                 minor_rgba=(255, 255, 255, 60),
+                 major_rgba=(255, 255, 0, 160)):
+    """Draw a metric grid on top of the texture so distance is readable in-game.
+
+    side_m is the world span the texture covers (1 km for the current level).
+    Minor lines every minor_m metres in white; major lines every major_m
+    metres in yellow. Drawn pixel-aligned with alpha blending.
+    """
+    arr = np.asarray(img).astype(np.float32) / 255.0
+    h, w = arr.shape[:2]
+    px_per_m = w / side_m
+    out = arr.copy()
+
+    def blend_line(mask, rgba):
+        rgb = np.array(rgba[:3], dtype=np.float32) / 255.0
+        a   = rgba[3] / 255.0
+        for c in range(3):
+            out[..., c] = np.where(mask, out[..., c] * (1 - a) + rgb[c] * a, out[..., c])
+
+    # Minor gridlines
+    xs_minor = np.round(np.arange(0, side_m + 1e-6, minor_m) * px_per_m).astype(int)
+    ys_minor = xs_minor.copy()
+    col_mask = np.zeros((h, w), dtype=bool)
+    col_mask[:, xs_minor[xs_minor < w]] = True
+    col_mask[ys_minor[ys_minor < h], :] = True
+    blend_line(col_mask, minor_rgba)
+
+    # Major gridlines (over the minor lines)
+    xs_major = np.round(np.arange(0, side_m + 1e-6, major_m) * px_per_m).astype(int)
+    maj_mask = np.zeros((h, w), dtype=bool)
+    maj_mask[:, xs_major[xs_major < w]] = True
+    maj_mask[xs_major[xs_major < h], :] = True
+    blend_line(maj_mask, major_rgba)
+
+    return Image.fromarray((out * 255).astype(np.uint8))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--source', choices=['dem', 'nac'], default='dem',
@@ -155,6 +193,12 @@ def main():
                     help='solar azimuth degrees (Site 01 lunar south pole: ~20°)')
     ap.add_argument('--sun-alt', type=float, default=2.0,
                     help='solar altitude degrees (south pole sun stays low: ~2°)')
+    ap.add_argument('--grid', action='store_true',
+                    help='overlay metric gridlines (10 m minor white, 100 m major yellow)')
+    ap.add_argument('--grid-minor-m', type=float, default=10.0,
+                    help='minor gridline spacing in metres (default 10)')
+    ap.add_argument('--grid-major-m', type=float, default=100.0,
+                    help='major gridline spacing in metres (default 100)')
     args = ap.parse_args()
 
     import json
@@ -169,6 +213,13 @@ def main():
             sys.exit(f"NAC image missing: {NAC_IMG} — fetch from PDS first.")
         img = bake_nac_composite(meta, args.size, args.sun_azimuth, args.sun_alt)
         kind = "NAC orthoimage + hillshade fallback"
+
+    if args.grid:
+        side_m = float(meta['side_m'])
+        img = overlay_grid(img, side_m,
+                           minor_m=args.grid_minor_m,
+                           major_m=args.grid_major_m)
+        kind += f" + grid {args.grid_minor_m:.0f}/{args.grid_major_m:.0f} m"
 
     img.save(OUT_TGA)
     print(f"wrote {OUT_TGA} ({args.size}x{args.size}, {kind})")
