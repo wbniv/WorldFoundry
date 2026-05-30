@@ -49,6 +49,7 @@
 #include "gizmo.h"
 
 #include <algorithm>
+#include <atomic>
 #include <cerrno>
 #include <chrono>
 #include <cstdio>
@@ -2495,14 +2496,48 @@ int main(int argc, char** argv)
             identity.peer_id = ctx.our_peer_id;
             std::copy(ctx.our_colour, ctx.our_colour + 3, identity.colour);
         }
-        // Retry: a quick-tunnel relay can need a beat after registration for DNS
-        // to propagate to the local resolver / the proxy to accept connections.
-        bool relay_ok = false;
-        for (int attempt = 0; attempt < 4 && !relay_ok; ++attempt) {
-            if (attempt) sleep(2);
-            relay_ok = ctx.relay_client.connect(ctx_relay_url.c_str());
-        }
-        if (relay_ok) {
+        // (a) Run the blocking connect on a background thread and pump the window
+        // meanwhile, so it never freezes (no WM "not responding" / un-draggable
+        // window). `relay_client` is touched ONLY by this thread until it joins,
+        // then ONLY by the main thread — no concurrent access. The same `pump`
+        // lambda keeps the progress UI live during the connect AND the SYNC wait.
+        auto pump = [&](const char* msg) {
+            glfwPollEvents();
+            ImGui_ImplOpenGL3_NewFrame(); ImGui_ImplGlfw_NewFrame(); ImGui::NewFrame();
+            const ImGuiViewport* vp = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x + vp->WorkSize.x * 0.5f,
+                                           vp->WorkPos.y + vp->WorkSize.y * 0.5f),
+                                    ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+            ImGui::SetNextWindowSize(ImVec2(380, 0), ImGuiCond_Always);
+            ImGui::Begin("Host a call", nullptr, ImGuiWindowFlags_NoResize |
+                         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+            ImGui::TextUnformatted(msg);
+            const double t = glfwGetTime();
+            ImGui::ProgressBar(static_cast<float>(t - static_cast<long>(t)), ImVec2(-1.0f, 0.0f), "");
+            ImGui::End();
+            ImGui::Render();
+            int fbw, fbh; glfwGetFramebufferSize(win, &fbw, &fbh);
+            glViewport(0, 0, fbw, fbh);
+            glClearColor(0.10f, 0.10f, 0.11f, 1.0f); glClear(GL_COLOR_BUFFER_BIT);
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            glfwSwapBuffers(win);
+            const struct timespec fr{0, 16'000'000}; nanosleep(&fr, nullptr);   // ~60 fps cap
+        };
+
+        std::atomic<int> cstate{0};   // 0 = connecting, 1 = ok, 2 = failed
+        std::thread connector([&]{
+            bool ok = false;
+            for (int attempt = 0; attempt < 4 && !ok; ++attempt) {
+                if (attempt) { const struct timespec s{2, 0}; nanosleep(&s, nullptr); }
+                ok = ctx.relay_client.connect(ctx_relay_url.c_str());
+            }
+            cstate.store(ok ? 1 : 2);
+        });
+        const std::string connecting_msg = "Connecting to room " + room_id + "…";
+        while (cstate.load() == 0) pump(connecting_msg.c_str());
+        connector.join();
+
+        if (cstate.load() == 1) {
             // Send CONTROL join message: [0x04][room_id NUL peer_id].
             std::vector<uint8_t> ctrl;
             ctrl.push_back(0x04);
@@ -2511,11 +2546,13 @@ int main(int argc, char** argv)
             for (char ch : ctx.our_peer_id) ctrl.push_back(static_cast<uint8_t>(ch));
             ctx.relay_client.send(ctrl.data(), ctrl.size());
 
-            // Wait for the relay's initial full-state SYNC (up to 1 s).
+            // Wait (≤1 s) for the relay's initial full-state SYNC — pumping so
+            // this doesn't freeze either.
             {
                 std::vector<uint8_t> frame;
-                for (int t = 0; t < 1000 && !ctx.relay_client.poll(frame); ++t)
-                    usleep(1000);
+                const double deadline = glfwGetTime() + 1.0;
+                while (glfwGetTime() < deadline && !ctx.relay_client.poll(frame))
+                    pump(connecting_msg.c_str());
                 if (!frame.empty() && frame[0] == 0x01 && frame.size() > 1) {
                     // Remote-origin apply — the initial peer state must not seed
                     // our undo history.
