@@ -64,9 +64,16 @@
 		$3001004l { 'STR' "cr_coin_0.iff" }  // IFF RM1 001:004
 		$3001005l { 'STR' "cr_coin_1.iff" }  // IFF RM1 001:005
 		$3001006l { 'STR' "cr_coin_2.iff" }  // IFF RM1 001:006
-		$3001007l { 'STR' "abor_coin.iff" }  // IFF RM1 001:007
-		$3001008l { 'STR' "exit_pipe.iff" }  // IFF RM1 001:008
-		$3001009l { 'STR' "pipe_exit_warp.iff" }  // IFF RM1 001:009
+		$3001007l { 'STR' "cr_coin_3.iff" }  // IFF RM1 001:007
+		$3001008l { 'STR' "cr_coin_4.iff" }  // IFF RM1 001:008
+		$3001009l { 'STR' "cr_coin_5.iff" }  // IFF RM1 001:009
+		$300100al { 'STR' "cr_coin_6.iff" }  // IFF RM1 001:00a
+		$300100bl { 'STR' "cr_coin_7.iff" }  // IFF RM1 001:00b
+		$300100cl { 'STR' "cr_coin_8.iff" }  // IFF RM1 001:00c
+		$300100dl { 'STR' "cr_coin_9.iff" }  // IFF RM1 001:00d
+		$300100el { 'STR' "abor_coin.iff" }  // IFF RM1 001:00e
+		$300100fl { 'STR' "exit_pipe.iff" }  // IFF RM1 001:00f
+		$3001010l { 'STR' "pipe_exit_warp.iff" }  // IFF RM1 001:010
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "smb_w1_1.lvl" ] }
@@ -130,9 +137,16 @@
 		{ 'ASS' $3001004l [ "cr_coin_0.iff" ] }  // IFF RM1 001:004
 		{ 'ASS' $3001005l [ "cr_coin_1.iff" ] }  // IFF RM1 001:005
 		{ 'ASS' $3001006l [ "cr_coin_2.iff" ] }  // IFF RM1 001:006
-		{ 'ASS' $3001007l [ "abor_coin.iff" ] }  // IFF RM1 001:007
-		{ 'ASS' $3001008l [ "exit_pipe.iff" ] }  // IFF RM1 001:008
-		{ 'ASS' $3001009l [ "pipe_exit_warp.iff" ] }  // IFF RM1 001:009
+		{ 'ASS' $3001007l [ "cr_coin_3.iff" ] }  // IFF RM1 001:007
+		{ 'ASS' $3001008l [ "cr_coin_4.iff" ] }  // IFF RM1 001:008
+		{ 'ASS' $3001009l [ "cr_coin_5.iff" ] }  // IFF RM1 001:009
+		{ 'ASS' $300100al [ "cr_coin_6.iff" ] }  // IFF RM1 001:00a
+		{ 'ASS' $300100bl [ "cr_coin_7.iff" ] }  // IFF RM1 001:00b
+		{ 'ASS' $300100cl [ "cr_coin_8.iff" ] }  // IFF RM1 001:00c
+		{ 'ASS' $300100dl [ "cr_coin_9.iff" ] }  // IFF RM1 001:00d
+		{ 'ASS' $300100el [ "abor_coin.iff" ] }  // IFF RM1 001:00e
+		{ 'ASS' $300100fl [ "exit_pipe.iff" ] }  // IFF RM1 001:00f
+		{ 'ASS' $3001010l [ "pipe_exit_warp.iff" ] }  // IFF RM1 001:010
 	}
 	{ 'ALGN' .align(2048) }
 }

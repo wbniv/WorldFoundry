@@ -86,12 +86,15 @@ SCENE_MID_X = (GROUND_X0 + GROUND_X1) / 2
 # WF's room-to-room transition path. See docs/plans/2026-05-25-smb-pipe-warp-coin-room.md.
 SMB_AT_PIPE  = 1809               # INDEXOF_SMB_AT_PIPE (mailbox.inc) — entry ActBox sets 1 on the pipe mouth
 SMB_COIN_0, SMB_COIN_1, SMB_COIN_2 = 1811, 1812, 1813   # coin-room coin visibility mailboxes (mailbox.inc)
+SMB_COIN_3, SMB_COIN_4, SMB_COIN_5, SMB_COIN_6 = 1846, 1847, 1848, 1849  # coins 3-6
+SMB_COIN_7, SMB_COIN_8, SMB_COIN_9 = 1850, 1851, 1852                     # coins 7-9
 # Fire Mario fireball globals (mailbox.inc 1820-1827). The generators' Activation
 # MailBox needs the literal index here (an OAS int field); scripts use INDEXOF_ names.
 SMB_FIREBALL_FIRE_R, SMB_FIREBALL_FIRE_L = 1823, 1824
 ENTRY_PIPE_X = 12 * T             # = 18, on ground_0 between qblock0 (x12) and qblock1 (x21)
 CR_FLOOR_TOP = -48.0              # coin-room floor top
-CR_X0, CR_X1 = 0.0, 18.0         # coin-room play span (12 tiles)
+CR_X0, CR_X1 = 0.0, 24.0         # coin-room play span (16 tiles, faithful W1-1)
+CR_MID        = (CR_X0 + CR_X1) / 2  # = 12.0
 CR_ENTRY_X   = 3.0               # entry-warp drop point (left side)
 CR_ENTRY_Z   = CR_FLOOR_TOP + T  # = -46.5, feet drop-in (mirrors surface MARIO_SPAWN_Z)
 
@@ -1240,25 +1243,66 @@ if player:
         # coin-room coins: seed visible once, then proximity pickup. The Z test
         # (player z near -46) disambiguates the coin room from the surface, where
         # the same X range exists but z ~ 1.5. dup* = squared distance (no abs).
+        # 10 coins at T=1.5m intervals — faithful W1-1 underground row.
         "INDEXOF_SMB_COIN_INIT read-mailbox not if\n"
         "  1 INDEXOF_SMB_COIN_0 write-mailbox 1 INDEXOF_SMB_COIN_1 write-mailbox "
-        "1 INDEXOF_SMB_COIN_2 write-mailbox 1 INDEXOF_SMB_COIN_INIT write-mailbox\n"
+        "1 INDEXOF_SMB_COIN_2 write-mailbox\n"
+        "  1 INDEXOF_SMB_COIN_3 write-mailbox 1 INDEXOF_SMB_COIN_4 write-mailbox "
+        "1 INDEXOF_SMB_COIN_5 write-mailbox\n"
+        "  1 INDEXOF_SMB_COIN_6 write-mailbox 1 INDEXOF_SMB_COIN_7 write-mailbox "
+        "1 INDEXOF_SMB_COIN_8 write-mailbox 1 INDEXOF_SMB_COIN_9 write-mailbox\n"
+        "  1 INDEXOF_SMB_COIN_INIT write-mailbox\n"
         "then\n"
         "INDEXOF_Z_POS read-mailbox 46 + dup * 9.0 < if\n"          # in the coin room (|z+46| < 3)
         "  INDEXOF_SMB_COIN_0 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 6 - dup * 1.5 < if\n"
+        "    INDEXOF_X_POS read-mailbox 1.5 - dup * 1.5 < if\n"
         "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
         "0 INDEXOF_SMB_COIN_0 write-mailbox\n"
         "    then\n  then\n"
         "  INDEXOF_SMB_COIN_1 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 8 - dup * 1.5 < if\n"
+        "    INDEXOF_X_POS read-mailbox 3 - dup * 1.5 < if\n"
         "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
         "0 INDEXOF_SMB_COIN_1 write-mailbox\n"
         "    then\n  then\n"
         "  INDEXOF_SMB_COIN_2 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 10 - dup * 1.5 < if\n"
+        "    INDEXOF_X_POS read-mailbox 4.5 - dup * 1.5 < if\n"
         "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
         "0 INDEXOF_SMB_COIN_2 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_3 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 6 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_3 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_4 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 7.5 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_4 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_5 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 9 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_5 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_6 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 10.5 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_6 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_7 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 12 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_7 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_8 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 13.5 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_8 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_9 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 15 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_9 write-mailbox\n"
         "    then\n  then\n"
         "then\n"
         # Coin delta scoring + 100-coin 1UP.
@@ -1929,13 +1973,17 @@ add_statplat('cr_wall_r', CR_X1,     -GROUND_Y, CR_FLOOR_TOP,
 # Mario arrives (see TODO). Mario warps in at X=3 and walks RIGHT past these to the
 # exit warp (X=12), collecting them en route.
 COIN_DISC_MAT = make_mat('smb_coinroom_coin', (1.0, 0.84, 0.0))
-CR_COIN_XS = [6.0, 8.0, 10.0]
+# 10 coins at T=1.5m intervals across the 16-tile room — faithful W1-1 underground row.
+# Stop at X=15 (3 tiles before exit warp at X=18) so all coins are reachable before warp.
+CR_COIN_XS = [1.5, 3.0, 4.5, 6.0, 7.5, 9.0, 10.5, 12.0, 13.5, 15.0]
 # Float the coins ABOVE Mario's head (feet -48, ~1.8 tall → top ~-46.2). The coins are
 # collidable statplats; if they overlap his body he bumps them and gets shoved through
 # the floor. At -44 there's a clear ~1.8 gap. Pickup is X-proximity + a player-Z room
 # gate (uses the PLAYER's Z, not the coin's), so coin height doesn't affect collection.
 CR_COIN_Z  = CR_FLOOR_TOP + 4.0          # -44, floating clear above Mario
-CR_COIN_MB = [SMB_COIN_0, SMB_COIN_1, SMB_COIN_2]
+CR_COIN_MB = [SMB_COIN_0, SMB_COIN_1, SMB_COIN_2,
+              SMB_COIN_3, SMB_COIN_4, SMB_COIN_5, SMB_COIN_6,
+              SMB_COIN_7, SMB_COIN_8, SMB_COIN_9]
 for _ci, _cxv in enumerate(CR_COIN_XS):
     _coin = add_statplat(f'cr_coin_{_ci}', _cxv - 0.3, -0.25, CR_COIN_Z - 0.4,
                          _cxv + 0.3,  0.25, CR_COIN_Z + 0.4, COIN_DISC_MAT)
@@ -1952,14 +2000,14 @@ def _make_target(name, loc):
 
 # Entry landing (where Down warps Mario) + cs_coin look-at point.
 _make_target('Target_cr_entry',  (CR_ENTRY_X, 0.0, CR_ENTRY_Z))
-_make_target('Target_cr_lookat', (9.0, 0.0, CR_FLOOR_TOP + T))
+_make_target('Target_cr_lookat', (CR_MID, 0.0, CR_FLOOR_TOP + T))
 
 # cs_coin: static shot framing the whole coin room (no scroll script → unlike
 # cs_side it does not read SMB_TARGET_CAM_X). Direction = lookat - campos.
 cs_coin = bpy.data.objects.new('cs_coin', None)
 scene.collection.objects.link(cs_coin)
 attach_schema(cs_coin, 'camshot')
-cs_coin.location = (9.0, -35.0, CR_FLOOR_TOP + 4.5)    # (9,-35,-43.5), inside coin-room bbox
+cs_coin.location = (CR_MID, -35.0, CR_FLOOR_TOP + 4.5)    # centred on room, inside coin-room bbox
 cs_coin['wf_Position X'] = 'Absolute'
 cs_coin['wf_Position Y'] = 'Absolute'
 cs_coin['wf_Position Z'] = 'Absolute'
@@ -1975,10 +2023,10 @@ cs_coin['wf_Follow']       = 'Target_cr_lookat'
 # plane Y=0, NOT the bbox Y-centre). While Mario is inside it writes cs_coin's
 # index to EMAILBOX_CAMSHOT (1021) each frame, so the camera tracks him underground.
 # Volume is entirely below Z=-37 → disjoint from the surface camera zone.
-bpy.ops.mesh.primitive_cube_add(size=2.0, location=(9.0, 0.0, CR_FLOOR_TOP + 4.5))
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(CR_MID, 0.0, CR_FLOOR_TOP + 4.5))
 ab = bpy.context.object
 ab.name = 'abor_coin'; ab.data.name = 'abor_coin'
-ab.scale = ((CR_X1 - CR_X0)/2 + 1.0, GROUND_Y + 2.0, 6.0)   # X[-1,19] Y[-3.5,3.5] Z[-49.5,-37.5]
+ab.scale = ((CR_X1 - CR_X0)/2 + 1.0, GROUND_Y + 2.0, 6.0)   # X[-1,25] Y[-3.5,3.5] Z[-49.5,-37.5]
 bpy.ops.object.transform_apply(scale=True)
 attach_schema(ab, 'actboxor')
 ab['wf_MailBox']            = 1921        # INDEXOF_CAMSHOT (mailbox.inc:59 — NOT 1021; the
@@ -1995,7 +2043,7 @@ if light:
     coin_light = light.copy()
     scene.collection.objects.link(coin_light)
     coin_light.name = 'Light_coin'
-    coin_light.location = (9.0, -22.0, CR_FLOOR_TOP + 6.0)   # (9,-22,-42), inside coin-room bbox
+    coin_light.location = (CR_MID, -22.0, CR_FLOOR_TOP + 6.0)   # centre of room, inside coin-room bbox
     coin_light.rotation_euler = (math.pi / 3, 0, 0)
 
 # ── 15. Exit pipe → warp back to the surface (Phase B) ────────────────────────
@@ -2003,19 +2051,21 @@ if light:
 # surface return point (past the entry pipe, so no instant re-trigger; the entry
 # needs Down anyway). The Warp class teleports any overlapping actor in its filter
 # (no input gate needed for a walk-into exit) — this validates Warp's Jolt teleport.
-EXIT_PIPE_X0, EXIT_PIPE_X1 = 15.0, 18.0
+# Exit pipe flush with right wall (CR_X1=24); warp sensor 3 tiles to its left.
+EXIT_PIPE_X0, EXIT_PIPE_X1 = CR_X1 - 3*T, CR_X1   # = [19.5, 24]  (2-tile wide pipe)
 add_statplat('exit_pipe', EXIT_PIPE_X0, -GROUND_Y, CR_FLOOR_TOP,
              EXIT_PIPE_X1,  GROUND_Y, CR_FLOOR_TOP + 2*T, PIPE_GREEN)
 
-# Surface return marker, on ground_0 right of the entry pipe (X=18).
-_make_target('Target_surface_return', (24.0, 0.0, MARIO_SPAWN_Z))
+# Surface return: past BOTH surface pipes (entry X=18±1.5, piranha X=24±1.5).
+# PIRANHA_X + 2*T = 27.0 — solidly on ground_0 (pit0 starts at 28.5).
+_make_target('Target_surface_return', (PIRANHA_X + 2*T, 0.0, MARIO_SPAWN_Z))
 
-# Warp volume just LEFT of the exit pipe so walking right triggers it before the
-# pipe wall blocks. Activated By Player; Target resolves by name at compile time.
-bpy.ops.mesh.primitive_cube_add(size=2.0, location=(13.5, 0.0, CR_FLOOR_TOP + 1.0))
+# Warp volume just LEFT of the exit pipe — 3 tiles wide, centred between coin end and pipe.
+_warp_cx = EXIT_PIPE_X0 - 1.5*T          # centre of warp zone: EXIT_PIPE_X0 - 2.25 = 17.25
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(_warp_cx, 0.0, CR_FLOOR_TOP + 1.0))
 wp = bpy.context.object
 wp.name = 'pipe_exit_warp'; wp.data.name = 'pipe_exit_warp'
-wp.scale = (1.5, GROUND_Y, 1.0)        # X[12,15] Z[-48,-46]
+wp.scale = (1.5, GROUND_Y, 1.0)        # ±1.5 → X[_warp_cx-1.5, _warp_cx+1.5]
 bpy.ops.object.transform_apply(scale=True)
 attach_schema(wp, 'warp')
 wp['wf_Target']             = 'Target_surface_return'
