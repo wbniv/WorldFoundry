@@ -1,4 +1,6 @@
 # Source data fetched from external archives — not vendored in the repo.
-# See data/README.md for the download URL and SHA256.
-data/*.tif
-data/*.IMG
+# See data/README.md and data/nac/README.md for download URLs + SHA256s.
+data/**/*.tif
+data/**/*.IMG
+data/**/*.tif.gz
+output.mp4

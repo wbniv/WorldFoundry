@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
 """
-make_terrain_texture.py — bake a terrain texture from the source DEM.
+make_terrain_texture.py — bake a terrain texture from the source data.
 
-Phase 3 first pass: synthesise a hillshaded + elevation-tinted RGB texture
-from the same PGDA GeoTIFF the heightfield came from. Texture pixels line up
-1:1 with the heightfield's geographic extent, so geometry and shading agree.
+Two modes, gated by --source:
 
-A future iteration will swap this for an LROC NAC + WAC composite (Phase 3b)
-— the script writes to terrain_texture.tga and blender_create_moon.py
-consumes it by name, so the upgrade is a one-line dem-to-NAC switch.
+  --source dem  (default)  — synthesise a hillshade from the PGDA DEM. Geometry
+                             and shading agree exactly. Use when no NAC is
+                             handy (Phase 3a).
+
+  --source nac             — composite the LROC NAC orthorectified frame
+                             (NAC_DTM_SHACKRDGE02_M139797542_120CM.IMG, 1.2 m/px,
+                             native south polar stereographic) over a DEM-
+                             hillshade fallback for shadowed/nodata regions.
+                             Real lunar imagery on the lit half; hillshade on
+                             the shadowed half (Phase 3b).
 
 Run:
-  python3 make_terrain_texture.py
-  python3 make_terrain_texture.py --size 4096 --sun-azimuth 45 --sun-alt 5
+  python3 make_terrain_texture.py                       # DEM hillshade
+  python3 make_terrain_texture.py --source nac          # NAC + hillshade fallback
+  python3 make_terrain_texture.py --source nac --size 512
 """
 
 import argparse
@@ -30,6 +36,8 @@ from PIL import Image
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_TIF    = os.path.join(SCRIPT_DIR, 'data', 'Site01_final_adj_5mpp_surf.tif')
+NAC_IMG    = os.path.join(SCRIPT_DIR, 'data', 'nac',
+                          'NAC_DTM_SHACKRDGE02_M139797542_120CM.IMG')
 META_JSON  = os.path.join(SCRIPT_DIR, 'terrain_heights.json')
 OUT_TGA    = os.path.join(SCRIPT_DIR, 'terrain_texture.tga')
 
@@ -46,21 +54,8 @@ def hillshade(z, cell_m, az_deg=315.0, alt_deg=45.0):
         0.0, 1.0)
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument('--size', type=int, default=2048,
-                    help='output texture edge in pixels (default 2048)')
-    ap.add_argument('--sun-azimuth', type=float, default=20.0,
-                    help='solar azimuth degrees (Site 01 lunar south pole: ~20°)')
-    ap.add_argument('--sun-alt', type=float, default=2.0,
-                    help='solar altitude degrees (south pole sun stays low: ~2°)')
-    args = ap.parse_args()
-
-    # Match the heightfield's crop window from terrain_heights.json so the
-    # texture aligns perfectly with mesh UVs.
-    import json
-    with open(META_JSON) as f:
-        meta = json.load(f)
+def _read_dem_window_metres(meta):
+    """Return (z float32, lunar_X0, lunar_Y0, native_cell_m) for the heightfield crop."""
     side_m = float(meta['side_m'])
     cc, cr = meta['centre_pixel']
     native = 5.0
@@ -71,25 +66,112 @@ def main():
     with rasterio.open(SRC_TIF) as src:
         window = rasterio.windows.Window(c0, r0, c1 - c0, r1 - r0)
         z = src.read(1, window=window).astype(np.float32)
+        # GeoTIFF transform: world_x = a*col + b*row + c, world_y = d*col + e*row + f
+        # For a north-up image we have: pixel (c0, r0) → world (lunar_X0, lunar_Y0_top)
+        t = src.transform
+        lunar_X0 = t.c + t.a * c0                 # west edge of crop
+        lunar_Y_top = t.f + t.e * r0              # north edge (top, larger Y)
     z = np.where(np.isfinite(z), z, np.nanmedian(z))
+    return z, lunar_X0, lunar_Y_top, native
 
-    shade = hillshade(z, native,
-                      az_deg=args.sun_azimuth,
-                      alt_deg=args.sun_alt)
+
+def bake_dem_hillshade(meta, size, sun_az_deg, sun_alt_deg):
+    z, _, _, native = _read_dem_window_metres(meta)
+    shade = hillshade(z, native, az_deg=sun_az_deg, alt_deg=sun_alt_deg)
     nz = (z - z.min()) / (z.max() - z.min() + 1e-9)
-
-    # Composite: regolith grey × hillshade, with a faint elevation tint so
-    # higher ridges read warmer / lighter (and crater shadows colder).
-    base = np.full_like(shade, 0.55)              # mid-grey lunar regolith
-    tint = 0.12 * (nz - 0.5)                      # ±0.06 around mid-grey
+    base = np.full_like(shade, 0.55)
+    tint = 0.12 * (nz - 0.5)
     val = np.clip((base + tint) * (0.20 + 0.80 * shade), 0.0, 1.0)
-
-    rgb = np.stack([val, val * 0.98, val * 0.94], axis=-1)   # warm bias
+    rgb = np.stack([val, val * 0.98, val * 0.94], axis=-1)
     img = Image.fromarray((rgb * 255).astype(np.uint8))
-    img = img.resize((args.size, args.size), Image.Resampling.LANCZOS)
+    return img.resize((size, size), Image.Resampling.LANCZOS)
+
+
+def bake_nac_composite(meta, size, sun_az_deg, sun_alt_deg):
+    """Composite NAC orthoimage over a DEM hillshade fallback.
+
+    Both products are in the same south polar stereographic frame (MOON_ME),
+    so cropping by world coords directly is exact — no gdalwarp needed.
+    """
+    side_m = float(meta['side_m'])
+    cc, cr = meta['centre_pixel']
+    native = 5.0
+    # Same crop window as the DEM, in polar-stereo X/Y metres.
+    half_px = int(round(side_m / native / 2))
+    c0 = cc - half_px
+    r0 = cr - half_px
+    with rasterio.open(SRC_TIF) as src:
+        t = src.transform
+        play_x0 = t.c + t.a * c0
+        play_y_top = t.f + t.e * r0
+        play_x1 = play_x0 + side_m
+        play_y_bottom = play_y_top - side_m
+    print(f"crop window (polar stereo metres): "
+          f"X[{play_x0:.0f}, {play_x1:.0f}] Y[{play_y_bottom:.0f}, {play_y_top:.0f}]")
+
+    # Read the NAC at the target output resolution directly — rasterio resamples
+    # via the dataset's `out_shape` parameter (default = nearest; we want
+    # bilinear for a smoother texture).
+    from rasterio.enums import Resampling
+    with rasterio.open(NAC_IMG) as nac:
+        window = rasterio.windows.from_bounds(
+            play_x0, play_y_bottom, play_x1, play_y_top, transform=nac.transform)
+        nac_arr = nac.read(1, window=window,
+                           out_shape=(size, size),
+                           resampling=Resampling.bilinear).astype(np.float32)
+        nac_nodata = nac.nodata or 0
+
+    # nodata=0 in the NAC = shadowed / outside-strip → use hillshade there.
+    nac_valid = nac_arr > nac_nodata
+    valid_frac = float(np.mean(nac_valid))
+    print(f"NAC coverage of play area: {100*valid_frac:.1f}% lit / valid")
+
+    # Stretch the NAC's valid pixels into [0, 1] with a percentile clip so
+    # specular hot-spots don't blow the texture out.
+    if np.any(nac_valid):
+        lo, hi = np.percentile(nac_arr[nac_valid], (2, 99))
+        nac_norm = np.clip((nac_arr - lo) / max(hi - lo, 1.0), 0.0, 1.0)
+    else:
+        nac_norm = np.zeros_like(nac_arr)
+
+    # Build the hillshade fallback at the same output size.
+    hill = np.asarray(bake_dem_hillshade(meta, size, sun_az_deg, sun_alt_deg)) / 255.0
+
+    # Composite: NAC where valid, hillshade RGB elsewhere.
+    out = hill.copy()
+    nac_rgb = np.stack([nac_norm, nac_norm * 0.98, nac_norm * 0.94], axis=-1)
+    mask3 = np.repeat(nac_valid[..., None], 3, axis=-1)
+    out = np.where(mask3, nac_rgb, out)
+    return Image.fromarray((out * 255).astype(np.uint8))
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--source', choices=['dem', 'nac'], default='dem',
+                    help='texture source (default dem hillshade)')
+    ap.add_argument('--size', type=int, default=256,
+                    help='output texture edge in pixels (default 256 — fits WF texture page budget)')
+    ap.add_argument('--sun-azimuth', type=float, default=20.0,
+                    help='solar azimuth degrees (Site 01 lunar south pole: ~20°)')
+    ap.add_argument('--sun-alt', type=float, default=2.0,
+                    help='solar altitude degrees (south pole sun stays low: ~2°)')
+    args = ap.parse_args()
+
+    import json
+    with open(META_JSON) as f:
+        meta = json.load(f)
+
+    if args.source == 'dem':
+        img = bake_dem_hillshade(meta, args.size, args.sun_azimuth, args.sun_alt)
+        kind = f"DEM hillshade (sun az={args.sun_azimuth}° alt={args.sun_alt}°)"
+    else:
+        if not os.path.isfile(NAC_IMG):
+            sys.exit(f"NAC image missing: {NAC_IMG} — fetch from PDS first.")
+        img = bake_nac_composite(meta, args.size, args.sun_azimuth, args.sun_alt)
+        kind = "NAC orthoimage + hillshade fallback"
+
     img.save(OUT_TGA)
-    print(f"wrote {OUT_TGA} ({args.size}x{args.size}, "
-          f"sun az={args.sun_azimuth}° alt={args.sun_alt}°)")
+    print(f"wrote {OUT_TGA} ({args.size}x{args.size}, {kind})")
 
 
 if __name__ == '__main__':
