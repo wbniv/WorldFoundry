@@ -27,6 +27,7 @@
 #include <gfx/material.hp>
 #include <gfx/rendobj2.hp>
 #include <gfx/rendobj3.hp>
+#include <gfx/vmem.hp>      // VideoMemory::VRAMTransient{Width,Height} for the UV page bound
 
 //============================================================================
 
@@ -214,9 +215,13 @@ Material::Construct()
 
 //-----------------------------------------------------------------------------
 
-#define TEXTURE_PAGE_XSIZE 256
+// TEXTURE_PAGE_XSIZE / YSIZE are now runtime — they read the transient slot
+// dimensions set by --vram-slot-width / --vram-slot-height (or the 256 default).
+// See docs/plans/2026-05-30-uv-int16-widening.md and
+// docs/plans/2026-05-30-runtime-vram-cli-overrides.md.
+#define TEXTURE_PAGE_XSIZE (VideoMemory::VRAMTransientWidth)
 #define TEXTURE_PAGE_XSTART_BOUNDRY 64
-#define TEXTURE_PAGE_YSIZE 256
+#define TEXTURE_PAGE_YSIZE (VideoMemory::VRAMTransientHeight)
 #define TEXTURE_PAGE_YSTART_BOUNDRY 256
 
 
@@ -324,16 +329,16 @@ Material::InitPrimitive(Primitive& prim, const Vertex3D& vertex0, const Vertex3D
 			offsetV = Scalar(offsetV.WholePart(),0);
 //			cout << "minUV = " << offsetU << "," << offsetV << std::endl;
 
-			int8 u0;
-			int8 v0;
+			uint16 u0;
+			uint16 v0;
 			CalcVRAMuv(vertex0.u-offsetU,vertex0.v-offsetV,u0,v0,_texture);
 
-			int8 u1;
-			int8 v1;
+			uint16 u1;
+			uint16 v1;
 			CalcVRAMuv(vertex1.u-offsetU,vertex1.v-offsetV,u1,v1,_texture);
 
-			int8 u2;
-			int8 v2;
+			uint16 u2;
+			uint16 v2;
 			CalcVRAMuv(vertex2.u-offsetU,vertex2.v-offsetV,u2,v2,_texture);
 
 
@@ -389,16 +394,16 @@ Material::InitPrimitive(Primitive& prim, const Vertex3D& vertex0, const Vertex3D
 			offsetV = Scalar(offsetV.WholePart(),0);
 //			cout << "minUV = " << offsetU << "," << offsetV << std::endl;
 
-			int8 u0;
-			int8 v0;
+			uint16 u0;
+			uint16 v0;
 			CalcVRAMuv(vertex0.u-offsetU,vertex0.v-offsetV,u0,v0,_texture);
 
-			int8 u1;
-			int8 v1;
+			uint16 u1;
+			uint16 v1;
 			CalcVRAMuv(vertex1.u-offsetU,vertex1.v-offsetV,u1,v1,_texture);
 
-			int8 u2;
-			int8 v2;
+			uint16 u2;
+			uint16 v2;
 			CalcVRAMuv(vertex2.u-offsetU,vertex2.v-offsetV,u2,v2,_texture);
 
 //			cout << "uv's " <<
