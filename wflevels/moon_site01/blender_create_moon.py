@@ -119,42 +119,57 @@ def attach_schema(obj, oad_name):
 # heights[row, col]). (N−1)² quads. Centre vertex sits exactly at the world
 # origin (0, 0, 0) by construction.
 
-def build_terrain_mesh(name):
+def build_terrain_mesh(name, tex_path):
     bm = bmesh.new()
+    uv_layer = bm.loops.layers.uv.new('UVMap')
 
-    # Vertices, indexed by (row, col) → grid[row][col]
+    # Vertices, indexed by (row, col) → grid[row][col]. UV is planar — (col,
+    # row) normalised into [0, 1] — so the texture maps 1:1 onto the same
+    # geographic crop the heightfield came from.
     grid = [[None] * N for _ in range(N)]
+    uvs  = [[None] * N for _ in range(N)]
     for row in range(N):
         y = row * CELL_M - HALF_M
+        v_uv = row / (N - 1)
         for col in range(N):
             x = col * CELL_M - HALF_M
             z = float(heights[row, col])
             grid[row][col] = bm.verts.new((x, y, z))
+            uvs[row][col]  = (col / (N - 1), v_uv)
     bm.verts.ensure_lookup_table()
 
-    # Quads — CCW from above (+Z).
+    # Quads — CCW from above (+Z), per-loop UVs.
     for row in range(N - 1):
         for col in range(N - 1):
-            v00 = grid[row    ][col    ]
-            v10 = grid[row    ][col + 1]
-            v11 = grid[row + 1][col + 1]
-            v01 = grid[row + 1][col    ]
-            bm.faces.new((v00, v10, v11, v01))
+            v00 = grid[row    ][col    ]; uv00 = uvs[row    ][col    ]
+            v10 = grid[row    ][col + 1]; uv10 = uvs[row    ][col + 1]
+            v11 = grid[row + 1][col + 1]; uv11 = uvs[row + 1][col + 1]
+            v01 = grid[row + 1][col    ]; uv01 = uvs[row + 1][col    ]
+            face = bm.faces.new((v00, v10, v11, v01))
+            for loop, uv_xy in zip(face.loops, (uv00, uv10, uv11, uv01)):
+                loop[uv_layer].uv = uv_xy
 
     bm.normal_update()
     mesh = bpy.data.meshes.new(name)
     bm.to_mesh(mesh)
     bm.free()
 
-    # Single grey material — lunar regolith. Phase 3 will swap this for a
-    # NAC/WAC-baked texture.
+    # Hillshaded regolith material (Phase 3a — texture baked from the DEM
+    # via make_terrain_texture.py). Phase 3b will swap in a NAC+WAC bake.
     mat = bpy.data.materials.new('lunar_regolith')
-    mat.diffuse_color = (0.55, 0.54, 0.52, 1.0)
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes['Principled BSDF']
+    tex_node = mat.node_tree.nodes.new('ShaderNodeTexImage')
+    tex_node.image = bpy.data.images.load(tex_path)
+    mat.node_tree.links.new(tex_node.outputs['Color'], bsdf.inputs['Base Color'])
     mesh.materials.append(mat)
     return mesh
 
 
-terrain_mesh = build_terrain_mesh('lunar_terrain')
+TERRAIN_TEX = os.path.join(SCRIPT_DIR, 'terrain_texture.tga')
+if not os.path.isfile(TERRAIN_TEX):
+    raise SystemExit(f"missing {TERRAIN_TEX} — run `python3 make_terrain_texture.py` first")
+terrain_mesh = build_terrain_mesh('lunar_terrain', TERRAIN_TEX)
 terrain_obj  = bpy.data.objects.new('lunar_terrain', terrain_mesh)
 scene.collection.objects.link(terrain_obj)
 attach_schema(terrain_obj, 'statplat')
