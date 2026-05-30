@@ -1,0 +1,4 @@
+# Source data fetched from external archives — not vendored in the repo.
+# See data/README.md for the download URL and SHA256.
+data/*.tif
+data/*.IMG
