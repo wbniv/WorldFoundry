@@ -46,6 +46,14 @@ camera_actor['wf_FoggingCompleteDistance'] = 1000.0
 
 No engine code change. No other level affected.
 
+## Screenshot
+
+![Moon Site 01 vista, post-fog-fix](screenshots/2026-05-31-moon-site01-vista-engine.png)
+
+Captured via `WF_GAME_SCREENSHOT_PPM` from `task run-moon`. Hillshaded
+Connecting Ridge terrain, faceted shadows, black sky beyond the play
+area edge, 1.8 m astronaut player capsule near frame centre.
+
 ## Verification
 
 1. `task build` clean.
