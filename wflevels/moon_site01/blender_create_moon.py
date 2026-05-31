@@ -60,10 +60,9 @@ PLAYER_HEIGHT = 1.8
 # collision). Centre vertex of the heightfield is at Z=0 by construction.
 PLAYER_SPAWN  = (0.0, 0.0, 5.0)
 
-# Camera: third-person from −Y. Tuned 2026-05-30 by iteration on engine
-# screenshots: (0, -8, 3.5) was too low + close (player filled frame, no
-# terrain visible); (0, -25, 18) was too high + far (player lost in distant
-# terrain). (0, -12, 6) framing the player at ~25° downward angle works.
+# Camera: vista from −Y, elevated to show NAC texture detail across a
+# real field of view. Distance ~85 m, ~30° downward angle, 60° FOV →
+# visible footprint ~100 m → ~100 NAC texels (1024² over 1 km play area).
 CAM_OFFSET    = (0.0, -12.0, 6.0)
 LOOK_TARGET   = (PLAYER_SPAWN[0], PLAYER_SPAWN[1], 1.5)
 
@@ -189,7 +188,8 @@ print(f"[moon] terrain mesh: {len(terrain_mesh.vertices)} verts, "
 
 matte = find_by_class('matte')
 if matte:
-    matte.location = (0.0, 0.0, 50.0)
+    matte.location = (0.0, 0.0, 0.0)   # position is cosmetic — Color matte
+                                       # is the glClearColor, not a plane
     matte['wf_Matte Type']        = 'Color'
     matte['wf_Background Color']  = 0x000000      # space-black
     matte['wf_Visibility Mailbox']= 1
@@ -253,6 +253,17 @@ if target:
     target.name = 'CamTarget'
     target.location = LOOK_TARGET
 
+# Pre-position the camera actor at the camshot location so BungeeCameraHandler
+# doesn't have to spring it from the snowgoons-imported default (10, -40, 8)
+# to the vista camshot at (0, -75, 50) over multiple frames — at large
+# distances the bungee can take many seconds to converge, and the
+# WF_GAME_SCREENSHOT_PPM dump fires at frame 30.
+camera_actor = find_by_class('camera')
+if camera_actor:
+    camera_actor.location = (PLAYER_SPAWN[0] + CAM_OFFSET[0],
+                             PLAYER_SPAWN[1] + CAM_OFFSET[1],
+                             PLAYER_SPAWN[2] + CAM_OFFSET[2])
+
 camshot = find_by_class('camshot')
 if camshot:
     camshot.name = 'cs_chase'
@@ -281,7 +292,7 @@ if camshot:
 room = find_by_class('room')
 if room:
     z_min = float(heights.min()) - 10.0      # 10 m below lowest terrain pixel
-    z_max = max(50.0, float(heights.max()) + 50.0)  # headroom for jumps / cam
+    z_max = max(50.0, float(heights.max()) + 50.0)   # chase cam at Z=11 + headroom
     centre = (0.0, 0.0, (z_min + z_max) / 2.0)
     rel = (-HALF_M - 10.0, -HALF_M - 10.0, z_min - centre[2],
            +HALF_M + 10.0, +HALF_M + 10.0, z_max - centre[2])
