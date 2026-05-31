@@ -48,27 +48,32 @@ MARIO_FEET_Z  = GROUND_TOP_Z
 MARIO_SPAWN_Z = MARIO_FEET_Z + T
 BLOCK_Z       = GROUND_TOP_Z + 4*T + T/2 # ? block centre (4 tiles above ground)
 
-# W1-1 landmark X positions (tile counts × T)
+# W1-1 landmark X positions (tile counts × T) — faithful 224-tile original
 MARIO_SPAWN_X = 3  * T
-QBLOCK_XS     = [8*T, 14*T, 17*T]        # lone ? block, then cluster pair
-GOOMBA_X      = 29 * T                    # 43.5 — right of pit0; reveals as Mario crosses onto ground_1
-KOOPA_X       = 32 * T                    # 48.0 — staggered deeper into ground_1 (still left of pit1 at 51)
-FLAGPOLE_X    = 42 * T
+QBLOCK_XS     = [21*T, 107*T]            # coin ? blocks at faithful cols 21, 107
+KOOPA_X       = 113 * T                  # col 113 (was 32*T)
+FLAGPOLE_X    = 210 * T                  # 315 m — faithful (was 42*T)
+
+# 16 Goombas at reference positions (docs/smb-level-layouts.md §1-1)
+GOOMBA_XS = [
+    22*T,                                # col 22 — first enemy
+    32*T, 34*T,                          # between pipes 1–2
+    42*T, 44*T,                          # between pipes 2–3
+    50*T,                                # lone Goomba mid-level
+    80*T, 83*T,                          # near post-pit ? block
+    88*T, 92*T, 95*T, 99*T,             # overhead block row area
+    128*T, 133*T,                        # near pyramid A
+    143*T, 147*T,                        # near pyramid B
+]
 
 GROUND_X0 = -2 * T
 GROUND_X1 = FLAGPOLE_X + 5*T
 GROUND_Y  = T                             # half-depth of ground slab in Y
 
-# Pits (bottomless gaps in the ground). The ground slab is split into solid
-# segments around these X-ranges; an invisible pit-death ActBox sits below each.
-# Real W1-1 has two signature gaps — one mid-level, one on the final approach by
-# the double-pyramid staircase. This level is geometrically compressed (~49 tiles
-# vs the real ~212), so these reproduce the two-pit *structure* proportionally,
-# clear of the ? cluster (tiles 8/14/17), Goomba (22), Koopa (28) and flag (42).
-# Each is a 2-tile (3 m) gap — jumpable under the current jump tuning.
+# Pits (bottomless gaps in the ground) — faithful W1-1 positions.
 # See docs/plans/2026-05-25-smb-pit-death-and-level-timer.md.
-PITS = [(28.5, 31.5),   # tiles 19-20: mid-level gap, between the ? cluster and the first Goomba
-        (51.0, 54.0)]   # tiles 34-35: the signature late gap on the final approach to the flag
+PITS = [(77*T, 81*T),   # cols 77-80: mid-level gap
+        (118*T, 122*T)] # cols 118-121: late gap before pyramids
 
 # Level countdown timer (Director script). SMB starts at 400 "time units"; we
 # drain them over TIMER_REAL_SECONDS of wall-clock so 100-left lines up with the
@@ -93,7 +98,7 @@ SMB_COIN_14, SMB_COIN_15, SMB_COIN_16, SMB_COIN_17, SMB_COIN_18 = 1857, 1858, 18
 # Fire Mario fireball globals (mailbox.inc 1820-1827). The generators' Activation
 # MailBox needs the literal index here (an OAS int field); scripts use INDEXOF_ names.
 SMB_FIREBALL_FIRE_R, SMB_FIREBALL_FIRE_L = 1823, 1824
-ENTRY_PIPE_X = 12 * T             # = 18, on ground_0 between qblock0 (x12) and qblock1 (x21)
+ENTRY_PIPE_X = 47 * T             # = 70.5, center of cols 46-47 (was 12*T)
 CR_FLOOR_TOP = -48.0              # coin-room floor top
 CR_X0, CR_X1 = 0.0, 24.0         # coin-room play span (16 tiles, faithful W1-1)
 CR_MID        = (CR_X0 + CR_X1) / 2  # = 12.0
@@ -169,9 +174,10 @@ if director:
     # INDEXOF_SMB_MAX_CAM_X holds the ratchet state; 0 means uninitialised
     # → seed to SPAWN_CAM_X=4.5.
     # Edge bounds: X_MIN+HALF_FRUSTUM = -3.0+12.0 = 9.0;
-    #              X_MAX-HALF_FRUSTUM = 70.5-12.0 = 58.5.
+    #              X_MAX-HALF_FRUSTUM = FLAGPOLE_X-12.0 = 303.0.
     # Deadzone test uses (delta < 1.5) — true for both in-deadzone AND
     # Mario-behind-camera cases (the one-way ratchet falls out for free).
+    _cam_x_max = FLAGPOLE_X - 12.0
     director['wf_Script'] = (
         "\\ wf\n"
         "INDEXOF_SMB_MAX_CAM_X read-mailbox not if "
@@ -182,7 +188,7 @@ if director:
         "if drop INDEXOF_SMB_MAX_CAM_X read-mailbox\n"
         "else 1.5 - "
         "dup 9.0 < if drop 9.0 then "
-        "dup 58.5 > if drop 58.5 then "
+        f"dup {_cam_x_max:.1f} > if drop {_cam_x_max:.1f} then "
         "dup INDEXOF_SMB_MAX_CAM_X write-mailbox\n"
         "then\n"
         "INDEXOF_SMB_TARGET_CAM_X write-mailbox\n"
@@ -758,7 +764,7 @@ POWERUP_BLOCK_SCRIPT = (
     "then\n"
 )
 
-MUSHROOM_BLOCK_X = 6 * T   # 9.0 — lone block before the ? cluster (easy to reach for verification)
+MUSHROOM_BLOCK_X = 16 * T  # 24.0 — col 16, faithful W1-1 mushroom ? block
 mblk = _add_textured_box('mushroom_block',
                          MUSHROOM_BLOCK_X - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
                          MUSHROOM_BLOCK_X + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
@@ -816,9 +822,11 @@ def _make_powerup_template(name, mat, script, running_decel, park_x):
 
 # Power-up dispensing block: a one-shot Generator (bump from below -> throw one
 # collectible -> latch tan), using POWERUP_BLOCK_SCRIPT.
-def _make_powerup_block(name, x, throw, vx):
-    b = _add_textured_box(name, x - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
-                                x + BSIZE,  BSIZE, BLOCK_Z + BSIZE, qblock_tex)
+def _make_powerup_block(name, x, throw, vx, z=None):
+    if z is None:
+        z = BLOCK_Z
+    b = _add_textured_box(name, x - BSIZE, -BSIZE, z - BSIZE,
+                                x + BSIZE,  BSIZE, z + BSIZE, qblock_tex)
     attach_schema(b, 'generator')
     b['wf_Mobility']           = 'Anchored'
     b['wf_Model Type']         = 'Mesh'
@@ -862,7 +870,7 @@ POWERUP_SCRIPT = (
 _make_powerup_template('powerup_template', mat_powerup, POWERUP_SCRIPT, 0.0, -55.0)
 # @15: throws straight up (X vel 0) so the flower sits; by here you've grabbed the
 # mushroom from the @9 block and are Super, so this dispenses a flower. One-shot.
-FIREFLOWER_BLOCK_X = 10 * T   # 15.0 — between qblock_01 (12) and the entry pipe (16.5-19.5)
+FIREFLOWER_BLOCK_X = 23 * T   # 34.5 — col 23, faithful W1-1 flower ? block
 _make_powerup_block('fireflower_block', FIREFLOWER_BLOCK_X, 'powerup_template', 0.0)
 
 # Star — BOUNCES rightward and reverses off walls. Running Decel 0 keeps the slide; the
@@ -899,7 +907,7 @@ STAR_SCRIPT = (
     "then\n"
 )
 _make_powerup_template('star_template', mat_star, STAR_SCRIPT, 0.0, -59.0)
-STAR_BLOCK_X = 38 * T   # 57.0 — past pit1 (51-54), before the flag (63); a late reward
+STAR_BLOCK_X = 99 * T   # 148.5 — col 99, faithful W1-1 starman block
 _make_powerup_block('star_block', STAR_BLOCK_X, 'star_template', 1.5)
 
 # 1UP mushroom — green mushroom that grants +1 life on proximity pickup.
@@ -1643,13 +1651,15 @@ def _build_goomba():
     return body
 
 
-goomba_mesh = _build_goomba()
-goomba_obj  = bpy.data.objects.new('goomba_00', goomba_mesh.data)
-scene.collection.objects.link(goomba_obj)
-bpy.data.objects.remove(goomba_mesh, do_unlink=True)
-goomba_obj.location = (GOOMBA_X, 0.0, MARIO_Z)
-attach_schema(goomba_obj, 'enemy')
-_apply_enemy_movement(goomba_obj)
+_goomba_body = _build_goomba()
+_goomba_data = _goomba_body.data
+bpy.data.objects.remove(_goomba_body, do_unlink=True)
+for _gi, _gx in enumerate(GOOMBA_XS):
+    _go = bpy.data.objects.new(f'goomba_{_gi:02d}', _goomba_data)
+    scene.collection.objects.link(_go)
+    _go.location = (_gx, 0.0, MARIO_Z)
+    attach_schema(_go, 'enemy')
+    _apply_enemy_movement(_go)
 
 # ── 9. Koopa Troopa placeholder (static visual) ───────────────────────────────
 mat_kgreen = make_mat('koopa_green', (0.14, 0.56, 0.20))
@@ -1701,92 +1711,6 @@ _apply_enemy_movement(koopa_obj)
 # shared cap is 8, which would clamp the slide).
 koopa_obj['wf_Script']           = KOOPA_SCRIPT
 koopa_obj['wf_Max Ground Speed'] = 16.0
-
-# ── 9b. Piranha Plant (docs/plans/2026-05-27-smb-piranha-plant.md) ────────────────
-# An ANCHORED Enemy (no Jolt body -> non-colliding, passes through the solid pipe and
-# is positioned purely by script) that slides its own Z_POS out of a pipe and back.
-# Motion is RATE*DELTA_TIME (framerate-independent); hurt + fireball-defeat are by
-# proximity like the goomba/koopa. Retracts while Mario stands on the pipe (|dx|<1),
-# so a ground-walking Mario passes safely (the plant is overhead) but jumping into the
-# emerged plant hurts.
-PIRANHA_X         = 16 * T                  # 24.0 — clear lane between qblock1 (21) and pit0 (28.5)
-PIPE_MOUTH_Z      = GROUND_TOP_Z + 2*T      # 3.0 — pipe top
-PIRANHA_HIDDEN_Z  = GROUND_TOP_Z + 0.5      # 0.5 — base inside the pipe (occluded behind it)
-PIRANHA_EMERGED_Z = PIPE_MOUTH_Z            # 3.0 — base at the mouth, head clears the pipe top
-PIRANHA_RATE      = 3.0                      # units/sec rise & fall
-PIRANHA_DWELL     = 1.5                      # sec per up/down phase
-mat_ppipe = make_mat('smb_ppipe_green', (0.0, 0.62, 0.0))
-mat_pstem = make_mat('smb_piranha_stem', (0.20, 0.70, 0.24))
-mat_phead = make_mat('smb_piranha_head', (0.85, 0.16, 0.12))
-
-PIRANHA_SCRIPT = (
-    "\\ wf\n"
-    # phase toggle every DWELL seconds (TIME deadline)
-    "INDEXOF_TIME read-mailbox INDEXOF_SMB_PIRANHA_NEXT read-mailbox > if\n"
-    "  INDEXOF_SMB_PIRANHA_UP read-mailbox not INDEXOF_SMB_PIRANHA_UP write-mailbox\n"
-    f"  INDEXOF_TIME read-mailbox {PIRANHA_DWELL} + INDEXOF_SMB_PIRANHA_NEXT write-mailbox\n"
-    "then\n"
-    # GO = phase-up by default
-    "INDEXOF_SMB_PIRANHA_UP read-mailbox 0<> if 1 else 0 then INDEXOF_SMB_PIRANHA_GO write-mailbox\n"
-    # Mario on the pipe (horizontally close) -> force retract this tick
-    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup * 1.0 < if\n"
-    "  0 INDEXOF_SMB_PIRANHA_GO write-mailbox\n"
-    "then\n"
-    # slide Z_POS toward the limit at RATE*dt (framerate-independent)
-    "INDEXOF_SMB_PIRANHA_GO read-mailbox 0<> if\n"
-    f"  INDEXOF_Z_POS read-mailbox {PIRANHA_EMERGED_Z} < if\n"
-    f"    INDEXOF_Z_POS read-mailbox {PIRANHA_RATE} INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n"
-    "  then\n"
-    "else\n"
-    f"  INDEXOF_Z_POS read-mailbox {PIRANHA_HIDDEN_Z} > if\n"
-    f"    INDEXOF_Z_POS read-mailbox {PIRANHA_RATE} INDEXOF_DELTA_TIME read-mailbox * - INDEXOF_Z_POS write-mailbox\n"
-    "  then\n"
-    "then\n"
-    # hurt: emerged (Z>2) AND Mario at the plant's height + close in X (jumped into it)
-    "INDEXOF_Z_POS read-mailbox 2.0 > if\n"
-    "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup * 1.7 < if\n"
-    "    INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup * 1.5 < if\n"
-    "      1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"
-    "    then\n"
-    "  then\n"
-    "then\n"
-    # fireball defeat (any height) — same idiom as the goomba
-    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
-    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "  + 2.5 < if 0 INDEXOF_ALIVE write-mailbox then\n"
-    "then\n"
-)
-
-# Decorative pipe (solid; Mario can stand on it) — entry_pipe's twin, no warp.
-add_statplat('piranha_pipe', PIRANHA_X - T, -GROUND_Y, GROUND_TOP_Z,
-             PIRANHA_X + T,  GROUND_Y, PIPE_MOUTH_Z, mat_ppipe)
-
-# Plant mesh: green stem + red head (origin at the base, so Z_POS = base height).
-_pparts = []
-bpy.ops.mesh.primitive_cylinder_add(radius=0.22*T, depth=1.4, location=(0, 0, 0.7))
-bpy.context.object.data.materials.clear(); bpy.context.object.data.materials.append(mat_pstem)
-for _p in bpy.context.object.data.polygons: _p.material_index = 0
-_pparts.append(bpy.context.object)
-bpy.ops.mesh.primitive_uv_sphere_add(radius=0.42*T, segments=10, ring_count=6, location=(0, 0, 1.7))
-bpy.context.object.data.materials.clear(); bpy.context.object.data.materials.append(mat_phead)
-for _p in bpy.context.object.data.polygons: _p.material_index = 0; _p.use_smooth = True
-_pparts.append(bpy.context.object)
-bpy.ops.object.select_all(action='DESELECT')
-for _o in _pparts: _o.select_set(True)
-bpy.context.view_layer.objects.active = _pparts[0]
-bpy.ops.object.join()
-_pmesh = bpy.context.object
-_pmesh.name = 'piranha_00'; _pmesh.data.name = 'piranha_00'
-piranha_obj = bpy.data.objects.new('piranha_00', _pmesh.data)
-scene.collection.objects.link(piranha_obj)
-bpy.data.objects.remove(_pmesh, do_unlink=True)
-piranha_obj.location = (PIRANHA_X, 0.0, PIRANHA_HIDDEN_Z)
-attach_schema(piranha_obj, 'enemy')
-piranha_obj['wf_Mobility']           = 'Anchored'   # no Jolt body -> non-colliding, script-driven
-piranha_obj['wf_Model Type']         = 'Mesh'
-piranha_obj['wf_Visibility Mailbox'] = 1
-piranha_obj['wf_Script']             = PIRANHA_SCRIPT
 
 # ── 10. Flagpole ──────────────────────────────────────────────────────────────
 mat_pole = make_mat('smb_pole', (0.72, 0.72, 0.72))
@@ -1910,12 +1834,13 @@ abs_['wf_Model Type']         = 'None'
 
 # ── 12. Room bbox ─────────────────────────────────────────────────────────────
 # Absolute extremes of all actor centres:
-#   X: GROUND_X0 ≈ -3   ..  FLAGPOLE_X+7.5 ≈ +70.5
+#   X: GROUND_X0 .. FLAGPOLE_X+7.5 — now 325 m; bbox must cover all of it.
 #   Y: camera at Y=-30, light at Y≈-12       → [-32, +5]
 #   Z: ground bottom -T ≈ -1.5, pole top 15  → [-3, +18]
 # Room placed at (SCENE_MID_X, 0, 5); bbox is relative to that centre.
 ROOM_CENTRE = (SCENE_MID_X, 0.0, 5.0)
-RX0, RX1 = -100.0,  100.0
+_half_span  = (GROUND_X1 - GROUND_X0) / 2 + 5   # covers full level width + margin
+RX0, RX1 = -_half_span, _half_span
 RY0, RY1 =  -35.0,   10.0
 RZ0, RZ1 =  -15.0,   20.0
 ROOM_BBOX_REL = (RX0, RY0, RZ0, RX1, RY1, RZ1)
@@ -1989,9 +1914,21 @@ if room:
 PIPE_GREEN   = make_mat('smb_pipe_green', (0.0, 0.62, 0.0))
 CR_FLOOR_MAT = make_mat('smb_cr_floor',   (0.45, 0.22, 0.05))   # dark brick-brown
 
-# Surface entry pipe: 2 tiles wide x 2 tall, solid (Mario jumps onto the mouth).
+# Faithful W1-1 surface pipes. PIPE_GREEN is defined above.
+# Pipe 1 (cols 28-29, 2T tall), Pipe 2 (cols 38-39, 2T tall) — plain, no warp.
+# Pipe 4 exit surface (cols 64-65, 4T tall) — unreachable entry, exit from underground.
+_PIPE_H2 = GROUND_TOP_Z + 2*T
+_PIPE_H4 = GROUND_TOP_Z + 4*T
+add_statplat('pipe_28', 28*T - T, -GROUND_Y, GROUND_TOP_Z,
+             28*T + T,  GROUND_Y, _PIPE_H2, PIPE_GREEN)
+add_statplat('pipe_38', 38*T - T, -GROUND_Y, GROUND_TOP_Z,
+             38*T + T,  GROUND_Y, _PIPE_H2, PIPE_GREEN)
+add_statplat('pipe_64', 64*T - T, -GROUND_Y, GROUND_TOP_Z,
+             64*T + T,  GROUND_Y, _PIPE_H4, PIPE_GREEN)
+
+# Surface entry pipe: 2 tiles wide × 3 tall (col 46-47 → center 47*T = 70.5 m).
 add_statplat('entry_pipe', ENTRY_PIPE_X - T, -GROUND_Y, GROUND_TOP_Z,
-             ENTRY_PIPE_X + T,  GROUND_Y, GROUND_TOP_Z + 2*T, PIPE_GREEN)
+             ENTRY_PIPE_X + T,  GROUND_Y, GROUND_TOP_Z + 3*T, PIPE_GREEN)
 
 # Entry sense: a thin ActBox lid over the pipe mouth. Only Mario standing ON TOP
 # (feet Z=3) overlaps the Z band [2.8,4.0]; walking past on the ground (Z 0) does
@@ -2131,9 +2068,8 @@ EXIT_PIPE_X0, EXIT_PIPE_X1 = 13*T, 15*T   # = [19.5, 22.5]  cols 13-14, 2-tile w
 add_statplat('exit_pipe', EXIT_PIPE_X0, -GROUND_Y, CR_FLOOR_TOP,
              EXIT_PIPE_X1,  GROUND_Y, CR_FLOOR_TOP + 2*T, PIPE_GREEN)
 
-# Surface return: past BOTH surface pipes (entry X=18±1.5, piranha X=24±1.5).
-# PIRANHA_X + 2*T = 27.0 — solidly on ground_0 (pit0 starts at 28.5).
-_make_target('Target_surface_return', (PIRANHA_X + 2*T, 0.0, MARIO_SPAWN_Z))
+# Surface return: solidly past the entry pipe (ENTRY_PIPE_X ± T = 69–72 m).
+_make_target('Target_surface_return', (ENTRY_PIPE_X + 3*T, 0.0, MARIO_SPAWN_Z))
 
 # Warp volume just LEFT of the exit pipe — 3 tiles wide, centred between coin end and pipe.
 _warp_cx = EXIT_PIPE_X0 - 1.5*T          # centre of warp zone: EXIT_PIPE_X0 - 2.25 = 17.25
@@ -2297,40 +2233,29 @@ def _add_brick(name, x, z=BLOCK_Z):
     blk['wf_Script']             = BRICK_SCRIPT
     return blk
 
-# The iconic 1-1 brick/? row, interleaved with the existing coin ? blocks
-# (qblock_01@21, qblock_02@25.5). New bricks sit on the 1.5 m grid between them,
-# clear of the entry pipe (X[16.5,19.5]) and the pit (X[28.5,31.5]). Reads as
-# B(20.25) ?(21) B(22.5) B(24) ?(25.5).
-_add_brick('brick_0', 20.25)   # tile 13.5 — just right of the entry pipe
-_add_brick('brick_1', 22.5)    # tile 15 — between the two ? blocks
-_add_brick('brick_2', 24.0)    # tile 16
+# Faithful W1-1 brick layout (docs/smb-level-layouts.md §1-1):
+#   Cols 20, 22, 24 — cluster flanking the coin ? blocks at cols 21, 23
+#   Cols 91-98     — extended overhead brick row (8 wide)
+#   Cols 108, 110  — hi-row bricks flanking the flower ? block at col 109 (row 6)
+BLOCK_Z_6 = GROUND_TOP_Z + 6*T + T/2   # row-6 block centre (2 tiles above BLOCK_Z)
 
-# Hidden-item brick — looks like a plain brick but bumps out one power-up on the first
-# hit-from-below, then turns tan and stays solid. Reuses the proven one-shot
-# POWERUP_BLOCK_SCRIPT + the self-determining powerup_template (mushroom while Small,
-# flower while Super+), skinned with brick_tex.
-HIDDEN_BRICK_X = 27.0   # tile 18 — last block before the pit
-hbrick = _add_textured_box('brick_hidden',
-                           HIDDEN_BRICK_X - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
-                           HIDDEN_BRICK_X + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
-                           brick_tex)
-attach_schema(hbrick, 'generator')
-hbrick['wf_Mobility']           = 'Anchored'
-hbrick['wf_Model Type']         = 'Mesh'
-hbrick['wf_Visibility Mailbox'] = 1
-hbrick['wf_Number Of Local Mailboxes'] = 13   # 2000..2012, like the mushroom block
-hbrick['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
-hbrick['wf_Object To Throw']    = 'powerup_template'
-hbrick['wf_Generation Rate']    = 10.0
-hbrick['wf_Object X Velocity']  = 1.5
-hbrick['wf_Object Y Velocity']  = 0.0
-hbrick['wf_Object Z Velocity']  = 6.0
-hbrick['wf_Script']             = POWERUP_BLOCK_SCRIPT
+_add_brick('brick_0', 20*T)
+_add_brick('brick_1', 22*T)
+_add_brick('brick_2', 24*T)
+
+for _bi, _bc in enumerate(range(91, 99)):
+    _add_brick(f'brick_row_{_bi}', _bc * T)
+
+_add_brick('brick_hi_0', 108*T, z=BLOCK_Z_6)
+_add_brick('brick_hi_1', 110*T, z=BLOCK_Z_6)
+# Also add a coin ? block at col 107 (row 8) and a flower ? block at col 109 (row 6)
+_make_powerup_block('qblock_107', 107*T, 'powerup_template', 0.0)
+_make_powerup_block('fireflower_block_hi', 109*T, 'powerup_template', 0.0, z=BLOCK_Z_6)
 
 # Hidden 1UP brick — tile 40 (x=60m), just before the flagpole (x=63m).
 # Looks like a plain brick; hit from below → launches a green 1UP mushroom that
 # slides right; player catches it for +1 life. Faithful to W1-1 hidden 1UP.
-ONEUP_BRICK_X = 40 * T   # 60.0 — between star_block (57) and flagpole (63)
+ONEUP_BRICK_X = 57 * T   # 85.5 — col 57, hidden 1-UP block (was 40*T)
 hbrick_1up = _add_textured_box('brick_1up',
                                ONEUP_BRICK_X - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
                                ONEUP_BRICK_X + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
@@ -2413,6 +2338,33 @@ def _make_popup_template():
 
 
 _make_popup_template()
+
+# ── 12c. Pyramids + staircase (faithful W1-1 terrain features) ───────────────
+mat_hard = make_mat('smb_hard_block', (0.48, 0.25, 0.05))
+
+
+def _add_pyramid(name_base, base_col, steps=4):
+    """Left-to-right ascending staircase: col 0 = 1T tall, col n-1 = n*T tall."""
+    for _s in range(steps):
+        add_statplat(f'{name_base}_{_s}',
+                     (base_col + _s)*T - BSIZE, -GROUND_Y, GROUND_TOP_Z,
+                     (base_col + _s)*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + (_s + 1)*T,
+                     mat_hard)
+
+
+def _add_staircase(name_base, base_col, steps=8):
+    """Left-to-right descending staircase: col 0 = tallest (steps*T), col n-1 = 1*T."""
+    for _s in range(steps):
+        _h = (steps - _s) * T
+        add_statplat(f'{name_base}_{_s}',
+                     (base_col + _s)*T - BSIZE, -GROUND_Y, GROUND_TOP_Z,
+                     (base_col + _s)*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + _h,
+                     mat_hard)
+
+
+_add_pyramid('pyramid_a', base_col=134)
+_add_pyramid('pyramid_b', base_col=148)
+_add_staircase('staircase', base_col=198)
 
 # ── 13. Export ────────────────────────────────────────────────────────────────
 print(f"[smb] Exporting to {OUT_LEV}")
