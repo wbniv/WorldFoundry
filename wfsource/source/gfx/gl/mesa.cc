@@ -29,6 +29,7 @@
 #include <atomic>
 #include <hal/lifecycle.h>
 #include <gfx/host_gl_context.h>
+#include <gfx/display.hp>
 
 // kts major kludge, both GL and WF should use namespaces
 #define Display XDisplay
@@ -146,7 +147,7 @@ OpenMainWindow( char *title )
     attr.event_mask = ExposureMask | StructureNotifyMask | KeyPressMask | KeyReleaseMask | FocusChangeMask;
     attr.colormap = XCreateColormap(halDisplay.mainDisplay, root, halDisplay.visInfo->visual, AllocNone);
 
-    halDisplay.win = XCreateWindow(halDisplay.mainDisplay, root, x, y, wfWindowWidth, wfWindowHeight,
+    halDisplay.win = XCreateWindow(halDisplay.mainDisplay, root, x, y, wfInitialWindowWidth, wfInitialWindowHeight,
                                    0, halDisplay.visInfo->depth, InputOutput, halDisplay.visInfo->visual,
                                    CWBorderPixel|CWColormap|CWEventMask, &attr);
     if(!halDisplay.win)
@@ -178,7 +179,7 @@ OpenMainWindow( char *title )
     attr.background_pixel = BlackPixel( halDisplay.mainDisplay, halDisplay.screenIndex );
 
    // Create the window 
-    halDisplay.win = XCreateWindow( halDisplay.mainDisplay, root, x,y, wfWindowWidth, wfWindowHeight, 0,
+    halDisplay.win = XCreateWindow( halDisplay.mainDisplay, root, x,y, wfInitialWindowWidth, wfInitialWindowHeight, 0,
                                     halDisplay.visInfo->depth, InputOutput,
                                     halDisplay.visInfo->visual,
                                     CWBorderPixel|CWColormap|CWEventMask|CWBackPixel, &attr);
@@ -249,7 +250,7 @@ void ProcessXEvents(XEvent event)
 
     switch(event.type)
     {
-        case ConfigureNotify: 
+        case ConfigureNotify:
             {
                 /* this approach preserves a 1:1 viewport aspect ratio */
                 int vX, vY, vW, vH;
@@ -268,6 +269,12 @@ void ProcessXEvents(XEvent event)
                 }
                 glViewport(vX, vY, vW, vH);
                 AssertGLOK();
+                // Push the live window size into Display so HUD layout
+                // (screen-space ortho) anchors to actual window corners after a
+                // resize. The 3D viewport above stays an inscribed square; HUD
+                // uses the full window via Display::GetSurfaceSize.
+                if (auto* d = Display::GetActive())
+                    d->SetLiveWindowSize(eW, eH);
             }
             break;
 

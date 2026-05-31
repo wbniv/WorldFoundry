@@ -81,7 +81,8 @@ extern char szAppName[];
 // seeds them from the GLFW framebuffer before HALStart; editor_build re-applies
 // glViewport + SetProjection from them on window resize (the engine's own
 // resize path early-bails in host-owned mode).
-extern int wfWindowWidth, wfWindowHeight;
+#include <gfx/display.hp>
+extern int wfInitialWindowWidth, wfInitialWindowHeight;
 
 namespace {
 
@@ -1277,7 +1278,8 @@ bool editor_build(void* p)
         glfwGetFramebufferSize(c->win, &fbw, &fbh);
         if (fbw > 0 && fbh > 0 && (fbw != c->fb_w || fbh != c->fb_h)) {
             c->fb_w = fbw; c->fb_h = fbh;
-            wfWindowWidth = fbw; wfWindowHeight = fbh;   // keep engine globals truthful
+            // Push the new size into Display so HUD layout / WFInitGL pick it up.
+            if (auto* d = Display::GetActive()) d->SetLiveWindowSize(fbw, fbh);
             glViewport(0, 0, fbw, fbh);
             // Mirror WFInitGL (display.cc:283-284): FOV 60°, near 1, far 1000.
             // Constants duplicated because we must not modify the engine build.
@@ -3004,14 +3006,14 @@ int main(int argc, char** argv)
     // wfWindow* defaults — ParseWindowSwitches, which would set them, is #if 0'd —
     // and WFInitGL runs glViewport(0,0,640,480) + a 640/480 projection aspect, so
     // the level renders into only the bottom-left of our 1280×800 window. Set
-    // before HALStart, which constructs Display (→ _xSize/_ySize) and calls
-    // WFInitGL (→ glViewport + aspect). Later resizes are tracked per-frame in
-    // editor_build (wfWindowWidth/Height is the file-scope extern above).
+    // before HALStart, which constructs Display (→ _xSize/_ySize/_liveWidth/Height)
+    // and calls WFInitGL (→ glViewport + aspect, both sized off Display::GetSurfaceSize).
+    // Later resizes go through Display::SetLiveWindowSize in editor_build.
     extern int _halWindowWidth, _halWindowHeight;   // hal/linux: feeds Display _xSize/_ySize
     int fbw = 0, fbh = 0;
     glfwGetFramebufferSize(win, &fbw, &fbh);
-    wfWindowWidth  = _halWindowWidth  = fbw;
-    wfWindowHeight = _halWindowHeight = fbh;
+    wfInitialWindowWidth  = _halWindowWidth  = fbw;
+    wfInitialWindowHeight = _halWindowHeight = fbh;
     std::printf("wf-edit: engine surface size %dx%d\n", fbw, fbh);
 
     std::printf("wf-edit: HALStart (--editor, level=%s)\n", level.c_str());

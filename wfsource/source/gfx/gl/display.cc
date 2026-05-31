@@ -476,8 +476,12 @@ GLfloat windowXPos;
 GLfloat windowYPos;
 GLfloat windowWidth;
 GLfloat windowHeight;
-int wfWindowWidth = 640;
-int wfWindowHeight = 480;
+// Initial X window dimensions for XCreateWindow only. After the window is
+// created the live surface size is owned by Display (set via
+// Display::SetLiveWindowSize from the platform layer, read via GetSurfaceSize).
+// See docs/plans/2026-05-31-display-getsurfacesize-refactor.md.
+int wfInitialWindowWidth  = 640;
+int wfInitialWindowHeight = 480;
 
 
 #if defined(__ANDROID__)
@@ -519,19 +523,42 @@ WFInitGL()
 
     RendererBackendGet().ResetModelView();
 
-    glViewport(0, 0, wfWindowWidth, wfWindowHeight);
+    // Viewport + projection aspect both sized off the current draw surface
+    // (FBO when capturing, OS window otherwise). See
+    // Display::GetSurfaceSize / docs/plans/2026-05-31-display-getsurfacesize-refactor.md.
+    int suw = wfInitialWindowWidth, suh = wfInitialWindowHeight;
+    if (auto* d = Display::GetActive()) d->GetSurfaceSize(suw, suh);
+    glViewport(0, 0, suw, suh);
     AssertGLOK();
 
-    // Aspect from the actual surface so geometry isn't squished when the
-    // window isn't square. Keeps content proportions — on a landscape
-    // phone the horizontal field of view widens instead of content
-    // stretching. (Was hardcoded 1.0 which combined with the 640×480
-    // wfWindow defaults rendered the engine into the top-left corner of
-    // anything larger.)
-    const float fAspect = float(wfWindowWidth) / float(wfWindowHeight);
+    const float fAspect = float(suw) / float(suh);
     RendererBackendGet().SetProjection(60.0f, fAspect, 1.0f, 1000.0f);
 }
 //==============================================================================
+
+// Process-wide single active Display. Set in the ctor, cleared in the dtor.
+// Backs Display::GetActive() for callers (platform layers, free functions)
+// that don't carry a Display* through their call chain.
+static Display* gActiveDisplay = nullptr;
+
+Display* Display::GetActive() { return gActiveDisplay; }
+
+void Display::SetLiveWindowSize(int w, int h)
+{
+    if (w <= 0 || h <= 0) return;
+    _liveWidth  = w;
+    _liveHeight = h;
+}
+
+void Display::GetSurfaceSize(int& w, int& h) const
+{
+#if DESIGNER_CHEATS && defined(__LINUX__)
+    extern bool bRecordVideo;
+    if (bRecordVideo) { w = _xSize; h = _ySize; return; }
+#endif
+    w = _liveWidth;
+    h = _liveHeight;
+}
 
 Display::Display(int orderTableSize, int xPos, int yPos, int xSize, int ySize, Memory& memory,bool /*interlace*/) :
 _drawPage(0),
@@ -543,8 +570,11 @@ _xPos(xPos),
 _yPos(yPos),
 _xSize(xSize),
 _ySize(ySize),
+_liveWidth(xSize),
+_liveHeight(ySize),
 _memory(memory)
 {
+    gActiveDisplay = this;
 
     _memory.Validate();
     if(!InitWindow(xPos, yPos, _halWindowWidth, _halWindowHeight ))
@@ -586,6 +616,7 @@ _memory(memory)
 
 Display::~Display()
 {
+    if (gActiveDisplay == this) gActiveDisplay = nullptr;
     Validate();
     // Skip final PageFlips if the X window was already destroyed by HALCloseWindow().
     if (!HALWindowCloseRequested()) {
@@ -976,10 +1007,11 @@ Display::PageFlip()
     if (wf_hud_score | wf_hud_timer | wf_hud_lives | wf_hud_game_over
         | wf_hud_entering_initials | wf_moon_overlay_enabled)
     {
-        // Use the actual render-target size so HUD coords match the FBO
-        // (record_video captures _xSize/_ySize, not wfWindow*). On normal
-        // interactive play these are the same; in headless capture they drift.
-        DrawHud(_xSize, _ySize);
+        // Surface-size policy (capture FBO vs live window) lives in
+        // Display::GetSurfaceSize — see refactor plan.
+        int huw, huh;
+        GetSurfaceSize(huw, huh);
+        DrawHud(huw, huh);
     }
 #endif
 

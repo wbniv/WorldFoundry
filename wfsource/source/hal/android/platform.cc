@@ -50,16 +50,15 @@ void*   halMemory = nullptr;
 // projection aspect. Kept in sync with _halWindow* so the game coord system
 // and GL viewport both match the real EGL surface (instead of the 640×480
 // module defaults that rendered the engine into the top-left corner).
-extern int wfWindowWidth;
-extern int wfWindowHeight;
+#include <gfx/display.hp>
 
 extern "C" void
 WFAndroidSetSurfaceSize(int w, int h)
 {
     _halWindowWidth  = w;
     _halWindowHeight = h;
-    wfWindowWidth    = w;
-    wfWindowHeight   = h;
+    if (auto* d = Display::GetActive())
+        d->SetLiveWindowSize(w, h);
 }
 
 //=============================================================================

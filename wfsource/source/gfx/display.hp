@@ -107,6 +107,26 @@ public:
 	int XSize() const;					// get x size of display
 	int YSize() const;					// get y size of display
 
+	// Size of the surface the engine is currently drawing into:
+	//   - bRecordVideo / WF_GAME_SCREENSHOT_PPM: capture FBO = _xSize × _ySize.
+	//   - Interactive play: the live OS window, tracked via SetLiveWindowSize().
+	// Use this from any per-frame code that needs to anchor screen-space
+	// elements (viewport setup, projection aspect, HUD layout) — it's the
+	// single source of truth for the current draw target's dimensions.
+	// See docs/plans/2026-05-31-display-getsurfacesize-refactor.md.
+	void GetSurfaceSize(int& w, int& h) const;
+
+	// Called by platform layers (X11 ConfigureNotify, Android surface change,
+	// editor GLFW framebuffer-size loop) when the OS reports the window/surface
+	// has been resized. Idempotent; safe to call every frame.
+	void SetLiveWindowSize(int w, int h);
+
+	// Process-wide accessor for callers outside this class that don't carry a
+	// Display*. Returns the current active Display (set by the ctor; cleared
+	// by the dtor). Single-Display invariant — the engine builds one at boot.
+	// Returns nullptr only during very early init or after shutdown.
+	static Display* GetActive();
+
 	void Validate() const;
 
 #if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
@@ -153,8 +173,10 @@ private:
 	int _xPos;						// x & y position of display
 	int _yPos;
 
-	int _xSize;						// x & y size of display
+	int _xSize;						// x & y size of display (the FBO/native render size, fixed at construction)
 	int _ySize;
+	int _liveWidth;					// current OS window size (interactive). Updated via SetLiveWindowSize.
+	int _liveHeight;
 #if   defined(__LINUX__) || defined(__ANDROID__)
 	float _backgroundColorRed = 0.0f;
 	float _backgroundColorGreen = 0.0f;
