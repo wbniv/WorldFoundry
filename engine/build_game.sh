@@ -253,17 +253,37 @@ OBJS=()
 FAILED_SRCS=()
 
 # compile_stub src obj [extra_flags...] — one-shot files (stubs, generated .cc).
-# Simple mtime check: recompile if .o is missing or src is newer than .o.
-# No header-dep tracking; these files rarely change their transitive includes.
+# Uses the same depfile-driven staleness check as compile() so that header
+# changes (e.g. scripting_stub.cc → mailbox/mailbox.inc) trigger a rebuild.
+# Earlier this was a plain source-mtime check, which meant mailbox.inc edits
+# silently went unnoticed and the script had to be touched manually — fixed
+# while wiring up the moon position-display HUD overlay 2026-05-31.
 compile_stub() {
     local src="$1" obj="$2"; shift 2
-    if [[ -f "$obj" && ! "$src" -nt "$obj" ]]; then
+    local dep="${obj%.o}.d"
+
+    if [[ -f "$obj" && -f "$dep" ]]; then
+        local stale=0
+        local prereqs
+        prereqs=$(tr '\\\n' '  ' < "$dep" | sed 's/[^:]*://')
+        for prereq in $prereqs; do
+            [[ -z "$prereq" ]] && continue
+            [[ -f "$prereq" && "$prereq" -nt "$obj" ]] && { stale=1; break; }
+        done
+        if [[ $stale -eq 0 ]]; then
+            echo "  skip $src"
+            OBJS+=("$obj")
+            return
+        fi
+    elif [[ -f "$obj" && ! "$src" -nt "$obj" ]]; then
+        # No depfile yet (first build after upgrade) — fall back to mtime check.
         echo "  skip $src"
         OBJS+=("$obj")
         return
     fi
+
     echo "  CC $src"
-    if g++ "${CXXFLAGS[@]}" "$@" -MMD -MP -MF "${obj%.o}.d" -c "$src" -o "$obj" 2>&1; then
+    if g++ "${CXXFLAGS[@]}" "$@" -MMD -MP -MF "$dep" -c "$src" -o "$obj" 2>&1; then
         OBJS+=("$obj")
     else
         echo "  *** FAILED: $src"

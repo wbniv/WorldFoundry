@@ -92,6 +92,13 @@ Comment("=====================================================================")
 	MAILBOXENTRY( HUD_TIMER, 71 )			Comment("HUD timer slot (read by game.cc:554); Director writes the countdown here")
 	MAILBOXENTRY( LIVES, 72 )			Comment("HUD lives slot (read by game.cc:553 for the LIVES display); player respawn decrements it")
 
+	// Moon Site 01 position-display HUD overlay — see docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md
+	MAILBOXENTRY( MOON_OVERLAY_ENABLED, 1875 )	Comment("Gates the moon position HUD overlay; moon player init sets to 1")
+	MAILBOXENTRY( MOON_PLAYER_X, 1876 )		Comment("Live player X (m) — copied from local X_POS each tick")
+	MAILBOXENTRY( MOON_PLAYER_Y, 1877 )		Comment("Live player Y (m) — copied from local Y_POS each tick")
+	MAILBOXENTRY( MOON_PLAYER_Z, 1878 )		Comment("Live player Z (m) — copied from local Z_POS each tick")
+	MAILBOXENTRY( MOON_PLAYER_HEADING, 1879 )	Comment("Live player heading (revolutions) — copied from local ROTATION_C each tick")
+
 
 	MAILBOXENTRY(GLOBAL_USER_MAX,1900)
 	Comment(" *Inclusive* last valid index — user range is [GLOBAL_USER_START, GLOBAL_USER_MAX].          ")

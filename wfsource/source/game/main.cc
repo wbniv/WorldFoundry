@@ -86,6 +86,12 @@ int  wf_hud_initials_pos = 0;
 char wf_hud_pilot[4][128]  = {};
 int  wf_hud_pilot_count    = 0;   // monotonically increasing; slot = count % 4
 char wf_hud_pilot_pending[128] = {};
+// Moon Site 01 position-display HUD overlay — see docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md
+int   wf_moon_overlay_enabled    = 0;
+float wf_moon_player_x_m         = 0.0f;
+float wf_moon_player_y_m         = 0.0f;
+float wf_moon_player_z_m         = 0.0f;
+float wf_moon_player_heading_rev = 0.0f;
 #endif
 
 bool bPerspectiveCorrection = false;

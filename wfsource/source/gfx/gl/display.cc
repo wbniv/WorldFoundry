@@ -57,6 +57,13 @@ extern int  wf_hud_initials_pos;
 extern char wf_hud_pilot[4][128];
 extern int  wf_hud_pilot_count;
 
+// Moon Site 01 position-display HUD overlay — see docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md
+extern int   wf_moon_overlay_enabled;
+extern float wf_moon_player_x_m;
+extern float wf_moon_player_y_m;
+extern float wf_moon_player_z_m;
+extern float wf_moon_player_heading_rev;
+
 #include "hscore.h"
 
 // Forward declarations for the offscreen capture FBO — definitions live in
@@ -74,6 +81,71 @@ static void DrawHudText(float x, float y, const char* text)
     glVertexPointer(2, GL_FLOAT, 16, vbuf);
     glDrawArrays(GL_QUADS, 0, num_quads * 4);
     glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+// Moon Site 01 minimap. Loads wflevels/moon_site01/minimap.tga from cwd on
+// first use; if missing, the minimap silently disables (text overlay still
+// renders). Hardcoded relative path is a v1 shortcut; proper cd.iff asset
+// wiring is a follow-up.
+static GLuint gMoonMinimapTex = 0;
+static bool   gMoonMinimapTried = false;
+static int    gMoonMinimapW = 0, gMoonMinimapH = 0;
+
+static void LoadMoonMinimapTexture()
+{
+    gMoonMinimapTried = true;
+    FILE* fp = fopen("wflevels/moon_site01/minimap.tga", "rb");
+    if (!fp) { fprintf(stderr, "moon overlay: minimap.tga not found, minimap disabled\n"); return; }
+    fseek(fp, 0, SEEK_END);
+    long fsize = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    if (fsize < 18) { fclose(fp); fprintf(stderr, "moon overlay: minimap.tga truncated\n"); return; }
+    uint8_t* buf = (uint8_t*)malloc(fsize);
+    if (fread(buf, 1, fsize, fp) != (size_t)fsize) { free(buf); fclose(fp); return; }
+    fclose(fp);
+
+    // Minimal TGA reader: uncompressed truecolor (type 2), 24- or 32-bpp, no colormap.
+    uint8_t id_len    = buf[0];
+    uint8_t cmap_type = buf[1];
+    uint8_t img_type  = buf[2];
+    int     width     = buf[12] | (buf[13] << 8);
+    int     height    = buf[14] | (buf[15] << 8);
+    uint8_t bpp       = buf[16];
+    uint8_t desc      = buf[17];
+    bool    top_down  = (desc & 0x20) != 0;
+    if (cmap_type != 0 || img_type != 2 || (bpp != 24 && bpp != 32)) {
+        fprintf(stderr, "moon overlay: minimap.tga unsupported format (type=%d bpp=%d)\n", img_type, bpp);
+        free(buf); return;
+    }
+    int channels = bpp / 8;
+    int expected = 18 + id_len + width * height * channels;
+    if (expected > fsize) { fprintf(stderr, "moon overlay: minimap.tga payload truncated\n"); free(buf); return; }
+
+    const uint8_t* pix = buf + 18 + id_len;
+    // Convert BGR(A) → RGB top-down for GL upload.
+    uint8_t* rgb = (uint8_t*)malloc(width * height * 3);
+    for (int y = 0; y < height; ++y) {
+        int src_y = top_down ? y : (height - 1 - y);
+        const uint8_t* src_row = pix + src_y * width * channels;
+        uint8_t* dst_row = rgb + y * width * 3;
+        for (int x = 0; x < width; ++x) {
+            dst_row[x*3 + 0] = src_row[x*channels + 2];   // R
+            dst_row[x*3 + 1] = src_row[x*channels + 1];   // G
+            dst_row[x*3 + 2] = src_row[x*channels + 0];   // B
+        }
+    }
+    free(buf);
+
+    glGenTextures(1, &gMoonMinimapTex);
+    glBindTexture(GL_TEXTURE_2D, gMoonMinimapTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    free(rgb);
+    gMoonMinimapW = width; gMoonMinimapH = height;
+    fprintf(stderr, "moon overlay: minimap loaded (%dx%d), tex=%u\n", width, height, gMoonMinimapTex);
 }
 
 static void DrawHud(int xSize, int ySize)
@@ -120,6 +192,137 @@ static void DrawHud(int xSize, int ySize)
         float lw = (float)stb_easy_font_width((char*)buf) * kScale;
         glPushMatrix(); glTranslatef((float)xSize - lw - 8, 8, 0); glScalef(kScale, kScale, 1);
         DrawHudText(0, 0, buf); glPopMatrix();
+    }
+
+    // ── Moon Site 01 position-display HUD overlay ──────────────────────────
+    // Text block (top-left, under SCORE) + minimap inset (top-right).
+    // Gated on MOON_OVERLAY_ENABLED (mb 1875) so SMB / qbert stay untouched.
+    // See docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md
+    if (wf_moon_overlay_enabled)
+    {
+        // South polar stereographic linearisation at the play-area centre.
+        // PGDA crop centre = PS (-11000, -12000) m, lunar R = 1737.4 km.
+        // rho = sqrt(11000^2 + 12000^2) ≈ 16278.8 m → c ≈ 0.009370 rad
+        // → lat0 = -90 + c·180/π = -89.4632°. Lon0 from README is 227.0381° E.
+        // For a 1 km × 1 km patch the per-metre slopes are constant.
+        const double LAT0       = -89.4632;
+        const double LON0       =  227.0381;
+        const double RAD_PER_M  =  180.0 / (3.14159265358979 * 1737400.0);   // ≈ 3.30e-5 °/m
+        // d_lat/dY = RAD_PER_M · (Y_ps/rho); d_lon/dX scales by 1/sin(|lat0|)
+        const double D_LAT_PER_M = RAD_PER_M * (12000.0 / 16278.8);          // ≈ +2.43e-5 °/m (Y+ ⇒ less negative lat)
+        const double D_LON_PER_M = RAD_PER_M / 0.009378;                     // sin(0.5368°), ≈ +3.52e-3 °/m
+        // ELEV: player Z is metres above play-area centre; centre is +1944.77 m above lunar reference radius.
+        const double ELEV_BASE_M = 1944.77;
+
+        double lat  = LAT0 + (double)wf_moon_player_y_m * D_LAT_PER_M;
+        double lon  = LON0 + (double)wf_moon_player_x_m * D_LON_PER_M;
+        double elev = ELEV_BASE_M + (double)wf_moon_player_z_m;
+
+        glColor3f(1.0f, 1.0f, 0.0f);
+        const float kTxt = 1.5f;
+        char  l[80];
+        auto draw_line = [&](float y, const char* s) {
+            glPushMatrix(); glTranslatef(8.0f, y, 0.0f); glScalef(kTxt, kTxt, 1.0f);
+            DrawHudText(0.0f, 0.0f, (char*)s); glPopMatrix();
+        };
+        draw_line(36.0f, "SITE 01 -- CONNECTING RIDGE");
+        snprintf(l, sizeof(l), "LAT %.4f S  LON %.4f E", -lat, lon);
+        draw_line(50.0f, l);
+        snprintf(l, sizeof(l), "ELEV %+.0f m  (delta %+.1f m)", elev, (double)wf_moon_player_z_m);
+        draw_line(64.0f, l);
+        snprintf(l, sizeof(l), "POS X%+.0f  Y%+.0f  (m from spawn)",
+                 (double)wf_moon_player_x_m, (double)wf_moon_player_y_m);
+        draw_line(78.0f, l);
+
+        // Minimap inset, 128×128 px, top-right corner with 8 px margin.
+        const float MM = 128.0f;
+        const float mm_x = (float)xSize - 8.0f - MM;
+        const float mm_y = 8.0f;
+
+        if (!gMoonMinimapTried) LoadMoonMinimapTexture();
+        if (gMoonMinimapTex != 0)
+        {
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, gMoonMinimapTex);
+            glColor3f(1.0f, 1.0f, 1.0f);
+            glBegin(GL_QUADS);
+                glTexCoord2f(0, 0); glVertex2f(mm_x,      mm_y);
+                glTexCoord2f(1, 0); glVertex2f(mm_x + MM, mm_y);
+                glTexCoord2f(1, 1); glVertex2f(mm_x + MM, mm_y + MM);
+                glTexCoord2f(0, 1); glVertex2f(mm_x,      mm_y + MM);
+            glEnd();
+            glDisable(GL_TEXTURE_2D);
+        }
+
+        // 1-px white border.
+        glColor3f(1.0f, 1.0f, 1.0f);
+        glBegin(GL_LINE_LOOP);
+            glVertex2f(mm_x,      mm_y);
+            glVertex2f(mm_x + MM, mm_y);
+            glVertex2f(mm_x + MM, mm_y + MM);
+            glVertex2f(mm_x,      mm_y + MM);
+        glEnd();
+
+        // Game-world (X, Y) ∈ [-500, +500] m → minimap (sx, sy). v is flipped so
+        // world +Y (north-ish) maps to up on the minimap; texture is loaded
+        // top-down so this matches the visible image orientation.
+        const float HALF_M = 500.0f;
+        const float SIDE_M = 1000.0f;
+        auto world_to_screen = [&](float wx, float wy, float& sx, float& sy) {
+            float u = (wx + HALF_M) / SIDE_M;
+            float v = (wy + HALF_M) / SIDE_M;
+            sx = mm_x + u * MM;
+            sy = mm_y + (1.0f - v) * MM;
+        };
+
+        float sx, sy;
+
+        // Spawn square — hollow yellow 4-px outline at world (0, 0).
+        glColor3f(1.0f, 1.0f, 0.0f);
+        world_to_screen(0.0f, 0.0f, sx, sy);
+        glBegin(GL_LINE_LOOP);
+            glVertex2f(sx - 2.0f, sy - 2.0f);
+            glVertex2f(sx + 2.0f, sy - 2.0f);
+            glVertex2f(sx + 2.0f, sy + 2.0f);
+            glVertex2f(sx - 2.0f, sy + 2.0f);
+        glEnd();
+
+        // Lander X — yellow 6-px cross at world (+30, +25) per blender_create_moon.py.
+        world_to_screen(30.0f, 25.0f, sx, sy);
+        glBegin(GL_LINES);
+            glVertex2f(sx - 3.0f, sy - 3.0f); glVertex2f(sx + 3.0f, sy + 3.0f);
+            glVertex2f(sx - 3.0f, sy + 3.0f); glVertex2f(sx + 3.0f, sy - 3.0f);
+        glEnd();
+
+        // Player dot — filled 3×3 yellow square at live position.
+        world_to_screen(wf_moon_player_x_m, wf_moon_player_y_m, sx, sy);
+        glBegin(GL_QUADS);
+            glVertex2f(sx - 1.0f, sy - 1.0f);
+            glVertex2f(sx + 2.0f, sy - 1.0f);
+            glVertex2f(sx + 2.0f, sy + 2.0f);
+            glVertex2f(sx - 1.0f, sy + 2.0f);
+        glEnd();
+
+        // Compass chevron — cyan triangle pointing in heading direction. WF
+        // currentDir = (cos C, sin C, 0); heading_rev is C / (2π) in revolutions.
+        // Screen Y is flipped (v=1-y), so world +Y heading → screen up.
+        float theta = wf_moon_player_heading_rev * 6.28318530718f;
+        float cs    = cosf(theta);
+        float sn    = sinf(theta);
+        auto rot_pt = [&](float fwd, float side, float& ox, float& oy) {
+            ox = sx + fwd * cs + side * sn;
+            oy = sy - fwd * sn + side * cs;     // -sn because world Y → screen -Y
+        };
+        float tx, ty, bxL, byL, bxR, byR;
+        rot_pt(6.0f,  0.0f, tx,  ty);
+        rot_pt(-1.5f, +2.5f, bxL, byL);
+        rot_pt(-1.5f, -2.5f, bxR, byR);
+        glColor3f(0.0f, 1.0f, 1.0f);   // cyan
+        glBegin(GL_TRIANGLES);
+            glVertex2f(tx,  ty);
+            glVertex2f(bxL, byL);
+            glVertex2f(bxR, byR);
+        glEnd();
     }
 
     // Game-over overlay — driven by mb 420 via wf_hud_game_over (game.cc HUD glue).
@@ -771,9 +974,12 @@ Display::PageFlip()
     // mm_practice / moon_site01 never touch the mailboxes and stay HUD-less.
     // See docs/plans/2026-05-31-hud-gate-on-level-opt-in.md.
     if (wf_hud_score | wf_hud_timer | wf_hud_lives | wf_hud_game_over
-        | wf_hud_entering_initials)
+        | wf_hud_entering_initials | wf_moon_overlay_enabled)
     {
-        DrawHud(wfWindowWidth, wfWindowHeight);
+        // Use the actual render-target size so HUD coords match the FBO
+        // (record_video captures _xSize/_ySize, not wfWindow*). On normal
+        // interactive play these are the same; in headless capture they drift.
+        DrawHud(_xSize, _ySize);
     }
 #endif
 

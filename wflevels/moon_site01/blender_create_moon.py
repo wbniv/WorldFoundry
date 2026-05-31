@@ -410,6 +410,13 @@ if player:
         "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox "
         "dup 16384 & 256 / over 8192 & 64 / | | "
         "INDEXOF_INPUT write-mailbox\n"
+        # Position-display HUD overlay: copy locals → globals every tick so
+        # display.cc can read them. See docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md.
+        "1 INDEXOF_MOON_OVERLAY_ENABLED write-mailbox\n"
+        "INDEXOF_X_POS read-mailbox INDEXOF_MOON_PLAYER_X write-mailbox\n"
+        "INDEXOF_Y_POS read-mailbox INDEXOF_MOON_PLAYER_Y write-mailbox\n"
+        "INDEXOF_Z_POS read-mailbox INDEXOF_MOON_PLAYER_Z write-mailbox\n"
+        "INDEXOF_ROTATION_C read-mailbox INDEXOF_MOON_PLAYER_HEADING write-mailbox\n"
     )
 
 # ── 6b. Artemis lander (Starship HLS) ────────────────────────────────────────
