@@ -1190,6 +1190,14 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         COMMAND sh -c "WF_EDIT_TURN_TEST=1 $<TARGET_FILE:wf_edit> 2>&1 | tee /dev/stderr | grep -q '\\[turn\\] all PASS'"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+    # Headless 3-peer WebRTC mesh self-test (Phase 3 of the multi-peer plan).
+    # Runs the wf_edit binary before GL, no DISPLAY: three in-process WebrtcSessions
+    # shuttle each other's signalling and must all reach ConnectedPeerCount()==2 (a
+    # complete mesh). The headless complement to tests/screenshot_three_peer_b2.sh.
+    add_test(NAME wf_edit_mesh
+        COMMAND sh -c "WF_EDIT_MESH_TEST=1 $<TARGET_FILE:wf_edit> 2>&1 | tee /dev/stderr | grep -q '\\[mesh\\] all PASS'"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
     # wf-relay: standalone relay server binary (co-edit Phase 1).
     # Built via Cargo; not linked into wf_edit (avoids duplicate Rust runtime symbols).
     add_custom_target(wf_relay

@@ -51,13 +51,32 @@ Tried it. In the live path the inscribed-square viewport reported by ConfigureNo
 
    SCORE/TIME at y=8, four-line text block (SITE 01 / LAT-LON / ELEV / POS), 128×128 minimap inset top-right with hillshade + spawn square + lander X + cyan compass chevron, lander tower visible in scene, astronaut speck centre.
 
-3. Interactive resize test: launch `task run-moon`, drag the window to a non-square size, confirm:
-   - 3D scene fills the live window (already worked before)
-   - SCORE/TIME stay top-left, 8 px from edge
-   - Minimap stays top-right, 8 px from edge, full 128×128 in frame
-   - As window grows, HUD elements stay the same pixel size and remain anchored to corners (no scaling)
+3. Interactive resize test — launch the game, programmatically resize the X11 window via `python3-xlib`, dump it with `xwd`, convert with `gm`:
 
-   (Interactive resize can't be captured by `WF_GAME_SCREENSHOT_PPM` — the screenshot path always renders into the fixed 512×384 capture FBO. User confirms this visually in-window.)
+   ![interactive resize verification](screenshots/2026-05-31-moon-hud-resized-interactive.png)
+
+   Window resized to 1500×800. SCORE/TIME anchored top, 4-line text block top-left, 128×128 minimap top-right (not clipped), Starship lander dominating centre, astronaut speck mid-frame. Compare against the pre-fix screenshot the user supplied (`~/Pictures/Screenshots/Screenshot from 2026-05-31 06-56-44.png`) where the entire HUD was crammed into a tiny region of the bottom-left.
+
+   Repro recipe (saved as ad-hoc shell, not a checked-in test):
+   ```bash
+   LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game \
+       --vram-width=4096 --vram-height=2048 --vram-slot-width=1024 --vram-slot-height=1024 \
+       -Lwflevels/moon_site01-standalone.iff &
+   sleep 4
+   DISPLAY=:0 python3 -c '
+   from Xlib import display
+   d=display.Display(); root=d.screen().root
+   def walk(w):
+       try: nm=w.get_wm_name()
+       except: nm=None
+       if nm and "World Foundry" in nm: return w
+       for c in w.query_tree().children:
+           r=walk(c)
+           if r: return r
+   walk(root).configure(width=1500, height=800); d.sync()'
+   sleep 2
+   DISPLAY=:0 xwd -name "World Foundry" -out /tmp/x.xwd && gm convert /tmp/x.xwd /tmp/x.png
+   ```
 
 ## Follow-ups
 

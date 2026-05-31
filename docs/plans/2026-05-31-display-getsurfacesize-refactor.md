@@ -4,11 +4,15 @@
 **Date:** 2026-05-31
 **Estimate:** ~1 h · **Actual:** ~30 min (smaller surface area than expected — the survey was thorough enough that migrations were mechanical)
 
-## Verification screenshot
+## Verification screenshots
+
+**Capture path** — identical to the pre-refactor capture (same image file as the HUD-resize plan); the refactor is a behaviour no-op for the FBO path:
 
 ![capture parity](screenshots/2026-05-31-moon-hud-overlay-capture.png)
 
-Identical to the pre-refactor capture (same image file referenced from the HUD-resize plan) — refactor is a behaviour no-op; the policy is just consolidated.
+**Interactive resize path** — Xlib-programmatically resized to 1500×800, captured via `xwd`. SCORE/TIME at top, text block top-left, minimap top-right (8 px margin, not clipped), lander dominating centre. The refactor preserves the prior live-resize fix because `mesa.cc`'s `ConfigureNotify` still feeds the new size in, now via `Display::SetLiveWindowSize()` instead of writing the global directly:
+
+![interactive resize](screenshots/2026-05-31-moon-hud-resized-interactive.png)
 
 ## Context
 

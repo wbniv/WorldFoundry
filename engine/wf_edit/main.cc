@@ -2252,6 +2252,12 @@ int main(int argc, char** argv)
     if (const char* p = std::getenv("WF_EDIT_TURN_TEST"); p && *p)
         return RunTurnTest();
 
+    // Headless 3-peer mesh self-test — three in-process WebrtcSessions form a
+    // full mesh by shuttling their own signalling. Needs no level, GL, relay, or
+    // args. Must run before any window/engine setup. See RunMeshTest above.
+    if (const char* p = std::getenv("WF_EDIT_MESH_TEST"); p && *p)
+        return RunMeshTest();
+
     // Headless quick-tunnel self-test (Phase 4.3): spawn relay + cloudflared,
     // resolve the public host, print the share link, reap, exit. Needs network +
     // a built wf-relay; verifies the spawn/scrape/lifecycle without a window.
