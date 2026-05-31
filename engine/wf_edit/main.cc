@@ -106,6 +106,12 @@ struct WfeditIdentity {
     // (Phase 4). Ships empty — set it to a durable wss:// host, or use "Host a
     // call" (quick tunnel). WF_COLLAB_RELAY_DEFAULT env overrides.
     std::string  relay_default;
+    // Phase 3 (named tunnel): opt-in authenticated Cloudflare tunnel for
+    // durable/team hosting — rate-limit-free + stable hostname. BOTH must be set
+    // to engage; either alone falls back to the zero-config quick tunnel.
+    // WF_COLLAB_TUNNEL_TOKEN / WF_COLLAB_TUNNEL_HOSTNAME env vars override.
+    std::string  tunnel_token;
+    std::string  tunnel_hostname;
 };
 
 static std::string IdentityPath()
@@ -147,6 +153,8 @@ static std::optional<WfeditIdentity> LoadIdentity()
         id.turn_pass        = j.value("turn_pass", "");
         id.turn_tls         = j.value("turn_tls", false);
         id.relay_default    = j.value("relay_default", "");
+        id.tunnel_token     = j.value("tunnel_token", "");
+        id.tunnel_hostname  = j.value("tunnel_hostname", "");
         if (id.peer_id.empty()) return std::nullopt;
         return id;
     } catch (...) {
@@ -179,7 +187,9 @@ static void SaveIdentity(const WfeditIdentity& id)
             {"turn_user",        id.turn_user},
             {"turn_pass",        id.turn_pass},
             {"turn_tls",         id.turn_tls},
-            {"relay_default",    id.relay_default}
+            {"relay_default",    id.relay_default},
+            {"tunnel_token",     id.tunnel_token},
+            {"tunnel_hostname",  id.tunnel_hostname}
         };
         std::ofstream f(path);
         f << j.dump(2) << "\n";
@@ -792,10 +802,20 @@ static std::string ToolPath(const std::string& exe_path, const char* name)
     return name;   // PATH
 }
 
-// Spawn wf-relay + a Cloudflare quick tunnel (non-blocking). cloudflared's
-// banner is written to out_logpath for incremental polling; children are reaped
-// via atexit. Returns false if a prerequisite is missing.
+// Spawn wf-relay + a Cloudflare tunnel (non-blocking). Two paths:
+//   * **Named tunnel** (Phase 3) — when `tunnel_token` is set, run
+//     `cloudflared tunnel run --token <TOKEN>`; the hostname is fixed (from
+//     `tunnel_hostname`, the host's pre-configured CF DNS) so there's no URL to
+//     scrape and no quick-tunnel rate limit. The user's tunnel ingress must
+//     route their hostname to `http://localhost:<port>`.
+//   * **Quick tunnel** (default, zero-config) — `cloudflared tunnel --protocol
+//     http2 --url http://localhost:<port>`. The ephemeral
+//     `*.trycloudflare.com` URL is scraped from cloudflared's banner.
+// cloudflared's output is written to out_logpath for incremental polling;
+// children are reaped via atexit. Returns false if a prerequisite is missing.
 static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
+                                  const std::string& tunnel_token,
+                                  const std::string& tunnel_hostname,
                                   std::string& out_logpath)
 {
     const std::string cf = ToolPath(exe_path, "cloudflared");
@@ -812,6 +832,10 @@ static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
 
     const std::string ps  = std::to_string(port);
     const std::string url = "http://localhost:" + ps;
+    const bool named = !tunnel_token.empty() && !tunnel_hostname.empty();
+    if (named)
+        std::printf("wf-edit: using named tunnel — hostname %s (rate-limit-free)\n",
+                    tunnel_hostname.c_str());
 
     s_relay_pid = ::fork();
     if (s_relay_pid == 0) {
@@ -823,14 +847,24 @@ static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
     s_cloudflared_pid = ::fork();
     if (s_cloudflared_pid == 0) {
         ::dup2(logfd, 1); ::dup2(logfd, 2);
-        // --protocol http2: force the edge link over TCP :7844 instead of QUIC
-        // (UDP :7844). The tunnel carries SIGNALING only (media is DTLS-SRTP
-        // P2P/TURN), so QUIC's latency edge is irrelevant, and TCP is reachable
-        // on far more networks — many firewalls/NATs block or throttle UDP/QUIC,
-        // which leaves the quick tunnel unregistered (no DNS → "relay connect
-        // failed"). http2 "just works" on restrictive and normal networks alike.
-        ::execl(cf.c_str(), cf.c_str(), "tunnel", "--protocol", "http2",
-                "--url", url.c_str(), (char*)nullptr);
+        if (named) {
+            // Named tunnel: cloudflared knows the tunnel ID + origin routing
+            // from the token's ingress config (host configures hostname →
+            // http://localhost:<port> in the CF Zero Trust dashboard). No
+            // --url, no URL to scrape; the hostname is fixed.
+            ::execl(cf.c_str(), cf.c_str(), "tunnel", "run",
+                    "--token", tunnel_token.c_str(), (char*)nullptr);
+        } else {
+            // Quick tunnel: --protocol http2 forces the edge link over TCP :7844
+            // instead of QUIC (UDP :7844). The tunnel carries SIGNALING only
+            // (media is DTLS-SRTP P2P/TURN), so QUIC's latency edge is
+            // irrelevant, and TCP is reachable on far more networks — many
+            // firewalls/NATs block or throttle UDP/QUIC, which leaves the quick
+            // tunnel unregistered (no DNS → "relay connect failed"). http2
+            // "just works" on restrictive and normal networks alike.
+            ::execl(cf.c_str(), cf.c_str(), "tunnel", "--protocol", "http2",
+                    "--url", url.c_str(), (char*)nullptr);
+        }
         _exit(127);
     }
     ::close(logfd);
@@ -890,7 +924,7 @@ static bool HostResolves(const std::string& host)
 static std::string HostQuickTunnel(const std::string& exe_path, int port)
 {
     std::string logpath, host;
-    if (!StartQuickTunnelProcs(exe_path, port, logpath)) return "";
+    if (!StartQuickTunnelProcs(exe_path, port, "", "", logpath)) return "";
     for (int i = 0; i < 80 && host.empty(); ++i) {
         host = PollTunnelUrl(logpath);
         if (host.empty()) { const struct timespec ts{0, 250'000'000}; ::nanosleep(&ts, nullptr); }
@@ -1989,21 +2023,35 @@ int main(int argc, char** argv)
                         ctx_relay_url.c_str(), room_id.c_str());
     }
 
-    // Phase 4.3: host a call over a Cloudflare quick tunnel. Spawn wf-relay +
+    // Phase 4.3: host a call over a Cloudflare tunnel. Spawn wf-relay +
     // cloudflared NOW (non-blocking) so the tunnel comes up while the window +
     // level load; the public host is resolved later by a responsive progress
     // loop (after the GL context is up) rather than blocking startup here. The
     // resolved wss:// host overrides any default relay above.
+    //
+    // Phase 3 (named tunnel): if identity has a `tunnel_token` + `tunnel_hostname`
+    // (or env overrides), use an authenticated named tunnel (rate-limit-free,
+    // stable hostname). Else fall back to the zero-config quick tunnel.
     std::string tunnel_share_link;
     std::string tunnel_logpath;        // cloudflared banner, polled by the loading loop
+    std::string tunnel_known_host;     // non-empty for the named-tunnel path (skip URL scrape)
     bool        tunnel_pending = false;
     if (host_tunnel) {
         if (room_id.empty()) room_id = "studio-" + std::to_string(::getpid() % 10000);
-        std::printf("wf-edit: starting quick tunnel for room '%s'…\n", room_id.c_str());
+        // Env overrides identity per-field.
+        std::string tok = identity.tunnel_token;
+        std::string hn  = identity.tunnel_hostname;
+        if (const char* e = std::getenv("WF_COLLAB_TUNNEL_TOKEN");    e && *e) tok = e;
+        if (const char* e = std::getenv("WF_COLLAB_TUNNEL_HOSTNAME"); e && *e) hn  = e;
+        const bool named = !tok.empty() && !hn.empty();
+        std::printf("wf-edit: starting %s tunnel for room '%s'…\n",
+                    named ? "named" : "quick", room_id.c_str());
         std::fflush(stdout);
-        tunnel_pending = StartQuickTunnelProcs(argv[0], 9900, tunnel_logpath);
+        tunnel_pending = StartQuickTunnelProcs(argv[0], 9900, tok, hn, tunnel_logpath);
         if (!tunnel_pending)
-            std::fprintf(stderr, "wf-edit: quick tunnel failed to start — no relay\n");
+            std::fprintf(stderr, "wf-edit: tunnel failed to start — no relay\n");
+        else if (named)
+            tunnel_known_host = hn;    // skip URL scrape; the host is fixed
     }
 
     // 0. Read-only Y.Doc (M4): shell out to `levtree parse`, build a wfcrdt::Doc
@@ -2339,7 +2387,9 @@ int main(int argc, char** argv)
     // takes to come up.
     if (tunnel_pending) {
         const double t0 = glfwGetTime();
-        std::string host;
+        // Named-tunnel path: hostname is known up front (skip the URL-scrape
+        // phase); the Registered+grace+resolve gates still run as the safety net.
+        std::string host = tunnel_known_host;
         bool   registered = false;
         double reg_t = 0, last_check = 0;
         bool   resolved = false;

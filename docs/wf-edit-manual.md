@@ -357,6 +357,44 @@ colour) in the Collaborators panel. Edits you make on one — drag the move/rota
 gizmo, change a field — sync live to the other through the same `wss://` relay;
 voice/video go peer-to-peer (DTLS-SRTP) or via a configured TURN (see below).
 
+#### Named tunnel — durable, rate-limit-free, stable hostname
+
+Account-less quick tunnels are throttled by Cloudflare per source IP, and the
+`*.trycloudflare.com` host changes every session. If you have a Cloudflare
+account and a domain, you can host through an **authenticated named tunnel**
+instead — no rate limit, and a hostname you pick stays the same forever. The
+zero-config quick tunnel remains the default; this is purely opt-in.
+
+**One-time setup on the host machine:**
+
+1. **Cloudflare Zero Trust → Networks → Tunnels → Create a tunnel.** (Free tier
+   is enough.) Give it any name (e.g. `wf-host`).
+2. Save the connector **token** that Cloudflare shows you.
+3. In the tunnel's **Public Hostname** tab, add a route:
+   - **Subdomain / domain:** `wf.<your-domain>` (Cloudflare creates the DNS
+     CNAME automatically).
+   - **Service:** `http://localhost:9900` (the `wf-relay` port).
+4. Put the token + hostname in `~/.config/wf-edit/identity.json` on the host:
+
+   ```json
+   {
+     "tunnel_token":    "<paste the token>",
+     "tunnel_hostname": "wf.your-domain"
+   }
+   ```
+
+   (Or set `WF_COLLAB_TUNNEL_TOKEN` / `WF_COLLAB_TUNNEL_HOSTNAME` in the env for
+   a one-off run — env wins per-field.)
+
+That's it. Next time you **Host a call**, the editor uses your named tunnel: the
+loading panel skips the *Establishing* phase (the hostname is fixed), the share
+link looks like `wfedit+s://wf.your-domain/r/<room>`, and there's no rate
+limit. The joiner side doesn't change — they just paste the link.
+
+Empty / missing config → automatic fall-back to the quick tunnel; if the named
+tunnel fails to register (bad token, wrong ingress), it fails loudly with the
+cloudflared log instead of silently downgrading.
+
 #### Trying it on one machine (testing)
 
 For two editors **on the same machine** you must give them distinct config dirs,
