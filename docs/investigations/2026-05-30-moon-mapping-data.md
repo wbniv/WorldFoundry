@@ -167,6 +167,19 @@ piece of Moon you can walk on" in one level. Tier 1 (global) is a streaming
 terrain system, much bigger build. Tier 3 (sub-meter) needs a custom
 photogrammetry pipeline and is research-grade.
 
+### Update 2026-05-31 — Tier 2 shipped
+
+PGDA Site 01 (Connecting Ridge) is now a walkable level — see
+[`wflevels/moon_site01/`](../../wflevels/moon_site01/) and `task run-moon`.
+1 km × 1 km play area at 10 m terrain sampling, 1024² NAC + DEM-hillshade
+composite texture, 1.8 m astronaut at lunar gravity. Engine work along the
+way: [runtime VRAM CLI overrides](../plans/2026-05-30-runtime-vram-cli-overrides.md),
+[UV int16 widening](../plans/2026-05-30-uv-int16-widening.md), and
+[disabling snowgoons' inherited Earth fog](../plans/2026-05-31-uninitialised-fog-defaults.md)
+so the vista actually renders cleanly. The (a) Blender-mesh / static-collider
+path described above is what shipped; (b) generic heightfield asset remains
+deferred to Tier 1.
+
 ## Sources
 
 - [LOLA global DEM 118 m (USGS Astropedia)](https://astrogeology.usgs.gov/search/map/moon_lro_lola_dem_118m)
