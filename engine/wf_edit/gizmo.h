@@ -45,4 +45,15 @@ void CommitGizmoToDoc(wfcrdt::Doc& doc, int doc_index, const float model_gl[16])
 // (docs/plans/2026-05-30-a-e-b-…md §B).
 bool GetCameraPoseWS(float pos[3], float fwd[3], float up[3]);
 
+// Build the editor's view + projection matrices without an actor model — the
+// peer-cursor renderer calls this once per frame, then projects each peer's
+// cursor data with its own ProjectToScreen calls. Same matrices BuildGizmoMats
+// uses (column-major GL float[16]). Returns false if no live level/camera.
+bool BuildViewProj(float fbw, float fbh, float view[16], float proj[16]);
+
+// Get the live engine actor's world-space position. engine_idx is 1-based
+// (wfmut::ActorIdx). Returns false if no actor. Float-only API for the
+// peer-cursor renderer in main.cc.
+bool GetActorWorldPos(int engine_idx, float out[3]);
+
 }  // namespace wfedit

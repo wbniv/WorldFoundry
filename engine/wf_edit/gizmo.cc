@@ -70,23 +70,39 @@ void Mat4PerspectiveGL(float fovDegY, float aspect, float nz, float fz, float ou
 
 namespace wfedit {
 
-GizmoMats BuildGizmoMats(int engine_idx, float fbw, float fbh)
+bool BuildViewProj(float fbw, float fbh, float view[16], float proj[16])
 {
-    GizmoMats g;
-    if (!theLevel || !theLevel->camera() || engine_idx < 1 || fbh <= 0.0f)
-        return g;  // valid stays false
-
+    if (!theLevel || !theLevel->camera() || fbh <= 0.0f) return false;
     // VIEW = inverse of the camera's world transform (the engine's
     // _invertedPosition; camera.cc:206 does exactly this then feeds it through
     // Matrix34ToFloat16).
     const Matrix34& camWorld = theLevel->camera()->GetRenderCamera().GetPosition();
     Matrix34 inv;
     inv.Inverse(camWorld);
-    Matrix34ToGL(inv, g.view);
-
+    Matrix34ToGL(inv, view);
     // PROJECTION — the exact params the editor sets on resize (main.cc
     // RendererBackendGet().SetProjection(60, fbw/fbh, 1, 1000)).
-    Mat4PerspectiveGL(60.0f, fbw / fbh, 1.0f, 1000.0f, g.proj);
+    Mat4PerspectiveGL(60.0f, fbw / fbh, 1.0f, 1000.0f, proj);
+    return true;
+}
+
+bool GetActorWorldPos(int engine_idx, float out[3])
+{
+    if (!theLevel || engine_idx < 1) return false;
+    std::optional<Vector3> p = wfmut::GetActorPos(*theLevel, engine_idx);
+    if (!p) return false;
+    out[0] = (float)p->X();
+    out[1] = (float)p->Y();
+    out[2] = (float)p->Z();
+    return true;
+}
+
+GizmoMats BuildGizmoMats(int engine_idx, float fbw, float fbh)
+{
+    GizmoMats g;
+    // VIEW + PROJ — same matrices the peer-overlay renderer uses.
+    if (!BuildViewProj(fbw, fbh, g.view, g.proj) || engine_idx < 1)
+        return g;  // valid stays false
 
     // MODEL — actor world transform (rotation + translation) so the rotate rings
     // display at the actor's current orientation.

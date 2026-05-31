@@ -1074,6 +1074,146 @@ static void RunOpenBrowserModal(EditorCtx* c)
     ImGui::EndPopup();
 }
 
+// Shared cursors b2: project a world-space point through view+proj into
+// top-left-origin screen pixels for ImGui. Returns false if the point lies
+// behind the near plane (clip.w <= 0), in which case the caller skips the draw.
+// Matrices are column-major GL (matches BuildViewProj's output).
+static bool world_to_screen(const float v[16], const float p[16],
+                            float fbw, float fbh,
+                            const float w[3], float* sx, float* sy)
+{
+    // viewSpace = view * (w, 1).  GL view[16] is column-major: element [col*4 + row].
+    auto m4xv4 = [](const float m[16], const float in[4], float out[4]) {
+        for (int r = 0; r < 4; ++r) {
+            out[r] = m[ 0 + r] * in[0]
+                   + m[ 4 + r] * in[1]
+                   + m[ 8 + r] * in[2]
+                   + m[12 + r] * in[3];
+        }
+    };
+    float w4[4] = { w[0], w[1], w[2], 1.0f };
+    float vs[4], cs[4];
+    m4xv4(v, w4, vs);
+    m4xv4(p, vs, cs);
+    if (cs[3] <= 0.0001f) return false;        // behind near plane / degenerate
+    const float ndx = cs[0] / cs[3];
+    const float ndy = cs[1] / cs[3];
+    *sx = (ndx * 0.5f + 0.5f) * fbw;
+    *sy = (1.0f - (ndy * 0.5f + 0.5f)) * fbh;   // y-flip for top-left origin
+    return true;
+}
+
+// Shared cursors b2: draw each remote peer's selection ring + camera frustum
+// on the foreground drawlist. True no-op when peer_presence is empty.
+// (docs/plans/2026-05-31-shared-cursors-b2-viewport-rings-frustums.md)
+static void RenderPeerOverlay(EditorCtx* c, float fbw, float fbh)
+{
+    if (!c) return;
+    // Debug aid: WF_EDIT_FAKE_PEER injects a synthetic peer with a fixed cam
+    // pose + the first actor selected, so a screenshot of a single editor can
+    // verify the ring + frustum render path without needing a live relay +
+    // two-editor setup. Cleaned up at session end; not for production.
+    static bool s_fake_logged = false;
+    if (std::getenv("WF_EDIT_FAKE_PEER") && !c->actor_eids.empty()) {
+        auto& fp = c->peer_presence["fake-peer-screenshot"];
+        fp.name = "Alice (fake)";
+        fp.colour[0] = 1.0f; fp.colour[1] = 0.55f; fp.colour[2] = 0.2f;
+        // Pick an actor at index ~middle so it's likely in view.
+        const size_t pick = c->actor_eids.size() / 2;
+        fp.selected_eid = c->actor_eids[pick];
+        fp.last_seen = 1e18;                       // never evict
+        // Camera off to the side and slightly up, looking back toward origin.
+        // WF basis: +X forward, +Y left, +Z up — but for the fake we pick any
+        // orthonormal triple; the receiver re-derives right = fwd × up.
+        fp.cam_pos[0] =  8.f;  fp.cam_pos[1] = 8.f; fp.cam_pos[2] = 5.f;
+        fp.cam_fwd[0] = -0.7f; fp.cam_fwd[1] =-0.7f; fp.cam_fwd[2] = 0.f;
+        fp.cam_up [0] =  0.f;  fp.cam_up [1] =  0.f; fp.cam_up [2] = 1.f;
+        fp.has_cam = true;
+        if (!s_fake_logged) { s_fake_logged = true; std::fprintf(stderr, "[b2] WF_EDIT_FAKE_PEER injected\n"); }
+    }
+    if (c->peer_presence.empty()) return;
+    float view[16], proj[16];
+    if (!wfedit::BuildViewProj(fbw, fbh, view, proj)) return;
+
+    // EID → 0-based doc index, built once per frame.
+    std::unordered_map<std::string, int> doc_idx_by_eid;
+    doc_idx_by_eid.reserve(c->actor_eids.size());
+    for (size_t i = 0; i < c->actor_eids.size(); ++i)
+        if (!c->actor_eids[i].empty())
+            doc_idx_by_eid.emplace(c->actor_eids[i], static_cast<int>(i));
+
+    ImDrawList* dl = ImGui::GetForegroundDrawList();
+
+    for (const auto& [pid, ps] : c->peer_presence) {
+        const ImU32 col = IM_COL32(
+            (int)(ps.colour[0] * 255.f),
+            (int)(ps.colour[1] * 255.f),
+            (int)(ps.colour[2] * 255.f),
+            255);
+
+        // Selection ring on the peer's currently-selected actor.
+        if (!ps.selected_eid.empty()) {
+            auto it = doc_idx_by_eid.find(ps.selected_eid);
+            if (it != doc_idx_by_eid.end()) {
+                const int eidx = wfedit::DocActorToEngineIdx(it->second);
+                float wpos[3];
+                float sx, sy;
+                if (eidx > 0 && wfedit::GetActorWorldPos(eidx, wpos)
+                    && world_to_screen(view, proj, fbw, fbh, wpos, &sx, &sy))
+                {
+                    dl->AddCircle(ImVec2(sx, sy), 14.0f, col, 16, 2.5f);
+                    // Tiny name tag floats above the ring.
+                    dl->AddText(ImVec2(sx + 16.f, sy - 10.f), col, ps.name.c_str());
+                }
+            }
+        }
+
+        // Camera frustum: apex at cam_pos, 4 far-plane corners.
+        if (ps.has_cam) {
+            // right = fwd × up   (assumes fwd, up are roughly orthonormal — they
+            // come from a Matrix34's rows, so this is the engine's own basis).
+            const float fwd[3] = { ps.cam_fwd[0], ps.cam_fwd[1], ps.cam_fwd[2] };
+            const float up [3] = { ps.cam_up [0], ps.cam_up [1], ps.cam_up [2] };
+            const float right[3] = {
+                fwd[1] * up[2] - fwd[2] * up[1],
+                fwd[2] * up[0] - fwd[0] * up[2],
+                fwd[0] * up[1] - fwd[1] * up[0],
+            };
+            const float far_d = 8.0f, side = 3.0f;
+            const float apex[3] = { ps.cam_pos[0], ps.cam_pos[1], ps.cam_pos[2] };
+            float corners[4][3];
+            for (int i = 0; i < 4; ++i) {
+                const float sx_ = (i & 1) ? +side : -side;
+                const float sy_ = (i & 2) ? +side : -side;
+                corners[i][0] = apex[0] + fwd[0] * far_d + right[0] * sx_ + up[0] * sy_;
+                corners[i][1] = apex[1] + fwd[1] * far_d + right[1] * sx_ + up[1] * sy_;
+                corners[i][2] = apex[2] + fwd[2] * far_d + right[2] * sx_ + up[2] * sy_;
+            }
+            float ax, ay;
+            const bool apex_ok = world_to_screen(view, proj, fbw, fbh, apex, &ax, &ay);
+            float cx[4], cy[4];
+            bool  corner_ok[4];
+            int   any_corner = 0;
+            for (int i = 0; i < 4; ++i) {
+                corner_ok[i] = world_to_screen(view, proj, fbw, fbh, corners[i], &cx[i], &cy[i]);
+                if (corner_ok[i]) ++any_corner;
+            }
+            if (apex_ok && any_corner > 0) {
+                for (int i = 0; i < 4; ++i)
+                    if (corner_ok[i])
+                        dl->AddLine(ImVec2(ax, ay), ImVec2(cx[i], cy[i]), col, 1.5f);
+                // Close the far quad (0-1, 1-3, 3-2, 2-0) — bit ordering picked
+                // above so these pairs trace the far rectangle's perimeter.
+                const int edges[4][2] = { {0,1}, {1,3}, {3,2}, {2,0} };
+                for (auto& e : edges)
+                    if (corner_ok[e[0]] && corner_ok[e[1]])
+                        dl->AddLine(ImVec2(cx[e[0]], cy[e[0]]),
+                                    ImVec2(cx[e[1]], cy[e[1]]), col, 1.5f);
+            }
+        }
+    }
+}
+
 // Build phase (EditorBuildCallback): called by WFGame::RunEditor at the TOP of
 // each iteration, BEFORE StepFrame. We poll input, apply any pending Doc edits
 // to the live engine (the bridge drain), and build the ImGui UI — so the
@@ -1720,6 +1860,11 @@ bool editor_build(void* p)
             c->gizmo_active = false;   // selection/level lost mid-drag — drop cleanly
         }
     }
+
+    // Shared cursors b2: draw each remote peer's selection ring + camera frustum
+    // on the foreground drawlist (same surface ImGuizmo uses). True no-op when
+    // peer_presence is empty.
+    RenderPeerOverlay(c, float(c->fb_w), float(c->fb_h));
 
     // Collaborators panel (voice + video; only when a room is active).
     if (c->collab)
