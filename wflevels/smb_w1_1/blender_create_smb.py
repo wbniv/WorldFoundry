@@ -1102,11 +1102,12 @@ if player:
     # 60/(0.85*30) ≈ 2.35 m/s was far too slow — Mario fell ~5 m short of brick_1up
     # on the entry_pipe→brick→pipe_64 hop. Max Ground Speed is NOT the limiter once it
     # exceeds the steady value, so prior MaxGroundSpeed bumps (6→12→24→32) were inert.
-    # Trajectory traces: a launch of ~9.3-9.6 m/s lands ON the brick (X 84.75-86.25, top
-    # Z=7.5); ~8.5 m/s passes UNDER it (bottom Z=6.0). 60/(0.20*30) = 10.0 m/s top, so the
-    # 3 m pipe-top runway builds ~9.3 m/s at the edge — inside the brick-landing window. From
-    # the brick a jump easily clears the 4T pipe_64. docs/plans/2026-05-31-smb-tall-pipe-hop-physics.md.
-    player['wf_Running Deceleration']  = 0.20
+    # Trajectory traces: a launch of ~9-10 m/s lands ON the brick (X 84.75-86.25, top Z=7.5);
+    # ~8.5 m/s passes UNDER it (bottom Z=6.0); ~10.5+ overshoots. 60/(0.18*30) = 11.1 m/s top,
+    # so the 3 m pipe-top runway can build ~9.5-10 m/s — but jumping too early stays short and
+    # too late overshoots, so the hop is achievable with practice, not first-try (design intent:
+    # somewhat difficult, never impossible). docs/plans/2026-05-31-smb-tall-pipe-hop-physics.md.
+    player['wf_Running Deceleration']  = 0.18
     player['wf_Max Ground Speed']      = 32.0
     player['wf_Jumping Acceleration']  = 60.0
     player['wf_Falling Acceleration']  = 12.0

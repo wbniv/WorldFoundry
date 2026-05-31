@@ -85,7 +85,7 @@ def launch(x, z, vx, vz, settle=1.6):
 # let camera settle on spawn, then dwell so the recording has lead-in
 time.sleep(1.5)
 print("HOP A: pipe edge -> brick")
-ax, az, ap = launch(PIPE_EDGE_X, PIPE_Z, 9.4, JUMP_VZ, settle=1.8)
+ax, az, ap = launch(PIPE_EDGE_X, PIPE_Z, 10.0, JUMP_VZ, settle=1.8)
 print(f"  -> X={ax:.2f} Z={az:.2f} peak={ap:.2f}")
 time.sleep(1.2)
 print("HOP B: brick -> over pipe_64")

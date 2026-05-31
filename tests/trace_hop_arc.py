@@ -85,7 +85,7 @@ def trace(vx):
     fx, fz = g(X_POS), g(Z_POS)
     print(f"  FINAL X={fx:.2f} Z={fz:.2f}")
 
-for vx in (8.0, 8.6, 9.2):
+for vx in (8.5, 9.0, 9.5, 10.0, 10.5, 11.0):
     trace(vx)
 
 cli.inject_input(slot="joystick1_raw", value=0, duration_frames=1)

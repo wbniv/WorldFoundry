@@ -84,7 +84,7 @@ So the brick is solid and reachable; the landing window is ~**9.0–10.0 m/s** l
 
 In [`blender_create_smb.py`](../../wflevels/smb_w1_1/blender_create_smb.py) player block (~line 1101):
 
-- `wf_Running Deceleration`: **0.85 → 0.20** (raises steady ground/air speed ~2.35 → **10.0 m/s**; measured 8.99 m/s at 0.22). 10.0 m/s top → the 3 m pipe-top runway builds ~9.3 m/s at the edge, inside the brick-landing window.
+- `wf_Running Deceleration`: **0.85 → 0.18** (raises steady ground/air speed ~2.35 → **11.1 m/s**; measured 8.99 m/s at 0.22, so model is accurate). At 0.20 (top 9.0) the brick needed *near-max* speed — a knife-edge leaning toward impossible. 0.18 gives headroom so a well-timed jump lands it while too-early (short) / too-late (overshoot) miss — **achievable with practice, not first-try** (design intent per user: somewhat difficult, never impossible).
 - Fix the stale `Horiz Air Drag` comment (the sustain branch keeps held-RIGHT momentum; the knob only bites on released frames).
 - Leave geometry, jump accel, gravity, `Max Ground Speed` untouched.
 

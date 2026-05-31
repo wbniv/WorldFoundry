@@ -887,7 +887,7 @@
 		{ 'STR' { 'NAME' "Object To Follow" } { 'STR' "" } }
 		{ 'STR' { 'NAME' "Follow Offset" } { 'STR' "" } }
 		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 60.0000000000000000(1.15.16) } { 'STR' "60.0" } }
-		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.2000000000000000(1.15.16) } { 'STR' "0.2" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.1800000000000000(1.15.16) } { 'STR' "0.18" } }
 		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 32.0000000000000000(1.15.16) } { 'STR' "32.0" } }
 		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Crawling Acceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
