@@ -71,6 +71,11 @@ tasks:
       - ./cmake-build-editor/engine/crdt/wfcrdt_smoke
       - ./cmake-build-editor/engine/crdt/wfcrdt_wrapper_test
 
+  build-pilot-runner:
+    desc: "Build the C++ PILOT bridge runner (Phase 3 — replaces Python pilot_driver.py for engine-tier scenarios)"
+    cmds:
+      - bash engine/build_bridge_runner.sh
+
   build-wf-edit:
     desc: "Build the wf-edit GUI editor binary (WebRTC voice/video collab). First run: task dev-setup-editor."
     deps: [vendor-unpack]

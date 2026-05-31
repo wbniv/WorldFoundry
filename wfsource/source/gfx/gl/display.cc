@@ -788,7 +788,20 @@ Display::MeasureDelta()
     struct timeval deltatime;
     deltatime.tv_usec = tv.tv_usec - _clockLastTime.tv_usec;
     deltatime.tv_sec = tv.tv_sec - _clockLastTime.tv_sec;
-    assert(deltatime.tv_sec < 5);               // if more than 5 seconds something is really wrong
+    // Game mode: a ≥5 s frame gap genuinely is catastrophic (the world would
+    // jump huge amounts while the player stared at a frozen screen), so keep
+    // the loud assert. Editor mode: stalls are routine (ASan, Doc-apply, the
+    // remote-SYNC apply hot path, debugging breakpoints) — warn and clamp like
+    // the > 0.2 s case below, so the editor survives stalls of any length.
+    extern bool gEditorMode;   // game/main.cc — set true under --editor
+    if (!gEditorMode) {
+        assert(deltatime.tv_sec < 5);
+    } else if (deltatime.tv_sec >= 5) {
+        std::cout << "editor: large frame stall (" << deltatime.tv_sec
+                  << " s), clamping" << std::endl;
+        deltatime.tv_sec  = 4;
+        deltatime.tv_usec = 999999;
+    }
     int tempCounter = 0;
     while(deltatime.tv_usec < 0)
     {

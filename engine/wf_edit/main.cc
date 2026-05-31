@@ -68,6 +68,8 @@
 #include <netdb.h>
 #include <csignal>
 #include <ctime>
+#include <exception>
+#include <execinfo.h>
 #include <fcntl.h>
 
 // Provided by the engine's platform layer (mirrors the host-GL e2e harness).
@@ -1922,8 +1924,40 @@ static int RunTurnTest()
     return fails == 0 ? 0 : 1;
 }
 
+// Make `terminate called without an active exception` self-diagnosing — libstdc++
+// otherwise gives no clue what triggered it (unhandled exception, noexcept throw,
+// joinable thread destroyed without join, …). On terminate, rethrow + catch the
+// active exception (if any) and dump a backtrace before letting the process die.
+// Pure diagnostic; zero cost when nothing terminates.
+static void TerminateHandler()
+{
+    std::fprintf(stderr, "\n=== wf-edit: std::terminate fired ===\n");
+    if (std::exception_ptr ep = std::current_exception()) {
+        try {
+            std::rethrow_exception(ep);
+        } catch (const std::exception& e) {
+            std::fprintf(stderr, "  active std::exception: %s\n", e.what());
+        } catch (...) {
+            std::fprintf(stderr, "  active exception: (non-std::exception)\n");
+        }
+    } else {
+        std::fprintf(stderr, "  no active exception "
+                     "(likely joinable std::thread destroyed without join, "
+                     "or noexcept function throwing)\n");
+    }
+    void* frames[64];
+    const int n = ::backtrace(frames, 64);
+    std::fprintf(stderr, "  backtrace (%d frames):\n", n);
+    ::backtrace_symbols_fd(frames, n, STDERR_FILENO);
+    std::fprintf(stderr, "=== aborting ===\n");
+    std::fflush(stderr);
+    std::abort();
+}
+
 int main(int argc, char** argv)
 {
+    std::set_terminate(TerminateHandler);
+
     // Headless TURN/ICE self-test — needs no level, GL, or args. Must run before
     // any window/engine setup.
     if (const char* p = std::getenv("WF_EDIT_TURN_TEST"); p && *p)

@@ -238,6 +238,12 @@ encounter them while implementing the arcade port.
 - [ ] WAMR Phase 3 — w2c2 AOT backend; deferred until Phase 2 lands — [plan](docs/plans/2026-04-14-wamr-dev-aot-ship.md)
 
 
+## BUILD SYSTEM
+
+- [investigated] C++ exception-usage audit (2026-05-30) — first first-party `<exception>` include is the editor's `set_terminate` handler, correctly scoped (editor only, parallel to the `-fno-rtti` policy); engine source proper is exception-free as expected. Surfaced one follow-up (next bullet). — [plan](docs/plans/2026-05-27-c-exception-usage-audit-refine-the-delta-too-large.md) [investigation](docs/investigations/2026-05-30-cpp-exceptions-audit.md)
+- [ ] **`engine/stubs/debug_server.cc:141` `try { std::stod } catch (...)` lives in a `-fno-exceptions` target.** `debug_server.cc` is appended to `WF_SOURCES` ([`CMakeLists.txt:583`](CMakeLists.txt), gated on `WF_DEBUG_BRIDGE`, default ON desktop). `wfengine` carries `-fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables` in Release-Clang ([`CMakeLists.txt:701`](CMakeLists.txt)). Clang compiles `try`/`catch(...)` under `-fno-exceptions` with a warning rather than an error, so the bridge has likely been quietly shipped exception-free (i.e. `std::stod` failures slip past the `catch(...)`). Easiest fix: switch to `std::strtod` (`errno`-based, doesn't throw). One-liner. Surfaced by the [2026-05-30 exception-usage audit](docs/investigations/2026-05-30-cpp-exceptions-audit.md).
+
+
 ## DONE
 
 - [x] Multi-step cube cycles — L1/L3 single-hop (0→2 +25); L2 two-hop (0→1→2 +25+50, done→revert 0); L4 two-hop (done→revert 1) — [plan](docs/plans/2026-05-14-qbert-multi-step-cube-cycles.md)

@@ -1,6 +1,6 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-05-26  
+**As of:** 2026-05-30  
 **Branch:** `2026-new-level`
 
 ---
@@ -8,6 +8,8 @@
 ## History
 
 49 days of work (2026-04-12 – 2026-05-30). Newest first:
+
+- **`wf-edit` survives long frame stalls + self-diagnosing `terminate` (2026-05-30)** — The engine no longer aborts on the >5 s frame-delta `assert` in editor mode (a `gEditorMode` gate at [`display.cc:791`](wfsource/source/gfx/gl/display.cc) now warns and clamps like the existing >0.2 s path, since stalls under ASan + Doc-apply are routine) and an `engine/wf_edit/main.cc` `std::set_terminate` handler prints the active exception's `what()` plus an `<execinfo.h>` backtrace before `abort()`-ing — so the next `terminate called without an active exception` won't be opaque; the audit that scoped the new `<exception>` include confirms it's the first first-party use of the header and editor-only, parallel to the `-fno-rtti` policy. STOP/CONT smoke verified the editor lives through a 6 s frame gap. See [plan](docs/plans/2026-05-30-delta-too-large.md), [audit](docs/investigations/2026-05-30-cpp-exceptions-audit.md).
 
 - **`wf-edit` Host-a-call — opt-in named tunnel (rate-limit-free, stable hostname) (2026-05-30)** — Adds an authenticated Cloudflare named tunnel as an opt-in alternative to the zero-config quick tunnel: when `tunnel_token` + `tunnel_hostname` are set (in `identity.json` or `WF_COLLAB_TUNNEL_TOKEN` / `WF_COLLAB_TUNNEL_HOSTNAME` env, env wins per-field), `StartQuickTunnelProcs` runs `cloudflared tunnel run --token <…>` instead of `--url …`, the loading loop pre-seeds the known host so it skips the *Establishing* phase, and the share link uses the host's stable hostname (e.g. `wfedit+s://wf.you.example/r/<room>`) — no rate limit, no ephemeral subdomain. Joiner side unchanged. Quick-tunnel regression verified (no token set → `starting quick tunnel` → connects). One-time CF Zero Trust setup recipe added to [the manual](docs/wf-edit-manual.md#named-tunnel--durable-rate-limit-free-stable-hostname). See [plan](docs/plans/2026-05-30-quick-tunnel-named-tunnel.md).
 
