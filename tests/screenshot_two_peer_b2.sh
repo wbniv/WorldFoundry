@@ -41,13 +41,13 @@ done
 
 # Instance A — Alice, broadcasts an actor selection (WF_EDIT_AUTO_SELECT=5) so
 # she contributes a ring + frustum without any interactive click. Distinct
-# display name lets us recognise her in B's screenshot.
+# display name lets us recognise her in B's screenshot. Uses wf-edit's default
+# level (snowgoons-blender) — --level=qbert_practice.iff triggers an unrelated
+# engine-side assertion.
 XDG_CONFIG_HOME=/tmp/b2-alice WF_EDIT_AUTO_SELECT=5 \
 DISPLAY=:0 "$WFEDIT" --relay=ws://127.0.0.1:$PORT --room=$ROOM --frames 240 \
     --screenshot "$SCREENSHOTS/wfedit_shared_cursors_b2_live_A.ppm" \
-    # Use wf-edit's default level (snowgoons-blender) — passing --level=
-    # for the qbert_practice.iff triggers a different engine-side assertion
-    # unrelated to the b2 verification. >/tmp/b2-A.log 2>&1 &
+    >/tmp/b2-A.log 2>&1 &
 A_PID=$!
 
 # Instance B — Bob, captures what Alice's overlay looks like from his viewport.
@@ -57,9 +57,7 @@ sleep 1.5
 XDG_CONFIG_HOME=/tmp/b2-bob \
 DISPLAY=:0 "$WFEDIT" --relay=ws://127.0.0.1:$PORT --room=$ROOM --frames 180 \
     --screenshot "$SCREENSHOTS/wfedit_shared_cursors_b2_live_B.ppm" \
-    # Use wf-edit's default level (snowgoons-blender) — passing --level=
-    # for the qbert_practice.iff triggers a different engine-side assertion
-    # unrelated to the b2 verification. >/tmp/b2-B.log 2>&1 &
+    >/tmp/b2-B.log 2>&1 &
 B_PID=$!
 
 # Both auto-exit at frame 200; we wait for them.
