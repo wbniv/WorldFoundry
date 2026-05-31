@@ -412,7 +412,39 @@ std::string ResolveEngineViewportLevel(const std::string& leveltree_arg, bool& o
     if (!has_sel) {
         // A bare binary .iff/.lvl is already a complete L<N> chunk (what -L wants);
         // a text .lev has no binary to render.
-        return IsBinaryLevel(base) ? base : std::string();
+        if (!IsBinaryLevel(base)) return std::string();
+        // …unless it's a multi-level .iff (e.g. wflevels/qbert_practice/qbert_practice.iff)
+        // whose engine-loadable single-level companion lives at <base>-standalone.iff.
+        // Try both same-dir and parent-dir variants (qbert ships both) before falling
+        // back to the input, which would otherwise trip plmc->tagRam at level.cc:426
+        // because the multi-level container isn't a complete L<N> chunk by itself.
+        auto strip_suffix = [](const std::string& s) -> std::string {
+            for (const char* suf : { ".iff", ".lvl" }) {
+                const size_t L = std::strlen(suf);
+                if (s.size() > L && s.compare(s.size() - L, L, suf) == 0)
+                    return s.substr(0, s.size() - L);
+            }
+            return s;
+        };
+        const std::string stem = strip_suffix(base);
+        if (stem.size() > 11 && stem.compare(stem.size() - 11, 11, "-standalone") == 0)
+            return base;   // already the standalone variant
+        // Candidate 1: same-dir sibling, e.g. wflevels/qbert/qbert.iff → wflevels/qbert/qbert-standalone.iff
+        const std::string same_dir = stem + "-standalone.iff";
+        if (access(same_dir.c_str(), R_OK) == 0) return same_dir;
+        // Candidate 2: parent-dir sibling, e.g. wflevels/qbert/qbert.iff → wflevels/qbert-standalone.iff
+        const auto slash = base.find_last_of('/');
+        if (slash != std::string::npos) {
+            const std::string parent_dir = base.substr(0, slash);
+            const auto pslash = parent_dir.find_last_of('/');
+            const std::string dirname  = (pslash == std::string::npos)
+                                        ? parent_dir : parent_dir.substr(pslash + 1);
+            const std::string parent_prefix = (pslash == std::string::npos)
+                                             ? std::string() : parent_dir.substr(0, pslash + 1);
+            const std::string up_one = parent_prefix + dirname + "-standalone.iff";
+            if (access(up_one.c_str(), R_OK) == 0) return up_one;
+        }
+        return base;   // no standalone variant found — try the raw input (may fail at the engine)
     }
 
     // cd.iff:<tag|index> — find the entry's byte offset, then slice its complete
