@@ -311,6 +311,74 @@ def _build_astronaut():
 
 _astronaut = _build_astronaut()
 
+
+def _build_artemis_lander():
+    """Starship HLS Artemis lander — primitive build at 1:1 real scale
+    (~47 m tall, ~9 m diameter). Joined into one mesh with the engine-mount
+    base at z=0. See docs/plans/2026-05-31-moon-artemis-lander.md."""
+    mat_white = _make_mat('lander_white', (0.92, 0.92, 0.92))
+    mat_dark  = _make_mat('lander_dark',  (0.20, 0.20, 0.22))
+
+    parts = []
+    SEG = 12   # smoother silhouette than the astronaut — this is a vehicle hull
+
+    def add_cyl(r, h, loc, mat):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=SEG, radius=r, depth=h, location=loc)
+        parts.append((bpy.context.object, mat))
+
+    def add_cone(r1, r2, h, loc, mat):
+        bpy.ops.mesh.primitive_cone_add(vertices=SEG, radius1=r1, radius2=r2, depth=h, location=loc)
+        parts.append((bpy.context.object, mat))
+
+    def add_cube(sx, sy, sz, loc, mat):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=loc)
+        obj = bpy.context.object
+        obj.scale = (sx, sy, sz)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((obj, mat))
+
+    # Engine-mount base (Starship HLS doesn't need a heat shield; this is the
+    # thrust-structure ring the Raptors hang from).
+    add_cyl(4.5, 2.0, (0.0, 0.0, 1.0), mat_dark)
+
+    # Three Raptor nozzles clustered at the base, ring radius 2.4 m.
+    for ang_deg in (0.0, 120.0, 240.0):
+        ang = math.radians(ang_deg)
+        add_cone(1.0, 0.55, 3.2,
+                 (2.4 * math.cos(ang), 2.4 * math.sin(ang), -0.6),
+                 mat_dark)
+
+    # Main body — the recognisable Starship cylinder, 36 m tall.
+    add_cyl(4.5, 36.0, (0.0, 0.0, 20.0), mat_white)
+
+    # Crew access door + ARTEMIS stripe — both on the −X face so they read
+    # from the vista camera (the lander sits at +X relative to player spawn,
+    # so its −X face points back toward the astronaut and camera).
+    add_cube(0.3, 1.8, 2.0, (-4.5, 0.0, 10.0), mat_dark)
+    add_cube(0.4, 9.0, 0.7, (-4.6, 0.0, 28.0), mat_dark)
+
+    # Nose cone — tip at z=47, base meets body top at z=38.
+    add_cone(4.5, 0.0, 9.0, (0.0, 0.0, 42.5), mat_white)
+
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for p in obj.data.polygons:
+            p.material_index = 0
+            p.use_smooth = True
+
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    body.name = 'artemis_lander'
+    body.data.name = 'artemis_lander'
+    return body
+
+
 player = find_by_class('player')
 if player:
     player.name = 'Player'
@@ -343,6 +411,21 @@ if player:
         "dup 16384 & 256 / over 8192 & 64 / | | "
         "INDEXOF_INPUT write-mailbox\n"
     )
+
+# ── 6b. Artemis lander (Starship HLS) ────────────────────────────────────────
+# Real actor, not background scenery — uses class 'platform' (movable actor),
+# Mobility='Anchored' for v1 so it sits still. Future launch sequence (v2) can
+# flip the mobility or drive position via script. See
+# docs/plans/2026-05-31-moon-artemis-lander.md.
+
+_lander = _build_artemis_lander()
+attach_schema(_lander, 'platform')
+_lander.location = (30.0, 25.0, 0.0)
+_lander['wf_Mobility']           = 'Anchored'
+_lander['wf_Model Type']         = 'Mesh'
+_lander['wf_Visibility Mailbox'] = 1
+print(f"[moon] lander mesh: {len(_lander.data.vertices)} verts, "
+      f"{len(_lander.data.polygons)} polys at {_lander.location[:]}")
 
 # ── 7. Camera ────────────────────────────────────────────────────────────────
 target = find_by_class('target')
