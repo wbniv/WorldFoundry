@@ -14,6 +14,12 @@
 
 ![interactive resize](screenshots/2026-05-31-moon-hud-resized-interactive.png)
 
+**No-regression check on other HUD-using levels** — same launch+xwd recipe against SMB W1-1 and qbert. Both render SCORE / TIME / LIVES at the correct corners, with no moon overlay leaking in (gated off on non-moon levels):
+
+| SMB W1-1 | Qbert |
+|---|---|
+| ![smb hud](screenshots/2026-05-31-smb-hud-regression-check.png) | ![qbert hud](screenshots/2026-05-31-qbert-hud-regression-check.png) |
+
 ## Context
 
 `wfWindowWidth` and `wfWindowHeight` are mutable globals (`int = 640/480` defaults in `wfsource/source/gfx/gl/display.cc:479-480`) used for *two completely different things*:
