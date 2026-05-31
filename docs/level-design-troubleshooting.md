@@ -348,6 +348,38 @@ looks colourful from one camera and gray from another, it's the camera. (2026-05
 snowgoons-blender investigation: the whole "untextured" symptom was `camshot_12`
 exporting as Fixed/Absolute instead of Track/Relative.)
 
+## "Vista camera renders flat mid-grey, chase camera looks fine" → snowgoons fog inheritance
+
+Sibling failure mode to the CamShot-toggle gotcha above, but the symptom is
+distance-dependent rather than camera-pose-dependent: zooming the camera out
+fades distant terrain to uniform `(135, 135, 135)`, while a close third-person
+shot looks textured. The cause is the **fog OAS fields on the `camera` actor**
+(`FoggingColor`, `FoggingStartDistance`, `FoggingCompleteDistance`,
+[`camera.oas`](../wfsource/source/oas/camera.oas)).
+
+Levels scaffolded by importing snowgoons inherit its Earth-fog defaults:
+`#888888` ramp 20 → 30 m. The engine reads these per-level at
+[`game/camera.cc:56-57`](../wfsource/source/game/camera.cc) and calls
+`SetFog` accordingly, so anything past 30 m fogs to flat mid-grey — and that
+mid-grey happens to be close to the `v_color × v_lit` value an
+unsuccessfully-textured primitive would render, so the symptom reads as
+"texture missing" rather than "fogged."
+
+Fix in the Blender level script (per-level data, no engine change):
+
+```python
+camera_actor['wf_FoggingColor']            = 0x000000   # match the sky
+camera_actor['wf_FoggingStartDistance']    = 999.0      # past the 1000 m
+camera_actor['wf_FoggingCompleteDistance'] = 1000.0     # far-clip plane
+```
+
+For airless settings (Moon, Mars, space) push past 1000 m and use sky-colour
+fog. For Earth-style hazy outdoor, tune the ramp to the level's actual view
+distance rather than leaving snowgoons' 20–30 m default. See
+[`wflevels/moon_site01/blender_create_moon.py`](../wflevels/moon_site01/blender_create_moon.py)
+for a vacuum template and [plans/2026-05-31-uninitialised-fog-defaults.md](plans/2026-05-31-uninitialised-fog-defaults.md)
+for the full debugging trace.
+
 ## A decompiled `.lev` enum field whose DATA and STR disagree is corrupt
 
 A `{ 'I32' { 'NAME' "Rotation" } { 'DATA' 0l } { 'STR' "Track" } }` is **invalid** —

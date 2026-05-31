@@ -624,6 +624,31 @@ fine — see [troubleshooting](level-design-troubleshooting.md). These toggles a
 `TYPEENTRYBOOLEANTOGGLE` enums; a `.lev` where their `DATA` and `STR` disagree is
 corrupt and now hard-fails on Blender import.
 
+#### Fog OAS fields — match your environment, don't inherit snowgoons'
+
+The `camera` actor carries three fog fields ([`camera.oas`](../wfsource/source/oas/camera.oas)):
+`FoggingColor`, `FoggingStartDistance`, `FoggingCompleteDistance`. The engine
+reads them per-level at [`game/camera.cc:56-57`](../wfsource/source/game/camera.cc)
+and calls the renderer's `SetFog`. The default values in the snowgoons scaffold
+are `#888888` ramp 20 → 30 m — tuned for an Earth-atmosphere chase-cam view of
+a small playable area; any pixel past 30 m fades to flat `#888888`.
+
+When you `bpy.ops.wf.import_level(SNOWGOONS)` to inherit infrastructure, find
+the `camera` actor and set the fog to match your *actual* setting:
+
+| Setting              | `FoggingColor` | `FoggingStartDistance` | `FoggingCompleteDistance` |
+|----------------------|---------------:|-----------------------:|--------------------------:|
+| Vacuum (Moon/Mars)   |     `0x000000` |                  999.0 |                    1000.0 |
+| Earth, hazy outdoor  |     `0x888888` |    half visible-extent |           visible-extent  |
+| Indoor / arcade      |     `0x000000` |                  999.0 |                    1000.0 |
+| Dust / haze planet   |   tint match   |                  ~50.0 |                    ~200.0 |
+
+Far-clip is 1000 m ([`gfx/gl/display.cc:307`](../wfsource/source/gfx/gl/display.cc)),
+so pushing `FoggingCompleteDistance` past 1000 m effectively disables fog. See
+[`wflevels/moon_site01/blender_create_moon.py`](../wflevels/moon_site01/blender_create_moon.py)
+for a vacuum template and [`level-design-troubleshooting.md`](level-design-troubleshooting.md#vista-camera-renders-flat-mid-grey-chase-camera-looks-fine--snowgoons-fog-inheritance)
+for the failure mode this prevents.
+
 #### EMAILBOX_CAMSHOT Bootstrap
 
 > **Correction (2026-05-25, verified):** an earlier version of this section claimed
