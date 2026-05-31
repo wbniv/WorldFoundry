@@ -65,6 +65,13 @@ struct FileLine
 	// (retVal + sizeof(FileLine)) inherits the block's alignment.
 	// With LMALLOC_TRACK_SIZE && !LMALLOC_TRACK_LINE_AND_FILE: _state(4)+_size(4)=8 ✓
 };
+
+// The total per-block debug overhead (header + canary reservation) must be a
+// multiple of WF_POINTER_ALIGN, so an already-aligned caller request stays
+// aligned — see Allocate(). Holds on every target: align==4 (ESP32) and
+// align==8 (64-bit hosts, AAPCS Cortex-M).
+static_assert((sizeof(FileLine) + ALIGN_POW2(sizeof(int32), WF_POINTER_ALIGN)) % WF_POINTER_ALIGN == 0,
+              "LMalloc debug overhead must be a multiple of WF_POINTER_ALIGN");
 #endif
 
 //==============================================================================
@@ -218,7 +225,13 @@ LMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 #if DO_ASSERTIONS
 #if LMALLOC_TRACK_SIZE
 	size += sizeof(FileLine);
-	size += sizeof(int32);		// canary sentinel
+	// Reserve the canary rounded up to WF_POINTER_ALIGN so the total debug
+	// overhead stays a multiple of the platform alignment — otherwise a bare
+	// 4-byte canary knocks an 8-aligned request off alignment and trips the
+	// "not N-byte aligned" warning below on our own bookkeeping. Using the
+	// platform constant (not a literal 8) keeps this byte-identical on 32-bit
+	// targets where WF_POINTER_ALIGN==4 (e.g. ESP32). See align.hp.
+	size += ALIGN_POW2(sizeof(int32), WF_POINTER_ALIGN);	// canary sentinel
 #endif
 #endif
 
