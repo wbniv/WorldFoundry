@@ -2318,6 +2318,13 @@ int main(int argc, char** argv)
             host_tunnel = true;
         else if (std::strncmp(argv[i], "--host-tunnel=", 14) == 0)
             { host_tunnel = true; room_id = argv[i] + 14; }
+        else if (argv[i][0] != '-' && argv[i][0] != '\0') {
+            // Positional argument — treat as the level (same as --leveltree=PATH).
+            // Pre-2026-05-31 unrecognised positional args were silently dropped, so
+            // `wf-edit … wflevels/foo/foo.iff` quietly fell back to the snowgoons
+            // default. Now matches the File→Open re-exec convention (line 782).
+            leveltree = argv[i];
+        }
     }
 
     // Phase 6: load persisted identity (peer_id, colour, recent rooms).
