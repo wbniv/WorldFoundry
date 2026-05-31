@@ -2932,10 +2932,17 @@ int main(int argc, char** argv)
                 while (glfwGetTime() < deadline && !ctx.relay_client.poll(frame))
                     pump(connecting_msg.c_str());
                 if (!frame.empty() && frame[0] == 0x01 && frame.size() > 1) {
-                    // Remote-origin apply — the initial peer state must not seed
-                    // our undo history.
-                    auto txn = doc.beginRemote();
-                    txn.apply(wfcrdt::ByteView{frame.data() + 1, frame.size() - 1});
+                    // Apply in its own scope so the yffi write txn commits before
+                    // ReadActorNames opens a read — yrs is single-writer, and a
+                    // freshly-opened Transaction's `raw()` returns NULL while the
+                    // outer one is still live, which makes `yarray_get(..., NULL, i)`
+                    // panic on `txn.as_ref().unwrap()`. Pre-2026-05-31 this nested
+                    // shape crashed every --relay session at the first SYNC. See
+                    // docs/plans/2026-05-31-fix-relay-frames-readactornames-crash.md
+                    {
+                        auto txn = doc.beginRemote();
+                        txn.apply(wfcrdt::ByteView{frame.data() + 1, frame.size() - 1});
+                    } // ← outer txn commits here, before the reads below
                     ctx.actor_names = wfedit::ReadActorNames(doc);
                     ctx.actor_eids  = wfedit::ReadActorEids(doc);
                 }
