@@ -32,6 +32,8 @@
 #include <math/matrix34.hp>
 #include <math/euler.hp>
 
+#include <atomic>
+
 #include "movecam.hp"
 #include "camshot.hp"
 #include "actor.hp"
@@ -174,6 +176,12 @@ LookUp
 
 Euler cameraEuler;            // kludge, rendcrow uses this to make scarecrows face the camera
 
+// Editor camera override: when true, CameraHandler::SetCamera skips its writes
+// so an external owner (wf-edit's Jump-to-view) can hold the camera at an
+// arbitrary pose without CamShot stomping on it every tick. Default false →
+// zero behaviour change in the game build. Set via wfmut::SetEditorCameraOverride.
+std::atomic<bool> gEditorCameraOverride{false};
+
 //=============================================================================
 // this allows all of the various handlers to have a single interface to the
 // object's camera position and orientation, using the cameraPosition struct
@@ -182,6 +190,11 @@ void
 CameraHandler::SetCamera(PhysicalObject& physicalObject, const cameraPosition& destCam)
 {
 #pragma message ("KTS: write field of view, hither and yon code")
+
+	// Editor override: skip writes when wf-edit holds the camera at a
+	// jumped-to-peer pose. The override owner is responsible for the writes.
+	if (gEditorCameraOverride.load(std::memory_order_relaxed))
+		return;
 
 	PhysicalAttributes& pa = physicalObject.GetWritablePhysicalAttributes();
 	pa.SetPosition(destCam.position);

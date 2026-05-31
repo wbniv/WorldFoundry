@@ -38,6 +38,7 @@
 #include "level_doc.h"
 #include "property_panel.h"
 #include "engine_bridge.h"
+#include "wfmut.hpp"                 // wfmut::SetEditorCameraOverride (Jump-to-view)
 #include "level_save.h"
 #include "wfcrdt.hpp"
 #include "collab_session.h"
@@ -345,6 +346,8 @@ struct EditorCtx {
     double last_presence_send = 0.0;
     float  our_colour[3] = {0.5f, 0.5f, 0.5f};   // set on relay connect from peer_id hash
     std::string display_name = "Editor";         // copied from identity.json at startup; broadcast as the peer "name"
+    bool   camera_override_active = false;       // true while wfmut::SetEditorCameraOverride is on — gates the "Follow CamShot" release button
+    bool   display_name_dirty     = false;       // set when Collaborate → Display name input fires; triggers SaveIdentity on shutdown
 
     // Phase 5: chat sidebar (only visible when relay is connected).
     struct ChatEntry {
@@ -410,6 +413,16 @@ void RefreshActorList(EditorCtx* c)
     c->actor_eids  = wfedit::ReadActorEids(*c->doc);
     if (c->selected >= static_cast<int>(c->actor_names.size()))
         c->selected = static_cast<int>(c->actor_names.size()) - 1;
+    // Dev/screenshot aid: WF_EDIT_AUTO_SELECT=N picks an actor index at startup
+    // so the b2 two-editor smoke can broadcast a selection ring without an
+    // interactive click. Applied once, only when nothing is selected yet.
+    if (c->selected < 0) {
+        if (const char* asel = std::getenv("WF_EDIT_AUTO_SELECT")) {
+            const int n = std::atoi(asel);
+            if (n >= 0 && n < static_cast<int>(c->actor_names.size()))
+                c->selected = n;
+        }
+    }
     c->fields_for = -1;          // force Properties to re-resolve on the next frame
 }
 
@@ -1130,6 +1143,18 @@ static void RenderPeerOverlay(EditorCtx* c, float fbw, float fbh)
         fp.cam_up [0] =  0.f;  fp.cam_up [1] =  0.f; fp.cam_up [2] = 1.f;
         fp.has_cam = true;
         if (!s_fake_logged) { s_fake_logged = true; std::fprintf(stderr, "[b2] WF_EDIT_FAKE_PEER injected\n"); }
+        // WF_EDIT_AUTO_JUMP=1: once the fake peer is up, simulate clicking
+        // Jump-to-view on it — proves the camera-override path in a single-
+        // instance screenshot. Idempotent. (B-leftovers plan §1 verification.)
+        static bool s_auto_jumped = false;
+        if (!s_auto_jumped && std::getenv("WF_EDIT_AUTO_JUMP")) {
+            if (wfedit::SetEditorCameraPose(fp.cam_pos, fp.cam_fwd, fp.cam_up)) {
+                wfmut::SetEditorCameraOverride(true);
+                c->camera_override_active = true;
+                std::fprintf(stderr, "[b2] WF_EDIT_AUTO_JUMP fired (cam snapped to fake peer)\n");
+            }
+            s_auto_jumped = true;
+        }
     }
     if (c->peer_presence.empty()) return;
     float view[16], proj[16];
@@ -1587,6 +1612,25 @@ bool editor_build(void* p)
                 ReExecHostTunnel(c);
             if (!can_host && ImGui::IsItemHovered())
                 ImGui::SetTooltip(c->collab ? "Already in a call" : "Open a level first");
+
+            // Display name — broadcast as the peer "name" in CH_PRESENCE JSON;
+            // persisted to identity.json on Enter. Editable mid-session.
+            ImGui::Separator();
+            static char s_dispname_buf[64] = {};
+            static bool s_dispname_init = false;
+            if (!s_dispname_init) {
+                std::strncpy(s_dispname_buf, c->display_name.c_str(),
+                             sizeof(s_dispname_buf) - 1);
+                s_dispname_init = true;
+            }
+            ImGui::SetNextItemWidth(160);
+            if (ImGui::InputText("Display name", s_dispname_buf, sizeof(s_dispname_buf),
+                                 ImGuiInputTextFlags_EnterReturnsTrue))
+            {
+                c->display_name = s_dispname_buf;
+                c->display_name_dirty = true;   // persisted on the next save path
+            }
+            ImGui::TextDisabled("   (Enter to apply; saved to identity.json)");
             ImGui::EndMenu();
         }
         if (c->collab && ImGui::BeginMenu("View")) {
@@ -1929,7 +1973,28 @@ bool editor_build(void* p)
                     ImGui::SameLine();
                     ImGui::TextDisabled("  cam (%.1f,%.1f,%.1f)",
                                         ps.cam_pos[0], ps.cam_pos[1], ps.cam_pos[2]);
+                    // Jump-to-view: snap local cam to peer's pose, hold via the
+                    // CamShot-suppress override. Push-button needs a unique ID
+                    // (peer_id) since labels collide across peers.
+                    ImGui::SameLine();
+                    ImGui::PushID(pid.c_str());
+                    if (ImGui::SmallButton("Jump")) {
+                        if (wfedit::SetEditorCameraPose(ps.cam_pos, ps.cam_fwd, ps.cam_up)) {
+                            wfmut::SetEditorCameraOverride(true);
+                            c->camera_override_active = true;
+                        }
+                    }
+                    ImGui::PopID();
                 }
+            }
+            // Release override → resume CamShot. Visible only when override is on.
+            if (c->camera_override_active) {
+                if (ImGui::SmallButton("Follow CamShot")) {
+                    wfmut::SetEditorCameraOverride(false);
+                    c->camera_override_active = false;
+                }
+                ImGui::SameLine();
+                ImGui::TextDisabled("(camera held; click to resume authored CamShot)");
             }
             ImGui::Separator();
         }
@@ -2946,6 +3011,17 @@ int main(int argc, char** argv)
         identity.gizmo_snap       = ctx.gizmo_snap;
         identity.gizmo_snap_trans = ctx.gizmo_snap_trans;
         identity.gizmo_snap_rot   = ctx.gizmo_snap_rot;
+        // Display name: persist if the user edited it via Collaborate menu.
+        // Strip the b1-fallback `Editor (xxxxxx)` decoration so identity.json
+        // round-trips back to the user's intent rather than the auto-tag.
+        if (ctx.display_name_dirty) {
+            identity.display_name = ctx.display_name;
+            // If user kept the fallback tag, strip it back to "Editor" so
+            // they re-tag fresh next session.
+            const std::string& dn = identity.display_name;
+            if (dn.rfind("Editor (", 0) == 0 && dn.back() == ')')
+                identity.display_name = "Editor";
+        }
         SaveIdentity(identity);
     }
 

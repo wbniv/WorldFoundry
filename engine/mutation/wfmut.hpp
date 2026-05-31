@@ -115,6 +115,15 @@ bool HasTemplate(const Level& level, int templateIdx);
 bool SetMailbox(Level& level, ActorIdx idx, int mailboxIndex, double value);
 std::optional<double> GetMailbox(const Level& level, ActorIdx idx, int mailboxIndex);
 
+// ── Editor camera override ──────────────────────────────────────────────────
+// When `active` is true, CameraHandler::SetCamera (the engine's CamShot tick)
+// becomes a no-op, so an external owner (wf-edit's Jump-to-view button) can
+// hold the camera at an arbitrary pose without CamShot stomping every frame.
+// The owner is responsible for the writes while the override is on. Flipping
+// back to false resumes authored-camera control immediately.
+// (docs/plans/2026-05-31-shared-cursors-b-leftovers.md §1)
+void SetEditorCameraOverride(bool active);
+
 } // namespace wfmut
 
 #else // neither WF_DEBUG_BRIDGE nor WF_ENABLE_EDITOR — lean builds: no-op stubs.
@@ -148,6 +157,8 @@ inline bool HasTemplate(const Level&, int) { return false; }
 
 inline bool SetMailbox(Level&, ActorIdx, int, double) { return false; }
 inline std::optional<double> GetMailbox(const Level&, ActorIdx, int) { return std::nullopt; }
+
+inline void SetEditorCameraOverride(bool) {}
 
 } // namespace wfmut
 

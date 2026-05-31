@@ -97,6 +97,28 @@ bool GetActorWorldPos(int engine_idx, float out[3])
     return true;
 }
 
+bool SetEditorCameraPose(const float pos[3], const float fwd[3], const float up[3])
+{
+    if (!theLevel || !theLevel->camera()) return false;
+    // Build a Matrix34 with rows matching what GetCameraPoseWS reads — row 0 =
+    // fwd, row 2 = up, row 3 = pos. Row 1 = right = fwd × up so the rotation
+    // is orthonormal. Inline the cross-product to avoid pulling another header.
+    const Vector3 v_fwd  ((Scalar)fwd[0], (Scalar)fwd[1], (Scalar)fwd[2]);
+    const Vector3 v_up   ((Scalar)up [0], (Scalar)up [1], (Scalar)up [2]);
+    const Vector3 v_right(
+        (Scalar)((double)fwd[1] * up[2] - (double)fwd[2] * up[1]),
+        (Scalar)((double)fwd[2] * up[0] - (double)fwd[0] * up[2]),
+        (Scalar)((double)fwd[0] * up[1] - (double)fwd[1] * up[0]));
+    const Vector3 v_pos  ((Scalar)pos[0], (Scalar)pos[1], (Scalar)pos[2]);
+    Matrix34 m;
+    m[0] = v_fwd;
+    m[1] = v_right;
+    m[2] = v_up;
+    m[3] = v_pos;
+    theLevel->camera()->SetCameraMatrix(m);
+    return true;
+}
+
 GizmoMats BuildGizmoMats(int engine_idx, float fbw, float fbh)
 {
     GizmoMats g;

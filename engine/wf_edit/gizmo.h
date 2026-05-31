@@ -56,4 +56,11 @@ bool BuildViewProj(float fbw, float fbh, float view[16], float proj[16]);
 // peer-cursor renderer in main.cc.
 bool GetActorWorldPos(int engine_idx, float out[3]);
 
+// Set the live engine camera's world pose directly (Jump-to-view target).
+// Float-only API for the same X11/Display reason GetCameraPoseWS exists.
+// Returns false if no live level/camera. Should be called with the wfmut
+// editor-camera-override flag turned on; otherwise CamShot will stomp the
+// pose on its next tick. See docs/plans/2026-05-31-shared-cursors-b-leftovers.md.
+bool SetEditorCameraPose(const float pos[3], const float fwd[3], const float up[3]);
+
 }  // namespace wfedit
