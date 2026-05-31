@@ -88,6 +88,8 @@ SMB_AT_PIPE  = 1809               # INDEXOF_SMB_AT_PIPE (mailbox.inc) — entry 
 SMB_COIN_0, SMB_COIN_1, SMB_COIN_2 = 1811, 1812, 1813   # coin-room coin visibility mailboxes (mailbox.inc)
 SMB_COIN_3, SMB_COIN_4, SMB_COIN_5, SMB_COIN_6 = 1846, 1847, 1848, 1849  # coins 3-6
 SMB_COIN_7, SMB_COIN_8, SMB_COIN_9 = 1850, 1851, 1852                     # coins 7-9
+SMB_COIN_10, SMB_COIN_11, SMB_COIN_12, SMB_COIN_13 = 1853, 1854, 1855, 1856  # coins 10-13
+SMB_COIN_14, SMB_COIN_15, SMB_COIN_16, SMB_COIN_17, SMB_COIN_18 = 1857, 1858, 1859, 1860, 1861  # coins 14-18
 # Fire Mario fireball globals (mailbox.inc 1820-1827). The generators' Activation
 # MailBox needs the literal index here (an OAS int field); scripts use INDEXOF_ names.
 SMB_FIREBALL_FIRE_R, SMB_FIREBALL_FIRE_L = 1823, 1824
@@ -1243,66 +1245,119 @@ if player:
         # coin-room coins: seed visible once, then proximity pickup. The Z test
         # (player z near -46) disambiguates the coin room from the surface, where
         # the same X range exists but z ~ 1.5. dup* = squared distance (no abs).
-        # 10 coins at T=1.5m intervals — faithful W1-1 underground row.
+        # 19 coins in 3 rows — faithful W1-1 layout (SMBDIS.ASM L_UndergroundArea3).
+        # Pickup is X-only per column; three stacked coins at the same column are
+        # all collected in the same pass (by design — no per-height check needed).
         "INDEXOF_SMB_COIN_INIT read-mailbox not if\n"
         "  1 INDEXOF_SMB_COIN_0 write-mailbox 1 INDEXOF_SMB_COIN_1 write-mailbox "
         "1 INDEXOF_SMB_COIN_2 write-mailbox\n"
         "  1 INDEXOF_SMB_COIN_3 write-mailbox 1 INDEXOF_SMB_COIN_4 write-mailbox "
         "1 INDEXOF_SMB_COIN_5 write-mailbox\n"
         "  1 INDEXOF_SMB_COIN_6 write-mailbox 1 INDEXOF_SMB_COIN_7 write-mailbox "
-        "1 INDEXOF_SMB_COIN_8 write-mailbox 1 INDEXOF_SMB_COIN_9 write-mailbox\n"
+        "1 INDEXOF_SMB_COIN_8 write-mailbox\n"
+        "  1 INDEXOF_SMB_COIN_9 write-mailbox 1 INDEXOF_SMB_COIN_10 write-mailbox "
+        "1 INDEXOF_SMB_COIN_11 write-mailbox\n"
+        "  1 INDEXOF_SMB_COIN_12 write-mailbox 1 INDEXOF_SMB_COIN_13 write-mailbox "
+        "1 INDEXOF_SMB_COIN_14 write-mailbox\n"
+        "  1 INDEXOF_SMB_COIN_15 write-mailbox 1 INDEXOF_SMB_COIN_16 write-mailbox "
+        "1 INDEXOF_SMB_COIN_17 write-mailbox 1 INDEXOF_SMB_COIN_18 write-mailbox\n"
         "  1 INDEXOF_SMB_COIN_INIT write-mailbox\n"
         "then\n"
         "INDEXOF_Z_POS read-mailbox 46 + dup * 9.0 < if\n"          # in the coin room (|z+46| < 3)
         "  INDEXOF_SMB_COIN_0 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 1.5 - dup * 1.5 < if\n"
+        "    INDEXOF_X_POS read-mailbox 6.75 - dup * 1.5 < if\n"
         "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
         "0 INDEXOF_SMB_COIN_0 write-mailbox\n"
         "    then\n  then\n"
         "  INDEXOF_SMB_COIN_1 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 3 - dup * 1.5 < if\n"
+        "    INDEXOF_X_POS read-mailbox 8.25 - dup * 1.5 < if\n"
         "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
         "0 INDEXOF_SMB_COIN_1 write-mailbox\n"
         "    then\n  then\n"
         "  INDEXOF_SMB_COIN_2 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 4.5 - dup * 1.5 < if\n"
+        "    INDEXOF_X_POS read-mailbox 9.75 - dup * 1.5 < if\n"
         "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
         "0 INDEXOF_SMB_COIN_2 write-mailbox\n"
         "    then\n  then\n"
         "  INDEXOF_SMB_COIN_3 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 6 - dup * 1.5 < if\n"
+        "    INDEXOF_X_POS read-mailbox 11.25 - dup * 1.5 < if\n"
         "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
         "0 INDEXOF_SMB_COIN_3 write-mailbox\n"
         "    then\n  then\n"
         "  INDEXOF_SMB_COIN_4 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 7.5 - dup * 1.5 < if\n"
+        "    INDEXOF_X_POS read-mailbox 12.75 - dup * 1.5 < if\n"
         "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
         "0 INDEXOF_SMB_COIN_4 write-mailbox\n"
         "    then\n  then\n"
         "  INDEXOF_SMB_COIN_5 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 9 - dup * 1.5 < if\n"
+        "    INDEXOF_X_POS read-mailbox 14.25 - dup * 1.5 < if\n"
         "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
         "0 INDEXOF_SMB_COIN_5 write-mailbox\n"
         "    then\n  then\n"
         "  INDEXOF_SMB_COIN_6 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 10.5 - dup * 1.5 < if\n"
+        "    INDEXOF_X_POS read-mailbox 15.75 - dup * 1.5 < if\n"
         "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
         "0 INDEXOF_SMB_COIN_6 write-mailbox\n"
         "    then\n  then\n"
         "  INDEXOF_SMB_COIN_7 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 12 - dup * 1.5 < if\n"
+        "    INDEXOF_X_POS read-mailbox 6.75 - dup * 1.5 < if\n"
         "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
         "0 INDEXOF_SMB_COIN_7 write-mailbox\n"
         "    then\n  then\n"
         "  INDEXOF_SMB_COIN_8 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 13.5 - dup * 1.5 < if\n"
+        "    INDEXOF_X_POS read-mailbox 8.25 - dup * 1.5 < if\n"
         "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
         "0 INDEXOF_SMB_COIN_8 write-mailbox\n"
         "    then\n  then\n"
         "  INDEXOF_SMB_COIN_9 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 15 - dup * 1.5 < if\n"
+        "    INDEXOF_X_POS read-mailbox 9.75 - dup * 1.5 < if\n"
         "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
         "0 INDEXOF_SMB_COIN_9 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_10 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 11.25 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_10 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_11 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 12.75 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_11 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_12 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 14.25 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_12 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_13 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 15.75 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_13 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_14 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 8.25 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_14 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_15 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 9.75 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_15 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_16 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 11.25 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_16 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_17 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 12.75 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_17 write-mailbox\n"
+        "    then\n  then\n"
+        "  INDEXOF_SMB_COIN_18 read-mailbox 0<> if\n"
+        "    INDEXOF_X_POS read-mailbox 14.25 - dup * 1.5 < if\n"
+        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
+        "0 INDEXOF_SMB_COIN_18 write-mailbox\n"
         "    then\n  then\n"
         "then\n"
         # Coin delta scoring + 100-coin 1UP.
@@ -1963,9 +2018,9 @@ es['wf_Activated Actor Mailbox'] = 4005      # scratch (must be >=2; default 0 a
 add_statplat('cr_floor',  CR_X0 - 1, -5.0, CR_FLOOR_TOP - 4.0,
              CR_X1 + 1,    5.0, CR_FLOOR_TOP,        CR_FLOOR_MAT)
 add_statplat('cr_wall_l', CR_X0 - 1, -GROUND_Y, CR_FLOOR_TOP,
-             CR_X0,        GROUND_Y, CR_FLOOR_TOP + 6*T,  CR_FLOOR_MAT)
+             CR_X0,        GROUND_Y, CR_FLOOR_TOP + 10*T,  CR_FLOOR_MAT)
 add_statplat('cr_wall_r', CR_X1,     -GROUND_Y, CR_FLOOR_TOP,
-             CR_X1 + 1,    GROUND_Y, CR_FLOOR_TOP + 6*T,  CR_FLOOR_MAT)
+             CR_X1 + 1,    GROUND_Y, CR_FLOOR_TOP + 10*T,  CR_FLOOR_MAT)
 
 # Collectible coins: static gold discs the player collects by proximity (the player
 # script awards GOLD and flips each coin's visibility mailbox off). Pre-placed `gold`
@@ -1973,21 +2028,41 @@ add_statplat('cr_wall_r', CR_X1,     -GROUND_Y, CR_FLOOR_TOP,
 # Mario arrives (see TODO). Mario warps in at X=3 and walks RIGHT past these to the
 # exit warp (X=12), collecting them en route.
 COIN_DISC_MAT = make_mat('smb_coinroom_coin', (1.0, 0.84, 0.0))
-# 10 coins at T=1.5m intervals across the 16-tile room — faithful W1-1 underground row.
-# Stop at X=15 (3 tiles before exit warp at X=18) so all coins are reachable before warp.
-CR_COIN_XS = [1.5, 3.0, 4.5, 6.0, 7.5, 9.0, 10.5, 12.0, 13.5, 15.0]
-# Float the coins ABOVE Mario's head (feet -48, ~1.8 tall → top ~-46.2). The coins are
-# collidable statplats; if they overlap his body he bumps them and gets shoved through
-# the floor. At -44 there's a clear ~1.8 gap. Pickup is X-proximity + a player-Z room
-# gate (uses the PLAYER's Z, not the coin's), so coin height doesn't affect collection.
-CR_COIN_Z  = CR_FLOOR_TOP + 4.0          # -44, floating clear above Mario
-CR_COIN_MB = [SMB_COIN_0, SMB_COIN_1, SMB_COIN_2,
-              SMB_COIN_3, SMB_COIN_4, SMB_COIN_5, SMB_COIN_6,
-              SMB_COIN_7, SMB_COIN_8, SMB_COIN_9]
-for _ci, _cxv in enumerate(CR_COIN_XS):
-    _coin = add_statplat(f'cr_coin_{_ci}', _cxv - 0.3, -0.25, CR_COIN_Z - 0.4,
-                         _cxv + 0.3,  0.25, CR_COIN_Z + 0.4, COIN_DISC_MAT)
-    _coin['wf_Visibility Mailbox'] = CR_COIN_MB[_ci]   # seeded to 1, set to 0 on pickup
+# 19 coins in 3 rows — faithful W1-1 underground room (SMBDIS.ASM L_UndergroundArea3).
+# Row 7 (low): cols 4-10 (7 coins). Row 5 (mid): cols 4-10 (7 coins). Row 3 (top): cols 5-9 (5 coins).
+# Pickup uses X-proximity + player-Z underground gate; coin Z is purely visual.
+_CR_LOW_Z  = CR_FLOOR_TOP + 4.5*T   # -41.25 — row 7
+_CR_MID_Z  = CR_FLOOR_TOP + 6.5*T   # -38.25 — row 5
+_CR_HIGH_Z = CR_FLOOR_TOP + 8.5*T   # -35.25 — row 3
+CR_COINS = [
+    # (X,         Z,         mailbox)
+    # Row 7 (lowest) — cols 4-10
+    (4.5*T,  _CR_LOW_Z,  SMB_COIN_0),
+    (5.5*T,  _CR_LOW_Z,  SMB_COIN_1),
+    (6.5*T,  _CR_LOW_Z,  SMB_COIN_2),
+    (7.5*T,  _CR_LOW_Z,  SMB_COIN_3),
+    (8.5*T,  _CR_LOW_Z,  SMB_COIN_4),
+    (9.5*T,  _CR_LOW_Z,  SMB_COIN_5),
+    (10.5*T, _CR_LOW_Z,  SMB_COIN_6),
+    # Row 5 (middle) — cols 4-10
+    (4.5*T,  _CR_MID_Z,  SMB_COIN_7),
+    (5.5*T,  _CR_MID_Z,  SMB_COIN_8),
+    (6.5*T,  _CR_MID_Z,  SMB_COIN_9),
+    (7.5*T,  _CR_MID_Z,  SMB_COIN_10),
+    (8.5*T,  _CR_MID_Z,  SMB_COIN_11),
+    (9.5*T,  _CR_MID_Z,  SMB_COIN_12),
+    (10.5*T, _CR_MID_Z,  SMB_COIN_13),
+    # Row 3 (top) — cols 5-9
+    (5.5*T,  _CR_HIGH_Z, SMB_COIN_14),
+    (6.5*T,  _CR_HIGH_Z, SMB_COIN_15),
+    (7.5*T,  _CR_HIGH_Z, SMB_COIN_16),
+    (8.5*T,  _CR_HIGH_Z, SMB_COIN_17),
+    (9.5*T,  _CR_HIGH_Z, SMB_COIN_18),
+]
+for _ci, (_cx, _cz, _cmb) in enumerate(CR_COINS):
+    _coin = add_statplat(f'cr_coin_{_ci}', _cx - 0.3, -0.25, _cz - 0.4,
+                         _cx + 0.3,  0.25, _cz + 0.4, COIN_DISC_MAT)
+    _coin['wf_Visibility Mailbox'] = _cmb   # seeded to 1, set to 0 on pickup
 
 
 def _make_target(name, loc):
@@ -2052,7 +2127,7 @@ if light:
 # needs Down anyway). The Warp class teleports any overlapping actor in its filter
 # (no input gate needed for a walk-into exit) — this validates Warp's Jolt teleport.
 # Exit pipe flush with right wall (CR_X1=24); warp sensor 3 tiles to its left.
-EXIT_PIPE_X0, EXIT_PIPE_X1 = CR_X1 - 3*T, CR_X1   # = [19.5, 24]  (2-tile wide pipe)
+EXIT_PIPE_X0, EXIT_PIPE_X1 = 13*T, 15*T   # = [19.5, 22.5]  cols 13-14, 2-tile wide pipe
 add_statplat('exit_pipe', EXIT_PIPE_X0, -GROUND_Y, CR_FLOOR_TOP,
              EXIT_PIPE_X1,  GROUND_Y, CR_FLOOR_TOP + 2*T, PIPE_GREEN)
 

@@ -71,9 +71,18 @@
 		$300100bl { 'STR' "cr_coin_7.iff" }  // IFF RM1 001:00b
 		$300100cl { 'STR' "cr_coin_8.iff" }  // IFF RM1 001:00c
 		$300100dl { 'STR' "cr_coin_9.iff" }  // IFF RM1 001:00d
-		$300100el { 'STR' "abor_coin.iff" }  // IFF RM1 001:00e
-		$300100fl { 'STR' "exit_pipe.iff" }  // IFF RM1 001:00f
-		$3001010l { 'STR' "pipe_exit_warp.iff" }  // IFF RM1 001:010
+		$300100el { 'STR' "cr_coin_10.iff" }  // IFF RM1 001:00e
+		$300100fl { 'STR' "cr_coin_11.iff" }  // IFF RM1 001:00f
+		$3001010l { 'STR' "cr_coin_12.iff" }  // IFF RM1 001:010
+		$3001011l { 'STR' "cr_coin_13.iff" }  // IFF RM1 001:011
+		$3001012l { 'STR' "cr_coin_14.iff" }  // IFF RM1 001:012
+		$3001013l { 'STR' "cr_coin_15.iff" }  // IFF RM1 001:013
+		$3001014l { 'STR' "cr_coin_16.iff" }  // IFF RM1 001:014
+		$3001015l { 'STR' "cr_coin_17.iff" }  // IFF RM1 001:015
+		$3001016l { 'STR' "cr_coin_18.iff" }  // IFF RM1 001:016
+		$3001017l { 'STR' "abor_coin.iff" }  // IFF RM1 001:017
+		$3001018l { 'STR' "exit_pipe.iff" }  // IFF RM1 001:018
+		$3001019l { 'STR' "pipe_exit_warp.iff" }  // IFF RM1 001:019
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "smb_w1_1.lvl" ] }
@@ -144,9 +153,18 @@
 		{ 'ASS' $300100bl [ "cr_coin_7.iff" ] }  // IFF RM1 001:00b
 		{ 'ASS' $300100cl [ "cr_coin_8.iff" ] }  // IFF RM1 001:00c
 		{ 'ASS' $300100dl [ "cr_coin_9.iff" ] }  // IFF RM1 001:00d
-		{ 'ASS' $300100el [ "abor_coin.iff" ] }  // IFF RM1 001:00e
-		{ 'ASS' $300100fl [ "exit_pipe.iff" ] }  // IFF RM1 001:00f
-		{ 'ASS' $3001010l [ "pipe_exit_warp.iff" ] }  // IFF RM1 001:010
+		{ 'ASS' $300100el [ "cr_coin_10.iff" ] }  // IFF RM1 001:00e
+		{ 'ASS' $300100fl [ "cr_coin_11.iff" ] }  // IFF RM1 001:00f
+		{ 'ASS' $3001010l [ "cr_coin_12.iff" ] }  // IFF RM1 001:010
+		{ 'ASS' $3001011l [ "cr_coin_13.iff" ] }  // IFF RM1 001:011
+		{ 'ASS' $3001012l [ "cr_coin_14.iff" ] }  // IFF RM1 001:012
+		{ 'ASS' $3001013l [ "cr_coin_15.iff" ] }  // IFF RM1 001:013
+		{ 'ASS' $3001014l [ "cr_coin_16.iff" ] }  // IFF RM1 001:014
+		{ 'ASS' $3001015l [ "cr_coin_17.iff" ] }  // IFF RM1 001:015
+		{ 'ASS' $3001016l [ "cr_coin_18.iff" ] }  // IFF RM1 001:016
+		{ 'ASS' $3001017l [ "abor_coin.iff" ] }  // IFF RM1 001:017
+		{ 'ASS' $3001018l [ "exit_pipe.iff" ] }  // IFF RM1 001:018
+		{ 'ASS' $3001019l [ "pipe_exit_warp.iff" ] }  // IFF RM1 001:019
 	}
 	{ 'ALGN' .align(2048) }
 }
