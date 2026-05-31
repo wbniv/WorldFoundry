@@ -1,7 +1,7 @@
 # Plan — wf-edit Host-a-call: opt-in named tunnel (rate-limit-free, stable hostname)
 
 **Date:** 2026-05-30
-**Status:** Planned (not started)
+**Status:** **DONE 2026-05-30 (`03dc866c`)** — `tunnel_token` + `tunnel_hostname` slots on `WfeditIdentity` (env wins, same precedence as TURN), `StartQuickTunnelProcs` branches on token+hostname → `cloudflared tunnel run --token …` (no scrape), loading loop pre-seeds the host so it skips the *Establishing* phase, share link unchanged in shape. Quick-tunnel regression verified (no token → `starting quick tunnel` → `relay connected wss://…trycloudflare.com`). One-time setup added to the manual. Named-tunnel live verification needs a real CF account (manual smoke test only — cannot be CI'd).
 **Parent:** Phase 3 of [docs/plans/2026-05-27-quick-tunnel-vpn-robustness.md](2026-05-27-quick-tunnel-vpn-robustness.md)
 
 ## Context
