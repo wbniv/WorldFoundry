@@ -111,7 +111,7 @@
 | 134 | Hard-block pyramid A | 4-step pyramid, center gap |
 | 148 | Hard-block pyramid B | 4-step pyramid, pit in center |
 | 160 | Pipe (tall) | Exit of underground bonus (unreachable entry) |
-| 198 | Staircase | 8-step descending staircase to flagpole |
+| 198 | Staircase | 8-step ascending staircase (col 198 = 1T, col 205 = 8T) leading to flagpole |
 | 210 | Flagpole | Col ~210 |
 | 212 | Castle | End of level |
 
