@@ -221,11 +221,12 @@ in PILOT.
 
 ## Relation to World Foundry's Pilot
 
-World Foundry has its own in-engine object-script language **also called "Pilot"** (see
+World Foundry's in-engine object-script language **is an implementation of PILOT** — the
+language this report describes, built for the engine on purpose (see
 [`docs/pilot-language.md`](../pilot-language.md) and the implementation plan
 [`docs/plans/2026-05-30-pilot-for-world-foundry-in-engine-object-script-la.md`](../plans/2026-05-30-pilot-for-world-foundry-in-engine-object-script-la.md)).
-It is a deliberate descendant, not a coincidence of names: WF's spec opens by citing
-PILOT as "a 1960s line-oriented language" and adopts its exact statement grammar —
+The name is the point, not a coincidence: WF's spec opens by citing PILOT as "a 1960s
+line-oriented language" and implements its exact statement grammar —
 `VERB [Y|N] [(guard)] : operand`, `*label` jump targets, `T:`/`A:`/`M:`/`C:`/`J:`/`U:`/
 `E:`/`R:` verbs, a persistent match flag, and the same emit→await→classify→branch loop —
 then extends it with engine-control verbs (`SP:`, `WM:`, `IN:`, …) and runs it on two
