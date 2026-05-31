@@ -16,12 +16,44 @@
 #include <string>
 #include <unordered_map>
 
+// Phase 4 HUD text — ring buffer defined in main.cc, rendered in display.cc.
+// Declared here (global namespace) so InEngineMailboxHost can access them.
+#if defined(DESIGNER_CHEATS)
+extern char wf_hud_pilot[4][128];
+extern int  wf_hud_pilot_count;
+extern char wf_hud_pilot_pending[128];
+#endif
+
 namespace pilot_engine {
 
 using namespace pilot;
 
+#if defined(DESIGNER_CHEATS)
+
+// MailboxHost subclass that additionally writes T:/TH: output to the HUD ring.
+class InEngineMailboxHost : public MailboxHost
+{
+public:
+    void Type(const std::string& text, bool nl) override
+    {
+        MailboxHost::Type(text, nl);   // stderr (existing behaviour)
+        size_t cur = std::strlen(wf_hud_pilot_pending);
+        std::strncat(wf_hud_pilot_pending, text.c_str(),
+                     sizeof(wf_hud_pilot_pending) - 1 - cur);
+        if (nl) {
+            int slot = wf_hud_pilot_count % 4;
+            std::strncpy(wf_hud_pilot[slot], wf_hud_pilot_pending, 127);
+            wf_hud_pilot[slot][127] = '\0';
+            wf_hud_pilot_pending[0] = '\0';
+            ++wf_hud_pilot_count;
+        }
+    }
+};
+static InEngineMailboxHost g_host;
+#else
 // Module state (mirrors scripting_zforth.cc's module-static pattern).
 static MailboxHost g_host;                                     // no heap
+#endif
 static ConstTable  g_consts;
 static std::unordered_map<const char*, Program> g_progCache;   // by src pointer
 static std::unordered_map<int, VMState>          g_actorState; // by objectIndex

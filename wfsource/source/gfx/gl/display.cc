@@ -52,7 +52,10 @@ extern int wf_hud_lives;
 extern int wf_hud_game_over;
 extern int wf_hud_entering_initials;
 extern char wf_hud_initials[4];
-extern int wf_hud_initials_pos;
+extern int  wf_hud_initials_pos;
+// PILOT T:/TH: text (Phase 4).
+extern char wf_hud_pilot[4][128];
+extern int  wf_hud_pilot_count;
 
 #include "hscore.h"
 
@@ -223,6 +226,25 @@ static void DrawHud(int xSize, int ySize)
         }
 
         glColor3f(1.0f, 1.0f, 0.0f);  // restore HUD yellow for any later draws
+    }
+
+    // PILOT T:/TH: text — cyan, stacked from the bottom of the HUD.
+    // Ring of 4 lines; start slot = wf_hud_pilot_count % 4 (oldest visible).
+    if (wf_hud_pilot_count > 0) {
+        glColor3f(0.0f, 1.0f, 1.0f);
+        int nlines = wf_hud_pilot_count < 4 ? wf_hud_pilot_count : 4;
+        int start  = wf_hud_pilot_count % 4;   // oldest slot in the ring
+        float lh   = 11.0f * kScale;           // line height at kScale
+        float y0   = (float)ySize - 8.0f - (float)nlines * lh;
+        for (int i = 0; i < nlines; ++i) {
+            int slot = (start + i) % 4;
+            glPushMatrix();
+            glTranslatef(8.0f, y0 + (float)i * lh, 0.0f);
+            glScalef(kScale, kScale, 1.0f);
+            DrawHudText(0.0f, 0.0f, wf_hud_pilot[slot]);
+            glPopMatrix();
+        }
+        glColor3f(1.0f, 1.0f, 0.0f);   // restore HUD yellow
     }
 
     glEnable(GL_DEPTH_TEST);

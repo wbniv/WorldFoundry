@@ -80,6 +80,12 @@ int  wf_hud_game_over = 0;
 int  wf_hud_entering_initials = 0;
 char wf_hud_initials[4] = {'A','A','A','\0'};
 int  wf_hud_initials_pos = 0;
+// PILOT T:/TH: HUD text. Written by InEngineMailboxHost::Type() in scripting_pilot.cc;
+// rendered in DrawHud() (display.cc). Ring of 4 lines; wf_hud_pilot_pending accumulates
+// TH: (no-newline) fragments until T: flushes them as a complete line.
+char wf_hud_pilot[4][128]  = {};
+int  wf_hud_pilot_count    = 0;   // monotonically increasing; slot = count % 4
+char wf_hud_pilot_pending[128] = {};
 #endif
 
 bool bPerspectiveCorrection = false;
