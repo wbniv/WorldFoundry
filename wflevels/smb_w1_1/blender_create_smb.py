@@ -1098,15 +1098,24 @@ if player:
     # OAS custom-prop keys mirror the schema's field.key, which preserves
     # spaces (e.g. "Running Acceleration"), NOT a WikiWord form.
     player['wf_Running Acceleration']  = 60.0
-    player['wf_Running Deceleration']  = 0.85
+    # Steady ground speed = RunningAccel / (RunningDecel * 30)  [movement.cc:233,318].
+    # 60/(0.85*30) ≈ 2.35 m/s was far too slow — Mario fell ~5 m short of brick_1up
+    # on the entry_pipe→brick→pipe_64 hop. Max Ground Speed is NOT the limiter once it
+    # exceeds the steady value, so prior MaxGroundSpeed bumps (6→12→24→32) were inert.
+    # Trajectory traces: a launch of ~9.3-9.6 m/s lands ON the brick (X 84.75-86.25, top
+    # Z=7.5); ~8.5 m/s passes UNDER it (bottom Z=6.0). 60/(0.20*30) = 10.0 m/s top, so the
+    # 3 m pipe-top runway builds ~9.3 m/s at the edge — inside the brick-landing window. From
+    # the brick a jump easily clears the 4T pipe_64. docs/plans/2026-05-31-smb-tall-pipe-hop-physics.md.
+    player['wf_Running Deceleration']  = 0.20
     player['wf_Max Ground Speed']      = 32.0
     player['wf_Jumping Acceleration']  = 60.0
     player['wf_Falling Acceleration']  = 12.0
     player['wf_Air Acceleration']      = 0.0
     player['wf_Max Air Speed']         = 32.0
-    # No air control (Air Acceleration=0) means takeoff momentum sails for the
-    # whole jump unless damped. HorizAirDrag=3 ≈ 5% per frame at 60Hz, so a
-    # 32 m/s launch decays to ~12 m/s by the time gravity brings Mario back.
+    # Air "sustain" (movement.cc:872-895): with Air Acceleration=0, holding RIGHT while
+    # moving +X sets hDrag=1, so takeoff momentum persists for the whole jump (the hop holds
+    # RIGHT throughout, so this knob does not bite on it). It only decays velocity on frames
+    # where RIGHT is released — kept at 3.0 for a slight let-go float, same as before.
     player['wf_Horiz Air Drag']        = 3.0
     # TurnRate=0 → doom-stick LEFT/RIGHT strafe instead of rotate.
     # currentDir() = (cos C, sin C, 0) [physicalobject.hpi:52].
@@ -2353,9 +2362,9 @@ def _add_pyramid(name_base, base_col, steps=4):
 
 
 def _add_staircase(name_base, base_col, steps=8):
-    """Left-to-right descending staircase: col 0 = tallest (steps*T), col n-1 = 1*T."""
+    """Left-to-right ascending staircase: col 0 = 1*T tall, col n-1 = steps*T tall."""
     for _s in range(steps):
-        _h = (steps - _s) * T
+        _h = (_s + 1) * T
         add_statplat(f'{name_base}_{_s}',
                      (base_col + _s)*T - BSIZE, -GROUND_Y, GROUND_TOP_Z,
                      (base_col + _s)*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + _h,
