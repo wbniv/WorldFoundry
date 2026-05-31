@@ -2215,6 +2215,77 @@ static int RunTurnTest()
     return fails == 0 ? 0 : 1;
 }
 
+// ── Headless 3-peer mesh test (WF_EDIT_MESH_TEST) ──────────────────────────────
+// Phase 3 of docs/plans/2026-05-31-multi-peer-voice-video-mesh.md. The headless
+// complement to tests/screenshot_three_peer_b2.sh: that shell smoke proves three
+// live editors over a relay; this proves the WebrtcSession layer forms a COMPLETE
+// mesh (every pair connects) deterministically, with no display, relay, or cd.iff.
+//
+// Three in-process sessions (peer-a/b/c) shuttle each other's signalling exactly
+// as the relay would — but with three peers DrainSignaling's `to` field MUST be
+// honoured to route to the right destination (the 2-peer turn test had a single
+// destination and could ignore it). The offerer for each pair is the
+// lexicographically smaller peer_id, chosen inside SyncPeers, so the mesh
+// converges without coordination. Prints "[mesh] all PASS" iff all three reach
+// ConnectedPeerCount() == 2.
+//
+// Teardown discipline mirrors RunTurnTest: the sessions live in an inner scope so
+// their PeerConnections destruct BEFORE WebrtcCleanup() (rtc::Cleanup().wait()),
+// and the verdict is printed + flushed AFTER cleanup — destroying PCs while the
+// global rtc cleanup is in flight is what produced an unclean exit + lost stdout.
+static int RunMeshTest()
+{
+    using namespace wfedit;
+    bool ok = false;
+    size_t fa = 0, fb = 0, fc = 0;
+
+    {   // a/b/c destruct at the end of this block, before WebrtcCleanup().
+        WebrtcSession a(nullptr, nullptr);
+        WebrtcSession b(nullptr, nullptr);
+        WebrtcSession c(nullptr, nullptr);
+
+        a.SyncPeers({"peer-b", "peer-c"}, "peer-a");
+        b.SyncPeers({"peer-a", "peer-c"}, "peer-b");
+        c.SyncPeers({"peer-a", "peer-b"}, "peer-c");
+
+        // Route one session's queued signals to the ADDRESSED peer's OnSignal.
+        // sig.first = destination peer_id, sig.second = JSON payload.
+        auto route = [&](WebrtcSession& src, const char* from) {
+            for (auto& sig : src.DrainSignaling()) {
+                if      (sig.first == "peer-a") a.OnSignal(from, sig.second);
+                else if (sig.first == "peer-b") b.OnSignal(from, sig.second);
+                else if (sig.first == "peer-c") c.OnSignal(from, sig.second);
+            }
+        };
+
+        const auto deadline =
+            std::chrono::steady_clock::now() + std::chrono::seconds(30);
+        while (std::chrono::steady_clock::now() < deadline) {
+            route(a, "peer-a");
+            route(b, "peer-b");
+            route(c, "peer-c");
+            fa = a.ConnectedPeerCount();
+            fb = b.ConnectedPeerCount();
+            fc = c.ConnectedPeerCount();
+            if (fa == 2 && fb == 2 && fc == 2) { ok = true; break; }
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+    }   // ← PeerConnections destruct here.
+
+    // Join libdatachannel's threads / free its globals so LSan stays quiet.
+    WebrtcCleanup();
+
+    if (ok) {
+        std::printf("[mesh] full 3-node mesh connected (a=2 b=2 c=2)\n");
+    } else {
+        std::printf("[mesh] TIMEOUT — mesh incomplete "
+                    "(a=%zu b=%zu c=%zu, want 2 each)\n", fa, fb, fc);
+    }
+    std::printf("[mesh] %s\n", ok ? "all PASS" : "FAIL");
+    std::fflush(stdout);
+    return ok ? 0 : 1;
+}
+
 // Make `terminate called without an active exception` self-diagnosing — libstdc++
 // otherwise gives no clue what triggered it (unhandled exception, noexcept throw,
 // joinable thread destroyed without join, …). On terminate, rethrow + catch the
@@ -2253,6 +2324,12 @@ int main(int argc, char** argv)
     // any window/engine setup.
     if (const char* p = std::getenv("WF_EDIT_TURN_TEST"); p && *p)
         return RunTurnTest();
+
+    // Headless 3-peer mesh self-test — three in-process WebrtcSessions form a
+    // full mesh by shuttling their own signalling. No level, GL, relay, or args.
+    // Must run before any window/engine setup. See RunMeshTest above.
+    if (const char* p = std::getenv("WF_EDIT_MESH_TEST"); p && *p)
+        return RunMeshTest();
 
     // Headless quick-tunnel self-test (Phase 4.3): spawn relay + cloudflared,
     // resolve the public host, print the share link, reap, exit. Needs network +
