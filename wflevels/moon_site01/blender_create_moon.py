@@ -63,8 +63,10 @@ PLAYER_SPAWN  = (0.0, 0.0, 5.0)
 # Camera: vista from −Y, elevated to show NAC texture detail across a
 # real field of view. Distance ~85 m, ~30° downward angle, 60° FOV →
 # visible footprint ~100 m → ~100 NAC texels (1024² over 1 km play area).
-CAM_OFFSET    = (0.0, -12.0, 6.0)
-LOOK_TARGET   = (PLAYER_SPAWN[0], PLAYER_SPAWN[1], 1.5)
+# Vista camera — fog now disabled on the camera actor (FoggingColor=black,
+# FoggingCompleteDistance=1000) so distant terrain renders cleanly.
+CAM_OFFSET    = (0.0, -100.0, 80.0)
+LOOK_TARGET   = (0.0, 0.0, 0.0)
 
 NUM_MAILBOXES = 100
 
@@ -164,6 +166,12 @@ def build_terrain_mesh(name, tex_path):
     tex_node = mat.node_tree.nodes.new('ShaderNodeTexImage')
     tex_node.image = bpy.data.images.load(tex_path)
     mat.node_tree.links.new(tex_node.outputs['Color'], bsdf.inputs['Base Color'])
+    # WF fragment shader (gfx/glpipeline/backend_modern.cc kFS) samples the
+    # texture only when v_color is white (`step(0.99, min(rgb))`); the
+    # exported MATL `_color` is what becomes v_color per vertex. Force the
+    # BSDF base RGB to white so is_white=1 and the texture is actually used.
+    bsdf.inputs['Base Color'].default_value = (1.0, 1.0, 1.0, 1.0)
+    mat.diffuse_color = (1.0, 1.0, 1.0, 1.0)
     mesh.materials.append(mat)
     return mesh
 
@@ -262,6 +270,14 @@ if camera_actor:
     camera_actor.location = (PLAYER_SPAWN[0] + CAM_OFFSET[0],
                              PLAYER_SPAWN[1] + CAM_OFFSET[1],
                              PLAYER_SPAWN[2] + CAM_OFFSET[2])
+    # Snowgoons inherits a fog setup tuned for Earth atmosphere (start 20 m,
+    # complete 30 m, mid-grey #888888) — at vista distances this fogs the
+    # entire terrain to flat grey. The Moon has no atmosphere; push fog far
+    # beyond the 1000 m far clip so it never affects rendering. Black fog
+    # colour matches the space-black sky in case it does kick in.
+    camera_actor['wf_FoggingColor']            = 0x000000
+    camera_actor['wf_FoggingStartDistance']    = 999.0
+    camera_actor['wf_FoggingCompleteDistance'] = 1000.0
 
 camshot = find_by_class('camshot')
 if camshot:
