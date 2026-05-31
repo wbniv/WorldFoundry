@@ -448,6 +448,33 @@ For an isometric camera where screen-up ≠ world-N, use a bit-rotation word ins
 hop arcs, AI), see `qbert_practice/blender_create_qbert.py` for the canonical multi-tick
 state-machine pattern in Forth.
 
+#### PILOT in-level scripts
+
+PILOT is a scripting language option alongside Forth/Lua/Wren/JS/Wasm (engine `kDispatch`
+slot 6). Full grammar: [`docs/pilot-language.md`](pilot-language.md). To author a PILOT
+`{Script}` on an actor, set its `wf_Script` custom property to a program whose **first
+non-blank line is the `R:pilot` sigil**:
+
+```pilot
+R:pilot
+C:mb(GOLD) = 1234
+*top
+C:mb(GOLD) = mb(GOLD) + 1
+PA:0.1
+J:*top
+```
+
+How routing works (no OAD field needed): the engine still dispatches per-actor scripts with
+the hardcoded Forth language id (`actor.cc`), but `ScriptRouter::RunScript`
+**content-sniffs** the source — a leading `R:pilot` re-routes to the PILOT engine
+(Forth's own `\ wf` sigil never matches). Unlike Forth (which re-runs the whole script
+every frame), **PILOT is a frame-resumable state machine**: the per-actor program counter
+persists across frames, and blocking verbs (`A:`, `PA:`, `WM:`) suspend until satisfied —
+loop explicitly with `J:*top`. `mb(IDX)` reads/writes the actor's mailbox; mailbox names are
+available prefix-free (`GOLD`, `X_POS`, …). Angles are revolutions; `PA:`/`WT:` are seconds
+(LevelClock). Worked end-to-end example: [`wflevels/pilot_demo/blender_create_pilot_demo.py`](../wflevels/pilot_demo/blender_create_pilot_demo.py),
+verified by [`tests/pilot/in_level_demo.pilot`](../tests/pilot/in_level_demo.pilot).
+
 #### Camera-relative input (SW iso pattern)
 
 The WF `MarbleHandler` applies button bits as world-axis impulses:

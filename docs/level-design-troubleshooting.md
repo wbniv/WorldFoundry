@@ -463,6 +463,47 @@ iffcomp-rs -binary -o=../<name>-standalone.iff <name>-standalone.iff.txt
 
 ---
 
+## Building a new minimal level from scratch — the four-gotcha chain {#minimal-level-gotchas}
+
+Authoring a tiny level (e.g. the `pilot_demo` in-engine PILOT demo —
+`wflevels/pilot_demo/blender_create_pilot_demo.py`) by importing snowgoons infrastructure,
+stripping it, and adding your own geometry hits four crashes in order. Each one's *visible*
+symptom points away from its real cause:
+
+1. **`level.cc:426` assert `plmc->tagRam == IFFTAG('R','A','M','\0')`** — you ran the inner
+   `<name>.iff` instead of the L4-wrapped `<name>-standalone.iff`. The engine's `-L` loader
+   expects the `RAM`-tagged standalone form. Fix: add a `<name>-standalone.iff.txt` wrapper
+   (see "How to run a standalone level" above) so the pipeline emits `<name>-standalone.iff`,
+   and run *that*. (`-L<level>` runs a level directly — no `cd.iff` needed.)
+
+2. **`assets.cc:190` assert `roundedSize == entry._size`** (with a `DiskTOC: Entries=…` dump) —
+   the level has **no renderable room geometry**, so levcomp emitted `nRooms = 0` (check
+   `<name>.ini` → `[Rooms] nRooms`) and the room-slot loader reads a bogus TOC entry. A bare
+   player isn't enough — its mesh goes to `PERM`. Fix: include ≥1 mesh actor whose
+   **world-center is inside a room bbox** (levcomp assigns actors to rooms by center; widen
+   the `room` actor's `wf_original_bbox` to contain it). Related: "Texture atlas empty /
+   Room0.tga is 146 bytes" below.
+
+3. **`textile` aborts the build (silently)** — reusing imported snowgoons/qbert meshes drags
+   in their `.tga` textures, which aren't in your level dir; `textile` exits non-zero
+   ("couldn't find texture G_…"), and because `build_level_binary.sh` pipes textile to
+   `/dev/null` under `set -e`, the script dies at step 3 and **leaves the previous
+   `-standalone.iff` stale** (its mtime is *older* than `<name>.lvl` — the tell-tale). Fix:
+   build your own geometry from **flat-colored primitives** — a Principled-BSDF material with
+   a base color and no texture image (mirror qbert's cubes / the `pilot_demo` floor). textile
+   then has nothing to look up. Re-run `textile` *without* the `>/dev/null` to see its errors.
+
+4. **`terminate called without an active exception` (SIGABRT) — but the root cause is the
+   camera.** Deleting imported objects shifts object indices, so a CamShot's `Target`
+   (look-at) and `Track Object` (follow) `OBJREFERENCE`s dangle → `movecam.cc:289` assert
+   `shotData->Target`. The assert calls `exit()`, whose atexit handlers destroy the still-
+   joinable debug-bridge listener `std::thread` → `std::terminate`. So you see a terminate at
+   shutdown, not the camera assert. Fix: explicitly set `camshot['wf_Target']` and
+   `camshot['wf_Track Object']` to a *live* object's name (e.g. the player's `obj.name`), and
+   aim the shot to frame it. See also "BungeeCam: target placement".
+
+---
+
 ## Assembling the `cd.iff` bundle — feed cdpack the **standalone** IFFs, not the bare LVAS
 
 **Symptom:** Running `wf_game` with no `-L` (default `cd.iff` path) aborts immediately

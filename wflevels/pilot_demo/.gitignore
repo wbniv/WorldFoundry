@@ -1,0 +1,17 @@
+# Golden sources (committed): blender_create_pilot_demo.py, pilot_demo.blend,
+# pilot_demo-standalone.iff.txt. Everything else here is regenerable:
+#   blender --background --python blender_create_pilot_demo.py   # .blend -> .lev + mesh .iff
+#   bash ../../wftools/wf_blender/build_level_binary.sh pilot_demo  # -> ../pilot_demo*.iff
+*.lev
+*.lev.bin
+*.lvl
+pilot_demo.iff.txt
+*.ini
+asset.inc
+*.tga
+*.ruv
+*.cyc
+*.iff
+*.blend1
+__pycache__/
+textile.log.htm
