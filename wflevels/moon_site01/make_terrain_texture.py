@@ -76,13 +76,18 @@ def _read_dem_window_metres(meta):
 
 
 def bake_dem_hillshade(meta, size, sun_az_deg, sun_alt_deg):
+    """Synthetic hillshade for fallback in shadowed / out-of-NAC regions.
+
+    Output is **neutral grayscale** matching the LROC NAC's panchromatic
+    palette — no warm tint, no elevation hue shift. Earlier versions had a
+    `val * 0.98 / val * 0.94` "regolith warm bias" plus a `0.12*(nz-0.5)`
+    elevation tint that read as alien pink/peach next to the real NAC half;
+    the moon is famously graphite-grey (Apollo crew reports). Dropped.
+    """
     z, _, _, native = _read_dem_window_metres(meta)
     shade = hillshade(z, native, az_deg=sun_az_deg, alt_deg=sun_alt_deg)
-    nz = (z - z.min()) / (z.max() - z.min() + 1e-9)
-    base = np.full_like(shade, 0.55)
-    tint = 0.12 * (nz - 0.5)
-    val = np.clip((base + tint) * (0.20 + 0.80 * shade), 0.0, 1.0)
-    rgb = np.stack([val, val * 0.98, val * 0.94], axis=-1)
+    val = np.clip(shade, 0.0, 1.0)
+    rgb = np.stack([val, val, val], axis=-1)
     img = Image.fromarray((rgb * 255).astype(np.uint8))
     return img.resize((size, size), Image.Resampling.LANCZOS)
 
@@ -137,11 +142,26 @@ def bake_nac_composite(meta, size, sun_az_deg, sun_alt_deg):
     # Build the hillshade fallback at the same output size.
     hill = np.asarray(bake_dem_hillshade(meta, size, sun_az_deg, sun_alt_deg)) / 255.0
 
-    # Composite: NAC where valid, hillshade RGB elsewhere.
-    out = hill.copy()
-    nac_rgb = np.stack([nac_norm, nac_norm * 0.98, nac_norm * 0.94], axis=-1)
+    # Match hillshade brightness to NAC's percentile-stretched range so the
+    # seam between "real NAC" and "synthetic hillshade fallback" disappears.
+    # Both are already normalised into [0, 1]; the issue is that the NAC's
+    # mean tone (after percentile stretch) ≠ the hillshade's. Compute both
+    # means and shift the hillshade to land on the NAC's mean while keeping
+    # its contrast.
+    hill_gray = hill[..., 0]
+    if np.any(nac_valid):
+        nac_mean = float(nac_norm[nac_valid].mean())
+        nac_std  = float(nac_norm[nac_valid].std())
+        h_mean = float(hill_gray.mean())
+        h_std  = float(hill_gray.std()) or 1e-6
+        # z-score the hillshade then re-fit to NAC's mean and std
+        hill_gray = np.clip((hill_gray - h_mean) * (nac_std / h_std) + nac_mean, 0, 1)
+    hill_rgb = np.stack([hill_gray, hill_gray, hill_gray], axis=-1)
+
+    # Composite: NAC (neutral) where valid, matched hillshade elsewhere.
+    nac_rgb = np.stack([nac_norm, nac_norm, nac_norm], axis=-1)
     mask3 = np.repeat(nac_valid[..., None], 3, axis=-1)
-    out = np.where(mask3, nac_rgb, out)
+    out = np.where(mask3, nac_rgb, hill_rgb)
     return Image.fromarray((out * 255).astype(np.uint8))
 
 
