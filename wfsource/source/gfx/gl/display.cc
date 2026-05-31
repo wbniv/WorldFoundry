@@ -764,7 +764,17 @@ Display::PageFlip()
     RendererBackendGet().EndFrame();
 
 #if DESIGNER_CHEATS && defined(__LINUX__)
-    DrawHud(wfWindowWidth, wfWindowHeight);
+    // Skip the arcade HUD on levels that don't write the score/timer/lives/
+    // game-over mailboxes (game.cc:558-561 refreshes these globals each
+    // frame from mb 70/71/72/420). qbert and SMB write LIVES=3 from their
+    // Forth startup script so the HUD appears immediately; snowgoons /
+    // mm_practice / moon_site01 never touch the mailboxes and stay HUD-less.
+    // See docs/plans/2026-05-31-hud-gate-on-level-opt-in.md.
+    if (wf_hud_score | wf_hud_timer | wf_hud_lives | wf_hud_game_over
+        | wf_hud_entering_initials)
+    {
+        DrawHud(wfWindowWidth, wfWindowHeight);
+    }
 #endif
 
     glFlush();
