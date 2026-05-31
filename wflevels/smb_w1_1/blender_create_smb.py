@@ -1098,7 +1098,10 @@ if player:
     # OAS custom-prop keys mirror the schema's field.key, which preserves
     # spaces (e.g. "Running Acceleration"), NOT a WikiWord form.
     player['wf_Running Acceleration']  = 60.0
-    # Steady ground speed = RunningAccel / (RunningDecel * 30)  [movement.cc:233,318].
+    # Steady ground speed = RunningAccel / (RunningDecel * 30). The doom-stick player
+    # (Turn Rate=0) runs MarbleHandler when grounded [movement.cc:575-579 routes
+    # TurnRate==0 -> MarbleHandler]: accel at :717, decay at :689. GroundHandler (:318/:233)
+    # is the identical-on-flat-ground twin for steered actors. Same formula either way.
     # 60/(0.85*30) ≈ 2.35 m/s was far too slow — Mario fell ~5 m short of brick_1up
     # on the entry_pipe→brick→pipe_64 hop. Max Ground Speed is NOT the limiter once it
     # exceeds the steady value, so prior MaxGroundSpeed bumps (6→12→24→32) were inert.
@@ -1940,10 +1943,14 @@ add_statplat('pipe_64', 64*T - T, -GROUND_Y, GROUND_TOP_Z,
 add_statplat('entry_pipe', ENTRY_PIPE_X - T, -GROUND_Y, GROUND_TOP_Z,
              ENTRY_PIPE_X + T,  GROUND_Y, GROUND_TOP_Z + 3*T, PIPE_GREEN)
 
-# Entry sense: a thin ActBox lid over the pipe mouth. Only Mario standing ON TOP
-# (feet Z=3) overlaps the Z band [2.8,4.0]; walking past on the ground (Z 0) does
-# not. Sets SMB_AT_PIPE=1 on overlap and clears it to 0 on exit.
-bpy.ops.mesh.primitive_cube_add(size=2.0, location=(ENTRY_PIPE_X, 0.0, GROUND_TOP_Z + 2*T + 0.4))
+# Entry sense: a thin ActBox lid over the pipe mouth. The band must sit at the pipe
+# TOP so Mario standing there (origin Z≈4.5 on the 3T pipe) overlaps it, while a
+# ground walk-past (origin Z≈1.5) does not. BUG FIX 2026-05-31: this box was authored
+# for the old 2T pipe (band [2.8,4.0], "feet Z=3"); the faithful expansion made
+# entry_pipe 3T (top 4.5) but left the box behind, so standing on top fell ABOVE the
+# band and the warp never triggered (verified: SMB_AT_PIPE 0/30 frames). Raised to the
+# 3T mouth: GROUND_TOP_Z + 3*T + 0.2 = 4.7 → band [4.1,5.3] covers the resting origin.
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(ENTRY_PIPE_X, 0.0, GROUND_TOP_Z + 3*T + 0.2))
 es = bpy.context.object
 es.name = 'pipe_entry_sense'; es.data.name = 'pipe_entry_sense'
 es.scale = (T, GROUND_Y, 0.6)

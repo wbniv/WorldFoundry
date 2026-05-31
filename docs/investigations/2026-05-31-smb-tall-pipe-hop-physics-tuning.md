@@ -40,9 +40,13 @@ jump height. This redirected the whole effort away from the jump and onto ground
 
 ## 3. Read the handler; derive the speed model
 
-`wfsource/source/movement/movement.cc` (MarbleHandler / doom-stick path) accumulates
-`wheelVelocity += RunningAccel·dt` per held-direction frame (line ~318) and decays it by
-`drag = 1 − RunningDecel·dt·30` (line ~233). Solving for steady state:
+The player is a doom-stick actor (`Turn Rate = 0`), and `wfsource/source/movement/movement.cc:575-579`
+routes TurnRate==0 actors to **`MarbleHandler`** when grounded (others use `GroundHandler`). So the
+player's ground speed is governed by `MarbleHandler::predictPosition` (line 651): it adds
+`RunningAcceleration·dt` to `vel` per held-direction frame (line 717) and decays the XY velocity by
+`(1 − RunningDeceleration·dt·30)` each frame (line 689). (`GroundHandler::predictPosition`, lines
+196–485, is the *identical-formula* twin for TurnRate≠0 actors — its `wheelVelocity` accumulate/decay
+are lines 318/233 — but the player never runs it.) Solving for steady state:
 
 ```
 steady ground speed = RunningAcceleration / (RunningDeceleration × 30)
