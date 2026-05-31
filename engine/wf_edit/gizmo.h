@@ -63,4 +63,10 @@ bool GetActorWorldPos(int engine_idx, float out[3]);
 // pose on its next tick. See docs/plans/2026-05-31-shared-cursors-b-leftovers.md.
 bool SetEditorCameraPose(const float pos[3], const float fwd[3], const float up[3]);
 
+// Push the live OS-window size into the active engine Display (HUD layout +
+// WFInitGL viewport/projection on resize). int-only wrapper kept here because
+// gfx/display.hp's `class Display` clashes with X11's `Display` typedef under
+// GLFW_EXPOSE_NATIVE_X11 in main.cc. No-op before the engine Display exists.
+void SetEditorLiveWindowSize(int w, int h);
+
 }  // namespace wfedit

@@ -1,7 +1,26 @@
 # Plan — Multi-peer voice/video: verify mesh works, extend tests, capture canonical proof
 
 **Date:** 2026-05-31
-**Status:** In progress — Phase 3 code written + syntax-verified 2026-05-31 (`RunMeshTest` + `wf_edit_mesh` ctest); Phase 2 confirmed moot (mesh already wired). Remaining: build/run the ctest (Phase 3) + live 3-peer voice smoke + screenshot (Phase 1/4), all blocked on the concurrent gfx WIP clearing.
+**Status (2026-05-31, honest):**
+- **Done + verified — `wf_edit` Display/X11 build collision fixed.** A separate commit
+  (`748f787c refactor(gfx): Display::GetSurfaceSize…`) had put `#include <gfx/display.hp>`
+  into `main.cc`, where Xlib's `Display` typedef (from `GLFW_EXPOSE_NATIVE_X11`) collides
+  with WF's `class Display` → `wf_edit` wouldn't compile. Fixed by moving the one
+  `Display::SetLiveWindowSize` call into `gizmo.cc` behind `wfedit::SetEditorLiveWindowSize`
+  (same TU-isolation pattern as `GetCameraPoseWS`). `wf_edit` builds clean; TURN ctest
+  passes. **This is unrelated to multi-peer but was blocking any `wf_edit` build.**
+- **Phase 2 confirmed moot** — mesh already wired end-to-end (see Recon below).
+- **Phase 3 (`wf_edit_mesh` ctest) — attempted, RED, backed out.** The `RunMeshTest`
+  harness was written and run against the now-building binary, but the 3-session mesh did
+  **not** fully converge: instrumented run showed `a=2, b=1, c=1` — node `a` connects to
+  both peers but the `b↔c` edge never reaches `Connected`, and the harness hangs in
+  `WebrtcCleanup`. This is a real problem in the headless harness (single-threaded
+  synchronous signal routing across 3 in-process sessions), NOT verified to be a mesh-code
+  bug — pairwise WebRTC is proven by the passing TURN test. The `RunMeshTest` + `wf_edit_mesh`
+  ctest were **removed from the tree** rather than commit a known-failing test. Needs a
+  rethink of the loopback routing (or running real 3-editor `screenshot_three_peer_b2.sh`)
+  before re-attempting.
+- **Remaining:** debug/redo Phase 3 harness, then live 3-peer voice smoke + screenshot (Phase 1/4).
 **Parent:** §B umbrella ([A-E-B plan](2026-05-30-a-e-b-audit-follow-up-mailbox-999-fix-shared-curso.md)); continuation of the WebRTC arc.
 
 ## Context
@@ -128,8 +147,21 @@ The mesh is **already fully wired end-to-end**, including the change Phase 2 pro
 is already implemented**. This plan reduces to live verification — Phase 1 (3-peer voice
 smoke), Phase 3 (`WF_EDIT_MESH_TEST` ctest), Phase 4 (proof screenshot).
 
-**Blocked on a clean build:** `build-editor/wf-edit` isn't built (its build was killed at
-06:52 per the 2026-05-31 transcript); `wf-relay` is now built (Rust, no collision). A
-concurrent session is editing `wfsource/source/gfx/gl/display.cc` + `mesa.cc` (engine gfx
-that `wf-edit` links), so the `wf-edit` rebuild + live smoke are deferred until that tree
-is quiescent, to avoid compiling their WIP / contending on `build-editor/`.
+**Correction (earlier framing was wrong):** an earlier draft of this section claimed a
+*concurrent session* was editing `display.cc`/`mesa.cc` and the build was "blocked on that
+tree going quiescent." That was a misread — the gfx work was sequential and already
+committed (`748f787c`, `f7fe1553`), not a live race. The real obstacle was a deterministic
+**C++ name clash**, not concurrency:
+
+`748f787c refactor(gfx): Display::GetSurfaceSize…` added `#include <gfx/display.hp>` directly
+into `engine/wf_edit/main.cc`. But `main.cc` defines `GLFW_EXPOSE_NATIVE_X11` (line 20),
+pulling in Xlib's `typedef struct _XDisplay Display` — so WF's `class Display`
+(`display.hp:80`) then fails to parse: *"using typedef-name 'Display' after 'class'"*. Only
+`wf_edit` breaks (engine/`wf_game` have no X11 in scope), and its binary was stale
+(pre-commit), so it went unnoticed. `main.cc:1363` already documents this exact trap.
+
+**Fix (this session):** moved the single `Display::SetLiveWindowSize` call out of `main.cc`
+into `gizmo.cc` behind a new int-only wrapper `wfedit::SetEditorLiveWindowSize(int,int)` —
+the same TU-isolation convention `gizmo.cc` already uses for `GetCameraPoseWS` /
+`SetEditorCameraPose` (`gizmo.h:43-44` documents the clash). `wf_edit` rebuilt clean
+(`BUILD_EXIT=0`). `wf-relay` is also built.

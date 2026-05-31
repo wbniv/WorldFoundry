@@ -16,6 +16,7 @@
 #include <game/camera.hp>   // Camera::GetRenderCamera
 #include <game/actor.hp>    // pulls in Vector3 / Scalar
 #include <gfx/camera.hp>    // RenderCamera::GetPosition
+#include <gfx/display.hp>   // Display::GetActive / SetLiveWindowSize (X11-clash-safe here)
 #include <math/matrix34.hp> // Matrix34
 #include <math/euler.hp>    // Euler
 #include <math/angle.hp>    // Angle::AsRadian
@@ -200,6 +201,16 @@ void CommitGizmoToDoc(wfcrdt::Doc& doc, int doc_index, const float model_gl[16])
                       e.GetC().AsRadian().AsFloat());
         WriteFieldLeaf(doc, doc_index, oriChild, "DATA", buf);
     }
+}
+
+// Push the live OS-window size into the active engine Display so HUD layout and
+// WFInitGL's viewport/projection pick it up on resize. Wrapper exists because
+// gfx/display.hp's `class Display` clashes with X11's `Display` typedef pulled
+// into main.cc via GLFW_EXPOSE_NATIVE_X11 — same reason as GetCameraPoseWS.
+// No-op if no Display is active yet (pre-HALStart).
+void SetEditorLiveWindowSize(int w, int h)
+{
+    if (auto* d = Display::GetActive()) d->SetLiveWindowSize(w, h);
 }
 
 }  // namespace wfedit

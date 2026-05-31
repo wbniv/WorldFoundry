@@ -80,8 +80,9 @@ extern char szAppName[];
 // gfx/gl/display.cc — drive WFInitGL's glViewport + projection aspect. main()
 // seeds them from the GLFW framebuffer before HALStart; editor_build re-applies
 // glViewport + SetProjection from them on window resize (the engine's own
-// resize path early-bails in host-owned mode).
-#include <gfx/display.hp>
+// resize path early-bails in host-owned mode). Display::SetLiveWindowSize is
+// reached via wfedit::SetEditorLiveWindowSize (gizmo.cc) — gfx/display.hp's
+// `class Display` clashes with X11's `Display` typedef here (GLFW_EXPOSE_NATIVE_X11).
 extern int wfInitialWindowWidth, wfInitialWindowHeight;
 
 namespace {
@@ -1278,8 +1279,9 @@ bool editor_build(void* p)
         glfwGetFramebufferSize(c->win, &fbw, &fbh);
         if (fbw > 0 && fbh > 0 && (fbw != c->fb_w || fbh != c->fb_h)) {
             c->fb_w = fbw; c->fb_h = fbh;
-            // Push the new size into Display so HUD layout / WFInitGL pick it up.
-            if (auto* d = Display::GetActive()) d->SetLiveWindowSize(fbw, fbh);
+            // Push the new size into Display so HUD layout / WFInitGL pick it up
+            // (via gizmo.cc — Display vs X11 typedef clash, see include note above).
+            wfedit::SetEditorLiveWindowSize(fbw, fbh);
             glViewport(0, 0, fbw, fbh);
             // Mirror WFInitGL (display.cc:283-284): FOV 60°, near 1, far 1000.
             // Constants duplicated because we must not modify the engine build.
@@ -2251,12 +2253,6 @@ int main(int argc, char** argv)
     // any window/engine setup.
     if (const char* p = std::getenv("WF_EDIT_TURN_TEST"); p && *p)
         return RunTurnTest();
-
-    // Headless 3-peer mesh self-test — three in-process WebrtcSessions form a
-    // full mesh by shuttling their own signalling. Needs no level, GL, relay, or
-    // args. Must run before any window/engine setup. See RunMeshTest above.
-    if (const char* p = std::getenv("WF_EDIT_MESH_TEST"); p && *p)
-        return RunMeshTest();
 
     // Headless quick-tunnel self-test (Phase 4.3): spawn relay + cloudflared,
     // resolve the public host, print the share link, reap, exit. Needs network +
