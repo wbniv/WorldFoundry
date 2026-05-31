@@ -188,8 +188,7 @@ print(f"[moon] terrain mesh: {len(terrain_mesh.vertices)} verts, "
 
 matte = find_by_class('matte')
 if matte:
-    matte.location = (0.0, 0.0, 0.0)   # position is cosmetic — Color matte
-                                       # is the glClearColor, not a plane
+    matte.location = (0.0, -490.0, 0.0)  # parked at edge of room, no chance of frustum overlap
     matte['wf_Matte Type']        = 'Color'
     matte['wf_Background Color']  = 0x000000      # space-black
     matte['wf_Visibility Mailbox']= 1
@@ -292,7 +291,7 @@ if camshot:
 room = find_by_class('room')
 if room:
     z_min = float(heights.min()) - 10.0      # 10 m below lowest terrain pixel
-    z_max = max(50.0, float(heights.max()) + 50.0)   # chase cam at Z=11 + headroom
+    z_max = max(300.0, float(heights.max()) + 50.0)  # vista cam headroom
     centre = (0.0, 0.0, (z_min + z_max) / 2.0)
     rel = (-HALF_M - 10.0, -HALF_M - 10.0, z_min - centre[2],
            +HALF_M + 10.0, +HALF_M + 10.0, z_max - centre[2])

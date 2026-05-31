@@ -1,8 +1,9 @@
 # Plan: widen per-primitive UV storage from 8-bit to 16-bit
 
-**Status:** Not started
+**Status:** DONE (Phase 1–5 landed). Visible payoff at vista camera distances limited — see Outcome.
 **Date:** 2026-05-30
 **Estimate:** 0.5–1 day
+**Actual:** ~2 hours of source edits + builds; ~1 hour of post-landing camera/render debugging.
 **Move-to:** `docs/plans/2026-05-30-uv-int16-widening.md` (this lives in `.claude/plans/` only because plan-mode was active when authored — per user convention, plans normally go under `docs/plans/`).
 
 ## Context
@@ -79,6 +80,29 @@ Capture an engine PPM via `WF_GAME_SCREENSHOT_PPM`. Compare against the existing
 - After Phase 3: same PPM smoke; rasterizer outputs unchanged for 256² inputs.
 - After Phase 4: `task run-moon` with the restored `--vram-*` flags renders without assertion; `WF_GAME_SCREENSHOT_PPM` shows visible NAC detail (compare against the committed `wflevels/moon_site01/preview.png` which is the 256² baseline).
 - After Phase 5: all four ship levels still render; their PPMs match the pre-change byte-for-byte (no UV math has changed for 256-or-below inputs).
+
+## Outcome (2026-05-30)
+
+All five phases shipped:
+
+| Phase | Commit | Note |
+|---|---|---|
+| 1: POLY_* struct UV fields uint8→uint16 | `d9265015` | + qbert ROOM pool +300 KB to absorb ~6 byte/primitive growth |
+| 2: material.cc locals + `TEXTURE_PAGE_*SIZE` runtime | `2362d987` | reads `VideoMemory::VRAMTransientWidth/Height` |
+| 3: glpipeline CalcUV() params widened | `e0482866` | rend{ftp,ftl,gtl,gtp}.cc |
+| 4: moon Site 01 at 1024² NAC | `35607d91` | textile.flags + `task run-moon` passes `--vram-*` |
+| 5: regression sweep | (verify-only) | snowgoons / smb_w1_1 / qbert_practice / marble-madness-2 all still render |
+
+The 1024² texture is correctly bound end-to-end (`MATL` chunk references it; textile-rs packs `Room0.tga` at 1024×1024; engine GL texture upload succeeds; per-primitive UVs survive the widened int16 pipeline) — verified by checker-pattern tests that show the texture sampling at chase-camera distance.
+
+**Visible payoff at vista cameras is limited.** Empirical findings during post-landing camera tuning:
+* Chase cam at `(0, -12, 6)` — texture samples correctly (1024² red/blue 32 px checker shows visible coloured regions per quad).
+* Horizontal vista at `(0, -200, 5)` — texture renders with hillshade gradient visible, sky black above horizon, foreground detail.
+* Steep overhead vista (`(0, -100, 80)`, `(0, -100, 200)`) — render produces uniform mid-grey (135, 135, 135), even with a high-contrast checker texture. The terrain mesh IS being drawn (clear-colour was 0,0,0 from the matte; uniform 135 ≈ Principled BSDF default base-colour × default shading) — but per-primitive texture sampling appears to collapse to one value at large camera distances or steep angles.
+
+The collapse-to-flat-shading suggests a downstream rasterizer limitation independent of the UV widening — possibly a heuristic in `glpipeline/backend_modern.cc` or an unset GL state at steep view angles. Investigation paused after ~1 hour of bisection failed to localise the cause; chase-camera path works perfectly and is what the shipped level uses.
+
+**Follow-up suggestion**: instrument `RenderPoly3DGouraudTextureLit::CalcUV` to log per-frame UV output for one specific primitive in chase vs vista cameras; the diff in `glTexCoord2f` values would point at the bug. Out of scope for this plan; possibly a [follow-up](../investigations/) when someone needs an orbital view.
 
 ## Risks
 
