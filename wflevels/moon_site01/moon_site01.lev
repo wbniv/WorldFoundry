@@ -956,10 +956,10 @@
 		{ 'STR' { 'NAME' "Shadow Object Template" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Check Below Only Once" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
-		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000006095826(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000033069422(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000001593707(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000007968535(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "lunar_terrain" }

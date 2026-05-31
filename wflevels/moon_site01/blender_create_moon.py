@@ -227,7 +227,90 @@ if light:
     light['wf_lightGreen'] = 1.0
     light['wf_lightBlue']  = 1.0
 
-# ── 6. Player ────────────────────────────────────────────────────────────────
+# ── 6. Player (astronaut) ────────────────────────────────────────────────────
+# Built in-script from primitives like SMB Mario / Q*bert, not imported. ~14
+# primitives joined into one mesh, feet at z=0 via transform_apply. See
+# docs/plans/2026-05-31-moon-astronaut-mesh.md.
+
+def _make_mat(name, rgb):
+    mat = bpy.data.materials.new(name=name)
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes.get('Principled BSDF')
+    if bsdf:
+        bsdf.inputs['Base Color'].default_value = (*rgb, 1.0)
+    mat.diffuse_color = (*rgb, 1.0)
+    return mat
+
+
+def _build_astronaut():
+    mat_white = _make_mat('astro_white', (0.92, 0.92, 0.92))
+    mat_off   = _make_mat('astro_offwhite', (0.85, 0.85, 0.82))   # PLSS backpack
+    mat_dark  = _make_mat('astro_dark', (0.18, 0.18, 0.20))       # chest panel, neck
+    mat_visor = _make_mat('astro_visor', (0.76, 0.53, 0.25))      # gold-amber #c28840
+
+    parts = []
+    SEG = 8; RING = 5  # low-poly UV sphere segments (matches SMB Mario)
+
+    def add_cyl(r, h, loc, mat):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=SEG, radius=r, depth=h, location=loc)
+        parts.append((bpy.context.object, mat))
+
+    def add_sph(r, loc, mat):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=r, segments=SEG, ring_count=RING, location=loc)
+        parts.append((bpy.context.object, mat))
+
+    def add_cube(sx, sy, sz, loc, mat):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=loc)
+        obj = bpy.context.object
+        obj.scale = (sx, sy, sz)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((obj, mat))
+
+    # Boots, lower legs, upper legs (mirrored in ±Y)
+    for yo in (-0.12, 0.12):
+        add_cube(0.18, 0.15, 0.10, (0.0, yo, 0.05), mat_white)               # boot
+        add_cyl(0.09, 0.42, (0.0, yo, 0.31), mat_white)                       # lower leg
+        add_cyl(0.10, 0.42, (0.0, yo, 0.73), mat_white)                       # upper leg
+
+    add_cyl(0.20, 0.10, (0.0, 0.0, 0.95), mat_white)                          # hips
+    add_cyl(0.22, 0.45, (0.0, 0.0, 1.225), mat_white)                         # torso
+    add_cube(0.20, 0.08, 0.12, (-0.20, 0.0, 1.30), mat_dark)                  # chest panel
+    add_cube(0.30, 0.18, 0.50, (+0.27, 0.0, 1.20), mat_off)                   # PLSS backpack
+
+    for yo in (-0.27, 0.27):
+        add_sph(0.11, (0.0, yo, 1.42), mat_white)                             # shoulder
+        add_cyl(0.08, 0.30, (0.0, yo, 1.27), mat_white)                       # upper arm
+        add_cyl(0.08, 0.28, (0.0, yo, 0.98), mat_white)                       # forearm
+        add_sph(0.09, (0.0, yo, 0.84), mat_white)                             # glove
+
+    add_cyl(0.06, 0.06, (0.0, 0.0, 1.475), mat_dark)                          # neck
+    add_sph(0.14, (0.0, 0.0, 1.66), mat_white)                                # helmet
+    add_sph(0.13, (-0.05, 0.0, 1.66), mat_visor)                              # visor
+
+    # Apply per-part material assignments
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for p in obj.data.polygons:
+            p.material_index = 0
+            p.use_smooth = True
+
+    # Join all parts into one mesh, then bake the root part's location into
+    # mesh-local verts so the joined mesh's origin lands at feet (z=0).
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    body.name = 'astronaut'
+    body.data.name = 'astronaut'
+    return body
+
+
+_astronaut = _build_astronaut()
+
 player = find_by_class('player')
 if player:
     player.name = 'Player'
@@ -236,8 +319,12 @@ if player:
     player['wf_Mass']                 = 80.0       # ~80 kg astronaut
     player['wf_Model Type']           = 'Mesh'
     player['wf_Visibility Mailbox']   = 1
-    # 1.8 m astronaut. Player.location is feet; capsule extends +Z.
-    player.scale = (PLAYER_HEIGHT, PLAYER_HEIGHT, PLAYER_HEIGHT)
+    # Use the built astronaut mesh — already 1.8 m tall in mesh-local coords
+    # with feet at z=0. No actor-side scale (the old 1.8×1.8×1.8 blanket scale
+    # was a cube-shaped placeholder).
+    player.data = _astronaut.data
+    bpy.data.objects.remove(_astronaut, do_unlink=True)
+    player.scale = (1.0, 1.0, 1.0)
     # Walking on the Moon at ~1 m/s — slower than SMB Mario.
     player['wf_Running Acceleration']  = 8.0
     player['wf_Running Deceleration']  = 0.85
