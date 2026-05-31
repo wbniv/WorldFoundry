@@ -35,4 +35,14 @@ void ApplyGizmoToEngine(int engine_idx, const float model_gl[16]);
 // and syncs to co-edit peers. doc_index is the 0-based content[] index.
 void CommitGizmoToDoc(wfcrdt::Doc& doc, int doc_index, const float model_gl[16]);
 
+// Extract the live engine camera's world pose into three float[3] vectors:
+// position (row 3 of camera-world Matrix34), forward axis (row 0 — WF actor +X
+// = forward), and up axis (row 2 — WF +Z = up). Returns false if there's no
+// live level/camera (caller leaves the outs untouched). Float-only API so
+// main.cc can call it without pulling engine headers (game/camera.hp →
+// gfx/display.hp clashes with X11's `Display` typedef under
+// GLFW_EXPOSE_NATIVE_X11). Used by the shared-cursors presence broadcast
+// (docs/plans/2026-05-30-a-e-b-…md §B).
+bool GetCameraPoseWS(float pos[3], float fwd[3], float up[3]);
+
 }  // namespace wfedit

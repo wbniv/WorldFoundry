@@ -121,6 +121,21 @@ void ApplyGizmoToEngine(int engine_idx, const float model_gl[16])
     wfmut::SetActorOrientation(*theLevel, engine_idx, m.AsEuler());  // WF's own extraction
 }
 
+bool GetCameraPoseWS(float pos[3], float fwd[3], float up[3])
+{
+    if (!theLevel || !theLevel->camera()) return false;
+    // Same matrix BuildGizmoMats uses (gizmo.cc:82). Float-only output so the
+    // caller (main.cc) doesn't have to pull game/camera.hp etc.
+    const Matrix34& camWorld = theLevel->camera()->GetRenderCamera().GetPosition();
+    const Vector3& p   = camWorld[3];   // translation
+    const Vector3& fX  = camWorld[0];   // WF actor +X = forward
+    const Vector3& uZ  = camWorld[2];   // WF +Z = up
+    pos[0] = (float)p.X();   pos[1] = (float)p.Y();   pos[2] = (float)p.Z();
+    fwd[0] = (float)fX.X();  fwd[1] = (float)fX.Y();  fwd[2] = (float)fX.Z();
+    up [0] = (float)uZ.X();  up [1] = (float)uZ.Y();  up [2] = (float)uZ.Z();
+    return true;
+}
+
 void CommitGizmoToDoc(wfcrdt::Doc& doc, int doc_index, const float model_gl[16])
 {
     Matrix34 m = GLToMatrix34(model_gl);

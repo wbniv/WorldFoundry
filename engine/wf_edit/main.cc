@@ -333,10 +333,18 @@ struct EditorCtx {
         float colour[3] = {0.8f, 0.8f, 0.8f};
         std::string selected_eid;
         double last_seen = 0.0;   // glfwGetTime()
+        // Shared cursors (2026-05-30 plan §B): full camera pose for frustum draw +
+        // "Jump to view." Absent on older peers → fields stay zero and the receiver
+        // skips frustum + Jump-to-view for that peer.
+        float cam_pos[3] = {0.f, 0.f, 0.f};
+        float cam_fwd[3] = {0.f, 0.f, 0.f};   // WF camera "forward" axis (row 0 of cam world matrix)
+        float cam_up [3] = {0.f, 0.f, 0.f};   // WF camera "up" axis (row 2)
+        bool  has_cam    = false;             // true iff cam_pos/fwd/up were present in the last frame
     };
     std::unordered_map<std::string, PresenceState> peer_presence;  // peer_id → state
     double last_presence_send = 0.0;
     float  our_colour[3] = {0.5f, 0.5f, 0.5f};   // set on relay connect from peer_id hash
+    std::string display_name = "Editor";         // copied from identity.json at startup; broadcast as the peer "name"
 
     // Phase 5: chat sidebar (only visible when relay is connected).
     struct ChatEntry {
@@ -525,6 +533,20 @@ void CollabDrain(EditorCtx* c) {
                     }
                     ps.selected_eid = j.value("selected_eid", "");
                     ps.last_seen    = glfwGetTime();
+                    // Shared-cursors fields (absent on older peers): keep
+                    // has_cam false so the receiver renders no frustum / no
+                    // Jump-to-view button for that peer.
+                    auto vec3_into = [&](const char* key, float out[3]) -> bool {
+                        if (!j.contains(key) || !j[key].is_array() || j[key].size() < 3) return false;
+                        out[0] = j[key][0].get<float>();
+                        out[1] = j[key][1].get<float>();
+                        out[2] = j[key][2].get<float>();
+                        return true;
+                    };
+                    const bool p = vec3_into("cam_pos", ps.cam_pos);
+                    const bool f = vec3_into("cam_fwd", ps.cam_fwd);
+                    const bool u = vec3_into("cam_up",  ps.cam_up );
+                    ps.has_cam = p && f && u;
                 }
             } catch (...) {}
         } else if (ch == 0x03) {
@@ -1154,6 +1176,8 @@ bool editor_build(void* p)
     if (c->doc) wfedit::DrainEngineSync(*c->doc, c->gizmo_active ? c->selected : -1);
 
     // Phase 4: broadcast own presence ~10 Hz when relay is connected.
+    // Shared-cursors extension (2026-05-30): includes camera pose + selected_eid
+    // so peers can draw each other's viewing frustums + selection rings.
     if (c->relay_client.connected()) {
         const double now = glfwGetTime();
         if (now - c->last_presence_send >= 0.1) {
@@ -1162,12 +1186,24 @@ bool editor_build(void* p)
                 (c->selected >= 0 && c->selected < static_cast<int>(c->actor_eids.size()))
                 ? c->actor_eids[c->selected] : "";
             using json = nlohmann::json;
-            const std::string body = json{
+            json body_obj = {
                 {"peer_id",      c->our_peer_id},
-                {"name",         "Editor"},
+                {"name",         c->display_name},
                 {"colour",       json::array({c->our_colour[0], c->our_colour[1], c->our_colour[2]})},
                 {"selected_eid", sel_eid}
-            }.dump();
+            };
+            // Camera pose if a level is live. Engine headers (game/camera.hp,
+            // gfx/display.hp) clash with X11's Display typedef pulled in via
+            // GLFW_EXPOSE_NATIVE_X11, so the pose extraction lives in gizmo.cc
+            // (its TU already has the engine headers cleanly) and exposes a
+            // thin float-only API to keep main.cc on the editor side.
+            float pos[3], fwd[3], up[3];
+            if (wfedit::GetCameraPoseWS(pos, fwd, up)) {
+                body_obj["cam_pos"] = json::array({pos[0], pos[1], pos[2]});
+                body_obj["cam_fwd"] = json::array({fwd[0], fwd[1], fwd[2]});
+                body_obj["cam_up"]  = json::array({up[0],  up[1],  up[2]});
+            }
+            const std::string body = body_obj.dump();
             std::vector<uint8_t> msg;
             msg.reserve(1 + body.size());
             msg.push_back(0x02);   // PRESENCE channel
@@ -1703,12 +1739,53 @@ bool editor_build(void* p)
             ImGui::SetNextWindowFocus();
         }
         ImGui::Begin("Chat");
-        // Peer presence list above history.
+        // Peer presence list above history. Tiles include each peer's selected
+        // actor (looked up via the local actor_eids ↔ actor_names map) so you
+        // can see at a glance what every co-editor is looking at; tiles also
+        // host the (b2) "Jump to view" button when a peer's cam pose is known.
         if (!c->peer_presence.empty()) {
-            for (const auto& [pid, ps] : c->peer_presence)
+            // Lookup table EID → friendly actor name (built once per frame).
+            std::unordered_map<std::string, std::string> name_by_eid;
+            for (size_t i = 0; i < c->actor_eids.size()
+                            && i < c->actor_names.size(); ++i)
+                name_by_eid[c->actor_eids[i]] = c->actor_names[i];
+
+            ImGui::TextDisabled("Peers (%zu)", c->peer_presence.size() + 1);
+            // "You" tile first so the local editor sees its own colour next to peers'.
+            {
+                const std::string& sel_eid =
+                    (c->selected >= 0 && c->selected < static_cast<int>(c->actor_eids.size()))
+                    ? c->actor_eids[c->selected] : std::string();
+                ImGui::TextColored(
+                    ImVec4(c->our_colour[0], c->our_colour[1], c->our_colour[2], 1.f),
+                    "●");
+                ImGui::SameLine();
+                ImGui::Text("%s (you)", c->display_name.c_str());
+                if (!sel_eid.empty()) {
+                    auto it = name_by_eid.find(sel_eid);
+                    ImGui::SameLine();
+                    ImGui::TextDisabled("→ %s", it != name_by_eid.end() ? it->second.c_str() : sel_eid.c_str());
+                }
+            }
+            for (const auto& [pid, ps] : c->peer_presence) {
                 ImGui::TextColored(
                     ImVec4(ps.colour[0], ps.colour[1], ps.colour[2], 1.f),
-                    "● %s", ps.name.c_str());
+                    "●");
+                ImGui::SameLine();
+                ImGui::TextUnformatted(ps.name.c_str());
+                if (!ps.selected_eid.empty()) {
+                    auto it = name_by_eid.find(ps.selected_eid);
+                    ImGui::SameLine();
+                    ImGui::TextDisabled(
+                        "→ %s",
+                        it != name_by_eid.end() ? it->second.c_str() : ps.selected_eid.c_str());
+                }
+                if (ps.has_cam) {
+                    ImGui::SameLine();
+                    ImGui::TextDisabled("  cam (%.1f,%.1f,%.1f)",
+                                        ps.cam_pos[0], ps.cam_pos[1], ps.cam_pos[2]);
+                }
+            }
             ImGui::Separator();
         }
         // Scrollable message history.
@@ -2580,6 +2657,13 @@ int main(int argc, char** argv)
             identity.peer_id = ctx.our_peer_id;
             std::copy(ctx.our_colour, ctx.our_colour + 3, identity.colour);
         }
+        // Shared-cursors broadcast (2026-05-30 §B) uses ctx.display_name as the
+        // peer "name." Pull from identity.json; if the user kept the "Editor"
+        // default, fall back to a peer_id-prefix tag so co-editors can tell
+        // each other apart at a glance even without setting display_name.
+        ctx.display_name = (identity.display_name == "Editor" && !ctx.our_peer_id.empty())
+            ? std::string("Editor (") + ctx.our_peer_id.substr(0, 6) + ")"
+            : identity.display_name;
         // (a) Run the blocking connect on a background thread and pump the window
         // meanwhile, so it never freezes (no WM "not responding" / un-draggable
         // window). `relay_client` is touched ONLY by this thread until it joins,
