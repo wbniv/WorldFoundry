@@ -147,19 +147,18 @@ task run -- wflevels/moon_site04/moon_site04-standalone.iff
 spawn player at Z=100, step ~10 s of frames, confirm player Z stabilises
 near terrain height, X/Y stays inside extent.
 
-### Phase 6 — Astronaut polish (~1 day, optional)
+### Phase 6 — Astronaut polish (~1 day, optional) — DONE 2026-05-31
 
 Cheap visual upgrades that sell the level:
 
-- Black skybox (no atmosphere) — override the default sky asset.
-- Single hard directional sunlight at low angle (south pole sun
-  geometry — sun stays ~1–2° above horizon).
-- No ambient fill except a faint earthshine term.
+- ~~Black skybox (no atmosphere)~~ — done via the matte (`wf_Matte Type=Color`, `wf_Background Color=0x000000`) plus disabling the snowgoons-inherited Earth-fog defaults on the camera actor (`FoggingColor=0x000000`, `FoggingStartDistance=999`, `FoggingCompleteDistance=1000`). The fog override was the critical step — without it every distant pixel fades to `#888888` regardless of skybox setup, see [the fog plan](2026-05-31-uninitialised-fog-defaults.md).
+- ~~Single hard directional sunlight at low angle~~ — done via the `light` actor at az 20° / alt 2°.
+- ~~No ambient fill~~ — done.
 - Player avatar: reuse Mario placeholder initially; astronaut sprite
-  is its own art task.
+  is its own art task. (Still pending.)
 
 **Verify:** screenshot looks plausibly "Moon-like" — hard shadows, black
-sky, low-contrast grey terrain matching NAC imagery.
+sky, low-contrast grey terrain matching NAC imagery. Verified — `task run-moon` at vista cam (0, -100, 80) shows the 1024² NAC composite + hillshade tones + black sky.
 
 ## Open questions
 

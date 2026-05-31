@@ -63,8 +63,11 @@ PLAYER_SPAWN  = (0.0, 0.0, 5.0)
 # Camera: vista from −Y, elevated to show NAC texture detail across a
 # real field of view. Distance ~85 m, ~30° downward angle, 60° FOV →
 # visible footprint ~100 m → ~100 NAC texels (1024² over 1 km play area).
-# Vista camera — fog now disabled on the camera actor (FoggingColor=black,
-# FoggingCompleteDistance=1000) so distant terrain renders cleanly.
+# Vista camera at (0, -100, 80) — looks down at the play area centre at
+# ~38° from a 128 m diagonal. Fog is disabled on the camera actor below so
+# distant terrain renders cleanly (snowgoons inherits Earth-atmosphere fog
+# that fades everything past 30 m to flat #888888; see
+# docs/plans/2026-05-31-uninitialised-fog-defaults.md).
 CAM_OFFSET    = (0.0, -100.0, 80.0)
 LOOK_TARGET   = (0.0, 0.0, 0.0)
 

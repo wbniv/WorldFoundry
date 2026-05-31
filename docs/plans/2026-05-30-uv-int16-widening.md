@@ -95,14 +95,7 @@ All five phases shipped:
 
 The 1024² texture is correctly bound end-to-end (`MATL` chunk references it; textile-rs packs `Room0.tga` at 1024×1024; engine GL texture upload succeeds; per-primitive UVs survive the widened int16 pipeline) — verified by checker-pattern tests that show the texture sampling at chase-camera distance.
 
-**Visible payoff at vista cameras is limited.** Empirical findings during post-landing camera tuning:
-* Chase cam at `(0, -12, 6)` — texture samples correctly (1024² red/blue 32 px checker shows visible coloured regions per quad).
-* Horizontal vista at `(0, -200, 5)` — texture renders with hillshade gradient visible, sky black above horizon, foreground detail.
-* Steep overhead vista (`(0, -100, 80)`, `(0, -100, 200)`) — render produces uniform mid-grey (135, 135, 135), even with a high-contrast checker texture. The terrain mesh IS being drawn (clear-colour was 0,0,0 from the matte; uniform 135 ≈ Principled BSDF default base-colour × default shading) — but per-primitive texture sampling appears to collapse to one value at large camera distances or steep angles.
-
-The collapse-to-flat-shading suggests a downstream rasterizer limitation independent of the UV widening — possibly a heuristic in `glpipeline/backend_modern.cc` or an unset GL state at steep view angles. Investigation paused after ~1 hour of bisection failed to localise the cause; chase-camera path works perfectly and is what the shipped level uses.
-
-**Follow-up suggestion**: instrument `RenderPoly3DGouraudTextureLit::CalcUV` to log per-frame UV output for one specific primitive in chase vs vista cameras; the diff in `glTexCoord2f` values would point at the bug. Out of scope for this plan; possibly a [follow-up](../investigations/) when someone needs an orbital view.
+**Update 2026-05-31 — the visible-payoff cap was unrelated.** The "vista renders uniform 135-grey" symptom traced to [snowgoons fog inheritance](2026-05-31-uninitialised-fog-defaults.md), not the rasterizer: the imported `camera` actor carried `FoggingColor=#888888` ramp 20–30 m, fogging every distant pixel to flat mid-grey regardless of texture resolution. Engine path is correct (`gfx/camera.cc:56-57` reads OAD fog fields per-level). Once the moon camera overrode the three Fogging OAS fields, the vista cam at `(0, -100, 80)` shows the 1024² NAC composite + hillshade tones + black sky cleanly — proving the UV pipeline works at all camera distances. The earlier "rasterizer limitation" theory in this section was wrong.
 
 ## Risks
 

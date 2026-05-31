@@ -3,7 +3,7 @@
 **Status:** DONE
 **Date:** 2026-05-31
 **Estimate:** 15 min
-**Actual:** 10 min once the OAD path was discovered.
+**Actual:** ~3 hours of investigation chasing rasterizer / texture / UV theories first (the visible symptom looked like a rendering pipeline limitation), then ~2 minutes to apply the fix once the user prompted "is that the fogging settings?" and I read the shader's fog block as a possible cause rather than skipped past it.
 
 ## Context
 

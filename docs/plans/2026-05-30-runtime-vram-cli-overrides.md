@@ -138,6 +138,17 @@ moon level to 256² (the pre-1024 NAC composite, committed in `fabb9efb`).
 Open a follow-up plan for the int8→int16 UV widening; Phase 4-5 here
 get marked deferred behind that work.
 
+## Update 2026-05-31: Phase 4-5 unblocked end-to-end
+
+The follow-up [UV int16 widening](2026-05-30-uv-int16-widening.md) landed
+(commits `d9265015` / `2362d987` / `e0482866` / `35607d91` / `f597d460`),
+AND the residual "vista still renders grey at 1024²" turned out to be
+[snowgoons fog inheritance](2026-05-31-uninitialised-fog-defaults.md) — not
+a rasterizer cap. With the moon camera overriding the three Fogging OAS
+fields, the level now renders the 1024² NAC composite cleanly at vista
+distances. Phase 4-5 of this plan are effectively complete via the
+moon-Site-01 ship state (`task run-moon` at `(0, -100, 80)` vista cam).
+
 ## Risks / open questions
 
 - **Static-init order**: `Display::VRAMWidth` is referenced in inline functions in `pixelmap.hpi` etc. — those need to compile against a non-constexpr value. Should be fine (regular int read), but if any expression is in a place requiring constexpr (e.g. an enum initializer somewhere else, or an array size), it'll surface as a compile error in Phase 1. Fix: keep that specific value as enum, replace the rest.
