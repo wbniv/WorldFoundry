@@ -20,6 +20,10 @@
 |---|---|
 | ![smb hud](screenshots/2026-05-31-smb-hud-regression-check.png) | ![qbert hud](screenshots/2026-05-31-qbert-hud-regression-check.png) |
 
+**Negative case** — snowgoons-blender boots with *no* HUD at all (no SCORE/TIME/LIVES, no moon overlay), confirming the gate's silent path is also intact (per [`2026-05-31-hud-gate-on-level-opt-in.md`](2026-05-31-hud-gate-on-level-opt-in.md), levels that never write the trigger mailboxes get no HUD draw at all):
+
+![snowgoons no hud](screenshots/2026-05-31-snowgoons-no-hud-regression-check.png)
+
 ## Context
 
 `wfWindowWidth` and `wfWindowHeight` are mutable globals (`int = 640/480` defaults in `wfsource/source/gfx/gl/display.cc:479-480`) used for *two completely different things*:
