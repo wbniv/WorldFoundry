@@ -275,6 +275,57 @@ static void DrawHud(int xSize, int ySize)
             sy = mm_y + (1.0f - v) * MM;
         };
 
+        // Lat/lon edge ticks — auto-pick a "nice" angular subdivision per axis
+        // targeting ≤10 ticks across the play-area span (PGDA Site 01 at 89.46°S
+        // gives 10″ lat / 30′ lon). See docs/plans/2026-05-31-moon-minimap-latlon-ticks.md.
+        static const double kNiceUnitsDeg[] = {
+            1.0/3600.0, 3.0/3600.0, 5.0/3600.0, 10.0/3600.0, 30.0/3600.0,
+            1.0/60.0,   3.0/60.0,   5.0/60.0,   10.0/60.0,   30.0/60.0,
+            1.0,        3.0,        5.0,        10.0,        30.0,
+        };
+        auto pick_unit = [](double span_deg) {
+            for (double u : kNiceUnitsDeg) if (span_deg / u <= 10.0) return u;
+            return 30.0;
+        };
+        auto pick_major = [](double minor) {
+            for (double u : kNiceUnitsDeg) if (u > minor + 1e-12) return u;
+            return minor * 6.0;
+        };
+
+        const double lat_min = LAT0 + (double)(-HALF_M) * D_LAT_PER_M;
+        const double lat_max = LAT0 + (double)(+HALF_M) * D_LAT_PER_M;
+        const double lon_min = LON0 + (double)(-HALF_M) * D_LON_PER_M;
+        const double lon_max = LON0 + (double)(+HALF_M) * D_LON_PER_M;
+
+        const double lat_unit  = pick_unit(fabs(lat_max - lat_min));
+        const double lon_unit  = pick_unit(fabs(lon_max - lon_min));
+        const double lat_major = pick_major(lat_unit);
+        const double lon_major = pick_major(lon_unit);
+
+        glColor3f(0.6f, 0.6f, 0.6f);
+        glBegin(GL_LINES);
+        // Lat → vertical edges (left + right).
+        for (double lat = ceil(lat_min/lat_unit)*lat_unit; lat <= lat_max + 1e-9; lat += lat_unit) {
+            double y_world = (lat - LAT0) / D_LAT_PER_M;
+            float tx_ignored, sy;
+            world_to_screen(-HALF_M, (float)y_world, tx_ignored, sy);
+            const bool major = fabs(remainder(lat, lat_major)) < lat_unit * 0.01;
+            const float len = major ? 4.0f : 3.0f;
+            glVertex2f(mm_x,            sy); glVertex2f(mm_x + len,        sy);
+            glVertex2f(mm_x + MM,       sy); glVertex2f(mm_x + MM - len,   sy);
+        }
+        // Lon → horizontal edges (top + bottom).
+        for (double lon = ceil(lon_min/lon_unit)*lon_unit; lon <= lon_max + 1e-9; lon += lon_unit) {
+            double x_world = (lon - LON0) / D_LON_PER_M;
+            float sx, ty_ignored;
+            world_to_screen((float)x_world, -HALF_M, sx, ty_ignored);
+            const bool major = fabs(remainder(lon, lon_major)) < lon_unit * 0.01;
+            const float len = major ? 4.0f : 3.0f;
+            glVertex2f(sx, mm_y);           glVertex2f(sx, mm_y + len);
+            glVertex2f(sx, mm_y + MM);      glVertex2f(sx, mm_y + MM - len);
+        }
+        glEnd();
+
         float sx, sy;
 
         // Spawn square — hollow yellow 4-px outline at world (0, 0).
