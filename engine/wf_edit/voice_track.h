@@ -39,6 +39,12 @@ struct PeerAudio {
 
     // Audio level (0..1) for the UI meter, updated by decode thread.
     float level = 0.f;
+
+    // WF_COLLAB_VOICE_DEBUG counters (received side): total decoded packets and
+    // the peak level seen since the last debug print. Lets a two-machine test
+    // confirm media is actually flowing from this peer, grep-able on stderr.
+    uint64_t recv_count = 0;
+    float    recv_peak  = 0.f;
 };
 
 class VoiceChat {
@@ -108,6 +114,14 @@ private:
     // 48 kHz). The capture callback may deliver variable-size chunks.
     float    accum_[960]{};
     int      accum_n_ = 0;
+
+    // WF_COLLAB_VOICE_DEBUG: when the env var is set (resolved once in Start),
+    // log per-second send/receive stats to stderr so a two-machine call can
+    // confirm Opus is actually flowing without watching the UI meters. The
+    // 20 ms frame cadence is fixed (48 kHz / 960), so every 50 frames ≈ 1 s.
+    bool     voice_debug_   = false;
+    uint64_t send_count_    = 0;   // total Opus frames encoded + sent
+    float    send_peak_     = 0.f; // peak mic RMS since last send-debug print
 };
 
 } // namespace wfedit

@@ -357,6 +357,11 @@ colour) in the Collaborators panel. Edits you make on one — drag the move/rota
 gizmo, change a field — sync live to the other through the same `wss://` relay;
 voice/video go peer-to-peer (DTLS-SRTP) or via a configured TURN (see below).
 
+> **Verifying voice/video actually flows (not just connects):** run both sides
+> with `WF_COLLAB_VOICE_DEBUG=1` for per-second `voice-dbg: send/recv` Opus stats
+> on stderr. Full step-by-step (incl. forcing the TURN path from a VPN) in the
+> [two-machine voice/video run sheet](wf-edit-two-machine-voice-test.md).
+
 #### Named tunnel — durable, rate-limit-free, stable hostname
 
 Account-less quick tunnels are throttled by Cloudflare per source IP, and the
