@@ -98,9 +98,12 @@ SMB_COIN_14, SMB_COIN_15, SMB_COIN_16, SMB_COIN_17, SMB_COIN_18 = 1857, 1858, 18
 # Fire Mario fireball globals (mailbox.inc 1820-1827). The generators' Activation
 # MailBox needs the literal index here (an OAS int field); scripts use INDEXOF_ names.
 SMB_FIREBALL_FIRE_R, SMB_FIREBALL_FIRE_L = 1823, 1824
-# Celebration extension (mailbox.inc 1864-1867): Mario hides into the castle + 3 fireworks.
+# Celebration extension (mailbox.inc 1864-1871): Mario hides into the castle + radial fireworks.
 SMB_MARIO_VIS = 1864                          # Player visibility mailbox (1=show, 0=hide)
-SMB_FIREWORK_0, SMB_FIREWORK_1, SMB_FIREWORK_2 = 1865, 1866, 1867
+# 6 firework-generator activation mailboxes; generator n throws a spark burst in its window
+# iff n < SMB_FIREWORK_COUNT (the faithful 1/3/6 last-digit count, latched at celebration start).
+SMB_FIREWORK = [1865, 1866, 1867, 1868, 1869, 1870]
+SMB_FIREWORK_COUNT = 1871
 ENTRY_PIPE_X = 47 * T             # = 70.5, center of cols 46-47 (was 12*T)
 CR_FLOOR_TOP = -48.0              # coin-room floor top
 CR_X0, CR_X1 = 0.0, 24.0         # coin-room play span (16 tiles, faithful W1-1)
@@ -216,7 +219,7 @@ if director:
         "  dup 1.5 > if "                                       # phase D: drain the timer
         "INDEXOF_HUD_TIMER read-mailbox 250.0 INDEXOF_DELTA_TIME read-mailbox * - "
         "dup 0 < if drop 0 then INDEXOF_HUD_TIMER write-mailbox then\n"
-        "  4.2 > if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n"  # phase G: finale (after the fireworks)
+        "  4.5 > if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n"  # phase G: finale (after the last firework burst ~4.35)
         "else\n"
         "  INDEXOF_SMB_TIMER_START read-mailbox not if "
         "INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox then\n"
@@ -1292,6 +1295,11 @@ if player:
         "    INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n"
         "    INDEXOF_HUD_TIMER read-mailbox 50 *\n"
         "    INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n"
+        # Faithful firework count: last digit of the remaining timer, but only 1/3/6 give
+        # fireworks (else none). Latched here, once, BEFORE the Director drains HUD_TIMER.
+        "    INDEXOF_HUD_TIMER read-mailbox 10 %\n"   # `%` casts to int → last digit 0..9
+        "    dup 1 = if drop 1 else dup 3 = if drop 3 else dup 6 = if drop 6 else drop 0 then then then\n"
+        "    INDEXOF_SMB_FIREWORK_COUNT write-mailbox\n"
         "  then\n"
         # Walk Mario into the castle, then hide him (the SMB "enters the castle door" beat):
         #   elapsed < 0.9  → hold at the pole (clamp overshoot; the flag is sliding);
@@ -1813,10 +1821,11 @@ add_statplat('castle', CASTLE_X0, -GROUND_Y, GROUND_TOP_Z, CASTLE_X1, GROUND_Y, 
 add_statplat('castle_pole', CASTLE_MID_X - 0.1, -0.1, CASTLE_TOP,
              CASTLE_MID_X + 0.1, 0.1, CASTLE_TOP + 2 * T, mat_pole)
 
-CFLAG_BASE_Z = CASTLE_TOP             # 4.5 — authored low (rooftop base)
-CFLAG_TOP_Z  = CASTLE_TOP + 2.0 * T   # 7.5 — raised up the rooftop pole
+CFLAG_BASE_Z = CASTLE_TOP                          # 4.5 — authored low (rooftop base)
+CFLAG_TOP_Z  = CASTLE_TOP + 2.0 * T - 0.35 * T     # flag TOP (not center) meets the pole top 7.5
 # Thin VERTICAL slab (same reason as the pole flag — a flat plane is edge-on to the camera).
-bpy.ops.mesh.primitive_cube_add(size=2.0, location=(CASTLE_MID_X - 0.6 * T, 0, CFLAG_BASE_Z))
+# X so the flag's right edge overlaps the pole centre (CASTLE_MID_X) — attached, not floating beside it.
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(CASTLE_MID_X - 0.45 * T, 0, CFLAG_BASE_Z))
 cflag = bpy.context.object
 cflag.name      = 'castle_flag'
 cflag.data.name = 'castle_flag'
@@ -1844,36 +1853,95 @@ mat_door = make_mat('smb_castle_door', (0.05, 0.04, 0.06))
 add_statplat('castle_door', CASTLE_X0 + 0.15, -GROUND_Y - 0.06, GROUND_TOP_Z,
              CASTLE_X0 + 1.35, -GROUND_Y - 0.02, GROUND_TOP_Z + 2.2, mat_door)
 
-# 3 fireworks — bright slabs that pop above the castle in sequence during phase F. Each
-# is hidden (SMB_FIREWORK_n=0) except inside its [t0,t1] elapsed window. Anchored, no
-# physics — same visibility-gate idiom as the coins/popup.
-_FW_A = make_mat('smb_fw_a', (1.0, 0.90, 0.20))   # yellow
-_FW_B = make_mat('smb_fw_b', (1.0, 1.00, 0.95))   # white
-_FW_C = make_mat('smb_fw_c', (1.0, 0.55, 0.15))   # orange
-FIREWORKS = [
-    (0, SMB_FIREWORK_0, CASTLE_X0 + 0.5, CASTLE_TOP + 1.5, 2.1, 3.0, _FW_A),
-    (1, SMB_FIREWORK_1, CASTLE_MID_X,    CASTLE_TOP + 2.2, 2.6, 3.5, _FW_B),
-    (2, SMB_FIREWORK_2, CASTLE_X1 - 0.5, CASTLE_TOP + 1.5, 3.1, 4.0, _FW_C),
+# ── Radial spark-burst fireworks (debris idiom, replaces the flat slabs) ──────
+# A parked Physics `spark_template` is THROWN by 6 invisible `generator` actors arranged
+# in an arc in the open sky above the castle (clear of the flag at Z 7.5). Each generator
+# pulses its global activation mailbox during a staggered elapsed window, but ONLY if its
+# index < SMB_FIREWORK_COUNT — the faithful SMB count (remaining-timer last digit 1/3/6,
+# else 0) the Player latches at celebration start. The generator's up-launch (Object Z
+# Velocity) + gravity arc the sparks; SPARK_SCRIPT fans XSPEED by actor index for the
+# radial spread; the spark despawns once it falls back below the burst height.
+# LOCAL_SYSTEM mailboxes only on the template (a LOCAL_USER write on a default-sized
+# template overflows its array → crash); no Random Displacement (Scalar::Random() asserts)
+# — the fan is deterministic via the fragment's actor index, like the brick debris.
+mat_spark = make_mat('smb_spark', (1.0, 0.95, 0.55))   # bright warm spark
+SPARK_H = 0.16                                          # ~0.32 m spark cube
+SPARK_DESPAWN_Z = CASTLE_TOP + 1.5                     # 6.0 — fallen back below the burst → vanish
+
+SPARK_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"                       # tumble
+    "INDEXOF_ACTOR_INDEX read-mailbox 9 % 4 - 3.0 * INDEXOF_XSPEED write-mailbox\n"      # fan -12..12 m/s
+    f"INDEXOF_Z_POS read-mailbox {SPARK_DESPAWN_Z:.1f} < if 0 INDEXOF_ALIVE write-mailbox then\n"
+)
+
+def _make_spark_template():
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(SPARK_H*2, SPARK_H*2, SPARK_H*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new('spark_template')
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat_spark)
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('spark_template', mesh)
+    obj.location = (-72.0, 0.0, 0.0)   # parking spot; generator overrides pos/vel on spawn
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'generator')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Max Air Speed']        = 50.0
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = 0.0
+    obj['wf_Activation MailBox']   = 0      # mailbox[0] = always-false → the template never spawns
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'spark_template.iff'
+    obj['wf_Script']               = SPARK_SCRIPT
+    return obj
+
+_make_spark_template()
+
+# 6 invisible generators in an arc in the open sky above the castle. Burst n fires in its
+# window iff n < SMB_FIREWORK_COUNT, so a count of 1/3/6 lights 1/3/6 bursts.
+FW_SKY_Z = CASTLE_TOP + 5.0   # 9.5 — burst origins above the flag (7.5), in open sky
+FW_ARC = [   # (x, z) arc above the castle, centre highest
+    (CASTLE_MID_X - 3.0 * T, FW_SKY_Z - 0.5 * T),
+    (CASTLE_MID_X - 1.8 * T, FW_SKY_Z + 0.3 * T),
+    (CASTLE_MID_X - 0.6 * T, FW_SKY_Z + 0.8 * T),
+    (CASTLE_MID_X + 0.6 * T, FW_SKY_Z + 0.8 * T),
+    (CASTLE_MID_X + 1.8 * T, FW_SKY_Z + 0.3 * T),
+    (CASTLE_MID_X + 3.0 * T, FW_SKY_Z - 0.5 * T),
 ]
-for _i, _mb, _fx, _fz, _t0, _t1, _mat in FIREWORKS:
-    bpy.ops.mesh.primitive_cube_add(size=2.0, location=(_fx, 0, _fz))
-    _fw = bpy.context.object
-    _fw.name = f'firework_{_i}'
-    _fw.data.name = f'firework_{_i}'
-    _fw.scale = (0.5 * T, 0.03, 0.5 * T)   # ~1.5 m bright burst, thin in Y (faces the camera)
-    bpy.ops.object.transform_apply(scale=True)
-    _fw.data.materials.clear()
-    _fw.data.materials.append(_mat)
-    attach_schema(_fw, 'enemy')
-    _fw['wf_Mobility'] = 'Anchored'
-    _fw['wf_Model Type'] = 'Mesh'
-    _fw['wf_Visibility Mailbox'] = _mb     # default 0 (hidden); script shows it in its window
-    _fw['wf_Script'] = (
+for _i, (_fx, _fz) in enumerate(FW_ARC):
+    _t0 = 2.0 + _i * 0.35   # staggered; 0.6 s window → last burst ends ~4.35 (finale 4.5)
+    _t1 = _t0 + 0.6
+    g = bpy.data.objects.new(f'firework_gen_{_i}', None)   # Empty → meshless, non-solid spawner
+    scene.collection.objects.link(g)
+    attach_schema(g, 'generator')
+    g.location = (_fx, 0.0, _fz)
+    g['wf_Mobility']           = 'Anchored'
+    g['wf_Model Type']         = 'None'              # invisible
+    g['wf_Visibility Mailbox'] = 0
+    g['wf_Activation MailBox'] = SMB_FIREWORK[_i]    # global; the script pulses it in-window
+    g['wf_Object To Throw']    = 'spark_template'
+    g['wf_Generation Rate']    = 10.0               # generator.oas cap; ~6 sparks over the 0.6 s window
+    g['wf_Object X Velocity']  = 0.0
+    g['wf_Object Y Velocity']  = 0.0                # OAS default 1.0 drifts into +Y — zero it
+    g['wf_Object Z Velocity']  = 4.0               # up-launch; gravity arcs the sparks back down
+    g['wf_Script'] = (
         "\\ wf\n"
-        f"0 INDEXOF_SMB_FIREWORK_{_i} write-mailbox\n"       # default hidden
+        f"0 INDEXOF_SMB_FIREWORK_{_i} write-mailbox\n"            # default: don't spawn
         "INDEXOF_SMB_CELEBRATE read-mailbox if\n"
-        "  INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox -\n"   # elapsed
-        f"  dup {_t0} > swap {_t1} < & if 1 INDEXOF_SMB_FIREWORK_{_i} write-mailbox then\n"  # `&` = bitwise AND (zForth has no `and` word; the codebase uses & / |)
+        f"  {_i} INDEXOF_SMB_FIREWORK_COUNT read-mailbox < if\n"  # this burst enabled by the count?
+        "    INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox -\n"   # elapsed
+        f"    dup {_t0:.2f} > swap {_t1:.2f} < & if 1 INDEXOF_SMB_FIREWORK_{_i} write-mailbox then\n"
+        "  then\n"
         "then\n"
     )
 

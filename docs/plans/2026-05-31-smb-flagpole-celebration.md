@@ -170,8 +170,6 @@ each firework; mp4 of the full beat; `verify_smb_scroll` + `verify_smb_scoring` 
 ## Follow-ups (after this pass)
 
 - **Fanfare** SFX (`SfxLibrary`; audio-verify on the other machine).
-- **Radial spark-burst fireworks** (generator + `firework_spark` Physics template, the debris idiom)
-  and **count = remaining-timer last digit** (1/3/6) — the current pass is three flashing slabs.
-- Tighten the castle flag onto its rooftop pole; nudge the firework slabs clear of the flag so they
-  read as distinct sky bursts.
-- Bring the celebration to W1-2 / faithful W1-2.
+- **Radial spark-burst fireworks** + **count = remaining-timer last digit** (1/3/6), **flag/firework
+  positioning**, and **faithful W1-2** are being done in
+  [2026-06-01-smb-fireworks-rework-and-faithful-w1-2.md](2026-06-01-smb-fireworks-rework-and-faithful-w1-2.md).
