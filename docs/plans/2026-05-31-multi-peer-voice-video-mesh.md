@@ -34,8 +34,27 @@
     and the verdict capturable. (Two earlier status notes in this doc's git history quoted
     fabricated numbers — `a=2 b=1 c=1` as a failure, then `a=2 b=2 c=2` as a pass — before
     any such line was ever in a log; the output above is the first genuinely captured run.)
-- **Remaining:** live 3-peer voice smoke + canonical screenshot (Phase 1/4) — the visible-proof
-  layer on top of the now-verified mesh transport.
+- **Phase 1 (live 3-peer mesh over the real relay) + Phase 4 (canonical screenshot) — DONE + verified (2026-05-31).**
+  Ran `tests/screenshot_three_peer_b2.sh` (`wf-relay` + Alice/Bob/Carol, distinct
+  `XDG_CONFIG_HOME`, `DISPLAY=:0`), `SMOKE_EXIT=0`. Captured per-editor `webrtc: connected
+  to peer` lines show a **complete 3-node mesh** — each editor connected to exactly its two
+  peers (IDs cross-check: Alice `ce4606`↔Bob `d13827`↔Carol `6daa37`, all three pairs up),
+  with offerer flags consistent with the lexicographic rule. `voice: added peer` /
+  `video: added peer` fire for both peers on each editor (per-peer A/V slots created). This
+  is **W1 verified live over the wire** — the relay-path counterpart to the loopback
+  `wf_edit_mesh` ctest. **W2** confirmed by Carol's screenshot
+  ([`wfedit_shared_cursors_b2_live_three_C.png`](../../tests/screenshots/wfedit_shared_cursors_b2_live_three_C.png)):
+  chat sidebar shows `Peers (3)` (her + `d13827` + `ce4606`, each with cam coords + `Jump`),
+  two camera frustums overlaid in the viewport, and the Collab call panel with two peer tiles.
+  - **NOT verified (honest scope):** W3/W4 (Opus encode actually running + `OnRemoteOpus`
+    firing from both peers). The voice path uses **real miniaudio mic capture**
+    (`voice_track.cc:115`, `ma_device_init capture`) with no synthetic-audio injection hook,
+    so headless there's no mic and the encode/decode path can't be honestly exercised. The
+    *transport* for it is proven (tracks added, mesh connected); the *media flow* needs a
+    real mic on two+ machines, or a synthetic-source hook added to `voice_track.cc` first.
+- **Remaining:** optionally add a synthetic-audio source to `voice_track.cc` to close W3/W4
+  headlessly; otherwise the multi-peer arc is functionally complete (transport + presence +
+  visual proof all verified at N=3).
 **Parent:** §B umbrella ([A-E-B plan](2026-05-30-a-e-b-audit-follow-up-mailbox-999-fix-shared-curso.md)); continuation of the WebRTC arc.
 
 ## Context
