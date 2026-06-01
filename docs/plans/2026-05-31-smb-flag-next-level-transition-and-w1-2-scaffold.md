@@ -117,8 +117,7 @@ boots into Mario; demos kept at 2/3). Update the task `desc:`. Run/verify with t
 3. **Transition proof (headless bridge; the engine `Level Loaded: Object Count` line IDs each
    level — 120 = W1-1, 18 = W1-2):** boot `cd.iff` (→ 120); drive the meta-loop directly
    (`set_mailbox 5000=1` + `1905=1`, idx 0) → 18 (W1-2); then **walk** Mario across flat W1-2 into
-   its flagpole → 120 (loop back to W1-1). Net sequence **`120 → 18 → 120`**; screenshots
-   `tests/screenshots/smb_transition_{1..4}_*.png`.
+   its flagpole → 120 (loop back to W1-1). Net sequence **`120 → 18 → 120`** — proof artifacts below.
    - *(W1-1's own 315 m flag is too far to walk headlessly, and teleporting `X_POS` glitches the
      Jolt body into a fall/death → death reloads the same level. So the flag ActBox is proven on
      W1-2, which uses the byte-identical composition; the W1-1 advance ActBox is field-verified in
@@ -131,6 +130,29 @@ boots into Mario; demos kept at 2/3). Update the task `desc:`. Run/verify with t
      per "no new harness"; can be promoted to `tests/verify_smb_level_transition.py` on request.)
 4. Regression: `python3 tests/verify_smb_scroll.py` + `verify_smb_scoring.py` still pass after the
    W1-1 re-export (scoring 6/6; the flagpole bonus still fires).
+
+### Proof artifacts
+
+**Run-through video (27 s — the full loop):**
+[`tests/recordings/smb_w1_1_w1_2_transition.mp4`](../../tests/recordings/smb_w1_1_w1_2_transition.mp4)
+— W1-1 → (meta-loop) → W1-2 → *walk into the flag* → W1-1. Recorded with `-record_video`; its FBO
+is narrower than the on-screen window, so the 7.5 m ceiling sits just above the *video* frame —
+the screenshots below (window-native 640 px) show it.
+
+**Screenshots** (`tests/screenshots/`) — W1-1 has a `?`-block + coin, bare W1-2 has neither (and
+adds the brick ceiling), so the content change across the cuts *is* the transition:
+
+*1 — `cd.iff` boots into W1-1:*
+
+![W1-1 boot](../../tests/screenshots/smb_transition_1_w1_1.png)
+
+*2 — advanced to W1-2 (underground: flat floor + brick ceiling + near-black void):*
+
+![W1-2 loaded](../../tests/screenshots/smb_transition_2_w1_2.png)
+
+*3 — back in W1-1 after walking W1-2's flag (loop-back — `?`-block + coin return):*
+
+![W1-1 again](../../tests/screenshots/smb_transition_4_w1_1_loopback.png)
 
 ## Follow-ups (logged, not this pass)
 
