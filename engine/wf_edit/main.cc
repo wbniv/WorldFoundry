@@ -125,6 +125,8 @@ struct WfeditIdentity {
     std::string  tunnel_hostname;
     // Outliner: group actors into a collapsible tree by shared base name.
     bool         outliner_group_by_prefix = true;
+    // Strip the shared base prefix from children within each group.
+    bool         outliner_strip_prefix    = true;
 };
 
 static std::string IdentityPath()
@@ -169,6 +171,7 @@ static std::optional<WfeditIdentity> LoadIdentity()
         id.tunnel_token     = j.value("tunnel_token", "");
         id.tunnel_hostname  = j.value("tunnel_hostname", "");
         id.outliner_group_by_prefix = j.value("outliner_group_by_prefix", true);
+        id.outliner_strip_prefix    = j.value("outliner_strip_prefix",    true);
         if (id.peer_id.empty()) return std::nullopt;
         return id;
     } catch (...) {
@@ -204,7 +207,8 @@ static void SaveIdentity(const WfeditIdentity& id)
             {"relay_default",    id.relay_default},
             {"tunnel_token",     id.tunnel_token},
             {"tunnel_hostname",  id.tunnel_hostname},
-            {"outliner_group_by_prefix", id.outliner_group_by_prefix}
+            {"outliner_group_by_prefix", id.outliner_group_by_prefix},
+            {"outliner_strip_prefix",    id.outliner_strip_prefix}
         };
         std::ofstream f(path);
         f << j.dump(2) << "\n";
@@ -278,7 +282,8 @@ struct EditorCtx {
     int                      selected = -1;
     // Outliner: group actors into a collapsible tree by shared base name
     // (toggle in the Outliner header; persists in identity.json).
-    bool                     outliner_group = false;
+    bool                     outliner_group        = false;
+    bool                     outliner_strip_prefix = true;
 
     // Property panel: the selected actor's fields, read from the Doc and (Phase
     // 2) correlated against its class .oad into widget-typed PropFields, cached
@@ -1750,6 +1755,11 @@ bool editor_build(void* p)
     ImGui::SameLine();
     if (ImGui::SmallButton(c->outliner_group ? "Ungroup" : "Group"))
         c->outliner_group = !c->outliner_group;
+    if (c->outliner_group) {
+        ImGui::SameLine();
+        if (ImGui::SmallButton(c->outliner_strip_prefix ? "Full names" : "Strip prefix"))
+            c->outliner_strip_prefix = !c->outliner_strip_prefix;
+    }
 
     // Class-picker popup for "Add..."
     static const char* kClasses[] = {
@@ -1788,7 +1798,8 @@ bool editor_build(void* p)
 
     // One actor row: the Selectable (selection is an index into actor_names) plus
     // a peer-presence dot in the right margin. Shared by the flat + grouped paths.
-    auto render_row = [&](int i) {
+    // label: when non-null, displayed instead of the full actor name (stripped prefix).
+    auto render_row = [&](int i, const char* label = nullptr) {
         const std::string& eid = (i < static_cast<int>(c->actor_eids.size()))
                                  ? c->actor_eids[i] : "";
         // Find any peer that has this actor selected.
@@ -1797,8 +1808,10 @@ bool editor_build(void* p)
             for (const auto& [pid, ps] : c->peer_presence)
                 if (ps.selected_eid == eid) { peer_sel = &ps; break; }
         }
-        if (ImGui::Selectable(c->actor_names[i].c_str(), c->selected == i))
+        ImGui::PushID(i);
+        if (ImGui::Selectable(label ? label : c->actor_names[i].c_str(), c->selected == i))
             c->selected = i;
+        ImGui::PopID();
         if (peer_sel) {
             // Draw a small coloured dot in the right margin of the row.
             const ImVec2 rmin = ImGui::GetItemRectMin();
@@ -1836,7 +1849,19 @@ bool editor_build(void* p)
                 ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen);
             ImGui::PopID();
             if (open) {
-                for (int i : idx) render_row(i);
+                for (int i : idx) {
+                    if (c->outliner_strip_prefix) {
+                        const std::string& name = c->actor_names[i];
+                        // Strip base + one separator (_/-/.) so "statplat_1" → "1".
+                        std::string suffix = name.size() > b.size() ? name.substr(b.size()) : name;
+                        if (!suffix.empty() && (suffix[0] == '_' || suffix[0] == '-' || suffix[0] == '.'))
+                            suffix = suffix.substr(1);
+                        if (suffix.empty()) suffix = name;
+                        render_row(i, suffix.c_str());
+                    } else {
+                        render_row(i);
+                    }
+                }
                 ImGui::TreePop();
             }
         }
@@ -2970,7 +2995,8 @@ int main(int argc, char** argv)
     ctx.gizmo_snap       = identity.gizmo_snap;        // restore persisted snap prefs
     ctx.gizmo_snap_trans = identity.gizmo_snap_trans;
     ctx.gizmo_snap_rot   = identity.gizmo_snap_rot;
-    ctx.outliner_group   = identity.outliner_group_by_prefix;
+    ctx.outliner_group        = identity.outliner_group_by_prefix;
+    ctx.outliner_strip_prefix = identity.outliner_strip_prefix;
     if (preselect >= 0 && preselect < static_cast<int>(ctx.actor_names.size()))
         ctx.selected = preselect;   // headless: exercise the Outliner→Properties path
 
@@ -3198,6 +3224,7 @@ int main(int argc, char** argv)
         identity.gizmo_snap_trans = ctx.gizmo_snap_trans;
         identity.gizmo_snap_rot   = ctx.gizmo_snap_rot;
         identity.outliner_group_by_prefix = ctx.outliner_group;
+        identity.outliner_strip_prefix    = ctx.outliner_strip_prefix;
         // Display name: persist if the user edited it via Collaborate menu.
         // Strip the b1-fallback `Editor (xxxxxx)` decoration so identity.json
         // round-trips back to the user's intent rather than the auto-tag.

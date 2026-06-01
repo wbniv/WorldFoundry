@@ -98,6 +98,9 @@ SMB_COIN_14, SMB_COIN_15, SMB_COIN_16, SMB_COIN_17, SMB_COIN_18 = 1857, 1858, 18
 # Fire Mario fireball globals (mailbox.inc 1820-1827). The generators' Activation
 # MailBox needs the literal index here (an OAS int field); scripts use INDEXOF_ names.
 SMB_FIREBALL_FIRE_R, SMB_FIREBALL_FIRE_L = 1823, 1824
+# Celebration extension (mailbox.inc 1864-1867): Mario hides into the castle + 3 fireworks.
+SMB_MARIO_VIS = 1864                          # Player visibility mailbox (1=show, 0=hide)
+SMB_FIREWORK_0, SMB_FIREWORK_1, SMB_FIREWORK_2 = 1865, 1866, 1867
 ENTRY_PIPE_X = 47 * T             # = 70.5, center of cols 46-47 (was 12*T)
 CR_FLOOR_TOP = -48.0              # coin-room floor top
 CR_X0, CR_X1 = 0.0, 24.0         # coin-room play span (16 tiles, faithful W1-1)
@@ -213,7 +216,7 @@ if director:
         "  dup 1.5 > if "                                       # phase D: drain the timer
         "INDEXOF_HUD_TIMER read-mailbox 250.0 INDEXOF_DELTA_TIME read-mailbox * - "
         "dup 0 < if drop 0 then INDEXOF_HUD_TIMER write-mailbox then\n"
-        "  3.5 > if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n"  # phase E: finale
+        "  4.2 > if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n"  # phase G: finale (after the fireworks)
         "else\n"
         "  INDEXOF_SMB_TIMER_START read-mailbox not if "
         "INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox then\n"
@@ -1108,7 +1111,7 @@ if player:
     player['wf_Mobility'] = 'Physics'  # restored for diagnosis
     player['wf_Mass']     = 1.0
     player['wf_Model Type'] = 'Mesh'
-    player['wf_Visibility Mailbox'] = 1
+    player['wf_Visibility Mailbox'] = SMB_MARIO_VIS   # 1=visible; celebration sets 0 (enters castle)
     # Survive the coin-room warp: with MovesBetweenRooms the player's mesh binds to
     # PERM (always loaded), not the surface room's transient slot that unloads on
     # the room switch. Without this Mario vanishes the instant he warps underground.
@@ -1154,6 +1157,7 @@ if player:
     # RIGHT (bit13=0x2000) → add StepRight (bit7=0x80):  0x2000/64  = 0x80
     player['wf_Script'] = (
         "\\ wf\n"
+        "1 INDEXOF_SMB_MARIO_VIS write-mailbox\n"   # default visible; celebration hides Mario in the castle
         "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox "
         "dup 16384 & 256 / over 8192 & 64 / | | "
         "INDEXOF_INPUT write-mailbox\n"
@@ -1289,12 +1293,18 @@ if player:
         "    INDEXOF_HUD_TIMER read-mailbox 50 *\n"
         "    INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n"
         "  then\n"
-        # Clamp Mario at the pole — only pull him BACK if he overshoots, never teleport
-        # him forward. (Writing an absolute X each frame flings the bungee camera out of
-        # the room when Mario is far from the pole; he walks here in real play, so a clamp
-        # is a sub-metre correction.)
-        f"  INDEXOF_X_POS read-mailbox {FLAGPOLE_X:.1f} > if "
+        # Walk Mario into the castle, then hide him (the SMB "enters the castle door" beat):
+        #   elapsed < 0.9  → hold at the pole (clamp overshoot; the flag is sliding);
+        #   0.9 – 1.6      → walk right FLAGPOLE_X → FLAGPOLE_X+2 (the castle door), visible;
+        #   ≥ 1.6          → entered → hide (SMB_MARIO_VIS=0) + hold at the door.
+        # Writing X_POS each frame overrides input; the 2 m walk is gentle so the bungee tracks.
+        "  INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox -\n"   # elapsed
+        f"  dup 0.9 < if drop INDEXOF_X_POS read-mailbox {FLAGPOLE_X:.1f} > if "
         f"{FLAGPOLE_X:.1f} INDEXOF_X_POS write-mailbox then\n"
+        "  else dup 1.6 < if "
+        f"0.9 - 1.42857 * dup 1.0 > if drop 1.0 then 2.0 * {FLAGPOLE_X:.1f} + INDEXOF_X_POS write-mailbox\n"
+        f"  else drop 0 INDEXOF_SMB_MARIO_VIS write-mailbox {FLAGPOLE_X + 2.0:.1f} INDEXOF_X_POS write-mailbox\n"
+        "  then then\n"
         "then\n"
         # coin-room coins: seed visible once, then proximity pickup. The Z test
         # (player z near -46) disambiguates the coin room from the surface, where
@@ -1789,11 +1799,12 @@ flag_obj['wf_Script'] = (
     "then\n"
 )
 
-# ── 10a. Castle + rising castle flag (celebration) ────────────────────────────
-# A small stone castle just past the flagpole; its rooftop flag RAISES up a pole
-# during phase C (elapsed 0.8–1.4 s) — the "flag which raises" beat. The castle flag
-# is a scriptable Anchored 'enemy' like the pole flag. Mario is clamped at the pole,
-# so the castle is purely visual this pass (walking into it is a follow-up).
+# ── 10a. Castle + rising castle flag + door + fireworks (celebration) ─────────
+# A small stone castle just past the flagpole. Mario walks into its door and vanishes
+# (Player phases B/D); its rooftop flag RAISES (phase C, 0.8–1.4 s — the "flag which
+# raises" beat); then 3 fireworks pop above it (phase F, staggered 2.4/2.9/3.4 s). The
+# flags + fireworks are scriptable Anchored 'enemy' actors driving their own Z /
+# visibility off the celebration clock (elapsed = TIME − SMB_CELEBRATE_START).
 mat_castle = make_mat('smb_castle', (0.60, 0.55, 0.50))
 CASTLE_X0, CASTLE_X1 = FLAGPOLE_X + 1.5 * T, FLAGPOLE_X + 4.5 * T   # 317.25 .. 321.75 (on the ground)
 CASTLE_TOP   = 3 * T                                               # 4.5 m tall
@@ -1826,6 +1837,45 @@ cflag['wf_Script'] = (
     f"{CFLAG_TOP_Z - CFLAG_BASE_Z:.2f} * {CFLAG_BASE_Z:.2f} + INDEXOF_Z_POS write-mailbox\n"  # Z = base + span*frac
     "then\n"
 )
+
+# Castle door — a dark face on the castle's left/front where Mario walks in (he stops at
+# FLAGPOLE_X+2 ≈ the door, then SMB_MARIO_VIS=0 hides him → "entered the castle").
+mat_door = make_mat('smb_castle_door', (0.05, 0.04, 0.06))
+add_statplat('castle_door', CASTLE_X0 + 0.15, -GROUND_Y - 0.06, GROUND_TOP_Z,
+             CASTLE_X0 + 1.35, -GROUND_Y - 0.02, GROUND_TOP_Z + 2.2, mat_door)
+
+# 3 fireworks — bright slabs that pop above the castle in sequence during phase F. Each
+# is hidden (SMB_FIREWORK_n=0) except inside its [t0,t1] elapsed window. Anchored, no
+# physics — same visibility-gate idiom as the coins/popup.
+_FW_A = make_mat('smb_fw_a', (1.0, 0.90, 0.20))   # yellow
+_FW_B = make_mat('smb_fw_b', (1.0, 1.00, 0.95))   # white
+_FW_C = make_mat('smb_fw_c', (1.0, 0.55, 0.15))   # orange
+FIREWORKS = [
+    (0, SMB_FIREWORK_0, CASTLE_X0 + 0.5, CASTLE_TOP + 1.5, 2.1, 3.0, _FW_A),
+    (1, SMB_FIREWORK_1, CASTLE_MID_X,    CASTLE_TOP + 2.2, 2.6, 3.5, _FW_B),
+    (2, SMB_FIREWORK_2, CASTLE_X1 - 0.5, CASTLE_TOP + 1.5, 3.1, 4.0, _FW_C),
+]
+for _i, _mb, _fx, _fz, _t0, _t1, _mat in FIREWORKS:
+    bpy.ops.mesh.primitive_cube_add(size=2.0, location=(_fx, 0, _fz))
+    _fw = bpy.context.object
+    _fw.name = f'firework_{_i}'
+    _fw.data.name = f'firework_{_i}'
+    _fw.scale = (0.5 * T, 0.03, 0.5 * T)   # ~1.5 m bright burst, thin in Y (faces the camera)
+    bpy.ops.object.transform_apply(scale=True)
+    _fw.data.materials.clear()
+    _fw.data.materials.append(_mat)
+    attach_schema(_fw, 'enemy')
+    _fw['wf_Mobility'] = 'Anchored'
+    _fw['wf_Model Type'] = 'Mesh'
+    _fw['wf_Visibility Mailbox'] = _mb     # default 0 (hidden); script shows it in its window
+    _fw['wf_Script'] = (
+        "\\ wf\n"
+        f"0 INDEXOF_SMB_FIREWORK_{_i} write-mailbox\n"       # default hidden
+        "INDEXOF_SMB_CELEBRATE read-mailbox if\n"
+        "  INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox -\n"   # elapsed
+        f"  dup {_t0} > swap {_t1} < & if 1 INDEXOF_SMB_FIREWORK_{_i} write-mailbox then\n"  # `&` = bitwise AND (zForth has no `and` word; the codebase uses & / |)
+        "then\n"
+    )
 
 # ── 10b. Flagpole end-of-level trigger ────────────────────────────────────────
 # Composition, NOT a class: an invisible ActBox sensor volume over the flagpole.
