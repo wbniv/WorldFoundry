@@ -117,6 +117,8 @@ struct WfeditIdentity {
     // WF_COLLAB_TUNNEL_TOKEN / WF_COLLAB_TUNNEL_HOSTNAME env vars override.
     std::string  tunnel_token;
     std::string  tunnel_hostname;
+    // Outliner: group actors into a collapsible tree by shared base name.
+    bool         outliner_group_by_prefix = false;
 };
 
 static std::string IdentityPath()
@@ -160,6 +162,7 @@ static std::optional<WfeditIdentity> LoadIdentity()
         id.relay_default    = j.value("relay_default", "");
         id.tunnel_token     = j.value("tunnel_token", "");
         id.tunnel_hostname  = j.value("tunnel_hostname", "");
+        id.outliner_group_by_prefix = j.value("outliner_group_by_prefix", false);
         if (id.peer_id.empty()) return std::nullopt;
         return id;
     } catch (...) {
@@ -194,11 +197,23 @@ static void SaveIdentity(const WfeditIdentity& id)
             {"turn_tls",         id.turn_tls},
             {"relay_default",    id.relay_default},
             {"tunnel_token",     id.tunnel_token},
-            {"tunnel_hostname",  id.tunnel_hostname}
+            {"tunnel_hostname",  id.tunnel_hostname},
+            {"outliner_group_by_prefix", id.outliner_group_by_prefix}
         };
         std::ofstream f(path);
         f << j.dump(2) << "\n";
     } catch (...) {}
+}
+
+// Outliner grouping: the actor's base name = its name with a trailing run of
+// digits and one preceding separator (_/-/.) stripped. "statplat_1"→"statplat",
+// "Player01"→"Player", "House"→"House". Actors sharing a base are grouped.
+static std::string BaseName(const std::string& n) {
+    size_t e = n.size();
+    while (e > 0 && n[e-1] >= '0' && n[e-1] <= '9') --e;
+    if (e == 0) return n;                       // all-digit name → its own key
+    if (n[e-1] == '_' || n[e-1] == '-' || n[e-1] == '.') --e;
+    return e == 0 ? n : n.substr(0, e);
 }
 
 // Parse wfedit://<host:port>/r/<room-id> → {relay_url="ws://host:port", room_id}.
@@ -255,6 +270,9 @@ struct EditorCtx {
     std::string              level_name;
     std::vector<std::string> actor_names;
     int                      selected = -1;
+    // Outliner: group actors into a collapsible tree by shared base name
+    // (toggle in the Outliner header; persists in identity.json).
+    bool                     outliner_group = false;
 
     // Property panel: the selected actor's fields, read from the Doc and (Phase
     // 2) correlated against its class .oad into widget-typed PropFields, cached
@@ -1723,6 +1741,9 @@ bool editor_build(void* p)
     ImGui::EndDisabled();
     ImGui::SameLine();
     if (ImGui::SmallButton("Add..."))    ImGui::OpenPopup("add_actor");
+    ImGui::SameLine();
+    if (ImGui::SmallButton(c->outliner_group ? "Ungroup" : "Group"))
+        c->outliner_group = !c->outliner_group;
 
     // Class-picker popup for "Add..."
     static const char* kClasses[] = {
@@ -1758,7 +1779,10 @@ bool editor_build(void* p)
     }
     ImGui::Separator();
     ImDrawList* dl = ImGui::GetWindowDrawList();
-    for (int i = 0; i < static_cast<int>(c->actor_names.size()); ++i) {
+
+    // One actor row: the Selectable (selection is an index into actor_names) plus
+    // a peer-presence dot in the right margin. Shared by the flat + grouped paths.
+    auto render_row = [&](int i) {
         const std::string& eid = (i < static_cast<int>(c->actor_eids.size()))
                                  ? c->actor_eids[i] : "";
         // Find any peer that has this actor selected.
@@ -1780,6 +1804,38 @@ bool editor_build(void* p)
                          static_cast<int>(peer_sel->colour[1] * 255),
                          static_cast<int>(peer_sel->colour[2] * 255), 220));
         }
+    };
+
+    const int n_actors = static_cast<int>(c->actor_names.size());
+    if (!c->outliner_group) {
+        for (int i = 0; i < n_actors; ++i) render_row(i);
+    } else {
+        // Group by shared base name: a base with >=2 members becomes a collapsible
+        // tree node; a unique-base actor stays a plain top-level row. Bases are
+        // emitted in first-appearance (Doc) order — groups first, loose rows after.
+        std::unordered_map<std::string, std::vector<int>> members;
+        std::vector<std::string> order;
+        for (int i = 0; i < n_actors; ++i) {
+            std::string b = BaseName(c->actor_names[i]);
+            if (members.find(b) == members.end()) order.push_back(b);
+            members[b].push_back(i);
+        }
+        for (const std::string& b : order) {              // pass 1: groups (>=2)
+            const std::vector<int>& idx = members[b];
+            if (idx.size() < 2) continue;
+            ImGui::PushID(b.c_str());
+            const std::string label = b + "  (" + std::to_string(idx.size()) + ")";
+            const bool open = ImGui::TreeNodeEx(
+                label.c_str(),
+                ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen);
+            ImGui::PopID();
+            if (open) {
+                for (int i : idx) render_row(i);
+                ImGui::TreePop();
+            }
+        }
+        for (const std::string& b : order)                // pass 2: unique-base rows
+            if (members[b].size() == 1) render_row(members[b][0]);
     }
     ImGui::End();
 
@@ -2907,6 +2963,7 @@ int main(int argc, char** argv)
     ctx.gizmo_snap       = identity.gizmo_snap;        // restore persisted snap prefs
     ctx.gizmo_snap_trans = identity.gizmo_snap_trans;
     ctx.gizmo_snap_rot   = identity.gizmo_snap_rot;
+    ctx.outliner_group   = identity.outliner_group_by_prefix;
     if (preselect >= 0 && preselect < static_cast<int>(ctx.actor_names.size()))
         ctx.selected = preselect;   // headless: exercise the Outliner→Properties path
 
@@ -3106,6 +3163,7 @@ int main(int argc, char** argv)
         identity.gizmo_snap       = ctx.gizmo_snap;
         identity.gizmo_snap_trans = ctx.gizmo_snap_trans;
         identity.gizmo_snap_rot   = ctx.gizmo_snap_rot;
+        identity.outliner_group_by_prefix = ctx.outliner_group;
         // Display name: persist if the user edited it via Collaborate menu.
         // Strip the b1-fallback `Editor (xxxxxx)` decoration so identity.json
         // round-trips back to the user's intent rather than the auto-tag.
