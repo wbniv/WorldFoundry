@@ -1748,6 +1748,14 @@ flag_obj['wf_Model Type'] = 'Mesh'
 # See docs/plans/2026-05-25-smb-flagpole-end-of-level.md and the composition
 # pattern in docs/level-building.md.
 END_OF_LEVEL = 1905   # INDEXOF_END_OF_LEVEL (wfsource/source/mailbox/mailbox.inc:31)
+# Flag-driven level advance: a SECOND ActBox at the flag writes LEVEL_TO_RUN, the
+# persistent mailbox the meta-loop reads to pick the next level. shell.fth only seeds
+# it on first boot, so the value persists across the reload. mailbox.inc:247 documents
+# 5000 as "written by a flagpole ActBox to advance"; a level-side write to 5000 routes
+# to WFGame::WriteSystemMailbox (mailbox.cc:90-102) -> _desiredLevelNum (game.cc:705).
+# See docs/plans/2026-05-31-smb-flag-next-level-transition-and-w1-2-scaffold.md.
+LEVEL_TO_RUN     = 5000   # INDEXOF_LEVEL_TO_RUN (wfsource/source/mailbox/mailbox.inc:247)
+NEXT_LEVEL_INDEX = 1      # W1-1 is bundle level 0 -> advance to W1-2 (level 1)
 
 bpy.ops.mesh.primitive_cube_add(size=2.0, location=(FLAGPOLE_X, 0.0, 2 * T))
 flagtrig = bpy.context.object
@@ -1764,6 +1772,25 @@ flagtrig['wf_Activated By Actor'] = 'Player'       # ActivatedBy defaults to 1 (
 # We don't need the activator, so send it to a scratch slot (SCRATCH_USER_START=4005).
 flagtrig['wf_Activated Actor Mailbox'] = 4005
 # ActBox DEFAULT_VISIBILITY=0 → invisible; bbox (activation volume) comes from the cube mesh.
+
+# ── 10c. Flagpole ADVANCE trigger (invisible ActBox → next level) ─────────────
+# Second ActBox at the SAME volume as flagpole_trigger. On Player overlap it writes
+# LEVEL_TO_RUN = NEXT_LEVEL_INDEX so the meta-loop loads the next level after this one
+# unloads. Same bbox as the END_OF_LEVEL trigger so both fire on the same frame; order
+# is irrelevant because the meta-loop reads _desiredLevelNum only after RunLevel()
+# returns. Death sets END_OF_LEVEL without touching LEVEL_TO_RUN, so dying restarts the
+# same level — only the flag advances.
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(FLAGPOLE_X, 0.0, 2 * T))
+flagadv = bpy.context.object
+flagadv.name      = 'flagpole_advance'
+flagadv.data.name = 'flagpole_advance'
+flagadv.scale = (1.5, T, 2.5 * T)   # identical half-extents to flagpole_trigger
+bpy.ops.object.transform_apply(scale=True)
+attach_schema(flagadv, 'actbox')
+flagadv['wf_MailBox']            = LEVEL_TO_RUN
+flagadv['wf_MailBoxValue']       = NEXT_LEVEL_INDEX
+flagadv['wf_Activated By Actor'] = 'Player'
+flagadv['wf_Activated Actor Mailbox'] = 4005   # scratch sink (same reserved-mb-0 gotcha)
 
 # ── 11. CamShot + Targets ─────────────────────────────────────────────────────
 camshot = find_by_class('camshot')
