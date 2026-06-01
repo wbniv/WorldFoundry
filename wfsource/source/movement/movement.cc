@@ -301,11 +301,7 @@ GroundHandler::predictPosition(MovementManager& movementManager, MovementObject&
 		if (buttons & EJ_BUTTONF_LEFT)
 		{
 			if (turnRate != Scalar::zero)
-				// Sign flipped 2026-06-01 to match typical "LEFT key = CCW turn
-				// from the player's POV / decreases heading angle"; was the
-				// reverse, which felt backwards when actually playing the moon
-				// level (see docs/plans/2026-05-31-moon-turn-style-movement.md).
-				actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(-turnRate)));
+				actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(turnRate)));
 			else
 			{	// TurnRate==0: no rotation desired; treat LEFT as strafe-left
 				Vector3 stepVector = currentDir * runningAccel * deltaT;
@@ -316,7 +312,7 @@ GroundHandler::predictPosition(MovementManager& movementManager, MovementObject&
 		if (buttons & EJ_BUTTONF_RIGHT)
 		{
 			if (turnRate != Scalar::zero)
-				actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(turnRate)));
+				actorAttr.AddRotation( Euler(Angle::zero,Angle::zero,Angle::Revolution(-turnRate)));
 			else
 			{	// TurnRate==0: no rotation desired; treat RIGHT as strafe-right
 				Vector3 stepVector = currentDir * runningAccel * deltaT;
