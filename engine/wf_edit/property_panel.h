@@ -53,6 +53,9 @@ struct PropField {
     long                     min = 0;
     long                     max = 0;
     std::vector<std::string> options;   // enum option labels
+    long                     default_open = 0;  // section (PROPERTY_SHEET) header only: OAD `def`,
+                                                // i.e. the macro's `active` arg. !=0 ⇒ the
+                                                // collapsible rollout defaults open.
 
     int       child_index = -1;         // Doc address for write-back (Phase 3)
     FieldKind kind = FieldKind::Raw;

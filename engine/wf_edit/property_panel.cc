@@ -5,6 +5,7 @@
 #include "oad_reader.h"
 
 #include "imgui.h"
+#include "imgui_internal.h"          // TablePushBackgroundChannel — group-box border across rows
 #include "misc/cpp/imgui_stdlib.h"   // ImGui::InputText(label, std::string&) — editable strings
 #include "imgui_markdown.h"          // ImGui::Markdown — Notes leaf rendering (matches chat sidebar)
 
@@ -266,6 +267,7 @@ std::vector<PropField> ResolveProperties(const std::vector<ActorField>& doc_fiel
         PropField h;
         h.name = e.name;
         h.button_type = e.button_type;
+        h.default_open = e.def;   // PROPERTY_SHEET: `active` arg → !=0 defaults the rollout open
         switch (e.button_type) {
             case BUTTON_PROPERTY_SHEET: h.kind = FieldKind::Section;    break;
             case BUTTON_GROUP_START:    h.kind = FieldKind::GroupStart; break;
@@ -627,20 +629,66 @@ bool RenderProperties(wfcrdt::Doc& doc, int actor_index, std::vector<PropField>&
     // otherwise be below the fold (e.g. the COLOR swatch ~field 48).
     static const char* s_scroll_to = std::getenv("WF_EDIT_SCROLL_TO");
 
+    // OAS layout markers (faithful to the 3ds Max OAD UI — propshet.cc / group.cc):
+    //  • PROPERTY_SHEET (FieldKind::Section) → a collapsible rollout; its default
+    //    open/closed is the OAD `def` (the macro's `active` arg), carried in
+    //    PropField::default_open via ResolveProperties::make_header.
+    //  • GROUP_START..GROUP_STOP → a captioned border box drawn *around* its fields.
+    // Authoring UX forbids nesting (no sheet-in-sheet, no group-in-group), so a
+    // single `section_open` bool and a depth-≤1 box stack suffice.
+    ImGui::PushID(actor_index);           // per-actor: collapse + widget state is per actor
+    bool section_open = true;             // before the first sheet, everything is visible
+    struct GroupBox { float x0, y0; };    // a GROUP_START's top-left, drawn as a rect at GROUP_STOP
+    std::vector<GroupBox> group_boxes;    // open group frames (≤1 deep)
+
     bool any_edit = false;
     int row = 0;
     for (auto& f : fields) {
-        ++row;
-        if (f.kind == FieldKind::Skip) continue;
+        ++row;                            // ALWAYS advance — keeps PushID(row) stable across collapse
 
-        // Section / group headers span both columns.
-        if (f.kind == FieldKind::Section || f.kind == FieldKind::GroupStart) {
+        // PROPERTY_SHEET → collapsible header spanning both columns. A new sheet
+        // implicitly closes the previous one (PROPERTY_SHEET_FOOTER emits no record).
+        if (f.kind == FieldKind::Section) {
+            group_boxes.clear();          // a new sheet ends any still-open group
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            ImGui::SeparatorText(f.name.c_str());
+            ImGui::PushID(row);
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAllColumns;
+            if (f.default_open != 0) flags |= ImGuiTreeNodeFlags_DefaultOpen;
+            section_open = ImGui::CollapsingHeader(f.name.c_str(), flags);
+            ImGui::PopID();
             continue;
         }
-        if (f.kind == FieldKind::GroupEnd) continue;
+
+        if (!section_open) continue;      // collapsed sheet hides its fields, group captions + boxes
+        if (f.kind == FieldKind::Skip) continue;
+
+        // GROUP_START → caption + capture the box's top-left; box drawn at GROUP_STOP.
+        if (f.kind == FieldKind::GroupStart) {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            const ImVec2 p = ImGui::GetCursorScreenPos();
+            ImGui::TextUnformatted(f.name.c_str());   // etched-frame caption, top-left
+            group_boxes.push_back({ p.x, p.y });
+            continue;
+        }
+        // GROUP_STOP → close the etched frame: a border rect from the captured top
+        // down to the current row, drawn in the table's background channel so it
+        // frames the rows instead of being clipped to a single cell.
+        if (f.kind == FieldKind::GroupEnd) {
+            if (!group_boxes.empty()) {
+                const GroupBox g = group_boxes.back();
+                group_boxes.pop_back();
+                const float y1 = ImGui::GetCursorScreenPos().y;
+                const float x1 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+                ImGui::TablePushBackgroundChannel();
+                ImGui::GetWindowDrawList()->AddRect(ImVec2(g.x0 - 2.0f, g.y0 - 2.0f),
+                                                    ImVec2(x1, y1),
+                                                    ImGui::GetColorU32(ImGuiCol_Border), 3.0f);
+                ImGui::TablePopBackgroundChannel();
+            }
+            continue;
+        }
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -661,6 +709,7 @@ bool RenderProperties(wfcrdt::Doc& doc, int actor_index, std::vector<PropField>&
         } else
             ImGui::TextWrapped("%s", f.value.empty() ? "(empty)" : f.value.c_str());
     }
+    ImGui::PopID();   // balances PushID(actor_index)
     ImGui::EndTable();
     return any_edit;
 }
