@@ -17,6 +17,10 @@ wftools/*/target/
 
 # CMake build output dirs
 cmake-build-*/
+build*/
+
+# Packaged addon/tool artifacts (e.g. dist/wf_asset_browser-*.zip)
+dist/
 
 # Codemagic artifact downloads (CI output, never source)
 WorldFoundry_*_artifacts.zip
@@ -60,7 +64,6 @@ docs/investigations/wf-screenshots/wf_walker_*.png
 
 # Harness binaries (built by engine/build_host_gl_test.sh)
 engine/wf_host_gl_test/wf_host_gl_test
-build-editor/
 
 # Dear ImGui runtime layout file (written by wf-edit on exit)
 imgui.ini
