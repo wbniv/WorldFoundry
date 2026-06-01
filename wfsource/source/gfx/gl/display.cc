@@ -374,6 +374,45 @@ static void DrawHud(int xSize, int ySize)
             glVertex2f(bxL, byL);
             glVertex2f(bxR, byR);
         glEnd();
+
+        // Cardinal-direction labels (N/S/E/W) at minimap edges. Game-world
+        // axes don't align with lunar cardinals at 89.46°S — meridian
+        // convergence means "north" at the play-area centre is rotated
+        // significantly from game +Y. Compute the cardinals from the PS
+        // centre offset and place orange letters along the matching radii.
+        // See docs/plans/2026-05-31-moon-minimap-cardinal-directions.md.
+        {
+            const double PS_CX = -11000.0, PS_CY = -12000.0;
+            const double rho_c = sqrt(PS_CX*PS_CX + PS_CY*PS_CY);
+            // North = away from pole = +(PS_CX, PS_CY)/rho_c in game coords.
+            const double N_gx = PS_CX / rho_c;
+            const double N_gy = PS_CY / rho_c;
+            // East = 90° CCW from N in PS plane: (a,b) → (-b,a).
+            const double E_gx = -N_gy;
+            const double E_gy =  N_gx;
+
+            struct CardinalDir { double dx, dy; const char* letter; };
+            const CardinalDir dirs[4] = {
+                {  N_gx,  N_gy, "N" },
+                { -N_gx, -N_gy, "S" },
+                {  E_gx,  E_gy, "E" },
+                { -E_gx, -E_gy, "W" },
+            };
+            const float ccx = mm_x + MM*0.5f;
+            const float ccy = mm_y + MM*0.5f;
+            const float crad = MM*0.5f - 10.0f;     // 54 px from centre
+            glColor3f(1.0f, 0.6f, 0.0f);            // orange
+            for (const CardinalDir& d : dirs) {
+                // Game (dx, dy) → screen offset: world Y → screen -Y.
+                const float lx = ccx + (float)d.dx * crad;
+                const float ly = ccy + (float)(-d.dy) * crad;
+                // Centre the 6×8 stb_easy_font glyph at scale 1.0.
+                glPushMatrix();
+                glTranslatef(lx - 3.0f, ly - 4.0f, 0.0f);
+                DrawHudText(0.0f, 0.0f, (char*)d.letter);
+                glPopMatrix();
+            }
+        }
     }
 
     // Game-over overlay — driven by mb 420 via wf_hud_game_over (game.cc HUD glue).
