@@ -139,8 +139,13 @@ if(WF_ASAN AND NOT ANDROID AND NOT IOS)
     # polymorphic object (notably libdatachannel + std::future in wf-edit's WebRTC
     # path). vptr checking is meaningless under -fno-rtti, so turn it off.
     add_compile_options(-fsanitize=address,undefined -fno-sanitize=vptr -fno-omit-frame-pointer)
-    add_link_options(-fsanitize=address,undefined -fno-sanitize=vptr)
-    message(STATUS "WF_ASAN: AddressSanitizer + UBSan enabled (vptr excluded — project is -fno-rtti)")
+    # Static-link the sanitizer runtimes into each executable (no libasan.so.8 /
+    # libubsan.so.1 in NEEDED). This makes the binaries self-contained — no
+    # dependency on a matching system libasan, and the "ASan runtime does not come
+    # first in initial library list" ordering check can never fire, including for
+    # any forked/re-exec'd child (wf-edit re-execs itself + spawns helper procs).
+    add_link_options(-fsanitize=address,undefined -fno-sanitize=vptr -static-libasan -static-libubsan)
+    message(STATUS "WF_ASAN: AddressSanitizer + UBSan enabled, runtime static-linked (vptr excluded — project is -fno-rtti)")
 endif()
 
 # ─── Source directories ───────────────────────────────────────────────────────
