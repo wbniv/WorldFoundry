@@ -462,15 +462,22 @@ tasks:
         bash wftools/wf_blender/build_level_binary.sh "$1"
 
   build-cd-iff:
-    desc: "Assemble wfsource/source/game/cd.iff from shell.fth + standalone level IFFs via cdpack-rs (snowgoons=level 0, qbert=level 1)"
+    desc: "Assemble wfsource/source/game/cd.iff from shell.fth + standalone level IFFs via cdpack-rs (SMB W1-1=level 0, W1-2=level 1, snowgoons=2, qbert=3)"
     cmds:
       - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
       # Feed the *-standalone.iff (L4-rooted) files, NOT the bare LVAS *.iff:
       # game.cc:250 seeks TOC_offset + one sector before reading each level's RAM
       # config, so every body needs the standalone wrapper's leading ALGN sector.
+      # Order = TOC index. shell.fth boots level 0, so SMB W1-1 leads -> the bundle
+      # boots into Mario. The W1-1 flagpole's advance ActBox writes LEVEL_TO_RUN=1
+      # (-> W1-2) and W1-2's writes 0 (-> W1-1), an endless W1-1<->W1-2 loop. The
+      # snowgoons/qbert demos stay bundled at 2/3 (reachable by writing LEVEL_TO_RUN).
+      # See docs/plans/2026-05-31-smb-flag-next-level-transition-and-w1-2-scaffold.md.
       - |
         wftools/cdpack-rs/target/release/cdpack \
           wfsource/source/game/shell.fth \
+          wflevels/smb_w1_1-standalone.iff \
+          wflevels/smb_w1_2-standalone.iff \
           wflevels/snowgoons-standalone.iff \
           wflevels/qbert_practice-standalone.iff \
           -o wfsource/source/game/cd.iff

@@ -1893,3 +1893,36 @@ flaky: the behaviour may not have advanced within those steps. **Loop on elapsed
 (mailbox `1906`) instead.** The SMB Piranha test (a plant that toggles emerge/retract on a 1.5 s
 `TIME` deadline) was flaky on step-count windows and rock-solid once every window became
 "step until `TIME` advanced by N seconds." Pairs with the resume-don't-step dt-spike note above.
+
+## Flag → next-level transition (and verifying it headlessly)
+
+Advancing levels is a **`cd.iff`-only** feature, by construction: the meta-loop
+(`game.cc:233-264`) that reads `_desiredLevelNum` and loads the next TOC level only runs when
+booting `cd.iff`. `-L<path>` (`task run-level`/`run-smb`) sets `gLevelOverridePath`, runs **one**
+level, and returns (`game.cc:177-188`) — no meta-loop, so a flag there just ends the process.
+**To make a flag advance, the level must be inside `cd.iff` (build via `task build-cd-iff`), and
+you must `task run` it — never `-L`.**
+
+The flagpole composition: the visual `statplat` + an invisible `actbox` writing
+`END_OF_LEVEL`(1905)=1 + a **second** invisible `actbox` at the same volume writing
+`LEVEL_TO_RUN`(5000)=`<next TOC index>`. A level-side write of 5000 routes
+`LevelMailboxes → GameMailboxes → WFGame::WriteSystemMailbox → _desiredLevelNum`
+(`mailbox.cc:59-104`, `game.cc:705`); `shell.fth` only seeds it on first boot (gated on persistent
+mailbox 6000) so it **persists** across the reload. Death sets only `END_OF_LEVEL`, so dying
+restarts the same level — only the flag advances. The last level loops back (index 0) so the meta-
+loop never indexes past the TOC (`GetTOCEntry` asserts). (2026-05-31 —
+[plan](plans/2026-05-31-smb-flag-next-level-transition-and-w1-2-scaffold.md).)
+
+**Verifying transitions over the bridge — gotchas hit:**
+- **Disable vsync or the engine throttles to ~1 FPS** when its window is unfocused/occluded
+  (`delta too large: 1.004`, `timeofday` ticking ~1 s/frame). Launch with
+  `env vblank_mode=0 __GL_SYNC_TO_VBLANK=0` (as the SMB playthrough tests do) — otherwise Mario
+  can't walk far enough to reach a flag in any reasonable wall-clock time.
+- **`Level Loaded: Object Count: N` (progress stream, `-ppe`) cleanly identifies which level
+  loaded** — read the load *sequence* from the engine log as the transition proof
+  (e.g. `120 → 18 → 120` = W1-1 → W1-2 → W1-1). The bridge has no actor-name/level-name op, and
+  state-reads after a transition are flaky (the `DebugServer` stops in `UnloadLevel` and restarts
+  in `LoadLevel`, so the socket drops and you must reconnect per level).
+- **Don't teleport the player by writing `X_POS` to reach a far flag** — it glitches the Jolt body
+  (fall/death → death reloads the *same* level, masking the transition). Walk the player in with
+  `inject_input joystick1_raw=0x2000` on a short, hazard-free stretch instead.

@@ -1,7 +1,12 @@
 # Plan: SMB flag → next-level transition + W1-2 scaffold (bare underground proof)
 
 **Date:** 2026-05-31
-**Status:** In progress
+**Status:** Done + verified (2026-05-31; ~1 h). Headless bridge proof — booting `cd.iff` and
+driving the flow produced the level-load sequence **`120 → 18 → 120`** (W1-1 → W1-2 → W1-1):
+the meta-loop advances on `LEVEL_TO_RUN`, and **walking Mario into W1-2's flagpole looped back
+to W1-1** (the flag ActBox end-to-end). Screenshots: `tests/screenshots/smb_transition_{1..4}_*.png`.
+W1-1 regressions (`verify_smb_scroll`, `verify_smb_scoring`) stayed green after the re-export.
+Note: the brick ceiling sits at 9 tiles up (faithful height; just above the side-camera frame).
 
 ## Context
 
