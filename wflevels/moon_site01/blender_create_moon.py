@@ -404,12 +404,14 @@ if player:
     player['wf_Horiz Air Drag']        = 1.5
     player['wf_Turn Rate']             = 0.0
     player.rotation_euler.z            = math.pi / 2     # face +Y so LEFT/RIGHT are ±X
-    # Joystick → INPUT mailbox. Same doom-stick mapping as smb_w1_1.
+    # Doomstick 4-direction strafe (UP forward / DOWN back / LEFT-RIGHT strafe
+    # since TurnRate=0). Raw passthrough — every bit (UP/DOWN/LEFT/RIGHT and A
+    # for jump) flows into INPUT at its native position; movement.cc reads them
+    # via the gDoomStick branch (the level's RAM FLAG sets gDoomStick=true).
+    # See docs/plans/2026-05-31-doomstick-4-direction-strafe-input-on-the-moon-lev.md.
     player['wf_Script'] = (
         "\\ wf\n"
-        "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox "
-        "dup 16384 & 256 / over 8192 & 64 / | | "
-        "INDEXOF_INPUT write-mailbox\n"
+        "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n"
         # Position-display HUD overlay: copy locals → globals every tick so
         # display.cc can read them. See docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md.
         "1 INDEXOF_MOON_OVERLAY_ENABLED write-mailbox\n"

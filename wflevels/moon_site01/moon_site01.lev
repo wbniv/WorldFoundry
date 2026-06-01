@@ -911,7 +911,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\n1 INDEXOF_MOON_OVERLAY_ENABLED write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_MOON_PLAYER_X write-mailbox\nINDEXOF_Y_POS read-mailbox INDEXOF_MOON_PLAYER_Y write-mailbox\nINDEXOF_Z_POS read-mailbox INDEXOF_MOON_PLAYER_Z write-mailbox\nINDEXOF_ROTATION_C read-mailbox INDEXOF_MOON_PLAYER_HEADING write-mailbox\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n1 INDEXOF_MOON_OVERLAY_ENABLED write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_MOON_PLAYER_X write-mailbox\nINDEXOF_Y_POS read-mailbox INDEXOF_MOON_PLAYER_Y write-mailbox\nINDEXOF_Z_POS read-mailbox INDEXOF_MOON_PLAYER_Z write-mailbox\nINDEXOF_ROTATION_C read-mailbox INDEXOF_MOON_PLAYER_HEADING write-mailbox\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }

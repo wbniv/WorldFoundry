@@ -78,13 +78,17 @@ existing `flagpole_trigger` ActBox, create a second `flagpole_advance` ActBox (s
 
 New `wflevels/smb_w1_2/blender_create_smb_w1_2.py` (copy `blender_create_smb.py`, strip all
 population; keep scene/addon setup, snowgoons-skeleton import, camera **Director** script,
-**player**, **flagpole composition** with `NEXT_LEVEL_INDEX = 0`). Remove coins, ?-blocks,
+**player**, **flagpole composition** with `NEXT_LEVEL_INDEX = 0`). Removed coins, ?-blocks,
 bricks, power-ups, enemies+scripts, fireball pool, piranha, pyramids/staircase, pit sensors,
-coin-room, popup. Short corridor (`FLAGPOLE_X ≈ 40*T`); Director camera X-max → `FLAGPOLE_X - 12.0`.
-Underground retheme via solid materials: near-black/teal matte (`~0x041018`), a brick-ceiling
-`statplat` slab at `~GROUND_TOP_Z + 9*T`, dark ground. *Gotcha:* if textile needs ≥1 texture,
-reuse W1-1's `brick_tex.tga` for the ceiling. Add `wflevels/smb_w1_2/smb_w1_2-standalone.iff.txt`
-mirroring W1-1's L4 wrapper. Build with `build_level_binary.sh smb_w1_2`.
+coin-room (+ its 2nd room), popup. **As built:** short corridor `FLAGPOLE_X = 24*T` (36 m),
+`PITS = []` (flat ground); Director camera X-max → `FLAGPOLE_X - 12.0` (auto). Underground
+retheme: near-black/teal matte (`0x041018`) + a solid brick-coloured ceiling `statplat` slab at
+**`GROUND_TOP_Z + 5*T`** (7.5 m — low enough to sit in the side-camera frame; 9 tiles was above
+it). The grid-textured ground is **kept as-is** — it gives the textile step a real page, so the
+zero-texture gotcha never bit. Restored the 4 Mario tint constants the player script reads
+(`FIRE_TINT`/`MARIO_DEFAULT_TINT`/`STAR_FLASH_A`/`STAR_FLASH_B`, defined in W1-1's deleted §6).
+Added `wflevels/smb_w1_2/smb_w1_2-standalone.iff.txt` (L4 wrapper). 17 actors total. Build with
+`build_level_binary.sh smb_w1_2`.
 
 ## Part C — bundle into the real `cd.iff` (no new tasks, no separate bundle)
 
@@ -110,9 +114,45 @@ boots into Mario; demos kept at 2/3). Update the task `desc:`. Run/verify with t
 
 1. Build: rebuild W1-1, build W1-2, `task build-cd-iff`, `task build`; confirm binary mtime advanced.
 2. W1-2 fields landed: grep `smb_w1_2.lev` for both flagpole actboxes (1905 and 5000) + the ceiling.
-3. `task run` → walk Mario to W1-1's flag → W1-2 loads (underground, brick ceiling); walk to
-   W1-2's flag → W1-1 reloads. Screenshot at the transition as proof.
-4. Regression: `python3 tests/verify_smb_scroll.py` + `verify_smb_scoring.py` still pass after the W1-1 re-export.
+3. **Transition proof (headless bridge; the engine `Level Loaded: Object Count` line IDs each
+   level — 120 = W1-1, 18 = W1-2):** boot `cd.iff` (→ 120); drive the meta-loop directly
+   (`set_mailbox 5000=1` + `1905=1`, idx 0) → 18 (W1-2); then **walk** Mario across flat W1-2 into
+   its flagpole → 120 (loop back to W1-1). Net sequence **`120 → 18 → 120`** — proof artifacts below.
+   - *(W1-1's own 315 m flag is too far to walk headlessly, and teleporting `X_POS` glitches the
+     Jolt body into a fall/death → death reloads the same level. So the flag ActBox is proven on
+     W1-2, which uses the byte-identical composition; the W1-1 advance ActBox is field-verified in
+     `smb_w1_1.lev` — `MailBox 5000 = 1`.)*
+   - *Run real-time with `vblank_mode=0 __GL_SYNC_TO_VBLANK=0`* or the engine throttles to ~1 FPS
+     when the window is unfocused. The bridge has no actor/level-name op and its `step`/state-reads
+     are flaky across a transition (the `DebugServer` stops in `UnloadLevel`), so the engine log's
+     `Object Count` sequence is the reliable level-ID signal.
+   - (Verified with a throwaway driver, kept at `/tmp/verify_smb_transition.py` — not committed,
+     per "no new harness"; can be promoted to `tests/verify_smb_level_transition.py` on request.)
+4. Regression: `python3 tests/verify_smb_scroll.py` + `verify_smb_scoring.py` still pass after the
+   W1-1 re-export (scoring 6/6; the flagpole bonus still fires).
+
+### Proof artifacts
+
+**Run-through video (27 s — the full loop):**
+[`tests/recordings/smb_w1_1_w1_2_transition.mp4`](../../tests/recordings/smb_w1_1_w1_2_transition.mp4)
+— W1-1 → (meta-loop) → W1-2 → *walk into the flag* → W1-1. Recorded with `-record_video`; its FBO
+is narrower than the on-screen window, so the 7.5 m ceiling sits just above the *video* frame —
+the screenshots below (window-native 640 px) show it.
+
+**Screenshots** (`tests/screenshots/`) — W1-1 has a `?`-block + coin, bare W1-2 has neither (and
+adds the brick ceiling), so the content change across the cuts *is* the transition:
+
+*1 — `cd.iff` boots into W1-1:*
+
+![W1-1 boot](../../tests/screenshots/smb_transition_1_w1_1.png)
+
+*2 — advanced to W1-2 (underground: flat floor + brick ceiling + near-black void):*
+
+![W1-2 loaded](../../tests/screenshots/smb_transition_2_w1_2.png)
+
+*3 — back in W1-1 after walking W1-2's flag (loop-back — `?`-block + coin return):*
+
+![W1-1 again](../../tests/screenshots/smb_transition_4_w1_1_loopback.png)
 
 ## Follow-ups (logged, not this pass)
 
