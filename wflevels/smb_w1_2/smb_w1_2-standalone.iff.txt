@@ -1,0 +1,23 @@
+// smb_w1_2-standalone.iff.txt — L4-wrapped form of smb_w1_2 for wf_game -L.
+//
+// Build:
+//   bash wftools/wf_blender/build_level_binary.sh smb_w1_2
+//
+// NOTE: the W1-1 -> W1-2 -> W1-1 flag transition only works from a cd.iff bundle
+// (the meta-loop), NOT from -L (single-level, returns after one level). This
+// standalone wrapper is for eyeballing W1-2 in isolation; the transition is
+// exercised via `task build-cd-iff` + `task run`.
+//
+// Bare underground proof: ~10 actors (player, ground, ceiling, flagpole + 2 triggers,
+// camera/director/matte/light/room). Pools kept generous (mirror W1-1).
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 200000l                  // actors + margin
+        'PERM' 500000l                  // player.iff
+        'ROOM' 1000000l                 // ground + ceiling + flagpole
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../smb_w1_2.iff" ]
+}
