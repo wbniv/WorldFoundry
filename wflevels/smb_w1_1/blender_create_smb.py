@@ -1269,6 +1269,12 @@ if player:
         # the player runs in the main loop, the Director runs last).
         # EOL_LATCH guards the credit so it fires once across the multi-second celebration.
         "INDEXOF_SMB_CELEBRATE read-mailbox 0<> if\n"
+        # Seed SMB_CELEBRATE_START here (the player runs before the flag enemies), so the
+        # flag/castle-flag scripts read a valid START the same frame and animate from
+        # elapsed≈0 instead of snapping to the end (the Director also seeds it, but runs
+        # last, so on frame 1 the flags would otherwise see START=0 → elapsed=TIME → frac=1).
+        "  INDEXOF_SMB_CELEBRATE_START read-mailbox not if "
+        "INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START write-mailbox then\n"
         "  INDEXOF_SMB_EOL_LATCH read-mailbox not if\n"
         "    1 INDEXOF_SMB_EOL_LATCH write-mailbox\n"
         "    INDEXOF_Z_POS read-mailbox\n"
@@ -1740,11 +1746,11 @@ mat_pole = make_mat('smb_pole', (0.72, 0.72, 0.72))
 mat_flag = make_mat('smb_flag', (0.10, 0.65, 0.16))
 
 POLE_HEIGHT = 10 * T
-POLE_RADIUS = 0.10 * T
+POLE_RADIUS = 0.18 * T   # 0.27 m — a real round pole, not a thin sliver from the side cam
 
-# Pole — thin cylinder from ground to 10 tiles high
+# Pole — a proper round cylinder (16 sides) from ground to 10 tiles high
 bpy.ops.mesh.primitive_cylinder_add(
-    vertices=8, radius=POLE_RADIUS, depth=POLE_HEIGHT,
+    vertices=16, radius=POLE_RADIUS, depth=POLE_HEIGHT,
     location=(FLAGPOLE_X, 0, POLE_HEIGHT / 2))
 pole_obj = bpy.context.object
 pole_obj.name      = 'flagpole_pole'
@@ -1761,11 +1767,12 @@ pole_obj['wf_Model Type'] = 'Mesh'
 # at the authored top. Anchored = no Jolt body, no collision; the script owns its Z.
 FLAG_TOP_Z  = POLE_HEIGHT - T        # 13.5 — authored start (near pole top)
 FLAG_BASE_Z = T * 0.7                # ~1.05 — slide target (pole base, the "grab")
-bpy.ops.mesh.primitive_plane_add(size=1.0, location=(FLAGPOLE_X - T, 0, FLAG_TOP_Z))
+# Thin VERTICAL slab (a flat plane lies in XY → edge-on/invisible to the side camera).
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(FLAGPOLE_X - T, 0, FLAG_TOP_Z))
 flag_obj = bpy.context.object
 flag_obj.name      = 'flagpole_flag'
 flag_obj.data.name = 'flagpole_flag'
-flag_obj.scale = (T, 0.01, 0.65 * T)
+flag_obj.scale = (0.5 * T, 0.03, 0.4 * T)   # 1.5 m wide × 1.2 m tall, thin in Y; faces the camera
 bpy.ops.object.transform_apply(scale=True)
 flag_obj.data.materials.clear()
 flag_obj.data.materials.append(mat_flag)
@@ -1776,7 +1783,7 @@ flag_obj['wf_Visibility Mailbox'] = 1
 flag_obj['wf_Script'] = (
     "\\ wf\n"
     "INDEXOF_SMB_CELEBRATE read-mailbox if\n"
-    "INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox - 2.0 *\n"  # frac = elapsed/0.5
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox - 1.1 *\n"  # frac = elapsed/0.9
     "dup 1.0 > if drop 1.0 then\n"
     f"{FLAG_TOP_Z - FLAG_BASE_Z:.2f} * {FLAG_TOP_Z:.2f} swap - INDEXOF_Z_POS write-mailbox\n"  # Z = top - span*frac
     "then\n"
@@ -1796,12 +1803,13 @@ add_statplat('castle_pole', CASTLE_MID_X - 0.1, -0.1, CASTLE_TOP,
              CASTLE_MID_X + 0.1, 0.1, CASTLE_TOP + 2 * T, mat_pole)
 
 CFLAG_BASE_Z = CASTLE_TOP             # 4.5 — authored low (rooftop base)
-CFLAG_TOP_Z  = CASTLE_TOP + 1.5 * T   # 6.75 — raised to the rooftop pole top
-bpy.ops.mesh.primitive_plane_add(size=1.0, location=(CASTLE_MID_X - 0.5 * T, 0, CFLAG_BASE_Z))
+CFLAG_TOP_Z  = CASTLE_TOP + 2.0 * T   # 7.5 — raised up the rooftop pole
+# Thin VERTICAL slab (same reason as the pole flag — a flat plane is edge-on to the camera).
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(CASTLE_MID_X - 0.6 * T, 0, CFLAG_BASE_Z))
 cflag = bpy.context.object
 cflag.name      = 'castle_flag'
 cflag.data.name = 'castle_flag'
-cflag.scale = (0.5 * T, 0.01, 0.4 * T)
+cflag.scale = (0.45 * T, 0.03, 0.35 * T)   # 1.35 m wide × 1.05 m tall, thin in Y
 bpy.ops.object.transform_apply(scale=True)
 cflag.data.materials.clear()
 cflag.data.materials.append(mat_flag)
