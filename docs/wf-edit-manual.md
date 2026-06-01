@@ -406,8 +406,8 @@ For two editors **on the same machine** you must give them distinct config dirs,
 otherwise they share an `identity.json` and look like one peer:
 
 ```bash
-XDG_CONFIG_HOME=/tmp/wfedit-A  ./build-editor/wf-edit --host-tunnel        # host
-XDG_CONFIG_HOME=/tmp/wfedit-B  ./build-editor/wf-edit --url=<link>         # joiner
+XDG_CONFIG_HOME=/tmp/wfedit-A  ./build-editor/wf-edit --host-tunnel wflevels/cd.iff        # host
+XDG_CONFIG_HOME=/tmp/wfedit-B  ./build-editor/wf-edit --url=<link>  wflevels/cd.iff        # joiner
 ```
 
 ### Calls over the internet (STUN + TURN)

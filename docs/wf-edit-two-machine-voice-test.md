@@ -40,7 +40,7 @@ still connect (P2P or STUN), but you won't have isolated the relay leg.
 ### 1. Host (computer 1)
 
 ```bash
-WF_COLLAB_VOICE_DEBUG=1 ./build-editor/wf-edit --host-tunnel
+WF_COLLAB_VOICE_DEBUG=1 ./build-editor/wf-edit --host-tunnel wflevels/cd.iff
 # Wait ~10–20 s for "Establishing secure tunnel…" to resolve, then copy the
 # printed link:   wfedit+s://<random>.trycloudflare.com/r/<room>
 ```
@@ -53,7 +53,7 @@ default).
 
 ```bash
 # Bring up the VPN first (WireGuard/Surfshark/etc.), then:
-WF_COLLAB_VOICE_DEBUG=1 ./build-editor/wf-edit --url='wfedit+s://<random>.trycloudflare.com/r/<room>'
+WF_COLLAB_VOICE_DEBUG=1 ./build-editor/wf-edit --url='wfedit+s://<random>.trycloudflare.com/r/<room>' wflevels/cd.iff
 ```
 
 Un-mute the mic here too. Talk on each end.
