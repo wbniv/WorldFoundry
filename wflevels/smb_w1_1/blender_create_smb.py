@@ -197,15 +197,31 @@ if director:
         # SMB_TIMER_START anchors the current life; reaching 0 = "TIME UP" fires
         # SMB_PLAYER_HURT (Mario dies, loses a life via the player respawn) and
         # restarts the clock. The player respawn also re-anchors it on every death.
-        "INDEXOF_SMB_TIMER_START read-mailbox not if "
+        # ── celebration sequencer (gates on SMB_CELEBRATE) OR normal countdown ──
+        # On SMB_CELEBRATE: seed START once, then phase off elapsed = TIME-START.
+        #   phase D (elapsed>1.5): drain HUD_TIMER toward 0 (visual; the player already
+        #     credited HUD_TIMER*50 to the score on the rising edge).
+        #   phase E (elapsed>=3.5): fire END_OF_LEVEL -> meta-loop loads the next level.
+        # While celebrating the normal countdown is suspended (it also owns HUD_TIMER).
+        "INDEXOF_SMB_CELEBRATE read-mailbox if\n"
+        "  INDEXOF_SMB_CELEBRATE_START read-mailbox not if "
+        "INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START write-mailbox then\n"
+        "  INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox -\n"   # elapsed
+        "  dup 1.5 > if "                                       # phase D: drain the timer
+        "INDEXOF_HUD_TIMER read-mailbox 250.0 INDEXOF_DELTA_TIME read-mailbox * - "
+        "dup 0 < if drop 0 then INDEXOF_HUD_TIMER write-mailbox then\n"
+        "  3.5 > if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n"  # phase E: finale
+        "else\n"
+        "  INDEXOF_SMB_TIMER_START read-mailbox not if "
         "INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox then\n"
-        f"{TIMER_UNITS} INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START read-mailbox - "
+        f"  {TIMER_UNITS} INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START read-mailbox - "
         f"{TIMER_UNITS / TIMER_REAL_SECONDS:.5f} * -\n"        # 400 - elapsed*RATE
-        "dup 0 <= if "
+        "  dup 0 <= if "
         "1 INDEXOF_SMB_PLAYER_HURT write-mailbox "
         "INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox "
         "drop 0 then\n"                                        # clamp display to 0
-        "INDEXOF_HUD_TIMER write-mailbox\n"
+        "  INDEXOF_HUD_TIMER write-mailbox\n"
+        "then\n"
     )
 
 levelobj = find_by_class('levelobj')
@@ -1243,11 +1259,13 @@ if player:
         "  INDEXOF_LIVES read-mailbox 1 + INDEXOF_LIVES write-mailbox\n"
         "  0 INDEXOF_SMB_ONEUP_PICKUP write-mailbox\n"
         "then\n"
-        # Flagpole height + time bonus — one-shot on the tick END_OF_LEVEL fires.
+        # Flagpole celebration — fires on SMB_CELEBRATE's rising edge (the flag ActBox
+        # sets it). One-shot height+time bonus, then pin Mario at the pole for the show.
         # Height tiers: Z≥9→5000, ≥6→2000, ≥4.5→800, ≥3→400, ≥1.5→200, else→100.
-        # Time bonus: HUD_TIMER remaining × 50.
-        # EOL_LATCH prevents re-firing if the level lingers a tick before unloading.
-        "INDEXOF_END_OF_LEVEL read-mailbox 0<> if\n"
+        # Time bonus: HUD_TIMER remaining × 50 (read once, before the Director drains it —
+        # the player runs in the main loop, the Director runs last).
+        # EOL_LATCH guards the credit so it fires once across the multi-second celebration.
+        "INDEXOF_SMB_CELEBRATE read-mailbox 0<> if\n"
         "  INDEXOF_SMB_EOL_LATCH read-mailbox not if\n"
         "    1 INDEXOF_SMB_EOL_LATCH write-mailbox\n"
         "    INDEXOF_Z_POS read-mailbox\n"
@@ -1262,6 +1280,12 @@ if player:
         "    INDEXOF_HUD_TIMER read-mailbox 50 *\n"
         "    INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n"
         "  then\n"
+        # Clamp Mario at the pole — only pull him BACK if he overshoots, never teleport
+        # him forward. (Writing an absolute X each frame flings the bungee camera out of
+        # the room when Mario is far from the pole; he walks here in real play, so a clamp
+        # is a sub-metre correction.)
+        f"  INDEXOF_X_POS read-mailbox {FLAGPOLE_X:.1f} > if "
+        f"{FLAGPOLE_X:.1f} INDEXOF_X_POS write-mailbox then\n"
         "then\n"
         # coin-room coins: seed visible once, then proximity pickup. The Z test
         # (player z near -46) disambiguates the coin room from the surface, where
@@ -1743,11 +1767,13 @@ flag_obj['wf_Model Type'] = 'Mesh'
 
 # ── 10b. Flagpole end-of-level trigger ────────────────────────────────────────
 # Composition, NOT a class: an invisible ActBox sensor volume over the flagpole.
-# On Player overlap it writes END_OF_LEVEL=1 → the level unloads. No script, no
-# coordinate baked into a script (the box's placement IS the trigger region).
-# See docs/plans/2026-05-25-smb-flagpole-end-of-level.md and the composition
-# pattern in docs/level-building.md.
-END_OF_LEVEL = 1905   # INDEXOF_END_OF_LEVEL (wfsource/source/mailbox/mailbox.inc:31)
+# On Player overlap it writes SMB_CELEBRATE=1 → the Director runs the end-of-level
+# celebration (pole-flag slide, castle flag raise, timer→score drain) and fires
+# END_OF_LEVEL itself at the end. No script, no coordinate baked into a script (the
+# box's placement IS the trigger region). See docs/plans/2026-05-31-smb-flagpole-
+# celebration.md + 2026-05-25-smb-flagpole-end-of-level.md.
+END_OF_LEVEL  = 1905  # INDEXOF_END_OF_LEVEL (wfsource/source/mailbox/mailbox.inc:31)
+SMB_CELEBRATE = 1862  # INDEXOF_SMB_CELEBRATE — flag touch starts the celebration cutscene
 # Flag-driven level advance: a SECOND ActBox at the flag writes LEVEL_TO_RUN, the
 # persistent mailbox the meta-loop reads to pick the next level. shell.fth only seeds
 # it on first boot, so the value persists across the reload. mailbox.inc:247 documents
@@ -1764,7 +1790,7 @@ flagtrig.data.name = 'flagpole_trigger'
 flagtrig.scale = (1.5, T, 2.5 * T)   # half-extents X±1.5, Y±T, Z±3.75 (centre Z=3): covers Mario at the pole
 bpy.ops.object.transform_apply(scale=True)
 attach_schema(flagtrig, 'actbox')
-flagtrig['wf_MailBox']            = END_OF_LEVEL   # write-to-mailbox on activation
+flagtrig['wf_MailBox']            = SMB_CELEBRATE  # start the celebration (Director fires END_OF_LEVEL at the end)
 flagtrig['wf_MailBoxValue']       = 1
 flagtrig['wf_Activated By Actor'] = 'Player'       # ActivatedBy defaults to 1 (Actor)
 # ActBox::activate unconditionally writes the activator's index to "Activated Actor

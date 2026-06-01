@@ -88,6 +88,10 @@ Comment("=====================================================================")
 	MAILBOXENTRY( SMB_COIN_17, 1860 )		Comment("coin-room coin 17 visibility")
 	MAILBOXENTRY( SMB_COIN_18, 1861 )		Comment("coin-room coin 18 visibility")
 
+	Comment(" SMB W1-1 flagpole celebration — docs/plans/2026-05-31-smb-flagpole-celebration.md ")
+	MAILBOXENTRY( SMB_CELEBRATE, 1862 )		Comment("flag touch sets 1; the end-of-level cutscene gates on it (Director/Player/flag actors read it). Replaces the flag's instant END_OF_LEVEL write")
+	MAILBOXENTRY( SMB_CELEBRATE_START, 1863 )	Comment("level-TIME captured on SMB_CELEBRATE's rising edge; phase elapsed = TIME - this")
+
 	MAILBOXENTRY( HUD_SCORE, 70 )			Comment("HUD score slot (read by game.cc:554); player writes its GOLD here")
 	MAILBOXENTRY( HUD_TIMER, 71 )			Comment("HUD timer slot (read by game.cc:554); Director writes the countdown here")
 	MAILBOXENTRY( LIVES, 72 )			Comment("HUD lives slot (read by game.cc:553 for the LIVES display); player respawn decrements it")
