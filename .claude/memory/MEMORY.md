@@ -23,6 +23,7 @@
 - [Cross-project glossary location](reference_glossary.md) — `/home/will/SRC/docs/glossary.md` is the canonical glossary; add new terms there, not in memory.
 - [Vendor research papers when citing](feedback_vendor_research_papers.md) — SOP: download open-access PDFs into `docs/papers/` (or `engine/<comp>/papers/` for impl refs) in same commit as any doc citing academic work.
 - [Use French + Spanish diacritics in prose](feedback_loanword_diacritics.md) — naïve, résumé, façade, déjà vu, jalapeño, El Niño, mañana, señor, etc.; full inventory in the memory file.
+- [Code age ≠ stability](feedback_code_age_not_stability.md) — never argue from "N years old / survived untouched"; judge designs on pure CS (ISP/DIP/YAGNI). WF is dormant — don't mention it.
 
 <!-- BEGIN GLOBAL MEMORY (managed by claude-housekeeping; do not edit) -->
 
