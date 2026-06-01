@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # engine/build_game.sh — build the WF game engine executable from source
 #
-# Run from this directory. Output: wf_game (lean game engine) or wf-edit
-# (editor stack, when WF_ENABLE_EDITOR=1) — the two binaries coexist.
+# Run from this directory. Output: wf_game (lean game engine) or wf_game-dev
+# (editor/dev stack, when WF_ENABLE_EDITOR=1) — the two binaries coexist.
 # To run: cd wfsource/source/game && DISPLAY=:0 ../../../engine/wf_game
 set -euo pipefail
 
@@ -798,11 +798,12 @@ fi
 
 echo "=== Linking ==="
 
-# Editor builds emit a separate binary (wf-edit) so they never overwrite the
-# lean game-engine output (wf_game). Both can coexist side-by-side; running
-# the bridge or the wfmut smoke uses wf-edit, the shipped game uses wf_game.
+# Editor/dev builds emit a separate binary (wf_game-dev) so they never overwrite
+# the lean game-engine output (wf_game). Both can coexist side-by-side; the
+# shipped game uses wf_game. (NB: the GUI desktop editor is a different program,
+# CMake target wf_edit → build-editor/wf-edit — not this binary.)
 if [[ "$WF_ENABLE_EDITOR" == "1" ]]; then
-    WF_BIN_NAME="wf-edit"
+    WF_BIN_NAME="wf_game-dev"
 else
     WF_BIN_NAME="wf_game"
 fi
