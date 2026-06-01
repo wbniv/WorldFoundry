@@ -274,8 +274,8 @@ def _build_astronaut():
 
     add_cyl(0.20, 0.10, (0.0, 0.0, 0.95), mat_white)                          # hips
     add_cyl(0.22, 0.45, (0.0, 0.0, 1.225), mat_white)                         # torso
-    add_cube(0.20, 0.08, 0.12, (-0.20, 0.0, 1.30), mat_dark)                  # chest panel
-    add_cube(0.30, 0.18, 0.50, (+0.27, 0.0, 1.20), mat_off)                   # PLSS backpack
+    add_cube(0.20, 0.08, 0.12, (+0.20, 0.0, 1.30), mat_dark)                  # chest panel at mesh +X (front, per WF convention)
+    add_cube(0.30, 0.18, 0.50, (-0.27, 0.0, 1.20), mat_off)                   # PLSS backpack at mesh -X (back)
 
     for yo in (-0.27, 0.27):
         add_sph(0.11, (0.0, yo, 1.42), mat_white)                             # shoulder
@@ -285,7 +285,7 @@ def _build_astronaut():
 
     add_cyl(0.06, 0.06, (0.0, 0.0, 1.475), mat_dark)                          # neck
     add_sph(0.14, (0.0, 0.0, 1.66), mat_white)                                # helmet
-    add_sph(0.13, (-0.05, 0.0, 1.66), mat_visor)                              # visor
+    add_sph(0.13, (+0.05, 0.0, 1.66), mat_visor)                              # visor at mesh +X (front)
 
     # Apply per-part material assignments
     for obj, mat in parts:
@@ -402,8 +402,8 @@ if player:
     player['wf_Air Acceleration']      = 0.0
     player['wf_Max Air Speed']         = 8.0
     player['wf_Horiz Air Drag']        = 1.5
-    player['wf_Turn Rate']             = 0.0
-    player.rotation_euler.z            = math.pi / 2     # face +Y so LEFT/RIGHT are ±X
+    player['wf_Turn Rate']             = 0.5             # rev/sec — LEFT/RIGHT rotate (180°/sec, full turn in 2s)
+    player.rotation_euler.z            = math.pi / 2     # face +Y (into vista) at spawn
     # Doomstick 4-direction strafe (UP forward / DOWN back / LEFT-RIGHT strafe
     # since TurnRate=0). Raw passthrough — every bit (UP/DOWN/LEFT/RIGHT and A
     # for jump) flows into INPUT at its native position; movement.cc reads them
