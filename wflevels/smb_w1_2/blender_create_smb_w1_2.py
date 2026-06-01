@@ -584,7 +584,7 @@ for _i, (_sx0, _sx1) in enumerate(_solid_spans):
 # A solid brick-coloured slab spanning the corridor, 9 tiles up. This is what
 # gives the bare W1-2 its "underground" read alongside the near-black matte.
 mat_ceiling = make_mat('smb_ug_ceiling', (0.55, 0.30, 0.14))
-CEIL_Z = GROUND_TOP_Z + 9 * T
+CEIL_Z = GROUND_TOP_Z + 5 * T   # 7.5 m — low cave ceiling, in the side-camera frame
 add_statplat('ceiling',
              GROUND_X0, -GROUND_Y, CEIL_Z,
              GROUND_X1,  GROUND_Y, CEIL_Z + GROUND_THICK,

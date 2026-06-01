@@ -6,7 +6,8 @@ driving the flow produced the level-load sequence **`120 → 18 → 120`** (W1-1
 the meta-loop advances on `LEVEL_TO_RUN`, and **walking Mario into W1-2's flagpole looped back
 to W1-1** (the flag ActBox end-to-end). Screenshots: `tests/screenshots/smb_transition_{1..4}_*.png`.
 W1-1 regressions (`verify_smb_scroll`, `verify_smb_scoring`) stayed green after the re-export.
-Note: the brick ceiling sits at 9 tiles up (faithful height; just above the side-camera frame).
+The brick ceiling is at 5 tiles (7.5 m) so it sits in the side-camera frame — see
+`tests/screenshots/smb_transition_2_w1_2.png` (floor + brick ceiling + dark void = underground).
 
 ## Context
 
