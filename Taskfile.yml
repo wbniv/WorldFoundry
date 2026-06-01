@@ -99,6 +99,37 @@ tasks:
       NPROC:
         sh: nproc
 
+  turn-serve:
+    desc: "Run a network-reachable coturn for a REAL two-machine wf-edit call (config/turnserver-wfedit.conf). Ctrl-C to stop. Throwaway/static creds — not for production."
+    silent: true
+    vars:
+      TURN_USER: wfedit
+      TURN_PASS: wfeditpass
+    cmds:
+      - |
+        set -eu
+        command -v turnserver >/dev/null 2>&1 || {
+          echo "coturn not installed — run: sudo apt-get install -y coturn"; exit 1; }
+        CONF="$(git rev-parse --show-toplevel)/config/turnserver-wfedit.conf"
+        # Best-effort reachable IP for the clients (first non-loopback IPv4).
+        IP="$(ip -4 -o addr show scope global 2>/dev/null | awk '{print $4}' | cut -d/ -f1 | head -1)"
+        IP="${IP:-<this-host-ip>}"
+        echo "turn-serve: launching coturn from $CONF"
+        echo "turn-serve: clients on the SAME network use this env —"
+        echo
+        echo "    export WF_COLLAB_TURN='$IP:3478'"
+        echo "    export WF_COLLAB_TURN_USER={{.TURN_USER}}"
+        echo "    export WF_COLLAB_TURN_PASS={{.TURN_PASS}}"
+        echo "    export WF_COLLAB_FORCE_RELAY=1   # to PROVE the relay leg"
+        echo
+        echo "    NOTE: if THIS host is behind NAT (home router), $IP is private."
+        echo "    Forward UDP 3478 + 49300-49400 and set external-ip=<public-ip>"
+        echo "    in $CONF, then advertise the public IP to the remote machine."
+        echo
+        echo "turn-serve: Ctrl-C to stop. Open UDP 3478 + 49300-49400 on the firewall."
+        echo
+        exec turnserver -c "$CONF"
+
   turn-test-relay:
     desc: "Prove wf-edit's WebRTC TURN path: run a local coturn + force-relay connectivity test (needs `coturn`)."
     deps: [build-wf-edit]

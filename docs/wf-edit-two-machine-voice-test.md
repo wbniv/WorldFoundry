@@ -116,12 +116,27 @@ server-reflexive candidate — so a plain successful call does **not** prove TUR
 works. To isolate the relay leg (the ~15–25 % of real-world peer pairs that STUN
 can't punch — symmetric NAT/CGNAT, some VPNs):
 
-On the VPN machine, before launching:
+**Stand up the TURN server** — on a machine both peers can reach (a host with a
+public IP, or one on the same LAN as the others; **not** the VPN'd box):
 
 ```bash
-export WF_COLLAB_TURN='turn.example.org:3478'   # your TURN host[:port]
-export WF_COLLAB_TURN_USER='<user>'
-export WF_COLLAB_TURN_PASS='<pass>'
+task turn-serve     # runs coturn from config/turnserver-wfedit.conf,
+                    # then prints the exact WF_COLLAB_* env to paste on the clients
+```
+
+`task turn-serve` auto-detects the host's reachable IPv4 and prints a ready-to-paste
+block. Open **UDP 3478 and 49300–49400** on that host's firewall. If the TURN host is
+itself behind NAT (home router), forward those ports and set `external-ip=<public-ip>`
+in [`config/turnserver-wfedit.conf`](../config/turnserver-wfedit.conf) so it advertises
+a reachable relay candidate. (Static creds `wfedit:wfeditpass` are for this throwaway
+test only — see the security note atop the config.)
+
+**On the VPN machine**, before launching, paste what `turn-serve` printed:
+
+```bash
+export WF_COLLAB_TURN='<turn-host-ip>:3478'
+export WF_COLLAB_TURN_USER='wfedit'
+export WF_COLLAB_TURN_PASS='wfeditpass'
 export WF_COLLAB_FORCE_RELAY=1                   # pins ICE to relay-only
 WF_COLLAB_VOICE_DEBUG=1 ./build-editor/wf-edit --url='<link>'
 ```
@@ -131,9 +146,10 @@ TURN server — so a working call + flowing `voice-dbg:` counters is direct proo
 the relay path carries DTLS-SRTP media. (This mirrors what the headless
 `WF_EDIT_TURN_TEST` does against a local coturn, but now over the real internet.)
 
-No TURN server yet? The traversal test still has value without it (STUN will
-handle most NATs); just note in the result that the **relay fallback was not
-exercised** — don't claim it.
+No TURN server yet? `task turn-serve` (coturn, validated against 4.6.1) stands one
+up from [`config/turnserver-wfedit.conf`](../config/turnserver-wfedit.conf). If you
+skip it entirely, the traversal test still has value (STUN handles most NATs); just
+note in the result that the **relay fallback was not exercised** — don't claim it.
 
 ---
 
