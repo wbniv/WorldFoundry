@@ -155,19 +155,48 @@ or be reused.)
 
 ## Verification
 
-> Note: `build-editor/wf-edit` is a **Debug + ASan** binary (ASan is the Debug
-> default, `Taskfile.yml:42`) and is dynamically linked against `libasan.so`, so
-> it must be launched with the runtime preloaded or it aborts with "ASan runtime
-> does not come first". All run steps below use:
-> `LD_PRELOAD=$(gcc -print-file-name=libasan.so) ASAN_OPTIONS=detect_leaks=0:halt_on_error=0`
+> Note (updated 2026-06-01): the **Debug + ASan** runtime is now **static-linked**
+> into the binary ([`d46c7cda`](https://github.com/wbniv/WorldFoundry/commit/d46c7cda),
+> `-static-libasan -static-libubsan`), so the editor launches directly with **no
+> `LD_PRELOAD`** — the earlier "ASan runtime does not come first" abort can no
+> longer occur (`readelf -d build-editor/wf-edit` shows no asan/ubsan `NEEDED`).
+>
+> **Partial verification run — 2026-06-01.** Steps 1–2 exercised live against a
+> real two-machine session (host on a remote box, probe from this box via the
+> vendored `wftools/wf_collab/probe_relay.py` raw-WS client). Steps 3–5 are **open**:
+> the joiner-over-public-`wss://` path could not be cleanly tested from the tool
+> shell (output buffering + `timeout`-kill + GUI-from-non-interactive-shell noise),
+> and live testing ended when the editor was quit. Re-run 3–5 from a real terminal.
 
 1. Build the editor: `task build-wf-edit` → links `build-editor/wf-edit`.
+
+   ```
+   ✓ wf-edit built → build-editor/wf-edit (14:03:52, 367085344 bytes)
+   readelf -d build-editor/wf-edit | grep -iE 'asan|ubsan'  → (no matches; runtime baked in)
+   ./build-editor/wf-edit --frames 20 wflevels/cd.iff:L4    → EXIT=0, no ASan ordering error, no LD_PRELOAD
+   ```
+   **PASS** — builds, links, launches clean with the runtime embedded.
 
 2. **Host joins its own room over loopback.** Start a host
    (`--host-tunnel`), wait for the share link, then from a second client probe
    the room. The host's own peer must appear (presence within a few seconds of
    the share link showing). Confirm the host log prints
    `wf-edit: relay connected ws://127.0.0.1:9900 room=studio-… (peer …)`.
+
+   ```
+   # probe of host tunnel royalty-walls-…/r/studio-5664 (host on remote machine):
+   GET https://royalty-walls-…/  → HTTP 502   (connector up, relay reachable)
+   [probe] JOIN room=studio-5664 peer=probe-claude
+   [probe] PRESENCE from peer_id='ccf9ca2c…' name='Editor (ccf9ca)'   (×307 over 35 s ≈ 9 Hz)
+   [probe] SIGNAL (…)   ×7   (host opened WebRTC toward the probe)
+   ===== SUMMARY ===== frames: SYNC=1 PRESENCE=307 SIGNAL=7
+   OTHER peers in room studio-5664: {'ccf9ca2c…': 'Editor (ccf9ca)'}
+   ```
+   **PASS (host presence confirmed)** — the host editor is reliably present in its
+   own room at the expected ~10 Hz, which it never was before this change (two
+   prior sessions, `studio-2781` and `studio-8907`, showed an empty room). Caveat:
+   the host's own `relay connected ws://127.0.0.1:9900` log line was not directly
+   observed (host ran on a remote machine); presence in the room is the proof.
 
 3. **Joiner rides out quick-tunnel warm-up.** Immediately after the host's
    share link appears (while a plain `GET https://<host>/` may still return
@@ -176,14 +205,45 @@ or be reused.)
    `wf-edit: relay connected wss://… room=studio-… (peer …)` once the tunnel
    warms up — not fail at ~8 s.
 
+   ```
+   OPEN — inconclusive from the tool shell. Two joiner launches against the live
+   studio-5664 (host present, tunnel up, GET=502): the editor loaded the level
+   and printed up to `collab room 'studio-5664' started` (main.cc:3005), then
+   entered the relay-connect block (main.cc:3009). No `relay connected` /
+   `relay connect failed` verdict was ever captured (lost to stdout buffering +
+   timeout-kill mid-retry), and a concurrent probe saw NO second peer appear in
+   ~28 s — i.e. the joiner had not joined within that window. Cannot distinguish
+   "real WsClient-vs-quick-tunnel-wss failure" from "harness launch artifact"
+   from here. NB: the raw Python probe joins the SAME public wss:// host on the
+   first try (101 + SYNC + visible to the host), so the relay/tunnel are fine —
+   the open question is specifically the editor's WsClient TLS/upgrade path
+   against the Cloudflare edge.
+   ```
+   **OPEN** — re-run from a real terminal; capture the verdict line + any `ws:`
+   lines. If it fails where Python succeeds, open a focused `WsClient` (TLS/SNI/
+   HTTP-upgrade vs Cloudflare HTTP/2 edge) investigation.
+
 4. **Two editors see each other.** With host + joiner both connected, each
    editor's Collaborators panel shows a 🟢 connected dot and lists the other
    peer; an edit on one appears on the other.
+
+   ```
+   OPEN — blocked on step 3 (no confirmed joiner connection yet).
+   ```
+   **OPEN.**
 
 5. **Bad URL still fails cleanly.** `--url=wfedit+s://nonexistent.example/r/x`
    shows the attempt counter, exhausts the 45 s budget, logs
    `relay connect failed`, and the panel shows the 🔴 disconnected dot — no hang,
    no crash.
 
+   ```
+   OPEN — not yet exercised against the post-fix (45 s budget) build. A pre-fix
+   run earlier (studio-8907, old 4×2 s budget) did log `relay connect failed`
+   and fall back to offline cleanly on HTTP 530, so the fail-soft path is sound;
+   the 45 s-budget timing remains to be confirmed.
+   ```
+   **OPEN.**
+
 Paste raw output under each step and mark PASS/FAIL before promoting the
-`[verify]` TODO item to `[x]`.
+`[verify]` TODO item to `[x]`. Current state: **1–2 PASS, 3–5 OPEN.**
