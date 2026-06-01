@@ -99,6 +99,12 @@ tasks:
       NPROC:
         sh: nproc
 
+  run-wf-edit:
+    desc: "Run the wf-edit GUI editor (build first with task build-wf-edit)."
+    deps: [build-wf-edit]
+    cmds:
+      - ./build-editor/wf-edit {{.CLI_ARGS}}
+
   turn-serve:
     desc: "Run a network-reachable coturn for a REAL two-machine wf-edit call (config/turnserver-wfedit.conf). Ctrl-C to stop. Throwaway/static creds — not for production."
     silent: true

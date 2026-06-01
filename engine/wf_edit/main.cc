@@ -118,7 +118,7 @@ struct WfeditIdentity {
     std::string  tunnel_token;
     std::string  tunnel_hostname;
     // Outliner: group actors into a collapsible tree by shared base name.
-    bool         outliner_group_by_prefix = false;
+    bool         outliner_group_by_prefix = true;
 };
 
 static std::string IdentityPath()
@@ -162,7 +162,7 @@ static std::optional<WfeditIdentity> LoadIdentity()
         id.relay_default    = j.value("relay_default", "");
         id.tunnel_token     = j.value("tunnel_token", "");
         id.tunnel_hostname  = j.value("tunnel_hostname", "");
-        id.outliner_group_by_prefix = j.value("outliner_group_by_prefix", false);
+        id.outliner_group_by_prefix = j.value("outliner_group_by_prefix", true);
         if (id.peer_id.empty()) return std::nullopt;
         return id;
     } catch (...) {
