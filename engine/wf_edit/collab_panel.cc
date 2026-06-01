@@ -50,7 +50,8 @@ void RenderCollabPanel(bool& show_collab,
                        CollabSession& session,
                        VoiceChat&     voice,
                        VideoChat&     video,
-                       const std::string& room_id)
+                       const std::string& room_id,
+                       bool           relay_connected)
 {
     if (!show_collab) return;
 
@@ -62,6 +63,25 @@ void RenderCollabPanel(bool& show_collab,
 
     // Room ID / invite line.
     ImGui::TextDisabled("Room: %s", room_id.empty() ? "(none)" : room_id.c_str());
+    // Relay socket status. The connect is one-shot at startup with no reconnect,
+    // so a failed/dropped connection leaves the rest of the panel (Room name,
+    // "You" tile, "No peers…") looking exactly like a live session — this dot is
+    // the only honest signal of whether edits/presence are actually flowing.
+    if (!room_id.empty()) {
+        ImGui::SameLine(0, 12);
+        const ImU32 dot = relay_connected ? IM_COL32( 76, 217, 100, 255)   // green
+                                          : IM_COL32(230,  90,  76, 255);  // red
+        const float lh  = ImGui::GetTextLineHeight();
+        const float rad = lh * 0.30f;
+        const ImVec2 p  = ImGui::GetCursorScreenPos();
+        ImGui::GetWindowDrawList()->AddCircleFilled(
+            { p.x + rad, p.y + lh * 0.5f }, rad, dot);
+        ImGui::Dummy({ rad * 2 + 6, lh });
+        ImGui::SameLine(0, 0);
+        ImGui::TextColored(relay_connected ? ImVec4(0.30f, 0.85f, 0.40f, 1.f)
+                                           : ImVec4(0.90f, 0.35f, 0.30f, 1.f),
+                           relay_connected ? "connected" : "disconnected");
+    }
     ImGui::Separator();
 
     // ── Self preview ────────────────────────────────────────────────────────

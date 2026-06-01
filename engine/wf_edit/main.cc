@@ -1973,7 +1973,8 @@ bool editor_build(void* p)
     // Collaborators panel (voice + video; only when a room is active).
     if (c->collab)
         wfedit::RenderCollabPanel(c->show_collab, *c->collab,
-                                  *c->voice, *c->video, c->room_id);
+                                  *c->voice, *c->video, c->room_id,
+                                  c->relay_client.connected());
 
     // Chat panel (when a relay is connected, or forced by WF_EDIT_CHAT_DEMO).
     if (c->relay_client.connected() || c->chat_demo) {
