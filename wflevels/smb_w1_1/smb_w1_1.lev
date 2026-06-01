@@ -147,7 +147,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_MAX_CAM_X read-mailbox not if 4.5 INDEXOF_SMB_MAX_CAM_X write-mailbox then\nINDEXOF_SMB_PLAYER_X read-mailbox 1.5 +\ndup INDEXOF_SMB_MAX_CAM_X read-mailbox -\n1.5 <\nif drop INDEXOF_SMB_MAX_CAM_X read-mailbox\nelse 1.5 - dup 9.0 < if drop 9.0 then dup 303.0 > if drop 303.0 then dup INDEXOF_SMB_MAX_CAM_X write-mailbox\nthen\nINDEXOF_SMB_TARGET_CAM_X write-mailbox\nINDEXOF_SMB_CELEBRATE read-mailbox if\n  INDEXOF_SMB_CELEBRATE_START read-mailbox not if INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START write-mailbox then\n  INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox -\n  dup 1.5 > if INDEXOF_HUD_TIMER read-mailbox 250.0 INDEXOF_DELTA_TIME read-mailbox * - dup 0 < if drop 0 then INDEXOF_HUD_TIMER write-mailbox then\n  3.5 > if 1 INDEXOF_END_OF_LEVEL write-mailbox then\nelse\n  INDEXOF_SMB_TIMER_START read-mailbox not if INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox then\n  400 INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START read-mailbox - 2.66667 * -\n  dup 0 <= if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox drop 0 then\n  INDEXOF_HUD_TIMER write-mailbox\nthen\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_MAX_CAM_X read-mailbox not if 4.5 INDEXOF_SMB_MAX_CAM_X write-mailbox then\nINDEXOF_SMB_PLAYER_X read-mailbox 1.5 +\ndup INDEXOF_SMB_MAX_CAM_X read-mailbox -\n1.5 <\nif drop INDEXOF_SMB_MAX_CAM_X read-mailbox\nelse 1.5 - dup 9.0 < if drop 9.0 then dup 303.0 > if drop 303.0 then dup INDEXOF_SMB_MAX_CAM_X write-mailbox\nthen\nINDEXOF_SMB_TARGET_CAM_X write-mailbox\nINDEXOF_SMB_CELEBRATE read-mailbox if\n  INDEXOF_SMB_CELEBRATE_START read-mailbox not if INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START write-mailbox then\n  315.0 INDEXOF_SMB_TARGET_CAM_X write-mailbox\n  INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox -\n  dup 1.5 > if INDEXOF_HUD_TIMER read-mailbox 250.0 INDEXOF_DELTA_TIME read-mailbox * - dup 0 < if drop 0 then INDEXOF_HUD_TIMER write-mailbox then\n  3.5 > if 1 INDEXOF_END_OF_LEVEL write-mailbox then\nelse\n  INDEXOF_SMB_TIMER_START read-mailbox not if INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox then\n  400 INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START read-mailbox - 2.66667 * -\n  dup 0 <= if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox drop 0 then\n  INDEXOF_HUD_TIMER write-mailbox\nthen\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
@@ -1847,9 +1847,67 @@
 		} }
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 312.7500000000000000(1.15.16) -0.0049999998882413(1.15.16) 13.5000000000000000(1.15.16) 314.2500000000000000(1.15.16) 0.0049999998882413(1.15.16) 13.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
-		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "flagpole_flag.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_CELEBRATE read-mailbox if\nINDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox - 2.0 *\ndup 1.0 > if drop 1.0 then\n12.45 * 13.50 swap - INDEXOF_Z_POS write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "castle" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 317.2500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 321.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "castle.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "castle_pole" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 319.3999938964843750(1.15.16) -0.1000000014901161(1.15.16) 4.5000000000000000(1.15.16) 319.6000061035156250(1.15.16) 0.1000000014901161(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "castle_pole.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "castle_flag" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 318.3750000000000000(1.15.16) -0.0049999998882413(1.15.16) 4.5000000000000000(1.15.16) 319.1250000000000000(1.15.16) 0.0049999998882413(1.15.16) 4.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "castle_flag.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_CELEBRATE read-mailbox if\nINDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox - 0.8 -\ndup 0.0 < if drop 0.0 then 1.667 *\ndup 1.0 > if drop 1.0 then\n2.25 * 4.50 + INDEXOF_Z_POS write-mailbox\nthen\n" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }

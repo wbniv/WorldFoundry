@@ -206,6 +206,9 @@ if director:
         "INDEXOF_SMB_CELEBRATE read-mailbox if\n"
         "  INDEXOF_SMB_CELEBRATE_START read-mailbox not if "
         "INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START write-mailbox then\n"
+        # Frame the flag + the castle to its right (overrides the scroll target, which
+        # clamps at the pole and would leave the castle off the right edge).
+        f"  {FLAGPOLE_X:.1f} INDEXOF_SMB_TARGET_CAM_X write-mailbox\n"
         "  INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox -\n"   # elapsed
         "  dup 1.5 > if "                                       # phase D: drain the timer
         "INDEXOF_HUD_TIMER read-mailbox 250.0 INDEXOF_DELTA_TIME read-mailbox * - "
@@ -1752,8 +1755,13 @@ attach_schema(pole_obj, 'statplat')
 pole_obj['wf_Visibility Mailbox'] = 1
 pole_obj['wf_Model Type'] = 'Mesh'
 
-# Flag — flat plane near top, offset left of pole
-bpy.ops.mesh.primitive_plane_add(size=1.0, location=(FLAGPOLE_X - T, 0, POLE_HEIGHT - T))
+# Flag — flat plane near the pole top. A scriptable Anchored 'enemy' (statplats can't
+# tick a script) so it SLIDES DOWN the pole during the celebration: phase A
+# (elapsed 0–0.5 s) lerps its Z from the top to the base. Before SMB_CELEBRATE it sits
+# at the authored top. Anchored = no Jolt body, no collision; the script owns its Z.
+FLAG_TOP_Z  = POLE_HEIGHT - T        # 13.5 — authored start (near pole top)
+FLAG_BASE_Z = T * 0.7                # ~1.05 — slide target (pole base, the "grab")
+bpy.ops.mesh.primitive_plane_add(size=1.0, location=(FLAGPOLE_X - T, 0, FLAG_TOP_Z))
 flag_obj = bpy.context.object
 flag_obj.name      = 'flagpole_flag'
 flag_obj.data.name = 'flagpole_flag'
@@ -1761,9 +1769,55 @@ flag_obj.scale = (T, 0.01, 0.65 * T)
 bpy.ops.object.transform_apply(scale=True)
 flag_obj.data.materials.clear()
 flag_obj.data.materials.append(mat_flag)
-attach_schema(flag_obj, 'statplat')
-flag_obj['wf_Visibility Mailbox'] = 1
+attach_schema(flag_obj, 'enemy')
+flag_obj['wf_Mobility'] = 'Anchored'
 flag_obj['wf_Model Type'] = 'Mesh'
+flag_obj['wf_Visibility Mailbox'] = 1
+flag_obj['wf_Script'] = (
+    "\\ wf\n"
+    "INDEXOF_SMB_CELEBRATE read-mailbox if\n"
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox - 2.0 *\n"  # frac = elapsed/0.5
+    "dup 1.0 > if drop 1.0 then\n"
+    f"{FLAG_TOP_Z - FLAG_BASE_Z:.2f} * {FLAG_TOP_Z:.2f} swap - INDEXOF_Z_POS write-mailbox\n"  # Z = top - span*frac
+    "then\n"
+)
+
+# ── 10a. Castle + rising castle flag (celebration) ────────────────────────────
+# A small stone castle just past the flagpole; its rooftop flag RAISES up a pole
+# during phase C (elapsed 0.8–1.4 s) — the "flag which raises" beat. The castle flag
+# is a scriptable Anchored 'enemy' like the pole flag. Mario is clamped at the pole,
+# so the castle is purely visual this pass (walking into it is a follow-up).
+mat_castle = make_mat('smb_castle', (0.60, 0.55, 0.50))
+CASTLE_X0, CASTLE_X1 = FLAGPOLE_X + 1.5 * T, FLAGPOLE_X + 4.5 * T   # 317.25 .. 321.75 (on the ground)
+CASTLE_TOP   = 3 * T                                               # 4.5 m tall
+CASTLE_MID_X = (CASTLE_X0 + CASTLE_X1) / 2
+add_statplat('castle', CASTLE_X0, -GROUND_Y, GROUND_TOP_Z, CASTLE_X1, GROUND_Y, CASTLE_TOP, mat_castle)
+add_statplat('castle_pole', CASTLE_MID_X - 0.1, -0.1, CASTLE_TOP,
+             CASTLE_MID_X + 0.1, 0.1, CASTLE_TOP + 2 * T, mat_pole)
+
+CFLAG_BASE_Z = CASTLE_TOP             # 4.5 — authored low (rooftop base)
+CFLAG_TOP_Z  = CASTLE_TOP + 1.5 * T   # 6.75 — raised to the rooftop pole top
+bpy.ops.mesh.primitive_plane_add(size=1.0, location=(CASTLE_MID_X - 0.5 * T, 0, CFLAG_BASE_Z))
+cflag = bpy.context.object
+cflag.name      = 'castle_flag'
+cflag.data.name = 'castle_flag'
+cflag.scale = (0.5 * T, 0.01, 0.4 * T)
+bpy.ops.object.transform_apply(scale=True)
+cflag.data.materials.clear()
+cflag.data.materials.append(mat_flag)
+attach_schema(cflag, 'enemy')
+cflag['wf_Mobility'] = 'Anchored'
+cflag['wf_Model Type'] = 'Mesh'
+cflag['wf_Visibility Mailbox'] = 1
+cflag['wf_Script'] = (
+    "\\ wf\n"
+    "INDEXOF_SMB_CELEBRATE read-mailbox if\n"
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox - 0.8 -\n"  # elapsed - 0.8 (phase C)
+    "dup 0.0 < if drop 0.0 then 1.667 *\n"   # frac = (elapsed-0.8)/0.6, clamped >=0
+    "dup 1.0 > if drop 1.0 then\n"
+    f"{CFLAG_TOP_Z - CFLAG_BASE_Z:.2f} * {CFLAG_BASE_Z:.2f} + INDEXOF_Z_POS write-mailbox\n"  # Z = base + span*frac
+    "then\n"
+)
 
 # ── 10b. Flagpole end-of-level trigger ────────────────────────────────────────
 # Composition, NOT a class: an invisible ActBox sensor volume over the flagpole.
