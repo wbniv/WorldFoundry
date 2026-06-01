@@ -1,7 +1,9 @@
 # Plan: SMB W1-1 flagpole celebration (flag-raise + timer→score, 2D→3D)
 
 **Date:** 2026-05-31
-**Status:** Done + verified (2026-05-31). Both phases landed. Reaching the flag fires
+**Status:** Done + verified (Phases 1–2 2026-05-31; Phase 3 2026-06-01). All three phases landed —
+Phase 3 adds **Mario auto-walking into the castle** (then vanishing) and **fireworks** popping above
+it. Reaching the flag fires
 `SMB_CELEBRATE` (not `END_OF_LEVEL`); the Director sequences a ~3.5 s show (pole flag slides
 down, a new castle's rooftop flag raises, the timer drains into score) then fires `END_OF_LEVEL`
 → the existing `LEVEL_TO_RUN` advance. Headless proof (step-teleport Mario to the pole,
@@ -94,6 +96,30 @@ script. Re-export + rebuild.
 *Verify:* screenshots of the flag mid-slide, the castle, and the castle flag raised; plus an mp4 of
 the full beat into the transition.
 
+**Phase 3 — Mario walks into the castle + fireworks (2026-06-01):**
+Slots two new beats into the elapsed-based timeline (all keyed off `elapsed = TIME −
+SMB_CELEBRATE_START`):
+- **Mario walk + hide** (Player script): `wf_Visibility Mailbox = SMB_MARIO_VIS` (seeded `1` each
+  frame so the unseeded-global default doesn't hide him at load); the celebration tail replaces the
+  old clamp — `elapsed < 0.9` hold at the pole, `0.9–1.6` walk X 315→317 (into the castle door),
+  `≥ 1.6` set `SMB_MARIO_VIS=0` (disappear) + hold X.
+- **Castle door**: a dark `castle_door` statplat on the castle's left face so he walks *into* a door.
+- **Fireworks**: three `firework_0/1/2` Anchored `enemy` bright slabs above the castle,
+  `wf_Visibility Mailbox = SMB_FIREWORK_n`, each self-gated visible only while `SMB_CELEBRATE` set
+  **and** `elapsed ∈ [tₙ, tₙ′]` (staggered [2.1,3.0]/[2.6,3.5]/[3.1,4.0]).
+- **Director finale** extended `3.5 → 4.2` so `END_OF_LEVEL` fires *after* the fireworks.
+
+> **zForth gotcha (cost a long detour):** the window test was first written `… < and if …`, but this
+> zForth has **no `and`/`or` word** — the bitwise primitives are spelled **`&`** / **`|`** (as every
+> other SMB script already does). `and` compiled to `NOT_A_WORD`, and the per-frame recompile retries
+> left dict garbage that surfaced as misleading `OUTSIDE_MEM` aborts — a red herring that looked like
+> dictionary exhaustion. Fix was one character: `and` → `&`. New mailboxes: `SMB_MARIO_VIS` (1864),
+> `SMB_FIREWORK_0/1/2` (1865–1867).
+*Verify:* the step-teleport capture **settles the bungee camera** (hold Mario at 313, just shy of the
+315 trigger, with zeroed velocities for ~2.6 s) *before* firing `SMB_CELEBRATE`, so the firework
+windows get a stable framing instead of a mid-swing drop. Screenshots of the walk, the vanish, and
+each firework; mp4 of the full beat; `verify_smb_scroll` + `verify_smb_scoring` green.
+
 ## Verification
 
 - The **flag-touch → `SMB_CELEBRATE`** link is the same ActBox mechanism already proven (the W1-1
@@ -102,18 +128,19 @@ the full beat into the transition.
   field-verified `smb_w1_1.lev` confirms `flagpole_trigger` now writes `1862`.
 - Run real-time with `vblank_mode=0 __GL_SYNC_TO_VBLANK=0` (else ~1 FPS unfocized).
 - Screenshots → `tests/screenshots/smb_celebration_*.png`; mp4 → `tests/recordings/`.
-- Regression: `verify_smb_scroll` + `verify_smb_scoring` still pass (the flagpole bonus now fires on
-  `SMB_CELEBRATE` — `verify_smb_scoring` may need its trigger mailbox updated 1905→1862).
+- Regression: `verify_smb_scroll` + `verify_smb_scoring` both pass. The flagpole bonus now fires on
+  `SMB_CELEBRATE`, so `verify_smb_scoring` was updated to poke `SMB_CELEBRATE` (1862) instead of
+  `END_OF_LEVEL` (1905) — it had gone stale at the Phase 1 refactor (bonus 19.9k confirmed).
 
 ## Critical files
 
 | File | Change |
 |---|---|
-| [`wfsource/source/mailbox/mailbox.inc`](../../wfsource/source/mailbox/mailbox.inc) | + `SMB_CELEBRATE` (1862), `SMB_CELEBRATE_START` (1863) |
-| [`wflevels/smb_w1_1/blender_create_smb.py`](../../wflevels/smb_w1_1/blender_create_smb.py) | trigger→`SMB_CELEBRATE`; flag→Anchored enemy + slide; + castle + castle_flag; Player pin/bonus; Director sequencer + drain |
-| `engine/wf_game` | rebuilt (mailbox.inc changed) |
-| `wflevels/smb_w1_1.iff`/`-standalone.iff`, `wfsource/source/game/cd.iff` | rebuilt artifacts |
-| `tests/verify_smb_scoring.py` | update EOL trigger mailbox 1905→1862 if it pokes it directly |
+| [`wfsource/source/mailbox/mailbox.inc`](../../wfsource/source/mailbox/mailbox.inc) | + `SMB_CELEBRATE` (1862), `SMB_CELEBRATE_START` (1863); **P3:** + `SMB_MARIO_VIS` (1864), `SMB_FIREWORK_0/1/2` (1865–1867) |
+| [`wflevels/smb_w1_1/blender_create_smb.py`](../../wflevels/smb_w1_1/blender_create_smb.py) | trigger→`SMB_CELEBRATE`; flag→Anchored enemy + slide; + castle + castle_flag; Player pin/bonus; Director sequencer + drain; **P3:** Player walk/hide + vis mailbox, `castle_door`, 3 fireworks (`&` not `and`), Director finale 3.5→4.2 |
+| `engine/wf_game` | rebuilt (mailbox.inc changed; `ZF_DICT_SIZE` left at 65536 — dict was a red herring) |
+| `wflevels/smb_w1_1.iff`/`-standalone.iff`, `wfsource/source/game/cd.iff` | rebuilt artifacts (+ `castle_door.iff`, `firework_0/1/2.iff` meshes) |
+| [`tests/verify_smb_scoring.py`](../../tests/verify_smb_scoring.py) | flagpole-bonus trigger updated `END_OF_LEVEL` (1905) → `SMB_CELEBRATE` (1862) |
 
 ## Proof
 
@@ -125,9 +152,26 @@ the full beat into the transition.
 
 ![celebration](../../tests/screenshots/smb_celebration_4_flag_castle.png)
 
+**Phase 3 proof** (settled-camera capture, `tests/recordings/smb_w1_1_celebration.mp4` for the full beat):
+
+*Mario walking right into the castle (elapsed 1.1 s, before any firework):*
+
+![mario walks in](../../tests/screenshots/smb_celebration_p3_a_walk.png)
+
+*Mario vanished into the castle, flag raised (elapsed 1.8 s):*
+
+![mario gone](../../tests/screenshots/smb_celebration_p3_b_entered.png)
+
+*Fireworks popping above the castle in their staggered windows (elapsed 2.4 s and 3.6 s), score banked, timer drained:*
+
+![fireworks early](../../tests/screenshots/smb_celebration_p3_c_fireworks.png)
+![fireworks late](../../tests/screenshots/smb_celebration_p3_e_fireworks.png)
+
 ## Follow-ups (after this pass)
 
-- Mario **walks into the castle** (ScriptControlsInput cutscene + disappear).
 - **Fanfare** SFX (`SfxLibrary`; audio-verify on the other machine).
-- **Fireworks** on timer last-digit 1/3/6 (reuse `SMB_POPUP_*`).
+- **Radial spark-burst fireworks** (generator + `firework_spark` Physics template, the debris idiom)
+  and **count = remaining-timer last digit** (1/3/6) — the current pass is three flashing slabs.
+- Tighten the castle flag onto its rooftop pole; nudge the firework slabs clear of the flag so they
+  read as distinct sky bursts.
 - Bring the celebration to W1-2 / faithful W1-2.

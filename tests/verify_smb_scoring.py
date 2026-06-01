@@ -39,6 +39,7 @@ TIME_MB         = 1906
 SMB_SCORE       = 1838
 SMB_LAST_GOLD   = 1839
 SMB_EOL_LATCH   = 1840
+SMB_CELEBRATE   = 1862   # flag touch starts the celebration; the height+time bonus gates on this
 SMB_ONEUP_PICKUP = 1841
 SMB_STOMP       = 1806
 SMB_LIVES_INIT  = 1807
@@ -253,14 +254,16 @@ def main() -> int:
             # screenshot while popup is mid-float (UNTIL still set)
             shot("stomp")
 
-        # ── 6. Flagpole / END_OF_LEVEL → HUD_SCORE += height + time bonus ────
-        # NOTE: END_OF_LEVEL=1 permanently exits the level — keep this LAST.
+        # ── 6. Flagpole celebration → HUD_SCORE += height + time bonus ────
+        # The flag touch sets SMB_CELEBRATE (not END_OF_LEVEL directly anymore); the
+        # Player awards the one-shot height+time bonus on the SMB_EOL_LATCH edge while
+        # the celebration runs, then the Director fires END_OF_LEVEL at elapsed 4.2.
+        # Keep this LAST: the celebration leads to the level terminating.
         hud_before_eol = cached(1, HUD_SCORE)
-        # clear latch so the EOL edge fires once
-        cli.set_mailbox(idx=1, mailbox=SMB_EOL_LATCH, value=0.0)
+        cli.set_mailbox(idx=1, mailbox=SMB_EOL_LATCH, value=0.0)   # clear latch so the bonus edge fires once
         step(2)
-        cli.set_mailbox(idx=1, mailbox=END_OF_LEVEL, value=1.0)
-        step(1)  # engine exits after this frame — don't send more steps
+        cli.set_mailbox(idx=1, mailbox=SMB_CELEBRATE, value=1.0)   # start the celebration → awards the bonus
+        step(2)
         hud_after_eol = wait_gt(1, HUD_SCORE, hud_before_eol + 99, timeout=5.0)
         bonus = hud_after_eol - hud_before_eol
         print(f"  flagpole bonus: HUD_SCORE {hud_before_eol} → {hud_after_eol}  bonus={bonus}")
