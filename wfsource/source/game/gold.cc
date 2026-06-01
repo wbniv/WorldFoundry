@@ -24,6 +24,13 @@
 
 static const float kGoldTTL = 5.0f;
 
+// XZ-plane pickup radius (metres). True-contact: the player's box must actually
+// overlap the coin (coin disc is 0.75 m wide × 1.5 m tall). 1.0 m is tight but
+// safe from tunnelling at Mario's top speed (~11 m/s ≈ 0.24 m/frame). Applies to
+// EVERY coin in the game (surface ?-block coins here; the coin-room coins mirror
+// this same radius in their Forth pickup).
+static const float kGoldPickupRadius = 1.0f;
+
 Gold::Gold(const SObjectStartupData* startupData)
 	: Actor(startupData)
 	, _despawnTime(startupData->currentTime.Current() + Scalar(kGoldTTL))
@@ -48,7 +55,7 @@ static void TryPickup(Gold& coin, Actor& player)
 	const Vector3& pp = player.GetPhysicalAttributes().Position();
 	float dx = (pp.X() - cp.X()).AsFloat();
 	float dz = (pp.Z() - cp.Z()).AsFloat();
-	if (dx*dx + dz*dz > 1.5f * 1.5f) return;
+	if (dx*dx + dz*dz > kGoldPickupRadius * kGoldPickupRadius) return;
 
 	Mailboxes& pm = player.GetMailboxes();
 	// Award the OAD-configured Gold Value (default 1). This proximity path is the

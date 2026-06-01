@@ -28,6 +28,20 @@
 #include "display.hp"
 
 //=============================================================================
+// Runtime-overridable VRAM slot sizes — defaults match the legacy compile-
+// time enums (256² everywhere). main.cc sets these from CLI flags before
+// VideoMemory is constructed. See
+// docs/plans/2026-05-30-runtime-vram-cli-overrides.md.
+#if !defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
+int VideoMemory::VRAMPaletteWidth    = 256;
+int VideoMemory::VRAMPaletteHeight   = 8;
+int VideoMemory::VRAMPermanentWidth  = 256;
+int VideoMemory::VRAMPermanentHeight = 256;
+int VideoMemory::VRAMTransientWidth  = 256;
+int VideoMemory::VRAMTransientHeight = 256;
+#endif
+
+//=============================================================================
 
 VideoMemory::VideoMemory(Display& display)
 {

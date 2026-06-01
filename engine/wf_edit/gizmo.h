@@ -35,4 +35,38 @@ void ApplyGizmoToEngine(int engine_idx, const float model_gl[16]);
 // and syncs to co-edit peers. doc_index is the 0-based content[] index.
 void CommitGizmoToDoc(wfcrdt::Doc& doc, int doc_index, const float model_gl[16]);
 
+// Extract the live engine camera's world pose into three float[3] vectors:
+// position (row 3 of camera-world Matrix34), forward axis (row 0 — WF actor +X
+// = forward), and up axis (row 2 — WF +Z = up). Returns false if there's no
+// live level/camera (caller leaves the outs untouched). Float-only API so
+// main.cc can call it without pulling engine headers (game/camera.hp →
+// gfx/display.hp clashes with X11's `Display` typedef under
+// GLFW_EXPOSE_NATIVE_X11). Used by the shared-cursors presence broadcast
+// (docs/plans/2026-05-30-a-e-b-…md §B).
+bool GetCameraPoseWS(float pos[3], float fwd[3], float up[3]);
+
+// Build the editor's view + projection matrices without an actor model — the
+// peer-cursor renderer calls this once per frame, then projects each peer's
+// cursor data with its own ProjectToScreen calls. Same matrices BuildGizmoMats
+// uses (column-major GL float[16]). Returns false if no live level/camera.
+bool BuildViewProj(float fbw, float fbh, float view[16], float proj[16]);
+
+// Get the live engine actor's world-space position. engine_idx is 1-based
+// (wfmut::ActorIdx). Returns false if no actor. Float-only API for the
+// peer-cursor renderer in main.cc.
+bool GetActorWorldPos(int engine_idx, float out[3]);
+
+// Set the live engine camera's world pose directly (Jump-to-view target).
+// Float-only API for the same X11/Display reason GetCameraPoseWS exists.
+// Returns false if no live level/camera. Should be called with the wfmut
+// editor-camera-override flag turned on; otherwise CamShot will stomp the
+// pose on its next tick. See docs/plans/2026-05-31-shared-cursors-b-leftovers.md.
+bool SetEditorCameraPose(const float pos[3], const float fwd[3], const float up[3]);
+
+// Push the live OS-window size into the active engine Display (HUD layout +
+// WFInitGL viewport/projection on resize). int-only wrapper kept here because
+// gfx/display.hp's `class Display` clashes with X11's `Display` typedef under
+// GLFW_EXPOSE_NATIVE_X11 in main.cc. No-op before the engine Display exists.
+void SetEditorLiveWindowSize(int w, int h);
+
 }  // namespace wfedit

@@ -28,8 +28,9 @@
 		$3fff002l { 'STR' "coin_template.iff" }  // IFF PERM fff:002
 		$3fff003l { 'STR' "powerup_template.iff" }  // IFF PERM fff:003
 		$3fff004l { 'STR' "star_template.iff" }  // IFF PERM fff:004
-		$3fff005l { 'STR' "fireball_template.iff" }  // IFF PERM fff:005
-		$3fff006l { 'STR' "debris_template.iff" }  // IFF PERM fff:006
+		$3fff005l { 'STR' "oneup_template.iff" }  // IFF PERM fff:005
+		$3fff006l { 'STR' "fireball_template.iff" }  // IFF PERM fff:006
+		$3fff007l { 'STR' "debris_template.iff" }  // IFF PERM fff:007
 		$3000001l { 'STR' "ground_0.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "ground_1.iff" }  // IFF RM0 000:002
 		$3000003l { 'STR' "ground_2.iff" }  // IFF RM0 000:003
@@ -37,33 +38,93 @@
 		$3000005l { 'STR' "pit_death_1.iff" }  // IFF RM0 000:005
 		$3000006l { 'STR' "qblock_00.iff" }  // IFF RM0 000:006
 		$3000007l { 'STR' "qblock_01.iff" }  // IFF RM0 000:007
-		$3000008l { 'STR' "qblock_02.iff" }  // IFF RM0 000:008
-		$3000009l { 'STR' "mushroom_block.iff" }  // IFF RM0 000:009
-		$300000al { 'STR' "fireflower_block.iff" }  // IFF RM0 000:00a
-		$300000bl { 'STR' "star_block.iff" }  // IFF RM0 000:00b
-		$300000cl { 'STR' "goomba_00.001.iff" }  // IFF RM0 000:00c
-		$300000dl { 'STR' "koopa_00.001.iff" }  // IFF RM0 000:00d
-		$300000el { 'STR' "piranha_pipe.iff" }  // IFF RM0 000:00e
-		$300000fl { 'STR' "piranha_00.001.iff" }  // IFF RM0 000:00f
-		$3000010l { 'STR' "flagpole_pole.iff" }  // IFF RM0 000:010
-		$3000011l { 'STR' "flagpole_flag.iff" }  // IFF RM0 000:011
-		$3000012l { 'STR' "flagpole_trigger.iff" }  // IFF RM0 000:012
-		$3000013l { 'STR' "abor_surface.iff" }  // IFF RM0 000:013
-		$3000014l { 'STR' "entry_pipe.iff" }  // IFF RM0 000:014
-		$3000015l { 'STR' "pipe_entry_sense.iff" }  // IFF RM0 000:015
-		$3000016l { 'STR' "brick_0.iff" }  // IFF RM0 000:016
-		$3000017l { 'STR' "brick_1.iff" }  // IFF RM0 000:017
-		$3000018l { 'STR' "brick_2.iff" }  // IFF RM0 000:018
-		$3000019l { 'STR' "brick_hidden.iff" }  // IFF RM0 000:019
+		$3000008l { 'STR' "mushroom_block.iff" }  // IFF RM0 000:008
+		$3000009l { 'STR' "fireflower_block.iff" }  // IFF RM0 000:009
+		$300000al { 'STR' "star_block.iff" }  // IFF RM0 000:00a
+		$300000bl { 'STR' "goomba_00.iff" }  // IFF RM0 000:00b
+		$300000cl { 'STR' "goomba_01.iff" }  // IFF RM0 000:00c
+		$300000dl { 'STR' "goomba_02.iff" }  // IFF RM0 000:00d
+		$300000el { 'STR' "goomba_03.iff" }  // IFF RM0 000:00e
+		$300000fl { 'STR' "goomba_04.iff" }  // IFF RM0 000:00f
+		$3000010l { 'STR' "goomba_05.iff" }  // IFF RM0 000:010
+		$3000011l { 'STR' "goomba_06.iff" }  // IFF RM0 000:011
+		$3000012l { 'STR' "goomba_07.iff" }  // IFF RM0 000:012
+		$3000013l { 'STR' "goomba_08.iff" }  // IFF RM0 000:013
+		$3000014l { 'STR' "goomba_09.iff" }  // IFF RM0 000:014
+		$3000015l { 'STR' "goomba_10.iff" }  // IFF RM0 000:015
+		$3000016l { 'STR' "goomba_11.iff" }  // IFF RM0 000:016
+		$3000017l { 'STR' "goomba_12.iff" }  // IFF RM0 000:017
+		$3000018l { 'STR' "goomba_13.iff" }  // IFF RM0 000:018
+		$3000019l { 'STR' "goomba_14.iff" }  // IFF RM0 000:019
+		$300001al { 'STR' "goomba_15.iff" }  // IFF RM0 000:01a
+		$300001bl { 'STR' "koopa_00.001.iff" }  // IFF RM0 000:01b
+		$300001cl { 'STR' "flagpole_pole.iff" }  // IFF RM0 000:01c
+		$300001dl { 'STR' "flagpole_flag.iff" }  // IFF RM0 000:01d
+		$300001el { 'STR' "flagpole_trigger.iff" }  // IFF RM0 000:01e
+		$300001fl { 'STR' "abor_surface.iff" }  // IFF RM0 000:01f
+		$3000020l { 'STR' "pipe_28.iff" }  // IFF RM0 000:020
+		$3000021l { 'STR' "pipe_38.iff" }  // IFF RM0 000:021
+		$3000022l { 'STR' "pipe_64.iff" }  // IFF RM0 000:022
+		$3000023l { 'STR' "entry_pipe.iff" }  // IFF RM0 000:023
+		$3000024l { 'STR' "pipe_entry_sense.iff" }  // IFF RM0 000:024
+		$3000025l { 'STR' "brick_0.iff" }  // IFF RM0 000:025
+		$3000026l { 'STR' "brick_1.iff" }  // IFF RM0 000:026
+		$3000027l { 'STR' "brick_2.iff" }  // IFF RM0 000:027
+		$3000028l { 'STR' "brick_row_0.iff" }  // IFF RM0 000:028
+		$3000029l { 'STR' "brick_row_1.iff" }  // IFF RM0 000:029
+		$300002al { 'STR' "brick_row_2.iff" }  // IFF RM0 000:02a
+		$300002bl { 'STR' "brick_row_3.iff" }  // IFF RM0 000:02b
+		$300002cl { 'STR' "brick_row_4.iff" }  // IFF RM0 000:02c
+		$300002dl { 'STR' "brick_row_5.iff" }  // IFF RM0 000:02d
+		$300002el { 'STR' "brick_row_6.iff" }  // IFF RM0 000:02e
+		$300002fl { 'STR' "brick_row_7.iff" }  // IFF RM0 000:02f
+		$3000030l { 'STR' "brick_hi_0.iff" }  // IFF RM0 000:030
+		$3000031l { 'STR' "brick_hi_1.iff" }  // IFF RM0 000:031
+		$3000032l { 'STR' "qblock_107.iff" }  // IFF RM0 000:032
+		$3000033l { 'STR' "fireflower_block_hi.iff" }  // IFF RM0 000:033
+		$3000034l { 'STR' "brick_1up.iff" }  // IFF RM0 000:034
+		$3000035l { 'STR' "popup_score.iff" }  // IFF RM0 000:035
+		$3000036l { 'STR' "pyramid_a_0.iff" }  // IFF RM0 000:036
+		$3000037l { 'STR' "pyramid_a_1.iff" }  // IFF RM0 000:037
+		$3000038l { 'STR' "pyramid_a_2.iff" }  // IFF RM0 000:038
+		$3000039l { 'STR' "pyramid_a_3.iff" }  // IFF RM0 000:039
+		$300003al { 'STR' "pyramid_b_0.iff" }  // IFF RM0 000:03a
+		$300003bl { 'STR' "pyramid_b_1.iff" }  // IFF RM0 000:03b
+		$300003cl { 'STR' "pyramid_b_2.iff" }  // IFF RM0 000:03c
+		$300003dl { 'STR' "pyramid_b_3.iff" }  // IFF RM0 000:03d
+		$300003el { 'STR' "staircase_0.iff" }  // IFF RM0 000:03e
+		$300003fl { 'STR' "staircase_1.iff" }  // IFF RM0 000:03f
+		$3000040l { 'STR' "staircase_2.iff" }  // IFF RM0 000:040
+		$3000041l { 'STR' "staircase_3.iff" }  // IFF RM0 000:041
+		$3000042l { 'STR' "staircase_4.iff" }  // IFF RM0 000:042
+		$3000043l { 'STR' "staircase_5.iff" }  // IFF RM0 000:043
+		$3000044l { 'STR' "staircase_6.iff" }  // IFF RM0 000:044
+		$3000045l { 'STR' "staircase_7.iff" }  // IFF RM0 000:045
 		$3001001l { 'STR' "cr_floor.iff" }  // IFF RM1 001:001
 		$3001002l { 'STR' "cr_wall_l.iff" }  // IFF RM1 001:002
 		$3001003l { 'STR' "cr_wall_r.iff" }  // IFF RM1 001:003
 		$3001004l { 'STR' "cr_coin_0.iff" }  // IFF RM1 001:004
 		$3001005l { 'STR' "cr_coin_1.iff" }  // IFF RM1 001:005
 		$3001006l { 'STR' "cr_coin_2.iff" }  // IFF RM1 001:006
-		$3001007l { 'STR' "abor_coin.iff" }  // IFF RM1 001:007
-		$3001008l { 'STR' "exit_pipe.iff" }  // IFF RM1 001:008
-		$3001009l { 'STR' "pipe_exit_warp.iff" }  // IFF RM1 001:009
+		$3001007l { 'STR' "cr_coin_3.iff" }  // IFF RM1 001:007
+		$3001008l { 'STR' "cr_coin_4.iff" }  // IFF RM1 001:008
+		$3001009l { 'STR' "cr_coin_5.iff" }  // IFF RM1 001:009
+		$300100al { 'STR' "cr_coin_6.iff" }  // IFF RM1 001:00a
+		$300100bl { 'STR' "cr_coin_7.iff" }  // IFF RM1 001:00b
+		$300100cl { 'STR' "cr_coin_8.iff" }  // IFF RM1 001:00c
+		$300100dl { 'STR' "cr_coin_9.iff" }  // IFF RM1 001:00d
+		$300100el { 'STR' "cr_coin_10.iff" }  // IFF RM1 001:00e
+		$300100fl { 'STR' "cr_coin_11.iff" }  // IFF RM1 001:00f
+		$3001010l { 'STR' "cr_coin_12.iff" }  // IFF RM1 001:010
+		$3001011l { 'STR' "cr_coin_13.iff" }  // IFF RM1 001:011
+		$3001012l { 'STR' "cr_coin_14.iff" }  // IFF RM1 001:012
+		$3001013l { 'STR' "cr_coin_15.iff" }  // IFF RM1 001:013
+		$3001014l { 'STR' "cr_coin_16.iff" }  // IFF RM1 001:014
+		$3001015l { 'STR' "cr_coin_17.iff" }  // IFF RM1 001:015
+		$3001016l { 'STR' "cr_coin_18.iff" }  // IFF RM1 001:016
+		$3001017l { 'STR' "abor_coin.iff" }  // IFF RM1 001:017
+		$3001018l { 'STR' "exit_pipe.iff" }  // IFF RM1 001:018
+		$3001019l { 'STR' "pipe_exit_warp.iff" }  // IFF RM1 001:019
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "smb_w1_1.lvl" ] }
@@ -77,8 +138,9 @@
 		{ 'ASS' $3fff002l [ "coin_template.iff" ] }  // IFF PERM fff:002
 		{ 'ASS' $3fff003l [ "powerup_template.iff" ] }  // IFF PERM fff:003
 		{ 'ASS' $3fff004l [ "star_template.iff" ] }  // IFF PERM fff:004
-		{ 'ASS' $3fff005l [ "fireball_template.iff" ] }  // IFF PERM fff:005
-		{ 'ASS' $3fff006l [ "debris_template.iff" ] }  // IFF PERM fff:006
+		{ 'ASS' $3fff005l [ "oneup_template.iff" ] }  // IFF PERM fff:005
+		{ 'ASS' $3fff006l [ "fireball_template.iff" ] }  // IFF PERM fff:006
+		{ 'ASS' $3fff007l [ "debris_template.iff" ] }  // IFF PERM fff:007
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'
@@ -93,24 +155,68 @@
 		{ 'ASS' $3000005l [ "pit_death_1.iff" ] }  // IFF RM0 000:005
 		{ 'ASS' $3000006l [ "qblock_00.iff" ] }  // IFF RM0 000:006
 		{ 'ASS' $3000007l [ "qblock_01.iff" ] }  // IFF RM0 000:007
-		{ 'ASS' $3000008l [ "qblock_02.iff" ] }  // IFF RM0 000:008
-		{ 'ASS' $3000009l [ "mushroom_block.iff" ] }  // IFF RM0 000:009
-		{ 'ASS' $300000al [ "fireflower_block.iff" ] }  // IFF RM0 000:00a
-		{ 'ASS' $300000bl [ "star_block.iff" ] }  // IFF RM0 000:00b
-		{ 'ASS' $300000cl [ "goomba_00.001.iff" ] }  // IFF RM0 000:00c
-		{ 'ASS' $300000dl [ "koopa_00.001.iff" ] }  // IFF RM0 000:00d
-		{ 'ASS' $300000el [ "piranha_pipe.iff" ] }  // IFF RM0 000:00e
-		{ 'ASS' $300000fl [ "piranha_00.001.iff" ] }  // IFF RM0 000:00f
-		{ 'ASS' $3000010l [ "flagpole_pole.iff" ] }  // IFF RM0 000:010
-		{ 'ASS' $3000011l [ "flagpole_flag.iff" ] }  // IFF RM0 000:011
-		{ 'ASS' $3000012l [ "flagpole_trigger.iff" ] }  // IFF RM0 000:012
-		{ 'ASS' $3000013l [ "abor_surface.iff" ] }  // IFF RM0 000:013
-		{ 'ASS' $3000014l [ "entry_pipe.iff" ] }  // IFF RM0 000:014
-		{ 'ASS' $3000015l [ "pipe_entry_sense.iff" ] }  // IFF RM0 000:015
-		{ 'ASS' $3000016l [ "brick_0.iff" ] }  // IFF RM0 000:016
-		{ 'ASS' $3000017l [ "brick_1.iff" ] }  // IFF RM0 000:017
-		{ 'ASS' $3000018l [ "brick_2.iff" ] }  // IFF RM0 000:018
-		{ 'ASS' $3000019l [ "brick_hidden.iff" ] }  // IFF RM0 000:019
+		{ 'ASS' $3000008l [ "mushroom_block.iff" ] }  // IFF RM0 000:008
+		{ 'ASS' $3000009l [ "fireflower_block.iff" ] }  // IFF RM0 000:009
+		{ 'ASS' $300000al [ "star_block.iff" ] }  // IFF RM0 000:00a
+		{ 'ASS' $300000bl [ "goomba_00.iff" ] }  // IFF RM0 000:00b
+		{ 'ASS' $300000cl [ "goomba_01.iff" ] }  // IFF RM0 000:00c
+		{ 'ASS' $300000dl [ "goomba_02.iff" ] }  // IFF RM0 000:00d
+		{ 'ASS' $300000el [ "goomba_03.iff" ] }  // IFF RM0 000:00e
+		{ 'ASS' $300000fl [ "goomba_04.iff" ] }  // IFF RM0 000:00f
+		{ 'ASS' $3000010l [ "goomba_05.iff" ] }  // IFF RM0 000:010
+		{ 'ASS' $3000011l [ "goomba_06.iff" ] }  // IFF RM0 000:011
+		{ 'ASS' $3000012l [ "goomba_07.iff" ] }  // IFF RM0 000:012
+		{ 'ASS' $3000013l [ "goomba_08.iff" ] }  // IFF RM0 000:013
+		{ 'ASS' $3000014l [ "goomba_09.iff" ] }  // IFF RM0 000:014
+		{ 'ASS' $3000015l [ "goomba_10.iff" ] }  // IFF RM0 000:015
+		{ 'ASS' $3000016l [ "goomba_11.iff" ] }  // IFF RM0 000:016
+		{ 'ASS' $3000017l [ "goomba_12.iff" ] }  // IFF RM0 000:017
+		{ 'ASS' $3000018l [ "goomba_13.iff" ] }  // IFF RM0 000:018
+		{ 'ASS' $3000019l [ "goomba_14.iff" ] }  // IFF RM0 000:019
+		{ 'ASS' $300001al [ "goomba_15.iff" ] }  // IFF RM0 000:01a
+		{ 'ASS' $300001bl [ "koopa_00.001.iff" ] }  // IFF RM0 000:01b
+		{ 'ASS' $300001cl [ "flagpole_pole.iff" ] }  // IFF RM0 000:01c
+		{ 'ASS' $300001dl [ "flagpole_flag.iff" ] }  // IFF RM0 000:01d
+		{ 'ASS' $300001el [ "flagpole_trigger.iff" ] }  // IFF RM0 000:01e
+		{ 'ASS' $300001fl [ "abor_surface.iff" ] }  // IFF RM0 000:01f
+		{ 'ASS' $3000020l [ "pipe_28.iff" ] }  // IFF RM0 000:020
+		{ 'ASS' $3000021l [ "pipe_38.iff" ] }  // IFF RM0 000:021
+		{ 'ASS' $3000022l [ "pipe_64.iff" ] }  // IFF RM0 000:022
+		{ 'ASS' $3000023l [ "entry_pipe.iff" ] }  // IFF RM0 000:023
+		{ 'ASS' $3000024l [ "pipe_entry_sense.iff" ] }  // IFF RM0 000:024
+		{ 'ASS' $3000025l [ "brick_0.iff" ] }  // IFF RM0 000:025
+		{ 'ASS' $3000026l [ "brick_1.iff" ] }  // IFF RM0 000:026
+		{ 'ASS' $3000027l [ "brick_2.iff" ] }  // IFF RM0 000:027
+		{ 'ASS' $3000028l [ "brick_row_0.iff" ] }  // IFF RM0 000:028
+		{ 'ASS' $3000029l [ "brick_row_1.iff" ] }  // IFF RM0 000:029
+		{ 'ASS' $300002al [ "brick_row_2.iff" ] }  // IFF RM0 000:02a
+		{ 'ASS' $300002bl [ "brick_row_3.iff" ] }  // IFF RM0 000:02b
+		{ 'ASS' $300002cl [ "brick_row_4.iff" ] }  // IFF RM0 000:02c
+		{ 'ASS' $300002dl [ "brick_row_5.iff" ] }  // IFF RM0 000:02d
+		{ 'ASS' $300002el [ "brick_row_6.iff" ] }  // IFF RM0 000:02e
+		{ 'ASS' $300002fl [ "brick_row_7.iff" ] }  // IFF RM0 000:02f
+		{ 'ASS' $3000030l [ "brick_hi_0.iff" ] }  // IFF RM0 000:030
+		{ 'ASS' $3000031l [ "brick_hi_1.iff" ] }  // IFF RM0 000:031
+		{ 'ASS' $3000032l [ "qblock_107.iff" ] }  // IFF RM0 000:032
+		{ 'ASS' $3000033l [ "fireflower_block_hi.iff" ] }  // IFF RM0 000:033
+		{ 'ASS' $3000034l [ "brick_1up.iff" ] }  // IFF RM0 000:034
+		{ 'ASS' $3000035l [ "popup_score.iff" ] }  // IFF RM0 000:035
+		{ 'ASS' $3000036l [ "pyramid_a_0.iff" ] }  // IFF RM0 000:036
+		{ 'ASS' $3000037l [ "pyramid_a_1.iff" ] }  // IFF RM0 000:037
+		{ 'ASS' $3000038l [ "pyramid_a_2.iff" ] }  // IFF RM0 000:038
+		{ 'ASS' $3000039l [ "pyramid_a_3.iff" ] }  // IFF RM0 000:039
+		{ 'ASS' $300003al [ "pyramid_b_0.iff" ] }  // IFF RM0 000:03a
+		{ 'ASS' $300003bl [ "pyramid_b_1.iff" ] }  // IFF RM0 000:03b
+		{ 'ASS' $300003cl [ "pyramid_b_2.iff" ] }  // IFF RM0 000:03c
+		{ 'ASS' $300003dl [ "pyramid_b_3.iff" ] }  // IFF RM0 000:03d
+		{ 'ASS' $300003el [ "staircase_0.iff" ] }  // IFF RM0 000:03e
+		{ 'ASS' $300003fl [ "staircase_1.iff" ] }  // IFF RM0 000:03f
+		{ 'ASS' $3000040l [ "staircase_2.iff" ] }  // IFF RM0 000:040
+		{ 'ASS' $3000041l [ "staircase_3.iff" ] }  // IFF RM0 000:041
+		{ 'ASS' $3000042l [ "staircase_4.iff" ] }  // IFF RM0 000:042
+		{ 'ASS' $3000043l [ "staircase_5.iff" ] }  // IFF RM0 000:043
+		{ 'ASS' $3000044l [ "staircase_6.iff" ] }  // IFF RM0 000:044
+		{ 'ASS' $3000045l [ "staircase_7.iff" ] }  // IFF RM0 000:045
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM1'
@@ -124,9 +230,25 @@
 		{ 'ASS' $3001004l [ "cr_coin_0.iff" ] }  // IFF RM1 001:004
 		{ 'ASS' $3001005l [ "cr_coin_1.iff" ] }  // IFF RM1 001:005
 		{ 'ASS' $3001006l [ "cr_coin_2.iff" ] }  // IFF RM1 001:006
-		{ 'ASS' $3001007l [ "abor_coin.iff" ] }  // IFF RM1 001:007
-		{ 'ASS' $3001008l [ "exit_pipe.iff" ] }  // IFF RM1 001:008
-		{ 'ASS' $3001009l [ "pipe_exit_warp.iff" ] }  // IFF RM1 001:009
+		{ 'ASS' $3001007l [ "cr_coin_3.iff" ] }  // IFF RM1 001:007
+		{ 'ASS' $3001008l [ "cr_coin_4.iff" ] }  // IFF RM1 001:008
+		{ 'ASS' $3001009l [ "cr_coin_5.iff" ] }  // IFF RM1 001:009
+		{ 'ASS' $300100al [ "cr_coin_6.iff" ] }  // IFF RM1 001:00a
+		{ 'ASS' $300100bl [ "cr_coin_7.iff" ] }  // IFF RM1 001:00b
+		{ 'ASS' $300100cl [ "cr_coin_8.iff" ] }  // IFF RM1 001:00c
+		{ 'ASS' $300100dl [ "cr_coin_9.iff" ] }  // IFF RM1 001:00d
+		{ 'ASS' $300100el [ "cr_coin_10.iff" ] }  // IFF RM1 001:00e
+		{ 'ASS' $300100fl [ "cr_coin_11.iff" ] }  // IFF RM1 001:00f
+		{ 'ASS' $3001010l [ "cr_coin_12.iff" ] }  // IFF RM1 001:010
+		{ 'ASS' $3001011l [ "cr_coin_13.iff" ] }  // IFF RM1 001:011
+		{ 'ASS' $3001012l [ "cr_coin_14.iff" ] }  // IFF RM1 001:012
+		{ 'ASS' $3001013l [ "cr_coin_15.iff" ] }  // IFF RM1 001:013
+		{ 'ASS' $3001014l [ "cr_coin_16.iff" ] }  // IFF RM1 001:014
+		{ 'ASS' $3001015l [ "cr_coin_17.iff" ] }  // IFF RM1 001:015
+		{ 'ASS' $3001016l [ "cr_coin_18.iff" ] }  // IFF RM1 001:016
+		{ 'ASS' $3001017l [ "abor_coin.iff" ] }  // IFF RM1 001:017
+		{ 'ASS' $3001018l [ "exit_pipe.iff" ] }  // IFF RM1 001:018
+		{ 'ASS' $3001019l [ "pipe_exit_warp.iff" ] }  // IFF RM1 001:019
 	}
 	{ 'ALGN' .align(2048) }
 }

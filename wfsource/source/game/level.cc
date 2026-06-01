@@ -1496,6 +1496,9 @@ Level::ReadSystemMailbox( int boxnum ) const
 
     switch(boxnum)
     {
+        case EMAILBOX_END_OF_LEVEL:
+            return Scalar( _done ? 1 : 0, 0 );
+
         case EMAILBOX_CAMSHOT:
             return Scalar( _camShotMailBox, 0 );
 

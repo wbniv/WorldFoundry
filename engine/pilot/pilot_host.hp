@@ -1,0 +1,70 @@
+// pilot_host.hp — host-agnostic effect interface for the PILOT interpreter.
+//
+// pilot_core (the parser + VM) is pure C++ and never performs I/O or blocks;
+// it calls through this vtable. Two backends implement it:
+//   MailboxHost  (engine/pilot/host_mailbox.cc) — in-process, drives the engine
+//                via MailboxesManager; Await suspends the per-actor VM (coroutine).
+//   (a CaptureHost lives in pilot_test.cc for the standalone conformance runner.)
+//
+// The ONE place the in-engine and external backends genuinely diverge is the
+// await: in-engine cannot block (it runs on the game thread), so CheckAwait is
+// a non-blocking poll that returns Pending to park the actor's program counter.
+//
+// No engine headers here — values are plain double so the core stays
+// dependency-free. Conversion to/from Scalar happens inside MailboxHost.
+
+#ifndef WF_PILOT_HOST_HP
+#define WF_PILOT_HOST_HP
+
+#include <string>
+
+namespace pilot {
+
+struct PilotHost
+{
+    enum class AwaitKind { Mailbox, ClockSeconds };
+    enum class RelOp     { Eq, Ne, Lt, Le, Gt, Ge };
+    enum class AwaitState { Satisfied, Pending, TimedOut };
+
+    struct AwaitReq
+    {
+        AwaitKind kind = AwaitKind::Mailbox;
+        int       actorIdx = 0;
+        int       mailbox = 0;
+        RelOp     op = RelOp::Ge;
+        double    value = 0.0;        // ClockSeconds: absolute target seconds
+        double    timeoutSecs = 0.0;  // 0 => no timeout
+        double    startSecs = 0.0;    // ClockSeconds at the time the await began
+    };
+
+    virtual ~PilotHost() {}
+
+    // T: / TH:
+    virtual void   Type(const std::string& text, bool newline) = 0;
+
+    // mailbox I/O (mb(), C: mb-LHS, SM:)
+    virtual double ReadMailbox(int actorIdx, int mailbox) = 0;
+    virtual void   SetMailbox(int actorIdx, int mailbox, double value) = 0;
+
+    // Non-blocking await check. In-engine returns Pending to suspend the actor
+    // until next frame; a blocking external host loops until non-Pending.
+    virtual AwaitState CheckAwait(const AwaitReq& req, double& outValue) = 0;
+
+    // LevelClock seconds (PA:/WT: targets). 0 if unavailable.
+    virtual double ClockSeconds() { return 0.0; }
+
+    // Optional effect verbs (no-ops where a backend can't honor them — e.g. an
+    // in-engine actor cannot pause/step/screenshot the engine it runs inside).
+    virtual void SetTransform(int /*actor*/, double, double, double) {}
+    virtual void SetProp(int /*actor*/, const std::string& /*key*/, double) {}
+    virtual void InjectInput(const std::string& /*slot*/, int /*bits*/, int /*held*/) {}
+    virtual void Pause() {}
+    virtual void Resume() {}
+    virtual void Step(int /*frames*/) {}
+    virtual bool Screenshot(const std::string& /*name*/) { return false; }
+    virtual void Watch(int /*actor*/, int /*mbx*/, bool /*off*/) {}
+};
+
+} // namespace pilot
+
+#endif // WF_PILOT_HOST_HP

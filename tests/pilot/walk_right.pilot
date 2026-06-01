@@ -1,0 +1,26 @@
+R:pilot
+R:@tier engine
+R:@desc Mario walks RIGHT under injected input — X_POS strictly increases
+R:@level smb_w1_1-standalone.iff
+R:@needs player as #P
+R:@expect-exit 0
+R:@expect-out PASS
+R:@screenshot walk_right.png
+PS:
+WA:#P X_POS
+IN:joystick1_raw BTN_RIGHT held -1
+ST:8
+C:#x0 = mb(X_POS, #P)
+T:start X = $#x0
+C:#goal = #x0 + 1
+ST:200
+WM:#P X_POS > #goal timeout 5.0
+M:#last > #x0
+SH:walk_right.png
+ST:1
+TY:PASS — Mario walked RIGHT from $#x0 to X=$#last
+TN:FAIL — Mario stalled at X=$#last (start $#x0)
+JN:*fail
+E:
+*fail
+EX:1

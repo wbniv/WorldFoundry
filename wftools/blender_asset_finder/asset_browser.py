@@ -749,7 +749,7 @@ _CLASSES = [
 
 
 def _menu_import(self, context):
-    self.layout.operator("wf.browse_assets", text="WF Asset Browser")
+    self.layout.operator("wf.open_browser_popup", text="WF Asset Browser")
 
 
 def register():

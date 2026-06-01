@@ -31,7 +31,7 @@ extern RendererVariables globalRendererVariables;
 
 static inline void
 CalcUV(unsigned short tpage,
-       unsigned char uin, unsigned char vin,
+       uint16 uin, uint16 vin,            // widened 2026-05-30 — see docs/plans/2026-05-30-uv-int16-widening.md
        const PixelMap& texturePixelMap,
        float& uOut, float& vOut)
 {
@@ -59,8 +59,8 @@ RenderObject3D::RenderPoly3DGouraudTextureLit(Primitive* primitive)
     const unsigned char rArr[3] = { poly.r0, poly.r1, poly.r2 };
     const unsigned char gArr[3] = { poly.g0, poly.g1, poly.g2 };
     const unsigned char bArr[3] = { poly.b0, poly.b1, poly.b2 };
-    const unsigned char uArr[3] = { poly.u0, poly.u1, poly.u2 };
-    const unsigned char vArr[3] = { poly.v0, poly.v1, poly.v2 };
+    const uint16 uArr[3] = { poly.u0, poly.u1, poly.u2 };
+    const uint16 vArr[3] = { poly.v0, poly.v1, poly.v2 };
 
     RBVertex v[3];
     const Vector3_PS* const gte = globalRendererVariables.gteVect;

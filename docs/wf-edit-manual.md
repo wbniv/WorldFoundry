@@ -313,6 +313,98 @@ with an initials avatar (audio-only).
 > now flows over **WebRTC (DTLS-SRTP, ICE + STUN)** rather than raw multicast UDP, so calls
 > reach peers across the internet — see [Calls over the internet](#calls-over-the-internet-stun--turn).
 
+### Host a call (quick tunnel) — zero-config "share a link"
+
+The easiest way to call a collaborator across the internet: **Collaborate → Host a call (quick
+tunnel)**. The editor re-launches into the call, spins up a local signalling relay (`wf-relay`)
+and a [Cloudflare quick tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/)
+(`cloudflared`), and shows a copyable invite link:
+
+```
+wfedit+s://<random>.trycloudflare.com/r/<room>
+```
+
+Send that link to a collaborator; they paste it (or run `wf-edit … <link>`) and join. No
+self-hosted relay, no router config. Signalling is `wss://` (TLS); media stays DTLS-SRTP
+peer-to-peer (or via TURN), never through the tunnel.
+
+- **First run:** `task fetch-cloudflared` (also pulled in by `task dev-setup-editor`) downloads
+  the pinned, SHA256-verified `cloudflared` to `build-editor/tools/`. It is not committed.
+- **From the shell:** `task quick-tunnel` does the same and prints the link, without the editor.
+- **Works behind a VPN:** the tunnel is forced onto `--protocol http2` (TCP), so it survives
+  VPNs that block QUIC/UDP (e.g. WireGuard). It can take ~10–20 s to come up — the loading panel
+  shows *Establishing → Registering → Resolving*; if it can't (outbound port 7844 blocked, or
+  Cloudflare rate-limited the account-less tunnel), it reports the reason instead of hanging.
+- **Ephemeral:** the link lives only for that session, and account-less quick tunnels are
+  rate-limited. For durable/team hosting, run a named tunnel or a fixed relay (planned).
+
+#### Two computers
+
+The minimum for a real cross-network call between two people:
+
+```bash
+# computer 1 — host (needs cloudflared, fetched once by task fetch-cloudflared)
+./build-editor/wf-edit --host-tunnel
+# → copy the printed   wfedit+s://<random>.trycloudflare.com/r/<room>   link
+
+# computer 2 — joiner (needs only wf-edit built; no cloudflared)
+./build-editor/wf-edit --url=<that link>
+```
+
+Each machine has its own `~/.config/wf-edit/identity.json` (auto-generated on
+first run), so the two appear as distinct collaborators (different `peer_id` +
+colour) in the Collaborators panel. Edits you make on one — drag the move/rotate
+gizmo, change a field — sync live to the other through the same `wss://` relay;
+voice/video go peer-to-peer (DTLS-SRTP) or via a configured TURN (see below).
+
+#### Named tunnel — durable, rate-limit-free, stable hostname
+
+Account-less quick tunnels are throttled by Cloudflare per source IP, and the
+`*.trycloudflare.com` host changes every session. If you have a Cloudflare
+account and a domain, you can host through an **authenticated named tunnel**
+instead — no rate limit, and a hostname you pick stays the same forever. The
+zero-config quick tunnel remains the default; this is purely opt-in.
+
+**One-time setup on the host machine:**
+
+1. **Cloudflare Zero Trust → Networks → Tunnels → Create a tunnel.** (Free tier
+   is enough.) Give it any name (e.g. `wf-host`).
+2. Save the connector **token** that Cloudflare shows you.
+3. In the tunnel's **Public Hostname** tab, add a route:
+   - **Subdomain / domain:** `wf.<your-domain>` (Cloudflare creates the DNS
+     CNAME automatically).
+   - **Service:** `http://localhost:9900` (the `wf-relay` port).
+4. Put the token + hostname in `~/.config/wf-edit/identity.json` on the host:
+
+   ```json
+   {
+     "tunnel_token":    "<paste the token>",
+     "tunnel_hostname": "wf.your-domain"
+   }
+   ```
+
+   (Or set `WF_COLLAB_TUNNEL_TOKEN` / `WF_COLLAB_TUNNEL_HOSTNAME` in the env for
+   a one-off run — env wins per-field.)
+
+That's it. Next time you **Host a call**, the editor uses your named tunnel: the
+loading panel skips the *Establishing* phase (the hostname is fixed), the share
+link looks like `wfedit+s://wf.your-domain/r/<room>`, and there's no rate
+limit. The joiner side doesn't change — they just paste the link.
+
+Empty / missing config → automatic fall-back to the quick tunnel; if the named
+tunnel fails to register (bad token, wrong ingress), it fails loudly with the
+cloudflared log instead of silently downgrading.
+
+#### Trying it on one machine (testing)
+
+For two editors **on the same machine** you must give them distinct config dirs,
+otherwise they share an `identity.json` and look like one peer:
+
+```bash
+XDG_CONFIG_HOME=/tmp/wfedit-A  ./build-editor/wf-edit --host-tunnel        # host
+XDG_CONFIG_HOME=/tmp/wfedit-B  ./build-editor/wf-edit --url=<link>         # joiner
+```
+
 ### Calls over the internet (STUN + TURN)
 
 Media uses **WebRTC**: ICE picks the best path between peers, **STUN** (a public Google server

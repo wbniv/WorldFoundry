@@ -25,6 +25,7 @@
 #  include "scripting_forth.hp"
 #endif
 
+#include <atomic>           // gEditorCameraOverride
 #include <cstddef>          // offsetof
 #include <thread>
 #include <unordered_map>
@@ -412,6 +413,18 @@ std::optional<double> GetMailbox(const Level& level, ActorIdx idx, int mailboxIn
     Scalar v = actor->GetMailboxes().ReadMailbox(mailboxIndex);   // int -> int32 mailbox index
     ok();
     return static_cast<double>(v.AsFloat());
+}
+
+// Editor camera override — sets the flag movecam.cc consults at the top of
+// CameraHandler::SetCamera. The flag lives at global scope in movecam.cc; this
+// function is a thin shim so editor code can reach it through wfmut.
+} // namespace wfmut
+extern std::atomic<bool> gEditorCameraOverride;   // global; defined in wfsource/source/game/movecam.cc
+namespace wfmut {
+void SetEditorCameraOverride(bool active)
+{
+    ::gEditorCameraOverride.store(active, std::memory_order_relaxed);
+    ok();
 }
 
 } // namespace wfmut

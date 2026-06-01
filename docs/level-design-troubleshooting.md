@@ -348,6 +348,38 @@ looks colourful from one camera and gray from another, it's the camera. (2026-05
 snowgoons-blender investigation: the whole "untextured" symptom was `camshot_12`
 exporting as Fixed/Absolute instead of Track/Relative.)
 
+## "Vista camera renders flat mid-grey, chase camera looks fine" → snowgoons fog inheritance
+
+Sibling failure mode to the CamShot-toggle gotcha above, but the symptom is
+distance-dependent rather than camera-pose-dependent: zooming the camera out
+fades distant terrain to uniform `(135, 135, 135)`, while a close third-person
+shot looks textured. The cause is the **fog OAS fields on the `camera` actor**
+(`FoggingColor`, `FoggingStartDistance`, `FoggingCompleteDistance`,
+[`camera.oas`](../wfsource/source/oas/camera.oas)).
+
+Levels scaffolded by importing snowgoons inherit its Earth-fog defaults:
+`#888888` ramp 20 → 30 m. The engine reads these per-level at
+[`game/camera.cc:56-57`](../wfsource/source/game/camera.cc) and calls
+`SetFog` accordingly, so anything past 30 m fogs to flat mid-grey — and that
+mid-grey happens to be close to the `v_color × v_lit` value an
+unsuccessfully-textured primitive would render, so the symptom reads as
+"texture missing" rather than "fogged."
+
+Fix in the Blender level script (per-level data, no engine change):
+
+```python
+camera_actor['wf_FoggingColor']            = 0x000000   # match the sky
+camera_actor['wf_FoggingStartDistance']    = 999.0      # past the 1000 m
+camera_actor['wf_FoggingCompleteDistance'] = 1000.0     # far-clip plane
+```
+
+For airless settings (Moon, Mars, space) push past 1000 m and use sky-colour
+fog. For Earth-style hazy outdoor, tune the ramp to the level's actual view
+distance rather than leaving snowgoons' 20–30 m default. See
+[`wflevels/moon_site01/blender_create_moon.py`](../wflevels/moon_site01/blender_create_moon.py)
+for a vacuum template and [plans/2026-05-31-uninitialised-fog-defaults.md](plans/2026-05-31-uninitialised-fog-defaults.md)
+for the full debugging trace.
+
 ## A decompiled `.lev` enum field whose DATA and STR disagree is corrupt
 
 A `{ 'I32' { 'NAME' "Rotation" } { 'DATA' 0l } { 'STR' "Track" } }` is **invalid** —
@@ -460,6 +492,47 @@ cd wflevels/<name>
 bash ../../wftools/wf_blender/build_level_binary.sh <name>
 iffcomp-rs -binary -o=../<name>-standalone.iff <name>-standalone.iff.txt
 ```
+
+---
+
+## Building a new minimal level from scratch — the four-gotcha chain {#minimal-level-gotchas}
+
+Authoring a tiny level (e.g. the `pilot_demo` in-engine PILOT demo —
+`wflevels/pilot_demo/blender_create_pilot_demo.py`) by importing snowgoons infrastructure,
+stripping it, and adding your own geometry hits four crashes in order. Each one's *visible*
+symptom points away from its real cause:
+
+1. **`level.cc:426` assert `plmc->tagRam == IFFTAG('R','A','M','\0')`** — you ran the inner
+   `<name>.iff` instead of the L4-wrapped `<name>-standalone.iff`. The engine's `-L` loader
+   expects the `RAM`-tagged standalone form. Fix: add a `<name>-standalone.iff.txt` wrapper
+   (see "How to run a standalone level" above) so the pipeline emits `<name>-standalone.iff`,
+   and run *that*. (`-L<level>` runs a level directly — no `cd.iff` needed.)
+
+2. **`assets.cc:190` assert `roundedSize == entry._size`** (with a `DiskTOC: Entries=…` dump) —
+   the level has **no renderable room geometry**, so levcomp emitted `nRooms = 0` (check
+   `<name>.ini` → `[Rooms] nRooms`) and the room-slot loader reads a bogus TOC entry. A bare
+   player isn't enough — its mesh goes to `PERM`. Fix: include ≥1 mesh actor whose
+   **world-center is inside a room bbox** (levcomp assigns actors to rooms by center; widen
+   the `room` actor's `wf_original_bbox` to contain it). Related: "Texture atlas empty /
+   Room0.tga is 146 bytes" below.
+
+3. **`textile` aborts the build (silently)** — reusing imported snowgoons/qbert meshes drags
+   in their `.tga` textures, which aren't in your level dir; `textile` exits non-zero
+   ("couldn't find texture G_…"), and because `build_level_binary.sh` pipes textile to
+   `/dev/null` under `set -e`, the script dies at step 3 and **leaves the previous
+   `-standalone.iff` stale** (its mtime is *older* than `<name>.lvl` — the tell-tale). Fix:
+   build your own geometry from **flat-colored primitives** — a Principled-BSDF material with
+   a base color and no texture image (mirror qbert's cubes / the `pilot_demo` floor). textile
+   then has nothing to look up. Re-run `textile` *without* the `>/dev/null` to see its errors.
+
+4. **`terminate called without an active exception` (SIGABRT) — but the root cause is the
+   camera.** Deleting imported objects shifts object indices, so a CamShot's `Target`
+   (look-at) and `Track Object` (follow) `OBJREFERENCE`s dangle → `movecam.cc:289` assert
+   `shotData->Target`. The assert calls `exit()`, whose atexit handlers destroy the still-
+   joinable debug-bridge listener `std::thread` → `std::terminate`. So you see a terminate at
+   shutdown, not the camera assert. Fix: explicitly set `camshot['wf_Target']` and
+   `camshot['wf_Track Object']` to a *live* object's name (e.g. the player's `obj.name`), and
+   aim the shot to frame it. See also "BungeeCam: target placement".
 
 ---
 

@@ -87,7 +87,8 @@ MailboxesWithStorage::ReadMailbox(int32 mailbox) const
         if(_parent)
             return _parent->ReadMailbox(mailbox);
         else
-            assert(0);
+            AssertMsg(0,"Attempt to read mailbox " << mailbox << " out of valid range ["
+                        << _mailboxBase << ", " << (_mailboxBase + _localMailboxes.Size() - 1) << "]");
             return Scalar::zero;
     }
 }
@@ -105,7 +106,8 @@ MailboxesWithStorage::WriteMailbox(int32 mailbox, Scalar value)
         if(_parent)
             _parent->WriteMailbox(mailbox, value);
         else
-            AssertMsg(0,"Attempt to write mailbox " << mailbox << " which doesn't exist");
+            AssertMsg(0,"Attempt to write mailbox " << mailbox << " out of valid range ["
+                        << _mailboxBase << ", " << (_mailboxBase + _localMailboxes.Size() - 1) << "]");
     }
 }
 

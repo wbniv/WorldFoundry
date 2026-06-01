@@ -48,27 +48,32 @@ MARIO_FEET_Z  = GROUND_TOP_Z
 MARIO_SPAWN_Z = MARIO_FEET_Z + T
 BLOCK_Z       = GROUND_TOP_Z + 4*T + T/2 # ? block centre (4 tiles above ground)
 
-# W1-1 landmark X positions (tile counts × T)
+# W1-1 landmark X positions (tile counts × T) — faithful 224-tile original
 MARIO_SPAWN_X = 3  * T
-QBLOCK_XS     = [8*T, 14*T, 17*T]        # lone ? block, then cluster pair
-GOOMBA_X      = 29 * T                    # 43.5 — right of pit0; reveals as Mario crosses onto ground_1
-KOOPA_X       = 32 * T                    # 48.0 — staggered deeper into ground_1 (still left of pit1 at 51)
-FLAGPOLE_X    = 42 * T
+QBLOCK_XS     = [21*T, 107*T]            # coin ? blocks at faithful cols 21, 107
+KOOPA_X       = 113 * T                  # col 113 (was 32*T)
+FLAGPOLE_X    = 210 * T                  # 315 m — faithful (was 42*T)
+
+# 16 Goombas at reference positions (docs/smb-level-layouts.md §1-1)
+GOOMBA_XS = [
+    22*T,                                # col 22 — first enemy
+    32*T, 34*T,                          # between pipes 1–2
+    42*T, 44*T,                          # between pipes 2–3
+    50*T,                                # lone Goomba mid-level
+    80*T, 83*T,                          # near post-pit ? block
+    88*T, 92*T, 95*T, 99*T,             # overhead block row area
+    128*T, 133*T,                        # near pyramid A
+    143*T, 147*T,                        # near pyramid B
+]
 
 GROUND_X0 = -2 * T
 GROUND_X1 = FLAGPOLE_X + 5*T
 GROUND_Y  = T                             # half-depth of ground slab in Y
 
-# Pits (bottomless gaps in the ground). The ground slab is split into solid
-# segments around these X-ranges; an invisible pit-death ActBox sits below each.
-# Real W1-1 has two signature gaps — one mid-level, one on the final approach by
-# the double-pyramid staircase. This level is geometrically compressed (~49 tiles
-# vs the real ~212), so these reproduce the two-pit *structure* proportionally,
-# clear of the ? cluster (tiles 8/14/17), Goomba (22), Koopa (28) and flag (42).
-# Each is a 2-tile (3 m) gap — jumpable under the current jump tuning.
+# Pits (bottomless gaps in the ground) — faithful W1-1 positions.
 # See docs/plans/2026-05-25-smb-pit-death-and-level-timer.md.
-PITS = [(28.5, 31.5),   # tiles 19-20: mid-level gap, between the ? cluster and the first Goomba
-        (51.0, 54.0)]   # tiles 34-35: the signature late gap on the final approach to the flag
+PITS = [(77*T, 81*T),   # cols 77-80: mid-level gap
+        (118*T, 122*T)] # cols 118-121: late gap before pyramids
 
 # Level countdown timer (Director script). SMB starts at 400 "time units"; we
 # drain them over TIMER_REAL_SECONDS of wall-clock so 100-left lines up with the
@@ -86,12 +91,17 @@ SCENE_MID_X = (GROUND_X0 + GROUND_X1) / 2
 # WF's room-to-room transition path. See docs/plans/2026-05-25-smb-pipe-warp-coin-room.md.
 SMB_AT_PIPE  = 1809               # INDEXOF_SMB_AT_PIPE (mailbox.inc) — entry ActBox sets 1 on the pipe mouth
 SMB_COIN_0, SMB_COIN_1, SMB_COIN_2 = 1811, 1812, 1813   # coin-room coin visibility mailboxes (mailbox.inc)
+SMB_COIN_3, SMB_COIN_4, SMB_COIN_5, SMB_COIN_6 = 1846, 1847, 1848, 1849  # coins 3-6
+SMB_COIN_7, SMB_COIN_8, SMB_COIN_9 = 1850, 1851, 1852                     # coins 7-9
+SMB_COIN_10, SMB_COIN_11, SMB_COIN_12, SMB_COIN_13 = 1853, 1854, 1855, 1856  # coins 10-13
+SMB_COIN_14, SMB_COIN_15, SMB_COIN_16, SMB_COIN_17, SMB_COIN_18 = 1857, 1858, 1859, 1860, 1861  # coins 14-18
 # Fire Mario fireball globals (mailbox.inc 1820-1827). The generators' Activation
 # MailBox needs the literal index here (an OAS int field); scripts use INDEXOF_ names.
 SMB_FIREBALL_FIRE_R, SMB_FIREBALL_FIRE_L = 1823, 1824
-ENTRY_PIPE_X = 12 * T             # = 18, on ground_0 between qblock0 (x12) and qblock1 (x21)
+ENTRY_PIPE_X = 47 * T             # = 70.5, center of cols 46-47 (was 12*T)
 CR_FLOOR_TOP = -48.0              # coin-room floor top
-CR_X0, CR_X1 = 0.0, 18.0         # coin-room play span (12 tiles)
+CR_X0, CR_X1 = 0.0, 24.0         # coin-room play span (16 tiles, faithful W1-1)
+CR_MID        = (CR_X0 + CR_X1) / 2  # = 12.0
 CR_ENTRY_X   = 3.0               # entry-warp drop point (left side)
 CR_ENTRY_Z   = CR_FLOOR_TOP + T  # = -46.5, feet drop-in (mirrors surface MARIO_SPAWN_Z)
 
@@ -164,9 +174,10 @@ if director:
     # INDEXOF_SMB_MAX_CAM_X holds the ratchet state; 0 means uninitialised
     # → seed to SPAWN_CAM_X=4.5.
     # Edge bounds: X_MIN+HALF_FRUSTUM = -3.0+12.0 = 9.0;
-    #              X_MAX-HALF_FRUSTUM = 70.5-12.0 = 58.5.
+    #              X_MAX-HALF_FRUSTUM = FLAGPOLE_X-12.0 = 303.0.
     # Deadzone test uses (delta < 1.5) — true for both in-deadzone AND
     # Mario-behind-camera cases (the one-way ratchet falls out for free).
+    _cam_x_max = FLAGPOLE_X - 12.0
     director['wf_Script'] = (
         "\\ wf\n"
         "INDEXOF_SMB_MAX_CAM_X read-mailbox not if "
@@ -177,7 +188,7 @@ if director:
         "if drop INDEXOF_SMB_MAX_CAM_X read-mailbox\n"
         "else 1.5 - "
         "dup 9.0 < if drop 9.0 then "
-        "dup 58.5 > if drop 58.5 then "
+        f"dup {_cam_x_max:.1f} > if drop {_cam_x_max:.1f} then "
         "dup INDEXOF_SMB_MAX_CAM_X write-mailbox\n"
         "then\n"
         "INDEXOF_SMB_TARGET_CAM_X write-mailbox\n"
@@ -753,7 +764,7 @@ POWERUP_BLOCK_SCRIPT = (
     "then\n"
 )
 
-MUSHROOM_BLOCK_X = 6 * T   # 9.0 — lone block before the ? cluster (easy to reach for verification)
+MUSHROOM_BLOCK_X = 16 * T  # 24.0 — col 16, faithful W1-1 mushroom ? block
 mblk = _add_textured_box('mushroom_block',
                          MUSHROOM_BLOCK_X - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
                          MUSHROOM_BLOCK_X + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
@@ -811,9 +822,11 @@ def _make_powerup_template(name, mat, script, running_decel, park_x):
 
 # Power-up dispensing block: a one-shot Generator (bump from below -> throw one
 # collectible -> latch tan), using POWERUP_BLOCK_SCRIPT.
-def _make_powerup_block(name, x, throw, vx):
-    b = _add_textured_box(name, x - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
-                                x + BSIZE,  BSIZE, BLOCK_Z + BSIZE, qblock_tex)
+def _make_powerup_block(name, x, throw, vx, z=None):
+    if z is None:
+        z = BLOCK_Z
+    b = _add_textured_box(name, x - BSIZE, -BSIZE, z - BSIZE,
+                                x + BSIZE,  BSIZE, z + BSIZE, qblock_tex)
     attach_schema(b, 'generator')
     b['wf_Mobility']           = 'Anchored'
     b['wf_Model Type']         = 'Mesh'
@@ -857,7 +870,7 @@ POWERUP_SCRIPT = (
 _make_powerup_template('powerup_template', mat_powerup, POWERUP_SCRIPT, 0.0, -55.0)
 # @15: throws straight up (X vel 0) so the flower sits; by here you've grabbed the
 # mushroom from the @9 block and are Super, so this dispenses a flower. One-shot.
-FIREFLOWER_BLOCK_X = 10 * T   # 15.0 — between qblock_01 (12) and the entry pipe (16.5-19.5)
+FIREFLOWER_BLOCK_X = 23 * T   # 34.5 — col 23, faithful W1-1 flower ? block
 _make_powerup_block('fireflower_block', FIREFLOWER_BLOCK_X, 'powerup_template', 0.0)
 
 # Star — BOUNCES rightward and reverses off walls. Running Decel 0 keeps the slide; the
@@ -894,8 +907,24 @@ STAR_SCRIPT = (
     "then\n"
 )
 _make_powerup_template('star_template', mat_star, STAR_SCRIPT, 0.0, -59.0)
-STAR_BLOCK_X = 38 * T   # 57.0 — past pit1 (51-54), before the flag (63); a late reward
+STAR_BLOCK_X = 99 * T   # 148.5 — col 99, faithful W1-1 starman block
 _make_powerup_block('star_block', STAR_BLOCK_X, 'star_template', 1.5)
+
+# 1UP mushroom — green mushroom that grants +1 life on proximity pickup.
+# Same gold-class template pattern as powerup/star (GoldValue=0, gold.cc despawns on
+# proximity); the script raises SMB_ONEUP_PICKUP; player script grants the life.
+mat_oneup = make_mat('smb_oneup', (0.05, 0.75, 0.05))   # bright green body
+ONEUP_SCRIPT = (
+    "\\ wf\n"
+    # Proximity pickup (dx^2 + dz^2 < 1.5^2 = 2.25) -> signal for +1 life.
+    # gold.cc TryPickup also fires at radius 1.5 and calls SetPendingRemove (despawn).
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "+ 2.25 < if\n"
+    "  1 INDEXOF_SMB_ONEUP_PICKUP write-mailbox\n"
+    "then\n"
+)
+_make_powerup_template('oneup_template', mat_oneup, ONEUP_SCRIPT, 0.0, -65.0)
 
 # ── 6c. Fire Mario fireball — first runtime-positioned spawn ───────────────────
 # WF's first spawn at a runtime-chosen position, with ZERO engine code: rather than
@@ -1069,15 +1098,28 @@ if player:
     # OAS custom-prop keys mirror the schema's field.key, which preserves
     # spaces (e.g. "Running Acceleration"), NOT a WikiWord form.
     player['wf_Running Acceleration']  = 60.0
-    player['wf_Running Deceleration']  = 0.85
+    # Steady ground speed = RunningAccel / (RunningDecel * 30). The doom-stick player
+    # (Turn Rate=0) runs MarbleHandler when grounded [movement.cc:575-579 routes
+    # TurnRate==0 -> MarbleHandler]: accel at :717, decay at :689. GroundHandler (:318/:233)
+    # is the identical-on-flat-ground twin for steered actors. Same formula either way.
+    # 60/(0.85*30) ≈ 2.35 m/s was far too slow — Mario fell ~5 m short of brick_1up
+    # on the entry_pipe→brick→pipe_64 hop. Max Ground Speed is NOT the limiter once it
+    # exceeds the steady value, so prior MaxGroundSpeed bumps (6→12→24→32) were inert.
+    # Trajectory traces: a launch of ~9-10 m/s lands ON the brick (X 84.75-86.25, top Z=7.5);
+    # ~8.5 m/s passes UNDER it (bottom Z=6.0); ~10.5+ overshoots. 60/(0.18*30) = 11.1 m/s top,
+    # so the 3 m pipe-top runway can build ~9.5-10 m/s — but jumping too early stays short and
+    # too late overshoots, so the hop is achievable with practice, not first-try (design intent:
+    # somewhat difficult, never impossible). docs/plans/2026-05-31-smb-tall-pipe-hop-physics.md.
+    player['wf_Running Deceleration']  = 0.18
     player['wf_Max Ground Speed']      = 32.0
     player['wf_Jumping Acceleration']  = 60.0
     player['wf_Falling Acceleration']  = 12.0
     player['wf_Air Acceleration']      = 0.0
     player['wf_Max Air Speed']         = 32.0
-    # No air control (Air Acceleration=0) means takeoff momentum sails for the
-    # whole jump unless damped. HorizAirDrag=3 ≈ 5% per frame at 60Hz, so a
-    # 32 m/s launch decays to ~12 m/s by the time gravity brings Mario back.
+    # Air "sustain" (movement.cc:872-895): with Air Acceleration=0, holding RIGHT while
+    # moving +X sets hDrag=1, so takeoff momentum persists for the whole jump (the hop holds
+    # RIGHT throughout, so this knob does not bite on it). It only decays velocity on frames
+    # where RIGHT is released — kept at 3.0 for a slight let-go float, same as before.
     player['wf_Horiz Air Drag']        = 3.0
     # TurnRate=0 → doom-stick LEFT/RIGHT strafe instead of rotate.
     # currentDir() = (cos C, sin C, 0) [physicalobject.hpi:52].
@@ -1098,13 +1140,15 @@ if player:
         "INDEXOF_INPUT write-mailbox\n"
         "INDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\n"
         "INDEXOF_Z_POS read-mailbox INDEXOF_SMB_PLAYER_Z write-mailbox\n"   # enemies use proximity
-        "INDEXOF_GOLD read-mailbox INDEXOF_HUD_SCORE write-mailbox\n"
         # seed lives once (guarded so game-over at LIVES=0 never re-seeds)
         "INDEXOF_SMB_LIVES_INIT read-mailbox not if "
         "3 INDEXOF_LIVES write-mailbox 1 INDEXOF_SMB_LIVES_INIT write-mailbox then\n"
-        # bounce up when we stomped an enemy this frame
-        "INDEXOF_SMB_STOMP read-mailbox 0<> if "
-        "8.0 INDEXOF_ZSPEED write-mailbox 0 INDEXOF_SMB_STOMP write-mailbox then\n"
+        # bounce up when we stomped an enemy this frame; award 100 pts
+        "INDEXOF_SMB_STOMP read-mailbox 0<> if\n"
+        "  8.0 INDEXOF_ZSPEED write-mailbox\n"
+        "  INDEXOF_SMB_SCORE read-mailbox 100 + INDEXOF_SMB_SCORE write-mailbox\n"
+        "  0 INDEXOF_SMB_STOMP write-mailbox\n"
+        "then\n"
         # Super Mushroom pickup -> grow to Super. Small(0)->Super(1) only; already-Super
         # stays Super. Visual scale only (hitbox-resize deferred); the feet-origin mesh
         # scales up cleanly from the floor. `not` = state == 0.
@@ -1194,30 +1238,155 @@ if player:
         "0 INDEXOF_ZSPEED write-mailbox\n"
         "  then\n"
         "then\n"
+        # 1UP mushroom pickup: raise +1 life, clear signal
+        "INDEXOF_SMB_ONEUP_PICKUP read-mailbox 0<> if\n"
+        "  INDEXOF_LIVES read-mailbox 1 + INDEXOF_LIVES write-mailbox\n"
+        "  0 INDEXOF_SMB_ONEUP_PICKUP write-mailbox\n"
+        "then\n"
+        # Flagpole height + time bonus — one-shot on the tick END_OF_LEVEL fires.
+        # Height tiers: Z≥9→5000, ≥6→2000, ≥4.5→800, ≥3→400, ≥1.5→200, else→100.
+        # Time bonus: HUD_TIMER remaining × 50.
+        # EOL_LATCH prevents re-firing if the level lingers a tick before unloading.
+        "INDEXOF_END_OF_LEVEL read-mailbox 0<> if\n"
+        "  INDEXOF_SMB_EOL_LATCH read-mailbox not if\n"
+        "    1 INDEXOF_SMB_EOL_LATCH write-mailbox\n"
+        "    INDEXOF_Z_POS read-mailbox\n"
+        "    dup 9.0 > if drop 5000\n"
+        "    else dup 6.0 > if drop 2000\n"
+        "    else dup 4.5 > if drop 800\n"
+        "    else dup 3.0 > if drop 400\n"
+        "    else dup 1.5 > if drop 200\n"
+        "    else drop 100\n"
+        "    then then then then then\n"
+        "    INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n"
+        "    INDEXOF_HUD_TIMER read-mailbox 50 *\n"
+        "    INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n"
+        "  then\n"
+        "then\n"
         # coin-room coins: seed visible once, then proximity pickup. The Z test
         # (player z near -46) disambiguates the coin room from the surface, where
         # the same X range exists but z ~ 1.5. dup* = squared distance (no abs).
+        # 19 coins in 3 rows — faithful W1-1 layout (SMBDIS.ASM L_UndergroundArea3).
+        # Pickup is X-only per column; three stacked coins at the same column are
+        # all collected in the same pass (by design — no per-height check needed).
         "INDEXOF_SMB_COIN_INIT read-mailbox not if\n"
         "  1 INDEXOF_SMB_COIN_0 write-mailbox 1 INDEXOF_SMB_COIN_1 write-mailbox "
-        "1 INDEXOF_SMB_COIN_2 write-mailbox 1 INDEXOF_SMB_COIN_INIT write-mailbox\n"
+        "1 INDEXOF_SMB_COIN_2 write-mailbox\n"
+        "  1 INDEXOF_SMB_COIN_3 write-mailbox 1 INDEXOF_SMB_COIN_4 write-mailbox "
+        "1 INDEXOF_SMB_COIN_5 write-mailbox\n"
+        "  1 INDEXOF_SMB_COIN_6 write-mailbox 1 INDEXOF_SMB_COIN_7 write-mailbox "
+        "1 INDEXOF_SMB_COIN_8 write-mailbox\n"
+        "  1 INDEXOF_SMB_COIN_9 write-mailbox 1 INDEXOF_SMB_COIN_10 write-mailbox "
+        "1 INDEXOF_SMB_COIN_11 write-mailbox\n"
+        "  1 INDEXOF_SMB_COIN_12 write-mailbox 1 INDEXOF_SMB_COIN_13 write-mailbox "
+        "1 INDEXOF_SMB_COIN_14 write-mailbox\n"
+        "  1 INDEXOF_SMB_COIN_15 write-mailbox 1 INDEXOF_SMB_COIN_16 write-mailbox "
+        "1 INDEXOF_SMB_COIN_17 write-mailbox 1 INDEXOF_SMB_COIN_18 write-mailbox\n"
+        "  1 INDEXOF_SMB_COIN_INIT write-mailbox\n"
         "then\n"
-        "INDEXOF_Z_POS read-mailbox 46 + dup * 9.0 < if\n"          # in the coin room (|z+46| < 3)
-        "  INDEXOF_SMB_COIN_0 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 6 - dup * 1.5 < if\n"
-        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
-        "0 INDEXOF_SMB_COIN_0 write-mailbox\n"
-        "    then\n  then\n"
-        "  INDEXOF_SMB_COIN_1 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 8 - dup * 1.5 < if\n"
-        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
-        "0 INDEXOF_SMB_COIN_1 write-mailbox\n"
-        "    then\n  then\n"
-        "  INDEXOF_SMB_COIN_2 read-mailbox 0<> if\n"
-        "    INDEXOF_X_POS read-mailbox 10 - dup * 1.5 < if\n"
-        "      INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox "
-        "0 INDEXOF_SMB_COIN_2 write-mailbox\n"
-        "    then\n  then\n"
+        # coin-room pickup: TRUE XZ contact (dx^2+dz^2 < 1.0, == gold.cc
+        # kGoldPickupRadius^2) against each coin's real row Z. No underground-band
+        # gate -- the per-coin Z test subsumes it (surface is z~1.5, far from any
+        # coin row at z~-35..-41). Player poke (a coin can't write the player's GOLD).
+        "INDEXOF_SMB_COIN_0 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 6.75 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_0 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_1 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 8.25 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_1 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_2 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 9.75 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_2 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_3 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 11.25 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_3 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_4 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 12.75 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_4 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_5 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 14.25 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_5 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_6 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 15.75 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_6 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_7 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 6.75 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_7 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_8 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 8.25 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_8 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_9 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 9.75 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_9 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_10 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 11.25 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_10 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_11 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 12.75 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_11 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_12 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 14.25 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_12 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_13 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 15.75 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_13 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_14 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 8.25 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_14 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_15 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 9.75 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_15 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_16 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 11.25 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_16 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_17 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 12.75 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_17 write-mailbox\n"
+        "  then then\n"
+        "INDEXOF_SMB_COIN_18 read-mailbox 0<> if\n"
+        "  INDEXOF_X_POS read-mailbox 14.25 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n"
+        "    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_18 write-mailbox\n"
+        "  then then\n"
+        # Coin delta scoring + 100-coin 1UP.
+        # delta = GOLD − LAST_GOLD catches both gold.cc coin pickups and coin-room
+        # script pickups. Score 200 pts per coin. At each 100-coin boundary (GOLD
+        # crosses a multiple of 100, edge-detected via LAST_GOLD mod), grant +1 life.
+        "INDEXOF_GOLD read-mailbox INDEXOF_SMB_LAST_GOLD read-mailbox -\n"  # delta
+        "dup 0 > if\n"
+        "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+        "  INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+        "  1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+        "  200 * INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n"
+        "  INDEXOF_GOLD read-mailbox 100 % not if\n"            # GOLD now a multiple of 100
+        "    INDEXOF_SMB_LAST_GOLD read-mailbox 100 % 0<> if\n"  # LAST_GOLD was not
+        "      INDEXOF_GOLD read-mailbox 0 > if\n"               # skip the initial 0
+        "        INDEXOF_LIVES read-mailbox 1 + INDEXOF_LIVES write-mailbox\n"
+        "      then\n"
+        "    then\n"
+        "  then\n"
+        "else\n"
+        "  drop\n"
         "then\n"
+        "INDEXOF_GOLD read-mailbox INDEXOF_SMB_LAST_GOLD write-mailbox\n"
+        # HUD score: display the accumulated SMB_SCORE (coins×200 + bonus points).
+        "INDEXOF_SMB_SCORE read-mailbox INDEXOF_HUD_SCORE write-mailbox\n"
         # ── Fire Mario fireball ───────────────────────────────────────────────
         # docs/plans/2026-05-26-fire-mario-fireball-pooled-generator.md
         # Facing latch: RIGHT -> +1, LEFT -> -1, else keep (seed +1 while still 0).
@@ -1299,6 +1468,9 @@ ENEMY_SCRIPT = (
     "      dup 0.7 >\n"                                                       # player clearly ABOVE us?
     "      if\n"
     "        drop\n"
+    "        INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "        INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "        1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
     "        0 INDEXOF_ALIVE write-mailbox\n"              # stomped -> die
     "        1 INDEXOF_SMB_STOMP write-mailbox\n"          # tell the player to bounce
     "      else\n"
@@ -1316,6 +1488,10 @@ ENEMY_SCRIPT = (
     "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"  # dx^2
     "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"  # dz^2
     "  + 2.5 < if\n"                                     # dx^2 + dz^2 < 2.5 (waist-height fireball vs ground enemy)
+    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
     "    0 INDEXOF_ALIVE write-mailbox\n"                # fireball kill: die, no bounce, no hurt
     "  then\n"
     "then\n"
@@ -1325,6 +1501,10 @@ ENEMY_SCRIPT = (
     "  INDEXOF_SMB_SHELL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
     "  INDEXOF_SMB_SHELL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
     "  + 1.5 < if\n"                                     # both on the ground -> tighter radius
+    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "    INDEXOF_SMB_SCORE read-mailbox 100 + INDEXOF_SMB_SCORE write-mailbox\n"
     "    0 INDEXOF_ALIVE write-mailbox\n"
     "  then\n"
     "then\n"
@@ -1371,6 +1551,9 @@ KOOPA_SCRIPT = (
     "    if\n"                                           # STOMP (player above)
     "      drop\n"
     "      INDEXOF_SMB_KOOPA_STATE read-mailbox 2 < if 0.5 INDEXOF_Z_SCALE write-mailbox then\n"  # walk->shell: squash
+    "      INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "      INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "      1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
     "      1 INDEXOF_SMB_KOOPA_STATE write-mailbox\n"    # retract to a resting shell (NOT death)
     "      0 INDEXOF_XSPEED write-mailbox\n"
     "      1 INDEXOF_SMB_STOMP write-mailbox\n"          # bounce Mario
@@ -1395,7 +1578,13 @@ KOOPA_SCRIPT = (
     "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
     "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
     "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "  + 2.5 < if 0 INDEXOF_ALIVE write-mailbox then\n"
+    "  + 2.5 < if\n"
+    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  then\n"
     "then\n"
 )
 
@@ -1458,13 +1647,15 @@ def _build_goomba():
     return body
 
 
-goomba_mesh = _build_goomba()
-goomba_obj  = bpy.data.objects.new('goomba_00', goomba_mesh.data)
-scene.collection.objects.link(goomba_obj)
-bpy.data.objects.remove(goomba_mesh, do_unlink=True)
-goomba_obj.location = (GOOMBA_X, 0.0, MARIO_Z)
-attach_schema(goomba_obj, 'enemy')
-_apply_enemy_movement(goomba_obj)
+_goomba_body = _build_goomba()
+_goomba_data = _goomba_body.data
+bpy.data.objects.remove(_goomba_body, do_unlink=True)
+for _gi, _gx in enumerate(GOOMBA_XS):
+    _go = bpy.data.objects.new(f'goomba_{_gi:02d}', _goomba_data)
+    scene.collection.objects.link(_go)
+    _go.location = (_gx, 0.0, MARIO_Z)
+    attach_schema(_go, 'enemy')
+    _apply_enemy_movement(_go)
 
 # ── 9. Koopa Troopa placeholder (static visual) ───────────────────────────────
 mat_kgreen = make_mat('koopa_green', (0.14, 0.56, 0.20))
@@ -1516,92 +1707,6 @@ _apply_enemy_movement(koopa_obj)
 # shared cap is 8, which would clamp the slide).
 koopa_obj['wf_Script']           = KOOPA_SCRIPT
 koopa_obj['wf_Max Ground Speed'] = 16.0
-
-# ── 9b. Piranha Plant (docs/plans/2026-05-27-smb-piranha-plant.md) ────────────────
-# An ANCHORED Enemy (no Jolt body -> non-colliding, passes through the solid pipe and
-# is positioned purely by script) that slides its own Z_POS out of a pipe and back.
-# Motion is RATE*DELTA_TIME (framerate-independent); hurt + fireball-defeat are by
-# proximity like the goomba/koopa. Retracts while Mario stands on the pipe (|dx|<1),
-# so a ground-walking Mario passes safely (the plant is overhead) but jumping into the
-# emerged plant hurts.
-PIRANHA_X         = 16 * T                  # 24.0 — clear lane between qblock1 (21) and pit0 (28.5)
-PIPE_MOUTH_Z      = GROUND_TOP_Z + 2*T      # 3.0 — pipe top
-PIRANHA_HIDDEN_Z  = GROUND_TOP_Z + 0.5      # 0.5 — base inside the pipe (occluded behind it)
-PIRANHA_EMERGED_Z = PIPE_MOUTH_Z            # 3.0 — base at the mouth, head clears the pipe top
-PIRANHA_RATE      = 3.0                      # units/sec rise & fall
-PIRANHA_DWELL     = 1.5                      # sec per up/down phase
-mat_ppipe = make_mat('smb_ppipe_green', (0.0, 0.62, 0.0))
-mat_pstem = make_mat('smb_piranha_stem', (0.20, 0.70, 0.24))
-mat_phead = make_mat('smb_piranha_head', (0.85, 0.16, 0.12))
-
-PIRANHA_SCRIPT = (
-    "\\ wf\n"
-    # phase toggle every DWELL seconds (TIME deadline)
-    "INDEXOF_TIME read-mailbox INDEXOF_SMB_PIRANHA_NEXT read-mailbox > if\n"
-    "  INDEXOF_SMB_PIRANHA_UP read-mailbox not INDEXOF_SMB_PIRANHA_UP write-mailbox\n"
-    f"  INDEXOF_TIME read-mailbox {PIRANHA_DWELL} + INDEXOF_SMB_PIRANHA_NEXT write-mailbox\n"
-    "then\n"
-    # GO = phase-up by default
-    "INDEXOF_SMB_PIRANHA_UP read-mailbox 0<> if 1 else 0 then INDEXOF_SMB_PIRANHA_GO write-mailbox\n"
-    # Mario on the pipe (horizontally close) -> force retract this tick
-    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup * 1.0 < if\n"
-    "  0 INDEXOF_SMB_PIRANHA_GO write-mailbox\n"
-    "then\n"
-    # slide Z_POS toward the limit at RATE*dt (framerate-independent)
-    "INDEXOF_SMB_PIRANHA_GO read-mailbox 0<> if\n"
-    f"  INDEXOF_Z_POS read-mailbox {PIRANHA_EMERGED_Z} < if\n"
-    f"    INDEXOF_Z_POS read-mailbox {PIRANHA_RATE} INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n"
-    "  then\n"
-    "else\n"
-    f"  INDEXOF_Z_POS read-mailbox {PIRANHA_HIDDEN_Z} > if\n"
-    f"    INDEXOF_Z_POS read-mailbox {PIRANHA_RATE} INDEXOF_DELTA_TIME read-mailbox * - INDEXOF_Z_POS write-mailbox\n"
-    "  then\n"
-    "then\n"
-    # hurt: emerged (Z>2) AND Mario at the plant's height + close in X (jumped into it)
-    "INDEXOF_Z_POS read-mailbox 2.0 > if\n"
-    "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup * 1.7 < if\n"
-    "    INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup * 1.5 < if\n"
-    "      1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"
-    "    then\n"
-    "  then\n"
-    "then\n"
-    # fireball defeat (any height) — same idiom as the goomba
-    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
-    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "  + 2.5 < if 0 INDEXOF_ALIVE write-mailbox then\n"
-    "then\n"
-)
-
-# Decorative pipe (solid; Mario can stand on it) — entry_pipe's twin, no warp.
-add_statplat('piranha_pipe', PIRANHA_X - T, -GROUND_Y, GROUND_TOP_Z,
-             PIRANHA_X + T,  GROUND_Y, PIPE_MOUTH_Z, mat_ppipe)
-
-# Plant mesh: green stem + red head (origin at the base, so Z_POS = base height).
-_pparts = []
-bpy.ops.mesh.primitive_cylinder_add(radius=0.22*T, depth=1.4, location=(0, 0, 0.7))
-bpy.context.object.data.materials.clear(); bpy.context.object.data.materials.append(mat_pstem)
-for _p in bpy.context.object.data.polygons: _p.material_index = 0
-_pparts.append(bpy.context.object)
-bpy.ops.mesh.primitive_uv_sphere_add(radius=0.42*T, segments=10, ring_count=6, location=(0, 0, 1.7))
-bpy.context.object.data.materials.clear(); bpy.context.object.data.materials.append(mat_phead)
-for _p in bpy.context.object.data.polygons: _p.material_index = 0; _p.use_smooth = True
-_pparts.append(bpy.context.object)
-bpy.ops.object.select_all(action='DESELECT')
-for _o in _pparts: _o.select_set(True)
-bpy.context.view_layer.objects.active = _pparts[0]
-bpy.ops.object.join()
-_pmesh = bpy.context.object
-_pmesh.name = 'piranha_00'; _pmesh.data.name = 'piranha_00'
-piranha_obj = bpy.data.objects.new('piranha_00', _pmesh.data)
-scene.collection.objects.link(piranha_obj)
-bpy.data.objects.remove(_pmesh, do_unlink=True)
-piranha_obj.location = (PIRANHA_X, 0.0, PIRANHA_HIDDEN_Z)
-attach_schema(piranha_obj, 'enemy')
-piranha_obj['wf_Mobility']           = 'Anchored'   # no Jolt body -> non-colliding, script-driven
-piranha_obj['wf_Model Type']         = 'Mesh'
-piranha_obj['wf_Visibility Mailbox'] = 1
-piranha_obj['wf_Script']             = PIRANHA_SCRIPT
 
 # ── 10. Flagpole ──────────────────────────────────────────────────────────────
 mat_pole = make_mat('smb_pole', (0.72, 0.72, 0.72))
@@ -1725,12 +1830,13 @@ abs_['wf_Model Type']         = 'None'
 
 # ── 12. Room bbox ─────────────────────────────────────────────────────────────
 # Absolute extremes of all actor centres:
-#   X: GROUND_X0 ≈ -3   ..  FLAGPOLE_X+7.5 ≈ +70.5
+#   X: GROUND_X0 .. FLAGPOLE_X+7.5 — now 325 m; bbox must cover all of it.
 #   Y: camera at Y=-30, light at Y≈-12       → [-32, +5]
 #   Z: ground bottom -T ≈ -1.5, pole top 15  → [-3, +18]
 # Room placed at (SCENE_MID_X, 0, 5); bbox is relative to that centre.
 ROOM_CENTRE = (SCENE_MID_X, 0.0, 5.0)
-RX0, RX1 = -100.0,  100.0
+_half_span  = (GROUND_X1 - GROUND_X0) / 2 + 5   # covers full level width + margin
+RX0, RX1 = -_half_span, _half_span
 RY0, RY1 =  -35.0,   10.0
 RZ0, RZ1 =  -15.0,   20.0
 ROOM_BBOX_REL = (RX0, RY0, RZ0, RX1, RY1, RZ1)
@@ -1804,14 +1910,30 @@ if room:
 PIPE_GREEN   = make_mat('smb_pipe_green', (0.0, 0.62, 0.0))
 CR_FLOOR_MAT = make_mat('smb_cr_floor',   (0.45, 0.22, 0.05))   # dark brick-brown
 
-# Surface entry pipe: 2 tiles wide x 2 tall, solid (Mario jumps onto the mouth).
-add_statplat('entry_pipe', ENTRY_PIPE_X - T, -GROUND_Y, GROUND_TOP_Z,
-             ENTRY_PIPE_X + T,  GROUND_Y, GROUND_TOP_Z + 2*T, PIPE_GREEN)
+# Faithful W1-1 surface pipes. PIPE_GREEN is defined above.
+# Pipe 1 (cols 28-29, 2T tall), Pipe 2 (cols 38-39, 2T tall) — plain, no warp.
+# Pipe 4 exit surface (cols 64-65, 4T tall) — unreachable entry, exit from underground.
+_PIPE_H2 = GROUND_TOP_Z + 2*T
+_PIPE_H4 = GROUND_TOP_Z + 4*T
+add_statplat('pipe_28', 28*T - T, -GROUND_Y, GROUND_TOP_Z,
+             28*T + T,  GROUND_Y, _PIPE_H2, PIPE_GREEN)
+add_statplat('pipe_38', 38*T - T, -GROUND_Y, GROUND_TOP_Z,
+             38*T + T,  GROUND_Y, _PIPE_H2, PIPE_GREEN)
+add_statplat('pipe_64', 64*T - T, -GROUND_Y, GROUND_TOP_Z,
+             64*T + T,  GROUND_Y, _PIPE_H4, PIPE_GREEN)
 
-# Entry sense: a thin ActBox lid over the pipe mouth. Only Mario standing ON TOP
-# (feet Z=3) overlaps the Z band [2.8,4.0]; walking past on the ground (Z 0) does
-# not. Sets SMB_AT_PIPE=1 on overlap and clears it to 0 on exit.
-bpy.ops.mesh.primitive_cube_add(size=2.0, location=(ENTRY_PIPE_X, 0.0, GROUND_TOP_Z + 2*T + 0.4))
+# Surface entry pipe: 2 tiles wide × 3 tall (col 46-47 → center 47*T = 70.5 m).
+add_statplat('entry_pipe', ENTRY_PIPE_X - T, -GROUND_Y, GROUND_TOP_Z,
+             ENTRY_PIPE_X + T,  GROUND_Y, GROUND_TOP_Z + 3*T, PIPE_GREEN)
+
+# Entry sense: a thin ActBox lid over the pipe mouth. The band must sit at the pipe
+# TOP so Mario standing there (origin Z≈4.5 on the 3T pipe) overlaps it, while a
+# ground walk-past (origin Z≈1.5) does not. BUG FIX 2026-05-31: this box was authored
+# for the old 2T pipe (band [2.8,4.0], "feet Z=3"); the faithful expansion made
+# entry_pipe 3T (top 4.5) but left the box behind, so standing on top fell ABOVE the
+# band and the warp never triggered (verified: SMB_AT_PIPE 0/30 frames). Raised to the
+# 3T mouth: GROUND_TOP_Z + 3*T + 0.2 = 4.7 → band [4.1,5.3] covers the resting origin.
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(ENTRY_PIPE_X, 0.0, GROUND_TOP_Z + 3*T + 0.2))
 es = bpy.context.object
 es.name = 'pipe_entry_sense'; es.data.name = 'pipe_entry_sense'
 es.scale = (T, GROUND_Y, 0.6)
@@ -1833,9 +1955,9 @@ es['wf_Activated Actor Mailbox'] = 4005      # scratch (must be >=2; default 0 a
 add_statplat('cr_floor',  CR_X0 - 1, -5.0, CR_FLOOR_TOP - 4.0,
              CR_X1 + 1,    5.0, CR_FLOOR_TOP,        CR_FLOOR_MAT)
 add_statplat('cr_wall_l', CR_X0 - 1, -GROUND_Y, CR_FLOOR_TOP,
-             CR_X0,        GROUND_Y, CR_FLOOR_TOP + 6*T,  CR_FLOOR_MAT)
+             CR_X0,        GROUND_Y, CR_FLOOR_TOP + 10*T,  CR_FLOOR_MAT)
 add_statplat('cr_wall_r', CR_X1,     -GROUND_Y, CR_FLOOR_TOP,
-             CR_X1 + 1,    GROUND_Y, CR_FLOOR_TOP + 6*T,  CR_FLOOR_MAT)
+             CR_X1 + 1,    GROUND_Y, CR_FLOOR_TOP + 10*T,  CR_FLOOR_MAT)
 
 # Collectible coins: static gold discs the player collects by proximity (the player
 # script awards GOLD and flips each coin's visibility mailbox off). Pre-placed `gold`
@@ -1843,17 +1965,60 @@ add_statplat('cr_wall_r', CR_X1,     -GROUND_Y, CR_FLOOR_TOP,
 # Mario arrives (see TODO). Mario warps in at X=3 and walks RIGHT past these to the
 # exit warp (X=12), collecting them en route.
 COIN_DISC_MAT = make_mat('smb_coinroom_coin', (1.0, 0.84, 0.0))
-CR_COIN_XS = [6.0, 8.0, 10.0]
-# Float the coins ABOVE Mario's head (feet -48, ~1.8 tall → top ~-46.2). The coins are
-# collidable statplats; if they overlap his body he bumps them and gets shoved through
-# the floor. At -44 there's a clear ~1.8 gap. Pickup is X-proximity + a player-Z room
-# gate (uses the PLAYER's Z, not the coin's), so coin height doesn't affect collection.
-CR_COIN_Z  = CR_FLOOR_TOP + 4.0          # -44, floating clear above Mario
-CR_COIN_MB = [SMB_COIN_0, SMB_COIN_1, SMB_COIN_2]
-for _ci, _cxv in enumerate(CR_COIN_XS):
-    _coin = add_statplat(f'cr_coin_{_ci}', _cxv - 0.3, -0.25, CR_COIN_Z - 0.4,
-                         _cxv + 0.3,  0.25, CR_COIN_Z + 0.4, COIN_DISC_MAT)
-    _coin['wf_Visibility Mailbox'] = CR_COIN_MB[_ci]   # seeded to 1, set to 0 on pickup
+# 19 coins in 3 rows — faithful W1-1 underground room (SMBDIS.ASM L_UndergroundArea3).
+# Row 7 (low): cols 4-10 (7 coins). Row 5 (mid): cols 4-10 (7 coins). Row 3 (top): cols 5-9 (5 coins).
+# Pickup uses X-proximity + player-Z underground gate; coin Z is purely visual.
+_CR_LOW_Z  = CR_FLOOR_TOP + 4.5*T   # -41.25 — row 7
+_CR_MID_Z  = CR_FLOOR_TOP + 6.5*T   # -38.25 — row 5
+_CR_HIGH_Z = CR_FLOOR_TOP + 8.5*T   # -35.25 — row 3
+CR_COINS = [
+    # (X,         Z,         mailbox)
+    # Row 7 (lowest) — cols 4-10
+    (4.5*T,  _CR_LOW_Z,  SMB_COIN_0),
+    (5.5*T,  _CR_LOW_Z,  SMB_COIN_1),
+    (6.5*T,  _CR_LOW_Z,  SMB_COIN_2),
+    (7.5*T,  _CR_LOW_Z,  SMB_COIN_3),
+    (8.5*T,  _CR_LOW_Z,  SMB_COIN_4),
+    (9.5*T,  _CR_LOW_Z,  SMB_COIN_5),
+    (10.5*T, _CR_LOW_Z,  SMB_COIN_6),
+    # Row 5 (middle) — cols 4-10
+    (4.5*T,  _CR_MID_Z,  SMB_COIN_7),
+    (5.5*T,  _CR_MID_Z,  SMB_COIN_8),
+    (6.5*T,  _CR_MID_Z,  SMB_COIN_9),
+    (7.5*T,  _CR_MID_Z,  SMB_COIN_10),
+    (8.5*T,  _CR_MID_Z,  SMB_COIN_11),
+    (9.5*T,  _CR_MID_Z,  SMB_COIN_12),
+    (10.5*T, _CR_MID_Z,  SMB_COIN_13),
+    # Row 3 (top) — cols 5-9
+    (5.5*T,  _CR_HIGH_Z, SMB_COIN_14),
+    (6.5*T,  _CR_HIGH_Z, SMB_COIN_15),
+    (7.5*T,  _CR_HIGH_Z, SMB_COIN_16),
+    (8.5*T,  _CR_HIGH_Z, SMB_COIN_17),
+    (9.5*T,  _CR_HIGH_Z, SMB_COIN_18),
+]
+# Spinning coin discs (NOT statplats): anchored 'enemy'-schema mesh actors so they
+# run COIN_SCRIPT (ROTATION_C = TIME) and spin like the surface coins, without
+# gold.cc's 5 s TTL despawning them (the popup_score actor uses the same trick).
+# Pickup is true-XZ contact in the player script above. One shared disc mesh; each
+# coin exports its own cr_coin_N.iff.
+_crc_mesh = bpy.data.meshes.new('cr_coin')
+_crc_bm = _bmesh.new()
+_bmesh.ops.create_cube(_crc_bm, size=1.0)
+_bmesh.ops.scale(_crc_bm, vec=(COIN_X*2, COIN_T*2, COIN_Z*2), verts=_crc_bm.verts)
+_crc_bm.to_mesh(_crc_mesh); _crc_bm.free()
+_crc_mesh.materials.append(mat_coin)
+for _p in _crc_mesh.polygons:
+    _p.material_index = 0
+for _ci, (_cx, _cz, _cmb) in enumerate(CR_COINS):
+    _coin = bpy.data.objects.new(f'cr_coin_{_ci}', _crc_mesh)
+    scene.collection.objects.link(_coin)
+    _coin.location = (_cx, 0.0, _cz)
+    attach_schema(_coin, 'enemy')
+    _coin['wf_Mobility']           = 'Anchored'
+    _coin['wf_Model Type']         = 'Mesh'
+    _coin['wf_Visibility Mailbox'] = _cmb   # seeded to 1, set to 0 on pickup
+    _coin['wf_Mesh Name']          = f'cr_coin_{_ci}.iff'
+    _coin['wf_Script']             = COIN_SCRIPT
 
 
 def _make_target(name, loc):
@@ -1866,14 +2031,14 @@ def _make_target(name, loc):
 
 # Entry landing (where Down warps Mario) + cs_coin look-at point.
 _make_target('Target_cr_entry',  (CR_ENTRY_X, 0.0, CR_ENTRY_Z))
-_make_target('Target_cr_lookat', (9.0, 0.0, CR_FLOOR_TOP + T))
+_make_target('Target_cr_lookat', (CR_MID, 0.0, CR_FLOOR_TOP + T))
 
 # cs_coin: static shot framing the whole coin room (no scroll script → unlike
 # cs_side it does not read SMB_TARGET_CAM_X). Direction = lookat - campos.
 cs_coin = bpy.data.objects.new('cs_coin', None)
 scene.collection.objects.link(cs_coin)
 attach_schema(cs_coin, 'camshot')
-cs_coin.location = (9.0, -35.0, CR_FLOOR_TOP + 4.5)    # (9,-35,-43.5), inside coin-room bbox
+cs_coin.location = (CR_MID, -35.0, CR_FLOOR_TOP + 4.5)    # centred on room, inside coin-room bbox
 cs_coin['wf_Position X'] = 'Absolute'
 cs_coin['wf_Position Y'] = 'Absolute'
 cs_coin['wf_Position Z'] = 'Absolute'
@@ -1889,10 +2054,10 @@ cs_coin['wf_Follow']       = 'Target_cr_lookat'
 # plane Y=0, NOT the bbox Y-centre). While Mario is inside it writes cs_coin's
 # index to EMAILBOX_CAMSHOT (1021) each frame, so the camera tracks him underground.
 # Volume is entirely below Z=-37 → disjoint from the surface camera zone.
-bpy.ops.mesh.primitive_cube_add(size=2.0, location=(9.0, 0.0, CR_FLOOR_TOP + 4.5))
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(CR_MID, 0.0, CR_FLOOR_TOP + 4.5))
 ab = bpy.context.object
 ab.name = 'abor_coin'; ab.data.name = 'abor_coin'
-ab.scale = ((CR_X1 - CR_X0)/2 + 1.0, GROUND_Y + 2.0, 6.0)   # X[-1,19] Y[-3.5,3.5] Z[-49.5,-37.5]
+ab.scale = ((CR_X1 - CR_X0)/2 + 1.0, GROUND_Y + 2.0, 6.0)   # X[-1,25] Y[-3.5,3.5] Z[-49.5,-37.5]
 bpy.ops.object.transform_apply(scale=True)
 attach_schema(ab, 'actboxor')
 ab['wf_MailBox']            = 1921        # INDEXOF_CAMSHOT (mailbox.inc:59 — NOT 1021; the
@@ -1909,7 +2074,7 @@ if light:
     coin_light = light.copy()
     scene.collection.objects.link(coin_light)
     coin_light.name = 'Light_coin'
-    coin_light.location = (9.0, -22.0, CR_FLOOR_TOP + 6.0)   # (9,-22,-42), inside coin-room bbox
+    coin_light.location = (CR_MID, -22.0, CR_FLOOR_TOP + 6.0)   # centre of room, inside coin-room bbox
     coin_light.rotation_euler = (math.pi / 3, 0, 0)
 
 # ── 15. Exit pipe → warp back to the surface (Phase B) ────────────────────────
@@ -1917,19 +2082,20 @@ if light:
 # surface return point (past the entry pipe, so no instant re-trigger; the entry
 # needs Down anyway). The Warp class teleports any overlapping actor in its filter
 # (no input gate needed for a walk-into exit) — this validates Warp's Jolt teleport.
-EXIT_PIPE_X0, EXIT_PIPE_X1 = 15.0, 18.0
+# Exit pipe flush with right wall (CR_X1=24); warp sensor 3 tiles to its left.
+EXIT_PIPE_X0, EXIT_PIPE_X1 = 13*T, 15*T   # = [19.5, 22.5]  cols 13-14, 2-tile wide pipe
 add_statplat('exit_pipe', EXIT_PIPE_X0, -GROUND_Y, CR_FLOOR_TOP,
              EXIT_PIPE_X1,  GROUND_Y, CR_FLOOR_TOP + 2*T, PIPE_GREEN)
 
-# Surface return marker, on ground_0 right of the entry pipe (X=18).
-_make_target('Target_surface_return', (24.0, 0.0, MARIO_SPAWN_Z))
+# Surface return: solidly past the entry pipe (ENTRY_PIPE_X ± T = 69–72 m).
+_make_target('Target_surface_return', (ENTRY_PIPE_X + 3*T, 0.0, MARIO_SPAWN_Z))
 
-# Warp volume just LEFT of the exit pipe so walking right triggers it before the
-# pipe wall blocks. Activated By Player; Target resolves by name at compile time.
-bpy.ops.mesh.primitive_cube_add(size=2.0, location=(13.5, 0.0, CR_FLOOR_TOP + 1.0))
+# Warp volume just LEFT of the exit pipe — 3 tiles wide, centred between coin end and pipe.
+_warp_cx = EXIT_PIPE_X0 - 1.5*T          # centre of warp zone: EXIT_PIPE_X0 - 2.25 = 17.25
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(_warp_cx, 0.0, CR_FLOOR_TOP + 1.0))
 wp = bpy.context.object
 wp.name = 'pipe_exit_warp'; wp.data.name = 'pipe_exit_warp'
-wp.scale = (1.5, GROUND_Y, 1.0)        # X[12,15] Z[-48,-46]
+wp.scale = (1.5, GROUND_Y, 1.0)        # ±1.5 → X[_warp_cx-1.5, _warp_cx+1.5]
 bpy.ops.object.transform_apply(scale=True)
 attach_schema(wp, 'warp')
 wp['wf_Target']             = 'Target_surface_return'
@@ -2048,6 +2214,10 @@ BRICK_SCRIPT = (
     "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
     "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
     "        INDEXOF_SMB_MARIO_STATE read-mailbox 0<> if\n"
+    "          INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "          INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "          1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "          INDEXOF_SMB_SCORE read-mailbox 50 + INDEXOF_SMB_SCORE write-mailbox\n"
     "          INDEXOF_TIME read-mailbox 0.4 + INDEXOF_SMB_BRICK_BREAK_END write-mailbox\n"
     "          1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
     "        else\n"
@@ -2082,35 +2252,138 @@ def _add_brick(name, x, z=BLOCK_Z):
     blk['wf_Script']             = BRICK_SCRIPT
     return blk
 
-# The iconic 1-1 brick/? row, interleaved with the existing coin ? blocks
-# (qblock_01@21, qblock_02@25.5). New bricks sit on the 1.5 m grid between them,
-# clear of the entry pipe (X[16.5,19.5]) and the pit (X[28.5,31.5]). Reads as
-# B(20.25) ?(21) B(22.5) B(24) ?(25.5).
-_add_brick('brick_0', 20.25)   # tile 13.5 — just right of the entry pipe
-_add_brick('brick_1', 22.5)    # tile 15 — between the two ? blocks
-_add_brick('brick_2', 24.0)    # tile 16
+# Faithful W1-1 brick layout (docs/smb-level-layouts.md §1-1):
+#   Cols 20, 22, 24 — cluster flanking the coin ? blocks at cols 21, 23
+#   Cols 91-98     — extended overhead brick row (8 wide)
+#   Cols 108, 110  — hi-row bricks flanking the flower ? block at col 109 (row 6)
+BLOCK_Z_6 = GROUND_TOP_Z + 6*T + T/2   # row-6 block centre (2 tiles above BLOCK_Z)
 
-# Hidden-item brick — looks like a plain brick but bumps out one power-up on the first
-# hit-from-below, then turns tan and stays solid. Reuses the proven one-shot
-# POWERUP_BLOCK_SCRIPT + the self-determining powerup_template (mushroom while Small,
-# flower while Super+), skinned with brick_tex.
-HIDDEN_BRICK_X = 27.0   # tile 18 — last block before the pit
-hbrick = _add_textured_box('brick_hidden',
-                           HIDDEN_BRICK_X - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
-                           HIDDEN_BRICK_X + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
-                           brick_tex)
-attach_schema(hbrick, 'generator')
-hbrick['wf_Mobility']           = 'Anchored'
-hbrick['wf_Model Type']         = 'Mesh'
-hbrick['wf_Visibility Mailbox'] = 1
-hbrick['wf_Number Of Local Mailboxes'] = 13   # 2000..2012, like the mushroom block
-hbrick['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
-hbrick['wf_Object To Throw']    = 'powerup_template'
-hbrick['wf_Generation Rate']    = 10.0
-hbrick['wf_Object X Velocity']  = 1.5
-hbrick['wf_Object Y Velocity']  = 0.0
-hbrick['wf_Object Z Velocity']  = 6.0
-hbrick['wf_Script']             = POWERUP_BLOCK_SCRIPT
+_add_brick('brick_0', 20*T)
+_add_brick('brick_1', 22*T)
+_add_brick('brick_2', 24*T)
+
+for _bi, _bc in enumerate(range(91, 99)):
+    _add_brick(f'brick_row_{_bi}', _bc * T)
+
+_add_brick('brick_hi_0', 108*T, z=BLOCK_Z_6)
+_add_brick('brick_hi_1', 110*T, z=BLOCK_Z_6)
+# Also add a coin ? block at col 107 (row 8) and a flower ? block at col 109 (row 6)
+_make_powerup_block('qblock_107', 107*T, 'powerup_template', 0.0)
+_make_powerup_block('fireflower_block_hi', 109*T, 'powerup_template', 0.0, z=BLOCK_Z_6)
+
+# Hidden 1UP brick — tile 40 (x=60m), just before the flagpole (x=63m).
+# Looks like a plain brick; hit from below → launches a green 1UP mushroom that
+# slides right; player catches it for +1 life. Faithful to W1-1 hidden 1UP.
+ONEUP_BRICK_X = 57 * T   # 85.5 — col 57, hidden 1-UP block (was 40*T)
+hbrick_1up = _add_textured_box('brick_1up',
+                               ONEUP_BRICK_X - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                               ONEUP_BRICK_X + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
+                               brick_tex)
+attach_schema(hbrick_1up, 'generator')
+hbrick_1up['wf_Mobility']           = 'Anchored'
+hbrick_1up['wf_Model Type']         = 'Mesh'
+hbrick_1up['wf_Visibility Mailbox'] = 1
+hbrick_1up['wf_Number Of Local Mailboxes'] = 13
+hbrick_1up['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+hbrick_1up['wf_Object To Throw']    = 'oneup_template'
+hbrick_1up['wf_Generation Rate']    = 10.0
+hbrick_1up['wf_Object X Velocity']  = 1.5
+hbrick_1up['wf_Object Y Velocity']  = 0.0
+hbrick_1up['wf_Object Z Velocity']  = 6.0
+hbrick_1up['wf_Script']             = POWERUP_BLOCK_SCRIPT
+
+# ── 12b. Score pop-up actor (docs/plans/2026-05-27-smb-score-pop-up-actors.md) ─
+# Pre-placed diamond actor parked underground at (0,0,-5), inside the surface room
+# bbox (x[-66,133] z[-10,25]) so its script runs every tick.  Scoring events write
+# SMB_POPUP_X/Z + pulse SMB_POPUP_TRIGGER=1; this script teleports the diamond
+# above the event, floats it up for 0.75 s, then parks it back underground.
+# Uses `enemy` schema (Anchored) so gold.cc::TryPickup never despawns it.
+POPUP_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_POPUP_TRIGGER read-mailbox 0<> if\n"
+    "  INDEXOF_SMB_POPUP_X read-mailbox INDEXOF_X_POS write-mailbox\n"
+    "  0 INDEXOF_Y_POS write-mailbox\n"
+    "  INDEXOF_SMB_POPUP_Z read-mailbox 1.5 + INDEXOF_Z_POS write-mailbox\n"
+    "  INDEXOF_TIME read-mailbox 0.75 + INDEXOF_SMB_POPUP_UNTIL write-mailbox\n"
+    "  0 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "then\n"
+    "INDEXOF_SMB_POPUP_UNTIL read-mailbox 0<> if\n"
+    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_POPUP_UNTIL read-mailbox < if\n"
+    "    INDEXOF_Z_POS read-mailbox 3.0 INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n"
+    "  else\n"
+    "    0.0 INDEXOF_X_POS write-mailbox\n"
+    "    -5.0 INDEXOF_Z_POS write-mailbox\n"
+    "    0 INDEXOF_SMB_POPUP_UNTIL write-mailbox\n"
+    "  then\n"
+    "then\n"
+)
+
+
+def _make_popup_template():
+    POP_W = T * 0.35
+    POP_H = T * 0.45
+    POP_T = 0.12
+    bm = _bmesh.new()
+    tf = bm.verts.new((0,      POP_T,  POP_H))
+    rf = bm.verts.new((POP_W,  POP_T,  0))
+    bf = bm.verts.new((0,      POP_T, -POP_H))
+    lf = bm.verts.new((-POP_W, POP_T,  0))
+    tb = bm.verts.new((0,     -POP_T,  POP_H))
+    rb = bm.verts.new((POP_W, -POP_T,  0))
+    bb = bm.verts.new((0,     -POP_T, -POP_H))
+    lb = bm.verts.new((-POP_W,-POP_T,  0))
+    bm.faces.new([tf, rf, bf, lf])
+    bm.faces.new([tb, lb, bb, rb])
+    bm.faces.new([tf, tb, rb, rf])
+    bm.faces.new([rf, rb, bb, bf])
+    bm.faces.new([bf, bb, lb, lf])
+    bm.faces.new([lf, lb, tb, tf])
+    mesh = bpy.data.meshes.new('popup_score')
+    bm.to_mesh(mesh); bm.free()
+    mat = make_mat('smb_popup', (1.0, 0.95, 0.2))
+    mesh.materials.append(mat)
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('popup_score', mesh)
+    obj.location = (0.0, 0.0, -5.0)   # underground inside room bbox so script runs
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'enemy')
+    obj['wf_Mobility']             = 'Anchored'
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'popup_score.iff'
+    obj['wf_Script']               = POPUP_SCRIPT
+    return obj
+
+
+_make_popup_template()
+
+# ── 12c. Pyramids + staircase (faithful W1-1 terrain features) ───────────────
+mat_hard = make_mat('smb_hard_block', (0.48, 0.25, 0.05))
+
+
+def _add_pyramid(name_base, base_col, steps=4):
+    """Left-to-right ascending staircase: col 0 = 1T tall, col n-1 = n*T tall."""
+    for _s in range(steps):
+        add_statplat(f'{name_base}_{_s}',
+                     (base_col + _s)*T - BSIZE, -GROUND_Y, GROUND_TOP_Z,
+                     (base_col + _s)*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + (_s + 1)*T,
+                     mat_hard)
+
+
+def _add_staircase(name_base, base_col, steps=8):
+    """Left-to-right ascending staircase: col 0 = 1*T tall, col n-1 = steps*T tall."""
+    for _s in range(steps):
+        _h = (_s + 1) * T
+        add_statplat(f'{name_base}_{_s}',
+                     (base_col + _s)*T - BSIZE, -GROUND_Y, GROUND_TOP_Z,
+                     (base_col + _s)*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + _h,
+                     mat_hard)
+
+
+_add_pyramid('pyramid_a', base_col=134)
+_add_pyramid('pyramid_b', base_col=148)
+_add_staircase('staircase', base_col=198)
 
 # ── 13. Export ────────────────────────────────────────────────────────────────
 print(f"[smb] Exporting to {OUT_LEV}")

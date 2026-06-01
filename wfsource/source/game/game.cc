@@ -554,11 +554,20 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 			extern int wf_hud_score, wf_hud_timer, wf_hud_lives, wf_hud_game_over;
 			extern int wf_hud_entering_initials, wf_hud_initials_pos;
 			extern char wf_hud_initials[4];
+			// Moon Site 01 position-display HUD overlay — see docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md
+			extern int   wf_moon_overlay_enabled;
+			extern float wf_moon_player_x_m, wf_moon_player_y_m, wf_moon_player_z_m;
+			extern float wf_moon_player_heading_rev;
 			Mailboxes& mb = _curLevel->GetMailboxes();
 			wf_hud_score     = mb.ReadMailbox(70).WholePart();
 			wf_hud_timer     = mb.ReadMailbox(71).WholePart();
 			wf_hud_lives     = mb.ReadMailbox(72).WholePart();
 			wf_hud_game_over = mb.ReadMailbox(420).WholePart();
+			wf_moon_overlay_enabled     = mb.ReadMailbox(1875).WholePart();
+			wf_moon_player_x_m          = mb.ReadMailbox(1876).AsFloat();
+			wf_moon_player_y_m          = mb.ReadMailbox(1877).AsFloat();
+			wf_moon_player_z_m          = mb.ReadMailbox(1878).AsFloat();
+			wf_moon_player_heading_rev  = mb.ReadMailbox(1879).AsFloat();
 
 			// High-score initials entry — triggered on fresh game-over edge.
 			// Joystick bits from mb 1910 (JUSTPRESSED, already edge-detected):

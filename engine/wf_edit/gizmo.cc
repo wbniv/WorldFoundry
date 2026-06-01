@@ -16,6 +16,7 @@
 #include <game/camera.hp>   // Camera::GetRenderCamera
 #include <game/actor.hp>    // pulls in Vector3 / Scalar
 #include <gfx/camera.hp>    // RenderCamera::GetPosition
+#include <gfx/display.hp>   // Display::GetActive / SetLiveWindowSize (X11-clash-safe here)
 #include <math/matrix34.hp> // Matrix34
 #include <math/euler.hp>    // Euler
 #include <math/angle.hp>    // Angle::AsRadian
@@ -70,23 +71,61 @@ void Mat4PerspectiveGL(float fovDegY, float aspect, float nz, float fz, float ou
 
 namespace wfedit {
 
-GizmoMats BuildGizmoMats(int engine_idx, float fbw, float fbh)
+bool BuildViewProj(float fbw, float fbh, float view[16], float proj[16])
 {
-    GizmoMats g;
-    if (!theLevel || !theLevel->camera() || engine_idx < 1 || fbh <= 0.0f)
-        return g;  // valid stays false
-
+    if (!theLevel || !theLevel->camera() || fbh <= 0.0f) return false;
     // VIEW = inverse of the camera's world transform (the engine's
     // _invertedPosition; camera.cc:206 does exactly this then feeds it through
     // Matrix34ToFloat16).
     const Matrix34& camWorld = theLevel->camera()->GetRenderCamera().GetPosition();
     Matrix34 inv;
     inv.Inverse(camWorld);
-    Matrix34ToGL(inv, g.view);
-
+    Matrix34ToGL(inv, view);
     // PROJECTION — the exact params the editor sets on resize (main.cc
     // RendererBackendGet().SetProjection(60, fbw/fbh, 1, 1000)).
-    Mat4PerspectiveGL(60.0f, fbw / fbh, 1.0f, 1000.0f, g.proj);
+    Mat4PerspectiveGL(60.0f, fbw / fbh, 1.0f, 1000.0f, proj);
+    return true;
+}
+
+bool GetActorWorldPos(int engine_idx, float out[3])
+{
+    if (!theLevel || engine_idx < 1) return false;
+    std::optional<Vector3> p = wfmut::GetActorPos(*theLevel, engine_idx);
+    if (!p) return false;
+    out[0] = (float)p->X();
+    out[1] = (float)p->Y();
+    out[2] = (float)p->Z();
+    return true;
+}
+
+bool SetEditorCameraPose(const float pos[3], const float fwd[3], const float up[3])
+{
+    if (!theLevel || !theLevel->camera()) return false;
+    // Build a Matrix34 with rows matching what GetCameraPoseWS reads — row 0 =
+    // fwd, row 2 = up, row 3 = pos. Row 1 = right = fwd × up so the rotation
+    // is orthonormal. Inline the cross-product to avoid pulling another header.
+    const Vector3 v_fwd  ((Scalar)fwd[0], (Scalar)fwd[1], (Scalar)fwd[2]);
+    const Vector3 v_up   ((Scalar)up [0], (Scalar)up [1], (Scalar)up [2]);
+    const Vector3 v_right(
+        (Scalar)((double)fwd[1] * up[2] - (double)fwd[2] * up[1]),
+        (Scalar)((double)fwd[2] * up[0] - (double)fwd[0] * up[2]),
+        (Scalar)((double)fwd[0] * up[1] - (double)fwd[1] * up[0]));
+    const Vector3 v_pos  ((Scalar)pos[0], (Scalar)pos[1], (Scalar)pos[2]);
+    Matrix34 m;
+    m[0] = v_fwd;
+    m[1] = v_right;
+    m[2] = v_up;
+    m[3] = v_pos;
+    theLevel->camera()->SetCameraMatrix(m);
+    return true;
+}
+
+GizmoMats BuildGizmoMats(int engine_idx, float fbw, float fbh)
+{
+    GizmoMats g;
+    // VIEW + PROJ — same matrices the peer-overlay renderer uses.
+    if (!BuildViewProj(fbw, fbh, g.view, g.proj) || engine_idx < 1)
+        return g;  // valid stays false
 
     // MODEL — actor world transform (rotation + translation) so the rotate rings
     // display at the actor's current orientation.
@@ -121,6 +160,21 @@ void ApplyGizmoToEngine(int engine_idx, const float model_gl[16])
     wfmut::SetActorOrientation(*theLevel, engine_idx, m.AsEuler());  // WF's own extraction
 }
 
+bool GetCameraPoseWS(float pos[3], float fwd[3], float up[3])
+{
+    if (!theLevel || !theLevel->camera()) return false;
+    // Same matrix BuildGizmoMats uses (gizmo.cc:82). Float-only output so the
+    // caller (main.cc) doesn't have to pull game/camera.hp etc.
+    const Matrix34& camWorld = theLevel->camera()->GetRenderCamera().GetPosition();
+    const Vector3& p   = camWorld[3];   // translation
+    const Vector3& fX  = camWorld[0];   // WF actor +X = forward
+    const Vector3& uZ  = camWorld[2];   // WF +Z = up
+    pos[0] = (float)p.X();   pos[1] = (float)p.Y();   pos[2] = (float)p.Z();
+    fwd[0] = (float)fX.X();  fwd[1] = (float)fX.Y();  fwd[2] = (float)fX.Z();
+    up [0] = (float)uZ.X();  up [1] = (float)uZ.Y();  up [2] = (float)uZ.Z();
+    return true;
+}
+
 void CommitGizmoToDoc(wfcrdt::Doc& doc, int doc_index, const float model_gl[16])
 {
     Matrix34 m = GLToMatrix34(model_gl);
@@ -147,6 +201,16 @@ void CommitGizmoToDoc(wfcrdt::Doc& doc, int doc_index, const float model_gl[16])
                       e.GetC().AsRadian().AsFloat());
         WriteFieldLeaf(doc, doc_index, oriChild, "DATA", buf);
     }
+}
+
+// Push the live OS-window size into the active engine Display so HUD layout and
+// WFInitGL's viewport/projection pick it up on resize. Wrapper exists because
+// gfx/display.hp's `class Display` clashes with X11's `Display` typedef pulled
+// into main.cc via GLFW_EXPOSE_NATIVE_X11 — same reason as GetCameraPoseWS.
+// No-op if no Display is active yet (pre-HALStart).
+void SetEditorLiveWindowSize(int w, int h)
+{
+    if (auto* d = Display::GetActive()) d->SetLiveWindowSize(w, h);
 }
 
 }  // namespace wfedit

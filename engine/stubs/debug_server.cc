@@ -10,6 +10,7 @@
 
 #include <atomic>
 #include <cstdio>
+#include <cstdlib>     // std::strtod — exception-safe under wfengine's -fno-exceptions
 #include <cstring>
 #include <mutex>
 #include <queue>
@@ -119,6 +120,22 @@ static std::string parse_jstr(const std::string& line, const char* key)
     return out;
 }
 
+// Strtod-based number parse — `std::stod` throws on bad input, which is silently
+// no-op under wfengine's `-fno-exceptions` Release-Clang build (Clang turns the
+// catch into a warning, not an error, so failures bypass the guard and would
+// abort the engine). `strtod` reports failure via `endptr == start` / `errno`,
+// matching the audit recommendation (docs/investigations/2026-05-30-cpp-exceptions-audit.md).
+static bool parse_double_at(const char* s, double* out, const char** endp)
+{
+    errno = 0;
+    char* end = nullptr;
+    const double v = std::strtod(s, &end);
+    if (end == s || errno == ERANGE) return false;
+    *out = v;
+    if (endp) *endp = end;
+    return true;
+}
+
 static double parse_jnum(const std::string& line, const char* key)
 {
     std::string needle = std::string("\"") + key + "\"";
@@ -127,10 +144,13 @@ static double parse_jnum(const std::string& line, const char* key)
     pos = line.find(':', pos + needle.size());
     if (pos == std::string::npos) return 0.0;
     while (++pos < line.size() && (line[pos] == ' ' || line[pos] == '\t'));
-    return std::stod(line.c_str() + pos);
+    double v = 0.0;
+    parse_double_at(line.c_str() + pos, &v, nullptr);  // returns 0.0 on parse failure (legacy contract)
+    return v;
 }
 
-// Parse a JSON [x,y,z] array after "key": into out[3]. Returns false if missing.
+// Parse a JSON [x,y,z] array after "key": into out[3]. Returns false if missing
+// or malformed.
 static bool parse_jvec3(const std::string& line, const char* key, float out[3])
 {
     std::string needle = std::string("\"") + key + "\"";
@@ -138,15 +158,19 @@ static bool parse_jvec3(const std::string& line, const char* key, float out[3])
     if (pos == std::string::npos) return false;
     auto lb = line.find('[', pos + needle.size());
     if (lb == std::string::npos) return false;
-    try {
-        out[0] = (float)std::stod(line.c_str() + lb + 1);
-        auto c1 = line.find(',', lb + 1);
-        if (c1 == std::string::npos) return false;
-        out[1] = (float)std::stod(line.c_str() + c1 + 1);
-        auto c2 = line.find(',', c1 + 1);
-        if (c2 == std::string::npos) return false;
-        out[2] = (float)std::stod(line.c_str() + c2 + 1);
-    } catch (...) { return false; }
+    const char* s = line.c_str() + lb + 1;
+    for (int i = 0; i < 3; ++i) {
+        double v = 0.0;
+        const char* end = nullptr;
+        if (!parse_double_at(s, &v, &end)) return false;
+        out[i] = (float)v;
+        if (i < 2) {
+            // Advance past the next ','. Whitespace between number and comma OK.
+            while (*end == ' ' || *end == '\t') ++end;
+            if (*end != ',') return false;
+            s = end + 1;
+        }
+    }
     return true;
 }
 

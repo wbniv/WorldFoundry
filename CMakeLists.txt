@@ -18,6 +18,7 @@ set(WF_JS_ENGINE     "quickjs"  CACHE STRING "none | quickjs | jerryscript")
 set(WF_WASM_ENGINE   "wamr"     CACHE STRING "none | wamr")
 option(WF_ENABLE_WREN     "Wren scripting"                ON)
 set(WF_FORTH_ENGINE  "zforth"   CACHE STRING "none | zforth | ficl | atlast | embed | libforth | pforth")
+set(WF_PILOT_ENGINE  "builtin"  CACHE STRING "none | builtin")  # PILOT — from-scratch C++, no vendored lib
 # Default ON when zforth is selected, OFF otherwise. cmake_dependent_option auto-tracks
 # WF_FORTH_ENGINE so reconfiguring to a different Forth engine flips this off cleanly.
 include(CMakeDependentOption)
@@ -68,6 +69,7 @@ if(ANDROID OR IOS)
     set(WF_WASM_ENGINE   "none"   CACHE STRING "" FORCE)
     set(WF_ENABLE_WREN   OFF      CACHE BOOL   "" FORCE)
     set(WF_FORTH_ENGINE  "zforth" CACHE STRING "" FORCE)
+    set(WF_PILOT_ENGINE  "none"   CACHE STRING "" FORCE)  # mobile = Forth-only scripting
     set(WF_REST_API      OFF      CACHE BOOL   "" FORCE)
     set(WF_DEBUG_BRIDGE  OFF      CACHE BOOL   "" FORCE)
     set(WF_ENABLE_STEAM  OFF      CACHE BOOL   "" FORCE)
@@ -422,6 +424,15 @@ set(ATLAST_DIR   ${VENDOR}/atlast-08ff0e1a/atlast-64)
 set(EMBED_DIR    ${VENDOR}/embed-154aeb2f)
 set(LIBFORTH_DIR ${VENDOR}/libforth-b851c6a2)
 set(PFORTH_DIR   ${VENDOR}/pforth-63d4a418)
+
+# ─── PILOT engine ─────────────────────────────────────────────────────────────
+# From-scratch C++ interpreter; no vendored library, no editor dependency.
+set(PILOT_DIR ${CMAKE_SOURCE_DIR}/engine/pilot)
+if(WF_PILOT_ENGINE STREQUAL "builtin")
+    list(APPEND WF_SOURCES ${STUB_SRC}/scripting_pilot.cc ${PILOT_DIR}/pilot_core.cc)
+    list(APPEND WF_INCLUDES ${PILOT_DIR})
+    list(APPEND WF_DEFS WF_WITH_PILOT WF_PILOT_ENGINE_BUILTIN)
+endif()
 
 if(NOT WF_FORTH_ENGINE STREQUAL "none")
     list(APPEND WF_DEFS WF_WITH_FORTH)
@@ -1177,6 +1188,14 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
     # is set (a coturn box); see `task turn-test-relay`.
     add_test(NAME wf_edit_turn
         COMMAND sh -c "WF_EDIT_TURN_TEST=1 $<TARGET_FILE:wf_edit> 2>&1 | tee /dev/stderr | grep -q '\\[turn\\] all PASS'"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+    # Headless 3-peer WebRTC mesh self-test (Phase 3 of the multi-peer plan).
+    # Runs the wf_edit binary before GL, no DISPLAY: three in-process WebrtcSessions
+    # shuttle each other's signalling and must all reach ConnectedPeerCount()==2 (a
+    # complete mesh). The headless complement to tests/screenshot_three_peer_b2.sh.
+    add_test(NAME wf_edit_mesh
+        COMMAND sh -c "WF_EDIT_MESH_TEST=1 $<TARGET_FILE:wf_edit> 2>&1 | tee /dev/stderr | grep -q '\\[mesh\\] all PASS'"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
     # wf-relay: standalone relay server binary (co-edit Phase 1).

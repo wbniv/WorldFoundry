@@ -45,7 +45,7 @@ extern RendererVariables globalRendererVariables;
 
 static inline void
 CalcUV(unsigned short tpage,
-       unsigned char uin, unsigned char vin,
+       uint16 uin, uint16 vin,            // widened 2026-05-30 — see docs/plans/2026-05-30-uv-int16-widening.md
        const PixelMap& texturePixelMap,
        float& uOut, float& vOut)
 {

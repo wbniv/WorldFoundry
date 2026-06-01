@@ -38,6 +38,7 @@
 #include "level_doc.h"
 #include "property_panel.h"
 #include "engine_bridge.h"
+#include "wfmut.hpp"                 // wfmut::SetEditorCameraOverride (Jump-to-view)
 #include "level_save.h"
 #include "wfcrdt.hpp"
 #include "collab_session.h"
@@ -49,6 +50,7 @@
 #include "gizmo.h"
 
 #include <algorithm>
+#include <atomic>
 #include <cerrno>
 #include <chrono>
 #include <cstdio>
@@ -67,6 +69,8 @@
 #include <netdb.h>
 #include <csignal>
 #include <ctime>
+#include <exception>
+#include <execinfo.h>
 #include <fcntl.h>
 
 // Provided by the engine's platform layer (mirrors the host-GL e2e harness).
@@ -76,8 +80,10 @@ extern char szAppName[];
 // gfx/gl/display.cc — drive WFInitGL's glViewport + projection aspect. main()
 // seeds them from the GLFW framebuffer before HALStart; editor_build re-applies
 // glViewport + SetProjection from them on window resize (the engine's own
-// resize path early-bails in host-owned mode).
-extern int wfWindowWidth, wfWindowHeight;
+// resize path early-bails in host-owned mode). Display::SetLiveWindowSize is
+// reached via wfedit::SetEditorLiveWindowSize (gizmo.cc) — gfx/display.hp's
+// `class Display` clashes with X11's `Display` typedef here (GLFW_EXPOSE_NATIVE_X11).
+extern int wfInitialWindowWidth, wfInitialWindowHeight;
 
 namespace {
 
@@ -105,6 +111,12 @@ struct WfeditIdentity {
     // (Phase 4). Ships empty — set it to a durable wss:// host, or use "Host a
     // call" (quick tunnel). WF_COLLAB_RELAY_DEFAULT env overrides.
     std::string  relay_default;
+    // Phase 3 (named tunnel): opt-in authenticated Cloudflare tunnel for
+    // durable/team hosting — rate-limit-free + stable hostname. BOTH must be set
+    // to engage; either alone falls back to the zero-config quick tunnel.
+    // WF_COLLAB_TUNNEL_TOKEN / WF_COLLAB_TUNNEL_HOSTNAME env vars override.
+    std::string  tunnel_token;
+    std::string  tunnel_hostname;
 };
 
 static std::string IdentityPath()
@@ -146,6 +158,8 @@ static std::optional<WfeditIdentity> LoadIdentity()
         id.turn_pass        = j.value("turn_pass", "");
         id.turn_tls         = j.value("turn_tls", false);
         id.relay_default    = j.value("relay_default", "");
+        id.tunnel_token     = j.value("tunnel_token", "");
+        id.tunnel_hostname  = j.value("tunnel_hostname", "");
         if (id.peer_id.empty()) return std::nullopt;
         return id;
     } catch (...) {
@@ -178,7 +192,9 @@ static void SaveIdentity(const WfeditIdentity& id)
             {"turn_user",        id.turn_user},
             {"turn_pass",        id.turn_pass},
             {"turn_tls",         id.turn_tls},
-            {"relay_default",    id.relay_default}
+            {"relay_default",    id.relay_default},
+            {"tunnel_token",     id.tunnel_token},
+            {"tunnel_hostname",  id.tunnel_hostname}
         };
         std::ofstream f(path);
         f << j.dump(2) << "\n";
@@ -320,10 +336,20 @@ struct EditorCtx {
         float colour[3] = {0.8f, 0.8f, 0.8f};
         std::string selected_eid;
         double last_seen = 0.0;   // glfwGetTime()
+        // Shared cursors (2026-05-30 plan §B): full camera pose for frustum draw +
+        // "Jump to view." Absent on older peers → fields stay zero and the receiver
+        // skips frustum + Jump-to-view for that peer.
+        float cam_pos[3] = {0.f, 0.f, 0.f};
+        float cam_fwd[3] = {0.f, 0.f, 0.f};   // WF camera "forward" axis (row 0 of cam world matrix)
+        float cam_up [3] = {0.f, 0.f, 0.f};   // WF camera "up" axis (row 2)
+        bool  has_cam    = false;             // true iff cam_pos/fwd/up were present in the last frame
     };
     std::unordered_map<std::string, PresenceState> peer_presence;  // peer_id → state
     double last_presence_send = 0.0;
     float  our_colour[3] = {0.5f, 0.5f, 0.5f};   // set on relay connect from peer_id hash
+    std::string display_name = "Editor";         // copied from identity.json at startup; broadcast as the peer "name"
+    bool   camera_override_active = false;       // true while wfmut::SetEditorCameraOverride is on — gates the "Follow CamShot" release button
+    bool   display_name_dirty     = false;       // set when Collaborate → Display name input fires; triggers SaveIdentity on shutdown
 
     // Phase 5: chat sidebar (only visible when relay is connected).
     struct ChatEntry {
@@ -389,6 +415,16 @@ void RefreshActorList(EditorCtx* c)
     c->actor_eids  = wfedit::ReadActorEids(*c->doc);
     if (c->selected >= static_cast<int>(c->actor_names.size()))
         c->selected = static_cast<int>(c->actor_names.size()) - 1;
+    // Dev/screenshot aid: WF_EDIT_AUTO_SELECT=N picks an actor index at startup
+    // so the b2 two-editor smoke can broadcast a selection ring without an
+    // interactive click. Applied once, only when nothing is selected yet.
+    if (c->selected < 0) {
+        if (const char* asel = std::getenv("WF_EDIT_AUTO_SELECT")) {
+            const int n = std::atoi(asel);
+            if (n >= 0 && n < static_cast<int>(c->actor_names.size()))
+                c->selected = n;
+        }
+    }
     c->fields_for = -1;          // force Properties to re-resolve on the next frame
 }
 
@@ -512,6 +548,20 @@ void CollabDrain(EditorCtx* c) {
                     }
                     ps.selected_eid = j.value("selected_eid", "");
                     ps.last_seen    = glfwGetTime();
+                    // Shared-cursors fields (absent on older peers): keep
+                    // has_cam false so the receiver renders no frustum / no
+                    // Jump-to-view button for that peer.
+                    auto vec3_into = [&](const char* key, float out[3]) -> bool {
+                        if (!j.contains(key) || !j[key].is_array() || j[key].size() < 3) return false;
+                        out[0] = j[key][0].get<float>();
+                        out[1] = j[key][1].get<float>();
+                        out[2] = j[key][2].get<float>();
+                        return true;
+                    };
+                    const bool p = vec3_into("cam_pos", ps.cam_pos);
+                    const bool f = vec3_into("cam_fwd", ps.cam_fwd);
+                    const bool u = vec3_into("cam_up",  ps.cam_up );
+                    ps.has_cam = p && f && u;
                 }
             } catch (...) {}
         } else if (ch == 0x03) {
@@ -791,10 +841,20 @@ static std::string ToolPath(const std::string& exe_path, const char* name)
     return name;   // PATH
 }
 
-// Spawn wf-relay + a Cloudflare quick tunnel (non-blocking). cloudflared's
-// banner is written to out_logpath for incremental polling; children are reaped
-// via atexit. Returns false if a prerequisite is missing.
+// Spawn wf-relay + a Cloudflare tunnel (non-blocking). Two paths:
+//   * **Named tunnel** (Phase 3) — when `tunnel_token` is set, run
+//     `cloudflared tunnel run --token <TOKEN>`; the hostname is fixed (from
+//     `tunnel_hostname`, the host's pre-configured CF DNS) so there's no URL to
+//     scrape and no quick-tunnel rate limit. The user's tunnel ingress must
+//     route their hostname to `http://localhost:<port>`.
+//   * **Quick tunnel** (default, zero-config) — `cloudflared tunnel --protocol
+//     http2 --url http://localhost:<port>`. The ephemeral
+//     `*.trycloudflare.com` URL is scraped from cloudflared's banner.
+// cloudflared's output is written to out_logpath for incremental polling;
+// children are reaped via atexit. Returns false if a prerequisite is missing.
 static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
+                                  const std::string& tunnel_token,
+                                  const std::string& tunnel_hostname,
                                   std::string& out_logpath)
 {
     const std::string cf = ToolPath(exe_path, "cloudflared");
@@ -811,6 +871,10 @@ static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
 
     const std::string ps  = std::to_string(port);
     const std::string url = "http://localhost:" + ps;
+    const bool named = !tunnel_token.empty() && !tunnel_hostname.empty();
+    if (named)
+        std::printf("wf-edit: using named tunnel — hostname %s (rate-limit-free)\n",
+                    tunnel_hostname.c_str());
 
     s_relay_pid = ::fork();
     if (s_relay_pid == 0) {
@@ -822,14 +886,24 @@ static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
     s_cloudflared_pid = ::fork();
     if (s_cloudflared_pid == 0) {
         ::dup2(logfd, 1); ::dup2(logfd, 2);
-        // --protocol http2: force the edge link over TCP :7844 instead of QUIC
-        // (UDP :7844). The tunnel carries SIGNALING only (media is DTLS-SRTP
-        // P2P/TURN), so QUIC's latency edge is irrelevant, and TCP is reachable
-        // on far more networks — many firewalls/NATs block or throttle UDP/QUIC,
-        // which leaves the quick tunnel unregistered (no DNS → "relay connect
-        // failed"). http2 "just works" on restrictive and normal networks alike.
-        ::execl(cf.c_str(), cf.c_str(), "tunnel", "--protocol", "http2",
-                "--url", url.c_str(), (char*)nullptr);
+        if (named) {
+            // Named tunnel: cloudflared knows the tunnel ID + origin routing
+            // from the token's ingress config (host configures hostname →
+            // http://localhost:<port> in the CF Zero Trust dashboard). No
+            // --url, no URL to scrape; the hostname is fixed.
+            ::execl(cf.c_str(), cf.c_str(), "tunnel", "run",
+                    "--token", tunnel_token.c_str(), (char*)nullptr);
+        } else {
+            // Quick tunnel: --protocol http2 forces the edge link over TCP :7844
+            // instead of QUIC (UDP :7844). The tunnel carries SIGNALING only
+            // (media is DTLS-SRTP P2P/TURN), so QUIC's latency edge is
+            // irrelevant, and TCP is reachable on far more networks — many
+            // firewalls/NATs block or throttle UDP/QUIC, which leaves the quick
+            // tunnel unregistered (no DNS → "relay connect failed"). http2
+            // "just works" on restrictive and normal networks alike.
+            ::execl(cf.c_str(), cf.c_str(), "tunnel", "--protocol", "http2",
+                    "--url", url.c_str(), (char*)nullptr);
+        }
         _exit(127);
     }
     ::close(logfd);
@@ -889,7 +963,7 @@ static bool HostResolves(const std::string& host)
 static std::string HostQuickTunnel(const std::string& exe_path, int port)
 {
     std::string logpath, host;
-    if (!StartQuickTunnelProcs(exe_path, port, logpath)) return "";
+    if (!StartQuickTunnelProcs(exe_path, port, "", "", logpath)) return "";
     for (int i = 0; i < 80 && host.empty(); ++i) {
         host = PollTunnelUrl(logpath);
         if (host.empty()) { const struct timespec ts{0, 250'000'000}; ::nanosleep(&ts, nullptr); }
@@ -1015,6 +1089,158 @@ static void RunOpenBrowserModal(EditorCtx* c)
     ImGui::EndPopup();
 }
 
+// Shared cursors b2: project a world-space point through view+proj into
+// top-left-origin screen pixels for ImGui. Returns false if the point lies
+// behind the near plane (clip.w <= 0), in which case the caller skips the draw.
+// Matrices are column-major GL (matches BuildViewProj's output).
+static bool world_to_screen(const float v[16], const float p[16],
+                            float fbw, float fbh,
+                            const float w[3], float* sx, float* sy)
+{
+    // viewSpace = view * (w, 1).  GL view[16] is column-major: element [col*4 + row].
+    auto m4xv4 = [](const float m[16], const float in[4], float out[4]) {
+        for (int r = 0; r < 4; ++r) {
+            out[r] = m[ 0 + r] * in[0]
+                   + m[ 4 + r] * in[1]
+                   + m[ 8 + r] * in[2]
+                   + m[12 + r] * in[3];
+        }
+    };
+    float w4[4] = { w[0], w[1], w[2], 1.0f };
+    float vs[4], cs[4];
+    m4xv4(v, w4, vs);
+    m4xv4(p, vs, cs);
+    if (cs[3] <= 0.0001f) return false;        // behind near plane / degenerate
+    const float ndx = cs[0] / cs[3];
+    const float ndy = cs[1] / cs[3];
+    *sx = (ndx * 0.5f + 0.5f) * fbw;
+    *sy = (1.0f - (ndy * 0.5f + 0.5f)) * fbh;   // y-flip for top-left origin
+    return true;
+}
+
+// Shared cursors b2: draw each remote peer's selection ring + camera frustum
+// on the foreground drawlist. True no-op when peer_presence is empty.
+// (docs/plans/2026-05-31-shared-cursors-b2-viewport-rings-frustums.md)
+static void RenderPeerOverlay(EditorCtx* c, float fbw, float fbh)
+{
+    if (!c) return;
+    // Debug aid: WF_EDIT_FAKE_PEER injects a synthetic peer with a fixed cam
+    // pose + the first actor selected, so a screenshot of a single editor can
+    // verify the ring + frustum render path without needing a live relay +
+    // two-editor setup. Cleaned up at session end; not for production.
+    static bool s_fake_logged = false;
+    if (std::getenv("WF_EDIT_FAKE_PEER") && !c->actor_eids.empty()) {
+        auto& fp = c->peer_presence["fake-peer-screenshot"];
+        fp.name = "Alice (fake)";
+        fp.colour[0] = 1.0f; fp.colour[1] = 0.55f; fp.colour[2] = 0.2f;
+        // Pick an actor at index ~middle so it's likely in view.
+        const size_t pick = c->actor_eids.size() / 2;
+        fp.selected_eid = c->actor_eids[pick];
+        fp.last_seen = 1e18;                       // never evict
+        // Camera off to the side and slightly up, looking back toward origin.
+        // WF basis: +X forward, +Y left, +Z up — but for the fake we pick any
+        // orthonormal triple; the receiver re-derives right = fwd × up.
+        fp.cam_pos[0] =  8.f;  fp.cam_pos[1] = 8.f; fp.cam_pos[2] = 5.f;
+        fp.cam_fwd[0] = -0.7f; fp.cam_fwd[1] =-0.7f; fp.cam_fwd[2] = 0.f;
+        fp.cam_up [0] =  0.f;  fp.cam_up [1] =  0.f; fp.cam_up [2] = 1.f;
+        fp.has_cam = true;
+        if (!s_fake_logged) { s_fake_logged = true; std::fprintf(stderr, "[b2] WF_EDIT_FAKE_PEER injected\n"); }
+        // WF_EDIT_AUTO_JUMP=1: once the fake peer is up, simulate clicking
+        // Jump-to-view on it — proves the camera-override path in a single-
+        // instance screenshot. Idempotent. (B-leftovers plan §1 verification.)
+        static bool s_auto_jumped = false;
+        if (!s_auto_jumped && std::getenv("WF_EDIT_AUTO_JUMP")) {
+            if (wfedit::SetEditorCameraPose(fp.cam_pos, fp.cam_fwd, fp.cam_up)) {
+                wfmut::SetEditorCameraOverride(true);
+                c->camera_override_active = true;
+                std::fprintf(stderr, "[b2] WF_EDIT_AUTO_JUMP fired (cam snapped to fake peer)\n");
+            }
+            s_auto_jumped = true;
+        }
+    }
+    if (c->peer_presence.empty()) return;
+    float view[16], proj[16];
+    if (!wfedit::BuildViewProj(fbw, fbh, view, proj)) return;
+
+    // EID → 0-based doc index, built once per frame.
+    std::unordered_map<std::string, int> doc_idx_by_eid;
+    doc_idx_by_eid.reserve(c->actor_eids.size());
+    for (size_t i = 0; i < c->actor_eids.size(); ++i)
+        if (!c->actor_eids[i].empty())
+            doc_idx_by_eid.emplace(c->actor_eids[i], static_cast<int>(i));
+
+    ImDrawList* dl = ImGui::GetForegroundDrawList();
+
+    for (const auto& [pid, ps] : c->peer_presence) {
+        const ImU32 col = IM_COL32(
+            (int)(ps.colour[0] * 255.f),
+            (int)(ps.colour[1] * 255.f),
+            (int)(ps.colour[2] * 255.f),
+            255);
+
+        // Selection ring on the peer's currently-selected actor.
+        if (!ps.selected_eid.empty()) {
+            auto it = doc_idx_by_eid.find(ps.selected_eid);
+            if (it != doc_idx_by_eid.end()) {
+                const int eidx = wfedit::DocActorToEngineIdx(it->second);
+                float wpos[3];
+                float sx, sy;
+                if (eidx > 0 && wfedit::GetActorWorldPos(eidx, wpos)
+                    && world_to_screen(view, proj, fbw, fbh, wpos, &sx, &sy))
+                {
+                    dl->AddCircle(ImVec2(sx, sy), 14.0f, col, 16, 2.5f);
+                    // Tiny name tag floats above the ring.
+                    dl->AddText(ImVec2(sx + 16.f, sy - 10.f), col, ps.name.c_str());
+                }
+            }
+        }
+
+        // Camera frustum: apex at cam_pos, 4 far-plane corners.
+        if (ps.has_cam) {
+            // right = fwd × up   (assumes fwd, up are roughly orthonormal — they
+            // come from a Matrix34's rows, so this is the engine's own basis).
+            const float fwd[3] = { ps.cam_fwd[0], ps.cam_fwd[1], ps.cam_fwd[2] };
+            const float up [3] = { ps.cam_up [0], ps.cam_up [1], ps.cam_up [2] };
+            const float right[3] = {
+                fwd[1] * up[2] - fwd[2] * up[1],
+                fwd[2] * up[0] - fwd[0] * up[2],
+                fwd[0] * up[1] - fwd[1] * up[0],
+            };
+            const float far_d = 8.0f, side = 3.0f;
+            const float apex[3] = { ps.cam_pos[0], ps.cam_pos[1], ps.cam_pos[2] };
+            float corners[4][3];
+            for (int i = 0; i < 4; ++i) {
+                const float sx_ = (i & 1) ? +side : -side;
+                const float sy_ = (i & 2) ? +side : -side;
+                corners[i][0] = apex[0] + fwd[0] * far_d + right[0] * sx_ + up[0] * sy_;
+                corners[i][1] = apex[1] + fwd[1] * far_d + right[1] * sx_ + up[1] * sy_;
+                corners[i][2] = apex[2] + fwd[2] * far_d + right[2] * sx_ + up[2] * sy_;
+            }
+            float ax, ay;
+            const bool apex_ok = world_to_screen(view, proj, fbw, fbh, apex, &ax, &ay);
+            float cx[4], cy[4];
+            bool  corner_ok[4];
+            int   any_corner = 0;
+            for (int i = 0; i < 4; ++i) {
+                corner_ok[i] = world_to_screen(view, proj, fbw, fbh, corners[i], &cx[i], &cy[i]);
+                if (corner_ok[i]) ++any_corner;
+            }
+            if (apex_ok && any_corner > 0) {
+                for (int i = 0; i < 4; ++i)
+                    if (corner_ok[i])
+                        dl->AddLine(ImVec2(ax, ay), ImVec2(cx[i], cy[i]), col, 1.5f);
+                // Close the far quad (0-1, 1-3, 3-2, 2-0) — bit ordering picked
+                // above so these pairs trace the far rectangle's perimeter.
+                const int edges[4][2] = { {0,1}, {1,3}, {3,2}, {2,0} };
+                for (auto& e : edges)
+                    if (corner_ok[e[0]] && corner_ok[e[1]])
+                        dl->AddLine(ImVec2(cx[e[0]], cy[e[0]]),
+                                    ImVec2(cx[e[1]], cy[e[1]]), col, 1.5f);
+            }
+        }
+    }
+}
+
 // Build phase (EditorBuildCallback): called by WFGame::RunEditor at the TOP of
 // each iteration, BEFORE StepFrame. We poll input, apply any pending Doc edits
 // to the live engine (the bridge drain), and build the ImGui UI — so the
@@ -1053,7 +1279,9 @@ bool editor_build(void* p)
         glfwGetFramebufferSize(c->win, &fbw, &fbh);
         if (fbw > 0 && fbh > 0 && (fbw != c->fb_w || fbh != c->fb_h)) {
             c->fb_w = fbw; c->fb_h = fbh;
-            wfWindowWidth = fbw; wfWindowHeight = fbh;   // keep engine globals truthful
+            // Push the new size into Display so HUD layout / WFInitGL pick it up
+            // (via gizmo.cc — Display vs X11 typedef clash, see include note above).
+            wfedit::SetEditorLiveWindowSize(fbw, fbh);
             glViewport(0, 0, fbw, fbh);
             // Mirror WFInitGL (display.cc:283-284): FOV 60°, near 1, far 1000.
             // Constants duplicated because we must not modify the engine build.
@@ -1117,6 +1345,8 @@ bool editor_build(void* p)
     if (c->doc) wfedit::DrainEngineSync(*c->doc, c->gizmo_active ? c->selected : -1);
 
     // Phase 4: broadcast own presence ~10 Hz when relay is connected.
+    // Shared-cursors extension (2026-05-30): includes camera pose + selected_eid
+    // so peers can draw each other's viewing frustums + selection rings.
     if (c->relay_client.connected()) {
         const double now = glfwGetTime();
         if (now - c->last_presence_send >= 0.1) {
@@ -1125,12 +1355,24 @@ bool editor_build(void* p)
                 (c->selected >= 0 && c->selected < static_cast<int>(c->actor_eids.size()))
                 ? c->actor_eids[c->selected] : "";
             using json = nlohmann::json;
-            const std::string body = json{
+            json body_obj = {
                 {"peer_id",      c->our_peer_id},
-                {"name",         "Editor"},
+                {"name",         c->display_name},
                 {"colour",       json::array({c->our_colour[0], c->our_colour[1], c->our_colour[2]})},
                 {"selected_eid", sel_eid}
-            }.dump();
+            };
+            // Camera pose if a level is live. Engine headers (game/camera.hp,
+            // gfx/display.hp) clash with X11's Display typedef pulled in via
+            // GLFW_EXPOSE_NATIVE_X11, so the pose extraction lives in gizmo.cc
+            // (its TU already has the engine headers cleanly) and exposes a
+            // thin float-only API to keep main.cc on the editor side.
+            float pos[3], fwd[3], up[3];
+            if (wfedit::GetCameraPoseWS(pos, fwd, up)) {
+                body_obj["cam_pos"] = json::array({pos[0], pos[1], pos[2]});
+                body_obj["cam_fwd"] = json::array({fwd[0], fwd[1], fwd[2]});
+                body_obj["cam_up"]  = json::array({up[0],  up[1],  up[2]});
+            }
+            const std::string body = body_obj.dump();
             std::vector<uint8_t> msg;
             msg.reserve(1 + body.size());
             msg.push_back(0x02);   // PRESENCE channel
@@ -1374,6 +1616,25 @@ bool editor_build(void* p)
                 ReExecHostTunnel(c);
             if (!can_host && ImGui::IsItemHovered())
                 ImGui::SetTooltip(c->collab ? "Already in a call" : "Open a level first");
+
+            // Display name — broadcast as the peer "name" in CH_PRESENCE JSON;
+            // persisted to identity.json on Enter. Editable mid-session.
+            ImGui::Separator();
+            static char s_dispname_buf[64] = {};
+            static bool s_dispname_init = false;
+            if (!s_dispname_init) {
+                std::strncpy(s_dispname_buf, c->display_name.c_str(),
+                             sizeof(s_dispname_buf) - 1);
+                s_dispname_init = true;
+            }
+            ImGui::SetNextItemWidth(160);
+            if (ImGui::InputText("Display name", s_dispname_buf, sizeof(s_dispname_buf),
+                                 ImGuiInputTextFlags_EnterReturnsTrue))
+            {
+                c->display_name = s_dispname_buf;
+                c->display_name_dirty = true;   // persisted on the next save path
+            }
+            ImGui::TextDisabled("   (Enter to apply; saved to identity.json)");
             ImGui::EndMenu();
         }
         if (c->collab && ImGui::BeginMenu("View")) {
@@ -1648,6 +1909,11 @@ bool editor_build(void* p)
         }
     }
 
+    // Shared cursors b2: draw each remote peer's selection ring + camera frustum
+    // on the foreground drawlist (same surface ImGuizmo uses). True no-op when
+    // peer_presence is empty.
+    RenderPeerOverlay(c, float(c->fb_w), float(c->fb_h));
+
     // Collaborators panel (voice + video; only when a room is active).
     if (c->collab)
         wfedit::RenderCollabPanel(c->show_collab, *c->collab,
@@ -1666,12 +1932,74 @@ bool editor_build(void* p)
             ImGui::SetNextWindowFocus();
         }
         ImGui::Begin("Chat");
-        // Peer presence list above history.
+        // Peer presence list above history. Tiles include each peer's selected
+        // actor (looked up via the local actor_eids ↔ actor_names map) so you
+        // can see at a glance what every co-editor is looking at; tiles also
+        // host the (b2) "Jump to view" button when a peer's cam pose is known.
         if (!c->peer_presence.empty()) {
-            for (const auto& [pid, ps] : c->peer_presence)
+            // Lookup table EID → friendly actor name (built once per frame).
+            std::unordered_map<std::string, std::string> name_by_eid;
+            for (size_t i = 0; i < c->actor_eids.size()
+                            && i < c->actor_names.size(); ++i)
+                name_by_eid[c->actor_eids[i]] = c->actor_names[i];
+
+            ImGui::TextDisabled("Peers (%zu)", c->peer_presence.size() + 1);
+            // "You" tile first so the local editor sees its own colour next to peers'.
+            {
+                const std::string& sel_eid =
+                    (c->selected >= 0 && c->selected < static_cast<int>(c->actor_eids.size()))
+                    ? c->actor_eids[c->selected] : std::string();
+                ImGui::TextColored(
+                    ImVec4(c->our_colour[0], c->our_colour[1], c->our_colour[2], 1.f),
+                    "●");
+                ImGui::SameLine();
+                ImGui::Text("%s (you)", c->display_name.c_str());
+                if (!sel_eid.empty()) {
+                    auto it = name_by_eid.find(sel_eid);
+                    ImGui::SameLine();
+                    ImGui::TextDisabled("→ %s", it != name_by_eid.end() ? it->second.c_str() : sel_eid.c_str());
+                }
+            }
+            for (const auto& [pid, ps] : c->peer_presence) {
                 ImGui::TextColored(
                     ImVec4(ps.colour[0], ps.colour[1], ps.colour[2], 1.f),
-                    "● %s", ps.name.c_str());
+                    "●");
+                ImGui::SameLine();
+                ImGui::TextUnformatted(ps.name.c_str());
+                if (!ps.selected_eid.empty()) {
+                    auto it = name_by_eid.find(ps.selected_eid);
+                    ImGui::SameLine();
+                    ImGui::TextDisabled(
+                        "→ %s",
+                        it != name_by_eid.end() ? it->second.c_str() : ps.selected_eid.c_str());
+                }
+                if (ps.has_cam) {
+                    ImGui::SameLine();
+                    ImGui::TextDisabled("  cam (%.1f,%.1f,%.1f)",
+                                        ps.cam_pos[0], ps.cam_pos[1], ps.cam_pos[2]);
+                    // Jump-to-view: snap local cam to peer's pose, hold via the
+                    // CamShot-suppress override. Push-button needs a unique ID
+                    // (peer_id) since labels collide across peers.
+                    ImGui::SameLine();
+                    ImGui::PushID(pid.c_str());
+                    if (ImGui::SmallButton("Jump")) {
+                        if (wfedit::SetEditorCameraPose(ps.cam_pos, ps.cam_fwd, ps.cam_up)) {
+                            wfmut::SetEditorCameraOverride(true);
+                            c->camera_override_active = true;
+                        }
+                    }
+                    ImGui::PopID();
+                }
+            }
+            // Release override → resume CamShot. Visible only when override is on.
+            if (c->camera_override_active) {
+                if (ImGui::SmallButton("Follow CamShot")) {
+                    wfmut::SetEditorCameraOverride(false);
+                    c->camera_override_active = false;
+                }
+                ImGui::SameLine();
+                ImGui::TextDisabled("(camera held; click to resume authored CamShot)");
+            }
             ImGui::Separator();
         }
         // Scrollable message history.
@@ -1887,12 +2215,121 @@ static int RunTurnTest()
     return fails == 0 ? 0 : 1;
 }
 
+// ── Headless 3-peer mesh test (WF_EDIT_MESH_TEST) ──────────────────────────────
+// Phase 3 of docs/plans/2026-05-31-multi-peer-voice-video-mesh.md. The headless
+// complement to tests/screenshot_three_peer_b2.sh: that shell smoke proves three
+// live editors over a relay; this proves the WebrtcSession layer forms a COMPLETE
+// mesh (every pair connects) deterministically, with no display, relay, or cd.iff.
+//
+// Three in-process sessions (peer-a/b/c) shuttle each other's signalling exactly
+// as the relay would — but with three peers DrainSignaling's `to` field MUST be
+// honoured to route to the right destination (the 2-peer turn test had a single
+// destination and could ignore it). The offerer for each pair is the
+// lexicographically smaller peer_id, chosen inside SyncPeers, so the mesh
+// converges without coordination. Prints "[mesh] all PASS" iff all three reach
+// ConnectedPeerCount() == 2.
+//
+// Teardown discipline mirrors RunTurnTest: the sessions live in an inner scope so
+// their PeerConnections destruct BEFORE WebrtcCleanup() (rtc::Cleanup().wait()),
+// and the verdict is printed + flushed AFTER cleanup — destroying PCs while the
+// global rtc cleanup is in flight is what produced an unclean exit + lost stdout.
+static int RunMeshTest()
+{
+    using namespace wfedit;
+    bool ok = false;
+    size_t fa = 0, fb = 0, fc = 0;
+
+    {   // a/b/c destruct at the end of this block, before WebrtcCleanup().
+        WebrtcSession a(nullptr, nullptr);
+        WebrtcSession b(nullptr, nullptr);
+        WebrtcSession c(nullptr, nullptr);
+
+        a.SyncPeers({"peer-b", "peer-c"}, "peer-a");
+        b.SyncPeers({"peer-a", "peer-c"}, "peer-b");
+        c.SyncPeers({"peer-a", "peer-b"}, "peer-c");
+
+        // Route one session's queued signals to the ADDRESSED peer's OnSignal.
+        // sig.first = destination peer_id, sig.second = JSON payload.
+        auto route = [&](WebrtcSession& src, const char* from) {
+            for (auto& sig : src.DrainSignaling()) {
+                if      (sig.first == "peer-a") a.OnSignal(from, sig.second);
+                else if (sig.first == "peer-b") b.OnSignal(from, sig.second);
+                else if (sig.first == "peer-c") c.OnSignal(from, sig.second);
+            }
+        };
+
+        const auto deadline =
+            std::chrono::steady_clock::now() + std::chrono::seconds(30);
+        while (std::chrono::steady_clock::now() < deadline) {
+            route(a, "peer-a");
+            route(b, "peer-b");
+            route(c, "peer-c");
+            fa = a.ConnectedPeerCount();
+            fb = b.ConnectedPeerCount();
+            fc = c.ConnectedPeerCount();
+            if (fa == 2 && fb == 2 && fc == 2) { ok = true; break; }
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+    }   // ← PeerConnections destruct here.
+
+    // Join libdatachannel's threads / free its globals so LSan stays quiet.
+    WebrtcCleanup();
+
+    if (ok) {
+        std::printf("[mesh] full 3-node mesh connected (a=2 b=2 c=2)\n");
+    } else {
+        std::printf("[mesh] TIMEOUT — mesh incomplete "
+                    "(a=%zu b=%zu c=%zu, want 2 each)\n", fa, fb, fc);
+    }
+    std::printf("[mesh] %s\n", ok ? "all PASS" : "FAIL");
+    std::fflush(stdout);
+    return ok ? 0 : 1;
+}
+
+// Make `terminate called without an active exception` self-diagnosing — libstdc++
+// otherwise gives no clue what triggered it (unhandled exception, noexcept throw,
+// joinable thread destroyed without join, …). On terminate, rethrow + catch the
+// active exception (if any) and dump a backtrace before letting the process die.
+// Pure diagnostic; zero cost when nothing terminates.
+static void TerminateHandler()
+{
+    std::fprintf(stderr, "\n=== wf-edit: std::terminate fired ===\n");
+    if (std::exception_ptr ep = std::current_exception()) {
+        try {
+            std::rethrow_exception(ep);
+        } catch (const std::exception& e) {
+            std::fprintf(stderr, "  active std::exception: %s\n", e.what());
+        } catch (...) {
+            std::fprintf(stderr, "  active exception: (non-std::exception)\n");
+        }
+    } else {
+        std::fprintf(stderr, "  no active exception "
+                     "(likely joinable std::thread destroyed without join, "
+                     "or noexcept function throwing)\n");
+    }
+    void* frames[64];
+    const int n = ::backtrace(frames, 64);
+    std::fprintf(stderr, "  backtrace (%d frames):\n", n);
+    ::backtrace_symbols_fd(frames, n, STDERR_FILENO);
+    std::fprintf(stderr, "=== aborting ===\n");
+    std::fflush(stderr);
+    std::abort();
+}
+
 int main(int argc, char** argv)
 {
+    std::set_terminate(TerminateHandler);
+
     // Headless TURN/ICE self-test — needs no level, GL, or args. Must run before
     // any window/engine setup.
     if (const char* p = std::getenv("WF_EDIT_TURN_TEST"); p && *p)
         return RunTurnTest();
+
+    // Headless 3-peer mesh self-test — three in-process WebrtcSessions form a
+    // full mesh by shuttling their own signalling. No level, GL, relay, or args.
+    // Must run before any window/engine setup. See RunMeshTest above.
+    if (const char* p = std::getenv("WF_EDIT_MESH_TEST"); p && *p)
+        return RunMeshTest();
 
     // Headless quick-tunnel self-test (Phase 4.3): spawn relay + cloudflared,
     // resolve the public host, print the share link, reap, exit. Needs network +
@@ -1962,6 +2399,13 @@ int main(int argc, char** argv)
             host_tunnel = true;
         else if (std::strncmp(argv[i], "--host-tunnel=", 14) == 0)
             { host_tunnel = true; room_id = argv[i] + 14; }
+        else if (argv[i][0] != '-' && argv[i][0] != '\0') {
+            // Positional argument — treat as the level (same as --leveltree=PATH).
+            // Pre-2026-05-31 unrecognised positional args were silently dropped, so
+            // `wf-edit … wflevels/foo/foo.iff` quietly fell back to the snowgoons
+            // default. Now matches the File→Open re-exec convention (line 782).
+            leveltree = argv[i];
+        }
     }
 
     // Phase 6: load persisted identity (peer_id, colour, recent rooms).
@@ -1988,21 +2432,35 @@ int main(int argc, char** argv)
                         ctx_relay_url.c_str(), room_id.c_str());
     }
 
-    // Phase 4.3: host a call over a Cloudflare quick tunnel. Spawn wf-relay +
+    // Phase 4.3: host a call over a Cloudflare tunnel. Spawn wf-relay +
     // cloudflared NOW (non-blocking) so the tunnel comes up while the window +
     // level load; the public host is resolved later by a responsive progress
     // loop (after the GL context is up) rather than blocking startup here. The
     // resolved wss:// host overrides any default relay above.
+    //
+    // Phase 3 (named tunnel): if identity has a `tunnel_token` + `tunnel_hostname`
+    // (or env overrides), use an authenticated named tunnel (rate-limit-free,
+    // stable hostname). Else fall back to the zero-config quick tunnel.
     std::string tunnel_share_link;
     std::string tunnel_logpath;        // cloudflared banner, polled by the loading loop
+    std::string tunnel_known_host;     // non-empty for the named-tunnel path (skip URL scrape)
     bool        tunnel_pending = false;
     if (host_tunnel) {
         if (room_id.empty()) room_id = "studio-" + std::to_string(::getpid() % 10000);
-        std::printf("wf-edit: starting quick tunnel for room '%s'…\n", room_id.c_str());
+        // Env overrides identity per-field.
+        std::string tok = identity.tunnel_token;
+        std::string hn  = identity.tunnel_hostname;
+        if (const char* e = std::getenv("WF_COLLAB_TUNNEL_TOKEN");    e && *e) tok = e;
+        if (const char* e = std::getenv("WF_COLLAB_TUNNEL_HOSTNAME"); e && *e) hn  = e;
+        const bool named = !tok.empty() && !hn.empty();
+        std::printf("wf-edit: starting %s tunnel for room '%s'…\n",
+                    named ? "named" : "quick", room_id.c_str());
         std::fflush(stdout);
-        tunnel_pending = StartQuickTunnelProcs(argv[0], 9900, tunnel_logpath);
+        tunnel_pending = StartQuickTunnelProcs(argv[0], 9900, tok, hn, tunnel_logpath);
         if (!tunnel_pending)
-            std::fprintf(stderr, "wf-edit: quick tunnel failed to start — no relay\n");
+            std::fprintf(stderr, "wf-edit: tunnel failed to start — no relay\n");
+        else if (named)
+            tunnel_known_host = hn;    // skip URL scrape; the host is fixed
     }
 
     // 0. Read-only Y.Doc (M4): shell out to `levtree parse`, build a wfcrdt::Doc
@@ -2338,7 +2796,9 @@ int main(int argc, char** argv)
     // takes to come up.
     if (tunnel_pending) {
         const double t0 = glfwGetTime();
-        std::string host;
+        // Named-tunnel path: hostname is known up front (skip the URL-scrape
+        // phase); the Registered+grace+resolve gates still run as the safety net.
+        std::string host = tunnel_known_host;
         bool   registered = false;
         double reg_t = 0, last_check = 0;
         bool   resolved = false;
@@ -2495,14 +2955,55 @@ int main(int argc, char** argv)
             identity.peer_id = ctx.our_peer_id;
             std::copy(ctx.our_colour, ctx.our_colour + 3, identity.colour);
         }
-        // Retry: a quick-tunnel relay can need a beat after registration for DNS
-        // to propagate to the local resolver / the proxy to accept connections.
-        bool relay_ok = false;
-        for (int attempt = 0; attempt < 4 && !relay_ok; ++attempt) {
-            if (attempt) sleep(2);
-            relay_ok = ctx.relay_client.connect(ctx_relay_url.c_str());
-        }
-        if (relay_ok) {
+        // Shared-cursors broadcast (2026-05-30 §B) uses ctx.display_name as the
+        // peer "name." Pull from identity.json; if the user kept the "Editor"
+        // default, fall back to a peer_id-prefix tag so co-editors can tell
+        // each other apart at a glance even without setting display_name.
+        ctx.display_name = (identity.display_name == "Editor" && !ctx.our_peer_id.empty())
+            ? std::string("Editor (") + ctx.our_peer_id.substr(0, 6) + ")"
+            : identity.display_name;
+        // (a) Run the blocking connect on a background thread and pump the window
+        // meanwhile, so it never freezes (no WM "not responding" / un-draggable
+        // window). `relay_client` is touched ONLY by this thread until it joins,
+        // then ONLY by the main thread — no concurrent access. The same `pump`
+        // lambda keeps the progress UI live during the connect AND the SYNC wait.
+        auto pump = [&](const char* msg) {
+            glfwPollEvents();
+            ImGui_ImplOpenGL3_NewFrame(); ImGui_ImplGlfw_NewFrame(); ImGui::NewFrame();
+            const ImGuiViewport* vp = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(ImVec2(vp->WorkPos.x + vp->WorkSize.x * 0.5f,
+                                           vp->WorkPos.y + vp->WorkSize.y * 0.5f),
+                                    ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+            ImGui::SetNextWindowSize(ImVec2(380, 0), ImGuiCond_Always);
+            ImGui::Begin("Host a call", nullptr, ImGuiWindowFlags_NoResize |
+                         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+            ImGui::TextUnformatted(msg);
+            const double t = glfwGetTime();
+            ImGui::ProgressBar(static_cast<float>(t - static_cast<long>(t)), ImVec2(-1.0f, 0.0f), "");
+            ImGui::End();
+            ImGui::Render();
+            int fbw, fbh; glfwGetFramebufferSize(win, &fbw, &fbh);
+            glViewport(0, 0, fbw, fbh);
+            glClearColor(0.10f, 0.10f, 0.11f, 1.0f); glClear(GL_COLOR_BUFFER_BIT);
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            glfwSwapBuffers(win);
+            const struct timespec fr{0, 16'000'000}; nanosleep(&fr, nullptr);   // ~60 fps cap
+        };
+
+        std::atomic<int> cstate{0};   // 0 = connecting, 1 = ok, 2 = failed
+        std::thread connector([&]{
+            bool ok = false;
+            for (int attempt = 0; attempt < 4 && !ok; ++attempt) {
+                if (attempt) { const struct timespec s{2, 0}; nanosleep(&s, nullptr); }
+                ok = ctx.relay_client.connect(ctx_relay_url.c_str());
+            }
+            cstate.store(ok ? 1 : 2);
+        });
+        const std::string connecting_msg = "Connecting to room " + room_id + "…";
+        while (cstate.load() == 0) pump(connecting_msg.c_str());
+        connector.join();
+
+        if (cstate.load() == 1) {
             // Send CONTROL join message: [0x04][room_id NUL peer_id].
             std::vector<uint8_t> ctrl;
             ctrl.push_back(0x04);
@@ -2511,16 +3012,25 @@ int main(int argc, char** argv)
             for (char ch : ctx.our_peer_id) ctrl.push_back(static_cast<uint8_t>(ch));
             ctx.relay_client.send(ctrl.data(), ctrl.size());
 
-            // Wait for the relay's initial full-state SYNC (up to 1 s).
+            // Wait (≤1 s) for the relay's initial full-state SYNC — pumping so
+            // this doesn't freeze either.
             {
                 std::vector<uint8_t> frame;
-                for (int t = 0; t < 1000 && !ctx.relay_client.poll(frame); ++t)
-                    usleep(1000);
+                const double deadline = glfwGetTime() + 1.0;
+                while (glfwGetTime() < deadline && !ctx.relay_client.poll(frame))
+                    pump(connecting_msg.c_str());
                 if (!frame.empty() && frame[0] == 0x01 && frame.size() > 1) {
-                    // Remote-origin apply — the initial peer state must not seed
-                    // our undo history.
-                    auto txn = doc.beginRemote();
-                    txn.apply(wfcrdt::ByteView{frame.data() + 1, frame.size() - 1});
+                    // Apply in its own scope so the yffi write txn commits before
+                    // ReadActorNames opens a read — yrs is single-writer, and a
+                    // freshly-opened Transaction's `raw()` returns NULL while the
+                    // outer one is still live, which makes `yarray_get(..., NULL, i)`
+                    // panic on `txn.as_ref().unwrap()`. Pre-2026-05-31 this nested
+                    // shape crashed every --relay session at the first SYNC. See
+                    // docs/plans/2026-05-31-fix-relay-frames-readactornames-crash.md
+                    {
+                        auto txn = doc.beginRemote();
+                        txn.apply(wfcrdt::ByteView{frame.data() + 1, frame.size() - 1});
+                    } // ← outer txn commits here, before the reads below
                     ctx.actor_names = wfedit::ReadActorNames(doc);
                     ctx.actor_eids  = wfedit::ReadActorEids(doc);
                 }
@@ -2575,14 +3085,14 @@ int main(int argc, char** argv)
     // wfWindow* defaults — ParseWindowSwitches, which would set them, is #if 0'd —
     // and WFInitGL runs glViewport(0,0,640,480) + a 640/480 projection aspect, so
     // the level renders into only the bottom-left of our 1280×800 window. Set
-    // before HALStart, which constructs Display (→ _xSize/_ySize) and calls
-    // WFInitGL (→ glViewport + aspect). Later resizes are tracked per-frame in
-    // editor_build (wfWindowWidth/Height is the file-scope extern above).
+    // before HALStart, which constructs Display (→ _xSize/_ySize/_liveWidth/Height)
+    // and calls WFInitGL (→ glViewport + aspect, both sized off Display::GetSurfaceSize).
+    // Later resizes go through Display::SetLiveWindowSize in editor_build.
     extern int _halWindowWidth, _halWindowHeight;   // hal/linux: feeds Display _xSize/_ySize
     int fbw = 0, fbh = 0;
     glfwGetFramebufferSize(win, &fbw, &fbh);
-    wfWindowWidth  = _halWindowWidth  = fbw;
-    wfWindowHeight = _halWindowHeight = fbh;
+    wfInitialWindowWidth  = _halWindowWidth  = fbw;
+    wfInitialWindowHeight = _halWindowHeight = fbh;
     std::printf("wf-edit: engine surface size %dx%d\n", fbw, fbh);
 
     std::printf("wf-edit: HALStart (--editor, level=%s)\n", level.c_str());
@@ -2596,6 +3106,17 @@ int main(int argc, char** argv)
         identity.gizmo_snap       = ctx.gizmo_snap;
         identity.gizmo_snap_trans = ctx.gizmo_snap_trans;
         identity.gizmo_snap_rot   = ctx.gizmo_snap_rot;
+        // Display name: persist if the user edited it via Collaborate menu.
+        // Strip the b1-fallback `Editor (xxxxxx)` decoration so identity.json
+        // round-trips back to the user's intent rather than the auto-tag.
+        if (ctx.display_name_dirty) {
+            identity.display_name = ctx.display_name;
+            // If user kept the fallback tag, strip it back to "Editor" so
+            // they re-tag fresh next session.
+            const std::string& dn = identity.display_name;
+            if (dn.rfind("Editor (", 0) == 0 && dn.back() == ')')
+                identity.display_name = "Editor";
+        }
         SaveIdentity(identity);
     }
 

@@ -1,0 +1,21 @@
+// moon_site01-standalone.iff.txt — L4-wrapped form of moon_site01 for wf_game -L.
+//
+// Build:
+//   task build-level -- moon_site01
+//
+// Run:
+//   task run-level -- wflevels/moon_site01-standalone.iff
+//
+// Tier 2 Moon-surface walkable level: PGDA Site 01 (Connecting Ridge), 1 km × 1 km
+// at 10 m sampling, 9801-quad terrain mesh, 1.8 m astronaut player.
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 100000l                  // 10 actors + margin
+        'PERM' 500000l                  // player.iff
+        'ROOM' 8000000l                 // 10000-vert terrain mesh ~2.5MB + room overhead
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../moon_site01.iff" ]
+}
