@@ -159,10 +159,25 @@ static void DrawHud(int xSize, int ySize)
 
     glUseProgram(0);   // ensure fixed-function pipeline; Flush() may have left a program bound
 
+    // HUD ortho units inflate proportionally to the surface's short axis
+    // (clamped to ≥ 1.0): at 640×480 / 512×384 capture FBO it's 1.0 (existing
+    // sizes preserved); at 1920×1080 it's 1.8×; at 4K it's 3.6×. Every
+    // existing pixel constant in this function (margins, text scale, minimap
+    // size, marker sizes, tick lengths) is in ortho units, so they all scale
+    // together. See docs/plans/2026-05-31-hud-scale-with-window.md.
+    const float hud_scale = std::max(1.0f,
+        std::min((float)xSize, (float)ySize) / 600.0f);
+    const float ortho_w = (float)xSize / hud_scale;
+    const float ortho_h = (float)ySize / hud_scale;
+    // After this point, treat xSize / ySize aliases as the *ortho* size so
+    // anchoring math reads from the inflated coordinate system.
+    xSize = (int)ortho_w;
+    ySize = (int)ortho_h;
+
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(0, xSize, ySize, 0, -1, 1);
+    glOrtho(0, ortho_w, ortho_h, 0, -1, 1);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
