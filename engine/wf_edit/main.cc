@@ -87,6 +87,12 @@ extern int wfInitialWindowWidth, wfInitialWindowHeight;
 
 namespace {
 
+// wf-relay's default listen port (relay.rs:13). The host spawns wf-relay here
+// and connects to it over loopback (ws://127.0.0.1:kRelayPort) rather than
+// round-tripping its own join through the public tunnel — see the connect
+// block + docs/plans/2026-06-01-relay-connect-localhost-and-resilient-retry.md.
+static constexpr int kRelayPort = 9900;
+
 // ── Phase 6: identity persistence + wfedit:// URL ───────────────────────────
 
 struct RecentRoom { std::string relay_url, room_id; };
@@ -2392,7 +2398,7 @@ int main(int argc, char** argv)
     // resolve the public host, print the share link, reap, exit. Needs network +
     // a built wf-relay; verifies the spawn/scrape/lifecycle without a window.
     if (const char* p = std::getenv("WF_EDIT_HOST_TUNNEL_TEST"); p && *p) {
-        const std::string host = HostQuickTunnel(argv[0], 9900);
+        const std::string host = HostQuickTunnel(argv[0], kRelayPort);
         if (host.empty()) { std::printf("[host-tunnel] FAIL (no URL)\n"); return 1; }
         std::printf("[host-tunnel] share: wfedit+s://%s/r/studio-1\n", host.c_str());
         std::printf("[host-tunnel] relay: wss://%s\n", host.c_str());
@@ -2513,7 +2519,7 @@ int main(int argc, char** argv)
         std::printf("wf-edit: starting %s tunnel for room '%s'…\n",
                     named ? "named" : "quick", room_id.c_str());
         std::fflush(stdout);
-        tunnel_pending = StartQuickTunnelProcs(argv[0], 9900, tok, hn, tunnel_logpath);
+        tunnel_pending = StartQuickTunnelProcs(argv[0], kRelayPort, tok, hn, tunnel_logpath);
         if (!tunnel_pending)
             std::fprintf(stderr, "wf-edit: tunnel failed to start — no relay\n");
         else if (named)
@@ -3048,17 +3054,44 @@ int main(int argc, char** argv)
             const struct timespec fr{0, 16'000'000}; nanosleep(&fr, nullptr);   // ~60 fps cap
         };
 
-        std::atomic<int> cstate{0};   // 0 = connecting, 1 = ok, 2 = failed
+        // The host owns the relay (spawned on loopback at kRelayPort); connect to
+        // it directly rather than round-tripping its own join through the public
+        // tunnel, which is subject to the Cloudflare quick-tunnel warm-up 530 race.
+        // ctx_relay_url stays the public wss:// address (share link, recent-rooms,
+        // log line); only the connect target differs. Joiners use the public URL.
+        const std::string connect_url =
+            host_tunnel ? ("ws://127.0.0.1:" + std::to_string(kRelayPort))
+                        : ctx_relay_url;
+
+        std::atomic<int> cstate{0};    // 0 = connecting, 1 = ok, 2 = failed
+        std::atomic<int> cattempt{0};  // surfaced in the progress message
         std::thread connector([&]{
+            // Host connects over loopback (relay already listening) → short budget.
+            // A joiner must ride out the quick-tunnel warm-up: the Cloudflare edge
+            // returns 530 ("no connector") for ~15–30 s after the URL appears, so
+            // the old 4×2 s budget gave up inside that window. Retry any failure
+            // (530/502/refused/DNS-not-yet — all transient) until the budget ends;
+            // a genuinely bad URL simply exhausts it.
+            const double budget = host_tunnel ? 8.0 : 45.0;
+            const double t0 = glfwGetTime();
             bool ok = false;
-            for (int attempt = 0; attempt < 4 && !ok; ++attempt) {
-                if (attempt) { const struct timespec s{2, 0}; nanosleep(&s, nullptr); }
-                ok = ctx.relay_client.connect(ctx_relay_url.c_str());
+            for (int attempt = 0; !ok; ++attempt) {
+                cattempt.store(attempt + 1);
+                ok = ctx.relay_client.connect(connect_url.c_str());
+                if (ok || glfwGetTime() - t0 >= budget) break;
+                const double back = std::min(3.0, 1.0 + 0.5 * attempt);  // 1.0,1.5,…,3.0 s
+                const struct timespec s{ static_cast<time_t>(back),
+                                         static_cast<long>((back - static_cast<long>(back)) * 1e9) };
+                nanosleep(&s, nullptr);
             }
             cstate.store(ok ? 1 : 2);
         });
         const std::string connecting_msg = "Connecting to room " + room_id + "…";
-        while (cstate.load() == 0) pump(connecting_msg.c_str());
+        while (cstate.load() == 0) {
+            const std::string m = connecting_msg + "  (attempt " +
+                                  std::to_string(cattempt.load()) + ")";
+            pump(m.c_str());
+        }
         connector.join();
 
         if (cstate.load() == 1) {
