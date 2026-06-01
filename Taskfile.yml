@@ -99,6 +99,27 @@ tasks:
       NPROC:
         sh: nproc
 
+  build-wf-edit-fast:
+    desc: "Build wf-edit WITHOUT AddressSanitizer (-DWF_ASAN=OFF) into build-editor-fast/. ASan ~2-3x's RSS; use this binary for real collab sessions so two editors + browser fit in RAM. Memory-debugging still uses task build-wf-edit (ASan)."
+    deps: [vendor-unpack]
+    cmds:
+      - cmake -S . -B build-editor-fast -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Debug -DWF_ASAN=OFF
+      - cmake --build build-editor-fast --target wf_edit -j{{.NPROC}}
+      # Same stale-binary guard as build-wf-edit (a failed compile leaves the old
+      # binary on disk; assert it out-dates every source and print a success marker).
+      - |
+        bin=build-editor-fast/wf-edit
+        stale=$(find engine/wf_edit wfsource/source -name '*.cc' -o -name '*.cpp' 2>/dev/null \
+                | while read -r f; do [ "$f" -nt "$bin" ] && { echo "$f"; break; }; done)
+        if [ -n "$stale" ]; then
+          echo "BUILD STALE: $bin is older than $stale — the link did not run; FIX the compile error" >&2
+          exit 1
+        fi
+        echo "✓ wf-edit (no-ASan) built → $bin ($(date -r "$bin" +%H:%M:%S), $(stat -c%s "$bin") bytes)"
+    vars:
+      NPROC:
+        sh: nproc
+
   run-wf-edit:
     desc: "Run the wf-edit GUI editor (build first with task build-wf-edit)."
     deps: [build-wf-edit]
