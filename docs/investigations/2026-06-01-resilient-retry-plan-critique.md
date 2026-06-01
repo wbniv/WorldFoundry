@@ -12,7 +12,7 @@ The plan was written *early* in the session, before we had the real evidence. By
 ## TL;DR verdict
 
 - **Fix 1 (host connects to its own relay over `ws://127.0.0.1:kRelayPort`): keep.** Architecturally correct regardless of whether it measurably changed behavior. Low risk.
-- **Fix 2 (time-budget + backoff "resilient retry", host 8 s / joiner 45 s): questionable.** Built on a premise (quick-tunnel "warm-up 530 window") we never actually confirmed; ships a real close-button regression; makes the *common* failure (dead tunnel) slower; retries fatal errors pointlessly; targets startup when the recurring failure was mid-session drop; and is **largely mooted by the named tunnel** (which has no warm-up window).
+- **Fix 2 (time-budget + backoff "resilient retry", host 8 s / joiner 45 s): questionable.** Built on a premise (quick-tunnel "warm-up 530 window") we never actually confirmed; ships a real close-button regression; makes the *common* failure (dead tunnel) slower; retries fatal errors pointlessly; targets startup when the recurring failure was mid-session drop; and its rationale is undercut by the named-tunnel path (which has no warm-up window — though that path is itself committed-but-unverified, [`cc07da17`](https://github.com/wbniv/WorldFoundry/commit/cc07da17)).
 - **The plan over-claims its own verification** (steps 1–2 PASS).
 - The genuinely valuable artifact from the whole effort was the **connection indicator**, not the retry.
 
@@ -64,7 +64,9 @@ The close flag is *set* by `pump()` but never acted on, so **for up to 45 s the 
 
 ## The reframe the named tunnel forces
 
-[`docs/plans/2026-05-30-quick-tunnel-named-tunnel.md`](../plans/2026-05-30-quick-tunnel-named-tunnel.md) (DONE, [`03dc866c`](https://github.com/wbniv/WorldFoundry/commit/03dc866c)) gives an opt-in **stable, pre-resolved, always-up hostname** (`tunnel_token` + `tunnel_hostname` → `cloudflared tunnel run --token`). A named tunnel has **no warm-up `530` window** — so for the durable/team path you actually want, **Fix 2's entire rationale evaporates.** The resilient retry was hardening the *throwaway* quick-tunnel path while the real fix (named tunnel) was already implemented and unused. Effort was misallocated.
+[`docs/plans/2026-05-30-quick-tunnel-named-tunnel.md`](../plans/2026-05-30-quick-tunnel-named-tunnel.md) describes an opt-in **stable, pre-resolved, always-up hostname** (`tunnel_token` + `tunnel_hostname` → `cloudflared tunnel run --token`). A code path for it **is committed** — in [`cc07da17`](https://github.com/wbniv/WorldFoundry/commit/cc07da17) (the plan's own header cites `03dc866c`, which **does not exist in the repo** — a provenance bug to fix in the plan). **Caveat:** this code has **never been live-verified or even run** — it needs a real Cloudflare account, "cannot be CI'd," and the only mentions anywhere are this session's conversation. So it is *unproven*, not a turnkey alternative.
+
+Directionally, a named tunnel has **no warm-up `530` window**, so it removes Fix 2's stated rationale *for the durable path*. But because the named-tunnel code is unverified, it can't yet be relied on as "the real fix" — it may have its own bugs. The honest statement is: **the resilient retry was hardening the throwaway quick-tunnel path while the better path (named tunnel) sat committed-but-unverified.** Both want attention; neither is proven working end-to-end.
 
 ## Recommended changes
 
