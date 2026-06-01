@@ -1,5 +1,7 @@
 | Date | Change |
 |------|--------|
+| [2026-05-26](https://github.com/wbniv/WorldFoundry/commit/d7446ee5) | feat(wf-blender): wire Blender→engine live push (live editor bridge Phase 2) |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/85c6c2ce) | docs(bridge): correct stale Phase 4 + wfmut smoke-count status |
 | [2026-05-05](https://github.com/wbniv/WorldFoundry/commit/74008c54) | chore: accumulated session work — docs, qbert scripts, engine tweaks |
 | [2026-04-29](https://github.com/wbniv/WorldFoundry/commit/5ffe17cb) | debug bridge Phase 4a: perf overlay + --debug-bind flag |
 | [2026-04-29](https://github.com/wbniv/WorldFoundry/commit/c5719bcf) | debug bridge Phase 2b: OAD property writes via in-place CommonBlock patch |

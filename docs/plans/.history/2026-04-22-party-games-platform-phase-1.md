@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/84418c7c) | docs(plans): Waves B–E of status sweep — stamp/accurate-ize the rest |
 | [2026-04-23](https://github.com/wbniv/WorldFoundry/commit/8c82e591) | party-games: Phase 5 — Worst Take Wins + shell plugin seam + session grace |
 | [2026-04-23](https://github.com/wbniv/WorldFoundry/commit/3b7e4e3b) | party-games: Phase 3 — room codes (multi-room support) |
 | [2026-04-23](https://github.com/wbniv/WorldFoundry/commit/c6f1533d) | party-games: reaction-game parity on LAST_STANDING + receiver log line |

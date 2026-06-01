@@ -1,5 +1,8 @@
 | Date | Change |
 |------|--------|
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/84418c7c) | docs(plans): Waves B–E of status sweep — stamp/accurate-ize the rest |
+| [2026-05-22](https://github.com/wbniv/WorldFoundry/commit/69a7ac6b) | docs(blender-roundtrip): close step 6; park Phase 2c path/channel in TODO |
+| [2026-05-22](https://github.com/wbniv/WorldFoundry/commit/6989a0ee) | docs(blender-roundtrip): step-6 close-out — render + play verified, Phase 2c open |
 | [2026-05-05](https://github.com/wbniv/WorldFoundry/commit/74008c54) | chore: accumulated session work — docs, qbert scripts, engine tweaks |
 | [2026-04-19](https://github.com/wbniv/WorldFoundry/commit/dd0f3e24) | docs(blender-roundtrip): move back to In Progress — gameplay reached but statplat assertion open |
 | [2026-04-16](https://github.com/wbniv/WorldFoundry/commit/29a1ec91) | fix(wf_blender): WF is Z-up — remove incorrect Y↔Z coordinate swap |

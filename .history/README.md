@@ -1,5 +1,107 @@
 | Date | Change |
 |------|--------|
+| [2026-05-31](https://github.com/wbniv/WorldFoundry/commit/7506ec76) | test(wf-edit): three-editor shared-cursors smoke + screenshots |
+| [2026-05-31](https://github.com/wbniv/WorldFoundry/commit/0c7210d8) | fix(tests): screenshot_two_peer_b2.sh — un-comment the redirect+& so editors run in parallel |
+| [2026-05-31](https://github.com/wbniv/WorldFoundry/commit/b857330f) | fix(wf-edit): scope beginRemote txn so ReadActorNames doesn't nest into yrs-NULL panic |
+| [2026-05-31](https://github.com/wbniv/WorldFoundry/commit/64104466) | feat(wf-edit): shared cursors — Jump-to-view + display-name input (B leftovers) |
+| [2026-05-31](https://github.com/wbniv/WorldFoundry/commit/d4edfdc9) | feat(wf-edit): shared cursors b2 — viewport rings + camera frustums |
+| [2026-05-31](https://github.com/wbniv/WorldFoundry/commit/3ba12fcd) | docs(wf-status): tighten today's entry to one sentence |
+| [2026-05-31](https://github.com/wbniv/WorldFoundry/commit/3a436ba3) | docs: thread the fog discovery through all related plans + wf-status |
+| [2026-05-30](https://github.com/wbniv/WorldFoundry/commit/cc687718) | fix(mailbox): allocate GLOBAL_USER_MAX inclusively (+ 1) so the named max is writable |
+| [2026-05-30](https://github.com/wbniv/WorldFoundry/commit/9f6db44d) | feat(pilot): Phase 3 — C++ BridgeHost + pilot_bridge_runner |
+| [2026-05-30](https://github.com/wbniv/WorldFoundry/commit/da77c537) | docs(wf-edit): mark Phase 3 (named tunnel) DONE |
+| [2026-05-30](https://github.com/wbniv/WorldFoundry/commit/e07acd17) | docs(wf-edit): two-computer recipe + Phase 2b/verification status |
+| [2026-05-27](https://github.com/wbniv/WorldFoundry/commit/7831d477) | docs(wf-edit): quick-tunnel calling — manual howto, plan, + wf-status |
+| [2026-05-27](https://github.com/wbniv/WorldFoundry/commit/a14bf1cd) | docs(wf-edit): mark WebRTC Phase 4 (quick-tunnel reachability) DONE |
+| [2026-05-27](https://github.com/wbniv/WorldFoundry/commit/e6605217) | feat(smb): Piranha Plant — rises from a pipe, bites, retracts, dies to fireball |
+| [2026-05-27](https://github.com/wbniv/WorldFoundry/commit/03d9b390) | feat(smb): Koopa shell-kick — stomp retracts, kick slides, shell defeats enemies |
+| [2026-05-27](https://github.com/wbniv/WorldFoundry/commit/24791808) | docs(wf-edit): TURN Phase 3 force-relay leg verified against real coturn |
+| [2026-05-27](https://github.com/wbniv/WorldFoundry/commit/f1c09d44) | feat(smb): Fire Mario fireball defeats enemies (Phase 2) |
+| [2026-05-27](https://github.com/wbniv/WorldFoundry/commit/d363495b) | feat(wf-edit): WebRTC Phase 3 — generic TURN relay client |
+| [2026-05-26](https://github.com/wbniv/WorldFoundry/commit/f9aea002) | feat(smb): Fire Mario fireball — runtime-positioned spawn, zero engine logic |
+| [2026-05-26](https://github.com/wbniv/WorldFoundry/commit/92b325a2) | feat(macos): .app bundle + NSBundle asset accessor |
+| [2026-05-26](https://github.com/wbniv/WorldFoundry/commit/7108930f) | docs(smb): pooled-generator spawn (Approach A) + Fire Mario fireball plan |
+| [2026-05-26](https://github.com/wbniv/WorldFoundry/commit/d87b940c) | feat(smb): state-aware power-up block + Starman wall-reversal |
+| [2026-05-26](https://github.com/wbniv/WorldFoundry/commit/e60d42f1) | docs(wf-edit): mark internet voice/video WebRTC plan done; update wf-status |
+| [2026-05-26](https://github.com/wbniv/WorldFoundry/commit/5db4da39) | feat(smb): Fire Flower (Fire state) + bouncing Star (invincibility) |
+| [2026-05-26](https://github.com/wbniv/WorldFoundry/commit/64a4b722) | docs(investigation): macOS port runtime + engine delta estimate |
+| [2026-05-26](https://github.com/wbniv/WorldFoundry/commit/d85c5028) | feat(wf-edit): render Notes leaf as Markdown (dormant — blocked on OAD) |
+| [2026-05-26](https://github.com/wbniv/WorldFoundry/commit/360e65d9) | docs(wf-status): log wf-edit File→Open + Save-As labeling (#2/#1) |
+| [2026-05-26](https://github.com/wbniv/WorldFoundry/commit/945dae8c) | feat(smb): enemies dormant until they scroll on-screen (faithful) |
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/e4dab26a) | feat(smb): collectible coins in the pipe-warp coin room |
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/af6ea3a2) | feat(smb): pipe-warp exit + full round-trip; fix camera room-gap freeze |
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/1cf25c54) | feat(wf-edit): viewport tracks the picked/loaded binary level |
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/175514a0) | feat(wf-edit): startup cd.iff level picker |
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/cd182677) | docs(wf-edit): cd.iff re-pack is not a goal — save out as a new file |
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/0c6f30e8) | feat(wf-edit): load compiled binary levels (.iff, bare or from cd.iff) |
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/6efa6563) | docs(status): condense History to one-sentence convention + add SMB pit/timer |
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/651e7fd2) | feat(wf-edit): collab-hardening — leaf-granular, drag-aware engine propagation |
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/d3c923a1) | docs: reconcile TODO/wf-status/manual with the plan-status sweep |
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/f19373d7) | fix(smb): coin slides right on landing — Running Deceleration=0 |
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/16258a46) | test(wf-edit): verify deep-observer path; fix matched-guard dropping transforms |
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/efc8b41b) | test(gold): verify OAD Gold Value=3 awarded on pickup; flag stale exporter OAD dir |
+| [2026-05-25](https://github.com/wbniv/WorldFoundry/commit/ccf5f549) | fix(gold): award OAD Gold Value on active pickup path; mark coin-fixes plan done |
+| [2026-05-23](https://github.com/wbniv/WorldFoundry/commit/adab041b) | docs: remove stale -flto=thin limitation notes |
+| [2026-05-22](https://github.com/wbniv/WorldFoundry/commit/f6ee0978) | docs(gold): plan doc + level-design gotchas + wf-status for TTL/spin |
+| [2026-05-22](https://github.com/wbniv/WorldFoundry/commit/69a7ac6b) | docs(blender-roundtrip): close step 6; park Phase 2c path/channel in TODO |
+| [2026-05-22](https://github.com/wbniv/WorldFoundry/commit/6989a0ee) | docs(blender-roundtrip): step-6 close-out — render + play verified, Phase 2c open |
+| [2026-05-22](https://github.com/wbniv/WorldFoundry/commit/90bf0a3f) | feat(wf-edit): native Ctrl+Z/Ctrl+Y undo via Yrs UndoManager (Phase B) |
+| [2026-05-22](https://github.com/wbniv/WorldFoundry/commit/b7e01833) | feat(crdt): upgrade Yrs 0.9.3 → 0.26.0 (Phase A of native undo) |
+| [2026-05-22](https://github.com/wbniv/WorldFoundry/commit/0f7ab718) | docs(blender-roundtrip): mark camshot-enum plan done; status + level-building CamShot note |
+| [2026-05-22](https://github.com/wbniv/WorldFoundry/commit/bb1bd298) | docs(investigation): Blender-snowgoons untextured — ultrathink brief + A/B evidence |
+| [2026-05-22](https://github.com/wbniv/WorldFoundry/commit/c3b9b8b3) | docs(gizmo): mark plan done — interactive drag verified + path tangle fixed |
+| [2026-05-22](https://github.com/wbniv/WorldFoundry/commit/558773f8) | feat(editor): wire translate+rotate gizmo into the viewport (gizmo P3) |
+| [2026-05-22](https://github.com/wbniv/WorldFoundry/commit/69e5b959) | feat(editor): vendor ImGuizmo + gizmo matrix/write-back TU (gizmo P0+P1) |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/2af911b3) | feat(smb): wire GOLD count to HUD score display (mb 70) |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/0fe8aaa6) | docs(co-edit): mark plan done; update wf-status with co-editing summary |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/2314b0a6) | docs: sync wf-status + dev-setup with editor work; close kpropmap M3 |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/3221e6fd) | test(smb): verify Gold coin spawn end-to-end; close TTL despawn plan |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/93836143) | docs(smb): Gold TTL plan done + wf-status sync |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/c259a717) | docs(status): 2026-05-21 — JoltContactDispatch self-index fix close-out |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/dc96038f) | docs(status): 2026-05-21 — lossless Doc schema + outliner add/delete |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/a8cb9603) | docs(editor): Outliner add/delete M3 — close-out + live-sync follow-ups |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/f38144a7) | feat(editor): Outliner add/delete actor (M1+M2) — first structural editing |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/987574f3) | docs(editor): lossless Doc schema M3 — close-out; M2 deferred (proven by construction) |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/498c649b) | feat(editor): lossless Doc schema M1 — unified items array; pure Doc->JSON save |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/a65e0739) | docs(editor): save round-trip M5 — close-out + lossless-Doc-schema follow-up |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/945a3d4c) | feat(editor): save round-trip M4 — Save + Compile (.lev -> .iff) |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/14905af4) | feat(editor): save round-trip M3 — File→Save UI + toast (Ctrl+S / headless) |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/2a784623) | feat(editor): save round-trip M2 — lockstep patch applies Doc edits onto the JSON |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/76b987b2) | feat(editor): save round-trip M1 — retain parse JSON + canonical-print identity gate |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/a78313e1) | docs(editor): CRDT->engine bridge (Option C) M4 — close-out + follow-ups |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/f8bf4196) | feat(editor): CRDT->engine bridge (Option C) M3 — panel edit moves the actor on screen |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/f5eb1b98) | feat(editor): CRDT->engine bridge (Option C) M2 — Doc field -> wfmut translation |
+| [2026-05-21](https://github.com/wbniv/WorldFoundry/commit/deed9b33) | feat(editor): CRDT->engine bridge (Option C) M1 — Doc<->engine actor identity map |
+| [2026-05-20](https://github.com/wbniv/WorldFoundry/commit/c0cb871d) | feat(editor): property panel Phase 3 — editable widgets -> Doc |
+| [2026-05-20](https://github.com/wbniv/WorldFoundry/commit/90af391e) | feat(editor): property panel Phase 2 — OAD-driven widgets (read-only) |
+| [2026-05-20](https://github.com/wbniv/WorldFoundry/commit/e0dd6732) | docs(editor): mark wf-edit shell plan complete (M1–M6); sync wf-status |
+| [2026-05-20](https://github.com/wbniv/WorldFoundry/commit/08e25907) | feat(editor): read-only Y.Doc -> Outliner (wf-edit M4) |
+| [2026-05-20](https://github.com/wbniv/WorldFoundry/commit/6a7c65fa) | docs(oas): plan + status for .ht codegen repair |
+| [2026-05-20](https://github.com/wbniv/WorldFoundry/commit/691895d9) | docs(editor): mark .lev↔Y.Doc translator done; sync status + design doc |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/d30b8e4d) | docs(plan): correct engine-mutation-api status — SpawnActor path is open |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/aa04182f) | docs(rtti): close out Eliminate-RTTI plan — verified done + BUGS.md (step 7) |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/85c6c2ce) | docs(bridge): correct stale Phase 4 + wfmut smoke-count status |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/3637eacc) | docs(rtti): sync plan + wf-status — steps 1-6 done, commit + BUGS.md left |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/8de17c40) | docs(rtti): log JoltContactDispatch self-index bug + sync status (step 5 done) |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/aadbdf8b) | docs(mutation): step 7 — sync wfmut landing across plan + status + design |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/298f4e2a) | docs(rtti): refresh elimination plan and move out of deferred/ |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/db9bf7aa) | feat(mutation): wfmut:: skeleton + build wiring (step 1) |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/55c89f2c) | docs(crdt): sync wfcrdt C++ wrapper landing across docs (step 6) |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/dc4e9d50) | docs(plan): wfcrdt C++ RAII wrapper plan |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/79f843ae) | docs(crdt): sync Yrs binding landing across docs (step 8) |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/9ff853e6) | docs(wf-status): sync Live Editor Bridge row with implemented phases |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/292af662) | memory: WF_POINTER_ALIGN — compile-time pointer-sized allocator alignment |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/f10cec54) | memory: HAL pool allocators round to 8 bytes — fix UB / SIGBUS-prone misalignment |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/40a7e4c7) | docs: wf-status — BaseObjectIterator fix + ASan sweep clean |
+| [2026-05-19](https://github.com/wbniv/WorldFoundry/commit/29d36132) | gfx: fix RenderObject3D::Render past-end read + remove broken sentinel assert |
+| [2026-05-18](https://github.com/wbniv/WorldFoundry/commit/6a13cd6b) | docs: Phase 0b #3 — mark host-GL e2e plan Done; sync TODO + wf-status |
+| [2026-05-18](https://github.com/wbniv/WorldFoundry/commit/2a334304) | docs(editor): plan v1 Yrs C ABI binding (split-shape, editor owns Y.Doc) |
+| [2026-05-18](https://github.com/wbniv/WorldFoundry/commit/287c631e) | docs(editor): Phase 0b #1 step 8 — mark frame-step API plan done; status sync |
+| [2026-05-18](https://github.com/wbniv/WorldFoundry/commit/6981ffc1) | docs(editor): Phase 0b plan docs — frame-step API + external GL context |
+| [2026-05-18](https://github.com/wbniv/WorldFoundry/commit/8a4f8226) | feat(smb): ?-block coin pop-out animation on bump |
+| [2026-05-18](https://github.com/wbniv/WorldFoundry/commit/f4071a34) | feat(engine): per-actor collision mailboxes — Actor::Collision writes,                 Actor::StartFrame clears; SMB W1-1 wires up the visibility-flip half |
+| [2026-05-17](https://github.com/wbniv/WorldFoundry/commit/0cb3abd1) | docs(plans): park SMB ?-block bump mechanic until W1-1 ships |
+| [2026-05-17](https://github.com/wbniv/WorldFoundry/commit/9a41e91b) | fix(movement) + feat(smb): MarbleHandler jump path + Mario speed/jump tuning |
 | [2026-05-17](https://github.com/wbniv/WorldFoundry/commit/39fb8f34) | docs: update wf-status.md through 2026-05-17 |
 | [2026-05-16](https://github.com/wbniv/WorldFoundry/commit/9c6ed1c6) | docs(qbert): update wf-status for SFX pass |
 | [2026-05-16](https://github.com/wbniv/WorldFoundry/commit/3f98ed6b) | refactor(test): rename test_16rounds.py → test_director_mailbox.py |
