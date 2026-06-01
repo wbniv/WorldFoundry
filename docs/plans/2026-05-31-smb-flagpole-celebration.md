@@ -1,7 +1,20 @@
 # Plan: SMB W1-1 flagpole celebration (flag-raise + timer→score, 2D→3D)
 
 **Date:** 2026-05-31
-**Status:** Not started
+**Status:** Done + verified (2026-05-31). Both phases landed. Reaching the flag fires
+`SMB_CELEBRATE` (not `END_OF_LEVEL`); the Director sequences a ~3.5 s show (pole flag slides
+down, a new castle's rooftop flag raises, the timer drains into score) then fires `END_OF_LEVEL`
+→ the existing `LEVEL_TO_RUN` advance. Headless proof (step-teleport Mario to the pole,
+`vblank_mode=0`): no crash, flag slides to base, castle flag raises, SCORE credited (~18.7k),
+timer drains. Screenshots `tests/screenshots/smb_celebration_{1_before,2_during,3_flagtouch,4_flag_castle}.png`.
+
+**As built / review fixes:** the flagpole is a real round 3D cylinder (16-sided, 0.54 m — was a
+thin sliver); both flags are thin **vertical** slabs (a flat plane is edge-on to the side camera);
+`SMB_CELEBRATE_START` is seeded in the **Player** (runs before the flag enemies) so they animate
+from the start instead of snapping to the end (the Director seeds it too, but runs last).
+**Open polish:** the castle flag sits a bit high/detached from its rooftop pole. **Verification
+limit:** the step-teleport sinks Mario to the advance ActBox's Z-edge, so the headless capture
+reloads W1-1 rather than advancing to W1-2 — walked play advances (proven by the transition test).
 
 ## Context
 
@@ -101,6 +114,16 @@ the full beat into the transition.
 | `engine/wf_game` | rebuilt (mailbox.inc changed) |
 | `wflevels/smb_w1_1.iff`/`-standalone.iff`, `wfsource/source/game/cd.iff` | rebuilt artifacts |
 | `tests/verify_smb_scoring.py` | update EOL trigger mailbox 1905→1862 if it pokes it directly |
+
+## Proof
+
+*Flag just touched — pole flag at top, before the show:*
+
+![flag touch](../../tests/screenshots/smb_celebration_3_flagtouch.png)
+
+*Celebration — pole flag slid to the base, castle flag raised (green, top), score credited, timer draining; flagpole is a round 3D cylinder:*
+
+![celebration](../../tests/screenshots/smb_celebration_4_flag_castle.png)
 
 ## Follow-ups (after this pass)
 
