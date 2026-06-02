@@ -59,7 +59,7 @@ STAR_FLASH_B       = 0xFFFFFF   # Star-invincibility flicker white
 MARIO_SPAWN_X = 3  * T
 QBLOCK_XS     = [21*T, 107*T]            # coin ? blocks at faithful cols 21, 107
 KOOPA_X       = 113 * T                  # col 113 (was 32*T)
-FLAGPOLE_X    = 24 * T                   # 36 m — bare W1-2 proof: short underground corridor
+FLAGPOLE_X    = 248 * T                  # 372 m — faithful W1-2 (256-tile underground, flagpole col 248)
 
 # 16 Goombas at reference positions (docs/smb-level-layouts.md §1-1)
 GOOMBA_XS = [

@@ -147,7 +147,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_MAX_CAM_X read-mailbox not if 4.5 INDEXOF_SMB_MAX_CAM_X write-mailbox then\nINDEXOF_SMB_PLAYER_X read-mailbox 1.5 +\ndup INDEXOF_SMB_MAX_CAM_X read-mailbox -\n1.5 <\nif drop INDEXOF_SMB_MAX_CAM_X read-mailbox\nelse 1.5 - dup 9.0 < if drop 9.0 then dup 24.0 > if drop 24.0 then dup INDEXOF_SMB_MAX_CAM_X write-mailbox\nthen\nINDEXOF_SMB_TARGET_CAM_X write-mailbox\nINDEXOF_SMB_TIMER_START read-mailbox not if INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox then\n400 INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START read-mailbox - 2.66667 * -\ndup 0 <= if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox drop 0 then\nINDEXOF_HUD_TIMER write-mailbox\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_MAX_CAM_X read-mailbox not if 4.5 INDEXOF_SMB_MAX_CAM_X write-mailbox then\nINDEXOF_SMB_PLAYER_X read-mailbox 1.5 +\ndup INDEXOF_SMB_MAX_CAM_X read-mailbox -\n1.5 <\nif drop INDEXOF_SMB_MAX_CAM_X read-mailbox\nelse 1.5 - dup 9.0 < if drop 9.0 then dup 360.0 > if drop 360.0 then dup INDEXOF_SMB_MAX_CAM_X write-mailbox\nthen\nINDEXOF_SMB_TARGET_CAM_X write-mailbox\nINDEXOF_SMB_TIMER_START read-mailbox not if INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox then\n400 INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START read-mailbox - 2.66667 * -\ndup 0 <= if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox drop 0 then\nINDEXOF_HUD_TIMER write-mailbox\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
@@ -430,7 +430,7 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "matte_11" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 20.2500000000000000(1.15.16) -32.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 188.2500000000000000(1.15.16) -32.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -735,11 +735,11 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "room_surface" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 20.2500000000000000(1.15.16) 0.0000000000000000(1.15.16) 5.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 188.2500000000000000(1.15.16) 0.0000000000000000(1.15.16) 5.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' -3.1415073871612549(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -28.2500000000000000(1.15.16) -35.0000000000000000(1.15.16) -15.0000000000000000(1.15.16) 28.2500000000000000(1.15.16) 10.0000000000000000(1.15.16) 20.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -196.2500000000000000(1.15.16) -35.0000000000000000(1.15.16) -15.0000000000000000(1.15.16) 196.2500000000000000(1.15.16) 10.0000000000000000(1.15.16) 20.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "room" } }
 		{ 'FX32' { 'NAME' "hp" } { 'DATA' 32767.0000000000000000(1.15.16) } { 'STR' "32767.0" } }
@@ -758,7 +758,7 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "Light01" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 20.2500000000000000(1.15.16) -22.0000000000000000(1.15.16) 13.5000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 188.2500000000000000(1.15.16) -22.0000000000000000(1.15.16) 13.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 1.0471975803375244(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -968,7 +968,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -3.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 43.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -3.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 379.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "ground_0.iff" } }
@@ -986,7 +986,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -3.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) 7.5000000000000000(1.15.16) 43.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 9.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -3.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) 7.5000000000000000(1.15.16) 379.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 9.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "ceiling.iff" } }
@@ -1000,7 +1000,7 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "flagpole_pole" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 36.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 7.5000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 372.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 7.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -1014,7 +1014,7 @@
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000936596621(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000033717478345(1.15.16) } { 'STR' "0.000003" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000348413942902(1.15.16) } { 'STR' "0.000035" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "flagpole_flag" }
@@ -1022,7 +1022,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 33.7500000000000000(1.15.16) -0.0049999998882413(1.15.16) 13.5000000000000000(1.15.16) 35.2500000000000000(1.15.16) 0.0049999998882413(1.15.16) 13.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 369.7500000000000000(1.15.16) -0.0049999998882413(1.15.16) 13.5000000000000000(1.15.16) 371.2500000000000000(1.15.16) 0.0049999998882413(1.15.16) 13.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "flagpole_flag.iff" } }
@@ -1040,7 +1040,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 34.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -0.7500000000000000(1.15.16) 37.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 370.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -0.7500000000000000(1.15.16) 373.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "flagpole_trigger.iff" } }
@@ -1060,7 +1060,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 34.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -0.7500000000000000(1.15.16) 37.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 370.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -0.7500000000000000(1.15.16) 373.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "flagpole_advance.iff" } }
@@ -1089,7 +1089,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -9.0000000000000000(1.15.16) -3.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) 49.5000000000000000(1.15.16) 3.5000000000000000(1.15.16) 13.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -9.0000000000000000(1.15.16) -3.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) 385.5000000000000000(1.15.16) 3.5000000000000000(1.15.16) 13.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actboxor" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "abor_surface.iff" } }
