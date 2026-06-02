@@ -246,9 +246,13 @@ WebrtcSession::GetOrCreate(const std::string& peer_id, bool is_offerer)
     // Audio track — Opus PT=111. SendRecv (not the libdatachannel default
     // SendOnly): a SendOnly track refuses incoming RTP, so onMessage never
     // fires on the receiving peer and no media flows.
+    // addSSRC advertises the SSRC we actually send with (audio_ssrc_) in the
+    // SDP — without it, the receiver can't demux our hand-rolled RTP (unknown
+    // SSRC) to this track and silently drops every packet.
     {
         rtc::Description::Audio audio("audio", rtc::Description::Direction::SendRecv);
         audio.addOpusCodec(111);
+        audio.addSSRC(audio_ssrc_, "wf-audio");
         state->audio_track = state->pc->addTrack(audio);
     }
     if (state->audio_track) {
@@ -266,9 +270,11 @@ WebrtcSession::GetOrCreate(const std::string& peer_id, bool is_offerer)
 
     // Video track — VP8 PT=96. SendRecv (see audio note above) so the
     // receiving peer's track actually delivers incoming RTP to onMessage.
+    // addSSRC: advertise video_ssrc_ in the SDP so the peer can demux it.
     {
         rtc::Description::Video video("video", rtc::Description::Direction::SendRecv);
         video.addVP8Codec(96);
+        video.addSSRC(video_ssrc_, "wf-video");
         state->video_track = state->pc->addTrack(video);
     }
     if (state->video_track) {
