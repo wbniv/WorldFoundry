@@ -226,7 +226,15 @@ WebrtcSession::GetOrCreate(const std::string& peer_id, bool is_offerer)
         QueueSignal(to, j.dump());
     });
 
-    state->pc->onStateChange([weak](rtc::PeerConnection::State s) {
+    state->pc->onStateChange([weak, peer_id](rtc::PeerConnection::State s) {
+        const char* sname = s == rtc::PeerConnection::State::Connected    ? "Connected"
+                          : s == rtc::PeerConnection::State::Connecting   ? "Connecting"
+                          : s == rtc::PeerConnection::State::Disconnected ? "Disconnected"
+                          : s == rtc::PeerConnection::State::Failed       ? "Failed"
+                          : s == rtc::PeerConnection::State::Closed       ? "Closed"
+                          : "New";
+        std::fprintf(stderr, "webrtc: state %s for peer %.8s\n", sname, peer_id.c_str());
+        std::fflush(stderr);
         if (s == rtc::PeerConnection::State::Connected) {
             if (auto sp = weak.lock()) sp->connected.store(true);
         } else if (s == rtc::PeerConnection::State::Failed ||
