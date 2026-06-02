@@ -24,55 +24,57 @@ everywhere** ([[feedback_share_mesh_datablocks]]).
 
 ## Gallery of unique SMB models
 
-Material colours shown as `RGB → #hex`. "Geometry" is the primitive recipe in the Blender builders.
-"Now" = how many distinct `.iff`s currently exist (per-instance × per-level); "Target" = 1 shared.
+*Each model rendered individually (exact geometry + real materials/textures), one per row.
+Reproduce: `blender --background --python wftools/wf_blender/smb_model_gallery.py` → `docs/plans/screenshots/model_<slug>.png`.
+"Copies" = distinct `.iff`s currently (per-instance × per-level); target is **1** shared each.*
 
 ### Characters
-| Model | Geometry | Material(s) | Now → Target |
+| Render | Model | Material(s) | Copies → 1 |
 |---|---|---|---|
-| **Mario** (player) | cube torso/head + cylinder limbs | red `0.87,0.14,0.07 → #DE2412`, blue `0.18,0.34,0.76 → #2E57C2`, skin `0.96,0.73,0.41 → #F5BA69` | 2 → **1** |
-| **Goomba** | flattened UV-sphere body + tan band + 2 feet | brown `0.55,0.27,0.06 → #8C450F`, tan `0.83,0.65,0.34 → #D4A657` | ~29 → **1** |
-| **Green Koopa** | flattened shell sphere + skin head sphere | green `0.14,0.56,0.20 → #248F33`, skin `0.90,0.76,0.34 → #E6C257` | ~4 → **1** |
-| **Red Koopa** | same mesh, red shell | red `0.78,0.12,0.10 → #C71F1A` + skin | ~1 → **1** (shares geometry w/ green; material variant) |
-| **Piranha Plant** | stem + head spheres/cyls | stem `0.20,0.70,0.24 → #33B33D`, head `0.85,0.16,0.12 → #D9291F` | ~4 → **1** |
+| ![](screenshots/model_mario.png) | **Mario** | red `#DE2412`, blue `#2E57C2`, skin `#F5BA69` | 2 |
+| ![](screenshots/model_goomba.png) | **Goomba** | brown `#8C450F`, tan `#D4A657` | ~29 |
+| ![](screenshots/model_koopa_green.png) | **Green Koopa** | green `#248F33`, skin `#E6C257` | ~4 |
+| ![](screenshots/model_koopa_red.png) | **Red Koopa** | red `#C71F1A` + skin (shares green's geometry) | ~1 |
+| ![](screenshots/model_piranha.png) | **Piranha Plant** | stem `#33B33D`, head `#D9291F` | ~4 |
 
 ### Pickups
-| Model | Geometry | Material(s) | Now → Target |
+| Render | Model | Material(s) | Copies → 1 |
 |---|---|---|---|
-| **Coin** | thin disc/cube | gold `1.0,0.84,0.0 → #FFD600` | ~40 → **1** |
-| **Super Mushroom / Fire Flower** | shared state-aware template cube | base red `0.85,0.16,0.12 → #D9291F` (recolours to fire-white at runtime via FACE_COLOR) | ~2 → **1** |
-| **Starman** | small cube/star | yellow `0.98,0.85,0.10 → #FAD91A` | ~2 → **1** |
-| **1-Up Mushroom** | mushroom template | green `0.05,0.75,0.05 → #0DBF0D` | ~2 → **1** |
+| ![](screenshots/model_coin.png) | **Coin** | gold `#FFD600` | ~40 |
+| ![](screenshots/model_mushroom.png) | **Super Mushroom** | red `#D9291F` (shared template) | ~2 |
+| ![](screenshots/model_fireflower.png) | **Fire Flower** | white `#FAF2F2` (same template, Fire state) | — |
+| ![](screenshots/model_starman.png) | **Starman** | yellow `#FAD91A` | ~2 |
+| ![](screenshots/model_oneup.png) | **1-Up Mushroom** | green `#0DBF0D` | ~2 |
 
 ### Effects / projectiles
-| Model | Geometry | Material(s) | Now → Target |
+| Render | Model | Material(s) | Copies → 1 |
 |---|---|---|---|
-| **Fireball** | small cube | orange `0.98,0.45,0.05 → #FA730D` | ~2 → **1** |
-| **Spark** (firework) | small bright cube | warm `1.0,0.95,0.55 → #FFF28C` | ~2 → **1** |
-| **Score Popup** | small cube | yellow `1.0,0.95,0.2 → #FFF233` | ~2 → **1** |
-| **Brick Debris** | small cube | brown `0.77,0.42,0.0 → #C46B00` | ~2 → **1** |
+| ![](screenshots/model_fireball.png) | **Fireball** | orange `#FA730D` | ~2 |
+| ![](screenshots/model_spark.png) | **Spark** (firework) | warm `#FFF28C` | ~2 |
+| ![](screenshots/model_popup.png) | **Score Popup** | yellow `#FFF233` | ~2 |
+| ![](screenshots/model_debris.png) | **Brick Debris** | brown `#C46B00` | ~2 |
 
 ### Blocks / terrain (fixed-size → 1 mesh; sized → 1 unit cube + per-object scale)
-| Model | Geometry | Material / texture | Now → Target |
+| Render | Model | Material / texture | Copies → 1 |
 |---|---|---|---|
-| **? Block** | 1-tile cube | `qblock` TGA (yellow ? on orange) | ~5 → **1** |
-| **Brick** | 1-tile cube | `brick` TGA (orange running-bond) | ~15 → **1** |
-| **Hard Block** (staircase / pyramid steps) | **unit cube, per-object scale** | hard-block `0.48,0.25,0.05 → #7A400D` | ~28 → **1** |
-| **Ground segment** | **unit cube, per-object scale** | grid TGA top + side `0.56,0.38,0.15 → #8F6126` | ~6 → **1** |
-| **Pipe** | box (+ optional rim) | pipe-green `0.0,0.62,0.0 → #009E00` | ~7 → **1** (+ scale for height) |
-| **Underground Ceiling** | wide box | brick TGA / `0.55,0.30,0.14 → #8C4D24` | ~2 → **1** |
-| **Coin-Room Floor** | box | `0.45,0.22,0.05 → #73380D` | ~1 → **1** |
+| ![](screenshots/model_qblock.png) | **? Block** | `qblock` TGA (yellow ? on orange) | ~5 |
+| ![](screenshots/model_brick.png) | **Brick** | `brick` TGA (running-bond) | ~15 |
+| ![](screenshots/model_hardblock.png) | **Hard Block** (staircase/pyramid) | `#7A400D` (unit cube + scale) | ~28 |
+| ![](screenshots/model_ground.png) | **Ground segment** | grid TGA + side `#8F6126` | ~6 |
+| ![](screenshots/model_pipe.png) | **Pipe** | green `#009E00` (+ scale for height) | ~7 |
+| ![](screenshots/model_ceiling.png) | **Underground Ceiling** | brick TGA `#8C4D24` | ~2 |
+| ![](screenshots/model_crfloor.png) | **Coin-Room Floor** | `#73380D` | ~1 |
 
 ### Flagpole / castle
-| Model | Geometry | Material(s) | Now → Target |
+| Render | Model | Material(s) | Copies → 1 |
 |---|---|---|---|
-| **Flagpole Pole** | 16-sided cylinder | grey `0.72,0.72,0.72 → #B8B8B8` | ~2 → **1** |
-| **Pole Flag** | vertical slab | green `0.10,0.65,0.16 → #1AA629` | ~2 → **1** |
-| **Castle** | stone block | `0.60,0.55,0.50 → #998C80` | ~1 → **1** |
-| **Castle Door** | dark face | `0.05,0.04,0.06 → #0D0A0F` | ~1 → **1** |
-| **Warp-Zone Sign** | small board | yellow `0.95,0.92,0.20 → #F2EB33` | ~1 → **1** |
+| ![](screenshots/model_pole.png) | **Flagpole Pole** | grey `#B8B8B8` | ~2 |
+| ![](screenshots/model_poleflag.png) | **Pole Flag** | green `#1AA629` | ~2 |
+| ![](screenshots/model_castle.png) | **Castle** | `#998C80` | ~1 |
+| ![](screenshots/model_castledoor.png) | **Castle Door** | `#0D0A0F` | ~1 |
+| ![](screenshots/model_warpsign.png) | **Warp-Zone Sign** | yellow `#F2EB33` | ~1 |
 
-≈ **26 unique model types** vs **108 unique meshes** currently in W1-2 alone.
+≈ **26 unique models** vs **108 unique meshes** currently in W1-2 alone.
 
 ## Architecture (corrected, per user 2026-06-01)
 - **Rooms are the asset-streaming unit.** Each SMB level has **2 rooms**: `RM0` (the whole surface
