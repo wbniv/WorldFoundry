@@ -361,6 +361,10 @@ voice/video go peer-to-peer (DTLS-SRTP) or via a configured TURN (see below).
 > with `WF_COLLAB_VOICE_DEBUG=1` for per-second `voice-dbg: send/recv` Opus stats
 > on stderr. Full step-by-step (incl. forcing the TURN path from a VPN) in the
 > [two-machine voice/video run sheet](wf-edit-two-machine-voice-test.md).
+>
+> **Verifying the *editing* path end-to-end** (connect over a named tunnel, live
+> edit sync, mid-session reconnect, fail-fast/closeable connect): the
+> [two-machine internet run sheet](wf-edit-two-machine-internet-test.md).
 
 #### Named tunnel — durable, rate-limit-free, stable hostname
 
