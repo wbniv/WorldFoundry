@@ -286,8 +286,9 @@ bool WsClient::connect(const char* url) {
         setsockopt(_fd, SOL_SOCKET, SO_SNDTIMEO, &none, sizeof(none));
     }
 
-    // Switch to non-blocking (plain TCP only; TLS layer handles its own buffering).
-    if (!_tls) {
+    // Switch to non-blocking. tls_recv() already maps SSL_ERROR_WANT_READ →
+    // errno=EAGAIN, so OpenSSL handles non-blocking sockets correctly.
+    {
         int flags = fcntl(_fd, F_GETFL, 0);
         fcntl(_fd, F_SETFL, flags | O_NONBLOCK);
     }
