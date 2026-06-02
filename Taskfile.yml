@@ -67,9 +67,10 @@ tasks:
     cmds:
       - bash engine/build_game.sh
       - cmake -S . -B cmake-build-editor -DWF_ENABLE_EDITOR=ON -DCMAKE_BUILD_TYPE=Release
-      - cmake --build cmake-build-editor --target wfcrdt_smoke wfcrdt_wrapper_test -j
+      - cmake --build cmake-build-editor --target wfcrdt_smoke wfcrdt_wrapper_test connect_retry_test -j
       - ./cmake-build-editor/engine/crdt/wfcrdt_smoke
       - ./cmake-build-editor/engine/crdt/wfcrdt_wrapper_test
+      - ./cmake-build-editor/connect_retry_test
 
   build-pilot-runner:
     desc: "Build the C++ PILOT bridge runner (Phase 3 — replaces Python pilot_driver.py for engine-tier scenarios)"

@@ -1163,6 +1163,25 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
         datachannel-static
         pthread)
 
+    # Relay connect retry policy — pure, header-only (connect_retry.h), no GL /
+    # no sockets, so it's a fast standalone unit test. Fault-injects a scripted
+    # connector + fake clock to pin fail-fast (NXDOMAIN/4xx → 1 attempt), budget,
+    # backoff, and abort. The regression guard from the 2026-06-01 critique (⑦).
+    add_executable(connect_retry_test engine/wf_edit/connect_retry_test.cc)
+    target_include_directories(connect_retry_test PRIVATE ${CMAKE_SOURCE_DIR}/engine/wf_edit)
+    add_test(NAME wf_edit_connect_retry COMMAND connect_retry_test)
+
+    # Close-button regression (2026-06-01 critique ③): point the editor at a dead
+    # relay port so it enters the retry/connect modal, then WF_EDIT_ABORT_CONNECT_AFTER
+    # simulates a window-close a few frames in — the editor must bail and print
+    # "connect cancelled by user" promptly rather than spinning out the 15 s budget.
+    # GL + DISPLAY (opens the connect modal window).
+    add_test(NAME wf_edit_connect_abort
+        COMMAND sh -c "WF_EDIT_ABORT_CONNECT_AFTER=5 $<TARGET_FILE:wf_edit> --relay=ws://127.0.0.1:9 --room=abort-test --leveltree=${CMAKE_SOURCE_DIR}/wflevels/snowgoons-blender/snowgoons-blender.lev --frames 100000 2>&1 | tee /dev/stderr | grep -q 'connect cancelled by user'"
+        WORKING_DIRECTORY ${WF_TEST_RUN_DIR})
+    set_tests_properties(wf_edit_connect_abort
+        PROPERTIES LABELS "gl" ENVIRONMENT "DISPLAY=:0")
+
     # SpawnActor runtime-path confirmation: loads snowgoons, finds the first
     # valid template, spawns it, checks the result. Confirms the Jolt
     # position-sync fix (commit 0adf1d4) works end-to-end. Needs GL + DISPLAY.
