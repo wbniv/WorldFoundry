@@ -460,9 +460,16 @@ void WebrtcSession::SendVP8(const uint8_t* vp8, int vp8_len, bool /*keyframe*/)
 
         {
             std::lock_guard<std::mutex> lk(peers_mu_);
+            static int s_vp8_sent = 0; ++s_vp8_sent;
             for (auto& [pid, state] : peers_) {
-                if (state->video_track && state->connected.load()) {
-                    try { state->video_track->send(pkt); } catch (...) {}
+                bool conn = state->connected.load();
+                if (s_vp8_sent <= 3)
+                    std::fprintf(stderr, "webrtc: VP8→peer %.8s connected=%d track=%s\n",
+                                 pid.c_str(), conn, state->video_track ? "yes" : "NO");
+                if (state->video_track && conn) {
+                    try { state->video_track->send(pkt); } catch (const std::exception& e) {
+                        std::fprintf(stderr, "webrtc: VP8 send threw: %s\n", e.what());
+                    }
                 }
             }
         }
