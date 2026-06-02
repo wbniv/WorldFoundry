@@ -1276,7 +1276,7 @@
 		{ 'I32' 
 			{ 'NAME' "lightType" 
 			}
-			{ 'DATA' 0l  //Directional|Ambient
+			{ 'DATA' 1l  //Directional|Ambient
 					
 			}
 			{ 'STR' "Ambient" 

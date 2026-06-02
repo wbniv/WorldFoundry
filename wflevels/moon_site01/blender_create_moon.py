@@ -227,6 +227,21 @@ if light:
     light['wf_lightGreen'] = 1.0
     light['wf_lightBlue']  = 1.0
 
+    # Ambient — without it, WF's shader (backend_modern.cc:84) leaves any
+    # curved-geometry actor pure black on the camera-facing side because
+    # u_ambient defaults to Color::black at level.cc:1158. See
+    # docs/level-design-troubleshooting.md "Actor renders pure black despite
+    # light" and docs/plans/2026-06-01-ambient-light-default-and-warnings.md.
+    ambient = light.copy()
+    ambient.data = light.data.copy() if light.data else None
+    scene.collection.objects.link(ambient)
+    ambient.name = 'AmbientLight'
+    ambient.location = (0.0, 0.0, 50.0)
+    ambient['wf_lightType']  = 'Ambient'
+    ambient['wf_lightRed']   = 0.40
+    ambient['wf_lightGreen'] = 0.42
+    ambient['wf_lightBlue']  = 0.50
+
 # ── 6. Player (astronaut) ────────────────────────────────────────────────────
 # Built in-script from primitives like SMB Mario / Q*bert, not imported. ~14
 # primitives joined into one mesh, feet at z=0 via transform_apply. See
