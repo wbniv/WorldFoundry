@@ -1030,7 +1030,12 @@ static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
             // `--url http://localhost:<port>` is the ingress — a single catch-all
             // route to wf-relay — so the operator needs no ~/.cloudflared/config.yml
             // (`route dns` only sets the CNAME, not the ingress).
-            ::execlp(cf.c_str(), cf.c_str(), "tunnel", "run",
+            // `--config /dev/null` bypasses any ~/.cloudflared/config.yml that
+            // hardcodes a different tunnel (e.g. a party-games config.yml would
+            // silently override the tunnel_name argument and connect to the wrong
+            // tunnel, causing HTTP 530 on the named-tunnel hostname).
+            ::execlp(cf.c_str(), cf.c_str(), "--config", "/dev/null",
+                     "tunnel", "run",
                      "--url", url.c_str(), tunnel_name.c_str(), (char*)nullptr);
         } else if (named_token) {
             // Token model (legacy): cloudflared knows the tunnel ID + origin
