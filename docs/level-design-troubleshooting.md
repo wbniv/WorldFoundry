@@ -995,6 +995,44 @@ This matches the orientation used by the working `mm_practice` level. When diagn
 
 ---
 
+## Actor renders pure black despite light — no ambient light authored
+
+**Symptom:** A spherical (or other large-curvature) actor renders pure black on the side facing the camera, even though a directional Light actor is set up correctly and the terrain lights up fine. Especially obvious on the Moon level where the directional sun sits near the horizon (`SUN_ALT_DEG=2`); any sphere-like actor (an Earth globe, a planted flag base, a lunar lander dome) has at most a thin lit crescent and the rest disappears into the black sky.
+
+**Cause:** WF's vertex shader (`wfsource/source/gfx/glpipeline/backend_modern.cc:84`) computes lighting as `lit = u_ambient + Σ u_light_color[i] * max(0, dot(N, u_light_dir[i]))`. There is **no implicit ambient term**: the `u_ambient` value comes from `Camera::SetAmbientColor`, which `wfsource/source/game/level.cc:1158` defaults to `Color::black`. With a grazing-angle directional light, the dot-product term is near-zero across most of any curved actor → the whole `lit` collapses to zero → the actor renders pure black, regardless of its material colour or texture.
+
+**Fix:** Author an `Ambient`-type Light actor in addition to the Directional one. The Light actor's class supports `wf_lightType` enum values `Directional|Ambient`; the runtime path is `wfsource/source/game/light.hpi:57` (`AMBIENT_LIGHT` branch calls `camera.GetRenderCamera().SetAmbientColor(_color)`).
+
+Pattern (Blender/MCP — duplicate the existing directional light, retype it):
+
+```python
+# Existing directional light setup ...
+light['wf_lightType']  = 'Directional'
+light['wf_lightRed']   = 1.0
+light['wf_lightGreen'] = 1.0
+light['wf_lightBlue']  = 1.0
+
+# Second light: ambient — without it, anything not directly facing the sun
+# renders pure black.
+ambient = light.copy()
+ambient.data = light.data.copy() if light.data else None
+scene.collection.objects.link(ambient)
+ambient.name = 'AmbientLight'
+ambient.location = (0.0, 0.0, 50.0)         # any spot inside the room
+ambient['wf_lightType']  = 'Ambient'
+ambient['wf_lightRed']   = 0.4
+ambient['wf_lightGreen'] = 0.42
+ambient['wf_lightBlue']  = 0.5
+```
+
+**Tuning rule of thumb:** ~0.4 RGB ambient gives readable shaded faces without blowing out the dramatic terrain-shadow contrast that's a moon-scene's whole point. 1.0 over-exposes; below ~0.25 is too dim to help. A slight blue tint (B > R,G) reads as Earthshine on a lunar surface.
+
+**Don't confuse with:** the *directional* light's color RGB. That's the lit-side intensity, not the shadow fill. Both can coexist (and almost always should).
+
+Discovered while building the moon Earth/Sun pass — see [`docs/investigations/2026-06-01-moon-sky-earth-sun-stars.md`](investigations/2026-06-01-moon-sky-earth-sun-stars.md).
+
+---
+
 ## Black screen — Matte actor not configured
 
 **Symptom:** Level loads, geometry is present, but background is black and no background colour is visible.
