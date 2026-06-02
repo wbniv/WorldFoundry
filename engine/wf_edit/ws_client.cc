@@ -105,10 +105,6 @@ bool WsClient::connect(const char* url) {
     ParsedUrl pu = parseWsUrl(url);
     if (!pu.ok) { _last_error = ConnectError::Other; return false; }
 
-    std::fprintf(stderr, "ws: connect → %s:%s%s\n",
-                 pu.host.c_str(), pu.port.c_str(), pu.tls ? " (TLS)" : "");
-    std::fflush(stderr);
-
     // Resolve hostname. AF_UNSPEC so we accept IPv4 *or* IPv6 — a public relay /
     // Cloudflare quick-tunnel host can answer AAAA-only, and the old AF_INET
     // forced IPv4-only (connect failed on such hosts). Try each result until one
@@ -139,20 +135,15 @@ bool WsClient::connect(const char* url) {
         // Make non-blocking for the connect() call only.
         const int flags = ::fcntl(fd, F_GETFL, 0);
         ::fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-        std::fprintf(stderr, "ws: trying fam=%d to %s:%s\n",
-                     rp->ai_family, pu.host.c_str(), pu.port.c_str());
-        std::fflush(stderr);
         const int rc = ::connect(fd, rp->ai_addr, rp->ai_addrlen);
         if (rc == 0 || errno == EINPROGRESS) {
             fd_set wfds; FD_ZERO(&wfds); FD_SET(fd, &wfds);
             struct timeval tv{ 5, 0 };
-            std::fprintf(stderr, "ws: select(5s) fam=%d\n", rp->ai_family); std::fflush(stderr);
             const int sel = ::select(fd + 1, nullptr, &wfds, nullptr, &tv);
             if (sel > 0) {
                 int err = 0; socklen_t len = sizeof(err);
                 ::getsockopt(fd, SOL_SOCKET, SO_ERROR, &err, &len);
                 if (err == 0) {
-                    std::fprintf(stderr, "ws: TCP connected fam=%d\n", rp->ai_family); std::fflush(stderr);
                     ::fcntl(fd, F_SETFL, flags);   // restore blocking
                     _fd = fd; break;
                 }
@@ -201,14 +192,12 @@ bool WsClient::connect(const char* url) {
         if (!ssl) { _last_error = ConnectError::Tls; SSL_CTX_free(ctx); ::close(_fd); _fd = -1; return false; }
         SSL_set_fd(ssl, _fd);
         SSL_set_tlsext_host_name(ssl, pu.host.c_str());
-        std::fprintf(stderr, "ws: TLS handshake…\n"); std::fflush(stderr);
         if (SSL_connect(ssl) != 1) {
             _last_error = ConnectError::Tls;
             std::fprintf(stderr, "ws: TLS handshake to %s failed\n", pu.host.c_str());
             SSL_free(ssl); SSL_CTX_free(ctx);
             ::close(_fd); _fd = -1; return false;
         }
-        std::fprintf(stderr, "ws: TLS ok\n"); std::fflush(stderr);
         _ssl     = ssl;
         _ssl_ctx = ctx;
     }
@@ -234,9 +223,7 @@ bool WsClient::connect(const char* url) {
         if (_tls) return tls_send(p, n) == static_cast<ssize_t>(n);
         return ::send(_fd, p, n, MSG_NOSIGNAL) == static_cast<ssize_t>(n);
     };
-    std::fprintf(stderr, "ws: sending WS upgrade to %s\n", pu.host.c_str()); std::fflush(stderr);
     if (!raw_send(req.c_str(), req.size())) {
-        std::fprintf(stderr, "ws: WS upgrade send failed\n"); std::fflush(stderr);
         disconnect(); return false;
     }
 
@@ -266,7 +253,6 @@ bool WsClient::connect(const char* url) {
     // any other non-101 status is a definitive rejection → fail fast.
     int code = 0;
     std::sscanf(buf, "HTTP/%*d.%*d %d", &code);
-    std::fprintf(stderr, "ws: upgrade response HTTP %d from %s\n", code, pu.host.c_str()); std::fflush(stderr);
     if (code != 101) {
         _last_error = (code / 100 == 5) ? ConnectError::HttpServerError
                                         : ConnectError::HttpClientError;
@@ -275,8 +261,6 @@ bool WsClient::connect(const char* url) {
         std::fprintf(stderr, "ws: WS upgrade not accepted by %s — response: %s\n", pu.host.c_str(), status);
         disconnect(); return false;
     }
-    std::fprintf(stderr, "ws: WS connected to %s\n", pu.host.c_str()); std::fflush(stderr);
-
     // Handshake done — drop the handshake recv/send timeout so the long-lived
     // socket keeps its original semantics (the timeout was only there to bound
     // the connect/upgrade phase for retry-budget and abort responsiveness).
