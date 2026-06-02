@@ -50,6 +50,7 @@ CollabSession::~CollabSession()
 
 bool CollabSession::Start(const std::string& room_id,
                           const std::string& display_name,
+                          const std::string& peer_id,
                           uint16_t audio_port,
                           uint16_t video_port)
 {
@@ -57,7 +58,12 @@ bool CollabSession::Start(const std::string& room_id,
     display_name_ = display_name;
     audio_port_   = audio_port;
     video_port_   = video_port;
-    our_peer_id_  = MakePeerId();
+    // Use the identity peer_id so multicast beacons and relay PRESENCE both
+    // use the same ID. MakePeerId() (random per session) broke dedup: the same
+    // physical host appeared twice in the merged peer list (once via relay with
+    // identity UUID, once via multicast with a random UUID), VP8 was tagged with
+    // the relay UUID which got evicted after 8 s, and the peer showed no video.
+    our_peer_id_  = peer_id.empty() ? MakePeerId() : peer_id;
 
     // Send socket (multicast output).
     send_fd_ = socket(AF_INET, SOCK_DGRAM, 0);

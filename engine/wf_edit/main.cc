@@ -3158,7 +3158,7 @@ int main(int argc, char** argv)
     if (!room_id.empty()) {
         voice_chat.Start();
         video_chat.Start();
-        collab_session.Start(room_id, "Editor",
+        collab_session.Start(room_id, ctx.display_name, ctx.our_peer_id,
                              voice_chat.ListenPort(), video_chat.ListenPort());
         // WebrtcSession hooks send_cb_ on voice_chat + video_chat to route media
         // through WebRTC (DTLS-SRTP) instead of raw UDP. TURN defaults come from

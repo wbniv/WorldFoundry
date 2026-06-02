@@ -30,8 +30,12 @@ public:
 
     // Join the multicast group and start broadcasting. audio_port/video_port
     // are the UDP ports this peer listens on for incoming A/V traffic.
+    // peer_id must be the identity peer_id (from identity.json) so that multicast
+    // beacons and relay PRESENCE use the same ID — enabling correct dedup and
+    // self-filtering in both paths.
     // Returns false if socket setup fails.
     bool Start(const std::string& room_id, const std::string& display_name,
+               const std::string& peer_id,
                uint16_t audio_port, uint16_t video_port);
     void Stop();
 
