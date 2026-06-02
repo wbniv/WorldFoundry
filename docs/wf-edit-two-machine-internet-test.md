@@ -86,9 +86,10 @@ sessions — that's the named tunnel's whole reason for being. Copy the share li
 ### 2. Joiner (computer 2)
 
 ```bash
-task join URL='wfedit+s://wf.worldfoundry.org/r/test1'
+task join ROOM=test1
 ```
 
+Defaults to `wf.worldfoundry.org`; reconstructs the full link automatically.
 The joiner needs no cloudflared and no account — it just dials the public
 `wss://` host. Its stderr should print `relay connected wss://wf.worldfoundry.org …`.
 

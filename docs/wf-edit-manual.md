@@ -351,7 +351,7 @@ task named-tunnel ROOM=studio-1
 # → copy the printed   wfedit+s://<host>/r/<room>   link
 
 # computer 2 — joiner (needs only wf-edit built; no cloudflared)
-task join URL='wfedit+s://<host>/r/<room>'
+task join ROOM=<room>
 ```
 
 Each machine has its own `~/.config/wf-edit/identity.json` (auto-generated on
@@ -421,7 +421,7 @@ The editor runs `cloudflared tunnel run wf-host`: the loading panel skips the
 The joiner side needs nothing extra:
 
 ```bash
-task join URL='wfedit+s://wf.worldfoundry.org/r/studio-1'
+task join ROOM=studio-1
 ```
 
 Empty / missing config → automatic fall-back to the quick tunnel; if the named
