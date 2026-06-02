@@ -39,22 +39,26 @@ cargo build --release --bin wf-relay --manifest-path wftools/wf_collab/Cargo.tom
 
 ---
 
-## One-time tunnel setup (host only) — the login model, no secret to keep
+## One-time tunnel setup (host only) — ✅ already done
 
-Use Cloudflare's `tunnel login`, **not** a dashboard connector token: `cloudflared`
-owns a `0600` credential under `~/.cloudflared/` (a one-time browser auth), so
-there is nothing to paste, store, or safeguard. Full detail + the dashboard
-alternative: [manual → Named tunnel](wf-edit-manual.md#named-tunnel--durable-rate-limit-free-stable-hostname).
+Tunnel `wf-host` → `wf.worldfoundry.org` is created and DNS-routed.
+The credential lives in `~/.cloudflared/` on Will's laptop.
+
+To host from a **different machine**, copy those two files:
 
 ```bash
-cloudflared tunnel login                                  # browser → ~/.cloudflared/cert.pem (0600)
-cloudflared tunnel create wf-host                         # → ~/.cloudflared/<UUID>.json (the run credential)
-cloudflared tunnel route dns wf-host wf.<your-domain>     # CNAME → the tunnel
+scp ~/.cloudflared/cert.pem ~/.cloudflared/<UUID>.json  other-host:~/.cloudflared/
 ```
 
-> The run credential is the per-tunnel `<UUID>.json`. To host from a *different*
-> machine than the one you ran `create` on, copy `~/.cloudflared/cert.pem` and
-> `~/.cloudflared/<UUID>.json` there — those two files are the credential.
+For reference, the three commands that were run once:
+
+```bash
+cloudflared tunnel login                                         # browser → ~/.cloudflared/cert.pem (0600)
+cloudflared tunnel create wf-host                                # → ~/.cloudflared/<UUID>.json
+cloudflared tunnel route dns wf-host wf.worldfoundry.org         # CNAME → the tunnel
+```
+
+Full setup detail: [manual → Named tunnel](wf-edit-manual.md#named-tunnel--durable-rate-limit-free-stable-hostname).
 
 ---
 
@@ -67,7 +71,7 @@ one-off; or put `tunnel_name` / `tunnel_hostname` in `~/.config/wf-edit/identity
 
 ```bash
 export WF_COLLAB_TUNNEL_NAME=wf-host          # the name from `tunnel create` (the UUID also works)
-export WF_COLLAB_TUNNEL_HOSTNAME=wf.<your-domain>
+export WF_COLLAB_TUNNEL_HOSTNAME=wf.worldfoundry.org
 task named-tunnel ROOM=test1
 ```
 
@@ -75,9 +79,9 @@ Confirm in the host's stderr — this is the proof the named path engaged:
 
 ```
 wf-edit: starting named tunnel for room 'test1'…
-wf-edit: using named tunnel — hostname wf.<your-domain> (login cred, rate-limit-free)
+wf-edit: using named tunnel — hostname wf.worldfoundry.org (login cred, rate-limit-free)
 wf-edit: relay connected ws://127.0.0.1:9900 room=test1 (peer …)     ← loopback self-join (Fix 1)
-   share link →  wfedit+s://wf.<your-domain>/r/test1
+   share link →  wfedit+s://wf.worldfoundry.org/r/test1
 ```
 
 No `Establishing` / `530` warm-up phase, and the hostname is stable across
@@ -86,11 +90,11 @@ sessions — that's the named tunnel's whole reason for being. Copy the share li
 ### 2. Joiner (computer 2)
 
 ```bash
-task join URL='wfedit+s://wf.<your-domain>/r/test1'
+task join URL='wfedit+s://wf.worldfoundry.org/r/test1'
 ```
 
 The joiner needs no cloudflared and no account — it just dials the public
-`wss://` host. Its stderr should print `relay connected wss://wf.<your-domain> …`.
+`wss://` host. Its stderr should print `relay connected wss://wf.worldfoundry.org …`.
 
 ---
 

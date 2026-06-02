@@ -348,7 +348,7 @@ The minimum for a real cross-network call between two people:
 task quick-tunnel
 # named tunnel (stable hostname, needs one-time CF setup — see below):
 export WF_COLLAB_TUNNEL_NAME=wf-host
-export WF_COLLAB_TUNNEL_HOSTNAME=wf.<your-domain>
+export WF_COLLAB_TUNNEL_HOSTNAME=wf.worldfoundry.org
 task named-tunnel ROOM=studio-1
 # → copy the printed   wfedit+s://<host>/r/<room>   link
 
@@ -383,13 +383,16 @@ zero-config quick tunnel remains the default; this is purely opt-in.
 credential (mode `0600`) under `~/.cloudflared/` that `cloudflared` owns — you
 never paste or save a token anywhere, and wf-edit never stores one.
 
-**One-time setup on the host machine** ([`cloudflared` docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-local-tunnel/);
-dashboard if you prefer clicking: <https://one.dash.cloudflare.com/> → **Networks → Tunnels**):
+**One-time setup on the host machine** — ✅ done (`wf-host` → `wf.worldfoundry.org`).
+Credential in `~/.cloudflared/` on Will's laptop. To host from another machine,
+copy `~/.cloudflared/cert.pem` + `~/.cloudflared/<UUID>.json` there.
+
+For reference ([`cloudflared` docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-local-tunnel/)):
 
 ```bash
 cloudflared tunnel login                       # browser auth → ~/.cloudflared/cert.pem (0600)
 cloudflared tunnel create wf-host              # → tunnel UUID + ~/.cloudflared/<UUID>.json
-cloudflared tunnel route dns wf-host wf.<your-domain>   # CNAME → the tunnel
+cloudflared tunnel route dns wf-host wf.worldfoundry.org   # CNAME → the tunnel
 ```
 
 Tell `wf-edit` the tunnel **name + hostname** (no secret) in
@@ -398,7 +401,7 @@ Tell `wf-edit` the tunnel **name + hostname** (no secret) in
 ```json
 {
   "tunnel_name":     "wf-host",
-  "tunnel_hostname": "wf.your-domain"
+  "tunnel_hostname": "wf.worldfoundry.org"
 }
 ```
 
@@ -409,18 +412,18 @@ Then host with:
 
 ```bash
 export WF_COLLAB_TUNNEL_NAME=wf-host
-export WF_COLLAB_TUNNEL_HOSTNAME=wf.your-domain
+export WF_COLLAB_TUNNEL_HOSTNAME=wf.worldfoundry.org
 task named-tunnel ROOM=studio-1
 ```
 
 The editor runs `cloudflared tunnel run wf-host`: the loading panel skips the
 *Establishing* phase (the hostname is fixed), the share link looks like
-`wfedit+s://wf.your-domain/r/studio-1`, and there's no rate limit.
+`wfedit+s://wf.worldfoundry.org/r/studio-1`, and there's no rate limit.
 
 The joiner side needs nothing extra:
 
 ```bash
-task join URL='wfedit+s://wf.your-domain/r/studio-1'
+task join URL='wfedit+s://wf.worldfoundry.org/r/studio-1'
 ```
 
 Empty / missing config → automatic fall-back to the quick tunnel; if the named
