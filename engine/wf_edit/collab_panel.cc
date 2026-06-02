@@ -138,6 +138,11 @@ void RenderCollabPanel(bool& show_collab,
 
         // Video thumbnail or initials avatar.
         unsigned int tex = video.PeerTexture(p.peer_id);
+        {
+            static int s_pt = 0;
+            if (++s_pt % 120 == 0)
+                std::fprintf(stderr, "panel: PeerTexture(%.8s) = %u\n", p.peer_id.c_str(), tex);
+        }
         if (tex) {
             ImGui::Image(static_cast<ImTextureID>(tex),
                          { kThumbF, kThumbFH });
