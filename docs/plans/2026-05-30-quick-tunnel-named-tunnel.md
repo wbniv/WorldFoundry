@@ -119,6 +119,32 @@ Cloudflare account + a domain you control + one-time DNS setup.
   `wfedit+s://<hostname>/r/<room>`, and a joiner connects. Cannot be CI'd (needs a real CF
   account); document the manual smoke procedure.
 
+### Live-verification checklist (the user runs this — recommendation ⑤)
+
+This is the one piece of the [relay-connect critique](../investigations/2026-06-01-resilient-retry-plan-critique.md)
+that can't be done in this repo: the named-tunnel code (`cc07da17`) has **never been run**, and
+verifying it needs a real Cloudflare account. The retry hardening in the
+[remediation plan](2026-06-01-implement-the-relay-connect-critique-s-recommendat.md) is patching the
+*throwaway* quick-tunnel path; this is the **durable** path that supersedes it — so confirming it
+works is worth doing. Steps:
+
+1. **One-time CF setup** (per [`wf-edit-manual.md`](../wf-edit-manual.md)): create a named tunnel in
+   the Cloudflare Zero-Trust dashboard, add an ingress rule routing `wf.<your-domain>` →
+   `http://localhost:9900` (= `kRelayPort`), and copy the tunnel **token**.
+2. **Configure** either via `identity.json` (`tunnel_token` + `tunnel_hostname`) or env:
+   `WF_COLLAB_TUNNEL_TOKEN=<token> WF_COLLAB_TUNNEL_HOSTNAME=wf.<your-domain>`.
+3. **Host:** `task run-wf-edit` (or `task quick-tunnel`) with those set. Confirm the log shows
+   `cloudflared tunnel run --token` (not a quick-tunnel scrape), **no `Establishing`/`530` warm-up**,
+   and the share-link modal reads `wfedit+s://wf.<your-domain>/r/<room>`.
+4. **Verify the host self-joins** over loopback: the host log prints
+   `relay connected ws://127.0.0.1:9900` and the connection dot is 🟢.
+5. **Join from a second machine** with that share link → connects first try (no warm-up retries,
+   since a named tunnel is always-up), both editors 🟢, an edit on one shows on the other.
+6. **Drop test** (exercises the new mid-session reconnect against the durable path): on the host,
+   `cloudflared` stays up, but kill+restart `wf-relay` — joiner goes 🔴 then auto-🟢 and re-syncs.
+7. Record the host/joiner logs + a screenshot of both 🟢; if it all holds, the named tunnel becomes
+   the recommended durable-hosting path and the quick-tunnel retry is demoted to best-effort.
+
 ## Notes
 
 - Sizing: ~0.5–1 day implementation (config + branch + loading-loop tweak + docs), *average-

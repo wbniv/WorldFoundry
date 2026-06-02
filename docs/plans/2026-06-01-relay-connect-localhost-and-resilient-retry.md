@@ -192,11 +192,16 @@ or be reused.)
    ===== SUMMARY ===== frames: SYNC=1 PRESENCE=307 SIGNAL=7
    OTHER peers in room studio-5664: {'ccf9ca2c…': 'Editor (ccf9ca)'}
    ```
-   **PASS (host presence confirmed)** — the host editor is reliably present in its
-   own room at the expected ~10 Hz, which it never was before this change (two
-   prior sessions, `studio-2781` and `studio-8907`, showed an empty room). Caveat:
-   the host's own `relay connected ws://127.0.0.1:9900` log line was not directly
-   observed (host ran on a remote machine); presence in the room is the proof.
+   **OBSERVED — host presence confirmed; loopback causal effect UNconfirmed**
+   (tempered 2026-06-01 per the [critique](../investigations/2026-06-01-resilient-retry-plan-critique.md)
+   ⑥). The host editor is reliably present in its own room at the expected ~10 Hz,
+   which it never was before (two prior sessions, `studio-2781` and `studio-8907`,
+   showed an empty room) — so *something* changed. But the proof that **Fix 1**
+   specifically caused it is missing: the host ran on a **different machine, on a
+   binary this agent never built**, and the host's own
+   `relay connected ws://127.0.0.1:9900` log line was never captured. Presence is
+   real; the causal attribution to the loopback change is not. Fix 1 is kept
+   regardless — it is the architecturally correct design.
 
 3. **Joiner rides out quick-tunnel warm-up.** Immediately after the host's
    share link appears (while a plain `GET https://<host>/` may still return
@@ -223,6 +228,18 @@ or be reused.)
    lines. If it fails where Python succeeds, open a focused `WsClient` (TLS/SNI/
    HTTP-upgrade vs Cloudflare HTTP/2 edge) investigation.
 
+   > **Fix 2 revised (2026-06-01).** The retry path here was **never exercised
+   > end-to-end** — every run connected on attempt 1 or died (OOM/render-stall)
+   > before the budget mattered — and the "15–30 s warm-up window" the 45 s budget
+   > was sized for was never observed (the `530`s in the session meant the tunnel
+   > was *down*, not warming). Per the
+   > [critique](../investigations/2026-06-01-resilient-retry-plan-critique.md),
+   > Fix 2 is now: joiner budget **15 s** (not 45), and `WsClient::connect`
+   > **classifies** failures so NXDOMAIN / definitive 4xx **fail fast** while
+   > 530/502/refused/timeout retry. Plus the close-button defect (the wait loop
+   > ignored `glfwWindowShouldClose`) is fixed and mid-session reconnect is added.
+   > See [the remediation plan](2026-06-01-implement-the-relay-connect-critique-s-recommendat.md).
+
 4. **Two editors see each other.** With host + joiner both connected, each
    editor's Collaborators panel shows a 🟢 connected dot and lists the other
    peer; an edit on one appears on the other.
@@ -233,17 +250,21 @@ or be reused.)
    **OPEN.**
 
 5. **Bad URL still fails cleanly.** `--url=wfedit+s://nonexistent.example/r/x`
-   shows the attempt counter, exhausts the 45 s budget, logs
-   `relay connect failed`, and the panel shows the 🔴 disconnected dot — no hang,
-   no crash.
+   shows the attempt counter and logs `relay connect failed`, with the panel
+   showing the 🔴 disconnected dot — no hang, no crash. **Post-remediation a
+   *bad host* (NXDOMAIN) now fails fast on attempt 1** rather than exhausting the
+   budget; a host that resolves but refuses/530s retries until the 15 s budget.
 
    ```
-   OPEN — not yet exercised against the post-fix (45 s budget) build. A pre-fix
-   run earlier (studio-8907, old 4×2 s budget) did log `relay connect failed`
-   and fall back to offline cleanly on HTTP 530, so the fail-soft path is sound;
-   the 45 s-budget timing remains to be confirmed.
+   OPEN — re-exercise against the remediation build. Note the test target matters:
+   NXDOMAIN fails fast now, so to see the retry/attempt-counter behaviour use a
+   resolvable-but-refusing host (e.g. wfedit://127.0.0.1:1/r/x).
    ```
    **OPEN.**
 
 Paste raw output under each step and mark PASS/FAIL before promoting the
-`[verify]` TODO item to `[x]`. Current state: **1–2 PASS, 3–5 OPEN.**
+`[verify]` TODO item to `[x]`. Current state: **1 PASS; 2 OBSERVED (causal effect
+unconfirmed); Fix 2 revised per critique (budget 45→15 s + fail-fast
+classification + close-button fix + reconnect, see the
+[remediation plan](2026-06-01-implement-the-relay-connect-critique-s-recommendat.md));
+3–5 OPEN.**

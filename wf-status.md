@@ -1,6 +1,6 @@
 # WorldFoundry Project Status
 
-**As of:** 2026-05-31  
+**As of:** 2026-06-01  
 **Branch:** `2026-new-level`
 
 ---
@@ -8,6 +8,8 @@
 ## History
 
 50 days of work (2026-04-12 – 2026-05-31). Newest first:
+
+- **`wf-edit` relay-connect critique remediation (2026-06-01)** — Implemented the [self-critique](docs/investigations/2026-06-01-resilient-retry-plan-critique.md)'s recommendations on the resilient-retry work: the connect-wait loop now breaks on `glfwWindowShouldClose` so a joiner window closes instantly instead of being frozen for the whole budget (the one outright defect), the untestable inline retry loop is extracted into a pure, fault-injection-tested policy ([`connect_retry.h`](engine/wf_edit/connect_retry.h) + [`connect_retry_test.cc`](engine/wf_edit/connect_retry_test.cc)) while [`WsClient::connect`](engine/wf_edit/ws_client.cc) now reports *why* it failed so NXDOMAIN / definitive-4xx **fail fast** and only 530/502/refused/timeout retry within a trimmed **15 s** (was 45 s) joiner budget, **mid-session reconnect** ([`ServiceRelayReconnect`](engine/wf_edit/main.cc)) detects a dropped relay/tunnel and re-joins the room in the background (the recurring real failure), and Fix 1's over-claimed "PASS" is corrected to "observed; causal effect unconfirmed" — with named-tunnel live-verification left as the user's to run (needs a real Cloudflare account, can't be CI'd). See [plan](docs/plans/2026-06-01-implement-the-relay-connect-critique-s-recommendat.md).
 
 - **SMB flag → next-level transition + bare underground W1-2 (2026-05-31)** — Reaching a flagpole now advances to the next level via a **second** invisible `ActBox` at the flag writing `LEVEL_TO_RUN`(5000)=`<next TOC index>` (W1-1→W1-2; W1-2 loops back to W1-1), with zero engine change since a level-side write of 5000 routes `LevelMailboxes → GameMailboxes → WFGame::_desiredLevelNum` and `shell.fth` only seeds it on first boot so it persists across the meta-loop reload, wired into the real `cd.iff` (`task build-cd-iff` now packs `[smb_w1_1, smb_w1_2, snowgoons, qbert]` so `task run` boots into Mario; advancing is `cd.iff`-only since `-L` bypasses the meta-loop) alongside a new bare 24-tile underground W1-2 ([`wflevels/smb_w1_2/`](wflevels/smb_w1_2/blender_create_smb_w1_2.py) — flat dark ground + brick ceiling + near-black matte, sliced down from W1-1's golden-source Blender script keeping `_build_mario`/Director/flagpole), verified headlessly by the engine level-load sequence **`120 → 18 → 120`** with Mario *walked* into W1-2's flag to prove the loop-back (`vblank_mode=0` needed or the engine throttles to ~1 FPS unfocused; the bridge-`step` teleport glitches Jolt → fall/death). See [plan](docs/plans/2026-05-31-smb-flag-next-level-transition-and-w1-2-scaffold.md), [screenshots](tests/screenshots/smb_transition_1_w1_1.png).
 
