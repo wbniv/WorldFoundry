@@ -370,35 +370,45 @@ account and a domain, you can host through an **authenticated named tunnel**
 instead — no rate limit, and a hostname you pick stays the same forever. The
 zero-config quick tunnel remains the default; this is purely opt-in.
 
-**One-time setup on the host machine:**
+**No secret to keep.** Setup uses `cloudflared`'s own login, which stores a
+credential (mode `0600`) under `~/.cloudflared/` that `cloudflared` owns — you
+never paste or save a token anywhere, and wf-edit never stores one.
 
-1. **Cloudflare Zero Trust → Networks → Tunnels → Create a tunnel.** (Free tier
-   is enough.) Give it any name (e.g. `wf-host`).
-2. Save the connector **token** that Cloudflare shows you.
-3. In the tunnel's **Public Hostname** tab, add a route:
-   - **Subdomain / domain:** `wf.<your-domain>` (Cloudflare creates the DNS
-     CNAME automatically).
-   - **Service:** `http://localhost:9900` (the `wf-relay` port).
-4. Put the token + hostname in `~/.config/wf-edit/identity.json` on the host:
+**One-time setup on the host machine** ([`cloudflared` docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-local-tunnel/);
+dashboard if you prefer clicking: <https://one.dash.cloudflare.com/> → **Networks → Tunnels**):
 
-   ```json
-   {
-     "tunnel_token":    "<paste the token>",
-     "tunnel_hostname": "wf.your-domain"
-   }
-   ```
+```bash
+cloudflared tunnel login                       # browser auth → ~/.cloudflared/cert.pem (0600)
+cloudflared tunnel create wf-host              # → tunnel UUID + ~/.cloudflared/<UUID>.json
+cloudflared tunnel route dns wf-host wf.<your-domain>   # CNAME → the tunnel
+```
 
-   (Or set `WF_COLLAB_TUNNEL_TOKEN` / `WF_COLLAB_TUNNEL_HOSTNAME` in the env for
-   a one-off run — env wins per-field.)
+Tell `wf-edit` the tunnel **name + hostname** (no secret) in
+`~/.config/wf-edit/identity.json`:
 
-That's it. Next time you **Host a call**, the editor uses your named tunnel: the
-loading panel skips the *Establishing* phase (the hostname is fixed), the share
-link looks like `wfedit+s://wf.your-domain/r/<room>`, and there's no rate
-limit. The joiner side doesn't change — they just paste the link.
+```json
+{
+  "tunnel_name":     "wf-host",
+  "tunnel_hostname": "wf.your-domain"
+}
+```
+
+(Or set `WF_COLLAB_TUNNEL_NAME` / `WF_COLLAB_TUNNEL_HOSTNAME` in the env for a
+one-off run — env wins per-field.)
+
+That's it. Next time you **Host a call**, the editor runs `cloudflared tunnel run
+wf-host`: the loading panel skips the *Establishing* phase (the hostname is
+fixed), the share link looks like `wfedit+s://wf.your-domain/r/<room>`, and
+there's no rate limit. The joiner side doesn't change — they just paste the link.
 
 Empty / missing config → automatic fall-back to the quick tunnel; if the named
-tunnel fails to register (bad token, wrong ingress), it fails loudly with the
-cloudflared log instead of silently downgrading.
+tunnel fails to start (not logged in, wrong name, wrong ingress), it fails loudly
+with the cloudflared log instead of silently downgrading.
+
+> **Legacy token model.** A dashboard-created tunnel hands you a connector
+> *token* instead; wf-edit still accepts it (`tunnel_token` in `identity.json` /
+> `WF_COLLAB_TUNNEL_TOKEN`), but the login model above is preferred precisely
+> because it leaves no long-lived secret for you to safeguard.
 
 #### Trying it on one machine (testing)
 

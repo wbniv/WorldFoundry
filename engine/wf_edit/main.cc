@@ -129,10 +129,13 @@ struct WfeditIdentity {
     // call" (quick tunnel). WF_COLLAB_RELAY_DEFAULT env overrides.
     std::string  relay_default;
     // Phase 3 (named tunnel): opt-in authenticated Cloudflare tunnel for
-    // durable/team hosting — rate-limit-free + stable hostname. BOTH must be set
-    // to engage; either alone falls back to the zero-config quick tunnel.
-    // WF_COLLAB_TUNNEL_TOKEN / WF_COLLAB_TUNNEL_HOSTNAME env vars override.
-    std::string  tunnel_token;
+    // durable/team hosting — rate-limit-free + stable hostname. Preferred model
+    // is `tunnel_name` (cloudflared `tunnel login` owns a 0600 cred in
+    // ~/.cloudflared — no secret to keep); `tunnel_token` is the legacy
+    // dashboard-token model. Either needs `tunnel_hostname` (for the share link).
+    // WF_COLLAB_TUNNEL_NAME / _TOKEN / _HOSTNAME env vars override per-field.
+    std::string  tunnel_name;      // `cloudflared tunnel run <name>` (login model, no secret)
+    std::string  tunnel_token;     // `cloudflared tunnel run --token <token>` (legacy)
     std::string  tunnel_hostname;
     // Outliner: group actors into a collapsible tree by shared base name.
     bool         outliner_group_by_prefix = true;
@@ -179,6 +182,7 @@ static std::optional<WfeditIdentity> LoadIdentity()
         id.turn_pass        = j.value("turn_pass", "");
         id.turn_tls         = j.value("turn_tls", false);
         id.relay_default    = j.value("relay_default", "");
+        id.tunnel_name      = j.value("tunnel_name", "");
         id.tunnel_token     = j.value("tunnel_token", "");
         id.tunnel_hostname  = j.value("tunnel_hostname", "");
         id.outliner_group_by_prefix = j.value("outliner_group_by_prefix", true);
@@ -216,6 +220,7 @@ static void SaveIdentity(const WfeditIdentity& id)
             {"turn_pass",        id.turn_pass},
             {"turn_tls",         id.turn_tls},
             {"relay_default",    id.relay_default},
+            {"tunnel_name",      id.tunnel_name},
             {"tunnel_token",     id.tunnel_token},
             {"tunnel_hostname",  id.tunnel_hostname},
             {"outliner_group_by_prefix", id.outliner_group_by_prefix},
@@ -960,18 +965,22 @@ static std::string ToolPath(const std::string& exe_path, const char* name)
     return name;   // PATH
 }
 
-// Spawn wf-relay + a Cloudflare tunnel (non-blocking). Two paths:
-//   * **Named tunnel** (Phase 3) — when `tunnel_token` is set, run
-//     `cloudflared tunnel run --token <TOKEN>`; the hostname is fixed (from
-//     `tunnel_hostname`, the host's pre-configured CF DNS) so there's no URL to
-//     scrape and no quick-tunnel rate limit. The user's tunnel ingress must
-//     route their hostname to `http://localhost:<port>`.
+// Spawn wf-relay + a Cloudflare tunnel (non-blocking). Three paths:
+//   * **Named tunnel, login model** (preferred) — when `tunnel_name` is set, run
+//     `cloudflared tunnel run <name>`. cloudflared authenticates from its own
+//     0600 credential in ~/.cloudflared (from a one-time `cloudflared tunnel
+//     login` + `tunnel create`), so there is NO secret to paste or store. The
+//     hostname is fixed (`tunnel_hostname`) → no URL scrape, no rate limit.
+//   * **Named tunnel, token model** (legacy) — when `tunnel_token` is set, run
+//     `cloudflared tunnel run --token <TOKEN>`. Same shape, but the operator has
+//     to hold a long-lived token (we avoid this; kept for back-compat).
 //   * **Quick tunnel** (default, zero-config) — `cloudflared tunnel --protocol
 //     http2 --url http://localhost:<port>`. The ephemeral
 //     `*.trycloudflare.com` URL is scraped from cloudflared's banner.
 // cloudflared's output is written to out_logpath for incremental polling;
 // children are reaped via atexit. Returns false if a prerequisite is missing.
 static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
+                                  const std::string& tunnel_name,
                                   const std::string& tunnel_token,
                                   const std::string& tunnel_hostname,
                                   std::string& out_logpath)
@@ -990,10 +999,16 @@ static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
 
     const std::string ps  = std::to_string(port);
     const std::string url = "http://localhost:" + ps;
-    const bool named = !tunnel_token.empty() && !tunnel_hostname.empty();
+    // Named if a hostname plus EITHER a tunnel name (login model, preferred) or a
+    // token (legacy) is configured. The name model wins if both are set — it's
+    // the one with no secret to keep.
+    const bool named_name  = !tunnel_name.empty()  && !tunnel_hostname.empty();
+    const bool named_token = !named_name && !tunnel_token.empty() && !tunnel_hostname.empty();
+    const bool named = named_name || named_token;
     if (named)
-        std::printf("wf-edit: using named tunnel — hostname %s (rate-limit-free)\n",
-                    tunnel_hostname.c_str());
+        std::printf("wf-edit: using named tunnel — hostname %s (%s, rate-limit-free)\n",
+                    tunnel_hostname.c_str(),
+                    named_name ? "login cred" : "token");
 
     s_relay_pid = ::fork();
     if (s_relay_pid == 0) {
@@ -1005,10 +1020,17 @@ static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
     s_cloudflared_pid = ::fork();
     if (s_cloudflared_pid == 0) {
         ::dup2(logfd, 1); ::dup2(logfd, 2);
-        if (named) {
-            // Named tunnel: cloudflared knows the tunnel ID + origin routing
-            // from the token's ingress config (host configures hostname →
-            // http://localhost:<port> in the CF Zero Trust dashboard). No
+        if (named_name) {
+            // Login model (preferred): cloudflared reads its credential from
+            // ~/.cloudflared (from `cloudflared tunnel login` + `tunnel create
+            // <name>`) and resolves the tunnel ID + ingress from the named
+            // config. No token on the command line, nothing for us to store.
+            ::execl(cf.c_str(), cf.c_str(), "tunnel", "run",
+                    tunnel_name.c_str(), (char*)nullptr);
+        } else if (named_token) {
+            // Token model (legacy): cloudflared knows the tunnel ID + origin
+            // routing from the token's ingress config (host configures hostname
+            // → http://localhost:<port> in the CF Zero Trust dashboard). No
             // --url, no URL to scrape; the hostname is fixed.
             ::execl(cf.c_str(), cf.c_str(), "tunnel", "run",
                     "--token", tunnel_token.c_str(), (char*)nullptr);
@@ -1082,7 +1104,7 @@ static bool HostResolves(const std::string& host)
 static std::string HostQuickTunnel(const std::string& exe_path, int port)
 {
     std::string logpath, host;
-    if (!StartQuickTunnelProcs(exe_path, port, "", "", logpath)) return "";
+    if (!StartQuickTunnelProcs(exe_path, port, "", "", "", logpath)) return "";
     for (int i = 0; i < 80 && host.empty(); ++i) {
         host = PollTunnelUrl(logpath);
         if (host.empty()) { const struct timespec ts{0, 250'000'000}; ::nanosleep(&ts, nullptr); }
@@ -2622,7 +2644,8 @@ int main(int argc, char** argv)
     // loop (after the GL context is up) rather than blocking startup here. The
     // resolved wss:// host overrides any default relay above.
     //
-    // Phase 3 (named tunnel): if identity has a `tunnel_token` + `tunnel_hostname`
+    // Phase 3 (named tunnel): if identity has a `tunnel_name` (login model,
+    // preferred — no secret) or `tunnel_token` (legacy) plus `tunnel_hostname`
     // (or env overrides), use an authenticated named tunnel (rate-limit-free,
     // stable hostname). Else fall back to the zero-config quick tunnel.
     std::string tunnel_share_link;
@@ -2632,15 +2655,17 @@ int main(int argc, char** argv)
     if (host_tunnel) {
         if (room_id.empty()) room_id = "studio-" + std::to_string(::getpid() % 10000);
         // Env overrides identity per-field.
-        std::string tok = identity.tunnel_token;
-        std::string hn  = identity.tunnel_hostname;
-        if (const char* e = std::getenv("WF_COLLAB_TUNNEL_TOKEN");    e && *e) tok = e;
-        if (const char* e = std::getenv("WF_COLLAB_TUNNEL_HOSTNAME"); e && *e) hn  = e;
-        const bool named = !tok.empty() && !hn.empty();
+        std::string name = identity.tunnel_name;
+        std::string tok  = identity.tunnel_token;
+        std::string hn   = identity.tunnel_hostname;
+        if (const char* e = std::getenv("WF_COLLAB_TUNNEL_NAME");     e && *e) name = e;
+        if (const char* e = std::getenv("WF_COLLAB_TUNNEL_TOKEN");    e && *e) tok  = e;
+        if (const char* e = std::getenv("WF_COLLAB_TUNNEL_HOSTNAME"); e && *e) hn   = e;
+        const bool named = (!name.empty() || !tok.empty()) && !hn.empty();
         std::printf("wf-edit: starting %s tunnel for room '%s'…\n",
                     named ? "named" : "quick", room_id.c_str());
         std::fflush(stdout);
-        tunnel_pending = StartQuickTunnelProcs(argv[0], kRelayPort, tok, hn, tunnel_logpath);
+        tunnel_pending = StartQuickTunnelProcs(argv[0], kRelayPort, name, tok, hn, tunnel_logpath);
         if (!tunnel_pending)
             std::fprintf(stderr, "wf-edit: tunnel failed to start — no relay\n");
         else if (named)
