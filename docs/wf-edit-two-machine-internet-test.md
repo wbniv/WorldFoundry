@@ -66,10 +66,10 @@ Tell `wf-edit` the tunnel **name + hostname** (no secret). Env is easiest for a
 one-off; or put `tunnel_name` / `tunnel_hostname` in `~/.config/wf-edit/identity.json`.
 
 ```bash
-export WF_COLLAB_TUNNEL_NAME=wf-host          # the name from `tunnel create` (the UUID also works)
-export WF_COLLAB_TUNNEL_HOSTNAME=wf.worldfoundry.org
 task named-tunnel ROOM=test1
 ```
+
+Defaults to `wf-host` → `wf.worldfoundry.org`. Override with env if needed.
 
 Confirm in the host's stderr — this is the proof the named path engaged:
 

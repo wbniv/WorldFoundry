@@ -319,16 +319,17 @@ tasks:
         wait
 
   named-tunnel:
-    desc: "Host a wf-edit call via named Cloudflare tunnel (stable hostname, rate-limit-free). Needs WF_COLLAB_TUNNEL_NAME + WF_COLLAB_TUNNEL_HOSTNAME set. Ctrl-C to stop."
+    desc: "Host a wf-edit call via named Cloudflare tunnel (wf-host → wf.worldfoundry.org). Ctrl-C to stop."
     silent: true
     deps: [build-wf-edit-fast]
     vars:
       ROOM: '{{.ROOM | default "studio-1"}}'
+    env:
+      WF_COLLAB_TUNNEL_NAME: '{{.WF_COLLAB_TUNNEL_NAME | default "wf-host"}}'
+      WF_COLLAB_TUNNEL_HOSTNAME: '{{.WF_COLLAB_TUNNEL_HOSTNAME | default "wf.worldfoundry.org"}}'
     cmds:
       - |
         set -euo pipefail
-        [ -n "${WF_COLLAB_TUNNEL_NAME:-}" ]     || { echo "Error: WF_COLLAB_TUNNEL_NAME not set (tunnel create name, e.g. wf-host)"; exit 1; }
-        [ -n "${WF_COLLAB_TUNNEL_HOSTNAME:-}" ] || { echo "Error: WF_COLLAB_TUNNEL_HOSTNAME not set (e.g. wf.your-domain)"; exit 1; }
         echo ""
         echo "  Named tunnel: $WF_COLLAB_TUNNEL_NAME → wss://$WF_COLLAB_TUNNEL_HOSTNAME"
         echo "  Room:         {{.ROOM}}"

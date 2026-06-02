@@ -347,8 +347,6 @@ The minimum for a real cross-network call between two people:
 # quick tunnel (zero-config, ephemeral URL):
 task quick-tunnel
 # named tunnel (stable hostname, needs one-time CF setup — see below):
-export WF_COLLAB_TUNNEL_NAME=wf-host
-export WF_COLLAB_TUNNEL_HOSTNAME=wf.worldfoundry.org
 task named-tunnel ROOM=studio-1
 # → copy the printed   wfedit+s://<host>/r/<room>   link
 
@@ -411,10 +409,10 @@ one-off run — env wins per-field.)
 Then host with:
 
 ```bash
-export WF_COLLAB_TUNNEL_NAME=wf-host
-export WF_COLLAB_TUNNEL_HOSTNAME=wf.worldfoundry.org
 task named-tunnel ROOM=studio-1
 ```
+
+Defaults to `wf-host` → `wf.worldfoundry.org`. Override with env if you have a different tunnel.
 
 The editor runs `cloudflared tunnel run wf-host`: the loading panel skips the
 *Establishing* phase (the hostname is fixed), the share link looks like
