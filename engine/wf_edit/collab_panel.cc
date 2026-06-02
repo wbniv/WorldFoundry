@@ -146,11 +146,6 @@ void RenderCollabPanel(bool& show_collab,
         if (tex) {
             ImGui::Image(static_cast<ImTextureID>(tex),
                          { kThumbF, kThumbFH });
-            // Debug: bright border so we can tell if Image is rendered but black
-            // vs not rendered at all. Remove once video is confirmed working.
-            ImVec2 r0 = ImGui::GetItemRectMin();
-            ImVec2 r1 = ImGui::GetItemRectMax();
-            ImGui::GetWindowDrawList()->AddRect(r0, r1, IM_COL32(255, 0, 0, 255), 0.f, 0, 2.f);
         } else {
             DrawInitialsAvatar(p.display_name, kThumbF);
         }
