@@ -254,11 +254,6 @@ void VideoChat::OnRemoteVP8Frame(const std::string& peer_id,
         std::lock_guard<std::mutex> flk(pv->frame_mu);
         pv->rgb         = std::move(rgb);
         pv->frame_dirty = true;
-        static int s_img = 0;
-        if (++s_img <= 3 || s_img % 150 == 0)
-            std::fprintf(stderr, "video: decoded image #%d for %.8s (%dx%d → rgb %zu)\n",
-                         s_img, peer_id.c_str(), src_w, src_h, pv->rgb.size());
-        std::fflush(stderr);
     }
 }
 
@@ -285,23 +280,6 @@ void VideoChat::UploadFrames()
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, kThumbW, kThumbH, 0,
                          GL_RGB, GL_UNSIGNED_BYTE, pv->rgb.data());
-            GLint fbo = 0;
-            glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
-            GLenum err = glGetError();
-            // Sample 4 pixels: top-left, top-right, centre, bottom-right.
-            auto px = [&](int x, int y) -> const uint8_t* {
-                return pv->rgb.data() + (y * kThumbW + x) * 3;
-            };
-            const uint8_t* tl = px(0, 0);
-            const uint8_t* tr = px(kThumbW-1, 0);
-            const uint8_t* cc = px(kThumbW/2, kThumbH/2);
-            const uint8_t* br = px(kThumbW-1, kThumbH-1);
-            std::fprintf(stderr, "video: GL texture %u for %.8s fbo=%d err=%u "
-                         "tl=(%d,%d,%d) tr=(%d,%d,%d) cc=(%d,%d,%d) br=(%d,%d,%d)\n",
-                         pv->gl_tex, pid.c_str(), fbo, err,
-                         tl[0],tl[1],tl[2], tr[0],tr[1],tr[2],
-                         cc[0],cc[1],cc[2], br[0],br[1],br[2]);
-            std::fflush(stderr);
         } else {
             glBindTexture(GL_TEXTURE_2D, pv->gl_tex);
             glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, kThumbW, kThumbH,
@@ -522,11 +500,6 @@ void VideoChat::EncodeAndSend(const std::vector<uint8_t>& i420,
         bool           is_key = (pkt->data.frame.flags & VPX_FRAME_IS_KEY) != 0;
 
         std::lock_guard<std::mutex> lk(send_cb_mu_);
-        static int s_sent = 0;
-        if (++s_sent <= 5 || s_sent % 150 == 0)
-            std::fprintf(stderr, "video: VP8 send #%d len=%d key=%d cb=%s\n",
-                         s_sent, size, (int)is_key, send_cb_ ? "yes" : "NO");
-        std::fflush(stderr);
         if (send_cb_) send_cb_(data, size, is_key);
     }
 }

@@ -280,10 +280,6 @@ WebrtcSession::GetOrCreate(const std::string& peer_id, bool is_offerer)
     if (state->video_track) {
         std::string pid = peer_id;
         state->video_track->onMessage([this, pid, weak](rtc::message_variant data) {
-            static int s_vmsg = 0;
-            if (++s_vmsg <= 5)
-                std::fprintf(stderr, "webrtc: video onMessage #%d peer=%.8s\n",
-                             s_vmsg, pid.c_str());
             auto* bin = std::get_if<rtc::binary>(&data);
             if (!bin || bin->size() <= 13) return;  // header(12) + descriptor(1)
             const uint8_t* rtp = reinterpret_cast<const uint8_t*>(bin->data());
@@ -473,13 +469,8 @@ void WebrtcSession::SendVP8(const uint8_t* vp8, int vp8_len, bool /*keyframe*/)
 
         {
             std::lock_guard<std::mutex> lk(peers_mu_);
-            static int s_vp8_sent = 0; ++s_vp8_sent;
             for (auto& [pid, state] : peers_) {
-                bool conn = state->connected.load();
-                if (s_vp8_sent <= 3)
-                    std::fprintf(stderr, "webrtc: VP8→peer %.8s connected=%d track=%s\n",
-                                 pid.c_str(), conn, state->video_track ? "yes" : "NO");
-                if (state->video_track && conn) {
+                if (state->video_track && state->connected.load()) {
                     try { state->video_track->send(pkt); } catch (const std::exception& e) {
                         std::fprintf(stderr, "webrtc: VP8 send threw: %s\n", e.what());
                     }
