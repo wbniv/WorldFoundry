@@ -212,6 +212,62 @@ fn main() {
         oad_loader::OadSchemas::empty()
     };
 
+    // Warn if no Ambient-type Light actor authored. With Camera::SetAmbientColor
+    // defaulting to Color::black (wfsource/source/game/level.cc:1158) and the
+    // shader having no implicit ambient term (backend_modern.cc:84), the
+    // shadowed side of any curved-geometry actor renders pure black. See
+    // docs/level-design-troubleshooting.md "Actor renders pure black despite
+    // light" + docs/plans/2026-06-01-ambient-light-default-and-warnings.md.
+    {
+        let mut total_lights = 0usize;
+        let mut ambient_lights = 0usize;
+        let mut str_data_mismatch: Vec<String> = Vec::new();
+        for obj in objects.iter() {
+            if !obj.class_name.eq_ignore_ascii_case("light") { continue; }
+            total_lights += 1;
+            // lightType is I32 enum: DATA 0=Directional, 1=Ambient. STR is the
+            // human-readable label, which can disagree with DATA — that's a
+            // separate authoring bug worth flagging (mm_practice shipped with it).
+            let Some(field) = obj.find_field("lightType") else { continue; };
+            let data_bytes = lev_parser::field_data(field);
+            let mut data_value = 0i32;
+            if data_bytes.len() >= 4 {
+                data_value = i32::from_le_bytes([data_bytes[0], data_bytes[1],
+                                                  data_bytes[2], data_bytes[3]]);
+            }
+            let str_value = lev_parser::field_str_child_only(field);
+            if data_value == 1 { ambient_lights += 1; }
+            let str_says_ambient = str_value.eq_ignore_ascii_case("Ambient");
+            let str_says_directional = str_value.eq_ignore_ascii_case("Directional");
+            let data_says_ambient = data_value == 1;
+            let data_says_directional = data_value == 0;
+            if (str_says_ambient && data_says_directional) ||
+               (str_says_directional && data_says_ambient) {
+                str_data_mismatch.push(obj.name.clone());
+            }
+        }
+        if total_lights > 0 && ambient_lights == 0 {
+            eprintln!(
+                "levcomp-rs: WARNING: level has {} Light actor(s) but none are \
+                 lightType=Ambient — Camera::SetAmbientColor defaults to black, so \
+                 any curved-geometry actor (sphere, terrain, lander hull) will \
+                 render pure black on its shadowed side. Add an Ambient Light \
+                 (wf_lightType='Ambient', RGB ~0.4 grey). See \
+                 docs/level-design-troubleshooting.md \"Actor renders pure black \
+                 despite light\".",
+                total_lights
+            );
+        }
+        for name in &str_data_mismatch {
+            eprintln!(
+                "levcomp-rs: WARNING: Light actor {:?} has lightType DATA / STR \
+                 mismatch (one says Directional, the other says Ambient). Runtime \
+                 reads DATA, so the STR label is misleading. Fix the source data.",
+                name
+            );
+        }
+    }
+
     // Pre-compute mesh bboxes per object (None when no mesh dir or no Mesh Name).
     let mesh_bboxes: Vec<Option<[i32; 6]>> = objects.iter().map(|obj| {
         let mdir = mesh_dir?;

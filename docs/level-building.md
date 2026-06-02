@@ -318,6 +318,46 @@ fields, mailboxes, and Forth scripts. The patterns below are what the
 existing levels (`mm_practice`, `qbert_practice`, `snowgoons`, the MM
 reproduction) actually use.
 
+### Lighting — every level needs Directional **and** Ambient
+
+WF's vertex shader (`wfsource/source/gfx/glpipeline/backend_modern.cc:84`) builds the per-vertex `v_lit` term as `u_ambient + Σ(N·L × light_color)`. **There is no implicit ambient term** — `u_ambient` comes from `Camera::SetAmbientColor`, which `wfsource/source/game/level.cc:1158` defaults to `Color::black`. The only way to raise it is to author an `Ambient`-type Light actor (`wfsource/source/game/light.hpi:57` is where that flows back to the camera).
+
+If you author only Directional lights, any face whose normal isn't facing one of them gets `N·L ≈ 0` → `v_lit ≈ 0` → the face renders pure black, regardless of the actor's material color or texture. Flat-shaded cubes (qbert, SMB blocks) get away with this because their lit faces *are* fully lit and their shadowed faces are intentionally pure black. Curved-geometry actors (spheres, terrain meshes, anything smooth-shaded) and any sub-grazing single-directional setup (the moon's near-horizon sun) fall apart.
+
+**Pattern: author both, in the Blender script:**
+
+```python
+# Directional — your "sun" / key light. Affects which surfaces get lit.
+light = find_by_class('light')           # or create from scratch
+light.name = 'Sun'
+light.rotation_euler = (math.pi/2 - math.radians(SUN_ALT_DEG),
+                        0.0,
+                        math.radians(SUN_AZ_DEG))
+light['wf_lightType']  = 'Directional'
+light['wf_lightRed']   = 1.0
+light['wf_lightGreen'] = 1.0
+light['wf_lightBlue']  = 1.0
+
+# Ambient — the "fill" that prevents pure-black shadow sides. RGB ~0.4 grey
+# is the studio-with-fill-light point: shadows still visible, but directional
+# contrast preserved (lit side clearly brighter than shadow side).
+ambient = light.copy()
+ambient.data = light.data.copy() if light.data else None
+scene.collection.objects.link(ambient)
+ambient.name = 'AmbientLight'
+ambient.location = (0.0, 0.0, 50.0)      # any spot inside the room
+ambient['wf_lightType']  = 'Ambient'
+ambient['wf_lightRed']   = 0.40
+ambient['wf_lightGreen'] = 0.42
+ambient['wf_lightBlue']  = 0.50
+```
+
+`levcomp-rs` warns at build time if your level has no `Ambient`-type Light, plus warns on the STR/DATA mismatch shape (`STR "Ambient" + DATA 0`) that's an easy authoring slip. Don't ignore those warnings.
+
+Picking the value: ~0.4 grey is a "clear-day outdoor / studio-with-fill" floor (shadow:lit ≈ 1:2.5). Slightly higher (0.5) reads as overcast; much higher (≥0.8) starts to make the directional light invisible; lower (0.15) is dim-crevice territory. Atmospheric moon levels can explicitly set 0 RGB for true black if dramatic shadow is the look you want — author it explicitly so a future reader knows the dark is intentional. That also suppresses the levcomp warning (the level *does* have an Ambient Light, just at zero) and documents the choice.
+
+See `docs/level-design-troubleshooting.md` "Actor renders pure black despite light" for the troubleshooting flow.
+
 ### Composing actors — sensors + visuals (reach for this *before* a new class)
 
 WF game objects are usually **compositions of small, single-purpose primitive actors**, not

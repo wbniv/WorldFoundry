@@ -259,7 +259,7 @@ def emit_light():
     fx32("lightRed", 1.0, "1.000000")
     fx32("lightGreen", 1.0, "1.000000")
     fx32("lightBlue", 1.0, "1.000000")
-    i32("lightType", 0, "Ambient", "Directional|Ambient")
+    i32("lightType", 1, "Ambient", "Directional|Ambient")     # was 0 ("Ambient") — STR/DATA mismatch made the runtime read this as Directional
     end_obj()
 
 
