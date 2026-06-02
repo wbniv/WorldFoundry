@@ -243,9 +243,11 @@ WebrtcSession::GetOrCreate(const std::string& peer_id, bool is_offerer)
         }
     });
 
-    // Audio track — Opus PT=111.
+    // Audio track — Opus PT=111. SendRecv (not the libdatachannel default
+    // SendOnly): a SendOnly track refuses incoming RTP, so onMessage never
+    // fires on the receiving peer and no media flows.
     {
-        rtc::Description::Audio audio;
+        rtc::Description::Audio audio("audio", rtc::Description::Direction::SendRecv);
         audio.addOpusCodec(111);
         state->audio_track = state->pc->addTrack(audio);
     }
@@ -262,9 +264,10 @@ WebrtcSession::GetOrCreate(const std::string& peer_id, bool is_offerer)
         });
     }
 
-    // Video track — VP8 PT=96.
+    // Video track — VP8 PT=96. SendRecv (see audio note above) so the
+    // receiving peer's track actually delivers incoming RTP to onMessage.
     {
-        rtc::Description::Video video;
+        rtc::Description::Video video("video", rtc::Description::Direction::SendRecv);
         video.addVP8Codec(96);
         state->video_track = state->pc->addTrack(video);
     }
