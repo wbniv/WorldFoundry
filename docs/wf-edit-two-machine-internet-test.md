@@ -42,13 +42,9 @@ cargo build --release --bin wf-relay --manifest-path wftools/wf_collab/Cargo.tom
 ## One-time tunnel setup (host only) — ✅ already done
 
 Tunnel `wf-host` → `wf.worldfoundry.org` is created and DNS-routed.
-The credential lives in `~/.cloudflared/` on Will's laptop.
-
-To host from a **different machine**, copy those two files:
-
-```bash
-scp ~/.cloudflared/cert.pem ~/.cloudflared/<UUID>.json  other-host:~/.cloudflared/
-```
+The credential lives in `~/.cloudflared/` on Will's laptop (both machines share the git repo,
+so code is already in sync; the only per-machine step is installing the `~/.cloudflared/` creds
+if you host from the second machine — not needed for the joiner role).
 
 For reference, the three commands that were run once:
 

@@ -384,8 +384,8 @@ credential (mode `0600`) under `~/.cloudflared/` that `cloudflared` owns — you
 never paste or save a token anywhere, and wf-edit never stores one.
 
 **One-time setup on the host machine** — ✅ done (`wf-host` → `wf.worldfoundry.org`).
-Credential in `~/.cloudflared/` on Will's laptop. To host from another machine,
-copy `~/.cloudflared/cert.pem` + `~/.cloudflared/<UUID>.json` there.
+Credential in `~/.cloudflared/` on Will's laptop. To host from a machine that doesn't
+have `~/.cloudflared/` yet, copy `cert.pem` + `<UUID>.json` there (joiner role needs nothing).
 
 For reference ([`cloudflared` docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-local-tunnel/)):
 
