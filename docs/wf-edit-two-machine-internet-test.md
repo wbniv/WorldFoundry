@@ -49,9 +49,12 @@ if you host from the second machine — not needed for the joiner role).
 For reference, the three commands that were run once:
 
 ```bash
-cloudflared tunnel login                                         # browser → ~/.cloudflared/cert.pem (0600)
+cloudflared tunnel login                                         # browser → ~/.cloudflared/cert.pem
+                                                                 # IMPORTANT: select worldfoundry.org, not rapid-raccoon.com
 cloudflared tunnel create wf-host                                # → ~/.cloudflared/<UUID>.json
-cloudflared tunnel route dns wf-host wf.worldfoundry.org         # CNAME → the tunnel
+cloudflared tunnel list                                          # get the UUID
+cloudflared tunnel route dns --overwrite-dns <UUID> wf.worldfoundry.org   # use UUID, not name
+                                                                 # (name lookup silently uses config.yml's tunnel)
 ```
 
 Full setup detail: [manual → Named tunnel](wf-edit-manual.md#named-tunnel--durable-rate-limit-free-stable-hostname).
