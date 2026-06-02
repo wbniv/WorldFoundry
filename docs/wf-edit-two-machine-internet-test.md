@@ -66,10 +66,11 @@ Tell `wf-edit` the tunnel **name + hostname** (no secret). Env is easiest for a
 one-off; or put `tunnel_name` / `tunnel_hostname` in `~/.config/wf-edit/identity.json`.
 
 ```bash
-task named-tunnel ROOM=test1
+task named-tunnel          # room defaults to studio-1
+task named-tunnel ROOM=x   # or pick a room
 ```
 
-Defaults to `wf-host` → `wf.worldfoundry.org`. Override with env if needed.
+Defaults: `wf-host` → `wf.worldfoundry.org`, room `studio-1`. Override anything via env or var.
 
 Confirm in the host's stderr — this is the proof the named path engaged:
 
@@ -86,10 +87,11 @@ sessions — that's the named tunnel's whole reason for being. Copy the share li
 ### 2. Joiner (computer 2)
 
 ```bash
-task join ROOM=test1
+task join          # joins studio-1 on wf.worldfoundry.org
+task join ROOM=x   # or pick a room
 ```
 
-Defaults to `wf.worldfoundry.org`; reconstructs the full link automatically.
+Reconstructs the full link automatically.
 The joiner needs no cloudflared and no account — it just dials the public
 `wss://` host. Its stderr should print `relay connected wss://wf.worldfoundry.org …`.
 

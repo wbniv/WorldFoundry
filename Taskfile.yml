@@ -319,7 +319,7 @@ tasks:
         wait
 
   named-tunnel:
-    desc: "Host a wf-edit call via named Cloudflare tunnel (wf-host → wf.worldfoundry.org). Ctrl-C to stop."
+    desc: "Host a wf-edit call via named Cloudflare tunnel. Defaults: wf-host → wf.worldfoundry.org, room studio-1. Ctrl-C to stop."
     silent: true
     deps: [build-wf-edit-fast]
     vars:
@@ -337,7 +337,7 @@ tasks:
         exec ./build-editor-fast/wf-edit --host-tunnel --room={{.ROOM}} {{.CLI_ARGS}}
 
   join:
-    desc: "Join a wf-edit call by room. Usage: task join ROOM=test1 (defaults to wf.worldfoundry.org). Override host with URL=wfedit+s://..."
+    desc: "Join a wf-edit call. Defaults: room studio-1 on wf.worldfoundry.org. Override: ROOM=x or URL=wfedit+s://..."
     silent: true
     deps: [build-wf-edit-fast]
     vars:
