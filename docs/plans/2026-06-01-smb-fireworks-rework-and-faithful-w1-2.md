@@ -165,9 +165,17 @@ keeps looping `LEVEL_TO_RUN` back to W1-1.
   (FLAGPOLE_X=372-relative): flag-slide + castle + rising castle flag + door + radial spark
   fireworks (count = remaining-timer last digit 1/3/6) + Director timer→score sequencer; flagpole
   trigger now writes `SMB_CELEBRATE` (Director fires `END_OF_LEVEL` at the finale). Boots clean:
-  object count 142 (90 unique meshes, no OOM). Fireworks verified firing via engine log
-  (`Generato::FIRING` + `ConstructTemplateObject -> non-NULL` × 31 across the burst window);
-  celebration sequence screenshotted (`tests/screenshots/smb_w1_2_celebration*.png`).
+  object count 142 (90 unique meshes, no OOM). **Fireworks verified three ways:** (1) the engine
+  log shows the generators firing — `Generato::FIRING obj=… spawn=(371.9,…,8.9) vel=(0,0,4)` +
+  `ConstructTemplateObject -> non-NULL`, ×31 across the burst window; (2) a celebration **video**
+  ([`tests/recordings/smb_w1_2_celebration.mp4`](../../tests/recordings/smb_w1_2_celebration.mp4))
+  shows the flag slide + Mario walking into the castle + the spark bursts popping; (3) a
+  long-exposure **composite still**
+  ([`tests/screenshots/smb_w1_2_celebration_fireworks.png`](../../tests/screenshots/smb_w1_2_celebration_fireworks.png))
+  overlays the radial spark positions across the burst window above/around the castle. The
+  sparks are faithfully small (0.32 m, same as W1-1) so they read best in motion (the video) —
+  a single still catches only 1–2 of a burst. The plain celebration frame (flag + castle +
+  timer drained to 0, Mario hidden) is `tests/screenshots/smb_w1_2_celebration.png`.
 
 ## Verification
 
