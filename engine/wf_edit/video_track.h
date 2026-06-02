@@ -42,6 +42,10 @@ struct PeerVideo {
     vpx_codec_ctx*   decoder    = nullptr;
     FrameAssembly    assembly;
 
+    // When true the decoder was reset after an error; discard frames until the
+    // next VP8 keyframe resyncs the decoder reference-frame state.
+    bool waiting_for_keyframe = true;
+
     // Latest decoded frame as RGB (160×120). Protected by frame_mu.
     std::vector<uint8_t> rgb;    // 160*120*3 bytes, or empty if no frame yet
     std::mutex           frame_mu;

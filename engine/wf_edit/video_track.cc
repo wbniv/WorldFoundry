@@ -38,8 +38,9 @@ static constexpr int kMaxFragSize = 1200;
 static constexpr uint8_t kMagic[4] = { 'W', 'F', 'V', '\0' };
 static constexpr int kHdrSize = 14;
 
-// Key frame every 60 frames (~2 s at 30 fps).
-static constexpr int kKeyframeInterval = 60;
+// Key frame every 30 frames (~1 s at 30 fps). More frequent keyframes mean
+// the decoder re-syncs faster after any packet loss or reordering on the LAN.
+static constexpr int kKeyframeInterval = 30;
 
 // ─── VideoChat ───────────────────────────────────────────────────────────────
 
@@ -148,6 +149,23 @@ void VideoChat::SetSendCallback(std::function<void(const uint8_t*, int, bool)> c
     send_cb_ = std::move(cb);
 }
 
+// VP8 bitstream frame type: bit 0 of byte 0 is 0 for keyframe, 1 for inter.
+static bool IsVP8Keyframe(const uint8_t* data, int len)
+{
+    return len >= 1 && (data[0] & 0x01) == 0;
+}
+
+// Destroy and reinitialise the VP8 decoder for a peer so it waits cleanly for
+// the next keyframe instead of cascading corruption through delta frames.
+static void ResetDecoder(PeerVideo* pv)
+{
+    if (pv->decoder) {
+        vpx_codec_destroy(pv->decoder);
+        vpx_codec_dec_init(pv->decoder, vpx_codec_vp8_dx(), nullptr, 0);
+    }
+    pv->waiting_for_keyframe = true;
+}
+
 void VideoChat::OnRemoteVP8Frame(const std::string& peer_id,
                                   const uint8_t* vp8_data, int len, bool /*is_key*/)
 {
@@ -162,14 +180,25 @@ void VideoChat::OnRemoteVP8Frame(const std::string& peer_id,
     PeerVideo* pv = it->second;
     if (!pv || !pv->decoder) return;
 
-    static int s_recv = 0;
-    if (++s_recv <= 5 || s_recv % 150 == 0)
-        std::fprintf(stderr, "video: VP8 frame #%d from %s len=%d\n", s_recv, peer_id.c_str(), len);
-    std::fflush(stderr);
+    // While waiting for a keyframe after an error, discard inter frames —
+    // they'd reference a corrupt reference frame and produce more garbage.
+    bool is_key = IsVP8Keyframe(vp8_data, len);
+    if (pv->waiting_for_keyframe) {
+        if (!is_key) return;
+        pv->waiting_for_keyframe = false;
+    }
 
     if (vpx_codec_decode(pv->decoder, vp8_data, static_cast<unsigned>(len),
                           nullptr, 0) != VPX_CODEC_OK) {
-        std::fprintf(stderr, "video: VP8 decode failed frame #%d\n", s_recv); std::fflush(stderr);
+        ResetDecoder(pv);
+        return;
+    }
+
+    // Check whether the decoder internally concealed errors (corrupted frame).
+    int corrupted = 0;
+    vpx_codec_control(pv->decoder, VP8D_GET_FRAME_CORRUPTED, &corrupted);
+    if (corrupted) {
+        ResetDecoder(pv);
         return;
     }
 
