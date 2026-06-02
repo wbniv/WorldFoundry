@@ -391,10 +391,11 @@ bool VideoChat::OpenCamera()
     vpx_codec_enc_config_default(vpx_codec_vp8_cx(), &cfg, 0);
     cfg.g_w          = static_cast<unsigned>(cap_w_);
     cfg.g_h          = static_cast<unsigned>(cap_h_);
-    cfg.rc_target_bitrate = 500;   // kbps
+    cfg.rc_target_bitrate = 700;   // kbps — 500 was too tight for 320×240@30
     cfg.g_timebase.num   = 1;
     cfg.g_timebase.den   = 30;
     cfg.g_threads        = 2;
+    cfg.g_error_resilient = VPX_ERROR_RESILIENT_DEFAULT;  // each frame independently decodable
     if (vpx_codec_enc_init(encoder_, vpx_codec_vp8_cx(), &cfg, 0) != VPX_CODEC_OK) {
         std::fprintf(stderr, "video: vp8 encoder init failed\n");
         delete encoder_; encoder_ = nullptr;
