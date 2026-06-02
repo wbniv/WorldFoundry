@@ -259,13 +259,19 @@ void VideoChat::UploadFrames()
             GLint fbo = 0;
             glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
             GLenum err = glGetError();
-            // Log top-left 3 pixels to verify non-black content.
+            // Sample 4 pixels: top-left, top-right, centre, bottom-right.
+            auto px = [&](int x, int y) -> const uint8_t* {
+                return pv->rgb.data() + (y * kThumbW + x) * 3;
+            };
+            const uint8_t* tl = px(0, 0);
+            const uint8_t* tr = px(kThumbW-1, 0);
+            const uint8_t* cc = px(kThumbW/2, kThumbH/2);
+            const uint8_t* br = px(kThumbW-1, kThumbH-1);
             std::fprintf(stderr, "video: GL texture %u for %.8s fbo=%d err=%u "
-                         "px[0]=(%d,%d,%d) px[1]=(%d,%d,%d) px[2]=(%d,%d,%d)\n",
+                         "tl=(%d,%d,%d) tr=(%d,%d,%d) cc=(%d,%d,%d) br=(%d,%d,%d)\n",
                          pv->gl_tex, pid.c_str(), fbo, err,
-                         pv->rgb[0], pv->rgb[1], pv->rgb[2],
-                         pv->rgb[3], pv->rgb[4], pv->rgb[5],
-                         pv->rgb[6], pv->rgb[7], pv->rgb[8]);
+                         tl[0],tl[1],tl[2], tr[0],tr[1],tr[2],
+                         cc[0],cc[1],cc[2], br[0],br[1],br[2]);
             std::fflush(stderr);
         } else {
             glBindTexture(GL_TEXTURE_2D, pv->gl_tex);
