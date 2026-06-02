@@ -63,10 +63,11 @@ void RenderCollabPanel(bool& show_collab,
 
     // Room ID / invite line.
     ImGui::TextDisabled("Room: %s", room_id.empty() ? "(none)" : room_id.c_str());
-    // Relay socket status. The connect is one-shot at startup with no reconnect,
-    // so a failed/dropped connection leaves the rest of the panel (Room name,
-    // "You" tile, "No peers…") looking exactly like a live session — this dot is
-    // the only honest signal of whether edits/presence are actually flowing.
+    // Relay socket status. A dropped connection now auto-reconnects in the
+    // background (ServiceRelayReconnect), and `relay_connected` reflects
+    // RelayUsable() — false while a reconnect is in flight — so this dot honestly
+    // tracks whether edits/presence are actually flowing right now (🔴 while
+    // down/reconnecting, 🟢 once re-joined), independent of the rest of the panel.
     if (!room_id.empty()) {
         ImGui::SameLine(0, 12);
         const ImU32 dot = relay_connected ? IM_COL32( 76, 217, 100, 255)   // green

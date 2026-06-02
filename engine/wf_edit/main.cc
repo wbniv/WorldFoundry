@@ -93,6 +93,17 @@ namespace {
 // block + docs/plans/2026-06-01-relay-connect-localhost-and-resilient-retry.md.
 static constexpr int kRelayPort = 9900;
 
+// Connect time-budgets (seconds). The host reaches its own relay over loopback,
+// so a failure is immediate and definitive → a short budget. A joiner may hit a
+// quick tunnel that is still warming (Cloudflare edge 530/502 for a few seconds
+// after the URL appears), so it gets a longer one — but 15 s, not the original
+// 45 s, which punished the *common* case (a dead/dropped tunnel) by making the
+// user stare at "Connecting…" for 45 s before giving up. Definitive failures
+// (NXDOMAIN, 4xx) now fail fast regardless of budget via WsClient::lastError().
+// See docs/investigations/2026-06-01-resilient-retry-plan-critique.md (②⑧).
+static constexpr double kHostConnectBudgetSec   = 8.0;
+static constexpr double kJoinerConnectBudgetSec = 15.0;
+
 // ── Phase 6: identity persistence + wfedit:// URL ───────────────────────────
 
 struct RecentRoom { std::string relay_url, room_id; };
@@ -358,6 +369,20 @@ struct EditorCtx {
     std::optional<wfcrdt::Subscription> relay_sub;
     bool                                suppress_relay_send = false;
 
+    // Mid-session reconnect (2026-06-01 critique ⑤). A relay/tunnel can die
+    // mid-session; rather than sit there 🔴 forever, a background thread
+    // re-connects while the main thread re-joins the room (so the relay re-pushes
+    // a full SYNC that the existing CollabDrain path applies — no doc race). The
+    // reconnect thread is the *only* toucher of relay_client while it runs; the
+    // main thread gates all relay access on RelayUsable() so the two never race.
+    std::string         relay_connect_url;              // loopback-or-public target to reconnect to
+    bool                relay_was_connected = false;    // latch: only auto-reconnect after a real connect
+    std::atomic<bool>   relay_reconnecting{false};
+    std::atomic<int>    relay_reconnect_done{0};        // 0=running 1=ok 2=fatal 3=shutdown
+    std::atomic<bool>   relay_shutdown{false};          // abort seam for the reconnect thread
+    bool                relay_reconnect_abandoned = false;  // fatal classification → stop retrying
+    std::thread         relay_reconnect_thread;
+
     // Phase 4: presence — stable actor eids (parallel to actor_names), peer state.
     std::vector<std::string> actor_eids;
     struct PresenceState {
@@ -540,9 +565,74 @@ static void PeerColourFromId(const std::string& id, float col[3])
     col[2] = 0.45f + 0.55f * static_cast<float>((h >> 16) & 0xFF) / 255.f;
 }
 
+// Relay is usable from the main thread only when the socket is up AND a
+// background reconnect isn't currently owning relay_client. Every main-thread
+// relay touch gates on this so the two threads never race the socket.
+static inline bool RelayUsable(EditorCtx* c) {
+    return c->relay_client.connected() && !c->relay_reconnecting.load();
+}
+
+// Send the CONTROL "join room" frame: [0x04][room_id NUL peer_id]. Shared by the
+// initial connect and by reconnect (which re-joins so the relay re-pushes SYNC).
+static void SendRoomJoin(EditorCtx* c) {
+    std::vector<uint8_t> ctrl;
+    ctrl.push_back(0x04);
+    for (char ch : c->room_id)      ctrl.push_back(static_cast<uint8_t>(ch));
+    ctrl.push_back(0);
+    for (char ch : c->our_peer_id)  ctrl.push_back(static_cast<uint8_t>(ch));
+    c->relay_client.send(ctrl.data(), ctrl.size());
+}
+
+// Mid-session reconnect state machine (2026-06-01 critique ⑤). Called each frame
+// before CollabDrain. Detects a drop, spawns a background thread that exclusively
+// owns relay_client while it re-connects (the main thread stops touching the
+// socket via RelayUsable()), then on success re-joins the room on the main thread
+// so the relay re-pushes a full SYNC that CollabDrain applies — no doc race, no
+// new doc-mutation code. Fatal failures (NXDOMAIN/4xx) stop the retrying.
+void ServiceRelayReconnect(EditorCtx* c) {
+    if (c->relay_connect_url.empty() || c->relay_reconnect_abandoned) return;
+
+    if (c->relay_reconnecting.load()) {                  // an attempt is in flight
+        const int done = c->relay_reconnect_done.load();
+        if (done == 0) return;                           // still trying
+        if (c->relay_reconnect_thread.joinable())
+            c->relay_reconnect_thread.join();            // main thread re-owns relay_client
+        c->relay_reconnecting.store(false);
+        if (done == 1) {
+            SendRoomJoin(c);                             // → relay re-pushes SYNC (CollabDrain applies)
+            std::printf("wf-edit: relay reconnected, re-joined room=%s\n", c->room_id.c_str());
+        } else if (done == 2) {
+            c->relay_reconnect_abandoned = true;
+            std::fprintf(stderr, "wf-edit: relay reconnect abandoned (fatal connect error)\n");
+        }
+        return;
+    }
+
+    if (c->relay_was_connected && !c->relay_client.connected()) {   // genuine mid-session drop
+        std::fprintf(stderr, "wf-edit: relay dropped — reconnecting to %s\n",
+                     c->relay_connect_url.c_str());
+        c->relay_reconnecting.store(true);
+        c->relay_reconnect_done.store(0);
+        c->relay_reconnect_thread = std::thread([c]{
+            // Unlimited budget: retry transient failures until reconnected, a
+            // fatal classification, or shutdown (the aborted() seam).
+            const wfedit::ConnectOutcome out = wfedit::RunConnectWithRetry(/*budget=*/0.0,
+                [c]{ const bool ok = c->relay_client.connect(c->relay_connect_url.c_str());
+                     return wfedit::ConnectAttempt{ ok, ok ? wfedit::ConnectError::NoError
+                                                           : c->relay_client.lastError() }; },
+                []{ return glfwGetTime(); },
+                [](double s){ const struct timespec ts{ static_cast<time_t>(s),
+                                  static_cast<long>((s - static_cast<long>(s)) * 1e9) };
+                              nanosleep(&ts, nullptr); },
+                [c]{ return c->relay_shutdown.load(); });
+            c->relay_reconnect_done.store(c->relay_shutdown.load() ? 3 : (out.ok ? 1 : 2));
+        });
+    }
+}
+
 // Drain incoming relay messages (SYNC + PRESENCE). Non-blocking; called each frame.
 void CollabDrain(EditorCtx* c) {
-    if (!c->relay_client.connected() || !c->doc) return;
+    if (!RelayUsable(c) || !c->doc) return;
     std::vector<uint8_t> frame;
     while (c->relay_client.poll(frame)) {
         if (frame.size() < 2) { frame.clear(); continue; }
@@ -1353,6 +1443,12 @@ bool editor_build(void* p)
     // when the SYNC below fires them.
     if (c->doc) wfedit::InitBridgeMap(*c->doc);
 
+    // Mid-session reconnect: detect a relay drop and drive the background
+    // reconnect / re-join state machine. Runs before CollabDrain because a
+    // successful re-join re-sends the room CONTROL frame, after which the relay
+    // pushes a fresh SYNC that the CollabDrain below applies.
+    ServiceRelayReconnect(c);
+
     // Phase 2: drain incoming relay SYNC + PRESENCE messages. A SYNC fires the
     // content observer (marks a rebuild) and the deep observer (queues touched
     // actor indices), so it must precede UpdateBridgeMap + DrainEngineSync.
@@ -1376,7 +1472,7 @@ bool editor_build(void* p)
     // Phase 4: broadcast own presence ~10 Hz when relay is connected.
     // Shared-cursors extension (2026-05-30): includes camera pose + selected_eid
     // so peers can draw each other's viewing frustums + selection rings.
-    if (c->relay_client.connected()) {
+    if (RelayUsable(c)) {
         const double now = glfwGetTime();
         if (now - c->last_presence_send >= 0.1) {
             c->last_presence_send = now;
@@ -1594,7 +1690,7 @@ bool editor_build(void* p)
             for (const auto& p : peers) peer_ids.push_back(p.peer_id);
             c->webrtc->SyncPeers(peer_ids, c->our_peer_id);
             // Send any queued SDP / ICE-candidate signals via the relay.
-            if (c->relay_client.connected()) {
+            if (RelayUsable(c)) {
                 for (auto& [to, json] : c->webrtc->DrainSignaling()) {
                     std::vector<uint8_t> sig;
                     sig.push_back(0x05);  // CH_SIGNAL
@@ -2005,10 +2101,10 @@ bool editor_build(void* p)
     if (c->collab)
         wfedit::RenderCollabPanel(c->show_collab, *c->collab,
                                   *c->voice, *c->video, c->room_id,
-                                  c->relay_client.connected());
+                                  RelayUsable(c));
 
     // Chat panel (when a relay is connected, or forced by WF_EDIT_CHAT_DEMO).
-    if (c->relay_client.connected() || c->chat_demo) {
+    if (RelayUsable(c) || c->chat_demo) {
         if (c->chat_demo) {
             // Demo/screenshot: float it over the viewport so the capture shows it
             // (normally it's docked once the user drags it into the layout).
@@ -3089,45 +3185,67 @@ int main(int argc, char** argv)
             host_tunnel ? ("ws://127.0.0.1:" + std::to_string(kRelayPort))
                         : ctx_relay_url;
 
-        std::atomic<int> cstate{0};    // 0 = connecting, 1 = ok, 2 = failed
-        std::atomic<int> cattempt{0};  // surfaced in the progress message
+        std::atomic<int>  cstate{0};    // 0 = connecting, 1 = ok, 2 = failed
+        std::atomic<int>  cattempt{0};  // surfaced in the progress message
+        std::atomic<bool> cabort{false}; // set when the user closes the window mid-connect
         std::thread connector([&]{
-            // Host connects over loopback (relay already listening) → short budget.
-            // A joiner must ride out the quick-tunnel warm-up: the Cloudflare edge
-            // returns 530 ("no connector") for ~15–30 s after the URL appears, so
-            // the old 4×2 s budget gave up inside that window. Retry any failure
-            // (530/502/refused/DNS-not-yet — all transient) until the budget ends;
-            // a genuinely bad URL simply exhausts it.
-            const double budget = host_tunnel ? 8.0 : 45.0;
-            const double t0 = glfwGetTime();
-            bool ok = false;
-            for (int attempt = 0; !ok; ++attempt) {
-                cattempt.store(attempt + 1);
-                ok = ctx.relay_client.connect(connect_url.c_str());
-                if (ok || glfwGetTime() - t0 >= budget) break;
-                const double back = std::min(3.0, 1.0 + 0.5 * attempt);  // 1.0,1.5,…,3.0 s
-                const struct timespec s{ static_cast<time_t>(back),
-                                         static_cast<long>((back - static_cast<long>(back)) * 1e9) };
-                nanosleep(&s, nullptr);
-            }
-            cstate.store(ok ? 1 : 2);
+            // Host connects over loopback (relay already listening) → short budget;
+            // a joiner may ride out a quick-tunnel warm-up (Cloudflare 530/502 for a
+            // few seconds after the URL appears). The retry policy classifies each
+            // failure: transient ones (530/502/refused/timeout/TLS) retry until the
+            // budget runs out, definitive ones (NXDOMAIN, 4xx) fail fast. Note the
+            // earlier "530 ⇒ warming" assumption was wrong — in the 2026-06-01
+            // session the 530s meant the tunnel was *down*; fail-fast + a 15 s
+            // joiner budget keep a dead host from blocking the user for 45 s.
+            // See docs/investigations/2026-06-01-resilient-retry-plan-critique.md.
+            const double budget = host_tunnel ? kHostConnectBudgetSec
+                                              : kJoinerConnectBudgetSec;
+            const wfedit::ConnectOutcome out = wfedit::RunConnectWithRetry(budget,
+                [&]{ const bool ok = ctx.relay_client.connect(connect_url.c_str());
+                     return wfedit::ConnectAttempt{ ok, ok ? wfedit::ConnectError::NoError
+                                                           : ctx.relay_client.lastError() }; },
+                []{ return glfwGetTime(); },
+                [](double s){ const struct timespec ts{ static_cast<time_t>(s),
+                                  static_cast<long>((s - static_cast<long>(s)) * 1e9) };
+                              nanosleep(&ts, nullptr); },
+                [&]{ return cabort.load(); },
+                &cattempt);
+            cstate.store(out.ok ? 1 : 2);
         });
         const std::string connecting_msg = "Connecting to room " + room_id + "…";
-        while (cstate.load() == 0) {
+        // Test hook (headless close-button regression): simulate a window close
+        // after N pump frames so tests can prove the loop bails on the close flag
+        // instead of spinning out the whole budget. No effect unless the env is set.
+        const int abort_after = []{ const char* e = std::getenv("WF_EDIT_ABORT_CONNECT_AFTER");
+                                    return e ? std::atoi(e) : 0; }();
+        int pump_frames = 0;
+        // Stop pumping the moment the window's close button is hit — otherwise the
+        // close flag pump() sets is never acted on and the window can't be closed
+        // for the whole budget (presents as a "Not Responding" freeze).
+        while (cstate.load() == 0 && !glfwWindowShouldClose(win)) {
             const std::string m = connecting_msg + "  (attempt " +
                                   std::to_string(cattempt.load()) + ")";
             pump(m.c_str());
+            if (abort_after && ++pump_frames >= abort_after)
+                glfwSetWindowShouldClose(win, GLFW_TRUE);   // == user clicking the X
         }
+        if (cstate.load() == 0) cabort.store(true);  // user closed → tell the connector to bail
         connector.join();
+        if (glfwWindowShouldClose(win)) {
+            // Launch cancelled by the user. The connector is joined (no dangling
+            // thread); RAII tears down voice/video/webrtc/window as main returns.
+            std::printf("wf-edit: connect cancelled by user — exiting\n");
+            return 0;
+        }
 
         if (cstate.load() == 1) {
+            // Remember the target + latch "was connected" so mid-session drops
+            // trigger an auto-reconnect (ServiceRelayReconnect) to the same place.
+            ctx.relay_connect_url   = connect_url;
+            ctx.relay_was_connected = true;
+
             // Send CONTROL join message: [0x04][room_id NUL peer_id].
-            std::vector<uint8_t> ctrl;
-            ctrl.push_back(0x04);
-            for (char ch : room_id)         ctrl.push_back(static_cast<uint8_t>(ch));
-            ctrl.push_back(0);
-            for (char ch : ctx.our_peer_id) ctrl.push_back(static_cast<uint8_t>(ch));
-            ctx.relay_client.send(ctrl.data(), ctrl.size());
+            SendRoomJoin(&ctx);
 
             // Wait (≤1 s) for the relay's initial full-state SYNC — pumping so
             // this doesn't freeze either.
@@ -3153,9 +3271,10 @@ int main(int argc, char** argv)
                 }
             }
 
-            // Wire local commits → relay.
+            // Wire local commits → relay. While reconnecting, the bg thread owns
+            // relay_client, so drop the send (CRDT state re-syncs on reconnect).
             ctx.relay_sub = doc.observeUpdates([&ctx](wfcrdt::ByteView update) {
-                if (ctx.suppress_relay_send) return;
+                if (ctx.suppress_relay_send || ctx.relay_reconnecting.load()) return;
                 std::vector<uint8_t> msg;
                 msg.push_back(0x01);  // CH_SYNC
                 msg.insert(msg.end(), update.data, update.data + update.len);
@@ -3215,6 +3334,12 @@ int main(int argc, char** argv)
     std::printf("wf-edit: HALStart (--editor, level=%s)\n", level.c_str());
     HALStart(hal_argc, hal_argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
     std::printf("wf-edit: HALStart returned\n");
+
+    // Stop any in-flight mid-session reconnect before ctx (and relay_client)
+    // tear down — the aborted() seam lets the thread exit promptly, then join.
+    ctx.relay_shutdown.store(true);
+    if (ctx.relay_reconnect_thread.joinable())
+        ctx.relay_reconnect_thread.join();
 
     // Persist gizmo snap prefs. Only when a peer_id exists — LoadIdentity rejects
     // an identity with an empty one, so saving without one would write a file that

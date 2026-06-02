@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+#include "connect_retry.h"   // ConnectError
+
 namespace wfedit {
 
 class WsClient {
@@ -29,6 +31,10 @@ public:
     //      "wss://host[:port]/path" (port default 443, TLS via OpenSSL).
     // Blocks until connected. Returns false on failure.
     bool connect(const char* url);
+
+    // Why the last connect() failed (None after a success). Lets the connector
+    // fail fast on definitive errors (NXDOMAIN, 4xx) instead of retrying them.
+    ConnectError lastError() const { return _last_error; }
 
     // Close the socket.
     void disconnect();
@@ -46,6 +52,7 @@ public:
 
 private:
     int _fd = -1;
+    ConnectError _last_error = ConnectError::NoError;  // why the last connect() failed
     std::vector<uint8_t> _recv_buf;  // partial frame accumulator
     bool  _tls     = false;
     void* _ssl     = nullptr;    // SSL* (OpenSSL) — non-null when TLS active

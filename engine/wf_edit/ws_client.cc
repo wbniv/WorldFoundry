@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <cstdio>
 #include <cstring>
@@ -99,9 +100,10 @@ ssize_t WsClient::tls_recv(void* buf, size_t len) {
 
 bool WsClient::connect(const char* url) {
     disconnect();
+    _last_error = ConnectError::NoError;
 
     ParsedUrl pu = parseWsUrl(url);
-    if (!pu.ok) return false;
+    if (!pu.ok) { _last_error = ConnectError::Other; return false; }
 
     // Resolve hostname. AF_UNSPEC so we accept IPv4 *or* IPv6 — a public relay /
     // Cloudflare quick-tunnel host can answer AAAA-only, and the old AF_INET
@@ -110,34 +112,64 @@ bool WsClient::connect(const char* url) {
     struct addrinfo hints{}, *res = nullptr;
     hints.ai_family   = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    if (getaddrinfo(pu.host.c_str(), pu.port.c_str(), &hints, &res) != 0) {
-        std::fprintf(stderr, "ws: getaddrinfo(%s:%s) failed\n", pu.host.c_str(), pu.port.c_str());
+    const int gai = getaddrinfo(pu.host.c_str(), pu.port.c_str(), &hints, &res);
+    if (gai != 0) {
+        // EAI_AGAIN = resolver temporarily busy (worth a retry); everything else
+        // (NXDOMAIN/EAI_NONAME, EAI_NODATA, EAI_FAIL) is a bad host → fail fast.
+        _last_error = (gai == EAI_AGAIN) ? ConnectError::DnsTemporary
+                                         : ConnectError::DnsFatal;
+        std::fprintf(stderr, "ws: getaddrinfo(%s:%s) failed: %s\n",
+                     pu.host.c_str(), pu.port.c_str(), gai_strerror(gai));
         return false;
     }
 
     _fd = -1;
+    int connect_errno = 0;   // last ::connect() failure, classified below
     for (struct addrinfo* rp = res; rp; rp = rp->ai_next) {
         const int fd = ::socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-        if (fd < 0) continue;
+        if (fd < 0) { connect_errno = errno; continue; }
         if (::connect(fd, rp->ai_addr, rp->ai_addrlen) == 0) { _fd = fd; break; }
+        connect_errno = errno;
         std::fprintf(stderr, "ws: connect(fam=%d) to %s:%s failed: %s\n",
                      rp->ai_family, pu.host.c_str(), pu.port.c_str(), std::strerror(errno));
         ::close(fd);
     }
     freeaddrinfo(res);
-    if (_fd < 0) return false;
+    if (_fd < 0) {
+        switch (connect_errno) {
+            case ECONNREFUSED:               _last_error = ConnectError::Refused;     break;
+            case ETIMEDOUT:                  _last_error = ConnectError::Timeout;     break;
+            case ENETUNREACH: case EHOSTUNREACH:
+                                             _last_error = ConnectError::Unreachable; break;
+            default:                         _last_error = ConnectError::Other;       break;
+        }
+        return false;
+    }
 
-    // TLS handshake for wss://.
+    // Bound blocking I/O so one slow/half-open peer can't hang an attempt past
+    // the retry budget (and so the abort-join after a window close stays snappy).
+    // Covers the plain-TCP recv/send and, since OpenSSL drives this fd, the TLS
+    // handshake's reads too. (A non-blocking ::connect with a select() cap — to
+    // bound the SYN wait to a black-hole host — is a noted follow-up.)
+    {
+        const struct timeval to{ 5, 0 };   // 5 s
+        setsockopt(_fd, SOL_SOCKET, SO_RCVTIMEO, &to, sizeof(to));
+        setsockopt(_fd, SOL_SOCKET, SO_SNDTIMEO, &to, sizeof(to));
+    }
+
+    // TLS handshake for wss://. A handshake failure against a warming Cloudflare
+    // edge is transient, so classify as Tls (retryable) at every exit.
     _tls = pu.tls;
     if (_tls) {
         SSL_CTX* ctx = SSL_CTX_new(TLS_client_method());
-        if (!ctx) { ::close(_fd); _fd = -1; return false; }
+        if (!ctx) { _last_error = ConnectError::Tls; ::close(_fd); _fd = -1; return false; }
         SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, nullptr);
         SSL* ssl = SSL_new(ctx);
-        if (!ssl) { SSL_CTX_free(ctx); ::close(_fd); _fd = -1; return false; }
+        if (!ssl) { _last_error = ConnectError::Tls; SSL_CTX_free(ctx); ::close(_fd); _fd = -1; return false; }
         SSL_set_fd(ssl, _fd);
         SSL_set_tlsext_host_name(ssl, pu.host.c_str());
         if (SSL_connect(ssl) != 1) {
+            _last_error = ConnectError::Tls;
             std::fprintf(stderr, "ws: TLS handshake to %s failed\n", pu.host.c_str());
             SSL_free(ssl); SSL_CTX_free(ctx);
             ::close(_fd); _fd = -1; return false;
@@ -180,6 +212,9 @@ bool WsClient::connect(const char* url) {
         if (_tls) n = tls_recv(buf + total, sizeof(buf) - 1 - total);
         else      n = ::recv(_fd, buf + total, sizeof(buf) - 1 - total, 0);
         if (n <= 0) {
+            // Peer closed (or recv timed out) before the full upgrade response —
+            // common while a quick tunnel is still coming up. Retryable.
+            _last_error = ConnectError::UpgradeFailed;
             std::fprintf(stderr, "ws: upgrade read failed (recv=%zd) from %s\n", n, pu.host.c_str());
             disconnect(); return false;
         }
@@ -188,11 +223,28 @@ bool WsClient::connect(const char* url) {
         found = (strstr(buf, "\r\n\r\n") != nullptr);
     }
 
-    if (!strstr(buf, "101")) {
+    // Parse the real status line ("HTTP/1.1 <code> <reason>") rather than
+    // strstr'ing for "101" — a header value could contain "101" and false-match.
+    // 101 = success; 5xx (Cloudflare 530/502, gateway warming) is retryable;
+    // any other non-101 status is a definitive rejection → fail fast.
+    int code = 0;
+    std::sscanf(buf, "HTTP/%*d.%*d %d", &code);
+    if (code != 101) {
+        _last_error = (code / 100 == 5) ? ConnectError::HttpServerError
+                                        : ConnectError::HttpClientError;
         char status[80] = {0};
         std::snprintf(status, sizeof(status), "%.*s", 60, buf);   // first line of the response
         std::fprintf(stderr, "ws: WS upgrade not accepted by %s — response: %s\n", pu.host.c_str(), status);
         disconnect(); return false;
+    }
+
+    // Handshake done — drop the handshake recv/send timeout so the long-lived
+    // socket keeps its original semantics (the timeout was only there to bound
+    // the connect/upgrade phase for retry-budget and abort responsiveness).
+    {
+        const struct timeval none{ 0, 0 };
+        setsockopt(_fd, SOL_SOCKET, SO_RCVTIMEO, &none, sizeof(none));
+        setsockopt(_fd, SOL_SOCKET, SO_SNDTIMEO, &none, sizeof(none));
     }
 
     // Switch to non-blocking (plain TCP only; TLS layer handles its own buffering).
