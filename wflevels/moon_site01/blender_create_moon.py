@@ -69,17 +69,7 @@ PLAYER_SPAWN  = (0.0, 0.0, 5.0)
 # that fades everything past 30 m to flat #888888; see
 # docs/plans/2026-05-31-uninitialised-fog-defaults.md).
 CAM_OFFSET    = (0.0, -100.0, 80.0)
-# Pitch from camera-to-look. (0,0,0) is the "vista" framing (-38.7° down,
-# sky band ~5% of frame). With Earth in the sky added 2026-06-01 we need a
-# wider sky band, so raised LOOK_TARGET to z=50 → -16.7° pitch, ~50% sky
-# band. See docs/plans/2026-06-01-moon-sky-earth-sun-stars.md. Vista-to-
-# earthrise toggle deferred to v2.
-LOOK_TARGET   = (0.0, 0.0, 50.0)
-
-# Sun azimuth/altitude (hoisted so the sun-disc actor placement can match the
-# directional light). 89.5°S has a sun stuck near the horizon all "day".
-SUN_AZ_DEG  = 20.0
-SUN_ALT_DEG = 2.0
+LOOK_TARGET   = (0.0, 0.0, 0.0)
 
 NUM_MAILBOXES = 100
 
@@ -227,6 +217,8 @@ if light:
     # rotation_euler.x = π/3 "sun ~60° above horizon"), the X rotation tilts
     # the beam off zenith. South-pole sun at altitude 2° → X = π/2 − 2°.
     # Z rotation rotates the cast-shadow azimuth around the vertical.
+    SUN_AZ_DEG  = 20.0
+    SUN_ALT_DEG = 2.0
     light.rotation_euler = (math.pi / 2 - math.radians(SUN_ALT_DEG),
                             0.0,
                             math.radians(SUN_AZ_DEG))
@@ -234,22 +226,6 @@ if light:
     light['wf_lightRed']   = 1.0
     light['wf_lightGreen'] = 1.0
     light['wf_lightBlue']  = 1.0
-
-    # Second light: Ambient — without it, the shader's lit term collapses to
-    # zero for any face not directly facing the sun and Earth's back-lit
-    # hemisphere renders pure black. (Camera::SetAmbientColor defaults to
-    # black; the only way to raise it is to author an Ambient-type Light
-    # actor — see Light::Update in wfsource/source/game/light.hpi:57.)
-    # Tiny + slightly-blue (Earth-glow on the regolith).
-    ambient = light.copy()
-    ambient.data = light.data.copy() if light.data else None
-    scene.collection.objects.link(ambient)
-    ambient.name = 'AmbientLight'
-    ambient.location = (0.0, 0.0, 50.0)         # any spot inside the room
-    ambient['wf_lightType']  = 'Ambient'
-    ambient['wf_lightRed']   = 0.40
-    ambient['wf_lightGreen'] = 0.42
-    ambient['wf_lightBlue']  = 0.50    # very slight blue (regolith Earth-glow)
 
 # ── 6. Player (astronaut) ────────────────────────────────────────────────────
 # Built in-script from primitives like SMB Mario / Q*bert, not imported. ~14
@@ -334,83 +310,6 @@ def _build_astronaut():
 
 
 _astronaut = _build_astronaut()
-
-
-def _build_earth():
-    """Blue Marble Earth as a textured UV-sphere, R=20 m. Vertex color must be
-    white to trigger texture sampling in the WF fragment shader
-    (gfx/glpipeline/backend_modern.cc:115); the texture is then multiplied by
-    v_lit (ambient + directional). Pairs with the AmbientLight actor below so
-    Earth's back-lit hemisphere isn't pure black."""
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=20.0, segments=24, ring_count=12,
-                                          location=(0.0, 0.0, 0.0))
-    obj = bpy.context.object
-    obj.name = 'earth'; obj.data.name = 'earth'
-    for p in obj.data.polygons:
-        p.use_smooth = True
-    mat = bpy.data.materials.new('earth_mat')
-    mat.use_nodes = True
-    bsdf = mat.node_tree.nodes['Principled BSDF']
-    tex = mat.node_tree.nodes.new('ShaderNodeTexImage')
-    tex.image = bpy.data.images.load(os.path.join(SCRIPT_DIR, 'earth.tga'))
-    mat.node_tree.links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
-    # Force base color white so the WF fragment shader's is_white branch fires
-    # and actually samples the Blue Marble texture.
-    bsdf.inputs['Base Color'].default_value = (1.0, 1.0, 1.0, 1.0)
-    mat.diffuse_color = (1.0, 1.0, 1.0, 1.0)
-    obj.data.materials.append(mat)
-    return obj
-
-
-def _build_sun():
-    """Bright unlit sun disc — UV-sphere R=8 m, off-white emissive material."""
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=8.0, segments=16, ring_count=8,
-                                          location=(0.0, 0.0, 0.0))
-    obj = bpy.context.object
-    obj.name = 'sun'; obj.data.name = 'sun'
-    for p in obj.data.polygons:
-        p.use_smooth = True
-    mat = _make_mat('sun_mat', (1.0, 1.0, 0.95))
-    # Boost emission so the sun reads as a bright disc against the dark sky.
-    bsdf = mat.node_tree.nodes.get('Principled BSDF')
-    if bsdf and 'Emission Color' in bsdf.inputs:
-        bsdf.inputs['Emission Color'].default_value = (1.0, 1.0, 0.95, 1.0)
-        bsdf.inputs['Emission Strength'].default_value = 3.0
-    obj.data.materials.append(mat)
-    return obj
-
-
-def _build_skydome():
-    """Inverted-normal sphere (we see the inside) holding the starfield. R=200m
-    centred on the play area. Stars are baked into the equirectangular texture
-    by make_starfield.py."""
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=200.0, segments=32, ring_count=16,
-                                          location=(0.0, 0.0, 0.0))
-    obj = bpy.context.object
-    obj.name = 'skydome'; obj.data.name = 'skydome'
-    # Flip face winding so the inside faces the camera. We're rendering this
-    # from the inside of the sphere — the existing back-face cull would hide
-    # all the faces if normals pointed outward.
-    bpy.context.view_layer.objects.active = obj
-    bpy.ops.object.editmode_toggle()
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.mesh.flip_normals()
-    bpy.ops.object.editmode_toggle()
-    for p in obj.data.polygons:
-        p.use_smooth = True
-    mat = bpy.data.materials.new('skydome_mat')
-    mat.use_nodes = True
-    bsdf = mat.node_tree.nodes['Principled BSDF']
-    tex = mat.node_tree.nodes.new('ShaderNodeTexImage')
-    tex.image = bpy.data.images.load(os.path.join(SCRIPT_DIR, 'starfield.tga'))
-    mat.node_tree.links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
-    if 'Emission Color' in bsdf.inputs:
-        mat.node_tree.links.new(tex.outputs['Color'], bsdf.inputs['Emission Color'])
-        bsdf.inputs['Emission Strength'].default_value = 1.0
-    bsdf.inputs['Base Color'].default_value = (1.0, 1.0, 1.0, 1.0)
-    mat.diffuse_color = (1.0, 1.0, 1.0, 1.0)
-    obj.data.materials.append(mat)
-    return obj
 
 
 def _build_artemis_lander():
@@ -537,39 +436,6 @@ _lander['wf_Visibility Mailbox'] = 1
 print(f"[moon] lander mesh: {len(_lander.data.vertices)} verts, "
       f"{len(_lander.data.polygons)} polys at {_lander.location[:]}")
 
-# ── 6c. Sky (Earth + Sun + Stars) ────────────────────────────────────────────
-# See docs/plans/2026-06-01-moon-sky-earth-sun-stars.md.
-
-_earth = _build_earth()
-attach_schema(_earth, 'platform')
-# Place Earth so the sun-lit hemisphere faces the camera (otherwise we see
-# nothing but the shadowed side). Sun is at +X+Y direction from origin;
-# putting Earth in the +Y/+Z direction from origin at distance ~400 m puts
-# camera and sun on the same side relative to Earth, so its near hemisphere
-# is lit.
-_earth.location = (0.0, 200.0, 50.0)   # centre-mid sky band, clear of HUD text + minimap
-_earth['wf_Mobility']           = 'Anchored'
-_earth['wf_Model Type']         = 'Mesh'
-_earth['wf_Visibility Mailbox'] = 1
-
-_sun = _build_sun()
-attach_schema(_sun, 'platform')
-# Sun at the same az/alt the directional light uses, distance 800 m.
-_sun_az = math.radians(SUN_AZ_DEG)
-_sun_alt = math.radians(SUN_ALT_DEG)
-_sun.location = (800.0 * math.cos(_sun_alt) * math.sin(_sun_az),
-                 800.0 * math.cos(_sun_alt) * math.cos(_sun_az),
-                 800.0 * math.sin(_sun_alt))
-_sun['wf_Mobility']           = 'Anchored'
-_sun['wf_Model Type']         = 'Mesh'
-_sun['wf_Visibility Mailbox'] = 1
-
-# Skydome (textured starfield) deferred to v2 — the R=200 dome occludes the
-# terrain at y > 200, and growing it past the room bbox triggers "actor outside
-# room" warnings. Black sky stays for v1; stars revisit when we wire matte
-# type 2 instead. See docs/plans/2026-06-01-moon-sky-earth-sun-stars.md.
-print(f"[moon] sky actors: earth@{_earth.location[:]}  sun@{tuple(round(c,1) for c in _sun.location)}")
-
 # ── 7. Camera ────────────────────────────────────────────────────────────────
 target = find_by_class('target')
 if target:
@@ -607,21 +473,13 @@ if camshot:
     camshot['wf_Position X'] = 'Absolute'
     camshot['wf_Position Y'] = 'Absolute'
     camshot['wf_Position Z'] = 'Absolute'
-    # Track CamTarget so changing LOOK_TARGET actually re-aims the camera —
-    # with 'Fixed' the camshot ignored the target and used its own (default)
-    # orientation, so my 2026-06-01 LOOK_TARGET z=50 raise had no visual effect.
-    camshot['wf_Rotation']   = 'Track'
+    camshot['wf_Rotation']   = 'Fixed'
     camshot['wf_FOV']                 = 60.0
     camshot['wf_Pan Time In Seconds'] = 0.1
     camshot['wf_Model Type']          = 'None'
     camshot['wf_Track Object'] = 'Player'
     camshot['wf_Target']       = 'CamTarget'
     camshot['wf_Follow']       = 'CamTarget'
-    # Also set the camshot's own rotation_euler to point at the target — for
-    # cases where Track ignores the Target field. Same calc the preview cam uses.
-    import mathutils as _mu
-    _dir = _mu.Vector(LOOK_TARGET) - _mu.Vector(camshot.location)
-    camshot.rotation_euler = _dir.to_track_quat('-Z', 'Y').to_euler()
 
 # ── 8. Level object ──────────────────────────────────────────────────────────
 # ── 7b. Room bounds ──────────────────────────────────────────────────────────
@@ -633,12 +491,8 @@ if room:
     z_min = float(heights.min()) - 10.0      # 10 m below lowest terrain pixel
     z_max = max(300.0, float(heights.max()) + 50.0)  # vista cam headroom
     centre = (0.0, 0.0, (z_min + z_max) / 2.0)
-    # X/Y room half-extent: terrain spans ±HALF_M (500m) but the sky actors
-    # (sun at y=751, earth at y=600) live past the terrain edge. Bump to 1000m
-    # so levcomp doesn't warn "actor falls outside every room bbox" for them.
-    ROOM_HALF = max(HALF_M + 10.0, 1000.0)
-    rel = (-ROOM_HALF, -ROOM_HALF, z_min - centre[2],
-           +ROOM_HALF, +ROOM_HALF, z_max - centre[2])
+    rel = (-HALF_M - 10.0, -HALF_M - 10.0, z_min - centre[2],
+           +HALF_M + 10.0, +HALF_M + 10.0, z_max - centre[2])
 
     room.name = 'room_moon'
     room.location = centre

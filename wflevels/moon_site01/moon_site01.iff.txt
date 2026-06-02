@@ -26,8 +26,6 @@
 		$3fff001l { 'STR' "player.iff" }  // IFF PERM fff:001
 		$3000001l { 'STR' "lunar_terrain.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "artemis_lander.iff" }  // IFF RM0 000:002
-		$3000003l { 'STR' "earth.iff" }  // IFF RM0 000:003
-		$3000004l { 'STR' "sun.iff" }  // IFF RM0 000:004
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "moon_site01.lvl" ] }
@@ -47,8 +45,6 @@
 		{ 'ASS' $7000fffl [ "Room0.cyc" ] }    // CYC RM0 000:fff
 		{ 'ASS' $3000001l [ "lunar_terrain.iff" ] }  // IFF RM0 000:001
 		{ 'ASS' $3000002l [ "artemis_lander.iff" ] }  // IFF RM0 000:002
-		{ 'ASS' $3000003l [ "earth.iff" ] }  // IFF RM0 000:003
-		{ 'ASS' $3000004l [ "sun.iff" ] }  // IFF RM0 000:004
 	}
 	{ 'ALGN' .align(2048) }
 }

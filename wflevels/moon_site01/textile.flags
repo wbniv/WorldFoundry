@@ -10,8 +10,6 @@
 # UV int16 widening that landed in commits d9265015..e0482866.
 
 PAGEX=1024
-PAGEY=2048
+PAGEY=1024
 PERMPAGEX=1024
 PERMPAGEY=1024
-# Bumped PAGEY 1024 → 2048 on 2026-06-01 so the sky textures (earth.tga 512×256,
-# starfield.tga 512×256) fit in Room0 alongside the 1024² terrain_texture.tga.
