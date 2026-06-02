@@ -98,6 +98,8 @@ void VideoChat::SetCameraEnabled(bool on)
     cam_enabled_.store(on);
     if (on && cam_fd_ < 0) {
         cam_enabled_.store(OpenCamera());
+    } else if (!on && cam_fd_ >= 0) {
+        CloseCamera();   // release the device so the camera LED turns off
     }
 }
 
@@ -151,13 +153,25 @@ void VideoChat::OnRemoteVP8Frame(const std::string& peer_id,
 {
     std::lock_guard<std::mutex> lk(peers_mu_);
     auto it = peer_video_.find(peer_id);
-    if (it == peer_video_.end()) return;
+    if (it == peer_video_.end()) {
+        static int s_miss = 0;
+        if (++s_miss <= 3)
+            std::fprintf(stderr, "video: VP8 frame for unknown peer %s\n", peer_id.c_str());
+        return;
+    }
     PeerVideo* pv = it->second;
     if (!pv || !pv->decoder) return;
 
+    static int s_recv = 0;
+    if (++s_recv <= 5 || s_recv % 150 == 0)
+        std::fprintf(stderr, "video: VP8 frame #%d from %s len=%d\n", s_recv, peer_id.c_str(), len);
+    std::fflush(stderr);
+
     if (vpx_codec_decode(pv->decoder, vp8_data, static_cast<unsigned>(len),
-                          nullptr, 0) != VPX_CODEC_OK)
+                          nullptr, 0) != VPX_CODEC_OK) {
+        std::fprintf(stderr, "video: VP8 decode failed frame #%d\n", s_recv); std::fflush(stderr);
         return;
+    }
 
     vpx_codec_iter_t iter = nullptr;
     vpx_image_t* img;
@@ -456,6 +470,11 @@ void VideoChat::EncodeAndSend(const std::vector<uint8_t>& i420,
         bool           is_key = (pkt->data.frame.flags & VPX_FRAME_IS_KEY) != 0;
 
         std::lock_guard<std::mutex> lk(send_cb_mu_);
+        static int s_sent = 0;
+        if (++s_sent <= 5 || s_sent % 150 == 0)
+            std::fprintf(stderr, "video: VP8 send #%d len=%d key=%d cb=%s\n",
+                         s_sent, size, (int)is_key, send_cb_ ? "yes" : "NO");
+        std::fflush(stderr);
         if (send_cb_) send_cb_(data, size, is_key);
     }
 }

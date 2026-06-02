@@ -334,7 +334,7 @@ tasks:
         echo "  Named tunnel: $WF_COLLAB_TUNNEL_NAME → wss://$WF_COLLAB_TUNNEL_HOSTNAME"
         echo "  Room:         {{.ROOM}}"
         echo ""
-        exec ./build-editor-fast/wf-edit --host-tunnel --room={{.ROOM}} {{.CLI_ARGS}}
+        ./build-editor-fast/wf-edit --host-tunnel --room={{.ROOM}} {{.CLI_ARGS}} 2>&1 | tee /tmp/wf-host.log
 
   join:
     desc: "Join a wf-edit call. Defaults: room studio-1 on wf.worldfoundry.org. Override: ROOM=x or URL=wfedit+s://..."
