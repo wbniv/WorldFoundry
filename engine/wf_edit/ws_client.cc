@@ -123,15 +123,39 @@ bool WsClient::connect(const char* url) {
         return false;
     }
 
+    // Try each address with a non-blocking connect + select so a black-hole host
+    // (e.g. unreachable IPv6) doesn't block indefinitely. 5 s per address matches
+    // the SO_RCVTIMEO/SO_SNDTIMEO set below; the retry budget above handles the
+    // overall cap so individual attempts stay snappy.
     _fd = -1;
-    int connect_errno = 0;   // last ::connect() failure, classified below
+    int connect_errno = 0;
     for (struct addrinfo* rp = res; rp; rp = rp->ai_next) {
         const int fd = ::socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if (fd < 0) { connect_errno = errno; continue; }
-        if (::connect(fd, rp->ai_addr, rp->ai_addrlen) == 0) { _fd = fd; break; }
-        connect_errno = errno;
+        // Make non-blocking for the connect() call only.
+        const int flags = ::fcntl(fd, F_GETFL, 0);
+        ::fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+        const int rc = ::connect(fd, rp->ai_addr, rp->ai_addrlen);
+        if (rc == 0 || errno == EINPROGRESS) {
+            fd_set wfds; FD_ZERO(&wfds); FD_SET(fd, &wfds);
+            struct timeval tv{ 5, 0 };
+            const int sel = ::select(fd + 1, nullptr, &wfds, nullptr, &tv);
+            if (sel > 0) {
+                int err = 0; socklen_t len = sizeof(err);
+                ::getsockopt(fd, SOL_SOCKET, SO_ERROR, &err, &len);
+                if (err == 0) {
+                    ::fcntl(fd, F_SETFL, flags);   // restore blocking
+                    _fd = fd; break;
+                }
+                connect_errno = err;
+            } else {
+                connect_errno = (sel == 0) ? ETIMEDOUT : errno;
+            }
+        } else {
+            connect_errno = errno;
+        }
         std::fprintf(stderr, "ws: connect(fam=%d) to %s:%s failed: %s\n",
-                     rp->ai_family, pu.host.c_str(), pu.port.c_str(), std::strerror(errno));
+                     rp->ai_family, pu.host.c_str(), pu.port.c_str(), std::strerror(connect_errno));
         ::close(fd);
     }
     freeaddrinfo(res);
