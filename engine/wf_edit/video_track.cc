@@ -225,6 +225,11 @@ void VideoChat::OnRemoteVP8Frame(const std::string& peer_id,
         std::lock_guard<std::mutex> flk(pv->frame_mu);
         pv->rgb         = std::move(rgb);
         pv->frame_dirty = true;
+        static int s_img = 0;
+        if (++s_img <= 3 || s_img % 150 == 0)
+            std::fprintf(stderr, "video: decoded image #%d for %.8s (%dx%d → rgb %zu)\n",
+                         s_img, peer_id.c_str(), src_w, src_h, pv->rgb.size());
+        std::fflush(stderr);
     }
 }
 
@@ -251,6 +256,8 @@ void VideoChat::UploadFrames()
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, kThumbW, kThumbH, 0,
                          GL_RGB, GL_UNSIGNED_BYTE, pv->rgb.data());
+            std::fprintf(stderr, "video: created GL texture %u for %.8s\n", pv->gl_tex, pid.c_str());
+            std::fflush(stderr);
         } else {
             glBindTexture(GL_TEXTURE_2D, pv->gl_tex);
             glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, kThumbW, kThumbH,
