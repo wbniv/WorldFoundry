@@ -1571,15 +1571,15 @@ SHELL_SPEED = 14.0
 KOOPA_SCRIPT = (
     "\\ wf\n"
     # --- movement by state ---
-    "INDEXOF_SMB_KOOPA_STATE read-mailbox not if\n"                # state 0: walk (dormant-until-onscreen)
+    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox not if\n"                # state 0: walk (dormant-until-onscreen)
     "  INDEXOF_SMB_MAX_CAM_X read-mailbox 12.0 + INDEXOF_X_POS read-mailbox > if\n"
     f"    {-ENEMY_WALK_SPEED} INDEXOF_XSPEED write-mailbox\n"
     "  else\n"
     "    0 INDEXOF_XSPEED write-mailbox\n"
     "  then\n"
     "then\n"
-    "INDEXOF_SMB_KOOPA_STATE read-mailbox 1 = if 0 INDEXOF_XSPEED write-mailbox then\n"   # state 1: parked
-    "INDEXOF_SMB_KOOPA_STATE read-mailbox 2 = if\n"                # state 2: sliding shell
+    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox 1 = if 0 INDEXOF_XSPEED write-mailbox then\n"   # state 1: parked
+    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox 2 = if\n"                # state 2: sliding shell
     # reverse off a wall (|NORMAL_X| > 0.5), consume the normal (Starman idiom)
     "  INDEXOF_COLLISION_NORMAL_X read-mailbox dup * 0.25 > if\n"
     "    0 INDEXOF_XSPEED read-mailbox - INDEXOF_XSPEED write-mailbox\n"
@@ -1601,23 +1601,23 @@ KOOPA_SCRIPT = (
     "    dup 0.7 >\n"
     "    if\n"                                           # STOMP (player above)
     "      drop\n"
-    "      INDEXOF_SMB_KOOPA_STATE read-mailbox 2 < if 0.5 INDEXOF_Z_SCALE write-mailbox then\n"  # walk->shell: squash
+    "      INDEXOF_SMB_KOOPA_STATE_L read-mailbox 2 < if 0.5 INDEXOF_Z_SCALE write-mailbox then\n"  # walk->shell: squash
     "      INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
     "      INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
     "      1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "      1 INDEXOF_SMB_KOOPA_STATE write-mailbox\n"    # retract to a resting shell (NOT death)
+    "      1 INDEXOF_SMB_KOOPA_STATE_L write-mailbox\n"    # retract to a resting shell (NOT death)
     "      0 INDEXOF_XSPEED write-mailbox\n"
     "      1 INDEXOF_SMB_STOMP write-mailbox\n"          # bounce Mario
     "    else\n"                                         # side touch (roughly level)
     "      -1.5 >\n"
     "      if\n"
-    "        INDEXOF_SMB_KOOPA_STATE read-mailbox 1 = if\n"   # KICK a resting shell, away from Mario
+    "        INDEXOF_SMB_KOOPA_STATE_L read-mailbox 1 = if\n"   # KICK a resting shell, away from Mario
     "          INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - 0 < if\n"
     f"            {SHELL_SPEED} INDEXOF_XSPEED write-mailbox\n"        # player on the left -> slide right
     "          else\n"
     f"            {-SHELL_SPEED} INDEXOF_XSPEED write-mailbox\n"       # player on the right -> slide left
     "          then\n"
-    "          2 INDEXOF_SMB_KOOPA_STATE write-mailbox\n"
+    "          2 INDEXOF_SMB_KOOPA_STATE_L write-mailbox\n"
     "        else\n"
     "          1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"  # walking koopa OR moving shell -> hurt Mario
     "        then\n"
@@ -1758,6 +1758,7 @@ _apply_enemy_movement(koopa_obj)
 # shared cap is 8, which would clamp the slide).
 koopa_obj['wf_Script']           = KOOPA_SCRIPT
 koopa_obj['wf_Max Ground Speed'] = 16.0
+koopa_obj['wf_Number Of Local Mailboxes'] = 19   # per-actor shell state at SMB_KOOPA_STATE_L (2018)
 
 # ── 10. Flagpole ──────────────────────────────────────────────────────────────
 mat_pole = make_mat('smb_pole', (0.72, 0.72, 0.72))
