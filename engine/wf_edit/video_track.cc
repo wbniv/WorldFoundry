@@ -256,7 +256,16 @@ void VideoChat::UploadFrames()
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, kThumbW, kThumbH, 0,
                          GL_RGB, GL_UNSIGNED_BYTE, pv->rgb.data());
-            std::fprintf(stderr, "video: created GL texture %u for %.8s\n", pv->gl_tex, pid.c_str());
+            GLint fbo = 0;
+            glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+            GLenum err = glGetError();
+            // Log top-left 3 pixels to verify non-black content.
+            std::fprintf(stderr, "video: GL texture %u for %.8s fbo=%d err=%u "
+                         "px[0]=(%d,%d,%d) px[1]=(%d,%d,%d) px[2]=(%d,%d,%d)\n",
+                         pv->gl_tex, pid.c_str(), fbo, err,
+                         pv->rgb[0], pv->rgb[1], pv->rgb[2],
+                         pv->rgb[3], pv->rgb[4], pv->rgb[5],
+                         pv->rgb[6], pv->rgb[7], pv->rgb[8]);
             std::fflush(stderr);
         } else {
             glBindTexture(GL_TEXTURE_2D, pv->gl_tex);

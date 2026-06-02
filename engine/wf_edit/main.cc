@@ -2310,6 +2310,23 @@ void editor_present(void* p)
 {
     EditorCtx* c = static_cast<EditorCtx*>(p);
 
+    // StepFrame may leave a non-default FBO bound (e.g. post-process pass).
+    // ImGui_ImplOpenGL3_RenderDrawData does not save/restore GL_FRAMEBUFFER_BINDING,
+    // so ensure FBO 0 (the default/screen framebuffer) is current before the overlay.
+    {
+        static auto s_glBindFB =
+            (void(*)(unsigned int, unsigned int))glfwGetProcAddress("glBindFramebuffer");
+        static constexpr unsigned int kGL_FRAMEBUFFER         = 0x8D40u;
+        static constexpr unsigned int kGL_FRAMEBUFFER_BINDING = 0x8CA6u;
+        GLint bound_fbo = 0;
+        glGetIntegerv(static_cast<GLenum>(kGL_FRAMEBUFFER_BINDING), &bound_fbo);
+        if (bound_fbo != 0) {
+            std::fprintf(stderr, "editor_present: StepFrame left FBO %d — resetting to 0\n",
+                         bound_fbo);
+            if (s_glBindFB) s_glBindFB(kGL_FRAMEBUFFER, 0);
+        }
+    }
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
