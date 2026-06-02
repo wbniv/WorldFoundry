@@ -3028,15 +3028,16 @@ int main(int argc, char** argv)
                          ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                          ImGuiWindowFlags_NoCollapse);
             const double elapsed = glfwGetTime() - t0;
-            ImGui::Text(host.empty()     ? "Establishing secure tunnel…  (%.0f s)"
-                        : !registered    ? "Registering tunnel…  (%.0f s)"
-                                         : "Resolving address…  (%.0f s)", elapsed);
+            ImGui::Text(host.empty()     ? "Establishing secure tunnel...  (%.0f s)"
+                        : !registered    ? "Registering tunnel...  (%.0f s)"
+                                         : "Resolving address...  (%.0f s)", elapsed);
             ImGui::Spacing();
             // Animated sweep (0→1 each second) — a liveness cue, not a real %.
             ImGui::ProgressBar(static_cast<float>(elapsed - static_cast<long>(elapsed)),
                                ImVec2(-1.0f, 0.0f), "");
             ImGui::Spacing();
-            ImGui::TextDisabled("wf-relay + Cloudflare quick tunnel");
+            ImGui::TextDisabled(host.empty() ? "wf-relay + Cloudflare quick tunnel"
+                                             : "wf-relay + Cloudflare named tunnel");
             ImGui::End();
 
             ImGui::Render();
