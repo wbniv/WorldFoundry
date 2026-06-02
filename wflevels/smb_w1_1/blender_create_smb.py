@@ -2251,7 +2251,9 @@ for _ci, (_cx, _cz, _cmb) in enumerate(CR_COINS):
     _coin['wf_Mobility']           = 'Anchored'
     _coin['wf_Model Type']         = 'Mesh'
     _coin['wf_Visibility Mailbox'] = _cmb   # seeded to 1, set to 0 on pickup
-    _coin['wf_Mesh Name']          = f'cr_coin_{_ci}.iff'
+    # No per-instance wf_Mesh Name — all coins share the _crc_mesh datablock, so the
+    # exporter dedup writes one cr_coin .iff and every coin references it (one room-pool
+    # mesh, not 19). (A per-instance name would defeat the dedup, as it did before.)
     _coin['wf_Script']             = COIN_SCRIPT
 
 

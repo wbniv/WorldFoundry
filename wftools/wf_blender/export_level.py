@@ -956,6 +956,11 @@ def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
     lines = ["{ 'LVL' "]
     level_dir = os.path.dirname(filepath)
 
+    # Mesh dedup: objects sharing one Blender mesh datablock export ONE .iff (named for
+    # the first user) and the rest reference it — so N identical actors cost one room-pool
+    # mesh, not N (was: one .iff per object → cbRoom OOM). Keyed by datablock.
+    _mesh_iff_by_datablock = {}
+
     for obj in objects:
         schema_path = obj[SCHEMA_PATH_KEY]
         typename = os.path.splitext(os.path.basename(bpy.path.abspath(schema_path)))[0]
@@ -1022,12 +1027,18 @@ def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
         mesh_filename = ""
         model_type    = 0  # 0=None/Box
         if has_mesh and obj.data and obj.data.polygons:
-            mesh_filename = (orig_mesh if orig_mesh else obj.name + ".iff").lower()
-            mesh_out = os.path.join(level_dir, mesh_filename)
-            if _write_mesh_iff(obj, mesh_out):
-                model_type = 1  # Mesh
+            _dbkey = obj.data.name   # objects sharing this datablock share one .iff
+            if _dbkey in _mesh_iff_by_datablock:
+                mesh_filename = _mesh_iff_by_datablock[_dbkey]   # reference the already-written mesh
+                model_type = 1
             else:
-                mesh_filename = ""
+                mesh_filename = (orig_mesh if orig_mesh else obj.name + ".iff").lower()
+                mesh_out = os.path.join(level_dir, mesh_filename)
+                if _write_mesh_iff(obj, mesh_out):
+                    model_type = 1  # Mesh
+                    _mesh_iff_by_datablock[_dbkey] = mesh_filename
+                else:
+                    mesh_filename = ""
 
         if has_mesh:
             lines.append(f'\t\t{{ \'FILE\' {{ \'NAME\' "Mesh Name" }} {{ \'STR\' "{mesh_filename}" }} }}')
