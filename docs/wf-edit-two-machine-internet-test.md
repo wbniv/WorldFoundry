@@ -66,9 +66,9 @@ Tell `wf-edit` the tunnel **name + hostname** (no secret). Env is easiest for a
 one-off; or put `tunnel_name` / `tunnel_hostname` in `~/.config/wf-edit/identity.json`.
 
 ```bash
-export WF_COLLAB_TUNNEL_NAME=wf-host        # the name from `tunnel create` (the UUID also works)
+export WF_COLLAB_TUNNEL_NAME=wf-host          # the name from `tunnel create` (the UUID also works)
 export WF_COLLAB_TUNNEL_HOSTNAME=wf.<your-domain>
-./build-editor-fast/wf-edit --host-tunnel --room=test1
+task named-tunnel ROOM=test1
 ```
 
 Confirm in the host's stderr — this is the proof the named path engaged:
@@ -86,7 +86,7 @@ sessions — that's the named tunnel's whole reason for being. Copy the share li
 ### 2. Joiner (computer 2)
 
 ```bash
-./build-editor-fast/wf-edit --url=wfedit+s://wf.<your-domain>/r/test1
+task join URL='wfedit+s://wf.<your-domain>/r/test1'
 ```
 
 The joiner needs no cloudflared and no account — it just dials the public

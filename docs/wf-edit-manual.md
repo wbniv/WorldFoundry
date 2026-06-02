@@ -343,12 +343,17 @@ peer-to-peer (or via TURN), never through the tunnel.
 The minimum for a real cross-network call between two people:
 
 ```bash
-# computer 1 — host (needs cloudflared, fetched once by task fetch-cloudflared)
-./build-editor/wf-edit --host-tunnel
-# → copy the printed   wfedit+s://<random>.trycloudflare.com/r/<room>   link
+# computer 1 — host
+# quick tunnel (zero-config, ephemeral URL):
+task quick-tunnel
+# named tunnel (stable hostname, needs one-time CF setup — see below):
+export WF_COLLAB_TUNNEL_NAME=wf-host
+export WF_COLLAB_TUNNEL_HOSTNAME=wf.<your-domain>
+task named-tunnel ROOM=studio-1
+# → copy the printed   wfedit+s://<host>/r/<room>   link
 
 # computer 2 — joiner (needs only wf-edit built; no cloudflared)
-./build-editor/wf-edit --url=<that link>
+task join URL='wfedit+s://<host>/r/<room>'
 ```
 
 Each machine has its own `~/.config/wf-edit/identity.json` (auto-generated on
@@ -400,10 +405,23 @@ Tell `wf-edit` the tunnel **name + hostname** (no secret) in
 (Or set `WF_COLLAB_TUNNEL_NAME` / `WF_COLLAB_TUNNEL_HOSTNAME` in the env for a
 one-off run — env wins per-field.)
 
-That's it. Next time you **Host a call**, the editor runs `cloudflared tunnel run
-wf-host`: the loading panel skips the *Establishing* phase (the hostname is
-fixed), the share link looks like `wfedit+s://wf.your-domain/r/<room>`, and
-there's no rate limit. The joiner side doesn't change — they just paste the link.
+Then host with:
+
+```bash
+export WF_COLLAB_TUNNEL_NAME=wf-host
+export WF_COLLAB_TUNNEL_HOSTNAME=wf.your-domain
+task named-tunnel ROOM=studio-1
+```
+
+The editor runs `cloudflared tunnel run wf-host`: the loading panel skips the
+*Establishing* phase (the hostname is fixed), the share link looks like
+`wfedit+s://wf.your-domain/r/studio-1`, and there's no rate limit.
+
+The joiner side needs nothing extra:
+
+```bash
+task join URL='wfedit+s://wf.your-domain/r/studio-1'
+```
 
 Empty / missing config → automatic fall-back to the quick tunnel; if the named
 tunnel fails to start (not logged in, wrong name, wrong ingress), it fails loudly
@@ -420,8 +438,8 @@ For two editors **on the same machine** you must give them distinct config dirs,
 otherwise they share an `identity.json` and look like one peer:
 
 ```bash
-XDG_CONFIG_HOME=/tmp/wfedit-A  ./build-editor/wf-edit --host-tunnel wflevels/cd.iff        # host
-XDG_CONFIG_HOME=/tmp/wfedit-B  ./build-editor/wf-edit --url=<link>  wflevels/cd.iff        # joiner
+XDG_CONFIG_HOME=/tmp/wfedit-A  task named-tunnel ROOM=test1 CLI_ARGS=wflevels/cd.iff       # host
+XDG_CONFIG_HOME=/tmp/wfedit-B  task join URL='wfedit+s://...' CLI_ARGS=wflevels/cd.iff     # joiner
 ```
 
 ### Calls over the internet (STUN + TURN)

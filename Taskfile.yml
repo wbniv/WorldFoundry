@@ -318,6 +318,38 @@ tasks:
         echo ""
         wait
 
+  named-tunnel:
+    desc: "Host a wf-edit call via named Cloudflare tunnel (stable hostname, rate-limit-free). Needs WF_COLLAB_TUNNEL_NAME + WF_COLLAB_TUNNEL_HOSTNAME set. Ctrl-C to stop."
+    silent: true
+    deps: [build-wf-edit-fast]
+    vars:
+      ROOM: '{{.ROOM | default "studio-1"}}'
+    cmds:
+      - |
+        set -euo pipefail
+        [ -n "${WF_COLLAB_TUNNEL_NAME:-}" ]     || { echo "Error: WF_COLLAB_TUNNEL_NAME not set (tunnel create name, e.g. wf-host)"; exit 1; }
+        [ -n "${WF_COLLAB_TUNNEL_HOSTNAME:-}" ] || { echo "Error: WF_COLLAB_TUNNEL_HOSTNAME not set (e.g. wf.your-domain)"; exit 1; }
+        echo ""
+        echo "  Named tunnel: $WF_COLLAB_TUNNEL_NAME → wss://$WF_COLLAB_TUNNEL_HOSTNAME"
+        echo "  Room:         {{.ROOM}}"
+        echo ""
+        exec ./build-editor-fast/wf-edit --host-tunnel --room={{.ROOM}} {{.CLI_ARGS}}
+
+  join:
+    desc: "Join a wf-edit call. Pass URL=wfedit+s://... (share link from the host). Also accepts CLI_ARGS for --level= or other flags."
+    silent: true
+    deps: [build-wf-edit-fast]
+    vars:
+      URL: '{{.URL | default ""}}'
+    cmds:
+      - |
+        set -euo pipefail
+        if [ -n "{{.URL}}" ]; then
+          exec ./build-editor-fast/wf-edit --url="{{.URL}}" {{.CLI_ARGS}}
+        else
+          exec ./build-editor-fast/wf-edit {{.CLI_ARGS}}
+        fi
+
   build-cmake-android:
     desc: "Build libwf_game.so via CMake + NDK (arm64-v8a)"
     deps: [vendor-unpack]
