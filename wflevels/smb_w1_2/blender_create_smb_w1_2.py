@@ -64,6 +64,16 @@ QBLOCK_XS     = []                       # W1-2 ? blocks placed explicitly (5-bl
 KOOPA_X       = None                     # W1-2 koopas placed explicitly (3 green + 1 red)
 FLAGPOLE_X    = 248 * T                  # 372 m — faithful W1-2 (256-tile underground, flagpole col 248)
 
+# ── Celebration mailboxes (mailbox.inc 1862-1871) — flagpole end-of-level cutscene ──
+# Mario walks into the castle + hides, the rooftop flag raises, radial spark fireworks
+# pop above the castle (count = remaining-timer last digit if 1/3/6 else 0). Identical
+# machinery to W1-1 (ported, not re-derived; FLAGPOLE_X-relative so it follows col 248).
+# (SMB_CELEBRATE itself is defined at the flagpole trigger below — the only Python use.)
+SMB_CELEBRATE_START = 1863   # level-TIME at the rising edge; phase elapsed = TIME - this
+SMB_MARIO_VIS       = 1864   # Player visibility (1=show, 0=hide once he enters the castle)
+SMB_FIREWORK        = [1865, 1866, 1867, 1868, 1869, 1870]  # 6 firework-generator activations
+SMB_FIREWORK_COUNT  = 1871   # how many bursts fire = remaining-timer last digit if 1/3/6 else 0
+
 # 14 Goombas at faithful W1-2 reference positions (docs/smb-level-layouts.md §1-2):
 #   S1 2 after entry + 1 on the block-tower; S2 cluster of 5 + 1 flanking the Koopas;
 #   S3 2 before the pipe corridor; S4 2 on the half-pyramid. Total = 14.
@@ -206,20 +216,40 @@ if director:
         "dup INDEXOF_SMB_MAX_CAM_X write-mailbox\n"
         "then\n"
         "INDEXOF_SMB_TARGET_CAM_X write-mailbox\n"
+        # ── celebration sequencer (gates on SMB_CELEBRATE) OR normal countdown ──
+        # On SMB_CELEBRATE: seed START once, then phase off elapsed = TIME-START.
+        #   phase D (elapsed>1.5): drain HUD_TIMER toward 0 (visual; the player already
+        #     credited HUD_TIMER*50 to the score on the rising edge).
+        #   phase G (elapsed>4.5): fire END_OF_LEVEL -> meta-loop loads the next level
+        #     (after the last firework burst ends ~4.35).
+        # While celebrating the normal countdown is suspended (it also owns HUD_TIMER).
+        "INDEXOF_SMB_CELEBRATE read-mailbox if\n"
+        "  INDEXOF_SMB_CELEBRATE_START read-mailbox not if "
+        "INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START write-mailbox then\n"
+        # Frame the flag + the castle to its right (overrides the scroll target, which
+        # clamps at the pole and would leave the castle off the right edge).
+        f"  {FLAGPOLE_X:.1f} INDEXOF_SMB_TARGET_CAM_X write-mailbox\n"
+        "  INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox -\n"   # elapsed
+        "  dup 1.5 > if "                                       # phase D: drain the timer
+        "INDEXOF_HUD_TIMER read-mailbox 250.0 INDEXOF_DELTA_TIME read-mailbox * - "
+        "dup 0 < if drop 0 then INDEXOF_HUD_TIMER write-mailbox then\n"
+        "  4.5 > if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n"  # phase G: finale
+        "else\n"
         # ── level countdown timer ───────────────────────────────────────────
         # display = TIMER_UNITS - elapsed*RATE (clamped >=0) -> HUD_TIMER slot.
         # SMB_TIMER_START anchors the current life; reaching 0 = "TIME UP" fires
         # SMB_PLAYER_HURT (Mario dies, loses a life via the player respawn) and
         # restarts the clock. The player respawn also re-anchors it on every death.
-        "INDEXOF_SMB_TIMER_START read-mailbox not if "
+        "  INDEXOF_SMB_TIMER_START read-mailbox not if "
         "INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox then\n"
-        f"{TIMER_UNITS} INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START read-mailbox - "
+        f"  {TIMER_UNITS} INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START read-mailbox - "
         f"{TIMER_UNITS / TIMER_REAL_SECONDS:.5f} * -\n"        # 400 - elapsed*RATE
-        "dup 0 <= if "
+        "  dup 0 <= if "
         "1 INDEXOF_SMB_PLAYER_HURT write-mailbox "
         "INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox "
         "drop 0 then\n"                                        # clamp display to 0
-        "INDEXOF_HUD_TIMER write-mailbox\n"
+        "  INDEXOF_HUD_TIMER write-mailbox\n"
+        "then\n"
     )
 
 levelobj = find_by_class('levelobj')
@@ -683,7 +713,7 @@ if player:
     player['wf_Mobility'] = 'Physics'  # restored for diagnosis
     player['wf_Mass']     = 1.0
     player['wf_Model Type'] = 'Mesh'
-    player['wf_Visibility Mailbox'] = 1
+    player['wf_Visibility Mailbox'] = SMB_MARIO_VIS   # 1=visible; celebration sets 0 (enters castle)
     # Survive the coin-room warp: with MovesBetweenRooms the player's mesh binds to
     # PERM (always loaded), not the surface room's transient slot that unloads on
     # the room switch. Without this Mario vanishes the instant he warps underground.
@@ -737,6 +767,7 @@ if player:
         # seed lives once (guarded so game-over at LIVES=0 never re-seeds)
         "INDEXOF_SMB_LIVES_INIT read-mailbox not if "
         "3 INDEXOF_LIVES write-mailbox 1 INDEXOF_SMB_LIVES_INIT write-mailbox then\n"
+        "1 INDEXOF_SMB_MARIO_VIS write-mailbox\n"   # default visible; celebration hides Mario in the castle
         # bounce up when we stomped an enemy this frame; award 100 pts
         "INDEXOF_SMB_STOMP read-mailbox 0<> if\n"
         "  8.0 INDEXOF_ZSPEED write-mailbox\n"
@@ -837,11 +868,18 @@ if player:
         "  INDEXOF_LIVES read-mailbox 1 + INDEXOF_LIVES write-mailbox\n"
         "  0 INDEXOF_SMB_ONEUP_PICKUP write-mailbox\n"
         "then\n"
-        # Flagpole height + time bonus — one-shot on the tick END_OF_LEVEL fires.
+        # Flagpole celebration — fires on SMB_CELEBRATE's rising edge (the flag ActBox
+        # sets it). One-shot height+time bonus, then pin Mario at the pole for the show.
         # Height tiers: Z≥9→5000, ≥6→2000, ≥4.5→800, ≥3→400, ≥1.5→200, else→100.
-        # Time bonus: HUD_TIMER remaining × 50.
-        # EOL_LATCH prevents re-firing if the level lingers a tick before unloading.
-        "INDEXOF_END_OF_LEVEL read-mailbox 0<> if\n"
+        # Time bonus: HUD_TIMER remaining × 50 (read once, before the Director drains it —
+        # the player runs in the main loop, the Director runs last).
+        # EOL_LATCH guards the credit so it fires once across the multi-second celebration.
+        "INDEXOF_SMB_CELEBRATE read-mailbox 0<> if\n"
+        # Seed SMB_CELEBRATE_START here (the player runs before the flag enemies) so the
+        # flag/castle-flag scripts read a valid START the same frame and animate from
+        # elapsed≈0 instead of snapping to the end.
+        "  INDEXOF_SMB_CELEBRATE_START read-mailbox not if "
+        "INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START write-mailbox then\n"
         "  INDEXOF_SMB_EOL_LATCH read-mailbox not if\n"
         "    1 INDEXOF_SMB_EOL_LATCH write-mailbox\n"
         "    INDEXOF_Z_POS read-mailbox\n"
@@ -855,7 +893,23 @@ if player:
         "    INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n"
         "    INDEXOF_HUD_TIMER read-mailbox 50 *\n"
         "    INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n"
+        # Faithful firework count: last digit of the remaining timer, but only 1/3/6 give
+        # fireworks (else none). Latched here, once, BEFORE the Director drains HUD_TIMER.
+        "    INDEXOF_HUD_TIMER read-mailbox 10 %\n"   # `%` casts to int → last digit 0..9
+        "    dup 1 = if drop 1 else dup 3 = if drop 3 else dup 6 = if drop 6 else drop 0 then then then\n"
+        "    INDEXOF_SMB_FIREWORK_COUNT write-mailbox\n"
         "  then\n"
+        # Walk Mario into the castle, then hide him (the SMB "enters the castle door" beat):
+        #   elapsed < 0.9  → hold at the pole (clamp overshoot; the flag is sliding);
+        #   0.9 – 1.6      → walk right FLAGPOLE_X → FLAGPOLE_X+2 (the castle door), visible;
+        #   ≥ 1.6          → entered → hide (SMB_MARIO_VIS=0) + hold at the door.
+        "  INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox -\n"   # elapsed
+        f"  dup 0.9 < if drop INDEXOF_X_POS read-mailbox {FLAGPOLE_X:.1f} > if "
+        f"{FLAGPOLE_X:.1f} INDEXOF_X_POS write-mailbox then\n"
+        "  else dup 1.6 < if "
+        f"0.9 - 1.42857 * dup 1.0 > if drop 1.0 then 2.0 * {FLAGPOLE_X:.1f} + INDEXOF_X_POS write-mailbox\n"
+        f"  else drop 0 INDEXOF_SMB_MARIO_VIS write-mailbox {FLAGPOLE_X + 2.0:.1f} INDEXOF_X_POS write-mailbox\n"
+        "  then then\n"
         "then\n"
         # coin-room coins: seed visible once, then proximity pickup. The Z test
         # (player z near -46) disambiguates the coin room from the surface, where
@@ -1053,26 +1107,175 @@ attach_schema(pole_obj, 'statplat')
 pole_obj['wf_Visibility Mailbox'] = 1
 pole_obj['wf_Model Type'] = 'Mesh'
 
-# Flag — flat plane near top, offset left of pole
-bpy.ops.mesh.primitive_plane_add(size=1.0, location=(FLAGPOLE_X - T, 0, POLE_HEIGHT - T))
+# Flag — a scriptable Anchored 'enemy' (statplats can't tick a script) so it SLIDES DOWN
+# the pole during the celebration: phase A (elapsed 0–0.9 s) lerps its Z from the top to
+# the base. Before SMB_CELEBRATE it sits at the authored top. A thin VERTICAL slab (a flat
+# plane lies in XY → edge-on/invisible to the side camera).
+FLAG_TOP_Z  = POLE_HEIGHT - T        # 13.5 — authored start (near pole top)
+FLAG_BASE_Z = T * 0.7                # ~1.05 — slide target (pole base, the "grab")
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(FLAGPOLE_X - T, 0, FLAG_TOP_Z))
 flag_obj = bpy.context.object
 flag_obj.name      = 'flagpole_flag'
 flag_obj.data.name = 'flagpole_flag'
-flag_obj.scale = (T, 0.01, 0.65 * T)
+flag_obj.scale = (0.5 * T, 0.03, 0.4 * T)   # 1.5 m wide × 1.2 m tall, thin in Y; faces the camera
 bpy.ops.object.transform_apply(scale=True)
 flag_obj.data.materials.clear()
 flag_obj.data.materials.append(mat_flag)
-attach_schema(flag_obj, 'statplat')
-flag_obj['wf_Visibility Mailbox'] = 1
+attach_schema(flag_obj, 'enemy')
+flag_obj['wf_Mobility'] = 'Anchored'
 flag_obj['wf_Model Type'] = 'Mesh'
+flag_obj['wf_Visibility Mailbox'] = 1
+flag_obj['wf_Script'] = (
+    "\\ wf\n"
+    "INDEXOF_SMB_CELEBRATE read-mailbox if\n"
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox - 1.1 *\n"  # frac = elapsed/0.9
+    "dup 1.0 > if drop 1.0 then\n"
+    f"{FLAG_TOP_Z - FLAG_BASE_Z:.2f} * {FLAG_TOP_Z:.2f} swap - INDEXOF_Z_POS write-mailbox\n"  # Z = top - span*frac
+    "then\n"
+)
+
+# ── 10a. Castle + rising castle flag + door + fireworks (celebration) ─────────
+# A small stone castle just past the flagpole. Mario walks into its door and vanishes
+# (Player walk phase); its rooftop flag RAISES (0.8–1.4 s); then up to 6 radial spark
+# fireworks pop above it. The flags + fireworks are scriptable Anchored 'enemy' actors
+# driving their own Z / visibility off the celebration clock (elapsed = TIME − START).
+mat_castle = make_mat('smb_castle', (0.60, 0.55, 0.50))
+CASTLE_X0, CASTLE_X1 = FLAGPOLE_X + 1.5 * T, FLAGPOLE_X + 4.5 * T   # on the ground, right of the pole
+CASTLE_TOP   = 3 * T                                               # 4.5 m tall
+CASTLE_MID_X = (CASTLE_X0 + CASTLE_X1) / 2
+add_statplat('castle', CASTLE_X0, -GROUND_Y, GROUND_TOP_Z, CASTLE_X1, GROUND_Y, CASTLE_TOP, mat_castle)
+add_statplat('castle_pole', CASTLE_MID_X - 0.1, -0.1, CASTLE_TOP,
+             CASTLE_MID_X + 0.1, 0.1, CASTLE_TOP + 2 * T, mat_pole)
+
+CFLAG_BASE_Z = CASTLE_TOP                          # 4.5 — authored low (rooftop base)
+CFLAG_TOP_Z  = CASTLE_TOP + 2.0 * T - 0.35 * T     # flag TOP (not center) meets the pole top 7.5
+# Thin VERTICAL slab; X so the flag's right edge overlaps the pole centre (attached, not floating).
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(CASTLE_MID_X - 0.45 * T, 0, CFLAG_BASE_Z))
+cflag = bpy.context.object
+cflag.name      = 'castle_flag'
+cflag.data.name = 'castle_flag'
+cflag.scale = (0.45 * T, 0.03, 0.35 * T)   # 1.35 m wide × 1.05 m tall, thin in Y
+bpy.ops.object.transform_apply(scale=True)
+cflag.data.materials.clear()
+cflag.data.materials.append(mat_flag)
+attach_schema(cflag, 'enemy')
+cflag['wf_Mobility'] = 'Anchored'
+cflag['wf_Model Type'] = 'Mesh'
+cflag['wf_Visibility Mailbox'] = 1
+cflag['wf_Script'] = (
+    "\\ wf\n"
+    "INDEXOF_SMB_CELEBRATE read-mailbox if\n"
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox - 0.8 -\n"  # elapsed - 0.8 (phase C)
+    "dup 0.0 < if drop 0.0 then 1.667 *\n"   # frac = (elapsed-0.8)/0.6, clamped >=0
+    "dup 1.0 > if drop 1.0 then\n"
+    f"{CFLAG_TOP_Z - CFLAG_BASE_Z:.2f} * {CFLAG_BASE_Z:.2f} + INDEXOF_Z_POS write-mailbox\n"  # Z = base + span*frac
+    "then\n"
+)
+
+# Castle door — a dark face where Mario walks in (he stops at FLAGPOLE_X+2 ≈ the door,
+# then SMB_MARIO_VIS=0 hides him → "entered the castle").
+mat_door = make_mat('smb_castle_door', (0.05, 0.04, 0.06))
+add_statplat('castle_door', CASTLE_X0 + 0.15, -GROUND_Y - 0.06, GROUND_TOP_Z,
+             CASTLE_X0 + 1.35, -GROUND_Y - 0.02, GROUND_TOP_Z + 2.2, mat_door)
+
+# ── Radial spark-burst fireworks (debris idiom) ───────────────────────────────
+# A parked Physics `spark_template` is THROWN by 6 invisible `generator` actors in an arc
+# in the open sky above the castle. Each generator pulses its activation mailbox during a
+# staggered window, but ONLY if its index < SMB_FIREWORK_COUNT (the faithful 1/3/6 count
+# the Player latched). The up-launch + gravity arc the sparks; SPARK_SCRIPT fans XSPEED by
+# actor index for the radial spread; the spark despawns once it falls below the burst height.
+# LOCAL_SYSTEM mailboxes only on the template; no Random Displacement (Scalar::Random asserts).
+mat_spark = make_mat('smb_spark', (1.0, 0.95, 0.55))   # bright warm spark
+SPARK_H = 0.16                                          # ~0.32 m spark cube
+SPARK_DESPAWN_Z = CASTLE_TOP + 1.5                     # fallen back below the burst → vanish
+
+SPARK_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"                       # tumble
+    "INDEXOF_ACTOR_INDEX read-mailbox 9 % 4 - 3.0 * INDEXOF_XSPEED write-mailbox\n"      # fan -12..12 m/s
+    f"INDEXOF_Z_POS read-mailbox {SPARK_DESPAWN_Z:.1f} < if 0 INDEXOF_ALIVE write-mailbox then\n"
+)
+
+def _make_spark_template():
+    import bmesh as _bmesh   # module-level `import ... as _bmesh` is below this call site
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(SPARK_H*2, SPARK_H*2, SPARK_H*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new('spark_template')
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat_spark)
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('spark_template', mesh)
+    obj.location = (-72.0, 0.0, 0.0)   # parking spot; generator overrides pos/vel on spawn
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'generator')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Max Air Speed']        = 50.0
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = 0.0
+    obj['wf_Activation MailBox']   = 0      # mailbox[0] = always-false → the template never spawns
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'spark_template.iff'
+    obj['wf_Script']               = SPARK_SCRIPT
+    return obj
+
+_make_spark_template()
+
+# 6 invisible generators in an arc in the open sky above the castle. Burst n fires in its
+# window iff n < SMB_FIREWORK_COUNT, so a count of 1/3/6 lights 1/3/6 bursts.
+FW_SKY_Z = CASTLE_TOP + 5.0   # burst origins above the flag (7.5), in open sky
+FW_ARC = [   # (x, z) arc above the castle, centre highest
+    (CASTLE_MID_X - 3.0 * T, FW_SKY_Z - 0.5 * T),
+    (CASTLE_MID_X - 1.8 * T, FW_SKY_Z + 0.3 * T),
+    (CASTLE_MID_X - 0.6 * T, FW_SKY_Z + 0.8 * T),
+    (CASTLE_MID_X + 0.6 * T, FW_SKY_Z + 0.8 * T),
+    (CASTLE_MID_X + 1.8 * T, FW_SKY_Z + 0.3 * T),
+    (CASTLE_MID_X + 3.0 * T, FW_SKY_Z - 0.5 * T),
+]
+for _i, (_fx, _fz) in enumerate(FW_ARC):
+    _t0 = 2.0 + _i * 0.35   # staggered; 0.6 s window → last burst ends ~4.35 (finale 4.5)
+    _t1 = _t0 + 0.6
+    g = bpy.data.objects.new(f'firework_gen_{_i}', None)   # Empty → meshless, non-solid spawner
+    scene.collection.objects.link(g)
+    attach_schema(g, 'generator')
+    g.location = (_fx, 0.0, _fz)
+    g['wf_Mobility']           = 'Anchored'
+    g['wf_Model Type']         = 'None'              # invisible
+    g['wf_Visibility Mailbox'] = 0
+    g['wf_Activation MailBox'] = SMB_FIREWORK[_i]    # global; the script pulses it in-window
+    g['wf_Object To Throw']    = 'spark_template'
+    g['wf_Generation Rate']    = 10.0               # generator.oas cap; ~6 sparks over the 0.6 s window
+    g['wf_Object X Velocity']  = 0.0
+    g['wf_Object Y Velocity']  = 0.0                # OAS default 1.0 drifts into +Y — zero it
+    g['wf_Object Z Velocity']  = 4.0               # up-launch; gravity arcs the sparks back down
+    g['wf_Script'] = (
+        "\\ wf\n"
+        f"0 INDEXOF_SMB_FIREWORK_{_i} write-mailbox\n"            # default: don't spawn
+        "INDEXOF_SMB_CELEBRATE read-mailbox if\n"
+        f"  {_i} INDEXOF_SMB_FIREWORK_COUNT read-mailbox < if\n"  # this burst enabled by the count?
+        "    INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox -\n"   # elapsed
+        f"    dup {_t0:.2f} > swap {_t1:.2f} < & if 1 INDEXOF_SMB_FIREWORK_{_i} write-mailbox then\n"
+        "  then\n"
+        "then\n"
+    )
 
 # ── 10b. Flagpole end-of-level trigger ────────────────────────────────────────
 # Composition, NOT a class: an invisible ActBox sensor volume over the flagpole.
-# On Player overlap it writes END_OF_LEVEL=1 → the level unloads. No script, no
-# coordinate baked into a script (the box's placement IS the trigger region).
-# See docs/plans/2026-05-25-smb-flagpole-end-of-level.md and the composition
-# pattern in docs/level-building.md.
-END_OF_LEVEL = 1905   # INDEXOF_END_OF_LEVEL (wfsource/source/mailbox/mailbox.inc:31)
+# On Player overlap it writes SMB_CELEBRATE=1 → the Director runs the end-of-level
+# celebration (pole-flag slide, castle flag raise, timer→score drain, fireworks) and
+# fires END_OF_LEVEL itself at the end. No script, no coordinate baked into a script
+# (the box's placement IS the trigger region).
+# See docs/plans/2026-05-31-smb-flagpole-celebration.md + 2026-05-25-smb-flagpole-end-of-level.md.
+END_OF_LEVEL  = 1905   # INDEXOF_END_OF_LEVEL (wfsource/source/mailbox/mailbox.inc:31)
+SMB_CELEBRATE = 1862   # INDEXOF_SMB_CELEBRATE — flag touch starts the celebration cutscene
 # Flag-driven level advance: a SECOND ActBox at the flag writes LEVEL_TO_RUN, the
 # persistent mailbox the meta-loop reads to pick the next level. shell.fth only seeds
 # it on first boot, so the value persists across the reload. mailbox.inc:247 documents
@@ -1089,7 +1292,7 @@ flagtrig.data.name = 'flagpole_trigger'
 flagtrig.scale = (1.5, T, 2.5 * T)   # half-extents X±1.5, Y±T, Z±3.75 (centre Z=3): covers Mario at the pole
 bpy.ops.object.transform_apply(scale=True)
 attach_schema(flagtrig, 'actbox')
-flagtrig['wf_MailBox']            = END_OF_LEVEL   # write-to-mailbox on activation
+flagtrig['wf_MailBox']            = SMB_CELEBRATE  # start the celebration (Director fires END_OF_LEVEL at the end)
 flagtrig['wf_MailBoxValue']       = 1
 flagtrig['wf_Activated By Actor'] = 'Player'       # ActivatedBy defaults to 1 (Actor)
 # ActBox::activate unconditionally writes the activator's index to "Activated Actor
