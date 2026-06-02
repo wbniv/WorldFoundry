@@ -55,31 +55,39 @@ MARIO_DEFAULT_TINT = 0xFFFFFF   # neutral restore
 STAR_FLASH_A       = 0xFFE000   # Star-invincibility flicker yellow
 STAR_FLASH_B       = 0xFFFFFF   # Star-invincibility flicker white
 
-# W1-1 landmark X positions (tile counts × T) — faithful 224-tile original
+# W1-2 landmark X positions (tile counts × T) — faithful 256-tile underground.
+# docs/smb-level-layouts.md §1-2. Coin ?-blocks, bricks, and Koopas are placed
+# explicitly in the population section below, so QBLOCK_XS / KOOPA_X are kept for
+# symmetry with W1-1 but left unused here.
 MARIO_SPAWN_X = 3  * T
-QBLOCK_XS     = [21*T, 107*T]            # coin ? blocks at faithful cols 21, 107
-KOOPA_X       = 113 * T                  # col 113 (was 32*T)
+QBLOCK_XS     = []                       # W1-2 ? blocks placed explicitly (5-block row + others)
+KOOPA_X       = None                     # W1-2 koopas placed explicitly (3 green + 1 red)
 FLAGPOLE_X    = 248 * T                  # 372 m — faithful W1-2 (256-tile underground, flagpole col 248)
 
-# 16 Goombas at reference positions (docs/smb-level-layouts.md §1-1)
+# 14 Goombas at faithful W1-2 reference positions (docs/smb-level-layouts.md §1-2):
+#   S1 2 after entry + 1 on the block-tower; S2 cluster of 5 + 1 flanking the Koopas;
+#   S3 2 before the pipe corridor; S4 2 on the half-pyramid. Total = 14.
 GOOMBA_XS = [
-    22*T,                                # col 22 — first enemy
-    32*T, 34*T,                          # between pipes 1–2
-    42*T, 44*T,                          # between pipes 2–3
-    50*T,                                # lone Goomba mid-level
-    80*T, 83*T,                          # near post-pit ? block
-    88*T, 92*T, 95*T, 99*T,             # overhead block row area
-    128*T, 133*T,                        # near pyramid A
-    143*T, 147*T,                        # near pyramid B
+    12*T, 16*T,                          # S1: 2 Goombas after the entry pipe
+    28*T,                                # S1: Goomba on the block tower
+    58*T,                                # S2: Goomba flanking the Koopas
+    71*T, 74*T, 77*T, 80*T, 83*T,        # S2: cluster of 5 Goombas
+    122*T, 126*T,                        # S3: 2 Goombas before the pipe corridor
+    191*T, 194*T,                        # S4: 2 Goombas on the half-pyramid
 ]
 
 GROUND_X0 = -2 * T
 GROUND_X1 = FLAGPOLE_X + 5*T
 GROUND_Y  = T                             # half-depth of ground slab in Y
 
-# Bare W1-2 proof: flat ground, no bottomless gaps. Empty PITS -> §5 builds one
-# continuous slab and the pit-death sensor loop is a no-op.
-PITS = []
+# W1-2 Section 4 has 2 gaps (docs/smb-level-layouts.md §1-2). Each (x_left, x_right)
+# span is skipped when the ground slabs are built, leaving a real bottomless hole; the
+# existing pit-death-sensor loop drops an invisible ActBox under each so a fall costs a
+# life. ~3-tile gaps the player jumps across (or rides the static lift-platforms over).
+PITS = [
+    (184*T, 187*T),                      # S4 gap 1 (cols 184-187)
+    (199*T, 202*T),                      # S4 gap 2 (cols 199-202)
+]
 
 # Level countdown timer (Director script). SMB starts at 400 "time units"; we
 # drain them over TIMER_REAL_SECONDS of wall-clock so 100-left lines up with the
@@ -104,7 +112,7 @@ SMB_COIN_14, SMB_COIN_15, SMB_COIN_16, SMB_COIN_17, SMB_COIN_18 = 1857, 1858, 18
 # Fire Mario fireball globals (mailbox.inc 1820-1827). The generators' Activation
 # MailBox needs the literal index here (an OAS int field); scripts use INDEXOF_ names.
 SMB_FIREBALL_FIRE_R, SMB_FIREBALL_FIRE_L = 1823, 1824
-ENTRY_PIPE_X = 47 * T             # = 70.5, center of cols 46-47 (was 12*T)
+ENTRY_PIPE_X = 130 * T            # = 195.0 — Section-3 pipe 1 (col 130); leads to the bonus coin room
 CR_FLOOR_TOP = -48.0              # coin-room floor top
 CR_X0, CR_X1 = 0.0, 24.0         # coin-room play span (16 tiles, faithful W1-1)
 CR_MID        = (CR_X0 + CR_X1) / 2  # = 12.0
@@ -1223,12 +1231,1081 @@ if room:
     if old and old.users == 0:
         bpy.data.meshes.remove(old)
 
-    # Bare W1-2 is a single room. Clear the snowgoons self-adjacency ("room_6")
-    # that room.copy()'s source carried, so the surface room has no stale neighbour.
-    # (The W1-1 underground coin room + its mutual-adjacency camera trick are dropped
-    # here — see the faithful-W1-2 follow-up in the plan.)
-    room['wf_Adjacent Room 1']      = ''
+    # Second room: the W1-2 bonus coin room (pipe-warp target). Same idiom as W1-1 §14 —
+    # room.copy() inherits the schema + Mobility/MovementClass; we give it its own bounds
+    # mesh + disjoint bbox. MUTUAL ADJACENCY is load-bearing: the room SWITCH is bbox-driven
+    # but the camera entity is updated only via the active room's update list, so listing the
+    # rooms as each other's neighbour keeps BOTH active (MAX_ACTIVE_ROOMS=3) and the camera
+    # keeps ticking + follows cs_coin down. (room.copy() also carried snowgoons' self-adjacency
+    # "room_6"; overwrite it.)
+    coin_room = room.copy()
+    scene.collection.objects.link(coin_room)
+    coin_room.name = 'room_coin'
+    coin_room.location = CR_CENTRE
+    coin_room['wf_original_bbox'] = CR_BBOX_REL
+    coin_room.data = _room_bounds_mesh('CoinRoomBounds', CR_BBOX_REL)
+
+    room['wf_Adjacent Room 1']      = 'room_coin'
     room['wf_Adjacent Room 2']      = ''
+    coin_room['wf_Adjacent Room 1'] = 'room_surface'
+    coin_room['wf_Adjacent Room 2'] = ''
+
+# ══════════════════════════════════════════════════════════════════════════════
+# W1-2 POPULATION (faithful per docs/smb-level-layouts.md §1-2). All builders are
+# copied VERBATIM from wflevels/smb_w1_1/blender_create_smb.py — they reference the
+# module globals already defined above. The inline W1-1 Koopa is factored into
+# _build_koopa(x, red=False) so this level can place 4 (3 green + 1 red).
+# Layout left→right across cols 0-256 (X = col × T):
+#   S1 (0-40)   S2 (40-120)   S3 (120-180)   S4 (180-230)   S5 (230-256)
+#   + bonus coin room (pipe-warp) + decorative warp zone.
+# ══════════════════════════════════════════════════════════════════════════════
+import bmesh as _bmesh
+
+# ── Shared materials / textures / constants (verbatim from W1-1 §6) ────────────
+mat_coin   = make_mat('smb_coin', (1.0, 0.84, 0.0))   # gold #FFD600
+BSIZE = T / 2  # half-side of a 1-tile block
+qblock_tex = _make_qblock_tga(os.path.join(SCRIPT_DIR, 'qblock_tex.tga'))
+brick_tex  = _make_brick_tga(os.path.join(SCRIPT_DIR, 'brick_tex.tga'))
+COIN_X = T * 0.25
+COIN_Z = T * 0.5
+COIN_T = 0.2
+
+# Per-actor local block state (matches mailbox.inc 2010-2015).
+MB_SMB_QBLOCK_ACTIVATE = 2010
+MB_SMB_QBLOCK_USED     = 2011
+MB_SMB_QBLOCK_DIE      = 2012
+MB_SMB_BRICK_BREAK_END = 2013
+MB_SMB_BRICK_BUMP_END  = 2014
+MB_SMB_BRICK_BUMP_PEAK = 2015
+# Per-actor Piranha state (mailbox.inc 2016-2017 — NEW; per-plant so 4 oscillate independently).
+MB_SMB_PIRANHA_UP   = 2016
+MB_SMB_PIRANHA_NEXT = 2017
+
+QBLOCK_TAN  = 0xC77D2E
+FLOWER_TINT = 0xF2731A
+
+# Row heights (block centres). BLOCK_Z = row 8; BLOCK_Z_6 = row 6 (2 tiles higher).
+BLOCK_Z_6 = GROUND_TOP_Z + 6*T + T/2
+
+# ── Scripts (verbatim from W1-1) ──────────────────────────────────────────────
+QBLOCK_SCRIPT = (
+    "\\ wf\n"
+    f"INDEXOF_SMB_QBLOCK_USED read-mailbox 0<> if\n"
+    f"  0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "else\n"
+    "  INDEXOF_SMB_QBLOCK_ACTIVATE read-mailbox 0<> if\n"
+    "    0 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "  then\n"
+    "  INDEXOF_SMB_QBLOCK_DIE read-mailbox dup not if\n"
+    "    drop\n"
+    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
+    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
+    "        INDEXOF_TIME read-mailbox 4.0 +\n"
+    "        INDEXOF_SMB_QBLOCK_DIE write-mailbox\n"
+    "        1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "      then\n"
+    "    then\n"
+    "  else\n"
+    "    INDEXOF_TIME read-mailbox > if\n"
+    "      INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
+    "        INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
+    "          1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "        then\n"
+    "      then\n"
+    "    else\n"
+    f"      0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "      1 INDEXOF_SMB_QBLOCK_USED write-mailbox\n"
+    "    then\n"
+    "  then\n"
+    "then\n"
+)
+
+COIN_SCRIPT = "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"
+
+POWERUP_BLOCK_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_QBLOCK_USED read-mailbox 0<> if\n"
+    f"  0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "else\n"
+    "  INDEXOF_SMB_QBLOCK_ACTIVATE read-mailbox 0<> if\n"
+    "    0 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    f"    0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "    1 INDEXOF_SMB_QBLOCK_USED write-mailbox\n"
+    "  else\n"
+    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
+    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
+    "        1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "      then\n"
+    "    then\n"
+    "  then\n"
+    "then\n"
+)
+
+POWERUP_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n"
+    "  0 INDEXOF_XSPEED write-mailbox\n"
+    f"  0x{FLOWER_TINT:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "then\n"
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "+ 2.25 < if\n"
+    "  INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n"
+    "    1 INDEXOF_SMB_FIREFLOWER_PICKUP write-mailbox\n"
+    "  else\n"
+    "    1 INDEXOF_SMB_MUSHROOM_PICKUP write-mailbox\n"
+    "  then\n"
+    "then\n"
+)
+
+STAR_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_COLLISION_NORMAL_Z read-mailbox -0.5 < if\n"
+    "  6.0 INDEXOF_ZSPEED write-mailbox\n"
+    "  0 INDEXOF_COLLISION_NORMAL_Z write-mailbox\n"
+    "then\n"
+    "INDEXOF_COLLISION_NORMAL_X read-mailbox dup * 0.25 > if\n"
+    "  0 INDEXOF_XSPEED read-mailbox - INDEXOF_XSPEED write-mailbox\n"
+    "  0 INDEXOF_COLLISION_NORMAL_X write-mailbox\n"
+    "then\n"
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "+ 2.25 < if\n"
+    "  1 INDEXOF_SMB_STAR_PICKUP write-mailbox\n"
+    "then\n"
+)
+
+ONEUP_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "+ 2.25 < if\n"
+    "  1 INDEXOF_SMB_ONEUP_PICKUP write-mailbox\n"
+    "then\n"
+)
+
+ENEMY_WALK_SPEED = 4.0
+ENEMY_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_MAX_CAM_X read-mailbox 12.0 + INDEXOF_X_POS read-mailbox > if\n"
+    f"  {-ENEMY_WALK_SPEED} INDEXOF_XSPEED write-mailbox\n"
+    "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n"
+    "  dup * 1.0 <\n"
+    "  if\n"
+    "    INDEXOF_TIME read-mailbox INDEXOF_SMB_STAR_UNTIL read-mailbox < if\n"
+    "      0 INDEXOF_ALIVE write-mailbox\n"
+    "    else\n"
+    "      INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"
+    "      dup 0.7 >\n"
+    "      if\n"
+    "        drop\n"
+    "        INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "        INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "        1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "        0 INDEXOF_ALIVE write-mailbox\n"
+    "        1 INDEXOF_SMB_STOMP write-mailbox\n"
+    "      else\n"
+    "        -1.5 >\n"
+    "        if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n"
+    "      then\n"
+    "    then\n"
+    "  then\n"
+    "else\n"
+    "  0 INDEXOF_XSPEED write-mailbox\n"
+    "then\n"
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "  + 2.5 < if\n"
+    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  then\n"
+    "then\n"
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_SHELL_LIVE_UNTIL read-mailbox < if\n"
+    "  INDEXOF_SMB_SHELL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "  INDEXOF_SMB_SHELL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "  + 1.5 < if\n"
+    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "    INDEXOF_SMB_SCORE read-mailbox 100 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  then\n"
+    "then\n"
+)
+
+# Koopa shell-kick — object-oriented PER-ACTOR state via the local slot SMB_KOOPA_STATE_L
+# (2018), so each of the 4 Koopas walks/retracts/slides on its own state machine (local
+# mailboxes are per-actor → no cross-talk). Each Koopa needs Number Of Local Mailboxes ≥ 19.
+# (Sliding-shell broadcasts SMB_SHELL_LIVE_* are still global — one shell usually slides at
+# a time; independent multi-shell-vs-enemy collisions are a later refinement.)
+SHELL_SPEED = 14.0
+KOOPA_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox not if\n"
+    "  INDEXOF_SMB_MAX_CAM_X read-mailbox 12.0 + INDEXOF_X_POS read-mailbox > if\n"
+    f"    {-ENEMY_WALK_SPEED} INDEXOF_XSPEED write-mailbox\n"
+    "  else\n"
+    "    0 INDEXOF_XSPEED write-mailbox\n"
+    "  then\n"
+    "then\n"
+    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox 1 = if 0 INDEXOF_XSPEED write-mailbox then\n"
+    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox 2 = if\n"
+    "  INDEXOF_COLLISION_NORMAL_X read-mailbox dup * 0.25 > if\n"
+    "    0 INDEXOF_XSPEED read-mailbox - INDEXOF_XSPEED write-mailbox\n"
+    "    0 INDEXOF_COLLISION_NORMAL_X write-mailbox\n"
+    "  then\n"
+    "  INDEXOF_X_POS read-mailbox INDEXOF_SMB_SHELL_LIVE_X write-mailbox\n"
+    "  INDEXOF_Z_POS read-mailbox INDEXOF_SMB_SHELL_LIVE_Z write-mailbox\n"
+    "  INDEXOF_TIME read-mailbox 0.1 + INDEXOF_SMB_SHELL_LIVE_UNTIL write-mailbox\n"
+    "then\n"
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n"
+    "dup * 1.0 <\n"
+    "if\n"
+    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_STAR_UNTIL read-mailbox < if\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  else\n"
+    "    INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"
+    "    dup 0.7 >\n"
+    "    if\n"
+    "      drop\n"
+    "      INDEXOF_SMB_KOOPA_STATE_L read-mailbox 2 < if 0.5 INDEXOF_Z_SCALE write-mailbox then\n"
+    "      INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "      INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "      1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "      1 INDEXOF_SMB_KOOPA_STATE_L write-mailbox\n"
+    "      0 INDEXOF_XSPEED write-mailbox\n"
+    "      1 INDEXOF_SMB_STOMP write-mailbox\n"
+    "    else\n"
+    "      -1.5 >\n"
+    "      if\n"
+    "        INDEXOF_SMB_KOOPA_STATE_L read-mailbox 1 = if\n"
+    "          INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - 0 < if\n"
+    f"            {SHELL_SPEED} INDEXOF_XSPEED write-mailbox\n"
+    "          else\n"
+    f"            {-SHELL_SPEED} INDEXOF_XSPEED write-mailbox\n"
+    "          then\n"
+    "          2 INDEXOF_SMB_KOOPA_STATE_L write-mailbox\n"
+    "        else\n"
+    "          1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"
+    "        then\n"
+    "      then\n"
+    "    then\n"
+    "  then\n"
+    "then\n"
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "  + 2.5 < if\n"
+    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  then\n"
+    "then\n"
+)
+
+# Debris fragment (verbatim from W1-1 §16) — LOCAL_SYSTEM-only template; deterministic
+# index-fanned X drift (no Scalar::Random). `%` casts to int in zForth.
+mat_debris = make_mat('smb_debris', (0.77, 0.42, 0.0))
+DEBRIS_H = 0.18
+DEBRIS_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"
+    "INDEXOF_ACTOR_INDEX read-mailbox 4 % 1.5 - 3.0 * INDEXOF_XSPEED write-mailbox\n"
+    "INDEXOF_Z_POS read-mailbox -20.0 < if\n"
+    "  0 INDEXOF_ALIVE write-mailbox\n"
+    "then\n"
+)
+
+BRICK_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_BRICK_BREAK_END read-mailbox 0<> if\n"
+    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BREAK_END read-mailbox > if\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  else\n"
+    "    1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "  then\n"
+    "else\n"
+    "  INDEXOF_SMB_BRICK_BUMP_END read-mailbox 0<> if\n"
+    "    INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BUMP_END read-mailbox > if\n"
+    "      0 INDEXOF_Z_POS write-mailbox\n"
+    "      0 INDEXOF_SMB_BRICK_BUMP_END write-mailbox\n"
+    "    else\n"
+    "      INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BUMP_PEAK read-mailbox > if\n"
+    "        0.10 INDEXOF_Z_POS write-mailbox\n"
+    "      else\n"
+    "        0.30 INDEXOF_Z_POS write-mailbox\n"
+    "      then\n"
+    "    then\n"
+    "  else\n"
+    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
+    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
+    "        INDEXOF_SMB_MARIO_STATE read-mailbox 0<> if\n"
+    "          INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "          INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "          1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "          INDEXOF_SMB_SCORE read-mailbox 50 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "          INDEXOF_TIME read-mailbox 0.4 + INDEXOF_SMB_BRICK_BREAK_END write-mailbox\n"
+    "          1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "        else\n"
+    "          INDEXOF_TIME read-mailbox 0.05 + INDEXOF_SMB_BRICK_BUMP_PEAK write-mailbox\n"
+    "          INDEXOF_TIME read-mailbox 0.10 + INDEXOF_SMB_BRICK_BUMP_END write-mailbox\n"
+    "        then\n"
+    "      then\n"
+    "    then\n"
+    "  then\n"
+    "then\n"
+)
+
+# Score pop-up (verbatim from W1-1 §12b).
+POPUP_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_POPUP_TRIGGER read-mailbox 0<> if\n"
+    "  INDEXOF_SMB_POPUP_X read-mailbox INDEXOF_X_POS write-mailbox\n"
+    "  0 INDEXOF_Y_POS write-mailbox\n"
+    "  INDEXOF_SMB_POPUP_Z read-mailbox 1.5 + INDEXOF_Z_POS write-mailbox\n"
+    "  INDEXOF_TIME read-mailbox 0.75 + INDEXOF_SMB_POPUP_UNTIL write-mailbox\n"
+    "  0 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "then\n"
+    "INDEXOF_SMB_POPUP_UNTIL read-mailbox 0<> if\n"
+    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_POPUP_UNTIL read-mailbox < if\n"
+    "    INDEXOF_Z_POS read-mailbox 3.0 INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n"
+    "  else\n"
+    "    0.0 INDEXOF_X_POS write-mailbox\n"
+    "    -5.0 INDEXOF_Z_POS write-mailbox\n"
+    "    0 INDEXOF_SMB_POPUP_UNTIL write-mailbox\n"
+    "  then\n"
+    "then\n"
+)
+
+# ── Piranha Plant (Anchored, non-colliding Enemy; PER-ACTOR oscillation) ──────
+# docs/plans/2026-05-27-smb-piranha-plant.md — W1-1 used GLOBAL phase state for a single
+# plant; W1-2 needs 4, so this script uses PER-ACTOR local slots (2016/2017) seeded on the
+# first tick from the plant's own ACTOR_INDEX (staggers the four plants out of phase). The
+# plant slides its own Z_POS between a hidden Z (inside the opaque pipe) and an emerged Z
+# (head above the pipe top) at RATE × DELTA_TIME, retracts while Mario stands on the pipe,
+# hurts on overhead contact, and dies to a fresh fireball. No stomp (a Piranha always hurts).
+PIRANHA_HIDDEN_Z  = GROUND_TOP_Z + 0.5*T   # inside the 2T pipe → occluded
+PIRANHA_EMERGED_Z = GROUND_TOP_Z + 3.2*T   # head clears the 2T pipe top
+PIRANHA_PIPE_TOP  = GROUND_TOP_Z + 2*T
+PIRANHA_RATE      = 4.0
+PIRANHA_DWELL     = 2.0
+PIRANHA_SCRIPT = (
+    "\\ wf\n"
+    # Seed the per-actor next-toggle deadline once; stagger by ACTOR_INDEX so the four
+    # plants are out of phase (index*0.4 s offset). `%` casts to int.
+    "INDEXOF_SMB_PIRANHA_NEXT_L read-mailbox not if\n"
+    f"  INDEXOF_TIME read-mailbox INDEXOF_ACTOR_INDEX read-mailbox 5 % 0.4 * + {PIRANHA_DWELL} +\n"
+    "  INDEXOF_SMB_PIRANHA_NEXT_L write-mailbox\n"
+    "  1 INDEXOF_SMB_PIRANHA_UP_L write-mailbox\n"
+    "then\n"
+    # Phase toggle on the TIME deadline: flip UP, push the next deadline out by DWELL.
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_PIRANHA_NEXT_L read-mailbox > if\n"
+    "  INDEXOF_SMB_PIRANHA_UP_L read-mailbox not INDEXOF_SMB_PIRANHA_UP_L write-mailbox\n"
+    f"  INDEXOF_TIME read-mailbox {PIRANHA_DWELL} + INDEXOF_SMB_PIRANHA_NEXT_L write-mailbox\n"
+    "then\n"
+    # GO = phase-up AND Mario not standing on the pipe mouth (|dx|<1.2 AND playerZ>2.0).
+    "INDEXOF_SMB_PIRANHA_UP_L read-mailbox\n"
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup * 1.44 < if\n"
+    "  INDEXOF_SMB_PLAYER_Z read-mailbox 2.0 > if drop 0 then\n"
+    "then\n"
+    # Slide toward the limit at RATE*dt.
+    "if\n"
+    f"  INDEXOF_Z_POS read-mailbox {PIRANHA_EMERGED_Z} < if\n"
+    f"    INDEXOF_Z_POS read-mailbox {PIRANHA_RATE} INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n"
+    "  then\n"
+    "else\n"
+    f"  INDEXOF_Z_POS read-mailbox {PIRANHA_HIDDEN_Z} > if\n"
+    f"    INDEXOF_Z_POS read-mailbox {PIRANHA_RATE} INDEXOF_DELTA_TIME read-mailbox * - INDEXOF_Z_POS write-mailbox\n"
+    "  then\n"
+    "then\n"
+    # Hurt: emerged (Z above pipe top) AND Mario in contact (close in X AND Z).
+    f"INDEXOF_Z_POS read-mailbox {PIRANHA_PIPE_TOP} > if\n"
+    "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "  INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "  + 2.0 < if\n"
+    "    1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"
+    "  then\n"
+    "then\n"
+    # Fireball defeat (any height) — same idiom as the goomba.
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "  + 2.5 < if\n"
+    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  then\n"
+    "then\n"
+)
+
+# ── Builder factories (verbatim from W1-1) ────────────────────────────────────
+def _make_coin_template():
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(COIN_X*2, COIN_T*2, COIN_Z*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new('coin_template')
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat_coin)
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('coin_template', mesh)
+    obj.location = (-50.0, 0.0, 0.0)
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'gold')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Max Air Speed']        = 50.0
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = 0.0
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'coin_template.iff'
+    obj['wf_Script']               = COIN_SCRIPT
+    return obj
+
+
+def _add_qblock(name, x, z=BLOCK_Z):
+    """Coin ?-block: a Generator that throws coin_template on bump-from-below (4 s window)."""
+    blk = _add_textured_box(name, x - BSIZE, -BSIZE, z - BSIZE,
+                                  x + BSIZE,  BSIZE, z + BSIZE, qblock_tex)
+    attach_schema(blk, 'generator')
+    blk['wf_Mobility']           = 'Anchored'
+    blk['wf_Model Type']         = 'Mesh'
+    blk['wf_Visibility Mailbox'] = 1
+    blk['wf_Number Of Local Mailboxes'] = 13
+    blk['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+    blk['wf_Object To Throw']    = 'coin_template'
+    blk['wf_Generation Rate']    = 10.0
+    blk['wf_Object X Velocity']  = 1.5
+    blk['wf_Object Y Velocity']  = 0.0
+    blk['wf_Object Z Velocity']  = 6.0
+    blk['wf_Script']             = QBLOCK_SCRIPT
+    return blk
+
+
+MUSH_X = T * 0.40
+MUSH_Z = T * 0.40
+MUSH_T = 0.25
+
+
+def _make_powerup_template(name, mat, script, running_decel, park_x):
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(MUSH_X*2, MUSH_T*2, MUSH_Z*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new(name)
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat)
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new(name, mesh)
+    obj.location = (park_x, 0.0, 0.0)
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'gold')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Max Air Speed']        = 50.0
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = running_decel
+    obj['wf_Gold Value']           = 0
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = name + '.iff'
+    obj['wf_Script']               = script
+    return obj
+
+
+def _make_powerup_block(name, x, throw, vx, z=None):
+    if z is None:
+        z = BLOCK_Z
+    b = _add_textured_box(name, x - BSIZE, -BSIZE, z - BSIZE,
+                                x + BSIZE,  BSIZE, z + BSIZE, qblock_tex)
+    attach_schema(b, 'generator')
+    b['wf_Mobility']           = 'Anchored'
+    b['wf_Model Type']         = 'Mesh'
+    b['wf_Visibility Mailbox'] = 1
+    b['wf_Number Of Local Mailboxes'] = 13
+    b['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+    b['wf_Object To Throw']    = throw
+    b['wf_Generation Rate']    = 10.0
+    b['wf_Object X Velocity']  = vx
+    b['wf_Object Y Velocity']  = 0.0
+    b['wf_Object Z Velocity']  = 6.0
+    b['wf_Script']             = POWERUP_BLOCK_SCRIPT
+    return b
+
+
+def _make_debris_template():
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(DEBRIS_H*2, DEBRIS_H*2, DEBRIS_H*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new('debris_template')
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat_debris)
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('debris_template', mesh)
+    obj.location = (-60.0, 0.0, 0.0)
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'generator')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Max Air Speed']        = 50.0
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = 0.0
+    obj['wf_Activation MailBox']   = 0
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'debris_template.iff'
+    obj['wf_Script']               = DEBRIS_SCRIPT
+    return obj
+
+
+def _add_brick(name, x, z=BLOCK_Z):
+    blk = _add_textured_box(name, x - BSIZE, -BSIZE, z - BSIZE,
+                                  x + BSIZE,  BSIZE, z + BSIZE, brick_tex)
+    attach_schema(blk, 'generator')
+    blk['wf_Mobility']           = 'Anchored'
+    blk['wf_Model Type']         = 'Mesh'
+    blk['wf_Visibility Mailbox'] = 1
+    blk['wf_Number Of Local Mailboxes'] = 16
+    blk['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+    blk['wf_Object To Throw']    = 'debris_template'
+    blk['wf_Generation Rate']    = 10.0
+    blk['wf_Object X Velocity']  = 0.0
+    blk['wf_Object Y Velocity']  = 0.0
+    blk['wf_Object Z Velocity']  = 7.0
+    blk['wf_Script']             = BRICK_SCRIPT
+    return blk
+
+
+def _make_popup_template():
+    POP_W = T * 0.35
+    POP_H = T * 0.45
+    POP_T = 0.12
+    bm = _bmesh.new()
+    tf = bm.verts.new((0,      POP_T,  POP_H))
+    rf = bm.verts.new((POP_W,  POP_T,  0))
+    bf = bm.verts.new((0,      POP_T, -POP_H))
+    lf = bm.verts.new((-POP_W, POP_T,  0))
+    tb = bm.verts.new((0,     -POP_T,  POP_H))
+    rb = bm.verts.new((POP_W, -POP_T,  0))
+    bb = bm.verts.new((0,     -POP_T, -POP_H))
+    lb = bm.verts.new((-POP_W,-POP_T,  0))
+    bm.faces.new([tf, rf, bf, lf])
+    bm.faces.new([tb, lb, bb, rb])
+    bm.faces.new([tf, tb, rb, rf])
+    bm.faces.new([rf, rb, bb, bf])
+    bm.faces.new([bf, bb, lb, lf])
+    bm.faces.new([lf, lb, tb, tf])
+    mesh = bpy.data.meshes.new('popup_score')
+    bm.to_mesh(mesh); bm.free()
+    mat = make_mat('smb_popup', (1.0, 0.95, 0.2))
+    mesh.materials.append(mat)
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('popup_score', mesh)
+    obj.location = (0.0, 0.0, -5.0)
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'enemy')
+    obj['wf_Mobility']             = 'Anchored'
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'popup_score.iff'
+    obj['wf_Script']               = POPUP_SCRIPT
+    return obj
+
+
+def _build_goomba():
+    mat_br = make_mat('goomba_brown', (0.55, 0.27, 0.06))
+    mat_tn = make_mat('goomba_tan',   (0.83, 0.65, 0.34))
+    parts = []
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=0.48*T, segments=10, ring_count=6, location=(0, 0, 0.44*T))
+    bpy.context.object.scale.z = 0.72
+    bpy.ops.object.transform_apply(scale=True)
+    parts.append((bpy.context.object, mat_br))
+    bpy.ops.mesh.primitive_cylinder_add(
+        vertices=10, radius=0.34*T, depth=0.09*T, location=(0, 0, 0.54*T))
+    parts.append((bpy.context.object, mat_tn))
+    for yo in (-0.19*T, 0.19*T):
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            radius=0.14*T, segments=6, ring_count=4, location=(0, yo, 0.10*T))
+        parts.append((bpy.context.object, mat_br))
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for p in obj.data.polygons:
+            p.material_index = 0
+            p.use_smooth = True
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    body.name      = 'goomba_00'
+    body.data.name = 'goomba_00'
+    return body
+
+
+def _apply_enemy_movement(obj):
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 1.0
+    obj['wf_Turn Rate']            = 0.0
+    obj['wf_Running Deceleration'] = 0.0
+    obj['wf_Max Ground Speed']     = 8.0
+    obj['wf_Max Air Speed']        = 50.0
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Script']               = ENEMY_SCRIPT
+
+
+def _build_koopa(name, x, red=False):
+    """Factored from W1-1's inline Koopa so W1-2 can place 4 (3 green + 1 red).
+    Green Koopa walks off ledges; Red Koopa is the same model in a red shell (the
+    'turns at ledges' AI difference is not modelled — placeholder fidelity)."""
+    mat_shell = make_mat(f'{name}_shell',
+                         (0.78, 0.12, 0.10) if red else (0.14, 0.56, 0.20))
+    mat_kskin = make_mat(f'{name}_skin', (0.90, 0.76, 0.34))
+    parts = []
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=0.48*T, segments=10, ring_count=6, location=(0, 0, 0.52*T))
+    bpy.context.object.scale.z = 0.80
+    bpy.ops.object.transform_apply(scale=True)
+    bpy.context.object.data.materials.clear()
+    bpy.context.object.data.materials.append(mat_shell)
+    for p in bpy.context.object.data.polygons:
+        p.material_index = 0
+        p.use_smooth = True
+    parts.append(bpy.context.object)
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=0.22*T, segments=8, ring_count=5, location=(0.30*T, 0, 0.90*T))
+    bpy.context.object.data.materials.clear()
+    bpy.context.object.data.materials.append(mat_kskin)
+    for p in bpy.context.object.data.polygons:
+        p.material_index = 0
+        p.use_smooth = True
+    parts.append(bpy.context.object)
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj in parts:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = parts[0]
+    bpy.ops.object.join()
+    km = bpy.context.object
+    km.name = name
+    km.data.name = name
+    ko = bpy.data.objects.new(name, km.data)
+    scene.collection.objects.link(ko)
+    bpy.data.objects.remove(km, do_unlink=True)
+    ko.location = (x, 0.0, MARIO_Z)
+    attach_schema(ko, 'enemy')
+    _apply_enemy_movement(ko)
+    ko['wf_Script']           = KOOPA_SCRIPT
+    ko['wf_Max Ground Speed'] = 16.0
+    ko['wf_Number Of Local Mailboxes'] = 19   # per-actor shell state at SMB_KOOPA_STATE_L (2018)
+    return ko
+
+
+# Hard-block / pipe materials (verbatim from W1-1).
+mat_hard   = make_mat('smb_hard_block', (0.48, 0.25, 0.05))
+PIPE_GREEN = make_mat('smb_pipe_green', (0.0, 0.62, 0.0))
+
+
+def _add_pyramid(name_base, base_col, steps=4):
+    for _s in range(steps):
+        add_statplat(f'{name_base}_{_s}',
+                     (base_col + _s)*T - BSIZE, -GROUND_Y, GROUND_TOP_Z,
+                     (base_col + _s)*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + (_s + 1)*T,
+                     mat_hard)
+
+
+def _add_staircase(name_base, base_col, steps=8):
+    for _s in range(steps):
+        _h = (_s + 1) * T
+        add_statplat(f'{name_base}_{_s}',
+                     (base_col + _s)*T - BSIZE, -GROUND_Y, GROUND_TOP_Z,
+                     (base_col + _s)*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + _h,
+                     mat_hard)
+
+
+def _add_pipe(name, col, height_tiles, width_tiles=2):
+    """Decorative green pipe statplat. col = centre column; width 2 tiles (X col±1)."""
+    add_statplat(name,
+                 col*T - width_tiles/2*T, -GROUND_Y, GROUND_TOP_Z,
+                 col*T + width_tiles/2*T,  GROUND_Y, GROUND_TOP_Z + height_tiles*T,
+                 PIPE_GREEN)
+
+
+def _build_piranha(name, col):
+    """Anchored, non-colliding Enemy plant that oscillates out of a pipe at `col`.
+    Per-actor local mailboxes (2016/2017) so the 4 plants run independent clocks."""
+    mat_stem = make_mat(f'{name}_stem', (0.10, 0.62, 0.16))
+    mat_head = make_mat(f'{name}_head', (0.85, 0.10, 0.10))
+    parts = []
+    bpy.ops.mesh.primitive_cylinder_add(
+        vertices=8, radius=0.18*T, depth=0.9*T, location=(0, 0, 0.0))
+    bpy.context.object.data.materials.clear()
+    bpy.context.object.data.materials.append(mat_stem)
+    for p in bpy.context.object.data.polygons:
+        p.material_index = 0
+        p.use_smooth = True
+    parts.append(bpy.context.object)
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=0.40*T, segments=10, ring_count=6, location=(0, 0, 0.55*T))
+    bpy.context.object.data.materials.clear()
+    bpy.context.object.data.materials.append(mat_head)
+    for p in bpy.context.object.data.polygons:
+        p.material_index = 0
+        p.use_smooth = True
+    parts.append(bpy.context.object)
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj in parts:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = parts[0]
+    bpy.ops.object.join()
+    pm = bpy.context.object
+    pm.name = name
+    pm.data.name = name
+    po = bpy.data.objects.new(name, pm.data)
+    scene.collection.objects.link(po)
+    bpy.data.objects.remove(pm, do_unlink=True)
+    po.location = (col*T, 0.0, PIRANHA_HIDDEN_Z)
+    attach_schema(po, 'enemy')
+    po['wf_Mobility']                  = 'Anchored'
+    po['wf_Model Type']                = 'Mesh'
+    po['wf_Visibility Mailbox']        = 1
+    po['wf_Number Of Local Mailboxes'] = 18   # 2000..2017 covers the piranha slots
+    po['wf_Script']                    = PIRANHA_SCRIPT
+    return po
+
+
+# ══ Templates (one per kind, parked off-screen) ══════════════════════════════
+_make_coin_template()
+_make_debris_template()
+_make_popup_template()
+
+mat_powerup = make_mat('powerup_red', (0.85, 0.16, 0.12))
+_make_powerup_template('powerup_template', mat_powerup, POWERUP_SCRIPT, 0.0, -55.0)
+mat_star  = make_mat('star_yellow', (0.98, 0.85, 0.10))
+_make_powerup_template('star_template', mat_star, STAR_SCRIPT, 0.0, -59.0)
+mat_oneup = make_mat('smb_oneup', (0.05, 0.75, 0.05))
+_make_powerup_template('oneup_template', mat_oneup, ONEUP_SCRIPT, 0.0, -65.0)
+
+# ══ SECTION 1 (cols 0-40): entry ════════════════════════════════════════════
+# Row of 5 ?-blocks at row 8, cols 19-23: leftmost (19) = powerup, 20-23 = coin blocks.
+_make_powerup_block('s1_powerup_block', 19*T, 'powerup_template', 0.0)   # mushroom/fire-flower
+_add_qblock('s1_qcoin_0', 20*T)
+_add_qblock('s1_qcoin_1', 21*T)
+_add_qblock('s1_qcoin_2', 22*T)
+_add_qblock('s1_qcoin_3', 23*T)
+# Block tower (hard blocks) with 1 Goomba on it (Goomba @28 in GOOMBA_XS).
+add_statplat('s1_tower_0', 27*T - BSIZE, -GROUND_Y, GROUND_TOP_Z,
+             27*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + 1*T, mat_hard)
+add_statplat('s1_tower_1', 28*T - BSIZE, -GROUND_Y, GROUND_TOP_Z,
+             28*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + 2*T, mat_hard)
+# Brick hiding a 10-coin block (a brick that dispenses coins over its 4 s window).
+_s1_10coin = _add_textured_box('s1_brick_10coin',
+                               34*T - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                               34*T + BSIZE,  BSIZE, BLOCK_Z + BSIZE, brick_tex)
+attach_schema(_s1_10coin, 'generator')
+_s1_10coin['wf_Mobility']           = 'Anchored'
+_s1_10coin['wf_Model Type']         = 'Mesh'
+_s1_10coin['wf_Visibility Mailbox'] = 1
+_s1_10coin['wf_Number Of Local Mailboxes'] = 13
+_s1_10coin['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+_s1_10coin['wf_Object To Throw']    = 'coin_template'
+_s1_10coin['wf_Generation Rate']    = 10.0   # ~10 coins over the 4 s coin window
+_s1_10coin['wf_Object X Velocity']  = 1.5
+_s1_10coin['wf_Object Y Velocity']  = 0.0
+_s1_10coin['wf_Object Z Velocity']  = 6.0
+_s1_10coin['wf_Script']             = QBLOCK_SCRIPT   # multi-coin 4 s window = "10-coin block"
+
+# ══ SECTION 2 (cols 40-120) ══════════════════════════════════════════════════
+# Brick formations.
+for _bi, _bc in enumerate(range(44, 49)):
+    _add_brick(f's2_bricks_a_{_bi}', _bc * T)
+# Brick hiding a Starman (reuses W1-1 star machinery: SMB_STAR_PICKUP).
+_make_powerup_block('s2_star_brick', 50*T, 'star_template', 1.5)
+# 2 Green Koopa Troopas.
+_build_koopa('koopa_green_0', 55*T)
+_build_koopa('koopa_green_1', 60*T)
+# Cluster of 5 Goombas + 1 Koopa (the 5 Goombas come from GOOMBA_XS @71-83;
+# the 3rd Green Koopa sits in the cluster).
+_build_koopa('koopa_green_2', 68*T)
+# Brick hiding a power-up.
+_make_powerup_block('s2_powerup_brick', 90*T, 'powerup_template', 0.0)
+# Brick with a 10-coin block.
+_s2_10coin = _add_textured_box('s2_brick_10coin',
+                               95*T - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                               95*T + BSIZE,  BSIZE, BLOCK_Z + BSIZE, brick_tex)
+attach_schema(_s2_10coin, 'generator')
+_s2_10coin['wf_Mobility']           = 'Anchored'
+_s2_10coin['wf_Model Type']         = 'Mesh'
+_s2_10coin['wf_Visibility Mailbox'] = 1
+_s2_10coin['wf_Number Of Local Mailboxes'] = 13
+_s2_10coin['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+_s2_10coin['wf_Object To Throw']    = 'coin_template'
+_s2_10coin['wf_Generation Rate']    = 10.0
+_s2_10coin['wf_Object X Velocity']  = 1.5
+_s2_10coin['wf_Object Y Velocity']  = 0.0
+_s2_10coin['wf_Object Z Velocity']  = 6.0
+_s2_10coin['wf_Script']             = QBLOCK_SCRIPT
+# Short gap: a non-bottomless step (raised platform after a brick row) + hidden 1-Up.
+# (NOT in PITS — the doc's "short gap" is jumpable, not a death pit.) The platform with
+# a hidden 1-Up: a brick at col 110 that dispenses the green 1-UP mushroom.
+add_statplat('s2_platform', 104*T - BSIZE, -GROUND_Y, GROUND_TOP_Z,
+             108*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + 1*T, mat_hard)
+_s2_1up = _add_textured_box('s2_brick_1up',
+                            110*T - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                            110*T + BSIZE,  BSIZE, BLOCK_Z + BSIZE, brick_tex)
+attach_schema(_s2_1up, 'generator')
+_s2_1up['wf_Mobility']           = 'Anchored'
+_s2_1up['wf_Model Type']         = 'Mesh'
+_s2_1up['wf_Visibility Mailbox'] = 1
+_s2_1up['wf_Number Of Local Mailboxes'] = 13
+_s2_1up['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+_s2_1up['wf_Object To Throw']    = 'oneup_template'
+_s2_1up['wf_Generation Rate']    = 10.0
+_s2_1up['wf_Object X Velocity']  = 1.5
+_s2_1up['wf_Object Y Velocity']  = 0.0
+_s2_1up['wf_Object Z Velocity']  = 6.0
+_s2_1up['wf_Script']             = POWERUP_BLOCK_SCRIPT
+
+# ══ SECTION 3 (cols 120-180): pipe corridor ══════════════════════════════════
+# 2 Goombas come from GOOMBA_XS (@122, 126). 3 pipes with Piranha Plants (~cols 130/145/160).
+# Pipe 1 (col 130 = ENTRY_PIPE_X) leads to the bonus coin room (entry sense + warp below).
+_add_pipe('pipe_s3_1', 130, 2)   # = ENTRY_PIPE_X/T; warp pipe
+_add_pipe('pipe_s3_2', 145, 2)
+_add_pipe('pipe_s3_3', 160, 2)
+_build_piranha('piranha_0', 130)
+_build_piranha('piranha_1', 145)
+_build_piranha('piranha_2', 160)
+
+# ══ SECTION 4 (cols 180-230): gaps + half-pyramid + (deferred) lifts + red koopa ═
+# The 2 gaps are in PITS (built above as real holes + pit-death sensors).
+# Half-pyramid with 2 Goombas (Goombas @191, 194 in GOOMBA_XS).
+_add_pyramid('s4_pyramid', base_col=189, steps=4)
+# LIFTS DEFERRED → static jump-across platforms over the descending/ascending-lift bays
+# (cols ~205-220) so the level stays traversable. Stone (hard-block) platforms at staggered
+# heights the player hops between.
+add_statplat('s4_lift_static_0', 205*T - BSIZE, -GROUND_Y, GROUND_TOP_Z + 1*T,
+             206*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + 1*T + 0.5, mat_hard)
+add_statplat('s4_lift_static_1', 211*T - BSIZE, -GROUND_Y, GROUND_TOP_Z + 2*T,
+             212*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + 2*T + 0.5, mat_hard)
+add_statplat('s4_lift_static_2', 217*T - BSIZE, -GROUND_Y, GROUND_TOP_Z + 1*T,
+             218*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + 1*T + 0.5, mat_hard)
+# Brick platform with 1 Red Koopa Troopa + bricks.
+for _bi, _bc in enumerate(range(221, 225)):
+    _add_brick(f's4_bricks_{_bi}', _bc * T, z=BLOCK_Z_6)
+_build_koopa('koopa_red_0', 223*T, red=True)
+# Final brick row with a hidden power-up.
+for _bi, _bc in enumerate(range(227, 230)):
+    _add_brick(f's4_final_bricks_{_bi}', _bc * T)
+_make_powerup_block('s4_final_powerup', 228*T, 'powerup_template', 0.0, z=BLOCK_Z_6)
+
+# ══ SECTION 5 (cols 230-256): surface/exit ═══════════════════════════════════
+# Pipe with a Piranha Plant on the surface.
+_add_pipe('pipe_s5', 235, 2)
+_build_piranha('piranha_3', 235)
+# Hard-block staircase up to the flagpole (col 248, already built). 8 ascending steps.
+_add_staircase('s5_staircase', base_col=240, steps=8)
+
+# ══ Goombas (14, from GOOMBA_XS) ═════════════════════════════════════════════
+_goomba_body = _build_goomba()
+_goomba_data = _goomba_body.data
+bpy.data.objects.remove(_goomba_body, do_unlink=True)
+for _gi, _gx in enumerate(GOOMBA_XS):
+    _go = bpy.data.objects.new(f'goomba_{_gi:02d}', _goomba_data)
+    scene.collection.objects.link(_go)
+    _go.location = (_gx, 0.0, MARIO_Z)
+    attach_schema(_go, 'enemy')
+    _apply_enemy_movement(_go)
+
+# ══ DECORATIVE WARP ZONE (~col 210, non-functional) ══════════════════════════
+# Three pipes + a "WELCOME TO WARP ZONE" sign. NO warps wired (worlds 2-1/3-1/4-1 don't
+# exist) — this is pure set-dressing behind the playfield so it reads as the famous secret.
+# Placed slightly into +Y (Y=2.5) so it sits behind the player plane and the camera frames it.
+for _wi, _wc in enumerate((208, 211, 214)):
+    add_statplat(f'warp_pipe_{_wi}',
+                 _wc*T - T, 1.5, GROUND_TOP_Z + 1*T,
+                 _wc*T + T, 3.5, GROUND_TOP_Z + (2 + _wi)*T, PIPE_GREEN)
+# Sign — a bright statplat slab above the warp pipes (textured colour stands in for text).
+mat_warp_sign = make_mat('smb_warp_sign', (0.95, 0.92, 0.20))
+add_statplat('warp_zone_sign',
+             207*T, 2.0, GROUND_TOP_Z + 4*T,
+             215*T, 2.2, GROUND_TOP_Z + 4*T + 0.8*T, mat_warp_sign)
+
+# ══ BONUS COIN ROOM (pipe-warp target, copied from W1-1 §14) ═════════════════
+CR_FLOOR_MAT = make_mat('smb_cr_floor', (0.45, 0.22, 0.05))
+
+# Entry sense: a thin ActBox lid over the Section-3 pipe-1 mouth (col 130, 2T tall → top 3.0).
+# Standing on top (origin Z≈4.5 once Mario is on the pipe? — the pipe is 2T = top 3.0, so a
+# resting origin Z≈3.0+T=… ) ; band at the pipe TOP so a stand-on overlaps, a ground walk-past
+# (origin Z≈1.5) does not. SMB_AT_PIPE + Down (player script) warps to CR_ENTRY_X/Z.
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(ENTRY_PIPE_X, 0.0, GROUND_TOP_Z + 2*T + 0.2))
+es = bpy.context.object
+es.name = 'pipe_entry_sense'; es.data.name = 'pipe_entry_sense'
+es.scale = (T, GROUND_Y, 0.6)
+bpy.ops.object.transform_apply(scale=True)
+attach_schema(es, 'actbox')
+es['wf_MailBox']                 = SMB_AT_PIPE
+es['wf_MailBoxValue']            = 1
+es['wf_ClearOnExit']             = 'True'
+es['wf_Mailbox Exit Value']      = 0
+es['wf_Activated By Actor']      = 'Player'
+es['wf_Activated Actor Mailbox'] = 4005
+
+# Coin-room floor + side walls (wide+thick to catch the warp-landing jitter).
+add_statplat('cr_floor',  CR_X0 - 1, -5.0, CR_FLOOR_TOP - 4.0,
+             CR_X1 + 1,    5.0, CR_FLOOR_TOP,        CR_FLOOR_MAT)
+add_statplat('cr_wall_l', CR_X0 - 1, -GROUND_Y, CR_FLOOR_TOP,
+             CR_X0,        GROUND_Y, CR_FLOOR_TOP + 10*T,  CR_FLOOR_MAT)
+add_statplat('cr_wall_r', CR_X1,     -GROUND_Y, CR_FLOOR_TOP,
+             CR_X1 + 1,    GROUND_Y, CR_FLOOR_TOP + 10*T,  CR_FLOOR_MAT)
+
+# 19 collectible coin discs in 3 rows at the EXACT X/Z the player script checks
+# (cols 4-10, rows 7/5/3). Anchored 'enemy' meshes so COIN_SCRIPT spins them without
+# gold.cc's 5 s TTL despawning. Pickup is true-XZ contact in the player script.
+_CR_LOW_Z  = CR_FLOOR_TOP + 4.5*T   # -41.25 — matches player-script Z check
+_CR_MID_Z  = CR_FLOOR_TOP + 6.5*T   # -38.25
+_CR_HIGH_Z = CR_FLOOR_TOP + 8.5*T   # -35.25
+CR_COINS = [
+    (4.5*T,  _CR_LOW_Z,  SMB_COIN_0),  (5.5*T,  _CR_LOW_Z,  SMB_COIN_1),
+    (6.5*T,  _CR_LOW_Z,  SMB_COIN_2),  (7.5*T,  _CR_LOW_Z,  SMB_COIN_3),
+    (8.5*T,  _CR_LOW_Z,  SMB_COIN_4),  (9.5*T,  _CR_LOW_Z,  SMB_COIN_5),
+    (10.5*T, _CR_LOW_Z,  SMB_COIN_6),
+    (4.5*T,  _CR_MID_Z,  SMB_COIN_7),  (5.5*T,  _CR_MID_Z,  SMB_COIN_8),
+    (6.5*T,  _CR_MID_Z,  SMB_COIN_9),  (7.5*T,  _CR_MID_Z,  SMB_COIN_10),
+    (8.5*T,  _CR_MID_Z,  SMB_COIN_11), (9.5*T,  _CR_MID_Z,  SMB_COIN_12),
+    (10.5*T, _CR_MID_Z,  SMB_COIN_13),
+    (5.5*T,  _CR_HIGH_Z, SMB_COIN_14), (6.5*T,  _CR_HIGH_Z, SMB_COIN_15),
+    (7.5*T,  _CR_HIGH_Z, SMB_COIN_16), (8.5*T,  _CR_HIGH_Z, SMB_COIN_17),
+    (9.5*T,  _CR_HIGH_Z, SMB_COIN_18),
+]
+_crc_mesh = bpy.data.meshes.new('cr_coin')
+_crc_bm = _bmesh.new()
+_bmesh.ops.create_cube(_crc_bm, size=1.0)
+_bmesh.ops.scale(_crc_bm, vec=(COIN_X*2, COIN_T*2, COIN_Z*2), verts=_crc_bm.verts)
+_crc_bm.to_mesh(_crc_mesh); _crc_bm.free()
+_crc_mesh.materials.append(mat_coin)
+for _p in _crc_mesh.polygons:
+    _p.material_index = 0
+for _ci, (_cx, _cz, _cmb) in enumerate(CR_COINS):
+    _coin = bpy.data.objects.new(f'cr_coin_{_ci}', _crc_mesh)
+    scene.collection.objects.link(_coin)
+    _coin.location = (_cx, 0.0, _cz)
+    attach_schema(_coin, 'enemy')
+    _coin['wf_Mobility']           = 'Anchored'
+    _coin['wf_Model Type']         = 'Mesh'
+    _coin['wf_Visibility Mailbox'] = _cmb
+    _coin['wf_Mesh Name']          = f'cr_coin_{_ci}.iff'
+    _coin['wf_Script']             = COIN_SCRIPT
+
+# 10-coin block in the coin room (a brick that dispenses coins on bump-from-below).
+_cr_10coin = _add_textured_box('cr_brick_10coin',
+                               CR_MID - BSIZE, -BSIZE, _CR_LOW_Z - 2*T - BSIZE,
+                               CR_MID + BSIZE,  BSIZE, _CR_LOW_Z - 2*T + BSIZE, brick_tex)
+attach_schema(_cr_10coin, 'generator')
+_cr_10coin['wf_Mobility']           = 'Anchored'
+_cr_10coin['wf_Model Type']         = 'Mesh'
+_cr_10coin['wf_Visibility Mailbox'] = 1
+_cr_10coin['wf_Number Of Local Mailboxes'] = 13
+_cr_10coin['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+_cr_10coin['wf_Object To Throw']    = 'coin_template'
+_cr_10coin['wf_Generation Rate']    = 10.0
+_cr_10coin['wf_Object X Velocity']  = 1.5
+_cr_10coin['wf_Object Y Velocity']  = 0.0
+_cr_10coin['wf_Object Z Velocity']  = 6.0
+_cr_10coin['wf_Script']             = QBLOCK_SCRIPT
+
+
+def _make_target(name, loc):
+    t = bpy.data.objects.new(name, None)
+    scene.collection.objects.link(t)
+    attach_schema(t, 'target')
+    t.location = loc
+    t['wf_Model Type'] = 'None'
+    return t
+
+
+_make_target('Target_cr_entry',  (CR_ENTRY_X, 0.0, CR_ENTRY_Z))
+_make_target('Target_cr_lookat', (CR_MID, 0.0, CR_FLOOR_TOP + T))
+
+# cs_coin: static shot framing the coin room (no scroll script → unlike cs_side).
+cs_coin = bpy.data.objects.new('cs_coin', None)
+scene.collection.objects.link(cs_coin)
+attach_schema(cs_coin, 'camshot')
+cs_coin.location = (CR_MID, -35.0, CR_FLOOR_TOP + 4.5)
+cs_coin['wf_Position X'] = 'Absolute'
+cs_coin['wf_Position Y'] = 'Absolute'
+cs_coin['wf_Position Z'] = 'Absolute'
+cs_coin['wf_Rotation']   = 'Fixed'
+cs_coin['wf_FOV']                 = 35.0
+cs_coin['wf_Pan Time In Seconds'] = 0.1
+cs_coin['wf_Model Type']          = 'None'
+cs_coin['wf_Track Object'] = 'Player'
+cs_coin['wf_Target']       = 'Target_cr_lookat'
+cs_coin['wf_Follow']       = 'Target_cr_lookat'
+
+# abor_coin: ActBoxOR over the coin-room play space; while Mario is inside it writes
+# cs_coin's index to INDEXOF_CAMSHOT (1921) each frame so the camera tracks underground.
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(CR_MID, 0.0, CR_FLOOR_TOP + 4.5))
+ab = bpy.context.object
+ab.name = 'abor_coin'; ab.data.name = 'abor_coin'
+ab.scale = ((CR_X1 - CR_X0)/2 + 1.0, GROUND_Y + 2.0, 6.0)
+bpy.ops.object.transform_apply(scale=True)
+attach_schema(ab, 'actboxor')
+ab['wf_MailBox']            = 1921
+ab['wf_Object']             = 'cs_coin'
+ab['wf_Activated By Actor'] = 'Player'
+ab['wf_Model Type']         = 'None'
+
+# Coin-room light (the surface light unloads on the room switch).
+if light:
+    coin_light = light.copy()
+    scene.collection.objects.link(coin_light)
+    coin_light.name = 'Light_coin'
+    coin_light.location = (CR_MID, -22.0, CR_FLOOR_TOP + 6.0)
+    coin_light.rotation_euler = (math.pi / 3, 0, 0)
+
+# Exit pipe + walk-into warp back to the surface (Mario collects coins L→R then exits).
+EXIT_PIPE_X0, EXIT_PIPE_X1 = 13*T, 15*T
+add_statplat('exit_pipe', EXIT_PIPE_X0, -GROUND_Y, CR_FLOOR_TOP,
+             EXIT_PIPE_X1,  GROUND_Y, CR_FLOOR_TOP + 2*T, PIPE_GREEN)
+# Surface return: just RIGHT of the Section-3 entry pipe so no instant re-trigger.
+_make_target('Target_surface_return', (ENTRY_PIPE_X + 3*T, 0.0, MARIO_SPAWN_Z))
+_warp_cx = EXIT_PIPE_X0 - 1.5*T
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(_warp_cx, 0.0, CR_FLOOR_TOP + 1.0))
+wp = bpy.context.object
+wp.name = 'pipe_exit_warp'; wp.data.name = 'pipe_exit_warp'
+wp.scale = (1.5, GROUND_Y, 1.0)
+bpy.ops.object.transform_apply(scale=True)
+attach_schema(wp, 'warp')
+wp['wf_Target']             = 'Target_surface_return'
+wp['wf_Activated By Actor'] = 'Player'
+wp['wf_Model Type']         = 'None'
+wp['wf_Visibility Mailbox'] = 0
 
 # ── 13. Export ────────────────────────────────────────────────────────────────
 print(f"[smb_w1_2] Exporting to {OUT_LEV}")
