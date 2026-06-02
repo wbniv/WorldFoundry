@@ -1020,6 +1020,9 @@ static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
     s_cloudflared_pid = ::fork();
     if (s_cloudflared_pid == 0) {
         ::dup2(logfd, 1); ::dup2(logfd, 2);
+        // execlp (not execl) so a bare "cloudflared" from ToolPath's PATH fallback
+        // is resolved via PATH. execl with a path that contains no slash looks only
+        // in the current directory; execlp searches PATH as the shell would.
         if (named_name) {
             // Login model (preferred): cloudflared reads its credential from
             // ~/.cloudflared (from `cloudflared tunnel login` + `tunnel create
@@ -1027,15 +1030,15 @@ static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
             // `--url http://localhost:<port>` is the ingress — a single catch-all
             // route to wf-relay — so the operator needs no ~/.cloudflared/config.yml
             // (`route dns` only sets the CNAME, not the ingress).
-            ::execl(cf.c_str(), cf.c_str(), "tunnel", "run",
-                    "--url", url.c_str(), tunnel_name.c_str(), (char*)nullptr);
+            ::execlp(cf.c_str(), cf.c_str(), "tunnel", "run",
+                     "--url", url.c_str(), tunnel_name.c_str(), (char*)nullptr);
         } else if (named_token) {
             // Token model (legacy): cloudflared knows the tunnel ID + origin
             // routing from the token's ingress config (host configures hostname
             // → http://localhost:<port> in the CF Zero Trust dashboard). No
             // --url, no URL to scrape; the hostname is fixed.
-            ::execl(cf.c_str(), cf.c_str(), "tunnel", "run",
-                    "--token", tunnel_token.c_str(), (char*)nullptr);
+            ::execlp(cf.c_str(), cf.c_str(), "tunnel", "run",
+                     "--token", tunnel_token.c_str(), (char*)nullptr);
         } else {
             // Quick tunnel: --protocol http2 forces the edge link over TCP :7844
             // instead of QUIC (UDP :7844). The tunnel carries SIGNALING only
@@ -1044,8 +1047,8 @@ static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
             // firewalls/NATs block or throttle UDP/QUIC, which leaves the quick
             // tunnel unregistered (no DNS → "relay connect failed"). http2
             // "just works" on restrictive and normal networks alike.
-            ::execl(cf.c_str(), cf.c_str(), "tunnel", "--protocol", "http2",
-                    "--url", url.c_str(), (char*)nullptr);
+            ::execlp(cf.c_str(), cf.c_str(), "tunnel", "--protocol", "http2",
+                     "--url", url.c_str(), (char*)nullptr);
         }
         _exit(127);
     }
