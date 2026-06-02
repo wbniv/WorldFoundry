@@ -1023,10 +1023,12 @@ static bool StartQuickTunnelProcs(const std::string& exe_path, int port,
         if (named_name) {
             // Login model (preferred): cloudflared reads its credential from
             // ~/.cloudflared (from `cloudflared tunnel login` + `tunnel create
-            // <name>`) and resolves the tunnel ID + ingress from the named
-            // config. No token on the command line, nothing for us to store.
+            // <name>`); no token on the command line, nothing for us to store.
+            // `--url http://localhost:<port>` is the ingress — a single catch-all
+            // route to wf-relay — so the operator needs no ~/.cloudflared/config.yml
+            // (`route dns` only sets the CNAME, not the ingress).
             ::execl(cf.c_str(), cf.c_str(), "tunnel", "run",
-                    tunnel_name.c_str(), (char*)nullptr);
+                    "--url", url.c_str(), tunnel_name.c_str(), (char*)nullptr);
         } else if (named_token) {
             // Token model (legacy): cloudflared knows the tunnel ID + origin
             // routing from the token's ingress config (host configures hostname
