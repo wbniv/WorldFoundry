@@ -29,8 +29,16 @@
 
 //=============================================================================
 
-// kts where is PATH_MAX comming from (it is not in limits.h)
-//#include <limits.h>
+// PATH_MAX (used by szAppName below): POSIX puts it in <limits.h> — on macOS
+// that pulls it in via <sys/syslimits.h>. On Linux glibc it also arrives
+// transitively through <hal/hal.h>, which is why this was historically left
+// commented out; but Apple Clang's transitive path doesn't define it, so the
+// macOS desktop build needs the explicit include. The fallback covers any
+// toolchain that still omits it (some embedded libcs do).
+#include <limits.h>
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
 
 #include <hal/hal.h>			// includes everything
 #include <hal/_platfor.h>
