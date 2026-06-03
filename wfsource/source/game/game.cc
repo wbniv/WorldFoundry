@@ -558,6 +558,9 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 			extern int   wf_moon_overlay_enabled;
 			extern float wf_moon_player_x_m, wf_moon_player_y_m, wf_moon_player_z_m;
 			extern float wf_moon_player_heading_rev;
+			// Moon lander launch sequence — see docs/plans/2026-06-02-moon-lander-launch-sequence.md
+			extern int   wf_moon_launch_phase;
+			extern float wf_moon_launch_t_minus;
 			Mailboxes& mb = _curLevel->GetMailboxes();
 			wf_hud_score     = mb.ReadMailbox(70).WholePart();
 			wf_hud_timer     = mb.ReadMailbox(71).WholePart();
@@ -568,6 +571,8 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 			wf_moon_player_y_m          = mb.ReadMailbox(1877).AsFloat();
 			wf_moon_player_z_m          = mb.ReadMailbox(1878).AsFloat();
 			wf_moon_player_heading_rev  = mb.ReadMailbox(1879).AsFloat();
+			wf_moon_launch_phase        = mb.ReadMailbox(1881).WholePart();
+			wf_moon_launch_t_minus      = mb.ReadMailbox(1882).AsFloat();
 
 			// High-score initials entry — triggered on fresh game-over edge.
 			// Joystick bits from mb 1910 (JUSTPRESSED, already edge-detected):

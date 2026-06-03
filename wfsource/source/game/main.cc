@@ -92,6 +92,9 @@ float wf_moon_player_x_m         = 0.0f;
 float wf_moon_player_y_m         = 0.0f;
 float wf_moon_player_z_m         = 0.0f;
 float wf_moon_player_heading_rev = 0.0f;
+// Moon lander launch sequence — see docs/plans/2026-06-02-moon-lander-launch-sequence.md
+int   wf_moon_launch_phase       = 0;        // 0=idle, 1=countdown, 2=ignition, 3=ascent
+float wf_moon_launch_t_minus     = 0.0f;     // seconds until launch (phase 1) or since ignition (phase ≥ 2)
 #endif
 
 bool bPerspectiveCorrection = false;

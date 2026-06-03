@@ -111,6 +111,11 @@ Comment("=====================================================================")
 	MAILBOXENTRY( MOON_PLAYER_Z, 1878 )		Comment("Live player Z (m) — copied from local Z_POS each tick")
 	MAILBOXENTRY( MOON_PLAYER_HEADING, 1879 )	Comment("Live player heading (revolutions) — copied from local ROTATION_C each tick")
 
+	// Moon lander launch sequence — see docs/plans/2026-06-02-moon-lander-launch-sequence.md
+	MAILBOXENTRY( MOON_LAUNCH_TIMER, 1880 )		Comment("Tick counter incremented by the moon player each frame; drives launch sequence phase")
+	MAILBOXENTRY( MOON_LAUNCH_PHASE, 1881 )		Comment("Launch phase: 0=idle, 1=countdown, 2=ignition, 3=ascent")
+	MAILBOXENTRY( MOON_LAUNCH_T_MINUS, 1882 )	Comment("Seconds until launch (phase 1) or seconds since ignition (phase ≥ 2)")
+
 
 	MAILBOXENTRY(GLOBAL_USER_MAX,1900)
 	Comment(" *Inclusive* last valid index — user range is [GLOBAL_USER_START, GLOBAL_USER_MAX].          ")

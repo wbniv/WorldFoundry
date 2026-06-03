@@ -63,6 +63,9 @@ extern float wf_moon_player_x_m;
 extern float wf_moon_player_y_m;
 extern float wf_moon_player_z_m;
 extern float wf_moon_player_heading_rev;
+// Moon lander launch sequence — see docs/plans/2026-06-02-moon-lander-launch-sequence.md
+extern int   wf_moon_launch_phase;
+extern float wf_moon_launch_t_minus;
 
 #include "hscore.h"
 
@@ -195,7 +198,11 @@ static void DrawHud(int xSize, int ySize)
     DrawHudText(0, 0, buf); glPopMatrix();
 
     int t = wf_hud_timer > 0 ? wf_hud_timer : 0;
-    snprintf(buf, sizeof(buf), "TIME %d", t);
+    if (wf_moon_launch_phase >= 3) {
+        snprintf(buf, sizeof(buf), "TIME %d", (int)wf_moon_launch_t_minus);
+    } else {
+        snprintf(buf, sizeof(buf), "TIME %d", t);
+    }
     {
         float tw = (float)stb_easy_font_width((char*)buf) * kScale;
         glPushMatrix(); glTranslatef((float)xSize * 0.5f - tw * 0.5f, 8, 0); glScalef(kScale, kScale, 1);
@@ -427,6 +434,33 @@ static void DrawHud(int xSize, int ySize)
                 DrawHudText(0.0f, 0.0f, (char*)d.letter);
                 glPopMatrix();
             }
+        }
+
+        // Launch countdown banner — bright orange, centred high in the frame,
+        // visible only during pre-ascent phases (1 = countdown, 2 = ignition).
+        // Phase 3 (ascent) repurposes the top-bar TIME counter as seconds since
+        // ignition instead of carrying its own banner.
+        // See docs/plans/2026-06-02-moon-lander-launch-sequence.md.
+        if (wf_moon_launch_phase == 1 || wf_moon_launch_phase == 2) {
+            char banner[64];
+            float bscale = 3.0f;
+            if (wf_moon_launch_phase == 1) {
+                int t_sec = (int)(wf_moon_launch_t_minus + 0.999f);
+                if (t_sec < 1) t_sec = 1;
+                snprintf(banner, sizeof(banner), "LAUNCH IN: T-%d", t_sec);
+            } else {
+                snprintf(banner, sizeof(banner), "IGNITION");
+            }
+            float bw = (float)stb_easy_font_width(banner) * bscale;
+            // Centred horizontally, ~y=110 (below the 4-line text block, above
+            // the lander silhouette).
+            glColor3f(1.0f, 0.6f, 0.1f);   // Raptor-flame orange
+            glPushMatrix();
+            glTranslatef((float)xSize * 0.5f - bw * 0.5f, 110.0f, 0.0f);
+            glScalef(bscale, bscale, 1.0f);
+            DrawHudText(0.0f, 0.0f, banner);
+            glPopMatrix();
+            glColor3f(1.0f, 1.0f, 0.0f);   // restore yellow for any HUD below
         }
     }
 
@@ -1163,16 +1197,12 @@ Display::MeasureDelta()
     struct timeval deltatime;
     deltatime.tv_usec = tv.tv_usec - _clockLastTime.tv_usec;
     deltatime.tv_sec = tv.tv_sec - _clockLastTime.tv_sec;
-    // Game mode: a ≥5 s frame gap genuinely is catastrophic (the world would
-    // jump huge amounts while the player stared at a frozen screen), so keep
-    // the loud assert. Editor mode: stalls are routine (ASan, Doc-apply, the
-    // remote-SYNC apply hot path, debugging breakpoints) — warn and clamp like
-    // the > 0.2 s case below, so the editor survives stalls of any length.
-    extern bool gEditorMode;   // game/main.cc — set true under --editor
-    if (!gEditorMode) {
-        assert(deltatime.tv_sec < 5);
-    } else if (deltatime.tv_sec >= 5) {
-        std::cout << "editor: large frame stall (" << deltatime.tv_sec
+    // Clamp large wall-clock stalls (alt-tab, debugger pause, ASan hitch,
+    // Android backgrounding, editor Doc-apply) so a legitimate frame gap
+    // doesn't abort the session. Post-clamp the 1/5-s ceiling below still
+    // caps the simulation step.
+    if (deltatime.tv_sec >= 5) {
+        std::cout << "large frame stall (" << deltatime.tv_sec
                   << " s), clamping" << std::endl;
         deltatime.tv_sec  = 4;
         deltatime.tv_usec = 999999;

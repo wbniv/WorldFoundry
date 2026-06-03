@@ -375,6 +375,18 @@ def _build_artemis_lander():
     # Nose cone — tip at z=47, base meets body top at z=38.
     add_cone(4.5, 0.0, 9.0, (0.0, 0.0, 42.5), mat_white)
 
+    # Raptor exhaust flames — three bright-orange tapered cones below each
+    # nozzle, mesh-local z = -2 (top) to -4 (tip). Buried under the regolith
+    # initially; the moment the lander Z rises during ascent they become
+    # visible as the flame trail. See
+    # docs/plans/2026-06-02-moon-lander-launch-sequence.md.
+    mat_exhaust = _make_mat('lander_exhaust', (1.0, 0.6, 0.1))
+    for ang_deg in (0.0, 120.0, 240.0):
+        ang = math.radians(ang_deg)
+        add_cone(1.2, 0.2, 2.0,
+                 (2.4 * math.cos(ang), 2.4 * math.sin(ang), -3.0),
+                 mat_exhaust)
+
     for obj, mat in parts:
         obj.data.materials.clear()
         obj.data.materials.append(mat)
@@ -434,6 +446,22 @@ if player:
         "INDEXOF_Y_POS read-mailbox INDEXOF_MOON_PLAYER_Y write-mailbox\n"
         "INDEXOF_Z_POS read-mailbox INDEXOF_MOON_PLAYER_Z write-mailbox\n"
         "INDEXOF_ROTATION_C read-mailbox INDEXOF_MOON_PLAYER_HEADING write-mailbox\n"
+        # Launch sequence — derive phase + T-minus from level-clock TIME (seconds).
+        # WF dt is variable (3-60+ fps depending on workload / video record),
+        # so timing in TIME-seconds, never in ticks.  See
+        # docs/plans/2026-06-02-moon-lander-launch-sequence.md.
+        # Phases: 0-10s idle, 10-15s countdown, 15-16s ignition, 16s+ ascent.
+        "INDEXOF_TIME read-mailbox "
+        "dup 10 < if drop 0 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
+        "0 INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
+        "else dup 15 < if "
+        "1 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
+        "15 swap - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
+        "else dup 16 < if drop 2 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
+        "0 INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
+        "else 3 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
+        "16 - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
+        "then then then\n"
     )
 
 # ── 6b. Artemis lander (Starship HLS) ────────────────────────────────────────
@@ -448,6 +476,16 @@ _lander.location = (30.0, 25.0, 0.0)
 _lander['wf_Mobility']           = 'Anchored'
 _lander['wf_Model Type']         = 'Mesh'
 _lander['wf_Visibility Mailbox'] = 1
+# Launch sequence script: when phase ≥ 3 (ascent), compute Z from quadratic
+# t² curve and write to own Z_POS. See
+# docs/plans/2026-06-02-moon-lander-launch-sequence.md.
+_lander['wf_Script'] = (
+    "\\ wf\n"
+    "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if "    # >2 == >=3 (zForth lacks >=)
+    "INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox dup * 0.5 * "
+    "INDEXOF_Z_POS write-mailbox "
+    "then\n"
+)
 print(f"[moon] lander mesh: {len(_lander.data.vertices)} verts, "
       f"{len(_lander.data.polygons)} polys at {_lander.location[:]}")
 
