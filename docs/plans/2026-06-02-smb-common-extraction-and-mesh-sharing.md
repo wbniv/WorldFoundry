@@ -1,7 +1,27 @@
 # Plan: `smb_common.py` extraction + per-type mesh sharing
 
 **Date:** 2026-06-02
-**Status:** Not started
+**Status:** DONE (2026-06-03) — full consolidation landed (P1+P2a+B+C). Builders, scripts, and the
+player/director/celebration generators all single-sourced in `smb_common.py`; both levels are now
+just layout + cfg + calls. P2-pre/P2b (size-variant box meshes via the scale pipeline) and P3
+(game-wide source-mesh dir) remain as the further-reductions follow-ups (see end).
+
+## Reductions achieved
+
+| | before | after | Δ |
+|---|---|---|---|
+| `smb_w1_1/blender_create_smb.py` | 2628 | 994 | **−1634 (−62%)** |
+| `smb_w1_2/blender_create_smb_w1_2.py` | 2518 | 910 | **−1608 (−64%)** |
+| `smb_common.py` (new, shared) | 0 | 1970 | +1970 |
+| **total LOC (2 levels → 3 files)** | **5146** | **3874** | **−1272 (−25%)** |
+| duplicated code (shared logic held twice) | ~1970 ×2 | 1970 ×1 | **~1970 deduped** |
+| W1-2 unique meshes | 90 | 85 | −5 (koopa 4→2, piranha 4→1) |
+| `.001` stray mesh files | 8 | 0 | −8 |
+
+Single-sourced into `smb_common`: 13 helpers + 14 Forth scripts + ~16 builders + the
+`director_script`/`player_script`/`celebration` generators + the shared constants/materials. Every
+batch verified `.lev`-byte-identical (W1-1) or behaviour-equivalent (W1-2: one idempotent
+`SMB_MARIO_VIS` reorder + the cosmetic 16-vert flagpole). Regressions green throughout.
 
 > On approval, implement in phases below, committing per phase. Back-references:
 > [shared-mesh-library plan](2026-06-01-smb-shared-mesh-library.md) (the gallery + the
@@ -149,15 +169,23 @@ loads its own copy at runtime.
 
 ## Phasing (commit per phase)
 
-- **P1a** — write `smb_common.py` (lift W1-1 verbatim); W1-1 imports it; prove W1-1 behaviour-identical. Commit.
-- **P1b** — W1-2 imports `smb_common` (drop its fork); re-verify W1-2. Commit.
-- **P2a** — same-size types build-once-instance-many in `smb_common`; re-export both; confirm unique-mesh drop + `.001` gone + both still load/play. Commit. (No pipeline change needed for these.)
-- **P2-pre** — wire per-object **scale** through the export pipeline (`export_level.py` emit scale →
-  `.lev` scale field → `levcomp-rs` pass it instead of hardcoded `(ONE,ONE,ONE)`); round-trip-test
-  byte-stability on an existing level. Commit (toolchain change — touches wftools, verify broadly).
-- **P2b** — box builders instance one shared unit-cube datablock **per material** + `obj.scale`
-  (depends on P2-pre); re-export both; re-measure unique-mesh count. Commit.
-- **P3** — (stretch) shared source-mesh dir. Separate decision.
+- ✅ **P1a** — `smb_common.py` + 13 identical helpers; W1-1 imports it (`8bc71972`).
+- ✅ **P1b** — W1-2 imports `smb_common` (`f3073fa8`).
+- ✅ **P2a** — koopa/piranha share one datablock per type; `.001` gone, 90→85 meshes (`0e62e1f5`).
+- ✅ **Batch A** — 14 Forth scripts + constants → `smb_common` (`6c063fc7`).
+- ✅ **Batch B1/B2** — all builders → `smb_common` (self-contained, material-dep, texture) (`584d08d2`, `a38ad28c`, `7195b9fe`).
+- ✅ **Batch C1/C2/C3** — `director_script`/`player_script`/`celebration` generators → `smb_common` (`a3473632`, `07bc716b`).
+- ⏳ **P2-pre** — wire per-object **scale** through the export pipeline (`export_level.py` emit scale →
+  `.lev` scale field → `levcomp-rs` pass it instead of hardcoded `(ONE,ONE,ONE)`). The deferred
+  toolchain prerequisite for the next mesh reduction.
+- ⏳ **P2b** — box builders share one unit-cube datablock **per material** + `obj.scale` (needs
+  P2-pre). The big remaining mesh win (W1-2's ~40 staircase/brick/pyramid/pipe/qcoin meshes → ~1 per
+  material).
+- ⏳ **P3** — (stretch) shared source-mesh dir: one canonical `.iff` per type referenced by all SMB
+  levels (today each level re-exports its own copy — ~159 mesh files across W1-1+W1-2, many identical
+  types).
+- ⏳ **Minor** — import the still-duplicated layout constants (T/BSIZE/dims/COIN_SCRIPT/SMB_FIREWORK)
+  from `smb_common` instead of redefining; move `mat_powerup`/`mat_star`/`mat_oneup` to getters.
 
 ## Verification
 
