@@ -1065,8 +1065,10 @@ bpy.context.scene.collection.objects.link(_c2)
 for _i, (_cobj, (_cx, _cy)) in enumerate(
         zip([_cruiser_mesh, _c1, _c2], _CRUISER_XY)):
     _cz = terrain_z(_cx, _cy)
-    _place_prop(_cobj, (_cx, _cy, _cz), mobility='Vehicle',
+    _place_prop(_cobj, (_cx, _cy, _cz), mobility='Physics',
                 name=f'lunar_cruiser_{_i}')
+    _cobj['wf_Running Acceleration'] = 12.0   # heavier than astronaut (8.0)
+    _cobj['wf_Running Deceleration'] = 0.3    # low friction — slides on regolith
     _cidx_mb = 1886 + _i   # MOON_CRUISER_0/1/2_IDX
     _cobj['wf_Script'] = (
         "\\ wf\n"
