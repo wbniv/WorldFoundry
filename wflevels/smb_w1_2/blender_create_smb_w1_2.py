@@ -258,7 +258,7 @@ if _cursor < GROUND_X1:
 
 for _i, (_sx0, _sx1) in enumerate(_solid_spans):
     seg_mesh = build_textured_ground_mesh(
-        f'ground_{_i}',
+        f'w1_2_ground_{_i}',   # level-tagged: textured tiling grounds differ per level (can't dedup)
         _sx0, -GROUND_Y, GROUND_TOP_Z - GROUND_THICK,
         _sx1,  GROUND_Y, GROUND_TOP_Z,
         grid_tex_path)
@@ -290,7 +290,7 @@ for _i, (_pl, _pr) in enumerate(PITS):
     bpy.ops.mesh.primitive_cube_add(size=2.0, location=(_cx, 0.0, -8.0))
     pit = bpy.context.object
     pit.name      = f'pit_death_{_i}'
-    pit.data.name = f'pit_death_{_i}'
+    pit.data.name = f'w1_2_pit_death_{_i}'   # baked per-level position → level-tagged in the shared dir
     pit.scale = (_hx, GROUND_Y, 7.0)   # half-extents -> Z band [-15, -1]
     bpy.ops.object.transform_apply(scale=True)
     attach_schema(pit, 'actbox')
@@ -419,7 +419,7 @@ if actboxor:
     bpy.data.objects.remove(actboxor, do_unlink=True)
 bpy.ops.mesh.primitive_cube_add(size=2.0, location=(SCENE_MID_X, 0.0, 5.0))
 abs_ = bpy.context.object
-abs_.name = 'abor_surface'; abs_.data.name = 'abor_surface'
+abs_.name = 'abor_surface'; abs_.data.name = 'w1_2_abor_surface'   # per-level size → level-tagged
 abs_.scale = ((GROUND_X1 - GROUND_X0)/2 + 6.0, GROUND_Y + 2.0, 8.0)   # surface playfield, Z[-3,13]
 bpy.ops.object.transform_apply(scale=True)
 attach_schema(abs_, 'actboxor')
@@ -769,7 +769,7 @@ CR_FLOOR_MAT = make_mat('smb_cr_floor', (0.45, 0.22, 0.05))
 # (origin Z≈1.5) does not. SMB_AT_PIPE + Down (player script) warps to CR_ENTRY_X/Z.
 bpy.ops.mesh.primitive_cube_add(size=2.0, location=(ENTRY_PIPE_X, 0.0, GROUND_TOP_Z + 2*T + 0.2))
 es = bpy.context.object
-es.name = 'pipe_entry_sense'; es.data.name = 'pipe_entry_sense'
+es.name = 'pipe_entry_sense'; es.data.name = 'w1_2_pipe_entry_sense'   # baked per-level position → level-tagged
 es.scale = (T, GROUND_Y, 0.6)
 bpy.ops.object.transform_apply(scale=True)
 attach_schema(es, 'actbox')
@@ -903,8 +903,11 @@ wp['wf_Model Type']         = 'None'
 wp['wf_Visibility Mailbox'] = 0
 
 # ── 13. Export ────────────────────────────────────────────────────────────────
-print(f"[smb_w1_2] Exporting to {OUT_LEV}")
-bpy.ops.wf.export_level(filepath=OUT_LEV)
+# Shared game-wide mesh library: all SMB meshes land in wflevels/smb/, named by
+# datablock (deduped across levels). See docs/plans/2026-06-03-smb-shared-mesh-dir.md.
+SMB_MESH_DIR = os.path.join(REPO, 'wflevels', 'smb')
+print(f"[smb_w1_2] Exporting to {OUT_LEV} (meshes → {SMB_MESH_DIR})")
+bpy.ops.wf.export_level(filepath=OUT_LEV, mesh_dir=SMB_MESH_DIR)
 print("[smb] Objects in scene:", [o.name for o in bpy.data.objects])
 print(f"[smb] Done — {OUT_LEV}")
 

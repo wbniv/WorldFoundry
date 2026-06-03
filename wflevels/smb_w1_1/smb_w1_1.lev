@@ -971,7 +971,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -3.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 115.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "ground_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "w1_1_ground_0.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -989,7 +989,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 121.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 177.0000000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "ground_1.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "w1_1_ground_1.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -1007,7 +1007,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 183.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 322.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "ground_2.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "w1_1_ground_2.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -1025,7 +1025,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 115.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) -15.0000000000000000(1.15.16) 122.0000000000000000(1.15.16) 1.5000000000000000(1.15.16) -1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pit_death_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "w1_1_pit_death_0.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 1804l } { 'STR' "1804" } }
@@ -1045,7 +1045,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 176.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -15.0000000000000000(1.15.16) 183.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) -1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pit_death_1.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "w1_1_pit_death_1.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 1804l } { 'STR' "1804" } }
@@ -1097,7 +1097,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "qblock_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_qblock_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -1126,7 +1126,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "qblock_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_qblock_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -1155,7 +1155,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "qblock_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_qblock_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -1214,7 +1214,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "qblock_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_qblock_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -1273,7 +1273,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "qblock_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_qblock_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -1398,7 +1398,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1424,7 +1424,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1450,7 +1450,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1476,7 +1476,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1502,7 +1502,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1528,7 +1528,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1554,7 +1554,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1580,7 +1580,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1606,7 +1606,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1632,7 +1632,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1658,7 +1658,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1684,7 +1684,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1710,7 +1710,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1736,7 +1736,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1762,7 +1762,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1788,7 +1788,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1814,7 +1814,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) 0.2039999365806580(1.15.16) 0.7638486623764038(1.15.16) 0.7200000286102295(1.15.16) 1.6800000667572021(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "koopa_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "koopa_green.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1861,7 +1861,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.0299999993294477(1.15.16) -0.6000000238418579(1.15.16) 0.7500000000000000(1.15.16) 0.0299999993294477(1.15.16) 0.6000000238418579(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "flagpole_flag.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_flag.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_CELEBRATE read-mailbox if\nINDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox - 1.1 *\ndup 1.0 > if drop 1.0 then\n12.45 * 13.50 swap - INDEXOF_Z_POS write-mailbox\nthen\n" } }
@@ -1883,7 +1883,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -2.2500000000000000(1.15.16) -1.5000000000000000(1.15.16) -2.2500000000000000(1.15.16) 2.2500000000000000(1.15.16) 1.5000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "castle.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_castle.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -1903,7 +1903,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.1000000014901161(1.15.16) -0.1000000014901161(1.15.16) -1.5000000000000000(1.15.16) 0.1000000014901161(1.15.16) 0.1000000014901161(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "castle_pole.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_pole.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -1923,7 +1923,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6750000119209290(1.15.16) -0.0299999993294477(1.15.16) -0.5249999761581421(1.15.16) 0.6750000119209290(1.15.16) 0.0299999993294477(1.15.16) 0.5249999761581421(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "flagpole_flag.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_flag.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_CELEBRATE read-mailbox if\nINDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox - 0.8 -\ndup 0.0 < if drop 0.0 then 1.667 *\ndup 1.0 > if drop 1.0 then\n2.47 * 4.50 + INDEXOF_Z_POS write-mailbox\nthen\n" } }
@@ -1945,7 +1945,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6000000238418579(1.15.16) -0.0199999995529652(1.15.16) -1.1000000238418579(1.15.16) 0.6000000238418579(1.15.16) 0.0199999995529652(1.15.16) 1.1000000238418579(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "castle_door.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_castle_door.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2104,7 +2104,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -3.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "flagpole_trigger.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_trigger.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 1862l } { 'STR' "1862" } }
@@ -2126,7 +2126,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -3.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "flagpole_trigger.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_trigger.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 5000l } { 'STR' "5000" } }
@@ -2155,7 +2155,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -9.0000000000000000(1.15.16) -3.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) 328.5000000000000000(1.15.16) 3.5000000000000000(1.15.16) 13.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actboxor" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "abor_surface.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "w1_1_abor_surface.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 1921l } { 'STR' "1921" } }
@@ -2200,7 +2200,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pipe_28.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_pipe_green.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2220,7 +2220,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pipe_28.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_pipe_green.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2240,7 +2240,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pipe_28.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_pipe_green.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2260,7 +2260,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -2.2500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pipe_28.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_pipe_green.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2278,7 +2278,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 69.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) 4.0999999046325684(1.15.16) 72.0000000000000000(1.15.16) 1.5000000000000000(1.15.16) 5.2999997138977051(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pipe_entry_sense.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "w1_1_pipe_entry_sense.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 1809l } { 'STR' "1809" } }
@@ -2302,7 +2302,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -13.0000000000000000(1.15.16) -5.0000000000000000(1.15.16) -2.0000000000000000(1.15.16) 13.0000000000000000(1.15.16) 5.0000000000000000(1.15.16) 2.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_floor.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_cr_floor.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2322,7 +2322,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -7.5000000000000000(1.15.16) 0.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_floor.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_cr_floor.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2342,7 +2342,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -7.5000000000000000(1.15.16) 0.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_floor.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_cr_floor.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2360,7 +2360,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2380,7 +2380,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2400,7 +2400,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2420,7 +2420,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2440,7 +2440,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2460,7 +2460,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2480,7 +2480,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2500,7 +2500,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2520,7 +2520,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2540,7 +2540,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2560,7 +2560,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2580,7 +2580,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2600,7 +2600,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2620,7 +2620,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2640,7 +2640,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2660,7 +2660,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2680,7 +2680,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2700,7 +2700,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2720,7 +2720,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2905,7 +2905,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pipe_28.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_pipe_green.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2985,7 +2985,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3014,7 +3014,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3043,7 +3043,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3072,7 +3072,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3101,7 +3101,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3130,7 +3130,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3159,7 +3159,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3188,7 +3188,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3217,7 +3217,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3246,7 +3246,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3275,7 +3275,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3304,7 +3304,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3333,7 +3333,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3362,7 +3362,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "qblock_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_qblock_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -3391,7 +3391,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "qblock_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_qblock_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -3420,7 +3420,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -3470,7 +3470,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3490,7 +3490,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3510,7 +3510,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -2.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3530,7 +3530,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3550,7 +3550,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3570,7 +3570,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3590,7 +3590,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -2.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3610,7 +3610,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3630,7 +3630,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3650,7 +3650,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3670,7 +3670,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -2.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3690,7 +3690,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3710,7 +3710,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -3.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3730,7 +3730,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -4.5000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3750,7 +3750,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -5.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 5.2500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3770,7 +3770,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -6.0000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 6.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }

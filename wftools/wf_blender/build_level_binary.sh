@@ -49,8 +49,21 @@ echo "[1/5] iffcomp-rs  $LEVEL.lev  →  $LEVEL.lev.bin"
 "$IFFCOMP" -binary -o="$LEVEL.lev.bin" "$LEVEL.lev" >/dev/null
 
 echo "[2/5] levcomp-rs  $LEVEL.lev.bin  →  $LEVEL.lvl + asset.inc + $LEVEL.iff.txt + $LEVEL.ini"
+# Optional shared mesh dir: wflevels/<level>/mesh.flags may set MESH_DIR (where the
+# per-mesh .iff files live, relative to the level dir — for bbox reads) and
+# MESH_REF_PREFIX (path prepended to the .iff.txt file-include refs so iffcomp embeds
+# from there). Default = self-contained level dir. SMB levels point both at ../smb/.
+# See docs/plans/2026-06-03-smb-shared-mesh-dir.md.
+MESH_DIR="."
+MESH_REF_PREFIX=""
+if [[ -f "$LEVEL_DIR/mesh.flags" ]]; then
+  # shellcheck disable=SC1091
+  source "$LEVEL_DIR/mesh.flags"
+  echo "    mesh.flags: MESH_DIR=$MESH_DIR MESH_REF_PREFIX=$MESH_REF_PREFIX"
+fi
 "$LEVCOMP" "$LEVEL.lev.bin" "$OBJECTS_LC" "$LEVEL.lvl" "$OAD_DIR" \
-  --mesh-dir . \
+  --mesh-dir "$MESH_DIR" \
+  --mesh-ref-prefix "$MESH_REF_PREFIX" \
   --iff-txt "$LEVEL.iff.txt" \
   --textile-ini "$LEVEL.ini"
 

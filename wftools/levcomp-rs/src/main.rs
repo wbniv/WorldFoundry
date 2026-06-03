@@ -361,7 +361,7 @@ fn main() {
     // ini.prp expansion (wfsource/levels.src/ini.prp).
     if let Some(textile_ini) = textile_ini_str.as_deref() {
         let textile_ini_path = Path::new(textile_ini);
-        ini_writer::write(&assets, &level_name, textile_ini_path)
+        ini_writer::write(&assets, &level_name, textile_ini_path, mesh_dir_str.as_deref().unwrap_or("."))
             .unwrap_or_else(|e| {
                 eprintln!("warning: could not write {}: {}", textile_ini_path.display(), e);
             });

@@ -991,8 +991,8 @@ def _build_goomba():
     body = parts[0][0]
     bpy.context.view_layer.objects.active = body
     bpy.ops.object.join()
-    body.name      = 'goomba_00'
-    body.data.name = 'goomba_00'
+    body.name      = 'goomba'
+    body.data.name = 'goomba'   # canonical type name (one shared mesh, all instances)
     return body
 
 
