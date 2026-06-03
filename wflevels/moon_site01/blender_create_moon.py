@@ -502,6 +502,268 @@ def _build_moon_racer():
     return body
 
 
+def _build_vsat_tower():
+    """Astrobotic LunaGrid VSAT — 10 m vertical solar mast.
+    See docs/plans/2026-06-03-moon-site-01-surface-asset-models.md."""
+    mat_dark   = _make_mat('vsat_dark',   (0.18, 0.18, 0.20))
+    mat_silver = _make_mat('vsat_silver', (0.78, 0.78, 0.80))
+    mat_white  = _make_mat('vsat_white',  (0.92, 0.92, 0.92))
+
+    parts = []
+    SEG = 8
+
+    def add_cyl(r, h, loc, mat):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=SEG, radius=r, depth=h, location=loc)
+        parts.append((bpy.context.object, mat))
+
+    def add_cube(sx, sy, sz, loc, mat):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=loc)
+        obj = bpy.context.object
+        obj.scale = (sx, sy, sz)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((obj, mat))
+
+    add_cube(1.5, 1.5, 0.4, (0.0, 0.0, 0.2), mat_dark)      # ground anchor
+    add_cyl(0.12, 9.5, (0.0, 0.0, 5.15), mat_silver)         # mast
+    add_cube(2.5, 0.06, 2.0, (0.0, 0.0, 10.5), mat_white)    # solar array face A
+    add_cube(0.06, 2.5, 2.0, (0.0, 0.0, 10.5), mat_white)    # solar array face B (90°)
+
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for p in obj.data.polygons:
+            p.material_index = 0
+
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    body.name = 'vsat_tower'
+    body.data.name = 'vsat_tower'
+    return body
+
+
+def _build_lunar_cruiser():
+    """Toyota/JAXA Lunar Cruiser — pressurized 6-wheel rover 6×5.2×3.8 m.
+    Mobility=Anchored; will be hooked to Jolt vehicle physics later.
+    See docs/plans/2026-06-03-moon-site-01-surface-asset-models.md."""
+    mat_white = _make_mat('cruiser_white', (0.90, 0.90, 0.88))
+    mat_dark  = _make_mat('cruiser_dark',  (0.18, 0.19, 0.20))
+
+    parts = []
+    SEG = 8
+
+    def add_cyl(r, h, loc, mat, rot=(0.0, 0.0, 0.0)):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=SEG, radius=r, depth=h, location=loc)
+        obj = bpy.context.object
+        obj.rotation_euler = rot
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+        parts.append((obj, mat))
+
+    def add_cube(sx, sy, sz, loc, mat):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=loc)
+        obj = bpy.context.object
+        obj.scale = (sx, sy, sz)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((obj, mat))
+
+    add_cube(5.5, 4.5, 2.2, (0.0, 0.0, 1.8), mat_white)       # main pressurised body
+    add_cube(5.6, 4.6, 0.4, (0.0, 0.0, 2.9), mat_dark)         # viewport window strip
+    add_cube(0.5, 3.0, 2.0, (3.0, 0.0, 1.8), mat_dark)         # airlock end-cap +X
+
+    # 6 wheels: 2 rows of 3 (fore/mid/aft), port and starboard
+    for fx in (+1.9, 0.0, -1.9):
+        for fy in (+2.6, -2.6):
+            add_cyl(0.7, 0.35, (fx, fy, 0.7), mat_dark, rot=(math.pi / 2, 0.0, 0.0))
+
+    add_cube(2.0, 0.10, 0.08, (0.0, 0.0, 3.19), mat_dark)      # roof boom
+    add_cube(2.0, 1.50, 0.06, (0.0, 0.0, 3.27), mat_white)     # roof solar panel
+    add_cyl(0.05, 1.0, (0.0, 0.0, 3.82), mat_dark)              # antenna
+
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for p in obj.data.polygons:
+            p.material_index = 0
+
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    body.name = 'lunar_cruiser'
+    body.data.name = 'lunar_cruiser'
+    return body
+
+
+def _build_blue_moon_mk1():
+    """Blue Origin Blue Moon Mark 1 — uncrewed cargo lander ~8 m tall.
+    Gold thermal-blanket cylinder, 4 splayed landing legs.
+    Mobility=Anchored; could get a landing/launch sequence like the Starship HLS.
+    See docs/plans/2026-06-03-moon-site-01-surface-asset-models.md."""
+    mat_gold   = _make_mat('mk1_gold',   (0.72, 0.55, 0.10))
+    mat_silver = _make_mat('mk1_silver', (0.70, 0.72, 0.73))
+    mat_dark   = _make_mat('mk1_dark',   (0.20, 0.20, 0.22))
+
+    parts = []
+    SEG = 12
+
+    def add_cyl(r, h, loc, mat, rot=(0.0, 0.0, 0.0)):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=SEG, radius=r, depth=h, location=loc)
+        obj = bpy.context.object
+        obj.rotation_euler = rot
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+        parts.append((obj, mat))
+
+    def add_cone(r1, r2, h, loc, mat):
+        bpy.ops.mesh.primitive_cone_add(vertices=SEG, radius1=r1, radius2=r2, depth=h,
+                                        location=loc)
+        parts.append((bpy.context.object, mat))
+
+    def add_cube(sx, sy, sz, loc, mat):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=loc)
+        obj = bpy.context.object
+        obj.scale = (sx, sy, sz)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((obj, mat))
+
+    add_cyl(1.4, 5.0, (0.0, 0.0, 4.5), mat_gold)              # main tank
+    add_cyl(1.6, 0.6, (0.0, 0.0, 1.8), mat_dark)              # engine skirt
+    add_cone(1.0, 0.4, 1.5, (0.0, 0.0, 0.75), mat_dark)       # engine bell
+    add_cube(3.2, 3.2, 0.4, (0.0, 0.0, 7.2), mat_silver)      # payload deck
+
+    # 4 landing legs at ±45°/±135° azimuth, tilted ~34° outward from vertical.
+    # Leg runs from attachment (r=1.6, z=1.8) to foot (r=2.8, z=0), length≈2.2m.
+    for ang_deg in (45.0, 135.0, 225.0, 315.0):
+        ang = math.radians(ang_deg)
+        cx = 2.2 * math.cos(ang)
+        cy = 2.2 * math.sin(ang)
+        add_cyl(0.08, 2.2, (cx, cy, 0.9), mat_dark,
+                rot=(0.0, math.radians(34), ang))              # leg strut
+        add_cyl(0.25, 0.1, (2.8 * math.cos(ang),              # foot pad
+                             2.8 * math.sin(ang), 0.05), mat_dark)
+
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for p in obj.data.polygons:
+            p.material_index = 0
+
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    body.name = 'blue_moon_mk1'
+    body.data.name = 'blue_moon_mk1'
+    return body
+
+
+def _build_fsh():
+    """NASA Foundation Surface Habitat — 3-storey hybrid metallic+inflatable.
+    4 m-dia metallic base (~3 m tall) + 6.5 m-dia inflatable upper (~7 m tall).
+    See docs/plans/2026-06-03-moon-site-01-surface-asset-models.md."""
+    mat_white = _make_mat('fsh_white', (0.90, 0.90, 0.88))
+    mat_dark  = _make_mat('fsh_dark',  (0.25, 0.27, 0.30))
+
+    parts = []
+    SEG = 16
+
+    def add_cyl(r, h, loc, mat):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=SEG, radius=r, depth=h, location=loc)
+        parts.append((bpy.context.object, mat))
+
+    def add_cube(sx, sy, sz, loc, mat):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=loc)
+        obj = bpy.context.object
+        obj.scale = (sx, sy, sz)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((obj, mat))
+
+    add_cyl(2.0, 3.0, (0.0, 0.0, 1.5), mat_dark)               # metallic base module
+    add_cube(2.0, 1.8, 2.0, (2.9, 0.0, 1.5), mat_dark)         # airlock stub (+X)
+    add_cyl(2.6, 0.8, (0.0, 0.0, 3.4), mat_dark)               # transition ring
+    add_cyl(3.2, 6.5, (0.0, 0.0, 6.75), mat_white)             # inflatable upper
+    # Radiator panels on ±X faces of the inflatable section
+    add_cube(0.1, 1.0, 2.0, (3.2, 0.0, 6.75), mat_white)       # radiator +X
+    add_cube(0.1, 1.0, 2.0, (-3.2, 0.0, 6.75), mat_white)      # radiator −X
+
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for p in obj.data.polygons:
+            p.material_index = 0
+
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    body.name = 'fsh'
+    body.data.name = 'fsh'
+    return body
+
+
+def _build_fsp_reactor():
+    """NASA/DOE Fission Surface Power — 40 kWe reactor with 4-fin radiator array.
+    Sited away from the habitat; distinctive cross-fin silhouette.
+    See docs/plans/2026-06-03-moon-site-01-surface-asset-models.md."""
+    mat_dark   = _make_mat('fsp_dark',   (0.30, 0.30, 0.32))
+    mat_silver = _make_mat('fsp_silver', (0.65, 0.65, 0.68))
+    mat_lunar  = _make_mat('fsp_lunar',  (0.82, 0.80, 0.73))
+
+    parts = []
+    SEG = 12
+
+    def add_cyl(r, h, loc, mat):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=SEG, radius=r, depth=h, location=loc)
+        parts.append((bpy.context.object, mat))
+
+    def add_cone(r1, r2, h, loc, mat):
+        bpy.ops.mesh.primitive_cone_add(vertices=SEG, radius1=r1, radius2=r2, depth=h,
+                                        location=loc)
+        parts.append((bpy.context.object, mat))
+
+    add_cyl(2.5, 0.5, (0.0, 0.0, 0.25), mat_lunar)             # regolith shielding berm
+    add_cyl(0.9, 2.0, (0.0, 0.0, 1.0), mat_dark)               # reactor vessel
+    add_cone(0.9, 0.5, 1.0, (0.0, 0.0, 2.5), mat_dark)         # conical top shield
+
+    # 4 radiator fins fanning out at 0°/45°/90°/135° — each a flat slab
+    for ang_deg in (0.0, 45.0, 90.0, 135.0):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0.0, 0.0, 1.0))
+        fin = bpy.context.object
+        fin.scale = (2.8, 0.06, 1.6)
+        fin.rotation_euler = (0.0, 0.0, math.radians(ang_deg))
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+        parts.append((fin, mat_silver))
+
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for p in obj.data.polygons:
+            p.material_index = 0
+
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    body.name = 'fsp_reactor'
+    body.data.name = 'fsp_reactor'
+    return body
+
+
 player = find_by_class('player')
 if player:
     player.name = 'Player'
@@ -561,7 +823,7 @@ if player:
         # See docs/plans/2026-06-03-moon-earth-cutscene.md.
         "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 1 > if "
         "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if "
-        "INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox 20 > if "
+        "INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox 13 > if "
         "INDEXOF_MOON_CHASE_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox "
         "else "
         "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox "
@@ -622,15 +884,24 @@ print(f"[moon] Earth sphere at {_earth.location[:]}")
 # Vehicles will be hooked to Jolt vehicle physics when controls are added.
 # See docs/plans/2026-06-03-moon-site-01-surface-asset-models.md.
 
-_racer = _build_moon_racer()
-attach_schema(_racer, 'platform')
-_racer.location                    = (15.0, 20.0, 0.0)
-_racer['wf_Mobility']              = 'Anchored'
-_racer['wf_Model Type']            = 'Mesh'
-_racer['wf_Visibility Mailbox']    = 1
-_racer['wf_Moves Between Rooms']   = 'True'
-print(f"[moon] Moon RACER at {_racer.location[:]}, "
-      f"{len(_racer.data.vertices)} verts, {len(_racer.data.polygons)} polys")
+def _place_prop(obj, loc, name=None):
+    """Wire a surface-asset mesh as a platform/Anchored actor and place it."""
+    attach_schema(obj, 'platform')
+    obj.location                 = loc
+    obj['wf_Mobility']           = 'Anchored'
+    obj['wf_Model Type']         = 'Mesh'
+    obj['wf_Visibility Mailbox'] = 1
+    obj['wf_Moves Between Rooms'] = 'True'
+    tag = name or obj.name
+    print(f"[moon] {tag} at {obj.location[:]}, "
+          f"{len(obj.data.vertices)} verts, {len(obj.data.polygons)} polys")
+
+_racer   = _build_moon_racer();    _place_prop(_racer,   (15.0,  20.0,  0.0))
+_vsat    = _build_vsat_tower();    _place_prop(_vsat,    (60.0,  40.0,  0.0))
+_cruiser = _build_lunar_cruiser(); _place_prop(_cruiser, (-20.0, 35.0,  0.0))
+_mk1     = _build_blue_moon_mk1(); _place_prop(_mk1,     (-40.0, -15.0, 0.0))
+_fsh     = _build_fsh();           _place_prop(_fsh,     (-55.0,  55.0, 0.0))
+_fsp     = _build_fsp_reactor();   _place_prop(_fsp,     (-90.0,  80.0, 0.0))
 
 # ── 7. Camera ────────────────────────────────────────────────────────────────
 target = find_by_class('target')
