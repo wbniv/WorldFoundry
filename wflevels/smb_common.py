@@ -1757,3 +1757,214 @@ def player_script(cfg):
         "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_B & not if "
         "0 INDEXOF_SMB_FIRE_LATCH write-mailbox then\n"
     )
+
+SMB_FIREWORK = [1865, 1866, 1867, 1868, 1869, 1870]  # firework-generator activation mailboxes
+
+
+def celebration(cfg):
+    """Flagpole + castle + rising flags + radial fireworks + end-of-level/advance
+    triggers. cfg: FLAGPOLE_X, NEXT_LEVEL_INDEX."""
+    FLAGPOLE_X = cfg['FLAGPOLE_X']
+    # ── 10. Flagpole ──────────────────────────────────────────────────────────────
+    mat_pole = make_mat('smb_pole', (0.72, 0.72, 0.72))
+    mat_flag = make_mat('smb_flag', (0.10, 0.65, 0.16))
+
+    POLE_HEIGHT = 10 * T
+    POLE_RADIUS = 0.18 * T   # 0.27 m — a real round pole, not a thin sliver from the side cam
+
+    # Pole — a proper round cylinder (16 sides) from ground to 10 tiles high
+    bpy.ops.mesh.primitive_cylinder_add(
+        vertices=16, radius=POLE_RADIUS, depth=POLE_HEIGHT,
+        location=(FLAGPOLE_X, 0, POLE_HEIGHT / 2))
+    pole_obj = bpy.context.object
+    pole_obj.name      = 'flagpole_pole'
+    pole_obj.data.name = 'flagpole_pole'
+    pole_obj.data.materials.clear()
+    pole_obj.data.materials.append(mat_pole)
+    attach_schema(pole_obj, 'statplat')
+    pole_obj['wf_Visibility Mailbox'] = 1
+    pole_obj['wf_Model Type'] = 'Mesh'
+
+    # Flag — flat plane near the pole top. A scriptable Anchored 'enemy' (statplats can't
+    # tick a script) so it SLIDES DOWN the pole during the celebration: phase A
+    # (elapsed 0–0.5 s) lerps its Z from the top to the base. Before SMB_CELEBRATE it sits
+    # at the authored top. Anchored = no Jolt body, no collision; the script owns its Z.
+    FLAG_TOP_Z  = POLE_HEIGHT - T        # 13.5 — authored start (near pole top)
+    FLAG_BASE_Z = T * 0.7                # ~1.05 — slide target (pole base, the "grab")
+    # Thin VERTICAL slab (a flat plane lies in XY → edge-on/invisible to the side camera).
+    bpy.ops.mesh.primitive_cube_add(size=2.0, location=(FLAGPOLE_X - T, 0, FLAG_TOP_Z))
+    flag_obj = bpy.context.object
+    flag_obj.name      = 'flagpole_flag'
+    flag_obj.data.name = 'flagpole_flag'
+    flag_obj.scale = (0.5 * T, 0.03, 0.4 * T)   # 1.5 m wide × 1.2 m tall, thin in Y; faces the camera
+    bpy.ops.object.transform_apply(scale=True)
+    flag_obj.data.materials.clear()
+    flag_obj.data.materials.append(mat_flag)
+    attach_schema(flag_obj, 'enemy')
+    flag_obj['wf_Mobility'] = 'Anchored'
+    flag_obj['wf_Model Type'] = 'Mesh'
+    flag_obj['wf_Visibility Mailbox'] = 1
+    flag_obj['wf_Script'] = (
+        "\\ wf\n"
+        "INDEXOF_SMB_CELEBRATE read-mailbox if\n"
+        "INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox - 1.1 *\n"  # frac = elapsed/0.9
+        "dup 1.0 > if drop 1.0 then\n"
+        f"{FLAG_TOP_Z - FLAG_BASE_Z:.2f} * {FLAG_TOP_Z:.2f} swap - INDEXOF_Z_POS write-mailbox\n"  # Z = top - span*frac
+        "then\n"
+    )
+
+    # ── 10a. Castle + rising castle flag + door + fireworks (celebration) ─────────
+    # A small stone castle just past the flagpole. Mario walks into its door and vanishes
+    # (Player phases B/D); its rooftop flag RAISES (phase C, 0.8–1.4 s — the "flag which
+    # raises" beat); then 3 fireworks pop above it (phase F, staggered 2.4/2.9/3.4 s). The
+    # flags + fireworks are scriptable Anchored 'enemy' actors driving their own Z /
+    # visibility off the celebration clock (elapsed = TIME − SMB_CELEBRATE_START).
+    mat_castle = make_mat('smb_castle', (0.60, 0.55, 0.50))
+    CASTLE_X0, CASTLE_X1 = FLAGPOLE_X + 1.5 * T, FLAGPOLE_X + 4.5 * T   # 317.25 .. 321.75 (on the ground)
+    CASTLE_TOP   = 3 * T                                               # 4.5 m tall
+    CASTLE_MID_X = (CASTLE_X0 + CASTLE_X1) / 2
+    add_statplat('castle', CASTLE_X0, -GROUND_Y, GROUND_TOP_Z, CASTLE_X1, GROUND_Y, CASTLE_TOP, mat_castle)
+    add_statplat('castle_pole', CASTLE_MID_X - 0.1, -0.1, CASTLE_TOP,
+                 CASTLE_MID_X + 0.1, 0.1, CASTLE_TOP + 2 * T, mat_pole)
+
+    CFLAG_BASE_Z = CASTLE_TOP                          # 4.5 — authored low (rooftop base)
+    CFLAG_TOP_Z  = CASTLE_TOP + 2.0 * T - 0.35 * T     # flag TOP (not center) meets the pole top 7.5
+    # Thin VERTICAL slab (same reason as the pole flag — a flat plane is edge-on to the camera).
+    # X so the flag's right edge overlaps the pole centre (CASTLE_MID_X) — attached, not floating beside it.
+    bpy.ops.mesh.primitive_cube_add(size=2.0, location=(CASTLE_MID_X - 0.45 * T, 0, CFLAG_BASE_Z))
+    cflag = bpy.context.object
+    cflag.name      = 'castle_flag'
+    cflag.data.name = 'castle_flag'
+    cflag.scale = (0.45 * T, 0.03, 0.35 * T)   # 1.35 m wide × 1.05 m tall, thin in Y
+    bpy.ops.object.transform_apply(scale=True)
+    cflag.data.materials.clear()
+    cflag.data.materials.append(mat_flag)
+    attach_schema(cflag, 'enemy')
+    cflag['wf_Mobility'] = 'Anchored'
+    cflag['wf_Model Type'] = 'Mesh'
+    cflag['wf_Visibility Mailbox'] = 1
+    cflag['wf_Script'] = (
+        "\\ wf\n"
+        "INDEXOF_SMB_CELEBRATE read-mailbox if\n"
+        "INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox - 0.8 -\n"  # elapsed - 0.8 (phase C)
+        "dup 0.0 < if drop 0.0 then 1.667 *\n"   # frac = (elapsed-0.8)/0.6, clamped >=0
+        "dup 1.0 > if drop 1.0 then\n"
+        f"{CFLAG_TOP_Z - CFLAG_BASE_Z:.2f} * {CFLAG_BASE_Z:.2f} + INDEXOF_Z_POS write-mailbox\n"  # Z = base + span*frac
+        "then\n"
+    )
+
+    # Castle door — a dark face on the castle's left/front where Mario walks in (he stops at
+    # FLAGPOLE_X+2 ≈ the door, then SMB_MARIO_VIS=0 hides him → "entered the castle").
+    mat_door = make_mat('smb_castle_door', (0.05, 0.04, 0.06))
+    add_statplat('castle_door', CASTLE_X0 + 0.15, -GROUND_Y - 0.06, GROUND_TOP_Z,
+                 CASTLE_X0 + 1.35, -GROUND_Y - 0.02, GROUND_TOP_Z + 2.2, mat_door)
+
+    # ── Radial spark-burst fireworks (debris idiom, replaces the flat slabs) ──────
+    # A parked Physics `spark_template` is THROWN by 6 invisible `generator` actors arranged
+    # in an arc in the open sky above the castle (clear of the flag at Z 7.5). Each generator
+    # pulses its global activation mailbox during a staggered elapsed window, but ONLY if its
+    # index < SMB_FIREWORK_COUNT — the faithful SMB count (remaining-timer last digit 1/3/6,
+    # else 0) the Player latches at celebration start. The generator's up-launch (Object Z
+    # Velocity) + gravity arc the sparks; SPARK_SCRIPT fans XSPEED by actor index for the
+    # radial spread; the spark despawns once it falls back below the burst height.
+    # LOCAL_SYSTEM mailboxes only on the template (a LOCAL_USER write on a default-sized
+    # template overflows its array → crash); no Random Displacement (Scalar::Random() asserts)
+    # — the fan is deterministic via the fragment's actor index, like the brick debris.
+    # (the spark material is created inside _make_spark_template via mat_spark())
+    SPARK_H = 0.16                                          # ~0.32 m spark cube
+    SPARK_DESPAWN_Z = CASTLE_TOP + 1.5                     # 6.0 — fallen back below the burst → vanish
+
+
+    _make_spark_template()
+
+    # 6 invisible generators in an arc in the open sky above the castle. Burst n fires in its
+    # window iff n < SMB_FIREWORK_COUNT, so a count of 1/3/6 lights 1/3/6 bursts.
+    FW_SKY_Z = CASTLE_TOP + 5.0   # 9.5 — burst origins above the flag (7.5), in open sky
+    FW_ARC = [   # (x, z) arc above the castle, centre highest
+        (CASTLE_MID_X - 3.0 * T, FW_SKY_Z - 0.5 * T),
+        (CASTLE_MID_X - 1.8 * T, FW_SKY_Z + 0.3 * T),
+        (CASTLE_MID_X - 0.6 * T, FW_SKY_Z + 0.8 * T),
+        (CASTLE_MID_X + 0.6 * T, FW_SKY_Z + 0.8 * T),
+        (CASTLE_MID_X + 1.8 * T, FW_SKY_Z + 0.3 * T),
+        (CASTLE_MID_X + 3.0 * T, FW_SKY_Z - 0.5 * T),
+    ]
+    for _i, (_fx, _fz) in enumerate(FW_ARC):
+        _t0 = 2.0 + _i * 0.35   # staggered; 0.6 s window → last burst ends ~4.35 (finale 4.5)
+        _t1 = _t0 + 0.6
+        g = bpy.data.objects.new(f'firework_gen_{_i}', None)   # Empty → meshless, non-solid spawner
+        scene.collection.objects.link(g)
+        attach_schema(g, 'generator')
+        g.location = (_fx, 0.0, _fz)
+        g['wf_Mobility']           = 'Anchored'
+        g['wf_Model Type']         = 'None'              # invisible
+        g['wf_Visibility Mailbox'] = 0
+        g['wf_Activation MailBox'] = SMB_FIREWORK[_i]    # global; the script pulses it in-window
+        g['wf_Object To Throw']    = 'spark_template'
+        g['wf_Generation Rate']    = 10.0               # generator.oas cap; ~6 sparks over the 0.6 s window
+        g['wf_Object X Velocity']  = 0.0
+        g['wf_Object Y Velocity']  = 0.0                # OAS default 1.0 drifts into +Y — zero it
+        g['wf_Object Z Velocity']  = 4.0               # up-launch; gravity arcs the sparks back down
+        g['wf_Script'] = (
+            "\\ wf\n"
+            f"0 INDEXOF_SMB_FIREWORK_{_i} write-mailbox\n"            # default: don't spawn
+            "INDEXOF_SMB_CELEBRATE read-mailbox if\n"
+            f"  {_i} INDEXOF_SMB_FIREWORK_COUNT read-mailbox < if\n"  # this burst enabled by the count?
+            "    INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox -\n"   # elapsed
+            f"    dup {_t0:.2f} > swap {_t1:.2f} < & if 1 INDEXOF_SMB_FIREWORK_{_i} write-mailbox then\n"
+            "  then\n"
+            "then\n"
+        )
+
+    # ── 10b. Flagpole end-of-level trigger ────────────────────────────────────────
+    # Composition, NOT a class: an invisible ActBox sensor volume over the flagpole.
+    # On Player overlap it writes SMB_CELEBRATE=1 → the Director runs the end-of-level
+    # celebration (pole-flag slide, castle flag raise, timer→score drain) and fires
+    # END_OF_LEVEL itself at the end. No script, no coordinate baked into a script (the
+    # box's placement IS the trigger region). See docs/plans/2026-05-31-smb-flagpole-
+    # celebration.md + 2026-05-25-smb-flagpole-end-of-level.md.
+    END_OF_LEVEL  = 1905  # INDEXOF_END_OF_LEVEL (wfsource/source/mailbox/mailbox.inc:31)
+    SMB_CELEBRATE = 1862  # INDEXOF_SMB_CELEBRATE — flag touch starts the celebration cutscene
+    # Flag-driven level advance: a SECOND ActBox at the flag writes LEVEL_TO_RUN, the
+    # persistent mailbox the meta-loop reads to pick the next level. shell.fth only seeds
+    # it on first boot, so the value persists across the reload. mailbox.inc:247 documents
+    # 5000 as "written by a flagpole ActBox to advance"; a level-side write to 5000 routes
+    # to WFGame::WriteSystemMailbox (mailbox.cc:90-102) -> _desiredLevelNum (game.cc:705).
+    # See docs/plans/2026-05-31-smb-flag-next-level-transition-and-w1-2-scaffold.md.
+    LEVEL_TO_RUN     = 5000   # INDEXOF_LEVEL_TO_RUN (wfsource/source/mailbox/mailbox.inc:247)
+    NEXT_LEVEL_INDEX = cfg['NEXT_LEVEL_INDEX']
+
+    bpy.ops.mesh.primitive_cube_add(size=2.0, location=(FLAGPOLE_X, 0.0, 2 * T))
+    flagtrig = bpy.context.object
+    flagtrig.name      = 'flagpole_trigger'
+    flagtrig.data.name = 'flagpole_trigger'
+    flagtrig.scale = (1.5, T, 2.5 * T)   # half-extents X±1.5, Y±T, Z±3.75 (centre Z=3): covers Mario at the pole
+    bpy.ops.object.transform_apply(scale=True)
+    attach_schema(flagtrig, 'actbox')
+    flagtrig['wf_MailBox']            = SMB_CELEBRATE  # start the celebration (Director fires END_OF_LEVEL at the end)
+    flagtrig['wf_MailBoxValue']       = 1
+    flagtrig['wf_Activated By Actor'] = 'Player'       # ActivatedBy defaults to 1 (Actor)
+    # ActBox::activate unconditionally writes the activator's index to "Activated Actor
+    # Mailbox"; its default 0 is a RESERVED mailbox (mailbox.cc asserts >= 2) → abort.
+    # We don't need the activator, so send it to a scratch slot (SCRATCH_USER_START=4005).
+    flagtrig['wf_Activated Actor Mailbox'] = 4005
+    # ActBox DEFAULT_VISIBILITY=0 → invisible; bbox (activation volume) comes from the cube mesh.
+
+    # ── 10c. Flagpole ADVANCE trigger (invisible ActBox → next level) ─────────────
+    # Second ActBox at the SAME volume as flagpole_trigger. On Player overlap it writes
+    # LEVEL_TO_RUN = NEXT_LEVEL_INDEX so the meta-loop loads the next level after this one
+    # unloads. Same bbox as the END_OF_LEVEL trigger so both fire on the same frame; order
+    # is irrelevant because the meta-loop reads _desiredLevelNum only after RunLevel()
+    # returns. Death sets END_OF_LEVEL without touching LEVEL_TO_RUN, so dying restarts the
+    # same level — only the flag advances.
+    bpy.ops.mesh.primitive_cube_add(size=2.0, location=(FLAGPOLE_X, 0.0, 2 * T))
+    flagadv = bpy.context.object
+    flagadv.name      = 'flagpole_advance'
+    flagadv.data.name = 'flagpole_advance'
+    flagadv.scale = (1.5, T, 2.5 * T)   # identical half-extents to flagpole_trigger
+    bpy.ops.object.transform_apply(scale=True)
+    attach_schema(flagadv, 'actbox')
+    flagadv['wf_MailBox']            = LEVEL_TO_RUN
+    flagadv['wf_MailBoxValue']       = NEXT_LEVEL_INDEX
+    flagadv['wf_Activated By Actor'] = 'Player'
+    flagadv['wf_Activated Actor Mailbox'] = 4005   # scratch sink (same reserved-mb-0 gotcha)
+
