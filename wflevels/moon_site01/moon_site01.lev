@@ -631,7 +631,7 @@
 		{ 'FX32' { 'NAME' "Roll" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Pan Time In Seconds" } { 'DATA' 0.1000000000000000(1.15.16) } { 'STR' "0.1" } }
 		{ 'FX32' { 'NAME' "Hither" } { 'DATA' 0.0999755859375000(1.15.16) } { 'STR' "0.0999755859375" } }
-		{ 'FX32' { 'NAME' "Yon" } { 'DATA' 500.0000000000000000(1.15.16) } { 'STR' "500.0" } }
+		{ 'FX32' { 'NAME' "Yon" } { 'DATA' 2500.0000000000000000(1.15.16) } { 'STR' "2500.0" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -639,7 +639,7 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "CamTarget" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 50.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -912,7 +912,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n1 INDEXOF_MOON_OVERLAY_ENABLED write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_MOON_PLAYER_X write-mailbox\nINDEXOF_Y_POS read-mailbox INDEXOF_MOON_PLAYER_Y write-mailbox\nINDEXOF_Z_POS read-mailbox INDEXOF_MOON_PLAYER_Z write-mailbox\nINDEXOF_ROTATION_C read-mailbox INDEXOF_MOON_PLAYER_HEADING write-mailbox\nINDEXOF_TIME read-mailbox dup 10 < if 1 INDEXOF_MOON_LAUNCH_PHASE write-mailbox 10 swap - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox else dup 11 < if drop 2 INDEXOF_MOON_LAUNCH_PHASE write-mailbox 0 INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox else 3 INDEXOF_MOON_LAUNCH_PHASE write-mailbox 11 - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox then then\nINDEXOF_MOON_LAUNCH_PHASE read-mailbox 1 > if INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox 13 > if INDEXOF_MOON_CHASE_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox else INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox then else INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox then then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n1 INDEXOF_MOON_OVERLAY_ENABLED write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_MOON_PLAYER_X write-mailbox\nINDEXOF_Y_POS read-mailbox INDEXOF_MOON_PLAYER_Y write-mailbox\nINDEXOF_Z_POS read-mailbox INDEXOF_MOON_PLAYER_Z write-mailbox\nINDEXOF_ROTATION_C read-mailbox INDEXOF_MOON_PLAYER_HEADING write-mailbox\nINDEXOF_TIME read-mailbox dup 10 < if 1 INDEXOF_MOON_LAUNCH_PHASE write-mailbox 10 swap - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox else dup 11 < if drop 2 INDEXOF_MOON_LAUNCH_PHASE write-mailbox 0 INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox else 3 INDEXOF_MOON_LAUNCH_PHASE write-mailbox 11 - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox then then\nINDEXOF_MOON_LAUNCH_PHASE read-mailbox 1 > if INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox 13 > if INDEXOF_MOON_CHASE_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox else INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox then else INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox then else INDEXOF_MOON_CHASE_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox then\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
@@ -1250,6 +1250,46 @@
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000829514300(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
+		{ 'NAME' "sun_disc" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 164.0696563720703125(1.15.16) 450.7776794433593750(1.15.16) 16.7517585754394531(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -7.9999995231628418(1.15.16) -8.0000000000000000(1.15.16) -8.0000000000000000(1.15.16) 8.0000000000000000(1.15.16) 8.0000000000000000(1.15.16) 8.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sun_disc.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000306754373(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000593427103(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000013969839(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000216940588480(1.15.16) } { 'STR' "0.000022" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "skydome" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1999.9986572265625000(1.15.16) -1999.9989013671875000(1.15.16) -2000.0000000000000000(1.15.16) 1999.9995117187500000(1.15.16) 2000.0000000000000000(1.15.16) 2000.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "platform" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "skydome.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000982799975(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000115251169(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000001746230(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
 		{ 'NAME' "launch_tracker" }
 		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 30.0000000000000000(1.15.16) 25.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
 		} }
@@ -1279,6 +1319,6 @@
 		{ 'I32' { 'NAME' "Position Z" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
 		{ 'FX32' { 'NAME' "FOV" } { 'DATA' 40.0000000000000000(1.15.16) } { 'STR' "40.0" } }
 		{ 'FX32' { 'NAME' "Pan Time In Seconds" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
-		{ 'FX32' { 'NAME' "Yon" } { 'DATA' 500.0000000000000000(1.15.16) } { 'STR' "500.0" } }
+		{ 'FX32' { 'NAME' "Yon" } { 'DATA' 2500.0000000000000000(1.15.16) } { 'STR' "2500.0" } }
 	}
 }

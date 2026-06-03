@@ -48,12 +48,19 @@ PERM (always loaded — props)
   cs_chase              Vista camshot (no model)
   cs_earth              Launch cutscene camshot (no model)
   launch_tracker        Invisible proxy actor; Z_POS follows lander (see below)
+  sun_disc.iff          Visible sun — UV sphere R=8 m at (164, 451, 17) (Anchored)
+  skydome.iff           Star-field skydome — UV sphere R=2000 m, inverted normals (Anchored)
 ```
 
 **Architecture rule:** Room0 atlas (1024×1024) holds the terrain tile only.
 All props must carry `wf_Moves Between Rooms = True` in `blender_create_moon.py`.
 **PERM pool** is set in `moon_site01-standalone.iff.txt`; budget ~2.5 × total prop
 `.iff` file sizes. Currently 1,000,000 bytes.
+
+**VRAM note:** The PERM atlas grows when textured PERM actors are added (starfield.tga
+512×256 + earth.tga 128×64 → Perm.tga 640×256). `VRAMPermanentWidth` defaults to 256 —
+exceed that and the engine asserts at startup. `task run-moon` passes
+`--vram-perm-width=1024 --vram-perm-height=512` to cover current + future PERM textures.
 
 ## Atlas pages (textile.flags)
 

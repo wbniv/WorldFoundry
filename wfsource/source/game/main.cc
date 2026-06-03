@@ -171,6 +171,8 @@ usage( int argc, char* argv[] )
     std::cout << "\t--vram-height N\t\tTotal VRAM box height (default " << Display::VRAMHeight << ")" << std::endl;
     std::cout << "\t--vram-slot-width N\tTransient texture slot width  (default " << VideoMemory::VRAMTransientWidth  << ")" << std::endl;
     std::cout << "\t--vram-slot-height N\tTransient texture slot height (default " << VideoMemory::VRAMTransientHeight << ")" << std::endl;
+    std::cout << "\t--vram-perm-width N\tPermanent texture slot width  (default " << VideoMemory::VRAMPermanentWidth  << ")" << std::endl;
+    std::cout << "\t--vram-perm-height N\tPermanent texture slot height (default " << VideoMemory::VRAMPermanentHeight << ")" << std::endl;
     std::cout << "\t-zs\t\tZ-Sorted" << std::endl;
     std::cout << "\t-zb\t\tZ-Buffered" << std::endl;
 	std::cout << "\t-nologo\t\tDon't display company logos" << std::endl;
@@ -286,6 +288,10 @@ ParseCommandLine(int argc, char** argv)
             VideoMemory::VRAMTransientWidth  = atoi( argv[index] + 18 );
         else if ( strncmp( argv[index]+1, "-vram-slot-height=", 18 ) == 0 )
             VideoMemory::VRAMTransientHeight = atoi( argv[index] + 19 );
+        else if ( strncmp( argv[index]+1, "-vram-perm-width=", 17 ) == 0 )
+            VideoMemory::VRAMPermanentWidth  = atoi( argv[index] + 18 );
+        else if ( strncmp( argv[index]+1, "-vram-perm-height=", 18 ) == 0 )
+            VideoMemory::VRAMPermanentHeight = atoi( argv[index] + 19 );
 		else if ( strcmp( argv[index]+1, "zb" ) == 0 )
 		{
 			bRenderZb = true;

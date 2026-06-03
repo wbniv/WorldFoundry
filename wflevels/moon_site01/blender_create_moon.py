@@ -69,7 +69,15 @@ PLAYER_SPAWN  = (0.0, 0.0, 5.0)
 # that fades everything past 30 m to flat #888888; see
 # docs/plans/2026-05-31-uninitialised-fog-defaults.md).
 CAM_OFFSET    = (0.0, -100.0, 80.0)
-LOOK_TARGET   = (0.0, 0.0, 0.0)
+# Raised from (0,0,0) to tilt cs_chase from 38.7° down to 16.7° down — puts
+# Earth (at Y=200,Z=50) from 33° off-center to 11° off-center (half-FOV=30°).
+LOOK_TARGET   = (0.0, 0.0, 50.0)
+
+# Sun direction — az 20°, alt 2° (matches LOLA illumination at site latitude).
+# Used by both the engine directional-light actor and the visible Sun disc mesh.
+SUN_AZ_DEG  = 20.0
+SUN_ALT_DEG = 2.0
+SUN_DIST_M  = 480.0   # sun disc placed 480 m from origin (≤505 m room half-size)
 
 NUM_MAILBOXES = 100
 
@@ -217,8 +225,6 @@ if light:
     # rotation_euler.x = π/3 "sun ~60° above horizon"), the X rotation tilts
     # the beam off zenith. South-pole sun at altitude 2° → X = π/2 − 2°.
     # Z rotation rotates the cast-shadow azimuth around the vertical.
-    SUN_AZ_DEG  = 20.0
-    SUN_ALT_DEG = 2.0
     light.rotation_euler = (math.pi / 2 - math.radians(SUN_ALT_DEG),
                             0.0,
                             math.radians(SUN_AZ_DEG))
@@ -831,6 +837,8 @@ if player:
         "else "
         "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox "
         "then "
+        "else "
+        "INDEXOF_MOON_CHASE_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox "
         "then\n"
     )
 
@@ -896,12 +904,93 @@ def _place_prop(obj, loc, name=None):
     print(f"[moon] {tag} at {obj.location[:]}, "
           f"{len(obj.data.vertices)} verts, {len(obj.data.polygons)} polys")
 
+
+def _build_sun():
+    """Visible sun disc — UV sphere R=8 m along the directional-light vector at
+    SUN_DIST_M from origin.  White/yellow material so the texture-gate branch
+    in backend_modern.cc's fragment shader keeps it bright."""
+    sun_az  = math.radians(SUN_AZ_DEG)
+    sun_alt = math.radians(SUN_ALT_DEG)
+    sx = math.cos(sun_alt) * math.sin(sun_az) * SUN_DIST_M
+    sy = math.cos(sun_alt) * math.cos(sun_az) * SUN_DIST_M
+    sz = math.sin(sun_alt)                     * SUN_DIST_M
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=8.0, segments=16, ring_count=8,
+        location=(sx, sy, sz))
+    obj = bpy.context.object
+    obj.name      = 'sun_disc'
+    obj.data.name = 'sun_disc'
+    mat = bpy.data.materials.new('sun_mat')
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes['Principled BSDF']
+    bsdf.inputs['Base Color'].default_value = (1.0, 0.98, 0.88, 1.0)  # warm white
+    mat.diffuse_color = (1.0, 0.98, 0.88, 1.0)
+    obj.data.materials.append(mat)
+    print(f"[moon] sun_disc at ({sx:.1f}, {sy:.1f}, {sz:.1f}), R=8 m")
+    return obj
+
+
+def _build_skydome():
+    """Star-field skydome — UV sphere R=2000 m, normals flipped so the inner
+    surface is visible.  starfield.tga (512x256) equirectangular map.
+
+    Depth safety: minimum distance from camera (0,-100,80) to the sphere
+    surface is ≈1872 m; maximum terrain distance is ≈785 m → terrain always
+    wins the depth test (closer = lower depth value).  Yon=2500 m lets the
+    skydome reach the far clip.  No engine changes required.
+
+    See docs/plans/2026-06-01-moon-sky-earth-in-frame-sun-disc-starfield-skydome.md."""
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=2000.0, segments=32, ring_count=16,
+        location=(0.0, 0.0, 0.0))
+    obj = bpy.context.object
+    obj.name      = 'skydome'
+    obj.data.name = 'skydome'
+
+    # Flip all normals so the inner (concave) surface is the visible face.
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bmesh.ops.reverse_faces(bm, faces=bm.faces)
+    bm.to_mesh(obj.data)
+    bm.free()
+    obj.data.update()
+
+    # starfield.tga — equirectangular star map.  White diffuse base so the
+    # WF shader's texture-gate (step(0.99,min(rgb))) passes the texture through.
+    mat = bpy.data.materials.new('skydome_mat')
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes['Principled BSDF']
+    tex_node = mat.node_tree.nodes.new('ShaderNodeTexImage')
+    tex_node.image = bpy.data.images.load(os.path.join(SCRIPT_DIR, 'starfield.tga'))
+    mat.node_tree.links.new(tex_node.outputs['Color'], bsdf.inputs['Base Color'])
+    bsdf.inputs['Base Color'].default_value = (1.0, 1.0, 1.0, 1.0)
+    mat.diffuse_color = (1.0, 1.0, 1.0, 1.0)
+    obj.data.materials.append(mat)
+    print(f"[moon] skydome R=2000 m, {len(obj.data.vertices)} verts, "
+          f"{len(obj.data.polygons)} polys")
+    return obj
+
+
 _racer   = _build_moon_racer();    _place_prop(_racer,   (15.0,  20.0,  0.0))
 _vsat    = _build_vsat_tower();    _place_prop(_vsat,    (60.0,  40.0,  0.0))
 _cruiser = _build_lunar_cruiser(); _place_prop(_cruiser, (-20.0, 35.0,  0.0))
 _mk1     = _build_blue_moon_mk1(); _place_prop(_mk1,     (-40.0, -15.0, 0.0))
 _fsh     = _build_fsh();           _place_prop(_fsh,     (-55.0,  55.0, 0.0))
 _fsp     = _build_fsp_reactor();   _place_prop(_fsp,     (-90.0,  80.0, 0.0))
+
+_sun = _build_sun()
+attach_schema(_sun, 'platform')
+_sun['wf_Mobility']            = 'Anchored'
+_sun['wf_Model Type']          = 'Mesh'
+_sun['wf_Visibility Mailbox']  = 1
+_sun['wf_Moves Between Rooms'] = 'True'
+
+_dome = _build_skydome()
+attach_schema(_dome, 'platform')
+_dome['wf_Mobility']            = 'Anchored'
+_dome['wf_Model Type']          = 'Mesh'
+_dome['wf_Visibility Mailbox']  = 1
+_dome['wf_Moves Between Rooms'] = 'True'
 
 # ── 7. Camera ────────────────────────────────────────────────────────────────
 target = find_by_class('target')
@@ -947,7 +1036,7 @@ if camshot:
     camshot['wf_Track Object'] = 'Player'
     camshot['wf_Target']       = 'CamTarget'
     camshot['wf_Follow']       = 'CamTarget'
-    camshot['wf_Yon']          = 500.0   # Earth is at 301 m; default 100 m clips it
+    camshot['wf_Yon']          = 2500.0  # skydome R=2000 m; default 100 m clips it
     camshot['wf_Moves Between Rooms'] = 'True'
     # Publish own actor index so player script can restore chase cam after cutscene.
     camshot['wf_Script'] = (
@@ -995,7 +1084,7 @@ cs_earth_obj['wf_Model Type']          = 'None'
 cs_earth_obj['wf_Track Object']        = 'launch_tracker'  # room actor — avoids PERM→PERM crash
 cs_earth_obj['wf_Target']              = 'CamTarget'   # required non-null by movecam.cc:236
 cs_earth_obj['wf_Follow']              = 'CamTarget'   # required non-null by movecam.cc:236
-cs_earth_obj['wf_Yon']                 = 500.0
+cs_earth_obj['wf_Yon']                 = 2500.0
 cs_earth_obj['wf_Moves Between Rooms'] = 'True'
 # Publish own actor index for player script camera switching.
 cs_earth_obj['wf_Script'] = (
