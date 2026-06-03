@@ -528,6 +528,35 @@ def piranha_mesh(name):
     return shared_mesh('piranha', name, _piranha_geo)
 
 
+def _paratroopa_geo():
+    """Green Koopa body (same shell+head as _koopa_geo) plus two white wings spread to
+    either side so it reads as a Paratroopa from the side camera."""
+    shell = make_mat('koopa_green_shell', (0.14, 0.56, 0.20))
+    skin  = make_mat('koopa_green_skin',  (0.90, 0.76, 0.34))
+    wing  = make_mat('paratroopa_wing',   (0.96, 0.96, 0.98))
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.48*T, segments=10, ring_count=6, location=(0, 0, 0.52*T))
+    bpy.context.object.scale.z = 0.80
+    bpy.ops.object.transform_apply(scale=True)
+    p0 = _setmat(bpy.context.object, shell)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.22*T, segments=8, ring_count=5, location=(0.30*T, 0, 0.90*T))
+    p1 = _setmat(bpy.context.object, skin)
+    parts = [p0, p1]
+    for sx in (-1, 1):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=(sx*0.52*T, 0.0, 0.74*T))
+        w = bpy.context.object
+        w.scale = (0.14*T, 0.30*T, 0.44*T)
+        bpy.ops.object.transform_apply(scale=True)
+        w.rotation_euler = (0.0, sx*0.5, 0.0)   # tilt each wing outward (radians)
+        bpy.ops.object.transform_apply(rotation=True)
+        parts.append(_setmat(w, wing))
+    return _join(parts, 'paratroopa')
+
+
+def paratroopa_mesh(name):
+    """One Paratroopa datablock, shared across all instances."""
+    return shared_mesh('paratroopa', name, _paratroopa_geo)
+
+
 # ── Shared SMB constants + Forth scripts (single source) ─────────────────────
 # Geometry/colour/timing axioms + the generator/enemy/template actor scripts that
 # were duplicated verbatim in every level. Constants first so the f-string scripts
@@ -550,6 +579,14 @@ PIRANHA_EMERGED_Z = GROUND_TOP_Z + 3.2*T
 PIRANHA_PIPE_TOP  = GROUND_TOP_Z + 2*T
 PIRANHA_RATE      = 4.0
 PIRANHA_DWELL     = 2.0
+# Koopa Paratroopa (W1-3): a green Koopa that bounces in place over the tree-tops.
+# Vertical triangle-wave between PARA_LOW_Z and PARA_HIGH_Z at PARA_RATE m/s; reuses the
+# per-actor local SMB_PIRANHA_UP_L (2016) as the up/down phase flag (generic oscillator
+# slot — no piranhas in W1-3). Anchored, hurts on side contact, despawns when stomped.
+PARA_LOW_Z   = MARIO_Z + 1.0*T
+PARA_HIGH_Z  = MARIO_Z + 3.0*T
+PARA_RATE    = 5.0
+COIN_PICK_R2 = 1.5            # coin proximity-pickup radius^2 (dx^2+dz^2 < this)
 
 
 QBLOCK_SCRIPT = (
@@ -936,6 +973,75 @@ PIRANHA_SCRIPT = (
     "then\n"
 )
 
+# Koopa Paratroopa — airborne green Koopa bouncing over the tree-tops (W1-3). Vertical
+# triangle wave via the per-actor SMB_PIRANHA_UP_L phase flag (1=rising, 0=falling); flips
+# at PARA_HIGH_Z / PARA_LOW_Z. Player interaction mirrors the Koopa: Star kills it; a stomp
+# (player clearly above) pops a score + bounces Mario + despawns it; a side touch hurts.
+PARATROOPA_SCRIPT = (
+    "\\ wf\n"
+    # --- vertical bounce ---
+    "INDEXOF_SMB_PIRANHA_UP_L read-mailbox if\n"
+    f"  INDEXOF_Z_POS read-mailbox {PARA_HIGH_Z} < if\n"
+    f"    INDEXOF_Z_POS read-mailbox {PARA_RATE} INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n"
+    "  else\n"
+    "    0 INDEXOF_SMB_PIRANHA_UP_L write-mailbox\n"
+    "  then\n"
+    "else\n"
+    f"  INDEXOF_Z_POS read-mailbox {PARA_LOW_Z} > if\n"
+    f"    INDEXOF_Z_POS read-mailbox {PARA_RATE} INDEXOF_DELTA_TIME read-mailbox * - INDEXOF_Z_POS write-mailbox\n"
+    "  else\n"
+    "    1 INDEXOF_SMB_PIRANHA_UP_L write-mailbox\n"
+    "  then\n"
+    "then\n"
+    # --- player interaction (proximity), same stack discipline as KOOPA_SCRIPT ---
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n"   # dx
+    "dup * 1.0 <\n"
+    "if\n"
+    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_STAR_UNTIL read-mailbox < if\n"
+    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "    INDEXOF_SMB_SCORE read-mailbox 100 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"                # invincible Mario: dies regardless
+    "  else\n"
+    "    INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"   # dz
+    "    dup 0.7 >\n"
+    "    if\n"                                           # STOMP (player above)
+    "      drop\n"
+    "      INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "      INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "      1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "      INDEXOF_SMB_SCORE read-mailbox 100 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "      1 INDEXOF_SMB_STOMP write-mailbox\n"          # bounce Mario
+    "      0 INDEXOF_ALIVE write-mailbox\n"              # defeated -> despawn (no shell stage)
+    "    else\n"                                         # side touch (roughly level)
+    "      -1.5 >\n"
+    "      if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n"
+    "    then\n"
+    "  then\n"
+    "then\n"
+)
+
+# Open-air collectible coin (W1-3) — an Anchored Enemy spinning disc that collects itself
+# on player proximity: +200 score then ALIVE=0 (despawn, like a stomped enemy). The
+# per-actor SMB_COIN_TAKEN_L latch gates the proximity test so the score adds exactly once
+# even if the despawn settles a frame later. No parking (parked actors leak into frame —
+# project_smb_parked_helper_visibility) and no per-coin global: the player X/Z it reads are
+# the existing SMB_PLAYER_X/SMB_PLAYER_Z broadcasts.
+COIN_PICKUP_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"   # spin in place
+    "INDEXOF_SMB_COIN_TAKEN_L read-mailbox not if\n"
+    "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "  INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    f"  + {COIN_PICK_R2} < if\n"
+    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "    1 INDEXOF_SMB_COIN_TAKEN_L write-mailbox\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  then\n"
+    "then\n"
+)
+
 
 # ── Self-contained builders (geometry/actor setup; deps already in smb_common) ─
 def _apply_enemy_movement(obj):
@@ -1038,7 +1144,12 @@ def _make_popup_template():
     attach_schema(obj, 'enemy')
     obj['wf_Mobility']             = 'Anchored'
     obj['wf_Model Type']           = 'Mesh'
-    obj['wf_Visibility Mailbox']   = 1
+    # Gate visibility on SMB_POPUP_UNTIL (1845): its value is 0 while idle/parked and
+    # nonzero only during the 0.75 s score-pop window (mailbox.inc: "0 = idle/parked").
+    # Was hard-wired to 1 (always visible) — that left the parked yellow diamond rendered
+    # at (0,0,-5), in-frame near Mario's spawn (the "stray gold coin" on W1-1). With the
+    # gate it only draws while it animates upward. See project_smb_parked_helper_visibility.
+    obj['wf_Visibility Mailbox']   = 1845   # INDEXOF_SMB_POPUP_UNTIL
     obj['wf_Mesh Name']            = 'popup_score.iff'
     obj['wf_Script']               = POPUP_SCRIPT
     return obj
@@ -1096,6 +1207,8 @@ def mat_spark():    return _mat('spark', 'smb_spark', (1.0, 0.95, 0.55))
 def mat_fireball(): return _mat('fireball', 'fireball_orange', (0.98, 0.45, 0.05))
 def mat_hard():     return _mat('hard', 'smb_hard_block', (0.48, 0.25, 0.05))
 def mat_pipe():     return _mat('pipe', 'smb_pipe_green', (0.0, 0.62, 0.0))
+def mat_treetop():  return _mat('treetop', 'smb_treetop_green', (0.16, 0.62, 0.18))   # canopy
+def mat_treestem(): return _mat('treestem', 'smb_tree_stem', (0.55, 0.32, 0.10))      # trunk
 
 
 # ── Builders with material/dim deps (materials via getters above) ─────────────
@@ -1287,6 +1400,22 @@ def _add_pipe(name, col, height_tiles, width_tiles=2):
                  col*T - width_tiles/2*T, -GROUND_Y, GROUND_TOP_Z,
                  col*T + width_tiles/2*T,  GROUND_Y, GROUND_TOP_Z + height_tiles*T,
                  mat_pipe())
+
+
+def add_treetop(name, col, top_z, width_tiles=3):
+    """A SMB-3-style tree-top (mushroom) island: a green canopy slab you stand on plus a
+    narrow brown trunk hanging beneath it. `col` = centre column, `top_z` = canopy top Z.
+    The canopy is the collision/standing surface; the stem is decorative (well below it).
+    All canopies share one green datablock, all stems one brown datablock (add_statplat
+    keys the shared mesh on the material)."""
+    cx   = col * T
+    half = width_tiles * T / 2.0
+    add_statplat(f'{name}_canopy',
+                 cx - half, -GROUND_Y, top_z - 0.5*T,
+                 cx + half,  GROUND_Y, top_z,            mat_treetop())
+    add_statplat(f'{name}_stem',
+                 cx - 0.4*T, -0.6*GROUND_Y, top_z - 0.5*T - 2.0*T,
+                 cx + 0.4*T,  0.6*GROUND_Y, top_z - 0.5*T,  mat_treestem())
 
 
 # ── Texture paths for the textured-box builders (set by the level after it

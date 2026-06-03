@@ -526,6 +526,16 @@ Actor::BindAssets(Memory& memory)
 	_renderActor->Validate();
 	DBSTREAM3(casset << "BindAssets: actor:" << *this << ",now has a renderActor =" << _renderActor << std::endl; )
 
+	// Push the OAS-authored per-actor render scale (_scaleX/Y/Z, read in the ctor)
+	// into the freshly-bound RenderActor3D. Previously ONLY the EMAILBOX_X/Y/Z_SCALE
+	// mailbox path (below) called SetActorScale, so a load-time Scale field rendered
+	// unit-sized while its scaled BOX3 made collision correct — wide shared-unit-box
+	// statplats (the SMB tree-tops / platforms / staircases that carry size as Scale
+	// instead of baked verts) drew as 1-tile cubes. No-op for identity scale, so
+	// pre-scale levels are unchanged. (Axis-aligned boxes only; non-uniform scale on a
+	// rotated actor would shear — same caveat as the mailbox path.)
+	_renderActor->SetActorScale(Vector3(_scaleX, _scaleY, _scaleZ));
+
 #ifdef PHYSICS_ENGINE_JOLT
 	// For StatPlat mesh actors and anchored Generator mesh actors: replace the
 	// constructor's box-body placeholder with a trimesh body now that the

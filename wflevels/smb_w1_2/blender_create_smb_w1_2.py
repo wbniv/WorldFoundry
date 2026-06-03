@@ -363,7 +363,9 @@ if player:
         bpy.data.meshes.remove(old)
 
 # ── 10. Flagpole + castle + fireworks + triggers (shared celebration) ───────
-smb_common.celebration({'FLAGPOLE_X': FLAGPOLE_X, 'NEXT_LEVEL_INDEX': 0})
+# NEXT_LEVEL_INDEX = 2 → advance to W1-3 (cd.iff level 2). The loop is now
+# W1-1(0) → W1-2(1) → W1-3(2) → W1-1(0); W1-3's flagpole writes 0.
+smb_common.celebration({'FLAGPOLE_X': FLAGPOLE_X, 'NEXT_LEVEL_INDEX': 2})
 
 # ── 11. CamShot + Targets ─────────────────────────────────────────────────────
 camshot = find_by_class('camshot')

@@ -1756,28 +1756,41 @@ size; the comment in `lmalloc.cc` documents the invariant explicitly so it doesn
 get broken again.
 
 
-## Per-actor scale is visual-only — collision and physics don't scale
+## Per-actor scale: two paths with different collision behaviour
 
-**Symptom:** You scale an actor (via the `X/Y/Z_SCALE` mailboxes 3040–3042, or — once
-wired — Blender object scale) and the mesh visibly stretches, but the actor still
-collides, blocks, and is walked on as if it were its original size.
+There are **two** ways an actor's `_scaleX/Y/Z` gets set, and they behave differently —
+know which one you're using.
 
-**Why:** The scale is applied **at draw time only** — `Actor` caches `_scaleX/Y/Z`
-and forwards them to `RenderActor3D::SetActorScale`, which column-multiplies the world
-matrix just before rendering (`wfsource/source/game/actor.cc:1606-1622`). Nothing
-propagates that scale to the collision bbox (`coarse` rect in the on-disk record) or
-to the Jolt physics shape, so collision and physics keep the unscaled geometry.
+### (a) Load-time OAS / Blender object scale — renders AND box-collides
 
-**What to do:**
+**This is the SMB mesh-sharing path.** A statplat shares one unit-cube datablock and
+carries its real size as a Blender object scale → exported as a `{ VEC3 "Scale" }` field
+**and** a pre-scaled `{ BOX3 "Global Bounding Box" }` (`export_level.py` multiplies the
+bbox corners by scale; it does NOT bake verts or call `transform_apply`). At load the
+`Actor` ctor reads `_scaleX/Y/Z` (`actor.cc:712-727`) and `BindAssets` now pushes them
+into the render actor via `SetActorScale` (`actor.cc` just after `_renderActor->Validate()`).
+So **render is scaled** (the fix, 2026-06-03 — before it, load-time scale rendered as a
+unit cube while only the BOX3 collided, so wide shared-box statplats drew as 1-tile cubes;
+W1-3's whole tree-top geometry exposed this) and **box-collision is scaled** (the exporter's
+scaled BOX3, consumed via `GetColSpace()` for `MODEL_TYPE_BOX`). Use this freely for
+axis-aligned platforms of varying size that share one datablock.
 
-- For **purely visual** scaling (squash/stretch effects, decorative size variation
-  with no gameplay collision — e.g. qbert), this is fine and intended.
-- For a size change that must **affect gameplay** (a genuinely bigger crate you stand
-  on or bump into), make it a **real mesh edit in Blender** and re-export — the mesh
-  is the golden source of an object's true size.
-- A first-class "scale that also scales collision + physics" (Jolt `ScaledShape`,
-  authored as Blender object scale) is a tracked follow-up, deferred until after the
-  next level ships — see `TODO.md` § *DEFERRED UNTIL LEVEL*.
+**Caveat:** the render scale column-multiplies the world matrix, so non-uniform scale on a
+**rotated** actor shears — keep scaled statplats axis-aligned (SMB ones are). And it only
+fixes **box** collision; a `MODEL_TYPE_MESH` Jolt-trimesh statplat builds its body from raw
+verts with no scale multiply (`actor.cc` BindAssets trimesh block), so a scaled trimesh
+statplat would still collide unit-sized — keep scaled statplats `MODEL_TYPE_BOX`/BOX3.
+
+### (b) Runtime `X/Y/Z_SCALE` mailboxes (3040–3042) — visual-only
+
+**Symptom:** You stretch/squash an actor at runtime via the scale mailboxes (e.g. qbert)
+and the mesh visibly changes, but it still collides/blocks as its original size.
+
+**Why:** the mailbox write forwards to `SetActorScale` (`actor.cc:1606-1628`) at draw time;
+nothing re-derives the collision bbox or Jolt shape mid-frame. This is fine and intended for
+squash/stretch effects. For a gameplay-size change at **author time**, use path (a) above (or
+a real mesh edit). A first-class runtime "scale that also rescales collision + physics" (Jolt
+`ScaledShape`) is a tracked follow-up — see `TODO.md` § *DEFERRED UNTIL LEVEL*.
 
 
 ## Multi-room levels & cross-room warps (the SMB pipe warp)

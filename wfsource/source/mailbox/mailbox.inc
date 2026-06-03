@@ -197,6 +197,7 @@ Comment("=====================================================================")
 	Comment(" at rest, 2=shell sliding. (Sliding-shell broadcasts SMB_SHELL_LIVE_* stay global — one")
 	Comment(" shell typically slides at a time; multi-shell-vs-enemy collisions are a later refinement.)")
 	MAILBOXENTRY( SMB_KOOPA_STATE_L, 2018 )		Comment(" per-Koopa shell state: 0=walk, 1=resting shell, 2=sliding shell ")
+	MAILBOXENTRY( SMB_COIN_TAKEN_L, 2019 )		Comment(" per-coin collected latch (W1-3 open-air coins): set 1 on pickup so the +200 scores once; coin then despawns via ALIVE=0. (INDEXOF_ prefix still per convention — wanted gone eventually.) ")
 
 	MAILBOXENTRY( LOCAL_SYSTEM_START, 3000)
 	MAILBOXENTRY( HITPOINTS, 3000)

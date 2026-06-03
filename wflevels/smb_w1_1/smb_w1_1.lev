@@ -3453,7 +3453,7 @@
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_POPUP_TRIGGER read-mailbox 0<> if\n  INDEXOF_SMB_POPUP_X read-mailbox INDEXOF_X_POS write-mailbox\n  0 INDEXOF_Y_POS write-mailbox\n  INDEXOF_SMB_POPUP_Z read-mailbox 1.5 + INDEXOF_Z_POS write-mailbox\n  INDEXOF_TIME read-mailbox 0.75 + INDEXOF_SMB_POPUP_UNTIL write-mailbox\n  0 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\nthen\nINDEXOF_SMB_POPUP_UNTIL read-mailbox 0<> if\n  INDEXOF_TIME read-mailbox INDEXOF_SMB_POPUP_UNTIL read-mailbox < if\n    INDEXOF_Z_POS read-mailbox 3.0 INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n  else\n    0.0 INDEXOF_X_POS write-mailbox\n    -5.0 INDEXOF_Z_POS write-mailbox\n    0 INDEXOF_SMB_POPUP_UNTIL write-mailbox\n  then\nthen\n" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "popup_score.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1845l } { 'STR' "1845" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
