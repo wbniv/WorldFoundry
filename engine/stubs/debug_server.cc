@@ -549,6 +549,16 @@ void DebugServer_Start(int port)
     if (port <= 0) return;
     gRunning = true;
     gListenerThread = std::thread(listener_loop, port);
+    // Detach immediately. On the exit(-1) path (e.g. an engine AssertMsg), the
+    // C++ runtime runs static destructors during __run_exit_handlers BEFORE our
+    // sys_atexit DebugServer_Stop gets a chance to join — and destroying a still
+    // *joinable* std::thread calls std::terminate(), which masks the real assert
+    // with a bogus "terminate called without an active exception" and
+    // std::thread::~thread() at the top of the stack. Detaching makes the static
+    // destructor a no-op; clean shutdown still stops the loop via gRunning=false
+    // + closing gServerFd in DebugServer_Stop. (handle_client threads are
+    // detached for the same reason at the accept site.)
+    gListenerThread.detach();
 
     static bool atexitRegistered = false;
     if (!atexitRegistered) {
@@ -571,7 +581,9 @@ void DebugServer_Stop()
         for (int fd : gClients) ::close(fd);
         gClients.clear();
     }
-    if (gListenerThread.joinable()) gListenerThread.join();
+    // gListenerThread was detached in DebugServer_Start (see the rationale
+    // there) — no join. Closing gServerFd above unblocked its accept(); the
+    // detached thread exits on its own.
     gOriginals.clear();
     gChangeStack.clear();
     gPropOriginals.clear();

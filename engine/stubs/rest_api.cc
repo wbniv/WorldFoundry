@@ -283,11 +283,16 @@ void RestApi_Start()
         gServer->listen(host, port);
         std::fprintf(stderr, "rest_api: server stopped\n");
     });
+    // Detach: this is a static std::thread, and on the exit(-1) path (e.g. an
+    // engine AssertMsg) the C++ runtime runs static destructors during
+    // __run_exit_handlers BEFORE our sys_atexit RestApi_Stop gets to join —
+    // destroying a still-*joinable* std::thread calls std::terminate(), which
+    // tacks a bogus "terminate called without an active exception" + SIGABRT
+    // onto every assert (the sys_atexit-join below is NOT guaranteed to run
+    // first). Detaching makes the destructor a no-op; RestApi_Stop still breaks
+    // listen() via gServer->stop(). Mirrors the debug-bridge listener fix.
+    gServerThread.detach();
 
-    // Window-close routes through sys_exit() → libc exit(), which runs static
-    // destructors.  ~std::thread() on a joinable thread calls std::terminate.
-    // Register stop-and-join as an atexit so shutdown happens before the
-    // static gServerThread destructor runs.
     static bool atexitRegistered = false;
     if (!atexitRegistered) {
         sys_atexit([](int) { RestApi_Stop(); });
@@ -400,9 +405,12 @@ void RestApi_RenderBoxes()
 void RestApi_Stop()
 {
     if (gServer) {
-        gServer->stop();
-        if (gServerThread.joinable()) gServerThread.join();
-        delete gServer;
+        gServer->stop();    // unblocks listen(); the detached gServerThread exits on its own
+        // Leak gServer rather than delete + join: the thread is detached (see
+        // RestApi_Start) and may still be unwinding gServer->listen(), so deleting
+        // under it would be a use-after-free. RestApi_Stop is atexit-only, so the
+        // OS reclaims the object at process exit — a harmless one-shot leak that
+        // avoids both the std::terminate (joinable static dtor) and the UAF.
         gServer = nullptr;
     }
 }
