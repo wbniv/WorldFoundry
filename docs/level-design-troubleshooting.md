@@ -422,6 +422,38 @@ The engine-side alternative (guard the write so `0` means "don't record") is log
 
 ---
 
+## `ActBox` crashes with `activate.cc:42` — `Activated By = 'Actor'` but no actor named
+
+**Symptom:** A trigger volume fires and the engine aborts immediately with:
+
+```
+AssertMsg: object is activated by Actor but none is specified
+activate.cc:42
+```
+
+**Cause:** The `ActBox` OAD field `Activated By` has four enum values: `All`, `Actor`, `Class`, `List`.
+Default is `All`. If the field is left at `Actor` (either explicitly or because a stale import left
+it that way) without setting `Activated By Actor` to a live object name, `ActBox::activate`
+reads a null actor pointer and asserts.
+
+This commonly surfaces when creating entry-trigger volumes programmatically and forgetting to set
+`Activated By`:
+
+```python
+# Wrong — Activated By defaults to 'All' (or may be stale 'Actor' from import)
+trig['wf_MailBox']      = MOON_ACTIVE_VEHICLE
+trig['wf_MailBoxValue'] = vehicle_id
+
+# Correct — set Activated By explicitly
+trig['wf_Activated By'] = 'All'   # fire for any actor that overlaps
+```
+
+**Fix:** always set `wf_Activated By` explicitly on every programmatically-created actbox. If
+only the player should trigger it, use `'Actor'` + `wf_Activated By Actor = 'Player'`. For a
+general entry volume that any actor can trip, use `'All'`.
+
+---
+
 ## Added a mailbox to `mailbox.inc` but scripts using its `INDEXOF_` fail (`error 7 not_a_word`)
 
 **Symptom:** you add a `MAILBOXENTRY( FOO, … )` row to
@@ -1600,6 +1632,32 @@ Steps 3 and 4 must happen *after* step 1, not before.
 
 ---
 
+## Blender re-export: Python changes don't land until you re-run Blender AND rebuild
+
+**Symptom:** You edit `blender_create_<level>.py` (e.g. change a field assignment or add a
+new actor), run `task build-level`, but the engine behaviour is unchanged. The compiled `.iff`
+is current, yet the actor/field you touched has no effect.
+
+**Cause:** The build pipeline has two stages:
+
+1. **Blender export**: `blender --background --python blender_create_<level>.py` → writes `<level>.lev`
+2. **Binary compile**: `levcomp-rs` + `iffcomp-rs` → writes `<level>.iff` / `<level>-standalone.iff`
+
+`task build-level` only runs stage 2. If you change the Python script and skip stage 1,
+the `.lev` is stale and stage 2 compiles the old data.
+
+**Fix:** always re-run the Blender script first:
+
+```bash
+blender --background --python wflevels/<level>/blender_create_<level>.py
+task build-level -- <level>
+```
+
+**Tell-tale:** if a field value in `<level>.lev` doesn't match what the Python sets, the export
+was skipped. Check `grep "FieldName" wflevels/<level>/<level>.lev` vs the Python assignment.
+
+---
+
 ## Blender re-export: stale object names from the imported base level
 
 **Symptom:** After a headless `blender --background --python blender_create_smb.py`
@@ -2025,6 +2083,88 @@ INDEXOF_MOON_LANDER_Z read-mailbox INDEXOF_Z_POS write-mailbox
 
 The PERM actor's script publishes its position to the global mailbox each frame, and the
 room proxy mirrors it.  The camshot tracks the proxy, which `GetObject` always finds.
+
+---
+
+## `MOBILITY_PHYSICS` actor as a quick driveable vehicle
+
+Proper Jolt `VehicleConstraint` is deferred (see `TODO.md`). In the meantime you can make any
+`MOBILITY_PHYSICS` actor respond to the joystick like a humanoid by combining two things:
+
+**1. Set `Script Controls Input = 'True'` on the vehicle actor.**  
+This makes the engine create a `QInputDigital(InputScript*)` instead of `theNullInputDigital`.
+Without it every tick is a no-op. The field is an **Enum**, not Bool — use the string label:
+
+```python
+vehicle_obj['wf_Script Controls Input'] = 'True'   # must be the string, not int 1
+vehicle_obj['wf_Running Acceleration']  = 12.0     # heavier than a humanoid
+vehicle_obj['wf_Running Deceleration']  = 0.3      # low friction — slides on regolith
+```
+
+**2. Route the global joystick to the actor's `INDEXOF_INPUT` mailbox in a Forth script.**  
+`INDEXOF_INPUT` is a per-actor local system mailbox (base 3024). Writing to it from within the
+actor's own script routes to `InputScript::setButtons`, which feeds the `GroundHandler` /
+`MarbleHandler` that day's button read:
+
+```forth
+\ wf
+INDEXOF_MOON_ACTIVE_VEH_IDX read-mailbox INDEXOF_ACTOR_INDEX read-mailbox = if
+  INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox
+then
+```
+
+The vehicle script must also publish its own position to shared globals each tick so the player
+script can read them (see "Vehicle entry: one-frame position sync skip" below).
+
+**Handler selection:** with a non-zero `Turn Rate` the actor uses `GroundHandler` (humanoid-style
+directional movement), which is correct for a vehicle. With `Turn Rate = 0` it uses
+`MarbleHandler` (momentum-carry ball-style), which is usually wrong for a vehicle. If the
+platform OAD's default TurnRate is 0, set it explicitly:
+
+```python
+vehicle_obj['wf_Turn Rate'] = 0.5   # non-zero → GroundHandler, not MarbleHandler
+```
+
+**Limitation:** the vehicle stays a Jolt `CharacterVirtual` — it can climb steps, fall, and
+collide with static geometry, but there's no suspension, steering angle, or wheel physics.
+The hack is useful for top-down or side-view contexts where the distinction isn't visible.
+See `TODO.md § VEHICLE PHYSICS` for the Jolt `VehicleConstraint` upgrade path.
+
+---
+
+## Vehicle entry: one-frame position sync skip
+
+**Symptom:** On the first frame after the player "enters" a vehicle (a script writes the vehicle's
+actor index to a mailbox and the player script starts copying vehicle X/Y/Z to its own X/Y/Z),
+the player teleports to world origin (0, 0, 0) for one frame then snaps back to the vehicle.
+
+**Cause:** The vehicle position mailboxes (`MOON_VEHICLE_X/Y/Z`) are 0 at the start of the level
+and are only updated by the vehicle script *each tick*. On the entry tick, the player script reads
+those mailboxes before the vehicle has published its position — so the player teleports to (0,0,0).
+
+**Fix:** use a one-frame "entering" flag mailbox:
+
+```python
+# In the player script — on vehicle entry, set the entering flag:
+"1 INDEXOF_MOON_VEH_ENTERING write-mailbox\n"
+
+# Each in-vehicle tick, skip position sync on the first frame:
+"INDEXOF_MOON_VEH_ENTERING read-mailbox 1 = if\n"
+"  0 INDEXOF_MOON_VEH_ENTERING write-mailbox\n"    # clear, don't sync this frame
+"else\n"
+"  INDEXOF_MOON_VEHICLE_X read-mailbox INDEXOF_X_POS write-mailbox\n"
+"  INDEXOF_MOON_VEHICLE_Y read-mailbox INDEXOF_Y_POS write-mailbox\n"
+"  INDEXOF_MOON_VEHICLE_Z read-mailbox INDEXOF_Z_POS write-mailbox\n"
+"then\n"
+```
+
+The vehicle's own script publishes its position *this* tick; the player reads it *next* tick.
+The flag ensures the player doesn't sample the stale zero values during the entry frame.
+
+**Root cause:** WF script execution order within a frame is actor-list order. The vehicle actor
+and the player actor run in the same pass; whichever is earlier in the actor list publishes first.
+If the player is listed before the vehicle, the position is always one frame stale on the first
+read after entry. The flag makes that one stale frame harmless.
 
 ---
 
