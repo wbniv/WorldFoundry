@@ -152,6 +152,7 @@ smb_common.init(scene, OAD_DIR)
 from smb_common import (make_mat, attach_schema, find_by_class, get_class,
     add_box, add_statplat, _add_textured_box, _make_qblock_tga, _make_brick_tga,
     _make_grid_tile_tga, build_textured_ground_mesh, _room_bounds_mesh, _build_mario)
+from smb_common import (_make_coin_template, _make_debris_template, _make_spark_template, _make_powerup_template, _add_pyramid, _add_staircase, _add_pipe)
 from smb_common import (_apply_enemy_movement, _build_goomba, _make_target, _make_popup_template)
 from smb_common import (
     QBLOCK_SCRIPT, DEBRIS_SCRIPT, SPARK_SCRIPT, BRICK_SCRIPT, POPUP_SCRIPT, ENEMY_SCRIPT, KOOPA_SCRIPT, POWERUP_BLOCK_SCRIPT, POWERUP_SCRIPT, STAR_SCRIPT, ONEUP_SCRIPT, PIRANHA_SCRIPT)
@@ -838,41 +839,10 @@ add_statplat('castle_door', CASTLE_X0 + 0.15, -GROUND_Y - 0.06, GROUND_TOP_Z,
 # the Player latched). The up-launch + gravity arc the sparks; SPARK_SCRIPT fans XSPEED by
 # actor index for the radial spread; the spark despawns once it falls below the burst height.
 # LOCAL_SYSTEM mailboxes only on the template; no Random Displacement (Scalar::Random asserts).
-mat_spark = make_mat('smb_spark', (1.0, 0.95, 0.55))   # bright warm spark
+mat_spark = smb_common.mat_spark()
 SPARK_H = 0.16                                          # ~0.32 m spark cube
 SPARK_DESPAWN_Z = CASTLE_TOP + 1.5                     # fallen back below the burst → vanish
 
-
-def _make_spark_template():
-    import bmesh as _bmesh   # module-level `import ... as _bmesh` is below this call site
-    bm = _bmesh.new()
-    _bmesh.ops.create_cube(bm, size=1.0)
-    _bmesh.ops.scale(bm, vec=(SPARK_H*2, SPARK_H*2, SPARK_H*2), verts=bm.verts)
-    mesh = bpy.data.meshes.new('spark_template')
-    bm.to_mesh(mesh); bm.free()
-    mesh.materials.append(mat_spark)
-    for p in mesh.polygons:
-        p.material_index = 0
-    obj = bpy.data.objects.new('spark_template', mesh)
-    obj.location = (-72.0, 0.0, 0.0)   # parking spot; generator overrides pos/vel on spawn
-    scene.collection.objects.link(obj)
-    attach_schema(obj, 'generator')
-    obj['wf_Template Object']      = 'True'
-    obj['wf_Moves Between Rooms']  = 'True'
-    obj['wf_Mobility']             = 'Physics'
-    obj['wf_Mass']                 = 0.001
-    obj['wf_Falling Acceleration'] = 12.0
-    obj['wf_Max Air Speed']        = 50.0
-    obj['wf_Surface Friction']     = 0.0
-    obj['wf_Horiz Air Drag']       = 0.0
-    obj['wf_Vert Air Drag']        = 0.0
-    obj['wf_Running Deceleration'] = 0.0
-    obj['wf_Activation MailBox']   = 0      # mailbox[0] = always-false → the template never spawns
-    obj['wf_Model Type']           = 'Mesh'
-    obj['wf_Visibility Mailbox']   = 1
-    obj['wf_Mesh Name']            = 'spark_template.iff'
-    obj['wf_Script']               = SPARK_SCRIPT
-    return obj
 
 _make_spark_template()
 
@@ -1100,7 +1070,7 @@ if room:
 import bmesh as _bmesh
 
 # ── Shared materials / textures / constants (verbatim from W1-1 §6) ────────────
-mat_coin   = make_mat('smb_coin', (1.0, 0.84, 0.0))   # gold #FFD600
+mat_coin = smb_common.mat_coin()
 BSIZE = T / 2  # half-side of a 1-tile block
 qblock_tex = _make_qblock_tga(os.path.join(SCRIPT_DIR, 'qblock_tex.tga'))
 brick_tex  = _make_brick_tga(os.path.join(SCRIPT_DIR, 'brick_tex.tga'))
@@ -1144,7 +1114,7 @@ SHELL_SPEED = 14.0
 
 # Debris fragment (verbatim from W1-1 §16) — LOCAL_SYSTEM-only template; deterministic
 # index-fanned X drift (no Scalar::Random). `%` casts to int in zForth.
-mat_debris = make_mat('smb_debris', (0.77, 0.42, 0.0))
+mat_debris = smb_common.mat_debris()
 DEBRIS_H = 0.18
 
 
@@ -1164,36 +1134,6 @@ PIRANHA_RATE      = 4.0
 PIRANHA_DWELL     = 2.0
 
 # ── Builder factories (verbatim from W1-1) ────────────────────────────────────
-def _make_coin_template():
-    bm = _bmesh.new()
-    _bmesh.ops.create_cube(bm, size=1.0)
-    _bmesh.ops.scale(bm, vec=(COIN_X*2, COIN_T*2, COIN_Z*2), verts=bm.verts)
-    mesh = bpy.data.meshes.new('coin_template')
-    bm.to_mesh(mesh); bm.free()
-    mesh.materials.append(mat_coin)
-    for p in mesh.polygons:
-        p.material_index = 0
-    obj = bpy.data.objects.new('coin_template', mesh)
-    obj.location = (-50.0, 0.0, 0.0)
-    scene.collection.objects.link(obj)
-    attach_schema(obj, 'gold')
-    obj['wf_Template Object']      = 'True'
-    obj['wf_Moves Between Rooms']  = 'True'
-    obj['wf_Mobility']             = 'Physics'
-    obj['wf_Mass']                 = 0.001
-    obj['wf_Falling Acceleration'] = 12.0
-    obj['wf_Max Air Speed']        = 50.0
-    obj['wf_Surface Friction']     = 0.0
-    obj['wf_Horiz Air Drag']       = 0.0
-    obj['wf_Vert Air Drag']        = 0.0
-    obj['wf_Running Deceleration'] = 0.0
-    obj['wf_Model Type']           = 'Mesh'
-    obj['wf_Visibility Mailbox']   = 1
-    obj['wf_Mesh Name']            = 'coin_template.iff'
-    obj['wf_Script']               = COIN_SCRIPT
-    return obj
-
-
 def _add_qblock(name, x, z=BLOCK_Z):
     """Coin ?-block: a Generator that throws coin_template on bump-from-below (4 s window)."""
     blk = _add_textured_box(name, x - BSIZE, -BSIZE, z - BSIZE,
@@ -1218,37 +1158,6 @@ MUSH_Z = T * 0.40
 MUSH_T = 0.25
 
 
-def _make_powerup_template(name, mat, script, running_decel, park_x):
-    bm = _bmesh.new()
-    _bmesh.ops.create_cube(bm, size=1.0)
-    _bmesh.ops.scale(bm, vec=(MUSH_X*2, MUSH_T*2, MUSH_Z*2), verts=bm.verts)
-    mesh = bpy.data.meshes.new(name)
-    bm.to_mesh(mesh); bm.free()
-    mesh.materials.append(mat)
-    for p in mesh.polygons:
-        p.material_index = 0
-    obj = bpy.data.objects.new(name, mesh)
-    obj.location = (park_x, 0.0, 0.0)
-    scene.collection.objects.link(obj)
-    attach_schema(obj, 'gold')
-    obj['wf_Template Object']      = 'True'
-    obj['wf_Moves Between Rooms']  = 'True'
-    obj['wf_Mobility']             = 'Physics'
-    obj['wf_Mass']                 = 0.001
-    obj['wf_Falling Acceleration'] = 12.0
-    obj['wf_Max Air Speed']        = 50.0
-    obj['wf_Surface Friction']     = 0.0
-    obj['wf_Horiz Air Drag']       = 0.0
-    obj['wf_Vert Air Drag']        = 0.0
-    obj['wf_Running Deceleration'] = running_decel
-    obj['wf_Gold Value']           = 0
-    obj['wf_Model Type']           = 'Mesh'
-    obj['wf_Visibility Mailbox']   = 1
-    obj['wf_Mesh Name']            = name + '.iff'
-    obj['wf_Script']               = script
-    return obj
-
-
 def _make_powerup_block(name, x, throw, vx, z=None):
     if z is None:
         z = BLOCK_Z
@@ -1267,37 +1176,6 @@ def _make_powerup_block(name, x, throw, vx, z=None):
     b['wf_Object Z Velocity']  = 6.0
     b['wf_Script']             = POWERUP_BLOCK_SCRIPT
     return b
-
-
-def _make_debris_template():
-    bm = _bmesh.new()
-    _bmesh.ops.create_cube(bm, size=1.0)
-    _bmesh.ops.scale(bm, vec=(DEBRIS_H*2, DEBRIS_H*2, DEBRIS_H*2), verts=bm.verts)
-    mesh = bpy.data.meshes.new('debris_template')
-    bm.to_mesh(mesh); bm.free()
-    mesh.materials.append(mat_debris)
-    for p in mesh.polygons:
-        p.material_index = 0
-    obj = bpy.data.objects.new('debris_template', mesh)
-    obj.location = (-60.0, 0.0, 0.0)
-    scene.collection.objects.link(obj)
-    attach_schema(obj, 'generator')
-    obj['wf_Template Object']      = 'True'
-    obj['wf_Moves Between Rooms']  = 'True'
-    obj['wf_Mobility']             = 'Physics'
-    obj['wf_Mass']                 = 0.001
-    obj['wf_Falling Acceleration'] = 12.0
-    obj['wf_Max Air Speed']        = 50.0
-    obj['wf_Surface Friction']     = 0.0
-    obj['wf_Horiz Air Drag']       = 0.0
-    obj['wf_Vert Air Drag']        = 0.0
-    obj['wf_Running Deceleration'] = 0.0
-    obj['wf_Activation MailBox']   = 0
-    obj['wf_Model Type']           = 'Mesh'
-    obj['wf_Visibility Mailbox']   = 1
-    obj['wf_Mesh Name']            = 'debris_template.iff'
-    obj['wf_Script']               = DEBRIS_SCRIPT
-    return obj
 
 
 def _add_brick(name, x, z=BLOCK_Z):
@@ -1334,33 +1212,8 @@ def _build_koopa(name, x, red=False):
 
 
 # Hard-block / pipe materials (verbatim from W1-1).
-mat_hard   = make_mat('smb_hard_block', (0.48, 0.25, 0.05))
-PIPE_GREEN = make_mat('smb_pipe_green', (0.0, 0.62, 0.0))
-
-
-def _add_pyramid(name_base, base_col, steps=4):
-    for _s in range(steps):
-        add_statplat(f'{name_base}_{_s}',
-                     (base_col + _s)*T - BSIZE, -GROUND_Y, GROUND_TOP_Z,
-                     (base_col + _s)*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + (_s + 1)*T,
-                     mat_hard)
-
-
-def _add_staircase(name_base, base_col, steps=8):
-    for _s in range(steps):
-        _h = (_s + 1) * T
-        add_statplat(f'{name_base}_{_s}',
-                     (base_col + _s)*T - BSIZE, -GROUND_Y, GROUND_TOP_Z,
-                     (base_col + _s)*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + _h,
-                     mat_hard)
-
-
-def _add_pipe(name, col, height_tiles, width_tiles=2):
-    """Decorative green pipe statplat. col = centre column; width 2 tiles (X col±1)."""
-    add_statplat(name,
-                 col*T - width_tiles/2*T, -GROUND_Y, GROUND_TOP_Z,
-                 col*T + width_tiles/2*T,  GROUND_Y, GROUND_TOP_Z + height_tiles*T,
-                 PIPE_GREEN)
+mat_hard = smb_common.mat_hard()
+PIPE_GREEN = smb_common.mat_pipe()
 
 
 def _build_piranha(name, col):

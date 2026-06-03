@@ -1037,3 +1037,227 @@ def _make_fireball_generator(name, fire_mb, vx):
     g['wf_Object Z Velocity']  = 0.0
     g['wf_Script']             = FIREBALL_GEN_SCRIPT
     return g
+
+
+# ── Builder deps: dimensions, COIN_SCRIPT, lazy material getters (P2a/#1 batch B2) ─
+COIN_X = T * 0.25
+COIN_Z = T * 0.5
+COIN_T = 0.2
+MUSH_X = T * 0.40
+MUSH_Z = T * 0.40
+MUSH_T = 0.25
+FB       = 0.2
+SPARK_H  = 0.16
+DEBRIS_H = 0.18
+
+COIN_SCRIPT = "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"
+
+_mat_cache = {}
+
+
+def _mat(key, name, rgb):
+    """Lazily create + cache one material per key (shared by builders + level layout)."""
+    m = _mat_cache.get(key)
+    if m is None:
+        m = make_mat(name, rgb)
+        _mat_cache[key] = m
+    return m
+
+
+def mat_coin():     return _mat('coin', 'smb_coin', (1.0, 0.84, 0.0))
+def mat_debris():   return _mat('debris', 'smb_debris', (0.77, 0.42, 0.0))
+def mat_spark():    return _mat('spark', 'smb_spark', (1.0, 0.95, 0.55))
+def mat_fireball(): return _mat('fireball', 'fireball_orange', (0.98, 0.45, 0.05))
+def mat_hard():     return _mat('hard', 'smb_hard_block', (0.48, 0.25, 0.05))
+def mat_pipe():     return _mat('pipe', 'smb_pipe_green', (0.0, 0.62, 0.0))
+
+
+# ── Builders with material/dim deps (materials via getters above) ─────────────
+def _make_coin_template():
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(COIN_X*2, COIN_T*2, COIN_Z*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new('coin_template')
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat_coin())
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('coin_template', mesh)
+    obj.location = (-50.0, 0.0, 0.0)
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'gold')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Max Air Speed']        = 50.0
+    # NOTE: under Jolt, Surface Friction / Air Drag are DEAD (the old wheel-friction
+    # path never runs). The live ground-friction knob for a doom-stick/MarbleHandler
+    # actor is Running Deceleration (movebloc default 0.90 ≈ full stop per frame).
+    # Set it to 0 so the coin keeps its generator-imparted +X drift on the ground
+    # instead of freezing the instant it lands.
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = 0.0    # frictionless ground → coin slides right
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'coin_template.iff'
+    obj['wf_Script']               = COIN_SCRIPT
+    return obj
+
+
+def _make_debris_template():
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(DEBRIS_H*2, DEBRIS_H*2, DEBRIS_H*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new('debris_template')
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat_debris())
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('debris_template', mesh)
+    obj.location = (-60.0, 0.0, 0.0)   # parking spot; generator overrides pos/vel on spawn
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'generator')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Max Air Speed']        = 50.0
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = 0.0
+    obj['wf_Activation MailBox']   = 0      # mailbox[0] = always-false → never spawns anything
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'debris_template.iff'
+    obj['wf_Script']               = DEBRIS_SCRIPT
+    return obj
+
+
+def _make_spark_template():
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(SPARK_H*2, SPARK_H*2, SPARK_H*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new('spark_template')
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat_spark())
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('spark_template', mesh)
+    obj.location = (-72.0, 0.0, 0.0)   # parking spot; generator overrides pos/vel on spawn
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'generator')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Max Air Speed']        = 50.0
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = 0.0
+    obj['wf_Activation MailBox']   = 0      # mailbox[0] = always-false → the template never spawns
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'spark_template.iff'
+    obj['wf_Script']               = SPARK_SCRIPT
+    return obj
+
+
+def _make_fireball_template():
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(FB*2, FB*2, FB*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new('fireball_template')
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat_fireball())
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('fireball_template', mesh)
+    obj.location = (-66.0, 0.0, 0.0)   # parking spot off-screen; generator velocity overrides on spawn
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'missile')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 0.0     # flat travel (v1); a ground-bounce arc is polish
+    obj['wf_Max Air Speed']        = 50.0    # don't let the speed cap zero the velocity (marble bug)
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = 0.0     # frictionless: keeps its launch velocity
+    obj['wf_Explosion Delay']      = 2.0     # built-in TTL despawn (SetPendingRemove)
+    obj['wf_Explode On Impact']    = 'True'
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'fireball_template.iff'
+    obj['wf_Script']               = FIREBALL_SCRIPT   # broadcast live position for enemy proximity-defeat
+    return obj
+
+
+def _make_powerup_template(name, mat, script, running_decel, park_x):
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(MUSH_X*2, MUSH_T*2, MUSH_Z*2), verts=bm.verts)
+    mesh = bpy.data.meshes.new(name)
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat)
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new(name, mesh)
+    obj.location = (park_x, 0.0, 0.0)   # parking spot; generator velocity overrides on spawn
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'gold')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 12.0
+    obj['wf_Max Air Speed']        = 50.0
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = running_decel
+    obj['wf_Gold Value']           = 0
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = name + '.iff'
+    obj['wf_Script']               = script
+    return obj
+
+# Power-up dispensing block: a one-shot Generator (bump from below -> throw one
+# collectible -> latch tan), using POWERUP_BLOCK_SCRIPT.
+
+
+def _add_pyramid(name_base, base_col, steps=4):
+    """Left-to-right ascending staircase: col 0 = 1T tall, col n-1 = n*T tall."""
+    for _s in range(steps):
+        add_statplat(f'{name_base}_{_s}',
+                     (base_col + _s)*T - BSIZE, -GROUND_Y, GROUND_TOP_Z,
+                     (base_col + _s)*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + (_s + 1)*T,
+                     mat_hard())
+
+
+def _add_staircase(name_base, base_col, steps=8):
+    """Left-to-right ascending staircase: col 0 = 1*T tall, col n-1 = steps*T tall."""
+    for _s in range(steps):
+        _h = (_s + 1) * T
+        add_statplat(f'{name_base}_{_s}',
+                     (base_col + _s)*T - BSIZE, -GROUND_Y, GROUND_TOP_Z,
+                     (base_col + _s)*T + BSIZE,  GROUND_Y, GROUND_TOP_Z + _h,
+                     mat_hard())
+
+
+def _add_pipe(name, col, height_tiles, width_tiles=2):
+    """Decorative green pipe statplat. col = centre column; width 2 tiles (X col±1)."""
+    add_statplat(name,
+                 col*T - width_tiles/2*T, -GROUND_Y, GROUND_TOP_Z,
+                 col*T + width_tiles/2*T,  GROUND_Y, GROUND_TOP_Z + height_tiles*T,
+                 mat_pipe())
