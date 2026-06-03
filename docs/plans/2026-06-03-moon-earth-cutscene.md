@@ -14,9 +14,11 @@ Earth above. Returns to `cs_chase` when the player writes phase 0 (next level ru
 
 ```
 cs_earth position: (30, -80, 5)   ← behind & below the lander
-cs_earth tracks:   artemis_lander ← tilts up as lander ascends
+cs_earth tracks:   Player         ← always loaded; lander tracked via artemis_lander
+                                    caused null GetObject (cross-PERM ref timing)
 Yon:               500 m          ← Earth comfortably in range
 FOV:               40°            ← telephoto, compresses lander+Earth
+cutback:           t_minus > 20 s ← returns to cs_chase (~200 m ascent, off-screen)
 ```
 
 ### cs_chase (normal play) — after Yon fix
@@ -58,8 +60,7 @@ FOV:               40°            ← telephoto, compresses lander+Earth
 │─────────────────────────────────────────────────────────────────│
 │              ░░░░░░░░░░░░░░░  ← crater rim / terrain            │
 └──────────────────────────────────────────────────────────────────┘
-  camera at (30,−80,5) tracking artemis_lander, FOV 40°, Yon 500m
-  as lander ascends, camera tilts up — Earth stays in upper frame
+  camera at (30,−80,5) tracking Player (see implementation notes), FOV 40°, Yon 500m
 
   at t+3s into ascent:
 
@@ -96,14 +97,19 @@ INDEXOF_ACTOR_INDEX read-mailbox INDEXOF_MOON_CHASE_CAM_IDX write-mailbox
 
 Player phase script adds camera cut logic after phase update:
 ```forth
+\ phase 2 → cs_earth; phase 3 ≤20 s → cs_earth; phase 3 >20 s → cs_chase
 INDEXOF_MOON_LAUNCH_PHASE read-mailbox 1 > if
-  INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox
+  INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if
+    INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox 20 > if
+      INDEXOF_MOON_CHASE_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox
+    else
+      INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox
+    then
+  else
+    INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox
+  then
 then
 ```
-(phase > 1 = ignition or ascent → cs_earth; phase ≤ 1 = cs_chase via bootstrap)
-
-No "return to chase cam" write needed — the level restarts fresh (phase resets
-to 0) and bootstrap re-writes 1921.
 
 ## Mailbox additions (`wfsource/source/mailbox/mailbox.inc`)
 
@@ -118,14 +124,39 @@ MAILBOXENTRY( MOON_EARTH_CAM_IDX, 1884 )
 - `wfsource/source/mailbox/mailbox.inc` — 2 new entries (1883, 1884)
 - `wflevels/moon_site01/blender_create_moon.py`
   - `cs_chase`: add `wf_Yon = 500.0`, add startup script writing to 1883
-  - new `cs_earth` camshot at (30, −80, 5), Track=lander, Yon=500, FOV=40,
+  - new `cs_earth` camshot at (30, −80, 5), Track=Player, Yon=500, FOV=40,
     startup script writing to 1884
-  - player Forth script: append camera cut trigger after phase write
+  - room z_max: 300 → 2000 m (lander ascent headroom)
+  - player Forth script: 3-branch camera logic (phase 2/early-3/late-3)
 - `wfsource/source/game/scripting_stub.cc` — touch to force mailbox.inc recompile
+
+## Implementation notes
+
+**`Follow` and `Target` required non-null** (`movecam.cc:236`): even with
+`Position X/Y/Z = Absolute`, `SetCameraParametersFromShot` still dereferences
+`shotData->Follow` for the relative-vector calc. Both must name a valid live
+actor. Used `CamTarget` (same as `cs_chase`).
+
+**`Track Object = artemis_lander` crashed** (`movecam.cc:1067`): lander index
+resolved non-zero at export but `theLevel->GetObject(idx)` returned null at
+runtime — cross-PERM actor reference timing issue. Changed to `Player` (always
+available). Camera at (30,−80,5) still frames the launch site correctly since
+Player is between camera and lander/Earth.
+
+**Room z ceiling** was 300 m (`max(300, heights.max+50)`). Lander hits 300 m
+at t≈24.5 s of ascent (`z = 0.5t²`), triggering
+`UpdateRoomContents: fell out of room 0` → actor invalidation → crash.
+Raised to 2000 m; lander now stays in-room until t≈63 s (long after cutback).
+
+## Screenshots
+
+*(add first-light capture here when available)*
+
+*(add finished capture here when polished)*
 
 ## Verification
 
 1. `task build && task build-level -- moon_site01`
-2. `task run-moon` — Earth sphere visible in `cs_chase` view immediately
-3. Wait to t=15 s — camera cuts to `cs_earth` at ignition; lander + Earth
-   both in frame; lander rises through frame during ascent
+2. `task run-moon` — Earth sphere visible in `cs_chase` immediately
+3. t=15 s → cuts to `cs_earth`; lander + Earth in frame
+4. t=36 s (t_minus=20) → cuts back to `cs_chase`; player on terrain
