@@ -1178,8 +1178,15 @@ over 2048 & if 10240 | then
 ```
 
 Other bitwise primitives: `^` (XOR), `<<` (shift left), `>>` (shift right).
-Other logical helpers defined in the WF bootstrap: `not` (= `0 =`), `<`, `>`,
-`<=`, `>=`, `<>`.
+
+Two more zForth renames fall in the same trap: **`<0` is `0<`**, and **`%` is `mod`** (integer
+remainder). `mod` is now also aliased, so either works — but never spell mod as `over over / * -`:
+cells are float, so `/` doesn't truncate and that "workaround" silently returns garbage.
+
+Logical / CORE helpers defined in the WF bootstrap (expanded 2026-06-02): `not` (= `0=`),
+`0= 0< 0> 0<>`, `< > <= >= <>`, `negate abs min max`, `?dup nip tuck -rot 2dup 2drop 2swap`,
+`+!`, and `mod`. New scripts should use these directly instead of inlining `over over` / `swap drop`
+/ `0 =`. Full vocabulary: [`docs/level-building.md` § Scripting System](level-building.md#scripting-system).
 
 ---
 
