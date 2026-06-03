@@ -1,10 +1,15 @@
 # Build a faithful Super Mario Bros. World 1-3
 
 **Date:** 2026-06-03
-**Status:** Built + render-verified (Phases 0–6 done; Phase 7 partial — geometry/coins/counts
-verified via stills, clean enemy-behaviour playthrough is a follow-up; Phase 8 TODO filed).
-Two bugs found + fixed en route: the parked-popup visibility leak (the W1-1 "stray gold coin",
-game-wide) and the load-time render-scale gap (wide shared-box statplats drew as 1-tile cubes).
+**Status:** Built + verified (Phases 0–7 done; Phase 8 TODO filed). Geometry/coins/counts
+verified via stills; enemy behaviour verified live via the debug bridge
+([`tests/verify_smb_w1_3_enemies.py`](../../tests/verify_smb_w1_3_enemies.py)) — koopa
+stomp→shell, paratroopa bounce + stomp, and side-hit hurt all assert on durable mailbox
+transitions (the goomba-stomp case is harness-flaky, behaviour covered transitively; see the
+test docstring). Three bugs found + fixed/filed en route: the parked-popup visibility leak
+(the W1-1 "stray gold coin", game-wide, FIXED) and the load-time render-scale gap (wide
+shared-box statplats drew as 1-tile cubes, FIXED); plus a latent camera track-object
+use-after-free when the tracked actor leaves the room (TODO, defensive).
 **Author:** Claude (Opus 4.8)
 **Verification stills:** [`tests/screenshots/smb_w13_01_spawn.png`](../../tests/screenshots/smb_w13_01_spawn.png)
 (clean spawn — no stray coin), [`..._02_treetops.png`](../../tests/screenshots/smb_w13_02_treetops.png)
