@@ -37,6 +37,9 @@
 #include <Jolt/Physics/Character/CharacterBase.h>
 #include <Jolt/Physics/Character/CharacterVirtual.h>
 #include <Jolt/Physics/Collision/BroadPhase/BroadPhaseQuery.h>
+#include <Jolt/Physics/Vehicle/VehicleConstraint.h>
+#include <Jolt/Physics/Vehicle/VehicleCollisionTester.h>
+#include <Jolt/Physics/Vehicle/WheeledVehicleController.h>
 #pragma GCC diagnostic pop
 
 JPH_SUPPRESS_WARNINGS
@@ -413,6 +416,8 @@ void JoltBodyAddLinVelocity(uint32_t handle, const Vector3& delta)
     gBodyInterface->AddLinearVelocity(gBodies[handle].joltID, ToJph(delta));
 }
 
+static void UpdateVehicleCaches();   // forward decl — defined after character section
+
 void JoltWorldStep(float dt)
 {
     if (!gPhysicsSystem) return;
@@ -438,6 +443,9 @@ void JoltWorldStep(float dt)
         e.velCache = FromJph(gBodyInterface->GetLinearVelocity(e.joltID));
         e.rotCache = FromJph(gBodyInterface->GetRotation(e.joltID));
     }
+
+    // Refresh vehicle position/rotation caches.
+    UpdateVehicleCaches();
 
     // Substep telemetry: uncomment to debug scheduler stability.
     // if (nSteps > 0) std::fprintf(stderr, "jolt: step x%d (acc=%.4f)\n", nSteps, gAccumulator);
@@ -819,6 +827,163 @@ Vector3 JoltCharacterGetGroundNormal(uint32_t handle)
 }
 
 // ---------------------------------------------------------------------------
+// WheeledVehicleController registry — one entry per MOBILITY_VEHICLE actor.
+
+struct VehicleEntry
+{
+    JPH::Ref<JPH::VehicleConstraint> constraint;
+    JPH::BodyID                      bodyID;
+    Vector3 posCache = Vector3::zero;
+    Euler   rotCache = Euler::zero;
+    bool    occupied = false;
+};
+
+static std::vector<VehicleEntry> gVehicles;
+
+static uint32_t AllocVehicleEntry()
+{
+    for (uint32_t i = 0; i < (uint32_t)gVehicles.size(); ++i)
+        if (!gVehicles[i].occupied) return i;
+    gVehicles.push_back(VehicleEntry{});
+    return (uint32_t)(gVehicles.size() - 1);
+}
+
+uint32_t JoltVehicleCreate(const Vector3& pos, const Euler& rot,
+                            const JoltVehicleConfig& cfg)
+{
+    if (!gPhysicsSystem) return kJoltInvalidBodyID;
+
+    // Chassis rigid body.
+    JPH::Vec3 halfExt(cfg.chassis_hx, cfg.chassis_hy, cfg.chassis_hz);
+    JPH::BoxShapeSettings boxSettings(halfExt);
+    boxSettings.mDensity = cfg.mass_kg / (8.0f * cfg.chassis_hx * cfg.chassis_hy * cfg.chassis_hz);
+    JPH::ShapeRefC shape = boxSettings.Create().Get();
+
+    // Raise the body so the wheel rest positions sit at terrain level.
+    // The chassis origin is the geometric centre of the box; wheels attach
+    // below it. We offset the spawn Z up by the wheel radius + a little.
+    float spawnZ = pos.Z().AsFloat() + cfg.chassis_hz + cfg.wheel_radius * 0.5f;
+    JPH::RVec3 jphPos(pos.X().AsFloat(), pos.Y().AsFloat(), spawnZ);
+    JPH::Quat  jphRot = ToJph(rot);
+
+    JPH::BodyCreationSettings bodySettings(
+        shape, jphPos, jphRot,
+        JPH::EMotionType::Dynamic,
+        (JPH::ObjectLayer)WFPhysLayers::DYNAMIC);
+    bodySettings.mGravityFactor      = fabsf(cfg.gravity_z) / 9.81f;
+    bodySettings.mLinearDamping      = 0.2f;
+    bodySettings.mAngularDamping     = 0.4f;
+    bodySettings.mFriction           = 0.6f;
+
+    JPH::Body* body = gBodyInterface->CreateBody(bodySettings);
+    if (!body) { fprintf(stderr,"[jolt_vehicle] body create failed\n"); return kJoltInvalidBodyID; }
+    gBodyInterface->AddBody(body->GetID(), JPH::EActivation::Activate);
+
+    // VehicleConstraint settings.
+    JPH::VehicleConstraintSettings vehicle;
+    vehicle.mUp      = JPH::Vec3(0,0,1);
+    vehicle.mForward = JPH::Vec3(1,0,0);
+
+    // Suspension direction: downward (-Z in WF/Jolt).
+    JPH::Vec3 suspDir(0.f, 0.f, -1.f);
+
+    auto* ctrl = new JPH::WheeledVehicleControllerSettings;
+    ctrl->mEngine.mMaxTorque  = cfg.max_torque_nm;
+    ctrl->mEngine.mMinRPM     = 500.f;
+    ctrl->mEngine.mMaxRPM     = 3000.f;
+    ctrl->mTransmission.mGearRatios = { 3.0f };       // single forward gear
+    ctrl->mTransmission.mReverseGearRatios = { -2.0f };
+    ctrl->mTransmission.mMode = JPH::ETransmissionMode::Manual;
+    vehicle.mController = ctrl;
+
+    // Add wheels.
+    for (int i = 0; i < cfg.num_wheels; ++i)
+    {
+        const JoltVehicleWheelCfg& wc = cfg.wheels[i];
+        JPH::WheelSettingsWV* ws = new JPH::WheelSettingsWV;
+        // Wheel attachment point: at the bottom of the chassis box minus clearance.
+        ws->mPosition             = JPH::Vec3(wc.x, wc.y, -cfg.chassis_hz + 0.05f);
+        ws->mSuspensionDirection  = suspDir;
+        ws->mSteeringAxis         = JPH::Vec3(0,0,1);
+        ws->mWheelUp              = JPH::Vec3(0,0,1);
+        ws->mWheelForward         = JPH::Vec3(1,0,0);
+        ws->mSuspensionMinLength  = 0.0f;
+        ws->mSuspensionMaxLength  = cfg.wheel_radius * 0.8f;
+        ws->mRadius               = cfg.wheel_radius;
+        ws->mWidth                = cfg.wheel_half_width * 2.0f;
+        ws->mMaxSteerAngle        = wc.steer ? cfg.max_steer_angle_rad : 0.0f;
+        ws->mMaxHandBrakeTorque   = wc.steer ? 0.0f : 4000.f;
+        vehicle.mWheels.push_back(ws);
+    }
+
+    JPH::Ref<JPH::VehicleConstraint> constraint = new JPH::VehicleConstraint(*body, vehicle);
+
+    // Ray-cast collision tester: projects a ray from each wheel attachment point
+    // downward to find the road surface. Layer filter: only hit STATIC geometry.
+    auto* tester = new JPH::VehicleCollisionTesterRay(
+        (JPH::ObjectLayer)WFPhysLayers::STATIC);
+    constraint->SetVehicleCollisionTester(tester);
+
+    gPhysicsSystem->AddConstraint(constraint);
+
+    uint32_t handle = AllocVehicleEntry();
+    VehicleEntry& e = gVehicles[handle];
+    e.constraint = constraint;
+    e.bodyID     = body->GetID();
+    e.posCache   = Vector3(Scalar(pos.X()), Scalar(pos.Y()), Scalar(pos.Z()));
+    e.rotCache   = rot;
+    e.occupied   = true;
+    return handle;
+}
+
+void JoltVehicleDestroy(uint32_t handle)
+{
+    if (handle >= (uint32_t)gVehicles.size() || !gVehicles[handle].occupied) return;
+    VehicleEntry& e = gVehicles[handle];
+    gPhysicsSystem->RemoveConstraint(e.constraint);
+    gBodyInterface->RemoveBody(e.bodyID);
+    gBodyInterface->DestroyBody(e.bodyID);
+    e.constraint = nullptr;
+    e.occupied   = false;
+}
+
+void JoltVehicleSetInput(uint32_t handle, float forward, float rightward, float brake)
+{
+    if (handle >= (uint32_t)gVehicles.size() || !gVehicles[handle].occupied) return;
+    auto* ctrl = static_cast<JPH::WheeledVehicleController*>(
+        gVehicles[handle].constraint->GetController());
+    ctrl->SetDriverInput(forward, rightward, brake, 0.0f);
+}
+
+const Vector3& JoltVehicleGetPosition(uint32_t handle)
+{
+    if (handle >= (uint32_t)gVehicles.size() || !gVehicles[handle].occupied)
+        return kZeroVec;
+    return gVehicles[handle].posCache;
+}
+
+Euler JoltVehicleGetRotation(uint32_t handle)
+{
+    if (handle >= (uint32_t)gVehicles.size() || !gVehicles[handle].occupied)
+        return Euler::zero;
+    return gVehicles[handle].rotCache;
+}
+
+// Cache position/rotation each world step (called inside JoltWorldStep below).
+static void UpdateVehicleCaches()
+{
+    for (VehicleEntry& e : gVehicles)
+    {
+        if (!e.occupied) continue;
+        JPH::RVec3 p = gBodyInterface->GetCenterOfMassPosition(e.bodyID);
+        JPH::Quat  q = gBodyInterface->GetRotation(e.bodyID);
+        e.posCache = Vector3(Scalar(p.GetX()), Scalar(p.GetY()), Scalar(p.GetZ()));
+        // Extract heading (Z-axis rotation) from quaternion → WF Euler C.
+        e.rotCache = FromJph(q);
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Init / shutdown — called by JoltRuntimeInit / JoltRuntimeShutdown (physics_jolt.cc)
 // These are called from the existing lifecycle in scripting_stub.cc.
 
@@ -870,6 +1035,7 @@ void JoltBackendShutdown()
     }
     gBodies.clear();
     gCharacters.clear();
+    gVehicles.clear();
     delete gPhysicsSystem; gPhysicsSystem = nullptr;
     delete gJobSystem;     gJobSystem     = nullptr;
     delete gTempAllocator; gTempAllocator = nullptr;

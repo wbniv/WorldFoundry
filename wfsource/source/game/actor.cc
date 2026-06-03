@@ -42,6 +42,9 @@
 #include <memory/memory.hp>
 #include <anim/animmang.hp>
 #include <movement/movefoll.hp>
+#ifdef PHYSICS_ENGINE_JOLT
+#include <movement/movevehicle.hp>
+#endif
 #include <movement/movepath.hp>
 
 #include <oas/oad.h>
@@ -110,6 +113,9 @@ MovementHandlerEntry MovementHandlerArray[] =
    { MOBILITY_PATH,    &thePathHandler},
    { MOBILITY_CAMERA,  &theDelayCameraHandler},
    { MOBILITY_FOLLOW,  &theFollowHandler},
+#ifdef PHYSICS_ENGINE_JOLT
+   { MOBILITY_VEHICLE, &theVehicleHandler},
+#endif
    { -1,NULL}
 };
 
