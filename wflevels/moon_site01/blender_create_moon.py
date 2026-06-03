@@ -494,6 +494,12 @@ if player:
         "else 3 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
         "16 - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
         "then then then\n"
+        # Camera cut: phase ≥ 2 (ignition + ascent) → cs_earth cutscene shot;
+        # phase < 2 → cs_chase (bootstrap already wrote it to CAMSHOT at load).
+        # See docs/plans/2026-06-03-moon-earth-cutscene.md.
+        "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 1 > if "
+        "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox "
+        "then\n"
     )
 
 # ── 6b. Artemis lander (Starship HLS) ────────────────────────────────────────
@@ -580,6 +586,40 @@ if camshot:
     camshot['wf_Track Object'] = 'Player'
     camshot['wf_Target']       = 'CamTarget'
     camshot['wf_Follow']       = 'CamTarget'
+    camshot['wf_Yon']          = 500.0   # Earth is at 301 m; default 100 m clips it
+    camshot['wf_Moves Between Rooms'] = 'True'
+    # Publish own actor index so player script can restore chase cam after cutscene.
+    camshot['wf_Script'] = (
+        "\\ wf\n"
+        "INDEXOF_ACTOR_INDEX read-mailbox INDEXOF_MOON_CHASE_CAM_IDX write-mailbox\n"
+    )
+
+# ── cs_earth — low telephoto shot behind lander for launch cutscene ───────────
+# Position (30, -80, 5): 105 m behind lander, 5 m above ground.
+# Tracks artemis_lander so camera tilts up as lander ascends.
+# FOV 40° (telephoto) compresses lander+Earth into same frame.
+# Triggered at phase ≥ 2 (ignition onward) by player Forth script via
+# EMAILBOX_CAMSHOT (1921). See docs/plans/2026-06-03-moon-earth-cutscene.md.
+cs_earth_data = bpy.data.meshes.new('cs_earth_mesh')
+cs_earth_obj  = bpy.data.objects.new('cs_earth', cs_earth_data)
+bpy.context.scene.collection.objects.link(cs_earth_obj)
+attach_schema(cs_earth_obj, 'camshot')
+cs_earth_obj.location = (30.0, -80.0, 5.0)
+cs_earth_obj['wf_Position X']        = 'Absolute'
+cs_earth_obj['wf_Position Y']        = 'Absolute'
+cs_earth_obj['wf_Position Z']        = 'Absolute'
+cs_earth_obj['wf_Rotation']          = 'Fixed'
+cs_earth_obj['wf_FOV']               = 40.0
+cs_earth_obj['wf_Pan Time In Seconds'] = 0.5
+cs_earth_obj['wf_Model Type']        = 'None'
+cs_earth_obj['wf_Track Object']      = 'artemis_lander'
+cs_earth_obj['wf_Yon']               = 500.0
+cs_earth_obj['wf_Moves Between Rooms'] = 'True'
+# Publish own actor index for player script camera switching.
+cs_earth_obj['wf_Script'] = (
+    "\\ wf\n"
+    "INDEXOF_ACTOR_INDEX read-mailbox INDEXOF_MOON_EARTH_CAM_IDX write-mailbox\n"
+)
 
 # ── 8. Level object ──────────────────────────────────────────────────────────
 # ── 7b. Room bounds ──────────────────────────────────────────────────────────

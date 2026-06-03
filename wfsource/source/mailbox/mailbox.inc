@@ -115,6 +115,8 @@ Comment("=====================================================================")
 	MAILBOXENTRY( MOON_LAUNCH_TIMER, 1880 )		Comment("Tick counter incremented by the moon player each frame; drives launch sequence phase")
 	MAILBOXENTRY( MOON_LAUNCH_PHASE, 1881 )		Comment("Launch phase: 0=idle, 1=countdown, 2=ignition, 3=ascent")
 	MAILBOXENTRY( MOON_LAUNCH_T_MINUS, 1882 )	Comment("Seconds until launch (phase 1) or seconds since ignition (phase ≥ 2)")
+	MAILBOXENTRY( MOON_CHASE_CAM_IDX, 1883 )	Comment("Actor index of cs_chase camshot; written at startup for phase-driven camera switching")
+	MAILBOXENTRY( MOON_EARTH_CAM_IDX, 1884 )	Comment("Actor index of cs_earth camshot; written at startup for phase-driven camera switching")
 
 
 	MAILBOXENTRY(GLOBAL_USER_MAX,1900)

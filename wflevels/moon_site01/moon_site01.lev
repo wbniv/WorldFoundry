@@ -536,7 +536,7 @@
 		{ 'I32' { 'NAME' "MovementClass" } { 'DATA' 16l } { 'STR' "16" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 75.0000000000000000(1.15.16) } { 'STR' "75.0" } }
-		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Movement Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.5499877929687500(1.15.16) } { 'STR' "0.54998779296875" } }
 		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
@@ -571,6 +571,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_ACTOR_INDEX read-mailbox INDEXOF_MOON_CHASE_CAM_IDX write-mailbox\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
@@ -630,7 +631,7 @@
 		{ 'FX32' { 'NAME' "Roll" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
 		{ 'FX32' { 'NAME' "Pan Time In Seconds" } { 'DATA' 0.1000000000000000(1.15.16) } { 'STR' "0.1" } }
 		{ 'FX32' { 'NAME' "Hither" } { 'DATA' 0.0999755859375000(1.15.16) } { 'STR' "0.0999755859375" } }
-		{ 'FX32' { 'NAME' "Yon" } { 'DATA' 1000.0000000000000000(1.15.16) } { 'STR' "1000.0" } }
+		{ 'FX32' { 'NAME' "Yon" } { 'DATA' 500.0000000000000000(1.15.16) } { 'STR' "500.0" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -911,7 +912,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n1 INDEXOF_MOON_OVERLAY_ENABLED write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_MOON_PLAYER_X write-mailbox\nINDEXOF_Y_POS read-mailbox INDEXOF_MOON_PLAYER_Y write-mailbox\nINDEXOF_Z_POS read-mailbox INDEXOF_MOON_PLAYER_Z write-mailbox\nINDEXOF_ROTATION_C read-mailbox INDEXOF_MOON_PLAYER_HEADING write-mailbox\nINDEXOF_TIME read-mailbox dup 10 < if drop 0 INDEXOF_MOON_LAUNCH_PHASE write-mailbox 0 INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox else dup 15 < if 1 INDEXOF_MOON_LAUNCH_PHASE write-mailbox 15 swap - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox else dup 16 < if drop 2 INDEXOF_MOON_LAUNCH_PHASE write-mailbox 0 INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox else 3 INDEXOF_MOON_LAUNCH_PHASE write-mailbox 16 - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox then then then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n1 INDEXOF_MOON_OVERLAY_ENABLED write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_MOON_PLAYER_X write-mailbox\nINDEXOF_Y_POS read-mailbox INDEXOF_MOON_PLAYER_Y write-mailbox\nINDEXOF_Z_POS read-mailbox INDEXOF_MOON_PLAYER_Z write-mailbox\nINDEXOF_ROTATION_C read-mailbox INDEXOF_MOON_PLAYER_HEADING write-mailbox\nINDEXOF_TIME read-mailbox dup 10 < if drop 0 INDEXOF_MOON_LAUNCH_PHASE write-mailbox 0 INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox else dup 15 < if 1 INDEXOF_MOON_LAUNCH_PHASE write-mailbox 15 swap - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox else dup 16 < if drop 2 INDEXOF_MOON_LAUNCH_PHASE write-mailbox 0 INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox else 3 INDEXOF_MOON_LAUNCH_PHASE write-mailbox 16 - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox then then then\nINDEXOF_MOON_LAUNCH_PHASE read-mailbox 1 > if INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox then\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
@@ -1127,5 +1128,24 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000109171702(1.15.16) } { 'STR' "-0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000021834340360(1.15.16) } { 'STR' "-0.000002" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "cs_earth" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 30.0000000000000000(1.15.16) -80.0000000000000000(1.15.16) 5.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "camshot" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_ACTOR_INDEX read-mailbox INDEXOF_MOON_EARTH_CAM_IDX write-mailbox\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'STR' { 'NAME' "Track Object" } { 'STR' "artemis_lander" } }
+		{ 'I32' { 'NAME' "Rotation" } { 'DATA' 0l } { 'STR' "Fixed" } }  //Fixed|Track
+		{ 'I32' { 'NAME' "Position X" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
+		{ 'I32' { 'NAME' "Position Y" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
+		{ 'I32' { 'NAME' "Position Z" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
+		{ 'FX32' { 'NAME' "FOV" } { 'DATA' 40.0000000000000000(1.15.16) } { 'STR' "40.0" } }
+		{ 'FX32' { 'NAME' "Pan Time In Seconds" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Yon" } { 'DATA' 500.0000000000000000(1.15.16) } { 'STR' "500.0" } }
 	}
 }
