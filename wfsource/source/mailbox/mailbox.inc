@@ -117,6 +117,7 @@ Comment("=====================================================================")
 	MAILBOXENTRY( MOON_LAUNCH_T_MINUS, 1882 )	Comment("Seconds until launch (phase 1) or seconds since ignition (phase ≥ 2)")
 	MAILBOXENTRY( MOON_CHASE_CAM_IDX, 1883 )	Comment("Actor index of cs_chase camshot; written at startup for phase-driven camera switching")
 	MAILBOXENTRY( MOON_EARTH_CAM_IDX, 1884 )	Comment("Actor index of cs_earth camshot; written at startup for phase-driven camera switching")
+	MAILBOXENTRY( MOON_LANDER_Z, 1885 )		Comment("Lander altitude (m) written by lander script each frame; read by launch_tracker proxy for cs_earth Track Object")
 
 
 	MAILBOXENTRY(GLOBAL_USER_MAX,1900)
