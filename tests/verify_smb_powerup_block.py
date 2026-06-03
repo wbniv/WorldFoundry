@@ -28,11 +28,12 @@ import os, re, sys, time, subprocess
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from debug_bridge_client import BridgeClient  # noqa: E402
+from debug_bridge_client import BridgeClient, discover_by_pos  # noqa: E402
 
 REPO  = Path(__file__).resolve().parent.parent
 WF    = REPO / "engine" / "wf_game"
 LEVEL = REPO / "wflevels" / "smb_w1_1-standalone.iff"
+LEV   = REPO / "wflevels" / "smb_w1_1" / "smb_w1_1.lev"   # name→pos for shared-mesh discovery
 LIB   = REPO / "engine" / "libs"
 CWD   = REPO / "wfsource" / "source" / "game"
 SCROT = REPO / "tests" / "screenshots"
@@ -105,14 +106,16 @@ def main() -> int:
         print(f"  screenshot {label}: {'OK -> ' + out.name if ok else 'WARN ' + str(m)}")
 
     try:
-        names = {"player", "mushroom_block"}
-        idx = discover(LOG, names)
-        print("discovered indices:", idx)
-        if not names.issubset(idx):
+        # player has a unique mesh (player.iff) → discover by mesh; mushroom_block
+        # shares the ?-block datablock since P2b → discover by position via the .lev.
+        idx = discover(LOG, {"player"})
+        blocks = discover_by_pos(LOG, LEV, {"mushroom_block"})
+        print("discovered indices:", idx, blocks)
+        if "player" not in idx or "mushroom_block" not in blocks:
             print("FATAL: missing core actors; aborting"); return 1
         global PLAYER
         PLAYER = idx["player"]
-        BLOCK  = idx["mushroom_block"]
+        BLOCK  = blocks["mushroom_block"]
 
         cli = BridgeClient("127.0.0.1", PORT, timeout=15.0)
         print("bridge: connected"); time.sleep(1.0)

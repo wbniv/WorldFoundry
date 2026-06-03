@@ -1,8 +1,29 @@
 # Plan: per-actor scale through the export pipeline (P2-pre) + SMB mesh collapse (P2b)
 
 **Date:** 2026-06-03
-**Status:** In progress
+**Status:** DONE (2026-06-03)
 **Parent:** [`2026-06-02-smb-common-extraction-and-mesh-sharing.md`](2026-06-02-smb-common-extraction-and-mesh-sharing.md) — deferred items P2-pre and P2b.
+
+## Results
+
+| Level | mesh `.iff` files before | after | Δ |
+|---|--:|--:|--:|
+| smb_w1_1 | 74 | **34** | −40 (−54%) |
+| smb_w1_2 | 85 | **37** | −48 (−56%) |
+
+Collapsed clusters (W1-1 examples): 14 bricks → 1 shared datablock, 16 staircase/pyramid
+`mat_hard` boxes → 1, 7 `?`-blocks/power-up blocks → 1, 5 pipes → 1. **P2-pre** verified a no-op
+for all existing content (snowgoons/qbert/W1-1/W1-2 rebuild byte-identical `.lvl`/`.iff`; W1-1
+re-exports byte-identical `.lev`; +4 levcomp unit tests). **P2b** verified behaviour-equivalent:
+`verify_smb_scroll`, `verify_smb_scoring`, `verify_smb_powerup_block`, `verify_smb_brick_break`
+all green; W1-2 boots clean (object count 142, 0 issues, player rests on the scaled ground).
+
+**Discovery fallout (fixed):** mesh-sharing breaks the test idiom of identifying an actor by its
+mesh-`.iff` name (N actors now share one). Added `discover_by_pos()` to
+[`debug_bridge_client.py`](../../tests/debug_bridge_client.py) — bridges authored name → runtime
+idx via position (the runtime carries no actor name; the `.lev` has name+pos, the log has idx+pos).
+Rewired `verify_smb_powerup_block` + `verify_smb_brick_break` (the latter was already broken at HEAD:
+it required a `brick_hidden` mesh the layout renamed to `mushroom_block` long ago).
 
 ## Goal
 

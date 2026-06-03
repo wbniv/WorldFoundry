@@ -57,20 +57,31 @@ def get_class(obj):
     return os.path.splitext(os.path.basename(schema))[0] if schema else ''
 
 
-def add_box(mesh_name, x0, y0, z0, x1, y1, z1, mat):
-    """Add a box mesh [x0..x1]×[y0..y1]×[z0..z1], return the object."""
-    cx, cy, cz = (x0+x1)/2, (y0+y1)/2, (z0+z1)/2
-    sx, sy, sz = x1-x0, y1-y0, z1-z0
-    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(cx, cy, cz))
+def _unit_box_geo(mat):
+    """A 1×1×1 cube at the origin with `mat` on every (flat) face — the canonical
+    datablock shared by all `add_box` instances of this material (P2b)."""
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, 0, 0))
     obj = bpy.context.object
-    obj.name      = mesh_name
-    obj.data.name = mesh_name
-    obj.scale = (sx, sy, sz)
-    bpy.ops.object.transform_apply(scale=True)
     obj.data.materials.clear()
     obj.data.materials.append(mat)
     for p in obj.data.polygons:
         p.material_index = 0
+    return obj
+
+
+def add_box(mesh_name, x0, y0, z0, x1, y1, z1, mat):
+    """Add a box [x0..x1]×[y0..y1]×[z0..z1], return the object.
+
+    All boxes of one material share a single unit-cube datablock and carry their
+    size as live `obj.scale` (no transform_apply) — the export pipeline emits that
+    scale (P2-pre) so N differently-sized boxes cost ONE room-pool mesh, not N.
+    Scale drives the render mesh; the exporter scales the collision BOX3 to match.
+    """
+    cx, cy, cz = (x0+x1)/2, (y0+y1)/2, (z0+z1)/2
+    sx, sy, sz = x1-x0, y1-y0, z1-z0
+    obj = shared_mesh('unit_box::' + mat.name, mesh_name, lambda: _unit_box_geo(mat))
+    obj.location = (cx, cy, cz)
+    obj.scale    = (sx, sy, sz)
     return obj
 
 
@@ -82,18 +93,18 @@ def add_statplat(mesh_name, x0, y0, z0, x1, y1, z1, mat):
     return obj
 
 
-def _add_textured_box(mesh_name, x0, y0, z0, x1, y1, z1, tex_path):
-    """Box with a UV-mapped texture on all 6 faces (full [0,1]² per face).
+def _textured_box_geo(tex_path):
+    """Canonical 1×1×1 UV-textured box at the origin (full [0,1]² per face), shared
+    by every `_add_textured_box` instance of this texture (P2b).
 
-    The front face (-Y, camera-side) gets vertex order chosen so the
-    texture appears right-side-up when the camera is at Y≈-30 looking +Y.
-    UV V=0 = top of the PIL image; V=1 = bottom — opposite of the Blender
-    default but matching the WF/textile-rs VRAM convention where row 0 is
-    the image top.
+    The front face (-Y, camera-side) gets vertex order chosen so the texture appears
+    right-side-up when the camera is at Y≈-30 looking +Y. UV V=0 = top of the PIL
+    image; V=1 = bottom — matching the WF/textile-rs VRAM convention where row 0 is
+    the image top. UVs are per-loop so they are unaffected by the instances' scale.
     """
     import bmesh
 
-    mat = bpy.data.materials.new(name=f'{mesh_name}_mat')
+    mat = bpy.data.materials.new(name='tex_' + os.path.basename(tex_path))
     mat.use_nodes = True
     nodes = mat.node_tree.nodes
     bsdf  = nodes['Principled BSDF']
@@ -104,20 +115,20 @@ def _add_textured_box(mesh_name, x0, y0, z0, x1, y1, z1, tex_path):
     bm = bmesh.new()
     uv = bm.loops.layers.uv.new('UVMap')
 
+    h = 0.5  # unit cube ±0.5; instances carry the real size as obj.scale
     v = [
-        bm.verts.new((x0, y0, z0)),  # 0
-        bm.verts.new((x1, y0, z0)),  # 1
-        bm.verts.new((x1, y1, z0)),  # 2
-        bm.verts.new((x0, y1, z0)),  # 3
-        bm.verts.new((x0, y0, z1)),  # 4
-        bm.verts.new((x1, y0, z1)),  # 5
-        bm.verts.new((x1, y1, z1)),  # 6
-        bm.verts.new((x0, y1, z1)),  # 7
+        bm.verts.new((-h, -h, -h)),  # 0
+        bm.verts.new(( h, -h, -h)),  # 1
+        bm.verts.new(( h,  h, -h)),  # 2
+        bm.verts.new((-h,  h, -h)),  # 3
+        bm.verts.new((-h, -h,  h)),  # 4
+        bm.verts.new(( h, -h,  h)),  # 5
+        bm.verts.new(( h,  h,  h)),  # 6
+        bm.verts.new((-h,  h,  h)),  # 7
     ]
 
     # UV corners per face: (bottom-left, bottom-right, top-right, top-left)
     # viewed from outside, with V=0=image-top / V=1=image-bottom (WF VRAM convention).
-    # Each face lists (vert, uv) pairs.
     face_defs = [
         # front -Y (camera-side): CCW from -Y; bl→br→tr→tl as seen by camera
         ([v[0], v[1], v[5], v[4]], [(0,1),(1,1),(1,0),(0,0)]),
@@ -139,16 +150,31 @@ def _add_textured_box(mesh_name, x0, y0, z0, x1, y1, z1, tex_path):
         for loop, uv_coord in zip(f.loops, uvs):
             loop[uv].uv = uv_coord
 
-    mesh = bpy.data.meshes.new(mesh_name)
+    mesh = bpy.data.meshes.new('tex_box')
     bm.to_mesh(mesh)
     bm.free()
     mesh.materials.append(mat)
 
-    obj = bpy.data.objects.new(mesh_name, mesh)
+    obj = bpy.data.objects.new('tex_box', mesh)
     bpy.context.collection.objects.link(obj)
-    bpy.context.view_layer.objects.active = obj
-    bpy.ops.object.select_all(action='DESELECT')
-    obj.select_set(True)
+    return obj
+
+
+def _add_textured_box(mesh_name, x0, y0, z0, x1, y1, z1, tex_path):
+    """Add a UV-textured box, sharing one canonical unit datablock per texture.
+
+    All bricks share one mesh, all ?-blocks/power-up blocks another (they key on
+    `tex_path`); per-instance size rides as live `obj.scale` (P2-pre emits it). The
+    distinguishing generator script/mailboxes live in each object's OAS, not the mesh.
+    """
+    cx, cy, cz = (x0+x1)/2, (y0+y1)/2, (z0+z1)/2
+    sx, sy, sz = x1-x0, y1-y0, z1-z0
+    # Key on the texture basename (one brick + one ?-block texture per level) so the
+    # shared datablock name stays short (Blender truncates names at 63 chars).
+    obj = shared_mesh('tex_box::' + os.path.basename(tex_path), mesh_name,
+                      lambda: _textured_box_geo(tex_path))
+    obj.location = (cx, cy, cz)
+    obj.scale    = (sx, sy, sz)
     return obj
 
 
