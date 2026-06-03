@@ -73,3 +73,29 @@ static lib (small CMake refactor; deferred).
 - **#5:** a malformed signal logs `webrtc: dropped malformed signal: …`.
 - Commit by area (C++ bridge/crdt/stubs together; the Rust relay separately; the
   webrtc log with the editor build). Re-run editor ctests for no regression.
+
+## Status — DONE (2026-06-02)
+
+All five fixed and committed: [`19e95a86`](https://github.com/wbniv/WorldFoundry/commit/19e95a86)
+(C++ #1/#2/#3/#5 + docs), [`e6e031c3`](https://github.com/wbniv/WorldFoundry/commit/e6e031c3)
+(relay #4), [`c4eceaa1`](https://github.com/wbniv/WorldFoundry/commit/c4eceaa1) (`Cargo.lock`).
+Predecessor: the debug-bridge terminate fix
+[`15801ebc`](https://github.com/wbniv/WorldFoundry/commit/15801ebc). ~1 h.
+
+**Verified:**
+- Builds clean: `wf_game-dev` (#1/#2/#3), `wf-edit` (#5), `cargo` relay (#4).
+- No regression: `wfcrdt_wrapper_test` 14/14, `connect_retry_test` 6/6.
+- **#3** behavioural: a malformed-float REST body (`"x":"notanumber"`) creates the box
+  and the process stays alive (pre-fix `std::stof` threw → abort).
+- **#4** behavioural: `wf-relay --port nope` and a bind-permission error both print
+  `[relay] error: …` + exit instead of a panic backtrace.
+- **#1 / #2 / #5** are compile-verified + correct-by-construction (a pre-check returning
+  `failopt` before the terminating call / an abort-with-cause guard / a logged catch).
+
+**Deferred → [TODO.md](../../TODO.md):**
+- **#1** behavioural test: there's no bridge spawn op, and `RunSpawnConfirmTest` was parked
+  *because* spawning terminate'd — now that the guard makes it safe, un-deferring it into a
+  real spawn regression test pairs with the deeper engine-side fix (make
+  `ConstructTemplateObject` return NULL on *any* unmet prerequisite, covering all kinds).
+- The exceptions **host-only dev-lib** refactor (escape hatch), per the
+  [exceptions audit](../investigations/2026-05-30-cpp-exceptions-audit.md) § Policy decision.
