@@ -438,6 +438,70 @@ def _build_artemis_lander():
     return body
 
 
+def _build_moon_racer():
+    """Moon RACER LTV — open-cab electric buggy ~4×2×1.5 m.
+    Intuitive Machines / Boeing / Northrop Grumman (Artemis V+).
+    Mobility=Anchored for now; will be hooked to Jolt vehicle physics later.
+    See docs/plans/2026-06-03-moon-site-01-surface-asset-models.md."""
+    mat_white = _make_mat('rover_white', (0.92, 0.92, 0.92))
+    mat_dark  = _make_mat('rover_dark',  (0.15, 0.15, 0.17))
+
+    parts = []
+    SEG = 8
+
+    def add_cyl(r, h, loc, mat, rot=(0.0, 0.0, 0.0)):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=SEG, radius=r, depth=h, location=loc)
+        obj = bpy.context.object
+        obj.rotation_euler = rot
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+        parts.append((obj, mat))
+
+    def add_cube(sx, sy, sz, loc, mat):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=loc)
+        obj = bpy.context.object
+        obj.scale = (sx, sy, sz)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((obj, mat))
+
+    # Chassis frame — 4×2×0.5 m, centre at z=0.6
+    add_cube(4.0, 2.0, 0.5, (0.0, 0.0, 0.6), mat_white)
+
+    # 4 wheels (r=0.5, w=0.3 m). Blender cylinders run along Z; rotate 90° around X
+    # so the wheel axis aligns with Y and the rover rolls in X.
+    for fx in (+1.6, -1.6):
+        for fy in (+1.1, -1.1):
+            add_cyl(0.5, 0.3, (fx, fy, 0.5), mat_dark, rot=(math.pi / 2, 0.0, 0.0))
+
+    # Crew seat — centre of chassis
+    add_cube(1.0, 0.8, 0.4, (0.0, 0.0, 1.25), mat_white)
+
+    # Camera mast — front-centre
+    add_cyl(0.06, 1.5, (1.6, 0.0, 1.6), mat_dark)
+
+    # Solar panel atop mast
+    add_cube(1.5, 0.8, 0.06, (1.6, 0.0, 2.42), mat_white)
+
+    # Robotic arm (folded) — starboard rear
+    add_cube(1.2, 0.15, 0.15, (-1.0, -1.1, 1.1), mat_dark)
+
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for p in obj.data.polygons:
+            p.material_index = 0
+
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    body.name = 'moon_racer'
+    body.data.name = 'moon_racer'
+    return body
+
+
 player = find_by_class('player')
 if player:
     player.name = 'Player'
@@ -482,18 +546,16 @@ if player:
         # WF dt is variable (3-60+ fps depending on workload / video record),
         # so timing in TIME-seconds, never in ticks.  See
         # docs/plans/2026-06-02-moon-lander-launch-sequence.md.
-        # Phases: 0-10s idle, 10-15s countdown, 15-16s ignition, 16s+ ascent.
+        # Phases: 0-10s countdown (T_MINUS 10→0), 10-11s ignition, 11s+ ascent.
         "INDEXOF_TIME read-mailbox "
-        "dup 10 < if drop 0 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
-        "0 INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
-        "else dup 15 < if "
+        "dup 10 < if "
         "1 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
-        "15 swap - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
-        "else dup 16 < if drop 2 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
+        "10 swap - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
+        "else dup 11 < if drop 2 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
         "0 INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
         "else 3 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
-        "16 - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
-        "then then then\n"
+        "11 - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
+        "then then\n"
         # Camera: cs_earth at ignition (phase 2) + first 20 s of ascent (phase 3);
         # cut back to cs_chase after 20 s (lander at ~200 m, off-screen anyway).
         # See docs/plans/2026-06-03-moon-earth-cutscene.md.
@@ -530,6 +592,7 @@ _lander['wf_Script'] = (
     "\\ wf\n"
     "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if "    # >2 == >=3 (zForth lacks >=)
     "INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox dup * 0.5 * "
+    "dup INDEXOF_MOON_LANDER_Z write-mailbox "          # publish z for launch_tracker proxy
     "dup 500 > if "                                     # z > 500 m → despawn (t≈32 s)
     "drop 0 INDEXOF_ALIVE write-mailbox "
     "else "
@@ -553,6 +616,21 @@ _earth['wf_Model Type']           = 'Mesh'
 _earth['wf_Visibility Mailbox']   = 1
 _earth['wf_Moves Between Rooms']  = 'True'   # routes texture to PERM atlas (Room0 is full)
 print(f"[moon] Earth sphere at {_earth.location[:]}")
+
+# ── 6d. Surface assets ───────────────────────────────────────────────────────
+# All use class 'platform' (movable actor) with Mobility='Anchored' for now.
+# Vehicles will be hooked to Jolt vehicle physics when controls are added.
+# See docs/plans/2026-06-03-moon-site-01-surface-asset-models.md.
+
+_racer = _build_moon_racer()
+attach_schema(_racer, 'platform')
+_racer.location                    = (15.0, 20.0, 0.0)
+_racer['wf_Mobility']              = 'Anchored'
+_racer['wf_Model Type']            = 'Mesh'
+_racer['wf_Visibility Mailbox']    = 1
+_racer['wf_Moves Between Rooms']   = 'True'
+print(f"[moon] Moon RACER at {_racer.location[:]}, "
+      f"{len(_racer.data.vertices)} verts, {len(_racer.data.polygons)} polys")
 
 # ── 7. Camera ────────────────────────────────────────────────────────────────
 target = find_by_class('target')
@@ -606,9 +684,28 @@ if camshot:
         "INDEXOF_ACTOR_INDEX read-mailbox INDEXOF_MOON_CHASE_CAM_IDX write-mailbox\n"
     )
 
+# ── launch_tracker — invisible proxy actor for cs_earth Track Object ──────────
+# cs_earth can't track artemis_lander directly: both are in PERM and
+# GetObject(lander_idx) returns null at runtime (cross-PERM timing).
+# launch_tracker is a room actor (not PERM) so GetObject finds it reliably.
+# Its script reads MOON_LANDER_Z (written by the lander each frame) and
+# copies it to own Z_POS, keeping the camera look-at on the rising lander.
+# See docs/plans/2026-06-03-moon-earth-cutscene.md.
+tracker_mesh = bpy.data.meshes.new('launch_tracker_mesh')
+tracker_obj  = bpy.data.objects.new('launch_tracker', tracker_mesh)
+bpy.context.scene.collection.objects.link(tracker_obj)
+attach_schema(tracker_obj, 'platform')
+tracker_obj.location = (30.0, 25.0, 0.0)   # same XY as lander
+tracker_obj['wf_Mobility']   = 'Anchored'
+tracker_obj['wf_Model Type'] = 'None'
+tracker_obj['wf_Script'] = (
+    "\\ wf\n"
+    "INDEXOF_MOON_LANDER_Z read-mailbox INDEXOF_Z_POS write-mailbox\n"
+)
+
 # ── cs_earth — low telephoto shot behind lander for launch cutscene ───────────
 # Position (30, -80, 5): 105 m behind lander, 5 m above ground.
-# Tracks artemis_lander so camera tilts up as lander ascends.
+# Tracks launch_tracker (room actor proxy) so camera tilts up as lander ascends.
 # FOV 40° (telephoto) compresses lander+Earth into same frame.
 # Triggered at phase ≥ 2 (ignition onward) by player Forth script via
 # EMAILBOX_CAMSHOT (1921). See docs/plans/2026-06-03-moon-earth-cutscene.md.
@@ -624,7 +721,7 @@ cs_earth_obj['wf_Rotation']            = 'Fixed'
 cs_earth_obj['wf_FOV']                 = 40.0
 cs_earth_obj['wf_Pan Time In Seconds'] = 0.5
 cs_earth_obj['wf_Model Type']          = 'None'
-cs_earth_obj['wf_Track Object']        = 'Player'
+cs_earth_obj['wf_Track Object']        = 'launch_tracker'  # room actor — avoids PERM→PERM crash
 cs_earth_obj['wf_Target']              = 'CamTarget'   # required non-null by movecam.cc:236
 cs_earth_obj['wf_Follow']              = 'CamTarget'   # required non-null by movecam.cc:236
 cs_earth_obj['wf_Yon']                 = 500.0
