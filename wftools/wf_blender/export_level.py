@@ -1001,7 +1001,12 @@ def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
             wf_local_min = (float(orig_bbox[0]), float(orig_bbox[1]), float(orig_bbox[2]))
             wf_local_max = (float(orig_bbox[3]), float(orig_bbox[4]), float(orig_bbox[5]))
         else:
-            corners_local = [obj.bound_box[i][:] for i in range(8)]
+            # bound_box is mesh-local (does NOT include obj.scale). Multiply by the
+            # object's local scale so the collision BOX3 matches the *rendered* size:
+            # the engine scales only the render mesh (rendacto.cc:481), never the bbox.
+            # Identity scale (every level authored before the scale pipeline) ⇒ no-op.
+            bl_scale = obj.matrix_world.to_scale()
+            corners_local = [tuple(obj.bound_box[i][k] * bl_scale[k] for k in range(3)) for i in range(8)]
             bl_local_min = [min(c[i] for c in corners_local) for i in range(3)]
             bl_local_max = [max(c[i] for c in corners_local) for i in range(3)]
             wf_lmn_x, wf_lmn_y, wf_lmn_z = bl_to_wf(bl_local_min[0], bl_local_min[1], bl_local_min[2])
@@ -1040,6 +1045,13 @@ def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
 
         lines.append(f"\t\t{{ 'VEC3' {{ 'NAME' \"Position\" }} {{ 'DATA' {fp(wf_pos[0])} {fp(wf_pos[1])} {fp(wf_pos[2])}  //x,y,z\n\t\t}} }}")
         lines.append(f"\t\t{{ 'EULR' {{ 'NAME' \"Orientation\" }} {{ 'DATA' {fp(wf_rot[0])} {fp(wf_rot[1])} {fp(wf_rot[2])}  //a,b,c\n\t\t}} }}")
+        # Per-actor render scale (OAS x/y/z_scale). bl_to_wf is identity, so scale maps
+        # component-wise. Emit ONLY when non-identity: identity-scale objects (every level
+        # authored before the scale pipeline) stay byte-identical — levcomp defaults absent
+        # Scale to (ONE,ONE,ONE). Drives the render mesh size; the BOX3 above carries collision.
+        wf_scale = bl_to_wf(*obj.matrix_world.to_scale())
+        if any(abs(s - 1.0) > 1e-6 for s in wf_scale):
+            lines.append(f"\t\t{{ 'VEC3' {{ 'NAME' \"Scale\" }} {{ 'DATA' {fp(wf_scale[0])} {fp(wf_scale[1])} {fp(wf_scale[2])}  //x,y,z\n\t\t}} }}")
         had_bbox = obj.get("wf_had_authored_bbox", None)
         if had_bbox is not None:
             should_emit_bbox = bool(had_bbox)

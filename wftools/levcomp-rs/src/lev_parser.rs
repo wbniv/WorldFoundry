@@ -73,6 +73,10 @@ pub struct LevObject {
     pub class_name: String,
     pub position: Vec3,
     pub rotation: Eulr,
+    /// Per-actor render scale (OAS x/y/z_scale). Identity (ONE,ONE,ONE) when the
+    /// OBJ has no `VEC3 "Scale"` chunk — which is every level authored before the
+    /// scale pipeline landed, so absent ⇒ writer emits the historical (ONE,ONE,ONE).
+    pub scale: Vec3,
     pub bbox: Box3,
     /// Path/keyframe animation block, if the object carries a PATH chunk.
     pub path: Option<PathBlock>,
@@ -190,6 +194,8 @@ fn parse_obj(payload: &[u8]) -> Result<Option<LevObject>, String> {
     let mut class_name = String::new();
     let mut position = Vec3 { x: 0, y: 0, z: 0 };
     let mut rotation = Eulr { a: 0, b: 0, c: 0 };
+    // ONE = 0x10000 (1.0 in 16.16); identity until a `VEC3 "Scale"` overrides it.
+    let mut scale = Vec3 { x: 0x10000, y: 0x10000, z: 0x10000 };
     let mut bbox = Box3 { min: [0; 3], max: [0; 3] };
     let mut path: Option<PathBlock> = None;
 
@@ -202,6 +208,12 @@ fn parse_obj(payload: &[u8]) -> Result<Option<LevObject>, String> {
                 let (named, data) = read_named_data(&f.payload)?;
                 if named == "Position" && data.len() >= 12 {
                     position = Vec3 {
+                        x: le_i32(&data, 0),
+                        y: le_i32(&data, 4),
+                        z: le_i32(&data, 8),
+                    };
+                } else if named == "Scale" && data.len() >= 12 {
+                    scale = Vec3 {
                         x: le_i32(&data, 0),
                         y: le_i32(&data, 4),
                         z: le_i32(&data, 8),
@@ -241,7 +253,7 @@ fn parse_obj(payload: &[u8]) -> Result<Option<LevObject>, String> {
         return Ok(None);
     }
 
-    Ok(Some(LevObject { name, class_name, position, rotation, bbox, path, fields }))
+    Ok(Some(LevObject { name, class_name, position, rotation, scale, bbox, path, fields }))
 }
 
 /// Parse a PATH sub-chunk payload into a `PathBlock`.  Returns `None` when
@@ -366,4 +378,53 @@ fn le_i32(b: &[u8], off: usize) -> i32 {
 #[allow(dead_code)]
 fn tag_eq(id: u32, s: &str) -> bool {
     id == str_to_id(s)
+}
+
+#[cfg(test)]
+mod scale_tests {
+    use super::*;
+    use wf_iff::write_chunk;
+
+    const ONE: i32 = 0x10000;
+
+    /// Wrap a named DATA chunk (e.g. VEC3 "Scale" / STR "Class Name").
+    fn named(id: &str, name: &str, data: &[u8]) -> Vec<u8> {
+        let mut cstr = name.as_bytes().to_vec();
+        cstr.push(0);
+        let mut payload = write_chunk(str_to_id("NAME"), &cstr);
+        payload.extend(write_chunk(str_to_id("DATA"), data));
+        write_chunk(str_to_id(id), &payload)
+    }
+
+    fn vec3(x: i32, y: i32, z: i32) -> Vec<u8> {
+        let mut v = Vec::new();
+        v.extend(x.to_le_bytes());
+        v.extend(y.to_le_bytes());
+        v.extend(z.to_le_bytes());
+        v
+    }
+
+    /// Minimal OBJ payload: NAME + Class Name + Position, plus any `extra` chunks.
+    fn obj(extra: &[u8]) -> Vec<u8> {
+        let mut p = write_chunk(str_to_id("NAME"), b"box\0");
+        p.extend(named("STR", "Class Name", b"statplat\0"));
+        p.extend(named("VEC3", "Position", &vec3(ONE, 2 * ONE, 3 * ONE)));
+        p.extend_from_slice(extra);
+        p
+    }
+
+    #[test]
+    fn scale_absent_defaults_to_identity() {
+        let o = parse_obj(&obj(&[])).unwrap().unwrap();
+        assert_eq!((o.scale.x, o.scale.y, o.scale.z), (ONE, ONE, ONE));
+        // sanity: position still parses
+        assert_eq!((o.position.x, o.position.y, o.position.z), (ONE, 2 * ONE, 3 * ONE));
+    }
+
+    #[test]
+    fn scale_chunk_is_parsed() {
+        let s = named("VEC3", "Scale", &vec3(2 * ONE, ONE, ONE / 2));
+        let o = parse_obj(&obj(&s)).unwrap().unwrap();
+        assert_eq!((o.scale.x, o.scale.y, o.scale.z), (2 * ONE, ONE, ONE / 2));
+    }
 }

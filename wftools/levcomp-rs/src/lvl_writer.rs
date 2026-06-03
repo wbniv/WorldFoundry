@@ -337,7 +337,9 @@ pub fn write(plan: &mut LevelPlan) -> Result<Vec<u8>, String> {
             &mut out,
             type_idx,
             (obj.position.x, obj.position.y, obj.position.z),
-            (ONE, ONE, ONE),
+            // Per-actor render scale from the `.lev` (VEC3 "Scale"); defaults to
+            // (ONE,ONE,ONE) when absent, so historical levels are unchanged.
+            (obj.scale.x, obj.scale.y, obj.scale.z),
             rot,
             &bbox,
             oad_flags,
@@ -507,6 +509,30 @@ fn write_obj_header(
 
 fn push_i32(out: &mut Vec<u8>, v: i32) {
     out.extend_from_slice(&v.to_le_bytes());
+}
+
+#[cfg(test)]
+mod scale_header_tests {
+    use super::*;
+
+    const ONE: i32 = 0x10000;
+
+    #[test]
+    fn header_carries_nonidentity_scale() {
+        // Layout: type_idx(2) + pad(2) + pos(12) + scale(12) at byte offset 16.
+        let mut out = Vec::new();
+        write_obj_header(&mut out, 5, (0, 0, 0), (2 * ONE, ONE, ONE / 2), (0, 0, 0), &[0; 6], 0, -1, 0);
+        let rd = |o: usize| i32::from_le_bytes(out[o..o + 4].try_into().unwrap());
+        assert_eq!((rd(16), rd(20), rd(24)), (2 * ONE, ONE, ONE / 2));
+    }
+
+    #[test]
+    fn header_default_identity_scale_matches_legacy() {
+        let mut out = Vec::new();
+        write_obj_header(&mut out, 5, (0, 0, 0), (ONE, ONE, ONE), (0, 0, 0), &[0; 6], 0, -1, 0);
+        let rd = |o: usize| i32::from_le_bytes(out[o..o + 4].try_into().unwrap());
+        assert_eq!((rd(16), rd(20), rd(24)), (ONE, ONE, ONE));
+    }
 }
 
 /// Convert fixed32 radians (as stored in a `.lev` EULR DATA) to the u16
