@@ -54,7 +54,16 @@ static float json_float(const std::string& body, const char* key)
     if (pos == std::string::npos) return std::nanf("");
     // skip whitespace
     while (++pos < body.size() && (body[pos]==' '||body[pos]=='\t'||body[pos]=='\n'||body[pos]=='\r'));
-    return std::stof(body.c_str() + pos);
+    // strtof, NOT std::stof: stof throws std::invalid_argument on a malformed
+    // value, which — uncaught in this exception-free stub (it links into
+    // wfengine) — aborts the process on a bad REST body. strtof reports failure
+    // via endptr and returns NaN here, matching the "absent → NaN" contract.
+    // (Same fix the 2026-05-30 exceptions audit applied to debug_server.cc.)
+    const char* start = body.c_str() + pos;
+    char* end = nullptr;
+    const float v = std::strtof(start, &end);
+    if (end == start) return std::nanf("");
+    return v;
 }
 
 // Parse a named string value from JSON, e.g. "color":"#ff0000" → "#ff0000".

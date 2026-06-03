@@ -14,6 +14,8 @@ extern "C" {
 }
 
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <utility>
 
@@ -79,7 +81,19 @@ YTransaction* Transaction::raw() const {
     // UndoManager capture; it isn't part of the v1 update wire format, so sync
     // is unaffected.
     if (!_docw) return nullptr;
-    if (!_txn) _txn = ydoc_write_transaction(_docw->raw(), _originLen, _origin);
+    if (!_txn) {
+        _txn = ydoc_write_transaction(_docw->raw(), _originLen, _origin);
+        // A valid Doc that still yields no txn means another write txn is already
+        // live on it — a nested doc.begin() (yrs is single-writer). Left as NULL,
+        // it flows into the next yffi call and panics across the FFI with no
+        // context (an opaque abort). Fail here, at the real cause, instead.
+        if (!_txn) {
+            std::fprintf(stderr,
+                "wfcrdt: nested write transaction — yrs is single-writer; commit "
+                "the outer Transaction before opening another (Transaction::raw)\n");
+            std::abort();
+        }
+    }
     return _txn;
 }
 

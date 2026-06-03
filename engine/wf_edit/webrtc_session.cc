@@ -396,7 +396,15 @@ void WebrtcSession::OnSignal(const std::string& from_peer,
             if (!cand.empty())
                 state->pc->addRemoteCandidate(rtc::Candidate(cand, sdpMid));
         }
-    } catch (...) {}
+    } catch (const std::exception& e) {
+        // Don't silently swallow malformed signaling (bad JSON / SDP / ICE) —
+        // a dropped signal that's invisible makes connection failures un-debuggable.
+        std::fprintf(stderr, "webrtc: dropped malformed signal from %.8s: %s\n",
+                     from_peer.c_str(), e.what());
+    } catch (...) {
+        std::fprintf(stderr, "webrtc: dropped malformed signal from %.8s (non-std throw)\n",
+                     from_peer.c_str());
+    }
 }
 
 // ── DrainSignaling ────────────────────────────────────────────────────────────
