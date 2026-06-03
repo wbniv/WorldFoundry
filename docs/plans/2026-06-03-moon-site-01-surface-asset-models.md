@@ -49,6 +49,9 @@ The level pipeline (`blender --background --python blender_create_moon.py`) rebu
 ![Moon RACER concept art — Intuitive Machines / NASA, April 2024](screenshots/ref_moon_racer.jpg)
 *Moon RACER concept art (Intuitive Machines / NASA, April 2024). Source: [NASA News Release 24-027](https://www.nasa.gov/news-release/nasa-selects-companies-to-advance-moon-mobility-for-artemis-missions/).*
 
+![Moon RACER — WF primitive model](screenshots/moon_moon_racer.png)
+*WF model — 112 verts / 74 polys.*
+
 **Why Moon RACER:** Investigation doc explicitly calls it "highest-bang-for-buck next addition" and notes Intuitive Machines built a drivable Earth-side mock-up in November 2024 giving the cleanest reference geometry of the three LTV candidates (vs Lunar Dawn / FLEX).
 
 **Dimensions:** ~4 m long × 2 m wide × 1.5 m tall (open-cab electric buggy).
@@ -80,6 +83,9 @@ All added as a new section `# ── 6c. Surface assets ──` after the lander
 ![Astrobotic LunaGrid VSAT delivered to the Moon by Griffin lander](screenshots/ref_vsat_tower.jpg)
 *LunaGrid VSAT delivered by Astrobotic's Griffin lander (Astrobotic, July 2024). Source: [Astrobotic press release](https://www.astrobotic.com/lunagrids-vertical-solar-array-technology-enters-tvac/).*
 
+![VSAT Tower — WF primitive model](screenshots/moon_vsat_tower.png)
+*WF model — 40 verts / 28 polys.*
+
 Dimensions: 10 m tall mast, solar array at top.
 
 **Primitives in `_build_vsat_tower()`:**
@@ -96,6 +102,9 @@ Dimensions: 10 m tall mast, solar array at top.
 
 ![Toyota/JAXA Lunar Cruiser model at Japan Mobility Show 2023](screenshots/ref_lunar_cruiser.jpg)
 *Toyota/JAXA Lunar Cruiser 1/5-scale model, Japan Mobility Show 2023. Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Toyota_JAXA_LUNA_CRUISER_Model_at_Japan_Mobility_Show_2023.jpg) (CC).*
+
+![Lunar Cruiser — WF primitive model](screenshots/moon_lunar_cruiser.png)
+*WF model — 152 verts / 100 polys.*
 
 Dimensions: 6 m × 5.2 m × 3.8 m pressurized cabin on 6 large wheels.
 
@@ -118,6 +127,9 @@ Dimensions: 6 m × 5.2 m × 3.8 m pressurized cabin on 6 large wheels.
 ![Blue Origin Blue Moon Mark 1 after thermal-vacuum testing at NASA JSC](screenshots/ref_blue_moon_mk1.jpg)
 *Blue Moon Mark 1 after environmental testing in Chamber A, NASA Johnson Space Center (NASA, May 2026). Source: [NASA](https://www.nasa.gov/missions/artemis/blue-origin-moon-lander-completes-testing-at-nasa-vacuum-chamber/).*
 
+![Blue Moon MK1 — WF primitive model](screenshots/moon_blue_moon_mk1.png)
+*WF model — 272 verts / 160 polys.*
+
 Dimensions: ~8 m tall × ~3 m diameter. Gold thermal-blanket body, four splayed landing legs.
 
 **Primitives in `_build_blue_moon_mk1()`:**
@@ -139,6 +151,9 @@ Dimensions: ~8 m tall × ~3 m diameter. Gold thermal-blanket body, four splayed 
 ![NASA Foundation Surface Habitat concept](screenshots/ref_fsh.png)
 *NASA Foundation Surface Habitat concept from the Artemis Plan (NASA, September 2020). Public domain. Source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:NASA_Foundation_Surface_Habitat.png).*
 
+![Foundation Surface Habitat — WF primitive model](screenshots/moon_fsh.png)
+*WF model — 120 verts / 72 polys.*
+
 Dimensions: 4 m-diameter metallic base ~3 m tall; 6.5 m-diameter inflatable upper ~7 m tall. Total ~10 m.
 
 **Primitives in `_build_fsh()`:**
@@ -156,6 +171,9 @@ Dimensions: 4 m-diameter metallic base ~3 m tall; 6.5 m-diameter inflatable uppe
 
 ![NASA Fission Surface Power surface-deployment concept](screenshots/ref_fsp_reactor.jpg)
 *NASA Fission Surface Power surface-deployment concept (NASA Glenn Research Center, May 2023). Source: [NASA FSP programme page](https://www.nasa.gov/exploration-systems-development-mission-directorate/fission-surface-power/).*
+
+![FSP Reactor — WF primitive model](screenshots/moon_fsp_reactor.png)
+*WF model — 104 verts / 66 polys.*
 
 Dimensions: reactor vessel ~2 m tall × 1.8 m diameter; radiator skirt ~6 m diameter.
 
@@ -189,56 +207,9 @@ Reuse `_make_mat()` and `attach_schema()` helpers already in the script.
 
 **All non-ground materials go in PERM.** All new materials use `_make_mat(name, rgb)` — flat procedural colours, no separate texture images → lands in PERM automatically. Do not create per-asset atlas pages. PERM budget is fine: six new assets are all flat-colour, very low UV area.
 
-### Per-asset screenshot workflow
-
-After each asset's `_build_*()` function is written and the script re-run in Blender, capture a close-up viewport render using the Blender MCP bridge:
-
-```python
-# Position the Blender viewport to a 3/4 front-top angle on the asset,
-# then capture via mcp__blender__get_viewport_screenshot.
-# Save the PNG to docs/plans/screenshots/moon_<asset>.png
-# and embed it in the matching section of this plan doc.
-```
-
-Steps per asset:
-1. Write `_build_*()` + wire actor, `py_compile` check.
-2. In Blender (via `mcp__blender__execute_blender_code`): run the build function in isolation, deselect all, select the new object, frame it with `bpy.ops.view3d.view_selected()`, set a 3/4 top-front view angle.
-3. `mcp__blender__get_viewport_screenshot` → save PNG.
-4. Edit this plan doc: replace the `<!-- screenshot: <asset> -->` placeholder below each heading with `![<asset>](screenshots/moon_<asset>.png)`.
-
 **Commit structure:**
-- Phase 1 commit: Moon RACER builder + placement + screenshot in plan + plan doc
-- Phase 2 commit (per asset or batched): each remaining asset + screenshot + plan update
-
----
-
-## Asset renders
-
-Screenshots added here as each asset is completed.
-
-### Moon RACER
-
-![Moon RACER — Blender render](screenshots/moon_moon_racer.png)
-
-### VSAT Tower
-
-![VSAT Tower — Blender render](screenshots/moon_vsat_tower.png)
-
-### Lunar Cruiser
-
-![Lunar Cruiser — Blender render](screenshots/moon_lunar_cruiser.png)
-
-### Blue Moon Mark 1
-
-![Blue Moon MK1 — Blender render](screenshots/moon_blue_moon_mk1.png)
-
-### Foundation Surface Habitat
-
-![Foundation Surface Habitat — Blender render](screenshots/moon_fsh.png)
-
-### FSP Reactor
-
-![FSP Reactor — Blender render](screenshots/moon_fsp_reactor.png)
+- Phase 1 commit: Moon RACER + plan doc
+- Phase 2 commit: remaining five assets + plan doc
 
 ---
 
