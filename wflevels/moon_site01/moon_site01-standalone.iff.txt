@@ -12,7 +12,7 @@
     { 'ALGN' .align( 2048 ) }
     { 'RAM'
         'OBJD' 100000l                  // 10 actors + margin
-        'PERM' 500000l                  // player.iff
+        'PERM' 1000000l                 // prop models: player, lander, earth, surface assets
         'ROOM' 8000000l                 // 10000-vert terrain mesh ~2.5MB + room overhead
         'FLAG' 1l 1l                    // doomstick, bungeecam
     }
