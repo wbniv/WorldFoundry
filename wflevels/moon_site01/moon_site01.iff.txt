@@ -24,8 +24,9 @@
 	// Example: `$3fff001` = `IFF` + room `fff` (`PERM`) + slot `001`.
 	{ 'ASMP'
 		$3fff001l { 'STR' "player.iff" }  // IFF PERM fff:001
+		$3fff002l { 'STR' "artemis_lander.iff" }  // IFF PERM fff:002
+		$3fff003l { 'STR' "earth.iff" }  // IFF PERM fff:003
 		$3000001l { 'STR' "lunar_terrain.iff" }  // IFF RM0 000:001
-		$3000002l { 'STR' "artemis_lander.iff" }  // IFF RM0 000:002
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "moon_site01.lvl" ] }
@@ -36,6 +37,8 @@
 		{ 'ASS' $5ffffffl [ "Perm.ruv" ] }     // RUV PERM fff:fff
 		{ 'ASS' $7ffffffl [ "Perm.cyc" ] }     // CYC PERM fff:fff
 		{ 'ASS' $3fff001l [ "player.iff" ] }  // IFF PERM fff:001
+		{ 'ASS' $3fff002l [ "artemis_lander.iff" ] }  // IFF PERM fff:002
+		{ 'ASS' $3fff003l [ "earth.iff" ] }  // IFF PERM fff:003
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'
@@ -44,7 +47,6 @@
 		{ 'ASS' $5000fffl [ "Room0.ruv" ] }    // RUV RM0 000:fff
 		{ 'ASS' $7000fffl [ "Room0.cyc" ] }    // CYC RM0 000:fff
 		{ 'ASS' $3000001l [ "lunar_terrain.iff" ] }  // IFF RM0 000:001
-		{ 'ASS' $3000002l [ "artemis_lander.iff" ] }  // IFF RM0 000:002
 	}
 	{ 'ALGN' .align(2048) }
 }
