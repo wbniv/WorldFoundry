@@ -222,23 +222,23 @@ Screenshots added here as each asset is completed.
 
 ### VSAT Tower
 
-<!-- screenshot: vsat_tower -->
+![VSAT Tower — Blender render](screenshots/moon_vsat_tower.png)
 
 ### Lunar Cruiser
 
-<!-- screenshot: lunar_cruiser -->
+![Lunar Cruiser — Blender render](screenshots/moon_lunar_cruiser.png)
 
 ### Blue Moon Mark 1
 
-<!-- screenshot: blue_moon_mk1 -->
+![Blue Moon MK1 — Blender render](screenshots/moon_blue_moon_mk1.png)
 
 ### Foundation Surface Habitat
 
-<!-- screenshot: fsh -->
+![Foundation Surface Habitat — Blender render](screenshots/moon_fsh.png)
 
 ### FSP Reactor
 
-<!-- screenshot: fsp_reactor -->
+![FSP Reactor — Blender render](screenshots/moon_fsp_reactor.png)
 
 ---
 
