@@ -17,9 +17,9 @@ W1-2 build from `../smb`, boot clean (131/142 objects, 0 asserts), and pass
 now — levcomp (`--mesh-dir` bbox + `--mesh-ref-prefix` embed path), textile (`[VRML] Path` in the
 `.ini`), iffcomp (the embed) — all keyed off the per-level `mesh.flags`.
 
-Residual (minor, deferred): `coin_template.iff` vs `cr_coin.iff` are byte-identical but separate
-(the coin-room coin uses its own datablock) — fold the coin-room coin into the `coin_template`
-datablock to drop one more file.
+Follow-on (done): folded the coin-room coins into the `coin_template` datablock (they built a
+byte-identical `cr_coin` mesh) — **smb/ 43 → 42 files**; also dropped W1-2's per-instance
+`wf_Mesh Name='cr_coin_N.iff'` that named files which never existed (stale `.lev` refs gone).
 **Parent:** [`2026-06-02-smb-common-extraction-and-mesh-sharing.md`](2026-06-02-smb-common-extraction-and-mesh-sharing.md) (P3) · follows [`2026-06-03-smb-export-scale-pipeline-and-mesh-collapse.md`](2026-06-03-smb-export-scale-pipeline-and-mesh-collapse.md) (P2b).
 
 ## Context
