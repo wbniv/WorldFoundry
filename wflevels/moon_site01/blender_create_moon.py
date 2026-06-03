@@ -69,9 +69,7 @@ PLAYER_SPAWN  = (0.0, 0.0, 5.0)
 # that fades everything past 30 m to flat #888888; see
 # docs/plans/2026-05-31-uninitialised-fog-defaults.md).
 CAM_OFFSET    = (0.0, -100.0, 80.0)
-# Raised from (0,0,0) to tilt cs_chase from 38.7° down to 16.7° down — puts
-# Earth (at Y=200,Z=50) from 33° off-center to 11° off-center (half-FOV=30°).
-LOOK_TARGET   = (0.0, 0.0, 50.0)
+LOOK_TARGET   = (0.0, 0.0, 0.0)   # cs_chase looks ~39° down — overhead camp view
 
 # Sun direction — az 20°, alt 2° (matches LOLA illumination at site latitude).
 # Used by both the engine directional-light actor and the visible Sun disc mesh.
@@ -340,7 +338,7 @@ def _build_earth():
     pixel at the equator; going higher wastes atlas space with no visible gain.
     See docs/investigations/2026-06-02-texture-lod-for-distant-spheres.md."""
     bpy.ops.mesh.primitive_uv_sphere_add(
-        radius=20.0, segments=24, ring_count=12,
+        radius=80.0, segments=24, ring_count=12,
         location=(0.0, 0.0, 0.0))
     obj = bpy.context.object
     obj.name = 'earth'
@@ -824,21 +822,28 @@ if player:
         "else 3 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
         "11 - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
         "then then\n"
-        # Camera: cs_earth at ignition (phase 2) + first 20 s of ascent (phase 3);
-        # cut back to cs_chase after 20 s (lander at ~200 m, off-screen anyway).
-        # See docs/plans/2026-06-03-moon-earth-cutscene.md.
+        # Camera logic (every frame):
+        #   phase 0-1 (idle/countdown): cs_earth — static ground shot of rocket + Earth
+        #   phase 2 (ignition):         cs_earth — rocket starts rising
+        #   phase 3, T≤13 s:            cs_earth — tracking lander upward
+        #   phase 3, T>13 s:            cs_chase — overhead view of camp
+        # Guard every CAMSHOT write: index may be 0 on frame-0 (mailbox not yet
+        # populated by the camshot actor's own script). Writing 0 trips
+        # RangeCheck(1,idxShot,max) in movecam.cc:947; the engine bootstrap at
+        # level.cc:209 seeds CAMSHOT with the first valid CamShot index, so
+        # skipping a 0-write keeps that valid seed in place for frame 0.
         "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 1 > if "
         "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if "
         "INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox 13 > if "
-        "INDEXOF_MOON_CHASE_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox "
+        "INDEXOF_MOON_CHASE_CAM_IDX read-mailbox dup 0 = if drop else INDEXOF_CAMSHOT write-mailbox then "
         "else "
-        "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox "
+        "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox dup 0 = if drop else INDEXOF_CAMSHOT write-mailbox then "
         "then "
         "else "
-        "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox "
+        "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox dup 0 = if drop else INDEXOF_CAMSHOT write-mailbox then "
         "then "
         "else "
-        "INDEXOF_MOON_CHASE_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox "
+        "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox dup 0 = if drop else INDEXOF_CAMSHOT write-mailbox then "
         "then\n"
     )
 
@@ -880,7 +885,7 @@ print(f"[moon] lander mesh: {len(_lander.data.vertices)} verts, "
 # See docs/investigations/2026-06-02-texture-lod-for-distant-spheres.md.
 _earth = _build_earth()
 attach_schema(_earth, 'platform')
-_earth.location = (0.0, 200.0, 50.0)
+_earth.location = (0.0, 2000.0, 400.0)
 _earth['wf_Mobility']             = 'Anchored'
 _earth['wf_Model Type']           = 'Mesh'
 _earth['wf_Visibility Mailbox']   = 1
@@ -1102,8 +1107,11 @@ if room:
     z_min = float(heights.min()) - 10.0      # 10 m below lowest terrain pixel
     z_max = max(2000.0, float(heights.max()) + 50.0)  # headroom for lander ascent (z=0.5t²)
     centre = (0.0, 0.0, (z_min + z_max) / 2.0)
+    # Y max extended to cover Earth actor at Y=2000 (PERM actors still need to
+    # fall inside room bbox or levcomp won't associate them with any room).
+    y_max = max(HALF_M + 10.0, 2100.0)
     rel = (-HALF_M - 10.0, -HALF_M - 10.0, z_min - centre[2],
-           +HALF_M + 10.0, +HALF_M + 10.0, z_max - centre[2])
+           +HALF_M + 10.0, y_max, z_max - centre[2])
 
     room.name = 'room_moon'
     room.location = centre
