@@ -1101,7 +1101,7 @@
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox dup * 0.5 * INDEXOF_Z_POS write-mailbox then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox dup * 0.5 * dup 500 > if drop 0 INDEXOF_ALIVE write-mailbox else INDEXOF_Z_POS write-mailbox then then\n" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000002108546(1.15.16) } { 'STR' "0.000000" } }

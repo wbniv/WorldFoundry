@@ -530,7 +530,11 @@ _lander['wf_Script'] = (
     "\\ wf\n"
     "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if "    # >2 == >=3 (zForth lacks >=)
     "INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox dup * 0.5 * "
+    "dup 500 > if "                                     # z > 500 m → despawn (t≈32 s)
+    "drop 0 INDEXOF_ALIVE write-mailbox "
+    "else "
     "INDEXOF_Z_POS write-mailbox "
+    "then "
     "then\n"
 )
 print(f"[moon] lander mesh: {len(_lander.data.vertices)} verts, "

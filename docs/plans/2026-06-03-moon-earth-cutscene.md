@@ -130,6 +130,24 @@ MAILBOXENTRY( MOON_EARTH_CAM_IDX, 1884 )
   - player Forth script: 3-branch camera logic (phase 2/early-3/late-3)
 - `wfsource/source/game/scripting_stub.cc` — touch to force mailbox.inc recompile
 
+## Lander despawn (timebomb fix)
+
+`z = 0.5t²` — lander exits the room bbox (z_max 2000 m) at t≈63 s. Despawn instead:
+
+```forth
+INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if
+  INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox dup * 0.5 *
+  dup 500 > if
+    drop 0 INDEXOF_ALIVE write-mailbox   \ t≈32 s; camera already cut to cs_chase
+  else
+    INDEXOF_Z_POS write-mailbox
+  then
+then
+```
+
+Camera cuts back to `cs_chase` at t_minus > 20 s (t≈20 s into ascent, z≈200 m).
+Lander despawns at z > 500 m (t≈32 s) — 12 s after the cutback, well before room exit.
+
 ## Implementation notes
 
 **`Follow` and `Target` required non-null** (`movecam.cc:236`): even with
