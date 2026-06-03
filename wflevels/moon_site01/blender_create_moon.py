@@ -865,22 +865,21 @@ if player:
         # ── In-vehicle mode ────────────────────────────────────────────────────
         "else\n"
         "0 INDEXOF_INPUT write-mailbox\n"
-        # Snap player to vehicle — skip the first frame (vehicle hasn't published X/Y/Z yet).
-        "INDEXOF_MOON_VEH_ENTERING read-mailbox 1 = if\n"
-        "0 INDEXOF_MOON_VEH_ENTERING write-mailbox\n"
-        "else\n"
+        # VEH_ENTERING=1 on the first frame after entry — vehicle hasn't published
+        # X/Y/Z yet, and B may still be held from the entry press.  Gate both
+        # position sync and exit on VEH_ENTERING=0 to prevent instant accidental exit.
+        "INDEXOF_MOON_VEH_ENTERING read-mailbox 0 = if\n"
         "INDEXOF_MOON_VEHICLE_X read-mailbox INDEXOF_X_POS write-mailbox\n"
         "INDEXOF_MOON_VEHICLE_Y read-mailbox INDEXOF_Y_POS write-mailbox\n"
         "INDEXOF_MOON_VEHICLE_Z read-mailbox INDEXOF_Z_POS write-mailbox\n"
-        "then\n"
-        # Input routing: the vehicle's own script reads HARDWARE_JOYSTICK1_RAW
-        # and writes to its own local INDEXOF_INPUT — no write-actor-mailbox needed
-        # (cross-actor mailbox write fails range check since INPUT index differs per actor).
-        # Exit on B button.
+        # Exit on B button — only checked after VEH_ENTERING cleared (safe frame).
         f"INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox {_INTERACT_BIT} & 0 > if\n"
         "0 INDEXOF_MOON_ACTIVE_VEHICLE write-mailbox\n"
         "0 INDEXOF_MOON_ACTIVE_VEH_IDX write-mailbox\n"
         "1 INDEXOF_MOON_PLAYER_VIS write-mailbox\n"
+        "then\n"
+        "else\n"
+        "0 INDEXOF_MOON_VEH_ENTERING write-mailbox\n"
         "then\n"
         "then\n"   # close outer on-foot/in-vehicle if-else
     )
@@ -1071,16 +1070,15 @@ for _i, (_cobj, (_cx, _cy)) in enumerate(
     _cobj['wf_Running Acceleration']  = 12.0   # heavier than astronaut (8.0)
     _cobj['wf_Running Deceleration']  = 0.3    # low friction — slides on regolith
     _cidx_mb = 1886 + _i   # MOON_CRUISER_0/1/2_IDX
+    _vehicle_id = _i + 1   # 1/2/3 matching what the ActBox writes to MOON_NEARBY_VEHICLE
     _cobj['wf_Script'] = (
         "\\ wf\n"
-        # Publish own actor index every tick (needed for entry resolve in player script).
+        # Publish own actor index every tick (needed by player entry-resolve).
         f"INDEXOF_ACTOR_INDEX read-mailbox {_cidx_mb} write-mailbox\n"
-        # When I am the active vehicle: route joystick to own INPUT and publish position.
-        # Reading HARDWARE_JOYSTICK1_RAW is safe here — it is a global mailbox (index 1909)
-        # accessible to all actors. Writing to INDEXOF_INPUT writes to THIS actor's local
-        # INPUT mailbox (within [vehicle_base, vehicle_base+N]), which is what MovementHandlerVehicle
-        # reads via GetInputDevice(). This avoids the cross-actor write-actor-mailbox range trap.
-        "INDEXOF_MOON_ACTIVE_VEH_IDX read-mailbox INDEXOF_ACTOR_INDEX read-mailbox = if\n"
+        # Route joystick + publish position when I am the active vehicle.
+        # Compare MOON_ACTIVE_VEHICLE (1/2/3 vehicle id) to my fixed id — simpler
+        # and more reliable than actor-index comparison via MOON_ACTIVE_VEH_IDX.
+        f"INDEXOF_MOON_ACTIVE_VEHICLE read-mailbox {_vehicle_id} = if\n"
         "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n"
         "INDEXOF_X_POS read-mailbox INDEXOF_MOON_VEHICLE_X write-mailbox\n"
         "INDEXOF_Y_POS read-mailbox INDEXOF_MOON_VEHICLE_Y write-mailbox\n"
