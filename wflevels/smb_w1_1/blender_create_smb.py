@@ -780,16 +780,10 @@ CR_COINS = [
 # Spinning coin discs (NOT statplats): anchored 'enemy'-schema mesh actors so they
 # run COIN_SCRIPT (ROTATION_C = TIME) and spin like the surface coins, without
 # gold.cc's 5 s TTL despawning them (the popup_score actor uses the same trick).
-# Pickup is true-XZ contact in the player script above. One shared disc mesh; each
-# coin exports its own cr_coin_N.iff.
-_crc_mesh = bpy.data.meshes.new('cr_coin')
-_crc_bm = _bmesh.new()
-_bmesh.ops.create_cube(_crc_bm, size=1.0)
-_bmesh.ops.scale(_crc_bm, vec=(COIN_X*2, COIN_T*2, COIN_Z*2), verts=_crc_bm.verts)
-_crc_bm.to_mesh(_crc_mesh); _crc_bm.free()
-_crc_mesh.materials.append(mat_coin)
-for _p in _crc_mesh.polygons:
-    _p.material_index = 0
+# Pickup is true-XZ contact in the player script above. The disc is byte-identical
+# to the coin_template, so reuse that datablock — every coin (room + thrown) shares one
+# coin_template.iff game-wide (was a separate cr_coin.iff).
+_crc_mesh = bpy.data.meshes['coin_template']
 for _ci, (_cx, _cz, _cmb) in enumerate(CR_COINS):
     _coin = bpy.data.objects.new(f'cr_coin_{_ci}', _crc_mesh)
     scene.collection.objects.link(_coin)

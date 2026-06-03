@@ -3413,11 +3413,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1811l } { 'STR' "1811" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3434,11 +3433,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_1.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1812l } { 'STR' "1812" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3455,11 +3453,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_2.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1813l } { 'STR' "1813" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3476,11 +3473,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_3.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1846l } { 'STR' "1846" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3497,11 +3493,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_4.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1847l } { 'STR' "1847" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3518,11 +3513,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_5.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1848l } { 'STR' "1848" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3539,11 +3533,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_6.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1849l } { 'STR' "1849" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3560,11 +3553,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_7.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1850l } { 'STR' "1850" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3581,11 +3573,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_8.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1851l } { 'STR' "1851" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3602,11 +3593,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_9.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1852l } { 'STR' "1852" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3623,11 +3613,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_10.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1853l } { 'STR' "1853" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3644,11 +3633,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_11.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1854l } { 'STR' "1854" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3665,11 +3653,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_12.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1855l } { 'STR' "1855" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3686,11 +3673,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_13.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1856l } { 'STR' "1856" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3707,11 +3693,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_14.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1857l } { 'STR' "1857" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3728,11 +3713,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_15.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1858l } { 'STR' "1858" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3749,11 +3733,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_16.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1859l } { 'STR' "1859" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3770,11 +3753,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_17.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1860l } { 'STR' "1860" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3791,11 +3773,10 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_18.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1861l } { 'STR' "1861" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }

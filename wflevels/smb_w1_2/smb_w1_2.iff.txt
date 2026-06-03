@@ -56,7 +56,7 @@
 		$3000017l { 'STR' "unit_box_smb_warp_sign.iff" }  // IFF RM0 000:017
 		$3000018l { 'STR' "w1_2_pipe_entry_sense.iff" }  // IFF RM0 000:018
 		$3001001l { 'STR' "unit_box_smb_cr_floor.iff" }  // IFF RM1 001:001
-		$3001002l { 'STR' "cr_coin.iff" }  // IFF RM1 001:002
+		$3001002l { 'STR' "coin_template.iff" }  // IFF RM1 001:002
 		$3001003l { 'STR' "tex_box_brick_tex_tga.iff" }  // IFF RM1 001:003
 		$3001004l { 'STR' "abor_coin.iff" }  // IFF RM1 001:004
 		$3001005l { 'STR' "unit_box_smb_pipe_green.iff" }  // IFF RM1 001:005
@@ -116,7 +116,7 @@
 		{ 'ASS' $5001fffl [ "Room1.ruv" ] }    // RUV RM1 001:fff
 		{ 'ASS' $7001fffl [ "Room1.cyc" ] }    // CYC RM1 001:fff
 		{ 'ASS' $3001001l [ "../smb/unit_box_smb_cr_floor.iff" ] }  // IFF RM1 001:001
-		{ 'ASS' $3001002l [ "../smb/cr_coin.iff" ] }  // IFF RM1 001:002
+		{ 'ASS' $3001002l [ "../smb/coin_template.iff" ] }  // IFF RM1 001:002
 		{ 'ASS' $3001003l [ "../smb/tex_box_brick_tex_tga.iff" ] }  // IFF RM1 001:003
 		{ 'ASS' $3001004l [ "../smb/abor_coin.iff" ] }  // IFF RM1 001:004
 		{ 'ASS' $3001005l [ "../smb/unit_box_smb_pipe_green.iff" ] }  // IFF RM1 001:005

@@ -807,14 +807,11 @@ CR_COINS = [
     (7.5*T,  _CR_HIGH_Z, SMB_COIN_16), (8.5*T,  _CR_HIGH_Z, SMB_COIN_17),
     (9.5*T,  _CR_HIGH_Z, SMB_COIN_18),
 ]
-_crc_mesh = bpy.data.meshes.new('cr_coin')
-_crc_bm = _bmesh.new()
-_bmesh.ops.create_cube(_crc_bm, size=1.0)
-_bmesh.ops.scale(_crc_bm, vec=(COIN_X*2, COIN_T*2, COIN_Z*2), verts=_crc_bm.verts)
-_crc_bm.to_mesh(_crc_mesh); _crc_bm.free()
-_crc_mesh.materials.append(mat_coin)
-for _p in _crc_mesh.polygons:
-    _p.material_index = 0
+# Reuse the coin_template datablock (byte-identical disc) so the room coins share one
+# coin_template.iff game-wide — no separate cr_coin.iff, and no per-instance Mesh Name
+# (the old per-coin cr_coin_N.iff names referenced files that never existed: the actors
+# shared one datablock, so only one .iff was ever written).
+_crc_mesh = bpy.data.meshes['coin_template']
 for _ci, (_cx, _cz, _cmb) in enumerate(CR_COINS):
     _coin = bpy.data.objects.new(f'cr_coin_{_ci}', _crc_mesh)
     scene.collection.objects.link(_coin)
@@ -823,7 +820,6 @@ for _ci, (_cx, _cz, _cmb) in enumerate(CR_COINS):
     _coin['wf_Mobility']           = 'Anchored'
     _coin['wf_Model Type']         = 'Mesh'
     _coin['wf_Visibility Mailbox'] = _cmb
-    _coin['wf_Mesh Name']          = f'cr_coin_{_ci}.iff'
     _coin['wf_Script']             = COIN_SCRIPT
 
 # 10-coin block in the coin room (a brick that dispenses coins on bump-from-below).
