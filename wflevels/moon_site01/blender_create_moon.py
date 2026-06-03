@@ -954,6 +954,7 @@ def _add_entry_trigger(cx, cy, cz, vehicle_id):
     trig.scale = (3.0, 4.0, 2.0)
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     attach_schema(trig, 'actbox')
+    trig['wf_Activated By']            = 'All'
     trig['wf_MailBox']                 = 1889     # MOON_NEARBY_VEHICLE
     trig['wf_MailBoxValue']            = float(vehicle_id)
     trig['wf_ClearOnExit']             = 'True'
