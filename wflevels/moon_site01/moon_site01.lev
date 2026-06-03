@@ -1141,7 +1141,7 @@
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
 		{ 'STR' { 'NAME' "Target" } { 'STR' "CamTarget" } }
 		{ 'STR' { 'NAME' "Follow" } { 'STR' "CamTarget" } }
-		{ 'STR' { 'NAME' "Track Object" } { 'STR' "artemis_lander" } }
+		{ 'STR' { 'NAME' "Track Object" } { 'STR' "Player" } }
 		{ 'I32' { 'NAME' "Rotation" } { 'DATA' 0l } { 'STR' "Fixed" } }  //Fixed|Track
 		{ 'I32' { 'NAME' "Position X" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
 		{ 'I32' { 'NAME' "Position Y" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
