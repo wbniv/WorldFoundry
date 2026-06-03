@@ -54,6 +54,14 @@ HALF_M    = SIDE_M / 2.0
 print(f"[moon] heightfield: {N}x{N} samples @ {CELL_M} m/sample, "
       f"Z range {heights.min():+.1f} to {heights.max():+.1f} m")
 
+
+def terrain_z(wx, wy):
+    """Sample the LOLA heightfield at world position (wx, wy) — nearest-neighbour."""
+    col = max(0.0, min(float(N - 1), (wx + HALF_M) / CELL_M))
+    row = max(0.0, min(float(N - 1), (wy + HALF_M) / CELL_M))
+    return float(heights[int(round(row)), int(round(col))])
+
+
 # ── Player (astronaut) — 1.8 m tall, WF unit = 1 m ───────────────────────────
 PLAYER_HEIGHT = 1.8
 # Spawn at centre of play area, 5 m above terrain centre (drop is the proof of
@@ -775,7 +783,7 @@ if player:
     player['wf_Mobility']             = 'Physics'
     player['wf_Mass']                 = 80.0       # ~80 kg astronaut
     player['wf_Model Type']           = 'Mesh'
-    player['wf_Visibility Mailbox']   = 1
+    player['wf_Visibility Mailbox']   = 1891   # MOON_PLAYER_VIS: 1=visible, 0=hidden in vehicle
     # Use the built astronaut mesh — already 1.8 m tall in mesh-local coords
     # with feet at z=0. No actor-side scale (the old 1.8×1.8×1.8 blanket scale
     # was a cube-shaped placeholder).
@@ -798,21 +806,24 @@ if player:
     # for jump) flows into INPUT at its native position; movement.cc reads them
     # via the gDoomStick branch (the level's RAM FLAG sets gDoomStick=true).
     # See docs/plans/2026-05-31-doomstick-4-direction-strafe-input-on-the-moon-lev.md.
+    # EJ_BUTTONF_B = (1 << EJ_BUTTONB_B) = (1 << 1) = 2 — B button, not used by
+    # movement so safe as the vehicle interact / enter-exit button.
+    _INTERACT_BIT = 2
     player['wf_Script'] = (
         "\\ wf\n"
+        # ── On-foot mode ───────────────────────────────────────────────────────
+        # Seed visibility, run normal locomotion, handle launch sequence and
+        # camera cuts. Skip all of this when the player is inside a vehicle.
+        "INDEXOF_MOON_ACTIVE_VEHICLE read-mailbox 0 = if\n"
+        "1 INDEXOF_MOON_PLAYER_VIS write-mailbox\n"
         "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n"
-        # Position-display HUD overlay: copy locals → globals every tick so
-        # display.cc can read them. See docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md.
+        # Position HUD overlay.
         "1 INDEXOF_MOON_OVERLAY_ENABLED write-mailbox\n"
         "INDEXOF_X_POS read-mailbox INDEXOF_MOON_PLAYER_X write-mailbox\n"
         "INDEXOF_Y_POS read-mailbox INDEXOF_MOON_PLAYER_Y write-mailbox\n"
         "INDEXOF_Z_POS read-mailbox INDEXOF_MOON_PLAYER_Z write-mailbox\n"
         "INDEXOF_ROTATION_C read-mailbox INDEXOF_MOON_PLAYER_HEADING write-mailbox\n"
-        # Launch sequence — derive phase + T-minus from level-clock TIME (seconds).
-        # WF dt is variable (3-60+ fps depending on workload / video record),
-        # so timing in TIME-seconds, never in ticks.  See
-        # docs/plans/2026-06-02-moon-lander-launch-sequence.md.
-        # Phases: 0-10s countdown (T_MINUS 10→0), 10-11s ignition, 11s+ ascent.
+        # Launch sequence.
         "INDEXOF_TIME read-mailbox "
         "dup 10 < if "
         "1 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
@@ -822,19 +833,10 @@ if player:
         "else 3 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
         "11 - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
         "then then\n"
-        # Camera logic (every frame):
-        #   phase 0-1 (idle/countdown): cs_earth — static ground shot of rocket + Earth
-        #   phase 2 (ignition):         cs_earth — rocket starts rising
-        #   phase 3, T≤13 s:            cs_earth — tracking lander upward
-        #   phase 3, T>13 s:            cs_chase — overhead view of camp
-        # Guard every CAMSHOT write: index may be 0 on frame-0 (mailbox not yet
-        # populated by the camshot actor's own script). Writing 0 trips
-        # RangeCheck(1,idxShot,max) in movecam.cc:947; the engine bootstrap at
-        # level.cc:209 seeds CAMSHOT with the first valid CamShot index, so
-        # skipping a 0-write keeps that valid seed in place for frame 0.
+        # Camera cuts (unchanged).
         "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 1 > if "
         "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if "
-        "INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox 13 > if "
+        "INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox 20 > if "
         "INDEXOF_MOON_CHASE_CAM_IDX read-mailbox dup 0 = if drop else INDEXOF_CAMSHOT write-mailbox then "
         "else "
         "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox dup 0 = if drop else INDEXOF_CAMSHOT write-mailbox then "
@@ -845,6 +847,39 @@ if player:
         "else "
         "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox dup 0 = if drop else INDEXOF_CAMSHOT write-mailbox then "
         "then\n"
+        # Enter vehicle: adjacent (ActBox wrote MOON_NEARBY_VEHICLE) + B button.
+        "INDEXOF_MOON_NEARBY_VEHICLE read-mailbox 0 > if\n"
+        f"INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox {_INTERACT_BIT} & 0 > if\n"
+        "INDEXOF_MOON_NEARBY_VEHICLE read-mailbox INDEXOF_MOON_ACTIVE_VEHICLE write-mailbox\n"
+        "0 INDEXOF_MOON_PLAYER_VIS write-mailbox\n"
+        "0 INDEXOF_INPUT write-mailbox\n"
+        # Resolve vehicle ID (1/2/3) → actual actor index → MOON_ACTIVE_VEH_IDX.
+        "INDEXOF_MOON_NEARBY_VEHICLE read-mailbox 1 = if\n"
+        "INDEXOF_MOON_CRUISER_0_IDX read-mailbox INDEXOF_MOON_ACTIVE_VEH_IDX write-mailbox then\n"
+        "INDEXOF_MOON_NEARBY_VEHICLE read-mailbox 2 = if\n"
+        "INDEXOF_MOON_CRUISER_1_IDX read-mailbox INDEXOF_MOON_ACTIVE_VEH_IDX write-mailbox then\n"
+        "INDEXOF_MOON_NEARBY_VEHICLE read-mailbox 3 = if\n"
+        "INDEXOF_MOON_CRUISER_2_IDX read-mailbox INDEXOF_MOON_ACTIVE_VEH_IDX write-mailbox then\n"
+        "then then\n"   # close NEARBY_VEHICLE > 0 and outer on-foot if
+        # ── In-vehicle mode ────────────────────────────────────────────────────
+        "else\n"
+        "0 INDEXOF_INPUT write-mailbox\n"
+        # Snap player to vehicle so cs_chase tracks the vehicle.
+        "INDEXOF_MOON_VEHICLE_X read-mailbox INDEXOF_X_POS write-mailbox\n"
+        "INDEXOF_MOON_VEHICLE_Y read-mailbox INDEXOF_Y_POS write-mailbox\n"
+        "INDEXOF_MOON_VEHICLE_Z read-mailbox INDEXOF_Z_POS write-mailbox\n"
+        # Route joystick → vehicle INPUT via write-actor-mailbox (val idx actor --).
+        "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox\n"
+        "INDEXOF_INPUT\n"
+        "INDEXOF_MOON_ACTIVE_VEH_IDX read-mailbox\n"
+        "write-actor-mailbox\n"
+        # Exit on B button.
+        f"INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox {_INTERACT_BIT} & 0 > if\n"
+        "0 INDEXOF_MOON_ACTIVE_VEHICLE write-mailbox\n"
+        "0 INDEXOF_MOON_ACTIVE_VEH_IDX write-mailbox\n"
+        "1 INDEXOF_MOON_PLAYER_VIS write-mailbox\n"
+        "then\n"
+        "then\n"   # close outer on-foot/in-vehicle if-else
     )
 
 # ── 6b. Artemis lander (Starship HLS) ────────────────────────────────────────
@@ -897,17 +932,36 @@ print(f"[moon] Earth sphere at {_earth.location[:]}")
 # Vehicles will be hooked to Jolt vehicle physics when controls are added.
 # See docs/plans/2026-06-03-moon-site-01-surface-asset-models.md.
 
-def _place_prop(obj, loc, name=None):
-    """Wire a surface-asset mesh as a platform/Anchored actor and place it."""
+def _place_prop(obj, loc, mobility='Anchored', name=None):
+    """Wire a surface-asset mesh as a platform actor and place it."""
     attach_schema(obj, 'platform')
-    obj.location                 = loc
-    obj['wf_Mobility']           = 'Anchored'
-    obj['wf_Model Type']         = 'Mesh'
-    obj['wf_Visibility Mailbox'] = 1
+    obj.location                  = loc
+    obj['wf_Mobility']            = mobility
+    obj['wf_Model Type']          = 'Mesh'
+    obj['wf_Visibility Mailbox']  = 1
     obj['wf_Moves Between Rooms'] = 'True'
     tag = name or obj.name
-    print(f"[moon] {tag} at {obj.location[:]}, "
+    print(f"[moon] {tag} ({mobility}) at {obj.location[:]}, "
           f"{len(obj.data.vertices)} verts, {len(obj.data.polygons)} polys")
+
+
+def _add_entry_trigger(cx, cy, cz, vehicle_id):
+    """Anchored ActBox beside the Cruiser +X airlock face.
+    Writes MOON_NEARBY_VEHICLE = vehicle_id on entry, 0 on exit.
+    Activated Actor Mailbox set to 4005 (default 0 aborts — see TODO.md)."""
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(cx + 5.5, cy, cz + 2.0))
+    trig = bpy.context.object
+    trig.scale = (3.0, 4.0, 2.0)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    attach_schema(trig, 'actbox')
+    trig['wf_MailBox']                 = 1889     # MOON_NEARBY_VEHICLE
+    trig['wf_MailBoxValue']            = float(vehicle_id)
+    trig['wf_ClearOnExit']             = 'True'
+    trig['wf_Mailbox Exit Value']      = 0.0
+    trig['wf_Activated Actor Mailbox'] = 4005
+    trig['wf_Mobility']                = 'Anchored'
+    trig.name = f'entry_trigger_{vehicle_id}'
+    print(f"[moon] entry_trigger_{vehicle_id} at {trig.location[:]}")
 
 
 def _build_sun():
@@ -976,12 +1030,51 @@ def _build_skydome():
     return obj
 
 
-_racer   = _build_moon_racer();    _place_prop(_racer,   (15.0,  20.0,  0.0))
-_vsat    = _build_vsat_tower();    _place_prop(_vsat,    (60.0,  40.0,  0.0))
-_cruiser = _build_lunar_cruiser(); _place_prop(_cruiser, (-20.0, 35.0,  0.0))
-_mk1     = _build_blue_moon_mk1(); _place_prop(_mk1,     (-40.0, -15.0, 0.0))
-_fsh     = _build_fsh();           _place_prop(_fsh,     (-55.0,  55.0, 0.0))
-_fsp     = _build_fsp_reactor();   _place_prop(_fsp,     (-90.0,  80.0, 0.0))
+# Non-vehicle props — all clamped to terrain.
+_racer = _build_moon_racer()
+_place_prop(_racer, (15.0,  20.0,  terrain_z(15.0,  20.0)))
+
+_vsat = _build_vsat_tower()
+_place_prop(_vsat,  (60.0,  40.0,  terrain_z(60.0,  40.0)))
+
+_mk1 = _build_blue_moon_mk1()
+_place_prop(_mk1,   (-40.0, -15.0, terrain_z(-40.0, -15.0)))
+
+_fsh = _build_fsh()
+_place_prop(_fsh,   (-55.0,  55.0, terrain_z(-55.0,  55.0)))
+
+_fsp = _build_fsp_reactor()
+_place_prop(_fsp,   (-90.0,  80.0, terrain_z(-90.0,  80.0)))
+
+# Lunar Cruisers — shared mesh, MOBILITY_VEHICLE, entry ActBox each.
+# Three Cruisers share one mesh datablock → one .iff entry in the room pool.
+_CRUISER_XY = [(-20.0, 35.0), (-50.0, 0.0), (10.0, -40.0)]
+_cruiser_mesh = _build_lunar_cruiser()
+_cruiser_mesh.name      = 'lunar_cruiser_0'
+_cruiser_mesh.data.name = 'lunar_cruiser_0'
+
+_c1 = bpy.data.objects.new('lunar_cruiser_1', _cruiser_mesh.data)
+bpy.context.scene.collection.objects.link(_c1)
+_c2 = bpy.data.objects.new('lunar_cruiser_2', _cruiser_mesh.data)
+bpy.context.scene.collection.objects.link(_c2)
+
+for _i, (_cobj, (_cx, _cy)) in enumerate(
+        zip([_cruiser_mesh, _c1, _c2], _CRUISER_XY)):
+    _cz = terrain_z(_cx, _cy)
+    _place_prop(_cobj, (_cx, _cy, _cz), mobility='Vehicle',
+                name=f'lunar_cruiser_{_i}')
+    _cidx_mb = 1886 + _i   # MOON_CRUISER_0/1/2_IDX
+    _cobj['wf_Script'] = (
+        "\\ wf\n"
+        f"INDEXOF_ACTOR_INDEX read-mailbox {_cidx_mb} write-mailbox\n"
+        "INDEXOF_MOON_ACTIVE_VEH_IDX read-mailbox "
+        "INDEXOF_ACTOR_INDEX read-mailbox = if\n"
+        "INDEXOF_X_POS read-mailbox INDEXOF_MOON_VEHICLE_X write-mailbox\n"
+        "INDEXOF_Y_POS read-mailbox INDEXOF_MOON_VEHICLE_Y write-mailbox\n"
+        "INDEXOF_Z_POS read-mailbox INDEXOF_MOON_VEHICLE_Z write-mailbox\n"
+        "then\n"
+    )
+    _add_entry_trigger(_cx, _cy, _cz, _i + 1)   # vehicle_id 1/2/3
 
 _sun = _build_sun()
 attach_schema(_sun, 'platform')
