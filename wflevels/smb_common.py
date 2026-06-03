@@ -419,3 +419,84 @@ def _build_mario():
     body.name      = 'player'
     body.data.name = 'player'
     return body
+
+
+# ── Shared mesh datablocks: build once per type, instance many (P2a) ──────────
+# Identical actors must SHARE one Blender mesh datablock so the exporter writes a
+# single .iff per type (it dedups by obj.data.name). These helpers build the
+# geometry the first time a type is requested, cache the datablock, and return a
+# fresh *object* referencing it for every later instance — no per-instance
+# datablock names (so no `koopa_green_0.001.iff` churn) and far fewer room-pool
+# entries. See docs/plans/2026-06-02-smb-common-extraction-and-mesh-sharing.md.
+_shared_mesh = {}   # type key -> bpy mesh datablock
+
+
+def _setmat(obj, mat):
+    """Assign one material to every (smooth) face of obj's mesh."""
+    obj.data.materials.clear()
+    obj.data.materials.append(mat)
+    for p in obj.data.polygons:
+        p.material_index = 0
+        p.use_smooth = True
+    return obj
+
+
+def _join(parts, dbname):
+    """Join `parts` (first is the keeper) into one mesh object named `dbname`."""
+    bpy.ops.object.select_all(action='DESELECT')
+    for o in parts:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = parts[0]
+    bpy.ops.object.join()
+    o = bpy.context.object
+    o.name = o.data.name = dbname
+    return o
+
+
+def shared_mesh(key, name, build_geo):
+    """Return a NEW object `name` sharing the cached `key` datablock (built once
+    via build_geo(), which returns the first object — its mesh becomes canonical)."""
+    db = _shared_mesh.get(key)
+    if db is None:
+        obj = build_geo()
+        obj.data.name = key
+        _shared_mesh[key] = obj.data
+        obj.name = name
+        return obj
+    obj = bpy.data.objects.new(name, db)
+    scene.collection.objects.link(obj)
+    return obj
+
+
+# ── Per-type geometry (built once; actor props/scripts/position set by caller) ─
+def _koopa_geo(red):
+    shell = make_mat('koopa_red_shell' if red else 'koopa_green_shell',
+                     (0.78, 0.12, 0.10) if red else (0.14, 0.56, 0.20))
+    skin = make_mat('koopa_red_skin' if red else 'koopa_green_skin', (0.90, 0.76, 0.34))
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.48*T, segments=10, ring_count=6, location=(0, 0, 0.52*T))
+    bpy.context.object.scale.z = 0.80
+    bpy.ops.object.transform_apply(scale=True)
+    p0 = _setmat(bpy.context.object, shell)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.22*T, segments=8, ring_count=5, location=(0.30*T, 0, 0.90*T))
+    p1 = _setmat(bpy.context.object, skin)
+    return _join([p0, p1], 'koopa_red' if red else 'koopa_green')
+
+
+def koopa_mesh(name, red=False):
+    """One green + one red Koopa datablock, shared across all instances."""
+    return shared_mesh('koopa_red' if red else 'koopa_green', name, lambda: _koopa_geo(red))
+
+
+def _piranha_geo():
+    stem = make_mat('piranha_stem', (0.10, 0.62, 0.16))
+    head = make_mat('piranha_head', (0.85, 0.10, 0.10))
+    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.18*T, depth=0.9*T, location=(0, 0, 0.0))
+    p0 = _setmat(bpy.context.object, stem)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.40*T, segments=10, ring_count=6, location=(0, 0, 0.55*T))
+    p1 = _setmat(bpy.context.object, head)
+    return _join([p0, p1], 'piranha')
+
+
+def piranha_mesh(name):
+    """One Piranha datablock, shared across all instances."""
+    return shared_mesh('piranha', name, _piranha_geo)

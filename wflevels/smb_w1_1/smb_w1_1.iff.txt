@@ -43,7 +43,7 @@
 		$3000009l { 'STR' "fireflower_block.iff" }  // IFF RM0 000:009
 		$300000al { 'STR' "star_block.iff" }  // IFF RM0 000:00a
 		$300000bl { 'STR' "goomba_00.iff" }  // IFF RM0 000:00b
-		$300000cl { 'STR' "koopa_00.001.iff" }  // IFF RM0 000:00c
+		$300000cl { 'STR' "koopa_00.iff" }  // IFF RM0 000:00c
 		$300000dl { 'STR' "flagpole_pole.iff" }  // IFF RM0 000:00d
 		$300000el { 'STR' "flagpole_flag.iff" }  // IFF RM0 000:00e
 		$300000fl { 'STR' "castle.iff" }  // IFF RM0 000:00f
@@ -133,7 +133,7 @@
 		{ 'ASS' $3000009l [ "fireflower_block.iff" ] }  // IFF RM0 000:009
 		{ 'ASS' $300000al [ "star_block.iff" ] }  // IFF RM0 000:00a
 		{ 'ASS' $300000bl [ "goomba_00.iff" ] }  // IFF RM0 000:00b
-		{ 'ASS' $300000cl [ "koopa_00.001.iff" ] }  // IFF RM0 000:00c
+		{ 'ASS' $300000cl [ "koopa_00.iff" ] }  // IFF RM0 000:00c
 		{ 'ASS' $300000dl [ "flagpole_pole.iff" ] }  // IFF RM0 000:00d
 		{ 'ASS' $300000el [ "flagpole_flag.iff" ] }  // IFF RM0 000:00e
 		{ 'ASS' $300000fl [ "castle.iff" ] }  // IFF RM0 000:00f

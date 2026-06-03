@@ -1723,42 +1723,11 @@ def _apply_enemy_movement(obj):
 
 
 def _build_koopa(name, x, red=False):
-    """Factored from W1-1's inline Koopa so W1-2 can place 4 (3 green + 1 red).
-    Green Koopa walks off ledges; Red Koopa is the same model in a red shell (the
-    'turns at ledges' AI difference is not modelled — placeholder fidelity)."""
-    mat_shell = make_mat(f'{name}_shell',
-                         (0.78, 0.12, 0.10) if red else (0.14, 0.56, 0.20))
-    mat_kskin = make_mat(f'{name}_skin', (0.90, 0.76, 0.34))
-    parts = []
-    bpy.ops.mesh.primitive_uv_sphere_add(
-        radius=0.48*T, segments=10, ring_count=6, location=(0, 0, 0.52*T))
-    bpy.context.object.scale.z = 0.80
-    bpy.ops.object.transform_apply(scale=True)
-    bpy.context.object.data.materials.clear()
-    bpy.context.object.data.materials.append(mat_shell)
-    for p in bpy.context.object.data.polygons:
-        p.material_index = 0
-        p.use_smooth = True
-    parts.append(bpy.context.object)
-    bpy.ops.mesh.primitive_uv_sphere_add(
-        radius=0.22*T, segments=8, ring_count=5, location=(0.30*T, 0, 0.90*T))
-    bpy.context.object.data.materials.clear()
-    bpy.context.object.data.materials.append(mat_kskin)
-    for p in bpy.context.object.data.polygons:
-        p.material_index = 0
-        p.use_smooth = True
-    parts.append(bpy.context.object)
-    bpy.ops.object.select_all(action='DESELECT')
-    for obj in parts:
-        obj.select_set(True)
-    bpy.context.view_layer.objects.active = parts[0]
-    bpy.ops.object.join()
-    km = bpy.context.object
-    km.name = name
-    km.data.name = name
-    ko = bpy.data.objects.new(name, km.data)
-    scene.collection.objects.link(ko)
-    bpy.data.objects.remove(km, do_unlink=True)
+    """3 green + 1 red Koopa. Geometry is shared via smb_common.koopa_mesh (one
+    datablock per colour — all greens share, the red shares), so the exporter writes
+    just koopa_green.iff + koopa_red.iff (was 4 `.001` copies). Green walks off ledges;
+    Red is the same model in a red shell (the 'turns at ledges' AI is not modelled)."""
+    ko = smb_common.koopa_mesh(name, red=red)
     ko.location = (x, 0.0, MARIO_Z)
     attach_schema(ko, 'enemy')
     _apply_enemy_movement(ko)
@@ -1800,37 +1769,9 @@ def _add_pipe(name, col, height_tiles, width_tiles=2):
 
 def _build_piranha(name, col):
     """Anchored, non-colliding Enemy plant that oscillates out of a pipe at `col`.
-    Per-actor local mailboxes (2016/2017) so the 4 plants run independent clocks."""
-    mat_stem = make_mat(f'{name}_stem', (0.10, 0.62, 0.16))
-    mat_head = make_mat(f'{name}_head', (0.85, 0.10, 0.10))
-    parts = []
-    bpy.ops.mesh.primitive_cylinder_add(
-        vertices=8, radius=0.18*T, depth=0.9*T, location=(0, 0, 0.0))
-    bpy.context.object.data.materials.clear()
-    bpy.context.object.data.materials.append(mat_stem)
-    for p in bpy.context.object.data.polygons:
-        p.material_index = 0
-        p.use_smooth = True
-    parts.append(bpy.context.object)
-    bpy.ops.mesh.primitive_uv_sphere_add(
-        radius=0.40*T, segments=10, ring_count=6, location=(0, 0, 0.55*T))
-    bpy.context.object.data.materials.clear()
-    bpy.context.object.data.materials.append(mat_head)
-    for p in bpy.context.object.data.polygons:
-        p.material_index = 0
-        p.use_smooth = True
-    parts.append(bpy.context.object)
-    bpy.ops.object.select_all(action='DESELECT')
-    for obj in parts:
-        obj.select_set(True)
-    bpy.context.view_layer.objects.active = parts[0]
-    bpy.ops.object.join()
-    pm = bpy.context.object
-    pm.name = name
-    pm.data.name = name
-    po = bpy.data.objects.new(name, pm.data)
-    scene.collection.objects.link(po)
-    bpy.data.objects.remove(pm, do_unlink=True)
+    Geometry shared via smb_common.piranha_mesh (one piranha.iff for all plants, was 4
+    `.001` copies). Per-actor local mailboxes (2016/2017) so the plants run independent clocks."""
+    po = smb_common.piranha_mesh(name)
     po.location = (col*T, 0.0, PIRANHA_HIDDEN_Z)
     attach_schema(po, 'enemy')
     po['wf_Mobility']                  = 'Anchored'

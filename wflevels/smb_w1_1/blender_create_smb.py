@@ -1359,47 +1359,10 @@ for _gi, _gx in enumerate(GOOMBA_XS):
     _apply_enemy_movement(_go)
 
 # ── 9. Koopa Troopa placeholder (static visual) ───────────────────────────────
-mat_kgreen = make_mat('koopa_green', (0.14, 0.56, 0.20))
-mat_kskin  = make_mat('koopa_skin',  (0.90, 0.76, 0.34))
-
-parts = []
-
-# Shell — green flattened sphere
-bpy.ops.mesh.primitive_uv_sphere_add(
-    radius=0.48*T, segments=10, ring_count=6,
-    location=(0, 0, 0.52*T))
-bpy.context.object.scale.z = 0.80
-bpy.ops.object.transform_apply(scale=True)
-bpy.context.object.data.materials.clear()
-bpy.context.object.data.materials.append(mat_kgreen)
-for p in bpy.context.object.data.polygons:
-    p.material_index = 0
-    p.use_smooth = True
-parts.append(bpy.context.object)
-
-# Head — small skin sphere
-bpy.ops.mesh.primitive_uv_sphere_add(
-    radius=0.22*T, segments=8, ring_count=5,
-    location=(0.30*T, 0, 0.90*T))
-bpy.context.object.data.materials.clear()
-bpy.context.object.data.materials.append(mat_kskin)
-for p in bpy.context.object.data.polygons:
-    p.material_index = 0
-    p.use_smooth = True
-parts.append(bpy.context.object)
-
-bpy.ops.object.select_all(action='DESELECT')
-for obj in parts:
-    obj.select_set(True)
-bpy.context.view_layer.objects.active = parts[0]
-bpy.ops.object.join()
-koopa_mesh = bpy.context.object
-koopa_mesh.name      = 'koopa_00'
-koopa_mesh.data.name = 'koopa_00'
-
-koopa_obj = bpy.data.objects.new('koopa_00', koopa_mesh.data)
-scene.collection.objects.link(koopa_obj)
-bpy.data.objects.remove(koopa_mesh, do_unlink=True)
+# Geometry shared via smb_common.koopa_mesh — one green Koopa datablock (the same
+# build W1-2's Koopas use; single source, build-once-instance-many). Also fixes the
+# old inline `objects.new(name)`-while-name-taken trick that produced koopa_00.001.iff.
+koopa_obj = smb_common.koopa_mesh('koopa_00')
 koopa_obj.location = (KOOPA_X, 0.0, MARIO_Z)
 attach_schema(koopa_obj, 'enemy')
 _apply_enemy_movement(koopa_obj)
