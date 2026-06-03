@@ -494,11 +494,19 @@ if player:
         "else 3 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
         "16 - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
         "then then then\n"
-        # Camera cut: phase ≥ 2 (ignition + ascent) → cs_earth cutscene shot;
-        # phase < 2 → cs_chase (bootstrap already wrote it to CAMSHOT at load).
+        # Camera: cs_earth at ignition (phase 2) + first 20 s of ascent (phase 3);
+        # cut back to cs_chase after 20 s (lander at ~200 m, off-screen anyway).
         # See docs/plans/2026-06-03-moon-earth-cutscene.md.
         "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 1 > if "
+        "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if "
+        "INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox 20 > if "
+        "INDEXOF_MOON_CHASE_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox "
+        "else "
         "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox "
+        "then "
+        "else "
+        "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox INDEXOF_CAMSHOT write-mailbox "
+        "then "
         "then\n"
     )
 
@@ -631,7 +639,7 @@ cs_earth_obj['wf_Script'] = (
 room = find_by_class('room')
 if room:
     z_min = float(heights.min()) - 10.0      # 10 m below lowest terrain pixel
-    z_max = max(300.0, float(heights.max()) + 50.0)  # vista cam headroom
+    z_max = max(2000.0, float(heights.max()) + 50.0)  # headroom for lander ascent (z=0.5t²)
     centre = (0.0, 0.0, (z_min + z_max) / 2.0)
     rel = (-HALF_M - 10.0, -HALF_M - 10.0, z_min - centre[2],
            +HALF_M + 10.0, +HALF_M + 10.0, z_max - centre[2])
