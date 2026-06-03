@@ -1139,6 +1139,8 @@
 		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_ACTOR_INDEX read-mailbox INDEXOF_MOON_EARTH_CAM_IDX write-mailbox\n" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'STR' { 'NAME' "Target" } { 'STR' "CamTarget" } }
+		{ 'STR' { 'NAME' "Follow" } { 'STR' "CamTarget" } }
 		{ 'STR' { 'NAME' "Track Object" } { 'STR' "artemis_lander" } }
 		{ 'I32' { 'NAME' "Rotation" } { 'DATA' 0l } { 'STR' "Fixed" } }  //Fixed|Track
 		{ 'I32' { 'NAME' "Position X" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative

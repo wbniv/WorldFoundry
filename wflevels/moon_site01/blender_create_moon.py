@@ -605,15 +605,17 @@ cs_earth_obj  = bpy.data.objects.new('cs_earth', cs_earth_data)
 bpy.context.scene.collection.objects.link(cs_earth_obj)
 attach_schema(cs_earth_obj, 'camshot')
 cs_earth_obj.location = (30.0, -80.0, 5.0)
-cs_earth_obj['wf_Position X']        = 'Absolute'
-cs_earth_obj['wf_Position Y']        = 'Absolute'
-cs_earth_obj['wf_Position Z']        = 'Absolute'
-cs_earth_obj['wf_Rotation']          = 'Fixed'
-cs_earth_obj['wf_FOV']               = 40.0
+cs_earth_obj['wf_Position X']          = 'Absolute'
+cs_earth_obj['wf_Position Y']          = 'Absolute'
+cs_earth_obj['wf_Position Z']          = 'Absolute'
+cs_earth_obj['wf_Rotation']            = 'Fixed'
+cs_earth_obj['wf_FOV']                 = 40.0
 cs_earth_obj['wf_Pan Time In Seconds'] = 0.5
-cs_earth_obj['wf_Model Type']        = 'None'
-cs_earth_obj['wf_Track Object']      = 'artemis_lander'
-cs_earth_obj['wf_Yon']               = 500.0
+cs_earth_obj['wf_Model Type']          = 'None'
+cs_earth_obj['wf_Track Object']        = 'artemis_lander'
+cs_earth_obj['wf_Target']              = 'CamTarget'   # required non-null by movecam.cc:236
+cs_earth_obj['wf_Follow']              = 'CamTarget'   # required non-null by movecam.cc:236
+cs_earth_obj['wf_Yon']                 = 500.0
 cs_earth_obj['wf_Moves Between Rooms'] = 'True'
 # Publish own actor index for player script camera switching.
 cs_earth_obj['wf_Script'] = (
