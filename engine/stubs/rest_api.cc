@@ -18,6 +18,9 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#if defined(__SANITIZE_ADDRESS__)
+#  include <sanitizer/lsan_interface.h>
+#endif
 #include <cstring>
 #include <functional>
 #include <future>
@@ -186,6 +189,9 @@ void RestApi_Start()
     int port = port_env ? atoi(port_env) : 8765;
 
     gServer = new httplib::Server();
+#if defined(__SANITIZE_ADDRESS__)
+    __lsan_ignore_object(gServer);   // intentional leak — see RestApi_Stop comment
+#endif
 
     // POST /boxes — create
     gServer->Post("/boxes", [](const httplib::Request& req, httplib::Response& res) {
