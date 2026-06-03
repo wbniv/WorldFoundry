@@ -868,11 +868,9 @@ if player:
         "INDEXOF_MOON_VEHICLE_X read-mailbox INDEXOF_X_POS write-mailbox\n"
         "INDEXOF_MOON_VEHICLE_Y read-mailbox INDEXOF_Y_POS write-mailbox\n"
         "INDEXOF_MOON_VEHICLE_Z read-mailbox INDEXOF_Z_POS write-mailbox\n"
-        # Route joystick → vehicle INPUT via write-actor-mailbox (val idx actor --).
-        "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox\n"
-        "INDEXOF_INPUT\n"
-        "INDEXOF_MOON_ACTIVE_VEH_IDX read-mailbox\n"
-        "write-actor-mailbox\n"
+        # Input routing: the vehicle's own script reads HARDWARE_JOYSTICK1_RAW
+        # and writes to its own local INDEXOF_INPUT — no write-actor-mailbox needed
+        # (cross-actor mailbox write fails range check since INPUT index differs per actor).
         # Exit on B button.
         f"INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox {_INTERACT_BIT} & 0 > if\n"
         "0 INDEXOF_MOON_ACTIVE_VEHICLE write-mailbox\n"
@@ -1067,9 +1065,15 @@ for _i, (_cobj, (_cx, _cy)) in enumerate(
     _cidx_mb = 1886 + _i   # MOON_CRUISER_0/1/2_IDX
     _cobj['wf_Script'] = (
         "\\ wf\n"
+        # Publish own actor index every tick (needed for entry resolve in player script).
         f"INDEXOF_ACTOR_INDEX read-mailbox {_cidx_mb} write-mailbox\n"
-        "INDEXOF_MOON_ACTIVE_VEH_IDX read-mailbox "
-        "INDEXOF_ACTOR_INDEX read-mailbox = if\n"
+        # When I am the active vehicle: route joystick to own INPUT and publish position.
+        # Reading HARDWARE_JOYSTICK1_RAW is safe here — it is a global mailbox (index 1909)
+        # accessible to all actors. Writing to INDEXOF_INPUT writes to THIS actor's local
+        # INPUT mailbox (within [vehicle_base, vehicle_base+N]), which is what MovementHandlerVehicle
+        # reads via GetInputDevice(). This avoids the cross-actor write-actor-mailbox range trap.
+        "INDEXOF_MOON_ACTIVE_VEH_IDX read-mailbox INDEXOF_ACTOR_INDEX read-mailbox = if\n"
+        "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n"
         "INDEXOF_X_POS read-mailbox INDEXOF_MOON_VEHICLE_X write-mailbox\n"
         "INDEXOF_Y_POS read-mailbox INDEXOF_MOON_VEHICLE_Y write-mailbox\n"
         "INDEXOF_Z_POS read-mailbox INDEXOF_MOON_VEHICLE_Z write-mailbox\n"
