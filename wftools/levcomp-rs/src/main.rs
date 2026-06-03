@@ -39,6 +39,8 @@ fn usage() -> ! {
     eprintln!("                  When present, each object's OAD data block is sized");
     eprintln!("                  from its class schema; when absent, OADSize = 0.");
     eprintln!("  --mesh-dir:     directory containing mesh .iff files (optional).");
+    eprintln!("  --mesh-ref-prefix: path prefix prepended to mesh file-include refs in the");
+    eprintln!("                  .iff.txt (e.g. \"../smb/\" for a shared mesh dir; default none).");
     eprintln!("                  When present, each object's bbox is extended to");
     eprintln!("                  encompass its mesh vertices.  Also writes asset.inc");
     eprintln!("                  alongside the output .lvl for the iff.prp pipeline.");
@@ -148,6 +150,7 @@ fn main() {
     let mut mesh_dir_str: Option<String> = None;
     let mut iff_txt_str: Option<String> = None;
     let mut textile_ini_str: Option<String> = None;
+    let mut mesh_ref_prefix = String::new();
     {
         let mut i = 4;
         while i < args.len() {
@@ -155,6 +158,10 @@ fn main() {
                 i += 1;
                 if i >= args.len() { usage(); }
                 mesh_dir_str = Some(args[i].clone());
+            } else if args[i] == "--mesh-ref-prefix" {
+                i += 1;
+                if i >= args.len() { usage(); }
+                mesh_ref_prefix = args[i].clone();
             } else if args[i] == "--iff-txt" {
                 i += 1;
                 if i >= args.len() { usage(); }
@@ -343,7 +350,7 @@ fn main() {
             room_set.insert(0);
         }
         let rooms: Vec<i32> = room_set.into_iter().collect();
-        lvas_writer::write(&assets, &level_name, &rooms, iff_txt_path)
+        lvas_writer::write(&assets, &level_name, &rooms, iff_txt_path, &mesh_ref_prefix)
             .unwrap_or_else(|e| {
                 eprintln!("warning: could not write {}: {}", iff_txt_path.display(), e);
             });
