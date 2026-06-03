@@ -178,8 +178,17 @@ loads its own copy at runtime.
   then box sizes are baked into geometry. **Don't** decompose into unit cubes — scale is the right
   tool. (Corrected from the first draft, which wrongly claimed no scale support — thanks to the
   user's catch.)
-- **Blender export isn't byte-stable** (TODO) — compare *behaviour*, not mesh bytes, when proving
-  W1-1 unchanged.
+- **Blender export determinism — FIXED 2026-06-02 (canonicalize vertex/face order in the writer).**
+  Root cause was a pure vertex/face **re-ordering**: `_write_mesh_iff` emitted verts in `bm.faces`
+  encounter order, which `bpy.ops.object.join()` produced non-deterministically (identical geometry,
+  churned bytes). Fix: re-key verts by fixed-point `(x,y,z,u,v)` (merge identical, sort) + remap/sort
+  faces in [`export_level.py::_write_mesh_iff`](../../wftools/wf_blender/export_level.py) before
+  packing `VRTX`/`FACE`. Two fresh re-exports are now byte-identical (goomba 1164→0 diff; all 74 W1-1
+  meshes 0 diff). So mesh bytes **are** now a valid behaviour check, and P2's repeated W1-2 re-exports
+  are reproducible. Write-up: [investigation](../investigations/2026-06-02-blender-export-nondeterminism.md).
+  (Also corrected: the W1-2 re-export boot crash was **not** caused by this churn — identical geometry
+  — it's a separate flaky physics/camera gap; the camera should fall back to `mainCharacter` instead
+  of asserting on a null/out-of-room track object at `movecam.cc:1067`.)
 - **Concurrent shared checkout** — both level scripts + `cd.iff` are hot; commit per phase with
   explicit pathspecs ([[project_concurrent_sessions_shared_checkout]]).
 

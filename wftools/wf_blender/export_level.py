@@ -470,6 +470,37 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
             tri.append(split_map[key])
         face_triples.append((tri[0], tri[1], tri[2], face.material_index))
 
+    # ── Canonicalize vertex + face order (deterministic export) ──────────────
+    # split_verts/face_triples above are built in `bm.faces` encounter order,
+    # which inherits the Blender mesh's internal polygon order. For meshes built
+    # by `bpy.ops.object.join()` (goomba/koopa/…) that order is NON-deterministic
+    # run-to-run, so the VRTX/FACE chunks churned every re-export with byte-
+    # identical *geometry* (confirmed: identical vertex multiset, different order
+    # — docs/investigations/2026-06-02-blender-export-nondeterminism.md). Re-key
+    # vertices by their fixed-point (position, uv) so identical verts merge and
+    # the order is canonical; remap + sort faces. Geometry/rendering unchanged;
+    # the bytes are now reproducible.
+    def _vkey(co, u, v):
+        return (int(round(co.x * 65536)), int(round(co.y * 65536)), int(round(co.z * 65536)),
+                int(round(u * 65536)), int(round(v * 65536)))
+    _canon = {}            # _vkey → final index (sorted)
+    for co, u, v in sorted(split_verts, key=lambda t: _vkey(*t)):
+        k = _vkey(co, u, v)
+        if k not in _canon:
+            _canon[k] = len(_canon)
+    _old_to_new = [_canon[_vkey(*t)] for t in split_verts]
+    _canon_verts = [None] * len(_canon)
+    for co, u, v in split_verts:
+        _canon_verts[_canon[_vkey(co, u, v)]] = (co, u, v)
+    split_verts = _canon_verts
+    _faces = []
+    for a, b, c, m in face_triples:
+        na, nb, nc = _old_to_new[a], _old_to_new[b], _old_to_new[c]
+        if na != nb and nb != nc and na != nc:   # drop tris collapsed by the merge
+            _faces.append((na, nb, nc, m))
+    _faces.sort()
+    face_triples = _faces
+
     # Build VRTX payload
     vrtx = bytearray()
     for co, u, v in split_verts:
