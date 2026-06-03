@@ -1818,14 +1818,12 @@ def celebration(cfg):
     FLAG_TOP_Z  = POLE_HEIGHT - T        # 13.5 — authored start (near pole top)
     FLAG_BASE_Z = T * 0.7                # ~1.05 — slide target (pole base, the "grab")
     # Thin VERTICAL slab (a flat plane lies in XY → edge-on/invisible to the side camera).
-    bpy.ops.mesh.primitive_cube_add(size=2.0, location=(FLAGPOLE_X - T, 0, FLAG_TOP_Z))
-    flag_obj = bpy.context.object
-    flag_obj.name      = 'flagpole_flag'
-    flag_obj.data.name = 'flagpole_flag'
-    flag_obj.scale = (0.5 * T, 0.03, 0.4 * T)   # 1.5 m wide × 1.2 m tall, thin in Y; faces the camera
-    bpy.ops.object.transform_apply(scale=True)
-    flag_obj.data.materials.clear()
-    flag_obj.data.materials.append(mat_flag)
+    # Shared unit-box mesh + size-as-scale (position-independent, dedups game-wide); half-extents
+    # (0.5T, 0.03, 0.4T) about (FLAGPOLE_X - T, 0, FLAG_TOP_Z). Runtime raise drives Z_POS.
+    flag_obj = add_box('flagpole_flag',
+                       (FLAGPOLE_X - T) - 0.5 * T, -0.03, FLAG_TOP_Z - 0.4 * T,
+                       (FLAGPOLE_X - T) + 0.5 * T,  0.03, FLAG_TOP_Z + 0.4 * T,
+                       mat_flag)
     attach_schema(flag_obj, 'enemy')
     flag_obj['wf_Mobility'] = 'Anchored'
     flag_obj['wf_Model Type'] = 'Mesh'
@@ -1857,14 +1855,12 @@ def celebration(cfg):
     CFLAG_TOP_Z  = CASTLE_TOP + 2.0 * T - 0.35 * T     # flag TOP (not center) meets the pole top 7.5
     # Thin VERTICAL slab (same reason as the pole flag — a flat plane is edge-on to the camera).
     # X so the flag's right edge overlaps the pole centre (CASTLE_MID_X) — attached, not floating beside it.
-    bpy.ops.mesh.primitive_cube_add(size=2.0, location=(CASTLE_MID_X - 0.45 * T, 0, CFLAG_BASE_Z))
-    cflag = bpy.context.object
-    cflag.name      = 'castle_flag'
-    cflag.data.name = 'castle_flag'
-    cflag.scale = (0.45 * T, 0.03, 0.35 * T)   # 1.35 m wide × 1.05 m tall, thin in Y
-    bpy.ops.object.transform_apply(scale=True)
-    cflag.data.materials.clear()
-    cflag.data.materials.append(mat_flag)
+    # Shared unit-box mesh + size-as-scale; half-extents (0.45T, 0.03, 0.35T) about
+    # (CASTLE_MID_X - 0.45T, 0, CFLAG_BASE_Z). Same green mat as the pole flag → shares its datablock.
+    cflag = add_box('castle_flag',
+                    (CASTLE_MID_X - 0.45 * T) - 0.45 * T, -0.03, CFLAG_BASE_Z - 0.35 * T,
+                    (CASTLE_MID_X - 0.45 * T) + 0.45 * T,  0.03, CFLAG_BASE_Z + 0.35 * T,
+                    mat_flag)
     attach_schema(cflag, 'enemy')
     cflag['wf_Mobility'] = 'Anchored'
     cflag['wf_Model Type'] = 'Mesh'
@@ -1959,12 +1955,13 @@ def celebration(cfg):
     LEVEL_TO_RUN     = 5000   # INDEXOF_LEVEL_TO_RUN (wfsource/source/mailbox/mailbox.inc:247)
     NEXT_LEVEL_INDEX = cfg['NEXT_LEVEL_INDEX']
 
-    bpy.ops.mesh.primitive_cube_add(size=2.0, location=(FLAGPOLE_X, 0.0, 2 * T))
-    flagtrig = bpy.context.object
-    flagtrig.name      = 'flagpole_trigger'
-    flagtrig.data.name = 'flagpole_trigger'
-    flagtrig.scale = (1.5, T, 2.5 * T)   # half-extents X±1.5, Y±T, Z±3.75 (centre Z=3): covers Mario at the pole
-    bpy.ops.object.transform_apply(scale=True)
+    # Invisible activator volumes (actbox) — shared unit-box mesh + size-as-scale. Both triggers
+    # are the same box about (FLAGPOLE_X, 0, 2T) with half-extents (1.5, T, 2.5T) → one datablock.
+    mat_trigger = make_mat('smb_trigger', (0.5, 0.5, 0.5))
+    flagtrig = add_box('flagpole_trigger',
+                       FLAGPOLE_X - 1.5, -T, 2 * T - 2.5 * T,
+                       FLAGPOLE_X + 1.5,  T, 2 * T + 2.5 * T,
+                       mat_trigger)
     attach_schema(flagtrig, 'actbox')
     flagtrig['wf_MailBox']            = SMB_CELEBRATE  # start the celebration (Director fires END_OF_LEVEL at the end)
     flagtrig['wf_MailBoxValue']       = 1
@@ -1982,12 +1979,10 @@ def celebration(cfg):
     # is irrelevant because the meta-loop reads _desiredLevelNum only after RunLevel()
     # returns. Death sets END_OF_LEVEL without touching LEVEL_TO_RUN, so dying restarts the
     # same level — only the flag advances.
-    bpy.ops.mesh.primitive_cube_add(size=2.0, location=(FLAGPOLE_X, 0.0, 2 * T))
-    flagadv = bpy.context.object
-    flagadv.name      = 'flagpole_advance'
-    flagadv.data.name = 'flagpole_advance'
-    flagadv.scale = (1.5, T, 2.5 * T)   # identical half-extents to flagpole_trigger
-    bpy.ops.object.transform_apply(scale=True)
+    flagadv = add_box('flagpole_advance',
+                      FLAGPOLE_X - 1.5, -T, 2 * T - 2.5 * T,
+                      FLAGPOLE_X + 1.5,  T, 2 * T + 2.5 * T,
+                      mat_trigger)   # identical box to flagpole_trigger → shares its datablock
     attach_schema(flagadv, 'actbox')
     flagadv['wf_MailBox']            = LEVEL_TO_RUN
     flagadv['wf_MailBoxValue']       = NEXT_LEVEL_INDEX
