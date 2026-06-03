@@ -10,6 +10,13 @@ game-wide) and the load-time render-scale gap (wide shared-box statplats drew as
 (clean spawn — no stray coin), [`..._02_treetops.png`](../../tests/screenshots/smb_w13_02_treetops.png)
 (wide mushroom canopies), [`..._03_flagpole.png`](../../tests/screenshots/smb_w13_03_flagpole.png)
 (solid staircase). Enemy actors confirmed loaded: 3 koopa_green + 3 goomba + 2 paratroopa + 23 coins.
+Full 3×3 contact sheet of the 9 debug-bridge captures (spawn → flagpole):
+
+![W1-3 in-game contact sheet](screenshots/2026-06-03-smb-w1-3-contact-sheet.png)
+
+(The later frames look rough — the teleport-capture keeps dropping Mario into the pit,
+resetting the camera on respawn; that's the harness, not the level. The spawn / tree-top /
+flagpole frames are the clean ones.)
 
 ## Goal
 
@@ -54,6 +61,12 @@ the defining 1-3 hazard on narrow tree-tops). We build green and **fix the repo 
 Phase 1. `koopa_green.iff` already exists in the shared mesh dir.
 
 ## Layout (left → right; X = col × T, T = 1.5 m)
+
+To-scale side elevation (generated from the level data by
+[`tests/diagram_smb_w1_3.py`](../../tests/diagram_smb_w1_3.py) — K=Koopa, G=Goomba,
+P=Paratroopa, ?=power-up, ⇅/↔=static mover stand-in):
+
+![W1-3 to-scale layout](screenshots/2026-06-03-smb-w1-3-layout-diagram.png)
 
 Continuous death pit from the start strip's right edge (col ~8) to the end strip (col ~148).
 Tree-tops are the only footing. Heights are canopy-top Z in tiles above ground (`GROUND_TOP_Z = 0`).
