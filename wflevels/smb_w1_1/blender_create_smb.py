@@ -805,6 +805,17 @@ if player:
         "INDEXOF_INPUT write-mailbox\n"
         "INDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\n"
         "INDEXOF_Z_POS read-mailbox INDEXOF_SMB_PLAYER_Z write-mailbox\n"   # enemies use proximity
+        # ── Confine the player to the level box (ends + sides) ───────────────
+        # Fixed walls at the level's ENDS (X: left edge GROUND_X0, right edge GROUND_X1)
+        # and SIDES (Y: the ground half-depth ±GROUND_Y). Z stays free so pits + tubes/
+        # warps still work. The X clamp is surface-only (z > -8; the coin room has its own
+        # walls + X range). Without this you run/jump off the ends or sides of the level.
+        "INDEXOF_Z_POS read-mailbox -8.0 > if\n"
+        f"  INDEXOF_X_POS read-mailbox {GROUND_X0:.2f} < if {GROUND_X0:.2f} INDEXOF_X_POS write-mailbox 0 INDEXOF_XSPEED write-mailbox then\n"
+        f"  INDEXOF_X_POS read-mailbox {GROUND_X1:.2f} > if {GROUND_X1:.2f} INDEXOF_X_POS write-mailbox 0 INDEXOF_XSPEED write-mailbox then\n"
+        "then\n"
+        f"INDEXOF_Y_POS read-mailbox {-GROUND_Y:.2f} < if {-GROUND_Y:.2f} INDEXOF_Y_POS write-mailbox 0 INDEXOF_YSPEED write-mailbox then\n"
+        f"INDEXOF_Y_POS read-mailbox {GROUND_Y:.2f} > if {GROUND_Y:.2f} INDEXOF_Y_POS write-mailbox 0 INDEXOF_YSPEED write-mailbox then\n"
         # seed lives once (guarded so game-over at LIVES=0 never re-seeds)
         "INDEXOF_SMB_LIVES_INIT read-mailbox not if "
         "3 INDEXOF_LIVES write-mailbox 1 INDEXOF_SMB_LIVES_INIT write-mailbox then\n"
