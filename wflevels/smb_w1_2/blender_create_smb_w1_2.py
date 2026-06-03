@@ -152,6 +152,7 @@ smb_common.init(scene, OAD_DIR)
 from smb_common import (make_mat, attach_schema, find_by_class, get_class,
     add_box, add_statplat, _add_textured_box, _make_qblock_tga, _make_brick_tga,
     _make_grid_tile_tga, build_textured_ground_mesh, _room_bounds_mesh, _build_mario)
+from smb_common import (_add_brick, _make_powerup_block, _add_qblock)
 from smb_common import (_make_coin_template, _make_debris_template, _make_spark_template, _make_powerup_template, _add_pyramid, _add_staircase, _add_pipe)
 from smb_common import (_apply_enemy_movement, _build_goomba, _make_target, _make_popup_template)
 from smb_common import (
@@ -1073,7 +1074,9 @@ import bmesh as _bmesh
 mat_coin = smb_common.mat_coin()
 BSIZE = T / 2  # half-side of a 1-tile block
 qblock_tex = _make_qblock_tga(os.path.join(SCRIPT_DIR, 'qblock_tex.tga'))
+smb_common.set_textures(qblock=qblock_tex)
 brick_tex  = _make_brick_tga(os.path.join(SCRIPT_DIR, 'brick_tex.tga'))
+smb_common.set_textures(brick=brick_tex)
 COIN_X = T * 0.25
 COIN_Z = T * 0.5
 COIN_T = 0.2
@@ -1134,66 +1137,9 @@ PIRANHA_RATE      = 4.0
 PIRANHA_DWELL     = 2.0
 
 # ── Builder factories (verbatim from W1-1) ────────────────────────────────────
-def _add_qblock(name, x, z=BLOCK_Z):
-    """Coin ?-block: a Generator that throws coin_template on bump-from-below (4 s window)."""
-    blk = _add_textured_box(name, x - BSIZE, -BSIZE, z - BSIZE,
-                                  x + BSIZE,  BSIZE, z + BSIZE, qblock_tex)
-    attach_schema(blk, 'generator')
-    blk['wf_Mobility']           = 'Anchored'
-    blk['wf_Model Type']         = 'Mesh'
-    blk['wf_Visibility Mailbox'] = 1
-    blk['wf_Number Of Local Mailboxes'] = 13
-    blk['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
-    blk['wf_Object To Throw']    = 'coin_template'
-    blk['wf_Generation Rate']    = 10.0
-    blk['wf_Object X Velocity']  = 1.5
-    blk['wf_Object Y Velocity']  = 0.0
-    blk['wf_Object Z Velocity']  = 6.0
-    blk['wf_Script']             = QBLOCK_SCRIPT
-    return blk
-
-
 MUSH_X = T * 0.40
 MUSH_Z = T * 0.40
 MUSH_T = 0.25
-
-
-def _make_powerup_block(name, x, throw, vx, z=None):
-    if z is None:
-        z = BLOCK_Z
-    b = _add_textured_box(name, x - BSIZE, -BSIZE, z - BSIZE,
-                                x + BSIZE,  BSIZE, z + BSIZE, qblock_tex)
-    attach_schema(b, 'generator')
-    b['wf_Mobility']           = 'Anchored'
-    b['wf_Model Type']         = 'Mesh'
-    b['wf_Visibility Mailbox'] = 1
-    b['wf_Number Of Local Mailboxes'] = 13
-    b['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
-    b['wf_Object To Throw']    = throw
-    b['wf_Generation Rate']    = 10.0
-    b['wf_Object X Velocity']  = vx
-    b['wf_Object Y Velocity']  = 0.0
-    b['wf_Object Z Velocity']  = 6.0
-    b['wf_Script']             = POWERUP_BLOCK_SCRIPT
-    return b
-
-
-def _add_brick(name, x, z=BLOCK_Z):
-    blk = _add_textured_box(name, x - BSIZE, -BSIZE, z - BSIZE,
-                                  x + BSIZE,  BSIZE, z + BSIZE, brick_tex)
-    attach_schema(blk, 'generator')
-    blk['wf_Mobility']           = 'Anchored'
-    blk['wf_Model Type']         = 'Mesh'
-    blk['wf_Visibility Mailbox'] = 1
-    blk['wf_Number Of Local Mailboxes'] = 16
-    blk['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
-    blk['wf_Object To Throw']    = 'debris_template'
-    blk['wf_Generation Rate']    = 10.0
-    blk['wf_Object X Velocity']  = 0.0
-    blk['wf_Object Y Velocity']  = 0.0
-    blk['wf_Object Z Velocity']  = 7.0
-    blk['wf_Script']             = BRICK_SCRIPT
-    return blk
 
 
 def _build_koopa(name, x, red=False):

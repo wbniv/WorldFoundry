@@ -1261,3 +1261,90 @@ def _add_pipe(name, col, height_tiles, width_tiles=2):
                  col*T - width_tiles/2*T, -GROUND_Y, GROUND_TOP_Z,
                  col*T + width_tiles/2*T,  GROUND_Y, GROUND_TOP_Z + height_tiles*T,
                  mat_pipe())
+
+
+# ── Texture paths for the textured-box builders (set by the level after it
+#    generates the per-level TGAs via _make_brick_tga / _make_qblock_tga) ──────
+_brick_tex = None
+_qblock_tex = None
+
+
+def set_textures(brick=None, qblock=None):
+    global _brick_tex, _qblock_tex
+    if brick is not None: _brick_tex = brick
+    if qblock is not None: _qblock_tex = qblock
+
+
+def _add_brick(name, x, z=BLOCK_Z):
+    blk = _add_textured_box(name,
+                            x - BSIZE, -BSIZE, z - BSIZE,
+                            x + BSIZE,  BSIZE, z + BSIZE,
+                            _brick_tex)
+    attach_schema(blk, 'generator')
+    blk['wf_Mobility']           = 'Anchored'
+    blk['wf_Model Type']         = 'Mesh'
+    blk['wf_Visibility Mailbox'] = 1
+    blk['wf_Number Of Local Mailboxes'] = 16   # 2000..2015 (qblock slots + brick timers)
+    blk['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+    blk['wf_Object To Throw']    = 'debris_template'
+    blk['wf_Generation Rate']    = 10.0   # 10/s is the generator.oas max; ~4 fragments over the 0.4 s burst
+    blk['wf_Object X Velocity']  = 0.0
+    blk['wf_Object Y Velocity']  = 0.0    # OAS default is 1.0 — zero it or debris drifts into +Y
+    blk['wf_Object Z Velocity']  = 7.0    # pop up; fragments fall back through the floor
+    # NB: no Random Displacement — the engine's Scalar::Random() asserts (RangeCheck
+    # integer-casts a fractional Scalar). The debris fan is done deterministically in
+    # DEBRIS_SCRIPT via the fragment's actor index instead.
+    blk['wf_Script']             = BRICK_SCRIPT
+    return blk
+
+# Faithful W1-1 brick layout (docs/smb-level-layouts.md §1-1):
+#   Cols 20, 22, 24 — cluster flanking the coin ? blocks at cols 21, 23
+#   Cols 91-98     — extended overhead brick row (8 wide)
+#   Cols 108, 110  — hi-row bricks flanking the flower ? block at col 109 (row 6)
+
+
+def _make_powerup_block(name, x, throw, vx, z=None):
+    if z is None:
+        z = BLOCK_Z
+    b = _add_textured_box(name, x - BSIZE, -BSIZE, z - BSIZE,
+                                x + BSIZE,  BSIZE, z + BSIZE, _qblock_tex)
+    attach_schema(b, 'generator')
+    b['wf_Mobility']           = 'Anchored'
+    b['wf_Model Type']         = 'Mesh'
+    b['wf_Visibility Mailbox'] = 1
+    b['wf_Number Of Local Mailboxes'] = 13   # 2000..2012, same as the qblocks
+    b['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+    b['wf_Object To Throw']    = throw
+    b['wf_Generation Rate']    = 10.0
+    b['wf_Object X Velocity']  = vx
+    b['wf_Object Y Velocity']  = 0.0
+    b['wf_Object Z Velocity']  = 6.0
+    b['wf_Script']             = POWERUP_BLOCK_SCRIPT
+    return b
+
+# Mushroom-or-flower: ONE self-determining power-up. A Generator's Object To Throw is
+# fixed at load (generator.cc:84), so rather than two templates the single
+# `powerup_template` reads SMB_MARIO_STATE LIVE and BECOMES the right item: Small (0)
+# stays the red mushroom that slides; Super+ (>0) repaints orange and forces stationary
+# (the flower). On pickup it raises the signal for Mario's current tier (mushroom ->
+# Super, flower -> Fire) = the existing player handlers. One-shot blocks mean Mario's
+# tier can't change between bump and catch, so the live read always matches the item.
+
+
+def _add_qblock(name, x, z=BLOCK_Z):
+    """Coin ?-block: a Generator that throws coin_template on bump-from-below (4 s window)."""
+    blk = _add_textured_box(name, x - BSIZE, -BSIZE, z - BSIZE,
+                                  x + BSIZE,  BSIZE, z + BSIZE, _qblock_tex)
+    attach_schema(blk, 'generator')
+    blk['wf_Mobility']           = 'Anchored'
+    blk['wf_Model Type']         = 'Mesh'
+    blk['wf_Visibility Mailbox'] = 1
+    blk['wf_Number Of Local Mailboxes'] = 13
+    blk['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+    blk['wf_Object To Throw']    = 'coin_template'
+    blk['wf_Generation Rate']    = 10.0
+    blk['wf_Object X Velocity']  = 1.5
+    blk['wf_Object Y Velocity']  = 0.0
+    blk['wf_Object Z Velocity']  = 6.0
+    blk['wf_Script']             = QBLOCK_SCRIPT
+    return blk

@@ -134,6 +134,7 @@ smb_common.init(scene, OAD_DIR)
 from smb_common import (make_mat, attach_schema, find_by_class, get_class,
     add_box, add_statplat, _add_textured_box, _make_qblock_tga, _make_brick_tga,
     _make_grid_tile_tga, build_textured_ground_mesh, _room_bounds_mesh, _build_mario)
+from smb_common import (_add_brick, _make_powerup_block)
 from smb_common import (_make_coin_template, _make_debris_template, _make_spark_template, _make_fireball_template, _make_powerup_template, _add_pyramid, _add_staircase)
 from smb_common import (_apply_enemy_movement, _build_goomba, _make_target, _make_popup_template, _make_fireball_generator)
 from smb_common import (
@@ -324,6 +325,7 @@ for _i, (_pl, _pr) in enumerate(PITS):
 mat_coin = smb_common.mat_coin()
 BSIZE = T / 2  # half-side of a 1-tile block
 qblock_tex = _make_qblock_tga(os.path.join(SCRIPT_DIR, 'qblock_tex.tga'))
+smb_common.set_textures(qblock=qblock_tex)
 COIN_X = T * 0.25   # half-width:  NES 8px/16px → 50% of block → 0.375 m
 COIN_Z = T * 0.5    # half-height: NES 16px/16px → 100% of block → 0.75 m
 COIN_T = 0.2        # Y-depth: ≥ ~0.2 m to render from side-camera (Y=-20).
@@ -432,25 +434,6 @@ mblk['wf_Script']             = POWERUP_BLOCK_SCRIPT
 # through the player to be collected, lands + slides/rests on the floor.
 # Power-up dispensing block: a one-shot Generator (bump from below -> throw one
 # collectible -> latch tan), using POWERUP_BLOCK_SCRIPT.
-def _make_powerup_block(name, x, throw, vx, z=None):
-    if z is None:
-        z = BLOCK_Z
-    b = _add_textured_box(name, x - BSIZE, -BSIZE, z - BSIZE,
-                                x + BSIZE,  BSIZE, z + BSIZE, qblock_tex)
-    attach_schema(b, 'generator')
-    b['wf_Mobility']           = 'Anchored'
-    b['wf_Model Type']         = 'Mesh'
-    b['wf_Visibility Mailbox'] = 1
-    b['wf_Number Of Local Mailboxes'] = 13   # 2000..2012, same as the qblocks
-    b['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
-    b['wf_Object To Throw']    = throw
-    b['wf_Generation Rate']    = 10.0
-    b['wf_Object X Velocity']  = vx
-    b['wf_Object Y Velocity']  = 0.0
-    b['wf_Object Z Velocity']  = 6.0
-    b['wf_Script']             = POWERUP_BLOCK_SCRIPT
-    return b
-
 # Mushroom-or-flower: ONE self-determining power-up. A Generator's Object To Throw is
 # fixed at load (generator.cc:84), so rather than two templates the single
 # `powerup_template` reads SMB_MARIO_STATE LIVE and BECOMES the right item: Small (0)
@@ -1487,6 +1470,7 @@ wp['wf_Visibility Mailbox'] = 0
 # indices the test harnesses hardcode (Player, qblock_00) don't shift.
 # See docs/plans/2026-05-26-breakable-bricks-smb-world-1-1.md.
 brick_tex = _make_brick_tga(os.path.join(SCRIPT_DIR, 'brick_tex.tga'))
+smb_common.set_textures(brick=brick_tex)
 
 # Per-actor local brick state (must match mailbox.inc). The brick reuses
 # SMB_QBLOCK_ACTIVATE (2010) as its debris-throw pulse.
@@ -1525,28 +1509,6 @@ _make_debris_template()
 # Ordering matters: on the first break tick we set the window end AND pulse, but defer
 # ALIVE=0 to a later tick so the Generator (spawn-check runs before the script) actually
 # throws fragments across the window first (plan risk #3).
-
-def _add_brick(name, x, z=BLOCK_Z):
-    blk = _add_textured_box(name,
-                            x - BSIZE, -BSIZE, z - BSIZE,
-                            x + BSIZE,  BSIZE, z + BSIZE,
-                            brick_tex)
-    attach_schema(blk, 'generator')
-    blk['wf_Mobility']           = 'Anchored'
-    blk['wf_Model Type']         = 'Mesh'
-    blk['wf_Visibility Mailbox'] = 1
-    blk['wf_Number Of Local Mailboxes'] = 16   # 2000..2015 (qblock slots + brick timers)
-    blk['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
-    blk['wf_Object To Throw']    = 'debris_template'
-    blk['wf_Generation Rate']    = 10.0   # 10/s is the generator.oas max; ~4 fragments over the 0.4 s burst
-    blk['wf_Object X Velocity']  = 0.0
-    blk['wf_Object Y Velocity']  = 0.0    # OAS default is 1.0 — zero it or debris drifts into +Y
-    blk['wf_Object Z Velocity']  = 7.0    # pop up; fragments fall back through the floor
-    # NB: no Random Displacement — the engine's Scalar::Random() asserts (RangeCheck
-    # integer-casts a fractional Scalar). The debris fan is done deterministically in
-    # DEBRIS_SCRIPT via the fragment's actor index instead.
-    blk['wf_Script']             = BRICK_SCRIPT
-    return blk
 
 # Faithful W1-1 brick layout (docs/smb-level-layouts.md §1-1):
 #   Cols 20, 22, 24 — cluster flanking the coin ? blocks at cols 21, 23
