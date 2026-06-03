@@ -500,3 +500,412 @@ def _piranha_geo():
 def piranha_mesh(name):
     """One Piranha datablock, shared across all instances."""
     return shared_mesh('piranha', name, _piranha_geo)
+
+
+# ── Shared SMB constants + Forth scripts (single source) ─────────────────────
+# Geometry/colour/timing axioms + the generator/enemy/template actor scripts that
+# were duplicated verbatim in every level. Constants first so the f-string scripts
+# below resolve. (Levels keep their own copies of layout constants; these mirror
+# them — stable axioms, not logic.)
+GROUND_TOP_Z = 0.0
+BSIZE        = T / 2
+BLOCK_Z      = GROUND_TOP_Z + 4*T + T/2
+GROUND_Y     = T
+MARIO_Z      = GROUND_TOP_Z + T
+MB_SMB_QBLOCK_ACTIVATE = 2010
+QBLOCK_TAN   = 0xC77D2E
+FLOWER_TINT  = 0xF2731A
+SHELL_SPEED      = 14.0
+ENEMY_WALK_SPEED = 4.0
+CASTLE_TOP        = 3 * T
+SPARK_DESPAWN_Z   = CASTLE_TOP + 1.5
+PIRANHA_HIDDEN_Z  = GROUND_TOP_Z + 0.5*T
+PIRANHA_EMERGED_Z = GROUND_TOP_Z + 3.2*T
+PIRANHA_PIPE_TOP  = GROUND_TOP_Z + 2*T
+PIRANHA_RATE      = 4.0
+PIRANHA_DWELL     = 2.0
+
+
+QBLOCK_SCRIPT = (
+    "\\ wf\n"
+    f"INDEXOF_SMB_QBLOCK_USED read-mailbox 0<> if\n"
+    f"  0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "else\n"
+    "  INDEXOF_SMB_QBLOCK_ACTIVATE read-mailbox 0<> if\n"
+    "    0 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "  then\n"
+    "  INDEXOF_SMB_QBLOCK_DIE read-mailbox dup not if\n"
+    "    drop\n"
+    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
+    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
+    "        INDEXOF_TIME read-mailbox 4.0 +\n"
+    "        INDEXOF_SMB_QBLOCK_DIE write-mailbox\n"
+    "        1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "      then\n"
+    "    then\n"
+    "  else\n"
+    "    INDEXOF_TIME read-mailbox > if\n"
+    "      INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
+    "        INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
+    "          1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "        then\n"
+    "      then\n"
+    "    else\n"
+    f"      0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "      1 INDEXOF_SMB_QBLOCK_USED write-mailbox\n"
+    "    then\n"
+    "  then\n"
+    "then\n"
+)
+
+DEBRIS_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"
+    "INDEXOF_ACTOR_INDEX read-mailbox 4 % 1.5 - 3.0 * INDEXOF_XSPEED write-mailbox\n"
+    "INDEXOF_Z_POS read-mailbox -20.0 < if\n"
+    "  0 INDEXOF_ALIVE write-mailbox\n"
+    "then\n"
+)
+
+SPARK_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"                       # tumble
+    "INDEXOF_ACTOR_INDEX read-mailbox 9 % 4 - 3.0 * INDEXOF_XSPEED write-mailbox\n"      # fan -12..12 m/s
+    f"INDEXOF_Z_POS read-mailbox {SPARK_DESPAWN_Z:.1f} < if 0 INDEXOF_ALIVE write-mailbox then\n"
+)
+
+BRICK_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_BRICK_BREAK_END read-mailbox 0<> if\n"
+    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BREAK_END read-mailbox > if\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  else\n"
+    "    1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "  then\n"
+    "else\n"
+    "  INDEXOF_SMB_BRICK_BUMP_END read-mailbox 0<> if\n"
+    "    INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BUMP_END read-mailbox > if\n"
+    "      0 INDEXOF_Z_POS write-mailbox\n"
+    "      0 INDEXOF_SMB_BRICK_BUMP_END write-mailbox\n"
+    "    else\n"
+    "      INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BUMP_PEAK read-mailbox > if\n"
+    "        0.10 INDEXOF_Z_POS write-mailbox\n"
+    "      else\n"
+    "        0.30 INDEXOF_Z_POS write-mailbox\n"
+    "      then\n"
+    "    then\n"
+    "  else\n"
+    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
+    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
+    "        INDEXOF_SMB_MARIO_STATE read-mailbox 0<> if\n"
+    "          INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "          INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "          1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "          INDEXOF_SMB_SCORE read-mailbox 50 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "          INDEXOF_TIME read-mailbox 0.4 + INDEXOF_SMB_BRICK_BREAK_END write-mailbox\n"
+    "          1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "        else\n"
+    "          INDEXOF_TIME read-mailbox 0.05 + INDEXOF_SMB_BRICK_BUMP_PEAK write-mailbox\n"
+    "          INDEXOF_TIME read-mailbox 0.10 + INDEXOF_SMB_BRICK_BUMP_END write-mailbox\n"
+    "        then\n"
+    "      then\n"
+    "    then\n"
+    "  then\n"
+    "then\n"
+)
+
+POPUP_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_POPUP_TRIGGER read-mailbox 0<> if\n"
+    "  INDEXOF_SMB_POPUP_X read-mailbox INDEXOF_X_POS write-mailbox\n"
+    "  0 INDEXOF_Y_POS write-mailbox\n"
+    "  INDEXOF_SMB_POPUP_Z read-mailbox 1.5 + INDEXOF_Z_POS write-mailbox\n"
+    "  INDEXOF_TIME read-mailbox 0.75 + INDEXOF_SMB_POPUP_UNTIL write-mailbox\n"
+    "  0 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "then\n"
+    "INDEXOF_SMB_POPUP_UNTIL read-mailbox 0<> if\n"
+    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_POPUP_UNTIL read-mailbox < if\n"
+    "    INDEXOF_Z_POS read-mailbox 3.0 INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n"
+    "  else\n"
+    "    0.0 INDEXOF_X_POS write-mailbox\n"
+    "    -5.0 INDEXOF_Z_POS write-mailbox\n"
+    "    0 INDEXOF_SMB_POPUP_UNTIL write-mailbox\n"
+    "  then\n"
+    "then\n"
+)
+
+ENEMY_SCRIPT = (
+    "\\ wf\n"
+    # Faithful SMB: stay DORMANT until we scroll into the camera frame, then do the
+    # dumb leftward walk (so we no longer pre-walk into pit 0 before Mario arrives).
+    # SMB_MAX_CAM_X is the Director's one-way camera ratchet; +12 is the half-frustum,
+    # so (SMB_MAX_CAM_X + 12) is the screen's right edge. Once it passes our X we are
+    # revealed — and since the ratchet only ever increases, this latches on for good
+    # (no per-actor state flag needed).
+    "INDEXOF_SMB_MAX_CAM_X read-mailbox 12.0 + INDEXOF_X_POS read-mailbox > if\n"
+    f"  {-ENEMY_WALK_SPEED} INDEXOF_XSPEED write-mailbox\n"   # on-screen: walk left toward Mario
+    # Proximity to the player. Player<->enemy contacts (both CharacterVirtual) do NOT
+    # fire the Jolt collision dispatch (neither is in gBodies — same reason Gold uses
+    # proximity), so compare the broadcast player X/Z to our own position.
+    "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n"    # dx = playerX - myX
+    "  dup * 1.0 <\n"                                                       # dx^2 < 1  (close horizontally)
+    "  if\n"
+    # Star active? touching Mario defeats us — no bounce, no hurt. Else the normal dz logic.
+    "    INDEXOF_TIME read-mailbox INDEXOF_SMB_STAR_UNTIL read-mailbox < if\n"
+    "      0 INDEXOF_ALIVE write-mailbox\n"                # invincible Mario: defeated by touch
+    "    else\n"
+    "      INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"  # dz = playerZ - myZ
+    "      dup 0.7 >\n"                                                       # player clearly ABOVE us?
+    "      if\n"
+    "        drop\n"
+    "        INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "        INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "        1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "        0 INDEXOF_ALIVE write-mailbox\n"              # stomped -> die
+    "        1 INDEXOF_SMB_STOMP write-mailbox\n"          # tell the player to bounce
+    "      else\n"
+    "        -1.5 >\n"                                     # roughly level (not far below) = side hit
+    "        if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n"
+    "      then\n"
+    "    then\n"
+    "  then\n"
+    "else\n"
+    "  0 INDEXOF_XSPEED write-mailbox\n"                 # dormant: stand still until revealed
+    "then\n"
+    # Fireball defeat (independent of the player block — a fireball can hit us anywhere).
+    # Only while a fireball is FRESH (TIME < LIVE_UNTIL); else LIVE_X/Z are stale and ignored.
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"  # dx^2
+    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"  # dz^2
+    "  + 2.5 < if\n"                                     # dx^2 + dz^2 < 2.5 (waist-height fireball vs ground enemy)
+    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"                # fireball kill: die, no bounce, no hurt
+    "  then\n"
+    "then\n"
+    # Sliding-shell defeat — same fresh-broadcast proximity idiom as the fireball, reading the
+    # Koopa shell's live position (docs/plans/2026-05-27-smb-koopa-shell-kick.md).
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_SHELL_LIVE_UNTIL read-mailbox < if\n"
+    "  INDEXOF_SMB_SHELL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "  INDEXOF_SMB_SHELL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "  + 1.5 < if\n"                                     # both on the ground -> tighter radius
+    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "    INDEXOF_SMB_SCORE read-mailbox 100 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  then\n"
+    "then\n"
+)
+
+KOOPA_SCRIPT = (
+    "\\ wf\n"
+    # --- movement by state ---
+    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox not if\n"                # state 0: walk (dormant-until-onscreen)
+    "  INDEXOF_SMB_MAX_CAM_X read-mailbox 12.0 + INDEXOF_X_POS read-mailbox > if\n"
+    f"    {-ENEMY_WALK_SPEED} INDEXOF_XSPEED write-mailbox\n"
+    "  else\n"
+    "    0 INDEXOF_XSPEED write-mailbox\n"
+    "  then\n"
+    "then\n"
+    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox 1 = if 0 INDEXOF_XSPEED write-mailbox then\n"   # state 1: parked
+    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox 2 = if\n"                # state 2: sliding shell
+    # reverse off a wall (|NORMAL_X| > 0.5), consume the normal (Starman idiom)
+    "  INDEXOF_COLLISION_NORMAL_X read-mailbox dup * 0.25 > if\n"
+    "    0 INDEXOF_XSPEED read-mailbox - INDEXOF_XSPEED write-mailbox\n"
+    "    0 INDEXOF_COLLISION_NORMAL_X write-mailbox\n"
+    "  then\n"
+    # broadcast the live shell position + freshness so the goomba can die to it
+    "  INDEXOF_X_POS read-mailbox INDEXOF_SMB_SHELL_LIVE_X write-mailbox\n"
+    "  INDEXOF_Z_POS read-mailbox INDEXOF_SMB_SHELL_LIVE_Z write-mailbox\n"
+    "  INDEXOF_TIME read-mailbox 0.1 + INDEXOF_SMB_SHELL_LIVE_UNTIL write-mailbox\n"
+    "then\n"
+    # --- player interaction (proximity), mirroring the goomba's stack discipline ---
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n"   # dx
+    "dup * 1.0 <\n"
+    "if\n"
+    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_STAR_UNTIL read-mailbox < if\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"                # invincible Mario: dies regardless
+    "  else\n"
+    "    INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"   # dz
+    "    dup 0.7 >\n"
+    "    if\n"                                           # STOMP (player above)
+    "      drop\n"
+    "      INDEXOF_SMB_KOOPA_STATE_L read-mailbox 2 < if 0.5 INDEXOF_Z_SCALE write-mailbox then\n"  # walk->shell: squash
+    "      INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "      INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "      1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "      1 INDEXOF_SMB_KOOPA_STATE_L write-mailbox\n"    # retract to a resting shell (NOT death)
+    "      0 INDEXOF_XSPEED write-mailbox\n"
+    "      1 INDEXOF_SMB_STOMP write-mailbox\n"          # bounce Mario
+    "    else\n"                                         # side touch (roughly level)
+    "      -1.5 >\n"
+    "      if\n"
+    "        INDEXOF_SMB_KOOPA_STATE_L read-mailbox 1 = if\n"   # KICK a resting shell, away from Mario
+    "          INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - 0 < if\n"
+    f"            {SHELL_SPEED} INDEXOF_XSPEED write-mailbox\n"        # player on the left -> slide right
+    "          else\n"
+    f"            {-SHELL_SPEED} INDEXOF_XSPEED write-mailbox\n"       # player on the right -> slide left
+    "          then\n"
+    "          2 INDEXOF_SMB_KOOPA_STATE_L write-mailbox\n"
+    "        else\n"
+    "          1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"  # walking koopa OR moving shell -> hurt Mario
+    "        then\n"
+    "      then\n"
+    "    then\n"
+    "  then\n"
+    "then\n"
+    # --- fireball defeat (any state) ---
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "  + 2.5 < if\n"
+    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
+    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
+    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
+    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  then\n"
+    "then\n"
+)
+
+POWERUP_BLOCK_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_QBLOCK_USED read-mailbox 0<> if\n"
+    f"  0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "else\n"
+    "  INDEXOF_SMB_QBLOCK_ACTIVATE read-mailbox 0<> if\n"
+    "    0 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"          # generator consumed the pulse last tick
+    f"    0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "    1 INDEXOF_SMB_QBLOCK_USED write-mailbox\n"              # one mushroom only -> latch used
+    "  else\n"
+    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
+    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"     # bump-from-below
+    "        1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
+    "      then\n"
+    "    then\n"
+    "  then\n"
+    "then\n"
+)
+
+POWERUP_SCRIPT = (
+    "\\ wf\n"
+    # Identity from Mario's current tier (Super+ -> flower: orange + stationary).
+    "INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n"
+    "  0 INDEXOF_XSPEED write-mailbox\n"
+    f"  0x{FLOWER_TINT:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
+    "then\n"
+    # Proximity pickup (dx^2 + dz^2 < 1.5^2) -> raise the signal for Mario's tier.
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "+ 2.25 < if\n"
+    "  INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n"
+    "    1 INDEXOF_SMB_FIREFLOWER_PICKUP write-mailbox\n"
+    "  else\n"
+    "    1 INDEXOF_SMB_MUSHROOM_PICKUP write-mailbox\n"
+    "  then\n"
+    "then\n"
+)
+
+STAR_SCRIPT = (
+    "\\ wf\n"
+    # Starman bounce: re-launch upward on a real floor contact. Landing on static
+    # ground routes through Actor::JoltStaticCollision -> COLLIDER_IDX=0 (no actor)
+    # and COLLISION_NORMAL_Z < 0 (the normal points DOWN, the way the char pushes
+    # into the floor). We gate on that, then ZERO the normal to consume it: it is
+    # NOT cleared per-frame (only COLLIDER_IDX is, actor.cc:1106), so without the
+    # consume the stale value would re-fire mid-air. Ground-aware: over a pit there
+    # is no contact, the normal stays 0, and the star falls in.
+    "INDEXOF_COLLISION_NORMAL_Z read-mailbox -0.5 < if\n"
+    "  6.0 INDEXOF_ZSPEED write-mailbox\n"
+    "  0 INDEXOF_COLLISION_NORMAL_Z write-mailbox\n"
+    "then\n"
+    # Wall/pipe/flagpole reversal: a side contact gives |COLLISION_NORMAL_X| ~ 1 (and
+    # NORMAL_Z ~ 0). Negate XSPEED and consume the X-normal, same idiom as the bounce.
+    # `dup * 0.25 >` tests NX^2 > 0.25 i.e. |NX| > 0.5 (avoids needing abs).
+    "INDEXOF_COLLISION_NORMAL_X read-mailbox dup * 0.25 > if\n"
+    "  0 INDEXOF_XSPEED read-mailbox - INDEXOF_XSPEED write-mailbox\n"
+    "  0 INDEXOF_COLLISION_NORMAL_X write-mailbox\n"
+    "then\n"
+    # Proximity pickup -> raise the Star signal; Gold::update removes the actor.
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "+ 2.25 < if\n"
+    "  1 INDEXOF_SMB_STAR_PICKUP write-mailbox\n"
+    "then\n"
+)
+
+ONEUP_SCRIPT = (
+    "\\ wf\n"
+    # Proximity pickup (dx^2 + dz^2 < 1.5^2 = 2.25) -> signal for +1 life.
+    # gold.cc TryPickup also fires at radius 1.5 and calls SetPendingRemove (despawn).
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "+ 2.25 < if\n"
+    "  1 INDEXOF_SMB_ONEUP_PICKUP write-mailbox\n"
+    "then\n"
+)
+
+FIREBALL_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_X_POS read-mailbox INDEXOF_SMB_FIREBALL_LIVE_X write-mailbox\n"
+    "INDEXOF_Z_POS read-mailbox INDEXOF_SMB_FIREBALL_LIVE_Z write-mailbox\n"
+    "INDEXOF_TIME read-mailbox 0.1 + INDEXOF_SMB_FIREBALL_LIVE_UNTIL write-mailbox\n"
+)
+
+FIREBALL_GEN_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_FIREBALL_X read-mailbox INDEXOF_X_POS write-mailbox\n"
+    "INDEXOF_SMB_FIREBALL_Y read-mailbox INDEXOF_Y_POS write-mailbox\n"
+    "INDEXOF_SMB_FIREBALL_Z read-mailbox INDEXOF_Z_POS write-mailbox\n"
+)
+
+PIRANHA_SCRIPT = (
+    "\\ wf\n"
+    # Seed the per-actor next-toggle deadline once; stagger by ACTOR_INDEX so the four
+    # plants are out of phase (index*0.4 s offset). `%` casts to int.
+    "INDEXOF_SMB_PIRANHA_NEXT_L read-mailbox not if\n"
+    f"  INDEXOF_TIME read-mailbox INDEXOF_ACTOR_INDEX read-mailbox 5 % 0.4 * + {PIRANHA_DWELL} +\n"
+    "  INDEXOF_SMB_PIRANHA_NEXT_L write-mailbox\n"
+    "  1 INDEXOF_SMB_PIRANHA_UP_L write-mailbox\n"
+    "then\n"
+    # Phase toggle on the TIME deadline: flip UP, push the next deadline out by DWELL.
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_PIRANHA_NEXT_L read-mailbox > if\n"
+    "  INDEXOF_SMB_PIRANHA_UP_L read-mailbox not INDEXOF_SMB_PIRANHA_UP_L write-mailbox\n"
+    f"  INDEXOF_TIME read-mailbox {PIRANHA_DWELL} + INDEXOF_SMB_PIRANHA_NEXT_L write-mailbox\n"
+    "then\n"
+    # GO = phase-up AND Mario not standing on the pipe mouth (|dx|<1.2 AND playerZ>2.0).
+    "INDEXOF_SMB_PIRANHA_UP_L read-mailbox\n"
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup * 1.44 < if\n"
+    "  INDEXOF_SMB_PLAYER_Z read-mailbox 2.0 > if drop 0 then\n"
+    "then\n"
+    # Slide toward the limit at RATE*dt.
+    "if\n"
+    f"  INDEXOF_Z_POS read-mailbox {PIRANHA_EMERGED_Z} < if\n"
+    f"    INDEXOF_Z_POS read-mailbox {PIRANHA_RATE} INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n"
+    "  then\n"
+    "else\n"
+    f"  INDEXOF_Z_POS read-mailbox {PIRANHA_HIDDEN_Z} > if\n"
+    f"    INDEXOF_Z_POS read-mailbox {PIRANHA_RATE} INDEXOF_DELTA_TIME read-mailbox * - INDEXOF_Z_POS write-mailbox\n"
+    "  then\n"
+    "then\n"
+    # Hurt: emerged (Z above pipe top) AND Mario in contact (close in X AND Z).
+    f"INDEXOF_Z_POS read-mailbox {PIRANHA_PIPE_TOP} > if\n"
+    "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "  INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "  + 2.0 < if\n"
+    "    1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"
+    "  then\n"
+    "then\n"
+    # Fireball defeat (any height) — same idiom as the goomba.
+    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "  + 2.5 < if\n"
+    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
+    "    0 INDEXOF_ALIVE write-mailbox\n"
+    "  then\n"
+    "then\n"
+)

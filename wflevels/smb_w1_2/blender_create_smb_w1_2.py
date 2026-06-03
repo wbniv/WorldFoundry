@@ -152,6 +152,8 @@ smb_common.init(scene, OAD_DIR)
 from smb_common import (make_mat, attach_schema, find_by_class, get_class,
     add_box, add_statplat, _add_textured_box, _make_qblock_tga, _make_brick_tga,
     _make_grid_tile_tga, build_textured_ground_mesh, _room_bounds_mesh, _build_mario)
+from smb_common import (
+    QBLOCK_SCRIPT, DEBRIS_SCRIPT, SPARK_SCRIPT, BRICK_SCRIPT, POPUP_SCRIPT, ENEMY_SCRIPT, KOOPA_SCRIPT, POWERUP_BLOCK_SCRIPT, POWERUP_SCRIPT, STAR_SCRIPT, ONEUP_SCRIPT, PIRANHA_SCRIPT)
 
 # ── 2. Import snowgoons for infrastructure ────────────────────────────────────
 print(f"[smb] Importing snowgoons from {SNOWGOONS}")
@@ -839,12 +841,6 @@ mat_spark = make_mat('smb_spark', (1.0, 0.95, 0.55))   # bright warm spark
 SPARK_H = 0.16                                          # ~0.32 m spark cube
 SPARK_DESPAWN_Z = CASTLE_TOP + 1.5                     # fallen back below the burst → vanish
 
-SPARK_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"                       # tumble
-    "INDEXOF_ACTOR_INDEX read-mailbox 9 % 4 - 3.0 * INDEXOF_XSPEED write-mailbox\n"      # fan -12..12 m/s
-    f"INDEXOF_Z_POS read-mailbox {SPARK_DESPAWN_Z:.1f} < if 0 INDEXOF_ALIVE write-mailbox then\n"
-)
 
 def _make_spark_template():
     import bmesh as _bmesh   # module-level `import ... as _bmesh` is below this call site
@@ -1129,154 +1125,14 @@ FLOWER_TINT = 0xF2731A
 BLOCK_Z_6 = GROUND_TOP_Z + 6*T + T/2
 
 # ── Scripts (verbatim from W1-1) ──────────────────────────────────────────────
-QBLOCK_SCRIPT = (
-    "\\ wf\n"
-    f"INDEXOF_SMB_QBLOCK_USED read-mailbox 0<> if\n"
-    f"  0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
-    "else\n"
-    "  INDEXOF_SMB_QBLOCK_ACTIVATE read-mailbox 0<> if\n"
-    "    0 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
-    "  then\n"
-    "  INDEXOF_SMB_QBLOCK_DIE read-mailbox dup not if\n"
-    "    drop\n"
-    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
-    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
-    "        INDEXOF_TIME read-mailbox 4.0 +\n"
-    "        INDEXOF_SMB_QBLOCK_DIE write-mailbox\n"
-    "        1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
-    "      then\n"
-    "    then\n"
-    "  else\n"
-    "    INDEXOF_TIME read-mailbox > if\n"
-    "      INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
-    "        INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
-    "          1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
-    "        then\n"
-    "      then\n"
-    "    else\n"
-    f"      0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
-    "      1 INDEXOF_SMB_QBLOCK_USED write-mailbox\n"
-    "    then\n"
-    "  then\n"
-    "then\n"
-)
 
 COIN_SCRIPT = "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"
 
-POWERUP_BLOCK_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_SMB_QBLOCK_USED read-mailbox 0<> if\n"
-    f"  0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
-    "else\n"
-    "  INDEXOF_SMB_QBLOCK_ACTIVATE read-mailbox 0<> if\n"
-    "    0 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
-    f"    0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
-    "    1 INDEXOF_SMB_QBLOCK_USED write-mailbox\n"
-    "  else\n"
-    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
-    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
-    "        1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
-    "      then\n"
-    "    then\n"
-    "  then\n"
-    "then\n"
-)
 
-POWERUP_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n"
-    "  0 INDEXOF_XSPEED write-mailbox\n"
-    f"  0x{FLOWER_TINT:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
-    "then\n"
-    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "+ 2.25 < if\n"
-    "  INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n"
-    "    1 INDEXOF_SMB_FIREFLOWER_PICKUP write-mailbox\n"
-    "  else\n"
-    "    1 INDEXOF_SMB_MUSHROOM_PICKUP write-mailbox\n"
-    "  then\n"
-    "then\n"
-)
 
-STAR_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_COLLISION_NORMAL_Z read-mailbox -0.5 < if\n"
-    "  6.0 INDEXOF_ZSPEED write-mailbox\n"
-    "  0 INDEXOF_COLLISION_NORMAL_Z write-mailbox\n"
-    "then\n"
-    "INDEXOF_COLLISION_NORMAL_X read-mailbox dup * 0.25 > if\n"
-    "  0 INDEXOF_XSPEED read-mailbox - INDEXOF_XSPEED write-mailbox\n"
-    "  0 INDEXOF_COLLISION_NORMAL_X write-mailbox\n"
-    "then\n"
-    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "+ 2.25 < if\n"
-    "  1 INDEXOF_SMB_STAR_PICKUP write-mailbox\n"
-    "then\n"
-)
 
-ONEUP_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "+ 2.25 < if\n"
-    "  1 INDEXOF_SMB_ONEUP_PICKUP write-mailbox\n"
-    "then\n"
-)
 
 ENEMY_WALK_SPEED = 4.0
-ENEMY_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_SMB_MAX_CAM_X read-mailbox 12.0 + INDEXOF_X_POS read-mailbox > if\n"
-    f"  {-ENEMY_WALK_SPEED} INDEXOF_XSPEED write-mailbox\n"
-    "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n"
-    "  dup * 1.0 <\n"
-    "  if\n"
-    "    INDEXOF_TIME read-mailbox INDEXOF_SMB_STAR_UNTIL read-mailbox < if\n"
-    "      0 INDEXOF_ALIVE write-mailbox\n"
-    "    else\n"
-    "      INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"
-    "      dup 0.7 >\n"
-    "      if\n"
-    "        drop\n"
-    "        INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
-    "        INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
-    "        1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "        0 INDEXOF_ALIVE write-mailbox\n"
-    "        1 INDEXOF_SMB_STOMP write-mailbox\n"
-    "      else\n"
-    "        -1.5 >\n"
-    "        if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n"
-    "      then\n"
-    "    then\n"
-    "  then\n"
-    "else\n"
-    "  0 INDEXOF_XSPEED write-mailbox\n"
-    "then\n"
-    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
-    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "  + 2.5 < if\n"
-    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
-    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
-    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
-    "    0 INDEXOF_ALIVE write-mailbox\n"
-    "  then\n"
-    "then\n"
-    "INDEXOF_TIME read-mailbox INDEXOF_SMB_SHELL_LIVE_UNTIL read-mailbox < if\n"
-    "  INDEXOF_SMB_SHELL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "  INDEXOF_SMB_SHELL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "  + 1.5 < if\n"
-    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
-    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
-    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "    INDEXOF_SMB_SCORE read-mailbox 100 + INDEXOF_SMB_SCORE write-mailbox\n"
-    "    0 INDEXOF_ALIVE write-mailbox\n"
-    "  then\n"
-    "then\n"
-)
 
 # Koopa shell-kick — object-oriented PER-ACTOR state via the local slot SMB_KOOPA_STATE_L
 # (2018), so each of the 4 Koopas walks/retracts/slides on its own state machine (local
@@ -1284,145 +1140,14 @@ ENEMY_SCRIPT = (
 # (Sliding-shell broadcasts SMB_SHELL_LIVE_* are still global — one shell usually slides at
 # a time; independent multi-shell-vs-enemy collisions are a later refinement.)
 SHELL_SPEED = 14.0
-KOOPA_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox not if\n"
-    "  INDEXOF_SMB_MAX_CAM_X read-mailbox 12.0 + INDEXOF_X_POS read-mailbox > if\n"
-    f"    {-ENEMY_WALK_SPEED} INDEXOF_XSPEED write-mailbox\n"
-    "  else\n"
-    "    0 INDEXOF_XSPEED write-mailbox\n"
-    "  then\n"
-    "then\n"
-    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox 1 = if 0 INDEXOF_XSPEED write-mailbox then\n"
-    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox 2 = if\n"
-    "  INDEXOF_COLLISION_NORMAL_X read-mailbox dup * 0.25 > if\n"
-    "    0 INDEXOF_XSPEED read-mailbox - INDEXOF_XSPEED write-mailbox\n"
-    "    0 INDEXOF_COLLISION_NORMAL_X write-mailbox\n"
-    "  then\n"
-    "  INDEXOF_X_POS read-mailbox INDEXOF_SMB_SHELL_LIVE_X write-mailbox\n"
-    "  INDEXOF_Z_POS read-mailbox INDEXOF_SMB_SHELL_LIVE_Z write-mailbox\n"
-    "  INDEXOF_TIME read-mailbox 0.1 + INDEXOF_SMB_SHELL_LIVE_UNTIL write-mailbox\n"
-    "then\n"
-    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n"
-    "dup * 1.0 <\n"
-    "if\n"
-    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_STAR_UNTIL read-mailbox < if\n"
-    "    0 INDEXOF_ALIVE write-mailbox\n"
-    "  else\n"
-    "    INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"
-    "    dup 0.7 >\n"
-    "    if\n"
-    "      drop\n"
-    "      INDEXOF_SMB_KOOPA_STATE_L read-mailbox 2 < if 0.5 INDEXOF_Z_SCALE write-mailbox then\n"
-    "      INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
-    "      INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
-    "      1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "      1 INDEXOF_SMB_KOOPA_STATE_L write-mailbox\n"
-    "      0 INDEXOF_XSPEED write-mailbox\n"
-    "      1 INDEXOF_SMB_STOMP write-mailbox\n"
-    "    else\n"
-    "      -1.5 >\n"
-    "      if\n"
-    "        INDEXOF_SMB_KOOPA_STATE_L read-mailbox 1 = if\n"
-    "          INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - 0 < if\n"
-    f"            {SHELL_SPEED} INDEXOF_XSPEED write-mailbox\n"
-    "          else\n"
-    f"            {-SHELL_SPEED} INDEXOF_XSPEED write-mailbox\n"
-    "          then\n"
-    "          2 INDEXOF_SMB_KOOPA_STATE_L write-mailbox\n"
-    "        else\n"
-    "          1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"
-    "        then\n"
-    "      then\n"
-    "    then\n"
-    "  then\n"
-    "then\n"
-    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
-    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "  + 2.5 < if\n"
-    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
-    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
-    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
-    "    0 INDEXOF_ALIVE write-mailbox\n"
-    "  then\n"
-    "then\n"
-)
 
 # Debris fragment (verbatim from W1-1 §16) — LOCAL_SYSTEM-only template; deterministic
 # index-fanned X drift (no Scalar::Random). `%` casts to int in zForth.
 mat_debris = make_mat('smb_debris', (0.77, 0.42, 0.0))
 DEBRIS_H = 0.18
-DEBRIS_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"
-    "INDEXOF_ACTOR_INDEX read-mailbox 4 % 1.5 - 3.0 * INDEXOF_XSPEED write-mailbox\n"
-    "INDEXOF_Z_POS read-mailbox -20.0 < if\n"
-    "  0 INDEXOF_ALIVE write-mailbox\n"
-    "then\n"
-)
 
-BRICK_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_SMB_BRICK_BREAK_END read-mailbox 0<> if\n"
-    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BREAK_END read-mailbox > if\n"
-    "    0 INDEXOF_ALIVE write-mailbox\n"
-    "  else\n"
-    "    1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
-    "  then\n"
-    "else\n"
-    "  INDEXOF_SMB_BRICK_BUMP_END read-mailbox 0<> if\n"
-    "    INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BUMP_END read-mailbox > if\n"
-    "      0 INDEXOF_Z_POS write-mailbox\n"
-    "      0 INDEXOF_SMB_BRICK_BUMP_END write-mailbox\n"
-    "    else\n"
-    "      INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BUMP_PEAK read-mailbox > if\n"
-    "        0.10 INDEXOF_Z_POS write-mailbox\n"
-    "      else\n"
-    "        0.30 INDEXOF_Z_POS write-mailbox\n"
-    "      then\n"
-    "    then\n"
-    "  else\n"
-    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
-    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
-    "        INDEXOF_SMB_MARIO_STATE read-mailbox 0<> if\n"
-    "          INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
-    "          INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
-    "          1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "          INDEXOF_SMB_SCORE read-mailbox 50 + INDEXOF_SMB_SCORE write-mailbox\n"
-    "          INDEXOF_TIME read-mailbox 0.4 + INDEXOF_SMB_BRICK_BREAK_END write-mailbox\n"
-    "          1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
-    "        else\n"
-    "          INDEXOF_TIME read-mailbox 0.05 + INDEXOF_SMB_BRICK_BUMP_PEAK write-mailbox\n"
-    "          INDEXOF_TIME read-mailbox 0.10 + INDEXOF_SMB_BRICK_BUMP_END write-mailbox\n"
-    "        then\n"
-    "      then\n"
-    "    then\n"
-    "  then\n"
-    "then\n"
-)
 
 # Score pop-up (verbatim from W1-1 §12b).
-POPUP_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_SMB_POPUP_TRIGGER read-mailbox 0<> if\n"
-    "  INDEXOF_SMB_POPUP_X read-mailbox INDEXOF_X_POS write-mailbox\n"
-    "  0 INDEXOF_Y_POS write-mailbox\n"
-    "  INDEXOF_SMB_POPUP_Z read-mailbox 1.5 + INDEXOF_Z_POS write-mailbox\n"
-    "  INDEXOF_TIME read-mailbox 0.75 + INDEXOF_SMB_POPUP_UNTIL write-mailbox\n"
-    "  0 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "then\n"
-    "INDEXOF_SMB_POPUP_UNTIL read-mailbox 0<> if\n"
-    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_POPUP_UNTIL read-mailbox < if\n"
-    "    INDEXOF_Z_POS read-mailbox 3.0 INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n"
-    "  else\n"
-    "    0.0 INDEXOF_X_POS write-mailbox\n"
-    "    -5.0 INDEXOF_Z_POS write-mailbox\n"
-    "    0 INDEXOF_SMB_POPUP_UNTIL write-mailbox\n"
-    "  then\n"
-    "then\n"
-)
 
 # ── Piranha Plant (Anchored, non-colliding Enemy; PER-ACTOR oscillation) ──────
 # docs/plans/2026-05-27-smb-piranha-plant.md — W1-1 used GLOBAL phase state for a single
@@ -1436,53 +1161,6 @@ PIRANHA_EMERGED_Z = GROUND_TOP_Z + 3.2*T   # head clears the 2T pipe top
 PIRANHA_PIPE_TOP  = GROUND_TOP_Z + 2*T
 PIRANHA_RATE      = 4.0
 PIRANHA_DWELL     = 2.0
-PIRANHA_SCRIPT = (
-    "\\ wf\n"
-    # Seed the per-actor next-toggle deadline once; stagger by ACTOR_INDEX so the four
-    # plants are out of phase (index*0.4 s offset). `%` casts to int.
-    "INDEXOF_SMB_PIRANHA_NEXT_L read-mailbox not if\n"
-    f"  INDEXOF_TIME read-mailbox INDEXOF_ACTOR_INDEX read-mailbox 5 % 0.4 * + {PIRANHA_DWELL} +\n"
-    "  INDEXOF_SMB_PIRANHA_NEXT_L write-mailbox\n"
-    "  1 INDEXOF_SMB_PIRANHA_UP_L write-mailbox\n"
-    "then\n"
-    # Phase toggle on the TIME deadline: flip UP, push the next deadline out by DWELL.
-    "INDEXOF_TIME read-mailbox INDEXOF_SMB_PIRANHA_NEXT_L read-mailbox > if\n"
-    "  INDEXOF_SMB_PIRANHA_UP_L read-mailbox not INDEXOF_SMB_PIRANHA_UP_L write-mailbox\n"
-    f"  INDEXOF_TIME read-mailbox {PIRANHA_DWELL} + INDEXOF_SMB_PIRANHA_NEXT_L write-mailbox\n"
-    "then\n"
-    # GO = phase-up AND Mario not standing on the pipe mouth (|dx|<1.2 AND playerZ>2.0).
-    "INDEXOF_SMB_PIRANHA_UP_L read-mailbox\n"
-    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup * 1.44 < if\n"
-    "  INDEXOF_SMB_PLAYER_Z read-mailbox 2.0 > if drop 0 then\n"
-    "then\n"
-    # Slide toward the limit at RATE*dt.
-    "if\n"
-    f"  INDEXOF_Z_POS read-mailbox {PIRANHA_EMERGED_Z} < if\n"
-    f"    INDEXOF_Z_POS read-mailbox {PIRANHA_RATE} INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n"
-    "  then\n"
-    "else\n"
-    f"  INDEXOF_Z_POS read-mailbox {PIRANHA_HIDDEN_Z} > if\n"
-    f"    INDEXOF_Z_POS read-mailbox {PIRANHA_RATE} INDEXOF_DELTA_TIME read-mailbox * - INDEXOF_Z_POS write-mailbox\n"
-    "  then\n"
-    "then\n"
-    # Hurt: emerged (Z above pipe top) AND Mario in contact (close in X AND Z).
-    f"INDEXOF_Z_POS read-mailbox {PIRANHA_PIPE_TOP} > if\n"
-    "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "  INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "  + 2.0 < if\n"
-    "    1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"
-    "  then\n"
-    "then\n"
-    # Fireball defeat (any height) — same idiom as the goomba.
-    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
-    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "  + 2.5 < if\n"
-    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
-    "    0 INDEXOF_ALIVE write-mailbox\n"
-    "  then\n"
-    "then\n"
-)
 
 # ── Builder factories (verbatim from W1-1) ────────────────────────────────────
 def _make_coin_template():

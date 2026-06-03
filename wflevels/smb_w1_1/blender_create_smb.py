@@ -134,6 +134,8 @@ smb_common.init(scene, OAD_DIR)
 from smb_common import (make_mat, attach_schema, find_by_class, get_class,
     add_box, add_statplat, _add_textured_box, _make_qblock_tga, _make_brick_tga,
     _make_grid_tile_tga, build_textured_ground_mesh, _room_bounds_mesh, _build_mario)
+from smb_common import (
+    QBLOCK_SCRIPT, DEBRIS_SCRIPT, SPARK_SCRIPT, BRICK_SCRIPT, POPUP_SCRIPT, ENEMY_SCRIPT, KOOPA_SCRIPT, POWERUP_BLOCK_SCRIPT, POWERUP_SCRIPT, STAR_SCRIPT, ONEUP_SCRIPT, FIREBALL_SCRIPT, FIREBALL_GEN_SCRIPT)
 
 # ── 2. Import snowgoons for infrastructure ────────────────────────────────────
 print(f"[smb] Importing snowgoons from {SNOWGOONS}")
@@ -358,37 +360,6 @@ FLOWER_TINT        = 0xF2731A   # orange (fire flower) — repaints the power-up
 # bottom of Generato::update) → exactly one coin per distinct bump.
 # `not` used instead of `0=` (zForth defines `not` as `: not 0 = ;` but
 # doesn't expose `0=` as a named word; `0<>` and `>` are both available).
-QBLOCK_SCRIPT = (
-    "\\ wf\n"
-    f"INDEXOF_SMB_QBLOCK_USED read-mailbox 0<> if\n"
-    f"  0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
-    "else\n"
-    "  INDEXOF_SMB_QBLOCK_ACTIVATE read-mailbox 0<> if\n"
-    "    0 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
-    "  then\n"
-    "  INDEXOF_SMB_QBLOCK_DIE read-mailbox dup not if\n"
-    "    drop\n"
-    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
-    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
-    "        INDEXOF_TIME read-mailbox 4.0 +\n"
-    "        INDEXOF_SMB_QBLOCK_DIE write-mailbox\n"
-    "        1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
-    "      then\n"
-    "    then\n"
-    "  else\n"
-    "    INDEXOF_TIME read-mailbox > if\n"
-    "      INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
-    "        INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
-    "          1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
-    "        then\n"
-    "      then\n"
-    "    else\n"
-    f"      0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
-    "      1 INDEXOF_SMB_QBLOCK_USED write-mailbox\n"
-    "    then\n"
-    "  then\n"
-    "then\n"
-)
 
 COIN_SCRIPT = "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"
 
@@ -464,24 +435,6 @@ MUSH_T = 0.25       # Y-depth (>= ~0.2 m so it renders from the side camera at Y
 # bump-from-below, then latches USED (tan). Mirrors the qblock authoring but without
 # the 4-second multi-coin window: set the activate pulse on the first bump; the tick
 # after the Generator consumes it, latch USED so no second item can spawn.
-POWERUP_BLOCK_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_SMB_QBLOCK_USED read-mailbox 0<> if\n"
-    f"  0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
-    "else\n"
-    "  INDEXOF_SMB_QBLOCK_ACTIVATE read-mailbox 0<> if\n"
-    "    0 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"          # generator consumed the pulse last tick
-    f"    0x{QBLOCK_TAN:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
-    "    1 INDEXOF_SMB_QBLOCK_USED write-mailbox\n"              # one mushroom only -> latch used
-    "  else\n"
-    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
-    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"     # bump-from-below
-    "        1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
-    "      then\n"
-    "    then\n"
-    "  then\n"
-    "then\n"
-)
 
 MUSHROOM_BLOCK_X = 16 * T  # 24.0 — col 16, faithful W1-1 mushroom ? block
 mblk = _add_textured_box('mushroom_block',
@@ -568,24 +521,6 @@ def _make_powerup_block(name, x, throw, vx, z=None):
 # Super, flower -> Fire) = the existing player handlers. One-shot blocks mean Mario's
 # tier can't change between bump and catch, so the live read always matches the item.
 mat_powerup = make_mat('powerup_red', (0.85, 0.16, 0.12))   # base colour = mushroom red
-POWERUP_SCRIPT = (
-    "\\ wf\n"
-    # Identity from Mario's current tier (Super+ -> flower: orange + stationary).
-    "INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n"
-    "  0 INDEXOF_XSPEED write-mailbox\n"
-    f"  0x{FLOWER_TINT:06X} INDEXOF_FACE_COLOR_TOP write-mailbox\n"
-    "then\n"
-    # Proximity pickup (dx^2 + dz^2 < 1.5^2) -> raise the signal for Mario's tier.
-    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "+ 2.25 < if\n"
-    "  INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n"
-    "    1 INDEXOF_SMB_FIREFLOWER_PICKUP write-mailbox\n"
-    "  else\n"
-    "    1 INDEXOF_SMB_MUSHROOM_PICKUP write-mailbox\n"
-    "  then\n"
-    "then\n"
-)
 _make_powerup_template('powerup_template', mat_powerup, POWERUP_SCRIPT, 0.0, -55.0)
 # @15: throws straight up (X vel 0) so the flower sits; by here you've grabbed the
 # mushroom from the @9 block and are Super, so this dispenses a flower. One-shot.
@@ -598,33 +533,6 @@ _make_powerup_block('fireflower_block', FIREFLOWER_BLOCK_X, 'powerup_template', 
 # restitution (TODO: PHYSICS), and flips XSPEED on a side contact (|NORMAL_X| ~ 1). The
 # stomp-bounce proves ZSPEED writes on a CharacterVirtual work.
 mat_star = make_mat('star_yellow', (0.98, 0.85, 0.10))
-STAR_SCRIPT = (
-    "\\ wf\n"
-    # Starman bounce: re-launch upward on a real floor contact. Landing on static
-    # ground routes through Actor::JoltStaticCollision -> COLLIDER_IDX=0 (no actor)
-    # and COLLISION_NORMAL_Z < 0 (the normal points DOWN, the way the char pushes
-    # into the floor). We gate on that, then ZERO the normal to consume it: it is
-    # NOT cleared per-frame (only COLLIDER_IDX is, actor.cc:1106), so without the
-    # consume the stale value would re-fire mid-air. Ground-aware: over a pit there
-    # is no contact, the normal stays 0, and the star falls in.
-    "INDEXOF_COLLISION_NORMAL_Z read-mailbox -0.5 < if\n"
-    "  6.0 INDEXOF_ZSPEED write-mailbox\n"
-    "  0 INDEXOF_COLLISION_NORMAL_Z write-mailbox\n"
-    "then\n"
-    # Wall/pipe/flagpole reversal: a side contact gives |COLLISION_NORMAL_X| ~ 1 (and
-    # NORMAL_Z ~ 0). Negate XSPEED and consume the X-normal, same idiom as the bounce.
-    # `dup * 0.25 >` tests NX^2 > 0.25 i.e. |NX| > 0.5 (avoids needing abs).
-    "INDEXOF_COLLISION_NORMAL_X read-mailbox dup * 0.25 > if\n"
-    "  0 INDEXOF_XSPEED read-mailbox - INDEXOF_XSPEED write-mailbox\n"
-    "  0 INDEXOF_COLLISION_NORMAL_X write-mailbox\n"
-    "then\n"
-    # Proximity pickup -> raise the Star signal; Gold::update removes the actor.
-    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "+ 2.25 < if\n"
-    "  1 INDEXOF_SMB_STAR_PICKUP write-mailbox\n"
-    "then\n"
-)
 _make_powerup_template('star_template', mat_star, STAR_SCRIPT, 0.0, -59.0)
 STAR_BLOCK_X = 99 * T   # 148.5 — col 99, faithful W1-1 starman block
 _make_powerup_block('star_block', STAR_BLOCK_X, 'star_template', 1.5)
@@ -633,16 +541,6 @@ _make_powerup_block('star_block', STAR_BLOCK_X, 'star_template', 1.5)
 # Same gold-class template pattern as powerup/star (GoldValue=0, gold.cc despawns on
 # proximity); the script raises SMB_ONEUP_PICKUP; player script grants the life.
 mat_oneup = make_mat('smb_oneup', (0.05, 0.75, 0.05))   # bright green body
-ONEUP_SCRIPT = (
-    "\\ wf\n"
-    # Proximity pickup (dx^2 + dz^2 < 1.5^2 = 2.25) -> signal for +1 life.
-    # gold.cc TryPickup also fires at radius 1.5 and calls SetPendingRemove (despawn).
-    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "+ 2.25 < if\n"
-    "  1 INDEXOF_SMB_ONEUP_PICKUP write-mailbox\n"
-    "then\n"
-)
 _make_powerup_template('oneup_template', mat_oneup, ONEUP_SCRIPT, 0.0, -65.0)
 
 # ── 6c. Fire Mario fireball — first runtime-positioned spawn ───────────────────
@@ -669,12 +567,6 @@ mat_fireball = make_mat('fireball_orange', (0.98, 0.45, 0.05))
 # same reason enemies track the player by proximity). When no fireball is alive nobody
 # refreshes LIVE_UNTIL, so the stale LIVE_X/Z are ignored. Missile::update ends in
 # Actor::update(), so this script runs each tick.
-FIREBALL_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_X_POS read-mailbox INDEXOF_SMB_FIREBALL_LIVE_X write-mailbox\n"
-    "INDEXOF_Z_POS read-mailbox INDEXOF_SMB_FIREBALL_LIVE_Z write-mailbox\n"
-    "INDEXOF_TIME read-mailbox 0.1 + INDEXOF_SMB_FIREBALL_LIVE_UNTIL write-mailbox\n"
-)
 
 def _make_fireball_template():
     bm = _bmesh.new()
@@ -713,12 +605,6 @@ _make_fireball_template()
 # generators are Anchored (no Jolt character body) so this same-actor X/Y/Z_POS write
 # sticks. Generato::update spawns from currentPos() BEFORE Actor::update() runs this
 # script, so a fireball appears at Mario's previous-tick point — sub-pixel at frame rate.
-FIREBALL_GEN_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_SMB_FIREBALL_X read-mailbox INDEXOF_X_POS write-mailbox\n"
-    "INDEXOF_SMB_FIREBALL_Y read-mailbox INDEXOF_Y_POS write-mailbox\n"
-    "INDEXOF_SMB_FIREBALL_Z read-mailbox INDEXOF_Z_POS write-mailbox\n"
-)
 
 def _make_fireball_generator(name, fire_mb, vx):
     # Empty (no mesh) -> the exporter emits no mesh + Model Type stays the generator
@@ -1145,71 +1031,6 @@ if player:
 # + Running Deceleration 0 (carries velocity), and a per-tick script that forces a
 # constant leftward XSPEED. Stomp + hurt branches are added in later phases.
 ENEMY_WALK_SPEED = 4.0
-ENEMY_SCRIPT = (
-    "\\ wf\n"
-    # Faithful SMB: stay DORMANT until we scroll into the camera frame, then do the
-    # dumb leftward walk (so we no longer pre-walk into pit 0 before Mario arrives).
-    # SMB_MAX_CAM_X is the Director's one-way camera ratchet; +12 is the half-frustum,
-    # so (SMB_MAX_CAM_X + 12) is the screen's right edge. Once it passes our X we are
-    # revealed — and since the ratchet only ever increases, this latches on for good
-    # (no per-actor state flag needed).
-    "INDEXOF_SMB_MAX_CAM_X read-mailbox 12.0 + INDEXOF_X_POS read-mailbox > if\n"
-    f"  {-ENEMY_WALK_SPEED} INDEXOF_XSPEED write-mailbox\n"   # on-screen: walk left toward Mario
-    # Proximity to the player. Player<->enemy contacts (both CharacterVirtual) do NOT
-    # fire the Jolt collision dispatch (neither is in gBodies — same reason Gold uses
-    # proximity), so compare the broadcast player X/Z to our own position.
-    "  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n"    # dx = playerX - myX
-    "  dup * 1.0 <\n"                                                       # dx^2 < 1  (close horizontally)
-    "  if\n"
-    # Star active? touching Mario defeats us — no bounce, no hurt. Else the normal dz logic.
-    "    INDEXOF_TIME read-mailbox INDEXOF_SMB_STAR_UNTIL read-mailbox < if\n"
-    "      0 INDEXOF_ALIVE write-mailbox\n"                # invincible Mario: defeated by touch
-    "    else\n"
-    "      INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"  # dz = playerZ - myZ
-    "      dup 0.7 >\n"                                                       # player clearly ABOVE us?
-    "      if\n"
-    "        drop\n"
-    "        INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
-    "        INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
-    "        1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "        0 INDEXOF_ALIVE write-mailbox\n"              # stomped -> die
-    "        1 INDEXOF_SMB_STOMP write-mailbox\n"          # tell the player to bounce
-    "      else\n"
-    "        -1.5 >\n"                                     # roughly level (not far below) = side hit
-    "        if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n"
-    "      then\n"
-    "    then\n"
-    "  then\n"
-    "else\n"
-    "  0 INDEXOF_XSPEED write-mailbox\n"                 # dormant: stand still until revealed
-    "then\n"
-    # Fireball defeat (independent of the player block — a fireball can hit us anywhere).
-    # Only while a fireball is FRESH (TIME < LIVE_UNTIL); else LIVE_X/Z are stale and ignored.
-    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
-    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"  # dx^2
-    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"  # dz^2
-    "  + 2.5 < if\n"                                     # dx^2 + dz^2 < 2.5 (waist-height fireball vs ground enemy)
-    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
-    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
-    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
-    "    0 INDEXOF_ALIVE write-mailbox\n"                # fireball kill: die, no bounce, no hurt
-    "  then\n"
-    "then\n"
-    # Sliding-shell defeat — same fresh-broadcast proximity idiom as the fireball, reading the
-    # Koopa shell's live position (docs/plans/2026-05-27-smb-koopa-shell-kick.md).
-    "INDEXOF_TIME read-mailbox INDEXOF_SMB_SHELL_LIVE_UNTIL read-mailbox < if\n"
-    "  INDEXOF_SMB_SHELL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "  INDEXOF_SMB_SHELL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "  + 1.5 < if\n"                                     # both on the ground -> tighter radius
-    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
-    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
-    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "    INDEXOF_SMB_SCORE read-mailbox 100 + INDEXOF_SMB_SCORE write-mailbox\n"
-    "    0 INDEXOF_ALIVE write-mailbox\n"
-    "  then\n"
-    "then\n"
-)
 
 # ── Koopa shell-kick (docs/plans/2026-05-27-smb-koopa-shell-kick.md) ──────────────
 # 3-state machine on SMB_KOOPA_STATE: 0=walk (like the goomba), 1=shell at rest,
@@ -1218,76 +1039,6 @@ ENEMY_SCRIPT = (
 # reverses off walls (Starman idiom), broadcasts SMB_SHELL_LIVE so the goomba dies
 # to it, and hurts Mario on a side hit.
 SHELL_SPEED = 14.0
-KOOPA_SCRIPT = (
-    "\\ wf\n"
-    # --- movement by state ---
-    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox not if\n"                # state 0: walk (dormant-until-onscreen)
-    "  INDEXOF_SMB_MAX_CAM_X read-mailbox 12.0 + INDEXOF_X_POS read-mailbox > if\n"
-    f"    {-ENEMY_WALK_SPEED} INDEXOF_XSPEED write-mailbox\n"
-    "  else\n"
-    "    0 INDEXOF_XSPEED write-mailbox\n"
-    "  then\n"
-    "then\n"
-    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox 1 = if 0 INDEXOF_XSPEED write-mailbox then\n"   # state 1: parked
-    "INDEXOF_SMB_KOOPA_STATE_L read-mailbox 2 = if\n"                # state 2: sliding shell
-    # reverse off a wall (|NORMAL_X| > 0.5), consume the normal (Starman idiom)
-    "  INDEXOF_COLLISION_NORMAL_X read-mailbox dup * 0.25 > if\n"
-    "    0 INDEXOF_XSPEED read-mailbox - INDEXOF_XSPEED write-mailbox\n"
-    "    0 INDEXOF_COLLISION_NORMAL_X write-mailbox\n"
-    "  then\n"
-    # broadcast the live shell position + freshness so the goomba can die to it
-    "  INDEXOF_X_POS read-mailbox INDEXOF_SMB_SHELL_LIVE_X write-mailbox\n"
-    "  INDEXOF_Z_POS read-mailbox INDEXOF_SMB_SHELL_LIVE_Z write-mailbox\n"
-    "  INDEXOF_TIME read-mailbox 0.1 + INDEXOF_SMB_SHELL_LIVE_UNTIL write-mailbox\n"
-    "then\n"
-    # --- player interaction (proximity), mirroring the goomba's stack discipline ---
-    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox -\n"   # dx
-    "dup * 1.0 <\n"
-    "if\n"
-    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_STAR_UNTIL read-mailbox < if\n"
-    "    0 INDEXOF_ALIVE write-mailbox\n"                # invincible Mario: dies regardless
-    "  else\n"
-    "    INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox -\n"   # dz
-    "    dup 0.7 >\n"
-    "    if\n"                                           # STOMP (player above)
-    "      drop\n"
-    "      INDEXOF_SMB_KOOPA_STATE_L read-mailbox 2 < if 0.5 INDEXOF_Z_SCALE write-mailbox then\n"  # walk->shell: squash
-    "      INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
-    "      INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
-    "      1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "      1 INDEXOF_SMB_KOOPA_STATE_L write-mailbox\n"    # retract to a resting shell (NOT death)
-    "      0 INDEXOF_XSPEED write-mailbox\n"
-    "      1 INDEXOF_SMB_STOMP write-mailbox\n"          # bounce Mario
-    "    else\n"                                         # side touch (roughly level)
-    "      -1.5 >\n"
-    "      if\n"
-    "        INDEXOF_SMB_KOOPA_STATE_L read-mailbox 1 = if\n"   # KICK a resting shell, away from Mario
-    "          INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - 0 < if\n"
-    f"            {SHELL_SPEED} INDEXOF_XSPEED write-mailbox\n"        # player on the left -> slide right
-    "          else\n"
-    f"            {-SHELL_SPEED} INDEXOF_XSPEED write-mailbox\n"       # player on the right -> slide left
-    "          then\n"
-    "          2 INDEXOF_SMB_KOOPA_STATE_L write-mailbox\n"
-    "        else\n"
-    "          1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"  # walking koopa OR moving shell -> hurt Mario
-    "        then\n"
-    "      then\n"
-    "    then\n"
-    "  then\n"
-    "then\n"
-    # --- fireball defeat (any state) ---
-    "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
-    "  INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
-    "  INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
-    "  + 2.5 < if\n"
-    "    INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
-    "    INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
-    "    1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "    INDEXOF_SMB_SCORE read-mailbox 200 + INDEXOF_SMB_SCORE write-mailbox\n"
-    "    0 INDEXOF_ALIVE write-mailbox\n"
-    "  then\n"
-    "then\n"
-)
 
 
 def _apply_enemy_movement(obj):
@@ -1482,12 +1233,6 @@ mat_spark = make_mat('smb_spark', (1.0, 0.95, 0.55))   # bright warm spark
 SPARK_H = 0.16                                          # ~0.32 m spark cube
 SPARK_DESPAWN_Z = CASTLE_TOP + 1.5                     # 6.0 — fallen back below the burst → vanish
 
-SPARK_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"                       # tumble
-    "INDEXOF_ACTOR_INDEX read-mailbox 9 % 4 - 3.0 * INDEXOF_XSPEED write-mailbox\n"      # fan -12..12 m/s
-    f"INDEXOF_Z_POS read-mailbox {SPARK_DESPAWN_Z:.1f} < if 0 INDEXOF_ALIVE write-mailbox then\n"
-)
 
 def _make_spark_template():
     bm = _bmesh.new()
@@ -1976,14 +1721,6 @@ DEBRIS_H = 0.18   # half-extent → ~0.36 m cube (quarter-brick chunk)
 # a LOCAL_USER slot (2000-2099) on a default-sized template overflows its array → crash.
 # (The engine's Random Displacement path is unusable: Scalar::Random() asserts via
 # RangeCheck's integer cast — see TODO.) `%` casts to int in zForth.
-DEBRIS_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"
-    "INDEXOF_ACTOR_INDEX read-mailbox 4 % 1.5 - 3.0 * INDEXOF_XSPEED write-mailbox\n"
-    "INDEXOF_Z_POS read-mailbox -20.0 < if\n"
-    "  0 INDEXOF_ALIVE write-mailbox\n"
-    "then\n"
-)
 
 def _make_debris_template():
     bm = _bmesh.new()
@@ -2027,45 +1764,6 @@ _make_debris_template()
 # Ordering matters: on the first break tick we set the window end AND pulse, but defer
 # ALIVE=0 to a later tick so the Generator (spawn-check runs before the script) actually
 # throws fragments across the window first (plan risk #3).
-BRICK_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_SMB_BRICK_BREAK_END read-mailbox 0<> if\n"
-    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BREAK_END read-mailbox > if\n"
-    "    0 INDEXOF_ALIVE write-mailbox\n"
-    "  else\n"
-    "    1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
-    "  then\n"
-    "else\n"
-    "  INDEXOF_SMB_BRICK_BUMP_END read-mailbox 0<> if\n"
-    "    INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BUMP_END read-mailbox > if\n"
-    "      0 INDEXOF_Z_POS write-mailbox\n"
-    "      0 INDEXOF_SMB_BRICK_BUMP_END write-mailbox\n"
-    "    else\n"
-    "      INDEXOF_TIME read-mailbox INDEXOF_SMB_BRICK_BUMP_PEAK read-mailbox > if\n"
-    "        0.10 INDEXOF_Z_POS write-mailbox\n"
-    "      else\n"
-    "        0.30 INDEXOF_Z_POS write-mailbox\n"
-    "      then\n"
-    "    then\n"
-    "  else\n"
-    "    INDEXOF_COLLIDER_IDX read-mailbox 0<> if\n"
-    "      INDEXOF_COLLISION_NORMAL_Z read-mailbox 0 > if\n"
-    "        INDEXOF_SMB_MARIO_STATE read-mailbox 0<> if\n"
-    "          INDEXOF_X_POS read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n"
-    "          INDEXOF_Z_POS read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n"
-    "          1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "          INDEXOF_SMB_SCORE read-mailbox 50 + INDEXOF_SMB_SCORE write-mailbox\n"
-    "          INDEXOF_TIME read-mailbox 0.4 + INDEXOF_SMB_BRICK_BREAK_END write-mailbox\n"
-    "          1 INDEXOF_SMB_QBLOCK_ACTIVATE write-mailbox\n"
-    "        else\n"
-    "          INDEXOF_TIME read-mailbox 0.05 + INDEXOF_SMB_BRICK_BUMP_PEAK write-mailbox\n"
-    "          INDEXOF_TIME read-mailbox 0.10 + INDEXOF_SMB_BRICK_BUMP_END write-mailbox\n"
-    "        then\n"
-    "      then\n"
-    "    then\n"
-    "  then\n"
-    "then\n"
-)
 
 def _add_brick(name, x, z=BLOCK_Z):
     blk = _add_textured_box(name,
@@ -2135,25 +1833,6 @@ hbrick_1up['wf_Script']             = POWERUP_BLOCK_SCRIPT
 # SMB_POPUP_X/Z + pulse SMB_POPUP_TRIGGER=1; this script teleports the diamond
 # above the event, floats it up for 0.75 s, then parks it back underground.
 # Uses `enemy` schema (Anchored) so gold.cc::TryPickup never despawns it.
-POPUP_SCRIPT = (
-    "\\ wf\n"
-    "INDEXOF_SMB_POPUP_TRIGGER read-mailbox 0<> if\n"
-    "  INDEXOF_SMB_POPUP_X read-mailbox INDEXOF_X_POS write-mailbox\n"
-    "  0 INDEXOF_Y_POS write-mailbox\n"
-    "  INDEXOF_SMB_POPUP_Z read-mailbox 1.5 + INDEXOF_Z_POS write-mailbox\n"
-    "  INDEXOF_TIME read-mailbox 0.75 + INDEXOF_SMB_POPUP_UNTIL write-mailbox\n"
-    "  0 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n"
-    "then\n"
-    "INDEXOF_SMB_POPUP_UNTIL read-mailbox 0<> if\n"
-    "  INDEXOF_TIME read-mailbox INDEXOF_SMB_POPUP_UNTIL read-mailbox < if\n"
-    "    INDEXOF_Z_POS read-mailbox 3.0 INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n"
-    "  else\n"
-    "    0.0 INDEXOF_X_POS write-mailbox\n"
-    "    -5.0 INDEXOF_Z_POS write-mailbox\n"
-    "    0 INDEXOF_SMB_POPUP_UNTIL write-mailbox\n"
-    "  then\n"
-    "then\n"
-)
 
 
 def _make_popup_template():
