@@ -985,8 +985,8 @@ def _build_sun():
     mat = bpy.data.materials.new('sun_mat')
     mat.use_nodes = True
     bsdf = mat.node_tree.nodes['Principled BSDF']
-    bsdf.inputs['Base Color'].default_value = (1.0, 0.98, 0.88, 1.0)  # warm white
-    mat.diffuse_color = (1.0, 0.98, 0.88, 1.0)
+    bsdf.inputs['Base Color'].default_value = (1.0, 0.88, 0.08, 1.0)  # solar yellow
+    mat.diffuse_color = (1.0, 0.88, 0.08, 1.0)
     obj.data.materials.append(mat)
     print(f"[moon] sun_disc at ({sx:.1f}, {sy:.1f}, {sz:.1f}), R=8 m")
     return obj
