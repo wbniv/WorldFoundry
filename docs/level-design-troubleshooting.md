@@ -1971,3 +1971,89 @@ loop never indexes past the TOC (`GetTOCEntry` asserts). (2026-05-31 —
 - **Don't teleport the player by writing `X_POS` to reach a far flag** — it glitches the Jolt body
   (fall/death → death reloads the *same* level, masking the transition). Walk the player in with
   `inject_input joystick1_raw=0x2000` on a short, hazard-free stretch instead.
+
+---
+
+## PERM pool OOM — size the pool for all prop models, not just the player
+
+**Symptom:** Engine crashes at load with:
+```
+AssertMsg: Lmalloc based at address 0x… out of memory, request size = N.
+lmalloc remaining = M, Named Room #4095
+```
+`Named Room #4095` is the PERM slot (room `0xFFF` in the asset system).
+
+**Cause:** `<level>-standalone.iff.txt` has a hard-coded `'PERM' Nl` byte count.  The
+initial value was sized for `player.iff` alone.  Each prop model added to PERM (via
+`wf_Moves Between Rooms = 'True'`) consumes ~55 KB in the pool at runtime — roughly 2–3×
+the on-disk IFF size, because the engine expands mesh geometry into float32 normals,
+UV tables, and material lists.
+
+**Fix:** Increase the `PERM` value in `<level>-standalone.iff.txt`:
+
+```
+'PERM' 1000000l   // 1 MB — fits ~18 prop models at current average
+```
+
+Rule of thumb: budget **≈ 2.5 × sum of prop `.iff` file sizes** for the PERM pool.
+Never cross the 2048-byte sector boundary of a round number — use multiples of 2048 for
+CD-sector alignment (1 MB = 1 048 576, round down to 1 000 000 is fine on PC dev; on real
+target you'd align to 0x100000).
+
+---
+
+## Cutscene camera `Track Object` — must be a room actor, not a PERM actor
+
+**Symptom:** With `wf_Track Object = 'some_perm_actor'` on a cutscene camshot, the
+camera asserts at runtime:
+```
+ASSERTION FAILED: ValidPtr(trackObject)    movecam.cc:1067
+```
+
+**Cause:** `GetObject(idx)` only searches the room object table. PERM actors are loaded
+into a separate slot and are not returned by `GetObject`, so the track-object pointer is
+null every frame the camera is active.
+
+**Fix:** Use a room-resident proxy actor as the track target.  Give the proxy a per-frame
+Forth script that reads a shared mailbox (e.g. `MOON_LANDER_Z`) and writes to its own
+`INDEXOF_Z_POS`, keeping its position in sync with the PERM actor:
+
+```forth
+\\ wf
+INDEXOF_MOON_LANDER_Z read-mailbox INDEXOF_Z_POS write-mailbox
+```
+
+The PERM actor's script publishes its position to the global mailbox each frame, and the
+room proxy mirrors it.  The camshot tracks the proxy, which `GetObject` always finds.
+
+---
+
+## Script-driven ascent: despawn before the actor exits room z_max
+
+**Symptom:** A script writes `INDEXOF_Z_POS` each frame to make an actor rise (e.g. a
+rocket launch: `z = 0.5 × t²`).  After some time the engine prints:
+```
+Room::UpdateRoomContents: object N … fell out of room 0
+```
+…and then crashes (null GetObject return for any actor that was tracking the flyer).
+
+**Cause:** The actor's Z coordinate eventually exceeds the room's `z_max` ceiling.
+Raising `z_max` in `blender_create_<level>.py` only delays the crash — it's a timebomb.
+
+**Fix:** Despawn the actor (`ALIVE = 0`) in its own Forth script **before** it can exit
+the room.  Compute the expected exit altitude and despawn well below it:
+
+```forth
+\\ wf
+INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if
+  INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox dup * 0.5 *   \ z = 0.5 × t²
+  dup 500 > if
+    drop 0 INDEXOF_ALIVE write-mailbox   \ despawn at 500 m, z_max = 2000 m
+  else
+    INDEXOF_Z_POS write-mailbox
+  then
+then
+```
+
+Choose the despawn threshold to be well below `z_max` and after any camera cutback that
+references the actor, so the camera is never active and tracking a despawned actor.

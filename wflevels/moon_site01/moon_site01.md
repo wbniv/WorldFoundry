@@ -39,11 +39,21 @@ PERM (always loaded — props)
   player.iff            Astronaut character (Physics actor)
   artemis_lander.iff    Starship HLS primitive build at 1:1 scale (Anchored)
   earth.iff             Earth sphere R=20 m at (0, 200, 50) (Anchored)
+  moon_racer.iff        Moon RACER LTV rover (Anchored, foreground)
+  vsat_tower.iff        VSAT comms tower
+  lunar_cruiser.iff     Lunar Cruiser / LTV concept
+  blue_moon_mk1.iff     Blue Moon Mk1 lander
+  fsh.iff               Forward Support Habitat (FSH)
+  fsp_reactor.iff       Fission Surface Power (FSP) reactor + radiator
+  cs_chase              Vista camshot (no model)
+  cs_earth              Launch cutscene camshot (no model)
+  launch_tracker        Invisible proxy actor; Z_POS follows lander (see below)
 ```
 
 **Architecture rule:** Room0 atlas (1024×1024) holds the terrain tile only.
-All props — present and future (rover, habitat, solar arrays) — belong in PERM
-and must carry `wf_Moves Between Rooms = True` in `blender_create_moon.py`.
+All props must carry `wf_Moves Between Rooms = True` in `blender_create_moon.py`.
+**PERM pool** is set in `moon_site01-standalone.iff.txt`; budget ~2.5 × total prop
+`.iff` file sizes. Currently 1,000,000 bytes.
 
 ## Atlas pages (textile.flags)
 
@@ -74,22 +84,35 @@ To re-derive the heightfield from new DEM tiles: `python3 dem_to_grid.py`.
 |----------|-------|-------------|
 | `MOON_PLAYER_HEADING` | 1879 | player heading (revolutions) for minimap |
 | `MOON_LAUNCH_TIMER` | 1880 | reserved |
-| `MOON_LAUNCH_PHASE` | 1881 | 0=idle 1=countdown 2=ignition 3=ascent |
+| `MOON_LAUNCH_PHASE` | 1881 | 1=countdown 2=ignition 3=ascent |
 | `MOON_LAUNCH_T_MINUS` | 1882 | seconds into current phase |
+| `MOON_CHASE_CAM_IDX` | 1883 | actor index of `cs_chase`; written by its startup script |
+| `MOON_EARTH_CAM_IDX` | 1884 | actor index of `cs_earth`; written by its startup script |
+| `MOON_LANDER_Z` | 1885 | lander altitude (m); written by lander script, read by `launch_tracker` |
 
 ## Launch sequence
 
 Triggered automatically by level clock. Phases driven by `INDEXOF_TIME`
 (level-clock seconds):
 
-| Time | Phase | HUD |
-|------|-------|-----|
-| 0–10 s | 0 idle | normal TIME counter |
-| 10–15 s | 1 countdown | `LAUNCH IN T-N` banner |
-| 15–16 s | 2 ignition | `IGNITION` banner; Raptor exhaust cones visible |
-| 16 s+ | 3 ascent | TIME counter repurposed → mission-elapsed seconds |
+| Time | Phase | T_MINUS | HUD |
+|------|-------|---------|-----|
+| 0–10 s | 1 countdown | 10→0 | `LAUNCH IN T-N` banner |
+| 10–11 s | 2 ignition | 0 | `IGNITION` banner; Raptor exhaust visible |
+| 11 s+ | 3 ascent | seconds since ignition | TIME counter → mission-elapsed |
 
-Lander Z position during ascent: `z = 0.5 × t²` (t = seconds since ignition).
+Lander Z during ascent: `z = 0.5 × T_MINUS²` (m); despawned at z > 500 m (T_MINUS ≈ 32 s).
+
+## Cutscene cameras
+
+| Camera | When active | Position | FOV | Yon | Track Object |
+|--------|-------------|----------|-----|-----|-------------|
+| `cs_chase` | always (default) | (0, −100, 80) vista | 60° | 500 m | Player |
+| `cs_earth` | phase ≥ 2 (t=10 s) until T_MINUS > 13 s | (30, −80, 5) behind lander | 40° | 500 m | `launch_tracker` |
+
+`launch_tracker` is an invisible room actor at lander XY whose Z_POS mirrors `MOON_LANDER_Z`
+each frame. `cs_earth` tracks it instead of `artemis_lander` directly because PERM→PERM
+`GetObject` returns null at runtime (see level-design-troubleshooting.md).
 
 ## HUD
 
@@ -108,4 +131,6 @@ Lander Z position during ascent: `z = 0.5 × t²` (t = seconds since ignition).
 - Texture LOD sizing: `docs/investigations/2026-06-02-texture-lod-for-distant-spheres.md`
 - Artemis lander build: `docs/plans/2026-05-31-moon-artemis-lander.md`
 - Launch sequence: `docs/plans/2026-06-02-moon-lander-launch-sequence.md`
+- Earth cutscene camera: `docs/plans/2026-06-03-moon-earth-cutscene.md`
+- Surface asset models: `docs/plans/2026-06-03-moon-site-01-surface-asset-models.md`
 - Future surface assets: `docs/investigations/2026-06-02-moon-site01-future-surface-assets.md`
