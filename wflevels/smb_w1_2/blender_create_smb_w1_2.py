@@ -152,6 +152,7 @@ smb_common.init(scene, OAD_DIR)
 from smb_common import (make_mat, attach_schema, find_by_class, get_class,
     add_box, add_statplat, _add_textured_box, _make_qblock_tga, _make_brick_tga,
     _make_grid_tile_tga, build_textured_ground_mesh, _room_bounds_mesh, _build_mario)
+from smb_common import (_apply_enemy_movement, _build_goomba, _make_target, _make_popup_template)
 from smb_common import (
     QBLOCK_SCRIPT, DEBRIS_SCRIPT, SPARK_SCRIPT, BRICK_SCRIPT, POPUP_SCRIPT, ENEMY_SCRIPT, KOOPA_SCRIPT, POWERUP_BLOCK_SCRIPT, POWERUP_SCRIPT, STAR_SCRIPT, ONEUP_SCRIPT, PIRANHA_SCRIPT)
 
@@ -1317,89 +1318,6 @@ def _add_brick(name, x, z=BLOCK_Z):
     return blk
 
 
-def _make_popup_template():
-    POP_W = T * 0.35
-    POP_H = T * 0.45
-    POP_T = 0.12
-    bm = _bmesh.new()
-    tf = bm.verts.new((0,      POP_T,  POP_H))
-    rf = bm.verts.new((POP_W,  POP_T,  0))
-    bf = bm.verts.new((0,      POP_T, -POP_H))
-    lf = bm.verts.new((-POP_W, POP_T,  0))
-    tb = bm.verts.new((0,     -POP_T,  POP_H))
-    rb = bm.verts.new((POP_W, -POP_T,  0))
-    bb = bm.verts.new((0,     -POP_T, -POP_H))
-    lb = bm.verts.new((-POP_W,-POP_T,  0))
-    bm.faces.new([tf, rf, bf, lf])
-    bm.faces.new([tb, lb, bb, rb])
-    bm.faces.new([tf, tb, rb, rf])
-    bm.faces.new([rf, rb, bb, bf])
-    bm.faces.new([bf, bb, lb, lf])
-    bm.faces.new([lf, lb, tb, tf])
-    mesh = bpy.data.meshes.new('popup_score')
-    bm.to_mesh(mesh); bm.free()
-    mat = make_mat('smb_popup', (1.0, 0.95, 0.2))
-    mesh.materials.append(mat)
-    for p in mesh.polygons:
-        p.material_index = 0
-    obj = bpy.data.objects.new('popup_score', mesh)
-    obj.location = (0.0, 0.0, -5.0)
-    scene.collection.objects.link(obj)
-    attach_schema(obj, 'enemy')
-    obj['wf_Mobility']             = 'Anchored'
-    obj['wf_Model Type']           = 'Mesh'
-    obj['wf_Visibility Mailbox']   = 1
-    obj['wf_Mesh Name']            = 'popup_score.iff'
-    obj['wf_Script']               = POPUP_SCRIPT
-    return obj
-
-
-def _build_goomba():
-    mat_br = make_mat('goomba_brown', (0.55, 0.27, 0.06))
-    mat_tn = make_mat('goomba_tan',   (0.83, 0.65, 0.34))
-    parts = []
-    bpy.ops.mesh.primitive_uv_sphere_add(
-        radius=0.48*T, segments=10, ring_count=6, location=(0, 0, 0.44*T))
-    bpy.context.object.scale.z = 0.72
-    bpy.ops.object.transform_apply(scale=True)
-    parts.append((bpy.context.object, mat_br))
-    bpy.ops.mesh.primitive_cylinder_add(
-        vertices=10, radius=0.34*T, depth=0.09*T, location=(0, 0, 0.54*T))
-    parts.append((bpy.context.object, mat_tn))
-    for yo in (-0.19*T, 0.19*T):
-        bpy.ops.mesh.primitive_uv_sphere_add(
-            radius=0.14*T, segments=6, ring_count=4, location=(0, yo, 0.10*T))
-        parts.append((bpy.context.object, mat_br))
-    for obj, mat in parts:
-        obj.data.materials.clear()
-        obj.data.materials.append(mat)
-        for p in obj.data.polygons:
-            p.material_index = 0
-            p.use_smooth = True
-    bpy.ops.object.select_all(action='DESELECT')
-    for obj, _ in parts:
-        obj.select_set(True)
-    body = parts[0][0]
-    bpy.context.view_layer.objects.active = body
-    bpy.ops.object.join()
-    body.name      = 'goomba_00'
-    body.data.name = 'goomba_00'
-    return body
-
-
-def _apply_enemy_movement(obj):
-    obj['wf_Mobility']             = 'Physics'
-    obj['wf_Mass']                 = 1.0
-    obj['wf_Turn Rate']            = 0.0
-    obj['wf_Running Deceleration'] = 0.0
-    obj['wf_Max Ground Speed']     = 8.0
-    obj['wf_Max Air Speed']        = 50.0
-    obj['wf_Falling Acceleration'] = 12.0
-    obj['wf_Model Type']           = 'Mesh'
-    obj['wf_Visibility Mailbox']   = 1
-    obj['wf_Script']               = ENEMY_SCRIPT
-
-
 def _build_koopa(name, x, red=False):
     """3 green + 1 red Koopa. Geometry is shared via smb_common.koopa_mesh (one
     datablock per colour — all greens share, the red shares), so the exporter writes
@@ -1698,15 +1616,6 @@ _cr_10coin['wf_Object X Velocity']  = 1.5
 _cr_10coin['wf_Object Y Velocity']  = 0.0
 _cr_10coin['wf_Object Z Velocity']  = 6.0
 _cr_10coin['wf_Script']             = QBLOCK_SCRIPT
-
-
-def _make_target(name, loc):
-    t = bpy.data.objects.new(name, None)
-    scene.collection.objects.link(t)
-    attach_schema(t, 'target')
-    t.location = loc
-    t['wf_Model Type'] = 'None'
-    return t
 
 
 _make_target('Target_cr_entry',  (CR_ENTRY_X, 0.0, CR_ENTRY_Z))
