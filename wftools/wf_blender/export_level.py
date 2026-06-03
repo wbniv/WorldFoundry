@@ -977,8 +977,21 @@ def scene_index_map(context) -> dict[int, str]:
     }
 
 
-def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
-    """Write the current Blender scene to a .lev text IFF. Returns (ok, message)."""
+def _sanitize_mesh_name(name: str) -> str:
+    """Datablock name → filename-safe slug (lowercase, runs of non-alnum → '_')."""
+    import re
+    return re.sub(r'[^a-z0-9]+', '_', name.lower()).strip('_')
+
+
+def export_scene_to_lev(context, filepath: str, mesh_dir: str = "") -> tuple[bool, str]:
+    """Write the current Blender scene to a .lev text IFF. Returns (ok, message).
+
+    When `mesh_dir` is given (e.g. a game-wide shared mesh library), per-mesh .iff
+    files are written there and named by their canonical DATABLOCK name (so identical
+    actors dedup to one clean-named file game-wide) instead of into the level dir named
+    after the first instance. Empty `mesh_dir` (the default) keeps the historical
+    behaviour, so non-shared-dir levels export byte-identically.
+    """
     objects = [o for o in context.scene.objects if o.get(SCHEMA_PATH_KEY)]
     if not objects:
         return False, "No WF objects in scene (attach schemas first)"
@@ -986,6 +999,9 @@ def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
     lines = ["{ 'LVL' "]
     level_dir = os.path.dirname(filepath)
+    mesh_out_dir = mesh_dir or level_dir          # where per-mesh .iff files land
+    if mesh_dir:
+        os.makedirs(mesh_dir, exist_ok=True)
 
     # Mesh dedup: objects sharing one Blender mesh datablock export ONE .iff (named for
     # the first user) and the rest reference it — so N identical actors cost one room-pool
@@ -1075,8 +1091,15 @@ def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
                 mesh_filename = _mesh_iff_by_datablock[_dbkey]   # reference the already-written mesh
                 model_type = 1
             else:
-                mesh_filename = (orig_mesh if orig_mesh else obj.name + ".iff").lower()
-                mesh_out = os.path.join(level_dir, mesh_filename)
+                if orig_mesh:
+                    mesh_filename = orig_mesh.lower()
+                elif mesh_dir:
+                    # Shared-library mode: canonical datablock name → one clean-named
+                    # file per unique mesh, game-wide (not per first-instance object).
+                    mesh_filename = _sanitize_mesh_name(obj.data.name) + ".iff"
+                else:
+                    mesh_filename = (obj.name + ".iff").lower()
+                mesh_out = os.path.join(mesh_out_dir, mesh_filename)
                 if _write_mesh_iff(obj, mesh_out):
                     model_type = 1  # Mesh
                     _mesh_iff_by_datablock[_dbkey] = mesh_filename
@@ -1158,9 +1181,14 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
 
     filename_ext = ".lev"
     filter_glob: StringProperty(default="*.lev", options={'HIDDEN'})
+    mesh_dir: StringProperty(
+        default="",
+        description="Optional shared mesh-library dir; meshes written there named by "
+                    "datablock (dedup game-wide). Empty = per-level dir (historical).",
+    )
 
     def execute(self, context):
-        ok, msg = export_scene_to_lev(context, self.filepath)
+        ok, msg = export_scene_to_lev(context, self.filepath, mesh_dir=self.mesh_dir)
         level = 'INFO' if ok else 'WARNING'
         self.report({level}, msg)
         return {'FINISHED'} if ok else {'CANCELLED'}
