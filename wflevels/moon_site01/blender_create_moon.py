@@ -327,6 +327,38 @@ def _build_astronaut():
 _astronaut = _build_astronaut()
 
 
+def _build_earth():
+    """Blue Marble Earth — UV sphere R=20 m, NASA earth.tga (128×64) texture.
+    Placed at (0, 200, 50) — 301 m from the camera, ~7.6° angular diameter,
+    ~81 px on a 640 px / 60° FOV window. 128×64 texels ≈ 1 texel per screen
+    pixel at the equator; going higher wastes atlas space with no visible gain.
+    See docs/investigations/2026-06-02-texture-lod-for-distant-spheres.md."""
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=20.0, segments=24, ring_count=12,
+        location=(0.0, 0.0, 0.0))
+    obj = bpy.context.object
+    obj.name = 'earth'
+    obj.data.name = 'earth'
+
+    mat = bpy.data.materials.new('earth_mat')
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes['Principled BSDF']
+    tex_node = mat.node_tree.nodes.new('ShaderNodeTexImage')
+    tex_node.image = bpy.data.images.load(os.path.join(SCRIPT_DIR, 'earth.tga'))
+    mat.node_tree.links.new(tex_node.outputs['Color'], bsdf.inputs['Base Color'])
+    # WF fragment shader (backend_modern.cc kFS) samples the texture only when
+    # v_color is white (step(0.99, min(rgb))).  Force Base Color = white so the
+    # exported MATL _color drives v_color = (1,1,1) per vertex.
+    bsdf.inputs['Base Color'].default_value = (1.0, 1.0, 1.0, 1.0)
+    mat.diffuse_color = (1.0, 1.0, 1.0, 1.0)
+    obj.data.materials.append(mat)
+
+    for poly in obj.data.polygons:
+        poly.use_smooth = True
+
+    return obj
+
+
 def _build_artemis_lander():
     """Starship HLS Artemis lander — primitive build at 1:1 real scale
     (~47 m tall, ~9 m diameter). Joined into one mesh with the engine-mount
@@ -473,9 +505,10 @@ if player:
 _lander = _build_artemis_lander()
 attach_schema(_lander, 'platform')
 _lander.location = (30.0, 25.0, 0.0)
-_lander['wf_Mobility']           = 'Anchored'
-_lander['wf_Model Type']         = 'Mesh'
-_lander['wf_Visibility Mailbox'] = 1
+_lander['wf_Mobility']            = 'Anchored'
+_lander['wf_Model Type']          = 'Mesh'
+_lander['wf_Visibility Mailbox']  = 1
+_lander['wf_Moves Between Rooms'] = 'True'   # prop, not terrain — goes in PERM atlas
 # Launch sequence script: when phase ≥ 3 (ascent), compute Z from quadratic
 # t² curve and write to own Z_POS. See
 # docs/plans/2026-06-02-moon-lander-launch-sequence.md.
@@ -488,6 +521,20 @@ _lander['wf_Script'] = (
 )
 print(f"[moon] lander mesh: {len(_lander.data.vertices)} verts, "
       f"{len(_lander.data.polygons)} polys at {_lander.location[:]}")
+
+# ── 6c. Earth in the lunar sky ────────────────────────────────────────────────
+# Real NASA Blue Marble texture (earth.tga, 128×64) on a UV sphere R=20 m.
+# Placed 301 m from the camera so it subtends ~7.6° — large enough to read
+# continents but not dominating the frame. Anchored so it never moves.
+# See docs/investigations/2026-06-02-texture-lod-for-distant-spheres.md.
+_earth = _build_earth()
+attach_schema(_earth, 'platform')
+_earth.location = (0.0, 200.0, 50.0)
+_earth['wf_Mobility']             = 'Anchored'
+_earth['wf_Model Type']           = 'Mesh'
+_earth['wf_Visibility Mailbox']   = 1
+_earth['wf_Moves Between Rooms']  = 'True'   # routes texture to PERM atlas (Room0 is full)
+print(f"[moon] Earth sphere at {_earth.location[:]}")
 
 # ── 7. Camera ────────────────────────────────────────────────────────────────
 target = find_by_class('target')
