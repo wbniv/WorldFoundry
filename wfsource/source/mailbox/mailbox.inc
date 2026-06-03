@@ -129,6 +129,7 @@ Comment("=====================================================================")
 	MAILBOXENTRY( MOON_VEHICLE_X,      1893 )	Comment("Active vehicle X position (m); published by vehicle script each tick")
 	MAILBOXENTRY( MOON_VEHICLE_Y,      1894 )	Comment("Active vehicle Y position (m); published by vehicle script each tick")
 	MAILBOXENTRY( MOON_VEHICLE_Z,      1895 )	Comment("Active vehicle Z position (m); published by vehicle script each tick")
+	MAILBOXENTRY( MOON_VEH_ENTERING,   1896 )	Comment("One-frame flag: 1 on the entry frame so in-vehicle snap is skipped until vehicle publishes X/Y/Z")
 
 	MAILBOXENTRY(GLOBAL_USER_MAX,1900)
 	Comment(" *Inclusive* last valid index — user range is [GLOBAL_USER_START, GLOBAL_USER_MAX].          ")

@@ -853,6 +853,7 @@ if player:
         "INDEXOF_MOON_NEARBY_VEHICLE read-mailbox INDEXOF_MOON_ACTIVE_VEHICLE write-mailbox\n"
         "0 INDEXOF_MOON_PLAYER_VIS write-mailbox\n"
         "0 INDEXOF_INPUT write-mailbox\n"
+        "1 INDEXOF_MOON_VEH_ENTERING write-mailbox\n"
         # Resolve vehicle ID (1/2/3) → actual actor index → MOON_ACTIVE_VEH_IDX.
         "INDEXOF_MOON_NEARBY_VEHICLE read-mailbox 1 = if\n"
         "INDEXOF_MOON_CRUISER_0_IDX read-mailbox INDEXOF_MOON_ACTIVE_VEH_IDX write-mailbox then\n"
@@ -864,10 +865,14 @@ if player:
         # ── In-vehicle mode ────────────────────────────────────────────────────
         "else\n"
         "0 INDEXOF_INPUT write-mailbox\n"
-        # Snap player to vehicle so cs_chase tracks the vehicle.
+        # Snap player to vehicle — skip the first frame (vehicle hasn't published X/Y/Z yet).
+        "INDEXOF_MOON_VEH_ENTERING read-mailbox 1 = if\n"
+        "0 INDEXOF_MOON_VEH_ENTERING write-mailbox\n"
+        "else\n"
         "INDEXOF_MOON_VEHICLE_X read-mailbox INDEXOF_X_POS write-mailbox\n"
         "INDEXOF_MOON_VEHICLE_Y read-mailbox INDEXOF_Y_POS write-mailbox\n"
         "INDEXOF_MOON_VEHICLE_Z read-mailbox INDEXOF_Z_POS write-mailbox\n"
+        "then\n"
         # Input routing: the vehicle's own script reads HARDWARE_JOYSTICK1_RAW
         # and writes to its own local INDEXOF_INPUT — no write-actor-mailbox needed
         # (cross-actor mailbox write fails range check since INPUT index differs per actor).
