@@ -915,10 +915,10 @@ print(f"[moon] lander mesh: {len(_lander.data.vertices)} verts, "
 # See docs/investigations/2026-06-02-texture-lod-for-distant-spheres.md.
 _earth = _build_earth()
 attach_schema(_earth, 'platform')
-# Confirmed rendering at (30, 200, 80) — moves back to sky position.
-# R≈1836 m from origin, inside R=2000 skydome. From cs_earth 13.4° off-center
-# (half-FOV 20°). Ambient 0.70 → ~70% brightness against black sky.
-_earth.location = (0.0, 1800.0, 360.0)
+# 800 m out, 200 m up — 10° angular diameter (2× bigger than 1800 m version),
+# clearly reads as a globe. R≈825 m from origin, well inside R=2000 skydome.
+# From cs_earth: 8° above look-center (tracker now at Z=15 → cam tilts up 5°).
+_earth.location = (0.0, 800.0, 200.0)
 _earth['wf_Mobility']             = 'Anchored'
 _earth['wf_Model Type']           = 'Mesh'
 _earth['wf_Visibility Mailbox']   = 1
@@ -1174,7 +1174,7 @@ tracker_mesh = bpy.data.meshes.new('launch_tracker_mesh')
 tracker_obj  = bpy.data.objects.new('launch_tracker', tracker_mesh)
 bpy.context.scene.collection.objects.link(tracker_obj)
 attach_schema(tracker_obj, 'platform')
-tracker_obj.location = (30.0, 25.0, 0.0)   # same XY as lander
+tracker_obj.location = (30.0, 25.0, 15.0)  # Z=15 tilts cs_earth up ~5° → Earth sits in upper sky
 tracker_obj['wf_Mobility']   = 'Anchored'
 tracker_obj['wf_Model Type'] = 'None'
 tracker_obj['wf_Script'] = (
