@@ -62,7 +62,7 @@ extern bool bPrintVersion;
 
 extern bool bShowWindow;
 
-bool bFullScreen = true;
+bool bFullScreen = false;
 
 //=============================================================================
 

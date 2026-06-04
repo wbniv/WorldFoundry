@@ -155,6 +155,15 @@ OpenMainWindow( char *title )
         FatalError("Couldn't open X window!");
     XStoreName(halDisplay.mainDisplay, halDisplay.win, title);
 
+    // Tell the WM this is a normal application window so it gets decorations.
+    {
+        Atom wm_window_type   = XInternAtom(halDisplay.mainDisplay, "_NET_WM_WINDOW_TYPE", False);
+        Atom wm_type_normal   = XInternAtom(halDisplay.mainDisplay, "_NET_WM_WINDOW_TYPE_NORMAL", False);
+        XChangeProperty(halDisplay.mainDisplay, halDisplay.win,
+                        wm_window_type, XA_ATOM, 32, PropModeReplace,
+                        (unsigned char*)&wm_type_normal, 1);
+    }
+
     // Request fullscreen before mapping so the WM sees it at map time
     // (EWMH spec: set _NET_WM_STATE on an unmapped window via XChangeProperty;
     // use ClientMessage only for already-visible windows).
