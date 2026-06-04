@@ -77,7 +77,7 @@ PLAYER_SPAWN  = (0.0, 0.0, 5.0)
 # that fades everything past 30 m to flat #888888; see
 # docs/plans/2026-05-31-uninitialised-fog-defaults.md).
 CAM_OFFSET    = (0.0, -100.0, 80.0)
-LOOK_TARGET   = (0.0, 0.0, 0.0)   # cs_chase looks ~39° down — overhead camp view
+LOOK_TARGET   = (0.0, 0.0, 65.0)  # tilt cs_chase 19°→6° down; Earth (+8.5° elev) lands ~23° off-center (upper quarter)
 
 # Sun direction — az 20°, alt 2° (matches LOLA illumination at site latitude).
 # Used by both the engine directional-light actor and the visible Sun disc mesh.
@@ -253,6 +253,22 @@ if light:
     ambient['wf_lightRed']   = 0.40
     ambient['wf_lightGreen'] = 0.42
     ambient['wf_lightBlue']  = 0.50
+
+    # Fill light — second directional, az=200° (from camera side, -Y,-X).
+    # The primary sun (az=20°, +Y) never illuminates Earth's camera-facing side
+    # because the camera is at Y=-80 while Earth is at Y=1800+. A fill from
+    # az=200° gives N·L≈+0.91 on Earth's camera face; terrain faces (N≈+Z)
+    # see only N·L≈0.035 (< 4% extra), so terrain appearance barely changes.
+    fill = light.copy()
+    fill.data = light.data.copy() if light.data else None
+    scene.collection.objects.link(fill)
+    fill.name = 'FillLight'
+    fill.location = (0.0, 0.0, 50.0)
+    fill.rotation_euler = (math.pi / 2 - math.radians(2.0), 0.0, math.radians(200.0))
+    fill['wf_lightType']  = 'Directional'
+    fill['wf_lightRed']   = 0.25
+    fill['wf_lightGreen'] = 0.25
+    fill['wf_lightBlue']  = 0.30
 
 # ── 6. Player (astronaut) ────────────────────────────────────────────────────
 # Built in-script from primitives like SMB Mario / Q*bert, not imported. ~14
@@ -922,7 +938,7 @@ print(f"[moon] lander mesh: {len(_lander.data.vertices)} verts, "
 # See docs/investigations/2026-06-02-texture-lod-for-distant-spheres.md.
 _earth = _build_earth()
 attach_schema(_earth, 'platform')
-_earth.location = (0.0, 2000.0, 400.0)
+_earth.location = (0.0, 1800.0, 360.0)  # R≈1836 m from origin — inside R=2000 skydome (was 2040 m, occluded)
 _earth['wf_Mobility']             = 'Anchored'
 _earth['wf_Model Type']           = 'Mesh'
 _earth['wf_Visibility Mailbox']   = 1
@@ -948,12 +964,13 @@ def _place_prop(obj, loc, mobility='Anchored', name=None):
 
 
 def _add_entry_trigger(cx, cy, cz, vehicle_id):
-    """Anchored ActBox beside the Cruiser +X airlock face.
-    Writes MOON_NEARBY_VEHICLE = vehicle_id on entry, 0 on exit.
-    Activated Actor Mailbox set to 4005 (default 0 aborts — see TODO.md)."""
-    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(cx + 5.5, cy, cz + 2.0))
+    """Anchored ActBox centred on the Cruiser (not offset to one side).
+    7×7×4 m box so the player can approach from any direction.
+    Vehicles are ≥40 m apart so no cross-trigger overlap.
+    Writes MOON_NEARBY_VEHICLE = vehicle_id on entry, 0 on exit."""
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(cx, cy, cz + 2.0))
     trig = bpy.context.object
-    trig.scale = (3.0, 4.0, 2.0)
+    trig.scale = (7.0, 7.0, 4.0)
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     attach_schema(trig, 'actbox')
     trig['wf_Activated By']            = 'All'
@@ -1068,7 +1085,7 @@ for _i, (_cobj, (_cx, _cy)) in enumerate(
                 name=f'lunar_cruiser_{_i}')
     _cobj['wf_Script Controls Input'] = 'True'
     _cobj['wf_Running Acceleration']  = 12.0   # heavier than astronaut (8.0)
-    _cobj['wf_Running Deceleration']  = 0.3    # low friction — slides on regolith
+    _cobj['wf_Running Deceleration']  = 0.8    # raised from 0.3 — 0.3 caused oscillation jitter on turns
     _cidx_mb = 1886 + _i   # MOON_CRUISER_0/1/2_IDX
     _vehicle_id = _i + 1   # 1/2/3 matching what the ActBox writes to MOON_NEARBY_VEHICLE
     _cobj['wf_Script'] = (
