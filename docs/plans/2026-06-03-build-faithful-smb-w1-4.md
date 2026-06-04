@@ -1,8 +1,16 @@
 # Build a faithful Super Mario Bros. World 1-4 (Castle)
 
 **Date:** 2026-06-03
-**Status:** Not started
-**Author:** Claude (Sonnet 4.6)
+**Status:** Phase 1 (geometry/collision/traversability), Phase 2 (7 fire-bars), and
+Phase 3 (Fake Bowser + axe + coin blocks) **built + live-verified**
+([`tests/verify_smb_w1_4_firebars.py`](../../tests/verify_smb_w1_4_firebars.py),
+[`tests/verify_smb_w1_4_boss.py`](../../tests/verify_smb_w1_4_boss.py) both pass).
+Remaining: **Phase 5** (insert W1-4 into `cd.iff` + re-point W1-3 → W1-4 so it's
+reachable in the meta-loop) and **Phase 6** mid-level screenshots (blocked on a
+headless capture/render anomaly — filed in TODO.md; spawn renders clean). Phase 4
+(celebration) works — the axe fires END_OF_LEVEL. Moving platforms stay a Phase-2
+follow-up plan ([`2026-06-03-smb-moving-platforms.md`], TODO.md:135).
+**Author:** Claude (Sonnet 4.6, Phases 0–1; Opus 4.8, Phases 2–3)
 
 ## Goal
 
