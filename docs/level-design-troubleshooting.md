@@ -1781,6 +1781,16 @@ fixes **box** collision; a `MODEL_TYPE_MESH` Jolt-trimesh statplat builds its bo
 verts with no scale multiply (`actor.cc` BindAssets trimesh block), so a scaled trimesh
 statplat would still collide unit-sized — keep scaled statplats `MODEL_TYPE_BOX`/BOX3.
 
+**For floor tiles that CharacterVirtual must stand on — use `build_textured_ground_mesh`.**
+`add_statplat` (unit-box datablock) creates both a BOX static body (correct scale from the
+OAD BOX3) AND a MESH_STATIC body (raw verts at ±0.5, unscaled). When the character was
+created before static bodies (W1-1/W1-3), both systems work because no body is excluded and
+the BOX body stops the character. But when character creation happens after static bodies
+(e.g. W1-4, where floor slabs are added early), the Jolt character falls through the BOX body
+in a subtle way — root cause not fully traced. `build_textured_ground_mesh` bakes scale into
+vertices via `transform_apply`, giving Jolt a correctly-sized MESH_STATIC body that reliably
+stops the character regardless of creation order. Discovered 2026-06-04 while building W1-4.
+
 ### (b) Runtime `X/Y/Z_SCALE` mailboxes (3040–3042) — visual-only
 
 **Symptom:** You stretch/squash an actor at runtime via the scale mailboxes (e.g. qbert)
