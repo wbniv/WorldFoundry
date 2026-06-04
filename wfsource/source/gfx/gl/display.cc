@@ -75,6 +75,7 @@ extern float wf_moon_launch_t_minus;
 extern bool bRecordVideo;
 extern GLuint gCaptureFBO;
 static void EnsureCaptureFBO(int w, int h);
+static void CaptureFrame(int xSize, int ySize, int liveW, int liveH);
 
 static void DrawHudText(float x, float y, const char* text)
 {
@@ -942,7 +943,7 @@ EnsureCaptureFBO(int w, int h)
 }
 
 static void
-CaptureFrame(int xSize, int ySize)
+CaptureFrame(int xSize, int ySize, int liveW, int liveH)
 {
     if (!gCapturePipe)
     {
@@ -973,8 +974,8 @@ CaptureFrame(int xSize, int ySize)
     {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, gCaptureFBO);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        glBlitFramebuffer(0, 0, xSize, ySize, 0, 0, xSize, ySize,
-                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        glBlitFramebuffer(0, 0, xSize, ySize, 0, 0, liveW, liveH,
+                          GL_COLOR_BUFFER_BIT, GL_LINEAR);
         // FBO remains bound as the READ framebuffer for glReadPixels below.
     }
 
@@ -1159,7 +1160,7 @@ Display::PageFlip()
 
 #if DESIGNER_CHEATS && defined(__LINUX__)
     if (bRecordVideo)
-        CaptureFrame(_xSize, _ySize);
+        CaptureFrame(_xSize, _ySize, _liveWidth, _liveHeight);
 #endif
 
 #if defined(__ANDROID__)

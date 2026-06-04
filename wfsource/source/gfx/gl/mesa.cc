@@ -276,27 +276,9 @@ void ProcessXEvents(XEvent event)
     {
         case ConfigureNotify:
             {
-                /* this approach preserves a 1:1 viewport aspect ratio */
-                int vX, vY, vW, vH;
                 int eW = event.xconfigure.width, eH = event.xconfigure.height;
-                if(eW >= eH)
-                {
-                    vX = 0;
-                    vY = (eH - eW) >> 1;
-                    vW = vH = eW;
-                }
-                else
-                {
-                    vX = (eW - eH) >> 1;
-                    vY = 0;
-                    vW = vH = eH;
-                }
-                glViewport(vX, vY, vW, vH);
+                glViewport(0, 0, eW, eH);
                 AssertGLOK();
-                // Push the live window size into Display so HUD layout
-                // (screen-space ortho) anchors to actual window corners after a
-                // resize. The 3D viewport above stays an inscribed square; HUD
-                // uses the full window via Display::GetSurfaceSize.
                 if (auto* d = Display::GetActive())
                     d->SetLiveWindowSize(eW, eH);
             }
