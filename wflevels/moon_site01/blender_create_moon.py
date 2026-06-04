@@ -915,10 +915,12 @@ print(f"[moon] lander mesh: {len(_lander.data.vertices)} verts, "
 # See docs/investigations/2026-06-02-texture-lod-for-distant-spheres.md.
 _earth = _build_earth()
 attach_schema(_earth, 'platform')
-# 800 m out, 200 m up — 10° angular diameter (2× bigger than 1800 m version),
-# clearly reads as a globe. R≈825 m from origin, well inside R=2000 skydome.
-# From cs_earth: 8° above look-center (tracker now at Z=15 → cam tilts up 5°).
-_earth.location = (0.0, 800.0, 200.0)
+# Shifted to X=-150 so Earth clears the lander's silhouette.
+# Lander is at X=30 = camera X → lander is dead-center in cs_earth frame.
+# Earth at X=0 was only 2° left, inside the lander body. At X=-150 it is
+# 11.6° left of center — 6° of clear sky past the lander edge. 10° apparent
+# diameter. R≈844 m from origin, well inside the 2000 m skydome.
+_earth.location = (-150.0, 800.0, 200.0)
 _earth['wf_Mobility']             = 'Anchored'
 _earth['wf_Model Type']           = 'Mesh'
 _earth['wf_Visibility Mailbox']   = 1
