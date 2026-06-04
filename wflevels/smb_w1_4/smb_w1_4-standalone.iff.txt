@@ -1,0 +1,23 @@
+// smb_w1_4-standalone.iff.txt — L4-wrapped form of smb_w1_4 for wf_game -L.
+//
+// Build:
+//   bash wftools/wf_blender/build_level_binary.sh smb_w1_4
+//
+// NOTE: the W1-3 -> W1-4 -> W1-1 flag transition only works from a cd.iff bundle
+// (the meta-loop). This standalone is for eyeballing W1-4 geometry; the full
+// chain is exercised via `task build-cd-iff` + `task run`.
+//
+// Castle level: ~43 actors Phase 1 (player, floor/ceil slabs, lava visuals+sensors,
+// platforms, powerup block, templates, camera/director/matte/light/room/celebration).
+// Phases 2+3 add fire-bars, Bowser, axe, hidden ? blocks.
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 200000l                  // actors + margin
+        'PERM' 500000l                  // player.iff + shared templates
+        'ROOM' 1000000l                 // castle geometry + celebration
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../smb_w1_4.iff" ]
+}

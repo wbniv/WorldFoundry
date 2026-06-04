@@ -1209,6 +1209,9 @@ def mat_hard():     return _mat('hard', 'smb_hard_block', (0.48, 0.25, 0.05))
 def mat_pipe():     return _mat('pipe', 'smb_pipe_green', (0.0, 0.62, 0.0))
 def mat_treetop():  return _mat('treetop', 'smb_treetop_green', (0.16, 0.62, 0.18))   # canopy
 def mat_treestem(): return _mat('treestem', 'smb_tree_stem', (0.55, 0.32, 0.10))      # trunk
+def mat_castle():   return _mat('castle',  'smb_castle',     (0.60, 0.55, 0.50))      # gray stone
+def mat_lava():     return _mat('lava',    'smb_lava',       (1.00, 0.27, 0.00))      # lava orange-red
+def mat_axe():      return _mat('axe',     'smb_axe',        (1.00, 0.85, 0.00))      # gold axe
 
 
 # ── Builders with material/dim deps (materials via getters above) ─────────────
