@@ -826,6 +826,14 @@ Display::RenderBegin()
        glBindFramebuffer(GL_FRAMEBUFFER, gCaptureFBO);
    }
 #endif
+   // Recompute viewport + projection every frame so resize/maximize stays correct.
+   {
+       int suw, suh;
+       GetSurfaceSize(suw, suh);
+       glViewport(0, 0, suw, suh);
+       RendererBackendGet().SetProjection(60.0f, float(suw) / float(suh), 1.0f, 1000.0f);
+       AssertGLOK();
+   }
    glClearColor( _backgroundColorRed, _backgroundColorGreen, _backgroundColorBlue, 1.0 );
    AssertGLOK();
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);     // Clear the window with current clearing color
