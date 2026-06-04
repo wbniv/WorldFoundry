@@ -183,8 +183,8 @@ ParseWindowSwitches( int __argc, char* __argv[] )
 
 	if ( _halWindowWidth == 0 )
 	{
-		_halWindowWidth = 512;
-		_halWindowHeight = 384;
+		_halWindowWidth = 640;
+		_halWindowHeight = 480;
 	}
 
 }
