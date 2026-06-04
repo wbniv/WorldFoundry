@@ -220,9 +220,9 @@ if player:
         bpy.data.meshes.remove(old)
 
 # ── 7. Flagpole + castle + fireworks + triggers (shared celebration) ──────────
-# NEXT_LEVEL_INDEX = 0 → loop back to W1-1 (W1-4 doesn't exist yet). cd.iff order makes
-# W1-3 level 2; W1-2's flagpole is re-pointed to 2 so the loop is W1-1→W1-2→W1-3→W1-1.
-smb_common.celebration({'FLAGPOLE_X': FLAGPOLE_X, 'NEXT_LEVEL_INDEX': 0})
+# NEXT_LEVEL_INDEX = 3 → advance to W1-4 (cd.iff level 3). The loop is now
+# W1-1(0)→W1-2(1)→W1-3(2)→W1-4(3)→W1-1(0); W1-4's axe writes 0 to close it.
+smb_common.celebration({'FLAGPOLE_X': FLAGPOLE_X, 'NEXT_LEVEL_INDEX': 3})
 
 # ── 8. CamShot + Targets + surface camera zone ────────────────────────────────
 camshot = find_by_class('camshot')

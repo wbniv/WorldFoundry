@@ -1316,7 +1316,7 @@
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 5000l } { 'STR' "5000" } }
-		{ 'I32' { 'NAME' "MailBoxValue" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'I32' { 'NAME' "MailBoxValue" } { 'DATA' 3l } { 'STR' "3" } }
 		{ 'I32' { 'NAME' "Activated Actor Mailbox" } { 'DATA' 4005l } { 'STR' "4005" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }

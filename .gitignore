@@ -70,3 +70,4 @@ imgui.ini
 
 # wf_blender test harness cache (built wf_core.so)
 tests/.cache/
+wfsource/source/game/output.mp4
