@@ -233,11 +233,14 @@ _castle_floor('toad', 154, 160)
 # z_top = -3 (2 tiles below floor) so feet at Z=0 are safe; triggers when feet < -0.5.
 _actbox_death('fallback_death', LEVEL_X0, LEVEL_X1, z_top=-3.0)
 
-# Ceiling spans the entire castle (single unbroken slab)
-add_statplat('w1_4_ceil',
-             LEVEL_X0, -GROUND_Y, CEILING_Z,
-             LEVEL_X1,  GROUND_Y, CEILING_Z + GROUND_THICK,
-             mat_castle())
+# Ceiling spans the entire castle (single unbroken slab). Kept INVISIBLE — it is a
+# jump barrier (collision), not scenery; rendered, its lit underside washed the
+# mid-level view bright. The dark matte reads as the castle interior overhead.
+_ceil = add_statplat('w1_4_ceil',
+                     LEVEL_X0, -GROUND_Y, CEILING_Z,
+                     LEVEL_X1,  GROUND_Y, CEILING_Z + GROUND_THICK,
+                     mat_castle())
+_ceil['wf_Visibility Mailbox'] = 0
 
 # Lava sections (visual + per-section death sensor)
 _lava_section('pit1',  14,  32)
