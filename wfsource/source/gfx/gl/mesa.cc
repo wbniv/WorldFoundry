@@ -37,6 +37,7 @@
 #include <GL/glx.h>
 #include <GL/glu.h>
 #undef Display
+#include <X11/Xatom.h>  // XA_ATOM, for _NET_WM_STATE_FULLSCREEN
 
 //==============================================================================
 
@@ -153,6 +154,20 @@ OpenMainWindow( char *title )
     if(!halDisplay.win)
         FatalError("Couldn't open X window!");
     XStoreName(halDisplay.mainDisplay, halDisplay.win, title);
+
+    // Request fullscreen before mapping so the WM sees it at map time
+    // (EWMH spec: set _NET_WM_STATE on an unmapped window via XChangeProperty;
+    // use ClientMessage only for already-visible windows).
+    extern bool bFullScreen;
+    if (bFullScreen)
+    {
+        Atom wm_state = XInternAtom(halDisplay.mainDisplay, "_NET_WM_STATE", False);
+        Atom fs_atom  = XInternAtom(halDisplay.mainDisplay, "_NET_WM_STATE_FULLSCREEN", False);
+        XChangeProperty(halDisplay.mainDisplay, halDisplay.win,
+                        wm_state, XA_ATOM, 32, PropModeReplace,
+                        (unsigned char*)&fs_atom, 1);
+    }
+
     // XMapRaised = map + raise; signals the WM to focus the window on open.
     XMapRaised(halDisplay.mainDisplay, halDisplay.win);
     _wmDeleteWindow = XInternAtom(halDisplay.mainDisplay, "WM_DELETE_WINDOW", False);

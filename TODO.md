@@ -1,5 +1,11 @@
 # TODO
 
+## PLATFORM / DISPLAY
+
+- [x] **Linux: `-fullscreen`, `-width=N`, `-height=N` window flags.** Re-enabled the `#if 0` arg block in `hal/linux/platform_init.cc`; `-fullscreen` queries screen dims via X11 so FBO + recording match. `WF_FULLSCREEN=1` / `WF_RECORD=1` added to all `task run-*`. [plan](docs/plans/2026-06-04-window-size-parity-fullscreen-flag.md)
+- [ ] **macOS: `-fullscreen`, `-width=N`, `-height=N` window flags.** Linux uses `_NET_WM_STATE_FULLSCREEN` via X11. macOS needs the equivalent using AppKit (`NSWindow` frame sizing + `toggleFullScreen:` / `NSWindowStyleMaskFullScreen`) in the macOS platform HAL. Tablets (Android/iOS) are always fullscreen by OS design — no changes needed there.
+
+
 ## NEURAL-FORTH AI LIBRARY
 
 - [x] Stages 1–8 complete — fuzzy, NN, autograd, ∂4 slots, 62/62 tests — [plan](docs/plans/2026-05-22-neural-forth.md) [investigation](docs/investigations/2026-04-22-neural-forth.md)
