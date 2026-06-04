@@ -827,19 +827,6 @@ if player:
         "INDEXOF_Y_POS read-mailbox INDEXOF_MOON_PLAYER_Y write-mailbox\n"
         "INDEXOF_Z_POS read-mailbox INDEXOF_MOON_PLAYER_Z write-mailbox\n"
         "INDEXOF_ROTATION_C read-mailbox INDEXOF_MOON_PLAYER_HEADING write-mailbox\n"
-        # Launch sequence.
-        "INDEXOF_TIME read-mailbox "
-        "dup 10 < if "
-        "1 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
-        "10 swap - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
-        "else dup 11 < if drop 2 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
-        "0 INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
-        "else 3 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
-        "11 - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
-        "then then\n"
-        # Camera cuts moved to each camshot's own script — cs_earth writes
-        # CAMSHOT when TIME<31, cs_chase writes it when TIME>31. No player
-        # involvement needed; this also fixes the frame-1 race.
         # Enter vehicle: adjacent (ActBox wrote MOON_NEARBY_VEHICLE) + B button.
         "INDEXOF_MOON_NEARBY_VEHICLE read-mailbox 0 > if\n"
         f"INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox {_INTERACT_BIT} & 0 > if\n"
@@ -875,6 +862,17 @@ if player:
         "0 INDEXOF_MOON_VEH_ENTERING write-mailbox\n"
         "then\n"
         "then\n"   # close outer on-foot/in-vehicle if-else
+        # Launch sequence runs every frame regardless of vehicle state —
+        # it is a world event, not player state.
+        "INDEXOF_TIME read-mailbox "
+        "dup 10 < if "
+        "1 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
+        "10 swap - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
+        "else dup 11 < if drop 2 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
+        "0 INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
+        "else 3 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
+        "11 - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
+        "then then\n"
     )
 
 # ── 6b. Artemis lander (Starship HLS) ────────────────────────────────────────
