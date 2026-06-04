@@ -518,8 +518,13 @@ tasks:
       - |
         LOG=/tmp/wfgame_snowgoons.log
         echo "Logging to $LOG"
-        RECFLAG=""; if [ -n "${WF_RECORD:-}" ]; then F="${WF_RECORD}"; [ "$F" = "1" ] && F="$(date +%Y%m%d_%H%M%S)_snowgoons.mp4"; RECFLAG="-record_video $F"; echo "Recording → $F"; fi
+        RECFLAG=""; RECOUT=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_snowgoons.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/snowgoons.iff $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
   build-level:
     desc: "Build a level's inner + standalone .iff (usage: task build-level -- qbert_practice)"
@@ -562,8 +567,13 @@ tasks:
       - |
         LOG=/tmp/wfgame_qbert.log
         echo "Logging to $LOG"
-        RECFLAG=""; if [ -n "${WF_RECORD:-}" ]; then F="${WF_RECORD}"; [ "$F" = "1" ] && F="$(date +%Y%m%d_%H%M%S)_qbert.mp4"; RECFLAG="-record_video $F"; echo "Recording → $F"; fi
+        RECFLAG=""; RECOUT=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_qbert.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/qbert_practice-standalone.iff $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
   run-smb:
     desc: "Run wf_game on wflevels/smb_w1_1-standalone.iff directly (bypass cd.iff). WF_RECORD=1 records video."
@@ -571,8 +581,13 @@ tasks:
       - |
         LOG=/tmp/wfgame_smb.log
         echo "Logging to $LOG"
-        RECFLAG=""; if [ -n "${WF_RECORD:-}" ]; then F="${WF_RECORD}"; [ "$F" = "1" ] && F="$(date +%Y%m%d_%H%M%S)_smb.mp4"; RECFLAG="-record_video $F"; echo "Recording → $F"; fi
+        RECFLAG=""; RECOUT=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_smb.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/smb_w1_1-standalone.iff $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
   run-moon:
     desc: "Run wf_game on wflevels/moon_site01-standalone.iff (PGDA Site 01 Connecting Ridge — LOLA terrain + NAC texture at 1024², lunar gravity). WF_RECORD=1 records video."
@@ -586,13 +601,18 @@ tasks:
       - |
         LOG=/tmp/wfgame_moon.log
         echo "Logging to $LOG"
-        RECFLAG=""; if [ -n "${WF_RECORD:-}" ]; then F="${WF_RECORD}"; [ "$F" = "1" ] && F="$(date +%Y%m%d_%H%M%S)_moon.mp4"; RECFLAG="-record_video $F"; echo "Recording → $F"; fi
+        RECFLAG=""; RECOUT=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_moon.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game \
           --vram-width=4096 --vram-height=2048 \
           --vram-slot-width=1024 --vram-slot-height=1024 \
           --vram-perm-width=1024 --vram-perm-height=512 \
           -Lwflevels/moon_site01-standalone.iff \
           $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
   run-debug:
     desc: "Run wf_game with debug bridge on port 7777 (usage: task run-debug -- wflevels/snowgoons.iff)"
