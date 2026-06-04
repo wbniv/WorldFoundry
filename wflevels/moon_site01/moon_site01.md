@@ -150,9 +150,9 @@ each frame. `cs_earth` tracks it instead of `artemis_lander` directly because PE
 
 ## Reference
 
-- Texture LOD sizing: `docs/investigations/2026-06-02-texture-lod-for-distant-spheres.md`
-- Artemis lander build: `docs/plans/2026-05-31-moon-artemis-lander.md`
-- Launch sequence: `docs/plans/2026-06-02-moon-lander-launch-sequence.md`
-- Earth cutscene camera: `docs/plans/2026-06-03-moon-earth-cutscene.md`
-- Surface asset models: `docs/plans/2026-06-03-moon-site-01-surface-asset-models.md`
-- Future surface assets: `docs/investigations/2026-06-02-moon-site01-future-surface-assets.md`
+- [Texture LOD sizing](../../docs/investigations/2026-06-02-texture-lod-for-distant-spheres.md)
+- [Artemis lander build](../../docs/plans/2026-05-31-moon-artemis-lander.md)
+- [Launch sequence](../../docs/plans/2026-06-02-moon-lander-launch-sequence.md)
+- [Earth cutscene camera](../../docs/plans/2026-06-03-moon-earth-cutscene.md)
+- [Surface asset models](../../docs/plans/2026-06-03-moon-site-01-surface-asset-models.md)
+- [Future surface assets](../../docs/investigations/2026-06-02-moon-site01-future-surface-assets.md)
