@@ -144,7 +144,10 @@ Far rings beyond 39×39 (flight altitude) switch to a single pre-baked **global 
 | Large region | 100×100 km | 10,000 | 26 GB |
 | **Whole moon** | 3.79×10⁷ km² | **37.9 M** | **≈ 100 TB** ❌ |
 
-**Whole-moon can't be pre-baked or shipped (~100 TB).** Therefore "whole-moon eventually" means: ship the compact global source datasets — LOLA DEM (already used by `dem_to_grid.py`) + an LROC WAC global mosaic (~tens of GB) — and **generate each chunk's atlas on demand**, cached to disk on first visit. The existing `make_terrain_texture.py` / `dem_to_grid.py` pipeline is exactly the per-chunk generator; it just needs to be parameterized by chunk `(i,j)` and run at stream-in time instead of build time. The 100 TB is a derived cache, never a deliverable.
+**Whole-moon can't be pre-baked into the bundle or shipped (~100 TB).** So "whole-moon eventually" means chunks are produced + delivered **on demand** into a local disk cache (the 100 TB is a derived cache, never a deliverable). Two ways to source them, both feeding the same cache + loader (see Phase 4):
+
+- **Option A — stream pre-baked chunks from object storage** (R2 now, Hetzner-ready). Bake every chunk's LOD set server-side from NASA source data, upload once, fetch on demand over HTTPS. Thin client, needs network.
+- **Option B — generate on-device** from the shipped compact global datasets (LOLA DEM, already used by `dem_to_grid.py`, + an LROC WAC mosaic, ~tens of GB), running the per-chunk `make_terrain_texture(i,j)` generator on cache miss. Offline, no hosting, heavier client.
 
 ---
 
@@ -189,15 +192,19 @@ flowchart TD
   W --> D{Diff vs current _tblFromRooms / _tblToRooms}
   D -->|fell out of all rings| F[FreeRoomSlot]
   D -->|entered a ring| L[Choose LOD by ring]
-  L --> C{Chunk atlas on disk cache?}
+  L --> C{Chunk atlas in disk cache?}
   C -->|yes| LS[LoadRoomSlot at LOD]
-  C -->|no| G[Generate atlas from LOLA DEM + WAC mosaic, make_terrain_texture i,j]
-  G --> LS
+  C -->|no| PROV[ChunkProvider.fetch i,j,lod]
+  PROV -->|Option A| NET[HTTPS GET from R2/Hetzner]
+  PROV -->|Option B| GEN[Generate locally: make_terrain_texture i,j]
+  NET --> CACHE[Write disk cache]
+  GEN --> CACHE
+  CACHE --> LS
   LS --> V[Bind in VRAM slot]
   V --> R[Render terrain ring + HUD minimap samples resident overhead tiles]
 ```
 
-(ASCII fallback: edge-cross → recompute window → diff → free-old / pick-LOD → cache hit loads, miss generates-then-caches → bind → render terrain + minimap from the same resident tiles.)
+(ASCII fallback: edge-cross → recompute window → diff → free-old / pick-LOD → cache hit loads; miss goes through ChunkProvider — Option A fetches from object storage, Option B generates locally — both write the disk cache → bind → render terrain + minimap from the same resident tiles.)
 
 ---
 
@@ -229,15 +236,27 @@ Each phase is independently shippable and commits with its docs (per repo conven
 - `ChangeActiveRoom` loads each entering chunk at its ring's LOD; minimap stitches mid+far tiles.
 - Verify the 82 MB-VRAM ridge view from Map 2 against `MEMORY`/VRAM counters.
 
-### Phase 4 — async / pipelined loader + eviction · ~1 week
-*Kills the frame stall that `LoadRoomSlot`'s synchronous disk read causes at grid scale.*
-- Background load queue; chunk slots fill over frames with a placeholder LOD meanwhile.
-- LRU / distance eviction for chunks beyond all rings.
+### Phase 4 — whole-moon chunk sourcing: Option A or Option B · scoping spike first
+*Makes "whole moon" real without the ~100 TB full pre-bake.* Reaching whole-moon (37.9 M chunks) needs chunks **produced and delivered on demand** behind the streaming window. Two strategies; both feed the **same on-disk cache** through one seam — a `ChunkProvider::fetch(i, j, lod) → atlas/mesh bytes` interface plugged in behind the LOD-ring loader — so they're swappable and can even coexist (A primary, B offline fallback). A spatial index (chunk `(i,j)` hash) replaces the fixed grid adjacency in both.
 
-### Phase 5 — on-demand chunk generation (whole-moon) · scoping spike first
-*Makes "whole moon" real without 100 TB.*
-- Ship LOLA DEM + WAC mosaic; run `make_terrain_texture(i,j)` / `dem_to_grid(i,j)` at stream-in on cache miss; cache the generated atlas to disk.
-- Spatial index (chunk `(i,j)` hash, not a room adjacency list) replaces the fixed grid.
+#### Option A — stream from object storage (R2 now; Hetzner-ready) · ~1–1.5 weeks
+Pre-bake every chunk's LOD set **server-side** from NASA source data, upload to object storage, and have the client fetch on demand over HTTPS into the local disk cache. Thin client; needs network (falls back to whatever's already cached when offline).
+
+- **Backend-agnostic on purpose.** R2 and Hetzner Object Storage are both S3-compatible, and chunk objects are immutable, so the **read path is a plain HTTPS GET against a configurable base URL** (`WF_CHUNK_BASE_URL` — an R2 public/custom-domain today, a Hetzner/CDN endpoint later). Swapping R2→Hetzner is a config change, not a code change. The **write/seed path** uses the S3 API (endpoint + bucket + key), which both speak.
+- **Key scheme** (deterministic, CDN-cacheable): `moon/v1/{lod}/{i}/{j}.tga` for atlases (`lod ∈ {near,mid,far}`), `moon/v1/mesh/{i}/{j}.iff` for meshes. Optional content-addressed variant (`moon/v1/blob/{sha256}` + a per-region manifest) for immutable far-future CDN caching.
+- **Engine read path:** `ChunkProvider::fetch` = libcurl HTTPS GET `${WF_CHUNK_BASE_URL}/moon/v1/{lod}/{i}/{j}.tga` → write to `~/.cache/worldfoundry/moon/…` → load as a normal room atlas. Cache hit skips the network entirely. Async (Phase-4 loader) so a fetch never blocks the frame; show a coarser cached LOD until the finer one arrives.
+- **Seed scripts** (new, `wftools/moon_chunk_bake/`):
+  - `bake_chunk.py i j` — parameterize the existing `make_terrain_texture.py` / `dem_to_grid.py` by chunk `(i,j)` over the **global** LOLA DEM + LROC WAC mosaic (NAC where coverage exists); emit that chunk's near/mid/far atlas LODs + mesh.
+  - `bake_region.py --bbox <i0,j0,i1,j1>` / `--all` — drive `bake_chunk` across a region or the whole grid in parallel; idempotent (skip already-baked).
+  - `seed_r2.sh` — upload the baked tree to R2 via `rclone` (or `aws s3 --endpoint-url`), reading endpoint/bucket/creds from env so the **same script targets Hetzner by swapping the endpoint**. Idempotent (checksum / skip-existing).
+- **Source data (NASA).** LOLA global DEM (Lunar Orbiter Laser Altimeter) + LROC WAC global mosaic (Lunar Reconnaissance Orbiter Camera), from the PDS Geosciences / LROC archives — same lineage as today's Site 01 NAC DTM. Document exact products + provenance + a checksummed fetch in `wftools/moon_chunk_bake/SOURCES.md`; do **not** vendor the multi-GB rasters.
+
+#### Option B — generate on-device, async loader (the former Phases 4+5, merged) · ~1.5–2 weeks
+Ship the compact global datasets and generate each chunk on-device on cache miss; no server, fully offline.
+
+- **Async / pipelined loader + eviction** (kills the synchronous `LoadRoomSlot` frame stall at grid scale): background load queue; an entering chunk's slot fills over frames showing a coarser/placeholder LOD until ready; LRU / distance eviction for chunks past the outermost ring. *(This loader is the shared machinery — Option A reuses it; only the `ChunkProvider` differs: network GET vs local generate.)*
+- **On-device generation:** ship LOLA global DEM + a downsampled WAC mosaic (~tens of GB) alongside the bundle; on cache miss run `make_terrain_texture(i,j)` / `dem_to_grid(i,j)` locally; cache the generated atlas to disk; load as normal.
+- **Trade-off vs A:** no network or hosting and works fully offline, but ships tens of GB and spends device CPU/GPU generating chunks (heavier on mobile). A is a thin client but needs connectivity + hosting. They share the loader + cache, so A-primary / B-fallback is viable.
 
 ---
 
@@ -246,7 +265,7 @@ Each phase is independently shippable and commits with its docs (per repo conven
 - **Phase 1:** `task build` only (no level rebuild needed — no asset change). `task run-moon` with `WF_GAME_SCREENSHOT_PPM` + `-record_video`; minimap renders from the live ground atlas (hillshade matches the in-world terrain), and `grep` confirms `LoadMoonMinimapTexture`/`fopen("…minimap.tga")` are gone and `minimap.tga` is deleted. Walk via debug-bridge `inject_input`; the minimap is the same image the player is standing on. Boot snowgoons → minimap absent (still gated on `wf_moon_overlay_enabled`).
 - **Phase 2:** debug-bridge `inject_input` to walk the player across a seam; assert via stderr that `FreeRoomSlot`/`LoadRoomSlot` fire for the expected chunk indices (per `reference_debug_bridge_test_gotchas` — count "AddObject ok" lines, watch slot logs). Screenshot shows continuous terrain across the seam.
 - **Phase 3:** capture from a scripted elevated camera; compare resident-chunk count + VRAM against the Map 2 budget (±1 ring).
-- **Phases 4–5:** frame-time trace across many seams (no stall spikes); cache-miss generation produces a byte-stable atlas re-run-to-re-run.
+- **Phase 4 (both options):** frame-time trace across many seams shows no stall spikes (async loader); cache hit serves with zero provider calls. **Option A:** `seed_r2.sh` round-trips a baked chunk to R2 and the client fetches the identical bytes via `WF_CHUNK_BASE_URL`; pulling the network (after warm cache) still renders cached chunks; swapping the base URL to a Hetzner/local endpoint needs no rebuild. **Option B:** cache-miss generation produces a byte-stable atlas re-run-to-re-run.
 
 ## Open design notes (decide as we build)
 
