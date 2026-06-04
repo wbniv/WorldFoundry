@@ -239,6 +239,8 @@ Each phase is independently shippable and commits with its docs (per repo conven
 ### Phase 4 — whole-moon chunk sourcing: Option A or Option B · scoping spike first
 *Makes "whole moon" real without the ~100 TB full pre-bake.* Reaching whole-moon (37.9 M chunks) needs chunks **produced and delivered on demand** behind the streaming window. Two strategies; both feed the **same on-disk cache** through one seam — a `ChunkProvider::fetch(i, j, lod) → atlas/mesh bytes` interface plugged in behind the LOD-ring loader — so they're swappable and can even coexist (A primary, B offline fallback). A spatial index (chunk `(i,j)` hash) replaces the fixed grid adjacency in both.
 
+**Both options are fully async / background — neither ever blocks a frame.** The async loader + eviction (detailed under Option B) is the shared machinery; the only thing that differs is what `ChunkProvider::fetch` does on the background queue — Option A issues an HTTPS GET, Option B runs a local generate. While that's in flight the entering chunk shows the coarsest already-cached LOD (or stays void on the minimap); when the bytes land in the disk cache the slot binds on a later frame. The main loop only ever touches the disk cache synchronously (a fast read) — never the network or the generator.
+
 #### Option A — stream from object storage (R2 now; Hetzner-ready) · ~1–1.5 weeks
 Pre-bake every chunk's LOD set **server-side** from NASA source data, upload to object storage, and have the client fetch on demand over HTTPS into the local disk cache. Thin client; needs network (falls back to whatever's already cached when offline).
 
