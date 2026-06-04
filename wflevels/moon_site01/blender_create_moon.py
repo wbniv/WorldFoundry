@@ -1155,40 +1155,12 @@ if camshot:
     camshot['wf_Script'] = (
         "\\ wf\n"
         "INDEXOF_ACTOR_INDEX read-mailbox dup INDEXOF_MOON_CHASE_CAM_IDX write-mailbox\n"
-        "INDEXOF_TIME read-mailbox dup 31 > if\n"
+        "INDEXOF_TIME read-mailbox 31 > if\n"
         "  INDEXOF_TIME read-mailbox 51 < if\n"
         "  INDEXOF_CAMSHOT write-mailbox\n"
         "  else drop then\n"
         "else drop then\n"
     )
-
-# ── cs_ground — low chase shot (Z≈28 m), active TIME > 51 ─────────────────────
-# 2/3 closer to ground than cs_chase (Z=85→28); same XY position and tracking.
-# Gives a ground-level perspective once the sequence settles.
-cs_ground_data = bpy.data.meshes.new('cs_ground_mesh')
-cs_ground_obj  = bpy.data.objects.new('cs_ground', cs_ground_data)
-bpy.context.scene.collection.objects.link(cs_ground_obj)
-attach_schema(cs_ground_obj, 'camshot')
-cs_ground_obj.location = (0.0, -100.0, 85.0 / 3.0)
-cs_ground_obj['wf_Position X']          = 'Absolute'
-cs_ground_obj['wf_Position Y']          = 'Absolute'
-cs_ground_obj['wf_Position Z']          = 'Absolute'
-cs_ground_obj['wf_Rotation']            = 'Fixed'
-cs_ground_obj['wf_FOV']                 = 60.0
-cs_ground_obj['wf_Pan Time In Seconds'] = 3.0
-cs_ground_obj['wf_Model Type']          = 'None'
-cs_ground_obj['wf_Track Object']        = 'Player'
-cs_ground_obj['wf_Target']              = 'CamTarget'
-cs_ground_obj['wf_Follow']              = 'CamTarget'
-cs_ground_obj['wf_Yon']                 = 2500.0
-cs_ground_obj['wf_Moves Between Rooms'] = 'True'
-cs_ground_obj['wf_Script'] = (
-    "\\ wf\n"
-    "INDEXOF_ACTOR_INDEX read-mailbox\n"
-    "INDEXOF_TIME read-mailbox 51 > if\n"
-    "INDEXOF_CAMSHOT write-mailbox\n"
-    "else drop then\n"
-)
 
 # ── launch_tracker — invisible proxy actor for cs_earth Track Object ──────────
 # cs_earth can't track artemis_lander directly: both are in PERM and
@@ -1268,6 +1240,34 @@ cs_earth_obj['wf_Script'] = (
     "  INDEXOF_TIME read-mailbox 3 > if\n"
     "  INDEXOF_CAMSHOT write-mailbox\n"
     "  else drop then\n"
+    "else drop then\n"
+)
+
+# ── cs_ground — low chase shot (Z≈28 m), active TIME > 51 ─────────────────────
+# 2/3 closer to ground than cs_chase (Z=85→28); same XY/tracking. Must be added
+# AFTER all other camshots so existing actor indices are not shifted.
+cs_ground_data = bpy.data.meshes.new('cs_ground_mesh')
+cs_ground_obj  = bpy.data.objects.new('cs_ground', cs_ground_data)
+bpy.context.scene.collection.objects.link(cs_ground_obj)
+attach_schema(cs_ground_obj, 'camshot')
+cs_ground_obj.location = (0.0, -100.0, 85.0 / 3.0)
+cs_ground_obj['wf_Position X']          = 'Absolute'
+cs_ground_obj['wf_Position Y']          = 'Absolute'
+cs_ground_obj['wf_Position Z']          = 'Absolute'
+cs_ground_obj['wf_Rotation']            = 'Fixed'
+cs_ground_obj['wf_FOV']                 = 60.0
+cs_ground_obj['wf_Pan Time In Seconds'] = 3.0
+cs_ground_obj['wf_Model Type']          = 'None'
+cs_ground_obj['wf_Track Object']        = 'Player'
+cs_ground_obj['wf_Target']              = 'CamTarget'
+cs_ground_obj['wf_Follow']              = 'CamTarget'
+cs_ground_obj['wf_Yon']                 = 2500.0
+cs_ground_obj['wf_Moves Between Rooms'] = 'True'
+cs_ground_obj['wf_Script'] = (
+    "\\ wf\n"
+    "INDEXOF_ACTOR_INDEX read-mailbox\n"
+    "INDEXOF_TIME read-mailbox 51 > if\n"
+    "INDEXOF_CAMSHOT write-mailbox\n"
     "else drop then\n"
 )
 
