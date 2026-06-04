@@ -250,25 +250,13 @@ if light:
     ambient.name = 'AmbientLight'
     ambient.location = (0.0, 0.0, 50.0)
     ambient['wf_lightType']  = 'Ambient'
-    ambient['wf_lightRed']   = 0.40
-    ambient['wf_lightGreen'] = 0.42
-    ambient['wf_lightBlue']  = 0.50
-
-    # Fill light — second directional, az=200° (from camera side, -Y,-X).
-    # The primary sun (az=20°, +Y) never illuminates Earth's camera-facing side
-    # because the camera is at Y=-80 while Earth is at Y=1800+. A fill from
-    # az=200° gives N·L≈+0.91 on Earth's camera face; terrain faces (N≈+Z)
-    # see only N·L≈0.035 (< 4% extra), so terrain appearance barely changes.
-    fill = light.copy()
-    fill.data = light.data.copy() if light.data else None
-    scene.collection.objects.link(fill)
-    fill.name = 'FillLight'
-    fill.location = (0.0, 0.0, 50.0)
-    fill.rotation_euler = (math.pi / 2 - math.radians(2.0), 0.0, math.radians(200.0))
-    fill['wf_lightType']  = 'Directional'
-    fill['wf_lightRed']   = 0.25
-    fill['wf_lightGreen'] = 0.25
-    fill['wf_lightBlue']  = 0.30
+    # Raised from 0.40/0.42/0.50 — primary sun (az 20°, +Y) always hits Earth's
+    # back face from camera at Y=-80, so only ambient contributes to Earth's
+    # visible hemisphere. 0.70 gives ~70% brightness on Earth's camera-facing
+    # side; terrain shading is flatter but the moon has no bounce light anyway.
+    ambient['wf_lightRed']   = 0.70
+    ambient['wf_lightGreen'] = 0.72
+    ambient['wf_lightBlue']  = 0.80
 
 # ── 6. Player (astronaut) ────────────────────────────────────────────────────
 # Built in-script from primitives like SMB Mario / Q*bert, not imported. ~14
