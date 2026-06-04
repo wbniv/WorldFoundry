@@ -837,20 +837,9 @@ if player:
         "else 3 INDEXOF_MOON_LAUNCH_PHASE write-mailbox "
         "11 - INDEXOF_MOON_LAUNCH_T_MINUS write-mailbox "
         "then then\n"
-        # Camera cuts (unchanged).
-        "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 1 > if "
-        "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if "
-        "INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox 20 > if "
-        "INDEXOF_MOON_CHASE_CAM_IDX read-mailbox dup 0 = if drop else INDEXOF_CAMSHOT write-mailbox then "
-        "else "
-        "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox dup 0 = if drop else INDEXOF_CAMSHOT write-mailbox then "
-        "then "
-        "else "
-        "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox dup 0 = if drop else INDEXOF_CAMSHOT write-mailbox then "
-        "then "
-        "else "
-        "INDEXOF_MOON_EARTH_CAM_IDX read-mailbox dup 0 = if drop else INDEXOF_CAMSHOT write-mailbox then "
-        "then\n"
+        # Camera cuts moved to each camshot's own script — cs_earth writes
+        # CAMSHOT when TIME<31, cs_chase writes it when TIME>31. No player
+        # involvement needed; this also fixes the frame-1 race.
         # Enter vehicle: adjacent (ActBox wrote MOON_NEARBY_VEHICLE) + B button.
         "INDEXOF_MOON_NEARBY_VEHICLE read-mailbox 0 > if\n"
         f"INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox {_INTERACT_BIT} & 0 > if\n"
@@ -926,10 +915,10 @@ print(f"[moon] lander mesh: {len(_lander.data.vertices)} verts, "
 # See docs/investigations/2026-06-02-texture-lod-for-distant-spheres.md.
 _earth = _build_earth()
 attach_schema(_earth, 'platform')
-# DIAGNOSTIC: moved to (30, 200, 80) — 220 m directly in cs_earth's look direction,
-# 33° angular diameter (fills most of the 40° FOV). If still invisible it's a
-# renderer/PERM bug, not a positioning issue. Move back to (0, 1800, 360) once confirmed.
-_earth.location = (30.0, 200.0, 80.0)
+# Confirmed rendering at (30, 200, 80) — moves back to sky position.
+# R≈1836 m from origin, inside R=2000 skydome. From cs_earth 13.4° off-center
+# (half-FOV 20°). Ambient 0.70 → ~70% brightness against black sky.
+_earth.location = (0.0, 1800.0, 360.0)
 _earth['wf_Mobility']             = 'Anchored'
 _earth['wf_Model Type']           = 'Mesh'
 _earth['wf_Visibility Mailbox']   = 1
@@ -1158,10 +1147,16 @@ if camshot:
     camshot['wf_Follow']       = 'CamTarget'
     camshot['wf_Yon']          = 2500.0  # skydome R=2000 m; default 100 m clips it
     camshot['wf_Moves Between Rooms'] = 'True'
-    # Publish own actor index so player script can restore chase cam after cutscene.
+    # cs_chase owns its CAMSHOT write directly — active when TIME >= 31 s
+    # (phase 3 T_MINUS > 20: lander at ~200 m, off-screen).
+    # Writing from the camshot's own script eliminates the frame-1 race where
+    # the player script read MOON_EARTH_CAM_IDX=0 before cs_earth published it.
     camshot['wf_Script'] = (
         "\\ wf\n"
-        "INDEXOF_ACTOR_INDEX read-mailbox INDEXOF_MOON_CHASE_CAM_IDX write-mailbox\n"
+        "INDEXOF_ACTOR_INDEX read-mailbox dup INDEXOF_MOON_CHASE_CAM_IDX write-mailbox\n"
+        "INDEXOF_TIME read-mailbox 31 > if\n"
+        "INDEXOF_CAMSHOT write-mailbox\n"
+        "else drop then\n"
     )
 
 # ── launch_tracker — invisible proxy actor for cs_earth Track Object ──────────
@@ -1206,10 +1201,14 @@ cs_earth_obj['wf_Target']              = 'CamTarget'   # required non-null by mo
 cs_earth_obj['wf_Follow']              = 'CamTarget'   # required non-null by movecam.cc:236
 cs_earth_obj['wf_Yon']                 = 2500.0
 cs_earth_obj['wf_Moves Between Rooms'] = 'True'
-# Publish own actor index for player script camera switching.
+# cs_earth owns its CAMSHOT write directly — active when TIME < 31 s
+# (phases 0-1 pre-launch, phase 2 ignition, phase 3 first 20 s of ascent).
 cs_earth_obj['wf_Script'] = (
     "\\ wf\n"
-    "INDEXOF_ACTOR_INDEX read-mailbox INDEXOF_MOON_EARTH_CAM_IDX write-mailbox\n"
+    "INDEXOF_ACTOR_INDEX read-mailbox dup INDEXOF_MOON_EARTH_CAM_IDX write-mailbox\n"
+    "INDEXOF_TIME read-mailbox 31 < if\n"
+    "INDEXOF_CAMSHOT write-mailbox\n"
+    "else drop then\n"
 )
 
 # ── 8. Level object ──────────────────────────────────────────────────────────
