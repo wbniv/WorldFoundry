@@ -1111,7 +1111,7 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "earth" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 1800.0000000000000000(1.15.16) 360.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 30.0000000000000000(1.15.16) 200.0000000000000000(1.15.16) 80.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -1127,7 +1127,7 @@
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000526455955(1.15.16) } { 'STR' "-0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000109171702(1.15.16) } { 'STR' "-0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
-		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000196509063244(1.15.16) } { 'STR' "-0.000020" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000037628019022(1.15.16) } { 'STR' "-0.000004" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "moon_racer" }
@@ -1244,6 +1244,7 @@
 		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
 		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8000000000000000(1.15.16) } { 'STR' "0.8" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.1500000000000000(1.15.16) } { 'STR' "0.15" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_ACTOR_INDEX read-mailbox 1886 write-mailbox\nINDEXOF_MOON_ACTIVE_VEHICLE read-mailbox 1 = if\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_MOON_VEHICLE_X write-mailbox\nINDEXOF_Y_POS read-mailbox INDEXOF_MOON_VEHICLE_Y write-mailbox\nINDEXOF_Z_POS read-mailbox INDEXOF_MOON_VEHICLE_Z write-mailbox\nthen\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
@@ -1268,6 +1269,7 @@
 		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
 		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8000000000000000(1.15.16) } { 'STR' "0.8" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.1500000000000000(1.15.16) } { 'STR' "0.15" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_ACTOR_INDEX read-mailbox 1887 write-mailbox\nINDEXOF_MOON_ACTIVE_VEHICLE read-mailbox 2 = if\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_MOON_VEHICLE_X write-mailbox\nINDEXOF_Y_POS read-mailbox INDEXOF_MOON_VEHICLE_Y write-mailbox\nINDEXOF_Z_POS read-mailbox INDEXOF_MOON_VEHICLE_Z write-mailbox\nthen\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
@@ -1292,6 +1294,7 @@
 		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
 		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8000000000000000(1.15.16) } { 'STR' "0.8" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.1500000000000000(1.15.16) } { 'STR' "0.15" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_ACTOR_INDEX read-mailbox 1888 write-mailbox\nINDEXOF_MOON_ACTIVE_VEHICLE read-mailbox 3 = if\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_MOON_VEHICLE_X write-mailbox\nINDEXOF_Y_POS read-mailbox INDEXOF_MOON_VEHICLE_Y write-mailbox\nINDEXOF_Z_POS read-mailbox INDEXOF_MOON_VEHICLE_Z write-mailbox\nthen\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
@@ -1303,11 +1306,11 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "entry_trigger_1" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -20.0000000000000000(1.15.16) 35.0000000000000000(1.15.16) -0.9375000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -14.5000000000000000(1.15.16) 35.0000000000000000(1.15.16) -1.4375000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -3.5000000000000000(1.15.16) -3.5000000000000000(1.15.16) -2.0000000000000000(1.15.16) 3.5000000000000000(1.15.16) 3.5000000000000000(1.15.16) 2.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "entry_trigger_1.iff" } }
@@ -1326,11 +1329,11 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "entry_trigger_2" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -50.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 3.6752929687500000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -44.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 3.1752929687500000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -3.5000000000000000(1.15.16) -3.5000000000000000(1.15.16) -2.0000000000000000(1.15.16) 3.5000000000000000(1.15.16) 3.5000000000000000(1.15.16) 2.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "entry_trigger_2.iff" } }
@@ -1349,11 +1352,11 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "entry_trigger_3" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 10.0000000000000000(1.15.16) -40.0000000000000000(1.15.16) 4.1795654296875000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 15.5000000000000000(1.15.16) -40.0000000000000000(1.15.16) 3.6795654296875000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -3.5000000000000000(1.15.16) -3.5000000000000000(1.15.16) -2.0000000000000000(1.15.16) 3.5000000000000000(1.15.16) 3.5000000000000000(1.15.16) 2.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "entry_trigger_3.iff" } }

@@ -926,7 +926,10 @@ print(f"[moon] lander mesh: {len(_lander.data.vertices)} verts, "
 # See docs/investigations/2026-06-02-texture-lod-for-distant-spheres.md.
 _earth = _build_earth()
 attach_schema(_earth, 'platform')
-_earth.location = (0.0, 1800.0, 360.0)  # R≈1836 m from origin — inside R=2000 skydome (was 2040 m, occluded)
+# DIAGNOSTIC: moved to (30, 200, 80) — 220 m directly in cs_earth's look direction,
+# 33° angular diameter (fills most of the 40° FOV). If still invisible it's a
+# renderer/PERM bug, not a positioning issue. Move back to (0, 1800, 360) once confirmed.
+_earth.location = (30.0, 200.0, 80.0)
 _earth['wf_Mobility']             = 'Anchored'
 _earth['wf_Model Type']           = 'Mesh'
 _earth['wf_Visibility Mailbox']   = 1
@@ -952,13 +955,15 @@ def _place_prop(obj, loc, mobility='Anchored', name=None):
 
 
 def _add_entry_trigger(cx, cy, cz, vehicle_id):
-    """Anchored ActBox centred on the Cruiser (not offset to one side).
-    7×7×4 m box so the player can approach from any direction.
-    Vehicles are ≥40 m apart so no cross-trigger overlap.
-    Writes MOON_NEARBY_VEHICLE = vehicle_id on entry, 0 on exit."""
-    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(cx, cy, cz + 2.0))
+    """ActBox adjacent to Cruiser on the +X side — NOT centred.
+    ActBox::update() clears the mailbox to 0 then re-writes vehicle_id if
+    anything overlaps this frame, so the box must NOT overlap the vehicle's
+    own physics body. Vehicle half-width ≈ 2.5 m → start trigger at +4 m.
+    3×6×3 m box gives ample entry from the +X direction without self-trigger.
+    Writes MOON_NEARBY_VEHICLE = vehicle_id while player is inside; 0 when they leave."""
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(cx + 5.5, cy, cz + 1.5))
     trig = bpy.context.object
-    trig.scale = (7.0, 7.0, 4.0)
+    trig.scale = (3.0, 6.0, 3.0)
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     attach_schema(trig, 'actbox')
     trig['wf_Activated By']            = 'All'
@@ -1073,7 +1078,8 @@ for _i, (_cobj, (_cx, _cy)) in enumerate(
                 name=f'lunar_cruiser_{_i}')
     _cobj['wf_Script Controls Input'] = 'True'
     _cobj['wf_Running Acceleration']  = 12.0   # heavier than astronaut (8.0)
-    _cobj['wf_Running Deceleration']  = 0.8    # raised from 0.3 — 0.3 caused oscillation jitter on turns
+    _cobj['wf_Running Deceleration']  = 0.8
+    _cobj['wf_Turn Rate']             = 0.15   # enables heading rotation; 0 = doom-stick strafe (caused jitter)
     _cidx_mb = 1886 + _i   # MOON_CRUISER_0/1/2_IDX
     _vehicle_id = _i + 1   # 1/2/3 matching what the ActBox writes to MOON_NEARBY_VEHICLE
     _cobj['wf_Script'] = (
