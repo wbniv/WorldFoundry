@@ -523,7 +523,7 @@ tasks:
           RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_snowgoons.mp4"
           RECFLAG="-record_video"; echo "Recording → $RECOUT"
         fi
-        [ -n "${WF_FULLSCREEN:-}" ] && FSFLAG="-fullscreen"
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/snowgoons.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
         [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
@@ -574,7 +574,7 @@ tasks:
           RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_qbert.mp4"
           RECFLAG="-record_video"; echo "Recording → $RECOUT"
         fi
-        [ -n "${WF_FULLSCREEN:-}" ] && FSFLAG="-fullscreen"
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/qbert_practice-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
         [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
@@ -589,7 +589,7 @@ tasks:
           RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_smb.mp4"
           RECFLAG="-record_video"; echo "Recording → $RECOUT"
         fi
-        [ -n "${WF_FULLSCREEN:-}" ] && FSFLAG="-fullscreen"
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/smb_w1_1-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
         [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
@@ -610,7 +610,7 @@ tasks:
           RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_moon.mp4"
           RECFLAG="-record_video"; echo "Recording → $RECOUT"
         fi
-        [ -n "${WF_FULLSCREEN:-}" ] && FSFLAG="-fullscreen"
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game \
           --vram-width=4096 --vram-height=2048 \
           --vram-slot-width=1024 --vram-slot-height=1024 \
