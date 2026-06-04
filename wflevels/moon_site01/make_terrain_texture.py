@@ -40,7 +40,6 @@ NAC_IMG    = os.path.join(SCRIPT_DIR, 'data', 'nac',
                           'NAC_DTM_SHACKRDGE02_M139797542_120CM.IMG')
 META_JSON  = os.path.join(SCRIPT_DIR, 'terrain_heights.json')
 OUT_TGA    = os.path.join(SCRIPT_DIR, 'terrain_texture.tga')
-MINIMAP_TGA = os.path.join(SCRIPT_DIR, 'minimap.tga')
 
 
 def hillshade(z, cell_m, az_deg=315.0, alt_deg=45.0):
@@ -245,22 +244,10 @@ def main():
     img.save(OUT_TGA)
     print(f"wrote {OUT_TGA} ({args.size}x{args.size}, {kind})")
 
-    # Also emit a small minimap.tga for the position-display HUD overlay
-    # (display.cc loads this directly via fopen). Always 256² regardless of
-    # main texture size — small enough for a 128-px HUD inset with 2× headroom
-    # for bilinear filtering. See docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md.
-    MM_SIZE = 256
-    mm = img.resize((MM_SIZE, MM_SIZE), Image.Resampling.LANCZOS).convert('RGB')
-    mm_arr = np.asarray(mm).astype(np.float32)
-    # Contrast boost — minimap reads better at small size with crisper terrain features.
-    mm_arr = np.clip((mm_arr - 128.0) * 1.25 + 128.0, 0, 255)
-    # Bright 1-px border for legibility against the black lunar sky.
-    mm_arr[0, :, :]  = [255, 255, 255]
-    mm_arr[-1, :, :] = [255, 255, 255]
-    mm_arr[:, 0, :]  = [255, 255, 255]
-    mm_arr[:, -1, :] = [255, 255, 255]
-    Image.fromarray(mm_arr.astype(np.uint8)).save(MINIMAP_TGA)
-    print(f"wrote {MINIMAP_TGA} ({MM_SIZE}x{MM_SIZE}, minimap inset)")
+    # NOTE: no separate minimap.tga is emitted any more. The HUD minimap samples
+    # the resident ground atlas (terrain_texture.tga, which fills RM0's atlas)
+    # live in the engine — see display.cc / game.cc wf_moon_ground_atlas() and
+    # docs/plans/2026-06-04-moon-overhead-map-and-chunk-texture-streaming.md.
 
 
 if __name__ == '__main__':

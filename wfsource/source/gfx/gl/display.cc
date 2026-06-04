@@ -87,70 +87,14 @@ static void DrawHudText(float x, float y, const char* text)
     glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-// Moon Site 01 minimap. Loads wflevels/moon_site01/minimap.tga from cwd on
-// first use; if missing, the minimap silently disables (text overlay still
-// renders). Hardcoded relative path is a v1 shortcut; proper cd.iff asset
-// wiring is a follow-up.
-static GLuint gMoonMinimapTex = 0;
-static bool   gMoonMinimapTried = false;
-static int    gMoonMinimapW = 0, gMoonMinimapH = 0;
-
-static void LoadMoonMinimapTexture()
-{
-    gMoonMinimapTried = true;
-    FILE* fp = fopen("wflevels/moon_site01/minimap.tga", "rb");
-    if (!fp) { fprintf(stderr, "moon overlay: minimap.tga not found, minimap disabled\n"); return; }
-    fseek(fp, 0, SEEK_END);
-    long fsize = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    if (fsize < 18) { fclose(fp); fprintf(stderr, "moon overlay: minimap.tga truncated\n"); return; }
-    uint8_t* buf = (uint8_t*)malloc(fsize);
-    if (fread(buf, 1, fsize, fp) != (size_t)fsize) { free(buf); fclose(fp); return; }
-    fclose(fp);
-
-    // Minimal TGA reader: uncompressed truecolor (type 2), 24- or 32-bpp, no colormap.
-    uint8_t id_len    = buf[0];
-    uint8_t cmap_type = buf[1];
-    uint8_t img_type  = buf[2];
-    int     width     = buf[12] | (buf[13] << 8);
-    int     height    = buf[14] | (buf[15] << 8);
-    uint8_t bpp       = buf[16];
-    uint8_t desc      = buf[17];
-    bool    top_down  = (desc & 0x20) != 0;
-    if (cmap_type != 0 || img_type != 2 || (bpp != 24 && bpp != 32)) {
-        fprintf(stderr, "moon overlay: minimap.tga unsupported format (type=%d bpp=%d)\n", img_type, bpp);
-        free(buf); return;
-    }
-    int channels = bpp / 8;
-    int expected = 18 + id_len + width * height * channels;
-    if (expected > fsize) { fprintf(stderr, "moon overlay: minimap.tga payload truncated\n"); free(buf); return; }
-
-    const uint8_t* pix = buf + 18 + id_len;
-    // Convert BGR(A) → RGB top-down for GL upload.
-    uint8_t* rgb = (uint8_t*)malloc(width * height * 3);
-    for (int y = 0; y < height; ++y) {
-        int src_y = top_down ? y : (height - 1 - y);
-        const uint8_t* src_row = pix + src_y * width * channels;
-        uint8_t* dst_row = rgb + y * width * 3;
-        for (int x = 0; x < width; ++x) {
-            dst_row[x*3 + 0] = src_row[x*channels + 2];   // R
-            dst_row[x*3 + 1] = src_row[x*channels + 1];   // G
-            dst_row[x*3 + 2] = src_row[x*channels + 0];   // B
-        }
-    }
-    free(buf);
-
-    glGenTextures(1, &gMoonMinimapTex);
-    glBindTexture(GL_TEXTURE_2D, gMoonMinimapTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    free(rgb);
-    gMoonMinimapW = width; gMoonMinimapH = height;
-    fprintf(stderr, "moon overlay: minimap loaded (%dx%d), tex=%u\n", width, height, gMoonMinimapTex);
-}
+// Moon Site 01 minimap. Samples the resident ground atlas live (terrain_texture.tga
+// fills RM0's texture — Room0.ruv has a single 0,0,1024,1024 entry) instead of a
+// baked minimap.tga: no loose-file I/O, no extra GL texture, automatically correct
+// under chunk streaming (it's the texture the player is standing on). The atlas
+// PixelMap + its normalized UV rect come from the game layer (it needs theLevel /
+// AssetManager). Mirrors the wf_moon_* game->display global pattern.
+// See docs/plans/2026-06-04-moon-overhead-map-and-chunk-texture-streaming.md.
+extern const PixelMap* wf_moon_ground_atlas();
 
 static void DrawHud(int xSize, int ySize)
 {
@@ -262,17 +206,23 @@ static void DrawHud(int xSize, int ySize)
         const float mm_x = (float)xSize - 8.0f - MM;
         const float mm_y = 8.0f;
 
-        if (!gMoonMinimapTried) LoadMoonMinimapTexture();
-        if (gMoonMinimapTex != 0)
+        // Sample the resident ground atlas (the terrain the player is on),
+        // not a baked image. terrain_texture.tga fills RM0's atlas, so UV 0..1
+        // is the whole chunk. v=0 at the inset top: the engine uploads the atlas
+        // top-row-first (row 0 = terrain north), so v ascends downward — which
+        // matches world_to_screen's v-flip below (world +Y → inset top).
+        // Confirmed by ncc vs the old baked minimap.tga (0.91 at this mapping).
+        const PixelMap* atlas = wf_moon_ground_atlas();
+        if (atlas)
         {
             glEnable(GL_TEXTURE_2D);
-            glBindTexture(GL_TEXTURE_2D, gMoonMinimapTex);
+            atlas->SetGLTexture();
             glColor3f(1.0f, 1.0f, 1.0f);
             glBegin(GL_QUADS);
-                glTexCoord2f(0, 0); glVertex2f(mm_x,      mm_y);
-                glTexCoord2f(1, 0); glVertex2f(mm_x + MM, mm_y);
-                glTexCoord2f(1, 1); glVertex2f(mm_x + MM, mm_y + MM);
-                glTexCoord2f(0, 1); glVertex2f(mm_x,      mm_y + MM);
+                glTexCoord2f(0.0f, 0.0f); glVertex2f(mm_x,      mm_y);
+                glTexCoord2f(1.0f, 0.0f); glVertex2f(mm_x + MM, mm_y);
+                glTexCoord2f(1.0f, 1.0f); glVertex2f(mm_x + MM, mm_y + MM);
+                glTexCoord2f(0.0f, 1.0f); glVertex2f(mm_x,      mm_y + MM);
             glEnd();
             glDisable(GL_TEXTURE_2D);
         }
