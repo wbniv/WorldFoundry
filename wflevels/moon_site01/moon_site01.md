@@ -139,6 +139,15 @@ each frame. `cs_earth` tracks it instead of `artemis_lander` directly because PE
 |------|------|-------|
 | [20260604_064139_moon.mp4](../../20260604_064139_moon.mp4) | 2026-06-04 | First windowed 640×480 run — cs_hold establishing shot + cs_earth lander tracking |
 
+### Camera shots — 20260604_064139
+
+| Shot | Camera | Frame |
+|------|--------|-------|
+| cs_hold — terrain establishing | ground-level wide, lander on pad | ![cs_hold](screenshots/cs_hold.png) |
+| cs_earth — liftoff | behind/below, lander rising | ![cs_earth liftoff](screenshots/cs_earth_liftoff.png) |
+| cs_earth — ascent (Earth in frame) | tilting up, Earth visible low-left | ![cs_earth ascent](screenshots/cs_earth_ascent.png) |
+| cs_earth — space shot | pointing up, Earth below lander | ![cs_earth space](screenshots/cs_earth_space.png) |
+
 ## Reference
 
 - Texture LOD sizing: `docs/investigations/2026-06-02-texture-lod-for-distant-spheres.md`
