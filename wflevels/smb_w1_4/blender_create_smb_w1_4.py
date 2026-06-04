@@ -49,16 +49,20 @@ SCENE_MID_X = LEVEL_X1 / 2
 # with the established Mario tuning. (col_start, col_end) per platform.
 LAVA1_PLATS = [(16, 19), (21, 24), (26, 29)]
 
-# Boss bridge stand-in (surface at floor level — TODO Phase 2: collapsing bridge)
-BRIDGE_X0, BRIDGE_X1 = 122 * T, 152 * T
+# Boss bridge stand-in (surface at floor level — TODO Phase 2: collapsing bridge).
+# Extends to col 154 so it meets the toad floor (cols 154-160) with no lava gap —
+# the celebration walks Mario rightward off the bridge, so the run-off must be solid.
+BRIDGE_X0, BRIDGE_X1 = 122 * T, 154 * T
 
 # Powerup ? block above lava-pit-1 platform B (col 22), hit-from-below at 4T
 POWERUP_COL = 22
 POWERUP_Z   = FLOOR_Z + 4 * T    # 6 m above floor
 
-# Axe position = "flagpole" for celebration sequencer
-AXE_COL   = 152
-FLAGPOLE_X = AXE_COL * T   # 228 m
+# Axe at the right end of the bridge (col 152). The end-of-level "flagpole"
+# celebration is staged in the toad room (col 156) so Mario finishes on solid
+# ground — placing it at the axe (over lava) drops him in the lava mid-cutscene.
+AXE_COL    = 152
+FLAGPOLE_X = 156 * T   # 234 m — toad-room floor (cols 154-160)
 
 # Mario tint colours
 FIRE_TINT          = 0xF8F0E0
@@ -102,9 +106,11 @@ from smb_common import (make_mat, attach_schema, find_by_class, get_class,
     _make_qblock_tga, _make_brick_tga, _make_grid_tile_tga,
     build_textured_ground_mesh, _build_mario)
 from smb_common import (_make_coin_template, _make_popup_template,
-    _make_powerup_template, _make_powerup_block)
+    _make_powerup_template, _make_powerup_block, _add_qblock)
 from smb_common import (_make_fireball_generator, _make_fireball_template)
-from smb_common import (POWERUP_SCRIPT)
+from smb_common import (_make_bowser_fireball_template, _make_bowser_fireball_generator,
+    koopa_mesh)
+from smb_common import (POWERUP_SCRIPT, AXE_SCRIPT, fakebowser_script)
 from smb_common import (mat_castle, mat_lava, mat_axe, mat_hard)
 
 # ── 2. Import snowgoons for infrastructure ────────────────────────────────────
@@ -176,7 +182,8 @@ if light:
 # mesh vertices at ±0.5 local space; the resulting MESH body only covers a 1 m³
 # cube and the character falls through despite the correct BOX body.
 castle_tile_tex = _make_grid_tile_tga(
-    os.path.join(SCRIPT_DIR, 'grid_tile.tga'))
+    os.path.join(SCRIPT_DIR, 'grid_tile.tga'),
+    bg=(70, 70, 78), fg=(40, 40, 46))   # dark gray castle stone (not overworld brown)
 
 def _castle_floor(name, col_start, col_end):
     """Solid textured gray floor slab, top surface at FLOOR_Z."""
@@ -289,8 +296,9 @@ _make_popup_template()
 mat_powerup = make_mat('powerup_red', (0.85, 0.16, 0.12))
 _make_powerup_template('powerup_template', mat_powerup, POWERUP_SCRIPT, 0.0, -55.0)
 _make_fireball_template()
-_make_fireball_generator('fireball_gen_l', 1833, -12.0)   # Fire Mario fires left
-_make_fireball_generator('fireball_gen_r', 1835, +12.0)   # Fire Mario fires right
+SMB_FIREBALL_FIRE_R, SMB_FIREBALL_FIRE_L = 1823, 1824
+_make_fireball_generator('fireball_gen_r', SMB_FIREBALL_FIRE_R,  12.0)   # Fire Mario fires right
+_make_fireball_generator('fireball_gen_l', SMB_FIREBALL_FIRE_L, -12.0)   # Fire Mario fires left
 
 # ── 8. Powerup block (above lava pit 1 platform) ──────────────────────────────
 # Mushroom if Small, Fire Flower if Super — same self-determining powerup_template as W1-1/W1-2.
@@ -367,11 +375,52 @@ for _fbname, _fbcol, _fbz, _fbom, _fbang in _FIREBARS:
 print(f"[smb_w1_4] fire-bar segments placed: {_firebar_n[0]} "
       f"(7 bars × {N_SEGS} = {7 * N_SEGS})")
 
-# ── Phase 3 TODO: Fake Bowser, axe, hidden ? blocks ──────────────────────────
-# _build_fakebowser('bowser', BOWSER_COL=138)
-# _build_axe('w14_axe', AXE_COL=152)
-# 6 hidden ? blocks at cols [94,97,100,103,106,109], Z=5T
-# See docs/plans/2026-06-03-build-faithful-smb-w1-4.md Phase 3.
+# ── Phase 3: Hidden-chamber coin blocks, Fake Bowser, axe ────────────────────
+# 6 coin ? blocks in the chamber before the boss (cols 94-109, hit from below).
+# (True invisible-until-bump is deferred; these are visible coin blocks for now.)
+for _hc in (94, 97, 100, 103, 106, 109):
+    _add_qblock(f'w14_coinblk_{_hc}', _hc * T, z=FLOOR_Z + 5 * T)
+
+# Fake Bowser — big Physics boss patrolling the boss bridge (cols 122-152). Reuses
+# the koopa_green datablock at 2× scale. Walks + lobs fireballs + 5 HP; defeated by
+# the axe or 5 Mario fireballs. Bridge rails inset 2 tiles from each bridge end.
+BOWSER_COL = 138
+BRIDGE_L_RAIL = (122 + 2) * T
+BRIDGE_R_RAIL = (152 - 2) * T
+bowser = koopa_mesh('bowser', red=False)
+bowser.location = (BOWSER_COL * T, 0.0, FLOOR_Z)
+bowser.scale = (2.0, 2.0, 2.0)                       # 2× — render + collision (OAS Scale)
+attach_schema(bowser, 'enemy')
+bowser['wf_Mobility']                  = 'Physics'
+bowser['wf_Mass']                      = 4.0
+bowser['wf_Turn Rate']                 = 0.0   # → MarbleHandler: carries the script's XSPEED
+bowser['wf_Running Deceleration']      = 0.0   # frictionless so the walk velocity isn't bled off
+bowser['wf_Max Air Speed']             = 50.0  # don't let the speed cap zero gravity (marble bug)
+bowser['wf_Falling Acceleration']      = 12.0
+bowser['wf_Model Type']                = 'Mesh'
+bowser['wf_Visibility Mailbox']        = 1
+bowser['wf_Max Ground Speed']          = 8.0
+bowser['wf_Number Of Local Mailboxes'] = 23          # LOCAL_BOWSER_HP/HIT_COOL/FIRE_T (2020-2022)
+bowser['wf_Script'] = fakebowser_script(BRIDGE_L_RAIL, BRIDGE_R_RAIL,
+                                        walk_speed=2.0, fire_interval=2.5)
+
+# Bowser's fireball template + a fixed generator at the bridge centre.
+_make_bowser_fireball_template()
+_make_bowser_fireball_generator('bowser_fb_gen', BOWSER_COL * T, FLOOR_Z + 0.8 * T)
+
+# The axe at the right end of the bridge (col 152). A gold box; Anchored + script
+# so Mario passes through it. Touch → SMB_CELEBRATE → celebration → level end.
+_axe_half = 0.35 * T
+_axe_z = FLOOR_Z + 1.0 * T
+_axe = add_box('w14_axe',
+               AXE_COL * T - _axe_half, -GROUND_Y, _axe_z - _axe_half,
+               AXE_COL * T + _axe_half,  GROUND_Y, _axe_z + _axe_half,
+               smb_common.mat_axe())
+attach_schema(_axe, 'enemy')
+_axe['wf_Mobility']           = 'Anchored'
+_axe['wf_Model Type']         = 'Mesh'
+_axe['wf_Visibility Mailbox'] = 1
+_axe['wf_Script']             = AXE_SCRIPT
 
 # ── 9. Celebration ────────────────────────────────────────────────────────────
 # SMB_CELEBRATE fires when the axe is touched (Phase 3). The Director's celebration

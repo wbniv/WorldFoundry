@@ -27,7 +27,8 @@
 		$3fff002l { 'STR' "coin_template.iff" }  // IFF PERM fff:002
 		$3fff003l { 'STR' "powerup_template.iff" }  // IFF PERM fff:003
 		$3fff004l { 'STR' "fireball_template.iff" }  // IFF PERM fff:004
-		$3fff005l { 'STR' "spark_template.iff" }  // IFF PERM fff:005
+		$3fff005l { 'STR' "bowser_fireball_template.iff" }  // IFF PERM fff:005
+		$3fff006l { 'STR' "spark_template.iff" }  // IFF PERM fff:006
 		$3000001l { 'STR' "w1_4_entry_floor.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "w1_4_corr_floor.iff" }  // IFF RM0 000:002
 		$3000003l { 'STR' "w1_4_toad_floor.iff" }  // IFF RM0 000:003
@@ -43,13 +44,15 @@
 		$300000dl { 'STR' "popup_score.iff" }  // IFF RM0 000:00d
 		$300000el { 'STR' "tex_box_qblock_tex_tga.iff" }  // IFF RM0 000:00e
 		$300000fl { 'STR' "firebar_seg.iff" }  // IFF RM0 000:00f
-		$3000010l { 'STR' "flagpole_pole.iff" }  // IFF RM0 000:010
-		$3000011l { 'STR' "unit_box_smb_flag.iff" }  // IFF RM0 000:011
-		$3000012l { 'STR' "unit_box_smb_castle_001.iff" }  // IFF RM0 000:012
-		$3000013l { 'STR' "unit_box_smb_pole.iff" }  // IFF RM0 000:013
-		$3000014l { 'STR' "unit_box_smb_castle_door.iff" }  // IFF RM0 000:014
-		$3000015l { 'STR' "unit_box_smb_trigger.iff" }  // IFF RM0 000:015
-		$3000016l { 'STR' "w1_4_abor_surface.iff" }  // IFF RM0 000:016
+		$3000010l { 'STR' "koopa_green.iff" }  // IFF RM0 000:010
+		$3000011l { 'STR' "unit_box_smb_axe.iff" }  // IFF RM0 000:011
+		$3000012l { 'STR' "flagpole_pole.iff" }  // IFF RM0 000:012
+		$3000013l { 'STR' "unit_box_smb_flag.iff" }  // IFF RM0 000:013
+		$3000014l { 'STR' "unit_box_smb_castle_001.iff" }  // IFF RM0 000:014
+		$3000015l { 'STR' "unit_box_smb_pole.iff" }  // IFF RM0 000:015
+		$3000016l { 'STR' "unit_box_smb_castle_door.iff" }  // IFF RM0 000:016
+		$3000017l { 'STR' "unit_box_smb_trigger.iff" }  // IFF RM0 000:017
+		$3000018l { 'STR' "w1_4_abor_surface.iff" }  // IFF RM0 000:018
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "smb_w1_4.lvl" ] }
@@ -63,7 +66,8 @@
 		{ 'ASS' $3fff002l [ "../smb/coin_template.iff" ] }  // IFF PERM fff:002
 		{ 'ASS' $3fff003l [ "../smb/powerup_template.iff" ] }  // IFF PERM fff:003
 		{ 'ASS' $3fff004l [ "../smb/fireball_template.iff" ] }  // IFF PERM fff:004
-		{ 'ASS' $3fff005l [ "../smb/spark_template.iff" ] }  // IFF PERM fff:005
+		{ 'ASS' $3fff005l [ "../smb/bowser_fireball_template.iff" ] }  // IFF PERM fff:005
+		{ 'ASS' $3fff006l [ "../smb/spark_template.iff" ] }  // IFF PERM fff:006
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'
@@ -86,13 +90,15 @@
 		{ 'ASS' $300000dl [ "../smb/popup_score.iff" ] }  // IFF RM0 000:00d
 		{ 'ASS' $300000el [ "../smb/tex_box_qblock_tex_tga.iff" ] }  // IFF RM0 000:00e
 		{ 'ASS' $300000fl [ "../smb/firebar_seg.iff" ] }  // IFF RM0 000:00f
-		{ 'ASS' $3000010l [ "../smb/flagpole_pole.iff" ] }  // IFF RM0 000:010
-		{ 'ASS' $3000011l [ "../smb/unit_box_smb_flag.iff" ] }  // IFF RM0 000:011
-		{ 'ASS' $3000012l [ "../smb/unit_box_smb_castle_001.iff" ] }  // IFF RM0 000:012
-		{ 'ASS' $3000013l [ "../smb/unit_box_smb_pole.iff" ] }  // IFF RM0 000:013
-		{ 'ASS' $3000014l [ "../smb/unit_box_smb_castle_door.iff" ] }  // IFF RM0 000:014
-		{ 'ASS' $3000015l [ "../smb/unit_box_smb_trigger.iff" ] }  // IFF RM0 000:015
-		{ 'ASS' $3000016l [ "../smb/w1_4_abor_surface.iff" ] }  // IFF RM0 000:016
+		{ 'ASS' $3000010l [ "../smb/koopa_green.iff" ] }  // IFF RM0 000:010
+		{ 'ASS' $3000011l [ "../smb/unit_box_smb_axe.iff" ] }  // IFF RM0 000:011
+		{ 'ASS' $3000012l [ "../smb/flagpole_pole.iff" ] }  // IFF RM0 000:012
+		{ 'ASS' $3000013l [ "../smb/unit_box_smb_flag.iff" ] }  // IFF RM0 000:013
+		{ 'ASS' $3000014l [ "../smb/unit_box_smb_castle_001.iff" ] }  // IFF RM0 000:014
+		{ 'ASS' $3000015l [ "../smb/unit_box_smb_pole.iff" ] }  // IFF RM0 000:015
+		{ 'ASS' $3000016l [ "../smb/unit_box_smb_castle_door.iff" ] }  // IFF RM0 000:016
+		{ 'ASS' $3000017l [ "../smb/unit_box_smb_trigger.iff" ] }  // IFF RM0 000:017
+		{ 'ASS' $3000018l [ "../smb/w1_4_abor_surface.iff" ] }  // IFF RM0 000:018
 	}
 	{ 'ALGN' .align(2048) }
 }

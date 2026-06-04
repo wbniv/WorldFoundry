@@ -286,10 +286,11 @@ def _make_brick_tga(out_path, scale=2):
 
 
 def _make_grid_tile_tga(out_path, width=256, height=32, cells_x=64, cells_y=8,
-                         line_px=1):
+                         line_px=1, bg=(143, 97, 38), fg=(102, 66, 23)):
     """Pre-tiled grid texture (one image, no mesh subdivision needed):
-    `cells_x` × `cells_y` grid lines baked in, light brown fill with darker
-    brown lines along the top + left edge of each cell.
+    `cells_x` × `cells_y` grid lines baked in, `bg` fill with `fg` lines along
+    the top + left edge of each cell (default: light brown / darker brown for
+    the overworld grounds; pass a gray pair for the castle floors).
 
     Dims forced to {16,32,64,128,256,512,1024}^2 (textile-rs power-of-2
     constraint at bitmap.rs:507). The whole texture is mapped UV [0, 1]
@@ -301,8 +302,8 @@ def _make_grid_tile_tga(out_path, width=256, height=32, cells_x=64, cells_y=8,
     73.5 m ground that gives one grid line every 73.5/64 ≈ 1.15 m — close
     enough to a 1-metre grid for visual position estimation."""
     from PIL import Image
-    BG = (143, 97, 38)
-    FG = (102, 66, 23)
+    BG = bg
+    FG = fg
     cell_w = width // cells_x
     cell_h = height // cells_y
     img = Image.new('RGB', (width, height), BG)
@@ -1010,6 +1011,140 @@ def firebar_segment_script(px, pz, omega):
         "  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"
         "then\n"
     )
+
+
+# ── SMB W1-4 castle boss: Fake Bowser + axe ────────────────────────────────────
+# The axe (end of the boss bridge): on player proximity it raises SMB_CELEBRATE —
+# the same end-of-level signal the flagpole uses — then despawns. The Director's
+# celebration sequencer runs the cutscene and fires END_OF_LEVEL. Fake Bowser
+# also watches SMB_CELEBRATE and despawns ("falls in the lava") when the axe is hit.
+AXE_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "+ 2.5 < if\n"
+    "  1 INDEXOF_SMB_CELEBRATE write-mailbox\n"
+    "  0 INDEXOF_ALIVE write-mailbox\n"
+    "then\n"
+)
+
+# Bowser's fireball: a Physics missile thrown leftward by the boss's generator on
+# the SMB_BOWSER_FIRE pulse. Unlike Mario's fireball (which defeats enemies), this
+# one HURTS the player on proximity, then despawns.
+BOWSER_FB_SCRIPT = (
+    "\\ wf\n"
+    "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+    "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+    "+ 1.7 < if\n"
+    "  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"
+    "  0 INDEXOF_ALIVE write-mailbox\n"
+    "then\n"
+)
+
+
+def fakebowser_script(bridge_l, bridge_r, walk_speed=1.5, fire_interval=2.5):
+    """Fake Bowser (W1-4 boss) — a big Physics enemy patrolling the boss bridge.
+    Walks back and forth between [bridge_l, bridge_r], lobs a fireball leftward
+    every `fire_interval` s (pulses SMB_BOWSER_FIRE for its generator), hurts the
+    player on contact (no stomp — you can't jump on Bowser), and tracks 5 hit
+    points: each fresh Mario fireball within range knocks one off (0.5 s debounce
+    so one fireball isn't counted on consecutive frames). Defeated at 0 HP OR when
+    the axe raises SMB_CELEBRATE — either way it despawns and the level ends."""
+    return (
+        "\\ wf\n"
+        # defeat by the axe (celebration) — Bowser falls
+        "INDEXOF_SMB_CELEBRATE read-mailbox if 0 INDEXOF_ALIVE write-mailbox then\n"
+        # seed 5 HP once
+        "INDEXOF_LOCAL_BOWSER_HP read-mailbox not if 5 INDEXOF_LOCAL_BOWSER_HP write-mailbox then\n"
+        # walk: kick off / keep moving if (near) stopped, then bounce at the rail ends
+        f"INDEXOF_XSPEED read-mailbox dup * 0.01 < if {-walk_speed:.2f} INDEXOF_XSPEED write-mailbox then\n"
+        f"INDEXOF_X_POS read-mailbox {bridge_r:.2f} > if {-walk_speed:.2f} INDEXOF_XSPEED write-mailbox then\n"
+        f"INDEXOF_X_POS read-mailbox {bridge_l:.2f} < if {walk_speed:.2f} INDEXOF_XSPEED write-mailbox then\n"
+        # fire timer: accumulate dt; on overflow pulse SMB_BOWSER_FIRE and reset
+        "INDEXOF_LOCAL_BOWSER_FIRE_T read-mailbox INDEXOF_DELTA_TIME read-mailbox +\n"
+        f"dup {fire_interval:.2f} > if\n"
+        "  drop 0.0\n"
+        "  1 INDEXOF_SMB_BOWSER_FIRE write-mailbox\n"
+        "else\n"
+        "  0 INDEXOF_SMB_BOWSER_FIRE write-mailbox\n"
+        "then\n"
+        "INDEXOF_LOCAL_BOWSER_FIRE_T write-mailbox\n"
+        # decay the hit-debounce cooldown
+        "INDEXOF_LOCAL_BOWSER_HIT_COOL read-mailbox 0 > if\n"
+        "  INDEXOF_LOCAL_BOWSER_HIT_COOL read-mailbox INDEXOF_DELTA_TIME read-mailbox -\n"
+        "  dup 0 < if drop 0 then INDEXOF_LOCAL_BOWSER_HIT_COOL write-mailbox\n"
+        "then\n"
+        # Mario's fireball knocks off 1 HP (only while fresh AND not debouncing)
+        "INDEXOF_TIME read-mailbox INDEXOF_SMB_FIREBALL_LIVE_UNTIL read-mailbox < if\n"
+        "  INDEXOF_LOCAL_BOWSER_HIT_COOL read-mailbox 0.01 < if\n"
+        "    INDEXOF_SMB_FIREBALL_LIVE_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+        "    INDEXOF_SMB_FIREBALL_LIVE_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+        "    + 4.0 < if\n"
+        "      INDEXOF_LOCAL_BOWSER_HP read-mailbox 1 - dup INDEXOF_LOCAL_BOWSER_HP write-mailbox\n"
+        "      1 < if 1 INDEXOF_SMB_CELEBRATE write-mailbox 0 INDEXOF_ALIVE write-mailbox then\n"
+        "      0.5 INDEXOF_LOCAL_BOWSER_HIT_COOL write-mailbox\n"
+        "    then\n"
+        "  then\n"
+        "then\n"
+        # hurt the player on contact — big body, no stomp branch
+        "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+        "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+        "+ 3.0 < if 1 INDEXOF_SMB_PLAYER_HURT write-mailbox then\n"
+    )
+
+
+def _make_bowser_fireball_template():
+    """Bowser's projectile — a Physics missile (frictionless, flat flight, 2 s TTL)
+    that hurts the player. Mirrors _make_fireball_template but runs BOWSER_FB_SCRIPT
+    (hurt-the-player, not defeat-enemies) and parks at its own off-screen spot."""
+    bm = _bmesh.new()
+    _bmesh.ops.create_cube(bm, size=1.0)
+    _bmesh.ops.scale(bm, vec=(FB*2.4, FB*2.4, FB*2.4), verts=bm.verts)
+    mesh = bpy.data.meshes.new('bowser_fireball_template')
+    bm.to_mesh(mesh); bm.free()
+    mesh.materials.append(mat_fireball())
+    for p in mesh.polygons:
+        p.material_index = 0
+    obj = bpy.data.objects.new('bowser_fireball_template', mesh)
+    obj.location = (-78.0, 0.0, 0.0)
+    scene.collection.objects.link(obj)
+    attach_schema(obj, 'missile')
+    obj['wf_Template Object']      = 'True'
+    obj['wf_Moves Between Rooms']  = 'True'
+    obj['wf_Mobility']             = 'Physics'
+    obj['wf_Mass']                 = 0.001
+    obj['wf_Falling Acceleration'] = 0.0
+    obj['wf_Max Air Speed']        = 50.0
+    obj['wf_Surface Friction']     = 0.0
+    obj['wf_Horiz Air Drag']       = 0.0
+    obj['wf_Vert Air Drag']        = 0.0
+    obj['wf_Running Deceleration'] = 0.0
+    obj['wf_Explosion Delay']      = 2.0
+    obj['wf_Explode On Impact']    = 'True'
+    obj['wf_Model Type']           = 'Mesh'
+    obj['wf_Visibility Mailbox']   = 1
+    obj['wf_Mesh Name']            = 'bowser_fireball_template.iff'
+    obj['wf_Script']               = BOWSER_FB_SCRIPT
+    return obj
+
+
+def _make_bowser_fireball_generator(name, x, z, vx=-8.0):
+    """Fixed generator on the boss bridge: throws one bowser_fireball_template
+    leftward each time Fake Bowser pulses SMB_BOWSER_FIRE."""
+    g = bpy.data.objects.new(name, None)
+    scene.collection.objects.link(g)
+    attach_schema(g, 'generator')
+    g.location = (x, 0.0, z)
+    g['wf_Mobility']           = 'Anchored'
+    g['wf_Model Type']         = 'None'
+    g['wf_Visibility Mailbox'] = 0
+    g['wf_Activation MailBox'] = 1872   # INDEXOF_SMB_BOWSER_FIRE
+    g['wf_Object To Throw']    = 'bowser_fireball_template'
+    g['wf_Generation Rate']    = 20.0   # fast → one pulse throws exactly one
+    g['wf_Object X Velocity']  = vx
+    g['wf_Object Y Velocity']  = 0.0
+    g['wf_Object Z Velocity']  = 0.0
+    return g
 
 
 # Koopa Paratroopa — airborne green Koopa bouncing over the tree-tops (W1-3). Vertical
