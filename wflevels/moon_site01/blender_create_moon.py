@@ -1114,9 +1114,13 @@ if target:
 # WF_GAME_SCREENSHOT_PPM dump fires at frame 30.
 camera_actor = find_by_class('camera')
 if camera_actor:
-    camera_actor.location = (PLAYER_SPAWN[0] + CAM_OFFSET[0],
-                             PLAYER_SPAWN[1] + CAM_OFFSET[1],
-                             PLAYER_SPAWN[2] + CAM_OFFSET[2])
+    # Pre-position at cs_earth (the opening camshot), not cs_chase.
+    # BungeeCameraHandler springs FROM the camera actor's starting position.
+    # If we start at cs_chase (0,-100,85) and the first camshot is cs_earth
+    # (30,-80,5), the huge first-frame delta (≈1.1 s) overshoots dramatically
+    # and Earth flashes for one frame then disappears. Starting at cs_earth
+    # means zero travel needed — camera is already there on frame 1.
+    camera_actor.location = (30.0, -80.0, 5.0)  # cs_earth position
     # Snowgoons inherits a fog setup tuned for Earth atmosphere (start 20 m,
     # complete 30 m, mid-grey #888888) — at vista distances this fogs the
     # entire terrain to flat grey. The Moon has no atmosphere; push fog far
@@ -1140,7 +1144,7 @@ if camshot:
     camshot['wf_Position Z'] = 'Absolute'
     camshot['wf_Rotation']   = 'Fixed'
     camshot['wf_FOV']                 = 60.0
-    camshot['wf_Pan Time In Seconds'] = 0.1
+    camshot['wf_Pan Time In Seconds'] = 3.0  # slow pan from cs_earth (Shot C) to cs_chase (Shot D)
     camshot['wf_Model Type']          = 'None'
     camshot['wf_Track Object'] = 'Player'
     camshot['wf_Target']       = 'CamTarget'
