@@ -36,7 +36,14 @@
 
 class AssetSlot;
 
-const int MAX_ACTIVE_ROOMS = MAX_ADJACENT_ROOMS+1;
+// Resident transient-room count. Decoupled from the disk-format MAX_ADJACENT_ROOMS
+// (still 2; the .lvl layout is untouched, so other levels keep loading) and raised
+// to a 3×3 chunk-streaming ring (radius 1). Must equal VideoMemory::MAX_TRANSIENT_SLOTS
+// (asserted in actrooms.cc). Legacy adjacency levels only ever fill slots 0..2, so
+// their behaviour is unchanged; they just allocate (unused) extra slots. Bump this
+// and MAX_TRANSIENT_SLOTS together to widen the ring (25 = 5×5).
+// See docs/plans/2026-06-04-moon-overhead-map-and-chunk-texture-streaming.md.
+const int MAX_ACTIVE_ROOMS = 9;
 
 //==============================================================================
 

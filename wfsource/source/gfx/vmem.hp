@@ -41,7 +41,13 @@ public:
 	inline void Validate() const;
 
 	enum
-	{	MAX_TRANSIENT_SLOTS = 3,
+	{	// Raised 3→9 for the moon chunk-streaming grid (a 3×3 resident ring,
+		// radius 1). Decoupled from the disk-format MAX_ADJACENT_ROOMS (still 2),
+		// so legacy adjacency levels keep slots 0..2 unchanged and only pay extra
+		// (unused) slot allocations. Must stay == AssetManager MAX_ACTIVE_ROOMS
+		// (asserted in actrooms.cc). Bump together to widen the ring (25 = 5×5).
+		// See docs/plans/2026-06-04-moon-overhead-map-and-chunk-texture-streaming.md.
+		MAX_TRANSIENT_SLOTS = 9,
 		MAX_PERMENENT_SLOTS = 1,
 		MAX_SLOTS = MAX_TRANSIENT_SLOTS + MAX_PERMENENT_SLOTS,
 		PERMANENT_SLOT = MAX_TRANSIENT_SLOTS	  // last slot is permanent
