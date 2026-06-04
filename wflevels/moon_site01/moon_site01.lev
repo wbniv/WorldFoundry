@@ -571,7 +571,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_ACTOR_INDEX read-mailbox dup INDEXOF_MOON_CHASE_CAM_IDX write-mailbox\nINDEXOF_TIME read-mailbox 31 > if\nINDEXOF_CAMSHOT write-mailbox\nelse drop then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_ACTOR_INDEX read-mailbox dup INDEXOF_MOON_CHASE_CAM_IDX write-mailbox\nINDEXOF_TIME read-mailbox dup 31 > if\n  INDEXOF_TIME read-mailbox 51 < if\n  INDEXOF_CAMSHOT write-mailbox\n  else drop then\nelse drop then\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
@@ -1412,6 +1412,27 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000115251169(1.15.16) } { 'STR' "-0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' -0.0000000001746230(1.15.16) } { 'STR' "-0.000000" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "cs_ground" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -100.0000000000000000(1.15.16) 28.3333339691162109(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "camshot" } }
+		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_ACTOR_INDEX read-mailbox\nINDEXOF_TIME read-mailbox 51 > if\nINDEXOF_CAMSHOT write-mailbox\nelse drop then\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'STR' { 'NAME' "Target" } { 'STR' "CamTarget" } }
+		{ 'STR' { 'NAME' "Follow" } { 'STR' "CamTarget" } }
+		{ 'STR' { 'NAME' "Track Object" } { 'STR' "Player" } }
+		{ 'I32' { 'NAME' "Rotation" } { 'DATA' 0l } { 'STR' "Fixed" } }  //Fixed|Track
+		{ 'I32' { 'NAME' "Position X" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
+		{ 'I32' { 'NAME' "Position Y" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
+		{ 'I32' { 'NAME' "Position Z" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
+		{ 'FX32' { 'NAME' "FOV" } { 'DATA' 60.0000000000000000(1.15.16) } { 'STR' "60.0" } }
+		{ 'FX32' { 'NAME' "Pan Time In Seconds" } { 'DATA' 3.0000000000000000(1.15.16) } { 'STR' "3.0" } }
+		{ 'FX32' { 'NAME' "Yon" } { 'DATA' 2500.0000000000000000(1.15.16) } { 'STR' "2500.0" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "launch_tracker" }
