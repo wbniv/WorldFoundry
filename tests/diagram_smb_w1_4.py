@@ -10,16 +10,18 @@ PLAT1_COLS   = (18, 26)    # lava-pit-1 platform
 PLAT1_Z      =  2          # tiles above floor
 BRIDGE_COLS  = (122, 152)  # boss-bridge stand-in
 BRIDGE_Z     =  3
-# (pivot_col, pivot_z_tiles, initial_angle_deg)
+# (pivot_col, pivot_z_tiles, initial_angle_deg). Floor/platform bars pivot at
+# Z=2T, ceiling bars at Z=6T; 5 segments at 0.4T spacing → 2T (3 m) max radius.
 FIREBARS = [
     (22, 2,   0),   # FB#1  on lava-pit-1 platform
-    (42, 1,  90),   # FB#2  corridor floor
-    (50, 7,   0),   # FB#3  corridor ceiling
-    (58, 1,  45),   # FB#4  corridor floor
-    (66, 7, 135),   # FB#5  corridor ceiling
+    (42, 2,  90),   # FB#2  corridor floor
+    (50, 6,   0),   # FB#3  corridor ceiling
+    (58, 2,  45),   # FB#4  corridor floor
+    (66, 6, 135),   # FB#5  corridor ceiling
     (76, 2,   0),   # FB#6  fire-bar room low
     (84, 6,  90),   # FB#7  fire-bar room high
 ]
+SEG_SPACING_T = 0.4   # tiles between segments (matches blender_create_smb_w1_4.py)
 HIDDEN_BLOCK_COLS = [94, 97, 100, 103, 106, 109]   # hidden ? blocks, Z=5T
 POWERUP_COL  = 22; POWERUP_Z = 4   # ? block above lava-pit-1 platform
 BOWSER_COL   = 138
@@ -88,16 +90,17 @@ mid = (c0 + c1) // 2
 d.text((X(mid) - 42, Y(BRIDGE_Z) - PX - 8), "BOSS BRIDGE (static stand-in)", fill=WHITE)
 
 # ── Fire-Bars ─────────────────────────────────────────────────────────────────
-BAR_R_TILES = 5
+N_SEGS = 5
 for i, (pc, pz, angle_deg) in enumerate(FIREBARS):
     cx = X(pc) + PX//2
     cy = Y(pz) + PX//2
     d.ellipse([cx-3, cy-3, cx+3, cy+3], fill=GRAY)
-    for seg in range(1, BAR_R_TILES + 1):
+    for seg in range(1, N_SEGS + 1):
         a = math.radians(angle_deg)
-        sx = cx + seg * PX * math.cos(a)
-        sy = cy - seg * PX * math.sin(a)
-        d.ellipse([sx-3, sy-3, sx+3, sy+3], fill=ORANGE)
+        r = seg * SEG_SPACING_T * PX          # 0.4-tile spacing → 2-tile max radius
+        sx = cx + r * math.cos(a)
+        sy = cy - r * math.sin(a)
+        d.ellipse([sx-2, sy-2, sx+2, sy+2], fill=ORANGE)
     d.text((cx - 6, cy - PX - 6), f"FB{i+1}", fill=ORANGE)
 
 # ── ? blocks ─────────────────────────────────────────────────────────────────

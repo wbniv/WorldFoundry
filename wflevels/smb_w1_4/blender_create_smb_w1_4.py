@@ -292,9 +292,76 @@ _make_fireball_generator('fireball_gen_r', 1835, +12.0)   # Fire Mario fires rig
 # Mushroom if Small, Fire Flower if Super — same self-determining powerup_template as W1-1/W1-2.
 _make_powerup_block('w14_powerup', POWERUP_COL * T, 'powerup_template', 0.0, z=POWERUP_Z)
 
-# ── Phase 2 TODO: Fire-Bars ────────────────────────────────────────────────────
-# 7 fire-bars added once FIREBAR_SCRIPT + _build_firebar() land in smb_common.
-# See docs/plans/2026-06-03-build-faithful-smb-w1-4.md Phase 2.
+# ── Phase 2: Fire-Bars ─────────────────────────────────────────────────────────
+# A fire-bar = 1 small hard-block pivot + N orbiting lava-cube segments. Each
+# segment is an Anchored 'enemy' running firebar_segment_script (symplectic-Euler
+# orbit around the pivot + lethal proximity). All segments share one mesh datablock.
+N_SEGS         = 5
+SEG_SPACING_T  = 0.4          # tiles between segments → max radius N*0.4 = 2T
+SEG_HALF       = 0.2 * T      # segment cube half-extent (≈ spacing → continuous bar)
+FIREBAR_OMEGA  = 2.4          # rad/s → ~2.6 s per revolution (faithful NES cadence)
+
+# Build one shared fire-segment datablock (small orange lava cube).
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(0.0, 0.0, 0.0))
+_seg = bpy.context.object
+_seg.scale = (SEG_HALF, SEG_HALF, SEG_HALF)
+bpy.ops.object.transform_apply(scale=True)
+_seg.data.materials.clear()
+_seg.data.materials.append(mat_lava())
+for _p in _seg.data.polygons:
+    _p.material_index = 0
+_seg.name = 'firebar_seg'; _seg.data.name = 'firebar_seg'
+_firebar_seg_data = _seg.data
+bpy.data.objects.remove(_seg, do_unlink=True)
+_firebar_n = [0]
+
+
+def _build_firebar(name, pivot_col, pivot_z_tiles, omega, initial_angle_deg=0.0,
+                   n_segs=N_SEGS):
+    """Place a fire-bar: a solid pivot block + n_segs orbiting lava segments."""
+    px = pivot_col * T
+    pz = pivot_z_tiles * T
+    # Pivot — small solid hard block marking the hub (faithful: fire-bar centres
+    # are solid blocks Mario must navigate around).
+    add_box(f'{name}_pivot',
+            px - 0.4 * T, -GROUND_Y, pz - 0.4 * T,
+            px + 0.4 * T,  GROUND_Y, pz + 0.4 * T,
+            mat_hard())
+    script = smb_common.firebar_segment_script(px, pz, omega)
+    theta0 = math.radians(initial_angle_deg)
+    for k in range(1, n_segs + 1):
+        r  = k * SEG_SPACING_T * T
+        sx = px + r * math.cos(theta0)
+        sz = pz + r * math.sin(theta0)
+        seg = bpy.data.objects.new(f'{name}_seg{k}', _firebar_seg_data)
+        scene.collection.objects.link(seg)
+        seg.location = (sx, 0.0, sz)
+        attach_schema(seg, 'enemy')
+        seg['wf_Mobility']                  = 'Anchored'
+        seg['wf_Model Type']                = 'Mesh'
+        seg['wf_Visibility Mailbox']        = 1
+        seg['wf_Number Of Local Mailboxes'] = 0      # pivot baked in script; uses globals
+        seg['wf_Script']                    = script
+        _firebar_n[0] += 1
+
+
+# 7 fire-bars (col, pivot_z_tiles, omega, initial_angle_deg). Floor/platform bars
+# pivot at Z=2T (sweep 0..4T, lower arc grazes the floor); ceiling bars at Z=6T
+# (sweep 4..8T, upper arc tucks into the ceiling). Alternate spin + start angle so
+# the seven don't beat in unison.
+_FIREBARS = [
+    ('fb1', 22, 2,  FIREBAR_OMEGA,   0.0),   # lava-pit-1 platform
+    ('fb2', 42, 2, -FIREBAR_OMEGA,  90.0),   # corridor floor
+    ('fb3', 50, 6,  FIREBAR_OMEGA,   0.0),   # corridor ceiling
+    ('fb4', 58, 2,  FIREBAR_OMEGA,  45.0),   # corridor floor
+    ('fb5', 66, 6, -FIREBAR_OMEGA, 135.0),   # corridor ceiling
+    ('fb6', 76, 2,  FIREBAR_OMEGA,   0.0),   # fire-bar room low
+    ('fb7', 84, 6, -FIREBAR_OMEGA,  90.0),   # fire-bar room high
+]
+for _fbname, _fbcol, _fbz, _fbom, _fbang in _FIREBARS:
+    _build_firebar(_fbname, _fbcol, _fbz, _fbom, _fbang)
+print(f"[smb_w1_4] fire-bar segments placed: {_firebar_n[0]} "
+      f"(7 bars × {N_SEGS} = {7 * N_SEGS})")
 
 # ── Phase 3 TODO: Fake Bowser, axe, hidden ? blocks ──────────────────────────
 # _build_fakebowser('bowser', BOWSER_COL=138)

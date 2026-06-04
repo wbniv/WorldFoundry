@@ -973,6 +973,45 @@ PIRANHA_SCRIPT = (
     "then\n"
 )
 
+
+def firebar_segment_script(px, pz, omega):
+    """One SMB castle fire-bar segment (W1-4). An Anchored actor that orbits the
+    pivot (px, pz) in the XZ plane at angular velocity `omega` rad/s and hurts the
+    player on contact (no stomp — fire-bars are pure hazards).
+
+    Motion uses **symplectic Euler** (update X from the OLD Z, then Z from the
+    NEW X). The per-frame map has determinant 1, so the orbit stays a bounded
+    closed ellipse forever; plain explicit Euler would spiral every segment
+    outward over the level's lifetime. All segments of one bar share the same
+    omega → identical per-frame map → they rotate in lockstep and stay collinear
+    through the pivot, so the bar reads as a rigid spinning rod.
+
+    The pivot is baked in as a literal, so segments need no per-actor mailbox
+    (every bar gets its own script string; ~7 unique strings for the level).
+    `omega` sign sets spin direction (+ = counter-clockwise in screen XZ)."""
+    return (
+        "\\ wf\n"
+        # new_x = X_POS - (omega*dt) * (Z_POS - pz)
+        "INDEXOF_X_POS read-mailbox\n"
+        f"  {omega:.5f} INDEXOF_DELTA_TIME read-mailbox *\n"
+        f"  INDEXOF_Z_POS read-mailbox {pz:.4f} -\n"
+        "  *\n"
+        "- INDEXOF_X_POS write-mailbox\n"
+        # new_z = Z_POS + (omega*dt) * (X_POS - px)   [X_POS already updated → symplectic]
+        "INDEXOF_Z_POS read-mailbox\n"
+        f"  {omega:.5f} INDEXOF_DELTA_TIME read-mailbox *\n"
+        f"  INDEXOF_X_POS read-mailbox {px:.4f} -\n"
+        "  *\n"
+        "+ INDEXOF_Z_POS write-mailbox\n"
+        # lethal proximity: hurt the player within ~1 m (no stomp branch)
+        "INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\n"
+        "INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n"
+        "+ 1.0 < if\n"
+        "  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\n"
+        "then\n"
+    )
+
+
 # Koopa Paratroopa — airborne green Koopa bouncing over the tree-tops (W1-3). Vertical
 # triangle wave via the per-actor SMB_PIRANHA_UP_L phase flag (1=rising, 0=falling); flips
 # at PARA_HIGH_Z / PARA_LOW_Z. Player interaction mirrors the Koopa: Star kills it; a stomp

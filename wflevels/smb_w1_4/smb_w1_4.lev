@@ -1354,6 +1354,741 @@
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
+		{ 'NAME' "fb1_seg1" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 33.5999984741210938(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 33.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb1_seg2" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 34.2000007629394531(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 33.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb1_seg3" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 34.7999992370605469(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 33.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb1_seg4" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 35.4000015258789062(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 33.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb1_seg5" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 36.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 33.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb2_seg1" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 63.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 3.5999999046325684(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 63.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb2_seg2" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 63.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 4.1999998092651367(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 63.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb2_seg3" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 63.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 4.8000001907348633(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 63.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb2_seg4" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 63.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 5.4000000953674316(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 63.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb2_seg5" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 63.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 63.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb3_seg1" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 75.5999984741210938(1.15.16) 0.0000000000000000(1.15.16) 9.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 75.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb3_seg2" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 76.1999969482421875(1.15.16) 0.0000000000000000(1.15.16) 9.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 75.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb3_seg3" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 76.8000030517578125(1.15.16) 0.0000000000000000(1.15.16) 9.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 75.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb3_seg4" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 77.4000015258789062(1.15.16) 0.0000000000000000(1.15.16) 9.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 75.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb3_seg5" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 78.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 9.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 75.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb4_seg1" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 87.4242630004882812(1.15.16) 0.0000000000000000(1.15.16) 3.4242639541625977(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 87.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb4_seg2" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 87.8485260009765625(1.15.16) 0.0000000000000000(1.15.16) 3.8485281467437744(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 87.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb4_seg3" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 88.2727890014648438(1.15.16) 0.0000000000000000(1.15.16) 4.2727923393249512(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 87.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb4_seg4" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 88.6970596313476562(1.15.16) 0.0000000000000000(1.15.16) 4.6970562934875488(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 87.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb4_seg5" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 89.1213226318359375(1.15.16) 0.0000000000000000(1.15.16) 5.1213202476501465(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 87.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb5_seg1" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 98.5757369995117188(1.15.16) 0.0000000000000000(1.15.16) 9.4242639541625977(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 99.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb5_seg2" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 98.1514739990234375(1.15.16) 0.0000000000000000(1.15.16) 9.8485279083251953(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 99.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb5_seg3" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 97.7272109985351562(1.15.16) 0.0000000000000000(1.15.16) 10.2727918624877930(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 99.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb5_seg4" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 97.3029403686523438(1.15.16) 0.0000000000000000(1.15.16) 10.6970558166503906(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 99.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb5_seg5" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 96.8786773681640625(1.15.16) 0.0000000000000000(1.15.16) 11.1213207244873047(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 99.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb6_seg1" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 114.5999984741210938(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 114.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb6_seg2" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 115.1999969482421875(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 114.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb6_seg3" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 115.8000030517578125(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 114.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb6_seg4" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 116.4000015258789062(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 114.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb6_seg5" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 117.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 3.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 114.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb7_seg1" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 126.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 9.6000003814697266(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 126.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb7_seg2" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 126.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 10.1999998092651367(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 126.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb7_seg3" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 126.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 10.8000001907348633(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 126.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb7_seg4" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 126.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 11.3999996185302734(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 126.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "fb7_seg5" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 126.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 12.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) -0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16) 0.3000000119209290(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "firebar_seg.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_X_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_Z_POS read-mailbox 9.0000 -\n  *\n- INDEXOF_X_POS write-mailbox\nINDEXOF_Z_POS read-mailbox\n  -2.40000 INDEXOF_DELTA_TIME read-mailbox *\n  INDEXOF_X_POS read-mailbox 126.0000 -\n  *\n+ INDEXOF_Z_POS write-mailbox\nINDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_X_POS read-mailbox - dup *\nINDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_Z_POS read-mailbox - dup *\n+ 1.0 < if\n  1 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\n" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
 		{ 'NAME' "flagpole_pole" }
 		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 228.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 7.5000000000000000(1.15.16)  //x,y,z
 		} }
