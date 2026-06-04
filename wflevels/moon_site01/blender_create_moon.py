@@ -1184,12 +1184,39 @@ tracker_obj['wf_Script'] = (
     "INDEXOF_MOON_LANDER_Z read-mailbox INDEXOF_Z_POS write-mailbox\n"
 )
 
+# ── cs_hold — 3-second static establishing shot before cs_earth tracking ──────
+# Identical position/FOV/target as cs_earth but active only for TIME < 3 s.
+# Camera actor is pre-positioned here so zero spring travel on load.
+# PanTime 0.5 irrelevant (camera already at this position).
+cs_hold_data = bpy.data.meshes.new('cs_hold_mesh')
+cs_hold_obj  = bpy.data.objects.new('cs_hold', cs_hold_data)
+bpy.context.scene.collection.objects.link(cs_hold_obj)
+attach_schema(cs_hold_obj, 'camshot')
+cs_hold_obj.location = (30.0, -80.0, 5.0)
+cs_hold_obj['wf_Position X']          = 'Absolute'
+cs_hold_obj['wf_Position Y']          = 'Absolute'
+cs_hold_obj['wf_Position Z']          = 'Absolute'
+cs_hold_obj['wf_Rotation']            = 'Fixed'
+cs_hold_obj['wf_FOV']                 = 40.0
+cs_hold_obj['wf_Pan Time In Seconds'] = 0.5
+cs_hold_obj['wf_Model Type']          = 'None'
+cs_hold_obj['wf_Track Object']        = 'launch_tracker'
+cs_hold_obj['wf_Target']              = 'CamTarget'
+cs_hold_obj['wf_Follow']              = 'CamTarget'
+cs_hold_obj['wf_Yon']                 = 2500.0
+cs_hold_obj['wf_Moves Between Rooms'] = 'True'
+cs_hold_obj['wf_Script'] = (
+    "\\ wf\n"
+    "INDEXOF_ACTOR_INDEX read-mailbox INDEXOF_TIME read-mailbox 3 < if\n"
+    "INDEXOF_CAMSHOT write-mailbox\n"
+    "else drop then\n"
+)
+
 # ── cs_earth — low telephoto shot behind lander for launch cutscene ───────────
 # Position (30, -80, 5): 105 m behind lander, 5 m above ground.
 # Tracks launch_tracker (room actor proxy) so camera tilts up as lander ascends.
 # FOV 40° (telephoto) compresses lander+Earth into same frame.
-# Triggered at phase ≥ 2 (ignition onward) by player Forth script via
-# EMAILBOX_CAMSHOT (1921). See docs/plans/2026-06-03-moon-earth-cutscene.md.
+# Active TIME > 3 (after cs_hold) through TIME < 31 (before cs_chase pan).
 cs_earth_data = bpy.data.meshes.new('cs_earth_mesh')
 cs_earth_obj  = bpy.data.objects.new('cs_earth', cs_earth_data)
 bpy.context.scene.collection.objects.link(cs_earth_obj)
@@ -1207,13 +1234,15 @@ cs_earth_obj['wf_Target']              = 'CamTarget'   # required non-null by mo
 cs_earth_obj['wf_Follow']              = 'CamTarget'   # required non-null by movecam.cc:236
 cs_earth_obj['wf_Yon']                 = 2500.0
 cs_earth_obj['wf_Moves Between Rooms'] = 'True'
-# cs_earth owns its CAMSHOT write directly — active when TIME < 31 s
-# (phases 0-1 pre-launch, phase 2 ignition, phase 3 first 20 s of ascent).
+# Active TIME > 3 (hands off from cs_hold) through TIME < 31 (hands off to cs_chase).
+# Double-gated to avoid fighting cs_hold for t < 3.
 cs_earth_obj['wf_Script'] = (
     "\\ wf\n"
     "INDEXOF_ACTOR_INDEX read-mailbox dup INDEXOF_MOON_EARTH_CAM_IDX write-mailbox\n"
     "INDEXOF_TIME read-mailbox 31 < if\n"
-    "INDEXOF_CAMSHOT write-mailbox\n"
+    "  INDEXOF_TIME read-mailbox 3 > if\n"
+    "  INDEXOF_CAMSHOT write-mailbox\n"
+    "  else drop then\n"
     "else drop then\n"
 )
 
