@@ -133,6 +133,12 @@ each frame. `cs_earth` tracks it instead of `artemis_lander` directly because PE
   at site latitude
 - Ambient light: RGB (0.40, 0.42, 0.50) — fills crater shadow sides
 
+## Recordings
+
+| File | Date | Notes |
+|------|------|-------|
+| [20260604_064139_moon.mp4](../../20260604_064139_moon.mp4) | 2026-06-04 | First windowed 640×480 run — cs_hold establishing shot + cs_earth lander tracking |
+
 ## Reference
 
 - Texture LOD sizing: `docs/investigations/2026-06-02-texture-lod-for-distant-spheres.md`
