@@ -14,14 +14,20 @@ file=$(echo "$input" | jq -r '.tool_input.file_path // empty')
 bare=$(python3 - "$file" <<'PYEOF'
 import re, sys
 
-text = open(sys.argv[1]).read()
+raw = open(sys.argv[1]).read()
+
+# Strip fenced code blocks and inline code spans so we don't flag examples.
+# Replace their contents with spaces (preserving offsets isn't needed — we
+# just need them absent from the search text).
+text = re.sub(r'```.*?```', lambda m: ' ' * len(m.group()), raw, flags=re.DOTALL)
+text = re.sub(r'`[^`\n]+`', lambda m: ' ' * len(m.group()), text)
 
 found = []
 
 # --- 1. Bare relative .md paths ---
 for m in re.finditer(
-    r'`?((?:\.\.?/|docs/|wflevels/|wfsource/|engine/|tests/|wftools/)'
-    r'[^\s`"<>()]+\.md)`?',
+    r'((?:\.\.?/|docs/|wflevels/|wfsource/|engine/|tests/|wftools/)'
+    r'[^\s`"<>()]+\.md)',
     text
 ):
     path = m.group(1)
