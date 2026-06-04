@@ -2,6 +2,7 @@
 
 ## PLATFORM / DISPLAY
 
+- [x] **Linux: viewport resizes on window maximize/resize.** Three bugs fixed: wrong inscribed-square viewport math in `ConfigureNotify` (`mesa.cc`); FBO blit destination hardcoded to 640×480 (`display.cc`); projection matrix only set once at init — moved to `RenderBegin()` so aspect ratio recomputes every frame. [plan](docs/plans/2026-06-04-viewport-doesn-t-resize-on-window-maximize.md)
 - [x] **Linux: `-fullscreen`, `-width=N`, `-height=N` window flags.** Re-enabled the `#if 0` arg block in `hal/linux/platform_init.cc`; `-fullscreen` queries screen dims via X11 so FBO + recording match. `WF_FULLSCREEN=1` / `WF_RECORD=1` added to all `task run-*`. [plan](docs/plans/2026-06-04-window-size-parity-fullscreen-flag.md)
 - [ ] **macOS: `-fullscreen`, `-width=N`, `-height=N` window flags.** Linux uses `_NET_WM_STATE_FULLSCREEN` via X11. macOS needs the equivalent using AppKit (`NSWindow` frame sizing + `toggleFullScreen:` / `NSWindowStyleMaskFullScreen`) in the macOS platform HAL. Tablets (Android/iOS) are always fullscreen by OS design — no changes needed there.
 
