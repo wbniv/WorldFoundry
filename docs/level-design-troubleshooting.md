@@ -1782,14 +1782,14 @@ verts with no scale multiply (`actor.cc` BindAssets trimesh block), so a scaled 
 statplat would still collide unit-sized — keep scaled statplats `MODEL_TYPE_BOX`/BOX3.
 
 **For floor tiles that CharacterVirtual must stand on — use `build_textured_ground_mesh`.**
-`add_statplat` (unit-box datablock) creates both a BOX static body (correct scale from the
-OAD BOX3) AND a MESH_STATIC body (raw verts at ±0.5, unscaled). When the character was
-created before static bodies (W1-1/W1-3), both systems work because no body is excluded and
-the BOX body stops the character. But when character creation happens after static bodies
-(e.g. W1-4, where floor slabs are added early), the Jolt character falls through the BOX body
-in a subtle way — root cause not fully traced. `build_textured_ground_mesh` bakes scale into
-vertices via `transform_apply`, giving Jolt a correctly-sized MESH_STATIC body that reliably
-stops the character regardless of creation order. Discovered 2026-06-04 while building W1-4.
+W1-4 showed Mario falling through `add_statplat` (unit-box datablock) floor tiles even with
+no player input (ball pos X=3.0 constant, Z decreasing). Switching to `build_textured_ground_mesh`
+(which bakes scale into mesh vertices via `transform_apply`) fixed it. Root cause not fully
+traced — one observable difference is that `add_statplat` creates both a BOX_STATIC body
+(correct, from the scaled OAD BOX3) and a MESH_STATIC body (local verts at ±0.5, not scaled
+by actor scale), while `build_textured_ground_mesh` produces a MESH_STATIC with correct world
+positions. Use `build_textured_ground_mesh` for any surface where the character must land.
+Discovered 2026-06-04 while building W1-4.
 
 ### (b) Runtime `X/Y/Z_SCALE` mailboxes (3040–3042) — visual-only
 
