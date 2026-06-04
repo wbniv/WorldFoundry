@@ -6,8 +6,8 @@ T = 1.5
 # ── Layout data (must stay in sync with blender_create_smb_w1_4.py) ──────────
 TOTAL_COLS   = 160
 CEIL_Z       =  8          # tiles
-PLAT1_COLS   = (18, 26)    # lava-pit-1 platform
-PLAT1_Z      =  2          # tiles above floor
+LAVA1_PLATS  = [(16, 19), (21, 24), (26, 29)]   # 3 stepping stones across lava pit 1
+PLAT_Z       =  0          # platform tops at floor level
 BRIDGE_COLS  = (122, 152)  # boss-bridge stand-in
 BRIDGE_Z     =  3
 # (pivot_col, pivot_z_tiles, initial_angle_deg). Floor/platform bars pivot at
@@ -81,8 +81,8 @@ for col, direction, n in STAIRS:
         d.rectangle([X(sc), Y(z), X(sc + 1), Y(0)], fill=GRAY, outline=GRAY_DK)
 
 # ── Platforms ─────────────────────────────────────────────────────────────────
-c0, c1 = PLAT1_COLS
-d.rectangle([X(c0), Y(PLAT1_Z), X(c1), Y(PLAT1_Z) + PX//2], fill=GRAY, outline=GRAY_DK)
+for c0, c1 in LAVA1_PLATS:    # 3 stepping stones across lava pit 1
+    d.rectangle([X(c0), Y(PLAT_Z), X(c1), Y(PLAT_Z) + PX//2], fill=GRAY, outline=GRAY_DK)
 
 c0, c1 = BRIDGE_COLS
 d.rectangle([X(c0), Y(BRIDGE_Z), X(c1), Y(BRIDGE_Z) + PX//2], fill=GRAY, outline=GRAY_DK)

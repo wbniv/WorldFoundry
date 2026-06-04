@@ -44,13 +44,15 @@ LEVEL_X0    = 0.0
 LEVEL_X1    = 160 * T     # 240 m
 SCENE_MID_X = LEVEL_X1 / 2
 
-# Platform over lava pit 1 (surface at floor level — Mario can jump from entry floor)
-PLAT1_X0, PLAT1_X1 = 18 * T, 26 * T
+# Stepping platforms across lava pit 1 (cols 14-32). Sized so every gap — entry
+# edge → A → B → C → corridor edge — is ≤3 tiles (≤4.5 m), comfortably jumpable
+# with the established Mario tuning. (col_start, col_end) per platform.
+LAVA1_PLATS = [(16, 19), (21, 24), (26, 29)]
 
 # Boss bridge stand-in (surface at floor level — TODO Phase 2: collapsing bridge)
 BRIDGE_X0, BRIDGE_X1 = 122 * T, 152 * T
 
-# Powerup ? block above lava pit 1 platform, hit-from-below at 4T
+# Powerup ? block above lava-pit-1 platform B (col 22), hit-from-below at 4T
 POWERUP_COL = 22
 POWERUP_Z   = FLOOR_Z + 4 * T    # 6 m above floor
 
@@ -234,9 +236,11 @@ add_statplat('w1_4_ceil',
 _lava_section('pit1',  14,  32)
 _lava_section('boss', 120, 154)
 
-# Floating platforms over lava — also use textured mesh for correct Jolt body
-for _pname, _px0, _px1 in [('plat1', PLAT1_X0, PLAT1_X1),
-                             ('boss_bridge', BRIDGE_X0, BRIDGE_X1)]:
+# Floating platforms over lava — textured mesh for correct Jolt body.
+# 3 stepping stones across lava pit 1 + the wide boss bridge stand-in.
+_PLATFORMS = [(f'plat1_{_i}', c0 * T, c1 * T) for _i, (c0, c1) in enumerate(LAVA1_PLATS)]
+_PLATFORMS.append(('boss_bridge', BRIDGE_X0, BRIDGE_X1))
+for _pname, _px0, _px1 in _PLATFORMS:
     _pmesh = build_textured_ground_mesh(
         f'w1_4_{_pname}',
         _px0, -GROUND_Y, FLOOR_Z - GROUND_THICK,
