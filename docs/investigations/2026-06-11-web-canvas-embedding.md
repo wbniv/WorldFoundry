@@ -15,7 +15,7 @@
 - **Portable dependencies** — Jolt 5.5.0 (pure C++), zForth (pure C), miniaudio 0.11.25 (**ships a Web Audio / Emscripten backend**), STB headers. Lua/QuickJS/Wren also compile cleanly to wasm if wanted later. Only WAMR has x86-64 inline asm (`CMakeLists.txt:388`), and it's simplest to build the web target Forth-only.
 - **Clean HAL seam** — platform code is isolated under `wfsource/source/hal/<platform>/` (Linux 837 LOC, Android 808 LOC) and selected by a CMake `if(ANDROID)/elseif(IOS)/...` block (`CMakeLists.txt:665–690`). A `hal/emscripten/` directory slots in the same way, est. 300–500 LOC.
 
-**Estimated effort: ~2–3 weeks** to an embeddable, playable build, with a first-render milestone inside week 1. Breakdown below.
+**Estimated effort: ~2–3 weeks to a shippable v1** (ASYNCIFY main loop), with a first-render milestone inside week 1, **plus a committed ~1-week v2 that replaces ASYNCIFY with a proper state-machine main loop**. The inversion is required scope — ASYNCIFY is a shipping vehicle for v1, not the end state. Breakdown below.
 
 ---
 
@@ -81,9 +81,47 @@ Browsers never let a page block: the engine must return to the event loop every 
 - `RunLevel()` — `while(!LevelDone()...)` (`game.cc:661–674`)
 - `StepFrame()` — one update+render tick (`game.cc:494–640`)
 
-**v1: ASYNCIFY.** Emscripten's [ASYNCIFY](https://emscripten.org/docs/porting/asyncify.html) instruments the wasm so a deep call stack can unwind to the browser and resume next frame — insert one `emscripten_sleep(0)` in `StepFrame()` and the nested loops work unmodified. Cost: ~30–50 % larger wasm and some CPU overhead, fine for v1 at these asset sizes.
+**v1: ASYNCIFY (shipping vehicle, not end state).** Emscripten's [ASYNCIFY](https://emscripten.org/docs/porting/asyncify.html) instruments the wasm so a deep call stack can unwind to the browser and resume next frame — insert one `emscripten_sleep(0)` in `StepFrame()` and the nested loops work unmodified. Cost: ~30–50 % larger wasm and CPU overhead on every unwind/rewind. Acceptable to get v1 in front of people quickly; not acceptable to keep.
 
-**v2 (optional): proper inversion.** Restructure into a state machine (`BOOT → META_SCRIPT → LOADING → IN_LEVEL`) driven by `emscripten_set_main_loop()`. `StepFrame()` already exists as a clean single-tick function, so the work is hoisting the loop state (current level, script continuation) into the `WFGame` object. Worth doing only if ASYNCIFY's overhead shows up in profiles.
+**v2: state-machine inversion (committed scope).** Restructure into a state machine driven by `emscripten_set_main_loop()`:
+
+```
+BOOT → META_SCRIPT → LOAD_LEVEL → IN_LEVEL ─┬→ UNLOAD → META_SCRIPT (next level)
+                          (one rAF tick each ⤴)  └→ EXIT
+```
+
+The scope is exactly two loops — the editor's frame loop at `game.cc:476` is `WF_ENABLE_EDITOR`-only and excluded from the web build:
+
+1. `RunGameScript()`'s `for(;;)` meta loop (`game.cc:233–268`). The Forth meta script (`interpreter->RunScript`) runs to completion to select the next level — it's short and can execute synchronously inside one callback (`META_SCRIPT` state), so the Forth interpreter itself doesn't need to become resumable.
+2. `RunLevel()`'s `while(!LevelDone() && ContinueRequested() && ...)` (`game.cc:661–674`). Its loop condition becomes the `IN_LEVEL → UNLOAD` transition.
+
+`StepFrame()` already exists as a clean single-tick function, so the work is hoisting the loop state (current level, disk file/TOC cursor, script pointer) into `WFGame` members and adding the transition logic. Bonus beyond dropping the ASYNCIFY tax: the inverted loop benefits the other callback-driven platforms too — iOS Phase 2C needs exactly this shape for its `CADisplayLink` tick, so this refactor pays twice.
+
+### Profiling: quantifying the ASYNCIFY tax
+
+ASYNCIFY's cost has two components, and v1→v2 is a natural A/B experiment — measure both sides and record the numbers in this doc.
+
+**What ASYNCIFY costs (mechanism):**
+
+- **Code size:** every function that can be on the stack during an unwind gets instrumented with save/restore logic. The [Emscripten docs](https://emscripten.org/docs/porting/asyncify.html) cite roughly **+50 % wasm size** on instrumented code in the typical case; whole-binary impact depends on how much of the call graph is reachable from the yield point.
+- **Runtime:** instrumented functions carry extra branching even when not unwinding, and each frame pays a full stack unwind + rewind through the `RunGameScript → RunScript → RunLevel → StepFrame` chain. Published worst cases approach ~2× on hot instrumented code; our yield is once per frame at the bottom of a shallow chain, so the expected hit is far smaller — but that's exactly the claim to verify, not assume.
+
+**Containment knobs (apply in v1, before measuring):**
+
+- `-sASYNCIFY_ADVISE` — build-time report of every function being instrumented and why (which call edge makes it unwind-reachable). Run this first; paste the list here.
+- `-sASYNCIFY_ONLY=[...]` — whitelist only the actual unwind chain (`main`, `HALStart`, `PIGSMain`, `WFGame::RunGameScript`, `WFGame::RunLevel`, `WFGame::StepFrame`, the zForth `RunScript` path). Since `emscripten_sleep(0)` lives at a known single point, the indirect-call blowup (ASYNCIFY's usual size killer) is avoidable. This should shrink the tax dramatically before v2 even lands.
+
+**Measurements to capture (fill in during implementation):**
+
+| Metric | How | v1 ASYNCIFY (naïve) | v1 + `ASYNCIFY_ONLY` | v2 inverted |
+|--------|-----|--------------------:|---------------------:|------------:|
+| `wf_game.wasm` size (raw / gzip) | `ls -l`, `gzip -9 \| wc -c` | _TBD_ | _TBD_ | _TBD_ |
+| Instrumented function count | `-sASYNCIFY_ADVISE` output | _TBD_ | _TBD_ | 0 |
+| Frame time p50 / p95 / p99 (ms) | `performance.now()` around the tick, 60 s capture in `moon_site01` | _TBD_ | _TBD_ | _TBD_ |
+| Unwind/rewind share of frame | Chrome DevTools Performance with `--profiling-funcs` build (symbolized flamegraph; look for `asyncify_*` frames) | _TBD_ | _TBD_ | n/a |
+| Startup → first interactive frame (ms) | `performance.mark()` at `Module.onRuntimeInitialized` vs first `StepFrame` return | _TBD_ | _TBD_ | _TBD_ |
+
+Method notes: build with `--profiling-funcs` (keeps function names in the wasm) for the flamegraph runs only — strip it for the size measurements. Use the same level (`moon_site01.iff`), same machine, same Chrome version across all three columns; Firefox numbers optional but interesting. 60 s capture, discard the first 5 s (JIT warm-up).
 
 ### 5. HTML shell + hosting
 
@@ -137,7 +175,7 @@ The existing `-L <level>.iff` CLI convention carries over via `Module.arguments`
 
 | # | Difficulty | Severity | Mitigation |
 |---|-----------|----------|------------|
-| 1 | **Blocking nested main loop** — browsers require returning to the event loop every frame; `RunGameScript`→`RunLevel`→`StepFrame` never returns | High (the core refactor) | ASYNCIFY for v1 (near-zero code change); state-machine inversion later if profiling demands |
+| 1 | **Blocking nested main loop** — browsers require returning to the event loop every frame; `RunGameScript`→`RunLevel`→`StepFrame` never returns | High (the core refactor) | ASYNCIFY ships v1 (near-zero code change); **committed v2** replaces it with the state-machine inversion above |
 | 2 | **X11/GLX window path** — `gfx/gl/mesa.cc:133–160` does raw `XOpenDisplay`/`glXCreateContext`; no SDL/GLFW layer to lean on | Medium | Bypass entirely: `hal/emscripten/platform.cc` creates the context with one `emscripten_webgl_create_context()` call |
 | 3 | **Desktop-GL residue** — Linux build compiles against `<GL/gl.h>`; debug HUD uses `glBegin` | Medium‑low | Production pipeline verified clean (grep of `glpipeline/` found zero fixed-function calls); take the Android `GLES3` branch and leave `DESIGNER_CHEATS` off for web |
 | 4 | **Input mapping** — keyboard/gamepad arrive as DOM events, not X11 | Low | `emscripten/html5.h` callbacks → existing `kBtn*` enum; Gamepad API is poll-based, matching the engine's per-frame input read |
@@ -159,7 +197,9 @@ Not difficulties (verified, pleasant surprises): no threading in the game runtim
 | 4. Input | Keyboard + gamepad → `kBtn*` | 1–2 days |
 | 5. Audio | miniaudio Web Audio + gesture gate | 0.5–1 day |
 | 6. Polish + ship | Lifecycle/visibility, IDBFS saves, HTML shell, deploy to Pages | 2–3 days |
-| **Total** | | **~9–15 working days (2–3 weeks)** |
+| **v1 total** | | **~9–15 working days (2–3 weeks)** |
+| 7. **v2: main-loop inversion** (committed, not contingent) | State machine in `WFGame`, hoist loop state, drop `-sASYNCIFY`, re-verify | 3–5 days |
+| **v1 + v2 total** | | **~12–20 working days (3–4 weeks)** |
 
 Risk buffer lives mostly in phase 2: if the GLES3 pipeline trips on a WebGL 2 restriction the Android driver tolerated (e.g. unsupported texture format, non-constant loop index in a shader), add 2–3 days of shader/format fixes.
 
@@ -174,6 +214,9 @@ Risk buffer lives mostly in phase 2: if the GLES3 pipeline trips on a WebGL 2 re
 5. Hide tab 10 s, return: engine resumed, no time-step explosion (delta-time clamped).
 6. Save, reload page, load: savegame persisted via IDBFS.
 7. `wf_game.wasm` + `.data` total size recorded; page interactive < 10 s on throttled "Fast 3G" profile.
+8. ASYNCIFY tax table (Profiling section above) filled in for the v1 columns: wasm size raw/gzip, instrumented-function count from `-sASYNCIFY_ADVISE`, frame-time p50/p95/p99, flamegraph share of `asyncify_*` frames.
+9. **(v2)** Final link flags contain no `-sASYNCIFY`; loop driven by `emscripten_set_main_loop()`; v2 column of the tax table filled in and the v1-vs-v2 delta summarized in one line.
+10. **(v2)** Level transition works through the state machine: completing a level returns to the meta script and loads the next level without a page reload.
 
 ---
 
