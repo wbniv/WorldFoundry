@@ -134,13 +134,20 @@ Sections sorted alphabetically by class name.
 
 **Likely uses for arcade ports:** Despawning ball/Coily actors when the player hits them (Q✱bert), enemy cleanup on wave end (Galaga / Space Invaders), destructible walls.
 
-### `Dir` — Editor-only directory/folder marker
+### `Dir` — FSN directory tower (template-only)
 
 **Source:** `dir.oas`
 **Includes:** `actor.inc`
-**Purpose.** Organisational container in the level editor; not an in-game actor. Empty custom block.
+**Status:** ✅ Runtime actor — `OBJECTONLYTEMPLATEENTRY`; `dir.cc` / `dir.hp` present.
+**Purpose.** Visual stand-in for a filesystem directory in the FSN-style filesystem browser level (`wflevels/filesys/`). Spawned at runtime by the Director Forth script via `ConstructTemplateObject`, never placed directly. Scale mailboxes 3040–3042 drive tower height proportional to √(file count in that subdirectory).
 
 **Key OAD fields:** (none beyond `actor.inc`).
+
+**Level authoring:** Place one `DirTemplate` object in the Blender scene with `Template Object = 1` and an OOB spawn position (Z = −200). The Director script calls `spawn-template` (custom syscall 7 / `135 sys`) to position and scale it at level start.
+
+**Collision:** `COLTABLEENTRY(File, Player, CI_PHYSICS, CI_PHYSICS)` — player bounces off spawned towers. (The `File`/`Dir` collision entry covers both — the File entry in `objects.mac` line 109 handles the collidable player interaction for both types.)
+
+**See also:** `wflevels/filesys/blender_filesys.py`, [docs/plans/2026-06-12-filesys-browser-level.md](plans/2026-06-12-filesys-browser-level.md).
 
 ### `Director` — Per-level orchestrator script
 
@@ -182,13 +189,21 @@ Sections sorted alphabetically by class name.
 
 **Likely uses for arcade ports:** Impact effects (bullets, collisions, destructible walls).
 
-### `File` — Editor-only file-boundary marker
+### `File` — FSN file box (template-only)
 
 **Source:** `file.oas`
 **Includes:** `actor.inc`
-**Purpose.** Marks a level-file boundary in the editor. Empty custom block.
+**Status:** ✅ Runtime actor — `OBJECTONLYTEMPLATEENTRY`; `file.cc` / `file.hp` present.
+**Purpose.** Visual stand-in for a filesystem file in the FSN-style filesystem browser level (`wflevels/filesys/`). Spawned at runtime by the Director Forth script via `ConstructTemplateObject`, never placed directly. Scale mailboxes 3040–3042 drive box height proportional to √(file size in bytes) / 50, minimum 0.1.
 
-**Key OAD fields:** (none beyond `actor.inc`).
+**Key OAD fields:**
+- `fileSize` — File size in bytes (INT32, 0–2 147 483 647, default 0). Set by the Director Forth script at spawn time.
+
+**Level authoring:** Place one `FileTemplate` object in the Blender scene with `Template Object = 1` and an OOB spawn position (Z = −200). The Director script calls `spawn-template` (custom syscall 7 / `135 sys`) to position and scale it at level start.
+
+**Collision:** `COLTABLEENTRY(File, Player, CI_PHYSICS, CI_PHYSICS)` (`objects.mac` line 109) — player bounces off spawned file boxes.
+
+**See also:** `wflevels/filesys/blender_filesys.py`, [docs/plans/2026-06-12-filesys-browser-level.md](plans/2026-06-12-filesys-browser-level.md).
 
 ### `Font` — Font asset ⚠️ schema-only, not shipped
 

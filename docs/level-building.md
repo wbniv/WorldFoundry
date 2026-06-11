@@ -447,6 +447,8 @@ The authoritative list of what actually instantiates at runtime is the factory i
 | `Platform` | movable / path-following surface (C++ minimal; motion via OAS movement block) |
 | `Generator` | spawns its `Object To Throw` template on activation |
 | `Gold` | collectible coin *(template-only — spawned, not placed directly)* |
+| `Dir` | FSN directory tower *(template-only — height ∝ √file-count in subdir)* |
+| `File` | FSN file box *(template-only — height ∝ √file-size / 50)* |
 | `Shield` | player invulnerability/power-up, follows the player *(template-only)* |
 | `Missile` | projectile *(template-only)* |
 | `Explode` | explosion effect *(template-only)* |

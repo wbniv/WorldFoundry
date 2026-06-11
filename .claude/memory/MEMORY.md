@@ -25,6 +25,8 @@
 - [Vendor research papers when citing](feedback_vendor_research_papers.md) — SOP: download open-access PDFs into `docs/papers/` (or `engine/<comp>/papers/` for impl refs) in same commit as any doc citing academic work.
 - [Use French + Spanish diacritics in prose](feedback_loanword_diacritics.md) — naïve, résumé, façade, déjà vu, jalapeño, El Niño, mañana, señor, etc.; full inventory in the memory file.
 - [Code age ≠ stability](feedback_code_age_not_stability.md) — never argue from "N years old / survived untouched"; judge designs on pure CS (ISP/DIP/YAGNI). WF is dormant — don't mention it.
+- [Joiner test machine](project_joiner_machine.md) — 192.168.4.32; SSH via Will's keys; runs `task join` for collab testing
+- [SSH joiner machine directly](feedback_ssh_joiner.md) — run joiner commands via SSH yourself; don't ask user to do it
 
 <!-- BEGIN GLOBAL MEMORY (managed by claude-housekeeping; do not edit) -->
 
