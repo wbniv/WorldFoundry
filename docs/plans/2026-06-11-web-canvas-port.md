@@ -8,7 +8,7 @@
 
 ## Implementation status — v1 complete & browser-verified 2026-06-12
 
-**v1 is functionally complete and verified end-to-end in headless Chrome (SwiftShader WebGL 2):** the engine builds to wasm, boots, loads a level, renders a native-equivalent 3-D frame, takes keyboard input, and initialises audio. Evidence in the Verification section below; first-render screenshot at `screenshots/2026-06-11-web-first-render-snowgoons.png`. This table is the live tracker.
+**v1 is functionally complete, browser-verified, and published.** The engine builds to wasm, boots, loads a level, renders a native-equivalent 3-D frame, takes keyboard input, and initialises audio (verified end-to-end in headless Chrome / SwiftShader WebGL 2). **Published to [`worldfoundry.org/v2/play/`](https://worldfoundry.org/v2/play/)** — a designed Astro page with a level switcher embedding the engine bundle (committed in the `worldfoundry.org` repo; goes live on the next `v*` deploy tag). Evidence in the Verification section below; screenshots `2026-06-11-web-first-render-snowgoons.png`, `2026-06-12-web-moon-site01-render.png`. This table is the live tracker.
 
 | Step | Status | Note |
 |------|--------|------|
@@ -24,7 +24,7 @@
 | Phase 3 assets + zForth boot | ✓ done & verified | `-standalone` level preloaded to MEMFS, POSIX accessor reads it, zForth boots, level loads |
 | Phase 4 input (keyboard + gamepad) | ✓ done; kbd verified | ArrowRight moved the camera in-browser; gamepad coded (`emscripten_window.cc:153-193`), not hardware-tested |
 | Phase 5 audio | ✓ done & verified | `miniaudio v0.11.25 ready` in-browser; click-to-start gesture unlocks `AudioContext` (no extra JS) |
-| Phase 6 shell + persistence | ✓ shell + IDBFS; deploy/profiling open | custom shell `web/shell.html` (click-to-start, progress, `?level=` selector); hi-score IDBFS wired (`hscore.cc`, `platform_main.cc`). **Open:** deploy to external Cloudflare Pages, P6.4 ASYNCIFY-tax table |
+| Phase 6 shell + persistence + ship | ✓ done | custom shell `web/shell.html` (click-to-start, load progress, `?level=` selector, container fullscreen); hi-score IDBFS (`hscore.cc`, `platform_main.cc`); P6.4 ASYNCIFY-tax measured (investigation table); **published to `worldfoundry.org/v2/play/`** via `task bundle-web` → Astro page + iframe (`worldfoundry.org` commit `d825379`; live on next `v*` tag) |
 | Phase 7 v2 main-loop inversion | ☐ not started | committed follow-up; plan sequences it after v1 ships + is profiled |
 
 ### Bugs fixed during the implementation pass
@@ -32,6 +32,8 @@
 1. **CMake link flags** — the Release LTO block passed native-lld flags (`--icf=safe`, `--export-dynamic-symbol=ANativeActivity_onCreate`) that emcc's `wasm-ld` rejects; the generator expression fired for the web build because emcc is Clang. Scoped to `if(NOT EMSCRIPTEN)`; web gets its own `-O3 -flto=thin` (`CMakeLists.txt`).
 2. **WebGL2 texParameter on the default texture** — `WFInitGL` (`display.cc:622-625`) set wrap/filter with no texture bound; desktop/Android tolerate it, WebGL 2 errors `INVALID_OPERATION`. Skipped for web (every real texture sets its own params in `pixelmap.cc:197-224`).
 3. **Wrong preload file + `-L` arg form** — the build preloaded the **LVAS asset-bundle** `moon_site01.iff`; the `-L` path needs the **`-standalone`** variant (complete L-chunk, magic `L4`). Reproduced identically on native — a doc bug, not a port bug. Also: `-L` wants the path joined as ONE token (`-L<path>`, `main.cc:210`), not `-L <path>` as the plan mockups showed. Shell + CMake preload corrected.
+4. **Fullscreen rendered blank** — the shell's fullscreen button used Emscripten's `Module.requestFullscreen`, which wraps/resizes the canvas; the engine's fixed 640×480 GL surface then drew blank. Switched to the native Fullscreen API on the `#wf-stage` container with `object-fit: contain` on the canvas — the GL surface is untouched and just letterbox-scales (`web/shell.html`).
+5. **`task build-web` was broken / status-bar level name hardcoded** — two cosmetic-but-real fixes: `build-web` aborted before `emcc` because Task's POSIX shell can't source `emsdk_env.sh` (now run via system bash), and the player status bar hardcoded "moon_site01" (now the selected level).
 
 > **moon_site01 (resolved 2026-06-12):** the headline `moon_site01-standalone.iff` initially showed a black frame — its 1024² NAC terrain texture overflowed the default VRAM slot (`texture.cc:74` `RangeCheckExclusive`). **Not a web bug:** native needs the same VRAM-override switches (the `task run-moon` recipe). The shell now passes them per-level (`LEVEL_ARGS` → `--vram-width=4096 --vram-height=2048 --vram-slot-width=1024 --vram-slot-height=1024`), and moon renders in-browser — `screenshots/2026-06-12-web-moon-site01-render.png`.
 

@@ -45,20 +45,29 @@ The engine parses the switch as one joined token — `-L<path>`, never `-L <path
 <script src="wf_game.js"></script>
 ```
 
-## Deploy (Cloudflare Pages)
+## Deploy → worldfoundry.org/v2/play/
+
+Published at **[worldfoundry.org/v2/play/](https://worldfoundry.org/v2/play/)**. The `worldfoundry.org` repo
+is an **Astro** site on **Cloudflare Workers Static Assets**, deployed by pushing
+a `v*` git tag (GitHub Actions runs `pnpm build` + `wrangler deploy`). The bundle
+is embedded by a designed page, `worldfoundry.org/src/pages/v2/play/index.astro`
+(level switcher + iframe), and the artifacts live in `public/v2/play/`.
+
+To publish a new build:
 
 ```sh
-task bundle-web     # stages the 4 artifacts + index.html into dist/web/
+task bundle-web     # stages the 4 artifacts (+ index.html) into dist/web/
+cp build-web/wf_game.{html,js,wasm,data} ../worldfoundry.org/public/v2/play/
+# then in ../worldfoundry.org: commit, and push a v* tag to deploy
 ```
 
-`dist/web/` is a complete static site. Deploy it to the existing worldfoundry
-Cloudflare Pages project (separate repo) by either:
+Single-threaded build → **no COOP/COEP headers** needed. Cloudflare serves
+`.wasm` as `application/wasm` automatically. ~5.8 MB total, `$0` on the free tier.
+`public/_headers` gives `/v2/play/*` a short max-age + stale-while-revalidate so
+a rebuilt (fixed-filename) bundle propagates within a day.
 
-- **Dashboard:** drag-drop `dist/web/` into the Pages project's upload, or
-- **Wrangler:** `wrangler pages deploy dist/web --project-name <worldfoundry-pages>`
-
-No special configuration is needed — static files, `$0` on the free tier.
-The `.wasm` must be served as `application/wasm` (Pages does this automatically).
+`task bundle-web` also produces a standalone `dist/web/` you can host anywhere
+static (drag-drop, `wrangler pages deploy`, any HTTP server).
 
 ## Per-level engine args
 
