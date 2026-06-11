@@ -13,6 +13,32 @@ Format per entry:
 
 ---
 
+## `RangeCheck(Scalar)` casts to `bool` — `Scalar::Random()` aborts on every call — 2026-06-12
+
+**Status:** FIXED [`2fe49ef4`](https://github.com/wbniv/WorldFoundry/commit/2fe49ef4) (`wfsource/source/pigsys/assert.hp` — new cast-free `RangeCheckScalar`; `wfsource/source/math/scalar.cc`).
+
+**Symptom:** Every call to `Scalar::Random()` aborts on the first iteration in an assertion build (`AssertMsg: random_value = 0.42…, Scalar::one = 1` → `terminate`). The `Generator` actor's Random Displacement is therefore unusable, and gameplay worked around it (the SMB breakable-brick debris fan is a *deterministic* actor-index pattern precisely because `Scalar::Random` is broken).
+
+**Root cause:** `RangeCheck` / `RangeCheckInclusive` / `RangeCheckExclusive` (`assert.hp:200-216`) cast every argument to `(ptrdiff_t)`. `Scalar`'s *only* conversion operator is `operator bool()` (`scalar.hpi:388`; its constructors are all `explicit`), so `(ptrdiff_t)(anyScalar)` resolves through `operator bool()` and collapses to **0 or 1**. In `Random()`, both `value` (∈[0,1)) and `max` (`Scalar::one`) become `1`, so the upper check `value < max` is `1 < 1` → always false → abort.
+
+**Why dormant:** The line is from the 2010 first commit (`a2784f6e`). It survived because (1) `Random()` is essentially never called — its one realistic caller, `Generator` Random Displacement, was always left at zero or replaced by deterministic workarounds; and (2) only the *exclusive* `RangeCheck` aborts (`1<1`) — the *inclusive* form passes (`1<=1`), so the sibling `Scalar` sites (viewport size, particle alpha) silently degrade to a no-op check instead of aborting. Original PSX shipping builds also disabled assertions; the modern revival enables `DO_ASSERTIONS=1` in every build (incl. the Release web build) but never wired up a `Random` caller. (Secondary bug: `rand()>>16 ÷ 65536` only spanned `[0, 0.5)`, not `[0, 1)`.)
+
+**Fix:** Add cast-free `RangeCheckScalar` / `RangeCheckScalarInclusive` macros that compare via the value's own `operator>=/</<=` (no `ptrdiff_t` cast); switch all 11 `RangeCheck*`-with-`Scalar` sites to them (integer sites left as-is). `rand()>>16` → `>>15` for a full `[0,1)`. Regression assert added in `math/mathtest.cc`.
+
+**Diff** (`wfsource/source/pigsys/assert.hp` + `scalar.cc`):
+```diff
++#  define RangeCheckScalar( min, value, max ) \
++   { AssertMsg( (value) >= (min), … ); AssertMsg( (value) <  (max), … ); }   // no (ptrdiff_t) cast
+-	temp = rand() >> 16;
++	temp = rand() >> 15;                          // full [0,1), not [0,0.5)
+-	RangeCheck( Scalar::zero, random_value, Scalar::one );
++	RangeCheckScalar( Scalar::zero, random_value, Scalar::one );
+```
+
+**Investigation:** [`docs/investigations/2026-06-12-scalar-random-rangecheck.md`](investigations/2026-06-12-scalar-random-rangecheck.md).
+
+---
+
 ## `Scalar::AsUnsignedFraction` negative-fraction UB — right-turn dead on WebAssembly — 2026-06-12
 
 **Status:** FIXED [`944cc31b`](https://github.com/wbniv/WorldFoundry/commit/944cc31b) (`wfsource/source/math/scalar.hpi` — float/double path of `AsUnsignedFraction`).
