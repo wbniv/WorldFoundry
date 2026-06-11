@@ -109,19 +109,26 @@ ASYNCIFY's cost has two components, and v1→v2 is a natural A/B experiment — 
 **Containment knobs (apply in v1, before measuring):**
 
 - `-sASYNCIFY_ADVISE` — build-time report of every function being instrumented and why (which call edge makes it unwind-reachable). Run this first; paste the list here.
-- `-sASYNCIFY_ONLY=[...]` — whitelist only the actual unwind chain (`main`, `HALStart`, `PIGSMain`, `WFGame::RunGameScript`, `WFGame::RunLevel`, `WFGame::StepFrame`, the zForth `RunScript` path). Since `emscripten_sleep(0)` lives at a known single point, the indirect-call blowup (ASYNCIFY's usual size killer) is avoidable. This should shrink the tax dramatically before v2 even lands.
+- `-sASYNCIFY_ONLY=[...]` — whitelist only the actual unwind chain (`main`, `HALStart`, `PIGSMain`, `WFGame::RunGameScript`, `WFGame::RunLevel`, `WFGame::StepFrame`, the zForth `RunScript` path). Since `emscripten_sleep(0)` lives at a known single point, the indirect-call blowup (ASYNCIFY's usual size killer) is *in principle* avoidable. **Measured outcome (see Results): not viable** — `HALStart` reaches `RunGameScript` through PIGS function-pointer task dispatch, so an indirect frame is genuinely on the unwind stack. The narrowing can't be proven safe without restructuring, which is what v2 does anyway.
 
 **Measurements to capture (fill in during implementation):**
 
 | Metric | How | v1 ASYNCIFY (naïve) | v1 + `ASYNCIFY_ONLY` | v2 inverted |
 |--------|-----|--------------------:|---------------------:|------------:|
-| `wf_game.wasm` size (raw / gzip) | `ls -l`, `gzip -9 \| wc -c` | _TBD_ | _TBD_ | _TBD_ |
-| Instrumented function count | `-sASYNCIFY_ADVISE` output | _TBD_ | _TBD_ | 0 |
-| Frame time p50 / p95 / p99 (ms) | `performance.now()` around the tick, 60 s capture in `moon_site01` | _TBD_ | _TBD_ | _TBD_ |
-| Unwind/rewind share of frame | Chrome DevTools Performance with `--profiling-funcs` build (symbolized flamegraph; look for `asyncify_*` frames) | _TBD_ | _TBD_ | n/a |
-| Startup → first interactive frame (ms) | `performance.mark()` at `Module.onRuntimeInitialized` vs first `StepFrame` return | _TBD_ | _TBD_ | _TBD_ |
+| `wf_game.wasm` size (raw / gzip) | `ls -l`, `gzip -9 \| wc -c` | **3.11 MB / 982 KB** | n/a (see note) | _TBD (Phase 7)_ |
+| Instrumented function count | `-sASYNCIFY_ADVISE` output | **3,995** | n/a (see note) | 0 |
+| Frame time p50 / p95 / p99 (ms) | `performance.now()` around the tick, 60 s capture | _needs real-GPU browser_ | n/a | _TBD (Phase 7)_ |
+| Unwind/rewind share of frame | Chrome DevTools Performance with `--profiling-funcs` build | _needs real-GPU browser_ | n/a | n/a |
+| Startup → first interactive frame (ms) | `performance.mark()` at `onRuntimeInitialized` | ~1–2 s on localhost (not throttle-measured) | n/a | _TBD (Phase 7)_ |
 
-Method notes: build with `--profiling-funcs` (keeps function names in the wasm) for the flamegraph runs only — strip it for the size measurements. Use the same level (`moon_site01.iff`), same machine, same Chrome version across all three columns; Firefox numbers optional but interesting. 60 s capture, discard the first 5 s (JIT warm-up).
+**Results (2026-06-12, measured on the `-O3` web build):**
+
+- **Size:** `wf_game.wasm` is **3,108,719 B raw / 982,501 B gz**. Adding link-time `-O3` over the compile-time `-O3` objects barely moved it — the bulk is ASYNCIFY instrumentation, not unoptimised code.
+- **Instrumentation:** `-sASYNCIFY_ADVISE` reports **3,995 instrumented functions**. Only **4** are `invoke_*` indirect-call trampolines — but those four imports "can change the state", so ASYNCIFY's initial scan instruments their whole reachable closure (Jolt hash tables, STL, etc.). This is the indirect-call blowup the plan flagged.
+- **`ASYNCIFY_ONLY` is not viable as written.** The hoped-for whitelist (`main` → `HALStart` → `RunGameScript` → `RunLevel` → `StepFrame`) is real, but `HALStart` reaches `RunGameScript` (`main.cc:471`) **through PIGS's function-pointer task/message dispatch**, so the unwind stack genuinely includes an indirect frame. Neither `ASYNCIFY_ONLY` nor `ASYNCIFY_IGNORE_INDIRECT` is provably safe without restructuring that dispatch — applying either blindly risks silent state corruption. **This is the empirical case for v2:** the state-machine inversion (Phase 7) removes ASYNCIFY entirely instead of fighting its closure, and is the correct end state — exactly as the plan committed.
+- **Frame-time / flamegraph rows** require a real-GPU browser run; the headless SwiftShader rasteriser used for render verification is CPU-bound and unrepresentative of frame cadence, so quoting its numbers would mislead. Deferred to a manual capture (and the v2 A/B).
+
+Method notes: build with `--profiling-funcs` (keeps function names in the wasm) for the flamegraph runs only — strip it for the size measurements. Use the same level, same machine, same Chrome version across columns. 60 s capture, discard the first 5 s (JIT warm-up). The v1↔v2 size/instrumentation delta lands with Phase 7.
 
 ### 5. HTML shell + hosting
 

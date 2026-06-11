@@ -366,16 +366,31 @@ tasks:
     desc: "Build wf_game for the browser (wasm + WebGL2) into build-web/"
     deps: [vendor-unpack, setup-emsdk]
     cmds:
+      # emsdk_env.sh uses bashisms that Task's POSIX shell (mvdan/sh) can't
+      # source — under errexit that aborts the build before emcmake runs. Run
+      # the whole thing through the system bash so the env is set correctly.
       - |
-        . engine/vendor/emsdk-6.0.0/emsdk_env.sh >/dev/null 2>&1
-        emcmake cmake -S . -B build-web -DCMAKE_BUILD_TYPE=Release
-        cmake --build build-web -j
+        bash -c '
+          set -euo pipefail
+          . engine/vendor/emsdk-6.0.0/emsdk_env.sh >/dev/null 2>&1
+          emcmake cmake -S . -B build-web -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-web -j
+        '
 
   serve-web:
     desc: "Serve the web build at http://localhost:8080/wf_game.html"
     dir: build-web
     cmds:
       - python3 -m http.server 8080
+
+  bundle-web:
+    desc: "Stage the deployable web build into dist/web/ (for Cloudflare Pages) — see web/README.md"
+    deps: [build-web]
+    cmds:
+      - rm -rf dist/web && mkdir -p dist/web
+      - cp build-web/wf_game.html build-web/wf_game.js build-web/wf_game.wasm build-web/wf_game.data dist/web/
+      - cp build-web/wf_game.html dist/web/index.html
+      - 'echo "Bundle ready: dist/web/ ($(du -sh dist/web | cut -f1)) — deploy per web/README.md"'
 
   build-cmake-android:
     desc: "Build libwf_game.so via CMake + NDK (arm64-v8a)"
