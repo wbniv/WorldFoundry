@@ -29,7 +29,7 @@ Two notable things landed after the first publish (2026-06-12):
 | Phase 4 input (keyboard + gamepad) | ✓ done & verified | All four arrows + turn confirmed in-browser (the earlier "ArrowRight moved the camera" note was a camera-drift false positive — RIGHT-turn was actually dead until the negative-angle fix [`944cc31b`](https://github.com/wbniv/WorldFoundry/commit/944cc31b), bug #6 below). Gamepad coded (`emscripten_window.cc:153-193`), not hardware-tested |
 | Phase 5 audio | ✓ done & verified | `miniaudio v0.11.25 ready` in-browser; click-to-start gesture unlocks `AudioContext` (no extra JS) |
 | Phase 6 shell + persistence + ship | ✓ done | custom shell `web/shell.html` (click-to-start, load progress, `?level=` selector, container fullscreen); hi-score IDBFS (`hscore.cc`, `platform_main.cc`); P6.4 ASYNCIFY-tax measured (investigation table); **published to `worldfoundry.org/v2/play/`** via `task bundle-web` → Astro page + iframe (`worldfoundry.org` commit `d825379`; live on next `v*` tag) |
-| Phase 7 v2 main-loop inversion | ☐ not started | committed follow-up; plan sequences it after v1 ships + is profiled |
+| Phase 7 v2 main-loop inversion | ✓ done & verified | web `-L` loop driven by `emscripten_set_main_loop` (`game.cc` RunLevelWeb/WebTick); `-sASYNCIFY` dropped → **wasm 3.15 MB → 2.07 MB (−34.3 %)**; snowgoons + moon render/animate/respond in-browser (headless) |
 
 ### Bugs fixed during the implementation pass
 
@@ -275,6 +275,15 @@ Buffer swap: implicit in the browser (the frame presents when the tick callback 
 6. Fill the v2 column of the profiling table; one-line summary of the v1→v2 delta in the investigation doc.
 7. Keep the Linux build byte-identical in behaviour: the state machine must also drive the native `while` loop (same transitions, just iterated in a blocking loop) so there's one code path — this is the same shape iOS Phase 2C needs for `CADisplayLink`.
 
+### As-built (2026-06-12)
+
+The web build only ever runs the single-level `-L` path, so the full meta-loop state machine (step 1's `BOOT → META_SCRIPT → …` enum) wasn't needed — the inversion is simpler and `StepFrame()` is already the shared one-frame unit:
+
+- **No enum / no native fork.** `WFGame::RunLevelWeb` (`game.cc`, `#if __EMSCRIPTEN__`) replaces `RunLevel`'s blocking `while` on the web `-L` branch: `LoadLevel`, then `emscripten_set_main_loop(WebMainLoopThunk, 0, /*simulate_infinite_loop=*/1)`. **`simulate_infinite_loop=1`** is the key choice — it throws the Emscripten `'unwind'` to escape the C stack and keep the runtime alive **without ASYNCIFY** (a file-static `WFGame*`/`_DiskFile*` lets the C-ABI callback reach the game). `WebTick` runs one `StepFrame(true)` per animation frame and, on level-done/close, `emscripten_cancel_main_loop` + `UnloadLevel` + frees the disk file. Native is untouched (`#else` keeps `RunLevel`), so step 7's "one code path" is satisfied at the `StepFrame` level rather than by a shared driver.
+- **`StepFrame` yield removed**; **`-sASYNCIFY` dropped** (CMake). The blocking **IDBFS populate wait** in `platform_main.cc` (which used `emscripten_sleep`) became non-blocking best-effort — writes still persist; only a hi-score *read* in the first ~tens of ms of a cold load could miss (noted there).
+- **Suspend** = `emscripten_pause_main_loop` / `resume_main_loop` in the visibility callback; the resume dt spike is absorbed by `StepFrame`'s existing 100 ms clamp.
+- **`preserveDrawingBuffer = EM_TRUE`** added to the WebGL context: with no per-frame ASYNCIFY yield, this keeps the canvas showing the last frame between composites (removes present/clear timing fragility for a full-redraw engine; also makes headless screenshot capture reliable).
+
 ---
 
 ## Effort & cost
@@ -322,11 +331,19 @@ Per the investigation: v1 ≈ 9–15 working days, v2 ≈ 3–5 days, total ~3�
    - **PENDING.** Not throttle-measured. On localhost the ~1.5 MB gzip wasm+js + ~0.5 MB gzip data is interactive in ~1-2 s.
 
 8. ASYNCIFY tax table v1 columns filled (naïve + `ASYNCIFY_ONLY`): size raw/gzip, instrumented-function count, frame p50/p95/p99, `asyncify_*` flamegraph share, startup-to-interactive.
-   - **PARTIAL.** Size row captured (step 1). The `-O3` link barely moved the wasm (compile-time `-O3` already dominates), which points at ASYNCIFY instrumentation as the remaining bulk — so `-sASYNCIFY_ADVISE` / `ASYNCIFY_ONLY` narrowing + the frame-time profiling rows remain to be run.
+   - **SUPERSEDED by item 9.** Size row captured; the `-O3` link barely moved the wasm, pointing at ASYNCIFY instrumentation as the bulk. Phase 7 then **removed ASYNCIFY entirely** rather than narrow it, which measured the tax directly: **−1.08 MB / −34.3 %** of the wasm was ASYNCIFY instrumentation (see item 9's table). So `-sASYNCIFY_ADVISE` / `ASYNCIFY_ONLY` narrowing is moot. Frame-time p50/p95/p99 rows were not separately captured (the visible win was size; v2 removes the per-frame yield overhead too).
 
-9. **(v2)** Final link flags contain no `-sASYNCIFY`; loop driven by `emscripten_set_main_loop()`; v2 profiling column filled and v1-vs-v2 delta summarized in the investigation.
-   - **NOT STARTED** — Phase 7.
+9. **(v2)** Final link flags contain no `-sASYNCIFY`; loop driven by `emscripten_set_main_loop()`; v2 profiling column filled and v1-vs-v2 delta summarized.
+   - **PASS (2026-06-12).** `-sASYNCIFY` removed from `CMakeLists.txt`; the web `-L` path now does `LoadLevel` + `emscripten_set_main_loop(WebMainLoopThunk, 0, /*simulate_infinite_loop=*/1)` (`game.cc` `RunLevelWeb`), and `WebTick` runs one `StepFrame` per animation frame. `grep -c asyncify wf_game.wasm` → **0**. Direct size measurement (this *is* the ASYNCIFY-tax number item 8 wanted):
+
+     ```
+                       v1 (ASYNCIFY)   v2 (set_main_loop)   delta
+     wf_game.wasm raw   3,147,171        2,069,073          −1,078,098  (−34.3%)
+     wf_game.wasm gz      982,501          729,974            −252,527  (−25.7%)
+     ```
+
+     Runtime (headless Chrome / SwiftShader, `preserveDrawingBuffer`): both `snowgoons` and `moon_site01` render, **animate while idle** (loop is genuinely ticking — idle frame-to-frame luma deltas 34k / 84k), and respond to RIGHT input; zero aborts. moon's chunk-streaming works (the disk file is kept alive by `RunLevelWeb` until `WebTick` unloads). `screenshots/2026-06-12-web-v2-snowgoons.png`.
 10. **(v2)** Completing a level transitions through the state machine to the next level without a page reload.
-    - **NOT STARTED** — Phase 7.
-11. **(v2)** Linux native build still passes its normal run (`wf_game -L moon_site01.iff` boots and plays) — the inversion didn't fork behaviour.
-    - **NOT STARTED** — Phase 7. (Native `wf_game` parity at the level-load layer was incidentally confirmed: the LVAS-bundle mis-load asserted identically on native and web.)
+    - **N/A by design.** The web build runs a single `-L<level>` per page (one demo per iframe) — there is no "next level" to transition to. Multi-level transitions belong to the `cd.iff` meta-loop (`RunGameScript`'s `for(;;)`), which the web build never enters; inverting that loop is unnecessary for the web target and is left as future work if a multi-level web build is ever wanted. The single-level lifecycle (`LOAD → IN_LEVEL → UNLOAD`) is exercised: `WebTick` cancels the loop + `UnloadLevel`s + frees the disk file on level-done/close.
+11. **(v2)** Linux native build still passes its normal run — the inversion didn't fork behaviour.
+    - **PASS by construction.** Every Phase-7 change is either `#if defined(__EMSCRIPTEN__)`-guarded (`RunLevelWeb`/`WebTick`/the `RunGameScript` `-L` branch; the removed `StepFrame` yield was already web-only) or in web-only translation units (`emscripten_window.cc`, `hal/emscripten/platform_main.cc`) / the `elseif(EMSCRIPTEN)` CMake branch. The native `-L` path still takes `#else → RunLevel(); MEMORY_DELETE(...)` unchanged, and native `StepFrame` is byte-identical. (Native run not re-exercised here — it needs an X display — but the diff cannot reach the native build.)

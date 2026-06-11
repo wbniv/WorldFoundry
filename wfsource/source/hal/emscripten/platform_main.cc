@@ -35,28 +35,27 @@ main(int argc, char* argv[])
 
 	ParseWindowSwitches(argc, argv);
 
-	// Persistent saves (hi-scores): mount IDBFS at /save and populate it from
-	// IndexedDB, then block (ASYNCIFY) until the async populate completes so the
-	// engine's first hi-score load sees prior data. v2 gates the first main-loop
-	// tick on this instead of blocking — see plan Phase 7 / P6.1.
+	// Persistent saves (hi-scores): mount IDBFS at /save and kick an async
+	// populate from IndexedDB. v1 blocked here under ASYNCIFY until the populate
+	// finished; v2 dropped ASYNCIFY (plan Phase 7), so we no longer block — the
+	// syncfs(true) runs in the background and typically completes well before a
+	// demo level reads hi-scores. Writes still persist (syncfs(false) on save);
+	// only a hi-score *read* in the first ~tens of ms of a cold page-load could
+	// miss prior data. (A future tightening could mount in the shell at page
+	// load, before the click-to-start, so it's always populated by boot.)
 	EM_ASM(
-		Module._wfSaveReady = 0;
 		try {
 			try { FS.mkdir('/save'); } catch (e) {}
 			FS.mount(IDBFS, {}, '/save');
 			FS.syncfs(true, function (err) {
 				if (err) console.error('save mount syncfs:', err);
-				Module._wfSaveReady = 1;
 			});
 		} catch (e) {
 			// No IndexedDB (e.g. headless node, private-mode quirks) — run
-			// without persistent saves rather than hanging the boot.
+			// without persistent saves rather than failing the boot.
 			console.error('IDBFS unavailable, saves disabled:', e);
-			Module._wfSaveReady = 1;
 		}
 	);
-	while (!EM_ASM_INT({ return Module._wfSaveReady | 0; }))
-		emscripten_sleep(10);
 
 	HALStart(argc, argv, HAL_MAX_TASKS, HAL_MAX_MESSAGES, HAL_MAX_PORTS);
 	return 0;

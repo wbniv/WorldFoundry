@@ -99,10 +99,23 @@ static EM_BOOL
 VisibilityCallback(int /*eventType*/, const EmscriptenVisibilityChangeEvent* e,
                    void* /*userData*/)
 {
+    // v2 (plan Phase 7): pausing the main loop is the suspend mechanism — the
+    // browser stops calling WebTick, so StepFrame isn't run while backgrounded
+    // (no torn-down-context renders, no wasted CPU). The first frame after
+    // resume gets a large dt, but StepFrame already clamps to 100 ms. (Before
+    // any loop is registered these are harmless no-ops.) HALNotify* is kept for
+    // HAL-level state; on web HALIsSuspended() stays driven by it but the
+    // suspended branch in StepFrame is unreachable because the loop is paused.
     if (e->hidden)
+    {
+        emscripten_pause_main_loop();
         HALNotifySuspend();
+    }
     else
+    {
         HALNotifyResume();
+        emscripten_resume_main_loop();
+    }
     return EM_FALSE;
 }
 
@@ -118,6 +131,13 @@ InitWindow( int /*xPos*/, int /*yPos*/, int /*xSize*/, int /*ySize*/ )
     attrs.alpha   = EM_FALSE;
     attrs.depth   = EM_TRUE;
     attrs.stencil = EM_TRUE;
+    // v2 (plan Phase 7): the loop is now driven by emscripten_set_main_loop and
+    // the engine redraws fully every frame. Preserve the drawing buffer so the
+    // canvas keeps showing the last frame between the browser's composites — it
+    // removes any present/clear timing fragility (a skipped rAF can't flash a
+    // cleared frame) at negligible cost for a full-redraw engine, and makes the
+    // frame readable for headless screenshot verification.
+    attrs.preserveDrawingBuffer = EM_TRUE;
 
     _webglContext = emscripten_webgl_create_context("#canvas", &attrs);
     if (_webglContext <= 0)

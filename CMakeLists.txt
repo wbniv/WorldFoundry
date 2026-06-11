@@ -911,14 +911,14 @@ elseif(APPLE)
     )
 elseif(EMSCRIPTEN)
     # Browser: no native libs — GL resolves to WebGL via Emscripten's GLES3
-    # emulation. ASYNCIFY is the v1 main-loop strategy (one emscripten_sleep(0)
-    # per frame in StepFrame); v2 replaces it with emscripten_set_main_loop —
-    # see docs/plans/2026-06-11-web-canvas-port.md P2.2 / Phase 7.
+    # emulation. v2 (plan Phase 7) drives the loop with emscripten_set_main_loop
+    # (game.cc RunLevelWeb/WebTick) and no longer links -sASYNCIFY: the per-frame
+    # emscripten_sleep yield is gone, which strips the ASYNCIFY instrumentation
+    # bulk from the wasm. See docs/plans/2026-06-11-web-canvas-port.md Phase 7.
     target_link_options(wf_game PRIVATE
         -sMIN_WEBGL_VERSION=2
         -sMAX_WEBGL_VERSION=2
         -sALLOW_MEMORY_GROWTH=1
-        -sASYNCIFY
         -sEXIT_RUNTIME=0
         # callMain: the shell gates engine start on a click (Module.noInitialRun);
         # requestFullscreen: the shell's fullscreen button. Both must be exported.
@@ -926,8 +926,7 @@ elseif(EMSCRIPTEN)
         -lidbfs.js                                  # IDBFS for persistent hi-scores (P6.1)
         # wfengine.a objects are thin-LTO bitcode (Release+Clang compile flags);
         # match at link so wasm-ld LTO-compiles them, and run binaryen -O3 over
-        # the final wasm. ASYNCIFY narrowing (-sASYNCIFY_ONLY=[...]) is the
-        # remaining P6.4 size lever — see plan / the profiling table.
+        # the final wasm.
         "$<$<CONFIG:Release>:-O3;-flto=thin>"
         # The custom shell (web/shell.html) selects the level via ?level=<name>.
         "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/web/shell.html"

@@ -69,6 +69,16 @@ public:
 	void RunLevel(_DiskFile* levelFile);		// executes a single level, returns when done
 	void RunGameScript();				// runs the whole game, returns when game (really) over (quit to OS)
 
+#if defined(__EMSCRIPTEN__)
+	// v2 web main loop (plan Phase 7): instead of RunLevel's blocking while
+	// loop + per-frame ASYNCIFY yield, LoadLevel then hand the browser one
+	// StepFrame per animation frame via emscripten_set_main_loop. RunLevelWeb
+	// does NOT return — it unwinds the C stack and keeps the runtime alive — so
+	// it owns the level for the life of the page; WebTick is the per-frame cb.
+	void RunLevelWeb(_DiskFile* levelFile);
+	void WebTick();
+#endif
+
 	// One tick of the inner game loop. do_swap=true (default) drives
 	// _display->PageFlip(); do_swap=false uses _display->MeasureDelta()
 	// so a host that swaps its own buffers (editor compositing widgets

@@ -206,8 +206,17 @@ WFGame::RunGameScript()				// runs the whole game, returns when game (really) ov
 		// File is a complete L<N> chunk: header + ALGN + RAM + ... — same
 		// layout as inside cd.iff. RAM lands at SECTOR_SIZE.
 		diskFile->SeekRandom( DiskFileCD::_SECTOR_SIZE );
+#if defined(__EMSCRIPTEN__)
+		// v2 (plan Phase 7): hand the level to the browser's frame scheduler
+		// instead of spinning a blocking while loop. RunLevelWeb does not return
+		// — it unwinds the C stack and the browser drives StepFrame from here on,
+		// so the diskFile is freed by WebTick on level-done, not here.
+		RunLevelWeb( diskFile );
+		// unreachable
+#else
 		RunLevel( diskFile );
 		MEMORY_DELETE( HALLmalloc, diskFile, DiskFile );
+#endif
 		return;
 	}
 
@@ -519,14 +528,12 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 {
 	assert(_curLevel);
 
-#if defined(__EMSCRIPTEN__)
-	// v1 web main loop (ASYNCIFY): yield to the browser once per frame — this
-	// is what presents the canvas, fires the DOM input callbacks, and runs
-	// timers. The suspended branch below also yields via usleep (Emscripten
-	// implements it with emscripten_sleep under ASYNCIFY). Replaced by
-	// emscripten_set_main_loop in v2 — web-canvas-port plan Phase 7.
-	emscripten_sleep(0);
-#endif
+	// v2 web (plan Phase 7): no per-frame yield here — the browser calls
+	// WebTick once per animation frame and the canvas presents when WebTick
+	// returns. (v1 yielded via emscripten_sleep(0) under ASYNCIFY; removed with
+	// the loop inversion.) Suspend on web is handled by pausing the main loop
+	// (emscripten_pause_main_loop in the visibility callback), so the suspended
+	// branch below is only reached on Android/Linux.
 
 	if ( HALIsSuspended() )
 	{
@@ -710,6 +717,55 @@ WFGame::RunLevel(_DiskFile* levelFile)
 
 	UnloadLevel();
 }
+
+//==============================================================================
+
+#if defined(__EMSCRIPTEN__)
+//-----------------------------------------------------------------------------
+// v2 web main loop (plan Phase 7). One WFGame is live for the page, so a
+// file-static back-pointer is enough for the C-ABI emscripten callback to reach
+// it. This replaces RunLevel's blocking while loop + per-frame ASYNCIFY yield.
+
+namespace {
+	WFGame*    s_webGame      = nullptr;
+	_DiskFile* s_webLevelFile = nullptr;
+	void WebMainLoopThunk() { assert(s_webGame); s_webGame->WebTick(); }
+}
+
+void
+WFGame::RunLevelWeb(_DiskFile* levelFile)
+{
+	s_webGame      = this;
+	s_webLevelFile = levelFile;     // kept alive (chunk streaming) until WebTick unloads
+	LoadLevel(levelFile);
+
+	// fps=0 → requestAnimationFrame cadence; simulate_infinite_loop=1 throws the
+	// Emscripten 'unwind' to escape the C stack and keep the runtime alive with
+	// NO ASYNCIFY. This call never returns; the browser now drives WebTick, so
+	// the HALStart/PIGSMain teardown after us is intentionally skipped (the page
+	// owns process lifetime — same as any emscripten_set_main_loop app).
+	emscripten_set_main_loop(WebMainLoopThunk, 0, 1);
+}
+
+void
+WFGame::WebTick()
+{
+	// Same termination predicate as RunLevel's while condition; on the web -L
+	// path there is no next level, so we stop (the last frame stays presented).
+	if ( LevelDone() || !ContinueRequested() || HALWindowCloseRequested() )
+	{
+		emscripten_cancel_main_loop();
+		UnloadLevel();
+		if (s_webLevelFile)
+		{
+			MEMORY_DELETE(HALLmalloc, s_webLevelFile, DiskFile);
+			s_webLevelFile = nullptr;
+		}
+		return;
+	}
+	StepFrame(true);                // browser composites the canvas when this returns
+}
+#endif // __EMSCRIPTEN__
 
 //==============================================================================
 
