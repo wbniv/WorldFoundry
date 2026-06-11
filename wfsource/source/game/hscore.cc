@@ -2,11 +2,20 @@
 #include <cstdio>
 #include <cstring>
 #include <algorithm>
+#if defined(__EMSCRIPTEN__)
+#include <emscripten.h>
+#endif
 
 HiScore g_hiscores[HS_COUNT] = {};
 
 static bool s_loaded = false;
+#if defined(__EMSCRIPTEN__)
+// The browser cwd isn't persistent; saves live in the IDBFS mount that
+// hal/emscripten/platform_main.cc creates at /save and syncs to IndexedDB.
+static const char* kHiScoreFile = "/save/qbert_hiscores.txt";
+#else
 static const char* kHiScoreFile = "qbert_hiscores.txt";
+#endif
 
 // All 23 arcade ROM factory defaults (from attract-mode HIGH SCORES screen).
 static const HiScore kDefaults[HS_COUNT] = {
@@ -61,6 +70,11 @@ void HScore_Save()
     if (!f) return;
     fwrite(g_hiscores, sizeof(HiScore), HS_COUNT, f);
     fclose(f);
+#if defined(__EMSCRIPTEN__)
+    // Flush MEMFS → IndexedDB so the score survives a page reload
+    // (async, fire-and-forget — the data is already safely in MEMFS).
+    EM_ASM( FS.syncfs(false, function (err) { if (err) console.error('hiscore syncfs:', err); }); );
+#endif
 }
 
 bool HScore_IsHigh(int score)

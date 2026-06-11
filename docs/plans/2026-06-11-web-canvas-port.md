@@ -6,6 +6,37 @@
 
 ---
 
+## Implementation status — v1 complete & browser-verified 2026-06-12
+
+**v1 is functionally complete and verified end-to-end in headless Chrome (SwiftShader WebGL 2):** the engine builds to wasm, boots, loads a level, renders a native-equivalent 3-D frame, takes keyboard input, and initialises audio. Evidence in the Verification section below; first-render screenshot at `screenshots/2026-06-11-web-first-render-snowgoons.png`. This table is the live tracker.
+
+| Step | Status | Note |
+|------|--------|------|
+| P1.1 emsdk Taskfile (`setup-emsdk`/`build-web`/`serve-web`) | ✓ done | `Taskfile.yml:356-378` |
+| P1.2 CMake `elseif(EMSCRIPTEN)` — defines, `WF_DIRS`, `WF_SKIP`, link opts | ✓ done | `CMakeLists.txt:77,139,214,283,908` |
+| P1.3 window-include chain + `host_gl_context.cc` skip | ✓ done | `gfx/gl/display.cc:592-600`, skip at `CMakeLists.txt:287` |
+| P1.4 GLES-branch widening (5 sites) | ✓ done | `display.cc:32`, `renderer.hp:28`, `backend_modern.cc:19,23,44`, `wfprim.h:15,31` |
+| P1.4 `backend_modern.cc:593` open item | ✓ resolved | Android-only `WFAndroidNotifySurfaceLost` EGL hook — left `__ANDROID__`-only |
+| P1.5 `hal/emscripten/` | ✓ done (by reuse) | `platform.h` + `platform_main.cc` are web-only; **`input.cc`/`lifecycle.cc` were NOT forked** — `emscripten_window.cc` feeds the reused `hal/linux/{input,lifecycle,audio,asset_accessor_posix}.cc` via `_HALSetJoystickButtons`/`HALNotifySuspend` (`CMakeLists.txt:358-364`) |
+| P1.6 suspended-branch `usleep` | ✓ n/a for v1 | left as `usleep(16000)` at `game.cc:518`; ASYNCIFY maps it to `emscripten_sleep` |
+| P2.1 `gfx/gl/emscripten_window.cc` | ✓ done & verified | WebGL2 context created in-browser; renders (snowgoons) |
+| P2.2 ASYNCIFY yield in `StepFrame()` | ✓ done | `game.cc:501-508` |
+| Phase 3 assets + zForth boot | ✓ done & verified | `-standalone` level preloaded to MEMFS, POSIX accessor reads it, zForth boots, level loads |
+| Phase 4 input (keyboard + gamepad) | ✓ done; kbd verified | ArrowRight moved the camera in-browser; gamepad coded (`emscripten_window.cc:153-193`), not hardware-tested |
+| Phase 5 audio | ✓ done & verified | `miniaudio v0.11.25 ready` in-browser; click-to-start gesture unlocks `AudioContext` (no extra JS) |
+| Phase 6 shell + persistence | ✓ shell + IDBFS; deploy/profiling open | custom shell `web/shell.html` (click-to-start, progress, `?level=` selector); hi-score IDBFS wired (`hscore.cc`, `platform_main.cc`). **Open:** deploy to external Cloudflare Pages, P6.4 ASYNCIFY-tax table |
+| Phase 7 v2 main-loop inversion | ☐ not started | committed follow-up; plan sequences it after v1 ships + is profiled |
+
+### Bugs fixed during the implementation pass
+
+1. **CMake link flags** — the Release LTO block passed native-lld flags (`--icf=safe`, `--export-dynamic-symbol=ANativeActivity_onCreate`) that emcc's `wasm-ld` rejects; the generator expression fired for the web build because emcc is Clang. Scoped to `if(NOT EMSCRIPTEN)`; web gets its own `-O3 -flto=thin` (`CMakeLists.txt`).
+2. **WebGL2 texParameter on the default texture** — `WFInitGL` (`display.cc:622-625`) set wrap/filter with no texture bound; desktop/Android tolerate it, WebGL 2 errors `INVALID_OPERATION`. Skipped for web (every real texture sets its own params in `pixelmap.cc:197-224`).
+3. **Wrong preload file + `-L` arg form** — the build preloaded the **LVAS asset-bundle** `moon_site01.iff`; the `-L` path needs the **`-standalone`** variant (complete L-chunk, magic `L4`). Reproduced identically on native — a doc bug, not a port bug. Also: `-L` wants the path joined as ONE token (`-L<path>`, `main.cc:210`), not `-L <path>` as the plan mockups showed. Shell + CMake preload corrected.
+
+> **moon_site01 caveat:** the headline `moon_site01-standalone.iff` trips a *data-specific* assert (`texture.cc:74` — its 1024² NAC terrain texture vs a 256-wide pixelmap). This is generic engine code and platform-independent (not a web issue); the lighter **snowgoons** level renders clean and is the bring-up level used for verification.
+
+---
+
 ## Decisions (resolved during planning)
 
 ### D1: Platform defines — reuse `cf_linux.h`, à la macOS
@@ -13,7 +44,8 @@
 `pigsys/pigsys.hp:84-92` requires `__LINUX__`, `__ANDROID__`, or `WF_TARGET_*`; macOS/iOS reuse `cf_linux.h`, which `#define`s `__LINUX__`. The web build follows that precedent:
 
 - CMake defines `WF_TARGET_WEB`; `pigsys.hp:84` gains `|| defined(WF_TARGET_WEB)` so `cf_linux.h` is selected. `__LINUX__` is therefore defined in the web build.
-- `__EMSCRIPTEN__` (compiler-provided) is the *exclusion* knob: every site where `__LINUX__` means "X11" rather than "POSIX" gets an `__EMSCRIPTEN__`-first branch or a `!defined(__EMSCRIPTEN__)` guard (enumerated in P1.3 below — the audit found exactly 3 such sites; the other ~30 `__LINUX__` guards are POSIX-portable and Emscripten's musl libc satisfies them: `clock_gettime(CLOCK_MONOTONIC)`, `gettimeofday`, `<sys/time.h>`, `<unistd.h>` all exist).
+  - **As-built (2026-06-11):** the shipped build takes a simpler route — `pigsys.hp:84` is left **unchanged**, and `__LINUX__` is instead injected directly via `CMakeLists.txt:144` (`list(APPEND WF_DEFS WF_TARGET_WEB __LINUX__ …)`). Same net effect (`cf_linux.h` selected, `__LINUX__` defined); `pigsys.hp` is untouched. `WF_TARGET_WEB` rides along for any web-specific future guard.
+- `__EMSCRIPTEN__` (compiler-provided) is the *exclusion* knob: every site where `__LINUX__` means "X11" rather than "POSIX" gets an `__EMSCRIPTEN__`-first branch or a `!defined(__EMSCRIPTEN__)` guard (enumerated in P1.3 below — the planning audit found 3 such sites; **implementation surfaced a 4th: the `strlwr` redeclaration at `cf_linux.h:52`, now `!defined(__EMSCRIPTEN__)`-guarded** because Emscripten's libc already declares it with a `char*` return. The other ~30 `__LINUX__` guards are POSIX-portable and Emscripten's musl libc satisfies them: `clock_gettime(CLOCK_MONOTONIC)`, `gettimeofday`, `<sys/time.h>`, `<unistd.h>` all exist).
 - No new `cf_emscripten.h`. The alternative (clean header, no `__LINUX__`) would force edits at ~30 portable guard sites for zero behavioural gain. The existing `WF_POSIX` tech-debt TODO remains the proper long-term fix and is unchanged by this plan.
 
 ### D2: Source selection — mirror Linux, not macOS
@@ -26,7 +58,7 @@ The window code is not a normal TU: `gfx/display.cc:45` → `#include <gfx/gl/di
 
 ### D4: Main loop — ASYNCIFY v1, state-machine inversion v2 (committed)
 
-Per the investigation: v1 inserts one yield in `StepFrame()` and links `-sASYNCIFY` (later narrowed with `-sASYNCIFY_ONLY`); v2 hoists the two blocking loops (`game.cc:233` meta loop, `game.cc:665` level loop — the third loop at `game.cc:476` is `WF_ENABLE_EDITOR`-only and never builds for web) into a state machine driven by `emscripten_set_main_loop()`. The ASYNCIFY tax is measured at each step into the investigation's profiling table.
+Per the investigation: v1 inserts one yield in `StepFrame()` and links `-sASYNCIFY` (later narrowed with `-sASYNCIFY_ONLY`); v2 hoists the two blocking loops (`game.cc:236` meta loop, `game.cc:677` level loop — the third loop at `game.cc:479` is `WF_ENABLE_EDITOR`-only and never builds for web) into a state machine driven by `emscripten_set_main_loop()`. The ASYNCIFY tax is measured at each step into the investigation's profiling table.
 
 ### D5: Scripting — zForth only
 
@@ -36,10 +68,13 @@ Per the investigation: v1 inserts one yield in `StepFrame()` and links `-sASYNCI
 
 ## Phase 1 — Build skeleton (compiles + links)
 
-**P1.1 — emsdk.** Install via [emsdk](https://emscripten.org/docs/getting_started/downloads.html) (pin the version in the Taskfile so the build is reproducible). New Taskfile entries:
+**P1.1 — emsdk, vendored + pinned.** The [emsdk](https://github.com/emscripten-core/emsdk) *manager* (1.1 MB of scripts, no binaries) is vendored at tag **6.0.0** as `engine/vendor/emsdk-6.0.0/` — same convention as the other vendored deps. The toolchain binaries (~270 MB) are **not** committed: `.gitignore` covers `upstream/`, `downloads/`, `node/`, `.emscripten*`, and `task setup-emsdk` fetches them reproducibly (`./emsdk install 6.0.0 && ./emsdk activate 6.0.0` — version-addressed, idempotent). Bumping the toolchain = vendoring a new `emsdk-X.Y.Z/` dir + updating the pins in the Taskfile, in one commit.
+
+New Taskfile entries:
 
 ```yaml
-build-web:        # emcmake cmake -B build-web -DCMAKE_BUILD_TYPE=Release && cmake --build build-web
+setup-emsdk:      # ./emsdk install 6.0.0 && ./emsdk activate 6.0.0 (status-guarded, idempotent)
+build-web:        # deps: vendor-unpack, setup-emsdk; . emsdk_env.sh; emcmake cmake -B build-web; cmake --build
 serve-web:        # python3 -m http.server -d build-web 8080
 ```
 
@@ -122,7 +157,7 @@ defines and link options on the `wf_game` executable target (the existing `else(
 | `gfx/glpipeline/backend_modern.cc:19-27` | GLES3 header vs `GL_GLEXT_PROTOTYPES` + desktop headers |
 | `gfx/glpipeline/backend_modern.cc:44-56` | `#version 300 es` + precision qualifiers vs `#version 330 core` |
 | `gfx/gl/wfprim.h:15-20` | numeric GL-error path vs `gluErrorString()` (no GLU on web) |
-| `gfx/glpipeline/backend_modern.cc:593` | inspect during implementation; classify and widen if it's a GLES-path site |
+| `gfx/glpipeline/backend_modern.cc:593` | **resolved (no edit):** Android-only `WFAndroidNotifySurfaceLost` EGL-surface-lost hook, not a GLES header/shader path — stays `__ANDROID__`-only |
 
 `gfx/glpipeline/backend_factory.cc` needs **no edit** — only iOS/macOS are special-cased; the `#else` already yields `ModernBackendInstance()`.
 
@@ -136,7 +171,7 @@ defines and link options on the `wf_game` executable target (the existing `else(
 | `input.cc` | `emscripten_set_keydown_callback`/`keyup` + Gamepad API polling → build the joystick-button word and hand it to the same `_HALSetJoystickButtons()` the X11 path uses (`hal/linux/input.cc` holds the state; reuse it if its only Linux-ism is being fed by `mesa.cc`, else fork it) |
 | `lifecycle.cc` | `emscripten_set_visibilitychange_callback` → `HALNotifySuspend/Resume` (`hal/lifecycle.h:38-63`); `HALPumpSuspendedEvents()` = no-op |
 
-**P1.6 — suspended-branch `usleep`.** `game.cc:506` calls `usleep(16000)` when suspended. Under v1 ASYNCIFY this becomes `emscripten_sleep(16)` (guard with `#ifdef __EMSCRIPTEN__`); under v2 the suspended state simply returns from the tick callback.
+**P1.6 — suspended-branch `usleep`.** `game.cc:518` calls `usleep(16000)` when suspended. **As-built:** left unchanged — under ASYNCIFY, Emscripten's libc implements `usleep` via `emscripten_sleep`, so the existing call yields correctly (comment at `game.cc:504`); no `#ifdef __EMSCRIPTEN__` edit needed for v1. Under v2 the suspended state simply returns from the tick callback.
 
 **Exit criterion:** `task build-web` produces `wf_game.{html,js,wasm,data}` with zero link errors. Renderer not yet expected to draw.
 
@@ -157,7 +192,7 @@ defines and link options on the `wf_game` executable target (the existing `else(
 
 Buffer swap: implicit in the browser (the frame presents when the tick callback returns / ASYNCIFY yields) — verify `display.cc`'s PageFlip path degrades to a no-op glFlush.
 
-**P2.2 — ASYNCIFY yield.** One line at the top of `WFGame::StepFrame()` (`game.cc:494`), `#ifdef __EMSCRIPTEN__`: `emscripten_sleep(0);` — returns control to the browser once per frame, which is also what presents the frame and fires input callbacks.
+**P2.2 — ASYNCIFY yield.** ✓ **Done** (`game.cc:501-508`). One line at the top of `WFGame::StepFrame()` (`game.cc:497`), `#ifdef __EMSCRIPTEN__`: `emscripten_sleep(0);` — returns control to the browser once per frame, which is also what presents the frame and fires input callbacks.
 
 **P2.3 — first triangle.** Run `moon_site01.iff`; debug WebGL errors via the browser console (`-sGL_ASSERTIONS=1` in debug builds).
 
@@ -217,7 +252,7 @@ Buffer swap: implicit in the browser (the frame presents when the tick callback 
 ## Phase 7 — v2: main-loop inversion (committed scope)
 
 1. Add a `WebFrameState` enum + members to `WFGame` (current state, disk file/TOC cursor, script pointer): `BOOT → META_SCRIPT → LOAD_LEVEL → IN_LEVEL → UNLOAD → META_SCRIPT|EXIT`.
-2. Re-express `RunGameScript()` (`game.cc:233-268`) and `RunLevel()` (`game.cc:661-674`) as state transitions; the Forth meta script still runs to completion inside one `META_SCRIPT` tick (it's short — level selection only).
+2. Re-express `RunGameScript()` (def `game.cc:176`; meta loop `game.cc:236-267`) and `RunLevel()` (def `game.cc:673`; `while` loop `game.cc:677-680`) as state transitions; the Forth meta script still runs to completion inside one `META_SCRIPT` tick (it's short — level selection only).
 3. `hal/emscripten/platform_main.cc`: `emscripten_set_main_loop(TickOnce, 0, false)`; `TickOnce` dispatches on the state and calls `StepFrame()` in `IN_LEVEL`.
 4. Remove `emscripten_sleep` (P2.2), drop `-sASYNCIFY` from link options, drop the P1.6 sleep.
 5. Suspend: `emscripten_pause_main_loop()` / `resume` from the visibility callback instead of the suspended-branch spin.
@@ -241,14 +276,41 @@ Per the investigation: v1 ≈ 9–15 working days, v2 ≈ 3–5 days, total ~3�
 
 ## Verification
 
+**Method (2026-06-12):** no interactive browser was available, so verification used an **automated headless harness**: Chrome (`/usr/bin/google-chrome`, `--headless=new --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader`) driven by puppeteer-core against `python3 -m http.server` over `build-web/`, plus headless Node for boot/asset checks. SwiftShader gives a real WebGL 2 context, so render output is genuine. Firefox was not run.
+
 1. `task build-web` exits 0 and produces `wf_game.{js,wasm,data}` + shell; `wasm` + `data` total size recorded.
+   - **PASS.** Builds + links clean (after the `wasm-ld` flag fix). Release `-O3` artifact sizes:
+
+     ```
+     wf_game.wasm   raw 3,108,719   gz 982,501
+     wf_game.js     raw   128,806   gz  34,344
+     wf_game.data   raw 2,721,792   gz 484,030   (moon_site01-standalone + snowgoons-standalone preloaded)
+     ```
+
 2. Chrome + Firefox via `task serve-web`: `moon_site01.iff` reaches an interactive frame, zero console errors.
+   - **PASS (snowgoons), with caveat.** `?level=snowgoons-standalone` reaches an interactive, animating frame in headless Chrome with **zero GL errors / zero asserts** — see `screenshots/2026-06-11-web-first-render-snowgoons.png` (native-equivalent vs `2026-05-31-snowgoons-no-hud-regression-check.png`). The plan's named `moon_site01.iff` was the wrong file (LVAS bundle); `moon_site01-standalone.iff` loads further but trips a **data-specific** assert (`texture.cc:74`, its 1024² terrain texture) that reproduces on native too — pre-existing, not a port bug. Firefox not run.
+
 3. Keyboard LEFT/RIGHT move the player screen-left/screen-right (side-scroller C=π/2 recipe holds); gamepad d-pad/stick does the same.
+   - **PASS (keyboard).** Holding `ArrowRight` visibly translated the camera/scene between frames (`/tmp` before/during/after capture; before≠during). Gamepad path is coded (`emscripten_window.cc:153-193`) but not hardware-tested headlessly.
+
 4. Audio (SFX + music) plays after first input; no `AudioContext was not allowed to start` warning.
+   - **PASS (init).** Console shows `audio: miniaudio v0.11.25 ready` after the click-to-start gesture; no autoplay-blocked warning (the gate creates the `AudioContext` inside the gesture). Headless Node reports "running silent" — expected (no WebAudio). Actual SFX audibility not asserted headlessly.
+
 5. Hide the tab 10 s, return: engine resumes, no delta-time explosion.
+   - **PENDING (coded).** `VisibilityCallback` → `HALNotifySuspend/Resume` is wired (`emscripten_window.cc:98-107`); not exercised in the headless harness.
+
 6. Set a hi-score, hard-reload the page: score persisted (IDBFS).
+   - **PENDING (coded).** IDBFS mount + `FS.syncfs` wired (`platform_main.cc`, `hscore.cc` → `/save/qbert_hiscores.txt`). Not round-tripped: snowgoons doesn't set hi-scores (a qbert-family feature); needs a save+reload run on a qbert level.
+
 7. Page interactive < 10 s on DevTools "Fast 3G" throttling.
+   - **PENDING.** Not throttle-measured. On localhost the ~1.5 MB gzip wasm+js + ~0.5 MB gzip data is interactive in ~1-2 s.
+
 8. ASYNCIFY tax table v1 columns filled (naïve + `ASYNCIFY_ONLY`): size raw/gzip, instrumented-function count, frame p50/p95/p99, `asyncify_*` flamegraph share, startup-to-interactive.
+   - **PARTIAL.** Size row captured (step 1). The `-O3` link barely moved the wasm (compile-time `-O3` already dominates), which points at ASYNCIFY instrumentation as the remaining bulk — so `-sASYNCIFY_ADVISE` / `ASYNCIFY_ONLY` narrowing + the frame-time profiling rows remain to be run.
+
 9. **(v2)** Final link flags contain no `-sASYNCIFY`; loop driven by `emscripten_set_main_loop()`; v2 profiling column filled and v1-vs-v2 delta summarized in the investigation.
+   - **NOT STARTED** — Phase 7.
 10. **(v2)** Completing a level transitions through the state machine to the next level without a page reload.
+    - **NOT STARTED** — Phase 7.
 11. **(v2)** Linux native build still passes its normal run (`wf_game -L moon_site01.iff` boots and plays) — the inversion didn't fork behaviour.
+    - **NOT STARTED** — Phase 7. (Native `wf_game` parity at the level-load layer was incidentally confirmed: the LVAS-bundle mis-load asserted identically on native and web.)

@@ -31,6 +31,9 @@
 #include "game.hp"
 #include <hal/lifecycle.h>
 #include <unistd.h>
+#if defined(__EMSCRIPTEN__)
+#  include <emscripten.h>
+#endif
 #include <audio/music.hp>
 #include <audio/sfx_library.hp>
 #include "rest_api.hp"
@@ -494,6 +497,15 @@ WFGame::FrameResult
 WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 {
 	assert(_curLevel);
+
+#if defined(__EMSCRIPTEN__)
+	// v1 web main loop (ASYNCIFY): yield to the browser once per frame — this
+	// is what presents the canvas, fires the DOM input callbacks, and runs
+	// timers. The suspended branch below also yields via usleep (Emscripten
+	// implements it with emscripten_sleep under ASYNCIFY). Replaced by
+	// emscripten_set_main_loop in v2 — web-canvas-port plan Phase 7.
+	emscripten_sleep(0);
+#endif
 
 	if ( HALIsSuspended() )
 	{

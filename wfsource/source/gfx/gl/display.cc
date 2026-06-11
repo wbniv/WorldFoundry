@@ -29,7 +29,7 @@
 #if defined(WF_ENABLE_STEAM)
 #  include <hal/linux/steam.h>
 #endif
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
 #  include <GLES3/gl3.h>
 #else
 #  define GL_GLEXT_PROTOTYPES 1
@@ -591,6 +591,10 @@ int wfInitialWindowHeight = 480;
 
 #if defined(__ANDROID__)
 #  include "android_window.cc"
+#elif defined(__EMSCRIPTEN__)
+// Must precede the __LINUX__ branch: the web build defines __LINUX__ (cf_linux.h
+// reuse, plan D1) but must never ingest the X11/GLX code in mesa.cc.
+#  include "emscripten_window.cc"
 #elif defined(__LINUX__)
 #  include "mesa.cc"
 #endif
@@ -615,11 +619,19 @@ WFInitGL()
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     AssertGLOK();
 
+#if !defined(__EMSCRIPTEN__)
+    // Default wrap/filter applied to the texture-0 object (nothing is bound
+    // here). Desktop GL and the Android GLES driver tolerate glTexParameter
+    // with no texture bound — it pokes the default texture — but WebGL 2
+    // rejects it as INVALID_OPERATION ("no texture bound to target"). These
+    // are redundant anyway: every real texture binds and sets its own
+    // wrap/filter in gfx/pixelmap.cc:197-224, so the web build skips them.
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     AssertGLOK();
+#endif
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1131,6 +1143,10 @@ Display::PageFlip()
 #if defined(__ANDROID__)
     AndroidSwapBuffers();
     AssertGLOK();
+#elif defined(__EMSCRIPTEN__)
+    // No explicit swap on WebGL: the browser composites the canvas when the
+    // frame yields to the event loop (ASYNCIFY emscripten_sleep in StepFrame /
+    // the v2 main-loop callback return). glFlush() above is sufficient.
 #elif defined(__LINUX__)
     glXSwapBuffers(halDisplay.mainDisplay, halDisplay.win);
     AssertGLOK();

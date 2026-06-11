@@ -25,7 +25,8 @@
 // Original Author: Kevin T. Seghetti
 //============================================================================
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
+// Web (Emscripten) maps GLES3 onto WebGL 2 — same header as Android.
 #  include <GLES3/gl3.h>
 #elif defined(WF_TARGET_IOS)
 // iOS ships OpenGLES.framework (deprecated iOS 12+, still present). We use

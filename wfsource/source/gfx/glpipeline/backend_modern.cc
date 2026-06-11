@@ -16,11 +16,11 @@
 // On Linux/Mesa, GL 3.3+ function prototypes are gated behind this macro in
 // <GL/glext.h>. Define before any header that might pull in <GL/gl.h>, or
 // the prototypes go missing once gl.h's include-guard fires.
-#if !defined(__ANDROID__)
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
 #  define GL_GLEXT_PROTOTYPES 1
 #endif
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
 #  include <GLES3/gl3.h>
 #else
 #  include <GL/gl.h>
@@ -41,13 +41,13 @@
 namespace
 {
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
 // GLES 3.0 requires explicit precision on `int` in the fragment shader (there
 // is no default), but the vertex shader gets `highp` implicitly. If we set
 // int precision in only one stage, the link fails with
 // "fragment integer variable foo does not match the vertex variable".
 // Declare highp for both float and int so u_fog / u_lighting / u_use_tex
-// match across stages.
+// match across stages. WebGL 2 (Emscripten) is GLSL ES 3.00 — same rules.
 static const char* kShaderHeader =
     "#version 300 es\n"
     "precision highp float;\n"

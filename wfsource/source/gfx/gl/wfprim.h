@@ -12,10 +12,10 @@
 //#if DO_ASSERTIONS
 //#if SW_DBSTREAM
 
-#if !defined(__ANDROID__) && !defined(WF_TARGET_IOS) && !defined(WF_TARGET_MACOS)
+#if !defined(__ANDROID__) && !defined(WF_TARGET_IOS) && !defined(WF_TARGET_MACOS) && !defined(__EMSCRIPTEN__)
 // X11/GLX desktop only — GLU provides gluErrorString for AssertGLOK
-// diagnostics. Android GLES, iOS Simulator, and headless macOS all lack it
-// (we don't link GLU/OpenGL on macOS); the numeric-code branch below handles
+// diagnostics. Android GLES, iOS Simulator, headless macOS, and the web build
+// (no GLU on WebGL) all lack it; the numeric-code branch below handles
 // diagnostics there.
 #  include <GL/glu.h>
 #endif
@@ -28,8 +28,8 @@
 
 #if SW_DBSTREAM
 
-#if defined(__ANDROID__) || defined(WF_TARGET_IOS) || defined(WF_TARGET_MACOS)
-// GLES / headless macOS have no gluErrorString; print the numeric code.
+#if defined(__ANDROID__) || defined(WF_TARGET_IOS) || defined(WF_TARGET_MACOS) || defined(__EMSCRIPTEN__)
+// GLES / headless macOS / WebGL have no gluErrorString; print the numeric code.
 #define AssertGLOKMsg(string)        \
 {                           \
     GLenum glError = glGetError(); \

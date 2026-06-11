@@ -49,8 +49,14 @@ const MachineType gHostMachineType = LINUX;
 #define _MAX_PATH PATH_MAX
 #define DIRECTORY_SEPARATOR '/'
 
+#if !defined(__EMSCRIPTEN__)
+// Emscripten's libc already declares (compat/string.h) and implements strlwr
+// with a char* return; redeclaring it void here is an overload-on-return-type
+// error there. Native Linux libc has no strlwr — engine/stubs/platform_stubs.cc
+// provides it.
 void
 strlwr( char* string );
+#endif
 
 void
 _linux_init(void);

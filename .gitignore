@@ -70,3 +70,13 @@ imgui.ini
 
 # wf_blender test harness cache (built wf_core.so)
 tests/.cache/
+
+# emsdk: manager scripts are vendored+pinned (engine/vendor/emsdk-6.0.0/);
+# toolchain binaries are fetched reproducibly by `task setup-emsdk`
+engine/vendor/emsdk-6.0.0/upstream/
+engine/vendor/emsdk-6.0.0/downloads/
+engine/vendor/emsdk-6.0.0/node/
+engine/vendor/emsdk-6.0.0/.emscripten*
+
+# Web build output
+build-web/

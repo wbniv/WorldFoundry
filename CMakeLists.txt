@@ -37,7 +37,7 @@ option(WF_ENABLE_STEAM    "Steamworks SDK"                OFF)
 # uninstrumented. The "fast-debug" build (Debug symbols, no sanitizer tax) is
 # `-DWF_ASAN=OFF` (see `task build-fast`). Overridable either way.
 set(_WF_ASAN_DEFAULT OFF)
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT ANDROID AND NOT IOS)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT ANDROID AND NOT IOS AND NOT EMSCRIPTEN)
     set(_WF_ASAN_DEFAULT ON)
 endif()
 option(WF_ASAN "AddressSanitizer + UBSan (default ON for host Debug; -DWF_ASAN=OFF = fast-debug)" ${_WF_ASAN_DEFAULT})
@@ -74,6 +74,21 @@ if(ANDROID OR IOS)
     set(WF_DEBUG_BRIDGE  OFF      CACHE BOOL   "" FORCE)
     set(WF_ENABLE_STEAM  OFF      CACHE BOOL   "" FORCE)
     set(WF_ENABLE_EDITOR OFF      CACHE BOOL   "" FORCE)
+elseif(EMSCRIPTEN)
+    # Web (browser/wasm): Forth-only scripting, like mobile. WAMR ships x86-64
+    # inline asm; bridge/REST are raw-TCP servers; no editor host, no Steam.
+    # See docs/plans/2026-06-11-web-canvas-port.md (D5).
+    set(WF_LUA_ENGINE    "none"   CACHE STRING "" FORCE)
+    set(WF_ENABLE_FENNEL OFF      CACHE BOOL   "" FORCE)
+    set(WF_JS_ENGINE     "none"   CACHE STRING "" FORCE)
+    set(WF_WASM_ENGINE   "none"   CACHE STRING "" FORCE)
+    set(WF_ENABLE_WREN   OFF      CACHE BOOL   "" FORCE)
+    set(WF_FORTH_ENGINE  "zforth" CACHE STRING "" FORCE)
+    set(WF_PILOT_ENGINE  "none"   CACHE STRING "" FORCE)
+    set(WF_REST_API      OFF      CACHE BOOL   "" FORCE)
+    set(WF_DEBUG_BRIDGE  OFF      CACHE BOOL   "" FORCE)
+    set(WF_ENABLE_STEAM  OFF      CACHE BOOL   "" FORCE)
+    set(WF_ENABLE_EDITOR OFF      CACHE BOOL   "" FORCE)
 elseif(APPLE)
     # macOS desktop: full scripting roster (Lua/Fennel/QuickJS/Wren + zForth)
     # and debug bridge enabled. WAMR deferred (macOS arm64 unverified). Editor
@@ -89,7 +104,7 @@ endif()
 # rely on it; surprising them with an opt-in flag broke at least one
 # user's workflow when the bridge briefly defaulted off. Mobile is already
 # forced OFF above; the NOT(ANDROID OR IOS) guard preserves that.
-if(NOT (ANDROID OR IOS) AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(NOT (ANDROID OR IOS OR EMSCRIPTEN) AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(WF_DEBUG_BRIDGE ON CACHE BOOL "Debug build forces bridge on" FORCE)
 endif()
 
@@ -121,6 +136,13 @@ elseif(APPLE)
     # true no-op via engine/stubs/renderer_stub.cc); gfx/gl + gfx/glpipeline are
     # excluded like iOS. The real Metal renderer lands later, shared with iOS.
     list(APPEND WF_DEFS WF_TARGET_MACOS SCALAR_TYPE_FLOAT)
+elseif(EMSCRIPTEN)
+    # Web (browser/wasm): GLES3 renderer (WebGL 2) like Android; cf_linux.h
+    # platform header like macOS — here __LINUX__ means "POSIX", and the
+    # compiler-provided __EMSCRIPTEN__ guards the X11-vs-web splits.
+    # See docs/plans/2026-06-11-web-canvas-port.md (D1).
+    list(APPEND WF_DEFS WF_TARGET_WEB __LINUX__
+                        RENDERER_GLES RENDERER_PIPELINE_GLES SCALAR_TYPE_FLOAT)
 else()
     list(APPEND WF_DEFS WF_TARGET_LINUX __LINUX__
                         RENDERER_GL RENDERER_PIPELINE_GL SCALAR_TYPE_FLOAT)
@@ -189,6 +211,22 @@ elseif(APPLE)
         profile renderassets savegame savegame/linux
         menu particle audio/linux
     )
+elseif(EMSCRIPTEN)
+    # Web: full GL stack like Linux (GLES branches like Android), hal/emscripten
+    # for the entry shell. The portable Linux HAL files (platform_init, audio,
+    # input, lifecycle, asset_accessor_posix) are reused explicitly in the
+    # Emscripten extra-sources block below — same mechanism as macOS.
+    # savegame/ dirs are vestigial on every platform (no such directory; the
+    # GLOB is empty) — kept for symmetry.
+    set(WF_DIRS
+        pigsys streams cpplib math memory iff mailbox
+        hal hal/emscripten
+        gfx gfx/gl gfx/glpipeline
+        input asset baseobject movement room physics
+        anim timer scripting game ini loadfile
+        profile renderassets savegame savegame/linux
+        menu particle audio/linux
+    )
 else()
     set(WF_DIRS
         pigsys streams cpplib math memory iff mailbox
@@ -241,6 +279,15 @@ elseif(APPLE)
     # display_ios.cc / gfx/gl/display.cc), not a standalone TU.
     list(APPEND WF_SKIP
         hal/macos/display_macos.cc
+    )
+elseif(EMSCRIPTEN)
+    list(APPEND WF_SKIP
+        # X11/GLX editor-host context registry — guard is __LINUX__ &&
+        # !__ANDROID__, which matches the web build (D1 defines __LINUX__).
+        gfx/gl/host_gl_context.cc
+        # #included by gfx/gl/display.cc (same pattern as mesa.cc /
+        # android_window.cc), not a standalone TU.
+        gfx/gl/emscripten_window.cc
     )
 endif()
 
@@ -298,6 +345,22 @@ elseif(APPLE)
         ${SRC}/hal/linux/input.cc
         ${SRC}/hal/linux/lifecycle.cc
         ${SRC}/hal/macos/asset_accessor_nsbundle.mm
+    )
+elseif(EMSCRIPTEN)
+    # Web — the portable Linux HAL files are reused verbatim (the X11 code that
+    # feeds them lives in gfx/gl/mesa.cc, which the web build never includes):
+    #   platform_init.cc — POSIX init, FatalError, ParseWindowSwitches; selects
+    #                      the POSIX asset accessor (reads from Emscripten MEMFS)
+    #   audio.cc         — miniaudio init/term (miniaudio has a Web Audio backend)
+    #   input.cc         — joystick-button state holder; hal/emscripten feeds it
+    #                      via _HALSetJoystickButtons from DOM/Gamepad callbacks
+    #   lifecycle.cc     — atomic suspend flag; visibilitychange toggles it
+    list(APPEND WF_SOURCES
+        ${SRC}/hal/linux/platform_init.cc
+        ${SRC}/hal/linux/audio.cc
+        ${SRC}/hal/linux/input.cc
+        ${SRC}/hal/linux/lifecycle.cc
+        ${SRC}/hal/linux/asset_accessor_posix.cc
     )
 endif()
 
@@ -568,6 +631,14 @@ if(WF_PHYSICS_ENGINE STREQUAL "jolt")
         COMPILE_DEFINITIONS "NDEBUG"
         COMPILE_OPTIONS     "-O2;-w;-fno-rtti"
     )
+    if(EMSCRIPTEN)
+        # Jolt.cmake unconditionally enables a PCH, but the source-file
+        # properties above (-O2 -fno-rtti) don't apply to the PCH compile.
+        # GCC silently ignores a flag-mismatched PCH; emcc (clang) hard-errors
+        # ("run-time type information was enabled in precompiled file").
+        # Disable the PCH for the web build — flags then match per-TU.
+        set_target_properties(Jolt PROPERTIES DISABLE_PRECOMPILE_HEADERS ON)
+    endif()
     list(APPEND WF_LINK_LIBS Jolt)
 else()
     list(APPEND WF_DEFS PHYSICS_ENGINE_WF)
@@ -677,6 +748,12 @@ elseif(APPLE)
     # hal/linux and compiled into libwfengine.a via the stub-sources block.
     list(APPEND WF_PLATFORM_SHELL_SOURCES
         ${SRC}/hal/macos/platform_main.cc)
+elseif(EMSCRIPTEN)
+    # Web — thin main() shell (Linux-minus-X11), HALStart on the browser main
+    # thread. platform_init.cc is reused from hal/linux via the extra-sources
+    # block above.
+    list(APPEND WF_PLATFORM_SHELL_SOURCES
+        ${SRC}/hal/emscripten/platform_main.cc)
 else()
     # Linux: only platform_main.cc (just main()) goes in the shell.
     # platform_init.cc (FatalError, _PlatformSpecificInit, FPEHandler,
@@ -705,10 +782,10 @@ target_compile_options(wfengine PRIVATE
     "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
     "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>"
 )
-if(ANDROID OR IOS OR APPLE)
+if(ANDROID OR IOS OR APPLE OR EMSCRIPTEN)
     # Legacy `register` keyword is C++17-removed; WF's pigsys/endian.cc still
     # uses it. Silence to match the Linux build's permissive stance. (APPLE
-    # covers both iOS and macOS desktop — both are Apple Clang.)
+    # covers both iOS and macOS desktop; Emscripten's emcc is also Clang.)
     target_compile_options(wfengine PRIVATE -Wno-register)
 endif()
 
@@ -771,10 +848,17 @@ target_compile_options(wf_game PRIVATE
     "$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-O0;-g>"
     "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-O3;-flto=thin;-ffunction-sections;-fdata-sections;-fvisibility=hidden;-fno-exceptions;-fno-unwind-tables;-fno-asynchronous-unwind-tables>"
 )
-target_link_options(wf_game PRIVATE
-    "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-flto=thin;-Wl,--gc-sections;-Wl,--icf=safe;-Wl,-O2;-Wl,--export-dynamic-symbol=ANativeActivity_onCreate>"
-)
-if(ANDROID OR IOS OR APPLE)
+# These are native GNU ld / LLVM lld link flags. Emscripten's wasm-ld rejects
+# --icf and --export-dynamic-symbol (unknown arguments), and ANativeActivity_onCreate
+# is Android-only. The web build gets its own -flto=thin in the EMSCRIPTEN link
+# block below instead. (emcc is Clang, so without this guard the generator
+# expression fires for the web build and wasm-ld errors out — see plan Phase 1.)
+if(NOT EMSCRIPTEN)
+    target_link_options(wf_game PRIVATE
+        "$<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:Clang>>:-flto=thin;-Wl,--gc-sections;-Wl,--icf=safe;-Wl,-O2;-Wl,--export-dynamic-symbol=ANativeActivity_onCreate>"
+    )
+endif()
+if(ANDROID OR IOS OR APPLE OR EMSCRIPTEN)
     target_compile_options(wf_game PRIVATE -Wno-register)
 endif()
 
@@ -828,6 +912,35 @@ elseif(APPLE)
         "-framework AVFoundation"
         m pthread
     )
+elseif(EMSCRIPTEN)
+    # Browser: no native libs — GL resolves to WebGL via Emscripten's GLES3
+    # emulation. ASYNCIFY is the v1 main-loop strategy (one emscripten_sleep(0)
+    # per frame in StepFrame); v2 replaces it with emscripten_set_main_loop —
+    # see docs/plans/2026-06-11-web-canvas-port.md P2.2 / Phase 7.
+    target_link_options(wf_game PRIVATE
+        -sMIN_WEBGL_VERSION=2
+        -sMAX_WEBGL_VERSION=2
+        -sALLOW_MEMORY_GROWTH=1
+        -sASYNCIFY
+        -sEXIT_RUNTIME=0
+        # callMain: the shell gates engine start on a click (Module.noInitialRun);
+        # requestFullscreen: the shell's fullscreen button. Both must be exported.
+        -sEXPORTED_RUNTIME_METHODS=callMain,requestFullscreen
+        -lidbfs.js                                  # IDBFS for persistent hi-scores (P6.1)
+        # wfengine.a objects are thin-LTO bitcode (Release+Clang compile flags);
+        # match at link so wasm-ld LTO-compiles them, and run binaryen -O3 over
+        # the final wasm. ASYNCIFY narrowing (-sASYNCIFY_ONLY=[...]) is the
+        # remaining P6.4 size lever — see plan / the profiling table.
+        "$<$<CONFIG:Release>:-O3;-flto=thin>"
+        # Preload the "-standalone" level variants (complete L-chunks the -L path
+        # can load directly), NOT the LVAS asset-bundle .iff. The shell selects
+        # among them via ?level=<name>. moon_site01 is the headline level;
+        # snowgoons is the lighter canonical bring-up level.
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/wflevels/moon_site01-standalone.iff@/moon_site01-standalone.iff"
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/wflevels/snowgoons-standalone.iff@/snowgoons-standalone.iff"
+        "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/web/shell.html"
+    )
+    set_target_properties(wf_game PROPERTIES SUFFIX ".html")
 else()
     list(APPEND WF_LINK_LIBS GL GLU X11 m pthread dl)
     # wf_game-specific link option (noexecstack on the final exe, not on the
@@ -851,7 +964,7 @@ target_link_libraries(wf_game  PRIVATE wfengine)
 # duplicate-symbol errors, and proves the Phase B LIFO fixes in
 # ~Level/~WFGame hold when driven from outside RunLevel.
 # Linux/desktop only — host GL plumbing is X11/GLX specific.
-if(NOT ANDROID AND NOT IOS AND NOT APPLE)
+if(NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     # macOS desktop is excluded here: these are X11/GLX host-GL + ctest targets
     # that don't apply to the headless bring-up. macOS verifies by running the
     # binary directly (--frame-step-smoke) in the Codemagic workflow. Re-add
@@ -1017,7 +1130,7 @@ endif()
 # Standalone executable that links against zforth + the neural-forth C files.
 # Provides its own zf_host_* callbacks; does not depend on wf_game.
 # Excluded from the game build (neural_forth_test.cc is not in WF_SOURCES).
-if(WF_NEURAL_FORTH AND NOT ANDROID AND NOT IOS AND NOT APPLE)
+if(WF_NEURAL_FORTH AND NOT ANDROID AND NOT IOS AND NOT APPLE AND NOT EMSCRIPTEN)
     add_executable(nf_test
         ${NF_DIR}/neural_forth_test.cc
         ${NF_DIR}/dictionary.c
@@ -1038,7 +1151,9 @@ if(WF_NEURAL_FORTH AND NOT ANDROID AND NOT IOS AND NOT APPLE)
 endif()
 
 # ─── Output location matches build_game.sh ────────────────────────────────────
-if(NOT ANDROID)
+if(NOT ANDROID AND NOT EMSCRIPTEN)
+    # Emscripten keeps its .html/.js/.wasm/.data set in build-web/ — engine/ is
+    # for native binaries.
     set_target_properties(wf_game PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/engine)
 endif()

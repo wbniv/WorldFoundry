@@ -7,11 +7,15 @@
 #include <cstdlib>
 #include <cstdio>
 
-// strlwr: declared with C++ linkage in pigsys/cf_linux.h
+// strlwr: declared with C++ linkage in pigsys/cf_linux.h.
+// Emscripten's libc ships strlwr (compat/string.h, extern "C", char* return) —
+// defining this one there is an overload-on-return-type error.
+#if !defined(__EMSCRIPTEN__)
 void strlwr(char* s) {
     for (char* p = s; *p; ++p)
         *p = (char)tolower((unsigned char)*p);
 }
+#endif
 
 // strnicmp: case-insensitive strncmp (Windows/BSD, not in POSIX)
 extern "C" int strnicmp(const char* a, const char* b, size_t n) {
