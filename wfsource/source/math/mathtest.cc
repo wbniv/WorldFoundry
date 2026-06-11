@@ -104,6 +104,22 @@ PIGSMain( int argc, char* argv[] )
 		MATH_DEBUG( std::cout << "divResult = " << divResult.AsUnsignedFraction() << std::endl; )
 	}
 
+	{
+		// Regression: AsUnsignedFraction must treat the fraction as MODULAR.
+		// A negative revolution is the same binary-angular value as frac+1:
+		// -0.25 rev == 0.75 rev == 49152/65536. The fixed path got this for free
+		// via two's-complement uint16 truncation; the float path used to do
+		// uint16(negativeFloat) which is UB — wasm's saturating fptoui clamped it
+		// to 0, so Angle::Revolution(-turnRate) produced zero rotation and the
+		// right-turn was dead on the web build. See scalar.hpi AsUnsignedFraction.
+		AssertMsg( SCALAR_CONSTANT(-0.25).AsUnsignedFraction() == 49152,
+			"neg AsUnsignedFraction = " << SCALAR_CONSTANT(-0.25).AsUnsignedFraction() );
+		AssertMsg( Angle::Revolution(SCALAR_CONSTANT(-0.25)) == Angle::Revolution(SCALAR_CONSTANT(0.75)),
+			"Angle::Revolution(-0.25) must equal Revolution(0.75)" );
+		AssertMsg( -Angle::Revolution(SCALAR_CONSTANT(0.25)) == Angle::Revolution(SCALAR_CONSTANT(0.75)),
+			"-Angle::Revolution(0.25) must equal Revolution(0.75)" );
+	}
+
 #if defined(SCALAR_TYPE_FIXED)
 	// test divide overflow
 	a = SCALAR_CONSTANT(-10.973755);
