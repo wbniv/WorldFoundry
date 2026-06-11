@@ -125,7 +125,10 @@ tasks:
     desc: "Run the wf-edit GUI editor (build first with task build-wf-edit)."
     deps: [build-wf-edit]
     cmds:
-      - ./build-editor/wf-edit {{.CLI_ARGS}}
+      - |
+        LOG=/tmp/wfedit.log
+        echo "Logging to $LOG"
+        ./build-editor/wf-edit {{.CLI_ARGS}} 2>&1 | tee "$LOG"
 
   turn-serve:
     desc: "Run a network-reachable coturn for a REAL two-machine wf-edit call (config/turnserver-wfedit.conf). Ctrl-C to stop. Throwaway/static creds — not for production."
@@ -534,7 +537,7 @@ tasks:
           ../../../engine/wf_game 2>&1 | tee /tmp/wfgdb.log
 
   run-level:
-    desc: "Run wf_game with -L<path> (usage: task run-level -- wflevels/snowgoons.iff [-record_video ...])"
+    desc: "Run wf_game with -L<path> (usage: task run-level -- wflevels/snowgoons.iff [-record_video out.mp4]). Or set WF_RECORD=1 on named run-* tasks."
     cmds:
       - |
         set -- {{.CLI_ARGS}}
@@ -543,13 +546,25 @@ tasks:
           exit 1
         fi
         LEVEL="$1"; shift
+        LOG=/tmp/wfgame.log
+        echo "Logging to $LOG"
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
-          engine/wf_game "-L$LEVEL" "$@"
+          engine/wf_game "-L$LEVEL" "$@" 2>&1 | tee "$LOG"
 
   run-snowgoons:
-    desc: "Run wf_game on wflevels/snowgoons.iff directly (bypass cd.iff)"
+    desc: "Run wf_game on wflevels/snowgoons.iff directly (bypass cd.iff). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
     cmds:
-      - LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/snowgoons.iff
+      - |
+        LOG=/tmp/wfgame_snowgoons.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_snowgoons.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/snowgoons.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
   build-level:
     desc: "Build a level's inner + standalone .iff (usage: task build-level -- qbert_practice)"
@@ -564,46 +579,84 @@ tasks:
         bash wftools/wf_blender/build_level_binary.sh "$1"
 
   build-cd-iff:
-    desc: "Assemble wfsource/source/game/cd.iff from shell.fth + standalone level IFFs via cdpack-rs (SMB W1-1=level 0, W1-2=level 1, snowgoons=2, qbert=3)"
+    desc: "Assemble wfsource/source/game/cd.iff from shell.fth + standalone level IFFs via cdpack-rs (SMB W1-1=0, W1-2=1, W1-3=2, W1-4=3, snowgoons=4, qbert=5)"
     cmds:
       - cargo build --release --manifest-path wftools/cdpack-rs/Cargo.toml
       # Feed the *-standalone.iff (L4-rooted) files, NOT the bare LVAS *.iff:
       # game.cc:250 seeks TOC_offset + one sector before reading each level's RAM
       # config, so every body needs the standalone wrapper's leading ALGN sector.
       # Order = TOC index. shell.fth boots level 0, so SMB W1-1 leads -> the bundle
-      # boots into Mario. The W1-1 flagpole's advance ActBox writes LEVEL_TO_RUN=1
-      # (-> W1-2) and W1-2's writes 0 (-> W1-1), an endless W1-1<->W1-2 loop. The
-      # snowgoons/qbert demos stay bundled at 2/3 (reachable by writing LEVEL_TO_RUN).
-      # See docs/plans/2026-05-31-smb-flag-next-level-transition-and-w1-2-scaffold.md.
+      # boots into Mario. Flagpole/axe advance ActBoxes chain the loop:
+      # W1-1 writes LEVEL_TO_RUN=1 (-> W1-2), W1-2 writes 2 (-> W1-3), W1-3 writes 3
+      # (-> W1-4), W1-4 writes 0 (-> W1-1) — an endless W1-1->W1-2->W1-3->W1-4 loop.
+      # snowgoons/qbert stay at 4/5 (reachable by writing LEVEL_TO_RUN).
+      # See docs/plans/2026-06-03-build-faithful-smb-w1-4.md.
       - |
         wftools/cdpack-rs/target/release/cdpack \
           wfsource/source/game/shell.fth \
           wflevels/smb_w1_1-standalone.iff \
           wflevels/smb_w1_2-standalone.iff \
+          wflevels/smb_w1_3-standalone.iff \
+          wflevels/smb_w1_4-standalone.iff \
           wflevels/snowgoons-standalone.iff \
           wflevels/qbert_practice-standalone.iff \
           -o wfsource/source/game/cd.iff
 
   run-qbert:
-    desc: "Run wf_game on wflevels/qbert_practice-standalone.iff directly (bypass cd.iff)"
+    desc: "Run wf_game on wflevels/qbert_practice-standalone.iff directly (bypass cd.iff). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
     cmds:
-      - LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/qbert_practice-standalone.iff
+      - |
+        LOG=/tmp/wfgame_qbert.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_qbert.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/qbert_practice-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
   run-smb:
-    desc: "Run wf_game on wflevels/smb_w1_1-standalone.iff directly (bypass cd.iff)"
+    desc: "Run wf_game on wflevels/smb_w1_1-standalone.iff directly (bypass cd.iff). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
     cmds:
-      - LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/smb_w1_1-standalone.iff
+      - |
+        LOG=/tmp/wfgame_smb.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_smb.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/smb_w1_1-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
   run-moon:
-    desc: "Run wf_game on wflevels/moon_site01-standalone.iff (PGDA Site 01 Connecting Ridge — LOLA terrain + NAC texture at 1024², lunar gravity)"
+    desc: "Run wf_game on wflevels/moon_site01-standalone.iff (PGDA Site 01 Connecting Ridge — LOLA terrain + NAC texture at 1024², lunar gravity). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
     cmds:
       # 1024² NAC composite — needs the wider transient VRAM slot (Phase 1-3
       # of docs/plans/2026-05-30-runtime-vram-cli-overrides.md) AND the
       # int16 UV pipeline (docs/plans/2026-05-30-uv-int16-widening.md).
-      - LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game
-          --vram-width=4096 --vram-height=2048
-          --vram-slot-width=1024 --vram-slot-height=1024
-          -Lwflevels/moon_site01-standalone.iff
+      # --vram-perm-width/height: PERM atlas includes starfield.tga (512×256)
+      # + earth.tga (128×64), packing to ~640×256 by textile-rs — exceeds the
+      # 256-pixel VRAMPermanentWidth default (see docs/plans/2026-06-01-...).
+      - |
+        LOG=/tmp/wfgame_moon.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""; FSFLAG=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_moon.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game \
+          --vram-width=4096 --vram-height=2048 \
+          --vram-slot-width=1024 --vram-slot-height=1024 \
+          --vram-perm-width=1024 --vram-perm-height=512 \
+          -Lwflevels/moon_site01-standalone.iff \
+          $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
   run-debug:
     desc: "Run wf_game with debug bridge on port 7777 (usage: task run-debug -- wflevels/snowgoons.iff)"
@@ -615,8 +668,11 @@ tasks:
           exit 1
         fi
         LEVEL="$1"; shift
+        LOG=/tmp/wfgame_debug.log
+        echo "Logging to $LOG"
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
-          engine/wf_game "-L$LEVEL" "$@" --debug-port 7777 --debug-bind 127.0.0.1 --debug-print-actors
+          engine/wf_game "-L$LEVEL" "$@" --debug-port 7777 --debug-bind 127.0.0.1 --debug-print-actors \
+          2>&1 | tee "$LOG"
 
   run-debug-remote:
     desc: "Run wf_game with debug bridge open on all interfaces (remote device / CI; usage: task run-debug-remote -- wflevels/snowgoons.iff)"
@@ -627,8 +683,11 @@ tasks:
           echo "Usage: task run-debug-remote -- <path/to/level.iff>" >&2
           exit 1
         fi
+        LOG=/tmp/wfgame_debug_remote.log
+        echo "Logging to $LOG"
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 \
-          engine/wf_game "-L$ARGS" --debug-port 7777 --debug-bind 0.0.0.0
+          engine/wf_game "-L$ARGS" --debug-port 7777 --debug-bind 0.0.0.0 \
+          2>&1 | tee "$LOG"
 
   dev-setup:
     desc: "Install runtime dev dependencies (Linux build + Android toolchain)"

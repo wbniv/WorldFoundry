@@ -422,6 +422,38 @@ The engine-side alternative (guard the write so `0` means "don't record") is log
 
 ---
 
+## `ActBox` crashes with `activate.cc:42` — `Activated By = 'Actor'` but no actor named
+
+**Symptom:** A trigger volume fires and the engine aborts immediately with:
+
+```
+AssertMsg: object is activated by Actor but none is specified
+activate.cc:42
+```
+
+**Cause:** The `ActBox` OAD field `Activated By` has four enum values: `All`, `Actor`, `Class`, `List`.
+Default is `All`. If the field is left at `Actor` (either explicitly or because a stale import left
+it that way) without setting `Activated By Actor` to a live object name, `ActBox::activate`
+reads a null actor pointer and asserts.
+
+This commonly surfaces when creating entry-trigger volumes programmatically and forgetting to set
+`Activated By`:
+
+```python
+# Wrong — Activated By defaults to 'All' (or may be stale 'Actor' from import)
+trig['wf_MailBox']      = MOON_ACTIVE_VEHICLE
+trig['wf_MailBoxValue'] = vehicle_id
+
+# Correct — set Activated By explicitly
+trig['wf_Activated By'] = 'All'   # fire for any actor that overlaps
+```
+
+**Fix:** always set `wf_Activated By` explicitly on every programmatically-created actbox. If
+only the player should trigger it, use `'Actor'` + `wf_Activated By Actor = 'Player'`. For a
+general entry volume that any actor can trip, use `'All'`.
+
+---
+
 ## Added a mailbox to `mailbox.inc` but scripts using its `INDEXOF_` fail (`error 7 not_a_word`)
 
 **Symptom:** you add a `MAILBOXENTRY( FOO, … )` row to
@@ -1223,8 +1255,15 @@ over 2048 & if 10240 | then
 ```
 
 Other bitwise primitives: `^` (XOR), `<<` (shift left), `>>` (shift right).
-Other logical helpers defined in the WF bootstrap: `not` (= `0 =`), `<`, `>`,
-`<=`, `>=`, `<>`.
+
+Two more zForth renames fall in the same trap: **`<0` is `0<`**, and **`%` is `mod`** (integer
+remainder). `mod` is now also aliased, so either works — but never spell mod as `over over / * -`:
+cells are float, so `/` doesn't truncate and that "workaround" silently returns garbage.
+
+Logical / CORE helpers defined in the WF bootstrap (expanded 2026-06-02): `not` (= `0=`),
+`0= 0< 0> 0<>`, `< > <= >= <>`, `negate abs min max`, `?dup nip tuck -rot 2dup 2drop 2swap`,
+`+!`, and `mod`. New scripts should use these directly instead of inlining `over over` / `swap drop`
+/ `0 =`. Full vocabulary: [`docs/level-building.md` § Scripting System](level-building.md#scripting-system).
 
 ---
 
@@ -1638,6 +1677,32 @@ Steps 3 and 4 must happen *after* step 1, not before.
 
 ---
 
+## Blender re-export: Python changes don't land until you re-run Blender AND rebuild
+
+**Symptom:** You edit `blender_create_<level>.py` (e.g. change a field assignment or add a
+new actor), run `task build-level`, but the engine behaviour is unchanged. The compiled `.iff`
+is current, yet the actor/field you touched has no effect.
+
+**Cause:** The build pipeline has two stages:
+
+1. **Blender export**: `blender --background --python blender_create_<level>.py` → writes `<level>.lev`
+2. **Binary compile**: `levcomp-rs` + `iffcomp-rs` → writes `<level>.iff` / `<level>-standalone.iff`
+
+`task build-level` only runs stage 2. If you change the Python script and skip stage 1,
+the `.lev` is stale and stage 2 compiles the old data.
+
+**Fix:** always re-run the Blender script first:
+
+```bash
+blender --background --python wflevels/<level>/blender_create_<level>.py
+task build-level -- <level>
+```
+
+**Tell-tale:** if a field value in `<level>.lev` doesn't match what the Python sets, the export
+was skipped. Check `grep "FieldName" wflevels/<level>/<level>.lev` vs the Python assignment.
+
+---
+
 ## Blender re-export: stale object names from the imported base level
 
 **Symptom:** After a headless `blender --background --python blender_create_smb.py`
@@ -1736,28 +1801,51 @@ size; the comment in `lmalloc.cc` documents the invariant explicitly so it doesn
 get broken again.
 
 
-## Per-actor scale is visual-only — collision and physics don't scale
+## Per-actor scale: two paths with different collision behaviour
 
-**Symptom:** You scale an actor (via the `X/Y/Z_SCALE` mailboxes 3040–3042, or — once
-wired — Blender object scale) and the mesh visibly stretches, but the actor still
-collides, blocks, and is walked on as if it were its original size.
+There are **two** ways an actor's `_scaleX/Y/Z` gets set, and they behave differently —
+know which one you're using.
 
-**Why:** The scale is applied **at draw time only** — `Actor` caches `_scaleX/Y/Z`
-and forwards them to `RenderActor3D::SetActorScale`, which column-multiplies the world
-matrix just before rendering (`wfsource/source/game/actor.cc:1606-1622`). Nothing
-propagates that scale to the collision bbox (`coarse` rect in the on-disk record) or
-to the Jolt physics shape, so collision and physics keep the unscaled geometry.
+### (a) Load-time OAS / Blender object scale — renders AND box-collides
 
-**What to do:**
+**This is the SMB mesh-sharing path.** A statplat shares one unit-cube datablock and
+carries its real size as a Blender object scale → exported as a `{ VEC3 "Scale" }` field
+**and** a pre-scaled `{ BOX3 "Global Bounding Box" }` (`export_level.py` multiplies the
+bbox corners by scale; it does NOT bake verts or call `transform_apply`). At load the
+`Actor` ctor reads `_scaleX/Y/Z` (`actor.cc:712-727`) and `BindAssets` now pushes them
+into the render actor via `SetActorScale` (`actor.cc` just after `_renderActor->Validate()`).
+So **render is scaled** (the fix, 2026-06-03 — before it, load-time scale rendered as a
+unit cube while only the BOX3 collided, so wide shared-box statplats drew as 1-tile cubes;
+W1-3's whole tree-top geometry exposed this) and **box-collision is scaled** (the exporter's
+scaled BOX3, consumed via `GetColSpace()` for `MODEL_TYPE_BOX`). Use this freely for
+axis-aligned platforms of varying size that share one datablock.
 
-- For **purely visual** scaling (squash/stretch effects, decorative size variation
-  with no gameplay collision — e.g. qbert), this is fine and intended.
-- For a size change that must **affect gameplay** (a genuinely bigger crate you stand
-  on or bump into), make it a **real mesh edit in Blender** and re-export — the mesh
-  is the golden source of an object's true size.
-- A first-class "scale that also scales collision + physics" (Jolt `ScaledShape`,
-  authored as Blender object scale) is a tracked follow-up, deferred until after the
-  next level ships — see `TODO.md` § *DEFERRED UNTIL LEVEL*.
+**Caveat:** the render scale column-multiplies the world matrix, so non-uniform scale on a
+**rotated** actor shears — keep scaled statplats axis-aligned (SMB ones are). And it only
+fixes **box** collision; a `MODEL_TYPE_MESH` Jolt-trimesh statplat builds its body from raw
+verts with no scale multiply (`actor.cc` BindAssets trimesh block), so a scaled trimesh
+statplat would still collide unit-sized — keep scaled statplats `MODEL_TYPE_BOX`/BOX3.
+
+**For floor tiles that CharacterVirtual must stand on — use `build_textured_ground_mesh`.**
+W1-4 showed Mario falling through `add_statplat` (unit-box datablock) floor tiles even with
+no player input (ball pos X=3.0 constant, Z decreasing). Switching to `build_textured_ground_mesh`
+(which bakes scale into mesh vertices via `transform_apply`) fixed it. Root cause not fully
+traced — one observable difference is that `add_statplat` creates both a BOX_STATIC body
+(correct, from the scaled OAD BOX3) and a MESH_STATIC body (local verts at ±0.5, not scaled
+by actor scale), while `build_textured_ground_mesh` produces a MESH_STATIC with correct world
+positions. Use `build_textured_ground_mesh` for any surface where the character must land.
+Discovered 2026-06-04 while building W1-4.
+
+### (b) Runtime `X/Y/Z_SCALE` mailboxes (3040–3042) — visual-only
+
+**Symptom:** You stretch/squash an actor at runtime via the scale mailboxes (e.g. qbert)
+and the mesh visibly changes, but it still collides/blocks as its original size.
+
+**Why:** the mailbox write forwards to `SetActorScale` (`actor.cc:1606-1628`) at draw time;
+nothing re-derives the collision bbox or Jolt shape mid-frame. This is fine and intended for
+squash/stretch effects. For a gameplay-size change at **author time**, use path (a) above (or
+a real mesh edit). A first-class runtime "scale that also rescales collision + physics" (Jolt
+`ScaledShape`) is a tracked follow-up — see `TODO.md` § *DEFERRED UNTIL LEVEL*.
 
 
 ## Multi-room levels & cross-room warps (the SMB pipe warp)
@@ -2009,3 +2097,171 @@ loop never indexes past the TOC (`GetTOCEntry` asserts). (2026-05-31 —
 - **Don't teleport the player by writing `X_POS` to reach a far flag** — it glitches the Jolt body
   (fall/death → death reloads the *same* level, masking the transition). Walk the player in with
   `inject_input joystick1_raw=0x2000` on a short, hazard-free stretch instead.
+
+---
+
+## PERM pool OOM — size the pool for all prop models, not just the player
+
+**Symptom:** Engine crashes at load with:
+```
+AssertMsg: Lmalloc based at address 0x… out of memory, request size = N.
+lmalloc remaining = M, Named Room #4095
+```
+`Named Room #4095` is the PERM slot (room `0xFFF` in the asset system).
+
+**Cause:** `<level>-standalone.iff.txt` has a hard-coded `'PERM' Nl` byte count.  The
+initial value was sized for `player.iff` alone.  Each prop model added to PERM (via
+`wf_Moves Between Rooms = 'True'`) consumes ~55 KB in the pool at runtime — roughly 2–3×
+the on-disk IFF size, because the engine expands mesh geometry into float32 normals,
+UV tables, and material lists.
+
+**Fix:** Increase the `PERM` value in `<level>-standalone.iff.txt`:
+
+```
+'PERM' 1000000l   // 1 MB — fits ~18 prop models at current average
+```
+
+Rule of thumb: budget **≈ 2.5 × sum of prop `.iff` file sizes** for the PERM pool.
+Never cross the 2048-byte sector boundary of a round number — use multiples of 2048 for
+CD-sector alignment (1 MB = 1 048 576, round down to 1 000 000 is fine on PC dev; on real
+target you'd align to 0x100000).
+
+---
+
+## Cutscene camera `Track Object` — must be a room actor, not a PERM actor
+
+**Symptom:** With `wf_Track Object = 'some_perm_actor'` on a cutscene camshot, the
+camera asserts at runtime:
+```
+ASSERTION FAILED: ValidPtr(trackObject)    movecam.cc:1067
+```
+
+**Cause:** `GetObject(idx)` only searches the room object table. PERM actors are loaded
+into a separate slot and are not returned by `GetObject`, so the track-object pointer is
+null every frame the camera is active.
+
+**Fix:** Use a room-resident proxy actor as the track target.  Give the proxy a per-frame
+Forth script that reads a shared mailbox (e.g. `MOON_LANDER_Z`) and writes to its own
+`INDEXOF_Z_POS`, keeping its position in sync with the PERM actor:
+
+```forth
+\\ wf
+INDEXOF_MOON_LANDER_Z read-mailbox INDEXOF_Z_POS write-mailbox
+```
+
+The PERM actor's script publishes its position to the global mailbox each frame, and the
+room proxy mirrors it.  The camshot tracks the proxy, which `GetObject` always finds.
+
+---
+
+## `MOBILITY_PHYSICS` actor as a quick driveable vehicle
+
+Proper Jolt `VehicleConstraint` is deferred (see `TODO.md`). In the meantime you can make any
+`MOBILITY_PHYSICS` actor respond to the joystick like a humanoid by combining two things:
+
+**1. Set `Script Controls Input = 'True'` on the vehicle actor.**  
+This makes the engine create a `QInputDigital(InputScript*)` instead of `theNullInputDigital`.
+Without it every tick is a no-op. The field is an **Enum**, not Bool — use the string label:
+
+```python
+vehicle_obj['wf_Script Controls Input'] = 'True'   # must be the string, not int 1
+vehicle_obj['wf_Running Acceleration']  = 12.0     # heavier than a humanoid
+vehicle_obj['wf_Running Deceleration']  = 0.3      # low friction — slides on regolith
+```
+
+**2. Route the global joystick to the actor's `INDEXOF_INPUT` mailbox in a Forth script.**  
+`INDEXOF_INPUT` is a per-actor local system mailbox (base 3024). Writing to it from within the
+actor's own script routes to `InputScript::setButtons`, which feeds the `GroundHandler` /
+`MarbleHandler` that day's button read:
+
+```forth
+\ wf
+INDEXOF_MOON_ACTIVE_VEH_IDX read-mailbox INDEXOF_ACTOR_INDEX read-mailbox = if
+  INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox
+then
+```
+
+The vehicle script must also publish its own position to shared globals each tick so the player
+script can read them (see "Vehicle entry: one-frame position sync skip" below).
+
+**Handler selection:** with a non-zero `Turn Rate` the actor uses `GroundHandler` (humanoid-style
+directional movement), which is correct for a vehicle. With `Turn Rate = 0` it uses
+`MarbleHandler` (momentum-carry ball-style), which is usually wrong for a vehicle. If the
+platform OAD's default TurnRate is 0, set it explicitly:
+
+```python
+vehicle_obj['wf_Turn Rate'] = 0.5   # non-zero → GroundHandler, not MarbleHandler
+```
+
+**Limitation:** the vehicle stays a Jolt `CharacterVirtual` — it can climb steps, fall, and
+collide with static geometry, but there's no suspension, steering angle, or wheel physics.
+The hack is useful for top-down or side-view contexts where the distinction isn't visible.
+See `TODO.md § VEHICLE PHYSICS` for the Jolt `VehicleConstraint` upgrade path.
+
+---
+
+## Vehicle entry: one-frame position sync skip
+
+**Symptom:** On the first frame after the player "enters" a vehicle (a script writes the vehicle's
+actor index to a mailbox and the player script starts copying vehicle X/Y/Z to its own X/Y/Z),
+the player teleports to world origin (0, 0, 0) for one frame then snaps back to the vehicle.
+
+**Cause:** The vehicle position mailboxes (`MOON_VEHICLE_X/Y/Z`) are 0 at the start of the level
+and are only updated by the vehicle script *each tick*. On the entry tick, the player script reads
+those mailboxes before the vehicle has published its position — so the player teleports to (0,0,0).
+
+**Fix:** use a one-frame "entering" flag mailbox:
+
+```python
+# In the player script — on vehicle entry, set the entering flag:
+"1 INDEXOF_MOON_VEH_ENTERING write-mailbox\n"
+
+# Each in-vehicle tick, skip position sync on the first frame:
+"INDEXOF_MOON_VEH_ENTERING read-mailbox 1 = if\n"
+"  0 INDEXOF_MOON_VEH_ENTERING write-mailbox\n"    # clear, don't sync this frame
+"else\n"
+"  INDEXOF_MOON_VEHICLE_X read-mailbox INDEXOF_X_POS write-mailbox\n"
+"  INDEXOF_MOON_VEHICLE_Y read-mailbox INDEXOF_Y_POS write-mailbox\n"
+"  INDEXOF_MOON_VEHICLE_Z read-mailbox INDEXOF_Z_POS write-mailbox\n"
+"then\n"
+```
+
+The vehicle's own script publishes its position *this* tick; the player reads it *next* tick.
+The flag ensures the player doesn't sample the stale zero values during the entry frame.
+
+**Root cause:** WF script execution order within a frame is actor-list order. The vehicle actor
+and the player actor run in the same pass; whichever is earlier in the actor list publishes first.
+If the player is listed before the vehicle, the position is always one frame stale on the first
+read after entry. The flag makes that one stale frame harmless.
+
+---
+
+## Script-driven ascent: despawn before the actor exits room z_max
+
+**Symptom:** A script writes `INDEXOF_Z_POS` each frame to make an actor rise (e.g. a
+rocket launch: `z = 0.5 × t²`).  After some time the engine prints:
+```
+Room::UpdateRoomContents: object N … fell out of room 0
+```
+…and then crashes (null GetObject return for any actor that was tracking the flyer).
+
+**Cause:** The actor's Z coordinate eventually exceeds the room's `z_max` ceiling.
+Raising `z_max` in `blender_create_<level>.py` only delays the crash — it's a timebomb.
+
+**Fix:** Despawn the actor (`ALIVE = 0`) in its own Forth script **before** it can exit
+the room.  Compute the expected exit altitude and despawn well below it:
+
+```forth
+\\ wf
+INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if
+  INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox dup * 0.5 *   \ z = 0.5 × t²
+  dup 500 > if
+    drop 0 INDEXOF_ALIVE write-mailbox   \ despawn at 500 m, z_max = 2000 m
+  else
+    INDEXOF_Z_POS write-mailbox
+  then
+then
+```
+
+Choose the despawn threshold to be well below `z_max` and after any camera cutback that
+references the actor, so the camera is never active and tracking a despawned actor.

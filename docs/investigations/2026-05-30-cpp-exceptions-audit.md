@@ -79,6 +79,33 @@ So it's a code-size optimisation, exactly as `-fno-rtti` is a code-size optimisa
 
 - `engine/stubs/debug_server.cc:141` `try { std::stod } catch (...)` lives in a `-fno-exceptions` Release-Clang target. Verify the build path or rewrite to `std::strtod`. One-liner.
 
+## Policy decision (confirmed 2026-06-02)
+
+The question "should we allow exceptions in the editor code?" came up again. The build
+map makes the answer concrete, so recording it here once:
+
+1. **`-fno-exceptions` is Release+Clang-only** ([`CMakeLists.txt`](../../CMakeLists.txt):706/772
+   on `wfengine`/`wf_game`, generator-gated). It's a code-size optimisation, paralleling
+   `-fno-rtti` — **not** a blanket ban. `wf-edit`, `wf_game-dev`, and every Debug/GCC build
+   compile with exceptions **on**.
+2. **The editor/dev code is `#ifdef`-gated out of the shipped lean build** (`WF_ENABLE_EDITOR`
+   / `WF_DEBUG_BRIDGE` / `WF_REST_API`). So `engine/wf_edit`, `engine/crdt`, `engine/mutation`,
+   and the bridge stubs aren't even compiled into the one build that has `-fno-exceptions`.
+3. **Therefore: exceptions are *already* allowed where the editor runs.** No flag to flip.
+   - **Pure-host UI (`engine/wf_edit/*`):** may use exceptions freely (it already does —
+     nlohmann, libdatachannel, `std::set_terminate`). Catch at the entry points.
+   - **Engine-straddling stubs (`engine/stubs/debug_server.cc`, `rest_api.cc`, `engine/mutation/*`):**
+     these link into `wfengine` and **inherit its flags**, so a Release+Clang build with the
+     bridge enabled would make a throw abort. **Keep these no-throw** (`strtof`/`strtod`,
+     error-returns, asserts) so they're correct under either setting. Cheap, robust.
+4. **Escape hatch (deferred):** if the no-throw discipline ever chafes, lift the bridge/dev
+   stubs out of `wfengine` into a host-only `-fexceptions` static lib linked only by dev
+   hosts — makes the partition explicit. Small CMake refactor; not needed today.
+
+The audit's `try { std::stod }` follow-up is now **fully closed**: `debug_server.cc` moved to
+`std::strtod` (2026-05-30), and `rest_api.cc`'s sibling `std::stof` moved to `std::strtof`
+(2026-06-02, [editor-fail-clean-nuggets plan](../plans/2026-06-02-editor-fail-clean-nuggets.md)).
+
 ## Related
 
 - [`project_no_rtti_architectural_constraint`](../../../.claude/projects/-home-will-WorldFoundry/memory/project_no_rtti_architectural_constraint.md) memory — the parent policy. Same cost-on-MCU logic; `-fno-exceptions` follows the same shape as `-fno-rtti`.

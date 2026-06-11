@@ -80,7 +80,7 @@ ActBox::activate( const Actor* pActor )
 {
     assert( ValidPtr( pActor ) );
     DBSTREAM1( cactor << "actbox update: writing " << getOad()->MailBoxValue << " to mailbox " << getOad()->MailBox << std::endl; )
-    GetMailboxes().WriteMailbox( getOad()->MailBox, Scalar::FromFixed32( getOad()->MailBoxValue ) );
+    GetMailboxes().WriteMailbox( getOad()->MailBox, Scalar( (float)getOad()->MailBoxValue ) );
     GetMailboxes().WriteMailbox( getOad()->ActivatedActorMailbox, Scalar( pActor->GetActorIndex(), 0 ) );
 }
 

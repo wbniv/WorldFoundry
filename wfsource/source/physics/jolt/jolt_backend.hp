@@ -116,4 +116,41 @@ void           JoltCharacterUpdate(uint32_t handle, float dt);
 bool           JoltCharacterIsOnGround(uint32_t handle);
 Vector3        JoltCharacterGetGroundNormal(uint32_t handle);
 
+// ---------------------------------------------------------------------------
+// WheeledVehicleController — one per MOBILITY_VEHICLE actor (Lunar Cruiser etc.).
+// Wheel positions are in vehicle-local coordinates (WF axes: X=forward, Y=left,
+// Z=up). Suspension rest length is set so wheel centre sits at wheel_z above
+// the chassis origin.
+//
+// Workflow per frame:
+//   1. Read INPUT mailbox bits for forward/steer/brake.
+//   2. JoltVehicleSetInput(handle, forward, rightward, brake).
+//   3. JoltWorldStep already called — constraint is updated inside it.
+//   4. JoltVehicleGetPosition / GetRotation — push to actor PhysicalAttributes.
+
+struct JoltVehicleWheelCfg {
+    float x, y;     // vehicle-local position (Z derived from suspension)
+    bool  steer;    // true = steerable (front wheels)
+};
+
+struct JoltVehicleConfig {
+    float chassis_hx, chassis_hy, chassis_hz; // box half-extents (metres)
+    float mass_kg;
+    float gravity_z;            // negative falling accel (e.g. -1.62 for moon)
+    float wheel_radius;
+    float wheel_half_width;
+    float max_steer_angle_rad;  // for steerable wheels
+    float max_torque_nm;
+    int   num_wheels;
+    const JoltVehicleWheelCfg* wheels;
+};
+
+uint32_t JoltVehicleCreate(const Vector3& pos, const Euler& rot,
+                            const JoltVehicleConfig& cfg);
+void     JoltVehicleDestroy(uint32_t handle);
+// forward ∈ [-1,+1], rightward ∈ [-1,+1], brake ∈ [0,1]
+void     JoltVehicleSetInput(uint32_t handle, float forward, float rightward, float brake);
+const Vector3& JoltVehicleGetPosition(uint32_t handle);
+Euler          JoltVehicleGetRotation(uint32_t handle);
+
 #endif // PHYSICS_ENGINE_JOLT

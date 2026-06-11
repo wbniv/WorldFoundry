@@ -83,6 +83,10 @@ Engine default change (#4): **dropped from scope**.
 
 Documentation update (`docs/level-building.md`) goes alongside (1).
 
+## Post-landing verification (2026-06-02)
+
+Captured `docs/plans/screenshots/2026-06-02-moon-post-ambient-baseline.png` after `b280d591` to eye-test for regressions. Plan: [`2026-05-31-verify-the-moon-ambientlight-fix-landed-cleanly.md`](2026-05-31-verify-the-moon-ambientlight-fix-landed-cleanly.md). Result: **clean**. HUD/text-block/minimap/cardinals/lat-lon-ticks all intact; terrain shading shows the subtle ambient lift (shadow side of crater rims slightly fuller, lit side unchanged because it clamps). No regressions.
+
 ## Files affected (per item)
 
 - (1) `wflevels/moon_site01/blender_create_moon.py`

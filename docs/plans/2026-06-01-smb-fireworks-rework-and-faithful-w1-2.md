@@ -1,7 +1,7 @@
 # Plan: SMB radial-burst fireworks + faithful underground W1-2
 
 **Date:** 2026-06-01
-**Status:** Part A in progress
+**Status:** DONE (2026-06-02) — A + B1 + B2 + B3 landed; B0 (`smb_common.py`) deferred (ported inline instead, see Phasing)
 
 ## Context
 
@@ -151,11 +151,31 @@ keeps looping `LEVEL_TO_RUN` back to W1-1.
 
 ## Phasing (commit per phase)
 
-- **A** — W1-1 fireworks rework + count + positioning. Verify, commit.
-- **B0** — extract `smb_common.py`; W1-1 imports it; re-verify W1-1 unchanged. Commit.
-- **B1** — W1-2 geometry + underground theme. Commit.
-- **B2** — W1-2 populated (blocks/coins/items, enemies, pipes, bonus room, warp decor). Commit (may split enemies vs items).
-- **B3** — W1-2 celebration ending. Commit.
+- **A** — ✅ W1-1 fireworks rework + count + positioning. Verified, committed.
+- **B0** — ⏸️ **deferred** — `smb_common.py` extraction was attempted but orphaned in a
+  concurrent-checkout git tangle (2026-06-01); rather than re-do the W1-1 refactor (regression
+  risk on a working, verified level), the celebration was **ported inline** into W1-2 (matching its
+  already-forked builder style). The shared-module extraction is a code-quality follow-up, not a
+  deliverable blocker — see Follow-ups.
+- **B1** — ✅ W1-2 geometry + underground theme. Committed.
+- **B2** — ✅ W1-2 populated (blocks/coins/items, enemies, pipes, bonus room, warp decor).
+  Committed (`49d3c453`). **OOM fixed by exporter mesh dedup** (115→85 unique meshes; one `.iff`
+  per Blender datablock, not per object) — no limit bumps. Boots clean: object count 131.
+- **B3** — ✅ W1-2 celebration ending. Committed. Ported the W1-1 celebration verbatim
+  (FLAGPOLE_X=372-relative): flag-slide + castle + rising castle flag + door + radial spark
+  fireworks (count = remaining-timer last digit 1/3/6) + Director timer→score sequencer; flagpole
+  trigger now writes `SMB_CELEBRATE` (Director fires `END_OF_LEVEL` at the finale). Boots clean:
+  object count 142 (90 unique meshes, no OOM). **Fireworks verified three ways:** (1) the engine
+  log shows the generators firing — `Generato::FIRING obj=… spawn=(371.9,…,8.9) vel=(0,0,4)` +
+  `ConstructTemplateObject -> non-NULL`, ×31 across the burst window; (2) a celebration **video**
+  ([`tests/recordings/smb_w1_2_celebration.mp4`](../../tests/recordings/smb_w1_2_celebration.mp4))
+  shows the flag slide + Mario walking into the castle + the spark bursts popping; (3) a
+  long-exposure **composite still**
+  ([`tests/screenshots/smb_w1_2_celebration_fireworks.png`](../../tests/screenshots/smb_w1_2_celebration_fireworks.png))
+  overlays the radial spark positions across the burst window above/around the castle. The
+  sparks are faithfully small (0.32 m, same as W1-1) so they read best in motion (the video) —
+  a single still catches only 1–2 of a burst. The plain celebration frame (flag + castle +
+  timer drained to 0, Mario hidden) is `tests/screenshots/smb_w1_2_celebration.png`.
 
 ## Verification
 
@@ -185,3 +205,16 @@ keeps looping `LEVEL_TO_RUN` back to W1-1.
 - Fanfare SFX (audio — verify on the other machine) — explicitly excluded now.
 - Real moving-platform **lifts** (`platform.oas`) + functional **warp zone** once worlds 2-1/3-1/4-1 exist.
 - 3-D (out-of-plane) spark spread if the 2-D burst reads flat.
+- **`smb_common.py` extraction** (the deferred B0): W1-1 + W1-2 still each carry a forked copy of the
+  builders + the ~700-line Player script + Director + celebration. Extract the shared machinery into
+  `wflevels/smb_common.py` so the two levels can't drift — do it when neither level is mid-change and
+  re-run `verify_smb_scroll`/`verify_smb_scoring` + re-capture both celebrations to prove no behaviour
+  change.
+- **Koopa/Piranha `.001` mesh filenames** (`koopa_green_0.001.iff`, `piranha_0.001.iff`): the exporter
+  emitted `.001`-suffixed names because the Blender datablock name collided during build (each enemy
+  builds a fresh datablock named after the object, and the object name already exists). Cosmetic —
+  the meshes load fine — but the names should be clean; fixes when the builders share datablocks.
+- **Celebration sparks fan past the room's right edge** (`Room::UpdateRoomContents … fell out of
+  room 0`, X>384.5): pre-existing in W1-1 too (same FLAGPOLE_X-relative geometry); the engine
+  re-adds them so they still render, but both rooms' right bound should extend ~10 m past the castle
+  to contain the spark fan and stop the log spam.

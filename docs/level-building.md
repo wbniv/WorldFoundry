@@ -488,6 +488,46 @@ For an isometric camera where screen-up ≠ world-N, use a bit-rotation word ins
 hop arcs, AI), see `qbert_practice/blender_create_qbert.py` for the canonical multi-tick
 state-machine pattern in Forth.
 
+#### Available Forth words (zForth vocabulary)
+
+The actor `{Script}` field runs in zForth with a vocabulary already loaded — **you don't need to define
+these, and new scripts should use them directly** rather than inlining the old workarounds:
+
+- **Stack:** `dup drop swap over rot -rot nip tuck ?dup 2dup 2drop 2swap pick`
+- **Arithmetic:** `+ - * / 1+ 1- negate abs min max mod` (`%` is the native alias for `mod`)
+- **Compare** *(true = `-1`, like standard Forth):* `= <> < > <= >= 0= 0< 0> 0<> not`
+- **Bitwise:** `&` (= `and`), `|` (= `or`) — **not** `and`/`or`, which abort at runtime (`ZF_ABORT_NOT_A_WORD`)
+- **Memory:** `@ ! +! , here`
+- **Control flow:** `if … else … then` (`fi` = `then`), `begin … until`, `begin … again`, `limit start do … loop` (or `loop+`), loop indices `i` `j`
+- **WF bridge:** `read-mailbox ( idx -- val )`, `write-mailbox ( val idx -- )`, `write-actor-mailbox ( val idx actor -- )`
+- **Constants:** every `INDEXOF_*` mailbox name is pre-defined.
+
+> **New as of 2026-06-02:** `0= 0< 0> negate abs min max ?dup nip tuck -rot 2dup 2drop 2swap +! mod`
+> were added to `kCoreBootstrap` (`engine/stubs/scripting_zforth.cc`). Older scripts that inline
+> equivalents — `over over` (→ `2dup`), `swap drop` (→ `nip`), `0 =` (→ `0=`) — still work, but reach for
+> the words. (The cam-remap example below predates this and still uses `swap drop`; `nip` is equivalent.)
+
+> **Cells are float**, so `/` is floating-point division. For an integer remainder use `mod` (or `%`),
+> which truncate via zForth's native `%` primitive (and abort on divide-by-zero). Do **not** write
+> `over over / * -` for mod — it cannot truncate under float division and silently returns garbage.
+
+**Branching on a mailbox value** — three patterns; pick by whether you need the value after the test:
+```forth
+( 1. value not needed — direct: if consumes it )
+INDEXOF_TRIGGER read-mailbox if  ...  then
+
+( 2. value needed on true branch only — ?dup: copies non-zero, leaves 0 unchanged )
+INDEXOF_CAM read-mailbox ?dup if INDEXOF_CAMSHOT write-mailbox then
+
+( 3. value needed on both branches — dup 0= to test without consuming )
+INDEXOF_DIST read-mailbox dup 0= if drop 0 else  ... use value ...  then
+```
+`0 <>` before `if` is unnecessary for branching — `if` treats any non-zero value as true. Only use
+`0 <>` (or `0=`) when you need the normalized `-1`/`0` boolean itself on the stack.
+
+Full catalogue + rename gotchas (`&`/`|`/`<0`/`%`) and compile-mode rules for `if/then` live in
+[`docs/scripting-languages.md`](scripting-languages.md#L37).
+
 #### PILOT in-level scripts
 
 PILOT is a scripting language option alongside Forth/Lua/Wren/JS/Wasm (engine `kDispatch`

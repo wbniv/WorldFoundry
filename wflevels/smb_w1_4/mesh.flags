@@ -1,0 +1,6 @@
+# Shared game-wide SMB mesh library (P3). Sourced by build_level_binary.sh.
+# MESH_DIR: where per-mesh .iff files live, relative to this level dir (bbox reads).
+# MESH_REF_PREFIX: path prepended to the .iff.txt file-include refs (iffcomp embed).
+# See docs/plans/2026-06-03-smb-shared-mesh-dir.md.
+MESH_DIR=../smb
+MESH_REF_PREFIX=../smb/

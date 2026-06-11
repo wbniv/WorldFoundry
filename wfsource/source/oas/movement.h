@@ -37,6 +37,7 @@ enum
 	MOBILITY_PATH,
 	MOBILITY_CAMERA,
 	MOBILITY_FOLLOW,
+	MOBILITY_VEHICLE,   // Jolt VehicleConstraint + WheeledVehicleController
 	MOBILITY_MAX
 };
 

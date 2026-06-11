@@ -266,6 +266,29 @@ static const char* kCoreBootstrap =
     ": loop+ ' r> , ' + , ' dup , ' >r , ' lit , 1 , ' pickr , ' >= , "
              "' jmp0 , , ' r> , ' drop , ' r> , ' drop , ; immediate "
     ": loop  ' lit , 1 , postpone loop+ ; immediate "
+    // --- Standard ANS CORE words (tiers 1+2 + mod) — see
+    // docs/plans/2026-05-17-add-tier-1-2-standard-forth-words-to-the-wf-zforth.md.
+    // Order matters: later defs reuse earlier ones and the control-flow / stack
+    // primitives defined above (over, <, >, if, then, =, <0, @, !, rot, >r, r>).
+    ": 0=     0 = ; "
+    ": 0<     <0 ; "                       // <0 is the zForth primitive; 0< is the ANS name
+    ": 0>     0 > ; "
+    ": negate 0 swap - ; "
+    ": abs    dup 0< if negate then ; "
+    ": min    over over > if swap then drop ; "
+    ": max    over over < if swap then drop ; "
+    ": ?dup   dup if dup then ; "
+    ": nip    swap drop ; "
+    ": tuck   swap over ; "
+    ": -rot   rot rot ; "
+    ": 2dup   over over ; "
+    ": 2drop  drop drop ; "
+    ": 2swap  >r -rot r> -rot ; "          // a b c d -> c d a b
+    ": +!     dup @ rot + swap ! ; "
+    // `mod` is the ANS name for zForth's native `%` primitive — integer remainder
+    // (int)a%(int)b with a divide-by-zero abort (zforth.c PRIM_MOD). Same family as
+    // & = and, | = or, <0 = 0<. NOT `over over / * -` — `/` is float division here.
+    ": mod    % ; "
     ;
 
 void Init(MailboxesManager& mgr)

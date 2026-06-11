@@ -63,6 +63,9 @@ extern float wf_moon_player_x_m;
 extern float wf_moon_player_y_m;
 extern float wf_moon_player_z_m;
 extern float wf_moon_player_heading_rev;
+// Moon lander launch sequence — see docs/plans/2026-06-02-moon-lander-launch-sequence.md
+extern int   wf_moon_launch_phase;
+extern float wf_moon_launch_t_minus;
 
 #include "hscore.h"
 
@@ -72,6 +75,7 @@ extern float wf_moon_player_heading_rev;
 extern bool bRecordVideo;
 extern GLuint gCaptureFBO;
 static void EnsureCaptureFBO(int w, int h);
+static void CaptureFrame(int xSize, int ySize, int liveW, int liveH);
 
 static void DrawHudText(float x, float y, const char* text)
 {
@@ -83,70 +87,14 @@ static void DrawHudText(float x, float y, const char* text)
     glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-// Moon Site 01 minimap. Loads wflevels/moon_site01/minimap.tga from cwd on
-// first use; if missing, the minimap silently disables (text overlay still
-// renders). Hardcoded relative path is a v1 shortcut; proper cd.iff asset
-// wiring is a follow-up.
-static GLuint gMoonMinimapTex = 0;
-static bool   gMoonMinimapTried = false;
-static int    gMoonMinimapW = 0, gMoonMinimapH = 0;
-
-static void LoadMoonMinimapTexture()
-{
-    gMoonMinimapTried = true;
-    FILE* fp = fopen("wflevels/moon_site01/minimap.tga", "rb");
-    if (!fp) { fprintf(stderr, "moon overlay: minimap.tga not found, minimap disabled\n"); return; }
-    fseek(fp, 0, SEEK_END);
-    long fsize = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    if (fsize < 18) { fclose(fp); fprintf(stderr, "moon overlay: minimap.tga truncated\n"); return; }
-    uint8_t* buf = (uint8_t*)malloc(fsize);
-    if (fread(buf, 1, fsize, fp) != (size_t)fsize) { free(buf); fclose(fp); return; }
-    fclose(fp);
-
-    // Minimal TGA reader: uncompressed truecolor (type 2), 24- or 32-bpp, no colormap.
-    uint8_t id_len    = buf[0];
-    uint8_t cmap_type = buf[1];
-    uint8_t img_type  = buf[2];
-    int     width     = buf[12] | (buf[13] << 8);
-    int     height    = buf[14] | (buf[15] << 8);
-    uint8_t bpp       = buf[16];
-    uint8_t desc      = buf[17];
-    bool    top_down  = (desc & 0x20) != 0;
-    if (cmap_type != 0 || img_type != 2 || (bpp != 24 && bpp != 32)) {
-        fprintf(stderr, "moon overlay: minimap.tga unsupported format (type=%d bpp=%d)\n", img_type, bpp);
-        free(buf); return;
-    }
-    int channels = bpp / 8;
-    int expected = 18 + id_len + width * height * channels;
-    if (expected > fsize) { fprintf(stderr, "moon overlay: minimap.tga payload truncated\n"); free(buf); return; }
-
-    const uint8_t* pix = buf + 18 + id_len;
-    // Convert BGR(A) → RGB top-down for GL upload.
-    uint8_t* rgb = (uint8_t*)malloc(width * height * 3);
-    for (int y = 0; y < height; ++y) {
-        int src_y = top_down ? y : (height - 1 - y);
-        const uint8_t* src_row = pix + src_y * width * channels;
-        uint8_t* dst_row = rgb + y * width * 3;
-        for (int x = 0; x < width; ++x) {
-            dst_row[x*3 + 0] = src_row[x*channels + 2];   // R
-            dst_row[x*3 + 1] = src_row[x*channels + 1];   // G
-            dst_row[x*3 + 2] = src_row[x*channels + 0];   // B
-        }
-    }
-    free(buf);
-
-    glGenTextures(1, &gMoonMinimapTex);
-    glBindTexture(GL_TEXTURE_2D, gMoonMinimapTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, rgb);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    free(rgb);
-    gMoonMinimapW = width; gMoonMinimapH = height;
-    fprintf(stderr, "moon overlay: minimap loaded (%dx%d), tex=%u\n", width, height, gMoonMinimapTex);
-}
+// Moon Site 01 minimap. Samples the resident ground atlas live (terrain_texture.tga
+// fills RM0's texture — Room0.ruv has a single 0,0,1024,1024 entry) instead of a
+// baked minimap.tga: no loose-file I/O, no extra GL texture, automatically correct
+// under chunk streaming (it's the texture the player is standing on). The atlas
+// PixelMap + its normalized UV rect come from the game layer (it needs theLevel /
+// AssetManager). Mirrors the wf_moon_* game->display global pattern.
+// See docs/plans/2026-06-04-moon-overhead-map-and-chunk-texture-streaming.md.
+extern const PixelMap* wf_moon_ground_atlas();
 
 static void DrawHud(int xSize, int ySize)
 {
@@ -195,7 +143,11 @@ static void DrawHud(int xSize, int ySize)
     DrawHudText(0, 0, buf); glPopMatrix();
 
     int t = wf_hud_timer > 0 ? wf_hud_timer : 0;
-    snprintf(buf, sizeof(buf), "TIME %d", t);
+    if (wf_moon_launch_phase >= 3) {
+        snprintf(buf, sizeof(buf), "TIME %d", (int)wf_moon_launch_t_minus);
+    } else {
+        snprintf(buf, sizeof(buf), "TIME %d", t);
+    }
     {
         float tw = (float)stb_easy_font_width((char*)buf) * kScale;
         glPushMatrix(); glTranslatef((float)xSize * 0.5f - tw * 0.5f, 8, 0); glScalef(kScale, kScale, 1);
@@ -254,17 +206,23 @@ static void DrawHud(int xSize, int ySize)
         const float mm_x = (float)xSize - 8.0f - MM;
         const float mm_y = 8.0f;
 
-        if (!gMoonMinimapTried) LoadMoonMinimapTexture();
-        if (gMoonMinimapTex != 0)
+        // Sample the resident ground atlas (the terrain the player is on),
+        // not a baked image. terrain_texture.tga fills RM0's atlas, so UV 0..1
+        // is the whole chunk. v=0 at the inset top: the engine uploads the atlas
+        // top-row-first (row 0 = terrain north), so v ascends downward — which
+        // matches world_to_screen's v-flip below (world +Y → inset top).
+        // Confirmed by ncc vs the old baked minimap.tga (0.91 at this mapping).
+        const PixelMap* atlas = wf_moon_ground_atlas();
+        if (atlas)
         {
             glEnable(GL_TEXTURE_2D);
-            glBindTexture(GL_TEXTURE_2D, gMoonMinimapTex);
+            atlas->SetGLTexture();
             glColor3f(1.0f, 1.0f, 1.0f);
             glBegin(GL_QUADS);
-                glTexCoord2f(0, 0); glVertex2f(mm_x,      mm_y);
-                glTexCoord2f(1, 0); glVertex2f(mm_x + MM, mm_y);
-                glTexCoord2f(1, 1); glVertex2f(mm_x + MM, mm_y + MM);
-                glTexCoord2f(0, 1); glVertex2f(mm_x,      mm_y + MM);
+                glTexCoord2f(0.0f, 0.0f); glVertex2f(mm_x,      mm_y);
+                glTexCoord2f(1.0f, 0.0f); glVertex2f(mm_x + MM, mm_y);
+                glTexCoord2f(1.0f, 1.0f); glVertex2f(mm_x + MM, mm_y + MM);
+                glTexCoord2f(0.0f, 1.0f); glVertex2f(mm_x,      mm_y + MM);
             glEnd();
             glDisable(GL_TEXTURE_2D);
         }
@@ -427,6 +385,33 @@ static void DrawHud(int xSize, int ySize)
                 DrawHudText(0.0f, 0.0f, (char*)d.letter);
                 glPopMatrix();
             }
+        }
+
+        // Launch countdown banner — bright orange, centred high in the frame,
+        // visible only during pre-ascent phases (1 = countdown, 2 = ignition).
+        // Phase 3 (ascent) repurposes the top-bar TIME counter as seconds since
+        // ignition instead of carrying its own banner.
+        // See docs/plans/2026-06-02-moon-lander-launch-sequence.md.
+        if (wf_moon_launch_phase == 1 || wf_moon_launch_phase == 2) {
+            char banner[64];
+            float bscale = 3.0f;
+            if (wf_moon_launch_phase == 1) {
+                int t_sec = (int)(wf_moon_launch_t_minus + 0.999f);
+                if (t_sec < 1) t_sec = 1;
+                snprintf(banner, sizeof(banner), "LAUNCH IN: T-%d", t_sec);
+            } else {
+                snprintf(banner, sizeof(banner), "IGNITION");
+            }
+            float bw = (float)stb_easy_font_width(banner) * bscale;
+            // Centred horizontally, ~y=110 (below the 4-line text block, above
+            // the lander silhouette).
+            glColor3f(1.0f, 0.6f, 0.1f);   // Raptor-flame orange
+            glPushMatrix();
+            glTranslatef((float)xSize * 0.5f - bw * 0.5f, 110.0f, 0.0f);
+            glScalef(bscale, bscale, 1.0f);
+            DrawHudText(0.0f, 0.0f, banner);
+            glPopMatrix();
+            glColor3f(1.0f, 1.0f, 0.0f);   // restore yellow for any HUD below
         }
     }
 
@@ -820,6 +805,14 @@ Display::RenderBegin()
        glBindFramebuffer(GL_FRAMEBUFFER, gCaptureFBO);
    }
 #endif
+   // Recompute viewport + projection every frame so resize/maximize stays correct.
+   {
+       int suw, suh;
+       GetSurfaceSize(suw, suh);
+       glViewport(0, 0, suw, suh);
+       RendererBackendGet().SetProjection(60.0f, float(suw) / float(suh), 1.0f, 1000.0f);
+       AssertGLOK();
+   }
    glClearColor( _backgroundColorRed, _backgroundColorGreen, _backgroundColorBlue, 1.0 );
    AssertGLOK();
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);     // Clear the window with current clearing color
@@ -937,7 +930,7 @@ EnsureCaptureFBO(int w, int h)
 }
 
 static void
-CaptureFrame(int xSize, int ySize)
+CaptureFrame(int xSize, int ySize, int liveW, int liveH)
 {
     if (!gCapturePipe)
     {
@@ -968,8 +961,8 @@ CaptureFrame(int xSize, int ySize)
     {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, gCaptureFBO);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        glBlitFramebuffer(0, 0, xSize, ySize, 0, 0, xSize, ySize,
-                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        glBlitFramebuffer(0, 0, xSize, ySize, 0, 0, liveW, liveH,
+                          GL_COLOR_BUFFER_BIT, GL_LINEAR);
         // FBO remains bound as the READ framebuffer for glReadPixels below.
     }
 
@@ -1154,7 +1147,7 @@ Display::PageFlip()
 
 #if DESIGNER_CHEATS && defined(__LINUX__)
     if (bRecordVideo)
-        CaptureFrame(_xSize, _ySize);
+        CaptureFrame(_xSize, _ySize, _liveWidth, _liveHeight);
 #endif
 
 #if defined(__ANDROID__)
@@ -1196,16 +1189,12 @@ Display::MeasureDelta()
     struct timeval deltatime;
     deltatime.tv_usec = tv.tv_usec - _clockLastTime.tv_usec;
     deltatime.tv_sec = tv.tv_sec - _clockLastTime.tv_sec;
-    // Game mode: a ≥5 s frame gap genuinely is catastrophic (the world would
-    // jump huge amounts while the player stared at a frozen screen), so keep
-    // the loud assert. Editor mode: stalls are routine (ASan, Doc-apply, the
-    // remote-SYNC apply hot path, debugging breakpoints) — warn and clamp like
-    // the > 0.2 s case below, so the editor survives stalls of any length.
-    extern bool gEditorMode;   // game/main.cc — set true under --editor
-    if (!gEditorMode) {
-        assert(deltatime.tv_sec < 5);
-    } else if (deltatime.tv_sec >= 5) {
-        std::cout << "editor: large frame stall (" << deltatime.tv_sec
+    // Clamp large wall-clock stalls (alt-tab, debugger pause, ASan hitch,
+    // Android backgrounding, editor Doc-apply) so a legitimate frame gap
+    // doesn't abort the session. Post-clamp the 1/5-s ceiling below still
+    // caps the simulation step.
+    if (deltatime.tv_sec >= 5) {
+        std::cout << "large frame stall (" << deltatime.tv_sec
                   << " s), clamping" << std::endl;
         deltatime.tv_sec  = 4;
         deltatime.tv_usec = 999999;

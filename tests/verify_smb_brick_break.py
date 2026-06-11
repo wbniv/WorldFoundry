@@ -29,11 +29,12 @@ import os, re, sys, time, subprocess
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from debug_bridge_client import BridgeClient  # noqa: E402
+from debug_bridge_client import BridgeClient, discover_by_pos  # noqa: E402
 
 REPO  = Path(__file__).resolve().parent.parent
 WF    = REPO / "engine" / "wf_game"
 LEVEL = REPO / "wflevels" / "smb_w1_1-standalone.iff"
+LEV   = REPO / "wflevels" / "smb_w1_1" / "smb_w1_1.lev"   # name→pos for shared-mesh discovery
 LIB   = REPO / "engine" / "libs"
 CWD   = REPO / "wfsource" / "source" / "game"
 SCROT = REPO / "tests" / "screenshots"
@@ -127,12 +128,16 @@ def main() -> int:
         print(f"  screenshot {label}: {'OK -> ' + out.name if (m and m.get('op')=='screenshot_done') else 'WARN ' + str(m)}")
 
     try:
-        names = {"player", "brick_0", "brick_1", "brick_hidden"}
-        idx = discover(LOG, names)
-        print("discovered indices:", idx)
-        if not names.issubset(idx):
+        # player has a unique mesh → discover by mesh. The bricks share one mesh
+        # datablock since P2b (and the hidden mushroom brick is authored as
+        # `mushroom_block`, not `brick_hidden`), so discover those by position.
+        idx = discover(LOG, {"player"})
+        blocks = discover_by_pos(LOG, LEV, {"brick_0", "brick_1", "mushroom_block"})
+        print("discovered indices:", idx, blocks)
+        if "player" not in idx or len(blocks) < 3:
             print("FATAL: missing brick actors; aborting"); return 1
-        PLAYER, B0, B1, BH = idx["player"], idx["brick_0"], idx["brick_1"], idx["brick_hidden"]
+        PLAYER = idx["player"]
+        B0, B1, BH = blocks["brick_0"], blocks["brick_1"], blocks["mushroom_block"]
 
         cli = BridgeClient("127.0.0.1", PORT, timeout=15.0)
         print("bridge: connected"); time.sleep(1.0)

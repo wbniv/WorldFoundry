@@ -37,6 +37,7 @@
 #include <GL/glx.h>
 #include <GL/glu.h>
 #undef Display
+#include <X11/Xatom.h>  // XA_ATOM, for _NET_WM_STATE_FULLSCREEN
 
 //==============================================================================
 
@@ -153,6 +154,29 @@ OpenMainWindow( char *title )
     if(!halDisplay.win)
         FatalError("Couldn't open X window!");
     XStoreName(halDisplay.mainDisplay, halDisplay.win, title);
+
+    // Tell the WM this is a normal application window so it gets decorations.
+    {
+        Atom wm_window_type   = XInternAtom(halDisplay.mainDisplay, "_NET_WM_WINDOW_TYPE", False);
+        Atom wm_type_normal   = XInternAtom(halDisplay.mainDisplay, "_NET_WM_WINDOW_TYPE_NORMAL", False);
+        XChangeProperty(halDisplay.mainDisplay, halDisplay.win,
+                        wm_window_type, XA_ATOM, 32, PropModeReplace,
+                        (unsigned char*)&wm_type_normal, 1);
+    }
+
+    // Request fullscreen before mapping so the WM sees it at map time
+    // (EWMH spec: set _NET_WM_STATE on an unmapped window via XChangeProperty;
+    // use ClientMessage only for already-visible windows).
+    extern bool bFullScreen;
+    if (bFullScreen)
+    {
+        Atom wm_state = XInternAtom(halDisplay.mainDisplay, "_NET_WM_STATE", False);
+        Atom fs_atom  = XInternAtom(halDisplay.mainDisplay, "_NET_WM_STATE_FULLSCREEN", False);
+        XChangeProperty(halDisplay.mainDisplay, halDisplay.win,
+                        wm_state, XA_ATOM, 32, PropModeReplace,
+                        (unsigned char*)&fs_atom, 1);
+    }
+
     // XMapRaised = map + raise; signals the WM to focus the window on open.
     XMapRaised(halDisplay.mainDisplay, halDisplay.win);
     _wmDeleteWindow = XInternAtom(halDisplay.mainDisplay, "WM_DELETE_WINDOW", False);
@@ -252,27 +276,9 @@ void ProcessXEvents(XEvent event)
     {
         case ConfigureNotify:
             {
-                /* this approach preserves a 1:1 viewport aspect ratio */
-                int vX, vY, vW, vH;
                 int eW = event.xconfigure.width, eH = event.xconfigure.height;
-                if(eW >= eH)
-                {
-                    vX = 0;
-                    vY = (eH - eW) >> 1;
-                    vW = vH = eW;
-                }
-                else
-                {
-                    vX = (eW - eH) >> 1;
-                    vY = 0;
-                    vW = vH = eH;
-                }
-                glViewport(vX, vY, vW, vH);
+                glViewport(0, 0, eW, eH);
                 AssertGLOK();
-                // Push the live window size into Display so HUD layout
-                // (screen-space ortho) anchors to actual window corners after a
-                // resize. The 3D viewport above stays an inscribed square; HUD
-                // uses the full window via Display::GetSurfaceSize.
                 if (auto* d = Display::GetActive())
                     d->SetLiveWindowSize(eW, eH);
             }

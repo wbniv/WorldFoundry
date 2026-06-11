@@ -55,6 +55,7 @@ pub fn write(
     level_stem: &str,
     rooms: &[i32],
     out_path: &Path,
+    mesh_ref_prefix: &str,
 ) -> io::Result<()> {
     let mut s = String::new();
     s.push_str("//=============================================================================\n");
@@ -155,8 +156,9 @@ pub fn write(
     for (name, id) in assets.entries() {
         if room_from_id(*id) == ROOM_PERM && !name.ends_with(".tga") {
             s.push_str(&format!(
-                "\t\t{{ 'ASS' ${id:x}l [ \"{name}\" ] }}  // {decoded}\n",
+                "\t\t{{ 'ASS' ${id:x}l [ \"{prefix}{name}\" ] }}  // {decoded}\n",
                 id = id,
+                prefix = mesh_ref_prefix,
                 name = name,
                 decoded = decode_id(*id),
             ));
@@ -173,8 +175,9 @@ pub fn write(
         for (name, id) in assets.entries() {
             if room_from_id(*id) == r && !name.ends_with(".tga") {
                 s.push_str(&format!(
-                    "\t\t{{ 'ASS' ${id:x}l [ \"{name}\" ] }}  // {decoded}\n",
+                    "\t\t{{ 'ASS' ${id:x}l [ \"{prefix}{name}\" ] }}  // {decoded}\n",
                     id = id,
+                    prefix = mesh_ref_prefix,
                     name = name,
                     decoded = decode_id(*id),
                 ));

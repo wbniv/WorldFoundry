@@ -18,6 +18,9 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#if defined(__SANITIZE_ADDRESS__)
+#  include <sanitizer/lsan_interface.h>
+#endif
 #include <cstring>
 #include <functional>
 #include <future>
@@ -54,7 +57,16 @@ static float json_float(const std::string& body, const char* key)
     if (pos == std::string::npos) return std::nanf("");
     // skip whitespace
     while (++pos < body.size() && (body[pos]==' '||body[pos]=='\t'||body[pos]=='\n'||body[pos]=='\r'));
-    return std::stof(body.c_str() + pos);
+    // strtof, NOT std::stof: stof throws std::invalid_argument on a malformed
+    // value, which — uncaught in this exception-free stub (it links into
+    // wfengine) — aborts the process on a bad REST body. strtof reports failure
+    // via endptr and returns NaN here, matching the "absent → NaN" contract.
+    // (Same fix the 2026-05-30 exceptions audit applied to debug_server.cc.)
+    const char* start = body.c_str() + pos;
+    char* end = nullptr;
+    const float v = std::strtof(start, &end);
+    if (end == start) return std::nanf("");
+    return v;
 }
 
 // Parse a named string value from JSON, e.g. "color":"#ff0000" → "#ff0000".
@@ -177,6 +189,9 @@ void RestApi_Start()
     int port = port_env ? atoi(port_env) : 8765;
 
     gServer = new httplib::Server();
+#if defined(__SANITIZE_ADDRESS__)
+    __lsan_ignore_object(gServer);   // intentional leak — see RestApi_Stop comment
+#endif
 
     // POST /boxes — create
     gServer->Post("/boxes", [](const httplib::Request& req, httplib::Response& res) {
@@ -283,11 +298,16 @@ void RestApi_Start()
         gServer->listen(host, port);
         std::fprintf(stderr, "rest_api: server stopped\n");
     });
+    // Detach: this is a static std::thread, and on the exit(-1) path (e.g. an
+    // engine AssertMsg) the C++ runtime runs static destructors during
+    // __run_exit_handlers BEFORE our sys_atexit RestApi_Stop gets to join —
+    // destroying a still-*joinable* std::thread calls std::terminate(), which
+    // tacks a bogus "terminate called without an active exception" + SIGABRT
+    // onto every assert (the sys_atexit-join below is NOT guaranteed to run
+    // first). Detaching makes the destructor a no-op; RestApi_Stop still breaks
+    // listen() via gServer->stop(). Mirrors the debug-bridge listener fix.
+    gServerThread.detach();
 
-    // Window-close routes through sys_exit() → libc exit(), which runs static
-    // destructors.  ~std::thread() on a joinable thread calls std::terminate.
-    // Register stop-and-join as an atexit so shutdown happens before the
-    // static gServerThread destructor runs.
     static bool atexitRegistered = false;
     if (!atexitRegistered) {
         sys_atexit([](int) { RestApi_Stop(); });
@@ -400,9 +420,12 @@ void RestApi_RenderBoxes()
 void RestApi_Stop()
 {
     if (gServer) {
-        gServer->stop();
-        if (gServerThread.joinable()) gServerThread.join();
-        delete gServer;
+        gServer->stop();    // unblocks listen(); the detached gServerThread exits on its own
+        // Leak gServer rather than delete + join: the thread is detached (see
+        // RestApi_Start) and may still be unwinding gServer->listen(), so deleting
+        // under it would be a use-after-free. RestApi_Stop is atexit-only, so the
+        // OS reclaims the object at process exit — a harmless one-shot leak that
+        // avoids both the std::terminate (joinable static dtor) and the UAF.
         gServer = nullptr;
     }
 }

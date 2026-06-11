@@ -92,6 +92,9 @@ float wf_moon_player_x_m         = 0.0f;
 float wf_moon_player_y_m         = 0.0f;
 float wf_moon_player_z_m         = 0.0f;
 float wf_moon_player_heading_rev = 0.0f;
+// Moon lander launch sequence — see docs/plans/2026-06-02-moon-lander-launch-sequence.md
+int   wf_moon_launch_phase       = 0;        // 0=idle, 1=countdown, 2=ignition, 3=ascent
+float wf_moon_launch_t_minus     = 0.0f;     // seconds until launch (phase 1) or since ignition (phase ≥ 2)
 #endif
 
 bool bPerspectiveCorrection = false;
@@ -168,6 +171,8 @@ usage( int argc, char* argv[] )
     std::cout << "\t--vram-height N\t\tTotal VRAM box height (default " << Display::VRAMHeight << ")" << std::endl;
     std::cout << "\t--vram-slot-width N\tTransient texture slot width  (default " << VideoMemory::VRAMTransientWidth  << ")" << std::endl;
     std::cout << "\t--vram-slot-height N\tTransient texture slot height (default " << VideoMemory::VRAMTransientHeight << ")" << std::endl;
+    std::cout << "\t--vram-perm-width N\tPermanent texture slot width  (default " << VideoMemory::VRAMPermanentWidth  << ")" << std::endl;
+    std::cout << "\t--vram-perm-height N\tPermanent texture slot height (default " << VideoMemory::VRAMPermanentHeight << ")" << std::endl;
     std::cout << "\t-zs\t\tZ-Sorted" << std::endl;
     std::cout << "\t-zb\t\tZ-Buffered" << std::endl;
 	std::cout << "\t-nologo\t\tDon't display company logos" << std::endl;
@@ -283,6 +288,10 @@ ParseCommandLine(int argc, char** argv)
             VideoMemory::VRAMTransientWidth  = atoi( argv[index] + 18 );
         else if ( strncmp( argv[index]+1, "-vram-slot-height=", 18 ) == 0 )
             VideoMemory::VRAMTransientHeight = atoi( argv[index] + 19 );
+        else if ( strncmp( argv[index]+1, "-vram-perm-width=", 17 ) == 0 )
+            VideoMemory::VRAMPermanentWidth  = atoi( argv[index] + 18 );
+        else if ( strncmp( argv[index]+1, "-vram-perm-height=", 18 ) == 0 )
+            VideoMemory::VRAMPermanentHeight = atoi( argv[index] + 19 );
 		else if ( strcmp( argv[index]+1, "zb" ) == 0 )
 		{
 			bRenderZb = true;

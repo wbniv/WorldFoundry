@@ -147,3 +147,63 @@ class BridgeClient:
                 return True
             time.sleep(0.05)
         return False
+
+
+# ── Actor discovery by authored name → runtime index ──────────────────────────
+# The engine log identifies actors only by mesh filename + position
+# ("actor idx=N mesh=foo.iff ... pos=(x,y,z)"); it carries no authored name
+# (the runtime _ObjectOnDisk has no name field — stripped for MCU targets).
+# When many actors share one mesh datablock (mesh-sharing / P2b), the mesh name
+# no longer identifies an instance, so we bridge the authored NAME → idx through
+# POSITION: the .lev has both name and Position; the log has idx and pos.
+import re as _re                                                    # noqa: E402
+from pathlib import Path as _Path                                   # noqa: E402
+
+_LEV_OBJ_NAME_RE = _re.compile(r"\{\s*'NAME'\s*\"([^\"]+)\"\s*\}")
+_LEV_POS_RE = _re.compile(
+    r"'VEC3'\s*\{\s*'NAME'\s*\"Position\"\s*\}\s*\{\s*'DATA'\s*"
+    r"([-\d.]+)\(1\.15\.16\)\s+([-\d.]+)\(1\.15\.16\)\s+([-\d.]+)\(1\.15\.16\)")
+_LOG_ACTOR_POS_RE = _re.compile(
+    r"actor idx=(\d+) mesh=\S+ mobility=\S+ pos=\(([-\d.]+),([-\d.]+),([-\d.]+)\)")
+
+
+def lev_name_to_pos(lev_path) -> dict[str, tuple[float, float, float]]:
+    """Parse a text `.lev`: return {authored object name: (x, y, z)}."""
+    text = _Path(lev_path).read_text(errors="ignore")
+    out: dict[str, tuple[float, float, float]] = {}
+    for chunk in text.split("'OBJ'")[1:]:
+        nm = _LEV_OBJ_NAME_RE.search(chunk)          # first NAME = the object's
+        pm = _LEV_POS_RE.search(chunk)
+        if nm and pm:
+            out[nm.group(1)] = (float(pm.group(1)), float(pm.group(2)), float(pm.group(3)))
+    return out
+
+
+def discover_by_pos(log_path, lev_path, want: set[str],
+                    timeout: float = 8.0, tol: float = 0.6) -> dict[str, int]:
+    """Map authored object names → runtime actor idx via position.
+
+    Robust to mesh-sharing (where several actors log the same mesh name). Only
+    valid for anchored/static actors, whose runtime pos equals the authored one.
+    """
+    name_pos = lev_name_to_pos(lev_path)
+    missing = [n for n in want if n not in name_pos]
+    if missing:
+        raise KeyError(f"names not found in {lev_path}: {missing}")
+    targets = {n: name_pos[n] for n in want}
+    deadline = time.time() + timeout
+    found: dict[str, int] = {}
+    while time.time() < deadline and len(found) < len(want):
+        if _Path(log_path).exists():
+            idx_pos = [(int(m.group(1)), float(m.group(2)), float(m.group(3)), float(m.group(4)))
+                       for m in _LOG_ACTOR_POS_RE.finditer(_Path(log_path).read_text(errors="ignore"))]
+            for nm, (tx, ty, tz) in targets.items():
+                if nm in found:
+                    continue
+                for idx, x, y, z in idx_pos:
+                    if abs(x - tx) < tol and abs(y - ty) < tol and abs(z - tz) < tol:
+                        found[nm] = idx
+                        break
+        if len(found) < len(want):
+            time.sleep(0.1)
+    return found

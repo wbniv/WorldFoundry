@@ -912,7 +912,7 @@
 		{ 'STR' { 'NAME' "Poof" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Is Needle Gun Target" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Write To Mailbox On Death" } { 'DATA' 0l } { 'STR' "0" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n1 INDEXOF_SMB_MARIO_VIS write-mailbox\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\nINDEXOF_Z_POS read-mailbox INDEXOF_SMB_PLAYER_Z write-mailbox\nINDEXOF_SMB_LIVES_INIT read-mailbox not if 3 INDEXOF_LIVES write-mailbox 1 INDEXOF_SMB_LIVES_INIT write-mailbox then\nINDEXOF_SMB_STOMP read-mailbox 0<> if\n  8.0 INDEXOF_ZSPEED write-mailbox\n  INDEXOF_SMB_SCORE read-mailbox 100 + INDEXOF_SMB_SCORE write-mailbox\n  0 INDEXOF_SMB_STOMP write-mailbox\nthen\nINDEXOF_SMB_MUSHROOM_PICKUP read-mailbox 0<> if\n  INDEXOF_SMB_MARIO_STATE read-mailbox not if\n    1 INDEXOF_SMB_MARIO_STATE write-mailbox\n    1.25 INDEXOF_X_SCALE write-mailbox 1.25 INDEXOF_Y_SCALE write-mailbox 1.9 INDEXOF_Z_SCALE write-mailbox\n  then\n  0 INDEXOF_SMB_MUSHROOM_PICKUP write-mailbox\nthen\nINDEXOF_SMB_FIREFLOWER_PICKUP read-mailbox 0<> if\n  INDEXOF_SMB_MARIO_STATE read-mailbox 2 < if\n    2 INDEXOF_SMB_MARIO_STATE write-mailbox\n    1.25 INDEXOF_X_SCALE write-mailbox 1.25 INDEXOF_Y_SCALE write-mailbox 1.9 INDEXOF_Z_SCALE write-mailbox\n    0xF8F0E0 INDEXOF_FACE_COLOR_TOP write-mailbox\n  then\n  0 INDEXOF_SMB_FIREFLOWER_PICKUP write-mailbox\nthen\nINDEXOF_SMB_STAR_PICKUP read-mailbox 0<> if\n  INDEXOF_TIME read-mailbox 10.0 + INDEXOF_SMB_STAR_UNTIL write-mailbox\n  INDEXOF_TIME read-mailbox 10.0 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n  0 INDEXOF_SMB_STAR_PICKUP write-mailbox\nthen\nINDEXOF_TIME read-mailbox INDEXOF_SMB_STAR_UNTIL read-mailbox < if\n  INDEXOF_TIME read-mailbox 8.0 * 2 % if 0xFFE000 else 0xFFFFFF then INDEXOF_FACE_COLOR_TOP write-mailbox\n  1 INDEXOF_SMB_STAR_FLICKER_LATCH write-mailbox\nelse\n  INDEXOF_SMB_STAR_FLICKER_LATCH read-mailbox 0<> if\n    INDEXOF_SMB_MARIO_STATE read-mailbox 2 = if 0xF8F0E0 else 0xFFFFFF then INDEXOF_FACE_COLOR_TOP write-mailbox\n    0 INDEXOF_SMB_STAR_FLICKER_LATCH write-mailbox\n  then\nthen\nINDEXOF_SMB_PLAYER_HURT read-mailbox 0<> if\n  INDEXOF_TIME read-mailbox INDEXOF_SMB_INVULN_UNTIL read-mailbox > if\n    INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n      INDEXOF_SMB_MARIO_STATE read-mailbox 1 - dup INDEXOF_SMB_MARIO_STATE write-mailbox\n      0 > if\n        1.25 INDEXOF_X_SCALE write-mailbox 1.25 INDEXOF_Y_SCALE write-mailbox 1.9 INDEXOF_Z_SCALE write-mailbox\n      else\n        1.0 INDEXOF_X_SCALE write-mailbox 1.0 INDEXOF_Y_SCALE write-mailbox 1.0 INDEXOF_Z_SCALE write-mailbox\n      then\n      0xFFFFFF INDEXOF_FACE_COLOR_TOP write-mailbox\n      INDEXOF_TIME read-mailbox 1.5 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n    else\n      INDEXOF_LIVES read-mailbox 1 - INDEXOF_LIVES write-mailbox\n      4.5 INDEXOF_X_POS write-mailbox\n      0 INDEXOF_Y_POS write-mailbox\n      1.5 INDEXOF_Z_POS write-mailbox\n      0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox 0 INDEXOF_ZSPEED write-mailbox\n      INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox\n      INDEXOF_TIME read-mailbox 2.0 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n      INDEXOF_LIVES read-mailbox 1 < if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n    then\n  then\n  0 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\nINDEXOF_SMB_AT_PIPE read-mailbox 0<> if\n  INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox 4096 & 0<> if\n    3.0 INDEXOF_X_POS write-mailbox\n    0 INDEXOF_Y_POS write-mailbox\n    -46.5 INDEXOF_Z_POS write-mailbox\n    0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox 0 INDEXOF_ZSPEED write-mailbox\n  then\nthen\nINDEXOF_SMB_ONEUP_PICKUP read-mailbox 0<> if\n  INDEXOF_LIVES read-mailbox 1 + INDEXOF_LIVES write-mailbox\n  0 INDEXOF_SMB_ONEUP_PICKUP write-mailbox\nthen\nINDEXOF_SMB_CELEBRATE read-mailbox 0<> if\n  INDEXOF_SMB_CELEBRATE_START read-mailbox not if INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START write-mailbox then\n  INDEXOF_SMB_EOL_LATCH read-mailbox not if\n    1 INDEXOF_SMB_EOL_LATCH write-mailbox\n    INDEXOF_Z_POS read-mailbox\n    dup 9.0 > if drop 5000\n    else dup 6.0 > if drop 2000\n    else dup 4.5 > if drop 800\n    else dup 3.0 > if drop 400\n    else dup 1.5 > if drop 200\n    else drop 100\n    then then then then then\n    INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n    INDEXOF_HUD_TIMER read-mailbox 50 *\n    INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n    INDEXOF_HUD_TIMER read-mailbox 10 %\n    dup 1 = if drop 1 else dup 3 = if drop 3 else dup 6 = if drop 6 else drop 0 then then then\n    INDEXOF_SMB_FIREWORK_COUNT write-mailbox\n  then\n  INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox -\n  dup 0.9 < if drop INDEXOF_X_POS read-mailbox 315.0 > if 315.0 INDEXOF_X_POS write-mailbox then\n  else dup 1.6 < if 0.9 - 1.42857 * dup 1.0 > if drop 1.0 then 2.0 * 315.0 + INDEXOF_X_POS write-mailbox\n  else drop 0 INDEXOF_SMB_MARIO_VIS write-mailbox 317.0 INDEXOF_X_POS write-mailbox\n  then then\nthen\nINDEXOF_SMB_COIN_INIT read-mailbox not if\n  1 INDEXOF_SMB_COIN_0 write-mailbox 1 INDEXOF_SMB_COIN_1 write-mailbox 1 INDEXOF_SMB_COIN_2 write-mailbox\n  1 INDEXOF_SMB_COIN_3 write-mailbox 1 INDEXOF_SMB_COIN_4 write-mailbox 1 INDEXOF_SMB_COIN_5 write-mailbox\n  1 INDEXOF_SMB_COIN_6 write-mailbox 1 INDEXOF_SMB_COIN_7 write-mailbox 1 INDEXOF_SMB_COIN_8 write-mailbox\n  1 INDEXOF_SMB_COIN_9 write-mailbox 1 INDEXOF_SMB_COIN_10 write-mailbox 1 INDEXOF_SMB_COIN_11 write-mailbox\n  1 INDEXOF_SMB_COIN_12 write-mailbox 1 INDEXOF_SMB_COIN_13 write-mailbox 1 INDEXOF_SMB_COIN_14 write-mailbox\n  1 INDEXOF_SMB_COIN_15 write-mailbox 1 INDEXOF_SMB_COIN_16 write-mailbox 1 INDEXOF_SMB_COIN_17 write-mailbox 1 INDEXOF_SMB_COIN_18 write-mailbox\n  1 INDEXOF_SMB_COIN_INIT write-mailbox\nthen\nINDEXOF_SMB_COIN_0 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 6.75 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_0 write-mailbox\n  then then\nINDEXOF_SMB_COIN_1 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 8.25 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_1 write-mailbox\n  then then\nINDEXOF_SMB_COIN_2 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 9.75 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_2 write-mailbox\n  then then\nINDEXOF_SMB_COIN_3 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 11.25 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_3 write-mailbox\n  then then\nINDEXOF_SMB_COIN_4 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 12.75 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_4 write-mailbox\n  then then\nINDEXOF_SMB_COIN_5 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 14.25 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_5 write-mailbox\n  then then\nINDEXOF_SMB_COIN_6 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 15.75 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_6 write-mailbox\n  then then\nINDEXOF_SMB_COIN_7 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 6.75 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_7 write-mailbox\n  then then\nINDEXOF_SMB_COIN_8 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 8.25 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_8 write-mailbox\n  then then\nINDEXOF_SMB_COIN_9 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 9.75 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_9 write-mailbox\n  then then\nINDEXOF_SMB_COIN_10 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 11.25 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_10 write-mailbox\n  then then\nINDEXOF_SMB_COIN_11 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 12.75 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_11 write-mailbox\n  then then\nINDEXOF_SMB_COIN_12 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 14.25 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_12 write-mailbox\n  then then\nINDEXOF_SMB_COIN_13 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 15.75 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_13 write-mailbox\n  then then\nINDEXOF_SMB_COIN_14 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 8.25 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_14 write-mailbox\n  then then\nINDEXOF_SMB_COIN_15 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 9.75 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_15 write-mailbox\n  then then\nINDEXOF_SMB_COIN_16 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 11.25 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_16 write-mailbox\n  then then\nINDEXOF_SMB_COIN_17 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 12.75 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_17 write-mailbox\n  then then\nINDEXOF_SMB_COIN_18 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 14.25 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_18 write-mailbox\n  then then\nINDEXOF_GOLD read-mailbox INDEXOF_SMB_LAST_GOLD read-mailbox -\ndup 0 > if\n  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n  INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n  1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n  200 * INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n  INDEXOF_GOLD read-mailbox 100 % not if\n    INDEXOF_SMB_LAST_GOLD read-mailbox 100 % 0<> if\n      INDEXOF_GOLD read-mailbox 0 > if\n        INDEXOF_LIVES read-mailbox 1 + INDEXOF_LIVES write-mailbox\n      then\n    then\n  then\nelse\n  drop\nthen\nINDEXOF_GOLD read-mailbox INDEXOF_SMB_LAST_GOLD write-mailbox\nINDEXOF_SMB_SCORE read-mailbox INDEXOF_HUD_SCORE write-mailbox\nINDEXOF_SMB_MARIO_FACING read-mailbox not if 1 INDEXOF_SMB_MARIO_FACING write-mailbox then\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_RIGHT & 0<> if 1 INDEXOF_SMB_MARIO_FACING write-mailbox then\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_LEFT & 0<> if -1 INDEXOF_SMB_MARIO_FACING write-mailbox then\nINDEXOF_X_POS read-mailbox INDEXOF_SMB_MARIO_FACING read-mailbox 1.8 * + INDEXOF_SMB_FIREBALL_X write-mailbox\nINDEXOF_Y_POS read-mailbox INDEXOF_SMB_FIREBALL_Y write-mailbox\nINDEXOF_Z_POS read-mailbox 0.8 + INDEXOF_SMB_FIREBALL_Z write-mailbox\n0 INDEXOF_SMB_FIREBALL_FIRE_R write-mailbox 0 INDEXOF_SMB_FIREBALL_FIRE_L write-mailbox\nINDEXOF_SMB_MARIO_STATE read-mailbox 2 = if\n  INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_B & 0<> if\n    INDEXOF_SMB_FIRE_LATCH read-mailbox not if\n      INDEXOF_TIME read-mailbox INDEXOF_SMB_FIRE_COOLDOWN read-mailbox > if\n        INDEXOF_SMB_MARIO_FACING read-mailbox 0 > if\n          1 INDEXOF_SMB_FIREBALL_FIRE_R write-mailbox\n        else\n          1 INDEXOF_SMB_FIREBALL_FIRE_L write-mailbox\n        then\n        1 INDEXOF_SMB_FIRE_LATCH write-mailbox\n        INDEXOF_TIME read-mailbox 0.5 + INDEXOF_SMB_FIRE_COOLDOWN write-mailbox\n      then\n    then\n  then\nthen\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_B & not if 0 INDEXOF_SMB_FIRE_LATCH write-mailbox then\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\n1 INDEXOF_SMB_MARIO_VIS write-mailbox\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox dup 16384 & 256 / over 8192 & 64 / | | INDEXOF_INPUT write-mailbox\nINDEXOF_X_POS read-mailbox INDEXOF_SMB_PLAYER_X write-mailbox\nINDEXOF_Z_POS read-mailbox INDEXOF_SMB_PLAYER_Z write-mailbox\nINDEXOF_Z_POS read-mailbox -8.0 > if\n  INDEXOF_X_POS read-mailbox -3.00 < if -3.00 INDEXOF_X_POS write-mailbox 0 INDEXOF_XSPEED write-mailbox then\n  INDEXOF_X_POS read-mailbox 322.50 > if 322.50 INDEXOF_X_POS write-mailbox 0 INDEXOF_XSPEED write-mailbox then\nthen\nINDEXOF_Y_POS read-mailbox -1.50 < if -1.50 INDEXOF_Y_POS write-mailbox 0 INDEXOF_YSPEED write-mailbox then\nINDEXOF_Y_POS read-mailbox 1.50 > if 1.50 INDEXOF_Y_POS write-mailbox 0 INDEXOF_YSPEED write-mailbox then\nINDEXOF_SMB_LIVES_INIT read-mailbox not if 3 INDEXOF_LIVES write-mailbox 1 INDEXOF_SMB_LIVES_INIT write-mailbox then\nINDEXOF_SMB_STOMP read-mailbox 0<> if\n  8.0 INDEXOF_ZSPEED write-mailbox\n  INDEXOF_SMB_SCORE read-mailbox 100 + INDEXOF_SMB_SCORE write-mailbox\n  0 INDEXOF_SMB_STOMP write-mailbox\nthen\nINDEXOF_SMB_MUSHROOM_PICKUP read-mailbox 0<> if\n  INDEXOF_SMB_MARIO_STATE read-mailbox not if\n    1 INDEXOF_SMB_MARIO_STATE write-mailbox\n    1.25 INDEXOF_X_SCALE write-mailbox 1.25 INDEXOF_Y_SCALE write-mailbox 1.9 INDEXOF_Z_SCALE write-mailbox\n  then\n  0 INDEXOF_SMB_MUSHROOM_PICKUP write-mailbox\nthen\nINDEXOF_SMB_FIREFLOWER_PICKUP read-mailbox 0<> if\n  INDEXOF_SMB_MARIO_STATE read-mailbox 2 < if\n    2 INDEXOF_SMB_MARIO_STATE write-mailbox\n    1.25 INDEXOF_X_SCALE write-mailbox 1.25 INDEXOF_Y_SCALE write-mailbox 1.9 INDEXOF_Z_SCALE write-mailbox\n    0xF8F0E0 INDEXOF_FACE_COLOR_TOP write-mailbox\n  then\n  0 INDEXOF_SMB_FIREFLOWER_PICKUP write-mailbox\nthen\nINDEXOF_SMB_STAR_PICKUP read-mailbox 0<> if\n  INDEXOF_TIME read-mailbox 10.0 + INDEXOF_SMB_STAR_UNTIL write-mailbox\n  INDEXOF_TIME read-mailbox 10.0 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n  0 INDEXOF_SMB_STAR_PICKUP write-mailbox\nthen\nINDEXOF_TIME read-mailbox INDEXOF_SMB_STAR_UNTIL read-mailbox < if\n  INDEXOF_TIME read-mailbox 8.0 * 2 % if 0xFFE000 else 0xFFFFFF then INDEXOF_FACE_COLOR_TOP write-mailbox\n  1 INDEXOF_SMB_STAR_FLICKER_LATCH write-mailbox\nelse\n  INDEXOF_SMB_STAR_FLICKER_LATCH read-mailbox 0<> if\n    INDEXOF_SMB_MARIO_STATE read-mailbox 2 = if 0xF8F0E0 else 0xFFFFFF then INDEXOF_FACE_COLOR_TOP write-mailbox\n    0 INDEXOF_SMB_STAR_FLICKER_LATCH write-mailbox\n  then\nthen\nINDEXOF_SMB_PLAYER_HURT read-mailbox 0<> if\n  INDEXOF_TIME read-mailbox INDEXOF_SMB_INVULN_UNTIL read-mailbox > if\n    INDEXOF_SMB_MARIO_STATE read-mailbox 0 > if\n      INDEXOF_SMB_MARIO_STATE read-mailbox 1 - dup INDEXOF_SMB_MARIO_STATE write-mailbox\n      0 > if\n        1.25 INDEXOF_X_SCALE write-mailbox 1.25 INDEXOF_Y_SCALE write-mailbox 1.9 INDEXOF_Z_SCALE write-mailbox\n      else\n        1.0 INDEXOF_X_SCALE write-mailbox 1.0 INDEXOF_Y_SCALE write-mailbox 1.0 INDEXOF_Z_SCALE write-mailbox\n      then\n      0xFFFFFF INDEXOF_FACE_COLOR_TOP write-mailbox\n      INDEXOF_TIME read-mailbox 1.5 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n    else\n      INDEXOF_LIVES read-mailbox 1 - INDEXOF_LIVES write-mailbox\n      4.5 INDEXOF_X_POS write-mailbox\n      0 INDEXOF_Y_POS write-mailbox\n      1.5 INDEXOF_Z_POS write-mailbox\n      0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox 0 INDEXOF_ZSPEED write-mailbox\n      INDEXOF_TIME read-mailbox INDEXOF_SMB_TIMER_START write-mailbox\n      INDEXOF_TIME read-mailbox 2.0 + INDEXOF_SMB_INVULN_UNTIL write-mailbox\n      INDEXOF_LIVES read-mailbox 1 < if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n    then\n  then\n  0 INDEXOF_SMB_PLAYER_HURT write-mailbox\nthen\nINDEXOF_SMB_AT_PIPE read-mailbox 0<> if\n  INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox 4096 & 0<> if\n    3.0 INDEXOF_X_POS write-mailbox\n    0 INDEXOF_Y_POS write-mailbox\n    -46.5 INDEXOF_Z_POS write-mailbox\n    0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox 0 INDEXOF_ZSPEED write-mailbox\n  then\nthen\nINDEXOF_SMB_ONEUP_PICKUP read-mailbox 0<> if\n  INDEXOF_LIVES read-mailbox 1 + INDEXOF_LIVES write-mailbox\n  0 INDEXOF_SMB_ONEUP_PICKUP write-mailbox\nthen\nINDEXOF_SMB_CELEBRATE read-mailbox 0<> if\n  INDEXOF_SMB_CELEBRATE_START read-mailbox not if INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START write-mailbox then\n  INDEXOF_SMB_EOL_LATCH read-mailbox not if\n    1 INDEXOF_SMB_EOL_LATCH write-mailbox\n    INDEXOF_Z_POS read-mailbox\n    dup 9.0 > if drop 5000\n    else dup 6.0 > if drop 2000\n    else dup 4.5 > if drop 800\n    else dup 3.0 > if drop 400\n    else dup 1.5 > if drop 200\n    else drop 100\n    then then then then then\n    INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n    INDEXOF_HUD_TIMER read-mailbox 50 *\n    INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n    INDEXOF_HUD_TIMER read-mailbox 10 %\n    dup 1 = if drop 1 else dup 3 = if drop 3 else dup 6 = if drop 6 else drop 0 then then then\n    INDEXOF_SMB_FIREWORK_COUNT write-mailbox\n  then\n  INDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox -\n  dup 0.9 < if drop INDEXOF_X_POS read-mailbox 315.0 > if 315.0 INDEXOF_X_POS write-mailbox then\n  else dup 1.6 < if 0.9 - 1.42857 * dup 1.0 > if drop 1.0 then 2.0 * 315.0 + INDEXOF_X_POS write-mailbox\n  else drop 0 INDEXOF_SMB_MARIO_VIS write-mailbox 317.0 INDEXOF_X_POS write-mailbox\n  then then\nthen\nINDEXOF_SMB_COIN_INIT read-mailbox not if\n  1 INDEXOF_SMB_COIN_0 write-mailbox 1 INDEXOF_SMB_COIN_1 write-mailbox 1 INDEXOF_SMB_COIN_2 write-mailbox\n  1 INDEXOF_SMB_COIN_3 write-mailbox 1 INDEXOF_SMB_COIN_4 write-mailbox 1 INDEXOF_SMB_COIN_5 write-mailbox\n  1 INDEXOF_SMB_COIN_6 write-mailbox 1 INDEXOF_SMB_COIN_7 write-mailbox 1 INDEXOF_SMB_COIN_8 write-mailbox\n  1 INDEXOF_SMB_COIN_9 write-mailbox 1 INDEXOF_SMB_COIN_10 write-mailbox 1 INDEXOF_SMB_COIN_11 write-mailbox\n  1 INDEXOF_SMB_COIN_12 write-mailbox 1 INDEXOF_SMB_COIN_13 write-mailbox 1 INDEXOF_SMB_COIN_14 write-mailbox\n  1 INDEXOF_SMB_COIN_15 write-mailbox 1 INDEXOF_SMB_COIN_16 write-mailbox 1 INDEXOF_SMB_COIN_17 write-mailbox 1 INDEXOF_SMB_COIN_18 write-mailbox\n  1 INDEXOF_SMB_COIN_INIT write-mailbox\nthen\nINDEXOF_SMB_COIN_0 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 6.75 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_0 write-mailbox\n  then then\nINDEXOF_SMB_COIN_1 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 8.25 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_1 write-mailbox\n  then then\nINDEXOF_SMB_COIN_2 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 9.75 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_2 write-mailbox\n  then then\nINDEXOF_SMB_COIN_3 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 11.25 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_3 write-mailbox\n  then then\nINDEXOF_SMB_COIN_4 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 12.75 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_4 write-mailbox\n  then then\nINDEXOF_SMB_COIN_5 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 14.25 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_5 write-mailbox\n  then then\nINDEXOF_SMB_COIN_6 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 15.75 - dup * INDEXOF_Z_POS read-mailbox -41.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_6 write-mailbox\n  then then\nINDEXOF_SMB_COIN_7 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 6.75 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_7 write-mailbox\n  then then\nINDEXOF_SMB_COIN_8 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 8.25 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_8 write-mailbox\n  then then\nINDEXOF_SMB_COIN_9 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 9.75 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_9 write-mailbox\n  then then\nINDEXOF_SMB_COIN_10 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 11.25 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_10 write-mailbox\n  then then\nINDEXOF_SMB_COIN_11 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 12.75 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_11 write-mailbox\n  then then\nINDEXOF_SMB_COIN_12 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 14.25 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_12 write-mailbox\n  then then\nINDEXOF_SMB_COIN_13 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 15.75 - dup * INDEXOF_Z_POS read-mailbox -38.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_13 write-mailbox\n  then then\nINDEXOF_SMB_COIN_14 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 8.25 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_14 write-mailbox\n  then then\nINDEXOF_SMB_COIN_15 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 9.75 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_15 write-mailbox\n  then then\nINDEXOF_SMB_COIN_16 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 11.25 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_16 write-mailbox\n  then then\nINDEXOF_SMB_COIN_17 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 12.75 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_17 write-mailbox\n  then then\nINDEXOF_SMB_COIN_18 read-mailbox 0<> if\n  INDEXOF_X_POS read-mailbox 14.25 - dup * INDEXOF_Z_POS read-mailbox -35.25 - dup * + 1.0 < if\n    INDEXOF_GOLD read-mailbox 1 + INDEXOF_GOLD write-mailbox 0 INDEXOF_SMB_COIN_18 write-mailbox\n  then then\nINDEXOF_GOLD read-mailbox INDEXOF_SMB_LAST_GOLD read-mailbox -\ndup 0 > if\n  INDEXOF_SMB_PLAYER_X read-mailbox INDEXOF_SMB_POPUP_X write-mailbox\n  INDEXOF_SMB_PLAYER_Z read-mailbox INDEXOF_SMB_POPUP_Z write-mailbox\n  1 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\n  200 * INDEXOF_SMB_SCORE read-mailbox + INDEXOF_SMB_SCORE write-mailbox\n  INDEXOF_GOLD read-mailbox 100 % not if\n    INDEXOF_SMB_LAST_GOLD read-mailbox 100 % 0<> if\n      INDEXOF_GOLD read-mailbox 0 > if\n        INDEXOF_LIVES read-mailbox 1 + INDEXOF_LIVES write-mailbox\n      then\n    then\n  then\nelse\n  drop\nthen\nINDEXOF_GOLD read-mailbox INDEXOF_SMB_LAST_GOLD write-mailbox\nINDEXOF_SMB_SCORE read-mailbox INDEXOF_HUD_SCORE write-mailbox\nINDEXOF_SMB_MARIO_FACING read-mailbox not if 1 INDEXOF_SMB_MARIO_FACING write-mailbox then\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_RIGHT & 0<> if 1 INDEXOF_SMB_MARIO_FACING write-mailbox then\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_LEFT & 0<> if -1 INDEXOF_SMB_MARIO_FACING write-mailbox then\nINDEXOF_X_POS read-mailbox INDEXOF_SMB_MARIO_FACING read-mailbox 1.8 * + INDEXOF_SMB_FIREBALL_X write-mailbox\nINDEXOF_Y_POS read-mailbox INDEXOF_SMB_FIREBALL_Y write-mailbox\nINDEXOF_Z_POS read-mailbox 0.8 + INDEXOF_SMB_FIREBALL_Z write-mailbox\n0 INDEXOF_SMB_FIREBALL_FIRE_R write-mailbox 0 INDEXOF_SMB_FIREBALL_FIRE_L write-mailbox\nINDEXOF_SMB_MARIO_STATE read-mailbox 2 = if\n  INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_B & 0<> if\n    INDEXOF_SMB_FIRE_LATCH read-mailbox not if\n      INDEXOF_TIME read-mailbox INDEXOF_SMB_FIRE_COOLDOWN read-mailbox > if\n        INDEXOF_SMB_MARIO_FACING read-mailbox 0 > if\n          1 INDEXOF_SMB_FIREBALL_FIRE_R write-mailbox\n        else\n          1 INDEXOF_SMB_FIREBALL_FIRE_L write-mailbox\n        then\n        1 INDEXOF_SMB_FIRE_LATCH write-mailbox\n        INDEXOF_TIME read-mailbox 0.5 + INDEXOF_SMB_FIRE_COOLDOWN write-mailbox\n      then\n    then\n  then\nthen\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox JOYSTICK_BUTTON_B & not if 0 INDEXOF_SMB_FIRE_LATCH write-mailbox then\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
@@ -971,7 +971,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -3.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 115.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "ground_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "w1_1_ground_0.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -989,7 +989,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 121.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 177.0000000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "ground_1.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "w1_1_ground_1.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -1007,7 +1007,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 183.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 322.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "ground_2.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "w1_1_ground_2.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -1025,7 +1025,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 115.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) -15.0000000000000000(1.15.16) 122.0000000000000000(1.15.16) 1.5000000000000000(1.15.16) -1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pit_death_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "w1_1_pit_death_0.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 1804l } { 'STR' "1804" } }
@@ -1045,7 +1045,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 176.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -15.0000000000000000(1.15.16) 183.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) -1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pit_death_1.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "w1_1_pit_death_1.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 1804l } { 'STR' "1804" } }
@@ -1088,14 +1088,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "qblock_00" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 31.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 30.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 32.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "qblock_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_qblock_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -1115,14 +1117,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "qblock_01" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 160.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 159.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 161.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "qblock_01.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_qblock_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -1142,14 +1146,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "mushroom_block" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 24.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 23.2500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 24.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "mushroom_block.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_qblock_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -1199,14 +1205,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "fireflower_block" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 34.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 33.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 35.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "fireflower_block.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_qblock_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -1256,14 +1264,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "star_block" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 148.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 147.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 149.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "star_block.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_qblock_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -1388,7 +1398,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1414,7 +1424,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1440,7 +1450,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1466,7 +1476,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1492,7 +1502,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1518,7 +1528,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1544,7 +1554,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1570,7 +1580,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1596,7 +1606,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1622,7 +1632,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1648,7 +1658,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1674,7 +1684,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1700,7 +1710,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1726,7 +1736,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1752,7 +1762,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1778,7 +1788,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) -0.0599999874830246(1.15.16) 0.6847608089447021(1.15.16) 0.7200000286102295(1.15.16) 1.1784000396728516(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba_00.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "goomba.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1796,7 +1806,7 @@
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' -0.0000032001703990(1.15.16) } { 'STR' "-0.000003" } }
 	}
 	{ 'OBJ' 
-		{ 'NAME' "koopa_00.001" }
+		{ 'NAME' "koopa_00" }
 		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 169.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
@@ -1804,7 +1814,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6847607493400574(1.15.16) -0.7200000882148743(1.15.16) 0.2039999365806580(1.15.16) 0.7638486623764038(1.15.16) 0.7200000286102295(1.15.16) 1.6800000667572021(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "koopa_00.001.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "koopa_green.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
@@ -1842,14 +1852,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "flagpole_flag" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 313.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 13.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 312.7500000000000000(1.15.16) -0.0299999993294477(1.15.16) 12.8999996185302734(1.15.16) 314.2500000000000000(1.15.16) 0.0299999993294477(1.15.16) 14.1000003814697266(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 0.0599999986588955(1.15.16) 1.2000000476837158(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.0299999993294477(1.15.16) -0.6000000238418579(1.15.16) 0.7500000000000000(1.15.16) 0.0299999993294477(1.15.16) 0.6000000238418579(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "flagpole_flag.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_flag.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_CELEBRATE read-mailbox if\nINDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox - 1.1 *\ndup 1.0 > if drop 1.0 then\n12.45 * 13.50 swap - INDEXOF_Z_POS write-mailbox\nthen\n" } }
@@ -1862,14 +1874,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "castle" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 319.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 317.2500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 321.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 4.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -2.2500000000000000(1.15.16) -1.5000000000000000(1.15.16) -2.2500000000000000(1.15.16) 2.2500000000000000(1.15.16) 1.5000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "castle.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_castle.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -1880,14 +1894,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "castle_pole" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 319.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 319.3999938964843750(1.15.16) -0.1000000014901161(1.15.16) 4.5000000000000000(1.15.16) 319.6000061035156250(1.15.16) 0.1000000014901161(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 0.2000000029802322(1.15.16) 0.2000000029802322(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.1000000014901161(1.15.16) -0.1000000014901161(1.15.16) -1.5000000000000000(1.15.16) 0.1000000014901161(1.15.16) 0.1000000014901161(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "castle_pole.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_pole.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -1898,14 +1914,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "castle_flag" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 318.8250122070312500(1.15.16) 0.0000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 318.1500244140625000(1.15.16) -0.0299999993294477(1.15.16) 3.9749999046325684(1.15.16) 319.5000000000000000(1.15.16) 0.0299999993294477(1.15.16) 5.0250000953674316(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.3500000238418579(1.15.16) 0.0599999986588955(1.15.16) 1.0499999523162842(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6750000119209290(1.15.16) -0.0299999993294477(1.15.16) -0.5249999761581421(1.15.16) 0.6750000119209290(1.15.16) 0.0299999993294477(1.15.16) 0.5249999761581421(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "castle_flag.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_flag.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_CELEBRATE read-mailbox if\nINDEXOF_TIME read-mailbox INDEXOF_SMB_CELEBRATE_START read-mailbox - 0.8 -\ndup 0.0 < if drop 0.0 then 1.667 *\ndup 1.0 > if drop 1.0 then\n2.47 * 4.50 + INDEXOF_Z_POS write-mailbox\nthen\n" } }
@@ -1918,14 +1936,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "castle_door" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 318.0000000000000000(1.15.16) -1.5399999618530273(1.15.16) 1.1000000238418579(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 317.3999938964843750(1.15.16) -1.5599999427795410(1.15.16) 0.0000000000000000(1.15.16) 318.6000061035156250(1.15.16) -1.5199999809265137(1.15.16) 2.2000000476837158(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.2000000476837158(1.15.16) 0.0399999991059303(1.15.16) 2.2000000476837158(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.6000000238418579(1.15.16) -0.0199999995529652(1.15.16) -1.1000000238418579(1.15.16) 0.6000000238418579(1.15.16) 0.0199999995529652(1.15.16) 1.1000000238418579(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "castle_door.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_castle_door.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2075,14 +2095,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "flagpole_trigger" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 315.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 313.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -0.7500000000000000(1.15.16) 316.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 3.0000000000000000(1.15.16) 3.0000000000000000(1.15.16) 7.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -3.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "flagpole_trigger.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_trigger.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 1862l } { 'STR' "1862" } }
@@ -2095,14 +2117,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "flagpole_advance" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 315.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 313.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -0.7500000000000000(1.15.16) 316.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 3.0000000000000000(1.15.16) 3.0000000000000000(1.15.16) 7.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -3.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "flagpole_advance.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_trigger.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 5000l } { 'STR' "5000" } }
@@ -2131,7 +2155,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -9.0000000000000000(1.15.16) -3.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) 328.5000000000000000(1.15.16) 3.5000000000000000(1.15.16) 13.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actboxor" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "abor_surface.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "w1_1_abor_surface.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 1921l } { 'STR' "1921" } }
@@ -2167,14 +2191,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "pipe_28" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 42.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 40.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 43.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 3.0000000000000000(1.15.16) 3.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pipe_28.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_pipe_green.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2185,14 +2211,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "pipe_38" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 57.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 55.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 58.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 3.0000000000000000(1.15.16) 3.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pipe_38.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_pipe_green.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2203,14 +2231,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "pipe_64" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 96.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 94.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 97.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 6.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 3.0000000000000000(1.15.16) 3.0000000000000000(1.15.16) 6.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pipe_64.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_pipe_green.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2221,14 +2251,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "entry_pipe" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 70.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 69.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 72.0000000000000000(1.15.16) 1.5000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 3.0000000000000000(1.15.16) 3.0000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -2.2500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "entry_pipe.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_pipe_green.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2246,7 +2278,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 69.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) 4.0999999046325684(1.15.16) 72.0000000000000000(1.15.16) 1.5000000000000000(1.15.16) 5.2999997138977051(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actbox" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pipe_entry_sense.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "w1_1_pipe_entry_sense.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'STR' { 'NAME' "Activated By Actor" } { 'STR' "Player" } }
 		{ 'I32' { 'NAME' "MailBox" } { 'DATA' 1809l } { 'STR' "1809" } }
@@ -2261,14 +2293,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "cr_floor" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 12.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) -50.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.0000000000000000(1.15.16) -5.0000000000000000(1.15.16) -52.0000000000000000(1.15.16) 25.0000000000000000(1.15.16) 5.0000000000000000(1.15.16) -48.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 26.0000000000000000(1.15.16) 10.0000000000000000(1.15.16) 4.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -13.0000000000000000(1.15.16) -5.0000000000000000(1.15.16) -2.0000000000000000(1.15.16) 13.0000000000000000(1.15.16) 5.0000000000000000(1.15.16) 2.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_floor.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_cr_floor.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2279,14 +2313,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "cr_wall_l" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' -0.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) -40.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) -48.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 1.5000000000000000(1.15.16) -33.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.0000000000000000(1.15.16) 3.0000000000000000(1.15.16) 15.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -7.5000000000000000(1.15.16) 0.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_wall_l.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_cr_floor.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2297,14 +2333,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "cr_wall_r" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 24.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) -40.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 24.0000000000000000(1.15.16) -1.5000000000000000(1.15.16) -48.0000000000000000(1.15.16) 25.0000000000000000(1.15.16) 1.5000000000000000(1.15.16) -33.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.0000000000000000(1.15.16) 3.0000000000000000(1.15.16) 15.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -7.5000000000000000(1.15.16) 0.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_wall_r.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_cr_floor.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2322,7 +2360,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2342,7 +2380,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2362,7 +2400,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2382,7 +2420,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2402,7 +2440,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2422,7 +2460,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2442,7 +2480,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2462,7 +2500,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2482,7 +2520,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2502,7 +2540,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2522,7 +2560,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2542,7 +2580,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2562,7 +2600,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2582,7 +2620,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2602,7 +2640,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2622,7 +2660,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2642,7 +2680,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2662,7 +2700,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2682,7 +2720,7 @@
 		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.3750000000000000(1.15.16) -0.2000000029802322(1.15.16) -0.7500000000000000(1.15.16) 0.3750000000000000(1.15.16) 0.2000000029802322(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "enemy" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "cr_coin_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "coin_template.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n" } }
@@ -2858,14 +2896,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "exit_pipe" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 21.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) -46.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 19.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -48.0000000000000000(1.15.16) 22.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) -45.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 3.0000000000000000(1.15.16) 3.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "exit_pipe.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_pipe_green.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -2936,14 +2976,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "brick_0" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 30.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 29.2500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 30.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -2963,14 +3005,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "brick_1" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 33.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 32.2500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 33.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_1.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -2990,14 +3034,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "brick_2" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 36.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 35.2500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 36.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_2.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3017,14 +3063,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "brick_row_0" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 136.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 135.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 137.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_row_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3044,14 +3092,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "brick_row_1" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 138.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 137.2500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 138.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_row_1.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3071,14 +3121,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "brick_row_2" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 139.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 138.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 140.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_row_2.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3098,14 +3150,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "brick_row_3" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 141.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 140.2500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 141.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_row_3.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3125,14 +3179,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "brick_row_4" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 142.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 141.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 143.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_row_4.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3152,14 +3208,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "brick_row_5" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 144.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 143.2500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 144.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_row_5.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3179,14 +3237,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "brick_row_6" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 145.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 144.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 146.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_row_6.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3206,14 +3266,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "brick_row_7" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 147.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 146.2500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 147.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_row_7.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3233,14 +3295,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "brick_hi_0" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 162.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 9.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 161.2500000000000000(1.15.16) -0.7500000000000000(1.15.16) 9.0000000000000000(1.15.16) 162.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 10.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_hi_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3260,14 +3324,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "brick_hi_1" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 165.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 9.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 164.2500000000000000(1.15.16) -0.7500000000000000(1.15.16) 9.0000000000000000(1.15.16) 165.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 10.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_hi_1.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 16l } { 'STR' "16" } }
@@ -3287,14 +3353,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "qblock_107" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 160.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 159.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 161.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "qblock_107.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_qblock_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -3314,14 +3382,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "fireflower_block_hi" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 163.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 9.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 162.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 9.0000000000000000(1.15.16) 164.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 10.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "fireflower_block_hi.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_qblock_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -3341,14 +3411,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "brick_1up" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 85.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 84.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 6.0000000000000000(1.15.16) 86.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "generator" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "brick_1up.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "tex_box_brick_tex_tga.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 13l } { 'STR' "13" } }
@@ -3381,7 +3453,7 @@
 		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_SMB_POPUP_TRIGGER read-mailbox 0<> if\n  INDEXOF_SMB_POPUP_X read-mailbox INDEXOF_X_POS write-mailbox\n  0 INDEXOF_Y_POS write-mailbox\n  INDEXOF_SMB_POPUP_Z read-mailbox 1.5 + INDEXOF_Z_POS write-mailbox\n  INDEXOF_TIME read-mailbox 0.75 + INDEXOF_SMB_POPUP_UNTIL write-mailbox\n  0 INDEXOF_SMB_POPUP_TRIGGER write-mailbox\nthen\nINDEXOF_SMB_POPUP_UNTIL read-mailbox 0<> if\n  INDEXOF_TIME read-mailbox INDEXOF_SMB_POPUP_UNTIL read-mailbox < if\n    INDEXOF_Z_POS read-mailbox 3.0 INDEXOF_DELTA_TIME read-mailbox * + INDEXOF_Z_POS write-mailbox\n  else\n    0.0 INDEXOF_X_POS write-mailbox\n    -5.0 INDEXOF_Z_POS write-mailbox\n    0 INDEXOF_SMB_POPUP_UNTIL write-mailbox\n  then\nthen\n" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "popup_score.iff" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
-		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1845l } { 'STR' "1845" } }
 		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
@@ -3389,14 +3461,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "pyramid_a_0" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 201.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 200.2500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 201.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3407,14 +3481,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "pyramid_a_1" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 202.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 201.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 203.2500000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_1.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3425,14 +3501,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "pyramid_a_2" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 204.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 203.2500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 204.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -2.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_2.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3443,14 +3521,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "pyramid_a_3" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 205.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 204.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 206.2500000000000000(1.15.16) 1.5000000000000000(1.15.16) 6.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 6.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_a_3.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3461,14 +3541,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "pyramid_b_0" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 222.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 221.2500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 222.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_b_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3479,14 +3561,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "pyramid_b_1" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 223.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 222.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 224.2500000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_b_1.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3497,14 +3581,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "pyramid_b_2" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 225.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 224.2500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 225.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -2.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_b_2.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3515,14 +3601,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "pyramid_b_3" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 226.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 225.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 227.2500000000000000(1.15.16) 1.5000000000000000(1.15.16) 6.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 6.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "pyramid_b_3.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3533,14 +3621,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "staircase_0" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 297.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 296.2500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 297.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -0.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 0.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "staircase_0.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3551,14 +3641,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "staircase_1" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 298.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 297.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 299.2500000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 1.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "staircase_1.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3569,14 +3661,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "staircase_2" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 300.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 299.2500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 300.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -2.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 2.2500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "staircase_2.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3587,14 +3681,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "staircase_3" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 301.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 300.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 302.2500000000000000(1.15.16) 1.5000000000000000(1.15.16) 6.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 6.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -3.0000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "staircase_3.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3605,14 +3701,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "staircase_4" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 303.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 3.7500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 302.2500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 303.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 7.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 7.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -3.7500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 3.7500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "staircase_4.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3623,14 +3721,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "staircase_5" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 304.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 303.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 305.2500000000000000(1.15.16) 1.5000000000000000(1.15.16) 9.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 9.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -4.5000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 4.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "staircase_5.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3641,14 +3741,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "staircase_6" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 306.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 5.2500000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 305.2500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 306.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 10.5000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 10.5000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -5.2500000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 5.2500000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "staircase_6.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
@@ -3659,14 +3761,16 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "staircase_7" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 307.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 6.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 306.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 308.2500000000000000(1.15.16) 1.5000000000000000(1.15.16) 12.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'VEC3' { 'NAME' "Scale" } { 'DATA' 1.5000000000000000(1.15.16) 3.0000000000000000(1.15.16) 12.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.7500000000000000(1.15.16) -1.5000000000000000(1.15.16) -6.0000000000000000(1.15.16) 0.7500000000000000(1.15.16) 1.5000000000000000(1.15.16) 6.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "staircase_7.iff" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "unit_box_smb_hard_block.iff" } }
 		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }

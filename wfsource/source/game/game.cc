@@ -48,6 +48,8 @@
 #include "matte.hp"
 #include "mailbox.hp"
 #include <gfx/vmem.hp>
+#include <asset/assets.hp>     // AssetManager::LookupTexture (Moon minimap ground-atlas accessor)
+#include <streams/asset.hp>    // packedAssetID
 #include <cpplib/libstrm.hp>
 #if DESIGNER_CHEATS
 #include "hscore.h"
@@ -59,6 +61,25 @@
 //==============================================================================
 
 Level* theLevel;
+
+// Resident ground-atlas accessor for the Moon position-display minimap.
+// terrain_texture.tga fills RM0's texture atlas (Room0.ruv: a single
+// 0,0,1024,1024 entry) and each VRAM slot is its own GL texture, so the minimap
+// samples the whole resident texture (UV 0..1) — the live ground the player is
+// standing on — instead of a separate baked minimap.tga. Returns the atlas
+// PixelMap, or nullptr if no level is loaded. Lives here (not display.cc)
+// because it needs theLevel/AssetManager, mirroring the wf_moon_* game->display
+// global pattern. When chunks later share an atlas (Phase 2+), swap UV 0..1 for
+// the texture's RMUV sub-rect (theLevel->GetAssetManager().LookupTexture(...).texture).
+// See docs/plans/2026-06-04-moon-overhead-map-and-chunk-texture-streaming.md.
+const PixelMap* wf_moon_ground_atlas()
+{
+	if (!theLevel)
+		return nullptr;
+	packedAssetID rm0(0, packedAssetID::TGA, 0xFFF);   // RM0 ground-atlas slot; LookupTexture keys on Room()
+	LookupTextureStruct lt = theLevel->GetAssetManager().LookupTexture("terrain_texture.tga", rm0.ID());
+	return &lt.texturePixelMap;
+}
 
 // Simulated actor for the "meta-script" run
 //const WFGame::LevelActor WFGame::_ActorLevel;
@@ -570,6 +591,9 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 			extern int   wf_moon_overlay_enabled;
 			extern float wf_moon_player_x_m, wf_moon_player_y_m, wf_moon_player_z_m;
 			extern float wf_moon_player_heading_rev;
+			// Moon lander launch sequence — see docs/plans/2026-06-02-moon-lander-launch-sequence.md
+			extern int   wf_moon_launch_phase;
+			extern float wf_moon_launch_t_minus;
 			Mailboxes& mb = _curLevel->GetMailboxes();
 			wf_hud_score     = mb.ReadMailbox(70).WholePart();
 			wf_hud_timer     = mb.ReadMailbox(71).WholePart();
@@ -580,6 +604,8 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 			wf_moon_player_y_m          = mb.ReadMailbox(1877).AsFloat();
 			wf_moon_player_z_m          = mb.ReadMailbox(1878).AsFloat();
 			wf_moon_player_heading_rev  = mb.ReadMailbox(1879).AsFloat();
+			wf_moon_launch_phase        = mb.ReadMailbox(1881).WholePart();
+			wf_moon_launch_t_minus      = mb.ReadMailbox(1882).AsFloat();
 
 			// High-score initials entry — triggered on fresh game-over edge.
 			// Joystick bits from mb 1910 (JUSTPRESSED, already edge-detected):

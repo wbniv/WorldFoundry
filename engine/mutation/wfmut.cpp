@@ -352,6 +352,21 @@ std::optional<ActorIdx> SpawnActor(Level& level, int templateIdx,
         return failopt<ActorIdx>("wfmut::SpawnActor: templateIdx must be >= 1");
     if (!level.HasTemplate(templateIdx))
         return failopt<ActorIdx>("wfmut::SpawnActor: no template at idx");
+    // Some template classes have no clean runtime-spawn path: their OAS
+    // constructor terminate()s rather than failing softly (Room/Tool/StatPlat —
+    // see oas/objects.c + engine_bridge.cc's RunSpawnConfirmTest). Probe the
+    // template's class kind from its startup data and fail-soft here instead of
+    // letting ConstructTemplateObject abort the process. (Documented-unsafe set;
+    // extend if more kinds surface — the deeper cause is unmet placement/parent
+    // prerequisites that the generated constructor asserts on.)
+    if (const SObjectStartupData* td = level.FindTemplateObjectData(templateIdx)) {
+        const int32 kind = td->objectData->type;
+        if (kind == Actor::Room_KIND || kind == Actor::Tool_KIND ||
+            kind == Actor::StatPlat_KIND)
+            return failopt<ActorIdx>(
+                "wfmut::SpawnActor: template class is not runtime-spawnable "
+                "(Room/Tool/StatPlat abort in the OAS constructor)");
+    }
     if (parentIdx == 0)
         return failopt<ActorIdx>("wfmut::SpawnActor: parentIdx must be >= 1 (engine asserts otherwise)");
     if (!resolve_actor(level, parentIdx, "wfmut::SpawnActor"))

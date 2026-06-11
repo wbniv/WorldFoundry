@@ -47,6 +47,7 @@
 #include <hal/salloc.hp>
 #include <hal/asset_accessor.hp>
 #include <signal.h>
+#include <X11/Xlib.h>   // XOpenDisplay/DisplayWidth/Height for -fullscreen screen-size query
 
 // On macOS desktop (.app bundle) use NSBundle to resolve bundled resources;
 // on Linux use the POSIX cwd-relative accessor.
@@ -61,7 +62,7 @@ extern bool bPrintVersion;
 
 extern bool bShowWindow;
 
-bool bFullScreen = true;
+bool bFullScreen = false;
 
 //=============================================================================
 
@@ -92,7 +93,6 @@ int		_halWindowYPos;
 void
 ParseWindowSwitches( int __argc, char* __argv[] )
 { // Determine screen/window dimensions
-#if 0
 	for ( int i=1; i<__argc; ++i )
 	{
 		const char szWidth[] = "-width=";
@@ -107,14 +107,29 @@ ParseWindowSwitches( int __argc, char* __argv[] )
 		else if ( strcmp( __argv[ i ], szWindow ) == 0 )
 			bFullScreen = false;
 		else if ( strcmp( __argv[ i ], szFullScreen ) == 0 )
+		{
 			bFullScreen = true;
-		else if ( strnicmp( __argv[i], szXPos, strlen( szXPos ) ) == 0 )
+			// Query actual screen dimensions so the FBO (and recording) match.
+			// Only overrides size if -width/-height were not already given.
+			if ( _halWindowWidth == 0 )
+			{
+				::Display* xd = XOpenDisplay(NULL);
+				if (xd)
+				{
+					int s = DefaultScreen(xd);
+					_halWindowWidth  = DisplayWidth(xd, s);
+					_halWindowHeight = DisplayHeight(xd, s);
+					XCloseDisplay(xd);
+				}
+			}
+		}
+		else if ( strncmp( __argv[i], szXPos, strlen( szXPos ) ) == 0 )
 			_halWindowXPos = atoi( __argv[i] + strlen( szXPos ) );
-		else if ( strnicmp( __argv[i], szYPos, strlen( szYPos ) ) == 0 )
+		else if ( strncmp( __argv[i], szYPos, strlen( szYPos ) ) == 0 )
 			_halWindowYPos = atoi( __argv[i] + strlen( szYPos ) );
-		else if ( strnicmp( __argv[i], szWidth, strlen( szWidth ) ) == 0 )
+		else if ( strncmp( __argv[i], szWidth, strlen( szWidth ) ) == 0 )
 			_halWindowWidth = atoi( __argv[i] + strlen( szWidth ) );
-		else if ( strnicmp( __argv[i], szHeight, strlen( szWidth ) ) == 0 )
+		else if ( strncmp( __argv[i], szHeight, strlen( szHeight ) ) == 0 )
 			_halWindowHeight = atoi( __argv[i] + strlen( szHeight ) );
 #if defined( DESIGNER_CHEATS )
 		else if ( strncmp( __argv[i], HALMEM, strlen( HALMEM ) ) == 0 )
@@ -164,14 +179,12 @@ ParseWindowSwitches( int __argc, char* __argv[] )
 					printf( "Unknown height of %d\n", _halWindowHeight );
 			}
 		}
-
 	}
 
-#endif
 	if ( _halWindowWidth == 0 )
 	{
-		_halWindowWidth = 512;
-		_halWindowHeight = 384;
+		_halWindowWidth = 640;
+		_halWindowHeight = 480;
 	}
 
 }

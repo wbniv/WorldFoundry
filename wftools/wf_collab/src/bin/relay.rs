@@ -18,7 +18,8 @@
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use parking_lot::Mutex;   // non-poisoning: a panicking handler can't cascade-crash the relay
 use std::time::{Duration, Instant};
 
 use futures_util::{SinkExt, StreamExt};
@@ -148,7 +149,7 @@ async fn snapshot_task(rooms: Rooms, dir: PathBuf) {
         let to_save: Vec<(String, Vec<u8>, u32)>;
         let to_evict: Vec<String>;
         {
-            let mut lock = rooms.lock().unwrap();
+            let mut lock = rooms.lock();
             to_evict = lock
                 .iter()
                 .filter(|(_, r)| {
@@ -236,7 +237,7 @@ async fn handle_tcp(
 
     // Register peer; create room (loading snapshot if available) if not present.
     let full_state = {
-        let mut rooms_lock = rooms.lock().unwrap();
+        let mut rooms_lock = rooms.lock();
         let room = rooms_lock.entry(room_id.clone()).or_insert_with(|| {
             let doc = snapshot_dir
                 .as_ref()
@@ -276,14 +277,14 @@ async fn handle_tcp(
 
         match bytes[0] {
             CH_SYNC => {
-                let mut rooms_lock = rooms.lock().unwrap();
+                let mut rooms_lock = rooms.lock();
                 if let Some(room) = rooms_lock.get_mut(&room_id) {
                     room.apply_sync(&bytes[1..]);
                     room.fanout(&bytes, &peer_id);
                 }
             }
             CH_PRESENCE | CH_CHAT => {
-                let rooms_lock = rooms.lock().unwrap();
+                let rooms_lock = rooms.lock();
                 if let Some(room) = rooms_lock.get(&room_id) {
                     room.fanout(&bytes, &peer_id);
                 }
@@ -294,7 +295,7 @@ async fn handle_tcp(
                 let payload = &bytes[1..];
                 let mid = payload.iter().position(|&x| x == 0).unwrap_or(payload.len());
                 let to = String::from_utf8_lossy(&payload[..mid]).into_owned();
-                let rooms_lock = rooms.lock().unwrap();
+                let rooms_lock = rooms.lock();
                 if let Some(room) = rooms_lock.get(&room_id) {
                     if to.is_empty() {
                         room.fanout(&bytes, &peer_id);
@@ -311,7 +312,7 @@ async fn handle_tcp(
 
     // Cleanup: remove peer; mark room empty if no peers remain.
     {
-        let mut rooms_lock = rooms.lock().unwrap();
+        let mut rooms_lock = rooms.lock();
         if let Some(room) = rooms_lock.get_mut(&room_id) {
             room.peers.remove(&peer_id);
             if room.peers.is_empty() {
@@ -329,6 +330,14 @@ async fn handle_tcp(
 
 // ── main ─────────────────────────────────────────────────────────────────────
 
+// Print a reason and exit non-zero instead of panicking with a backtrace, so a
+// misconfiguration (bad port, snapshot path, or a port already in use) reports
+// what went wrong rather than dumping a panic.
+fn die(msg: impl std::fmt::Display) -> ! {
+    eprintln!("[relay] error: {msg}");
+    std::process::exit(1);
+}
+
 #[tokio::main]
 async fn main() {
     let mut port = 9900u16;
@@ -336,23 +345,29 @@ async fn main() {
     let mut args = std::env::args().skip(1);
     while let Some(arg) = args.next() {
         if arg == "--port" {
-            port = args.next().expect("missing port").parse().expect("invalid port");
+            port = match args.next().and_then(|s| s.parse().ok()) {
+                Some(p) => p,
+                None => die("--port needs a valid u16"),
+            };
         } else if let Some(s) = arg.strip_prefix("--port=") {
-            port = s.parse().expect("invalid port");
+            port = s.parse().unwrap_or_else(|_| die(format!("invalid --port={s}")));
         } else if arg == "--snapshot-dir" {
-            snapshot_dir = Some(PathBuf::from(args.next().expect("missing snapshot-dir")));
+            snapshot_dir = Some(PathBuf::from(
+                args.next().unwrap_or_else(|| die("--snapshot-dir needs a path"))));
         } else if let Some(s) = arg.strip_prefix("--snapshot-dir=") {
             snapshot_dir = Some(PathBuf::from(s));
         }
     }
 
     if let Some(dir) = &snapshot_dir {
-        std::fs::create_dir_all(dir).expect("cannot create snapshot-dir");
+        std::fs::create_dir_all(dir)
+            .unwrap_or_else(|e| die(format!("cannot create snapshot-dir {}: {e}", dir.display())));
         eprintln!("[relay] snapshots → {}", dir.display());
     }
 
     let addr = format!("0.0.0.0:{port}");
-    let listener = TcpListener::bind(&addr).await.expect("bind failed");
+    let listener = TcpListener::bind(&addr).await
+        .unwrap_or_else(|e| die(format!("cannot bind {addr}: {e} (is the port already in use?)")));
     eprintln!("[relay] listening on {addr}");
 
     let rooms: Rooms = Arc::new(Mutex::new(HashMap::new()));

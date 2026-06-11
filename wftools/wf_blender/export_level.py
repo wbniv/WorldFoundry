@@ -470,6 +470,37 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
             tri.append(split_map[key])
         face_triples.append((tri[0], tri[1], tri[2], face.material_index))
 
+    # ── Canonicalize vertex + face order (deterministic export) ──────────────
+    # split_verts/face_triples above are built in `bm.faces` encounter order,
+    # which inherits the Blender mesh's internal polygon order. For meshes built
+    # by `bpy.ops.object.join()` (goomba/koopa/…) that order is NON-deterministic
+    # run-to-run, so the VRTX/FACE chunks churned every re-export with byte-
+    # identical *geometry* (confirmed: identical vertex multiset, different order
+    # — docs/investigations/2026-06-02-blender-export-nondeterminism.md). Re-key
+    # vertices by their fixed-point (position, uv) so identical verts merge and
+    # the order is canonical; remap + sort faces. Geometry/rendering unchanged;
+    # the bytes are now reproducible.
+    def _vkey(co, u, v):
+        return (int(round(co.x * 65536)), int(round(co.y * 65536)), int(round(co.z * 65536)),
+                int(round(u * 65536)), int(round(v * 65536)))
+    _canon = {}            # _vkey → final index (sorted)
+    for co, u, v in sorted(split_verts, key=lambda t: _vkey(*t)):
+        k = _vkey(co, u, v)
+        if k not in _canon:
+            _canon[k] = len(_canon)
+    _old_to_new = [_canon[_vkey(*t)] for t in split_verts]
+    _canon_verts = [None] * len(_canon)
+    for co, u, v in split_verts:
+        _canon_verts[_canon[_vkey(co, u, v)]] = (co, u, v)
+    split_verts = _canon_verts
+    _faces = []
+    for a, b, c, m in face_triples:
+        na, nb, nc = _old_to_new[a], _old_to_new[b], _old_to_new[c]
+        if na != nb and nb != nc and na != nc:   # drop tris collapsed by the merge
+            _faces.append((na, nb, nc, m))
+    _faces.sort()
+    face_triples = _faces
+
     # Build VRTX payload
     vrtx = bytearray()
     for co, u, v in split_verts:
@@ -946,8 +977,21 @@ def scene_index_map(context) -> dict[int, str]:
     }
 
 
-def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
-    """Write the current Blender scene to a .lev text IFF. Returns (ok, message)."""
+def _sanitize_mesh_name(name: str) -> str:
+    """Datablock name → filename-safe slug (lowercase, runs of non-alnum → '_')."""
+    import re
+    return re.sub(r'[^a-z0-9]+', '_', name.lower()).strip('_')
+
+
+def export_scene_to_lev(context, filepath: str, mesh_dir: str = "") -> tuple[bool, str]:
+    """Write the current Blender scene to a .lev text IFF. Returns (ok, message).
+
+    When `mesh_dir` is given (e.g. a game-wide shared mesh library), per-mesh .iff
+    files are written there and named by their canonical DATABLOCK name (so identical
+    actors dedup to one clean-named file game-wide) instead of into the level dir named
+    after the first instance. Empty `mesh_dir` (the default) keeps the historical
+    behaviour, so non-shared-dir levels export byte-identically.
+    """
     objects = [o for o in context.scene.objects if o.get(SCHEMA_PATH_KEY)]
     if not objects:
         return False, "No WF objects in scene (attach schemas first)"
@@ -955,6 +999,9 @@ def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
     lines = ["{ 'LVL' "]
     level_dir = os.path.dirname(filepath)
+    mesh_out_dir = mesh_dir or level_dir          # where per-mesh .iff files land
+    if mesh_dir:
+        os.makedirs(mesh_dir, exist_ok=True)
 
     # Mesh dedup: objects sharing one Blender mesh datablock export ONE .iff (named for
     # the first user) and the rest reference it — so N identical actors cost one room-pool
@@ -970,7 +1017,12 @@ def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
             wf_local_min = (float(orig_bbox[0]), float(orig_bbox[1]), float(orig_bbox[2]))
             wf_local_max = (float(orig_bbox[3]), float(orig_bbox[4]), float(orig_bbox[5]))
         else:
-            corners_local = [obj.bound_box[i][:] for i in range(8)]
+            # bound_box is mesh-local (does NOT include obj.scale). Multiply by the
+            # object's local scale so the collision BOX3 matches the *rendered* size:
+            # the engine scales only the render mesh (rendacto.cc:481), never the bbox.
+            # Identity scale (every level authored before the scale pipeline) ⇒ no-op.
+            bl_scale = obj.matrix_world.to_scale()
+            corners_local = [tuple(obj.bound_box[i][k] * bl_scale[k] for k in range(3)) for i in range(8)]
             bl_local_min = [min(c[i] for c in corners_local) for i in range(3)]
             bl_local_max = [max(c[i] for c in corners_local) for i in range(3)]
             wf_lmn_x, wf_lmn_y, wf_lmn_z = bl_to_wf(bl_local_min[0], bl_local_min[1], bl_local_min[2])
@@ -1009,6 +1061,13 @@ def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
 
         lines.append(f"\t\t{{ 'VEC3' {{ 'NAME' \"Position\" }} {{ 'DATA' {fp(wf_pos[0])} {fp(wf_pos[1])} {fp(wf_pos[2])}  //x,y,z\n\t\t}} }}")
         lines.append(f"\t\t{{ 'EULR' {{ 'NAME' \"Orientation\" }} {{ 'DATA' {fp(wf_rot[0])} {fp(wf_rot[1])} {fp(wf_rot[2])}  //a,b,c\n\t\t}} }}")
+        # Per-actor render scale (OAS x/y/z_scale). bl_to_wf is identity, so scale maps
+        # component-wise. Emit ONLY when non-identity: identity-scale objects (every level
+        # authored before the scale pipeline) stay byte-identical — levcomp defaults absent
+        # Scale to (ONE,ONE,ONE). Drives the render mesh size; the BOX3 above carries collision.
+        wf_scale = bl_to_wf(*obj.matrix_world.to_scale())
+        if any(abs(s - 1.0) > 1e-6 for s in wf_scale):
+            lines.append(f"\t\t{{ 'VEC3' {{ 'NAME' \"Scale\" }} {{ 'DATA' {fp(wf_scale[0])} {fp(wf_scale[1])} {fp(wf_scale[2])}  //x,y,z\n\t\t}} }}")
         had_bbox = obj.get("wf_had_authored_bbox", None)
         if had_bbox is not None:
             should_emit_bbox = bool(had_bbox)
@@ -1032,8 +1091,15 @@ def export_scene_to_lev(context, filepath: str) -> tuple[bool, str]:
                 mesh_filename = _mesh_iff_by_datablock[_dbkey]   # reference the already-written mesh
                 model_type = 1
             else:
-                mesh_filename = (orig_mesh if orig_mesh else obj.name + ".iff").lower()
-                mesh_out = os.path.join(level_dir, mesh_filename)
+                if orig_mesh:
+                    mesh_filename = orig_mesh.lower()
+                elif mesh_dir:
+                    # Shared-library mode: canonical datablock name → one clean-named
+                    # file per unique mesh, game-wide (not per first-instance object).
+                    mesh_filename = _sanitize_mesh_name(obj.data.name) + ".iff"
+                else:
+                    mesh_filename = (obj.name + ".iff").lower()
+                mesh_out = os.path.join(mesh_out_dir, mesh_filename)
                 if _write_mesh_iff(obj, mesh_out):
                     model_type = 1  # Mesh
                     _mesh_iff_by_datablock[_dbkey] = mesh_filename
@@ -1115,9 +1181,14 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
 
     filename_ext = ".lev"
     filter_glob: StringProperty(default="*.lev", options={'HIDDEN'})
+    mesh_dir: StringProperty(
+        default="",
+        description="Optional shared mesh-library dir; meshes written there named by "
+                    "datablock (dedup game-wide). Empty = per-level dir (historical).",
+    )
 
     def execute(self, context):
-        ok, msg = export_scene_to_lev(context, self.filepath)
+        ok, msg = export_scene_to_lev(context, self.filepath, mesh_dir=self.mesh_dir)
         level = 'INFO' if ok else 'WARNING'
         self.report({level}, msg)
         return {'FINISHED'} if ok else {'CANCELLED'}

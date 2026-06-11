@@ -35,6 +35,7 @@ pub fn write(
     assets: &AssetRegistry,
     _level_name: &str,
     out_path: &Path,
+    vrml_path: &str,
 ) -> io::Result<()> {
     // Collect distinct non-PERM room indices in sorted order.
     let mut room_indices: Vec<i32> = assets.entries().iter()
@@ -53,6 +54,14 @@ pub fn write(
     s.push_str("[Version]\n");
     s.push_str("levelcon = levcomp-rs\n");
     s.push('\n');
+    // textile-rs resolves the textured-mesh .iff files via [VRML] Path. When the
+    // meshes live in a shared dir (P3), point it there (relative to the level dir =
+    // textile's cwd). "." / empty = cwd → emit nothing (historical, byte-identical).
+    if !vrml_path.is_empty() && vrml_path != "." {
+        s.push_str("[VRML]\n");
+        s.push_str(&format!("Path = {vrml_path}\n"));
+        s.push('\n');
+    }
     s.push_str("[Rooms]\n");
     s.push_str(&format!("nRooms = {n_rooms}\n"));
 

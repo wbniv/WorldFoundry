@@ -24,8 +24,20 @@
 	// Example: `$3fff001` = `IFF` + room `fff` (`PERM`) + slot `001`.
 	{ 'ASMP'
 		$3fff001l { 'STR' "player.iff" }  // IFF PERM fff:001
+		$3fff002l { 'STR' "artemis_lander.iff" }  // IFF PERM fff:002
+		$3fff003l { 'STR' "earth.iff" }  // IFF PERM fff:003
+		$3fff004l { 'STR' "moon_racer.iff" }  // IFF PERM fff:004
+		$3fff005l { 'STR' "vsat_tower.iff" }  // IFF PERM fff:005
+		$3fff006l { 'STR' "blue_moon_mk1.iff" }  // IFF PERM fff:006
+		$3fff007l { 'STR' "fsh.iff" }  // IFF PERM fff:007
+		$3fff008l { 'STR' "fsp_reactor.iff" }  // IFF PERM fff:008
+		$3fff009l { 'STR' "lunar_cruiser_0.iff" }  // IFF PERM fff:009
+		$3fff00al { 'STR' "sun_disc.iff" }  // IFF PERM fff:00a
+		$3fff00bl { 'STR' "skydome.iff" }  // IFF PERM fff:00b
 		$3000001l { 'STR' "lunar_terrain.iff" }  // IFF RM0 000:001
-		$3000002l { 'STR' "artemis_lander.iff" }  // IFF RM0 000:002
+		$3000002l { 'STR' "entry_trigger_1.iff" }  // IFF RM0 000:002
+		$3000003l { 'STR' "entry_trigger_2.iff" }  // IFF RM0 000:003
+		$3000004l { 'STR' "entry_trigger_3.iff" }  // IFF RM0 000:004
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'LVL' [ "moon_site01.lvl" ] }
@@ -36,6 +48,16 @@
 		{ 'ASS' $5ffffffl [ "Perm.ruv" ] }     // RUV PERM fff:fff
 		{ 'ASS' $7ffffffl [ "Perm.cyc" ] }     // CYC PERM fff:fff
 		{ 'ASS' $3fff001l [ "player.iff" ] }  // IFF PERM fff:001
+		{ 'ASS' $3fff002l [ "artemis_lander.iff" ] }  // IFF PERM fff:002
+		{ 'ASS' $3fff003l [ "earth.iff" ] }  // IFF PERM fff:003
+		{ 'ASS' $3fff004l [ "moon_racer.iff" ] }  // IFF PERM fff:004
+		{ 'ASS' $3fff005l [ "vsat_tower.iff" ] }  // IFF PERM fff:005
+		{ 'ASS' $3fff006l [ "blue_moon_mk1.iff" ] }  // IFF PERM fff:006
+		{ 'ASS' $3fff007l [ "fsh.iff" ] }  // IFF PERM fff:007
+		{ 'ASS' $3fff008l [ "fsp_reactor.iff" ] }  // IFF PERM fff:008
+		{ 'ASS' $3fff009l [ "lunar_cruiser_0.iff" ] }  // IFF PERM fff:009
+		{ 'ASS' $3fff00al [ "sun_disc.iff" ] }  // IFF PERM fff:00a
+		{ 'ASS' $3fff00bl [ "skydome.iff" ] }  // IFF PERM fff:00b
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'
@@ -44,7 +66,9 @@
 		{ 'ASS' $5000fffl [ "Room0.ruv" ] }    // RUV RM0 000:fff
 		{ 'ASS' $7000fffl [ "Room0.cyc" ] }    // CYC RM0 000:fff
 		{ 'ASS' $3000001l [ "lunar_terrain.iff" ] }  // IFF RM0 000:001
-		{ 'ASS' $3000002l [ "artemis_lander.iff" ] }  // IFF RM0 000:002
+		{ 'ASS' $3000002l [ "entry_trigger_1.iff" ] }  // IFF RM0 000:002
+		{ 'ASS' $3000003l [ "entry_trigger_2.iff" ] }  // IFF RM0 000:003
+		{ 'ASS' $3000004l [ "entry_trigger_3.iff" ] }  // IFF RM0 000:004
 	}
 	{ 'ALGN' .align(2048) }
 }
