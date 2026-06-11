@@ -8,7 +8,11 @@
 
 ## Implementation status — v1 complete & browser-verified 2026-06-12
 
-**v1 is functionally complete, browser-verified, and published.** The engine builds to wasm, boots, loads a level, renders a native-equivalent 3-D frame, takes keyboard input, and initialises audio (verified end-to-end in headless Chrome / SwiftShader WebGL 2). **Published to [`worldfoundry.org/v2/play/`](https://worldfoundry.org/v2/play/)** — a designed Astro page with a level switcher embedding the engine bundle (committed in the `worldfoundry.org` repo; goes live on the next `v*` deploy tag). Evidence in the Verification section below; screenshots `2026-06-11-web-first-render-snowgoons.png`, `2026-06-12-web-moon-site01-render.png`. This table is the live tracker.
+**v1 is functionally complete, browser-verified, published, and live.** The engine builds to wasm, boots, loads a level, renders a native-equivalent 3-D frame, takes keyboard input, and initialises audio (verified end-to-end in headless Chrome / SwiftShader WebGL 2). **Live at [`worldfoundry.org/v2/play/`](https://worldfoundry.org/v2/play/)** — a designed Astro page with a level switcher embedding the engine bundle, now serving 8 demo levels (snowgoons, moon, Q\*bert, Mario W1‑1…1‑4, Marble Madness). Evidence in the Verification section below; screenshots `2026-06-11-web-first-render-snowgoons.png`, `2026-06-12-web-moon-site01-render.png`. This table is the live tracker.
+
+Two notable things landed after the first publish (2026-06-12):
+- **A dormant engine bug surfaced and was fixed** — the RIGHT-turn key was dead on the web build (negative-angle UB in `Scalar::AsUnsignedFraction`; wasm saturates `uint16(negativeFloat)` to 0). Player-confirmed working in-browser after the fix. Full writeup in [`docs/BUGS.md`](../BUGS.md) and [investigation](../investigations/2026-06-12-web-right-turn-negative-angle.md); engine commit [`944cc31b`](https://github.com/wbniv/WorldFoundry/commit/944cc31b).
+- **The bundle is now content-hashed** so deploys never need a hard refresh (see *Deployment robustness* below).
 
 | Step | Status | Note |
 |------|--------|------|
@@ -22,7 +26,7 @@
 | P2.1 `gfx/gl/emscripten_window.cc` | ✓ done & verified | WebGL2 context created in-browser; renders (snowgoons) |
 | P2.2 ASYNCIFY yield in `StepFrame()` | ✓ done | `game.cc:501-508` |
 | Phase 3 assets + zForth boot | ✓ done & verified | `-standalone` level preloaded to MEMFS, POSIX accessor reads it, zForth boots, level loads |
-| Phase 4 input (keyboard + gamepad) | ✓ done; kbd verified | ArrowRight moved the camera in-browser; gamepad coded (`emscripten_window.cc:153-193`), not hardware-tested |
+| Phase 4 input (keyboard + gamepad) | ✓ done & verified | All four arrows + turn confirmed in-browser (the earlier "ArrowRight moved the camera" note was a camera-drift false positive — RIGHT-turn was actually dead until the negative-angle fix [`944cc31b`](https://github.com/wbniv/WorldFoundry/commit/944cc31b), bug #6 below). Gamepad coded (`emscripten_window.cc:153-193`), not hardware-tested |
 | Phase 5 audio | ✓ done & verified | `miniaudio v0.11.25 ready` in-browser; click-to-start gesture unlocks `AudioContext` (no extra JS) |
 | Phase 6 shell + persistence + ship | ✓ done | custom shell `web/shell.html` (click-to-start, load progress, `?level=` selector, container fullscreen); hi-score IDBFS (`hscore.cc`, `platform_main.cc`); P6.4 ASYNCIFY-tax measured (investigation table); **published to `worldfoundry.org/v2/play/`** via `task bundle-web` → Astro page + iframe (`worldfoundry.org` commit `d825379`; live on next `v*` tag) |
 | Phase 7 v2 main-loop inversion | ☐ not started | committed follow-up; plan sequences it after v1 ships + is profiled |
@@ -34,8 +38,18 @@
 3. **Wrong preload file + `-L` arg form** — the build preloaded the **LVAS asset-bundle** `moon_site01.iff`; the `-L` path needs the **`-standalone`** variant (complete L-chunk, magic `L4`). Reproduced identically on native — a doc bug, not a port bug. Also: `-L` wants the path joined as ONE token (`-L<path>`, `main.cc:210`), not `-L <path>` as the plan mockups showed. Shell + CMake preload corrected.
 4. **Fullscreen rendered blank** — the shell's fullscreen button used Emscripten's `Module.requestFullscreen`, which wraps/resizes the canvas; the engine's fixed 640×480 GL surface then drew blank. Switched to the native Fullscreen API on the `#wf-stage` container with `object-fit: contain` on the canvas — the GL surface is untouched and just letterbox-scales (`web/shell.html`).
 5. **`task build-web` was broken / status-bar level name hardcoded** — two cosmetic-but-real fixes: `build-web` aborted before `emcc` because Task's POSIX shell can't source `emsdk_env.sh` (now run via system bash), and the player status bar hardcoded "moon_site01" (now the selected level).
+6. **RIGHT-turn dead on web — negative-angle UB (dormant since 2010).** In levels with `turnRate != 0` (snowgoons, moon) the RIGHT arrow did nothing while LEFT/UP/DOWN worked. The input layer was proven blameless first (instrumentation showed `ArrowRight` delivers `EJ_BUTTONF_RIGHT` into `QInputDigital::_current` identically to LEFT); the asymmetry was `Angle::Revolution(-turnRate)` feeding a **negative** `Scalar` into `Scalar::AsUnsignedFraction`, whose float path does `uint16(negativeFloat)` — UB. wasm's saturating `i32.trunc_sat_f64_u` clamps it to 0 (native x86 `fptoui` and the fixed-point path both wrapped it correctly, hence dormant on PSX + desktop for 16 years). Fixed by wrapping the negative fraction into `[0,1)` in `scalar.hpi`; regression assert in `mathtest.cc`. Engine [`944cc31b`](https://github.com/wbniv/WorldFoundry/commit/944cc31b), [BUGS.md](../BUGS.md), [investigation](../investigations/2026-06-12-web-right-turn-negative-angle.md). **Not web-specific code** — a latent shared-math bug the wasm target was first to expose.
 
 > **moon_site01 (resolved 2026-06-12):** the headline `moon_site01-standalone.iff` initially showed a black frame — its 1024² NAC terrain texture overflowed the default VRAM slot (`texture.cc:74` `RangeCheckExclusive`). **Not a web bug:** native needs the same VRAM-override switches (the `task run-moon` recipe). The shell now passes them per-level (`LEVEL_ARGS` → `--vram-width=4096 --vram-height=2048 --vram-slot-width=1024 --vram-slot-height=1024`), and moon renders in-browser — `screenshots/2026-06-12-web-moon-site01-render.png`.
+
+### Deployment robustness — content-hashed bundle (2026-06-12)
+
+The first publish used fixed filenames (`wf_game.{js,wasm,data}`) under `max-age=3600, stale-while-revalidate`. Because the `.js`/`.data` carry the level manifest, a half-stale cached trio rendered newly-added levels as a **black screen** until a manual hard refresh — and a stale `.wasm` masked the right-turn fix. Fixed in the `worldfoundry.org` repo by content-addressing the bundle, matching the existing `_astro/*` convention:
+
+- `task sync-game-bundle` hashes the prebuilt bundle into `public/v2/play/<hash>/`, stamps `src/lib/wfBundle.ts`, keeps the last 3 hashed dirs, and **automates the previously-manual copy** from `WorldFoundry-wbniv/build-web/`.
+- The demos page points the iframe at the hashed dir — a new build is a new URL, so browsers fetch fresh and never revalidate-stale. `_headers` marks `/v2/play/:hash/*` `immutable` and the tiny index page `no-cache` (always-fresh entry point + forever-immutable assets).
+
+This closes the "publish from build-web is a manual copy" gap noted in Phase 6 and means future bundle updates need no hard refresh. (worldfoundry.org commits `4dbde65`, `09f2e1f`.)
 
 ---
 
