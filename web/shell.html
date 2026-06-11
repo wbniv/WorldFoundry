@@ -188,7 +188,7 @@
         if (startBtn.disabled || started) return;
         started = true;
         overlay.style.display = 'none';
-        statusEl.textContent = 'Running — moon_site01';
+        statusEl.textContent = 'Running — ' + name;
         canvas.focus();
         // Runs engine init (incl. AudioContext creation) synchronously inside
         // this gesture, up to the first ASYNCIFY yield → audio is unlocked.
