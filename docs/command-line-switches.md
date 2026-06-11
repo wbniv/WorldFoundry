@@ -27,6 +27,16 @@ wf_game {switches} [level#]
 | `-profmainloop` | `DO_PROFILE` | Profile CPU usage during main loop |
 | `-breaktime=<t>` | `DO_DEBUGGING_INFO` | Break into debugger at wall-clock time `t` |
 | `-paranoid` | always | Insanely slow error checks |
+| `--vram-width=N` | always | Total VRAM box width (default 1024) |
+| `--vram-height=N` | always | Total VRAM box height (default 512) |
+| `--vram-slot-width=N` | always | Transient texture slot width (default 256) — raise for textures > 256² (e.g. 1024 for moon Site 01) |
+| `--vram-slot-height=N` | always | Transient texture slot height (default 256) — raise for textures > 256² |
+
+> **High-res textures:** a texture wider/taller than the transient slot (256²)
+> aborts at load (`texture.cc:74`). Size `--vram-width/height` and
+> `--vram-slot-width/height` to fit — see `task run-moon` and the
+> [level-design troubleshooting note](level-design-troubleshooting.md). Not
+> web-specific; native needs the same switches.
 
 ## Stream Redirection
 

@@ -1136,6 +1136,51 @@ This matches the engine's `VRAMPaletteWidth` on the PC path. The PSX path uses 3
 
 ---
 
+## Texture assertion: `width < map.GetXSize()+1` (width = 1024) — texture bigger than the transient VRAM slot
+
+Same assert as the `width = 320` palette case above, but here the number is your
+**texture's own dimension** and the fix is a runtime switch, not a textile rebuild.
+
+**Symptom:** A level with a **high-resolution texture** (e.g. a 1024² terrain
+composite) black-screens or aborts at load:
+
+```
+AssertMsg:width = 1024, map.GetXSize()+1 = 257
+|(ptrdiff_t)(width) < (ptrdiff_t)(map.GetXSize()+1)
+|in file "wfsource/source/gfx/texture.cc" on line 74
+```
+
+**Cause:** `LoadTexture` (`texture.cc:74`) range-checks the TGA width against its
+destination PixelMap — the **transient texture slot** in VRAM
+(`VideoMemory::GetSlotTexturePixelMap`, `assslot.cc:89`). That slot defaults to
+**256×256** (`VideoMemory::VRAMTransientWidth/Height`, `vmem.cc:40-41`), and the
+total VRAM box defaults to **1024×512** (`Display::VRAMWidth/Height`,
+`display.cc:32-33`). Any texture larger than the slot overflows it — so a 1024²
+texture needs both a bigger box *and* a bigger slot. **This is platform-independent**
+— it bites native and web identically; it is not a renderer/WebGL issue.
+
+**Fix (runtime, per-level):** pass the VRAM-override switches sized for your
+texture. For a 1024² texture (the moon Site 01 NAC terrain):
+
+```bash
+wf_game --vram-width=4096 --vram-height=2048 \
+        --vram-slot-width=1024 --vram-slot-height=1024 \
+        -L/abs/path/to/<name>-standalone.iff
+```
+
+`task run-moon` is the canonical recipe. On the **web** build the shell carries a
+per-level arg map (`web/shell.html` → `LEVEL_ARGS`) that supplies these
+automatically for `moon_site01`; add an entry there for any other high-res level.
+Full switch list: [command-line-switches.md](command-line-switches.md); design
+rationale: [plans/2026-05-30-runtime-vram-cli-overrides.md](plans/2026-05-30-runtime-vram-cli-overrides.md)
+(moon also needs the int16-UV widening, [plans/2026-05-30-uv-int16-widening.md](plans/2026-05-30-uv-int16-widening.md)).
+
+**Rule of thumb:** keep level textures ≤ 256² unless you ship the matching
+`--vram-slot-*` overrides *with* the level — otherwise it black-screens on load,
+on every platform.
+
+---
+
 ## Camera exits room → level crashes or stutters
 
 **Symptom:** At runtime: `Room::UpdateRoomContents: object N kind=13 ... fell out of room 0`. Camera actor exits the room bounds and the engine crashes or forces level done.
