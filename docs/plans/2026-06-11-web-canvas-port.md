@@ -33,7 +33,7 @@
 2. **WebGL2 texParameter on the default texture** — `WFInitGL` (`display.cc:622-625`) set wrap/filter with no texture bound; desktop/Android tolerate it, WebGL 2 errors `INVALID_OPERATION`. Skipped for web (every real texture sets its own params in `pixelmap.cc:197-224`).
 3. **Wrong preload file + `-L` arg form** — the build preloaded the **LVAS asset-bundle** `moon_site01.iff`; the `-L` path needs the **`-standalone`** variant (complete L-chunk, magic `L4`). Reproduced identically on native — a doc bug, not a port bug. Also: `-L` wants the path joined as ONE token (`-L<path>`, `main.cc:210`), not `-L <path>` as the plan mockups showed. Shell + CMake preload corrected.
 
-> **moon_site01 caveat:** the headline `moon_site01-standalone.iff` trips a *data-specific* assert (`texture.cc:74` — its 1024² NAC terrain texture vs a 256-wide pixelmap). This is generic engine code and platform-independent (not a web issue); the lighter **snowgoons** level renders clean and is the bring-up level used for verification.
+> **moon_site01 (resolved 2026-06-12):** the headline `moon_site01-standalone.iff` initially showed a black frame — its 1024² NAC terrain texture overflowed the default VRAM slot (`texture.cc:74` `RangeCheckExclusive`). **Not a web bug:** native needs the same VRAM-override switches (the `task run-moon` recipe). The shell now passes them per-level (`LEVEL_ARGS` → `--vram-width=4096 --vram-height=2048 --vram-slot-width=1024 --vram-slot-height=1024`), and moon renders in-browser — `screenshots/2026-06-12-web-moon-site01-render.png`.
 
 ---
 
@@ -288,7 +288,7 @@ Per the investigation: v1 ≈ 9–15 working days, v2 ≈ 3–5 days, total ~3�
      ```
 
 2. Chrome + Firefox via `task serve-web`: `moon_site01.iff` reaches an interactive frame, zero console errors.
-   - **PASS (snowgoons), with caveat.** `?level=snowgoons-standalone` reaches an interactive, animating frame in headless Chrome with **zero GL errors / zero asserts** — see `screenshots/2026-06-11-web-first-render-snowgoons.png` (native-equivalent vs `2026-05-31-snowgoons-no-hud-regression-check.png`). The plan's named `moon_site01.iff` was the wrong file (LVAS bundle); `moon_site01-standalone.iff` loads further but trips a **data-specific** assert (`texture.cc:74`, its 1024² terrain texture) that reproduces on native too — pre-existing, not a port bug. Firefox not run.
+   - **PASS (both levels).** `?level=snowgoons-standalone` reaches an interactive, animating frame with **zero GL errors / zero asserts** — `screenshots/2026-06-11-web-first-render-snowgoons.png` (native-equivalent vs `2026-05-31-snowgoons-no-hud-regression-check.png`). **moon_site01 also renders** (`screenshots/2026-06-12-web-moon-site01-render.png`) once the shell passes its VRAM-override args (see the moon note above) — the plan's named `moon_site01.iff` was the wrong file (LVAS bundle); the `-standalone` variant + VRAM args is correct. Firefox not run.
 
 3. Keyboard LEFT/RIGHT move the player screen-left/screen-right (side-scroller C=π/2 recipe holds); gamepad d-pad/stick does the same.
    - **PASS (keyboard).** Holding `ArrowRight` visibly translated the camera/scene between frames (`/tmp` before/during/after capture; before≠during). Gamepad path is coded (`emscripten_window.cc:153-193`) but not hardware-tested headlessly.

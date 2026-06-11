@@ -150,7 +150,15 @@
       // wants the path joined to the switch as ONE token: "-L<path>"
       // (main.cc:210), never "-L <path>".
       var qLevel = new URLSearchParams(location.search).get('level') || 'moon_site01-standalone';
-      var ARGS = ['-L/' + qLevel + '.iff'];
+      // Per-level engine args. moon_site01's 1024² NAC terrain texture needs a
+      // wider VRAM box + transient texture slot than the engine defaults — without
+      // these the TGA overflows the slot (texture.cc:74 RangeCheckExclusive). This
+      // mirrors the native `task run-moon`; other levels use the defaults.
+      var LEVEL_ARGS = {
+        'moon_site01-standalone': ['--vram-width=4096', '--vram-height=2048',
+                                   '--vram-slot-width=1024', '--vram-slot-height=1024'],
+      };
+      var ARGS = (LEVEL_ARGS[qLevel] || []).concat(['-L/' + qLevel + '.iff']);
       var name = qLevel.replace(/-standalone$/, '');
       document.getElementById('wf-level').textContent = name;
       document.title = 'World Foundry — ' + name;

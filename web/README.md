@@ -60,10 +60,17 @@ Cloudflare Pages project (separate repo) by either:
 No special configuration is needed — static files, `$0` on the free tier.
 The `.wasm` must be served as `application/wasm` (Pages does this automatically).
 
+## Per-level engine args
+
+Some levels need extra engine switches. The shell carries a small per-level
+arg map (`LEVEL_ARGS` in `shell.html`) so the right switches go through
+`Module.arguments` automatically. **moon_site01** needs a wider VRAM box +
+transient texture slot for its 1024² NAC terrain texture
+(`--vram-width=4096 --vram-height=2048 --vram-slot-width=1024 --vram-slot-height=1024`,
+matching native `task run-moon`); without them the texture overflows the slot
+(`texture.cc:74`). This is **not** web-specific — native needs the same flags.
+
 ## Known limitations
 
-- **moon_site01** trips a data-specific assert (`texture.cc:74` — its 1024²
-  terrain texture); this reproduces on native too. snowgoons is the clean
-  bring-up level. Pass `?level=snowgoons-standalone`.
 - v1 uses `-sASYNCIFY` for the blocking main loop; **v2 (Phase 7)** replaces it
   with `emscripten_set_main_loop`. See the plan.
