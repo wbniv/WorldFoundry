@@ -13,6 +13,38 @@ Format per entry:
 
 ---
 
+## `Scalar::AsUnsignedFraction` negative-fraction UB — right-turn dead on WebAssembly — 2026-06-12
+
+**Status:** FIXED [`944cc31b`](https://github.com/wbniv/WorldFoundry/commit/944cc31b) (`wfsource/source/math/scalar.hpi` — float/double path of `AsUnsignedFraction`).
+
+**Symptom:** On the web build (`/v2/play/`), the **RIGHT** arrow key did nothing in any level with a non-zero `turnRate` (snowgoons, moon). LEFT, UP, DOWN worked; native builds turned right fine. The keyboard layer was proven blameless first — instrumentation showed `ArrowRight` delivers `0x2000` (`EJ_BUTTONF_RIGHT`) into `QInputDigital::_current` identically to LEFT's `0x4000`. The asymmetry was downstream: holding RIGHT left the player's heading (`currentDir`) frozen frame-to-frame while LEFT rotated it normally.
+
+**Root cause:** `movement.cc` builds the right-turn as `Angle::Revolution(-turnRate)` — a **negative** `Scalar` into `Angle` (a `uint16` binary angular measure). The float/double path of `Scalar::AsUnsignedFraction()` does:
+
+```cpp
+FLOAT_TYPE temp = _value;
+temp -= int(_value);              // -0.0125  (range (-1,1), can be negative)
+return uint16(temp*SCALAR_ONE_LS);   // uint16(-819.2) — negative → unsigned, UB
+```
+
+Converting a negative float to unsigned is UB. clang-for-wasm emits the **saturating** `i32.trunc_sat_f64_u`, which clamps negatives to **0**, so `Revolution(-turnRate)` yields a zero-rotation angle and the right-turn is dead.
+
+**Why dormant:** The buggy expression dates to 2010-05-01 and "worked" on every prior target by luck. (1) The `SCALAR_TYPE_FIXED` PSX path is `return uint16(_value)` — two's-complement truncation wraps a negative fixed-point value to the correct BAM angle for free. (2) Native x86 desktop float builds use `fptoui`, which *wraps* a small negative to the correct "turn the other way" `uint16` — UB, but benign. Only WebAssembly's saturating conversion (clamp-to-0) bites. And a negative angle has to *reach* the conversion: the only two call sites passing a negative revolution are the RIGHT-turn branches in `movement.cc` (:315, :777), exercised only on a level with `turnRate != 0`. The 2026 web demos are the first such combination run on wasm.
+
+**Fix:** Wrap the negative fraction into `[0,1)` before the unsigned convert — modular BAM semantics, matching what the fixed-point path gets for free. Regression assert added in `math/mathtest.cc` (`-0.25 rev == 0.75 rev == 49152`).
+
+**Diff** (`wfsource/source/math/scalar.hpi`):
+```diff
+    temp -= int(_value);                // remove whole part → (-1,1)
++   if (temp < 0)
++      temp += 1;                       // wrap into [0,1)  (BAM is modular)
+    return uint16(temp*SCALAR_ONE_LS);
+```
+
+**Investigation:** [`docs/investigations/2026-06-12-web-right-turn-negative-angle.md`](investigations/2026-06-12-web-right-turn-negative-angle.md).
+
+---
+
 ## `SObjectStartupData::currentTime` stale-clock — spawned actors see level-load time, not spawn time — 2026-05-22
 
 **Status:** FIXED `948c3fbc` (`wfsource/source/game/level.cc` — `SafelyConstructTemplateObject`).
