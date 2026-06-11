@@ -165,9 +165,14 @@
       // wider VRAM box + transient texture slot than the engine defaults — without
       // these the TGA overflows the slot (texture.cc:74 RangeCheckExclusive). This
       // mirrors the native `task run-moon`; other levels use the defaults.
+      // Keep in sync with `task run-moon`. The moon's PERM atlas (starfield.tga
+      // 512×256, added with the chunk-streaming work) needs the --vram-perm-*
+      // overrides as well as the transient slot — without them the PERM texture
+      // overflows the 256-pixel default and aborts at load (texture.cc:74).
       var LEVEL_ARGS = {
         'moon_site01-standalone': ['--vram-width=4096', '--vram-height=2048',
-                                   '--vram-slot-width=1024', '--vram-slot-height=1024'],
+                                   '--vram-slot-width=1024', '--vram-slot-height=1024',
+                                   '--vram-perm-width=1024', '--vram-perm-height=512'],
       };
       var ARGS = (LEVEL_ARGS[qLevel] || []).concat(['-L/' + qLevel + '.iff']);
       var name = qLevel.replace(/-standalone$/, '');
