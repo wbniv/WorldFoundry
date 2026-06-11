@@ -252,7 +252,7 @@ set(WF_SKIP
     gfx/gl/unused.cc            gfx/gl/wgl.cc           gfx/otable.cc
     attrib/
     # sub-files #included by parent .cc — not compiled directly
-    gfx/gl/mesa.cc              gfx/gl/android_window.cc
+    gfx/gl/mesa.cc              gfx/gl/android_window.cc    gfx/gl/emscripten_window.cc
     gfx/gl/rendobj3.cc          gfx/gl/viewport.cc
     gfx/gl/display.cc
     gfx/glpipeline/rendobj3.cc
@@ -285,9 +285,6 @@ elseif(EMSCRIPTEN)
         # X11/GLX editor-host context registry — guard is __LINUX__ &&
         # !__ANDROID__, which matches the web build (D1 defines __LINUX__).
         gfx/gl/host_gl_context.cc
-        # #included by gfx/gl/display.cc (same pattern as mesa.cc /
-        # android_window.cc), not a standalone TU.
-        gfx/gl/emscripten_window.cc
     )
 endif()
 
@@ -932,14 +929,23 @@ elseif(EMSCRIPTEN)
         # the final wasm. ASYNCIFY narrowing (-sASYNCIFY_ONLY=[...]) is the
         # remaining P6.4 size lever — see plan / the profiling table.
         "$<$<CONFIG:Release>:-O3;-flto=thin>"
-        # Preload the "-standalone" level variants (complete L-chunks the -L path
-        # can load directly), NOT the LVAS asset-bundle .iff. The shell selects
-        # among them via ?level=<name>. moon_site01 is the headline level;
-        # snowgoons is the lighter canonical bring-up level.
-        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/wflevels/moon_site01-standalone.iff@/moon_site01-standalone.iff"
-        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/wflevels/snowgoons-standalone.iff@/snowgoons-standalone.iff"
+        # The custom shell (web/shell.html) selects the level via ?level=<name>.
         "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/web/shell.html"
     )
+    # Preloaded demo levels — the "-standalone" L-chunk variants (complete
+    # L-chunks the -L path loads directly), NOT the LVAS asset-bundle .iff. To add
+    # a demo: add a slug here AND a switcher entry on the worldfoundry.org
+    # /v2/play page. moon is the only heavy one and also needs the --vram-* args
+    # the shell's LEVEL_ARGS passes.
+    set(WF_WEB_LEVELS
+        moon_site01-standalone  snowgoons-standalone      qbert_practice-standalone
+        smb_w1_1-standalone     smb_w1_2-standalone        smb_w1_3-standalone
+        smb_w1_4-standalone     marble-madness-standalone  pilot_demo-standalone
+    )
+    foreach(_lvl ${WF_WEB_LEVELS})
+        target_link_options(wf_game PRIVATE
+            "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/wflevels/${_lvl}.iff@/${_lvl}.iff")
+    endforeach()
     set_target_properties(wf_game PROPERTIES SUFFIX ".html")
 else()
     list(APPEND WF_LINK_LIBS GL GLU X11 m pthread dl)
