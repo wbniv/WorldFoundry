@@ -47,7 +47,9 @@
 #include <hal/salloc.hp>
 #include <hal/asset_accessor.hp>
 #include <signal.h>
+#if !defined(__EMSCRIPTEN__)
 #include <X11/Xlib.h>   // XOpenDisplay/DisplayWidth/Height for -fullscreen screen-size query
+#endif
 
 // On macOS desktop (.app bundle) use NSBundle to resolve bundled resources;
 // on Linux use the POSIX cwd-relative accessor.
@@ -111,6 +113,8 @@ ParseWindowSwitches( int __argc, char* __argv[] )
 			bFullScreen = true;
 			// Query actual screen dimensions so the FBO (and recording) match.
 			// Only overrides size if -width/-height were not already given.
+			// X11 only — on web the canvas drives its own size (WFResizeSurface).
+#if !defined(__EMSCRIPTEN__)
 			if ( _halWindowWidth == 0 )
 			{
 				::Display* xd = XOpenDisplay(NULL);
@@ -122,6 +126,7 @@ ParseWindowSwitches( int __argc, char* __argv[] )
 					XCloseDisplay(xd);
 				}
 			}
+#endif
 		}
 		else if ( strncmp( __argv[i], szXPos, strlen( szXPos ) ) == 0 )
 			_halWindowXPos = atoi( __argv[i] + strlen( szXPos ) );
