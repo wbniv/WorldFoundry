@@ -651,6 +651,23 @@ WFInitGL()
     const float fAspect = float(suw) / float(suh);
     RendererBackendGet().SetProjection(60.0f, fAspect, 1.0f, 1000.0f);
 }
+
+#if defined(__EMSCRIPTEN__)
+//==============================================================================
+// Re-apply the GL viewport + projection for a new draw-surface size. The web
+// window layer (emscripten_window.cc) calls this when the canvas's displayed
+// (CSS) size changes — window resize, fullscreen enter/exit, iframe reflow — so
+// the engine renders at the canvas's actual resolution/aspect and fills the
+// viewport, instead of staying at the fixed size WFInitGL set at boot.
+void WFResizeSurface(int w, int h)
+{
+    if (w <= 0 || h <= 0) return;
+    if (auto* d = Display::GetActive()) d->SetLiveWindowSize(w, h);
+    glViewport(0, 0, w, h);
+    const float fAspect = float(w) / float(h);
+    RendererBackendGet().SetProjection(60.0f, fAspect, 1.0f, 1000.0f);
+}
+#endif
 //==============================================================================
 
 // Process-wide single active Display. Set in the ctor, cleared in the dtor.

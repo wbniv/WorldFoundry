@@ -70,17 +70,15 @@
     image-rendering: auto;
   }
 
-  /* Fullscreen the stage container (not the canvas) so the engine's fixed
-     640×480 GL surface is left alone and simply CSS-scales to fit, letterboxed.
-     Fullscreening the canvas via Emscripten resizes/wraps it and renders blank. */
+  /* Fullscreen the stage container (not the canvas) — Emscripten's own
+     requestFullscreen wraps/resizes the canvas and renders blank. The canvas
+     fills the container, and the engine resizes its GL surface to the canvas's
+     displayed size each frame (emscripten_window.cc → WFResizeSurface), so the
+     game fills the screen at the right aspect — no letterbox, no stretch. */
   #wf-stage:fullscreen {
     width: 100vw; height: 100vh;
     aspect-ratio: auto;
     background: #000;
-  }
-  #wf-stage:fullscreen #canvas {
-    width: 100%; height: 100%;
-    object-fit: contain;
   }
 
   #wf-overlay {

@@ -153,6 +153,29 @@ InitWindow( int /*xPos*/, int /*yPos*/, int /*xSize*/, int /*ySize*/ )
 void
 XEventLoop()
 {
+    // Responsive canvas: when the displayed (CSS) size of the canvas changes
+    // (window resize, fullscreen enter/exit, iframe/layout reflow), resize the
+    // GL backing to match and tell the engine, so the game fills the viewport
+    // at the correct aspect instead of the fixed 640×480 set at boot. Polled
+    // here (once per frame, acts only on change) so every resize path is caught
+    // without juggling resize/fullscreenchange callbacks.
+    {
+        extern void WFResizeSurface(int w, int h);
+        static int sLastW = 0, sLastH = 0;
+        double cssW = 0, cssH = 0;
+        if (emscripten_get_element_css_size("#canvas", &cssW, &cssH) == EMSCRIPTEN_RESULT_SUCCESS)
+        {
+            int w = (int)(cssW + 0.5), h = (int)(cssH + 0.5);
+            if (w > 0 && h > 0 && (w != sLastW || h != sLastH))
+            {
+                sLastW = w;
+                sLastH = h;
+                emscripten_set_canvas_element_size("#canvas", w, h);
+                WFResizeSurface(w, h);
+            }
+        }
+    }
+
     if (emscripten_sample_gamepad_data() != EMSCRIPTEN_RESULT_SUCCESS)
         return;
 
