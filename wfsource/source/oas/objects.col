@@ -48,6 +48,8 @@ int collisionTable[] =
 		0,	// Alias
 		1,	// Gold
 
+        	1,	// File
+        	1,	// Dir
 	
 };
 
@@ -84,6 +86,7 @@ int collisionTable[] =
 	
 	
 	
+        
 
 
 

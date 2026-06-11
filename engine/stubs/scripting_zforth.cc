@@ -45,6 +45,11 @@ extern "C" {
 #include <cstdarg>
 #include <string>
 #include <unordered_map>
+#include <vector>
+#include <dirent.h>
+#include <sys/stat.h>
+
+#include "level.hp"   // theLevel global (extern Level* theLevel)
 
 // ---------------------------------------------------------------------------
 // Module state
@@ -52,6 +57,10 @@ extern "C" {
 static zf_ctx              g_ctx;
 static MailboxesManager*   g_mgr     = nullptr;
 static int                 g_curObj  = 0;
+
+// FSN filesystem syscalls (custom 3-7 / sys 131-135)
+struct CwdEntry { std::string name; bool is_dir; int64_t size; };
+static std::vector<CwdEntry> g_cwd_entries;
 
 // Cache: src pointer → compiled word name.
 // Scripts are compiled once on first call; subsequent calls just invoke the word.
@@ -150,11 +159,75 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     Mailboxes& mb = g_mgr->LookupMailboxes(actorIdx);
                     mb.WriteMailbox(idx, Scalar::FromFloat(val));
                 }
+            } else if (custom == 3) {
+                // cwd-scan ( -- n )
+                // Scan CWD, populate g_cwd_entries (skipping . and ..), push count.
+                g_cwd_entries.clear();
+                DIR* d = opendir(".");
+                if (d) {
+                    struct dirent* ent;
+                    while ((ent = readdir(d)) != nullptr) {
+                        if (ent->d_name[0] == '.') continue;
+                        struct stat st;
+                        if (stat(ent->d_name, &st) != 0) continue;
+                        CwdEntry ce;
+                        ce.name   = ent->d_name;
+                        ce.is_dir = S_ISDIR(st.st_mode);
+                        ce.size   = ce.is_dir ? 0 : (int64_t)st.st_size;
+                        g_cwd_entries.push_back(ce);
+                    }
+                    closedir(d);
+                }
+                zf_push(ctx, (zf_cell)(float)g_cwd_entries.size());
+            } else if (custom == 4) {
+                // cwd-is-dir ( i -- bool )
+                int i = (int)zf_pop(ctx);
+                bool is_dir = (i >= 0 && i < (int)g_cwd_entries.size())
+                              ? g_cwd_entries[i].is_dir : false;
+                zf_push(ctx, (zf_cell)(is_dir ? 1.0f : 0.0f));
+            } else if (custom == 5) {
+                // cwd-file-size ( i -- bytes )
+                int i = (int)zf_pop(ctx);
+                float sz = (i >= 0 && i < (int)g_cwd_entries.size())
+                           ? (float)g_cwd_entries[i].size : 0.0f;
+                zf_push(ctx, (zf_cell)sz);
+            } else if (custom == 6) {
+                // cwd-dir-count ( i -- n )
+                // Count non-hidden entries in subdir g_cwd_entries[i].name.
+                int i = (int)zf_pop(ctx);
+                int count = 0;
+                if (i >= 0 && i < (int)g_cwd_entries.size() && g_cwd_entries[i].is_dir) {
+                    DIR* d = opendir(g_cwd_entries[i].name.c_str());
+                    if (d) {
+                        struct dirent* ent;
+                        while ((ent = readdir(d)) != nullptr)
+                            if (ent->d_name[0] != '.') ++count;
+                        closedir(d);
+                    }
+                }
+                zf_push(ctx, (zf_cell)(float)count);
+            } else if (custom == 7) {
+                // spawn-template ( x y z tmpl -- actor )
+                // Pop tmpl index and position; spawn via Level::ConstructTemplateObject;
+                // push the new actor's index.
+                int   tmpl = (int)zf_pop(ctx);
+                float z    = (float)zf_pop(ctx);
+                float y    = (float)zf_pop(ctx);
+                float x    = (float)zf_pop(ctx);
+                int   idx  = 0;
+                if (theLevel) {
+                    Vector3 pos(Scalar::FromFloat(x), Scalar::FromFloat(y), Scalar::FromFloat(z));
+                    Actor* a = theLevel->ConstructTemplateObject(tmpl, g_curObj, pos, Vector3::zero);
+                    if (a) {
+                        theLevel->AddObject(a, pos);
+                        idx = a->GetActorIndex();
+                    }
+                }
+                zf_push(ctx, (zf_cell)(float)idx);
             } else if (custom == 72) {
                 /* Neural-forth dispatch gate: syscall 200 = ZF_SYSCALL_USER + 72.
                  * Pops word-id from stack and routes to nf_dispatch().
-                 * Syscalls 3-71 are reserved for future WF primitives
-                 * (read-actor-mailbox at custom 3, spawn-template, etc.). */
+                 * Syscalls 8-71 are reserved for future WF primitives. */
 #ifdef WF_NEURAL_FORTH
                 int word_id = (int)zf_pop(ctx);
                 nf_dispatch(ctx, word_id);
@@ -315,6 +388,41 @@ void Init(MailboxesManager& mgr)
     r = zf_eval(&g_ctx, ": write-actor-mailbox 130 sys ;");
     if (r != ZF_OK)
         fprintf(stderr, "zforth: init failed (write-actor-mailbox): %d\n", r);
+
+    // FSN filesystem bridge words (custom 3-7 / sys 131-135)
+    r = zf_eval(&g_ctx, ": cwd-scan      131 sys ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (cwd-scan): %d\n", r);
+    r = zf_eval(&g_ctx, ": cwd-is-dir    132 sys ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (cwd-is-dir): %d\n", r);
+    r = zf_eval(&g_ctx, ": cwd-file-size 133 sys ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (cwd-file-size): %d\n", r);
+    r = zf_eval(&g_ctx, ": cwd-dir-count 134 sys ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (cwd-dir-count): %d\n", r);
+    r = zf_eval(&g_ctx, ": spawn-template 135 sys ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (spawn-template): %d\n", r);
+
+    // Uniform scale helper — sets qbert scale mailboxes 3040-3042 on an actor.
+    // Stack: ( actor scale -- )
+    // write-actor-mailbox signature: ( val idx actorIdx -- )
+    // 2dup swap 3040 swap builds ( actor scale scale 3040 actor ) then pops val=scale, idx=3040, actorIdx=actor.
+    r = zf_eval(&g_ctx,
+        ": set-scale "
+        "  2dup swap 3040 swap write-actor-mailbox "
+        "  2dup swap 3041 swap write-actor-mailbox "
+        "  2dup swap 3042 swap write-actor-mailbox "
+        "  2drop ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (set-scale): %d\n", r);
+
+    // Integer square root (iterative). Stack: ( n -- s )
+    // begin..until: increment s first, exit when s*s > n, return s-1.
+    r = zf_eval(&g_ctx,
+        ": isqrt "
+        "  dup 0 = if else "
+        "    1 swap "
+        "    begin swap 1+ swap over dup * over > until "
+        "    swap drop 1- "
+        "  fi ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (isqrt): %d\n", r);
 
 #ifdef WF_NEURAL_FORTH
     nf_init(&g_ctx);

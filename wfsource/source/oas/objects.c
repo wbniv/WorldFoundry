@@ -126,6 +126,12 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 			object = NULL; 
 			break;
 
+        	case Actor::File_KIND:
+			object = NULL; 
+			break;
+        	case Actor::Dir_KIND:
+			object = NULL; 
+			break;
 
 
 
@@ -161,6 +167,7 @@ ConstructOadObject(int32 type, const SObjectStartupData* startData)
 	
 	
 	
+        
 
 
 
@@ -274,6 +281,12 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 			object = OadGold(startData); 
 			break;
 
+        	case Actor::File_KIND:
+			object = OadFile(startData); 
+			break;
+        	case Actor::Dir_KIND:
+			object = OadDir(startData); 
+			break;
 
 
 
@@ -309,6 +322,7 @@ ConstructTemplateObject(int32 type, const SObjectStartupData* startData)
 	
 	
 	
+        
 
 
 

@@ -1,0 +1,12 @@
+;============================================================================
+; activate.def: created from OADdef.S and activate.oas DO NOT MODIFY
+;============================================================================
+;##ifndef activate_HT
+;##define activate_HT
+	( define OAD_ActivatedBy 0 )	; int32: Minumum: 0 Maximum: 3 Default: 1
+	( define OAD_ActivatedByActor 4 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_ActivatedByClass 8 )	; class reference: index into master class list, = CLASS_NULL if no reference
+	( define OAD_ActivatedByObjectList 12 )	; xdata_convert:
+;============================================================================
+;##endif         ; activate_DEF
+;============================================================================

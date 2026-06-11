@@ -1,0 +1,10 @@
+;============================================================================
+; shadowp.def: created from OADdef.S and shadowp.oas DO NOT MODIFY
+;============================================================================
+;##ifndef shadowp_HT
+;##define shadowp_HT
+	( define OAD_ShadowObjectTemplate 0 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_CheckBelowOnlyOnce 4 )	; boolean: Default: 1
+;============================================================================
+;##endif         ; shadowp_DEF
+;============================================================================

@@ -48,6 +48,8 @@
 	Alias_KIND,
 	Gold_KIND,
 
+        File_KIND,
+        Dir_KIND,
 
 
 
@@ -83,6 +85,7 @@
 	
 	
 	
+        
 
 
 

@@ -55,19 +55,25 @@ cd "$SCRIPT_DIR"
 
 echo "Regenerating .ht headers..." >&2
 count=0
-for ht in *.ht; do
-    stem="${ht%.ht}"
+# Process every .oas that has a matching .ht (regen) OR no .ht yet (bootstrap).
+# This way adding a new .oas + objects.mac entry auto-generates the .ht on the
+# next regen run, even if the file didn't previously exist.
+for oas in *.oas; do
+    stem="${oas%.oas}"
     "$PREP" -dTYPEFILE_OAS="$stem" oadtypes.s "$TMP/$stem.pp"
     awk "$CSTRUCT_AWK" "$TMP/$stem.pp" > "$OUTDIR/$stem.ht"
     count=$((count + 1))
 done
 echo "  $count .ht files written to $OUTDIR" >&2
 
-echo "Regenerating objects.{c,e,h}..." >&2
-"$PREP" objects.s  "$OUTDIR/objects.c"
-"$PREP" objects.es "$OUTDIR/objects.e"
-"$PREP" objects.hs "$OUTDIR/objects.h"
-echo "  objects.c objects.e objects.h written to $OUTDIR" >&2
+echo "Regenerating objects.{c,col,e,h,inc,lc}..." >&2
+"$PREP" objects.s   "$OUTDIR/objects.c"
+"$PREP" objects.cos "$OUTDIR/objects.col"
+"$PREP" objects.es  "$OUTDIR/objects.e"
+"$PREP" objects.hs  "$OUTDIR/objects.h"
+"$PREP" objects.ins "$OUTDIR/objects.inc"
+"$PREP" objects.lcs "$OUTDIR/objects.lc"
+echo "  objects.c objects.col objects.e objects.h objects.inc objects.lc written to $OUTDIR" >&2
 
 echo "Generating engine/mutation/kpropmap_generated.inc..." >&2
 # In normal mode (OUTDIR == SCRIPT_DIR) write to the canonical source-tree location.

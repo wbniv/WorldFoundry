@@ -1,0 +1,21 @@
+// filesys-standalone.iff.txt — L4-wrapped form of filesys for wf_game -L.
+//
+// Build:
+//   bash wftools/wf_blender/build_level_binary.sh filesys
+//
+// Run:
+//   task run-level -- wflevels/filesys-standalone.iff
+//
+// Phase 1 FSN level: 14 static actors + runtime-spawned Dir/File towers.
+// Pool budgets sized for ~50 spawned actors at peak (8×6 grid).
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 200000l                  // 14 static + up to ~50 spawned Dir/File towers
+        'PERM' 500000l                  // player mesh + floor
+        'ROOM' 800000l                  // room + spawned tower meshes
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../filesys.iff" ]
+}

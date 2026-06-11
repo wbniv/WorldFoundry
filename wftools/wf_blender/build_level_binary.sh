@@ -61,11 +61,12 @@ if [[ -f "$LEVEL_DIR/mesh.flags" ]]; then
   source "$LEVEL_DIR/mesh.flags"
   echo "    mesh.flags: MESH_DIR=$MESH_DIR MESH_REF_PREFIX=$MESH_REF_PREFIX"
 fi
-"$LEVCOMP" "$LEVEL.lev.bin" "$OBJECTS_LC" "$LEVEL.lvl" "$OAD_DIR" \
-  --mesh-dir "$MESH_DIR" \
-  --mesh-ref-prefix "$MESH_REF_PREFIX" \
-  --iff-txt "$LEVEL.iff.txt" \
-  --textile-ini "$LEVEL.ini"
+LEVCOMP_ARGS=("$LEVEL.lev.bin" "$OBJECTS_LC" "$LEVEL.lvl" "$OAD_DIR"
+  --mesh-dir "$MESH_DIR"
+  --iff-txt "$LEVEL.iff.txt"
+  --textile-ini "$LEVEL.ini")
+[[ -n "$MESH_REF_PREFIX" ]] && LEVCOMP_ARGS+=(--mesh-ref-prefix "$MESH_REF_PREFIX")
+"$LEVCOMP" "${LEVCOMP_ARGS[@]}"
 
 echo "[3/5] textile-rs  -ini=$LEVEL.ini  →  palN.tga / RoomN.{tga,ruv,cyc} / Perm.{tga,ruv,cyc}"
 # Options mirror the historical Makefile recipe at

@@ -65,6 +65,10 @@
 		
 #include "gold.hp"
 
+        	
+#include "file.hp"
+        	
+#include "dir.hp"
 
 
 
@@ -100,6 +104,7 @@
 	
 	
 	
+        
 
 
 

@@ -52,8 +52,8 @@ OBJECTSHEADER
 	OBJECTNOACTORENTRY(Alias,0)
 	OBJECTONLYTEMPLATEENTRY(Gold,1)
 
-@*        OBJECTENTRY(File,1)
-@*        OBJECTENTRY(Dir,1)
+        OBJECTONLYTEMPLATEENTRY(File,1)
+        OBJECTONLYTEMPLATEENTRY(Dir,1)
 OBJECTSFOOTER
 
 @*============================================================================
@@ -106,7 +106,7 @@ COLTABLEHEADER
 @*        COLTABLEENTRY(Warp,Platform,CI_SPECIAL,CI_NOTHING)
 @*        COLTABLEENTRY(Warp,Missile,CI_SPECIAL,CI_NOTHING)
 @*        COLTABLEENTRY(Warp,Explode,CI_SPECIAL,CI_NOTHING)
-@*        COLTABLEENTRY(File,Player,CI_PHYSICS,CI_PHYSICS)
+        COLTABLEENTRY(File,Player,CI_PHYSICS,CI_PHYSICS)
 COLTABLEFOOTER
 
 @*============================================================================
