@@ -1,11 +1,11 @@
 { 'LVL' 
 	{ 'OBJ' 
 		{ 'NAME' "Room01" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 20.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 25.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -32.0000000000000000(1.15.16) -35.0000000000000000(1.15.16) -22.0000000000000000(1.15.16) 32.0000000000000000(1.15.16) 32.0000000000000000(1.15.16) 22.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -35.0000000000000000(1.15.16) -72.0000000000000000(1.15.16) -28.0000000000000000(1.15.16) 35.0000000000000000(1.15.16) 40.0000000000000000(1.15.16) 28.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "room" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "room01.iff" } }
@@ -20,7 +20,7 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "LevelObj" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 20.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 25.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -31,7 +31,7 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "Matte" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 20.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 25.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -58,7 +58,7 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "Camera" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -25.0000000000000000(1.15.16) 13.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -70.0000000000000000(1.15.16) 41.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -68,7 +68,7 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "CamShot01" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -25.0000000000000000(1.15.16) 13.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) -70.0000000000000000(1.15.16) 41.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
@@ -81,11 +81,11 @@
 		{ 'FX32' { 'NAME' "Climb Rate" } { 'DATA' 3.0000000000000000(1.15.16) } { 'STR' "3.0" } }
 		{ 'FX32' { 'NAME' "Elasticity" } { 'DATA' 8.0000000000000000(1.15.16) } { 'STR' "8.0" } }
 		{ 'STR' { 'NAME' "Track Object" } { 'STR' "Player" } }
-		{ 'I32' { 'NAME' "Rotation" } { 'DATA' 1l } { 'STR' "Track" } }  //Fixed|Track
-		{ 'I32' { 'NAME' "Position X" } { 'DATA' 1l } { 'STR' "Relative" } }  //Absolute|Relative
-		{ 'I32' { 'NAME' "Position Y" } { 'DATA' 1l } { 'STR' "Relative" } }  //Absolute|Relative
+		{ 'I32' { 'NAME' "Rotation" } { 'DATA' 0l } { 'STR' "Fixed" } }  //Fixed|Track
+		{ 'I32' { 'NAME' "Position X" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
+		{ 'I32' { 'NAME' "Position Y" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
 		{ 'I32' { 'NAME' "Position Z" } { 'DATA' 0l } { 'STR' "Absolute" } }  //Absolute|Relative
-		{ 'FX32' { 'NAME' "FOV" } { 'DATA' 55.0000000000000000(1.15.16) } { 'STR' "55.0" } }
+		{ 'FX32' { 'NAME' "FOV" } { 'DATA' 75.0000000000000000(1.15.16) } { 'STR' "75.0" } }
 		{ 'FX32' { 'NAME' "Pan Time In Seconds" } { 'DATA' 0.2000000000000000(1.15.16) } { 'STR' "0.2" } }
 		{ 'FX32' { 'NAME' "Hither" } { 'DATA' 0.1000000000000000(1.15.16) } { 'STR' "0.1" } }
 		{ 'FX32' { 'NAME' "Yon" } { 'DATA' 500.0000000000000000(1.15.16) } { 'STR' "500.0" } }
@@ -119,7 +119,7 @@
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "director" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 5l } { 'STR' "5" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: DIR-TMPL  12 ;\n: FILE-TMPL 13 ;\n: COLS  8 ;\n: CELL  5 ;\n: X0    -17 ;\n: Y0    -15 ;\n: grid-x ( n -- x ) COLS mod CELL * X0 + ;\n: grid-y ( n -- y ) COLS /   CELL * Y0 + ;\n: cnt@  11 read-mailbox ;\n: cnt+  cnt@ 1 + 11 write-mailbox ;\n: isqrt ( n -- s )\n  dup 0 = if else\n    1 swap\n    begin swap 1+ swap over dup * over > until\n    swap drop 1-\n  fi ;\n: spawn-dir ( idx -- )\n  cwd-dir-count isqrt dup 1 < if drop 1 fi\n  cnt@ dup grid-x swap grid-y 0 DIR-TMPL spawn-template\n  swap set-scale\n  cnt+ ;\n: spawn-file ( idx -- )\n  cwd-file-size 1000 / isqrt dup 1 < if drop 1 fi\n  cnt@ dup grid-x swap grid-y 0 FILE-TMPL spawn-template\n  swap set-scale\n  cnt+ ;\n10 read-mailbox 0 = if\n  1 10 write-mailbox\n  0 11 write-mailbox\n  cwd-scan 0 do\n    i cwd-is-dir if\n      i spawn-dir\n    else\n      i spawn-file\n    fi\n  loop\nfi\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: DIR-TMPL  12 ;\n: FILE-TMPL 13 ;\n: COLS  8 ;\n: CELL  5 ;\n: X0    -17 ;\n: Y0    -35 ;\n: grid-x ( n -- x ) COLS mod CELL * X0 + ;\n: grid-y ( n -- y ) COLS /   CELL * Y0 + ;\n: cnt@  11 read-mailbox ;\n: cnt+  cnt@ 1 + 11 write-mailbox ;\n: isqrt ( n -- s )\n  dup 0 = if else\n    1 swap\n    begin swap 1+ swap over dup * over > until\n    swap drop 1-\n  fi ;\n: spawn-dir ( idx -- )\n  cwd-dir-count isqrt dup 6 > if drop 6 fi dup 1 < if drop 1 fi\n  cnt@ dup grid-x swap grid-y 0 DIR-TMPL spawn-template\n  swap set-z-scale\n  cnt+ ;\n: spawn-file ( idx -- )\n  cwd-file-size 1000 / isqrt dup 4 > if drop 4 fi dup 1 < if drop 1 fi\n  cnt@ dup grid-x swap grid-y 0 FILE-TMPL spawn-template\n  swap set-z-scale\n  cnt+ ;\n10 read-mailbox 0 = if\n  1 10 write-mailbox\n  0 11 write-mailbox\n  cwd-scan 0 do\n    i cwd-is-dir if\n      i spawn-dir\n    else\n      i spawn-file\n    fi\n  loop\nfi\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
 	}
@@ -154,7 +154,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -20.0000000000000000(1.15.16) -20.0000000000000000(1.15.16) -0.5000000000000000(1.15.16) 20.0000000000000000(1.15.16) 20.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -22.0000000000000000(1.15.16) -38.0000000000000000(1.15.16) -0.5000000000000000(1.15.16) 22.0000000000000000(1.15.16) 38.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "floor.iff" } }
@@ -209,11 +209,11 @@
 	}
 	{ 'OBJ' 
 		{ 'NAME' "ActBoxOR" }
-		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 20.0000000000000000(1.15.16)  //x,y,z
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 25.0000000000000000(1.15.16)  //x,y,z
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -32.0000000000000000(1.15.16) -35.0000000000000000(1.15.16) -22.0000000000000000(1.15.16) 32.0000000000000000(1.15.16) 32.0000000000000000(1.15.16) 22.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -35.0000000000000000(1.15.16) -72.0000000000000000(1.15.16) -28.0000000000000000(1.15.16) 35.0000000000000000(1.15.16) 40.0000000000000000(1.15.16) 28.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actboxor" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "actboxor.iff" } }

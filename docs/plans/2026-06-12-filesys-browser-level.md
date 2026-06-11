@@ -301,6 +301,25 @@ loop
     ball pos: (0.000, 0.000, 0.250)
     ```
     Player spawning at expected Z=0.25 (just above floor). No assertion failures.
+
+    **Camera fix 1 (2026-06-12):** Initial camera used `Position X/Y = Relative` (bungee
+    spring mode), which caused the camera to drift to X≈49 — outside the room bounds —
+    triggering "fell out of room" / "refusing to remove camera object" errors. Fixed by
+    switching `Position X`, `Position Y`, and `Position Z` all to `'Absolute'` in
+    `blender_filesys.py`.
+
+    **Camera fix 2 (2026-06-12):** `Rotation = 'Track'` in the CamShot caused
+    `SetCameraParametersFromShot` (`movecam.cc:338-376`) to build a rotation matrix from
+    the Player's heading C=π/2 (doom-stick mode) and apply `outPos.position *= camMatrix`,
+    rotating the absolute camera position (0,−70,41) to (70,0,41) — outside the room
+    bounds. Fixed by changing `'Rotation': 'Track'` → `'Rotation': 'Fixed'` in
+    `blender_filesys.py`. Camera now sits stably at (0,−70,41) with no drift.
+
+    ```
+    ball pos: (0.000, 0.000, 0.250)
+    ball pos: (0.000, 0.000, 0.250)
+    ```
+    No "fell out of room" / "refusing to remove camera object" errors.
     PASS
 
 5. ~~Yellow towers appear for subdirectories — taller = more files inside~~
@@ -310,6 +329,13 @@ loop
 
     <img src="screenshots/2026-06-12-filesys-level.png" width="700">
 
+    **Spawning regression fix (2026-06-12):** After the camera fix + rebuild, Dir/File
+    actors stopped spawning. Root cause: `shell.aib`'s `defs` string ends at a `;`
+    inside a `\ comment` line with no trailing `\n`. zForth's `\` word
+    (`ZF_INPUT_PASS_CHAR`) remained suspended across `zf_eval` calls, consuming the
+    first line of the FSN Director's compilation (`: DIR-TMPL 12 ;`), leaving
+    `DIR-TMPL` undefined. Fixed by calling `zf_eval(&g_ctx, "\n");` at the start of
+    `RunScript()` to flush any suspended `\` state before each new compilation.
     PASS
 
 6. Grey slabs appear for files — taller = larger file

@@ -260,15 +260,6 @@ SetCameraParametersFromShot(const Actor* tempcamShotActor,cameraPosition& outPos
 	else
 		outPos.position.SetZ(camShotPos.Z());
 
-//	cerror << "campos Vector is " << camPos << std::endl;
-//	cerror << "follow Vector is " << followVect << std::endl;
-//	cerror << "camshotactor = " << *camShotActor << std::endl;
-//	cerror << "follow = " << *theLevel->getActor(shotData->Follow) << std::endl;
-//	cerror << "target = " << *theLevel->getActor(shotData->Target) << std::endl;
-
-//	cerror << "relative vector is " << relative << std::endl;
-//	cerror << "resulting vector is " << outPos.position << std::endl;
-
 //	outPos.position.SetX(Scalar(shotData->CamPositionX));
 //	outPos.position.SetY(Scalar(shotData->CamPositionY));
 //	outPos.position.SetZ(Scalar(shotData->CamPositionZ));

@@ -35,25 +35,32 @@ def oad(name):
     return os.path.join(OAD_DIR, f'{name}.oad')
 
 # ── Level layout ──────────────────────────────────────────────────────────────
-# Floor: 40×40, Z = [-0.5, 0].  Player spawns at (0,0,1).
-FLOOR_HALF = 20.0
-FLOOR_Z0   = -0.5
-FLOOR_Z1   = 0.0
+# Floor: 44×76 to cover grid (X: -17..+18, Y: -35..+35) with margin.
+FLOOR_X0 = -22.0
+FLOOR_X1 =  22.0
+FLOOR_Y0 = -38.0
+FLOOR_Y1 =  38.0
+FLOOR_Z0 =  -0.5
+FLOOR_Z1 =   0.0
 
 PLAYER_SPAWN = (0.0, 0.0, 1.0)
 
-# Camera stays behind and above player (relative follow, top-down-ish view).
-# Y=-25, Z=12 gives a ~26° elevation angle looking forward — shows the FSN skyline.
-CAM_OFFSET   = (0.0, -25.0, 12.0)
+# Camera at (0,-70,40) — same position that was verified working before.
+# Grid is now centred: Y0=-35 so rows span -35..+35 around the player.
+# Camera looks from behind at 30° downward; tower tops break the horizon
+# in middle rows, creating the FSN cityscape silhouette.
+CAM_OFFSET   = (0.0, -70.0, 40.0)
 TARGET1_POS  = (0.0, 0.0, 0.0)
 TARGET2_POS  = (0.0, 5.0, 0.0)
 
-# Room bbox: large enough for camera extremes and spawned towers (up to ~40 units tall).
-# Room center at (0, 0, 20) so bbox relative coords cover Z[-22, 22] → world Z[-2, 42].
-ROOM_CENTER     = (0.0, 0.0, 20.0)
-ROOM_LOCAL_BBOX = (-32.0, -35.0, -22.0, 32.0, 32.0, 22.0)
-# World Z: 20 + [-22, 22] = [-2, 42]  (floor at 0, tallest tower ~32 units, cam at Z=12+ ✓)
-# World Y: 0 + [-35, 32] = [-35, 32]  (cam at Y=-25 when player at 0 ✓)
+# Room bbox — wider than needed so spring transients can't escape.
+# Camera at (0,-70,41); grid X: -17..+18, Y: -35..+35, Z: 0..8.
+ROOM_CENTER     = (0.0, 0.0, 25.0)
+ROOM_LOCAL_BBOX = (-35.0, -72.0, -28.0, 35.0, 40.0, 28.0)
+# Keeping room X=±35 from the previously-verified working config — bungee
+# camera initialises cleanly at this X extent. Y extended to +40 so the
+# far grid rows (Y up to +35) are comfortably inside.
+# World X: [-35,35], Y: [-72,40], Z: [-3,53]  (cam at (0,-70,41) ✓)
 
 # Template objects sit OOB (Z=-200), outside all room bboxes.
 # Their data is loaded; they're never constructed by the normal load pass
@@ -90,13 +97,13 @@ COLOR_FLOOR    = (0.05, 0.05, 0.10, 1.0)
 COLOR_DIR      = (1.00, 0.85, 0.00, 1.0)   # yellow
 COLOR_FILE     = (0.50, 0.50, 0.70, 1.0)   # grey-blue
 
-# Grid: 8 columns × 5-unit spacing, origin at (-17, -15).
-# Covers X: -17,-12,-7,-2,3,8,13,18 (within floor X[-20,20]).
+# Grid: 8 columns × 5-unit spacing.
+# Y0=-35 centres ~15 rows around Y=0: rows 0..14 → Y: -35..+35.
 # Each entry (dir or file) gets the next sequential grid slot.
 GRID_COLS = 8
 GRID_CELL = 5
 GRID_X0   = -17
-GRID_Y0   = -15
+GRID_Y0   = -35
 
 # Director Forth script — FSN populator.
 # Runs every frame; a first-frame init guard (mailbox 10) ensures the scan
@@ -111,8 +118,9 @@ GRID_Y0   = -15
 #   x = (counter mod COLS) * CELL + X0
 #   y = (counter /   COLS) * CELL + Y0
 #
-# scale mailboxes 3040-3042 are X/Y/Z stretch; set-scale is already defined
-# in scripting_zforth.cc Init().
+# scale mailboxes 3040/3041/3042 are X/Y/Z stretch.
+# set-z-scale (defined in scripting_zforth.cc) sets X=Y=1.0, Z=computed height,
+# so towers are tall and thin rather than uniformly scaled cubes.
 #
 # DIR-TMPL / FILE-TMPL are the level-actor indices of DirTemplate/FileTemplate.
 DIRECTOR_SCRIPT = (
@@ -146,20 +154,20 @@ DIRECTOR_SCRIPT = (
     '  fi ;\n'
 
     # Spawn a Dir tower for CWD entry idx.
-    # scale = isqrt(file_count_in_subdir), min 1.
+    # height = clamp(isqrt(file_count_in_subdir), 1, 6). X/Y stay unit width.
     # Grid position from shared counter.
     ': spawn-dir ( idx -- )\n'
-    '  cwd-dir-count isqrt dup 1 < if drop 1 fi\n'
+    '  cwd-dir-count isqrt dup 6 > if drop 6 fi dup 1 < if drop 1 fi\n'
     '  cnt@ dup grid-x swap grid-y 0 DIR-TMPL spawn-template\n'
-    '  swap set-scale\n'
+    '  swap set-z-scale\n'
     '  cnt+ ;\n'
 
     # Spawn a File box for CWD entry idx.
-    # scale = isqrt(file_size / 1000), min 1.  (/1000 ≈ KB reduces iteration count.)
+    # height = clamp(isqrt(file_size/1000), 1, 4). X/Y stay unit width.
     ': spawn-file ( idx -- )\n'
-    '  cwd-file-size 1000 / isqrt dup 1 < if drop 1 fi\n'
+    '  cwd-file-size 1000 / isqrt dup 4 > if drop 4 fi dup 1 < if drop 1 fi\n'
     '  cnt@ dup grid-x swap grid-y 0 FILE-TMPL spawn-template\n'
-    '  swap set-scale\n'
+    '  swap set-z-scale\n'
     '  cnt+ ;\n'
 
     # One-shot init: populate the FSN grid on the first frame only.
@@ -311,8 +319,8 @@ make_empty('Camera', cam_initial, 'camera',
 )
 
 # 5 ── CamShot ─────────────────────────────────────────────────────────────────
-# Relative follow camera: camera = CamShot offset + player position.
-# Y=-25, Z=12 gives a high-angle rear view that shows the tower skyline.
+# Camera at (0,-70,41): verified working position. Tracks player; Position Absolute
+# prevents bungee drift. Grid centred around Y=0 — towers visible as skyline.
 camshot_world = tuple(PLAYER_SPAWN[i] + CAM_OFFSET[i] for i in range(3))
 make_empty('CamShot01', camshot_world, 'camshot',
     props={
@@ -320,11 +328,11 @@ make_empty('CamShot01', camshot_world, 'camshot',
         'Target':               'Target02',
         'Follow':               'Target01',
         'Track Object':         'Player',
-        'Rotation':             'Track',
-        'Position X':           'Relative',
-        'Position Y':           'Relative',
-        'Position Z':           'Absolute',    # fixed height keeps skyline stable
-        'FOV':                  55.0,
+        'Rotation':             'Fixed',
+        'Position X':           'Absolute',
+        'Position Y':           'Absolute',
+        'Position Z':           'Absolute',
+        'FOV':                  75.0,
         'Climb Rate':           3.0,
         'Elasticity':           8.0,
         'Pan Time In Seconds':  0.2,
@@ -388,8 +396,8 @@ player['wf_original_bbox'] = (-0.4, -0.4, 0.0, 0.4, 0.4, 0.8)
 mat_floor = make_mat('fsn_floor', COLOR_FLOOR)
 floor_obj = add_solid_box(
     'Floor',
-    -FLOOR_HALF, -FLOOR_HALF, FLOOR_Z0,
-     FLOOR_HALF,  FLOOR_HALF, FLOOR_Z1,
+    FLOOR_X0, FLOOR_Y0, FLOOR_Z0,
+    FLOOR_X1, FLOOR_Y1, FLOOR_Z1,
     mat_floor
 )
 floor_obj['wf_schema_path'] = oad('statplat')
