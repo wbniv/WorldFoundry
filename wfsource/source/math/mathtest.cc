@@ -34,14 +34,23 @@
 void
 PIGSMain( int argc, char* argv[] )
 {
-	{ // random number test
-	for ( int i=0; i<100; ++i )
+	{ // random number test — regression guard for the RangeCheck-with-Scalar
+	  // abort + the >>16/>>15 half-range bug (docs/BUGS.md, 2026-06-12). Before
+	  // the fix: Scalar::Random() aborted on the first call in assertion builds
+	  // (RangeCheck cast the Scalar to bool), and in release only spanned [0,0.5).
+	Scalar maxSeen = Scalar::zero;
+	for ( int i=0; i<1000; ++i )
 	{
-		//s.Random();
-		std::cout << Scalar::Random() << '\t';
-		//s.Random( Scalar::negativeOne, Scalar::two );
-		std::cout << Scalar::Random( Scalar::negativeOne, Scalar::two ) << std::endl;
+		Scalar r = Scalar::Random();
+		AssertMsg( r >= Scalar::zero && r < Scalar::one, "Random() out of [0,1): " << r );
+		if ( r > maxSeen ) maxSeen = r;
+
+		Scalar rr = Scalar::Random( Scalar::negativeOne, Scalar::two );
+		AssertMsg( rr >= Scalar::negativeOne && rr < Scalar::two, "Random(-1,2) out of range: " << rr );
 	}
+	// >>15 (not >>16): the full [0,1) range must be reachable, not just [0,0.5).
+	AssertMsg( maxSeen > SCALAR_CONSTANT(0.5), "Random() never exceeded 0.5 over 1000 draws (range bug?): max = " << maxSeen );
+	std::cout << "Scalar::Random: 1000 draws in range, max = " << maxSeen << std::endl;
 	}
 
 	std::cout << "MathTest:" << std::endl;

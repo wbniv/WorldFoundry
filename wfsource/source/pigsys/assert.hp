@@ -215,6 +215,25 @@
 		AssertMsg((ptrdiff_t)(value) < (ptrdiff_t)(max), #value " = " << (value) << ", " << #max " = " << (max) ); \
 	}
 
+	// Range checks for value types whose only integral conversion is operator
+	// bool() — notably Scalar (fixed/float). The RangeCheck* macros above cast
+	// every arg to (ptrdiff_t), which collapses a Scalar to 0/1 via operator
+	// bool() and makes the check bogus (Scalar::Random's value<one became 1<1 →
+	// always aborts in assertion builds). These compare the values directly via
+	// the type's own operator>=/</<= and stream via operator<< — correct for
+	// Scalar and any comparable+streamable type. See docs/BUGS.md (2026-06-12).
+#	define RangeCheckScalar( min, value, max ) \
+	{\
+		AssertMsg( (value) >= (min), #min " = " << (min) << ", " #value " = " << (value) ); \
+		AssertMsg( (value) <  (max), #value " = " << (value) << ", " #max " = " << (max) ); \
+	}
+
+#	define RangeCheckScalarInclusive( min, value, max ) \
+	{\
+		AssertMsg( (value) >= (min), #min " = " << (min) << ", " #value " = " << (value) ); \
+		AssertMsg( (value) <= (max), #value " = " << (value) << ", " #max " = " << (max) ); \
+	}
+
 #	define assertEq(value1, value2) AssertMsg((value1) == (value2), #value1 " = " << (value1) << ", " #value2 " = " << (value2))
 #	define assertNe(value1, value2) AssertMsg((value1) != (value2), #value1 " = " << (value1) << ", " #value2 " = " << (value2))
 
@@ -234,6 +253,8 @@
 #	define RangeCheck( nim, value, max)
 #	define RangeCheckInclusive( min, value, max)
 #	define RangeCheckExclusive( min, value, max)
+#	define RangeCheckScalar( min, value, max)
+#	define RangeCheckScalarInclusive( min, value, max)
 
 #	define ValidateObject( x ) ((void)0)
 #	define ValidateObjectFileLine( x, file, line ) ((void)0)

@@ -39,8 +39,8 @@ ViewPort::Validate() const					// test integrity of class instance
 	assert(ValidPtr(_primitives));
 #endif
 
-	RangeCheckInclusive( Scalar::zero, _xSize, Scalar( _display.XSize(), 0 ) );
-	RangeCheckInclusive( Scalar::zero, _ySize, Scalar( _display.YSize(), 0 ) );
+	RangeCheckScalarInclusive( Scalar::zero, _xSize, Scalar( _display.XSize(), 0 ) );
+	RangeCheckScalarInclusive( Scalar::zero, _ySize, Scalar( _display.YSize(), 0 ) );
 #endif
 }
 
