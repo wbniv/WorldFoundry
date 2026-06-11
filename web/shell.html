@@ -70,6 +70,19 @@
     image-rendering: auto;
   }
 
+  /* Fullscreen the stage container (not the canvas) so the engine's fixed
+     640×480 GL surface is left alone and simply CSS-scales to fit, letterboxed.
+     Fullscreening the canvas via Emscripten resizes/wraps it and renders blank. */
+  #wf-stage:fullscreen {
+    width: 100vw; height: 100vh;
+    aspect-ratio: auto;
+    background: #000;
+  }
+  #wf-stage:fullscreen #canvas {
+    width: 100%; height: 100%;
+    object-fit: contain;
+  }
+
   #wf-overlay {
     position: absolute; inset: 0;
     display: flex; flex-direction: column;
@@ -195,9 +208,15 @@
         Module.callMain(Module.arguments);
       });
 
+      var stage = document.getElementById('wf-stage');
       document.getElementById('wf-full').addEventListener('click', function () {
-        if (Module.requestFullscreen) Module.requestFullscreen(false, false);
-        else if (canvas.requestFullscreen) canvas.requestFullscreen();
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+          (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+          return;
+        }
+        // Native fullscreen on the container — NOT Module.requestFullscreen,
+        // which wraps/resizes the canvas and blanks the fixed-size GL surface.
+        (stage.requestFullscreen || stage.webkitRequestFullscreen).call(stage);
       });
     })();
   </script>
