@@ -6,11 +6,12 @@
 
 ---
 
-## Implementation status — v1 complete & browser-verified 2026-06-12
+## Implementation status — v1 + v2 complete & live 2026-06-12
 
-**v1 is functionally complete, browser-verified, published, and live.** The engine builds to wasm, boots, loads a level, renders a native-equivalent 3-D frame, takes keyboard input, and initialises audio (verified end-to-end in headless Chrome / SwiftShader WebGL 2). **Live at [`worldfoundry.org/v2/play/`](https://worldfoundry.org/v2/play/)** — a designed Astro page with a level switcher embedding the engine bundle, now serving 8 demo levels (snowgoons, moon, Q\*bert, Mario W1‑1…1‑4, Marble Madness). Evidence in the Verification section below; screenshots `2026-06-11-web-first-render-snowgoons.png`, `2026-06-12-web-moon-site01-render.png`. This table is the live tracker.
+**Both v1 and v2 are complete, browser-verified, published, and live.** The engine builds to wasm, boots, loads a level, renders a native-equivalent 3-D frame, takes keyboard input, and initialises audio (verified end-to-end in headless Chrome / SwiftShader WebGL 2). **Live at [`worldfoundry.org/v2/play/`](https://worldfoundry.org/v2/play/)** — a designed Astro page with a level switcher embedding the engine bundle, serving 8 demo levels (snowgoons, moon, Q\*bert, Mario W1‑1…1‑4, Marble Madness). Evidence in the Verification section below; screenshots `2026-06-11-web-first-render-snowgoons.png`, `2026-06-12-web-moon-site01-render.png`, `2026-06-12-web-v2-snowgoons.png`. This table is the live tracker.
 
-Two notable things landed after the first publish (2026-06-12):
+Three notable things landed after the first publish (2026-06-12):
+- **v2 main-loop inversion shipped** (Phase 7) — the loop is driven by `emscripten_set_main_loop` and `-sASYNCIFY` is gone, cutting the wasm **3.15 MB → 2.07 MB (−34.3 %)**. Deployed in worldfoundry.org release **v0.1.18** (bundle hash `9e24ec56b883`). Details in Phase 7 below + verification items 9–11.
 - **A dormant engine bug surfaced and was fixed** — the RIGHT-turn key was dead on the web build (negative-angle UB in `Scalar::AsUnsignedFraction`; wasm saturates `uint16(negativeFloat)` to 0). Player-confirmed working in-browser after the fix. Full writeup in [`docs/BUGS.md`](../BUGS.md) and [investigation](../investigations/2026-06-12-web-right-turn-negative-angle.md); engine commit [`944cc31b`](https://github.com/wbniv/WorldFoundry/commit/944cc31b).
 - **The bundle is now content-hashed** so deploys never need a hard refresh (see *Deployment robustness* below).
 
