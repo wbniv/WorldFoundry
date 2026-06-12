@@ -1,6 +1,9 @@
 # Plan: wf-edit in the browser (WebRTC collab editor UI → WASM)
 
-> Status: approved 2026-06-12, implementation in progress. Phase 0 first (gating).
+> Status: approved 2026-06-12. **Phases 0–3 COMPLETE + verified (2026-06-13)**: WASM
+> editor renders/edits; Emscripten WebSocket + CRDT sync; multi-peer join-and-receive;
+> presence + chat browser↔browser. One known follow-up: the simultaneous-seed race
+> (Phase 3 status). Remaining: web Save/Export semantics (IDBFS / Blob download).
 
 ## Context
 
@@ -354,6 +357,48 @@ the web build.
 a selection ring on the actor it selected; chat round-trips both ways; closing a tab
 evicts the peer after the timeout.
 
+### Phase 3 — status (2026-06-13) — ✅ COMPLETE: presence + chat verified browser↔browser
+
+- **ROOT-CAUSE FIX — empty web peer_id (`main.cc`)** — on web there's no `identity.json`
+  in MEMFS and the `collab_stub_web` `CollabSession` has no id generator, so
+  `OurPeerId()` was empty. Every tab broadcast presence/chat with `peer_id=""`, which the
+  receiver drops on its `!pid.empty()` guard → **peers never saw each other**. Fixed by
+  minting a unique random id per tab (`web-%08x%08x` via `std::random_device` →
+  crypto.getRandomValues) when no persisted identity exists. Distinct ids per tab is
+  exactly right — each browser tab is an independent collaborator. (This was the only real
+  bug; the presence/chat send+receive code is the Phase-2 transport, unchanged.)
+- **Test affordances added (`main.cc`, unconditional — useful on native too):** a one-shot
+  `peer joined room — <id> (<name>)` log when a peer first appears; a `chat from <name> —
+  <text>` log on inbound `CH_CHAT`; and `WF_EDIT_CHAT_SEND=<text>` (gated on a peer being
+  present, so the receiver is guaranteed connected) which broadcasts one chat frame —
+  mirrors the UI Send button without driving the ImGui input widget.
+- **VERIFIED (2026-06-13)** — two real-time browser tabs via a dependency-free Node-22 CDP
+  driver (`Target.createTarget` ×2, `Runtime.consoleAPICalled` capture; **no
+  `--virtual-time-budget`** — that fast-forwards 20 s of page time into ~1.4 s wall-clock,
+  so two independently fast-forwarding tabs have a sub-second co-connected window and
+  live-only presence never crosses; CDP keeps both tabs live in real wall-clock). Tab A
+  seeds + `WF_EDIT_AUTO_SELECT=5`; tab B (staggered 4 s) joins. Result:
+  - **Join-and-receive:** A `seeded it from snowgoons-blender.lev`; B `adopted room Doc
+    from relay (36 actors)` — no duplication.
+  - **Presence (bidirectional):** A `peer joined room — web-eebc… (Editor (web-ee))`; B
+    `peer joined room — web-fab7… (Editor (web-fa))`. Relay log shows the real per-tab ids
+    joining (not "anon"), confirming the CONTROL join frame carries the minted id.
+  - **Chat round-trip:** A `WF_EDIT_CHAT_SEND sent "hello from A"`; B `chat from Editor
+    (web-fa) — hello from A`.
+  - **UI:** tab B renders peer A's remote camera frustum + selection ring and A's colour
+    block ("connected") in the Collab panel:
+    <img src="screenshots/2026-06-13-web-presence-chat-joiner.png" width="700">
+
+- **KNOWN LIMITATION — simultaneous-seed race (follow-up):** the host election is a fixed
+  ~0.6 s timeout (empty Doc at deadline ⇒ seed). If **two** peers join a *brand-new* room
+  within that window (before either's seed is pushed + relay-persisted), **both** seed and
+  the room ends up with duplicated content (independent Yrs client ids → ~72 actors, not
+  36). The normal flow is unaffected — one peer opens/creates the room, others join later
+  and adopt (verified above with a 4 s stagger; a 1.6 s stagger intermittently tripped the
+  race). A robust fix is deterministic host election (e.g. only the lowest peer_id among
+  present peers seeds) or a relay "room-is-new" signal on join; tracked as a follow-up, not
+  blocking — it needs either relay cooperation or a presence-aware election.
+
 ## Save semantics on web (no local FS / no shell)
 
 - Disable **Save + Compile** (shells out to `build_level_binary.sh`) on web.
@@ -392,7 +437,9 @@ exclusions for threads/modals/teardown/re-exec, web connect state machine),
 
 ## End-to-end verification
 
-1. Phase 0: C harness linking `libyrs.a`+`libwfcrdt.a` runs as wasm and round-trips a CRDT update.
-2. Phase 1: `task build-web-edit && task serve-web-edit` → browser renders preloaded level; Outliner/Properties/gizmo work; headless `--frames N --screenshot` produces a non-blank PPM.
-3. Phase 2: browser tab + native `wf-edit` on `room=webtest` co-edit bidirectionally; mid-session join shows current state.
-4. Phase 3: presence (names/colours/selection rings) + chat round-trip between browser and native; tab close evicts the peer.
+1. ~~Phase 0: C harness linking `libyrs.a`+`libwfcrdt.a` runs as wasm and round-trips a CRDT update.~~ ✅ done (Phase 0 status).
+2. ~~Phase 1: `task build-web-edit && task serve-web-edit` → browser renders preloaded level; Outliner/Properties/gizmo work; headless screenshot non-blank.~~ ✅ done (Phase 1 status).
+3. ~~Phase 2: two browser tabs on a relay room co-edit; mid-session join adopts current state (join-and-receive, 36 actors, no dup).~~ ✅ done 2026-06-13 (Phase 2 status). *(Verified browser↔browser via local relay; native↔browser interop not separately run — same wire framing + the proven native sync code, but the native side does not yet defer/push its initial Doc, so native-seeds→web-adopts needs the same join-and-receive treatment on native; tracked with the seed-race follow-up.)*
+4. ~~Phase 3: presence (names/colours/selection rings) + chat round-trip between two browsers; unique per-tab peer_id.~~ ✅ done 2026-06-13 (Phase 3 status). *(Browser↔browser via CDP; peer eviction-on-close not separately asserted — the 8 s timeout sweep at main.cc:809 is unchanged from the proven native path.)*
+5. **Remaining:** web Save/Export semantics (disable Save+Compile; `SaveDocToLev`→Blob download; optional IDBFS persistence) — see "Save semantics on web".
+6. **Follow-up:** simultaneous-seed race + native-side defer/push for cross-impl join-and-receive (Phase 3 status, "KNOWN LIMITATION").

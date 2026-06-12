@@ -67,6 +67,7 @@
 #include <filesystem>
 #include <fstream>
 #include <optional>
+#include <random>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -729,8 +730,13 @@ void CollabDrain(EditorCtx* c) {
                 json j = json::parse(frame.begin() + 1, frame.end());
                 const std::string pid = j.value("peer_id", "");
                 if (!pid.empty() && pid != c->our_peer_id) {
+                    const bool new_peer =
+                        c->peer_presence.find(pid) == c->peer_presence.end();
                     auto& ps = c->peer_presence[pid];
                     ps.name = j.value("name", "peer");
+                    if (new_peer)
+                        std::printf("wf-edit: peer joined room — %.8s… (%s)\n",
+                                    pid.c_str(), ps.name.c_str());
                     if (j.contains("colour") && j["colour"].is_array()
                         && j["colour"].size() >= 3) {
                         ps.colour[0] = j["colour"][0].get<float>();
@@ -776,6 +782,8 @@ void CollabDrain(EditorCtx* c) {
                         const std::string pid = j.value("peer_id", "");
                         PeerColourFromId(pid, e.colour);
                     }
+                    std::printf("wf-edit: chat from %s — %s\n",
+                                e.name.c_str(), e.text.c_str());
                     c->chat_log.push_back(std::move(e));
                     c->chat_scroll_btm = true;
                 }
@@ -1612,6 +1620,32 @@ bool editor_build(void* p)
             msg.push_back(0x02);   // PRESENCE channel
             msg.insert(msg.end(), body.begin(), body.end());
             c->relay_client.send(msg.data(), msg.size());
+        }
+    }
+
+    // Headless chat round-trip proof (WF_EDIT_CHAT_SEND=<text>): broadcast one
+    // CH_CHAT frame with the given text, then never again. Gated on a peer being
+    // present so the receiver is guaranteed connected (no lost-before-join race).
+    // Mirrors the UI Send button (~main.cc:2332) — lets a headless peer prove chat
+    // delivery without driving the ImGui input widget.
+    {
+        static bool s_chat_sent = false;
+        if (!s_chat_sent && RelayUsable(c) && !c->peer_presence.empty()) {
+            if (const char* txt = std::getenv("WF_EDIT_CHAT_SEND"); txt && *txt) {
+                s_chat_sent = true;
+                using json = nlohmann::json;
+                std::string body = json{
+                    {"peer_id", c->our_peer_id},
+                    {"name",    c->display_name},
+                    {"colour",  json::array({c->our_colour[0], c->our_colour[1], c->our_colour[2]})},
+                    {"text",    std::string(txt)}
+                }.dump();
+                std::vector<uint8_t> msg;
+                msg.push_back(0x03);
+                msg.insert(msg.end(), body.begin(), body.end());
+                c->relay_client.send(msg.data(), msg.size());
+                std::printf("wf-edit: WF_EDIT_CHAT_SEND sent \"%s\"\n", txt);
+            }
         }
     }
 
@@ -3290,6 +3324,22 @@ int main(int argc, char** argv)
             std::copy(identity.colour, identity.colour + 3, ctx.our_colour);
         } else {
             ctx.our_peer_id = ctx.collab ? ctx.collab->OurPeerId() : std::string("editor-anon");
+#if defined(__EMSCRIPTEN__)
+            // Web: there's no persisted identity.json in MEMFS and the web
+            // CollabSession stub has no id generator, so OurPeerId() is empty.
+            // Every tab would then broadcast presence with peer_id="" — which the
+            // receiver drops on its `!pid.empty()` guard — so peers never see each
+            // other. Mint a unique random id per tab here (crypto.getRandomValues
+            // via std::random_device); distinct ids per tab is exactly right since
+            // each browser tab is an independent collaborator.
+            if (ctx.our_peer_id.empty()) {
+                std::random_device rd;
+                char buf[24];
+                std::snprintf(buf, sizeof buf, "web-%08x%08x",
+                              static_cast<unsigned>(rd()), static_cast<unsigned>(rd()));
+                ctx.our_peer_id = buf;
+            }
+#endif
             PeerColourFromId(ctx.our_peer_id, ctx.our_colour);
             // First run — persist the generated id.
             identity.peer_id = ctx.our_peer_id;
