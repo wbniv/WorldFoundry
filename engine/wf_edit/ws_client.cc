@@ -305,7 +305,11 @@ bool WsClient::send(const uint8_t* data, size_t len) {
     if (_fd < 0) return false;
 
     // Build WebSocket frame header (client→server: masked, binary opcode 0x02).
-    uint8_t header[10];
+    // Max header = 1 (opcode) + 9 (127 marker + 8-byte length, for len ≥ 64 KiB)
+    // + 4 (mask) = 14 bytes. A 10-byte buffer overflowed by 4 on the ≥64 KiB path
+    // (stack-smash) — never hit until a full-Doc initial push (native join-and-
+    // receive seeding) sent a frame that large; small per-edit frames stay ≤8 B.
+    uint8_t header[14];
     size_t hdrLen = 0;
     header[hdrLen++] = 0x82;  // FIN=1, opcode=2 (binary)
 
