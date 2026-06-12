@@ -238,6 +238,20 @@ Identifiers:
 - **Fixed-point math: `Scalar`.** On target, `Scalar` is fixed-point
   (Q16.16); on PC dev builds it can be `float` via `SCALAR_TYPE=float`. New
   math code must work in both. See `math/scalar.hp`.
+- **Pre-increment/decrement for standalone steps.** When the result of `++`/`--`
+  is not used — a bare `++i;` statement or a `for`-loop step — write the
+  *pre* form (`++i`, not `i++`). Post-increment is specified to yield a copy of
+  the old value; the pre form has no such side effect and reads as the intent
+  ("step it"). Reserve `i++` for the rare expression that genuinely needs the
+  old value in place.
+- **Array bounds derive from the array, never a literal.** For a fixed-size
+  array's bounds (asserts, loop limits, capacity checks) use
+  `ARRAY_COUNT(arr)` (`pigsys/pigsys.hp` — expands to
+  `sizeof(arr)/sizeof((arr)[0])`). The size then lives in exactly one place,
+  the declaration, and a resize can't drift from its checks. A hardcoded `< 100`
+  beside an `arr[100]` is a magic number waiting to go off-by-one — the
+  pending-removal queue did exactly that (`arr[100]` with `assert(< 99)`, so
+  one slot was unused and the bound was a duplicated literal).
 
 ### 4.1 Resource-owning types — canonical form
 

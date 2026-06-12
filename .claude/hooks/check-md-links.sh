@@ -22,6 +22,13 @@ raw = open(sys.argv[1]).read()
 text = re.sub(r'```.*?```', lambda m: ' ' * len(m.group()), raw, flags=re.DOTALL)
 text = re.sub(r'`[^`\n]+`', lambda m: ' ' * len(m.group()), text)
 
+# Strip complete markdown links [text](url) so neither half is mistaken for a
+# bare path/URL. A perfectly-good [docs/foo.md](docs/foo.md) link carries the
+# path in BOTH halves; only the URL half was being skipped below, so the text
+# half ([docs/foo.md]) was false-flagged as bare. Runs after the code-span strip
+# so backtick-wrapped link text like [`docs/foo.md`](url) is already blanked.
+text = re.sub(r'\[[^\]\n]*\]\([^)\n]*\)', lambda m: ' ' * len(m.group()), text)
+
 found = []
 
 # --- 1. Bare relative .md paths ---
