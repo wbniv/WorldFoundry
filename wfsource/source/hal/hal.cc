@@ -62,7 +62,19 @@ HALStart(int argc, char** argv, int maxTasks,int maxMessages, int maxPorts)
 	_PlatformSpecificInit( argc, argv, maxTasks, maxMessages,  maxPorts );
 	assert(ValidPtr(_HALLmalloc));
 	{
+		// On web, PIGSMain → RunLevelWeb/RunEditorWeb hands control to
+		// emscripten_set_main_loop(..., simulate_infinite_loop=1), which UNWINDS this
+		// C stack. A stack-local scratch allocator would be destroyed by that unwind
+		// while _HALScratchLmalloc still points at it, so every later StepFrame access
+		// to HALScratchLmalloc is a stack-use-after-scope (ASan-confirmed; on a clean
+		// build the dead LMalloc's garbage vtable surfaces as an opaque "null function"
+		// wasm trap). Make it static so it outlives the unwind. Native keeps the scoped
+		// local — there the game loop runs inside this frame, so nothing unwinds.
+#if defined(__EMSCRIPTEN__)
+		static LMalloc __scratchLMalloc(*_HALLmalloc,cbHalScratchLmalloc MEMORY_NAMED( COMMA "HalScratchLMalloc" ) );
+#else
 		LMalloc __scratchLMalloc(*_HALLmalloc,cbHalScratchLmalloc MEMORY_NAMED( COMMA "HalScratchLMalloc" ) );
+#endif
 		_HALScratchLmalloc = &__scratchLMalloc;
 		assert(ValidPtr(_HALScratchLmalloc));
 		HalInitFileSubsystem();
