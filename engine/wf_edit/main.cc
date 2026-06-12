@@ -634,9 +634,18 @@ static void WebConnectStep(EditorCtx* c) {
 
 // Resolve the web seed/join decision. If the relay has populated our Doc within
 // the window, we're a joiner — adopt it (the local level was NOT loaded, so no
-// duplicate Yrs IDs). If it's still empty at the deadline, we're the host — load
-// the level now; observeUpdates (wired above) auto-pushes each commit, seeding the
-// relay so later joiners receive it. Runs each editor_build frame while pending.
+// duplicate Yrs IDs). If it's still empty at the deadline, we MAY be the host —
+// load the level now; observeUpdates (wired above) auto-pushes each commit, seeding
+// the relay so later joiners receive it. Runs each editor_build frame while pending.
+//
+// Host election (avoids the simultaneous-seed race): when two peers join a brand-new
+// room within the seed window, BOTH would reach the deadline with an empty Doc and
+// BOTH would seed — independent Yrs client ids → duplicated content. So at the
+// deadline we only seed if our peer_id is the LOWEST among ourselves + all present
+// peers; a higher-id peer instead extends its window and waits for the lower-id
+// peer's seed to arrive (which the `n > 0` adopt check above then picks up). If the
+// lower-id peer never seeds (e.g. it died), presence eviction (8 s, CollabDrain)
+// drops it, we become lowest, and we seed — so the wait is bounded, not indefinite.
 static void WebSeedStep(EditorCtx* c) {
     if (!c->web_seed_pending || !c->doc) return;
     int n = 0;
@@ -646,12 +655,22 @@ static void WebSeedStep(EditorCtx* c) {
         std::printf("wf-edit(web): adopted room Doc from relay (%d actors)\n", n);
         return;
     }
-    if (glfwGetTime() >= c->web_seed_deadline) {   // empty + timed out → host → seed
+    if (glfwGetTime() >= c->web_seed_deadline) {   // empty + timed out → elect a host
+        // Lowest peer_id among present peers (+ us) wins the seed; ties impossible
+        // (ids are unique). peer_presence reflects last frame's CollabDrain.
+        std::string lowest = c->our_peer_id;
+        for (const auto& [pid, ps] : c->peer_presence)
+            if (pid < lowest) lowest = pid;
+        if (lowest != c->our_peer_id) {            // a lower-id peer will seed → wait + adopt
+            c->web_seed_deadline = glfwGetTime() + 0.6;
+            return;
+        }
         c->web_seed_pending = false;
         std::string sp;
         if (wfedit::LoadLevelTreeIntoDoc(c->leveltree, *c->doc, &sp))
-            std::printf("wf-edit(web): room was empty — seeded it from %s\n",
-                        c->leveltree.c_str());
+            std::printf("wf-edit(web): room was empty — seeded it from %s%s\n",
+                        c->leveltree.c_str(),
+                        c->peer_presence.empty() ? "" : " (won host election)");
         else
             std::fprintf(stderr, "wf-edit(web): seed load failed for %s\n", c->leveltree.c_str());
     }
