@@ -48,8 +48,11 @@ extern "C" {
 #include <vector>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <cmath>      // atan2/cos/sin/sqrt for the FSN connector orientation
 
-#include "level.hp"   // theLevel global (extern Level* theLevel)
+#include "level.hp"   // theLevel global (extern Level* theLevel); pulls in Actor/PhysicalAttributes
+#include <math/euler.hp>     // Euler — connector orientation
+#include <math/angle.hp>
 
 // ---------------------------------------------------------------------------
 // Module state
@@ -61,6 +64,189 @@ static int                 g_curObj  = 0;
 // FSN filesystem syscalls (custom 3-7 / sys 131-135)
 struct CwdEntry { std::string name; bool is_dir; int64_t size; };
 static std::vector<CwdEntry> g_cwd_entries;
+
+// ---------------------------------------------------------------------------
+// FSN Phase 2 — recursive tree builder (custom 8-10 / sys 136-138).
+// The whole scan → radial layout → spawn (towers, files-on-tops, connector
+// wires) lives here in C++ because zForth has no float trig/sqrt and only a
+// 32-deep return stack (no deep recursion, no locals). The Director Forth
+// script just calls fsn-config / fsn-build / fsn-navigate.
+// See docs/plans/2026-06-12-filesys-browser-level.md.
+
+struct FsnTower { int actorIdx; std::string path; float x, y, topZ; };
+static std::vector<FsnTower> g_fsn_towers;    // dir towers in the CURRENT view (descend targets)
+static std::vector<int>      g_fsn_spawned;   // every actor spawned this view (despawn on rebuild)
+static std::string           g_fsn_root, g_fsn_start;   // current view root; start dir (ascend floor)
+static int g_fsn_dirT = 0, g_fsn_fileT = 0, g_fsn_connT = 0;
+static int g_fsn_maxDepth = 2, g_fsn_maxNodes = 120, g_fsn_playerIdx = 0;
+static bool g_fsn_enterLatch = false, g_fsn_backLatch = false;
+
+static const float FSN_PI = 3.14159265358979f;
+
+static int fsn_isqrt(int n) { int s = 0; while ((s + 1) * (s + 1) <= n) s++; return s; }
+
+static int fsn_budget_left() { return g_fsn_maxNodes - (int)g_fsn_spawned.size(); }
+
+// Spawn template `tmpl` at (x,y,z); record it; return actor index (0 on failure).
+static int fsn_spawn(int tmpl, float x, float y, float z) {
+    if (!theLevel || fsn_budget_left() <= 0) return 0;
+    Vector3 pos(Scalar::FromFloat(x), Scalar::FromFloat(y), Scalar::FromFloat(z));
+    Actor* a = theLevel->ConstructTemplateObject(tmpl, g_curObj, pos, Vector3::zero);
+    if (!a) return 0;
+    theLevel->AddObject(a, pos);
+    int idx = a->GetActorIndex();
+    g_fsn_spawned.push_back(idx);
+    return idx;
+}
+
+// Per-axis scale via the qbert scale mailboxes (3040-3042) — same path as set-z-scale.
+static void fsn_set_scale(int idx, float sx, float sy, float sz) {
+    if (!g_mgr || !idx) return;
+    Mailboxes& mb = g_mgr->LookupMailboxes(idx);
+    mb.WriteMailbox(3040, Scalar::FromFloat(sx));
+    mb.WriteMailbox(3041, Scalar::FromFloat(sy));
+    mb.WriteMailbox(3042, Scalar::FromFloat(sz));
+}
+
+// FSN connector wire: a base-pivot unit beam (local +X ∈ [0,1]) spawned at p1,
+// rotated so +X aims at p2 (flat: heading only), and X-scaled to the distance.
+static void fsn_spawn_connector(float x1, float y1, float z1, float x2, float y2) {
+    float dx = x2 - x1, dy = y2 - y1;
+    float L = std::sqrt(dx * dx + dy * dy);
+    if (L < 0.01f) return;
+    int idx = fsn_spawn(g_fsn_connT, x1, y1, z1);
+    if (!idx) return;
+    float headingRev = std::atan2(dy, dx) / (2.0f * FSN_PI);   // WF Euler C is in revolutions
+    Actor* a = theLevel->getActor(idx);
+    if (a) {
+        a->GetWritablePhysicalAttributes().SetRotation(
+            Euler(Angle::Revolution(Scalar::zero),
+                  Angle::Revolution(Scalar::zero),
+                  Angle::Revolution(Scalar::FromFloat(headingRev))));
+    }
+    fsn_set_scale(idx, L, 1.0f, 1.0f);   // stretch local +X to span the gap
+}
+
+// Recursively scan `dir` (skip hidden; lstat → never follow symlinks → loop-safe).
+struct FsnEntry { std::string name, path; bool is_dir; int64_t size; long mtime; };
+static void fsn_scan(const std::string& dir, std::vector<FsnEntry>& out) {
+    out.clear();
+    DIR* d = opendir(dir.c_str());
+    if (!d) return;
+    struct dirent* ent;
+    while ((ent = readdir(d)) != nullptr) {
+        if (ent->d_name[0] == '.') continue;                  // hidden, '.' and '..'
+        std::string full = dir + "/" + ent->d_name;
+        struct stat st;
+        if (lstat(full.c_str(), &st) != 0) continue;          // skip on stat failure
+        if (S_ISLNK(st.st_mode)) continue;                    // never follow symlinks
+        FsnEntry e;
+        e.name = ent->d_name; e.path = full;
+        e.is_dir = S_ISDIR(st.st_mode);
+        e.size   = e.is_dir ? 0 : (int64_t)st.st_size;
+        e.mtime  = (long)st.st_mtime;
+        out.push_back(e);
+    }
+    closedir(d);
+}
+
+// Ring a node's files on its tower top (z=topZ), scaled by √size.
+static void fsn_place_files(const std::vector<FsnEntry>& entries, float x, float y, float topZ) {
+    int nf = 0; for (auto& e : entries) if (!e.is_dir) nf++;
+    int fi = 0;
+    for (auto& e : entries) {
+        if (e.is_dir) continue;
+        if (fsn_budget_left() <= 0) break;
+        float ang = (nf > 1) ? (2.0f * FSN_PI * (float)fi / (float)nf) : 0.0f;
+        float fr  = (nf > 1) ? 0.6f : 0.0f;
+        float fx = x + fr * std::cos(ang), fy = y + fr * std::sin(ang);
+        int fh = fsn_isqrt((int)(e.size / 1000)); if (fh < 1) fh = 1; if (fh > 4) fh = 4;
+        int file = fsn_spawn(g_fsn_fileT, fx, fy, topZ);
+        if (file) fsn_set_scale(file, 1.0f, 1.0f, (float)fh);
+        fi++;
+    }
+}
+
+// One tree node (depth ≥ 1): spawn its dir tower, ring its files on top, fan its
+// child dirs out on a cone pointing away from the field centre (each wired), recurse.
+static void fsn_build_node(const std::string& path, float x, float y, int depth) {
+    if (depth > g_fsn_maxDepth || fsn_budget_left() <= 0) return;
+    std::vector<FsnEntry> entries;
+    fsn_scan(path, entries);
+
+    int h = fsn_isqrt((int)entries.size());
+    if (h < 1) h = 1; if (h > 6) h = 6;
+    int tower = fsn_spawn(g_fsn_dirT, x, y, 0.0f);
+    if (!tower) return;
+    fsn_set_scale(tower, 1.0f, 1.0f, (float)h);
+    float topZ = 2.0f * (float)h;                 // dir template is 2 units tall before scale
+    g_fsn_towers.push_back(FsnTower{ tower, path, x, y, topZ });
+    fsn_place_files(entries, x, y, topZ);
+
+    if (depth < g_fsn_maxDepth) {
+        int nd = 0; for (auto& e : entries) if (e.is_dir) nd++;
+        float R = (depth == 1) ? 11.0f : 7.0f;
+        float outward = std::atan2(y, x);          // fan away from the field centre
+        int ci = 0;
+        for (auto& e : entries) {
+            if (!e.is_dir) continue;
+            if (fsn_budget_left() <= 1) break;     // leave room for the connector
+            float frac = (nd > 1) ? ((float)ci / (float)(nd - 1) - 0.5f) : 0.0f;
+            float ang  = outward + FSN_PI * frac;  // ±90° cone
+            float cx = x + R * std::cos(ang), cy = y + R * std::sin(ang);
+            fsn_spawn_connector(x, y, 0.3f, cx, cy);
+            fsn_build_node(e.path, cx, cy, depth + 1);
+            ci++;
+        }
+    }
+}
+
+// Despawn the current view and rebuild from g_fsn_root. Returns spawned count.
+// The ROOT (CWD) gets NO tower — the player stands there. Its child dirs fan
+// across the +Y half-field in front of the player (camera looks from -Y); its
+// files ring the standpoint as short slabs. Walk into a child to descend (M3).
+static int fsn_build() {
+    if (theLevel) {
+        for (int idx : g_fsn_spawned) {
+            BaseObject* o = theLevel->GetObject(idx);
+            if (o) theLevel->SetPendingRemove(o);
+        }
+    }
+    g_fsn_spawned.clear();
+    g_fsn_towers.clear();
+
+    std::vector<FsnEntry> entries;
+    fsn_scan(g_fsn_root, entries);
+
+    // Root files: a low ring of slabs around the standpoint (radius 5, on the floor).
+    int nf = 0; for (auto& e : entries) if (!e.is_dir) nf++;
+    int fi = 0;
+    for (auto& e : entries) {
+        if (e.is_dir) continue;
+        if (fsn_budget_left() <= 0) break;
+        float ang = (nf > 1) ? (2.0f * FSN_PI * (float)fi / (float)nf) : 0.0f;
+        float fx = 5.0f * std::cos(ang), fy = 5.0f * std::sin(ang);
+        int fh = fsn_isqrt((int)(e.size / 1000)); if (fh < 1) fh = 1; if (fh > 4) fh = 4;
+        int file = fsn_spawn(g_fsn_fileT, fx, fy, 0.0f);
+        if (file) fsn_set_scale(file, 1.0f, 1.0f, (float)fh);
+        fi++;
+    }
+
+    // Root child dirs fan across +Y (20°..160°) so none land on the player at origin.
+    int nd = 0; for (auto& e : entries) if (e.is_dir) nd++;
+    int ci = 0;
+    for (auto& e : entries) {
+        if (!e.is_dir) continue;
+        if (fsn_budget_left() <= 1) break;
+        float t = (nd > 1) ? ((float)ci / (float)(nd - 1)) : 0.5f;
+        float a = (20.0f + 120.0f * t) * (FSN_PI / 180.0f);
+        float cx = 18.0f * std::cos(a), cy = 18.0f * std::sin(a);
+        fsn_spawn_connector(0.0f, 0.0f, 0.3f, cx, cy);
+        fsn_build_node(e.path, cx, cy, 1);
+        ci++;
+    }
+    return (int)g_fsn_spawned.size();
+}
 
 // Cache: src pointer → compiled word name.
 // Scripts are compiled once on first call; subsequent calls just invoke the word.
@@ -224,6 +410,24 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     }
                 }
                 zf_push(ctx, (zf_cell)(float)idx);
+            } else if (custom == 8) {
+                // fsn-config ( dirT fileT connT maxDepth maxNodes playerIdx -- )
+                g_fsn_playerIdx = (int)zf_pop(ctx);
+                g_fsn_maxNodes  = (int)zf_pop(ctx);
+                g_fsn_maxDepth  = (int)zf_pop(ctx);
+                g_fsn_connT     = (int)zf_pop(ctx);
+                g_fsn_fileT     = (int)zf_pop(ctx);
+                g_fsn_dirT      = (int)zf_pop(ctx);
+                g_fsn_root = g_fsn_start = ".";
+                g_fsn_enterLatch = g_fsn_backLatch = false;
+            } else if (custom == 9) {
+                // fsn-build ( -- nodeCount )
+                int n = fsn_build();
+                fprintf(stderr, "FSN: built '%s' — %d actors (%d towers)\n",
+                        g_fsn_root.c_str(), n, (int)g_fsn_towers.size());
+                zf_push(ctx, (zf_cell)(float)n);
+            } else if (custom == 10) {
+                // fsn-navigate ( -- ) — proximity descend / back ascend. M3 fills this in.
             } else if (custom == 72) {
                 /* Neural-forth dispatch gate: syscall 200 = ZF_SYSCALL_USER + 72.
                  * Pops word-id from stack and routes to nf_dispatch().
@@ -401,6 +605,14 @@ void Init(MailboxesManager& mgr)
     r = zf_eval(&g_ctx, ": spawn-template 135 sys ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: init failed (spawn-template): %d\n", r);
 
+    // FSN Phase 2 — recursive tree builder (C++ does scan/layout/spawn).
+    r = zf_eval(&g_ctx, ": fsn-config 136 sys ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (fsn-config): %d\n", r);
+    r = zf_eval(&g_ctx, ": fsn-build 137 sys ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (fsn-build): %d\n", r);
+    r = zf_eval(&g_ctx, ": fsn-navigate 138 sys ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (fsn-navigate): %d\n", r);
+
     // Uniform scale helper — sets qbert scale mailboxes 3040-3042 on an actor.
     // Stack: ( actor scale -- )
     // write-actor-mailbox signature: ( val idx actorIdx -- )
@@ -412,6 +624,17 @@ void Init(MailboxesManager& mgr)
         "  2dup swap 3042 swap write-actor-mailbox "
         "  2drop ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: init failed (set-scale): %d\n", r);
+
+    // Z-only scale helper — sets X/Y=1.0 and Z=scale. Stack: ( actor scale -- )
+    // Used for towers/boxes that should stay unit-width but vary in height.
+    // 3 pick from ( actor scale 1.0 3040 ) reaches actor at depth 3.
+    r = zf_eval(&g_ctx,
+        ": set-z-scale "
+        "  1.0 3040 3 pick write-actor-mailbox "
+        "  1.0 3041 3 pick write-actor-mailbox "
+        "  2dup swap 3042 swap write-actor-mailbox "
+        "  2drop ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (set-z-scale): %d\n", r);
 
     // Integer square root (iterative). Stack: ( n -- s )
     // begin..until: increment s first, exit when s*s > n, return s-1.
@@ -493,6 +716,12 @@ float RunScript(const char* src, int objectIndex)
     while (*src && *src != '\n') ++src;
     if (*src == '\n') ++src;
     if (!*src) return 0.0f;
+
+    // Flush any suspended \ (line-comment) loop left by a prior partial eval.
+    // shell.aib's defs string ends at a ; inside a \ comment with no trailing \n,
+    // leaving the \ loop in ZF_INPUT_PASS_CHAR. Feeding \n here lets it exit
+    // cleanly before this script's compilation begins.
+    zf_eval(&g_ctx, "\n");
 
     // Compile each unique script once (keyed by src pointer) into a named word
     // so if/else/then work correctly (they require compile mode) and the

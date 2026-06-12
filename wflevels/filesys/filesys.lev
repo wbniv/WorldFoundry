@@ -28,6 +28,7 @@
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
 		{ 'I32' { 'NAME' "Number Of Mailboxes" } { 'DATA' 50l } { 'STR' "50" } }
+		{ 'I32' { 'NAME' "Number Of Temporary Objects" } { 'DATA' 500l } { 'STR' "500" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "Matte" }
@@ -122,7 +123,7 @@
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "director" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 5l } { 'STR' "5" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: DIR-TMPL  12 ;\n: FILE-TMPL 13 ;\n: COLS  8 ;\n: CELL  5 ;\n: X0    -17 ;\n: Y0    -35 ;\n: grid-x ( n -- x ) COLS mod CELL * X0 + ;\n: grid-y ( n -- y ) COLS /   CELL * Y0 + ;\n: cnt@  11 read-mailbox ;\n: cnt+  cnt@ 1 + 11 write-mailbox ;\n: isqrt ( n -- s )\n  dup 0 = if else\n    1 swap\n    begin swap 1+ swap over dup * over > until\n    swap drop 1-\n  fi ;\n: spawn-dir ( idx -- )\n  cwd-dir-count isqrt dup 6 > if drop 6 fi dup 1 < if drop 1 fi\n  cnt@ dup grid-x swap grid-y 0 DIR-TMPL spawn-template\n  swap set-z-scale\n  cnt+ ;\n: spawn-file ( idx -- )\n  cwd-file-size 1000 / isqrt dup 4 > if drop 4 fi dup 1 < if drop 1 fi\n  cnt@ dup grid-x swap grid-y 0 FILE-TMPL spawn-template\n  swap set-z-scale\n  cnt+ ;\n10 read-mailbox 0 = if\n  1 10 write-mailbox\n  0 11 write-mailbox\n  cwd-scan 0 do\n    i cwd-is-dir if\n      i spawn-dir\n    else\n      i spawn-file\n    fi\n  loop\nfi\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: DIR-T   12 ;\n: FILE-T  13 ;\n: CONN-T  16 ;\n: MAXDEPTH 2 ;\n: MAXNODES 120 ;\n: PLAYER-IDX 10 ;\n10 read-mailbox 0 = if\n  1 10 write-mailbox\n  DIR-T FILE-T CONN-T MAXDEPTH MAXNODES PLAYER-IDX fsn-config\n  fsn-build drop\nfi\nfsn-navigate\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
 	}
@@ -251,5 +252,25 @@
 		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.4000000000000000(1.15.16) } { 'STR' "0.400000" } }
 		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.500000" } }
 		{ 'I32' { 'NAME' "lightType" } { 'DATA' 1l } { 'STR' "Ambient" } }  //Directional|Ambient
+	}
+	{ 'OBJ' 
+		{ 'NAME' "ConnectorTemplate" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 8.0000000000000000(1.15.16) -200.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' 0.0000000000000000(1.15.16) -0.0399999991059303(1.15.16) -0.0399999991059303(1.15.16) 1.0000000000000000(1.15.16) 0.0399999991059303(1.15.16) 0.0399999991059303(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "dir" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "connectortemplate.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
+		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'I32' { 'NAME' "Template Object" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 	}
 }

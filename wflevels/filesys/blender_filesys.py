@@ -87,10 +87,15 @@ ROOM_LOCAL_BBOX = (-35.0, -72.0, -28.0, 35.0, 40.0, 28.0)
 #   12      13   FileTemplate ← FILE-TMPL in the Forth script
 #   13      14   ActBoxOR
 #   14      15   AmbientLight (appended last so 11/12 above stay fixed)
+#   15      16   ConnectorTemplate (FSN wire, appended for Phase 2)
 #
-# These .lvl indices are what spawn-template passes to FindTemplateObjectData().
-DIR_TMPL_IDX  = 12
-FILE_TMPL_IDX = 13
+# These .lvl indices are passed to spawn-template / fsn-config.
+DIR_TMPL_IDX   = 12
+FILE_TMPL_IDX  = 13
+CONN_TMPL_IDX  = 16    # ConnectorTemplate (.lvl index)
+PLAYER_LVL_IDX = 10    # Player (.lvl index) — fsn-navigate reads its position
+FSN_MAX_DEPTH  = 2     # render the tree this many levels from the current root
+FSN_MAX_NODES  = 120   # hard cap on total spawned actors (towers+files+wires) < 500 pool
 
 # SGI FSN aesthetic: near-black blue background and floor, yellow towers, grey boxes.
 COLOR_BG       = 0x0a0a14   # near-black blue for Matte
@@ -124,66 +129,29 @@ GRID_Y0   = -35
 # so towers are tall and thin rather than uniformly scaled cubes.
 #
 # DIR-TMPL / FILE-TMPL are the level-actor indices of DirTemplate/FileTemplate.
+# Phase 2: the recursive scan + radial layout + spawning all live in C++
+# (fsn-build, scripting_zforth.cc) — zForth can't do the recursion/trig. The
+# Director just configures and triggers the build once, then polls navigation.
+#   fsn-config ( dirT fileT connT maxDepth maxNodes playerIdx -- )
+#   fsn-build  ( -- nodeCount )
+#   fsn-navigate ( -- )   \ proximity descend / back ascend (M3)
+# Mailbox 10 = one-shot init guard.
 DIRECTOR_SCRIPT = (
     r'\\ wf' '\n'
+    f': DIR-T   {DIR_TMPL_IDX} ;\n'
+    f': FILE-T  {FILE_TMPL_IDX} ;\n'
+    f': CONN-T  {CONN_TMPL_IDX} ;\n'
+    f': MAXDEPTH {FSN_MAX_DEPTH} ;\n'
+    f': MAXNODES {FSN_MAX_NODES} ;\n'
+    f': PLAYER-IDX {PLAYER_LVL_IDX} ;\n'
 
-    # Template indices (must match object ordering in the exported .lev)
-    f': DIR-TMPL  {DIR_TMPL_IDX} ;\n'
-    f': FILE-TMPL {FILE_TMPL_IDX} ;\n'
-
-    # Grid layout constants
-    f': COLS  {GRID_COLS} ;\n'
-    f': CELL  {GRID_CELL} ;\n'
-    f': X0    {GRID_X0} ;\n'
-    f': Y0    {GRID_Y0} ;\n'
-
-    ': grid-x ( n -- x ) COLS mod CELL * X0 + ;\n'
-    ': grid-y ( n -- y ) COLS /   CELL * Y0 + ;\n'
-
-    # Level mailboxes: 10=init flag, 11=shared grid counter.
-    # Mailboxes 0 (FALSE) and 1 (TRUE) are write-protected global constants.
-    ': cnt@  11 read-mailbox ;\n'
-    ': cnt+  cnt@ 1 + 11 write-mailbox ;\n'
-
-    # Integer square root: begin..until exits when s²>n.
-    # For n=0: if-branch leaves 0 on stack (the dup'd 0).
-    ': isqrt ( n -- s )\n'
-    '  dup 0 = if else\n'
-    '    1 swap\n'
-    '    begin swap 1+ swap over dup * over > until\n'
-    '    swap drop 1-\n'
-    '  fi ;\n'
-
-    # Spawn a Dir tower for CWD entry idx.
-    # height = clamp(isqrt(file_count_in_subdir), 1, 6). X/Y stay unit width.
-    # Grid position from shared counter.
-    ': spawn-dir ( idx -- )\n'
-    '  cwd-dir-count isqrt dup 6 > if drop 6 fi dup 1 < if drop 1 fi\n'
-    '  cnt@ dup grid-x swap grid-y 0 DIR-TMPL spawn-template\n'
-    '  swap set-z-scale\n'
-    '  cnt+ ;\n'
-
-    # Spawn a File box for CWD entry idx.
-    # height = clamp(isqrt(file_size/1000), 1, 4). X/Y stay unit width.
-    ': spawn-file ( idx -- )\n'
-    '  cwd-file-size 1000 / isqrt dup 4 > if drop 4 fi dup 1 < if drop 1 fi\n'
-    '  cnt@ dup grid-x swap grid-y 0 FILE-TMPL spawn-template\n'
-    '  swap set-z-scale\n'
-    '  cnt+ ;\n'
-
-    # One-shot init: populate the FSN grid on the first frame only.
-    # mailbox 10 = 0 → not done yet; set to 1 then scan + spawn.
     '10 read-mailbox 0 = if\n'
     '  1 10 write-mailbox\n'
-    '  0 11 write-mailbox\n'
-    '  cwd-scan 0 do\n'
-    '    i cwd-is-dir if\n'
-    '      i spawn-dir\n'
-    '    else\n'
-    '      i spawn-file\n'
-    '    fi\n'
-    '  loop\n'
+    '  DIR-T FILE-T CONN-T MAXDEPTH MAXNODES PLAYER-IDX fsn-config\n'
+    '  fsn-build drop\n'
     'fi\n'
+
+    'fsn-navigate\n'
 )
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -354,6 +322,9 @@ make_box_mesh(
 make_empty('LevelObj', ROOM_CENTER, 'levelobj',
     props={
         'Number Of Mailboxes': 50,
+        # Phase 2 spawns a recursive tree of towers + files + connector wires at
+        # runtime; raise the temp-object pool to the max so the build fits.
+        'Number Of Temporary Objects': 500,
         'Mobility':   'Anchored',
         'Model Type': 'None',
     }
@@ -571,6 +542,26 @@ make_empty('AmbientLight', (0.0, 0.0, 35.0), 'light',
         'Model Type': 'None',
     }
 )
+
+# 15 ── ConnectorTemplate (FSN wire) ───────────────────────────────────────────
+# Phase 2 connector: a thin beam whose length runs local +X ∈ [0,1], base-pivot
+# at the parent end (X=0). fsn-build spawns it at a parent tower, rotates +X to
+# aim at the child, and X-scales it to the gap (rendacto column-scale grows it
+# toward the child). Thin in Y/Z; bright cyan-green emissive for the FSN glow.
+# Appended last; its .lvl index (16) is passed to fsn-config (CONN_TMPL_IDX).
+mat_conn = make_mat('fsn_conn', (0.20, 1.00, 0.70, 1.0))   # cyan-green wire
+conn_tmpl = add_solid_box(
+    'ConnectorTemplate',
+    0.0,  -0.04, -0.04,
+    1.0,   0.04,  0.04,
+    mat_conn
+)
+conn_tmpl['wf_schema_path']        = oad('dir')   # reuse dir.oad (trivial mesh actor)
+conn_tmpl['wf_Template Object']    = 'True'
+conn_tmpl['wf_Mobility']           = 'Anchored'
+conn_tmpl['wf_Model Type']         = 'Mesh'
+conn_tmpl['wf_Visibility Mailbox'] = 1
+conn_tmpl.location                 = (8.0, -200.0, 0.0)
 
 # ── Export ────────────────────────────────────────────────────────────────────
 print(f'[filesys] Exporting to {OUT_LEV}')
