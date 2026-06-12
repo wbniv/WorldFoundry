@@ -28,6 +28,11 @@
   if (qs.get('room'))  { args.push('--room='  + qs.get('room')); }
   if (qs.get('relay')) { args.push('--relay=' + qs.get('relay')); }
 
+  // ?wfenv=KEY=VAL (repeatable) → set an emscripten ENV var read via getenv() —
+  // lets headless tests drive the editor's WF_EDIT_* hooks (e.g. WF_EDIT_ADD_UI)
+  // without a real GUI. Harmless when absent.
+  const wfenvs = qs.getAll('wfenv');
+
   var Module = {
     arguments: args,
     canvas: document.getElementById('canvas'),
@@ -35,6 +40,10 @@
     printErr: (t) => console.error(t),
     setStatus: (t) => { const s = document.getElementById('status');
                         if (s) { s.textContent = t || ''; if (!t) s.style.display = 'none'; } },
+    preRun: [function() {
+      for (const kv of wfenvs) { const i = kv.indexOf('=');
+        if (i > 0) { ENV[kv.slice(0, i)] = kv.slice(i + 1); } }
+    }],
     onRuntimeInitialized: () => { Module.setStatus(''); },
   };
   window.onerror = (e) => Module.setStatus('error: ' + e);
