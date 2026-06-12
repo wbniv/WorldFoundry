@@ -168,15 +168,19 @@ editor **defers** loading the level locally and instead:
 - **later peers** → **adopt** the room's `Doc` from the relay and never load locally — so two
   peers can't end up with independent CRDT ids and duplicated actors.
 
+If two peers open a **brand-new** room at the same instant, a **deterministic host election**
+picks the seeder (the lowest `peer_id` among present peers); higher-id peers wait and adopt
+its seed, so there's no duplication even under a simultaneous race. Solo and staggered joins
+behave as you'd expect (the first peer seeds, later peers adopt).
+
 Presence (peer cursors / camera frustums / selection rings) and text chat then flow over the
 same relay exactly as on native. Each browser tab mints its **own** random `peer_id` (there's
 no persisted `identity.json` in the browser), so tabs appear as distinct collaborators.
 
-> **Known limitation — simultaneous-seed race:** if *two* peers open a **brand-new** room
-> within the ~0.6 s seed window (before either's seed has been pushed + relay-persisted), both
-> seed and the room ends up with duplicated content. The normal flow — one person opens/creates
-> the room, others join after — adopts correctly. A robust fix (deterministic host election or a
-> relay "room-is-new" signal) is a tracked follow-up.
+> **Cross-implementation caveat:** a *native* `wf-edit` seeding a room that a *browser* peer
+> then joins doesn't yet converge — native loads its `Doc` before connecting and never pushes
+> that initial state, so the relay has nothing to replay to the web joiner. Pure browser↔browser
+> rooms are unaffected; native+web seed interop is a tracked follow-up.
 
 ### Saving on the web
 
@@ -650,8 +654,8 @@ workflow — they exist so the editor can be proven headlessly.
   Blender/`.lev` source. See the [load-binary-iff plan](plans/2026-05-25-wf-edit-load-binary-iff.md).
 - **Native build is Linux/X11 only.** Wayland and native mobile hosts are v2+. The editor
   also runs as a **WASM/WebGL2 browser build** ([Running in the browser](#running-in-the-browser-wasmwebgl2)),
-  which is cross-platform via the browser but drops voice/video and Save+Compile, and has the
-  simultaneous-seed-race caveat noted there.
+  which is cross-platform via the browser but drops voice/video and Save+Compile (native+web
+  seed interop is a tracked follow-up — see that section).
 
 ---
 

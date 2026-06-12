@@ -1,9 +1,10 @@
 # Plan: wf-edit in the browser (WebRTC collab editor UI → WASM)
 
 > Status: approved 2026-06-12. **Phases 0–3 COMPLETE + verified (2026-06-13)**: WASM
-> editor renders/edits; Emscripten WebSocket + CRDT sync; multi-peer join-and-receive;
-> presence + chat browser↔browser. One known follow-up: the simultaneous-seed race
-> (Phase 3 status). Remaining: web Save/Export semantics (IDBFS / Blob download).
+> editor renders/edits; Emscripten WebSocket + CRDT sync; multi-peer join-and-receive
+> (simultaneous-seed race fixed via deterministic host election); presence + chat
+> browser↔browser. Remaining: web Save/Export semantics (IDBFS / Blob download); native
+> defer/push for mixed native+web rooms (Phase 3 status).
 
 ## Outcome (2026-06-13)
 
@@ -18,6 +19,10 @@ What shipped, by phase (newest first):
 - **P3 — presence + text chat** ([`108b775a`](https://github.com/wbniv/WorldFoundry/commit/108b775a)).
   Root-cause fix: web tabs minted no `peer_id`, so presence/chat were self-dropped on the
   `!pid.empty()` guard — now a unique random id per tab. Verified browser↔browser.
+- **Simultaneous-seed race fixed — deterministic host election**
+  ([`7cd19d83`](https://github.com/wbniv/WorldFoundry/commit/7cd19d83)): the lowest `peer_id`
+  among present peers seeds; higher-id peers wait + adopt. Verified concurrent two-browser
+  (seeders=1 / adopters=1).
 - **P2 — Emscripten WebSocket + CRDT sync + join-and-receive**
   ([`f713533a`](https://github.com/wbniv/WorldFoundry/commit/f713533a) transport,
   [`58652d7e`](https://github.com/wbniv/WorldFoundry/commit/58652d7e) connect state machine,
@@ -29,8 +34,9 @@ What shipped, by phase (newest first):
 - **P0/P1 — yffi→wasm cross-compile spike + non-collab WASM editor** (panels + gizmo + the
   `wf_edit_web` CMake target, `web/shell-edit.html`, the three platform seams).
 
-**Open follow-ups:** web Save/Export (Blob download / IDBFS); the simultaneous-seed race +
-native-side defer/push for cross-impl join-and-receive (both in the Phase 3 status below).
+**Open follow-ups:** web Save/Export (Blob download / IDBFS); native-side defer/push so
+mixed native+web rooms seed-correctly (Phase 3 status below). *(The simultaneous-seed race is
+now fixed — `7cd19d83`.)*
 
 ## Context
 
@@ -416,15 +422,28 @@ evicts the peer after the timeout.
     block ("connected") in the Collab panel:
     <img src="screenshots/2026-06-13-web-presence-chat-joiner.png" width="700">
 
-- **KNOWN LIMITATION — simultaneous-seed race (follow-up):** the host election is a fixed
-  ~0.6 s timeout (empty Doc at deadline ⇒ seed). If **two** peers join a *brand-new* room
-  within that window (before either's seed is pushed + relay-persisted), **both** seed and
-  the room ends up with duplicated content (independent Yrs client ids → ~72 actors, not
-  36). The normal flow is unaffected — one peer opens/creates the room, others join later
-  and adopt (verified above with a 4 s stagger; a 1.6 s stagger intermittently tripped the
-  race). A robust fix is deterministic host election (e.g. only the lowest peer_id among
-  present peers seeds) or a relay "room-is-new" signal on join; tracked as a follow-up, not
-  blocking — it needs either relay cooperation or a presence-aware election.
+- **FIXED — simultaneous-seed race** ([`7cd19d83`](https://github.com/wbniv/WorldFoundry/commit/7cd19d83)).
+  Previously the host election was a bare ~0.6 s timeout (empty Doc at deadline ⇒ seed), so
+  two peers joining a *brand-new* room within that window both seeded → duplicated content
+  (independent Yrs client ids → ~72 actors, not 36). Now `WebSeedStep` runs a **deterministic
+  election**: at the deadline a peer seeds only if its `peer_id` is the **lowest** among
+  itself + all present peers (from `peer_presence`, populated by `CollabDrain`); a higher-id
+  peer extends its window and waits for the lower-id peer's seed (the `n > 0` adopt check then
+  picks it up). If the elected seeder dies, the 8 s presence eviction drops it, the waiter
+  becomes lowest, and it seeds — so the wait is bounded, not indefinite. Solo peers (empty
+  `peer_presence`) seed exactly as before. **Verified browser↔browser via raw CDP with two
+  SEPARATE chrome processes** (each its own foreground tab — a `createTarget` background tab
+  is *hidden* and its rAF main loop pauses, so a single-browser two-tab race test can't even
+  connect the second peer): a concurrent brand-new room gives **seeders=1 / adopters=1** (one
+  tab logs `won host election` + seeds, the other adopts 36 actors; pre-fix this was two
+  seeders), and a 4 s-stagger regression still seeds-then-adopts with bidirectional presence + chat.
+
+- **REMAINING follow-up — native-side defer/push for cross-impl join-and-receive:** the web
+  editor defers its Doc load and the host pushes via `observeUpdates`, but **native** still
+  loads its Doc *before* connecting and never pushes that initial state, so a *native* seeder
+  → *web* adopter doesn't converge (the relay has nothing to replay). Pure web↔web rooms
+  (verified above) are unaffected. Applying the same defer/push on native would make mixed
+  native+web rooms seed-correct; tracked as a follow-up.
 
 ## Save semantics on web (no local FS / no shell)
 
@@ -469,4 +488,4 @@ exclusions for threads/modals/teardown/re-exec, web connect state machine),
 3. ~~Phase 2: two browser tabs on a relay room co-edit; mid-session join adopts current state (join-and-receive, 36 actors, no dup).~~ ✅ done 2026-06-13 (Phase 2 status). *(Verified browser↔browser via local relay; native↔browser interop not separately run — same wire framing + the proven native sync code, but the native side does not yet defer/push its initial Doc, so native-seeds→web-adopts needs the same join-and-receive treatment on native; tracked with the seed-race follow-up.)*
 4. ~~Phase 3: presence (names/colours/selection rings) + chat round-trip between two browsers; unique per-tab peer_id.~~ ✅ done 2026-06-13 (Phase 3 status). *(Browser↔browser via CDP; peer eviction-on-close not separately asserted — the 8 s timeout sweep at main.cc:809 is unchanged from the proven native path.)*
 5. **Remaining:** web Save/Export semantics (disable Save+Compile; `SaveDocToLev`→Blob download; optional IDBFS persistence) — see "Save semantics on web".
-6. **Follow-up:** simultaneous-seed race + native-side defer/push for cross-impl join-and-receive (Phase 3 status, "KNOWN LIMITATION").
+6. ~~Follow-up: simultaneous-seed race~~ ✅ fixed `7cd19d83` (deterministic host election). **Still open:** native-side defer/push for cross-impl (native+web) join-and-receive (Phase 3 status).
