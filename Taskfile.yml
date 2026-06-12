@@ -589,6 +589,20 @@ tasks:
         LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/filesys-standalone.iff $RECFLAG 2>&1 | tee "$LOG"
         [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
+  run-filelight:
+    desc: "Run wf_game on wflevels/filelight-standalone.iff (3D Filelight sunburst). WF_RECORD=1 records video."
+    cmds:
+      - |
+        LOG=/tmp/wfgame_filelight.log
+        echo "Logging to $LOG"
+        RECFLAG=""; RECOUT=""
+        if [ -n "${WF_RECORD:-}" ]; then
+          RECOUT="${WF_RECORD}"; [ "$RECOUT" = "1" ] && RECOUT="$(date +%Y%m%d_%H%M%S)_filelight.mp4"
+          RECFLAG="-record_video"; echo "Recording → $RECOUT"
+        fi
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/filelight-standalone.iff $RECFLAG 2>&1 | tee "$LOG"
+        [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
+
   run-snowgoons:
     desc: "Run wf_game on wflevels/snowgoons.iff directly (bypass cd.iff). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
     cmds:

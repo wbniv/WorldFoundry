@@ -46,6 +46,7 @@ extern "C" {
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <algorithm>  // std::sort — Filelight orders sibling segments biggest-first
 #include <dirent.h>
 #include <sys/stat.h>
 #include <cmath>      // atan2/cos/sin/sqrt for the FSN connector orientation
@@ -84,6 +85,33 @@ static bool g_fsn_enterLatch = false, g_fsn_backLatch = false;
 static bool g_fsn_pendingBuild = false;   // navigation despawns one frame, respawns the next
 
 static const float FSN_PI = 3.14159265358979f;
+
+// ---------------------------------------------------------------------------
+// Filelight — 3D radial disk-usage sunburst (custom 12-21 / sys 140-149).
+//
+// The §6 split (docs/investigations/2026-06-13-zforth-recursion-stack-extension.md):
+// C walks the tree, computes recursive byte sizes, and subdivides the [0,1)
+// revolution circle proportionally — emitting a FLAT NUMERIC TABLE of segments.
+// The Director .fth iterates the table and applies the render *policy* (size→
+// height, hue, wedge tiling) by spawning + rotating + scaling + colouring. No
+// string ever crosses to Forth; angles are revolutions (the engine-native Euler
+// unit). See docs/plans/2026-06-13-filesystem-viz-on-a-flat-table-forth-policy-core-f.md.
+struct FlSeg {
+    int         depth;    // 0 = centre disk (cwd); 1.. = ring bands outward
+    float       a0, a1;   // arc start/end, REVOLUTIONS ∈ [0,1)
+    int64_t     sizeKB;   // recursive subtree size, KiB  (Forth: size→height)
+    int         branchId; // depth-1 ancestor index       (Forth: branch→hue)
+    std::string path;     // navigation re-root target (never crosses to Forth)
+};
+static std::vector<FlSeg> g_fl_segments;
+static std::string  g_fl_root, g_fl_start;
+static int   g_fl_maxDepth    = 3;
+static int   g_fl_playerIdx   = 0;
+static int   g_fl_branchCount = 0;
+static bool  g_fl_pendingBuild = false;
+static bool  g_fl_enterLatch = false, g_fl_backLatch = false;
+static const float FL_MIN_REV    = 0.012f;  // cull arcs below ~4.3° (and stop recursing)
+static const float FL_RING_WIDTH = 9.0f;    // world units per ring band (matches Blender)
 
 static int fsn_isqrt(int n) { int s = 0; while ((s + 1) * (s + 1) <= n) s++; return s; }
 
@@ -400,6 +428,175 @@ static void fsn_navigate() {
     if (!backDown) g_fsn_backLatch = false;
 }
 
+// ---------------------------------------------------------------------------
+// Filelight helpers — structure only (the C side of the §6 split).
+
+// Recursive byte sum under `dir`. statBudget caps total stat() calls so a huge
+// tree can't stall a frame; when it bottoms out we stop descending.
+static int64_t fl_subtree_bytes(const std::string& dir, int& statBudget) {
+    if (statBudget <= 0) return 0;
+    int64_t total = 0;
+    std::vector<FsnEntry> entries;
+    fsn_scan(dir, entries);                 // skips hidden / '.' '..'; lstat; no symlinks
+    for (const FsnEntry& e : entries) {
+        if (--statBudget <= 0) break;
+        if (e.is_dir) total += fl_subtree_bytes(e.path, statBudget);
+        else          total += e.size;
+    }
+    return total;
+}
+
+// Push the node's own row, then split its arc ∝ child subtree-bytes and recurse.
+// Depth 0 = the centre disk (full [0,1) turn). Loose files fold into the node's
+// size (the Filelight default: dirs fan, files don't get their own wedge).
+static void fl_subdivide(const std::string& path, int depth, float a0, float a1,
+                         int branchId, int64_t myBytes, int& statBudget) {
+    g_fl_segments.push_back(FlSeg{ depth, a0, a1, myBytes / 1024, branchId, path });
+    if (depth >= g_fl_maxDepth || (a1 - a0) < FL_MIN_REV || statBudget <= 0) return;
+
+    std::vector<FsnEntry> entries;
+    fsn_scan(path, entries);
+    struct Kid { std::string path; int64_t bytes; };
+    std::vector<Kid> kids;
+    int64_t total = 0;
+    for (const FsnEntry& e : entries) {
+        if (!e.is_dir) continue;            // files already folded into myBytes
+        int64_t kb = fl_subtree_bytes(e.path, statBudget);
+        kids.push_back(Kid{ e.path, kb });
+        total += kb;
+    }
+    if (total <= 0) return;
+    std::sort(kids.begin(), kids.end(),
+              [](const Kid& a, const Kid& b) { return a.bytes > b.bytes; });  // biggest first
+
+    float a = a0;
+    for (const Kid& k : kids) {
+        float span = (a1 - a0) * (float)((double)k.bytes / (double)total);
+        if (span < FL_MIN_REV) break;       // cull the small tail (keeps the actor budget sane)
+        fl_subdivide(k.path, depth + 1, a, a + span,
+                     depth == 0 ? g_fl_branchCount++ : branchId, k.bytes, statBudget);
+        a += span;
+    }
+}
+
+// Rebuild the segment table for the current root. Returns the row count.
+static int fl_scan() {
+    g_fl_segments.clear();
+    g_fl_branchCount = 0;
+    int statBudget = 200000;
+    int64_t rootBytes = fl_subtree_bytes(g_fl_root, statBudget);
+    fl_subdivide(g_fl_root, 0, 0.0f, 1.0f, 0, rootBytes, statBudget);
+    return (int)g_fl_segments.size();
+}
+
+// Camera fly-down for the centred sunburst: high overhead → angled play pose.
+static void fl_flydown(int camIdx, float t) {
+    if (!g_mgr || !camIdx) return;
+    const float SECS = 2.5f;
+    const float HY = -55.0f, HZ = 96.0f, PY = -30.0f, PZ = 88.0f;   // high → steep top-down
+    float f = t / SECS; if (f < 0.0f) f = 0.0f; if (f > 1.0f) f = 1.0f;
+    Mailboxes& mb = g_mgr->LookupMailboxes(camIdx);
+    mb.WriteMailbox(3010, Scalar::FromFloat(HY + (PY - HY) * f));   // EMAILBOX_Y_POS
+    mb.WriteMailbox(3011, Scalar::FromFloat(HZ + (PZ - HZ) * f));   // EMAILBOX_Z_POS
+}
+
+// Per-frame navigation. The render lives in Forth, so we only flag a rebuild:
+// returns 1 on the frame the Director should (re)render, else 0. Re-root despawn
+// happens here in C (frame N); the deferred frame (N+1) returns 1 so Forth
+// re-runs fl-scan + its tile loop into the freed slots.
+static int fl_navigate() {
+    if (!theLevel || !g_mgr || !g_fl_playerIdx) return 0;
+
+    if (g_fl_pendingBuild) {                 // deferred frame: old actors freed → render now
+        g_fl_pendingBuild = false;
+        Mailboxes& mb = g_mgr->LookupMailboxes(g_fl_playerIdx);
+        mb.WriteMailbox(3009, Scalar::FromFloat(0.0f));   // warp player back to centre
+        mb.WriteMailbox(3010, Scalar::FromFloat(0.0f));
+        mb.WriteMailbox(3011, Scalar::FromFloat(1.0f));
+        return 1;
+    }
+
+    // Headless regression hook: WF_FL_TEST_DESCEND=1 drives a descend (~3 s, into
+    // the largest depth-1 segment) then an ascend (~6 s) with no input device, so
+    // the despawn→re-scan→re-render path can be smoke-tested. No effect unset.
+    if (getenv("WF_FL_TEST_DESCEND")) {
+        static int s_n = 0;
+        s_n++;
+        if (s_n == 8) {                      // descend into the largest depth-1 segment
+            for (const FlSeg& s : g_fl_segments)
+                if (s.depth == 1) { g_fl_root = s.path; fsn_despawn(); g_fl_pendingBuild = true; break; }
+            fprintf(stderr, "FL-TEST: descend(frame %d) → '%s'\n", s_n, g_fl_root.c_str());
+            return 0;
+        }
+        if (s_n == 20) {                      // ascend back to the parent
+            if (g_fl_root != g_fl_start) {
+                size_t slash = g_fl_root.find_last_of('/');
+                g_fl_root = (slash == std::string::npos || slash == 0)
+                            ? g_fl_start : g_fl_root.substr(0, slash);
+                fsn_despawn(); g_fl_pendingBuild = true;
+            }
+            fprintf(stderr, "FL-TEST: ascend(frame %d) → '%s'\n", s_n, g_fl_root.c_str());
+            return 0;
+        }
+    }
+
+    Actor* player = theLevel->getActor(g_fl_playerIdx);
+    if (!ValidPtr(player)) return 0;
+    Vector3 p = player->currentPos();
+    float px = p.X().AsFloat(), py = p.Y().AsFloat(), pz = p.Z().AsFloat();
+
+    // Disk play-bounds: clamp r ≤ outer ring radius so the astronaut stays on the relief.
+    float r = std::sqrt(px * px + py * py);
+    float rMax = (float)(g_fl_maxDepth + 1) * FL_RING_WIDTH - 1.0f;
+    bool clamp = false;
+    if (r > rMax)   { float s = rMax / r; px *= s; py *= s; clamp = true; }
+    if (pz < 0.0f)  { pz = 0.5f; clamp = true; }
+    if (clamp) {
+        Mailboxes& mb = g_mgr->LookupMailboxes(g_fl_playerIdx);
+        mb.WriteMailbox(3009, Scalar::FromFloat(px));
+        mb.WriteMailbox(3010, Scalar::FromFloat(py));
+        mb.WriteMailbox(3011, Scalar::FromFloat(pz));
+    }
+
+    int buttons = (int)g_mgr->LookupMailboxes(g_curObj).ReadMailbox(1909).AsFloat();
+    bool enterDown = (buttons & 2) != 0;   // button B — zoom into the wedge under foot
+    bool backDown  = (buttons & 4) != 0;   // button C — ascend
+
+    // Descend: must be standing out on the rings (r ≥ one band), then the polar
+    // angle picks the depth-1 segment to re-root into.
+    if (enterDown && !g_fl_enterLatch) {
+        g_fl_enterLatch = true;
+        if (r >= FL_RING_WIDTH) {
+            float th = std::atan2(py, px) / (2.0f * FSN_PI);   // revolutions
+            if (th < 0.0f) th += 1.0f;
+            for (const FlSeg& s : g_fl_segments) {
+                if (s.depth != 1) continue;
+                if (th >= s.a0 && th < s.a1) {
+                    g_fl_root = s.path;
+                    fsn_despawn();
+                    g_fl_pendingBuild = true;
+                    break;
+                }
+            }
+        }
+    }
+    if (!enterDown) g_fl_enterLatch = false;
+
+    // Ascend: re-root to the parent dir (not above the start dir).
+    if (backDown && !g_fl_backLatch) {
+        g_fl_backLatch = true;
+        if (g_fl_root != g_fl_start) {
+            size_t slash = g_fl_root.find_last_of('/');
+            g_fl_root = (slash == std::string::npos || slash == 0)
+                        ? g_fl_start : g_fl_root.substr(0, slash);
+            fsn_despawn();
+            g_fl_pendingBuild = true;
+        }
+    }
+    if (!backDown) g_fl_backLatch = false;
+    return 0;
+}
+
 // Cache: src pointer → compiled word name.
 // Scripts are compiled once on first call; subsequent calls just invoke the word.
 static std::unordered_map<const char*, std::string> g_scriptCache;
@@ -586,6 +783,93 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                 int camIdx = (int)zf_pop(ctx);
                 float t    = (float)zf_pop(ctx);
                 fsn_flydown(camIdx, t);
+            } else if (custom == 12) {
+                // fl-config ( maxDepth maxNodes playerIdx -- )
+                g_fl_playerIdx = (int)zf_pop(ctx);
+                g_fsn_maxNodes = (int)zf_pop(ctx);   // shared spawn budget (fsn_spawn/fsn_budget_left)
+                g_fl_maxDepth  = (int)zf_pop(ctx);
+                g_fl_root = g_fl_start = ".";
+                g_fl_branchCount = 0;
+                g_fl_pendingBuild = false;
+                g_fl_enterLatch = g_fl_backLatch = false;
+            } else if (custom == 13) {
+                // fl-scan ( -- nSegments ) — rebuild the flat segment table for the root.
+                int n = fl_scan();
+                fprintf(stderr, "FL: scanned '%s' — %d segments\n", g_fl_root.c_str(), n);
+                zf_push(ctx, (zf_cell)(float)n);
+            } else if (custom == 14) {
+                // seg-depth ( i -- d )
+                int i = (int)zf_pop(ctx);
+                zf_push(ctx, (zf_cell)(float)((i >= 0 && i < (int)g_fl_segments.size())
+                                              ? g_fl_segments[i].depth : 0));
+            } else if (custom == 15) {
+                // seg-a0 ( i -- rev )
+                int i = (int)zf_pop(ctx);
+                zf_push(ctx, (zf_cell)((i >= 0 && i < (int)g_fl_segments.size())
+                                       ? g_fl_segments[i].a0 : 0.0f));
+            } else if (custom == 16) {
+                // seg-a1 ( i -- rev )
+                int i = (int)zf_pop(ctx);
+                zf_push(ctx, (zf_cell)((i >= 0 && i < (int)g_fl_segments.size())
+                                       ? g_fl_segments[i].a1 : 0.0f));
+            } else if (custom == 17) {
+                // seg-size ( i -- kb )
+                int i = (int)zf_pop(ctx);
+                zf_push(ctx, (zf_cell)(float)((i >= 0 && i < (int)g_fl_segments.size())
+                                              ? g_fl_segments[i].sizeKB : 0));
+            } else if (custom == 18) {
+                // seg-branch ( i -- branchId )
+                int i = (int)zf_pop(ctx);
+                zf_push(ctx, (zf_cell)(float)((i >= 0 && i < (int)g_fl_segments.size())
+                                              ? g_fl_segments[i].branchId : 0));
+            } else if (custom == 19) {
+                // set-rotation ( actor revs -- ) — Euler heading about Z (revolutions).
+                float rev = (float)zf_pop(ctx);
+                int   idx = (int)zf_pop(ctx);
+                if (theLevel) {
+                    Actor* a = theLevel->getActor(idx);
+                    if (a) a->GetWritablePhysicalAttributes().SetRotation(
+                        Euler(Angle::Revolution(Scalar::zero),
+                              Angle::Revolution(Scalar::zero),
+                              Angle::Revolution(Scalar::FromFloat(rev))));
+                }
+            } else if (custom == 20) {
+                // fl-navigate ( -- rebuild? )
+                zf_push(ctx, (zf_cell)(float)fl_navigate());
+            } else if (custom == 21) {
+                // fl-flydown ( t camIdx -- )
+                int camIdx = (int)zf_pop(ctx);
+                float t    = (float)zf_pop(ctx);
+                fl_flydown(camIdx, t);
+            } else if (custom == 22) {
+                // hsv>rgb ( h s v -- 0xRRGGBB ) — math primitive (like isqrt); the
+                // *which* hue/sat/val is the Director's colour policy. h,s,v ∈ [0,1].
+                float v = (float)zf_pop(ctx);
+                float s = (float)zf_pop(ctx);
+                float h = (float)zf_pop(ctx);
+                if (s < 0.0f) s = 0.0f; if (s > 1.0f) s = 1.0f;
+                if (v < 0.0f) v = 0.0f; if (v > 1.0f) v = 1.0f;
+                h -= std::floor(h); if (h < 0.0f) h += 1.0f;
+                float hh = h * 6.0f;
+                int   i  = (int)hh;
+                float f  = hh - (float)i;
+                float p  = v * (1.0f - s);
+                float q  = v * (1.0f - s * f);
+                float tt = v * (1.0f - s * (1.0f - f));
+                float r, g, b;
+                switch (i % 6) {
+                    case 0:  r=v;  g=tt; b=p;  break;
+                    case 1:  r=q;  g=v;  b=p;  break;
+                    case 2:  r=p;  g=v;  b=tt; break;
+                    case 3:  r=p;  g=q;  b=v;  break;
+                    case 4:  r=tt; g=p;  b=v;  break;
+                    default: r=v;  g=p;  b=q;  break;
+                }
+                int ri = (int)(r * 255.0f + 0.5f);
+                int gi = (int)(g * 255.0f + 0.5f);
+                int bi = (int)(b * 255.0f + 0.5f);
+                int packed = ((ri & 0xFF) << 16) | ((gi & 0xFF) << 8) | (bi & 0xFF);
+                zf_push(ctx, (zf_cell)(float)packed);
             } else if (custom == 72) {
                 /* Neural-forth dispatch gate: syscall 200 = ZF_SYSCALL_USER + 72.
                  * Pops word-id from stack and routes to nf_dispatch().
@@ -806,6 +1090,51 @@ void Init(MailboxesManager& mgr)
         "    swap drop 1- "
         "  fi ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: init failed (isqrt): %d\n", r);
+
+    // ---------------------------------------------------------------------
+    // Filelight bridge words (custom 12-21 / sys 140-149) + shared render
+    // primitives. The render *policy* (tile-seg, place-wedge, hue, height
+    // curve) lives in the level's Director .fth for hot-reload — only the
+    // primitives below live in the engine.
+    static const struct { const char* name; const char* body; } kFlWords[] = {
+        { "fl-config",    "140 sys" },
+        { "fl-scan",      "141 sys" },
+        { "seg-depth",    "142 sys" },
+        { "seg-a0",       "143 sys" },
+        { "seg-a1",       "144 sys" },
+        { "seg-size",     "145 sys" },
+        { "seg-branch",   "146 sys" },
+        { "set-rotation", "147 sys" },
+        { "fl-navigate",  "148 sys" },
+        { "fl-flydown",   "149 sys" },
+        { "hsv>rgb",      "150 sys" },
+    };
+    for (const auto& w : kFlWords) {
+        char buf[64];
+        snprintf(buf, sizeof(buf), ": %s %s ;", w.name, w.body);
+        if (zf_eval(&g_ctx, buf) != ZF_OK)
+            fprintf(stderr, "zforth: init failed (%s)\n", w.name);
+    }
+
+    // r@ — peek the return-stack top without popping (immediate: compiles `0 pickr`).
+    // Render words stash a spawned actor on the rstack while configuring it.
+    // (zForth ships `i`/`j` but no `r@`.)
+    r = zf_eval(&g_ctx, ": r@ ' lit , 0 , ' pickr , ; immediate");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (r@): %d\n", r);
+
+    // spawn0 ( tmpl -- actor ) — spawn a template at the world origin (0,0,0).
+    r = zf_eval(&g_ctx, ": spawn0 >r 0 0 0 r> spawn-template ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (spawn0): %d\n", r);
+
+    // set-color ( actor 0xRRGGBB -- ) — write the packed colour to all three face
+    // colour mailboxes (3037/3038/3039). Mirrors set-scale's stack shuffle.
+    r = zf_eval(&g_ctx,
+        ": set-color "
+        "  2dup swap 3037 swap write-actor-mailbox "
+        "  2dup swap 3038 swap write-actor-mailbox "
+        "  2dup swap 3039 swap write-actor-mailbox "
+        "  2drop ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (set-color): %d\n", r);
 
 #ifdef WF_NEURAL_FORTH
     nf_init(&g_ctx);
