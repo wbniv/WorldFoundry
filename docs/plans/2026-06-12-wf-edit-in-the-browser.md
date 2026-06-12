@@ -248,6 +248,13 @@ Runtime fixes found (each unblocked the next, classic emscripten bring-up):
    whole WASM/WebGL2 + ImGui + engine-viewport architecture is sound; (d) is the lone blocker
    to a clean render.
 
+   <img src="screenshots/2026-06-13-wf-edit-web-renders.png" width="700">
+
+   *wf-edit running in headless Chrome (SwiftShader WebGL2): Dear ImGui menu bar +
+   Outliner + Properties panels, and the engine viewport rendering the snowgoons terrain
+   (`frame 6, 0.6 FPS`). Captured from the checkpoint build that masks (d); the Outliner
+   shows 0 actors because the popen/levtree Doc-population path doesn't exist on web yet.*
+
 ## Phase 2 — Emscripten WebSocket backend + CRDT sync (co-edit with a native client)
 
 - **`ws_client_emscripten.cc`** (new): implement the *same* `wfedit::WsClient` interface
