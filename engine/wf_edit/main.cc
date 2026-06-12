@@ -455,9 +455,9 @@ void DoSave(EditorCtx* c)
 
 #if defined(__EMSCRIPTEN__)
 // Trigger a browser file download of in-memory text (a Blob + a synthetic <a download>
-// click). Used by the web Export — the only way to get a file out of MEMFS to the user.
+// click). The only way to get a file out of MEMFS to the user.
 EM_JS(void, wfedit_download_text, (const char* fname, const char* text), {
-    const blob = new Blob([UTF8ToString(text)], { type: 'application/json' });
+    const blob = new Blob([UTF8ToString(text)], { type: 'application/octet-stream' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
     a.href = url; a.download = UTF8ToString(fname);
@@ -465,11 +465,19 @@ EM_JS(void, wfedit_download_text, (const char* fname, const char* text), {
     URL.revokeObjectURL(url);
 });
 
-// File→Export (web): `levtree print` (popen) doesn't exist on wasm, so we can't write a
-// `.lev` in-process. Instead export the lossless levtree chunk-tree JSON (DocToLevtreeJson,
-// pure in-process) as a download; the user converts it to `.lev` natively with
-// `levtree print <file>.lev.json` (or re-imports via the Blender add-on). Captures every
-// structural + remote edit (it's the same JSON SaveDocToLev feeds to levtree on native).
+// levtree crate C ABI (liblevtree.a, linked into wf_edit_web): levtree chunk-tree
+// JSON → canonical `.lev` text, in-process — the wasm substitute for the native
+// `levtree print` subprocess (no popen on wasm). Returns a heap C string (free with
+// levtree_free) or NULL on parse error.
+extern "C" char* levtree_print_json(const char* json);
+extern "C" void  levtree_free(char* s);
+
+// File→Export (web): build the lossless levtree chunk-tree JSON in-process
+// (DocToLevtreeJson) and run it through the linked levtree printer to produce a real
+// `.lev` for one-click download. Captures every structural + remote edit (it's the
+// same tree the native Save feeds to `levtree print`). If the in-wasm print fails for
+// any reason, falls back to downloading the JSON (still convertible with a native
+// `levtree print <file>.lev.json`).
 void DoExportJsonWeb(EditorCtx* c)
 {
     if (!c->doc) { c->toast = "export: no document"; c->toast_frames = 180; return; }
@@ -477,16 +485,25 @@ void DoExportJsonWeb(EditorCtx* c)
     if (!wfedit::DocToLevtreeJson(*c->doc, tree_json)) {
         c->toast = "EXPORT FAILED (empty Doc)"; c->toast_frames = 180; return;
     }
-    // Download name: basename of the leveltree, suffixed .lev.json (e.g.
-    // /level/snowgoons-blender.lev → snowgoons-blender.lev.json).
-    std::string name = c->leveltree.empty() ? "level.lev" : c->leveltree;
-    if (auto s = name.find_last_of('/'); s != std::string::npos) name.erase(0, s + 1);
-    name += ".json";
-    wfedit_download_text(name.c_str(), tree_json.c_str());
-    c->toast = "exported " + name + " — `levtree print` it to a .lev";
-    c->toast_frames = 240;
-    std::printf("wf-edit(web): exported levtree JSON %s (%zu bytes)\n",
-                name.c_str(), tree_json.size());
+    // Base name from the leveltree (e.g. /level/snowgoons-blender.lev → snowgoons-blender.lev).
+    std::string base = c->leveltree.empty() ? "level.lev" : c->leveltree;
+    if (auto s = base.find_last_of('/'); s != std::string::npos) base.erase(0, s + 1);
+
+    if (char* lev = levtree_print_json(tree_json.c_str())) {
+        wfedit_download_text(base.c_str(), lev);               // one-click .lev
+        std::printf("wf-edit(web): exported %s (%zu bytes .lev)\n", base.c_str(), std::strlen(lev));
+        levtree_free(lev);
+        c->toast = "exported " + base;
+        c->toast_frames = 240;
+    } else {
+        // Fallback: ship the JSON (convert natively with `levtree print`).
+        std::string jname = base + ".json";
+        wfedit_download_text(jname.c_str(), tree_json.c_str());
+        std::fprintf(stderr, "wf-edit(web): levtree_print_json failed — exported JSON %s instead\n",
+                     jname.c_str());
+        c->toast = "exported " + jname + " (print failed — `levtree print` it)";
+        c->toast_frames = 240;
+    }
 }
 #endif
 
@@ -1927,17 +1944,16 @@ bool editor_build(void* p)
             }
             ImGui::Separator();
 #if defined(__EMSCRIPTEN__)
-            // Web: no local FS / no shell. `levtree print` (popen) is unavailable, so a
-            // one-click .lev can't be written in-process — export the lossless levtree
-            // JSON as a download instead (round-trips to .lev natively). Save / Save +
-            // Compile are hidden (Save would silently no-op; Compile shells out).
-            if (ImGui::MenuItem("Export .lev source (JSON)…"))
+            // Web: no local FS / no shell. `levtree print` runs IN-PROCESS via the
+            // linked levtree wasm staticlib (no popen), so Export downloads a real
+            // canonical .lev. Save (writes to unreachable MEMFS) / Save + Compile
+            // (shells out) are hidden — Export is the way to get work out.
+            if (ImGui::MenuItem("Export .lev…", "Ctrl+S"))
                 DoExportJsonWeb(c);
             if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("Downloads the lossless level tree as JSON.\n"
-                                  "Convert to .lev natively:  levtree print <file>.lev.json\n"
-                                  "(or re-import via the Blender add-on). The relay room\n"
-                                  "snapshot is the durable co-edit copy.");
+                ImGui::SetTooltip("Downloads the level as a canonical .lev (printed in-browser).\n"
+                                  "Re-import via the Blender add-on (wf.import_level) to refresh\n"
+                                  "the .blend. The relay room snapshot is the durable co-edit copy.");
 #else
             // A binary-loaded session is read-only at the source, so Save writes a
             // fresh .lev (save_path was redirected) — label it Save As to match.
@@ -2025,7 +2041,7 @@ bool editor_build(void* p)
     const bool typing = ImGui::GetIO().WantTextInput;
     if (!typing && ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S, false))
 #if defined(__EMSCRIPTEN__)
-        DoExportJsonWeb(c);   // web: Ctrl+S → Export JSON (Save has no in-process .lev writer)
+        DoExportJsonWeb(c);   // web: Ctrl+S → Export .lev (printed in-process via liblevtree.a)
 #else
         DoSave(c);
 #endif

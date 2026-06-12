@@ -431,3 +431,43 @@ mod tests {
         }
     }
 }
+
+// ── C ABI (web editor one-click Export) ─────────────────────────────────────
+// The browser editor can't shell out to the `levtree` binary (no popen on wasm),
+// so it links this crate as a static lib and calls levtree_print_json in-process:
+// a levtree chunk-tree JSON string → canonical `.lev` text. Only compiled for the
+// emscripten staticlib build; native keeps using the CLI via popen.
+#[cfg(target_os = "emscripten")]
+mod cabi {
+    use std::ffi::{CStr, CString};
+    use std::os::raw::c_char;
+
+    /// JSON levtree chunk-tree → canonical `.lev`. Returns a heap C string the
+    /// caller must release with `levtree_free`; NULL on null/invalid-UTF8/parse error.
+    #[no_mangle]
+    pub extern "C" fn levtree_print_json(json: *const c_char) -> *mut c_char {
+        if json.is_null() {
+            return std::ptr::null_mut();
+        }
+        let s = match unsafe { CStr::from_ptr(json) }.to_str() {
+            Ok(s) => s,
+            Err(_) => return std::ptr::null_mut(),
+        };
+        let doc: crate::LevelDoc = match serde_json::from_str(s) {
+            Ok(d) => d,
+            Err(_) => return std::ptr::null_mut(),
+        };
+        match CString::new(crate::print_lev(&doc)) {
+            Ok(c) => c.into_raw(),
+            Err(_) => std::ptr::null_mut(), // interior NUL (can't happen in .lev text)
+        }
+    }
+
+    /// Free a string returned by `levtree_print_json`.
+    #[no_mangle]
+    pub extern "C" fn levtree_free(s: *mut c_char) {
+        if !s.is_null() {
+            unsafe { drop(CString::from_raw(s)) };
+        }
+    }
+}

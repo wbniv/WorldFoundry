@@ -1455,7 +1455,26 @@ if(WF_ENABLE_WEB_EDITOR AND EMSCRIPTEN)
         "-DERR_DEBUG(x)="
         "$<$<CONFIG:Release>:-O3>"
     )
-    target_link_libraries(wf_edit_web PRIVATE wfengine wfcrdt)
+    # One-click .lev Export (web): wasm has no popen, so we can't shell out to
+    # `levtree print`. Instead link the levtree crate's C ABI (levtree_print_json,
+    # crate-type staticlib) as a wasm static lib and convert JSON→.lev in-process.
+    # Built via cargo (not Corrosion — the crate's lib and bin share the name
+    # "levtree", which would collide as two CMake targets). The build inherits the
+    # emcmake env (emsdk on PATH) + the Taskfile's RUSTUP_TOOLCHAIN/Rust_CARGO_TARGET.
+    set(_WF_LEVTREE_WASM_A
+        ${CMAKE_SOURCE_DIR}/wftools/levtree-rs/target/wasm32-unknown-emscripten/release/liblevtree.a)
+    add_custom_command(
+        OUTPUT ${_WF_LEVTREE_WASM_A}
+        COMMAND cargo build --lib --release --target wasm32-unknown-emscripten
+                --manifest-path ${CMAKE_SOURCE_DIR}/wftools/levtree-rs/Cargo.toml
+        COMMENT "Building levtree wasm staticlib (one-click .lev export)"
+        VERBATIM)
+    add_custom_target(levtree_wasm_build DEPENDS ${_WF_LEVTREE_WASM_A})
+    add_library(levtree_wasm STATIC IMPORTED GLOBAL)
+    set_target_properties(levtree_wasm PROPERTIES IMPORTED_LOCATION ${_WF_LEVTREE_WASM_A})
+    add_dependencies(wf_edit_web levtree_wasm_build)
+
+    target_link_libraries(wf_edit_web PRIVATE wfengine wfcrdt levtree_wasm)
     target_link_options(wf_edit_web PRIVATE
         -sUSE_GLFW=3
         -sMIN_WEBGL_VERSION=2

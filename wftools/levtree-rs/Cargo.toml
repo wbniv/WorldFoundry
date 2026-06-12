@@ -7,6 +7,9 @@ description = "World Foundry .lev <-> editable chunk tree (JSON) translator for 
 [lib]
 name = "levtree"
 path = "src/lib.rs"
+# rlib for the native `levtree` binary + Rust consumers; staticlib so the web
+# editor (wf_edit_web) can link the C ABI (levtree_print_json) into wasm.
+crate-type = ["rlib", "staticlib"]
 
 [[bin]]
 name = "levtree"
