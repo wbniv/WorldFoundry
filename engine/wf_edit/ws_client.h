@@ -16,6 +16,11 @@
 
 #include "connect_retry.h"   // ConnectError
 
+#if defined(__EMSCRIPTEN__)
+#include <deque>
+#include <emscripten/websocket.h>   // EMSCRIPTEN_WEBSOCKET_T + event types (browser backend)
+#endif
+
 namespace wfedit {
 
 class WsClient {
@@ -39,7 +44,11 @@ public:
     // Close the socket.
     void disconnect();
 
+#if defined(__EMSCRIPTEN__)
+    bool connected() const;   // browser readyState == OPEN (ws_client_emscripten.cc)
+#else
     bool connected() const { return _fd >= 0; }
+#endif
 
     // Send a binary WebSocket frame (client→server frames are masked per RFC 6455).
     // Returns false on send error (socket will need reconnect).
@@ -51,8 +60,26 @@ public:
     bool poll(std::vector<uint8_t>& out);
 
 private:
-    int _fd = -1;
     ConnectError _last_error = ConnectError::NoError;  // why the last connect() failed
+
+#if defined(__EMSCRIPTEN__)
+    // Browser WebSocket backend (ws_client_emscripten.cc). The browser performs
+    // TLS + RFC 6455 framing; onmessage delivers complete binary frames, which we
+    // queue here and hand out one-per-poll(). connect() is async — onopen flips
+    // _ws_state to Open, which connected() reports. Same channel-tag wire protocol
+    // as the native client, so a browser peer interoperates in the same relay room.
+    enum class WsState { Closed, Connecting, Open, Error };
+    EMSCRIPTEN_WEBSOCKET_T           _ws_socket = 0;     // 0 = none
+    WsState                          _ws_state  = WsState::Closed;
+    std::deque<std::vector<uint8_t>> _ws_incoming;       // complete binary frames
+
+    // Static C-ABI callbacks (registered with userData = this).
+    static EM_BOOL onOpen   (int, const EmscriptenWebSocketOpenEvent*,    void*);
+    static EM_BOOL onMessage(int, const EmscriptenWebSocketMessageEvent*, void*);
+    static EM_BOOL onError  (int, const EmscriptenWebSocketErrorEvent*,   void*);
+    static EM_BOOL onClose  (int, const EmscriptenWebSocketCloseEvent*,   void*);
+#else
+    int _fd = -1;
     std::vector<uint8_t> _recv_buf;  // partial frame accumulator
     bool  _tls     = false;
     void* _ssl     = nullptr;    // SSL* (OpenSSL) — non-null when TLS active
@@ -61,6 +88,7 @@ private:
     bool readExact(uint8_t* dst, size_t n);
     ssize_t tls_send(const void* buf, size_t len);
     ssize_t tls_recv(void* buf, size_t len);
+#endif
 };
 
 }  // namespace wfedit
