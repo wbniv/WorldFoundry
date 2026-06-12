@@ -113,6 +113,33 @@ static bool  g_fl_enterLatch = false, g_fl_backLatch = false;
 static const float FL_MIN_REV    = 0.012f;  // cull arcs below ~4.3° (and stop recursing)
 static const float FL_RING_WIDTH = 9.0f;    // world units per ring band (matches Blender)
 
+// ---------------------------------------------------------------------------
+// FSN Phase 3 — retrofit the tree builder to the same flat-table + Forth-policy
+// split as Filelight. fsn-scan walks the tree in C (BFS + the fan/connector trig)
+// and EMITS a flat numeric table; the filesys Director .fth renders it (tower
+// height curve, file age→colour, wire spawn+rotate+scale). Structure (positions,
+// angles — the trig) stays C; the *look* moves to Forth (hot-reloadable).
+enum { FSN_KIND_TOWER = 0, FSN_KIND_FILE = 1, FSN_KIND_CONN = 2 };
+struct FsnNode {
+    int   kind;     // tower / file / connector
+    float x, y, z;  // spawn position
+    float p1;       // tower: child-count (Forth isqrt→height); file: sizeKB; conn: heading rev
+    float p2;       // tower: depth; file: age-days (Forth → warm→cool); conn: length L
+};
+static std::vector<FsnNode> g_fsn_nodes;
+
+static bool fsn_emit(int kind, float x, float y, float z, float p1, float p2) {
+    if ((int)g_fsn_nodes.size() >= g_fsn_maxNodes) return false;
+    g_fsn_nodes.push_back(FsnNode{ kind, x, y, z, p1, p2 });
+    return true;
+}
+
+static float fsn_age_days(long mtime) {
+    long now = (long)time(nullptr);
+    long age = now - mtime; if (age < 0) age = 0;
+    return (float)age / 86400.0f;
+}
+
 static int fsn_isqrt(int n) { int s = 0; while ((s + 1) * (s + 1) <= n) s++; return s; }
 
 static int fsn_budget_left() { return g_fsn_maxNodes - (int)g_fsn_spawned.size(); }
@@ -343,6 +370,96 @@ static int fsn_build() {
     return fsn_spawn_tree();
 }
 
+// ---------------------------------------------------------------------------
+// FSN Phase 3 — EMIT versions: same walk + trig as fsn_spawn_tree/place_files,
+// but push flat rows instead of spawning. The filesys Director renders the rows.
+// Budget is capped on the row count (nothing is spawned yet during the emit).
+// Note: topZ (file-on-top Z) uses the default isqrt height so file slabs sit on
+// the tower tops; the Director's tower-height word matches it by construction.
+static void fsn_emit_place_files(const std::vector<FsnEntry>& entries, float x, float y, float topZ) {
+    int nf = 0; for (auto& e : entries) if (!e.is_dir) nf++;
+    if (nf > FSN_MAX_FILES_PER_NODE) nf = FSN_MAX_FILES_PER_NODE;
+    int fi = 0;
+    for (auto& e : entries) {
+        if (e.is_dir) continue;
+        if (fi >= nf) break;
+        float ang = (nf > 1) ? (2.0f * FSN_PI * (float)fi / (float)nf) : 0.0f;
+        float fr  = (nf > 1) ? 0.6f : 0.0f;
+        float fx = x + fr * std::cos(ang), fy = y + fr * std::sin(ang);
+        if (!fsn_emit(FSN_KIND_FILE, fx, fy, topZ, (float)(e.size / 1000), fsn_age_days(e.mtime))) break;
+        fi++;
+    }
+}
+
+static int fsn_emit_tree() {
+    g_fsn_nodes.clear();
+    g_fsn_towers.clear();
+    std::vector<FsnEntry> entries;
+    fsn_scan(g_fsn_root, entries);
+
+    // Root files: a low ring of slabs around the standpoint (radius 6), capped.
+    int nf = 0; for (auto& e : entries) if (!e.is_dir) nf++;
+    if (nf > 10) nf = 10;
+    int fi = 0;
+    for (auto& e : entries) {
+        if (e.is_dir) continue;
+        if (fi >= nf) break;
+        float ang = (nf > 1) ? (2.0f * FSN_PI * (float)fi / (float)nf) : 0.0f;
+        float fx = 6.0f * std::cos(ang), fy = 6.0f * std::sin(ang);
+        fsn_emit(FSN_KIND_FILE, fx, fy, 0.0f, (float)(e.size / 1000), fsn_age_days(e.mtime));
+        fi++;
+    }
+
+    // Seed the BFS queue with the root's child dirs, fanned wide across +Y (15°..165°).
+    std::vector<FsnJob> q;
+    int nd = 0; for (auto& e : entries) if (e.is_dir) nd++;
+    int ci = 0;
+    for (auto& e : entries) {
+        if (!e.is_dir) continue;
+        float t = (nd > 1) ? ((float)ci / (float)(nd - 1)) : 0.5f;
+        float a = (15.0f + 150.0f * t) * (FSN_PI / 180.0f);
+        q.push_back(FsnJob{ e.path, 30.0f * std::cos(a), 30.0f * std::sin(a), 0.0f, 0.0f, 1 });
+        ci++;
+    }
+
+    for (size_t qi = 0; qi < q.size(); ++qi) {
+        if ((int)g_fsn_nodes.size() >= g_fsn_maxNodes - 1) break;   // room for connector + tower
+        FsnJob job = q[qi];
+
+        // connector wire: base-to-base, heading + length computed in C (the trig).
+        float dx = job.x - job.px, dy = job.y - job.py;
+        float L = std::sqrt(dx * dx + dy * dy);
+        if (L >= 0.01f) {
+            float hRev = std::atan2(dy, dx) / (2.0f * FSN_PI);
+            fsn_emit(FSN_KIND_CONN, job.px, job.py, 0.3f, hRev, L);
+        }
+
+        std::vector<FsnEntry> sub;
+        fsn_scan(job.path, sub);
+        int h = fsn_isqrt((int)sub.size()); if (h < 1) h = 1; if (h > 6) h = 6;   // topZ placement
+        if (!fsn_emit(FSN_KIND_TOWER, job.x, job.y, 0.0f, (float)sub.size(), (float)job.depth)) continue;
+        float topZ = 2.0f * (float)h;
+        g_fsn_towers.push_back(FsnTower{ 0, job.path, job.x, job.y, topZ });
+        fsn_emit_place_files(sub, job.x, job.y, topZ);
+
+        if (job.depth < g_fsn_maxDepth) {
+            int snd = 0; for (auto& e : sub) if (e.is_dir) snd++;
+            float R = (job.depth == 1) ? 16.0f : 10.0f;
+            float outward = std::atan2(job.y, job.x);   // fan away from the field centre
+            int si = 0;
+            for (auto& e : sub) {
+                if (!e.is_dir) continue;
+                float frac = (snd > 1) ? ((float)si / (float)(snd - 1) - 0.5f) : 0.0f;
+                float ang  = outward + (FSN_PI * 0.78f) * frac;   // ±70° cone
+                q.push_back(FsnJob{ e.path, job.x + R * std::cos(ang),
+                                    job.y + R * std::sin(ang), job.x, job.y, job.depth + 1 });
+                si++;
+            }
+        }
+    }
+    return (int)g_fsn_nodes.size();
+}
+
 // Warp the player back to the standpoint (origin, just above the floor) — the
 // centre of the freshly-built view after a descend/ascend.
 static void fsn_reset_player() {
@@ -357,20 +474,20 @@ static void fsn_reset_player() {
 // Director every frame. Button B (bit 2) descends into the nearest dir tower
 // within reach; button C (bit 4) ascends to the parent (floored at the start
 // dir). The rebuild is deferred one frame to avoid a 2× actor-pool peak.
-static void fsn_navigate() {
-    if (!theLevel || !g_mgr || !g_fsn_playerIdx) return;
+static int fsn_navigate() {
+    if (!theLevel || !g_mgr || !g_fsn_playerIdx) return 0;
 
-    // Deferred respawn: the frame after a navigate despawn, the old actors have
-    // been freed (removePendingObjects), so the new tree fits the full budget.
+    // Deferred rebuild: the frame after a navigate despawn, the old actors have
+    // been freed (removePendingObjects). The render lives in Forth now, so just
+    // warp the player home and signal the Director to re-scan + re-render.
     if (g_fsn_pendingBuild) {
         g_fsn_pendingBuild = false;
-        fsn_spawn_tree();
         fsn_reset_player();
-        return;
+        return 1;
     }
 
     Actor* player = theLevel->getActor(g_fsn_playerIdx);
-    if (!ValidPtr(player)) return;
+    if (!ValidPtr(player)) return 0;
     Vector3 p = player->currentPos();
     float px = p.X().AsFloat(), py = p.Y().AsFloat(), pz = p.Z().AsFloat();
 
@@ -426,6 +543,7 @@ static void fsn_navigate() {
         }
     }
     if (!backDown) g_fsn_backLatch = false;
+    return 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -776,8 +894,8 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                         g_fsn_root.c_str(), n, (int)g_fsn_towers.size());
                 zf_push(ctx, (zf_cell)(float)n);
             } else if (custom == 10) {
-                // fsn-navigate ( -- ) — per-frame play-area bounds + proximity descend / back ascend.
-                fsn_navigate();
+                // fsn-navigate ( -- rebuild? ) — play-area bounds + proximity descend / ascend.
+                zf_push(ctx, (zf_cell)(float)fsn_navigate());
             } else if (custom == 11) {
                 // fsn-flydown ( t camIdx -- ) — ease the camshot high→play over the clock t.
                 int camIdx = (int)zf_pop(ctx);
@@ -870,6 +988,38 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                 int bi = (int)(b * 255.0f + 0.5f);
                 int packed = ((ri & 0xFF) << 16) | ((gi & 0xFF) << 8) | (bi & 0xFF);
                 zf_push(ctx, (zf_cell)(float)packed);
+            } else if (custom == 23) {
+                // fsn-scan ( -- nNodes ) — rebuild the FSN tree's flat render table.
+                int n = fsn_emit_tree();
+                fprintf(stderr, "FSN: emitted '%s' — %d nodes (%d towers)\n",
+                        g_fsn_root.c_str(), n, (int)g_fsn_towers.size());
+                zf_push(ctx, (zf_cell)(float)n);
+            } else if (custom >= 24 && custom <= 29) {
+                // node-kind/x/y/z/p1/p2 ( i -- v ) — index accessors into the table.
+                int i = (int)zf_pop(ctx);
+                float v = 0.0f;
+                if (i >= 0 && i < (int)g_fsn_nodes.size()) {
+                    const FsnNode& nd = g_fsn_nodes[i];
+                    switch (custom) {
+                        case 24: v = (float)nd.kind; break;
+                        case 25: v = nd.x;  break;
+                        case 26: v = nd.y;  break;
+                        case 27: v = nd.z;  break;
+                        case 28: v = nd.p1; break;
+                        default: v = nd.p2; break;   // 29
+                    }
+                }
+                zf_push(ctx, (zf_cell)v);
+            } else if (custom == 30) {
+                // node-count ( -- n )
+                zf_push(ctx, (zf_cell)(float)(int)g_fsn_nodes.size());
+            } else if (custom == 31) {
+                // pack-rgb ( r g b -- 0xRRGGBB ) — floor+clamp 3 channels, pack. The
+                // colour *ramp* (which r,g,b) is the Director's policy; this is the prim.
+                int b = (int)zf_pop(ctx); if (b < 0) b = 0; if (b > 255) b = 255;
+                int g = (int)zf_pop(ctx); if (g < 0) g = 0; if (g > 255) g = 255;
+                int r = (int)zf_pop(ctx); if (r < 0) r = 0; if (r > 255) r = 255;
+                zf_push(ctx, (zf_cell)(float)(((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF)));
             } else if (custom == 72) {
                 /* Neural-forth dispatch gate: syscall 200 = ZF_SYSCALL_USER + 72.
                  * Pops word-id from stack and routes to nf_dispatch().
@@ -1135,6 +1285,34 @@ void Init(MailboxesManager& mgr)
         "  2dup swap 3039 swap write-actor-mailbox "
         "  2drop ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: init failed (set-color): %d\n", r);
+
+    // set-x-scale ( actor scale -- ) — X=scale, Y=Z=1 (the FSN connector stretch).
+    r = zf_eval(&g_ctx,
+        ": set-x-scale "
+        "  2dup swap 3040 swap write-actor-mailbox "
+        "  1.0 3041 3 pick write-actor-mailbox "
+        "  1.0 3042 3 pick write-actor-mailbox "
+        "  2drop ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (set-x-scale): %d\n", r);
+
+    // FSN Phase 3 flat-table bridge words (custom 23-31 / sys 151-159).
+    static const struct { const char* name; const char* body; } kFsnWords[] = {
+        { "fsn-scan",   "151 sys" },
+        { "node-kind",  "152 sys" },
+        { "node-x",     "153 sys" },
+        { "node-y",     "154 sys" },
+        { "node-z",     "155 sys" },
+        { "node-p1",    "156 sys" },
+        { "node-p2",    "157 sys" },
+        { "node-count", "158 sys" },
+        { "pack-rgb",   "159 sys" },
+    };
+    for (const auto& w : kFsnWords) {
+        char buf[64];
+        snprintf(buf, sizeof(buf), ": %s %s ;", w.name, w.body);
+        if (zf_eval(&g_ctx, buf) != ZF_OK)
+            fprintf(stderr, "zforth: init failed (%s)\n", w.name);
+    }
 
 #ifdef WF_NEURAL_FORTH
     nf_init(&g_ctx);

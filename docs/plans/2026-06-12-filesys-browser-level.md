@@ -508,3 +508,46 @@ tower-top hubs are a variant the same syscall handles via the pitch term.
 **Rejected:** pure-Forth orientation (no float trig — fragile); pre-baked connector meshes
 (edges are runtime/data-dependent); per-axis scale without rotation (only works for
 axis-aligned edges — the grid is 2D so most edges are diagonal).
+
+---
+
+## Phase 3 — flat-table refactor (the §6 split) — *implemented 2026-06-13*
+
+Retrofitted the FSN builder to the same architecture as the
+[Filelight sunburst](2026-06-13-filesystem-viz-on-a-flat-table-forth-policy-core-f.md):
+the C++ monolith `fsn_spawn_tree` (scan → BFS layout → spawn, all in C) split into
+
+- **C emitter `fsn-scan ( -- nNodes )`** (`fsn_emit_tree`, `scripting_zforth.cc`) — keeps the
+  structural work that needs C: the recursive scan, the BFS fan positions, and the connector
+  `atan2`/length trig. It **emits a flat numeric table** of rows `{kind, x, y, z, p1, p2}`
+  (`FsnNode`) — tower / file / connector — plus `node-kind/x/y/z/p1/p2 ( i -- v )` accessors. No
+  string crosses to Forth.
+- **Render policy in the filesys Director `.fth`** — iterates the table (constant call depth, no
+  recursion, no rstack bump) and applies the *look*: `tower-height`/`file-height` curves
+  (`isqrt`), the file `age>rgb` warm→cool ramp (`pack-rgb`), and per-kind spawn + `set-rotation`
+  + `set-z-scale`/`set-x-scale` + `set-color`. **The FSN aesthetic is now hot-reloadable** — edit
+  the Director, rebuild the level, no engine recompile.
+
+`fsn-navigate` now returns a rebuild flag (deferred despawn → Forth re-render, like Filelight)
+instead of calling the builder itself.
+
+**Verification (regression guard — must look/play identical):**
+
+```
+task build && blender --background --python wflevels/filesys/blender_filesys.py
+task build-level -- filesys && task run-filesys
+```
+
+- Node/tower count: baseline `built '.' — 400 actors (75 towers)` → retrofit `emitted '.' — 400
+  nodes (75 towers)` — **identical**.
+- Render: yellow towers, age-coloured file slabs on tops + centre ring, cyan wires — visually
+  indistinguishable from the pre-retrofit baseline (screenshots/2026-06-13-p2-baseline-pre-retrofit.png
+  vs screenshots/2026-06-13-p2-retrofit-parity.png). PASS
+
+> Caveat: file-on-top Z (`topZ`) is computed in C with the *default* `isqrt` tower-height so
+> slabs sit on the tops; a Director that changes `tower-height` would float/sink the files
+> (the one structure↔policy coupling FSN has and Filelight doesn't). The colour ramp and the
+> height *curves themselves* are fully Forth.
+>
+> The old spawn path (`fsn-build`/`fsn_spawn_tree`) is left intact as a fallback (unused by the
+> Director); it can be removed once the flat-table path has soaked.

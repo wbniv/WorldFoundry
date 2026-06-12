@@ -139,13 +139,15 @@ GRID_Y0   = -35
 # set-z-scale (defined in scripting_zforth.cc) sets X=Y=1.0, Z=computed height,
 # so towers are tall and thin rather than uniformly scaled cubes.
 #
-# DIR-TMPL / FILE-TMPL are the level-actor indices of DirTemplate/FileTemplate.
-# Phase 2: the recursive scan + radial layout + spawning all live in C++
-# (fsn-build, scripting_zforth.cc) — zForth can't do the recursion/trig. The
-# Director just configures and triggers the build once, then polls navigation.
-#   fsn-config ( dirT fileT connT maxDepth maxNodes playerIdx -- )
-#   fsn-build  ( -- nodeCount )
-#   fsn-navigate ( -- )   \ proximity descend / back ascend (M3)
+# Phase 3 (flat-table + Forth-policy split, mirrors Filelight): the recursive
+# scan + BFS layout + connector trig stay in C (fsn-scan EMITS a flat node table);
+# this Director RENDERS the table — the tower/file height curves, the file age→
+# colour ramp, and the per-node spawn/rotate/scale are now Forth POLICY, so the
+# FSN look is hot-reloadable without recompiling the engine.
+#   fsn-config ( dirT fileT connT maxDepth maxNodes playerIdx -- )  \ caps + reset root
+#   fsn-scan   ( -- nNodes )            \ C walks the tree, emits the flat table
+#   node-kind/x/y/z/p1/p2 ( i -- v )   \ row accessors (0=tower 1=file 2=conn)
+#   fsn-navigate ( -- rebuild? )        \ descend/ascend; 1 = Director re-renders
 # Mailbox 10 = one-shot init guard.
 DIRECTOR_SCRIPT = (
     r'\\ wf' '\n'
@@ -157,17 +159,44 @@ DIRECTOR_SCRIPT = (
     f': PLAYER-IDX {PLAYER_LVL_IDX} ;\n'
     f': CAMSHOT-IDX {CAMSHOT_LVL_IDX} ;\n'
 
+    # --- render policy (the LOOK — hot-reloadable) ---
+    ': tower-height ( count -- h ) isqrt 1 max 6 min ;\n'   # dir height curve
+    ': file-height  ( sizeK -- h ) isqrt 1 max 4 min ;\n'   # file height curve
+    # file age(days) → warm(new 255,90,40) → cool(old 40,130,255) over ~a year
+    ': age>rgb ( ageDays -- 0xRRGGBB )\n'
+    '   365 / 0 max 1 min >r\n'
+    '   255 r@ 215 * -\n'
+    '   90  r@ 40 * +\n'
+    '   40  r> 215 * +\n'
+    '   pack-rgb ;\n'
+    # spawn + configure one node by kind (positions/angles come from the C table)
+    ': place-tower ( i -- )\n'
+    '   dup node-x over node-y 2 pick node-z DIR-T spawn-template\n'
+    '   >r  r@ over node-p1 tower-height set-z-scale  r> drop drop ;\n'
+    ': place-file ( i -- )\n'
+    '   dup node-x over node-y 2 pick node-z FILE-T spawn-template\n'
+    '   >r  r@ over node-p1 file-height set-z-scale\n'
+    '   r@ over node-p2 age>rgb set-color  r> drop drop ;\n'
+    ': place-conn ( i -- )\n'
+    '   dup node-x over node-y 2 pick node-z CONN-T spawn-template\n'
+    '   >r  r@ over node-p1 set-rotation  r@ over node-p2 set-x-scale  r> drop drop ;\n'
+    ': fsn-place ( i -- )\n'
+    '   dup node-kind\n'
+    '   dup 0 = if drop place-tower else\n'
+    '   dup 1 = if drop place-file else\n'
+    '       drop place-conn\n'
+    '   fi fi ;\n'
+    ': render-tree\n'
+    '   fsn-scan dup 0 = if drop else 0 do i fsn-place loop fi ;\n'
+
+    # --- per-frame body (no `;` past here) ---
     '10 read-mailbox 0 = if\n'
     '  1 10 write-mailbox\n'
     '  DIR-T FILE-T CONN-T MAXDEPTH MAXNODES PLAYER-IDX fsn-config\n'
-    '  fsn-build drop\n'
+    '  render-tree\n'
     'fi\n'
-
-    # Fly-down: pass the level clock (mailbox 1906 = TIME) + camshot index to the
-    # C++ fsn-flydown, which eases the camshot high→play (poses live in C++).
     '1906 read-mailbox CAMSHOT-IDX fsn-flydown\n'
-
-    'fsn-navigate\n'
+    'fsn-navigate if render-tree fi\n'
 )
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
