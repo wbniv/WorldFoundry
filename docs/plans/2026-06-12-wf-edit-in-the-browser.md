@@ -449,8 +449,29 @@ evicts the peer after the timeout.
 
 - Disable **Save + Compile** (shells out to `build_level_binary.sh`) on web.
 - Primary "it's saved" = the relay's durable snapshot (co-editors already converge).
-- Explicit **Export**: `SaveDocToLev` → MEMFS → offer as a JS `Blob` download.
+- Explicit **Export**: ~~`SaveDocToLev` → MEMFS → offer as a JS `Blob` download.~~
 - Optional cross-session local persistence via IDBFS (`-lidbfs.js`, `syncfs`).
+
+> **BLOCKER found 2026-06-13 (scoping #5):** there is **no working in-process `.lev`
+> writer on web.** `SaveDocToLev` (`level_save.cc`, compiled into `wf_edit_web`) builds the
+> lossless levtree JSON in-process (pure nlohmann), but then calls
+> `RunLevtreePrint` (`level_doc.cc:321`) which **shells out via `popen`** to the `levtree`
+> Rust tool. Emscripten *declares* `popen` (so it links) but it's a non-functional stub
+> (no fork/exec), so `SaveDocToLev` returns false at runtime. Two ways forward, with very
+> different effort:
+> 1. **Export the levtree JSON** (the lossless intermediate) as a Blob download — fully
+>    in-process, ~1 h; the user runs `levtree print <file>.json` natively to get the `.lev`
+>    (or re-imports via the Blender add-on). Smallest change; "round-trips, but not a
+>    one-click .lev."
+> 2. **Port `levtree print` (JSON→`.lev`) to run in-wasm** — either cross-compile the
+>    `levtree` crate to `wasm32-unknown-emscripten` and link it like `libyrs.a`, or
+>    reimplement the printer in C++. Gives a true one-click `.lev` download but is a
+>    sub-project (and the C++ reimpl risks drift from the Rust tool).
+> 3. **Yrs CRDT snapshot export** — in-process (yrs is linked), but only re-importable by
+>    another `wf-edit`, not a `.lev`. Niche.
+>
+> Independent of which export ships, **IDBFS** can persist the MEMFS level/identity across
+> reloads (`-lidbfs.js` + `syncfs`) — orthogonal to the export-format choice.
 
 ## Files to create / modify
 
