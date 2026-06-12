@@ -176,6 +176,11 @@ AssetManager::LoadRoomSlot(int roomIndex, int slotNum)
 	//AssertMsg(roomIndex < _maxRooms,"roomIndex = " << roomIndex << ", number of rooms = " << _maxRooms);
 	assert(slotNum >= 0);
 	assert(slotNum < MAX_ACTIVE_SLOTS);
+	// Fail fast if the level needs more active room slots than its 'SLOT' declared
+	// (else the room would write past the allocated asset buffer). Raise 'SLOT'.
+	AssertMsg(slotNum < _numActiveRoomSlots,
+	          "room slot " << slotNum << " >= declared 'SLOT' count " << _numActiveRoomSlots
+	          << " — raise 'SLOT' in the level's RAM chunk");
 	assert(_assets[slotNum] == NULL);
 
 	_levelTOC.Validate();

@@ -433,9 +433,10 @@ Level::Level
 	gBungeeCam = plmc->bungeeCamFlag;
 
 	// Optional 'SLOT' RAM field: how many active room-asset slots to allocate.
-	// Absent (older levels) → MAX_ACTIVE_ROOMS, preserving the 9× allocation.
+	// Absent → DEFAULT_ACTIVE_ROOM_SLOTS (3, "normal streaming"). Levels needing
+	// more declare it (moon 'SLOT' 9 for its chunk ring; filesys 'SLOT' 1).
 	int numActiveRoomSlots = (plmc->tagSlots == IFFTAG('S','L','O','T'))
-	                         ? (int)plmc->numActiveRoomSlots : MAX_ACTIVE_ROOMS;
+	                         ? (int)plmc->numActiveRoomSlots : DEFAULT_ACTIVE_ROOM_SLOTS;
 	if (numActiveRoomSlots < 1)                  numActiveRoomSlots = 1;
 	if (numActiveRoomSlots > MAX_ACTIVE_ROOMS)   numActiveRoomSlots = MAX_ACTIVE_ROOMS;
 

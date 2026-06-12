@@ -45,6 +45,13 @@ class AssetSlot;
 // See docs/plans/2026-06-04-moon-overhead-map-and-chunk-texture-streaming.md.
 const int MAX_ACTIVE_ROOMS = 9;
 
+// Default active room-asset slots when a level's RAM chunk has no 'SLOT' field.
+// 3 = "normal streaming" (single room or a 2-room warp like SMB fit comfortably).
+// Levels that need more declare it: filesys 'SLOT' 1 (single room), moon 'SLOT' 9
+// (3×3 chunk-streaming ring). Only the asset DRAM allocation uses this; the
+// active-room arrays / VRAM transient slots stay sized at MAX_ACTIVE_ROOMS.
+const int DEFAULT_ACTIVE_ROOM_SLOTS = 3;
+
 //==============================================================================
 
 class AssetCallback
