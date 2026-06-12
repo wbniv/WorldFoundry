@@ -54,7 +54,7 @@ json ChunkToJson(const wfcrdt::Map& chunk)
 
 }  // namespace
 
-bool SaveDocToLev(wfcrdt::Doc& doc, const std::string& out_path)
+bool DocToLevtreeJson(wfcrdt::Doc& doc, std::string& out_json)
 {
     // Reconstruct the levtree JSON straight from the Doc — no retained parse JSON
     // (the v2 schema is lossless). The LVL wrapper was lifted at load; rebuild it
@@ -83,9 +83,17 @@ bool SaveDocToLev(wfcrdt::Doc& doc, const std::string& out_path)
         root["items"] = std::move(items);
         tree["root"] = std::move(root);
     }
+    out_json = tree.dump(2);   // pretty (2-space) — this JSON may be exported/edited
+    return true;
+}
+
+bool SaveDocToLev(wfcrdt::Doc& doc, const std::string& out_path)
+{
+    std::string tree_json;
+    if (!DocToLevtreeJson(doc, tree_json)) return false;
 
     std::string lev;
-    if (!RunLevtreePrint(tree.dump(), lev)) {
+    if (!RunLevtreePrint(tree_json, lev)) {
         std::fprintf(stderr, "wf-edit: save: levtree print failed\n");
         return false;
     }

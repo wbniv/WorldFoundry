@@ -447,10 +447,18 @@ evicts the peer after the timeout.
 
 ## Save semantics on web (no local FS / no shell)
 
-- Disable **Save + Compile** (shells out to `build_level_binary.sh`) on web.
+- ~~Disable **Save + Compile** (shells out to `build_level_binary.sh`) on web.~~ ✅ done —
+  File menu hides Save + Save+Compile on web; Ctrl+S → Export.
 - Primary "it's saved" = the relay's durable snapshot (co-editors already converge).
-- Explicit **Export**: ~~`SaveDocToLev` → MEMFS → offer as a JS `Blob` download.~~
-- Optional cross-session local persistence via IDBFS (`-lidbfs.js`, `syncfs`).
+- ~~Explicit **Export**: `SaveDocToLev` → MEMFS → offer as a JS `Blob` download.~~ ✅ done —
+  **Export = levtree JSON download** (option 1 below): File → "Export .lev source (JSON)…"
+  (or Ctrl+S) builds the lossless levtree tree in-process (`DocToLevtreeJson`, factored out
+  of `SaveDocToLev`) and downloads it via an `EM_JS` Blob helper (`wfedit_download_text`).
+  No `popen`. **Verified** headlessly (`WF_EDIT_EXPORT=1` + CDP `Browser.setDownloadBehavior`):
+  the captured `snowgoons-blender.lev.json` parses as `root.id=LVL`, 36 chunks, and
+  `levtree print` of it round-trips to a valid 3456-line `.lev`.
+- Optional cross-session local persistence via IDBFS (`-lidbfs.js`, `syncfs`) — **still open**.
+- **Still open:** a true one-click `.lev` download (option 2 — port `levtree print` to wasm).
 
 > **BLOCKER found 2026-06-13 (scoping #5):** there is **no working in-process `.lev`
 > writer on web.** `SaveDocToLev` (`level_save.cc`, compiled into `wf_edit_web`) builds the

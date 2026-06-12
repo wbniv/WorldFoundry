@@ -24,4 +24,11 @@ namespace wfedit {
 // canonical-`print` identity, not raw-file identity.
 bool SaveDocToLev(wfcrdt::Doc& doc, const std::string& out_path);
 
+// Walk `doc` → the lossless levtree chunk-tree JSON (the in-process first half of
+// SaveDocToLev, before `levtree print`). Pretty-printed. Used by the web editor's
+// Export, where `levtree print` (popen) is unavailable — the downloaded JSON
+// round-trips to `.lev` via a native `levtree print <file>.json` (or the Blender
+// add-on's re-import). Returns false if the Doc has no content array.
+bool DocToLevtreeJson(wfcrdt::Doc& doc, std::string& out_json);
+
 }  // namespace wfedit

@@ -184,11 +184,25 @@ no persisted `identity.json` in the browser), so tabs appear as distinct collabo
 
 ### Saving on the web
 
-There is **no local filesystem or shell** in the browser, so **Save + Compile is disabled**.
-The durable copy of your work is the **relay's room snapshot** (co-editors converge on it). An
-explicit **Export** (`SaveDocToLev` → a downloadable `.lev` Blob) and optional cross-session
-IDBFS persistence are a tracked follow-up — see
-[Save semantics on web](plans/2026-06-12-wf-edit-in-the-browser.md).
+There is **no local filesystem or shell** in the browser, so **Save** and **Save + Compile**
+are hidden — `Save + Compile` shells out to the build pipeline, and even a plain `.lev` save
+can't run in-process (`levtree print` is a subprocess that doesn't exist on wasm). The durable
+copy of your work is the **relay's room snapshot** (co-editors converge on it).
+
+To get your work *out*, use **File → "Export .lev source (JSON)…"** (or <kbd>Ctrl</kbd>+<kbd>S</kbd>),
+which downloads the level as the **lossless levtree JSON** (built entirely in-process, no
+subprocess). Convert it to a `.lev` natively:
+
+```bash
+levtree print snowgoons-blender.lev.json > snowgoons-blender.lev   # → canonical .lev
+```
+
+…or re-import the JSON's `.lev` into the golden `.blend` via the Blender add-on
+(`wf.import_level`). The JSON captures every structural + remote edit — it's the same tree
+the native **Save** feeds to `levtree print`. (Verified end-to-end: a headless export round-trips
+through `levtree print` to a valid 3456-line `.lev`.) A true one-click `.lev` download (porting
+`levtree print` into wasm) and optional cross-session **IDBFS** persistence remain tracked
+follow-ups — see [Save semantics on web](plans/2026-06-12-wf-edit-in-the-browser.md).
 
 ### Verifying it headlessly
 
@@ -618,6 +632,7 @@ workflow — they exist so the editor can be proven headlessly.
 | `WF_EDIT_SPAWN_CONFIRM_TEST=1` | Verify the `SpawnActor` runtime path (run with `--frames 5`). |
 | `WF_EDIT_AUTO_SELECT=N` | Preselect actor *N* at startup so the editor broadcasts a selection ring without a click (presence/shared-cursor screenshots). |
 | `WF_EDIT_CHAT_SEND="<text>"` | Once a peer is present in the room, broadcast one `CH_CHAT` frame with `<text>` (then never again) — proves chat delivery headlessly without driving the ImGui input. Gating on a present peer guarantees the receiver is connected. |
+| `WF_EDIT_EXPORT=1` | **Web build only.** Drive File → Export once (triggers the levtree-JSON Blob download), so a CDP run with `Browser.setDownloadBehavior` can capture + validate the file. |
 
 ---
 
