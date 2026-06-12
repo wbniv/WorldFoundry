@@ -34,10 +34,10 @@ What shipped, by phase (newest first):
 - **P0/P1 — yffi→wasm cross-compile spike + non-collab WASM editor** (panels + gizmo + the
   `wf_edit_web` CMake target, `web/shell-edit.html`, the three platform seams).
 
-**Open follow-ups:** web one-click `.lev` (port `levtree print`→wasm) + IDBFS persistence
-(optional; Save semantics below). *(Done: simultaneous-seed race `7cd19d83`; web Export
-`03fa21a9`; native defer/push for mixed native+web rooms `4eac6426` + the ws_client ≥64 KiB
-send fix `92537874`.)*
+**Open follow-ups:** only optional IDBFS cross-session persistence remains (Save semantics
+below). *(Done: simultaneous-seed race `7cd19d83`; web Export JSON `03fa21a9` → one-click
+`.lev` via levtree-in-wasm `6d090c51`; native defer/push for mixed native+web rooms `4eac6426`
++ the ws_client ≥64 KiB send fix `92537874`.)*
 
 ## Context
 
@@ -465,36 +465,29 @@ evicts the peer after the timeout.
 - ~~Disable **Save + Compile** (shells out to `build_level_binary.sh`) on web.~~ ✅ done —
   File menu hides Save + Save+Compile on web; Ctrl+S → Export.
 - Primary "it's saved" = the relay's durable snapshot (co-editors already converge).
-- ~~Explicit **Export**: `SaveDocToLev` → MEMFS → offer as a JS `Blob` download.~~ ✅ done —
-  **Export = levtree JSON download** (option 1 below): File → "Export .lev source (JSON)…"
-  (or Ctrl+S) builds the lossless levtree tree in-process (`DocToLevtreeJson`, factored out
-  of `SaveDocToLev`) and downloads it via an `EM_JS` Blob helper (`wfedit_download_text`).
-  No `popen`. **Verified** headlessly (`WF_EDIT_EXPORT=1` + CDP `Browser.setDownloadBehavior`):
-  the captured `snowgoons-blender.lev.json` parses as `root.id=LVL`, 36 chunks, and
-  `levtree print` of it round-trips to a valid 3456-line `.lev`.
-- Optional cross-session local persistence via IDBFS (`-lidbfs.js`, `syncfs`) — **still open**.
-- **Still open:** a true one-click `.lev` download (option 2 — port `levtree print` to wasm).
+- ~~Explicit **Export**~~ ✅ done — **one-click `.lev` download** (option 2 below, shipped
+  [`6d090c51`](https://github.com/wbniv/WorldFoundry/commit/6d090c51); option 1 JSON export
+  landed first in [`03fa21a9`](https://github.com/wbniv/WorldFoundry/commit/03fa21a9) and is
+  now the fallback). File → "Export .lev…" (or Ctrl+S) builds the lossless levtree tree
+  in-process (`DocToLevtreeJson`) and runs it through the **`levtree` printer linked into
+  wasm** (`levtree_print_json` C ABI on `liblevtree.a`) → downloads a real canonical `.lev`
+  via an `EM_JS` Blob helper. No `popen`. **Verified** (`WF_EDIT_EXPORT=1` + CDP
+  `Browser.setDownloadBehavior`): the captured `snowgoons-blender.lev` is canonical levtree
+  text, 36 OBJ chunks, **257426 bytes — byte-identical to the native `levtree print`**.
+- Optional cross-session local persistence via IDBFS (`-lidbfs.js`, `syncfs`) — **still open**
+  (the one remaining web follow-up; orthogonal to export).
 
-> **BLOCKER found 2026-06-13 (scoping #5):** there is **no working in-process `.lev`
-> writer on web.** `SaveDocToLev` (`level_save.cc`, compiled into `wf_edit_web`) builds the
-> lossless levtree JSON in-process (pure nlohmann), but then calls
-> `RunLevtreePrint` (`level_doc.cc:321`) which **shells out via `popen`** to the `levtree`
-> Rust tool. Emscripten *declares* `popen` (so it links) but it's a non-functional stub
-> (no fork/exec), so `SaveDocToLev` returns false at runtime. Two ways forward, with very
-> different effort:
-> 1. **Export the levtree JSON** (the lossless intermediate) as a Blob download — fully
->    in-process, ~1 h; the user runs `levtree print <file>.json` natively to get the `.lev`
->    (or re-imports via the Blender add-on). Smallest change; "round-trips, but not a
->    one-click .lev."
-> 2. **Port `levtree print` (JSON→`.lev`) to run in-wasm** — either cross-compile the
->    `levtree` crate to `wasm32-unknown-emscripten` and link it like `libyrs.a`, or
->    reimplement the printer in C++. Gives a true one-click `.lev` download but is a
->    sub-project (and the C++ reimpl risks drift from the Rust tool).
-> 3. **Yrs CRDT snapshot export** — in-process (yrs is linked), but only re-importable by
->    another `wf-edit`, not a `.lev`. Niche.
->
-> Independent of which export ships, **IDBFS** can persist the MEMFS level/identity across
-> reloads (`-lidbfs.js` + `syncfs`) — orthogonal to the export-format choice.
+> **RESOLVED 2026-06-13 (was a scoping blocker).** The original gap: `SaveDocToLev`
+> (`level_save.cc`) builds the lossless levtree JSON in-process but then `RunLevtreePrint`
+> (`level_doc.cc:321`) **shells out via `popen`** to the `levtree` tool — and emscripten's
+> `popen` is a non-functional stub (links, fails at runtime). Of the three options
+> considered — (1) export JSON + convert natively, (2) port `levtree print` into wasm,
+> (3) Yrs-snapshot export — **option 1 shipped first** (`03fa21a9`, now the fallback) and
+> **option 2 shipped** (`6d090c51`): the `levtree` print path is pure Rust (serde_json + the
+> chunk formatter), so the crate cross-compiles to `wasm32-unknown-emscripten` (de-risked by
+> a spike), exposes a `levtree_print_json` C ABI, and links into `wf_edit_web` as
+> `liblevtree.a` — the browser prints a real `.lev` in-process, byte-identical to native.
+> **IDBFS** persistence (`-lidbfs.js` + `syncfs`) remains the one orthogonal open item.
 
 ## Files to create / modify
 
@@ -531,5 +524,5 @@ exclusions for threads/modals/teardown/re-exec, web connect state machine),
 2. ~~Phase 1: `task build-web-edit && task serve-web-edit` → browser renders preloaded level; Outliner/Properties/gizmo work; headless screenshot non-blank.~~ ✅ done (Phase 1 status).
 3. ~~Phase 2: two browser tabs on a relay room co-edit; mid-session join adopts current state (join-and-receive, 36 actors, no dup).~~ ✅ done 2026-06-13 (Phase 2 status). *(Verified browser↔browser via local relay; native↔browser interop not separately run — same wire framing + the proven native sync code, but the native side does not yet defer/push its initial Doc, so native-seeds→web-adopts needs the same join-and-receive treatment on native; tracked with the seed-race follow-up.)*
 4. ~~Phase 3: presence (names/colours/selection rings) + chat round-trip between two browsers; unique per-tab peer_id.~~ ✅ done 2026-06-13 (Phase 3 status). *(Browser↔browser via CDP; peer eviction-on-close not separately asserted — the 8 s timeout sweep at main.cc:809 is unchanged from the proven native path.)*
-5. **Remaining:** web Save/Export semantics (disable Save+Compile; `SaveDocToLev`→Blob download; optional IDBFS persistence) — see "Save semantics on web".
+5. ~~Web Save/Export semantics~~ ✅ done — Save+Compile hidden on web; one-click `.lev` export via the levtree printer cross-compiled into wasm (`6d090c51`, JSON fallback `03fa21a9`), byte-identical to native. **Optional remaining:** IDBFS cross-session persistence.
 6. ~~Follow-up: simultaneous-seed race~~ ✅ fixed `7cd19d83` (host election); ~~native-side defer/push for cross-impl (native+web) join-and-receive~~ ✅ done `4eac6426` (+ ws_client ≥64 KiB send fix `92537874`), verified native-seeds→web-adopts. **Residual:** native-native simultaneous-fresh-room race (Phase 3 status).

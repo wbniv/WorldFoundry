@@ -187,24 +187,24 @@ side has; staggered/real-world native joins are fine.
 ### Saving on the web
 
 There is **no local filesystem or shell** in the browser, so **Save** and **Save + Compile**
-are hidden — `Save + Compile` shells out to the build pipeline, and even a plain `.lev` save
-can't run in-process (`levtree print` is a subprocess that doesn't exist on wasm). The durable
-copy of your work is the **relay's room snapshot** (co-editors converge on it).
+are hidden — `Save + Compile` shells out to the build pipeline, and a plain `.lev` *save*
+can't write to a path you can reach. The durable copy of your work is the **relay's room
+snapshot** (co-editors converge on it).
 
-To get your work *out*, use **File → "Export .lev source (JSON)…"** (or <kbd>Ctrl</kbd>+<kbd>S</kbd>),
-which downloads the level as the **lossless levtree JSON** (built entirely in-process, no
-subprocess). Convert it to a `.lev` natively:
+To get your work *out*, use **File → "Export .lev…"** (or <kbd>Ctrl</kbd>+<kbd>S</kbd>): it
+downloads a real **canonical `.lev`**, printed entirely **in-browser**. The `levtree` printer
+(`levtree print`'s logic) is cross-compiled to WebAssembly and linked into the editor
+(`liblevtree.a`), so there's no subprocess — the same chunk tree the native **Save** feeds to
+`levtree print` is converted in-process. Re-import the downloaded `.lev` into the golden
+`.blend` via the Blender add-on (`wf.import_level`) to refresh it.
 
-```bash
-levtree print snowgoons-blender.lev.json > snowgoons-blender.lev   # → canonical .lev
-```
+> Verified end-to-end: a headless browser export produces a `.lev` **byte-identical** to the
+> native `levtree print` (36 actors, 257 426 bytes). If the in-wasm print ever fails, Export
+> falls back to downloading the levtree JSON (convertible with a native `levtree print
+> <file>.lev.json`).
 
-…or re-import the JSON's `.lev` into the golden `.blend` via the Blender add-on
-(`wf.import_level`). The JSON captures every structural + remote edit — it's the same tree
-the native **Save** feeds to `levtree print`. (Verified end-to-end: a headless export round-trips
-through `levtree print` to a valid 3456-line `.lev`.) A true one-click `.lev` download (porting
-`levtree print` into wasm) and optional cross-session **IDBFS** persistence remain tracked
-follow-ups — see [Save semantics on web](plans/2026-06-12-wf-edit-in-the-browser.md).
+Optional cross-session **IDBFS** persistence (so MEMFS state survives a reload) remains a
+tracked follow-up — see [Save semantics on web](plans/2026-06-12-wf-edit-in-the-browser.md).
 
 ### Verifying it headlessly
 
