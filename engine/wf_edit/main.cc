@@ -598,6 +598,30 @@ static void SendRoomJoin(EditorCtx* c) {
     c->relay_client.send(ctrl.data(), ctrl.size());
 }
 
+#if defined(__EMSCRIPTEN__)
+// Web connect completion (poll-in-loop). The browser WebSocket connects async, so
+// instead of the native blocking-connect-then-join, main() initiates the connect
+// before HALStart and this runs every editor_build frame: once relay_client opens
+// (connected()), it sends the room-join (→ relay pushes a full SYNC that CollabDrain
+// applies) and wires local commits → relay. Fires once (relay_was_connected latch).
+// Mid-session reconnect (ServiceRelayReconnect, bg thread) is native-only for v1.
+static void WebConnectStep(EditorCtx* c) {
+    if (c->relay_connect_url.empty() || c->relay_was_connected) return;
+    if (!c->relay_client.connected()) return;            // still connecting / failed
+    c->relay_was_connected = true;
+    SendRoomJoin(c);
+    c->relay_sub = c->doc->observeUpdates([c](wfcrdt::ByteView update) {
+        if (c->suppress_relay_send) return;
+        std::vector<uint8_t> msg;
+        msg.push_back(0x01);                             // CH_SYNC
+        msg.insert(msg.end(), update.data, update.data + update.len);
+        c->relay_client.send(msg.data(), msg.size());
+    });
+    std::printf("wf-edit(web): relay connected, joined room=%s (peer %.8s…)\n",
+                c->room_id.c_str(), c->our_peer_id.c_str());
+}
+#endif
+
 // Mid-session reconnect state machine (2026-06-01 critique ⑤). Called each frame
 // before CollabDrain. Detects a drop, spawns a background thread that exclusively
 // owns relay_client while it re-connects (the main thread stops touching the
@@ -1492,7 +1516,11 @@ bool editor_build(void* p)
     // reconnect / re-join state machine. Runs before CollabDrain because a
     // successful re-join re-sends the room CONTROL frame, after which the relay
     // pushes a fresh SYNC that the CollabDrain below applies.
-    ServiceRelayReconnect(c);
+#if defined(__EMSCRIPTEN__)
+    WebConnectStep(c);          // async-connect completion (web): join + wire on open
+#else
+    ServiceRelayReconnect(c);   // mid-session reconnect (native; spawns a bg thread)
+#endif
 
     // Phase 2: drain incoming relay SYNC + PRESENCE messages. A SYNC fires the
     // content observer (marks a rebuild) and the deep observer (queues touched
@@ -3229,6 +3257,18 @@ int main(int argc, char** argv)
         ctx.display_name = (identity.display_name == "Editor" && !ctx.our_peer_id.empty())
             ? std::string("Editor (") + ctx.our_peer_id.substr(0, 6) + ")"
             : identity.display_name;
+#if defined(__EMSCRIPTEN__)
+        // Web: the browser WebSocket connects async and main() can't block (the
+        // browser drives RunEditorWeb). Initiate the connect here (non-blocking);
+        // WebConnectStep (editor_build) sends the room-join + wires observeUpdates
+        // once it opens. Web is always a joiner — connect target is the public
+        // wss:// relay (no host-tunnel loopback). The threaded connect + blocking
+        // SYNC-wait pump below are native-only.
+        ctx.relay_connect_url = ctx_relay_url;
+        ctx.relay_client.connect(ctx_relay_url.c_str());
+        std::printf("wf-edit(web): connecting to relay %s room=%s…\n",
+                    ctx_relay_url.c_str(), room_id.c_str());
+#else
         // (a) Run the blocking connect on a background thread and pump the window
         // meanwhile, so it never freezes (no WM "not responding" / un-draggable
         // window). `relay_client` is touched ONLY by this thread until it joins,
@@ -3371,6 +3411,7 @@ int main(int argc, char** argv)
             std::fprintf(stderr, "wf-edit: relay connect failed: %s\n",
                          ctx_relay_url.c_str());
         }
+#endif  // !__EMSCRIPTEN__ (native threaded connect)
     } else if (!identity.peer_id.empty() && identity.peer_id != "editor-anon") {
         // Relay not used this session, but peer_id still available for
         // display/debugging.
