@@ -1409,6 +1409,28 @@ if(WF_ENABLE_WEB_EDITOR AND EMSCRIPTEN)
         ${IMGUIZMO_DIR}/ImGuizmo.cpp
     )
     add_dependencies(wf_edit_web gen_oas_headers)
+
+    # Web Doc-population: wasm has no popen, so the editor can't shell out to
+    # `levtree parse <lev>` at runtime. Pre-parse the .lev with the NATIVE levtree
+    # at build time and preload the JSON beside the .lev (<lev>.json) into MEMFS;
+    # the web RunLevtreeParse reads that file instead (engine/wf_edit/level_doc.cc).
+    set(_WF_WEB_LEV  ${CMAKE_SOURCE_DIR}/wflevels/snowgoons-blender/snowgoons-blender.lev)
+    set(_WF_WEB_JSON ${CMAKE_CURRENT_BINARY_DIR}/snowgoons-blender.lev.json)
+    set(_WF_LEVTREE  ${CMAKE_SOURCE_DIR}/wftools/levtree-rs/target/release/levtree)
+    # Run at configure time (execute_process OUTPUT_FILE captures stdout cleanly —
+    # add_custom_command can't redirect). The .lev is a static demo asset, so a
+    # configure-time parse is fine; reconfigure if it changes.
+    if(EXISTS ${_WF_LEVTREE})
+        execute_process(COMMAND ${_WF_LEVTREE} parse ${_WF_WEB_LEV}
+                        OUTPUT_FILE ${_WF_WEB_JSON} RESULT_VARIABLE _wf_lt_rc)
+        if(NOT _wf_lt_rc EQUAL 0)
+            message(WARNING "levtree parse failed (rc=${_wf_lt_rc}) — web Outliner will be empty")
+        endif()
+    else()
+        message(WARNING "native levtree not built (${_WF_LEVTREE}) — web Outliner will be empty; "
+                        "run: cargo build --release --manifest-path wftools/levtree-rs/Cargo.toml")
+    endif()
+
     set_source_files_properties(${CMAKE_SOURCE_DIR}/engine/wf_edit/engine_bridge.cc
         PROPERTIES OBJECT_DEPENDS ${NAMEPATH_OUT})
     set_target_properties(wf_edit_web PROPERTIES OUTPUT_NAME "wf-edit" SUFFIX ".html")
@@ -1455,5 +1477,7 @@ if(WF_ENABLE_WEB_EDITOR AND EMSCRIPTEN)
         # Both are the snowgoons demo (Doc + viewport are the same level).
         "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/wflevels/snowgoons-blender@/level"
         "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/wflevels/snowgoons-standalone.iff@/snowgoons-standalone.iff"
+        # Pre-parsed .lev → JSON (built above) for web Doc-population (no popen on wasm).
+        "SHELL:--preload-file ${_WF_WEB_JSON}@/level/snowgoons-blender.lev.json"
     )
 endif()

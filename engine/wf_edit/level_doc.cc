@@ -70,6 +70,25 @@ std::string ShQuote(const std::string& s)
 // ── run `levtree parse <lev>` and capture stdout ─────────────────────────────
 bool RunLevtreeParse(const std::string& lev_path, std::string& out)
 {
+#if defined(__EMSCRIPTEN__)
+    // No subprocess on wasm (popen doesn't exist). The web build pre-parses the
+    // .lev with the native `levtree parse` and preloads the JSON next to it as
+    // "<lev>.json" into MEMFS; read that instead. See the wf_edit_web preload in
+    // CMakeLists + docs/plans/2026-06-12-wf-edit-in-the-browser.md (Doc-population).
+    const std::string json_path = lev_path + ".json";
+    FILE* jf = std::fopen(json_path.c_str(), "rb");
+    if (!jf) {
+        std::fprintf(stderr, "wf-edit(web): preloaded levtree JSON not found: %s\n",
+                     json_path.c_str());
+        return false;
+    }
+    std::array<char, 65536> jbuf;
+    size_t jn;
+    while ((jn = std::fread(jbuf.data(), 1, jbuf.size(), jf)) > 0)
+        out.append(jbuf.data(), jn);
+    std::fclose(jf);
+    return !out.empty();
+#else
     const std::string levtree = FindLevtree();
     // Paths come from CLI args / built-in defaults (trusted); shell-quote
     // single quotes defensively so odd filenames don't break the command.
@@ -95,6 +114,7 @@ bool RunLevtreeParse(const std::string& lev_path, std::string& out)
         return false;
     }
     return true;
+#endif // __EMSCRIPTEN__
 }
 
 // ── locate the levcomp binary (the binary-level decompiler) ──────────────────
