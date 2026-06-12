@@ -1018,18 +1018,20 @@ BungeeCameraHandler::update(MovementManager& /*movementManager*/, MovementObject
 	const _CamShot* shotData = camShotActor->GetOADData();
 	assert(shotData);
 	assert(shotData->Target);
-	assert(theLevel->getActor(shotData->Target));
-	DBSTREAM3( ccamera << "Target actor = " << *theLevel->getActor(shotData->Target) << std::endl; )
-	Vector3 targetPos = (theLevel->getActor(shotData->Target))->GetPredictedPosition();
-	DBSTREAM3( ccamera << "Target actor position = " << targetPos << std::endl; )
-	targetPos -= (theLevel->getActor(shotData->Follow))->GetPredictedPosition();
-	DBSTREAM3( ccamera << "Follow actor = " << *theLevel->getActor(shotData->Follow) << std::endl; )
-	DBSTREAM3( ccamera << "Follow actor position = " << (theLevel->getActor(shotData->Follow))->GetPredictedPosition() << std::endl; )
-	targetPos += (theLevel->getActor(shotData->TrackObject))->GetPredictedPosition();
-	DBSTREAM3( ccamera << "TrackObject actor = " << *theLevel->getActor(shotData->TrackObject) << std::endl; )
-	DBSTREAM3( ccamera << "TrackObject position = " << (theLevel->getActor(shotData->TrackObject))->GetPredictedPosition() << std::endl; )
-	DBSTREAM3( ccamera << "Modified target position = " << targetPos << std::endl; )
-	destCam.direction = targetPos - destCam.position;
+	// Target/Follow are static anchors; TrackObject is the player and can go
+	// transiently null when it walks out of the room. Guard all three so a
+	// frame where the player is mid re-add keeps the old look-direction instead
+	// of dereferencing null.
+	Actor* targetActor = theLevel->getActor(shotData->Target);
+	Actor* followActor = theLevel->getActor(shotData->Follow);
+	Actor* trackActor  = theLevel->getActor(shotData->TrackObject);
+	if (ValidPtr(targetActor) && ValidPtr(followActor) && ValidPtr(trackActor))
+	{
+		Vector3 targetPos = targetActor->GetPredictedPosition();
+		targetPos -= followActor->GetPredictedPosition();
+		targetPos += trackActor->GetPredictedPosition();
+		destCam.direction = targetPos - destCam.position;
+	}
 
 	DBSTREAM3( ccamera << "Setting new camera position: " << destCam.position << std::endl; )
 	SetCamera(movementObject, destCam);
@@ -1055,10 +1057,12 @@ BungeeCameraHandler::GetWatchObject(const MovementObject& movementObject) const
 	if(cd.idxTrackObject)
 	{
 		BaseObject* trackObject = theLevel->GetObject(cd.idxTrackObject);
-		assert(ValidPtr(trackObject));
-      assert(IsPhysicalObject(trackObject));
-      PhysicalObject* po = static_cast<PhysicalObject*>(trackObject);
-		return(po);
+		// The track object can be transiently null — e.g. the player mid re-add
+		// after walking out of the room (Room::UpdateRoomContents). Fall back to
+		// mainCharacter rather than assert-crash the camera (the idxTrackObject==0
+		// path below already does this).
+		if (ValidPtr(trackObject) && IsPhysicalObject(trackObject))
+			return static_cast<PhysicalObject*>(trackObject);
 	}
 	DBSTREAM1( cerror << "BungeeCameraHandler::GetWatchObject: had to return mainCharacter" << std::endl; )
 	return(theLevel->mainCharacter());
