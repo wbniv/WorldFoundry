@@ -65,6 +65,9 @@
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "camera" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Camera" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'I32' { 'NAME' "FoggingColor" } { 'DATA' 0l } { 'STR' "0" } }
+		{ 'FX32' { 'NAME' "FoggingStartDistance" } { 'DATA' 999.0000000000000000(1.15.16) } { 'STR' "999.0" } }
+		{ 'FX32' { 'NAME' "FoggingCompleteDistance" } { 'DATA' 1000.0000000000000000(1.15.16) } { 'STR' "1000.0" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "CamShot01" }

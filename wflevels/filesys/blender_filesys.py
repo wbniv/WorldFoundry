@@ -313,8 +313,11 @@ light.rotation_euler = (math.pi / 2, 0, 0)   # aim downward
 cam_initial = tuple(PLAYER_SPAWN[i] + CAM_OFFSET[i] for i in range(3))
 make_empty('Camera', cam_initial, 'camera',
     props={
-        'Mobility':   'Camera',
-        'Model Type': 'None',
+        'Mobility':              'Camera',
+        'Model Type':            'None',
+        'FoggingColor':          0x000000,
+        'FoggingStartDistance':  999.0,
+        'FoggingCompleteDistance': 1000.0,
     }
 )
 

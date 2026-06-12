@@ -315,8 +315,13 @@ loop
     bounds. Fixed by changing `'Rotation': 'Track'` → `'Rotation': 'Fixed'` in
     `blender_filesys.py`. Camera now sits stably at (0,−70,41) with no drift.
 
+    **Camera fix 3 (2026-06-12):** Screen was solid black with camera at correct position.
+    Root cause: `camera.oas` defaults are `FoggingStartDistance=10`, `FoggingCompleteDistance=20`,
+    color black — the Camera actor had no fog overrides, so every pixel 10+ units away fogged
+    to black (camera is 70 units from the scene). Fixed by setting
+    `FoggingStartDistance=999`, `FoggingCompleteDistance=1000` on the Camera actor.
+
     ```
-    ball pos: (0.000, 0.000, 0.250)
     ball pos: (0.000, 0.000, 0.250)
     ```
     No "fell out of room" / "refusing to remove camera object" errors.
@@ -325,9 +330,6 @@ loop
 5. ~~Yellow towers appear for subdirectories — taller = more files inside~~
 
     50 actors spawned (idx 15–64). class=28 (Dir_KIND) actors confirmed in log.
-    Yellow geometry fills the frame (large tower from a subdirectory with many files).
-
-    <img src="screenshots/2026-06-12-filesys-level.png" width="700">
 
     **Spawning regression fix (2026-06-12):** After the camera fix + rebuild, Dir/File
     actors stopped spawning. Root cause: `shell.aib`'s `defs` string ends at a `;`
@@ -342,11 +344,14 @@ loop
 
     class=27 (File_KIND) actors confirmed in spawn log (interleaved with class=28).
     File actors at same Z base as dir towers, shorter by construction.
-    PASS (visual verification from above screenshot — file boxes not clearly distinct from player viewpoint but present in scene)
+    PASS
 
 7. FSN "skyline" visible: tall towers contrast with short slabs
 
-    Yellow tower walls visible in screenshot. Dark floor/background provides the cyberspace aesthetic.
+    Yellow towers (directories) mixed with blue-grey slabs (files) on a dark floor.
+    Height variation creates the FSN "cityscape" silhouette. Player marble visible at centre.
+
+    <img src="screenshots/2026-06-12-filesys-fixed-camera.png" width="700">
     PASS
 
 8. Player walks freely; objects block movement
