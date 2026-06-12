@@ -81,6 +81,7 @@ static std::string           g_fsn_root, g_fsn_start;   // current view root; st
 static int g_fsn_dirT = 0, g_fsn_fileT = 0, g_fsn_connT = 0;
 static int g_fsn_maxDepth = 2, g_fsn_maxNodes = 120, g_fsn_playerIdx = 0;
 static bool g_fsn_enterLatch = false, g_fsn_backLatch = false;
+static bool g_fsn_pendingBuild = false;   // navigation despawns one frame, respawns the next
 
 static const float FSN_PI = 3.14159265358979f;
 
@@ -223,12 +224,8 @@ static void fsn_place_files(const std::vector<FsnEntry>& entries, float x, float
 // A queued tree node: render its tower when dequeued, wire it to its parent.
 struct FsnJob { std::string path; float x, y, px, py; int depth; };
 
-// Despawn the current view and rebuild from g_fsn_root, BREADTH-FIRST. Returns
-// the spawned count. The ROOT (CWD) gets NO tower — the player stands there; its
-// files ring the standpoint and its child dirs fan across the +Y half-field in
-// front of the player (camera looks from -Y). BFS spreads the node budget across
-// breadth before depth, so siblings all appear instead of one subtree clumping.
-static int fsn_build() {
+// Mark the current view's actors for removal (freed at end of frame).
+static void fsn_despawn() {
     if (theLevel) {
         for (int idx : g_fsn_spawned) {
             BaseObject* o = theLevel->GetObject(idx);
@@ -237,7 +234,14 @@ static int fsn_build() {
     }
     g_fsn_spawned.clear();
     g_fsn_towers.clear();
+}
 
+// Spawn the tree for g_fsn_root, BREADTH-FIRST (assumes the previous view was
+// already despawned). The ROOT (CWD) gets NO tower — the player stands there;
+// its files ring the standpoint and its child dirs fan across the +Y half-field
+// in front of the player (camera looks from -Y). BFS spreads the node budget
+// across breadth before depth, so siblings appear instead of one subtree clumping.
+static int fsn_spawn_tree() {
     std::vector<FsnEntry> entries;
     fsn_scan(g_fsn_root, entries);
 
@@ -301,6 +305,99 @@ static int fsn_build() {
         }
     }
     return (int)g_fsn_spawned.size();
+}
+
+// Initial / full rebuild in one call (used by fsn-build at startup, where nothing
+// is spawned yet so there is no 2× pool peak). Navigation instead despawns one
+// frame and respawns the next (fsn_navigate), so the freed slots are reusable.
+static int fsn_build() {
+    fsn_despawn();
+    return fsn_spawn_tree();
+}
+
+// Warp the player back to the standpoint (origin, just above the floor) — the
+// centre of the freshly-built view after a descend/ascend.
+static void fsn_reset_player() {
+    if (!g_mgr || !g_fsn_playerIdx) return;
+    Mailboxes& mb = g_mgr->LookupMailboxes(g_fsn_playerIdx);
+    mb.WriteMailbox(3009, Scalar::FromFloat(0.0f));   // X_POS
+    mb.WriteMailbox(3010, Scalar::FromFloat(0.0f));   // Y_POS
+    mb.WriteMailbox(3011, Scalar::FromFloat(1.0f));   // Z_POS
+}
+
+// Per-frame navigation + play-area bounds (custom 10 / sys 138). Called by the
+// Director every frame. Button B (bit 2) descends into the nearest dir tower
+// within reach; button C (bit 4) ascends to the parent (floored at the start
+// dir). The rebuild is deferred one frame to avoid a 2× actor-pool peak.
+static void fsn_navigate() {
+    if (!theLevel || !g_mgr || !g_fsn_playerIdx) return;
+
+    // Deferred respawn: the frame after a navigate despawn, the old actors have
+    // been freed (removePendingObjects), so the new tree fits the full budget.
+    if (g_fsn_pendingBuild) {
+        g_fsn_pendingBuild = false;
+        fsn_spawn_tree();
+        fsn_reset_player();
+        return;
+    }
+
+    Actor* player = theLevel->getActor(g_fsn_playerIdx);
+    if (!ValidPtr(player)) return;
+    Vector3 p = player->currentPos();
+    float px = p.X().AsFloat(), py = p.Y().AsFloat(), pz = p.Z().AsFloat();
+
+    // Play-area bounds: clamp the player onto the floor so it can't walk off into
+    // the void (which falls out of the room and trips the bungee-cam assert).
+    {
+        const float BX = 44.0f, BY0 = -36.0f, BY1 = 48.0f;
+        bool clamp = false;
+        if (px < -BX)  { px = -BX;  clamp = true; }
+        if (px >  BX)  { px =  BX;  clamp = true; }
+        if (py <  BY0) { py =  BY0; clamp = true; }
+        if (py >  BY1) { py =  BY1; clamp = true; }
+        if (pz <  0.0f){ pz =  0.5f;clamp = true; }
+        if (clamp) {
+            Mailboxes& mb = g_mgr->LookupMailboxes(g_fsn_playerIdx);
+            mb.WriteMailbox(3009, Scalar::FromFloat(px));
+            mb.WriteMailbox(3010, Scalar::FromFloat(py));
+            mb.WriteMailbox(3011, Scalar::FromFloat(pz));
+        }
+    }
+
+    int buttons = (int)g_mgr->LookupMailboxes(g_curObj).ReadMailbox(1909).AsFloat();  // raw joystick
+    bool enterDown = (buttons & 2) != 0;   // button B
+    bool backDown  = (buttons & 4) != 0;   // button C
+
+    // Descend: on the rising edge of B, re-root into the nearest tower in reach.
+    if (enterDown && !g_fsn_enterLatch) {
+        g_fsn_enterLatch = true;
+        int best = -1; float bestD2 = 1e18f;
+        for (size_t i = 0; i < g_fsn_towers.size(); ++i) {
+            float dx = g_fsn_towers[i].x - px, dy = g_fsn_towers[i].y - py;
+            float d2 = dx * dx + dy * dy;
+            if (d2 < bestD2) { bestD2 = d2; best = (int)i; }
+        }
+        const float ENTER_R2 = 8.0f * 8.0f;
+        if (best >= 0 && bestD2 < ENTER_R2) {
+            g_fsn_root = g_fsn_towers[best].path;
+            fsn_despawn();
+            g_fsn_pendingBuild = true;
+        }
+    }
+    if (!enterDown) g_fsn_enterLatch = false;
+
+    // Ascend: on the rising edge of C, re-root to the parent dir (not above start).
+    if (backDown && !g_fsn_backLatch) {
+        g_fsn_backLatch = true;
+        if (g_fsn_root != g_fsn_start) {
+            size_t slash = g_fsn_root.find_last_of('/');
+            g_fsn_root = (slash == std::string::npos || slash == 0)
+                         ? g_fsn_start : g_fsn_root.substr(0, slash);
+            fsn_despawn();
+            g_fsn_pendingBuild = true;
+        }
+    }
+    if (!backDown) g_fsn_backLatch = false;
 }
 
 // Cache: src pointer → compiled word name.
@@ -482,7 +579,8 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                         g_fsn_root.c_str(), n, (int)g_fsn_towers.size());
                 zf_push(ctx, (zf_cell)(float)n);
             } else if (custom == 10) {
-                // fsn-navigate ( -- ) — proximity descend / back ascend. M3 fills this in.
+                // fsn-navigate ( -- ) — per-frame play-area bounds + proximity descend / back ascend.
+                fsn_navigate();
             } else if (custom == 11) {
                 // fsn-flydown ( t camIdx -- ) — ease the camshot high→play over the clock t.
                 int camIdx = (int)zf_pop(ctx);
