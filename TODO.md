@@ -73,7 +73,6 @@ timer callbacks, concurrent AI), explore these alternatives instead:
 
 ## LEVEL / GAMEPLAY
 
-- [ ] **FSN filesystem browser (`wflevels/filesys/`) — Phase 1 landed; Phase 2 deferred.** Flat SGI-FSN cityscape: directory towers (height ∝ file count) + file slabs on a dark floor, populated at runtime by a Director Forth script over new `cwd-*`/`spawn-template` syscalls. A walking EVA astronaut (moon_site01 setup: `Script Controls Input=True` + joystick→INPUT routing + `Turn Rate=0.5` GroundHandler) replaces the original marble — the marble was immobile because, with `Script Controls Input` unset, `Actor::_InitInput` binds `&theNullInputDigital` (always 0 buttons). Three render fixes en route: camera `Rotation=Fixed` (heading-rotation drift), fog 999/1000 (default 10/20 blacked the scene at the 70-unit cam), base-pivot templates + an Ambient light (curved suit shadow side). **Phase 2 (deferred):** recursive CWD scan → tree; files on tower tops; FSN connector wires via a `spawn-connector` C++ syscall (stretch-and-orient a base-pivot unit beam between parent/child — design in the plan); camera fly-down; file color by age. — [plan](docs/plans/2026-06-12-filesys-browser-level.md)
 - [ ] **FSN browser design references — desktop filesystem visualizers.** Study these
   for layout/encoding ideas (size→area, type→colour, hierarchy→nesting):
   - **KDirStat / QDirStat** — treemap (squarified rectangles ∝ size). Original KDirStat is
@@ -297,6 +296,7 @@ encounter them while implementing the arcade port.
 
 ## DONE
 
+- [x] **FSN filesystem browser (`wflevels/filesys/`) — Phase 1 + 2 landed.** Recursive SGI-FSN tree: wired dir towers + files-on-tops color-by-age, camera fly-down, walk-in descend/ascend, walking EVA astronaut. Tree/layout/nav in C++ syscalls 136-139 (`scripting_zforth.cc`); engine work: per-level `'SLOT'` room-slot count, PERM-at-slot-0, `ARRAY_COUNT` removal-queue — [plan](docs/plans/2026-06-12-filesys-browser-level.md)
 - [x] **`Scalar::Random()` abort fixed** — `RangeCheck*` cast `Scalar`→`ptrdiff_t`→`bool`, so `Random`'s `value<one` became `1<1` → aborted every call (dormant since 2010). New cast-free `RangeCheckScalar` at all 11 Scalar sites + `>>16`→`>>15` full-range — [`2fe49ef4`](https://github.com/wbniv/WorldFoundry/commit/2fe49ef4), [BUGS.md](docs/BUGS.md)
 - [x] **Web/canvas port (Emscripten/WebGL2)** — `wf_game` live in-browser at [/v2/play/](https://worldfoundry.org/v2/play/) (8 levels); v2 dropped ASYNCIFY via `emscripten_set_main_loop` (wasm −34%), right-turn UB fixed, bundle content-hashed — [plan](docs/plans/2026-06-11-web-canvas-port.md)
 - [x] Multi-step cube cycles — L1/L3 single-hop (0→2 +25); L2 two-hop (0→1→2 +25+50, done→revert 0); L4 two-hop (done→revert 1) — [plan](docs/plans/2026-05-14-qbert-multi-step-cube-cycles.md)

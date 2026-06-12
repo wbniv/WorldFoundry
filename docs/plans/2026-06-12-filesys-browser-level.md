@@ -14,7 +14,7 @@ Re-implements the SGI FSN ("fusion") aesthetic from IRIX — the 3D file-system 
 | Phase | Description | Status |
 |-------|-------------|--------|
 | 1 | Flat FSN — one CWD deep, mixed grid, towers + boxes | this PR |
-| 2 | Full FSN — recursive scan, files on tower tops, wires | deferred |
+| 2 | Full FSN — recursive tree, files-on-tops, wires, fly-down, color-by-age, navigable descend | this PR |
 
 ---
 
@@ -393,14 +393,72 @@ loop
 
 ---
 
-## Phase 2 notes (deferred)
+## Phase 2 — implemented
 
-- Recursive CWD scan → tree of `CwdEntry` nodes (each dir node carries its grid position)
-- Files sit on top of their parent tower (z-offset = tower top)
-- Camera approach: start high, fly down into the landscape
-- File color by age (`stat.st_mtime` → hue; add `cwd-file-age` syscall)
+Phase 2 shipped on `2026-new-level`. The flat phase-1 grid became a **recursive
+directory tree rendered as a 3D node-link landscape**: directory towers wired
+base-to-base by glowing connectors, files ringed on each tower top tinted by age,
+a camera fly-down at start, and walk-in navigation that re-roots the view into a
+tower (descend) or back out to the parent (ascend).
 
-### Connectors (FSN wires) — stretch-and-orient a unit beam
+All scan → layout → spawn logic lives in C++ (`engine/stubs/scripting_zforth.cc`,
+syscalls **136 `fsn-config` / 137 `fsn-build` / 138 `fsn-navigate` / 139
+`fsn-flydown`) because zForth can't recurse deeply (32-deep RSTACK), has no locals,
+and has no float trig (`atan2`/`hypot` for connector orientation). The Director Forth
+script shrank to "configure once, build, fly the camera, poll navigation."
+
+### Milestones (all verified)
+
+| # | Milestone | What shipped | Status |
+|---|-----------|--------------|--------|
+| M1 | Static recursive landscape | `fsn-config`/`fsn-build`: BFS scan (`lstat`, skip hidden/symlinks), radial layout, towers Z-scaled by subtree size, files ringed on tops (cap 6/node), base-to-base connector wires (`fsn_spawn_connector`, `atan2` heading + X-scale=length) | ☑ |
+| M2 | Cinematics + color | `fsn-flydown` (syscall 139): pans high→play pose over 2.5 s by writing pos mailboxes 3010/3011; `fsn_color_by_age` maps `mtime` → hue (warm=new … cool=old over a year) into FACE_COLOR 3037-3039 | ☑ |
+| M3 | Navigable descend/ascend | `fsn-navigate`: play-area clamp, proximity + button-B edge → re-root into nearest tower (≤ 8 u), button-C → parent (floored at start dir); despawn-and-rebuild via `SetPendingRemove`, slots reused | ☑ |
+
+### Supporting engine work (landed alongside)
+
+The 400-node tree exceeded several phase-1-era fixed limits; fixing them properly
+(not just bumping numbers) produced reusable engine improvements:
+
+- **Per-level active-room-slot count — `'SLOT'` RAM field.** Asset memory is
+  `cbPerm + numActiveRoomSlots × cbRoom`. Levels now declare their slot count in
+  the standalone RAM chunk (`filesys` → 1, `moon` → 9, default 3 =
+  `DEFAULT_ACTIVE_ROOM_SLOTS`). Read in `level.cc`, threaded into the
+  `AssetManager` ctor. Avoids paying for 9 planet-sized slots on a 1-room level.
+- **PERM moved to slot 0.** Asset layout is now `[perm][room0..roomN-1]` with PERM
+  at constant offset 0 (`assets.cc`). Templated objects with "moves between rooms"
+  bind to PERM, so the FSN spawn pool (400 actors) is bounded by `cbPerm` — bumped
+  to 4 MB after the real overflow was traced to the PERM slot, not the room slots.
+- **Pending-removal queue grown + made self-describing.** `_toBeRemovedObjects`
+  went `[100]` → `[512]` (an M3 descend despawns ~400 actors at once). The capacity
+  assert now derives its bound from the array via the new `ARRAY_COUNT` macro
+  (`pigsys.hp`) instead of a duplicated `99` literal — see
+  [docs/coding-conventions.md](../coding-conventions.md) §4.
+
+### Verification
+
+```
+task build                                  # engine: syscalls 136-139, 'SLOT', PERM@0, ARRAY_COUNT
+blender --background --python wflevels/filesys/blender_filesys.py
+task build-level -- filesys
+task run-filesys
+```
+
+- **M1** — headless load spawns the recursive tree (towers + files-on-tops +
+  connector wires), total actor count under the temp-object cap, no spawn failures,
+  no asserts. Interactive: multi-level wired cityscape renders. PASS
+- **M2** — camera flies high→play over ~2.5 s at start; files visibly tinted
+  new→old. PASS
+- **M3** — walking into a tower re-roots the view one level deeper; back-button
+  ascends to the start dir and no further; repeated descend/ascend keeps the actor
+  count bounded (queue `[512]`, no overflow) — *user-confirmed "M3 worked without
+  crashing."* PASS
+
+### Connectors (FSN wires) — stretch-and-orient a unit beam *(as built)*
+
+The connector approach below is what shipped — `fsn_spawn_connector` in
+`scripting_zforth.cc`, with `ConnectorTemplate` built inline in
+`blender_filesys.py`. Retained here as the rationale for the design.
 
 Real FSN runs thin glowing wires from a parent directory pedestal out to each child
 tower. The engine has no line primitive (everything is a baked mesh), so a connector is
