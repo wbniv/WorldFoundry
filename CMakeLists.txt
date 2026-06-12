@@ -1440,6 +1440,10 @@ if(WF_ENABLE_WEB_EDITOR AND EMSCRIPTEN)
         -sMAX_WEBGL_VERSION=2
         -sALLOW_MEMORY_GROWTH=1
         -sEXIT_RUNTIME=0
+        # ImGui's recursive draw + the engine StepFrame run on one stack; the 64 KB
+        # emscripten default overflows on the first editor frame. wf_game (shallower
+        # per-frame depth) doesn't need this; the editor does. 8 MB ~ a desktop stack.
+        -sSTACK_SIZE=8388608
         -fexceptions
         -sEXPORTED_RUNTIME_METHODS=callMain,requestFullscreen
         -lwebsocket.js          # emscripten/websocket.h (relay transport, Phase 2)

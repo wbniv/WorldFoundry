@@ -2975,7 +2975,11 @@ int main(int argc, char** argv)
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;  // used from M3
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(win, true);
+#if defined(__EMSCRIPTEN__)
+    ImGui_ImplOpenGL3_Init("#version 300 es");   // WebGL2 = GLES 3.0
+#else
     ImGui_ImplOpenGL3_Init("#version 130");
+#endif
 
     // 2b. Startup cd.iff level picker. When launched on a bare multi-level archive
     //     (no `:tag` selector), show the modal now — the window + ImGui exist but
