@@ -386,6 +386,30 @@ tasks:
     cmds:
       - python3 -m http.server 8080
 
+  build-web-edit:
+    desc: "Build the collaborative editor (wf-edit) for the browser (wasm + WebGL2) into build-web-edit/. Run `task dev-setup-web-edit` once first."
+    deps: [dev-setup-web-edit]
+    cmds:
+      # emsdk_env.sh + the rustup wasm toolchain (NOT the distro rust) must be on
+      # PATH; run through system bash so the env sticks (Task's POSIX shell can't
+      # source emsdk_env.sh). Rust_CARGO_TARGET stops Corrosion's host-triple fallback.
+      - |
+        bash -c '
+          set -euo pipefail
+          export RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}" CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
+          export PATH="$CARGO_HOME/bin:$PATH" RUSTUP_TOOLCHAIN=1.85.1
+          . engine/vendor/emsdk-6.0.0/emsdk_env.sh >/dev/null 2>&1
+          emcmake cmake -S . -B build-web-edit -DCMAKE_BUILD_TYPE=Release \
+            -DWF_ENABLE_WEB_EDITOR=ON -DRust_CARGO_TARGET=wasm32-unknown-emscripten
+          cmake --build build-web-edit --target wf_edit_web -j
+        '
+
+  serve-web-edit:
+    desc: "Serve the web editor at http://localhost:8081/wf-edit.html"
+    dir: build-web-edit
+    cmds:
+      - python3 -m http.server 8081
+
   bundle-web:
     desc: "Stage the deployable web build into dist/web/ (for Cloudflare Pages) — see web/README.md"
     deps: [build-web]

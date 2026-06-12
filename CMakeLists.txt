@@ -1445,8 +1445,11 @@ if(WF_ENABLE_WEB_EDITOR AND EMSCRIPTEN)
         -lwebsocket.js          # emscripten/websocket.h (relay transport, Phase 2)
         -lidbfs.js              # persistence (save/identity)
         "$<$<CONFIG:Release>:-O3>"
-        # Custom shell (web/shell-edit.html) is added once the target links; the
-        # game shell is reused meanwhile so a bare build still produces a page.
-        "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/web/shell.html"
+        "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/web/shell-edit.html"
+        # Preloaded level into MEMFS: the .lev tree drives the CRDT Doc/Outliner
+        # (LoadLevelTreeIntoDoc), the standalone .iff is the engine viewport (-L).
+        # Both are the snowgoons demo (Doc + viewport are the same level).
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/wflevels/snowgoons-blender@/level"
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/wflevels/snowgoons-standalone.iff@/snowgoons-standalone.iff"
     )
 endif()
