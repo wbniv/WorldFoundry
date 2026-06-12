@@ -286,6 +286,22 @@ browser `wf-edit.html` on the same room; moving an actor in one moves it in the 
 (bidirectional `CH_SYNC` + wasm CRDT apply + identical framing). A fresh tab joining
 mid-session shows current edits from the relay snapshot.
 
+### Phase 2 — status (2026-06-13) — 🟡 implemented + compiles; verification gated on Phase-1 (d)
+
+- **DONE (commits `f713533a`, `58652d7e`)** — real browser-WebSocket backend
+  (`ws_client_emscripten.cc` over `emscripten/websocket.h`, same `WsClient` interface +
+  wire framing as native) and the web connect state machine: `main()` initiates a
+  non-blocking connect pre-`HALStart`; `WebConnectStep` (in `editor_build`) sends the
+  room-join + wires `observeUpdates`→relay once `connected()` flips; `CollabDrain`
+  applies inbound. Threaded connect + mid-session reconnect are native-only. Compiles +
+  links into `wf_edit_web`.
+- **BLOCKED on Phase-1 (d)** — functional co-edit can't be verified yet: the deferred UB
+  traps in `InitBridgeMap`'s epilogue, *before* `editor_build` reaches `WebConnectStep` /
+  `CollabDrain`, so the join + sync never run in a clean build. Only the connect *initiate*
+  (pre-`HALStart`) runs. **Phase 2 *and* Phase 3 (presence/chat also live in
+  `editor_build`) are gated on fixing (d)** — that's the next gate to a verifiable
+  collaborative web editor.
+
 ## Phase 3 — Presence + text chat
 
 Mostly falls out of Phase 2: the `CH_PRESENCE` (main.cc:656-690) and `CH_CHAT`
