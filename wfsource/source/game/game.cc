@@ -767,6 +767,61 @@ WFGame::WebTick()
 }
 #endif // __EMSCRIPTEN__
 
+#if defined(__EMSCRIPTEN__) && defined(WF_ENABLE_EDITOR)
+//-----------------------------------------------------------------------------
+// Web editor main loop. The browser owns cadence, so RunEditor's blocking
+// for(;;) is inverted into a per-frame callback (same shape as RunLevelWeb).
+// build → StepFrame(false) → present is preserved (the zero-latency local-edit
+// invariant). engine/wf_edit/main.cc registers the build/present callbacks via
+// SetEditorFrameCallbacks before HALStart, exactly as the native editor does.
+
+namespace {
+	WFGame*    s_webEditorGame = nullptr;
+	_DiskFile* s_webEditorDf   = nullptr;
+	void WebEditorLoopThunk() { assert(s_webEditorGame); s_webEditorGame->WebTickEditor(); }
+}
+
+void
+WFGame::RunEditorWeb()
+{
+	extern const char* gLevelOverridePath;
+	AssertMsg(gLevelOverridePath, "--editor requires -L<level-path>");
+
+	_DiskFile* df = ConstructDiskFile(const_cast<char*>(gLevelOverridePath), HALLmalloc);
+	assert(ValidPtr(df));
+	df->SeekRandom(DiskFileCD::_SECTOR_SIZE);
+	LoadLevel(df);
+
+	s_webEditorGame = this;
+	s_webEditorDf   = df;     // kept alive until WebTickEditor unloads
+
+	// Never returns; the browser drives WebTickEditor each animation frame. The
+	// HALStart / main() teardown after us is intentionally skipped (the page
+	// owns process lifetime) — same as RunLevelWeb.
+	emscripten_set_main_loop(WebEditorLoopThunk, 0, 1);
+}
+
+void
+WFGame::WebTickEditor()
+{
+	Scalar dt;
+	if (!sEditorBuild || !sEditorBuild(sEditorCtx))
+	{
+		emscripten_cancel_main_loop();
+		UnloadLevel();
+		if (s_webEditorDf)
+		{
+			MEMORY_DELETE(HALLmalloc, s_webEditorDf, _DiskFile);
+			s_webEditorDf = nullptr;
+		}
+		return;
+	}
+	StepFrame(false, &dt);
+	if (sEditorPresent)
+		sEditorPresent(sEditorCtx);
+}
+#endif // __EMSCRIPTEN__ && WF_ENABLE_EDITOR
+
 //==============================================================================
 
 Scalar

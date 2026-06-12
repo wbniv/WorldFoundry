@@ -1373,3 +1373,80 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS AND NOT EMSCRIPTEN)
         COMMENT "Building wf-relay (co-edit relay server)"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endif()
+
+# ─── Browser/WASM editor (wf_edit_web) ───────────────────────────────────────
+# The Dear ImGui editor compiled to Emscripten/WebGL2. Reuses the portable
+# editor sources; the native-only media/discovery stack (collab_session /
+# voice_track / video_track / webrtc_session and the native ws_client) is
+# replaced by no-op stubs (collab_stub_web.cc) + a browser WebSocket backend
+# (ws_client_emscripten.cc). GLFW is Emscripten's built-in port (-sUSE_GLFW=3),
+# so imgui_impl_glfw + imgui_impl_opengl3 work unchanged; the engine adopts the
+# editor's single WebGL2 canvas context. v1 = co-edit + presence + chat;
+# voice/video deferred. See docs/plans/2026-06-12-wf-edit-in-the-browser.md.
+if(WF_ENABLE_WEB_EDITOR AND EMSCRIPTEN)
+    set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/third_party/imgui)
+    set(IMGUIZMO_DIR ${CMAKE_SOURCE_DIR}/third_party/imguizmo)
+    set(IMGUI_MARKDOWN_DIR ${CMAKE_SOURCE_DIR}/third_party/imgui_markdown)
+    add_executable(wf_edit_web
+        engine/wf_edit/main.cc
+        engine/wf_edit/level_doc.cc
+        engine/wf_edit/property_panel.cc
+        engine/wf_edit/oad_reader.cc
+        engine/wf_edit/engine_bridge.cc
+        engine/wf_edit/gizmo.cc
+        engine/wf_edit/level_save.cc
+        engine/wf_edit/collab_panel.cc
+        engine/wf_edit/collab_stub_web.cc       # no-op media/discovery (web)
+        engine/wf_edit/ws_client_emscripten.cc  # browser WebSocket relay backend
+        wftools/oaddump/oad.cc
+        ${IMGUI_DIR}/imgui.cpp
+        ${IMGUI_DIR}/imgui_draw.cpp
+        ${IMGUI_DIR}/imgui_tables.cpp
+        ${IMGUI_DIR}/imgui_widgets.cpp
+        ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+        ${IMGUIZMO_DIR}/ImGuizmo.cpp
+    )
+    add_dependencies(wf_edit_web gen_oas_headers)
+    set_source_files_properties(${CMAKE_SOURCE_DIR}/engine/wf_edit/engine_bridge.cc
+        PROPERTIES OBJECT_DEPENDS ${NAMEPATH_OUT})
+    set_target_properties(wf_edit_web PROPERTIES OUTPUT_NAME "wf-edit" SUFFIX ".html")
+    target_include_directories(wf_edit_web PRIVATE
+        ${IMGUI_DIR} ${IMGUI_DIR}/backends
+        ${IMGUIZMO_DIR}
+        ${IMGUI_MARKDOWN_DIR}
+        ${CMAKE_SOURCE_DIR}/engine/crdt
+        ${CMAKE_SOURCE_DIR}/engine/mutation
+        ${CMAKE_SOURCE_DIR}/third_party/json
+        ${CMAKE_SOURCE_DIR}/wftools/oaddump
+        ${CMAKE_SOURCE_DIR}/engine/vendor/miniaudio-0.11.25
+    )
+    # nlohmann/json (presence/chat parse in main.cc) uses try/catch, so the
+    # editor TUs need exceptions even though the engine lib is -fno-exceptions.
+    target_compile_options(wf_edit_web PRIVATE
+        -fpermissive -w -fno-rtti -fexceptions
+        -Wno-register   # engine headers (color.hpi) use 'register'; emcc/clang
+                        # treats it as a hard C++17 error that -w doesn't downgrade
+                        # (mirrors wf_game's web target).
+        "-D__GAME__=\"wf-edit\""
+        "-DERR_DEBUG(x)="
+        "$<$<CONFIG:Release>:-O3>"
+    )
+    target_link_libraries(wf_edit_web PRIVATE wfengine wfcrdt)
+    target_link_options(wf_edit_web PRIVATE
+        -sUSE_GLFW=3
+        -sMIN_WEBGL_VERSION=2
+        -sMAX_WEBGL_VERSION=2
+        -sALLOW_MEMORY_GROWTH=1
+        -sEXIT_RUNTIME=0
+        -fexceptions
+        -sEXPORTED_RUNTIME_METHODS=callMain,requestFullscreen
+        -lwebsocket.js          # emscripten/websocket.h (relay transport, Phase 2)
+        -lidbfs.js              # persistence (save/identity)
+        "$<$<CONFIG:Release>:-O3>"
+        # Custom shell (web/shell-edit.html) is added once the target links; the
+        # game shell is reused meanwhile so a bare build still produces a page.
+        "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/web/shell.html"
+    )
+endif()

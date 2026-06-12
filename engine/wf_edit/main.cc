@@ -17,10 +17,18 @@
 // operator-new macro conflicts with STL internal placement-new in <valarray>.
 #include <nlohmann/json.hpp>
 
+// On the web, GLFW is Emscripten's built-in port (-sUSE_GLFW=3): there is a
+// single WebGL2 canvas context and no X11/GLX, so the native-handle extraction
+// (glfw3native.h) does not exist. The engine adopts the editor's canvas context
+// directly (see the web host-context path). Native keeps the X11/GLX handshake.
+#if !defined(__EMSCRIPTEN__)
 #define GLFW_EXPOSE_NATIVE_X11
 #define GLFW_EXPOSE_NATIVE_GLX
+#endif
 #include <GLFW/glfw3.h>
+#if !defined(__EMSCRIPTEN__)
 #include <GLFW/glfw3native.h>
+#endif
 
 #include "imgui.h"
 #include "imgui_internal.h"   // DockBuilder API (default panel layout)
@@ -70,7 +78,9 @@
 #include <csignal>
 #include <ctime>
 #include <exception>
-#include <execinfo.h>
+#if !defined(__EMSCRIPTEN__)
+#include <execinfo.h>   // backtrace() in TerminateHandler — no execinfo.h on wasm
+#endif
 #include <fcntl.h>
 
 // Provided by the engine's platform layer (mirrors the host-GL e2e harness).
@@ -1453,12 +1463,14 @@ bool editor_build(void* p)
         glGetIntegerv(GL_DRAW_BUFFER, &drawbuf);
         glGetIntegerv(GL_READ_BUFFER, &readbuf);
         glGetBooleanv(GL_DOUBLEBUFFER, &dbl);
-        GLXContext  curctx  = glXGetCurrentContext();
-        GLXDrawable curdraw = glXGetCurrentDrawable();
         std::fprintf(stderr,
             "[gl-debug] FRAMEBUFFER_BINDING=%d DRAW_BUFFER=0x%04x READ_BUFFER=0x%04x "
             "DOUBLEBUFFER=%d glErr=0x%04x\n",
             fb, drawbuf, readbuf, (int)dbl, glGetError());
+#if !defined(__EMSCRIPTEN__)
+        // GLX/X11 native-handle dump — native only (web has one WebGL2 context).
+        GLXContext  curctx  = glXGetCurrentContext();
+        GLXDrawable curdraw = glXGetCurrentDrawable();
         std::fprintf(stderr,
             "[gl-debug] curGLXctx=%p curGLXdraw=0x%lx | glfwGLXWindow=0x%lx "
             "glfwX11Window=0x%lx glfwGLXctx=%p glfwCurCtx=%p win=%p\n",
@@ -1467,6 +1479,7 @@ bool editor_build(void* p)
             (unsigned long)glfwGetX11Window(c->win),
             (void*)glfwGetGLXContext(c->win),
             (void*)glfwGetCurrentContext(), (void*)c->win);
+#endif
     }
 
     // M2: initialize the stable doc→engine index map on the first frame the live
@@ -2540,10 +2553,14 @@ static void TerminateHandler()
                      "(likely joinable std::thread destroyed without join, "
                      "or noexcept function throwing)\n");
     }
+#if !defined(__EMSCRIPTEN__)
     void* frames[64];
     const int n = ::backtrace(frames, 64);
     std::fprintf(stderr, "  backtrace (%d frames):\n", n);
     ::backtrace_symbols_fd(frames, n, STDERR_FILENO);
+#else
+    std::fprintf(stderr, "  (no backtrace on wasm; check the browser devtools stack)\n");
+#endif
     std::fprintf(stderr, "=== aborting ===\n");
     std::fflush(stderr);
     std::abort();
@@ -3019,11 +3036,18 @@ int main(int argc, char** argv)
     // doubles as a valid GLXDrawable; an adopted GLFW window does not. In editor
     // (host-owned) mode mesa.cc uses halDisplay.win purely as the GLX drawable —
     // XEventLoop / HALCloseWindow early-bail — so a GLXWindow XID here is correct.
+#if !defined(__EMSCRIPTEN__)
     HostGLContext hc{ glfwGetX11Display(),
                       static_cast<unsigned long>(glfwGetGLXWindow(win)),
                       glfwGetGLXContext(win),
                       true };
     SetHostGLContext(&hc);
+#else
+    // Web: there is a single WebGL2 context, and GLFW (-sUSE_GLFW=3) already
+    // created + made it current above. No X11/GLX handles exist to register; the
+    // engine's emscripten_window.cc::InitWindow adopts the current context rather
+    // than creating its own. See docs/plans/2026-06-12-wf-edit-in-the-browser.md.
+#endif
 
     // Phase 4.3: resolve the quick tunnel behind a responsive progress UI instead
     // of blocking startup. Pure-ImGui frames on `win` (before HALStart, like the
@@ -3427,7 +3451,9 @@ int main(int argc, char** argv)
         voice_chat.Stop();
         video_chat.Stop();
     }
-    ClearHostGLContext();
+#if !defined(__EMSCRIPTEN__)
+    ClearHostGLContext();   // web never registered one (and never reaches teardown)
+#endif
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();

@@ -464,8 +464,16 @@ PIGSMain( int argc, char* * argv )
 #if defined(WF_ENABLE_EDITOR)
 	else if (gEditorMode)
 	{
+#if defined(__EMSCRIPTEN__)
+		// Browser: invert the editor loop onto the frame scheduler (does not
+		// return; the browser drives WebTickEditor). Mirrors RunLevelWeb above.
+		DBSTREAM1( cprogress << "main::editor mode (RunEditorWeb)" << std::endl; )
+		game->RunEditorWeb( );
+		// unreachable
+#else
 		DBSTREAM1( cprogress << "main::editor mode (RunEditor)" << std::endl; )
 		game->RunEditor( );
+#endif
 	}
 #endif
 	else
