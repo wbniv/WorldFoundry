@@ -19,6 +19,7 @@
 - [OAD property paths are scoped, not flat](project_oad_structure.md) — use block.field notation (common.Speed, movebloc.maxVelocity); relevant to scene:set_prop in Phase 2b.
 - [Write investigations docs proactively](feedback_investigations.md) — save notable research to docs/investigations/ without asking permission first.
 - [Commit freely without asking](feedback_commit_freely.md) — commit at every logical chunk; never ask permission; git is free and rewrites outside git are costly.
+- [Replace physics with Jolt](project_followup_replace_physics.md) — Jolt chosen 2026-04-14; CharacterVirtual integrated + parity-tested; open: vehicle constraint, restitution/bounce, substepping.
 - [Always link commits in docs](feedback_commit_links.md) — when a doc references a commit hash, include a GitHub link: `https://github.com/wbniv/WorldFoundry/commit/<hash>`.
 - [WF camera system origin](project_camera_system.md) — camera is unusually powerful/flexible; evolved from designer indecision, not intentional design. It's a feature.
 - [Cross-project glossary location](reference_glossary.md) — `/home/will/SRC/docs/glossary.md` is the canonical glossary; add new terms there, not in memory.

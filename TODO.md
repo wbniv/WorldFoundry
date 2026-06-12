@@ -7,6 +7,11 @@
 - [ ] **macOS: `-fullscreen`, `-width=N`, `-height=N` window flags.** Linux uses `_NET_WM_STATE_FULLSCREEN` via X11. macOS needs the equivalent using AppKit (`NSWindow` frame sizing + `toggleFullScreen:` / `NSWindowStyleMaskFullScreen`) in the macOS platform HAL. Tablets (Android/iOS) are always fullscreen by OS design — no changes needed there.
 
 
+## WEB EDITOR (wf-edit in the browser)
+
+- [ ] **Port the C++ ImGui collaborative editor to WASM/WebGL2.** Compile the existing `wf-edit` (ImGui panels, ImGuizmo gizmo, OAD property panel, `engine_bridge`, `wfcrdt::Doc`) to Emscripten — the engine viewport already runs in the browser. v1 collab = co-edit + presence + text chat over the existing `wss://wf.worldfoundry.org` relay (binary CH_SYNC/PRESENCE/CHAT framing, byte-compatible with native clients in the same room); **voice/video deferred** (native libdatachannel/Opus/libvpx/V4L2 compiled out). Three platform seams convert: windowing/GL (`-sUSE_GLFW=3`, engine adopts the editor's WebGL2 context), WebSocket transport (new `ws_client_emscripten.cc` over `emscripten/websocket.h`, async-connect state machine), and main-loop ownership (`RunEditorWeb`/`WebTickEditor` via `emscripten_set_main_loop`). Phased: **P0** de-risk spike — Rust `yffi`→`libyrs.a` cross-compiles for `wasm32-unknown-emscripten` (Corrosion silently falls back to host triple; force `Rust_CARGO_TARGET`) — **gates everything**; **P1** non-collab WASM editor (preloaded level, panels + gizmo, new `wf_edit_web` CMake target); **P2** WebSocket backend + CRDT sync (browser co-edits with native `wf-edit`); **P3** presence + chat. [plan](docs/plans/2026-06-12-wf-edit-in-the-browser.md)
+
+
 ## NEURAL-FORTH AI LIBRARY
 
 - [x] Stages 1–8 complete — fuzzy, NN, autograd, ∂4 slots, 62/62 tests — [plan](docs/plans/2026-05-22-neural-forth.md) [investigation](docs/investigations/2026-04-22-neural-forth.md)
@@ -53,11 +58,6 @@
 
 - [x] **SMB: score pop-up actor** — floating yellow diamond above enemies/coins/bricks when scored. Pre-placed pool actor at (0,0,−5) controlled via SMB_POPUP_X/Z/TRIGGER/UNTIL mailboxes (1842–1845). [plan](docs/plans/2026-05-27-smb-score-pop-up-actors.md)
 
-- [ ] **SMB: Mario drifts slowly +X with no input after a warp-land.** Minor — after the
-  pipe warp drops him at X=3 (zeroed velocity) he creeps to X≈6 over a few seconds with no
-  joystick. Likely residual MarbleHandler velocity / `Running Deceleration` not fully
-  damping. Not gameplay-breaking (the player steers); revisit when polishing Mario's
-  doom-stick feel. Surfaced 2026-05-25 ([pipe-warp plan](docs/plans/2026-05-25-smb-pipe-warp-coin-room.md)).
 
 
 ## CONCURRENCY / ASYNC
