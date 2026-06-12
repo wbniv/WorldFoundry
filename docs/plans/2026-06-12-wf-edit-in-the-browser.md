@@ -245,20 +245,18 @@ Runtime fixes found (each unblocked the next, classic emscripten bring-up):
      symptoms of the same dead allocator + an independent gamestrm static-init issue; kept as
      they're correct on their own.
 
-   **Render proof — CLEAN build (no fprintf, no ASan), all (a)–(d) fixed:** the editor draws its
-   menu bar (File/Edit/Collaborate), Outliner (0 actors — empty Doc; the popen/levtree
-   Doc-population path is a separate web follow-up), Properties, and the engine viewport
-   rendering the snowgoons terrain, full frame loop completing, **zero traps**. So the
-   whole WASM/WebGL2 + ImGui + engine-viewport architecture is sound — Phase 1 renders
-   end-to-end in a clean build.
+   **Render proof — CLEAN build (no fprintf, no ASan), all (a)–(d) + Doc-population fixed:**
+   the editor draws its menu bar (File/Edit/Collaborate), a **populated Outliner (36 snowgoons
+   actors** — `InitBridgeMap: 36 actors`), Properties, and the engine viewport rendering the
+   snowgoons terrain, full frame loop completing, **zero traps**. So the whole WASM/WebGL2 +
+   ImGui + engine-viewport architecture is sound — Phase 1 renders end-to-end in a clean build.
 
    <img src="screenshots/2026-06-13-wf-edit-web-renders.png" width="700">
 
-   *wf-edit running in headless Chrome (SwiftShader WebGL2): Dear ImGui menu bar +
-   Outliner + Properties panels, and the engine viewport rendering the snowgoons terrain.
-   The Outliner shows 0 actors because the popen/levtree Doc-population path doesn't exist
-   on web yet (separate follow-up); the terrain is flat grey because snowgoons' inherited
-   camera fog (FoggingColor 0x888888, complete at 30 m) greys out anything past the pulled-back
+   *wf-edit running in headless Chrome (SwiftShader WebGL2): Dear ImGui menu bar + Outliner
+   (36 actors: statplat/actboxor/room/light/camshot/target/tool/…) + Properties, and the
+   engine viewport. The terrain is flat grey because snowgoons' inherited camera fog
+   (FoggingColor 0x888888, complete at 30 m) greys out anything past the pulled-back
    edit camera — the known snowgoons fog trap, not missing textures.*
 
 ## Phase 2 — Emscripten WebSocket backend + CRDT sync (co-edit with a native client)
@@ -292,7 +290,7 @@ browser `wf-edit.html` on the same room; moving an actor in one moves it in the 
 (bidirectional `CH_SYNC` + wasm CRDT apply + identical framing). A fresh tab joining
 mid-session shows current edits from the relay snapshot.
 
-### Phase 2 — status (2026-06-13) — 🟢 implemented + compiles; (d) gate cleared → ready to verify
+### Phase 2 — status (2026-06-13) — 🟢 transport verified + Doc-population done; multi-peer co-edit = design follow-up
 
 - **DONE (commits `f713533a`, `58652d7e`)** — real browser-WebSocket backend
   (`ws_client_emscripten.cc` over `emscripten/websocket.h`, same `WsClient` interface +
@@ -301,11 +299,22 @@ mid-session shows current edits from the relay snapshot.
   room-join + wires `observeUpdates`→relay once `connected()` flips; `CollabDrain`
   applies inbound. Threaded connect + mid-session reconnect are native-only. Compiles +
   links into `wf_edit_web`.
-- **GATE CLEARED** — finding (d) (the `editor_build`/`StepFrame` UB) is fixed (`59dc44d3`),
-  so a clean build now reaches `WebConnectStep` / `CollabDrain` every frame. Functional
-  co-edit is now **testable**: run the local `wf-relay` (or `wss://wf.worldfoundry.org`),
-  open `wf-edit.html?room=…&relay=…`, and a native `wf-edit` on the same room; verify
-  bidirectional `CH_SYNC`. (Not yet exercised end-to-end this session — next step.)
+- **GATE CLEARED** — finding (d) fixed (`59dc44d3`), so a clean build runs `editor_build`
+  (`WebConnectStep` / `CollabDrain`) every frame.
+- **TRANSPORT VERIFIED (2026-06-13)** — local `wf-relay` + headless-Chrome
+  `wf-edit.html?room=webtest&relay=ws://localhost:9911`: browser console
+  `relay connected, joined room=webtest`; relay log `[relay] anon joined room webtest`;
+  zero traps. So `ws_client_emscripten` + `WebConnectStep` work end-to-end against a real relay.
+- **DOC-POPULATION FIXED (`be7baa6e`)** — the browser now loads the level locally (36
+  snowgoons actors via preloaded levtree JSON), so it has a base Doc for editing.
+- **REMAINING for multi-peer co-edit (design, not transport):** seeding/CRDT-origin. The
+  relay model is "one peer seeds, others receive incremental deltas," but the web editor
+  (like native) loads its own Doc *before* connecting, so the initial state isn't pushed,
+  and two peers that each load the same `.lev` independently have distinct Yrs client IDs
+  (merge would duplicate, not converge). A correct multi-peer flow is **join-and-receive**
+  (joiner starts empty, adopts the relay/host Doc) vs **load-local** (host seeds). That's a
+  follow-up design step; transport + the sync code (`observeUpdates`/`CollabDrain`, shared
+  with the proven native path) are in place.
 
 ## Phase 3 — Presence + text chat
 
