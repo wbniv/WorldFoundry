@@ -40,9 +40,10 @@ AssetManager::AssetManager( size_t cbPermMemory, size_t cbRoomMemory, int numAct
 	_numActiveRoomSlots = numActiveRoomSlots;
 	assert( _numActiveRoomSlots >= 1 && _numActiveRoomSlots <= MAX_ACTIVE_ROOMS );
 
-	// Layout: [room0][room1]…[room(N-1)][perm], N = _numActiveRoomSlots. PERM keeps
-	// array index PERM_SLOT_INDEX (=MAX_ACTIVE_ROOMS) but its MEMORY sits right after
-	// the N used room slots, so a single-room level pays cbPerm + 1×cbRoom, not ×9.
+	// Layout: [perm][room0][room1]…[room(N-1)], N = _numActiveRoomSlots. PERM is at
+	// a CONSTANT offset 0 — decoupled from the room-slot count — and the room slots
+	// stream in after it. (PERM keeps array index PERM_SLOT_INDEX; only its memory
+	// offset moved to the front.) A single-room level pays cbPerm + 1×cbRoom, not ×9.
 	_assetMemory = new ( HALLmalloc ) char [ _cbPermMemory + _numActiveRoomSlots * _cbRoomMemory ];
 	assert( ValidPtr( _assetMemory ) );
 
@@ -157,8 +158,8 @@ AssetManager::LoadPermanents()
 	}
 	binistream roomStream((void*)(((char*)streamBuffer)+sizeof(CHUNKHDR)),chdr.size);
 
-	// PERM memory sits right after the N allocated room slots (not at ×MAX_ACTIVE_ROOMS).
-	_assets[PERM_SLOT_INDEX] = new (_memory) AssetSlot(PERM_SLOT_INDEX, AssetManager::ROOM_PERM_INDEX,roomStream, maxAsset, (void*)&_assetMemory[_cbRoomMemory*_numActiveRoomSlots],_cbPermMemory,_videoMemory);
+	// PERM memory is at offset 0 (constant, independent of the room-slot count).
+	_assets[PERM_SLOT_INDEX] = new (_memory) AssetSlot(PERM_SLOT_INDEX, AssetManager::ROOM_PERM_INDEX,roomStream, maxAsset, (void*)&_assetMemory[0],_cbPermMemory,_videoMemory);
 	assert(ValidPtr(_assets[PERM_SLOT_INDEX]));
 	HALLmalloc.Free(streamBuffer,_levelTOC.GetTOCEntry(TOC_PERM_INDEX)._size);
 }
@@ -209,7 +210,8 @@ AssetManager::LoadRoomSlot(int roomIndex, int slotNum)
 	}
 	binistream roomStream((void*)(((char*)streamBuffer)+sizeof(CHUNKHDR)),chdr.size);
 
-	_assets[slotNum] = new (_memory) AssetSlot(slotNum, roomIndex,roomStream, maxAsset, (void*)&_assetMemory[_cbRoomMemory*slotNum],_cbRoomMemory,_videoMemory);
+	// Room slots stream in AFTER the perm block: offset cbPerm + slotNum × cbRoom.
+	_assets[slotNum] = new (_memory) AssetSlot(slotNum, roomIndex,roomStream, maxAsset, (void*)&_assetMemory[_cbPermMemory + _cbRoomMemory*slotNum],_cbRoomMemory,_videoMemory);
 	assert(ValidPtr(_assets[slotNum]));
 	HALLmalloc.Free(streamBuffer);
 }
