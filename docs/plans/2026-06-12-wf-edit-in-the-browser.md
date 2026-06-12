@@ -34,9 +34,10 @@ What shipped, by phase (newest first):
 - **P0/P1 — yffi→wasm cross-compile spike + non-collab WASM editor** (panels + gizmo + the
   `wf_edit_web` CMake target, `web/shell-edit.html`, the three platform seams).
 
-**Open follow-ups:** web Save/Export (Blob download / IDBFS); native-side defer/push so
-mixed native+web rooms seed-correctly (Phase 3 status below). *(The simultaneous-seed race is
-now fixed — `7cd19d83`.)*
+**Open follow-ups:** web one-click `.lev` (port `levtree print`→wasm) + IDBFS persistence
+(optional; Save semantics below). *(Done: simultaneous-seed race `7cd19d83`; web Export
+`03fa21a9`; native defer/push for mixed native+web rooms `4eac6426` + the ws_client ≥64 KiB
+send fix `92537874`.)*
 
 ## Context
 
@@ -438,12 +439,26 @@ evicts the peer after the timeout.
   tab logs `won host election` + seeds, the other adopts 36 actors; pre-fix this was two
   seeders), and a 4 s-stagger regression still seeds-then-adopts with bidirectional presence + chat.
 
-- **REMAINING follow-up — native-side defer/push for cross-impl join-and-receive:** the web
-  editor defers its Doc load and the host pushes via `observeUpdates`, but **native** still
-  loads its Doc *before* connecting and never pushes that initial state, so a *native* seeder
-  → *web* adopter doesn't converge (the relay has nothing to replay). Pure web↔web rooms
-  (verified above) are unaffected. Applying the same defer/push on native would make mixed
-  native+web rooms seed-correct; tracked as a follow-up.
+- **DONE — native-side defer/push for cross-impl join-and-receive**
+  ([`4eac6426`](https://github.com/wbniv/WorldFoundry/commit/4eac6426), with the
+  [`92537874`](https://github.com/wbniv/WorldFoundry/commit/92537874) ws_client fix). Native
+  now mirrors the web flow: joining a relay room **defers** the startup Doc load
+  (`defer_doc_load`, formerly `web_defer_doc_load`), and after connect + the initial-SYNC wait
+  + `observeUpdates` wiring, the connect block resolves host vs joiner — host loads now (so
+  `observeUpdates` pushes the full Doc, seeding the relay), joiner adopts the relay's Doc.
+  Connect-failure falls back to a local load (offline editing). **Verified cross-impl:** a
+  native host seeded room `ncy` (36 actors, "relay connected", clean exit 0) and an
+  overlapping web joiner logged `adopted room Doc from relay (36 actors)`.
+  - **Bug found + fixed en route** ([`92537874`](https://github.com/wbniv/WorldFoundry/commit/92537874)):
+    native `WsClient::send` built the frame header into `uint8_t header[10]`, but the ≥64 KiB
+    extended-length path needs 14 bytes (opcode + 8-byte length + 4-byte mask) — a 4-byte
+    stack-buffer overflow (canary → SIGABRT). Dormant because nothing ever *sent* a ≥64 KiB
+    frame until this full-Doc push; per-edit frames are tiny, and snapshots were only ever
+    received. Not BUGS.md-eligible (fresh 2026 editor code). Fixed → `header[14]`.
+  - **Residual:** the *native-native* simultaneous-fresh-room race isn't covered by the
+    presence-based host election (presence isn't drained until the editor loop, after the
+    connect-block seed decision). Staggered/real native joins are fine; web↔web has the full
+    election. A unified presence-aware election across both transports is a possible follow-up.
 
 ## Save semantics on web (no local FS / no shell)
 
@@ -517,4 +532,4 @@ exclusions for threads/modals/teardown/re-exec, web connect state machine),
 3. ~~Phase 2: two browser tabs on a relay room co-edit; mid-session join adopts current state (join-and-receive, 36 actors, no dup).~~ ✅ done 2026-06-13 (Phase 2 status). *(Verified browser↔browser via local relay; native↔browser interop not separately run — same wire framing + the proven native sync code, but the native side does not yet defer/push its initial Doc, so native-seeds→web-adopts needs the same join-and-receive treatment on native; tracked with the seed-race follow-up.)*
 4. ~~Phase 3: presence (names/colours/selection rings) + chat round-trip between two browsers; unique per-tab peer_id.~~ ✅ done 2026-06-13 (Phase 3 status). *(Browser↔browser via CDP; peer eviction-on-close not separately asserted — the 8 s timeout sweep at main.cc:809 is unchanged from the proven native path.)*
 5. **Remaining:** web Save/Export semantics (disable Save+Compile; `SaveDocToLev`→Blob download; optional IDBFS persistence) — see "Save semantics on web".
-6. ~~Follow-up: simultaneous-seed race~~ ✅ fixed `7cd19d83` (deterministic host election). **Still open:** native-side defer/push for cross-impl (native+web) join-and-receive (Phase 3 status).
+6. ~~Follow-up: simultaneous-seed race~~ ✅ fixed `7cd19d83` (host election); ~~native-side defer/push for cross-impl (native+web) join-and-receive~~ ✅ done `4eac6426` (+ ws_client ≥64 KiB send fix `92537874`), verified native-seeds→web-adopts. **Residual:** native-native simultaneous-fresh-room race (Phase 3 status).

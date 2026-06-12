@@ -177,10 +177,12 @@ Presence (peer cursors / camera frustums / selection rings) and text chat then f
 same relay exactly as on native. Each browser tab mints its **own** random `peer_id` (there's
 no persisted `identity.json` in the browser), so tabs appear as distinct collaborators.
 
-> **Cross-implementation caveat:** a *native* `wf-edit` seeding a room that a *browser* peer
-> then joins doesn't yet converge — native loads its `Doc` before connecting and never pushes
-> that initial state, so the relay has nothing to replay to the web joiner. Pure browser↔browser
-> rooms are unaffected; native+web seed interop is a tracked follow-up.
+Join-and-receive works **across implementations**: a native `wf-edit` host seeds a room and
+a browser peer adopts its Doc (and vice-versa) — native now defers its startup Doc load when
+joining a relay room and pushes the seed via the same mechanism as web. (Verified native-host
+→ web-joiner, 36 actors adopted.) The one residual is the *native-native* simultaneous-join
+race into a brand-new room, which doesn't yet use the presence-based host election the web
+side has; staggered/real-world native joins are fine.
 
 ### Saving on the web
 
