@@ -92,7 +92,12 @@
 #endif	//__cplusplus
 	extern void		_sys_assert( int _, const char * expr, const char *file, int line )
 //#if		!_SYS_SUPPRESS_EXIT
+#if !defined(__EMSCRIPTEN__)
+		// Web: _sys_assert WARNS + returns (non-fatal — see assert.cc), so it must
+		// NOT be noreturn there, or the compiler emits a wasm `unreachable` after
+		// every assert call site and the return traps. Native keeps noreturn (exit).
 		__attribute__ ((noreturn))
+#endif
 //#endif	//!_SYS_SUPPRESS_EXIT
 		;
 #if defined( __cplusplus )

@@ -551,7 +551,15 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 	RestApi_DrainQueue();
 	DebugServer_DrainQueue(*_curLevel);
 	assert(HALScratchLmalloc.Empty());
+	// The game debug streams (gamestrm.cc) hit a cross-TU static-init-order issue
+	// on web — cframeinfo's streambuf isn't wired when the first write runs, so
+	// operator<< calls a null streambuf vtable slot ("null function" wasm trap).
+	// This per-frame DBSTREAM1 also violates dbstrm.hp's own "nothing in the game
+	// loop" contract for DBSTREAM1, and writes to a null sink (no output), so skip
+	// it on web. See docs/plans/2026-06-12-wf-edit-in-the-browser.md.
+#if !defined(__EMSCRIPTEN__)
 	DBSTREAM1( cframeinfo << char(12) << std::endl << "Frame Info:" << std::endl; )
+#endif
 	DBSTREAM2( cflow << "Top of WFGame::update" << std::endl; )
 
 
