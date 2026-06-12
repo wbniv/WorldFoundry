@@ -351,7 +351,15 @@ loop
     Yellow towers (directories) mixed with blue-grey slabs (files) on a dark floor.
     Height variation creates the FSN "cityscape" silhouette. Player marble visible at centre.
 
-    <img src="screenshots/2026-06-12-filesys-fixed-camera.png" width="700">
+    **Base-pivot fix (2026-06-12):** Templates were center-pivoted (mesh-local
+    Z ∈ [-1,+1]), and the scale mailboxes column-multiply about the local origin
+    (`rendacto.cc:481-483`), so each scaled box grew symmetrically — half *below*
+    the floor. Re-authored DirTemplate to local Z [0,2] and FileTemplate to [0,0.5]
+    (base at the origin) so scale grows them upward. Towers now rise cleanly from
+    the floor. Promoted to a general authoring rule — see `docs/level-building.md`
+    "Mesh origin — base (lowest vertex) at local z=0".
+
+    <img src="screenshots/2026-06-12-filesys-base-pivot.png" width="700">
     PASS
 
 8. Player walks freely; objects block movement
