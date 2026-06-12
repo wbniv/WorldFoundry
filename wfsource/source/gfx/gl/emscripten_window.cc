@@ -124,6 +124,22 @@ VisibilityCallback(int /*eventType*/, const EmscriptenVisibilityChangeEvent* e,
 bool
 InitWindow( int /*xPos*/, int /*yPos*/, int /*xSize*/, int /*ySize*/ )
 {
+    // Host-owned context adopt path (web editor): when a WebGL context is already
+    // current — the wf_edit_web editor created + made-current its GLFW canvas
+    // context (-sUSE_GLFW=3) before engine init — adopt it instead of creating a
+    // second context on the same #canvas. There is only one canvas, and ImGui is
+    // already bound to the GLFW context; a second context would split rendering.
+    // The host (GLFW/ImGui) owns input + canvas sizing, so skip the key/visibility
+    // callbacks and the canvas resize here (mirrors mesa.cc's host-owned mode).
+    // Standalone wf_game has no GLFW context current → get_current_context()==0 →
+    // the normal create path below runs unchanged.
+    EMSCRIPTEN_WEBGL_CONTEXT_HANDLE existing = emscripten_webgl_get_current_context();
+    if (existing > 0)
+    {
+        _webglContext = existing;
+        return true;
+    }
+
     EmscriptenWebGLContextAttributes attrs;
     emscripten_webgl_init_context_attributes(&attrs);
     attrs.majorVersion = 2;     // WebGL 2 = GLES 3.0, the engine's baseline
