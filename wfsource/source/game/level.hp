@@ -242,7 +242,10 @@ private:
 	Clock levelClock;
 
 	// object list variables
-	int32 							_toBeRemovedObjects[100];
+	// Sized to hold a full view's worth of removals in one frame: the FSN browser
+	// despawns its entire spawned tree (up to the temp-object pool, ~500) on a
+	// navigate descend/ascend. Was [100].
+	int32 							_toBeRemovedObjects[512];
 	int 							_numToBeRemovedObjects;
 
 	// template object variables
