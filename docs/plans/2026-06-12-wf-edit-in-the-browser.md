@@ -169,6 +169,59 @@ level; Outliner lists actors; selecting populates Properties (OAD reader); gizmo
 actor visibly same-frame (build-before-step + engine_bridge wfmut). Headless: run `.js`
 under node with `--frames N --screenshot out.ppm` for CI.
 
+### Phase 1 — progress & findings (2026-06-12) — 🟡 boots in-browser, render blocked by 1 trap
+
+Landed (commits `89b25159` plumbing, `9d30b480` compile+link, `687d460b` GL adopt,
+`da860e04` shell+preload, `f5de5a89` stack+shader): the `wf_edit_web` target compiles
++ links, and **boots in headless Chrome (SwiftShader WebGL2)** — `main()` runs, the
+GLFW→WebGL2 context-adopt works (`engine surface 1280x800`), and the engine loads the
+level (Jolt init, 37 objects, zForth constants, broadphase). Verified by screenshotting
+`google-chrome --headless --use-gl=angle --use-angle=swiftshader … wf-edit.html`.
+
+Runtime fixes found (each unblocked the next, classic emscripten bring-up):
+
+1. **Stack overflow → `-sSTACK_SIZE=8388608`.** ImGui's recursive draw + the engine
+   `StepFrame` run on one stack; emscripten's 64 KB default overflows on the first
+   editor frame (`-sASSERTIONS=2` named it). `wf_game` (shallower per-frame depth)
+   never needed it. 8 MB ≈ a desktop stack.
+
+2. **ImGui shader `#version 130` → `#version 300 es` (the issue you flagged).**
+   Implications:
+   - `ImGui_ImplOpenGL3_Init(glsl_version)`'s string sets the GLSL dialect for **ImGui's
+     own UI-drawing shaders** — not the engine's. `#version 130` is desktop GL 3.0 GLSL;
+     **WebGL2 = OpenGL ES 3.0 requires `#version 300 es`** (with mandatory `precision`
+     qualifiers, which ImGui's backend emits only when handed an `…es` version). A 130
+     shader is rejected by the WebGL2 compiler → `CreateDeviceObjects` fails → ImGui
+     can't draw a single vertex (blank panels), and on some drivers the failed program
+     cascades into a draw-time fault.
+   - **The engine viewport was never affected**: `gfx/glpipeline/backend_modern.cc`
+     already emits `#version 300 es` on web. This bug was isolated to the ImGui overlay;
+     the `#if __EMSCRIPTEN__` conditional keeps native on 130 and web on 300 es from one
+     source, zero runtime cost.
+   - **Broader class it represents**: the editor was authored desktop-GL-first, so every
+     editor-side GL/GLSL assumption must be remapped to GLES3/WebGL2. This was the ImGui
+     backend; ImGuizmo is safe (it emits into ImGui's draw list, no shaders of its own);
+     audit `gizmo.cc` and any direct GL in editor TUs for the same axis. It's a
+     necessary-but-not-sufficient fix — it cleared the shader failure but rendering is
+     still blocked by (4).
+
+3. **Doc/Outliner population gap (popen/levtree).** `LoadLevelTreeIntoDoc` shells out to
+   the `levtree` binary via `popen` to parse a `.lev` — `popen` doesn't exist on wasm, so
+   the Doc is empty (`Y.Doc population failed … Outliner will be empty`). The 3D viewport
+   still loads via the engine `-L` (a binary `.iff`), so the scene renders; only the
+   Outliner/Properties are empty until a web Doc-population path exists. Options: compile
+   the levtree parser into the wasm (call it in-process instead of via popen), or have
+   the relay deliver the initial CRDT state (Phase 2 already does this for co-edit). Track
+   as a Phase-1 follow-up; not blocking the viewport.
+
+4. **OPEN — `RuntimeError: null function` in the first `editor_build` frame**, right
+   after `[bridge] InitBridgeMap: 0 actors` (so after engine init + level load, with the
+   stack + shader fixes in place). A genuine null/!signature indirect call. Next debug
+   step: localize within `editor_build` (ServiceRelayReconnect / CollabDrain /
+   UpdateBridgeMap / DrainEngineSync / ImGui panel build) or the first `StepFrame`, via a
+   `-g2` names build or by bisecting the callback body. This is the remaining blocker to
+   first render.
+
 ## Phase 2 — Emscripten WebSocket backend + CRDT sync (co-edit with a native client)
 
 - **`ws_client_emscripten.cc`** (new): implement the *same* `wfedit::WsClient` interface
