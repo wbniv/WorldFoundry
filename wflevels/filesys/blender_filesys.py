@@ -411,13 +411,16 @@ floor_obj['wf_Visibility Mailbox'] = 1
 # 11 ── DirTemplate ────────────────────────────────────────────────────────────
 # Template Object=1: not constructed at load time; spawned at runtime via
 # spawn-template (syscall 135).  Scale mailboxes 3040-3042 set height.
-# Base cube is 2×2×2; scale=n makes it n towers high.
-# Placed OOB (Z=-200) so it's outside all rooms.
+# Base-pivot: mesh-local Z spans [0, 2] (base at the local origin), so the
+# Z-scale (which column-multiplies about the origin, rendacto.cc:481-483) grows
+# the tower purely UPWARD from the floor — a centered [-1,+1] cube would sink
+# half its scaled height below z=0.  See level-building.md "Mesh origin".
+# 2×2 footprint; scale=n makes it 2n units tall.  Placed OOB (Z=-200).
 mat_dir = make_mat('fsn_dir', COLOR_DIR)
 dir_tmpl = add_solid_box(
     'DirTemplate',
-    -1.0, -1.0, -1.0,
-     1.0,  1.0,  1.0,
+    -1.0, -1.0, 0.0,
+     1.0,  1.0, 2.0,
     mat_dir
 )
 dir_tmpl['wf_schema_path']          = oad('dir')
@@ -428,13 +431,15 @@ dir_tmpl['wf_Visibility Mailbox']   = 1
 dir_tmpl.location                   = (0.0, -200.0, 0.0)
 
 # 12 ── FileTemplate ───────────────────────────────────────────────────────────
-# Base box is 2×2×0.5; short box sitting on the floor.
-# Scale=n makes it n×0.5 units tall (files stay shorter than dir towers).
+# Base-pivot: mesh-local Z spans [0, 0.5] (base at the local origin) so Z-scale
+# grows the box upward from the floor, never below it.  See DirTemplate above /
+# level-building.md "Mesh origin".  2×2 footprint, 0.5 tall before scale;
+# scale=n makes it n×0.5 units tall (files stay shorter than dir towers).
 mat_file = make_mat('fsn_file', COLOR_FILE)
 file_tmpl = add_solid_box(
     'FileTemplate',
-    -1.0, -1.0, -0.25,
-     1.0,  1.0,  0.25,
+    -1.0, -1.0, 0.0,
+     1.0,  1.0, 0.5,
     mat_file
 )
 file_tmpl['wf_schema_path']         = oad('file')

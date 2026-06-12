@@ -309,6 +309,53 @@ Authoring scripts (`blender_create_*.py`) should apply the snippet above as a
 last step before saving the .blend, so the `wf_Model Type` settings stay in
 sync with viewport display.
 
+### Mesh origin — base (lowest vertex) at local z=0
+
+**WF standard:** any mesh actor that rests on a surface is authored with its
+**base — the lowest vertex — at mesh-local z=0**, not centered on the origin.
+The actor's position is then its *base/feet* point, and the body grows upward
+from there. This applies to **every** surface-resting mesh actor — `Anchored`,
+`Physics`, and runtime-spawned templates alike. The only exceptions are spheres
+and vertically-symmetric props (a marble, a floating orb) where there is no
+"down" to anchor.
+
+Two independent failure modes both demand it — get either wrong and the actor
+sinks into the floor:
+
+1. **Placement.** `actor.pos = base position`. An actor dropped on a floor at
+   z=0 (or a `Physics` actor that Jolt settles at `actor.pos.z = ground_top_z`)
+   buries any mesh-local geometry below z=0. See
+   [Physics-mobility rule #1](#physics-mobility-actor-authoring-rules).
+2. **Scaling.** The runtime `X/Y/Z_SCALE` mailboxes 3040-3042 — and the
+   load-time OAD scale — **column-multiply the world matrix about the local
+   origin** ([`rendacto.cc:481-483`](../wfsource/source/renderassets/rendacto.cc)):
+   `matrix[0]*=scaleX; matrix[1]*=scaleY; matrix[2]*=scaleZ`. A vertex at local
+   z=0 is unaffected; a vertex at local z=−h moves to −h·scaleZ. So a
+   **center-pivot** box grows *symmetrically — downward through the floor* — as
+   it scales (qbert stretch-and-squash, the FSN `filesys` towers). A base-pivot
+   box grows purely upward. This second reason is invisible until you scale, so
+   it bites template/stretch actors that *placed* fine at scale=1.
+
+**How to enforce it** in a Blender authoring script:
+
+```python
+# After joining multi-primitive bodies, re-base so the lowest vertex is at z=0:
+def _origin_to_feet(body):
+    min_z = min(v.co.z for v in body.data.vertices)
+    for v in body.data.vertices:
+        v.co.z -= min_z
+    return min_z
+# …or, for a hand-built box, just author the verts with Z spanning [0, H]
+# (e.g. filesys DirTemplate uses local Z [0, 2], not [-1, +1]).
+```
+
+**Precedent:** the same sinking bug has been fixed three times — SMB Mario
+(2026-05-17, `Physics`), the qbert Slick/Sam flipper enemies
+([2026-05-22 plan](plans/2026-05-22-qbert-slick-sam-feet-origin.md), `Anchored`),
+and the FSN `filesys` towers (2026-06-12, runtime template + scale). It is one
+rule, not a physics quirk. See also the scale-mailbox note in
+[level-design-troubleshooting.md](level-design-troubleshooting.md#b-runtime-xyz_scale-mailboxes-30403042--visual-only).
+
 ---
 
 ## Engine systems you wire from a level
@@ -801,7 +848,7 @@ Actors with `wf_Mobility = 'Physics'` are driven by [Jolt's `CharacterVirtual`](
 
 **Three rules, all level-side:**
 
-1. **Mesh-local feet at z=0.** WF's convention is `actor.pos = feet position`. The Jolt character settles with `actor.pos.z = ground_top_z`, so anything with mesh-local z < 0 ends up *inside* the ground. In a Blender script, after joining multi-primitive bodies, call `bpy.ops.object.transform_apply(location=True, ...)` so the joined mesh origin sits at the lowest vertex (the feet), then assign `player.data = body.data`. Otherwise the body inherits the active object's pre-join location and the mesh-local feet drift below z=0.
+1. **Mesh-local feet at z=0** — the physics instance of the general [Mesh origin convention](#mesh-origin--base-lowest-vertex-at-local-z0). WF's convention is `actor.pos = feet/base position`; the Jolt character additionally settles with `actor.pos.z = ground_top_z`, so anything with mesh-local z < 0 ends up *inside* the ground. In a Blender script, after joining multi-primitive bodies, call `bpy.ops.object.transform_apply(location=True, ...)` so the joined mesh origin sits at the lowest vertex (the feet), then assign `player.data = body.data`. Otherwise the body inherits the active object's pre-join location and the mesh-local feet drift below z=0.
 
 2. **Collision shape = visual-mesh AABB (auto-derived).** The Blender exporter writes a `Global Bounding Box` (BOX3) per actor from the visual mesh AABB, and the engine turns it into a Z-up [`CapsuleShape`](../wfsource/source/physics/jolt/jolt_backend.cc) (radius = `min(halfX, halfY)`, halfHeight = `halfZ − radius`). For Mario-shaped actors (taller than wide) you get a capsule that fills the silhouette; for short, wide actors (halfZ ≤ radiusXY) the engine falls back to a single-radius sphere. There is no separate `wf_ColSpace` override field yet — see [`docs/investigations/2026-05-17-colspace-authoring.md`](investigations/2026-05-17-colspace-authoring.md) for when one might be worth adding.
 

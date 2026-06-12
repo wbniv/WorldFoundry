@@ -1847,6 +1847,12 @@ squash/stretch effects. For a gameplay-size change at **author time**, use path 
 a real mesh edit). A first-class runtime "scale that also rescales collision + physics" (Jolt
 `ScaledShape`) is a tracked follow-up — see `TODO.md` § *DEFERRED UNTIL LEVEL*.
 
+**Pivot gotcha:** the scale column-multiplies the world matrix **about the actor's local
+origin** (`rendacto.cc:481-483`), so a **center-pivot** mesh grows *symmetrically — downward
+through the floor* — as Z-scale increases, even when it placed fine at scale=1. Author
+surface-resting meshes **base-pivot** (lowest vertex at local z=0) so scale grows them
+upward only. This is the general [Mesh origin convention](level-building.md#mesh-origin--base-lowest-vertex-at-local-z0); the FSN `filesys` towers hit exactly this (2026-06-12).
+
 
 ## Multi-room levels & cross-room warps (the SMB pipe warp)
 

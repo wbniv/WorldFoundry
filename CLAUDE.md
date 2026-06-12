@@ -31,6 +31,7 @@ task md -- <file>        # render Markdown
 - Blender addon lives in `wftools/wf_blender/`. Python files there are checked by py-syntax hook.
 - Level source files: `.lev` (text) → `.lvl` (binary via levcomp-rs) → `.iff` (via iffcomp-rs).
 - `cd.iff` is the asset bundle; all assets loaded via `HALGetAssetAccessor()`, never from raw file paths.
+- Mesh actors that rest on a surface: author the **base (lowest vertex) at local z=0**, not centered — both placement and scale (mailboxes 3040-3042) pivot on the origin, so a centered mesh sinks/grows through the floor. See `docs/level-building.md` "Mesh origin". Exception: spheres / vertically-symmetric props.
 
 ## Coordinate Systems
 
