@@ -60,6 +60,14 @@ option(WF_ASAN "AddressSanitizer + UBSan (default ON for host Debug; -DWF_ASAN=O
 # cases, editor for its CRDT bridge). See the per-source-list gate below.
 option(WF_ENABLE_EDITOR   "Build the collaborative editor stack (CRDT + replay UI + DAP, etc.). OFF for shipped game-engine builds; ON for the editor application." OFF)
 
+# Browser/WASM editor (wf_edit_web): the Dear ImGui editor compiled to
+# Emscripten/WebGL2. Only meaningful under EMSCRIPTEN. When ON it re-enables the
+# WF_ENABLE_EDITOR umbrella (so the CRDT lib builds) but the NATIVE wf_edit target
+# stays out (it is gated `AND NOT EMSCRIPTEN`). v1 = co-edit + presence + chat;
+# voice/video native libs are compiled out. See
+# docs/plans/2026-06-12-wf-edit-in-the-browser.md.
+option(WF_ENABLE_WEB_EDITOR "Build the browser/WASM collaborative editor (wf_edit_web). Requires EMSCRIPTEN." OFF)
+
 # Mobile (Android + iOS): Forth-only, no scripting roster, no bridge/REST/editor.
 # WAMR ships x86_64 assembly (invokeNative_em64.s) that fails on arm64 mobile.
 if(ANDROID OR IOS)
@@ -88,7 +96,22 @@ elseif(EMSCRIPTEN)
     set(WF_REST_API      OFF      CACHE BOOL   "" FORCE)
     set(WF_DEBUG_BRIDGE  OFF      CACHE BOOL   "" FORCE)
     set(WF_ENABLE_STEAM  OFF      CACHE BOOL   "" FORCE)
-    set(WF_ENABLE_EDITOR OFF      CACHE BOOL   "" FORCE)
+    # The browser editor (wf_edit_web) reuses the engine's CRDT lib (engine/crdt
+    # → libwfcrdt.a → libyrs.a). WF_ENABLE_WEB_EDITOR flips the WF_ENABLE_EDITOR
+    # umbrella back ON *only* for that subdir — the native wf_edit target is also
+    # gated `AND NOT EMSCRIPTEN`, so it never enters the web build. yffi
+    # cross-compiles to wasm via the rustup toolchain; pin the cargo target
+    # because Corrosion's FindRust has no Emscripten branch and otherwise falls
+    # back to the host triple under emcmake (see project_wasm_editor_rust_toolchain
+    # + docs/plans/2026-06-12-wf-edit-in-the-browser.md Phase 0).
+    if(WF_ENABLE_WEB_EDITOR)
+        set(WF_ENABLE_EDITOR ON CACHE BOOL "" FORCE)
+        if(NOT DEFINED Rust_CARGO_TARGET)
+            set(Rust_CARGO_TARGET "wasm32-unknown-emscripten" CACHE STRING "" FORCE)
+        endif()
+    else()
+        set(WF_ENABLE_EDITOR OFF CACHE BOOL "" FORCE)
+    endif()
 elseif(APPLE)
     # macOS desktop: full scripting roster (Lua/Fennel/QuickJS/Wren + zForth)
     # and debug bridge enabled. WAMR deferred (macOS arm64 unverified). Editor
@@ -1189,7 +1212,7 @@ endif()
 # worldfoundry-editor-dev metapackage). M2 extracts GLFW's native X11/GLX
 # handles and registers them via SetHostGLContext so the engine renders into
 # this context.
-if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS)
+if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS AND NOT EMSCRIPTEN)
     # Opus + VP8 for in-editor voice/video chat.
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(OPUS REQUIRED opus)
