@@ -5,6 +5,33 @@
 > presence + chat browser↔browser. One known follow-up: the simultaneous-seed race
 > (Phase 3 status). Remaining: web Save/Export semantics (IDBFS / Blob download).
 
+## Outcome (2026-06-13)
+
+The same C++ Dear ImGui editor now runs in a WebGL2 browser, binary-compatible on the wire
+with native clients in the same relay room. Build/run: `task dev-setup-web-edit` (once) →
+`task build-web-edit` → `task serve-web-edit`
+(`http://localhost:8081/wf-edit.html?room=…&relay=…`). User-facing how-to is in
+[wf-edit-manual.md → Running in the browser](../wf-edit-manual.md#running-in-the-browser-wasmwebgl2).
+
+What shipped, by phase (newest first):
+
+- **P3 — presence + text chat** ([`108b775a`](https://github.com/wbniv/WorldFoundry/commit/108b775a)).
+  Root-cause fix: web tabs minted no `peer_id`, so presence/chat were self-dropped on the
+  `!pid.empty()` guard — now a unique random id per tab. Verified browser↔browser.
+- **P2 — Emscripten WebSocket + CRDT sync + join-and-receive**
+  ([`f713533a`](https://github.com/wbniv/WorldFoundry/commit/f713533a) transport,
+  [`58652d7e`](https://github.com/wbniv/WorldFoundry/commit/58652d7e) connect state machine,
+  [`be7baa6e`](https://github.com/wbniv/WorldFoundry/commit/be7baa6e) Doc population,
+  [`ea234a42`](https://github.com/wbniv/WorldFoundry/commit/ea234a42) join-and-receive).
+- **(d) heisenbug fix that gated P2** — scratch allocator outliving the Emscripten stack
+  unwind ([`59dc44d3`](https://github.com/wbniv/WorldFoundry/commit/59dc44d3); BUGS.md entry
+  [`f0f57a7c`](https://github.com/wbniv/WorldFoundry/commit/f0f57a7c)).
+- **P0/P1 — yffi→wasm cross-compile spike + non-collab WASM editor** (panels + gizmo + the
+  `wf_edit_web` CMake target, `web/shell-edit.html`, the three platform seams).
+
+**Open follow-ups:** web Save/Export (Blob download / IDBFS); the simultaneous-seed race +
+native-side defer/push for cross-impl join-and-receive (both in the Phase 3 status below).
+
 ## Context
 
 `wf-edit` is WorldFoundry's collaborative level editor — a Dear ImGui app that embeds

@@ -1,6 +1,6 @@
 # `wf-edit` — World Foundry collaborative level editor: user manual
 
-**Applies to:** `wf-edit` v1 (Linux/X11), as of 2026-05-21.
+**Applies to:** `wf-edit` v1 (Linux/X11 native **and** WASM/WebGL2 browser build), as of 2026-06-13.
 **Audience:** level designers and engine developers running the editor.
 
 `wf-edit` is a standalone desktop application that **embeds the World Foundry game
@@ -33,10 +33,14 @@ see and hear each other without leaving the tool.
 | Save back to `.lev`; compile `.lev` → `.iff` | ✅ |
 | Voice + video calling between editor instances in the same room | ✅ (LAN, Linux) |
 | Real-time multi-user co-editing over a network (presence, relay, chat, disk persistence) | ✅ (WebSocket relay; only at-rest **BYOK** snapshot encryption is deferred — see [Known limitations](#known-limitations)) |
+| Run the **whole editor in a web browser** (WASM/WebGL2) — same C++ ImGui app, co-edit + presence + chat over the relay | ✅ (Linux build cross-compiled to Emscripten; voice/video compiled out — see [Running in the browser](#running-in-the-browser-wasmwebgl2)) |
 
-**Platform:** Linux/X11 only in v1. The editor adopts an existing GLX context; Wayland
-and mobile hosts are v2+. `wf-edit` builds **only** when the engine is configured with
-`WF_ENABLE_EDITOR=ON`; a shipped game build carries none of the editor stack.
+**Platform:** the native editor is **Linux/X11 only** in v1 (it adopts an existing GLX
+context; Wayland and native mobile hosts are v2+). The **same editor also runs in a web
+browser** as a WASM/WebGL2 build (`wf_edit_web`) — see
+[Running in the browser](#running-in-the-browser-wasmwebgl2). Either way `wf-edit` builds
+**only** when the engine is configured with `WF_ENABLE_EDITOR=ON` (the web target sets it
+implicitly via `WF_ENABLE_WEB_EDITOR=ON`); a shipped game build carries none of the editor stack.
 
 ---
 
@@ -99,6 +103,98 @@ Camera capture uses Linux [V4L2](https://www.kernel.org/doc/html/latest/userspac
 > is silently ignored and the editor runs forever. See
 > [the screenshot-capture notes](../.claude/projects/-home-will-WorldFoundry/memory/project_wfedit_screenshot_capture.md)
 > for the headless-capture recipe.
+
+---
+
+## Running in the browser (WASM/WebGL2)
+
+The **same C++ ImGui editor** compiles to WebAssembly and runs in any WebGL2 browser — no
+JS rewrite, binary-compatible on the wire with native clients in the same relay room. The
+engine viewport, Outliner, Properties panel, OAD reader, gizmo, and CRDT bridge are all the
+native code paths; only three platform seams change (GLFW-Emscripten owns the WebGL2 canvas
+and the engine adopts it; `emscripten/websocket.h` replaces POSIX sockets; the blocking
+`RunEditor` loop becomes `RunEditorWeb`/`WebTickEditor` via `emscripten_set_main_loop`).
+**Voice/video is compiled out** of the web build (the native libdatachannel/Opus/libvpx/V4L2
+stack doesn't port to WASM); co-edit + presence + text chat are fully present.
+
+The full bring-up is recorded in the
+[wf-edit-in-the-browser plan](plans/2026-06-12-wf-edit-in-the-browser.md).
+
+### One-time toolchain setup
+
+The CRDT layer (`wfcrdt`→`libyrs.a`) is Rust cross-compiled to `wasm32-unknown-emscripten`,
+which needs an isolated rustup toolchain (the distro Rust can't target it) plus a vendored
+`yrs` patch:
+
+```bash
+task dev-setup-web-edit      # isolated rustup 1.85.1 + wasm32-unknown-emscripten + yrs patch
+```
+
+### Build + serve
+
+```bash
+task build-web-edit          # emcmake … -DWF_ENABLE_WEB_EDITOR=ON -DRust_CARGO_TARGET=wasm32-unknown-emscripten
+task serve-web-edit          # http://localhost:8081/wf-edit.html
+```
+
+`build-web-edit` produces `build-web-edit/wf-edit.{html,js,wasm,data}`. At configure time it
+pre-parses the level tree to `<lev>.json` (the browser can't `popen` a native levtree pass)
+and `--preload-file`s the level into MEMFS.
+
+### Query-string options
+
+The [`web/shell-edit.html`](../web/shell-edit.html) shell turns query params into the
+editor's `Module.arguments` / Emscripten `ENV`:
+
+| Param | Meaning | Default |
+|---|---|---|
+| `?leveltree=<path>` | Level the Outliner/Properties `Doc` is built from (a preloaded `/level/*.lev`) | `/level/snowgoons-blender.lev` |
+| `?level=<path>` | Level the engine renders in the viewport (a preloaded `/*.iff`) | `/snowgoons-standalone.iff` |
+| `?room=<id>` | Join a relay co-edit room (omit → local-only) | — |
+| `?relay=<url>` | Relay WebSocket URL, e.g. `wss://wf.worldfoundry.org` or `ws://localhost:9900` | — |
+| `?wfenv=KEY=VAL` | Set an Emscripten `ENV` var (repeatable) — drives the headless `WF_EDIT_*` hooks below from a URL | — |
+
+```
+http://localhost:8081/wf-edit.html?room=studio-1&relay=wss://wf.worldfoundry.org
+```
+
+### Co-edit on the web: join-and-receive
+
+A relay room has **one** authoritative `Doc`. When you open a URL with `?room=`, the web
+editor **defers** loading the level locally and instead:
+
+- **first peer in** → seeds the room: after a short window with an empty `Doc` it loads the
+  level, and (because `observeUpdates` is already wired) every commit auto-pushes to the relay;
+- **later peers** → **adopt** the room's `Doc` from the relay and never load locally — so two
+  peers can't end up with independent CRDT ids and duplicated actors.
+
+Presence (peer cursors / camera frustums / selection rings) and text chat then flow over the
+same relay exactly as on native. Each browser tab mints its **own** random `peer_id` (there's
+no persisted `identity.json` in the browser), so tabs appear as distinct collaborators.
+
+> **Known limitation — simultaneous-seed race:** if *two* peers open a **brand-new** room
+> within the ~0.6 s seed window (before either's seed has been pushed + relay-persisted), both
+> seed and the room ends up with duplicated content. The normal flow — one person opens/creates
+> the room, others join after — adopts correctly. A robust fix (deterministic host election or a
+> relay "room-is-new" signal) is a tracked follow-up.
+
+### Saving on the web
+
+There is **no local filesystem or shell** in the browser, so **Save + Compile is disabled**.
+The durable copy of your work is the **relay's room snapshot** (co-editors converge on it). An
+explicit **Export** (`SaveDocToLev` → a downloadable `.lev` Blob) and optional cross-session
+IDBFS persistence are a tracked follow-up — see
+[Save semantics on web](plans/2026-06-12-wf-edit-in-the-browser.md).
+
+### Verifying it headlessly
+
+The browser build accepts the same `WF_EDIT_*` hooks as native (via `?wfenv=`). Because two
+independently fast-forwarding `--virtual-time-budget` tabs barely co-exist in wall-clock (20 s
+of virtual time burns in ~1.4 s real), live cross-peer presence is best verified with a
+**real-time** driver — a dependency-free Node-22 CDP script that opens two tabs with
+`Target.createTarget` and reads each tab's console, keeping both live for the exchange. This is
+how presence + chat were verified browser↔browser
+([`108b775a`](https://github.com/wbniv/WorldFoundry/commit/108b775a)).
 
 ---
 
@@ -516,6 +612,8 @@ workflow — they exist so the editor can be proven headlessly.
 | `WF_EDIT_REMOTE_TEST="<docB>\|<x y z>"` | With `--select=A` (A≠B): apply a **remote**-origin Position edit to actor *B* and confirm the deep observer alone moves it in the engine. |
 | `WF_EDIT_DRAGLOCK_TEST=1` | With `--select=N`: prove the active-drag transform lock — a remote edit to a simulated-dragged actor (non-transform *and* Position) leaves it put, and propagation resumes on release. |
 | `WF_EDIT_SPAWN_CONFIRM_TEST=1` | Verify the `SpawnActor` runtime path (run with `--frames 5`). |
+| `WF_EDIT_AUTO_SELECT=N` | Preselect actor *N* at startup so the editor broadcasts a selection ring without a click (presence/shared-cursor screenshots). |
+| `WF_EDIT_CHAT_SEND="<text>"` | Once a peer is present in the room, broadcast one `CH_CHAT` frame with `<text>` (then never again) — proves chat delivery headlessly without driving the ImGui input. Gating on a present peer guarantees the receiver is connected. |
 
 ---
 
@@ -550,7 +648,10 @@ workflow — they exist so the editor can be proven headlessly.
   (cross-references are stored by actor index; the decompiler synthesizes `{Class}_{index}` names),
   so a `.lev` saved from a binary load is a fresh derivative, not a round-trip to the original
   Blender/`.lev` source. See the [load-binary-iff plan](plans/2026-05-25-wf-edit-load-binary-iff.md).
-- **Linux/X11 only.** Wayland and mobile hosts are v2+.
+- **Native build is Linux/X11 only.** Wayland and native mobile hosts are v2+. The editor
+  also runs as a **WASM/WebGL2 browser build** ([Running in the browser](#running-in-the-browser-wasmwebgl2)),
+  which is cross-platform via the browser but drops voice/video and Save+Compile, and has the
+  simultaneous-seed-race caveat noted there.
 
 ---
 
@@ -564,7 +665,8 @@ workflow — they exist so the editor can be proven headlessly.
   [save round-trip](plans/2026-05-21-editor-save-roundtrip.md) ·
   [outliner add/delete](plans/2026-05-21-outliner-add-delete.md) ·
   [live structural sync](plans/2026-05-21-live-structural-sync.md) ·
-  [voice + video](plans/2026-05-21-voice-video-collab.md).
+  [voice + video](plans/2026-05-21-voice-video-collab.md) ·
+  [wf-edit in the browser (WASM/WebGL2)](plans/2026-06-12-wf-edit-in-the-browser.md).
 - [docs/level-building.md](level-building.md) and
   [docs/level-design-troubleshooting.md](level-design-troubleshooting.md) — the level
   designer's reference and gotcha log.

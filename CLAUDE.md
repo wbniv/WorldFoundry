@@ -21,6 +21,10 @@
 task build               # CMake build (Linux)
 task build-cmake-android # Android NDK build
 task build-apk           # Android APK
+task build-wf-edit       # native collaborative editor (ASan; build-editor/)
+task build-wf-edit-fast  # native editor, no ASan (build-editor-fast/) — for collab/RAM
+task build-web-edit      # editor → WASM/WebGL2 (build-web-edit/); needs `task dev-setup-web-edit` once
+task serve-web-edit      # serve the web editor at http://localhost:8081/wf-edit.html
 task md -- <file>        # render Markdown
 ```
 
