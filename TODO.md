@@ -82,6 +82,25 @@ timer callbacks, concurrent AI), explore these alternatives instead:
   - **Filelight** (KDE) — concentric/radial "sunburst" segments by depth, conceptually the
     2D analogue of the FSN radial tree: [Filelight](https://apps.kde.org/filelight/) ·
     [source (KDE invent)](https://invent.kde.org/utilities/filelight)
+- [ ] **Filesystem-viz family on a flat-table + Forth-policy core.** A platform for disk-usage
+  visualizations: C walks the tree and emits a flat numeric table; a per-view Forth Director
+  renders it (depth→template, size→height, hue, tiling) — so the *aesthetic* is hot-reloadable
+  in the level `.fth` (proven: re-skinned a level with the engine binary untouched). Adding a
+  view = "new C emitter + new `.fth` policy." ~~**P1 — Filelight** walkable radial sunburst~~
+  (DONE, [b2f18cf6](https://github.com/wbniv/WorldFoundry/commit/b2f18cf6); `wflevels/filelight/`,
+  syscalls 140-150, `task run-filelight`). **Open:**
+  - **P2 — retrofit FSN `filesys`** from its C monolith (`fsn_spawn_tree`) to the same split:
+    a `fsn-scan` emitter (tree positions/angles/sizes → flat rows + `node-*` accessors, keeping
+    the trig in C) + the render policy (tower height, age colour, wire spawn+rotate, file cap)
+    moved into the filesys Director `.fth`. Regression guard: before/after visual + actor-count
+    parity. Makes the tree-view aesthetics hot-reloadable too.
+  - **KDirStat/QDirStat treemap view** (next new view) — squarified rectangles, area ∝ size,
+    nested; a C emitter (rows `{x,y,w,h,depth,tag}`) + a Forth policy spawning XY-scaled boxes.
+    No trig at all — the cleanest fit for the flat-table model.
+  - **Tiered monument** (#2) + **planetarium dome** (#3) sunburst variants; **unified runtime
+    view-switcher** (one level, mode mailbox cycles tree↔sunburst↔treemap↔tiered↔dome);
+    **procedural single-mesh** upgrade (exact sectors via one runtime `RenderObject3D`).
+  — [plan](docs/plans/2026-06-13-filesystem-viz-on-a-flat-table-forth-policy-core-f.md)
 - [ ] **SMB W1-4 headless mid-level screenshots come out black — root cause NOT established.** When the player is teleported to mid-level via `X_POS` (or the camera is driven with `SMB_MAX_CAM_X` while the player stays at spawn), the captured frame is all-black at the fire-bar/boss area. **What's confirmed:** the actors exist and run scripts ([`tests/verify_smb_w1_4_firebars.py`](tests/verify_smb_w1_4_firebars.py) + [`tests/verify_smb_w1_4_boss.py`](tests/verify_smb_w1_4_boss.py) pass); spawn renders clean; the *white* component was the full-span ceiling's lit underside (fixed — ceiling now invisible, [bf06dbec](https://github.com/wbniv/WorldFoundry/commit/bf06dbec)). **What's NOT confirmed:** whether the black is geometry failing to draw or simply the camera pointing at empty space — I only ever read `SMB_TARGET_CAM_X` (the *target* mailbox), never the camera actor's real world position (camera is actor idx 1, mobility=Camera). An earlier claim that "geometry doesn't render" was an unverified inference and is probably wrong; most likely this is a **capture-method artifact** (the camshot has `Rotation=Fixed`, and a discontinuous teleport may leave the camera aimed away from where the player lands), and **normal play renders fine**. Headless GUI diagnostics on `:0` were too flaky in this environment to settle it. **Next:** (1) play-test on `:0` — does mid-level W1-4 render during a normal walk? If yes, this is purely a capture limitation; (2) if a real bug, read the camera (idx 1) actual X vs the camshot (idx 5) and the `Fixed`-rotation path in [`movecam.cc`](wfsource/source/game/movecam.cc); (3) document a natural-walk capture recipe for SMB mid-level stills. See [W1-4 plan](docs/plans/2026-06-03-build-faithful-smb-w1-4.md).
 
 - [ ] **Moon Site 01: proper Jolt vehicle physics for lunar cruisers.** Current hack: cruisers are `MOBILITY_PHYSICS` (CharacterVirtual) with `RunningAccel=12 / RunningDecel=0.3` — they slide on the regolith in response to joystick but have capsule collision and no realistic drive. Real fix: add a `MOBILITY_VEHICLE` path in `actor.cc` that creates a Jolt `VehicleConstraint` body (wheel joints, suspension, drive forces on rear/all axles), exposes wheel-count/radius/suspension-travel/max-steer-angle OAS fields, and lets the level author set engine torque and brake torque. See [Jolt VehicleConstraint docs](https://jrouwe.github.io/JoltPhysics/) and the "replace physics" follow-up (`project_followup_replace_physics.md`). Trigger: when the CharacterVirtual slide-hack becomes a design blocker or a second vehicle type is needed.
