@@ -49,7 +49,13 @@ PLAYER_SPAWN = (0.0, 0.0, 1.0)
 # Grid is now centred: Y0=-35 so rows span -35..+35 around the player.
 # Camera looks from behind at 30° downward; tower tops break the horizon
 # in middle rows, creating the FSN cityscape silhouette.
-CAM_OFFSET   = (0.0, -70.0, 40.0)
+# Camera/CamShot START pose is the high establishing shot (0,-100,90); the
+# Director's `flydown` eases CamShot01 down to the play pose (0,-70,41) over the
+# first FLY_SECS seconds, and the bungee camera follows it into the field.
+CAM_OFFSET   = (0.0, -100.0, 89.0)        # high start: PLAYER_SPAWN + this = (0,-100,90)
+FLY_PLAY_Y   = -70.0                       # play pose the fly-down settles to
+FLY_PLAY_Z   =  41.0
+FLY_SECS     =  2.5
 TARGET1_POS  = (0.0, 0.0, 0.0)
 TARGET2_POS  = (0.0, 5.0, 0.0)
 
@@ -57,9 +63,10 @@ TARGET2_POS  = (0.0, 5.0, 0.0)
 # Camera at (0,-70,41); grid X: -17..+18, Y: -35..+35, Z: 0..8.
 ROOM_CENTER     = (0.0, 0.0, 25.0)
 # Phase 2: widened (X±50, Y up to 55) so the recursive tree fans out without
-# spawning outside the room (level.cc:1692 asserts on out-of-room spawns).
-# Camera at (0,-70,41) stays inside (Y min -72, Z world [-3,53]).
-ROOM_LOCAL_BBOX = (-50.0, -72.0, -28.0, 50.0, 55.0, 28.0)
+# spawning outside the room (level.cc:1692 asserts on out-of-room spawns). Y down
+# to -110 and Z up to world 95 so the high fly-down camera pose (0,-100,90) stays
+# inside the room (the bbox is just a containment box — no memory cost).
+ROOM_LOCAL_BBOX = (-50.0, -110.0, -28.0, 50.0, 55.0, 70.0)
 # Keeping room X=±35 from the previously-verified working config — bungee
 # camera initialises cleanly at this X extent. Y extended to +40 so the
 # far grid rows (Y up to +35) are comfortably inside.
@@ -97,6 +104,7 @@ DIR_TMPL_IDX   = 12
 FILE_TMPL_IDX  = 13
 CONN_TMPL_IDX  = 16    # ConnectorTemplate (.lvl index)
 PLAYER_LVL_IDX = 10    # Player (.lvl index) — fsn-navigate reads its position
+CAMSHOT_LVL_IDX = 6    # CamShot01 (.lvl index) — the fly-down animates its position
 FSN_MAX_DEPTH  = 2     # render the tree this many levels from the current root
 FSN_MAX_NODES  = 400   # hard cap on total spawned actors (towers+files+wires); pool=500, DRAM-sized
 
@@ -147,12 +155,17 @@ DIRECTOR_SCRIPT = (
     f': MAXDEPTH {FSN_MAX_DEPTH} ;\n'
     f': MAXNODES {FSN_MAX_NODES} ;\n'
     f': PLAYER-IDX {PLAYER_LVL_IDX} ;\n'
+    f': CAMSHOT-IDX {CAMSHOT_LVL_IDX} ;\n'
 
     '10 read-mailbox 0 = if\n'
     '  1 10 write-mailbox\n'
     '  DIR-T FILE-T CONN-T MAXDEPTH MAXNODES PLAYER-IDX fsn-config\n'
     '  fsn-build drop\n'
     'fi\n'
+
+    # Fly-down: pass the level clock (mailbox 1906 = TIME) + camshot index to the
+    # C++ fsn-flydown, which eases the camshot high→play (poses live in C++).
+    '1906 read-mailbox CAMSHOT-IDX fsn-flydown\n'
 
     'fsn-navigate\n'
 )

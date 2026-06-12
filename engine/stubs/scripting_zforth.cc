@@ -49,6 +49,7 @@ extern "C" {
 #include <dirent.h>
 #include <sys/stat.h>
 #include <cmath>      // atan2/cos/sin/sqrt for the FSN connector orientation
+#include <ctime>      // time() for FSN file color-by-age
 
 #include "level.hp"   // theLevel global (extern Level* theLevel); pulls in Actor/PhysicalAttributes
 #include <math/euler.hp>     // Euler — connector orientation
@@ -118,6 +119,42 @@ static void fsn_set_scale(int idx, float sx, float sy, float sz) {
     mb.WriteMailbox(3042, Scalar::FromFloat(sz));
 }
 
+// Override an actor's material colour on all three faces (mailboxes 3037-3039,
+// packed 0xRRGGBB) — the qbert per-cube colour path.
+static void fsn_set_color(int idx, int r, int g, int b) {
+    if (!g_mgr || !idx) return;
+    float packed = (float)(((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF));
+    Mailboxes& mb = g_mgr->LookupMailboxes(idx);
+    mb.WriteMailbox(3037, Scalar::FromFloat(packed));   // FACE_COLOR_TOP
+    mb.WriteMailbox(3038, Scalar::FromFloat(packed));   // FACE_COLOR_LIT
+    mb.WriteMailbox(3039, Scalar::FromFloat(packed));   // FACE_COLOR_SHADOW
+}
+
+// Camera fly-down: ease the CamShot from the high establishing pose to the play
+// pose over FSN_FLY_SECS, given the level clock t (seconds). The bungee camera
+// follows the camshot. Poses must match blender_filesys.py (CAM_OFFSET high start).
+static void fsn_flydown(int camIdx, float t) {
+    if (!g_mgr || !camIdx) return;
+    const float SECS = 2.5f;
+    const float HY = -100.0f, HZ = 90.0f, PY = -70.0f, PZ = 41.0f;   // high → play
+    float f = t / SECS; if (f < 0.0f) f = 0.0f; if (f > 1.0f) f = 1.0f;
+    Mailboxes& mb = g_mgr->LookupMailboxes(camIdx);
+    mb.WriteMailbox(3010, Scalar::FromFloat(HY + (PY - HY) * f));   // EMAILBOX_Y_POS
+    mb.WriteMailbox(3011, Scalar::FromFloat(HZ + (PZ - HZ) * f));   // EMAILBOX_Z_POS
+}
+
+// FSN file colour-by-age: warm (new) → cool (old) over ~a year of mtime.
+static void fsn_color_by_age(int idx, long mtime) {
+    long now = (long)time(nullptr);
+    long age = now - mtime; if (age < 0) age = 0;
+    float t = (float)age / (365.0f * 86400.0f);   // 0 = brand new … 1 = a year+ old
+    if (t > 1.0f) t = 1.0f;
+    int r = (int)(255.0f * (1.0f - t) +  40.0f * t);   // 255 → 40
+    int g = (int)( 90.0f * (1.0f - t) + 130.0f * t);   //  90 → 130
+    int b = (int)( 40.0f * (1.0f - t) + 255.0f * t);   //  40 → 255
+    fsn_set_color(idx, r, g, b);
+}
+
 // FSN connector wire: a base-pivot unit beam (local +X ∈ [0,1]) spawned at p1,
 // rotated so +X aims at p2 (flat: heading only), and X-scaled to the distance.
 static void fsn_spawn_connector(float x1, float y1, float z1, float x2, float y2) {
@@ -178,7 +215,7 @@ static void fsn_place_files(const std::vector<FsnEntry>& entries, float x, float
         float fx = x + fr * std::cos(ang), fy = y + fr * std::sin(ang);
         int fh = fsn_isqrt((int)(e.size / 1000)); if (fh < 1) fh = 1; if (fh > 4) fh = 4;
         int file = fsn_spawn(g_fsn_fileT, fx, fy, topZ);
-        if (file) fsn_set_scale(file, 1.0f, 1.0f, (float)fh);
+        if (file) { fsn_set_scale(file, 1.0f, 1.0f, (float)fh); fsn_color_by_age(file, e.mtime); }
         fi++;
     }
 }
@@ -215,7 +252,7 @@ static int fsn_build() {
         float fx = 6.0f * std::cos(ang), fy = 6.0f * std::sin(ang);
         int fh = fsn_isqrt((int)(e.size / 1000)); if (fh < 1) fh = 1; if (fh > 4) fh = 4;
         int file = fsn_spawn(g_fsn_fileT, fx, fy, 0.0f);
-        if (file) fsn_set_scale(file, 1.0f, 1.0f, (float)fh);
+        if (file) { fsn_set_scale(file, 1.0f, 1.0f, (float)fh); fsn_color_by_age(file, e.mtime); }
         fi++;
     }
 
@@ -446,6 +483,11 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                 zf_push(ctx, (zf_cell)(float)n);
             } else if (custom == 10) {
                 // fsn-navigate ( -- ) — proximity descend / back ascend. M3 fills this in.
+            } else if (custom == 11) {
+                // fsn-flydown ( t camIdx -- ) — ease the camshot high→play over the clock t.
+                int camIdx = (int)zf_pop(ctx);
+                float t    = (float)zf_pop(ctx);
+                fsn_flydown(camIdx, t);
             } else if (custom == 72) {
                 /* Neural-forth dispatch gate: syscall 200 = ZF_SYSCALL_USER + 72.
                  * Pops word-id from stack and routes to nf_dispatch().
@@ -630,6 +672,8 @@ void Init(MailboxesManager& mgr)
     if (r != ZF_OK) fprintf(stderr, "zforth: init failed (fsn-build): %d\n", r);
     r = zf_eval(&g_ctx, ": fsn-navigate 138 sys ;");
     if (r != ZF_OK) fprintf(stderr, "zforth: init failed (fsn-navigate): %d\n", r);
+    r = zf_eval(&g_ctx, ": fsn-flydown 139 sys ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (fsn-flydown): %d\n", r);
 
     // Uniform scale helper — sets qbert scale mailboxes 3040-3042 on an actor.
     // Stack: ( actor scale -- )
