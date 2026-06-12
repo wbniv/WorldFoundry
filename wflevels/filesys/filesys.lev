@@ -5,7 +5,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -35.0000000000000000(1.15.16) -72.0000000000000000(1.15.16) -28.0000000000000000(1.15.16) 35.0000000000000000(1.15.16) 40.0000000000000000(1.15.16) 28.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -50.0000000000000000(1.15.16) -72.0000000000000000(1.15.16) -28.0000000000000000(1.15.16) 50.0000000000000000(1.15.16) 55.0000000000000000(1.15.16) 28.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "room" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "room01.iff" } }
@@ -123,7 +123,7 @@
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "director" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 5l } { 'STR' "5" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: DIR-T   12 ;\n: FILE-T  13 ;\n: CONN-T  16 ;\n: MAXDEPTH 2 ;\n: MAXNODES 120 ;\n: PLAYER-IDX 10 ;\n10 read-mailbox 0 = if\n  1 10 write-mailbox\n  DIR-T FILE-T CONN-T MAXDEPTH MAXNODES PLAYER-IDX fsn-config\n  fsn-build drop\nfi\nfsn-navigate\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: DIR-T   12 ;\n: FILE-T  13 ;\n: CONN-T  16 ;\n: MAXDEPTH 2 ;\n: MAXNODES 400 ;\n: PLAYER-IDX 10 ;\n10 read-mailbox 0 = if\n  1 10 write-mailbox\n  DIR-T FILE-T CONN-T MAXDEPTH MAXNODES PLAYER-IDX fsn-config\n  fsn-build drop\nfi\nfsn-navigate\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
 	}
@@ -165,7 +165,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -22.0000000000000000(1.15.16) -38.0000000000000000(1.15.16) -0.5000000000000000(1.15.16) 22.0000000000000000(1.15.16) 38.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -45.0000000000000000(1.15.16) -38.0000000000000000(1.15.16) -0.5000000000000000(1.15.16) 45.0000000000000000(1.15.16) 50.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "statplat" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "floor.iff" } }
@@ -224,7 +224,7 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
 		} }
-		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -35.0000000000000000(1.15.16) -72.0000000000000000(1.15.16) -28.0000000000000000(1.15.16) 35.0000000000000000(1.15.16) 40.0000000000000000(1.15.16) 28.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -50.0000000000000000(1.15.16) -72.0000000000000000(1.15.16) -28.0000000000000000(1.15.16) 50.0000000000000000(1.15.16) 55.0000000000000000(1.15.16) 28.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
 		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "actboxor" } }
 		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "actboxor.iff" } }

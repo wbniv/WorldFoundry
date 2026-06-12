@@ -87,9 +87,19 @@ static int fsn_isqrt(int n) { int s = 0; while ((s + 1) * (s + 1) <= n) s++; ret
 
 static int fsn_budget_left() { return g_fsn_maxNodes - (int)g_fsn_spawned.size(); }
 
+// Room bbox guard (matches blender_filesys.py ROOM_LOCAL_BBOX, minus a margin):
+// SafelyConstructTemplateObject asserts (level.cc:1692) on a spawn outside every
+// room, so never hand it an out-of-room position — skip instead.
+static const float FSN_X_LIM = 48.0f, FSN_Y_MAX = 53.0f, FSN_Y_MIN = -70.0f;
+
 // Spawn template `tmpl` at (x,y,z); record it; return actor index (0 on failure).
 static int fsn_spawn(int tmpl, float x, float y, float z) {
     if (!theLevel || fsn_budget_left() <= 0) return 0;
+    if (x < -FSN_X_LIM || x > FSN_X_LIM || y < FSN_Y_MIN || y > FSN_Y_MAX) {
+        static int warned = 0;
+        if (warned++ < 3) fprintf(stderr, "FSN: skip out-of-room spawn (%.1f,%.1f)\n", x, y);
+        return 0;
+    }
     Vector3 pos(Scalar::FromFloat(x), Scalar::FromFloat(y), Scalar::FromFloat(z));
     Actor* a = theLevel->ConstructTemplateObject(tmpl, g_curObj, pos, Vector3::zero);
     if (!a) return 0;
@@ -150,13 +160,19 @@ static void fsn_scan(const std::string& dir, std::vector<FsnEntry>& out) {
     closedir(d);
 }
 
-// Ring a node's files on its tower top (z=topZ), scaled by √size.
+// Files are secondary to the tree, so cap how many a node shows (the rest are
+// implied) — otherwise a file-heavy dir eats the whole actor budget and the
+// tower tree starves.
+static const int FSN_MAX_FILES_PER_NODE = 6;
+
+// Ring up to N of a node's files on its tower top (z=topZ), scaled by √size.
 static void fsn_place_files(const std::vector<FsnEntry>& entries, float x, float y, float topZ) {
     int nf = 0; for (auto& e : entries) if (!e.is_dir) nf++;
+    if (nf > FSN_MAX_FILES_PER_NODE) nf = FSN_MAX_FILES_PER_NODE;
     int fi = 0;
     for (auto& e : entries) {
         if (e.is_dir) continue;
-        if (fsn_budget_left() <= 0) break;
+        if (fi >= nf || fsn_budget_left() <= 0) break;
         float ang = (nf > 1) ? (2.0f * FSN_PI * (float)fi / (float)nf) : 0.0f;
         float fr  = (nf > 1) ? 0.6f : 0.0f;
         float fx = x + fr * std::cos(ang), fy = y + fr * std::sin(ang);
@@ -167,44 +183,14 @@ static void fsn_place_files(const std::vector<FsnEntry>& entries, float x, float
     }
 }
 
-// One tree node (depth ≥ 1): spawn its dir tower, ring its files on top, fan its
-// child dirs out on a cone pointing away from the field centre (each wired), recurse.
-static void fsn_build_node(const std::string& path, float x, float y, int depth) {
-    if (depth > g_fsn_maxDepth || fsn_budget_left() <= 0) return;
-    std::vector<FsnEntry> entries;
-    fsn_scan(path, entries);
+// A queued tree node: render its tower when dequeued, wire it to its parent.
+struct FsnJob { std::string path; float x, y, px, py; int depth; };
 
-    int h = fsn_isqrt((int)entries.size());
-    if (h < 1) h = 1; if (h > 6) h = 6;
-    int tower = fsn_spawn(g_fsn_dirT, x, y, 0.0f);
-    if (!tower) return;
-    fsn_set_scale(tower, 1.0f, 1.0f, (float)h);
-    float topZ = 2.0f * (float)h;                 // dir template is 2 units tall before scale
-    g_fsn_towers.push_back(FsnTower{ tower, path, x, y, topZ });
-    fsn_place_files(entries, x, y, topZ);
-
-    if (depth < g_fsn_maxDepth) {
-        int nd = 0; for (auto& e : entries) if (e.is_dir) nd++;
-        float R = (depth == 1) ? 11.0f : 7.0f;
-        float outward = std::atan2(y, x);          // fan away from the field centre
-        int ci = 0;
-        for (auto& e : entries) {
-            if (!e.is_dir) continue;
-            if (fsn_budget_left() <= 1) break;     // leave room for the connector
-            float frac = (nd > 1) ? ((float)ci / (float)(nd - 1) - 0.5f) : 0.0f;
-            float ang  = outward + FSN_PI * frac;  // ±90° cone
-            float cx = x + R * std::cos(ang), cy = y + R * std::sin(ang);
-            fsn_spawn_connector(x, y, 0.3f, cx, cy);
-            fsn_build_node(e.path, cx, cy, depth + 1);
-            ci++;
-        }
-    }
-}
-
-// Despawn the current view and rebuild from g_fsn_root. Returns spawned count.
-// The ROOT (CWD) gets NO tower — the player stands there. Its child dirs fan
-// across the +Y half-field in front of the player (camera looks from -Y); its
-// files ring the standpoint as short slabs. Walk into a child to descend (M3).
+// Despawn the current view and rebuild from g_fsn_root, BREADTH-FIRST. Returns
+// the spawned count. The ROOT (CWD) gets NO tower — the player stands there; its
+// files ring the standpoint and its child dirs fan across the +Y half-field in
+// front of the player (camera looks from -Y). BFS spreads the node budget across
+// breadth before depth, so siblings all appear instead of one subtree clumping.
 static int fsn_build() {
     if (theLevel) {
         for (int idx : g_fsn_spawned) {
@@ -218,32 +204,64 @@ static int fsn_build() {
     std::vector<FsnEntry> entries;
     fsn_scan(g_fsn_root, entries);
 
-    // Root files: a low ring of slabs around the standpoint (radius 5, on the floor).
+    // Root files: a low ring of slabs around the standpoint (radius 6), capped.
     int nf = 0; for (auto& e : entries) if (!e.is_dir) nf++;
+    if (nf > 10) nf = 10;
     int fi = 0;
     for (auto& e : entries) {
         if (e.is_dir) continue;
-        if (fsn_budget_left() <= 0) break;
+        if (fi >= nf) break;
         float ang = (nf > 1) ? (2.0f * FSN_PI * (float)fi / (float)nf) : 0.0f;
-        float fx = 5.0f * std::cos(ang), fy = 5.0f * std::sin(ang);
+        float fx = 6.0f * std::cos(ang), fy = 6.0f * std::sin(ang);
         int fh = fsn_isqrt((int)(e.size / 1000)); if (fh < 1) fh = 1; if (fh > 4) fh = 4;
         int file = fsn_spawn(g_fsn_fileT, fx, fy, 0.0f);
         if (file) fsn_set_scale(file, 1.0f, 1.0f, (float)fh);
         fi++;
     }
 
-    // Root child dirs fan across +Y (20°..160°) so none land on the player at origin.
+    // Seed the BFS queue with the root's child dirs, fanned wide across +Y (15°..165°).
+    std::vector<FsnJob> q;
     int nd = 0; for (auto& e : entries) if (e.is_dir) nd++;
     int ci = 0;
     for (auto& e : entries) {
         if (!e.is_dir) continue;
-        if (fsn_budget_left() <= 1) break;
         float t = (nd > 1) ? ((float)ci / (float)(nd - 1)) : 0.5f;
-        float a = (20.0f + 120.0f * t) * (FSN_PI / 180.0f);
-        float cx = 18.0f * std::cos(a), cy = 18.0f * std::sin(a);
-        fsn_spawn_connector(0.0f, 0.0f, 0.3f, cx, cy);
-        fsn_build_node(e.path, cx, cy, 1);
+        float a = (15.0f + 150.0f * t) * (FSN_PI / 180.0f);
+        q.push_back(FsnJob{ e.path, 30.0f * std::cos(a), 30.0f * std::sin(a), 0.0f, 0.0f, 1 });
         ci++;
+    }
+
+    // Process breadth-first: each job spawns its wire-to-parent + tower + files,
+    // then enqueues its own child dirs fanned on a cone pointing away from centre.
+    for (size_t qi = 0; qi < q.size(); ++qi) {
+        if (fsn_budget_left() <= 1) break;             // 1 for the connector + 1 for the tower
+        FsnJob job = q[qi];
+        fsn_spawn_connector(job.px, job.py, 0.3f, job.x, job.y);
+
+        std::vector<FsnEntry> sub;
+        fsn_scan(job.path, sub);
+        int h = fsn_isqrt((int)sub.size()); if (h < 1) h = 1; if (h > 6) h = 6;
+        int tower = fsn_spawn(g_fsn_dirT, job.x, job.y, 0.0f);
+        if (!tower) continue;
+        fsn_set_scale(tower, 1.0f, 1.0f, (float)h);
+        float topZ = 2.0f * (float)h;
+        g_fsn_towers.push_back(FsnTower{ tower, job.path, job.x, job.y, topZ });
+        fsn_place_files(sub, job.x, job.y, topZ);
+
+        if (job.depth < g_fsn_maxDepth) {
+            int snd = 0; for (auto& e : sub) if (e.is_dir) snd++;
+            float R = (job.depth == 1) ? 16.0f : 10.0f;
+            float outward = std::atan2(job.y, job.x);  // fan away from the field centre
+            int si = 0;
+            for (auto& e : sub) {
+                if (!e.is_dir) continue;
+                float frac = (snd > 1) ? ((float)si / (float)(snd - 1) - 0.5f) : 0.0f;
+                float ang  = outward + (FSN_PI * 0.78f) * frac;   // ±70° cone
+                q.push_back(FsnJob{ e.path, job.x + R * std::cos(ang),
+                                    job.y + R * std::sin(ang), job.x, job.y, job.depth + 1 });
+                si++;
+            }
+        }
     }
     return (int)g_fsn_spawned.size();
 }

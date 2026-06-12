@@ -29,7 +29,7 @@
 
 //=============================================================================
 
-AssetManager::AssetManager( size_t cbPermMemory, size_t cbRoomMemory, VideoMemory& videoMemory, _DiskFile& diskFile, Memory& memory, AssetCallback& callback ) :
+AssetManager::AssetManager( size_t cbPermMemory, size_t cbRoomMemory, int numActiveRoomSlots, VideoMemory& videoMemory, _DiskFile& diskFile, Memory& memory, AssetCallback& callback ) :
     _videoMemory(videoMemory),
    _diskFile(diskFile),
    _memory(memory),
@@ -37,8 +37,13 @@ AssetManager::AssetManager( size_t cbPermMemory, size_t cbRoomMemory, VideoMemor
 {
 	_cbPermMemory = cbPermMemory;
 	_cbRoomMemory = cbRoomMemory;
+	_numActiveRoomSlots = numActiveRoomSlots;
+	assert( _numActiveRoomSlots >= 1 && _numActiveRoomSlots <= MAX_ACTIVE_ROOMS );
 
-	_assetMemory = new ( HALLmalloc ) char [ _cbPermMemory + MAX_ACTIVE_ROOMS * _cbRoomMemory ];
+	// Layout: [room0][room1]…[room(N-1)][perm], N = _numActiveRoomSlots. PERM keeps
+	// array index PERM_SLOT_INDEX (=MAX_ACTIVE_ROOMS) but its MEMORY sits right after
+	// the N used room slots, so a single-room level pays cbPerm + 1×cbRoom, not ×9.
+	_assetMemory = new ( HALLmalloc ) char [ _cbPermMemory + _numActiveRoomSlots * _cbRoomMemory ];
 	assert( ValidPtr( _assetMemory ) );
 
 	for ( int idxRoomSlot=0; idxRoomSlot < MAX_ACTIVE_SLOTS; ++idxRoomSlot )
@@ -152,7 +157,8 @@ AssetManager::LoadPermanents()
 	}
 	binistream roomStream((void*)(((char*)streamBuffer)+sizeof(CHUNKHDR)),chdr.size);
 
-	_assets[PERM_SLOT_INDEX] = new (_memory) AssetSlot(PERM_SLOT_INDEX, AssetManager::ROOM_PERM_INDEX,roomStream, maxAsset, (void*)&_assetMemory[_cbRoomMemory*PERM_SLOT_INDEX],_cbPermMemory,_videoMemory);
+	// PERM memory sits right after the N allocated room slots (not at ×MAX_ACTIVE_ROOMS).
+	_assets[PERM_SLOT_INDEX] = new (_memory) AssetSlot(PERM_SLOT_INDEX, AssetManager::ROOM_PERM_INDEX,roomStream, maxAsset, (void*)&_assetMemory[_cbRoomMemory*_numActiveRoomSlots],_cbPermMemory,_videoMemory);
 	assert(ValidPtr(_assets[PERM_SLOT_INDEX]));
 	HALLmalloc.Free(streamBuffer,_levelTOC.GetTOCEntry(TOC_PERM_INDEX)._size);
 }

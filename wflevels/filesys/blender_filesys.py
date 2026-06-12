@@ -36,10 +36,10 @@ def oad(name):
 
 # ── Level layout ──────────────────────────────────────────────────────────────
 # Floor: 44×76 to cover grid (X: -17..+18, Y: -35..+35) with margin.
-FLOOR_X0 = -22.0
-FLOOR_X1 =  22.0
+FLOOR_X0 = -45.0
+FLOOR_X1 =  45.0
 FLOOR_Y0 = -38.0
-FLOOR_Y1 =  38.0
+FLOOR_Y1 =  50.0
 FLOOR_Z0 =  -0.5
 FLOOR_Z1 =   0.0
 
@@ -56,7 +56,10 @@ TARGET2_POS  = (0.0, 5.0, 0.0)
 # Room bbox — wider than needed so spring transients can't escape.
 # Camera at (0,-70,41); grid X: -17..+18, Y: -35..+35, Z: 0..8.
 ROOM_CENTER     = (0.0, 0.0, 25.0)
-ROOM_LOCAL_BBOX = (-35.0, -72.0, -28.0, 35.0, 40.0, 28.0)
+# Phase 2: widened (X±50, Y up to 55) so the recursive tree fans out without
+# spawning outside the room (level.cc:1692 asserts on out-of-room spawns).
+# Camera at (0,-70,41) stays inside (Y min -72, Z world [-3,53]).
+ROOM_LOCAL_BBOX = (-50.0, -72.0, -28.0, 50.0, 55.0, 28.0)
 # Keeping room X=±35 from the previously-verified working config — bungee
 # camera initialises cleanly at this X extent. Y extended to +40 so the
 # far grid rows (Y up to +35) are comfortably inside.
@@ -95,7 +98,7 @@ FILE_TMPL_IDX  = 13
 CONN_TMPL_IDX  = 16    # ConnectorTemplate (.lvl index)
 PLAYER_LVL_IDX = 10    # Player (.lvl index) — fsn-navigate reads its position
 FSN_MAX_DEPTH  = 2     # render the tree this many levels from the current root
-FSN_MAX_NODES  = 120   # hard cap on total spawned actors (towers+files+wires) < 500 pool
+FSN_MAX_NODES  = 400   # hard cap on total spawned actors (towers+files+wires); pool=500, DRAM-sized
 
 # SGI FSN aesthetic: near-black blue background and floor, yellow towers, grey boxes.
 COLOR_BG       = 0x0a0a14   # near-black blue for Matte

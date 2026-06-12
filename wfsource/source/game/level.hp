@@ -271,6 +271,13 @@ private:
 			uint32 tagFlags;
 				uint32 doomStickFlag;		// if set, doom style joystick, otherwise alone in the dark style
 				uint32 bungeeCamFlag;		// if set, elastic camera, otherwise, alone in the dark style
+			// Optional 'SLOT' field (appended after FLAG). Absent on older levels
+			// (the bytes read as 0 ≠ 'SLOT') → defaults to MAX_ACTIVE_ROOMS. Lets a
+			// level declare how many active room-asset slots to allocate: 1 for a
+			// single-room level (so cbRoom isn't ×9'd), 3 for normal streaming, 9 for
+			// planet-scale. Asset memory = cbPerm + numActiveRoomSlots × cbRoom.
+			uint32 tagSlots;
+				uint32 numActiveRoomSlots;
 	};
    LevelRoomCallbacks* _roomCallbacks;
    AssetCallbackRoom* _assetCallbackRoom;

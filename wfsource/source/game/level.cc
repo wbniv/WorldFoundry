@@ -432,6 +432,13 @@ Level::Level
 	gDoomStick = plmc->doomStickFlag;
 	gBungeeCam = plmc->bungeeCamFlag;
 
+	// Optional 'SLOT' RAM field: how many active room-asset slots to allocate.
+	// Absent (older levels) → MAX_ACTIVE_ROOMS, preserving the 9× allocation.
+	int numActiveRoomSlots = (plmc->tagSlots == IFFTAG('S','L','O','T'))
+	                         ? (int)plmc->numActiveRoomSlots : MAX_ACTIVE_ROOMS;
+	if (numActiveRoomSlots < 1)                  numActiveRoomSlots = 1;
+	if (numActiveRoomSlots > MAX_ACTIVE_ROOMS)   numActiveRoomSlots = MAX_ACTIVE_ROOMS;
+
 //	_memory = new (HALLmalloc) DMalloc(HALLmalloc,340000,MEMORY_NAMED("Level DMalloc"));
 	Memory* newMemory = new (HALLmalloc) DMalloc(HALLmalloc,plmc->cbObjectsDRam,MEMORY_NAMED("Level DMalloc"));
 	assert( ValidPtr( newMemory ) );
@@ -471,7 +478,7 @@ Level::Level
    _assetCallbackRoom = new AssetCallbackRoom(GetLevelRooms());
    assert(ValidPtr(_assetCallbackRoom));
 
-	_theAssetManager = new (HALLmalloc) AssetManager( plmc->cbPerm, plmc->cbRoom,  videoMemory, *_levelFile, *_memory, *_assetCallbackRoom );
+	_theAssetManager = new (HALLmalloc) AssetManager( plmc->cbPerm, plmc->cbRoom, numActiveRoomSlots, videoMemory, *_levelFile, *_memory, *_assetCallbackRoom );
 	ValidatePtr(_theAssetManager);
 	LoadLevelData( );
 	assert( ValidPtr( _levelData ) );

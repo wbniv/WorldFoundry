@@ -69,7 +69,7 @@ struct AssetStringMap
 class AssetManager
 {
 public:
-	AssetManager( size_t cbPermMemory, size_t cbRoomMemory, VideoMemory& videoMemory, _DiskFile& diskFile, Memory& memory, AssetCallback& callback);
+	AssetManager( size_t cbPermMemory, size_t cbRoomMemory, int numActiveRoomSlots, VideoMemory& videoMemory, _DiskFile& diskFile, Memory& memory, AssetCallback& callback);
 	~AssetManager();
 
    void Validate() const;
@@ -113,6 +113,7 @@ private:
 	DiskTOC _levelTOC;
 	size_t _cbPermMemory;
 	size_t _cbRoomMemory;
+	int    _numActiveRoomSlots;   // room-asset slots allocated (≤ MAX_ACTIVE_ROOMS); PERM sits right after them
     VideoMemory& _videoMemory;
     _DiskFile& _diskFile;
     Memory& _memory;

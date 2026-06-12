@@ -6,15 +6,22 @@
 // Run:
 //   task run-level -- wflevels/filesys-standalone.iff
 //
-// Phase 1 FSN level: 14 static actors + runtime-spawned Dir/File towers.
-// Pool budgets sized for ~50 spawned actors at peak (8×6 grid).
+// Phase 2 FSN level: 16 static actors + a runtime-spawned recursive tree of
+// Dir towers, File slabs and Connector wires (fsn-build, scripting_zforth.cc).
+// Pool budgets sized for ~300 spawned actors at peak (FSN_MAX_NODES).
+//
+// Memory: total asset alloc = cbPerm + numActiveRoomSlots × cbRoom (assets.cc).
+// Spawned template instances BindAssets to the PERMANENT slot (level.cc:1732),
+// so cbPerm — NOT cbRoom — is what the ~400-actor tree consumes (the OOM pool
+// is "Room #4095" = ROOM_PERM_INDEX). 'SLOT' 1 keeps cbRoom ×1 (single room).
 { 'L4'
     { 'ALGN' .align( 2048 ) }
     { 'RAM'
-        'OBJD' 200000l                  // 14 static + up to ~50 spawned Dir/File towers
-        'PERM' 500000l                  // player mesh + floor
-        'ROOM' 800000l                  // room + spawned tower meshes
+        'OBJD' 1500000l                 // 16 static + up to ~400 spawned tree actors
+        'PERM' 4000000l                 // player/floor/template meshes + ~400 spawned instances
+        'ROOM' 2000000l                 // single active room slot (×1) — room's own static assets
         'FLAG' 1l 1l                    // doomstick, bungeecam
+        'SLOT' 1l                       // 1 active room slot (single-room level)
     }
     { 'ALGN' .align( 2048 ) }
     [ "../filesys.iff" ]
