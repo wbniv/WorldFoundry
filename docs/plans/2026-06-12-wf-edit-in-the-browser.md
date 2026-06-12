@@ -169,7 +169,7 @@ level; Outliner lists actors; selecting populates Properties (OAD reader); gizmo
 actor visibly same-frame (build-before-step + engine_bridge wfmut). Headless: run `.js`
 under node with `--frames N --screenshot out.ppm` for CI.
 
-### Phase 1 — progress & findings (2026-06-12) — 🟡 boots in-browser, render blocked by 1 trap
+### Phase 1 — progress & findings (2026-06-12/13) — 🟡 renders in-browser; 1 UB heisenbug blocks a clean build
 
 Landed (commits `89b25159` plumbing, `9d30b480` compile+link, `687d460b` GL adopt,
 `da860e04` shell+preload, `f5de5a89` stack+shader): the `wf_edit_web` target compiles
@@ -214,13 +214,39 @@ Runtime fixes found (each unblocked the next, classic emscripten bring-up):
    the relay deliver the initial CRDT state (Phase 2 already does this for co-edit). Track
    as a Phase-1 follow-up; not blocking the viewport.
 
-4. **OPEN — `RuntimeError: null function` in the first `editor_build` frame**, right
-   after `[bridge] InitBridgeMap: 0 actors` (so after engine init + level load, with the
-   stack + shader fixes in place). A genuine null/!signature indirect call. Next debug
-   step: localize within `editor_build` (ServiceRelayReconnect / CollabDrain /
-   UpdateBridgeMap / DrainEngineSync / ImGui panel build) or the first `StepFrame`, via a
-   `-g2` names build or by bisecting the callback body. This is the remaining blocker to
-   first render.
+4. **The "null function" was three stacked bugs — two FIXED (commit `f7483dbb`), one OPEN.**
+   The original opaque `RuntimeError: null function` resolved into a chain, each masking
+   the next:
+   - **(a) FIXED** — A WF assert (`assert(HALScratchLmalloc.Empty())`, game.cc:739 + :562)
+     fires every frame on the editor path (scratch genuinely non-empty), and
+     `_sys_assert`'s `exit(-1)` under `-sEXIT_RUNTIME=0` unwinds to an opaque wasm trap that
+     blanks the canvas with no readable cause. Fix: `pigsys/assert.cc` — on web a firing
+     assert WARNS (throttled) + CONTINUES instead of exiting.
+   - **(b) FIXED** — `_sys_assert` was `__attribute__((noreturn))`, so the non-fatal return
+     made the compiler emit a wasm `unreachable` after every assert call site. Fix:
+     `pigsys/assert.hp` drops `noreturn` on web.
+   - **(c) FIXED** — `DBSTREAM1(cframeinfo<<…)` in `StepFrame` traps (the gamestrm.cc game
+     debug streams hit a cross-TU static-init-order issue on web → null streambuf vtable;
+     `cprogress` from the lib-stream TU works, `cframeinfo` doesn't). Fix: guarded on web
+     (it's a null sink + violates DBSTREAM1's own "not in the game loop" contract).
+   - **(d) OPEN — a UB heisenbug in the CRDT→engine bridge** (`engine_bridge.cc`:
+     `InitBridgeMap` tail / `UpdateBridgeMap` / `DrainEngineSync`, with an **empty Doc** —
+     the Outliner is empty because the popen/levtree Doc-population path doesn't exist on
+     web yet). It traps `null function` right after `[bridge] InitBridgeMap: 0 actors`
+     **only in a no-`fprintf` build** — temporary debug checkpoints accidentally masked it
+     (that's how the editor rendered, screenshot below). Same source, differ only by a
+     harmless `fprintf` → renders vs traps = textbook **undefined behavior** (the print
+     perturbs stack/memory layout enough to hide the fault). Not network-path
+     (ServiceRelayReconnect/CollabDrain guarded → still traps); not a fundamental CRDT FFI
+     break (Phase-0's 14/14 wrapper test exercises the deep observer on wasm). **Next step:
+     ASan/UBSan web build** (`-fsanitize=address,undefined`) to pinpoint it — printf
+     bisection can't, since the probe changes the outcome.
+
+   **Render proof (with the checkpoint build that masks (d)):** the editor draws its menu
+   bar (File/Edit/Collaborate), Outliner (0 actors — empty Doc, see (d)), Properties, and
+   the engine viewport rendering the snowgoons terrain, full frame loop completing — so the
+   whole WASM/WebGL2 + ImGui + engine-viewport architecture is sound; (d) is the lone blocker
+   to a clean render.
 
 ## Phase 2 — Emscripten WebSocket backend + CRDT sync (co-edit with a native client)
 
