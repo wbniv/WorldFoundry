@@ -88,12 +88,10 @@ timer callbacks, concurrent AI), explore these alternatives instead:
   in the level `.fth` (proven: re-skinned a level with the engine binary untouched). Adding a
   view = "new C emitter + new `.fth` policy." ~~**P1 — Filelight** walkable radial sunburst~~
   (DONE, [b2f18cf6](https://github.com/wbniv/WorldFoundry/commit/b2f18cf6); `wflevels/filelight/`,
-  syscalls 140-150, `task run-filelight`). **Open:**
-  - **P2 — retrofit FSN `filesys`** from its C monolith (`fsn_spawn_tree`) to the same split:
-    a `fsn-scan` emitter (tree positions/angles/sizes → flat rows + `node-*` accessors, keeping
-    the trig in C) + the render policy (tower height, age colour, wire spawn+rotate, file cap)
-    moved into the filesys Director `.fth`. Regression guard: before/after visual + actor-count
-    parity. Makes the tree-view aesthetics hot-reloadable too.
+  syscalls 140-150, `task run-filelight`). ~~**P2 — retrofit FSN `filesys`** to the flat-table
+  split~~ (DONE, [e49f3720](https://github.com/wbniv/WorldFoundry/commit/e49f3720); `fsn-scan`
+  emitter + `node-*` accessors + render policy in the filesys Director, syscalls 151-159;
+  parity-verified 400 nodes/75 towers, identical render). **Open:**
   - **KDirStat/QDirStat treemap view** (next new view) — squarified rectangles, area ∝ size,
     nested; a C emitter (rows `{x,y,w,h,depth,tag}`) + a Forth policy spawning XY-scaled boxes.
     No trig at all — the cleanest fit for the flat-table model.
