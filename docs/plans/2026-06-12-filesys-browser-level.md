@@ -364,15 +364,89 @@ loop
 
 8. Player walks freely; objects block movement
 
-    `ball pos` advancing confirms player update loop running. Jolt floor body created.
+    **Walking astronaut + movement fix (2026-06-12):** The original marble was
+    *immobile* — and the cause was not gDoomStick (the standalone wrapper has
+    `'FLAG' 1l 1l`, doomstick=1) nor the handler. It was the **null input device**:
+    with `Script Controls Input` unset (default false, `common.inc:22`),
+    `Actor::_InitInput` (`actor.cc:334`) binds `&theNullInputDigital`, whose
+    `arePressed()` is always 0 — so the `MarbleHandler` ran every frame reading zero
+    buttons. Replaced the marble with moon_site01's walking astronaut setup
+    (`blender_filesys.py`):
+    - `Script Controls Input = True` → a real `QInputDigital`.
+    - per-frame `wf_Script`: `INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox
+      INDEXOF_INPUT write-mailbox` (mailbox 1909 → 3024), routing the joystick into
+      the movement system (`actor.cc:1447` → `_input->setButtons()`).
+    - `Turn Rate = 0.5` → `GroundHandler` (`movement.cc:577`): ↑/↓ walk forward/back
+      along facing dir, ←/→ turn, Space jumps.
+    - inline EVA-astronaut mesh (`build_astronaut_mesh()`, ported from moon), real-life
+      ~1.8 m, feet at local z=0 → exported as `player.iff` (bbox `[..,0, ..,117964]`).
+    - added an **Ambient** light (appended last so the template indices stay fixed):
+      the curved suit renders pure-black on its shadowed side off the directional light
+      alone — every level needs Directional + Ambient (`docs/level-building.md` "Lighting").
+
+    Verified live: astronaut walks/turns with arrow keys; `ball pos` (the Jolt
+    capsule, `jolt_backend.cc:809`) tracks input and is stationary without it. No
+    asserts; no `sphere.iff` reference remains.
+
+    <img src="screenshots/2026-06-12-filesys-astronaut.png" width="700">
     PASS
 
 ---
 
 ## Phase 2 notes (deferred)
 
-- Recursive CWD scan → tree of `CwdEntry` nodes
+- Recursive CWD scan → tree of `CwdEntry` nodes (each dir node carries its grid position)
 - Files sit on top of their parent tower (z-offset = tower top)
-- Thin `StatPlat` wire objects connecting towers to children
 - Camera approach: start high, fly down into the landscape
 - File color by age (`stat.st_mtime` → hue; add `cwd-file-age` syscall)
+
+### Connectors (FSN wires) — stretch-and-orient a unit beam
+
+Real FSN runs thin glowing wires from a parent directory pedestal out to each child
+tower. The engine has no line primitive (everything is a baked mesh), so a connector is
+**one thin beam mesh stretched and rotated to span the two endpoints**:
+
+```
+        child tower
+           ▐█▌
+          ╱           connector = a unit beam, base-pivoted at the parent
+        ╱  L          end (local X∈[0,1]), rotated by heading C (+ pitch),
+   ▐█▌╱               then X-scaled to length L = |child − parent|.
+ parent
+ (spawn point)
+```
+
+Per edge: spawn the beam at the parent point → aim its local **+X** at the child →
+scale X to the distance.
+
+**Why a new `spawn-connector` C++ syscall** (sibling of the existing 131–135):
+`spawn-template`/`ConstructTemplateObject(tmpl, creator, position, velocity)` (`level.hp:133`)
+takes **velocity, not rotation** as its 4th arg — it always spawns axis-aligned at zero
+rotation. And zForth has no float `atan2`/`sqrt`. So the orientation math must live in C++
+(trivial there, and it's the same reason the other construction logic is C++):
+
+```
+spawn-connector ( x1 y1 z1  x2 y2 z2  tmpl -- actor )
+   p1=(x1,y1,z1); d=(x2,y2,z2)-p1
+   L   = |d|
+   C   = atan2(d.y, d.x)                 // heading
+   pit = atan2(d.z, hypot(d.x,d.y))      // pitch (0 for flat floor wires)
+   a = ConstructTemplateObject(tmpl, creator, p1, 0)
+   a->SetRotation( Euler(pit, 0, C) )    // same PhysicalAttributes path movement.cc uses
+   a->SetScaleX(L)                       // Y/Z stay at the thin template default
+```
+
+**Connector template:** a thin beam — **local X ∈ [0, 1]** (base-pivot at the parent end,
+per the [Mesh origin convention](../level-building.md#mesh-origin--base-lowest-vertex-at-local-z0):
+X-scale about the origin grows the beam *toward* the child, never behind the parent), thin
+in Y/Z (±0.04), bright/emissive color. Built inline like `DirTemplate`/`FileTemplate`,
+parked OOB, given a level index.
+
+**Endpoints** come from the recursive scan: for every parent→child dir edge call
+`spawn-connector(parentPoint, childPoint)`. Default to **base-to-base** wires (both ends
+near z≈0 → pitch=0, heading only — simplest, matches FSN's ground-running wires);
+tower-top hubs are a variant the same syscall handles via the pitch term.
+
+**Rejected:** pure-Forth orientation (no float trig — fragile); pre-baked connector meshes
+(edges are runtime/data-dependent); per-axis scale without rotation (only works for
+axis-aligned edges — the grid is 2D so most edges are diagonal).

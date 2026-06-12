@@ -86,6 +86,7 @@ ROOM_LOCAL_BBOX = (-35.0, -72.0, -28.0, 35.0, 40.0, 28.0)
 #   11      12   DirTemplate  ← DIR-TMPL  in the Forth script
 #   12      13   FileTemplate ← FILE-TMPL in the Forth script
 #   13      14   ActBoxOR
+#   14      15   AmbientLight (appended last so 11/12 above stay fixed)
 #
 # These .lvl indices are what spawn-template passes to FindTemplateObjectData().
 DIR_TMPL_IDX  = 12
@@ -258,6 +259,82 @@ def add_solid_box(name, x0, y0, z0, x1, y1, z1, mat=None):
     return obj
 
 
+def build_astronaut_mesh():
+    """Low-poly EVA-suit astronaut, ported from moon_site01 `_build_astronaut`.
+
+    Joins ~14 primitives into one mesh and bakes the origin to the feet (local
+    z=0) via transform_apply(location=True) — the base-pivot convention. The
+    suit faces mesh +X (chest/visor front, PLSS backpack at -X). Returns the
+    mesh datablock and leaves the scene with NO temp objects, so the caller can
+    create the Player at the correct scene-export index.
+    """
+    mat_white = make_mat('astro_white',    (0.92, 0.92, 0.92, 1.0))
+    mat_off   = make_mat('astro_offwhite', (0.85, 0.85, 0.82, 1.0))   # PLSS backpack
+    mat_dark  = make_mat('astro_dark',     (0.18, 0.18, 0.20, 1.0))   # chest panel, neck
+    mat_visor = make_mat('astro_visor',    (0.76, 0.53, 0.25, 1.0))   # gold-amber visor
+
+    parts = []
+    SEG = 8; RING = 5   # low-poly UV sphere/cylinder segments
+
+    def add_cyl(r, h, loc, mat):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=SEG, radius=r, depth=h, location=loc)
+        parts.append((bpy.context.object, mat))
+
+    def add_sph(r, loc, mat):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=r, segments=SEG, ring_count=RING, location=loc)
+        parts.append((bpy.context.object, mat))
+
+    def add_cube(sx, sy, sz, loc, mat):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=loc)
+        o = bpy.context.object
+        o.scale = (sx, sy, sz)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        parts.append((o, mat))
+
+    # Boots, lower legs, upper legs (mirrored in ±Y)
+    for yo in (-0.12, 0.12):
+        add_cube(0.18, 0.15, 0.10, (0.0, yo, 0.05), mat_white)   # boot
+        add_cyl(0.09, 0.42, (0.0, yo, 0.31), mat_white)          # lower leg
+        add_cyl(0.10, 0.42, (0.0, yo, 0.73), mat_white)          # upper leg
+
+    add_cyl(0.20, 0.10, (0.0, 0.0, 0.95), mat_white)             # hips
+    add_cyl(0.22, 0.45, (0.0, 0.0, 1.225), mat_white)            # torso
+    add_cube(0.20, 0.08, 0.12, (+0.20, 0.0, 1.30), mat_dark)     # chest panel (mesh +X front)
+    add_cube(0.30, 0.18, 0.50, (-0.27, 0.0, 1.20), mat_off)      # PLSS backpack (mesh -X back)
+
+    for yo in (-0.27, 0.27):
+        add_sph(0.11, (0.0, yo, 1.42), mat_white)                # shoulder
+        add_cyl(0.08, 0.30, (0.0, yo, 1.27), mat_white)          # upper arm
+        add_cyl(0.08, 0.28, (0.0, yo, 0.98), mat_white)          # forearm
+        add_sph(0.09, (0.0, yo, 0.84), mat_white)                # glove
+
+    add_cyl(0.06, 0.06, (0.0, 0.0, 1.475), mat_dark)             # neck
+    add_sph(0.14, (0.0, 0.0, 1.66), mat_white)                   # helmet
+    add_sph(0.13, (+0.05, 0.0, 1.66), mat_visor)                 # visor (mesh +X front)
+
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for p in obj.data.polygons:
+            p.material_index = 0
+            p.use_smooth = True
+
+    # Join all parts, then bake the root part's location into verts so the
+    # joined mesh origin lands at the feet (z=0).
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    mesh = body.data
+    mesh.name = 'astronaut'
+    bpy.data.objects.remove(body, do_unlink=True)   # leave scene clean; keep the mesh
+    mesh.use_fake_user = True                         # protect the now-userless datablock
+    return mesh
+
+
 # ── Build scene ───────────────────────────────────────────────────────────────
 
 clear_scene()
@@ -369,31 +446,47 @@ make_empty('Director', (0.0, 0.0, 1.0), 'director',
 )
 
 # 9 ── Player ──────────────────────────────────────────────────────────────────
-# Marble-style controller (TurnRate=0 → MarbleHandler).
-# Doom-stick with C=π/2: LEFT/RIGHT strafe along X axis.
-player = make_empty('Player', PLAYER_SPAWN, 'player',
-    props={
-        'Mobility':               'Physics',
-        'Moves Between Rooms':    'True',
-        'Turn Rate':              0.0,
-        'Running Acceleration':   15.0,
-        'Running Deceleration':   0.5,
-        'Max Ground Speed':       12.0,
-        'Air Acceleration':       8.0,
-        'Horiz Air Drag':         0.5,
-        'Max Air Speed':          20.0,
-        'Falling Acceleration':   9.8,
-        'Vertical Elasticity':    0.2,
-        'Horizontal Elasticity':  0.5,
-        'Step Size':              0.25,
-        'Mass':                   1.0,
-        'Mesh Name':              'sphere.iff',
-        'Model Type':             'Mesh',
-        'Visibility Mailbox':     1,
-    }
+# Walking EVA astronaut — moon_site01 locomotion.  Turn Rate>0 → GroundHandler
+# (movement.cc:577): UP/DOWN walk forward/back along facing dir, LEFT/RIGHT turn.
+#
+# Movement REQUIRES both of the following, or the player can never move:
+#   • Script Controls Input=True — else Actor::_InitInput (actor.cc:334) binds
+#     &theNullInputDigital, whose arePressed() is always 0 (this is why the old
+#     marble was immobile despite gDoomStick=1 and a working handler).
+#   • the wf_Script below, which copies the hardware joystick (mailbox 1909) into
+#     the player INPUT mailbox (3024) every frame — exactly what moon's player does.
+# Mesh is the inline astronaut (feet at local z=0); the exporter derives the
+# Global Bounding Box → Jolt capsule from the mesh AABB (no wf_original_bbox).
+_astro_mesh = build_astronaut_mesh()
+player = bpy.data.objects.new('Player', _astro_mesh)
+player.location = PLAYER_SPAWN
+bpy.context.scene.collection.objects.link(player)
+player['wf_schema_path'] = oad('player')
+for k, v in {
+    'Mobility':               'Physics',
+    'Moves Between Rooms':    'True',
+    'Script Controls Input':  'True',    # real input device — the core movement fix
+    'Turn Rate':              0.5,       # GroundHandler walk+turn (was 0.0 = marble)
+    'Running Acceleration':   8.0,
+    'Running Deceleration':   0.85,
+    'Max Ground Speed':       4.0,       # moon uses 2.5; bumped for the FSN floor
+    'Jumping Acceleration':   15.0,
+    'Falling Acceleration':   9.8,       # keep grounded (not the moon's 1.62)
+    'Air Acceleration':       0.0,
+    'Max Air Speed':          8.0,
+    'Horiz Air Drag':         1.5,
+    'Mass':                   80.0,
+    'Model Type':             'Mesh',
+    'Visibility Mailbox':     1,
+}.items():
+    player[f'wf_{k}'] = v
+player.rotation_euler.z = math.pi / 2   # C=π/2: faces mesh +X → world +Y (into the scene)
+# Route the hardware joystick into the player INPUT mailbox each frame (1909 → 3024).
+player['wf_Script'] = (
+    "\\ wf\n"
+    "INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n"
 )
-player.rotation_euler.z = math.pi / 2   # C=π/2: currentDir=+Y, strafes ±X
-player['wf_original_bbox'] = (-0.4, -0.4, 0.0, 0.4, 0.4, 0.8)
+_astro_mesh.use_fake_user = False        # Player now owns the datablock
 
 # 10 ── Floor (StatPlat) ───────────────────────────────────────────────────────
 mat_floor = make_mat('fsn_floor', COLOR_FLOOR)
@@ -459,6 +552,23 @@ abor = make_box_mesh(
         'MailBox':          1921,       # INDEXOF_CAMSHOT
         'Object':           'CamShot01',
         'Activated By': 'Player',
+    }
+)
+
+# 14 ── AmbientLight ───────────────────────────────────────────────────────────
+# Appended LAST so the DirTemplate/FileTemplate scene indices (11,12) the Director
+# script hardcodes (DIR_TMPL_IDX/FILE_TMPL_IDX) stay put. Every level needs a
+# Directional AND an Ambient light (docs/level-building.md "Lighting"): the flat
+# tower faces read fine off the directional alone, but the curved astronaut suit
+# renders pure-black on its shadowed side without ambient fill.
+make_empty('AmbientLight', (0.0, 0.0, 35.0), 'light',
+    props={
+        'Mobility':   'Anchored',
+        'lightType':  'Ambient',
+        'lightRed':   0.40,
+        'lightGreen': 0.40,
+        'lightBlue':  0.50,   # faint cool tint, SGI cyberspace feel
+        'Model Type': 'None',
     }
 )
 

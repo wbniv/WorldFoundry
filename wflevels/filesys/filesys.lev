@@ -132,24 +132,31 @@
 		} }
 		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 1.5707963705062866(1.15.16)  //a,b,c
 		} }
+		{ 'BOX3' { 'NAME' "Global Bounding Box" } { 'DATA' -0.4200000166893005(1.15.16) -0.3746162056922913(1.15.16) 0.0000000000000000(1.15.16) 0.3000000119209290(1.15.16) 0.3746162056922913(1.15.16) 1.7999999523162842(1.15.16)  //min(x,y,z)-max(x,y,z)
+		} }
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "player" } }
+		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "player.iff" } }
+		{ 'I32'  { 'NAME' "Model Type" } { 'DATA' 1l } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Physics" } }
 		{ 'I32' { 'NAME' "Moves Between Rooms" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
-		{ 'FX32' { 'NAME' "Step Size" } { 'DATA' 0.2500000000000000(1.15.16) } { 'STR' "0.25" } }
-		{ 'FX32' { 'NAME' "Vertical Elasticity" } { 'DATA' 0.2000000000000000(1.15.16) } { 'STR' "0.2" } }
-		{ 'FX32' { 'NAME' "Horizontal Elasticity" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
-		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 15.0000000000000000(1.15.16) } { 'STR' "15.0" } }
-		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
-		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 12.0000000000000000(1.15.16) } { 'STR' "12.0" } }
-		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
-		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 8.0000000000000000(1.15.16) } { 'STR' "8.0" } }
-		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
-		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 20.0000000000000000(1.15.16) } { 'STR' "20.0" } }
+		{ 'FX32' { 'NAME' "Running Acceleration" } { 'DATA' 8.0000000000000000(1.15.16) } { 'STR' "8.0" } }
+		{ 'FX32' { 'NAME' "Running Deceleration" } { 'DATA' 0.8500000000000000(1.15.16) } { 'STR' "0.85" } }
+		{ 'FX32' { 'NAME' "Max Ground Speed" } { 'DATA' 4.0000000000000000(1.15.16) } { 'STR' "4.0" } }
+		{ 'FX32' { 'NAME' "Turn Rate" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.5" } }
+		{ 'FX32' { 'NAME' "Jumping Acceleration" } { 'DATA' 15.0000000000000000(1.15.16) } { 'STR' "15.0" } }
+		{ 'FX32' { 'NAME' "Air Acceleration" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.0" } }
+		{ 'FX32' { 'NAME' "Horiz Air Drag" } { 'DATA' 1.5000000000000000(1.15.16) } { 'STR' "1.5" } }
+		{ 'FX32' { 'NAME' "Max Air Speed" } { 'DATA' 8.0000000000000000(1.15.16) } { 'STR' "8.0" } }
 		{ 'FX32' { 'NAME' "Falling Acceleration" } { 'DATA' 9.8000000000000007(1.15.16) } { 'STR' "9.8" } }
-		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 1.0000000000000000(1.15.16) } { 'STR' "1.0" } }
-		{ 'FILE' { 'NAME' "Mesh Name" } { 'STR' "sphere.iff" } }
+		{ 'FX32' { 'NAME' "Mass" } { 'DATA' 80.0000000000000000(1.15.16) } { 'STR' "80.0" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\ wf\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\n" } }
+		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 1l } { 'STR' "True" } }  //False|True
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "Mesh" } }
 		{ 'I32' { 'NAME' "Visibility Mailbox" } { 'DATA' 1l } { 'STR' "1" } }
+		{ 'FX32' { 'NAME' "slopeA" } { 'DATA' -0.0000000007689533(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' -0.0000000048608066(1.15.16) } { 'STR' "-0.000000" } }
+		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000001593707(1.15.16) } { 'STR' "0.000000" } }
+		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000001593707(1.15.16) } { 'STR' "0.000000" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "Floor" }
@@ -230,5 +237,19 @@
 		{ 'FX32' { 'NAME' "slopeB" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeC" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
 		{ 'FX32' { 'NAME' "slopeD" } { 'DATA' 0.0000000000000000(1.15.16) } { 'STR' "0.000000" } }
+	}
+	{ 'OBJ' 
+		{ 'NAME' "AmbientLight" }
+		{ 'VEC3' { 'NAME' "Position" } { 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 35.0000000000000000(1.15.16)  //x,y,z
+		} }
+		{ 'EULR' { 'NAME' "Orientation" } { 'DATA' 0.0000000000000000(1.15.16) -0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+		} }
+		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "light" } }
+		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
+		{ 'FX32' { 'NAME' "lightRed" } { 'DATA' 0.4000000000000000(1.15.16) } { 'STR' "0.400000" } }
+		{ 'FX32' { 'NAME' "lightGreen" } { 'DATA' 0.4000000000000000(1.15.16) } { 'STR' "0.400000" } }
+		{ 'FX32' { 'NAME' "lightBlue" } { 'DATA' 0.5000000000000000(1.15.16) } { 'STR' "0.500000" } }
+		{ 'I32' { 'NAME' "lightType" } { 'DATA' 1l } { 'STR' "Ambient" } }  //Directional|Ambient
 	}
 }
