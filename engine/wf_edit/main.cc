@@ -392,6 +392,12 @@ struct EditorCtx {
     // main thread gates all relay access on RelayUsable() so the two never race.
     std::string         relay_connect_url;              // loopback-or-public target to reconnect to
     bool                relay_was_connected = false;    // latch: only auto-reconnect after a real connect
+    // Web co-edit seed/join decision (set by WebConnectStep, resolved by WebSeedStep):
+    // after joining, wait briefly for the relay to push the room's Doc; if it stays
+    // empty we're the host → load the level (seeds the relay via observeUpdates),
+    // else we're a joiner → adopt the relay Doc (no local load → no duplicate IDs).
+    bool                web_seed_pending  = false;
+    double              web_seed_deadline = 0.0;
     std::atomic<bool>   relay_reconnecting{false};
     std::atomic<int>    relay_reconnect_done{0};        // 0=running 1=ok 2=fatal 3=shutdown
     std::atomic<bool>   relay_shutdown{false};          // abort seam for the reconnect thread
@@ -619,6 +625,35 @@ static void WebConnectStep(EditorCtx* c) {
     });
     std::printf("wf-edit(web): relay connected, joined room=%s (peer %.8s…)\n",
                 c->room_id.c_str(), c->our_peer_id.c_str());
+    // Begin the seed/join decision: give the relay ~0.6s to push the room's Doc
+    // (CollabDrain applies it). WebSeedStep resolves it each frame.
+    c->web_seed_pending  = true;
+    c->web_seed_deadline = glfwGetTime() + 0.6;
+}
+
+// Resolve the web seed/join decision. If the relay has populated our Doc within
+// the window, we're a joiner — adopt it (the local level was NOT loaded, so no
+// duplicate Yrs IDs). If it's still empty at the deadline, we're the host — load
+// the level now; observeUpdates (wired above) auto-pushes each commit, seeding the
+// relay so later joiners receive it. Runs each editor_build frame while pending.
+static void WebSeedStep(EditorCtx* c) {
+    if (!c->web_seed_pending || !c->doc) return;
+    int n = 0;
+    { auto txn = c->doc->begin(); n = txn.array("content").len(); }
+    if (n > 0) {                                   // relay/host seeded us → joiner
+        c->web_seed_pending = false;
+        std::printf("wf-edit(web): adopted room Doc from relay (%d actors)\n", n);
+        return;
+    }
+    if (glfwGetTime() >= c->web_seed_deadline) {   // empty + timed out → host → seed
+        c->web_seed_pending = false;
+        std::string sp;
+        if (wfedit::LoadLevelTreeIntoDoc(c->leveltree, *c->doc, &sp))
+            std::printf("wf-edit(web): room was empty — seeded it from %s\n",
+                        c->leveltree.c_str());
+        else
+            std::fprintf(stderr, "wf-edit(web): seed load failed for %s\n", c->leveltree.c_str());
+    }
 }
 #endif
 
@@ -1518,6 +1553,7 @@ bool editor_build(void* p)
     // pushes a fresh SYNC that the CollabDrain below applies.
 #if defined(__EMSCRIPTEN__)
     WebConnectStep(c);          // async-connect completion (web): join + wire on open
+    WebSeedStep(c);             // seed empty room / adopt relay Doc (join-and-receive)
 #else
     ServiceRelayReconnect(c);   // mid-session reconnect (native; spawns a bg thread)
 #endif
@@ -2776,7 +2812,16 @@ int main(int argc, char** argv)
                     actor_names.size());
     };
 
-    if (!show_picker) {
+    // Web co-edit: when joining a relay room, DEFER the Doc load. WebSeedStep (after
+    // connect) either seeds an empty room (loads the level once observeUpdates is
+    // wired, so the build auto-pushes) or adopts the host's Doc from the relay —
+    // loading locally here too would duplicate (independent Yrs client IDs). Solo
+    // web (no room) and native always load here.
+    bool web_defer_doc_load = false;
+#if defined(__EMSCRIPTEN__)
+    web_defer_doc_load = !room_id.empty();
+#endif
+    if (!show_picker && !web_defer_doc_load) {
         if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc, &save_path))
             finish_doc_load();
         else

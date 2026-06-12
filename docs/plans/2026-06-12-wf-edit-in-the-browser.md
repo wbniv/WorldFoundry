@@ -290,7 +290,7 @@ browser `wf-edit.html` on the same room; moving an actor in one moves it in the 
 (bidirectional `CH_SYNC` + wasm CRDT apply + identical framing). A fresh tab joining
 mid-session shows current edits from the relay snapshot.
 
-### Phase 2 — status (2026-06-13) — 🟢 transport verified + Doc-population done; multi-peer co-edit = design follow-up
+### Phase 2 — status (2026-06-13) — ✅ COMPLETE: transport verified + Doc-population done + multi-peer join-and-receive verified
 
 - **DONE (commits `f713533a`, `58652d7e`)** — real browser-WebSocket backend
   (`ws_client_emscripten.cc` over `emscripten/websocket.h`, same `WsClient` interface +
@@ -307,14 +307,33 @@ mid-session shows current edits from the relay snapshot.
   zero traps. So `ws_client_emscripten` + `WebConnectStep` work end-to-end against a real relay.
 - **DOC-POPULATION FIXED (`be7baa6e`)** — the browser now loads the level locally (36
   snowgoons actors via preloaded levtree JSON), so it has a base Doc for editing.
-- **REMAINING for multi-peer co-edit (design, not transport):** seeding/CRDT-origin. The
-  relay model is "one peer seeds, others receive incremental deltas," but the web editor
-  (like native) loads its own Doc *before* connecting, so the initial state isn't pushed,
-  and two peers that each load the same `.lev` independently have distinct Yrs client IDs
-  (merge would duplicate, not converge). A correct multi-peer flow is **join-and-receive**
-  (joiner starts empty, adopts the relay/host Doc) vs **load-local** (host seeds). That's a
-  follow-up design step; transport + the sync code (`observeUpdates`/`CollabDrain`, shared
-  with the proven native path) are in place.
+- **MULTI-PEER JOIN-AND-RECEIVE DONE + VERIFIED (`main.cc`, this commit)** — the
+  seeding/CRDT-origin problem is solved. On web, when joining a relay room the local Doc
+  load is **deferred** (`web_defer_doc_load = !room_id.empty()` in `main()`); after the
+  join frame, `WebConnectStep` arms a ~0.6 s window and `WebSeedStep` (run each
+  `editor_build` frame) resolves the role:
+  - **Host path** — if the Doc is still empty at the deadline, this peer is first in:
+    `LoadLevelTreeIntoDoc` runs *after* `observeUpdates` is wired, so every commit
+    auto-pushes `CH_SYNC` to the relay, seeding it for later joiners.
+  - **Joiner path** — if the relay populated the Doc within the window (`content` array
+    non-empty), this peer adopts it as-is and **never loads locally** — so there are no
+    independent Yrs client IDs and no duplication.
+
+  This avoids the duplicate-vs-converge trap: exactly one peer ever loads the `.lev`; all
+  others inherit its Doc via the relay. Native is untouched — `web_defer_doc_load` is
+  `false` off-wasm (collapses to the original `if (!show_picker)`), and `WebSeedStep` /
+  the new `EditorCtx::web_seed_*` fields are inside `#if defined(__EMSCRIPTEN__)` /
+  inert on native.
+- **VERIFIED (2026-06-13)** — local `wf-relay --port 9931` + two sequential headless-Chrome
+  tabs on `wf-edit.html?room=coedit&relay=ws://localhost:9931` (separate
+  `--user-data-dir`). Tab A console: `room was empty — seeded it from
+  /level/snowgoons-blender.lev`. Tab B console: `adopted room Doc from relay (36 actors)`
+  — **36, not 0, not 72** (no duplication). Relay log shows both joins to room `coedit`.
+  Tab B screenshot (Outliner = 36 actors, full tree, viewport rendering):
+  <img src="screenshots/2026-06-12-coedit-joiner-adopts-36.png" width="700">
+  The relay's durable snapshot held the seed across A's disconnect, so B (joining after A
+  left) still adopted it — proving both the seed→relay push and the relay→joiner adopt
+  legs of the round-trip.
 
 ## Phase 3 — Presence + text chat
 
