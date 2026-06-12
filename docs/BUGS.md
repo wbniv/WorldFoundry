@@ -13,6 +13,32 @@ Format per entry:
 
 ---
 
+## `_HALScratchLmalloc` dangles after the emscripten stack unwind — 2026-06-13
+
+**Status:** FIXED [`59dc44d3`](https://github.com/wbniv/WorldFoundry/commit/59dc44d3) (`wfsource/source/hal/hal.cc` — `static` scratch allocator on web).
+
+**Symptom:** The browser/WASM editor (`wf_edit_web`) renders a blank canvas; the console shows `Uncaught RuntimeError: null function` every frame, immediately after `[bridge] InitBridgeMap: 0 actors`. A maddening *layout-sensitive heisenbug* — adding debug `fprintf`s anywhere in `editor_build` made it render (the prints perturbed the stack enough to hide the fault), so printf-bisection chased phantoms. ASan finally pinned it: **`stack-use-after-scope` at `game.cc:553`** (the `assert(HALScratchLmalloc.Empty())` access).
+
+**Root cause:** `HALStart` declares the per-frame scratch allocator as a **stack local** — `LMalloc __scratchLMalloc(...)` — points the global `_HALScratchLmalloc` at it, then calls `PIGSMain` *inside that scope*. On native, `PIGSMain → RunEditor/RunLevel` is a blocking loop that runs **nested inside `HALStart`'s frame**, so the local lives for the whole session. On web, `PIGSMain → RunLevelWeb/RunEditorWeb` hands control to `emscripten_set_main_loop(…, simulate_infinite_loop=1)`, which **unwinds the C stack** (the Emscripten "unwind") so the browser event loop can run — destroying `__scratchLMalloc` while `_HALScratchLmalloc` still points at the dead slot. Every later `StepFrame` access to `HALScratchLmalloc` reads a destroyed `LMalloc` → garbage state/vtable → the virtual call surfaces as `null function`. (It also made the scratch-empty assert "fire" on garbage, which `_sys_assert`'s `exit(-1)` then turned into a *different* opaque trap — a red herring that cost extra rounds.)
+
+**Why dormant:** The stack-local pattern is from the 2010 first commit (`a2784f6e`). For ~16 years every platform ran the game loop *inside* `HALStart`'s frame, so the global-pointer-to-stack-local — fragile, but valid as long as nothing unwinds between the pointer set and its uses — was never violated. Only the 2026 main-loop inversion for web (`emscripten_set_main_loop`, which unwinds the C stack instead of looping in place) broke the 16-year assumption. `wf_game` web carries the *same* latent UB but survives by luck: its shallower post-unwind stack doesn't clobber the dead slot, so `.Empty()` reads stale-but-intact bytes; the editor's deeper stack (ImGui + CRDT bridge) reuses the slot → crash. ASan poisons the out-of-scope frame, making it deterministic and catchable.
+
+**Fix:** Make `__scratchLMalloc` `static` on web so it outlives the unwind. Native keeps the scoped local (nothing unwinds there). Also fixes `wf_game` web's latent UB.
+
+**Diff** (`wfsource/source/hal/hal.cc`):
+```diff
++#if defined(__EMSCRIPTEN__)
++		static LMalloc __scratchLMalloc(*_HALLmalloc,cbHalScratchLmalloc MEMORY_NAMED( COMMA "HalScratchLMalloc" ) );
++#else
+ 		LMalloc __scratchLMalloc(*_HALLmalloc,cbHalScratchLmalloc MEMORY_NAMED( COMMA "HalScratchLMalloc" ) );
++#endif
+ 		_HALScratchLmalloc = &__scratchLMalloc;
+```
+
+**Investigation:** [`docs/plans/2026-06-12-wf-edit-in-the-browser.md`](plans/2026-06-12-wf-edit-in-the-browser.md) Phase 1 finding (d) — the full heisenbug hunt (printf-masking → ASan → `emsymbolizer` → `game.cc:553` → `hal.cc:65`).
+
+---
+
 ## `RangeCheck(Scalar)` casts to `bool` — `Scalar::Random()` aborts on every call — 2026-06-12
 
 **Status:** FIXED [`2fe49ef4`](https://github.com/wbniv/WorldFoundry/commit/2fe49ef4) (`wfsource/source/pigsys/assert.hp` — new cast-free `RangeCheckScalar`; `wfsource/source/math/scalar.cc`).

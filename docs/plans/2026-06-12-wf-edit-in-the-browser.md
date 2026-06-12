@@ -229,31 +229,37 @@ Runtime fixes found (each unblocked the next, classic emscripten bring-up):
      debug streams hit a cross-TU static-init-order issue on web → null streambuf vtable;
      `cprogress` from the lib-stream TU works, `cframeinfo` doesn't). Fix: guarded on web
      (it's a null sink + violates DBSTREAM1's own "not in the game loop" contract).
-   - **(d) OPEN — a UB heisenbug in the CRDT→engine bridge** (`engine_bridge.cc`:
-     `InitBridgeMap` tail / `UpdateBridgeMap` / `DrainEngineSync`, with an **empty Doc** —
-     the Outliner is empty because the popen/levtree Doc-population path doesn't exist on
-     web yet). It traps `null function` right after `[bridge] InitBridgeMap: 0 actors`
-     **only in a no-`fprintf` build** — temporary debug checkpoints accidentally masked it
-     (that's how the editor rendered, screenshot below). Same source, differ only by a
-     harmless `fprintf` → renders vs traps = textbook **undefined behavior** (the print
-     perturbs stack/memory layout enough to hide the fault). Not network-path
-     (ServiceRelayReconnect/CollabDrain guarded → still traps); not a fundamental CRDT FFI
-     break (Phase-0's 14/14 wrapper test exercises the deep observer on wasm). **Next step:
-     ASan/UBSan web build** (`-fsanitize=address,undefined`) to pinpoint it — printf
-     bisection can't, since the probe changes the outcome.
+   - **(d) FIXED (commit `59dc44d3`) — `stack-use-after-scope` on the HAL scratch allocator.**
+     It looked like a CRDT-bridge heisenbug (traps right after `[bridge] InitBridgeMap: 0
+     actors`, masked by any `fprintf`), but ASan + `emsymbolizer` pinned it to **`game.cc:553`**
+     — the `assert(HALScratchLmalloc.Empty())` in `StepFrame` (which runs just after
+     `editor_build`, hence the misleading "after InitBridgeMap"). Root cause is in **`hal.cc`,
+     not the bridge:** `HALStart` holds the global `_HALScratchLmalloc` pointing at a **stack
+     local** `__scratchLMalloc` and calls `PIGSMain` inside that scope. Native runs the game
+     loop nested in that frame (local stays alive); web's `emscripten_set_main_loop(…,
+     simulate_infinite_loop=1)` **unwinds the C stack**, destroying the local while the global
+     still points at it → every `StepFrame` reads a dead `LMalloc` → garbage vtable → "null
+     function" (layout-sensitive, so `fprintf` masked it). Latent since the 2010 first commit;
+     see [`docs/BUGS.md`](../BUGS.md). Fix: `static` `__scratchLMalloc` on web so it outlives
+     the unwind. The earlier (a)–(c) fixes (non-fatal asserts, cframeinfo guard) were treating
+     symptoms of the same dead allocator + an independent gamestrm static-init issue; kept as
+     they're correct on their own.
 
-   **Render proof (with the checkpoint build that masks (d)):** the editor draws its menu
-   bar (File/Edit/Collaborate), Outliner (0 actors — empty Doc, see (d)), Properties, and
-   the engine viewport rendering the snowgoons terrain, full frame loop completing — so the
-   whole WASM/WebGL2 + ImGui + engine-viewport architecture is sound; (d) is the lone blocker
-   to a clean render.
+   **Render proof — CLEAN build (no fprintf, no ASan), all (a)–(d) fixed:** the editor draws its
+   menu bar (File/Edit/Collaborate), Outliner (0 actors — empty Doc; the popen/levtree
+   Doc-population path is a separate web follow-up), Properties, and the engine viewport
+   rendering the snowgoons terrain, full frame loop completing, **zero traps**. So the
+   whole WASM/WebGL2 + ImGui + engine-viewport architecture is sound — Phase 1 renders
+   end-to-end in a clean build.
 
    <img src="screenshots/2026-06-13-wf-edit-web-renders.png" width="700">
 
    *wf-edit running in headless Chrome (SwiftShader WebGL2): Dear ImGui menu bar +
-   Outliner + Properties panels, and the engine viewport rendering the snowgoons terrain
-   (`frame 6, 0.6 FPS`). Captured from the checkpoint build that masks (d); the Outliner
-   shows 0 actors because the popen/levtree Doc-population path doesn't exist on web yet.*
+   Outliner + Properties panels, and the engine viewport rendering the snowgoons terrain.
+   The Outliner shows 0 actors because the popen/levtree Doc-population path doesn't exist
+   on web yet (separate follow-up); the terrain is flat grey because snowgoons' inherited
+   camera fog (FoggingColor 0x888888, complete at 30 m) greys out anything past the pulled-back
+   edit camera — the known snowgoons fog trap, not missing textures.*
 
 ## Phase 2 — Emscripten WebSocket backend + CRDT sync (co-edit with a native client)
 
@@ -286,7 +292,7 @@ browser `wf-edit.html` on the same room; moving an actor in one moves it in the 
 (bidirectional `CH_SYNC` + wasm CRDT apply + identical framing). A fresh tab joining
 mid-session shows current edits from the relay snapshot.
 
-### Phase 2 — status (2026-06-13) — 🟡 implemented + compiles; verification gated on Phase-1 (d)
+### Phase 2 — status (2026-06-13) — 🟢 implemented + compiles; (d) gate cleared → ready to verify
 
 - **DONE (commits `f713533a`, `58652d7e`)** — real browser-WebSocket backend
   (`ws_client_emscripten.cc` over `emscripten/websocket.h`, same `WsClient` interface +
@@ -295,12 +301,11 @@ mid-session shows current edits from the relay snapshot.
   room-join + wires `observeUpdates`→relay once `connected()` flips; `CollabDrain`
   applies inbound. Threaded connect + mid-session reconnect are native-only. Compiles +
   links into `wf_edit_web`.
-- **BLOCKED on Phase-1 (d)** — functional co-edit can't be verified yet: the deferred UB
-  traps in `InitBridgeMap`'s epilogue, *before* `editor_build` reaches `WebConnectStep` /
-  `CollabDrain`, so the join + sync never run in a clean build. Only the connect *initiate*
-  (pre-`HALStart`) runs. **Phase 2 *and* Phase 3 (presence/chat also live in
-  `editor_build`) are gated on fixing (d)** — that's the next gate to a verifiable
-  collaborative web editor.
+- **GATE CLEARED** — finding (d) (the `editor_build`/`StepFrame` UB) is fixed (`59dc44d3`),
+  so a clean build now reaches `WebConnectStep` / `CollabDrain` every frame. Functional
+  co-edit is now **testable**: run the local `wf-relay` (or `wss://wf.worldfoundry.org`),
+  open `wf-edit.html?room=…&relay=…`, and a native `wf-edit` on the same room; verify
+  bidirectional `CH_SYNC`. (Not yet exercised end-to-end this session — next step.)
 
 ## Phase 3 — Presence + text chat
 
