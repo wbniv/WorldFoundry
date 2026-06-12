@@ -2933,16 +2933,20 @@ int main(int argc, char** argv)
                     actor_names.size());
     };
 
-    // Web co-edit: when joining a relay room, DEFER the Doc load. WebSeedStep (after
-    // connect) either seeds an empty room (loads the level once observeUpdates is
-    // wired, so the build auto-pushes) or adopts the host's Doc from the relay —
-    // loading locally here too would duplicate (independent Yrs client IDs). Solo
-    // web (no room) and native always load here.
-    bool web_defer_doc_load = false;
+    // Co-edit: when joining a relay room, DEFER the Doc load so join-and-receive
+    // (seed-vs-adopt) runs after connect — loading locally here too would duplicate
+    // (a local load + the relay's pushed Doc = independent Yrs client ids → ~2× the
+    // actors). The host loads once observeUpdates is wired (so the load auto-pushes,
+    // seeding the relay); a joiner adopts the relay's Doc. On WEB this resolves in
+    // WebSeedStep (editor_build); on NATIVE it resolves synchronously in the connect
+    // block below. Solo (no relay room) always loads here.
+    bool defer_doc_load = false;
 #if defined(__EMSCRIPTEN__)
-    web_defer_doc_load = !room_id.empty();
+    defer_doc_load = !room_id.empty();
+#else
+    defer_doc_load = !room_id.empty() && !ctx_relay_url.empty();
 #endif
-    if (!show_picker && !web_defer_doc_load) {
+    if (!show_picker && !defer_doc_load) {
         if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc, &save_path))
             finish_doc_load();
         else
@@ -3584,6 +3588,30 @@ int main(int argc, char** argv)
                 ctx.relay_client.send(msg.data(), msg.size());
             });
 
+            // Native join-and-receive: the startup Doc load was deferred (we joined a
+            // relay room). Now that observeUpdates is wired, resolve host vs joiner —
+            // mirrors the web WebSeedStep, but synchronously (the relay's initial SYNC
+            // was already applied above, within the 1 s wait).
+            if (defer_doc_load) {
+                int n = 0; { auto txn = doc.begin(); n = txn.array("content").len(); }
+                if (n > 0) {
+                    // Joiner: the relay's initial SYNC populated the Doc → adopt it.
+                    // (Local load was deferred, so no duplicate Yrs ids.)
+                    finish_doc_load();
+                    std::printf("wf-edit: adopted room Doc from relay (%d actors)\n", n);
+                } else if (wfedit::LoadLevelTreeIntoDoc(leveltree, doc, &save_path)) {
+                    // Host: relay room was empty → load now. observeUpdates (wired just
+                    // above) pushes the load as CH_SYNC, seeding the relay so later
+                    // joiners — native OR web — adopt it instead of re-loading a dup.
+                    finish_doc_load();
+                    std::printf("wf-edit: room was empty — seeded it from %s\n",
+                                leveltree.c_str());
+                } else {
+                    std::fprintf(stderr, "wf-edit: seed load failed for %s "
+                                         "(Outliner will be empty)\n", leveltree.c_str());
+                }
+            }
+
             // Phase 6: persist recent room + updated identity.
             PushRecentRoom(identity, ctx_relay_url, room_id);
             SaveIdentity(identity);
@@ -3592,6 +3620,10 @@ int main(int argc, char** argv)
         } else {
             std::fprintf(stderr, "wf-edit: relay connect failed: %s\n",
                          ctx_relay_url.c_str());
+            // Connect failed but we deferred the load → load now so the editor isn't
+            // empty (offline editing; no relay sync this session).
+            if (defer_doc_load && wfedit::LoadLevelTreeIntoDoc(leveltree, doc, &save_path))
+                finish_doc_load();
         }
 #endif  // !__EMSCRIPTEN__ (native threaded connect)
     } else if (!identity.peer_id.empty() && identity.peer_id != "editor-anon") {
