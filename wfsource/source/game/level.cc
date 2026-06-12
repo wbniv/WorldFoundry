@@ -1368,7 +1368,9 @@ Level::SetPendingRemove( const BaseObject* object )
 
 	DBSTREAM2( clevel << "SetPendingRemove: actor = " << *actor << std::endl; )
 	bool found = false;
-	assert( _numToBeRemovedObjects < 512 );   // _toBeRemovedObjects[512] — fills 0..511 then asserts
+	// Bound derived from the array itself (never a hardcoded literal): the add is
+	// `arr[count] = x; count++`, so `count < N` safely fills 0..N-1 then asserts.
+	assert( _numToBeRemovedObjects < ARRAY_COUNT(_toBeRemovedObjects) );
 
 	// check if already set to be removed
 	for ( int i = 0; i < _numToBeRemovedObjects; i++ )
@@ -1384,7 +1386,7 @@ Level::SetPendingRemove( const BaseObject* object )
 	{
 		DBSTREAM2( clevel << " Placing Actor " << GetObjectIndex( actor ) << " into _toBeRemovedObjects[" << _numToBeRemovedObjects << "]" << std::endl; )
 		_toBeRemovedObjects[_numToBeRemovedObjects] = idxActor;
-		_numToBeRemovedObjects++;
+		++_numToBeRemovedObjects;
 	}
 }
 

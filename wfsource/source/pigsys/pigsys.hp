@@ -192,6 +192,11 @@ typedef enum _MachineType
 // these should only be used for numeric types
 #define	ABS(_1)					((_1)<0?-(_1):(_1))
 
+// Compile-time element count of a fixed-size array. Use this for array bounds
+// (asserts, loop limits, capacity checks) so the size is never a hardcoded
+// literal that can drift from the array's declaration.
+#define	ARRAY_COUNT(_arr)		((int)(sizeof(_arr) / sizeof((_arr)[0])))
+
 #define	until( _condition_ )	while ( !(_condition_) )
 
 
