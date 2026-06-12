@@ -92,9 +92,11 @@ timer callbacks, concurrent AI), explore these alternatives instead:
   split~~ (DONE, [e49f3720](https://github.com/wbniv/WorldFoundry/commit/e49f3720); `fsn-scan`
   emitter + `node-*` accessors + render policy in the filesys Director, syscalls 151-159;
   parity-verified 400 nodes/75 towers, identical render). **Open:**
-  - **KDirStat/QDirStat treemap view** (next new view) — squarified rectangles, area ∝ size,
-    nested; a C emitter (rows `{x,y,w,h,depth,tag}`) + a Forth policy spawning XY-scaled boxes.
-    No trig at all — the cleanest fit for the flat-table model.
+  - ~~**KDirStat/QDirStat treemap view**~~ (DONE, [c-pending]; `wflevels/treemap/`,
+    `task run-treemap`) — flat squarified rectangles, area ∝ size, nested, colored by file type.
+    C `tm-scan` emitter (Bruls squarified layout + extension→type classify, syscalls 160-168) +
+    Forth render policy (unit box per cell, `set-scale3`, `type>rgb` palette). No trig at all.
+    [plan](docs/plans/2026-06-13-kdirstat-treemap-view.md)
   - **Tiered monument** (#2) + **planetarium dome** (#3) sunburst variants; **unified runtime
     view-switcher** (one level, mode mailbox cycles tree↔sunburst↔treemap↔tiered↔dome);
     **procedural single-mesh** upgrade (exact sectors via one runtime `RenderObject3D`).

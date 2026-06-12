@@ -1,0 +1,22 @@
+// treemap-standalone.iff.txt — L4-wrapped form of treemap for wf_game -L.
+//
+// Build: bash wftools/wf_blender/build_level_binary.sh treemap
+// Run:   task run-treemap
+//
+// KDirStat treemap: 14 static actors + a runtime-spawned squarified grid of
+// axis-aligned cell boxes (tm-scan emits the table; the Director .fth renders it).
+// Pool budgets sized for ~480 spawned cells at peak (MAX_NODES). Templated cell
+// instances BindAssets to the PERMANENT slot, so cbPerm bounds them. 'SLOT' 1 =
+// single active room slot.
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 1500000l                 // 14 static + up to ~480 spawned cell actors
+        'PERM' 4000000l                 // player/floor/box-template meshes + ~480 instances
+        'ROOM' 2000000l                 // single active room slot (×1)
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+        'SLOT' 1l                       // 1 active room slot
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../treemap.iff" ]
+}

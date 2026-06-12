@@ -47,6 +47,7 @@ extern "C" {
 #include <unordered_map>
 #include <vector>
 #include <algorithm>  // std::sort — Filelight orders sibling segments biggest-first
+#include <cctype>     // tolower — treemap file-extension classify
 #include <dirent.h>
 #include <sys/stat.h>
 #include <cmath>      // atan2/cos/sin/sqrt for the FSN connector orientation
@@ -715,6 +716,159 @@ static int fl_navigate() {
     return 0;
 }
 
+// ---------------------------------------------------------------------------
+// KDirStat treemap — flat squarified disk-usage map (custom 32-40 / sys 160-168).
+//
+// Pure arithmetic, NO trig: C runs the squarified-treemap layout (Bruls et al.)
+// and classifies file extensions into type ids, EMITTING a flat table of
+// axis-aligned cells `{x,y,w,h,type,depth}`. The Director .fth spawns a unit box
+// per cell scaled (w,h,slab) and coloured by type (the policy). Strings stay in
+// C — only the numeric type id crosses to Forth.
+struct TmCell { float x, y, w, h; int type, depth; };
+struct TmItem { std::string path; int64_t size; bool is_dir; int type; };
+static std::vector<TmCell> g_tm_cells;
+static std::string g_tm_root;
+static int   g_tm_maxDepth = 5;
+static const float TM_X0 = -34.0f, TM_Y0 = -34.0f, TM_X1 = 34.0f, TM_Y1 = 34.0f;
+// The root rect is ~4624 sq units; with a 480-cell budget and DEPTH-FIRST layout,
+// the cull thresholds must be big enough that the whole rect fills within budget
+// (else the first huge subtree eats it all and the rest is empty). ~4624/12 ≈ 385.
+static const float TM_MIN_AREA  = 11.0f;  // stop recursing into dirs below this (aggregate)
+static const float TM_MIN_LEAF  = 2.5f;   // skip leaf cells below this (invisible slivers)
+static const float TM_INSET     = 0.14f;  // dir-region inset per nesting level → gridline gaps
+
+// extension → type id (Director maps id → colour): 0 dir/other, 1 source,
+// 2 image, 3 video, 4 audio, 5 archive, 6 docs/data, 7 binary.
+static int tm_classify(const std::string& name, bool is_dir) {
+    if (is_dir) return 0;
+    size_t dot = name.find_last_of('.');
+    if (dot == std::string::npos || dot == 0 || dot + 1 >= name.size()) return 7;
+    std::string e = name.substr(dot + 1);
+    for (char& c : e) c = (char)tolower((unsigned char)c);
+    auto in = [&](std::initializer_list<const char*> xs) {
+        for (const char* x : xs) if (e == x) return true;
+        return false;
+    };
+    if (in({"c","cc","cpp","cxx","h","hpp","hp","hpi","py","rs","js","ts","java",
+            "go","sh","lua","fth","pl","rb","oas","mac","lc","s","scm"})) return 1;
+    if (in({"png","jpg","jpeg","gif","bmp","tga","svg","webp","ico","ppm"}))  return 2;
+    if (in({"mp4","mov","avi","mkv","webm","m4v"}))                            return 3;
+    if (in({"mp3","wav","ogg","flac","aac","m4a"}))                           return 4;
+    if (in({"zip","tar","gz","bz2","xz","7z","rar","tgz","zst"}))             return 5;
+    if (in({"md","txt","json","html","htm","xml","yaml","yml","toml","pdf",
+            "csv","cfg","ini","def","log"}))                                  return 6;
+    if (in({"o","so","a","exe","bin","iff","lvl","lev","obj","dll","dylib","wasm"})) return 7;
+    return 0;
+}
+
+static void tm_emit_leaf(float x, float y, float w, float h, int type, int depth) {
+    const float g = 0.08f;                        // per-leaf gap (file gridlines)
+    float ix = x + g, iy = y + g, iw = w - 2.0f * g, ih = h - 2.0f * g;
+    if (iw <= 0.05f || ih <= 0.05f) return;
+    if (iw * ih < TM_MIN_LEAF) return;            // skip invisible slivers (KDirStat hides tiny files)
+    if ((int)g_tm_cells.size() >= g_fsn_maxNodes) return;
+    g_tm_cells.push_back(TmCell{ ix, iy, iw, ih, type, depth });
+}
+
+static void tm_layout(const std::string& path, float x, float y, float w, float h, int depth);
+
+// Place one item into its sub-rect: recurse into a (big enough) dir, else leaf.
+static void tm_place_item(const TmItem& it, float x, float y, float w, float h, int depth) {
+    const float m = TM_INSET;
+    bool canRecurse = it.is_dir && depth < g_tm_maxDepth && (w * h) >= TM_MIN_AREA
+                      && (w - 2.0f * m) > 1.0f && (h - 2.0f * m) > 1.0f;
+    if (canRecurse)
+        tm_layout(it.path, x + m, y + m, w - 2.0f * m, h - 2.0f * m, depth + 1);
+    else
+        tm_emit_leaf(x, y, w, h, it.type, depth);
+}
+
+// Worst aspect ratio of a row (Bruls closed form): areas rowMax/rowMin, sum, side.
+static float tm_worst(float rowSum, float rowMax, float rowMin, float side) {
+    if (rowSum <= 0.0f || side <= 0.0f) return 1e18f;
+    float s2 = rowSum * rowSum, w2 = side * side;
+    float a = (w2 * rowMax) / s2;
+    float b = s2 / (w2 * rowMin);
+    return a > b ? a : b;
+}
+
+// Squarified layout of `items` (sorted desc) into rect (x,y,w,h); total = Σ sizes.
+static void tm_squarify(const std::vector<TmItem>& items, int64_t total,
+                        float x, float y, float w, float h, int depth) {
+    if (items.empty() || total <= 0) return;
+    double areaScale = (double)w * (double)h / (double)total;   // bytes → sq units
+    std::vector<float> area(items.size());
+    for (size_t k = 0; k < items.size(); ++k)
+        area[k] = (float)((double)items[k].size * areaScale);
+
+    float rx = x, ry = y, rw = w, rh = h;       // remaining rect
+    size_t i = 0;
+    while (i < items.size()) {
+        if ((int)g_tm_cells.size() >= g_fsn_maxNodes) break;
+        float side = (rw < rh) ? rw : rh;
+        // grow a row [i..j) while the worst aspect ratio keeps improving
+        float rowSum = 0.0f, rowMax = 0.0f, rowMin = 1e18f, best = 1e18f;
+        size_t j = i;
+        while (j < items.size()) {
+            float a = area[j];
+            float nSum = rowSum + a;
+            float nMax = a > rowMax ? a : rowMax;
+            float nMin = a < rowMin ? a : rowMin;
+            float wst  = tm_worst(nSum, nMax, nMin, side);
+            if (j > i && wst > best) break;     // adding j worsens → close the row
+            rowSum = nSum; rowMax = nMax; rowMin = nMin; best = wst; ++j;
+        }
+        float thick = (side > 0.0f) ? rowSum / side : 0.0f;
+        if (rw < rh) {                          // horizontal band along the bottom
+            float cx = rx;
+            for (size_t k = i; k < j; ++k) {
+                float cw = (thick > 0.0f) ? area[k] / thick : 0.0f;
+                tm_place_item(items[k], cx, ry, cw, thick, depth);
+                cx += cw;
+            }
+            ry += thick; rh -= thick;
+        } else {                                // vertical band along the left
+            float cy = ry;
+            for (size_t k = i; k < j; ++k) {
+                float ch = (thick > 0.0f) ? area[k] / thick : 0.0f;
+                tm_place_item(items[k], rx, cy, thick, ch, depth);
+                cy += ch;
+            }
+            rx += thick; rw -= thick;
+        }
+        i = j;
+    }
+}
+
+// Lay out a directory's children into its rect (recursively via tm_place_item).
+static void tm_layout(const std::string& path, float x, float y, float w, float h, int depth) {
+    if ((int)g_tm_cells.size() >= g_fsn_maxNodes) return;
+    std::vector<FsnEntry> entries;
+    fsn_scan(path, entries);
+    std::vector<TmItem> items;
+    int64_t total = 0;
+    int statBudget = 200000;
+    for (const FsnEntry& e : entries) {
+        int64_t sz = e.is_dir ? fl_subtree_bytes(e.path, statBudget) : e.size;
+        if (sz <= 0) sz = 1;                    // give empties a sliver so they can appear
+        items.push_back(TmItem{ e.path, sz, e.is_dir, tm_classify(e.name, e.is_dir) });
+        total += sz;
+    }
+    if (items.empty() || total <= 0) {          // empty dir → one grey leaf cell
+        tm_emit_leaf(x, y, w, h, 0, depth);
+        return;
+    }
+    std::sort(items.begin(), items.end(),
+              [](const TmItem& a, const TmItem& b) { return a.size > b.size; });
+    tm_squarify(items, total, x, y, w, h, depth);
+}
+
+static int tm_scan() {
+    g_tm_cells.clear();
+    tm_layout(g_tm_root, TM_X0, TM_Y0, TM_X1 - TM_X0, TM_Y1 - TM_Y0, 0);
+    return (int)g_tm_cells.size();
+}
+
 // Cache: src pointer → compiled word name.
 // Scripts are compiled once on first call; subsequent calls just invoke the word.
 static std::unordered_map<const char*, std::string> g_scriptCache;
@@ -1020,6 +1174,35 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                 int g = (int)zf_pop(ctx); if (g < 0) g = 0; if (g > 255) g = 255;
                 int r = (int)zf_pop(ctx); if (r < 0) r = 0; if (r > 255) r = 255;
                 zf_push(ctx, (zf_cell)(float)(((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF)));
+            } else if (custom == 32) {
+                // tm-config ( maxDepth maxNodes -- )
+                g_fsn_maxNodes = (int)zf_pop(ctx);   // shared spawn budget
+                g_tm_maxDepth  = (int)zf_pop(ctx);
+                g_tm_root = ".";
+            } else if (custom == 33) {
+                // tm-scan ( -- nCells ) — run the squarified layout, fill the table.
+                int n = tm_scan();
+                fprintf(stderr, "TM: laid out '%s' — %d cells\n", g_tm_root.c_str(), n);
+                zf_push(ctx, (zf_cell)(float)n);
+            } else if (custom >= 34 && custom <= 39) {
+                // tm-x/y/w/h/type/depth ( i -- v )
+                int i = (int)zf_pop(ctx);
+                float v = 0.0f;
+                if (i >= 0 && i < (int)g_tm_cells.size()) {
+                    const TmCell& c = g_tm_cells[i];
+                    switch (custom) {
+                        case 34: v = c.x; break;
+                        case 35: v = c.y; break;
+                        case 36: v = c.w; break;
+                        case 37: v = c.h; break;
+                        case 38: v = (float)c.type;  break;
+                        default: v = (float)c.depth; break;   // 39
+                    }
+                }
+                zf_push(ctx, (zf_cell)v);
+            } else if (custom == 40) {
+                // tm-count ( -- n )
+                zf_push(ctx, (zf_cell)(float)(int)g_tm_cells.size());
             } else if (custom == 72) {
                 /* Neural-forth dispatch gate: syscall 200 = ZF_SYSCALL_USER + 72.
                  * Pops word-id from stack and routes to nf_dispatch().
@@ -1308,6 +1491,35 @@ void Init(MailboxesManager& mgr)
         { "pack-rgb",   "159 sys" },
     };
     for (const auto& w : kFsnWords) {
+        char buf[64];
+        snprintf(buf, sizeof(buf), ": %s %s ;", w.name, w.body);
+        if (zf_eval(&g_ctx, buf) != ZF_OK)
+            fprintf(stderr, "zforth: init failed (%s)\n", w.name);
+    }
+
+    // set-scale3 ( actor sx sy sz -- ) — non-uniform XY+Z scale (the treemap cell stretch).
+    r = zf_eval(&g_ctx,
+        ": set-scale3 "
+        "  >r >r >r "
+        "  r> 3040 2 pick write-actor-mailbox "
+        "  r> 3041 2 pick write-actor-mailbox "
+        "  r> 3042 2 pick write-actor-mailbox "
+        "  drop ;");
+    if (r != ZF_OK) fprintf(stderr, "zforth: init failed (set-scale3): %d\n", r);
+
+    // KDirStat treemap bridge words (custom 32-40 / sys 160-168).
+    static const struct { const char* name; const char* body; } kTmWords[] = {
+        { "tm-config", "160 sys" },
+        { "tm-scan",   "161 sys" },
+        { "tm-x",      "162 sys" },
+        { "tm-y",      "163 sys" },
+        { "tm-w",      "164 sys" },
+        { "tm-h",      "165 sys" },
+        { "tm-type",   "166 sys" },
+        { "tm-depth",  "167 sys" },
+        { "tm-count",  "168 sys" },
+    };
+    for (const auto& w : kTmWords) {
         char buf[64];
         snprintf(buf, sizeof(buf), ": %s %s ;", w.name, w.body);
         if (zf_eval(&g_ctx, buf) != ZF_OK)
