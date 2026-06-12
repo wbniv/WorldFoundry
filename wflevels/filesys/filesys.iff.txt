@@ -24,9 +24,10 @@
 	// Example: `$3fff001` = `IFF` + room `fff` (`PERM`) + slot `001`.
 	{ 'ASMP'
 		$3fff001l { 'STR' "room01.iff" }  // IFF PERM fff:001
-		$3fff002l { 'STR' "sphere.iff" }  // IFF PERM fff:002
+		$3fff002l { 'STR' "player.iff" }  // IFF PERM fff:002
 		$3fff003l { 'STR' "dirtemplate.iff" }  // IFF PERM fff:003
 		$3fff004l { 'STR' "filetemplate.iff" }  // IFF PERM fff:004
+		$3fff005l { 'STR' "connectortemplate.iff" }  // IFF PERM fff:005
 		$3000001l { 'STR' "floor.iff" }  // IFF RM0 000:001
 		$3000002l { 'STR' "actboxor.iff" }  // IFF RM0 000:002
 	}
@@ -39,9 +40,10 @@
 		{ 'ASS' $5ffffffl [ "Perm.ruv" ] }     // RUV PERM fff:fff
 		{ 'ASS' $7ffffffl [ "Perm.cyc" ] }     // CYC PERM fff:fff
 		{ 'ASS' $3fff001l [ "room01.iff" ] }  // IFF PERM fff:001
-		{ 'ASS' $3fff002l [ "sphere.iff" ] }  // IFF PERM fff:002
+		{ 'ASS' $3fff002l [ "player.iff" ] }  // IFF PERM fff:002
 		{ 'ASS' $3fff003l [ "dirtemplate.iff" ] }  // IFF PERM fff:003
 		{ 'ASS' $3fff004l [ "filetemplate.iff" ] }  // IFF PERM fff:004
+		{ 'ASS' $3fff005l [ "connectortemplate.iff" ] }  // IFF PERM fff:005
 	}
 	{ 'ALGN' .align(2048) }
 	{ 'RM0'
