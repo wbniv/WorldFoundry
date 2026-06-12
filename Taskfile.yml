@@ -726,6 +726,48 @@ tasks:
     cmds:
       - sudo apt-get install -y libssl-dev libvpx-dev
 
+  dev-setup-web-edit:
+    desc: "One-time: provision the wasm Rust toolchain for the WASM editor (rustup 1.85.1 + wasm32-unknown-emscripten, isolated from your global rust) + emsdk + the yrs emscripten patch. See docs/plans/2026-06-12-wf-edit-in-the-browser.md Phase 0."
+    deps: [setup-emsdk]
+    silent: true
+    status:
+      # Skip when the wasm std AND the yrs patch are both already in place.
+      - test -d "${RUSTUP_HOME:-$HOME/.rustup}/toolchains/1.85.1-x86_64-unknown-linux-gnu/lib/rustlib/wasm32-unknown-emscripten"
+      - git -C wftools/y-crdt apply --reverse --check ../../docs/patches/yrs-0.26-undo-options-default-emscripten.patch
+    cmds:
+      - |
+        set -euo pipefail
+        # The y-crdt submodule must be present for the patch step.
+        git submodule update --init wftools/y-crdt >/dev/null 2>&1 || true
+        export RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}" CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
+        RUSTUP="$CARGO_HOME/bin/rustup"
+        # Distro rust (/usr/bin/rustc) has no wasm std and isn't rustup-managed. Install rustup
+        # ISOLATED (no PATH/profile change) so the global toolchain is untouched; the web build
+        # selects this toolchain explicitly. Fully reversible via `rustup self uninstall`.
+        if [ ! -x "$RUSTUP" ] && ! command -v rustup >/dev/null 2>&1; then
+          echo "rustup not found — installing isolated (distro rust untouched)…"
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o /tmp/rustup-init.sh
+          sh /tmp/rustup-init.sh -y --no-modify-path --profile minimal --default-toolchain 1.85.1
+        fi
+        [ -x "$RUSTUP" ] || RUSTUP="$(command -v rustup)"
+        # Pin 1.85.1 — matches the distro rustc the native editor builds with (known-good against
+        # the vendored yrs 0.26). build-web-edit uses THIS toolchain, not the global default.
+        "$RUSTUP" toolchain install 1.85.1 --profile minimal
+        "$RUSTUP" target add --toolchain 1.85.1 wasm32-unknown-emscripten
+        # Apply the yrs emscripten cfg patch to the submodule (idempotent). Upstream gates
+        # Options::default() on `not(target_family="wasm")`, which over-broadly excludes
+        # emscripten; the patch narrows it to match the SystemClock gate. Without it, yffi's
+        # yundo_manager fails to cross-compile for wasm32-unknown-emscripten.
+        P=../../docs/patches/yrs-0.26-undo-options-default-emscripten.patch
+        if git -C wftools/y-crdt apply --reverse --check "$P" >/dev/null 2>&1; then
+          echo "yrs emscripten patch already applied"
+        elif git -C wftools/y-crdt apply --check "$P" >/dev/null 2>&1; then
+          git -C wftools/y-crdt apply "$P"; echo "applied yrs emscripten patch"
+        else
+          echo "WARNING: yrs patch neither applies nor is applied — y-crdt submodule may have drifted from yrs 0.26" >&2
+        fi
+        echo "✓ web-edit toolchain ready (rustup 1.85.1 + wasm32-unknown-emscripten; yrs patched; emsdk via dep)"
+
   blender:
     desc: "Launch Blender, print logs to terminal and capture to /tmp/blender.log"
     cmds:
