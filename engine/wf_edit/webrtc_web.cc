@@ -59,6 +59,20 @@ EM_JS(void, wfwebrtc_set_self, (const char* self_p, const char* ice_json_p), {
             } catch (e) {}
         };
 
+        // Convert an ImGui screen rect (framebuffer/device px — what
+        // GetCursorScreenPos returns) into CSS viewport px for the overlay <video>.
+        // canvas.width is the device-px drawing buffer; getBoundingClientRect() is CSS
+        // px, so the ratio is CSS-per-device — without this the overlay is offset +
+        // oversized on a HiDPI (devicePixelRatio > 1) display.
+        S.cssRect = function (x, y, w, h) {
+            var c = document.getElementById('canvas') || Module.canvas;
+            if (!c) return { left: x, top: y, w: w, h: h };
+            var r = c.getBoundingClientRect();
+            var sx = (c.width  ? r.width  / c.width  : 1);
+            var sy = (c.height ? r.height / c.height : 1);
+            return { left: r.left + x * sx, top: r.top + y * sy, w: w * sx, h: h * sy };
+        };
+
         S.makePeer = function (pid, isOfferer) {
             if (S.peers[pid]) return S.peers[pid];
             var pc = new RTCPeerConnection(S.ice);
@@ -298,14 +312,17 @@ EM_JS(void, wfwebrtc_layout_video, (const char* pid_p, int x, int y, int w, int 
     var P = S.peers[UTF8ToString(pid_p)]; if (!P || !P.videoEl) return;
     var v = P.videoEl;
     if (!vis || w <= 0 || h <= 0) { v.style.display = 'none'; return; }
+    var r = S.cssRect(x, y, w, h);
     v.style.display = 'block';
-    v.style.left = x + 'px'; v.style.top = y + 'px'; v.style.width = w + 'px'; v.style.height = h + 'px';
+    v.style.left = r.left + 'px'; v.style.top = r.top + 'px'; v.style.width = r.w + 'px'; v.style.height = r.h + 'px';
 });
 EM_JS(void, wfwebrtc_layout_self, (int x, int y, int w, int h, int vis), {
-    var el = globalThis.__wfrtcSelfVideo ? globalThis.__wfrtcSelfVideo() : null; if (!el) return;
+    var S = globalThis.__WFRTC;
+    var el = globalThis.__wfrtcSelfVideo ? globalThis.__wfrtcSelfVideo() : null; if (!el || !S) return;
     if (!vis || w <= 0 || h <= 0) { el.style.display = 'none'; return; }
+    var r = S.cssRect(x, y, w, h);
     el.style.display = 'block';
-    el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.width = w + 'px'; el.style.height = h + 'px';
+    el.style.left = r.left + 'px'; el.style.top = r.top + 'px'; el.style.width = r.w + 'px'; el.style.height = r.h + 'px';
 });
 // Hide every video overlay (self + all peers) — called when the Collaborators panel is
 // closed/collapsed so the <video> elements don't float over the viewport.
