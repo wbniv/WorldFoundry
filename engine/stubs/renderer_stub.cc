@@ -29,7 +29,7 @@ public:
     void SetFog(float, float, float, float, float) override {}
     void SetFogEnabled(bool) override {}
     void DrawTriangle(const RBVertex&, const RBVertex&, const RBVertex&,
-                      float, float, float, const PixelMap*) override {}
+                      float, float, float, const PixelMap*, bool) override {}
     void EndFrame() override {}
     // ReloadProgram uses the base no-op default.
 };

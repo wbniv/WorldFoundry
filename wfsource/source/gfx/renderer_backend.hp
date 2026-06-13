@@ -69,11 +69,14 @@ public:
 
     // Triangle submission (see top of file). `nx/ny/nz` is the object-space
     // face normal — the modern backend replicates it into all three verts.
+    // `cullExempt` skips backface culling for this triangle (DOUBLE_SIDED
+    // materials, the matte/HUD background) — see the cull in backend_modern.cc.
     virtual void DrawTriangle(const RBVertex& v0,
                               const RBVertex& v1,
                               const RBVertex& v2,
                               float nx, float ny, float nz,
-                              const PixelMap* texture) = 0;
+                              const PixelMap* texture,
+                              bool cullExempt = false) = 0;
 
     // Flush any pending batched draws. Called once per frame, right before
     // the swap-buffers. Legacy fixed-function backend is a no-op; modern

@@ -98,6 +98,11 @@ public:
 	inline int32 GetMaterialFlags() const;
 	int32 SetMaterialFlags(int32 materialType);
 
+	// True when this material wants both faces drawn (DOUBLE_SIDED bit set) —
+	// the backface-culling exemption. Defined inline; the enum below is visible
+	// here in complete-class context.
+	bool IsDoubleSided() const { return (_materialFlags & DOUBLE_SIDED) != 0; }
+
 	INLINE void Validate() const;
 	// bits controlling what type of material this is,
 	// set up so that 0 is the simplest default: flat shaded color

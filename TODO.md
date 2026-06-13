@@ -5,14 +5,17 @@
 - [x] **Linux: viewport resizes on window maximize/resize.** Three bugs fixed: wrong inscribed-square viewport math in `ConfigureNotify` (`mesa.cc`); FBO blit destination hardcoded to 640×480 (`display.cc`); projection matrix only set once at init — moved to `RenderBegin()` so aspect ratio recomputes every frame. [plan](docs/plans/2026-06-04-viewport-doesn-t-resize-on-window-maximize.md)
 - [x] **Linux: `-fullscreen`, `-width=N`, `-height=N` window flags.** Re-enabled the `#if 0` arg block in `hal/linux/platform_init.cc`; `-fullscreen` queries screen dims via X11 so FBO + recording match. `WF_FULLSCREEN=1` / `WF_RECORD=1` added to all `task run-*`. [plan](docs/plans/2026-06-04-window-size-parity-fullscreen-flag.md)
 - [ ] **macOS: `-fullscreen`, `-width=N`, `-height=N` window flags.** Linux uses `_NET_WM_STATE_FULLSCREEN` via X11. macOS needs the equivalent using AppKit (`NSWindow` frame sizing + `toggleFullScreen:` / `NSWindowStyleMaskFullScreen`) in the macOS platform HAL. Tablets (Android/iOS) are always fullscreen by OS design — no changes needed there.
-- [ ] **Engine-wide backface culling (software, normal-based).** The glpipeline renderer never
-  enables `GL_CULL_FACE` (verified: only the Android HUD blit touches it, to disable) — both sides
-  of every triangle draw, causing z-fight/back-face bleed-through artifacts. Fix: a normal-vs-view
-  dot-product cull in `ModernRendererBackend::DrawTriangle` (eye space via `_mv`), default ON with
-  `WF_CULL=0` toggle, honoring the dormant `DOUBLE_SIDED` material flag (matte cull-exempt).
-  Winding-independent — reuses the per-face normals lighting already proves correct, so **no mesh
-  audit, interiors stay visible**. Also unblocks the planetarium dome (viewed from inside).
-  [plan](docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md)
+- [~] **Software backface culling — mechanism landed, OFF by default (`WF_CULL=1` opt-in).**
+  Normal-vs-view dot-product cull in `ModernRendererBackend::DrawTriangle` + Metal backend (eye
+  space via `_mv`), honoring the dormant `DOUBLE_SIDED` flag (matte cull-exempt). The glpipeline
+  renderer never enabled `GL_CULL_FACE` (both sides of every tri drew → z-fight/bleed-through).
+  **Shipped default-OFF:** A/B across 7 levels showed the mechanism is correct (qbert/snowgoons/
+  filesys/moon pixel-clean) but several shipped generators are wound **inward** (box/disk "top"
+  faces → −Z normals: `add_solid_box`/`make_box_mesh`/`disk_geo`), so a global enable culls their
+  visible faces; reversing winding also entangles with one-sided lighting + the `FACE_COLOR`
+  override (didn't cleanly restore the look). **Remaining:** audit + rewind shipped level meshes to
+  consistent normals, then flip the default on. The planetarium dome (authored with correct
+  normals) is the first `WF_CULL=1` consumer. [plan](docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md)
 - [ ] **Planetarium dome view (`wflevels/dome/`)** — 4th filesystem-viz view: the Filelight
   sunburst wrapped onto a hemisphere (player stands at centre, turns to look around; depth→elevation
   band, arc∝size, per-branch hue). **Reuses `fl-scan` verbatim → no engine code** (a new view = new

@@ -58,7 +58,8 @@ RenderObject3D::RenderPoly3DGouraudColorPreLit(Primitive* primitive)
                                       n.X().AsFloat(),
                                       n.Y().AsFloat(),
                                       n.Z().AsFloat(),
-                                      nullptr);
+                                      nullptr,
+                                      globalRendererVariables.currentRenderMaterial->IsDoubleSided());
     return 1;
 }
 

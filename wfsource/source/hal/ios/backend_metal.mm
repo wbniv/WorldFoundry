@@ -29,6 +29,7 @@
 #include <math/matrix34.hp>
 
 #include <cmath>
+#include <cstdlib>
 #include <cstring>
 #include <vector>
 
@@ -290,8 +291,33 @@ public:
                       const RBVertex& v1,
                       const RBVertex& v2,
                       float nx, float ny, float nz,
-                      const PixelMap* texture) override
+                      const PixelMap* texture,
+                      bool cullExempt) override
     {
+        // Software backface cull — mirrors backend_modern.cc. Cull from the
+        // object-space face normal + model->eye _mv (winding-independent): a face
+        // points away when dot(Ne, Pe) > 0 in eye space. DOUBLE_SIDED/matte pass
+        // cullExempt=true. OFF BY DEFAULT (opt-in via WF_CULL=1) — see the long
+        // note in backend_modern.cc::DrawTriangle for why.
+        static const bool cullEnabled = []() {
+            const char* e = getenv("WF_CULL");
+            return e && atoi(e) != 0;   // opt-in
+        }();
+        if (cullEnabled && !cullExempt)
+        {
+            const float nex = _mv[0]*nx + _mv[4]*ny + _mv[8]*nz;
+            const float ney = _mv[1]*nx + _mv[5]*ny + _mv[9]*nz;
+            const float nez = _mv[2]*nx + _mv[6]*ny + _mv[10]*nz;
+            const float cx = (v0.x + v1.x + v2.x) * (1.0f / 3.0f);
+            const float cy = (v0.y + v1.y + v2.y) * (1.0f / 3.0f);
+            const float cz = (v0.z + v1.z + v2.z) * (1.0f / 3.0f);
+            const float pex = _mv[0]*cx + _mv[4]*cy + _mv[8]*cz  + _mv[12];
+            const float pey = _mv[1]*cx + _mv[5]*cy + _mv[9]*cz  + _mv[13];
+            const float pez = _mv[2]*cx + _mv[6]*cy + _mv[10]*cz + _mv[14];
+            if (nex*pex + ney*pey + nez*pez > 0.0f)
+                return;
+        }
+
         if (texture != _curTexture && !_cpu.empty())
             Flush();
         _curTexture = texture;

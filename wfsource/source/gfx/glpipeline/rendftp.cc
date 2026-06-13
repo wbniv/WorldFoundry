@@ -77,7 +77,8 @@ RenderObject3D::RenderPoly3DFlatTexturePreLit(Primitive* primitive)
                                       n.X().AsFloat(),
                                       n.Y().AsFloat(),
                                       n.Z().AsFloat(),
-                                      poly.pPixelMap);
+                                      poly.pPixelMap,
+                                      globalRendererVariables.currentRenderMaterial->IsDoubleSided());
     return 1;
 }
 

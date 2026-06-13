@@ -723,11 +723,15 @@ Full root-cause analysis: [docs/investigations/2026-05-16-textile-rs-rgba555-ded
 
 ## Mesh face normals & backface culling
 
-> **CHANGED 2026-06-13 — culling is now ON by default.** WF previously drew both sides of
-> every polygon. The `glpipeline`/Metal backends now do **software backface culling**: a
-> triangle whose normal points away from the camera is skipped. Winding/normal direction is
-> therefore **load-bearing** — a face wound the wrong way will *vanish*, not just shade wrong.
-> Plan: [2026-06-13 planetarium-dome + culling](plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md).
+> **NEW 2026-06-13 — opt-in software backface culling (`WF_CULL=1`, OFF by default).** WF draws
+> both sides of every polygon by default. The `glpipeline`/Metal backends now have a **software
+> backface cull** — a triangle whose normal points away from the camera is skipped — but it stays
+> **off unless you run with `WF_CULL=1`**. It is opt-in because several shipped mesh generators are
+> wound INWARD (see "the inside-out box" below): enabling it globally makes their visible faces
+> *vanish*, and their look is entangled with one-sided lighting + the `FACE_COLOR` override, so
+> making every level culling-correct is a separate effort. **When culling is on, winding/normal
+> direction is load-bearing** — a face wound the wrong way vanishes, not just shades wrong. Plan:
+> [2026-06-13 planetarium-dome + culling](plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md).
 
 **How it works.** Each face normal is computed once at load from winding order —
 `CalculateNormal = (v2-v0) × (v1-v0)` (`gfx/face.hpi:35`). The cull (in
@@ -748,17 +752,18 @@ to be **seen from**:
 `make_box_mesh`) produces **inward** normals under `(v2-v0)×(v1-v0)` — its "top" face `(4,5,6,7)`
 normal is `-Z` (down). For an exterior box, **reverse every face tuple** so normals point out:
 `[(1,2,3,0),(7,6,5,4),(4,5,1,0),(5,6,2,1),(6,7,3,2),(7,4,0,3)]`. Likewise reverse fan/wall
-triangles in disk/cylinder generators (`disk_geo`). After authoring, eyeball it: a face that goes
-dark *or disappears* from the intended view is wound backwards. (Quick A/B: relaunch with
-`WF_CULL=0` to disable the cull — if the missing surface reappears, it's a winding bug.)
+triangles in disk/cylinder generators (`disk_geo`). After authoring, run with `WF_CULL=1` and
+eyeball it: a face that **disappears** from the intended view is wound backwards (toggle `WF_CULL`
+off and on — if the surface reappears with culling off, it's a winding bug, not a missing mesh).
 
 **Escape hatch — two-sided surfaces.** A genuinely double-sided surface (the matte/HUD
 background, a thin billboard/flag) should set the material's `DOUBLE_SIDED` flag
 (`gfx/material.hp`), which exempts it from culling. The matte path passes this automatically;
 the engine never culls the background.
 
-**Disable globally:** run with `WF_CULL=0` (env) to turn culling off engine-wide — useful for
-isolating whether an invisible surface is a culling/winding issue vs. a missing mesh.
+**Enable / disable:** culling is **off by default**; run with `WF_CULL=1` (env) to turn it on
+engine-wide (and `WF_CULL=0` or unset to turn it off). Toggling it is the quickest way to tell a
+culling/winding issue from a genuinely missing mesh.
 
 ---
 

@@ -356,6 +356,19 @@ and the FSN `filesys` towers (2026-06-12, runtime template + scale). It is one
 rule, not a physics quirk. See also the scale-mailbox note in
 [level-design-troubleshooting.md](level-design-troubleshooting.md#b-runtime-xyz_scale-mailboxes-30403042--visual-only).
 
+### Mesh face winding — normals must face the viewer (backface culling, 2026-06-13)
+
+**The renderer has an opt-in software backface cull** (`WF_CULL=1`, off by default — see the note
+below on why it isn't global yet). **When it's on**, author every face's winding so its normal
+points toward where the surface is **seen from** — **outward/up** for exterior geometry (props,
+floors, treemap cells, terrain), **inward** for interior geometry the player stands inside (rooms,
+a dome/skybox). A wrong-way face **vanishes** under culling, not just shades dark. The hand-written
+box list `[(0,3,2,1),(4,5,6,7),…]` is **inside-out** (inward normals) — reverse every tuple for an
+exterior box: `[(1,2,3,0),(7,6,5,4),(4,5,1,0),(5,6,2,1),(6,7,3,2),(7,4,0,3)]`. Genuinely two-sided
+surfaces (matte, billboards) set the material `DOUBLE_SIDED` flag. **Note:** culling is opt-in
+because most shipped level meshes are *not* yet wound consistently; turning it on globally is a
+separate effort. Full rules + the `WF_CULL` toggle: [level-design-troubleshooting.md → Mesh face normals & backface culling](level-design-troubleshooting.md#mesh-face-normals--backface-culling).
+
 ---
 
 ## Engine systems you wire from a level

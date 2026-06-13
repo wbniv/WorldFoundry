@@ -348,8 +348,47 @@ public:
                       const RBVertex& v1,
                       const RBVertex& v2,
                       float nx, float ny, float nz,
-                      const PixelMap* texture) override
+                      const PixelMap* texture,
+                      bool cullExempt) override
     {
+        // Software backface cull (winding-independent). The renderer never
+        // enables GL_CULL_FACE, and mesh winding is inconsistent across asset
+        // sources, so we cull from the already-correct per-face normal instead
+        // (the same normal one-sided lighting uses). Work in eye space, where
+        // the camera sits at the origin looking down -Z: transform the
+        // object-space normal by _mv's upper 3x3 (as SetDirLight does) and the
+        // face centre by the full _mv. The view vector from eye to face is just
+        // its eye-space position, so a face points away from the camera when
+        // dot(Ne, Pe) > 0 — cull it. DOUBLE_SIDED materials and the matte pass
+        // cullExempt=true.
+        //
+        // OFF BY DEFAULT (opt-in via WF_CULL=1). Enabling it engine-wide today
+        // regresses shipped levels: several mesh generators are wound INWARD
+        // (box/disk "top" faces have -Z normals), so their visible faces get
+        // culled and their appearance is entangled with one-sided lighting +
+        // the FACE_COLOR override. Making every level culling-correct is a
+        // separate effort; until then this is opt-in (e.g. the dome authored
+        // with correct outward/inward normals runs with WF_CULL=1). See
+        // docs/level-design-troubleshooting.md "Mesh face normals & backface culling".
+        static const bool cullEnabled = []() {
+            const char* e = getenv("WF_CULL");
+            return e && atoi(e) != 0;   // opt-in
+        }();
+        if (cullEnabled && !cullExempt)
+        {
+            const float nex = _mv[0]*nx + _mv[4]*ny + _mv[8]*nz;
+            const float ney = _mv[1]*nx + _mv[5]*ny + _mv[9]*nz;
+            const float nez = _mv[2]*nx + _mv[6]*ny + _mv[10]*nz;
+            const float cx = (v0.x + v1.x + v2.x) * (1.0f / 3.0f);
+            const float cy = (v0.y + v1.y + v2.y) * (1.0f / 3.0f);
+            const float cz = (v0.z + v1.z + v2.z) * (1.0f / 3.0f);
+            const float pex = _mv[0]*cx + _mv[4]*cy + _mv[8]*cz  + _mv[12];
+            const float pey = _mv[1]*cx + _mv[5]*cy + _mv[9]*cz  + _mv[13];
+            const float pez = _mv[2]*cx + _mv[6]*cy + _mv[10]*cz + _mv[14];
+            if (nex*pex + ney*pey + nez*pez > 0.0f)
+                return;   // back-facing — skip
+        }
+
         if (texture != _curTexture && !_cpu.empty())
             Flush();
         _curTexture = texture;

@@ -217,9 +217,10 @@ ScrollingMatte::Render(ViewPort&
             CalcVRAMuv(xTileOffsetRight,  yTileOffset,       uResult, vResult, _texture);
             CalcUV(uResult, vResult, *texturePixelMap, tr.u, tr.v);
 
-            // Unlit matte: normal unused, but set facing camera.
-            RendererBackendGet().DrawTriangle(tl, bl, br, 0.0f, 0.0f, 1.0f, texturePixelMap);
-            RendererBackendGet().DrawTriangle(tl, br, tr, 0.0f, 0.0f, 1.0f, texturePixelMap);
+            // Unlit matte: normal unused, but set facing camera. cullExempt=true —
+            // the background quad must never be backface-culled.
+            RendererBackendGet().DrawTriangle(tl, bl, br, 0.0f, 0.0f, 1.0f, texturePixelMap, true);
+            RendererBackendGet().DrawTriangle(tl, br, tr, 0.0f, 0.0f, 1.0f, texturePixelMap, true);
 #endif
 			}
 		}
