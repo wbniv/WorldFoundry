@@ -90,6 +90,12 @@ public:
 private:
     void EncodeAndSend(const float* pcm, int frame_samples);
 
+    // Return the PeerAudio for peer_id, creating its Opus decoder on first use.
+    // Caller MUST hold peers_mu_. nullptr only if decoder create fails. Mirrors
+    // VideoChat::EnsurePeer: Opus tolerated the unknown-peer drop (every packet
+    // is independently decodable), but lazy-create removes the asymmetry.
+    PeerAudio* EnsurePeer(const std::string& peer_id);
+
     bool     muted_ = true;
 
     OpusEncoder* encoder_ = nullptr;

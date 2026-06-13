@@ -1365,6 +1365,15 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS AND NOT EMSCRIPTEN)
         COMMAND sh -c "WF_EDIT_MESH_TEST=1 $<TARGET_FILE:wf_edit> 2>&1 | tee /dev/stderr | grep -q '\\[mesh\\] all PASS'"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+    # Native VideoChat decoder-creation race (regression guard): a remote VP8
+    # keyframe that arrives before the presence-driven SyncPeers registers the
+    # peer must be decoded by the lazy-create path (EnsurePeer) rather than
+    # dropped — else the decoder stays waiting_for_keyframe and the remote video
+    # is blank. CPU-only (encodes one real keyframe via libvpx, exits before GL).
+    add_test(NAME wf_edit_video_race
+        COMMAND sh -c "WF_EDIT_VIDEO_RACE_TEST=1 $<TARGET_FILE:wf_edit> 2>&1 | tee /dev/stderr | grep -q '\\[video-race\\] all PASS'"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
     # wf-relay: standalone relay server binary (co-edit Phase 1).
     # Built via Cargo; not linked into wf_edit (avoids duplicate Rust runtime symbols).
     add_custom_target(wf_relay

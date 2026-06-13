@@ -94,6 +94,10 @@ public:
     // Main-thread only.
     unsigned int PeerTexture(const std::string& peer_id);
 
+    // True if a decoded frame is pending upload for this peer (GL-free probe;
+    // mirrors VoiceChat::PeerLevel). Used by the headless video-race test.
+    bool PeerHasFrame(const std::string& peer_id);
+
     // RGB pixel buffer for self-preview (may be empty). Main-thread only.
     const std::vector<uint8_t>& SelfPreview() const { return self_preview_; }
 
@@ -109,6 +113,13 @@ private:
                           std::vector<uint8_t>& rgb_out);
 
     void EncodeAndSend(const std::vector<uint8_t>& i420, bool force_keyframe);
+
+    // Return the PeerVideo for peer_id, creating its VP8 decoder on first use.
+    // Caller MUST hold peers_mu_. nullptr only if decoder init fails. Shared by
+    // SyncPeers (presence-driven) and OnRemoteVP8Frame (media that beats the
+    // roster — the decoder-creation race; distinct from the lost-keyframe PLI
+    // work in TODO.md).
+    PeerVideo* EnsurePeer(const std::string& peer_id);
 
     std::atomic<bool> cam_enabled_{false};
     std::atomic<bool> running_{false};

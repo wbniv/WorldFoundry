@@ -112,26 +112,34 @@ void VideoChat::SetCameraEnabled(bool on)
     }
 }
 
+PeerVideo* VideoChat::EnsurePeer(const std::string& peer_id)
+{
+    // Caller holds peers_mu_.
+    auto it = peer_video_.find(peer_id);
+    if (it != peer_video_.end()) return it->second;
+
+    auto* dec_ctx = new vpx_codec_ctx{};
+    if (vpx_codec_dec_init(dec_ctx, vpx_codec_vp8_dx(), nullptr, 0) != VPX_CODEC_OK) {
+        std::fprintf(stderr, "video: vp8 decoder init failed for peer %s\n",
+                     peer_id.c_str());
+        delete dec_ctx;
+        return nullptr;
+    }
+    auto* pv = new PeerVideo{};
+    pv->decoder = dec_ctx;
+    peer_video_[peer_id] = pv;
+    std::printf("video: added peer %s\n", peer_id.c_str());
+    return pv;
+}
+
 void VideoChat::SyncPeers(const std::vector<PeerInfo>& peers)
 {
     std::lock_guard<std::mutex> lk(peers_mu_);
 
-    // Add VP8 decoders for new peers.
-    for (const auto& pi : peers) {
-        if (!peer_video_.count(pi.peer_id)) {
-            auto* dec_ctx = new vpx_codec_ctx{};
-            if (vpx_codec_dec_init(dec_ctx, vpx_codec_vp8_dx(), nullptr, 0) != VPX_CODEC_OK) {
-                std::fprintf(stderr, "video: vp8 decoder init failed for peer %s\n",
-                             pi.peer_id.c_str());
-                delete dec_ctx;
-                continue;
-            }
-            auto* pv = new PeerVideo{};
-            pv->decoder = dec_ctx;
-            peer_video_[pi.peer_id] = pv;
-            std::printf("video: added peer %s\n", pi.peer_id.c_str());
-        }
-    }
+    // Add VP8 decoders for new peers (idempotent; OnRemoteVP8Frame may have
+    // already created one if media beat presence).
+    for (const auto& pi : peers)
+        EnsurePeer(pi.peer_id);
 
     // Remove decoders for departed peers.
     for (auto it = peer_video_.begin(); it != peer_video_.end(); ) {
@@ -178,14 +186,12 @@ void VideoChat::OnRemoteVP8Frame(const std::string& peer_id,
                                   const uint8_t* vp8_data, int len, bool /*is_key*/)
 {
     std::lock_guard<std::mutex> lk(peers_mu_);
-    auto it = peer_video_.find(peer_id);
-    if (it == peer_video_.end()) {
-        static int s_miss = 0;
-        if (++s_miss <= 3)
-            std::fprintf(stderr, "video: VP8 frame for unknown peer %s\n", peer_id.c_str());
-        return;
-    }
-    PeerVideo* pv = it->second;
+    // Lazy-create the decoder if media beat the presence-driven SyncPeers —
+    // otherwise the initial keyframe is dropped and the decoder stays
+    // waiting_for_keyframe forever (a browser sender resends only on PLI).
+    // This is the decoder-creation race; the lost-keyframe PLI request is a
+    // separate enhancement (TODO.md).
+    PeerVideo* pv = EnsurePeer(peer_id);
     if (!pv || !pv->decoder) return;
 
     // While waiting for a keyframe after an error, discard inter frames —
@@ -309,6 +315,16 @@ unsigned int VideoChat::PeerTexture(const std::string& peer_id)
     std::lock_guard<std::mutex> lk(peers_mu_);
     auto it = peer_video_.find(peer_id);
     return it != peer_video_.end() ? it->second->gl_tex : 0u;
+}
+
+bool VideoChat::PeerHasFrame(const std::string& peer_id)
+{
+    std::lock_guard<std::mutex> lk(peers_mu_);
+    auto it = peer_video_.find(peer_id);
+    if (it == peer_video_.end() || !it->second) return false;
+    PeerVideo* pv = it->second;
+    std::lock_guard<std::mutex> flk(pv->frame_mu);
+    return pv->frame_dirty && !pv->rgb.empty();
 }
 
 // ─── Camera (V4L2) ──────────────────────────────────────────────────────────

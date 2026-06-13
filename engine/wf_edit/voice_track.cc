@@ -183,22 +183,30 @@ void VoiceChat::SetMuted(bool muted)
     }
 }
 
+PeerAudio* VoiceChat::EnsurePeer(const std::string& peer_id)
+{
+    // Caller holds peers_mu_.
+    auto it = peer_audio_.find(peer_id);
+    if (it != peer_audio_.end()) return it->second;
+
+    int err = 0;
+    OpusDecoder* dec = opus_decoder_create(48000, 1, &err);
+    if (err != OPUS_OK || !dec) return nullptr;
+    auto* pa = new PeerAudio{};
+    pa->decoder = dec;
+    peer_audio_[peer_id] = pa;
+    std::printf("voice: added peer %s\n", peer_id.c_str());
+    return pa;
+}
+
 void VoiceChat::SyncPeers(const std::vector<PeerInfo>& peers)
 {
     std::lock_guard<std::mutex> lk(peers_mu_);
 
-    // Add decoders for new peers.
-    for (const auto& pi : peers) {
-        if (!peer_audio_.count(pi.peer_id)) {
-            int err = 0;
-            OpusDecoder* dec = opus_decoder_create(48000, 1, &err);
-            if (err != OPUS_OK) continue;
-            auto* pa = new PeerAudio{};
-            pa->decoder = dec;
-            peer_audio_[pi.peer_id] = pa;
-            std::printf("voice: added peer %s\n", pi.peer_id.c_str());
-        }
-    }
+    // Add decoders for new peers (idempotent; OnRemoteOpus may have already
+    // created one if media beat presence).
+    for (const auto& pi : peers)
+        EnsurePeer(pi.peer_id);
 
     // Remove decoders for departed peers.
     for (auto it = peer_audio_.begin(); it != peer_audio_.end(); ) {
@@ -224,9 +232,9 @@ void VoiceChat::OnRemoteOpus(const std::string& peer_id,
                               const uint8_t* opus, int len)
 {
     std::lock_guard<std::mutex> lk(peers_mu_);
-    auto ait = peer_audio_.find(peer_id);
-    if (ait == peer_audio_.end()) return;
-    PeerAudio* pa = ait->second;
+    // Lazy-create the decoder if media beat presence (mirrors VideoChat); Opus
+    // tolerated the drop, but creating here keeps the two paths symmetric.
+    PeerAudio* pa = EnsurePeer(peer_id);
     if (!pa || !pa->decoder) return;
 
     float pcm[960]{};

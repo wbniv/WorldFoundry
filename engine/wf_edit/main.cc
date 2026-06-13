@@ -86,6 +86,14 @@
 #endif
 #include <fcntl.h>
 
+#if !defined(__EMSCRIPTEN__)
+// libvpx / libopus — used only by RunVideoRaceTest() to synthesise one real VP8
+// keyframe + Opus frame for the headless decoder-creation-race regression test.
+#include <vpx/vpx_encoder.h>
+#include <vpx/vp8cx.h>
+#include <opus/opus.h>
+#endif
+
 // Provided by the engine's platform layer (mirrors the host-GL e2e harness).
 extern void ParseWindowSwitches(int argc, char** argv);
 extern char szAppName[];
@@ -2748,6 +2756,141 @@ static int RunMeshTest()
     return ok ? 0 : 1;
 }
 
+#if !defined(__EMSCRIPTEN__)
+// ── Headless decoder-creation race test (WF_EDIT_VIDEO_RACE_TEST) ──────────────
+// Regression guard for the native-VideoChat bug where a remote VP8 keyframe that
+// arrived BEFORE the presence-driven SyncPeers registered the peer was dropped,
+// leaving the decoder stuck waiting_for_keyframe forever → blank remote video.
+// The fix lazy-creates the per-peer decoder in OnRemoteVP8Frame (EnsurePeer).
+// No GL, camera, network, or relay: we encode a real VP8 keyframe with libvpx and
+// feed it to an UNREGISTERED peer, then assert PeerHasFrame() — fails on the
+// pre-fix drop, passes after. The delta-frame negative control proves the
+// lazily-created decoder still gates on a keyframe (no garbage in).
+
+namespace {
+struct EncodedFrame { std::vector<uint8_t> data; bool is_key = false; };
+
+// Encode `count` VP8 frames from a moving synthetic I420 image on ONE encoder
+// (so frame 0 is a keyframe and frame 1+ are deltas). Mirrors VideoChat's
+// encoder setup (OpenCamera / EncodeAndSend). Empty on init/encode failure.
+std::vector<EncodedFrame> EncodeVP8Frames(int w, int h, int count)
+{
+    std::vector<EncodedFrame> frames;
+
+    vpx_codec_ctx enc{};
+    vpx_codec_enc_cfg_t cfg{};
+    vpx_codec_enc_config_default(vpx_codec_vp8_cx(), &cfg, 0);
+    cfg.g_w = static_cast<unsigned>(w);
+    cfg.g_h = static_cast<unsigned>(h);
+    cfg.g_timebase.num = 1;
+    cfg.g_timebase.den = 30;
+    cfg.g_threads      = 1;
+    cfg.kf_max_dist    = 999999;   // don't auto-insert keyframes after the first
+    if (vpx_codec_enc_init(&enc, vpx_codec_vp8_cx(), &cfg, 0) != VPX_CODEC_OK)
+        return frames;
+
+    std::vector<uint8_t> i420(static_cast<size_t>(w * h * 3 / 2));
+    for (int f = 0; f < count; ++f) {
+        uint8_t* Y = i420.data();
+        uint8_t* U = Y + w * h;
+        uint8_t* V = U + w * h / 4;
+        for (int y = 0; y < h; ++y)
+            for (int x = 0; x < w; ++x)
+                Y[y * w + x] = static_cast<uint8_t>((x + y + f * 7) & 0xff);
+        std::memset(U, 128, static_cast<size_t>(w * h / 4));
+        std::memset(V, 128, static_cast<size_t>(w * h / 4));
+
+        vpx_image_t img{};
+        vpx_img_wrap(&img, VPX_IMG_FMT_I420, static_cast<unsigned>(w),
+                     static_cast<unsigned>(h), 1, i420.data());
+        if (vpx_codec_encode(&enc, &img, f, 1, 0, VPX_DL_REALTIME) != VPX_CODEC_OK)
+            break;
+
+        const vpx_codec_cx_pkt_t* pkt;
+        vpx_codec_iter_t iter = nullptr;
+        while ((pkt = vpx_codec_get_cx_data(&enc, &iter))) {
+            if (pkt->kind != VPX_CODEC_CX_FRAME_PKT) continue;
+            const uint8_t* d = static_cast<const uint8_t*>(pkt->data.frame.buf);
+            frames.push_back({ std::vector<uint8_t>(d, d + pkt->data.frame.sz),
+                               (pkt->data.frame.flags & VPX_FRAME_IS_KEY) != 0 });
+        }
+    }
+    vpx_codec_destroy(&enc);
+    return frames;
+}
+
+// One 20 ms Opus frame (48 kHz mono) of a ~480 Hz square wave — non-silent so
+// the decoded RMS level is > 0. Empty on failure.
+std::vector<uint8_t> EncodeOneOpus()
+{
+    int err = 0;
+    OpusEncoder* enc = opus_encoder_create(48000, 1, OPUS_APPLICATION_VOIP, &err);
+    if (err != OPUS_OK || !enc) return {};
+
+    float pcm[960];
+    for (int i = 0; i < 960; ++i)
+        pcm[i] = ((i / 50) % 2 == 0) ? 0.25f : -0.25f;
+
+    uint8_t buf[1275];
+    int n = opus_encode_float(enc, pcm, 960, buf, static_cast<int>(sizeof(buf)));
+    opus_encoder_destroy(enc);
+    if (n <= 0) return {};
+    return std::vector<uint8_t>(buf, buf + n);
+}
+}  // namespace
+
+static int RunVideoRaceTest()
+{
+    using namespace wfedit;
+    int failures = 0;
+    auto check = [&](bool cond, const char* what) {
+        std::printf("[video-race] %s — %s\n", cond ? "PASS" : "FAIL", what);
+        if (!cond) ++failures;
+    };
+
+    std::vector<EncodedFrame> frames = EncodeVP8Frames(320, 240, 2);
+    check(frames.size() >= 2 && frames[0].is_key && !frames[1].is_key,
+          "encoded a real VP8 keyframe + delta frame");
+
+    if (frames.size() >= 2) {
+        // (1) The bug condition: a keyframe for a peer that was NEVER passed to
+        //     SyncPeers must be decoded, not dropped.
+        VideoChat video;   // no Start() — no capture thread, camera, or GL.
+        video.OnRemoteVP8Frame("ghost-peer", frames[0].data.data(),
+                               static_cast<int>(frames[0].data.size()),
+                               frames[0].is_key);
+        check(video.PeerHasFrame("ghost-peer"),
+              "keyframe for an unregistered peer decoded (not dropped)");
+
+        // (2) Negative control: a delta frame to another unregistered peer must
+        //     NOT produce a frame — the lazily-created decoder still waits for a
+        //     keyframe, so the gate isn't blindly accepting garbage.
+        video.OnRemoteVP8Frame("ghost-peer-2", frames[1].data.data(),
+                               static_cast<int>(frames[1].data.size()),
+                               frames[1].is_key);
+        check(!video.PeerHasFrame("ghost-peer-2"),
+              "delta frame to an unregistered peer correctly withheld");
+    }
+
+    // (3) Audio mirror: an Opus packet for an unregistered peer decodes (level>0).
+    {
+        std::vector<uint8_t> opus = EncodeOneOpus();
+        check(!opus.empty(), "encoded a real Opus frame");
+        if (!opus.empty()) {
+            VoiceChat voice;   // no Start() — no miniaudio devices.
+            voice.OnRemoteOpus("ghost-peer", opus.data(),
+                               static_cast<int>(opus.size()));
+            check(voice.PeerLevel("ghost-peer") > 0.f,
+                  "Opus for an unregistered peer decoded (level > 0)");
+        }
+    }
+
+    std::printf("[video-race] %s\n", failures == 0 ? "all PASS" : "FAIL");
+    std::fflush(stdout);
+    return failures == 0 ? 0 : 1;
+}
+#endif  // !__EMSCRIPTEN__
+
 // Make `terminate called without an active exception` self-diagnosing — libstdc++
 // otherwise gives no clue what triggered it (unhandled exception, noexcept throw,
 // joinable thread destroyed without join, …). On terminate, rethrow + catch the
@@ -2796,6 +2939,14 @@ int main(int argc, char** argv)
     // Must run before any window/engine setup. See RunMeshTest above.
     if (const char* p = std::getenv("WF_EDIT_MESH_TEST"); p && *p)
         return RunMeshTest();
+
+#if !defined(__EMSCRIPTEN__)
+    // Headless decoder-creation race self-test — encodes a real VP8 keyframe and
+    // feeds it to an unregistered peer (the native remote-video bug). No level,
+    // GL, relay, camera, or args. Must run before any window/engine setup.
+    if (const char* p = std::getenv("WF_EDIT_VIDEO_RACE_TEST"); p && *p)
+        return RunVideoRaceTest();
+#endif
 
     // Headless quick-tunnel self-test (Phase 4.3): spawn relay + cloudflared,
     // resolve the public host, print the share link, reap, exit. Needs network +
