@@ -30,6 +30,7 @@
 - [Joiner test machine](project_joiner_machine.md) — 192.168.4.32; SSH via Will's keys; runs `task join` for collab testing
 - [SSH joiner machine directly](feedback_ssh_joiner.md) — run joiner commands via SSH yourself; don't ask user to do it
 - [DRY, magic-number-free WF C++](feedback_dry_cpp_idioms.md) — ARRAY_COUNT for array bounds, pre-increment standalone ++, no hardcoded constants; codified in coding-conventions.md §4
+- [Never suggest stopping](feedback_no_stop_suggestions.md) — no "good stopping point"/pause/commit-tally closers (enforced by a Stop hook); exception: Claude requesting its own break is fine
 
 <!-- BEGIN GLOBAL MEMORY (managed by claude-housekeeping; do not edit) -->
 
