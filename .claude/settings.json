@@ -16,6 +16,17 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/no-stop-suggestions.sh",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   },
   "permissions": {
