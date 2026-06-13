@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>   // getenv (WF_COLLAB_NO_CAM)
 #include <cstring>
 #include <cerrno>
 
@@ -55,10 +56,17 @@ bool VideoChat::Start()
 {
     running_.store(true);
 
-    // Try to open the camera; non-fatal if absent.
-    cam_enabled_.store(OpenCamera());
-    if (!cam_enabled_.load()) {
-        std::fprintf(stderr, "video: no camera available\n");
+    // Try to open the camera; non-fatal if absent. WF_COLLAB_NO_CAM forces
+    // receive-only — skip OpenCamera so the webcam is never activated. Used to join a
+    // call as a viewer, and for headless web↔native receive tests on a shared desktop.
+    if (const char* nocam = std::getenv("WF_COLLAB_NO_CAM"); nocam && *nocam) {
+        cam_enabled_.store(false);
+        std::fprintf(stderr, "video: capture suppressed (WF_COLLAB_NO_CAM) — receive-only\n");
+    } else {
+        cam_enabled_.store(OpenCamera());
+        if (!cam_enabled_.load()) {
+            std::fprintf(stderr, "video: no camera available\n");
+        }
     }
 
     // Launch capture thread (incoming frames arrive via OnRemoteVP8Frame).
