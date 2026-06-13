@@ -16,6 +16,7 @@
 
 #include "level.hp"
 #include "actor.hp"
+#include "movecam.hp"   // CameraHandler::ResolveTrackObject (camera stale-track regression)
 #include <baseobject/baseobject.hp>
 #include <math/angle.hp>
 #include <pigsys/pigsys.hp>
@@ -568,6 +569,38 @@ void run_crosscutting_tests(Level& level, ActorIdx player)
         "cross-thread death-test, and verify_wfmut_bridge.py.\n");
 }
 
+// ── Camera track-object resolution (TODO 134/135 regression) ─────────────────
+// CameraHandler::ResolveTrackObject must NEVER assert on a stale/destroyed/
+// out-of-range track index — it returns null so a despawned tracked actor
+// degrades the camera gracefully instead of aborting. The huge-OOR case (C3)
+// ABORTS via Level::GetObject's RangeCheck before the fix, so this whole group
+// is the fails-before / passes-after guard.
+void run_camera_track_tests(Level& level, ActorIdx player)
+{
+    std::fprintf(stderr,"--- Camera track resolve (C1-C6) ---\n");
+
+    report("C1: ResolveTrackObject(0) == null (unset)",
+           CameraHandler::ResolveTrackObject(0) == nullptr);
+    report("C2: ResolveTrackObject(-1) == null (negative)",
+           CameraHandler::ResolveTrackObject(-1) == nullptr);
+    report("C3: ResolveTrackObject(31158) == null (out of range — aborted pre-fix)",
+           CameraHandler::ResolveTrackObject(31158) == nullptr);
+    report("C4: ResolveTrackObject(GetMaxObjectIndex()) == null (at bound)",
+           CameraHandler::ResolveTrackObject(level.GetMaxObjectIndex()) == nullptr);
+    report("C5: ResolveTrackObject(player) == that actor",
+           CameraHandler::ResolveTrackObject(static_cast<int32>(player))
+               == static_cast<const PhysicalObject*>(level.GetObject(static_cast<int>(player))));
+
+    // C6 (best-effort): an in-range empty/freed slot resolves to null.
+    for (int i = 1; i < level.GetMaxObjectIndex(); ++i) {
+        if (level.GetObject(i) == NULL) {
+            report("C6: ResolveTrackObject(empty slot) == null",
+                   CameraHandler::ResolveTrackObject(i) == nullptr);
+            break;
+        }
+    }
+}
+
 } // namespace
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -591,6 +624,7 @@ int RunSmokeTests(Level& level)
     run_spawn_remove_tests(level, player);
     run_mailbox_tests(level, player);
     run_crosscutting_tests(level, player);
+    run_camera_track_tests(level, player);
 
     // Cross-cutting tests (X1-X8) land in a follow-up; some require manual
     // verification (bridge regression, screenshot capture) and are tracked

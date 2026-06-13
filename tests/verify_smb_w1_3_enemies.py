@@ -10,9 +10,10 @@ SMB_STOMP/HURT pulses are caught by tight polling as a bonus):
   paratroopa stomp drop Mario onto it                -> paratroopa ALIVE 1->0
   side-hit hurt    Super Mario overlaps an enemy     -> SMB_MARIO_STATE 1->0 (shrink)
 
-Mario HOVERS over each enemy (re-pinned each frame) so he never falls out of the room
-(a real fall crashes the camera's track-object lookup — movecam.cc:1067, latent bug); the
-engine FBO recording (-record_video -> output.mp4) captures the interactions.
+Mario HOVERS over each enemy (re-pinned each frame) so he stays in frame for the recording
+(a real fall used to crash the camera's track-object lookup — movecam.cc, fixed: the camera
+now degrades gracefully on a despawned tracked actor, TODO 134/135); the engine FBO
+recording (-record_video -> output.mp4) captures the interactions.
 
 Result: 4/5 assert cleanly. The "goomba stomp" case (test 1) is harness-flaky — that
 specific goomba walks off its narrow tree-top into the pit (the faithful 1-3 green-enemy
@@ -95,9 +96,9 @@ def main():
     def strike(eidx, boot_x, boot_z, dh, done, shot_name=None, pin_enemy=False, timeout=4.5):
         """HOVER Mario at a fixed dz=dh above (or level with) an enemy and hold until the
         `done()` predicate fires. Hovering (re-pinning X+Z, zeroing velocity each frame)
-        keeps Mario IN the room over the death pit — a real fall would leave the room and
-        crash the camera's track-object lookup (movecam.cc:1067; latent bug, see TODO). The
-        enemy walks left at 4 m/s, so we track its live X/Z (broadcast on change).
+        keeps Mario IN the room over the death pit — a real fall used to crash the camera's
+        track-object lookup (movecam.cc; now fixed — the camera degrades gracefully, TODO
+        134/135). The enemy walks left at 4 m/s, so we track its live X/Z (broadcast on change).
         dh>0.7 → Mario "above" → stomp; dh in (0,0.7) → side contact → hurt.
         """
         cli, PLAYER = state["cli"], state["PLAYER"]
@@ -124,8 +125,8 @@ def main():
             if done():
                 if shot_name:                       # capture with Mario still at the enemy
                     time.sleep(0.1); shot(shot_name)
-                # park Mario on the guaranteed-safe start strip so he can't fall out
-                # of the room (camera-crash guard) before the next strike re-teleports.
+                # park Mario on the guaranteed-safe start strip so he stays in frame
+                # (and in-room) before the next strike re-teleports.
                 cli.set_mailbox(idx=PLAYER, mailbox=X_POS, value=4.5)
                 cli.set_mailbox(idx=PLAYER, mailbox=Z_POS, value=2.0)
                 cli.set_mailbox(idx=PLAYER, mailbox=ZSPEED, value=0)

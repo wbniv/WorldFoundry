@@ -134,12 +134,13 @@ def main() -> int:
               reverted is not None)
 
         # 6. Screenshot proof (feedback_screenshots_for_proof). Capture WHILE
-        #    PAUSED — rendering + BroadcastState keep running when paused, and
-        #    this avoids the >100 ms dt spike that resuming after a multi-
-        #    second wall-clock pause produces (the bridge's resume path
-        #    doesn't clamp dt the way WFGame::StepFrame does; resuming here
-        #    flings the no-mobility player and asserts on a garbage actor
-        #    index — pre-existing bridge fragility, unrelated to wfmut).
+        #    PAUSED — rendering + BroadcastState keep running when paused.
+        #    (Historical note: this used to blame a ">100 ms dt spike on resume"
+        #    for the `idxObject = 31158` assert. That was a misdiagnosis — dt is
+        #    clamped at three layers incl. Level::update. The real crash was the
+        #    camera reading a stale/destroyed track-object index; the camera now
+        #    degrades gracefully (movecam.cc ResolveTrackObject), so resuming
+        #    after a long pause is safe. See TODO 134/135.)
         b.send({"op": "screenshot", "filename": str(SHOT)})
         reply = b.wait_for(lambda m: m.get("op") in ("screenshot_done", "error")
                            and "screenshot" in str(m), timeout=5.0)
