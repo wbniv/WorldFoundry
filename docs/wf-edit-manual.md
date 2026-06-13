@@ -125,7 +125,8 @@ panel's **Unmute mic** / **Cam on** buttons to grant the camera/mic permission a
 
 The full bring-up is recorded in the
 [wf-edit-in-the-browser plan](plans/2026-06-12-wf-edit-in-the-browser.md); the A/V work in the
-[web A/V plan](plans/2026-06-13-web-editor-audio-video.md).
+[web A/V plan](plans/2026-06-13-web-editor-audio-video.md). To run + exercise it locally
+(relay + two peers + A/V), see [wf-edit-web-testing.md](wf-edit-web-testing.md).
 
 ### One-time toolchain setup
 
