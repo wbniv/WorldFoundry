@@ -28,7 +28,7 @@
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
 		{ 'I32' { 'NAME' "Number Of Mailboxes" } { 'DATA' 50l } { 'STR' "50" } }
-		{ 'I32' { 'NAME' "Number Of Temporary Objects" } { 'DATA' 500l } { 'STR' "500" } }
+		{ 'I32' { 'NAME' "Number Of Temporary Objects" } { 'DATA' 2000l } { 'STR' "2000" } }
 	}
 	{ 'OBJ' 
 		{ 'NAME' "Matte" }
@@ -123,7 +123,7 @@
 		{ 'STR' { 'NAME' "Class Name" } { 'DATA' "director" } }
 		{ 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
 		{ 'I32' { 'NAME' "Number Of Local Mailboxes" } { 'DATA' 5l } { 'STR' "5" } }
-		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: BOX-T 12 ;\n: MAXDEPTH 5 ;\n: MAXNODES 480 ;\n: SLAB 0.5 ;\n: type>rgb ( type -- 0xRRGGBB )\n   dup 1 = if drop 0x4080ff else\n   dup 2 = if drop 0x40c060 else\n   dup 3 = if drop 0xb050d0 else\n   dup 4 = if drop 0x40c0c0 else\n   dup 5 = if drop 0xd04040 else\n   dup 6 = if drop 0xe0c040 else\n   dup 7 = if drop 0xe08030 else\n       drop 0x707078\n   fi fi fi fi fi fi fi ;\n: place-cell ( i -- )\n   dup tm-x over tm-y 0 BOX-T spawn-template\n   >r\n   r@ over tm-w 2 pick tm-h SLAB set-scale3\n   r@ over tm-type type>rgb set-color\n   r> drop drop ;\n: render-treemap\n   tm-scan dup 0 = if drop else 0 do i place-cell loop fi ;\n10 read-mailbox 0 = if\n  1 10 write-mailbox\n  MAXDEPTH MAXNODES tm-config\n  render-treemap\nfi\n" } }
+		{ 'STR' { 'NAME' "Script" } { 'STR' "\\\\ wf\n: BOX-T 12 ;\n: MAXDEPTH 6 ;\n: MAXNODES 1900 ;\n: SLAB 0.5 ;\n: type>rgb ( type -- 0xRRGGBB )\n   dup 1 = if drop 0x4080ff else\n   dup 2 = if drop 0x40c060 else\n   dup 3 = if drop 0xb050d0 else\n   dup 4 = if drop 0x40c0c0 else\n   dup 5 = if drop 0xd04040 else\n   dup 6 = if drop 0xe0c040 else\n   dup 7 = if drop 0xe08030 else\n       drop 0x707078\n   fi fi fi fi fi fi fi ;\n: place-cell ( i -- )\n   dup tm-x over tm-y 0 BOX-T spawn-template\n   >r\n   r@ over tm-w 2 pick tm-h SLAB set-scale3\n   r@ over tm-type type>rgb set-color\n   r> drop drop ;\n: render-treemap\n   tm-scan dup 0 = if drop else 0 do i place-cell loop fi ;\n10 read-mailbox 0 = if\n  1 10 write-mailbox\n  MAXDEPTH MAXNODES tm-config\n  render-treemap\nfi\n" } }
 		{ 'I32' { 'NAME' "Script Controls Input" } { 'DATA' 0l } { 'STR' "False" } }  //False|True
 		{ 'I32' { 'NAME' "Model Type" } { 'STR' "None" } }
 	}

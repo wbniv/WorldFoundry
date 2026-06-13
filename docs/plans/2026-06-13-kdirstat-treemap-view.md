@@ -46,8 +46,14 @@ Reuses the core: `fl_subtree_bytes` (recursive size), `fsn_scan`, `fsn_spawn`/`g
 
 **Budget tuning (the one real gotcha).** The layout is depth-first, so a small cell budget gets
 eaten by the first huge subtree and the rest of the rect stays empty. Fixed with **area-based
-culling** (`TM_MIN_AREA = 11` stop-recursing threshold + `TM_MIN_LEAF = 2.5` sliver cull) so
-~250 visible cells fill the *whole* rect well under the 480-cell pool.
+culling** (`TM_MIN_AREA` stop-recursing threshold + `TM_MIN_LEAF` sliver cull) so the cells fill
+the *whole* rect within the spawn budget. **Density bump (2026-06-13):** lowered the cull
+thresholds (`TM_MIN_AREA 11 → 1.5`, `TM_MIN_LEAF 2.5 → 0.4`) and raised `MAX_DEPTH 5 → 6` to
+render finer detail — ~247 → **678 cells**. That needs more pool: `Number Of Temporary Objects
+500 → 2000` (Director `MAXNODES 480 → 1900`), which exceeds `Room::Construct`'s
+`RangeCheck(0, numberOfTemporaryObjects, 1000)` — raised that arbitrary cap to **4000** in
+[`wfsource/source/room/room.cc:109`](../../wfsource/source/room/room.cc) (engine rebuild needed,
+shared by all fs-viz levels).
 
 ## Verification
 
@@ -58,13 +64,15 @@ task build-level -- treemap
 task run-treemap
 ```
 
-- `TM: laid out '.' — 247 cells` — under the 480 pool; **fills the entire floor** (after the
-  area-cull fix; before it, the budget was eaten by `.git`/`wfsource` and only the corner filled).
+- `TM: laid out '.' — 678 cells` — under the 1900 budget / 2000 pool; **fills the entire floor**
+  (after the area-cull fix; before it, the budget was eaten by `.git`/`wfsource` and only the
+  corner filled). (Was 247 cells at the original 480 budget — see the density bump above.)
 - Render: near-square nested cells tiling the plane, area ∝ size, colored by file type (grey
-  dirs, orange binaries dominate this asset-heavy repo, with yellow docs / red archive accents) —
-  recognizable KDirStat. No asserts, no out-of-room skips.
-  <img src="../../wflevels/treemap/screenshots/2026-06-13-squarified-treemap.png" width="600">
-  PASS
+  dirs, orange binaries dominate this asset-heavy repo, with yellow docs / red archive / purple
+  video / green-cyan accents) — recognizable KDirStat. No asserts, no out-of-room skips, no
+  terminate.
+  <img src="../../wflevels/treemap/screenshots/2026-06-13-squarified-treemap-dense.png" width="600">
+  PASS — 678-cell dense layout, captured 2026-06-13.
 
 ## Out of scope (future)
 Cushion shading (KDirStat's lit ridges — a shader, not geometry); per-depth z-terracing (a

@@ -11,8 +11,8 @@
 { 'L4'
     { 'ALGN' .align( 2048 ) }
     { 'RAM'
-        'OBJD' 1500000l                 // 14 static + up to ~480 spawned cell actors
-        'PERM' 4000000l                 // player/floor/box-template meshes + ~480 instances
+        'OBJD' 8000000l                 // 14 static + up to ~2000 spawned cell actors
+        'PERM' 24000000l                // player/floor/box-template meshes + ~2000 instances
         'ROOM' 2000000l                 // single active room slot (×1)
         'FLAG' 1l 1l                    // doomstick, bungeecam
         'SLOT' 1l                       // 1 active room slot

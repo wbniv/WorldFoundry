@@ -106,7 +106,7 @@ Room::Construct
    RangeCheck(1,levelNumRooms, 1000);             // arbitrary
    RangeCheck(0,roomIndex,1000);                      // arbitrary
    memory.Validate();
-   RangeCheck(0,numberOfTemporaryObjects,1000);  // arbitrary
+   RangeCheck(0,numberOfTemporaryObjects,4000);  // arbitrary (raised 1000→4000 for the fs-viz levels)
    assert(ValidPtr(listCheckFuncList));
    RangeCheck(0,checkListEntries,100);           // arbitrary
    assert(ValidPtr(roomCallbacks));

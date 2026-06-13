@@ -40,8 +40,8 @@ def oad(name):
 
 # ── Layout ────────────────────────────────────────────────────────────────────
 # Treemap root rect ≈ X/Y ∈ [-34,34] (matches C TM_X0/TM_Y0/TM_X1/TM_Y1).
-MAX_DEPTH = 5
-MAX_NODES = 480          # spawn-budget cap; pool = 500
+MAX_DEPTH = 6
+MAX_NODES = 1900         # spawn-budget cap; pool = 2000 (raised from 480/500)
 
 PLAYER_SPAWN = (0.0, 0.0, 1.0)
 
@@ -254,7 +254,7 @@ make_box_mesh('Room01', ROOM_CENTER, ROOM_LOCAL_BBOX, 'room',
 make_empty('LevelObj', ROOM_CENTER, 'levelobj',
     props={
         'Number Of Mailboxes':        50,
-        'Number Of Temporary Objects': 500,
+        'Number Of Temporary Objects': 2000,
         'Mobility':   'Anchored',
         'Model Type': 'None',
     })

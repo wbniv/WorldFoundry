@@ -730,11 +730,11 @@ static std::vector<TmCell> g_tm_cells;
 static std::string g_tm_root;
 static int   g_tm_maxDepth = 5;
 static const float TM_X0 = -34.0f, TM_Y0 = -34.0f, TM_X1 = 34.0f, TM_Y1 = 34.0f;
-// The root rect is ~4624 sq units; with a 480-cell budget and DEPTH-FIRST layout,
-// the cull thresholds must be big enough that the whole rect fills within budget
-// (else the first huge subtree eats it all and the rest is empty). ~4624/12 ≈ 385.
-static const float TM_MIN_AREA  = 11.0f;  // stop recursing into dirs below this (aggregate)
-static const float TM_MIN_LEAF  = 2.5f;   // skip leaf cells below this (invisible slivers)
+// The root rect is ~4624 sq units; the cull thresholds bound the cell count so
+// the whole rect fills within the spawn budget (DEPTH-FIRST layout would
+// otherwise let the first huge subtree eat it all). ~4624/3.5 ≈ 1320 cells.
+static const float TM_MIN_AREA  = 1.5f;   // stop recursing into dirs below this (aggregate)
+static const float TM_MIN_LEAF  = 0.4f;   // skip leaf cells below this (invisible slivers)
 static const float TM_INSET     = 0.14f;  // dir-region inset per nesting level → gridline gaps
 
 // extension → type id (Director maps id → colour): 0 dir/other, 1 source,
