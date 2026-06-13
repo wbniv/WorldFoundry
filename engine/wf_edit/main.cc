@@ -1926,6 +1926,12 @@ bool editor_build(void* p)
             peer_ids.reserve(peers.size());
             for (const auto& p : peers) peer_ids.push_back(p.peer_id);
             c->webrtc->SyncPeers(peer_ids, c->our_peer_id);
+            // RTCP PLI: ask each sender for a keyframe for any peer whose decoder
+            // is stuck waiting (fast recovery vs. the ~1 s periodic keyframe).
+            // Throttling/gating lives in TakePliRequests; SendPli no-ops if the
+            // peer isn't connected or its video SSRC isn't known yet.
+            for (const auto& pid : c->video->TakePliRequests(now))
+                c->webrtc->SendPli(pid);
             // Send any queued SDP / ICE-candidate signals via the relay.
             if (RelayUsable(c)) {
                 for (auto& [to, json] : c->webrtc->DrainSignaling()) {
@@ -2889,6 +2895,109 @@ static int RunVideoRaceTest()
     std::fflush(stdout);
     return failures == 0 ? 0 : 1;
 }
+
+// ── Headless RTCP PLI test (WF_EDIT_PLI_TEST) ──────────────────────────────────
+// Regression guard for the PLI keyframe-request feature. No GL/camera/network:
+// asserts the PLI wire format + discrimination, the honor-side force-keyframe
+// decision (DecideForceKey), and the request-side trigger/throttle/activity gate
+// (TakePliRequests) driven by a real libvpx keyframe/delta. Full SRTCP transit is
+// verified manually with two live peers (see the plan).
+static int RunPliTest()
+{
+    using namespace wfedit;
+    int failures = 0;
+    auto check = [&](bool cond, const char* what) {
+        std::printf("[pli] %s — %s\n", cond ? "PASS" : "FAIL", what);
+        if (!cond) ++failures;
+    };
+
+    // (1) Wire format + endianness.
+    {
+        auto p = WebrtcSession::MakePliPacket(0xAABBCCDD, 0x11223344);
+        auto b = [&](int i){ return static_cast<uint8_t>(p[i]); };
+        bool fmt_ok    = p.size() == 12 && b(0) == 0x81 && b(1) == 206 &&
+                         b(2) == 0x00 && b(3) == 0x02;
+        bool sender_ok = b(4)==0xAA && b(5)==0xBB && b(6)==0xCC && b(7)==0xDD;
+        bool media_ok  = b(8)==0x11 && b(9)==0x22 && b(10)==0x33 && b(11)==0x44;
+        uint32_t parsed = 0;
+        bool is_pli = WebrtcSession::IsPliPacket(p.data(), p.size(), &parsed);
+        check(fmt_ok && sender_ok && media_ok, "MakePliPacket bytes + big-endian SSRCs");
+        check(is_pli && parsed == 0x11223344, "IsPliPacket parses its own PLI (media SSRC)");
+    }
+
+    // (2) Discrimination: FIR yes; VP8 RTP no; ordinary RTCP (SR/RR) no.
+    {
+        std::byte fir[12] = {};
+        fir[0] = std::byte{0x84};   // FMT=4 (FIR)
+        fir[1] = std::byte{206};
+        check(WebrtcSession::IsPliPacket(fir, sizeof fir), "FIR (FMT=4) recognised as keyframe request");
+
+        std::byte rtp[16] = {};
+        rtp[0] = std::byte{0x80}; rtp[1] = std::byte{96};   // VP8 RTP, PT=96
+        check(!WebrtcSession::IsPliPacket(rtp, sizeof rtp), "VP8 RTP packet is not a PLI");
+
+        std::byte sr[28] = {};  sr[0] = std::byte{0x80}; sr[1] = std::byte{200};  // SR
+        std::byte rr[8]  = {};  rr[0] = std::byte{0x80}; rr[1] = std::byte{201};  // RR
+        check(!WebrtcSession::IsPliPacket(sr, sizeof sr) &&
+              !WebrtcSession::IsPliPacket(rr, sizeof rr),
+              "ordinary RTCP (SR/RR) is not treated as a PLI");
+    }
+
+    // (3) Honor side: RequestKeyframe sets the flag; DecideForceKey consumes it
+    //     and preserves the periodic cadence.
+    {
+        VideoChat v;
+        check(!v.HasPendingKeyframe(), "no pending keyframe initially");
+        v.RequestKeyframe();
+        check(v.HasPendingKeyframe(), "RequestKeyframe sets the pending flag");
+
+        std::atomic<bool> flag{true};
+        int fsk = 0;
+        bool d1 = VideoChat::DecideForceKey(flag, fsk, 30);
+        check(d1 && !flag.load() && fsk == 0, "pending PLI forces a keyframe + consumes flag + resets");
+        fsk = 28;
+        bool d2 = VideoChat::DecideForceKey(flag, fsk, 30);   // 28>=30? no → fsk 29
+        bool d3 = VideoChat::DecideForceKey(flag, fsk, 30);   // 29>=30? no → fsk 30
+        bool d4 = VideoChat::DecideForceKey(flag, fsk, 30);   // 30>=30? yes → reset
+        check(!d2 && !d3 && d4 && fsk == 0, "periodic cadence honored without a PLI");
+    }
+
+    // (4) Request side: a delta to an unregistered peer leaves it waiting → PLI
+    //     wanted; throttled on the immediate re-poll; offered again after the
+    //     interval; not wanted once a keyframe syncs; suppressed when silent.
+    {
+        std::vector<EncodedFrame> frames = EncodeVP8Frames(320, 240, 2);
+        if (frames.size() < 2 || !frames[0].is_key || frames[1].is_key) {
+            check(false, "encoded a keyframe + delta for the pump test");
+        } else {
+            VideoChat v;
+            double t = MonoNow();
+            v.OnRemoteVP8Frame("ghost", frames[1].data.data(),
+                               static_cast<int>(frames[1].data.size()), false);  // delta → still waiting
+            auto r1 = v.TakePliRequests(t);
+            check(r1.size() == 1 && r1[0] == "ghost", "waiting peer is offered a PLI");
+            check(v.TakePliRequests(t).empty(), "second poll within the interval is throttled");
+            check(!v.TakePliRequests(t + 0.30).empty(), "PLI offered again after the throttle interval");
+
+            v.OnRemoteVP8Frame("ghost", frames[0].data.data(),
+                               static_cast<int>(frames[0].data.size()), true);   // keyframe syncs
+            check(v.TakePliRequests(t + 0.60).empty(), "no PLI once the keyframe syncs the decoder");
+        }
+
+        std::vector<EncodedFrame> f2 = EncodeVP8Frames(320, 240, 2);
+        if (f2.size() >= 2 && !f2[1].is_key) {
+            VideoChat v;
+            double t = MonoNow();
+            v.OnRemoteVP8Frame("quiet", f2[1].data.data(),
+                               static_cast<int>(f2[1].data.size()), false);
+            check(v.TakePliRequests(t + 3.0).empty(), "silent peer (>2 s) is not PLIed");
+        }
+    }
+
+    std::printf("[pli] %s\n", failures == 0 ? "all PASS" : "FAIL");
+    std::fflush(stdout);
+    return failures == 0 ? 0 : 1;
+}
 #endif  // !__EMSCRIPTEN__
 
 // Make `terminate called without an active exception` self-diagnosing — libstdc++
@@ -2946,6 +3055,10 @@ int main(int argc, char** argv)
     // GL, relay, camera, or args. Must run before any window/engine setup.
     if (const char* p = std::getenv("WF_EDIT_VIDEO_RACE_TEST"); p && *p)
         return RunVideoRaceTest();
+
+    // Headless RTCP PLI self-test — PLI wire format + keyframe-request logic.
+    if (const char* p = std::getenv("WF_EDIT_PLI_TEST"); p && *p)
+        return RunPliTest();
 #endif
 
     // Headless quick-tunnel self-test (Phase 4.3): spawn relay + cloudflared,

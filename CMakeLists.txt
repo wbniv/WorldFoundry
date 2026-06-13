@@ -1374,6 +1374,13 @@ if(WF_ENABLE_EDITOR AND NOT ANDROID AND NOT IOS AND NOT EMSCRIPTEN)
         COMMAND sh -c "WF_EDIT_VIDEO_RACE_TEST=1 $<TARGET_FILE:wf_edit> 2>&1 | tee /dev/stderr | grep -q '\\[video-race\\] all PASS'"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+    # RTCP PLI (regression guard): PLI wire format + discrimination, the honor-side
+    # force-keyframe decision, and the request-side trigger/throttle/activity gate.
+    # CPU-only (encodes a real keyframe via libvpx, exits before GL).
+    add_test(NAME wf_edit_pli
+        COMMAND sh -c "WF_EDIT_PLI_TEST=1 $<TARGET_FILE:wf_edit> 2>&1 | tee /dev/stderr | grep -q '\\[pli\\] all PASS'"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
     # wf-relay: standalone relay server binary (co-edit Phase 1).
     # Built via Cargo; not linked into wf_edit (avoids duplicate Rust runtime symbols).
     add_custom_target(wf_relay

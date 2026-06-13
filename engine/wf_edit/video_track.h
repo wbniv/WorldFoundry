@@ -56,6 +56,11 @@ struct PeerVideo {
 
     // Audio level display (0..1) — updated by VoiceChat, read here for layout.
     float audio_level = 0.f;
+
+    // RTCP PLI activity-gating (monotonic seconds; written under peers_mu_):
+    // when we last received a VP8 frame, and when we last sent a PLI for it.
+    double last_vp8_frame_mono = 0.0;
+    double last_pli_mono       = 0.0;
 };
 
 class VideoChat {
@@ -79,6 +84,22 @@ public:
     // WebrtcSession from its track receive callback (any thread).
     void OnRemoteVP8Frame(const std::string& peer_id,
                           const uint8_t* vp8, int len, bool is_key);
+
+    // RTCP PLI — honor side: an incoming Picture Loss Indication asks our encoder
+    // for an immediate keyframe. RequestKeyframe is called from the WebRTC receive
+    // thread; the capture thread consumes the flag via DecideForceKey.
+    void RequestKeyframe();
+    bool HasPendingKeyframe() const;   // test probe (GL-free)
+
+    // RTCP PLI — request side: peer-ids whose decoder is stuck waiting for a
+    // keyframe and should be sent a PLI now (active stream within ~2 s, throttled
+    // to ≤4/s). Called once per frame on the main thread; the caller maps each id
+    // to WebrtcSession::SendPli. Stamps the per-peer throttle as a side effect.
+    std::vector<std::string> TakePliRequests(double now);
+
+    // The capture thread's force-keyframe decision: periodic OR a pending PLI.
+    // Factored out (and consuming the flag) so it's unit-testable in isolation.
+    static bool DecideForceKey(std::atomic<bool>& flag, int& frames_since_key, int interval);
 
     void SetCameraEnabled(bool on);
     bool IsCameraEnabled() const { return cam_enabled_.load(); }
@@ -136,6 +157,7 @@ private:
     vpx_codec_ctx* encoder_ = nullptr;
     uint32_t       frame_seq_ = 0;
     int            frames_since_key_ = 0;
+    std::atomic<bool> force_keyframe_{false};   // set by an incoming RTCP PLI
 
     // Outgoing send callback (set by WebrtcSession). Thread-safe via send_cb_mu_.
     std::mutex                                         send_cb_mu_;

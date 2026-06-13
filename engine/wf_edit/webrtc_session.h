@@ -13,6 +13,7 @@
 // Plan: docs/plans/2026-05-26-internet-voice-video-webrtc.md Phase 2
 
 #include <atomic>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -88,6 +89,22 @@ public:
     // Thread-safe; used by the headless TURN test to confirm connectivity.
     size_t ConnectedPeerCount();
 
+    // Send an RTCP Picture Loss Indication to a peer, asking it to emit an
+    // immediate keyframe (fast video recovery instead of the ~1 s periodic
+    // keyframe). No-op if the peer isn't connected or we haven't learned its
+    // video SSRC yet. Main-thread only.
+    void SendPli(const std::string& peer_id);
+
+    // RTCP PLI wire helpers (RFC 4585 §6.3.1). Pure + public so the headless
+    // test can exercise them without a live connection. MakePliPacket builds the
+    // 12-byte PSFB/PLI (sender_ssrc = ours, media_ssrc = the stream we want a
+    // keyframe for); IsPliPacket recognises a PLI (FMT=1) or FIR (FMT=4) and
+    // optionally returns the media-source SSRC. rtc::binary is std::vector<byte>,
+    // so MakePliPacket's result feeds Track::send directly.
+    static std::vector<std::byte> MakePliPacket(uint32_t sender_ssrc, uint32_t media_ssrc);
+    static bool IsPliPacket(const std::byte* data, size_t len,
+                            uint32_t* out_media_ssrc = nullptr);
+
 private:
     struct PeerState;
     using PeerStatePtr = std::shared_ptr<PeerState>;
@@ -104,6 +121,7 @@ private:
     VideoChat*  vd_ = nullptr;
     std::string our_peer_id_;
     IceConfig   ice_;   // resolved (identity.json defaults + env overrides)
+    bool        video_debug_ = false;  // WF_COLLAB_VIDEO_DEBUG: log PLI send/recv
 
     std::mutex  peers_mu_;
     std::map<std::string, PeerStatePtr> peers_;

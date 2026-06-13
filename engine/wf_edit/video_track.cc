@@ -43,6 +43,12 @@ static constexpr int kHdrSize = 14;
 // the decoder re-syncs faster after any packet loss or reordering on the LAN.
 static constexpr int kKeyframeInterval = 30;
 
+// PLI request gating (see TakePliRequests): only ask a sender for a keyframe
+// while its stream is active (a VP8 frame within this window) and at most once
+// per min-interval, so a single loss event triggers a bounded retry, not a flood.
+static constexpr double kPliActiveWindow = 2.0;    // seconds
+static constexpr double kPliMinInterval  = 0.25;   // seconds (≤4 PLI/s per peer)
+
 // ─── VideoChat ───────────────────────────────────────────────────────────────
 
 VideoChat::VideoChat() = default;
@@ -194,6 +200,10 @@ void VideoChat::OnRemoteVP8Frame(const std::string& peer_id,
     PeerVideo* pv = EnsurePeer(peer_id);
     if (!pv || !pv->decoder) return;
 
+    // Stamp arrival BEFORE the keyframe gate so an inter-only-while-waiting
+    // stream still counts as active for PLI retry (see TakePliRequests).
+    pv->last_vp8_frame_mono = MonoNow();
+
     // While waiting for a keyframe after an error, discard inter frames —
     // they'd reference a corrupt reference frame and produce more garbage.
     bool is_key = IsVP8Keyframe(vp8_data, len);
@@ -325,6 +335,43 @@ bool VideoChat::PeerHasFrame(const std::string& peer_id)
     PeerVideo* pv = it->second;
     std::lock_guard<std::mutex> flk(pv->frame_mu);
     return pv->frame_dirty && !pv->rgb.empty();
+}
+
+// ─── RTCP PLI ─────────────────────────────────────────────────────────────────
+
+void VideoChat::RequestKeyframe()
+{
+    force_keyframe_.store(true, std::memory_order_relaxed);
+}
+
+bool VideoChat::HasPendingKeyframe() const
+{
+    return force_keyframe_.load(std::memory_order_relaxed);
+}
+
+bool VideoChat::DecideForceKey(std::atomic<bool>& flag, int& frames_since_key, int interval)
+{
+    // exchange runs every call (coalesces a burst of PLIs into one keyframe);
+    // resetting the counter on a forced keyframe avoids a redundant periodic one.
+    bool forced = flag.exchange(false, std::memory_order_relaxed);
+    bool fk = forced || (frames_since_key++ >= interval);
+    if (fk) frames_since_key = 0;
+    return fk;
+}
+
+std::vector<std::string> VideoChat::TakePliRequests(double now)
+{
+    std::vector<std::string> out;
+    std::lock_guard<std::mutex> lk(peers_mu_);
+    for (auto& [pid, pv] : peer_video_) {
+        if (!pv || !pv->decoder || !pv->waiting_for_keyframe) continue;
+        if (pv->last_vp8_frame_mono <= 0.0) continue;                  // no video yet
+        if (now - pv->last_vp8_frame_mono >= kPliActiveWindow) continue; // stream went silent
+        if (now - pv->last_pli_mono < kPliMinInterval) continue;        // throttle
+        pv->last_pli_mono = now;
+        out.push_back(pid);
+    }
+    return out;
 }
 
 // ─── Camera (V4L2) ──────────────────────────────────────────────────────────
@@ -555,8 +602,7 @@ void VideoChat::CaptureThread()
             self_dirty_ = true;
         }
 
-        bool force_key = (frames_since_key_++ >= kKeyframeInterval);
-        if (force_key) frames_since_key_ = 0;
+        bool force_key = DecideForceKey(force_keyframe_, frames_since_key_, kKeyframeInterval);
 
         EncodeAndSend(i420, force_key);
         ++frame_seq_;

@@ -67,6 +67,51 @@ static rtc::binary MakeVideoRtp(uint16_t seq, uint32_t ts, uint32_t ssrc,
     return pkt;
 }
 
+// ── RTCP PLI helpers ─────────────────────────────────────────────────────────
+
+// Build a 12-byte RTCP Picture Loss Indication (RFC 4585 §6.3.1): PSFB (PT=206),
+// FMT=1. libdatachannel's Track::outgoing auto-tags an outbound packet as RTCP
+// when IsRtcp() matches (no media handler installed) and sends it over SRTCP, so
+// a hand-rolled PLI binary fed to Track::send "just works".
+std::vector<std::byte> WebrtcSession::MakePliPacket(uint32_t sender_ssrc,
+                                                    uint32_t media_ssrc)
+{
+    std::vector<std::byte> pkt(12);
+    std::byte* p = pkt.data();
+    p[0]  = std::byte{0x81};   // V=2, P=0, FMT=1 (PLI)
+    p[1]  = std::byte{206};    // PT=206 (PSFB)
+    p[2]  = std::byte{0x00};   // length = 2 (3 32-bit words minus 1)
+    p[3]  = std::byte{0x02};
+    p[4]  = std::byte{static_cast<uint8_t>(sender_ssrc >> 24)};
+    p[5]  = std::byte{static_cast<uint8_t>((sender_ssrc >> 16) & 0xff)};
+    p[6]  = std::byte{static_cast<uint8_t>((sender_ssrc >>  8) & 0xff)};
+    p[7]  = std::byte{static_cast<uint8_t>(sender_ssrc & 0xff)};
+    p[8]  = std::byte{static_cast<uint8_t>(media_ssrc >> 24)};
+    p[9]  = std::byte{static_cast<uint8_t>((media_ssrc >> 16) & 0xff)};
+    p[10] = std::byte{static_cast<uint8_t>((media_ssrc >>  8) & 0xff)};
+    p[11] = std::byte{static_cast<uint8_t>(media_ssrc & 0xff)};
+    return pkt;
+}
+
+bool WebrtcSession::IsPliPacket(const std::byte* data, size_t len,
+                                uint32_t* out_media_ssrc)
+{
+    if (!data || len < 12) return false;
+    // For RTCP, byte 1 is the full 8-bit packet type (no RTP marker bit) — do not
+    // mask with 0x7f (that's IsRtcp's 64..95 range heuristic, not the exact PT).
+    const uint8_t pt  = static_cast<uint8_t>(data[1]);          // packet type (206=PSFB)
+    const uint8_t fmt = static_cast<uint8_t>(data[0]) & 0x1f;   // feedback msg type
+    if (pt != 206 || (fmt != 1 && fmt != 4)) return false;       // PLI(1) or FIR(4)
+    if (out_media_ssrc) {
+        *out_media_ssrc =
+            (static_cast<uint32_t>(static_cast<uint8_t>(data[8]))  << 24) |
+            (static_cast<uint32_t>(static_cast<uint8_t>(data[9]))  << 16) |
+            (static_cast<uint32_t>(static_cast<uint8_t>(data[10])) <<  8) |
+            (static_cast<uint32_t>(static_cast<uint8_t>(data[11])));
+    }
+    return true;
+}
+
 // ── PeerState ────────────────────────────────────────────────────────────────
 
 struct WebrtcSession::PeerState {
@@ -76,6 +121,10 @@ struct WebrtcSession::PeerState {
     std::shared_ptr<rtc::Track> video_track;
     std::atomic<bool> connected{false};
     bool is_offerer = false;
+
+    // The remote sender's video SSRC, learned from inbound RTP — the media
+    // source a PLI we send must name. 0 until the first VP8 packet arrives.
+    std::atomic<uint32_t> remote_video_ssrc{0};
 
     // VP8 reassembly buffer (receive side; guarded by vp8_mu).
     std::mutex           vp8_mu;
@@ -141,6 +190,9 @@ static rtc::Configuration BuildRtcConfig(const IceConfig& ice)
 WebrtcSession::WebrtcSession(VoiceChat* vc, VideoChat* vd, IceConfig ice)
     : vc_(vc), vd_(vd), ice_(ResolveIceConfig(std::move(ice)))
 {
+    if (const char* p = std::getenv("WF_COLLAB_VIDEO_DEBUG"); p && *p)
+        video_debug_ = true;
+
     if (!ice_.turn_host.empty()) {
         std::printf("wf-edit: WebRTC TURN relay %s:%u (%s)%s\n",
                     ice_.turn_host.c_str(), ice_.turn_port,
@@ -259,7 +311,9 @@ WebrtcSession::GetOrCreate(const std::string& peer_id, bool is_offerer)
         std::string pid = peer_id;
         state->audio_track->onMessage([this, pid](rtc::message_variant data) {
             auto* bin = std::get_if<rtc::binary>(&data);
-            if (!bin || bin->size() <= 12) return;
+            if (!bin) return;
+            if (rtc::IsRtcp(*bin)) return;   // ignore RTCP (SR/RR/…) on the audio track
+            if (bin->size() <= 12) return;
             // Strip 12-byte RTP header; pass raw Opus to VoiceChat.
             const uint8_t* opus =
                 reinterpret_cast<const uint8_t*>(bin->data()) + 12;
@@ -281,7 +335,21 @@ WebrtcSession::GetOrCreate(const std::string& peer_id, bool is_offerer)
         std::string pid = peer_id;
         state->video_track->onMessage([this, pid, weak](rtc::message_variant data) {
             auto* bin = std::get_if<rtc::binary>(&data);
-            if (!bin || bin->size() <= 13) return;  // header(12) + descriptor(1)
+            if (!bin) return;
+            if (rtc::IsRtcp(*bin)) {
+                // Honor a Picture Loss Indication / Full Intra Request from the
+                // receiver: ask our encoder for an immediate keyframe. Other RTCP
+                // (SR/RR/SDES/BYE) is ignored. dispatchMedia can fan compound RTCP
+                // to either track, so this must run before any RTP field access.
+                if (vd_ && IsPliPacket(bin->data(), bin->size())) {
+                    if (video_debug_)
+                        std::fprintf(stderr, "video: PLI from peer %.8s — forcing keyframe\n",
+                                     pid.c_str());
+                    vd_->RequestKeyframe();
+                }
+                return;
+            }
+            if (bin->size() <= 13) return;  // header(12) + descriptor(1)
             const uint8_t* rtp = reinterpret_cast<const uint8_t*>(bin->data());
             bool marker = (rtp[1] & 0x80) != 0;           // RTP marker bit
             bool start  = (rtp[12] & 0x10) != 0;          // VP8 S bit
@@ -290,6 +358,13 @@ WebrtcSession::GetOrCreate(const std::string& peer_id, bool is_offerer)
 
             auto sp = weak.lock();
             if (!sp) return;
+            // Learn the sender's video SSRC (RTP header bytes 8-11) so a PLI we
+            // send back can name the right media source.
+            uint32_t rssrc = (static_cast<uint32_t>(rtp[8])  << 24) |
+                             (static_cast<uint32_t>(rtp[9])  << 16) |
+                             (static_cast<uint32_t>(rtp[10]) <<  8) |
+                             (static_cast<uint32_t>(rtp[11]));
+            if (rssrc) sp->remote_video_ssrc.store(rssrc, std::memory_order_relaxed);
             std::lock_guard<std::mutex> lk(sp->vp8_mu);
             if (start) sp->vp8_accum.clear();
             sp->vp8_accum.insert(sp->vp8_accum.end(), payload, payload + payload_len);
@@ -488,6 +563,31 @@ void WebrtcSession::SendVP8(const uint8_t* vp8, int vp8_len, bool /*keyframe*/)
 
         offset += chunk;
         first = false;
+    }
+}
+
+// ── SendPli ──────────────────────────────────────────────────────────────────
+
+void WebrtcSession::SendPli(const std::string& peer_id)
+{
+    uint32_t sender;
+    { std::lock_guard<std::mutex> lk(rtp_mu_); sender = video_ssrc_; }
+
+    std::lock_guard<std::mutex> lk(peers_mu_);
+    auto it = peers_.find(peer_id);
+    if (it == peers_.end()) return;
+    auto& st = it->second;
+    if (!st->connected.load() || !st->video_track) return;
+    uint32_t media = st->remote_video_ssrc.load(std::memory_order_relaxed);
+    if (!media) return;   // haven't seen this peer's video yet — nothing to PLI
+
+    try {
+        st->video_track->send(MakePliPacket(sender, media));
+        if (video_debug_)
+            std::fprintf(stderr, "video: PLI -> peer %.8s (media ssrc %08x)\n",
+                         peer_id.c_str(), media);
+    } catch (const std::exception& e) {
+        std::fprintf(stderr, "webrtc: PLI send threw: %s\n", e.what());
     }
 }
 
