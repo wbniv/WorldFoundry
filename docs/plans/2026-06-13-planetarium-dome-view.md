@@ -204,6 +204,29 @@ task run-dome                                # walk to centre, look up at the do
 
 Paste raw output + PASS/FAIL under each step on completion.
 
+## Verification results (2026-06-13)
+
+Built: `blender --background --python wflevels/dome/blender_dome.py` (17 objects, correct order)
+→ `task build-level -- dome` (+ hand-authored `dome-standalone.iff.txt`, mirroring filelight's
+~450-wedge budget) → `dome.iff` + `dome-standalone.iff`.
+
+- **M1 — PASS.** `FL: scanned '.' — 37 segments`; no asserts, no "fell out of room", no terminate,
+  no zforth errors. (The 4 levcomp "outside every room bbox" warnings are the parked-OOB band/cap
+  *templates* — spawned at the origin at runtime, exactly as filelight's parked templates.)
+- **M2 — PASS.** Renders the planetarium dome: light-blue **zenith cap** (cwd) overhead, ringed by
+  concentric **elevation bands** coloured per-branch (green/gold/red/pink, desaturating with depth).
+  And **`WF_CULL=1` is pixel-identical to the default (cull-off)** run — the inward-wound spherical
+  patches + cap are correct, so the dome is a clean first culling-on consumer.
+  <img src="../../wflevels/dome/screenshots/2026-06-13-dome-cull-off-vs-on.png" width="700">
+  *(left: default / cull off · right: `WF_CULL=1` / cull on — identical)*
+- **M3 — inherited, not separately demonstrated.** The render policy lives entirely in the Director
+  `.fth` (depth→band, hue), the same hot-reload mechanism filelight proved; not re-demonstrated this
+  session.
+
+**Tuning note:** the camera (FOV 80, at centre looking up-and-forward) frames the cap + inner bands
+filling the view; pull `CAM_OFFSET`/`TARGET2_POS` back to take in more of the hemisphere. The
+"turn to look around" (`Rotation=Track`) wasn't interactively play-tested (headless capture only).
+
 ## Out of scope (future tunables, all policy-only)
 - **Azimuthal camera spin** (planetarium drift) — a per-frame camshot heading write; needs either a
   tiny C helper or a Forth frame-counter driving a mailbox.

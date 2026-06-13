@@ -16,12 +16,14 @@
   override (didn't cleanly restore the look). **Remaining:** audit + rewind shipped level meshes to
   consistent normals, then flip the default on. The planetarium dome (authored with correct
   normals) is the first `WF_CULL=1` consumer. [plan](docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md)
-- [ ] **Planetarium dome view (`wflevels/dome/`)** — 4th filesystem-viz view: the Filelight
-  sunburst wrapped onto a hemisphere (player stands at centre, turns to look around; depth→elevation
-  band, arc∝size, per-branch hue). **Reuses `fl-scan` verbatim → no engine code** (a new view = new
-  `.fth` + spherical-patch meshes). Build against the culling-on binary.
-  [plan](docs/plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md) ·
-  [dome detail](docs/plans/2026-06-13-planetarium-dome-view.md)
+- [x] **Planetarium dome view (`wflevels/dome/`) — DONE 2026-06-13.** 4th filesystem-viz view: the
+  Filelight sunburst wrapped onto a hemisphere (player at centre, `Rotation=Track` turn-to-look-around;
+  depth→elevation band, arc∝size, per-branch hue). **Reuses `fl-scan` verbatim → zero engine code**
+  (new view = new Director `.fth` + spherical-patch band meshes + zenith cap). Verified: loads clean
+  (`FL: scanned — 37 segments`, no asserts); renders cap + bands + hue; **`WF_CULL=1` pixel-identical
+  to cull-off** (inward normals correct — the dome is the first culling-on consumer). `task run-dome`.
+  Open polish: camera pull-back framing, interactive turn play-test, hot-reload re-demo.
+  [dome detail + verification](docs/plans/2026-06-13-planetarium-dome-view.md)
 
 
 ## WEB EDITOR (wf-edit in the browser)
@@ -118,9 +120,12 @@ timer callbacks, concurrent AI), explore these alternatives instead:
     syscalls 160-168) + Forth render policy (unit box per cell, `set-scale3`, `type>rgb` palette).
     No trig at all. Density bump 678 cells (cull thresholds + `MAX_DEPTH 6` + pool 2000, `room.cc`
     `RangeCheck` 1000→4000). [plan](docs/plans/2026-06-13-kdirstat-treemap-view.md)
-  - **Tiered monument** (#2) + **planetarium dome** (#3) sunburst variants; **unified runtime
-    view-switcher** (one level, mode mailbox cycles tree↔sunburst↔treemap↔tiered↔dome);
-    **procedural single-mesh** upgrade (exact sectors via one runtime `RenderObject3D`).
+  - ~~**planetarium dome** (#3)~~ (DONE 2026-06-13; `wflevels/dome/`, `task run-dome`) — sunburst on
+    a hemisphere, reuses `fl-scan` verbatim (zero engine code), first `WF_CULL=1` consumer.
+    [plan](docs/plans/2026-06-13-planetarium-dome-view.md)
+  - **Tiered monument** (#2) sunburst variant; **unified runtime view-switcher** (one level, mode
+    mailbox cycles tree↔sunburst↔treemap↔tiered↔dome); **procedural single-mesh** upgrade (exact
+    sectors via one runtime `RenderObject3D`).
   — [plan](docs/plans/2026-06-13-filesystem-viz-on-a-flat-table-forth-policy-core-f.md)
 - [ ] **SMB W1-4 headless mid-level screenshots come out black — root cause NOT established.** When the player is teleported to mid-level via `X_POS` (or the camera is driven with `SMB_MAX_CAM_X` while the player stays at spawn), the captured frame is all-black at the fire-bar/boss area. **What's confirmed:** the actors exist and run scripts ([`tests/verify_smb_w1_4_firebars.py`](tests/verify_smb_w1_4_firebars.py) + [`tests/verify_smb_w1_4_boss.py`](tests/verify_smb_w1_4_boss.py) pass); spawn renders clean; the *white* component was the full-span ceiling's lit underside (fixed — ceiling now invisible, [bf06dbec](https://github.com/wbniv/WorldFoundry/commit/bf06dbec)). **What's NOT confirmed:** whether the black is geometry failing to draw or simply the camera pointing at empty space — I only ever read `SMB_TARGET_CAM_X` (the *target* mailbox), never the camera actor's real world position (camera is actor idx 1, mobility=Camera). An earlier claim that "geometry doesn't render" was an unverified inference and is probably wrong; most likely this is a **capture-method artifact** (the camshot has `Rotation=Fixed`, and a discontinuous teleport may leave the camera aimed away from where the player lands), and **normal play renders fine**. Headless GUI diagnostics on `:0` were too flaky in this environment to settle it. **Next:** (1) play-test on `:0` — does mid-level W1-4 render during a normal walk? If yes, this is purely a capture limitation; (2) if a real bug, read the camera (idx 1) actual X vs the camshot (idx 5) and the `Fixed`-rotation path in [`movecam.cc`](wfsource/source/game/movecam.cc); (3) document a natural-walk capture recipe for SMB mid-level stills. See [W1-4 plan](docs/plans/2026-06-03-build-faithful-smb-w1-4.md).
 
