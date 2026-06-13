@@ -35,11 +35,10 @@ python3 -m http.server 8081 --directory build-web-edit
 
 ## 4. Open two peers
 
-Open **two browser windows** (or tabs) to the **same room**:
+Open the editor in **two separate browser windows** (separate windows/profiles, **not** two
+tabs in one window — see the gotcha below) on the **same room**:
 
-```
-http://localhost:8081/wf-edit.html?room=demo&relay=ws://localhost:9900
-```
+[http://localhost:8081/wf-edit.html?room=demo&relay=ws://localhost:9900](http://localhost:8081/wf-edit.html?room=demo&relay=ws://localhost:9900)
 
 Query params: `room=<id>` and `relay=<ws-url>` join a co-edit room; omit both for
 local-only. Also `leveltree=<preloaded .lev>`, `level=<preloaded .iff>`, and repeatable
