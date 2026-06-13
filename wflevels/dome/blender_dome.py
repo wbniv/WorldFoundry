@@ -57,12 +57,13 @@ BANDS      = {1: (50.0, 72.0), 2: (28.0, 50.0), 3: (8.0, 28.0)}
 PLAYER_SPAWN = (0.0, 0.0, 1.0)          # player at the dome centre
 
 # Camera — player turns to look around (Rotation='Track' follows the player heading
-# C; Position Relative keeps it at the centre). Look-at target is high+forward so
-# the gaze pitches UP at the dome; turning sweeps that upward view around. (Framing
-# is a tuning step — adjust CAM_OFFSET / TARGET2_POS against a screenshot.)
-CAM_OFFSET  = (0.0,  0.0,  2.0)         # camera ≈ at the player's head
+# C). The player stands INSIDE a 35-unit hemisphere, so you can't "pull back" to see
+# it whole — the dome always surrounds you. Instead this is a wide FISHEYE looking
+# straight UP from the centre: the zenith cap centres, the elevation bands read as
+# concentric rings out toward the horizon at the frame edge. Turning sweeps it.
+CAM_OFFSET  = (0.0,  0.0,  3.5)         # at the dome centre, above the astronaut's head
 TARGET1_POS = (0.0,  0.0,  1.0)         # follow anchor (centre)
-TARGET2_POS = (0.0,  9.0, 26.0)         # look-at: up + forward → pitch toward the dome
+TARGET2_POS = (0.0,  2.0, 34.0)         # look-at: ~straight up (tiny +Y avoids gimbal)
 
 # Room bbox — contains the hemisphere (±35, z≤35), player, and camera, with margin.
 #   world = ROOM_CENTER + local  →  X[-45,45] Y[-45,45] Z[-2,45].
@@ -416,7 +417,7 @@ make_empty('CamShot01', CAM_OFFSET, 'camshot',
         'Position X':          'Relative',
         'Position Y':          'Relative',
         'Position Z':          'Relative',
-        'FOV':                 80.0,          # wide, to take in the dome overhead
+        'FOV':                 150.0,         # fisheye — whole hemisphere (cap → horizon)
         'Climb Rate':          4.0,
         'Elasticity':          10.0,
         'Pan Time In Seconds': 0.4,

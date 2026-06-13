@@ -1,8 +1,14 @@
 | Date | Change |
 |------|--------|
+| [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/7622e66c) | feat(dome): planetarium dome view — sunburst on a hemisphere (wflevels/dome/) |
 | [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/d1e98510) | feat(gfx): software backface culling, opt-in via WF_CULL=1 (default off) |
 
 <!--history-meta v1
+7622e66c	author	Will Norris
+7622e66c	added	23
+7622e66c	deleted	0
+7622e66c	files	1
+7622e66c	body	Fourth filesystem-visualization view (after FSN node-link, Filelight flat\nsunburst, KDirStat treemap). The player stands at the centre of a dome and looks\nup: the cwd is a light-blue cap directly overhead (the zenith), its children fan\nout in concentric ELEVATION bands descending toward the horizon, each segment's\nAZIMUTH arc proportional to recursive size, coloured per branch.\n\nZero engine code — REUSES Filelight's fl-scan emitter verbatim. The dome reads\nthe same {depth, a0, a1 (rev), branchId} table: depth -> elevation band (φ range\nbaked into the mesh), a0/a1 -> azimuth, branch -> hue; sizeKB unused (size lives\nin the arc, not height). So a new view is a new Director .fth + new meshes:\n\n- blender_dome.py: spherical-patch band templates (φ bands [50,72]/[28,50]/[8,28])\n  + a zenith spherical cap, all wound for INWARD normals (toward the player at the\n  centre) so they're visible from inside under backface culling. Player-relative\n  heading-tracking camera (Rotation=Track) → turn to look around. Director tiles\n  each segment's arc with set-rotation'd band wedges (no height scale), reusing\n  seg-color/hsv>rgb from Filelight; the cap is spawned once.\n- dome-standalone.iff.txt (L4 wrapper, ~450-wedge budget like filelight) +\n  built dome.iff / dome-standalone.iff. `task run-dome` (WF_CULL=1 enables the\n  cull the dome is wound for; renders fine with it off too).\n\nVerified: loads clean (FL: scanned 37 segments, no asserts/terminate/out-of-room);\nrenders cap + bands + per-branch hue; and WF_CULL=1 is pixel-identical to cull-off\n— the inward winding is correct, making the dome the first WF_CULL=1 consumer.\nOpen polish: camera pull-back framing, interactive turn play-test, hot-reload\nre-demo. Plan + screenshots: docs/plans/2026-06-13-planetarium-dome-view.md.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 d1e98510	author	Will Norris
 d1e98510	added	214
 d1e98510	deleted	0

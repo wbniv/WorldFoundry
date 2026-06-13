@@ -213,19 +213,25 @@ Built: `blender --background --python wflevels/dome/blender_dome.py` (17 objects
 - **M1 — PASS.** `FL: scanned '.' — 37 segments`; no asserts, no "fell out of room", no terminate,
   no zforth errors. (The 4 levcomp "outside every room bbox" warnings are the parked-OOB band/cap
   *templates* — spawned at the origin at runtime, exactly as filelight's parked templates.)
-- **M2 — PASS.** Renders the planetarium dome: light-blue **zenith cap** (cwd) overhead, ringed by
-  concentric **elevation bands** coloured per-branch (green/gold/red/pink, desaturating with depth).
-  And **`WF_CULL=1` is pixel-identical to the default (cull-off)** run — the inward-wound spherical
-  patches + cap are correct, so the dome is a clean first culling-on consumer.
+- **M2 — PASS.** Renders the planetarium dome — a wide **fisheye looking straight up from the
+  centre**: the light-blue **zenith cap** (cwd) centred, the **elevation bands** radiating as
+  concentric per-branch colour wedges (big green/gold/red depth-1 branches subdivided into depth-2/3
+  arcs; thin slivers for small branches) out to the horizon at the frame edge, full 360°. The whole
+  hemisphere reads in one frame. **`WF_CULL=1` is pixel-identical to the default (cull-off)** run —
+  the inward-wound spherical patches + cap are correct, so the dome is a clean first culling-on
+  consumer.
+  <img src="../../wflevels/dome/screenshots/2026-06-13-planetarium-dome.png" width="480">
   <img src="../../wflevels/dome/screenshots/2026-06-13-dome-cull-off-vs-on.png" width="700">
-  *(left: default / cull off · right: `WF_CULL=1` / cull on — identical)*
+  *(top: fisheye up-view (whole hemisphere) · bottom — left: cull off · right: `WF_CULL=1` — identical)*
 - **M3 — inherited, not separately demonstrated.** The render policy lives entirely in the Director
   `.fth` (depth→band, hue), the same hot-reload mechanism filelight proved; not re-demonstrated this
   session.
 
-**Tuning note:** the camera (FOV 80, at centre looking up-and-forward) frames the cap + inner bands
-filling the view; pull `CAM_OFFSET`/`TARGET2_POS` back to take in more of the hemisphere. The
-"turn to look around" (`Rotation=Track`) wasn't interactively play-tested (headless capture only).
+**Camera:** a wide fisheye (`FOV 150`) from the dome centre looking straight up — you can't "pull
+back" from inside a 35-unit hemisphere (it always surrounds you), so the whole dome is shown as a
+radial fisheye instead. `CAM_OFFSET` z is raised to `3.5` (above the astronaut's head) so the
+avatar doesn't occlude the cap. The "turn to look around" (`Rotation=Track`) wasn't interactively
+play-tested (headless capture only).
 
 ## Out of scope (future tunables, all policy-only)
 - **Azimuthal camera spin** (planetarium drift) — a per-frame camshot heading write; needs either a
