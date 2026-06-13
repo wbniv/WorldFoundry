@@ -557,14 +557,19 @@ symptom points away from its real cause:
    a base color and no texture image (mirror qbert's cubes / the `pilot_demo` floor). textile
    then has nothing to look up. Re-run `textile` *without* the `>/dev/null` to see its errors.
 
-4. **`terminate called without an active exception` (SIGABRT) — but the root cause is the
-   camera.** Deleting imported objects shifts object indices, so a CamShot's `Target`
-   (look-at) and `Track Object` (follow) `OBJREFERENCE`s dangle → `movecam.cc:289` assert
-   `shotData->Target`. The assert calls `exit()`, whose atexit handlers destroy the still-
-   joinable debug-bridge listener `std::thread` → `std::terminate`. So you see a terminate at
-   shutdown, not the camera assert. Fix: explicitly set `camshot['wf_Target']` and
-   `camshot['wf_Track Object']` to a *live* object's name (e.g. the player's `obj.name`), and
-   aim the shot to frame it. See also "BungeeCam: target placement".
+4. **CamShot `Target`/`Follow` dangle after deleting imported objects → camera assert.**
+   Deleting imported objects shifts object indices, so a CamShot's `Target` (look-at) and
+   `Follow` (anchor) `OBJREFERENCE`s can dangle → `SetCameraParametersFromShot` asserts on
+   `shotData->Target` / `Follow` (`movecam.cc`). Fix: set `camshot['wf_Target']` and
+   `camshot['wf_Follow']` to a *live* object's name (e.g. the player's `obj.name`) and aim the
+   shot to frame it.
+   - As of 2026-06-13 a dangling/destroyed **`Track Object`** no longer crashes — the camera
+     degrades to its shot position via `CameraHandler::ResolveTrackObject` (it just stops
+     following). Still set `wf_Track Object` to a live object if you want the camera to track.
+   - The masked `terminate called without an active exception` (SIGABRT at shutdown) this
+     used to surface as is also gone: the debug-bridge listener thread is now detached and a
+     shared `std::set_terminate` handler names the real cause, so you see the camera assert
+     directly. See also "BungeeCam: target placement".
 
 ---
 
@@ -716,13 +721,44 @@ Full root-cause analysis: [docs/investigations/2026-05-16-textile-rs-rgba555-ded
 
 ---
 
-## Mesh face normals
+## Mesh face normals & backface culling
 
-WF's `glpipeline` renderer does **not** enable `GL_CULL_FACE`. Faces are always drawn regardless of winding order.
+> **CHANGED 2026-06-13 — culling is now ON by default.** WF previously drew both sides of
+> every polygon. The `glpipeline`/Metal backends now do **software backface culling**: a
+> triangle whose normal points away from the camera is skipped. Winding/normal direction is
+> therefore **load-bearing** — a face wound the wrong way will *vanish*, not just shade wrong.
+> Plan: [2026-06-13 planetarium-dome + culling](plans/2026-06-13-planetarium-dome-view-engine-wide-backface-culling.md).
 
-However, face normals (computed in `rendobj3.cc` via cross-product during load) affect lighting. A face whose normal points away from the dominant light source will receive less light and may appear dark. For a ramp or floor surface the normal should point generally upward (+Z).
+**How it works.** Each face normal is computed once at load from winding order —
+`CalculateNormal = (v2-v0) × (v1-v0)` (`gfx/face.hpi:35`). The cull (in
+`gfx/glpipeline/backend_modern.cc::DrawTriangle`) transforms that normal + the face centre into
+eye space via the modelview and skips the triangle when `dot(Ne, Pe) > 0` (normal facing away
+from the camera at the origin). The same normal also drives one-sided lighting, so a wrong-way
+normal both **culls** the face *and* (when it isn't culled) leaves it **dark/ambient-only**.
 
-**Rule of thumb:** Export the mesh with normals pointing away from the surface in the direction the player/camera faces it.
+**The winding rule.** Author every face so its normal points toward where the surface is meant
+to be **seen from**:
+- **Exterior-viewed** geometry (props, towers, treemap cells, floors, ground, terrain seen from
+  above) → normals point **outward / upward (+Z for a top face)**.
+- **Interior-viewed** geometry (room boxes seen from inside, a dome/skybox the player stands
+  within) → normals point **inward, toward the viewer**.
+
+**Common gotcha — the inside-out box.** The hand-written box face list
+`[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]` (as in `add_solid_box` /
+`make_box_mesh`) produces **inward** normals under `(v2-v0)×(v1-v0)` — its "top" face `(4,5,6,7)`
+normal is `-Z` (down). For an exterior box, **reverse every face tuple** so normals point out:
+`[(1,2,3,0),(7,6,5,4),(4,5,1,0),(5,6,2,1),(6,7,3,2),(7,4,0,3)]`. Likewise reverse fan/wall
+triangles in disk/cylinder generators (`disk_geo`). After authoring, eyeball it: a face that goes
+dark *or disappears* from the intended view is wound backwards. (Quick A/B: relaunch with
+`WF_CULL=0` to disable the cull — if the missing surface reappears, it's a winding bug.)
+
+**Escape hatch — two-sided surfaces.** A genuinely double-sided surface (the matte/HUD
+background, a thin billboard/flag) should set the material's `DOUBLE_SIDED` flag
+(`gfx/material.hp`), which exempts it from culling. The matte path passes this automatically;
+the engine never culls the background.
+
+**Disable globally:** run with `WF_CULL=0` (env) to turn culling off engine-wide — useful for
+isolating whether an invisible surface is a culling/winding issue vs. a missing mesh.
 
 ---
 
@@ -1868,9 +1904,13 @@ Jolt-safe (`jolt/physical.hpi::Update()` explicitly pushes WF-side warps into th
 character). The room system then follows on its own:
 
 - `ActiveRooms::UpdateRoom(watchObject)` ([actrooms.cc:293](../wfsource/source/room/actrooms.cc))
-  runs each frame with `_camera->GetWatchObject()` (the player). When the player leaves
-  `_activeRooms[0]`'s bbox it loops over **every** room and switches to the first one whose
-  bbox contains the player. **Adjacency is NOT required for the switch** — it's a full scan.
+  runs each frame with `_camera->GetWatchObject()` — the active CamShot's **Track Object**
+  (normally the player). When it leaves `_activeRooms[0]`'s bbox it loops over **every** room
+  and switches to the first one whose bbox contains it. **Adjacency is NOT required for the
+  switch** — it's a full scan. (As of 2026-06-13 `GetWatchObject` returns `null` — *not* the
+  main character — when the Track Object is unset/invalid; the room-update simply skips that
+  frame and the active rooms hold. The camera is not a special/global actor and no longer
+  falls back to `mainCharacter()`.)
 - **The rooms must partition space CONTIGUOUSLY — touching, NOT gapped.** Two competing
   constraints:
   - For the **switch**: the warp destination must be unambiguously inside the *target*
@@ -2136,15 +2176,19 @@ target you'd align to 0x100000).
 
 ## Cutscene camera `Track Object` — must be a room actor, not a PERM actor
 
-**Symptom:** With `wf_Track Object = 'some_perm_actor'` on a cutscene camshot, the
-camera asserts at runtime:
-```
-ASSERTION FAILED: ValidPtr(trackObject)    movecam.cc:1067
-```
+**Symptom:** With `wf_Track Object = 'some_perm_actor'` on a cutscene camshot, the camera
+**silently fails to follow** the actor — it holds at the CamShot's own (Follow-relative)
+position and never tracks.
+
+> Before 2026-06-13 this was a hard crash: `ASSERTION FAILED: ValidPtr(trackObject)
+> movecam.cc:1067`. `CameraHandler::ResolveTrackObject` now returns `null` for an
+> unresolvable track index instead of asserting, so a bad `Track Object` degrades
+> gracefully rather than aborting — but it still won't *track*, so the fix below still
+> applies. (This is Track-Object-specific: a dangling `Target` or `Follow` still asserts.)
 
 **Cause:** `GetObject(idx)` only searches the room object table. PERM actors are loaded
-into a separate slot and are not returned by `GetObject`, so the track-object pointer is
-null every frame the camera is active.
+into a separate slot and are not returned by `GetObject`, so `ResolveTrackObject` sees no
+object at that index and returns null every frame the camera is active.
 
 **Fix:** Use a room-resident proxy actor as the track target.  Give the proxy a per-frame
 Forth script that reads a shared mailbox (e.g. `MOON_LANDER_Z`) and writes to its own
