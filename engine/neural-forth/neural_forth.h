@@ -11,6 +11,7 @@
  *   128 / custom 0 = read-mailbox      (existing WF)
  *   129 / custom 1 = write-mailbox     (existing WF)
  *   130 / custom 2 = write-actor-mailbox (existing WF)
+ *   152 / custom 24 = read-actor-mailbox (existing WF; 3-23 taken)
  *   131 / custom 3 = neural-forth dispatch gate  ← this module
  *
  * All NF words share syscall 131; the word ID is passed on the data stack

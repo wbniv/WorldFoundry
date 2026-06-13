@@ -15,6 +15,7 @@
 // Host functions (registered once at Init):
 //   "env" "read_mailbox"  (i32) → f32   mailbox read for current actor
 //   "env" "write_mailbox" (i32 f32) → Ø mailbox write for current actor
+//   "env" "read_actor_mailbox" (i32 i32) → f32  cross-actor mailbox read
 //
 // Host globals (per-call, from AddConstantArray map):
 //   "consts" "<NAME>" → i32  resolved by name from g_consts
@@ -103,6 +104,23 @@ static wasm_trap_t* host_read_mailbox(const wasm_val_vec_t* args,
     float   val = 0.0f;
     if (g_mgr) {
         Mailboxes& mb = g_mgr->LookupMailboxes(g_curObj);
+        val = mb.ReadMailbox(idx).AsFloat();
+    }
+    results->data[0].kind = WASM_F32;
+    results->data[0].of.f32 = val;
+    return nullptr;
+}
+
+// Signature: read_actor_mailbox(i32 idx, i32 actor) -> f32 — cross-actor read
+// (symmetric partner of write-actor-mailbox; reads `actor`, not g_curObj).
+static wasm_trap_t* host_read_actor_mailbox(const wasm_val_vec_t* args,
+                                            wasm_val_vec_t*       results)
+{
+    int32_t idx   = args->data[0].of.i32;
+    int32_t actor = args->data[1].of.i32;
+    float   val   = 0.0f;
+    if (g_mgr) {
+        Mailboxes& mb = g_mgr->LookupMailboxes(actor);
         val = mb.ReadMailbox(idx).AsFloat();
     }
     results->data[0].kind = WASM_F32;
@@ -220,6 +238,14 @@ float RunScript(const char* src, int objectIndex)
     wasm_valtype_vec_new_empty(&wm_results_empty);
     wasm_functype_t* write_ft = wasm_functype_new(&wm_params, &wm_results_empty);
 
+    // read_actor_mailbox: (i32, i32) -> f32
+    wasm_valtype_t* ram_param_v[]  = { wasm_valtype_new_i32(), wasm_valtype_new_i32() };
+    wasm_valtype_t* ram_result_v[] = { wasm_valtype_new_f32() };
+    wasm_valtype_vec_t ram_params, ram_results;
+    wasm_valtype_vec_new(&ram_params,  2, ram_param_v);
+    wasm_valtype_vec_new(&ram_results, 1, ram_result_v);
+    wasm_functype_t* read_actor_ft = wasm_functype_new(&ram_params, &ram_results);
+
     // Build externs in import order.
     size_t n = import_types.size;
     std::vector<wasm_extern_t*> extern_ptrs(n, nullptr);
@@ -247,6 +273,9 @@ float RunScript(const char* src, int objectIndex)
             } else if (nm_str == "write_mailbox") {
                 ft = write_ft;
                 cb = host_write_mailbox;
+            } else if (nm_str == "read_actor_mailbox") {
+                ft = read_actor_ft;
+                cb = host_read_actor_mailbox;
             } else {
                 fprintf(stderr, "wamr: unknown env import '%s'\n", nm_str.c_str());
                 ok = false;
@@ -290,6 +319,7 @@ float RunScript(const char* src, int objectIndex)
     wasm_importtype_vec_delete(&import_types);
     wasm_functype_delete(read_ft);
     wasm_functype_delete(write_ft);
+    wasm_functype_delete(read_actor_ft);
 
     float result = 0.0f;
     if (ok) {

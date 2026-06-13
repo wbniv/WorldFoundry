@@ -17,6 +17,7 @@
 #include "level.hp"
 #include "actor.hp"
 #include "movecam.hp"   // CameraHandler::ResolveTrackObject (camera stale-track regression)
+#include "../stubs/scripting_forth.hp"   // forth_engine::RunScript (read-actor-mailbox test)
 #include <baseobject/baseobject.hp>
 #include <math/angle.hp>
 #include <pigsys/pigsys.hp>
@@ -601,6 +602,45 @@ void run_camera_track_tests(Level& level, ActorIdx player)
     }
 }
 
+// ── read-actor-mailbox (cross-actor Forth primitive, RA1) ────────────────────
+// The new zForth word `read-actor-mailbox ( idx actor_idx -- val )`. Drive a
+// genuine cross-actor round-trip through the interpreter: the player WRITES a
+// sentinel to another actor's scratch mailbox (existing write-actor-mailbox),
+// then READS it back via read-actor-mailbox; assert the value survived. Fails
+// before the fix (word undefined → eval error → RunScript returns 0).
+void run_actor_mailbox_tests(Level& level, ActorIdx player)
+{
+    std::fprintf(stderr,"--- read-actor-mailbox (RA1) ---\n");
+
+    ActorIdx other = 0;                          // a second actor; fall back to player
+    for (int i = 1; i < level.GetMaxObjectIndex(); ++i)
+        if (static_cast<ActorIdx>(i) != player && IsActor(level.GetObject(i))) {
+            other = static_cast<ActorIdx>(i); break;
+        }
+    if (other == 0) other = player;
+
+    const int   S        = 4005;                 // SCRATCH_USER_START — harmless slot
+    const float sentinel = 42.0f;
+
+    // Eval in an override-free context (objectIndex 0): a scripted actor like the
+    // player has a registered script override that RunScript would run instead of
+    // our ad-hoc string. The mailbox words take an EXPLICIT actor index, so the
+    // running context is irrelevant — we still read/write `other`'s mailbox.
+    // `\ wf` sigil line is required — RunScript skips the first line.
+    char wbuf[128], rbuf[128];
+    std::snprintf(wbuf, sizeof wbuf, "\\ wf\n%g %d %u write-actor-mailbox",
+                  sentinel, S, static_cast<unsigned>(other));
+    std::snprintf(rbuf, sizeof rbuf, "\\ wf\n%d %u read-actor-mailbox",
+                  S, static_cast<unsigned>(other));
+    forth_engine::RunScript(wbuf, 0);
+    float got = forth_engine::RunScript(rbuf, 0);
+
+    report("RA1: read-actor-mailbox round-trips write-actor-mailbox (cross-actor)",
+           fclose_to(got, sentinel),
+           fclose_to(got, sentinel) ? "" : std::string("got=") + std::to_string(got)
+                                           + " other=" + std::to_string(other));
+}
+
 } // namespace
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -625,6 +665,7 @@ int RunSmokeTests(Level& level)
     run_mailbox_tests(level, player);
     run_crosscutting_tests(level, player);
     run_camera_track_tests(level, player);
+    run_actor_mailbox_tests(level, player);
 
     // Cross-cutting tests (X1-X8) land in a follow-up; some require manual
     // verification (bridge regression, screenshot capture) and are tracked

@@ -12,6 +12,7 @@
 //   : read-mailbox  128 sys ;   \ ZF_SYSCALL_USER+0: ( idx -- val )
 //   : write-mailbox 129 sys ;   \ ZF_SYSCALL_USER+1: ( val idx -- )
 //   : write-actor-mailbox 130 sys ;   \ ZF_SYSCALL_USER+2: ( val idx actor_idx -- )
+//   : read-actor-mailbox 152 sys ;    \ custom 24 (3-23 taken): ( idx actor_idx -- val )
 //
 // Control flow (zForth uses `fi` not `then`):
 //   if ... fi        ( flag -- )
@@ -966,6 +967,21 @@ zf_input_state zf_host_sys(zf_ctx* ctx, zf_syscall_id id, const char* /*last_wor
                     Mailboxes& mb = g_mgr->LookupMailboxes(actorIdx);
                     mb.WriteMailbox(idx, Scalar::FromFloat(val));
                 }
+            } else if (custom == 24) {
+                // read-actor-mailbox ( idx actor_idx -- val )
+                // Symmetric partner of write-actor-mailbox (custom 2): read
+                // mailbox `idx` on the actor identified by `actor_idx`, not the
+                // running actor — cross-actor observation (e.g. a Director
+                // reading another actor's X_POS without the push-to-global hack).
+                // id is 24 because custom 3-23 are already claimed (FSN, etc.).
+                int   actorIdx = (int)zf_pop(ctx);
+                int   idx      = (int)zf_pop(ctx);
+                float v = 0.0f;
+                if (g_mgr) {
+                    Mailboxes& mb = g_mgr->LookupMailboxes(actorIdx);
+                    v = mb.ReadMailbox(idx).AsFloat();
+                }
+                zf_push(ctx, (zf_cell)v);
             } else if (custom == 3) {
                 // cwd-scan ( -- n )
                 // Scan CWD, populate g_cwd_entries (skipping . and ..), push count.
@@ -1367,6 +1383,9 @@ void Init(MailboxesManager& mgr)
     r = zf_eval(&g_ctx, ": write-actor-mailbox 130 sys ;");
     if (r != ZF_OK)
         fprintf(stderr, "zforth: init failed (write-actor-mailbox): %d\n", r);
+    r = zf_eval(&g_ctx, ": read-actor-mailbox 152 sys ;");   // custom 24 (3-23 taken)
+    if (r != ZF_OK)
+        fprintf(stderr, "zforth: init failed (read-actor-mailbox): %d\n", r);
 
     // FSN filesystem bridge words (custom 3-7 / sys 131-135)
     r = zf_eval(&g_ctx, ": cwd-scan      131 sys ;");
