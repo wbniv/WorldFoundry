@@ -33,7 +33,7 @@ see and hear each other without leaving the tool.
 | Save back to `.lev`; compile `.lev` → `.iff` | ✅ |
 | Voice + video calling between editor instances in the same room | ✅ (LAN, Linux) |
 | Real-time multi-user co-editing over a network (presence, relay, chat, disk persistence) | ✅ (WebSocket relay; only at-rest **BYOK** snapshot encryption is deferred — see [Known limitations](#known-limitations)) |
-| Run the **whole editor in a web browser** (WASM/WebGL2) — same C++ ImGui app, co-edit + presence + chat over the relay | ✅ (Linux build cross-compiled to Emscripten; voice/video compiled out — see [Running in the browser](#running-in-the-browser-wasmwebgl2)) |
+| Run the **whole editor in a web browser** (WASM/WebGL2) — same C++ ImGui app, co-edit + presence + chat over the relay | ✅ (Linux build cross-compiled to Emscripten; **voice + video too**, via the browser's WebRTC — see [Running in the browser](#running-in-the-browser-wasmwebgl2)) |
 
 **Platform:** the native editor is **Linux/X11 only** in v1 (it adopts an existing GLX
 context; Wayland and native mobile hosts are v2+). The **same editor also runs in a web
@@ -114,11 +114,18 @@ engine viewport, Outliner, Properties panel, OAD reader, gizmo, and CRDT bridge 
 native code paths; only three platform seams change (GLFW-Emscripten owns the WebGL2 canvas
 and the engine adopts it; `emscripten/websocket.h` replaces POSIX sockets; the blocking
 `RunEditor` loop becomes `RunEditorWeb`/`WebTickEditor` via `emscripten_set_main_loop`).
-**Voice/video is compiled out** of the web build (the native libdatachannel/Opus/libvpx/V4L2
-stack doesn't port to WASM); co-edit + presence + text chat are fully present.
+Co-edit + presence + text chat are fully present. **Voice + video also work** — not via the
+native libdatachannel/Opus/libvpx/V4L2 stack (which doesn't port to WASM) but via the browser's
+own **WebRTC** (`RTCPeerConnection`, `getUserMedia`, Opus/VP8, DTLS-SRTP, ICE/STUN/TURN): the web
+`WebrtcSession`/`VoiceChat`/`VideoChat` are thin shims over a per-peer JS `RTCPeerConnection`
+(`engine/wf_edit/webrtc_web.cc`), reusing the **same** relay `CH_SIGNAL` path and offerer rule as
+native, so a browser peer and a native `wf-edit` peer share a call in one room. Remote/self video
+render as HTML `<video>` overlays positioned over the Collaborators-panel thumbnails. Use the
+panel's **Unmute mic** / **Cam on** buttons to grant the camera/mic permission and start sending.
 
 The full bring-up is recorded in the
-[wf-edit-in-the-browser plan](plans/2026-06-12-wf-edit-in-the-browser.md).
+[wf-edit-in-the-browser plan](plans/2026-06-12-wf-edit-in-the-browser.md); the A/V work in the
+[web A/V plan](plans/2026-06-13-web-editor-audio-video.md).
 
 ### One-time toolchain setup
 
