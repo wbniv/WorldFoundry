@@ -56,15 +56,22 @@ What to try:
 
 ## Gotchas
 
-- **Two tabs sharing one webcam can conflict** — the OS may let only one tab open the camera,
-  so two-way *video* in one browser may be one-sided. **Audio + co-edit + presence + chat work
-  two-tab.** For clean two-way video use **two different browsers** (Chrome + Firefox), two
-  browser **profiles**, or two machines.
+- **⚠ Don't run two peers as two tabs in one browser window.** The editor services the relay +
+  WebRTC signaling from its per-frame `requestAnimationFrame` loop, and browsers **throttle/pause
+  rAF in a background (non-focused) tab** — so the inactive tab stalls its networking and its peer
+  connection won't establish/flow reliably (verified: a background second tab registered *no peer*
+  at all). This is **not** about the camera. Run each peer in its **own browser window** (keep both
+  visible), its **own profile/process** (`--user-data-dir=…`), or **two machines**. The headless
+  fake-camera peer works precisely because it's a separate full-speed process.
+  *(Follow-up: decouple the relay/WebRTC servicing from the rAF loop so background tabs stay live.)*
 - **`localhost` is a secure context**, so `getUserMedia` (camera/mic) works. A **LAN IP does
   not** — browsers block camera/mic over plain `http://` on non-localhost; that path needs
   HTTPS (e.g. the deployed `wss://wf.worldfoundry.org` + an HTTPS-served editor).
-- **Camera-less / "join as viewer"** — set `wfenv=WF_COLLAB_NO_CAM=1` (or env on native) to
-  join without opening the webcam at all; you still see/hear others.
+- **Joining as a viewer (no camera)** — on the **web** build the mic and camera are **off by
+  default** and aren't opened until you click **Unmute mic** / **Cam on**, so joining as a
+  viewer/listener is just the default — no flag needed. (`WF_COLLAB_NO_CAM` is a **native-only**
+  env var: the *native* editor opens `/dev/video0` at startup, so that flag suppresses it; it has
+  no effect on the web build, where nothing opens a device until you click.)
 - **Native interop** — a native `wf-edit --room=demo --relay=ws://localhost:9900` joins the
   same call; audio interoperates with browser peers (display of *remote* video on the native
   side has a known bug — see TODO).

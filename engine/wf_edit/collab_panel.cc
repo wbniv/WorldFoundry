@@ -68,8 +68,11 @@ void RenderCollabPanel(bool& show_collab,
         return;
     }
 
-    ImGui::SetNextWindowSizeConstraints({ 280, 180 }, { 1000, 800 });
-    if (!ImGui::Begin("Collaborators", &show_collab)) {
+    // Auto-size to the peer list so every "You" + peer row (and its <video> overlay on
+    // web) is visible — a short fixed panel clipped the rows and made the web overlay
+    // float over the viewport. Width is clamped; height grows with the peer count.
+    ImGui::SetNextWindowSizeConstraints({ 300, 180 }, { 520, 1200 });
+    if (!ImGui::Begin("Collaborators", &show_collab, ImGuiWindowFlags_AlwaysAutoResize)) {
 #if defined(__EMSCRIPTEN__)
         wfwebrtc_hide_all_video();   // collapsed
 #endif
@@ -116,10 +119,11 @@ void RenderCollabPanel(bool& show_collab,
         // over this reserved rect — SelfPreview()'s RGB buffer is unused on web.
         const ImVec2 spos = ImGui::GetCursorScreenPos();
         ImGui::Dummy({ static_cast<float>(kThumbW), static_cast<float>(kThumbH) });
+        const bool svis = ImGui::IsRectVisible(spos, { spos.x + kThumbW, spos.y + kThumbH });
         ImGui::SameLine();
         ImGui::TextDisabled("(live)");
         wfwebrtc_layout_self(static_cast<int>(spos.x), static_cast<int>(spos.y),
-                             kThumbW, kThumbH, 1);
+                             kThumbW, kThumbH, svis ? 1 : 0);
 #else
         const auto& sp = video.SelfPreview();
         if (sp.empty()) {
@@ -178,8 +182,10 @@ void RenderCollabPanel(bool& show_collab,
 #if defined(__EMSCRIPTEN__)
         // Web: position this peer's remote-video <video> overlay over the thumbnail
         // rect (it's display:none until ontrack, so the avatar shows through first).
+        // Hide it if the row is clipped/off-screen so it never floats over the viewport.
+        const bool pvis = ImGui::IsRectVisible(thumbPos, { thumbPos.x + kThumbF, thumbPos.y + kThumbFH });
         wfwebrtc_layout_video(p.peer_id.c_str(), static_cast<int>(thumbPos.x),
-                              static_cast<int>(thumbPos.y), kThumbW, kThumbH, 1);
+                              static_cast<int>(thumbPos.y), kThumbW, kThumbH, pvis ? 1 : 0);
 #endif
 
         // Name + audio level meter.
