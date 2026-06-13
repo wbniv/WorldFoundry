@@ -102,8 +102,24 @@ EM_JS(void, wfwebrtc_set_self, (const char* self_p, const char* ice_json_p), {
             return P;
         };
 
-        // Attach a remote track to a hidden <audio> (Phase 2) or a <video> overlay
-        // element (Phase 3). Called from each PC's ontrack.
+        // The overlay container (a positioned <div> over the canvas in shell-edit.html);
+        // fall back to <body> so media still decodes (videoWidth>0) even without it.
+        var layer = function () { return document.getElementById('wf-video-layer') || document.body; };
+
+        // Lazily create the local-camera self-preview <video> (mirrored).
+        globalThis.__wfrtcSelfVideo = function () {
+            if (!S.selfEl) {
+                var v = S.selfEl = document.createElement('video');
+                v.autoplay = true; v.muted = true; v.setAttribute('playsinline', '');
+                v.style.position = 'absolute'; v.style.objectFit = 'cover';
+                v.style.transform = 'scaleX(-1)'; v.style.display = 'none';
+                layer().appendChild(v);
+            }
+            return S.selfEl;
+        };
+
+        // Attach a remote track to a hidden <audio> (audio) or an overlay <video> (video).
+        // Called from each PC's ontrack.
         globalThis.__wfrtcAttachTrack = function (pid, ev) {
             var P = S.peers[pid]; if (!P) return;
             var track = ev.track;
@@ -116,8 +132,17 @@ EM_JS(void, wfwebrtc_set_self, (const char* self_p, const char* ice_json_p), {
                 }
                 P.audioEl.srcObject = stream;
                 P.audioEl.play().catch(function () { /* autoplay blocked until a user gesture */ });
+            } else if (track.kind === 'video') {
+                if (!P.videoEl) {
+                    var v = P.videoEl = document.createElement('video');
+                    v.autoplay = true; v.muted = true; v.setAttribute('playsinline', '');
+                    v.style.position = 'absolute'; v.style.objectFit = 'cover';
+                    v.style.display = 'none';   // shown once laid out over the panel thumbnail
+                    layer().appendChild(v);
+                }
+                P.videoEl.srcObject = stream;
+                P.videoEl.play().catch(function () {});
             }
-            // track.kind === 'video' → Phase 3 (overlay <video>).
         };
     }
 });
@@ -222,10 +247,42 @@ EM_JS(void, wfwebrtc_set_mic, (int enabled), {
         for (var pid in S.peers) S.attachLocal(S.peers[pid]);
     }).catch(function (e) { console.error('webrtc(web): getUserMedia(audio)', e); });
 });
+// Camera: first enable acquires getUserMedia({video}) → replaceTrack into each peer's
+// pre-negotiated video transceiver (no renegotiation) + self-preview. Toggle flips enabled.
 EM_JS(void, wfwebrtc_set_cam, (int enabled), {
-    console.log('webrtc(web): set_cam ' + enabled + ' (Phase 3)');
+    var S = globalThis.__WFRTC; if (!S) return;
+    if (!enabled) {
+        if (S.cam) S.cam.getVideoTracks().forEach(function (t) { t.enabled = false; });
+        return;
+    }
+    if (S.cam) { S.cam.getVideoTracks().forEach(function (t) { t.enabled = true; }); return; }
+    navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } }).then(function (stream) {
+        S.cam = stream;
+        console.log('webrtc(web): cam track acquired');
+        if (globalThis.__wfrtcSelfVideo) {
+            var sv = globalThis.__wfrtcSelfVideo(); sv.srcObject = stream; sv.play().catch(function(){});
+        }
+        for (var pid in S.peers) S.attachLocal(S.peers[pid]);
+    }).catch(function (e) { console.error('webrtc(web): getUserMedia(video)', e); });
 });
 EM_JS(double, wfwebrtc_peer_level, (const char* peer_id_p), { return 0.0; });
+
+// Position/size a peer's remote-video overlay element over the canvas (CSS px,
+// canvas-relative), or hide it. Driven from collab_panel.cc each frame.
+EM_JS(void, wfwebrtc_layout_video, (const char* pid_p, int x, int y, int w, int h, int vis), {
+    var S = globalThis.__WFRTC; if (!S) return;
+    var P = S.peers[UTF8ToString(pid_p)]; if (!P || !P.videoEl) return;
+    var v = P.videoEl;
+    if (!vis || w <= 0 || h <= 0) { v.style.display = 'none'; return; }
+    v.style.display = 'block';
+    v.style.left = x + 'px'; v.style.top = y + 'px'; v.style.width = w + 'px'; v.style.height = h + 'px';
+});
+EM_JS(void, wfwebrtc_layout_self, (int x, int y, int w, int h, int vis), {
+    var el = globalThis.__wfrtcSelfVideo ? globalThis.__wfrtcSelfVideo() : null; if (!el) return;
+    if (!vis || w <= 0 || h <= 0) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.width = w + 'px'; el.style.height = h + 'px';
+});
 
 namespace wfedit {
 

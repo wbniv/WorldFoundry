@@ -116,11 +116,15 @@ connect, for headless).
    --use-fake-ui-for-media-stream` + `WF_COLLAB_AV_AUTOSTART=1`): both peers `sendrecv`/`sendrecv`,
    `ontrack audio` both, inbound audio RTP bytes > 0 both (getStats). web↔native audio = Phase-4
    spot-check (native audio-device dependent; the Phase-1 connect already proved SDP/ICE interop).
-3. **Video.** `set_cam`, overlay + `collab_panel.cc` rect hook, self-preview. Verify web↔web (fake
-   video: `videoWidth>0`, overlay positioned, screenshot) + web↔native.
-4. **UI polish + robustness.** Panel-button permission prompts (real path), AnalyserNode meters,
-   overlay hide-on-collapse, teardown on peer-leave/`beforeunload`, PC-failed→recreate. 3-peer mixed
-   mesh (2 web + 1 native).
+3. **Video (transport + elements).** ✅ DONE + verified web↔web. `set_cam` (getUserMedia video →
+   replaceTrack), remote `ontrack video`→an overlay `<video>`, self-preview `<video>` (mirrored), and
+   the `layout_video`/`layout_self` positioning API. Verified (fake camera): both peers `vin>0` +
+   `vout>0` (getStats) and remote `<video>.videoWidth==320` — bidirectional video RTP. *(Elements
+   decode but stay `display:none` until positioned — panel-driven positioning is Phase 4.)*
+4. **UI polish + robustness.** The `<video>` overlay **positioning** (`#wf-video-layer` in
+   shell-edit.html + the `collab_panel.cc` rect hook → `layout_video`/`_self`); panel-button
+   permission prompts (real path), AnalyserNode meters, overlay hide-on-collapse, teardown on
+   peer-leave/`beforeunload`, PC-failed→recreate. web↔native A/V spot-check + 3-peer mixed mesh.
 
 ## Verification (end-to-end)
 
