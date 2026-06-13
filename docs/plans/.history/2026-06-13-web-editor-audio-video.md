@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/0392ea0e) | feat(wf-edit/web): A/V Phase 4 — video overlay positioning + robustness + mesh |
 | [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/2a5eee58) | feat(wf-edit/web): A/V Phase 3 — video (camera + remote <video>, bidirectional) |
 | [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/b7316645) | feat(wf-edit/web): A/V Phase 2 — voice (getUserMedia mic, bidirectional) |
 | [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/f872e3ae) | docs(wf-edit/web): plan voice+video (A/V) over browser WebRTC + TODO entry |
 
 <!--history-meta v1
+0392ea0e	author	Will Norris
+0392ea0e	added	12
+0392ea0e	deleted	4
+0392ea0e	files	1
+0392ea0e	body	- collab_panel.cc (web): each frame, position each peer's remote-video <video> and the\n  self-preview <video> over their panel-thumbnail rects (ImGui::GetCursorScreenPos +\n  kThumbW/H → wfwebrtc_layout_video/_self); ImGui screen coords map 1:1 to CSS px on\n  emscripten GLFW, so no DPR correction needed. Panel collapse/close → hide_all_video.\n- shell-edit.html: #wf-video-layer overlay container (pointer-events:none, z-index 10,\n  over the canvas) + a beforeunload that closes RTCPeerConnections so peers see the drop\n  immediately (relay presence backstops it otherwise).\n- webrtc_web.cc: wfwebrtc_hide_all_video; PC connectionState 'failed' → close + recreate\n  a fresh PC (re-derive offerer), mirroring native's re-sync.\n\nVerified web↔web: remote <video> display:block, videoWidth=320, positioned 162×122 over\nthe panel thumbnail; screenshot shows the live fake-camera tiles over the Collaborators\npanel. 3-peer full mesh: each peer connected to BOTH others and receiving media from\nboth (validates unicast to_peer_id routing).\n\nDeferred (minor, noted in plan): AnalyserNode level meters (flat meter, not broken);\nweb↔native MEDIA spot-check (connect/SDP/ICE interop already proven in Phase 1; full\nmedia interop needs native A/V hardware — a manual check).\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 2a5eee58	author	Will Norris
 2a5eee58	added	9
 2a5eee58	deleted	5

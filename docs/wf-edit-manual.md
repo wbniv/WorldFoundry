@@ -586,8 +586,14 @@ test server without editing the file:
 | TURN password | `turn_pass` | `WF_COLLAB_TURN_PASS` | — |
 | TURN-over-TLS (TURNS) | `turn_tls` | `WF_COLLAB_TURN_TLS` | off |
 | Force relay-only path | *(env only)* | `WF_COLLAB_FORCE_RELAY` | off |
+| Receive-only (no camera) | *(env only)* | `WF_COLLAB_NO_CAM` | off |
 
 > † `stun_url` is set via env; only the TURN fields persist to `identity.json` in this version.
+
+`WF_COLLAB_NO_CAM=1` joins a call **receive-only** — it skips opening the webcam entirely
+(you still hear/see others; the mic stays governed by Mute). Handy for joining as a
+viewer/listener, and for headless tests on a shared machine where you don't want the camera LED
+coming on. (Native build; the browser build never opens a device until you click **Cam on**.)
 
 ```bash
 # Point a session at a TURN server for this run only:

@@ -130,9 +130,23 @@ connect, for headless).
    panel thumbnail) + a screenshot showing the live video tiles over the Collaborators panel
    (`screenshots/2026-06-13-web-av-video-overlay.png`); **3-peer full mesh** — each peer connected
    to 2 others + receiving media from both (validates unicast `to_peer_id` routing).
-   **Deferred (minor):** AnalyserNode audio-level meters (peer_level returns 0 → flat meter, not
-   broken); web↔native *media* spot-check (Phase-1 proved web↔native connect/SDP/ICE interop; full
-   media interop needs a native box with mic/camera — a manual/real-hardware check).
+   **Follow-ups (done 2026-06-13):**
+   - **Audio-level meters** ✅ (`7ae7278f`) — `wfwebrtc_peer_level` now returns the audio
+     receiver's RFC-6464 `getSynchronizationSources()[0].audioLevel`; verified web↔web (both > 0
+     under the fake beep). The panel meter is live.
+   - **web↔native media** ✅ validated browser→native (`4c239c6b`). Added `WF_COLLAB_NO_CAM=1`
+     (receive-only — skips `OpenCamera`, so the test never activates the real webcam on the shared
+     desktop). A fake-media web peer → a native `WF_COLLAB_NO_CAM`/`WF_COLLAB_VOICE_DEBUG` peer:
+     native **received + decoded 500+ Opus packets** (peak 0.46) — browser-RTCPeerConnection ↔
+     native-libdatachannel **audio** interop confirmed; native also **received the web peer's VP8**
+     frames (video transport interop confirmed). native→web (native *sending*) needs Will's real
+     webcam/mic → a manual/consented check.
+   - **Found — native bug (filed in TODO, not web-A/V scope):** native shows no *remote* video —
+     `VideoChat::OnRemoteVP8Frame` drops frames that arrive before the presence-driven `SyncPeers`
+     registers the peer ("VP8 frame for unknown peer"); if the initial keyframe is among them,
+     native stays `waiting_for_keyframe` with no PLI/keyframe-request and never recovers. Affects
+     native↔native too. Fix shape: register the peer/decoder eagerly (on WebRTC connect/first frame)
+     or request a keyframe.
 
 ## Verification (end-to-end)
 
