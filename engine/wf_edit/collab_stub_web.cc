@@ -1,27 +1,18 @@
-// collab_stub_web.cc — no-op implementations of the editor's media/discovery
-// classes for the browser/WASM build (wf_edit_web).
+// collab_stub_web.cc — browser/WASM peer-discovery shim for wf_edit_web.
 //
-// v1 of the web editor ships co-edit + presence + text chat over the relay
-// (CRDT CH_SYNC + CH_PRESENCE + CH_CHAT, all in main.cc + ws_client). It does
-// NOT ship voice/video, and the browser has no UDP multicast. So the four
-// classes whose real implementations depend on native-only libs —
-//   collab_session.cc  (UDP multicast peer discovery)
-//   voice_track.cc      (miniaudio capture + Opus)
-//   video_track.cc      (V4L2 capture + libvpx)
-//   webrtc_session.cc   (libdatachannel ICE/DTLS-SRTP)
-// — are replaced by these stubs in the web target. main.cc keeps calling them
-// unchanged; the calls just no-op. Presence is the one exception: the relay
-// roster set via CollabSession::SetRelayPeers is returned by Peers(), so the
-// Collaborators panel still shows web peers (multicast is simply absent).
+// The browser has no UDP multicast, so CollabSession's multicast peer discovery
+// (collab_session.cc) is replaced here by a relay-only stub: Start() records the
+// identity, and presence flows entirely through the relay (SetRelayPeers / Peers).
+// main.cc keeps calling it unchanged.
 //
-// See docs/plans/2026-06-12-wf-edit-in-the-browser.md (Phase 1/3).
+// The A/V classes (VoiceChat / VideoChat / WebrtcSession) used to be stubbed here
+// too; they now have REAL browser-WebRTC implementations in webrtc_web.cc (the
+// browser's RTCPeerConnection replaces libdatachannel/Opus/libvpx/V4L2). This TU
+// is discovery-only. See docs/plans/2026-06-13-web-editor-audio-video.md.
 
 #if defined(__EMSCRIPTEN__)
 
 #include "collab_session.h"
-#include "voice_track.h"
-#include "video_track.h"
-#include "webrtc_session.h"
 
 #include <chrono>
 
@@ -62,45 +53,6 @@ const std::vector<PeerInfo>& CollabSession::Peers() const {
     // Web: relay peers are the only peers (no multicast).
     return relay_peers_;
 }
-
-// ── VoiceChat ───────────────────────────────────────────────────────────────
-VoiceChat::VoiceChat() = default;
-VoiceChat::~VoiceChat() = default;
-bool VoiceChat::Start() { return false; }   // no mic/Opus on web in v1
-void VoiceChat::Stop() {}
-void VoiceChat::SetSendCallback(std::function<void(const uint8_t*, int)> cb) { send_cb_ = std::move(cb); }
-void VoiceChat::OnRemoteOpus(const std::string&, const uint8_t*, int) {}
-void VoiceChat::SetMuted(bool muted) { muted_ = muted; }
-void VoiceChat::SyncPeers(const std::vector<PeerInfo>&) {}
-float VoiceChat::PeerLevel(const std::string&) { return 0.f; }
-void VoiceChat::OnCapture(const float*, unsigned int) {}
-void VoiceChat::OnPlayback(float*, unsigned int) {}
-
-// ── VideoChat ───────────────────────────────────────────────────────────────
-VideoChat::VideoChat() = default;
-VideoChat::~VideoChat() = default;
-bool VideoChat::Start() { return false; }   // no camera/VP8 on web in v1
-void VideoChat::Stop() {}
-void VideoChat::SetSendCallback(std::function<void(const uint8_t*, int, bool)> cb) { send_cb_ = std::move(cb); }
-void VideoChat::OnRemoteVP8Frame(const std::string&, const uint8_t*, int, bool) {}
-void VideoChat::SetCameraEnabled(bool on) { cam_enabled_.store(on); }
-void VideoChat::SyncPeers(const std::vector<PeerInfo>&) {}
-void VideoChat::UploadFrames() {}
-unsigned int VideoChat::PeerTexture(const std::string&) { return 0; }
-
-// ── WebrtcSession (+ free functions) ─────────────────────────────────────────
-IceConfig ResolveIceConfig(IceConfig defaults) { return defaults; }
-void WebrtcCleanup() {}
-
-WebrtcSession::WebrtcSession(VoiceChat* vc, VideoChat* vd, IceConfig ice)
-    : vc_(vc), vd_(vd), ice_(std::move(ice)) {}
-WebrtcSession::~WebrtcSession() = default;
-void WebrtcSession::SyncPeers(const std::vector<std::string>&, const std::string& our_peer_id) {
-    our_peer_id_ = our_peer_id;
-}
-void WebrtcSession::OnSignal(const std::string&, const std::string&) {}
-std::vector<std::pair<std::string, std::string>> WebrtcSession::DrainSignaling() { return {}; }
-size_t WebrtcSession::ConnectedPeerCount() { return 0; }
 
 } // namespace wfedit
 

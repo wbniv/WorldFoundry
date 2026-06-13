@@ -1396,7 +1396,8 @@ if(WF_ENABLE_WEB_EDITOR AND EMSCRIPTEN)
         engine/wf_edit/gizmo.cc
         engine/wf_edit/level_save.cc
         engine/wf_edit/collab_panel.cc
-        engine/wf_edit/collab_stub_web.cc       # no-op media/discovery (web)
+        engine/wf_edit/collab_stub_web.cc       # relay-only peer discovery (web)
+        engine/wf_edit/webrtc_web.cc            # browser-WebRTC A/V (RTCPeerConnection)
         engine/wf_edit/ws_client_emscripten.cc  # browser WebSocket relay backend
         wftools/oaddump/oad.cc
         ${IMGUI_DIR}/imgui.cpp
@@ -1486,7 +1487,9 @@ if(WF_ENABLE_WEB_EDITOR AND EMSCRIPTEN)
         # per-frame depth) doesn't need this; the editor does. 8 MB ~ a desktop stack.
         -sSTACK_SIZE=8388608
         -fexceptions
-        -sEXPORTED_RUNTIME_METHODS=callMain,requestFullscreen
+        # stringToNewUTF8/UTF8ToString are used by webrtc_web.cc's EM_JS bridge
+        # (DrainSignaling polls a JSON string out of JS; args arrive as char*).
+        -sEXPORTED_RUNTIME_METHODS=callMain,requestFullscreen,stringToNewUTF8,UTF8ToString
         -lwebsocket.js          # emscripten/websocket.h (relay transport, Phase 2)
         -lidbfs.js              # persistence (save/identity)
         "$<$<CONFIG:Release>:-O3>"
