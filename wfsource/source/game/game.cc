@@ -44,6 +44,7 @@
 #include "oas/matte.ht"
 #include "gamestrm.hp"
 #include "camera.hp"
+#include "sim_constants.hp"   // kMaxSimDeltaSeconds
 #include "oas/matte.ht"
 #include "matte.hp"
 #include "mailbox.hp"
@@ -697,8 +698,8 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 	// rarely trips this — only on real stalls — so its behaviour is
 	// unchanged in practice. Editor-as-host needs the tighter cap to
 	// stay simulable across pauses.
-	if (_deltaTime > SCALAR_CONSTANT(0.1))
-		_deltaTime = SCALAR_CONSTANT(0.1);
+	if (_deltaTime > kMaxSimDeltaSeconds)
+		_deltaTime = kMaxSimDeltaSeconds;
 
 	DBSTREAM2( cflow << "WFGame::update: done" << std::endl; )
 

@@ -27,6 +27,7 @@
 #define _LEVEL_CC
 
 #include <anim/path.hp>
+#include "sim_constants.hp"   // kMaxSimDeltaSeconds
 #include <movement/movement.hp>
 #include <room/room.hp>
 #include <physics/collision.hp>
@@ -813,8 +814,8 @@ Level::update(Scalar deltaTime)
 	// Fake clock updates, make game think the frame rate is a fixed value
 
 //	deltaTime = _MAX( deltaTime, SCALAR_CONSTANT(0.1) );
-	if ( deltaTime > SCALAR_CONSTANT(0.1) )  // never drop logical frame rate below 10 hz
-		deltaTime = SCALAR_CONSTANT(0.1);
+	if ( deltaTime > kMaxSimDeltaSeconds )  // never drop logical frame rate below 10 hz
+		deltaTime = kMaxSimDeltaSeconds;
 
 #pragma message( __FILE__ ": replace with bool( FakeFrameRate ):: need bool() operator in Scalar" )
 	Scalar newtime = levelClock() + ( FakeFrameRate.AsBool() ? FakeFrameRate : deltaTime );
