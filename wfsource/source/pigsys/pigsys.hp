@@ -430,6 +430,10 @@ START_EXTERN_C
 extern void				_sys_printenv(void);
 #endif	// defined(DESIGNER_CHEATS)
 extern void				sys_init(int* argc, char*** argv);
+// Install a de-noising std::terminate handler (dumps the active exception / cause
+// + backtrace, then abort) so a terminate doesn't mask the real assert. Call first
+// thing in main(); appName tags the banner. Defined in pigsys/fatal.cc.
+extern void				Sys_InstallTerminateHandler(const char* appName);
 extern void				sys_exit(int)
 //#if		!_SYS_SUPPRESS_EXIT
 		__attribute__ ((noreturn))

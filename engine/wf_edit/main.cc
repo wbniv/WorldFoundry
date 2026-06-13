@@ -79,9 +79,7 @@
 #include <csignal>
 #include <ctime>
 #include <exception>
-#if !defined(__EMSCRIPTEN__)
-#include <execinfo.h>   // backtrace() in TerminateHandler — no execinfo.h on wasm
-#else
+#if defined(__EMSCRIPTEN__)
 #include <emscripten.h>   // EM_JS — the web Export Blob-download helper
 #endif
 #include <fcntl.h>
@@ -3000,43 +2998,19 @@ static int RunPliTest()
 }
 #endif  // !__EMSCRIPTEN__
 
-// Make `terminate called without an active exception` self-diagnosing — libstdc++
-// otherwise gives no clue what triggered it (unhandled exception, noexcept throw,
-// joinable thread destroyed without join, …). On terminate, rethrow + catch the
-// active exception (if any) and dump a backtrace before letting the process die.
-// Pure diagnostic; zero cost when nothing terminates.
-static void TerminateHandler()
-{
-    std::fprintf(stderr, "\n=== wf-edit: std::terminate fired ===\n");
-    if (std::exception_ptr ep = std::current_exception()) {
-        try {
-            std::rethrow_exception(ep);
-        } catch (const std::exception& e) {
-            std::fprintf(stderr, "  active std::exception: %s\n", e.what());
-        } catch (...) {
-            std::fprintf(stderr, "  active exception: (non-std::exception)\n");
-        }
-    } else {
-        std::fprintf(stderr, "  no active exception "
-                     "(likely joinable std::thread destroyed without join, "
-                     "or noexcept function throwing)\n");
-    }
-#if !defined(__EMSCRIPTEN__)
-    void* frames[64];
-    const int n = ::backtrace(frames, 64);
-    std::fprintf(stderr, "  backtrace (%d frames):\n", n);
-    ::backtrace_symbols_fd(frames, n, STDERR_FILENO);
-#else
-    std::fprintf(stderr, "  (no backtrace on wasm; check the browser devtools stack)\n");
-#endif
-    std::fprintf(stderr, "=== aborting ===\n");
-    std::fflush(stderr);
-    std::abort();
-}
-
 int main(int argc, char** argv)
 {
-    std::set_terminate(TerminateHandler);
+    // First thing: a terminate dumps the real cause instead of masking the assert.
+    // Shared handler in wfengine (pigsys/fatal.cc) — also installed by wf_game.
+    Sys_InstallTerminateHandler("wf-edit");
+
+    // Headless self-test: prove the shared terminate handler emits its diagnostic.
+    // A terminate aborts the process, so the wf_edit_terminate ctest greps stderr.
+    if (const char* p = std::getenv("WF_EDIT_TERMINATE_TEST"); p && *p) {
+        std::fprintf(stderr, "[terminate-test] deliberately calling std::terminate\n");
+        std::fflush(stderr);
+        std::terminate();   // no active exception → exercises the masking branch
+    }
 
     // Headless TURN/ICE self-test — needs no level, GL, or args. Must run before
     // any window/engine setup.

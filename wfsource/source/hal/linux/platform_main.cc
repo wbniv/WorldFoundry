@@ -22,6 +22,8 @@ extern bool bPrintVersion;
 int
 main(int argc, char* argv[])
 {
+	// First thing: a terminate dumps the real cause instead of masking the assert.
+	Sys_InstallTerminateHandler("wf_game");
 	sys_init(&argc, &argv);
 
 	assert(argv[0]);
