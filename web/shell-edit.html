@@ -10,10 +10,16 @@
   #canvas { display: block; width: 100vw; height: 100vh; border: 0; outline: none; }
   #status { position: fixed; left: 12px; bottom: 10px; font-size: 12px; color: #7d8694;
             pointer-events: none; }
+  /* A/V: remote/self video are HTML <video> elements overlaid on the canvas, positioned
+     over the Collaborators-panel thumbnails by webrtc_web.cc. pointer-events:none keeps
+     the editor canvas interactive underneath. */
+  #wf-video-layer { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+  #wf-video-layer video { background: #000; border: 1px solid #2a2e35; border-radius: 3px; }
 </style>
 </head>
 <body>
 <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+<div id="wf-video-layer"></div>
 <div id="status">loading wf-edit…</div>
 <script>
   // Editor args. The browser editor reuses the engine's -L viewport level plus a
@@ -47,6 +53,13 @@
     onRuntimeInitialized: () => { Module.setStatus(''); },
   };
   window.onerror = (e) => Module.setStatus('error: ' + e);
+
+  // Close any open RTCPeerConnections on tab close so peers see the drop promptly
+  // (the relay/presence eviction would catch it eventually, but this is immediate).
+  window.addEventListener('beforeunload', () => {
+    const S = globalThis.__WFRTC;
+    if (S) for (const pid in S.peers) { try { S.peers[pid].pc.close(); } catch (e) {} }
+  });
 </script>
 {{{ SCRIPT }}}
 </body>

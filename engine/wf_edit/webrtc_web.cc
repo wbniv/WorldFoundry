@@ -87,6 +87,18 @@ EM_JS(void, wfwebrtc_set_self, (const char* self_p, const char* ice_json_p), {
             pc.onconnectionstatechange = function () {
                 P.connected = (pc.connectionState === 'connected');
                 console.log('webrtc(web): peer ' + pid.substring(0,8) + ' ' + pc.connectionState);
+                // Terminal failure → tear down + recreate a fresh PC (re-derive the
+                // offerer role), mirroring native's re-sync. 'disconnected' often
+                // recovers on its own, so only act on 'failed'. The relay-presence
+                // roster backstops a peer that's truly gone (close_peer via SyncPeers).
+                if (pc.connectionState === 'failed') {
+                    console.log('webrtc(web): peer ' + pid.substring(0,8) + ' failed — recreating');
+                    try { pc.close(); } catch (e) {}
+                    if (P.audioEl) { P.audioEl.srcObject = null; P.audioEl.remove(); }
+                    if (P.videoEl) { P.videoEl.srcObject = null; P.videoEl.remove(); }
+                    delete S.peers[pid];
+                    S.makePeer(pid, S.self < pid);
+                }
             };
             pc.ontrack = function (ev) {
                 console.log('webrtc(web): ontrack ' + ev.track.kind + ' from ' + pid.substring(0,8));
@@ -282,6 +294,13 @@ EM_JS(void, wfwebrtc_layout_self, (int x, int y, int w, int h, int vis), {
     if (!vis || w <= 0 || h <= 0) { el.style.display = 'none'; return; }
     el.style.display = 'block';
     el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.width = w + 'px'; el.style.height = h + 'px';
+});
+// Hide every video overlay (self + all peers) — called when the Collaborators panel is
+// closed/collapsed so the <video> elements don't float over the viewport.
+EM_JS(void, wfwebrtc_hide_all_video, (void), {
+    var S = globalThis.__WFRTC; if (!S) return;
+    if (S.selfEl) S.selfEl.style.display = 'none';
+    for (var pid in S.peers) { var v = S.peers[pid].videoEl; if (v) v.style.display = 'none'; }
 });
 
 namespace wfedit {

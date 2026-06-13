@@ -11,6 +11,14 @@
 #include <cstdio>
 #include <cmath>
 
+#if defined(__EMSCRIPTEN__)
+// Web: remote/self video are HTML <video> elements overlaid on the canvas (see
+// webrtc_web.cc); the panel positions them over each thumbnail rect each frame.
+extern "C" void wfwebrtc_layout_video(const char* peer_id, int x, int y, int w, int h, int vis);
+extern "C" void wfwebrtc_layout_self(int x, int y, int w, int h, int vis);
+extern "C" void wfwebrtc_hide_all_video(void);
+#endif
+
 namespace wfedit {
 
 // Draw a small colored initials avatar (for when no video frame is available).
@@ -53,10 +61,18 @@ void RenderCollabPanel(bool& show_collab,
                        const std::string& room_id,
                        bool           relay_connected)
 {
-    if (!show_collab) return;
+    if (!show_collab) {
+#if defined(__EMSCRIPTEN__)
+        wfwebrtc_hide_all_video();   // panel hidden → don't float <video> over the viewport
+#endif
+        return;
+    }
 
     ImGui::SetNextWindowSizeConstraints({ 280, 180 }, { 1000, 800 });
     if (!ImGui::Begin("Collaborators", &show_collab)) {
+#if defined(__EMSCRIPTEN__)
+        wfwebrtc_hide_all_video();   // collapsed
+#endif
         ImGui::End();
         return;
     }
@@ -91,7 +107,20 @@ void RenderCollabPanel(bool& show_collab,
 
     if (!video.IsCameraEnabled()) {
         ImGui::TextDisabled("[cam off]");
+#if defined(__EMSCRIPTEN__)
+        wfwebrtc_layout_self(0, 0, 0, 0, 0);   // hide the self <video> overlay
+#endif
     } else {
+#if defined(__EMSCRIPTEN__)
+        // Web: the live self-preview is an HTML <video> overlay (webrtc_web.cc) placed
+        // over this reserved rect — SelfPreview()'s RGB buffer is unused on web.
+        const ImVec2 spos = ImGui::GetCursorScreenPos();
+        ImGui::Dummy({ static_cast<float>(kThumbW), static_cast<float>(kThumbH) });
+        ImGui::SameLine();
+        ImGui::TextDisabled("(live)");
+        wfwebrtc_layout_self(static_cast<int>(spos.x), static_cast<int>(spos.y),
+                             kThumbW, kThumbH, 1);
+#else
         const auto& sp = video.SelfPreview();
         if (sp.empty()) {
             ImGui::TextDisabled("[waiting for camera...]");
@@ -103,6 +132,7 @@ void RenderCollabPanel(bool& show_collab,
             ImGui::SameLine();
             ImGui::TextDisabled("(live)");
         }
+#endif
     }
 
     ImGui::Spacing();
@@ -137,13 +167,20 @@ void RenderCollabPanel(bool& show_collab,
         ImGui::BeginGroup();
 
         // Video thumbnail or initials avatar.
+        const ImVec2 thumbPos = ImGui::GetCursorScreenPos();
         unsigned int tex = video.PeerTexture(p.peer_id);
         if (tex) {
             ImGui::Image(static_cast<ImTextureID>(tex),
                          { kThumbF, kThumbFH });
         } else {
-            DrawInitialsAvatar(p.display_name, kThumbF);
+            DrawInitialsAvatar(p.display_name, kThumbF);   // shows until the <video> overlay covers it
         }
+#if defined(__EMSCRIPTEN__)
+        // Web: position this peer's remote-video <video> overlay over the thumbnail
+        // rect (it's display:none until ontrack, so the avatar shows through first).
+        wfwebrtc_layout_video(p.peer_id.c_str(), static_cast<int>(thumbPos.x),
+                              static_cast<int>(thumbPos.y), kThumbW, kThumbH, 1);
+#endif
 
         // Name + audio level meter.
         ImGui::TextUnformatted(p.display_name.c_str());

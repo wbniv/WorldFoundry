@@ -1,9 +1,15 @@
 | Date | Change |
 |------|--------|
+| [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/2a5eee58) | feat(wf-edit/web): A/V Phase 3 — video (camera + remote <video>, bidirectional) |
 | [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/b7316645) | feat(wf-edit/web): A/V Phase 2 — voice (getUserMedia mic, bidirectional) |
 | [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/f872e3ae) | docs(wf-edit/web): plan voice+video (A/V) over browser WebRTC + TODO entry |
 
 <!--history-meta v1
+2a5eee58	author	Will Norris
+2a5eee58	added	9
+2a5eee58	deleted	5
+2a5eee58	files	1
+2a5eee58	body	webrtc_web.cc: wfwebrtc_set_cam acquires getUserMedia({video:320x240}) and replaceTrack's\nit into each peer's pre-negotiated video transceiver (no renegotiation — same sendrecv\nmechanism as audio); remote ontrack video → an overlay <video> element; a mirrored\nself-preview <video>; and wfwebrtc_layout_video/_self to position the overlay elements\nover the canvas (CSS px). Elements append to #wf-video-layer (shell) or <body>.\n\nVerified web↔web (two headless-Chrome, --use-fake-device-for-media-stream): both peers\nshow inbound AND outbound VIDEO RTP bytes (getStats vin/vout > 0) and the remote\n<video>.videoWidth == 320 — bidirectional video, alongside the Phase-2 audio.\n\nThe overlay POSITIONING (driving layout_video/_self from collab_panel.cc + the\n#wf-video-layer container) is Phase 4 (UI), where the panel lives; the <video> elements\ndecode now but stay display:none until positioned.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
 b7316645	author	Will Norris
 b7316645	added	15
 b7316645	deleted	4

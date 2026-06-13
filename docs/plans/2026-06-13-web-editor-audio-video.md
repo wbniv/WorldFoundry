@@ -121,10 +121,18 @@ connect, for headless).
    the `layout_video`/`layout_self` positioning API. Verified (fake camera): both peers `vin>0` +
    `vout>0` (getStats) and remote `<video>.videoWidth==320` — bidirectional video RTP. *(Elements
    decode but stay `display:none` until positioned — panel-driven positioning is Phase 4.)*
-4. **UI polish + robustness.** The `<video>` overlay **positioning** (`#wf-video-layer` in
-   shell-edit.html + the `collab_panel.cc` rect hook → `layout_video`/`_self`); panel-button
-   permission prompts (real path), AnalyserNode meters, overlay hide-on-collapse, teardown on
-   peer-leave/`beforeunload`, PC-failed→recreate. web↔native A/V spot-check + 3-peer mixed mesh.
+4. **UI polish + robustness.** ✅ DONE. The `<video>` overlay **positioning** (`#wf-video-layer`
+   in shell-edit.html + the `collab_panel.cc` rect hook → `layout_video`/`_self`; ImGui screen
+   coords map 1:1 to CSS px on emscripten GLFW — no DPR correction); hide-on-panel-collapse/close;
+   `beforeunload` PC teardown; PC-`failed`→recreate. Panel buttons already drive the real
+   SetMuted/SetCameraEnabled→getUserMedia path (user gesture grants permission). **Verified:**
+   2-peer overlay positioned (remote `<video>` display:block, videoWidth=320, rect 162×122 over the
+   panel thumbnail) + a screenshot showing the live video tiles over the Collaborators panel
+   (`screenshots/2026-06-13-web-av-video-overlay.png`); **3-peer full mesh** — each peer connected
+   to 2 others + receiving media from both (validates unicast `to_peer_id` routing).
+   **Deferred (minor):** AnalyserNode audio-level meters (peer_level returns 0 → flat meter, not
+   broken); web↔native *media* spot-check (Phase-1 proved web↔native connect/SDP/ICE interop; full
+   media interop needs a native box with mic/camera — a manual/real-hardware check).
 
 ## Verification (end-to-end)
 
