@@ -1,0 +1,11 @@
+| Date | Change |
+|------|--------|
+| [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/682ee4d8) | feat(wf-edit): RTCP PLI — fast keyframe recovery for native WebRTC video |
+
+<!--history-meta v1
+682ee4d8	author	Will Norris
+682ee4d8	added	124
+682ee4d8	deleted	0
+682ee4d8	files	1
+682ee4d8	body	Recover from a lost/corrupt keyframe in one RTT instead of the ~1 s periodic\nkeyframe (kKeyframeInterval=30). Critically, a browser sender resends keyframes\nonly on PLI, so a native receiver could otherwise stay blank after a genuine\nloss. Two complementary halves over the existing hand-rolled RTP (libdatachannel\nv0.21.2 delivers inbound RTCP to onMessage and auto-tags an outbound IsRtcp binary\nas SRTCP, so no MediaHandler is needed):\n\n(A) Honor an incoming PLI/FIR (PT=206, FMT 1/4): the video onMessage parses it and\ncalls VideoChat::RequestKeyframe(); CaptureThread's force-key decision is factored\ninto a pure DecideForceKey() that consumes/coalesces the atomic flag and preserves\nthe periodic cadence. An rtc::IsRtcp() guard now precedes RTP parsing on both tracks\n(also fixes a latent compound-RTCP-misparsed-as-VP8 path).\n\n(B) Send a PLI on loss via a main-loop pump (not a network-thread callback, which\nwould create a VideoChat::peers_mu_ -> WebrtcSession::peers_mu_ ABBA against\nSendVP8): VideoChat::TakePliRequests(now) returns peers whose decoder is stuck\nwaiting_for_keyframe, gated on stream-active(<2 s) + 0.25 s throttle; main.cc maps\neach to WebrtcSession::SendPli, which builds a 12-byte PLI naming the remote video\nSSRC learned from inbound RTP. No-op for a camera-off / receive-only peer.\n\nHand-rolled MakePliPacket/IsPliPacket (public statics). Gotcha caught by the test:\nRTCP byte 1 is the full packet type (206), not masked with 0x7f (that's IsRtcp's\nrange heuristic). PLI logs gated behind WF_COLLAB_VIDEO_DEBUG.\n\nRegression guard wf_edit_pli (WF_EDIT_PLI_TEST): PLI wire format + endianness,\nFIR-yes / VP8-RTP-no / SR-RR-no discrimination, DecideForceKey cadence/coalesce,\nand the pump's trigger/throttle/silent-gate driven by a real libvpx keyframe/delta.\nIt caught the PT-mask bug on first run. ctest: connect_retry/turn/mesh/video_race/\npli all pass. Live two-peer SRTCP round-trip stays a manual verify.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+-->
