@@ -1929,6 +1929,21 @@ bool editor_build(void* p)
                     c->relay_client.send(sig.data(), sig.size());
                 }
             }
+#if defined(__EMSCRIPTEN__)
+            // Headless A/V test affordance: WF_COLLAB_AV_AUTOSTART=1 turns mic + cam
+            // on once the first peer connects, driving the real SetMuted/
+            // SetCameraEnabled path without a Collaborators-panel click (the
+            // permission prompt is auto-granted under --use-fake-ui-for-media-stream).
+            static bool s_av_autostart = false;
+            if (!s_av_autostart && c->webrtc->ConnectedPeerCount() > 0) {
+                if (const char* e = std::getenv("WF_COLLAB_AV_AUTOSTART"); e && *e) {
+                    s_av_autostart = true;
+                    c->voice->SetMuted(false);
+                    c->video->SetCameraEnabled(true);
+                    std::printf("wf-edit(web): WF_COLLAB_AV_AUTOSTART — mic+cam on\n");
+                }
+            }
+#endif
         }
         c->voice->Tick();
         c->video->UploadFrames();

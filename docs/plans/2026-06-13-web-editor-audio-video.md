@@ -101,10 +101,21 @@ Headless Chrome fakes media: `--use-fake-device-for-media-stream --use-fake-ui-f
 `ontrack audio|video from <peer>`) + a `WF_COLLAB_AV_AUTOSTART=1` env hook (enable mic+cam on first
 connect, for headless).
 
-1. **Signaling + PC connect, no media.** `WebrtcSession` + `wf_webrtc.js` PC lifecycle +
-   `_wfwebrtc_queue_signal`; up-front transceivers. Verify web↔web (`connected peers=1`) + web↔native.
-2. **Audio.** `set_mic` (getUserMedia audio, `replaceTrack`, `ontrack`→`<audio>`). Verify web↔web
-   (fake mic + autostart: `ontrack audio`, track live) + web↔native (Opus both directions).
+1. **Signaling + PC connect, no media.** ✅ DONE + verified ([`01d40486`](https://github.com/wbniv/WorldFoundry/commit/01d40486)).
+   `webrtc_web.cc` (EM_JS + JS-outbox polled by `DrainSignaling`, no `--js-library`/reentrant
+   callback); up-front transceivers. **web↔web:** two headless-Chrome processes both log
+   `webrtc(web): peer <id> connected`. **web↔native:** browser ↔ native `wf-edit` connected —
+   native logged `webrtc: connected to peer web-… (offerer=1)`, browser logged `peer 845d… connected`
+   (validates the browser-RTCPeerConnection ↔ libdatachannel SDP/ICE interop over CH_SIGNAL).
+2. **Audio.** ✅ DONE + verified web↔web. `set_mic` (getUserMedia audio → `replaceTrack` into the
+   transceiver sender), remote `ontrack audio`→hidden `<audio>`. Two key fixes: (a) only the
+   **offerer** pre-adds transceivers (both-sides pre-add mis-aligns m-lines); (b) the **answerer
+   forces its transceivers `sendrecv` before `createAnswer`** — otherwise, with the local mic not
+   yet attached at answer time, the answer is `recvonly` and that peer can never send (audio went
+   one-way). Verified (two headless-Chrome, `--use-fake-device-for-media-stream
+   --use-fake-ui-for-media-stream` + `WF_COLLAB_AV_AUTOSTART=1`): both peers `sendrecv`/`sendrecv`,
+   `ontrack audio` both, inbound audio RTP bytes > 0 both (getStats). web↔native audio = Phase-4
+   spot-check (native audio-device dependent; the Phase-1 connect already proved SDP/ICE interop).
 3. **Video.** `set_cam`, overlay + `collab_panel.cc` rect hook, self-preview. Verify web↔web (fake
    video: `videoWidth>0`, overlay positioned, screenshot) + web↔native.
 4. **UI polish + robustness.** Panel-button permission prompts (real path), AnalyserNode meters,

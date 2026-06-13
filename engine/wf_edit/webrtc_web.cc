@@ -46,23 +46,36 @@ EM_JS(void, wfwebrtc_set_self, (const char* self_p, const char* ice_json_p), {
     try { S.ice = JSON.parse(UTF8ToString(ice_json_p)); } catch (e) { S.ice = {}; }
 
     if (!S.makePeer) {
+        // Replace this peer's outgoing audio/video with the currently-enabled local
+        // tracks (or null). No renegotiation — replaceTrack swaps the track on an
+        // existing sender. Used by makePeer (offerer), the answerer path in on_signal,
+        // and set_mic/set_cam.
+        S.attachLocal = function (P) {
+            try {
+                if (P.audioTx && P.audioTx.sender)
+                    P.audioTx.sender.replaceTrack((S.mic && S.mic.getAudioTracks()[0]) || null).catch(function(){});
+                if (P.videoTx && P.videoTx.sender)
+                    P.videoTx.sender.replaceTrack((S.cam && S.cam.getVideoTracks()[0]) || null).catch(function(){});
+            } catch (e) {}
+        };
+
         S.makePeer = function (pid, isOfferer) {
             if (S.peers[pid]) return S.peers[pid];
             var pc = new RTCPeerConnection(S.ice);
             var P = S.peers[pid] = { pc: pc, connected: false, audioEl: null, videoEl: null,
-                                     audioTx: null, videoTx: null };
-            // Up-front audio+video transceivers so the media m-lines exist from the
-            // first offer (matches native's "tracks present at PC creation" SDP → no
-            // renegotiation, codec-compatible with libdatachannel). Local tracks are
-            // attached later via replaceTrack when the user enables mic/cam.
-            try {
-                P.audioTx = pc.addTransceiver('audio', { direction: 'sendrecv' });
-                P.videoTx = pc.addTransceiver('video', { direction: 'sendrecv' });
-            } catch (e) { console.error('webrtc(web): addTransceiver', e); }
-            try {
-                if (S.mic && P.audioTx) P.audioTx.sender.replaceTrack(S.mic.getAudioTracks()[0] || null);
-                if (S.cam && P.videoTx) P.videoTx.sender.replaceTrack(S.cam.getVideoTracks()[0] || null);
-            } catch (e) {}
+                                     audioTx: null, videoTx: null, offerer: !!isOfferer };
+            // ONLY the offerer pre-adds transceivers; the answerer adopts the ones
+            // setRemoteDescription(offer) creates (see on_signal). Pre-adding on both
+            // sides mis-aligns the m-lines and silently breaks one media direction.
+            // Both ends still negotiate sendrecv. This also matches native libdatachannel
+            // (tracks present in the first offer) for web↔native interop.
+            if (isOfferer) {
+                try {
+                    P.audioTx = pc.addTransceiver('audio', { direction: 'sendrecv' });
+                    P.videoTx = pc.addTransceiver('video', { direction: 'sendrecv' });
+                } catch (e) { console.error('webrtc(web): addTransceiver', e); }
+                S.attachLocal(P);
+            }
 
             pc.onicecandidate = function (ev) {
                 if (ev.candidate) {
@@ -88,6 +101,24 @@ EM_JS(void, wfwebrtc_set_self, (const char* self_p, const char* ice_json_p), {
             }
             return P;
         };
+
+        // Attach a remote track to a hidden <audio> (Phase 2) or a <video> overlay
+        // element (Phase 3). Called from each PC's ontrack.
+        globalThis.__wfrtcAttachTrack = function (pid, ev) {
+            var P = S.peers[pid]; if (!P) return;
+            var track = ev.track;
+            var stream = ev.streams[0] || new MediaStream([track]);
+            if (track.kind === 'audio') {
+                if (!P.audioEl) {
+                    P.audioEl = document.createElement('audio');
+                    P.audioEl.autoplay = true; P.audioEl.setAttribute('playsinline', '');
+                    document.body.appendChild(P.audioEl);
+                }
+                P.audioEl.srcObject = stream;
+                P.audioEl.play().catch(function () { /* autoplay blocked until a user gesture */ });
+            }
+            // track.kind === 'video' → Phase 3 (overlay <video>).
+        };
     }
 });
 
@@ -111,8 +142,23 @@ EM_JS(void, wfwebrtc_on_signal, (const char* peer_id_p, const char* json_p), {
     if (msg.type === 'offer' || msg.type === 'answer') {
         pc.setRemoteDescription({ type: msg.type, sdp: msg.sdp }).then(function () {
             if (msg.type === 'offer') {
+                // Force every transceiver sendrecv BEFORE answering, so the answer
+                // advertises send-capability even though the local mic/cam track isn't
+                // attached yet (it's attached later via replaceTrack on unmute, with no
+                // renegotiation). Without this the answer is recvonly and this peer can
+                // never send — audio/video would flow one direction only.
+                pc.getTransceivers().forEach(function (t) { try { t.direction = 'sendrecv'; } catch (e) {} });
                 return pc.createAnswer().then(function (ans) { return pc.setLocalDescription(ans); })
                     .then(function () {
+                        // Answerer: adopt the transceivers setRemoteDescription(offer)
+                        // created so set_mic/set_cam can replaceTrack into them, then
+                        // attach any already-enabled local tracks.
+                        pc.getTransceivers().forEach(function (t) {
+                            var k = t.receiver && t.receiver.track && t.receiver.track.kind;
+                            if (k === 'audio') P.audioTx = t;
+                            else if (k === 'video') P.videoTx = t;
+                        });
+                        S.attachLocal(P);
                         S.outbox.push({ to: pid, json: JSON.stringify({
                             type: 'answer', sdp: pc.localDescription.sdp, from: S.self }) });
                     });
@@ -160,9 +206,21 @@ EM_JS(int, wfwebrtc_connected_count, (void), {
     return n;
 });
 
-// Media toggles — fully implemented in Phase 2 (mic) / Phase 3 (cam). Phase 1: log only.
+// Mic: first enable acquires getUserMedia({audio}) and replaceTrack's it into every
+// peer's pre-created audio transceiver sender (NO renegotiation — the sendrecv m-line
+// already exists from the first offer). Toggling thereafter flips track.enabled.
 EM_JS(void, wfwebrtc_set_mic, (int enabled), {
-    console.log('webrtc(web): set_mic ' + enabled + ' (Phase 2)');
+    var S = globalThis.__WFRTC; if (!S) return;
+    if (!enabled) {
+        if (S.mic) S.mic.getAudioTracks().forEach(function (t) { t.enabled = false; });
+        return;
+    }
+    if (S.mic) { S.mic.getAudioTracks().forEach(function (t) { t.enabled = true; }); return; }
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+        S.mic = stream;
+        console.log('webrtc(web): mic track acquired');
+        for (var pid in S.peers) S.attachLocal(S.peers[pid]);
+    }).catch(function (e) { console.error('webrtc(web): getUserMedia(audio)', e); });
 });
 EM_JS(void, wfwebrtc_set_cam, (int enabled), {
     console.log('webrtc(web): set_cam ' + enabled + ' (Phase 3)');
