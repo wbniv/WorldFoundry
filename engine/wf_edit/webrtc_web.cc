@@ -277,7 +277,19 @@ EM_JS(void, wfwebrtc_set_cam, (int enabled), {
         for (var pid in S.peers) S.attachLocal(S.peers[pid]);
     }).catch(function (e) { console.error('webrtc(web): getUserMedia(video)', e); });
 });
-EM_JS(double, wfwebrtc_peer_level, (const char* peer_id_p), { return 0.0; });
+// Per-peer remote audio level (0..1) for the panel meter. Uses the audio receiver's
+// RFC-6464 synchronization-source audioLevel — no WebAudio graph needed; only populated
+// while packets are arriving, so it reads ~0 on silence and rises with the peer's voice.
+EM_JS(double, wfwebrtc_peer_level, (const char* peer_id_p), {
+    var S = globalThis.__WFRTC; if (!S) return 0.0;
+    var P = S.peers[UTF8ToString(peer_id_p)];
+    if (!P || !P.audioTx || !P.audioTx.receiver) return 0.0;
+    try {
+        var srcs = P.audioTx.receiver.getSynchronizationSources();
+        if (srcs && srcs.length && typeof srcs[0].audioLevel === 'number') return srcs[0].audioLevel;
+    } catch (e) {}
+    return 0.0;
+});
 
 // Position/size a peer's remote-video overlay element over the canvas (CSS px,
 // canvas-relative), or hide it. Driven from collab_panel.cc each frame.
