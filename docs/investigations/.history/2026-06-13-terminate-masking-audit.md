@@ -1,0 +1,11 @@
+| Date | Change |
+|------|--------|
+| [2026-06-13](https://github.com/wbniv/WorldFoundry/commit/6479ebbe) | feat(engine): shared de-noising std::terminate handler (wf_game + wf_edit) |
+
+<!--history-meta v1
+6479ebbe	author	Will Norris
+6479ebbe	added	89
+6479ebbe	deleted	0
+6479ebbe	files	1
+6479ebbe	body	An engine AssertMsg exits via exit(-1), which runs static destructors. A joinable\nstatic std::thread destroyed there — or any unhandled exception / noexcept\nviolation — calls std::terminate(), whose default "terminate called without an\nactive exception" MASKS the real cause. wf_edit already installed a de-noising\nhandler (dump the active exception / cause + backtrace, then abort); wf_game (the\nmain engine, where the cited statplat-abort / mailbox-range bugs run) did not.\n\nFactor that handler into a shared Sys_InstallTerminateHandler(appName) in\nwfsource/source/pigsys/fatal.cc — auto-globbed into the wfengine static lib both\nbinaries link — and install it first thing in wf_game (linux/macos/emscripten\nmains) and wf_edit (replacing its inline copy; net -38 lines there). The backtrace\nis guarded for portability (__has_include(<execinfo.h>) && !__EMSCRIPTEN__),\nupgrading wf_edit's bare !__EMSCRIPTEN__ to also cover pre-API-33 Android.\n\nThis is the durable defense for the terminate-masking class behind commit 15801ebc\n(debug-bridge detach). An audit (docs/investigations/2026-06-13-terminate-masking-\naudit.md) confirmed the codebase is currently free of joinable static threads —\ndebug_server gListenerThread and rest_api gServerThread are both detached, all\nother threads are members of stack-local objects joined before main() returns — so\nnothing needed detaching; the handler guards against future regressions and\nnon-thread terminate causes.\n\nRegression guard wf_edit_terminate (WF_EDIT_TERMINATE_TEST): triggers\nstd::terminate() with no active exception (the exact masking branch) and asserts\nthe de-noising "no active exception" line reaches stderr (unique to our handler;\nlibstdc++'s default says "without an active exception"). Verified: wf_edit +\nwf_game build clean; the dump shows banner + cause + backtrace + "=== aborting\n==="; ctest terminate/pli/video_race/mesh/turn/connect_retry all pass.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+-->

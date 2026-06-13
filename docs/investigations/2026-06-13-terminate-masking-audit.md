@@ -55,8 +55,8 @@ binaries link), install it first thing in `wf_game` (linux/macos/emscripten main
 `wf_edit` (replacing its inline copy), and guard the backtrace for portability
 (`__has_include(<execinfo.h>) && !__EMSCRIPTEN__`). Regression guard: `wf_edit_terminate`
 ctest triggers `std::terminate()` (no active exception → the exact masking branch) and
-asserts the de-noising cause line reaches stderr. See
-[plan](../plans/) and the feature commit.
+asserts the de-noising cause line reaches stderr. Shipped in
+[`6479ebbe`](https://github.com/wbniv/WorldFoundry/commit/6479ebbe).
 
 ## Verification
 
