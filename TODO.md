@@ -25,6 +25,7 @@
 ### Camera & Rendering
 
 - [ ] **Snowgoons-import fog trap: inherited Earth-fog defaults grey out distant terrain.** Levels scaffolded off snowgoons inherit `FoggingColor=0x888888`, `FoggingStartDistance=20`, `FoggingCompleteDistance=30` → any pixel past ~30 m fades to flat `#888888`. Workaround overrides the three fields per-level; consider adding an opt-in "strip snowgoons fog" to `wf_blender` import_level. [plan](docs/plans/2026-05-31-uninitialised-fog-defaults.md)
+- [ ] Investigate https://github.com/jtsiomb/stereowrap
 
 ### Engine Robustness
 
@@ -76,6 +77,8 @@
 - [ ] **Filesystem-viz family — remaining views.** Platform shipped (flat numeric table from C + per-view Forth Director); done views: filelight, fsn `filesys`, treemap, planetarium dome. **Open:** **Tiered monument** (#2) sunburst variant; **unified runtime view-switcher** (one level, mode mailbox cycles tree↔sunburst↔treemap↔tiered↔dome); **procedural single-mesh** upgrade (exact sectors via one runtime `RenderObject3D`). [plan](docs/plans/2026-06-13-filesystem-viz-on-a-flat-table-forth-policy-core-f.md)
 - [ ] **Marble-madness: script-based input remapping** — `Script Controls Input = True`; script reads raw joystick (1008), remaps, writes `EMAILBOX_INPUT` (3024). Current impl handles LEFT/RIGHT strafe in `movement.cc` (TurnRate==0 branch); the script approach is a viable future refactor. See `player.cc:192` for the passthrough pattern.
 - [ ] **Object-model / class taxonomy — collectibles shouldn't masquerade as coins.** Mushroom/FireFlower/Star are all authored as `gold` actors with `Gold Value = 0` + a pickup script (the only stock class with the right walk-through + floor-landing collision profile). Real fix: a base `Collectible` (collision profile + pluggable pickup effect + despawn/TTL + visual) that `Gold`/`Mushroom`/`Star`/`1-Up`/`FireFlower` specialise. Four clones now exist (the trigger has fired). Pairs with the dead-`Gold::Collision` cleanup. [plan](docs/plans/2026-05-26-smb-super-mushroom-powerup.md)
+
+- [ ] Investigate https://studio.tripo3d.ai/?from=landingpage_header&category=featured&model_type=all&recommended=recommended&use_case=all
 
 
 ## Watch
@@ -241,3 +244,16 @@
 - [x] ????-??-?? — [rest-api] REST API PoC — cpp-httplib, 5 routes, GL wireframe box renderer, Postman playback.
 - [x] ????-??-?? — [wf-game-L] `wf_game -L<level.iff>` CLI flag — bypass cd.iff for dev iteration.
 - [x] ????-??-?? — [movecam-crash] movecam crash stabilised — invalid `(Actor*)&msgData` cast at `movecam.cc:964` guarded.
+
+
+## Inbox — auto-captured plan deferrals
+
+_Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage each into M1/M2/etc. and delete it here — it will not come back._
+
+<!-- BEGIN auto-captured-deferrals (managed by audit-plan-deferrals.sh — triage these into the curated sections above; the fingerprint ledger means a deleted item is NOT re-added) -->
+- [ ] **(triage)** Template-name → constant authoring (investigation option 2) — separate follow-up when a — _from [2026-06-13-spawn-template-forth-primitive.md](docs/plans/2026-06-13-spawn-template-forth-primitive.md)_  <!-- fp:0b1c847938f2c12f -->
+- [ ] **(triage)** Approach A (pooled-generator fireball) — already shipped; this is the orthogonal Approach B. — _from [2026-06-13-spawn-template-forth-primitive.md](docs/plans/2026-06-13-spawn-template-forth-primitive.md)_  <!-- fp:19bd9323ca2fcfd2 -->
+- [ ] **(triage)** Arbitrary-velocity / concurrent-burst consumers — this primitive enables them; wiring a — _from [2026-06-13-spawn-template-forth-primitive.md](docs/plans/2026-06-13-spawn-template-forth-primitive.md)_  <!-- fp:539de80d8b7cf2f5 -->
+- [verify] **2026-06-13-spawn-template-forth-primitive** — Verification section present but no PASS recorded — run + record the steps. _from [2026-06-13-spawn-template-forth-primitive.md](docs/plans/2026-06-13-spawn-template-forth-primitive.md)_  <!-- fp:b99e9fc4fd8d8b4e -->
+- [verify] **2026-06-13-web-av-finish-deferred-items** — Verification section present but no PASS recorded — run + record the steps. _from [2026-06-13-web-av-finish-deferred-items.md](docs/plans/2026-06-13-web-av-finish-deferred-items.md)_  <!-- fp:53a7a69bb75405c0 -->
+<!-- END auto-captured-deferrals -->
