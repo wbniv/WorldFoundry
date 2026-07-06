@@ -2,7 +2,9 @@
 
 **Date:** 2026-07-05
 **Status:** Brainstorm / market scan. All figures are Fermi estimates, not researched numbers — see §2 before quoting anything from this document.
+**Update 2026-07-05:** a verified deep-research pass ([2026-07-05-wf-edit-market-validation.md](2026-07-05-wf-edit-market-validation.md)) settled two decisions: **B3 (VTT — *virtual tabletop*, the software category groups use to play tabletop role-playing games like D&D online) is confirmed as the near-term wedge** — but with a buy-once host-pays license + content marketplace, not the subscription priced in idea B3.1 — and **A2 (AEC — *architecture, engineering & construction*) is downgraded to no-go-for-now**. Sections A2, B2, B3, §4, and §5 carry inline corrections; the companion doc has the evidence and citations.
 **Product:** `engine/wf_edit` on `origin/2026-new-level` (not present on this local branch — see the reconcile item in root `TODO.md`).
+**See also:** [2026-07-05-worldfoundry-default-sim-environment.md](2026-07-05-worldfoundry-default-sim-environment.md) — the eleventh analysis: the platform ambition beyond per-industry monetization.
 
 ---
 
@@ -10,11 +12,11 @@
 
 Capability inventory, assembled from the branch history and file tree (notably `ac3680d2` "one-click .lev export shipped — web editor v1 feature-complete"). Caveat: assessed from commit messages and file listings, not hands-on testing.
 
-- **Native level editor** — ImGui-based: gizmo manipulation, property panel over the OAD attribute system, level document + save, live engine bridge (`engine/wf_edit/`).
-- **Runs in the browser** — wasm via Emscripten, WebGL/GLES3, no install. Boots with a preloaded level.
-- **Real-time multiplayer editing** — CRDT document sync (Yrs/Yjs via yffi, cross-compiled to wasm), multi-peer join-and-receive seeding.
+- **Native level editor** — [ImGui](https://github.com/ocornut/imgui)-based: gizmo manipulation, property panel over the OAD attribute system (OAD — WorldFoundry's object-attribute-description schema), level document + save, live engine bridge (`engine/wf_edit/`).
+- **Runs in the browser** — [WebAssembly](https://webassembly.org/) (wasm) via [Emscripten](https://emscripten.org/), WebGL/GLES3, no install. Boots with a preloaded level.
+- **Real-time multiplayer editing** — CRDT document sync (CRDT — *conflict-free replicated data type*, the data structure that lets multiple people edit one document simultaneously without a locking server; see [crdt.tech](https://crdt.tech/)). Ours is [Yrs/Yjs](https://github.com/y-crdt/y-crdt) via yffi, cross-compiled to wasm, with multi-peer join-and-receive seeding.
 - **Presence + text chat** — collaborators panel, per-peer presence.
-- **Voice + video** — WebRTC; native build has RTCP PLI fast keyframe recovery and per-peer decoders; receive-only mode (`WF_COLLAB_NO_CAM`).
+- **Voice + video** — [WebRTC](https://webrtc.org/); native build has RTCP PLI fast keyframe recovery and per-peer decoders; receive-only mode (`WF_COLLAB_NO_CAM`).
 - **One-click `.lev` export** into the engine pipeline; the engine itself runs on Linux, Android, Chromecast/Google TV, iOS (in progress), with Steam packaging planned.
 - **Engine traits with commercial relevance** — fixed-point math and a small footprint (runs on very low-spec, legacy, and retro hardware), scriptable actors (Lua/Fennel/zForth/wasm, experimental neural-forth), Blender round-trip pipeline.
 
@@ -22,8 +24,8 @@ The honest one-liner: **"Figma-style multiplayer editing for 3D scenes — with 
 
 Two structural facts drive everything below:
 
-1. **The reusable asset is the collaboration substrate** (CRDT doc + WebRTC A/V + wasm 3D viewport), not the WorldFoundry format. Today the editor edits `.lev`/OAD only. Every non-game industry in Part A requires a **general scene-format layer (glTF import/export at minimum, USD for film)** plus auth, hosted persistence, TURN/SFU relay infrastructure, and billing before the first dollar arrives. The Part B industries mostly do not.
-2. **A/V has real marginal cost.** TURN relay bandwidth runs ~$0.05–0.40/GB depending on provider; sustained multi-party video caps gross margins at ~50–70%, below the 75–90% of classic SaaS. Pricing needs to meter or cap A/V minutes.
+1. **The reusable asset is the collaboration substrate** (CRDT doc + WebRTC A/V + wasm 3D viewport), not the WorldFoundry format. Today the editor edits `.lev`/OAD only. Every non-game industry in Part A requires a **general scene-format layer** — at minimum [glTF](https://www.khronos.org/gltf/) (*GL Transmission Format*, the Khronos-standard interchange format for 3D scenes, often called "the JPEG of 3D") import/export, plus [USD](https://openusd.org/) (*Universal Scene Description*, Pixar's film-pipeline scene format) for film work — plus auth, hosted persistence, TURN/SFU relay infrastructure (TURN — the relay servers WebRTC traffic falls back to when peers can't connect directly; SFU — a selective forwarding unit that routes multi-party video), and billing before the first dollar arrives. The Part B industries mostly do not.
+2. **A/V has real marginal cost.** TURN relay bandwidth runs ~$0.05–0.40/GB depending on provider; sustained multi-party video caps gross margins at ~50–70%, below the 75–90% of classic SaaS (*software as a service*). Pricing needs to meter or cap A/V minutes.
 
 ## 2. How to read the estimates
 
@@ -31,7 +33,7 @@ Two structural facts drive everything below:
 - **"Maturity"** = plausible annual revenue 3–5 years in, *if that idea is pursued as the main bet and executed well*.
 - **"First revenue"** = elapsed time from deciding to pursue the idea to the first paying customer.
 - **Confidence is low.** Any individual number is ±10×. The *rankings* (which industries are bigger, which are faster) are far more defensible than the absolute figures.
-- Market-size figures are ballpark, from general knowledge as of early 2026, and unverified. Validate the top 2–3 picks with a real research pass (customer interviews + competitive scan) before committing a roadmap to any of them.
+- Market-size figures are ballpark, from general knowledge as of early 2026, and unverified; no formal TAM/SAM analysis is attempted (TAM — *total addressable market*; SAM — *serviceable addressable market*, the slice you could realistically reach). The validation doc flags where even researched TAM/SAM numbers proved unverifiable. Validate the top 2–3 picks with a real research pass (customer interviews + competitive scan) before committing a roadmap to any of them.
 - **Revenue ≠ profit.** Rough gross margins: pure software SaaS 75–90%; A/V-heavy usage 50–70% after relay bandwidth; facilitated services/workshops 30–60%. Profit at this team size ≈ gross margin × revenue − (mostly) salaries.
 
 ---
@@ -42,15 +44,15 @@ Ranked by realistic ceiling *for this product*, not by raw industry size.
 
 ### A1. Games & interactive entertainment
 
-**Why:** Native fit — zero repositioning. Consumer games spend is ~$185B/yr; tools/middleware is a $2–5B slice; and UGC platforms are the existence proof that *editors* can out-earn games (Roblox books ~$4B/yr selling what is, at core, a collaborative editor plus distribution). wf_edit is already a game level editor with multiplayer built in.
+**Why:** Native fit — zero repositioning. Consumer games spend is ~$185B/yr; tools/middleware is a $2–5B slice; and UGC (*user-generated content*) platforms are the existence proof that *editors* can out-earn games ([Roblox](https://ir.roblox.com/) books ~$4B/yr selling what is, at core, a collaborative editor plus distribution). wf_edit is already a game level editor with multiplayer built in.
 **Entry cost:** Lowest of any industry here — the product works today. Platform-shaped ideas additionally need hosting, moderation, and payments.
-**Ceiling:** A seat-license tools business plateaus around $1–10M ARR; a UGC platform that hits is $100M+, but that outcome is hits-driven (lottery-shaped, not grind-shaped).
+**Ceiling:** A seat-license tools business plateaus around $1–10M ARR (*annual recurring revenue*); a UGC platform that hits is $100M+, but that outcome is hits-driven (lottery-shaped, not grind-shaped).
 
 1. **Hosted collaborative level-editor SaaS for indie teams.** Per-seat subscription ($10–25/seat/mo) for private rooms, cloud saves, version history. Estimate: $200k–2M ARR at maturity; first revenue in 2–4 months.
 2. **"Retro Roblox" UGC platform.** Players build, publish, and play retro-styled worlds in the browser; monetize via premium currency and a 70/30 creator marketplace. Estimate: $1M–100M+ (power-law outcome); 12–24 months to first marketplace revenue.
 3. **White-label collab SDK.** License the CRDT + WebRTC + wasm-viewport substrate to other engine and tool vendors who want "multiplayer editing" without building it. Estimate: $50k–500k/yr per licensee, 2–5 licensees realistic → $100k–2M ARR; 6–12 months.
-4. **Live-ops levels-as-a-service for F2P studios.** Studios ship weekly content; sell the collaborative pipeline (design → review-on-call → export) as an enterprise contract. Estimate: $100k–1M/yr per studio, a handful of logos → $500k–5M ARR; 9–18 months.
-5. **Paid game-jam hosting.** Branded jams with built-in team formation, live collab, and sponsor placement. Estimate: $5k–50k per event, 10–30 events/yr → $100k–1M/yr; 3–6 months.
+4. **Live-ops levels-as-a-service for F2P (*free-to-play*) studios.** Studios ship weekly content; sell the collaborative pipeline (design → review-on-call → export) as an enterprise contract. Estimate: $100k–1M/yr per studio, a handful of logos → $500k–5M ARR; 9–18 months.
+5. **Paid game-jam hosting.** Branded jams (à la [itch.io jams](https://itch.io/jams)) with built-in team formation, live collab, and sponsor placement. Estimate: $5k–50k per event, 10–30 events/yr → $100k–1M/yr; 3–6 months.
 6. **Co-development review rooms.** Studios working with external art/level outsourcers review work-in-progress together on video instead of trading builds. Estimate: $99–499/mo per studio-vendor pair → $300k–3M ARR; 6–12 months.
 7. **Live playtest sessions.** Developers watch players navigate a level, talk to them, and edit the level live between runs; usage-priced. Estimate: $100k–1M ARR; 4–8 months.
 8. **Level & asset marketplace.** 15–30% take rate on community-made levels, tilesets, and prefabs, attached to the SaaS user base. Estimate: $50k–2M/yr scaling with the base; 6–12 months after the SaaS exists.
@@ -59,16 +61,17 @@ Ranked by realistic ceiling *for this product*, not by raw industry size.
 
 ### A2. Architecture, engineering & construction (AEC) + real estate
 
-**Why:** Construction is a ~$10–13T/yr global industry with famously poor multi-party coordination; AEC software exceeds $10B/yr, and design-review/coordination tools (Revizto, Autodesk Construction Cloud, Resolve) already command $100s–1000s per seat per year. The daily workflow this industry runs on — several stakeholders on a call staring at a 3D model, one person driving — is exactly what wf_edit collapses: everyone in the model, voice/video native, decisions captured in place. A lightweight browser viewport is a *feature* here (site laptops, client iPads).
-**Entry cost:** Medium-high. Needs IFC/glTF import, measurement + markup tools, SSO and SOC2 for firm-wide deals. The game-specific parts matter less than the viewport + collab core.
+**Why:** Construction is a ~$10–13T/yr global industry with famously poor multi-party coordination; AEC software exceeds $10B/yr, and design-review/coordination tools ([Revizto](https://revizto.com/), [Autodesk Construction Cloud](https://construction.autodesk.com/), [Resolve](https://www.resolvebim.com/)) already command $100s–1000s per seat per year. The daily workflow this industry runs on — several stakeholders on a call staring at a 3D model, one person driving — is exactly what wf_edit collapses: everyone in the model, voice/video native, decisions captured in place. A lightweight browser viewport is a *feature* here (site laptops, client iPads).
+**Entry cost:** Medium-high. Needs [IFC](https://www.buildingsmart.org/standards/bsi-standards/industry-foundation-classes/) (*Industry Foundation Classes* — the open data standard for building models, maintained by buildingSMART) and glTF import, measurement + markup tools, SSO (*single sign-on*) and SOC 2 (the security-audit attestation enterprise buyers require) for firm-wide deals. The game-specific parts matter less than the viewport + collab core.
 **Ceiling:** $10–50M ARR — comparable focused review tools have reached this.
+**Validation 2026-07-05: no-go for now.** Not one public per-seat price could be verified anywhere in this category (the single pricing claim attempted was refuted) — opacity consistent with quote-driven enterprise sales a 1–3 person team can't survive. The browser multiuser-review slot is already served via the Revizto + Resolve integration (Jul 2025), and the one visible small-vendor survival mode is *complementing* the incumbent system-of-record, not competing with it. Absence-of-evidence verdict, not a disproof: revisit only through primary design-partner discovery.
 
 1. **Design-review rooms.** Import the model, walk it together, annotate spatially, export a decision log tied to positions in the model. Estimate: $50–150/seat/mo → $1–10M ARR; first revenue 9–18 months (format work is the gate).
 2. **Client-presentation walkthroughs with recorded sign-off.** The approval meeting happens inside the model and produces a video + annotation artifact for the project record. Estimate: $2–20k/yr per firm → $500k–5M ARR; 9–15 months.
 3. **Punch-list / site-issue spatial annotation.** Field issues pinned in 3D, walked through remotely with subs on video. Estimate: $20–60/seat/mo → $500k–5M ARR; 12–18 months.
 4. **New-build sales configurator.** Buyer + agent on video inside the unit; pick floors, finishes, furniture; export the selection sheet. Estimate: $10–50k per development project or per-seat → $500k–5M ARR; 9–15 months.
 5. **Public-consultation portals for urban planning.** Councils publish a walkable proposal; residents leave spatial comments; planners hold live sessions. Estimate: $20–200k per contract, government sales → $500k–3M/yr; 12–24 months.
-6. **Interior-design studio (SMB).** Designer and client co-edit a room live; prosumer pricing. Estimate: $29–99/mo → $200k–2M ARR; 6–12 months (lowest format bar in this industry).
+6. **Interior-design studio (SMB — *small/mid-size business*).** Designer and client co-edit a room live; prosumer pricing. Estimate: $29–99/mo → $200k–2M ARR; 6–12 months (lowest format bar in this industry).
 7. **Modular/prefab configurator.** White-labeled per manufacturer: configure a building from their catalog, export a BOM + quote. Estimate: $50k–500k/yr per manufacturer → $500k–3M ARR; 9–18 months.
 8. **Facilities digital-twin lite.** Building operators walk the as-built, annotate equipment, video-call the tech standing in front of it. Estimate: $5–50k/yr per portfolio → $500k–5M ARR; 12–24 months.
 9. **Insurance & inspection walkthroughs.** Photogrammetry import; adjusters/inspectors produce annotated 3D records instead of photo sets. Estimate: per-claim or per-seat pricing → $500k–5M ARR; 12–24 months.
@@ -76,7 +79,7 @@ Ranked by realistic ceiling *for this product*, not by raw industry size.
 
 ### A3. Film, TV & media production (previz / virtual production)
 
-**Why:** Media & entertainment is a ~$2.5–3T industry, and virtual-production tooling is a fast-growing $3–6B slice of it. Previsualization is inherently multi-party — director, DP, production designer, VFX supervisor, often on different continents — and today it mostly runs as one operator screen-sharing an Unreal session while everyone else talks over them. A browser previz room where *everyone can move things*, with A/V native, upgrades the early-stage workflow, and low-fidelity rendering is acceptable (even preferred) at that stage. Production budgets pay real money for schedule compression.
+**Why:** Media & entertainment is a ~$2.5–3T industry, and virtual-production tooling is a fast-growing $3–6B slice of it. Previsualization ("previz") is inherently multi-party — director, DP, production designer, VFX supervisor, often on different continents — and today it mostly runs as one operator screen-sharing an Unreal session while everyone else talks over them. A browser previz room where *everyone can move things*, with A/V native, upgrades the early-stage workflow, and low-fidelity rendering is acceptable (even preferred) at that stage. Production budgets pay real money for schedule compression.
 **Entry cost:** Medium. glTF/USD import, lens/FOV-accurate cameras, USD export for downstream handoff.
 **Ceiling:** $5–30M ARR — smaller niche than AEC, but chunky per-production and per-studio deals.
 
@@ -94,7 +97,7 @@ Ranked by realistic ceiling *for this product*, not by raw industry size.
 ### A4. Defense, public safety & simulation training
 
 **Why:** Global defense spending exceeds $2.5T/yr and is rising; US DoD modeling/simulation/training programs alone run ~$10B+/yr. The chronic, openly acknowledged bottleneck in training sims is **scenario authoring** — instructors can't build content without contractor cycles. A collaborative scenario editor that instructors drive themselves, with comms built in, is a credible pitch — and this stack's quirks are advantages here: small footprint, fixed-point (legacy/secure hardware), and a fully **self-hostable** collab stack (CRDT + WebRTC with no cloud dependency) for closed networks.
-**Entry cost:** Highest. ITAR handling, ATO/accreditation, on-prem deployment, eventually DIS/HLA interop, and usually a prime/partner relationship. The realistic wedge is SBIR/STTR (Phase I ≈ $100–250k, Phase II ≈ $1–2M) — grant money that subsidizes the roadmap.
+**Entry cost:** Highest. ITAR handling (*International Traffic in Arms Regulations*), ATO/accreditation (*authority to operate*), on-prem deployment, eventually DIS/HLA interop (*Distributed Interactive Simulation* / *High Level Architecture* — the military simulation-interoperability standards), and usually a prime/partner relationship. The realistic wedge is [SBIR/STTR](https://www.sbir.gov/) (*Small Business Innovation Research / Small Business Technology Transfer* — US federal R&D grant programs; Phase I ≈ $100–250k, Phase II ≈ $1–2M) — grant money that subsidizes the roadmap.
 **Ceiling:** Program-of-record money is $10M+/yr but 3–5+ years out; the SBIR path is $1–3M across years 1–3.
 
 1. **SBIR-funded scenario-authoring tool for training ranges.** The canonical entry: pitch instructor-driven authoring at a specific range/schoolhouse. Estimate: $100–250k Phase I, $1–2M Phase II; first (grant) revenue 6–12 months.
@@ -106,16 +109,16 @@ Ranked by realistic ceiling *for this product*, not by raw industry size.
 7. **Disaster-response coordination sandbox for NGOs/UN agencies.** Shared operational picture + comms for response planning; grant/tender funded. Estimate: $50–500k per program; 12–24 months.
 8. **Critical-infrastructure security review.** Utilities walk substations/plants with regulators and consultants without site visits. Estimate: $25–250k/yr per operator → $500k–3M/yr; 12–24 months.
 9. **Wargaming platform for think tanks & staff colleges.** Turn-based/moderated wargames in a shared 3D theater with A/V. Estimate: $25–100k/yr per institution → $300k–2M/yr; 12–18 months.
-10. **Subcontract licensing to primes.** Integrate the authoring/collab layer into CAE/Lockheed/Bohemia-ecosystem training products rather than selling direct. Estimate: $100k–1M/yr per integration → $500k–5M/yr; 18–36 months.
+10. **Subcontract licensing to primes.** Integrate the authoring/collab layer into [CAE](https://www.cae.com/defense-security/)/Lockheed/[Bohemia](https://bisimulations.com/)-ecosystem training products rather than selling direct. Estimate: $100k–1M/yr per integration → $500k–5M/yr; 18–36 months.
 
 ### A5. Enterprise training & industrial digital twins
 
 **Why:** Corporate training is a ~$350–400B/yr market, and industrial digital-twin software is projected into the tens of billions by decade's end (projections vary widely). The concrete, recurring workflow underneath the buzzwords: every warehouse re-slot, factory line change, and plant outage involves a spatial plan argued over by a plant manager, an integrator, and a consultant — today via screen-share and PDFs. Enterprise contract sizes make the absolute dollars large even at modest logo counts.
-**Entry cost:** Medium-high. CAD/point-cloud import, SSO/SOC2, and enough integration surface (export to the tools they already use) to survive procurement.
+**Entry cost:** Medium-high. CAD/point-cloud import, SSO/SOC 2, and enough integration surface (export to the tools they already use) to survive procurement.
 **Ceiling:** $5–30M ARR.
 
 1. **Factory & warehouse layout planning rooms.** Plant teams and integrators co-edit the layout live; export the agreed plan. Estimate: $20–100k/yr per site portfolio → $1–10M ARR; 9–18 months.
-2. **Safety-training scenario authoring.** EHS teams author walkable incident scenarios (lockout/tagout, confined space) for their actual facility. Estimate: $10–50k/yr per site → $500k–5M ARR; 9–15 months.
+2. **Safety-training scenario authoring.** EHS (*environment, health & safety*) teams author walkable incident scenarios (lockout/tagout, confined space) for their actual facility, per OSHA (*Occupational Safety and Health Administration*) programs. Estimate: $10–50k/yr per site → $500k–5M ARR; 9–15 months.
 3. **Remote-expert maintenance annotation.** The expert joins on video and draws in 3D space anchored to the equipment. Estimate: $30–80/seat/mo → $500k–3M ARR; 9–15 months.
 4. **Virtual facility onboarding tours.** New hires walk the plant, guided live or self-serve, before badge day. Estimate: $5–25k/yr per site → $300k–2M ARR; 6–12 months.
 5. **Retail planogram & store-layout collab.** Chains re-set hundreds of stores seasonally; HQ and regional teams co-edit the 3D set. Estimate: $50–250k/yr per chain → $500k–5M ARR; 9–18 months.
@@ -123,7 +126,7 @@ Ranked by realistic ceiling *for this product*, not by raw industry size.
 7. **Mine & field-site planning sandbox.** Remote sites planned collaboratively with terrain imports; poor-connectivity-friendly (small footprint helps). Estimate: $50–250k/yr per operator → $500k–3M ARR; 12–24 months.
 8. **Ergonomics & process-flow review.** Walk the line virtually before building it; industrial engineers annotate reach/flow issues. Estimate: $20–100k/yr per manufacturer → $300k–2M ARR; 9–15 months.
 9. **Evacuation & hazard drill rehearsal.** Run and critique drills in the facility twin with all shift leads on voice. Estimate: $10–50k/yr per site → $300k–2M ARR; 9–15 months.
-10. **White-label twin viewer for systems integrators.** Integrators resell the collab viewport inside their digital-twin offerings. Estimate: $100k–500k/yr per integrator → $500k–3M ARR; 12–18 months.
+10. **White-label twin viewer for systems integrators.** Integrators (who deploy WMS/ERP — *warehouse-management / enterprise-resource-planning* — systems) resell the collab viewport inside their digital-twin offerings. Estimate: $100k–500k/yr per integrator → $500k–3M ARR; 12–18 months.
 
 ---
 
@@ -133,7 +136,7 @@ Ranked by friction-to-first-dollar: product fits as-is, buyers are self-serve, s
 
 ### B1. Indie & retro game developers (prosumer)
 
-**Why easiest:** The product is *already their tool* — no adaptation, no import formats, no compliance. Buyers are online, pay by card, and the retro/homebrew scene is passionate, underserved, and reachable through open channels (itch.io, jams, Discord, YouTube). The wallet is small but the distance to it is nearly zero.
+**Why easiest:** The product is *already their tool* — no adaptation, no import formats, no compliance. Buyers are online, pay by card, and the retro/homebrew scene is passionate, underserved, and reachable through open channels ([itch.io](https://itch.io/), jams, Discord, YouTube). The wallet is small but the distance to it is nearly zero.
 **Realistic aggregate:** $100k–700k/yr across several of these; first dollars in weeks.
 
 1. **Pro subscription.** $8–15/mo: private rooms, larger levels, cloud saves, priority relay bandwidth. Estimate: $50k–500k ARR; first revenue 1–2 months.
@@ -149,40 +152,42 @@ Ranked by friction-to-first-dollar: product fits as-is, buyers are self-serve, s
 
 ### B2. Education (K-12 STEM, camps, bootcamps, universities)
 
-**Why easy:** Browser-based + no-install + *supervised, built-in* A/V is precisely what teaching game design in classrooms and remote programs needs, and IT departments approve browser tools far faster than installs. Per-classroom price points ($200–1000/yr) clear teacher purchase-card thresholds without procurement. COPPA/FERPA work is real but bounded and one-time. Sales are seasonal (school-year cycles) but renewals are sticky.
+**Why easy:** Browser-based + no-install + *supervised, built-in* A/V is precisely what teaching game design in classrooms and remote programs needs, and IT departments approve browser tools far faster than installs. Per-classroom price points ($200–1000/yr) clear teacher purchase-card thresholds without procurement. COPPA and FERPA work is real but bounded and one-time (COPPA — the [*Children's Online Privacy Protection Act*](https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa), the US law governing online data collection from children under 13; FERPA — the [*Family Educational Rights and Privacy Act*](https://studentprivacy.ed.gov/ferpa), the US law protecting student education records). Sales are seasonal (school-year cycles) but renewals are sticky.
 **Realistic aggregate:** $500k–3M ARR; first revenue one school-buying-season away.
+**Validation 2026-07-05: demoted to secondary channel.** Verified incumbent anchors compress pricing hard: [Minecraft Education](https://education.minecraft.net/) is $5.04/seat/yr for eligible institutions — and effectively **$0** for many districts via M365 A3/A5 bundling (Microsoft 365 Education's mid/top license bundles); [Delightex](https://www.delightex.com/pricing) (ex-CoSpaces) is $7/added seat (≈$260/yr for a 31-seat classroom, vs the $300–800 assumed in idea 1); [Construct 3](https://www.construct.net/en/make-games/buy-construct-3/educational-plans) runs $9.90–32.99/seat/yr. Vendor-direct POs start near $743 (100 seats); below that it's credit-card self-serve. COPPA/FERPA cost for a small vendor is unverifiable from public sources — treat as unknown, not "bounded" as claimed above. No education market-size or post-mortem claims survived verification: under-evidenced rather than disproven, so camps/after-school self-serve stays viable as a side channel.
 
 1. **Classroom site license.** $300–800/classroom/yr, teacher dashboard, student rosters. Estimate: $100k–1M ARR; 3–6 months (land pilots before the fall term).
 2. **Curriculum packs.** Lesson plans, rubrics, and standards-aligned projects sold atop the license. Estimate: $50k–300k/yr; 3–6 months.
 3. **Camp & after-school operator licensing.** Chains (Code-Ninjas-style) license per-location for summer/after-school programs. Estimate: $1–5k/location/yr → $100k–500k ARR; 3–6 months.
-4. **Teacher PD workshops & certification.** Paid training delivered inside the tool itself. Estimate: $30k–200k/yr; 2–4 months.
+4. **Teacher PD (*professional development*) workshops & certification.** Paid training delivered inside the tool itself. Estimate: $30k–200k/yr; 2–4 months.
 5. **University game-design lab licenses.** Departmental licenses; the collab + A/V fits studio-course critique sessions. Estimate: $2–10k/dept/yr → $50k–300k ARR; 4–8 months.
 6. **Student showcase & portfolio hosting.** Parents pay a small fee for a hosted, shareable portfolio of the student's worlds. Estimate: $20k–150k/yr; 4–6 months.
 7. **Sponsored student competitions.** Sponsors fund themed build competitions; schools join free. Estimate: $25k–150k/yr in sponsorships; 4–8 months.
-8. **LMS integration add-on.** Canvas/Google Classroom roster + grade passback as a paid tier. Estimate: $30k–200k/yr attach; 6–9 months.
+8. **LMS integration add-on.** [Canvas](https://www.instructure.com/canvas)/Google Classroom roster + grade passback as a paid tier (LMS — *learning management system*). Estimate: $30k–200k/yr attach; 6–9 months.
 9. **Homeschool co-op bundles.** Family/co-op pricing with a lighter curriculum; reachable through homeschool networks. Estimate: $20k–150k/yr; 2–4 months.
 10. **Grant-funded STEM programs.** Partner with nonprofits on rural/underserved programs funded by state and federal STEM grants. Estimate: $50k–300k per program cycle; 6–12 months.
 
 ### B3. Tabletop RPG & virtual tabletops (VTT)
 
-**Why easy:** The D&D-era audience already pays for online play (Roll20 subscriptions, Foundry VTT's $50 license, D&D Beyond) and already runs sessions over voice/video — wf_edit's shared 3D scene + A/V + chat *is* a VTT core loop, and 3D encounter building is the premium differentiator over 2D maps (TaleSpire proved demand). Buyers are consumers with cards; the paid-GM economy adds a prosumer tier that pays for production value.
+**Why easy:** The D&D-era audience already pays for online play ([Roll20](https://roll20.net/) subscriptions, [Foundry VTT](https://foundryvtt.com/)'s $50 license, [D&D Beyond](https://www.dndbeyond.com/)) and already runs sessions over voice/video — wf_edit's shared 3D scene + A/V + chat *is* a VTT core loop, and 3D encounter building is the premium differentiator over 2D maps ([TaleSpire](https://talespire.com/) proved demand). Buyers are consumers with cards; the paid-GM economy (GM — *game master*, the player who runs the game; see [StartPlaying](https://startplaying.games/)) adds a prosumer tier that pays for production value.
 **Watch out:** naming — "Foundry VTT" is an entrenched incumbent; "WorldFoundry" predates it but confusion cuts both ways. Brand the product line distinctly.
 **Realistic aggregate:** $500k–5M ARR.
+**Validation 2026-07-05: confirmed as the wedge, with a model correction.** Demand is proven and still growing — Foundry's paid license base +32% YoY (2024) and +22% (2025), premium content +85% to 862 packages, Roll20 at 10M+ registered accounts (cumulative, not active) — though the COVID spike is decelerating. **Price like the segment:** $50 one-time host-pays (Foundry, unchanged 2020–2026) and $24.99 buy-once ([TaleSpire on Steam](https://store.steampowered.com/app/720620/TaleSpire/)) are the anchors; the $8–15/mo subscription in idea 1 overshoots demonstrated willingness to pay. Buy-once license + premium-content marketplace is the only indie model publicly shown to work. The cautionary tale: WotC's Sigil (D&D-branded, Unreal Engine 5, 3D) died in ~20 months betting on game-style passive monetization — see the [Sigil overview in the validation doc](2026-07-05-wf-edit-market-validation.md) and WotC's own ["Closing the Chapter on Sigil"](https://www.dndbeyond.com/posts/2086) — and its servers go dark end of October 2026, stranding 3D-VTT users with TaleSpire as the main remaining option. That's a **~4-month displaced-user window** favoring shipping soon. Residual risk: 3D-specific willingness-to-pay rests on TaleSpire's opaque niche economics (sole public datapoint: ~$79k estimated gross in its first 4 days, Apr 2021).
 
-1. **GM subscription for 3D encounter maps.** $8–15/mo: build and run encounters in 3D with players joining free in-browser. Estimate: $100k–1M ARR; 2–4 months.
+1. **GM subscription for 3D encounter maps.** $8–15/mo: build and run encounters in 3D with players joining free in-browser. Estimate: $100k–1M ARR; 2–4 months. *(Validation note: reprice as buy-once — see above.)*
 2. **Map & asset marketplace.** 30% take on community tilesets, tokens, and prebuilt encounters. Estimate: $50k–500k/yr; 4–8 months.
 3. **Campaign hosting.** Persistent per-campaign worlds with session history; per-campaign or bundled pricing. Estimate: $50k–400k ARR; 3–6 months.
 4. **Roll20/Foundry export plugin.** Paid bridge: build in 3D, export battlemap renders + walls/lighting into the incumbent VTTs — sell to their users without fighting them. Estimate: $30k–200k/yr; 3–5 months.
-5. **Pro-GM toolkit.** Paid DMs (charging $20–50/seat/session) buy production value: staged reveals, camera control, ambience. Estimate: $50k–300k ARR; 3–6 months.
+5. **Pro-GM toolkit.** Paid GMs (charging $20–50/seat/session) buy production value: staged reveals, camera control, ambience. Estimate: $50k–300k ARR; 3–6 months.
 6. **Publisher partnerships.** Official adventure modules as ready-to-run 3D scenes, revenue-shared with the publisher. Estimate: $50k–500k/yr; 6–12 months.
-7. **Kickstarter themed edition.** Dungeon tileset + tool bundle as a campaign — the TTRPG Kickstarter channel is proven and doubles as marketing. Estimate: $30k–300k one-time; 4–6 months.
+7. **Kickstarter themed edition.** Dungeon tileset + tool bundle as a campaign — the TTRPG (*tabletop role-playing game*) Kickstarter channel is proven and doubles as marketing. Estimate: $30k–300k one-time; 4–6 months.
 8. **Convention & one-shot event mode.** Per-event licensing for cons and organized play: drop-in tables, spectator mode. Estimate: $20k–100k/yr; 4–8 months.
-9. **Mini-STL export.** Build the encounter, print the terrain — export watertight STLs as a paid add-on bridging to the 3D-printing hobby. Estimate: $20k–150k/yr; 4–6 months.
+9. **Mini-STL export.** Build the encounter, print the terrain — export watertight STLs (STL — the standard mesh format for 3D printing) as a paid add-on bridging to the 3D-printing hobby. Estimate: $20k–150k/yr; 4–6 months.
 10. **Actual-play streamer toolkit.** Spectator cameras, overlay-friendly output, scene-switching for shows. Estimate: $20k–150k/yr; 3–6 months.
 
 ### B4. Content creators, streamers & online communities
 
-**Why easy:** Creators buy tools that generate content, and *collaborative building is itself content* — speedbuilds, chat-driven builds, community world projects. Payments are consumer-grade, integrations (Twitch/Discord) are cheap to build, and the tool being on-stream is its own acquisition channel (CAC ≈ 0 when the product is the show). Attention is fickle, so revenue is spikier than B1–B3.
+**Why easy:** Creators buy tools that generate content, and *collaborative building is itself content* — speedbuilds, chat-driven builds, community world projects. Payments are consumer-grade, integrations (Twitch/Discord) are cheap to build, and the tool being on-stream is its own acquisition channel (CAC — *customer-acquisition cost* — ≈ 0 when the product is the show). Attention is fickle, so revenue is spikier than B1–B3.
 **Realistic aggregate:** $200k–2M/yr.
 
 1. **Streamer mode.** Chat-triggered edits, votes, and channel-point redemptions manipulate the live scene. Estimate: $15–30/mo → $50k–500k ARR; 2–4 months.
@@ -219,7 +224,7 @@ Ranked by friction-to-first-dollar: product fits as-is, buyers are self-serve, s
 | Track | Industry | Ceiling (ARR at maturity) | First revenue | Adaptation required | Main risk |
 |---|---|---|---|---|---|
 | A1 | Games & interactive | $1M–100M+ | 2–24 mo | None → platform infra | Hits-driven at the top end |
-| A2 | AEC + real estate | $10–50M | 9–18 mo | IFC/glTF, markup, SOC2 | Entrenched incumbents, sales motion |
+| A2 | AEC + real estate | $10–50M | 9–18 mo | IFC/glTF, markup, SOC 2 | Entrenched incumbents, sales motion |
 | A3 | Film/TV previz | $5–30M | 9–15 mo | USD/glTF, camera tools | Small niche, relationship-driven |
 | A4 | Defense & sim training | $10M+ (slow) | 6–12 mo (SBIR) | Compliance, on-prem, standards | Timeline + compliance burden |
 | A5 | Industrial twins & training | $5–30M | 9–18 mo | CAD import, SSO, integrations | Enterprise sales capacity at team size |
@@ -228,6 +233,29 @@ Ranked by friction-to-first-dollar: product fits as-is, buyers are self-serve, s
 | B3 | Tabletop/VTT | $0.5–5M | 2–4 mo | Content pipeline, UX polish | Incumbent ecosystems; naming collision |
 | B4 | Creators & communities | $0.2–2M | 2–4 mo | Twitch/Discord integrations | Fickle attention |
 | B5 | Team-building events | $0.1–1M | <2 mo | None (services wrapper) | Doesn't scale unproductized |
+
+The same table as a map — up and to the left is better; nothing lives in the ideal top-left, which is why the plan pairs a beachhead with a big bet:
+
+```mermaid
+quadrantChart
+    title Revenue ceiling vs time to first dollar
+    x-axis "first dollar in weeks" --> "first dollar in 1-2 years"
+    y-axis "low ceiling" --> "high ceiling"
+    quadrant-1 "big bets - format layer first"
+    quadrant-2 "ideal - nothing lives here"
+    quadrant-3 "beachheads - start here"
+    quadrant-4 "slow and small - avoid"
+    "A1 games/UGC": [0.5, 0.92]
+    "A2 AEC (no-go for now)": [0.78, 0.8]
+    "A4 defense/sim": [0.85, 0.74]
+    "A3 previz": [0.72, 0.66]
+    "A5 industrial": [0.8, 0.6]
+    "B3 VTT (the wedge)": [0.22, 0.42]
+    "B2 education": [0.35, 0.3]
+    "B4 creators": [0.2, 0.22]
+    "B1 indie/retro": [0.08, 0.13]
+    "B5 team-building": [0.05, 0.07]
+```
 
 Observations:
 
@@ -239,15 +267,38 @@ Observations:
 ## 4. Recommended sequencing (opinion, not gospel)
 
 1. **Now (0–3 months):** B5 facilitated workshops + B1 prosumer tier. First dollars on the current stack with zero new engineering; every paid session is also user research and a testimonial.
-2. **3–12 months:** Pick **one** of B3 (VTT) or B2 (education) as the product wedge — VTT if consumer energy shows up, education if you want steadier renewals. Ship glTF import/export during this phase regardless.
-3. **12+ months:** With the format layer done, run a real validation pass (deep research + ~20 customer interviews each) on A2 vs A3, and commit to one. File SBIR applications (A4) opportunistically throughout — grant money subsidizes the roadmap without a pivot.
+2. **3–12 months:** *(settled by validation, 2026-07-05)* **B3 (VTT) is the wedge** — buy-once host-pays license (~$25–50) plus content marketplace, timed to catch Sigil-displaced 3D-VTT users before its servers close (end of Oct 2026). Education drops to a secondary self-serve channel (camps/after-school under the ~$750 PO threshold). Ship glTF import/export during this phase regardless.
+3. **12+ months:** *(updated 2026-07-05)* A2 (AEC) validated **no-go-for-now** — revisit only via design-partner discovery, not more desk research. A3 (film previz) is now the default candidate for the later big bet, pending its own research pass. File SBIR applications (A4) opportunistically throughout — grant money subsidizes the roadmap without a pivot.
 4. **The UGC platform (A1.2) is the lottery ticket.** Keep it as the north star that shapes architecture decisions (identity, persistence, moderation hooks), but don't bet the runway on it.
+
+```mermaid
+gantt
+    title Validated sequencing (as of 2026-07-05)
+    dateFormat YYYY-MM-DD
+    axisFormat %b %Y
+    section Now
+    B5 facilitated workshops (first dollars)   :b5, 2026-07-15, 120d
+    B1 prosumer tier live                      :b1, 2026-08-01, 330d
+    section Wedge
+    Sigil displaced-user window (closes Oct 31) :crit, sig, 2026-07-05, 118d
+    B3 VTT wedge - build, launch, marketplace  :b3, 2026-08-01, 270d
+    glTF import/export (unlocks Part A)        :gltf, 2026-10-01, 150d
+    section Later
+    SBIR applications (A4, opportunistic)      :a4, 2026-09-01, 365d
+    A3 previz research pass                    :a3, 2027-03-01, 60d
+    A3 commit/kill decision                    :milestone, 2027-05-01, 0d
+```
 
 ## 5. Validation before committing
 
 None of the figures above have been market-tested. Before any roadmap commitment:
 
-- A structured research pass per shortlisted industry (market size, buyer, incumbent pricing) — the deep-research tooling in this environment is suited to exactly this.
+- ✅ *Done 2026-07-05* for VTT, education, and AEC — see [2026-07-05-wf-edit-market-validation.md](2026-07-05-wf-edit-market-validation.md). Film previz (A3) has not had its pass yet.
 - 10+ customer conversations for each of the top two picks.
+- **First hypothesis to test with real users** (top open question from the research pass): does built-in voice/video/chat actually win deals anywhere, or do Discord (VTT tables) and Teams/Zoom (reviews) neutralize the product's core differentiator? No public evidence exists either way — and it strikes at wf_edit's central premise.
 - A price test (landing page + checkout) for the B-track ideas — they're cheap to test for real.
-- Competitive scan minimums: Roblox/Fortnite-UGC and Core (A1); Revizto, Resolve, Autodesk Construction Cloud (A2); Unreal previz workflows, Cine Tracer (A3); Bohemia VBS, CAE (A4); Matterport, NVIDIA Omniverse (A5); TaleSpire, Foundry VTT, Roll20 (B3); Gather, Teamflow (B5).
+- Competitive scan minimums: [Roblox](https://create.roblox.com/) / [Unreal Editor for Fortnite (UEFN)](https://dev.epicgames.com/community/fortnite/getting-started/uefn) / [Core](https://www.coregames.com/) (A1); [Revizto](https://revizto.com/), [Resolve](https://www.resolvebim.com/), [Autodesk Construction Cloud](https://construction.autodesk.com/) (A2); Unreal previz workflows, [Cine Tracer](https://www.cinetracer.com/) (A3); [Bohemia VBS](https://bisimulations.com/), [CAE](https://www.cae.com/defense-security/) (A4); [Matterport](https://matterport.com/), [NVIDIA Omniverse](https://www.nvidia.com/en-us/omniverse/) (A5); [TaleSpire](https://talespire.com/), [Foundry VTT](https://foundryvtt.com/), [Roll20](https://roll20.net/) (B3); [Gather](https://www.gather.town/), [Teamflow](https://www.getteamflow.com/) (B5).
+
+## 6. The eleventh analysis: the platform ambition
+
+Everything above treats wf_edit as a product to sell into industries. There's a second, orthogonal ambition — making WorldFoundry the **default 3D world environment for simulations**, the thing people reach for first the way Gazebo is reached for in robotics or SQLite in embedded storage. That's a standards-and-openness game, not a sales game, and it gets its own analysis: [2026-07-05-worldfoundry-default-sim-environment.md](2026-07-05-worldfoundry-default-sim-environment.md).
