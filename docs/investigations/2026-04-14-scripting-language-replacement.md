@@ -91,13 +91,13 @@ debug, etc.). Treat the numbers as order-of-magnitude, not exact.
 |------------|-------------|-----------------|-------------------|-------|
 | ~~1~~      | ~~OpenJDK~~ | ~~100+ MB~~     | ~~100+ MB~~       | ~~HotSpot JIT fastest in raw; 50× over budget~~ |
 | 2          | LuaJIT      | ~500–700 KB     | ~150–250 KB       | Lua 5.1 API frozen; ~1 MB total is half the system budget |
-| 3          | WAMR (AOT)  | ~100–500 KB     | ~100 KB–few MB    | AOT modules; only the trimmed configuration fits |
+| **3**      | **WAMR (AOT)**  | **~100–500 KB** | **~100 KB–few MB** | **AOT modules; only the trimmed configuration fits** |
 | ~~4~~      | ~~Hermes~~  | ~~~1 MB~~       | ~~2–5 MB~~        | ~~Tuned for React Native; baseline RAM alone exceeds 2 MB~~ |
 | ~~5~~      | ~~AngelScript~~ | ~~~600 KB~~ | ~~~100 KB + classes~~ | ~~C++-adjacent syntax defeats the purpose of a scripting layer~~ |
-| 6          | QuickJS     | ~500–700 KB     | ~300 KB–1 MB      | Modern ES2020; heap is tunable; tight fit |
-| 7          | Wren        | ~100 KB         | ~20–40 KB         | Purpose-built for C embedding; excellent host API |
-| 8 (tie)    | Lua 5.4     | ~250–350 KB     | ~30–50 KB         | Default choice; comfortably fits |
-| 8 (tie)    | Fennel      | 0 (build-time compiler) | same as Lua | Lisp syntax → Lua bytecode; zero extra runtime cost |
+| **6**      | **QuickJS** | **~500–700 KB** | **~300 KB–1 MB**  | **Modern ES2020; heap is tunable; tight fit** |
+| **7**      | **Wren**    | **~100 KB**     | **~20–40 KB**     | **Purpose-built for C embedding; excellent host API** |
+| **8 (tie)** | **Lua 5.4** | **~250–350 KB** | **~30–50 KB**     | **Default choice; comfortably fits** |
+| **8 (tie)** | **Fennel**  | **0 (build-time compiler)** | **same as Lua** | **Lisp syntax → Lua bytecode; zero extra runtime cost** |
 | 10         | wasm3       | ~64 KB          | ~10 KB + module   | Smallest serious WASM runtime; MCU-grade footprint |
 | ~~11~~     | ~~Guile (w/JIT)~~ | ~~3–5 MB~~ | ~~10+ MB~~       | ~~Way over budget; LGPL v3 license risk~~ |
 | 12         | Squirrel    | ~400 KB         | ~50–200 KB        | Valve-approved; Lua-like with classes; fits |
@@ -107,7 +107,7 @@ debug, etc.). Treat the numbers as order-of-magnitude, not exact.
 | ~~16~~     | ~~Avian JVM~~ | ~~~1 MB~~     | ~~5–20 MB~~       | ~~RAM alone is 2.5–10× the budget~~ |
 | ~~17~~     | ~~Chibi~~   | ~~~200 KB~~     | ~~~200–500 KB~~   | ~~R7RS Scheme; Fennel supersedes~~ |
 | ~~18~~     | ~~MicroPython~~ | ~~~100–500 KB~~ | ~~~20–200 KB~~ | ~~Python semantics unsuitable for gameplay scripting~~ |
-| 19         | JerryScript | ~60–100 KB      | ~40–80 KB         | Smallest serious JS engine; IoT heritage; fits easily |
+| **19**     | **JerryScript** | **~60–100 KB** | **~40–80 KB**  | **Smallest serious JS engine; IoT heritage; fits easily** |
 
 ### How the speed rank is determined
 
