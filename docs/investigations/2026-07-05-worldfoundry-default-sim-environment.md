@@ -62,16 +62,17 @@ quadrantChart
     x-axis "install-first, heavyweight" --> "browser-first, zero-friction"
     y-axis "single-author" --> "real-time collaborative"
     quadrant-1 "vacant - WorldFoundry's claim"
-    quadrant-2 "cloud viewers, no authoring"
+    quadrant-2 "heavyweight collab (install/infra-gated)"
     quadrant-3 "the incumbents"
-    quadrant-4 "co-editing plugins, bolted on"
-    "Omniverse / Isaac": [0.2, 0.38]
+    quadrant-4 "browser viewers (single-user)"
+    "Omniverse / Isaac": [0.24, 0.55]
     "Gazebo + ROS": [0.12, 0.1]
     "CARLA": [0.15, 0.08]
     "Unity / Unreal sims": [0.25, 0.2]
     "VBS (defense)": [0.1, 0.3]
     "O3DE": [0.18, 0.15]
     "AnyLogic": [0.3, 0.12]
+    "three.js / web viewers": [0.82, 0.15]
     "WorldFoundry (target)": [0.88, 0.9]
 ```
 
@@ -82,6 +83,31 @@ Two honest observations about that quadrant: (a) it's vacant partly because it's
 **Footprint and determinism are one moat, not two.** Both come from the same fixed-point decision, and both are things a float-based competitor cannot copy without a ground-up rewrite: bit-identical replays (pillar 6) and no-FPU reach (§2) are the same wall seen from two sides. That is the single most defensible fact about the engine — lead with it.
 
 **Do not fight for:** photoreal rendering, continuum-physics fidelity (CFD/FEA), GPU-vendor ecosystems. **Fight for:** authoring, sharing, reproducing, *teaching*, and *running-everywhere* simulated worlds.
+
+### Which advantage to lead with — technical moat × market pull
+
+The vacant-quadrant map says *where the open turf is*; this second map says *which of our own advantages to lead with*. It plots each asset/bet by how hard it is for a competitor to copy (technical moat, y) against how much the market actually pulls for it today (x):
+
+```mermaid
+quadrantChart
+    title Which WorldFoundry advantages to lead with
+    x-axis "weak market pull" --> "strong market pull"
+    y-axis "low moat (easily copied)" --> "high moat (structural)"
+    quadrant-1 "lead with these"
+    quadrant-2 "moat without proven demand — protect & seed"
+    quadrant-3 "deprioritize"
+    quadrant-4 "table stakes — necessary, not a differentiator"
+    "Determinism (bit-identical)": [0.45, 0.85]
+    "~2MB / no-FPU reach": [0.30, 0.88]
+    "OpenWorldDoc spec": [0.30, 0.62]
+    "Browser collab editing": [0.56, 0.60]
+    "Python / Gym envs": [0.55, 0.42]
+    "URL-worlds / gallery": [0.70, 0.35]
+    "Voice / video built-in": [0.44, 0.26]
+    "glTF interop": [0.90, 0.18]
+```
+
+Reading across the quadrants tells the whole prioritization: the deepest moats — **determinism** and **no-FPU embedded reach** — sit top-left in *"moat without proven demand"*: unforgeable, but the market hasn't asked for them yet, so protect and seed them rather than building the pitch around them. **glTF interop** is bottom-right *table stakes*: strong pull, zero moat — it's the monetization doc's #1 unlock, yet it differentiates nothing. **Voice/video** sits low because *as a differentiator* it's commodity WebRTC with unproven pull (keep it — it's cheap and expected — just don't lead with it). The one bet that can reach top-right *"lead with these"* is **browser collaborative editing**: the CRDT + A/V combination is genuinely hard to copy (real moat) and plausibly high-pull — but its pull is exactly the unproven **open question** from §7 (does built-in collab/A-V actually win work?), which is why it straddles the centre. The instruction the map gives: **ship the table-stakes (glTF, URL-worlds) to open the funnel → prove the pull on browser-collab to earn the top-right → keep determinism + embedded reach as the wall nobody can climb, even before they headline.**
 
 ## 4. Strategy — seven pillars
 

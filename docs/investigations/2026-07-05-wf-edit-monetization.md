@@ -34,6 +34,7 @@ Two structural facts drive everything below:
 - **"First revenue"** = elapsed time from deciding to pursue the idea to the first paying customer.
 - **Confidence is low.** Any individual number is ±10×. The *rankings* (which industries are bigger, which are faster) are far more defensible than the absolute figures.
 - Market-size figures are ballpark, from general knowledge as of early 2026, and unverified; no formal TAM/SAM analysis is attempted (TAM — *total addressable market*; SAM — *serviceable addressable market*, the slice you could realistically reach). The validation doc flags where even researched TAM/SAM numbers proved unverifiable. Validate the top 2–3 picks with a real research pass (customer interviews + competitive scan) before committing a roadmap to any of them.
+- **Per-industry breakdown tables.** Each industry section ends with a table sizing its 10 ideas by the geometric mean of the revenue range in each bullet — the honest centre of a ±10× multiplicative range. Read the ranking and rough shares, not the digits; true per-idea *market* sizes aren't in public data.
 - **Revenue ≠ profit.** Rough gross margins: pure software SaaS 75–90%; A/V-heavy usage 50–70% after relay bandwidth; facilitated services/workshops 30–60%. Profit at this team size ≈ gross margin × revenue − (mostly) salaries.
 
 ---
@@ -59,6 +60,22 @@ Ranked by realistic ceiling *for this product*, not by raw industry size.
 9. **Commercial retro/homebrew toolchain licensing.** License the editor + engine export to publishers doing PSX-era re-releases and licensed minigames on set-top/TV hardware (the Chromecast/Google TV port is the wedge; fixed-point is the moat). Estimate: $25k–250k per deal, a few deals/yr; 6–12 months.
 10. **AI level-design copilot.** In-editor agent that drafts layouts, places actors, and wires scripting (the neural-forth and scripting hooks make this unusually plausible here); sold as a +$10–30/mo add-on. Estimate: $100k–1M ARR as an attach to the SaaS; 6–12 months.
 
+
+*Opportunity split — each idea sized by the geometric mean of its revenue range (~$k/yr); ±10× Fermi, read the ranking not the digits.*
+
+| Idea | ~$k/yr | share | |
+|---|--:|--:|---|
+| "Retro Roblox" UGC platform | 10,000 | 66% | ████████████████████ |
+| Live-ops levels for F2P | 1,581 | 10% | ███ |
+| Co-development review rooms | 949 | 6% | ██ |
+| Hosted collab-editor SaaS | 632 | 4% | █ |
+| White-label collab SDK | 447 | 3% | █ |
+| Paid game-jam hosting | 316 | 2% | █ |
+| Live playtest sessions | 316 | 2% | █ |
+| Level & asset marketplace | 316 | 2% | █ |
+| AI level-design copilot | 316 | 2% | █ |
+| Retro toolchain licensing | 237 | 2% | █ |
+
 ### A2. Architecture, engineering & construction (AEC) + real estate
 
 **Why:** Construction is a ~$10–13T/yr global industry with famously poor multi-party coordination; AEC software exceeds $10B/yr, and design-review/coordination tools ([Revizto](https://revizto.com/), [Autodesk Construction Cloud](https://construction.autodesk.com/), [Resolve](https://www.resolvebim.com/)) already command $100s–1000s per seat per year. The daily workflow this industry runs on — several stakeholders on a call staring at a 3D model, one person driving — is exactly what wf_edit collapses: everyone in the model, voice/video native, decisions captured in place. A lightweight browser viewport is a *feature* here (site laptops, client iPads).
@@ -77,6 +94,22 @@ Ranked by realistic ceiling *for this product*, not by raw industry size.
 9. **Insurance & inspection walkthroughs.** Photogrammetry import; adjusters/inspectors produce annotated 3D records instead of photo sets. Estimate: per-claim or per-seat pricing → $500k–5M ARR; 12–24 months.
 10. **Site-safety induction scenes.** Contractors walk new workers through the actual site's hazards before day one; sold per contractor/yr. Estimate: $10–100k/yr per contractor → $500k–3M ARR; 9–18 months.
 
+
+*Opportunity split — each idea sized by the geometric mean of its revenue range (~$k/yr); ±10× Fermi, read the ranking not the digits.*
+
+| Idea | ~$k/yr | share | |
+|---|--:|--:|---|
+| Design-review rooms | 3,162 | 21% | ████████████████████ |
+| Client walkthroughs + sign-off | 1,581 | 10% | ██████████ |
+| Punch-list spatial annotation | 1,581 | 10% | ██████████ |
+| New-build sales configurator | 1,581 | 10% | ██████████ |
+| Facilities digital-twin lite | 1,581 | 10% | ██████████ |
+| Insurance & inspection | 1,581 | 10% | ██████████ |
+| Public-consultation portals | 1,225 | 8% | ████████ |
+| Modular/prefab configurator | 1,225 | 8% | ████████ |
+| Site-safety induction scenes | 1,225 | 8% | ████████ |
+| Interior-design studio (SMB) | 632 | 4% | ████ |
+
 ### A3. Film, TV & media production (previz / virtual production)
 
 **Why:** Media & entertainment is a ~$2.5–3T industry, and virtual-production tooling is a fast-growing $3–6B slice of it. Previsualization ("previz") is inherently multi-party — director, DP, production designer, VFX supervisor, often on different continents — and today it mostly runs as one operator screen-sharing an Unreal session while everyone else talks over them. A browser previz room where *everyone can move things*, with A/V native, upgrades the early-stage workflow, and low-fidelity rendering is acceptable (even preferred) at that stage. Production budgets pay real money for schedule compression.
@@ -93,6 +126,22 @@ Ranked by realistic ceiling *for this product*, not by raw industry size.
 8. **Theme-park & attraction previz.** Design firms walk clients through attractions pre-build; long projects, high budgets. Estimate: $50–250k per project engagement → $500k–3M/yr; 12–18 months.
 9. **Interactive-content scene assembly.** Choose-your-path and interactive-streaming producers assemble branching 3D scenes collaboratively. Estimate: $50k–500k ARR (nascent market); 12–24 months.
 10. **Digital backlot marketplace.** License reusable scanned sets/environments with a take rate, attached to the scouting product. Estimate: $100k–1M/yr at maturity; 12–24 months after the scouting product exists.
+
+
+*Opportunity split — each idea sized by the geometric mean of its revenue range (~$k/yr); ±10× Fermi, read the ranking not the digits.*
+
+| Idea | ~$k/yr | share | |
+|---|--:|--:|---|
+| Virtual location scouting | 2,236 | 22% | ████████████████████ |
+| Previz-as-a-service seats | 1,225 | 12% | ███████████ |
+| Set-design sign-off | 1,225 | 12% | ███████████ |
+| Episodic set-continuity twin | 1,225 | 12% | ███████████ |
+| Ad-agency storyboard rooms | 1,225 | 12% | ███████████ |
+| Theme-park previz | 1,225 | 12% | ███████████ |
+| Camera-blocking planner | 775 | 7% | ███████ |
+| Concert & stage-show design | 775 | 7% | ███████ |
+| Digital backlot marketplace | 316 | 3% | ███ |
+| Interactive scene assembly | 158 | 2% | █ |
 
 ### A4. Defense, public safety & simulation training
 
@@ -111,6 +160,22 @@ Ranked by realistic ceiling *for this product*, not by raw industry size.
 9. **Wargaming platform for think tanks & staff colleges.** Turn-based/moderated wargames in a shared 3D theater with A/V. Estimate: $25–100k/yr per institution → $300k–2M/yr; 12–18 months.
 10. **Subcontract licensing to primes.** Integrate the authoring/collab layer into [CAE](https://www.cae.com/defense-security/)/Lockheed/[Bohemia](https://bisimulations.com/)-ecosystem training products rather than selling direct. Estimate: $100k–1M/yr per integration → $500k–5M/yr; 18–36 months.
 
+
+*Opportunity split — each idea sized by the geometric mean of its revenue range (~$k/yr); ±10× Fermi, read the ranking not the digits.*
+
+| Idea | ~$k/yr | share | |
+|---|--:|--:|---|
+| Mission-rehearsal sandbox | 2,236 | 20% | ████████████████████ |
+| Subcontract to primes | 1,581 | 14% | ██████████████ |
+| SBIR scenario-authoring | 1,414 | 12% | █████████████ |
+| Emergency-mgmt tabletops | 1,225 | 11% | ███████████ |
+| Law-enforcement scenarios | 1,225 | 11% | ███████████ |
+| Venue & campus security | 1,225 | 11% | ███████████ |
+| Critical-infra security review | 1,225 | 11% | ███████████ |
+| Wargaming platform | 775 | 7% | ███████ |
+| Base/installation planning | 316 | 3% | ███ |
+| Disaster-response (NGO/UN) | 158 | 1% | █ |
+
 ### A5. Enterprise training & industrial digital twins
 
 **Why:** Corporate training is a ~$350–400B/yr market, and industrial digital-twin software is projected into the tens of billions by decade's end (projections vary widely). The concrete, recurring workflow underneath the buzzwords: every warehouse re-slot, factory line change, and plant outage involves a spatial plan argued over by a plant manager, an integrator, and a consultant — today via screen-share and PDFs. Enterprise contract sizes make the absolute dollars large even at modest logo counts.
@@ -127,6 +192,22 @@ Ranked by realistic ceiling *for this product*, not by raw industry size.
 8. **Ergonomics & process-flow review.** Walk the line virtually before building it; industrial engineers annotate reach/flow issues. Estimate: $20–100k/yr per manufacturer → $300k–2M ARR; 9–15 months.
 9. **Evacuation & hazard drill rehearsal.** Run and critique drills in the facility twin with all shift leads on voice. Estimate: $10–50k/yr per site → $300k–2M ARR; 9–15 months.
 10. **White-label twin viewer for systems integrators.** Integrators (who deploy WMS/ERP — *warehouse-management / enterprise-resource-planning* — systems) resell the collab viewport inside their digital-twin offerings. Estimate: $100k–500k/yr per integrator → $500k–3M ARR; 12–18 months.
+
+
+*Opportunity split — each idea sized by the geometric mean of its revenue range (~$k/yr); ±10× Fermi, read the ranking not the digits.*
+
+| Idea | ~$k/yr | share | |
+|---|--:|--:|---|
+| Factory/warehouse planning | 3,162 | 23% | ████████████████████ |
+| Safety-training authoring | 1,581 | 12% | ██████████ |
+| Retail planogram collab | 1,581 | 12% | ██████████ |
+| Remote-expert annotation | 1,225 | 9% | ████████ |
+| Outage/turnaround planning | 1,225 | 9% | ████████ |
+| Mine & field-site sandbox | 1,225 | 9% | ████████ |
+| White-label twin viewer | 1,225 | 9% | ████████ |
+| Facility onboarding tours | 775 | 6% | █████ |
+| Ergonomics/process review | 775 | 6% | █████ |
+| Evacuation drill rehearsal | 775 | 6% | █████ |
 
 ---
 
@@ -150,6 +231,22 @@ Ranked by friction-to-first-dollar: product fits as-is, buyers are self-serve, s
 9. **Retro-console export add-on.** PSX-format/retro-target export as a paid feature — the fixed-point engine is the differentiator no web tool can copy. Estimate: $20k–150k/yr; 3–6 months.
 10. **Merch & boxed collector's edition.** Big-box toolchain release with manual, the retro collector market buys physical. Estimate: $10k–75k/yr; 3–5 months.
 
+
+*Opportunity split — each idea sized by the geometric mean of its revenue range (~$k/yr); ±10× Fermi, read the ranking not the digits.*
+
+| Idea | ~$k/yr | share | |
+|---|--:|--:|---|
+| Pro subscription | 158 | 27% | ████████████████████ |
+| Team rooms | 95 | 16% | ████████████ |
+| Lifetime license (itch.io) | 63 | 11% | ████████ |
+| Commercial-shipping license | 55 | 9% | ███████ |
+| Retro-console export add-on | 55 | 9% | ███████ |
+| Hosted game jams | 50 | 8% | ██████ |
+| Starter/template packs | 32 | 5% | ████ |
+| Sponsorware (OSS core) | 28 | 5% | ████ |
+| Paid community + workshops | 28 | 5% | ████ |
+| Merch & boxed edition | 27 | 5% | ███ |
+
 ### B2. Education (K-12 STEM, camps, bootcamps, universities)
 
 **Why easy:** Browser-based + no-install + *supervised, built-in* A/V is precisely what teaching game design in classrooms and remote programs needs, and IT departments approve browser tools far faster than installs. Per-classroom price points ($200–1000/yr) clear teacher purchase-card thresholds without procurement. COPPA and FERPA work is real but bounded and one-time (COPPA — the [*Children's Online Privacy Protection Act*](https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa), the US law governing online data collection from children under 13; FERPA — the [*Family Educational Rights and Privacy Act*](https://studentprivacy.ed.gov/ferpa), the US law protecting student education records). Sales are seasonal (school-year cycles) but renewals are sticky.
@@ -166,6 +263,22 @@ Ranked by friction-to-first-dollar: product fits as-is, buyers are self-serve, s
 8. **LMS integration add-on.** [Canvas](https://www.instructure.com/canvas)/Google Classroom roster + grade passback as a paid tier (LMS — *learning management system*). Estimate: $30k–200k/yr attach; 6–9 months.
 9. **Homeschool co-op bundles.** Family/co-op pricing with a lighter curriculum; reachable through homeschool networks. Estimate: $20k–150k/yr; 2–4 months.
 10. **Grant-funded STEM programs.** Partner with nonprofits on rural/underserved programs funded by state and federal STEM grants. Estimate: $50k–300k per program cycle; 6–12 months.
+
+
+*Opportunity split — each idea sized by the geometric mean of its revenue range (~$k/yr); ±10× Fermi, read the ranking not the digits.*
+
+| Idea | ~$k/yr | share | |
+|---|--:|--:|---|
+| Classroom site license | 316 | 26% | ████████████████████ |
+| Camp/after-school licensing | 224 | 18% | ██████████████ |
+| Curriculum packs | 122 | 10% | ████████ |
+| University lab licenses | 122 | 10% | ████████ |
+| Grant-funded STEM programs | 122 | 10% | ████████ |
+| Teacher PD & certification | 77 | 6% | █████ |
+| LMS integration add-on | 77 | 6% | █████ |
+| Sponsored competitions | 61 | 5% | ████ |
+| Student portfolio hosting | 55 | 4% | ███ |
+| Homeschool co-op bundles | 55 | 4% | ███ |
 
 ### B3. Tabletop RPG & virtual tabletops (VTT)
 
@@ -185,6 +298,22 @@ Ranked by friction-to-first-dollar: product fits as-is, buyers are self-serve, s
 9. **Mini-STL export.** Build the encounter, print the terrain — export watertight STLs (STL — the standard mesh format for 3D printing) as a paid add-on bridging to the 3D-printing hobby. Estimate: $20k–150k/yr; 4–6 months.
 10. **Actual-play streamer toolkit.** Spectator cameras, overlay-friendly output, scene-switching for shows. Estimate: $20k–150k/yr; 3–6 months.
 
+
+*Opportunity split — each idea sized by the geometric mean of its revenue range (~$k/yr); ±10× Fermi, read the ranking not the digits.*
+
+| Idea | ~$k/yr | share | |
+|---|--:|--:|---|
+| GM subscription (3D maps) | 316 | 26% | ████████████████████ |
+| Map & asset marketplace | 158 | 13% | ██████████ |
+| Publisher partnerships | 158 | 13% | ██████████ |
+| Campaign hosting | 141 | 12% | █████████ |
+| Pro-GM toolkit | 122 | 10% | ████████ |
+| Kickstarter themed edition | 95 | 8% | ██████ |
+| Roll20/Foundry export plugin | 77 | 6% | █████ |
+| Mini-STL export | 55 | 5% | ███ |
+| Actual-play streamer kit | 55 | 5% | ███ |
+| Convention/one-shot mode | 45 | 4% | ███ |
+
 ### B4. Content creators, streamers & online communities
 
 **Why easy:** Creators buy tools that generate content, and *collaborative building is itself content* — speedbuilds, chat-driven builds, community world projects. Payments are consumer-grade, integrations (Twitch/Discord) are cheap to build, and the tool being on-stream is its own acquisition channel (CAC — *customer-acquisition cost* — ≈ 0 when the product is the show). Attention is fickle, so revenue is spikier than B1–B3.
@@ -200,6 +329,22 @@ Ranked by friction-to-first-dollar: product fits as-is, buyers are self-serve, s
 8. **Tip-driven public builds.** Viewers tip to influence a communal build; platform takes a cut. Estimate: $10k–100k/yr; 3–5 months.
 9. **Creator affiliate program.** Rev-share on Pro-tier referrals from build-content creators. Estimate: indirect — accelerates B1/B4 subscriptions 10–30%; 2–3 months.
 10. **Clip-to-level contests.** Sponsors fund contests recreating famous scenes/moments as playable levels. Estimate: $20k–150k/yr; 4–6 months.
+
+
+*Opportunity split — each idea sized by the geometric mean of its revenue range (~$k/yr); ±10× Fermi, read the ranking not the digits.*
+
+| Idea | ~$k/yr | share | |
+|---|--:|--:|---|
+| Streamer mode | 158 | 19% | ████████████████████ |
+| Community world servers | 141 | 17% | ██████████████████ |
+| Sponsored build events | 122 | 15% | ███████████████ |
+| Speedbuild competitions | 95 | 12% | ████████████ |
+| Timelapse & replay export | 63 | 8% | ████████ |
+| Commission marketplace | 63 | 8% | ████████ |
+| Niche-community meetups | 55 | 7% | ███████ |
+| Clip-to-level contests | 55 | 7% | ███████ |
+| Creator affiliate (indirect) | 35 | 4% | ████ |
+| Tip-driven public builds | 32 | 4% | ████ |
 
 ### B5. Corporate team-building & virtual events (SMB)
 
@@ -217,9 +362,44 @@ Ranked by friction-to-first-dollar: product fits as-is, buyers are self-serve, s
 9. **Offsite & hackathon add-ons.** Packaged as the social track of engineering offsites and hackathons. Estimate: $20k–100k/yr; 2–4 months.
 10. **Gift vouchers.** Give a team a facilitated build session; consumer-style gifting flow. Estimate: $10k–75k/yr; 2–3 months.
 
+
+*Opportunity split — each idea sized by the geometric mean of its revenue range (~$k/yr); ±10× Fermi, read the ranking not the digits.*
+
+| Idea | ~$k/yr | share | |
+|---|--:|--:|---|
+| Facilitated workshops | 122 | 18% | ████████████████████ |
+| Escape-room puzzles | 87 | 13% | ██████████████ |
+| White-label for agencies | 87 | 13% | ██████████████ |
+| Self-serve event kits | 77 | 11% | █████████████ |
+| Seasonal themed events | 77 | 11% | █████████████ |
+| Onboarding icebreakers | 55 | 8% | █████████ |
+| Recurring guild subscriptions | 55 | 8% | █████████ |
+| Conference/booth experiences | 55 | 8% | █████████ |
+| Offsite/hackathon add-ons | 45 | 7% | ███████ |
+| Gift vouchers | 27 | 4% | ████ |
+
 ---
 
 ## 3. Cross-cutting summary
+
+The ten industries carry 10 ideas each (100 total, split evenly across the two tracks), but they differ enormously in the *size of the addressable market* each opens — which is the real reason Part A and Part B are separate tracks. The pie sizes each slice by a representative annual addressable-market figure (~$B/yr), largest to smallest:
+
+```mermaid
+pie showData
+    title Addressable market by industry (~$B/yr, representative)
+    "A2 AEC + real estate" : 12
+    "A4 Defense & sim training" : 10
+    "A5 Industrial twins & training" : 10
+    "A3 Film/TV previz" : 4.5
+    "A1 Games & interactive (tools)" : 3.5
+    "B5 Team-building & events" : 2
+    "B2 Education" : 1.5
+    "B4 Creators & communities" : 1
+    "B1 Indie/retro gamedev" : 0.4
+    "B3 Tabletop / VTT" : 0.4
+```
+
+**Sizing basis (read before quoting these):** each slice is the *addressable* sub-market this product could sell into — software, tooling, and programs — **not** whole-industry GDP. Using whole-industry figures (construction ~$13T, media ~$3T) would make three slices swallow the chart and tell you nothing about opportunity. The **Part A** values are the sub-market figures cited in each "Why" above: game tools/middleware $2–5B, AEC software >$10B, virtual-production tooling $3–6B, DoD modeling/simulation/training ~$10B+, industrial digital-twin software (near-term, of the "tens of billions by decade's end"). The **Part B values are rough, unverified proxies** — the [validation pass](2026-07-05-wf-edit-market-validation.md) found *no* reliable published market size for education, VTT, or the creator/events niches, so treat those five as order-of-magnitude only. The dependable signal here is the **~5–30× gap**: Part A's addressable markets dwarf Part B's, which is exactly why Part A is the "largest ceiling" track and Part B the "fastest to first dollar" track. For the two-axis decision view (ceiling × speed), see the quadrant map below; for how each industry's *own* 10 ideas split its opportunity, see the breakdown table at the end of each industry's section above. (Pie, not a stacked bar: Mermaid renders pie natively and has no stacked-bar type; a pie is the right *composition* form.)
 
 | Track | Industry | Ceiling (ARR at maturity) | First revenue | Adaptation required | Main risk |
 |---|---|---|---|---|---|
@@ -245,17 +425,19 @@ quadrantChart
     quadrant-2 "ideal - nothing lives here"
     quadrant-3 "beachheads - start here"
     quadrant-4 "slow and small - avoid"
-    "A1 games/UGC": [0.5, 0.92]
-    "A2 AEC (no-go for now)": [0.78, 0.8]
-    "A4 defense/sim": [0.85, 0.74]
-    "A3 previz": [0.72, 0.66]
-    "A5 industrial": [0.8, 0.6]
-    "B3 VTT (the wedge)": [0.22, 0.42]
-    "B2 education": [0.35, 0.3]
-    "B4 creators": [0.2, 0.22]
-    "B1 indie/retro": [0.08, 0.13]
-    "B5 team-building": [0.05, 0.07]
+    "A1 games / UGC": [0.48, 0.95]
+    "A2 AEC (no-go now)": [0.50, 0.85]
+    "A3 previz": [0.45, 0.73]
+    "A4 defense / sim": [0.33, 0.80]
+    "A5 industrial": [0.53, 0.76]
+    "B3 VTT (wedge)": [0.11, 0.46]
+    "B2 education": [0.16, 0.36]
+    "B4 creators": [0.12, 0.28]
+    "B1 indie / retro": [0.05, 0.12]
+    "B5 team-building": [0.06, 0.19]
 ```
+
+Point positions are tightened to the §3 table: **y** = revenue ceiling (log-scaled across $0.7M → $100M+), **x** = time to first revenue (midpoint of each row's stated range). One honesty note on **A4 (defense)**: it sits mid-axis rather than far-right because its *first* dollar is SBIR grant money (6–12 months) — even though scale/program-of-record revenue is 3–5 years out. A single point can't show both timelines; the position reflects first-dollar, per the table's "First revenue" column.
 
 Observations:
 
