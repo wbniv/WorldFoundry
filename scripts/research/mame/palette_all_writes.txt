@@ -1,0 +1,21 @@
+[INFO] tap=true
+
+=== PALETTE #1 (after frame 170, 5440 total writes) ===
+  pen00: #312176  (raw: 27 03)
+  pen01: #56A998  (raw: A9 05)
+  pen02: #DEDE00  (raw: D0 0D)
+  pen03: #314646  (raw: 44 03)
+  pen04: #5646EE  (raw: 4E 05)
+  pen05: #FF6666  (raw: 66 0F)
+  pen06: #000000  (raw: 00 00)
+  pen07: #EE1021  (raw: 12 0E)
+  pen08: #EE5600  (raw: 50 0E)
+  pen09: #FF7600  (raw: 70 0F)
+  pen10: #006600  (raw: 60 00)
+  pen11: #008800  (raw: 80 00)
+  pen12: #760066  (raw: 06 07)
+  pen13: #00B900  (raw: B0 00)
+  pen14: #EE6698  (raw: 69 0E)
+  pen15: #FFFFFF  (raw: FF 0F)
+
+=== DONE: 5440 writes, 1 unique palettes ===

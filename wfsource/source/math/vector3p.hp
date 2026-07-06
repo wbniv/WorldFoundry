@@ -26,11 +26,6 @@
 
 // ------------------------------------------------------------------------
 
-#if defined(__PSX__) && !defined(RENDERER_PIPELINE_SOFTWARE)
-#include "psx/Vector3p.hp"
-// ------------------------------------------------------------------------
-
-#else
 #include <math/vector3.hp>
 typedef Vector3 Vector3_PS;
 #define PS_SCALAR_CONSTANT SCALAR_CONSTANT
@@ -57,7 +52,6 @@ Vector3ToPS12(const Vector3& in)
 }
 
 
-#endif
 
 // ------------------------------------------------------------------------
 #endif

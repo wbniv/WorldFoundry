@@ -43,7 +43,7 @@
 #include "otable.hp"
 #include "renderer.hp"
 
-#if defined(__LINUX__)
+#if defined(__LINUX__) || defined(__ANDROID__) || defined(WF_TARGET_IOS)
 #include <sys/time.h>
 #endif
 
@@ -56,19 +56,10 @@ class PixelMap;
 //#define VIDEO_MEMORY_IN_ONE_PIXELMAP 
 
 
-#if defined(RENDERER_PIPELINE_GL)
 #define GFX_ZBUFFER
-#else
-//#define GFX_ZBUFFER
-#endif
 
-
-#if defined(RENDERER_GL)
-void LoadGLMatrixFromMatrix34(const Matrix34& matrix);
-#endif
 
 #if defined(VIDEO_MEMORY_IN_ONE_PIXELMAP)
-#if defined(RENDERER_GL)
 #   include <GL/gl.h>
 const int VRAM_WIDTH = 1024;
 const int VRAM_HEIGHT = 512;
@@ -76,15 +67,7 @@ const float VRAM_WIDTHF = float( VRAM_WIDTH );
 const float VRAM_HEIGHTF = float( VRAM_HEIGHT );
 
 
-#endif          // RENDERER_GL
 
-#if defined(RENDERER_XWINDOWS)
-#   include <GL/gl.h>
-const int VRAM_WIDTH = 1024;
-const int VRAM_HEIGHT = 512;
-const float VRAM_WIDTHF = float( VRAM_WIDTH );
-const float VRAM_HEIGHTF = float( VRAM_HEIGHT );
-#endif          // RENDERER_XWINDOWS
 
 #else
 //#error not yet!
@@ -102,12 +85,13 @@ public:
 		DISPLAY_PAGES=2				// double buffering is usually all that is needed
 	};
 
-	// define the size & shape of video ram for this platform
-	enum
-	{
-		VRAMWidth		= 1024,
-		VRAMHeight		= 512
-	};
+	// Total VRAM box. Default 1024×512 (legacy fixed-target layout). Both
+	// fields are runtime-settable via `--vram-width`/`--vram-height` CLI
+	// flags (see main.cc) so high-detail levels can opt into a larger
+	// layout without touching defaults. See
+	// docs/plans/2026-05-30-runtime-vram-cli-overrides.md.
+	static int VRAMWidth;
+	static int VRAMHeight;
 
 	Display(int orderTableSize, int xPos, int yPos, int xSize, int ySize,Memory& memory, bool interlace=false);
 	~Display();
@@ -117,10 +101,31 @@ public:
 	void RenderEnd();
 
 	Scalar PageFlip();					// switch to other page, and start rendering, returns how much real-time passed since last call
+	Scalar MeasureDelta();				// same delta PageFlip returns, but without swapping buffers; for hosts that drive their own swap
 	void ResetTime();					// used to reset delta timer for PageFlip
 
 	int XSize() const;					// get x size of display
 	int YSize() const;					// get y size of display
+
+	// Size of the surface the engine is currently drawing into:
+	//   - bRecordVideo / WF_GAME_SCREENSHOT_PPM: capture FBO = _xSize × _ySize.
+	//   - Interactive play: the live OS window, tracked via SetLiveWindowSize().
+	// Use this from any per-frame code that needs to anchor screen-space
+	// elements (viewport setup, projection aspect, HUD layout) — it's the
+	// single source of truth for the current draw target's dimensions.
+	// See docs/plans/2026-05-31-display-getsurfacesize-refactor.md.
+	void GetSurfaceSize(int& w, int& h) const;
+
+	// Called by platform layers (X11 ConfigureNotify, Android surface change,
+	// editor GLFW framebuffer-size loop) when the OS reports the window/surface
+	// has been resized. Idempotent; safe to call every frame.
+	void SetLiveWindowSize(int w, int h);
+
+	// Process-wide accessor for callers outside this class that don't carry a
+	// Display*. Returns the current active Display (set by the ctor; cleared
+	// by the dtor). Single-Display invariant — the engine builds one at boot.
+	// Returns nullptr only during very early init or after shutdown.
+	static Display* GetActive();
 
 	void Validate() const;
 
@@ -137,9 +142,7 @@ public:
 #if !defined(USE_ORDER_TABLES)
 #error must use order tables for stereogram
 #endif
-#if !defined(__PSX__)
 #error stereogram only works on psx
-#endif
 	int GetDrawPageIndex() const;						// returns whch page is available for drawing
 #endif
 
@@ -147,12 +150,6 @@ public:
 private:
 #endif
 
-#if defined(__PSX__)
-	int VideoSync();				    // components of PageFlip, public if stereogram, private otherwise
-	void UnSyncedPageFlip();
-	void ClearConstructionOrderTable();
-	void RenderOrderTable();
-#endif
 
 #if defined(USE_ORDER_TABLES)
 	void SetRenderOrderTableIndex(int index);
@@ -176,22 +173,14 @@ private:
 	int _xPos;						// x & y position of display
 	int _yPos;
 
-	int _xSize;						// x & y size of display
+	int _xSize;						// x & y size of display (the FBO/native render size, fixed at construction)
 	int _ySize;
-#if defined ( __PSX__)
-	DISPENV _dispEnv[DISPLAY_PAGES];
-	DRAWENV _drawEnv[DISPLAY_PAGES];
-	RECT bg[DISPLAY_PAGES];
-	bool _resetClock;
-#elif defined( __WIN__ )
-	float _backgroundColorRed;
-	float _backgroundColorGreen;
-	float _backgroundColorBlue;
-	unsigned long _clockLastTime;
-#elif defined( __LINUX__ )
-	float _backgroundColorRed;
-	float _backgroundColorGreen;
-	float _backgroundColorBlue;
+	int _liveWidth;					// current OS window size (interactive). Updated via SetLiveWindowSize.
+	int _liveHeight;
+#if   defined(__LINUX__) || defined(__ANDROID__)
+	float _backgroundColorRed = 0.0f;
+	float _backgroundColorGreen = 0.0f;
+	float _backgroundColorBlue = 0.0f;
     struct timeval _clockLastTime;
 #else
 #error platform not defined

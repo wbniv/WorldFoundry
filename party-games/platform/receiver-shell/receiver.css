@@ -1,0 +1,345 @@
+/* Receiver — TV display. Sized in vh/vw so it scales from browser-tab preview to 1080p TV. */
+:root { color-scheme: dark; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #0c0f14;
+  color: #e6e8eb;
+  min-height: 100vh;
+  padding: 3vh 4vw;
+  line-height: 1.35;
+}
+
+header { margin-bottom: 3vh; }
+
+/* Game-owned region ───────────────────────────────────────────────────────
+   The shell reserves this container for the per-game client module. The
+   game owns everything inside, including its own layout. Rules here are
+   only what the shell needs for sizing + error fallback. */
+.game-root {
+  display: flex;
+  flex-direction: column;
+  gap: 2vh;
+}
+.shell-error {
+  padding: 4vh 2vw;
+  font-size: 2.2vh;
+  opacity: 0.7;
+  line-height: 1.6;
+}
+.shell-error code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: rgba(255,255,255,0.08);
+  padding: 0.1em 0.35em;
+  border-radius: 0.3em;
+}
+
+h1 {
+  font-size: 4.5vh;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+h2 {
+  font-size: 2.2vh;
+  font-weight: 500;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 2.5vh 0 1vh;
+}
+
+.status {
+  font-size: 1.8vh;
+  opacity: 0.68;   /* WCAG AA bump; 0.55 was marginal on #0c0f14 */
+  margin-top: 0.6vh;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.room-code-line {
+  font-size: 2.2vh;
+  opacity: 0.8;
+  margin-top: 0.4vh;
+}
+.room-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 3.2vh;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  padding: 0 0.4em;
+  background: linear-gradient(90deg, #86efac, #facc15);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+#players ul, #log ol {
+  list-style: none;
+  font-size: 2.4vh;
+}
+#players li, #log li {
+  padding: 0.5vh 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+#players .empty {
+  opacity: 0.35;
+  font-style: italic;
+  border-bottom: none;
+}
+#log li {
+  opacity: 0.85;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.9vh;
+}
+
+/* ───── stage panels (LOBBY / COUNTDOWN / OPEN / ENDED / GAME_OVER) ───── */
+#stage { margin: 3vh 0 4vh; min-height: 35vh; }
+.stage-panel[hidden] { display: none; }
+.phase-label {
+  font-size: 2vh;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  opacity: 0.68;   /* WCAG AA: phase-label is small all-caps, needs more contrast than eye guesses */
+  margin-bottom: 1vh;
+}
+.hint {
+  opacity: 0.65;   /* WCAG AA: bump from 0.5 on #0c0f14 */
+  font-size: 1.8vh;
+  margin-top: 2vh;
+  font-style: italic;
+}
+
+/* countdown bar */
+#countdown-bar {
+  width: 90vw;
+  height: 4vh;
+  margin: 3vh auto 0;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+#countdown-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #facc15, #ef4444);
+  transform-origin: left center;
+  transform: scaleX(1);
+  border-radius: 999px;
+}
+
+/* GO screen */
+.go-word {
+  text-align: center;
+  font-size: 24vh;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  background: linear-gradient(90deg, #86efac, #34d399);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-top: 3vh;
+  animation: pulse 0.4s ease-in-out infinite alternate;
+}
+@keyframes pulse {
+  from { transform: scale(1); }
+  to   { transform: scale(1.06); }
+}
+
+/* round results */
+#round-ranks, #scoreboard, #final-scoreboard {
+  list-style: none;
+  font-size: 2.3vh;
+  line-height: 1.6;
+  margin-top: 1vh;
+  padding-left: 0;
+}
+#round-ranks li {
+  padding: 0.6vh 0.5vw;
+  display: grid;
+  grid-template-columns: 1fr auto 12vw;
+  gap: 1.5vw;
+  align-items: baseline;
+  opacity: 0;
+  transform: translateY(1vh);
+  animation: rank-enter 0.35s ease-out forwards;
+  animation-delay: calc(var(--i, 0) * 150ms);
+}
+#round-ranks li.scored .rank-badge {
+  color: #86efac;
+  font-weight: 700;
+  animation: badge-pop 0.4s ease-out;
+  animation-delay: calc((var(--i, 0) * 150ms) + 200ms);
+  display: inline-block;
+}
+#round-ranks li.locked-out {
+  /* Locked-out row: deliberately softer than active rows. Bumped from 0.55
+     to 0.65 so the name + badge still clear WCAG AA when displayed on TV. */
+  opacity: 0.65;
+}
+#round-ranks li.locked-out .rank-badge { color: #fca5a5; }
+#round-ranks .rank-name { text-align: left; }
+#round-ranks .rank-badge {
+  text-align: right;
+  min-width: 4vw;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+#round-ranks .rank-reaction {
+  text-align: right;
+  opacity: 0.68;   /* WCAG AA: reaction-ms is small mono; 0.55 was too faint on TV */
+  font-size: 1.9vh;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@keyframes rank-enter {
+  from { opacity: 0; transform: translateY(1.5vh); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes badge-pop {
+  0%   { transform: scale(1);    filter: none; }
+  40%  { transform: scale(1.35); filter: drop-shadow(0 0 1.5vh rgba(134, 239, 172, 0.6)); }
+  100% { transform: scale(1);    filter: none; }
+}
+
+#scoreboard  li, #final-scoreboard li { padding: 0.3vh 0; opacity: 0.85; }
+#scoreboard  li.changed {
+  opacity: 1;
+  color: #fef3c7;
+  animation: score-update 0.6s ease-out;
+  /* Wait for the rank rows to finish their stagger before the cumulative
+     update catches up. Longest rank delay is (max rows * 150ms) + badge
+     pulse ≈ 900 ms; pad slightly. */
+  animation-delay: 1000ms;
+  animation-fill-mode: backwards;
+}
+@keyframes score-update {
+  0%   { background: rgba(250, 204, 21, 0.2); transform: translateX(-0.6vw); }
+  40%  { background: rgba(250, 204, 21, 0.15); }
+  100% { background: transparent; transform: translateX(0); }
+}
+
+.winner {
+  font-size: 6vh;
+  font-weight: 700;
+  margin: 2vh 0 3vh;
+  color: #facc15;
+}
+
+/* Final scoreboard: podium-style with rank, highlight winner row. */
+.final-scoreboard {
+  list-style: none;
+  counter-reset: rank;
+  padding: 0;
+  margin: 2vh 0;
+  max-width: 70vw;
+}
+.final-scoreboard li {
+  counter-increment: rank;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2vw;
+  padding: 1vh 2vw;
+  margin-bottom: 0.8vh;
+  border-radius: 1vh;
+  background: rgba(255,255,255,0.03);
+  font-size: 2.6vh;
+}
+.final-scoreboard li::before {
+  content: counter(rank);
+  min-width: 2.5vw;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  opacity: 0.4;
+  font-size: 2vh;
+}
+.final-scoreboard li .name { flex: 1; }
+.final-scoreboard li .pts  { font-weight: 600; opacity: 0.85; }
+.final-scoreboard li.winner {
+  background: linear-gradient(90deg, rgba(250, 204, 21, 0.15), transparent);
+  color: #facc15;
+}
+.final-scoreboard li.winner::before {
+  content: '🥇';
+  font-size: 2.6vh;
+}
+
+/* ───── image-recognition panels ───────────────────────────────────── */
+.image-display {
+  font-size: 32vh;
+  line-height: 1;
+  text-align: center;
+  margin: 2vh auto;
+  user-select: none;
+}
+/* Each new distractor flashes in briefly so you can tell the image changed. */
+.image-flash { animation: img-flash 0.12s ease-out; }
+@keyframes img-flash {
+  from { opacity: 0.3; transform: scale(0.85); }
+  to   { opacity: 1;   transform: scale(1); }
+}
+/* Target pulses to signal the scoring window. */
+.image-target { animation: img-target 0.5s ease-in-out infinite alternate; }
+@keyframes img-target {
+  from { transform: scale(1);    filter: drop-shadow(0 0 1vh rgba(134, 239, 172, 0.4)); }
+  to   { transform: scale(1.08); filter: drop-shadow(0 0 3vh rgba(52, 211, 153, 0.9)); }
+}
+/* CLEAR sub-phase of REVEAL — brief blank to clear short-term memory. */
+.image-display.cleared { opacity: 0; }
+
+/* REVEAL countdown bar — shrinks over showMs; mirrors reaction's countdown. */
+.reveal-bar {
+  width: 60vw;
+  height: 2vh;
+  margin: 2vh auto 0;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+#reveal-bar-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #86efac, #facc15);
+  transform-origin: left center;
+  transform: scaleX(1);
+  border-radius: 999px;
+}
+
+/* Live commit indicator — one pill per committed player during PLAY. */
+.commit-indicator {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1vh 1.5vw;
+  margin-top: 3vh;
+  padding: 0;
+  min-height: 4vh;
+}
+.commit-indicator li {
+  padding: 0.6vh 1.5vw;
+  border-radius: 999px;
+  font-size: 2vh;
+  background: rgba(255,255,255,0.06);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6vw;
+  animation: commit-pop 0.35s ease-out;
+}
+.commit-indicator li.pressed { color: #86efac; }
+.commit-indicator li.lockedOut { color: #fca5a5; opacity: 0.8; }
+@keyframes commit-pop {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+/* Reduced-motion: respects OS-level opt-in. Disables the countdown-bar
+   drain, GO! pulse, rank-row stagger, badge pop, score-update flash,
+   image-flash, image-target pulse, and the reveal-bar scale. Games'
+   animations (which load in CSS files after this one) are also killed
+   via the universal !important rules — our game CSS doesn't use
+   !important so these win. Users who opt in still get a functional UI,
+   just without the motion. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

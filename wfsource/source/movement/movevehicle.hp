@@ -1,0 +1,36 @@
+//============================================================================
+// movevehicle.hp — MovementHandler for MOBILITY_VEHICLE actors.
+// Routes INPUT mailbox bits → Jolt WheeledVehicleController each tick and
+// reads position/rotation back from the VehicleConstraint.
+//============================================================================
+
+#ifndef _MOVEVEHICLE_HP
+#define _MOVEVEHICLE_HP
+
+#include <movement/movement.hp>
+#include <physics/physical.hp>
+#include <cstdint>
+
+//===========================================================================
+
+class VehicleHandler : public MovementHandler
+{
+    struct VehicleHandlerData
+    {
+        uint32_t joltHandle;    // Handle into gVehicles[] in jolt_backend.cc
+    };
+
+public:
+    virtual void init(MovementManager& movementManager, MovementObject& movementObject);
+    virtual bool check();
+    virtual bool update(MovementManager& movementManager, MovementObject& movementObject,
+                        const BaseObjectList& baseObjectList);
+    virtual void predictPosition(MovementManager& movementManager, MovementObject& movementObject,
+                                 const Clock& clock, const BaseObjectList& baseObjectList);
+};
+
+extern VehicleHandler theVehicleHandler;
+
+//==============================================================================
+#endif  // _MOVEVEHICLE_HP
+//==============================================================================

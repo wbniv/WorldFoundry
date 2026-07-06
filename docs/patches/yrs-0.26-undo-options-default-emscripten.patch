@@ -1,0 +1,40 @@
+# WF local patch for the vendored y-crdt submodule (upstream y-crdt/y-crdt @ 5238955, yrs 0.26.0).
+# Purpose: enable `yrs::undo::Options::default()` on wasm32-unknown-emscripten so yffi's
+# `yundo_manager` (and the wf-edit web build) cross-compiles. Upstream gates the impl on
+# `not(target_family = "wasm")`, which over-broadly excludes emscripten even though its only
+# dependency (SystemClock, sync/time.rs) is gated the narrower `not(all(wasm, os=unknown))`
+# and IS present on emscripten. Apply from the submodule root:
+#   git -C wftools/y-crdt apply docs/patches/yrs-0.26-undo-options-default-emscripten.patch
+# Applied idempotently by: task dev-setup-web-edit
+#
+diff --git a/yrs/src/undo.rs b/yrs/src/undo.rs
+index 63222e7..c96e742 100644
+--- a/yrs/src/undo.rs
++++ b/yrs/src/undo.rs
+@@ -76,7 +76,11 @@ where
+     /// Creates a new instance of the [UndoManager] working in a `scope` of a particular shared
+     /// type and document. While it's possible for undo manager to observe multiple shared types
+     /// (see: [UndoManager::expand_scope]), it can only work with a single document at the same time.
+-    #[cfg(not(target_family = "wasm"))]
++    // WF local patch: was `not(target_family = "wasm")`, which also excluded
++    // emscripten even though its only dependency, Options::default()/SystemClock,
++    // is available there (see sync/time.rs gate). Aligned with the SystemClock
++    // gate so wasm32-unknown-emscripten (the web editor target) can build.
++    #[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+     pub fn new<T>(doc: &Doc, scope: &T) -> Self
+     where
+         T: AsRef<Branch>,
+@@ -889,7 +893,12 @@ pub struct Options<M> {
+ 
+ pub type CaptureTransactionFn = Arc<dyn Fn(&TransactionMut) -> bool + Send + Sync + 'static>;
+ 
+-#[cfg(not(target_family = "wasm"))]
++// WF local patch: narrowed from `not(target_family = "wasm")` to match the
++// SystemClock gate in sync/time.rs — this impl only needs SystemClock, which IS
++// available on emscripten. Lets wasm32-unknown-emscripten (the web editor) build
++// `Options::default()` (used by yffi's yundo_manager). Bare wasm32-unknown-unknown
++// still excluded.
++#[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
+ impl<M> Default for Options<M> {
+     fn default() -> Self {
+         Options {

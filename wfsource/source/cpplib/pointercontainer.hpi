@@ -58,7 +58,11 @@ PointerContainer<T>::Delete()
 template< class T>
 PointerContainer<T>::~PointerContainer()
 {
-	MEMORY_DELETE(*_memory,_ptr,T);
+	// Skip if Delete() was already called explicitly (sets _ptr=_memory=NULL).
+	// Used by ~Level which must Free the held DMalloc in HALLmalloc LIFO order
+	// (before member dtors of MailboxesWithStorage etc. fire).
+	if (_ptr)
+		MEMORY_DELETE(*_memory,_ptr,T);
 }
    
 //==============================================================================

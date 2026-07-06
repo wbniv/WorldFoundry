@@ -32,6 +32,7 @@
 #include <gfx/material.hp>
 #include <gfx/math.hp>
 #include <gfx/display.hp>
+#include <gfx/renderer_backend.hp>
 
 //============================================================================
 // kts maybe I should write an SVECTOR class
@@ -61,8 +62,7 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
    );
   globalRendererVariables.GTEMatrix = inverted;
 
-  glMatrixMode( GL_MODELVIEW );
-  LoadGLMatrixFromMatrix34(position);
+  RendererBackendGet().SetModelView(position);
 
 	Primitive* primitive  = _primList[0];
 	pRenderObj3DFunc renderer;
@@ -80,7 +80,7 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 		renderer = globalRendererVariables.currentRenderMaterial->Get3DRenderer();
 		int currentMaterial = globalRendererVariables.currentRenderFace->materialIndex;
 
-		while(currentMaterial == globalRendererVariables.currentRenderFace->materialIndex && faceIndex<_faceCount)
+		while(faceIndex<_faceCount && currentMaterial == globalRendererVariables.currentRenderFace->materialIndex)
 		{
 			globalRendererVariables.gteVect[0] = Vector3ToPS(_vertexList[globalRendererVariables.currentRenderFace->v1Index].position);
 			globalRendererVariables.gteVect[1] = Vector3ToPS(_vertexList[globalRendererVariables.currentRenderFace->v2Index].position);
@@ -90,12 +90,6 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 			//globalRendererVariables.currentRenderFace->Validate();
 
 			assert(ValidPtr(this));
-	#if defined(__WIN__)
-			long* rendererPtr = (long*)&renderer;
-	//		cout << "rendererPtr = " << rendererPtr << std::endl;
-	//		cout << "renderer = " << hex << *rendererPtr << std::endl;
-			assert(ValidCodePtr((void*)(*rendererPtr)));
-	#endif
 	//		cout << "RenderObject3D::Render: calling renderer " << std::endl;
 			(this->*renderer)(primitive);
 	//		cout << "RenderObject3D::Render: done calling renderer " << std::endl;
@@ -104,7 +98,6 @@ RenderObject3D::Render(ViewPort& vp,const Matrix34& position)
 			globalRendererVariables.currentRenderFace++;
 		}
 	}
-	assert(_faceList[_faceCount].materialIndex = -1);
 //	cout << "RenderObject3D::Render: done" << std::endl;
 }
 

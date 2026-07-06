@@ -1,0 +1,34 @@
+/*============================================================================*/
+/* light.ht: created from OADTYPES.S and light.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef light_HT
+#define light_HT
+ struct _Light {
+	int32 moveblocPageOffset;                 /* offset in page data for this objects page */
+	int32 toolsetPageOffset;                 /* offset in page data for this objects page */
+	int32 commonPageOffset;                 /* offset in page data for this objects page */
+			int32 MeshName;	/* This is a packedAssetID */
+	int32 meshPageOffset;                 /* offset in page data for this objects page */
+	int32 shadowPageOffset;                 /* offset in page data for this objects page */
+	int32 TemplateObject;        /* Default: 0 */
+	fixed32 lightRed;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetlightRed() const { return Scalar::FromFixed32(lightRed); }
+	fixed32 lightGreen;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetlightGreen() const { return Scalar::FromFixed32(lightGreen); }
+	fixed32 lightBlue;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0)) */
+    Scalar GetlightBlue() const { return Scalar::FromFixed32(lightBlue); }
+	fixed32 lightX;         /* Minumum: ( ((long) -32768 * 65536.0)) Maximum: ( ((long) 32767 * 65536.0)) */
+    Scalar GetlightX() const { return Scalar::FromFixed32(lightX); }
+	fixed32 lightY;         /* Minumum: ( ((long) -32768 * 65536.0)) Maximum: ( ((long) 32767 * 65536.0)) */
+    Scalar GetlightY() const { return Scalar::FromFixed32(lightY); }
+	fixed32 lightZ;         /* Minumum: ( ((long) -32768 * 65536.0)) Maximum: ( ((long) 32767 * 65536.0)) */
+    Scalar GetlightZ() const { return Scalar::FromFixed32(lightZ); }
+	int32 lightType;               /* Minumum: 0 Maximum: 1 Default: 0 */
+};
+/*============================================================================*/
+#endif         /* light_HT */
+/*============================================================================*/

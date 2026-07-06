@@ -1,0 +1,21 @@
+;============================================================================
+; Spike.def: created from OADdef.S and Spike.oas DO NOT MODIFY
+;============================================================================
+;##ifndef Spike_HT
+;##define Spike_HT
+	( define OAD_moveblocPageOffset 0 )	; common block: offset in page data for this objects page
+	( define OAD_toolsetPageOffset 4 )	; common block: offset in page data for this objects page
+	( define OAD_commonPageOffset 8 )	; common block: offset in page data for this objects page
+	( define OAD_MeshName 12 )	;file Mesh Name: This is a packedAssetID
+	( define OAD_meshPageOffset 16 )	; common block: offset in page data for this objects page
+	( define OAD_shadowPageOffset 20 )	; common block: offset in page data for this objects page
+	( define OAD_TemplateObject 24 )	; boolean: Default: 0
+	( define OAD_HealthModifier 28 )	; int32: Minumum: -100 Maximum: 100 Default: -1
+	( define OAD_ActivatedBy 32 )	; int32: Minumum: 0 Maximum: 3 Default: 1
+	( define OAD_ActivatedByActor 36 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_ActivatedByClass 40 )	; class reference: index into master class list, = CLASS_NULL if no reference
+	( define OAD_ActivatedByObjectList 44 )	; xdata_convert:
+	( define OAD_AIPageOffset 48 )	; common block: offset in page data for this objects page
+;============================================================================
+;##endif         ; Spike_DEF
+;============================================================================

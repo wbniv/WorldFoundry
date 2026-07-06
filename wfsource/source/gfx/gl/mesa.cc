@@ -26,13 +26,18 @@
 //============================================================================
 
 #include <time.h>
+#include <atomic>
+#include <hal/lifecycle.h>
+#include <gfx/host_gl_context.h>
+#include <gfx/display.hp>
 
-// kts major kludge, both GL and WF should use namespaces              
+// kts major kludge, both GL and WF should use namespaces
 #define Display XDisplay
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <GL/glu.h>
 #undef Display
+#include <X11/Xatom.h>  // XA_ATOM, for _NET_WM_STATE_FULLSCREEN
 
 //==============================================================================
 
@@ -45,6 +50,19 @@ struct HalDisplay
 };
 
 HalDisplay halDisplay;
+static Atom _wmDeleteWindow;
+
+// User clicked the window-manager close (X) button. The X event handler
+// only sets this flag; the main game loop polls it via
+// HALWindowCloseRequested() and exits via the normal shutdown path —
+// avoiding the half-broken "exit() from inside the event handler"
+// behaviour that was here before.
+//
+// Not `static` — host_gl_context.cc's HALRequestClose() links against this
+// to let editor hosts set the flag (Phase 0b sub-task #2). The standalone
+// X11 WM_DELETE_WINDOW handler in ProcessXEvents below still owns the
+// in-process write path; HALRequestClose is the host-driven alternative.
+std::atomic<int> _closeRequested{0};
 
 //==============================================================================
 
@@ -95,8 +113,10 @@ static void
 _atExitTermDisplay(int code)
 {
 	(void)code;					// suppress unused warnings
-   SetX11AutoRepeat(1);
-   XFlush(halDisplay.mainDisplay);
+    // HALCloseWindow() may have already nulled the display (clean exit path).
+    if (!halDisplay.mainDisplay) return;
+    SetX11AutoRepeat(1);
+    XFlush(halDisplay.mainDisplay);
 }
 
 //==============================================================================
@@ -128,13 +148,39 @@ OpenMainWindow( char *title )
     attr.event_mask = ExposureMask | StructureNotifyMask | KeyPressMask | KeyReleaseMask | FocusChangeMask;
     attr.colormap = XCreateColormap(halDisplay.mainDisplay, root, halDisplay.visInfo->visual, AllocNone);
 
-    halDisplay.win = XCreateWindow(halDisplay.mainDisplay, root, x, y, wfWindowWidth, wfWindowHeight,
+    halDisplay.win = XCreateWindow(halDisplay.mainDisplay, root, x, y, wfInitialWindowWidth, wfInitialWindowHeight,
                                    0, halDisplay.visInfo->depth, InputOutput, halDisplay.visInfo->visual,
                                    CWBorderPixel|CWColormap|CWEventMask, &attr);
     if(!halDisplay.win)
         FatalError("Couldn't open X window!");
     XStoreName(halDisplay.mainDisplay, halDisplay.win, title);
-    XMapWindow(halDisplay.mainDisplay, halDisplay.win);
+
+    // Tell the WM this is a normal application window so it gets decorations.
+    {
+        Atom wm_window_type   = XInternAtom(halDisplay.mainDisplay, "_NET_WM_WINDOW_TYPE", False);
+        Atom wm_type_normal   = XInternAtom(halDisplay.mainDisplay, "_NET_WM_WINDOW_TYPE_NORMAL", False);
+        XChangeProperty(halDisplay.mainDisplay, halDisplay.win,
+                        wm_window_type, XA_ATOM, 32, PropModeReplace,
+                        (unsigned char*)&wm_type_normal, 1);
+    }
+
+    // Request fullscreen before mapping so the WM sees it at map time
+    // (EWMH spec: set _NET_WM_STATE on an unmapped window via XChangeProperty;
+    // use ClientMessage only for already-visible windows).
+    extern bool bFullScreen;
+    if (bFullScreen)
+    {
+        Atom wm_state = XInternAtom(halDisplay.mainDisplay, "_NET_WM_STATE", False);
+        Atom fs_atom  = XInternAtom(halDisplay.mainDisplay, "_NET_WM_STATE_FULLSCREEN", False);
+        XChangeProperty(halDisplay.mainDisplay, halDisplay.win,
+                        wm_state, XA_ATOM, 32, PropModeReplace,
+                        (unsigned char*)&fs_atom, 1);
+    }
+
+    // XMapRaised = map + raise; signals the WM to focus the window on open.
+    XMapRaised(halDisplay.mainDisplay, halDisplay.win);
+    _wmDeleteWindow = XInternAtom(halDisplay.mainDisplay, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(halDisplay.mainDisplay, halDisplay.win, &_wmDeleteWindow, 1);
     glXMakeCurrent(halDisplay.mainDisplay, halDisplay.win, cx);
     AssertGLOK();
 #else
@@ -157,7 +203,7 @@ OpenMainWindow( char *title )
     attr.background_pixel = BlackPixel( halDisplay.mainDisplay, halDisplay.screenIndex );
 
    // Create the window 
-    halDisplay.win = XCreateWindow( halDisplay.mainDisplay, root, x,y, wfWindowWidth, wfWindowHeight, 0,
+    halDisplay.win = XCreateWindow( halDisplay.mainDisplay, root, x,y, wfInitialWindowWidth, wfInitialWindowHeight, 0,
                                     halDisplay.visInfo->depth, InputOutput,
                                     halDisplay.visInfo->visual,
                                     CWBorderPixel|CWColormap|CWEventMask|CWBackPixel, &attr);
@@ -176,9 +222,35 @@ OpenMainWindow( char *title )
 
 //==============================================================================
 
+// Editor-host init path: skip XOpenDisplay / glXChooseVisual /
+// glXCreateContext / XCreateWindow — the host already did those and
+// passed us the handles via SetHostGLContext. We just adopt them into
+// halDisplay and make the context current so the WFInitGL() call that
+// follows in Display::Display sees the host's GL state instead of a
+// default zero state. visInfo stays nullptr — the host already chose
+// the visual; halDisplay.visInfo is only consulted by the standalone
+// init path. The host's GLXContext is bound implicitly via
+// glXMakeCurrent and we never destroy it — HALCloseWindow's step-4
+// early-bail ensures we don't free what the host owns.
+static bool InitWithExistingContext()
+{
+    const HostGLContext h = GetHostGLContext();
+    assert(h.valid);
+    halDisplay.mainDisplay = static_cast<XDisplay*>(h.display);
+    halDisplay.win         = static_cast<Window>(h.win);
+    glXMakeCurrent(halDisplay.mainDisplay, halDisplay.win,
+                   static_cast<GLXContext>(h.context));
+    AssertGLOK();
+    return true;
+}
+
+//==============================================================================
+
 bool
 InitWindow( int /*xPos*/, int /*yPos*/, int /*xSize*/, int /*ySize*/ )
 {
+    if (GetHostGLContext().valid)
+        return InitWithExistingContext();
     OpenMainWindow( "World Foundry");
     return true;
 }
@@ -202,25 +274,13 @@ void ProcessXEvents(XEvent event)
 
     switch(event.type)
     {
-        case ConfigureNotify: 
+        case ConfigureNotify:
             {
-                /* this approach preserves a 1:1 viewport aspect ratio */
-                int vX, vY, vW, vH;
                 int eW = event.xconfigure.width, eH = event.xconfigure.height;
-                if(eW >= eH)
-                {
-                    vX = 0;
-                    vY = (eH - eW) >> 1;
-                    vW = vH = eW;
-                }
-                else
-                {
-                    vX = (eW - eH) >> 1;
-                    vY = 0;
-                    vW = vH = eH;
-                }
-                glViewport(vX, vY, vW, vH);
+                glViewport(0, 0, eW, eH);
                 AssertGLOK();
+                if (auto* d = Display::GetActive())
+                    d->SetLiveWindowSize(eW, eH);
             }
             break;
 
@@ -259,6 +319,7 @@ void ProcessXEvents(XEvent event)
                     break;
                 case XK_KP_Insert:
                 case XK_1:
+                case XK_space:
                     _joystickButtons |= EJ_BUTTONF_A;
                     break;
                 case XK_KP_Delete:
@@ -302,7 +363,12 @@ void ProcessXEvents(XEvent event)
                     _joystickButtons |= EJ_BUTTONF_K;
                     break;
                 case XK_Escape:
-                    sys_exit(0);
+                    // Same shutdown path as the WM-close button — set the
+                    // flag, let the main loop run its full cleanup. Calling
+                    // sys_exit() here ran atexit handlers from inside the
+                    // event handler and was unreliable for the same reason
+                    // the WM-close path was.
+                    _closeRequested.store(1);
 //                 case XK_Escape:
 //                     _joystickButtons |= 0x80000000;
                     break;
@@ -347,6 +413,7 @@ void ProcessXEvents(XEvent event)
                     break;
                 case XK_KP_Insert:
                 case XK_1:
+                case XK_space:
                     _joystickButtons &= ~EJ_BUTTONF_A;
                     break;
                 case XK_KP_Delete:
@@ -416,6 +483,11 @@ void ProcessXEvents(XEvent event)
           SetX11AutoRepeat(1);
           break;
 
+        case ClientMessage:
+            if ((Atom)event.xclient.data.l[0] == _wmDeleteWindow)
+                _closeRequested.store(1);
+            break;
+
         default:
             break;
     }
@@ -428,6 +500,12 @@ void ProcessXEvents(XEvent event)
 
 void XEventLoop()
 {
+    // Host-owned mode: editor reads X events from its own connection and
+    // routes input via HALInjectJoystickButtons (b0639c5). Engine must not
+    // pump events against a Display* it doesn't own.
+    if (GetHostGLContext().valid)
+        return;
+
     XEvent xev;
     int num_events;
 
@@ -441,6 +519,31 @@ void XEventLoop()
     }
 
     // printf("_joystickButtons = %x\n", _joystickButtons);
+}
+
+// Called by the main game loop to know when to break out cleanly.
+extern "C" int HALWindowCloseRequested(void)
+{
+    return _closeRequested.load();
+}
+
+// Destroy the X window immediately so it disappears before process exit.
+extern "C" void HALCloseWindow(void)
+{
+    // Host-owned mode: the host owns the X11 display / window / context.
+    // Tearing them down here would yank state out from under the editor.
+    if (GetHostGLContext().valid)
+        return;
+#if defined(__LINUX__)
+    if (halDisplay.win)
+    {
+        glXMakeCurrent(halDisplay.mainDisplay, None, nullptr);
+        XDestroyWindow(halDisplay.mainDisplay, halDisplay.win);
+        XCloseDisplay(halDisplay.mainDisplay);
+        halDisplay.win = 0;
+        halDisplay.mainDisplay = nullptr;
+    }
+#endif
 }
 
 //==============================================================================

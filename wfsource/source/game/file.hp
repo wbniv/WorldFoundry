@@ -1,0 +1,36 @@
+//============================================================================
+// file.hp:  FSN-style file box — template-only spawnable actor.
+//           Placed by Director Forth script at runtime via ConstructTemplateObject.
+//           Scale mailboxes 3040-3042 drive visual height (√file_size / 50).
+//============================================================================
+
+#ifndef _File_HP
+#define _File_HP
+
+//============================================================================
+
+#include "actor.hp"
+#include <oas/file.ht>
+
+//============================================================================
+
+class File: public Actor
+{
+public:
+	INLINE const _File* getOad() const { return (const _File*)_oadData; }
+	File(const SObjectStartupData* startupData);
+	virtual ~File() { }
+
+	virtual EActorKind kind() const;
+	virtual void Collision(PhysicalObject& other, const Vector3& normal);
+	virtual void update();
+};
+
+//============================================================================
+
+Actor*
+OadFile(const SObjectStartupData* startupData);
+
+//============================================================================
+#endif // !_File_HP
+//============================================================================

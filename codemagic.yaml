@@ -1,0 +1,421 @@
+# Codemagic CI — WorldFoundry
+#
+# Workflows:
+#   android-apk-debug   (push to 2026-ios) — Linux arm64 APK, no signing.
+#   ios-simulator-debug (push to 2026-ios) — Phases 0-3, no signing.
+#   ios-device-release  (manual/tag)       — Phase 4+, signed arm64 IPA.
+#
+# Build budget: 500 free Mac-min/month on the individual plan (the free-tier
+# hook — Mac runners are the expensive resource elsewhere). Linux minutes
+# are paid. iOS Mac builds avg 3.4 min/build as of 2026-04-22 — ~100-150
+# Mac builds/mo feasible.
+
+workflows:
+  #------------------------------------------------------------------------------
+  # android-apk-debug — debug APK (arm64-v8a) for phone + Google TV sideload.
+  #
+  # See docs/plans/2026-04-23-chromecast-googletv-port.md Phase 1.
+  # Triggers on every push to 2026-ios so each commit has a downloadable APK.
+  #------------------------------------------------------------------------------
+  android-apk-debug:
+    name: Android APK (Debug, arm64)
+    instance_type: linux_x2
+    max_build_duration: 30
+
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: '2026-ios'
+          include: true
+          source: true
+      cancel_previous_builds: true
+
+    environment:
+      vars:
+        # NDK r26c — matches local 26.2.11394342. sdkmanager will install it if
+        # the agent ships a different version; the exact string is the NDK
+        # directory name under $ANDROID_SDK_ROOT/ndk/.
+        WF_NDK_VERSION: "26.2.11394342"
+
+    scripts:
+      - name: Toolchain versions
+        script: |
+          set -euo pipefail
+          java -version
+          gradle --version || true
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-unset}"
+          echo "ANDROID_HOME=${ANDROID_HOME:-unset}"
+          cmake --version
+
+      - name: Install NDK r26c
+        script: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME}}"
+          if [ ! -d "$SDK/ndk/$WF_NDK_VERSION" ]; then
+            echo "Installing NDK $WF_NDK_VERSION..."
+            yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" \
+              "ndk;$WF_NDK_VERSION" \
+              "platforms;android-34" \
+              "build-tools;34.0.0" \
+              --sdk_root="$SDK"
+          else
+            echo "NDK $WF_NDK_VERSION already present."
+          fi
+          echo "NDK path: $SDK/ndk/$WF_NDK_VERSION"
+
+      - name: Build debug APK
+        script: |
+          set -euo pipefail
+          cd android
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME}}"
+          ./gradlew :app:assembleDebug \
+            -Pandroid.ndkVersion="$WF_NDK_VERSION" \
+            -Psdk.dir="$SDK" \
+            --no-daemon \
+            --stacktrace \
+            | tee ../gradle-build.log
+          echo "--- APK ---"
+          find . -name '*.apk' -exec ls -lh {} \;
+
+    artifacts:
+      - android/app/build/outputs/apk/debug/*.apk
+      - gradle-build.log
+
+  ios-simulator-debug:
+    name: iOS Simulator (Debug)
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+
+    cache:
+      cache_paths:
+        # CMake/Xcode project dir — avoids full project re-gen + recompile.
+        - build-ios-sim
+        # Jolt extraction — once the iOS Jolt block lands this avoids re-tar.
+        - engine/vendor/jolt-physics-5.5.0
+
+    environment:
+      xcode: latest
+
+    # python-tui-lib submodule points at a local dev path; not needed for engine
+    # build, so skip submodule init on CI.
+    #
+    # STOP-BLEED 2026-05-12: 490/500 Mac-min used by day 12. Auto-trigger
+    # disabled (events list emptied) until 2026-06-01. Manual builds from the
+    # Codemagic dashboard still work. To restore: uncomment the events + branch
+    # blocks below.
+    # See docs/plans/2026-05-12-codemagic-budget-monitor.md.
+    triggering:
+      events: []
+      # events:
+      #   - push
+      # branch_patterns:
+      #   - pattern: '2026-ios'
+      #     include: true
+      #     source: true
+      cancel_previous_builds: true
+
+    scripts:
+      - name: Toolchain versions
+        script: |
+          set -euo pipefail
+          sw_vers
+          xcodebuild -version
+          cmake --version
+          which xcrun
+          xcrun --sdk iphonesimulator --show-sdk-path
+
+      - name: Configure CMake for iOS Simulator (arm64)
+        script: |
+          set -euo pipefail
+          mkdir -p build-ios-sim
+          cd build-ios-sim
+          # Phase 0: the CMakeLists.txt has no if(IOS) branch yet; this
+          # configure is expected to fail or fall through to the Linux path
+          # and then break at build time. That failure *is* the Phase 0
+          # signal — the pipeline reached the Mac toolchain.
+          cmake -G Xcode \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT=iphonesimulator \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 \
+            -DCMAKE_BUILD_TYPE=Debug \
+            ..
+
+      - name: Build
+        script: |
+          set -euo pipefail
+          cd build-ios-sim
+          xcodebuild \
+            -project wf_game.xcodeproj \
+            -scheme wf_game \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            build \
+            | tee ../xcodebuild.log
+          # xcodebuild exit code is what we care about; `tee` preserves it
+          # via pipefail.
+
+      - name: Boot Simulator, install .app, capture screenshot + log
+        # Phase 1 Verify proxy for users without a local Mac: Codemagic's Mac
+        # runner has Xcode + xcrun simctl, so we install the .app on a boot'd
+        # Simulator and capture a screenshot + unified-log output from the
+        # launched process. NSLog from WFRootViewController::viewDidLoad
+        # (cd.iff sanity probe via HALGetAssetAccessor) is our target signal.
+        script: |
+          set -euo pipefail
+
+          SIM_ART="$CM_BUILD_DIR/sim-artifacts"
+          mkdir -p "$SIM_ART"
+
+          APP="$CM_BUILD_DIR/engine/Debug/wf_game.app"
+          BUNDLE_ID="org.worldfoundry.wf-game"
+
+          # Pick the first available iPhone simulator that matches the SDK.
+          DEVICE_ID=$(xcrun simctl list -j devices available \
+            | python3 -c '
+          import json, sys
+          j = json.load(sys.stdin)["devices"]
+          for runtime, devs in j.items():
+              if "iOS" not in runtime: continue
+              for d in devs:
+                  if "iPhone" in d["name"] and d["isAvailable"]:
+                      print(d["udid"]); sys.exit(0)
+          sys.exit(1)
+          ')
+          echo "Using simulator UDID: $DEVICE_ID"
+
+          xcrun simctl boot "$DEVICE_ID" || true
+          xcrun simctl bootstatus "$DEVICE_ID" -b
+
+          echo "--- install ---"
+          xcrun simctl install "$DEVICE_ID" "$APP"
+
+          echo "--- launch ---"
+          LAUNCH_OUTPUT=$(xcrun simctl launch --terminate-running-process "$DEVICE_ID" "$BUNDLE_ID")
+          echo "$LAUNCH_OUTPUT"
+          APP_PID=$(echo "$LAUNCH_OUTPUT" | awk '{print $NF}')
+          echo "Launched PID: $APP_PID"
+
+          echo "--- sleep 3s to let viewDidLoad run ---"
+          sleep 3
+
+          echo "--- screenshot ---"
+          xcrun simctl io "$DEVICE_ID" screenshot "$SIM_ART/screenshot.png"
+
+          echo "--- capture unified log (last 60s, wf_game process) ---"
+          # log show reads finished log entries — no streaming, no GNU timeout
+          # needed (which doesn't exist on macOS).
+          xcrun simctl spawn "$DEVICE_ID" log show \
+              --predicate 'processImagePath CONTAINS "wf_game"' \
+              --style compact \
+              --last 60s \
+            > "$SIM_ART/launch.log" 2>&1 || true
+          echo "--- last 40 lines of sim log ---"
+          tail -40 "$SIM_ART/launch.log" || true
+
+          echo "--- process still alive check ---"
+          # If the app crashed, it won't be listed. Non-fatal.
+          if xcrun simctl spawn "$DEVICE_ID" launchctl list 2>/dev/null | grep -q wf_game; then
+              echo "wf_game still running after 3s"
+          else
+              echo "NOTE: wf_game not in launchctl list (may have exited cleanly or crashed)"
+          fi
+
+          ls -la "$SIM_ART/"
+
+          echo "--- shutdown ---"
+          xcrun simctl shutdown "$DEVICE_ID" || true
+
+          # Non-fatal — the sanity probe is informational.
+          if grep -q "cd.iff opened" "$SIM_ART/launch.log"; then
+              echo "Phase 1 Verify: HALGetAssetAccessor opened cd.iff"
+          else
+              echo "WARN: did not observe 'cd.iff opened' in sim log — see artifacts"
+          fi
+
+    artifacts:
+      - sim-artifacts/**
+      # CMake sets RUNTIME_OUTPUT_DIRECTORY to ${CMAKE_SOURCE_DIR}/engine, so
+      # the .app + its dSYM land under engine/Debug/ on iOS Sim builds.
+      - engine/**/*.app
+      - engine/**/*.dSYM
+      - build-ios-sim/**/*.app
+      - build-ios-sim/CMakeFiles/**/*.log
+      - xcodebuild.log
+
+  #------------------------------------------------------------------------------
+  # android-apk-debug — debug APK (arm64-v8a) for phone + Google TV sideload.
+  #
+  # See docs/plans/2026-04-23-chromecast-googletv-port.md Phase 1.
+  # Trigger manually from the Codemagic dashboard (no webhook configured yet).
+  #------------------------------------------------------------------------------
+  android-apk-debug:
+    name: Android APK (Debug, arm64)
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+
+    environment:
+      vars:
+        # NDK r26c — matches local 26.2.11394342. sdkmanager installs it if the
+        # agent ships a different version; the exact string is the NDK directory
+        # name under $ANDROID_SDK_ROOT/ndk/.
+        WF_NDK_VERSION: "26.2.11394342"
+
+    cache:
+      cache_paths:
+        # NDK install (~500 MB) — skip sdkmanager on warm builds
+        - /usr/local/share/android-sdk/ndk/26.2.11394342
+        # Gradle dependency cache — avoids re-downloading AGP + deps each build
+        - ~/.gradle/caches
+        # Jolt extracted source — skip tar extraction on warm builds
+        - engine/vendor/jolt-physics-5.5.0
+
+    scripts:
+      - name: Toolchain versions
+        script: |
+          set -euo pipefail
+          java -version
+          cmake --version
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-unset}"
+          echo "ANDROID_HOME=${ANDROID_HOME:-unset}"
+
+      - name: Install NDK r26c if absent
+        script: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          if [ -z "$SDK" ]; then
+            echo "error: ANDROID_SDK_ROOT and ANDROID_HOME are both unset" >&2; exit 1
+          fi
+          # sdkmanager lives under cmdline-tools (new layout) or tools (old layout)
+          SDKMANAGER=""
+          for candidate in \
+              "$SDK/cmdline-tools/latest/bin/sdkmanager" \
+              "$SDK/cmdline-tools/bin/sdkmanager" \
+              "$SDK/tools/bin/sdkmanager"; do
+            if [ -x "$candidate" ]; then SDKMANAGER="$candidate"; break; fi
+          done
+          if [ -z "$SDKMANAGER" ]; then
+            # last resort: search the whole SDK dir
+            SDKMANAGER="$(find "$SDK" -name sdkmanager -type f 2>/dev/null | head -1)"
+          fi
+          echo "sdkmanager: ${SDKMANAGER:-NOT FOUND}"
+          if [ ! -d "$SDK/ndk/$WF_NDK_VERSION" ]; then
+            echo "Installing NDK $WF_NDK_VERSION..."
+            # 'yes' exits with SIGPIPE (141) once sdkmanager closes stdin;
+            # run in a subshell with pipefail off so that doesn't fail the step.
+            ( set +o pipefail; yes | "$SDKMANAGER" "ndk;$WF_NDK_VERSION" )
+          else
+            echo "NDK $WF_NDK_VERSION already present"
+          fi
+
+      - name: Extract Jolt vendor archive
+        script: |
+          set -euo pipefail
+          cd engine/vendor
+          if [ ! -d jolt-physics-5.5.0 ]; then
+            echo "Extracting jolt-physics-5.5.0.tar.gz..."
+            tar -xzf jolt-physics-5.5.0.tar.gz
+            # GitHub archive extracts to jrouwe-JoltPhysics-<sha>/; rename to
+            # match the JOLT_DIR path CMakeLists.txt expects.
+            extracted=$(tar -tzf jolt-physics-5.5.0.tar.gz | head -1 | cut -d/ -f1)
+            mv "$extracted" jolt-physics-5.5.0
+            echo "Renamed $extracted -> jolt-physics-5.5.0"
+          else
+            echo "Jolt already extracted"
+          fi
+
+      - name: Build debug APK
+        script: |
+          set -euo pipefail
+          cd android
+          # pipefail propagates Gradle's exit code through tee
+          ./gradlew :app:assembleDebug --info 2>&1 | tee ../gradle-build.log
+
+    artifacts:
+      - android/app/build/outputs/apk/debug/*.apk
+      - gradle-build.log
+
+  #------------------------------------------------------------------------------
+  # macos-desktop-debug — native macOS build of wf_game (renderer-agnostic
+  # bring-up: compile + link + headless --frame-step-smoke; rendering is a TRUE
+  # no-op, no window). See docs/plans/2026-05-26-macos-port-runtime-bringup.md.
+  #
+  # Ninja generator (NOT -G Xcode) so Jolt's add_library target stays modifiable
+  # (the Xcode-generator limitation is why iOS fell back to legacy physics).
+  # The first bring-up forces legacy physics (-DWF_PHYSICS_ENGINE=legacy) +
+  # WF_ASAN=OFF so the scarce Mac-min compile the *novel* macOS code rather than
+  # re-compiling Jolt (upstream, known-portable). Re-enable Jolt once green.
+  #
+  # Trigger manually from the Codemagic dashboard (events: [] — no auto-fire;
+  # Mac-budget-sensitive). Build branch: 2026-new-level.
+  #------------------------------------------------------------------------------
+  macos-desktop-debug:
+    name: macOS Desktop (Debug, headless)
+    instance_type: mac_mini_m2
+    max_build_duration: 20
+
+    cache:
+      cache_paths:
+        # CMake build dir — .o files + libwfengine.a + libzforth.a survive
+        # between runs so only changed TUs recompile on fix-iterate cycles.
+        - build-macos
+        # Jolt extraction — not used today (legacy physics) but cached now so
+        # the first Jolt-enabled build skips the tar -xzf step.
+        - engine/vendor/jolt-physics-5.5.0
+
+    environment:
+      xcode: latest
+
+    triggering:
+      events: []
+      cancel_previous_builds: true
+
+    scripts:
+      - name: Toolchain versions
+        script: |
+          set -euo pipefail
+          sw_vers
+          clang --version
+          cmake --version
+          ninja --version 2>/dev/null || brew install ninja
+
+      - name: Configure CMake for macOS desktop (arm64, Ninja)
+        script: |
+          set -euo pipefail
+          mkdir -p build-macos
+          rm -rf build-macos/CMakeCache.txt build-macos/CMakeFiles
+          cd build-macos
+          cmake -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DWF_ASAN=OFF \
+            .. 2>&1 | tee ../macos-configure.log
+
+      - name: Build wf_game
+        script: |
+          set -euo pipefail
+          cd build-macos
+          # --target wf_game pulls in libwfengine.a + zforth. tee preserves the
+          # exit code via pipefail so a compile/link failure fails the step.
+          cmake --build . --target wf_game 2>&1 | tee ../macos-build.log
+
+      - name: Run headless frame-step smoke
+        script: |
+          set -euo pipefail
+          # wf_game is a .app bundle; the Mach-O lives inside it.
+          # -L bypasses the cd.iff AssetAccessor path so the NSBundle lookup
+          # for cd.iff is never exercised — the smoke verifies compile+link+load
+          # with a standalone level. Level path must be absolute (resolved here).
+          WF_GAME="$CM_BUILD_DIR/engine/wf_game.app/Contents/MacOS/wf_game"
+          LEVEL="$CM_BUILD_DIR/wflevels/snowgoons-blender/snowgoons-standalone.iff"
+          cd wfsource/source/game
+          "$WF_GAME" --frame-step-smoke=30 --cycles=1 -L"$LEVEL" \
+            2>&1 | tee "$CM_BUILD_DIR/macos-smoke.log"
+
+    artifacts:
+      - macos-configure.log
+      - macos-build.log
+      - macos-smoke.log
+      - engine/wf_game

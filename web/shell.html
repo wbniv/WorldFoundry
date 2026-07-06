@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>World Foundry — moon_site01</title>
+<!--
+  Custom Emscripten shell for the wf_game web build (plan P6.2).
+  emcc substitutes the engine glue at the {{{ SCRIPT }}} marker below.
+
+  Start is gated behind a "click to start" button (Module.noInitialRun =
+  true, then Module.callMain on click). That gesture does double duty: it is
+  also the user interaction that unlocks the WebAudio AudioContext, because
+  the whole engine init — including miniaudio's AudioContext creation — runs
+  synchronously inside the click handler, up to StepFrame's first ASYNCIFY
+  yield. No separate audio-resume JS is needed (plan Phase 5).
+
+  Embed contract (any page / itch.io-style iframe). Note the engine parses
+  -L<path> as ONE joined token (main.cc:210 reads argv[i]+2), NOT "-L <path>":
+      <canvas id="canvas" width="1280" height="720"></canvas>
+      <script>Module = { canvas: document.getElementById('canvas'),
+                         arguments: ['-L/moon_site01.iff'] };</script>
+      <script src="wf_game.js"></script>
+-->
+<style>
+  :root {
+    --wf-bg:     #0b0d12;
+    --wf-panel:  #14181f;
+    --wf-edge:   #2a313d;
+    --wf-accent: #5ec8ff;
+    --wf-text:   #c7d0dc;
+    --wf-dim:    #6b7686;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    background: var(--wf-bg);
+    color: var(--wf-text);
+    font: 14px/1.4 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  body { display: flex; align-items: center; justify-content: center; }
+
+  #wf-frame {
+    width: min(96vw, 1280px);
+    background: var(--wf-panel);
+    border: 1px solid var(--wf-edge);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 14px 50px rgba(0,0,0,.55);
+  }
+  #wf-titlebar {
+    padding: 10px 16px;
+    font-weight: 600;
+    letter-spacing: .2px;
+    border-bottom: 1px solid var(--wf-edge);
+    background: linear-gradient(180deg, #181d26, #11151c);
+  }
+  #wf-titlebar #wf-level { color: var(--wf-accent); }
+
+  #wf-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+  }
+  #canvas {
+    display: block;
+    width: 100%; height: 100%;
+    outline: none;
+    image-rendering: auto;
+  }
+
+  /* Fullscreen the stage container (not the canvas) — Emscripten's own
+     requestFullscreen wraps/resizes the canvas and renders blank. The canvas
+     fills the container, and the engine resizes its GL surface to the canvas's
+     displayed size each frame (emscripten_window.cc → WFResizeSurface), so the
+     game fills the screen at the right aspect — no letterbox, no stretch. */
+  #wf-stage:fullscreen {
+    width: 100vw; height: 100vh;
+    aspect-ratio: auto;
+    background: #000;
+  }
+
+  #wf-overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 22px;
+    background: radial-gradient(120% 120% at 50% 40%, rgba(20,24,31,.55), rgba(8,9,13,.92));
+    backdrop-filter: blur(1.5px);
+  }
+  #wf-start {
+    appearance: none;
+    font: inherit; font-size: 20px; font-weight: 600;
+    color: #061018;
+    background: var(--wf-accent);
+    border: none; border-radius: 999px;
+    padding: 14px 30px;
+    cursor: pointer;
+    transition: transform .08s ease, filter .15s ease, opacity .15s ease;
+  }
+  #wf-start:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+  #wf-start:disabled { background: #2b3340; color: var(--wf-dim); cursor: default; }
+
+  #wf-progress {
+    width: 60%; max-width: 420px; height: 6px;
+    background: #20262f; border-radius: 999px; overflow: hidden;
+  }
+  #wf-bar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #3aa0ff, var(--wf-accent));
+    transition: width .2s ease;
+  }
+
+  #wf-statusbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 14px;
+    font-size: 12px; color: var(--wf-dim);
+    border-top: 1px solid var(--wf-edge);
+    background: #11151c;
+  }
+  #wf-statusbar button {
+    appearance: none;
+    background: transparent; border: 1px solid var(--wf-edge);
+    color: var(--wf-text); border-radius: 6px;
+    padding: 3px 9px; margin-left: 8px; cursor: pointer; font-size: 13px;
+  }
+  #wf-statusbar button:hover { border-color: var(--wf-accent); color: var(--wf-accent); }
+</style>
+</head>
+<body>
+  <div id="wf-frame">
+    <div id="wf-titlebar">World&nbsp;Foundry — <span id="wf-level">moon_site01</span></div>
+    <div id="wf-stage">
+      <canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
+      <div id="wf-overlay">
+        <button id="wf-start" disabled>Loading…</button>
+        <div id="wf-progress"><div id="wf-bar"></div></div>
+      </div>
+    </div>
+    <div id="wf-statusbar">
+      <span id="wf-status">Loading cd.iff…</span>
+      <span><button id="wf-full" title="Fullscreen">⛶ Fullscreen</button></span>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var startBtn = document.getElementById('wf-start');
+      var bar      = document.getElementById('wf-bar');
+      var statusEl = document.getElementById('wf-status');
+      var overlay  = document.getElementById('wf-overlay');
+      var canvas   = document.getElementById('canvas');
+      var started  = false;
+
+      // Level selectable via ?level=<name> — one build fronts many levels. The
+      // file must be in the build's --preload-file set (CMakeLists EMSCRIPTEN
+      // block). NOTE: pass the "-standalone" level variant (a complete L-chunk,
+      // magic "L4"), not the LVAS asset-bundle .iff — the -L path expects the
+      // standalone layout (see plan P3 / Taskfile run-moon-site). The engine
+      // wants the path joined to the switch as ONE token: "-L<path>"
+      // (main.cc:210), never "-L <path>".
+      var qLevel = new URLSearchParams(location.search).get('level') || 'moon_site01-standalone';
+      // Per-level engine args. moon_site01's 1024² NAC terrain texture needs a
+      // wider VRAM box + transient texture slot than the engine defaults — without
+      // these the TGA overflows the slot (texture.cc:74 RangeCheckExclusive). This
+      // mirrors the native `task run-moon`; other levels use the defaults.
+      // Keep in sync with `task run-moon`. The moon's PERM atlas (starfield.tga
+      // 512×256, added with the chunk-streaming work) needs the --vram-perm-*
+      // overrides as well as the transient slot — without them the PERM texture
+      // overflows the 256-pixel default and aborts at load (texture.cc:74).
+      var LEVEL_ARGS = {
+        'moon_site01-standalone': ['--vram-width=4096', '--vram-height=2048',
+                                   '--vram-slot-width=1024', '--vram-slot-height=1024',
+                                   '--vram-perm-width=1024', '--vram-perm-height=512'],
+      };
+      var ARGS = (LEVEL_ARGS[qLevel] || []).concat(['-L/' + qLevel + '.iff']);
+      var name = qLevel.replace(/-standalone$/, '');
+      document.getElementById('wf-level').textContent = name;
+      document.title = 'World Foundry — ' + name;
+
+      window.Module = {
+        canvas: canvas,
+        arguments: ARGS,
+        noInitialRun: true,           // gate engine start on the click gesture
+        print:    function (t) { console.log(t); },
+        printErr: function (t) { console.error(t); },
+        setStatus: function (text) {
+          if (started) return;
+          statusEl.textContent = text || 'Ready';
+          var m = text && text.match(/([\d.]+)\s*\/\s*([\d.]+)/);
+          if (m) bar.style.width = (100 * parseFloat(m[1]) / parseFloat(m[2])) + '%';
+        },
+        onRuntimeInitialized: function () {
+          // wasm instantiated + cd.iff preload satisfied — safe to start.
+          bar.style.width = '100%';
+          statusEl.textContent = 'Ready';
+          startBtn.disabled = false;
+          startBtn.textContent = '▶ Click to start';
+        }
+      };
+
+      startBtn.addEventListener('click', function () {
+        if (startBtn.disabled || started) return;
+        started = true;
+        overlay.style.display = 'none';
+        statusEl.textContent = 'Running — ' + name;
+        canvas.focus();
+        // Runs engine init (incl. AudioContext creation) synchronously inside
+        // this gesture, up to the first ASYNCIFY yield → audio is unlocked.
+        Module.callMain(Module.arguments);
+      });
+
+      var stage = document.getElementById('wf-stage');
+      document.getElementById('wf-full').addEventListener('click', function () {
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+          (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+          return;
+        }
+        // Native fullscreen on the container — NOT Module.requestFullscreen,
+        // which wraps/resizes the canvas and blanks the fixed-size GL surface.
+        (stage.requestFullscreen || stage.webkitRequestFullscreen).call(stage);
+      });
+    })();
+  </script>
+  {{{ SCRIPT }}}
+</body>
+</html>

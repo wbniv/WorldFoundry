@@ -1,0 +1,159 @@
+\ Ficl test orchestrator - requires MARKER from softwords, forth2012-test-suite
+\ ficl306 - uses ttester.fr, core.fr from forth2012-test-suite, modified for ficl
+\
+marker ficltest-marker
+-1 set-order                   \ guarantee default search order
+
+load ttester.fr
+load core.fr
+load coreplus.fr
+
+\ verify initial conditions
+t{ -> }t
+
+\ test double stuff
+testing 2>r 2r> 2r@
+: 2r1  2>r r> r> swap ;
+: 2r2  swap >r >r 2r> ;
+: 2r3  2>r 2r@ R> R> 2DUP >R >R SWAP 2r> ;
+
+t{ 1 2 2r1 -> 1 2 }t
+t{ 1 2 2r2 -> 1 2 }t
+t{ 1 2 2r3 -> 1 2 1 2 1 2 }t
+t{ -> }t
+
+\ Now test ficl extras and optional word-sets
+testing locals
+: local1 { a b c | clr -- c b a 0 }
+    c b a clr
+;
+
+: local2 { | clr -- 0 } clr ;
+: local3 { a b | c }
+    a to c
+    b to a
+    c to b
+    a b
+;
+
+t{ 1 2 3 local1 -> 3 2 1 0 }t
+t{ local2 -> 0 }t
+t{ 1 local2 -> 1 0 }t
+t{ 1 2 local3 -> 2 1 }t
+
+testing :noname
+t{ :noname 1 ; execute -> 1 }t
+t{ 1 2 3 -rot -> 3 1 2 }t
+
+testing default search order
+t{ get-order -> forth-wordlist 1 }t
+t{ only definitions get-order -> forth-wordlist 1 }t
+
+testing forget
+here constant fence
+t{ fence forget fence -> here }t
+
+testing within
+t{ -1 1 0    within -> true }t
+t{  0 1s 2   within -> true }t
+t{ -100 0 -1 within -> true }t
+t{ -1 1 2    within -> false }t
+t{ -1 1 -2   within -> false }t
+t{ 1 -5 5    within -> true }t
+t{ 33000 32000 34000 within -> true }t
+t{ 0x80000000 0x7f000000 0x81000000 within -> true }t
+
+testing exception words
+: exc1 1 throw ;
+: exctest1 [ ' exc1 ] literal catch ;
+: exc2 exctest1 1 = if 2 throw endif ;
+: exctest2 [ ' exc2 ] literal catch ;
+: exctest? ' catch ;
+
+t{ exctest1 -> 1 }t
+t{ exctest2 -> 2 }t
+t{ exctest? abort -> -1 }t
+
+testing refill
+\ from file loading
+0 [if]
+.( Error )
+[else]
+1 [if]
+[else]
+.( Error )
+[then]
+[then]
+
+\ refill from evaluate string
+t{ -> }t
+t{ s" 1 refill 2 " evaluate -> 1 0 2 }t
+
+
+testing prefixes
+t{ 0x10 -> decimal 16 }t
+t{ hex 0d10 -> decimal 10 }t
+t{ hex 100 -> decimal 256 }t
+\ prefix should not affect state of BASE
+t{ decimal 0x0f base @ 10 = -> 15 true }t
+
+testing 2constant
+2 3 2constant 2c23
+t{ 2c23 -> 2 3 }t
+t{ 2c23 swap to 2c23 2c23 -> 3 2 }t
+
+testing number builder
+t{ 1 -> 1 }t
+t{ 3. -> 0 3 }t
+t{ -1 -> -1 }t
+
+has-floating [if]              \ defined in ttester.fr
+testing floating point
+    t{ fdepth -> 0 }t
+    t{ 1e0 2e0 f+ 3e0 f- f0= -> true }t
+    t{ 6e0 2e0 f/ 3e0 f- f0= -> true }t
+    t{ 2e0 3e0 f* 6e0 f- f0= -> true }t
+    t{ 1e0 fnegate f0< -> true }t
+    t{ 1e0 fdup f- f0= -> true }t
+    t{ 1e0 2e0 fover fswap f- f+ f0= -> true }t
+    t{ 1e0 2e0 f2dup fdepth f2drop f2drop -> 4 }t
+    t{ 1e0 2e0 f2drop fdepth -> 0 }t
+    t{ 1e0 2e0 f< -> true }t
+    t{ 2e0 1e0 f> -> true }t
+
+    2e0  : flit1 fliteral ;
+    3e-1 : flit2 fliteral ;
+    t{ flit1 2e0 f- f0= -> true }t
+    t{ flit1 fconstant fconst2 -> }t
+    t{ flit2 fconstant fconst3 -> }t
+    t{ fconst2 -> flit1 }t
+    t{ fconst3 to fconst2 fconst2 fconst3 f~= -> true }t
+
+testing compiled float literals
+    fvariable vflit
+    : t-flit-store  100e vflit f! ;
+    t{ t-flit-store vflit f@ 100e f- f0= -> true }t
+
+    : t-flit-two  1e 2e f+ ;
+    t{ t-flit-two 3e f- f0= -> true }t
+
+    1.25e fconstant fc-lit
+    t{ fc-lit 1.25e f- f0= -> true }t
+
+    : t-fplusstore  0e vflit f!  1e vflit f+!  vflit f@ 1e f- f0= ;
+    t{ t-fplusstore -> true }t
+
+testing f. precision
+    : f.pad  f. pad dup strlen ;
+    t{ 6 set-precision 3.14159265e0 f.pad s" 3.14159 " compare -> 0 }t
+    t{ 3 set-precision 3.14159265e0 f.pad s" 3.14 " compare -> 0 }t
+    t{ 1 set-precision 3.14159265e0 f.pad s" 3 " compare -> 0 }t
+    t{ 10 set-precision 1e0 f.pad s" 1 " compare -> 0 }t
+    t{ 6 set-precision 0e0 f.pad s" 0 " compare -> 0 }t
+    t{ 6 set-precision -2.5e0 f.pad s" -2.5 " compare -> 0 }t
+    6 set-precision cr
+[else]
+    .( skipping float tests ) cr
+[endif]
+
+ficltest-marker        \ dictionary cleanup

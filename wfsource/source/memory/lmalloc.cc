@@ -26,12 +26,14 @@
 
 #define _LMALLOC_CC
 #include <memory/lmalloc.hp>
+#include <cpplib/align.hp>
+#include <cstdint>
 #include <cpplib/stdstrm.hp>
 #include <streams/dbstrm.hp>
 #include <cpplib/libstrm.hp>
 #include <hal/hal.h>
 
-#define LMALLOC_TRACK_SIZE 0
+#define LMALLOC_TRACK_SIZE 1
 #define LMALLOC_TRACK_LINE_AND_FILE 0
 
 #if LMALLOC_TRACK_LINE_AND_FILE
@@ -50,15 +52,26 @@ struct FileLine
 	enum
 	{
 		ALLOCATED = 'ALOC',
-		FREED = 'FREE'
+		FREED = 'FREE',
+		CANARY_VALUE = (int32)0xDEADBEEF
 	};
-	long _state;
-	int _size;			                // size of allocation
+	int32 _state;
+	int _size;			                // size of allocation (includes FileLine header + canary)
 #if LMALLOC_TRACK_LINE_AND_FILE
 	char* _file;						// file and line allocation occured on
 	int _line;
 #endif
+	// sizeof(FileLine) must be a multiple of WF_POINTER_ALIGN so the user pointer
+	// (retVal + sizeof(FileLine)) inherits the block's alignment.
+	// With LMALLOC_TRACK_SIZE && !LMALLOC_TRACK_LINE_AND_FILE: _state(4)+_size(4)=8 ✓
 };
+
+// The total per-block debug overhead (header + canary reservation) must be a
+// multiple of WF_POINTER_ALIGN, so an already-aligned caller request stays
+// aligned — see Allocate(). Holds on every target: align==4 (ESP32) and
+// align==8 (64-bit hosts, AAPCS Cortex-M).
+static_assert((sizeof(FileLine) + ALIGN_POW2(sizeof(int32), WF_POINTER_ALIGN)) % WF_POINTER_ALIGN == 0,
+              "LMalloc debug overhead must be a multiple of WF_POINTER_ALIGN");
 #endif
 
 //==============================================================================
@@ -74,6 +87,18 @@ LMalloc::_Validate() const
 	assert(_currentFree >= _memory);
 	assert(_currentFree < (_endMemory));
 	assert(_flags == 0 || _flags == FLAG_MEMORY_OWNED);
+
+#if LMALLOC_TRACK_SIZE
+	char* p = _memory;
+	while (p < _currentFree)
+	{
+		FileLine* fl = (FileLine*)p;
+		AssertMsg(fl->_state == FileLine::ALLOCATED, "LMalloc _Validate: block not ALLOCATED at " << (void*)p);
+		AssertMsg(*(int32*)((char*)fl + fl->_size - sizeof(int32)) == FileLine::CANARY_VALUE,
+		          "LMalloc _Validate: canary corrupted at " << (void*)p);
+		p += fl->_size;
+	}
+#endif
 }
 
 #endif // DO_ASSERTIONS
@@ -157,6 +182,7 @@ LMalloc::LMalloc(void* memory, size_t size MEMORY_NAMED( COMMA const char* name 
 	assert(size);
 	assert(size >= 4);
 	AssertMsg(ValidPtr(memory),"memory = " << memory);
+	AssertMsg(((uintptr_t)memory & WF_POINTER_ALIGN_MASK) == 0, "LMalloc base pointer must be " << WF_POINTER_ALIGN << "-byte aligned, got " << memory);
 	_memory = (char*)memory;
 	assert(ValidPtr(_memory));
 	_endMemory = _memory + size;
@@ -199,14 +225,21 @@ LMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 #if DO_ASSERTIONS
 #if LMALLOC_TRACK_SIZE
 	size += sizeof(FileLine);
+	// Reserve the canary rounded up to WF_POINTER_ALIGN so the total debug
+	// overhead stays a multiple of the platform alignment — otherwise a bare
+	// 4-byte canary knocks an 8-aligned request off alignment and trips the
+	// "not N-byte aligned" warning below on our own bookkeeping. Using the
+	// platform constant (not a literal 8) keeps this byte-identical on 32-bit
+	// targets where WF_POINTER_ALIGN==4 (e.g. ESP32). See align.hp.
+	size += ALIGN_POW2(sizeof(int32), WF_POINTER_ALIGN);	// canary sentinel
 #endif
 #endif
 
-	if(size&3)
+	if(size & WF_POINTER_ALIGN_MASK)
 	{
-		DBSTREAM1(cwarn << "LMalloc of " << size << " not long word aligned" << std::endl; )
+		DBSTREAM1(cwarn << "LMalloc of " << size << " not " << WF_POINTER_ALIGN << "-byte aligned, rounding up" << std::endl; )
 	}
-	size += (4-(size&0x3))&3;
+	size = ALIGN_POW2(size, WF_POINTER_ALIGN);
 	assert(ValidPtr(_memory+size));			// insure the size is ok for this architecture
 
 	if((_currentFree + size) >= (_endMemory))
@@ -227,6 +260,9 @@ LMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 	_currentFree += size;
 #if DO_ASSERTIONS
 #if LMALLOC_TRACK_SIZE
+	if ((char*)retVal > _memory)
+		AssertMsg(*(int32*)((char*)retVal - sizeof(int32)) == FileLine::CANARY_VALUE,
+		          "LMalloc: canary corrupted — buffer overrun in previous allocation");
 	FileLine* fl = (FileLine*)retVal;
 	fl->_state = FileLine::ALLOCATED;
 #if LMALLOC_TRACK_LINE_AND_FILE
@@ -234,6 +270,7 @@ LMalloc::Allocate(size_t size ASSERTIONS( COMMA const char* file COMMA int line)
 	fl->_line = line;
 #endif		// LMALLOC_TRACK_LINE_AND_FILE
 	fl->_size = size;
+	*(int32*)((char*)retVal + size - sizeof(int32)) = FileLine::CANARY_VALUE;
 	retVal = ((char*)retVal) + sizeof(FileLine);
 #endif		// LMALLOC_TRACK_SIZE
 #endif		// DO_ASSERTIONS
@@ -271,6 +308,8 @@ LMalloc::Free(const void* mem)
 #if DO_ASSERTIONS
 #if LMALLOC_TRACK_SIZE
 	FileLine* fl = (FileLine*)mem;
+	AssertMsg(*(int32*)((char*)mem + fl->_size - sizeof(int32)) == FileLine::CANARY_VALUE,
+	          "LMalloc: canary corrupted at Free — buffer overrun detected");
 	assert(fl->_state == FileLine::ALLOCATED);
 
 	FileLine* nextfl = (FileLine*)(((char*)mem)+fl->_size);
@@ -280,6 +319,26 @@ LMalloc::Free(const void* mem)
 	if(nextfl)
 	{
 		cerror << "LMalloc allocation mismatch:" << std::endl;
+		// Enumerate every still-allocated block sitting on top of the block
+		// we're trying to free, so the LIFO-violating allocations can be
+		// identified by size (with -lms to see file:line for those sizes).
+		// Added 2026-05-18 while hunting the UnloadLevel LIFO chain; kept
+		// because the diagnosis trail in docs/investigations/2026-05-18-
+		// unloadlevel-lifo-bug.md depends on it for follow-up bugs in
+		// WFGame::~WFGame and engine shutdown.
+		cerror << "  trying to free block: addr=" << (void*)mem
+		       << " size=" << fl->_size << std::endl;
+		cerror << "  blocks still allocated on top (in stack-top → bottom order):" << std::endl;
+		FileLine* walk = nextfl;
+		int idx = 0;
+		while (walk && walk->_state == FileLine::ALLOCATED && (char*)walk < _currentFree) {
+			cerror << "    [" << idx << "] addr=" << (void*)walk
+			       << " size=" << walk->_size << std::endl;
+			walk = (FileLine*)(((char*)walk) + walk->_size);
+			if (++idx > 20) { cerror << "    ... (truncated)" << std::endl; break; }
+		}
+		cerror << "  _currentFree=" << (void*)_currentFree
+		       << "  expected mem=" << (void*)(_currentFree - fl->_size) << std::endl;
 #if LMALLOC_TRACK_LINE_AND_FILE
 		cerror << "should have freed: file = " << fl->_file << ", line = " << fl->_line << std::endl;
 		cerror << "but tried to free: file = " << nextfl->_file << ", line = " << nextfl->_line << std::endl;

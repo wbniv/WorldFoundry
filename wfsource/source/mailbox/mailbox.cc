@@ -51,9 +51,15 @@ Mailboxes::_Print( std::ostream& s ) const
 
 //==============================================================================
 
-MailboxesWithStorage::MailboxesWithStorage(long mailboxBase, long numberOfLocalMailboxes, Mailboxes* parent) :
+MailboxesWithStorage::MailboxesWithStorage(int32 mailboxBase, int32 numberOfLocalMailboxes, Mailboxes* parent, Memory* memory) :
     _mailboxBase(mailboxBase),
-    _localMailboxes(numberOfLocalMailboxes),
+    // Default `memory` is HALLmalloc, which is fine for the long-lived
+    // global/persistent/scratch instances created in deterministic order at
+    // engine startup or Level construction. Per-actor ActorMailboxes (small,
+    // many, destroyed mid-Level-teardown) MUST pass the per-level pool —
+    // see actor.cc ActorMailboxes ctor — otherwise HALLmalloc's LIFO
+    // discipline is violated when actors free out of stack order.
+    _localMailboxes(numberOfLocalMailboxes, memory),
     _parent(parent)
 {
     RangeCheck(0,_mailboxBase,10000);   // kts arbitrary
@@ -70,7 +76,7 @@ MailboxesWithStorage::~MailboxesWithStorage()
 }
 
 Scalar 
-MailboxesWithStorage::ReadMailbox(long mailbox) const
+MailboxesWithStorage::ReadMailbox(int32 mailbox) const
 {
     if(mailbox >= _mailboxBase && mailbox < _localMailboxes.Size()+_mailboxBase)
     {
@@ -81,13 +87,14 @@ MailboxesWithStorage::ReadMailbox(long mailbox) const
         if(_parent)
             return _parent->ReadMailbox(mailbox);
         else
-            assert(0);
+            AssertMsg(0,"Attempt to read mailbox " << mailbox << " out of valid range ["
+                        << _mailboxBase << ", " << (_mailboxBase + _localMailboxes.Size() - 1) << "]");
             return Scalar::zero;
     }
 }
 
 void 
-MailboxesWithStorage::WriteMailbox(long mailbox, Scalar value)
+MailboxesWithStorage::WriteMailbox(int32 mailbox, Scalar value)
 {
     if(mailbox >= _mailboxBase && mailbox < _localMailboxes.Size()+_mailboxBase)
     {
@@ -99,7 +106,8 @@ MailboxesWithStorage::WriteMailbox(long mailbox, Scalar value)
         if(_parent)
             _parent->WriteMailbox(mailbox, value);
         else
-            AssertMsg(0,"Attempt to write mailbox " << mailbox << " which doesn't exist");
+            AssertMsg(0,"Attempt to write mailbox " << mailbox << " out of valid range ["
+                        << _mailboxBase << ", " << (_mailboxBase + _localMailboxes.Size() - 1) << "]");
     }
 }
 

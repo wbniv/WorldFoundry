@@ -131,10 +131,24 @@ LevelRooms::AddObjectToRoom( int32 objectIndex )
 	assert( objectIndex >= 0 );
 	BaseObject* object = (*_masterObjectList)[objectIndex];
    assert(ValidPtr(object));
-	AssertMsg( object->kind() != BaseObject::StatPlat_KIND, "Cannot generate or move a statplat at runtime" );
+	// Statplats are static collision baked per-room, so the runtime forbids
+	// generating or moving them (it would desync the baked room collision). In
+	// the EDITOR (wf-edit drives the engine via RunEditor), though, repositioning
+	// a platform is a core authoring action — so allow a moved statplat through
+	// the normal room-add below instead of aborting the process. The mesh + Jolt
+	// body already followed the gizmo via setCurrentPos for live preview, and the
+	// authoritative per-room collision is recomputed on save+reload. Outside the
+	// editor this stays a hard assert (moving a statplat mid-game is a real bug).
+	// Without this gate, dragging any statplat in wf-edit hit AssertMsg here on
+	// the next Room::UpdateRoomContents → _sys_assert → exit(-1) → the static
+	// debug-bridge gListenerThread's joinable ~thread → std::terminate (SIGABRT).
+	// Root cause: docs/investigations/2026-05-25-wf-edit-statplat-move-abort.md.
+	extern bool gEditorMode;   // game/main.cc — set true under --editor
+	if ( !gEditorMode )
+		AssertMsg( object->kind() != BaseObject::StatPlat_KIND, "Cannot generate or move a statplat at runtime (objectIndex=" << objectIndex << ", kind=" << object->kind() << ", object=" << *object << ")" );
 
-   PhysicalObject* po = dynamic_cast<PhysicalObject*>(object);
-   assert(ValidPtr(po));
+   assert(IsPhysicalObject(object));
+   PhysicalObject* po = static_cast<PhysicalObject*>(object);
 
 	int roomnum = -1;
 	// figure out which room to add to
@@ -156,8 +170,8 @@ LevelRooms::AddObjectToRoom( int32 objectIndex )
 	// make sure that the object is permanent or in the room corresponding
 	// to its asset
 
-   Actor* actor = dynamic_cast<Actor*>(object);
-   assert(ValidPtr(actor));
+   assert(IsActor(object));
+   Actor* actor = static_cast<Actor*>(object);
 	if ( actor->HasMesh() )
 	{
 		packedAssetID assetID = actor->GetMeshName();
@@ -187,8 +201,8 @@ LevelRooms::RemoveObjectFromRoom( int32 idxObject )
 	assert(idxObject > 0);
 	BaseObject* object = (*_masterObjectList)[idxObject];
 	assert( ValidPtr( object ) );
-   PhysicalObject* po = dynamic_cast<PhysicalObject*>(object);
-   assert(ValidPtr(po));
+   assert(IsPhysicalObject(object));
+   PhysicalObject* po = static_cast<PhysicalObject*>(object);
 	int roomnum = -1;
 
 	assert( ValidPtr( _rooms ) );

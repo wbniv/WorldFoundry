@@ -1,0 +1,27 @@
+/*============================================================================*/
+/* shield.ht: created from OADTYPES.S and shield.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef shield_HT
+#define shield_HT
+ struct _Shield {
+	int32 moveblocPageOffset;                 /* offset in page data for this objects page */
+	int32 toolsetPageOffset;                 /* offset in page data for this objects page */
+	int32 commonPageOffset;                 /* offset in page data for this objects page */
+			int32 MeshName;	/* This is a packedAssetID */
+	int32 meshPageOffset;                 /* offset in page data for this objects page */
+	int32 shadowPageOffset;                 /* offset in page data for this objects page */
+	int32 TemplateObject;        /* Default: 1 */
+	fixed32 BlinkFrequency;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0)) */
+    Scalar GetBlinkFrequency() const { return Scalar::FromFixed32(BlinkFrequency); }
+	fixed32 ShieldPurchaseDisplay;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0)) */
+    Scalar GetShieldPurchaseDisplay() const { return Scalar::FromFixed32(ShieldPurchaseDisplay); }
+	fixed32 InvulnerabilityDisplay;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0)) */
+    Scalar GetInvulnerabilityDisplay() const { return Scalar::FromFixed32(InvulnerabilityDisplay); }
+};
+/*============================================================================*/
+#endif         /* shield_HT */
+/*============================================================================*/

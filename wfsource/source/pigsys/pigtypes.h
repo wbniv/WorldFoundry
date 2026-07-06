@@ -26,8 +26,11 @@
 #endif	//!defined(SYS_UINT16)
 
 #ifndef	SYS_INT32
-#if defined(__LINUX__)
-// LP64: `long` is 8 bytes on x86-64 Linux, so use `int` to keep int32 at 32 bits.
+#if defined(__LP64__)
+// LP64 (x86-64 Linux/Android, arm64 iOS/macOS): `long` is 8 bytes, so use `int`
+// to keep int32 at 32 bits. Key off the data model, not the OS — __LP64__ is the
+// thing that actually makes `long` 64-bit. ILP32 (PSX/x86-32) and LLP64 (Win64)
+// both have long==32 and fall through to the `long` branch unchanged.
 #define	SYS_INT32		signed int
 #else
 #define	SYS_INT32		signed long
@@ -35,7 +38,7 @@
 #endif	//!defined(SYS_INT32)
 
 #ifndef	SYS_UINT32
-#if defined(__LINUX__)
+#if defined(__LP64__)
 #define	SYS_UINT32		unsigned int
 #else
 #define	SYS_UINT32		unsigned long
@@ -78,9 +81,7 @@ typedef	SYS_UCHAR		uchar;
 #endif	//!SYS_SUPPRESS_BASE_TYPEDEFS
 
 #if		!SYS_SUPPRESS_BSD_TYPEDEFS
-#if !defined(__PSX__)
 typedef SYS_USHORT		ushort;
-#endif
 typedef SYS_UINT		uint;
 typedef SYS_ULONG		ulong;
 #endif	//!SYS_SUPPRESS_BSD_TYPEDEFS
@@ -92,9 +93,6 @@ typedef	SYS_LARGEINT	largeint;
 // ANSI standard(looking) Boolean notation added by XINA
 //--------------------------------------------------
 #if !_BOOL_IS_DEFINED_
-#	if defined( __WIN__ ) && defined( __cplusplus )
-#		error Use the bool built-in to C++
-#	endif
 #undef bool
 // definition of bool changed in accordance with the ANSI C++ Standard
 //#define bool char

@@ -1,0 +1,65 @@
+name: Ficl CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          if [ -f Makefile.linux ]; then
+            make -f Makefile.linux clean ficl
+          else
+            make -f makefile.linux clean ficl
+          fi
+
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          if [ -f Makefile.macos ]; then
+            make -f Makefile.macos clean ficl
+          else
+            make -f makefile.macos clean ficl
+          fi
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -property installationPath`) do set VSINSTALL=%%i
+          call "%VSINSTALL%\Common7\Tools\VsDevCmd.bat" -arch=x64
+          echo VCToolsInstallDir=%VCToolsInstallDir%
+          echo UniversalCRTSdkDir=%UniversalCRTSdkDir%
+          echo UCRTVersion=%UCRTVersion%
+          echo WindowsSdkDir=%WindowsSdkDir%
+          echo WindowsSDKVersion=%WindowsSDKVersion%
+          set "LIB=%VCToolsInstallDir%lib\x64;%UniversalCRTSdkDir%Lib\%UCRTVersion%\ucrt\x64;%WindowsSdkDir%Lib\%WindowsSDKVersion%\um\x64"
+          echo LIB=%LIB%
+          nmake /E /f makefile.windows clean ficl.exe
+
+      - name: Run tests (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          ./ficl --test
+
+      - name: Run tests (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          .\ficl.exe --test

@@ -15,6 +15,8 @@
 
 #include <hal/hal.h>
 #include <hal/_mempool.h>
+#include <cpplib/align.hp>
+#include <cstdint>
 
 #define MEMPOOL_REALTRACKING 1
 #define MEMPOOL_TRASHMEMORY DO_ASSERTIONS
@@ -27,7 +29,7 @@ SMemPool*
 MemPoolConstruct(size_t size,int entries,Memory& memory)
 {
 	assert(size);
-	AssertMsg((size % 4) == 0,"MemPool size must be long-word alligned, size was " << size);								// must be long-word aligned
+	AssertMsg((size % WF_POINTER_ALIGN) == 0,"MemPool entry size must be a multiple of " << WF_POINTER_ALIGN << " bytes, got " << size);
 	assert(entries);
 	assert(size >= sizeof(_MemPoolFreeEntry));				// make sure our free entry struct will fit
 
@@ -35,7 +37,7 @@ MemPoolConstruct(size_t size,int entries,Memory& memory)
 	memPool = new (memory) SMemPool;
 	assert(memPool);
 	AssertMemoryAllocation(memPool);
-	assert(((long)memPool % 4) == 0);
+	assert(((uintptr_t)memPool & WF_POINTER_ALIGN_MASK) == 0);
 #if DO_ASSERTIONS
 	memPool->_size = size;
 	memPool->_maxEntries = entries;

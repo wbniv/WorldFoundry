@@ -1,0 +1,27 @@
+// snowgoons-blender-standalone.iff.txt — L4-wrapped form of the BLENDER-built
+// snowgoons for wf_game -L (and the wf-edit viewport).
+//
+// This is the editable-source counterpart of snowgoons-standalone.iff.txt: that
+// one wraps the byte-oracle ../snowgoons.iff (kept for the engine-stability
+// smoke tests); this one wraps ../snowgoons-blender.iff — the inner LVAS that
+// build_level_binary.sh produces from snowgoons-blender.lev — so the editor's
+// "Save + Compile (.iff)" regenerates exactly the file the viewport loads.
+//
+// build_level_binary.sh's step 5 builds this automatically because the name
+// matches the $LEVEL-standalone.iff.txt convention ($LEVEL = snowgoons-blender),
+// emitting ../snowgoons-blender-standalone.iff.
+//
+// wf_game's -L<path> loader (game.cc:151-162) seeks to SECTOR_SIZE (2048) and
+// expects the RAM chunk there — the layout inside cd.iff's L4 chunk. RAM values
+// mirror wflevels/cd_snowgoons.iff.txt's L4 block — keep in sync.
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 100000l
+        'PERM' 300000l
+        'ROOM' 300000l
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../snowgoons-blender.iff" ]
+}

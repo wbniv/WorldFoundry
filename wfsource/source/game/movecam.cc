@@ -32,6 +32,8 @@
 #include <math/matrix34.hp>
 #include <math/euler.hp>
 
+#include <atomic>
+
 #include "movecam.hp"
 #include "camshot.hp"
 #include "actor.hp"
@@ -112,49 +114,6 @@ LimitRelativeMovementMagnitude(const Vector3& orig,const Vector3& outPos,const V
 
 //==============================================================================
 
-#if defined( __PSX__ )
-#if 0
-#pragma message ("KTS: test code: remove this function")
-
-void
-AdjustCameraParameters(Vector3& position,Euler& rotation)
-{
-	u_long	padd = PadRead(1);
-
-	padd >>= 16;
-	if (padd & PADRup)
-		rotation.SetA(rotation.GetA() + Angle(Angle::Degree(SCALAR_CONSTANT(1))));
-	if (padd & PADRdown)
-		rotation.SetA(rotation.GetA() - Angle(Angle::Degree(SCALAR_CONSTANT(1))));
-	if (padd & PADRleft)
-		rotation.SetB(rotation.GetB() - Angle(Angle::Degree(SCALAR_CONSTANT(1))));
-	if (padd & PADRright)
-		rotation.SetB(rotation.GetB() + Angle(Angle::Degree(SCALAR_CONSTANT(1))));
-	if (padd & PADR1)
-		rotation.SetC(rotation.GetC() - Angle(Angle::Degree(SCALAR_CONSTANT(1))));
-	if (padd & PADR2)
-		rotation.SetC(rotation.GetC() + Angle(Angle::Degree(SCALAR_CONSTANT(1))));
-
-	if (padd & PADLup)
-		position.SetY(position.Y() + SCALAR_CONSTANT(0.5));
-	if (padd & PADLdown)
-		position.SetY(position.Y() - SCALAR_CONSTANT(0.5));
-	if (padd & PADLleft)
-		position.SetX(position.X() - SCALAR_CONSTANT(0.5));
-	if (padd & PADLright)
-		position.SetX(position.X() + SCALAR_CONSTANT(0.5));
-
-	if (padd & PADL1)
-		position.SetZ(position.Z() - SCALAR_CONSTANT(0.5));
-	if (padd & PADL2)
-		position.SetZ(position.Z() + SCALAR_CONSTANT(0.5));
-
-	DBSTREAM3( cscreen << "camera position:" << std::endl << position << std::endl;
-	cscreen << "camera rotation:" << std::endl << rotation << std::endl; )
-}
-
-#endif
-#endif
 
 //==============================================================================
 
@@ -217,6 +176,12 @@ LookUp
 
 Euler cameraEuler;            // kludge, rendcrow uses this to make scarecrows face the camera
 
+// Editor camera override: when true, CameraHandler::SetCamera skips its writes
+// so an external owner (wf-edit's Jump-to-view) can hold the camera at an
+// arbitrary pose without CamShot stomping on it every tick. Default false →
+// zero behaviour change in the game build. Set via wfmut::SetEditorCameraOverride.
+std::atomic<bool> gEditorCameraOverride{false};
+
 //=============================================================================
 // this allows all of the various handlers to have a single interface to the
 // object's camera position and orientation, using the cameraPosition struct
@@ -226,12 +191,17 @@ CameraHandler::SetCamera(PhysicalObject& physicalObject, const cameraPosition& d
 {
 #pragma message ("KTS: write field of view, hither and yon code")
 
+	// Editor override: skip writes when wf-edit holds the camera at a
+	// jumped-to-peer pose. The override owner is responsible for the writes.
+	if (gEditorCameraOverride.load(std::memory_order_relaxed))
+		return;
+
 	PhysicalAttributes& pa = physicalObject.GetWritablePhysicalAttributes();
 	pa.SetPosition(destCam.position);
 
 	Matrix34 mat = LookUp( destCam.direction, destCam.up, pa.Position() );
-   Camera* camera = dynamic_cast<Camera*>(&physicalObject);
-   assert(ValidPtr(camera));
+   assert(physicalObject.kind() == BaseObject::Camera_KIND);
+   Camera* camera = static_cast<Camera*>(&physicalObject);
 	camera->SetCameraMatrix( mat );
 
 	DBSTREAM3(
@@ -251,6 +221,27 @@ CameraHandler::SetCamera(PhysicalObject& physicalObject, const cameraPosition& d
 //		Position = (Camshot - follow) + TrackObject
 //		Rotation = (Camshot - lookAt) + TrackObject
 //============================================================================
+// Resolve a (possibly stale/destroyed/recycled) track-object index WITHOUT
+// asserting. Returns the tracked PhysicalObject, or nullptr if the index is
+// unset (0), out of range, its slot is empty/freed, or it isn't a physical
+// object. A destroyed tracked actor must degrade gracefully, not abort.
+// NOTE: an index is not an identity — a recycled slot resolves to whatever now
+// owns it; the full cure is actor generation-IDs / safe handles (see TODO.md).
+
+const PhysicalObject*
+CameraHandler::ResolveTrackObject(int32 idxTrackObject)
+{
+	if (idxTrackObject <= 0)
+		return nullptr;
+	if (idxTrackObject >= theLevel->GetMaxObjectIndex())   // bounds-check before GetObject's RangeCheck
+		return nullptr;
+	BaseObject* o = theLevel->GetObject(idxTrackObject);   // NULL for an empty/freed slot
+	if (!o || !IsPhysicalObject(o))
+		return nullptr;
+	return static_cast<const PhysicalObject*>(o);
+}
+
+//============================================================================
 // given a cameraShot struct, read all of the fields and fill out a cameraPosition struct accordingly
 
 int32
@@ -258,8 +249,8 @@ SetCameraParametersFromShot(const Actor* tempcamShotActor,cameraPosition& outPos
 {
 	assert(ValidPtr(tempcamShotActor));
    
-	const CamShot* camShotActor = dynamic_cast<const CamShot*>(tempcamShotActor);
-	assert(ValidPtr(camShotActor));
+	assert(tempcamShotActor->kind() == BaseObject::CamShot_KIND);
+	const CamShot* camShotActor = static_cast<const CamShot*>(tempcamShotActor);
 
 	const _CamShot* shotData = camShotActor->GetOADData();           // oad shot data for this object
 	assert(shotData);
@@ -267,8 +258,8 @@ SetCameraParametersFromShot(const Actor* tempcamShotActor,cameraPosition& outPos
 
 	BaseObject* bo = bol[shotData->Follow];
    assert(ValidPtr(bo));
-   PhysicalObject* po = dynamic_cast<PhysicalObject*>(bo);
-   assert(ValidPtr(po));
+   assert(IsPhysicalObject(bo));
+   PhysicalObject* po = static_cast<PhysicalObject*>(bo);
 	const Vector3& followVect = po->GetPhysicalAttributes().PredictedPosition();
 
 	Vector3 camShotPos = camShotActor->GetPhysicalAttributes().PredictedPosition();
@@ -290,38 +281,25 @@ SetCameraParametersFromShot(const Actor* tempcamShotActor,cameraPosition& outPos
 	else
 		outPos.position.SetZ(camShotPos.Z());
 
-//	cerror << "campos Vector is " << camPos << std::endl;
-//	cerror << "follow Vector is " << followVect << std::endl;
-//	cerror << "camshotactor = " << *camShotActor << std::endl;
-//	cerror << "follow = " << *theLevel->getActor(shotData->Follow) << std::endl;
-//	cerror << "target = " << *theLevel->getActor(shotData->Target) << std::endl;
-
-//	cerror << "relative vector is " << relative << std::endl;
-//	cerror << "resulting vector is " << outPos.position << std::endl;
-
 //	outPos.position.SetX(Scalar(shotData->CamPositionX));
 //	outPos.position.SetY(Scalar(shotData->CamPositionY));
 //	outPos.position.SetZ(Scalar(shotData->CamPositionZ));
 
-	int32 idxTrackObject;
-	if(shotData->TrackObjectMailbox)
-	{
-		assert(shotData->TrackObjectMailbox);
-		AssertMsg(camShotActor->GetMailboxes().ReadMailbox(shotData->TrackObjectMailbox).WholePart(), " in object " << *camShotActor << ", TrackObjectMailbox = " << shotData->TrackObjectMailbox);
-		idxTrackObject = camShotActor->GetMailboxes().ReadMailbox(shotData->TrackObjectMailbox).WholePart();
-		AssertMsg( idxTrackObject, "TrackObjectMailbox was " << shotData->TrackObjectMailbox << ", contents were " << camShotActor->GetMailboxes().ReadMailbox(shotData->TrackObjectMailbox).WholePart() );
-	}
-	else
-	{
-		AssertMsg(shotData->TrackObject, "CamShot " << *camShotActor << " doesn't have a TrackObject entry");
-		AssertMsg(theLevel->GetObject(shotData->TrackObject)," Camshot is " << *camShotActor);
-		idxTrackObject = shotData->TrackObject;
-	}
-	assert(idxTrackObject);
-	PhysicalObject* trackObject = theLevel->getActor(idxTrackObject);
-	assert(ValidPtr(trackObject));
-	const PhysicalAttributes& trackObjectPA = trackObject->GetPhysicalAttributes();
-	const Vector3& trackObjectPosition = trackObjectPA.PredictedPosition();
+	int32 idxTrackObject = shotData->TrackObjectMailbox
+		? camShotActor->GetMailboxes().ReadMailbox(shotData->TrackObjectMailbox).WholePart()
+		: shotData->TrackObject;
+
+	// The tracked actor may have despawned (stale/recycled idx) or be unset.
+	// Resolve safely; if it's gone, drop the track (idx->0) and continue with no
+	// track offset/rotation so the camera degrades to its Follow-relative shot
+	// position instead of asserting/UAF (closes TODO 134/135). GetWatchObject
+	// then returns null and the room-update caller skips this frame.
+	const PhysicalObject* trackObject = CameraHandler::ResolveTrackObject(idxTrackObject);
+	if (!trackObject)
+		idxTrackObject = 0;
+	Vector3 trackObjectPosition = trackObject
+		? trackObject->GetPhysicalAttributes().PredictedPosition()
+		: Vector3::zero;
 
 	// now do look at
 	// kts change to calc eulers instead
@@ -364,7 +342,7 @@ SetCameraParametersFromShot(const Actor* tempcamShotActor,cameraPosition& outPos
 #endif
 	}
 
-	if (shotData->Rotation)	// track/mimic rotation of object
+	if (shotData->Rotation && trackObject)	// track/mimic rotation of object (skip if no live track)
 	{
 // there is still a bug on the psx version where the euler constructor doesn't work
 // this code is to help debug that problem, when we get around to it
@@ -388,7 +366,7 @@ SetCameraParametersFromShot(const Actor* tempcamShotActor,cameraPosition& outPos
 		Euler rot(
 			Angle::Revolution(Scalar::zero),		// ignore target roll and pitch
 			Angle::Revolution(Scalar::zero),
-		 	trackObjectPA.Rotation().GetC()
+		 	trackObject->GetPhysicalAttributes().Rotation().GetC()
 			);
 
 //		printf("eulers are: %d %d %d\n",
@@ -473,7 +451,7 @@ NormalCameraHandler::init(MovementManager& movementManager, MovementObject& move
 
 #if DO_ASSERTIONS
 	{
-		const CamShot* camShot = dynamic_cast<CamShot*>(theLevel->GetObject(shotIndex));
+		const CamShot* camShot = static_cast<CamShot*>(theLevel->GetObject(shotIndex));
       assert(ValidPtr(camShot));
 		AssertMsg(ValidPtr(camShot),"shotIndex = " << shotIndex);
 		assert(camShot->kind() == BaseObject::CamShot_KIND);
@@ -517,7 +495,7 @@ NormalCameraHandler::_update(MovementObject& movementObject,cameraPosition& dest
 
 	cameraData& cd  = GetCameraMovementData(movementObject);
 
-	long idxShot = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
+	int32 idxShot = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
 	DBSTREAM3( ccamera << "idxShot = " << idxShot << std::endl; )
 	AssertMsg(idxShot != 0, "Camera " << movementObject << " found no ActBoxOR, possible cause: Player is not in any actboxor");
 	assert(idxShot > 0);
@@ -594,18 +572,10 @@ NormalCameraHandler::GetWatchObject(const MovementObject& movementObject) const
 {
 	DBSTREAM3( ccamera << "NormalCameraHandler::GetWatchObject() called." << std::endl; )
 
-	const cameraData& cd = GetCameraMovementData(movementObject);
-	assert(ValidPtr(&cd));
-	if(cd.idxTrackObject)
-	{
-		BaseObject* trackObject = theLevel->GetObject(cd.idxTrackObject);
-		assert(ValidPtr(trackObject));
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(trackObject);
-      assert(ValidPtr(po));
-		return(po);
-	}
-	DBSTREAM1( cerror << "NormalCameraHandler::GetWatchObject: had to return mainCharacter" << std::endl; )
-	return(theLevel->mainCharacter());
+	// No (valid) track object → return null and let the caller decide. Don't
+	// special-case the main character, and don't assert on a stale/destroyed
+	// index (the sole caller, level.cc, already null-skips). See TODO 134/135.
+	return ResolveTrackObject(GetCameraMovementData(movementObject).idxTrackObject);
 }
 
 //============================================================================
@@ -715,7 +685,7 @@ PanCameraHandler::update(MovementManager& /*movementManager*/,  MovementObject& 
 	assert(cd.panStartTime <= theLevel->LevelClock().Current());
 	assert(cd.idxCamShotActor);
 
-	long shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
+	int32 shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
 	assert(shotIndex);
 	const CamShot* camShot = (CamShot*)theLevel->getActor(shotIndex);
 	assert(ValidPtr(camShot));
@@ -779,19 +749,8 @@ PanCameraHandler::GetWatchObject(const MovementObject& movementObject) const
 {
 	DBSTREAM3( ccamera << "PanCameraHandler::GetWatchObject() called." << std::endl; )
 
-	const cameraData& cd  = GetCameraMovementData(movementObject);
-	assert(ValidPtr(&cd));
-	if(cd.idxTrackObject)
-	{
-		BaseObject* trackObject = theLevel->GetObject(cd.idxTrackObject);
-		assert(ValidPtr(trackObject));
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(trackObject);
-      assert(ValidPtr(po));
-		return(po);
-	}
-//	assert(0);
-	DBSTREAM1( cerror << "PanCameraHandler::GetWatchObject: had to return mainCharacter" << std::endl; )
-	return(theLevel->mainCharacter());
+	// No (valid) track object → null; caller decides (see NormalCameraHandler).
+	return ResolveTrackObject(GetCameraMovementData(movementObject).idxTrackObject);
 }
 
 //============================================================================
@@ -842,7 +801,7 @@ DelayCameraHandler::check()
 {
 	assert(0);
 	DBSTREAM3( ccamera << "DelayCameraHandler check function called." << std::endl; )
-	long shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
+	int32 shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
 	return(shotIndex <= 0);						// only activate if there is no camshot right now
 //	return true;
 }
@@ -865,7 +824,7 @@ DelayCameraHandler::update(MovementManager& movementManager, MovementObject& mov
 	DBSTREAM3( ccamera << "DelayCameraHandler::update function called." << std::endl; )
 	assert( ValidPtr( theLevel ) );
 
-	long shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
+	int32 shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
 	//std::cout << "shotIndex = " << shotIndex << std::endl;
 	if(shotIndex > 0)
 	{
@@ -929,7 +888,7 @@ BungeeCameraHandler::init(MovementManager& movementManager, MovementObject& move
 
 	cameraData& cd = GetCameraMovementData(movementObject);
 
-	long shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
+	int32 shotIndex = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
 	AssertMsg(shotIndex != 0, "Camera " << movementObject << " found no ActBoxOR, possible cause: Player is not in any actboxor");
 	assert(shotIndex > 0);
 
@@ -973,7 +932,7 @@ BungeeCameraHandler::predictPosition(MovementManager& /*movementManager*/, Movem
 	Scalar deltaT = theLevel->LevelClock().Delta();
 
 	// Get climbRate and Elasticity from camShot data
-	long idxShot = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
+	int32 idxShot = theLevel->GetMailboxes().ReadMailbox(EMAILBOX_CAMSHOT).WholePart();
 	RangeCheck( 1, idxShot, theLevel->GetMaxObjectIndex() );
 
 	CamShot* camShotActor = (CamShot*)(theLevel->getActor( idxShot ));
@@ -985,7 +944,10 @@ BungeeCameraHandler::predictPosition(MovementManager& /*movementManager*/, Movem
    	_update(movementObject, destCam);	// Fill in destCam with the "desired" new position/orientation
 	DBSTREAM3( ccamera << "Desired camera position: " << destCam.position << std::endl; )
 
-	theLevel->GetMailboxes().WriteMailbox( EMAILBOX_CAMSHOT, Scalar::zero );					// clear mailbox after use
+	// NOTE: do not clear EMAILBOX_CAMSHOT here. The original design relied on ActBoxOR
+	// triggers re-writing the CamShot index every frame. With scripting disabled,
+	// nobody re-writes it, so clearing it would cause an assertion failure next frame.
+	//theLevel->GetMailboxes().WriteMailbox( EMAILBOX_CAMSHOT, Scalar::zero );					// clear mailbox after use
 	PhysicalAttributes& actorAttr = movementObject.GetWritablePhysicalAttributes();
 	Vector3 origLinVelocity = actorAttr.LinVelocity();
 
@@ -998,11 +960,9 @@ BungeeCameraHandler::predictPosition(MovementManager& /*movementManager*/, Movem
 	while( msgPort.GetMsgByType( MsgPort::SPECIAL_COLLISION, &msgData, msgDataSize ) )
 	{
 		hitSomething = true;
-      Actor* actor = (Actor*)&msgData;
-      assert(ValidPtr(actor));
-
-		if (movementObject.GetPhysicalAttributes().Position().Z() < actor->GetPhysicalAttributes().Position().Z())
-			hitTop = true;
+		// hitTop detection skipped — (Actor*)&msgData cast is invalid (msgData is
+		// raw collision bytes, not an Actor). Leaves hitTop=false; camera won't
+		// climb over collision tops until physics is replaced.
 	}
 
 	// if collision prevention may make us climb, don't seek the target in Z
@@ -1022,8 +982,8 @@ BungeeCameraHandler::predictPosition(MovementManager& /*movementManager*/, Movem
 			actorAttr.AddLinVelocity( Vector3(Scalar::zero, Scalar::zero, shotData->GetClimbRate()) );
 	}
 
-   Camera* camera = dynamic_cast<Camera*>(&movementObject);
-   assert(ValidPtr(camera));
+   assert(movementObject.kind() == BaseObject::Camera_KIND);
+   Camera* camera = static_cast<Camera*>(&movementObject);
 	camera->cameraPos = destCam;	// store this data for use in update()
 
    Vector3 newPosition(actorAttr.Position() + (((actorAttr.LinVelocity() + origLinVelocity) / Scalar::two) * theLevel->LevelClock().Delta())); 
@@ -1039,8 +999,8 @@ BungeeCameraHandler::update(MovementManager& /*movementManager*/, MovementObject
 	DBSTREAM3( ccamera << "BungeeCam::update() entered." << std::endl; )
 
 	cameraData& cd  = GetCameraMovementData(movementObject);
-   Camera* camera = dynamic_cast<Camera*>(&movementObject);
-   assert(ValidPtr(camera));
+   assert(movementObject.kind() == BaseObject::Camera_KIND);
+   Camera* camera = static_cast<Camera*>(&movementObject);
 	cameraPosition destCam = camera->cameraPos;
 
 	// Do collision check loop and don't allow motion if there's something in the way
@@ -1088,18 +1048,8 @@ BungeeCameraHandler::GetWatchObject(const MovementObject& movementObject) const
 {
 //	DBSTREAM3( ccamera << "BungeeCam::GetWatchObject() called." << std::endl; )
 
-	const cameraData& cd  = GetCameraMovementData(movementObject);
-	assert(ValidPtr(&cd));
-	if(cd.idxTrackObject)
-	{
-		BaseObject* trackObject = theLevel->GetObject(cd.idxTrackObject);
-		assert(ValidPtr(trackObject));
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(trackObject);
-      assert(ValidPtr(po));
-		return(po);
-	}
-	DBSTREAM1( cerror << "BungeeCameraHandler::GetWatchObject: had to return mainCharacter" << std::endl; )
-	return(theLevel->mainCharacter());
+	// No (valid) track object → null; caller decides (see NormalCameraHandler).
+	return ResolveTrackObject(GetCameraMovementData(movementObject).idxTrackObject);
 }
 
 //============================================================================

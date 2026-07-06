@@ -1,0 +1,23 @@
+[INFO] cheat ON
+[INFO] WAIT_RAM
+[round 1] ram=0x04 frame=1101
+[round 2] ram=0x05 frame=1281
+[round 3] ram=0x06 frame=1537
+[round 4] ram=0x07 frame=1793
+[round 5] ram=0x08 frame=2049
+[round 6] ram=0x09 frame=2305
+[round 7] ram=0x0A frame=2561
+[round 8] ram=0x0B frame=2817
+[round 9] ram=0x0C frame=3073
+[round 10] ram=0x0D frame=3329
+[round 11] ram=0x0E frame=3585
+[round 12] ram=0x0F frame=3841
+[round 13] ram=0x10 frame=4097
+[round 14] ram=0x11 frame=4353
+[round 15] ram=0x12 frame=4609
+[round 16] ram=0x13 frame=4865
+[snap state0] idx=0000 frame=4865 pos=0xB8
+[INFO] L4R1 dance scheduled: hop1=4895 hop2=4942 snap=4984
+[snap state1] idx=0001 frame=4984 pos=0xB8
+[INFO] dance complete, pos at snap = 0xB8 (apex=0xB8)
+[done]

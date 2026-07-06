@@ -1,27 +1,26 @@
-#ifndef AUDIO_BUFFER_HP
-#define AUDIO_BUFFER_HP
-
-#include <streams/binstrm.hp>
-#if defined( __WIN__ )
-#include <dsound.h>
-#endif
+#pragma once
+// SoundBuffer — a loaded, playable sound asset.
+// Constructed from raw WAV/Ogg bytes; fire-and-forget play() calls.
+// No miniaudio types in this header.
 
 class SoundBuffer
 {
 public:
-#if defined( __WIN__ )
-	SoundBuffer( LPDIRECTSOUND&, binistream& );
-#else
-	SoundBuffer( binistream& );
-#endif
+	// `data` and `len` must remain valid for the lifetime of this object.
+	SoundBuffer(const void* data, unsigned len);
 	~SoundBuffer();
+
+	// Play a non-positional (2D) instance.
 	void play() const;
 
-protected:
-	binistream& _binis;
-#if defined( __WIN__ )
-    LPDIRECTSOUNDBUFFER lplpDsb;
-#endif
-};
+	// Play a positional (3D) instance at world-space coordinates.
+	// Attenuates with distance from the audio listener.
+	void play(float x, float y, float z) const;
 
-#endif	// SOUND_BUFFER_HP
+	bool isLoaded() const { return _loaded; }
+
+private:
+	bool _loaded;
+	struct Impl;
+	Impl* _impl;
+};

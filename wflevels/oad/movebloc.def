@@ -1,0 +1,32 @@
+;============================================================================
+; movebloc.def: created from OADdef.S and movebloc.oas DO NOT MODIFY
+;============================================================================
+;##ifndef movebloc_HT
+;##define movebloc_HT
+	( define OAD_Mobility 0 )	; int32: Minumum: 0 Maximum: 4 Default: 0
+	( define OAD_MovesBetweenRooms 4 )	; boolean: Default: 0
+	( define OAD_MovementMailbox 8 )	; int32: Minumum: 0 Maximum: 3999 Default: 1
+	( define OAD_StepSize 12 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0))
+	( define OAD_VerticalElasticity 16 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0))
+	( define OAD_HorizontalElasticity 20 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1 * 65536.0))
+	( define OAD_AtEndOfPath 24 )	; int32: Minumum: 0 Maximum: 5 Default: 0
+	( define OAD_ObjectToFollow 28 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_FollowOffset 32 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_RunningAcceleration 36 )	; fixed32: Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0))
+	( define OAD_RunningDeceleration 40 )	; fixed32: Minumum: ( ((long) -1.0 * 65536.0)) Maximum: ( ((long) 1.0 * 65536.0))
+	( define OAD_MaxGroundSpeed 44 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0))
+	( define OAD_TurnRate 48 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0))
+	( define OAD_CrawlingAcceleration 52 )	; fixed32: Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0))
+	( define OAD_JumpingAcceleration 56 )	; fixed32: Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0))
+	( define OAD_JumpingMomentumTransfer 60 )	; fixed32: Minumum: ( ((long) -1.0 * 65536.0)) Maximum: ( ((long) 1.0 * 65536.0))
+	( define OAD_AirAcceleration 64 )	; fixed32: Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0))
+	( define OAD_HorizAirDrag 68 )	; fixed32: Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0))
+	( define OAD_VertAirDrag 72 )	; fixed32: Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0))
+	( define OAD_MaxAirSpeed 76 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0))
+	( define OAD_FallingAcceleration 80 )	; fixed32: Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0))
+	( define OAD_FallAnimThreshold 84 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0))
+	( define OAD_StunThreshold 88 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0))
+	( define OAD_StunDuration 92 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0))
+;============================================================================
+;##endif         ; movebloc_DEF
+;============================================================================

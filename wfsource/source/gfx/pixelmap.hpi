@@ -24,9 +24,6 @@
 
 #include <gfx/display.hp>
 
-#if defined( __PSX__ )
-#include <libgpu.h>
-#endif
 
 //==============================================================================
 
@@ -43,38 +40,17 @@ PixelMap::Validate() const
 	RangeCheckInclusive(0,_xPos + _xSize,Display::VRAMWidth);
 	RangeCheckInclusive(0,_yPos + _ySize,Display::VRAMHeight);
 
-#if defined(RENDERER_GL)
     if(_pixelBuffer)
         ValidatePtr(_pixelBuffer);
-#endif
 }
 
 //==============================================================================
 
-#if defined ( RENDERER_DIRECTX)
-#include <ddraw.h>
-extern LPDIRECTDRAWSURFACE lpTextureSurface;      // DirectDraw texture surface
-#endif
 
 inline void
 PixelMap::Clear(const Color& color)
 {
 	(void)color;
-#if defined(__PSX__)
-	RECT	rect;
-	setRECT(&rect, _xPos, _yPos, _xSize, _ySize);
-	ClearImage(&rect, color.Red(), color.Green(), color.Blue());
-#endif
-#if defined ( RENDERER_DIRECTX)
-//	DDBLTFX BltFX;
-//	BltFX.dwSize = sizeof(BltFX);
-//	uint16 colorWord =
-//		((color.Red()&0xf8)<<10) ||
-//		((color.Green()&0xf8)<<5) ||
-//		(color.Blue()&0xf8);
-//	BltFX.dwFillColor = colorWord;
-//	lpTextureSurface->Blt(NULL,NULL,NULL,DDBLT_COLORFILL, &BltFX);
-#endif
 }
 
 //==============================================================================
@@ -153,7 +129,6 @@ PixelMap::GetYPositionInVideoMemory() const		// only valid for video memory pixe
 
 //==============================================================================
 
-#if defined(RENDERER_GL)
 inline void
 PixelMap::SetGLTexture() const                 // make this pixelmap the current GL texture
 {
@@ -168,7 +143,6 @@ PixelMap::SetGLTexture() const                 // make this pixelmap the current
     AssertGLOK();
 }
 
-#endif
 
 //==============================================================================
 

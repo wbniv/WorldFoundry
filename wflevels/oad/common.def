@@ -1,0 +1,22 @@
+;============================================================================
+; common.def: created from OADdef.S and common.oas DO NOT MODIFY
+;============================================================================
+;##ifndef common_HT
+;##define common_HT
+	( define OAD_Mass 0 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0))
+	( define OAD_SurfaceFriction 4 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 1.0 * 65536.0))
+	( define OAD_hp 8 )	; int32: Minumum: 1 Maximum: 32767 Default: 32767
+	( define OAD_NumberOfLocalMailboxes 12 )	; int32: Minumum: 0 Maximum: 40 Default: 0
+	( define OAD_Poof 16 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_IsNeedleGunTarget 20 )	; boolean: Default: 0
+	( define OAD_WriteToMailboxOnDeath 24 )	; int32: Minumum: 0 Maximum: 3999 Default: 0
+	( define OAD_Script 28 )	; xdata_convert:
+	( define OAD_ScriptControlsInput 32 )	; boolean: Default: 0
+			TYPEENTRYSTRING_IGNORE(Cave Logic Studios Notes|,Notes)
+	( define OAD_slopeA 36 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 65536 * 65536.0))
+	( define OAD_slopeB 40 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 65536 * 65536.0))
+	( define OAD_slopeC 44 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 65536 * 65536.0))
+	( define OAD_slopeD 48 )	; fixed32: Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 65536 * 65536.0))
+;============================================================================
+;##endif         ; common_DEF
+;============================================================================

@@ -177,7 +177,8 @@ Shadow::predictPosition(const Clock& currentTime)
          
 			if ( floorBo )
          {
-            _floor = dynamic_cast<PhysicalObject*>(floorBo);
+            assert(IsPhysicalObject(floorBo));
+            _floor = static_cast<PhysicalObject*>(floorBo);
             setShadowPos( target );
          }
          else

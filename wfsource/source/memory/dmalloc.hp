@@ -32,6 +32,7 @@
 #include <pigsys/pigsys.hp>
 #include <streams/dbstrm.hp>
 #include <memory/memory.hp>
+#include <cpplib/align.hp>
 
 //==============================================================================
 
@@ -102,6 +103,17 @@ private:
 		uint32 _cookie;
 #endif
 	};
+
+	// AllocatedChunk precedes every DMalloc allocation; the user pointer
+	// returned by Allocate() sits at chunk_base + sizeof(AllocatedChunk).
+	// For the user pointer to inherit the WF_POINTER_ALIGN-aligned chunk_base,
+	// sizeof(AllocatedChunk) must itself be a multiple of WF_POINTER_ALIGN.
+	// Catches the day someone ships DO_ASSERTIONS=0 (which drops _cookie and
+	// shrinks the header to 4 bytes, silently misaligning every user pointer
+	// on 64-bit).
+	static_assert(sizeof(AllocatedChunk) % WF_POINTER_ALIGN == 0,
+	              "DMalloc::AllocatedChunk size must be a multiple of WF_POINTER_ALIGN — "
+	              "otherwise the user-returned pointer loses alignment");
 
 	FreeChunk* _firstChunk;
 };

@@ -10,7 +10,7 @@
 | eval | ~53 (CLI) + ~400 (grammar) | Blender work | Expression evaluator grammar needed by `wf_attr_validate`; belongs with Blender integration, not here |
 | prep | ~1 615 | Maybe later | Custom tokenizer + macro expander; interesting but larger scope |
 | **textile** | ~4 000+ | **Done** | Texture atlas packer; INI-driven room pipeline; TGA/BMP/SGI readers; 2D bin-packing algorithm |
-| **chargrab** | ~1 000+ | **In progress** | Tile extractor/deduplicator; C++ source dropped; plan at `docs/chargrab-rs-plan.md` |
+| **chargrab** | ~1 000+ | **In progress** | Tile extractor/deduplicator; C++ source dropped; plan at [docs/chargrab-rs-plan.md](chargrab-rs-plan.md) |
 | iff2lvl | ~8 731 | No | Massive 3D level converter; hardcoded paths; PSX/Saturn targets |
 | attribedit | ~3 517 | Blender plugin | GTK+ 2.x standalone OAD property editor — the reference implementation for what the Blender plugin needs to do |
 | iffdb | ~536 | Superseded | Alternative iffdump using in-memory IFF tree; `iffdump-rs` renders it redundant |
@@ -638,7 +638,7 @@ map. Companion to `textile` (texture atlas packer).
 
 The C++ source (`wftools/chargrab/`) has been deleted — it was never used in production
 (World Foundry was a 3D engine; tile extraction only applied to speculative 2D/Genesis
-work). The algorithm is fully documented in `docs/chargrab-rs-plan.md`.
+work). The algorithm is fully documented in [docs/chargrab-rs-plan.md](chargrab-rs-plan.md).
 
 ### CLI
 
@@ -677,5 +677,5 @@ Transparent (all-zero) tiles map to index 255 (`TRANSPARENT_INDEX`).
 
 ### Full plan
 
-See `docs/chargrab-rs-plan.md` for complete algorithm, type definitions, and
+See [docs/chargrab-rs-plan.md](chargrab-rs-plan.md) for complete algorithm, type definitions, and
 implementation steps.

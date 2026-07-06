@@ -1,0 +1,24 @@
+;============================================================================
+; Generato.def: created from OADdef.S and Generato.oas DO NOT MODIFY
+;============================================================================
+;##ifndef Generato_HT
+;##define Generato_HT
+	( define OAD_moveblocPageOffset 0 )	; common block: offset in page data for this objects page
+	( define OAD_toolsetPageOffset 4 )	; common block: offset in page data for this objects page
+	( define OAD_commonPageOffset 8 )	; common block: offset in page data for this objects page
+	( define OAD_MeshName 12 )	;file Mesh Name: This is a packedAssetID
+	( define OAD_meshPageOffset 16 )	; common block: offset in page data for this objects page
+	( define OAD_shadowPageOffset 20 )	; common block: offset in page data for this objects page
+	( define OAD_TemplateObject 24 )	; boolean: Default: 0
+	( define OAD_ActivationMailBox 28 )	; int32: Minumum: 0 Maximum: 3999 Default: 1               // mailbox to activate this
+	( define OAD_ObjectToThrow 32 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_GenerationRate 36 )	; fixed32: Minumum: ( ((long) 0.001 * 65536.0)) Maximum: ( ((long) 10.0 * 65536.0))             // how long to wait between generating objects, in seconds */
+	( define OAD_ObjectXVelocity 40 )	; fixed32: Minumum: ( ((long) -100.0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0))
+	( define OAD_ObjectYVelocity 44 )	; fixed32: Minumum: ( ((long) -100.0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0))
+	( define OAD_ObjectZVelocity 48 )	; fixed32: Minumum: ( ((long) -100.0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0))
+	( define OAD_RandomXRange 52 )	; fixed32: Minumum: ( ((long) -100.0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0))
+	( define OAD_RandomYRange 56 )	; fixed32: Minumum: ( ((long) -100.0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0))
+	( define OAD_RandomZRange 60 )	; fixed32: Minumum: ( ((long) -100.0 * 65536.0)) Maximum: ( ((long) 100.0 * 65536.0))
+;============================================================================
+;##endif         ; Generato_DEF
+;============================================================================

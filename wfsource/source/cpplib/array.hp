@@ -44,6 +44,7 @@ public:
 	Array(int32 entries, Memory* memory=&HALLmalloc);
 	~Array();
 	void SetMax( int32 entries, Memory* memory=&HALLmalloc);						// can only be called once, treat as a constructor
+	void Clear();																	// free storage early; safe to leave to ~Array otherwise. Used by ~Level to keep HALLmalloc LIFO discipline (the implicit ~Array would otherwise free out of order).
 	void Add( T value );
 	int32 Find( T value );				// returns offset of entry
 	int32 Size() const;						// returns current # of entries

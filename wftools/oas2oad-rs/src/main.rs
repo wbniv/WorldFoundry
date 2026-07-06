@@ -1,7 +1,7 @@
 //! oas2oad — compile a World Foundry `.oas` file to a binary `.oad`.
 //!
 //! Usage:
-//!   oas2oad-rs [--prep=<path>] [--types=<path>] [--gpp=<path>] [-o <outfile>] <infile.oas>
+//!   oas2oad-rs [--prep=<path>] [--types=<path>] [--gpp=<path>] [--objects-lc=<path>] [-o <outfile>] <infile.oas>
 //!
 //! Pipeline:
 //!   1. Shell out to `prep` to expand macros → C source with struct initializers.
@@ -13,6 +13,7 @@
 //! This mirrors what the original Windows pipeline did (wpp → wlink → exe2bin),
 //! keeping the compiler responsible for struct layout rather than reimplementing it.
 
+use std::collections::HashMap;
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -135,8 +136,35 @@ typedef struct _typeDescriptor {
 "#;
 
 fn usage() -> ! {
-    eprintln!("Usage: oas2oad [--prep=<path>] [--types=<path>] [--gpp=<path>] [-o <outfile>] <infile.oas>");
+    eprintln!("Usage: oas2oad [--prep=<path>] [--types=<path>] [--gpp=<path>] [--objects-lc=<path>] [-o <outfile>] <infile.oas>");
     process::exit(1);
+}
+
+/// Parse `objects.lc` and return a map of lowercased class name → 0-based index.
+/// Format: lines inside `{ ... }`, one class per line, index 0 = first entry.
+fn parse_objects_lc(path: &Path) -> HashMap<String, i32> {
+    let text = match fs::read_to_string(path) {
+        Ok(t) => t,
+        Err(e) => {
+            eprintln!("oas2oad: reading {}: {e}", path.display());
+            return HashMap::new();
+        }
+    };
+    let mut map = HashMap::new();
+    let mut in_block = false;
+    let mut idx: i32 = 0;
+    for line in text.lines() {
+        let t = line.trim();
+        if t == "{" { in_block = true; continue; }
+        if t == "}" { break; }
+        if !in_block || t.is_empty() || t.starts_with("//") || t.starts_with("/*") { continue; }
+        // first word on the line is the class name
+        if let Some(name) = t.split_whitespace().next() {
+            map.insert(name.to_lowercase(), idx);
+            idx += 1;
+        }
+    }
+    map
 }
 
 fn main() {
@@ -145,6 +173,7 @@ fn main() {
     let mut prep_path: Option<PathBuf> = None;
     let mut types_path: Option<PathBuf> = None;
     let mut gpp_path: Option<PathBuf> = None;
+    let mut objects_lc_path: Option<PathBuf> = None;
     let mut out_path: Option<PathBuf> = None;
     let mut in_path: Option<PathBuf> = None;
     let mut iter = args[1..].iter().peekable();
@@ -156,6 +185,8 @@ fn main() {
             types_path = Some(PathBuf::from(v));
         } else if let Some(v) = arg.strip_prefix("--gpp=") {
             gpp_path = Some(PathBuf::from(v));
+        } else if let Some(v) = arg.strip_prefix("--objects-lc=") {
+            objects_lc_path = Some(PathBuf::from(v));
         } else if arg == "-o" {
             out_path = Some(PathBuf::from(iter.next().unwrap_or_else(|| usage())));
         } else if arg.starts_with('-') {
@@ -181,6 +212,9 @@ fn main() {
         });
 
     // prep must run from the types3ds.s directory so @include types.h resolves.
+    // Canonicalize so that a relative types_s (e.g. "types3ds.s") gives a real parent dir
+    // rather than an empty path, which would make Command::current_dir fail.
+    let types_s = types_s.canonicalize().unwrap_or(types_s);
     let types_dir = types_s.parent().unwrap_or(Path::new(".")).to_path_buf();
     let oas_abs = in_path.canonicalize().unwrap_or_else(|_| in_path.clone());
     let oas_in_types_dir = types_dir.join(format!("{stem}.oas"));
@@ -250,15 +284,26 @@ fn main() {
         process::exit(1);
     });
 
+    // Resolve name_KIND for this class. types3ds.s sets OASNAME="name" (literal), so
+    // movebloc.inc's @e0(OASNAME@+_KIND)@- becomes @e0(name_KIND)@-, and g++ needs
+    // -Dname_KIND=<idx> to emit the correct MovementClass default for this class.
+    let kind_idx = objects_lc_path
+        .as_deref()
+        .map(|p| {
+            let map = parse_objects_lc(p);
+            map.get(stem).copied().unwrap_or_else(|| {
+                eprintln!("oas2oad: warning: '{stem}' not found in objects.lc, using name_KIND=0");
+                0
+            })
+        })
+        .unwrap_or(0);
+
     // Step 3: compile with g++
     let obj_path = types_dir.join(format!("{stem}.o.tmp"));
     let status = Command::new(&gpp_bin)
         .args(["-c", "-x", "c++"])
         .arg(format!("-include{}", compat_h_path.display()))
-        // name_KIND comes from EActorKind in the generated objects.h (doesn't exist here).
-        // DEFAULT_VISIBILITY defaults to 1 in movebloc.inc; mesh.oas omits the define.
-        // Both values are cosmetic defaults; 0/1 match the prep fallback behavior.
-        .arg("-Dname_KIND=0")
+        .arg(format!("-Dname_KIND={kind_idx}"))
         .arg("-DDEFAULT_VISIBILITY=1")
         .arg("-w")
         .arg("-o").arg(&obj_path)

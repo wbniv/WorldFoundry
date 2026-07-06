@@ -25,6 +25,14 @@
 // ===========================================================================
                                                          
 #include <pigsys/pigsys.hp>
+#include <hal/hal.h>
+#include <iff/iffread.hp>
+#include <gfx/rendobj3.hp>
+#include <gfx/face.hp>
+#include <vector>
+#ifdef PHYSICS_ENGINE_JOLT
+#include <physics/jolt/jolt_backend.hp>
+#endif
 #include <particle/emitter.hp>
 #include <movement/movement.hp>
 #include <mailbox/mailbox.hp>
@@ -34,6 +42,9 @@
 #include <memory/memory.hp>
 #include <anim/animmang.hp>
 #include <movement/movefoll.hp>
+#ifdef PHYSICS_ENGINE_JOLT
+#include <movement/movevehicle.hp>
+#endif
 #include <movement/movepath.hp>
 
 #include <oas/oad.h>
@@ -43,6 +54,7 @@
 #include <oas/activate.ht>
 #include <oas/matte.ht>
                           
+#include <audio/sfx_library.hp>
 #include "level.hp"
 #include "tool.hp"
 #include "gamestrm.hp"
@@ -73,17 +85,7 @@ const Scalar Actor::INDESTRUCTIBLE_HP = Scalar( SCALAR_CONSTANT(32767) );	// grr
 #include <streams/binstrm.hp>
 #include <iff/iffread.hp>
 
-#if defined( __WIN__ )				// only here so play cd kludge will work, remove
-#include <windows.h>
-#endif
 
-#if defined (__PSX__)
-#	include	<libcd.h>
-#	if defined( SOUND )
-#		include <libspu.h>
-#		include <libsnd.h>
-#	endif
-#endif
 
 #if defined( SOUND )
 #	include <climits>
@@ -94,7 +96,8 @@ const Scalar Actor::INDESTRUCTIBLE_HP = Scalar( SCALAR_CONSTANT(32767) );	// grr
 static InputNull theNullInput;
 static QInputDigital theNullInputDigital( &theNullInput, int(0) );
 
-extern bool gCDEnabled;
+// (extern bool gCDEnabled removed 2026-05-18 — was unused here; the global
+// itself was deleted in main.cc as a dead write-only flag.)
 
 extern PathHandler			thePathHandler;
 extern DelayCameraHandler	theDelayCameraHandler;
@@ -110,6 +113,9 @@ MovementHandlerEntry MovementHandlerArray[] =
    { MOBILITY_PATH,    &thePathHandler},
    { MOBILITY_CAMERA,  &theDelayCameraHandler},
    { MOBILITY_FOLLOW,  &theFollowHandler},
+#ifdef PHYSICS_ENGINE_JOLT
+   { MOBILITY_VEHICLE, &theVehicleHandler},
+#endif
    { -1,NULL}
 };
 
@@ -126,7 +132,17 @@ Actor::Validate() const
 
 #if SW_DBSTREAM
 #include <pigsys/genfh.hp>
-#include "game.hp"
+
+// Set by Level::Level() at level construction time so Actor::Print's
+// levels.txt lookup can find the right line without consulting a global
+// `theGame` pointer (removed 2026-05-18 as part of Phase 0b WFGame
+// de-globaling). Initialised to 0; Level updates per-level.
+static int32 g_actorPrintLevelNum = 0;
+void
+Actor::SetPrintLevelNum( int32 n )
+{
+	g_actorPrintLevelNum = n;
+}
 
 std::ostream&
 Actor::Print( std::ostream& s ) const
@@ -135,13 +151,12 @@ Actor::Print( std::ostream& s ) const
 	strcpy( szActor, "unknown" );
 
 #pragma message( __FILE__ ": recode to use genfh.hp macros" )
-#if !defined(__PSX__)
 
 	static char* actorNames[2000];
 	static int actorCount = 0;
 	if (!actorNames[0])
 	{
-		int levelNum = theGame->GetLevelNum() + 1;
+		int levelNum = g_actorPrintLevelNum + 1;
 		char szLevelsTxt[ _MAX_PATH ];
 
 		extern char szOadDir[];
@@ -187,7 +202,6 @@ Actor::Print( std::ostream& s ) const
 	if ( actorNames[ 0 ] && ( GetActorIndex() <= actorCount && actorNames[ GetActorIndex() ] ) )
 		strcpy( szActor, actorNames[ GetActorIndex() ] );
 
-#endif
 
 	s << "Actor #" << GetActorIndex() << " (" << szActor << ')';
     s << " Mailboxes = [" <<_mailboxes << ']';
@@ -222,9 +236,9 @@ Actor::Activated( BaseObjectIteratorWrapper objectIter, const _Activation* actbo
 			while ( !objectIter.Empty() )
 			{
             PhysicalObject* po;
-				po = dynamic_cast<PhysicalObject*>(&(*objectIter));
+				assert(IsPhysicalObject(&(*objectIter)));
+				po = static_cast<PhysicalObject*>(&(*objectIter));
 				//DBSTREAM1( cactor << std::endl << "checking against actor #" << theLevel->GetActorIndex( po ); )
-				assert( ValidPtr( po ) );
 				const PhysicalAttributes& pa = po->GetPhysicalAttributes();
 
 				if ( pa.CheckCollision( GetPhysicalAttributes() ) )
@@ -244,7 +258,8 @@ Actor::Activated( BaseObjectIteratorWrapper objectIter, const _Activation* actbo
 			if ( colObject )
 			{
 				//AssertMsg( colObject, *this << " activated by actor " << *colObject << " activated non-existant actor" << std::endl );
-            PhysicalObject* po = dynamic_cast<PhysicalObject*>(colObject);
+            assert(IsPhysicalObject(colObject));
+            PhysicalObject* po = static_cast<PhysicalObject*>(colObject);
 				const PhysicalAttributes& pa = po->GetPhysicalAttributes();
 				if ( pa.CheckCollision( GetPhysicalAttributes() ) )
             {
@@ -260,8 +275,8 @@ Actor::Activated( BaseObjectIteratorWrapper objectIter, const _Activation* actbo
 
 			while ( !objectIter.Empty() )
 			{
-				PhysicalObject* po = dynamic_cast<PhysicalObject*>(&(*objectIter));
-				assert( ValidPtr( po ) );
+				assert(IsPhysicalObject(&(*objectIter)));
+				PhysicalObject* po = static_cast<PhysicalObject*>(&(*objectIter));
 				if ( actbox->ActivatedByClass == po->kind() )
 				{
 					//DBSTREAM3( cactor << std::endl << "checking against actor #" << theLevel->GetActorIndex( po ); )
@@ -511,6 +526,73 @@ Actor::BindAssets(Memory& memory)
 	_renderActor->Validate();
 	DBSTREAM3(casset << "BindAssets: actor:" << *this << ",now has a renderActor =" << _renderActor << std::endl; )
 
+	// Push the OAS-authored per-actor render scale (_scaleX/Y/Z, read in the ctor)
+	// into the freshly-bound RenderActor3D. Previously ONLY the EMAILBOX_X/Y/Z_SCALE
+	// mailbox path (below) called SetActorScale, so a load-time Scale field rendered
+	// unit-sized while its scaled BOX3 made collision correct — wide shared-unit-box
+	// statplats (the SMB tree-tops / platforms / staircases that carry size as Scale
+	// instead of baked verts) drew as 1-tile cubes. No-op for identity scale, so
+	// pre-scale levels are unchanged. (Axis-aligned boxes only; non-uniform scale on a
+	// rotated actor would shear — same caveat as the mailbox path.)
+	_renderActor->SetActorScale(Vector3(_scaleX, _scaleY, _scaleZ));
+
+#ifdef PHYSICS_ENGINE_JOLT
+	// For StatPlat mesh actors and anchored Generator mesh actors: replace the
+	// constructor's box-body placeholder with a trimesh body now that the
+	// room's asset slot is loaded.
+	if ((_nonStatPlat == &_statPlatData ||
+	     (kind() == Actor::Generator_KIND && GetMovementBlockPtr()->Mobility == MOBILITY_ANCHORED)) &&
+	    GetMeshBlockPtr()->ModelType == MODEL_TYPE_MESH && GetMeshName() != 0)
+	{
+		packedAssetID meshID(GetMeshName());
+		binistream meshBinis = theLevel->GetAssetManager().GetAssetStream(meshID);
+		if (meshBinis.good())
+		{
+			IFFChunkIter meshIter(meshBinis);
+			if (meshIter.GetChunkID().ID() == IFFTAG('M','O','D','L'))
+			{
+				std::vector<JoltMeshVertex> jverts;
+				std::vector<JoltMeshFace>   jfaces;
+				while (meshIter.BytesLeft() > 0)
+				{
+					IFFChunkIter* chunk = meshIter.GetChunkIter(HALScratchLmalloc);
+					if (chunk->GetChunkID().ID() == IFFTAG('V','R','T','X'))
+					{
+						int count = chunk->Size() / (int)sizeof(Vertex3DOnDisk);
+						for (int i = 0; i < count; i++)
+						{
+							Vertex3DOnDisk v;
+							chunk->ReadBytes(&v, sizeof(v));
+							jverts.push_back({(float)v.x / 65536.0f,
+							                  (float)v.y / 65536.0f,
+							                  (float)v.z / 65536.0f});
+						}
+					}
+					else if (chunk->GetChunkID().ID() == IFFTAG('F','A','C','E'))
+					{
+						int count = chunk->Size() / (int)sizeof(_TriFaceOnDisk);
+						for (int i = 0; i < count; i++)
+						{
+							_TriFaceOnDisk f;
+							chunk->ReadBytes(&f, sizeof(f));
+							jfaces.push_back({(uint32_t)f.v1Index,
+							                  (uint32_t)f.v2Index,
+							                  (uint32_t)f.v3Index});
+						}
+					}
+					MEMORY_DELETE(HALScratchLmalloc, chunk, IFFChunkIter);
+				}
+				if (!jverts.empty() && !jfaces.empty()) {
+					_physicalAttributes.JoltMakeStaticMesh(
+						jverts.data(), (int)jverts.size(),
+						jfaces.data(), (int)jfaces.size());
+					JoltBodySetActor(_physicalAttributes.JoltBodyID(), this);
+				}
+			}
+		}
+	}
+#endif
+
 }
 
 //============================================================================
@@ -586,6 +668,11 @@ Actor::Actor( const SObjectStartupData* startupData ) :
     _mailboxes(*this, EMAILBOX_LOCAL_START,GetCommonBlockPtr()->NumberOfLocalMailboxes,startupData->mailboxes)
 {
 	DBSTREAM3( cactor << "Actor::Actor:" << std::endl; )
+    fprintf(stderr, "[Actor] idx=%d class=%d commonOff=%d NumberOfLocalMailboxes=%d\n",
+        startupData->idxActor,
+        startupData->objectData ? ((int16*)startupData->objectData)[0] : -1,
+        (int)((_Actor*)_oadData)->commonPageOffset,
+        GetCommonBlockPtr()->NumberOfLocalMailboxes);
 	assert( ValidPtr( startupData ) );
     assert(ValidPtr( startupData->mailboxes));
 	assert( ValidPtr( _oadData ) );
@@ -598,10 +685,59 @@ Actor::Actor( const SObjectStartupData* startupData ) :
 	_physicalAttributes.SetPredictedPosition( _physicalAttributes.Position() );
 	_physicalAttributes.Validate();
 
+#if DO_TEST_CODE
+	// --debug-print-actors: one-shot per-actor line for cross-referencing WF
+	// actor indices with bridge {"op":"state","idx":N} events. Off by default;
+	// the bridge prints WF actor idx, not Jolt body id / character handle (see
+	// docs/level-building.md "Identifier spaces"). Skipping kind() here — it's
+	// virtual and unsafe to call from the Actor base constructor (subclass
+	// vtable not yet installed); mesh + mobility + pos are enough to ID in
+	// practice. Guarded by DO_TEST_CODE so the whole block (and the global)
+	// disappear from safe-fast/release/final/console builds — see
+	// docs/compile-time-switches.md.
+	{
+		extern int gDebugPrintActors;
+		if (gDebugPrintActors)
+		{
+			static const char* kMobilityNames[] = {"Anchored","Physics","Path","Camera","Follow"};
+			int mob = GetMovementBlockPtr()->Mobility;
+			const char* mobStr = (mob >= 0 && mob < 5) ? kMobilityNames[mob] : "?";
+			const char* meshStr = "(none)";
+			int32 meshID = GetMeshName();
+			if (meshID != 0) {
+				const char* nm = theLevel->GetAssetManager().LookupAssetName(packedAssetID(meshID));
+				meshStr = nm ? nm : "(unresolved)";
+			}
+			const Vector3& p = _physicalAttributes.Position();
+			std::fprintf(stderr,
+				"actor idx=%d mesh=%s mobility=%s pos=(%.2f,%.2f,%.2f)\n",
+				_idxActor, meshStr, mobStr,
+				p.X().AsFloat(), p.Y().AsFloat(), p.Z().AsFloat());
+		}
+	}
+#endif // DO_TEST_CODE
+
 	_lastVisibility = false;
 	_visibility = false;
 
 	_renderActor = NULL;
+
+	// Per-actor non-uniform render scale: read from OAS (existing-but-
+	// previously-unread x_scale/y_scale/z_scale fields). Default to 1.0
+	// when the OAS value is zero (which is what every level currently
+	// authors, since no level has explicitly set these). Mutable per-frame
+	// via EMAILBOX_X/Y/Z_SCALE; consumed in RenderActor3D::Render().
+	{
+		const Scalar oadX = Scalar::FromFixed32(objdata->x_scale);
+		const Scalar oadY = Scalar::FromFixed32(objdata->y_scale);
+		const Scalar oadZ = Scalar::FromFixed32(objdata->z_scale);
+		_scaleX = (oadX == Scalar::zero) ? Scalar::one : oadX;
+		_scaleY = (oadY == Scalar::zero) ? Scalar::one : oadY;
+		_scaleZ = (oadZ == Scalar::zero) ? Scalar::one : oadZ;
+	}
+
+	_lastColliderIdx     = 0;
+	_lastCollisionNormal = Vector3::zero;
 
 	DBSTREAM3( cactor << "Created new Actor #" << _idxActor );
 	DBSTREAM3( cactor << ", Physical Attributes: " << std::endl );
@@ -617,6 +753,13 @@ Actor::Actor( const SObjectStartupData* startupData ) :
 		AssertMsg( !GetCommonBlockPtr()->ScriptControlsInput, *this <<" -- No scripts [and therefore no Script Controls Input] on StatPlat's" );
 		AssertMsg( GetCommonBlockPtr()->NumberOfLocalMailboxes == 0, *this << " -- No local mailboxes allowed on StatPlat's" );
 		AssertMsg( GetMovementBlockPtr()->Mobility == MOBILITY_ANCHORED, *this << " -- StatPlat's must be anchored -- Mobility is " << GetMovementBlockPtr()->Mobility );
+#ifdef PHYSICS_ENGINE_JOLT
+		// Create a box body as a placeholder; BindAssets() will replace it
+		// with a trimesh body for MODEL_TYPE_MESH actors once the room's
+		// asset slot is available.
+		_physicalAttributes.JoltMakeStatic();
+		JoltBodySetActor(_physicalAttributes.JoltBodyID(), this);
+#endif
 	}
 	else
 	{
@@ -647,6 +790,11 @@ Actor::Actor( const SObjectStartupData* startupData ) :
          // kts this is lame, there should be no connection between movement and animation (and it should be possible for a follow or pathed object to animate)
          _nonStatPlat->_animManager = new (theLevel->GetMemory()) AnimationManagerActual;
          assert(ValidPtr(_nonStatPlat->_animManager));
+#ifdef PHYSICS_ENGINE_JOLT
+         // PHYSICS actors are driven by CharacterVirtual — replaces the kinematic body.
+         _physicalAttributes.JoltMakeCharacter();
+         JoltCharacterSetActor(_physicalAttributes.JoltCharacterID(), this);
+#endif
       }
 
 		// setup the tools
@@ -661,6 +809,20 @@ Actor::Actor( const SObjectStartupData* startupData ) :
 			if ( pidxTools[ idxTool ] != -1 )
 				++_nonStatPlat->_nTools;
 		}
+
+#ifdef PHYSICS_ENGINE_JOLT
+		// Anchored Generator actors with a mesh (block-IS-generator pattern) need
+		// a static Jolt body so JoltContactDispatch can find them and populate
+		// the block's per-actor collision mailboxes. BindAssets() replaces this
+		// box placeholder with a trimesh body once the mesh IFF is loaded.
+		if (objdata->type == Actor::Generator_KIND &&
+		    GetMovementBlockPtr()->Mobility == MOBILITY_ANCHORED &&
+		    GetMeshBlockPtr()->ModelType == MODEL_TYPE_MESH)
+		{
+			_physicalAttributes.JoltMakeStatic();
+			JoltBodySetActor(_physicalAttributes.JoltBodyID(), this);
+		}
+#endif
 	}
 
 	AssertMsg( _nonStatPlat->_hitPoints > Scalar::zero, *this << " has an invalid hit point setting of " << _nonStatPlat->_hitPoints );
@@ -765,8 +927,6 @@ Actor::update()
 	}
 #endif
 #endif
-    //theLevel->GetMailboxes().WriteMailbox( EMAILBOX_NUM_COLLISIONS, Scalar::zero );
-
     char msgData[msgDataSize];
 	while( GetMsgPort().GetMsgByType( MsgPort::DELTA_HEALTH, &msgData,  msgDataSize) )
 	{
@@ -813,7 +973,11 @@ Actor::update()
 	if ( _nonStatPlat->_pScript )
 	{
 		DBSTREAM3( cactor << " executing script:" << _nonStatPlat->_pScript << std::endl; )
-      theLevel->EvalScript(_nonStatPlat->_pScript,GetActorIndex());
+      // ScriptLanguage field removed from common.oad to restore layout compat
+      // with pre-existing compiled levels.  Language selection moves to the
+      // next Gap 4 iteration (Blender/levcomp-rs-driven path).
+      // TEMP: hardcoded to 3 (Forth) for snowgoons Forth smoke test.
+      theLevel->EvalScript(_nonStatPlat->_pScript,GetActorIndex(),3);
 	}
 
 //#if DEBUG
@@ -948,6 +1112,14 @@ Actor::StartFrame()
 	assert(ValidPtr(_nonStatPlat->_input));
 	_nonStatPlat->_input->update();	// Moved this here so that both PredictPosition() and Update()
 						// agree about isPressed vs. justPressed
+
+	// Clear collision freshness signal at the TOP of the frame. The frame
+	// ordering (level.cc Level::update) is:
+	//   StartFrame → JoltWorldStep + DetectCollision (Collision() fires here,
+	//   sets _lastColliderIdx) → UpdatePhysics (script runs, reads the value).
+	// Clearing in Actor::update() (where the original NUM_COLLISIONS stub
+	// lived) would wipe the value before the script sees it.
+	_lastColliderIdx = 0;
 	DBSTREAM5( cflow << "Actor::StartFrame: done" << std::endl; )
 }
 
@@ -1055,11 +1227,11 @@ Actor::ReadSystemMailbox( int boxnum ) const
         case EMAILBOX_HITPOINTS:
             return _nonStatPlat->_hitPoints;
 
+        case EMAILBOX_GOLD:
+            return _nonStatPlat->_gold;
+
         case EMAILBOX_SHIELD:
             return Scalar( getPower(), 0 );
-
-        case EMAILBOX_LOCAL_MIDI:
-            UNIMPLEMENTED( "read local midi" );
 
         case EMAILBOX_ALIVE:
             return Scalar::one;
@@ -1111,6 +1283,32 @@ Actor::ReadSystemMailbox( int boxnum ) const
             UNIMPLEMENTED( "DELTA_ROLL mailbox is write-only!" );
             return Scalar::zero;
         }
+
+        case EMAILBOX_FACE_COLOR_TOP:
+        case EMAILBOX_FACE_COLOR_LIT:
+        case EMAILBOX_FACE_COLOR_SHADOW:
+            // Per-face color overrides are write-only — the renderer reads them
+            // through the actor's RenderObject3D, not through ReadMailbox. Return
+            // 0 instead of asserting so the debug bridge's set_mailbox handler
+            // (which reads old_val before writing for undo support) doesn't trip.
+            return Scalar::zero;
+
+        case EMAILBOX_X_SCALE:
+            return _scaleX;
+        case EMAILBOX_Y_SCALE:
+            return _scaleY;
+        case EMAILBOX_Z_SCALE:
+            return _scaleZ;
+
+        // Per-actor collision data — see Actor::Collision and Actor::Update.
+        case EMAILBOX_COLLIDER_IDX:
+            return Scalar(_lastColliderIdx, 0);
+        case EMAILBOX_COLLISION_NORMAL_X:
+            return _lastCollisionNormal.X();
+        case EMAILBOX_COLLISION_NORMAL_Y:
+            return _lastCollisionNormal.Y();
+        case EMAILBOX_COLLISION_NORMAL_Z:
+            return _lastCollisionNormal.Z();
 
         case EMAILBOX_KEYFRAME:
         {
@@ -1177,8 +1375,8 @@ Actor::ReadSystemMailbox( int boxnum ) const
             while ( !poIter.Empty() )
             {
 
-                colActor = dynamic_cast<Actor*>(&(*poIter));
-                assert( ValidPtr( colActor ) );
+                assert(IsActor(&(*poIter)));
+                colActor = static_cast<Actor*>(&(*poIter));
                 if ( colActor->CanRender() )
                 {
                     const PhysicalAttributes& colAttr = colActor->GetPhysicalAttributes();
@@ -1195,6 +1393,9 @@ Actor::ReadSystemMailbox( int boxnum ) const
             return closestActor ? Scalar( theLevel->GetObjectIndex( closestActor ), 0 ) : Scalar::zero;
 #endif
         }
+
+        case EMAILBOX_SOUND:
+            return Scalar::zero;
 
         default:
                 AssertMsg( 0, *this << "Actor::ReadSystemnMailbox(): Write-only local system mailbox " << boxnum << std::endl );
@@ -1224,10 +1425,11 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             _nonStatPlat->_hitPoints = value;
             break;
 
-        case EMAILBOX_SHIELD:
+        case EMAILBOX_GOLD:
+            _nonStatPlat->_gold = value;
             break;
 
-        case EMAILBOX_LOCAL_MIDI:
+        case EMAILBOX_SHIELD:
             break;
 
         case EMAILBOX_ALIVE:
@@ -1260,6 +1462,17 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             tVect.SetX(value);
             _physicalAttributes.SetPosition(tVect);
             _physicalAttributes.SetPredictedPosition(tVect);
+#ifdef PHYSICS_ENGINE_JOLT
+            // For Jolt character actors, the per-tick movement sync at
+            // movement.cc overwrites _position with the character body's
+            // pose unless we also push the teleport into Jolt. See plan
+            // docs/plans/2026-05-11-mailbox-pos-write-bypasses-jolt.md.
+            {
+                uint32_t charID = _physicalAttributes.JoltCharacterID();
+                if (charID != kJoltInvalidBodyID)
+                    JoltCharacterSetPosition(charID, tVect);
+            }
+#endif
             break;
         }
         case EMAILBOX_Y_POS:
@@ -1269,6 +1482,13 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             tVect.SetY(value);
             _physicalAttributes.SetPosition(tVect);
             _physicalAttributes.SetPredictedPosition(tVect);
+#ifdef PHYSICS_ENGINE_JOLT
+            {
+                uint32_t charID = _physicalAttributes.JoltCharacterID();
+                if (charID != kJoltInvalidBodyID)
+                    JoltCharacterSetPosition(charID, tVect);
+            }
+#endif
             break;
         }
         case EMAILBOX_Z_POS:
@@ -1278,6 +1498,13 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             tVect.SetZ(value);
             _physicalAttributes.SetPosition(tVect);
             _physicalAttributes.SetPredictedPosition(tVect);
+#ifdef PHYSICS_ENGINE_JOLT
+            {
+                uint32_t charID = _physicalAttributes.JoltCharacterID();
+                if (charID != kJoltInvalidBodyID)
+                    JoltCharacterSetPosition(charID, tVect);
+            }
+#endif
             break;
         }
         case EMAILBOX_ROTATION_A:
@@ -1342,23 +1569,6 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
 
         case EMAILBOX_CD_TRACK:
         {
-#if defined( __WIN__ )
-#include <cdda/cd.hp>
-            //extern HWND worldFoundryhWnd;
-            //assert( worldFoundryhWnd );
-            // kts 7/14/99 7:34AM doesn't link right now
-            //playCDTrack( worldFoundryhWnd, value.WholePart() );
-#endif
-            break;
-        }
-
-        case EMAILBOX_SOUND:
-        {
-            int32 soundEffect = value.WholePart();
-            DBSTREAM1( cdebug << "Playing sound # " << soundEffect << std::endl; )
-            RangeCheck( soundEffect, 0, 128 );
-            AssertMsg( theLevel->_sfx[ soundEffect ], "No sound effect loaded into slot #" << soundEffect );
-            theLevel->_sfx[ soundEffect ]->play();
             break;
         }
 
@@ -1385,6 +1595,59 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
           linVelocity.SetZ(value);
           _physicalAttributes.SetLinVelocity( linVelocity );
        }
+            break;
+
+        case EMAILBOX_FACE_COLOR_TOP:
+        case EMAILBOX_FACE_COLOR_LIT:
+        case EMAILBOX_FACE_COLOR_SHADOW:
+        {
+            // Per-face material color override. Value = packed 24-bit RGB
+            // (0xRRGGBB). Material index = mailbox enum offset (0/1/2).
+            // Re-bakes the actor's RenderObject3D primitives with the new color.
+            // No-op for actors without a RenderActor3D (default RenderActor base
+            // SetMaterialColor is a no-op).
+            // (qbert cube consolidation, 2026-05-10.)
+            if (ValidPtr(_renderActor))
+            {
+                const int idx = boxnum - EMAILBOX_FACE_COLOR_TOP;
+                const uint32 packed = (uint32)value.WholePart();
+                Color color((uint8)((packed >> 16) & 0xFF),
+                            (uint8)((packed >>  8) & 0xFF),
+                            (uint8)( packed        & 0xFF));
+                _renderActor->SetMaterialColor(idx, color);
+            }
+            break;
+        }
+
+        case EMAILBOX_X_SCALE:
+        case EMAILBOX_Y_SCALE:
+        case EMAILBOX_Z_SCALE:
+        {
+            // Per-actor non-uniform render scale. Cached on the Actor and
+            // forwarded to RenderActor3D, which applies it in Render() via
+            // column-multiply on the world matrix before draw. No-op on
+            // actors without a RenderActor3D (default RenderActor base
+            // SetActorScale is a no-op).
+            // (qbert stretch-and-squash, 2026-05-10.)
+            if (boxnum == EMAILBOX_X_SCALE) _scaleX = value;
+            else if (boxnum == EMAILBOX_Y_SCALE) _scaleY = value;
+            else                                  _scaleZ = value;
+            if (ValidPtr(_renderActor))
+                _renderActor->SetActorScale(Vector3(_scaleX, _scaleY, _scaleZ));
+            break;
+        }
+
+        case EMAILBOX_COLLIDER_IDX:
+            _lastColliderIdx = (int32)value.WholePart();
+            break;
+        case EMAILBOX_COLLISION_NORMAL_X:
+            _lastCollisionNormal.SetX(value);
+            break;
+        case EMAILBOX_COLLISION_NORMAL_Y:
+            _lastCollisionNormal.SetY(value);
+            break;
+        case EMAILBOX_COLLISION_NORMAL_Z:
+            _lastCollisionNormal.SetZ(value);
             break;
 
         case EMAILBOX_INPUT :
@@ -1428,6 +1691,10 @@ Actor::WriteSystemMailbox( int boxnum, Scalar value )
             break;
         }
 
+        case EMAILBOX_SOUND:
+            SfxLibrary::Play(static_cast<int>(value.WholePart()));
+            break;
+
         default:
             AssertMsg( 0, *this << ": (set) Unknown local system mailbox " << boxnum << std::endl );
             break;
@@ -1446,10 +1713,15 @@ Actor::GetSpecialCollisionMessage(void * msgData, int32 maxsize)
 {
 	if ( GetMsgPort().GetMsgByType( MsgPort::SPECIAL_COLLISION, msgData,maxsize) )
 	{
-		// re-check this collision to make sure it's still valid
-		const PhysicalAttributes& colAttr = ((Actor*)msgData)->GetPhysicalAttributes();
+		// re-check this collision to make sure it's still valid.
+		// msgData holds an Actor* posted by collision.cc as
+		// reinterpret_cast<uintptr_t>(&object) — read the pointer FROM the
+		// buffer, not (Actor*)msgData (which mis-read the buffer bytes as an
+		// Actor). Keep the pointer optimization (06373f5); just interpret it
+		// correctly, and invalidate via the pointer-width word, not `long`.
+		const PhysicalAttributes& colAttr = reinterpret_cast<Actor*>(*(uintptr_t*)msgData)->GetPhysicalAttributes();
 		if ( !(_physicalAttributes.CheckCollision(colAttr)) )
-			*(long*)msgData = 0;
+			*(uintptr_t*)msgData = 0;
 		return true;
 	}
 	else
@@ -1497,19 +1769,75 @@ Actor::GetMsgPort()
    return _nonStatPlat->_msgPort;
 }
 
-void 
+void
 Actor::Collision(PhysicalObject& other, const Vector3& normal)
 {
+	// Stash collision data on the actor so scripts can read it via mailboxes
+	// 3044-3047. PhysicalObject/MovementObject are abstract (neither overrides
+	// kind()), so every PhysicalObject reaching here is an Actor and IsActor()
+	// is always true today; the else (→ 0) stays as the single update point if
+	// a non-Actor PhysicalObject is ever added. See baseobject.hp IsActor doc.
+	if (IsActor(&other))
+		_lastColliderIdx = static_cast<Actor&>(other).GetActorIndex();
+	else
+		_lastColliderIdx = 0;
+	_lastCollisionNormal = normal;
+
 	if ( normal.Z() < Scalar::zero )
 	{
 		if (GetMovementManager().GetMovementHandlerData())
       {
-         MovementObject* movementObject = dynamic_cast<MovementObject*>(&other);
-         assert(ValidPtr(movementObject));
+         assert(IsMovementObject(&other));
+         MovementObject* movementObject = static_cast<MovementObject*>(&other);
 			GetMovementManager().GetMovementHandlerData()->supportingObject = movementObject;
       }
 	}
 }
+
+#ifdef PHYSICS_ENGINE_JOLT
+void Actor::JoltStaticCollision(const Vector3& normal)
+{
+	_lastColliderIdx     = 0;
+	_lastCollisionNormal = normal;
+}
+
+// Bridge Jolt's CharacterVirtual contacts into Actor::Collision so f4071a3's
+// per-actor collision mailboxes (COLLIDER_IDX / COLLISION_NORMAL_*) get
+// populated for Jolt-managed actors. Without this, collision.cc:513-520
+// skips the legacy event-list path for any actor with a JoltCharacterID,
+// leaving those mailboxes stuck at 0 in interactive play. Registered once
+// at engine startup; jolt_backend invokes it with the WF-convention normal
+// (direction the character pushes the surface), so a bump-from-below
+// arrives as normal.Z > 0 — matching what level scripts already write.
+static void JoltContactDispatch(void* characterActor, void* otherActor,
+                                const Vector3& normal)
+{
+	Actor* charA = static_cast<Actor*>(characterActor);
+	if (!charA) return;
+	if (Actor* otherA = static_cast<Actor*>(otherActor))
+	{
+		charA->Collision(*otherA, normal);
+		// Engine change #1 (block-IS-generator + Gold pickup): also notify the
+		// struck body so ITS per-actor collision mailboxes (COLLIDER_IDX /
+		// COLLISION_NORMAL_*) populate. Otherwise only the Jolt character
+		// (Mario) ever learns of the contact, so a `?`-block can't self-detect
+		// its bump and a Gold coin can't learn Mario touched it. The normal sign
+		// as seen by the struck body is calibrated in the script's hit-from-below
+		// gate (see docs/plans/2026-05-19-smb-block-generator-coin.md step 8).
+		otherA->Collision(*charA, normal);
+	}
+	else
+		charA->JoltStaticCollision(normal);  // static geometry — no WF Actor; collider idx = 0
+}
+
+// Run-once init: registered via a function-static, so the cost is paid on
+// first Actor construction and never repeated. Static-initialization order
+// across translation units is irrelevant — the callback is only invoked
+// after a CharacterVirtual exists, which is after at least one Actor is
+// constructed.
+static const bool g_joltContactCallbackRegistered = (
+	JoltSetContactCallback(&JoltContactDispatch), true);
+#endif
 
 //==============================================================================
 
@@ -1552,8 +1880,12 @@ Actor::GetMailboxes() const
 }
 
 
-ActorMailboxes::ActorMailboxes(Actor& actor,long mailboxesBase, long numberOfLocalMailboxes, Mailboxes* parent) :
-MailboxesWithStorage(mailboxesBase, numberOfLocalMailboxes, parent),
+ActorMailboxes::ActorMailboxes(Actor& actor,int32 mailboxesBase, int32 numberOfLocalMailboxes, Mailboxes* parent) :
+// Route _localMailboxes through the per-level _memory pool (DMalloc), not
+// the default HALLmalloc. Actors are constructed mid-Level-loading and
+// destroyed mid-Level-teardown — their HALLmalloc-backed sub-allocations
+// would otherwise be freed out of LIFO order. See mailbox.hp.
+MailboxesWithStorage(mailboxesBase, numberOfLocalMailboxes, parent, &actor.GetMemory()),
 _actor(actor)
 {
 
@@ -1565,7 +1897,7 @@ ActorMailboxes::~ActorMailboxes()
 }
 
 Scalar 
-ActorMailboxes::ReadMailbox(long mailbox) const
+ActorMailboxes::ReadMailbox(int32 mailbox) const
 {
     if(mailbox >= EMAILBOX_LOCAL_SYSTEM_START && mailbox < EMAILBOX_LOCAL_SYSTEM_MAX)
         return _actor.ReadSystemMailbox(mailbox);
@@ -1575,7 +1907,7 @@ ActorMailboxes::ReadMailbox(long mailbox) const
 
 
 void 
-ActorMailboxes::WriteMailbox(long mailbox, Scalar value)
+ActorMailboxes::WriteMailbox(int32 mailbox, Scalar value)
 {
     if(mailbox >= EMAILBOX_LOCAL_SYSTEM_START && mailbox < EMAILBOX_LOCAL_SYSTEM_MAX)
         _actor.WriteSystemMailbox(mailbox,value);
@@ -1588,6 +1920,7 @@ ActorMailboxes::WriteMailbox(long mailbox, Scalar value)
 #pragma message( "Put assertions in PutMsg() so that no messages are being sent to StatPlat's" )
 Actor::NonStatPlatData::NonStatPlatData(SMemPool * memPool, const _Movement* moveBlock) :
 	_hitPoints( Actor::INDESTRUCTIBLE_HP ),
+	_gold( Scalar::zero ),
 	_shield( NULL ),
 	_inputScript( NULL ),
 	_input( &theNullInputDigital ),

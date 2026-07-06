@@ -55,11 +55,19 @@ class RenderObject3D
 {
 public:
 	RenderObject3D( Memory& memory, binistream& input, int32 userData, const GfxCallbacks& callbacks );                 // userData is passed back to LookupTexture
-	RenderObject3D(Memory& memory, int vertexCount, Vertex3D* vertexList, int faceCount, TriFace* faceList, const Material* materialList );
+	// materialList is taken non-const so SetMaterialColor() can mutate it.
+	RenderObject3D(Memory& memory, int vertexCount, Vertex3D* vertexList, int faceCount, TriFace* faceList, Material* materialList );
 	RenderObject3D( Memory& memory, const RenderObject3D& );
 	~RenderObject3D();
-	void ApplyMaterials( const Material* materialList );
+	// Material array is non-const so SetMaterialColor() can mutate _color in
+	// place and re-bake primitives; storage ownership is unchanged.
+	void ApplyMaterials( Material* materialList );
 	void Render(ViewPort& vp,const Matrix34& position);
+
+	// Runtime material color override (qbert cube consolidation, 2026-05-10).
+	// Updates _materialList[idx]._color in place and re-bakes primitives so the
+	// next Render() picks up the new color. No-op if idx is out of range.
+	void SetMaterialColor(int idx, const Color& color);
 
 	Vertex3D* GetWrittableVertexList();	// should only be used by the animation system
 	int GetVertexCount() const;	// should only be used by the animation system
@@ -68,22 +76,13 @@ public:
 	inline void Validate() const;
 private:
 	// used by constructors
-	void Construct( Memory& memory, int vertexCount,Vertex3D* vertexList, int faceCount, TriFace* faceList, const Material* materialList );
+	void Construct( Memory& memory, int vertexCount,Vertex3D* vertexList, int faceCount, TriFace* faceList, Material* materialList );
 
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-#	include <gfx/softwarepipeline/renderer.inc>
-#elif defined(RENDERER_PIPELINE_PSX)
-#	include <gfx/psx/renderer.inc>
-#elif defined( RENDERER_PIPELINE_GL)
 #	include <gfx/glpipeline/renderer.inc>
-#elif defined( RENDERER_PIPELINE_DIRECTX)
-#	include <gfx/directxpipeline/renderer.inc>
-#else
-#	error Undefined platform for renderer pipeline
-#endif
 	enum { MAX_RENDERERS = 8 };
 	Primitive*	_primList[ORDER_TABLES];				// array of primitives, same # as face list
-	const Material*	_materialList;
+	Material*	_materialList;	// non-const so SetMaterialColor() can mutate; for runtime per-face color override (qbert cube consolidation, 2026-05-10).
+	int			_materialCount;	// kept so SetMaterialColor() can range-check; populated by the on-disk constructor.
 
 	int			_handleCount;		// number of handles in this object
 	Handle*		_handleList;		// array of [HandleID, vertexIndex] pairs
@@ -125,18 +124,7 @@ struct RotatedVector
 };
 
 
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-#	include <gfx/softwarepipeline/rendobj3.hp>
-#elif defined(RENDERER_PIPELINE_PSX)
-#	include <gfx/psx/rendobj3.hp>
-#elif defined(RENDERER_PIPELINE_GL)
 #		include <gfx/glpipeline/rendobj3.hp>
-#elif defined(RENDERER_PIPELINE_DIRECTX)
-#		include <gfx/directxpipeline/rendobj3.hp>
-#else
-#		error platform not defined
-#endif
-
 //============================================================================
 #include <gfx/rendobj3.hpi>		// include all inline definitions as appropriate
 //=============================================================================

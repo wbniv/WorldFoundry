@@ -47,6 +47,15 @@ public:
 	virtual const PhysicalObject* GetWatchObject(const MovementObject& movementObject) const = 0;
 	virtual const Vector3& GetLookAt(const MovementObject& movementObject) const = 0;
 	virtual bool ValidView(const MovementObject& movementObject) const = 0;
+
+	// Resolve a (possibly stale/destroyed/recycled) track-object index to its
+	// PhysicalObject, or nullptr if unset (0), out of range, an empty/freed slot,
+	// or not a physical object. Never asserts — a destroyed tracked actor must
+	// degrade gracefully, not abort. Shared by all three handlers' GetWatchObject
+	// and SetCameraParametersFromShot. NOTE: an index is not an identity; a
+	// recycled slot resolves to whatever now owns it (see the actor-identity /
+	// safe-handle follow-up in TODO.md).
+	static const PhysicalObject* ResolveTrackObject(int32 idxTrackObject);
 protected:
 	void SetCamera(PhysicalObject& physicalObject, const cameraPosition& destCam);         // will attempt to cast to Camera&
 	struct cameraData
@@ -169,10 +178,6 @@ public:
 };
 
 
-//==============================================================================
-#if		USE_INLINE_DEFS || defined(_movement_CC)
-#include "movecam.hpi"	// include all inline definitions as appropriate
-#endif
 //==============================================================================
 #endif // _MOVECAM_HP
 //==============================================================================

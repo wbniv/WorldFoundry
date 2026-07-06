@@ -88,26 +88,27 @@ impl<'a> Level<'a> {
     }
 }
 
-// ── _ObjectOnDisk field offsets (all packed, no padding) ────────────────────
+// ── _ObjectOnDisk field offsets (natural alignment, NOT pack(1)) ────────────
 //   0: type (i16)
-//   2: x,y,z (i32×3 = 12)
-//  14: x_scale,y_scale,z_scale (i32×3 = 12)
-//  26: rotation: a(u16),b(u16),c(u16),order(u8) = 7
-//  33: coarse: minX,minY,minZ,maxX,maxY,maxZ (i32×6 = 24)
-//  57: oadFlags (i32)
-//  61: pathIndex (i16)
-//  63: OADSize (i16)
-//  65: [OADSize bytes of OAD data]
+//   2: pad                                   (2 bytes for i32 alignment)
+//   4: x,y,z (i32×3 = 12)
+//  16: x_scale,y_scale,z_scale (i32×3 = 12)
+//  28: rotation: a(u16),b(u16),c(u16),order(u8) = 7  (aligned(4), 8 bytes total)
+//  36: coarse: minX,minY,minZ,maxX,maxY,maxZ (i32×6 = 24)
+//  60: oadFlags (i32)
+//  64: pathIndex (i16)
+//  66: OADSize (i16)
+//  68: [OADSize bytes of OAD data, padded to 4-byte alignment]
 
 const OBJ_TYPE_OFF:      usize = 0;
-const OBJ_X_OFF:         usize = 2;
-const OBJ_Y_OFF:         usize = 6;
-const OBJ_Z_OFF:         usize = 10;
-const OBJ_COARSE_OFF:    usize = 33;  // minX
-const OBJ_OFLAGS_OFF:    usize = 57;
-const OBJ_PATHIDX_OFF:   usize = 61;
-const OBJ_OADSIZE_OFF:   usize = 63;
-const OBJ_HEADER_SIZE:   usize = 65;
+const OBJ_X_OFF:         usize = 4;
+const OBJ_Y_OFF:         usize = 8;
+const OBJ_Z_OFF:         usize = 12;
+const OBJ_COARSE_OFF:    usize = 36;  // minX
+const OBJ_OFLAGS_OFF:    usize = 60;
+const OBJ_PATHIDX_OFF:   usize = 64;
+const OBJ_OADSIZE_OFF:   usize = 66;
+const OBJ_HEADER_SIZE:   usize = 68;
 
 // ── _PathOnDisk field offsets ────────────────────────────────────────────────
 //   0: base.x,y,z (i32×3=12), base.rot a,b,c,order (7) → 19 bytes

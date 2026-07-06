@@ -41,6 +41,9 @@
 #include <gfx/viewport.hp>
 #include "actor.hp"
 
+class Level;
+class GameMailboxes;
+
 //=============================================================================
 
 const int NumJoysticks = 2;
@@ -53,8 +56,89 @@ public:
 	WFGame( const int nStartingLevel = 0 );
 	~WFGame();
 
+	// One-tick result. Rendered = normal frame ran; Suspended = platform
+	// backgrounded us (Android onPause), no render/PageFlip happened;
+	// Done = level reported done() (caller should stop the loop).
+	enum class FrameResult { Rendered, Suspended, Done };
+
+	// Per-level lifecycle. RunLevel = LoadLevel + while-loop + UnloadLevel
+	// for standalone wf_game. Hosts (editor, replay driver, test harness)
+	// call LoadLevel + StepFrame... + UnloadLevel directly.
+	void LoadLevel(_DiskFile* levelFile);
+	void UnloadLevel();
 	void RunLevel(_DiskFile* levelFile);		// executes a single level, returns when done
 	void RunGameScript();				// runs the whole game, returns when game (really) over (quit to OS)
+
+#if defined(__EMSCRIPTEN__)
+	// v2 web main loop (plan Phase 7): instead of RunLevel's blocking while
+	// loop + per-frame ASYNCIFY yield, LoadLevel then hand the browser one
+	// StepFrame per animation frame via emscripten_set_main_loop. RunLevelWeb
+	// does NOT return — it unwinds the C stack and keeps the runtime alive — so
+	// it owns the level for the life of the page; WebTick is the per-frame cb.
+	void RunLevelWeb(_DiskFile* levelFile);
+	void WebTick();
+#endif
+
+	// One tick of the inner game loop. do_swap=true (default) drives
+	// _display->PageFlip(); do_swap=false uses _display->MeasureDelta()
+	// so a host that swaps its own buffers (editor compositing widgets
+	// on top of the engine draw) still gets an honest deltaTime.
+	// out_dt, if non-null, receives the deltaTime for this frame.
+	FrameResult StepFrame(bool do_swap = true, Scalar* out_dt = nullptr);
+
+	// Smoke entry-point for the frame-step API. Demonstrates the
+	// "external host drives the engine" path by calling LoadLevel +
+	// N StepFrame + UnloadLevel directly (bypassing RunLevel). The
+	// existing gLevelOverridePath ("-L") supplies the level file.
+	// Used by wf_game's --frame-step-smoke=N CLI flag and as the
+	// reference for editor / replay / test-harness integration. Pass
+	// cycles>1 to run multiple LoadLevel→StepFrame×N→UnloadLevel cycles
+	// (multi-cycle stability regression coverage).
+	void SmokeRunFrameStep(int frames, int cycles = 1);
+
+#if defined(WF_DEBUG_BRIDGE) || defined(WF_ENABLE_EDITOR)
+	// Smoke entry-point for the wfmut:: engine mutation API. Loads the level
+	// supplied via -L<path>, runs wfmut::RunSmokeTests(level), and unloads.
+	// Returns the number of failed assertions (0 = all green) — used by
+	// wf_game's --wfmut-smoke CLI as the process exit code. Available under
+	// both consumer flags since wfmut sits at the union.
+	// Plan: docs/plans/2026-05-19-engine-mutation-api.md.
+	int RunWfmutSmoke();
+
+	// X5 death-test: drives wfmut from a non-game thread, expecting the
+	// cross-thread guard to abort. wf_game's --wfmut-thread-test CLI.
+	int RunWfmutThreadTest();
+#endif
+
+#if defined(WF_ENABLE_EDITOR)
+	// Editor-mode driver (approach (a), docs/plans/2026-05-20-editor-app-shell.md).
+	// Loads -L<level>, then loops: the editor's build callback applies pending
+	// edits + builds its UI, StepFrame(do_swap=false) renders the level into the
+	// back buffer, then the editor's present callback composites its ImGui UI and
+	// swaps (SetEditorFrameCallbacks). Returns when build signals quit (editor
+	// window closed). wf-edit's --editor CLI.
+	void RunEditor();
+#endif
+
+#if defined(__EMSCRIPTEN__) && defined(WF_ENABLE_EDITOR)
+	// Browser/WASM editor driver (wf_edit_web): RunEditor's blocking loop
+	// inverted onto emscripten_set_main_loop, the same way RunLevelWeb inverts
+	// RunLevel. Does NOT return (unwinds the C stack, page owns lifetime);
+	// WebTickEditor is the per-animation-frame callback. Preserves the
+	// build → StepFrame(false) → present ordering. See
+	// docs/plans/2026-06-12-wf-edit-in-the-browser.md.
+	void RunEditorWeb();
+	void WebTickEditor();
+#endif
+
+	Level* CurrentLevel() const { return _curLevel; }
+
+	// Level-loop predicates for host-driven loops. LevelDone reads the
+	// loaded level's done() flag; ContinueRequested is the inverse of
+	// the abort flag (PIGSUserAborted has set _bContinue=false inside
+	// StepFrame). Defined inline in game.cc to avoid pulling level.hp.
+	bool LevelDone() const;
+	bool ContinueRequested() const { return _bContinue; }
 
 	SMemPool* MessagePortMemPool();
 
@@ -88,6 +172,14 @@ private:
 	_DiskFile* 			_gameFile;				// cd.iff
 	DiskTOC				_gameTOC;
 
+	// Per-level state. Owned by LoadLevel / UnloadLevel; null when no level
+	// is loaded. _gameMailboxes outlives _curLevel because the level's
+	// _scratchMailboxes holds a parent pointer to it.
+	Level*			_curLevel;
+	GameMailboxes*	_gameMailboxes;
+	bool			_bContinue;		// false short-circuits the level loop (PIGSUserAborted)
+	Scalar			_deltaTime;		// last frame's delta; fed back into next update()
+
 public:
 //     class LevelActor : public Actor
 //     {
@@ -103,9 +195,9 @@ public:
 };
 
 //=============================================================================
-
-extern WFGame* theGame;
-
+// (extern WFGame* theGame removed 2026-05-18 — Phase 0b WFGame de-globaling.
+// Level holds a WFGame& reference; debug-only Actor::Print's level-number
+// lookup uses Actor::SetPrintLevelNum, set by Level::Level.)
 //=============================================================================
 #include "game.hpi"	// include all inline definitions as appropriate
 //=============================================================================

@@ -29,11 +29,7 @@
 // ------------------------------------------------------------------------
 
 #if defined(SCALAR_TYPE_FIXED)
-#if defined ( __PSX__ )
-#include <math/psx/scalar.cc>
-#elif defined ( __WIN__ )
-#include <math/win/scalar.cc>
-#elif defined ( __LINUX__ )
+#if   defined ( __LINUX__ )
 #include <math/linux/scalar.cc>
 #else
 #error no scalar asm code!
@@ -1173,14 +1169,16 @@ Scalar
 Scalar::Random()
 {
    long temp;
-#if defined(__LINUX__)
+#if defined(__LINUX__) || defined(__ANDROID__)
 #if !(RAND_MAX == INT_MAX)
 #error update rand code
 #endif
-	temp = rand() >> 16;
-#elif defined(__WIN__)
-	temp = rand() << 1;
-#else 
+	// >>15 (not >>16): RAND_MAX is INT_MAX, so rand()>>15 spans [0, 65535],
+	// which normalises (÷65536 / raw 16.16) to a full [0, 1) fraction. The old
+	// >>16 only reached 32767 → [0, 0.5), so Random()/displacement covered half
+	// their intended range.
+	temp = rand() >> 15;
+#else
 #error rand not implemented for this platform
 #endif
 
@@ -1196,7 +1194,7 @@ Scalar::Random()
 #error SCALAR TYPE not defined
 #endif
 
-	RangeCheck( Scalar::zero, random_value, Scalar::one );
+	RangeCheckScalar( Scalar::zero, random_value, Scalar::one );   // not RangeCheck: that casts Scalar→ptrdiff_t→bool (BUGS.md)
 	return random_value;
 }
 
@@ -1209,7 +1207,7 @@ Scalar::Random( Scalar lower, Scalar upper )
 	Scalar random_value = Scalar::Random();
 	random_value *= ( upper - lower );
 	random_value += lower;
-	RangeCheck( lower, random_value, upper );
+	RangeCheckScalar( lower, random_value, upper );
 
 	return random_value;
 }

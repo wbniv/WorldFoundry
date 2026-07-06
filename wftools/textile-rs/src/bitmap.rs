@@ -535,6 +535,15 @@ impl Bitmap {
 
     pub fn load(path: &Path, cfg: &Config) -> Option<Self> {
         let name = path.to_string_lossy().into_owned();
+
+        // Fast path: 16-bit uncompressed BGR555 TGA. WF's source art is already
+        // in the target pixel format, so copy the raw bytes verbatim rather
+        // than routing through image::open (which doesn't support 16-bit TGA)
+        // → to_rgba8 → rgba_555 requantization. Preserves byte-identity.
+        if let Some(bm) = Self::try_load_tga_bgr555(path, cfg) {
+            return Some(bm);
+        }
+
         let img = image::open(path).map_err(|e| {
             eprintln!("textile: couldn't open \"{}\": {}", name, e);
         }).ok()?;
@@ -556,6 +565,91 @@ impl Bitmap {
             cb_row,
             buf_width: width, buf_height: height,
             name,
+            converted_palette: Vec::new(),
+            cmap_start: 0, cmap_length: 0,
+            start_colour: 0, end_colour: 0,
+            subx: -1, suby: -1,
+            xpal: -1, ypal: -1, idx_pal: -1,
+            colour_cycles: Vec::new(),
+            has_transparent: false,
+            power_of2: cfg.power_of2,
+        };
+
+        bm.transparent_remap(cfg.col_transparent);
+        if cfg.target == TargetSystem::PlayStation { bm.swap_rb(); }
+        bm.load_colour_cycles(cfg);
+        if cfg.force_translucent { bm.force_translucent_pixels(); }
+
+        Some(bm)
+    }
+
+    /// Fast path for WF's native uncompressed truecolor TGAs (16-bit BGR555
+    /// and 24-bit). 16-bit inputs copy pixel bytes verbatim (source already
+    /// in target format). 24-bit inputs pack each pixel via `br_colour_rgb_555`
+    /// exactly like C++ textile's `BR_COLOUR_BGRA(r,g,b,0)` at `tga.cc:179` —
+    /// reads file-bytes positionally as r,g,b, which matches how C++ assigns
+    /// them even though standard TGA stores 24-bit as BGR (C++'s positional
+    /// naming is self-consistent; we mirror it to preserve byte-identity).
+    /// Returns None for any other shape (colour-mapped, RLE, 8/32-bit),
+    /// letting the caller fall through to the image-crate general path.
+    fn try_load_tga_bgr555(path: &Path, cfg: &Config) -> Option<Self> {
+        let ext = path.extension().and_then(|s| s.to_str())?;
+        if !ext.eq_ignore_ascii_case("tga") { return None; }
+
+        let bytes = std::fs::read(path).ok()?;
+        if bytes.len() < 18 { return None; }
+
+        let id_len    = bytes[0] as usize;
+        let cmap_type = bytes[1];
+        let img_type  = bytes[2];
+        let w         = u16::from_le_bytes([bytes[12], bytes[13]]) as i32;
+        let h         = u16::from_le_bytes([bytes[14], bytes[15]]) as i32;
+        let bpp       = bytes[16];
+        let desc      = bytes[17];
+
+        // Only uncompressed truecolor, 16 or 24-bit, no colormap.
+        if cmap_type != 0 || img_type != 2 { return None; }
+        if bpp != 16 && bpp != 24 { return None; }
+
+        let src_bpp_bytes = (bpp as usize) / 8;
+        let pixel_start   = 18 + id_len;
+        let src_row_bytes = (w as usize) * src_bpp_bytes;
+        let src_pixel_bytes = src_row_bytes * (h as usize);
+        if bytes.len() < pixel_start + src_pixel_bytes { return None; }
+
+        let origin_top = (desc & 0x20) != 0;
+
+        let dst_row_bytes = (w as usize) * 2;
+        let dst_pixel_bytes = dst_row_bytes * (h as usize);
+        let mut pixels = Vec::with_capacity(dst_pixel_bytes);
+
+        // Iterate buffer rows top-down; read corresponding source row.
+        for y in 0..h {
+            let src_y = if origin_top { y as usize } else { (h - 1 - y) as usize };
+            let src_off = pixel_start + src_y * src_row_bytes;
+            if bpp == 16 {
+                pixels.extend_from_slice(&bytes[src_off .. src_off + src_row_bytes]);
+            } else {
+                // 24-bit: pack each triplet via br_colour_rgb_555 (= C++
+                // BR_COLOUR_BGRA(r, g, b, 0)). Positional byte naming matches
+                // C++ tga.cc:176-179.
+                for x in 0..w as usize {
+                    let o = src_off + x * 3;
+                    let r = bytes[o];
+                    let g = bytes[o + 1];
+                    let b = bytes[o + 2];
+                    pixels.extend_from_slice(&br_colour_rgb_555(r, g, b).to_le_bytes());
+                }
+            }
+        }
+
+        let mut bm = Bitmap {
+            pixels,
+            width: w, height: h,
+            bitdepth: 16,
+            cb_row: w * 2,
+            buf_width: w, buf_height: h,
+            name: path.to_string_lossy().into_owned(),
             converted_palette: Vec::new(),
             cmap_start: 0, cmap_length: 0,
             start_colour: 0, end_colour: 0,

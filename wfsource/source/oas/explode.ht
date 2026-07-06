@@ -1,0 +1,25 @@
+/*============================================================================*/
+/* explode.ht: created from OADTYPES.S and explode.oas DO NOT MODIFY */
+/*============================================================================*/
+#include <pigsys/pigsys.hp>
+#include <math/scalar.hp>
+/*      maximum value of a long int     */
+/* minimum value of a long int  */
+#ifndef explode_HT
+#define explode_HT
+ struct _Explode {
+	int32 moveblocPageOffset;                 /* offset in page data for this objects page */
+	int32 toolsetPageOffset;                 /* offset in page data for this objects page */
+	int32 commonPageOffset;                 /* offset in page data for this objects page */
+			int32 MeshName;	/* This is a packedAssetID */
+	int32 meshPageOffset;                 /* offset in page data for this objects page */
+	int32 shadowPageOffset;                 /* offset in page data for this objects page */
+	int32 TemplateObject;        /* Default: 1 */
+	fixed32 HealthModifier;         /* Minumum: ( ((long) -100 * 65536.0)) Maximum: ( ((long) 100 * 65536.0)) */
+    Scalar GetHealthModifier() const { return Scalar::FromFixed32(HealthModifier); }
+	fixed32 Force;         /* Minumum: ( ((long) 0 * 65536.0)) Maximum: ( ((long) 100 * 65536.0)) */
+    Scalar GetForce() const { return Scalar::FromFixed32(Force); }
+};
+/*============================================================================*/
+#endif         /* explode_HT */
+/*============================================================================*/

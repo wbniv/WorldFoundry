@@ -28,6 +28,7 @@
 
 #define _MISSILE_CC
 
+#include <cstdio>
 #include "level.hp"
 #include "missile.hp"
 #include "oas/missile.ht"		// get oad structure information
@@ -91,6 +92,14 @@ Missile::predictPosition(const Clock& currentTime)
 void
 Missile::update()
 {
+	std::fprintf(stderr, "Missile::update idx=%d pos=(%.2f,%.2f,%.2f) vel=(%.2f,%.2f,%.2f)\n",
+		GetActorIndex(),
+		_physicalAttributes.Position().X().AsFloat(),
+		_physicalAttributes.Position().Y().AsFloat(),
+		_physicalAttributes.Position().Z().AsFloat(),
+		_physicalAttributes.LinVelocity().X().AsFloat(),
+		_physicalAttributes.LinVelocity().Y().AsFloat(),
+		_physicalAttributes.LinVelocity().Z().AsFloat());
 	bool explodeNow = false;
 
 	_armed = theLevel->LevelClock().Current() >= _timeToArm;
@@ -109,8 +118,8 @@ Missile::update()
 	if ( _armed )
 	{
 #pragma message ("KTS: stop using mainChacter")
-		Actor* main = dynamic_cast<Actor*>(theLevel->mainCharacter());
-      assert(ValidPtr(main));
+		assert(IsActor(theLevel->mainCharacter()));
+		Actor* main = static_cast<Actor*>(theLevel->mainCharacter());
 		if ( main->GetInputDevice()->justReleased( kBtnGrenade ) )
 			explodeNow = true;
 

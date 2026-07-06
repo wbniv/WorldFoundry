@@ -32,32 +32,16 @@
 #include "material.hp"
 #include "callbacks.hp"
 
-#if defined ( __PSX__ )
-#	include <libgte.h>
-#	include <libgpu.h>
-#	include <inline_c.h>
-#elif defined ( __WIN__ )
-#	include <new.h>
-#endif
 
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-	#include <gfx/softwarepipeline/rendobj3.cc>
-#elif defined ( RENDERER_PIPELINE_PSX )
-	#include <gfx/psx/rendobj3.cc>
-#elif defined ( RENDERER_PIPELINE_GL )
 	#include <gfx/glpipeline/rendobj3.cc>
-#elif defined ( RENDERER_PIPELINE_DIRECTX )
-	#include <gfx/directxpipeline/rendobj3.cc>
-#else
-	#error no platform specific rendobj3 code!
-#endif
 
 //============================================================================
 // keeps pointers to facelist and vertexlist
 
-RenderObject3D::RenderObject3D( Memory& memory, int vertexCount,Vertex3D* vertexList, int faceCount, TriFace* faceList, const Material* materialList )
+RenderObject3D::RenderObject3D( Memory& memory, int vertexCount,Vertex3D* vertexList, int faceCount, TriFace* faceList, Material* materialList )
 {
 	_handleCount = 0;
+	_materialCount = 0;	// caller path; materialCount unknown — SetMaterialColor will reject out-of-range writes via the (idx >= _materialCount) check
 	Construct(memory, vertexCount,vertexList,faceCount,faceList,materialList);
 }
 
@@ -81,6 +65,7 @@ RenderObject3D::RenderObject3D( Memory& memory, const RenderObject3D& obj3d )
 #pragma message( __FILE__ ": use reference counting" )
 
 	_materialList = obj3d._materialList;
+	_materialCount = obj3d._materialCount;
 
 	_handleCount = obj3d._handleCount;
 	_handleList = obj3d._handleList;
@@ -99,7 +84,7 @@ RenderObject3D::RenderObject3D( Memory& memory, const RenderObject3D& obj3d )
 //=============================================================================
 
 void
-RenderObject3D::Construct( Memory& memory, int vertexCount,Vertex3D* vertexList, int faceCount, TriFace* faceList, const Material* materialList )
+RenderObject3D::Construct( Memory& memory, int vertexCount,Vertex3D* vertexList, int faceCount, TriFace* faceList, Material* materialList )
 {
 	assert(vertexCount > 0);
 	assert(faceCount > 0);
@@ -116,9 +101,6 @@ RenderObject3D::Construct( Memory& memory, int vertexCount,Vertex3D* vertexList,
 		assert(_faceList[debugIndex].v1Index < _vertexCount);
 		assert(_faceList[debugIndex].v2Index < _vertexCount);
 		assert(_faceList[debugIndex].v3Index < _vertexCount);
-#if defined(__WIN__)
-		AssertMsg((faceList[debugIndex].normal.Length()) > Scalar::zero,"normal = " << faceList[debugIndex].normal << ", length = " << faceList[debugIndex].normal.Length());
-#endif
 	}
 #endif
 	_InitPrimList( memory );
@@ -135,7 +117,7 @@ RenderObject3D::~RenderObject3D()
 //============================================================================
 
 void
-RenderObject3D::ApplyMaterials(const Material* materialList )
+RenderObject3D::ApplyMaterials(Material* materialList )
 {
 	_materialList = materialList;
 	for(int page=0;page<ORDER_TABLES;page++)
@@ -151,18 +133,6 @@ RenderObject3D::ApplyMaterials(const Material* materialList )
 				_vertexList[face.v3Index] );
 		}
 
-#if defined(RENDERER_PIPELINE_DIRECTX)
-	for(int index=0;index<_faceCount;index++)
-	{
-		TriFace& face = _faceList[index];
-		const Material* pMaterial = &( materialList[face.materialIndex] );
-		assert( pMaterial );
-		pMaterial->InitPrimitive(face,
-			_vertexList[face.v1Index],
-			_vertexList[face.v2Index],
-			_vertexList[face.v3Index] );
-	}
-#endif
 }
 
 
@@ -267,9 +237,6 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 					Vector3 v1( PSToVector3(vertexList[tempFaceList[index].v2Index].position));
 					Vector3 v2( PSToVector3(vertexList[tempFaceList[index].v3Index].position));
 					tempFaceList[index].normal = Vector3ToPS12(CalculateNormal(v0,v1,v2));
-#if defined(__WIN__)
-					assert((tempFaceList[index].normal.Length()) > Scalar::zero);
-#endif
 					AssertMsg(tempFaceList[index].materialIndex < materialCount,"Object ??? tried to refernce material index " << tempFaceList[index].materialIndex  << " when there are only " << materialCount << " materials");
 					RangeCheck(0,tempFaceList[index].materialIndex,materialCount);
 				}
@@ -331,7 +298,23 @@ RenderObject3D::RenderObject3D(Memory& memory, binistream& input,int32 userData,
 	assert( meshIter.BytesLeft() == 0 );
 	assert(vertexCount > 0);
 	assert(faceCount > 0);
+	_materialCount = materialCount;	// captured for SetMaterialColor() range checks
 	Construct(memory,vertexCount,vertexList,faceCount,faceList, materials);
+}
+
+//============================================================================
+
+void
+RenderObject3D::SetMaterialColor(int idx, const Color& color)
+{
+	if (idx < 0 || idx >= _materialCount) return;	// silently ignore out-of-range
+	if (!ValidPtr(_materialList)) return;
+	if (_materialList[idx].GetColor() == color) return;	// no-op shortcut
+	_materialList[idx].SetColor(color);
+	// Re-bake the prim list so the next Render() picks up the new color.
+	// SetColor() already updated Material._cdColor; this re-runs InitPrimitive
+	// for every face × ORDER_TABLES, which writes the new RGB into each Primitive.
+	ApplyMaterials(_materialList);
 }
 
 //============================================================================

@@ -20,9 +20,10 @@ World Foundry level import / export operators.
       ...
   }
 
-Coordinate transform (Blender Z-up ↔ WF Y-up):
-  export: wf_x = bl_x,  wf_y = bl_z,  wf_z = -bl_y
-  import: bl_x = wf_x,  bl_y = -wf_z, bl_z = wf_y
+Coordinate system: both WF and Blender use right-hand Z-up.
+  wf_to_bl and bl_to_wf are identity transforms.
+  (The earlier Y↔Z swap was wrong — WF is Z-up, confirmed by
+  mesh vertex data and Jolt physics output.)
 """
 
 import math
@@ -130,12 +131,18 @@ def _tokenize(text: str):
             yield ('tag', text[i+1:j])
             i = j + 1
         elif c == '"':
-            # Quoted string
+            # Quoted string.  Handle standard C-style escapes so that
+            # multi-line script text (`\n`, `\t`, `\\`, `\"`) survives
+            # round-tripping — a bare `\n` → `n` strip (the previous
+            # behaviour) corrupts every embedded newline in Director and
+            # Player scripts.
             j = i + 1
             buf = []
+            ESCAPES = {'n': '\n', 't': '\t', 'r': '\r', '0': '\0',
+                       '\\': '\\', '"': '"', "'": "'"}
             while j < n and text[j] != '"':
                 if text[j] == '\\' and j + 1 < n:
-                    buf.append(text[j+1])
+                    buf.append(ESCAPES.get(text[j+1], text[j+1]))
                     j += 2
                 else:
                     buf.append(text[j])
@@ -268,13 +275,13 @@ def _name_value(chunk):
 # ── coordinate transform ──────────────────────────────────────────────────────
 
 def wf_to_bl(wf_x, wf_y, wf_z):
-    """WF Y-up → Blender Z-up."""
-    return (wf_x, -wf_z, wf_y)
+    """WF Z-up → Blender Z-up (identity — both use right-hand Z-up)."""
+    return (wf_x, wf_y, wf_z)
 
 
 def bl_to_wf(bl_x, bl_y, bl_z):
-    """Blender Z-up → WF Y-up."""
-    return (bl_x, bl_z, -bl_y)
+    """Blender Z-up → WF Z-up (identity)."""
+    return (bl_x, bl_y, bl_z)
 
 
 # ── binary mesh reader ────────────────────────────────────────────────────────
@@ -463,6 +470,37 @@ def _write_mesh_iff(blobj, filepath: str) -> bool:
             tri.append(split_map[key])
         face_triples.append((tri[0], tri[1], tri[2], face.material_index))
 
+    # ── Canonicalize vertex + face order (deterministic export) ──────────────
+    # split_verts/face_triples above are built in `bm.faces` encounter order,
+    # which inherits the Blender mesh's internal polygon order. For meshes built
+    # by `bpy.ops.object.join()` (goomba/koopa/…) that order is NON-deterministic
+    # run-to-run, so the VRTX/FACE chunks churned every re-export with byte-
+    # identical *geometry* (confirmed: identical vertex multiset, different order
+    # — docs/investigations/2026-06-02-blender-export-nondeterminism.md). Re-key
+    # vertices by their fixed-point (position, uv) so identical verts merge and
+    # the order is canonical; remap + sort faces. Geometry/rendering unchanged;
+    # the bytes are now reproducible.
+    def _vkey(co, u, v):
+        return (int(round(co.x * 65536)), int(round(co.y * 65536)), int(round(co.z * 65536)),
+                int(round(u * 65536)), int(round(v * 65536)))
+    _canon = {}            # _vkey → final index (sorted)
+    for co, u, v in sorted(split_verts, key=lambda t: _vkey(*t)):
+        k = _vkey(co, u, v)
+        if k not in _canon:
+            _canon[k] = len(_canon)
+    _old_to_new = [_canon[_vkey(*t)] for t in split_verts]
+    _canon_verts = [None] * len(_canon)
+    for co, u, v in split_verts:
+        _canon_verts[_canon[_vkey(co, u, v)]] = (co, u, v)
+    split_verts = _canon_verts
+    _faces = []
+    for a, b, c, m in face_triples:
+        na, nb, nc = _old_to_new[a], _old_to_new[b], _old_to_new[c]
+        if na != nb and nb != nc and na != nc:   # drop tris collapsed by the merge
+            _faces.append((na, nb, nc, m))
+    _faces.sort()
+    face_triples = _faces
+
     # Build VRTX payload
     vrtx = bytearray()
     for co, u, v in split_verts:
@@ -552,6 +590,7 @@ def _default_oad_dirs() -> list[str]:
     # already open").
     # TODO: replace with addon preference once Blender allows nested file pickers
     _HARDCODED_CANDIDATES = [
+        "/home/will/WorldFoundry/wftools/wf_oad/tests/fixtures",
         "/home/will/SRC/WorldFoundry-wbniv/wftools/wf_oad/tests/fixtures",
         "/home/will/SRC/WorldFoundry/wftools/wf_oad/tests/fixtures",
     ]
@@ -647,12 +686,14 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
             # Bounding box (BOX3)
             bb_min_wf = (-0.5, -0.5, -0.5)
             bb_max_wf = ( 0.5,  0.5,  0.5)
+            has_authored_bbox = False
             box3 = _child_by_tag(obj_chunk, 'BOX3')
             if box3:
                 d = _data_scalars(box3)
                 if len(d) >= 6:
                     bb_min_wf = (float(d[0]), float(d[1]), float(d[2]))
                     bb_max_wf = (float(d[3]), float(d[4]), float(d[5]))
+                    has_authored_bbox = True
 
             # Class Name (STR with NAME "Class Name")
             typename = None
@@ -687,6 +728,14 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
                 if mesh_path:
                     mesh_geo = _load_mesh_iff(mesh_path)
 
+            # Orientation (EULR) — WF a,b,c → Blender rotation_euler
+            rot_wf = (0.0, 0.0, 0.0)
+            eulr = _child_by_tag(obj_chunk, 'EULR')
+            if eulr:
+                d = _data_scalars(eulr)
+                if len(d) >= 3:
+                    rot_wf = (float(d[0]), float(d[1]), float(d[2]))
+
             # Derive Blender location from BB centre
             cx_wf = (bb_min_wf[0] + bb_max_wf[0]) * 0.5
             cy_wf = (bb_min_wf[1] + bb_max_wf[1]) * 0.5
@@ -709,7 +758,9 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
                             uv_layer.data[li].uv = uvs[vi]
 
                 blobj = bpy.data.objects.new(obj_name, mesh)
-                blobj.location = bl_loc
+                # Place object at actual WF world position (not bbox center).
+                # Mesh vertices are already in WF local space relative to this origin.
+                blobj.location = wf_to_bl(pos_wf[0], pos_wf[1], pos_wf[2])
 
                 # Materials
                 level_dir = os.path.dirname(self.filepath)
@@ -726,25 +777,66 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
                     if poly.index < len(face_mat_idxs):
                         poly.material_index = face_mat_idxs[poly.index]
             else:
-                # Fallback: box sized to bounding box
-                sx = bb_max_wf[0] - bb_min_wf[0]  # WF X → Blender X
-                sy = bb_max_wf[2] - bb_min_wf[2]  # WF Z → Blender Y
-                sz = bb_max_wf[1] - bb_min_wf[1]  # WF Y → Blender Z
-                sx = max(sx, 0.01)
-                sy = max(sy, 0.01)
-                sz = max(sz, 0.01)
+                # Fallback: box sized to bounding box.
+                # Scale and translate vertices in mesh-local space so the box
+                # matches the WF local bbox exactly, then place the object at
+                # pos_wf (object scale stays identity to preserve round-trip).
+                sx = max(bb_max_wf[0] - bb_min_wf[0], 0.01)  # WF X → Blender X
+                sy = max(bb_max_wf[1] - bb_min_wf[1], 0.01)  # WF Y → Blender Y
+                sz = max(bb_max_wf[2] - bb_min_wf[2], 0.01)  # WF Z → Blender Z
+                cx_local = (bb_min_wf[0] + bb_max_wf[0]) * 0.5
+                cy_local = (bb_min_wf[1] + bb_max_wf[1]) * 0.5
+                cz_local = (bb_min_wf[2] + bb_max_wf[2]) * 0.5
 
                 mesh = bpy.data.meshes.new(obj_name)
                 bm = bmesh.new()
                 bmesh.ops.create_cube(bm, size=1.0)
+                # Unit cube has verts at ±0.5; scale to extents then shift to bbox center.
+                bmesh.ops.scale(bm, vec=(sx, sy, sz), verts=bm.verts)
+                bmesh.ops.translate(bm, verts=bm.verts,
+                                    vec=(cx_local, cy_local, cz_local))
                 bm.to_mesh(mesh)
                 bm.free()
 
                 blobj = bpy.data.objects.new(obj_name, mesh)
-                blobj.location = bl_loc
-                blobj.scale = (sx, sy, sz)
+                blobj.location = wf_to_bl(pos_wf[0], pos_wf[1], pos_wf[2])
+
+            # Both WF and Blender are Z-up — rotation axes map directly.
+            blobj.rotation_euler = (rot_wf[0], rot_wf[1], rot_wf[2])
+
+            # Remember whether the source .lev had a Mesh Name.  Abstract
+            # actors (camera, director, matte…) have none; the bbox-cube
+            # fallback still gives them mesh data in Blender, but the
+            # exporter must not re-emit a Mesh Name for them.
+            blobj["wf_original_mesh_name"] = mesh_name
+
+            # Preserve the authored bbox so round-trip emits the exact same
+            # BOX3.  Original .lev files often have bboxes wider than the
+            # raw mesh extent (Max's collision-box authoring); recomputing
+            # from mesh vertices would shrink the bbox and break runtime
+            # coarse-collision checks for static platforms.
+            #
+            # Also remember whether the source .lev had a BOX3 at all.
+            # max2lev.cc:374 (`process_bounding_box`) only emits BOX3 for
+            # geometry objects; cameras / camshots / directors / mattes
+            # get none, and iff2lvl defaults + expand_thin_bbox fills in
+            # (-0.25,-0.25,-0.25)-(0,0,0).  Round-trip must skip BOX3
+            # emission for those, or the default-path behaviour diverges
+            # from the oracle.
+            blobj["wf_had_authored_bbox"] = has_authored_bbox
+            if has_authored_bbox:
+                blobj["wf_original_bbox"] = (
+                    float(bb_min_wf[0]), float(bb_min_wf[1]), float(bb_min_wf[2]),
+                    float(bb_max_wf[0]), float(bb_max_wf[1]), float(bb_max_wf[2]),
+                )
 
             context.collection.objects.link(blobj)
+
+            # Import PATH animation data (if present)
+            try:
+                _import_path_block(blobj, obj_chunk, context.scene)
+            except Exception as e_path:
+                self.report({'WARNING'}, f"{obj_name}: PATH import error: {e_path}")
 
             # Attach OAD schema
             oad_path = _find_oad(typename, oad_dir)
@@ -755,6 +847,11 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
                     _seed_defaults(blobj, schema)
                     # Populate field values from remaining chunks
                     _apply_field_chunks(blobj, schema, obj_chunk)
+                except LevConsistencyError as e_corrupt:
+                    # Corrupt source — abort the whole import loudly rather than
+                    # importing a wrong value (per 2026-05-22 camshot round-trip plan).
+                    self.report({'ERROR'}, str(e_corrupt))
+                    return {'CANCELLED'}
                 except Exception as e:
                     self.report({'WARNING'}, f"{obj_name}: schema error: {e}")
             else:
@@ -764,6 +861,12 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
 
         self.report({'INFO'}, f"Imported {imported} objects ({skipped} skipped)")
         return {'FINISHED'}
+
+
+class LevConsistencyError(Exception):
+    """A .lev field is internally inconsistent (e.g. an enum whose DATA index
+    and STR label disagree). Raised during import to hard-fail rather than
+    silently guess which value is correct — the source must be regenerated."""
 
 
 def _apply_field_chunks(blobj, schema, obj_chunk):
@@ -793,30 +896,279 @@ def _apply_field_chunks(blobj, schema, obj_chunk):
 
         prop_key = _prop_key(field.key)
         data = _data_scalars(chunk)
-        if not data:
+        str_val = None
+        str_child = _child_by_tag(chunk, 'STR')
+        if str_child and str_child['scalars']:
+            # WF IFF allows C-style adjacent-string concatenation
+            # within a STR chunk: `{ 'STR' "line 1\n" "line 2\n" }` is
+            # one logical string.  The tokenizer emits each as a
+            # separate `('str', …)` scalar; concatenate them all.
+            # Without this, multi-line script text (Director + Player
+            # in snowgoons) gets truncated to the first line only.
+            str_val = "".join(
+                s[1] for s in str_child['scalars'] if s[0] == 'str'
+            )
+        if not data and tag == 'STR' and str_val is not None:
+            # XDATA/string fields store value in a nested STR child, not DATA
+            data = [str_val]
+        if not data and str_val is None:
             continue
-        val = data[0]
 
         if field.kind == "Int" or field.kind == "Bool":
-            try:
-                blobj[prop_key] = int(float(val))
-            except (ValueError, TypeError):
-                pass
+            if data:
+                try:
+                    blobj[prop_key] = int(float(data[0]))
+                except (ValueError, TypeError):
+                    pass
         elif field.kind == "Float":
-            try:
-                blobj[prop_key] = float(val)
-            except (ValueError, TypeError):
-                pass
+            if data:
+                try:
+                    blobj[prop_key] = float(data[0])
+                except (ValueError, TypeError):
+                    pass
         elif field.kind == "Enum":
-            try:
-                idx = int(float(val))
-                items = field.enum_items()
-                if 0 <= idx < len(items):
-                    blobj[prop_key] = items[idx]
-            except (ValueError, TypeError):
-                pass
-        elif field.kind in ("Str", "ObjRef", "FileRef"):
-            blobj[prop_key] = str(val)
+            # Enum values may come as a DATA int (index) and/or a nested STR
+            # label, e.g. `{ 'I32' { 'NAME' "Rotation" } { 'DATA' 1l } { 'STR' "Track" } }`.
+            # When BOTH a DATA index and a STR *label* are present they must
+            # agree: a disagreement means a corrupt .lev (e.g. a stale/buggy
+            # decompile that wrote `DATA 0` alongside `STR "Track"`, which would
+            # otherwise silently import as the wrong enum value — this is what
+            # dropped the snowgoons CamShot from Track/Relative to Fixed/Absolute).
+            # Hard-fail instead of guessing. A numeric STR (e.g. "1") is not a
+            # label, so no cross-check applies and the DATA index is used.
+            items = field.enum_items()
+            data_idx = None
+            if data:
+                try:
+                    data_idx = int(float(data[0]))
+                except (ValueError, TypeError):
+                    data_idx = None
+            str_idx = items.index(str_val) if (str_val is not None and str_val in items) else None
+            if (data_idx is not None and 0 <= data_idx < len(items)
+                    and str_idx is not None and data_idx != str_idx):
+                raise LevConsistencyError(
+                    f"{blobj.name}: enum field {field_name!r} is corrupt — "
+                    f"DATA index {data_idx} ({items[data_idx]!r}) disagrees with "
+                    f"STR label {str_val!r} (index {str_idx}). Regenerate the .lev "
+                    f"source (likely a stale/buggy decompile).")
+            if str_idx is not None:
+                blobj[prop_key] = items[str_idx]
+            elif data_idx is not None and 0 <= data_idx < len(items):
+                blobj[prop_key] = items[data_idx]
+        elif field.kind in ("Str", "ObjRef", "FileRef", "Skip", "Annotation"):
+            if data:
+                blobj[prop_key] = str(data[0])
+
+
+# ── export helper ─────────────────────────────────────────────────────────────
+
+def scene_index_map(context) -> dict[int, str]:
+    """{actor_idx: blender_obj_name} for the live debug bridge.
+
+    Mirrors levcomp-rs `lev_parser::name_to_index`: the engine numbers actors
+    1-based in `.lev` write order, and the exporter writes exactly the
+    schema-bearing objects in `context.scene.objects` iteration order (see
+    `export_scene_to_lev` below). Reproducing that order here keeps the bridge's
+    name↔idx map in lockstep with the running level.
+    """
+    return {
+        i + 1: o.name
+        for i, o in enumerate(o for o in context.scene.objects if o.get(SCHEMA_PATH_KEY))
+    }
+
+
+def _sanitize_mesh_name(name: str) -> str:
+    """Datablock name → filename-safe slug (lowercase, runs of non-alnum → '_')."""
+    import re
+    return re.sub(r'[^a-z0-9]+', '_', name.lower()).strip('_')
+
+
+def export_scene_to_lev(context, filepath: str, mesh_dir: str = "") -> tuple[bool, str]:
+    """Write the current Blender scene to a .lev text IFF. Returns (ok, message).
+
+    When `mesh_dir` is given (e.g. a game-wide shared mesh library), per-mesh .iff
+    files are written there and named by their canonical DATABLOCK name (so identical
+    actors dedup to one clean-named file game-wide) instead of into the level dir named
+    after the first instance. Empty `mesh_dir` (the default) keeps the historical
+    behaviour, so non-shared-dir levels export byte-identically.
+    """
+    objects = [o for o in context.scene.objects if o.get(SCHEMA_PATH_KEY)]
+    if not objects:
+        return False, "No WF objects in scene (attach schemas first)"
+
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    lines = ["{ 'LVL' "]
+    level_dir = os.path.dirname(filepath)
+    mesh_out_dir = mesh_dir or level_dir          # where per-mesh .iff files land
+    if mesh_dir:
+        os.makedirs(mesh_dir, exist_ok=True)
+
+    # Mesh dedup: objects sharing one Blender mesh datablock export ONE .iff (named for
+    # the first user) and the rest reference it — so N identical actors cost one room-pool
+    # mesh, not N (was: one .iff per object → cbRoom OOM). Keyed by datablock.
+    _mesh_iff_by_datablock = {}
+
+    for obj in objects:
+        schema_path = obj[SCHEMA_PATH_KEY]
+        typename = os.path.splitext(os.path.basename(bpy.path.abspath(schema_path)))[0]
+
+        orig_bbox = obj.get("wf_original_bbox", None)
+        if orig_bbox is not None and len(orig_bbox) == 6:
+            wf_local_min = (float(orig_bbox[0]), float(orig_bbox[1]), float(orig_bbox[2]))
+            wf_local_max = (float(orig_bbox[3]), float(orig_bbox[4]), float(orig_bbox[5]))
+        else:
+            # bound_box is mesh-local (does NOT include obj.scale). Multiply by the
+            # object's local scale so the collision BOX3 matches the *rendered* size:
+            # the engine scales only the render mesh (rendacto.cc:481), never the bbox.
+            # Identity scale (every level authored before the scale pipeline) ⇒ no-op.
+            bl_scale = obj.matrix_world.to_scale()
+            corners_local = [tuple(obj.bound_box[i][k] * bl_scale[k] for k in range(3)) for i in range(8)]
+            bl_local_min = [min(c[i] for c in corners_local) for i in range(3)]
+            bl_local_max = [max(c[i] for c in corners_local) for i in range(3)]
+            wf_lmn_x, wf_lmn_y, wf_lmn_z = bl_to_wf(bl_local_min[0], bl_local_min[1], bl_local_min[2])
+            wf_lmx_x, wf_lmx_y, wf_lmx_z = bl_to_wf(bl_local_max[0], bl_local_max[1], bl_local_max[2])
+            wf_local_min = (
+                min(wf_lmn_x, wf_lmx_x),
+                min(wf_lmn_y, wf_lmx_y),
+                min(wf_lmn_z, wf_lmx_z),
+            )
+            wf_local_max = (
+                max(wf_lmn_x, wf_lmx_x),
+                max(wf_lmn_y, wf_lmx_y),
+                max(wf_lmn_z, wf_lmx_z),
+            )
+
+        loc_vals = list(obj.matrix_world.to_translation())
+        rot_vals = list(obj.matrix_world.to_euler('XYZ'))
+        if obj.animation_data and obj.animation_data.action:
+            for bl_path, vals in (("location", loc_vals), ("rotation_euler", rot_vals)):
+                for idx in range(3):
+                    fc = obj.animation_data.action.fcurves.find(bl_path, index=idx)
+                    if fc and fc.keyframe_points:
+                        vals[idx] = fc.keyframe_points[0].co.y
+        wf_pos = bl_to_wf(loc_vals[0], loc_vals[1], loc_vals[2])
+        wf_rot = (rot_vals[0], rot_vals[1], rot_vals[2])
+
+        def fp(v):
+            return f"{v:.16f}(1.15.16)"
+
+        lines.append("\t{ 'OBJ' ")
+        lines.append(f'\t\t{{ \'NAME\' "{obj.name}" }}')
+
+        path_lines = _emit_path_block(obj, fp)
+        for pl in path_lines:
+            lines.append("\t\t" + pl)
+
+        lines.append(f"\t\t{{ 'VEC3' {{ 'NAME' \"Position\" }} {{ 'DATA' {fp(wf_pos[0])} {fp(wf_pos[1])} {fp(wf_pos[2])}  //x,y,z\n\t\t}} }}")
+        lines.append(f"\t\t{{ 'EULR' {{ 'NAME' \"Orientation\" }} {{ 'DATA' {fp(wf_rot[0])} {fp(wf_rot[1])} {fp(wf_rot[2])}  //a,b,c\n\t\t}} }}")
+        # Per-actor render scale (OAS x/y/z_scale). bl_to_wf is identity, so scale maps
+        # component-wise. Emit ONLY when non-identity: identity-scale objects (every level
+        # authored before the scale pipeline) stay byte-identical — levcomp defaults absent
+        # Scale to (ONE,ONE,ONE). Drives the render mesh size; the BOX3 above carries collision.
+        wf_scale = bl_to_wf(*obj.matrix_world.to_scale())
+        if any(abs(s - 1.0) > 1e-6 for s in wf_scale):
+            lines.append(f"\t\t{{ 'VEC3' {{ 'NAME' \"Scale\" }} {{ 'DATA' {fp(wf_scale[0])} {fp(wf_scale[1])} {fp(wf_scale[2])}  //x,y,z\n\t\t}} }}")
+        had_bbox = obj.get("wf_had_authored_bbox", None)
+        if had_bbox is not None:
+            should_emit_bbox = bool(had_bbox)
+        else:
+            should_emit_bbox = bool(obj.data and obj.data.polygons)
+        if should_emit_bbox:
+            lines.append(
+                f"\t\t{{ 'BOX3' {{ 'NAME' \"Global Bounding Box\" }} "
+                f"{{ 'DATA' {fp(wf_local_min[0])} {fp(wf_local_min[1])} {fp(wf_local_min[2])} "
+                f"{fp(wf_local_max[0])} {fp(wf_local_max[1])} {fp(wf_local_max[2])}  //min(x,y,z)-max(x,y,z)\n\t\t}} }}"
+            )
+        lines.append(f'\t\t{{ \'STR\' {{ \'NAME\' "Class Name" }} {{ \'DATA\' "{typename}" }} }}')
+
+        orig_mesh = obj.get("wf_original_mesh_name", None)
+        has_mesh = (orig_mesh != "") if orig_mesh is not None else (obj.data and obj.data.polygons)
+        mesh_filename = ""
+        model_type    = 0  # 0=None/Box
+        if has_mesh and obj.data and obj.data.polygons:
+            _dbkey = obj.data.name   # objects sharing this datablock share one .iff
+            if _dbkey in _mesh_iff_by_datablock:
+                mesh_filename = _mesh_iff_by_datablock[_dbkey]   # reference the already-written mesh
+                model_type = 1
+            else:
+                if orig_mesh:
+                    mesh_filename = orig_mesh.lower()
+                elif mesh_dir:
+                    # Shared-library mode: canonical datablock name → one clean-named
+                    # file per unique mesh, game-wide (not per first-instance object).
+                    mesh_filename = _sanitize_mesh_name(obj.data.name) + ".iff"
+                else:
+                    mesh_filename = (obj.name + ".iff").lower()
+                mesh_out = os.path.join(mesh_out_dir, mesh_filename)
+                if _write_mesh_iff(obj, mesh_out):
+                    model_type = 1  # Mesh
+                    _mesh_iff_by_datablock[_dbkey] = mesh_filename
+                else:
+                    mesh_filename = ""
+
+        if has_mesh:
+            lines.append(f'\t\t{{ \'FILE\' {{ \'NAME\' "Mesh Name" }} {{ \'STR\' "{mesh_filename}" }} }}')
+            lines.append(f'\t\t{{ \'I32\'  {{ \'NAME\' "Model Type" }} {{ \'DATA\' {model_type}l }} {{ \'STR\' "{"Mesh" if model_type == 1 else "None"}" }} }}')
+
+        try:
+            resolved = bpy.path.abspath(schema_path)
+            schema = wf_core.load_schema(resolved)
+            for fl in _emit_lev_fields(obj, schema, fp):
+                lines.append("\t\t" + fl)
+        except Exception as e_oad:
+            import traceback
+            with open("/tmp/wf_export_errors.log", "a") as _ef:
+                _ef.write(f"[wf_export] {obj.name}: {e_oad}\n")
+                traceback.print_exc(file=_ef)
+
+        is_light = typename.lower() == "light"
+        if is_light:
+            if obj.type == 'LIGHT' and obj.data:
+                r, g, b = obj.data.color[0], obj.data.color[1], obj.data.color[2]
+                lt = 1 if obj.data.type == 'POINT' else 0
+            else:
+                r = float(obj.get(_prop_key("lightRed"), 1.0))
+                g = float(obj.get(_prop_key("lightGreen"), 1.0))
+                b = float(obj.get(_prop_key("lightBlue"), 1.0))
+                lt_raw = obj.get(_prop_key("lightType"), 0)
+                lt_map = {"directional": 0, "ambient": 1}
+                lt = lt_map.get(str(lt_raw).lower(), int(lt_raw) if str(lt_raw).isdigit() else 0)
+            lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightRed\" }} {{ 'DATA' {fp(r)} }} {{ 'STR' \"{r:f}\" }} }}")
+            lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightGreen\" }} {{ 'DATA' {fp(g)} }} {{ 'STR' \"{g:f}\" }} }}")
+            lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"lightBlue\" }} {{ 'DATA' {fp(b)} }} {{ 'STR' \"{b:f}\" }} }}")
+            lines.append(f"\t\t{{ 'I32' {{ 'NAME' \"lightType\" }} {{ 'DATA' {lt}l }} {{ 'STR' \"{'Ambient' if lt else 'Directional'}\" }} }}  //Directional|Ambient")
+
+        if obj.data and hasattr(obj.data, 'polygons') and obj.data.polygons:
+            mesh = obj.data
+            nx, ny, nz = 0.0, 0.0, 0.0
+            for poly in mesh.polygons:
+                nx += poly.normal.x
+                ny += poly.normal.y
+                nz += poly.normal.z
+            n = len(mesh.polygons)
+            if n > 0:
+                nx, ny, nz = nx/n, ny/n, nz/n
+                wf_a, wf_b, wf_c = bl_to_wf(nx, ny, nz)
+                loc = obj.matrix_world.to_translation()
+                wf_px, wf_py, wf_pz = bl_to_wf(loc.x, loc.y, loc.z)
+                wf_d = wf_a * wf_px + wf_b * wf_py + wf_c * wf_pz
+                lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeA\" }} {{ 'DATA' {fp(wf_a)} }} {{ 'STR' \"{wf_a:f}\" }} }}")
+                lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeB\" }} {{ 'DATA' {fp(wf_b)} }} {{ 'STR' \"{wf_b:f}\" }} }}")
+                lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeC\" }} {{ 'DATA' {fp(wf_c)} }} {{ 'STR' \"{wf_c:f}\" }} }}")
+                lines.append(f"\t\t{{ 'FX32' {{ 'NAME' \"slopeD\" }} {{ 'DATA' {fp(wf_d)} }} {{ 'STR' \"{wf_d:f}\" }} }}")
+
+        lines.append("\t}")
+
+    lines.append("}")
+    text = "\n".join(lines) + "\n"
+
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(text)
+    except OSError as e:
+        return False, f"Cannot write file: {e}"
+
+    return True, f"Exported {len(objects)} objects to {filepath}"
 
 
 # ── export operator ───────────────────────────────────────────────────────────
@@ -829,107 +1181,17 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
 
     filename_ext = ".lev"
     filter_glob: StringProperty(default="*.lev", options={'HIDDEN'})
+    mesh_dir: StringProperty(
+        default="",
+        description="Optional shared mesh-library dir; meshes written there named by "
+                    "datablock (dedup game-wide). Empty = per-level dir (historical).",
+    )
 
     def execute(self, context):
-        objects = [o for o in context.scene.objects if o.get(SCHEMA_PATH_KEY)]
-        if not objects:
-            self.report({'WARNING'}, "No WF objects in scene (attach schemas first)")
-            return {'CANCELLED'}
-
-        lines = ["{ 'LVL' "]
-        for obj in objects:
-            schema_path = obj[SCHEMA_PATH_KEY]
-            # derive type name: strip directory, extension
-            typename = os.path.splitext(os.path.basename(bpy.path.abspath(schema_path)))[0]
-
-            # Bounding box in world space (Blender coords)
-            corners_bl = [obj.matrix_world @ obj.bound_box[i].to_4d().to_3d()
-                          if hasattr(obj.bound_box[0], 'to_4d')
-                          else _corner(obj, i)
-                          for i in range(8)]
-
-            bl_min = [min(c[i] for c in corners_bl) for i in range(3)]
-            bl_max = [max(c[i] for c in corners_bl) for i in range(3)]
-
-            # Transform bbox corners to WF space
-            wf_min_x, wf_min_y_raw, wf_min_z = bl_to_wf(bl_min[0], bl_min[1], bl_min[2])
-            wf_max_x, wf_max_y_raw, wf_max_z = bl_to_wf(bl_max[0], bl_max[1], bl_max[2])
-            # After transform, Y and Z axes may be swapped/negated — take real min/max
-            wf_bb_min = (
-                min(wf_min_x, wf_max_x),
-                min(wf_min_y_raw, wf_max_y_raw),
-                min(wf_min_z, wf_max_z),
-            )
-            wf_bb_max = (
-                max(wf_min_x, wf_max_x),
-                max(wf_min_y_raw, wf_max_y_raw),
-                max(wf_min_z, wf_max_z),
-            )
-
-            # Object position (world-space origin → WF)
-            loc = obj.matrix_world.to_translation()
-            wf_pos = bl_to_wf(loc.x, loc.y, loc.z)
-
-            # Orientation: Euler from world rotation (ZXY ≈ WF a,b,c)
-            rot = obj.matrix_world.to_euler('XYZ')
-            wf_rot = (rot.x, rot.z, -rot.y)
-
-            def fp(v):
-                return f"{v:.16f}(1.15.16)"
-
-            lines.append("\t{ 'OBJ' ")
-            lines.append(f'\t\t{{ \'NAME\' "{obj.name}" }}')
-            lines.append(f"\t\t{{ 'VEC3' {{ 'NAME' \"Position\" }} {{ 'DATA' {fp(wf_pos[0])} {fp(wf_pos[1])} {fp(wf_pos[2])}  //x,y,z }} }}")
-            lines.append(f"\t\t{{ 'EULR' {{ 'NAME' \"Orientation\" }} {{ 'DATA' {fp(wf_rot[0])} {fp(wf_rot[1])} {fp(wf_rot[2])}  //a,b,c }} }}")
-            lines.append(
-                f"\t\t{{ 'BOX3' {{ 'NAME' \"Global Bounding Box\" }} "
-                f"{{ 'DATA' {fp(wf_bb_min[0])} {fp(wf_bb_min[1])} {fp(wf_bb_min[2])} "
-                f"{fp(wf_bb_max[0])} {fp(wf_bb_max[1])} {fp(wf_bb_max[2])}  //min(x,y,z)-max(x,y,z) }} }}"
-            )
-            lines.append(f'\t\t{{ \'STR\' {{ \'NAME\' "Class Name" }} {{ \'DATA\' "{typename}" }} }}')
-
-            # Mesh geometry — export .iff if object has a real mesh
-            level_dir  = os.path.dirname(self.filepath)
-            mesh_filename = ""
-            model_type    = 0  # 0=None/Box
-            if obj.data and obj.data.polygons:
-                mesh_filename = obj.name + ".iff"
-                mesh_out = os.path.join(level_dir, mesh_filename)
-                if _write_mesh_iff(obj, mesh_out):
-                    model_type = 1  # Mesh
-                else:
-                    self.report({'WARNING'}, f"{obj.name}: mesh export failed")
-                    mesh_filename = ""
-
-            lines.append(f'\t\t{{ \'FILE\' {{ \'NAME\' "Mesh Name" }} {{ \'STR\' "{mesh_filename}" }} }}')
-            lines.append(f'\t\t{{ \'I32\'  {{ \'NAME\' "Model Type" }} {{ \'DATA\' {model_type}l }} {{ \'STR\' "{"Mesh" if model_type == 1 else "None"}" }} }}')
-
-            # OAD fields
-            try:
-                schema = wf_core.load_schema(bpy.path.abspath(schema_path))
-                values = _collect_values(obj, schema)
-                oad_iff = wf_core.export_iff_txt(schema, values)
-                # extract the inner field chunks from the OAD iff.txt
-                # (it's wrapped in { 'TYPE' { 'NAME' ... } ... })
-                for field_line in _extract_field_lines(oad_iff):
-                    lines.append("\t\t" + field_line)
-            except Exception as e:
-                self.report({'WARNING'}, f"{obj.name}: OAD export error: {e}")
-
-            lines.append("\t}")
-
-        lines.append("}")
-        text = "\n".join(lines) + "\n"
-
-        try:
-            with open(self.filepath, 'w', encoding='utf-8') as f:
-                f.write(text)
-        except OSError as e:
-            self.report({'ERROR'}, f"Cannot write file: {e}")
-            return {'CANCELLED'}
-
-        self.report({'INFO'}, f"Exported {len(objects)} objects to {self.filepath}")
-        return {'FINISHED'}
+        ok, msg = export_scene_to_lev(context, self.filepath, mesh_dir=self.mesh_dir)
+        level = 'INFO' if ok else 'WARNING'
+        self.report({level}, msg)
+        return {'FINISHED'} if ok else {'CANCELLED'}
 
 
 def _corner(obj, i):
@@ -937,6 +1199,274 @@ def _corner(obj, i):
     from mathutils import Vector
     local = Vector(obj.bound_box[i])
     return obj.matrix_world @ local
+
+
+def _import_path_block(blobj, obj_chunk, scene):
+    """Parse a PATH sub-chunk from the .lev and create Blender keyframes.
+
+    PATH layout:
+      { 'PATH'
+          { 'BPOS' x y z }
+          { 'BROT' a b c w }
+          { 'CHAN' { 'NAME' "position.x" } { 'TYPE' 0l } { 'RATE' t } { 'DIM' n } { 'DATA' t0 v0 t1 v1 ... } }
+          ... (6 channels: position.x/y/z + rotation.a/b/c)
+      }
+    """
+    path = _child_by_tag(obj_chunk, 'PATH')
+    if not path:
+        return
+
+    fps = scene.render.fps / scene.render.fps_base
+
+    # WF channel name → (Blender data_path, array_index, value transform)
+    # Both Z-up — direct mapping, no axis swap.
+    chan_map = {
+        "position.x":  ("location", 0, lambda v: v),
+        "position.y":  ("location", 1, lambda v: v),
+        "position.z":  ("location", 2, lambda v: v),
+        "rotation.a":  ("rotation_euler", 0, lambda v: v),
+        "rotation.b":  ("rotation_euler", 1, lambda v: v),
+        "rotation.c":  ("rotation_euler", 2, lambda v: v),
+    }
+
+    # Ensure the object has animation data
+    if not blobj.animation_data:
+        blobj.animation_data_create()
+    action = bpy.data.actions.new(name=f"{blobj.name}_path")
+    blobj.animation_data.action = action
+
+    for chan_chunk in _children_by_tag(path, 'CHAN'):
+        name_ch = _child_by_tag(chan_chunk, 'NAME')
+        if not name_ch or not name_ch['scalars']:
+            continue
+        chan_name = str(name_ch['scalars'][0][1])
+
+        mapping = chan_map.get(chan_name)
+        if not mapping:
+            continue
+        bl_path, bl_idx, xform = mapping
+
+        data_ch = _child_by_tag(chan_chunk, 'DATA')
+        if not data_ch or not data_ch['scalars']:
+            continue
+        raw = [float(s[1]) for s in data_ch['scalars']]
+
+        # DATA contains pairs: time0 value0 time1 value1 ...
+        if len(raw) < 2:
+            continue
+        keys = [(raw[i], raw[i+1]) for i in range(0, len(raw)-1, 2)]
+
+        fc = action.fcurves.new(data_path=bl_path, index=bl_idx)
+        fc.keyframe_points.add(count=len(keys))
+        for ki, (t, v) in enumerate(keys):
+            frame = t * fps
+            fc.keyframe_points[ki].co = (frame, xform(v))
+            fc.keyframe_points[ki].interpolation = 'LINEAR'
+
+    # Update the fcurves
+    for fc in action.fcurves:
+        fc.update()
+
+
+def _emit_path_block(obj, fp) -> list[str]:
+    """If the Blender object has animation keyframes, emit a PATH block
+    with BPOS, BROT, and 6 CHAN chunks (position.x/y/z + rotation.a/b/c).
+
+    Matches max2lev/max2lev.cc:158-306.  Returns empty list if no
+    animation data exists on this object.
+    """
+    if not obj.animation_data or not obj.animation_data.action:
+        return []
+
+    action = obj.animation_data.action
+    fcurves = action.fcurves
+    if not fcurves:
+        return []
+
+    scene = bpy.context.scene
+    fps = scene.render.fps / scene.render.fps_base
+
+    # Map Blender fcurve channels → WF channel names.
+    # Blender:  location[0]=X, location[1]=Y, location[2]=Z
+    #           rotation_euler[0]=X, [1]=Y, [2]=Z
+    # WF .lev:  position.x/y/z  rotation.a/b/c
+    # With coordinate transform: wf_x=bl_x, wf_y=bl_z, wf_z=-bl_y
+    # Both Z-up — direct mapping, no axis swap.
+    channel_map = [
+        ("position.x",  "location", 0, lambda v: v),
+        ("position.y",  "location", 1, lambda v: v),
+        ("position.z",  "location", 2, lambda v: v),
+        ("rotation.a",  "rotation_euler", 0, lambda v: v),
+        ("rotation.b",  "rotation_euler", 1, lambda v: v),
+        ("rotation.c",  "rotation_euler", 2, lambda v: v),
+    ]
+
+    chan_data = {}  # name → [(time, value), ...]
+    for wf_name, bl_path, bl_idx, xform in channel_map:
+        fc = fcurves.find(bl_path, index=bl_idx)
+        if fc and fc.keyframe_points:
+            keys = []
+            for kp in fc.keyframe_points:
+                t = kp.co.x / fps  # frame → seconds
+                v = xform(kp.co.y)
+                keys.append((t, v))
+            chan_data[wf_name] = keys
+        else:
+            chan_data[wf_name] = [(0.0, 0.0)]  # constant zero
+
+    if all(len(v) <= 1 and (not v or v[0][1] == 0.0) for v in chan_data.values()):
+        return []  # no meaningful animation
+
+    lines = ["{ 'PATH' "]
+    # BPOS — base position (all zeros; the actual position comes from keyframes)
+    lines.append(f"\t{{ 'BPOS' {fp(0.0)} {fp(0.0)} {fp(0.0)} }}  //basePosition")
+    # BROT — base rotation as quaternion (identity: 0,0,0,1)
+    lines.append(f"\t{{ 'BROT' {fp(0.0)} {fp(0.0)} {fp(0.0)} {fp(1.0)} }}  //baseRotation")
+
+    for wf_name in ["position.x", "position.y", "position.z",
+                     "rotation.a", "rotation.b", "rotation.c"]:
+        keys = chan_data[wf_name]
+        num_keys = len(keys)
+        end_time = keys[-1][0] if keys else 0.0
+        chan_type = 0 if num_keys > 1 else 1  # 0=LINEAR, 1=CONSTANT
+
+        lines.append("\t{ 'CHAN' ")
+        lines.append(f'\t\t{{ \'NAME\' "{wf_name}" }}')
+        lines.append(f"\t\t{{ 'TYPE' {chan_type}l }}")
+        lines.append(f"\t\t{{ 'RATE' {fp(end_time)} }}")
+        lines.append(f"\t\t{{ 'DIM' {num_keys}l }}")
+
+        data_parts = []
+        for i, (t, v) in enumerate(keys):
+            data_parts.append(f"{fp(t)} {fp(v)}  //#{i}")
+        lines.append("\t\t{ 'DATA' " + "\n\t\t\t\t".join(data_parts) + "\n\t\t}")
+
+        lines.append("\t}")
+
+    lines.append("}")
+    return lines
+
+
+def _emit_lev_fields(obj, schema, fp) -> list[str]:
+    """Walk every visible schema field and emit its value as a text-IFF
+    chunk line matching the .lev format that iffcomp / levcomp-rs consume.
+
+    Returns a list of single-line strings, one per field:
+      { 'I32'  { 'NAME' "Mobility" } { 'DATA' 0l } { 'STR' "Anchored" } }
+      { 'FX32' { 'NAME' "Mass" }     { 'DATA' 75.0(1.15.16) } { 'STR' "75.0" } }
+      { 'STR'  { 'NAME' "Script" }   { 'STR' "write_mailbox(..." } }
+    """
+    lines = []
+    for field in schema.fields():
+        kind = field.kind
+        if kind in ("Section", "Group", "GroupEnd"):
+            continue
+        key = _prop_key(field.key)
+        val = obj.get(key)
+        if val is None:
+            continue
+        # Skip hidden/structural fields UNLESS they carry a real value
+        # (e.g. XDATA Script fields are marked kind="Skip" by the schema
+        # but do hold script text that must round-trip).
+        if kind == "Skip" and (val == "" or val == 0):
+            continue
+        if field.show_as == 6 and kind != "Skip":  # hidden non-content
+            continue
+
+        # max2lev (oadobj.cc:504) writes GetName() = the internal key,
+        # NOT the display label.  The .lev reader (iff2lvl) and our own
+        # importer match by key, so round-tripping requires the key.
+        name = field.key
+
+        if kind == "Int" or kind == "Bool":
+            iv = int(val)
+            items = field.enum_items() if hasattr(field, 'enum_items') else []
+            if items:
+                label = items[iv] if 0 <= iv < len(items) else str(iv)
+                lines.append(
+                    f"{{ 'I32' {{ 'NAME' \"{name}\" }} "
+                    f"{{ 'DATA' {iv}l }} "
+                    f"{{ 'STR' \"{label}\" }} }}  //{_items_comment(items)}")
+            else:
+                lines.append(
+                    f"{{ 'I32' {{ 'NAME' \"{name}\" }} "
+                    f"{{ 'DATA' {iv}l }} {{ 'STR' \"{iv}\" }} }}")
+
+        elif kind == "Float":
+            fv = float(val)
+            lines.append(
+                f"{{ 'FX32' {{ 'NAME' \"{name}\" }} "
+                f"{{ 'DATA' {fp(fv)} }} {{ 'STR' \"{fv}\" }} }}")
+
+        elif kind == "Enum":
+            label = str(val)
+            items = field.enum_items()
+            idx = items.index(label) if label in items else 0
+            # max2lev (oadobj.cc:555): SHOW_AS_DROPMENU (4) omits DATA,
+            # writes only STR with the label.  All other showAs values
+            # (RADIOBUTTONS=5, etc.) write DATA(index) + STR(label).
+            if field.show_as == 4:
+                lines.append(
+                    f"{{ 'I32' {{ 'NAME' \"{name}\" }} "
+                    f"{{ 'STR' \"{label}\" }} }}")
+            else:
+                lines.append(
+                    f"{{ 'I32' {{ 'NAME' \"{name}\" }} "
+                    f"{{ 'DATA' {idx}l }} "
+                    f"{{ 'STR' \"{label}\" }} }}  //{_items_comment(items)}")
+
+        elif kind == "Str" or kind == "Annotation":
+            # Re-escape control characters so the emitted iff.txt is a
+            # single-line string literal (iffcomp doesn't accept raw
+            # newlines inside `"..."`).  Mirrors the tokenizer's
+            # escape-table on import.
+            sv = (
+                str(val)
+                .replace('\\', '\\\\')
+                .replace('"',  '\\"')
+                .replace('\n', '\\n')
+                .replace('\r', '\\r')
+                .replace('\t', '\\t')
+            )
+            lines.append(
+                f"{{ 'STR' {{ 'NAME' \"{name}\" }} "
+                f"{{ 'STR' \"{sv}\" }} }}")
+
+        elif kind == "ObjRef":
+            sv = str(val)
+            lines.append(
+                f"{{ 'STR' {{ 'NAME' \"{name}\" }} "
+                f"{{ 'STR' \"{sv}\" }} }}")
+
+        elif kind == "FileRef":
+            sv = str(val)
+            lines.append(
+                f"{{ 'FILE' {{ 'NAME' \"{name}\" }} "
+                f"{{ 'STR' \"{sv}\" }} }}")
+
+        elif kind == "Skip":
+            # XDATA fields (Script, Notes, etc.) — emit as STR with the
+            # stored text value, matching max2lev's XDATA→'STR' mapping.
+            # Re-escape control characters (scripts can be multi-line).
+            sv = (
+                str(val)
+                .replace('\\', '\\\\')
+                .replace('"',  '\\"')
+                .replace('\n', '\\n')
+                .replace('\r', '\\r')
+                .replace('\t', '\\t')
+            )
+            if sv:
+                lines.append(
+                    f"{{ 'STR' {{ 'NAME' \"{name}\" }} "
+                    f"{{ 'STR' \"{sv}\" }} }}")
+
+    return lines
+
+
+def _items_comment(items):
+    """Format enum items as a comment string: 'False|True'."""
+    return '|'.join(items) if items else ''
 
 
 def _extract_field_lines(oad_iff_txt: str) -> list[str]:

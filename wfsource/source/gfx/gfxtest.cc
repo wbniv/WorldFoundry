@@ -67,15 +67,6 @@
 #include <gfx/pixelmap.hp>
 #include <gfx/callbacks.hp>
 
-#if defined ( __PSX__)
-#	include <sys/types.h>
-#	include <libetc.h>
-#	include <libgte.h>
-#	include <libgpu.h>
-
-#	include <profile/sampprof.hp>
-#else
-#endif
 
 //-----------------------------------------------------------------------------
 
@@ -222,10 +213,6 @@ AdjustCameraParameters(Vector3& position,Euler& rotation,joystickButtonsF button
 		position.SetZ(position.Z() - SCALAR_CONSTANT(ADJUST_DELTA));
 	if (buttons1 & EJ_BUTTONF_H)
 		position.SetZ(position.Z() + SCALAR_CONSTANT(ADJUST_DELTA));
-#if defined( __PSX__ )
-//	DBSTREAM1(cscreen << "camera position:" << std::endl << position << std::endl;)
-//	DBSTREAM1(cscreen << "camera rotation:" << std::endl << rotation << std::endl;)
-#endif
 }
 
 //=============================================================================
@@ -433,9 +420,6 @@ GFXTester::GFXTester() :
 	joy2 = JoystickNew(EJW_JOYSTICK2);
 
 	display.SetBackgroundColor(Color(60,60,60));
-#if defined( __PSX__ )
-	PadInit(0);
-#endif
 
 #if TEST_2D
 	vertexList[0] = Vertex2D( SCALAR_CONSTANT(0),SCALAR_CONSTANT(0),Color(), Vector2( SCALAR_CONSTANT(-40),SCALAR_CONSTANT( 50)) );
@@ -613,9 +597,6 @@ GFXTester::Update()
 
 #if TEST_3D
 #if ANIMATE_POSITION
-#if defined( __PSX__ )
-//	if (((PadRead(1)) & PADselect) == 0)                    // freeze on select
-#endif
 	{
  		SetDelta3D(position3D,delta3D);
  		SetDelta3D(position3D2,delta3D2);
@@ -624,9 +605,6 @@ GFXTester::Update()
 #endif
 
 #if ANIMATE_ROTATION
-#if defined( __PSX__ )
-//	if (((PadRead(1)) & PADselect) == 0)                    // freeze on select
-#endif
 	{
  		rot3D += deltaRot3D;
  		rot3D2 += deltaRot3D2;
@@ -716,29 +694,6 @@ GFXTester::PageFlip()
 {
 	display.PageFlip();
 
-#if defined( __PSX__ )
-//              while (((PadRead(1)) & PADR1) != 0)                     // debounce triangle
-//                      ;
-
-#if DO_TEST_CODE
-	if((PadRead(1) & (PADstart|PADselect)) == (PADstart|PADselect) )
-	{
-		DBSTREAM1( std::cout << "Viewing Video memory:" << std::endl; )
-		ViewVideoMemory();
-	}
-#endif
-//	while (((PadRead(1)) & PADstart) != 0)                  // freeze on select
-//	{
-//                      if(((PadRead(1)) & PADR1) != 0)                 // debounce down
-//                              break;
-//	}
-//	if (((PadRead(1)) & PADselect) != 0)                    // freeze on select
-//	{
-//		for(int i=0;i<1000;i++)
-//			for(int j=0;j<10;j++)
-//				PadRead(1);
-//	}
-#endif
 
 }
 
@@ -785,21 +740,12 @@ TestGFX()
 	printf("Test gfx\n");
 	TestGFXInit();
 	printf("Test gfx init done\n");
-#if defined(__PSX__ ) && defined(DO_PROFILE)
-	profileSample sampler;
-		sampler.start();
-#endif
 
 #if defined(DO_SLOW_STEREOGRAM)
 	InitVSyncCallback(tester->GetDisplay());
 #endif
-#if defined( __PSX__ )
-	for (;;)
-//	for ( long i=0; i<1000; ++i )
-#else
 //	for ( long i=0; i<1000; ++i )
 	for (;;)
-#endif
 	{
 #if defined(DO_SLOW_STEREOGRAM)
 	if(((PadRead(1)) & PADselect) == 0)                  // freeze on select
@@ -870,10 +816,6 @@ TestGFX()
 
 	}
 	printf("shutting down\n");
-#if defined(__PSX__ ) && defined(DO_PROFILE)
-	sampler.stop();
-	sampler.save( "test.smp" );
-#endif
 #if defined(DO_SLOW_STEREOGRAM)
 	UnInitVSyncCallback();
 #endif
@@ -918,11 +860,6 @@ ParseCommandLine(int argc, char** argv)
 //============================================================================
 
 #if DO_DEBUG_FILE_SYSTEM
-#ifdef __PSX__
-#if defined(GTELAB)
-extern void GTELab();
-#endif
-#endif
 #endif
 
 //============================================================================
@@ -944,11 +881,6 @@ PIGSMain(int argc, char* argv[])
 	ParseCommandLine(argc,argv);
 
 #if DO_DEBUG_FILE_SYSTEM
-#if defined( __PSX__)
-#if defined(GTELAB)
-//	GTELab();
-#endif
-#endif
 #endif
 
 	TestGFX();

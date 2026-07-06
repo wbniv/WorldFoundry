@@ -34,14 +34,23 @@
 void
 PIGSMain( int argc, char* argv[] )
 {
-	{ // random number test
-	for ( int i=0; i<100; ++i )
+	{ // random number test — regression guard for the RangeCheck-with-Scalar
+	  // abort + the >>16/>>15 half-range bug (docs/BUGS.md, 2026-06-12). Before
+	  // the fix: Scalar::Random() aborted on the first call in assertion builds
+	  // (RangeCheck cast the Scalar to bool), and in release only spanned [0,0.5).
+	Scalar maxSeen = Scalar::zero;
+	for ( int i=0; i<1000; ++i )
 	{
-		//s.Random();
-		std::cout << Scalar::Random() << '\t';
-		//s.Random( Scalar::negativeOne, Scalar::two );
-		std::cout << Scalar::Random( Scalar::negativeOne, Scalar::two ) << std::endl;
+		Scalar r = Scalar::Random();
+		AssertMsg( r >= Scalar::zero && r < Scalar::one, "Random() out of [0,1): " << r );
+		if ( r > maxSeen ) maxSeen = r;
+
+		Scalar rr = Scalar::Random( Scalar::negativeOne, Scalar::two );
+		AssertMsg( rr >= Scalar::negativeOne && rr < Scalar::two, "Random(-1,2) out of range: " << rr );
 	}
+	// >>15 (not >>16): the full [0,1) range must be reachable, not just [0,0.5).
+	AssertMsg( maxSeen > SCALAR_CONSTANT(0.5), "Random() never exceeded 0.5 over 1000 draws (range bug?): max = " << maxSeen );
+	std::cout << "Scalar::Random: 1000 draws in range, max = " << maxSeen << std::endl;
 	}
 
 	std::cout << "MathTest:" << std::endl;
@@ -102,6 +111,22 @@ PIGSMain( int argc, char* argv[] )
 #endif
 
 		MATH_DEBUG( std::cout << "divResult = " << divResult.AsUnsignedFraction() << std::endl; )
+	}
+
+	{
+		// Regression: AsUnsignedFraction must treat the fraction as MODULAR.
+		// A negative revolution is the same binary-angular value as frac+1:
+		// -0.25 rev == 0.75 rev == 49152/65536. The fixed path got this for free
+		// via two's-complement uint16 truncation; the float path used to do
+		// uint16(negativeFloat) which is UB — wasm's saturating fptoui clamped it
+		// to 0, so Angle::Revolution(-turnRate) produced zero rotation and the
+		// right-turn was dead on the web build. See scalar.hpi AsUnsignedFraction.
+		AssertMsg( SCALAR_CONSTANT(-0.25).AsUnsignedFraction() == 49152,
+			"neg AsUnsignedFraction = " << SCALAR_CONSTANT(-0.25).AsUnsignedFraction() );
+		AssertMsg( Angle::Revolution(SCALAR_CONSTANT(-0.25)) == Angle::Revolution(SCALAR_CONSTANT(0.75)),
+			"Angle::Revolution(-0.25) must equal Revolution(0.75)" );
+		AssertMsg( -Angle::Revolution(SCALAR_CONSTANT(0.25)) == Angle::Revolution(SCALAR_CONSTANT(0.75)),
+			"-Angle::Revolution(0.25) must equal Revolution(0.75)" );
 	}
 
 #if defined(SCALAR_TYPE_FIXED)

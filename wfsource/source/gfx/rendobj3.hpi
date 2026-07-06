@@ -27,9 +27,9 @@ inline void
 RenderObject3D::Validate() const
 {
 	assert(_vertexCount > 0);
-	assert(_vertexCount < 10000);		// arbitrary
+	assert(_vertexCount < 32000);		// hard ceiling is int16 v?Index (face.hp:35)
 	assert(_faceCount > 0);
-	assert(_faceCount < 10000);		// arbitrary
+	assert(_faceCount < 32000);		// hard ceiling is int16 v?Index (face.hp:35)
 
 	assert(ValidPtr(_vertexList));
 	assert(ValidPtr(_faceList));

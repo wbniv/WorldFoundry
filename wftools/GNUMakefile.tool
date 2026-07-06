@@ -27,6 +27,7 @@ BUILDMODE=tool
 LIB_NAME = $(PROGRAM)
 
 include $(WF_DIR)/GNUMakefile.env
+INCLUDE += -I$(WF_DIR)/../wftools
 include $(WF_DIR)/GNUMakefile.rul
 include $(PIGS_DIR)/GNUpigs.dep
 

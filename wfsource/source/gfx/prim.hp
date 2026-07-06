@@ -57,9 +57,6 @@ public:
 		POLY_FT3 ft3;
 		POLY_GT3 gt3;
 		SPRT_16 sp16;
-#if defined(__PSX__)
-		DR_MODE dm;
-#endif
 	};
 };
 

@@ -34,6 +34,7 @@
 //
 //============================================================================
 
+#include <cstdio>
 #include <oas/generator.ht>		// get oad structure information
 #include "generator.hp"
 #include "actor.hp"
@@ -71,9 +72,14 @@ Generato::update()
 		if( GetMailboxes().ReadMailbox(_generateMailBox) == Scalar::zero )
 		{
 			_timeToGenerate = theLevel->LevelClock().Current();				// reset timer so when goes on doesn't generate tons of objects
-			return;
+			// Engine change #2: was `return;` here. Dropped so Actor::update()
+			// below (and thus this generator's own wf_Script) runs every tick,
+			// like every other Actor subclass — the block-IS-generator self-detect
+			// script lives there. The timer reset above still preserves the kts
+			// anti-over-generation guarantee; only the incidental script skip is gone.
 		}
-
+		else
+		{
 		//[UNUSED]const _Movement* _movementData = GetMovementBlockPtr();
 		int32 objectToGenerate = getOad()->ObjectToThrow;
 		assert(objectToGenerate > 0);
@@ -101,19 +107,39 @@ Generato::update()
 			zRandomDisplacement = Scalar::Random( -zRandomDisplacement, zRandomDisplacement );
 
 		Vector3 displacement( xRandomDisplacement, yRandomDisplacement, zRandomDisplacement );
-		Vector3 pos = _physicalAttributes.GetColSpace().GetCenter( currentPos() ) + displacement;
+		// Spawn at the XY centre but the TOP of the colspace so objects emerge
+		// above the generator body (e.g. coins pop out of a ?-block top).
+		Vector3 center = _physicalAttributes.GetColSpace().GetCenter( currentPos() );
+		Scalar  topZ   = _physicalAttributes.GetColSpace().UnExpMax( currentPos() ).Z();
+		// Offset spawn Z by the template's half-height so the spawned object's BOTTOM
+		// lands at topZ rather than its centre (avoids Jolt depenetration ejection).
+		SObjectStartupData* tmplData =
+			(SObjectStartupData*)theLevel->FindTemplateObjectData(objectToGenerate);
+		Scalar tmplHalfZ = Scalar::zero;
+		if (tmplData)
+		{
+			Scalar tMinZ = Scalar::FromFixed32(tmplData->objectData->coarse.minZ);
+			Scalar tMaxZ = Scalar::FromFixed32(tmplData->objectData->coarse.maxZ);
+			tmplHalfZ = (tMaxZ - tMinZ) / Scalar::two;
+		}
+		Vector3 pos = Vector3( center.X(), center.Y(), topZ + tmplHalfZ ) + displacement;
 
 		// generate an object
+		std::fprintf(stderr, "Generato::FIRING obj=%d spawn=(%.2f,%.2f,%.2f) vel=(%.2f,%.2f,%.2f)\n",
+			objectToGenerate, pos.X().AsFloat(), pos.Y().AsFloat(), pos.Z().AsFloat(),
+			_vect.X().AsFloat(), _vect.Y().AsFloat(), _vect.Z().AsFloat());
 		Actor* createdObject = theLevel->ConstructTemplateObject(objectToGenerate, _idxActor, pos,_vect);
+		std::fprintf(stderr, "Generato: ConstructTemplateObject -> %s\n",
+			createdObject ? "non-NULL" : "NULL");
 
-//		const SObjectStartupData* startupData = theLevel->FindTemplateObjectData(objectToGenerate);
-//		assert( ValidPtr( startupData ) );
-//		Actor* createdObject = ConstructTemplateObject( startupData->objectData->type, startupData );
-//		assert( ValidPtr( createdObject ));
-		if(createdObject)			    // in case we are out of memory, or it would be inside of something else
+		if(createdObject) {
 			theLevel->AddObject( createdObject, pos );
+			std::fprintf(stderr, "Generato: AddObject ok, coin actor_idx=%d\n",
+				createdObject->GetActorIndex());
+		}
+		}		// end else (mailbox active) — engine change #2
 	}
-	Actor::update();
+	Actor::update();		// always runs now (was skipped by the idle `return`)
 }
 
 //============================================================================

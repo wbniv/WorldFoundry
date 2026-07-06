@@ -50,11 +50,26 @@ Array<T>::Array(int32 entries, Memory* memory) :
 template<class CONTAINED_CLASS> INLINE
 Array<CONTAINED_CLASS>::~Array()
 {
+   Clear();
+}
+
+//============================================================================
+
+template<class CONTAINED_CLASS> INLINE void
+Array<CONTAINED_CLASS>::Clear()
+{
    if(_items)
    {
       assert(ValidPtr(_items));
       assert(ValidPtr(_memory));
-      MEMORY_DELETE_ARRAY(*_memory,_items,CONTAINED_CLASS,_max);
+      // Match the raw-alloc path in SetMax: dtor each element explicitly,
+      // then Free the same pointer that Allocate returned (no -1 offset).
+      for (int i = 0; i < _max; ++i)
+         _items[i].~CONTAINED_CLASS();
+      (*_memory).Free(_items);
+      _items = NULL;
+      _max = -1;
+      _num = 0;
    }
 }
 
@@ -74,8 +89,19 @@ Array<T>::SetMax(int32 max,Memory* memory)
 
     if(max)
     {
-        _items = new (*memory) (T[_max]);
+        // Allocate raw and placement-construct, instead of placement
+        // array-new. C++'s `new (mem) (T[N])` syntax may or may not insert a
+        // hidden element-count prefix depending on whether T has a
+        // non-trivial destructor — the compiler is free to choose. The
+        // historical Clear/~Array path used MEMORY_DELETE_ARRAY which
+        // ASSUMES the prefix exists (it does `(memory).Free((long*)items-1)`),
+        // so for trivial T like Scalar it Free'd 8 bytes before the actual
+        // chunk and tripped DMalloc cookie validation. By allocating raw
+        // and freeing the same pointer back, we control the offset.
+        _items = (T*)(*memory).Allocate(sizeof(T) * _max ASSERTIONS( COMMA __FILE__ COMMA __LINE__ ));
         assert( ValidPtr(_items) );
+        for (int i = 0; i < _max; ++i)
+            new (&_items[i]) T();
     }
 }
 
@@ -166,7 +192,7 @@ Array<T>::operator[](int32 index)
 	assert(index < _max);
 	assert(index >= 0);
 	assert(ValidPtr(_items));
-   if(index > _num)
+   if(index >= _num)
       _num = index+1;
 	return(_items[index]);
 }

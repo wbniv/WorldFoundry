@@ -30,7 +30,7 @@
 //=============================================================================
 
 #include <hal/message.h>
-#include <hal/_signal.h>
+#include <hal/_list.h>
 
 //=============================================================================
 // debugging macros
@@ -50,16 +50,6 @@
  {\
 	VALIDATEPTR(port); \
 	VALIDATELIST(&(port)->_messages);\
-	if(port->_behavior == EMP_NOTHING) \
-	 { \
-		assert(port->_task == 0); \
-		assert(port->_signal == 0); \
-	 } \
-	else \
-	 { \
-		VALIDATEITEM(port->_task); \
-		VALIDATESIGNAL(port->_signal); \
-	 } \
 	assert((port->_behavior == EMP_NOTHING) || (port->_behavior == EMP_SIGNAL));\
  }
 #else
@@ -74,8 +64,6 @@ struct _MessagePort
 	SNode _link;					// link into public message port list
 	char _name[PORTNAMELEN];		// for finding by name
 	portBehavior _behavior;			// what to do when message arrives
-	ITask _task;					// if behavior is PORT_SIGNAL, this is the task to signal
-	halSignal _signal;		 		// if behavior is PORT_SIGNAL, this is the signal to send
 	SList _messages;
 };
 

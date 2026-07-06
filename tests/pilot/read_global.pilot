@@ -1,0 +1,19 @@
+R:pilot
+R:@tier engine
+R:@desc TIME (a global) advances while stepping; global mailbox auto-routed to idx=1
+R:@level smb_w1_1-standalone.iff
+R:@expect-exit 0
+R:@expect-out clock-advanced
+PS:
+WA:1 TIME
+ST:2
+C:#t0 = mb(TIME, 1)
+ST:10
+WM:1 TIME > #t0 timeout 5.0
+M:#last > #t0
+TY:clock-advanced
+TN:clock-stalled
+JN:*fail
+E:
+*fail
+EX:1

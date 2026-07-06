@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="game-name" content="{{GAME_NAME}}">
+  <title>Party Games · Receiver</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%F0%9F%8E%B2%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="receiver.css">
+  {{GAME_STYLESHEET}}
+  <script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Party Games Platform</h1>
+      <p id="status" class="status" role="status" aria-live="polite">connecting…</p>
+      <p class="room-code-line">
+        room code:
+        <span id="room-code" class="room-code" aria-live="polite">—</span>
+      </p>
+    </header>
+    <section id="stage">
+      <!-- Game-owned region. Games build their entire receiver UI inside this
+           container via mount(ctx). The shell owns nothing below this line. -->
+      <div id="game-root" class="game-root"></div>
+    </section>
+    <section id="log" aria-labelledby="log-heading">
+      <h2 id="log-heading">Events</h2>
+      <ol id="event-log" aria-live="polite" aria-relevant="additions"></ol>
+    </section>
+  </div>
+  <script type="module" src="receiver.js"></script>
+</body>
+</html>

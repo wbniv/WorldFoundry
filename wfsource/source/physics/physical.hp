@@ -32,6 +32,10 @@
 #include <math/euler.hp>
 #include <timer/clock.hp>
 #include <oas/levelcon.h>
+#include <cstdint>
+#ifdef PHYSICS_ENGINE_JOLT
+#include <physics/jolt/jolt_backend.hp>
+#endif
 
 //#define PHYSICAL_INTERNAL_MATRIX
 #define PHYSICAL_INTERNAL_EULER
@@ -41,10 +45,6 @@
 #include <math/matrix34.hp>
 #else
 #error PHYSICAL_INTERNAL not defined
-#endif
-
-#if defined PHYSICS_ENGINE_ODE
-#include "ode/ode.hp"
 #endif
 
 //==============================================================================
@@ -121,6 +121,28 @@ public:
     bool HasRunUpdate() const;
     void HasRunUpdate(bool);
 
+#ifdef PHYSICS_ENGINE_JOLT
+    // Recreate the Jolt body as STATIC (immovable world geometry).
+    // Call once, immediately after construction, for MOBILITY_ANCHORED actors.
+    void JoltMakeStatic();
+    // Trimesh variant: use mesh triangle data instead of the bbox.
+    // Vertices are in actor local space; pos is added at body-create time.
+    void JoltMakeStaticMesh(const JoltMeshVertex* verts, int vertCount,
+                            const JoltMeshFace*   faces, int faceCount);
+    // Replace the kinematic body with a CharacterVirtual controller.
+    // Call once, immediately after construction, for MOBILITY_PHYSICS actors.
+    void JoltMakeCharacter();
+    // Returns kJoltInvalidBodyID if this PA has no CharacterVirtual.
+    uint32_t JoltCharacterID() const { return _joltCharID; }
+    // Returns kJoltInvalidBodyID if this PA has no Jolt body (e.g. character actors
+    // that swapped the kinematic body for a CharacterVirtual, or pre-Jolt actors).
+    uint32_t JoltBodyID() const { return _joltBodyID; }
+    // Write the authoritative Jolt-resolved position back into _position and
+    // _predictedPosition without exercising WF's swept-AABB expansion/validate
+    // machinery. Use from MovementHandlers that already ran a Jolt step.
+    void JoltSyncFromCharacter(const Vector3& newPos);
+#endif
+
 #if SW_DBSTREAM >= 1
 	friend std::ostream& operator << ( std::ostream& s, const PhysicalAttributes& pa );
 #endif
@@ -143,6 +165,11 @@ private:
 #error PHYSICAL_INTERNAL not defined
 #endif
 
+#ifdef PHYSICS_ENGINE_JOLT
+    uint32_t _joltBodyID;  // kinematic/static body handle; kJoltInvalidBodyID for CharacterVirtual actors
+    uint32_t _joltCharID;  // CharacterVirtual handle; kJoltInvalidBodyID unless JoltMakeCharacter() called
+#endif
+
 	Vector3	_predictedPosition;
 	ColSpace _colSpace;
 	Vector3 linVelocity;
@@ -152,13 +179,6 @@ private:
     unsigned 				_hasRunPredictPosition : 1;
     unsigned 				_hasRunUpdate : 1;
 
-#if defined PHYSICS_ENGINE_ODE
-   ode::dBodyID _body;			// the body
-   ode::dGeomID _geom;		// geometries representing this body
-#elif defined PHYSICS_ENGINE_WF
-#else
-#error physics engine not defined! 
-#endif
 };
 
 //============================================================================

@@ -1,0 +1,29 @@
+// dome-standalone.iff.txt — L4-wrapped form of the planetarium dome for wf_game -L.
+//
+// Build:
+//   bash wftools/wf_blender/build_level_binary.sh dome
+//
+// Run:
+//   WF_CULL=1 task run-dome     (dome meshes are wound for inward normals → opt
+//                                into backface culling; renders fine with it off too)
+//
+// Planetarium dome: 17 static actors + a runtime-spawned hemisphere of spherical-
+// patch band-wedge instances (the Director reuses Filelight's fl-scan table; depth
+// → elevation band, arc ∝ size, branch → hue). Pool budgets sized for ~450 spawned
+// wedges at peak (MAX_NODES), identical to Filelight.
+//
+// Memory: spawned template instances BindAssets to the PERMANENT slot
+// (level.cc:1732), so cbPerm — not cbRoom — carries the dome. 'SLOT' 1 keeps
+// cbRoom ×1 (single-room level).
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 1500000l                 // 17 static + up to ~450 spawned wedge actors
+        'PERM' 4000000l                 // player/floor/template meshes + ~450 spawned instances
+        'ROOM' 2000000l                 // single active room slot (×1)
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+        'SLOT' 1l                       // 1 active room slot (single-room level)
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../dome.iff" ]
+}

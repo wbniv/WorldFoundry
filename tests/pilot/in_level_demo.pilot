@@ -1,0 +1,21 @@
+R:pilot
+R:@tier engine
+R:@desc in-level PILOT runs in-engine — the player's {Script} ramps GOLD past its 1234 sentinel
+R:@level pilot_demo-standalone.iff
+R:@needs player as #P
+R:@expect-exit 0
+R:@expect-out PASS
+R:@screenshot pilot_demo.png
+PS:
+WA:#P GOLD
+ST:60
+WM:#P GOLD > 1234 timeout 6.0
+M:#last > 1234
+SH:pilot_demo.png
+ST:1
+TY:PASS — in-level PILOT executed; player GOLD=$#last (1234 sentinel + ramp)
+TN:FAIL — player GOLD=$#last; in-level PILOT did not run
+JN:*fail
+E:
+*fail
+EX:1

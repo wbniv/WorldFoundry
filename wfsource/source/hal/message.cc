@@ -25,9 +25,9 @@
 #define _mESSAGE_C
 
 #include <hal/halbase.h>
+#include <hal/_list.h>
 #include <hal/_message.h>
 #include <hal/message.h>
-#include <hal/_signal.h>
 #include <hal/general.h>
 #include <hal/_mempool.h>
 
@@ -118,8 +118,6 @@ MessagePortNew(char* name)
 	NodeConstruct(&self->_link);
 
 	self->_behavior = EMP_NOTHING;
-	self->_task = 0;					// clear item
-	self->_signal = SIGNAL_INVALID;
 	ListConstruct(&self->_messages);
 	self->_name[0] = 0;					// in case no name given
 	if(name)
@@ -142,42 +140,9 @@ MessagePortDelete(IMessagePort iSelf)
 	// MessagePortDestruct
 	NodeDestruct(&self->_link);
 	ListDestruct(&self->_messages);
-#if defined( DO_MULTITASKING )
-	if(self->_task)
-	 {
-		SignalFree(self->_task,self->_signal);
-	 }
-#endif
 	// end MessagePortDestruct
 	MemPoolFree(memPoolMessagePorts,self);
 	return(NULLITEM);
-}
-
-//=============================================================================
-
-#if defined( DO_MULTITASKING )
-void
-MessagePortAttachTask(IMessagePort iSelf, ITask iTask)
-{
-	SMessagePort* self;
-	VALIDATEMESSAGEPORT(iSelf);
-	self = ITEMRETRIEVE(iSelf,SMessagePort);
-	assert(self->_behavior == EMP_NOTHING);		// cannot attach if already attached
-	self->_behavior = EMP_SIGNAL;				// what to do when message arrives
-	self->_task = iTask;						// if behavior is PORT_SIGNAL, this is the task to signal
-	self->_signal = SignalAlloc(self->_task);	// if behavior is PORT_SIGNAL, this is the signal to send
-}
-#endif
-
-//=============================================================================
-
-ITask
-MessagePortGetTask(IMessagePort iSelf)
-{
-	SMessagePort* self;
-	VALIDATEMESSAGEPORT(iSelf);
-	self = ITEMRETRIEVE(iSelf,SMessagePort);
-	return(self->_task);
 }
 
 //=============================================================================
@@ -218,12 +183,6 @@ MessagePortPut(IMessagePort iSelf,int16 type, int32 message)	// send message to 
 	pMessage = MessageNew(type,message);
 	VALIDATEMESSAGE(pMessage);
 	ListAddHead(&self->_messages,(SNode*)pMessage);
-#if defined( DO_MULTITASKING )
-	if(self->_behavior == EMP_SIGNAL)
-	 {
-		SignalSend(self->_task,self->_signal);
-	 }
-#endif
 }
 
 //=============================================================================
@@ -238,31 +197,7 @@ MessagePortPutInterrupt(IMessagePort iSelf,int16 type, int32 message)	// send me
 	pMessage = MessageNew(type,message);
 	VALIDATEMESSAGE(pMessage);
 	ListAddHead(&self->_messages,(SNode*)pMessage);
-#if defined( DO_MULTITASKING )
-	if(self->_behavior == EMP_SIGNAL)
-	 {
-		// Note: here we call SignalSendInterrupt, which does not call task switch
-		SignalSendInterrupt(self->_task,self->_signal);
-	 }
-#endif
 }
-
-//=============================================================================
-
-#if defined( DO_MULTITASKING )
-void
-MessagePortWait(IMessagePort iSelf)					// wait until message arrives on this port
-{
-	SMessagePort* self;
-	VALIDATEMESSAGEPORT(iSelf);
-	self = ITEMRETRIEVE(iSelf,SMessagePort);
-	assert(self->_behavior == EMP_SIGNAL);			// only if signal port will this function work
-	while(ListEmpty(&self->_messages))				// insure that recieving a signal leads to having a message
-	 {												// note: this prevents more than one port from sharing a signal
-		SignalWait(self->_signal);
-	 }
-}
-#endif
 
 //=============================================================================
 // if message waiting, returns true

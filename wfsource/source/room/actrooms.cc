@@ -84,8 +84,8 @@ ActiveRooms::InitActiveRoom( int roomIndex, const LevelRooms& lRooms)
 			while(!rendIter.Empty())
 			{
             rendIter.Validate();
-            PhysicalObject* po = dynamic_cast<PhysicalObject*>(&(*rendIter));
-            assert(ValidPtr(po));
+            assert(IsPhysicalObject(&(*rendIter)));
+            PhysicalObject* po = static_cast<PhysicalObject*>(&(*rendIter));
 				int assetSlot = lRooms.GetSlotIndex(roomIndex);
 
 				if(po->GetMovementBlockPtr()->MovesBetweenRooms )

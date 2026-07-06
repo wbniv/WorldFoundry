@@ -27,6 +27,9 @@
 #include <math/angle.hp>
 #include <oas/levelcon.h>
 #include <math/matrix34.hp>
+#ifdef PHYSICS_ENGINE_JOLT
+#include <physics/jolt/jolt_backend.hp>
+#endif
 
 //==============================================================================
 
@@ -36,8 +39,6 @@ PhysicalAttributes::Validate() const
 #if DO_ASSERTIONS
    //kts write more validation code here
 
-#if defined PHYSICS_ENGINE_ODE
-#elif defined PHYSICS_ENGINE_WF
 // Validate the colBox expansion vector against the PredictedPosition vector
 	Vector3 expansionVector, predictedMotionVector;
 
@@ -65,7 +66,15 @@ PhysicalAttributes::Validate() const
 		expansionVector.SetZ( expminpoint.Z() - unexpminpoint.Z() );
 
 
-	if ( !(expansionVector == predictedMotionVector) )
+	// Strict `==` on Vector3 (bitwise per Scalar) fires spuriously when
+	// SCALAR_TYPE_FLOAT is in use: expansionVector recomputes the delta via
+	// (origMax + delta) - origMax, which loses a few ULPs of precision
+	// against the freshly-computed PredictedPosition() - Position(). On a
+	// fixed-point Scalar the two computations are bit-identical and this
+	// tolerance is a no-op. See docs/plans/2026-05-11-physical-validate-float-tolerance.md.
+	const Scalar tol = Scalar::FromDouble(1e-3);
+	const Vector3 diff = expansionVector - predictedMotionVector;
+	if ( diff.X().Abs() >= tol || diff.Y().Abs() >= tol || diff.Z().Abs() >= tol )
 	{
 		DBSTREAM1(
 			cerror << "FATAL ERROR: PhysicalAttributes::Validate() failed." << std::endl;
@@ -75,9 +84,6 @@ PhysicalAttributes::Validate() const
 		)
 		assert(0);
 	}
-#else
-#error physics engine not defined! 
-#endif
 
 
 #endif
@@ -98,10 +104,9 @@ PhysicalAttributes::PhysicalAttributes()
 #endif
 	_hasRunPredictPosition = false;
 	_hasRunUpdate = false;
-
-#if defined PHYSICS_ENGINE_ODE
-   _body = 0;
-   _geom = 0;
+#ifdef PHYSICS_ENGINE_JOLT
+	_joltBodyID = kJoltInvalidBodyID;
+	_joltCharID = kJoltInvalidBodyID;
 #endif
 }
 
@@ -144,16 +149,23 @@ PhysicalAttributes::PhysicalAttributes(const Vector3& position,
                       Scalar slopeA,
                       Scalar slopeB,
                       Scalar slopeC,
-                      Scalar slopeD) 
+                      Scalar slopeD)
 	: _predictedPosition(Vector3::zero), linVelocity(Vector3::zero), oldLinVelocity(Vector3::zero)
 {
+#ifdef PHYSICS_ENGINE_JOLT
+   // Construct() will JoltBodyDestroy(_joltBodyID) if it isn't the sentinel,
+   // so the ID must be initialized *before* that call. (The default ctor
+   // handles this; the parameterized path has to do it explicitly.)
+   _joltBodyID = kJoltInvalidBodyID;
+   _joltCharID = kJoltInvalidBodyID;
+#endif
    Construct(position,euler,minPoint,maxPoint,slopeA,slopeB,slopeC,slopeD);
 }
 
 //==============================================================================
 
 INLINE void
-PhysicalAttributes::Construct(const Vector3& position, const Euler& rotation, const Vector3& min, const Vector3& max, 
+PhysicalAttributes::Construct(const Vector3& position, const Euler& rotation, const Vector3& min, const Vector3& max,
 								Scalar slopeA,
 								Scalar slopeB,
 								Scalar slopeC,
@@ -172,41 +184,86 @@ PhysicalAttributes::Construct(const Vector3& position, const Euler& rotation, co
 #endif
 	_predictedPosition = Position();
 
-#if defined PHYSICS_ENGINE_ODE
-   assert(_body == 0);
-   assert(_geom == 0);
-   assert(odeWorld.Space() != 0);
-
-    _body = ode::dBodyCreate (odeWorld());
-    ode::dBodySetPosition (_body, position[0].AsFloat(),position[1].AsFloat(),position[2].AsFloat());
-
-#if defined(PHYSICAL_INTERNAL_EULER)              
-    Matrix34 temp(_orientation,_position);
-   ode::dBodySetRotation (_body,temp.AsFLoatArray());
-#elif defined(PHYSICAL_INTERNAL_MATRIX)
-    ode::dBodySetRotation (_body,_matrix.AsFLoatArray());
-#else
-#error PHYSICAL_INTERNAL not defined
-#endif
-
-    //dBodySetRotation (_body,R);
-    //dBodySetData (temp->body,(void*) i);
-    Vector3 size = _colSpace.Max()-_colSpace.Min();
-    _geom = dCreateBox (odeWorld.Space(),size.X().AsFloat(),size.Y().AsFloat(),size.Z().AsFloat());
-    ode::dGeomSetBody (_geom,_body);
-    ode::dMass m;
-#define DENSITY (5.0)		// density of all objects
-
-    ode::dMassSetBox (&m,DENSITY,size.X().AsFloat(),size.Y().AsFloat(),size.Z().AsFloat());
-    ode::dBodySetMass (_body,&m);
+#ifdef PHYSICS_ENGINE_JOLT
+	// Construct() creates NO Jolt body. JoltMakeStatic() (for StatPlats)
+	// and JoltMakeCharacter() (for MOBILITY_PHYSICS actors) are the only
+	// entry points that create Jolt objects. Non-participating actors
+	// (lights, cameras, markers, triggers, tools, shadows) carry no Jolt
+	// body at all — they existed pre-Jolt too, and WF's gameplay code
+	// doesn't touch Jolt for them.
+	// The defensive destroy-before-create guards in JoltMakeStatic /
+	// JoltMakeCharacter are now no-ops on the normal path but kept in case
+	// Construct() is ever called twice on the same instance.
 #endif
 }
+
+//==============================================================================
+
+#ifdef PHYSICS_ENGINE_JOLT
+INLINE void
+PhysicalAttributes::JoltMakeStatic()
+{
+    // Destroy the default KINEMATIC body and replace it with a STATIC one.
+    if (_joltBodyID != kJoltInvalidBodyID)
+    {
+        JoltBodyDestroy(_joltBodyID);
+        _joltBodyID = kJoltInvalidBodyID;
+    }
+    _joltBodyID = JoltBodyCreateStatic(
+        _position, _orientation,
+        _colSpace.UnExpMin(), _colSpace.UnExpMax());
+}
+
+INLINE void
+PhysicalAttributes::JoltMakeStaticMesh(const JoltMeshVertex* verts, int vertCount,
+                                        const JoltMeshFace*   faces, int faceCount)
+{
+    if (_joltBodyID != kJoltInvalidBodyID)
+    {
+        JoltBodyDestroy(_joltBodyID);
+        _joltBodyID = kJoltInvalidBodyID;
+    }
+    _joltBodyID = JoltBodyCreateStaticMesh(
+        _position, verts, vertCount, faces, faceCount);
+    // Fall back to bbox body if mesh creation failed.
+    if (_joltBodyID == kJoltInvalidBodyID)
+        _joltBodyID = JoltBodyCreateStatic(
+            _position, _orientation,
+            _colSpace.UnExpMin(), _colSpace.UnExpMax());
+}
+
+INLINE void
+PhysicalAttributes::JoltMakeCharacter()
+{
+    // Discard the KINEMATIC body — CharacterVirtual replaces it for PHYSICS actors.
+    if (_joltBodyID != kJoltInvalidBodyID)
+    {
+        JoltBodyDestroy(_joltBodyID);
+        _joltBodyID = kJoltInvalidBodyID;
+    }
+    _joltCharID = JoltCharacterCreate(
+        _position, _orientation,
+        _colSpace.UnExpMin(), _colSpace.UnExpMax());
+}
+#endif
 
 //==============================================================================
 
 INLINE
 PhysicalAttributes::~PhysicalAttributes()
 {
+#ifdef PHYSICS_ENGINE_JOLT
+	if (_joltBodyID != kJoltInvalidBodyID)
+	{
+		JoltBodyDestroy(_joltBodyID);
+		_joltBodyID = kJoltInvalidBodyID;
+	}
+	if (_joltCharID != kJoltInvalidBodyID)
+	{
+		JoltCharacterDestroy(_joltCharID);
+		_joltCharID = kJoltInvalidBodyID;
+	}
+#endif
 }
 
 //==============================================================================
@@ -524,12 +581,12 @@ PhysicalAttributes::Max() const
 
 //==============================================================================
 
-#if defined PHYSICS_ENGINE_ODE
-#include "ode/physical.hpi"
-#elif defined PHYSICS_ENGINE_WF
+#if defined(PHYSICS_ENGINE_JOLT)
+#include "jolt/physical.hpi"
+#elif defined(PHYSICS_ENGINE_WF)
 #include "wf/physical.hpi"
 #else
-#error physics engine not defined! 
+#error "PHYSICS_ENGINE_JOLT or PHYSICS_ENGINE_WF must be defined"
 #endif
 
 //==============================================================================

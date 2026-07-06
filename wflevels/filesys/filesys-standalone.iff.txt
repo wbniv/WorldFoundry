@@ -1,0 +1,28 @@
+// filesys-standalone.iff.txt — L4-wrapped form of filesys for wf_game -L.
+//
+// Build:
+//   bash wftools/wf_blender/build_level_binary.sh filesys
+//
+// Run:
+//   task run-level -- wflevels/filesys-standalone.iff
+//
+// Phase 2 FSN level: 16 static actors + a runtime-spawned recursive tree of
+// Dir towers, File slabs and Connector wires (fsn-build, scripting_zforth.cc).
+// Pool budgets sized for ~300 spawned actors at peak (FSN_MAX_NODES).
+//
+// Memory: total asset alloc = cbPerm + numActiveRoomSlots × cbRoom (assets.cc).
+// Spawned template instances BindAssets to the PERMANENT slot (level.cc:1732),
+// so cbPerm — NOT cbRoom — is what the ~400-actor tree consumes (the OOM pool
+// is "Room #4095" = ROOM_PERM_INDEX). 'SLOT' 1 keeps cbRoom ×1 (single room).
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 1500000l                 // 16 static + up to ~400 spawned tree actors
+        'PERM' 4000000l                 // player/floor/template meshes + ~400 spawned instances
+        'ROOM' 2000000l                 // single active room slot (×1) — room's own static assets
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+        'SLOT' 1l                       // 1 active room slot (single-room level)
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../filesys.iff" ]
+}

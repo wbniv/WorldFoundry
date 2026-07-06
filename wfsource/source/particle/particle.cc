@@ -32,10 +32,10 @@
 struct SingleForce
 {
 		int32 forceType;               /* Minumum: 0 Maximum: 3 Default: 0 */
-		Scalar Magnitude;         /* Minumum: ( ((long) 0.01 * 65536.0)) Maximum: ( ((long) 10 * 65536.0)) */
-		Scalar VectorX;         /* Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0)) */
-		Scalar VectorY;         /* Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0)) */
-		Scalar VectorZ;         /* Minumum: ( ((long) -1000 * 65536.0)) Maximum: ( ((long) 1000 * 65536.0)) */
+		Scalar Magnitude;         /* Minumum: ( ((int32) 0.01 * 65536.0)) Maximum: ( ((int32) 10 * 65536.0)) */
+		Scalar VectorX;         /* Minumum: ( ((int32) -1000 * 65536.0)) Maximum: ( ((int32) 1000 * 65536.0)) */
+		Scalar VectorY;         /* Minumum: ( ((int32) -1000 * 65536.0)) Maximum: ( ((int32) 1000 * 65536.0)) */
+		Scalar VectorZ;         /* Minumum: ( ((int32) -1000 * 65536.0)) Maximum: ( ((int32) 1000 * 65536.0)) */
 };
 
 void
