@@ -64,7 +64,7 @@ This is not a demotion of the strategy — it's a **relocation of the moat onto 
 
 ## Open questions
 
-1. **Does PlayCanvas/Snap have any embedded/tiny/fixed-point roadmap?** This single fact decides whether WorldFoundry's differentiated slot stays open. Highest-value follow-up.
+1. ~~Does PlayCanvas/Snap have any embedded/tiny/fixed-point roadmap?~~ — **RESOLVED: no** ([2026-07-07 PlayCanvas/Snap embedded-roadmap probe](2026-07-07-playcanvas-snap-embedded-roadmap.md)). PlayCanvas is a GPU-only WebGL/WebGPU engine *doubling down* on the GPU (WebGPU compute), with zero embedded/fixed-point mention; Snap's own hardware runs up-market Snapdragon-XR AR glasses, not microcontrollers. The slot is uncontested from the strongest competitor — the gap is a rewrite, not a feature. (Caveat surfaced: PlayCanvas is *also* ~1–2 MB, so "tiny footprint" isn't the moat — "no GPU, no FPU" is.)
 2. **Is there demand for collaborative *building* (not just play)?** Tabula Sono proves play-demand; GB Studio proves single-author retro-export demand; collaborative *authoring* of worlds/tables is still unproven — this is exactly the parallel [demand-validation pass](2026-07-07-game-worlds-vtt-demand.md) (running).
 3. **How big/monetizable is the general fixed-point/retro/embedded segment** beyond GB Studio's one-platform proof?
 4. **Where do the ~12 uncovered browser/spatial tools sit,** and does any occupy a slice of WorldFoundry's ground?
