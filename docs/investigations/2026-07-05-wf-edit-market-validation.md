@@ -113,7 +113,7 @@ flowchart LR
 | B2.1 assumed $300–800/classroom/yr | Delightex charges ≈$260/yr per 31-seat classroom; Minecraft Education is $5.04/seat and often effectively $0 (A3/A5 bundling). The estimate sits 1.5–3× above incumbent anchors |
 | B2 "COPPA/FERPA is real but bounded" | Cost is unverifiable from public sources — treat as unknown, not bounded |
 | A2 ceiling $10–50M ARR, entry 9–18 months | Unfalsifiable from public data (zero verified price points in the entire category); slot already served by Revizto+Resolve integration; downgraded to no-go pending design-partner discovery |
-| §4 sequencing: "validate A2 vs A3, commit to one" | A2 is now no-go-for-now; A3 (film previz) remains unvalidated either way |
+| §4 sequencing: "validate A2 vs A3, commit to one" | Both now validated **no-go**: A2 AEC (this doc) and A3 film previz ([2026-07-07](2026-07-07-a3-previz-validation.md)) — same failure mode, a collaborative-3D incumbent already fills the slot |
 | B3 risk note flagged only the Foundry-VTT naming collision | Add: Sigil's Oct 2026 shutdown creates a ~4-month displaced-user window — a timing argument the original doc missed |
 
 ## Sources (verified-claim contributors)
