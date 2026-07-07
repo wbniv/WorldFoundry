@@ -24,6 +24,15 @@ From the remote-line source (`git show origin/2026-new-level:engine/wf_edit/leve
 - **Rust toolchain precedent:** `iffcomp-rs`, `oaddump-rs`, `lvldump-rs`, `textile-rs` — deterministic file↔file converters. glTF conversion belongs here as a peer, not inside the C++ editor.
 - **Coordinate convention already settled:** the Blender plugin maps Y-up↔Z-up at `wftools/wf_blender/export_level.py:23-25` with `wf=(rot.x, rot.z, -rot.y)`. **The glTF path must use the identical transform** so Blender, glTF, and WF all agree — glTF is Y-up like Blender's export space.
 
+## Known pipeline gotchas (from the 2026-07-05 project review)
+
+The [2026-07-05 project review](../investigations/2026-07-05-project-review.md) audited the exact `.lev`/MODL/OAD pipeline this plan builds on. Four findings must be handled *inside* this work, not rediscovered mid-build:
+
+- **#77 (High) — actor `Scale` already round-trips lossily.** The Blender exporter writes a `VEC3 "Scale"` chunk but the importer only reads the first `VEC3` as Position (matched by tag, not name), and `levcomp-rs` decompile skips Scale entirely (`decompile.rs:24`). glTF nodes carry scale (TRS), so **Phase 1's transform mapping must fix the underlying Scale-drop** or imported scale silently resets to 1.0. Prerequisite, not a nice-to-have.
+- **#79 (Medium) — LIGHT fields are emitted twice and can disagree**, breaking byte-identical round-trip *today*. Phase 4's lossless-round-trip conformance test assumes the existing path is deterministic; it isn't. Fix or quarantine the double-emit before asserting round-trip equality.
+- **#72–74 (Medium) — the Rust parsers this tool sits beside panic on malformed input.** `levcomp-rs` decompile (`decompile.rs:113–123`, unchecked header offsets) and `textile-rs` `parse_modl` (`texture.rs:68`, `assert_eq!` on a file-supplied size) crash on bad files — and *"the editor calls this on user files."* `wf_gltf-rs` imports untrusted foreign `.glb`s into this neighborhood, so return errors, don't panic/assert — and don't build on a crashy base.
+- **#83 (Medium) — three competing OAD-schema directories exist** (some production levels load schemas from a *test-fixtures* dir). This tool fills non-geometry fields from OAD defaults, so pin the authoritative schema dir (`wflevels/oad/`) explicitly rather than inheriting whichever a level happens to reference.
+
 ## Design decisions
 
 1. **A standalone Rust crate, not C++ in the editor.** New tool `wftools/wf_gltf-rs` (CLI `wf-gltf`), using the Khronos-blessed [`gltf`](https://crates.io/crates/gltf) crate (read) + [`gltf-json`](https://crates.io/crates/gltf-json) (write). Rationale: reuses the deterministic Rust pipeline; works **headless** (CI, `wf_py`, batch conversion) not just in the editor; keeps wf_edit thin (it already shells out to `levtree`/`RunBuildLevel`, so `wf-gltf import|export` slots into the same pattern). Determinism is a first-class requirement (sorted keys, stable node/buffer ordering, no hashmap iteration leakage) — it must fit the "bit-identical" thesis.
