@@ -52,9 +52,9 @@ There is **no reliable film-previz-specific TAM.** The broad VP market is ~$2.75
 
 ## Open questions (coverage gaps — all requested, none resolved)
 
-1. **NVIDIA Omniverse was never addressed** — no surviving claim covered it, despite it being the closest architectural analog (browser/real-time, USD, multi-user Nucleus collaboration). If Omniverse *also* fills the collaborative-VP slot, that's a *second* incumbent reinforcing the no-go. This is the highest-value gap.
+1. ~~NVIDIA Omniverse was never addressed~~ — **RESOLVED** ([2026-07-07 A/V+collab validation](2026-07-07-av-and-collab-validation.md)): Omniverse is a genuine second collaborative-3D incumbent (Nucleus live co-authoring), but it has repositioned to **industrial "physical AI"** (Foxconn, Caterpillar, BMW), deprecated its standalone creator apps, and is a heavy local-RTX-GPU (non-browser) workload — so it **reinforces the no-go in industrial/AEC while largely vacating film/VP**, and never occupies the lightweight-browser slot.
 2. **Is remote co-editing a felt, paid-for pain?** Largely moot for the *enterprise* previz buyer — Unreal's LAN/VPN limitation is trivially cleared by studios' baseline IT (VPNs), so it isn't a real limitation for them. The browser/zero-VPN advantage is a consumer/long-tail lever, not an enterprise one; no demand-side evidence surfaced that any previz buyer would pay to remove the VPN step.
-3. **Is built-in voice/video a differentiator, or do Zoom/Teams neutralize it?** (Same open question #1 from the AEC/VTT work — still unanswered.)
+3. ~~Is built-in voice/video a differentiator?~~ — **RESOLVED** ([2026-07-07 A/V+collab validation](2026-07-07-av-and-collab-validation.md)): **no** — built-in A/V is a neutralized non-factor across segments (Figma wins without it; Roll20 ships it but tables use Discord). The genuine differentiator is *simultaneous real-time editing*, not the bundled A/V.
 4. **Fidelity expectations** at the previz stage (does a fixed-point/WebGL engine's low-fi suffice?), and whether shared virtual location scouting is a real sized market — both unquantified.
 
 ## Implications
