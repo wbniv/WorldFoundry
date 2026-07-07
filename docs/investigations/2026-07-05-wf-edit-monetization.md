@@ -8,6 +8,69 @@
 
 ---
 
+## TL;DR — the 10 likeliest revenue earners
+
+The 100 ideas below, filtered to the ten with the best odds of *actually* producing meaningful revenue and ranked by **likelihood, not size**. "Likelihood" is a rough, subjective probability the idea reaches at least its low-end estimate if pursued as a focused effort (everything here is ±10× Fermi — see §2); "$/yr" is annual revenue at maturity. The pattern is the point: the near-certain earners are the low-friction **B-track** — services, prosumer, and the validated VTT wedge — not the big-ceiling enterprise verticals (both A-verticals tested, AEC and previz, came back no-go). The next table places each *category's* biggest-ceiling idea in the full 100-idea ranking — including where "Retro Roblox" actually lands.
+
+| # | Idea | Likelihood | $/yr (maturity) | Why it's a likely earner |
+|---|---|:--:|---|---|
+| 1 | **B5.1 — Facilitated build-together workshops** | ~85% | $50–300k | Sellable in 2–6 weeks on the product *as it exists today* — zero new engineering; the fastest first dollar in the doc |
+| 2 | **B1.1 — Indie Pro subscription** | ~80% | $50–500k | The product already *is* the indie tool; proven willingness to pay; live in 1–2 months |
+| 3 | **B1.2 — Lifetime license (itch.io)** | ~80% | $20–200k | Retro crowd prefers buy-once; ~1 month; near-zero friction |
+| 4 | **B3.1 — VTT GM license (buy-once)** | ~70% | $100k–1M | The **validated wedge** — proven paid-VTT demand + the Sigil-shutdown window — but needs the VTT build + relay auth first (see the [VTT plan](../plans/2026-07-07-vtt-wedge.md)) |
+| 5 | **B5.2 — Self-serve event kits** | ~70% | $30–200k | Productized version of #1; self-serve, 1–3 months |
+| 6 | **B1.3 — Team rooms (small studios)** | ~70% | $30–300k | Natural upsell from #2; 2–3 months |
+| 7 | **B4.1 — Streamer mode** | ~60% | $50–500k | Collaborative building *is* content; creators buy content tools; attention-dependent |
+| 8 | **B3.2 — VTT map & asset marketplace** | ~60% | $50–500k | The proven Foundry revenue engine — but only once the VTT base (#4) exists |
+| 9 | **A1.1 — Hosted collab-editor SaaS** | ~55% | $200k–2M | Biggest $ of the likely set; works today, but more competitive and slower to first dollar |
+| 10 | **B2.3 — Camp/after-school licensing** | ~55% | $100–500k | Self-serve education under the ~$750 PO threshold; seasonal but sticky |
+
+*Ranked by likelihood, not ceiling — for the ceiling-vs-speed view see the §3 quadrant, and for how each industry's own 10 ideas split its opportunity see the table at the end of each industry section. Selection reflects the [validation pass](2026-07-05-wf-edit-market-validation.md): VTT confirmed as the wedge, education demoted to self-serve, AEC + previz both no-go.*
+
+### Each category's biggest swing, ranked among all 100
+
+Taking the single highest-**ceiling** idea from each of the ten categories and placing it in the full 100-idea likelihood ranking. The split *is* the story — every B-track flagship lands in the top quarter, every A-track flagship in the bottom third: **the biggest ceilings are the longest shots.**
+
+| Rank /100 | Category | Its biggest-ceiling idea | Likelihood | $ ceiling | |
+|:--:|---|---|:--:|--:|---|
+| **#1** | B5 team-building | Facilitated workshops | ~85% | $300k | also the overall #1 earner |
+| **#2** | B1 indie/retro | Pro subscription | ~80% | $500k | the product already *is* their tool |
+| **#4** | B3 tabletop / VTT | GM license (buy-once) | ~70% | $1M | the validated wedge |
+| **#11** | B4 creators | Streamer mode | ~60% | $500k | collaborative building *is* content |
+| **#24** | B2 education | Classroom site license | ~54% | $1M | self-serve, but district POs add friction |
+| **#62** | A5 industrial twins | Factory/warehouse planning | ~38% | $10M | enterprise sales, slow |
+| **#71** | A4 defense / sim | Mission-rehearsal sandbox | ~30% | $5M | SBIR-adjacent; long cycle |
+| **#78** | A1 games | "Retro Roblox" UGC platform | ~28% | **$100M+** | highest ceiling in the doc, lowest odds — the lottery ticket |
+| **#83** | A2 AEC | Design-review rooms | ~24% | $10M | validated **no-go** (incumbent-filled) |
+| **#85** | A3 film previz | Virtual location scouting | ~24% | $5M | validated **no-go** (incumbent-filled) |
+
+*Ranks use the same subjective likelihood estimates as the table above (±10× Fermi) — read them as tiers, not exact positions. "Biggest-ceiling idea" ≠ "best idea": most categories have a likelier, smaller idea (A1's best *odds* are its hosted SaaS at #23, not the UGC platform at #78).*
+
+**The same ten as a do-first map.** Likelihood barely varies across a list already filtered *for* likelihood, so the axes that actually separate these ten are **build effort** (sell it today vs. build first) and **revenue ceiling**. Read it as a sequence: start bottom-left (quick, reliable cash that funds the runway) and build toward top-right (the scale prizes — the VTT wedge and the hosted SaaS). This is the shortlist-idea counterpart to the §3 *industry* quadrant.
+
+```mermaid
+quadrantChart
+    title The 10 likeliest earners — build effort vs revenue (do-first map)
+    x-axis "sell it today / low build" --> "needs a build first"
+    y-axis "smaller $" --> "bigger $"
+    quadrant-1 "build toward these (scale prizes)"
+    quadrant-2 "sweet spot - fast & big"
+    quadrant-3 "start here - quick cash, funds the runway"
+    quadrant-4 "slow & small - deprioritize"
+    "B5.1 workshops": [0.08, 0.44]
+    "B1.2 lifetime lic": [0.14, 0.37]
+    "B5.2 event kits": [0.21, 0.41]
+    "B1.1 pro sub": [0.25, 0.56]
+    "B1.3 team rooms": [0.34, 0.46]
+    "B2.3 camp licensing": [0.45, 0.51]
+    "B4.1 streamer mode": [0.53, 0.59]
+    "A1.1 hosted SaaS": [0.61, 0.88]
+    "B3.2 VTT marketplace": [0.82, 0.53]
+    "B3.1 VTT license": [0.86, 0.72]
+```
+
+The top-left "fast **and** big" sweet spot is nearly empty — the honest signal that the biggest ceilings (A1.1, B3.1) all require a build; nothing is both instant and large. B3.2 (marketplace) sits build-heavy because it only pays off once the VTT base (B3.1) exists.
+
 ## 1. What we're actually selling
 
 Capability inventory, assembled from the branch history and file tree (notably `ac3680d2` "one-click .lev export shipped — web editor v1 feature-complete"). Caveat: assessed from commit messages and file listings, not hands-on testing.
