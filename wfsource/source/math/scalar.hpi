@@ -20,11 +20,7 @@
 // ------------------------------------------------------------------------
 
 #if defined(SCALAR_TYPE_FIXED)
-#if defined ( __PSX__ )
-#include <math/psx/scalar.hpi>
-#elif defined ( __WIN__ )
-#include <math/win/scalar.hpi>
-#elif defined ( __LINUX__ )
+#if   defined ( __LINUX__ )
 #include <math/linux/scalar.hpi>
 #else
 #error no scalar.hpi file for this platform!
@@ -455,7 +451,15 @@ Scalar::AsUnsignedFraction() const
 	return uint16( _value );
 #elif defined(SCALAR_TYPE_FLOAT) || defined(SCALAR_TYPE_DOUBLE)
    FLOAT_TYPE temp = _value;
-   temp -= int(_value);                // remove whole part
+   temp -= int(_value);                // remove whole part → (-1,1)
+   // Binary angular measure is modular: a negative fraction is the same angle
+   // as frac+1. The fixed-point path above wraps negatives for free via
+   // two's-complement uint16 truncation; the float path must do it explicitly.
+   // Without this, uint16(negativeFloat) is UB — and on wasm clang's saturating
+   // i32.trunc_sat_f64_u clamps it to 0, so e.g. Angle::Revolution(-x) yields a
+   // zero rotation instead of a turn the other way (right-turn dead on web).
+   if (temp < 0)
+      temp += 1;                       // wrap into [0,1)
    return uint16(temp*SCALAR_ONE_LS);
 #else
 #error SCALAR TYPE not defined

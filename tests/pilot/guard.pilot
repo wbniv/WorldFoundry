@@ -1,0 +1,10 @@
+R:pilot
+R:@tier vm
+R:@desc (expr) guard gates a statement independently of the match flag
+R:@expect-exit 0
+R:@expect-out hp-ok
+R:@expect-no-out hp-low
+C:#hp = 3
+T(#hp>0):hp-ok
+T(#hp<0):hp-low
+E:

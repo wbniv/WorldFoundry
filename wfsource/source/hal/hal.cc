@@ -18,10 +18,12 @@
 
 #include <hal/hal.h>
 #include <hal/_platfor.h>
-#include <hal/_tasker.h>
+#if defined(WF_ENABLE_STEAM)
+#  include <hal/linux/steam.h>
+#endif
+#include <hal/linux/audio.h>
 #include <hal/_input.h>
 #include <hal/sjoystic.h>
-#include <hal/_message.h>
 #include <hal/diskfile.hp>
 
 //============================================================================
@@ -31,7 +33,7 @@ static void PIGSInitStartupTask();
 LMalloc* _HALLmalloc;
 LMalloc* _HALScratchLmalloc;
 DMalloc* _HALDmalloc;
-int32 cbHalLmalloc = 3500000;
+int32 cbHalLmalloc = 64000000;  // bumped 16MB→64MB for qbert 16-round palettes (1344 cube actors, 2026-05-09)
 int32 cbHalScratchLmalloc = 180000;
 
 //============================================================================
@@ -60,31 +62,34 @@ HALStart(int argc, char** argv, int maxTasks,int maxMessages, int maxPorts)
 	_PlatformSpecificInit( argc, argv, maxTasks, maxMessages,  maxPorts );
 	assert(ValidPtr(_HALLmalloc));
 	{
+		// On web, PIGSMain → RunLevelWeb/RunEditorWeb hands control to
+		// emscripten_set_main_loop(..., simulate_infinite_loop=1), which UNWINDS this
+		// C stack. A stack-local scratch allocator would be destroyed by that unwind
+		// while _HALScratchLmalloc still points at it, so every later StepFrame access
+		// to HALScratchLmalloc is a stack-use-after-scope (ASan-confirmed; on a clean
+		// build the dead LMalloc's garbage vtable surfaces as an opaque "null function"
+		// wasm trap). Make it static so it outlives the unwind. Native keeps the scoped
+		// local — there the game loop runs inside this frame, so nothing unwinds.
+#if defined(__EMSCRIPTEN__)
+		static LMalloc __scratchLMalloc(*_HALLmalloc,cbHalScratchLmalloc MEMORY_NAMED( COMMA "HalScratchLMalloc" ) );
+#else
 		LMalloc __scratchLMalloc(*_HALLmalloc,cbHalScratchLmalloc MEMORY_NAMED( COMMA "HalScratchLMalloc" ) );
+#endif
 		_HALScratchLmalloc = &__scratchLMalloc;
 		assert(ValidPtr(_HALScratchLmalloc));
 		HalInitFileSubsystem();
 		_InitJoystickInterface();					// setup joystick code
-#if DO_VALIDATION
-		ItemInit();
+#if defined(WF_ENABLE_STEAM)
+		_InitSteam();
 #endif
-#if defined( DO_MULTITASKING )
-		_MessageSystemConstruct(maxMessages,maxPorts);				// this is where the malloc occurs
-		_PublicMessagePortListConstruct();
-		_TaskerStart(PIGSInitStartupTask,maxTasks,maxMessages,maxPorts);				// note: doesn't return until someone calls _TaskerEnd
-#else
+		_InitAudio();
 		PIGSMain( __argc, __argv );
-#endif
 
-#if defined( DO_MULTITASKING )
-	// cleanup
-		_PublicMessagePortListDestruct();
-		_MessageSystemDestruct();
-#endif
-#if DO_VALIDATION
-		ItemTerm();
-#endif
+		_TermAudio();
 		_TermJoystickInterface();
+#if defined(WF_ENABLE_STEAM)
+		_TermSteam();
+#endif
 	}
 	_PlatformSpecificUnInit();
 }
@@ -95,10 +100,6 @@ HALStart(int argc, char** argv, int maxTasks,int maxMessages, int maxPorts)
 void
 PIGSInitStartupTask()
 {
-	// any pigs modules which want to always have a task running should start it here
-#if defined( TASKER )
-//	_TimerStart(HAL_MAX_TIMER_SUBSCRIBERS);			// create all timer tasks
-#endif
 	PIGSMain( __argc,__argv );				// call game code, when returns, game is over
 	PIGSExit();
 }
@@ -109,15 +110,8 @@ PIGSInitStartupTask()
 void
 PIGSExit()
 {
-#if defined( DO_MULTITASKING )
-//	_TimerStop();
-	_TaskerStop();			// shuts down tasker, doesn't return
-#endif
 #if DO_TEST_CODE
 	printf("Tasker shutting down\n");
-#endif
-#if defined(__PSX__)
-	assert(0);
 #endif
 }
 

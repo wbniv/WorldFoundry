@@ -19,7 +19,7 @@
 // or see www.fsf.org
 
 // ===========================================================================
-// Description: Generic configuration file compiling for PSX.
+// Description: Generic configuration file compiling for Linux.
 // Original Author: Kevin T. Seghetti
 // ===========================================================================
 //=============================================================================
@@ -49,8 +49,14 @@ const MachineType gHostMachineType = LINUX;
 #define _MAX_PATH PATH_MAX
 #define DIRECTORY_SEPARATOR '/'
 
+#if !defined(__EMSCRIPTEN__)
+// Emscripten's libc already declares (compat/string.h) and implements strlwr
+// with a char* return; redeclaring it void here is an overload-on-return-type
+// error there. Native Linux libc has no strlwr — engine/stubs/platform_stubs.cc
+// provides it.
 void
 strlwr( char* string );
+#endif
 
 void
 _linux_init(void);
@@ -61,5 +67,5 @@ START_EXTERN_C
 END_EXTERN_C
 
 //=============================================================================
-#endif	//!defined(_CF_PSX_H)
+#endif	//!defined(_CF_LINUX_H)
 //=============================================================================

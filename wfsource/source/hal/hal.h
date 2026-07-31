@@ -29,14 +29,9 @@
 #include <cpplib/stdstrm.hp>
 
 #include <hal/halbase.h>
-#if defined(DO_MULTITASKING)
-#include <hal/tasker.h>
-#include <hal/timer.h>
-#endif
 #include <hal/message.h>
 #include <hal/general.h>
 //#include <hal/time.hp>
-#include <hal/item.h>
 #include <hal/sjoystic.h>
 #include <hal/platform.h>
 

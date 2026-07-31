@@ -23,12 +23,39 @@
 #ifndef _ALIGN_HP
 #define _ALIGN_HP
 
+#include <cstddef>      // size_t
+
 // ------------------------------------------------------------------------
 // Alignment Macros
 // ------------------------------------------------------------------------
 
 #define ALIGN_POW2( x, a ) ( ( ( x ) + ( ( a ) - 1 ) ) & ~( ( a ) - 1 ) )
 #define PAD_POW2( x, a ) ( ALIGN_POW2( ( x ), ( a ) ) - ( x ) )
+
+// WF_POINTER_ALIGN — pointer-sized natural alignment for HAL pool allocators.
+//
+// 4 bytes on 32-bit hosts (ESP32 Xtensa LX6/LX7 where __xtensa__ is set but
+// __arm__ is not; RISC-V 32-bit ESP32 P4/C-series; hypothetical i386).
+// 8 bytes on 64-bit hosts (Linux x86_64, Android arm64-v8a, iOS AArch64).
+//
+// One carve-out: 32-bit ARM AAPCS — covers Cortex-M7 / M33 microcontrollers
+// like RP2350, Teensy 4.x, Portenta H7 (on the fixed-point-platform roadmap)
+// plus dormant armeabi-v7a. On AAPCS, alignof(int64_t) = alignof(double) = 8
+// despite sizeof(void*) = 4 — force 8 to cover those types if heap-allocated.
+//
+// constexpr (not #define) so it survives stream-insertion in DBSTREAM warnings
+// and folds to a compile-time literal — ALIGN_POW2(size, WF_POINTER_ALIGN)
+// generates the same `add #N-1; and #~(N-1)` instruction pair as a hard-coded
+// literal 4 or 8 would, byte-identical codegen.
+#if defined(__arm__) && !defined(__aarch64__)
+constexpr size_t WF_POINTER_ALIGN      = 8;
+#else
+constexpr size_t WF_POINTER_ALIGN      = sizeof(void*);
+#endif
+constexpr size_t WF_POINTER_ALIGN_MASK = WF_POINTER_ALIGN - 1;
+
+static_assert((WF_POINTER_ALIGN & WF_POINTER_ALIGN_MASK) == 0,
+              "WF_POINTER_ALIGN must be a power of two");
 
 INLINE uint
 PowerOfTwoUpperBound( const uint x )

@@ -4,7 +4,7 @@
 **Context:** The WF engine has cycled through several scripting languages over its
 lifetime — original TCL (never intended to ship), a Scheme-like bytecode interpreter,
 Lua, and Perl. With the Linux resurrection underway and TCL currently stubbed out
-(`NullInterpreter` at `wftools/wf_viewer/stubs/scripting_stub.cc`), now is the right
+(`NullInterpreter` at `wftools/engine/stubs/scripting_stub.cc`), now is the right
 time to pick a replacement. This document surveys the field.
 
 ## What the scripting system actually needs to do

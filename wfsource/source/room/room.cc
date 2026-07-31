@@ -55,7 +55,9 @@ RoomCallbacks::Validate() const
 //============================================================================
 
 Room::Room() :
-	_physicalAttributes()
+	_physicalAttributes(),
+	_objectLists(NULL),
+	_memory(NULL)
 {
 	for( int roomIndex=0; roomIndex < MAX_ACTIVE_ROOMS; ++roomIndex )
 		adjacentRooms[ roomIndex ] = 0;
@@ -66,7 +68,14 @@ Room::Room() :
 Room::~Room()
 {
    Validate();
-   delete [] _objectLists;
+   // _objectLists was allocated via `new (memory) Int16List[N]` — a placement
+   // array-new from the WF Memory pool, NOT libc malloc. Calling `delete[]`
+   // here used to call libc free on a pool pointer → "free(): invalid pointer"
+   // on every clean shutdown. Use MEMORY_DELETE_ARRAY (manual element dtor
+   // loop + pool free) instead. Skip if Construct never ran.
+   if (_objectLists && _memory) {
+      MEMORY_DELETE_ARRAY((*_memory), _objectLists, Int16List, _checkListEntries);
+   }
 }
 
 //============================================================================
@@ -97,7 +106,7 @@ Room::Construct
    RangeCheck(1,levelNumRooms, 1000);             // arbitrary
    RangeCheck(0,roomIndex,1000);                      // arbitrary
    memory.Validate();
-   RangeCheck(0,numberOfTemporaryObjects,1000);  // arbitrary
+   RangeCheck(0,numberOfTemporaryObjects,4000);  // arbitrary (raised 1000→4000 for the fs-viz levels)
    assert(ValidPtr(listCheckFuncList));
    RangeCheck(0,checkListEntries,100);           // arbitrary
    assert(ValidPtr(roomCallbacks));
@@ -110,6 +119,7 @@ Room::Construct
    _roomCallbacks = roomCallbacks;
    _masterObjectList = &masterObjectList;
    assert(ValidPtr(_masterObjectList));
+   _memory = &memory;                       // remember pool for ~Room
    _objectLists = new (memory) Int16List[_checkListEntries];
 
 	DBSTREAM1( croom << "Room::Construct: roomIndex  = " << roomIndex << std::endl; )
@@ -263,11 +273,13 @@ Room::UpdateRoomContents(int updateIndex, LevelRooms& levelRooms)
 	while(!alIter.Empty())
 	 {
 		BaseObject* object = (*_masterObjectList)[*alIter];
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(object);
-      assert(ValidPtr(po));
+      assert(IsPhysicalObject(object));
+      PhysicalObject* po = static_cast<PhysicalObject*>(object);
 		if (!CheckCollision(*po))
 		 {
 			int32 objectIndex = *alIter;
+			Vector3 pp = po->GetPhysicalAttributes().Position();
+			cerror << "Room::UpdateRoomContents: object " << objectIndex << " kind=" << object->kind() << " pos=(" << pp.X().AsFloat() << "," << pp.Y().AsFloat() << "," << pp.Z().AsFloat() << ") fell out of room " << GetRoomIndex() << " roompos=(" << _physicalAttributes.Position().X().AsFloat() << "," << _physicalAttributes.Position().Y().AsFloat() << "," << _physicalAttributes.Position().Z().AsFloat() << ") roombox=(" << _physicalAttributes.GetColSpace().Min().X().AsFloat() << "," << _physicalAttributes.GetColSpace().Min().Y().AsFloat() << "," << _physicalAttributes.GetColSpace().Min().Z().AsFloat() << ")-(" << _physicalAttributes.GetColSpace().Max().X().AsFloat() << "," << _physicalAttributes.GetColSpace().Max().Y().AsFloat() << "," << _physicalAttributes.GetColSpace().Max().Z().AsFloat() << "); re-adding" << std::endl;
 			RemoveObject(objectIndex);
 
          Validate();
@@ -346,8 +358,8 @@ CheckSameRoom( BaseObjectIteratorWrapper boIter, const Room& room, const Clock& 
 	while( !boIter.Empty() )										// iterate through all objects in this room
 	{
 //		DBSTREAM2( clevel << "QL::dC:CR: cIter loop" << std::endl; )
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(&(*boIter));
-      assert(ValidPtr(po));
+      assert(IsPhysicalObject(&(*boIter)));
+      PhysicalObject* po = static_cast<PhysicalObject*>(&(*boIter));
 		room.CheckCollisionWithObjects( *po,clock, listIndex, count );
 		++boIter;
 		++count;
@@ -366,8 +378,8 @@ CheckOverlappedRoom( BaseObjectIteratorWrapper boIter, const Room& room, const C
 	{
 //		DBSTREAM2( clevel << "QL::dC:CR: cIter loop" << std::endl; )
 
-      PhysicalObject* po = dynamic_cast<PhysicalObject*>(&(*boIter));
-      assert(ValidPtr(po));
+      assert(IsPhysicalObject(&(*boIter)));
+      PhysicalObject* po = static_cast<PhysicalObject*>(&(*boIter));
 
 		if ( room.CheckCollision( *po ) )
       {

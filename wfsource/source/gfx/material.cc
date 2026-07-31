@@ -27,6 +27,7 @@
 #include <gfx/material.hp>
 #include <gfx/rendobj2.hp>
 #include <gfx/rendobj3.hp>
+#include <gfx/vmem.hp>      // VideoMemory::VRAMTransient{Width,Height} for the UV page bound
 
 //============================================================================
 
@@ -60,17 +61,7 @@ Material::Get3DRenderObjectPtr() const
 {
 	static const pRenderObj3DFunc _rendererList[] =
 	{
-		#if defined(RENDERER_PIPELINE_SOFTWARE)
-			#include <gfx/softwarepipeline/renderer.ext>
-		#elif defined( RENDERER_PIPELINE_PSX )
-			#include <gfx/psx/renderer.ext>
-		#elif defined( RENDERER_PIPELINE_GL )
 			#include <gfx/glpipeline/renderer.ext>
-		#elif defined( RENDERER_PIPELINE_DIRECTX )
-			#include <gfx/directxpipeline/renderer.ext>
-		#else
-			#error No platform...
-		#endif
 	};
 	ValidateRenderMask(_materialFlags);
 	return _rendererList[_materialFlags&RENDERER_SELECTION_MASK];
@@ -81,11 +72,7 @@ Material::Get3DRenderObjectPtr() const
 Material::Material(Color color, int materialFlags,const Texture& texture,const PixelMap* texturePixelMap)
 	:
 	_color(color),
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-	_materialFlags(materialFlags|Material::GOURAUD_SHADED),
-#else
    _materialFlags(materialFlags),
-#endif
 	_texture(texture),
     _texturePixelMap(texturePixelMap)
 
@@ -111,30 +98,29 @@ void
 Material::Construct()
 {
 
-//#if defined(__WIN__)
-//	_materialFlags &= ~Material::TEXTURE_MAPPED;
-//#endif
-
    // kts kludge until all models have been updated to be flat shaded
 
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-		// kts this is so fogging will always be smooth
-      _materialFlags |= GOURAUD_SHADED;
-#elif defined( RENDERER_PIPELINE_PSX )
-		// kts this is so fogging will always be smooth
-      _materialFlags |= GOURAUD_SHADED;
-#elif defined( RENDERER_PIPELINE_GL )
    if(_materialFlags & GOURAUD_SHADED)
       _materialFlags &= ~GOURAUD_SHADED;
-#elif defined( RENDERER_PIPELINE_DIRECTX )
-	#error hasnt been implemented yet, not sure what it will need	
-#else
-	#error No platform...
-#endif
 
 	// kts kludge until we can get translucency from material
 	if(_materialFlags & TEXTURE_MAPPED)
 	{
+		// Diagnostic (2026-04-19): log per-texture translucency pickup so we
+		// can see which materials flag translucent at load time. Suspects:
+		// roof textures (G_*shakes*) picking up bTranslucent from textile-rs
+		// setting `has_transparent=true` on any texture whose pixel data
+		// contains col_transparent (0x0000 by default) — even a single black
+		// pixel flips the flag. Remove once the roof transparency question
+		// is answered.
+		std::cerr << "material: texture=\"" << _texture.szTextureName
+		          << "\"  bTranslucent=" << int(_texture.bTranslucent)
+		          << "  bitdepth=" << int(_texture.bitdepth)
+		          << "  flags_in=0x" << std::hex << _materialFlags
+		          << std::dec
+		          << (_texture.bTranslucent ? "  ← flipping HALF_BACK_HALF_PRIM" : "")
+		          << std::endl;
+
 		if(_texture.bTranslucent)
 			_materialFlags |= TEXTURE_TRANSLUCENCY_HALF_BACK_HALF_PRIMITIVE;
 	}
@@ -145,9 +131,6 @@ Material::Construct()
 	{
 		case FLAT_SHADED|SOLID_COLOR:
 		{
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-			assert(0);              // software pipeline needs all polys to be gouraud shaded so that fogging will work
-#endif
 			POLY_F3 poly;
 			setPolyF3(&poly);
 			Color color = GetColor();
@@ -157,9 +140,7 @@ Material::Construct()
 		}
 		case GOURAUD_SHADED|SOLID_COLOR:
 		{
-#if !defined(RENDERER_PIPELINE_SOFTWARE)
 //         assert(0);           // kts we don't seem to have color by vertex finished
-#endif
 			POLY_G3 poly;
 			setPolyG3(&poly);
 			Color color = GetColor();
@@ -171,9 +152,6 @@ Material::Construct()
 		}
 		case FLAT_SHADED|TEXTURE_MAPPED:
 		{
-#if defined(RENDERER_PIPELINE_SOFTWARE)
-			assert(0);              // software pipeline needs all polys to be gouraud shaded so that fogging will work
-#endif
 			POLY_FT3 poly;
 			setPolyFT3(&poly);
 			Color color = GetColor();
@@ -183,9 +161,7 @@ Material::Construct()
 		}
 		case GOURAUD_SHADED|TEXTURE_MAPPED:
 		{
-#if !defined(RENDERER_PIPELINE_SOFTWARE)
          //assert(0);           // kts we don't seem to have color by vertex finished
-#endif
 			POLY_GT3 poly;
 			setPolyGT3(&poly);
 			Color color = GetColor();
@@ -236,52 +212,16 @@ Material::Construct()
 
 //-----------------------------------------------------------------------------
 
-#if defined(RENDERER_PIPELINE_DIRECTX)
-void
-Material::InitPrimitive(TriFace& face, const Vertex3D& vertex0, const Vertex3D& vertex1, const Vertex3D& vertex2) const
-{
-	if(_materialFlags & TEXTURE_MAPPED)
-	{
-#pragma message ("KTS: handle 4 & 8 bit textures as soon as I get data from textile")
-
-		Scalar minU = Scalar( vertex0.u.Min(vertex1.u).Min(vertex2.u).WholePart(), 0 );
-		Scalar minV = Scalar( vertex0.v.Min(vertex1.v).Min(vertex2.v).WholePart(), 0 );
-
-		assert(minU <= vertex0.u);
-		assert(minU <= vertex1.u);
-		assert(minU <= vertex2.u);
-		assert(minV <= vertex0.v);
-		assert(minV <= vertex1.v);
-		assert(minV <= vertex2.v);
-
-		float u0;
-		float v0;
-		DirectXCalcVRAMuv(vertex0.u-minU,vertex0.v-minV,u0,v0);
-
-		float u1;
-		float v1;
-		DirectXCalcVRAMuv(vertex1.u-minU,vertex1.v-minV,u1,v1);
-
-		float u2;
-		float v2;
-		DirectXCalcVRAMuv(vertex2.u-minU,vertex2.v-minV,u2,v2);
-
-		face._u[0] = u0;
-		face._v[0] = v0;
-		face._u[1] = u1;
-		face._v[1] = v1;
-		face._u[2] = u2;
-		face._v[2] = v2;
-	}
-}
-
-#endif
 
 //-----------------------------------------------------------------------------
 
-#define TEXTURE_PAGE_XSIZE 256
+// TEXTURE_PAGE_XSIZE / YSIZE are now runtime — they read the transient slot
+// dimensions set by --vram-slot-width / --vram-slot-height (or the 256 default).
+// See docs/plans/2026-05-30-uv-int16-widening.md and
+// docs/plans/2026-05-30-runtime-vram-cli-overrides.md.
+#define TEXTURE_PAGE_XSIZE (VideoMemory::VRAMTransientWidth)
 #define TEXTURE_PAGE_XSTART_BOUNDRY 64
-#define TEXTURE_PAGE_YSIZE 256
+#define TEXTURE_PAGE_YSIZE (VideoMemory::VRAMTransientHeight)
 #define TEXTURE_PAGE_YSTART_BOUNDRY 256
 
 
@@ -327,7 +267,6 @@ Material::InitPrimitive(Primitive& prim, const Vertex3D& vertex0, const Vertex3D
 			setPolyF3(poly);
 			Color color = GetColor();
 			setRGB0(poly, color.Red(),color.Green(),color.Blue());
-//			cout << "-- F3 RGB = " << color << std::endl;
 			break;
 		}
 		case GOURAUD_SHADED|SOLID_COLOR:
@@ -345,7 +284,6 @@ Material::InitPrimitive(Primitive& prim, const Vertex3D& vertex0, const Vertex3D
 			POLY_FT3* poly = (POLY_FT3*)&prim;
 			setPolyFT3(poly);
 			Color color = GetColor();
-         color = Color::white;            // kts temp until all models are updated to have proper colors on their textured materials
 			setRGB0(poly, color.Red(),color.Green(),color.Blue());
 #pragma message ("KTS: handle 4 & 8 bit textures as soon as I get data from textile")
 //			poly->tpage = getTPage(TEXTURE_MODE_16BIT_DIRECT,TEXTURE_TRANS_HALF_BACK_HALF_PRIMITIVE,_texture.u,_texture.v);
@@ -391,16 +329,16 @@ Material::InitPrimitive(Primitive& prim, const Vertex3D& vertex0, const Vertex3D
 			offsetV = Scalar(offsetV.WholePart(),0);
 //			cout << "minUV = " << offsetU << "," << offsetV << std::endl;
 
-			int8 u0;
-			int8 v0;
+			uint16 u0;
+			uint16 v0;
 			CalcVRAMuv(vertex0.u-offsetU,vertex0.v-offsetV,u0,v0,_texture);
 
-			int8 u1;
-			int8 v1;
+			uint16 u1;
+			uint16 v1;
 			CalcVRAMuv(vertex1.u-offsetU,vertex1.v-offsetV,u1,v1,_texture);
 
-			int8 u2;
-			int8 v2;
+			uint16 u2;
+			uint16 v2;
 			CalcVRAMuv(vertex2.u-offsetU,vertex2.v-offsetV,u2,v2,_texture);
 
 
@@ -456,16 +394,16 @@ Material::InitPrimitive(Primitive& prim, const Vertex3D& vertex0, const Vertex3D
 			offsetV = Scalar(offsetV.WholePart(),0);
 //			cout << "minUV = " << offsetU << "," << offsetV << std::endl;
 
-			int8 u0;
-			int8 v0;
+			uint16 u0;
+			uint16 v0;
 			CalcVRAMuv(vertex0.u-offsetU,vertex0.v-offsetV,u0,v0,_texture);
 
-			int8 u1;
-			int8 v1;
+			uint16 u1;
+			uint16 v1;
 			CalcVRAMuv(vertex1.u-offsetU,vertex1.v-offsetV,u1,v1,_texture);
 
-			int8 u2;
-			int8 v2;
+			uint16 u2;
+			uint16 v2;
 			CalcVRAMuv(vertex2.u-offsetU,vertex2.v-offsetV,u2,v2,_texture);
 
 //			cout << "uv's " <<

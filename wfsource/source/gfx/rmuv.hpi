@@ -26,14 +26,18 @@ _RMUV::Validate() const
 #if DO_ASSERTIONS
 	assert(nFrame < 100);			// kts arbitrary
 	assert(strlen(szTextureName) < 	TEXTURE_NAME_LENGTH+1);
-	RangeCheck(0,u,1024);
-	RangeCheck(0,v,512);
-	RangeCheck(0,w,1024);
-	RangeCheck(0,h,512);
+	// Was hardcoded 1024/512 (matched the legacy Display::VRAM* defaults);
+	// use the runtime values so levels that bump VRAM via --vram-* don't
+	// trip these asserts. See
+	// docs/plans/2026-05-30-runtime-vram-cli-overrides.md.
+	RangeCheck(0,u,Display::VRAMWidth);
+	RangeCheck(0,v,Display::VRAMHeight);
+	RangeCheck(0,w,Display::VRAMWidth);
+	RangeCheck(0,h,Display::VRAMHeight);
 	if(palx != -1)
-		RangeCheck(0,palx,1024);
+		RangeCheck(0,palx,Display::VRAMWidth);
 	if(paly != -1)
-		RangeCheck(0,paly,512);
+		RangeCheck(0,paly,Display::VRAMHeight);
 #endif
 }
 

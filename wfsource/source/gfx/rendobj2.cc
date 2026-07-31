@@ -27,10 +27,6 @@
 #include <memory/memory.hp>
 #include <gfx/rendobj2.hp>
 #include <gfx/material.hp>
-#if defined( __PSX__ )
-#	include <libgte.h>
-#	include <libgpu.h>
-#endif
 
 //============================================================================
 // keeps pointers to facelist and vertexlist

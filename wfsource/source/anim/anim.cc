@@ -117,7 +117,11 @@ extern Channel* ConstructChannelObject( _ChannelOnDisk*, Memory& );
 #pragma message("NOTE: AnimateRenderObject3D constructor assumes SIX CHANNELS PER VERTEX")
 
 	int channelCount = renderObject.GetVertexCount() * 6;
-	_channels.SetMax( channelCount );
+	// Default Array memory is HALLmalloc (stack allocator) — using it here
+	// for per-actor channel storage breaks LIFO when actors are destroyed
+	// in non-stack order during Level teardown. Route to the per-level
+	// DMalloc instead.
+	_channels.SetMax( channelCount, &memory );
 
 	// Load the big blob of data from the CANM chunk
 	_channelData = new (memory) char[animIter.BytesLeft()];
@@ -153,8 +157,8 @@ AnimateRenderObject3D::Animate(Scalar time,RenderObject3D& renderObject)
 
 	int frame = (time*_rate).WholePart() % _frameCount;
 
-	long* source = (long*)&_animArray[frame*vertexCount];
-	long* dest = (long*)vertexList;
+	int32* source = (int32*)&_animArray[frame*vertexCount];
+	int32* dest = (int32*)vertexList;
 	assert(((vertexCount*sizeof(Vertex3D)) % 4) == 0);
 	int count = (vertexCount*sizeof(Vertex3D)) / 4;
 	for(int memIndex=0;memIndex<count;memIndex++)

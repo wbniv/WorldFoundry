@@ -1,0 +1,991 @@
+"""
+blender_create_smb.py — create smb_w1_1 validation level.
+
+Super Mario Bros. W1-1 first-pass validation scene (brief §Verification steps 1–10):
+  - Flat ground platform (brown)
+  - Three ? blocks at tile-row 4 height (gold)
+  - Mario placeholder (red/blue figure, Physics mobility)
+  - Goomba placeholder (brown mushroom, static)
+  - Koopa Troopa placeholder (green shell, static)
+  - Flagpole at level end (grey pole + green flag)
+  - Side-scrolling camera (Y=-30, looking in +Y at X-Z gameplay plane)
+
+Geometry: T = 1.5 m per NES tile. Ground surface Z=0. Mario centre Z=T when standing.
+? blocks centre Z = 4*T + T/2 (4 tiles above ground, block centred in its tile).
+
+Camera: classic SMB scroll via Director + signal-mailbox pattern.  CamShot's
+X position is driven by a Forth Director script that reads Mario's X each
+tick, applies a 1-tile deadzone + one-way ratchet + level-edge clamp + 1-tile
+forward lead, and routes the target X through global mailbox 1801; the
+CamShot's own script consumes that mailbox and writes its INDEXOF_X_POS.
+Y/Z stay Absolute at (-20, MARIO_Z+3). Inherent 1-tick lag (16 ms @ 60 Hz,
+invisible). See docs/plans/2026-05-17-smb-scrolling-camera.md.
+
+Run via Blender MCP execute_blender_code, or headlessly:
+  blender --background --python blender_create_smb.py
+"""
+
+import bpy
+import os
+import math
+import addon_utils
+
+# ── Paths ─────────────────────────────────────────────────────────────────────
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO       = os.path.normpath(os.path.join(SCRIPT_DIR, '..', '..'))
+SNOWGOONS  = os.path.join(REPO, 'wflevels', 'snowgoons-blender', 'snowgoons-blender.lev')
+OUT_LEV    = os.path.join(SCRIPT_DIR, 'smb_w1_1.lev')
+OAD_DIR    = os.path.join(REPO, 'wftools', 'wf_oad', 'tests', 'fixtures')
+
+# ── Layout (T = NES tile size in WF metres) ───────────────────────────────────
+T = 1.5
+
+GROUND_TOP_Z  = 0.0
+GROUND_THICK  = T                         # 1-tile-thick slab
+MARIO_Z       = GROUND_TOP_Z + T         # reference "Mario height" — body centre for camera framing, etc.
+# Player actor.pos = feet (WF convention). Spawn 1 tile above ground so the fall is visible.
+MARIO_FEET_Z  = GROUND_TOP_Z
+MARIO_SPAWN_Z = MARIO_FEET_Z + T
+BLOCK_Z       = GROUND_TOP_Z + 4*T + T/2 # ? block centre (4 tiles above ground)
+
+# W1-1 landmark X positions (tile counts × T) — faithful 224-tile original
+MARIO_SPAWN_X = 3  * T
+QBLOCK_XS     = [21*T, 107*T]            # coin ? blocks at faithful cols 21, 107
+KOOPA_X       = 113 * T                  # col 113 (was 32*T)
+FLAGPOLE_X    = 210 * T                  # 315 m — faithful (was 42*T)
+
+# 16 Goombas at reference positions (docs/smb-level-layouts.md §1-1)
+GOOMBA_XS = [
+    22*T,                                # col 22 — first enemy
+    32*T, 34*T,                          # between pipes 1–2
+    42*T, 44*T,                          # between pipes 2–3
+    50*T,                                # lone Goomba mid-level
+    80*T, 83*T,                          # near post-pit ? block
+    88*T, 92*T, 95*T, 99*T,             # overhead block row area
+    128*T, 133*T,                        # near pyramid A
+    143*T, 147*T,                        # near pyramid B
+]
+
+GROUND_X0 = -2 * T
+GROUND_X1 = FLAGPOLE_X + 5*T
+GROUND_Y  = T                             # half-depth of ground slab in Y
+
+# Pits (bottomless gaps in the ground) — faithful W1-1 positions.
+# See docs/plans/2026-05-25-smb-pit-death-and-level-timer.md.
+PITS = [(77*T, 81*T),   # cols 77-80: mid-level gap
+        (118*T, 122*T)] # cols 118-121: late gap before pyramids
+
+# Level countdown timer (Director script). SMB starts at 400 "time units"; we
+# drain them over TIMER_REAL_SECONDS of wall-clock so 100-left lines up with the
+# faithful tempo-change point. display = TIMER_UNITS - elapsed * (UNITS/SECONDS).
+TIMER_UNITS        = 400
+TIMER_REAL_SECONDS = 150.0
+
+SCENE_MID_X = (GROUND_X0 + GROUND_X1) / 2
+
+# ── Underground coin room (pipe-warp target) ──────────────────────────────────
+# A genuine SECOND room, placed straight below the surface with a DISJOINT bbox
+# (Z gap -36..-10) so leaving the surface room's bbox triggers a real room switch
+# (ActiveRooms::UpdateRoom loops all rooms — no adjacency needed; hard-switch =
+# the W1-2 "unload surface / load underground" behaviour). The point is to prove
+# WF's room-to-room transition path. See docs/plans/2026-05-25-smb-pipe-warp-coin-room.md.
+SMB_AT_PIPE  = 1809               # INDEXOF_SMB_AT_PIPE (mailbox.inc) — entry ActBox sets 1 on the pipe mouth
+SMB_COIN_0, SMB_COIN_1, SMB_COIN_2 = 1811, 1812, 1813   # coin-room coin visibility mailboxes (mailbox.inc)
+SMB_COIN_3, SMB_COIN_4, SMB_COIN_5, SMB_COIN_6 = 1846, 1847, 1848, 1849  # coins 3-6
+SMB_COIN_7, SMB_COIN_8, SMB_COIN_9 = 1850, 1851, 1852                     # coins 7-9
+SMB_COIN_10, SMB_COIN_11, SMB_COIN_12, SMB_COIN_13 = 1853, 1854, 1855, 1856  # coins 10-13
+SMB_COIN_14, SMB_COIN_15, SMB_COIN_16, SMB_COIN_17, SMB_COIN_18 = 1857, 1858, 1859, 1860, 1861  # coins 14-18
+# Fire Mario fireball globals (mailbox.inc 1820-1827). The generators' Activation
+# MailBox needs the literal index here (an OAS int field); scripts use INDEXOF_ names.
+SMB_FIREBALL_FIRE_R, SMB_FIREBALL_FIRE_L = 1823, 1824
+# Celebration extension (mailbox.inc 1864-1871): Mario hides into the castle + radial fireworks.
+SMB_MARIO_VIS = 1864                          # Player visibility mailbox (1=show, 0=hide)
+# 6 firework-generator activation mailboxes; generator n throws a spark burst in its window
+# iff n < SMB_FIREWORK_COUNT (the faithful 1/3/6 last-digit count, latched at celebration start).
+SMB_FIREWORK = [1865, 1866, 1867, 1868, 1869, 1870]
+SMB_FIREWORK_COUNT = 1871
+ENTRY_PIPE_X = 47 * T             # = 70.5, center of cols 46-47 (was 12*T)
+CR_FLOOR_TOP = -48.0              # coin-room floor top
+CR_X0, CR_X1 = 0.0, 24.0         # coin-room play span (16 tiles, faithful W1-1)
+CR_MID        = (CR_X0 + CR_X1) / 2  # = 12.0
+CR_ENTRY_X   = 3.0               # entry-warp drop point (left side)
+CR_ENTRY_Z   = CR_FLOOR_TOP + T  # = -46.5, feet drop-in (mirrors surface MARIO_SPAWN_Z)
+
+# Camera: fixed side-view, Y=-30, looking toward +Y at Mario's spawn position.
+# SCENE_MID_X (33.75) is the level midpoint, but the player starts at MARIO_SPAWN_X
+# (4.5). Centering on MARIO_SPAWN_X keeps Mario in frame at game start.
+CAM_Y = -30.0
+CAMSHOT_POS = (MARIO_SPAWN_X, CAM_Y, MARIO_Z + 3.0)
+LOOKAT_POS  = (MARIO_SPAWN_X, 0.0,   MARIO_Z)
+
+NUM_MAILBOXES = 100   # minimal for validation level
+
+# ── 1. Clean scene & enable addon ─────────────────────────────────────────────
+bpy.ops.wm.read_factory_settings(use_empty=True)
+addon_utils.enable("wf_blender", default_set=False, persistent=False)
+scene = bpy.context.scene
+
+# ── Shared SMB builders (extracted to wflevels/smb_common.py so levels cannot drift).
+#    See docs/plans/2026-06-02-smb-common-extraction-and-mesh-sharing.md (Phase P1a).
+import sys as _sys
+_sys.path.insert(0, os.path.join(SCRIPT_DIR, '..'))
+import smb_common
+smb_common.init(scene, OAD_DIR)
+from smb_common import (make_mat, attach_schema, find_by_class, get_class,
+    add_box, add_statplat, _add_textured_box, _make_qblock_tga, _make_brick_tga,
+    _make_grid_tile_tga, build_textured_ground_mesh, _room_bounds_mesh, _build_mario)
+from smb_common import (_add_brick, _make_powerup_block)
+from smb_common import (_make_coin_template, _make_debris_template, _make_spark_template, _make_fireball_template, _make_powerup_template, _add_pyramid, _add_staircase)
+from smb_common import (_apply_enemy_movement, _build_goomba, _make_target, _make_popup_template, _make_fireball_generator)
+from smb_common import (
+    QBLOCK_SCRIPT, DEBRIS_SCRIPT, SPARK_SCRIPT, BRICK_SCRIPT, POPUP_SCRIPT, ENEMY_SCRIPT, KOOPA_SCRIPT, POWERUP_BLOCK_SCRIPT, POWERUP_SCRIPT, STAR_SCRIPT, ONEUP_SCRIPT, FIREBALL_SCRIPT, FIREBALL_GEN_SCRIPT)
+
+# ── 2. Import snowgoons for infrastructure ────────────────────────────────────
+print(f"[smb] Importing snowgoons from {SNOWGOONS}")
+bpy.ops.wf.import_level(filepath=SNOWGOONS)
+
+# ── 3. Strip gameplay objects; keep one of each infrastructure class ──────────
+KEEP_CLASSES   = {'director', 'camera', 'levelobj', 'matte', 'light',
+                  'room', 'camshot', 'target', 'actboxor', 'player'}
+DELETE_CLASSES = {'statplat', 'enemy', 'snowman01', 'missile',
+                  'tool', 'tool01', 'ground01', 'hp', 'gold', 'generator'}
+
+
+for obj in list(bpy.data.objects):
+    if get_class(obj) in DELETE_CLASSES:
+        bpy.data.objects.remove(obj, do_unlink=True)
+
+seen = set()
+for obj in list(bpy.data.objects):
+    cn = get_class(obj)
+    if cn in KEEP_CLASSES:
+        if cn in seen:
+            bpy.data.objects.remove(obj, do_unlink=True)
+        else:
+            seen.add(cn)
+
+print("[smb] Classes after strip:", sorted({get_class(o) for o in bpy.data.objects}))
+
+
+# ── 4. Configure infrastructure actors ───────────────────────────────────────
+director = find_by_class('director')
+if director:
+    director.location = (0, CAM_Y - 2, MARIO_Z)
+    director['wf_Model Type'] = 'None'
+    # SMB scroll Director — runs after every main-loop actor each tick
+    # (level.cc:881-888). Reads INDEXOF_SMB_PLAYER_X, applies deadzone +
+    # one-way ratchet + edge clamp + 1-tile lead, writes
+    # INDEXOF_SMB_TARGET_CAM_X for the CamShot to consume next tick.
+    # INDEXOF_SMB_MAX_CAM_X holds the ratchet state; 0 means uninitialised
+    # → seed to SPAWN_CAM_X=4.5.
+    # Edge bounds: X_MIN+HALF_FRUSTUM = -3.0+12.0 = 9.0;
+    #              X_MAX-HALF_FRUSTUM = FLAGPOLE_X-12.0 = 303.0.
+    # Deadzone test uses (delta < 1.5) — true for both in-deadzone AND
+    # Mario-behind-camera cases (the one-way ratchet falls out for free).
+    _cam_x_max = FLAGPOLE_X - 12.0
+    director['wf_Script'] = smb_common.director_script({'FLAGPOLE_X': FLAGPOLE_X, 'TIMER_UNITS': TIMER_UNITS, 'TIMER_REAL_SECONDS': TIMER_REAL_SECONDS})
+
+levelobj = find_by_class('levelobj')
+if levelobj:
+    levelobj.location = (0, CAM_Y - 2, MARIO_Z)
+    levelobj['wf_Number Of Mailboxes'] = NUM_MAILBOXES
+    levelobj['wf_Model Type'] = 'None'
+
+matte = find_by_class('matte')
+if matte:
+    matte.location = (SCENE_MID_X, CAM_Y - 2, MARIO_Z)
+    matte['wf_Matte Type'] = 'Color'
+    matte['wf_Background Color'] = 0x5C94FC   # NES overworld sky blue
+    matte['wf_Visibility Mailbox'] = 1
+    matte['wf_Model Type'] = 'None'
+
+camera = find_by_class('camera')
+if camera:
+    camera.location = CAMSHOT_POS
+    camera['wf_FoggingStartDistance']    = 150.0
+    camera['wf_FoggingCompleteDistance'] = 250.0
+    camera['wf_FoggingColor']            = 0x5C94FC
+    camera['wf_Model Type'] = 'None'
+
+light = find_by_class('light')
+if light:
+    light.location       = (SCENE_MID_X, CAM_Y + 8, MARIO_Z + 12)
+    light.rotation_euler = (math.pi / 3, 0, 0)   # sun ~60° above horizon
+    light.name = 'Light01'
+    light['wf_lightType']  = 'Directional'
+    light['wf_lightRed']   = 1.0
+    light['wf_lightGreen'] = 1.0
+    light['wf_lightBlue']  = 1.0
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── 5. Ground platform ────────────────────────────────────────────────────────
+# Texture-mapped 1-unit grid on top of the ground so screenshots can be read
+# off the floor (e.g. camera at X=9 sits at the 9th grid line from origin).
+# Single 32×32 tile, single mesh quad on top, UV scaled so 1 UV unit = 1
+# world metre (relies on GL_REPEAT — see TODO.md § SCRIPTING ENGINES for
+# the atlas-UV-uint8-overflow bug that may bite at high UV).
+grid_tex_path = _make_grid_tile_tga(os.path.join(SCRIPT_DIR, 'grid_tile.tga'))
+SMB_PLAYER_HURT = 1804   # INDEXOF_SMB_PLAYER_HURT (wfsource/source/mailbox/mailbox.inc)
+
+# Build the ground as solid slabs around the pits (the gaps in PITS are skipped,
+# leaving real holes the player can fall through).
+_solid_spans = []
+_cursor = GROUND_X0
+for _pl, _pr in sorted(PITS):
+    if _pl > _cursor:
+        _solid_spans.append((_cursor, _pl))
+    _cursor = max(_cursor, _pr)
+if _cursor < GROUND_X1:
+    _solid_spans.append((_cursor, GROUND_X1))
+
+for _i, (_sx0, _sx1) in enumerate(_solid_spans):
+    seg_mesh = build_textured_ground_mesh(
+        f'w1_1_ground_{_i}',   # level-tagged: textured tiling grounds differ per level (can't dedup)
+        _sx0, -GROUND_Y, GROUND_TOP_Z - GROUND_THICK,
+        _sx1,  GROUND_Y, GROUND_TOP_Z,
+        grid_tex_path)
+    seg_obj = bpy.data.objects.new(f'ground_{_i}', seg_mesh)
+    seg_obj.location = (0.0, 0.0, 0.0)
+    scene.collection.objects.link(seg_obj)
+    attach_schema(seg_obj, 'statplat')
+    seg_obj['wf_Visibility Mailbox'] = 1
+    seg_obj['wf_Model Type'] = 'Mesh'
+
+# Pit-death sensors: an invisible ActBox below each gap. A falling Player enters
+# the band -> SMB_PLAYER_HURT=1 -> the player script's existing respawn fires
+# (-1 life, back to spawn). Positioned below ground (Z band [-15, -1]) so a Mario
+# standing at the lip doesn't trigger it; only a fall does. Mirrors the flagpole
+# ActBox composition (see §10b).
+for _i, (_pl, _pr) in enumerate(PITS):
+    _cx = (_pl + _pr) / 2.0
+    _hx = (_pr - _pl) / 2.0 + 0.5
+    bpy.ops.mesh.primitive_cube_add(size=2.0, location=(_cx, 0.0, -8.0))
+    pit = bpy.context.object
+    pit.name      = f'pit_death_{_i}'
+    pit.data.name = f'w1_1_pit_death_{_i}'   # baked per-level position → level-tagged in the shared dir
+    pit.scale = (_hx, GROUND_Y, 7.0)   # half-extents -> Z band [-15, -1]
+    bpy.ops.object.transform_apply(scale=True)
+    attach_schema(pit, 'actbox')
+    pit['wf_MailBox']            = SMB_PLAYER_HURT
+    pit['wf_MailBoxValue']       = 1
+    pit['wf_Activated By Actor'] = 'Player'
+    pit['wf_Activated Actor Mailbox'] = 4005   # scratch slot (don't care who fell in)
+
+# ── 6. ? Blocks ───────────────────────────────────────────────────────────────
+# Each ? block is ONE Generator actor: solid visible mesh + 3-state self-detect
+# Forth script + per-actor activation mailbox. The block IS the generator.
+# See docs/plans/2026-05-19-smb-block-generator-coin.md.
+mat_coin = smb_common.mat_coin()
+BSIZE = T / 2  # half-side of a 1-tile block
+qblock_tex = _make_qblock_tga(os.path.join(SCRIPT_DIR, 'qblock_tex.tga'))
+smb_common.set_textures(qblock=qblock_tex)
+COIN_X = T * 0.25   # half-width:  NES 8px/16px → 50% of block → 0.375 m
+COIN_Z = T * 0.5    # half-height: NES 16px/16px → 100% of block → 0.75 m
+COIN_T = 0.2        # Y-depth: ≥ ~0.2 m to render from side-camera (Y=-20).
+                    # 0.04 was below the renderer's camera-depth threshold; see
+                    # docs/level-design-troubleshooting.md § "Object too thin…".
+
+# Per-actor local mailbox slots (same index on every block instance; no cross-talk
+# because local mailboxes 2000-2099 are per-actor). Must match mailbox.inc.
+MB_SMB_QBLOCK_ACTIVATE = 2010
+MB_SMB_QBLOCK_USED     = 2011
+MB_SMB_QBLOCK_DIE      = 2012
+
+# Tan (used-block) color packed as 0xRRGGBB for FACE_COLOR_TOP write-mailbox.
+# (0.78*255, 0.49*255, 0.18*255) = (199, 125, 46) = 0xC77D2E.
+QBLOCK_TAN = 0xC77D2E
+
+# Tint colors written via FACE_COLOR_TOP (3037 = override material[0]). Fire Mario
+# wears white/red; the Star flicker alternates yellow<->white; MARIO_DEFAULT_TINT
+# (white) restores Mario when leaving Fire or when the Star window closes. Verified
+# 2026-05-26: this tints the multi-material player mesh AND fully recolors a single-
+# material collectible box (every face is material[0]).
+FIRE_TINT          = 0xF8F0E0   # warm white (Fire Mario)
+MARIO_DEFAULT_TINT = 0xFFFFFF   # neutral restore
+STAR_FLASH_A       = 0xFFE000   # yellow
+STAR_FLASH_B       = 0xFFFFFF   # white
+FLOWER_TINT        = 0xF2731A   # orange (fire flower) — repaints the power-up box when Super+
+
+# 3-state self-detect script (NORMAL → ACTIVE → USED).
+# State: SMB_QBLOCK_DIE = window-close time (first_hit+4.0); 0 = NORMAL.
+#        SMB_QBLOCK_USED = 1 → permanently dead.
+# Hit-from-below gate: COLLISION_NORMAL_Z > 0. JoltContactDispatch passes the
+# same normal vector to both actor and struck body; bump-from-below is +Z for
+# both (direction Mario pushes the surface). Matches the engine change in
+# docs/plans/2026-05-19-smb-block-generator-coin.md step 8.
+# Activation pulse is one tick (Generator spawn-check at top, script clear at
+# bottom of Generato::update) → exactly one coin per distinct bump.
+# `not` used instead of `0=` (zForth defines `not` as `: not 0 = ;` but
+# doesn't expose `0=` as a named word; `0<>` and `>` are both available).
+
+COIN_SCRIPT = "\\ wf\nINDEXOF_TIME read-mailbox INDEXOF_ROTATION_C write-mailbox\n"
+
+# Coin template — Gold collectible class (pickup-driven despawn via
+# Gold::Collision + SetPendingRemove; spins via ROTATION_C each frame).
+import bmesh as _bmesh
+_make_coin_template()
+
+for i, bx in enumerate(QBLOCK_XS):
+    blk = _add_textured_box(f'qblock_{i:02d}',
+                             bx - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                             bx + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
+                             qblock_tex)
+    attach_schema(blk, 'generator')
+    blk['wf_Mobility']           = 'Anchored'
+    blk['wf_Model Type']         = 'Mesh'
+    blk['wf_Visibility Mailbox'] = 1
+    blk['wf_Number Of Local Mailboxes'] = 13  # LOCAL_USER_START+0..+12 covers 2000-2012
+    blk['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+    blk['wf_Object To Throw']    = 'coin_template'
+    blk['wf_Generation Rate']    = 10.0
+    blk['wf_Object X Velocity']  = 1.5   # slight rightward drift (+X = screen-right)
+    blk['wf_Object Y Velocity']  = 0.0
+    blk['wf_Object Z Velocity']  = 6.0
+    blk['wf_Script']             = QBLOCK_SCRIPT
+
+# ── 6b. Power-up collectibles — mushroom / fire flower / star ─────────────────
+# All three REUSE the `gold` collectible class as a "coin worth 0": Gold::update runs
+# the actor's wf_Script (proximity pickup raises a signal) and the C++ pickup removes
+# the actor on contact. They are NOT coins — taxonomy debt logged in TODO §69. The
+# gold/CharacterVirtual collision profile lets Mario walk THROUGH to collect while still
+# landing/sliding on the floor. The mushroom & flower are now ONE self-determining
+# template (see below). See docs/plans/2026-05-26-smb-powerup-block-and-star-reversal.md.
+MUSH_X = T * 0.40   # half-width
+MUSH_Z = T * 0.40   # half-height
+MUSH_T = 0.25       # Y-depth (>= ~0.2 m so it renders from the side camera at Y=-20)
+
+# One-shot power-up block — a Generator that throws exactly ONE collectible on the first
+# bump-from-below, then latches USED (tan). Mirrors the qblock authoring but without
+# the 4-second multi-coin window: set the activate pulse on the first bump; the tick
+# after the Generator consumes it, latch USED so no second item can spawn.
+
+MUSHROOM_BLOCK_X = 16 * T  # 24.0 — col 16, faithful W1-1 mushroom ? block
+mblk = _add_textured_box('mushroom_block',
+                         MUSHROOM_BLOCK_X - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                         MUSHROOM_BLOCK_X + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
+                         qblock_tex)
+attach_schema(mblk, 'generator')
+mblk['wf_Mobility']           = 'Anchored'
+mblk['wf_Model Type']         = 'Mesh'
+mblk['wf_Visibility Mailbox'] = 1
+mblk['wf_Number Of Local Mailboxes'] = 13   # 2000..2012, same as the qblocks
+mblk['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+mblk['wf_Object To Throw']    = 'powerup_template'   # state-aware: mushroom while Small
+mblk['wf_Generation Rate']    = 10.0
+mblk['wf_Object X Velocity']  = 1.5   # pops out drifting right (the mushroom slides)
+mblk['wf_Object Y Velocity']  = 0.0
+mblk['wf_Object Z Velocity']  = 6.0   # and upward, like the coin
+mblk['wf_Script']             = POWERUP_BLOCK_SCRIPT
+
+# ── 6b. Fire Flower + Star power-ups ───────────────────────────────────────────
+# Both reuse the gold class (Gold Value 0) like the mushroom — they are NOT coins;
+# their pickup scripts signal the player state machine. Logged as taxonomy debt
+# (TODO §69). See docs/plans/2026-05-26-smb-fire-flower-and-star.md.
+#
+# Shared collectible-template factory (the mushroom keeps its own fn, untouched, to
+# avoid perturbing its export). Same gold/CharacterVirtual collision profile: walks
+# through the player to be collected, lands + slides/rests on the floor.
+# Power-up dispensing block: a one-shot Generator (bump from below -> throw one
+# collectible -> latch tan), using POWERUP_BLOCK_SCRIPT.
+# Mushroom-or-flower: ONE self-determining power-up. A Generator's Object To Throw is
+# fixed at load (generator.cc:84), so rather than two templates the single
+# `powerup_template` reads SMB_MARIO_STATE LIVE and BECOMES the right item: Small (0)
+# stays the red mushroom that slides; Super+ (>0) repaints orange and forces stationary
+# (the flower). On pickup it raises the signal for Mario's current tier (mushroom ->
+# Super, flower -> Fire) = the existing player handlers. One-shot blocks mean Mario's
+# tier can't change between bump and catch, so the live read always matches the item.
+mat_powerup = make_mat('powerup_red', (0.85, 0.16, 0.12))   # base colour = mushroom red
+_make_powerup_template('powerup_template', mat_powerup, POWERUP_SCRIPT, 0.0, -55.0)
+# @15: throws straight up (X vel 0) so the flower sits; by here you've grabbed the
+# mushroom from the @9 block and are Super, so this dispenses a flower. One-shot.
+FIREFLOWER_BLOCK_X = 23 * T   # 34.5 — col 23, faithful W1-1 flower ? block
+_make_powerup_block('fireflower_block', FIREFLOWER_BLOCK_X, 'powerup_template', 0.0)
+
+# Star — BOUNCES rightward and reverses off walls. Running Decel 0 keeps the slide; the
+# per-tick script re-launches ZSPEED on a real floor contact (COLLISION_NORMAL_Z < 0,
+# landing normal points down), so it is ground-aware (falls into pits) without engine
+# restitution (TODO: PHYSICS), and flips XSPEED on a side contact (|NORMAL_X| ~ 1). The
+# stomp-bounce proves ZSPEED writes on a CharacterVirtual work.
+mat_star = make_mat('star_yellow', (0.98, 0.85, 0.10))
+_make_powerup_template('star_template', mat_star, STAR_SCRIPT, 0.0, -59.0)
+STAR_BLOCK_X = 99 * T   # 148.5 — col 99, faithful W1-1 starman block
+_make_powerup_block('star_block', STAR_BLOCK_X, 'star_template', 1.5)
+
+# 1UP mushroom — green mushroom that grants +1 life on proximity pickup.
+# Same gold-class template pattern as powerup/star (GoldValue=0, gold.cc despawns on
+# proximity); the script raises SMB_ONEUP_PICKUP; player script grants the life.
+mat_oneup = make_mat('smb_oneup', (0.05, 0.75, 0.05))   # bright green body
+_make_powerup_template('oneup_template', mat_oneup, ONEUP_SCRIPT, 0.0, -65.0)
+
+# ── 6c. Fire Mario fireball — first runtime-positioned spawn ───────────────────
+# WF's first spawn at a runtime-chosen position, with ZERO engine code: rather than
+# a new `spawn-template` primitive, two hidden pool Generators self-park on a point
+# Mario publishes each tick and fire a Missile when he pulses their (global)
+# Activation MailBox. Two generators (left/right) cover the Generator's baked-velocity
+# limit (Object X Velocity is fixed at load). See:
+#   docs/plans/2026-05-26-fire-mario-fireball-pooled-generator.md  (Approach A)
+#   docs/investigations/2026-05-26-spawn-template-forth-primitive.md
+#
+# Why a Missile and not a gold-worth-0 clone (the mushroom/flower/star idiom): the
+# COLTABLE has (Player,Missile,CI_NOTHING,CI_SPECIAL) — Mario neither collects nor
+# blocks it (a gold collectible would be self-collected the instant it spawns on him),
+# Missile is Physics + a template by default, and Explosion Delay gives a built-in TTL
+# despawn. CI_SPECIAL vs Enemy is the Phase-2 defeat hook.
+FIREBALL_SPEED = 12.0
+FB = 0.2   # fireball half-extent (small, so it spawns clear of Mario's body)
+mat_fireball = smb_common.mat_fireball()
+
+# Phase 2 (docs/plans/2026-05-27-smb-fireball-defeats-enemies.md): a live fireball
+# broadcasts its position + a freshness deadline each tick so enemies can self-defeat
+# by proximity (Missile<->Enemy are both CharacterVirtuals -> no Jolt contact dispatch,
+# same reason enemies track the player by proximity). When no fireball is alive nobody
+# refreshes LIVE_UNTIL, so the stale LIVE_X/Z are ignored. Missile::update ends in
+# Actor::update(), so this script runs each tick.
+
+_make_fireball_template()
+
+# Self-park: each tick copy Mario's published spawn point onto our own position. The
+# generators are Anchored (no Jolt character body) so this same-actor X/Y/Z_POS write
+# sticks. Generato::update spawns from currentPos() BEFORE Actor::update() runs this
+# script, so a fireball appears at Mario's previous-tick point — sub-pixel at frame rate.
+
+_make_fireball_generator('fireball_gen_r', SMB_FIREBALL_FIRE_R,  FIREBALL_SPEED)
+_make_fireball_generator('fireball_gen_l', SMB_FIREBALL_FIRE_L, -FIREBALL_SPEED)
+
+# ── 7. Mario placeholder ──────────────────────────────────────────────────────
+player = find_by_class('player')
+if player:
+    player.name = 'Player'   # CamShot Track Object references this name
+    player.location = (MARIO_SPAWN_X, 0.0, MARIO_SPAWN_Z)
+    # Physics mobility = engine handles gravity, ground collision, jump.
+    # Mobility value 1 = "Physics" (Anchored|Physics|Path|Camera|Follow).
+    player['wf_Mobility'] = 'Physics'  # restored for diagnosis
+    player['wf_Mass']     = 1.0
+    player['wf_Model Type'] = 'Mesh'
+    player['wf_Visibility Mailbox'] = SMB_MARIO_VIS   # 1=visible; celebration sets 0 (enters castle)
+    # Survive the coin-room warp: with MovesBetweenRooms the player's mesh binds to
+    # PERM (always loaded), not the surface room's transient slot that unloads on
+    # the room switch. Without this Mario vanishes the instant he warps underground.
+    player['wf_Moves Between Rooms'] = 'True'
+    # Physics movement parameters — tuned for SMB feel.
+    # OAS custom-prop keys mirror the schema's field.key, which preserves
+    # spaces (e.g. "Running Acceleration"), NOT a WikiWord form.
+    player['wf_Running Acceleration']  = 60.0
+    # Steady ground speed = RunningAccel / (RunningDecel * 30). The doom-stick player
+    # (Turn Rate=0) runs MarbleHandler when grounded [movement.cc:575-579 routes
+    # TurnRate==0 -> MarbleHandler]: accel at :717, decay at :689. GroundHandler (:318/:233)
+    # is the identical-on-flat-ground twin for steered actors. Same formula either way.
+    # 60/(0.85*30) ≈ 2.35 m/s was far too slow — Mario fell ~5 m short of brick_1up
+    # on the entry_pipe→brick→pipe_64 hop. Max Ground Speed is NOT the limiter once it
+    # exceeds the steady value, so prior MaxGroundSpeed bumps (6→12→24→32) were inert.
+    # Trajectory traces: a launch of ~9-10 m/s lands ON the brick (X 84.75-86.25, top Z=7.5);
+    # ~8.5 m/s passes UNDER it (bottom Z=6.0); ~10.5+ overshoots. 60/(0.18*30) = 11.1 m/s top,
+    # so the 3 m pipe-top runway can build ~9.5-10 m/s — but jumping too early stays short and
+    # too late overshoots, so the hop is achievable with practice, not first-try (design intent:
+    # somewhat difficult, never impossible). docs/plans/2026-05-31-smb-tall-pipe-hop-physics.md.
+    player['wf_Running Deceleration']  = 0.18
+    player['wf_Max Ground Speed']      = 32.0
+    player['wf_Jumping Acceleration']  = 60.0
+    player['wf_Falling Acceleration']  = 12.0
+    player['wf_Air Acceleration']      = 0.0
+    player['wf_Max Air Speed']         = 32.0
+    # Air "sustain" (movement.cc:872-895): with Air Acceleration=0, holding RIGHT while
+    # moving +X sets hDrag=1, so takeoff momentum persists for the whole jump (the hop holds
+    # RIGHT throughout, so this knob does not bite on it). It only decays velocity on frames
+    # where RIGHT is released — kept at 3.0 for a slight let-go float, same as before.
+    player['wf_Horiz Air Drag']        = 3.0
+    # TurnRate=0 → doom-stick LEFT/RIGHT strafe instead of rotate.
+    # currentDir() = (cos C, sin C, 0) [physicalobject.hpi:52].
+    # C=π/2 → currentDir=(0,1,0)=+Y; StepRight=(sin C,-cos C,0)=(1,0,0)=+X ✓
+    player['wf_Turn Rate']             = 0.0
+    player.rotation_euler.z            = math.pi / 2  # C=π/2 → faces +Y, strafes ±X
+    # Feed joystick bits to INPUT (3024), also adding kBtnStepLeft/Right (bits 6/7)
+    # when LEFT/RIGHT arrows are pressed. AirHandler doom-stick with TurnRate=0
+    # ignores EJ_BUTTONF_LEFT/RIGHT (rotation by zero), but DOES process
+    # kBtnStepLeft/Right as ±X strafe. MarbleHandler uses EJ_BUTTONF_LEFT/RIGHT
+    # directly, so keeping those bits ensures ground movement also works.
+    # LEFT  (bit14=0x4000) → add StepLeft  (bit6=0x40):  0x4000/256 = 0x40
+    # RIGHT (bit13=0x2000) → add StepRight (bit7=0x80):  0x2000/64  = 0x80
+    player['wf_Script'] = smb_common.player_script({'CR_ENTRY_X': CR_ENTRY_X, 'CR_ENTRY_Z': CR_ENTRY_Z, 'FIRE_TINT': FIRE_TINT, 'FLAGPOLE_X': FLAGPOLE_X, 'GROUND_X0': GROUND_X0, 'GROUND_X1': GROUND_X1, 'GROUND_Y': GROUND_Y, 'MARIO_DEFAULT_TINT': MARIO_DEFAULT_TINT, 'MARIO_SPAWN_X': MARIO_SPAWN_X, 'MARIO_SPAWN_Z': MARIO_SPAWN_Z, 'STAR_FLASH_A': STAR_FLASH_A, 'STAR_FLASH_B': STAR_FLASH_B})
+
+    mario_mesh = _build_mario()
+    old = player.data
+    player.data = mario_mesh.data
+    bpy.data.objects.remove(mario_mesh, do_unlink=True)
+    if old and old.users == 0:
+        bpy.data.meshes.remove(old)
+
+# ── 8. Goomba (walks left) ───────────────────────────────────────────────────
+# Enemies walk via the coin-slide pattern: Physics + Turn Rate 0 (→ MarbleHandler)
+# + Running Deceleration 0 (carries velocity), and a per-tick script that forces a
+# constant leftward XSPEED. Stomp + hurt branches are added in later phases.
+ENEMY_WALK_SPEED = 4.0
+
+# ── Koopa shell-kick (docs/plans/2026-05-27-smb-koopa-shell-kick.md) ──────────────
+# 3-state machine on SMB_KOOPA_STATE: 0=walk (like the goomba), 1=shell at rest,
+# 2=shell sliding. Stomp retracts (walk->rest, slide->rest) instead of killing; a
+# side touch of a resting shell KICKS it away into a fast slide; a sliding shell
+# reverses off walls (Starman idiom), broadcasts SMB_SHELL_LIVE so the goomba dies
+# to it, and hurts Mario on a side hit.
+SHELL_SPEED = 14.0
+
+
+_goomba_body = _build_goomba()
+_goomba_data = _goomba_body.data
+bpy.data.objects.remove(_goomba_body, do_unlink=True)
+for _gi, _gx in enumerate(GOOMBA_XS):
+    _go = bpy.data.objects.new(f'goomba_{_gi:02d}', _goomba_data)
+    scene.collection.objects.link(_go)
+    _go.location = (_gx, 0.0, MARIO_Z)
+    attach_schema(_go, 'enemy')
+    _apply_enemy_movement(_go)
+
+# ── 9. Koopa Troopa placeholder (static visual) ───────────────────────────────
+# Geometry shared via smb_common.koopa_mesh — one green Koopa datablock (the same
+# build W1-2's Koopas use; single source, build-once-instance-many). Also fixes the
+# old inline `objects.new(name)`-while-name-taken trick that produced koopa_00.001.iff.
+koopa_obj = smb_common.koopa_mesh('koopa_00')
+koopa_obj.location = (KOOPA_X, 0.0, MARIO_Z)
+attach_schema(koopa_obj, 'enemy')
+_apply_enemy_movement(koopa_obj)
+# Koopa runs the shell-kick state machine, not the shared goomba walk-and-die script.
+# A kicked shell slides at SHELL_SPEED (14) — raise the ground-speed cap above it (the
+# shared cap is 8, which would clamp the slide).
+koopa_obj['wf_Script']           = KOOPA_SCRIPT
+koopa_obj['wf_Max Ground Speed'] = 16.0
+koopa_obj['wf_Number Of Local Mailboxes'] = 19   # per-actor shell state at SMB_KOOPA_STATE_L (2018)
+
+# ── 10. Flagpole + castle + fireworks + triggers (shared celebration) ───────
+smb_common.celebration({'FLAGPOLE_X': FLAGPOLE_X, 'NEXT_LEVEL_INDEX': 1})
+
+# ── 11. CamShot + Targets ─────────────────────────────────────────────────────
+camshot = find_by_class('camshot')
+if camshot:
+    camshot.location = CAMSHOT_POS
+    camshot.name = 'cs_side'
+    # All absolute — fixed overview of the starting area
+    camshot['wf_Position X'] = 'Absolute'
+    camshot['wf_Position Y'] = 'Absolute'
+    camshot['wf_Position Z'] = 'Absolute'
+    camshot['wf_Rotation']   = 'Fixed'
+    camshot['wf_FOV']                 = 35.0
+    camshot['wf_Pan Time In Seconds'] = 0.1
+    camshot['wf_Model Type']          = 'None'
+    camshot['wf_Track Object'] = 'Player'
+    camshot['wf_Target']       = 'Target02'
+    camshot['wf_Follow']       = 'Target02'
+    # SMB scroll: read INDEXOF_SMB_TARGET_CAM_X written by the Director on
+    # the previous tick (Director runs after main loop, this runs in it),
+    # and apply it to our own X via the local INDEXOF_X_POS mailbox. Y and
+    # Z stay at the .lev-loaded values (CAM_Y, MARIO_Z+3) untouched.
+    camshot['wf_Script'] = (
+        "\\ wf\n"
+        "INDEXOF_SMB_TARGET_CAM_X read-mailbox INDEXOF_X_POS write-mailbox\n"
+    )
+
+# Target01 — world-origin anchor
+# Target02 — look-at point (level midpoint at Mario height)
+targets = [o for o in bpy.data.objects if get_class(o) == 'target']
+while len(targets) < 2:
+    tn = bpy.data.objects.new(f'Target_new_{len(targets)}', None)
+    scene.collection.objects.link(tn)
+    attach_schema(tn, 'target')
+    targets.append(tn)
+
+targets[0].location = (0.0, 0.0, 0.0)
+targets[0].name = 'Target01'
+targets[0]['wf_Model Type'] = 'None'
+
+targets[1].location = LOOKAT_POS
+targets[1].name = 'Target02'
+targets[1]['wf_Model Type'] = 'None'
+
+# Surface camera zone. The imported actboxor's bbox is offset way out of the room
+# (center Z≈52) so it never fires — the surface camera has been running on the
+# construct-time EMAILBOX_CAMSHOT bootstrap alone. That's fine until we ALSO switch
+# to cs_coin underground: on the RETURN nothing would switch back to cs_side (the
+# bootstrap is one-time, abor_coin stops firing). So give the surface zone a real
+# in-room volume that re-asserts cs_side every frame the player is on the surface.
+# MailBox=1921 (INDEXOF_CAMSHOT — NOT 1021; see the room-switch notes in the plan).
+actboxor = find_by_class('actboxor')
+if actboxor:
+    bpy.data.objects.remove(actboxor, do_unlink=True)
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(SCENE_MID_X, 0.0, 5.0))
+abs_ = bpy.context.object
+abs_.name = 'abor_surface'; abs_.data.name = 'w1_1_abor_surface'   # per-level size → level-tagged
+abs_.scale = ((GROUND_X1 - GROUND_X0)/2 + 6.0, GROUND_Y + 2.0, 8.0)   # surface playfield, Z[-3,13]
+bpy.ops.object.transform_apply(scale=True)
+attach_schema(abs_, 'actboxor')
+abs_['wf_MailBox']            = 1921
+abs_['wf_Object']             = 'cs_side'
+abs_['wf_Activated By Actor'] = 'Player'
+abs_['wf_Model Type']         = 'None'
+
+# ── 12. Room bbox ─────────────────────────────────────────────────────────────
+# Absolute extremes of all actor centres:
+#   X: GROUND_X0 .. FLAGPOLE_X+7.5 — now 325 m; bbox must cover all of it.
+#   Y: camera at Y=-30, light at Y≈-12       → [-32, +5]
+#   Z: ground bottom -T ≈ -1.5, pole top 15  → [-3, +18]
+# Room placed at (SCENE_MID_X, 0, 5); bbox is relative to that centre.
+ROOM_CENTRE = (SCENE_MID_X, 0.0, 5.0)
+_half_span  = (GROUND_X1 - GROUND_X0) / 2 + 5   # covers full level width + margin
+RX0, RX1 = -_half_span, _half_span
+RY0, RY1 =  -35.0,   10.0
+RZ0, RZ1 =  -15.0,   20.0
+ROOM_BBOX_REL = (RX0, RY0, RZ0, RX1, RY1, RZ1)
+
+# Coin-room bbox in WORLD space. Its TOP touches the surface room's bottom (Z=-10)
+# so room coverage is CONTINUOUS — the camera entity physically pans between camshot
+# poses, and if there were a Z gap between the rooms it would land in "no room" mid-pan,
+# stop updating, and FREEZE (it's updated only via the active room's update list). The
+# player switch still fires: the warp drops Mario to Z=-46.5, well clear of the surface
+# room (Z[-10,25]), so he leaves room 0. The upper part (Z -10..-40) is the empty pipe
+# shaft the camera travels down. (Surface room bottom = ROOM_CENTRE.z 5 + RZ0 -15 = -10.)
+CR_BBOX_WORLD = (CR_X0 - 4.0, -40.0, CR_FLOOR_TOP - 10.0,
+                 CR_X1 + 4.0,  12.0, -10.0)                 # x[-4,22] y[-40,12] z[-58,-10]
+_cx0,_cy0,_cz0,_cx1,_cy1,_cz1 = CR_BBOX_WORLD
+CR_CENTRE = ((_cx0+_cx1)/2, (_cy0+_cy1)/2, (_cz0+_cz1)/2)    # (9, -14, -47)
+CR_BBOX_REL = (_cx0-CR_CENTRE[0], _cy0-CR_CENTRE[1], _cz0-CR_CENTRE[2],
+               _cx1-CR_CENTRE[0], _cy1-CR_CENTRE[1], _cz1-CR_CENTRE[2])
+
+
+
+room = find_by_class('room')
+if room:
+    room.name = 'room_surface'
+    room.location = ROOM_CENTRE
+    room['wf_original_bbox'] = ROOM_BBOX_REL
+    old = room.data
+    room.data = _room_bounds_mesh('RoomBounds', ROOM_BBOX_REL)
+    if old and old.users == 0:
+        bpy.data.meshes.remove(old)
+
+    # Second room: the underground coin room. room.copy() inherits the room schema +
+    # Mobility/MovementClass; we give it its own bounds mesh + disjoint bbox.
+    coin_room = room.copy()
+    scene.collection.objects.link(coin_room)
+    coin_room.name = 'room_coin'
+    coin_room.location = CR_CENTRE
+    coin_room['wf_original_bbox'] = CR_BBOX_REL
+    coin_room.data = _room_bounds_mesh('CoinRoomBounds', CR_BBOX_REL)
+
+    # MUTUAL ADJACENCY is load-bearing here. The room SWITCH is bbox-driven (no
+    # adjacency needed), but the CAMERA entity is updated only via the active
+    # room's update list (level.cc:948-964) — it is not a special/global actor.
+    # With a hard switch the camera (which lives in the surface room) goes inactive
+    # the instant we switch to the coin room and FREEZES at its last surface pose,
+    # so it never adopts cs_coin → the coin room renders off-camera (black screen).
+    # Listing the rooms as each other's neighbour keeps BOTH active simultaneously
+    # (MAX_ACTIVE_ROOMS=3), so the camera keeps ticking and follows cs_coin down.
+    # (room.copy() also carried the snowgoons self-adjacency "room_6"; overwrite it.)
+    room['wf_Adjacent Room 1']      = 'room_coin'
+    room['wf_Adjacent Room 2']      = ''
+    coin_room['wf_Adjacent Room 1'] = 'room_surface'
+    coin_room['wf_Adjacent Room 2'] = ''
+
+# ── 14. Pipe warp → underground coin room ─────────────────────────────────────
+# Entry pipe + ActBox sense (SMB_AT_PIPE), gated by Down in the player script
+# (above). Coin room geometry, a dedicated static CamShot (cs_coin) framing it,
+# and an ActBoxOR zone that switches the camera while Mario is underground.
+# See docs/plans/2026-05-25-smb-pipe-warp-coin-room.md.
+PIPE_GREEN = smb_common.mat_pipe()
+CR_FLOOR_MAT = make_mat('smb_cr_floor',   (0.45, 0.22, 0.05))   # dark brick-brown
+
+# Faithful W1-1 surface pipes. PIPE_GREEN is defined above.
+# Pipe 1 (cols 28-29, 2T tall), Pipe 2 (cols 38-39, 2T tall) — plain, no warp.
+# Pipe 4 exit surface (cols 64-65, 4T tall) — unreachable entry, exit from underground.
+_PIPE_H2 = GROUND_TOP_Z + 2*T
+_PIPE_H4 = GROUND_TOP_Z + 4*T
+add_statplat('pipe_28', 28*T - T, -GROUND_Y, GROUND_TOP_Z,
+             28*T + T,  GROUND_Y, _PIPE_H2, PIPE_GREEN)
+add_statplat('pipe_38', 38*T - T, -GROUND_Y, GROUND_TOP_Z,
+             38*T + T,  GROUND_Y, _PIPE_H2, PIPE_GREEN)
+add_statplat('pipe_64', 64*T - T, -GROUND_Y, GROUND_TOP_Z,
+             64*T + T,  GROUND_Y, _PIPE_H4, PIPE_GREEN)
+
+# Surface entry pipe: 2 tiles wide × 3 tall (col 46-47 → center 47*T = 70.5 m).
+add_statplat('entry_pipe', ENTRY_PIPE_X - T, -GROUND_Y, GROUND_TOP_Z,
+             ENTRY_PIPE_X + T,  GROUND_Y, GROUND_TOP_Z + 3*T, PIPE_GREEN)
+
+# Entry sense: a thin ActBox lid over the pipe mouth. The band must sit at the pipe
+# TOP so Mario standing there (origin Z≈4.5 on the 3T pipe) overlaps it, while a
+# ground walk-past (origin Z≈1.5) does not. BUG FIX 2026-05-31: this box was authored
+# for the old 2T pipe (band [2.8,4.0], "feet Z=3"); the faithful expansion made
+# entry_pipe 3T (top 4.5) but left the box behind, so standing on top fell ABOVE the
+# band and the warp never triggered (verified: SMB_AT_PIPE 0/30 frames). Raised to the
+# 3T mouth: GROUND_TOP_Z + 3*T + 0.2 = 4.7 → band [4.1,5.3] covers the resting origin.
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(ENTRY_PIPE_X, 0.0, GROUND_TOP_Z + 3*T + 0.2))
+es = bpy.context.object
+es.name = 'pipe_entry_sense'; es.data.name = 'w1_1_pipe_entry_sense'   # baked per-level position → level-tagged
+es.scale = (T, GROUND_Y, 0.6)
+bpy.ops.object.transform_apply(scale=True)
+attach_schema(es, 'actbox')
+es['wf_MailBox']                 = SMB_AT_PIPE
+es['wf_MailBoxValue']            = 1
+es['wf_ClearOnExit']             = 'True'    # reset SMB_AT_PIPE when Mario steps off
+es['wf_Mailbox Exit Value']      = 0
+es['wf_Activated By Actor']      = 'Player'
+es['wf_Activated Actor Mailbox'] = 4005      # scratch (must be >=2; default 0 aborts)
+
+# Coin-room floor + side walls (contain Mario; exit pipe gap comes in Phase B).
+# WIDE in Y (±5) and THICK in Z (4 units) on purpose: the warp-landing can penetrate
+# the floor slightly and Jolt then depenetrates the character *sideways* (it drifted to
+# Y≈-2.2 and fell off a Y±1.5 floor through the room bottom). A wide+thick slab keeps
+# him on it regardless of landing jitter. (Surface ground is narrow because Mario never
+# warp-lands there.)
+add_statplat('cr_floor',  CR_X0 - 1, -5.0, CR_FLOOR_TOP - 4.0,
+             CR_X1 + 1,    5.0, CR_FLOOR_TOP,        CR_FLOOR_MAT)
+add_statplat('cr_wall_l', CR_X0 - 1, -GROUND_Y, CR_FLOOR_TOP,
+             CR_X0,        GROUND_Y, CR_FLOOR_TOP + 10*T,  CR_FLOOR_MAT)
+add_statplat('cr_wall_r', CR_X1,     -GROUND_Y, CR_FLOOR_TOP,
+             CR_X1 + 1,    GROUND_Y, CR_FLOOR_TOP + 10*T,  CR_FLOOR_MAT)
+
+# Collectible coins: static gold discs the player collects by proximity (the player
+# script awards GOLD and flips each coin's visibility mailbox off). Pre-placed `gold`
+# actors can't be used — the gold class TTL is hardcoded 5 s so they'd despawn before
+# Mario arrives (see TODO). Mario warps in at X=3 and walks RIGHT past these to the
+# exit warp (X=12), collecting them en route.
+COIN_DISC_MAT = make_mat('smb_coinroom_coin', (1.0, 0.84, 0.0))
+# 19 coins in 3 rows — faithful W1-1 underground room (SMBDIS.ASM L_UndergroundArea3).
+# Row 7 (low): cols 4-10 (7 coins). Row 5 (mid): cols 4-10 (7 coins). Row 3 (top): cols 5-9 (5 coins).
+# Pickup uses X-proximity + player-Z underground gate; coin Z is purely visual.
+_CR_LOW_Z  = CR_FLOOR_TOP + 4.5*T   # -41.25 — row 7
+_CR_MID_Z  = CR_FLOOR_TOP + 6.5*T   # -38.25 — row 5
+_CR_HIGH_Z = CR_FLOOR_TOP + 8.5*T   # -35.25 — row 3
+CR_COINS = [
+    # (X,         Z,         mailbox)
+    # Row 7 (lowest) — cols 4-10
+    (4.5*T,  _CR_LOW_Z,  SMB_COIN_0),
+    (5.5*T,  _CR_LOW_Z,  SMB_COIN_1),
+    (6.5*T,  _CR_LOW_Z,  SMB_COIN_2),
+    (7.5*T,  _CR_LOW_Z,  SMB_COIN_3),
+    (8.5*T,  _CR_LOW_Z,  SMB_COIN_4),
+    (9.5*T,  _CR_LOW_Z,  SMB_COIN_5),
+    (10.5*T, _CR_LOW_Z,  SMB_COIN_6),
+    # Row 5 (middle) — cols 4-10
+    (4.5*T,  _CR_MID_Z,  SMB_COIN_7),
+    (5.5*T,  _CR_MID_Z,  SMB_COIN_8),
+    (6.5*T,  _CR_MID_Z,  SMB_COIN_9),
+    (7.5*T,  _CR_MID_Z,  SMB_COIN_10),
+    (8.5*T,  _CR_MID_Z,  SMB_COIN_11),
+    (9.5*T,  _CR_MID_Z,  SMB_COIN_12),
+    (10.5*T, _CR_MID_Z,  SMB_COIN_13),
+    # Row 3 (top) — cols 5-9
+    (5.5*T,  _CR_HIGH_Z, SMB_COIN_14),
+    (6.5*T,  _CR_HIGH_Z, SMB_COIN_15),
+    (7.5*T,  _CR_HIGH_Z, SMB_COIN_16),
+    (8.5*T,  _CR_HIGH_Z, SMB_COIN_17),
+    (9.5*T,  _CR_HIGH_Z, SMB_COIN_18),
+]
+# Spinning coin discs (NOT statplats): anchored 'enemy'-schema mesh actors so they
+# run COIN_SCRIPT (ROTATION_C = TIME) and spin like the surface coins, without
+# gold.cc's 5 s TTL despawning them (the popup_score actor uses the same trick).
+# Pickup is true-XZ contact in the player script above. The disc is byte-identical
+# to the coin_template, so reuse that datablock — every coin (room + thrown) shares one
+# coin_template.iff game-wide (was a separate cr_coin.iff).
+_crc_mesh = bpy.data.meshes['coin_template']
+for _ci, (_cx, _cz, _cmb) in enumerate(CR_COINS):
+    _coin = bpy.data.objects.new(f'cr_coin_{_ci}', _crc_mesh)
+    scene.collection.objects.link(_coin)
+    _coin.location = (_cx, 0.0, _cz)
+    attach_schema(_coin, 'enemy')
+    _coin['wf_Mobility']           = 'Anchored'
+    _coin['wf_Model Type']         = 'Mesh'
+    _coin['wf_Visibility Mailbox'] = _cmb   # seeded to 1, set to 0 on pickup
+    # No per-instance wf_Mesh Name — all coins share the _crc_mesh datablock, so the
+    # exporter dedup writes one cr_coin .iff and every coin references it (one room-pool
+    # mesh, not 19). (A per-instance name would defeat the dedup, as it did before.)
+    _coin['wf_Script']             = COIN_SCRIPT
+
+
+# Entry landing (where Down warps Mario) + cs_coin look-at point.
+_make_target('Target_cr_entry',  (CR_ENTRY_X, 0.0, CR_ENTRY_Z))
+_make_target('Target_cr_lookat', (CR_MID, 0.0, CR_FLOOR_TOP + T))
+
+# cs_coin: static shot framing the whole coin room (no scroll script → unlike
+# cs_side it does not read SMB_TARGET_CAM_X). Direction = lookat - campos.
+cs_coin = bpy.data.objects.new('cs_coin', None)
+scene.collection.objects.link(cs_coin)
+attach_schema(cs_coin, 'camshot')
+cs_coin.location = (CR_MID, -35.0, CR_FLOOR_TOP + 4.5)    # centred on room, inside coin-room bbox
+cs_coin['wf_Position X'] = 'Absolute'
+cs_coin['wf_Position Y'] = 'Absolute'
+cs_coin['wf_Position Z'] = 'Absolute'
+cs_coin['wf_Rotation']   = 'Fixed'
+cs_coin['wf_FOV']                 = 35.0
+cs_coin['wf_Pan Time In Seconds'] = 0.1
+cs_coin['wf_Model Type']          = 'None'
+cs_coin['wf_Track Object'] = 'Player'
+cs_coin['wf_Target']       = 'Target_cr_lookat'
+cs_coin['wf_Follow']       = 'Target_cr_lookat'
+
+# abor_coin: ActBoxOR volume over the coin-room play space (centred on the player
+# plane Y=0, NOT the bbox Y-centre). While Mario is inside it writes cs_coin's
+# index to EMAILBOX_CAMSHOT (1021) each frame, so the camera tracks him underground.
+# Volume is entirely below Z=-37 → disjoint from the surface camera zone.
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(CR_MID, 0.0, CR_FLOOR_TOP + 4.5))
+ab = bpy.context.object
+ab.name = 'abor_coin'; ab.data.name = 'abor_coin'
+ab.scale = ((CR_X1 - CR_X0)/2 + 1.0, GROUND_Y + 2.0, 6.0)   # X[-1,25] Y[-3.5,3.5] Z[-49.5,-37.5]
+bpy.ops.object.transform_apply(scale=True)
+attach_schema(ab, 'actboxor')
+ab['wf_MailBox']            = 1921        # INDEXOF_CAMSHOT (mailbox.inc:59 — NOT 1021; the
+                                          # level-building.md scope table is wrong, verified
+                                          # against the engine's `zforth: INDEXOF_CAMSHOT = 1921`)
+ab['wf_Object']             = 'cs_coin'
+ab['wf_Activated By Actor'] = 'Player'
+ab['wf_Model Type']         = 'None'
+
+# Coin-room light: the surface Light01 lives in the surface room and unloads on the
+# switch, so without a light here the underground renders pure black (engine warns
+# " has no lights, gonna be hard to see!"). Clone the surface directional light.
+if light:
+    coin_light = light.copy()
+    scene.collection.objects.link(coin_light)
+    coin_light.name = 'Light_coin'
+    coin_light.location = (CR_MID, -22.0, CR_FLOOR_TOP + 6.0)   # centre of room, inside coin-room bbox
+    coin_light.rotation_euler = (math.pi / 3, 0, 0)
+
+# ── 15. Exit pipe → warp back to the surface (Phase B) ────────────────────────
+# A pure Warp + Target: Mario walks RIGHT into the warp volume → teleported to the
+# surface return point (past the entry pipe, so no instant re-trigger; the entry
+# needs Down anyway). The Warp class teleports any overlapping actor in its filter
+# (no input gate needed for a walk-into exit) — this validates Warp's Jolt teleport.
+# Exit pipe flush with right wall (CR_X1=24); warp sensor 3 tiles to its left.
+EXIT_PIPE_X0, EXIT_PIPE_X1 = 13*T, 15*T   # = [19.5, 22.5]  cols 13-14, 2-tile wide pipe
+add_statplat('exit_pipe', EXIT_PIPE_X0, -GROUND_Y, CR_FLOOR_TOP,
+             EXIT_PIPE_X1,  GROUND_Y, CR_FLOOR_TOP + 2*T, PIPE_GREEN)
+
+# Surface return: solidly past the entry pipe (ENTRY_PIPE_X ± T = 69–72 m).
+_make_target('Target_surface_return', (ENTRY_PIPE_X + 3*T, 0.0, MARIO_SPAWN_Z))
+
+# Warp volume just LEFT of the exit pipe — 3 tiles wide, centred between coin end and pipe.
+_warp_cx = EXIT_PIPE_X0 - 1.5*T          # centre of warp zone: EXIT_PIPE_X0 - 2.25 = 17.25
+bpy.ops.mesh.primitive_cube_add(size=2.0, location=(_warp_cx, 0.0, CR_FLOOR_TOP + 1.0))
+wp = bpy.context.object
+wp.name = 'pipe_exit_warp'; wp.data.name = 'pipe_exit_warp'
+wp.scale = (1.5, GROUND_Y, 1.0)        # ±1.5 → X[_warp_cx-1.5, _warp_cx+1.5]
+bpy.ops.object.transform_apply(scale=True)
+attach_schema(wp, 'warp')
+wp['wf_Target']             = 'Target_surface_return'
+wp['wf_Activated By Actor'] = 'Player'
+wp['wf_Model Type']         = 'None'
+# warp.oas has no DEFAULT_MODEL_TYPE override (unlike actbox.oas's =3), so the
+# volume mesh would render as a white debug box. Activation is independent of
+# rendering, so force always-invisible (Visibility Mailbox 0 = mb[0] = always false).
+wp['wf_Visibility Mailbox'] = 0
+
+# ── 16. Breakable bricks ──────────────────────────────────────────────────────
+# Super Mario shatters a brick from below (4-fragment debris burst + despawn);
+# Small Mario only bumps it (a brief upward nudge, brick stays solid). Each brick
+# is a Generator that throws `debris_template` on a Super hit. Built LAST (right
+# before export) so the new actors take fresh high indices and the existing static
+# indices the test harnesses hardcode (Player, qblock_00) don't shift.
+# See docs/plans/2026-05-26-breakable-bricks-smb-world-1-1.md.
+brick_tex = _make_brick_tga(os.path.join(SCRIPT_DIR, 'brick_tex.tga'))
+smb_common.set_textures(brick=brick_tex)
+
+# Per-actor local brick state (must match mailbox.inc). The brick reuses
+# SMB_QBLOCK_ACTIVATE (2010) as its debris-throw pulse.
+MB_SMB_BRICK_BREAK_END = 2013
+MB_SMB_BRICK_BUMP_END  = 2014
+MB_SMB_BRICK_BUMP_PEAK = 2015
+
+# Debris fragment — a small physics body that arcs up, falls (through the floor,
+# off-screen — generator-vs-ground isn't in objects.mac COLTABLE), and self-despawns
+# after ~1 s. It is a `generator` class (NOT `gold`) on purpose: gold would award a
+# coin on pickup (the stale-OAD path drops Gold Value 0, TODO §63), whereas a
+# generator that throws nothing has no scoring path at all. Activation MailBox 0
+# (mailbox[0] = always-false) means its own spawn branch never runs.
+mat_debris = smb_common.mat_debris()
+DEBRIS_H = 0.18   # half-extent → ~0.36 m cube (quarter-brick chunk)
+
+# DEBRIS_SCRIPT: tumble (ROTATION_C = time) and hold a DETERMINISTIC outward X velocity
+# fanned by the fragment's own actor index — `idx 4 % 1.5 - 3.0 *` → {-4.5,-1.5,+1.5,+4.5}
+# m/s — so fragments split left/right like the NES shatter (set every tick = constant
+# horizontal drift; the generator's +Z launch + gravity gives the arc). Despawn once the
+# fragment has fallen below the floor (Z < -20). Uses ONLY LOCAL_SYSTEM mailboxes
+# (3000+, always allocated), so the template needs no Number Of Local Mailboxes — writing
+# a LOCAL_USER slot (2000-2099) on a default-sized template overflows its array → crash.
+# (The engine's Random Displacement path is unusable: Scalar::Random() asserts via
+# RangeCheck's integer cast — see TODO.) `%` casts to int in zForth.
+
+_make_debris_template()
+
+# BRICK_SCRIPT — three behaviours, gated on the global SMB_MARIO_STATE the player owns:
+#   • break window open (SMB_BRICK_BREAK_END set): keep pulsing the debris generator
+#     until TIME passes the window end, then ALIVE=0 → brick vanishes.
+#   • bump in progress (SMB_BRICK_BUMP_END set): write an ADDITIVE Z offset that rises
+#     (0.30) then settles (0.10 → 0) — never a world Z (world-baked mesh, additive).
+#   • idle/solid: on a hit-from-below (COLLIDER_IDX≠0 & COLLISION_NORMAL_Z>0, the proven
+#     qblock gate), Super (state≠0) opens the break window + pulses; Small latches a bump.
+# Ordering matters: on the first break tick we set the window end AND pulse, but defer
+# ALIVE=0 to a later tick so the Generator (spawn-check runs before the script) actually
+# throws fragments across the window first (plan risk #3).
+
+# Faithful W1-1 brick layout (docs/smb-level-layouts.md §1-1):
+#   Cols 20, 22, 24 — cluster flanking the coin ? blocks at cols 21, 23
+#   Cols 91-98     — extended overhead brick row (8 wide)
+#   Cols 108, 110  — hi-row bricks flanking the flower ? block at col 109 (row 6)
+BLOCK_Z_6 = GROUND_TOP_Z + 6*T + T/2   # row-6 block centre (2 tiles above BLOCK_Z)
+
+_add_brick('brick_0', 20*T)
+_add_brick('brick_1', 22*T)
+_add_brick('brick_2', 24*T)
+
+for _bi, _bc in enumerate(range(91, 99)):
+    _add_brick(f'brick_row_{_bi}', _bc * T)
+
+_add_brick('brick_hi_0', 108*T, z=BLOCK_Z_6)
+_add_brick('brick_hi_1', 110*T, z=BLOCK_Z_6)
+# Also add a coin ? block at col 107 (row 8) and a flower ? block at col 109 (row 6)
+_make_powerup_block('qblock_107', 107*T, 'powerup_template', 0.0)
+_make_powerup_block('fireflower_block_hi', 109*T, 'powerup_template', 0.0, z=BLOCK_Z_6)
+
+# Hidden 1UP brick — tile 40 (x=60m), just before the flagpole (x=63m).
+# Looks like a plain brick; hit from below → launches a green 1UP mushroom that
+# slides right; player catches it for +1 life. Faithful to W1-1 hidden 1UP.
+ONEUP_BRICK_X = 57 * T   # 85.5 — col 57, hidden 1-UP block (was 40*T)
+hbrick_1up = _add_textured_box('brick_1up',
+                               ONEUP_BRICK_X - BSIZE, -BSIZE, BLOCK_Z - BSIZE,
+                               ONEUP_BRICK_X + BSIZE,  BSIZE, BLOCK_Z + BSIZE,
+                               brick_tex)
+attach_schema(hbrick_1up, 'generator')
+hbrick_1up['wf_Mobility']           = 'Anchored'
+hbrick_1up['wf_Model Type']         = 'Mesh'
+hbrick_1up['wf_Visibility Mailbox'] = 1
+hbrick_1up['wf_Number Of Local Mailboxes'] = 13
+hbrick_1up['wf_Activation MailBox'] = MB_SMB_QBLOCK_ACTIVATE
+hbrick_1up['wf_Object To Throw']    = 'oneup_template'
+hbrick_1up['wf_Generation Rate']    = 10.0
+hbrick_1up['wf_Object X Velocity']  = 1.5
+hbrick_1up['wf_Object Y Velocity']  = 0.0
+hbrick_1up['wf_Object Z Velocity']  = 6.0
+hbrick_1up['wf_Script']             = POWERUP_BLOCK_SCRIPT
+
+# ── 12b. Score pop-up actor (docs/plans/2026-05-27-smb-score-pop-up-actors.md) ─
+# Pre-placed diamond actor parked underground at (0,0,-5), inside the surface room
+# bbox (x[-66,133] z[-10,25]) so its script runs every tick.  Scoring events write
+# SMB_POPUP_X/Z + pulse SMB_POPUP_TRIGGER=1; this script teleports the diamond
+# above the event, floats it up for 0.75 s, then parks it back underground.
+# Uses `enemy` schema (Anchored) so gold.cc::TryPickup never despawns it.
+
+
+_make_popup_template()
+
+# ── 12c. Pyramids + staircase (faithful W1-1 terrain features) ───────────────
+mat_hard = smb_common.mat_hard()
+
+
+_add_pyramid('pyramid_a', base_col=134)
+_add_pyramid('pyramid_b', base_col=148)
+_add_staircase('staircase', base_col=198)
+
+# ── 13. Export ────────────────────────────────────────────────────────────────
+# Shared game-wide mesh library: all SMB meshes land in wflevels/smb/, named by
+# datablock (deduped across levels). See docs/plans/2026-06-03-smb-shared-mesh-dir.md.
+SMB_MESH_DIR = os.path.join(REPO, 'wflevels', 'smb')
+print(f"[smb] Exporting to {OUT_LEV} (meshes → {SMB_MESH_DIR})")
+bpy.ops.wf.export_level(filepath=OUT_LEV, mesh_dir=SMB_MESH_DIR)
+print("[smb] Objects in scene:", [o.name for o in bpy.data.objects])
+print(f"[smb] Done — {OUT_LEV}")

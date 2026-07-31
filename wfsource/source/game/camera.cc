@@ -56,9 +56,6 @@ Camera::Camera( const SObjectStartupData* startupData ) :
 	Color color(Color::FromInt(getOad()->FoggingColor));
 	GetRenderCamera().SetFog( color, Scalar(getOad()->GetFoggingStartDistance()), Scalar(getOad()->GetFoggingCompleteDistance()) );
 
-#if defined(DO_STEREOGRAM)
-	GetRenderCamera().SetStereogram( Scalar(getOad()->EyeDistance), Angle(Angle::Degree(Scalar(getOad()->EyeAngle))) );
-#endif
 	// Create collision box for the Camera actor, since some handlers do collision checking
 	_physicalAttributes.SetColSpace( Vector3( SCALAR_CONSTANT(-0.1), SCALAR_CONSTANT(-0.1), SCALAR_CONSTANT(-0.1) ),
 									 Vector3( SCALAR_CONSTANT(0.1), SCALAR_CONSTANT(0.1), SCALAR_CONSTANT(0.1) ) );
@@ -93,14 +90,9 @@ Camera::CanUpdate() const
 const PhysicalObject*
 Camera::GetWatchObject() const
 {
-#pragma message ("KTS: assuming camera always runs something derived from CameraMovementHandler")
-
    Validate();
    assert(ValidPtr(_nonStatPlat));
-	assert(ValidPtr(&_nonStatPlat->_movementManager.GetMovementHandler(*this)));
-	const CameraHandler* cHandler = dynamic_cast<const CameraHandler*>(&_nonStatPlat->_movementManager.GetMovementHandler(*this));
-   assert(ValidPtr(cHandler));
-	return cHandler->GetWatchObject(*this);
+	return _nonStatPlat->_movementManager.GetMovementHandler(*this).GetWatchObject(*this);
 }
 
 //============================================================================

@@ -1,0 +1,357 @@
+:root { color-scheme: dark; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #0c0f14;
+  color: #e6e8eb;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+  /* Disables the 300 ms tap-delay that iOS Safari + some Android Chrome
+     builds otherwise impose while waiting to see if you're double-tapping
+     to zoom. Still allows scrolling and pinch on the page. */
+  touch-action: manipulation;
+}
+
+main {
+  padding: 4vh 6vw;
+  /* Respect iPhone X+ notch / home-indicator and Android 3-button nav.
+     viewport-fit=cover in the <meta> lets us draw edge-to-edge; env(...)
+     gives the OS-reported inset sizes so interactive content doesn't
+     hide under the bars. max() keeps our existing padding as the floor
+     so normal Android phones don't end up with less than 4vh/6vw. */
+  padding-top:    max(4vh, env(safe-area-inset-top));
+  padding-bottom: max(4vh, env(safe-area-inset-bottom));
+  padding-left:   max(6vw, env(safe-area-inset-left));
+  padding-right:  max(6vw, env(safe-area-inset-right));
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3vh;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Landscape adjustment: the default layout is tall-column, which makes
+   the aspect-ratio:1/1 big-button taller than the viewport once the
+   phone rotates. Cap the button to the visible height and push the
+   whole main column into a two-column arrangement so the button and
+   status/cast column sit side-by-side. */
+@media (orientation: landscape) and (max-height: 520px) {
+  main {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2vh 4vw;
+  }
+  header { flex: 1 1 40%; }
+  .cast-row { flex: 1 1 100%; }
+  .big-button {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: none;
+    height: 70vh;
+    aspect-ratio: 1 / 1;
+  }
+  .game-root { flex: 1 1 50%; min-width: 50%; }
+}
+
+header {
+  text-align: center;
+  padding-top: 1vh;
+}
+.status {
+  opacity: 0.68;   /* WCAG AA small-text needs ≳4.5:1 on #0c0f14; 0.55 was marginal */
+  font-size: 0.85rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.name {
+  font-size: 1.15rem;
+  margin-top: 0.6vh;
+  opacity: 0.9;
+}
+
+.big-button {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  border: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ff8a8a, #d14545 55%, #8a2a2a 100%);
+  color: white;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: transform 80ms ease-out;
+  box-shadow: 0 2vh 5vh rgba(0,0,0,0.45), inset 0 -1vh 3vh rgba(0,0,0,0.3);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;   /* belt-and-suspenders: no tap-delay on the button itself */
+}
+.big-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.big-button.flash {
+  transform: scale(1.08);
+}
+.big-button:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.help {
+  opacity: 0.62;   /* WCAG AA bump from 0.5 for small text on #0c0f14 */
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: auto;
+  padding-bottom: 2vh;
+}
+
+/* Game-owned region ───────────────────────────────────────────────────────
+   The shell reserves this container for the per-game client module. The
+   game owns everything inside, including its own layout. Rules here are
+   only what the shell needs for sizing + error fallback. */
+.game-root {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 2vh;
+}
+.shell-error {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 0.95rem;
+  opacity: 0.7;
+  line-height: 1.6;
+}
+.shell-error code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: rgba(255,255,255,0.08);
+  padding: 0.1em 0.35em;
+  border-radius: 0.3em;
+}
+
+/* Cast launcher row ────────────────────────────────────────────────────── */
+.cast-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1vh 0;
+}
+google-cast-launcher {
+  --connected-color: #60a5fa;
+  --disconnected-color: #e6e8eb;
+  width: 40px;
+  height: 40px;
+}
+.cast-state {
+  font-size: 0.9rem;
+  opacity: 0.75;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.cast-state[data-state="connected"] { color: #60a5fa; opacity: 1; }
+.cast-state[data-state="connecting"] { color: #facc15; }
+.cast-state[data-state="unavail"] { opacity: 0.4; }
+
+/* Room-code entry overlay ─────────────────────────────────────────────── */
+.room-gate {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(12, 15, 20, 0.97);
+  z-index: 20;
+  /* Respect notch + home-indicator while the modal is up. */
+  padding: max(4vh, env(safe-area-inset-top)) max(6vw, env(safe-area-inset-right))
+           max(4vh, env(safe-area-inset-bottom)) max(6vw, env(safe-area-inset-left));
+  /* Keep scroll/swipe gestures inside the modal — prevents iOS Safari
+     rubber-band from revealing the controller behind the overlay. */
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+.room-gate[hidden] { display: none; }
+.room-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2vh;
+  padding: 4vh 6vw;
+  max-width: 420px;
+  width: 100%;
+}
+.room-form h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.room-gate-hint {
+  opacity: 0.6;
+  font-size: 0.95rem;
+  text-align: center;
+}
+.entry-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+}
+.entry-field[hidden] { display: none; }
+.entry-label {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding-left: 0.2rem;
+}
+.room-input, .name-input {
+  width: 100%;
+  padding: 1rem 1.2rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: #1a1d23;
+  color: #fef3c7;
+  border: 2px solid #3a3d44;
+  border-radius: 0.8rem;
+}
+.room-input {
+  font-size: 2.2rem;
+  text-align: center;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;  /* counteract the trailing letter-spacing push */
+  text-transform: uppercase;
+}
+.name-input {
+  font-size: 1.4rem;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.room-input:focus, .name-input:focus { outline: none; border-color: #facc15; }
+.room-join {
+  width: 100%;
+  padding: 1.1rem;
+  border: none;
+  border-radius: 0.8rem;
+  background: radial-gradient(circle at 30% 30%, #facc15, #eab308);
+  color: #111;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.room-join:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Outcome overlay ──────────────────────────────────────────────────────── */
+.outcome {
+  position: fixed; inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3vh;
+  padding: 4vh 6vw;
+  text-align: center;
+  z-index: 10;
+  overflow: hidden;
+  animation: outcome-fade-in 0.4s ease-out;
+}
+.outcome[hidden] { display: none; }
+.outcome.win {
+  background: radial-gradient(ellipse at center, #1c4c2a 0%, #0a1e12 60%, #0c0f14 100%);
+  color: #f0fdf4;
+}
+.outcome.lose {
+  background: radial-gradient(ellipse at center, #2a2230 0%, #121017 60%, #0c0f14 100%);
+  color: #cbcad1;
+}
+@keyframes outcome-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.outcome-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2vh;
+  z-index: 1;
+}
+.outcome-headline {
+  font-size: 3.2rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+.outcome.win .outcome-headline {
+  background: linear-gradient(90deg, #fde047, #facc15, #86efac);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: headline-pulse 0.6s ease-in-out infinite alternate;
+}
+.outcome.lose .outcome-headline { opacity: 0.85; }
+@keyframes headline-pulse {
+  from { transform: scale(1); }
+  to   { transform: scale(1.05); }
+}
+.outcome-subline {
+  font-size: 1.2rem;
+  opacity: 0.75;
+  line-height: 1.45;
+}
+.outcome-scoreboard {
+  list-style: none;
+  font-size: 1rem;
+  padding: 1vh 0;
+  line-height: 1.7;
+  min-width: 60%;
+}
+.outcome-scoreboard li {
+  padding: 0.6vh 1rem;
+  border-radius: 0.6rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.outcome-scoreboard li.me {
+  background: rgba(255,255,255,0.08);
+  font-weight: 600;
+}
+.outcome-scoreboard li.winner {
+  color: #facc15;
+}
+
+/* Confetti: emoji particles dropping/drifting; purely decorative. */
+.confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.confetti[hidden] { display: none; }
+.confetti span {
+  position: absolute;
+  top: -10vh;
+  font-size: 2rem;
+  animation: confetti-fall linear infinite;
+  will-change: transform;
+}
+@keyframes confetti-fall {
+  0%   { transform: translate3d(0, -10vh, 0) rotate(0deg);    opacity: 1; }
+  100% { transform: translate3d(0, 110vh, 0) rotate(720deg);  opacity: 0.7; }
+}
+
+/* Reduced-motion: respect OS setting. Disables the confetti rain, the
+   headline pulse, the button-flash scale, the entry-gate fade-in, and any
+   animations/transitions game CSS layers on top (game CSS loads after this
+   file but doesn't use !important, so the universal !important rules here
+   override). Users who've opted in still get a functional UI, just without
+   the motion that might trigger vestibular issues. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .confetti { display: none; }   /* nothing left to see even once animations are stilled */
+}

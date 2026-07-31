@@ -7,7 +7,7 @@
 #define OAD_H
 
 #define FIXED16(n) ( (short)(n * 256) )
-#define FIXED32(n) ( (long)(n * 65536) )
+#define FIXED32(n) ( (int32)(n * 65536) )
 #define RADIOBUTTONNAMELEN 10
 
 
@@ -107,10 +107,10 @@ typedef enum
 
 typedef struct _oadHeader
 {
-	long chunkId;
-	long chunkSize;
+	int32 chunkId;		// 32-bit on disk (PSX/x86-32 origin); `long` was 8 bytes
+	int32 chunkSize;	// on LP64 and mis-sized the header (80 vs 92 bytes).
 	char name[72-4];
-	long version;
+	int32 version;
 } oadHeader;
 
 /*============================================================================*/
@@ -127,11 +127,7 @@ typedef struct _oadHeader
 typedef char EConversionAction;
 
 
-#if defined( _MSC_VER )
-#pragma pack( push, 1 )
-#else
 #pragma pack( 1 )
-#endif
 
 typedef struct _typeDescriptor
 {
@@ -171,11 +167,7 @@ typedef struct _typeDescriptor
 
 } typeDescriptor;
 
-#if defined( _MSC_VER )
-#pragma pack( pop )
-#else
 #pragma pack( )
-#endif
 
 /*============================================================================*/
 

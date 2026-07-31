@@ -26,24 +26,28 @@
 
 #include <gfx/display.hp>
 
-#if defined ( RENDERER_PSX )
-#include <gfx/psx/display.cc>
+// Runtime VRAM box dimensions. Defaults preserve the historical 1024×512
+// layout; main.cc overrides before Display construction when CLI flags
+// are passed. See docs/plans/2026-05-30-runtime-vram-cli-overrides.md.
+int Display::VRAMWidth  = 1024;
+int Display::VRAMHeight = 512;
 
-#elif defined ( RENDERER_GL)
-#include <gfx/gl/display.cc>
-#pragma comment( lib, "opengl32.lib" )
-
-#elif defined ( RENDERER_XWINDOWS)
-#include <gfx/xwindows/display.cc>
-
-#elif defined ( RENDERER_DIRECTX)
-#include <gfx/directx/display.cc>
-#pragma comment( lib, "ddraw.lib" )
-#pragma comment( lib, "dxguid.lib" )
-
+#if defined(WF_TARGET_IOS)
+// iOS uses the Metal backend; windowing/drawable acquisition live in
+// hal/ios/metal_view.mm rather than gfx/gl/mesa.cc. Display on iOS is a
+// thin timer + projection-setup wrapper over the Metal RendererBackend.
+#  include <hal/ios/display_ios.cc>
+#elif defined(WF_TARGET_MACOS)
+// macOS desktop (renderer-agnostic bring-up): headless Display — no window, no
+// GL context. Thin timer + projection wrapper over the no-op RendererBackend.
+#  include <hal/macos/display_macos.cc>
 #else
-#error no platform specific display code!
-
+#  include <gfx/gl/display.cc>
 #endif
+
+#if defined(_MSC_VER)
+#pragma comment( lib, "opengl32.lib" )
+#endif
+
 
 //============================================================================

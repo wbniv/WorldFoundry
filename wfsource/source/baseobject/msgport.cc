@@ -62,7 +62,7 @@ MsgPort::~MsgPort()
 //============================================================================
 // Returns true if successful, false if error.
 
-bool MsgPort::PutMsg(int16 msgType, int32 msgData)
+bool MsgPort::PutMsg(int16 msgType, uintptr_t msgData)
 {
 
 #pragma message ("KTS " __FILE__ ": this needs to occur somewhere which knows about actors")
@@ -89,7 +89,7 @@ bool MsgPort::PutMsg(int16 msgType, int32 msgData)
 bool MsgPort::PutMsg(int16 msgType, const void* data, uint32 size)		// Send a message
 {
 
-#pragma message ("KTS " __FILE__ ": this needs to occur somewhere which knows about actors"
+#pragma message ("KTS " __FILE__ ": this needs to occur somewhere which knows about actors")
    // this assert was to make sure no messages were sent to a statplat (since they can't do anything about collisions anyway)
 	//assert( this != &( Actor::_statPlatData._msgPort ) );
 

@@ -29,7 +29,7 @@
 
 //=============================================================================
 
-AssetManager::AssetManager( size_t cbPermMemory, size_t cbRoomMemory, VideoMemory& videoMemory, _DiskFile& diskFile, Memory& memory, AssetCallback& callback ) :
+AssetManager::AssetManager( size_t cbPermMemory, size_t cbRoomMemory, int numActiveRoomSlots, VideoMemory& videoMemory, _DiskFile& diskFile, Memory& memory, AssetCallback& callback ) :
     _videoMemory(videoMemory),
    _diskFile(diskFile),
    _memory(memory),
@@ -37,8 +37,14 @@ AssetManager::AssetManager( size_t cbPermMemory, size_t cbRoomMemory, VideoMemor
 {
 	_cbPermMemory = cbPermMemory;
 	_cbRoomMemory = cbRoomMemory;
+	_numActiveRoomSlots = numActiveRoomSlots;
+	assert( _numActiveRoomSlots >= 1 && _numActiveRoomSlots <= MAX_ACTIVE_ROOMS );
 
-	_assetMemory = new ( HALLmalloc ) char [ _cbPermMemory + MAX_ACTIVE_ROOMS * _cbRoomMemory ];
+	// Layout: [perm][room0][room1]…[room(N-1)], N = _numActiveRoomSlots. PERM is at
+	// a CONSTANT offset 0 — decoupled from the room-slot count — and the room slots
+	// stream in after it. (PERM keeps array index PERM_SLOT_INDEX; only its memory
+	// offset moved to the front.) A single-room level pays cbPerm + 1×cbRoom, not ×9.
+	_assetMemory = new ( HALLmalloc ) char [ _cbPermMemory + _numActiveRoomSlots * _cbRoomMemory ];
 	assert( ValidPtr( _assetMemory ) );
 
 	for ( int idxRoomSlot=0; idxRoomSlot < MAX_ACTIVE_SLOTS; ++idxRoomSlot )
@@ -52,11 +58,23 @@ AssetManager::AssetManager( size_t cbPermMemory, size_t cbRoomMemory, VideoMemor
 
 AssetManager::~AssetManager()
 {
+	// Free the asset slots first (per-level pool — order-independent).
 	for(int index=0;index < MAX_ACTIVE_SLOTS;index++)
 	{
 		if(_assets[index])
 			MEMORY_DELETE(_memory,_assets[index],AssetSlot);
 	}
+	// _levelTOC._toc (HAL) and _assetMemory (HAL) are both members of this
+	// class; LIFO requires the most-recent first. _levelTOC._toc is loaded
+	// during LoadLevelData (well after the ctor allocated _assetMemory), so
+	// _toc sits ABOVE _assetMemory on the HAL stack — Free _toc first via
+	// the explicit Clear() (so the implicit ~DiskTOC after this body is a
+	// no-op), then Free _assetMemory. Both were historically leaked because
+	// UnloadLevel never ran cleanly to completion; the missing Frees would
+	// leave large blocks on top of HALLmalloc that the rest of ~Level can't
+	// get past.
+	_levelTOC.Clear();
+	HALLmalloc.Free(_assetMemory);
 }
 
 //==============================================================================
@@ -135,12 +153,13 @@ AssetManager::LoadPermanents()
 			assert(roomStream.good());
 			IFFChunkIter roomChunkIter(roomStream);
 			maxAsset++;
-			assert(maxAsset < 1000);	// arbitrary
+			assert(maxAsset < 4000);	// arbitrary; bumped 1000→4000 for qbert 1344-actor pyramid (2026-05-09)
 		}
 	}
 	binistream roomStream((void*)(((char*)streamBuffer)+sizeof(CHUNKHDR)),chdr.size);
 
-	_assets[PERM_SLOT_INDEX] = new (_memory) AssetSlot(PERM_SLOT_INDEX, AssetManager::ROOM_PERM_INDEX,roomStream, maxAsset, (void*)&_assetMemory[_cbRoomMemory*PERM_SLOT_INDEX],_cbPermMemory,_videoMemory);
+	// PERM memory is at offset 0 (constant, independent of the room-slot count).
+	_assets[PERM_SLOT_INDEX] = new (_memory) AssetSlot(PERM_SLOT_INDEX, AssetManager::ROOM_PERM_INDEX,roomStream, maxAsset, (void*)&_assetMemory[0],_cbPermMemory,_videoMemory);
 	assert(ValidPtr(_assets[PERM_SLOT_INDEX]));
 	HALLmalloc.Free(streamBuffer,_levelTOC.GetTOCEntry(TOC_PERM_INDEX)._size);
 }
@@ -157,6 +176,11 @@ AssetManager::LoadRoomSlot(int roomIndex, int slotNum)
 	//AssertMsg(roomIndex < _maxRooms,"roomIndex = " << roomIndex << ", number of rooms = " << _maxRooms);
 	assert(slotNum >= 0);
 	assert(slotNum < MAX_ACTIVE_SLOTS);
+	// Fail fast if the level needs more active room slots than its 'SLOT' declared
+	// (else the room would write past the allocated asset buffer). Raise 'SLOT'.
+	AssertMsg(slotNum < _numActiveRoomSlots,
+	          "room slot " << slotNum << " >= declared 'SLOT' count " << _numActiveRoomSlots
+	          << " — raise 'SLOT' in the level's RAM chunk");
 	assert(_assets[slotNum] == NULL);
 
 	_levelTOC.Validate();
@@ -186,12 +210,13 @@ AssetManager::LoadRoomSlot(int roomIndex, int slotNum)
 			assert(roomStream.good());
 			IFFChunkIter roomChunkIter(roomStream);
 			maxAsset++;
-			assert(maxAsset < 1000);	// arbitrary
+			assert(maxAsset < 4000);	// arbitrary; bumped 1000→4000 for qbert 1344-actor pyramid (2026-05-09)
 		}
 	}
 	binistream roomStream((void*)(((char*)streamBuffer)+sizeof(CHUNKHDR)),chdr.size);
 
-	_assets[slotNum] = new (_memory) AssetSlot(slotNum, roomIndex,roomStream, maxAsset, (void*)&_assetMemory[_cbRoomMemory*slotNum],_cbRoomMemory,_videoMemory);
+	// Room slots stream in AFTER the perm block: offset cbPerm + slotNum × cbRoom.
+	_assets[slotNum] = new (_memory) AssetSlot(slotNum, roomIndex,roomStream, maxAsset, (void*)&_assetMemory[_cbPermMemory + _cbRoomMemory*slotNum],_cbRoomMemory,_videoMemory);
 	assert(ValidPtr(_assets[slotNum]));
 	HALLmalloc.Free(streamBuffer);
 }
@@ -215,7 +240,7 @@ AssetManager::FreeRoomSlot(int slotNum)
 void
 AssetManager::ReadAssetMap(binistream& mapStream)
 {
-	const int MAX_ASMP_SIZE = DiskFileCD::_SECTOR_SIZE * 4;  // kts abritrary
+	const int MAX_ASMP_SIZE = DiskFileCD::_SECTOR_SIZE * 64;  // bumped 16→64 for qbert 1344-actor pyramid (2026-05-09; 16-round palettes)
 
 	IFFChunkIter mapChunkIter(mapStream);
 	assert(mapChunkIter.GetChunkID().ID() == IFFTAG('A','S','M','P'));
@@ -230,7 +255,7 @@ AssetManager::ReadAssetMap(binistream& mapStream)
 		stringIter->ReadBytes(&_assetStringMap[_assetStringMapEntries]._name,stringIter->BytesLeft());
 		MEMORY_DELETE(HALScratchLmalloc,stringIter,IFFChunkIter);
 		_assetStringMapEntries++;
-		assert(_assetStringMapEntries <= 300);
+		assert(_assetStringMapEntries <= 1024);   // bumped to 4000 on 2026-05-10 for qbert fan-out, reverted 2026-05-10 after Phase 1 (pair with assets.hp:116)
 	}
 
 }

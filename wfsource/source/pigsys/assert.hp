@@ -50,9 +50,6 @@
 #   include <iostream.h>
 #   if defined(__LINUX__)
 #       include <strstream.h>
-#   elif defined(__WIN__)
-#       include <strstrea.h>
-#   elif defined(__PSX__)
 #   else
 #   error no strstream defined!
 #   endif
@@ -95,7 +92,12 @@
 #endif	//__cplusplus
 	extern void		_sys_assert( int _, const char * expr, const char *file, int line )
 //#if		!_SYS_SUPPRESS_EXIT
+#if !defined(__EMSCRIPTEN__)
+		// Web: _sys_assert WARNS + returns (non-fatal — see assert.cc), so it must
+		// NOT be noreturn there, or the compiler emits a wasm `unreachable` after
+		// every assert call site and the return traps. Native keeps noreturn (exit).
 		__attribute__ ((noreturn))
+#endif
 //#endif	//!_SYS_SUPPRESS_EXIT
 		;
 #if defined( __cplusplus )
@@ -115,39 +117,6 @@
 		( (__expr__) ? (void)0 : (_sys_assert((int)(long)(__expr__), #__expr__, __FILE__, __LINE__ ) ) )
 
 #	ifdef __cplusplus
-#	if defined(NO_CONSOLE)
-#ifndef EXPORTER_EXCEPTION_DEFINED
-#define EXPORTER_EXCEPTION_DEFINED
-class WRLExporterException
-{
-public:
-	long	exceptionData;
-};
-#include <windows.h>
-#include <winuser.h>
-#endif
-#	define AssertMsg(__cond__, __msg__)\
-		if (!(__cond__))\
-		{\
-			char messageBuffer[1024];\
-            std::strstream outputStream(messageBuffer,1024,std::ios::out|std::ios::binary);\
-            outputStream << __msg__ << std::endl << __FILE__ << ":" << __LINE__;\
-			outputStream << '\0';\
-			MessageBox(NULL, outputStream.str(), "Error", MB_OK);\
-			throw WRLExporterException();\
-		}
-#	define AssertMsgFileLine(__cond__, __msg__, file, line)\
-		if (!(__cond__))\
-		{\
-			char messageBuffer[1024];\
-            std::strstream outputStream(messageBuffer,1024,std::ios::out|std::ios::binary);\
-            outputStream << __msg__ << std::endl << file << ":" << line;\
-			outputStream << '\0';\
-			MessageBox(NULL, outputStream.str(), "Error", MB_OK);\
-			throw WRLExporterException();\
-		}
-
-#	else
 #		if SW_DBSTREAM
 #		define AssertMsg( exp, str )\
 	 		do\
@@ -192,7 +161,6 @@ public:
 
 //#	define AssertMsg(ignore1,ignore2) ((void)0)
 #	endif		// SW_DBSTREAM
-#endif			// defined(NO_CONSOLE)
 
 #	define ValidateObject( x )\
  		( x ).Validate( __FILE__, __LINE__ )
@@ -236,20 +204,39 @@ public:
 
 #	define RangeCheck( min, value, max) \
 		{\
-		AssertMsg((value) >= (min), #min " = " << (min) << ", " << #value " = " << (value) ); \
-		AssertMsg((value) < (max), #value " = " << (value) << ", " #max " = " << (max) );\
+		AssertMsg((ptrdiff_t)(value) >= (ptrdiff_t)(min), #min " = " << (min) << ", " << #value " = " << (value) ); \
+		AssertMsg((ptrdiff_t)(value) < (ptrdiff_t)(max), #value " = " << (value) << ", " #max " = " << (max) );\
 		}
 
 #	define RangeCheckInclusive( min, value,  max) \
 	{\
-		AssertMsg((value) >= (min), #min " = " << (min) << ", " << #value " = " << (value) ); \
-		AssertMsg((value) <= (max), #value " = " << (value) << ", " #max " = " << (max) ); \
+		AssertMsg((ptrdiff_t)(value) >= (ptrdiff_t)(min), #min " = " << (min) << ", " << #value " = " << (value) ); \
+		AssertMsg((ptrdiff_t)(value) <= (ptrdiff_t)(max), #value " = " << (value) << ", " #max " = " << (max) ); \
 	}
 
 #	define RangeCheckExclusive( min, value, max) \
 	{\
-		AssertMsg((value) > (min), #min " = " << (min) << ", " << #value " = " << (value) ); \
-		AssertMsg((value) < (max), #value " = " << (value) << ", " << #max " = " << (max) ); \
+		AssertMsg((ptrdiff_t)(value) > (ptrdiff_t)(min), #min " = " << (min) << ", " << #value " = " << (value) ); \
+		AssertMsg((ptrdiff_t)(value) < (ptrdiff_t)(max), #value " = " << (value) << ", " << #max " = " << (max) ); \
+	}
+
+	// Range checks for value types whose only integral conversion is operator
+	// bool() — notably Scalar (fixed/float). The RangeCheck* macros above cast
+	// every arg to (ptrdiff_t), which collapses a Scalar to 0/1 via operator
+	// bool() and makes the check bogus (Scalar::Random's value<one became 1<1 →
+	// always aborts in assertion builds). These compare the values directly via
+	// the type's own operator>=/</<= and stream via operator<< — correct for
+	// Scalar and any comparable+streamable type. See docs/BUGS.md (2026-06-12).
+#	define RangeCheckScalar( min, value, max ) \
+	{\
+		AssertMsg( (value) >= (min), #min " = " << (min) << ", " #value " = " << (value) ); \
+		AssertMsg( (value) <  (max), #value " = " << (value) << ", " #max " = " << (max) ); \
+	}
+
+#	define RangeCheckScalarInclusive( min, value, max ) \
+	{\
+		AssertMsg( (value) >= (min), #min " = " << (min) << ", " #value " = " << (value) ); \
+		AssertMsg( (value) <= (max), #value " = " << (value) << ", " #max " = " << (max) ); \
 	}
 
 #	define assertEq(value1, value2) AssertMsg((value1) == (value2), #value1 " = " << (value1) << ", " #value2 " = " << (value2))
@@ -271,6 +258,8 @@ public:
 #	define RangeCheck( nim, value, max)
 #	define RangeCheckInclusive( min, value, max)
 #	define RangeCheckExclusive( min, value, max)
+#	define RangeCheckScalar( min, value, max)
+#	define RangeCheckScalarInclusive( min, value, max)
 
 #	define ValidateObject( x ) ((void)0)
 #	define ValidateObjectFileLine( x, file, line ) ((void)0)

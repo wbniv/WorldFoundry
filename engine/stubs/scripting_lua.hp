@@ -1,0 +1,52 @@
+// scripting_lua.hp — Lua 5.4 engine plug interface used by ScriptRouter.
+//
+// Compiled in when WF_LUA_ENGINE=lua54 (via build_game.sh).
+// Lua handles scripts not claimed by any other sigil (plain-text fallthrough).
+// Fennel (`;` sigil) is a sub-dispatch inside lua_engine because it shares
+// the lua_State; it is not a peer at the router level.
+//
+// Host functions available to Lua scripts:
+//   read_mailbox(idx [, actor])        -- returns float
+//   write_mailbox(idx, val [, actor])
+//
+// Dispatch order (see scripting_stub.cc ScriptRouter::RunScript):
+//   `\`        → Forth
+//   `//wren\n` → Wren
+//   `//`       → JS      (QuickJS or JerryScript)
+//   `#b64\n`   → Wasm    (wasm3 or WAMR)
+//   `;`        → Fennel  (sub-dispatch inside lua_engine)
+//   fallthrough→ Lua     (this header)
+
+#ifndef WF_SCRIPTING_LUA_HP
+#define WF_SCRIPTING_LUA_HP
+
+// Fennel requires Lua; auto-enable at the preprocessor level if needed.
+#if defined(WF_ENABLE_FENNEL) && !defined(WF_ENABLE_LUA)
+#  define WF_ENABLE_LUA
+#endif
+
+#ifdef WF_ENABLE_LUA
+
+class MailboxesManager;
+struct IntArrayEntry;
+
+namespace lua_engine {
+
+// Lifetime hooks — called from ScriptRouter ctor/dtor.
+void Init(MailboxesManager& mgr);
+void Shutdown();
+
+// Register/unregister INDEXOF_* / JOYSTICK_BUTTON_* constants as Lua globals.
+void AddConstantArray(IntArrayEntry* entryList);
+void DeleteConstantArray(IntArrayEntry* entryList);
+
+// Execute a Lua script (or route to Fennel if the `;` sigil is present and
+// Fennel is compiled in). `objectIndex` sets the current actor for
+// read_mailbox / write_mailbox. Returns a numeric result or 0.0f.
+float RunScript(const char* src, int objectIndex);
+
+} // namespace lua_engine
+
+#endif // WF_ENABLE_LUA
+
+#endif // WF_SCRIPTING_LUA_HP

@@ -53,8 +53,6 @@
 #include <mailbox/mailbox.hp>
 #include <physics/physical.hp>
 #include <physics/colbox.hp>
-#include <audio/device.hp>
-#include <audio/buffer.hp>
 #include <gfx/display.hp>
 #include <gfx/viewport.hp>
 #include <gfx/rendmatt.hp>
@@ -75,6 +73,7 @@ class Path;
 class Level;
 class Director;
 class LevelRoomCallbacks;
+class WFGame;
 
 struct _LevelObj;
 
@@ -122,7 +121,8 @@ class Level
 	// construction/deletion
 	Level
 	(
-		_DiskFile* _diskFile
+		WFGame& game
+		,_DiskFile* _diskFile
 		,ViewPort& _viewPort
         ,VideoMemory& videoMemory
         ,Mailboxes* parentMailboxes
@@ -131,6 +131,13 @@ class Level
 
 	// initialization methods
 	Actor* ConstructTemplateObject(int32 templateObjectIndex, int32 idxCreator, Vector3 position=Vector3::zero, Vector3 velocity=Vector3::zero);
+
+	// Safe predicate for wfmut::SpawnActor and similar external callers.
+	// Returns true iff idx is in [1, _numTemplateObjects) and the slot has
+	// a non-null template entry. Avoids the assertion in
+	// FindTemplateObjectData / SafelyConstructTemplateObject when probing
+	// unknown indices.
+	bool HasTemplate(int idx) const;
 
 	inline void Validate() const;
 	// miscellaneous query methods
@@ -180,10 +187,8 @@ class Level
 	// miscellaneous public methods - not sure how to categorize
 	inline const SObjectStartupData* FindTemplateObjectData( int32 objectIndex ) const;
 
-	Scalar EvalScript( const void* , int objectIndex);
+	Scalar EvalScript( const void* , int objectIndex, int language);
 
-	SoundDevice*					_theSoundDevice;
-	SoundBuffer*					_sfx[ 128 ];
 
 private:
    // private functions
@@ -203,6 +208,7 @@ private:
 	void LoadLevelData();				// assumes _levelFile already set to valid DiskFile
 
 	// data members initialized before constructor body
+	WFGame&							_game;     // parent game instance (de-globaled from theGame, 2026-05-18)
 	ViewPort&						_viewPort;
 	// data members initialized in constructor body
 	void*							_levelOnDiskMemory;  // actual _levelData allcation address
@@ -232,28 +238,22 @@ private:
 #pragma message( __FILE__ ": remove _idealMainCharacter" )
 	PhysicalObject*							_idealMainCharacter;
 
-#if 0	//msvc
-#if defined( TASKER )
-	IMessagePort					_port;
-#endif	// TASKER
-#endif
-
-  #if defined( MIDI_MUSIC )
-	Sound*							_theSound;
-  #endif
 
 	Clock levelClock;
 
 	// object list variables
-	int32 							_toBeRemovedObjects[100];
+	// Sized to hold a full view's worth of removals in one frame: the FSN browser
+	// despawns its entire spawned tree (up to the temp-object pool, ~500) on a
+	// navigate descend/ascend. Was [100].
+	int32 							_toBeRemovedObjects[512];
 	int 							_numToBeRemovedObjects;
 
 	// template object variables
 	SObjectStartupData **		_templateObjects;						// pointer to array of template object pointers, in levelcon order
 	int							_numTemplateObjects;
 	// system mailboxes requiring storage
-	long						_camRollMailBox;						// kts is there a better way?
-	long						_camShotMailBox;						// kts is there a better way?
+	int32						_camRollMailBox;						// mailbox index (was long → 8 bytes on LP64)
+	int32						_camShotMailBox;						// mailbox index (was long → 8 bytes on LP64)
 
    PointerContainer<Memory> _memory;
 
@@ -274,6 +274,13 @@ private:
 			uint32 tagFlags;
 				uint32 doomStickFlag;		// if set, doom style joystick, otherwise alone in the dark style
 				uint32 bungeeCamFlag;		// if set, elastic camera, otherwise, alone in the dark style
+			// Optional 'SLOT' field (appended after FLAG). Absent on older levels
+			// (the bytes read as 0 ≠ 'SLOT') → defaults to MAX_ACTIVE_ROOMS. Lets a
+			// level declare how many active room-asset slots to allocate: 1 for a
+			// single-room level (so cbRoom isn't ×9'd), 3 for normal streaming, 9 for
+			// planet-scale. Asset memory = cbPerm + numActiveRoomSlots × cbRoom.
+			uint32 tagSlots;
+				uint32 numActiveRoomSlots;
 	};
    LevelRoomCallbacks* _roomCallbacks;
    AssetCallbackRoom* _assetCallbackRoom;

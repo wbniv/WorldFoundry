@@ -93,12 +93,16 @@
   $DEy $BEEFw $7ACEBABEl
 
   // ------------------------------------------------------------------
-  // 8. Numeric expressions. `+` and `-` evaluate their operands and
-  //    discard the result (the grammar's chunk_statement → expr action
-  //    is empty). The items on each side still emit their bytes in
-  //    order: `5l + 3l - 2l` writes 5, 3, 2 as LE int32.
+  // 8. Numeric expressions. `+` and `-` compose into ONE emitted int32:
+  //    `5l + 3l - 2l` writes a single 6 as LE int32, not 5/3/2 as three
+  //    separate values. This matches the oracle level .iff files; see
+  //    docs/investigations/2026-04-19-iffcomp-offsetof-arithmetic.md
+  //    for why the pre-regression C++ grammar also did arithmetic
+  //    composition and why the modernized grammar's "emit at item time"
+  //    behavior was the anomaly.
   // ------------------------------------------------------------------
-  5l + 3l - 2l
+  5l 3l 2l                                     // three values, unchanged
+  5l + 3l - 2l                                 // arithmetic → single 6
 
   // ------------------------------------------------------------------
   // 9. Reals: default precision, explicit override, integer-as-real

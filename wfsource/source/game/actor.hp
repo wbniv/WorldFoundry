@@ -73,10 +73,10 @@ class Actor;
 class ActorMailboxes : public MailboxesWithStorage
 {
 public:
-   ActorMailboxes(Actor& actor, long mailboxesBase, long numberOfLocalMailboxes, Mailboxes* parent);
+   ActorMailboxes(Actor& actor, int32 mailboxesBase, int32 numberOfLocalMailboxes, Mailboxes* parent);
    virtual ~ActorMailboxes();
-   virtual Scalar ReadMailbox(long mailbox) const;
-   virtual void WriteMailbox(long mailbox, Scalar value);
+   virtual Scalar ReadMailbox(int32 mailbox) const;
+   virtual void WriteMailbox(int32 mailbox, Scalar value);
 private:
     Actor& _actor;          // kts temporary, eventually I will just put the mbox storage in here
 };
@@ -164,6 +164,13 @@ public:
 	// utility
 	Scalar GetDistanceTo( const Actor *pActor ) const;
 
+#if SW_DBSTREAM
+	// Cached level number for Actor::Print()'s levels.txt lookup. Set by
+	// Level::Level() so Actor::Print no longer needs to consult the (removed)
+	// `theGame` global. Debug-print path only.
+	static void SetPrintLevelNum( int32 n );
+#endif
+
 	// mailbox / messages / inter-object communication
 	Scalar ReadSystemMailbox( int boxnum ) const;
 	void WriteSystemMailbox( int boxnum, const Scalar value );
@@ -208,6 +215,12 @@ public:
    virtual const PhysicalAttributes& GetPhysicalAttributes() const;
    virtual PhysicalAttributes& GetWritablePhysicalAttributes();
    void Collision(PhysicalObject& other, const Vector3& normal);
+#ifdef PHYSICS_ENGINE_JOLT
+   // Static-geometry contact (no registered WF Actor). Sets _lastCollisionNormal
+   // and clears _lastColliderIdx to 0. Does NOT update supportingObject — Jolt
+   // tracks ground state via JoltCharacterIsOnGround, not supportingObject.
+   void JoltStaticCollision(const Vector3& normal);
+#endif
 
    // MovementObject interface/overrides
 	virtual const QInputDigital* GetInputDevice() const;
@@ -223,6 +236,7 @@ protected:
 		NonStatPlatData(SMemPool * memPool, const _Movement* moveBlock);  
 
 		Scalar 					_hitPoints;
+		Scalar 					_gold;				// per-actor gold/collectible count (EMAILBOX_GOLD 3001); reserved slot, backed 2026-05-20 for SMB Gold pickup
 		Shield* 				_shield;			// pointer to shield if this actor has one	// will go away
 
 		InputScript*			_inputScript;		// contained in _input in case of _input mapping to a mailbox
@@ -262,6 +276,26 @@ protected:
 
 	PhysicalAttributes			_physicalAttributes;
 	RenderActor*				_renderActor;
+
+	// Per-actor non-uniform render scale. Default (1,1,1). Initialised from
+	// the OAS x_scale/y_scale/z_scale fields at level load (if non-zero) and
+	// mutable per-frame via EMAILBOX_X_SCALE/Y_SCALE/Z_SCALE (3040..3042).
+	// Applied in RenderActor3D::Render() via column-scale of the world matrix.
+	// Added 2026-05-10 for qbert stretch-and-squash.
+	Scalar						_scaleX;
+	Scalar						_scaleY;
+	Scalar						_scaleZ;
+
+	// Most-recent collision contact this frame. Set by Actor::Collision (the
+	// callback fires for any Actor that participates in a physics contact),
+	// cleared each frame in Actor::Update. COLLIDER_IDX is the freshness
+	// signal — zero means no collision since last clear. Normal vector points
+	// AWAY from the other object (collision.cc:309-310 negates for object2),
+	// so a ?-block hit from below sees NORMAL_Z < 0; landing on top of
+	// something sees NORMAL_Z > 0. Surfaced to scripts via mailbox 3044-3047.
+	// Added 2026-05-17; see docs/plans/2026-05-17-per-actor-collision-mailboxes.md.
+	int32						_lastColliderIdx;
+	Vector3						_lastCollisionNormal;
 
 	// DATA END
 

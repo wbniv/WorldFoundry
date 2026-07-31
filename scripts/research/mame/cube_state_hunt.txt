@@ -1,0 +1,10 @@
+[INFO] tap installed
+[frame 405] snap0 taken (pre-hop)
+[frame 1125] snapH taken (post-16 hops)
+Bytes that went 0->1..8 (cube state candidates):
+  0x00B8: 0->1
+Total candidates: 1
+[frame 1155] filled 56 bytes at 0x00B8 with 1
+[timeout: no palette change]
+
+=== DONE: 0 level palettes captured ===

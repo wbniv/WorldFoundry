@@ -39,8 +39,8 @@ ViewPort::Validate() const					// test integrity of class instance
 	assert(ValidPtr(_primitives));
 #endif
 
-	RangeCheckInclusive( Scalar::zero, _xSize, Scalar( _display.XSize(), 0 ) );
-	RangeCheckInclusive( Scalar::zero, _ySize, Scalar( _display.YSize(), 0 ) );
+	RangeCheckScalarInclusive( Scalar::zero, _xSize, Scalar( _display.XSize(), 0 ) );
+	RangeCheckScalarInclusive( Scalar::zero, _ySize, Scalar( _display.YSize(), 0 ) );
 #endif
 }
 
@@ -122,17 +122,7 @@ INLINE void
 ViewPort::Clear()
 {
 	Validate();
-#if defined(RENDERER_PIPELINE_GL)
 	// do nothing
-#elif defined(RENDERER_PIPELINE_SOFTWARE) || defined(RENDERER_PIPELINE_PSX)
-
-#if defined(USE_ORDER_TABLES)
-	GetConstructionOrderTable().Clear();
-	_primitives[_display.GetConstructionOrderTableIndex()].Clear();
-#else
-#error now what?
-#endif
-#endif
 }
 
 //============================================================================

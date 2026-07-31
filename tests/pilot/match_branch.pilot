@@ -1,0 +1,11 @@
+R:pilot
+R:@tier vm
+R:@desc M: relational sets the match flag; TY:/TN: conditioners select the branch
+R:@expect-exit 0
+R:@expect-out big
+R:@expect-no-out small
+C:#x = 10
+M:#x > 5
+TY:big
+TN:small
+E:

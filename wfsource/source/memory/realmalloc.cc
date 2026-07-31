@@ -46,7 +46,7 @@ struct FileLine
 		ALLOCATED = 'ALOC',
 		FREED = 'FREE'
 	};
-	long _state;
+	int32 _state;
 	int _size;			                // size of allocation
 #if REALMALLOC_TRACK_LINE_AND_FILE
 	char* _file;						// file and line allocation occured on

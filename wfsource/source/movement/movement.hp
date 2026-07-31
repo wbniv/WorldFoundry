@@ -75,6 +75,11 @@ public:
 	virtual void SetStunTime(MovementManager& movementManager, Scalar duration);
    virtual size_t DataSize();                // returns how much storage this handler uses
 
+	// Pushed up from CameraHandler so Camera::GetWatchObject() can call it
+	// directly on a MovementHandler& without downcasting. Non-camera handlers
+	// inherit the default (no watched object). See docs/plans/2026-04-29-eliminate-rtti.md.
+	virtual const PhysicalObject* GetWatchObject(const MovementObject& movementObject) const { return nullptr; }
+
 protected:
 	// Helper methods for derived handlers
 	Vector3		SumForceVectors(MovementObject& movementObject);
@@ -121,6 +126,20 @@ public:
 };
 
 //============================================================================
+// Handler for marble / sphere physics: full 3D velocity carries over each frame,
+// gravity drives slope rolling, player input adds impulses.  Selected when
+// TurnRate == 0 (set in actor OAD).
+class MarbleHandler : public MovementHandler
+{
+public:
+    virtual void init(MovementManager& movementManager, MovementObject& movementObject);
+    virtual bool check();
+    virtual bool update(MovementManager& movementManager, MovementObject& movementObject, const BaseObjectList& baseObjectList);
+    virtual void predictPosition(MovementManager& movementManager, MovementObject& movementObject, const Clock& clock, const BaseObjectList& baseObjectList);
+    virtual void SetStunTime(MovementManager& movementManager, Scalar newTime);
+};
+
+//============================================================================
 // "Catch-all" handler for states no other handler can deal with.  If this is
 // ever selected by an object of MOBILITY == PHYSICS, something is wrong.
 class NullHandler : public MovementHandler
@@ -137,14 +156,13 @@ public:
 
 extern GroundHandler	theGroundHandler;
 extern AirHandler		theAirHandler;
+extern MarbleHandler	theMarbleHandler;
 extern ClimbHandler		theClimbHandler;
 extern NullHandler		theNullHandler;
 
 extern MovementHandler* physicsHandlerTable[];
 extern MovementHandler* cameraHandlerTable[];
 
-//==============================================================================
-#include "movement.hpi"  // include all inline definitions as appropriate
 //==============================================================================
 #endif // _MOVEMENT_HP
 //==============================================================================

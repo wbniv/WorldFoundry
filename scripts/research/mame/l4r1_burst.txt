@@ -1,0 +1,169 @@
+[INFO] cheat ON
+[round 1] ram=0x04 frame=1101
+[round 2] ram=0x05 frame=1281
+[round 3] ram=0x06 frame=1537
+[round 4] ram=0x07 frame=1793
+[round 5] ram=0x08 frame=2049
+[round 6] ram=0x09 frame=2305
+[round 7] ram=0x0A frame=2561
+[round 8] ram=0x0B frame=2817
+[round 9] ram=0x0C frame=3073
+[round 10] ram=0x0D frame=3329
+[round 11] ram=0x0E frame=3585
+[round 12] ram=0x0F frame=3841
+[round 13] ram=0x10 frame=4097
+[round 14] ram=0x11 frame=4353
+[round 15] ram=0x12 frame=4609
+[round 16] ram=0x13 frame=4865
+[snap L4R1_burst_start] idx=0000 frame=4865 ram=0x13
+[snap burst_001] idx=0001 frame=4873 ram=0x13
+[snap burst_002] idx=0002 frame=4881 ram=0x13
+[snap burst_003] idx=0003 frame=4889 ram=0x13
+[snap burst_004] idx=0004 frame=4897 ram=0x13
+[snap burst_005] idx=0005 frame=4905 ram=0x13
+[snap burst_006] idx=0006 frame=4913 ram=0x13
+[snap burst_007] idx=0007 frame=4921 ram=0x13
+[snap burst_008] idx=0008 frame=4929 ram=0x13
+[snap burst_009] idx=0009 frame=4937 ram=0x13
+[snap burst_010] idx=0010 frame=4945 ram=0x13
+[snap burst_011] idx=0011 frame=4953 ram=0x13
+[snap burst_012] idx=0012 frame=4961 ram=0x13
+[snap burst_013] idx=0013 frame=4969 ram=0x13
+[snap burst_014] idx=0014 frame=4977 ram=0x13
+[snap burst_015] idx=0015 frame=4985 ram=0x13
+[snap burst_016] idx=0016 frame=4993 ram=0x13
+[snap burst_017] idx=0017 frame=5001 ram=0x13
+[snap burst_018] idx=0018 frame=5009 ram=0x13
+[snap burst_019] idx=0019 frame=5017 ram=0x13
+[snap burst_020] idx=0020 frame=5025 ram=0x13
+[snap burst_021] idx=0021 frame=5033 ram=0x13
+[snap burst_022] idx=0022 frame=5041 ram=0x13
+[snap burst_023] idx=0023 frame=5049 ram=0x13
+[snap burst_024] idx=0024 frame=5057 ram=0x13
+[snap burst_025] idx=0025 frame=5065 ram=0x13
+[snap burst_026] idx=0026 frame=5073 ram=0x13
+[snap burst_027] idx=0027 frame=5081 ram=0x13
+[snap burst_028] idx=0028 frame=5089 ram=0x13
+[snap burst_029] idx=0029 frame=5097 ram=0x13
+[snap burst_030] idx=0030 frame=5105 ram=0x13
+[snap burst_031] idx=0031 frame=5113 ram=0x13
+[snap burst_032] idx=0032 frame=5121 ram=0x14
+[snap burst_033] idx=0033 frame=5129 ram=0x14
+[snap burst_034] idx=0034 frame=5137 ram=0x14
+[snap burst_035] idx=0035 frame=5145 ram=0x14
+[snap burst_036] idx=0036 frame=5153 ram=0x14
+[snap burst_037] idx=0037 frame=5161 ram=0x14
+[snap burst_038] idx=0038 frame=5169 ram=0x14
+[snap burst_039] idx=0039 frame=5177 ram=0x14
+[snap burst_040] idx=0040 frame=5185 ram=0x14
+[snap burst_041] idx=0041 frame=5193 ram=0x14
+[snap burst_042] idx=0042 frame=5201 ram=0x14
+[snap burst_043] idx=0043 frame=5209 ram=0x14
+[snap burst_044] idx=0044 frame=5217 ram=0x14
+[snap burst_045] idx=0045 frame=5225 ram=0x14
+[snap burst_046] idx=0046 frame=5233 ram=0x14
+[snap burst_047] idx=0047 frame=5241 ram=0x14
+[snap burst_048] idx=0048 frame=5249 ram=0x14
+[snap burst_049] idx=0049 frame=5257 ram=0x14
+[snap burst_050] idx=0050 frame=5265 ram=0x14
+[snap burst_051] idx=0051 frame=5273 ram=0x14
+[snap burst_052] idx=0052 frame=5281 ram=0x14
+[snap burst_053] idx=0053 frame=5289 ram=0x14
+[snap burst_054] idx=0054 frame=5297 ram=0x14
+[snap burst_055] idx=0055 frame=5305 ram=0x14
+[snap burst_056] idx=0056 frame=5313 ram=0x14
+[snap burst_057] idx=0057 frame=5321 ram=0x14
+[snap burst_058] idx=0058 frame=5329 ram=0x14
+[snap burst_059] idx=0059 frame=5337 ram=0x14
+[snap burst_060] idx=0060 frame=5345 ram=0x14
+[snap burst_061] idx=0061 frame=5353 ram=0x14
+[snap burst_062] idx=0062 frame=5361 ram=0x14
+[snap burst_063] idx=0063 frame=5369 ram=0x14
+[snap burst_064] idx=0064 frame=5377 ram=0x15
+[snap burst_065] idx=0065 frame=5385 ram=0x15
+[snap burst_066] idx=0066 frame=5393 ram=0x15
+[snap burst_067] idx=0067 frame=5401 ram=0x15
+[snap burst_068] idx=0068 frame=5409 ram=0x15
+[snap burst_069] idx=0069 frame=5417 ram=0x15
+[snap burst_070] idx=0070 frame=5425 ram=0x15
+[snap burst_071] idx=0071 frame=5433 ram=0x15
+[snap burst_072] idx=0072 frame=5441 ram=0x15
+[snap burst_073] idx=0073 frame=5449 ram=0x15
+[snap burst_074] idx=0074 frame=5457 ram=0x15
+[snap burst_075] idx=0075 frame=5465 ram=0x15
+[snap burst_076] idx=0076 frame=5473 ram=0x15
+[snap burst_077] idx=0077 frame=5481 ram=0x15
+[snap burst_078] idx=0078 frame=5489 ram=0x15
+[snap burst_079] idx=0079 frame=5497 ram=0x15
+[snap burst_080] idx=0080 frame=5505 ram=0x15
+[snap burst_081] idx=0081 frame=5513 ram=0x15
+[snap burst_082] idx=0082 frame=5521 ram=0x15
+[snap burst_083] idx=0083 frame=5529 ram=0x15
+[snap burst_084] idx=0084 frame=5537 ram=0x15
+[snap burst_085] idx=0085 frame=5545 ram=0x15
+[snap burst_086] idx=0086 frame=5553 ram=0x15
+[snap burst_087] idx=0087 frame=5561 ram=0x15
+[snap burst_088] idx=0088 frame=5569 ram=0x15
+[snap burst_089] idx=0089 frame=5577 ram=0x15
+[snap burst_090] idx=0090 frame=5585 ram=0x15
+[snap burst_091] idx=0091 frame=5593 ram=0x15
+[snap burst_092] idx=0092 frame=5601 ram=0x15
+[snap burst_093] idx=0093 frame=5609 ram=0x15
+[snap burst_094] idx=0094 frame=5617 ram=0x15
+[snap burst_095] idx=0095 frame=5625 ram=0x15
+[snap burst_096] idx=0096 frame=5633 ram=0x16
+[snap burst_097] idx=0097 frame=5641 ram=0x16
+[snap burst_098] idx=0098 frame=5649 ram=0x16
+[snap burst_099] idx=0099 frame=5657 ram=0x16
+[snap burst_100] idx=0100 frame=5665 ram=0x16
+[snap burst_101] idx=0101 frame=5673 ram=0x16
+[snap burst_102] idx=0102 frame=5681 ram=0x16
+[snap burst_103] idx=0103 frame=5689 ram=0x16
+[snap burst_104] idx=0104 frame=5697 ram=0x16
+[snap burst_105] idx=0105 frame=5705 ram=0x16
+[snap burst_106] idx=0106 frame=5713 ram=0x16
+[snap burst_107] idx=0107 frame=5721 ram=0x16
+[snap burst_108] idx=0108 frame=5729 ram=0x16
+[snap burst_109] idx=0109 frame=5737 ram=0x16
+[snap burst_110] idx=0110 frame=5745 ram=0x16
+[snap burst_111] idx=0111 frame=5753 ram=0x16
+[snap burst_112] idx=0112 frame=5761 ram=0x16
+[snap burst_113] idx=0113 frame=5769 ram=0x16
+[snap burst_114] idx=0114 frame=5777 ram=0x16
+[snap burst_115] idx=0115 frame=5785 ram=0x16
+[snap burst_116] idx=0116 frame=5793 ram=0x16
+[snap burst_117] idx=0117 frame=5801 ram=0x16
+[snap burst_118] idx=0118 frame=5809 ram=0x16
+[snap burst_119] idx=0119 frame=5817 ram=0x16
+[snap burst_120] idx=0120 frame=5825 ram=0x16
+[snap burst_121] idx=0121 frame=5833 ram=0x16
+[snap burst_122] idx=0122 frame=5841 ram=0x16
+[snap burst_123] idx=0123 frame=5849 ram=0x16
+[snap burst_124] idx=0124 frame=5857 ram=0x16
+[snap burst_125] idx=0125 frame=5865 ram=0x16
+[snap burst_126] idx=0126 frame=5873 ram=0x16
+[snap burst_127] idx=0127 frame=5881 ram=0x16
+[snap burst_128] idx=0128 frame=5889 ram=0x17
+[snap burst_129] idx=0129 frame=5897 ram=0x17
+[snap burst_130] idx=0130 frame=5905 ram=0x17
+[snap burst_131] idx=0131 frame=5913 ram=0x17
+[snap burst_132] idx=0132 frame=5921 ram=0x17
+[snap burst_133] idx=0133 frame=5929 ram=0x17
+[snap burst_134] idx=0134 frame=5937 ram=0x17
+[snap burst_135] idx=0135 frame=5945 ram=0x17
+[snap burst_136] idx=0136 frame=5953 ram=0x17
+[snap burst_137] idx=0137 frame=5961 ram=0x17
+[snap burst_138] idx=0138 frame=5969 ram=0x17
+[snap burst_139] idx=0139 frame=5977 ram=0x17
+[snap burst_140] idx=0140 frame=5985 ram=0x17
+[snap burst_141] idx=0141 frame=5993 ram=0x17
+[snap burst_142] idx=0142 frame=6001 ram=0x17
+[snap burst_143] idx=0143 frame=6009 ram=0x17
+[snap burst_144] idx=0144 frame=6017 ram=0x17
+[snap burst_145] idx=0145 frame=6025 ram=0x17
+[snap burst_146] idx=0146 frame=6033 ram=0x17
+[snap burst_147] idx=0147 frame=6041 ram=0x17
+[snap burst_148] idx=0148 frame=6049 ram=0x17
+[snap burst_149] idx=0149 frame=6057 ram=0x17
+[snap burst_150] idx=0150 frame=6065 ram=0x17
+[done] captured 151 burst frames

@@ -88,8 +88,8 @@ ToolNeedleGun::activate()
 
 		while( !objects.Empty() )
 		{
-         Actor* actor = dynamic_cast<Actor*>(&(*objects));
-         assert(ValidPtr(actor));
+         assert(IsActor(&(*objects)));
+         Actor* actor = static_cast<Actor*>(&(*objects));
 			if ( actor->IsNeedleGunTarget() )
 			{
 				candidate.actor = actor;
@@ -166,7 +166,7 @@ ToolNeedleGun::activate()
 
 	// Run this tool's activation script (if it has one)
 	if (_pScript)
-      theLevel->EvalScript(_pScript,GetActorIndex());
+      theLevel->EvalScript(_pScript,GetActorIndex(),0);  // TODO: ActivationScriptLanguage (tool.oas)
 }
 
 //============================================================================

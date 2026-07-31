@@ -1,0 +1,56 @@
+# vscode config
+.vscode/*
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+*.wasm
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Linker files
+*.ilk
+
+# Debugger Files
+*.pdb
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Ficl Stuff
+.ficl_history
+ficl
+ficl_wasm.js
+ficl_wasm.wasm
+
+# debug information files
+*.dwo
+.DS_Store
+
+# generated sources
+softcore.c
+

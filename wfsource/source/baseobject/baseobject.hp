@@ -45,7 +45,7 @@ public:
    virtual ~BaseObject();
    void Validate() const;
 
-	bool sendMsg(const int16 msgType, const int32 msgData);
+	bool sendMsg(const int16 msgType, const uintptr_t msgData);
 	bool sendMsg(const int16 msgType, const void* msgData,uint32 msgDataSize);
 
    virtual MsgPort& GetMsgPort() = 0;
@@ -68,7 +68,19 @@ public:
 		MAX_OBJECT_TYPES
 	};
 
-	virtual EActorKind kind() const = 0;         // manual RTTI, investigate removing
+	// Type dispatch — the engine's load-bearing downcast mechanism, used in
+	// place of C++ `dynamic_cast`. Not a poor-man's-RTTI placeholder to remove
+	// later: RTTI is fine in principle but costs where WF ships. On the
+	// fixed-point MCU targets (Cortex-M7/M33, ESP32; see
+	// docs/investigations/2026-05-10-fixed-point-platform-survey.md) `type_info`
+	// tables eat flash (~5-20 KB, 2026-04-18 audit) and per-contact
+	// `dynamic_cast` tree-walks burn cycles in hot loops, and RTTI support is
+	// uneven across those toolchains. On 64-bit dev hosts the cost is
+	// negligible — but `kind()` + `static_cast` is zero-overhead, greppable,
+	// and `-fno-rtti`-enforceable regardless, so it stays the convention.
+	// Pair `kind()` with `static_cast`; see `IsActor` / `IsMovementObject` /
+	// `IsPhysicalObject` below.
+	virtual EActorKind kind() const = 0;
 
 //------------------------------------------------------------------------------
 protected:
@@ -84,14 +96,29 @@ protected:
    // values all point to the same actual data bytes in order to save memory.
    const void*	const _oadData;
 
-   const CommonBlock _commonBlock;           // this is the CommonBlock which the oadData offsets point into (probably the same for all objects) 
+   const CommonBlock _commonBlock;           // this is the CommonBlock which the oadData offsets point into (probably the same for all objects)
 };
 
 //==============================================================================
+// kind()-based type predicates — replace dynamic_cast.
+//
+// Every concrete BaseObject in the engine derives from Actor (which extends
+// MovementObject : PhysicalObject : BaseObject). The five sentinel _KIND
+// values (NULL/Room/LevelObj/Disabled/Alias) are not overridden by any live
+// kind() implementation. Therefore every non-null BaseObject is also a
+// PhysicalObject, MovementObject, and Actor — these predicates are trivial
+// today but provide a single update point if a non-Actor BaseObject is ever
+// added.
+inline bool IsActor(const BaseObject* bo)          { return bo; }
+inline bool IsMovementObject(const BaseObject* bo) { return bo; }
+inline bool IsPhysicalObject(const BaseObject* bo) { return bo; }
 
-class BaseObjectIterator 
+//==============================================================================
+
+class BaseObjectIterator
 {
 public:
+    virtual ~BaseObjectIterator() {}
     virtual BaseObject& operator*() = 0;
     virtual BaseObjectIterator& operator++() = 0;
     virtual BaseObjectIterator& operator+=(int offset);              // will do it the slow way by default

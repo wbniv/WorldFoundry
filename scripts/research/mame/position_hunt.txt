@@ -1,0 +1,20 @@
+[INFO] PLAY
+[snap apex_a] frame=1350
+[snap c11] frame=1411
+[snap c21_a] frame=1472
+[snap c32] frame=1533
+[snap c21_b] frame=1594
+[snap c10_a] frame=1655
+[snap apex_b] frame=1716
+[snap c10_b] frame=1777
+[snap apex_c] frame=1838
+
+=== STRICT POSITION-BYTE CANDIDATES ===
+apex stable across 3 visits AND each cube has unique value
+AND same-cube revisits match (c21_a==c21_b, c10_a==c10_b)
+
+  0x0D64: apex=0xB8 (1,1)=0xF5 (2,1)=0xB2 (3,2)=0xEF (1,0)=0x75
+
+1 STRICT candidates
+
+[done]

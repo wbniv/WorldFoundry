@@ -35,13 +35,7 @@
 
 //==============================================================================
 
-#if defined PHYSICS_ENGINE_ODE
-#include "ode/physical.cc"
-#elif defined PHYSICS_ENGINE_WF
 #include "wf/physical.cc"
-#else
-#error physics engine not defined! 
-#endif
 
 #define DO_3RD_CHECK
                                   

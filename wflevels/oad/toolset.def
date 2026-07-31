@@ -1,0 +1,14 @@
+;============================================================================
+; toolset.def: created from OADdef.S and toolset.oas DO NOT MODIFY
+;============================================================================
+;##ifndef toolset_HT
+;##define toolset_HT
+	( define OAD_ToolA 0 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_ToolB 4 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_ToolC 8 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_ToolD 12 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_ToolE 16 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+	( define OAD_ToolF 20 )	; Object Reference: index into master object list, = OBJECT_NULL if no reference
+;============================================================================
+;##endif         ; toolset_DEF
+;============================================================================

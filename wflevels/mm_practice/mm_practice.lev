@@ -1,0 +1,4522 @@
+
+{ 'LVL' 
+	{ 'OBJ' 
+		{ 'NAME' "Ramp" 
+		}
+		{ 'VEC3' 
+			{ 'NAME' "Position" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 10.0000000000000000(1.15.16) 2.0000000000000000(1.15.16)  //x,y,z
+					
+			}
+		}
+		{ 'EULR' 
+			{ 'NAME' "Orientation" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+					
+			}
+		}
+		{ 'BOX3' 
+			{ 'NAME' "Global Bounding Box" 
+			}
+			{ 'DATA' -5.0000000000000000(1.15.16) -10.0000000000000000(1.15.16) -2.0000000000000000(1.15.16) 5.0000000000000000(1.15.16) 10.0000000000000000(1.15.16) 2.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+					
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Class Name" 
+			}
+			{ 'DATA' "statplat" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Mobility" 
+			}
+			{ 'STR' "Anchored" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Moves Between Rooms" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Movement Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Step Size" 
+			}
+			{ 'DATA' 0.5500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.55" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vertical Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horizontal Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "At End Of Path" 
+			}
+			{ 'STR' "Ping-Pong" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Object To Follow" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Follow Offset" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Deceleration" 
+			}
+			{ 'DATA' 0.9000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.9" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Ground Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Turn Rate" 
+			}
+			{ 'DATA' 5.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "5.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Crawling Acceleration" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Acceleration" 
+			}
+			{ 'DATA' 18.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "18.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Momentum Transfer" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Air Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horiz Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vert Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Air Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Falling Acceleration" 
+			}
+			{ 'DATA' 9.8100000000000005(1.15.16) 
+			}
+			{ 'STR' "9.81" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Fall Anim Threshold" 
+			}
+			{ 'DATA' 2.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Threshold" 
+			}
+			{ 'DATA' 2.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Duration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool A" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool B" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool C" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool D" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool E" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool F" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Mass" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Surface Friction" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "hp" 
+			}
+			{ 'DATA' 32767.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "32767.0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Local Mailboxes" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Poof" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Is Needle Gun Target" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Write To Mailbox On Death" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Script Controls Input" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'FILE' 
+			{ 'NAME' "Mesh Name" 
+			}
+			{ 'STR' "ramp.iff" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Model Type" 
+			}
+			{ 'STR' "Mesh" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Animation Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Visibility Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Shadow Object Template" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Check Below Only Once" 
+			}
+			{ 'DATA' 1l  //False|True
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Template Object" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Actboxor01" 
+		}
+		{ 'VEC3' 
+			{ 'NAME' "Position" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 10.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+					
+			}
+		}
+		{ 'EULR' 
+			{ 'NAME' "Orientation" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+					
+			}
+		}
+		{ 'BOX3' 
+			{ 'NAME' "Global Bounding Box" 
+			}
+			{ 'DATA' -10.0000000000000000(1.15.16) -12.0000000000000000(1.15.16) -6.0000000000000000(1.15.16) 10.0000000000000000(1.15.16) 12.0000000000000000(1.15.16) 4.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+					
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Class Name" 
+			}
+			{ 'DATA' "actboxor" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Mobility" 
+			}
+			{ 'STR' "Anchored" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Moves Between Rooms" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Movement Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Step Size" 
+			}
+			{ 'DATA' 0.5500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.55" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vertical Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horizontal Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "At End Of Path" 
+			}
+			{ 'STR' "Ping-Pong" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Object To Follow" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Follow Offset" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Deceleration" 
+			}
+			{ 'DATA' 0.9000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.9" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Ground Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Turn Rate" 
+			}
+			{ 'DATA' 5.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "5.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Crawling Acceleration" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Acceleration" 
+			}
+			{ 'DATA' 18.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "18.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Momentum Transfer" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Air Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horiz Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vert Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Air Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Falling Acceleration" 
+			}
+			{ 'DATA' 9.8100000000000005(1.15.16) 
+			}
+			{ 'STR' "9.81" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Fall Anim Threshold" 
+			}
+			{ 'DATA' 2.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Threshold" 
+			}
+			{ 'DATA' 2.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Duration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool A" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool B" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool C" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool D" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool E" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool F" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Mass" 
+			}
+			{ 'DATA' 75.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "75.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Surface Friction" 
+			}
+			{ 'DATA' 0.9500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.95" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "hp" 
+			}
+			{ 'DATA' 32767.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "32767.0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Local Mailboxes" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Poof" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Is Needle Gun Target" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Write To Mailbox On Death" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Script Controls Input" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'FILE' 
+			{ 'NAME' "Mesh Name" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Model Type" 
+			}
+			{ 'STR' "None" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Animation Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Visibility Mailbox" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Shadow Object Template" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Check Below Only Once" 
+			}
+			{ 'DATA' 1l  //False|True
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Template Object" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "MailBox" 
+			}
+			{ 'DATA' 100l  //
+					
+			}
+			{ 'STR' "100" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Object" 
+			}
+			{ 'STR' "CamShot01" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Activated By" 
+			}
+			{ 'DATA' 0l  //All|Actor|Class|List
+					
+			}
+			{ 'STR' "All" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Activated By Actor" 
+			}
+			{ 'STR' "Player" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Activated By Class" 
+			}
+			{ 'STR' "" 
+			}
+		}
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Room01" 
+		}
+		{ 'VEC3' 
+			{ 'NAME' "Position" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 10.0000000000000000(1.15.16) 3.0000000000000000(1.15.16)  //x,y,z
+					
+			}
+		}
+		{ 'EULR' 
+			{ 'NAME' "Orientation" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+					
+			}
+		}
+		{ 'BOX3' 
+			{ 'NAME' "Global Bounding Box" 
+			}
+			{ 'DATA' -25.0000000000000000(1.15.16) -25.0000000000000000(1.15.16) -35.0000000000000000(1.15.16) 25.0000000000000000(1.15.16) 45.0000000000000000(1.15.16) 25.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+					
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Class Name" 
+			}
+			{ 'DATA' "room" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "hp" 
+			}
+			{ 'DATA' 32767.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "32767.0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Local Mailboxes" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Poof" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Is Needle Gun Target" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Write To Mailbox On Death" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Script Controls Input" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Adjacent Room 1" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Adjacent Room 2" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Room Loaded Mailbox" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Omni01" 
+		}
+		{ 'VEC3' 
+			{ 'NAME' "Position" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 10.0000000000000000(1.15.16) 6.0000000000000000(1.15.16)  //x,y,z
+					
+			}
+		}
+		{ 'EULR' 
+			{ 'NAME' "Orientation" 
+			}
+			{ 'DATA' 1.5707963000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+					
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Class Name" 
+			}
+			{ 'DATA' "light" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Mobility" 
+			}
+			{ 'STR' "Anchored" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Moves Between Rooms" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Movement Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Step Size" 
+			}
+			{ 'DATA' 0.5500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.55" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vertical Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horizontal Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "At End Of Path" 
+			}
+			{ 'STR' "Ping-Pong" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Object To Follow" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Follow Offset" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Deceleration" 
+			}
+			{ 'DATA' 0.9000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.9" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Ground Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Turn Rate" 
+			}
+			{ 'DATA' 5.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "5.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Crawling Acceleration" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Acceleration" 
+			}
+			{ 'DATA' 18.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "18.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Momentum Transfer" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Air Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horiz Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vert Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Air Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Falling Acceleration" 
+			}
+			{ 'DATA' 9.8100000000000005(1.15.16) 
+			}
+			{ 'STR' "9.81" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Fall Anim Threshold" 
+			}
+			{ 'DATA' 2.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Threshold" 
+			}
+			{ 'DATA' 2.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Duration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool A" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool B" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool C" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool D" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool E" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool F" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Mass" 
+			}
+			{ 'DATA' 75.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "75.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Surface Friction" 
+			}
+			{ 'DATA' 0.9500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.95" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "hp" 
+			}
+			{ 'DATA' 32767.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "32767.0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Local Mailboxes" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Poof" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Is Needle Gun Target" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Write To Mailbox On Death" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Script Controls Input" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'FILE' 
+			{ 'NAME' "Mesh Name" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Model Type" 
+			}
+			{ 'STR' "None" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Animation Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Visibility Mailbox" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Shadow Object Template" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Check Below Only Once" 
+			}
+			{ 'DATA' 1l  //False|True
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Template Object" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "lightRed" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.000000" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "lightGreen" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.000000" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "lightBlue" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.000000" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "lightType" 
+			}
+			{ 'DATA' 1l  //Directional|Ambient
+					
+			}
+			{ 'STR' "Ambient" 
+			}
+		}
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Camera" 
+		}
+		{ 'VEC3' 
+			{ 'NAME' "Position" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) -2.0000000000000000(1.15.16) 7.0000000000000000(1.15.16)  //x,y,z
+					
+			}
+		}
+		{ 'EULR' 
+			{ 'NAME' "Orientation" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+					
+			}
+		}
+		{ 'BOX3' 
+			{ 'NAME' "Global Bounding Box" 
+			}
+			{ 'DATA' -0.5000000000000000(1.15.16) -0.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.5000000000000000(1.15.16) 0.5000000000000000(1.15.16) 1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+					
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Class Name" 
+			}
+			{ 'DATA' "camera" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Mobility" 
+			}
+			{ 'STR' "Camera" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Moves Between Rooms" 
+			}
+			{ 'DATA' 1l  //False|True
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Movement Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Step Size" 
+			}
+			{ 'DATA' 0.5500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.55" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vertical Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horizontal Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "At End Of Path" 
+			}
+			{ 'STR' "Ping-Pong" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Object To Follow" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Follow Offset" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Deceleration" 
+			}
+			{ 'DATA' 0.9000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.9" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Ground Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Turn Rate" 
+			}
+			{ 'DATA' 5.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "5.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Crawling Acceleration" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Acceleration" 
+			}
+			{ 'DATA' 18.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "18.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Momentum Transfer" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Air Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horiz Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vert Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Air Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Falling Acceleration" 
+			}
+			{ 'DATA' 9.8100000000000005(1.15.16) 
+			}
+			{ 'STR' "9.81" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Fall Anim Threshold" 
+			}
+			{ 'DATA' 2.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Threshold" 
+			}
+			{ 'DATA' 2.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Duration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool A" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool B" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool C" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool D" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool E" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool F" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Mass" 
+			}
+			{ 'DATA' 75.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "75.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Surface Friction" 
+			}
+			{ 'DATA' 0.9499970000000000(1.15.16) 
+			}
+			{ 'STR' "0.949997" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "hp" 
+			}
+			{ 'DATA' 32767.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "32767.0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Local Mailboxes" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Poof" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Is Needle Gun Target" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Write To Mailbox On Death" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Script Controls Input" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'FILE' 
+			{ 'NAME' "Mesh Name" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Model Type" 
+			}
+			{ 'STR' "Box" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Animation Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Visibility Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Shadow Object Template" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Check Below Only Once" 
+			}
+			{ 'DATA' 1l  //False|True
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Template Object" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "FoggingColor" 
+			}
+			{ 'DATA' 8947848l  //
+					
+			}
+			{ 'STR' "8947848" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "FoggingStartDistance" 
+			}
+			{ 'DATA' 500.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "500.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "FoggingCompleteDistance" 
+			}
+			{ 'DATA' 1000.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1000.0" 
+			}
+		}
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Director" 
+		}
+		{ 'VEC3' 
+			{ 'NAME' "Position" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 10.0000000000000000(1.15.16) 5.0000000000000000(1.15.16)  //x,y,z
+					
+			}
+		}
+		{ 'EULR' 
+			{ 'NAME' "Orientation" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+					
+			}
+		}
+		{ 'BOX3' 
+			{ 'NAME' "Global Bounding Box" 
+			}
+			{ 'DATA' -0.5000000000000000(1.15.16) -0.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.5000000000000000(1.15.16) 0.5000000000000000(1.15.16) 1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+					
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Class Name" 
+			}
+			{ 'DATA' "director" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Mobility" 
+			}
+			{ 'STR' "Anchored" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Moves Between Rooms" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Movement Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Step Size" 
+			}
+			{ 'DATA' 0.5500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.55" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vertical Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horizontal Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "At End Of Path" 
+			}
+			{ 'STR' "Ping-Pong" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Object To Follow" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Follow Offset" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Deceleration" 
+			}
+			{ 'DATA' 0.9000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.9" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Ground Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Turn Rate" 
+			}
+			{ 'DATA' 5.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "5.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Crawling Acceleration" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Acceleration" 
+			}
+			{ 'DATA' 18.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "18.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Momentum Transfer" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Air Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horiz Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vert Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Air Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Falling Acceleration" 
+			}
+			{ 'DATA' 9.8100000000000005(1.15.16) 
+			}
+			{ 'STR' "9.81" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Fall Anim Threshold" 
+			}
+			{ 'DATA' 2.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Threshold" 
+			}
+			{ 'DATA' 2.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Duration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool A" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool B" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool C" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool D" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool E" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool F" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Mass" 
+			}
+			{ 'DATA' 75.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "75.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Surface Friction" 
+			}
+			{ 'DATA' 0.9500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.95" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "hp" 
+			}
+			{ 'DATA' 32767.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "32767.0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Local Mailboxes" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Poof" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Is Needle Gun Target" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Write To Mailbox On Death" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Script" 
+			}
+			{ 'STR' "\\ wf\n: init-game  INDEXOF_TIME read-mailbox 90 +  2 write-mailbox  3 72 write-mailbox  0 70 write-mailbox ;\n2 read-mailbox 0 = if init-game then\n2 read-mailbox INDEXOF_TIME read-mailbox -  dup 71 write-mailbox  0 <= if 1 INDEXOF_END_OF_LEVEL write-mailbox then\n13 read-mailbox 0 <> if  0 13 write-mailbox  72 read-mailbox 1 -  dup 72 write-mailbox  0 <= if 1 INDEXOF_END_OF_LEVEL write-mailbox then  then\n100 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 99 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n 98 read-mailbox dup 0 <> if INDEXOF_CAMSHOT write-mailbox else drop then\n"
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Script Controls Input" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'FILE' 
+			{ 'NAME' "Mesh Name" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Model Type" 
+			}
+			{ 'STR' "None" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Animation Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Visibility Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Shadow Object Template" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Check Below Only Once" 
+			}
+			{ 'DATA' 1l  //False|True
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Template Object" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Level" 
+		}
+		{ 'VEC3' 
+			{ 'NAME' "Position" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 10.0000000000000000(1.15.16) 5.0000000000000000(1.15.16)  //x,y,z
+					
+			}
+		}
+		{ 'EULR' 
+			{ 'NAME' "Orientation" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+					
+			}
+		}
+		{ 'BOX3' 
+			{ 'NAME' "Global Bounding Box" 
+			}
+			{ 'DATA' -0.5000000000000000(1.15.16) -0.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.5000000000000000(1.15.16) 0.5000000000000000(1.15.16) 1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+					
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Class Name" 
+			}
+			{ 'DATA' "levelobj" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Mobility" 
+			}
+			{ 'STR' "Anchored" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Moves Between Rooms" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Movement Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Step Size" 
+			}
+			{ 'DATA' 0.5500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.55" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vertical Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horizontal Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "At End Of Path" 
+			}
+			{ 'STR' "Ping-Pong" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Object To Follow" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Follow Offset" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Deceleration" 
+			}
+			{ 'DATA' 0.9000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.9" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Ground Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Turn Rate" 
+			}
+			{ 'DATA' 5.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "5.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Crawling Acceleration" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Acceleration" 
+			}
+			{ 'DATA' 18.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "18.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Momentum Transfer" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Air Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horiz Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vert Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Air Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Falling Acceleration" 
+			}
+			{ 'DATA' 9.8100000000000005(1.15.16) 
+			}
+			{ 'STR' "9.81" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Fall Anim Threshold" 
+			}
+			{ 'DATA' 2.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Threshold" 
+			}
+			{ 'DATA' 2.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Duration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool A" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool B" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool C" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool D" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool E" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool F" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Mass" 
+			}
+			{ 'DATA' 75.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "75.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Surface Friction" 
+			}
+			{ 'DATA' 0.9499970000000000(1.15.16) 
+			}
+			{ 'STR' "0.949997" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "hp" 
+			}
+			{ 'DATA' 32767.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "32767.0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Local Mailboxes" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Poof" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Is Needle Gun Target" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Write To Mailbox On Death" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Script Controls Input" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'FILE' 
+			{ 'NAME' "Mesh Name" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Model Type" 
+			}
+			{ 'STR' "Box" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Animation Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Visibility Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Shadow Object Template" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Check Below Only Once" 
+			}
+			{ 'DATA' 1l  //False|True
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Template Object" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Mailboxes" 
+			}
+			{ 'DATA' 101l  //
+					
+			}
+			{ 'STR' "101" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Scratch Mailboxes" 
+			}
+			{ 'DATA' 10l  //
+					
+			}
+			{ 'STR' "10" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Temporary Objects" 
+			}
+			{ 'DATA' 200l  //
+					
+			}
+			{ 'STR' "200" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Sound Yon" 
+			}
+			{ 'DATA' 20.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "20.0" 
+			}
+		}
+		{ 'FILE' 
+			{ 'NAME' "MusicVh" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FILE' 
+			{ 'NAME' "MusicVb" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FILE' 
+			{ 'NAME' "MusicSeq" 
+			}
+			{ 'STR' "" 
+			}
+		}
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Matte" 
+		}
+		{ 'VEC3' 
+			{ 'NAME' "Position" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 10.0000000000000000(1.15.16) 5.0000000000000000(1.15.16)  //x,y,z
+					
+			}
+		}
+		{ 'EULR' 
+			{ 'NAME' "Orientation" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+					
+			}
+		}
+		{ 'BOX3' 
+			{ 'NAME' "Global Bounding Box" 
+			}
+			{ 'DATA' -0.5000000000000000(1.15.16) -0.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.5000000000000000(1.15.16) 0.5000000000000000(1.15.16) 1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+					
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Class Name" 
+			}
+			{ 'DATA' "matte" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Mobility" 
+			}
+			{ 'STR' "Anchored" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Moves Between Rooms" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Movement Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Step Size" 
+			}
+			{ 'DATA' 0.5500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.55" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vertical Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horizontal Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "At End Of Path" 
+			}
+			{ 'STR' "Ping-Pong" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Object To Follow" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Follow Offset" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Deceleration" 
+			}
+			{ 'DATA' 0.9000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.9" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Ground Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Turn Rate" 
+			}
+			{ 'DATA' 5.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "5.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Crawling Acceleration" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Acceleration" 
+			}
+			{ 'DATA' 18.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "18.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Momentum Transfer" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Air Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horiz Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vert Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Air Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Falling Acceleration" 
+			}
+			{ 'DATA' 9.8100000000000005(1.15.16) 
+			}
+			{ 'STR' "9.81" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Fall Anim Threshold" 
+			}
+			{ 'DATA' 2.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Threshold" 
+			}
+			{ 'DATA' 2.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Duration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool A" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool B" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool C" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool D" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool E" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool F" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Mass" 
+			}
+			{ 'DATA' 75.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "75.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Surface Friction" 
+			}
+			{ 'DATA' 0.9499970000000000(1.15.16) 
+			}
+			{ 'STR' "0.949997" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "hp" 
+			}
+			{ 'DATA' 32767.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "32767.0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Local Mailboxes" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Poof" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Is Needle Gun Target" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Write To Mailbox On Death" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Script Controls Input" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'FILE' 
+			{ 'NAME' "Mesh Name" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Model Type" 
+			}
+			{ 'STR' "Box" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Animation Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Visibility Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Shadow Object Template" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Check Below Only Once" 
+			}
+			{ 'DATA' 1l  //False|True
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Template Object" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Matte Type" 
+			}
+			{ 'DATA' 0l  //None|Color|Image
+					
+			}
+			{ 'STR' "Color" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Background Color" 
+			}
+			{ 'DATA' 12176l  //
+					
+			}
+			{ 'STR' "12176" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Debug Background Color" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "X Rotation Scale" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Y Rotation Scale" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1" 
+			}
+		}
+	}
+	{ 'OBJ' 
+		{ 'NAME' "CamShot01" 
+		}
+		{ 'VEC3' 
+			{ 'NAME' "Position" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) -2.0000000000000000(1.15.16) 7.0000000000000000(1.15.16)  //x,y,z
+					
+			}
+		}
+		{ 'EULR' 
+			{ 'NAME' "Orientation" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+					
+			}
+		}
+		{ 'BOX3' 
+			{ 'NAME' "Global Bounding Box" 
+			}
+			{ 'DATA' -0.5000000000000000(1.15.16) -0.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.5000000000000000(1.15.16) 0.5000000000000000(1.15.16) 1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+					
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Class Name" 
+			}
+			{ 'DATA' "camshot" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Mobility" 
+			}
+			{ 'STR' "Anchored" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Moves Between Rooms" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Movement Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Step Size" 
+			}
+			{ 'DATA' 0.5500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.55" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vertical Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horizontal Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "At End Of Path" 
+			}
+			{ 'STR' "Ping-Pong" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Object To Follow" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Follow Offset" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Deceleration" 
+			}
+			{ 'DATA' 0.9000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.9" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Ground Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Turn Rate" 
+			}
+			{ 'DATA' 5.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "5.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Crawling Acceleration" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Acceleration" 
+			}
+			{ 'DATA' 18.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "18.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Momentum Transfer" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Air Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horiz Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vert Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Air Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Falling Acceleration" 
+			}
+			{ 'DATA' 9.8100000000000005(1.15.16) 
+			}
+			{ 'STR' "9.81" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Fall Anim Threshold" 
+			}
+			{ 'DATA' 2.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Threshold" 
+			}
+			{ 'DATA' 2.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Duration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool A" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool B" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool C" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool D" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool E" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool F" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Mass" 
+			}
+			{ 'DATA' 75.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "75.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Surface Friction" 
+			}
+			{ 'DATA' 0.9499970000000000(1.15.16) 
+			}
+			{ 'STR' "0.949997" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "hp" 
+			}
+			{ 'DATA' 32767.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "32767.0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Local Mailboxes" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Poof" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Is Needle Gun Target" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Write To Mailbox On Death" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Script Controls Input" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'FILE' 
+			{ 'NAME' "Mesh Name" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Model Type" 
+			}
+			{ 'STR' "Box" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Animation Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Visibility Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Shadow Object Template" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Check Below Only Once" 
+			}
+			{ 'DATA' 1l  //False|True
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Template Object" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Target" 
+			}
+			{ 'STR' "Target02" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Follow" 
+			}
+			{ 'STR' "Target01" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Climb Rate" 
+			}
+			{ 'DATA' 5.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Elasticity" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Track Object Mailbox" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Track Object" 
+			}
+			{ 'STR' "Player" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Rotation" 
+			}
+			{ 'DATA' 0l  //Fixed|Track
+					
+			}
+			{ 'STR' "Track" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Position X" 
+			}
+			{ 'DATA' 0l  //Absolute|Relative
+					
+			}
+			{ 'STR' "Relative" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Position Y" 
+			}
+			{ 'DATA' 0l  //Absolute|Relative
+					
+			}
+			{ 'STR' "Relative" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Position Z" 
+			}
+			{ 'DATA' 0l  //Absolute|Relative
+					
+			}
+			{ 'STR' "Relative" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "FOV" 
+			}
+			{ 'DATA' 50.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "50" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Roll" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Pan Time In Seconds" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Hither" 
+			}
+			{ 'DATA' 0.1000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.1" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Yon" 
+			}
+			{ 'DATA' 1000.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1000" 
+			}
+		}
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Target01" 
+		}
+		{ 'VEC3' 
+			{ 'NAME' "Position" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 6.0000000000000000(1.15.16) 8.0000000000000000(1.15.16)  //x,y,z
+					
+			}
+		}
+		{ 'EULR' 
+			{ 'NAME' "Orientation" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+					
+			}
+		}
+		{ 'BOX3' 
+			{ 'NAME' "Global Bounding Box" 
+			}
+			{ 'DATA' -0.5000000000000000(1.15.16) -0.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.5000000000000000(1.15.16) 0.5000000000000000(1.15.16) 1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+					
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Class Name" 
+			}
+			{ 'DATA' "target" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Mobility" 
+			}
+			{ 'STR' "Anchored" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Moves Between Rooms" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Movement Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Step Size" 
+			}
+			{ 'DATA' 0.5500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.55" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vertical Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horizontal Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "At End Of Path" 
+			}
+			{ 'STR' "Ping-Pong" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Object To Follow" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Follow Offset" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Deceleration" 
+			}
+			{ 'DATA' 0.9000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.9" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Ground Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Turn Rate" 
+			}
+			{ 'DATA' 5.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "5.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Crawling Acceleration" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Acceleration" 
+			}
+			{ 'DATA' 18.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "18.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Momentum Transfer" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Air Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horiz Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vert Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Air Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Falling Acceleration" 
+			}
+			{ 'DATA' 9.8100000000000005(1.15.16) 
+			}
+			{ 'STR' "9.81" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Fall Anim Threshold" 
+			}
+			{ 'DATA' 2.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Threshold" 
+			}
+			{ 'DATA' 2.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Duration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool A" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool B" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool C" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool D" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool E" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool F" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Mass" 
+			}
+			{ 'DATA' 75.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "75.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Surface Friction" 
+			}
+			{ 'DATA' 0.9499970000000000(1.15.16) 
+			}
+			{ 'STR' "0.949997" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "hp" 
+			}
+			{ 'DATA' 32767.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "32767.0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Local Mailboxes" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Poof" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Is Needle Gun Target" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Write To Mailbox On Death" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Script Controls Input" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'FILE' 
+			{ 'NAME' "Mesh Name" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Model Type" 
+			}
+			{ 'STR' "Box" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Animation Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Visibility Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Shadow Object Template" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Check Below Only Once" 
+			}
+			{ 'DATA' 1l  //False|True
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Template Object" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Target02" 
+		}
+		{ 'VEC3' 
+			{ 'NAME' "Position" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 10.0000000000000000(1.15.16) 2.0000000000000000(1.15.16)  //x,y,z
+					
+			}
+		}
+		{ 'EULR' 
+			{ 'NAME' "Orientation" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+					
+			}
+		}
+		{ 'BOX3' 
+			{ 'NAME' "Global Bounding Box" 
+			}
+			{ 'DATA' -0.5000000000000000(1.15.16) -0.5000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.5000000000000000(1.15.16) 0.5000000000000000(1.15.16) 1.0000000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+					
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Class Name" 
+			}
+			{ 'DATA' "target" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Mobility" 
+			}
+			{ 'STR' "Anchored" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Moves Between Rooms" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Movement Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Step Size" 
+			}
+			{ 'DATA' 0.5500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.55" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vertical Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horizontal Elasticity" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "At End Of Path" 
+			}
+			{ 'STR' "Ping-Pong" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Object To Follow" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Follow Offset" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Deceleration" 
+			}
+			{ 'DATA' 0.9000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.9" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Ground Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Turn Rate" 
+			}
+			{ 'DATA' 5.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "5.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Crawling Acceleration" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Acceleration" 
+			}
+			{ 'DATA' 18.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "18.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Momentum Transfer" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Air Acceleration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horiz Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vert Air Drag" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Air Speed" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Falling Acceleration" 
+			}
+			{ 'DATA' 9.8100000000000005(1.15.16) 
+			}
+			{ 'STR' "9.81" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Fall Anim Threshold" 
+			}
+			{ 'DATA' 2.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Threshold" 
+			}
+			{ 'DATA' 2.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Duration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool A" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool B" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool C" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool D" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool E" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool F" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Mass" 
+			}
+			{ 'DATA' 75.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "75.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Surface Friction" 
+			}
+			{ 'DATA' 0.9499970000000000(1.15.16) 
+			}
+			{ 'STR' "0.949997" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "hp" 
+			}
+			{ 'DATA' 32767.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "32767.0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Local Mailboxes" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Poof" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Is Needle Gun Target" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Write To Mailbox On Death" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Script Controls Input" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'FILE' 
+			{ 'NAME' "Mesh Name" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Model Type" 
+			}
+			{ 'STR' "Box" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Animation Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Visibility Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Shadow Object Template" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Check Below Only Once" 
+			}
+			{ 'DATA' 1l  //False|True
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Template Object" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+	}
+	{ 'OBJ' 
+		{ 'NAME' "Player" 
+		}
+		{ 'VEC3' 
+			{ 'NAME' "Position" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 6.0000000000000000(1.15.16) 8.0000000000000000(1.15.16)  //x,y,z
+					
+			}
+		}
+		{ 'EULR' 
+			{ 'NAME' "Orientation" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.0000000000000000(1.15.16)  //a,b,c
+					
+			}
+		}
+		{ 'BOX3' 
+			{ 'NAME' "Global Bounding Box" 
+			}
+			{ 'DATA' -0.3300000000000000(1.15.16) -0.3300000000000000(1.15.16) 0.0000000000000000(1.15.16) 0.3300000000000000(1.15.16) 0.3300000000000000(1.15.16) 0.6600000000000000(1.15.16)  //min(x,y,z)-max(x,y,z)
+					
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Class Name" 
+			}
+			{ 'DATA' "player" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Mobility" 
+			}
+			{ 'STR' "Physics" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Moves Between Rooms" 
+			}
+			{ 'DATA' 1l  //False|True
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Movement Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Step Size" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vertical Elasticity" 
+			}
+			{ 'DATA' 0.3000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.3" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horizontal Elasticity" 
+			}
+			{ 'DATA' 0.7000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.7" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "At End Of Path" 
+			}
+			{ 'STR' "Ping-Pong" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Object To Follow" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Follow Offset" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Acceleration" 
+			}
+			{ 'DATA' 15.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "15.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Running Deceleration" 
+			}
+			{ 'DATA' 0.9000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.9" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Ground Speed" 
+			}
+			{ 'DATA' 15.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "15.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Turn Rate" 
+			}
+			{ 'DATA' 0.2500000000000000(1.15.16) 
+			}
+			{ 'STR' "0.25" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Crawling Acceleration" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Acceleration" 
+			}
+			{ 'DATA' 40.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "40.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Jumping Momentum Transfer" 
+			}
+			{ 'DATA' 0.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Air Acceleration" 
+			}
+			{ 'DATA' 10.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "10.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Horiz Air Drag" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Vert Air Drag" 
+			}
+			{ 'DATA' 0.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "0.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Max Air Speed" 
+			}
+			{ 'DATA' 12.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "12.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Falling Acceleration" 
+			}
+			{ 'DATA' 9.8000000000000007(1.15.16) 
+			}
+			{ 'STR' "9.8" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Fall Anim Threshold" 
+			}
+			{ 'DATA' 2.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Threshold" 
+			}
+			{ 'DATA' 2.5000000000000000(1.15.16) 
+			}
+			{ 'STR' "2.5" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Stun Duration" 
+			}
+			{ 'DATA' 1.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "1.0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool A" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool B" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool C" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool D" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool E" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Tool F" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Mass" 
+			}
+			{ 'DATA' 75.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "75.0" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "Surface Friction" 
+			}
+			{ 'DATA' 0.9499970000000000(1.15.16) 
+			}
+			{ 'STR' "0.949997" 
+			}
+		}
+		{ 'FX32' 
+			{ 'NAME' "hp" 
+			}
+			{ 'DATA' 32767.0000000000000000(1.15.16) 
+			}
+			{ 'STR' "32767" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Number Of Local Mailboxes" 
+			}
+			{ 'DATA' 6l  //
+					
+			}
+			{ 'STR' "6" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Poof" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Is Needle Gun Target" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Write To Mailbox On Death" 
+			}
+			{ 'DATA' 0l  //
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Script" 
+			}
+			{ 'STR' "\n\\ wf\n: respawn  0 INDEXOF_X_POS write-mailbox  6 INDEXOF_Y_POS write-mailbox  8 INDEXOF_Z_POS write-mailbox  0 INDEXOF_XSPEED write-mailbox  0 INDEXOF_YSPEED write-mailbox  0 INDEXOF_ZSPEED write-mailbox  1 13 write-mailbox ;\nINDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox INDEXOF_INPUT write-mailbox\nINDEXOF_Z_POS read-mailbox -5 < if respawn then\n"
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Script Controls Input" 
+			}
+			{ 'DATA' 1l  //False|True
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'FILE' 
+			{ 'NAME' "Mesh Name" 
+			}
+			{ 'STR' "player.iff" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Model Type" 
+			}
+			{ 'STR' "Mesh" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Animation Mailbox" 
+			}
+			{ 'DATA' 1l  //
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Visibility Mailbox" 
+			}
+			{ 'DATA' 2002l  //
+					
+			}
+			{ 'STR' "2002" 
+			}
+		}
+		{ 'STR' 
+			{ 'NAME' "Shadow Object Template" 
+			}
+			{ 'STR' "" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Check Below Only Once" 
+			}
+			{ 'DATA' 1l  //False|True
+					
+			}
+			{ 'STR' "1" 
+			}
+		}
+		{ 'I32' 
+			{ 'NAME' "Template Object" 
+			}
+			{ 'DATA' 0l  //False|True
+					
+			}
+			{ 'STR' "0" 
+			}
+		}
+	}
+}

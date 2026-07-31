@@ -1,0 +1,16 @@
+;============================================================================
+; Enemy.def: created from OADdef.S and Enemy.oas DO NOT MODIFY
+;============================================================================
+;##ifndef Enemy_HT
+;##define Enemy_HT
+	( define OAD_moveblocPageOffset 0 )	; common block: offset in page data for this objects page
+	( define OAD_toolsetPageOffset 4 )	; common block: offset in page data for this objects page
+	( define OAD_commonPageOffset 8 )	; common block: offset in page data for this objects page
+	( define OAD_MeshName 12 )	;file Mesh Name: This is a packedAssetID
+	( define OAD_meshPageOffset 16 )	; common block: offset in page data for this objects page
+	( define OAD_shadowPageOffset 20 )	; common block: offset in page data for this objects page
+	( define OAD_TemplateObject 24 )	; boolean: Default: 0
+	( define OAD_AIPageOffset 28 )	; common block: offset in page data for this objects page
+;============================================================================
+;##endif         ; Enemy_DEF
+;============================================================================

@@ -1,0 +1,28 @@
+// filelight-standalone.iff.txt — L4-wrapped form of filelight for wf_game -L.
+//
+// Build:
+//   bash wftools/wf_blender/build_level_binary.sh filelight
+//
+// Run:
+//   task run-filelight
+//
+// 3D Filelight: 17 static actors + a runtime-spawned radial sunburst of annular-
+// sector wedge instances (fl-scan emits the table; the Director .fth tiles it).
+// Pool budgets sized for ~450 spawned wedges at peak (MAX_NODES).
+//
+// Memory: total asset alloc = cbPerm + numActiveRoomSlots × cbRoom (assets.cc).
+// Spawned template instances BindAssets to the PERMANENT slot (level.cc:1732),
+// so cbPerm — NOT cbRoom — is what the sunburst consumes. 'SLOT' 1 keeps cbRoom
+// ×1 (single-room level).
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 1500000l                 // 17 static + up to ~450 spawned wedge actors
+        'PERM' 4000000l                 // player/floor/template meshes + ~450 spawned instances
+        'ROOM' 2000000l                 // single active room slot (×1)
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+        'SLOT' 1l                       // 1 active room slot (single-room level)
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../filelight.iff" ]
+}

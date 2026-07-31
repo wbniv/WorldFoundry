@@ -1,0 +1,17 @@
+#pragma once
+// SfxLibrary — global indexed sound-effect store.
+// Load WAVs by ID at level init; play by ID from scripts via EMAILBOX_SOUND.
+
+class SfxLibrary
+{
+public:
+	// Load a WAV asset into slot `id` via HALGetAssetAccessor.
+	// Logs to stderr. Silent no-op if the asset is missing.
+	static void Load(int id, const char* assetPath);
+
+	// Play slot `id` non-positionally. No-op if not loaded.
+	static void Play(int id);
+
+	// Release all loaded sounds (call on level unload).
+	static void Clear();
+};

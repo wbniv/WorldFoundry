@@ -1,0 +1,25 @@
+// moon_site01-standalone.iff.txt — L4-wrapped form of moon_site01 for wf_game -L.
+//
+// Build:
+//   task build-level -- moon_site01
+//
+// Run:
+//   task run-level -- wflevels/moon_site01-standalone.iff
+//
+// Tier 2 Moon-surface walkable level: PGDA Site 01 (Connecting Ridge), 1 km × 1 km
+// at 10 m sampling, 9801-quad terrain mesh, 1.8 m astronaut player.
+{ 'L4'
+    { 'ALGN' .align( 2048 ) }
+    { 'RAM'
+        'OBJD' 100000l                  // 10 actors + margin
+        'PERM' 1000000l                 // prop models: player, lander, earth, surface assets
+        'ROOM' 5000000l                 // per-chunk: ~10k-vert terrain mesh runtime ~3.7MB + slack.
+                                        // Trimmed 8MB→5MB so the 9-slot (3×3) chunk-streaming
+                                        // arena (cbPerm + 9*cbRoom = 46MB) fits the 64MB HAL pool.
+                                        // See docs/plans/2026-06-04-moon-overhead-map-and-chunk-texture-streaming.md.
+        'FLAG' 1l 1l                    // doomstick, bungeecam
+        'SLOT' 9l                       // 3×3 chunk-streaming ring (default is now 3)
+    }
+    { 'ALGN' .align( 2048 ) }
+    [ "../moon_site01.iff" ]
+}

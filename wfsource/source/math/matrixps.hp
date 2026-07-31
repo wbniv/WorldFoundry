@@ -25,12 +25,8 @@
 
 // ------------------------------------------------------------------------
 
-#if defined(__PSX__) && !defined(RENDERER_PIPELINE_SOFTWARE)
-#include "psx/matrixps.hp"
-#else
 #include <math/matrix34.hp>
 typedef Matrix34 Matrix34_PS;
-#endif
 
 // ------------------------------------------------------------------------
 #endif

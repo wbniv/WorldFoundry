@@ -47,6 +47,12 @@ public:
 	bool Load(istream& input, ostream& error);
 	friend ostream& operator<<(ostream& s, QObjectAttributeDataEntry &oad);
 
+	// Read-only view of the underlying descriptor (button type, name, showAs,
+	// min/max/def, option string). Added so the wf-edit property panel can
+	// drive widget dispatch off the OAD without re-implementing the read loop;
+	// the dumper path is unaffected.
+	const _typeDescriptor& Descriptor() const { return entry; }
+
 private:
 	_typeDescriptor entry;
 };
@@ -59,6 +65,10 @@ public:
 	bool Load(istream& input, ostream& error);
 	bool LoadEntries(istream& input, ostream& error);		// load from a stream which has no header
 	friend ostream& operator<<(ostream& s, QObjectAttributeData &oad);
+
+	// Ordered entry list (the OAD field layout). Read-only accessor for the
+	// wf-edit property panel's positional Doc↔OAD correlation.
+	const vector<QObjectAttributeDataEntry>& Entries() const { return entries; }
 
 private:
 	_oadHeader header;

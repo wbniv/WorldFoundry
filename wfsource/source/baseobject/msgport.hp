@@ -36,6 +36,7 @@
 #include <hal/_list.h>
 #include <hal/_mempool.h>
 #include <math/scalar.hp>
+#include <stdint.h>
 
 //============================================================================
 
@@ -45,8 +46,8 @@ struct SMsg
 	int16 _type;			// message type
    union _data
    {
-      int32 _message;			// actual message
-      char binary[sizeof(Scalar)];
+      uintptr_t _message;           // pointer-sized; holds integers and object pointers
+      char binary[sizeof(uintptr_t)];
    } data;
 };
 
@@ -60,7 +61,7 @@ public:
 	// public functions
 	MsgPort(SMemPool* msgPortMemPool);
 	~MsgPort();
-	bool PutMsg(int16 msgType, int32 msgData);		// Send a message
+	bool PutMsg(int16 msgType, uintptr_t msgData);	// Send a message
 	bool PutMsg(int16 msgType, const void* data, uint32 size);		// Send a message
 	bool GetMsg(int16& msgType, void* data, uint32 maxsize);	// Receive a message
 	bool GetMsgByType(const int16& msgType, void* data, uint32 size);

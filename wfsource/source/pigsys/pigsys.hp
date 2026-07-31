@@ -49,20 +49,6 @@ extern char* * __argv;
 }
 #endif
 
-#if defined( __WIN__ )
-#	if !defined( STRICT )
-#		define STRICT
-#	endif
-#	if !defined( WIN32_LEAN_AND_MEAN )
-#		define WIN32_LEAN_AND_MEAN
-#	endif
-//#	if !defined( _MSC_VER )
-//#		define _WIN32
-//#	endif
-#	if !defined( NOMINMAX )
-#		define NOMINMAX
-#	endif
-#endif
 
 
 //=============================================================================
@@ -71,9 +57,12 @@ extern char* * __argv;
 
 typedef enum _MachineType
 {
-	WIN,
-	PSX,
-	LINUX
+	LINUX,
+	MACHINE_ANDROID,
+	IOS,
+	XBOX,
+	SWITCH,
+	PLAYSTATION
 } MachineType;
 
 #endif // defined( __cplusplus )
@@ -92,14 +81,15 @@ typedef enum _MachineType
 
 // include directives from the makefile
 #ifndef _MKINC
-#if defined( __WIN__ )
-#define _MKINC "cf_win.h"
-#elif defined( __PSX__ )
-#define _MKINC "cf_psx.h"
-#elif defined( __LINUX__ )
+#if   defined(__LINUX__) || defined(__ANDROID__) || defined(WF_TARGET_IOS) || defined(WF_TARGET_MACOS)
+// iOS + macOS are Darwin/POSIX — reuse the Linux cf header. cf_linux.h
+// unconditionally #defines __LINUX__, which is fine: the Apple-specific HAL
+// lives in hal/ios/ + hal/macos/, and the shared core treats them as POSIX.
 #define _MKINC "cf_linux.h"
+#elif defined( __ANDROID__ )
+#define _MKINC "cf_android.h"
 #else
-#error "Undefined platform: please define __WIN__, __PSX__ o  __LINUX__"
+#error "Undefined platform: __LINUX__, __ANDROID__, or WF_TARGET_IOS must be defined"
 #endif
 #endif
 
@@ -200,9 +190,12 @@ typedef enum _MachineType
 
 // Convenience macros.
 // these should only be used for numeric types
-#if !defined(__PSX__)			// already defined in psx libraries
 #define	ABS(_1)					((_1)<0?-(_1):(_1))
-#endif
+
+// Compile-time element count of a fixed-size array. Use this for array bounds
+// (asserts, loop limits, capacity checks) so the size is never a hardcoded
+// literal that can drift from the array's declaration.
+#define	ARRAY_COUNT(_arr)		((int)(sizeof(_arr) / sizeof((_arr)[0])))
 
 #define	until( _condition_ )	while ( !(_condition_) )
 
@@ -281,15 +274,6 @@ typedef void (*voidFunctionPtr)(void);
 //=============================================================================
 
 #if defined( __cplusplus )
-#if defined( __PSX__ )
-#	include <pigsys/psx/new.h>
-#	if DO_IOSTREAMS
-// these come from pigsys/psx
-#		include <iostream>
-#		include <fstream.h>
-#		define NULL_STREAM cnull
-#	endif
-#else          // defined(__PSX__)
 #include <new>
 #  if DO_DEBUG_FILE_SYSTEM
 #		if defined(OLD_IOSTREAMS)
@@ -341,7 +325,6 @@ typedef void (*voidFunctionPtr)(void);
 #		endif
 #	endif
 #endif
-#endif
 
 
 
@@ -354,19 +337,6 @@ typedef void (*voidFunctionPtr)(void);
 //	to mess with wrappered implementations.
 
 // kts added 10-17-97 02:49pm
-#if defined(__PSX__)
-#ifndef _MAX_FNAME
-#define _MAX_FNAME 260
-#endif
-
-#ifndef _MAX_EXT
-#define _MAX_EXT _MAX_FNAME
-#endif
-
-#ifndef _MAX_PATH
-#define _MAX_PATH _MAX_FNAME
-#endif
-#endif
 // end kts
 
 
@@ -406,25 +376,13 @@ ERROR: neither SYS_FOPEN_MAX nor FOPEN_MAX was defined;
 //	strstr, strerror, strtok.
 #ifndef	_STRING_H
 // kts added so that string does not define index
-#ifdef __PSX__
-#define index stupidfuckingpsxfunction
-#endif
 #include <cstring>
-#ifdef __PSX__
-#undef index
-#endif
 #undef	_STRING_H
 #define	_STRING_H
 
-#ifdef __PSX__
-#undef strdup
-#endif
 #endif	// !defined(_STRING_H)
 
 
-#ifdef __WIN__
-#define strcasecmp stricmp
-#endif
 
 #if		DO_ASSERTIONS
 
@@ -441,7 +399,7 @@ END_EXTERN_C
 
 
 // Disabled on __LINUX__ (2026): same std:: collision as clib.h.
-#if !defined(__LINUX__)
+#if !defined(__LINUX__) && !defined(__ANDROID__)
 #define	strcmp      sys_strcmp
 #undef	strncmp
 #define	strncmp     sys_strncmp
@@ -451,7 +409,7 @@ END_EXTERN_C
 #define	strrchr     sys_strrchr
 #undef	strlen
 #define	strlen      sys_strlen
-#endif	// !defined(__LINUX__)
+#endif	// !defined(__LINUX__) && !defined(__ANDROID__)
 
 #else	// !DO_ASSERTIONS
 #endif	// !DO_ASSERTIONS
@@ -472,6 +430,10 @@ START_EXTERN_C
 extern void				_sys_printenv(void);
 #endif	// defined(DESIGNER_CHEATS)
 extern void				sys_init(int* argc, char*** argv);
+// Install a de-noising std::terminate handler (dumps the active exception / cause
+// + backtrace, then abort) so a terminate doesn't mask the real assert. Call first
+// thing in main(); appName tags the banner. Defined in pigsys/fatal.cc.
+extern void				Sys_InstallTerminateHandler(const char* appName);
 extern void				sys_exit(int)
 //#if		!_SYS_SUPPRESS_EXIT
 		__attribute__ ((noreturn))
@@ -499,18 +461,6 @@ END_EXTERN_C
 //#include <pigsys/qsort.h>
 //#endif	// !defined(_QSORT_H)
 
-#if 0
-// setjmp.h, 'sys_' prepended
-#ifndef	_SETJMP_H
-#include <csetjmp>
-#undef	_SETJMP_H
-#define	_SETJMP_H
-#endif	// !defined(_SETJMP_H)
-
-#ifndef	sys_jmp_buf
-#define	sys_jmp_buf			jmp_buf
-#endif	// !defined(sys_jmp_buf)
-#endif
 
 //#include <pigsys/psyserr.h>
 #include <pigsys/clib.h>

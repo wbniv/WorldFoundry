@@ -46,7 +46,7 @@ public:
 	virtual ~ScriptInterpreter();
    virtual void Validate();
 
-   virtual Scalar RunScript(const void* script, int objectIndex) = 0;
+   virtual Scalar RunScript(const void* script, int objectIndex, int language) = 0;
 
    virtual void AddConstantArray(IntArrayEntry* entryList);
    virtual void DeleteConstantArray(IntArrayEntry* entryList);

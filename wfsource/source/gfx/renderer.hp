@@ -25,30 +25,32 @@
 // Original Author: Kevin T. Seghetti
 //============================================================================
 
-#if defined( RENDERER_PSX )
-#	include <libetc.h>
-#	include <libgte.h>
-#	include <libgpu.h>
-#elif defined(RENDERER_GL)
-#	if defined( __WIN__ )
-#       include <windows.h>
-#	endif
-#  include <GL/gl.h>
-#	include <gfx/gl/wfprim.h>
-#elif defined(RENDERER_XWINDOWS)
-#  include <GL/gl.h>
-#	include <gfx/xwindows/wfprim.h>
-#elif defined(RENDERER_DIRECTX)
-#	include <gfx/directx/wfprim.h>
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
+// Web (Emscripten) maps GLES3 onto WebGL 2 — same header as Android.
+#  include <GLES3/gl3.h>
+#elif defined(WF_TARGET_IOS)
+// iOS ships OpenGLES.framework (deprecated iOS 12+, still present). We use
+// the GL type declarations (GLuint, GLenum, etc.) as a neutral vocabulary —
+// Metal doesn't use them, but existing gfx/ code still has sprinkled refs
+// that need to compile. Phase 2+ Metal backend renders through MTL*; the GL
+// API calls themselves never execute on iOS.
+#  include <OpenGLES/ES3/gl.h>
+#elif defined(WF_TARGET_MACOS)
+// macOS desktop (renderer-agnostic bring-up): rendering is a no-op, but gfx/
+// code references GL types (GLuint, GLenum, …) + constants (GL_TEXTURE_2D, …).
+// Use the legacy OpenGL.framework header for that vocabulary; the GL entry
+// points are stubbed in hal/macos/gl_stubs.cc and OpenGL.framework is NOT linked.
+#  define GL_SILENCE_DEPRECATION
+#  include <OpenGL/gl.h>
 #else
-# error renderer not defined
+#  define GL_GLEXT_PROTOTYPES
+#  include <GL/gl.h>
+#  include <GL/glext.h>
 #endif
+#include <gfx/gl/wfprim.h>
 
 //==============================================================================
                                                        
-#if defined(__WIN__)
-#pragma comment( lib, "winmm.lib" )
-#endif
 
 //==============================================================================
  

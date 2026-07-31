@@ -1,0 +1,45 @@
+"In Game Actions"
+{
+    "action_sets"
+    {
+        "InGame"
+        {
+            "title"     "#Set_InGame"
+            "StickPadGyro"
+            {
+                "move"
+                {
+                    "title"         "#Action_Move"
+                    "input_mode"    "joystick_move"
+                }
+            }
+            "Button"
+            {
+                "jump"          { "title" "#Action_Jump" }
+                "grenade"       { "title" "#Action_Grenade" }
+                "look"          { "title" "#Action_Look" }
+                "angel_mode"    { "title" "#Action_AngelMode" }
+                "sword"         { "title" "#Action_Sword" }
+                "step_left"     { "title" "#Action_StepLeft" }
+                "step_right"    { "title" "#Action_StepRight" }
+                "pause"         { "title" "#Action_Pause" }
+            }
+        }
+    }
+    "localization"
+    {
+        "english"
+        {
+            "Set_InGame"        "In Game"
+            "Action_Move"       "Move"
+            "Action_Jump"       "Jump"
+            "Action_Grenade"    "Grenade"
+            "Action_Look"       "Look"
+            "Action_AngelMode"  "Angel Mode"
+            "Action_Sword"      "Sword"
+            "Action_StepLeft"   "Step Left"
+            "Action_StepRight"  "Step Right"
+            "Action_Pause"      "Pause"
+        }
+    }
+}

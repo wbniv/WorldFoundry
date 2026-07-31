@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="game-name" content="{{GAME_NAME}}">
+  <title>Party Games · Controller</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%F0%9F%8E%B2%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="controller.css">
+  {{GAME_STYLESHEET}}
+  <!-- Google Cast Sender SDK (loadCastFramework=1 pulls in cast.framework API). -->
+  <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <p id="status" class="status" role="status" aria-live="polite">connecting…</p>
+      <p id="name" class="name"></p>
+    </header>
+    <div class="cast-row">
+      <!-- Google's built-in cast-launcher web component. Renders the standard
+           cast button and opens the native device picker on tap. -->
+      <google-cast-launcher id="cast-button" aria-label="Cast to TV"></google-cast-launcher>
+      <span id="cast-state" class="cast-state" role="status" aria-live="polite">cast: idle</span>
+    </div>
+    <!-- Game-owned region. Games build their entire controller UI inside this
+         container via mount(ctx). The shell owns nothing below this line. -->
+    <div id="game-root" class="game-root"></div>
+  </main>
+
+  <!-- Entry overlay: prompts for whichever of name/room the URL didn't carry.
+       connect() in controller.js waits until this form submits. -->
+  <div id="entry-gate" class="room-gate" hidden role="dialog" aria-modal="true" aria-labelledby="entry-heading">
+    <form id="entry-form" class="room-form">
+      <h2 id="entry-heading">Join the game</h2>
+      <p id="entry-hint" class="room-gate-hint"></p>
+      <label id="name-field" class="entry-field" hidden>
+        <span class="entry-label">Your name</span>
+        <input id="name-input" class="name-input" type="text"
+               inputmode="text" autocomplete="given-name" autocapitalize="words"
+               maxlength="32" aria-label="Your name">
+      </label>
+      <label id="room-field" class="entry-field" hidden>
+        <span class="entry-label">Room code</span>
+        <input id="room-input" class="room-input" type="text"
+               inputmode="latin" autocomplete="off" autocapitalize="characters" spellcheck="false"
+               maxlength="4" pattern="[A-Z]{4}"
+               aria-label="4-letter room code">
+      </label>
+      <button id="entry-join" type="submit" class="room-join">JOIN</button>
+    </form>
+  </div>
+
+  <script type="module" src="controller.js"></script>
+</body>
+</html>

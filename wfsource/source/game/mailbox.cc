@@ -27,7 +27,12 @@
 //==============================================================================
                     
 LevelMailboxes::LevelMailboxes(Level& level, Mailboxes* parent) :
-MailboxesWithStorage(EMAILBOX_GLOBAL_USER_START,EMAILBOX_GLOBAL_USER_MAX-EMAILBOX_GLOBAL_USER_START,parent),
+// _MAX constants are *inclusive* in mailbox.inc — the storage needs `MAX - START + 1`
+// slots so the named maximum index itself is writable. Prior to 2026-05-30 this was
+// `MAX - START`, leaving GLOBAL_USER_MAX (1900) as a 1-slot gap between user and
+// system that aborted on write. Fix matches user range `[START, MAX]` to system
+// range `[SYSTEM_START, SYSTEM_MAX)` without overlap.
+MailboxesWithStorage(EMAILBOX_GLOBAL_USER_START,EMAILBOX_GLOBAL_USER_MAX-EMAILBOX_GLOBAL_USER_START+1,parent),
 _level(level)
 {
     assert(EMAILBOX_GLOBAL_USER_START == 0);
@@ -38,7 +43,7 @@ _level(level)
 //==============================================================================
                      
 Scalar
-LevelMailboxes::ReadMailbox(long mailbox) const
+LevelMailboxes::ReadMailbox(int32 mailbox) const
 {
    DBSTREAM1(cmailbox << "LevelMailboxes::ReadMailbox: mailbox = " << mailbox << std::endl; )
 
@@ -51,7 +56,7 @@ LevelMailboxes::ReadMailbox(long mailbox) const
 //==============================================================================
 
 void
-LevelMailboxes::WriteMailbox(long mailbox, Scalar value)
+LevelMailboxes::WriteMailbox(int32 mailbox, Scalar value)
 {
     if(mailbox >= EMAILBOX_GLOBAL_SYSTEM_START && mailbox < EMAILBOX_GLOBAL_SYSTEM_MAX)
         _level.WriteSystemMailbox(mailbox, value);
@@ -67,7 +72,9 @@ LevelMailboxes::WriteMailbox(long mailbox, Scalar value)
 //==============================================================================
                     
 GameMailboxes::GameMailboxes(WFGame& game) :
-MailboxesWithStorage(EMAILBOX_PERSISTENT_USER_START,EMAILBOX_PERSISTENT_USER_MAX-EMAILBOX_PERSISTENT_USER_START,NULL),
+// Same `+ 1` reasoning as LevelMailboxes above — make EMAILBOX_PERSISTENT_USER_MAX
+// writable.
+MailboxesWithStorage(EMAILBOX_PERSISTENT_USER_START,EMAILBOX_PERSISTENT_USER_MAX-EMAILBOX_PERSISTENT_USER_START+1,NULL),
 _game(game)
 {
 
@@ -76,7 +83,7 @@ _game(game)
 //==============================================================================
 
 Scalar
-GameMailboxes::ReadMailbox(long mailbox) const
+GameMailboxes::ReadMailbox(int32 mailbox) const
 {
    DBSTREAM1(cmailbox << "GameMailboxes::ReadMailbox: mailbox = " << mailbox << std::endl; )
 
@@ -89,7 +96,7 @@ GameMailboxes::ReadMailbox(long mailbox) const
 //==============================================================================
 
 void
-GameMailboxes::WriteMailbox(long mailbox, Scalar value)
+GameMailboxes::WriteMailbox(int32 mailbox, Scalar value)
 {
    if(mailbox >= EMAILBOX_PERSISTENT_SYSTEM_START && mailbox < EMAILBOX_PERSISTENT_SYSTEM_MAX)
        _game.WriteSystemMailbox(mailbox, value);

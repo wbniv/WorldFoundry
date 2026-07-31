@@ -1,0 +1,21 @@
+To: [Author email address — look up at affiliation page]
+Subject: Request for reprint: "Fuzzy sets"
+
+Dear Zadeh,
+
+I am a researcher working on fuzzy logic and reinforcement learning and would
+greatly appreciate a copy of the following paper:
+
+  Zadeh, L.A. (1965). "Fuzzy sets." Information and Control. doi:10.1016/S0019-9958(65)90241-X
+
+Would you be able to send a PDF reprint?
+
+[NOTE: This author is deceased. Consider contacting their institution's archive or a surviving co-author.]
+
+Thank you very much,
+Will Norris
+wbnorris@gmail.com
+
+---
+Author affiliation from OpenAlex: (not found — search manually)
+

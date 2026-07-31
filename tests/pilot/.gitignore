@@ -1,0 +1,2 @@
+# Transient per-run engine logs written by run_engine_scenario().
+.*.log

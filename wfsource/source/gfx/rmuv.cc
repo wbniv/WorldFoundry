@@ -30,9 +30,9 @@ RMUV::RMUV( void* ppRMUV, int xOffset, int yOffset )
 {
 	assert( ValidPtr(ppRMUV ));
 	AssertMsg(sizeof(_RMUV) == 48,"size = " << sizeof(_RMUV));
-	long* pRMUV = (long*)ppRMUV;
+	int32* pRMUV = (int32*)ppRMUV;
 
-	assert(*pRMUV == IFFTAG('r','m','u','v'));
+	assert(*pRMUV == (int32)IFFTAG('r','m','u','v'));
 	++pRMUV;			// Skip 'RMUV'
 	assert(*pRMUV  > 0);
 	++pRMUV;			// Skip chunk size

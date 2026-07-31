@@ -1,0 +1,120 @@
+# Plan — Editor property panel (`wf-edit`: OAD-driven field widgets)
+
+**Date:** 2026-05-20
+**Status:** **Phase 3 done 2026-05-20 (~1 h) — property panel is editable.** Phases 1→2→3 all complete (~4 h total vs ~3–4 wk estimate). **Phase 3** makes every widget editable: edits commit to the actor's Doc leaf (`DATA`/`STR`) in a `wfcrdt` transaction and read back through an independent transaction — verified on House (`Mass` 0.0→5.0, `Mobility` Anchored→Physics, `Movement Mailbox` 1→7, all confirmed via before→after from two independent Doc reads; [screenshot](../../tests/screenshots/wfedit_p3_edit.png) shows the now-enabled widgets with the edits applied). Numeric edits preserve the levtree `(1.15.16)` fixed-point / `l` long suffix so they survive the round-trip; int/float clamp to OAD min/max; enum writes the label→`STR` (+ index→`DATA` when present); `EULR` stays in revolutions; the mailbox field shares the int spinner for now (no snowgoons field uses `showAs=MAILBOX`; the `INDEXOF_*`/`MB_*` autocomplete from `mailbox.inc` is a TODO when a level needs it — and would be the place to drop the `INDEXOF_` prefix). ASan+UBSan+LeakSanitizer-clean over edit→commit→read (`build-editor-asan/`). **Deferred (plan said "if wired"):** the full `levtree print`→levcomp round-trip needs a Doc→JSON serializer (doesn't exist yet) — the primary gate (persists in the Doc, read back) is met; full save/persistence belongs to a later plan. The Doc→engine→viewport propagation is the separate **CRDT→engine bridge (Option C)** — the next plan.
+
+<details><summary>Phase 2 (OAD-driven read-only widgets) — done 2026-05-20</summary>
+
+Built on the completed [editor shell](2026-05-20-editor-app-shell.md) (M1–M6). **Phase 1** (named read-only fields from the Doc, [screenshot](../../tests/screenshots/wfedit_p1_fields.png)) → **Phase 2** (OAD-driven `(ButtonType×showAs)` widget dispatch, read-only): the Properties panel now resolves each OBJ to its class `.oad`, correlates it against the Doc fields by sequence-alignment, and renders the matching widget per field. Verified on snowgoons House/statplat — **82/92 fields OAD-matched** (the per-instance prefix `Position`/`Orientation`/`Global Bounding Box`/`Class Name` + the duplicate `Mesh Name`/`Model Type` + the trailing `slope*` runs fall through to chunk-type widgets, exactly as predicted); `Mobility`→enum dropdown, `Moves Between Rooms`→checkbox, `Mass`/elasticities→float fields, `Mesh Name`→file+Browse, `Object To Follow`→object-ref ([overview screenshot](../../tests/screenshots/wfedit_p2_house.png)); `Background Color`/`Debug Background Color`→COLOR swatches, `Model Type`/`Matte Type`/`generationType`→enums ([scrolled screenshot](../../tests/screenshots/wfedit_p2_color.png)). The C++ OAD reader reads the committed `.oad` correctly under the in-flight long-audit `oad.h` width fix (no mismatch). Runtime byte-unchanged (the OAD reader compiles only into `wf_edit.dir`, never `wfengine`/`wf_game`, D1a); ASan+UBSan+LeakSanitizer-clean over OAD-read→align→render (`build-editor-asan/`). One discovery: the dumper's `oad.{cc,hp}` logs every entry to `cstats`/`cdebug` (~1.5k lines/class) — muted during the editor's load via an RAII stream-redirect guard; another: `.lev` field chunks carry **both** a raw `DATA` leaf and a display `STR` leaf, split into `ActorField::{data,label}` so widgets get the raw value and the current enum/bool/file label separately.
+
+</details>
+> **Scope update (2026-05-20, per Will):** the `.lev` source is **self-describing** — the Doc carries each field's **name** (`{ 'I32' { 'NAME' "Mass" } … }`), value, **enum current-label** ("Model Type: 11 Mesh"), and the OBJ's **class** ("Class Name: statplat"). **Phase 1** (named read-only fields, done) needed **no OAD** — names/values/labels come straight from the Doc. **OAD reading (D1/D1a/D2) is IN scope from Phase 2:** rather than build `.lev`-only widget heuristics in Phase 2 and rip them out for the real OAD dispatch in Phase 3, we bring the C++ OAD reader in now and dispatch widgets on the authoritative `(ButtonType×showAs)` from the start (full enum option lists, min/max, precise types). The **only** thing out of scope is **running the editor from a compiled `cd.iff`/level binary** (not self-describing) — we keep sourcing from the text `.lev`/`.iff.txt`.
+**Estimate:** ~3–4 weeks ([design doc roadmap](../investigations/2026-05-18-collaborative-level-editor-design.md) line 800) on the average-programmer scale per [feedback_estimate_average_programmer_scale](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_estimate_average_programmer_scale.md). Design is **de-risked by two reference impls** — the new work is ImGui rendering + Doc wiring, not the taxonomy.
+**Owner:** Claude (Will reviewing)
+**Branch:** `2026-new-level`
+
+---
+
+## Screenshots
+
+**Phase 1 — named read-only fields** (House: Position / Class Name=statplat / Mass / Movement Mailbox / …, straight from the self-describing `.lev`):
+
+![Phase 1 Properties: named field/value list for the House actor](../../tests/screenshots/wfedit_p1_fields.png)
+
+**Phase 2 — OAD-driven widgets, read-only** (`Mobility`→enum, `Moves Between Rooms`→checkbox, `Mass`/elasticities→float, `Mesh Name`→file+Browse; scrolled view shows COLOR swatches + enums):
+
+![Phase 2: OAD-typed widgets on the House](../../tests/screenshots/wfedit_p2_house.png)
+![Phase 2 scrolled: colour swatches and enum dropdowns](../../tests/screenshots/wfedit_p2_color.png)
+
+**Phase 3 — editable** (the edits applied: `Mass` 0.0→5.0, `Mobility` Anchored→Physics, `Movement Mailbox` 1→7):
+
+![Phase 3: editable widgets with edits committed to the Doc](../../tests/screenshots/wfedit_p3_edit.png)
+
+---
+
+## Context
+
+The [editor shell](2026-05-20-editor-app-shell.md) is complete: `wf-edit` embeds the engine viewport, has a dockspace, and the Outliner lists actors read from a read-only `wfcrdt::Doc`. The **Properties panel currently shows only the selected actor's name** ([engine/wf_edit/main.cc](../../engine/wf_edit/main.cc)). This plan fills it in: every field of the selected actor, rendered with the right widget, editable back into the Doc.
+
+The Doc carries each actor's full chunk subtree, but the leaves are **positional, typed-but-unnamed** IFF chunks (`NAME`, `VEC3`, `EULR`, `I32`, `I32`, `FX32`, `STR`, `FILE`, …) — the *N*-th `I32` is a specific field only the **OAD** can name. So OAD field metadata is the load-bearing dependency: it supplies field **names**, the **(`ButtonType`, `showAs`)** pair that picks each widget, and enum option lists / min-max.
+
+### The design is already specified (twice) — we port, not invent
+
+- **Spec:** [design doc § Widget + storage selection](../investigations/2026-05-18-collaborative-level-editor-design.md) (line 468) + the **(`ButtonType` × `showAs`) dispatch table** (line 565) + the widget gallery (line 605).
+- **Reference impl A:** the deleted Max plugin `wfmaxplugins/attrib/` (recover via `git show c5761ca^:wfmaxplugins/attrib/<file>`, per [project_wfmaxplugins_purged](/home/will/.claude/projects/-home-will-WorldFoundry/memory/project_wfmaxplugins_purged.md)) — a `uiDialog` base + ~14 widget subclasses, factory `switch`ing on `ButtonType`, sub-dispatching on `showAs`.
+- **Reference impl B (modern):** [`wftools/wf_blender/panels.py`](../../wftools/wf_blender/panels.py) (`WF_PT_attributes`) — `wf_core.load_schema(path)` → `schema.fields()` → per-field dispatch on `field.kind`/`field.show_as`. The widget behaviour to mirror is here; only the draw calls (Blender RNA → ImGui) differ.
+- **OAD parser:** [`wftools/wf_oad`](../../wftools/wf_oad/src/lib.rs) already reads a `.oad` into ordered `OadEntry { button_type, name, show_as, … }` (`OadFile::read`, [lib.rs:347](../../wftools/wf_oad/src/lib.rs)). It's a library — no CLI yet.
+
+---
+
+## Decisions
+
+| # | Decision | Choice | Reason |
+|---|---|---|---|
+| D1 | OAD + IFF reading (editor-gated; **Phase 2**) | **Read `.oad` (and any IFF-structured data) in-process with our existing C++ code.** (Phase 1 read-only fields needed no OAD; from Phase 2 we read the OAD for authoritative `(ButtonType×showAs)` dispatch + enum lists + ranges, rather than throwaway `.lev` heuristics.) OAD: `QObjectAttributeData::LoadEntries` ([wftools/oaddump/oad.{cc,hp}](../../wftools/oaddump/oad.hp), the dumper's reader; `oaddump.cc` is a thin `main` over it). Where locating/loading the `.oad` or the level's class→OAD table needs IFF chunk parsing, use our **C++ IFF reader** (engine `iff`/`oas` code, already linked via `wfengine`). | The editor is C++ and we already have C++ OAD + IFF readers; shelling out to a Rust tool for a UI-rate read is needless when `wf-edit` already links the C++ support libs. **The runtime engine can't supply the OAD metadata** — it retains only the packed `CommonBlock` (offsets/values), not the OAD's `showAs`/field-names (compile-time authoring data; `wfmut`'s `kPropMap` is a hand-curated subset). The Rust [`wf_oad`](../../wftools/wf_oad/src/lib.rs) is left untouched — it backs the Rust tool ports (iffcomp-rs/textile-rs/…), not the editor. Mild tension with [project_tools_language](/home/will/.claude/projects/-home-will-WorldFoundry/memory/project_tools_language.md) (tools-in-Rust, C++ oracle-only) — accepted by Will: this is an *app* reading data, not a tool rewrite. **We reuse the existing C++ readers as-is — no porting any Rust IFF/OAD code to C++; the Rust ports (`wf_oad`/`iffcomp-rs`/…) stay Rust.** |
+| D1a | **Guard — keep the runtime engine lightweight** | The OAD/IFF *reader* code (and the `<iostream>`/`<strstream>`-heavy authoring paths it pulls) compiles **only under `WF_ENABLE_EDITOR`, into the `wf_edit` target** — **never** into `wfengine` / `wf_game` / Android / iOS. Verify the runtime build is **byte-unchanged** (the engine runs on phones; it must not gain authoring-reader weight). Mirrors [shell-plan D8](2026-05-20-editor-app-shell.md) (GLFW/ImGui/JSON/CRDT all already editor-gated). | Will: *"the base runtime engine is super light weight (and runs on phones, etc.)."* Non-negotiable. |
+| D2 | OBJ → OAD resolution | **Phase-1 task:** map each Doc `OBJ` to its class's `.oad`, reading the level/asset container with our **C++ IFF code** (D1, editor-gated) where needed; mirror how `wf_blender` resolves it (`SCHEMA_PATH_KEY` → `_resolve_schema_path` → `load_schema`). Leads: the level's class table / the OBJ's class-reference field / the names the engine already resolved at load. | The one genuinely unknown step; the level *does* carry class→OAD info (the engine renders from it). Nail it down first against snowgoons so every later phase has named fields. |
+| D3 | Dispatch | **Port the (`ButtonType`, `showAs`) table verbatim** (design doc line 565) into a C++ `widget_for(button_type, show_as, enum_count)` → `FieldKind`; behaviour mirrors `panels.py`. `showAs` alone is insufficient (`SHOW_AS_N_A` fans out to 7 widgets). | The taxonomy is authoritative from two shipped editors; reinventing it is the [root-cause-not-symptom](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_root_cause_not_symptom.md) anti-pattern. |
+| D4 | Read-only first | **Phase 2 renders widgets read-only** (disabled/display state); **Phase 3** makes them editable. | Bounds risk; a read-only OAD-driven panel is already a visible win and proves the dispatch before write-back lands. |
+| D5 | Backing store = Doc leaf | Editable widgets read/write the **CRDT leaf** via a `provider`/`setter` pair — the design's abstraction == the old widgets' `reset`/`copy_to_xdata`. **No engine write here.** | Keeps this plan's blast radius in the Doc; the Doc→engine→viewport propagation is the separate [CRDT→engine bridge](2026-05-20-editor-app-shell.md) (Option C). |
+| D6 | Fallback chain | `showAs → chunk_type → raw monospace text`. Unknown/unported field → show its raw text, never hard-fail (the Max plugin `assert()`ed; we degrade like the Blender add-on). | Graceful coverage growth; the panel is useful before all ~14 widgets exist. |
+| D7 | WF conventions | `EULR` edits in **revolutions** (0 ≤ rev < 1, [feedback_angles_in_revolutions](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_angles_in_revolutions.md)); mailbox combo autocompletes `INDEXOF_*`/`MB_*` from [`mailbox.inc`](../../wfsource/source/mailbox/mailbox.inc) ([feedback_named_mailbox_constants](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_named_mailbox_constants.md), prefix-removal flagged per [feedback_indexof_prefix_wanted_gone](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_indexof_prefix_wanted_gone.md)); reuse existing math/scalar constants ([feedback_check_existing_constants](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_check_existing_constants.md)). | Carry the design doc's "justified divergences" forward. |
+
+---
+
+## Milestones (each its own commit, per [feedback_commit_after_each_phase](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_commit_after_each_phase.md))
+
+### 1. Named read-only fields (from the Doc) — ✅ DONE 2026-05-20
+- The `.lev` names every field inline, so **no OAD reader needed**: `ReadActorFields(doc, idx)` ([engine/wf_edit/level_doc.cc](../../engine/wf_edit/level_doc.cc)) walks the selected `OBJ`'s child chunks → `{name (NAME sub-chunk), chunk_type, value (DATA)}`; the Properties panel renders them as a Field/Value table, re-read on selection change.
+- **Gate met:** select an actor → panel shows its full named field list with values ([screenshot](../../tests/screenshots/wfedit_p1_fields.png) — House: Position/Orientation/Class Name=statplat/Mass/Movement Mailbox/…). Reads through the Doc (`ctx.doc`). Editor-only code; runtime untouched. ASan-clean (covered by the existing level_doc ASan harness shape).
+
+### 2. OAD reader + OAD-driven widget dispatch (read-only render) — ✅ DONE 2026-05-20
+- **Outcome:** the dumper's `QObjectAttributeData` reader is linked into `wf_edit` (editor-gated; runtime byte-unchanged verified — object files live only in `wf_edit.dir`). New editor TUs: [`oad_reader.{h,cc}`](../../engine/wf_edit/oad_reader.cc) (clean `OadEntry` POD adapter over `oad.hp`, isolates its `<iostream>`/pigsys baggage + mutes the `cstats`/`cdebug` flood from ImGui) and [`property_panel.{h,cc}`](../../engine/wf_edit/property_panel.cc) (OBJ→`.oad` resolution + cache, LCS sequence-alignment, `widget_for()` dispatch, read-only widget render). [`level_doc`](../../engine/wf_edit/level_doc.cc) `ActorField` gained `data`/`label` (raw DATA leaf vs display STR leaf). **Gate met** on snowgoons (82/92 House fields matched; enum/checkbox/float/file/object-ref/COLOR-swatch widgets — see Status screenshots); ASan-clean; runtime untouched.
+- **Bring in the OAD reader (D1/D1a/D2):** link our C++ `QObjectAttributeData`/`iff` readers into `wf_edit` **gated `WF_ENABLE_EDITOR`** (never in the runtime engine — verify `wf_game`/NDK builds byte-unchanged, D1a). Resolve each OBJ → its class's `.oad` from the Doc's `Class Name` field (e.g. `statplat` → `wfsource/source/oas/statplat.oad`); the compiled `<class>.oad` is essentially the **fully composed schema** (`.oas` `@include` chain resolved at compile — 88 data entries for `statplat`, w/ `ButtonType`/`showAs`/`Min`/`Max`/enum strings).
+- **Correlation = positional against the OAD, made robust by sequence-alignment (D-corr).** Architecture: `CommonBlock` is a **flyweight** — a const view (`_commonBlockBase` + `GetBlockPtr(offset)`) over a shared, OAD-laid-out block; the **OAD entry order *is* that shared field layout**, and instances read values by offset (the same model `wfmut` writes through). So the Doc/`.lev` field order *is* the OAD order — positional is authoritative by construction. The per-instance transform/identity header (`Position`/`Orientation`/`Global Bounding Box`/`Class Name`) lives **outside** the CommonBlock flyweight, hence absent from `<class>.oad` — that's the base prefix. Verified against House: `.lev` aligns with `statplat.oad` in long contiguous runs (`lev[6:44]==statplat[0:38]`, `lev[45:88]==statplat[45:88]`) modulo that prefix + a minor `Script`/`Notes`/`slopes` reorder; field names **duplicate** (`Mesh Name`/`Model Type` twice) so name-lookup is ambiguous. Implement as a `difflib`-style alignment of the two ordered name-lists (anchor on matching runs) to absorb the prefix/dups/reorders; matched fields take `showAs`/`ButtonType`/`Min`/`Max` from the OAD entry, unmatched → `chunk_type` fallback.
+- `widget_for(button_type, show_as, …)` from the design-doc table (D3): int/float, `VEC3`→3 floats, `EULR`→3 angles in revolutions ([feedback_angles_in_revolutions](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_angles_in_revolutions.md)), `BOX3`, single- vs multi-line string, enum (current label + full **option list** from OAD; ≤4 row / 5+ grid), checkbox, colour swatch, mailbox name, file/mesh, object-ref (name + ⚠ if missing), sections/groups. Strip `(S.W.F)` suffixes. Fallback chain `showAs → chunk_type → raw text` (D6).
+- **Gate:** screenshot of a rich read-only panel on a snowgoons actor (House `Mobility` showAs=4→enum, `Moves Between Rooms` showAs=8→checkbox; CamShot COLOR→swatch) matching the widget gallery. Field/widget choices spot-checked vs `panels.py`. Runtime build byte-unchanged; ASan over OAD-read→align→render.
+
+### 3. Properties **editor** — editable widgets → Doc — ✅ DONE 2026-05-20
+- **Outcome:** [`level_doc`](../../engine/wf_edit/level_doc.cc) gained `WriteFieldLeaf(doc, actor, child_index, "DATA"|"STR", text)` (navigates content→actor→children→field→leaf, overwrites the leaf's `text` in one transaction) and `ActorField::child_index` (the Doc address); [`property_panel`](../../engine/wf_edit/property_panel.cc) `RenderProperties` is now editable (`InputFloat`/`InputInt`/`InputText` via `imgui_stdlib`, `Combo`, `Checkbox`, `ColorEdit3`), committing through `WriteFieldLeaf` with suffix-preserving re-spelling and OAD min/max clamps. **Gate met:** headless `WF_EDIT_TEST_SET` drove `Mass`/`Mobility`/`Movement Mailbox` edits — before→after from two independent Doc reads confirmed commit ([screenshot](../../tests/screenshots/wfedit_p3_edit.png)); ASan-clean over edit→commit→read. `levtree print` round-trip deferred (needs Doc→JSON; "if wired").
+- `provider`/`setter` (D5): each widget (now OAD-typed from Phase 2) reads/writes its CRDT leaf; edits commit to the Doc in a transaction. Enum dropdowns pick from the OAD option list; numbers clamp to OAD min/max; `EULR` in revolutions; mailbox combo from `mailbox.inc` (D7). Re-reading the Doc reflects the edit. (Viewport does **not** update yet — that's the bridge.)
+- **Gate:** edit an int / string / vec3 / enum (from its OAD dropdown) → value persists in the Doc (read back, and via `levtree print` round-trip if wired). ASan over edit→commit→read. Screenshot.
+
+### 4. Docs + status sync
+- Plan `**Status:**` → Done w/ actuals; [wf-status.md](../../wf-status.md) Summary + Active row; design-doc property-panel milestone tick; next = the CRDT→engine bridge (Option C).
+
+---
+
+## Verification
+
+1. **Runtime engine byte-unchanged** — `WF_ENABLE_EDITOR` OFF → `wf_game` / Android / iOS carry **no** OAD/IFF *reader* code (D1a); the OAD reader compiles only into `wf_edit`.
+2. **OAD field names + dispatch** — panel field list + widgets match the OAD and `panels.py` for a known actor (snowgoons CamShot/Director); screenshots ([feedback_screenshots_for_proof](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_screenshots_for_proof.md)).
+3. **Edits round-trip through the Doc** — Phase 3 read-back; `levtree print` parity where wired.
+4. **ASan/UBSan clean** over OAD-parse→correlate and edit→commit→read (Debug builds are [ASan by default](/home/will/.claude/projects/-home-will-WorldFoundry/memory/project_debug_asan_default.md)). Built in `build-editor/` per [project_wf_edit_build_path](/home/will/.claude/projects/-home-will-WorldFoundry/memory/project_wf_edit_build_path.md).
+
+---
+
+## Critical files
+
+**Create:** `engine/wf_edit/property_panel.{h,cc}` — OAD-correlate + `widget_for` + per-widget render/edit; this plan.
+**Reuse (existing C++, link into `wf_edit` only):** [`wftools/oaddump/oad.{cc,hp}`](../../wftools/oaddump/oad.hp) (`QObjectAttributeData` reader; factor `oad.{cc,hp}` so `oaddump.cc` + `wf_edit` share it, `oaddump.cc` stays a thin `main`), engine `iff`/`oas` C++ readers (already linked via `wfengine`). **No Rust→C++ porting.**
+**Modify:** [`engine/wf_edit/main.cc`](../../engine/wf_edit/main.cc) (Properties panel calls the new module), `CMakeLists.txt` (`wf_edit` target gains `property_panel.cc` + `oad.cc` **under `WF_ENABLE_EDITOR`** — never in `wfengine`/`wf_game`), step-4 docs.
+**Read (port behaviour from, don't link):** [`wftools/wf_blender/panels.py`](../../wftools/wf_blender/panels.py), the design-doc dispatch table + gallery, the Max plugin via `git show c5761ca^:wfmaxplugins/attrib/`.
+
+---
+
+## Out of scope (each its own later plan)
+
+- **Running the editor from a compiled `cd.iff`/level binary** — a binary level isn't self-describing (no inline names/labels), so it would need the OAD/IFF C++ reader to interpret *everything*, not just the editor metadata. Out of scope while we source from the text `.lev`/`.iff.txt`. (Note: the OAD *reader itself* is **in scope at Phase 3** for the editor's enum lists / ranges / dispatch — this entry is only about the binary-input path.)
+- **CRDT→engine bridge (Option C)** — Doc edits → `wfmut` → viewport reflects them. The companion next plan; this plan stops at writing the Doc.
+- **`Y.Text` for `SHOW_AS_TEXTEDITOR`** (Script/Notes character-level merge) — v2; v1 is field-level LWW strings.
+- **Awareness/presence chips, per-leaf `_author`/`_ts`** — networking milestones.
+- **OAD authoring inside the editor** — design-doc "possibility, not committed" (line 966).
+
+---
+
+## Cross-references
+
+- Parent: [editor shell plan](2026-05-20-editor-app-shell.md); [design doc § Widget selection / Prior art / gallery](../investigations/2026-05-18-collaborative-level-editor-design.md) (lines 468, 556, 605), [(ButtonType × showAs) coverage audit](../investigations/2026-04-13-showas-coverage.md).
+- Backend: [`.lev`↔Y.Doc translator](2026-05-20-iff-lev-ydoc-translator.md), [wfcrdt wrapper](2026-05-19-wfcrdt-cpp-raii-wrapper.md), [engine mutation API](2026-05-19-engine-mutation-api.md).
+- Memory: [feedback_plans_before_implementation](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_plans_before_implementation.md), [feedback_angles_in_revolutions](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_angles_in_revolutions.md), [feedback_named_mailbox_constants](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_named_mailbox_constants.md), [feedback_indexof_prefix_wanted_gone](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_indexof_prefix_wanted_gone.md), [feedback_check_existing_constants](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_check_existing_constants.md), [feedback_screenshots_for_proof](/home/will/.claude/projects/-home-will-WorldFoundry/memory/feedback_screenshots_for_proof.md), [project_wf_edit_build_path](/home/will/.claude/projects/-home-will-WorldFoundry/memory/project_wf_edit_build_path.md), [project_debug_asan_default](/home/will/.claude/projects/-home-will-WorldFoundry/memory/project_debug_asan_default.md).

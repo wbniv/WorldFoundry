@@ -42,6 +42,9 @@
 //=============================================================================
 
 #include <hal/hal.h>
+#if defined(WF_ENABLE_STEAM)
+#  include "steam.h"
+#endif
 
 //=============================================================================
 
@@ -65,6 +68,17 @@ void
 _HALSetJoystickButtons(joystickButtonsF joystickButtons)
 {
     _buttons = joystickButtons;
+}
+
+//=============================================================================
+// Public host-injection wrapper. See hal/_input.h for the contract: any host
+// (editor, replay driver, test harness) calls this to feed button state into
+// the engine when the engine isn't pumping its own platform event loop.
+
+void
+HALInjectJoystickButtons(joystickButtonsF joystickButtons)
+{
+    _HALSetJoystickButtons(joystickButtons);
 }
 
 //=============================================================================
@@ -126,6 +140,9 @@ _JoystickButtonsF(IJoystick joystick)
 	if ( self->_stickNum == EJW_JOYSTICK1 )
 	{
         buttons = _buttons;
+#if defined(WF_ENABLE_STEAM)
+        buttons |= _GetSteamJoystickButtons();
+#endif
 #if 0
 		if ( joyGetPos( 0, &ji ) != JOYERR_UNPLUGGED )
 		{
