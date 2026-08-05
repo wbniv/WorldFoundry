@@ -1,5 +1,12 @@
 # WF Engine — Linux 64-bit Port Notes
 
+> **Historical.** Captures the initial Linux bring-up (2026-04-14), when scripting was
+> fully stubbed out (Tcl disabled, no replacement yet) and physics ran on the legacy
+> `PHYSICS_ENGINE_WF` backend. Both have since been superseded — zForth is the default
+> scripting engine and Jolt is the default physics backend (see `CLAUDE.md`). Kept for
+> the LP64 fixes and build-flag history below, which are still accurate; don't take the
+> "Scripting" / stub sections as current engine behavior.
+
 ## Status (2026-04-14)
 
 Engine builds and runs on Linux x86-64. Loads snowgoons level (L4 from `cd.iff`),

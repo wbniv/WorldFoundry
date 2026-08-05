@@ -643,7 +643,7 @@ tasks:
           RECFLAG="-record_video"; echo "Recording → $RECOUT"
         fi
         [ "${WF_FULLSCREEN:-}" = "1" ] && FSFLAG="-fullscreen"
-        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/snowgoons.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
+        LD_LIBRARY_PATH=engine/libs DISPLAY=:0 engine/wf_game -Lwflevels/snowgoons-standalone.iff $FSFLAG $RECFLAG 2>&1 | tee "$LOG"
         [ -n "$RECOUT" ] && [ -f output.mp4 ] && mv output.mp4 "$RECOUT" && echo "Saved → $RECOUT"
 
   build-level:
@@ -874,7 +874,7 @@ tasks:
   asset-browser-install:
     desc: "Install wf_asset_browser addon for development (symlinks, no build step)"
     cmds:
-      - bash wftools/wf_asset_browser/install.sh
+      - bash wftools/blender_asset_finder/install.sh
 
   asset-browser-install-zip:
     desc: "Install the built wf_asset_browser zip into Blender (REPO=user_default)"
@@ -889,21 +889,21 @@ tasks:
     vars:
       REPO: '{{default "user_default" .REPO}}'
       ZIP:
-        sh: ls dist/wf_asset_browser-*.zip 2>/dev/null | sort -V | tail -1
+        sh: ls dist/blender_asset_finder-*.zip 2>/dev/null | sort -V | tail -1
     cmds:
       - blender --command extension install-file -r {{.REPO}} -e {{.ZIP}}
 
   asset-browser-validate:
     desc: "Validate wf_asset_browser extension manifest (requires Blender 4.2+)"
     cmds:
-      - blender --command extension validate wftools/wf_asset_browser
+      - blender --command extension validate wftools/blender_asset_finder
 
   asset-browser-package:
     desc: "Build distributable wf_asset_browser zip; output in dist/"
     deps: [asset-browser-validate]
     cmds:
       - mkdir -p dist
-      - blender --command extension build --source-dir wftools/wf_asset_browser --output-dir dist
+      - blender --command extension build --source-dir wftools/blender_asset_finder --output-dir dist
       - echo "Package written to dist/"
 
   bump-asset-browser:
@@ -923,7 +923,7 @@ tasks:
           if [ -n "{{.CLI_ARGS}}" ]; then
             echo "{{.CLI_ARGS}}"
           else
-            cur=$(grep '^version' wftools/wf_asset_browser/blender_manifest.toml | cut -d'"' -f2)
+            cur=$(grep '^version' wftools/blender_asset_finder/blender_manifest.toml | cut -d'"' -f2)
             major=$(echo "$cur" | cut -d. -f1)
             minor=$(echo "$cur" | cut -d. -f2)
             patch=$(echo "$cur" | cut -d. -f3)
@@ -934,20 +934,20 @@ tasks:
             esac
           fi
     cmds:
-      - sed -i 's/^version = .*/version = "{{.NEW_VERSION}}"/' wftools/wf_asset_browser/blender_manifest.toml
-      - grep '^version' wftools/wf_asset_browser/blender_manifest.toml
+      - sed -i 's/^version = .*/version = "{{.NEW_VERSION}}"/' wftools/blender_asset_finder/blender_manifest.toml
+      - grep '^version' wftools/blender_asset_finder/blender_manifest.toml
 
   publish-asset-browser:
     desc: "Create a GitHub release for wf_asset_browser and attach the zip"
     deps: [asset-browser-package]
     vars:
       VERSION:
-        sh: grep '^version' wftools/wf_asset_browser/blender_manifest.toml | cut -d'"' -f2
+        sh: grep '^version' wftools/blender_asset_finder/blender_manifest.toml | cut -d'"' -f2
     cmds:
       - gh release create "asset-browser-v{{.VERSION}}"
           --title "Asset Browser v{{.VERSION}}"
           --notes "Licence-aware asset browser — pure Python, no build step required."
-          dist/wf_asset_browser-{{.VERSION}}.zip
+          dist/blender_asset_finder-{{.VERSION}}.zip
 
   package-all:
     desc: "Package both Blender addons into dist/"

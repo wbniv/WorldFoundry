@@ -14,6 +14,7 @@ sudo apt install \
 |---------|-----------|
 | `g++` | compiling the engine and C++ tools |
 | `libgl-dev` / `libglu-dev` / `libx11-dev` | GL / GLU / X11 headers and `.so` symlinks for engine link (`build_game.sh`) |
+| `ffmpeg` | Required for `-record_video` / `WF_RECORD=1` on any `task run-*` — `wf_game` pipes raw frames to `ffmpeg` via `popen()` (`gfx/gl/display.cc`) and fails silently (no `output.mp4`, no error) if the binary isn't on `PATH` |
 
 Lua is **vendored** (`engine/vendor/lua-5.4.8/`) and compiled statically — no system `liblua5.4-dev` needed.
 
