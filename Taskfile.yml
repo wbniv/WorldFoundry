@@ -31,6 +31,15 @@ tasks:
     cmds:
       - bash engine/build_game.sh
 
+  ensure-build:
+    desc: "Build wf_game only when the binary is missing or older than engine sources"
+    cmds:
+      - task: build
+    status:
+      - test -x engine/wf_game
+      - test engine/build_game.sh -ot engine/wf_game
+      - test -z "$(find engine wfsource/source -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.h' -o -name '*.hp' -o -name '*.hpi' -o -name '*.inc' -o -name '*.asm' -o -name '*.s' -o -name '*.fth' -o -name '*.lua' -o -name '*.fnl' -o -name 'CMakeLists.txt' -o -name 'Makefile' -o -name '*.mk' \) -newer engine/wf_game -print -quit)"
+
   build-cmake:
     desc: "Build wf_game via CMake (Linux)"
     deps: [vendor-unpack]
@@ -547,12 +556,14 @@ tasks:
 
   run:
     desc: "Run wf_game (cd.iff in cwd)"
+    deps: [ensure-build]
     dir: wfsource/source/game
     cmds:
       - LD_LIBRARY_PATH=../../../engine/libs DISPLAY=:0 ../../../engine/wf_game
 
   gdb:
     desc: "Run wf_game under gdb (-batch backtrace), tee to /tmp/wfgdb.log"
+    deps: [ensure-build]
     dir: wfsource/source/game
     cmds:
       - |
@@ -562,6 +573,7 @@ tasks:
 
   run-level:
     desc: "Run wf_game with -L<path> (usage: task run-level -- wflevels/snowgoons.iff [-record_video out.mp4]). Or set WF_RECORD=1 on named run-* tasks."
+    deps: [ensure-build]
     cmds:
       - |
         set -- {{.CLI_ARGS}}
@@ -577,6 +589,7 @@ tasks:
 
   run-filesys:
     desc: "Run wf_game on wflevels/filesys-standalone.iff (FSN filesystem browser). WF_RECORD=1 records video."
+    deps: [ensure-build]
     cmds:
       - |
         LOG=/tmp/wfgame_filesys.log
@@ -591,6 +604,7 @@ tasks:
 
   run-filelight:
     desc: "Run wf_game on wflevels/filelight-standalone.iff (3D Filelight sunburst). WF_RECORD=1 records video."
+    deps: [ensure-build]
     cmds:
       - |
         LOG=/tmp/wfgame_filelight.log
@@ -605,6 +619,7 @@ tasks:
 
   run-treemap:
     desc: "Run wf_game on wflevels/treemap-standalone.iff (KDirStat squarified treemap). WF_RECORD=1 records video."
+    deps: [ensure-build]
     cmds:
       - |
         LOG=/tmp/wfgame_treemap.log
@@ -619,6 +634,7 @@ tasks:
 
   run-dome:
     desc: "Run wf_game on wflevels/dome-standalone.iff (planetarium dome — sunburst on a hemisphere, look up + turn). WF_CULL=1 enables backface culling (dome is wound for it). WF_RECORD=1 records video."
+    deps: [ensure-build]
     cmds:
       - |
         LOG=/tmp/wfgame_dome.log
@@ -633,6 +649,7 @@ tasks:
 
   run-snowgoons:
     desc: "Run wf_game on wflevels/snowgoons.iff directly (bypass cd.iff). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
+    deps: [ensure-build]
     cmds:
       - |
         LOG=/tmp/wfgame_snowgoons.log
@@ -684,6 +701,7 @@ tasks:
 
   run-qbert:
     desc: "Run wf_game on wflevels/qbert_practice-standalone.iff directly (bypass cd.iff). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
+    deps: [ensure-build]
     cmds:
       - |
         LOG=/tmp/wfgame_qbert.log
@@ -699,6 +717,7 @@ tasks:
 
   run-smb:
     desc: "Run wf_game on wflevels/smb_w1_1-standalone.iff directly (bypass cd.iff). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
+    deps: [ensure-build]
     cmds:
       - |
         LOG=/tmp/wfgame_smb.log
@@ -714,6 +733,7 @@ tasks:
 
   run-moon:
     desc: "Run wf_game on wflevels/moon_site01-standalone.iff (PGDA Site 01 Connecting Ridge — LOLA terrain + NAC texture at 1024², lunar gravity). WF_RECORD=1 records video. WF_FULLSCREEN=1 for fullscreen."
+    deps: [ensure-build]
     cmds:
       # 1024² NAC composite — needs the wider transient VRAM slot (Phase 1-3
       # of docs/plans/2026-05-30-runtime-vram-cli-overrides.md) AND the
@@ -740,6 +760,7 @@ tasks:
 
   run-debug:
     desc: "Run wf_game with debug bridge on port 7777 (usage: task run-debug -- wflevels/snowgoons.iff)"
+    deps: [ensure-build]
     cmds:
       - |
         set -- {{.CLI_ARGS}}
@@ -756,6 +777,7 @@ tasks:
 
   run-debug-remote:
     desc: "Run wf_game with debug bridge open on all interfaces (remote device / CI; usage: task run-debug-remote -- wflevels/snowgoons.iff)"
+    deps: [ensure-build]
     cmds:
       - |
         ARGS="{{.CLI_ARGS}}"
