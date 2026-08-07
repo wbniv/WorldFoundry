@@ -610,6 +610,11 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 			// Moon lander launch sequence — see docs/plans/2026-06-02-moon-lander-launch-sequence.md
 			extern int   wf_moon_launch_phase;
 			extern float wf_moon_launch_t_minus;
+			// Site 01 lunar-descent game — see the MOON_LDR_* block in mailbox.inc
+			extern int   wf_moon_ldr_active, wf_moon_ldr_state, wf_moon_ldr_thrust;
+			extern float wf_moon_ldr_alt, wf_moon_ldr_vz, wf_moon_ldr_vx, wf_moon_ldr_vy;
+			extern float wf_moon_ldr_fuel, wf_moon_ldr_range2;
+			extern float wf_moon_ldr_impact_vz, wf_moon_ldr_impact_nz;
 			Mailboxes& mb = _curLevel->GetMailboxes();
 			wf_hud_score     = mb.ReadMailbox(70).WholePart();
 			wf_hud_timer     = mb.ReadMailbox(71).WholePart();
@@ -622,6 +627,17 @@ WFGame::StepFrame(bool do_swap, Scalar* out_dt)
 			wf_moon_player_heading_rev  = mb.ReadMailbox(1879).AsFloat();
 			wf_moon_launch_phase        = mb.ReadMailbox(1881).WholePart();
 			wf_moon_launch_t_minus      = mb.ReadMailbox(1882).AsFloat();
+			wf_moon_ldr_active          = mb.ReadMailbox(EMAILBOX_MOON_LDR_ACTIVE).WholePart();
+			wf_moon_ldr_state           = mb.ReadMailbox(EMAILBOX_MOON_LDR_STATE).WholePart();
+			wf_moon_ldr_thrust          = mb.ReadMailbox(EMAILBOX_MOON_LDR_THRUST).WholePart();
+			wf_moon_ldr_alt             = mb.ReadMailbox(EMAILBOX_MOON_LDR_ALT).AsFloat();
+			wf_moon_ldr_vz              = mb.ReadMailbox(EMAILBOX_MOON_LDR_VZ).AsFloat();
+			wf_moon_ldr_vx              = mb.ReadMailbox(EMAILBOX_MOON_LDR_VX).AsFloat();
+			wf_moon_ldr_vy              = mb.ReadMailbox(EMAILBOX_MOON_LDR_VY).AsFloat();
+			wf_moon_ldr_fuel            = mb.ReadMailbox(EMAILBOX_MOON_LDR_FUEL).AsFloat();
+			wf_moon_ldr_range2          = mb.ReadMailbox(EMAILBOX_MOON_LDR_RANGE2).AsFloat();
+			wf_moon_ldr_impact_vz       = mb.ReadMailbox(EMAILBOX_MOON_LDR_IMPACT_VZ).AsFloat();
+			wf_moon_ldr_impact_nz       = mb.ReadMailbox(EMAILBOX_MOON_LDR_IMPACT_NZ).AsFloat();
 
 			// High-score initials entry — triggered on fresh game-over edge.
 			// Joystick bits from mb 1910 (JUSTPRESSED, already edge-detected):

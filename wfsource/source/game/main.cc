@@ -95,6 +95,19 @@ float wf_moon_player_heading_rev = 0.0f;
 // Moon lander launch sequence — see docs/plans/2026-06-02-moon-lander-launch-sequence.md
 int   wf_moon_launch_phase       = 0;        // 0=idle, 1=countdown, 2=ignition, 3=ascent
 float wf_moon_launch_t_minus     = 0.0f;     // seconds until launch (phase 1) or since ignition (phase ≥ 2)
+// Site 01 lunar-descent game (WF_MOON_MODE=descent). Published by the Player's
+// zForth flight script; see the MOON_LDR_* block in mailbox/mailbox.inc.
+int   wf_moon_ldr_active         = 0;        // gates the whole lander HUD block
+int   wf_moon_ldr_state          = 0;        // 0=flying, 1=PERFECT, 2=ROUGH, 3=CRASHED
+float wf_moon_ldr_alt            = 0.0f;     // m above the pad datum
+float wf_moon_ldr_vz             = 0.0f;     // m/s, negative = descending
+float wf_moon_ldr_vx             = 0.0f;     // m/s
+float wf_moon_ldr_vy             = 0.0f;     // m/s
+float wf_moon_ldr_fuel           = 0.0f;     // 0-100
+float wf_moon_ldr_range2         = 0.0f;     // squared XY distance to pad (m²)
+float wf_moon_ldr_impact_vz      = 0.0f;     // |vz| latched at touchdown
+float wf_moon_ldr_impact_nz      = 0.0f;     // |normal Z| at touchdown; 1.0 = flat
+int   wf_moon_ldr_thrust         = 0;        // 1 while the main engine burns
 #endif
 
 bool bPerspectiveCorrection = false;

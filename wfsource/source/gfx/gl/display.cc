@@ -45,6 +45,10 @@
 #if DESIGNER_CHEATS && defined(__LINUX__)
 #define STB_EASY_FONT_IMPLEMENTATION
 #include "../../../../engine/vendor/stb_easy_font.h"
+// sqrtf/acosf for the Site 01 lander HUD (horizontal speed, range, slope
+// angle). There is a second <math.h> further down this file, but it lands
+// well after DrawHud() — this one has to precede it.
+#include <math.h>
 
 extern int wf_hud_score;
 extern int wf_hud_timer;
@@ -66,6 +70,18 @@ extern float wf_moon_player_heading_rev;
 // Moon lander launch sequence — see docs/plans/2026-06-02-moon-lander-launch-sequence.md
 extern int   wf_moon_launch_phase;
 extern float wf_moon_launch_t_minus;
+// Site 01 lunar-descent game — see the MOON_LDR_* block in mailbox/mailbox.inc
+extern int   wf_moon_ldr_active;
+extern int   wf_moon_ldr_state;
+extern int   wf_moon_ldr_thrust;
+extern float wf_moon_ldr_alt;
+extern float wf_moon_ldr_vz;
+extern float wf_moon_ldr_vx;
+extern float wf_moon_ldr_vy;
+extern float wf_moon_ldr_fuel;
+extern float wf_moon_ldr_range2;
+extern float wf_moon_ldr_impact_vz;
+extern float wf_moon_ldr_impact_nz;
 
 #include "hscore.h"
 
@@ -201,6 +217,62 @@ static void DrawHud(int xSize, int ySize)
                  (double)wf_moon_player_x_m, (double)wf_moon_player_y_m);
         draw_line(78.0f, l);
 
+        // ── Site 01 descent instruments (WF_MOON_MODE=descent only) ────────
+        // The Forth publishes VX/VY and squared range rather than magnitudes
+        // because zForth has no float sqrt — so the sqrt lives here.
+        if (wf_moon_ldr_active) {
+            snprintf(l, sizeof(l), "ALT %+6.0f m     RANGE %5.0f m",
+                     (double)wf_moon_ldr_alt,
+                     (double)sqrtf(wf_moon_ldr_range2));
+            draw_line(92.0f, l);
+
+            // Vertical speed is the single number that decides the run, so it
+            // carries the colour: green inside the survivable envelope, red
+            // outside it. VZ_SAFE (2.5 m/s) mirrors the Forth's own gate.
+            const float kVzSafe = 2.5f;
+            const bool  vzOk    = fabsf(wf_moon_ldr_vz) < kVzSafe;
+            glColor3f(vzOk ? 0.2f : 1.0f, vzOk ? 1.0f : 0.3f, 0.2f);
+            snprintf(l, sizeof(l), "VS  %+6.1f m/s   HS %5.1f m/s",
+                     (double)wf_moon_ldr_vz,
+                     (double)sqrtf(wf_moon_ldr_vx * wf_moon_ldr_vx +
+                                   wf_moon_ldr_vy * wf_moon_ldr_vy));
+            draw_line(106.0f, l);
+            glColor3f(1.0f, 1.0f, 0.0f);
+
+            snprintf(l, sizeof(l), "FUEL %3.0f %%%s",
+                     (double)wf_moon_ldr_fuel,
+                     wf_moon_ldr_thrust ? "   [BURN]" : "");
+            draw_line(120.0f, l);
+
+            // Fuel bar: 160x8 outline at (8,130), filled proportionally.
+            // Green over half, amber to a quarter, red below — readable at a
+            // glance without reading the number.
+            // fy=136 not 130: the FUEL row above is drawn at y=120 at scale
+            // 1.5, so its glyphs extend to ~y=132 and a bar at 130 clipped
+            // the text descenders.
+            const float fx = 8.0f, fy = 136.0f, fw = 160.0f, fh = 8.0f;
+            const float frac = (wf_moon_ldr_fuel < 0.0f)   ? 0.0f
+                             : (wf_moon_ldr_fuel > 100.0f) ? 1.0f
+                             : wf_moon_ldr_fuel / 100.0f;
+            if      (frac > 0.5f)  glColor3f(0.2f, 1.0f, 0.2f);
+            else if (frac > 0.25f) glColor3f(1.0f, 0.75f, 0.1f);
+            else                   glColor3f(1.0f, 0.25f, 0.2f);
+            glBegin(GL_QUADS);
+                glVertex2f(fx,             fy);
+                glVertex2f(fx + fw * frac, fy);
+                glVertex2f(fx + fw * frac, fy + fh);
+                glVertex2f(fx,             fy + fh);
+            glEnd();
+            glColor3f(1.0f, 1.0f, 1.0f);
+            glBegin(GL_LINE_LOOP);
+                glVertex2f(fx,      fy);
+                glVertex2f(fx + fw, fy);
+                glVertex2f(fx + fw, fy + fh);
+                glVertex2f(fx,      fy + fh);
+            glEnd();
+            glColor3f(1.0f, 1.0f, 0.0f);
+        }
+
         // Minimap inset, 128×128 px, top-right corner with 8 px margin.
         const float MM = 128.0f;
         const float mm_x = (float)xSize - 8.0f - MM;
@@ -318,6 +390,20 @@ static void DrawHud(int xSize, int ySize)
             glVertex2f(sx - 3.0f, sy + 3.0f); glVertex2f(sx + 3.0f, sy - 3.0f);
         glEnd();
 
+        // Landing-pad target — magenta cross at world (+95, -90), drawn bigger
+        // than the HLS marker because in descent mode it is the objective: the
+        // only genuinely flat ground on the tile. Descent mode only; in launch
+        // mode there is no pad actor to aim at.
+        if (wf_moon_ldr_active) {
+            world_to_screen(95.0f, -90.0f, sx, sy);
+            glColor3f(1.0f, 0.2f, 1.0f);
+            glBegin(GL_LINES);
+                glVertex2f(sx - 5.0f, sy);        glVertex2f(sx + 5.0f, sy);
+                glVertex2f(sx,        sy - 5.0f); glVertex2f(sx,        sy + 5.0f);
+            glEnd();
+            glColor3f(1.0f, 1.0f, 0.0f);
+        }
+
         // Player dot — filled 3×3 yellow square at live position.
         world_to_screen(wf_moon_player_x_m, wf_moon_player_y_m, sx, sy);
         glBegin(GL_QUADS);
@@ -412,6 +498,62 @@ static void DrawHud(int xSize, int ySize)
             DrawHudText(0.0f, 0.0f, banner);
             glPopMatrix();
             glColor3f(1.0f, 1.0f, 0.0f);   // restore yellow for any HUD below
+        }
+
+        // ── Site 01 outcome banner ─────────────────────────────────────────
+        // Without this the game is mute about its own result: the lander
+        // falls, stops, and nothing says whether that was a landing or a
+        // crash — which reads as a freeze. The second line is the payoff of
+        // the whole design: printing the SLOPE next to "TIPPED OVER" is what
+        // makes "the real LOLA terrain decided your fate" legible rather than
+        // arbitrary. Sits at y=170, clear of the instrument rows + fuel bar.
+        if (wf_moon_ldr_active && wf_moon_ldr_state > 0) {
+            const char* headline;
+            float r, g, b;
+            if (wf_moon_ldr_state == 1) {
+                headline = "TOUCHDOWN -- NOMINAL";  r = 0.2f; g = 1.0f; b = 0.2f;
+            } else if (wf_moon_ldr_state == 2) {
+                headline = "TOUCHDOWN -- ROUGH";    r = 1.0f; g = 0.75f; b = 0.1f;
+            } else if (wf_moon_ldr_impact_vz >= 2.5f) {
+                // Speed is checked FIRST on purpose. Both gates can fail at
+                // once — a free-fall arrival hits at ~31 m/s onto a 10 deg
+                // slope — and attributing that to the slope reads as "the
+                // terrain got me" when the actual fix is "brake". Only call
+                // it a tip-over when the descent was gentle enough to have
+                // survived flat ground, i.e. when slope really was the cause.
+                headline = "CRASHED -- TOO FAST";    r = 1.0f; g = 0.25f; b = 0.2f;
+            } else {
+                headline = "CRASHED -- TIPPED OVER"; r = 1.0f; g = 0.25f; b = 0.2f;
+            }
+
+            const float hscale = 3.0f;
+            float hw = (float)stb_easy_font_width((char*)headline) * hscale;
+            glColor3f(r, g, b);
+            glPushMatrix();
+            glTranslatef((float)xSize * 0.5f - hw * 0.5f, 170.0f, 0.0f);
+            glScalef(hscale, hscale, 1.0f);
+            DrawHudText(0.0f, 0.0f, (char*)headline);
+            glPopMatrix();
+
+            // acosf domain is [-1,1]; the Forth already publishes |nz|, but
+            // clamp anyway so a float rounding artefact can't produce NaN.
+            float nz = wf_moon_ldr_impact_nz;
+            if (nz > 1.0f) nz = 1.0f;
+            if (nz < 0.0f) nz = 0.0f;
+            const float slopeDeg = acosf(nz) * 57.2957795f;
+
+            char sub[96];
+            snprintf(sub, sizeof(sub),
+                     "SLOPE %.1f deg   IMPACT %.1f m/s   PRESS 2 TO RETRY",
+                     (double)slopeDeg, (double)wf_moon_ldr_impact_vz);
+            const float sscale = 1.5f;
+            float sw = (float)stb_easy_font_width(sub) * sscale;
+            glPushMatrix();
+            glTranslatef((float)xSize * 0.5f - sw * 0.5f, 200.0f, 0.0f);
+            glScalef(sscale, sscale, 1.0f);
+            DrawHudText(0.0f, 0.0f, sub);
+            glPopMatrix();
+            glColor3f(1.0f, 1.0f, 0.0f);
         }
     }
 

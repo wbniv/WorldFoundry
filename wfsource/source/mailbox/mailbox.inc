@@ -105,6 +105,28 @@ Comment("=====================================================================")
 	MAILBOXENTRY( HUD_TIMER, 71 )			Comment("HUD timer slot (read by game.cc:554); Director writes the countdown here")
 	MAILBOXENTRY( LIVES, 72 )			Comment("HUD lives slot (read by game.cc:553 for the LIVES display); player respawn decrements it")
 
+	// Site 01 lunar-descent game (WF_MOON_MODE=descent) — the flight model,
+	// touchdown evaluation and scoring all live in the Player's zForth script
+	// in wflevels/moon_site01/blender_create_moon.py; these are the globals it
+	// publishes so the C++ HUD can read them. Block 1784-1799 sits in the free
+	// gap between SMB (ends 1872) and the moon overlay block (starts 1875).
+	// 1798 is deliberately unallocated (spare).
+	MAILBOXENTRY( MOON_LDR_ACTIVE, 1784 )		Comment("Gates the Site 01 lander HUD block; the descent player script sets it to 1 each tick")
+	MAILBOXENTRY( MOON_LDR_ALT, 1785 )		Comment("Altitude above the landing-pad datum (m)")
+	MAILBOXENTRY( MOON_LDR_VZ, 1786 )		Comment("Signed vertical speed (m/s); negative = descending")
+	MAILBOXENTRY( MOON_LDR_VX, 1787 )		Comment("Signed X speed (m/s); HUD squares+sums VX/VY for horizontal speed (zForth has no sqrt)")
+	MAILBOXENTRY( MOON_LDR_VY, 1788 )		Comment("Signed Y speed (m/s); see MOON_LDR_VX")
+	MAILBOXENTRY( MOON_LDR_FUEL, 1789 )		Comment("Remaining fuel, 0-100; all thrusters cut out at 0")
+	MAILBOXENTRY( MOON_LDR_STATE, 1790 )		Comment("Run state: 0=flying, 1=landed PERFECT, 2=landed ROUGH, 3=crashed")
+	MAILBOXENTRY( MOON_LDR_RANGE2, 1791 )		Comment("Squared XY distance to the pad (m²) — squared to keep sqrt out of the Forth")
+	MAILBOXENTRY( MOON_LDR_IMPACT_VZ, 1792 )	Comment("|vz| latched at touchdown; must be latched a frame early because Jolt zeroes velocity before the script sees COLLIDER_IDX")
+	MAILBOXENTRY( MOON_LDR_IMPACT_NZ, 1793 )	Comment("|collision normal Z| at touchdown — the slope that decided the outcome; 1.0 = dead flat")
+	MAILBOXENTRY( MOON_LDR_PREV_VZ, 1794 )		Comment("Forth-internal: previous frame's commanded vz, the source for MOON_LDR_IMPACT_VZ")
+	MAILBOXENTRY( MOON_LDR_PREV_VH2, 1795 )		Comment("Forth-internal: previous frame's vx²+vy², for the horizontal-speed touchdown gate")
+	MAILBOXENTRY( MOON_LDR_INIT, 1796 )		Comment("Forth-internal: one-shot init latch; 0 triggers the spawn reset")
+	MAILBOXENTRY( MOON_LDR_END_T, 1797 )		Comment("Forth-internal: level TIME when the run ended; gates the retry beat and the crash tip-over ramp")
+	MAILBOXENTRY( MOON_LDR_THRUST, 1799 )		Comment("1 while the main engine is firing — for the HUD and any future plume actor")
+
 	// Moon Site 01 position-display HUD overlay — see docs/plans/2026-05-31-position-display-hud-overlay-on-the-moon-level-tex.md
 	MAILBOXENTRY( MOON_OVERLAY_ENABLED, 1875 )	Comment("Gates the moon position HUD overlay; moon player init sets to 1")
 	MAILBOXENTRY( MOON_PLAYER_X, 1876 )		Comment("Live player X (m) — copied from local X_POS each tick")
