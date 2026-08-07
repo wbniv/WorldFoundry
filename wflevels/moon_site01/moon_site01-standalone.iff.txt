@@ -12,7 +12,16 @@
     { 'ALGN' .align( 2048 ) }
     { 'RAM'
         'OBJD' 100000l                  // 10 actors + margin
-        'PERM' 1000000l                 // prop models: player, lander, earth, surface assets
+        'PERM' 2000000l                 // prop models: player, lander, earth, surface assets.
+                                        // Bumped 1MB->2MB: Site 01 descent mode (WF_MOON_MODE=
+                                        // descent) adds a second Blue Moon Mk1 mesh (the flyable
+                                        // lander), the landing-pad mesh, an astronaut reference
+                                        // prop, and a ~3.5KB flight-model Forth script inline in
+                                        // the Player common block — together enough to overflow
+                                        // the original 1MB budget loading skydome's starfield.tga
+                                        // ("Lmalloc ... out of memory ... Named Room #4095").
+                                        // Total arena (cbPerm + 9*cbRoom) stays 47MB, under the
+                                        // 64MB HAL pool budget noted below.
         'ROOM' 5000000l                 // per-chunk: ~10k-vert terrain mesh runtime ~3.7MB + slack.
                                         // Trimmed 8MB→5MB so the 9-slot (3×3) chunk-streaming
                                         // arena (cbPerm + 9*cbRoom = 46MB) fits the 64MB HAL pool.

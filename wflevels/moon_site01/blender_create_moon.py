@@ -62,6 +62,46 @@ def terrain_z(wx, wy):
     return float(heights[int(round(row)), int(round(col))])
 
 
+# ── Mode: launch showcase (default) vs. the playable descent game ────────────
+# WF_MOON_MODE=launch   — the original Starship HLS launch cutscene tableau.
+# WF_MOON_MODE=descent  — "Site 01": pilot a lander down on limited fuel.
+# One generator, two levels. Every difference is behind `if DESCENT:` so the
+# launch showcase stays byte-identical when built without the flag.
+MODE = os.environ.get('WF_MOON_MODE', 'launch').strip().lower()
+if MODE not in ('launch', 'descent'):
+    raise SystemExit(f"[moon] WF_MOON_MODE must be 'launch' or 'descent' (got {MODE!r})")
+DESCENT = (MODE == 'descent')
+print(f"[moon] mode: {MODE}")
+
+# ── Descent-game tuning ──────────────────────────────────────────────────────
+# Spawn sits above a 10-14° ridge shoulder — |normal_z| there is 0.971-0.987, so
+# descending straight down CRASHES no matter how gently. The only genuinely flat
+# ground (0.4°) is the pad site 240 m away. That asymmetry is the game, and it
+# comes straight out of the real LOLA elevation data.
+LDR_SPAWN = (-70.0, 85.0, 300.0)
+PAD_XY    = (95.0, -90.0)
+PAD_R     = 10.0        # landing-pad disc radius (m)
+MAIN_A    = 4.0         # main engine accel (m/s²) — 2.47x lunar g
+RCS_A     = 2.0         # lateral RCS accel (m/s²)
+FUEL0     = 100.0
+BURN_MAIN = 1.2         # fuel/s while the main engine burns
+BURN_RCS  = 0.4         # fuel/s per lateral thruster
+VZ_SAFE   = 2.5         # max survivable |vz| at touchdown (m/s)
+VH2_SAFE  = 6.25        # max horizontal speed², = (2.5 m/s)²
+NZ_GOOD   = 0.9950      # |normal_z| for PERFECT (slope <= 5.7°)
+NZ_OK     = 0.9900      # |normal_z| for ROUGH   (slope <= 8.1°)
+
+# Descent mailboxes. Raw numerics in M1 so the level needs no engine rebuild —
+# same pattern the cruiser scripts already use. 1784-1799 is free (SMB ends
+# 1872 starting at 1800; the moon block starts at 1875).
+MB_ACT,  MB_ALT,  MB_VZ,   MB_VX   = 1784, 1785, 1786, 1787
+MB_VY,   MB_FUEL, MB_ST,   MB_R2   = 1788, 1789, 1790, 1791
+MB_IVZ,  MB_INZ,  MB_PVZ,  MB_PVH2 = 1792, 1793, 1794, 1795
+MB_INIT, MB_ENDT, MB_THR           = 1796, 1797, 1799
+
+# Pad deck sits just above the local terrain; ALT is reported relative to it.
+PAD_Z = terrain_z(*PAD_XY) + 0.30
+
 # ── Player (astronaut) — 1.8 m tall, WF unit = 1 m ───────────────────────────
 PLAYER_HEIGHT = 1.8
 # Spawn at centre of play area, 5 m above terrain centre (drop is the proof of
@@ -93,8 +133,16 @@ addon_utils.enable("wf_blender", default_set=False, persistent=False)
 scene = bpy.context.scene
 
 # ── 2. Import snowgoons for infrastructure ────────────────────────────────────
+# Pass oad_dir explicitly. Without it the importer falls back to
+# _default_oad_dirs() (export_level.py:547), which tries two hardcoded
+# /home/will/... paths and then walks up from the add-on's __file__ — and
+# install.sh installs the add-on as *symlinks*, so abspath() leaves __file__
+# under ~/.config/blender/... where the walk-up never reaches wf_oad/tests/
+# fixtures. Every schema then resolves to None, every imported object loses its
+# class, and find_by_class('player') returns None — silently producing a level
+# with no Player, no CamTarget and no camera.
 print(f"[moon] Importing snowgoons scaffold from {SNOWGOONS}")
-bpy.ops.wf.import_level(filepath=SNOWGOONS)
+bpy.ops.wf.import_level(filepath=SNOWGOONS, oad_dir=OAD_DIR)
 
 # ── 3. Strip everything except bare infrastructure ────────────────────────────
 KEEP_CLASSES   = {'director', 'camera', 'levelobj', 'matte', 'light',
@@ -781,7 +829,149 @@ def _build_fsp_reactor():
 
 
 player = find_by_class('player')
-if player:
+if player and DESCENT:
+    # ── Site 01 descent game: the "player" IS the lander ──────────────────────
+    # Reusing the Player actor rather than adding one: it already has a Jolt
+    # CharacterVirtual (Mobility=Physics), already publishes X/Y/Z to the HUD
+    # mailboxes, and is already the Track Object of the chase camshots.
+    player.name = 'Player'
+    player.location = LDR_SPAWN
+    player['wf_Mobility']            = 'Physics'
+    player['wf_Mass']                = 4000.0   # cosmetic — Jolt characters ignore mass
+    player['wf_Model Type']          = 'Mesh'
+    player['wf_Visibility Mailbox']  = 1
+    # Second Blue Moon Mk1 build → its own mesh datablock, so the sister ship
+    # parked at (-40,-15) keeps its own. ~8 m, base at local z=0.
+    _lander_mesh = _build_blue_moon_mk1()
+    player.data = _lander_mesh.data
+    bpy.data.objects.remove(_lander_mesh, do_unlink=True)
+    player.scale = (1.0, 1.0, 1.0)
+    player.rotation_euler.z = 0.0
+    # Vacuum flight: no drag, lunar g only, and a speed clamp high enough that
+    # a 300 m free fall (peaks ~31 m/s) is never truncated. OAD range is 0..100.
+    player['wf_Running Acceleration'] = 0.0
+    player['wf_Running Deceleration'] = 5.0     # snuff any post-touchdown skate
+    player['wf_Max Ground Speed']     = 0.5
+    player['wf_Jumping Acceleration'] = 0.0
+    player['wf_Falling Acceleration'] = 1.62    # lunar g
+    player['wf_Air Acceleration']     = 0.0     # thrust comes from script, not the handler
+    player['wf_Max Air Speed']        = 90.0
+    player['wf_Horiz Air Drag']       = 0.0
+    player['wf_Vert Air Drag']        = 0.0
+    player['wf_Turn Rate']            = 0.5     # MUST stay > 0 — 0 routes to MarbleHandler
+    player['wf_Vertical Elasticity']  = 0.0     # no bounce
+    # Astronaut becomes a human-scale reference standing beside the pad instead
+    # of being consumed as the player mesh. (Inlined rather than _place_prop —
+    # that helper is defined further down the file.)
+    _ax, _ay = PAD_XY[0] + 13.0, PAD_XY[1] + 4.0
+    attach_schema(_astronaut, 'platform')
+    _astronaut.name = 'astronaut_ref'
+    _astronaut.location = (_ax, _ay, terrain_z(_ax, _ay))
+    _astronaut['wf_Mobility']            = 'Anchored'
+    _astronaut['wf_Model Type']          = 'Mesh'
+    _astronaut['wf_Visibility Mailbox']  = 1
+    _astronaut['wf_Moves Between Rooms'] = 'True'
+
+    _SX, _SY, _SZ = LDR_SPAWN
+    _PX, _PY = PAD_XY
+    player['wf_Script'] = (
+        "\\ wf\n"
+        # ── helper words (compiled once, cached by script-string pointer) ─────
+        ": LDT INDEXOF_DELTA_TIME read-mailbox ;\n"
+        ": LJOY INDEXOF_HARDWARE_JOYSTICK1_RAW read-mailbox ;\n"
+        ": LBTN LJOY & 0 <> ;\n"                       # ( mask -- flag ), & is commutative
+        f": LBURN LDT * {MB_FUEL} read-mailbox swap - 0 max {MB_FUEL} write-mailbox ;\n"
+        ": LTZ LDT * INDEXOF_ZSPEED read-mailbox + INDEXOF_ZSPEED write-mailbox ;\n"
+        ": LTX LDT * INDEXOF_XSPEED read-mailbox + INDEXOF_XSPEED write-mailbox ;\n"
+        ": LTY LDT * INDEXOF_YSPEED read-mailbox + INDEXOF_YSPEED write-mailbox ;\n"
+        ": LRESET\n"
+        f"{_SX} INDEXOF_X_POS write-mailbox {_SY} INDEXOF_Y_POS write-mailbox\n"
+        f"{_SZ} INDEXOF_Z_POS write-mailbox\n"
+        "0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox\n"
+        "0 INDEXOF_ZSPEED write-mailbox\n"
+        # A and B only commit when C is written too (actor.cc:1533) — order matters.
+        "0 INDEXOF_ROTATION_A write-mailbox 0 INDEXOF_ROTATION_B write-mailbox\n"
+        "0 INDEXOF_ROTATION_C write-mailbox\n"
+        f"{FUEL0} {MB_FUEL} write-mailbox\n"
+        f"0 {MB_ST} write-mailbox 0 {MB_IVZ} write-mailbox 0 {MB_INZ} write-mailbox\n"
+        f"0 {MB_PVZ} write-mailbox 0 {MB_PVH2} write-mailbox 0 {MB_ENDT} write-mailbox\n"
+        f"0 {MB_THR} write-mailbox 0 INDEXOF_HUD_SCORE write-mailbox\n"
+        f"1 {MB_INIT} write-mailbox ;\n"
+        # ── per-frame body ────────────────────────────────────────────────────
+        f"{MB_INIT} read-mailbox 0 = if LRESET then\n"
+        "1 INDEXOF_MOON_OVERLAY_ENABLED write-mailbox\n"
+        f"1 {MB_ACT} write-mailbox\n"
+        "0 INDEXOF_INPUT write-mailbox\n"          # never hand the stick to the movement handler
+        # Telemetry the existing HUD block + minimap already consume.
+        "INDEXOF_X_POS read-mailbox INDEXOF_MOON_PLAYER_X write-mailbox\n"
+        "INDEXOF_Y_POS read-mailbox INDEXOF_MOON_PLAYER_Y write-mailbox\n"
+        "INDEXOF_Z_POS read-mailbox INDEXOF_MOON_PLAYER_Z write-mailbox\n"
+        "INDEXOF_ROTATION_C read-mailbox INDEXOF_MOON_PLAYER_HEADING write-mailbox\n"
+        f"INDEXOF_Z_POS read-mailbox {PAD_Z} - {MB_ALT} write-mailbox\n"
+        # Squared range to the pad — squared avoids sqrt (zForth has no float sqrt)
+        # and punishes misses superlinearly, which is what we want for scoring.
+        f"INDEXOF_X_POS read-mailbox {_PX} - dup *\n"
+        f"INDEXOF_Y_POS read-mailbox {_PY} - dup * + {MB_R2} write-mailbox\n"
+        "INDEXOF_TIME read-mailbox INDEXOF_HUD_TIMER write-mailbox\n"
+        f"{MB_ST} read-mailbox 0 = if\n"
+        # COLLIDER_IDX is contact-edge-only (OnContactPersisted isn't routed), so
+        # a nonzero read here is exactly the touchdown frame.
+        "INDEXOF_COLLIDER_IDX read-mailbox 0 <> if\n"
+        # Jolt already zeroed vz resolving the collision, so the real impact
+        # speed is last frame's latched value.
+        f"{MB_PVZ} read-mailbox abs {MB_IVZ} write-mailbox\n"
+        # Landing on flat ground reports normal_z ~= -1.0 (jolt_backend.cc:520
+        # passes -mContactNormal), so always take the magnitude.
+        f"INDEXOF_COLLISION_NORMAL_Z read-mailbox abs {MB_INZ} write-mailbox\n"
+        f"3 {MB_ST} write-mailbox\n"                  # pessimistic default: CRASHED
+        f"{MB_INZ} read-mailbox {NZ_OK} > if\n"
+        f"{MB_IVZ} read-mailbox {VZ_SAFE} < if\n"
+        f"{MB_PVH2} read-mailbox {VH2_SAFE} < if\n"
+        f"{MB_INZ} read-mailbox {NZ_GOOD} > if 1 else 2 then {MB_ST} write-mailbox\n"
+        "then then then\n"
+        f"INDEXOF_TIME read-mailbox {MB_ENDT} write-mailbox\n"
+        "0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox\n"
+        f"0 INDEXOF_ZSPEED write-mailbox 0 {MB_THR} write-mailbox\n"
+        # ── score ─────────────────────────────────────────────────────────────
+        f"{MB_ST} read-mailbox 3 < if\n"
+        "1000\n"
+        f"{MB_FUEL} read-mailbox 25 * +\n"                        # fuel saved
+        f"3 {MB_IVZ} read-mailbox - 0 max 200 * +\n"              # touchdown softness
+        f"{MB_INZ} read-mailbox 0.99 - 0 max 40000 * +\n"         # site flatness
+        f"2000 {MB_R2} read-mailbox 8 / - 0 max +\n"              # accuracy
+        f"{MB_ST} read-mailbox 2 = if 0.6 * then\n"               # ROUGH = 60%
+        "INDEXOF_HUD_SCORE write-mailbox\n"
+        "else 0 INDEXOF_HUD_SCORE write-mailbox then\n"
+        "else\n"
+        # ── flying: axis-aligned RCS thrust (zForth has no trig) ──────────────
+        f"0 {MB_THR} write-mailbox\n"
+        f"{MB_FUEL} read-mailbox 0 > if\n"
+        f"1 LBTN if {MAIN_A} LTZ {BURN_MAIN} LBURN 1 {MB_THR} write-mailbox then\n"
+        f"2048 LBTN if {RCS_A} LTY {BURN_RCS} LBURN then\n"
+        f"4096 LBTN if {-RCS_A} LTY {BURN_RCS} LBURN then\n"
+        f"8192 LBTN if {RCS_A} LTX {BURN_RCS} LBURN then\n"
+        f"16384 LBTN if {-RCS_A} LTX {BURN_RCS} LBURN then\n"
+        "then\n"
+        # Latch this frame's commanded velocity — next frame's impact test reads it.
+        f"INDEXOF_ZSPEED read-mailbox dup {MB_VZ} write-mailbox {MB_PVZ} write-mailbox\n"
+        f"INDEXOF_XSPEED read-mailbox dup {MB_VX} write-mailbox dup *\n"
+        f"INDEXOF_YSPEED read-mailbox dup {MB_VY} write-mailbox dup * + {MB_PVH2} write-mailbox\n"
+        "then\n"
+        "else\n"
+        # ── run over: hold still, tip over if crashed, wait for retry ─────────
+        "0 INDEXOF_XSPEED write-mailbox 0 INDEXOF_YSPEED write-mailbox\n"
+        "0 INDEXOF_ZSPEED write-mailbox\n"
+        f"{MB_ST} read-mailbox 3 = if\n"
+        f"INDEXOF_TIME read-mailbox {MB_ENDT} read-mailbox - 0.6 min 0.1 *\n"
+        "INDEXOF_ROTATION_A write-mailbox\n"
+        "0 INDEXOF_ROTATION_B write-mailbox 0 INDEXOF_ROTATION_C write-mailbox\n"
+        "then\n"
+        f"INDEXOF_TIME read-mailbox {MB_ENDT} read-mailbox - 1.5 > if\n"
+        "2 LBTN if LRESET then\n"
+        "then\n"
+        "then\n"
+    )
+elif player:
     player.name = 'Player'
     player.location = PLAYER_SPAWN
     player['wf_Mobility']             = 'Physics'
@@ -891,18 +1081,21 @@ _lander['wf_Moves Between Rooms'] = 'True'   # prop, not terrain — goes in PER
 # Launch sequence script: when phase ≥ 3 (ascent), compute Z from quadratic
 # t² curve and write to own Z_POS. See
 # docs/plans/2026-06-02-moon-lander-launch-sequence.md.
-_lander['wf_Script'] = (
-    "\\ wf\n"
-    "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if "    # >2 == >=3 (zForth lacks >=)
-    "INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox dup * 0.5 * "
-    "dup INDEXOF_MOON_LANDER_Z write-mailbox "          # publish z for launch_tracker proxy
-    "dup 500 > if "                                     # z > 500 m → despawn (t≈32 s)
-    "drop 0 INDEXOF_ALIVE write-mailbox "
-    "else "
-    "INDEXOF_Z_POS write-mailbox "
-    "then "
-    "then\n"
-)
+# In descent mode the HLS never launches — it stays parked as the base-camp
+# landmark that makes the site read as inhabited.
+if not DESCENT:
+    _lander['wf_Script'] = (
+        "\\ wf\n"
+        "INDEXOF_MOON_LAUNCH_PHASE read-mailbox 2 > if "    # >2 == >=3 (zForth lacks >=)
+        "INDEXOF_MOON_LAUNCH_T_MINUS read-mailbox dup * 0.5 * "
+        "dup INDEXOF_MOON_LANDER_Z write-mailbox "          # publish z for launch_tracker proxy
+        "dup 500 > if "                                     # z > 500 m → despawn (t≈32 s)
+        "drop 0 INDEXOF_ALIVE write-mailbox "
+        "else "
+        "INDEXOF_Z_POS write-mailbox "
+        "then "
+        "then\n"
+    )
 print(f"[moon] lander mesh: {len(_lander.data.vertices)} verts, "
       f"{len(_lander.data.polygons)} polys at {_lander.location[:]}")
 
@@ -1101,6 +1294,71 @@ _dome['wf_Model Type']          = 'Mesh'
 _dome['wf_Visibility Mailbox']  = 1
 _dome['wf_Moves Between Rooms'] = 'True'
 
+
+# ── 6e. Landing pad (descent mode only) ──────────────────────────────────────
+# MUST be class 'statplat'. The terrain is the only collidable thing in this
+# level — every prop is class 'platform' and gets no Jolt body at all (bodies
+# are created only for StatPlat_KIND and anchored Generator_KIND, actor.cc:761,
+# :823), so a pad authored as a prop would be flown straight through.
+# Its top face is exactly horizontal, so touching down on it always reports
+# |normal_z| = 1.0 — a guaranteed slope pass, unlike the 10-14° ground at spawn.
+def _build_landing_pad():
+    mat_deck   = _make_mat('pad_deck',   (0.16, 0.16, 0.18))
+    mat_stripe = _make_mat('pad_stripe', (0.88, 0.88, 0.85))
+    parts = []
+
+    bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=PAD_R, depth=0.30,
+                                        location=(0.0, 0.0, 0.15))
+    parts.append((bpy.context.object, mat_deck))
+
+    # Target cross on the deck — visible from a few hundred metres up.
+    for rot_z in (0.0, math.pi / 2.0):
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0.0, 0.0, 0.31))
+        bar = bpy.context.object
+        bar.scale = (PAD_R * 1.30, PAD_R * 0.16, 0.02)
+        bar.rotation_euler = (0.0, 0.0, rot_z)
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+        parts.append((bar, mat_stripe))
+
+    # Corner beacons so the pad reads as a built structure, not a paint mark.
+    for ang_deg in (45.0, 135.0, 225.0, 315.0):
+        ang = math.radians(ang_deg)
+        bpy.ops.mesh.primitive_cylinder_add(
+            vertices=6, radius=0.22, depth=1.6,
+            location=(PAD_R * 0.86 * math.cos(ang), PAD_R * 0.86 * math.sin(ang), 0.8))
+        parts.append((bpy.context.object, mat_stripe))
+
+    for obj, mat in parts:
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        for p in obj.data.polygons:
+            p.material_index = 0
+
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj, _ in parts:
+        obj.select_set(True)
+    body = parts[0][0]
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    body.name = 'landing_pad'
+    body.data.name = 'landing_pad'
+    return body
+
+
+if DESCENT:
+    _pad = _build_landing_pad()
+    attach_schema(_pad, 'statplat')
+    _pad.location = (PAD_XY[0], PAD_XY[1], terrain_z(*PAD_XY))
+    _pad['wf_Mobility']           = 'Anchored'
+    _pad['wf_Model Type']         = 'Mesh'
+    _pad['wf_Visibility Mailbox'] = 1
+    # NOTE: deliberately no 'Moves Between Rooms' — the pad is collision
+    # geometry and belongs in Room0 with the terrain, not the PERM atlas.
+    print(f"[moon] landing_pad (statplat) at {_pad.location[:]}, "
+          f"{len(_pad.data.vertices)} verts, {len(_pad.data.polygons)} polys")
+
+
 # ── 7. Camera ────────────────────────────────────────────────────────────────
 target = find_by_class('target')
 if target:
@@ -1120,7 +1378,12 @@ if camera_actor:
     # (30,-80,5), the huge first-frame delta (≈1.1 s) overshoots dramatically
     # and Earth flashes for one frame then disappears. Starting at cs_earth
     # means zero travel needed — camera is already there on frame 1.
-    camera_actor.location = (30.0, -80.0, 5.0)  # cs_earth position
+    if DESCENT:
+        # Start where cs_open sits, so the bungee has zero travel on frame 1.
+        camera_actor.location = (PAD_XY[0] - 18.0, PAD_XY[1] - 26.0,
+                                 terrain_z(*PAD_XY) + 9.0)
+    else:
+        camera_actor.location = (30.0, -80.0, 5.0)  # cs_earth position
     # Snowgoons inherits a fog setup tuned for Earth atmosphere (start 20 m,
     # complete 30 m, mid-grey #888888) — at vista distances this fogs the
     # entire terrain to flat grey. The Moon has no atmosphere; push fog far
@@ -1131,7 +1394,43 @@ if camera_actor:
     camera_actor['wf_FoggingCompleteDistance'] = 1000.0
 
 camshot = find_by_class('camshot')
-if camshot:
+if camshot and DESCENT:
+    # ── cs_descent — the workhorse chase rig ──────────────────────────────────
+    # Position X/Y/Z = Relative makes the shot an offset that rides the tracked
+    # actor: final pos = camshotPos - CamTarget.pos + Player.pos
+    # (movecam.cc:290-302, :393-399). Track Object is the camera's *look-at*,
+    # not the position anchor — Target/Follow both being CamTarget cancels out
+    # (movecam.cc:1017-1024), which is what makes this a true chase camera.
+    camshot.name = 'cs_descent'
+    camshot.location = (LOOK_TARGET[0] + 0.0,
+                        LOOK_TARGET[1] - 60.0,
+                        LOOK_TARGET[2] + 38.0)
+    camshot['wf_Position X'] = 'Relative'
+    camshot['wf_Position Y'] = 'Relative'
+    camshot['wf_Position Z'] = 'Relative'
+    camshot['wf_Rotation']   = 'Fixed'
+    camshot['wf_FOV']                 = 60.0
+    # Bungee closes ~1/Elasticity of the gap per frame (movecam.cc:972).
+    # 3.0 ≈ 5-frame convergence — about 0.5 m of lag at 31 m/s.
+    camshot['wf_Elasticity']          = 3.0
+    camshot['wf_Pan Time In Seconds'] = 1.5
+    camshot['wf_Model Type']          = 'None'
+    camshot['wf_Track Object'] = 'Player'
+    camshot['wf_Target']       = 'CamTarget'
+    camshot['wf_Follow']       = 'CamTarget'
+    camshot['wf_Yon']          = 2500.0
+    camshot['wf_Moves Between Rooms'] = 'True'
+    # Active once the establishing hold is done and the run is still in progress.
+    camshot['wf_Script'] = (
+        "\\ wf\n"
+        "INDEXOF_ACTOR_INDEX read-mailbox\n"
+        "INDEXOF_TIME read-mailbox 4 > if\n"
+        f"  {MB_ST} read-mailbox 0 = if\n"
+        "  INDEXOF_CAMSHOT write-mailbox\n"
+        "  else drop then\n"
+        "else drop then\n"
+    )
+elif camshot:
     camshot.name = 'cs_chase'
     camshot.location = (PLAYER_SPAWN[0] + CAM_OFFSET[0],
                         PLAYER_SPAWN[1] + CAM_OFFSET[1],
@@ -1271,6 +1570,73 @@ cs_ground_obj['wf_Script'] = (
     "else drop then\n"
 )
 
+# ── 7c. Descent-mode camera swap ─────────────────────────────────────────────
+# Drop the launch-cutscene rig wholesale. Removing them together matters:
+# cs_hold/cs_earth name launch_tracker as their Track Object, so deleting the
+# tracker alone would leave dangling references. Every descent camshot elects
+# itself via INDEXOF_ACTOR_INDEX rather than a hardcoded index, so the actor
+# renumbering this causes is harmless.
+if DESCENT:
+    for _dead in ('launch_tracker', 'cs_hold', 'cs_earth', 'cs_ground'):
+        _o = bpy.data.objects.get(_dead)
+        if _o:
+            bpy.data.objects.remove(_o, do_unlink=True)
+            print(f"[moon] descent: removed {_dead}")
+
+    def _mk_camshot(name, loc, track, script, *, relative, pan=1.5,
+                    elasticity=None, fov=60.0):
+        data = bpy.data.meshes.new(name + '_mesh')
+        obj  = bpy.data.objects.new(name, data)
+        bpy.context.scene.collection.objects.link(obj)
+        attach_schema(obj, 'camshot')
+        obj.location = loc
+        mode = 'Relative' if relative else 'Absolute'
+        obj['wf_Position X'] = mode
+        obj['wf_Position Y'] = mode
+        obj['wf_Position Z'] = mode
+        obj['wf_Rotation']            = 'Fixed'
+        obj['wf_FOV']                 = fov
+        obj['wf_Pan Time In Seconds'] = pan
+        obj['wf_Model Type']          = 'None'
+        obj['wf_Track Object']        = track
+        obj['wf_Target']              = 'CamTarget'   # non-null required (movecam.cc:257,310)
+        obj['wf_Follow']              = 'CamTarget'
+        obj['wf_Yon']                 = 2500.0
+        obj['wf_Moves Between Rooms'] = 'True'
+        if elasticity is not None:
+            obj['wf_Elasticity'] = elasticity
+        obj['wf_Script'] = script
+        return obj
+
+    # cs_open — 4 s establishing hold, standing at the pad looking up at the
+    # inbound lander. Says "here is the only flat ground, and you are 300 m up
+    # and 240 m away from it" in one shot.
+    _mk_camshot(
+        'cs_open',
+        (PAD_XY[0] - 18.0, PAD_XY[1] - 26.0, terrain_z(*PAD_XY) + 9.0),
+        'Player',
+        "\\ wf\n"
+        "INDEXOF_ACTOR_INDEX read-mailbox\n"
+        "INDEXOF_TIME read-mailbox 4 < if\n"
+        "INDEXOF_CAMSHOT write-mailbox\n"
+        "else drop then\n",
+        relative=False, pan=0.5,
+    )
+
+    # cs_touchdown — hero close-up once the run resolves, so the tip-over on a
+    # slope crash (or the settle on the pad) is actually readable.
+    _mk_camshot(
+        'cs_touchdown',
+        (LOOK_TARGET[0] + 14.0, LOOK_TARGET[1] - 26.0, LOOK_TARGET[2] + 7.0),
+        'Player',
+        "\\ wf\n"
+        "INDEXOF_ACTOR_INDEX read-mailbox\n"
+        f"{MB_ST} read-mailbox 0 > if\n"
+        "INDEXOF_CAMSHOT write-mailbox\n"
+        "else drop then\n",
+        relative=True, pan=1.5, elasticity=4.0,
+    )
+
 # ── 8. Level object ──────────────────────────────────────────────────────────
 # ── 7b. Room bounds ──────────────────────────────────────────────────────────
 # Must enclose terrain extent + player jump headroom + camera offset so levcomp
@@ -1339,7 +1705,14 @@ scene.world = world
 
 scene.render.resolution_x = 800
 scene.render.resolution_y = 600
-scene.render.engine = 'BLENDER_EEVEE'
+# EEVEE was renamed BLENDER_EEVEE_NEXT in Blender 4.2+ and the old identifier
+# was dropped entirely by 4.5, where assigning it raises TypeError — which used
+# to abort the script *before* the export below ever ran. Pick whichever this
+# Blender actually offers (same idiom as wftools/wf_blender/smb_model_gallery.py:125).
+_engines = [e.identifier for e in
+            bpy.types.RenderSettings.bl_rna.properties['engine'].enum_items]
+scene.render.engine = ('BLENDER_EEVEE_NEXT' if 'BLENDER_EEVEE_NEXT' in _engines
+                       else 'BLENDER_EEVEE')
 scene.render.image_settings.file_format = 'PNG'
 PREVIEW_PNG = os.path.join(SCRIPT_DIR, 'preview.png')
 scene.render.filepath = PREVIEW_PNG
