@@ -28,6 +28,7 @@ Coordinate transform (Blender Z-up ↔ WF Y-up):
 import math
 import os
 import re
+import sys as _sys
 import struct
 
 import bpy
@@ -41,9 +42,136 @@ import wf_core
 
 SCHEMA_PATH_KEY = "wf_schema_path"
 
+# Set by the importer on actors that had no mesh in the source .lev and were
+# given a stand-in cube purely for visibility. The exporter must not write
+# those back out as geometry.
+PLACEHOLDER_MESH_KEY = "wf__import_placeholder_mesh"
+
 
 def _prop_key(field_key: str) -> str:
     return f"wf_{field_key}"
+
+
+# Emitted by the geometry writer in the export operator — must not be
+# duplicated by the OAD field pass.
+_GEOMETRY_OWNED_KEYS = {"Mesh Name", "Model Type"}
+
+# Structural / layout entries in the schema; they carry no value.
+_NON_VALUE_KINDS = {"Section", "Group", "GroupEnd", "Annotation"}
+
+
+def _lev_escape(s: str) -> str:
+    r"""Escape a Python str for a .lev { 'STR' "..." } chunk.
+
+    Backslash and newline are the two that matter in practice: every Forth
+    script starts with a literal ``\`` sigil line and is multi-line, and the
+    .lev text format carries both as C-style escapes on a single line.
+    """
+    return (str(s)
+            .replace("\\", "\\\\")
+            .replace('"', '\\"')
+            .replace("\r\n", "\\n")
+            .replace("\n", "\\n")
+            .replace("\t", "\\t"))
+
+
+def _emit_field_chunks(obj, schema) -> list[str]:
+    """Serialize an object's wf_ custom properties as .lev field chunks.
+
+    This is the exact inverse of :func:`_apply_field_chunks`, and it is what
+    makes ``blender_create_moon.py``-style generators round-trip.
+
+    It replaces an older path that fed ``wf_core.export_iff_txt`` into
+    ``_extract_field_lines``. Those two never agreed: ``export_iff_txt``
+    produces the *packed OAD blob* (``{ 'PLAY' … $01 $00 $00 $00 // Mobility``)
+    destined for a compiled ``.oad``, while a ``.lev`` wants named typed chunks
+    (``{ 'I32' { 'NAME' "Mobility" } …``). ``_extract_field_lines`` scanned for
+    a ``{ 'TYPE'`` wrapper that the blob format never contains, so it returned
+    zero lines for every actor and the export silently produced a level with no
+    OAD fields at all — which iffcomp then rejected.
+
+    Only fields the object actually carries are emitted. That matches how
+    generator-created actors already behave in the shipped levels (e.g.
+    ``artemis_lander`` carries ~15 chunks, not the schema's full 129).
+    """
+    lines: list[str] = []
+    for field in schema.fields():
+        kind = field.kind
+        if kind in _NON_VALUE_KINDS:
+            continue
+        key = field.key
+        if key in _GEOMETRY_OWNED_KEYS:
+            continue
+
+        val = obj.get(_prop_key(key))
+        if val is None:
+            # Fall back to the schema default. Actors created by a generator
+            # only carry the handful of properties the script sets, but the
+            # engine sizes each actor's common block from the full field list —
+            # omitting the rest makes levcomp collapse the actor onto the shared
+            # default block, and a renderable actor then has no renderActor at
+            # all ("has invalid renderActor", animmang.cc:124).
+            if field.show_as == 6:
+                continue
+            if kind == "Float":
+                val = field.default_display
+            elif kind in ("Str", "ObjRef", "FileRef"):
+                val = ""
+            elif kind == "Enum":
+                items = field.enum_items()
+                di = field.default_raw
+                val = items[di] if 0 <= di < len(items) else (items[0] if items else "")
+            elif kind == "Skip":
+                continue
+            else:
+                val = field.default_raw
+            if val is None:
+                continue
+
+        name = f'{{ \'NAME\' "{key}" }}'
+
+        if kind == "Enum":
+            items = field.enum_items()
+            if isinstance(val, str):
+                idx = items.index(val) if val in items else None
+                label = val
+            else:
+                idx = int(val)
+                label = items[idx] if 0 <= idx < len(items) else str(val)
+            if idx is None:
+                # Unknown label — emit the text so the value is at least visible
+                # rather than silently dropping it.
+                lines.append(f"{{ 'STR' {name} {{ 'STR' \"{_lev_escape(label)}\" }} }}")
+            else:
+                lines.append(f"{{ 'I32' {name} {{ 'DATA' {idx}l }} "
+                             f"{{ 'STR' \"{_lev_escape(label)}\" }} }}")
+
+        elif kind == "Bool":
+            if isinstance(val, str):
+                b = 1 if val.strip().lower() in ("true", "1", "yes") else 0
+            else:
+                b = 1 if val else 0
+            lines.append(f"{{ 'I32' {name} {{ 'DATA' {b}l }} "
+                         f"{{ 'STR' \"{'True' if b else 'False'}\" }} }}")
+
+        elif kind == "Int":
+            i = int(float(val))
+            lines.append(f"{{ 'I32' {name} {{ 'DATA' {i}l }} {{ 'STR' \"{i}\" }} }}")
+
+        elif kind == "Float":
+            f = float(val)
+            lines.append(f"{{ 'FX32' {name} {{ 'DATA' {f:.16f}(1.15.16) }} "
+                         f"{{ 'STR' \"{f!r}\" }} }}")
+
+        elif kind == "FileRef":
+            lines.append(f"{{ 'FILE' {name} {{ 'STR' \"{_lev_escape(val)}\" }} }}")
+
+        else:
+            # Str, ObjRef, and Skip. Skip is the kind the OAD gives Script —
+            # excluded from visible_fields(), but very much a real value.
+            lines.append(f"{{ 'STR' {name} {{ 'STR' \"{_lev_escape(val)}\" }} }}")
+
+    return lines
 
 
 def _seed_defaults(obj, schema):
@@ -273,8 +401,16 @@ def wf_to_bl(wf_x, wf_y, wf_z):
 
 
 def bl_to_wf(bl_x, bl_y, bl_z):
-    """Blender Z-up → WF Y-up."""
-    return (bl_x, bl_z, -bl_y)
+    """Blender → WF. Identity: both are right-handed Z-up.
+
+    This used to return ``(bl_x, bl_z, -bl_y)``, a Z-up→Y-up swap. That
+    contradicts both CLAUDE.md ("Blender X=right, Y=depth, Z=up. Same
+    orientation... bl_to_wf() is an identity transform") and every shipped
+    ``.lev``, where an actor authored at Blender ``(-90, 80, 2.79)`` is stored
+    verbatim as ``-90, 80, 2.79``. With the swap, positions came out rotated and
+    levcomp reported every actor as "falls outside every room bbox".
+    """
+    return (bl_x, bl_y, bl_z)
 
 
 # ── binary mesh reader ────────────────────────────────────────────────────────
@@ -743,6 +879,13 @@ class WF_OT_import_level(bpy.types.Operator, ImportHelper):
                 blobj = bpy.data.objects.new(obj_name, mesh)
                 blobj.location = bl_loc
                 blobj.scale = (sx, sy, sz)
+                # This actor had NO mesh in the source .lev — the cube exists
+                # only so it is visible/selectable in Blender. Tag it so the
+                # exporter doesn't write it back out as real geometry: doing so
+                # gives non-renderable actors (levelobj, camera, director) a
+                # renderActor the engine then rejects with
+                # "has invalid renderActor" (animmang.cc:124).
+                blobj[PLACEHOLDER_MESH_KEY] = 1
 
             context.collection.objects.link(blobj)
 
@@ -793,28 +936,61 @@ def _apply_field_chunks(blobj, schema, obj_chunk):
 
         prop_key = _prop_key(field.key)
         data = _data_scalars(chunk)
-        if not data:
-            continue
-        val = data[0]
+        val = data[0] if data else None
 
-        if field.kind == "Int" or field.kind == "Bool":
+        # DATA-less enum/bool chunk: { 'I32' { 'NAME' "Mobility" } { 'STR' "Anchored" } }
+        # — no 'DATA' subchunk at all, just the label. The shipped levels write
+        # this routinely (21 "Mobility: Anchored" chunks in moon_site01.lev
+        # alone). Before this fallback, `not data` hit the `continue` above and
+        # the field was silently left at the OAD's *schema* default instead of
+        # the level's authored value — invisible as long as they agreed, but
+        # `director.oad`'s schema default for Mobility is Physics (index 1)
+        # while every level author sets Director to Anchored, so the resulting
+        # imported object silently reverted to Physics. That one flip made
+        # Director's constructor choose AnimationManagerActual (which requires
+        # a real renderActor) over AnimationManagerNull — surfacing as
+        # "has invalid renderActor" (animmang.cc:124) only once OAD field
+        # export started working at all.
+        if val is None and field.kind in ("Enum", "Bool"):
+            str_chunk = _child_by_tag(chunk, 'STR')
+            if str_chunk and str_chunk['scalars']:
+                val = str(str_chunk['scalars'][0][1])
+
+        if val is None:
+            continue
+
+        if field.kind == "Int":
             try:
                 blobj[prop_key] = int(float(val))
             except (ValueError, TypeError):
                 pass
+        elif field.kind == "Bool":
+            if isinstance(val, str) and not re.fullmatch(r'-?\d+(\.\d+)?', val.strip()):
+                blobj[prop_key] = 1 if val.strip().lower() in ("true", "1", "yes") else 0
+            else:
+                try:
+                    blobj[prop_key] = int(float(val))
+                except (ValueError, TypeError):
+                    pass
         elif field.kind == "Float":
             try:
                 blobj[prop_key] = float(val)
             except (ValueError, TypeError):
                 pass
         elif field.kind == "Enum":
-            try:
-                idx = int(float(val))
-                items = field.enum_items()
-                if 0 <= idx < len(items):
-                    blobj[prop_key] = items[idx]
-            except (ValueError, TypeError):
-                pass
+            items = field.enum_items()
+            if isinstance(val, str) and not re.fullmatch(r'-?\d+(\.\d+)?', val.strip()):
+                # Label form — match against the schema's own item names, not
+                # a numeric reparse (fixes the DATA-less case above).
+                if val in items:
+                    blobj[prop_key] = val
+            else:
+                try:
+                    idx = int(float(val))
+                    if 0 <= idx < len(items):
+                        blobj[prop_key] = items[idx]
+                except (ValueError, TypeError):
+                    pass
         elif field.kind in ("Str", "ObjRef", "FileRef"):
             blobj[prop_key] = str(val)
 
@@ -837,16 +1013,26 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
             return {'CANCELLED'}
 
         lines = ["{ 'LVL' "]
+        # Mesh datablock name -> exported .iff filename. One file per datablock,
+        # named after the FIRST object that owns it. That single rule reproduces
+        # every case in the shipped levels: `Player` (whose datablock is named
+        # "astronaut") exports player.iff; the three lunar_cruiser actors share
+        # one datablock and all reference lunar_cruiser_0.iff; each
+        # entry_trigger_N has its own datablock and gets its own file.
+        _mesh_files: dict[str, str] = {}
         for obj in objects:
             schema_path = obj[SCHEMA_PATH_KEY]
             # derive type name: strip directory, extension
             typename = os.path.splitext(os.path.basename(bpy.path.abspath(schema_path)))[0]
 
-            # Bounding box in world space (Blender coords)
-            corners_bl = [obj.matrix_world @ obj.bound_box[i].to_4d().to_3d()
-                          if hasattr(obj.bound_box[0], 'to_4d')
-                          else _corner(obj, i)
-                          for i in range(8)]
+            # Bounding box in the actor's LOCAL space, not world space.
+            # The shipped levels store it local — fsp_reactor sits at world
+            # (-90, 80, 2.79) with a bbox of (-2.5,-2.5,0)-(2.5,2.5,3), i.e.
+            # the mesh extent around its own origin. Emitting it in world space
+            # made levcomp compute a world-centre of position+bbox_centre —
+            # roughly double the true position — so every actor tripped the
+            # "falls outside every room bbox — it will not render" warning.
+            corners_bl = [tuple(c) for c in obj.bound_box]
 
             bl_min = [min(c[i] for c in corners_bl) for i in range(3)]
             bl_max = [max(c[i] for c in corners_bl) for i in range(3)]
@@ -879,42 +1065,92 @@ class WF_OT_export_level(bpy.types.Operator, ExportHelper):
 
             lines.append("\t{ 'OBJ' ")
             lines.append(f'\t\t{{ \'NAME\' "{obj.name}" }}')
-            lines.append(f"\t\t{{ 'VEC3' {{ 'NAME' \"Position\" }} {{ 'DATA' {fp(wf_pos[0])} {fp(wf_pos[1])} {fp(wf_pos[2])}  //x,y,z }} }}")
-            lines.append(f"\t\t{{ 'EULR' {{ 'NAME' \"Orientation\" }} {{ 'DATA' {fp(wf_rot[0])} {fp(wf_rot[1])} {fp(wf_rot[2])}  //a,b,c }} }}")
+            # NB: the closing "} }" MUST go on the next line. `//` runs to end
+            # of line in the .lev text format, so keeping the braces on the same
+            # line as the trailing comment hides them from iffcomp — which then
+            # dies with "expected '}' closing chunk, got EOF". The shipped
+            # levels put the braces on the following line for exactly this
+            # reason; matching them here.
+            lines.append(f"\t\t{{ 'VEC3' {{ 'NAME' \"Position\" }} {{ 'DATA' {fp(wf_pos[0])} {fp(wf_pos[1])} {fp(wf_pos[2])}  //x,y,z")
+            lines.append("\t\t} }")
+            lines.append(f"\t\t{{ 'EULR' {{ 'NAME' \"Orientation\" }} {{ 'DATA' {fp(wf_rot[0])} {fp(wf_rot[1])} {fp(wf_rot[2])}  //a,b,c")
+            lines.append("\t\t} }")
             lines.append(
                 f"\t\t{{ 'BOX3' {{ 'NAME' \"Global Bounding Box\" }} "
                 f"{{ 'DATA' {fp(wf_bb_min[0])} {fp(wf_bb_min[1])} {fp(wf_bb_min[2])} "
-                f"{fp(wf_bb_max[0])} {fp(wf_bb_max[1])} {fp(wf_bb_max[2])}  //min(x,y,z)-max(x,y,z) }} }}"
+                f"{fp(wf_bb_max[0])} {fp(wf_bb_max[1])} {fp(wf_bb_max[2])}  //min(x,y,z)-max(x,y,z)"
             )
+            lines.append("\t\t} }")
             lines.append(f'\t\t{{ \'STR\' {{ \'NAME\' "Class Name" }} {{ \'DATA\' "{typename}" }} }}')
 
-            # Mesh geometry — export .iff if object has a real mesh
+            # Mesh geometry — export .iff if object has a real mesh.
+            #
+            # Two rules the shipped levels follow and this used to not:
+            #  * Mesh filenames are LOWERCASE. textile looks up meshes by
+            #    lowercased name ("couldn't find mesh \"camtarget.iff\""), so an
+            #    object named `Player` must export to `player.iff` or the atlas
+            #    build fails on a case-sensitive filesystem.
+            #  * An actor explicitly authored `Model Type = None` gets no mesh
+            #    at all. The importer substitutes a placeholder cube for
+            #    meshless actors, and without this check that placeholder gets
+            #    written back out as real geometry — e.g. CamTarget, a pure
+            #    look-at marker, would render a stray cube in mid-air.
             level_dir  = os.path.dirname(self.filepath)
             mesh_filename = ""
             model_type    = 0  # 0=None/Box
-            if obj.data and obj.data.polygons:
-                mesh_filename = obj.name + ".iff"
-                mesh_out = os.path.join(level_dir, mesh_filename)
-                if _write_mesh_iff(obj, mesh_out):
-                    model_type = 1  # Mesh
+            schema = wf_core.load_schema(bpy.path.abspath(schema_path))
+            schema_keys = {f.key for f in schema.fields()}
+
+            # A placeholder cube counts as "no mesh" unless the scene author
+            # explicitly asked for Mesh (the generators do this when they swap
+            # real geometry onto an imported actor, e.g. the Player).
+            is_placeholder = bool(obj.get(PLACEHOLDER_MESH_KEY)) and \
+                str(obj.get(_prop_key("Model Type"), "")) != "Mesh"
+            wants_mesh = (str(obj.get(_prop_key("Model Type"), "Mesh")) != "None"
+                          and not is_placeholder)
+            if wants_mesh and obj.data and getattr(obj.data, "polygons", None):
+                # Name the file after the MESH DATABLOCK, not the object, and
+                # write it once. Blender objects sharing a datablock are the
+                # same geometry — the shipped level has three lunar_cruiser
+                # actors all pointing at lunar_cruiser_0.iff. Per-object naming
+                # duplicated that geometry N times and blew the ROOM pool
+                # ("Lmalloc ... out of memory, Named Room #4095").
+                dbkey = obj.data.name
+                if dbkey in _mesh_files:
+                    # Shared geometry — point at the already-written file.
+                    mesh_filename = _mesh_files[dbkey]
+                    model_type = 1
                 else:
-                    self.report({'WARNING'}, f"{obj.name}: mesh export failed")
-                    mesh_filename = ""
+                    mesh_filename = obj.name.lower() + ".iff"
+                    mesh_out = os.path.join(level_dir, mesh_filename)
+                    if _write_mesh_iff(obj, mesh_out):
+                        _mesh_files[dbkey] = mesh_filename
+                        model_type = 1  # Mesh
+                    else:
+                        self.report({'WARNING'}, f"{obj.name}: mesh export failed")
+                        mesh_filename = ""
 
-            lines.append(f'\t\t{{ \'FILE\' {{ \'NAME\' "Mesh Name" }} {{ \'STR\' "{mesh_filename}" }} }}')
-            lines.append(f'\t\t{{ \'I32\'  {{ \'NAME\' "Model Type" }} {{ \'DATA\' {model_type}l }} {{ \'STR\' "{"Mesh" if model_type == 1 else "None"}" }} }}')
+            # Only actors whose OAD actually declares these fields carry them.
+            # camera/levelobj/room have no Mesh Name or Model Type at all, and
+            # emitting them anyway gave those actors a placeholder cube.
+            if "Mesh Name" in schema_keys and (mesh_filename or not is_placeholder):
+                lines.append(f'\t\t{{ \'FILE\' {{ \'NAME\' "Mesh Name" }} {{ \'STR\' "{mesh_filename}" }} }}')
+            if "Model Type" in schema_keys and (mesh_filename or not is_placeholder):
+                lines.append(f'\t\t{{ \'I32\'  {{ \'NAME\' "Model Type" }} {{ \'DATA\' {model_type}l }} {{ \'STR\' "{"Mesh" if model_type == 1 else "None"}" }} }}')
 
-            # OAD fields
+            # OAD fields — see _emit_field_chunks for why this no longer goes
+            # through wf_core.export_iff_txt (wrong format; produced nothing).
             try:
-                schema = wf_core.load_schema(bpy.path.abspath(schema_path))
-                values = _collect_values(obj, schema)
-                oad_iff = wf_core.export_iff_txt(schema, values)
-                # extract the inner field chunks from the OAD iff.txt
-                # (it's wrapped in { 'TYPE' { 'NAME' ... } ... })
-                for field_line in _extract_field_lines(oad_iff):
+                for field_line in _emit_field_chunks(obj, schema):
                     lines.append("\t\t" + field_line)
             except Exception as e:
-                self.report({'WARNING'}, f"{obj.name}: OAD export error: {e}")
+                # Loud, not swallowed: a silent field-emission failure is what
+                # made the previous breakage invisible (export still reported
+                # success while writing an unusable level).
+                msg = f"{obj.name}: OAD export error: {e}"
+                self.report({'ERROR'}, msg)
+                print(f"[wf_export] ERROR {msg}", file=_sys.stderr)
+                raise
 
             lines.append("\t}")
 

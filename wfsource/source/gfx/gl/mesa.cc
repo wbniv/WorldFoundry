@@ -38,6 +38,7 @@
 #include <GL/glu.h>
 #undef Display
 #include <X11/Xatom.h>  // XA_ATOM, for _NET_WM_STATE_FULLSCREEN
+#include <X11/Xutil.h>  // XWMHints/XAllocWMHints/InputHint, for WM_HINTS below
 
 //==============================================================================
 
@@ -145,7 +146,11 @@ OpenMainWindow( char *title )
     root = RootWindow(halDisplay.mainDisplay,halDisplay.visInfo->screen);
 
     attr.border_pixel = 0;
-    attr.event_mask = ExposureMask | StructureNotifyMask | KeyPressMask | KeyReleaseMask | FocusChangeMask;
+    // ButtonPress/Release added alongside the WM_HINTS fix below — the dead
+    // #else branch further down always asked for these; this, the live path,
+    // never did, so clicks were never even delivered to the app.
+    attr.event_mask = ExposureMask | StructureNotifyMask | KeyPressMask | KeyReleaseMask
+                     | FocusChangeMask | ButtonPressMask | ButtonReleaseMask;
     attr.colormap = XCreateColormap(halDisplay.mainDisplay, root, halDisplay.visInfo->visual, AllocNone);
 
     halDisplay.win = XCreateWindow(halDisplay.mainDisplay, root, x, y, wfInitialWindowWidth, wfInitialWindowHeight,
@@ -177,12 +182,61 @@ OpenMainWindow( char *title )
                         (unsigned char*)&fs_atom, 1);
     }
 
+    // Declare the "passive" ICCCM input model (WM_HINTS.input = True) BEFORE
+    // mapping, same timing as the _NET_WM_STATE fullscreen property above —
+    // the WM should read this at map time and call XSetInputFocus() for us.
+    //
+    // Without this, the window was never unfocusable-by-luck on ordinary
+    // Linux desktop WMs (most call XSetInputFocus on any mapped top-level
+    // window regardless of hints — lenient, not ICCCM-mandated behaviour),
+    // but under a strict/minimal compositor — Weston, which is what WSLg
+    // bridges through — no WM_HINTS.input means the WM never assigns
+    // keyboard focus at all: the window opens, Alt-Tab lists it (it's a real
+    // top-level window), yet no keypress or mouse click ever reaches it,
+    // because X11 never told it it was allowed to have focus. That's the
+    // exact "I can see it, I can Alt-Tab to it, nothing I do affects it"
+    // symptom — not a rendering or event-loop bug, an ICCCM omission.
+    XWMHints* wmHints = XAllocWMHints();
+    if (wmHints)
+    {
+        wmHints->flags = InputHint;
+        wmHints->input = True;
+        XSetWMHints(halDisplay.mainDisplay, halDisplay.win, wmHints);
+        XFree(wmHints);
+    }
+
     // XMapRaised = map + raise; signals the WM to focus the window on open.
     XMapRaised(halDisplay.mainDisplay, halDisplay.win);
     _wmDeleteWindow = XInternAtom(halDisplay.mainDisplay, "WM_DELETE_WINDOW", False);
     XSetWMProtocols(halDisplay.mainDisplay, halDisplay.win, &_wmDeleteWindow, 1);
     glXMakeCurrent(halDisplay.mainDisplay, halDisplay.win, cx);
     AssertGLOK();
+
+    // Belt-and-suspenders: try to grab focus ourselves too, rather than rely
+    // entirely on the WM honouring the hint above — but only as a
+    // best-effort extra. XSetInputFocus requires the window to already be
+    // Viewable server-side, and exactly when that happens is WM-specific
+    // (reparenting timing under Weston/WSLg isn't the same as a traditional
+    // X11 WM). Two things already tried here and rejected:
+    //   - calling it right after XSync: raced the WM, came back BadMatch,
+    //     and Xlib's default error handler treats that as fatal (exit()),
+    //     killing the app before it rendered a single frame.
+    //   - blocking on our own MapNotify via XIfEvent first: on this
+    //     compositor the wait never returned, hanging the app at startup
+    //     with no window, no error, nothing — worse than the crash.
+    // So: don't block on anything. Swallow whatever error (if any) comes
+    // back, non-fatally, via a temporary error handler. WM_HINTS.input=True
+    // above is the durable, WM-driven fix that doesn't depend on timing at
+    // all; this is purely an opportunistic add-on for WMs that map but don't
+    // auto-focus.
+    {
+        XSync(halDisplay.mainDisplay, False);
+        int (*prevHandler)(Display*, XErrorEvent*) =
+            XSetErrorHandler([](Display*, XErrorEvent*) -> int { return 0; });
+        XSetInputFocus(halDisplay.mainDisplay, halDisplay.win, RevertToParent, CurrentTime);
+        XSync(halDisplay.mainDisplay, False);   // force any error to surface now, not later
+        XSetErrorHandler(prevHandler);
+    }
 #else
     XEvent e;
 
@@ -466,7 +520,14 @@ void ProcessXEvents(XEvent event)
             break;
 
 
-        case ButtonPressMask:
+        // Was `case ButtonPressMask:` — event.type holds an X11 event TYPE
+        // constant (ButtonPress/KeyPress/Expose/...), not an event MASK bit
+        // (ButtonPressMask is only meaningful to XSelectInput's event_mask,
+        // a disjoint numeric namespace). Harmless before now — mouse clicks
+        // were never in the event mask at all, so this case never ran either
+        // way — but worth correcting now that ButtonPress is actually
+        // delivered (see the WM_HINTS fix above).
+        case ButtonPress:
             printf("You pressed button %d\n", event.xbutton.button);
             break;
 
