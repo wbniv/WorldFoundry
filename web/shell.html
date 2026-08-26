@@ -8,12 +8,20 @@
   Custom Emscripten shell for the wf_game web build (plan P6.2).
   emcc substitutes the engine glue at the {{{ SCRIPT }}} marker below.
 
-  Start is gated behind a "click to start" button (Module.noInitialRun =
-  true, then Module.callMain on click). That gesture does double duty: it is
-  also the user interaction that unlocks the WebAudio AudioContext, because
-  the whole engine init — including miniaudio's AudioContext creation — runs
-  synchronously inside the click handler, up to StepFrame's first ASYNCIFY
-  yield. No separate audio-resume JS is needed (plan Phase 5).
+  The engine starts automatically once the runtime is up: Module.noInitialRun
+  is still true, but onRuntimeInitialized calls start() itself rather than
+  waiting for a click. Nothing is downloaded earlier than before — the .data
+  preload has to complete before onRuntimeInitialized either way; only the
+  callMain gate is gone.
+
+  That start gesture used to do double duty, since it was also the user
+  interaction that unlocked WebAudio: engine init, including miniaudio's
+  AudioContext creation, ran synchronously inside the click handler. Starting
+  automatically means that context is now born 'suspended', so audio is
+  unlocked separately — every AudioContext is captured as it is constructed
+  (the wrapper below installs before the engine glue at {{{ SCRIPT }}}) and
+  resumed on the visitor's first pointer/key/touch event. On a game page that
+  is the first input they give it, so in practice audio arrives with play.
 
   Embed contract (any page / itch.io-style iframe). Note the engine parses
   -L<path> as ONE joined token (main.cc:210 reads argv[i]+2), NOT "-L <path>":
@@ -89,19 +97,6 @@
     background: radial-gradient(120% 120% at 50% 40%, rgba(20,24,31,.55), rgba(8,9,13,.92));
     backdrop-filter: blur(1.5px);
   }
-  #wf-start {
-    appearance: none;
-    font: inherit; font-size: 20px; font-weight: 600;
-    color: #061018;
-    background: var(--wf-accent);
-    border: none; border-radius: 999px;
-    padding: 14px 30px;
-    cursor: pointer;
-    transition: transform .08s ease, filter .15s ease, opacity .15s ease;
-  }
-  #wf-start:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
-  #wf-start:disabled { background: #2b3340; color: var(--wf-dim); cursor: default; }
-
   #wf-progress {
     width: 60%; max-width: 420px; height: 6px;
     background: #20262f; border-radius: 999px; overflow: hidden;
@@ -134,7 +129,6 @@
     <div id="wf-stage">
       <canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
       <div id="wf-overlay">
-        <button id="wf-start" disabled>Loading…</button>
         <div id="wf-progress"><div id="wf-bar"></div></div>
       </div>
     </div>
@@ -146,12 +140,45 @@
 
   <script>
     (function () {
-      var startBtn = document.getElementById('wf-start');
       var bar      = document.getElementById('wf-bar');
       var statusEl = document.getElementById('wf-status');
       var overlay  = document.getElementById('wf-overlay');
       var canvas   = document.getElementById('canvas');
       var started  = false;
+
+      // Audio unlock. The engine no longer starts inside a click, so the
+      // AudioContext miniaudio builds during init is created without a user
+      // gesture and browsers park it in 'suspended'. Capture every context as
+      // it is constructed, then resume them on the first real interaction.
+      // This has to run before the engine glue, which is why it lives here and
+      // not next to start().
+      var audioContexts = [];
+      (function () {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        // `new Tracked(...)` yields the real context: a constructor returning an
+        // object overrides `new`'s own instance. Sharing the prototype keeps
+        // `instanceof` and the whole AudioContext API intact.
+        function Tracked() {
+          var ctx = new (AC.bind.apply(AC, [null].concat([].slice.call(arguments))))();
+          audioContexts.push(ctx);
+          return ctx;
+        }
+        Tracked.prototype = AC.prototype;
+        window.AudioContext = Tracked;
+        if (window.webkitAudioContext) window.webkitAudioContext = Tracked;
+      })();
+
+      function unlockAudio() {
+        for (var i = 0; i < audioContexts.length; i++) {
+          if (audioContexts[i].state === 'suspended') audioContexts[i].resume();
+        }
+      }
+      // Left attached rather than {once:true}: miniaudio can build a context
+      // after the first gesture, and resume() on a running one is a no-op.
+      ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
+        window.addEventListener(ev, unlockAudio, true);
+      });
 
       // Level selectable via ?level=<name> — one build fronts many levels. The
       // file must be in the build's --preload-file set (CMakeLists EMSCRIPTEN
@@ -179,10 +206,23 @@
       document.getElementById('wf-level').textContent = name;
       document.title = 'World Foundry — ' + name;
 
+      function start() {
+        if (started) return;
+        started = true;
+        overlay.style.display = 'none';
+        statusEl.textContent = 'Running — ' + name;
+        // preventScroll: the canvas lives in an embedded iframe, and focusing it
+        // must not yank the host page's scroll position around on load.
+        canvas.focus({ preventScroll: true });
+        Module.callMain(Module.arguments);
+      }
+
       window.Module = {
         canvas: canvas,
         arguments: ARGS,
-        noInitialRun: true,           // gate engine start on the click gesture
+        // Still true: start() owns when callMain runs, it just no longer waits
+        // for a click.
+        noInitialRun: true,
         print:    function (t) { console.log(t); },
         printErr: function (t) { console.error(t); },
         setStatus: function (text) {
@@ -195,21 +235,9 @@
           // wasm instantiated + cd.iff preload satisfied — safe to start.
           bar.style.width = '100%';
           statusEl.textContent = 'Ready';
-          startBtn.disabled = false;
-          startBtn.textContent = '▶ Click to start';
+          start();
         }
       };
-
-      startBtn.addEventListener('click', function () {
-        if (startBtn.disabled || started) return;
-        started = true;
-        overlay.style.display = 'none';
-        statusEl.textContent = 'Running — ' + name;
-        canvas.focus();
-        // Runs engine init (incl. AudioContext creation) synchronously inside
-        // this gesture, up to the first ASYNCIFY yield → audio is unlocked.
-        Module.callMain(Module.arguments);
-      });
 
       var stage = document.getElementById('wf-stage');
       document.getElementById('wf-full').addEventListener('click', function () {

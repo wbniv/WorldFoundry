@@ -190,6 +190,13 @@ The existing `-L <level>.iff` CLI convention carries over via `Module.arguments`
 | 6 | **Savegames / non-asset file I/O** — POSIX writes need a persistent FS | Low | IDBFS mount + `FS.syncfs` after save; MIDI files ride inside the preload bundle |
 | 7 | **WAMR inline x86-64 asm** | Nil | Don't build it for web; zForth is the canonical scripting engine anyway |
 
+
+> **Superseded 2026-08-26 (row 5).** The "click to start" gate is gone — the
+> engine now autostarts from `onRuntimeInitialized`. Audio no longer rides on
+> the start gesture: `web/shell.html` wraps `AudioContext` to capture every
+> context miniaudio builds and resumes them on the visitor's first
+> pointer/key/touch event. The rest of this table still holds.
+
 Not difficulties (verified, pleasant surprises): no threading in the game runtime, no networking in the game runtime, miniaudio already has the Web Audio backend, asset bundles are megabytes not gigabytes, and the AssetAccessor abstraction (`wfsource/source/hal/asset_accessor.hp:41–60`) means asset loading may "just work" through MEMFS with the existing POSIX accessor.
 
 ---
