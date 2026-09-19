@@ -328,6 +328,7 @@ rows on commit.*
 | [20‑second guided tour video of every blue (205/639‑owned) room](2026-09-19-condo-639-tour-video.md) | Self-walking tour build (waypoint servo compiled into the player's Forth from a path file), bridge-timed burnt-in room captions, `task video-condo-639` → the 30 s `tour-639.mp4`. | [`88c389c7`](https://github.com/wbniv/WorldFoundry/commit/88c389c7), [`e59fcf28`](https://github.com/wbniv/WorldFoundry/commit/e59fcf28) | Feature |
 | [Condo level — darker floors so walls read against them](2026-09-19-condo-darker-floors.md) | Floor-top faces get the unit colour × 0.55 as their own material so walls and doorways separate from the floor under the doll-house camera; shade picked from real renders. | [`8781b5bb`](https://github.com/wbniv/WorldFoundry/commit/8781b5bb) | Feature |
 | [Condo level: site skybox from the real location + 6th‑floor elevation](2026-09-19-condo-site-skybox.md) | OSM-rendered sky dome + ground map for the Sathu Pradit site (back faces west), units lifted to their real 15.75 m, a balcony POV camera that pans over Bangkok, and the recorder fixed to run at level-clock speed; tour re-cut at 35 s. | [`c3ef550b`](https://github.com/wbniv/WorldFoundry/commit/c3ef550b) | Feature |
+| [Condo level: master‑bedroom window POV pan (+5 s in the tour)](2026-09-19-condo-master-window-pov.md) | Second first-person camshot switched by a strip zone along 640's curved south glass, 5 s SE→SW pan over the skybox via the new `add_pov_camera` helper; tour holds 5 s at the window, cut → 40 s. | [`00ae68df`](https://github.com/wbniv/WorldFoundry/commit/00ae68df) | Feature |
 | [`-width=N` / `-height=N`: make the existing window flags survive the game's argv parser](2026-09-19-window-size-flags-reach-the-game-parser.md) | The HAL parsed the window switches since June but `main.cc` matched switches by first letter, so `-height=` hit `-h` and exited; recognise them explicitly, make `-h`/`-f` exact, document, `TOUR_SIZE` on the tour recorder. | [`466adf4b`](https://github.com/wbniv/WorldFoundry/commit/466adf4b) | Fix |
 
 ---
@@ -344,5 +345,6 @@ rows on commit.*
   [condo-639-640-level](2026-09-19-condo-639-640-level.md),
   [condo-639-tour-video](2026-09-19-condo-639-tour-video.md),
   [condo-darker-floors](2026-09-19-condo-darker-floors.md),
-  [window-size-flags](2026-09-19-window-size-flags-reach-the-game-parser.md) and
-  [condo-site-skybox](2026-09-19-condo-site-skybox.md).
+  [window-size-flags](2026-09-19-window-size-flags-reach-the-game-parser.md),
+  [condo-site-skybox](2026-09-19-condo-site-skybox.md) and
+  [condo-master-window-pov](2026-09-19-condo-master-window-pov.md).
