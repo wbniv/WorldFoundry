@@ -330,6 +330,7 @@ rows on commit.*
 | [Condo level: site skybox from the real location + 6th‑floor elevation](2026-09-19-condo-site-skybox.md) | OSM-rendered sky dome + ground map for the Sathu Pradit site (back faces west), units lifted to their real 15.75 m, a balcony POV camera that pans over Bangkok, and the recorder fixed to run at level-clock speed; tour re-cut at 35 s. | [`c3ef550b`](https://github.com/wbniv/WorldFoundry/commit/c3ef550b) | Feature |
 | [Condo level: master‑bedroom window POV pan (+5 s in the tour)](2026-09-19-condo-master-window-pov.md) | Second first-person camshot switched by a strip zone along 640's curved south glass, 5 s SE→SW pan over the skybox via the new `add_pov_camera` helper; tour holds 5 s at the window, cut → 40 s. | [`00ae68df`](https://github.com/wbniv/WorldFoundry/commit/00ae68df) | Feature |
 | [Condo level: the surroundings — near buildings, the Bangkok skyline, the bridges](2026-09-19-condo-site-surroundings.md) | 113 OSM footprints within 150 m extruded into level geometry plus a podium under the units, the 642 towers within 8 km and four cable-stayed bridges painted into the sky, a generated landmark catalog and overview mockup; WF's opposite-hand face winding and the ground-plane z-fight fixed on the way. | [`70815109`](https://github.com/wbniv/WorldFoundry/commit/70815109) | Feature |
+| [Exporter: flip the face hand so Blender‑outward is WF‑outward](2026-09-19-exporter-face-hand.md) | The Blender add-on now reverses each face's loop order on export (and back on import) so a mesh that is outward in Blender is outward in the engine; every Blender-built level rebuilt with a before/after/WF_CULL contact sheet, a hand regression test, docs rewritten to "author for Blender". | [`9c36ba82`](https://github.com/wbniv/WorldFoundry/commit/9c36ba82) | Fix |
 | [`-width=N` / `-height=N`: make the existing window flags survive the game's argv parser](2026-09-19-window-size-flags-reach-the-game-parser.md) | The HAL parsed the window switches since June but `main.cc` matched switches by first letter, so `-height=` hit `-h` and exited; recognise them explicitly, make `-h`/`-f` exact, document, `TOUR_SIZE` on the tour recorder. | [`466adf4b`](https://github.com/wbniv/WorldFoundry/commit/466adf4b) | Fix |
 
 ---
@@ -348,5 +349,6 @@ rows on commit.*
   [condo-darker-floors](2026-09-19-condo-darker-floors.md),
   [window-size-flags](2026-09-19-window-size-flags-reach-the-game-parser.md),
   [condo-site-skybox](2026-09-19-condo-site-skybox.md),
-  [condo-master-window-pov](2026-09-19-condo-master-window-pov.md) and
-  [condo-site-surroundings](2026-09-19-condo-site-surroundings.md).
+  [condo-master-window-pov](2026-09-19-condo-master-window-pov.md),
+  [condo-site-surroundings](2026-09-19-condo-site-surroundings.md) and
+  [exporter-face-hand](2026-09-19-exporter-face-hand.md).

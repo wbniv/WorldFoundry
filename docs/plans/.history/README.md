@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/fdf945eb) | docs: index the condo surroundings plan |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/bf9b0aa7) | docs: index the condo master-window POV plan |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/2a810139) | docs: index the condo site-skybox plan |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/5ee3ea6b) | docs: index the window-size-flags plan |
@@ -12,6 +13,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+fdf945eb	author	Will Norris
+fdf945eb	added	4
+fdf945eb	deleted	2
+fdf945eb	files	1
+fdf945eb	body	Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_017hM4VFRoFFkipNVRLTs42g
 bf9b0aa7	author	Will Norris
 bf9b0aa7	added	4
 bf9b0aa7	deleted	2
