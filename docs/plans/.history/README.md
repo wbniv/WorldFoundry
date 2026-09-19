@@ -1,5 +1,6 @@
 | Date | Change |
 |------|--------|
+| [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/5ee3ea6b) | docs: index the window-size-flags plan |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/ead4d8f2) | docs: index the condo tour and darker-floors plans |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/6209eba1) | docs: index the condo level plan |
 | [2026-08-05](https://github.com/wbniv/WorldFoundry/commit/a1f2cb8d) | docs: index wf_game runner build plan |
@@ -9,6 +10,11 @@
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+5ee3ea6b	author	Will Norris
+5ee3ea6b	added	5
+5ee3ea6b	deleted	3
+5ee3ea6b	files	1
+5ee3ea6b	body	Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_017TmcNaoJVBysfboB3VeC7N
 ead4d8f2	author	Will Norris
 ead4d8f2	added	7
 ead4d8f2	deleted	3

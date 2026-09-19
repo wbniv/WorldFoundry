@@ -327,6 +327,7 @@ rows on commit.*
 | [Condo 205/639 + 205/640 → WorldFoundry walkthrough level](2026-09-19-condo-639-640-level.md) | Convert the air-con study `.blend` of two condo units into a walkable doll-house level (trimesh shells/partitions, glass, AC props + service runs, named room locators, `task condo-level`), fixing the merge-reverted exporter on the way. | [`8db74292`](https://github.com/wbniv/WorldFoundry/commit/8db74292), [`a33a4c83`](https://github.com/wbniv/WorldFoundry/commit/a33a4c83) | Feature |
 | [20‑second guided tour video of every blue (205/639‑owned) room](2026-09-19-condo-639-tour-video.md) | Self-walking tour build (waypoint servo compiled into the player's Forth from a path file), bridge-timed burnt-in room captions, `task video-condo-639` → the 30 s `tour-639.mp4`. | [`88c389c7`](https://github.com/wbniv/WorldFoundry/commit/88c389c7), [`e59fcf28`](https://github.com/wbniv/WorldFoundry/commit/e59fcf28) | Feature |
 | [Condo level — darker floors so walls read against them](2026-09-19-condo-darker-floors.md) | Floor-top faces get the unit colour × 0.55 as their own material so walls and doorways separate from the floor under the doll-house camera; shade picked from real renders. | [`8781b5bb`](https://github.com/wbniv/WorldFoundry/commit/8781b5bb) | Feature |
+| [Condo level: site skybox from the real location + 6th‑floor elevation](2026-09-19-condo-site-skybox.md) | OSM-rendered sky dome + ground map for the Sathu Pradit site (back faces west), units lifted to their real 15.75 m, a balcony POV camera that pans over Bangkok, and the recorder fixed to run at level-clock speed; tour re-cut at 35 s. | [`c3ef550b`](https://github.com/wbniv/WorldFoundry/commit/c3ef550b) | Feature |
 | [`-width=N` / `-height=N`: make the existing window flags survive the game's argv parser](2026-09-19-window-size-flags-reach-the-game-parser.md) | The HAL parsed the window switches since June but `main.cc` matched switches by first letter, so `-height=` hit `-h` and exited; recognise them explicitly, make `-h`/`-f` exact, document, `TOUR_SIZE` on the tour recorder. | [`466adf4b`](https://github.com/wbniv/WorldFoundry/commit/466adf4b) | Fix |
 
 ---
@@ -342,5 +343,6 @@ rows on commit.*
   [ensure fresh `wf_game` runs](2026-07-31-run-tasks-ensure-wf-game-build.md),
   [condo-639-640-level](2026-09-19-condo-639-640-level.md),
   [condo-639-tour-video](2026-09-19-condo-639-tour-video.md),
-  [condo-darker-floors](2026-09-19-condo-darker-floors.md) and
-  [window-size-flags](2026-09-19-window-size-flags-reach-the-game-parser.md).
+  [condo-darker-floors](2026-09-19-condo-darker-floors.md),
+  [window-size-flags](2026-09-19-window-size-flags-reach-the-game-parser.md) and
+  [condo-site-skybox](2026-09-19-condo-site-skybox.md).
