@@ -137,6 +137,7 @@
 
 ## Done
 
+- ✅ 2026-09-19 — [condo-floors] Floor-top faces get a 0.55× shade of the unit colour so walls/doorways read; tour re-recorded. See [plan](docs/plans/2026-09-19-condo-darker-floors.md).
 - ✅ 2026-09-19 — [condo-tour] 30 s captioned tour of all 11 blue rooms (Forth waypoint servo, `task video-condo-639`); bath-N door + 640 outlines added at source. See [plan](docs/plans/2026-09-19-condo-639-tour-video.md).
 - ✅ 2026-09-19 — [condo-level] Condo 205/639+640 doll-house walkthrough from the aircon .blend; `task condo-level`/`run-condo`; exporter merge-revert fixed. See [plan](docs/plans/2026-09-19-condo-639-640-level.md).
 - [x] 2026-06-14 — [apt-task] `task` migrated to live cloudsmith `ubuntu/questing`; apt owns `/usr/bin/task` 3.51.1 (foundry winner + cloudsmith auto-update), shadowing manual binary removed. [plan](docs/plans/2026-06-13-fix-task-apt-source.md)
@@ -270,4 +271,6 @@ _Auto-added from plan "Out of scope"/"Deferred" sections at commit time. Triage 
 - [verify] **2026-09-19-condo-639-tour-video** — Verification section present but no PASS recorded — run + record the steps. _from [2026-09-19-condo-639-tour-video.md](docs/plans/2026-09-19-condo-639-tour-video.md)_  <!-- fp:8366216da3905027 -->
 - [ ] **(triage)** A tour of 640's *own* (ochre) rooms — same script, different waypoints. — _from [2026-09-19-condo-639-tour-video.md](docs/plans/2026-09-19-condo-639-tour-video.md)_  <!-- fp:09af77effb1ade92 -->
 - [ ] **(triage)** **Republish `worldfoundry-blender-editor-exporter`** from the current exporter (the apt build is `git3fa94cbe`, 2026‑05‑19; the restored exporter is `a148bd7d`+) so a fresh machine gets the dedup/deterministic export too. — _from [2026-09-19-condo-639-640-level.md](docs/plans/2026-09-19-condo-639-640-level.md)_  <!-- fp:d7499a6246091d48 -->
+- [ ] **(triage)** Room‑by‑room floor colours (would need per‑room face selection from the `target` bboxes). — _from [2026-09-19-condo-darker-floors.md](docs/plans/2026-09-19-condo-darker-floors.md)_  <!-- fp:0b9b17a2aa9d9da0 -->
+- [ ] **(triage)** Any change to the source model's materials. — _from [2026-09-19-condo-darker-floors.md](docs/plans/2026-09-19-condo-darker-floors.md)_  <!-- fp:ff2aea8792a0122c -->
 <!-- END auto-captured-deferrals -->

@@ -274,6 +274,41 @@ print(f"[condo] converted: {stats['mesh']} meshes, {stats['curve']} tubes, "
       f"{len(room_outlines)} room outlines; dropped {_dropped['faces']} sub-threshold faces; "
       f"skipped hidden: {stats['skipped']}")
 
+# ── 3b. Floors: darker shade of the owning unit's colour ───────────────────
+# Floor and walls share one material per unit in the source, so from the
+# doll-house camera the floor, wall faces and wall tops merge into one mass.
+# Give each shell's floor-top faces (normal +Z at z≈0) their own material: the
+# face's current colour scaled by FLOOR_SHADE (per face, so 640's 639-blue
+# master suite keeps a blue — darker — floor). CONDO_FLOOR_SHADE overrides.
+FLOOR_SHADE = float(os.environ.get('CONDO_FLOOR_SHADE', 0.55))
+
+
+def darken_floors(obj, shade):
+    me = obj.data
+    if not me.materials or shade >= 0.999:
+        return 0
+    floor_mats = {}          # source material index → darkened material index
+    n = 0
+    for pg in me.polygons:
+        if pg.normal.z < 0.9 or abs(pg.center.z) > 1e-3:
+            continue
+        src_i = pg.material_index
+        if src_i not in floor_mats:
+            src = me.materials[src_i]
+            r, g, b, _a = src.diffuse_color
+            dark = make_flat_material(f'floor-{src.name}-{shade:.2f}', (r * shade, g * shade, b * shade))
+            me.materials.append(dark)
+            floor_mats[src_i] = len(me.materials) - 1
+        pg.material_index = floor_mats[src_i]
+        n += 1
+    return n
+
+
+for shell_name in ('unit-639', 'unit-640'):
+    shell = bpy.data.objects.get(shell_name)
+    if shell:
+        print(f"[condo] {shell_name}: {darken_floors(shell, FLOOR_SHADE)} floor faces at shade {FLOOR_SHADE}")
+
 # ── 4. Room outlines → named `target` locators (bbox = room, no Jolt body) ───
 target_proto = find_by_class('target')
 assert target_proto is not None, "snowgoons scaffold has no target"
