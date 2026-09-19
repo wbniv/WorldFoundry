@@ -324,6 +324,7 @@ rows on commit.*
 | [Plan: glTF import/export — turning wf_edit into a general 3D scene tool](2026-07-05-gltf-import-export.md) | Six-phase plan for glTF import/export via a standalone wf_gltf-rs crate (levtree-JSON seam into the live CRDT Doc, lossless WF_actor round-trip) — the top engineering unlock that makes the editor a general 3D scene tool. | [`75ffae75`](https://github.com/wbniv/WorldFoundry/commit/75ffae75) | Feature |
 | [Plan: the VTT wedge — a browser-native 3D virtual tabletop on wf_edit](2026-07-07-vtt-wedge.md) | Browser-native, zero-install 3D virtual tabletop on wf_edit (buy-once host-pays + marketplace, per-peer CRDT fog-of-war), timed to the end-of-Oct-2026 Sigil-shutdown attention window. | [`d58215d3`](https://github.com/wbniv/WorldFoundry/commit/d58215d3) | Feature |
 | [Plan: Make every `wf_game` run task ensure a fresh binary](2026-07-31-run-tasks-ensure-wf-game-build.md) | Make every native game runner build `wf_game` when missing or stale while skipping the build when the binary is current. | [`ae2fb379`](https://github.com/wbniv/WorldFoundry/commit/ae2fb379) | Tooling |
+| [Condo 205/639 + 205/640 → WorldFoundry walkthrough level](2026-09-19-condo-639-640-level.md) | Convert the air-con study `.blend` of two condo units into a walkable doll-house level (trimesh shells/partitions, glass, AC props + service runs, named room locators, `task condo-level`), fixing the merge-reverted exporter on the way. | [`8db74292`](https://github.com/wbniv/WorldFoundry/commit/8db74292), [`a33a4c83`](https://github.com/wbniv/WorldFoundry/commit/a33a4c83) | Feature |
 
 ---
 
@@ -332,7 +333,8 @@ rows on commit.*
 - **Order** = each plan's *creation* commit (oldest commit that touched the file), by committer date.
 - **Commit(s)** = the full `git log --follow` set per plan, oldest → newest.
 - **Summaries / categories** auto-generated from each plan's TL;DR (Sonnet, medium effort) — refine as needed.
-- **Generated** 2026-06-26 for 312 plan(s) (1 need a summary); rows 313–315
-  added by hand through 2026-08-05: [gltf-import-export](2026-07-05-gltf-import-export.md),
-  [vtt-wedge](2026-07-07-vtt-wedge.md), and
-  [ensure fresh `wf_game` runs](2026-07-31-run-tasks-ensure-wf-game-build.md).
+- **Generated** 2026-06-26 for 312 plan(s) (1 need a summary); rows 313–316
+  added by hand through 2026-09-19: [gltf-import-export](2026-07-05-gltf-import-export.md),
+  [vtt-wedge](2026-07-07-vtt-wedge.md),
+  [ensure fresh `wf_game` runs](2026-07-31-run-tasks-ensure-wf-game-build.md), and
+  [condo-639-640-level](2026-09-19-condo-639-640-level.md).

@@ -1,11 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-08-05](https://github.com/wbniv/WorldFoundry/commit/a1f2cb8d) | docs: index wf_game runner build plan |
 | [2026-07-07](https://github.com/wbniv/WorldFoundry/commit/781333b7) | docs(plans): index the glTF and VTT-wedge plans |
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/d84387b3) | docs(plans): correct more misreads (union of 2 more Opus audit passes) |
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/dff8e6c5) | docs(plans): fix summaries/categories flagged by an Opus faithfulness audit |
 | [2026-06-26](https://github.com/wbniv/WorldFoundry/commit/16d72fa6) | docs: add plan index (docs/plans/README.md) |
 
 <!--history-meta v1
+a1f2cb8d	author	Will Norris
+a1f2cb8d	added	5
+a1f2cb8d	deleted	2
+a1f2cb8d	files	1
 781333b7	author	Will Norris
 781333b7	added	3
 781333b7	deleted	0
