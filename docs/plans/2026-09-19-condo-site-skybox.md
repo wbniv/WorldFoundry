@@ -244,7 +244,11 @@ taller towers on the horizon, the projected ground palette below it.
   painted with the effective azimuth (150°) and the intended altitude; changing the light itself
   would re‑tune the approved floor shading, so it is left as is (noted in `site_constants.py`).
 - **`WF_CULL=1` dropped the ground quad** on the first build — `recalc_face_normals` on a lone
-  open quad picked the wrong side. Winding is now pinned CCW‑from‑above like the corridor box.
+  open quad picked the wrong side. Winding is now pinned to `(0, 3, 2, 1)`, which is Blender −Z
+  and therefore WF +Z: WF's face normal is `(v2−v0)×(v1−v0)`, the opposite hand of Blender's
+  (established properly in [condo-site-surroundings](2026-09-19-condo-site-surroundings.md);
+  the "like the corridor box" reasoning this line first carried was wrong — the box survived
+  culling by its inner faces).
 - **The pin is on the road.** OSM has no footprint at 13.6935894, 100.5334137 (Soi Sathu
   Pradit 34 / Sathu Pradit Road corner); `own_building` returns `None` rather than paint a
   neighbour darker, and `SITE_OFFSET_EN` is the knob to move the origin.

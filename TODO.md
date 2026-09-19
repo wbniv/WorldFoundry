@@ -142,6 +142,7 @@
 
 - ✅ 2026-09-19 — [window-flags] `-width/-height/-xpos/-ypos/-window/-fullscreen` now survive main.cc's parser (`-height=` was mistaken for `-h`); documented; `TOUR_SIZE` on the tour recorder. See [plan](docs/plans/2026-09-19-window-size-flags-reach-the-game-parser.md).
 - ✅ 2026-09-19 — [condo-floors] Floor-top faces get a 0.55× shade of the unit colour so walls/doorways read; tour re-recorded. See [plan](docs/plans/2026-09-19-condo-darker-floors.md).
+- ✅ 2026-09-19 — [condo-surroundings] 113 near footprints as geometry + podium, 642-tower 8 km skyline, 4 bridges, generated catalog; WF winding hand fixed. See [plan](docs/plans/2026-09-19-condo-site-surroundings.md).
 - ✅ 2026-09-19 — [condo-master-window] second POV camshot at 640's master window, 5 s SE→SW pan, `add_pov_camera` helper; tour cut → 40 s. See [plan](docs/plans/2026-09-19-condo-master-window-pov.md).
 - ✅ 2026-09-19 — [record-video-wallclock] `-record_video` frames stamped with the wall clock + cfr 30 (ffmpeg, not gettimeofday dup/drop) — video time = level time at any fps. See [plan](docs/plans/2026-09-19-condo-site-skybox.md) § 5c.
 - ✅ 2026-09-19 — [condo-skybox] OSM sky dome + ground map for the Sathu Pradit site, units at 15.75 m, balcony POV pan, recorder clock fix; tour re-cut 35 s. See [plan](docs/plans/2026-09-19-condo-site-skybox.md).

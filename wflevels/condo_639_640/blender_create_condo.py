@@ -79,7 +79,8 @@ CAM_OFFSET    = tuple(float(v) for v in os.environ['CONDO_CAM'].split(',')) if o
 LOOK_OFFSET   = tuple(float(v) for v in os.environ['CONDO_LOOK'].split(',')) if os.environ.get('CONDO_LOOK') \
                 else (0.0, 0.0, 0.9)         # aim at the player's chest, not the feet (CONDO_LOOK=x,y,z overrides)
 ROOM_CENTRE   = (0.0, -8.0, 12.0)            # z −4…28: ground quad and dome centres, the lifted units, the camera
-ROOM_HALF     = (15.0, 18.0, 16.0)           # y −26…10: the corridor and the balcony camera's look target
+ROOM_HALF     = (170.0, 170.0, 16.0)         # levcomp places an actor by its mesh-bbox centre: the merged
+                                             # site-buildings mesh (±150 m) must land inside (moon_site01 uses ±505 m)
 NUM_MAILBOXES = 100
 SUN_ALT_DEG   = 50.0
 SUN_AZ_DEG    = 30.0
@@ -349,12 +350,14 @@ import bmesh as _bmesh
 
 
 def box_mesh(name, x0, y0, z0, x1, y1, z1):
-    """Closed box with outward normals (exterior geometry — see level-building.md § winding)."""
+    """Closed box wound WF-outward: Blender-outward then reversed, since WF's face normal is
+    (v2−v0)×(v1−v0), the opposite hand of Blender's (level-building.md § winding)."""
     bm = _bmesh.new()
     _bmesh.ops.create_cube(bm, size=1.0)
     for v in bm.verts:
         v.co = ((x0 + x1) / 2 + v.co.x * (x1 - x0), (y0 + y1) / 2 + v.co.y * (y1 - y0), (z0 + z1) / 2 + v.co.z * (z1 - z0))
     _bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    _bmesh.ops.reverse_faces(bm, faces=bm.faces)
     me = bpy.data.meshes.new(name)
     bm.to_mesh(me)
     bm.free()
@@ -448,8 +451,7 @@ def build_skydome(radius, segs=48, rings=24):
     me.update()
     bm = _bmesh.new()
     bm.from_mesh(me)
-    _bmesh.ops.recalc_face_normals(bm, faces=bm.faces)   # outward first …
-    _bmesh.ops.reverse_faces(bm, faces=bm.faces)          # … then flip: inner surface visible
+    _bmesh.ops.recalc_face_normals(bm, faces=bm.faces)   # Blender-outward == WF-inward: the inner surface faces the player
     bm.to_mesh(me)
     bm.free()
     me.update()
@@ -469,7 +471,83 @@ skydome['wf_Moves Between Rooms'] = 'True'
 # level — with a mass the camera "hit" it every tick and climbed (BungeeCameraHandler
 # ClimbRate) until every shot was 12 m higher than authored.
 skydome['wf_Mass'] = 0.0
-NOT_LIFTED = {site_map.name, skydome.name, 'room_condo', 'Matte'}   # world-space: ground, sky, room bounds, backdrop
+# ── 5b. The neighbourhood: near buildings as prisms, a podium under the units ──
+# make_site_textures.py writes site-buildings.json — every OSM footprint within GEOM_R
+# (150 m) in level metres with a height by building type — and leaves those out of the
+# sky panorama. One merged mesh actor, Mass 0 (the physics camera's bbox pass ignores it),
+# world-space. Plan: docs/plans/2026-09-19-condo-site-surroundings.md
+import json as _json
+
+with open(os.path.join(SCRIPT_DIR, 'site-buildings.json')) as _f:
+    _near = _json.load(_f)['buildings']
+
+
+def prism(bm, loop, z0, z1, mat_wall, mat_roof):
+    """Closed prism over an (x, y) loop; returns the face count or 0 when the loop is degenerate."""
+    pts = [(x, y) for x, y in loop]
+    if len(pts) > 1 and pts[0] == pts[-1]:
+        pts = pts[:-1]
+    if len(pts) < 3:
+        return 0
+    try:
+        bot = [bm.verts.new((x, y, z0)) for x, y in pts]
+        top = [bm.verts.new((x, y, z1)) for x, y in pts]
+        # No bottom face: it would be coplanar with the ground quad and share the base edge
+        # with it, and the depth test then flickers along every building's foot ("z-fighting
+        # where the buildings meet the ground"). An open-bottomed prism is never seen from
+        # below. The normal recalc needs a closed shell, so cap it, recalc, then delete the cap.
+        fb = bm.faces.new(bot); ft = bm.faces.new(top)
+        fb.material_index = mat_wall; ft.material_index = mat_roof
+        n = len(pts)
+        faces = [fb, ft]
+        for i in range(n):
+            f = bm.faces.new((bot[i], bot[(i + 1) % n], top[(i + 1) % n], top[i]))
+            f.material_index = mat_wall
+            faces.append(f)
+        # Per prism, while it is still a closed manifold of its own (a global recalc after
+        # welding shared shophouse vertices turned rows into one non-manifold blob and
+        # flipped walls at random): Blender-outward, then reversed, because WF computes
+        # the face normal as (v2−v0)×(v1−v0) — the opposite hand — so Blender-outward is
+        # WF-inward: culled from outside under WF_CULL=1 and lit from the wrong side.
+        _bmesh.ops.recalc_face_normals(bm, faces=faces)
+        _bmesh.ops.reverse_faces(bm, faces=faces)
+        _bmesh.ops.delete(bm, geom=[fb], context='FACES_ONLY')
+        return n + 1
+    except ValueError:            # self-touching outline → duplicate face; leave what was built
+        return 0
+
+
+_bm = _bmesh.new()
+_nb, _skipped = 0, 0
+for b in _near:
+    if prism(_bm, b['pts'], 0.0, float(b['h']), 0, 1):
+        _nb += 1
+    else:
+        _skipped += 1
+_nm = bpy.data.meshes.new('site-buildings')
+_bm.to_mesh(_nm); _bm.free()
+_nm.materials.append(make_flat_material('site-walls', (0.78, 0.74, 0.68)))
+_nm.materials.append(make_flat_material('site-roofs', (0.62, 0.60, 0.57)))
+site_buildings = bpy.data.objects.new('site-buildings', _nm)
+scene.collection.objects.link(site_buildings)
+clean_mesh(_nm, recalc=False)                             # triangulate (concave footprints OK), drop slivers
+as_statplat(site_buildings)
+site_buildings['wf_Mass'] = 0.0
+print(f"[condo] site-buildings: {_nb} prisms, {len(_nm.polygons)} tris (skipped {_skipped})")
+
+# The podium: floors 1–5 under the units + corridor, so the doll-house is the top of a building.
+cx0, cy0, cx1, cy1 = CORRIDOR
+# Inset 5 cm from every surface it would otherwise share a plane with: the ground quad
+# below (z 0.05), the parapet's east face and the units' side walls (x/y), the slab bottoms
+# above (top 2 cm under them) — coincident faces flicker.
+_ins = 0.05
+site_podium = add_flat_actor('site-podium',
+                             box_mesh('site-podium', min(cx0, -7.95) + _ins, cy0 - PARAPET_T + _ins, _ins,
+                                      max(cx1, 8.05) - _ins, 0.05 - _ins, UNIT_Z - SLAB_T - 0.02),
+                             (0.72, 0.72, 0.70))
+site_podium['wf_Mass'] = 0.0
+
+NOT_LIFTED = {site_map.name, skydome.name, site_buildings.name, site_podium.name, 'room_condo', 'Matte'}   # world-space
 print(f"[condo] site: corridor {cx1 - cx0:.0f}×{cy1 - cy0:.0f} m + parapet, site-map ±{_g:.0f} m, "
       f"skydome R={SKY_R:.0f} m {len(_sky.vertices)} verts {len(_sky.polygons)} tris; units → z={UNIT_Z}")
 
