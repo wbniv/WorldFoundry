@@ -181,6 +181,9 @@ usage( int argc, char* argv[] )
 	std::cout << "\t-profmemload\tProfile memory usage during load" << std::endl;
 	std::cout << "\t-profmainloop\tProfile cpu usage during main game loop" << std::endl;
 	std::cout << "\t-lmalloc\tUse linear malloc() instead of C runtime malloc()" << std::endl;
+	std::cout << "\t-width=N -height=N\tWindow / recording size in pixels (default 640x480)" << std::endl;
+	std::cout << "\t-xpos=N -ypos=N\tWindow position" << std::endl;
+	std::cout << "\t-fullscreen\tFullscreen at the screen's size; -window for a window" << std::endl;
 	std::cout << "\t-sound\t\tEnable Sound" << std::endl;
 	std::cout << "\t-cd\t\tenable CD" << std::endl;
 #if defined(JOYSTICK_RECORDER)
@@ -218,6 +221,14 @@ ParseCommandLine(int argc, char** argv)
 			gLevelOverridePath = argv[index] + 2;
 			DBSTREAM1( cprogress << "Level override path: " << gLevelOverridePath << std::endl; )
 		}
+		// Window switches are consumed by the platform layer (ParseWindowSwitches in
+		// hal/<platform>/platform_init.cc) before we get here. They must be recognised
+		// explicitly, because the single-letter fallbacks below match by first character:
+		// "-height=960" used to hit the 'h' (help) branch and exit 1 (2026-09-19).
+		else if ( strncmp( argv[index]+1, "width=", 6 ) == 0 || strncmp( argv[index]+1, "height=", 7 ) == 0 ||
+		          strncmp( argv[index]+1, "xpos=", 5 ) == 0  || strncmp( argv[index]+1, "ypos=", 5 ) == 0 ||
+		          strcmp( argv[index]+1, "window" ) == 0     || strcmp( argv[index]+1, "fullscreen" ) == 0 )
+			;
 		else if ( strncmp( argv[index]+1, "-debug-port", 11 ) == 0 && argv[index+1] )
 		{
 			gDebugPort = atoi( argv[index+1] );
@@ -353,14 +364,14 @@ ParseCommandLine(int argc, char** argv)
 
 // kts: printframerate should be removed from release
 #if defined(DESIGNER_CHEATS)
-		else if ( tolower( *( argv[index]+1 ) ) == 'f' )
+		else if ( strcmp( argv[index]+1, "f" ) == 0 )
 		{
 			  printFrameRate = true;
 			  DBSTREAM1( std::cout << "PrintFrameRate on" << std::endl; )
 	 	}
 #endif
 #if SW_DBSTREAM > 0
-		else if ( *( argv[index]+1 ) == 'h' )
+		else if ( strcmp( argv[index]+1, "h" ) == 0 || strcmp( argv[index]+1, "help" ) == 0 || strcmp( argv[index]+1, "-help" ) == 0 )
 	  	{
 			usage( argc, argv );
          sys_exit(1);

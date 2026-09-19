@@ -37,7 +37,11 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--seconds", type=float, default=20.0, help="target length after setpts (0 = keep real time)")
 ap.add_argument("--out", default=str(REPO / "wflevels" / "condo_639_640" / "tour-639.mp4"))
 ap.add_argument("--timeout", type=float, default=120.0)
+ap.add_argument("--size", default=os.environ.get("TOUR_SIZE", "640x480"),
+                help="WxH passed to the engine as -width/-height (recording = window size)")
 args = ap.parse_args()
+VW, VH = (int(v) for v in args.size.lower().split("x"))
+CAPTION_PX = max(22, round(22 * VH / 480))       # caption/title scale with the frame height
 OUT = Path(args.out).resolve(); SRT = OUT.with_suffix(".srt")
 WORK = Path(os.environ.get("TOUR_WORKDIR", REPO / "tests" / ".tour_work")).resolve(); WORK.mkdir(parents=True, exist_ok=True)
 LOG = WORK / "wf_game.log"
@@ -63,7 +67,7 @@ env.setdefault("DISPLAY", ":0")
 for stale in ("output.mp4",):
     (WORK / stale).unlink(missing_ok=True)
 log_fp = open(LOG, "w")
-proc = subprocess.Popen([str(WF), f"-L{IFF}", "-record_video", "--debug-port", str(PORT),
+proc = subprocess.Popen([str(WF), f"-L{IFF}", f"-width={VW}", f"-height={VH}", "-record_video", "--debug-port", str(PORT),
                          "--debug-bind", "127.0.0.1", "--debug-print-actors"],
                         cwd=str(WORK), env=env, stdout=log_fp, stderr=subprocess.STDOUT)
 t_launch = time.time()
@@ -145,9 +149,12 @@ SRT.write_text("\n".join(srt_lines))
 
 # ── ffmpeg: title card + burnt-in captions (+ setpts to the target length) ────
 title = WORK / "title.mp4"
-subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", f"color=c=black:s=640x480:r=30:d={TITLE}",
-                "-vf", f"drawtext=fontfile={FONT}:text='205/639 room tour':fontcolor=white:fontsize=34:x=(w-text_w)/2:y=(h-text_h)/2-20,"
-                       f"drawtext=fontfile={FONT}:text='WorldFoundry condo_639_640  2026-09-19':fontcolor=#bbbbbb:fontsize=16:x=(w-text_w)/2:y=(h-text_h)/2+30",
+rw, rh = (int(v) for v in subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height",
+                                          "-of", "csv=p=0", str(raw)], capture_output=True, text=True).stdout.strip().split(","))
+k = rh / 480.0
+subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", f"color=c=black:s={rw}x{rh}:r=30:d={TITLE}",
+                "-vf", f"drawtext=fontfile={FONT}:text='205/639 room tour':fontcolor=white:fontsize={round(34*k)}:x=(w-text_w)/2:y=(h-text_h)/2-{round(20*k)},"
+                       f"drawtext=fontfile={FONT}:text='WorldFoundry condo_639_640  2026-09-19':fontcolor=#bbbbbb:fontsize={round(16*k)}:x=(w-text_w)/2:y=(h-text_h)/2+{round(30*k)}",
                 "-pix_fmt", "yuv420p", str(title)], check=True)
 body = WORK / "body.mp4"
 vf = (f"setpts=PTS/{speed:.6f}," if speed != 1.0 else "") + "fps=30"
@@ -157,8 +164,8 @@ concat.write_text(f"file '{title}'\nfile '{body}'\n")
 joined = WORK / "joined.mp4"
 subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", str(concat), "-c", "copy", str(joined)], check=True)
 subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(joined),
-                "-vf", f"subtitles={SRT}:force_style='FontName=DejaVu Sans,FontSize=22,Bold=1,Outline=2,Shadow=0,MarginV=24'",
+                "-vf", f"subtitles={SRT}:force_style='FontName=DejaVu Sans,FontSize={CAPTION_PX},Bold=1,Outline={max(2, round(2*k))},Shadow=0,MarginV={round(24*k)}'",
                 "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(OUT)], check=True)
 final = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(OUT)],
                        capture_output=True, text=True).stdout.strip()
-print(f"RESULT: PASS  {OUT} ({final}s; raw {real_len:.1f}s, speed x{speed:.2f}; {len(entries)} rooms)  captions {SRT}")
+print(f"RESULT: PASS  {OUT} ({final}s, {rw}x{rh}; raw {real_len:.1f}s, speed x{speed:.2f}; {len(entries)} rooms)  captions {SRT}")

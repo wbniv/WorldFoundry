@@ -796,10 +796,10 @@ tasks:
       - wflevels/condo_639_640_tour-standalone.iff
 
   video-condo-639:
-    desc: "Record the 639 room tour → wflevels/condo_639_640/tour-639.mp4 (+ .srt captions). TOUR_SECONDS=N target length (default 30; 0 = real time)."
+    desc: "Record the 639 room tour → wflevels/condo_639_640/tour-639.mp4 (+ .srt captions). TOUR_SECONDS=N target length (default 30; 0 = real time); TOUR_SIZE=WxH (default 640x480)."
     deps: [ensure-build, tour-condo-639]
     cmds:
-      - python3 tests/record_condo_639_tour.py --seconds "${TOUR_SECONDS:-30}"
+      - python3 tests/record_condo_639_tour.py --seconds "${TOUR_SECONDS:-30}" --size "${TOUR_SIZE:-640x480}"
     sources:
       - wflevels/condo_639_640_tour-standalone.iff
       - tests/record_condo_639_tour.py

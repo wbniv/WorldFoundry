@@ -1,10 +1,16 @@
 | Date | Change |
 |------|--------|
+| [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/e59fcf28) | feat(condo): 30 s captioned room tour of all 11 blue rooms — tour-639.mp4 |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/caba2591) | docs(plan): tour video — author the path once, replay frame-exact |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/de9d0b05) | feat(condo): bath-N door + 640 master/closet locators, walking pace, HOME-safe task sources |
 | [2026-09-19](https://github.com/wbniv/WorldFoundry/commit/88c389c7) | docs(plan): 20 s room-tour video of 205/639 (bridge-driven walk + burnt-in captions) |
 
 <!--history-meta v1
+e59fcf28	author	Will Norris
+e59fcf28	added	121
+e59fcf28	deleted	40
+e59fcf28	files	1
+e59fcf28	body	The tour build (wflevels/condo_639_640_tour, `task tour-condo-639`) is the\ncondo level with the player's Forth replaced by a waypoint servo compiled\nfrom tour-639.path.json: each leg pushes toward the waypoint coordinate\nfrom either side and advances only when within 0.12 m AND nearly stopped\n(X/YSPEED), so momentum can't slide him into a jamb (the first\n"complete once past" version stalled at the closet door 1 run in 4). Leg\ncounter is global mailbox 500, hold timer 501, done flag 502.\n\ntests/record_condo_639_tour.py records it with -record_video, times the\ncaptions off the leg counter + level clock over the bridge, cross-checks\neach hold against the room's target bbox, then ffmpeg burns the .srt in,\nprepends a title card and setpts to TOUR_SECONDS (30). Four takes: same\nroom order every time, cue drift ≤ 0.7 s.\n\nWhy not bridge-driven input: inject_input holds one override per slot\nand the loop renders (records) every iteration even when paused, so\nframe-exact external replay isn't available; a position-based walk is.\n\nCo-Authored-By: Claude Opus 5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_017TmcNaoJVBysfboB3VeC7N
 caba2591	author	Will Norris
 caba2591	added	30
 caba2591	deleted	15

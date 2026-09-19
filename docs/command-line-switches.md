@@ -27,6 +27,9 @@ wf_game {switches} [level#]
 | `-profmainloop` | `DO_PROFILE` | Profile CPU usage during main loop |
 | `-breaktime=<t>` | `DO_DEBUGGING_INFO` | Break into debugger at wall-clock time `t` |
 | `-paranoid` | always | Insanely slow error checks |
+| `-width=N` / `-height=N` | Linux (X11), web | Window size in pixels — and, with `-record_video` / `WF_GAME_SCREENSHOT_PPM`, the capture size (default 640 × 480). Parsed by the platform layer (`hal/linux/platform_init.cc`); since 2026‑09‑19 the game parser recognises them too (before that `-height=` was mistaken for `-h` and exited with usage). |
+| `-xpos=N` / `-ypos=N` | Linux (X11) | Window position |
+| `-fullscreen` / `-window` | Linux (X11) | Fullscreen at the screen's size (`_NET_WM_STATE_FULLSCREEN`; `-width/-height` still override the capture size) / windowed |
 | `--vram-width=N` | always | Total VRAM box width (default 1024) |
 | `--vram-height=N` | always | Total VRAM box height (default 512) |
 | `--vram-slot-width=N` | always | Transient texture slot width (default 256) — raise for textures > 256² (e.g. 1024 for moon Site 01) |

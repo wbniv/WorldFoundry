@@ -110,7 +110,7 @@ states to see the *bath‑N unreachable* variant (option b, rejected) and the ti
 
 - A tour of 640's *own* (ochre) rooms — same script, different waypoints.
 - Camera moves other than the doll‑house follow (a fly‑through would need a second CamShot + ActBoxOR switching).
-- Higher than 640 × 480: the Linux HAL has no `-width/-height` switch yet (TODO item exists); upscale with ffmpeg if needed.
+- Higher than 640 × 480: ~~the Linux HAL has no `-width/-height` switch yet~~ — it does; the game parser was eating `-height=` (fixed 2026‑09‑19, [plan](2026-09-19-window-size-flags-reach-the-game-parser.md)). `TOUR_SIZE=1280x960` works but plays fast until the capture pipe is wall‑clock paced; the committed video stays 640 × 480 by decision.
 
 ## Verification
 
